@@ -77,9 +77,11 @@ class ISchemaItem {
    * @brief Apply schema.
    *
    * @param Object Object to apply schema.
+   * @param RemoveFakeParameters contains true if need to remove fake parameters
+   * from smart object otherwise contains false.
    **/
-  virtual void applySchema(
-      NsSmartDeviceLink::NsSmartObjects::SmartObject& Object);
+  virtual void applySchema(NsSmartDeviceLink::NsSmartObjects::SmartObject& Object,
+                           const bool RemoveFakeParameters);
 
   /**
    * @brief Unapply schema.

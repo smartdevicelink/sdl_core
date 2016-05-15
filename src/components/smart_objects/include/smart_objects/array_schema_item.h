@@ -73,8 +73,11 @@ class CArraySchemaItem : public ISchemaItem {
    * @brief Apply schema.
    *
    * @param Object Object to apply schema.
+   *
+   * @param RemoveFakeParameters contains true if need to remove fake parameters
+   * from smart object otherwise contains false.
    **/
-  void applySchema(SmartObject& Object) OVERRIDE;
+  void applySchema(SmartObject& Object, const bool RemoveFakeParameters) OVERRIDE;
 
   /**
    * @brief Unapply schema.

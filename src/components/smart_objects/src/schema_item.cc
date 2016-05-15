@@ -47,7 +47,7 @@ bool ISchemaItem::hasDefaultValue(SmartObject& Object) {
   return false;
 }
 
-void ISchemaItem::applySchema(SmartObject& Object) {
+void ISchemaItem::applySchema(SmartObject& Object, const bool RemoveFakeParameters) {
 }
 
 void ISchemaItem::unapplySchema(SmartObject& Object) {

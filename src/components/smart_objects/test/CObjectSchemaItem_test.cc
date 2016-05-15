@@ -292,28 +292,36 @@ TEST_F(ObjectSchemaItemTest, validation_unexpected_param_remove) {
   obj[S_PARAMS][fake2] = SmartObject("123");
   obj[S_MSG_PARAMS][fake3] = true;
 
-  // Check apply schema
-  schema_item->applySchema(obj);
+  // Check apply schema, does not remove fake parameter
+  schema_item->applySchema(obj, false);
 
   EXPECT_TRUE(obj.keyExists(fake1));
   EXPECT_TRUE(obj[S_PARAMS].keyExists(fake2));
   EXPECT_TRUE(obj[S_MSG_PARAMS].keyExists(fake3));
   EXPECT_EQ(Errors::OK, schema_item->validate(obj));
 
-  // all fake parameters are removed on unapply schema
-  schema_item->unapplySchema(obj);
-
+  // Check apply schema, remove fake parameter
+  schema_item->applySchema(obj, true);
   EXPECT_FALSE(obj.keyExists(fake1));
   EXPECT_FALSE(obj[S_PARAMS].keyExists(fake2));
   EXPECT_FALSE(obj[S_MSG_PARAMS].keyExists(fake3));
+  EXPECT_TRUE(obj[S_PARAMS].keyExists(S_FUNCTION_ID));
+  EXPECT_TRUE(obj[S_PARAMS].keyExists(S_CORRELATION_ID));
+  EXPECT_TRUE(obj[S_PARAMS].keyExists(S_PROTOCOL_VERSION));
+  EXPECT_TRUE(obj[S_MSG_PARAMS].keyExists(Keys::RESULT_CODE));
+  EXPECT_TRUE(obj[S_MSG_PARAMS].keyExists(Keys::INFO));
+  EXPECT_TRUE(obj[S_MSG_PARAMS].keyExists(Keys::SUCCESS));
+  EXPECT_EQ(Errors::OK, schema_item->validate(obj));
+
 
   obj[fake1] = SmartObject(static_cast<int64_t>(0));
   obj[S_PARAMS][fake2] = SmartObject("123");
   obj[S_MSG_PARAMS][fake3] = true;
 
-  // Check unapply schema
+  // all fake parameters are removed on unapply schema
   schema_item->unapplySchema(obj);
-  // all fake parameters are removed on apply schema
+
+  // all fake parameters are removed on unapply schema
   EXPECT_FALSE(obj.keyExists(fake1));
   EXPECT_FALSE(obj[S_PARAMS].keyExists(fake2));
   EXPECT_FALSE(obj[S_MSG_PARAMS].keyExists(fake3));
@@ -334,7 +342,7 @@ TEST_F(ObjectSchemaItemTest, validation_empty_params) {
 
   EXPECT_EQ(Errors::OK, schema_item->validate(obj));
 
-  schema_item->applySchema(obj);
+  schema_item->applySchema(obj, false);
   EXPECT_EQ(Errors::OK, schema_item->validate(obj));
 
   schema_item->unapplySchema(obj);
@@ -374,7 +382,7 @@ TEST_F(ObjectSchemaItemTest, test_strings_to_enum_conversion) {
       // S_FUNCTION_ID and RESULT_CODE are not converted to int
       EXPECT_NE(Errors::OK, schema_item->validate(object));
 
-      schema_item->applySchema(object);
+      schema_item->applySchema(object, false);
       EXPECT_EQ(Errors::OK, schema_item->validate(object));
 
       // check conversion result

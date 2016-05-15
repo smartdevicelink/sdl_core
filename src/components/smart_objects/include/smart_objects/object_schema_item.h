@@ -93,8 +93,10 @@ class CObjectSchemaItem : public ISchemaItem {
   /**
    * @brief Apply schema.
    * @param Object Object to apply schema.
+   * @param RemoveFakeParameters contains true if need to remove fake parameters
+   * from smart object otherwise contains false.
    **/
-  void applySchema(SmartObject& Object) OVERRIDE;
+  void applySchema(SmartObject& Object, const bool RemoveFakeParameters) OVERRIDE;
   /**
    * @brief Unapply schema.
    * @param Object Object to unapply schema.
@@ -121,6 +123,13 @@ class CObjectSchemaItem : public ISchemaItem {
    *                describing the object member.
    **/
   CObjectSchemaItem(const Members& Members);
+
+  /**
+   * @brief Removes fake parameters from object.
+   * @param Object Object to remove fake parameters.
+   **/
+  void RemoveFakeParams(SmartObject& Object);
+
   /**
    * @brief Map of member name to SMember structure describing the object member.
    **/

@@ -321,10 +321,8 @@ std::vector<ApplicationSharedPtr> ApplicationManagerImpl::IviInfoUpdated(
 
   SubscribedToIVIPredicate finder(static_cast<int32_t>(vehicle_info));
   ApplicationListAccessor accessor;
-  std::vector<ApplicationSharedPtr> apps = accessor.FindAll(NaviAppPredicate);
-  LOG4CXX_DEBUG(
-      logger_,
-      " vehicle_info << " << vehicle_info << "Found count: " << apps.size());
+  std::vector<ApplicationSharedPtr> apps = accessor.FindAll(finder);
+  LOG4CXX_DEBUG(logger_, " vehicle_info << " << vehicle_info << "Found count: " << apps.size());
   return apps;
 }
 
@@ -1348,11 +1346,10 @@ void ApplicationManagerImpl::SendMessageToMobile(
         app->protocol_version();
   }
 
-  mobile_so_factory().attachSchema(*message);
-  LOG4CXX_DEBUG(
-      logger_,
-      "Attached schema to message, result if valid: " << message->isValid());
-
+  mobile_so_factory().attachSchema(*message, false);
+  LOG4CXX_INFO(logger_, "Attached schema to message, result if valid: "
+                            << message->isValid());
+  
   // Messages to mobile are not yet prioritized so use default priority value
   utils::SharedPtr<Message> message_to_send(
       new Message(protocol_handler::MessagePriority::kDefault));
@@ -1489,7 +1486,7 @@ bool ApplicationManagerImpl::ManageMobileCommand(
     }
 
     // Message for "CheckPermission" must be with attached schema
-    mobile_so_factory().attachSchema(*message);
+    mobile_so_factory().attachSchema(*message, false);
   }
 
   if (message_type == mobile_apis::messageType::response) {
@@ -1609,10 +1606,9 @@ void ApplicationManagerImpl::SendMessageToHMI(
     return;
   }
 
-  hmi_so_factory().attachSchema(*message);
-  LOG4CXX_INFO(
-      logger_,
-      "Attached schema to message, result if valid: " << message->isValid());
+  hmi_so_factory().attachSchema(*message, false);
+  LOG4CXX_INFO(logger_, "Attached schema to message, result if valid: "
+                            << message->isValid());
 
 #ifdef HMI_DBUS_API
   message_to_send->set_smart_object(*message);
@@ -1736,7 +1732,7 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
               message.function_id(),
               message.type(),
               message.correlation_id());
-      if (!conversion_result || !mobile_so_factory().attachSchema(output) ||
+      if (!conversion_result || !mobile_so_factory().attachSchema(output, false) ||
           ((output.validate() != smart_objects::Errors::OK))) {
         LOG4CXX_WARN(logger_,
                      "Failed to parse string to smart object :"
@@ -1784,15 +1780,14 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
 #ifdef ENABLE_LOG
       int32_t result =
 #endif
-          formatters::FormatterJsonRpc::FromString<
-              hmi_apis::FunctionID::eType,
-              hmi_apis::messageType::eType>(message.json_message(), output);
-      LOG4CXX_DEBUG(logger_,
-                    "Convertion result: "
-                        << result
-                        << " function id "
-                        << output[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt());
-      if (!hmi_so_factory().attachSchema(output)) {
+     formatters::FormatterJsonRpc::FromString<
+              hmi_apis::FunctionID::eType, hmi_apis::messageType::eType>(
+              message.json_message(), output);
+      LOG4CXX_INFO(logger_,
+                   "Convertion result: "
+                       << result << " function id "
+                       << output[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt());
+      if (!hmi_so_factory().attachSchema(output, false)) {
         LOG4CXX_WARN(logger_, "Failed to attach schema to object.");
         return false;
       }
@@ -1847,9 +1842,9 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
           output[strings::msg_params][strings::result_code] =
               NsSmartDeviceLinkRPC::V1::Result::UNSUPPORTED_VERSION;
 
-          smart_objects::SmartObjectSPtr msg_to_send =
+            smart_objects::SmartObjectSPtr msg_to_send =
               new smart_objects::SmartObject(output);
-          v1_shema.attachSchema(*msg_to_send);
+          v1_shema.attachSchema(*msg_to_send, false);
           SendMessageToMobile(msg_to_send);
           return false;
         }
@@ -2386,10 +2381,9 @@ void ApplicationManagerImpl::SendOnSDLClose() {
   utils::SharedPtr<Message> message_to_send(
       new Message(protocol_handler::MessagePriority::kDefault));
 
-  hmi_so_factory().attachSchema(*msg);
-  LOG4CXX_DEBUG(
-      logger_,
-      "Attached schema to message, result if valid: " << msg->isValid());
+  hmi_so_factory().attachSchema(*msg, false);
+  LOG4CXX_DEBUG(logger_,
+    "Attached schema to message, result if valid: " << msg->isValid());
 
 #ifdef HMI_DBUS_API
   message_to_send->set_smart_object(*msg);

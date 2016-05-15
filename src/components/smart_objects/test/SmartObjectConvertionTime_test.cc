@@ -183,7 +183,7 @@ class SmartObjectConvertionTimeTest : public ::testing::Test {
 
     srcObj[S_PARAMS][S_PROTOCOL_VERSION] = 1;       // adjust protocol version
 
-    srcObj.getSchema().applySchema(dstObj);
+    srcObj.getSchema().applySchema(dstObj, false);
     // The objects are different after remove non-schemed fields
 //      EXPECT_TRUE(srcObj == dstObj);
 
@@ -200,7 +200,7 @@ class SmartObjectConvertionTimeTest : public ::testing::Test {
 
     srcObj[S_PARAMS][S_PROTOCOL_VERSION] = 2;       // adjust protocol version
 
-    dstObj.getSchema().applySchema(dstObj);
+    dstObj.getSchema().applySchema(dstObj, false);
     // The objects are different after remove non-schemed fields
 //      EXPECT_TRUE(srcObj == dstObj);
   }

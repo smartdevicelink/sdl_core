@@ -149,9 +149,13 @@ namespace NsSmartDeviceLink
              *
              * @param object SmartObject to attach schema for.
              *
+             * @param RemoveFakeParameters contains true if need
+             * to remove fake parameters from smart object otherwise contains false.
+             *
              * @return True if operation was successful or false otherwise.
              */
-            bool attachSchema(NsSmartDeviceLink::NsSmartObjects::SmartObject& object);
+            bool attachSchema(NsSmartDeviceLink::NsSmartObjects::SmartObject& object,
+                              const bool RemoveFakeParameters);
 
           /**
            * @brief Attach schema to the struct SmartObject.
@@ -275,7 +279,9 @@ namespace NsSmartDeviceLink
         }
 
         template <class FunctionIdEnum, class MessageTypeEnum, class StructIdEnum>
-        bool CSmartFactory<FunctionIdEnum, MessageTypeEnum, StructIdEnum>::attachSchema(NsSmartDeviceLink::NsSmartObjects::SmartObject &object)
+        bool CSmartFactory<FunctionIdEnum, MessageTypeEnum, StructIdEnum>::
+        attachSchema(NsSmartDeviceLink::NsSmartObjects::SmartObject &object,
+                     const bool RemoveFakeParameters)
         {
             if(false == object.keyExists(strings::S_PARAMS)) return false;
             if(false == object[strings::S_PARAMS].keyExists(strings::S_MESSAGE_TYPE)) return false;
@@ -295,7 +301,7 @@ namespace NsSmartDeviceLink
             }
 
             object.setSchema(schemaIterator->second);
-            schemaIterator->second.applySchema(object);
+            schemaIterator->second.applySchema(object, RemoveFakeParameters);
 
             return true;
         }
@@ -315,7 +321,7 @@ namespace NsSmartDeviceLink
         }
 
         object.setSchema(structs_iterator->second);
-        structs_iterator->second.applySchema(object);
+        structs_iterator->second.applySchema(object, false);
 
         return true;
       }
@@ -338,7 +344,7 @@ namespace NsSmartDeviceLink
           NsSmartDeviceLink::NsSmartObjects::SmartObject function_object(
               NsSmartDeviceLink::NsSmartObjects::SmartType_Map);
           function_object.setSchema(schema_iterator->second);
-          schema_iterator->second.applySchema(function_object);
+          schema_iterator->second.applySchema(function_object, false);
             return function_object;
         }
 

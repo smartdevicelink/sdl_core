@@ -97,7 +97,7 @@ TEST(FormatterJsonRPCTest, CorrectRPCv1Request_ToString_Success) {
   obj[S_MSG_PARAMS] = SmartObject(SmartType::SmartType_Map);
   // Attach Schema
   hmi_apis::HMI_API factory;
-  EXPECT_TRUE(factory.attachSchema(obj));
+  EXPECT_TRUE(factory.attachSchema(obj, false));
 
   std::string result;
   // Convert SmartObject to Json string
@@ -117,7 +117,7 @@ TEST(FormatterJsonRPCTest, CorrectRPCv2Request_ToString_Success) {
   obj[S_MSG_PARAMS] = SmartObject(SmartType::SmartType_Map);
   // Attach Schema
   mobile_apis::MOBILE_API factory;
-  EXPECT_TRUE(factory.attachSchema(obj));
+  EXPECT_TRUE(factory.attachSchema(obj, false));
 
   std::string result;
   // Convert SmartObject to Json string
@@ -310,8 +310,8 @@ TEST(FormatterJsonRPCTest, InvalidRPC_ToString_False) {
   obj[S_MSG_PARAMS] = SmartObject(SmartType::SmartType_Map);
   // Attach Schema
   hmi_apis::HMI_API factory;
-  EXPECT_FALSE(factory.attachSchema(obj));
-  // Convert SmartObject to Json string
+  EXPECT_FALSE(factory.attachSchema(obj, false));
+  // Convert SmrtObject to Json string
   EXPECT_FALSE(FormatterJsonRpc::ToString(obj, result));
   // Expect result with default value. No correct conversion was done
   EXPECT_EQ(std::string("{\n   \"jsonrpc\" : \"2.0\"\n}\n"), result);
