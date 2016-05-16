@@ -74,7 +74,6 @@ class PolicyListener {
    * when snapshot for PTU has been created.
    *
    * @param pt_string the snapshot
-   *
    */
   virtual void OnSnapshotCreated(const BinaryMessage& pt_string) = 0;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,7 +44,13 @@ SDLPolicyUpdate::~SDLPolicyUpdate() {}
 
 void SDLPolicyUpdate::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
+#ifdef EXTENDED_POLICY
   SendRequest();
+#else
+  LOG4CXX_WARN(logger_,
+               "This RPC is part of extended policy flow."
+               "Please re-build with extended policy mode enabled.");
+#endif
 }
 
 }  // namespace commands

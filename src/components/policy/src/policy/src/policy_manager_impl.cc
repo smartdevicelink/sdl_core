@@ -106,7 +106,6 @@ utils::SharedPtr<policy_table::Table> PolicyManagerImpl::ParseArray(
     // For PT Update received from SDL Server.
     if (value["data"].size() != 0) {
       Json::Value data = value["data"];
-      // First Element in
       return new policy_table::Table(&data[0]);
     } else {
       return new policy_table::Table(&value);
@@ -147,7 +146,7 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
   // of 'data' array. No Parsing was done by HMI.
   utils::SharedPtr<policy_table::Table> pt_update = ParseArray(pt_content);
 #endif
-  if (!pt_update) {
+ if (!pt_update) {
     LOG4CXX_WARN(logger_, "Parsed table pointer is 0.");
     update_status_manager_.OnWrongUpdateReceived();
     return false;

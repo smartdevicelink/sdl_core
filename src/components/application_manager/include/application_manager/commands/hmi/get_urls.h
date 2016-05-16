@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_URLS_H_
 
 #include "application_manager/commands/hmi/request_from_hmi.h"
+#include "policy/policy_types.h"
 
 namespace application_manager {
 namespace commands {
@@ -59,10 +60,30 @@ class GetUrls : public RequestFromHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(GetUrls);
+#ifdef EXTENDED_POLICY
+    /**
+     * @brief Processes URLs collecting for policy service
+     * @param endpoints Endpoints section of policy table
+     */
+    void ProcessPolicyServiceURLs(const policy::EndpointUrls& endpoints);
+#endif
+
+    /**
+     * @brief Process URLs collecting for service
+     * @param endpoints Endpoints section of policy table
+     */
+    void ProcessServiceURLs(const policy::EndpointUrls& endpoints);
+
+    /**
+     * @brief Sends response to HMI
+     * @param result Result code
+     */
+    void SendResponseToHMI(hmi_apis::Common_Result::eType result);
+
+    DISALLOW_COPY_AND_ASSIGN(GetUrls);
 };
 
 }  // namespace commands

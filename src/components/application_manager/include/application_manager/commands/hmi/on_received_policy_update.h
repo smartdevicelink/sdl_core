@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,12 +52,12 @@ class OnReceivedPolicyUpdate : public NotificationFromHMI {
   /**
    * @brief OnReceivedPolicyUpdate class destructor
    **/
-  virtual ~OnReceivedPolicyUpdate();
+  ~OnReceivedPolicyUpdate() OVERRIDE;
 
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(OnReceivedPolicyUpdate);

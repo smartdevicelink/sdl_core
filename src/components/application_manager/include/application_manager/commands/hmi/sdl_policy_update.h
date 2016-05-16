@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,11 +48,13 @@ class SDLPolicyUpdate : public RequestToHMI {
      **/
   SDLPolicyUpdate(const MessageSharedPtr& message,
                   ApplicationManager& application_manager);
-  virtual ~SDLPolicyUpdate();
+
+  ~SDLPolicyUpdate() OVERRIDE;
+
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(SDLPolicyUpdate);

@@ -51,8 +51,10 @@ namespace application_manager {
 CREATE_LOGGERPTR_LOCAL(logger_, "ApplicationManager")
 namespace {
 
+#ifdef ENABLE_LOG
 const char* kQueryAppsValidationFailedPrefix =
     ":QUERY_APPS_VALIDATION_FAILED: ";
+#endif
 
 const unsigned int kVrSynonymLengthMax = 40U;
 const unsigned int kVrSynonymLengthMin = 1U;
