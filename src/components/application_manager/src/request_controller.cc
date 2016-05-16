@@ -495,7 +495,7 @@ void RequestController::UpdateTimer() {
           date_time::DateTime::getmSecs(end_time - current_time));
       LOG4CXX_DEBUG(logger_, "Sleep for " << msecs << " millisecs");
       // Timeout for bigger than 5 minutes is a mistake
-      timer_.Start(msecs, true);
+      timer_.Start(msecs, timer::kSingleShot);
     } else {
       LOG4CXX_WARN(
           logger_,
@@ -510,7 +510,7 @@ void RequestController::UpdateTimer() {
               << " Request timeout (sec): "
               << front->timeout_msec() /
                      date_time::DateTime::MILLISECONDS_IN_SECOND);
-      timer_.Start(0u, true);
+      timer_.Start(0u, timer::kSingleShot);
     }
   }
 }
