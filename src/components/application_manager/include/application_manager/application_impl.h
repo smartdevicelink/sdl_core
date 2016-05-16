@@ -176,6 +176,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   bool IsSubscribedToIVI(uint32_t vehicle_info_type) const OVERRIDE;
   bool UnsubscribeFromIVI(uint32_t vehicle_info_type) OVERRIDE;
   DataAccessor<VehicleInfoSubscriptions> SubscribedIVI() const OVERRIDE;
+  inline bool IsRegistered() const OVERRIDE;
 
   /**
    * @brief ResetDataInNone reset data counters in NONE
@@ -416,6 +417,10 @@ ApplicationImpl::audio_streaming_state() const {
 
 bool ApplicationImpl::app_allowed() const {
   return is_app_allowed_;
+}
+
+bool ApplicationImpl::IsRegistered() const {
+  return app_state_ == kRegistered;
 }
 
 }  // namespace application_manager

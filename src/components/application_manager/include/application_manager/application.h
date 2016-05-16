@@ -682,10 +682,7 @@ class Application : public virtual InitialApplicationData,
    *
    * @return true if registered, false otherwise.
    */
-  bool IsRegistered() const {
-    return app_state_ == kRegistered;
-  }
-
+  virtual bool IsRegistered() const = 0;
   /**
    * @brief MarkRegistered allows to mark application as registered.
    */

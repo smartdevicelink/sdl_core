@@ -45,6 +45,7 @@ if (BUILD_TESTS)
     ${COMPONENTS_DIR}/include/
     ${COMPONENTS_DIR}/policy/include/policy
     ${COMPONENTS_DIR}/policy/test/include
+    ${COMPONENTS_DIR}/policy/src/policy/usage_statistics
     ${COMPONENTS_DIR}/media_manager/include/
     ${SecurityManagerIncludeDir}
     ${COMPONENTS_DIR}/security_manager/include
@@ -62,6 +63,7 @@ if (BUILD_TESTS)
     ${AM_TEST_DIR}/hmi_capabilities_test.cc
     ${AM_TEST_DIR}/application_state_test.cc
     ${AM_TEST_DIR}/usage_statistics_test.cc
+    ${AM_TEST_DIR}/policy_handler_test.cc
     ${AM_TEST_DIR}/mock_message_helper.cc
   )
   set (request_controller_SOURCES

@@ -818,11 +818,7 @@ bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string,
   LOG4CXX_AUTO_TRACE(logger_);
   POLICY_LIB_CHECK(false);
 
-  if (last_used_app_ids_.empty()) {
-    LOG4CXX_WARN(logger_, "last_used_app_ids_ is empty");
-    return false;
-  }
-  uint32_t app_id = last_used_app_ids_.back();
+  uint32_t app_id = GetAppIdForSending();
 
   ApplicationSharedPtr app = application_manager_.application(app_id);
 
@@ -1090,25 +1086,6 @@ void PolicyHandler::OnPermissionsUpdated(const std::string& policy_app_id,
                 "Notification sent for application_id:"
                     << policy_app_id << " and connection_key "
                     << app->app_id());
-}
-
-bool PolicyHandler::SaveSnapshot(const BinaryMessage& pt_string,
-                                 std::string& snap_path) {
-  const std::string& policy_snapshot_file_name =
-      get_settings().policies_snapshot_file_name();
-  const std::string& system_files_path = get_settings().system_files_path();
-  snap_path = system_files_path + '/' + policy_snapshot_file_name;
-
-  bool result = false;
-  if (file_system::CreateDirectoryRecursively(system_files_path)) {
-    result = file_system::WriteBinaryFile(snap_path, pt_string);
-  }
-
-  if (!result) {
-    LOG4CXX_ERROR(logger_, "Failed to write snapshot file to " << snap_path);
-  }
-
-  return result;
 }
 
 void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string) {

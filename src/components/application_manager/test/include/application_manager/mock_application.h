@@ -275,6 +275,7 @@ class MockApplication : public ::application_manager::Application {
   MOCK_METHOD1(set_mobile_app_id, void(const std::string& policy_app_id));
   MOCK_CONST_METHOD0(is_foreground, bool());
   MOCK_METHOD1(set_foreground, void(bool is_foreground));
+  MOCK_CONST_METHOD0(IsRegistered, bool());
 };
 
 }  // namespace application_manager_test
