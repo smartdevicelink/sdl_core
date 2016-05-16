@@ -104,7 +104,7 @@ void OnSystemRequestNotification::Run() {
 #ifdef EXTENDED_POLICY
 void OnSystemRequestNotification::AddHeader(BinaryMessage& message) const {
   LOG4CXX_AUTO_TRACE(logger_);
-  const int timeout = policy::PolicyHandler::instance()->TimeoutExchange();
+  const int timeout = application_manager_.GetPolicyHandler().TimeoutExchange();
 
   char size_str[24];
 

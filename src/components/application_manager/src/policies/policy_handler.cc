@@ -1123,7 +1123,8 @@ void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string) {
   MessageHelper::SendPolicyUpdate(
       policy_snapshot_full_path,
       policy_manager_->TimeoutExchange(),
-      policy_manager_->RetrySequenceDelaysSeconds());
+      policy_manager_->RetrySequenceDelaysSeconds(),
+      application_manager_);
 #else
   EndpointUrls urls;
   policy_manager_->GetServiceUrls("0x07", urls);
