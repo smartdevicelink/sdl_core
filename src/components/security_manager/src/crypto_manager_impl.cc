@@ -266,6 +266,11 @@ bool CryptoManagerImpl::IsCertificateUpdateRequired() const {
   const time_t now = time(NULL);
   const time_t cert_date = mktime(&expiration_time_);
 
+  if (-1 == cert_date) {
+    LOGGER_ERROR(logger_, "Can't convert certificate date.");
+    return true;
+  }
+
   const double seconds = difftime(cert_date, now);
   LOGGER_DEBUG(
       logger_,
