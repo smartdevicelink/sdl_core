@@ -116,7 +116,7 @@ void GetUrls::ProcessPolicyServiceURLs(const policy::EndpointUrls& endpoints) {
 
   SmartObject& urls = object[msg_params][hmi_response::urls];
 
-  const std::string mobile_app_id = app->mobile_app_id();
+  const std::string mobile_app_id = app->policy_app_id();
   std::string default_url = "URL is not found";
 
   // Will use only one URL for particular application if it will be found
