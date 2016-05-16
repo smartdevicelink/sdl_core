@@ -79,7 +79,7 @@ if (OS_TYPE_OPTION)
     message(STATUS "Jenkins integration: set build process for QNX")
     #do not use include after project() command.
     #Such usecase results in infinite cycle of reinitialization of compiler and other variables
-    INCLUDE("./qnx_6.6.0_linux_x86.cmake")
+    INCLUDE("./qnx_6.6.0_linux_${ARCH_TYPE_OPTION}.cmake")
     set(objcopy "nto${ARCH_TYPE_OPTION}-objcopy")
     #tests are not supported yet for QNX build
     set (BUILD_TESTS OFF)
