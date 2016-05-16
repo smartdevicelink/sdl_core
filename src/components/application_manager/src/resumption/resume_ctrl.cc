@@ -79,7 +79,8 @@ void ResumeCtrl::set_resumption_storage(
 bool ResumeCtrl::Init(resumption::LastState& last_state) {
   bool use_db = application_manager_.get_settings().use_db_for_resumption();
   if (use_db) {
-    resumption_storage_.reset(new ResumptionDataDB(application_manager_));
+    resumption_storage_.reset(
+        new ResumptionDataDB(In_File_Storage, application_manager_));
     if (!resumption_storage_->Init()) {
       return false;
     }
@@ -267,9 +268,9 @@ void ResumeCtrl::OnSuspend() {
 }
 
 void ResumeCtrl::OnAwake() {
-  return resumption_storage_->OnAwake();
   ResetLaunchTime();
   StartSavePersistentDataTimer();
+  return resumption_storage_->OnAwake();
 }
 
 void ResumeCtrl::StartSavePersistentDataTimer() {
@@ -381,11 +382,16 @@ bool ResumeCtrl::CheckPersistenceFilesForResumption(
   bool result = resumption_storage_->GetSavedApplication(
       application->policy_app_id(), device_mac, saved_app);
   if (result) {
-    if (!CheckIcons(application, saved_app[strings::application_commands])) {
-      return false;
+    if (saved_app.keyExists(strings::application_commands)) {
+      if (!CheckIcons(application, saved_app[strings::application_commands])) {
+        return false;
+      }
     }
-    if (!CheckIcons(application, saved_app[strings::application_choice_sets])) {
-      return false;
+    if (saved_app.keyExists(strings::application_choice_sets)) {
+      if (!CheckIcons(application,
+                      saved_app[strings::application_choice_sets])) {
+        return false;
+      }
     }
   }
   return true;

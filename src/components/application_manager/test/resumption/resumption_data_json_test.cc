@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,13 +36,13 @@
 
 #include "application_manager/usage_statistics.h"
 #include "application_manager/mock_application.h"
-#include "include/resumption_data_mock.h"
+#include "application_manager/mock_resumption_data.h"
 #include "interfaces/MOBILE_API.h"
 #include "resumption/last_state.h"
 
-#include "resumption_data_test.h"
+#include "application_manager/resumption_data_test.h"
 #include "formatters/CFormatterJsonBase.h"
-#include "config_profile/profile.h"
+
 #include "utils/file_system.h"
 
 #include "application_manager/resumption/resumption_data_json.h"
@@ -66,7 +66,7 @@ class ResumptionDataJsonTest : public ResumptionDataTest {
  protected:
   ResumptionDataJsonTest()
       : last_state_("app_storage_folder", "app_info_storage")
-      , res_json(last_state_, mock_application_manager_settings_) {}
+      , res_json(last_state_, mock_application_manager_) {}
   virtual void SetUp() {
     app_mock = new NiceMock<application_manager_test::MockApplication>();
 
@@ -105,9 +105,6 @@ class ResumptionDataJsonTest : public ResumptionDataTest {
 
   resumption::LastState last_state_;
   ResumptionDataJson res_json;
-  application_manager_test::MockApplicationManagerSettings
-      mock_application_manager_settings_;
-  std::string policy_app_id_;
 };
 
 TEST_F(ResumptionDataJsonTest, SaveApplication) {
@@ -138,12 +135,12 @@ TEST_F(ResumptionDataJsonTest, RemoveApplicationFromSaved) {
   PrepareData();
   res_json.SaveApplication(app_mock);
   EXPECT_TRUE(
-      res_json.RemoveApplicationFromSaved(policy_app_id_, mac_address_));
+      res_json.RemoveApplicationFromSaved(policy_app_id_, kMacAddress_));
 
   // Check that application was deleted
   smart_objects::SmartObject remove_app;
   EXPECT_FALSE(
-      res_json.GetSavedApplication(policy_app_id_, mac_address_, remove_app));
+      res_json.GetSavedApplication(policy_app_id_, kMacAddress_, remove_app));
   EXPECT_TRUE(remove_app.empty());
 }
 
@@ -155,7 +152,7 @@ TEST_F(ResumptionDataJsonTest, IsApplicationSaved_ApplicationSaved) {
   PrepareData();
   res_json.SaveApplication(app_mock);
   CheckSavedJson();
-  ssize_t result = res_json.IsApplicationSaved(policy_app_id_, mac_address_);
+  ssize_t result = res_json.IsApplicationSaved(policy_app_id_, kMacAddress_);
   EXPECT_EQ(0, result);
 }
 
@@ -164,8 +161,8 @@ TEST_F(ResumptionDataJsonTest, IsApplicationSaved_ApplicationRemoved) {
   res_json.SaveApplication(app_mock);
   CheckSavedJson();
   EXPECT_TRUE(
-      res_json.RemoveApplicationFromSaved(policy_app_id_, mac_address_));
-  ssize_t result = res_json.IsApplicationSaved(policy_app_id_, mac_address_);
+      res_json.RemoveApplicationFromSaved(policy_app_id_, kMacAddress_));
+  ssize_t result = res_json.IsApplicationSaved(policy_app_id_, kMacAddress_);
   EXPECT_EQ(-1, result);
 }
 
@@ -174,7 +171,7 @@ TEST_F(ResumptionDataJsonTest, GetSavedApplication) {
   res_json.SaveApplication(app_mock);
   smart_objects::SmartObject saved_app;
   EXPECT_TRUE(
-      res_json.GetSavedApplication(policy_app_id_, mac_address_, saved_app));
+      res_json.GetSavedApplication(policy_app_id_, kMacAddress_, saved_app));
   CheckSavedApp(saved_app);
 }
 
@@ -193,7 +190,7 @@ TEST_F(ResumptionDataJsonTest, GetDataForLoadResumeData) {
   res_json.GetDataForLoadResumeData(saved_app);
 
   EXPECT_EQ(policy_app_id_, saved_app[0][am::strings::app_id].asString());
-  EXPECT_EQ(mac_address_, saved_app[0][am::strings::device_id].asString());
+  EXPECT_EQ(kMacAddress_, saved_app[0][am::strings::device_id].asString());
   EXPECT_EQ(hmi_level_,
             static_cast<HMILevel::eType>(
                 saved_app[0][am::strings::hmi_level].asInt()));
@@ -207,7 +204,7 @@ TEST_F(ResumptionDataJsonTest, GetDataForLoadResumeData_AppRemove) {
   res_json.SaveApplication(app_mock);
   CheckSavedJson();
   EXPECT_TRUE(
-      res_json.RemoveApplicationFromSaved(policy_app_id_, mac_address_));
+      res_json.RemoveApplicationFromSaved(policy_app_id_, kMacAddress_));
   res_json.GetDataForLoadResumeData(saved_app);
   EXPECT_TRUE(saved_app.empty());
 }
@@ -217,7 +214,7 @@ TEST_F(ResumptionDataJsonTest, UpdateHmiLevel) {
   res_json.SaveApplication(app_mock);
   CheckSavedJson();
   HMILevel::eType new_hmi_level = HMILevel::HMI_LIMITED;
-  res_json.UpdateHmiLevel(policy_app_id_, mac_address_, new_hmi_level);
+  res_json.UpdateHmiLevel(policy_app_id_, kMacAddress_, new_hmi_level);
   hmi_level_ = new_hmi_level;
 
   CheckSavedJson();
@@ -244,7 +241,7 @@ TEST_F(ResumptionDataJsonTest, GetHMIApplicationID) {
   res_json.SaveApplication(app_mock);
   CheckSavedJson();
   EXPECT_EQ(hmi_app_id_,
-            res_json.GetHMIApplicationID(policy_app_id_, mac_address_));
+            res_json.GetHMIApplicationID(policy_app_id_, kMacAddress_));
 }
 
 TEST_F(ResumptionDataJsonTest, GetHMIApplicationID_AppNotSaved) {
@@ -279,7 +276,7 @@ TEST_F(ResumptionDataJsonTest, OnSuspendFourTimes) {
   res_json.OnSuspend();
   res_json.OnSuspend();
 
-  EXPECT_TRUE(-1 != res_json.IsApplicationSaved(policy_app_id_, mac_address_));
+  EXPECT_TRUE(-1 != res_json.IsApplicationSaved(policy_app_id_, kMacAddress_));
 }
 
 TEST_F(ResumptionDataJsonTest, OnSuspendOnAwake) {
@@ -329,7 +326,7 @@ TEST_F(ResumptionDataJsonTest, GetHashId) {
   CheckSavedJson();
 
   std::string test_hash;
-  EXPECT_TRUE(res_json.GetHashId(policy_app_id_, mac_address_, test_hash));
+  EXPECT_TRUE(res_json.GetHashId(policy_app_id_, kMacAddress_, test_hash));
   EXPECT_EQ(hash_, test_hash);
 }
 
@@ -361,10 +358,10 @@ TEST_F(ResumptionDataJsonTest, DropAppDataResumption) {
   res_json.SaveApplication(app_mock);
   CheckSavedJson();
 
-  EXPECT_TRUE(res_json.DropAppDataResumption(mac_address_, policy_app_id_));
+  EXPECT_TRUE(res_json.DropAppDataResumption(kMacAddress_, policy_app_id_));
 
   smart_objects::SmartObject app;
-  EXPECT_TRUE(res_json.GetSavedApplication(policy_app_id_, mac_address_, app));
+  EXPECT_TRUE(res_json.GetSavedApplication(policy_app_id_, kMacAddress_, app));
 
   EXPECT_TRUE(app.keyExists(am::strings::application_commands) &&
               app[am::strings::application_commands].empty());

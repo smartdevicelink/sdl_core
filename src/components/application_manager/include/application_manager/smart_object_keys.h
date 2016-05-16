@@ -270,7 +270,6 @@ extern const char* last_ign_off_time;
 extern const char* resume_vr_grammars;
 
 extern const char* ign_off_count;
-extern const char* suspend_count;
 
 extern const char* connection_info;
 extern const char* is_download_complete;

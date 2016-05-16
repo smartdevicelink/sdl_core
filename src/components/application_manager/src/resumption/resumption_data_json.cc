@@ -80,7 +80,6 @@ void ResumptionDataJson::SaveApplication(
   json_app[strings::is_media_application] = application->IsAudioApplication();
   json_app[strings::hmi_level] = static_cast<int32_t>(hmi_level);
   json_app[strings::ign_off_count] = 0;
-  json_app[strings::suspend_count] = 0;
   json_app[strings::hash_id] = hash;
   Formatters::CFormatterJsonBase::objToJsonValue(
       GetApplicationCommands(application), tmp);
@@ -106,22 +105,6 @@ void ResumptionDataJson::SaveApplication(
   LOG4CXX_DEBUG(logger_, "SaveApplication : " << json_app.toStyledString());
 }
 
-int32_t ResumptionDataJson::GetStoredHMILevel(
-    const std::string& policy_app_id, const std::string& device_id) const {
-  using namespace app_mngr;
-  LOG4CXX_AUTO_TRACE(logger_);
-  sync_primitives::AutoLock autolock(resumption_lock_);
-  int idx = GetObjectIndex(policy_app_id, device_id);
-  if (idx != -1) {
-    const Json::Value& json_app = GetSavedApplications()[idx];
-    if (json_app.isMember(strings::hmi_level)) {
-      return json_app[strings::hmi_level].asInt();
-    }
-  }
-  LOG4CXX_FATAL(logger_, "There are some unknown keys among the stored apps");
-  return -1;
-}
-
 bool ResumptionDataJson::IsHMIApplicationIdExist(uint32_t hmi_app_id) const {
   using namespace app_mngr;
   LOG4CXX_AUTO_TRACE(logger_);
@@ -136,28 +119,6 @@ bool ResumptionDataJson::IsHMIApplicationIdExist(uint32_t hmi_app_id) const {
     }
   }
   return false;
-}
-
-bool ResumptionDataJson::CheckSavedApplication(const std::string& policy_app_id,
-                                               const std::string& device_id) {
-  using namespace app_mngr;
-  LOG4CXX_AUTO_TRACE(logger_);
-  sync_primitives::AutoLock autolock(resumption_lock_);
-  int index = IsApplicationSaved(policy_app_id, device_id);
-  if (-1 == index) {
-    return false;
-  }
-
-  if (!IsResumptionDataValid(index)) {
-    LOG4CXX_INFO(
-        logger_,
-        "Resumption data for app_id "
-            << policy_app_id << " device id " << device_id
-            << " is corrupted. Remove application from resumption list");
-    RemoveApplicationFromSaved(policy_app_id, device_id);
-    return false;
-  }
-  return true;
 }
 
 uint32_t ResumptionDataJson::GetHMIApplicationID(
@@ -190,13 +151,6 @@ void ResumptionDataJson::OnSuspend() {
   for (Json::Value::iterator it = GetSavedApplications().begin();
        it != GetSavedApplications().end();
        ++it) {
-    if ((*it).isMember(strings::suspend_count)) {
-      const uint32_t suspend_count = (*it)[strings::suspend_count].asUInt();
-      (*it)[strings::suspend_count] = suspend_count + 1;
-    } else {
-      LOG4CXX_WARN(logger_, "Unknown key among saved applications");
-      (*it)[strings::suspend_count] = 1;
-    }
     if ((*it).isMember(strings::ign_off_count)) {
       Json::Value& ign_off_count = (*it)[strings::ign_off_count];
       const uint32_t counter_value = ign_off_count.asUInt();
@@ -223,7 +177,11 @@ void ResumptionDataJson::OnAwake() {
        ++it) {
     if ((*it).isMember(strings::ign_off_count)) {
       const uint32_t ign_off_count = (*it)[strings::ign_off_count].asUInt();
-      (*it)[strings::ign_off_count] = ign_off_count - 1;
+      if (0 == ign_off_count) {
+        LOG4CXX_WARN(logger_, "Application has not been suspended");
+      } else {
+        (*it)[strings::ign_off_count] = ign_off_count - 1;
+      }
     } else {
       LOG4CXX_WARN(logger_, "Unknown key among saved applications");
       (*it)[strings::ign_off_count] = 0;

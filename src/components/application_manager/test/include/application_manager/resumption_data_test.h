@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,6 +30,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_RESUMPTION_DATA_TEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_RESUMPTION_DATA_TEST_H_
+
 #include <string>
 #include <algorithm>
 #include "gtest/gtest.h"
@@ -57,13 +60,17 @@ using namespace resumption;
 using namespace mobile_apis;
 
 class ResumptionDataTest : public ::testing::Test {
- public:
-  ResumptionDataTest() : tts_chunks_count(4) {}
-
  protected:
+  ResumptionDataTest()
+      : kCountOfCommands_(5u)
+      , kCountOfChoice_(2u)
+      , kCountOfChoiceSets_(4u)
+      , kCountOfSubmenues_(3u)
+      , kCountOfFiles_(8u)
+      , kCountOfVrhelptitle_(2u)
+      , kMacAddress_("12345") {}
   // Check structure in saved application
   void CheckSavedApp(sm::SmartObject& saved_data);
-
   // Set data for resumption
   virtual void PrepareData();
   utils::SharedPtr<NiceMock<application_manager_test::MockApplication>>
@@ -75,7 +82,7 @@ class ResumptionDataTest : public ::testing::Test {
   size_t hmi_app_id_;
   std::string policy_app_id_;
   size_t ign_off_count_;
-  const size_t tts_chunks_count;
+  const size_t tts_chunks_count = 4;
 
   size_t grammar_id_;
   std::string hash_;
@@ -116,13 +123,13 @@ class ResumptionDataTest : public ::testing::Test {
   void CheckVRTitle(sm::SmartObject& res_list);
   void CheckSubscriptions(sm::SmartObject& res_list);
 
-  const size_t count_of_commands = 5;
-  const size_t count_of_choice = 2;
-  const size_t count_of_choice_sets = 4;
-  const size_t count_of_submenues = 3;
-  const size_t count_of_files = 8;
-  const size_t count_of_vrhelptitle = 2;
-  const std::string mac_address_ = "12345";
+  const size_t kCountOfCommands_;
+  const size_t kCountOfChoice_;
+  const size_t kCountOfChoiceSets_;
+  const size_t kCountOfSubmenues_;
+  const size_t kCountOfFiles_;
+  const size_t kCountOfVrhelptitle_;
+  const std::string kMacAddress_;
 
   am::CommandsMap test_commands_map;
   am::SubMenuMap test_submenu_map;
@@ -137,9 +144,13 @@ class ResumptionDataTest : public ::testing::Test {
   sync_primitives::Lock setlock_;
   sync_primitives::Lock btnlock_;
   sync_primitives::Lock ivilock_;
-  const std::string app_storage_folder_ = "";
+  application_manager_test::MockApplicationManagerSettings
+      mock_application_manager_settings_;
+  application_manager_test::MockApplicationManager mock_application_manager_;
 };
 
 }  // namespace resumption_test
 }  // namespace components
 }  // namespace test
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_RESUMPTION_DATA_TEST_H_
