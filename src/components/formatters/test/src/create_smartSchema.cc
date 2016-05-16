@@ -31,6 +31,117 @@
  */
 
 #include "create_smartSchema.h"
+using namespace NsSmartDeviceLink::NsSmartObjects;
+using namespace NsSmartDeviceLink::NsJSONHandler::strings;
+using namespace NsSmartDeviceLink::NsJSONHandler::Formatters;
+template <>
+const EnumConversionHelper<
+    test::components::formatters::FunctionIDTest::eType>::CStringToEnumMap
+    EnumConversionHelper<test::components::formatters::FunctionIDTest::eType>::
+        cstring_to_enum_map_ = EnumConversionHelper<
+            test::components::formatters::FunctionIDTest::eType>::
+            InitCStringToEnumMap();
+
+template <>
+const EnumConversionHelper<
+    test::components::formatters::FunctionIDTest::eType>::EnumToCStringMap
+    EnumConversionHelper<test::components::formatters::FunctionIDTest::eType>::
+        enum_to_cstring_map_ = EnumConversionHelper<
+            test::components::formatters::FunctionIDTest::eType>::
+            InitEnumToCStringMap();
+
+template <>
+const char* const EnumConversionHelper<
+    test::components::formatters::FunctionIDTest::eType>::cstring_values_[] = {
+    "RegisterAppInterface", "UnregisterAppInterface", "SetGlobalProperties"};
+
+template <>
+const test::components::formatters::FunctionIDTest::eType EnumConversionHelper<
+    test::components::formatters::FunctionIDTest::eType>::enum_values_[] = {
+    test::components::formatters::FunctionIDTest::RegisterAppInterface,
+    test::components::formatters::FunctionIDTest::UnregisterAppInterface,
+    test::components::formatters::FunctionIDTest::SetGlobalProperties};
+
+template <>
+const EnumConversionHelper<test::components::formatters::Language::eType>::
+    EnumToCStringMap EnumConversionHelper<
+        test::components::formatters::Language::eType>::enum_to_cstring_map_ =
+        EnumConversionHelper<test::components::formatters::Language::eType>::
+            InitEnumToCStringMap();
+
+template <>
+const EnumConversionHelper<test::components::formatters::Language::eType>::
+    CStringToEnumMap EnumConversionHelper<
+        test::components::formatters::Language::eType>::cstring_to_enum_map_ =
+        EnumConversionHelper<test::components::formatters::Language::eType>::
+            InitCStringToEnumMap();
+
+template <>
+const char* const EnumConversionHelper<
+    test::components::formatters::Language::eType>::cstring_values_[] = {
+    "EN_EU", "RU_RU"};
+
+template <>
+const test::components::formatters::Language::eType EnumConversionHelper<
+    test::components::formatters::Language::eType>::enum_values_[] = {
+    test::components::formatters::Language::EN_EU,
+    test::components::formatters::Language::RU_RU};
+
+template <>
+const EnumConversionHelper<
+    test::components::formatters::SpeechCapabilities::eType>::EnumToCStringMap
+    EnumConversionHelper<test::components::formatters::SpeechCapabilities::
+                             eType>::enum_to_cstring_map_ =
+        EnumConversionHelper<test::components::formatters::SpeechCapabilities::
+                                 eType>::InitEnumToCStringMap();
+
+template <>
+const EnumConversionHelper<
+    test::components::formatters::SpeechCapabilities::eType>::CStringToEnumMap
+    EnumConversionHelper<test::components::formatters::SpeechCapabilities::
+                             eType>::cstring_to_enum_map_ =
+        EnumConversionHelper<test::components::formatters::SpeechCapabilities::
+                                 eType>::InitCStringToEnumMap();
+
+template <>
+const char* const EnumConversionHelper<
+    test::components::formatters::SpeechCapabilities::eType>::cstring_values_
+    [] = {"SC_TEXT"};
+
+template <>
+const test::components::formatters::SpeechCapabilities::eType
+    EnumConversionHelper<test::components::formatters::SpeechCapabilities::
+                             eType>::enum_values_[] = {
+        test::components::formatters::SpeechCapabilities::SC_TEXT};
+
+template <>
+const EnumConversionHelper<
+    test::components::formatters::AppTypeTest::eType>::EnumToCStringMap
+    EnumConversionHelper<test::components::formatters::AppTypeTest::eType>::
+        enum_to_cstring_map_ = EnumConversionHelper<
+            test::components::formatters::AppTypeTest::eType>::
+            InitEnumToCStringMap();
+
+template <>
+const EnumConversionHelper<
+    test::components::formatters::AppTypeTest::eType>::CStringToEnumMap
+    EnumConversionHelper<test::components::formatters::AppTypeTest::eType>::
+        cstring_to_enum_map_ = EnumConversionHelper<
+            test::components::formatters::AppTypeTest::eType>::
+            InitCStringToEnumMap();
+
+template <>
+const char* const EnumConversionHelper<
+    test::components::formatters::AppTypeTest::eType>::cstring_values_[] = {
+    "SYSTEM", "MEDIA"};
+
+template <>
+const test::components::formatters::AppTypeTest::eType EnumConversionHelper<
+    test::components::formatters::AppTypeTest::eType>::enum_values_[] = {
+    test::components::formatters::AppTypeTest::SYSTEM,
+    test::components::formatters::AppTypeTest::MEDIA,
+};
+
 namespace test {
 namespace components {
 namespace formatters {
@@ -38,106 +149,6 @@ namespace formatters {
 using namespace NsSmartDeviceLink::NsJSONHandler::strings;
 using namespace NsSmartDeviceLink::NsJSONHandler::Formatters;
 using namespace NsSmartDeviceLink::NsSmartObjects;
-
-template <>
-const EnumConversionHelper<FunctionIDTest::eType>::EnumToCStringMap
-    EnumConversionHelper<test::components::formatters::FunctionIDTest::eType>::
-        enum_to_cstring_map_ = EnumConversionHelper<
-            test::components::formatters::FunctionIDTest::eType>::
-            InitEnumToCStringMap();
-
-template <>
-const EnumConversionHelper<FunctionIDTest::eType>::CStringToEnumMap
-    EnumConversionHelper<test::components::formatters::FunctionIDTest::eType>::
-        cstring_to_enum_map_ = EnumConversionHelper<
-            test::components::formatters::FunctionIDTest::eType>::
-            InitCStringToEnumMap();
-
-template <>
-const char* const
-    EnumConversionHelper<FunctionIDTest::eType>::cstring_values_[] = {
-        "RegisterAppInterface",
-        "UnregisterAppInterface",
-        "SetGlobalProperties"};
-
-template <>
-const FunctionIDTest::eType
-    EnumConversionHelper<FunctionIDTest::eType>::enum_values_[] = {
-        test::components::formatters::FunctionIDTest::RegisterAppInterface,
-        test::components::formatters::FunctionIDTest::UnregisterAppInterface,
-        test::components::formatters::FunctionIDTest::SetGlobalProperties};
-
-template <>
-const EnumConversionHelper<Language::eType>::EnumToCStringMap
-    EnumConversionHelper<
-        test::components::formatters::Language::eType>::enum_to_cstring_map_ =
-        EnumConversionHelper<test::components::formatters::Language::eType>::
-            InitEnumToCStringMap();
-
-template <>
-const EnumConversionHelper<Language::eType>::CStringToEnumMap
-    EnumConversionHelper<
-        test::components::formatters::Language::eType>::cstring_to_enum_map_ =
-        EnumConversionHelper<test::components::formatters::Language::eType>::
-            InitCStringToEnumMap();
-
-template <>
-const char* const EnumConversionHelper<Language::eType>::cstring_values_[] = {
-    "EN_EU", "RU_RU"};
-
-template <>
-const Language::eType EnumConversionHelper<Language::eType>::enum_values_[] = {
-    test::components::formatters::Language::EN_EU,
-    test::components::formatters::Language::RU_RU};
-
-template <>
-const EnumConversionHelper<SpeechCapabilities::eType>::EnumToCStringMap
-    EnumConversionHelper<test::components::formatters::SpeechCapabilities::
-                             eType>::enum_to_cstring_map_ =
-        EnumConversionHelper<test::components::formatters::SpeechCapabilities::
-                                 eType>::InitEnumToCStringMap();
-
-template <>
-const EnumConversionHelper<SpeechCapabilities::eType>::CStringToEnumMap
-    EnumConversionHelper<test::components::formatters::SpeechCapabilities::
-                             eType>::cstring_to_enum_map_ =
-        EnumConversionHelper<test::components::formatters::SpeechCapabilities::
-                                 eType>::InitCStringToEnumMap();
-
-template <>
-const char* const
-    EnumConversionHelper<SpeechCapabilities::eType>::cstring_values_[] = {
-        "SC_TEXT"};
-
-template <>
-const SpeechCapabilities::eType
-    EnumConversionHelper<SpeechCapabilities::eType>::enum_values_[] = {
-        test::components::formatters::SpeechCapabilities::SC_TEXT};
-
-template <>
-const EnumConversionHelper<AppTypeTest::eType>::EnumToCStringMap
-    EnumConversionHelper<test::components::formatters::AppTypeTest::eType>::
-        enum_to_cstring_map_ = EnumConversionHelper<
-            test::components::formatters::AppTypeTest::eType>::
-            InitEnumToCStringMap();
-
-template <>
-const EnumConversionHelper<AppTypeTest::eType>::CStringToEnumMap
-    EnumConversionHelper<test::components::formatters::AppTypeTest::eType>::
-        cstring_to_enum_map_ = EnumConversionHelper<
-            test::components::formatters::AppTypeTest::eType>::
-            InitCStringToEnumMap();
-
-template <>
-const char* const EnumConversionHelper<AppTypeTest::eType>::cstring_values_[] =
-    {"SYSTEM", "MEDIA"};
-
-template <>
-const AppTypeTest::eType
-    EnumConversionHelper<AppTypeTest::eType>::enum_values_[] = {
-        test::components::formatters::AppTypeTest::SYSTEM,
-        test::components::formatters::AppTypeTest::MEDIA,
-};
 
 CSmartSchema initObjectSchema() {
   std::set<TestType::eType> resultCode_allowedEnumSubsetValues;

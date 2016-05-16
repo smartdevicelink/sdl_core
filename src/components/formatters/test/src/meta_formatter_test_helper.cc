@@ -31,6 +31,7 @@
  */
 #include "gtest/gtest.h"
 #include "meta_formatter_test_helper.h"
+#include "json/value.h"
 
 namespace test {
 namespace components {
@@ -58,13 +59,14 @@ void CMetaFormatterTestHelper::TearDown() {
 
 void CMetaFormatterTestHelper::AnyObjectToJsonString(
     const SmartObject& obj, std::string& result_string) {
-  Json::Value params(Json::objectValue);
+  utils::json::JsonValue params(utils::json::ValueType::OBJECT_VALUE);
 
   SmartObject formattedObj(obj);
+  utils::json::JsonValueRef json_value_ref;
+  json_value_ref.Append(params);
+  CFormatterJsonBase::objToJsonValue(formattedObj, json_value_ref);
 
-  CFormatterJsonBase::objToJsonValue(formattedObj, params);
-
-  result_string = params.toStyledString();
+  result_string = params.ToJson(true);
 }
 
 //-----------------------------------------------------------

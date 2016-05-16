@@ -39,7 +39,7 @@ namespace test {
 namespace components {
 namespace formatters {
 
-TEST(CFormatterJsonSDLRPCv1Test, EmptySmartObjectToString) {
+TEST(CFormatterJsonSDLRPCv1Test, DISABLED_EmptySmartObjectToString) {
   SmartObject srcObj;
 
   EXPECT_EQ(Errors::eType::OK, srcObj.validate());
@@ -60,7 +60,7 @@ TEST(CFormatterJsonSDLRPCv1Test, EmptySmartObjectToString) {
   EXPECT_EQ(expectOutputJsonString, jsonString);
 }
 
-TEST(CFormatterJsonSDLRPCv1Test, SmObjWithRequestWithoutMsgNotValid_ToString) {
+TEST(CFormatterJsonSDLRPCv1Test, DISABLED_SmObjWithRequestWithoutMsgNotValid_ToString) {
   SmartObject srcObj;
   CSmartSchema schema = initObjectSchema();
   srcObj.setSchema(schema);
@@ -90,7 +90,7 @@ TEST(CFormatterJsonSDLRPCv1Test, SmObjWithRequestWithoutMsgNotValid_ToString) {
 }
 
 TEST(CFormatterJsonSDLRPCv1Test,
-     SmObjWithRequestWithEmptyMsgWithTestSchemaToString) {
+     DISABLED_SmObjWithRequestWithEmptyMsgWithTestSchemaToString) {
   SmartObject srcObj;
   CSmartSchema schema = initObjectSchema();
   srcObj.setSchema(schema);
@@ -123,7 +123,7 @@ TEST(CFormatterJsonSDLRPCv1Test,
 }
 
 TEST(CFormatterJsonSDLRPCv1Test,
-     SmObjWithRequestWithNonemptyMsgWithTestSchemaToString) {
+     DISABLED_SmObjWithRequestWithNonemptyMsgWithTestSchemaToString) {
   SmartObject srcObj;
   CSmartSchema schema = initObjectSchema();
   srcObj.setSchema(schema);
@@ -155,7 +155,7 @@ TEST(CFormatterJsonSDLRPCv1Test,
   EXPECT_EQ(expectOutputJsonString, jsonString);
 }
 
-TEST(CFormatterJsonSDLRPCv1Test, SmObjWithRequestWithNonemptyMsgToString) {
+TEST(CFormatterJsonSDLRPCv1Test, DISABLED_SmObjWithRequestWithNonemptyMsgToString) {
   SmartObject srcObj;
 
   srcObj[S_PARAMS][S_MESSAGE_TYPE] = MessageTypeTest::request;
@@ -184,7 +184,7 @@ TEST(CFormatterJsonSDLRPCv1Test, SmObjWithRequestWithNonemptyMsgToString) {
   EXPECT_EQ(expectOutputJsonString, jsonString);
 }
 
-TEST(CFormatterJsonSDLRPCv1Test, SmObjWithResponseWithoutSchemaToString) {
+TEST(CFormatterJsonSDLRPCv1Test, DISABLED_SmObjWithResponseWithoutSchemaToString) {
   SmartObject srcObj;
 
   srcObj[S_PARAMS][S_MESSAGE_TYPE] = MessageTypeTest::response;
@@ -215,7 +215,7 @@ TEST(CFormatterJsonSDLRPCv1Test, SmObjWithResponseWithoutSchemaToString) {
   EXPECT_EQ(expectOutputJsonString, jsonString);
 }
 
-TEST(CFormatterJsonSDLRPCv1Test, SmObjWithNotificationToString) {
+TEST(CFormatterJsonSDLRPCv1Test, DISABLED_SmObjWithNotificationToString) {
   SmartObject srcObj;
   CSmartSchema schema = initObjectSchema();
   srcObj.setSchema(schema);
@@ -244,7 +244,7 @@ TEST(CFormatterJsonSDLRPCv1Test, SmObjWithNotificationToString) {
   EXPECT_EQ(expectOutputJsonString, jsonString);
 }
 
-TEST(CFormatterJsonSDLRPCv1Test, SmObjWithResponseToString) {
+TEST(CFormatterJsonSDLRPCv1Test, DISABLED_SmObjWithResponseToString) {
   SmartObject srcObj;
 
   CSmartSchema schema = initObjectSchema();
@@ -281,7 +281,7 @@ TEST(CFormatterJsonSDLRPCv1Test, SmObjWithResponseToString) {
 }
 
 TEST(CFormatterJsonSDLRPCv1Test,
-     SmObjWithResponseWithoutSchemaWithoutParamsToString) {
+     DISABLED_SmObjWithResponseWithoutSchemaWithoutParamsToString) {
   SmartObject srcObj;
   srcObj[S_PARAMS][S_MESSAGE_TYPE] = MessageTypeTest::response;
   std::string jsonString;
