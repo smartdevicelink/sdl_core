@@ -537,24 +537,24 @@ TEST_F(ApplicationImplTest, SubscribeToDefaultButton_UnsubscribeFromButton) {
 }
 
 TEST_F(ApplicationImplTest, SubscribeToSoftButton_UnsubscribeFromSoftButton) {
-  const uint btn_count = 10;
-  for (uint i = 0; i < btn_count; i++) {
+  const unsigned int btn_count = 10;
+  for (unsigned int i = 0; i < btn_count; i++) {
     EXPECT_FALSE(app_impl->IsSubscribedToSoftButton(i));
   }
 
   SoftButtonID test_button;
-  for (uint i = 0; i < btn_count; i++) {
+  for (unsigned int i = 0; i < btn_count; i++) {
     test_button.insert(i);
   }
   app_impl->SubscribeToSoftButtons(FunctionID::ScrollableMessageID,
                                    test_button);
 
-  for (uint i = 0; i < btn_count; i++) {
+  for (unsigned int i = 0; i < btn_count; i++) {
     EXPECT_TRUE(app_impl->IsSubscribedToSoftButton(i));
   }
   app_impl->UnsubscribeFromSoftButtons(FunctionID::ScrollableMessageID);
 
-  for (uint i = 0; i < btn_count; i++) {
+  for (unsigned int i = 0; i < btn_count; i++) {
     EXPECT_FALSE(app_impl->IsSubscribedToSoftButton(i));
   }
 }

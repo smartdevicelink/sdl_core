@@ -43,7 +43,7 @@ include_directories(
 set(LIBRARIES
     gmock
     ApplicationManager
-    MessageHelper
+    #MessageHelper
     jsoncpp
     connectionHandler
     MediaManager
@@ -55,6 +55,14 @@ set(LIBRARIES
 set(SOURCES
     #message_helper_test.cc
 )
+
+if(QT_PORT)
+  link_directories (${CMAKE_SOURCE_DIR}/build/openssl_win_x86/lib)
+endif()
+
+if(NOT QT_PORT AND ${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  link_directories(${CMAKE_SOURCE_DIR}/build/openssl_win_x64/lib/)
+endif()
 
 create_test("message_helper_test" "${SOURCES}" "${LIBRARIES}")
 

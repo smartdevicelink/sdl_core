@@ -342,28 +342,28 @@ TEST_F(HMICapabilitiesTest, LoadCapabilitiesFromFile) {
   EXPECT_EQ("SE", vehicle_type_so["trim"].asString());
 }
 
-TEST_F(HMICapabilitiesTest, ConvertJsonLanguagesToObj) {
-  Json::Value json_languages(Json::arrayValue);
-  json_languages[0] = "EN_US";
-  json_languages[1] = "ES_MX";
-  smart_objects::SmartObject sm_obj =
-      smart_objects::SmartObject(smart_objects::SmartType_Array);
+//TEST_F(HMICapabilitiesTest, ConvertJsonLanguagesToObj) {
+//  Json::Value json_languages(Json::arrayValue);
+//  json_languages[0] = "EN_US";
+//  json_languages[1] = "ES_MX";
+//  smart_objects::SmartObject sm_obj =
+//      smart_objects::SmartObject(smart_objects::SmartType_Array);
 
-  EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
-              CommonLanguageFromString(json_languages[0].asString()))
-      .WillOnce(Return(hmi_apis::Common_Language::EN_US));
+//  EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
+//              CommonLanguageFromString(json_languages[0].asString()))
+//      .WillOnce(Return(hmi_apis::Common_Language::EN_US));
 
-  EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
-              CommonLanguageFromString(json_languages[1].asString()))
-      .WillOnce(Return(hmi_apis::Common_Language::ES_MX));
+//  EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
+//              CommonLanguageFromString(json_languages[1].asString()))
+//      .WillOnce(Return(hmi_apis::Common_Language::ES_MX));
 
-  hmi_capabilities_test->ConvertJsonLanguagesToObj(json_languages, sm_obj);
+//  hmi_capabilities_test->ConvertJsonLanguagesToObj(json_languages, sm_obj);
 
-  EXPECT_EQ(hmi_apis::Common_Language::EN_US,
-            static_cast<hmi_apis::Common_Language::eType>(sm_obj[0].asInt()));
-  EXPECT_EQ(hmi_apis::Common_Language::ES_MX,
-            static_cast<hmi_apis::Common_Language::eType>(sm_obj[1].asInt()));
-}
+//  EXPECT_EQ(hmi_apis::Common_Language::EN_US,
+//            static_cast<hmi_apis::Common_Language::eType>(sm_obj[0].asInt()));
+//  EXPECT_EQ(hmi_apis::Common_Language::ES_MX,
+//            static_cast<hmi_apis::Common_Language::eType>(sm_obj[1].asInt()));
+//}
 
 TEST_F(HMICapabilitiesTest,
        HmiCapabilitiesInitialized_UiVrTtsIviNotCooperating) {

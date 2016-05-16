@@ -113,7 +113,7 @@ class ResumptionSqlQueriesTest : public ::testing::Test {
   static const int timeStamp2;
 
   static void SetUpTestCase() {
-    db_ = new SQLDatabase();
+    db_ = new SQLDatabase("test", "test_connection");
     ASSERT_TRUE(db_->Open());
     ASSERT_TRUE(db_->IsReadWrite());
     SQLQuery query(db_);

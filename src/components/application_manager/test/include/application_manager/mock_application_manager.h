@@ -43,6 +43,7 @@
 #include "application_manager/hmi_capabilities.h"
 #include "application_manager/vehicle_info_data.h"
 #include "application_manager/state_controller.h"
+#include "resumption/last_state.h"
 
 #include "interfaces/MOBILE_API.h"
 namespace test {

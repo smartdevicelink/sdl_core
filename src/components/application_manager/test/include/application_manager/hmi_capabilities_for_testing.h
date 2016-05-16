@@ -48,11 +48,11 @@ class HMICapabilitiesForTesting
     return load_capabilities_from_file();
   }
 
-  void ConvertJsonLanguagesToObj(
-      Json::Value& json_languages,
-      ::NsSmartDeviceLink::NsSmartObjects::SmartObject& languages) {
-    convert_json_languages_to_obj(json_languages, languages);
-  }
+//  void ConvertJsonLanguagesToObj(
+//      Json::Value& json_languages,
+//      ::NsSmartDeviceLink::NsSmartObjects::SmartObject& languages) {
+//    convert_json_languages_to_obj(json_languages, languages);
+//  }
 };
 
 }  // namespace application_manager_test
