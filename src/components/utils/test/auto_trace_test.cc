@@ -121,7 +121,8 @@ ssize_t CheckIfIstreamContains(std::ifstream& stream,
   return it == search_for.end() ? -1 : std::distance(search_for.begin(), it);
 }
 
-TEST(AutoTraceTest, AutoTrace_WriteToFile_ReadCorrectString) {
+// TODO(AKutsan) : Enable after resolve APPLINK-24336
+TEST(AutoTraceTest, DISABLED_AutoTrace_WriteToFile_ReadCorrectString) {
   const std::string debug_log_level = "DEBUG";
   const std::string trace_log_level = "TRACE";
   const std::string enter_message = ": Enter";
