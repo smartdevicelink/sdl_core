@@ -115,7 +115,7 @@ bool ResumeCtrl::Init(resumption::LastState& last_state) {
   save_persistent_data_timer_.Start(
       application_manager_.get_settings()
           .app_resumption_save_persistent_data_timeout(),
-      false);
+      timer::kPeriodic);
   return true;
 }
 
@@ -279,7 +279,7 @@ void ResumeCtrl::StartSavePersistentDataTimer() {
     save_persistent_data_timer_.Start(
         application_manager_.get_settings()
             .app_resumption_save_persistent_data_timeout(),
-        false);
+        timer::kPeriodic);
   }
 }
 
@@ -744,7 +744,8 @@ void ResumeCtrl::AddToResumptionTimerQueue(const uint32_t app_id) {
   if (!is_resumption_active_) {
     is_resumption_active_ = true;
     restore_hmi_level_timer_.Start(
-        application_manager_.get_settings().app_resuming_timeout(), true);
+        application_manager_.get_settings().app_resuming_timeout(),
+        timer::kSingleShot);
   }
 }
 

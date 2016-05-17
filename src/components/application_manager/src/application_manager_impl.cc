@@ -148,7 +148,7 @@ ApplicationManagerImpl::ApplicationManagerImpl(
       new TimerTaskImpl<ApplicationManagerImpl>(
           this, &ApplicationManagerImpl::ClearTimerPool)));
   const uint32_t timeout_ms = 10000u;
-  clearing_timer->Start(timeout_ms, false);
+  clearing_timer->Start(timeout_ms, timer::kPeriodic);
   timer_pool_.push_back(clearing_timer);
 }
 
@@ -426,7 +426,7 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   LOG4CXX_DEBUG(logger_, "Restarting application list update timer");
   GetPolicyHandler().OnAppsSearchStarted();
   uint32_t timeout = get_settings().application_list_update_timeout();
-  application_list_update_timer_.Start(timeout, true);
+  application_list_update_timer_.Start(timeout, timer::kSingleShot);
 
   if (!is_all_apps_allowed_) {
     LOG4CXX_WARN(logger_,
@@ -917,7 +917,7 @@ void ApplicationManagerImpl::OnFindNewApplicationsRequest() {
   connection_handler().ConnectToAllDevices();
   LOG4CXX_DEBUG(logger_, "Starting application list update timer");
   uint32_t timeout = get_settings().application_list_update_timeout();
-  application_list_update_timer_.Start(timeout, true);
+  application_list_update_timer_.Start(timeout, timer::kSingleShot);
   GetPolicyHandler().OnAppsSearchStarted();
 }
 
@@ -2945,7 +2945,7 @@ void ApplicationManagerImpl::EndNaviServices(uint32_t app_id) {
         "CloseNaviAppTimer",
         new TimerTaskImpl<ApplicationManagerImpl>(
             this, &ApplicationManagerImpl::CloseNaviApp)));
-    close_timer->Start(navi_close_app_timeout_, true);
+    close_timer->Start(navi_close_app_timeout_, timer::kSingleShot);
 
     sync_primitives::AutoLock lock(timer_pool_lock_);
     timer_pool_.push_back(close_timer);
@@ -2986,7 +2986,7 @@ void ApplicationManagerImpl::OnHMILevelChanged(
           "AppShouldFinishStreaming",
           new TimerTaskImpl<ApplicationManagerImpl>(
               this, &ApplicationManagerImpl::EndNaviStreaming)));
-      end_stream_timer->Start(navi_end_stream_timeout_, true);
+      end_stream_timer->Start(navi_end_stream_timeout_, timer::kSingleShot);
 
       sync_primitives::AutoLock lock(timer_pool_lock_);
       timer_pool_.push_back(end_stream_timer);
@@ -3272,7 +3272,7 @@ void ApplicationManagerImpl::AddAppToTTSGlobalPropertiesList(
     LOG4CXX_INFO(logger_, "Start tts_global_properties_timer_");
     tts_global_properties_app_list_lock_.Release();
     const uint32_t timeout_ms = 1000;
-    tts_global_properties_timer_.Start(timeout_ms, false);
+    tts_global_properties_timer_.Start(timeout_ms, timer::kPeriodic);
     return;
   }
   tts_global_properties_app_list_lock_.Release();
