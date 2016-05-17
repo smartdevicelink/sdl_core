@@ -398,8 +398,7 @@ ModuleConfig::ModuleConfig(const Json::Value *value__)
           impl::ValueMember(value__, "notifications_per_minute_by_priority")),
       vehicle_make(impl::ValueMember(value__, "vehicle_make")),
       vehicle_model(impl::ValueMember(value__, "vehicle_model")),
-      vehicle_year(impl::ValueMember(value__, "vehicle_year")),
-      certificate(impl::ValueMember(value__, "certificate")) {}
+      vehicle_year(impl::ValueMember(value__, "vehicle_year")) {}
 
 void ModuleConfig::SafeCopyFrom(const ModuleConfig &from) {
   //  device_certificates = from.device_certificates;  // According to the
@@ -416,12 +415,10 @@ void ModuleConfig::SafeCopyFrom(const ModuleConfig &from) {
   vehicle_make.assign_if_valid(from.vehicle_make);
   vehicle_model.assign_if_valid(from.vehicle_model);
   vehicle_year.assign_if_valid(from.vehicle_year);
-  certificate.assign_if_valid(from.certificate);
 }
 
 Json::Value ModuleConfig::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
-  impl::WriteJsonField("certificate", certificate, &result__);
   impl::WriteJsonField("preloaded_pt", preloaded_pt, &result__);
   impl::WriteJsonField("exchange_after_x_ignition_cycles",
                        exchange_after_x_ignition_cycles, &result__);
@@ -442,9 +439,6 @@ Json::Value ModuleConfig::ToJsonValue() const {
   return result__;
 }
 bool ModuleConfig::is_valid() const {
-  if (!certificate.is_valid()) {
-    return false;
-  }
   if (!preloaded_pt.is_valid()) {
     return false;
   }
@@ -484,9 +478,6 @@ bool ModuleConfig::is_initialized() const {
   return (initialization_state__ != kUninitialized) || (!struct_empty());
 }
 bool ModuleConfig::struct_empty() const {
-  if (certificate.is_initialized()) {
-    return false;
-  }
   if (preloaded_pt.is_initialized()) {
     return false;
   }
@@ -531,9 +522,6 @@ bool ModuleConfig::struct_empty() const {
 void ModuleConfig::ReportErrors(rpc::ValidationReport *report__) const {
   if (struct_empty()) {
     rpc::CompositeType::ReportErrors(report__);
-  }
-  if (!certificate.is_valid()) {
-    certificate.ReportErrors(&report__->ReportSubobject("certificate"));
   }
   if (!preloaded_pt.is_valid()) {
     preloaded_pt.ReportErrors(&report__->ReportSubobject("preloaded_pt"));
@@ -595,7 +583,6 @@ void ModuleConfig::ReportErrors(rpc::ValidationReport *report__) const {
 
 void ModuleConfig::SetPolicyTableType(PolicyTableType pt_type) {
   CompositeType::SetPolicyTableType(pt_type);
-  certificate.SetPolicyTableType(pt_type);
   preloaded_pt.SetPolicyTableType(pt_type);
   exchange_after_x_ignition_cycles.SetPolicyTableType(pt_type);
   exchange_after_x_kilometers.SetPolicyTableType(pt_type);

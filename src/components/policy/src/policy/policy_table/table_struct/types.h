@@ -187,7 +187,6 @@ public:
   Optional<String<1, 100>> vehicle_make;
   Optional<String<1, 100>> vehicle_model;
   Optional<String<4, 4>> vehicle_year;
-  Optional<String<0, 65535>> certificate;
 
 public:
   ModuleConfig();
