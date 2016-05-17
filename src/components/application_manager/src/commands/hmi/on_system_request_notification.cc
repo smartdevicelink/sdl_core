@@ -63,7 +63,7 @@ void OnSystemRequestNotification::Run() {
     LOG4CXX_DEBUG(logger_,
                   "No application specified, trying to choose automatically.");
     const policy::PolicyHandlerInterface& policy_handler =
-            application_manager_.GetPolicyHandler();
+        application_manager_.GetPolicyHandler();
     uint32_t selected_app_id = policy_handler.GetAppIdForSending();
     if (0 == selected_app_id) {
       LOG4CXX_WARN(logger_,
@@ -73,8 +73,8 @@ void OnSystemRequestNotification::Run() {
     app = application_manager_.application(selected_app_id);
   } else {
     const uint32_t app_id = msg_params[strings::app_id].asUInt();
-    LOG4CXX_WARN(logger_, "Looking for application with connection key "
-                 << app_id);
+    LOG4CXX_WARN(logger_,
+                 "Looking for application with connection key " << app_id);
     app = application_manager_.application(app_id);
   }
 

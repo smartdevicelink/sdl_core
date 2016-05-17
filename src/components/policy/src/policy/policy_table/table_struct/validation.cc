@@ -153,8 +153,7 @@ bool MessageLanguages::Validate() const {
 bool ConsumerFriendlyMessages::Validate() const {
   /* According to requirements consumer_friendly_messages are optional for PTU
      and required for PTP and PTS. So, they are allowed always */
-  if (PT_SNAPSHOT == GetPolicyTableType() && 
-    messages.is_initialized()) {
+  if (PT_SNAPSHOT == GetPolicyTableType() && messages.is_initialized()) {
     return false;
   }
   return true;
