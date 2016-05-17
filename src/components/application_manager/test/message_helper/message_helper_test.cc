@@ -34,18 +34,10 @@
 #include <vector>
 
 #include "gmock/gmock.h"
-#include "utils/macro.h"
 #include "utils/make_shared.h"
-#include "application_manager/policies/policy_handler.h"
-#include "application_manager/test/include/application_manager/mock_application.h"
-//#include "application_manager/test/include/application_mock.h"
-#include "utils/custom_string.h"
 #include "policy/mock_policy_settings.h"
-#include "application_manager/policies/policy_handler.h"
-//#include "application_manager/mock_application_manager.h"
-#include "application_manager/event_engine/event_dispatcher.h"
-#include "application_manager/state_controller.h"
-#include "application_manager/resumption/resume_ctrl.h"
+#include "application_manager/mock_application.h"
+#include "application_manager/mock_application_manager.h"
 
 namespace application_manager {
 namespace test {
@@ -53,16 +45,16 @@ namespace test {
 namespace HmiLanguage = hmi_apis::Common_Language;
 namespace HmiResults = hmi_apis::Common_Result;
 namespace MobileResults = mobile_apis::Result;
+namespace application_manager_test = ::test::components::application_manager_test;
+namespace policy_handler_test = ::test::components::policy_handler_test;
 
-typedef ::test::components::resumption_test::MockApplication AppMock;
+typedef application_manager_test::MockApplication AppMock;
 typedef utils::SharedPtr<AppMock> MockApplicationSharedPtr;
 typedef std::vector<std::string> StringArray;
 typedef ::application_manager::Application App;
 typedef utils::SharedPtr<App> ApplicationSharedPtr;
 
 using testing::AtLeast;
-using testing::ReturnRefOfCopy;
-using testing::ReturnRef;
 using testing::Return;
 
 TEST(MessageHelperTestCreate,
@@ -94,7 +86,7 @@ TEST(MessageHelperTestCreate,
 }
 
 TEST(MessageHelperTestCreate, CreateSetAppIcon_SendNullPathImagetype_Equal) {
-  std::string path_to_icon = "";
+  std::string path_to_icon;
   uint32_t app_id = 0;
   smart_objects::SmartObjectSPtr ptr =
       MessageHelper::CreateSetAppIcon(path_to_icon, app_id);
@@ -133,7 +125,7 @@ TEST(MessageHelperTestCreate, CreateSetAppIcon_SendPathImagetype_Equal) {
 
 TEST(MessageHelperTestCreate,
      CreateGlobalPropertiesRequestsToHMI_SmartObject_EmptyList) {
-  MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
+  MockApplicationSharedPtr appSharedMock = utils::MakeShared<AppMock>();
 
   EXPECT_CALL(*appSharedMock, vr_help_title()).Times(AtLeast(1));
   EXPECT_CALL(*appSharedMock, vr_help()).Times(AtLeast(1));
@@ -228,7 +220,7 @@ TEST(MessageHelperTestCreate, CreateShowRequestToHMI_SendSmartObject_Equal) {
 
 TEST(MessageHelperTestCreate,
      CreateAddCommandRequestToHMI_SendSmartObject_Empty) {
-  MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
+  MockApplicationSharedPtr appSharedMock = utils::MakeShared<AppMock>();
   ::application_manager::CommandsMap vis;
   DataAccessor<application_manager::CommandsMap> data_accessor(vis, true);
 
@@ -443,12 +435,14 @@ TEST(MessageHelperTestCreate, CreateNegativeResponse_SendSmartObject_Equal) {
 class MessageHelperTest : public ::testing::Test {
  public:
   MessageHelperTest()
-      : language_strings{"EN-US", "ES-MX", "FR-CA", "DE-DE", "ES-ES", "EN-GB",
+      : language_strings(StringArray
+                        {"EN-US", "ES-MX", "FR-CA", "DE-DE", "ES-ES", "EN-GB",
                          "RU-RU", "TR-TR", "PL-PL", "FR-FR", "IT-IT", "SV-SE",
                          "PT-PT", "NL-NL", "EN-AU", "ZH-CN", "ZH-TW", "JA-JP",
                          "AR-SA", "KO-KR", "PT-BR", "CS-CZ", "DA-DK", "NO-NO",
-                         "NL-BE", "EL-GR", "HU-HU", "FI-FI", "SK-SK"}
-      , hmi_result_strings{"SUCCESS",
+                         "NL-BE", "EL-GR", "HU-HU", "FI-FI", "SK-SK"})
+      , hmi_result_strings(StringArray
+                          {"SUCCESS",
                            "UNSUPPORTED_REQUEST",
                            "UNSUPPORTED_RESOURCE",
                            "DISALLOWED",
@@ -472,8 +466,9 @@ class MessageHelperTest : public ::testing::Test {
                            "WARNINGS",
                            "GENERIC_ERROR",
                            "USER_DISALLOWED",
-                           "TRUNCATED_DATA"}
-      , mobile_result_strings{"SUCCESS",
+                           "TRUNCATED_DATA"})
+      , mobile_result_strings(StringArray
+                             {"SUCCESS",
                               "UNSUPPORTED_REQUEST",
                               "UNSUPPORTED_RESOURCE",
                               "DISALLOWED",
@@ -505,8 +500,9 @@ class MessageHelperTest : public ::testing::Test {
                               "SAVED",
                               "INVALID_CERT",
                               "EXPIRED_CERT",
-                              "RESUME_FAILED"}
-      , function_id_strings{"RESERVED",
+                              "RESUME_FAILED"})
+      , function_id_strings(StringArray
+                           {"RESERVED",
                             "RegisterAppInterface",
                             "UnregisterAppInterface",
                             "SetGlobalProperties",
@@ -546,8 +542,9 @@ class MessageHelperTest : public ::testing::Test {
                             "DiagnosticMessage",
                             "SystemRequest",
                             "SendLocation",
-                            "DialNumber"}
-      , events_id_strings{"OnHMIStatus",
+                            "DialNumber"})
+      , events_id_strings(StringArray
+                        { "OnHMIStatus",
                           "OnAppInterfaceUnregistered",
                           "OnButtonEvent",
                           "OnButtonPress",
@@ -561,8 +558,8 @@ class MessageHelperTest : public ::testing::Test {
                           "OnKeyboardInput",
                           "OnTouchEvent",
                           "OnSystemRequest",
-                          "OnHashChange"}
-      , hmi_level_strings{"FULL", "LIMITED", "BACKGROUND", "NONE"}
+                          "OnHashChange"})
+      , hmi_level_strings(StringArray{"FULL", "LIMITED", "BACKGROUND", "NONE"})
       , delta_from_functions_id(32768) {}
 
  protected:

@@ -422,19 +422,30 @@ TEST_F(ApplicationImplTest, LoadPersistentFiles) {
   // Create test folder with diff files
 
   app_impl->MarkRegistered();
-  std::string folder_name = "";
+  const std::string folder_name = "app";
   app_impl->set_folder_name(folder_name);
 
-  file_system::CreateDirectory(directory_name);
+  const std::string test_path = file_system::ConcatPath(directory_name, folder_name);
 
-  EXPECT_TRUE(file_system::CreateFile(directory_name + "/test_file1.json"));
-  EXPECT_TRUE(file_system::CreateFile(directory_name + "/test_file2.bmp"));
-  EXPECT_TRUE(file_system::CreateFile(directory_name + "/test_file3.jpeg"));
-  EXPECT_TRUE(file_system::CreateFile(directory_name + "/test_file4.png"));
-  EXPECT_TRUE(file_system::CreateFile(directory_name + "/test_file5"));
-  EXPECT_TRUE(file_system::CreateFile(directory_name + "/test_file6.wave"));
-  EXPECT_TRUE(file_system::CreateFile(directory_name + "/test_file7.mp4"));
-  EXPECT_TRUE(file_system::CreateFile(directory_name + "/test_file8.mp3"));
+  EXPECT_TRUE(file_system::CreateDirectoryRecursively(test_path));
+
+  const std::string file1 = file_system::ConcatPath(test_path, "test_file1.json");
+  const std::string file2 = file_system::ConcatPath(test_path, "test_file2.bmp");
+  const std::string file3 = file_system::ConcatPath(test_path, "test_file3.jpeg");
+  const std::string file4 = file_system::ConcatPath(test_path, "test_file4.png");
+  const std::string file5 = file_system::ConcatPath(test_path, "test_file5");
+  const std::string file6 = file_system::ConcatPath(test_path, "test_file6.wave");
+  const std::string file7 = file_system::ConcatPath(test_path, "test_file7.mp4");
+  const std::string file8 = file_system::ConcatPath(test_path, "test_file8.mp3");
+
+  EXPECT_TRUE(file_system::CreateFile(file1));
+  EXPECT_TRUE(file_system::CreateFile(file2));
+  EXPECT_TRUE(file_system::CreateFile(file3));
+  EXPECT_TRUE(file_system::CreateFile(file4));
+  EXPECT_TRUE(file_system::CreateFile(file5));
+  EXPECT_TRUE(file_system::CreateFile(file6));
+  EXPECT_TRUE(file_system::CreateFile(file7));
+  EXPECT_TRUE(file_system::CreateFile(file8));
 
   app_impl->LoadPersistentFiles();
 
@@ -442,35 +453,35 @@ TEST_F(ApplicationImplTest, LoadPersistentFiles) {
 
   EXPECT_EQ(8u, files_map.size());
   const AppFile* test_file1 =
-      app_impl->GetFile(directory_name + "//test_file1.json");
+      app_impl->GetFile(file1);
   ASSERT_TRUE(test_file1);
   EXPECT_EQ(FileType::JSON, test_file1->file_type);
   const AppFile* test_file2 =
-      app_impl->GetFile(directory_name + "//test_file2.bmp");
+      app_impl->GetFile(file2);
   ASSERT_TRUE(test_file2);
   EXPECT_EQ(FileType::GRAPHIC_BMP, test_file2->file_type);
   const AppFile* test_file3 =
-      app_impl->GetFile(directory_name + "//test_file3.jpeg");
+      app_impl->GetFile(file3);
   ASSERT_TRUE(test_file3);
   EXPECT_EQ(FileType::GRAPHIC_JPEG, test_file3->file_type);
   const AppFile* test_file4 =
-      app_impl->GetFile(directory_name + "//test_file4.png");
+      app_impl->GetFile(file4);
   ASSERT_TRUE(test_file4);
   EXPECT_EQ(FileType::GRAPHIC_PNG, test_file4->file_type);
   const AppFile* test_file5 =
-      app_impl->GetFile(directory_name + "//test_file5");
+      app_impl->GetFile(file5);
   ASSERT_TRUE(test_file5);
   EXPECT_EQ(FileType::BINARY, test_file5->file_type);
   const AppFile* test_file6 =
-      app_impl->GetFile(directory_name + "//test_file6.wave");
+      app_impl->GetFile(file6);
   ASSERT_TRUE(test_file6);
   EXPECT_EQ(FileType::AUDIO_WAVE, test_file6->file_type);
   const AppFile* test_file7 =
-      app_impl->GetFile(directory_name + "//test_file7.mp4");
+      app_impl->GetFile(file7);
   ASSERT_TRUE(test_file7);
   EXPECT_EQ(FileType::AUDIO_AAC, test_file7->file_type);
   const AppFile* test_file8 =
-      app_impl->GetFile(directory_name + "//test_file8.mp3");
+      app_impl->GetFile(file8);
   ASSERT_TRUE(test_file8);
   EXPECT_EQ(FileType::AUDIO_MP3, test_file8->file_type);
 }
@@ -537,24 +548,24 @@ TEST_F(ApplicationImplTest, SubscribeToDefaultButton_UnsubscribeFromButton) {
 }
 
 TEST_F(ApplicationImplTest, SubscribeToSoftButton_UnsubscribeFromSoftButton) {
-  const unsigned int btn_count = 10;
-  for (unsigned int i = 0; i < btn_count; i++) {
+  const size_t btn_count = 10;
+  for (size_t i = 0; i < btn_count; i++) {
     EXPECT_FALSE(app_impl->IsSubscribedToSoftButton(i));
   }
 
   SoftButtonID test_button;
-  for (unsigned int i = 0; i < btn_count; i++) {
+  for (size_t i = 0; i < btn_count; i++) {
     test_button.insert(i);
   }
   app_impl->SubscribeToSoftButtons(FunctionID::ScrollableMessageID,
                                    test_button);
 
-  for (unsigned int i = 0; i < btn_count; i++) {
+  for (size_t i = 0; i < btn_count; i++) {
     EXPECT_TRUE(app_impl->IsSubscribedToSoftButton(i));
   }
   app_impl->UnsubscribeFromSoftButtons(FunctionID::ScrollableMessageID);
 
-  for (unsigned int i = 0; i < btn_count; i++) {
+  for (size_t i = 0; i < btn_count; i++) {
     EXPECT_FALSE(app_impl->IsSubscribedToSoftButton(i));
   }
 }

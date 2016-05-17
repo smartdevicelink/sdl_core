@@ -84,7 +84,9 @@ const string kDeleteData =
     "COMMIT; "
     "VACUUM;";
 
-const std::string kJournalOff = "PRAGMA journal_mode = OFF;";
+const static std::string kJournalOff = "PRAGMA journal_mode = OFF;";
+const static std::string db_path = "test";
+const static std::string connection_name = "test_connection";
 
 class ResumptionSqlQueriesTest : public ::testing::Test {
  public:
@@ -113,7 +115,7 @@ class ResumptionSqlQueriesTest : public ::testing::Test {
   static const int timeStamp2;
 
   static void SetUpTestCase() {
-    db_ = new SQLDatabase("test", "test_connection");
+    db_ = new SQLDatabase(db_path, connection_name);
     ASSERT_TRUE(db_->Open());
     ASSERT_TRUE(db_->IsReadWrite());
     SQLQuery query(db_);
