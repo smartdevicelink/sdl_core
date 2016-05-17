@@ -180,7 +180,11 @@ class SharedPtr {
   ObjectType* get() const;
 
 #ifdef BUILD_TESTS
+#ifdef QT_PORT
+  inline const QAtomicInt* get_ReferenceCounter() const {
+#else
   inline const uint32_t* get_ReferenceCounter() const {
+#endif
     return mReferenceCounter;
   }
 #endif  // BUILD_TESTS

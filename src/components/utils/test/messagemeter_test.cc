@@ -30,15 +30,12 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <unistd.h>
-
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
-
 #include "utils/macro.h"
-
 #include "utils/messagemeter.h"
 #include "utils/date_time.h"
+#include "utils/threads/thread.h"
 
 namespace test {
 namespace components {
@@ -57,7 +54,7 @@ const TimePair testing_time_pairs[] = {TimePair(0, 50),
 class MessageMeterTest : public ::testing::TestWithParam<TimePair> {
  protected:
   void SetUp() OVERRIDE {
-    usecs = date_time::DateTime::MICROSECONDS_IN_MILLISECOND;
+    usecs = date_time::kMicrosecondsInMillisecond;
     id1 = 0x0;
     id2 = 0xABCDEF;
     id3 = 0xFEBCDA;
@@ -75,7 +72,7 @@ class MessageMeterTest : public ::testing::TestWithParam<TimePair> {
   }
   void TearDown() OVERRIDE {}
   ::utils::MessageMeter<int> meter;
-  TimevalStruct time_range = {0, 0};
+  TimevalStruct time_range;
   int64_t time_range_msecs;
   int usecs;
   int id1, id2, id3;
@@ -83,27 +80,29 @@ class MessageMeterTest : public ::testing::TestWithParam<TimePair> {
 
 TEST(MessageMeterTest, DefaultTimeRange) {
   const ::utils::MessageMeter<int> default_meter;
-  const TimevalStruct time_second{1, 0};
+  TimevalStruct time_second;
+  time_second.tv_sec = 1;
+  time_second.tv_usec = 0;
   EXPECT_EQ(time_second, default_meter.time_range());
 }
 
 TEST(MessageMeterTest, TimeRangeSetter) {
   ::utils::MessageMeter<int> meter;
-  TimevalStruct time_range{0, 0};
+  TimevalStruct time_range;
+  time_range.tv_sec = 0;
+  time_range.tv_usec = 0;
   const int test_count_secs = 1000;
   // Skip 1000th msec value as wrong for TimevalStruct
   const int test_count_msecs = 999;
   for (int sec = test_count_secs; sec >= 0; --sec) {
     for (int msec = test_count_msecs; msec >= 0; --msec) {
       time_range.tv_sec = sec;
-      time_range.tv_usec =
-          msec * date_time::DateTime::MICROSECONDS_IN_MILLISECOND;
+      time_range.tv_usec = msec * date_time::kMicrosecondsInMillisecond;
       // Setter TimevalStruct
       meter.set_time_range(time_range);
       EXPECT_EQ(time_range, meter.time_range()) << sec << "." << msec << " sec";
       // Setter mSecs
-      meter.set_time_range(sec * date_time::DateTime::MILLISECONDS_IN_SECOND +
-                           msec);
+      meter.set_time_range(sec * date_time::kMillisecondsInSecond + msec);
       EXPECT_EQ(time_range, meter.time_range()) << sec << "." << msec << " sec";
     }
   }
@@ -113,7 +112,9 @@ TEST(MessageMeterTest, AddingWithNullTimeRange) {
   ::utils::MessageMeter<int> meter;
   const int id1 = 1;
   const int id2 = 2;
-  const TimevalStruct null_time_range{0, 0};
+  TimevalStruct null_time_range;
+  null_time_range.tv_sec = 0;
+  null_time_range.tv_usec = 0;
   meter.set_time_range(null_time_range);
   for (int i = 0; i < 10000; ++i) {
     // 1st Connection
@@ -195,7 +196,7 @@ TEST_P(MessageMeterTest, Frequency_CountingOverPeriod_CorrectCountOfMessages) {
   int64_t time_span;
   while ((time_span = date_time::DateTime::calculateTimeSpan(start_time)) <
          time_range_msecs) {
-    usleep(time_range_msecs);
+    threads::sleep(time_range_msecs);
 
     if (one_message != meter.Frequency(id1) ||
         one_message != meter.Frequency(id2) ||
@@ -213,7 +214,7 @@ TEST_P(MessageMeterTest, CountingOutOfPeriod) {
   EXPECT_EQ(one_message, meter.TrackMessage(id3));
 
   // sleep more than time range
-  usleep(time_range_msecs * usecs * 1.1);
+  threads::sleep(time_range_msecs * 1.1);
   EXPECT_EQ(0u, meter.Frequency(id1));
   EXPECT_EQ(0u, meter.Frequency(id2));
   EXPECT_EQ(0u, meter.Frequency(id3));
