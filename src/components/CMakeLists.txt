@@ -87,6 +87,11 @@ if (REMOTE_CONTROL)
   add_subdirectory(./can_cooperation)
 endif ()
 
+if (ENABLE_IVDCM)
+  # --- support of the In Vehicle Distributed Connectivity
+  add_subdirectory(./ivdcm_module)
+endif ()
+
 if (TIME_TESTER)
     add_subdirectory(./time_tester)
 endif()

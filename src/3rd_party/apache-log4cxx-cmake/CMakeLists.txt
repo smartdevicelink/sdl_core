@@ -48,12 +48,14 @@ set(COMMON_CONFIGURE_FLAGS
 if(CMAKE_SYSTEM_NAME STREQUAL "QNX")
   if (CMAKE_SYSTEM_PROCESSOR MATCHES arm*)
     set (ARCHITECTURE arm) # log4cxx doesn't recognize armv7
+    set (TARGET $ENV{QNX_TARGET}/armle-v7)
   else ()
     set (ARCHITECTURE ${CMAKE_SYSTEM_PROCESSOR})
+    set (TARGET $ENV{QNX_TARGET}/x86)
   endif ()
   set(CONFIGURE_FLAGS
     "--host=${ARCHITECTURE}-nto-qnx"
-    "LDFLAGS=-L${EXPAT_LIBS_DIRECTORY} -L$ENV{QNX_TARGET}/x86/lib -L$ENV{QNX_TARGET}/x86/usr/lib -L$ENV{QNX_TARGET}/x86/lib/gcc/4.7.3"
+    "LDFLAGS=-L${EXPAT_LIBS_DIRECTORY} -L${TARGET}/lib -L${TARGET}/usr/lib -L${TARGET}/lib/gcc/4.7.3"
     ${COMMON_CONFIGURE_FLAGS}
   )
 else()
