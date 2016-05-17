@@ -47,13 +47,12 @@ class HMIMessageHandlerImplTest : public ::testing::Test {
  public:
   HMIMessageHandlerImplTest()
       : mb_adapter_(NULL)
-      , hmi_handler_(NULL)
-      , mock_hmi_message_observer_(NULL) {}
+      , hmi_handler_(NULL) {}
 
  protected:
   hmi_message_handler::MessageBrokerAdapter* mb_adapter_;
   hmi_message_handler::HMIMessageHandlerImpl* hmi_handler_;
-  hmi_message_handler::MockHMIMessageObserver* mock_hmi_message_observer_;
+  MockHMIMessageObserver mock_hmi_message_observer_;
   testing::NiceMock<MockHMIMessageHandlerSettings>
       mock_hmi_message_handler_settings;
   const uint64_t stack_size = 1000u;
@@ -65,15 +64,12 @@ class HMIMessageHandlerImplTest : public ::testing::Test {
         mock_hmi_message_handler_settings);
     mb_adapter_ = new hmi_message_handler::MessageBrokerAdapter(
         hmi_handler_, "localhost", 22);
-    mock_hmi_message_observer_ =
-        new hmi_message_handler::MockHMIMessageObserver();
-    hmi_handler_->set_message_observer(mock_hmi_message_observer_);
+    hmi_handler_->set_message_observer(&mock_hmi_message_observer_);
     EXPECT_TRUE(NULL != hmi_handler_->observer());
   }
 
   void TearDown() OVERRIDE {
     hmi_handler_->set_message_observer(NULL);
-    delete mock_hmi_message_observer_;
     delete hmi_handler_;
     delete mb_adapter_;
   }
@@ -83,7 +79,7 @@ TEST_F(HMIMessageHandlerImplTest,
        OnErrorSending_EmptyMessage_OnErrorSendingProceeded) {
   // Arrange
   hmi_message_handler::MessageSharedPointer empty_message;
-  EXPECT_CALL(*mock_hmi_message_observer_, OnErrorSending(empty_message));
+  EXPECT_CALL(mock_hmi_message_observer_, OnErrorSending(empty_message));
   // Act
   hmi_handler_->OnErrorSending(empty_message);
 }
@@ -96,7 +92,7 @@ TEST_F(HMIMessageHandlerImplTest,
           protocol_handler::MessagePriority::FromServiceType(
               protocol_handler::ServiceType::kControl)));
 
-  EXPECT_CALL(*mock_hmi_message_observer_, OnErrorSending(message));
+  EXPECT_CALL(mock_hmi_message_observer_, OnErrorSending(message));
   // Act
   hmi_handler_->OnErrorSending(message);
 }
