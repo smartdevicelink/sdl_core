@@ -62,8 +62,7 @@ void GetUrls::Run() {
 
   policy::EndpointUrls endpoints;
   application_manager_.GetPolicyHandler().GetServiceUrls(
-      object[strings::msg_params][hmi_request::service].asString(),
-      endpoints);
+      object[strings::msg_params][hmi_request::service].asString(), endpoints);
   if (endpoints.empty()) {
     LOG4CXX_ERROR(logger_, "No URLs for service " << service_to_check);
     SendResponseToHMI(Common_Result::DATA_NOT_AVAILABLE);
@@ -105,7 +104,8 @@ void GetUrls::ProcessPolicyServiceURLs(const policy::EndpointUrls& endpoints) {
   if (!app.valid()) {
     LOG4CXX_WARN(logger_,
                  "There is no registered application with "
-                 "connection key '" << app_id_to_send_to << "'");
+                 "connection key '"
+                     << app_id_to_send_to << "'");
     SendResponseToHMI(Common_Result::DATA_NOT_AVAILABLE);
     return;
   }
@@ -124,7 +124,6 @@ void GetUrls::ProcessPolicyServiceURLs(const policy::EndpointUrls& endpoints) {
   SmartObject service_info = SmartObject(SmartType_Map);
 
   for (size_t e = 0; e < endpoints.size(); ++e) {
-
     if (mobile_app_id == endpoints[e].app_id) {
       if (endpoints[e].url.size()) {
         service_info[url] = endpoints[e].url[0];

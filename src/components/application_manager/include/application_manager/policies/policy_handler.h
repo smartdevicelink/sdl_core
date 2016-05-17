@@ -489,6 +489,7 @@ class PolicyHandler : public PolicyHandlerInterface,
     PolicyHandler* policy_handler_;
   };
 
+  bool SaveSnapshot(const BinaryMessage& pt_string, std::string& snap_path);
   static const std::string kLibrary;
   mutable sync_primitives::RWLock policy_manager_lock_;
   utils::SharedPtr<PolicyManager> policy_manager_;

@@ -119,23 +119,30 @@ void OnSystemRequestNotification::AddHeader(BinaryMessage& message) const {
 
   const std::string header =
 
-  "{"
-     " \"HTTPRequest\": {"
-          "\"headers\": {"
-              "\"ContentType\": \"application/json\","
-              "\"ConnectTimeout\": " + std::string(timeout_str) + ","
-              "\"DoOutput\": true,"
-              "\"DoInput\": true,"
-              "\"UseCaches\": false,"
-              "\"RequestMethod\": \"POST\","
-              "\"ReadTimeout\":" + std::string(timeout_str) + ","
-              "\"InstanceFollowRedirects\": false,"
-              "\"charset\": \"utf-8\","
-              "\"Content_Length\": " + std::string(size_str) +
-          "},"
-          "\"body\": \"" + std::string(message.begin(), message.end()) + "\""
+      "{"
+      " \"HTTPRequest\": {"
+      "\"headers\": {"
+      "\"ContentType\": \"application/json\","
+      "\"ConnectTimeout\": " +
+      std::string(timeout_str) +
+      ","
+      "\"DoOutput\": true,"
+      "\"DoInput\": true,"
+      "\"UseCaches\": false,"
+      "\"RequestMethod\": \"POST\","
+      "\"ReadTimeout\":" +
+      std::string(timeout_str) +
+      ","
+      "\"InstanceFollowRedirects\": false,"
+      "\"charset\": \"utf-8\","
+      "\"Content_Length\": " +
+      std::string(size_str) +
+      "},"
+      "\"body\": \"" +
+      std::string(message.begin(), message.end()) +
+      "\""
       "}"
-  "}";
+      "}";
 
   message.clear();
   message.assign(header.begin(), header.end());
@@ -145,7 +152,7 @@ void OnSystemRequestNotification::AddHeader(BinaryMessage& message) const {
 }
 #endif
 
-}  //namespace mobile
+}  // namespace mobile
 
 }  // namespace commands
 

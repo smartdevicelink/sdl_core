@@ -64,26 +64,26 @@ class GetUrls : public RequestFromHMI {
 
  private:
 #ifdef EXTENDED_POLICY
-    /**
-     * @brief Processes URLs collecting for policy service
-     * @param endpoints Endpoints section of policy table
-     */
-    void ProcessPolicyServiceURLs(const policy::EndpointUrls& endpoints);
+  /**
+   * @brief Processes URLs collecting for policy service
+   * @param endpoints Endpoints section of policy table
+   */
+  void ProcessPolicyServiceURLs(const policy::EndpointUrls& endpoints);
 #endif
 
-    /**
-     * @brief Process URLs collecting for service
-     * @param endpoints Endpoints section of policy table
-     */
-    void ProcessServiceURLs(const policy::EndpointUrls& endpoints);
+  /**
+   * @brief Process URLs collecting for service
+   * @param endpoints Endpoints section of policy table
+   */
+  void ProcessServiceURLs(const policy::EndpointUrls& endpoints);
 
-    /**
-     * @brief Sends response to HMI
-     * @param result Result code
-     */
-    void SendResponseToHMI(hmi_apis::Common_Result::eType result);
+  /**
+   * @brief Sends response to HMI
+   * @param result Result code
+   */
+  void SendResponseToHMI(hmi_apis::Common_Result::eType result);
 
-    DISALLOW_COPY_AND_ASSIGN(GetUrls);
+  DISALLOW_COPY_AND_ASSIGN(GetUrls);
 };
 
 }  // namespace commands
