@@ -1088,6 +1088,25 @@ void PolicyHandler::OnPermissionsUpdated(const std::string& policy_app_id,
                     << app->app_id());
 }
 
+bool PolicyHandler::SaveSnapshot(const BinaryMessage& pt_string,
+                                 std::string& snap_path) {
+  const std::string& policy_snapshot_file_name =
+      settings_.policies_snapshot_file_name();
+  const std::string& system_files_path = settings_.system_files_path();
+  snap_path = system_files_path + '/' + policy_snapshot_file_name;
+
+  bool result = false;
+  if (file_system::CreateDirectoryRecursively(system_files_path)) {
+    result = file_system::WriteBinaryFile(snap_path, pt_string);
+  }
+
+  if (!result) {
+    LOG4CXX_ERROR(logger_, "Failed to write snapshot file to " << snap_path);
+  }
+
+  return result;
+}
+
 void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string) {
   LOG4CXX_AUTO_TRACE(logger_);
   POLICY_LIB_CHECK_VOID();
@@ -1097,11 +1116,10 @@ void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string) {
     LOG4CXX_ERROR(logger_, "Snapshot processing skipped.");
     return;
   }
-  MessageHelper::SendPolicyUpdate(
-      policy_snapshot_full_path,
-      policy_manager_->TimeoutExchange(),
-      policy_manager_->RetrySequenceDelaysSeconds(),
-      application_manager_);
+  MessageHelper::SendPolicyUpdate(policy_snapshot_full_path,
+                                  policy_manager_->TimeoutExchange(),
+                                  policy_manager_->RetrySequenceDelaysSeconds(),
+                                  application_manager_);
 #else
   EndpointUrls urls;
   policy_manager_->GetServiceUrls("0x07", urls);
