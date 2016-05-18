@@ -31,7 +31,7 @@
 
 #include <sqlite3.h>
 #include "gtest/gtest.h"
-#include "generated_code_with_sqlite_test.h"
+#include "utils/generated_code_with_sqlite_test.h"
 
 namespace rpc {
 

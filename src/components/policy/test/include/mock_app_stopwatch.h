@@ -33,7 +33,7 @@
 #define SRC_COMPONENTS_INCLUDE_TEST_POLICY_USAGE_STATISTICS_MOCK_APP_STOPWATCH_H_
 
 #include "gmock/gmock.h"
-#include "usage_statistics/app_stopwatch.h"
+#include "policy/usage_statistics/app_stopwatch.h"
 #include "policy/usage_statistics/statistics_manager.h"
 
 namespace test {

@@ -43,7 +43,7 @@
 #include "policy/policy_table.h"
 #include "policy/cache_manager_interface.h"
 #include "policy/update_status_manager.h"
-#include "functions.h"
+#include "policy/policy_table/functions.h"
 #include "policy/usage_statistics/statistics_manager.h"
 #include "policy/policy_helper.h"
 #include "utils/timer.h"

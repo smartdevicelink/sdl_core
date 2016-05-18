@@ -32,9 +32,9 @@
 
 #include "gmock/gmock.h"
 #include "media_manager/media_manager_impl.h"
-#include "include/media_adapter_mock.h"
-#include "include/media_adapter_listener_mock.h"
-#include "include/media_adapter_impl_mock.h"
+#include "media_manager/media_adapter_mock.h"
+#include "media_manager/media_adapter_listener_mock.h"
+#include "media_manager/media_adapter_impl_mock.h"
 #include "protocol_handler/mock_protocol_handler.h"
 #include "media_manager/mock_media_manager_settings.h"
 #include "application_manager/mock_application_manager.h"

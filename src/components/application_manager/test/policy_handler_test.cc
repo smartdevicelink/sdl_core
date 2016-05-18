@@ -53,7 +53,7 @@
 #include "utils/file_system.h"
 #include "utils/make_shared.h"
 #include "utils/custom_string.h"
-#include "usage_statistics/counter.h"
+#include "policy/usage_statistics/counter.h"
 #include "policy/usage_statistics/statistics_manager.h"
 #include "interfaces/MOBILE_API.h"
 #include "policy/mock_policy_settings.h"

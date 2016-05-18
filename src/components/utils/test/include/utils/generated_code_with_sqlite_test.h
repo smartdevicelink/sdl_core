@@ -33,10 +33,10 @@
 #define SRC_COMPONENTS_POLICY_TEST_POLICY_INCLUDE_GENERATED_CODE_WITH_SQLITE_TEST_H_
 
 #include <string>
-#include "./types.h"
+#include "policy/policy_table/types.h"
 #include "rpc_base/rpc_base.h"
-#include "sqlite_wrapper/sql_query.h"
-#include "sqlite_wrapper/sql_database.h"
+#include "utils/sqlite_wrapper/sql_query.h"
+#include "utils/sqlite_wrapper/sql_database.h"
 
 namespace policy_table = rpc::policy_table_interface_base;
 namespace dbms = utils::dbms;

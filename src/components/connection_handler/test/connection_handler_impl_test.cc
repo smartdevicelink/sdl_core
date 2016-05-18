@@ -40,7 +40,7 @@
 #include "security_manager/mock_security_manager.h"
 #include "security_manager/mock_ssl_context.h"
 #include "protocol_handler/mock_protocol_handler.h"
-#include "connection_handler_observer_mock.h"
+#include "connection_handler/connection_handler_observer_mock.h"
 #include "connection_handler/mock_connection_handler_settings.h"
 #include "transport_manager/mock_transport_manager.h"
 #include "encryption/hashing.h"

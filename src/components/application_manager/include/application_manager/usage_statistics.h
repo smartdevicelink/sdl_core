@@ -35,8 +35,8 @@
 
 #include <string>
 #include <memory>
-#include "usage_statistics/counter.h"
-#include "usage_statistics/app_stopwatch.h"
+#include "policy/usage_statistics/counter.h"
+#include "policy/usage_statistics/app_stopwatch.h"
 #include "utils/macro.h"
 #include "utils/shared_ptr.h"
 #include "interfaces/MOBILE_API.h"

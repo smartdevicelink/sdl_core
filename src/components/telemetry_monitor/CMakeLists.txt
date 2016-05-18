@@ -38,8 +38,7 @@ include_directories (
   ${COMPONENTS_DIR}/connection_handler/include/
   ${COMPONENTS_DIR}/transport_manager/include/
   ${COMPONENTS_DIR}/application_manager/include/
-  ${COMPONENTS_DIR}/policy/src/policy/include/
-  ${COMPONENTS_DIR}/policy/src/policy/usage_statistics/include
+  ${COMPONENTS_DIR}/policy/include/
   ${COMPONENTS_DIR}/hmi_message_handler/include/
   ${COMPONENTS_DIR}/formatters/include/
   ${COMPONENTS_DIR}/media_manager/include/

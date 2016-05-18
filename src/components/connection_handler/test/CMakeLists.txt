@@ -35,12 +35,7 @@ set(appMain_DIR ${CMAKE_SOURCE_DIR}/src/appMain)
 include_directories(
     ${GMOCK_INCLUDE_DIRECTORY}
     ${COMPONENTS_DIR}/connection_handler/include
-    ${COMPONENTS_DIR}/security_manager/test/include
-    ${COMPONENTS_DIR}/protocol_handler/test/include
-    ${COMPONENTS_DIR}/security_manager/include
-    ${COMPONENTS_DIR}/application_manager/include
     ${COMPONENTS_DIR}/connection_handler/test/include
-    ${COMPONENTS_DIR}/transport_manager/test/include
     ${COMPONENTS_DIR}/resumption/include
     ${JSONCPP_INCLUDE_DIRECTORY}
 )
@@ -48,9 +43,7 @@ include_directories(
 set(LIBRARIES
     gmock
     connectionHandler
-    ConfigProfile
     ProtocolHandler
-    TransportManager
 )
 
 set(SOURCES

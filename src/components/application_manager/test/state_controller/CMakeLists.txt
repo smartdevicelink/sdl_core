@@ -32,7 +32,6 @@ if(BUILD_TESTS)
 
 include_directories(
     ${GMOCK_INCLUDE_DIRECTORY}
-    include
     ${COMPONENTS_DIR}/application_manager/test/include
 )
 

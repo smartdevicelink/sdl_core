@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "gtest/gtest.h"
-#include "meta_formatter_test_helper.h"
+#include "formatters/meta_formatter_test_helper.h"
 
 namespace test {
 namespace components {

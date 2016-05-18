@@ -35,8 +35,8 @@
 
 #include "json/reader.h"
 #include "json/value.h"
-#include "table_struct/enums.h"
-#include "table_struct/types.h"
+#include "policy/policy_table/enums.h"
+#include "policy/policy_table/types.h"
 #include "rpc_base/gtest_support.h"
 
 using rpc::policy_table_interface_base::Table;

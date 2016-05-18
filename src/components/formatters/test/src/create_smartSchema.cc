@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "create_smartSchema.h"
+#include "formatters/create_smartSchema.h"
 namespace test {
 namespace components {
 namespace formatters {

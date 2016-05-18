@@ -119,15 +119,13 @@ include_directories (
   ${COMPONENTS_DIR}/smart_objects/include/
   ${COMPONENTS_DIR}/media_manager/include/
   ${COMPONENTS_DIR}/telemetry_monitor/include
-  ${COMPONENTS_DIR}/policy/src/policy/include/
-  ${COMPONENTS_DIR}/policy/src/policy/usage_statistics/include/
+  ${COMPONENTS_DIR}/policy/include/
   ${COMPONENTS_DIR}/resumption/include/
   ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
   ${ENCRYPTION_INCLUDE_DIRECTORY}
   ${COMPONENTS_DIR}
   ${CMAKE_BINARY_DIR}/src/components/
   ${COMPONENTS_DIR}/dbus/include/
-  ${CMAKE_BINARY_DIR}/src/components/policy/src/policy
   ${CMAKE_SOURCE_DIR}
   ${default_media_inc}
   ${LOG4CXX_INCLUDE_DIRECTORY}

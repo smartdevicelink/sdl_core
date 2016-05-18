@@ -49,8 +49,8 @@
 #include "utils/shared_ptr.h"
 #include "utils/make_shared.h"
 #include "utils/file_system.h"
-#include "./types.h"
-#include "./enums.h"
+#include "policy/policy_table/types.h"
+#include "policy/policy_table/enums.h"
 #include "rpc_base/rpc_base.h"
 #include "utils/sqlite_wrapper/sql_database.h"
 

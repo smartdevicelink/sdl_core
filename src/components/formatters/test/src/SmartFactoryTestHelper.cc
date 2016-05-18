@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "SmartFactoryTestHelper.h"
+#include "formatters/SmartFactoryTestHelper.h"
 
 using namespace test::components::formatters;
 
