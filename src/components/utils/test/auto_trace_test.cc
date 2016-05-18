@@ -128,7 +128,7 @@ bool CheckAutoTraceDebugInFile(const std::string& debug_message) {
   return Compare<bool, EQ, ALL>(true, debug_found, trace_enter, trace_exit);
 }
 
-TEST(AutoTraceTest, AutoTrace_WriteToFile_ReadCorrectString) {
+TEST(AutoTraceTest, DISABLED_AutoTrace_WriteToFile_ReadCorrectString) {
   const std::string testlog = "Test trace is working!";
   Preconditions();
   InitLogger();

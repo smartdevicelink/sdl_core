@@ -104,7 +104,7 @@ TEST(DateTimeTest, GetuSecsmSecs) {
   ASSERT_EQ(expect_value, date_time::DateTime::getmSecs(time));
 }
 
-TEST(DateTimeTest, CalculateTimeSpan) {
+TEST(DateTimeTest, DISABLED_CalculateTimeSpan) {
   // arrange
   const TimevalStruct time = date_time::DateTime::getCurrentTime();
 
