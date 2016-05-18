@@ -383,6 +383,8 @@ TEST_F(ConnectionHandlerTest, GetDefaultProtocolVersion) {
   EXPECT_EQ(PROTOCOL_VERSION_2, protocol_version);
 }
 
+// exception on Windows platform
+#if defined(OS_POSIX)
 TEST_F(ConnectionHandlerTest, GetProtocolVersion) {
   AddTestDeviceConnection();
   AddTestSession();
@@ -394,6 +396,15 @@ TEST_F(ConnectionHandlerTest, GetProtocolVersion) {
 
   EXPECT_EQ(PROTOCOL_VERSION_3, protocol_version);
 }
+
+TEST_F(ConnectionHandlerTest, IsHeartBeatSupported) {
+  AddTestDeviceConnection();
+  AddTestSession();
+  ChangeProtocol(uid_, start_session_id_, PROTOCOL_VERSION_3);
+  EXPECT_TRUE(
+      connection_handler_->IsHeartBeatSupported(uid_, start_session_id_));
+}
+#endif
 
 TEST_F(ConnectionHandlerTest, GetProtocolVersionAfterBinding) {
   AddTestDeviceConnection();
@@ -420,14 +431,6 @@ TEST_F(ConnectionHandlerTest, GetPairFromKey) {
   connection_handler_->PairFromKey(connection_key_, &test_uid, &session_id);
   EXPECT_EQ(uid_, test_uid);
   EXPECT_EQ(start_session_id_, session_id);
-}
-
-TEST_F(ConnectionHandlerTest, IsHeartBeatSupported) {
-  AddTestDeviceConnection();
-  AddTestSession();
-  ChangeProtocol(uid_, start_session_id_, PROTOCOL_VERSION_3);
-  EXPECT_TRUE(
-      connection_handler_->IsHeartBeatSupported(uid_, start_session_id_));
 }
 
 TEST_F(ConnectionHandlerTest, SendEndServiceWithoutSetProtocolHandler) {

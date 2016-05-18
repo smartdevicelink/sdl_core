@@ -60,7 +60,20 @@ set(SOURCES
     heart_beat_monitor_test.cc
 )
 
+if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /FORCE" )
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /IGNORE:4099" )
+endif()
+
 file(COPY ${appMain_DIR}/smartDeviceLink.ini DESTINATION "./")
+
+if(QT_PORT)
+  link_directories (${CMAKE_SOURCE_DIR}/build/openssl_win_x86/lib)
+endif()
+
+if(NOT QT_PORT AND ${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  link_directories(${CMAKE_SOURCE_DIR}/build/openssl_win_x64/lib/)
+endif()
 
 create_test("connection_handler_test" "${SOURCES}" "${LIBRARIES}")
 
