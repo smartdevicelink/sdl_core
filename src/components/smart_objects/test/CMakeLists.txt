@@ -61,6 +61,10 @@ set(SOURCES
   ${COMPONENTS_DIR}/smart_objects/test/AlwaysFalseSchemaItem_test.cc
 )
 
+if(NOT QT_PORT AND ${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  set_target_properties(security_manager_test PROPERTIES LINK_FLAGS "/machine:X64")
+endif()
+
 create_test("smart_object_test" "${SOURCES}" "${LIBRARIES}")
 
 endif()
