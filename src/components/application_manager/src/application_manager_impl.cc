@@ -2578,6 +2578,11 @@ void ApplicationManagerImpl::UnregisterApplication(
 
       return;
     }
+    if (is_resuming) {
+      resume_ctrl_.SaveApplication(app_to_remove);
+    } else {
+      resume_ctrl_.RemoveApplicationFromSaved(app_to_remove);
+    }
     applications_.erase(app_to_remove);
     AppV4DevicePredicate finder(handle);
     ApplicationSharedPtr app = FindApp(accessor, finder);
@@ -2589,13 +2594,6 @@ void ApplicationManagerImpl::UnregisterApplication(
       SendUpdateAppList();
     }
   }
-
-  if (is_resuming) {
-    resume_ctrl_.SaveApplication(app_to_remove);
-  } else {
-    resume_ctrl_.RemoveApplicationFromSaved(app_to_remove);
-  }
-
   if (audio_pass_thru_active_) {
     // May be better to put this code in MessageHelper?
     EndAudioPassThrough();
