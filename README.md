@@ -165,6 +165,26 @@ Take the following steps to launch applications from sdl core.
   6. Both applications should show up on the head unit for launching
   7. Select the other application, and you should see it launched and brought to the foreground on the phone
 
+## Test Coverage
+### Used technologies
+  * GCOV - test coverage program.
+  * LCOV - graphical front-end for GCC's coverage testing tool for gcov.
+  * codecov.io - service for assembling code coverage and representing it in a clear for reading form.
+
+### Excluded folders
+_We test only sources written by us and we don`t need to test external sources(open source libraries)._
+  * '/usr/\*' - local libraries shouldn`t be covered by tests.
+  * '\*/test/\*' - we don`t need to cover tests.
+  * '\*/src/3rd\*' - open source libraries shouldn`t be covered by tests.
+
+### Current test coverage
+You can find it in [Coverage report](https://codecov.io/gh/smartdevicelink/sdl_core/branch/develop)
+
+### How to get Test Coverage locally
+ 1. Build project with enabled flag _-DBUILD_TESTS=on_
+ 2. Execute command 'make test'
+ 3. Execute './tools/Utils/collect_coverage.sh <path_to_build_directory>'
+
 ## Contributions
 
 Conversation regarding the design and development of SmartDeviceLink technology should be directed at the [GENIVI mailing list](https://lists.genivi.org/mailman/listinfo/genivi-smartdevicelink), which anyone can join. Public conference calls regarding the SmartDeviceLink technology will be announced to the GENIVI mailing list, we expect to have conversations every other week. We also encourage interested parties to write issues against our software, and submit pull requests right here in the GitHub repository.
