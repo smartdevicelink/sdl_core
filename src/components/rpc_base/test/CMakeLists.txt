@@ -39,8 +39,9 @@ if (BUILD_TESTS)
 )
 
 set(LIBRARIES
-  gmock
   jsoncpp
+  rpc_base
+  gmock
 )
 
 set(SOURCES

@@ -38,6 +38,9 @@
 namespace test {
 using namespace rpc;
 
+using utils::json::JsonValue;
+using utils::json::JsonValueRef;
+
 namespace {
 
 enum TestEnum { kValue0, kValue1, kInvalidValue };
@@ -186,20 +189,20 @@ TEST(ValidatedTypes, TestArrayInitializingConstructor) {
 }
 
 TEST(ValidatedTypes, TestOptionalEmptyArray) {
-  Optional<Array<Integer<int8_t, 0, 10>, 0, 5> > ai;
-  ASSERT_RPCTYPE_VALID(ai);
-  ASSERT_FALSE(ai.is_initialized());
-  Json::FastWriter fw;
-  std::string serialized = fw.write(ai.ToJsonValue());
+  Optional<Array<Integer<int8_t, 0, 10>, 0, 5> > int_array;
+  ASSERT_RPCTYPE_VALID(int_array);
+  ASSERT_FALSE(int_array.is_initialized());
+  JsonValue json_value = int_array.ToJsonValue();
+  std::string serialized = json_value.ToJson();
   ASSERT_EQ(serialized, "[]\n");
 }
 
 TEST(ValidatedTypes, TestMandatoryEmptyArray) {
-  Array<Integer<int8_t, 0, 10>, 0, 5> ai;
-  ASSERT_FALSE(ai.is_valid());
-  ASSERT_FALSE(ai.is_initialized());
-  Json::FastWriter fw;
-  std::string serialized = fw.write(ai.ToJsonValue());
+  Array<Integer<int8_t, 0, 10>, 0, 5> int_array;
+  ASSERT_FALSE(int_array.is_valid());
+  ASSERT_FALSE(int_array.is_initialized());
+  JsonValue json_value = int_array.ToJsonValue();
+  std::string serialized = json_value.ToJson();
   ASSERT_EQ(serialized, "[]\n");
 }
 
@@ -228,8 +231,8 @@ TEST(ValidatedTypes, TestEmptyMandatoryMap) {
   Map<Integer<int8_t, 0, 10>, 0, 5> im;
   ASSERT_FALSE(im.is_valid());
   ASSERT_FALSE(im.is_initialized());
-  Json::FastWriter fw;
-  std::string serialized = fw.write(im.ToJsonValue());
+  JsonValue json_value = im.ToJsonValue();
+  std::string serialized = json_value.ToJson();
   ASSERT_EQ(serialized, "{}\n");
 }
 
