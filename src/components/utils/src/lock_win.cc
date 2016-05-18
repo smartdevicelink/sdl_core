@@ -76,13 +76,16 @@ void Lock::Release() {
 }
 
 bool Lock::Try() {
-  if (TryEnterCriticalSection(&mutex_)) {
-#ifndef NDEBUG
-    lock_taken_++;
-#endif
-    return true;
+  if ((lock_taken_ > 0) && !is_mutex_recursive_) {
+    return false;
   }
-  return false;
+  if (!TryEnterCriticalSection(&mutex_)) {
+    return false;
+  }
+#ifndef NDEBUG
+  lock_taken_++;
+#endif
+  return true;
 }
 
 #ifndef NDEBUG

@@ -96,14 +96,16 @@ void Lock::Release() {
 }
 
 bool Lock::Try() {
-  const int32_t status = pthread_mutex_trylock(&mutex_);
-  if (status == 0) {
-#ifndef NDEBUG
-    lock_taken_++;
-#endif
-    return true;
+  if ((lock_taken_ > 0) && !is_mutex_recursive_) {
+    return false;
   }
-  return false;
+  if (0 != pthread_mutex_trylock(&mutex_)) {
+    return false;
+  }
+#ifndef NDEBUG
+  lock_taken_++;
+#endif
+  return true;
 }
 
 #ifndef NDEBUG
