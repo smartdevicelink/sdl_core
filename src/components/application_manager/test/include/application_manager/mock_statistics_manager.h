@@ -42,7 +42,10 @@ namespace test {
 namespace components {
 namespace application_manager_test {
 
-using namespace ::usage_statistics;
+namespace {
+  using namespace ::usage_statistics;
+}
+
 class MockStatisticsManager : public StatisticsManager {
  public:
   MOCK_METHOD1(Increment, void(GlobalCounterId type));

@@ -40,7 +40,8 @@ namespace test {
 namespace components {
 namespace connection_handler_test {
 
-class MockConnectionHandlerObserver : public ConnectionHandlerObserver {
+class MockConnectionHandlerObserver
+    : public connection_handler::ConnectionHandlerObserver {
  public:
   MOCK_METHOD1(OnDeviceListUpdated,
       void(const connection_handler::DeviceMap& device_list));

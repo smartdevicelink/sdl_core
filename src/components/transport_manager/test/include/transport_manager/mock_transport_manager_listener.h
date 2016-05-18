@@ -46,7 +46,7 @@ using namespace transport_manager;
 using ::protocol_handler::RawMessage;
 using ::protocol_handler::RawMessagePtr;
 
-class TransportManagerListenerMock : public TransportManagerListener {
+class MockTransportManagerListener : public TransportManagerListener {
  public:
   MOCK_METHOD1(OnDeviceListUpdated,
                void(const std::vector<DeviceInfo>& device_info));

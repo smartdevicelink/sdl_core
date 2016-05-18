@@ -30,43 +30,34 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_CONNECTION_HANDLER_TEST_INCLUDE_CONNECTION_HANDLER_CONNECTION_HANDLER_OBSERVER_MOCK_H_
-#define SRC_COMPONENTS_CONNECTION_HANDLER_TEST_INCLUDE_CONNECTION_HANDLER_CONNECTION_HANDLER_OBSERVER_MOCK_H_
+#ifndef TEST_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_ADAPTER_IMPL_MOCK_H_
+#define TEST_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_ADAPTER_IMPL_MOCK_H_
 
 #include "gmock/gmock.h"
-#include <string>
-#include "connection_handler/connection_handler_observer.h"
+#include "media_manager/media_adapter_impl.h"
 
 namespace test {
 namespace components {
-namespace connection_handler_test {
+namespace media_manager_test {
 
-/*
- * MOCK implementation of ::connection_handler::ConnectionHandlerObserver
- * interface
- */
-class ConnectionHandlerObserverMock
-    : public ::connection_handler::ConnectionHandlerObserver {
+using namespace media_manager;
+
+class MockMediaAdapterImpl : public ::media_manager::MediaAdapterImpl {
  public:
-  MOCK_METHOD1(OnDeviceListUpdated,
-               void(const connection_handler::DeviceMap& device_list));
-  MOCK_METHOD0(OnFindNewApplicationsRequest, void());
-  MOCK_METHOD1(RemoveDevice,
-               void(const connection_handler::DeviceHandle& device_handle));
-  MOCK_METHOD3(OnServiceStartedCallback,
-               bool(const connection_handler::DeviceHandle& device_handle,
-                    const int32_t& session_key,
-                    const protocol_handler::ServiceType& type));
-  MOCK_METHOD3(
-      OnServiceEndedCallback,
-      void(const int32_t& session_key,
-           const protocol_handler::ServiceType& type,
-           const connection_handler::CloseSessionReason& close_reason));
-  MOCK_CONST_METHOD1(
-      GetHandshakeContext,
-      security_manager::SSLContext::HandshakeContext(uint32_t key));
+  MOCK_METHOD1(AddListener,
+               void(const utils::SharedPtr<MediaAdapterListener>&));
+  MOCK_METHOD1(RemoveListener,
+               void(const utils::SharedPtr<MediaAdapterListener>&));
+  MOCK_METHOD2(SendData,
+               void(int32_t application_key,
+                    const ::protocol_handler::RawMessagePtr message));
+  MOCK_METHOD1(StartActivity, void(int32_t application_key));
+  MOCK_METHOD1(StopActivity, void(int32_t application_key));
+  MOCK_CONST_METHOD1(is_app_performing_activity, bool(int32_t application_key));
 };
-}  // namespace connection_handler_test
+
+}  // namespace media_manager_test
 }  // namespace components
 }  // namespace test
-#endif  // SRC_COMPONENTS_CONNECTION_HANDLER_TEST_INCLUDE_CONNECTION_HANDLER_CONNECTION_HANDLER_OBSERVER_MOCK_H_
+
+#endif  // TEST_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_ADAPTER_IMPL_MOCK_H_

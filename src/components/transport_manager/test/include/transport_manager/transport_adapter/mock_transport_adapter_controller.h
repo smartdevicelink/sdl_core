@@ -42,7 +42,7 @@ namespace transport_manager {
 
 using namespace ::transport_manager::transport_adapter;
 
-class TransportAdapterControllerMock : public TransportAdapterController {
+class MockTransportAdapterController : public TransportAdapterController {
  public:
   MOCK_METHOD1(AddDevice, DeviceSptr(DeviceSptr device));
   MOCK_METHOD1(SearchDeviceDone, void(DeviceVector device));

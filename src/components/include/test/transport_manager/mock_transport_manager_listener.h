@@ -41,11 +41,15 @@ namespace test {
 namespace components {
 namespace transport_manager_test {
 
+namespace {
+  using namespace transport_manager;
+}
+
 class MockTransportManagerListener
     : public transport_manager::TransportManagerListener {
  public:
   MOCK_METHOD1(OnDeviceListUpdated,
-      void(const std::vector<DeviceInfo>));
+      void(const std::vector<DeviceInfo>&));
   MOCK_METHOD0(OnFindNewApplicationsRequest,
       void());
   MOCK_METHOD1(OnDeviceFound,

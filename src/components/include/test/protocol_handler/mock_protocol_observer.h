@@ -44,7 +44,7 @@ namespace protocol_handler_test {
 /*
  * MOCK implementation of ::protocol_handler::ProtocolObserver interface
  */
-class ProtocolObserverMock : public ::protocol_handler::ProtocolObserver {
+class MockProtocolObserver : public ::protocol_handler::ProtocolObserver {
  public:
   MOCK_METHOD1(OnMessageReceived,
                void(const ::protocol_handler::RawMessagePtr));
