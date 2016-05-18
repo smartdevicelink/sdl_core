@@ -60,18 +60,18 @@ struct RequestInfo {
   virtual ~RequestInfo() {}
 
   RequestInfo(RequestPtr request,
-              const RequestType requst_type,
-              const uint64_t timeout_msec)
-      : request_(request), timeout_msec_(timeout_msec) {
-    start_time_ = date_time::DateTime::getCurrentTime();
+              const RequestType request_type,
+              const uint64_t timeout_msec,
+              const uint32_t app_id,
+              const uint32_t correlation_id)
+      : request_(request)
+      , start_time_(date_time::DateTime::getCurrentTime())
+      , timeout_msec_(timeout_msec)
+      , app_id_(app_id)
+      , requst_type_(request_type)
+      , correlation_id_(correlation_id) {
     updateEndTime();
-    requst_type_ = requst_type;
   }
-
-  RequestInfo(RequestPtr request,
-              const RequestType requst_type,
-              const TimevalStruct& start_time,
-              const uint64_t timeout_msec);
 
   void updateEndTime();
 
@@ -141,16 +141,10 @@ typedef utils::SharedPtr<RequestInfo> RequestInfoPtr;
 
 struct MobileRequestInfo : public RequestInfo {
   MobileRequestInfo(RequestPtr request, const uint64_t timeout_msec);
-  MobileRequestInfo(RequestPtr request,
-                    const TimevalStruct& start_time,
-                    const uint64_t timeout_msec);
 };
 
 struct HMIRequestInfo : public RequestInfo {
   HMIRequestInfo(RequestPtr request, const uint64_t timeout_msec);
-  HMIRequestInfo(RequestPtr request,
-                 const TimevalStruct& start_time,
-                 const uint64_t timeout_msec);
 };
 
 // Request info, for searching in request info set by log_n time
