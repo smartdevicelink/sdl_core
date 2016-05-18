@@ -41,8 +41,17 @@
 #include <map>
 #include <set>
 #include <string>
+#include <cstdint>
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+
+namespace {
+const uint64_t kDeltaEpochInMicrosecs = 11644473600000000u;
+const uint32_t kMillisecondsInSecond = 1000u;
+const uint32_t kMicrosecondsInMillisecond = 1000u;
+const uint32_t kMicrosecondsInSecond =
+    kMillisecondsInSecond * kMicrosecondsInMillisecond;
+}
 
 #if GTEST_OS_CYGWIN || GTEST_OS_LINUX || GTEST_OS_MAC
 # include <unistd.h>  // NOLINT
@@ -72,23 +81,48 @@ void UnlockAndSleep(const long usecs) {
   ::std::ostringstream s;
   s << "Sleeping for " << 0.001 * usecs << "mSecs" << ::std::endl;
   Log(testing::internal::kInfo, s.str(), 0);
+#if defined(OS_POSIX)
   usleep(usecs);
+#elif defined(OS_WINDOWS)
+  Sleep(usecs * kMicrosecondsInMillisecond);
+#endif
   g_gmock_mutex.Lock();
 }
 
 // Return time structure with the current date/time stamp
 timeval GetCurrentTime() {
   timeval now;
+#if defined(OS_POSIX)
   gettimeofday(&now, NULL);
+#elif defined(OS_WINDOWS)
+  FILETIME ft;
+  uint64_t tmpres = 0;
+
+  GetSystemTimeAsFileTime(&ft);
+  tmpres |= ft.dwHighDateTime;
+  tmpres <<= 32;
+  tmpres |= ft.dwLowDateTime;
+  tmpres /= 10;
+  tmpres -= kDeltaEpochInMicrosecs;
+
+  now.tv_sec = static_cast<long>(tmpres / kMicrosecondsInSecond);
+  now.tv_usec = static_cast<long>(tmpres % kMicrosecondsInSecond);
+#endif
   return now;
 }
 
-// Unlock internal mutex and wait for a while
 long UsecsElapsed(const timeval start_time) {
   timeval now = GetCurrentTime();
-  timeval priviously_elapsed;
-  timersub(&now, &start_time, &priviously_elapsed);
-  return priviously_elapsed.tv_sec*1000000L + priviously_elapsed.tv_usec;
+  timeval result;
+
+  result.tv_sec = now.tv_sec - start_time.tv_sec;
+  result.tv_usec = now.tv_usec - start_time.tv_usec;
+  if (result.tv_usec < 0) {
+    --result.tv_sec;
+    result.tv_usec += 1000000;
+  }
+
+  return result.tv_sec * kMicrosecondsInSecond + result.tv_usec;
 }
 
 // Constructs an ExpectationBase object.
@@ -302,7 +336,7 @@ void UntypedFunctionMockerBase::RegisterOwner(const void* mock_obj)
     mock_obj_ = mock_obj;
   }
   Mock::Register(mock_obj, this);
-  gettimeofday(&registered_time_, NULL);
+  registered_time_ = GetCurrentTime();
 }
 
 // Sets the mock object this mock method belongs to, and sets the name
@@ -772,7 +806,9 @@ bool Mock::AsyncVerifyAndClearExpectationsLocked(const int timeout_msec_in)
 
   // TODO(ezamakhov@gmail.com): refactor the next loops
   bool expectations_met = true;
-  timeval first_register_time {0, 0};
+  timeval first_register_time;
+  first_register_time.tv_sec = 0;
+  first_register_time.tv_usec = 0;
   int timeout_msec = timeout_msec_in;
   for (MockObjectRegistry::StateMap::iterator mock_it = state_map.begin();
       state_map.end() != mock_it; ++mock_it) {

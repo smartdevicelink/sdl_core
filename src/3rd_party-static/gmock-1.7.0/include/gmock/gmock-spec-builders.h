@@ -62,6 +62,8 @@
 
 #if defined(OS_POSIX)
 #include <sys/time.h>
+#elif defined(OS_WINDOWS)
+#include <winsock2.h>
 #endif
 
 #include <map>
