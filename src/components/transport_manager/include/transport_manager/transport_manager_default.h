@@ -67,4 +67,4 @@ class TransportManagerDefault : public TransportManagerImpl {
 };
 }
 
-#endif /* TRANSPORT_MANAGER_DEFAULT_H_ */
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_DEFAULT_H_

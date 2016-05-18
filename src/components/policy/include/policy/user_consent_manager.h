@@ -41,4 +41,4 @@ class UserConsentManager {
 };
 }  //  namespace policy
 
-#endif  //  SRC_COMPONENTS_POLICY_INCLUDE_POLICY_USER_CONSENT_MANAGER_H_
+#endif  // SRC_COMPONENTS_POLICY_INCLUDE_POLICY_USER_CONSENT_MANAGER_H_
