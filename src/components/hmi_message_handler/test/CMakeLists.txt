@@ -57,6 +57,11 @@ if(${QT_HMI})
     ${COMPONENTS_DIR}/hmi_message_handler/test/dbus_message_adapter_test.cc
   )
 endif()
+
 create_test("hmi_message_handler_test" "${SOURCES}" "${LIBRARIES}")
+
+if(MSVC)
+  target_link_libraries("hmi_message_handler_test" ws2_32)
+endif()
 
 endif()
