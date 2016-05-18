@@ -417,7 +417,7 @@ TEST_F(ApplicationImplTest, SetIconPath) {
   EXPECT_EQ(test_file.file_name, app_impl->app_icon_path());
 }
 
-TEST_F(ApplicationImplTest, LoadPersistentFiles) {
+TEST_F(ApplicationImplTest, DISABLED_LoadPersistentFiles) {
   // Precondition
   // Create test folder with diff files
 
