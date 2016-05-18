@@ -1,4 +1,4 @@
-/* Copyright (c) 2014, Ford Motor Company
+/* Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,6 @@
 #ifndef SRC_COMPONENTS_POLICY_TEST_POLICY_INCLUDE_MOCK_POLICY_LISTENER_H_
 #define SRC_COMPONENTS_POLICY_TEST_POLICY_INCLUDE_MOCK_POLICY_LISTENER_H_
 
-
 #include <string>
 
 #include "gmock/gmock.h"
@@ -46,42 +45,31 @@ namespace policy_table = ::rpc::policy_table_interface_base;
 namespace policy {
 
 class MockPolicyListener : public PolicyListener {
- public:
-  MOCK_METHOD3(OnPermissionsUpdated,
-               void(const std::string& policy_app_id,
-                    const Permissions& permissions,
-                    const policy::HMILevel& default_hmi));
-  MOCK_METHOD2(OnPermissionsUpdated,
-               void(const std::string& policy_app_id,
-                    const Permissions& permissions));
+public:
+  MOCK_METHOD3(OnPermissionsUpdated, void(const std::string &policy_app_id,
+                                          const Permissions &permissions,
+                                          const policy::HMILevel &default_hmi));
+  MOCK_METHOD2(OnPermissionsUpdated, void(const std::string &policy_app_id,
+                                          const Permissions &permissions));
   MOCK_METHOD1(OnPendingPermissionChange,
-               void(const std::string& policy_app_id));
-  MOCK_METHOD1(OnUpdateStatusChanged,
-               void(const std::string& status));
+               void(const std::string &policy_app_id));
+  MOCK_METHOD1(OnUpdateStatusChanged, void(const std::string &status));
   MOCK_METHOD1(OnCurrentDeviceIdUpdateRequired,
-               std::string(const std::string& policy_app_id));
-  MOCK_METHOD0(OnSystemInfoUpdateRequired,
-               void());
-  MOCK_METHOD1(GetAppName,
-               std::string(const std::string& policy_app_id));
-  MOCK_METHOD0(OnUserRequestedUpdateCheckRequired,
-               void());
+               std::string(const std::string &policy_app_id));
+  MOCK_METHOD0(OnSystemInfoUpdateRequired, void());
+  MOCK_METHOD1(GetAppName, std::string(const std::string &policy_app_id));
+  MOCK_METHOD0(OnUserRequestedUpdateCheckRequired, void());
   MOCK_METHOD2(OnDeviceConsentChanged,
-               void(const std::string& device_id,
-                    bool is_allowed));
-  MOCK_METHOD1(OnUpdateHMIAppType,
-               void(std::map<std::string, StringArray>));
-  MOCK_METHOD1(GetAvailableApps,
-               void(std::queue<std::string>&));
-  MOCK_METHOD3(OnSnapshotCreated,
-               void(const BinaryMessage& pt_string,
-                    const std::vector<int>& retry_seconds,
-                    int timeout_exceed));
-  MOCK_METHOD0(CanUpdate,
-               bool());
-  MOCK_METHOD1(OnCertificateUpdated, void (const std::string&));
+               void(const std::string &device_id, bool is_allowed));
+  MOCK_METHOD1(OnUpdateHMIAppType, void(std::map<std::string, StringArray>));
+  MOCK_METHOD1(GetAvailableApps, void(std::queue<std::string> &));
+  MOCK_METHOD1(OnSnapshotCreated, void(const BinaryMessage &pt_string));
+  MOCK_METHOD0(CanUpdate, bool());
+  MOCK_METHOD1(OnCertificateUpdated, void(const std::string &));
+  MOCK_CONST_METHOD2(SendOnAppPermissionsChanged,
+                     void(const AppPermissions &, const std::string &));
 };
 
-}  // namespace policy
+} // namespace policy
 
-#endif  // SRC_COMPONENTS_POLICY_TEST_POLICY_INCLUDE_MOCK_POLICY_LISTENER_H_
+#endif // SRC_COMPONENTS_POLICY_TEST_POLICY_INCLUDE_MOCK_POLICY_LISTENER_H_

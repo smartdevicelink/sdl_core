@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2013, Ford Motor Company
+ Copyright (c) 2016, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -34,6 +34,8 @@
 #define SRC_COMPONENTS_POLICY_INCLUDE_POLICY_POLICY_MANAGER_IMPL_H_
 
 #include <list>
+#include <cstdint>
+
 #include "utils/shared_ptr.h"
 #include "utils/lock.h"
 #include "policy/policy_manager.h"
@@ -42,6 +44,8 @@
 #include "policy/update_status_manager.h"
 #include "./functions.h"
 #include "usage_statistics/statistics_manager.h"
+#include "policy/policy_helper.h"
+#include "utils/timer_thread.h"
 
 namespace policy_table = rpc::policy_table_interface_base;
 
@@ -49,270 +53,280 @@ namespace policy {
 struct CheckAppPolicy;
 
 class PolicyManagerImpl : public PolicyManager {
-  public:
-    PolicyManagerImpl();
-    virtual void set_listener(PolicyListener* listener);
-    PolicyListener* listener() const {
-      return listener_;
-    }
-    virtual bool InitPT(const std::string& file_name);
-    virtual bool LoadPT(const std::string& file, const BinaryMessage& pt_content);
-    virtual bool ResetPT(const std::string& file_name);
+public:
+  PolicyManagerImpl();
+  virtual void set_listener(PolicyListener *listener);
+  PolicyListener *listener() const { return listener_; }
+  virtual bool InitPT(const std::string &file_name);
+  virtual bool LoadPT(const std::string &file, const BinaryMessage &pt_content);
+  virtual bool ResetPT(const std::string &file_name);
 
-    virtual void GetServiceUrls(const std::string& service_type,
-                                EndpointUrls& end_points);
+  virtual void GetServiceUrls(const std::string &service_type,
+                              EndpointUrls &end_points);
 
-    virtual std::string GetLockScreenIconUrl() const;
-    virtual void RequestPTUpdate();
-    virtual void CheckPermissions(const PTString& app_id,
-        const PTString& hmi_level,
-        const PTString& rpc,
-        const RPCParams& rpc_params,
-        CheckPermissionResult& result);
-    virtual bool ResetUserConsent();
-    virtual void KmsChanged(int kilometers);
-    virtual void IncrementIgnitionCycles();
-    virtual std::string ForcePTExchange();
-    virtual std::string GetPolicyTableStatus() const;
-    virtual void ResetRetrySequence();
-    virtual int NextRetryTimeout();
-    virtual int TimeoutExchange();
-    virtual const std::vector<int> RetrySequenceDelaysSeconds();
-    virtual void OnExceededTimeout();
-    virtual void OnUpdateStarted();
-    virtual void PTUpdatedAt(int kilometers, int days_after_epoch);
+  virtual std::string GetLockScreenIconUrl() const;
+  virtual bool RequestPTUpdate();
+  virtual void CheckPermissions(const PTString &app_id,
+                                const PTString &hmi_level, const PTString &rpc,
+                                const RPCParams &rpc_params,
+                                CheckPermissionResult &result);
+  virtual bool ResetUserConsent();
+  virtual void KmsChanged(int kilometers);
+  virtual void IncrementIgnitionCycles();
+  virtual std::string ForcePTExchange();
+  virtual std::string GetPolicyTableStatus() const;
+  virtual void ResetRetrySequence();
+  virtual uint32_t NextRetryTimeout();
+  virtual int TimeoutExchange();
+  virtual const std::vector<int> RetrySequenceDelaysSeconds();
+  virtual void OnExceededTimeout();
+  virtual void OnUpdateStarted();
+  virtual void PTUpdatedAt(int kilometers, int days_after_epoch);
 
-    /**
-     * Refresh data about retry sequence from policy table
-     */
-    virtual void RefreshRetrySequence();
-    virtual DeviceConsent GetUserConsentForDevice(const std::string& device_id);
-    virtual void GetUserConsentForApp(
-      const std::string& device_id, const std::string& policy_app_id,
-      std::vector<FunctionalGroupPermission>& permissions);
-    virtual void SetUserConsentForDevice(const std::string& device_id,
-                                         bool is_allowed);
-    virtual bool ReactOnUserDevConsentForApp(const std::string app_id,
-        bool is_device_allowed);
-    virtual bool GetInitialAppData(const std::string& application_id,
-                                   StringArray* nicknames = NULL,
-                                   StringArray* app_hmi_types = NULL);
+  /**
+   * Refresh data about retry sequence from policy table
+   */
+  virtual void RefreshRetrySequence();
+  virtual DeviceConsent GetUserConsentForDevice(const std::string &device_id);
+  virtual void
+  GetUserConsentForApp(const std::string &device_id,
+                       const std::string &policy_app_id,
+                       std::vector<FunctionalGroupPermission> &permissions);
+  virtual void SetUserConsentForDevice(const std::string &device_id,
+                                       bool is_allowed);
+  virtual bool ReactOnUserDevConsentForApp(const std::string app_id,
+                                           bool is_device_allowed);
+  virtual bool GetInitialAppData(const std::string &application_id,
+                                 StringArray *nicknames = NULL,
+                                 StringArray *app_hmi_types = NULL);
 
-    virtual void SetDeviceInfo(const std::string& device_id,
-                               const DeviceInfo& device_info);
+  virtual void SetDeviceInfo(const std::string &device_id,
+                             const DeviceInfo &device_info);
 
-    virtual void SetUserConsentForApp(const PermissionConsent& permissions);
+  virtual void SetUserConsentForApp(const PermissionConsent &permissions);
 
-    virtual bool GetDefaultHmi(const std::string& policy_app_id,
-                               std::string* default_hmi);
+  virtual bool GetDefaultHmi(const std::string &policy_app_id,
+                             std::string *default_hmi);
 
-    virtual bool GetPriority(const std::string& policy_app_id,
-                             std::string* priority);
+  virtual bool GetPriority(const std::string &policy_app_id,
+                           std::string *priority);
 
-    virtual std::vector<UserFriendlyMessage> GetUserFriendlyMessages(
-      const std::vector<std::string>& message_code, const std::string& language);
+  virtual std::vector<UserFriendlyMessage>
+  GetUserFriendlyMessages(const std::vector<std::string> &message_code,
+                          const std::string &language);
 
-    virtual bool IsApplicationRevoked(const std::string& app_id) const;
+  virtual bool IsApplicationRevoked(const std::string &app_id) const;
 
-    virtual void GetPermissionsForApp(
-      const std::string& device_id, const std::string& policy_app_id,
-      std::vector<FunctionalGroupPermission>& permissions);
+  virtual void
+  GetPermissionsForApp(const std::string &device_id,
+                       const std::string &policy_app_id,
+                       std::vector<FunctionalGroupPermission> &permissions);
 
-    virtual std::string& GetCurrentDeviceId(const std::string& policy_app_id);
+  virtual std::string &GetCurrentDeviceId(const std::string &policy_app_id);
 
-    virtual void SetSystemLanguage(const std::string& language);
+  virtual void SetSystemLanguage(const std::string &language);
 
-    virtual void SetSystemInfo(const std::string& ccpu_version,
-                               const std::string& wers_country_code,
-                               const std::string& language);
-    virtual void OnSystemReady();
+  virtual void SetSystemInfo(const std::string &ccpu_version,
+                             const std::string &wers_country_code,
+                             const std::string &language);
+  virtual void OnSystemReady();
 
-    virtual uint32_t GetNotificationsNumber(const std::string& priority);
+  virtual uint32_t GetNotificationsNumber(const std::string &priority);
 
-    virtual void SetVINValue(const std::string& value);
+  virtual void SetVINValue(const std::string &value);
 
-    // Interface StatisticsManager (begin)
-    virtual void Increment(usage_statistics::GlobalCounterId type);
-    virtual void Increment(const std::string& app_id,
-                           usage_statistics::AppCounterId type);
-    virtual void Set(const std::string& app_id, usage_statistics::AppInfoId type,
-                     const std::string& value);
-    virtual void Add(const std::string& app_id,
-                     usage_statistics::AppStopwatchId type,
-                     int32_t timespan_seconds);
-    // Interface StatisticsManager (end)
+  // Interface StatisticsManager (begin)
+  virtual void Increment(usage_statistics::GlobalCounterId type);
+  virtual void Increment(const std::string &app_id,
+                         usage_statistics::AppCounterId type);
+  virtual void Set(const std::string &app_id, usage_statistics::AppInfoId type,
+                   const std::string &value);
+  virtual void Add(const std::string &app_id,
+                   usage_statistics::AppStopwatchId type,
+                   int32_t timespan_seconds);
+  // Interface StatisticsManager (end)
 
-    AppPermissions GetAppPermissionsChanges(const std::string& policy_app_id);
-    void RemovePendingPermissionChanges(const std::string& app_id);
+  AppPermissions GetAppPermissionsChanges(const std::string &policy_app_id);
+  void RemovePendingPermissionChanges(const std::string &app_id);
 
-    void SendNotificationOnPermissionsUpdated(const std::string& application_id);
+  void SendNotificationOnPermissionsUpdated(const std::string &application_id);
 
-    bool CleanupUnpairedDevices();
+  bool CleanupUnpairedDevices();
 
-    bool CanAppKeepContext(const std::string& app_id);
-    bool CanAppStealFocus(const std::string& app_id);
-    void MarkUnpairedDevice(const std::string& device_id);
+  bool CanAppKeepContext(const std::string &app_id);
+  bool CanAppStealFocus(const std::string &app_id);
+  void MarkUnpairedDevice(const std::string &device_id);
 
-    void AddApplication(const std::string& application_id);
+  void AddApplication(const std::string &application_id);
 
-    virtual void RemoveAppConsentForGroup(const std::string& app_id,
-                                          const std::string& group_name);
+  virtual void RemoveAppConsentForGroup(const std::string &app_id,
+                                        const std::string &group_name);
 
-    virtual uint16_t HeartBeatTimeout(const std::string& app_id) const;
+  virtual uint16_t HeartBeatTimeout(const std::string &app_id) const;
 
-    virtual void SaveUpdateStatusRequired(bool is_update_needed);
+  virtual void SaveUpdateStatusRequired(bool is_update_needed);
 
-    virtual bool IsPredataPolicy(const std::string& policy_app_id);
-    void set_cache_manager(CacheManagerInterface* cache_manager);
+  virtual bool IsPredataPolicy(const std::string &policy_app_id);
+  void set_cache_manager(CacheManagerInterface *cache_manager);
 
-    virtual void OnAppsSearchStarted();
+  virtual void OnAppsSearchStarted();
 
-    virtual void OnAppsSearchCompleted();
+  virtual void OnAppsSearchCompleted();
 
-    virtual const std::vector<std::string> GetAppRequestTypes(
-      const std::string policy_app_id) const;
-  protected:
-    #ifdef USE_HMI_PTU_DECRYPTION
-    virtual utils::SharedPtr<policy_table::Table> Parse(
-        const BinaryMessage& pt_content);
-    #else
-    virtual utils::SharedPtr<policy_table::Table> ParseArray(
-        const BinaryMessage& pt_content);
-    #endif
+  virtual void OnAppRegisteredOnMobile(const std::string &application_id);
 
-  private:
-    void CheckTriggers();
-    /*
-     * @brief Checks policy table update along with current data for any changes
-     * in assigned functional group list of application
-     *
-     * @param Policy table update struct
-     */
-    void CheckPermissionsChanges(
-      const utils::SharedPtr<policy_table::Table> update,
-      const utils::SharedPtr<policy_table::Table> snapshot);
+  virtual const std::vector<std::string>
+  GetAppRequestTypes(const std::string policy_app_id) const;
 
-    /**
-     * @brief Fill structure to be sent with OnPermissionsChanged notification
-     *
-     * @param Policy table struct, which contains rpc functional groups data
-     * @param List of rpc functional group names, which should be checked
-     * @param group_permission User permissions for functional groups
-     * @param Notification struct to be filled and sent
-     */
-    void PrepareNotificationData(
-      const policy_table::FunctionalGroupings& groups,
-      const policy_table::Strings& group_names,
-      const std::vector<FunctionalGroupPermission>& group_permission,
-      Permissions& notification_data);
-
-    /**
-     * @brief Validate PermissionConsent structure according to currently
-     * assigned groups
-     * @param permissions PermissionConsent structure that should be validated.
-     * @return PermissonConsent struct, which contains no foreign groups
-     */
-    PermissionConsent EnsureCorrectPermissionConsent(
-        const PermissionConsent& permissions_to_check);
-
-    /**
-     * @brief Allows to process case when added application is not present in
-     * policy db.
-     * @param policy application id.
-     * @param cuuren consent for application's device.
-     */
-    void AddNewApplication(const std::string& application_id,
-                           DeviceConsent device_consent);
-
-    /**
-     * @brief Allows to process case when added application is already
-     * in policy db.
-     * @param policy application id.
-     * @param cuuren consent for application's device.
-     */
-    void PromoteExistedApplication(const std::string& application_id,
-                               DeviceConsent device_consent);
-
-    /**
-     * @brief Check if certain application already in policy db.
-     * @param policy application id.
-     * @return true if application presents false otherwise.
-     */
-    bool IsNewApplication(const std::string& application_id) const;
-
-    /**
-     * Checks existing and permissions of AppStorageFolder
-     * @return true if AppStorageFolder exists and has permissions read/write
-     */
-    bool CheckAppStorageFolder() const;
-
-    /**
-     * @brief Checks whether need ask the permission of users
-     * @return true if user consent is needed
-     */
-    virtual bool IsConsentNeeded(const std::string& app_id);
-
-    /**
-     * @brief Changes isConsentNeeded for app pending permissions, in case
-     * user set permissions before app activation.
-     * @param Unique app id
-     * @param Current permissions for app
-     */
-    void CheckPendingPermissionsChanges(
-                const std::string& policy_app_id,
-                const std::vector<FunctionalGroupPermission>& current_permissions);
-
-    virtual void StartPTExchange();
-    virtual bool ExceededDays();
-    virtual bool ExceededIgnitionCycles();
-    bool IsPTValid(utils::SharedPtr<policy_table::Table> policy_table,
-                   policy_table::PolicyTableType type) const;
+protected:
+#ifdef USE_HMI_PTU_DECRYPTION
+  virtual utils::SharedPtr<policy_table::Table>
+  Parse(const BinaryMessage &pt_content);
+#else
+  virtual utils::SharedPtr<policy_table::Table>
+  ParseArray(const BinaryMessage &pt_content);
+#endif
 
 private:
-    PolicyListener* listener_;
+  void CheckTriggers();
+  /*
+   * @brief Checks policy table update along with current data for any changes
+   * in assigned functional group list of application
+   *
+   * @param Policy table update struct
+   */
+  void
+  CheckPermissionsChanges(const utils::SharedPtr<policy_table::Table> update,
+                          const utils::SharedPtr<policy_table::Table> snapshot);
 
-    UpdateStatusManager update_status_manager_;
-    CacheManagerInterfaceSPtr cache_;
-    sync_primitives::Lock apps_registration_lock_;
-    sync_primitives::Lock app_permissions_diff_lock_;
-    std::map<std::string, AppPermissions> app_permissions_diff_;
+  /**
+   * @brief Fill structure to be sent with OnPermissionsChanged notification
+   *
+   * @param Policy table struct, which contains rpc functional groups data
+   * @param List of rpc functional group names, which should be checked
+   * @param group_permission User permissions for functional groups
+   * @param Notification struct to be filled and sent
+   */
+  void PrepareNotificationData(
+      const policy_table::FunctionalGroupings &groups,
+      const policy_table::Strings &group_names,
+      const std::vector<FunctionalGroupPermission> &group_permission,
+      Permissions &notification_data);
 
-    /**
-     * Timeout to wait response with UpdatePT
-     */
-    int retry_sequence_timeout_;
+  /**
+   * @brief Validate PermissionConsent structure according to currently
+   * assigned groups
+   * @param permissions PermissionConsent structure that should be validated.
+   * @return PermissonConsent struct, which contains no foreign groups
+   */
+  PermissionConsent
+  EnsureCorrectPermissionConsent(const PermissionConsent &permissions_to_check);
 
-    /**
-     * Seconds between retries to update PT
-     */
-    std::vector<int> retry_sequence_seconds_;
+  /**
+   * @brief Allows to process case when added application is not present in
+   * policy db.
+   * @param policy application id.
+   * @param cuuren consent for application's device.
+   */
+  void AddNewApplication(const std::string &application_id,
+                         DeviceConsent device_consent);
 
-    /**
-     * Current index trying of retry sequence
-     */
-    uint32_t retry_sequence_index_;
+  /**
+   * @brief Allows to process case when added application is already
+   * in policy db.
+   * @param policy application id.
+   * @param cuuren consent for application's device.
+   */
+  void PromoteExistedApplication(const std::string &application_id,
+                                 DeviceConsent device_consent);
 
-    /**
-     * Lock for guarding retry sequence
-     */
-    sync_primitives::Lock retry_sequence_lock_;
+  /**
+   * @brief Check if certain application already in policy db.
+   * @param policy application id.
+   * @return true if application presents false otherwise.
+   */
+  bool IsNewApplication(const std::string &application_id) const;
 
-    /**
-     * Lock for guarding recording statistics
-     */
-    sync_primitives::Lock statistics_lock_;
+  /**
+   * Checks existing and permissions of AppStorageFolder
+   * @return true if AppStorageFolder exists and has permissions read/write
+   */
+  bool CheckAppStorageFolder() const;
 
-    /**
-     * @brief Device id, which is used during PTU handling for specific
-     * application
-     */
-    std::string last_device_id_;
+  /**
+   * @brief Checks whether need ask the permission of users
+   * @return true if user consent is needed
+   */
+  virtual bool IsConsentNeeded(const std::string &app_id);
 
-    bool ignition_check;
+  /**
+   * @brief Changes isConsentNeeded for app pending permissions, in case
+   * user set permissions before app activation.
+   * @param Unique app id
+   * @param Current permissions for app
+   */
+  void CheckPendingPermissionsChanges(
+      const std::string &policy_app_id,
+      const std::vector<FunctionalGroupPermission> &current_permissions);
 
-    friend struct CheckAppPolicy;
+  virtual void StartPTExchange();
+  virtual bool ExceededDays();
+  virtual bool ExceededIgnitionCycles();
+  bool IsPTValid(utils::SharedPtr<policy_table::Table> policy_table,
+                 policy_table::PolicyTableType type) const;
+
+  void RetrySequence();
+
+private:
+  PolicyListener *listener_;
+
+  UpdateStatusManager update_status_manager_;
+  CacheManagerInterfaceSPtr cache_;
+  sync_primitives::Lock apps_registration_lock_;
+  sync_primitives::Lock app_permissions_diff_lock_;
+  std::map<std::string, AppPermissions> app_permissions_diff_;
+
+  /**
+   * Timeout to wait response with UpdatePT
+   */
+  uint32_t retry_sequence_timeout_;
+
+  /**
+   * Seconds between retries to update PT
+   */
+  std::vector<int> retry_sequence_seconds_;
+
+  /**
+   * Current index trying of retry sequence
+   */
+  uint32_t retry_sequence_index_;
+
+  /**
+   * Lock for guarding retry sequence
+   */
+  sync_primitives::Lock retry_sequence_lock_;
+
+  /**
+   * Timer to retry UpdatePT
+   */
+  timer::TimerThread<PolicyManagerImpl> timer_retry_sequence_;
+
+  /**
+   * Lock for guarding recording statistics
+   */
+  sync_primitives::Lock statistics_lock_;
+
+  /**
+   * @brief Device id, which is used during PTU handling for specific
+   * application
+   */
+  std::string last_device_id_;
+
+  bool ignition_check;
+
+  friend struct CheckAppPolicy;
 };
 
-}  // namespace policy
+} // namespace policy
 
-#endif  // SRC_COMPONENTS_POLICY_INCLUDE_POLICY_POLICY_MANAGER_IMPL_H_
+#endif // SRC_COMPONENTS_POLICY_INCLUDE_POLICY_POLICY_MANAGER_IMPL_H_
