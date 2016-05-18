@@ -55,35 +55,9 @@ namespace transport_manager_test {
 
 using ::testing::Return;
 using ::testing::_;
-
 using ::testing::NiceMock;
 using namespace ::transport_manager;
 using namespace ::protocol_handler;
-
-class TestTransportAdapter : public TransportAdapterImpl {
- public:
-  TestTransportAdapter(DeviceScanner* device_scanner,
-                       ServerConnectionFactory* server_connection_factory,
-                       ClientConnectionListener* client_connection_listener,
-                       resumption::LastState& last_state)
-      : TransportAdapterImpl(device_scanner,
-                             server_connection_factory,
-                             client_connection_listener,
-                             last_state) {}
-
-  ConnectionSPtr FindStatedConnection(const DeviceUID& device_handle,
-                                      const ApplicationHandle& app_handle) {
-    return this->FindEstablishedConnection(device_handle, app_handle);
-  }
-  virtual ~TestTransportAdapter(){};
-
-  virtual DeviceType GetDeviceType() const {
-    return UNKNOWN;
-  }
-
-  MOCK_CONST_METHOD0(Store, void());
-  MOCK_METHOD0(Restore, bool());
-};
 
 class TransportAdapterTest : public ::testing::Test {
  protected:
@@ -114,7 +88,6 @@ TEST_F(TransportAdapterTest, Init) {
                                              clientMock,
                                              last_state_,
                                              transport_manager_settings);
-
   EXPECT_CALL(*dev_mock, Init()).WillOnce(Return(TransportAdapter::OK));
   EXPECT_CALL(*clientMock, Init()).WillOnce(Return(TransportAdapter::OK));
   EXPECT_CALL(*serverMock, Init()).WillOnce(Return(TransportAdapter::OK));
@@ -321,7 +294,6 @@ TEST_F(TransportAdapterTest, ConnectDevice_DeviceNotAdded) {
   MockServerConnectionFactory* serverMock = new MockServerConnectionFactory();
   MockTransportAdapterImpl transport_adapter(
       NULL, serverMock, NULL, last_state_, transport_manager_settings);
-
   EXPECT_CALL(*serverMock, Init()).WillOnce(Return(TransportAdapter::OK));
   EXPECT_CALL(transport_adapter, Restore()).WillOnce(Return(true));
   transport_adapter.Init();

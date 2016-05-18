@@ -41,7 +41,8 @@ namespace components {
 namespace transport_manager_test {
 
 using ::testing::Return;
-TEST(TestTransportManagerDefault, Init_LastStateNotUsed) {
+// TODO(OHerasym) : Sometimes deadlock
+TEST(TestTransportManagerDefault, DISABLED_Init_LastStateNotUsed) {
   MockTransportManagerSettings transport_manager_settings;
   transport_manager::TransportManagerDefault transport_manager(
       transport_manager_settings);

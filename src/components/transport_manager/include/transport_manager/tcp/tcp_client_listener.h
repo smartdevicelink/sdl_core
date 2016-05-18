@@ -100,6 +100,16 @@ class TcpClientListener : public ClientConnectionListener {
    */
   virtual TransportAdapter::Error StopListening();
 
+#ifdef BUILD_TESTS
+  uint16_t port() const {
+    return port_;
+  }
+
+  threads::Thread* thread() const {
+    return thread_;
+  }
+#endif  // BUILD_TESTS
+
  private:
   const uint16_t port_;
   const bool enable_keepalive_;
