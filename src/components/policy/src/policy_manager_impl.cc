@@ -122,10 +122,11 @@ void PolicyManagerImpl::CheckTriggers() {
   const bool exceed_ignition_cycles = ExceededIgnitionCycles();
   const bool exceed_days = ExceededDays();
 
-  LOG4CXX_DEBUG(logger_,
-                "\nDays exceeded: " << std::boolalpha << exceed_ignition_cycles
-                                    << "\nStatusUpdateRequired: "
-                                    << std::boolalpha << exceed_days);
+  LOG4CXX_DEBUG(
+      logger_,
+      "\nDays exceeded: " << std::boolalpha << exceed_days
+                          << "\nIgnition cycles exceeded: " << std::boolalpha
+                          << exceed_ignition_cycles);
 
   if (exceed_ignition_cycles || exceed_days) {
     update_status_manager_.ScheduleUpdate();
