@@ -46,8 +46,9 @@
 #include "application_manager/state_controller.h"
 #include "application_manager/resumption/resume_ctrl.h"
 
-namespace application_manager {
 namespace test {
+namespace components {
+namespace application_manager_test {
 
 namespace HmiLanguage = hmi_apis::Common_Language;
 namespace HmiResults = hmi_apis::Common_Result;
@@ -902,5 +903,6 @@ TEST_F(MessageHelperTest, SubscribeApplicationToSoftButton_CallFromApp) {
       message_params, appSharedPtr, function_id);
 }
 
+}  // namespace application_manager_test
+}  // namespace components
 }  // namespace test
-}  // namespace application_manager

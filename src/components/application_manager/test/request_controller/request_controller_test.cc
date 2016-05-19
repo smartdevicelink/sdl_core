@@ -181,6 +181,6 @@ TEST_F(RequestControllerTestClass, ZeroValuePendingRequestsAmount) {
   }
 }
 
-}  // namespace request_controller
+}  // namespace request_controller_test
 }  // namespace components
 }  // namespace test
