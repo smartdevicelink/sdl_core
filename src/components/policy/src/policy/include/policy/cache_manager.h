@@ -48,7 +48,7 @@
 namespace policy {
 
 class CacheManager : public CacheManagerInterface {
- public:
+public:
   CacheManager();
   ~CacheManager();
 
@@ -62,10 +62,9 @@ class CacheManager : public CacheManagerInterface {
    * @return CheckPermissionResult containing flag if HMI Level is allowed
    * and list of allowed params.
    */
-  virtual void CheckPermissions(const PTString& app_id,
-                                const PTString& hmi_level,
-                                const PTString& rpc,
-                                CheckPermissionResult& result);
+  virtual void CheckPermissions(const PTString &app_id,
+                                const PTString &hmi_level, const PTString &rpc,
+                                CheckPermissionResult &result);
 
   /**
    * @brief Returns true if Policy Table was not updated yet
@@ -87,11 +86,10 @@ class CacheManager : public CacheManagerInterface {
   virtual int KilometersBeforeExchange(int current);
 
   /**
-   * @brief Sets kilometers and days after epoch, that passed for recieved
-   * successful PT UPdate
+   * @brief Sets counter value that passed for recieved successful PT UPdate
    */
-  virtual bool SetCountersPassedForSuccessfulUpdate(int kilometers,
-                                                    int days_after_epoch);
+  virtual bool SetCountersPassedForSuccessfulUpdate(Counters counter,
+                                                    int value);
 
   /**
    * Gets value in days before next update policy table
@@ -136,30 +134,33 @@ class CacheManager : public CacheManagerInterface {
    * @return true in case when data has been successfully updated,
    * false otherwise.
    */
-  bool SetVINValue(const std::string& value);
+  bool SetVINValue(const std::string &value);
 
   /**
    * @brief Get message text for displaying/pronouncing for user
    * dependent on language and context.
-   * @param msg_codes Context of message (Driver distraction, Grant permission etc)
+   * @param msg_codes Context of message (Driver distraction, Grant permission
+   * etc)
    * @param language Language of the message
    * @return Array of appropriate messages parameters
    */
-  std::vector<UserFriendlyMessage> GetUserFriendlyMsg(
-    const std::vector<std::string>& msg_codes, const std::string& language);
+  std::vector<UserFriendlyMessage>
+  GetUserFriendlyMsg(const std::vector<std::string> &msg_codes,
+                     const std::string &language);
 
   /**
    * @brief Get list of URLs related to particular service
    * @param service_type If URLs for specific service are preset,
    * return them otherwise default URLs.
    */
-  virtual void GetServiceUrls(const std::string& service_type,
-                              EndpointUrls& end_points);
+  virtual void GetServiceUrls(const std::string &service_type,
+                              EndpointUrls &end_points);
 
   /**
    * @brief GetLockScreenIcon allows to obtain lock screen icon url;
    *
-   * @return url which point to the resourse where lock screen icon could be obtained.
+   * @return url which point to the resourse where lock screen icon could be
+   *obtained.
    */
   virtual std::string GetLockScreenIconUrl() const;
 
@@ -168,7 +169,7 @@ class CacheManager : public CacheManagerInterface {
    * depending on application priority.
    * @param priority Priority of application
    */
-  virtual int GetNotificationsNumber(const std::string& priority);
+  virtual int GetNotificationsNumber(const std::string &priority);
 
   /**
    * @brief Get priority for given application
@@ -176,14 +177,14 @@ class CacheManager : public CacheManagerInterface {
    * @param priority Priority for application or empty, if value was not set
    * @return true, if succedeed, otherwise - false
    */
-  virtual bool GetPriority(const std::string& policy_app_id,
-                           std::string& priority);
+  virtual bool GetPriority(const std::string &policy_app_id,
+                           std::string &priority);
 
   /**
    * @brief Initialized Policy Table (load)
    * @return bool Success of operation
    */
-  bool Init(const std::string& file_name);
+  bool Init(const std::string &file_name);
 
   /**
    * @brief Get snapshot of Policy Table
@@ -198,13 +199,14 @@ class CacheManager : public CacheManagerInterface {
    * @param update_pt policy table
    * @return true if successfully
    */
-  bool ApplyUpdate(const policy_table::Table& update_pt);
+  bool ApplyUpdate(const policy_table::Table &update_pt);
 
   /**
    * @brief Gets list of appHMIType associated with mobile appID
    * @param container of appHMIType
    */
-  virtual void GetHMIAppTypeAfterUpdate(std::map<std::string, StringArray>& app_hmi_types);
+  virtual void
+  GetHMIAppTypeAfterUpdate(std::map<std::string, StringArray> &app_hmi_types);
 
   /**
    * Gets flag updateRequired
@@ -228,58 +230,57 @@ class CacheManager : public CacheManagerInterface {
    * appear (Navigation, Phone etc)
    * @return true in case initial application data was obtained successfuly.
    */
-  bool GetInitialAppData(const std::string& app_id,
-                         StringArray& nicknames,
-                         StringArray& app_hmi_types);
+  bool GetInitialAppData(const std::string &app_id, StringArray &nicknames,
+                         StringArray &app_hmi_types);
 
   /**
    * Checks if the application is revoked
    * @param app_id application id
    * @return true if application is revoked
    */
-  bool IsApplicationRevoked(const std::string& app_id) const;
+  bool IsApplicationRevoked(const std::string &app_id) const;
 
   /**
    * @brief Get functional groupings from DB
    * @param groups Known functional groupings
    * @return true, if succeeded, otherwise - false
    */
-  bool GetFunctionalGroupings(policy_table::FunctionalGroupings& groups);
+  bool GetFunctionalGroupings(policy_table::FunctionalGroupings &groups);
 
   /**
    * Checks if the application is represented in policy table
    * @param app_id application id
    * @return true if application is represented in policy table
    */
-  bool IsApplicationRepresented(const std::string& app_id) const;
+  bool IsApplicationRepresented(const std::string &app_id) const;
 
   /**
    * Checks if the application has default policy
    * @param app_id application id
    * @return true if application has default policy
    */
-  bool IsDefaultPolicy(const std::string& app_id);
+  bool IsDefaultPolicy(const std::string &app_id);
 
   /**
    * @brief SetIsDefault Sets is_default flag for application
    * @param app_id app specific application
    * @return  true in case opperation was done successfully.
    */
-  bool SetIsDefault(const std::string& app_id);
+  bool SetIsDefault(const std::string &app_id);
 
   /**
    * Checks if the application has pre_data policy
    * @param app_id application id
    * @return true if application has pre_data policy
    */
-  bool IsPredataPolicy(const std::string& app_id);
+  bool IsPredataPolicy(const std::string &app_id);
 
   /**
    * Sets default policy for application
    * @param app_id application id
    * @return true if success
    */
-  bool SetDefaultPolicy(const std::string& app_id);
+  bool SetDefaultPolicy(const std::string &app_id);
 
   /**
    * @brief Is application allowed to send notifications while in
@@ -287,14 +288,14 @@ class CacheManager : public CacheManagerInterface {
    * @param app_id Application id
    * @return bool Allowed/disallowed.
    */
-  bool CanAppKeepContext(const std::string& app_id);
+  bool CanAppKeepContext(const std::string &app_id);
 
   /**
    * @brief Is application allowed to move foreground at will?
    * @param app_id Application id
    * @return bool Allowed/disallowed.
    */
-  bool CanAppStealFocus(const std::string& app_id);
+  bool CanAppStealFocus(const std::string &app_id);
 
   /**
    * @brief Get default_hmi for given application
@@ -303,8 +304,7 @@ class CacheManager : public CacheManagerInterface {
    * not set
    * @return true, if succedeed, otherwise - false
    */
-  bool GetDefaultHMI(const std::string& app_id,
-                     std::string &default_hmi);
+  bool GetDefaultHMI(const std::string &app_id, std::string &default_hmi);
 
   /**
    * @brief Reset user consent for device data and applications permissions
@@ -319,7 +319,7 @@ class CacheManager : public CacheManagerInterface {
    * @param disallowed_groups Groups not consented by user
    * @return true, if query was successfull, otherwise - false
    */
-  bool GetUserPermissionsForDevice(const std::string& device_id,
+  bool GetUserPermissionsForDevice(const std::string &device_id,
                                    StringArray &consented_groups,
                                    StringArray &disallowed_groups);
 
@@ -330,8 +330,8 @@ class CacheManager : public CacheManagerInterface {
    * @param group_types Group list sorted by permission status
    * @return true, if query was successfull, otherwise - false
    */
-  bool GetPermissionsForApp(const std::string& device_id,
-                            const std::string& app_id,
+  bool GetPermissionsForApp(const std::string &device_id,
+                            const std::string &app_id,
                             FunctionalIdType &group_types);
 
   /**
@@ -349,14 +349,14 @@ class CacheManager : public CacheManagerInterface {
    * @param device_id Generated or obtained id of device
    * @return bool Success of operation
    */
-  bool SetDeviceData(const std::string& device_id,
-                     const std::string& hardware = "",
-                     const std::string& firmware = "",
-                     const std::string& os = "",
-                     const std::string& os_version = "",
-                     const std::string& carrier = "",
+  bool SetDeviceData(const std::string &device_id,
+                     const std::string &hardware = "",
+                     const std::string &firmware = "",
+                     const std::string &os = "",
+                     const std::string &os_version = "",
+                     const std::string &carrier = "",
                      const uint32_t number_of_ports = 0,
-                     const std::string& connection_type = "");
+                     const std::string &connection_type = "");
 
   /**
    * @brief Sets user consent for particular mobile device,
@@ -364,15 +364,15 @@ class CacheManager : public CacheManagerInterface {
    * @return bool Success of operation
    */
   bool SetUserPermissionsForDevice(
-      const std::string& device_id,
-      const StringArray& consented_groups = StringArray(),
-      const StringArray& disallowed_groups = StringArray());
+      const std::string &device_id,
+      const StringArray &consented_groups = StringArray(),
+      const StringArray &disallowed_groups = StringArray());
 
   /**
    * @brief Update Application Policies as reaction
    * on User allowing/disallowing device this app is running on.
    */
-  bool ReactOnUserDevConsentForApp(const std::string& app_id,
+  bool ReactOnUserDevConsentForApp(const std::string &app_id,
                                    bool is_device_allowed);
 
   /**
@@ -380,15 +380,15 @@ class CacheManager : public CacheManagerInterface {
    * @param permissions User consent on functional group
    * @return true, if operation succedeed, otherwise - false
    */
-  bool SetUserPermissionsForApp(const PermissionConsent& permissions);
+  bool SetUserPermissionsForApp(const PermissionConsent &permissions);
 
   /**
    * @brief Records information about head unit system to PT
    * @return bool Success of operation
    */
-  bool SetMetaInfo(const std::string& ccpu_version,
-                   const std::string& wers_country_code,
-                   const std::string& language);
+  bool SetMetaInfo(const std::string &ccpu_version,
+                   const std::string &wers_country_code,
+                   const std::string &language);
 
   /**
    * @brief Checks, if specific head unit is present in PT
@@ -401,7 +401,7 @@ class CacheManager : public CacheManagerInterface {
    * @param language System language
    * @return true, if succedeed, otherwise - false
    */
-  bool SetSystemLanguage(const std::string& language);
+  bool SetSystemLanguage(const std::string &language);
 
   /**
    * Increments global counter
@@ -414,7 +414,7 @@ class CacheManager : public CacheManagerInterface {
    * @param app_id id application
    * @param type type of counter
    */
-  void Increment(const std::string& app_id,
+  void Increment(const std::string &app_id,
                  usage_statistics::AppCounterId type);
 
   /**
@@ -423,9 +423,8 @@ class CacheManager : public CacheManagerInterface {
    * @param type type of information
    * @param value value of information
    */
-  void Set(const std::string& app_id,
-           usage_statistics::AppInfoId type,
-           const std::string& value);
+  void Set(const std::string &app_id, usage_statistics::AppInfoId type,
+           const std::string &value);
 
   /**
    * Adds value to stopwatch of application
@@ -433,8 +432,7 @@ class CacheManager : public CacheManagerInterface {
    * @param type type of stopwatch
    * @param seconds value for adding in seconds
    */
-  void Add(const std::string& app_id,
-           usage_statistics::AppStopwatchId type,
+  void Add(const std::string &app_id, usage_statistics::AppStopwatchId type,
            int seconds);
 
   /**
@@ -444,23 +442,23 @@ class CacheManager : public CacheManagerInterface {
    * @param device_id device id.
    * @return the count of unconsented groups
    */
-  int CountUnconsentedGroups(const std::string& policy_app_id,
-                              const std::string& device_id);
+  int CountUnconsentedGroups(const std::string &policy_app_id,
+                             const std::string &device_id);
 
   /**
    * @brief Gets functional group names and user_consent_prompts, if any
    * @param Array to be filled with group ids, names and functional prompts
    * @return true, if succeeded, otherwise - false
    */
-  bool GetFunctionalGroupNames(FunctionalGroupNames& names);
+  bool GetFunctionalGroupNames(FunctionalGroupNames &names);
 
   /**
    * @brief GetAllAppGroups allows to obtain all groups for certain application.
    * @param app_id specific application id.
    * @param all_group_ids parameter to fill.
    */
-  void GetAllAppGroups(const std::string& app_id,
-                       FunctionalGroupIDs& all_group_ids);
+  void GetAllAppGroups(const std::string &app_id,
+                       FunctionalGroupIDs &all_group_ids);
   /**
    * @brief GetPreConsentedGroups allows to obtain all pre-consented groups for
    * specific application.
@@ -468,7 +466,7 @@ class CacheManager : public CacheManagerInterface {
    * @param preconsented_groups parameter to fill.
    */
   void GetPreConsentedGroups(const std::string &app_id,
-                             FunctionalGroupIDs& preconsented_groups);
+                             FunctionalGroupIDs &preconsented_groups);
   /**
    * @brief GetConsentedGroups allows to obtain list of allowed and disallowed
    * groups for specific application on certain device.
@@ -479,8 +477,8 @@ class CacheManager : public CacheManagerInterface {
    */
   void GetConsentedGroups(const std::string &device_id,
                           const std::string &app_id,
-                          FunctionalGroupIDs& allowed_groups,
-                          FunctionalGroupIDs& disallowed_groups);
+                          FunctionalGroupIDs &allowed_groups,
+                          FunctionalGroupIDs &disallowed_groups);
 
   /**
    * @brief GetUnconsentedGroups allows to obtain list of allowed and disallowed
@@ -489,19 +487,19 @@ class CacheManager : public CacheManagerInterface {
    * @param policy_app_id application id.
    * @param unconsented_groups list of unconsented groups.
    */
-  void GetUnconsentedGroups(const std::string& device_id,
-                            const std::string& policy_app_id,
-                            FunctionalGroupIDs& unconsented_groups);
+  void GetUnconsentedGroups(const std::string &device_id,
+                            const std::string &policy_app_id,
+                            FunctionalGroupIDs &unconsented_groups);
 
-  void RemoveAppConsentForGroup(const std::string& app_id,
-                                const std::string& group_name);
+  void RemoveAppConsentForGroup(const std::string &app_id,
+                                const std::string &group_name);
 
   /**
    * @brief Set app policy to pre_DataConsented policy
    * @param app_id Policy ID of application to be changed
    * @return true, if succeeded, otherwise - false
    */
-  bool SetPredataPolicy(const std::string& app_id);
+  bool SetPredataPolicy(const std::string &app_id);
 
   /**
    * @brief Removes unpaired devices
@@ -515,14 +513,14 @@ class CacheManager : public CacheManagerInterface {
    * @param unpaired True, if should be marked as unpaired, otherwise - false
    * @return true if success
    */
-  bool SetUnpairedDevice(const std::string& device_id, bool unpaired = true);
+  bool SetUnpairedDevice(const std::string &device_id, bool unpaired = true);
 
   /**
    * Resets Policy Table
    * @param file_name Path to preloaded PT file
    * @return true if successfully
    */
-  bool ResetPT(const std::string& file_name);
+  bool ResetPT(const std::string &file_name);
 
   /**
    * @brief LoadFromBackup allows to load policy into the cache from backup.
@@ -535,13 +533,12 @@ class CacheManager : public CacheManagerInterface {
    * @param file_name preloaded
    * @return
    */
-  bool LoadFromFile(const std::string& file_name);
+  bool LoadFromFile(const std::string &file_name);
 
   /**
    * @brief Backup allows to save cache onto hard drive.
    */
   void Backup();
-
 
   /**
    * Returns heart beat timeout
@@ -549,7 +546,7 @@ class CacheManager : public CacheManagerInterface {
    * @return if timeout was set then value in seconds greater zero
    * otherwise heart beat for specific application isn't set
    */
-  uint16_t HeartBeatTimeout(const std::string& app_id) const;
+  uint16_t HeartBeatTimeout(const std::string &app_id) const;
 
   /**
    * @brief Allows to generate hash from the specified string.
@@ -557,27 +554,27 @@ class CacheManager : public CacheManagerInterface {
    * @param str_to_hash - the string from which hash should be generated.
    * @return integer hash for the specified string.
    */
-  static int32_t GenerateHash(const std::string& str_to_hash);
+  static int32_t GenerateHash(const std::string &str_to_hash);
 
   /**
    * @brief Gets request types for application
    * @param policy_app_id Unique application id
    * @param request_types Request types of application
    */
-  void GetAppRequestTypes(const std::string& policy_app_id,
-                          std::vector<std::string>& request_types) const;
+  void GetAppRequestTypes(const std::string &policy_app_id,
+                          std::vector<std::string> &request_types) const;
+
 private:
   std::string currentDateTime();
   struct AppHMITypeToString {
-      std::string operator()(rpc::Enum<policy_table::AppHMIType> value) {
-        return std::string(
-              policy_table::EnumToJsonString(value));
-      }
+    std::string operator()(rpc::Enum<policy_table::AppHMIType> value) {
+      return std::string(policy_table::EnumToJsonString(value));
+    }
   };
 
-  void GetGroupNameByHashID(const int32_t group_id, std::string& group_name);
+  void GetGroupNameByHashID(const int32_t group_id, std::string &group_name);
   void FillDeviceSpecificData();
-  bool AppExists(const std::string& app_id) const;
+  bool AppExists(const std::string &app_id) const;
   long ConvertSecondsToMinute(int seconds);
 
   /**
@@ -590,14 +587,13 @@ private:
 
   void ResetCalculatedPermissions();
 
-  void AddCalculatedPermissions(
-      const std::string& device_id,
-      const std::string& policy_app_id,
-      const policy::Permissions& permissions);
+  void AddCalculatedPermissions(const std::string &device_id,
+                                const std::string &policy_app_id,
+                                const policy::Permissions &permissions);
 
-  bool IsPermissionsCalculated(const std::string& device_id,
-                               const std::string& policy_app_id,
-                               policy::Permissions& permission);
+  bool IsPermissionsCalculated(const std::string &device_id,
+                               const std::string &policy_app_id,
+                               policy::Permissions &permission);
 
 private:
   /**
@@ -607,7 +603,7 @@ private:
    * @param output Output service
    * @return true, if successfully converted, otherwise - false
    */
-  bool IsNumberService(const std::string& input, std::string& output) const;
+  bool IsNumberService(const std::string &input, std::string &output) const;
 
 private:
   utils::SharedPtr<policy_table::Table> pt_;
@@ -626,27 +622,29 @@ private:
   CalculatedPermissions calculated_permissions_;
   sync_primitives::Lock calculated_permissions_lock_;
 
-  class BackgroundBackuper: public threads::ThreadDelegate {
-      friend class CacheManager;
-    public:
-      BackgroundBackuper(CacheManager* cache_manager);
-      ~BackgroundBackuper();
-      virtual void threadMain();
-      virtual void exitThreadMain();
-      void DoBackup();
-    private:
-      void InternalBackup();
-      CacheManager* cache_manager_;
-      sync_primitives::ConditionalVariable backup_notifier_;
-      volatile bool stop_flag_;
-      volatile bool new_data_available_;
+  class BackgroundBackuper : public threads::ThreadDelegate {
+    friend class CacheManager;
 
-      sync_primitives::Lock need_backup_lock_;
-      DISALLOW_COPY_AND_ASSIGN(BackgroundBackuper);
+  public:
+    BackgroundBackuper(CacheManager *cache_manager);
+    ~BackgroundBackuper();
+    virtual void threadMain();
+    virtual void exitThreadMain();
+    void DoBackup();
+
+  private:
+    void InternalBackup();
+    CacheManager *cache_manager_;
+    sync_primitives::ConditionalVariable backup_notifier_;
+    volatile bool stop_flag_;
+    volatile bool new_data_available_;
+
+    sync_primitives::Lock need_backup_lock_;
+    DISALLOW_COPY_AND_ASSIGN(BackgroundBackuper);
   };
-  threads::Thread* backup_thread_;
+  threads::Thread *backup_thread_;
   sync_primitives::Lock backuper_locker_;
-  BackgroundBackuper* backuper_;
+  BackgroundBackuper *backuper_;
 };
-}  // namespace policy
+} // namespace policy
 #endif // SRC_COMPONENTS_POLICY_INCLUDE_CACHE_MANAGER_H_

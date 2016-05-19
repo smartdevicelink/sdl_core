@@ -487,6 +487,14 @@ void PolicyHandler::OnAppPermissionConsentInternal(
   }
 }
 
+void policy::PolicyHandler::SetDaysAfterEpoch() {
+  POLICY_LIB_CHECK_VOID();
+  TimevalStruct current_time = date_time::DateTime::getCurrentTime();
+  const int kSecondsInDay = 60 * 60 * 24;
+  int days_after_epoch = current_time.tv_sec / kSecondsInDay;
+  PTUpdatedAt(Counters::DAYS_AFTER_EPOCH, days_after_epoch);
+}
+
 void PolicyHandler::OnGetUserFriendlyMessage(
     const std::vector<std::string> &message_codes, const std::string &language,
     uint32_t correlation_id) {
@@ -749,6 +757,8 @@ bool PolicyHandler::ReceiveMessageFromSDK(const std::string &file,
     policy_manager_->CleanupUnpairedDevices();
     int32_t correlation_id =
         ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
+
+    SetDaysAfterEpoch();
 
     event_observer_->subscribe_on_event(
 #ifdef HMI_DBUS_API
@@ -1086,9 +1096,9 @@ void PolicyHandler::OnSystemReady() {
   policy_manager_->OnSystemReady();
 }
 
-void PolicyHandler::PTUpdatedAt(int kilometers, int days_after_epoch) {
+void PolicyHandler::PTUpdatedAt(Counters counter, int value) {
   POLICY_LIB_CHECK_VOID();
-  policy_manager_->PTUpdatedAt(kilometers, days_after_epoch);
+  policy_manager_->PTUpdatedAt(counter, value);
 }
 
 void PolicyHandler::add_listener(PolicyHandlerObserver *listener) {
