@@ -5112,13 +5112,13 @@
     <param name="fileType" type="FileType" mandatory="false">
        <description>Optional file type (meant for HTTP file requests).</description>
     </param>
-    <param name="offset" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
+    <param name="offset" type="Integer" minvalue="0" maxvalue="100000000000" mandatory="false">
       <description>Optional offset in bytes for resuming partial data chunks</description>
     </param>
-    <param name="length" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
+    <param name="length" type="Integer" minvalue="0" maxvalue="100000000000" mandatory="false">
       <description>Optional length in bytes for resuming partial data chunks</description>
-    </param>    
-  </function>	
+    </param>
+  </function>
 
   <function name="OnHashChange" functionID="OnHashChangeID" messagetype="notification">
 	<description>
