@@ -2788,7 +2788,8 @@ ApplicationParams::ApplicationParams(
       !application.keyExists(grammar_id) ||
       !application.keyExists(connection_key) ||
       !application.keyExists(hmi_app_id) || !application.keyExists(hmi_level) ||
-      !application.keyExists(is_media_application)) {
+      !application.keyExists(is_media_application) ||
+      !application.keyExists(subscribed_for_way_points)) {
     return;
   }
   m_is_valid = true;
