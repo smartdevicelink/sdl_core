@@ -70,8 +70,7 @@ ResumptionDataDB::ResumptionDataDB(
     db_ = new utils::dbms::SQLDatabaseImpl(kDatabaseName, kConnectionName);
 #else
     db_ = new utils::dbms::SQLDatabaseImpl(file_system::ConcatPath(
-        application_manager_settings.app_storage_folder(),
-        kDatabaseName));
+        application_manager_settings.app_storage_folder(), kDatabaseName));
 #endif
   } else if (db_storage == In_Memory_Storage) {
     db_ = new utils::dbms::SQLDatabaseImpl();
@@ -79,13 +78,6 @@ ResumptionDataDB::ResumptionDataDB(
     SDL_ERROR("Get not existed type of database storage");
   }
 }
-
-#ifdef BUILD_TESTS
-ResumptionDataDB::ResumptionDataDB(
-    utils::dbms::SQLDatabase* db,
-    const application_manager::ApplicationManager& application_manager)
-    : ResumptionData(application_manager), db_(db) {}
-#endif  // BUILD_TESTS
 
 ResumptionDataDB::~ResumptionDataDB() {
   db_->Close();
@@ -103,8 +95,7 @@ bool ResumptionDataDB::Init() {
     SDL_DEBUG("Total attempts number is: " << attempts);
     bool is_opened = false;
     const uint16_t open_attempt_timeout_ms =
-        application_manager_settings_
-            .open_attempt_timeout_ms_resumption_db();
+        application_manager_settings_.open_attempt_timeout_ms_resumption_db();
 #if defined(OS_POSIX)
     const useconds_t sleep_interval_mcsec = open_attempt_timeout_ms * 1000;
     SDL_DEBUG("Open attempt timeout(ms) is: " << open_attempt_timeout_ms);
@@ -2729,7 +2720,8 @@ ApplicationParams::ApplicationParams(
       !application.keyExists(grammar_id) ||
       !application.keyExists(connection_key) ||
       !application.keyExists(hmi_app_id) || !application.keyExists(hmi_level) ||
-      !application.keyExists(is_media_application)) {
+      !application.keyExists(is_media_application) ||
+      !application.keyExists(subscribed_for_way_points)) {
     return;
   }
   m_is_valid = true;
