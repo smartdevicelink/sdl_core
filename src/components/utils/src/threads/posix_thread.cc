@@ -272,10 +272,10 @@ Thread::~Thread() {
   finalized_ = true;
   stopped_ = true;
   join();
-  //in some platforms pthread_join behaviour is undefined when thread is not created(pthread_create) and call pthread_join.
+  // in some platforms pthread_join behaviour is undefined when thread is
+  // not created(pthread_create) and call pthread_join.
   if(handle_) {
     pthread_join(handle_, NULL);
-    handle_ = 0;
   }
 }
 
