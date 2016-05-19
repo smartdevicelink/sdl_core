@@ -496,8 +496,12 @@ utils::SharedPtr<policy_table::Table> SQLPTRepresentation::GenerateSnapshot()
 void SQLPTRepresentation::GatherModuleMeta(
     policy_table::ModuleMeta* meta) const {
   LOG4CXX_INFO(logger_, "Gather Module Meta Info");
-  meta->mark_initialized();
-  // Section Module Meta is empty for SDL specific
+  utils::dbms::SQLQuery query(db());
+  if (query.Prepare(sql_pt::kSelectModuleMeta) && query.Next()) {
+    *meta->pt_exchanged_at_odometer_x = query.GetInteger(0);
+    *meta->pt_exchanged_x_days_after_epoch = query.GetInteger(1);
+    *meta->ignition_cycles_since_last_exchange = query.GetInteger(2);
+  }
 }
 
 void SQLPTRepresentation::GatherModuleConfig(
@@ -1041,7 +1045,23 @@ bool SQLPTRepresentation::SaveRequestType(
 }
 
 bool SQLPTRepresentation::SaveModuleMeta(const policy_table::ModuleMeta& meta) {
-  // Section Module Meta is empty for SDL specific
+  utils::dbms::SQLQuery query(db());
+
+  if (!query.Prepare(sql_pt::kSaveModuleMeta)) {
+    LOG4CXX_WARN(logger_, "Incorrect insert statement for module_meta.");
+    return false;
+  }
+  const int64_t odometer = *(meta.pt_exchanged_at_odometer_x);
+
+  query.Bind(0, odometer);
+  query.Bind(1, *(meta.pt_exchanged_x_days_after_epoch));
+  query.Bind(2, *(meta.ignition_cycles_since_last_exchange));
+
+  if (!query.Exec()) {
+    LOG4CXX_WARN(logger_, "Incorrect update for module_meta.");
+    return false;
+  }
+
   return true;
 }
 
