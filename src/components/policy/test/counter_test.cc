@@ -31,7 +31,7 @@
 
 #include "gmock/gmock.h"
 
-#include "mock_statistics_manager.h"
+#include "include/test/policy/mock_statistics_manager.h"
 #include "usage_statistics/counter.h"
 
 using ::testing::StrictMock;
