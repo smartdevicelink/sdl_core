@@ -516,13 +516,13 @@ TEST(SharedPtrTest, ValidMethodTest_ExpectCorrectValidation) {
 
 TEST(SharedPtrTest, StressTest) {
   // Arrange
-  const size_t kNumIterations = 1024U * 1024U;
+  const size_t kNumIterations = 10000u;
 
-  size_t objectCreated = 0U;
-  size_t pointersCopied = 0U;
+  size_t objectCreated = 0u;
+  size_t pointersCopied = 0u;
   std::vector<tMockObjectPtr> objects;
 
-  for (size_t i = 0U; i < kNumIterations; ++i) {
+  for (size_t i = 0u; i < kNumIterations; ++i) {
     if ((true == objects.empty()) || (0 == rand() % 256)) {
       CMockObject* object = new CMockObject(0);
       EXPECT_CALL(*object, destructor());
@@ -539,7 +539,7 @@ TEST(SharedPtrTest, StressTest) {
       }
     }
   }
-  printf("%zu objects created, %zu pointers copied\n",
+  printf("%lu objects created, %lu pointers copied\n",
          objectCreated,
          pointersCopied);
 }

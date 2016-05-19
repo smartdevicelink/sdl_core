@@ -31,6 +31,7 @@
  */
 
 #include "gmock/gmock.h"
+#include "gtest/gtest.h"
 #include "utils/scope_guard.h"
 #include "utils/macro.h"
 
@@ -79,6 +80,7 @@ TEST(ScopeGuardTest, CallObjectFunction) {
 
 TEST(ScopeGuardTest, CallObjectFunctionWithParam) {
   TestObject obj;
+  Mock::AllowLeak(&obj); // Google tests bug
   EXPECT_CALL(obj, function_to_call_with_param(&obj)).Times(1);
   {
     ScopeGuard guard =

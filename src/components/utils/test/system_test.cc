@@ -92,7 +92,8 @@ TEST(SystemTest, AddTwoArgsToCommand_CheckOrder_ExpectOrderCorrect) {
   EXPECT_STREQ(object.argv()[2].c_str(), args[1]);
 }
 
-TEST(SystemTest, SynchronousInvokeWithExistingCommand_ExpectSuccessfull) {
+TEST(SystemTest,
+     DISABLED_SynchronousInvokeWithExistingCommand_ExpectSuccessfull) {
   const std::string test_command("./testscript.sh");
   System object(test_command);
 

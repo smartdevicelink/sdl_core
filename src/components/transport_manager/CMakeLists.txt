@@ -220,5 +220,5 @@ endif()
 endif()
 
 if(BUILD_TESTS)
-  add_subdirectory(test)
+  #add_subdirectory(test)
 endif()
