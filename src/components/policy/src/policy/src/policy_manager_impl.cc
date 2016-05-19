@@ -115,10 +115,10 @@ void PolicyManagerImpl::CheckTriggers() {
   const bool exceed_ignition_cycles = ExceededIgnitionCycles();
   const bool exceed_days = ExceededDays();
 
-  LOG4CXX_DEBUG(logger_, "\nDays exceeded: "
-                             << std::boolalpha << exceed_ignition_cycles
-                             << "\nStatusUpdateRequired: " << std::boolalpha
-                             << exceed_days);
+  LOG4CXX_DEBUG(logger_, "\nDays exceeded: " << std::boolalpha << exceed_days
+                                             << "\nIgnition cycles exceeded: "
+                                             << std::boolalpha
+                                             << exceed_ignition_cycles);
 
   if (exceed_ignition_cycles || exceed_days) {
     update_status_manager_.ScheduleUpdate();
@@ -766,11 +766,9 @@ void PolicyManagerImpl::OnUpdateStarted() {
   cache_->SaveUpdateRequired(true);
 }
 
-void PolicyManagerImpl::PTUpdatedAt(int kilometers, int days_after_epoch) {
-  LOG4CXX_INFO(logger_, "PTUpdatedAt");
-  LOG4CXX_INFO(logger_, "Kilometers: " << kilometers
-                                       << " Days: " << days_after_epoch);
-  cache_->SetCountersPassedForSuccessfulUpdate(kilometers, days_after_epoch);
+void PolicyManagerImpl::PTUpdatedAt(Counters counter, int value) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  cache_->SetCountersPassedForSuccessfulUpdate(counter, value);
   cache_->ResetIgnitionCycles();
 }
 

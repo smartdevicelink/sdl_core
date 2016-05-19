@@ -113,8 +113,10 @@ extern const std::string kInsertApplicationFull;
 extern const std::string kDeletePreconsentedGroupsByApplicationId;
 extern const std::string kSelectApplicationFull;
 extern const std::string kUpdatePreloaded;
+extern const std::string kSaveModuleMeta;
+extern const std::string kSelectModuleMeta;
 
-}  // namespace sql_pt
-}  // namespace policy
+} // namespace sql_pt
+} // namespace policy
 
-#endif  // SRC_COMPONENTS_POLICY_INCLUDE_POLICY_SQL_PT_QUERIES_H_
+#endif // SRC_COMPONENTS_POLICY_INCLUDE_POLICY_SQL_PT_QUERIES_H_

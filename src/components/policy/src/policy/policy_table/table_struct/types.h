@@ -21,6 +21,9 @@ struct Rpcs;
 namespace rpc {
 namespace policy_table_interface_base {
 
+// According to HMI API
+#define ODO_MAX 17000000
+
 typedef Array<String<1, 255>, 0, 255> Strings;
 
 typedef Array<Enum<AppHMIType>, 0, 255> AppHMITypes;
@@ -277,6 +280,10 @@ private:
 
 struct ModuleMeta : CompositeType {
 public:
+  Optional<Integer<uint32_t, 0, ODO_MAX>> pt_exchanged_at_odometer_x;
+  Optional<Integer<uint16_t, 0, 65535>> pt_exchanged_x_days_after_epoch;
+  Optional<Integer<uint16_t, 0, 65535>> ignition_cycles_since_last_exchange;
+
 public:
   ModuleMeta();
   ~ModuleMeta();
