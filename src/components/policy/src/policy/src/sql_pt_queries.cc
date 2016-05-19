@@ -56,13 +56,9 @@ const std::string kCreateSchema =
     "  `count_of_sync_reboots` INTEGER "
     "); "
     "CREATE TABLE IF NOT EXISTS `module_meta`( "
-    "  `ccpu_version` VARCHAR(45), "
-    "  `language` VARCHAR(45), "
-    "  `wers_country_code` VARCHAR(45), "
     "  `pt_exchanged_at_odometer_x` INTEGER NOT NULL DEFAULT 0, "
     "  `pt_exchanged_x_days_after_epoch` INTEGER NOT NULL DEFAULT 0, "
     "  `ignition_cycles_since_last_exchange` INTEGER NOT NULL DEFAULT 0, "
-    "  `vin` VARCHAR(45),"
     "  `flag_update_required` BOOL NOT NULL "
     "); "
     "CREATE TABLE IF NOT EXISTS `module_config`( "
@@ -690,6 +686,14 @@ const std::string kSelectApplicationFull =
     "  `is_revoked`, `is_default`, `is_predata`, `memory_kb`,"
     "  `heart_beat_timeout_ms`, `certificate` FROM `application` WHERE `id` = "
     "?";
+
+const std::string kSaveModuleMeta =
+    "UPDATE `module_meta` SET "
+    "`pt_exchanged_at_odometer_x` = ?, "
+    "`pt_exchanged_x_days_after_epoch` = ?, "
+    "`ignition_cycles_since_last_exchange` = ? ";
+
+const std::string kSelectModuleMeta = "SELECT* FROM `module_meta`";
 
 } // namespace sql_pt
 } // namespace policy
