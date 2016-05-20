@@ -656,8 +656,7 @@ void StateControllerImpl::on_event(const event_engine::Event& event) {
         }
       }
       break;
-    }
-    break;
+    } break;
   }
   case FunctionID::VR_Started: {
     OnVRStarted();
@@ -677,7 +676,7 @@ void StateControllerImpl::on_event(const event_engine::Event& event) {
   }
   default:
     break;
-  }
+}
 }
 
 void StateControllerImpl::OnStateChanged(ApplicationSharedPtr app,
