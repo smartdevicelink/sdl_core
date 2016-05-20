@@ -1437,7 +1437,7 @@ TEST(SQLPTRepresentationTest3, RemoveDB_RemoveDB_ExpectFileDeleted) {
 }
 
 TEST_F(SQLPTRepresentationTest,
-       GenerateSnapshot_SetPolicyTable_SnapshotIsPresent) {
+       DISABLED_GenerateSnapshot_SetPolicyTable_SnapshotIsPresent) {
   // Arrange
   Json::Value table(Json::objectValue);
   PolicyTableUpdatePrepare(table);
