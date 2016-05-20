@@ -35,8 +35,7 @@
 
 namespace test {
 namespace components {
-namespace SmartObjects {
-namespace SmartObjectUnitTest {
+namespace smart_object_test {
 
 using namespace NsSmartDeviceLink::NsSmartObjects;
 
@@ -585,7 +584,7 @@ TEST(MapEraseTest, SmartObjectTest) {
   ASSERT_FALSE(srcObj.erase("one"));
 }
 // TODO: Add a test to check accessing an array at strange indexes.
-}  // namespace SmartObjectUnitTest
-}  // namespace SmartObjects
+
+}  // namespace smart_object_test
 }  // namespace components
 }  // namespace test

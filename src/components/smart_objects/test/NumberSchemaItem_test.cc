@@ -38,8 +38,7 @@
 
 namespace test {
 namespace components {
-namespace SmartObjects {
-namespace SchemaItem {
+namespace smart_object_test {
 
 using NsSmartDeviceLink::NsSmartObjects::ISchemaItemPtr;
 
@@ -820,7 +819,6 @@ TEST(test_double_int_value, test_NumberSchemaItemTest) {
   EXPECT_EQ(Errors::OK, resultType);
 }
 
-}  // namespace SchemaItem
-}  // namespace SmartObjects
+}  // namespace smart_object_test
 }  // namespace components
 }  // namespace test
