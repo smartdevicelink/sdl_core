@@ -41,7 +41,7 @@
 
 namespace test {
 namespace components {
-namespace utils {
+namespace utils_test {
 
 using namespace sync_primitives;
 using namespace threads;
@@ -135,6 +135,6 @@ TEST_F(AsyncRunnerTest,
   EXPECT_EQ(kDelegatesNum_ / 2, check_value);
 }
 
-}  // namespace utils
+}  // namespace utils_test
 }  // namespace components
 }  // namespace test
