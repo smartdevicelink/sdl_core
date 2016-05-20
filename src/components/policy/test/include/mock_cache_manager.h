@@ -38,10 +38,16 @@
 #include "gmock/gmock.h"
 
 #include "policy/cache_manager_interface.h"
+#include "policy/policy_table/types.h"
 
-namespace policy_table = rpc::policy_table_interface_base;
+namespace test {
+namespace components {
+namespace policy_test {
 
-namespace policy {
+namespace {
+  using namespace policy;
+  namespace policy_table = rpc::policy_table_interface_base;
+}
 
 class MockCacheManagerInterface : public CacheManagerInterface {
  public:
@@ -202,6 +208,8 @@ class MockCacheManagerInterface : public CacheManagerInterface {
   MOCK_METHOD1(SetDecryptedCertificate, void(const std::string&));
 };
 
-}  // namespace policy
+}  // namespace policy_test
+}  // namespace components
+}  // namespace test
 
 #endif  // SRC_COMPONENTS_POLICY_TEST_INCLUDE_MOCK_CACHE_MANAGER_H_

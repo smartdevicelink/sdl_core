@@ -68,7 +68,7 @@ using testing::Mock;
 
 namespace test {
 namespace components {
-namespace policy {
+namespace policy_test {
 
 class SQLPTRepresentationTest : public SQLPTRepresentation,
                                 public ::testing::Test {
@@ -1630,6 +1630,6 @@ TEST_F(SQLPTRepresentationTest, Save_SetPolicyTableThenSave_ExpectSavedToPT) {
   EXPECT_EQ("1.2", static_cast<std::string>(messages.version));
 }
 
-}  // namespace policy
+}  // namespace policy_test
 }  // namespace components
 }  // namespace test

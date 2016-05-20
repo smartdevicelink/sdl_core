@@ -43,7 +43,13 @@
 
 namespace policy_table = ::rpc::policy_table_interface_base;
 
-namespace policy {
+namespace test {
+namespace components {
+namespace policy_test {
+
+namespace {
+  using namespace policy;
+}
 
 namespace custom_str = utils::custom_string;
 
@@ -76,6 +82,8 @@ class MockPolicyListener : public PolicyListener {
                      void(const AppPermissions&, const std::string&));
 };
 
-}  // namespace policy
+}  // namespace policy_test
+}  // namespace components
+}  // namespace test
 
 #endif  // SRC_COMPONENTS_POLICY_TEST_INCLUDE_MOCK_POLICY_LISTENER_H_

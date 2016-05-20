@@ -46,7 +46,9 @@
 
 namespace policy_table = ::rpc::policy_table_interface_base;
 
-namespace policy_manager {
+namespace test {
+namespace components {
+namespace policy_test {
 
 using namespace policy;
 
@@ -174,6 +176,8 @@ class MockPolicyManager : public PolicyManager {
   MOCK_METHOD1(set_settings, void(const PolicySettings* get_settings));
 };
 
-}  // namespace policy_manager
+}  // namespace policy_test
+}  // namespace components
+}  // namespace test
 
 #endif  // SRC_COMPONENTS_POLICY_TEST_INCLUDE_MOCK_POLICY_MANAGER_H_
