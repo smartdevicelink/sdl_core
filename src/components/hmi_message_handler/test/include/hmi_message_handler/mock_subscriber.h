@@ -39,7 +39,7 @@ struct DBusConnection;
 
 namespace test {
 namespace components {
-namespace hmi_message_handler {
+namespace hmi_message_handler_test {
 
 class MockSubscriber {
  public:
@@ -55,7 +55,7 @@ class MockSubscriber {
   DBusConnection* conn_;
 };
 
-}  // namespace hmi_message_handler
+}  // namespace hmi_message_handler_test
 }  // namespace components
 }  // namespace test
 

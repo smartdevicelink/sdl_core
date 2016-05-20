@@ -40,7 +40,7 @@
 
 namespace test {
 namespace components {
-namespace profile {
+namespace profile_test {
 
 using namespace ::profile;
 
@@ -724,6 +724,6 @@ TEST_F(ProfileTest, CheckIntContainerInSecurityData) {
 }
 #endif
 
-}  // namespace profile
+}  // namespace profile_test
 }  // namespace components
 }  // namespace test

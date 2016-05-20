@@ -35,7 +35,7 @@
 
 namespace test {
 namespace components {
-namespace hmi_message_handler {
+namespace hmi_message_handler_test {
 
 MockSubscriber::MockSubscriber(const std::string& nameService,
                                const std::string& path)
@@ -69,6 +69,6 @@ void MockSubscriber::Send(const std::string& message) {
   // int a = message.length();
 }
 
-}  // namespace hmi_message_handler
+}  // namespace hmi_message_handler_test
 }  // namespace components
 }  // namespace test

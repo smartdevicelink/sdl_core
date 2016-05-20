@@ -53,7 +53,7 @@ class MockHMIMessageObserver : public HMIMessageObserver {
                void(utils::SharedPtr<application_manager::Message> message));
 };
 
-}  // namespace hmi_message_handler
+}  // namespace hmi_message_handler_test
 }  // namespace components
 }  // namespace test
 
