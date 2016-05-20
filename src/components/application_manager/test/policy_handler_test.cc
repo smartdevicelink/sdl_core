@@ -186,8 +186,9 @@ TEST_F(PolicyHandlerTest,
   EXPECT_FALSE(policy_handler_.InitPolicyTable());
 }
 
-TEST_F(PolicyHandlerTest,
-       InitPolicyTable_WithPreloadedFile_ExpectPolicyTableInitialized) {
+TEST_F(
+    PolicyHandlerTest,
+    DISABLED_InitPolicyTable_WithPreloadedFile_ExpectPolicyTableInitialized) {
   // Arrange
   EnablePolicy();
   EXPECT_TRUE(policy_handler_.LoadPolicyLibrary());
@@ -202,7 +203,8 @@ TEST_F(PolicyHandlerTest,
   EXPECT_FALSE(policy_handler_.ResetPolicyTable());
 }
 
-TEST_F(PolicyHandlerTest, ResetPolicyTable_PTNotInitialised_PTNotReset) {
+TEST_F(PolicyHandlerTest,
+       DISABLED_ResetPolicyTable_PTNotInitialised_PTNotReset) {
   // Arrange
   EnablePolicy();
   EXPECT_TRUE(policy_handler_.LoadPolicyLibrary());
@@ -211,7 +213,7 @@ TEST_F(PolicyHandlerTest, ResetPolicyTable_PTNotInitialised_PTNotReset) {
 }
 
 TEST_F(PolicyHandlerTest,
-       ResetPolicyTable_WithPreloadedFile_ExpectPolicyTableReset) {
+       DISABLED_ResetPolicyTable_WithPreloadedFile_ExpectPolicyTableReset) {
   // Arrange
   EnablePolicy();
   EXPECT_TRUE(policy_handler_.LoadPolicyLibrary());
@@ -220,7 +222,7 @@ TEST_F(PolicyHandlerTest,
   EXPECT_TRUE(policy_handler_.ResetPolicyTable());
 }
 
-TEST_F(PolicyHandlerTest, ResetPolicyTable_ExpectCallPMResetPT) {
+TEST_F(PolicyHandlerTest, DISABLED_ResetPolicyTable_ExpectCallPMResetPT) {
   ChangePolicyManagerToMock();
   EnablePolicy();
   EXPECT_CALL(*mock_policy_manager_, ResetPT(_));
@@ -233,7 +235,7 @@ TEST_F(PolicyHandlerTest, ClearUserConsent) {
   policy_handler_.ClearUserConsent();
 }
 
-TEST_F(PolicyHandlerTest, ReceiveMessageFromSDK) {
+TEST_F(PolicyHandlerTest, DISABLED_ReceiveMessageFromSDK) {
   // Arrange
   EnablePolicy();
   EXPECT_TRUE(policy_handler_.LoadPolicyLibrary());
@@ -276,7 +278,8 @@ TEST_F(PolicyHandlerTest, ReceiveMessageFromSDK_PTNotLoaded) {
   policy_handler_.ReceiveMessageFromSDK("", msg);
 }
 
-TEST_F(PolicyHandlerTest, UnloadPolicyLibrary_method_ExpectLibraryUnloaded) {
+TEST_F(PolicyHandlerTest,
+       DISABLED_UnloadPolicyLibrary_method_ExpectLibraryUnloaded) {
   // Arrange
   EnablePolicy();
   EXPECT_TRUE(policy_handler_.LoadPolicyLibrary());
@@ -1196,7 +1199,7 @@ TEST_F(PolicyHandlerTest, RetrieveCertificate) {
   EXPECT_EQ(test_certificate, policy_handler_.RetrieveCertificate());
 }
 
-TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlNotAdded) {
+TEST_F(PolicyHandlerTest, DISABLED_OnSnapshotCreated_UrlNotAdded) {
   EnablePolicyAndPolicyManagerMock();
   BinaryMessage msg;
   EndpointUrls test_data;
@@ -1205,7 +1208,7 @@ TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlNotAdded) {
   policy_handler_.OnSnapshotCreated(msg);
 }
 
-TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlAdded) {
+TEST_F(PolicyHandlerTest, DISABLED_OnSnapshotCreated_UrlAdded) {
   EnablePolicyAndPolicyManagerMock();
   BinaryMessage msg;
   EndpointUrls test_data;
