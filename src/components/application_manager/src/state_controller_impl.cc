@@ -656,27 +656,10 @@ void StateControllerImpl::on_event(const event_engine::Event& event) {
         }
       }
       break;
-    } break;
+    }
+    default:
+      break;
   }
-  case FunctionID::VR_Started: {
-    OnVRStarted();
-    break;
-  }
-  case FunctionID::VR_Stopped: {
-    OnVREnded();
-    break;
-  }
-  case FunctionID::TTS_Started: {
-    OnTTSStarted();
-    break;
-  }
-  case FunctionID::TTS_Stopped: {
-    OnTTSStopped();
-    break;
-  }
-  default:
-    break;
-}
 }
 
 void StateControllerImpl::OnStateChanged(ApplicationSharedPtr app,

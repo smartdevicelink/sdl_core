@@ -61,10 +61,6 @@ namespace {
 const uint32_t kDefaultRetryTimeoutInSec = 60u;
 }  // namespace
 
-namespace {
-const uint32_t kDefaultRetryTimeoutInSec = 60u;
-}  // namespace
-
 namespace policy {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "Policy")
@@ -888,12 +884,6 @@ bool PolicyManagerImpl::CanAppStealFocus(const std::string& app_id) const {
 }
 
 void PolicyManagerImpl::MarkUnpairedDevice(const std::string& device_id) {}
-
-void PolicyManagerImpl::OnAppRegisteredOnMobile(
-    const std::string& application_id) {
-  SendNotificationOnPermissionsUpdated(application_id);
-  StartPTExchange();
-}
 
 std::string PolicyManagerImpl::RetrieveCertificate() const {
   LOG4CXX_AUTO_TRACE(logger_);

@@ -113,7 +113,7 @@ class PolicyHandler : public PolicyHandlerInterface,
   void GetServiceUrls(const std::string& service_type,
                       EndpointUrls& end_points) OVERRIDE;
   void ResetRetrySequence() OVERRIDE;
-  int NextRetryTimeout() OVERRIDE;
+  uint32_t NextRetryTimeout() OVERRIDE;
   int TimeoutExchange() OVERRIDE;
   void OnExceededTimeout() OVERRIDE;
   void OnSystemReady() OVERRIDE;
@@ -354,15 +354,6 @@ class PolicyHandler : public PolicyHandlerInterface,
    * @brief Handler on applications search completed
    */
   void OnAppsSearchCompleted() OVERRIDE;
-
-  /**
-   * @brief OnAppRegisteredOnMobile alows to handle event when application were
-   * succesfully registered on mobile device.
-   * It will send OnAppPermissionSend notification and will try to start PTU.
-   *
-   * @param application_id registered application.
-   */
-  void OnAppRegisteredOnMobile(const std::string& application_id);
 
   /**
    * @brief Checks if certain request type is allowed for application
