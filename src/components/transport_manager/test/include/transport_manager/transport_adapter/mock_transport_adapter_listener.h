@@ -121,8 +121,9 @@ class MockTransportAdapterListener : public TransportAdapterListener {
                     const DeviceUID&,
                     const ApplicationHandle&));
 };
-}
-}
-}
+
+}  // namespace transport_manager_test
+}  // namespace components
+}  // namespace test
 
 #endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_MOCK_TRANSPORT_ADAPTER_LISTENER_H_

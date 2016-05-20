@@ -47,7 +47,7 @@ using ::testing::MatchResultListener;
 
 namespace test {
 namespace components {
-namespace transport_manager {
+namespace transport_manager_test {
 
 using namespace ::protocol_handler;
 
@@ -68,7 +68,7 @@ inline const Matcher<RawMessagePtr> RawMessageEq(RawMessagePtr msg) {
   return MakeMatcher(new RawMessageMatcher(msg));
 }
 
-}  // namespace transport_manager
+}  // namespace transport_manager_test
 }  // namespace components
 }  // namespace test
 
