@@ -473,9 +473,9 @@ class PolicyManager : public usage_statistics::StatisticsManager {
   virtual void StartPTExchange() = 0;
 };
 
-}  // namespace policy
+} // namespace policy
 
 extern "C" policy::PolicyManager* CreateManager();
 extern "C" void DeleteManager(policy::PolicyManager*);
 
-#endif  // SRC_COMPONENTS_POLICY_INCLUDE_POLICY_POLICY_MANAGER_H_
+#endif // SRC_COMPONENTS_POLICY_INCLUDE_POLICY_POLICY_MANAGER_H_

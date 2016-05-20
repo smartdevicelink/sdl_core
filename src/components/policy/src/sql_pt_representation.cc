@@ -61,7 +61,7 @@ void InsertUnique(K value, T* array) {
     array->push_back(value);
   }
 }
-}  //  namespace
+} //  namespace
 
 const std::string SQLPTRepresentation::kDatabaseName = "policy";
 
@@ -436,9 +436,7 @@ bool SQLPTRepresentation::Drop() {
   return true;
 }
 
-void SQLPTRepresentation::WriteDb() {
-  db_->Backup();
-}
+void SQLPTRepresentation::WriteDb() { db_->Backup(); }
 
 bool SQLPTRepresentation::Clear() {
   utils::dbms::SQLQuery query(db());
@@ -636,7 +634,7 @@ bool SQLPTRepresentation::GatherConsumerFriendlyMessages(
 }
 
 bool SQLPTRepresentation::GatherApplicationPoliciesSection(
-    policy_table::ApplicationPoliciesSection* policies) const {
+    policy_table::ApplicationPoliciesSection *policies) const {
   LOG4CXX_INFO(logger_, "Gather applications policies");
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt::kSelectAppPolicies)) {
@@ -646,7 +644,7 @@ bool SQLPTRepresentation::GatherApplicationPoliciesSection(
 
   while (query.Next()) {
     rpc::Nullable<policy_table::ApplicationParams> params;
-    const std::string& app_id = query.GetString(0);
+    const std::string &app_id = query.GetString(0);
     if (IsApplicationRevoked(app_id)) {
       params.set_to_null();
       (*policies).apps[app_id] = params;
@@ -693,7 +691,7 @@ bool SQLPTRepresentation::GatherApplicationPoliciesSection(
   return true;
 }
 
-bool SQLPTRepresentation::Save(const policy_table::Table& table) {
+bool SQLPTRepresentation::Save(const policy_table::Table &table) {
   LOG4CXX_AUTO_TRACE(logger_);
   db_->BeginTransaction();
   if (!SaveFunctionalGroupings(table.policy_table.functional_groupings)) {
@@ -791,9 +789,9 @@ bool SQLPTRepresentation::SaveRpcs(int64_t group_id,
 
   policy_table::Rpc::const_iterator it;
   for (it = rpcs.begin(); it != rpcs.end(); ++it) {
-    const policy_table::HmiLevels& hmi_levels = it->second.hmi_levels;
+    const policy_table::HmiLevels &hmi_levels = it->second.hmi_levels;
     // TODO(IKozyrenko): Check logic if optional container is missing
-    const policy_table::Parameters& parameters = *it->second.parameters;
+    const policy_table::Parameters &parameters = *it->second.parameters;
     policy_table::HmiLevels::const_iterator hmi_it;
     policy_table::Parameters::const_iterator ps_it;
     for (hmi_it = hmi_levels.begin(); hmi_it != hmi_levels.end(); ++hmi_it) {
@@ -1040,7 +1038,7 @@ bool SQLPTRepresentation::SaveRequestType(
   return true;
 }
 
-bool SQLPTRepresentation::SaveModuleMeta(const policy_table::ModuleMeta& meta) {
+bool SQLPTRepresentation::SaveModuleMeta(const policy_table::ModuleMeta &meta) {
   // Section Module Meta is empty for SDL specific
   return true;
 }
@@ -1105,10 +1103,10 @@ bool SQLPTRepresentation::SaveServiceEndpoints(
 
   policy_table::ServiceEndpoints::const_iterator it;
   for (it = endpoints.begin(); it != endpoints.end(); ++it) {
-    const policy_table::URLList& apps = it->second;
+    const policy_table::URLList &apps = it->second;
     policy_table::URLList::const_iterator app_it;
     for (app_it = apps.begin(); app_it != apps.end(); ++app_it) {
-      const policy_table::URL& urls = app_it->second;
+      const policy_table::URL &urls = app_it->second;
       policy_table::URL::const_iterator url_it;
       for (url_it = urls.begin(); url_it != urls.end(); ++url_it) {
         query.Bind(0, it->first);
@@ -1157,7 +1155,7 @@ bool SQLPTRepresentation::SaveConsumerFriendlyMessages(
       if (!SaveMessageType(it->first)) {
         return false;
       }
-      const policy_table::Languages& langs = it->second.languages;
+      const policy_table::Languages &langs = it->second.languages;
       policy_table::Languages::const_iterator lang_it;
       for (lang_it = langs.begin(); lang_it != langs.end(); ++lang_it) {
         if (!SaveLanguage(lang_it->first)) {
@@ -1296,8 +1294,8 @@ bool SQLPTRepresentation::SaveUsageAndErrorCounts(
   }
 
   policy_table::AppLevels::const_iterator it;
-  const policy_table::AppLevels& app_levels = *counts.app_level;
-  const_cast<policy_table::AppLevels&>(*counts.app_level).mark_initialized();
+  const policy_table::AppLevels &app_levels = *counts.app_level;
+  const_cast<policy_table::AppLevels &>(*counts.app_level).mark_initialized();
   for (it = app_levels.begin(); it != app_levels.end(); ++it) {
     query.Bind(0, it->first);
     if (!query.Exec()) {
@@ -1451,7 +1449,7 @@ bool SQLPTRepresentation::GatherAppGroup(
   return true;
 }
 
-bool SQLPTRepresentation::SaveApplicationCustomData(const std::string& app_id,
+bool SQLPTRepresentation::SaveApplicationCustomData(const std::string &app_id,
                                                     bool is_revoked,
                                                     bool is_default,
                                                     bool is_predata) {
@@ -1520,7 +1518,7 @@ bool SQLPTRepresentation::IsDefaultPolicy(const std::string& app_id) const {
   return query.IsNull(0) ? false : query.GetBoolean(0);
 }
 
-bool SQLPTRepresentation::IsPredataPolicy(const std::string& app_id) const {
+bool SQLPTRepresentation::IsPredataPolicy(const std::string &app_id) const {
   return false;
 }
 
@@ -1550,7 +1548,7 @@ bool SQLPTRepresentation::SetDefaultPolicy(const std::string& app_id) {
   return false;
 }
 
-bool SQLPTRepresentation::SetIsDefault(const std::string& app_id,
+bool SQLPTRepresentation::SetIsDefault(const std::string &app_id,
                                        bool is_default) const {
   LOG4CXX_TRACE(logger_, "Set flag is_default of application");
   utils::dbms::SQLQuery query(db());
@@ -1683,8 +1681,6 @@ void SQLPTRepresentation::SetPreloaded(bool value) {
   }
 }
 
-bool SQLPTRepresentation::SetVINValue(const std::string& value) {
-  return true;
-}
+bool SQLPTRepresentation::SetVINValue(const std::string &value) { return true; }
 
-}  // namespace policy
+} // namespace policy

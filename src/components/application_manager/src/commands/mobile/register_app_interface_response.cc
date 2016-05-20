@@ -89,7 +89,7 @@ void RegisterAppInterfaceResponse::Run() {
 }
 
 void RegisterAppInterfaceResponse::SetHeartBeatTimeout(
-    uint32_t connection_key, const std::string& mobile_app_id) {
+    uint32_t connection_key, const std::string &mobile_app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   policy::PolicyHandlerInterface& policy_handler =
       application_manager_.GetPolicyHandler();
@@ -104,5 +104,5 @@ void RegisterAppInterfaceResponse::SetHeartBeatTimeout(
   }
 }
 
-}  // namespace commands
-}  // namespace application_manager
+} // namespace commands
+} // namespace application_manager

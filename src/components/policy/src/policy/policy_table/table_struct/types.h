@@ -7,7 +7,7 @@
 #include "rpc_base/rpc_message.h"
 namespace Json {
 class Value;
-}  // namespace Json
+} // namespace Json
 namespace rpc {
 namespace policy_table_interface_base {
 struct AppLevel;
@@ -429,7 +429,7 @@ struct Table : CompositeType {
  private:
   bool Validate() const;
 };
-}  // namespace policy_table_interface_base
-}  // namespace rpc
+} // namespace policy_table_interface_base
+} // namespace rpc
 
-#endif  // POLICY_TABLE_INTERFACE_BASE_POLICY_TABLE_INTERFACE_BASE_TYPES_H_
+#endif // POLICY_TABLE_INTERFACE_BASE_POLICY_TABLE_INTERFACE_BASE_TYPES_H_

@@ -115,7 +115,7 @@ class PolicyManagerImplTest : public ::testing::Test {
     delete manager;
   }
 
-  ::testing::AssertionResult IsValid(const policy_table::Table& table) {
+  ::testing::AssertionResult IsValid(const policy_table::Table &table) {
     if (table.is_valid()) {
       return ::testing::AssertionSuccess();
     } else {

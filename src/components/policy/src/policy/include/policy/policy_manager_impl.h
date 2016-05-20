@@ -347,6 +347,6 @@ class PolicyManagerImpl : public PolicyManager {
   friend struct CheckAppPolicy;
 };
 
-}  // namespace policy
+} // namespace policy
 
-#endif  // SRC_COMPONENTS_POLICY_INCLUDE_POLICY_POLICY_MANAGER_IMPL_H_
+#endif // SRC_COMPONENTS_POLICY_INCLUDE_POLICY_POLICY_MANAGER_IMPL_H_
