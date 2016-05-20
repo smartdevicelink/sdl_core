@@ -83,7 +83,6 @@ class MediaManagerImpl : public MediaManager,
                          MediaAdapterImpl* mock_stream);
   void set_mock_streamer_listener(protocol_handler::ServiceType stype,
                                   MediaAdapterListener* mock_stream);
-
 #endif  // BUILD_TESTS
 
  protected:

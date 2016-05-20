@@ -60,12 +60,12 @@ HMILanguageHandler::HMILanguageHandler(ApplicationManager& application_manager)
 }
 
 void HMILanguageHandler::set_language_for(
-    HMILanguageHandler::Interface interface,
+    HMILanguageHandler::Interface iface,
     hmi_apis::Common_Language::eType language) {
   LOGGER_AUTO_TRACE(logger_);
   using namespace utils::json;
   std::string key = "UNKNOWN";
-  switch (interface) {
+  switch (iface) {
     case INTERFACE_UI:
       key = UIKey;
       break;
@@ -76,24 +76,24 @@ void HMILanguageHandler::set_language_for(
       key = TTSKey;
       break;
     default:
-      LOGGER_WARN(logger_, "Unknown interface has been passed " << interface);
+      LOGGER_WARN(logger_, "Unknown interface has been passed " << iface);
       return;
   }
   LOGGER_DEBUG(logger_,
                "Setting language " << language << " for interface "
-                                   << interface);
+                                   << iface);
   last_state_->dictionary()[LanguagesKey][key] =
       static_cast<JsonValue::Int>(language);
   return;
 }
 
 hmi_apis::Common_Language::eType HMILanguageHandler::get_language_for(
-    HMILanguageHandler::Interface interface) const {
+    HMILanguageHandler::Interface iface) const {
   LOGGER_AUTO_TRACE(logger_);
   using namespace resumption;
   using namespace hmi_apis;
   std::string key = "UNKNOWN";
-  switch (interface) {
+  switch (iface) {
     case INTERFACE_UI:
       key = UIKey;
       break;
@@ -104,7 +104,7 @@ hmi_apis::Common_Language::eType HMILanguageHandler::get_language_for(
       key = TTSKey;
       break;
     default:
-      LOGGER_WARN(logger_, "Unknown interfcase has been passed " << interface);
+      LOGGER_WARN(logger_, "Unknown interfcase has been passed " << iface);
       return Common_Language::INVALID_ENUM;
   }
 

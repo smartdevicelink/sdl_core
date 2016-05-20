@@ -56,13 +56,13 @@ using protocol_handler::ServiceType;
 
 class MediaManagerImplTest : public ::testing::Test {
  public:
-  MediaManagerImplTest() {}
+  MediaManagerImplTest():kDefaultValue_("") {}
 
  protected:
   const ::testing::NiceMock<MockMediaManagerSettings>
       mock_media_manager_settings_;
   protocol_handler_test::MockProtocolHandler mock_protocol_handler_;
-  const std::string kDefaultValue_ = "";
+  const std::string kDefaultValue_;
 };
 
 TEST_F(MediaManagerImplTest, StopMicrophoneRecording) {

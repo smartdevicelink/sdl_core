@@ -60,7 +60,7 @@ endif()
 
 create_test("hmi_message_handler_test" "${SOURCES}" "${LIBRARIES}")
 
-if(MSVC)
+if(WIN_NATIVE)
   target_link_libraries("hmi_message_handler_test" ws2_32)
 endif()
 
