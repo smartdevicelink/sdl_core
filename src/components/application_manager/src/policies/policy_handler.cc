@@ -1184,7 +1184,7 @@ void PolicyHandler::ResetRetrySequence() {
   policy_manager_->ResetRetrySequence();
 }
 
-int PolicyHandler::NextRetryTimeout() {
+uint32_t PolicyHandler::NextRetryTimeout() {
   POLICY_LIB_CHECK(0);
   return policy_manager_->NextRetryTimeout();
 }

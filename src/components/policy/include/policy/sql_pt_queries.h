@@ -115,6 +115,9 @@ extern const std::string kSelectApplicationFull;
 extern const std::string kUpdatePreloaded;
 extern const std::string kSelectDBVersion;
 extern const std::string kUpdateDBVersion;
+extern const std::string kSaveModuleMeta;
+extern const std::string kSelectModuleMeta;
+
 }  // namespace sql_pt
 }  // namespace policy
 

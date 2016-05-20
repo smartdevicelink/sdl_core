@@ -122,10 +122,11 @@ void PolicyManagerImpl::CheckTriggers() {
   const bool exceed_ignition_cycles = ExceededIgnitionCycles();
   const bool exceed_days = ExceededDays();
 
-  LOG4CXX_DEBUG(logger_,
-                "\nDays exceeded: " << std::boolalpha << exceed_ignition_cycles
-                                    << "\nStatusUpdateRequired: "
-                                    << std::boolalpha << exceed_days);
+  LOG4CXX_DEBUG(
+      logger_,
+      "\nDays exceeded: " << std::boolalpha << exceed_days
+                          << "\nIgnition cycles exceeded: " << std::boolalpha
+                          << exceed_ignition_cycles);
 
   if (exceed_ignition_cycles || exceed_days) {
     update_status_manager_.ScheduleUpdate();
@@ -283,7 +284,9 @@ std::string PolicyManagerImpl::GetLockScreenIconUrl() const {
 void PolicyManagerImpl::StartPTExchange() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  if (update_status_manager_.IsAppsSearchInProgress()) {
+  const bool update_required = update_status_manager_.IsUpdateRequired();
+
+  if (update_status_manager_.IsAppsSearchInProgress() && update_required) {
     update_status_manager_.ScheduleUpdate();
     LOG4CXX_INFO(logger_,
                  "Starting exchange skipped, since applications "
@@ -291,7 +294,7 @@ void PolicyManagerImpl::StartPTExchange() {
     return;
   }
 
-  if (update_status_manager_.IsUpdatePending()) {
+  if (update_status_manager_.IsUpdatePending() && update_required) {
     update_status_manager_.ScheduleUpdate();
     LOG4CXX_INFO(logger_,
                  "Starting exchange skipped, since another exchange "
@@ -325,6 +328,12 @@ void PolicyManagerImpl::OnAppsSearchCompleted() {
   if (update_status_manager_.IsUpdateRequired()) {
     StartPTExchange();
   }
+}
+
+void PolicyManagerImpl::OnAppRegisteredOnMobile(
+    const std::string& application_id) {
+  StartPTExchange();
+  SendNotificationOnPermissionsUpdated(application_id);
 }
 
 const std::vector<std::string> PolicyManagerImpl::GetAppRequestTypes(
@@ -876,12 +885,6 @@ bool PolicyManagerImpl::CanAppStealFocus(const std::string& app_id) const {
 }
 
 void PolicyManagerImpl::MarkUnpairedDevice(const std::string& device_id) {}
-
-void PolicyManagerImpl::OnAppRegisteredOnMobile(
-    const std::string& application_id) {
-  SendNotificationOnPermissionsUpdated(application_id);
-  StartPTExchange();
-}
 
 std::string PolicyManagerImpl::RetrieveCertificate() const {
   LOG4CXX_AUTO_TRACE(logger_);

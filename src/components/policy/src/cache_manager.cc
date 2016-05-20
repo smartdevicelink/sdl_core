@@ -468,6 +468,11 @@ int CacheManager::IgnitionCyclesBeforeExchange() {
   LOG4CXX_DEBUG(logger_, "IgnitionCyclesBeforeExchange limit:" << limit);
   uint8_t current = 0;
 
+  const int last_exch = static_cast<int>(
+      *pt_->policy_table.module_meta->ignition_cycles_since_last_exchange);
+  current = std::max(last_exch, 0);
+  LOG4CXX_DEBUG(logger_, "IgnitionCyclesBeforeExchange current:" << current);
+
   return std::max(limit - current, 0);
 }
 
@@ -480,6 +485,11 @@ int CacheManager::KilometersBeforeExchange(int current) {
   LOG4CXX_DEBUG(logger_, "KilometersBeforeExchange limit:" << limit);
   int last = 0;
 
+  const int odo_val = static_cast<int>(
+      *pt_->policy_table.module_meta->pt_exchanged_at_odometer_x);
+  last = std::max(odo_val, 0);
+  LOG4CXX_DEBUG(logger_, "KilometersBeforeExchange last:" << last);
+
   const int actual = std::max((current - last), 0);
   LOG4CXX_DEBUG(logger_, "KilometersBeforeExchange actual:" << actual);
   return std::max(limit - actual, 0);
@@ -488,32 +498,59 @@ int CacheManager::KilometersBeforeExchange(int current) {
 bool CacheManager::SetCountersPassedForSuccessfulUpdate(
     policy::Counters counter, int value) {
   CACHE_MANAGER_CHECK(false);
-  UNUSED(counter);
-  UNUSED(value);
+  switch (counter) {
+    case KILOMETERS:
+      *pt_->policy_table.module_meta->pt_exchanged_at_odometer_x = value;
+      LOG4CXX_DEBUG(logger_,
+                    "SetCountersPassedForSuccessfulUpdate km:" << value);
+      break;
+    case DAYS_AFTER_EPOCH:
+      *pt_->policy_table.module_meta->pt_exchanged_x_days_after_epoch = value;
+      LOG4CXX_DEBUG(
+          logger_,
+          "SetCountersPassedForSuccessfulUpdate days after epoch:" << value);
+      break;
+    default:
+      LOG4CXX_ERROR(logger_,
+                    "Unknown counter was requested to set: " << counter);
+      return false;
+  }
+
   Backup();
   return true;
 }
 
 int CacheManager::DaysBeforeExchange(int current) {
+  LOG4CXX_AUTO_TRACE(logger_);
   CACHE_MANAGER_CHECK(0);
-  const uint8_t limit = std::max(
-      static_cast<int>(pt_->policy_table.module_config.exchange_after_x_days),
-      0);
-  LOG4CXX_DEBUG(logger_, "DaysBeforeExchange limit:" << limit);
-  uint8_t last = 0;
+  const uint8_t limit = pt_->policy_table.module_config.exchange_after_x_days;
+  LOG4CXX_DEBUG(logger_,
+                "Exchange after: " << static_cast<int>(limit) << " days");
 
-  const uint8_t actaul = std::max((current - last), 0);
-  LOG4CXX_DEBUG(logger_, "DaysBeforeExchange actual:" << actaul);
-  return std::max(limit - actaul, 0);
+  const uint16_t days_after_epoch =
+      (*pt_->policy_table.module_meta->pt_exchanged_x_days_after_epoch);
+  LOG4CXX_DEBUG(logger_, "Epoch since last update: " << days_after_epoch);
+
+  const uint16_t actual =
+      std::max(static_cast<uint16_t>(current - days_after_epoch), uint16_t(0));
+  LOG4CXX_DEBUG(logger_, "The days since last update: " << actual);
+
+  return std::max(limit - actual, 0);
 }
 
 void CacheManager::IncrementIgnitionCycles() {
   CACHE_MANAGER_CHECK_VOID();
+  const int ign_val = static_cast<int>(
+      *pt_->policy_table.module_meta->ignition_cycles_since_last_exchange);
+  (*pt_->policy_table.module_meta->ignition_cycles_since_last_exchange) =
+      ign_val + 1;
+  LOG4CXX_DEBUG(logger_, "IncrementIgnitionCycles ignitions:" << ign_val);
   Backup();
 }
 
 void CacheManager::ResetIgnitionCycles() {
   CACHE_MANAGER_CHECK_VOID();
+  (*pt_->policy_table.module_meta->ignition_cycles_since_last_exchange) = 0;
   Backup();
 }
 

@@ -89,7 +89,7 @@ class PolicyHandlerInterface {
   virtual void GetServiceUrls(const std::string& service_type,
                               EndpointUrls& end_points) = 0;
   virtual void ResetRetrySequence() = 0;
-  virtual int NextRetryTimeout() = 0;
+  virtual uint32_t NextRetryTimeout() = 0;
   virtual int TimeoutExchange() = 0;
   virtual void OnExceededTimeout() = 0;
   virtual void OnSystemReady() = 0;

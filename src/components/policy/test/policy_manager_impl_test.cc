@@ -565,7 +565,7 @@ TEST_F(PolicyManagerImplTest, LoadPT_SetInvalidUpdatePT_PTIsNotLoaded) {
 }
 
 TEST_F(PolicyManagerImplTest2,
-       KmsChanged_SetExceededKms_ExpectCorrectSchedule) {
+       DISABLED_KmsChanged_SetExceededKms_ExpectCorrectSchedule) {
   // Arrange
   CreateLocalPT("sdl_preloaded_pt.json");
   ::policy::Counters counter = ::policy::Counters::KILOMETERS;

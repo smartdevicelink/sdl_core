@@ -48,7 +48,7 @@ option(ENABLE_GCOV "gcov code coverage feature" OFF)
 option(ENABLE_SANITIZE "Sanitize tool" OFF)
 option(ENABLE_SECURITY "Security Ford protocol protection" ON)
 option(ENABLE_HMI_PTU_DECRYPTION "Policy table update parsed by hmi" ON)
-option(ENABLE_EXTENDED_POLICY "Turns extended flow which requires embedded system interaction" OFF)
+option(ENABLE_EXTENDED_POLICY "Turns extended flow which requires embedded system interaction" ON)
 
 set(OS_TYPE_OPTION 	"$ENV{OS_TYPE}")
 set(DEBUG_OPTION 	"$ENV{DEBUG}")

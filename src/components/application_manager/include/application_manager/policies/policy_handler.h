@@ -113,7 +113,7 @@ class PolicyHandler : public PolicyHandlerInterface,
   void GetServiceUrls(const std::string& service_type,
                       EndpointUrls& end_points) OVERRIDE;
   void ResetRetrySequence() OVERRIDE;
-  int NextRetryTimeout() OVERRIDE;
+  uint32_t NextRetryTimeout() OVERRIDE;
   int TimeoutExchange() OVERRIDE;
   void OnExceededTimeout() OVERRIDE;
   void OnSystemReady() OVERRIDE;

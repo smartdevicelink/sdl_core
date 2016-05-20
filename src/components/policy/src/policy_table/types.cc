@@ -453,7 +453,6 @@ void ModuleConfig::SafeCopyFrom(const ModuleConfig& from) {
 
 Json::Value ModuleConfig::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
-  impl::WriteJsonField("device_certificates", device_certificates, &result__);
   impl::WriteJsonField("preloaded_pt", preloaded_pt, &result__);
   impl::WriteJsonField("exchange_after_x_ignition_cycles",
                        exchange_after_x_ignition_cycles,
@@ -478,9 +477,6 @@ Json::Value ModuleConfig::ToJsonValue() const {
   return result__;
 }
 bool ModuleConfig::is_valid() const {
-  if (!device_certificates.is_valid()) {
-    return false;
-  }
   if (!preloaded_pt.is_valid()) {
     return false;
   }
@@ -526,9 +522,6 @@ bool ModuleConfig::is_initialized() const {
   return (initialization_state__ != kUninitialized) || (!struct_empty());
 }
 bool ModuleConfig::struct_empty() const {
-  if (device_certificates.is_initialized()) {
-    return false;
-  }
   if (preloaded_pt.is_initialized()) {
     return false;
   }
@@ -638,7 +631,6 @@ void ModuleConfig::ReportErrors(rpc::ValidationReport* report__) const {
 
 void ModuleConfig::SetPolicyTableType(PolicyTableType pt_type) {
   CompositeType::SetPolicyTableType(pt_type);
-  device_certificates.SetPolicyTableType(pt_type);
   preloaded_pt.SetPolicyTableType(pt_type);
   exchange_after_x_ignition_cycles.SetPolicyTableType(pt_type);
   exchange_after_x_kilometers.SetPolicyTableType(pt_type);

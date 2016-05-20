@@ -159,7 +159,7 @@ hmi_apis::Common_Language::eType TestCommonLanguageFromString(
   return hmi_apis::Common_Language::INVALID_ENUM;
 }
 
-TEST_F(HMICapabilitiesTest, LoadCapabilitiesFromFile) {
+TEST_F(HMICapabilitiesTest, DISABLED_LoadCapabilitiesFromFile) {
   EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
               CommonLanguageFromString(_))
       .WillRepeatedly(Invoke(TestCommonLanguageFromString));
