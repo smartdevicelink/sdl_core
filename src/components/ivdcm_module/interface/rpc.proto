@@ -1,0 +1,41 @@
+syntax = "proto2";
+package sdl_ivdcm_api;
+
+//----------------COMMON--------------------------------------------------------------------------------------------
+enum MessageType {
+  REQUEST = 0;
+  RESPONSE = 1;
+  NOTIFICATION = 2;
+}
+
+enum ResultCode{
+  SUCCESS = 0;
+  TIMED_OUT = 1;
+  GENERIC_ERROR = 2;
+  PARTIAL_CONTENT = 3;
+}
+
+message SDLRPC {
+  enum SDLRPCName {
+     ON_INTERNET_STATE = 0;
+     SEND_IVDCM_DATA = 1;
+  }
+  required MessageType rpc_type = 1;
+  required SDLRPCName  rpc_name = 2;
+  required bytes       params   = 3;
+}
+
+message OnInternateStateNotificationParams {
+  required string nic_name = 1;
+  required bool   state    = 2;
+}
+
+message SendIvdcmDataRequestParams{
+  required string url = 1;
+}
+
+message SendIvdcmDataResponseParams {
+  required ResultCode resultCode   = 1;
+  optional bytes      responseData = 2;
+  optional string     info         = 3;
+}
