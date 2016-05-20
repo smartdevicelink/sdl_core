@@ -362,7 +362,7 @@ class PolicyHandler : public PolicyHandlerInterface,
    *
    * @param application_id registered application.
    */
-  void OnAppRegisteredOnMobile(const std::string &application_id);
+  void OnAppRegisteredOnMobile(const std::string& application_id);
 
   /**
    * @brief Checks if certain request type is allowed for application
@@ -502,7 +502,7 @@ class PolicyHandler : public PolicyHandlerInterface,
   static const std::string kLibrary;
   mutable sync_primitives::RWLock policy_manager_lock_;
   utils::SharedPtr<PolicyManager> policy_manager_;
-  void *dl_handle_;
+  void* dl_handle_;
   AppIds last_used_app_ids_;
   utils::SharedPtr<PolicyEventObserver> event_observer_;
   uint32_t last_activated_app_id_;
@@ -535,6 +535,6 @@ class PolicyHandler : public PolicyHandlerInterface,
   DISALLOW_COPY_AND_ASSIGN(PolicyHandler);
 };
 
-} //  namespace policy
+}  //  namespace policy
 
-#endif // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_POLICY_HANDLER_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_POLICY_HANDLER_H_

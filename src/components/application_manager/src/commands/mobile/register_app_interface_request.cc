@@ -49,7 +49,7 @@
 namespace {
 namespace custom_str = utils::custom_string;
 
-mobile_apis::AppHMIType::eType StringToAppHMIType(const std::string &str) {
+mobile_apis::AppHMIType::eType StringToAppHMIType(const std::string& str) {
   if ("DEFAULT" == str) {
     return mobile_apis::AppHMIType::DEFAULT;
   } else if ("COMMUNICATION" == str) {
@@ -682,8 +682,8 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckCoincidence() {
       return mobile_apis::Result::DUPLICATE_NAME;
     }
 
-    const smart_objects::SmartObject *vr = (*it)->vr_synonyms();
-    const std::vector<smart_objects::SmartObject> *curr_vr = NULL;
+    const smart_objects::SmartObject* vr = (*it)->vr_synonyms();
+    const std::vector<smart_objects::SmartObject>* curr_vr = NULL;
     if (NULL != vr) {
       curr_vr = vr->asArray();
       CoincidencePredicateVR v(app_name);
@@ -696,7 +696,7 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckCoincidence() {
 
     // vr check
     if (msg_params.keyExists(strings::vr_synonyms)) {
-      const std::vector<smart_objects::SmartObject> *new_vr =
+      const std::vector<smart_objects::SmartObject>* new_vr =
           msg_params[strings::vr_synonyms].asArray();
 
       CoincidencePredicateVR v(cur_name);
@@ -704,12 +704,12 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckCoincidence() {
         LOG4CXX_ERROR(logger_, "vr_synonyms duplicated with app_name .");
         return mobile_apis::Result::DUPLICATE_NAME;
       }
-    } // end vr check
+    }  // end vr check
 
-  } // application for end
+  }  // application for end
 
   return mobile_apis::Result::SUCCESS;
-} // method end
+}  // method end
 
 mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckWithPolicyData() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -720,7 +720,7 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckWithPolicyData() {
     return mobile_apis::Result::WARNINGS;
   }
 
-  smart_objects::SmartObject &message = *message_;
+  smart_objects::SmartObject& message = *message_;
   policy::StringArray app_nicknames;
   policy::StringArray app_hmi_types;
 
@@ -849,7 +849,7 @@ bool RegisterAppInterfaceRequest::IsApplicationWithSameAppIdRegistered() {
 
 bool RegisterAppInterfaceRequest::IsWhiteSpaceExist() {
   LOG4CXX_AUTO_TRACE(logger_);
-  const char *str = NULL;
+  const char* str = NULL;
 
   str = (*message_)[strings::msg_params][strings::app_name].asCharArray();
   if (!CheckSyntax(str)) {
@@ -858,7 +858,7 @@ bool RegisterAppInterfaceRequest::IsWhiteSpaceExist() {
   }
 
   if ((*message_)[strings::msg_params].keyExists(strings::tts_name)) {
-    const smart_objects::SmartArray *tn_array =
+    const smart_objects::SmartArray* tn_array =
         (*message_)[strings::msg_params][strings::tts_name].asArray();
 
     smart_objects::SmartArray::const_iterator it_tn = tn_array->begin();
@@ -885,7 +885,7 @@ bool RegisterAppInterfaceRequest::IsWhiteSpaceExist() {
   }
 
   if ((*message_)[strings::msg_params].keyExists(strings::vr_synonyms)) {
-    const smart_objects::SmartArray *vs_array =
+    const smart_objects::SmartArray* vs_array =
         (*message_)[strings::msg_params][strings::vr_synonyms].asArray();
 
     smart_objects::SmartArray::const_iterator it_vs = vs_array->begin();
@@ -976,8 +976,9 @@ bool RegisterAppInterfaceRequest::IsWhiteSpaceExist() {
 }
 
 void RegisterAppInterfaceRequest::CheckResponseVehicleTypeParam(
-    smart_objects::SmartObject &vehicle_type, const std::string &param,
-    const std::string &backup_value) {
+    smart_objects::SmartObject& vehicle_type,
+    const std::string& param,
+    const std::string& backup_value) {
   using namespace hmi_response;
   if (!vehicle_type.keyExists(param) || vehicle_type[param].empty()) {
     if (!backup_value.empty()) {
@@ -1007,6 +1008,6 @@ RegisterAppInterfaceRequest::GetPolicyHandler() {
   return application_manager_.GetPolicyHandler();
 }
 
-} // namespace commands
+}  // namespace commands
 
-} // namespace application_manager
+}  // namespace application_manager

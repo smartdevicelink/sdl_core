@@ -318,7 +318,7 @@ bool RpcParameters::struct_empty() const {
 
   return true;
 }
-void RpcParameters::ReportErrors(rpc::ValidationReport *report__) const {
+void RpcParameters::ReportErrors(rpc::ValidationReport* report__) const {
   if (struct_empty()) {
     rpc::CompositeType::ReportErrors(report__);
   }
@@ -372,7 +372,7 @@ bool Rpcs::struct_empty() const {
 
   return true;
 }
-void Rpcs::ReportErrors(rpc::ValidationReport *report__) const {
+void Rpcs::ReportErrors(rpc::ValidationReport* report__) const {
   if (struct_empty()) {
     rpc::CompositeType::ReportErrors(report__);
   }
@@ -563,7 +563,7 @@ bool ModuleConfig::struct_empty() const {
 
   return true;
 }
-void ModuleConfig::ReportErrors(rpc::ValidationReport *report__) const {
+void ModuleConfig::ReportErrors(rpc::ValidationReport* report__) const {
   if (struct_empty()) {
     rpc::CompositeType::ReportErrors(report__);
   }
@@ -707,7 +707,7 @@ bool MessageString::struct_empty() const {
   }
   return true;
 }
-void MessageString::ReportErrors(rpc::ValidationReport *report__) const {
+void MessageString::ReportErrors(rpc::ValidationReport* report__) const {
   if (struct_empty()) {
     rpc::CompositeType::ReportErrors(report__);
   }
@@ -766,7 +766,7 @@ bool MessageLanguages::struct_empty() const {
   return true;
 }
 
-void MessageLanguages::ReportErrors(rpc::ValidationReport *report__) const {
+void MessageLanguages::ReportErrors(rpc::ValidationReport* report__) const {
   if (struct_empty()) {
     rpc::CompositeType::ReportErrors(report__);
   }
@@ -873,8 +873,10 @@ bool ModuleMeta::is_valid() const {
 bool ModuleMeta::is_initialized() const {
   return (initialization_state__ != kUninitialized) || (!struct_empty());
 }
-bool ModuleMeta::struct_empty() const { return true; }
-void ModuleMeta::ReportErrors(rpc::ValidationReport *report__) const {
+bool ModuleMeta::struct_empty() const {
+  return true;
+}
+void ModuleMeta::ReportErrors(rpc::ValidationReport* report__) const {
   if (struct_empty()) {
     rpc::CompositeType::ReportErrors(report__);
   }
@@ -1133,7 +1135,7 @@ bool UsageAndErrorCounts::struct_empty() const {
   }
   return true;
 }
-void UsageAndErrorCounts::ReportErrors(rpc::ValidationReport *report__) const {
+void UsageAndErrorCounts::ReportErrors(rpc::ValidationReport* report__) const {
   if (struct_empty()) {
     rpc::CompositeType::ReportErrors(report__);
   }
@@ -1171,8 +1173,10 @@ bool DeviceParams::is_valid() const {
 bool DeviceParams::is_initialized() const {
   return (initialization_state__ != kUninitialized) || (!struct_empty());
 }
-bool DeviceParams::struct_empty() const { return true; }
-void DeviceParams::ReportErrors(rpc::ValidationReport *report__) const {
+bool DeviceParams::struct_empty() const {
+  return true;
+}
+void DeviceParams::ReportErrors(rpc::ValidationReport* report__) const {
   if (struct_empty()) {
     rpc::CompositeType::ReportErrors(report__);
   }
@@ -1269,7 +1273,7 @@ bool PolicyTable::struct_empty() const {
   }
   return true;
 }
-void PolicyTable::ReportErrors(rpc::ValidationReport *report__) const {
+void PolicyTable::ReportErrors(rpc::ValidationReport* report__) const {
   if (struct_empty()) {
     rpc::CompositeType::ReportErrors(report__);
   }
@@ -1349,7 +1353,7 @@ bool Table::struct_empty() const {
   }
   return true;
 }
-void Table::ReportErrors(rpc::ValidationReport *report__) const {
+void Table::ReportErrors(rpc::ValidationReport* report__) const {
   if (struct_empty()) {
     rpc::CompositeType::ReportErrors(report__);
   }
