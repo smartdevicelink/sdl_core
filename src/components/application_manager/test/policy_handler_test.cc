@@ -186,8 +186,9 @@ TEST_F(PolicyHandlerTest,
   EXPECT_FALSE(policy_handler_.InitPolicyTable());
 }
 
-TEST_F(PolicyHandlerTest,
-       DISABLED_InitPolicyTable_WithPreloadedFile_ExpectPolicyTableInitialized) {
+TEST_F(
+    PolicyHandlerTest,
+    DISABLED_InitPolicyTable_WithPreloadedFile_ExpectPolicyTableInitialized) {
   // Arrange
   EnablePolicy();
   EXPECT_TRUE(policy_handler_.LoadPolicyLibrary());
@@ -202,7 +203,8 @@ TEST_F(PolicyHandlerTest,
   EXPECT_FALSE(policy_handler_.ResetPolicyTable());
 }
 
-TEST_F(PolicyHandlerTest, DISABLED_ResetPolicyTable_PTNotInitialised_PTNotReset) {
+TEST_F(PolicyHandlerTest,
+       DISABLED_ResetPolicyTable_PTNotInitialised_PTNotReset) {
   // Arrange
   EnablePolicy();
   EXPECT_TRUE(policy_handler_.LoadPolicyLibrary());
@@ -276,7 +278,8 @@ TEST_F(PolicyHandlerTest, ReceiveMessageFromSDK_PTNotLoaded) {
   policy_handler_.ReceiveMessageFromSDK("", msg);
 }
 
-TEST_F(PolicyHandlerTest, DISABLED_UnloadPolicyLibrary_method_ExpectLibraryUnloaded) {
+TEST_F(PolicyHandlerTest,
+       DISABLED_UnloadPolicyLibrary_method_ExpectLibraryUnloaded) {
   // Arrange
   EnablePolicy();
   EXPECT_TRUE(policy_handler_.LoadPolicyLibrary());
