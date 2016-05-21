@@ -29,7 +29,6 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 if(BUILD_TESTS)
-add_definitions(-DUNIT_TESTS)
 
 include_directories (
   ${GMOCK_INCLUDE_DIRECTORY}

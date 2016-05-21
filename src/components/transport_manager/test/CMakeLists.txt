@@ -32,7 +32,7 @@ if(BUILD_TESTS)
 set(TM_TEST_DIR ${COMPONENTS_DIR}/transport_manager/test)
 
 include_directories(
-  include
+  ${TM_TEST_DIR}/include
   ${LOG4CXX_INCLUDE_DIRECTORY}
   ${GMOCK_INCLUDE_DIRECTORY}
   ${COMPONENTS_DIR}/smart_objects/include
@@ -72,5 +72,5 @@ set(SOURCES
 )
 
 create_test("transport_manager_test" "${SOURCES}" "${LIBRARIES}")
-file(COPY smartDeviceLink_test.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ${TM_TEST_DIR}/smartDeviceLink_test.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 endif()

@@ -29,8 +29,6 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 include_directories(
-  include
-  ${COMPONENTS_DIR}
   ${GMOCK_INCLUDE_DIRECTORY}
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${COMPONENTS_DIR}/policy/include
@@ -48,15 +46,15 @@ set(testLibraries
 )
 
 set(testSources
-  counter_test.cc
-  shared_library_test.cc
-  generated_code_test.cc
-  policy_manager_impl_test.cc
-  update_status_manager_test.cc
+  ${COMPONENTS_DIR}/policy/test/counter_test.cc
+  ${COMPONENTS_DIR}/policy/test/shared_library_test.cc
+  ${COMPONENTS_DIR}/policy/test/generated_code_test.cc
+  ${COMPONENTS_DIR}/policy/test/policy_manager_impl_test.cc
+  ${COMPONENTS_DIR}/policy/test/update_status_manager_test.cc
 )
 
 list (APPEND testSources
-  sql_pt_representation_test.cc
+  ${COMPONENTS_DIR}/policy/test/sql_pt_representation_test.cc
 )
 
 create_test("policy_test" "${testSources}" "${testLibraries}")

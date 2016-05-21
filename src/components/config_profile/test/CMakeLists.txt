@@ -37,8 +37,8 @@ include_directories (
   
 
 set(testSources
-  profile_test.cc
-  ini_file_test.cc
+  ${COMPONENTS_DIR}/config_profile/test/profile_test.cc
+  ${COMPONENTS_DIR}/config_profile/test/ini_file_test.cc
 )
 
 set(testLibraries

@@ -32,7 +32,7 @@
 set(TELEMETRY_MONITOR_SRC_DIR ${COMPONENTS_DIR}/telemetry_monitor/src)
 
 include_directories (
-  include
+  ${COMPONENTS_DIR}/telemetry_monitor/include/
   ${COMPONENTS_DIR}/utils/include/
   ${COMPONENTS_DIR}/protocol_handler/include/
   ${COMPONENTS_DIR}/connection_handler/include/

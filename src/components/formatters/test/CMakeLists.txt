@@ -36,7 +36,7 @@ include_directories(
   ${COMPONENTS_DIR}/smart_objects/include
   ${COMPONENTS_DIR}/formatters/include
   ${COMPONENTS_DIR}/formatters/test/include
-  ${CMAKE_BINARY_DIR}/src/components/interfaces
+  ${CMAKE_BINARY_DIR}/src/components
   ${JSONCPP_INCLUDE_DIRECTORY}
 )
 

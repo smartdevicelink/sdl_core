@@ -152,7 +152,7 @@ OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/libPolicy.so
   set(CMAKE_EXE_LINKER_FLAGS
     "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath=${CMAKE_CURRENT_BINARY_DIR}")
   create_test("application_manager_test" "${testSources}" "${testLibraries}" )
-# TODO [AKozoriz] : Fix not buildable tests 
+
  set(ResumptionData_SOURCES
     ${AM_TEST_DIR}/resumption/resumption_data_test.cc
     ${AM_TEST_DIR}/resumption/resumption_data_db_test.cc
