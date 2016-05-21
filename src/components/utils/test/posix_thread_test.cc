@@ -32,7 +32,7 @@
 
 #include "gtest/gtest.h"
 #include "utils/lock.h"
-#include "threads/thread.h"
+#include "utils/threads/thread.h"
 
 namespace test {
 namespace components {
