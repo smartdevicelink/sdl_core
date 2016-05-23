@@ -1437,7 +1437,7 @@ TEST(SQLPTRepresentationTest3, RemoveDB_RemoveDB_ExpectFileDeleted) {
 }
 
 TEST_F(SQLPTRepresentationTest,
-       DISABLED_GenerateSnapshot_SetPolicyTable_SnapshotIsPresent) {
+       GenerateSnapshot_SetPolicyTable_SnapshotIsPresent) {
   // Arrange
   Json::Value table(Json::objectValue);
   PolicyTableUpdatePrepare(table);
@@ -1471,7 +1471,6 @@ TEST_F(SQLPTRepresentationTest,
   table["policy_table"]["app_policies"]["device"].removeMember("steal_focus");
   table["policy_table"]["app_policies"]["device"].removeMember("groups");
   table["policy_table"]["device_data"] = Json::Value(Json::objectValue);
-  table["policy_table"]["module_meta"] = Json::Value(Json::objectValue);
   policy_table::Table expected(&table);
   Json::StyledWriter writer;
   // Checks
