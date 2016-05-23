@@ -163,7 +163,10 @@ hmi_apis::Common_Language::eType TestCommonLanguageFromString(
   return hmi_apis::Common_Language::INVALID_ENUM;
 }
 
-TEST_F(HMICapabilitiesTest, DISABLED_LoadCapabilitiesFromFile) {
+TEST_F(HMICapabilitiesTest, LoadCapabilitiesFromFile) {
+  const std::string hmi_capabilities_file = "hmi_capabilities.json";
+  EXPECT_CALL(mock_application_manager_settings_, hmi_capabilities_file_name())
+      .WillOnce(ReturnRef(hmi_capabilities_file));
   EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
               CommonLanguageFromString(_))
       .WillRepeatedly(Invoke(TestCommonLanguageFromString));
