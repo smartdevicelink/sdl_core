@@ -1,6 +1,6 @@
 // This file is generated, do not edit
-#ifndef POLICY_TABLE_INTERFACE_BASE_POLICY_TABLE_INTERFACE_BASE_TYPES_H_
-#define POLICY_TABLE_INTERFACE_BASE_POLICY_TABLE_INTERFACE_BASE_TYPES_H_
+#ifndef SRC_COMPONENTS_POLICY_INCLUDE_POLICY_POLICY_TABLE_TYPES_H_
+#define SRC_COMPONENTS_POLICY_INCLUDE_POLICY_POLICY_TABLE_TYPES_H_
 #include <climits>
 
 #include "./enums.h"
@@ -439,4 +439,4 @@ struct Table : CompositeType {
 }  // namespace policy_table_interface_base
 }  // namespace rpc
 
-#endif  // POLICY_TABLE_INTERFACE_BASE_POLICY_TABLE_INTERFACE_BASE_TYPES_H_
+#endif  // SRC_COMPONENTS_POLICY_INCLUDE_POLICY_POLICY_TABLE_TYPES_H_

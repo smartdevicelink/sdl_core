@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef RPC_BASE_DBUS_INL_H_
-#define RPC_BASE_DBUS_INL_H_
+#ifndef SRC_COMPONENTS_RPC_BASE_INCLUDE_RPC_BASE_RPC_BASE_DBUS_INL_H_
+#define SRC_COMPONENTS_RPC_BASE_INCLUDE_RPC_BASE_RPC_BASE_DBUS_INL_H_
 
 #include "dbus/dbus_message.h"
 #include "json/value.h"
@@ -498,4 +498,4 @@ inline void Optional<T>::ToDbusWriter(dbus::MessageWriter* writer) const {
 
 }  // namespace rpc
 
-#endif  // RPC_BASE_DBUS_INL_H_
+#endif  // SRC_COMPONENTS_RPC_BASE_INCLUDE_RPC_BASE_RPC_BASE_DBUS_INL_H_

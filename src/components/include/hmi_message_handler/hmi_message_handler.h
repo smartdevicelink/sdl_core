@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,39 +30,34 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_MANAGER_H_
-#define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_MANAGER_H_
+#ifndef SRC_COMPONENTS_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_HANDLER_H_
+#define SRC_COMPONENTS_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_HANDLER_H_
 
-#include <string>
-#include "protocol/service_type.h"
-#include "media_manager/media_manager_settings.h"
-namespace media_manager {
+#include "hmi_message_handler/hmi_message_sender.h"
+#include "hmi_message_handler/hmi_message_observer.h"
+#include "hmi_message_handler/hmi_message_handler_settings.h"
 
-class MediaManager {
+namespace hmi_message_handler {
+
+class HMIMessageAdapter;
+/**
+ * \class HMIMessageHandler
+ * \brief Abstract class for handling different HMI adapters;
+ * establishing interface for message exchange between SDL core and HMI.
+ */
+class HMIMessageHandler : public HMIMessageObserver, public HMIMessageSender {
  public:
-  virtual void PlayA2DPSource(int32_t application_key) = 0;
-  virtual void StopA2DPSource(int32_t application_key) = 0;
+  virtual ~HMIMessageHandler() {}
+  virtual void AddHMIMessageAdapter(HMIMessageAdapter* adapter) = 0;
+  virtual void RemoveHMIMessageAdapter(HMIMessageAdapter* adapter) = 0;
 
-  virtual void StartMicrophoneRecording(int32_t application_key,
-                                        const std::string& outputFileName,
-                                        int32_t duration) = 0;
-  virtual void StopMicrophoneRecording(int32_t application_key) = 0;
-
-  virtual void StartStreaming(int32_t application_key,
-                              protocol_handler::ServiceType service_type) = 0;
-  virtual void StopStreaming(int32_t application_key,
-                             protocol_handler::ServiceType service_type) = 0;
-  virtual void FramesProcessed(int32_t application_key,
-                               int32_t frame_number) = 0;
   /**
-   * \brief Media manager settings getter
-   * \return pointer to media manager settings class
+   * \brief Hmi message handler settings getter
+   * \return pointer to hmi message handler settings class
    */
-  virtual const MediaManagerSettings& settings() const = 0;
-
-  virtual ~MediaManager() {}
+  virtual const HMIMessageHandlerSettings& get_settings() const = 0;
 };
 
-}  // namespace media_manager
+}  // namespace hmi_message_handler
 
-#endif  // SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_MANAGER_H_
+#endif  // SRC_COMPONENTS_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_HANDLER_H_

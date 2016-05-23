@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,18 +30,28 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_SENDER_H_
-#define SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_SENDER_H_
+#ifndef SRC_COMPONENTS_INCLUDE_PROTOCOL_HANDLER_TELEMETRY_OBSERVER_H_
+#define SRC_COMPONENTS_INCLUDE_PROTOCOL_HANDLER_TELEMETRY_OBSERVER_H_
+#include "protocol/common.h"
 
-#include "application_manager/message.h"
+#include <stdint.h>
+#include "utils/date_time.h"
 
-namespace hmi_message_handler {
-typedef utils::SharedPtr<application_manager::Message> MessageSharedPointer;
+namespace protocol_handler {
 
-class HMIMessageSender {
+class PHTelemetryObserver {
  public:
-  virtual void SendMessageToHMI(MessageSharedPointer message) = 0;
+  struct MessageMetric {
+    RawMessagePtr raw_msg;
+    uint32_t message_id;
+    uint8_t connection_key;
+    TimevalStruct begin;
+    TimevalStruct end;
+  };
+  virtual void StartMessageProcess(uint32_t message_id,
+                                   const TimevalStruct& start_time) = 0;
+  virtual void EndMessageProcess(utils::SharedPtr<MessageMetric> m) = 0;
+  virtual ~PHTelemetryObserver() {}
 };
-}
-
-#endif  // SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_SENDER_H_
+}  // protocol_handler
+#endif  // SRC_COMPONENTS_INCLUDE_PROTOCOL_HANDLER_TELEMETRY_OBSERVER_H_

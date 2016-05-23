@@ -30,28 +30,39 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_PROTOCOL_HANDLER_TEST_INCLUDE_PROTOCOL_OBSERVER_MOCK_H_
-#define SRC_COMPONENTS_PROTOCOL_HANDLER_TEST_INCLUDE_PROTOCOL_OBSERVER_MOCK_H_
+#ifndef SRC_COMPONENTS_INCLUDE_MEDIA_MANAGER_MEDIA_MANAGER_H_
+#define SRC_COMPONENTS_INCLUDE_MEDIA_MANAGER_MEDIA_MANAGER_H_
 
-#include <gmock/gmock.h>
 #include <string>
-#include "protocol_handler/protocol_observer.h"
+#include "protocol/service_type.h"
+#include "media_manager/media_manager_settings.h"
+namespace media_manager {
 
-namespace test {
-namespace components {
-namespace protocol_handler_test {
-
-/*
- * MOCK implementation of ::protocol_handler::ProtocolObserver interface
- */
-class ProtocolObserverMock : public ::protocol_handler::ProtocolObserver {
+class MediaManager {
  public:
-  MOCK_METHOD1(OnMessageReceived,
-               void(const ::protocol_handler::RawMessagePtr));
-  MOCK_METHOD1(OnMobileMessageSent,
-               void(const ::protocol_handler::RawMessagePtr));
+  virtual void PlayA2DPSource(int32_t application_key) = 0;
+  virtual void StopA2DPSource(int32_t application_key) = 0;
+
+  virtual void StartMicrophoneRecording(int32_t application_key,
+                                        const std::string& outputFileName,
+                                        int32_t duration) = 0;
+  virtual void StopMicrophoneRecording(int32_t application_key) = 0;
+
+  virtual void StartStreaming(int32_t application_key,
+                              protocol_handler::ServiceType service_type) = 0;
+  virtual void StopStreaming(int32_t application_key,
+                             protocol_handler::ServiceType service_type) = 0;
+  virtual void FramesProcessed(int32_t application_key,
+                               int32_t frame_number) = 0;
+  /**
+   * \brief Media manager settings getter
+   * \return pointer to media manager settings class
+   */
+  virtual const MediaManagerSettings& settings() const = 0;
+
+  virtual ~MediaManager() {}
 };
-}  // namespace protocol_handler_test
-}  // namespace components
-}  // namespace test
-#endif  // SRC_COMPONENTS_PROTOCOL_HANDLER_TEST_INCLUDE_PROTOCOL_OBSERVER_MOCK_H_
+
+}  // namespace media_manager
+
+#endif  // SRC_COMPONENTS_INCLUDE_MEDIA_MANAGER_MEDIA_MANAGER_H_

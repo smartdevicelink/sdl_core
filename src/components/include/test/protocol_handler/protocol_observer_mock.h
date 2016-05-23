@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Ford Motor Company
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,34 +30,28 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_HANDLER_H_
-#define SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_HANDLER_H_
+#ifndef SRC_COMPONENTS_INCLUDE_TEST_PROTOCOL_HANDLER_PROTOCOL_OBSERVER_MOCK_H_
+#define SRC_COMPONENTS_INCLUDE_TEST_PROTOCOL_HANDLER_PROTOCOL_OBSERVER_MOCK_H_
 
-#include "hmi_message_handler/hmi_message_sender.h"
-#include "hmi_message_handler/hmi_message_observer.h"
-#include "hmi_message_handler/hmi_message_handler_settings.h"
+#include <gmock/gmock.h>
+#include <string>
+#include "protocol_handler/protocol_observer.h"
 
-namespace hmi_message_handler {
+namespace test {
+namespace components {
+namespace protocol_handler_test {
 
-class HMIMessageAdapter;
-/**
- * \class HMIMessageHandler
- * \brief Abstract class for handling different HMI adapters;
- * establishing interface for message exchange between SDL core and HMI.
+/*
+ * MOCK implementation of ::protocol_handler::ProtocolObserver interface
  */
-class HMIMessageHandler : public HMIMessageObserver, public HMIMessageSender {
+class ProtocolObserverMock : public ::protocol_handler::ProtocolObserver {
  public:
-  virtual ~HMIMessageHandler() {}
-  virtual void AddHMIMessageAdapter(HMIMessageAdapter* adapter) = 0;
-  virtual void RemoveHMIMessageAdapter(HMIMessageAdapter* adapter) = 0;
-
-  /**
-   * \brief Hmi message handler settings getter
-   * \return pointer to hmi message handler settings class
-   */
-  virtual const HMIMessageHandlerSettings& get_settings() const = 0;
+  MOCK_METHOD1(OnMessageReceived,
+               void(const ::protocol_handler::RawMessagePtr));
+  MOCK_METHOD1(OnMobileMessageSent,
+               void(const ::protocol_handler::RawMessagePtr));
 };
-
-}  // namespace hmi_message_handler
-
-#endif  // SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_HANDLER_H_
+}  // namespace protocol_handler_test
+}  // namespace components
+}  // namespace test
+#endif  // SRC_COMPONENTS_INCLUDE_TEST_PROTOCOL_HANDLER_PROTOCOL_OBSERVER_MOCK_H_

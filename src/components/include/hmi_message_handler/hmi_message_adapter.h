@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,28 +30,31 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_TIME_METRIC_OBSERVER_H_
-#define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_TIME_METRIC_OBSERVER_H_
-#include "protocol/common.h"
+#ifndef SRC_COMPONENTS_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_ADAPTER_H_
+#define SRC_COMPONENTS_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_ADAPTER_H_
 
-#include <stdint.h>
-#include "utils/date_time.h"
+#include "hmi_message_handler/hmi_message_sender.h"
 
-namespace protocol_handler {
-
-class PHTelemetryObserver {
- public:
-  struct MessageMetric {
-    RawMessagePtr raw_msg;
-    uint32_t message_id;
-    uint8_t connection_key;
-    TimevalStruct begin;
-    TimevalStruct end;
-  };
-  virtual void StartMessageProcess(uint32_t message_id,
-                                   const TimevalStruct& start_time) = 0;
-  virtual void EndMessageProcess(utils::SharedPtr<MessageMetric> m) = 0;
-  virtual ~PHTelemetryObserver() {}
+namespace hmi_message_handler {
+/**
+ * \class HMIMessageAdapter
+ * \brief Interface class describing methods neccessary for exchanging message
+ * between ApplicationManager and HMI. Adapter for concrete transport connection
+ * SDL with HMI has to implement this interface.
+ */
+class HMIMessageAdapter : public HMIMessageSender {
+ protected:
+  /**
+   * \brief Interface for subscriptions.
+   * Each class implementing interface should use it according to
+   * standarts of transport for which it is to be an adapter.
+   * For example, Adapter for MessageBroker will use it to subscribe to
+   * notifications
+   * from HMI.
+   */
+  virtual void SubscribeTo() = 0;
 };
-}  // protocol_handler
-#endif  // SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_TIME_METRIC_OBSERVER_H_
+
+}  // namespace hmi_message_handler
+
+#endif  // SRC_COMPONENTS_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_ADAPTER_H_
