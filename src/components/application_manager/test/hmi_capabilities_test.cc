@@ -64,12 +64,16 @@ class HMICapabilitiesTest : public ::testing::Test {
  protected:
   HMICapabilitiesTest() : last_state_("app_storage_folder", "app_info_data") {}
   virtual void SetUp() OVERRIDE {
-    ON_CALL(app_mngr_, event_dispatcher())
-        .WillByDefault(ReturnRef(mock_event_dispatcher));
-    ON_CALL(app_mngr_, get_settings())
-        .WillByDefault(ReturnRef(mock_application_manager_settings_));
-    ON_CALL(mock_application_manager_settings_, hmi_capabilities_file_name())
-        .WillByDefault(ReturnRef(kFileName));
+    EXPECT_CALL(app_mngr_, event_dispatcher())
+        .WillOnce(ReturnRef(mock_event_dispatcher));
+    EXPECT_CALL(app_mngr_, get_settings())
+        .WillRepeatedly(ReturnRef(mock_application_manager_settings_));
+    EXPECT_CALL(mock_application_manager_settings_,
+                hmi_capabilities_file_name()).WillOnce(ReturnRef(kFileName));
+    EXPECT_CALL(mock_event_dispatcher, add_observer(_, _, _)).Times(1);
+    EXPECT_CALL(mock_event_dispatcher, remove_observer(_)).Times(1);
+    EXPECT_CALL(mock_application_manager_settings_, launch_hmi())
+        .WillOnce(Return(false));
     hmi_capabilities_test =
         utils::MakeShared<HMICapabilitiesForTesting>(app_mngr_);
     hmi_capabilities_test->Init(&last_state_);
