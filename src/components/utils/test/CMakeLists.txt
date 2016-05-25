@@ -30,13 +30,11 @@
 
 if(BUILD_TESTS)
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "Windows" AND NOT QT_PORT)
+if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
   find_package(WinSqlite3 REQUIRED)
-  add_custom_target(copy_sqlite_lib ALL
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-      %SDL_SQLITE_DIR%/sqlite3.lib
-      ${CMAKE_CURRENT_BINARY_DIR}/sqlite3.lib
-    COMMENT "Copying sqlite lib")
+  if (NOT QT_PORT)
+    link_directories ($ENV{SDL_SQLITE_DIR})
+  endif()
 else()
   find_package(Sqlite3 REQUIRED)
 endif()
