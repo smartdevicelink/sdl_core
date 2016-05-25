@@ -62,7 +62,9 @@ using namespace application_manager;
 
 class HMICapabilitiesTest : public ::testing::Test {
  protected:
-  HMICapabilitiesTest() : last_state_("app_storage_folder", "app_info_data") {}
+  HMICapabilitiesTest()
+      : last_state_("app_storage_folder", "app_info_data"),
+        kFileName("hmi_capabilities.json") {}
   virtual void SetUp() OVERRIDE {
     ON_CALL(app_mngr_, event_dispatcher())
         .WillByDefault(ReturnRef(mock_event_dispatcher));
@@ -90,7 +92,7 @@ class HMICapabilitiesTest : public ::testing::Test {
   resumption::LastState last_state_;
   MockApplicationManagerSettings mock_application_manager_settings_;
   utils::SharedPtr<HMICapabilitiesForTesting> hmi_capabilities_test;
-  const std::string kFileName = "hmi_capabilities.json";
+  std::string kFileName;
 };
 
 const char* const cstring_values_[] = {

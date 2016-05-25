@@ -434,142 +434,169 @@ TEST(MessageHelperTestCreate, CreateNegativeResponse_SendSmartObject_Equal) {
 
 class MessageHelperTest : public ::testing::Test {
  public:
-  MessageHelperTest()
-      : language_strings(StringArray
-                        {"EN-US", "ES-MX", "FR-CA", "DE-DE", "ES-ES", "EN-GB",
-                         "RU-RU", "TR-TR", "PL-PL", "FR-FR", "IT-IT", "SV-SE",
-                         "PT-PT", "NL-NL", "EN-AU", "ZH-CN", "ZH-TW", "JA-JP",
-                         "AR-SA", "KO-KR", "PT-BR", "CS-CZ", "DA-DK", "NO-NO",
-                         "NL-BE", "EL-GR", "HU-HU", "FI-FI", "SK-SK"})
-      , hmi_result_strings(StringArray
-                          {"SUCCESS",
-                           "UNSUPPORTED_REQUEST",
-                           "UNSUPPORTED_RESOURCE",
-                           "DISALLOWED",
-                           "REJECTED",
-                           "ABORTED",
-                           "IGNORED",
-                           "RETRY",
-                           "IN_USE",
-                           "DATA_NOT_AVAILABLE",
-                           "TIMED_OUT",
-                           "INVALID_DATA",
-                           "CHAR_LIMIT_EXCEEDED",
-                           "INVALID_ID",
-                           "DUPLICATE_NAME",
-                           "APPLICATION_NOT_REGISTERED",
-                           "WRONG_LANGUAGE",
-                           "OUT_OF_MEMORY",
-                           "TOO_MANY_PENDING_REQUESTS",
-                           "NO_APPS_REGISTERED",
-                           "NO_DEVICES_CONNECTED",
-                           "WARNINGS",
-                           "GENERIC_ERROR",
-                           "USER_DISALLOWED",
-                           "TRUNCATED_DATA"})
-      , mobile_result_strings(StringArray
-                             {"SUCCESS",
-                              "UNSUPPORTED_REQUEST",
-                              "UNSUPPORTED_RESOURCE",
-                              "DISALLOWED",
-                              "REJECTED",
-                              "ABORTED",
-                              "IGNORED",
-                              "RETRY",
-                              "IN_USE",
-                              "VEHICLE_DATA_NOT_AVAILABLE",
-                              "TIMED_OUT",
-                              "INVALID_DATA",
-                              "CHAR_LIMIT_EXCEEDED",
-                              "INVALID_ID",
-                              "DUPLICATE_NAME",
-                              "APPLICATION_NOT_REGISTERED",
-                              "WRONG_LANGUAGE",
-                              "OUT_OF_MEMORY",
-                              "TOO_MANY_PENDING_REQUESTS",
-                              "TOO_MANY_APPLICATIONS",
-                              "APPLICATION_REGISTERED_ALREADY",
-                              "WARNINGS",
-                              "GENERIC_ERROR",
-                              "USER_DISALLOWED",
-                              "UNSUPPORTED_VERSION",
-                              "VEHICLE_DATA_NOT_ALLOWED",
-                              "FILE_NOT_FOUND",
-                              "CANCEL_ROUTE",
-                              "TRUNCATED_DATA",
-                              "SAVED",
-                              "INVALID_CERT",
-                              "EXPIRED_CERT",
-                              "RESUME_FAILED"})
-      , function_id_strings(StringArray
-                           {"RESERVED",
-                            "RegisterAppInterface",
-                            "UnregisterAppInterface",
-                            "SetGlobalProperties",
-                            "ResetGlobalProperties",
-                            "AddCommand",
-                            "DeleteCommand",
-                            "AddSubMenu",
-                            "DeleteSubMenu",
-                            "CreateInteractionChoiceSet",
-                            "PerformInteraction",
-                            "DeleteInteractionChoiceSet",
-                            "Alert",
-                            "Show",
-                            "Speak",
-                            "SetMediaClockTimer",
-                            "PerformAudioPassThru",
-                            "EndAudioPassThru",
-                            "SubscribeButton",
-                            "UnsubscribeButton",
-                            "SubscribeVehicleData",
-                            "UnsubscribeVehicleData",
-                            "GetVehicleData",
-                            "ReadDID",
-                            "GetDTCs",
-                            "ScrollableMessage",
-                            "Slider",
-                            "ShowConstantTBT",
-                            "AlertManeuver",
-                            "UpdateTurnList",
-                            "ChangeRegistration",
-                            "GenericResponse",
-                            "PutFile",
-                            "DeleteFile",
-                            "ListFiles",
-                            "SetAppIcon",
-                            "SetDisplayLayout",
-                            "DiagnosticMessage",
-                            "SystemRequest",
-                            "SendLocation",
-                            "DialNumber"})
-      , events_id_strings(StringArray
-                        { "OnHMIStatus",
-                          "OnAppInterfaceUnregistered",
-                          "OnButtonEvent",
-                          "OnButtonPress",
-                          "OnVehicleData",
-                          "OnCommand",
-                          "OnTBTClientState",
-                          "OnDriverDistraction",
-                          "OnPermissionsChange",
-                          "OnAudioPassThru",
-                          "OnLanguageChange",
-                          "OnKeyboardInput",
-                          "OnTouchEvent",
-                          "OnSystemRequest",
-                          "OnHashChange"})
-      , hmi_level_strings(StringArray{"FULL", "LIMITED", "BACKGROUND", "NONE"})
-      , delta_from_functions_id(32768) {}
+  MessageHelperTest() : delta_from_functions_id(32768) {
+    language_strings.push_back("EN-US");
+    language_strings.push_back("ES-MX");
+    language_strings.push_back("FR-CA");
+    language_strings.push_back("DE-DE");
+    language_strings.push_back("ES-ES");
+    language_strings.push_back("EN-GB");
+    language_strings.push_back("RU-RU");
+    language_strings.push_back("TR-TR");
+    language_strings.push_back("PL-PL");
+    language_strings.push_back("FR-FR");
+    language_strings.push_back("IT-IT");
+    language_strings.push_back("SV-SE");
+    language_strings.push_back("PT-PT");
+    language_strings.push_back("NL-NL");
+    language_strings.push_back("EN-AU");
+    language_strings.push_back("ZH-CN");
+    language_strings.push_back("ZH-TW");
+    language_strings.push_back("JA-JP");
+    language_strings.push_back("AR-SA");
+    language_strings.push_back("KO-KR");
+    language_strings.push_back("PT-BR");
+    language_strings.push_back("CS-CZ");
+    language_strings.push_back("DA-DK");
+    language_strings.push_back("NO-NO");
+    language_strings.push_back("NL-BE");
+    language_strings.push_back("EL-GR");
+    language_strings.push_back("HU-HU");
+    language_strings.push_back("FI-FI");
+    language_strings.push_back("SK-SK");
+
+    hmi_result_strings.push_back("SUCCESS");
+    hmi_result_strings.push_back("UNSUPPORTED_REQUEST");
+    hmi_result_strings.push_back("UNSUPPORTED_RESOURCE");
+    hmi_result_strings.push_back("DISALLOWED");
+    hmi_result_strings.push_back("REJECTED");
+    hmi_result_strings.push_back("ABORTED");
+    hmi_result_strings.push_back("IGNORED");
+    hmi_result_strings.push_back("RETRY");
+    hmi_result_strings.push_back("IN_USE");
+    hmi_result_strings.push_back("DATA_NOT_AVAILABLE");
+    hmi_result_strings.push_back("TIMED_OUT");
+    hmi_result_strings.push_back("INVALID_DATA");
+    hmi_result_strings.push_back("CHAR_LIMIT_EXCEEDED");
+    hmi_result_strings.push_back("INVALID_ID");
+    hmi_result_strings.push_back("DUPLICATE_NAME");
+    hmi_result_strings.push_back("APPLICATION_NOT_REGISTERED");
+    hmi_result_strings.push_back("WRONG_LANGUAGE");
+    hmi_result_strings.push_back("OUT_OF_MEMORY");
+    hmi_result_strings.push_back("TOO_MANY_PENDING_REQUESTS");
+    hmi_result_strings.push_back("NO_APPS_REGISTERED");
+    hmi_result_strings.push_back("NO_DEVICES_CONNECTED");
+    hmi_result_strings.push_back("WARNINGS");
+    hmi_result_strings.push_back("GENERIC_ERROR");
+    hmi_result_strings.push_back("USER_DISALLOWED");
+    hmi_result_strings.push_back("TRUNCATED_DATA");
+
+    mobile_result_strings.push_back("SUCCESS");
+    mobile_result_strings.push_back("UNSUPPORTED_REQUEST");
+    mobile_result_strings.push_back("UNSUPPORTED_RESOURCE");
+    mobile_result_strings.push_back("DISALLOWED");
+    mobile_result_strings.push_back("REJECTED");
+    mobile_result_strings.push_back("ABORTED");
+    mobile_result_strings.push_back("IGNORED");
+    mobile_result_strings.push_back("RETRY");
+    mobile_result_strings.push_back("IN_USE");
+    mobile_result_strings.push_back("VEHICLE_DATA_NOT_AVAILABLE");
+    mobile_result_strings.push_back("TIMED_OUT");
+    mobile_result_strings.push_back("INVALID_DATA");
+    mobile_result_strings.push_back("CHAR_LIMIT_EXCEEDED");
+    mobile_result_strings.push_back("INVALID_ID");
+    mobile_result_strings.push_back("DUPLICATE_NAME");
+    mobile_result_strings.push_back("APPLICATION_NOT_REGISTERED");
+    mobile_result_strings.push_back("WRONG_LANGUAGE");
+    mobile_result_strings.push_back("OUT_OF_MEMORY");
+    mobile_result_strings.push_back("TOO_MANY_PENDING_REQUESTS");
+    mobile_result_strings.push_back("TOO_MANY_APPLICATIONS");
+    mobile_result_strings.push_back("APPLICATION_REGISTERED_ALREADY");
+    mobile_result_strings.push_back("WARNINGS");
+    mobile_result_strings.push_back("GENERIC_ERROR");
+    mobile_result_strings.push_back("USER_DISALLOWED");
+    mobile_result_strings.push_back("UNSUPPORTED_VERSION");
+    mobile_result_strings.push_back("VEHICLE_DATA_NOT_ALLOWED");
+    mobile_result_strings.push_back("FILE_NOT_FOUND");
+    mobile_result_strings.push_back("CANCEL_ROUTE");
+    mobile_result_strings.push_back("TRUNCATED_DATA");
+    mobile_result_strings.push_back("SAVED");
+    mobile_result_strings.push_back("INVALID_CERT");
+    mobile_result_strings.push_back("EXPIRED_CERT");
+    mobile_result_strings.push_back("RESUME_FAILED");
+
+    function_id_strings.push_back("RESERVED");
+    function_id_strings.push_back("RegisterAppInterface");
+    function_id_strings.push_back("UnregisterAppInterface");
+    function_id_strings.push_back("SetGlobalProperties");
+    function_id_strings.push_back("ResetGlobalProperties");
+    function_id_strings.push_back("AddCommand");
+    function_id_strings.push_back("DeleteCommand");
+    function_id_strings.push_back("AddSubMenu");
+    function_id_strings.push_back("DeleteSubMenu");
+    function_id_strings.push_back("CreateInteractionChoiceSet");
+    function_id_strings.push_back("PerformInteraction");
+    function_id_strings.push_back("DeleteInteractionChoiceSet");
+    function_id_strings.push_back("Alert");
+    function_id_strings.push_back("Show");
+    function_id_strings.push_back("Speak");
+    function_id_strings.push_back("SetMediaClockTimer");
+    function_id_strings.push_back("PerformAudioPassThru");
+    function_id_strings.push_back("EndAudioPassThru");
+    function_id_strings.push_back("SubscribeButton");
+    function_id_strings.push_back("UnsubscribeButton");
+    function_id_strings.push_back("SubscribeVehicleData");
+    function_id_strings.push_back("UnsubscribeVehicleData");
+    function_id_strings.push_back("GetVehicleData");
+    function_id_strings.push_back("ReadDID");
+    function_id_strings.push_back("GetDTCs");
+    function_id_strings.push_back("ScrollableMessage");
+    function_id_strings.push_back("Slider");
+    function_id_strings.push_back("ShowConstantTBT");
+    function_id_strings.push_back("AlertManeuver");
+    function_id_strings.push_back("UpdateTurnList");
+    function_id_strings.push_back("ChangeRegistration");
+    function_id_strings.push_back("GenericResponse");
+    function_id_strings.push_back("PutFile");
+    function_id_strings.push_back("DeleteFile");
+    function_id_strings.push_back("ListFiles");
+    function_id_strings.push_back("SetAppIcon");
+    function_id_strings.push_back("SetDisplayLayout");
+    function_id_strings.push_back("DiagnosticMessage");
+    function_id_strings.push_back("SystemRequest");
+    function_id_strings.push_back("SendLocation");
+    function_id_strings.push_back("DialNumber");
+
+    events_id_strings.push_back("OnHMIStatus");
+    events_id_strings.push_back("OnAppInterfaceUnregistered");
+    events_id_strings.push_back("OnButtonEvent");
+    events_id_strings.push_back("OnButtonPress");
+    events_id_strings.push_back("OnVehicleData");
+    events_id_strings.push_back("OnCommand");
+    events_id_strings.push_back("OnTBTClientState");
+    events_id_strings.push_back("OnDriverDistraction");
+    events_id_strings.push_back("OnPermissionsChange");
+    events_id_strings.push_back("OnAudioPassThru");
+    events_id_strings.push_back("OnLanguageChange");
+    events_id_strings.push_back("OnKeyboardInput");
+    events_id_strings.push_back("OnTouchEvent");
+    events_id_strings.push_back("OnSystemRequest");
+    events_id_strings.push_back("OnHashChange");
+
+    hmi_level_strings.push_back("FULL");
+    hmi_level_strings.push_back("LIMITED");
+    hmi_level_strings.push_back("BACKGROUND");
+    hmi_level_strings.push_back("NONE");
+  }
 
  protected:
   application_manager_test::MockApplicationManager mock_application_manager;
-  const StringArray language_strings;
-  const StringArray hmi_result_strings;
-  const StringArray mobile_result_strings;
-  const StringArray function_id_strings;
-  const StringArray events_id_strings;
-  const StringArray hmi_level_strings;
+  StringArray language_strings;
+  StringArray hmi_result_strings;
+  StringArray mobile_result_strings;
+  StringArray function_id_strings;
+  StringArray events_id_strings;
+  StringArray hmi_level_strings;
 
   const size_t delta_from_functions_id;
 };
@@ -676,24 +703,26 @@ TEST_F(MessageHelperTest,
 }
 
 TEST_F(MessageHelperTest, VerifySoftButtonString_WrongStrings_False) {
-  const StringArray wrong_strings{"soft_button1\t\ntext",
-                                  "soft_button1\\ntext",
-                                  "soft_button1\\ttext",
-                                  " ",
-                                  "soft_button1\t\n",
-                                  "soft_button1\\n",
-                                  "soft_button1\\t"};
+  StringArray wrong_strings;
+  wrong_strings.push_back("soft_button1\t\ntext");
+  wrong_strings.push_back("soft_button1\\ntext");
+  wrong_strings.push_back("soft_button1\\ttext");
+  wrong_strings.push_back(" ");
+  wrong_strings.push_back("soft_button1\t\n");
+  wrong_strings.push_back("soft_button1\\n");
+  wrong_strings.push_back("soft_button1\\t");
   for (size_t i = 0; i < wrong_strings.size(); ++i) {
     EXPECT_FALSE(MessageHelper::VerifySoftButtonString(wrong_strings[i]));
   }
 }
 
 TEST_F(MessageHelperTest, VerifySoftButtonString_CorrectStrings_True) {
-  const StringArray wrong_strings{"soft_button1.text",
-                                  "soft_button1?text",
-                                  " asd asdasd    .././/",
-                                  "soft_button1??....asd",
-                                  "soft_button12313fcvzxc./.,"};
+  StringArray wrong_strings;
+  wrong_strings.push_back("soft_button1.text");
+  wrong_strings.push_back("soft_button1?text");
+  wrong_strings.push_back(" asd asdasd    .././/");
+  wrong_strings.push_back("soft_button1??....asd");
+  wrong_strings.push_back("soft_button12313fcvzxc./.,");
   for (size_t i = 0; i < wrong_strings.size(); ++i) {
     EXPECT_TRUE(MessageHelper::VerifySoftButtonString(wrong_strings[i]));
   }

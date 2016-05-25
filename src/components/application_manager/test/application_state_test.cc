@@ -67,9 +67,9 @@ class ApplicationStateTest : public ::testing::Test {
  protected:
   static std::vector<StateID> added_states_;
   ApplicationState app_state;
-  const StateID current_id = StateID::STATE_ID_CURRENT;
-  const StateID postponed_id = StateID::STATE_ID_POSTPONED;
-  const uint32_t app_id = 10;
+  static const StateID current_id = StateID::STATE_ID_CURRENT;
+  static const StateID postponed_id = StateID::STATE_ID_POSTPONED;
+  static const uint32_t app_id = 10;
   MockApplicationManager app_mngr_;
 };
 

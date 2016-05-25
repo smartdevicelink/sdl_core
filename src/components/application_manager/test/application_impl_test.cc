@@ -70,6 +70,7 @@ typedef void (ApplicationImpl::*AddSet)(HmiStatePtr args);
 class ApplicationImplTest : public ::testing::Test {
  protected:
   virtual void SetUp() OVERRIDE {
+    directory_name = "./test_storage";
     app_id = 10;
     policy_app_id = "policy_app_id";
     app_name = "app_name";
@@ -116,7 +117,7 @@ class ApplicationImplTest : public ::testing::Test {
   std::string policy_app_id;
   std::string mac_address;
   custom_str::CustomString app_name;
-  const std::string directory_name = "./test_storage";
+  std::string directory_name;
   HmiState::StateID state_id;
   HmiStatePtr testHmiState;
   HMILevel::eType test_lvl;

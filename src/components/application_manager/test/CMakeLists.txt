@@ -28,13 +28,10 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-# TODO{ALeshin}: APPLINK-10792. Do not write tests which use
-# application manager(AM) singleton while refactoring of AM is finished.
-
 if (BUILD_TESTS)
 
 include_directories(
-  include
+    include
     ${CMAKE_BINARY_DIR}/src/components/
     ${COMPONENTS_DIR}/resumption/include
     ${GMOCK_INCLUDE_DIRECTORY}
@@ -165,34 +162,8 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "QNX")
   list(REMOVE_ITEM test_exec_libraries dl)
 endif()
 
-set(testLibraries
-    Utils
-    ApplicationManager
-    jsoncpp
-    Policy
-    connectionHandler
-    HMI_API
-    MOBILE_API
-    v4_protocol_v1_2_no_extra
-    SmartObjects
-    formatters
-    gmock_main
-    UsageStatistics
-    dl
-    ProtocolLibrary
-    ConfigProfile
-    MediaManager
-    Resumption
-    ProtocolHandler
-    SecurityManager
-  )
-
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
   list(REMOVE_ITEM testLibraries dl)
-endif()
-
-if (${CMAKE_SYSTEM_NAME} MATCHES "QNX")
-  list(REMOVE_ITEM test_exec_libraries dl)
 endif()
 
 if(ENABLE_LOG)
@@ -226,12 +197,12 @@ OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/libPolicy.so
 
 set(CMAKE_EXE_LINKER_FLAGS
     "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath=${CMAKE_CURRENT_BINARY_DIR}")
-    create_test("application_manager_test" "${testSources}" "${testLibraries}"
-   )
+
+create_test("application_manager_test" "${testSources}" "${testLibraries}")
 
 # TODO [AKozoriz] : Fix not buildable tests
 set(ResumptionData_SOURCES
-    ${AM_TEST_DIR}/resumption/resumption_data_test.cc
+#    ${AM_TEST_DIR}/resumption/resumption_data_test.cc
 #    ${AM_TEST_DIR}/resumption/resumption_data_db_test.cc
 #    ${AM_TEST_DIR}/resumption/resumption_data_json_test.cc
 #    ${AM_TEST_DIR}/resumption/resume_ctrl_test.cc
@@ -240,14 +211,14 @@ set(ResumptionData_SOURCES
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj" )
-endif()  
+endif()
 
   file(COPY hmi_capabilities.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
   file(COPY smartDeviceLink_test.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
   file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/resumption)
   file(COPY smartDeviceLink_test.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/resumption)
-  create_test("resumption/data_resumption_test" "${ResumptionData_SOURCES}" "${testLibraries}")
+  create_test("data_resumption_test" "${ResumptionData_SOURCES}" "${testLibraries}")
 
-  add_subdirectory(state_controller)
+#  add_subdirectory(state_controller)
 endif()
