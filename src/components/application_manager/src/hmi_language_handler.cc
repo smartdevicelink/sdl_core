@@ -81,7 +81,7 @@ void HMILanguageHandler::set_language_for(
   }
   LOGGER_DEBUG(logger_,
                "Setting language " << language << " for interface "
-                                   << iface);
+               << iface);
   last_state_->dictionary()[LanguagesKey][key] =
       static_cast<JsonValue::Int>(language);
   return;
