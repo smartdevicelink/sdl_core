@@ -34,12 +34,13 @@
 
 #include "formatters/CFormatterJsonSDLRPCv1.h"
 #include "create_smartSchema.h"
+#include "FormattersJsonHelper.h"
 
 namespace test {
 namespace components {
 namespace formatters {
 
-TEST(CFormatterJsonSDLRPCv1Test, DISABLED_EmptySmartObjectToString) {
+TEST(CFormatterJsonSDLRPCv1Test, EmptySmartObjectToString) {
   SmartObject srcObj;
 
   EXPECT_EQ(Errors::eType::OK, srcObj.validate());
@@ -50,17 +51,12 @@ TEST(CFormatterJsonSDLRPCv1Test, DISABLED_EmptySmartObjectToString) {
   EXPECT_TRUE(result);
 
   std::string expectOutputJsonString =
-      "{\n \
-  \"\" : {\n\
-      \"name\" : \"\",\n\
-      \"parameters\" : \"\"\n\
-   }\n\
-}\n";
-
+      "{\"\":{\"name\":\"\",\"parameters\":\"\"}}";
+  CompactJson(jsonString);
   EXPECT_EQ(expectOutputJsonString, jsonString);
 }
 
-TEST(CFormatterJsonSDLRPCv1Test, DISABLED_SmObjWithRequestWithoutMsgNotValid_ToString) {
+TEST(CFormatterJsonSDLRPCv1Test, SmObjWithRequestWithoutMsgNotValid_ToString) {
   SmartObject srcObj;
   CSmartSchema schema = initObjectSchema();
   srcObj.setSchema(schema);
@@ -78,19 +74,14 @@ TEST(CFormatterJsonSDLRPCv1Test, DISABLED_SmObjWithRequestWithoutMsgNotValid_ToS
   EXPECT_TRUE(result);
 
   std::string expectOutputJsonString =
-      "{\n \
-  \"request\" : {\n\
-      \"correlationID\" : 13,\n\
-      \"name\" : \"RegisterAppInterface\",\n\
-      \"parameters\" : \"\"\n\
-   }\n\
-}\n";
-
+      "{\"request\":{\"correlationID\":13,\"name\""
+      ":\"RegisterAppInterface\",\"parameters\":\"\"}}";
+  CompactJson(jsonString);
   EXPECT_EQ(expectOutputJsonString, jsonString);
 }
 
 TEST(CFormatterJsonSDLRPCv1Test,
-     DISABLED_SmObjWithRequestWithEmptyMsgWithTestSchemaToString) {
+     SmObjWithRequestWithEmptyMsgWithTestSchemaToString) {
   SmartObject srcObj;
   CSmartSchema schema = initObjectSchema();
   srcObj.setSchema(schema);
@@ -111,19 +102,13 @@ TEST(CFormatterJsonSDLRPCv1Test,
   EXPECT_TRUE(result);
 
   std::string expectOutputJsonString =
-      "{\n \
-  \"request\" : {\n\
-      \"correlationID\" : 13,\n\
-      \"name\" : \"RegisterAppInterface\",\n\
-      \"parameters\" : {}\n\
-   }\n\
-}\n";
-
+      "{\"request\":{\"correlationID\":13,\"name\":\"RegisterAppInterface\",\"parameters\":{}}}";
+  CompactJson(jsonString);
   EXPECT_EQ(expectOutputJsonString, jsonString);
 }
 
 TEST(CFormatterJsonSDLRPCv1Test,
-     DISABLED_SmObjWithRequestWithNonemptyMsgWithTestSchemaToString) {
+     SmObjWithRequestWithNonemptyMsgWithTestSchemaToString) {
   SmartObject srcObj;
   CSmartSchema schema = initObjectSchema();
   srcObj.setSchema(schema);
@@ -142,20 +127,13 @@ TEST(CFormatterJsonSDLRPCv1Test,
   EXPECT_TRUE(result);
 
   std::string expectOutputJsonString =
-      "{\n \
-  \"request\" : {\n\
-      \"correlationID\" : 13,\n\
-      \"name\" : \"RegisterAppInterface\",\n\
-      \"parameters\" : {\n\
-         \"info\" : \"value\"\n\
-      }\n\
-   }\n\
-}\n";
-
+      "{\"request\":{\"correlationID\":13,\"name\":\"R"
+      "egisterAppInterface\",\"parameters\":{\"info\":\"value\"}}}";
+  CompactJson(jsonString);
   EXPECT_EQ(expectOutputJsonString, jsonString);
 }
 
-TEST(CFormatterJsonSDLRPCv1Test, DISABLED_SmObjWithRequestWithNonemptyMsgToString) {
+TEST(CFormatterJsonSDLRPCv1Test, SmObjWithRequestWithNonemptyMsgToString) {
   SmartObject srcObj;
 
   srcObj[S_PARAMS][S_MESSAGE_TYPE] = MessageTypeTest::request;
@@ -172,19 +150,13 @@ TEST(CFormatterJsonSDLRPCv1Test, DISABLED_SmObjWithRequestWithNonemptyMsgToStrin
   EXPECT_TRUE(result);
 
   std::string expectOutputJsonString =
-      "{\n \
-  \"0\" : {\n\
-      \"correlationID\" : 13,\n\
-      \"name\" : \"5\",\n\
-      \"parameters\" : {\n\
-         \"vrSynonyms\" : [ \"Synonym 1\" ]\n\
-      }\n\
-   }\n\
-}\n";
+      "{\"0\":{\"correlationID\":13,\"name\":\"5\",\"p"
+      "arameters\":{\"vrSynonyms\":[\"Synonym 1\"]}}}";
+  CompactJson(jsonString);
   EXPECT_EQ(expectOutputJsonString, jsonString);
 }
 
-TEST(CFormatterJsonSDLRPCv1Test, DISABLED_SmObjWithResponseWithoutSchemaToString) {
+TEST(CFormatterJsonSDLRPCv1Test, SmObjWithResponseWithoutSchemaToString) {
   SmartObject srcObj;
 
   srcObj[S_PARAMS][S_MESSAGE_TYPE] = MessageTypeTest::response;
@@ -202,20 +174,13 @@ TEST(CFormatterJsonSDLRPCv1Test, DISABLED_SmObjWithResponseWithoutSchemaToString
   EXPECT_TRUE(result);
 
   std::string expectOutputJsonString =
-      "{\n \
-  \"1\" : {\n\
-      \"correlationID\" : 13,\n\
-      \"name\" : \"5\",\n\
-      \"parameters\" : {\n\
-         \"resultCode\" : 0,\n\
-         \"success\" : true\n\
-      }\n\
-   }\n\
-}\n";
+      "{\"1\":{\"correlationID\":13,\"nam"
+      "e\":\"5\",\"parameters\":{\"resultCode\":0,\"success\":true}}}";
+  CompactJson(jsonString);
   EXPECT_EQ(expectOutputJsonString, jsonString);
 }
 
-TEST(CFormatterJsonSDLRPCv1Test, DISABLED_SmObjWithNotificationToString) {
+TEST(CFormatterJsonSDLRPCv1Test, SmObjWithNotificationToString) {
   SmartObject srcObj;
   CSmartSchema schema = initObjectSchema();
   srcObj.setSchema(schema);
@@ -233,18 +198,13 @@ TEST(CFormatterJsonSDLRPCv1Test, DISABLED_SmObjWithNotificationToString) {
   EXPECT_TRUE(result);
 
   std::string expectOutputJsonString =
-      "{\n \
-  \"notification\" : {\n\
-      \"correlationID\" : 13,\n\
-      \"name\" : \"SetGlobalProperties\",\n\
-      \"parameters\" : {}\n\
-   }\n\
-}\n";
-
+      "{\"notification\":{\"correlationID\":13,\"na"
+      "me\":\"SetGlobalProperties\",\"parameters\":{}}}";
+  CompactJson(jsonString);
   EXPECT_EQ(expectOutputJsonString, jsonString);
 }
 
-TEST(CFormatterJsonSDLRPCv1Test, DISABLED_SmObjWithResponseToString) {
+TEST(CFormatterJsonSDLRPCv1Test, SmObjWithResponseToString) {
   SmartObject srcObj;
 
   CSmartSchema schema = initObjectSchema();
@@ -266,22 +226,15 @@ TEST(CFormatterJsonSDLRPCv1Test, DISABLED_SmObjWithResponseToString) {
   EXPECT_TRUE(result);
 
   std::string expectOutputJsonString =
-      "{\n \
-  \"response\" : {\n\
-      \"correlationID\" : 13,\n\
-      \"name\" : \"RegisterAppInterface\",\n\
-      \"parameters\" : {\n\
-         \"resultCode\" : \"SUCCESS\",\n\
-         \"success\" : true\n\
-      }\n\
-   }\n\
-}\n";
-
+      "{\"response\":{\"correlationID\":13,\"name\":\"R"
+      "egisterAppInterface\",\"parameters\":{\"resultCode\":\"SUC"
+      "CESS\",\"success\":true}}}";
+  CompactJson(jsonString);
   EXPECT_EQ(expectOutputJsonString, jsonString);
 }
 
 TEST(CFormatterJsonSDLRPCv1Test,
-     DISABLED_SmObjWithResponseWithoutSchemaWithoutParamsToString) {
+     SmObjWithResponseWithoutSchemaWithoutParamsToString) {
   SmartObject srcObj;
   srcObj[S_PARAMS][S_MESSAGE_TYPE] = MessageTypeTest::response;
   std::string jsonString;
@@ -291,13 +244,8 @@ TEST(CFormatterJsonSDLRPCv1Test,
   EXPECT_TRUE(result);
 
   std::string expectOutputJsonString =
-      "{\n \
-  \"1\" : {\n\
-      \"name\" : \"\",\n\
-      \"parameters\" : \"\"\n\
-   }\n\
-}\n";
-
+      "{\"1\":{\"name\":\"\",\"parameters\":\"\"}}";
+  CompactJson(jsonString);
   EXPECT_EQ(expectOutputJsonString, jsonString);
 }
 

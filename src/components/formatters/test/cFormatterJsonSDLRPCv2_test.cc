@@ -33,6 +33,7 @@
 #include "gtest/gtest.h"
 #include "create_smartSchema.h"
 #include "formatters/CFormatterJsonSDLRPCv2.h"
+#include "FormattersJsonHelper.h"
 
 namespace test {
 namespace components {
@@ -49,7 +50,7 @@ TEST(CFormatterJsonSDLRPCv2Test, DISABLED_EmptySmartObjectToString) {
   EXPECT_TRUE(result);
 
   std::string expectOutputJsonString = "\"\"\n";
-
+  CompactJson(jsonString);
   EXPECT_EQ(expectOutputJsonString, jsonString);
 }
 
@@ -76,7 +77,7 @@ TEST(CFormatterJsonSDLRPCv2Test, DISABLED_SmObjWithRequestWithoutMsgNotValid_ToS
 }
 
 TEST(CFormatterJsonSDLRPCv2Test,
-     DISABLED_SmObjWithRequestWithEmptyMsgWithTestSchemaToString) {
+     SmObjWithRequestWithEmptyMsgWithTestSchemaToString) {
   SmartObject srcObj;
   CSmartSchema schema = initObjectSchema();
   srcObj.setSchema(schema);
@@ -96,13 +97,13 @@ TEST(CFormatterJsonSDLRPCv2Test,
 
   EXPECT_TRUE(result);
 
-  std::string expectOutputJsonString = "{}\n";
-
+  std::string expectOutputJsonString = "{}";
+  CompactJson(jsonString);
   EXPECT_EQ(expectOutputJsonString, jsonString);
 }
 
 TEST(CFormatterJsonSDLRPCv2Test,
-     DISABLED_SmObjWithRequestWithNonemptyMsgWithTestSchemaToString) {
+     SmObjWithRequestWithNonemptyMsgWithTestSchemaToString) {
   SmartObject srcObj;
   CSmartSchema schema = initObjectSchema();
   srcObj.setSchema(schema);
@@ -120,12 +121,12 @@ TEST(CFormatterJsonSDLRPCv2Test,
 
   EXPECT_TRUE(result);
 
-  std::string expectOutputJsonString = "{\n   \"info\" : \"value\"\n}\n";
-
+  std::string expectOutputJsonString = "{\"info\":\"value\"}";
+  CompactJson(jsonString);
   EXPECT_EQ(expectOutputJsonString, jsonString);
 }
 
-TEST(CFormatterJsonSDLRPCv2Test, DISABLED_SmObjWithRequestWithNonemptyMsgToString) {
+TEST(CFormatterJsonSDLRPCv2Test, SmObjWithRequestWithNonemptyMsgToString) {
   SmartObject srcObj;
 
   srcObj[S_PARAMS][S_MESSAGE_TYPE] = MessageTypeTest::request;
@@ -142,11 +143,12 @@ TEST(CFormatterJsonSDLRPCv2Test, DISABLED_SmObjWithRequestWithNonemptyMsgToStrin
   EXPECT_TRUE(result);
 
   std::string expectOutputJsonString =
-      "{\n   \"vrSynonyms\" : [ \"Synonym 1\" ]\n}\n";
+      "{\"vrSynonyms\":[\"Synonym 1\"]}";
+  CompactJson(jsonString);
   EXPECT_EQ(expectOutputJsonString, jsonString);
 }
 
-TEST(CFormatterJsonSDLRPCv2Test, DISABLED_SmObjWithResponseWithoutSchemaToString) {
+TEST(CFormatterJsonSDLRPCv2Test, SmObjWithResponseWithoutSchemaToString) {
   SmartObject srcObj;
 
   srcObj[S_PARAMS][S_MESSAGE_TYPE] = MessageTypeTest::response;
@@ -164,11 +166,12 @@ TEST(CFormatterJsonSDLRPCv2Test, DISABLED_SmObjWithResponseWithoutSchemaToString
   EXPECT_TRUE(result);
 
   std::string expectOutputJsonString =
-      "{\n   \"resultCode\" : 0,\n   \"success\" : true\n}\n";
+      "{\"resultCode\":0,\"success\":true}";
+  CompactJson(jsonString);
   EXPECT_EQ(expectOutputJsonString, jsonString);
 }
 
-TEST(CFormatterJsonSDLRPCv2Test, DISABLED_SmObjWithNotificationToString) {
+TEST(CFormatterJsonSDLRPCv2Test, SmObjWithNotificationToString) {
   SmartObject srcObj;
   CSmartSchema schema = initObjectSchema();
   srcObj.setSchema(schema);
@@ -186,12 +189,12 @@ TEST(CFormatterJsonSDLRPCv2Test, DISABLED_SmObjWithNotificationToString) {
   EXPECT_TRUE(result);
 
   std::string expectOutputJsonString =
-      "{\n   \"info\" : \"info_notification\"\n}\n";
-
+      "{\"info\":\"info_notification\"}";
+  CompactJson(jsonString);
   EXPECT_EQ(expectOutputJsonString, jsonString);
 }
 
-TEST(CFormatterJsonSDLRPCv2Test, DISABLED_SmObjWithResponseToString) {
+TEST(CFormatterJsonSDLRPCv2Test, SmObjWithResponseToString) {
   SmartObject srcObj;
 
   CSmartSchema schema = initObjectSchema();
@@ -213,8 +216,8 @@ TEST(CFormatterJsonSDLRPCv2Test, DISABLED_SmObjWithResponseToString) {
   EXPECT_TRUE(result);
 
   std::string expectOutputJsonString =
-      "{\n   \"resultCode\" : \"SUCCESS\",\n   \"success\" : true\n}\n";
-
+      "{\"resultCode\":\"SUCCESS\",\"success\":true}";
+  CompactJson(jsonString);
   EXPECT_EQ(expectOutputJsonString, jsonString);
 }
 
@@ -229,7 +232,7 @@ TEST(CFormatterJsonSDLRPCv2Test,
   EXPECT_TRUE(result);
 
   std::string expectOutputJsonString = "\"\"\n";
-
+  CompactJson(jsonString);
   EXPECT_EQ(expectOutputJsonString, jsonString);
 }
 

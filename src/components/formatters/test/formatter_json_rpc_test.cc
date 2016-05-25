@@ -45,25 +45,15 @@
 #include "formatters/CSmartFactory.h"
 #include "HMI_API_schema.h"
 #include "MOBILE_API_schema.h"
+#include "FormattersJsonHelper.h"
 
 namespace test {
 namespace components {
-namespace formatters_test {
+namespace formatters {
 
 using namespace NsSmartDeviceLink::NsSmartObjects;
 using namespace NsSmartDeviceLink::NsJSONHandler::Formatters;
 using namespace NsSmartDeviceLink::NsJSONHandler::strings;
-
-void CompactJson(std::string& str) {
-  Json::Value root;
-  Json::Reader reader;
-  reader.parse(str, root);
-  Json::FastWriter writer;
-  str = writer.write(root);
-  if (str[str.size() - 1] == '\n') {
-    str.erase(str.size() - 1, 1);
-  }
-}
 
 namespace {
 const int64_t big_64int = 100000000000;
@@ -289,7 +279,7 @@ TEST(FormatterJsonRPCTest, RequestWithoutCorID_ToString_Fail) {
   EXPECT_EQ(json_string, result);
 }
 
-TEST(FormatterJsonRPCTest, DISABLED_RequestWithoutType_ToString_Fail) {
+TEST(FormatterJsonRPCTest, RequestWithoutType_ToString_Fail) {
   // Create SmartObject
   SmartObject obj;
   obj[S_PARAMS][S_FUNCTION_ID] = mobile_apis::FunctionID::AddCommandID;
@@ -301,10 +291,11 @@ TEST(FormatterJsonRPCTest, DISABLED_RequestWithoutType_ToString_Fail) {
   std::string result;
   // Converting SmartObject to Json string is failed
   EXPECT_FALSE(FormatterJsonRpc::ToString(obj, result));
-  EXPECT_EQ(std::string("{\n   \"jsonrpc\" : \"2.0\"\n}\n"), result);
+  CompactJson(result);
+  EXPECT_EQ(std::string("{\"jsonrpc\":\"2.0\"}"), result);
 }
 
-TEST(FormatterJsonRPCTest, DISABLED_InvalidRPC_ToString_False) {
+TEST(FormatterJsonRPCTest, InvalidRPC_ToString_False) {
   // Create SmartObject with notification id and response message type
   SmartObject obj;
   std::string result;
@@ -321,7 +312,8 @@ TEST(FormatterJsonRPCTest, DISABLED_InvalidRPC_ToString_False) {
   // Convert SmrtObject to Json string
   EXPECT_FALSE(FormatterJsonRpc::ToString(obj, result));
   // Expect result with default value. No correct conversion was done
-  EXPECT_EQ(std::string("{\n   \"jsonrpc\" : \"2.0\"\n}\n"), result);
+  CompactJson(result);
+  EXPECT_EQ(std::string("{\"jsonrpc\":\"2.0\"}"), result);
 }
 
 TEST(FormatterJsonRPCTest, Notification_ToSmartObject_Success) {
@@ -430,6 +422,6 @@ TEST(FormatterJsonRPCTest,
   EXPECT_EQ(4u, keys.size());
 }
 
-}  // namespace formatters_test
+}  // namespace formatters
 }  // namespace components
 }  // namespace test
