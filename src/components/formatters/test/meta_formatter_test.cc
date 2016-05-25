@@ -33,6 +33,8 @@
 #include "gtest/gtest.h"
 #include "formatters/meta_formatter.h"
 #include "meta_formatter_test_helper.h"
+#include "json/value.h"
+#include "json/reader.h"
 
 namespace test {
 namespace components {
