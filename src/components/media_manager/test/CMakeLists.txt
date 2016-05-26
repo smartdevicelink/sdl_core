@@ -54,7 +54,6 @@ set(LIBRARIES
     SmartObjects
     MediaManager
     ApplicationManager
-    MessageHelper
     ProtocolHandler
     gmock
     connectionHandler
@@ -69,9 +68,26 @@ if(EXTENDED_MEDIA_MODE)
     ${GSTREAMER_gstreamer_LIBRARY})
 endif()
 
+if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+    link_directories ($ENV{SDL_SQLITE_DIR})
+  endif()
+
+if(QT_PORT)
+  link_directories (${CMAKE_SOURCE_DIR}/build/openssl_win_x86/lib)
+endif()
+
+if(NOT QT_PORT AND ${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  link_directories(${CMAKE_SOURCE_DIR}/build/openssl_win_x64/lib/)
+endif()
+
 create_test("media_manager_test" "${SOURCES}" "${LIBRARIES}")
 
-if(ENABLE_LOG)
+if(WIN_NATIVE)
+  target_link_libraries("media_manager_test" ws2_32)
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /IGNORE:4099" )
+endif()
+
+if(ENABLE_LOG AND POSIX)
     target_link_libraries("media_manager_test" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
 endif()
 

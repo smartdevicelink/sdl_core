@@ -70,7 +70,7 @@ set(testLibraries
   MessageHelper
   Resumption
   jsoncpp
-  transport_manager
+  TransportManager
   MediaManager
   ProtocolHandler
   connectionHandler

@@ -63,6 +63,12 @@ class LastState {
    */
   utils::json::JsonValue& dictionary();
 
+#ifdef BUILD_TESTS
+  void SetDictionary(utils::json::JsonValue dictionary) {
+    dictionary_ = dictionary;
+  }
+#endif
+
  private:
   /**
    * @brief Load dictionary from filesystem
