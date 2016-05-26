@@ -565,7 +565,7 @@ TEST_F(PolicyManagerImplTest, LoadPT_SetInvalidUpdatePT_PTIsNotLoaded) {
 }
 
 TEST_F(PolicyManagerImplTest2,
-       DISABLED_KmsChanged_SetExceededKms_ExpectCorrectSchedule) {
+       KmsChanged_SetExceededKms_ExpectCorrectSchedule) {
   // Arrange
   CreateLocalPT("sdl_preloaded_pt.json");
   ::policy::Counters counter = ::policy::Counters::KILOMETERS;
@@ -573,7 +573,7 @@ TEST_F(PolicyManagerImplTest2,
   EXPECT_EQ("UP_TO_DATE", manager->GetPolicyTableStatus());
   // Set kms changed but not exceed limit
   manager->KmsChanged(51500);
-  EXPECT_EQ("UPDATE_NEEDED", manager->GetPolicyTableStatus());
+  EXPECT_EQ("UP_TO_DATE", manager->GetPolicyTableStatus());
   // Set kms changed and exceed limit
   manager->KmsChanged(52500);
   EXPECT_EQ("UPDATE_NEEDED", manager->GetPolicyTableStatus());
