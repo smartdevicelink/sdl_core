@@ -42,11 +42,14 @@ include_directories(
   ${COMPONENTS_DIR}/policy/src/policy/policy_table/table_struct
   ${COMPONENTS_DIR}/policy/src/policy/policy_table/
   ${COMPONENTS_DIR}/policy/test/include/
+  ${COMPONENTS_DIR}/policy/test/
+  ${COMPONENTS_DIR}/include/test/policy/
   $ENV{SDL_SQLITE_DIR}
 )
 
 set(testLibraries
   gmock
+  dbms
   Utils
   PolicyTestLib
   UsageStatistics
@@ -59,9 +62,11 @@ set(testSources
   update_status_manager_test.cc
 )
 
+if (NOT QT_PORT)
   list (APPEND testSources
     sql_pt_representation_test.cc
   )
+endif()
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     list (APPEND testSources
@@ -69,7 +74,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 )
 endif()
 
-if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+if(WIN_NATIVE)
     link_directories ($ENV{SDL_SQLITE_DIR})
 endif()
 
