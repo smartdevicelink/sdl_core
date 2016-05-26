@@ -188,7 +188,7 @@ TEST(ValidatedTypes, TestArrayInitializingConstructor) {
   ASSERT_RPCTYPE_VALID(arr);
 }
 
-TEST(ValidatedTypes, TestOptionalEmptyArray) {
+TEST(ValidatedTypes, DISABLED_TestOptionalEmptyArray) {
   Optional<Array<Integer<int8_t, 0, 10>, 0, 5> > int_array;
   ASSERT_RPCTYPE_VALID(int_array);
   ASSERT_FALSE(int_array.is_initialized());
@@ -197,7 +197,7 @@ TEST(ValidatedTypes, TestOptionalEmptyArray) {
   ASSERT_EQ(serialized, "[]\n");
 }
 
-TEST(ValidatedTypes, TestMandatoryEmptyArray) {
+TEST(ValidatedTypes, DISABLED_TestMandatoryEmptyArray) {
   Array<Integer<int8_t, 0, 10>, 0, 5> int_array;
   ASSERT_FALSE(int_array.is_valid());
   ASSERT_FALSE(int_array.is_initialized());
@@ -227,7 +227,7 @@ TEST(ValidatedTypes, TestMapInitializingConstructor) {
   ASSERT_RPCTYPE_VALID(map);
 }
 
-TEST(ValidatedTypes, TestEmptyMandatoryMap) {
+TEST(ValidatedTypes, DISABLED_TestEmptyMandatoryMap) {
   Map<Integer<int8_t, 0, 10>, 0, 5> im;
   ASSERT_FALSE(im.is_valid());
   ASSERT_FALSE(im.is_initialized());
