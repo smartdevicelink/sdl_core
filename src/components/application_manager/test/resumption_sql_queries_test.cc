@@ -37,8 +37,7 @@
 #include <utility>
 #include "gtest/gtest.h"
 
-#include "utils/sqlite_wrapper/sql_database.h"
-#include "utils/sqlite_wrapper/sql_query.h"
+#include "utils/sql_wrapper.h"
 #include "utils/file_system.h"
 #include "application_manager/resumption/resumption_sql_queries.h"
 #include "policy/sql_pt_queries.h"
