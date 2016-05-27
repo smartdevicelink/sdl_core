@@ -244,7 +244,7 @@ TEST(TimerTest, Restart_Loop_3Calls) {
 
 // Restart from call
 
-TEST(TimerTest, DISABLED_Restart_NoLoop_FromCall) {
+TEST(TimerTest, Restart_NoLoop_FromCall) {
   sync_primitives::AutoLock auto_lock(shot_lock);
   TestTask* task = new TestTaskWithStart();
   timer::Timer timer(kTimerName, task);
@@ -263,7 +263,7 @@ TEST(TimerTest, DISABLED_Restart_NoLoop_FromCall) {
   EXPECT_EQ(1u, task->calls_count());
 }
 
-TEST(TimerTest, DISABLED_Restart_Loop_FromCall) {
+TEST(TimerTest, Restart_Loop_FromCall) {
   sync_primitives::AutoLock auto_lock(shot_lock);
   TestTask* task = new TestTaskWithStart();
   timer::Timer timer(kTimerName, task);
@@ -284,7 +284,7 @@ TEST(TimerTest, DISABLED_Restart_Loop_FromCall) {
 
 // Stop from call
 
-TEST(TimerTest, DISABLED_Stop_Loop_FromCall) {
+TEST(TimerTest, Stop_Loop_FromCall) {
   sync_primitives::AutoLock auto_lock(shot_lock);
   TestTask* task = new TestTaskWithStop();
   timer::Timer timer(kTimerName, task);
@@ -305,7 +305,7 @@ TEST(TimerTest, DISABLED_Stop_Loop_FromCall) {
 
 // Delete running
 
-TEST(TimerTest, DISABLED_Delete_Running_NoLoop) {
+TEST(TimerTest, Delete_Running_NoLoop) {
   MockTimerTask* mock_task = new MockTimerTask();
   EXPECT_CALL(*mock_task, run()).Times(0);
 

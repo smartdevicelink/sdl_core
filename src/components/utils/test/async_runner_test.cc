@@ -104,8 +104,8 @@ TEST_F(AsyncRunnerTest, ASyncRunManyDelegates_ExpectSuccessfulAllDelegatesRun) {
     delegates_[i] = new TestThreadDelegate();
     asr_pt_->AsyncRun(delegates_[i]);
   }
-  // Wait for 2 secs. Give this time to delegates to be run
-  cond_var_.WaitFor(lock, 2000);
+  // Wait for 1 secs. Give this time to delegates to be run
+  cond_var_.WaitFor(lock, 1000);
   // Expect all delegates run successfully
   EXPECT_EQ(kDelegatesNum_, check_value);
 }
@@ -120,8 +120,8 @@ TEST_F(AsyncRunnerTest,
   for (unsigned int i = 0; i < kDelegatesNum_; ++i) {
     delegates_[i] = new TestThreadDelegate();
   }
-  // Wait for 2 secs
-  cond_var_.WaitFor(lock, 2000);
+  // Wait for 1 secs
+  cond_var_.WaitFor(lock, 1000);
   // Run created delegates
   for (unsigned int i = 0; i < kDelegatesNum_; ++i) {
     if (kDelegatesNum_ > 1) {
