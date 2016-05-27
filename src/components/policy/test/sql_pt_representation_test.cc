@@ -1436,6 +1436,8 @@ TEST(SQLPTRepresentationTest3, RemoveDB_RemoveDB_ExpectFileDeleted) {
   delete reps;
 }
 
+// TODO {AKozoriz} : Snapshot must have module meta section, but test
+// generates snapshot without it.
 TEST_F(SQLPTRepresentationTest,
        DISABLED_GenerateSnapshot_SetPolicyTable_SnapshotIsPresent) {
   // Arrange
