@@ -263,8 +263,8 @@ TEST(PosixThreadTest, StartThread_ExpectThreadStarted) {
 
 TEST(PosixThreadTest, StartOneThreadTwice_ExpectTheSameThreadStartedTwice) {
   // Arrange
-  PlatformThreadHandle thread1_id;
-  PlatformThreadHandle thread2_id;
+  uint64_t thread1_id;
+  uint64_t thread2_id;
   threads::Thread* thread = NULL;
   TestThreadDelegate* threadDelegate = new TestThreadDelegate();
   AutoLock test_lock(test_mutex_);
@@ -290,8 +290,8 @@ TEST(PosixThreadTest, StartOneThreadTwice_ExpectTheSameThreadStartedTwice) {
 TEST(PosixThreadTest,
      StartOneThreadAgainAfterRename_ExpectRenamedThreadStarted) {
   // Arrange
-  PlatformThreadHandle thread1_id;
-  PlatformThreadHandle thread2_id;
+  uint64_t thread1_id;
+  uint64_t thread2_id;
   threads::Thread* thread = NULL;
   TestThreadDelegate* threadDelegate = new TestThreadDelegate();
   AutoLock test_lock(test_mutex_);

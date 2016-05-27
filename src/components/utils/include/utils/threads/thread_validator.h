@@ -67,10 +67,10 @@ class SingleThreadSimpleValidator {
   // This method should be called in every public method
   // of classes being checked for absence of concurrent access
   void AssertRunningOnCreationThread() const;
-  PlatformThreadHandle creation_thread_id() const;
+  uint64_t creation_thread_id() const;
 
  private:
-  const PlatformThreadHandle creation_thread_id_;
+  const uint64_t creation_thread_id_;
 };
 
 /*
@@ -92,14 +92,14 @@ class SingleThreadValidator {
 
   // Must be called prior to transferring object being validated to
   // another thread or when passing it back
-  void PassToThread(PlatformThreadHandle thread_id) const;
+  void PassToThread(uint64_t thread_id) const;
   // This method should be called in every public method
   // of classes being checked for absence of unintended concurrent
   // access
   void AssertRunningOnValidThread() const;
 
  private:
-  mutable PlatformThreadHandle owning_thread_id_;
+  mutable uint64_t owning_thread_id_;
 };
 
 }  // namespace threads

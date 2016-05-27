@@ -115,8 +115,7 @@ void* Thread::threadFunc(void* arg) {
   return NULL;
 }
 
-void Thread::SetNameForId(const PlatformThreadHandle& thread_id,
-                          std::string name) {}
+void Thread::SetNameForId(uint64_t thread_id, std::string name) {}
 
 Thread::Thread(const char* name, ThreadDelegate* delegate)
     : name_(name ? name : "undefined")
@@ -132,12 +131,12 @@ bool Thread::start() {
   return start(thread_options_);
 }
 
-PlatformThreadHandle Thread::CurrentId() {
-  return GetCurrentThread();
+uint64_t Thread::CurrentId() {
+  return static_cast<uint64_t>(GetCurrentThreadId());
 }
 
 bool Thread::IsCurrentThread() const {
-  return CurrentId() == thread_handle();
+  return CurrentId() == static_cast<uint64_t>(GetThreadId(thread_handle()));
 }
 
 bool Thread::start(const ThreadOptions& options) {

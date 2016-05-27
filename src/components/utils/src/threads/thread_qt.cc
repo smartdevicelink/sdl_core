@@ -92,8 +92,7 @@ void* Thread::threadFunc(void* arg) {
   return NULL;
 }
 
-void Thread::SetNameForId(const PlatformThreadHandle& thread_id,
-                          std::string name) {}
+void Thread::SetNameForId(uint64_t thread_id, std::string name) {}
 
 Thread::Thread(const char* name, ThreadDelegate* delegate, QObject* parent)
     : QObject(parent)
@@ -113,7 +112,7 @@ bool Thread::start() {
   return true;
 }
 
-PlatformThreadHandle Thread::CurrentId() {
+uint64_t Thread::CurrentId() {
   return QThread::currentThread();
 }
 

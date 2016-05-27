@@ -44,7 +44,7 @@ ThreadDelegate::~ThreadDelegate() {
 
 void ThreadDelegate::exitThreadMain() {
   if (thread_) {
-    if (thread_->thread_handle() == QThread::currentThreadId()) {
+    if (thread_->IsCurrentThread()) {
       DCHECK(!"Cannot terminate self");
     } else {
       emit TerminateThread();

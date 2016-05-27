@@ -133,11 +133,11 @@ void* Thread::threadFunc(void* arg) {
   return NULL;
 }
 
-void Thread::SetNameForId(const PlatformThreadHandle& thread_id,
-                          std::string name) {
+void Thread::SetNameForId(uint64_t thread_id, std::string name) {
   if (name.size() > THREAD_NAME_SIZE)
     name.erase(THREAD_NAME_SIZE);
-  const int rc = pthread_setname_np(thread_id, name.c_str());
+  const int rc =
+      pthread_setname_np(static_cast<pthread_t>(thread_id), name.c_str());
   if (rc != EOK) {
     LOGGER_WARN(logger_,
                 "Couldn't set pthread name \"" << name << "\", error code "
@@ -160,12 +160,12 @@ bool Thread::start() {
   return start(thread_options_);
 }
 
-PlatformThreadHandle Thread::CurrentId() {
-  return pthread_self();
+uint64_t Thread::CurrentId() {
+  return static_cast<uint64_t>(pthread_self());
 }
 
 bool Thread::IsCurrentThread() const {
-  return pthread_equal(CurrentId(), thread_handle());
+  return pthread_equal(static_cast<pthread_t>(CurrentId()), thread_handle());
 }
 
 bool Thread::start(const ThreadOptions& options) {
