@@ -38,6 +38,10 @@
 #include "hmi_message_handler/mock_hmi_message_handler_settings.h"
 #include "utils/make_shared.h"
 
+namespace {
+const uint64_t stack_size = 1000u;
+}
+
 namespace test {
 namespace components {
 namespace hmi_message_handler_test {
@@ -56,7 +60,6 @@ class HMIMessageHandlerImplTest : public ::testing::Test {
   hmi_message_handler::MockHMIMessageObserver* mock_hmi_message_observer_;
   testing::NiceMock<MockHMIMessageHandlerSettings>
       mock_hmi_message_handler_settings;
-  static const uint64_t stack_size = 1000u;
 
   virtual void SetUp() OVERRIDE {
     ON_CALL(mock_hmi_message_handler_settings, thread_min_stack_size())
@@ -123,7 +126,8 @@ TEST_F(HMIMessageHandlerImplTest,
   EXPECT_TRUE(hmi_handler_->message_adapters().empty());
 }
 
-TEST_F(HMIMessageHandlerImplTest, DISABLED_RemoveHMIMessageAdapter_ExpectRemoved) {
+TEST_F(HMIMessageHandlerImplTest,
+       DISABLED_RemoveHMIMessageAdapter_ExpectRemoved) {
   // Arrange
   hmi_handler_->AddHMIMessageAdapter(mb_adapter_);
   // Act
