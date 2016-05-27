@@ -301,7 +301,8 @@ TEST_F(ApplicationImplTest, SetPostponedState_RemovePostponedState) {
   EXPECT_EQ(NULL, state2);
 }
 
-TEST_F(ApplicationImplTest, AddStateAddRegularState_GetHmiLvlAudioSystemState) {
+TEST_F(ApplicationImplTest,
+       AddStateAddRegularState_GetHmiLvlAudioSystemState) {
   audiostate = AudioStreamingState::ATTENUATED;
   syst_context = SystemContext::SYSCTXT_ALERT;
   TestAddHmiState(HMILevel::HMI_FULL,
@@ -418,7 +419,7 @@ TEST_F(ApplicationImplTest, SetIconPath) {
   EXPECT_EQ(test_file.file_name, app_impl->app_icon_path());
 }
 
-TEST_F(ApplicationImplTest, DISABLED_LoadPersistentFiles) {
+TEST_F(ApplicationImplTest, LoadPersistentFiles) {
   // Precondition
   // Create test folder with diff files
 
@@ -487,7 +488,8 @@ TEST_F(ApplicationImplTest, DISABLED_LoadPersistentFiles) {
   EXPECT_EQ(FileType::AUDIO_MP3, test_file8->file_type);
 }
 
-TEST_F(ApplicationImplTest, IsCommandLimitsExceeded_SetLimitFromConfig) {
+TEST_F(ApplicationImplTest,
+       IsCommandLimitsExceeded_SetLimitFromConfig) {
   std::pair<uint32_t, int32_t> get_frequency;
   get_frequency.first = 5;
   get_frequency.second = 1;
@@ -684,7 +686,7 @@ TEST_F(ApplicationImplTest, SuspendAudioStreaming) {
 }
 
 // TODO {AKozoriz} : Fix tests with streaming (APPLINK-19289)
-TEST_F(ApplicationImplTest, DISABLED_Suspend_WakeUpAudioStreaming) {
+TEST_F(ApplicationImplTest, Suspend_WakeUpAudioStreaming) {
   protocol_handler::ServiceType type = protocol_handler::ServiceType::kAudio;
   EXPECT_CALL(mock_application_manager_, OnAppStreaming(app_id, type, false));
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
@@ -697,7 +699,7 @@ TEST_F(ApplicationImplTest, DISABLED_Suspend_WakeUpAudioStreaming) {
   app_impl->WakeUpStreaming(type);
 }
 
-TEST_F(ApplicationImplTest, DISABLED_Suspend_WakeUpNaviStreaming) {
+TEST_F(ApplicationImplTest, Suspend_WakeUpNaviStreaming) {
   protocol_handler::ServiceType type =
       protocol_handler::ServiceType::kMobileNav;
   EXPECT_CALL(mock_application_manager_, OnAppStreaming(app_id, type, false));
