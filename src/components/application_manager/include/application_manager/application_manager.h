@@ -52,6 +52,9 @@ namespace resumption {
 class LastState;
 }
 
+namespace app_launch {
+class AppLaunchCtrl;
+}  // namespace app_launch
 namespace media_manager {
 class MediaManager;
 }
@@ -490,6 +493,8 @@ class ApplicationManager {
       uint32_t connection_key, const std::string& policy_app_id) const = 0;
 
   virtual resumption::ResumeCtrl& resume_controller() = 0;
+
+   virtual app_launch::AppLaunchCtrl& app_launch_ctrl() = 0;
   /*
    * @brief Converts connection string transport type representation
    * to HMI Common_TransportType

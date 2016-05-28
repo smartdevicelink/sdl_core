@@ -139,6 +139,8 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   const std::string& app_icon_path() const;
   connection_handler::DeviceHandle device() const;
   const std::string& mac_address() const OVERRIDE;
+  const std::string& bundle_id() const OVERRIDE;
+  void set_bundle_id(const std::string& bundle_id) OVERRIDE;
   void set_tts_properties_in_none(bool active);
   bool tts_properties_in_none();
   void set_tts_properties_in_full(bool active);
@@ -357,7 +359,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   std::string app_icon_path_;
   connection_handler::DeviceHandle device_;
   const std::string mac_address_;
-
+  std::string bundle_id_;
   AppFilesMap app_files_;
   std::set<mobile_apis::ButtonName::eType> subscribed_buttons_;
   VehicleInfoSubscriptions subscribed_vehicle_info_;

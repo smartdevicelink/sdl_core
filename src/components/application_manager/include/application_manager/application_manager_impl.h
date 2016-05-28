@@ -49,6 +49,7 @@
 #include "application_manager/resumption/resume_ctrl.h"
 #include "application_manager/vehicle_info_data.h"
 #include "application_manager/state_controller_impl.h"
+#include "application_manager/app_launch/app_launch_data.h"
 #include "application_manager/application_manager_settings.h"
 #include "application_manager/event_engine/event_dispatcher_impl.h"
 
@@ -1102,6 +1103,8 @@ class ApplicationManagerImpl
   const ApplicationManagerSettings& get_settings() const OVERRIDE;
   virtual event_engine::EventDispatcher& event_dispatcher() OVERRIDE;
 
+  app_launch::AppLaunchCtrl& app_launch_ctrl() OVERRIDE;
+
  private:
   /**
    * @brief PullLanguagesInfo allows to pull information about languages.
@@ -1430,6 +1433,8 @@ class ApplicationManagerImpl
   sync_primitives::Lock timer_pool_lock_;
   sync_primitives::Lock stopping_application_mng_lock_;
   StateControllerImpl state_ctrl_;
+  std::auto_ptr<app_launch::AppLaunchData> app_launch_dto_;
+  std::auto_ptr<app_launch::AppLaunchCtrl> app_launch_ctrl_;
 
 #ifdef TELEMETRY_MONITOR
   AMTelemetryObserver* metric_observer_;

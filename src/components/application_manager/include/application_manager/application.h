@@ -109,6 +109,8 @@ class InitialApplicationData {
   virtual const smart_objects::SmartObject* app_types() const = 0;
   virtual const smart_objects::SmartObject* vr_synonyms() const = 0;
   virtual const std::string& mac_address() const = 0;
+  virtual const std::string& bundle_id() const = 0;
+  virtual void set_bundle_id(const std::string& bundle_id) = 0;
   virtual std::string policy_app_id() const = 0;
   virtual const smart_objects::SmartObject* tts_name() const = 0;
   virtual const smart_objects::SmartObject* ngn_media_screen_name() const = 0;

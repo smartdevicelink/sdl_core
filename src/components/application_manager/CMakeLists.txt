@@ -46,6 +46,7 @@ include_directories (
   ${COMPONENTS_DIR}/config_profile/include/
   ${COMPONENTS_DIR}/request_watchdog/include/
   ${COMPONENTS_DIR}/resumption/include/
+  ${COMPONENTS_DIR}/app_launch/include/
   ${COMPONENTS_DIR}/rpc_base/include/
   ${COMPONENTS_DIR}/interfaces
   ${CMAKE_BINARY_DIR}/src/components/
@@ -94,6 +95,12 @@ file (GLOB EVENT_ENGINE
 file (GLOB RESUMPTION
   ${AM_SOURCE_DIR}/src/resumption/*
 )
+
+
+file (GLOB APP_LAUNCH
+  ${AM_SOURCE_DIR}/src/app_launch/*
+)
+
 
 file (GLOB MOBILE_COMMANDS_SOURCES
   ${AM_SOURCE_DIR}/src/commands/*
@@ -382,7 +389,8 @@ add_library("MessageHelper" ${MESSAGE_HELPER_SOURCES})
 add_library("AMMobileCommandsLibrary" ${MOBILE_COMMANDS_SOURCES} )
 target_link_libraries("AMMobileCommandsLibrary" ${LIBRARIES} AMEventEngine)
 
-add_library("ApplicationManager" ${SOURCES} ${RESUMPTION})
+add_library("ApplicationManager" ${SOURCES} ${RESUMPTION} ${APP_LAUNCH})
+
 target_link_libraries("ApplicationManager" ${LIBRARIES} AMHMICommandsLibrary
                                                         AMMobileCommandsLibrary
                                                         AMEventEngine
