@@ -102,6 +102,16 @@ class ConnectionHandlerImpl
    */
   void ConnectToDevice(connection_handler::DeviceHandle device_handle) OVERRIDE;
 
+  /**
+   * @brief RunAppOnDevice allows to run specific application on the certain device.
+   *
+   * @param device_handle device identifier to run application on.
+   *
+   * @param app_id application id also known as bundle id on some devices to run.
+   */
+  void RunAppOnDevice(const std::string& device_mac,
+                      const std::string& bundle_id) const OVERRIDE;
+
   void ConnectToAllDevices() OVERRIDE;
 
   void StartTransportManager() OVERRIDE;

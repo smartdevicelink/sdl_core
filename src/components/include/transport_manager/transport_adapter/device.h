@@ -38,6 +38,7 @@
 
 #include "transport_manager/common.h"
 #include "utils/shared_ptr.h"
+#include "utils/macro.h"
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -76,7 +77,16 @@ class Device {
 
   virtual ApplicationList GetApplicationList() const = 0;
 
-  virtual void Stop() {}
+  /**
+   * @brief LaunchApp allows to run appropriate application on the device.
+   *
+   * @param bundle_id application identifier to run.
+   */
+  virtual void LaunchApp(const std::string& bundle_id) const {
+    UNUSED(bundle_id);
+  }
+
+  virtual void Stop() { }
 
   inline const DeviceUID& unique_device_id() const {
     return unique_device_id_;

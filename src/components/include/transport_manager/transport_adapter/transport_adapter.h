@@ -175,6 +175,16 @@ class TransportAdapter {
   virtual Error ConnectDevice(const DeviceUID& device_handle) = 0;
 
   /**
+   * @brief RunAppOnDevice allows to run specific application on the certain device.
+   *
+   * @param device_handle device identifier to run application on.
+   *
+   * @param app_id application id also known as bundle id on some devices to run.
+   */
+  virtual void RunAppOnDevice(const std::string& device_uid,
+                              const std::string& bundle_id) = 0;
+
+  /**
    * @brief Notify that listener of client connection is available.
    *
    * @return true - available, false - not available.

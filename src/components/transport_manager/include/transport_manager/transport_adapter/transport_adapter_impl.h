@@ -478,6 +478,17 @@ class TransportAdapterImpl : public TransportAdapter,
    */
   TransportAdapter::Error ConnectDevice(DeviceSptr device);
 
+
+  /**
+   * @brief RunAppOnDevice allows run specific application on the certain device.
+   *
+   * @param device_handle device identifier to run application on.
+   *
+   * @param bundle_id application id alsow known as bundle id on some devices to run.
+   */
+  void RunAppOnDevice(const DeviceUID &device_uid,
+                      const std::string& bundle_id) OVERRIDE;
+
   /**
    * @brief Remove specified device
    * @param device_handle Device unique identifier.

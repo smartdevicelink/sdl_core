@@ -341,6 +341,34 @@ int TransportManagerImpl::SendMessageToDevice(
   return E_SUCCESS;
 }
 
+void TransportManagerImpl::RunAppOnDevice(const DeviceHandle device_handle,
+                                          const std::string& bundle_id) {
+  if (!this->is_initialized_) {
+    LOG4CXX_ERROR(logger_, "TransportManager is not initialized.");
+    return;
+  }
+  DeviceUID device_id = converter_.HandleToUid(device_handle);
+  LOG4CXX_DEBUG(logger_, "Convert handle to id:" << device_id);
+
+  sync_primitives::AutoReadLock lock(device_to_adapter_map_lock_);
+  DeviceToAdapterMap::iterator it = device_to_adapter_map_.find(device_id);
+  if (it == device_to_adapter_map_.end()) {
+    LOG4CXX_ERROR(logger_, "No device adapter found by id " << device_id);
+    return;
+  }
+  transport_adapter::TransportAdapter* ta = it->second;
+
+  if (!ta) {
+    LOG4CXX_ERROR(logger_, "Transport adapter for device: " << device_id
+                                                            << " is NULL");
+    return;
+  }
+
+  ta->RunAppOnDevice(device_id, bundle_id);
+
+  return;
+}
+
 int TransportManagerImpl::ReceiveEventFromDevice(
     const TransportAdapterEvent& event) {
   LOG4CXX_TRACE(logger_, "enter. TransportAdapterEvent: " << &event);

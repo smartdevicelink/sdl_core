@@ -697,6 +697,19 @@ void ConnectionHandlerImpl::ConnectToDevice(
   }
 }
 
+void ConnectionHandlerImpl::RunAppOnDevice(const std::string& device_mac,
+                                           const std::string& bundle_id) const {
+  for (DeviceMap::const_iterator i = device_list_.begin();
+       i != device_list_.end(); ++i) {
+    const connection_handler::Device& device = i->second;
+    if (device.mac_address() == device_mac) {
+        transport_manager_.RunAppOnDevice(device.device_handle(), bundle_id);
+        return;
+    }
+  }
+  LOG4CXX_WARN(logger_, "No apps found on device " << device_mac);
+}
+
 void ConnectionHandlerImpl::ConnectToAllDevices() {
   for (DeviceMap::iterator i = device_list_.begin(); i != device_list_.end();
        ++i) {
