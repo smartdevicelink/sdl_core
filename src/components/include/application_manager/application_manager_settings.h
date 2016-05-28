@@ -34,15 +34,17 @@
 #define SRC_COMPONENTS_INCLUDE_APPLICATION_MANAGER_APPLICATION_MANAGER_SETTINGS_H_
 
 #include "application_manager/request_controller_settings.h"
+#include "application_manager/app_launch_settings.h"
 
 #include <stdint.h>
 #include <string>
 
 namespace application_manager {
-class ApplicationManagerSettings : public RequestControlerSettings {
+class ApplicationManagerSettings : public RequestControlerSettings,
+                                   public app_launch::AppLaunchSettings {
  public:
   virtual const uint32_t video_data_stopped_timeout() const = 0;
-  virtual const std::uint32_t audio_data_stopped_timeout() const = 0;
+  virtual const uint32_t audio_data_stopped_timeout() const = 0;
   virtual const std::pair<uint32_t, int32_t>& read_did_frequency() const = 0;
   virtual const std::pair<uint32_t, int32_t>& get_vehicle_data_frequency()
       const = 0;
@@ -94,6 +96,7 @@ class ApplicationManagerSettings : public RequestControlerSettings {
   virtual const uint32_t& app_icons_amount_to_remove() const = 0;
   virtual const uint32_t& list_files_response_size() const = 0;
 };
+
 }  // namespace application_manager
 
 #endif  // SRC_COMPONENTS_INCLUDE_APPLICATION_MANAGER_APPLICATION_MANAGER_SETTINGS_H_

@@ -58,7 +58,7 @@ class LastState;
  */
 
 class ResumeCtrlImpl : public ResumeCtrl,
-                       public application_manager::event_engine::EventObserver {
+                       public app_mngr::event_engine::EventObserver {
  public:
   /**
    * @brief allows to create ResumeCtrlImpl object
@@ -139,6 +139,11 @@ class ResumeCtrlImpl : public ResumeCtrl,
    * with reason "SUSPEND"
    */
   void StopSavePersistentDataTimer() OVERRIDE;
+
+  /**
+   * @brief Method stops restore_hmi_level_timer_ "RsmCtrlRstore" in OnSuspend()
+   */
+  void StopRestoreHmiLevelTimer();
 
   /**
    * @brief Start timer for resumption applications
@@ -440,6 +445,7 @@ class ResumeCtrlImpl : public ResumeCtrl,
 
   /**
    * @brief Add application to queue to restore HMI level
+   * @param time_stamp contains time when application was stored to resumption data
    * @param app_id contains id of application
    */
   void AddToResumptionTimerQueue(const uint32_t app_id);
