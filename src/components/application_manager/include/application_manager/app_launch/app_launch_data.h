@@ -81,8 +81,8 @@ class AppLaunchData {
   /**
    * @brief select from DB all records with this dev_mac
    * @param app_data - data to inserting
-   * @param dev_apps - pointer to vector with result of select
-   * @return true in success cases and false othrewise
+   * @param dev_apps -
+   * @return vector of pointers on results of select
    */
   virtual std::vector<ApplicationDataPtr> GetApplicationDataByDevice(
       const std::string& dev_mac) = 0;
