@@ -318,6 +318,10 @@ const std::string& ApplicationImpl::app_icon_path() const {
   return app_icon_path_;
 }
 
+const std::string& ApplicationImpl::bundle_id() const {
+  return bundle_id_;
+}
+
 connection_handler::DeviceHandle ApplicationImpl::device() const {
   return device_;
 }
@@ -568,6 +572,10 @@ uint32_t ApplicationImpl::get_grammar_id() const {
 
 void ApplicationImpl::set_grammar_id(uint32_t value) {
   grammar_id_ = value;
+}
+
+void ApplicationImpl::set_bundle_id(const std::string& bundle_id) {
+  bundle_id_ = bundle_id;
 }
 
 void ApplicationImpl::ResetDataInNone() {

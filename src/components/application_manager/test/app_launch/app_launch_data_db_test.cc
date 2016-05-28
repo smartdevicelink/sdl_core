@@ -32,6 +32,7 @@
 
 #include <algorithm>
 #include <sstream>
+#include <string>
 #include <memory>
 #include "gtest/gtest.h"
 #include "utils/macro.h"
@@ -45,7 +46,7 @@
 
 namespace test {
 namespace components {
-namespace test_app_launch {
+namespace app_launch_test {
 
 using namespace file_system;
 using namespace app_launch;
@@ -53,6 +54,13 @@ using namespace app_launch;
 using ::testing::ReturnRef;
 using ::testing::Return;
 using ::testing::NiceMock;
+
+namespace {
+const std::string kEmptyString = "";
+const std::string kMobileAppId = "mobile_app_id";
+const std::string kBundleId = "bundle_id";
+const std::string kDeviceMac = "device_mac";
+}  // namespace
 
 class AppLaunchDataDBTest : public ::testing::Test {
  protected:
@@ -182,7 +190,7 @@ std::string AppLaunchDataDBTest::GetApplicationData(
 std::string AppLaunchDataDBTest::AddCounter(const std::string& inp,
                                             int32_t val) {
   std::stringstream ss;
-  ss << inp << val;
+  ss << inp << "_" << val;
   return ss.str();
 }
 
@@ -194,18 +202,18 @@ TEST_F(AppLaunchDataDBTest, Init) {
 }
 
 TEST_F(AppLaunchDataDBTest, SaveAndGetData) {
-  ApplicationData data("mobile_app_id", "bundle_id", "device_mac");
+  ApplicationData data(kMobileAppId, kBundleId, kDeviceMac);
   AddApplicationDataWithIncreaseTable(data);
-  ApplicationData recoveredData("", "", "");
+  ApplicationData recoveredData(kEmptyString, kEmptyString, kEmptyString);
   GetApplicationData(data, recoveredData);
   EXPECT_TRUE(data == recoveredData);
 }
 
 TEST_F(AppLaunchDataDBTest, NotAddEmptyAppData) {
-  ApplicationData data1("", "bundle_id", "device_mac");
-  ApplicationData data2("mobile_app_id", "", "device_mac");
-  ApplicationData data3("mobile_app_id", "bundle_id", "");
-  ApplicationData data4("", "", "");
+  ApplicationData data1(kEmptyString, kBundleId, kDeviceMac);
+  ApplicationData data2(kMobileAppId, kEmptyString, kDeviceMac);
+  ApplicationData data3(kMobileAppId, kBundleId, kEmptyString);
+  ApplicationData data4(kEmptyString, kEmptyString, kEmptyString);
   EXPECT_FALSE(res_db()->AddApplicationData(data1));
   EXPECT_FALSE(res_db()->AddApplicationData(data2));
   EXPECT_FALSE(res_db()->AddApplicationData(data3));
@@ -214,7 +222,7 @@ TEST_F(AppLaunchDataDBTest, NotAddEmptyAppData) {
 }
 
 TEST_F(AppLaunchDataDBTest, SaveOneAndGetAnotherData) {
-  ApplicationData data("mobile_app_id", "bundle_id", "device_mac");
+  ApplicationData data(kMobileAppId, kBundleId, kDeviceMac);
   ApplicationData recoverData = data;
   AddApplicationDataWithIncreaseTable(data);
   recoverData.device_mac_ += "test";
@@ -223,16 +231,17 @@ TEST_F(AppLaunchDataDBTest, SaveOneAndGetAnotherData) {
 }
 
 TEST_F(AppLaunchDataDBTest, MaxCount) {
-  const uint32_t mac_ios_devs = res_db()->get_max_number_iOS_devs();
-  for (uint32_t i = 0; i < mac_ios_devs; i++) {
-    ApplicationData data(AddCounter("mobile_app_id_", i),
-                         AddCounter("bundle_id_", i),
-                         "device_mac");
+  const uint32_t max_ios_devs = res_db()->get_max_number_iOS_devs();
+
+  for (uint32_t i = 0; i < max_ios_devs; i++) {
+    ApplicationData data(
+        AddCounter(kMobileAppId, i), AddCounter(kBundleId, i), kDeviceMac);
     AddApplicationDataWithIncreaseTable(data);
   }
 
   utils::dbms::SQLQuery query(test_db());
-  ApplicationData changedRecord("mobile_app_id_0", "bundle_id_0", "device_mac");
+  ApplicationData changedRecord(
+      AddCounter(kMobileAppId, 0), AddCounter(kBundleId, 0), kDeviceMac);
   EXPECT_TRUE(query.Prepare(kInsertTimestamp));
   query.Bind(AppLaunchDataDB::device_mac_index, changedRecord.device_mac_);
   query.Bind(AppLaunchDataDB::application_id_index,
@@ -241,9 +250,11 @@ TEST_F(AppLaunchDataDBTest, MaxCount) {
   EXPECT_TRUE(query.Exec());
 
   uint32_t size_max = res_db()->GetCurentNumberOfAppData();
-  EXPECT_EQ(mac_ios_devs, size_max);
-  EXPECT_TRUE(res_db()->AddApplicationData(ApplicationData(
-      "mobile_app_id_last", "bundle_id_last", "device_mac_last")));
+  EXPECT_EQ(max_ios_devs, size_max);
+  EXPECT_TRUE(res_db()->AddApplicationData(
+      ApplicationData(AddCounter(kMobileAppId, max_ios_devs),
+                      AddCounter(kBundleId, max_ios_devs),
+                      kDeviceMac)));
   uint32_t size_after_max = res_db()->GetCurentNumberOfAppData();
   EXPECT_EQ(size_max, size_after_max);
   EXPECT_FALSE(res_db()->IsAppDataAlreadyExisted(changedRecord));
@@ -266,11 +277,12 @@ TEST_F(AppLaunchDataDBTest, SelectMultipleData) {
   const std::string device_mac_1 = "device_mac_1";
   const std::string device_mac_2 = "device_mac_2";
 
-  uint32_t half_part = res_db()->get_max_number_iOS_devs() / 2u;
+  uint32_t half_of_max_number_iOS_devs =
+      res_db()->get_max_number_iOS_devs() / 2u;
 
-  for (uint32_t i = 0; i < half_part; i++) {
-    const std::string mobile_app_id = AddCounter("d1_mobile_app_id_", i);
-    const std::string bundle_id = AddCounter("d1_bundle_id_", i);
+  for (uint32_t i = 0; i < half_of_max_number_iOS_devs; i++) {
+    const std::string mobile_app_id = AddCounter("d1_mobile_app_id", i);
+    const std::string bundle_id = AddCounter("d1_bundle_id", i);
 
     ApplicationDataPtr app_data = utils::MakeShared<ApplicationData>(
         mobile_app_id, bundle_id, device_mac_1);
@@ -278,9 +290,9 @@ TEST_F(AppLaunchDataDBTest, SelectMultipleData) {
     input_data1.push_back(app_data);
   }
 
-  for (uint32_t i = 0; i < half_part; i++) {
-    const std::string mobile_app_id = AddCounter("d2_mobile_app_id_", i);
-    const std::string bundle_id = AddCounter("d2_bundle_id_", i);
+  for (uint32_t i = 0; i < half_of_max_number_iOS_devs; i++) {
+    const std::string mobile_app_id = AddCounter("d2_mobile_app_id", i);
+    const std::string bundle_id = AddCounter("d2_bundle_id", i);
 
     ApplicationDataPtr app_data = utils::MakeShared<ApplicationData>(
         mobile_app_id, bundle_id, device_mac_2);
@@ -291,8 +303,8 @@ TEST_F(AppLaunchDataDBTest, SelectMultipleData) {
   output_data1 = res_db()->GetApplicationDataByDevice(device_mac_1);
   output_data2 = res_db()->GetApplicationDataByDevice(device_mac_2);
 
-  EXPECT_EQ(half_part, output_data1.size());
-  EXPECT_EQ(half_part, output_data2.size());
+  EXPECT_EQ(half_of_max_number_iOS_devs, output_data1.size());
+  EXPECT_EQ(half_of_max_number_iOS_devs, output_data2.size());
 
   std::sort(
       output_data1.begin(), output_data1.end(), ApplicationDataComporator);
@@ -314,9 +326,8 @@ TEST_F(AppLaunchDataDBTest, SelectMultipleData) {
 // requeste manual Init call
 TEST_F(AppLaunchDataDBTest, DeleteAllTableDataTwice) {
   for (uint32_t i = 0; i < res_db()->get_max_number_iOS_devs(); i++) {
-    ApplicationData data(AddCounter("mobile_app_id_", i),
-                         AddCounter("bundle_id_", i),
-                         "device_mac");
+    ApplicationData data(
+        AddCounter(kMobileAppId, i), AddCounter(kBundleId, i), kDeviceMac);
     AddApplicationDataWithIncreaseTable(data);
   }
 
@@ -329,6 +340,6 @@ TEST_F(AppLaunchDataDBTest, DeleteAllTableDataTwice) {
   EXPECT_EQ(0u, res_db()->GetCurentNumberOfAppData());
 }
 
-}  // namespace test_app_launch
+}  // namespace app_launch_test
 }  // namespace components
 }  // namespace test

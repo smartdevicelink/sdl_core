@@ -71,7 +71,7 @@ class AppLaunchDataJsonTest : public ::testing::Test {
         new resumption::LastState(kAppStorageFolder, kAppInfoStorage));
     ASSERT_TRUE(::file_system::CreateFile(kAppStorageFile));
 
-    NiceMock<MockAppLaunchSettings> mock_app_launch_settings_;
+    NiceMock<app_launch_test::MockAppLaunchSettings> mock_app_launch_settings_;
     ON_CALL(mock_app_launch_settings_, max_number_of_ios_device())
         .WillByDefault(Return(15u));
 

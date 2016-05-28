@@ -44,6 +44,11 @@
 #include "application_manager/message_helper.h"
 #include "application_manager/mobile_message_handler.h"
 #include "application_manager/policies/policy_handler.h"
+#include "application_manager/hmi_capabilities_impl.h"
+#include "application_manager/resumption/resume_ctrl_impl.h"
+#include "application_manager/app_launch/app_launch_ctrl_impl.h"
+#include "application_manager/app_launch/app_launch_data_db.h"
+#include "application_manager/app_launch/app_launch_data_json.h"
 #include "protocol_handler/protocol_handler.h"
 #include "hmi_message_handler/hmi_message_handler.h"
 #include "connection_handler/connection_handler_impl.h"
@@ -542,6 +547,11 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
             : GenerateNewHMIAppID());
   }
 
+  if (params.keyExists(strings::app_info)) {
+    const smart_objects::SmartObject& app_info = params[strings::app_info];
+    const std::string& bundle_id = app_info[strings::bundle_id].asString();
+    application->set_bundle_id(bundle_id);
+  }
   // Stops timer of saving data to resumption in order to
   // doesn't erase data from resumption storage.
   // Timer will be started after hmi level resumption.
@@ -916,6 +926,7 @@ void ApplicationManagerImpl::OnDeviceListUpdated(
 
     GetPolicyHandler().AddDevice(dev_params.device_mac_address,
                                  device_info.connection_type);
+    app_launch_ctrl().OnDeviceConnected(dev_params.device_mac_address);
   }
 
   smart_objects::SmartObjectSPtr msg_params =
@@ -1741,6 +1752,18 @@ bool ApplicationManagerImpl::Init(resumption::LastState& last_state,
                  "System is configured to work without policy functionality.");
   }
   media_manager_ = media_manager;
+
+  if (settings_.use_db_for_resumption()) {
+    app_launch_dto_.reset(new app_launch::AppLaunchDataDB(settings_));
+  } else {
+    app_launch_dto_.reset(
+        new app_launch::AppLaunchDataJson(settings_, last_state));
+  }
+  app_launch_ctrl_.reset(
+      new app_launch::AppLaunchCtrlImpl(*app_launch_dto_.get(),
+                                        *this,
+                                        settings_));
+
   return true;
 }
 
@@ -3463,7 +3486,11 @@ ProtocolVersion ApplicationManagerImpl::SupportedSDLVersion() const {
 }
 
 event_engine::EventDispatcher& ApplicationManagerImpl::event_dispatcher() {
-  return event_dispatcher_;
+    return event_dispatcher_;
+}
+
+app_launch::AppLaunchCtrl &ApplicationManagerImpl::app_launch_ctrl() {
+    return * app_launch_ctrl_;
 }
 
 const std::string ApplicationManagerImpl::DirectoryTypeToString(

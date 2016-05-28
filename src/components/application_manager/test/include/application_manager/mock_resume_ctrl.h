@@ -40,7 +40,7 @@ namespace test {
 namespace components {
 namespace resumprion_test {
 
-class MockResumeCtrl : public ResumeCtrl {
+class MockResumeCtrl : public resumption::ResumeCtrl {
  public:
   MOCK_METHOD0(SaveAllApplications, void());
   MOCK_METHOD1(SaveApplication,
@@ -72,7 +72,7 @@ class MockResumeCtrl : public ResumeCtrl {
   MOCK_METHOD1(OnAppActivated,
                void(app_mngr::ApplicationSharedPtr application));
   MOCK_METHOD1(RemoveFromResumption, void(uint32_t app_id));
-  MOCK_METHOD1(Init, bool(LastState& last_state));
+  MOCK_METHOD1(Init, bool(resumption::LastState& last_state));
   MOCK_METHOD2(OnAppRegistrationStart,
                void(const std::string& policy_app_id,
                     const std::string& device_id));
@@ -93,9 +93,9 @@ class MockResumeCtrl : public ResumeCtrl {
 
 #ifdef BUILD_TESTS
   MOCK_METHOD1(set_resumption_storage,
-               void(utils::SharedPtr<ResumptionData> mock_storage));
+               void(utils::SharedPtr<resumption::ResumptionData> mock_storage));
 #endif  // BUILD_TESTS
-}
+};
 
 }  // namespace resumprion_test
 }  // namespace components

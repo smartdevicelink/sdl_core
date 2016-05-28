@@ -776,7 +776,7 @@ uint32_t Profile::resumption_delay_before_ign() const {
   return resumption_delay_before_ign_;
 }
 
-uint32_t Profile::resumption_delay_after_ign() const {
+const uint32_t Profile::resumption_delay_after_ign() const {
   return resumption_delay_after_ign_;
 }
 

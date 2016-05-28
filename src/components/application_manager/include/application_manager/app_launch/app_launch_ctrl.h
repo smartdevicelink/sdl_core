@@ -38,7 +38,7 @@
 namespace application_manager {
 class Application;
 typedef utils::SharedPtr<const Application> ApplicationConstSharedPtr;
-}  // namesapce application_manager
+}  // namespace application_manager
 
 namespace app_launch {
 

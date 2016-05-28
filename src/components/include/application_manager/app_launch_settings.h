@@ -13,7 +13,7 @@ class AppLaunchSettings {
   virtual const uint16_t max_number_of_ios_device() const = 0;
   virtual const uint16_t wait_time_between_apps() const = 0;
   virtual const bool enable_app_launch_ios() const = 0;
-  virtual uint32_t resumption_delay_after_ign() const = 0;
+  virtual const uint32_t resumption_delay_after_ign() const = 0;
   virtual const std::string& app_storage_folder() const = 0;
 };
 

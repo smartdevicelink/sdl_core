@@ -170,3 +170,5 @@ OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/libPolicy.so
 
   add_subdirectory(state_controller)
 endif()
+
+add_subdirectory(app_launch)

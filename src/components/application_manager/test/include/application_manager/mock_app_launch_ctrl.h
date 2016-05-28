@@ -29,33 +29,19 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_APP_LAUNCH_CTRL_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_APP_LAUNCH_CTRL_H_
 
-#ifndef SRC_COMPONENTS_INCLUDE_TEST_APPLICATION_MANAGER_MOCK_APP_LAUNCH_SETTINGS_H_
-#define SRC_COMPONENTS_INCLUDE_TEST_APPLICATION_MANAGER_MOCK_APP_LAUNCH_SETTINGS_H_
-
-#include <string>
-#include "gmock/gmock.h"
-#include "application_manager/app_launch_settings.h"
+#include "application_manager/app_launch/app_launch_ctrl.h"
 
 namespace test {
 namespace components {
 namespace app_launch_test {
 
-class MockAppLaunchSettings : public app_launch::AppLaunchSettings {
- public:
-  MOCK_CONST_METHOD0(app_launch_wait_time, const uint16_t());
-  MOCK_CONST_METHOD0(app_launch_max_retry_attempt, const uint16_t());
-  MOCK_CONST_METHOD0(app_launch_retry_wait_time, const uint16_t());
-  MOCK_CONST_METHOD0(remove_bundle_id_attempts, const uint16_t());
-  MOCK_CONST_METHOD0(max_number_of_ios_device, const uint16_t());
-  MOCK_CONST_METHOD0(wait_time_between_apps, const uint16_t());
-  MOCK_CONST_METHOD0(enable_app_launch_ios, const bool());
-  MOCK_CONST_METHOD0(resumption_delay_after_ign, const uint32_t());
-  MOCK_CONST_METHOD0(app_storage_folder, std::string&());
-};
+class AppLaunchCtrlMock : public app_launch::AppLaunchCtrl {};
 
 }  // namespace app_launch_test
 }  // namespace components
 }  // namespace test
 
-#endif  // SRC_COMPONENTS_INCLUDE_TEST_APPLICATION_MANAGER_MOCK_APP_LAUNCH_SETTINGS_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_APP_LAUNCH_CTRL_H_

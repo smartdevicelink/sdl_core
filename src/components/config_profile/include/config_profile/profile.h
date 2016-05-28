@@ -560,7 +560,7 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
 
   uint32_t resumption_delay_before_ign() const;
 
-  uint32_t resumption_delay_after_ign() const;
+  const uint32_t resumption_delay_after_ign() const;
 
   uint32_t hash_string_size() const;
 
