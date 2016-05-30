@@ -69,9 +69,9 @@ FileSizeType FileSize(const std::string& utf8_path);
 /**
  * @brief Creates directory
  * @param utf8_path path to directory
- * @return path to created directory.
+ * @return return true if directory was created or already exist
  */
-std::string CreateDirectory(const std::string& utf8_path);
+bool CreateDirectory(const std::string& utf8_path);
 
 /**
  * @brief Creates directory recursively

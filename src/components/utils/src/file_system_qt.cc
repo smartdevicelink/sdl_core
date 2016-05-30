@@ -108,12 +108,9 @@ file_system::FileSizeType file_system::DirectorySize(
   return size;
 }
 
-std::string file_system::CreateDirectory(const std::string& utf8_path) {
+bool file_system::CreateDirectory(const std::string& utf8_path) {
   QDir dir;
-  if (dir.mkdir(QString::fromUtf8(utf8_path.c_str()))) {
-    return utf8_path;
-  }
-  return "";
+  return dir.mkdir(QString::fromUtf8(utf8_path.c_str()));
 }
 
 bool file_system::CreateDirectoryRecursively(const std::string& utf8_path) {
@@ -187,10 +184,17 @@ bool file_system::DeleteFile(const std::string& utf8_path) {
 
 void file_system::RemoveDirectoryContent(const std::string& utf8_path) {
   QDir dir(QString::fromUtf8(utf8_path.c_str()));
-  dir.setNameFilters(QStringList() << "*.*");
-  dir.setFilter(QDir::Files);
-  foreach (QString dirFile, dir.entryList()) { dir.remove(dirFile); }
-  dir.rmpath(QString::fromUtf8(utf8_path.c_str()));
+  dir.setFilter(QDir::Files | QDir::NoDotAndDotDot);
+  foreach(QString dirItem, dir.entryList())
+  {
+    dir.remove(dirItem);
+  }
+  dir.setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
+  foreach(QString dirItem, dir.entryList())
+  {
+    QDir subDir(dir.absoluteFilePath(dirItem));
+    subDir.removeRecursively();
+  }
 }
 
 bool file_system::RemoveDirectory(const std::string& utf8_path,
@@ -200,7 +204,7 @@ bool file_system::RemoveDirectory(const std::string& utf8_path,
     if (is_recursively) {
       return dir.removeRecursively();
     }
-    return dir.rmdir(QString::fromUtf8(utf8_path.c_str()));
+    return dir.rmdir(dir.absolutePath());
   }
   return false;
 }
@@ -232,7 +236,8 @@ std::vector<std::string> file_system::ListFiles(const std::string& utf8_path) {
     return listFiles;
   }
   QDir dir(QString::fromUtf8(utf8_path.c_str()));
-  QStringList list_files = dir.entryList(QDir::Files);
+  QStringList list_files =
+      dir.entryList(QDir::AllEntries | QDir::NoDotAndDotDot | QDir::NoSymLinks);
   foreach (QString str, list_files) { listFiles.push_back(str.toStdString()); }
   return listFiles;
 }

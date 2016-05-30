@@ -102,12 +102,8 @@ file_system::FileSizeType file_system::DirectorySize(
   return size;
 }
 
-std::string file_system::CreateDirectory(const std::string& utf8_path) {
-  if (!DirectoryExists(utf8_path)) {
-    mkdir(utf8_path.c_str(), S_IRWXU);
-  }
-
-  return utf8_path;
+bool file_system::CreateDirectory(const std::string& utf8_path) {
+  return DirectoryExists(utf8_path) || 0 == mkdir(utf8_path.c_str(), S_IRWXU);
 }
 
 bool file_system::CreateDirectoryRecursively(const std::string& utf8_path) {

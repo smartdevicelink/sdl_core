@@ -173,27 +173,20 @@ file_system::FileSizeType file_system::DirectorySize(
   return size;
 }
 
-std::string file_system::CreateDirectory(const std::string& utf8_path) {
-  if (!DirectoryExists(utf8_path)) {
-    _wmkdir(ConvertUTF8ToWString(utf8_path).c_str());
-  }
-  return utf8_path;
+bool file_system::CreateDirectory(const std::string& utf8_path) {
+  return DirectoryExists(utf8_path) ||
+      0 == _wmkdir(ConvertUTF8ToWString(utf8_path).c_str());
 }
 
 bool file_system::CreateDirectoryRecursively(const std::string& utf8_path) {
-  const std::string delimiter = GetPathDelimiter();
-  std::size_t pos = utf8_path.find(delimiter, 0);
+  size_t pos = IsRelativePath(utf8_path) ? 0 : utf8_path.find_first_of(":") + 2;
   while (pos < utf8_path.length()) {
-    pos = utf8_path.find(delimiter, pos + 1);
-    if (pos == std::string::npos) {
-      pos = utf8_path.length();
+    pos = std::min(utf8_path.find_first_of("/", pos),
+        utf8_path.find_first_of("\\", pos));
+    if (!CreateDirectory(utf8_path.substr(0, pos))) {
+      return false;
     }
-    if (!DirectoryExists(utf8_path.substr(0, pos))) {
-      if (0 !=
-          _wmkdir(ConvertUTF8ToWString(utf8_path.substr(0, pos)).c_str())) {
-        return false;
-      }
-    }
+    pos = std::string::npos == pos ? pos : pos + 1;
   }
   return true;
 }
@@ -283,14 +276,14 @@ void file_system::RemoveDirectoryContent(const std::string& utf8_path) {
   }
 
   do {
+    const std::string utf8_file_name = ConvertWStringToUTF8(ffd.cFileName);
     if (FILE_ATTRIBUTE_DIRECTORY == ffd.dwFileAttributes) {
-      const std::string utf8_file_name = ConvertWStringToUTF8(ffd.cFileName);
       if (utf8_file_name.compare(kCurrentDirectoryEntry) != 0 &&
           utf8_file_name.compare(kParentDirectoryEntry) != 0) {
-        RemoveDirectory(utf8_file_name, true);
+        RemoveDirectory(ConcatPath(utf8_path, utf8_file_name), true);
       }
     } else {
-      _wremove(ffd.cFileName);
+      DeleteFile(ConcatPath(utf8_path, utf8_file_name));
     }
   } while (FindNextFileW(find, &ffd) != 0);
 
@@ -390,7 +383,9 @@ std::vector<std::string> file_system::ListFiles(const std::string& utf8_path) {
   }
 
   do {
-    if (FILE_ATTRIBUTE_DIRECTORY != ffd.dwFileAttributes) {
+    const std::string utf8_file_name = ConvertWStringToUTF8(ffd.cFileName);
+    if (utf8_file_name.compare(kCurrentDirectoryEntry) != 0 &&
+        utf8_file_name.compare(kParentDirectoryEntry) != 0) {
       list_files.push_back(ConvertWStringToUTF8(ffd.cFileName));
     }
   } while (FindNextFileW(find, &ffd) != 0);

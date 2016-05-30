@@ -1042,8 +1042,6 @@ TEST(FileSystemTest, DISABLED_ConvertPathForURL) {
   EXPECT_NE(path, ConvertPathForURL(path));
   std::string path_brackets = "./Test_directory_with(brackets)";
   EXPECT_NE(path_brackets, ConvertPathForURL(path));
-  std::string another_path = "./Test_directory/new_directory_without_spaces";
-  EXPECT_EQ(another_path, ConvertPathForURL(another_path));
 }
 
 TEST(FileSystemTest, DISABLED_DirectorySize) {
