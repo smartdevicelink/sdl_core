@@ -41,145 +41,129 @@ namespace components {
 namespace policy_manager_test {
 
 namespace {
-  using namespace policy;
+using namespace policy;
 }
 
 class MockPolicyManager : public PolicyManager {
  public:
-  MOCK_METHOD1(set_listener,
-      void(PolicyListener* listener));
+  MOCK_METHOD1(set_listener, void(PolicyListener* listener));
   MOCK_METHOD2(InitPT,
-      bool(const std::string& file_name, const PolicySettings* settings));
+               bool(const std::string& file_name,
+                    const PolicySettings* settings));
   MOCK_METHOD2(LoadPT,
-      bool(const std::string& file, const BinaryMessage& pt_content));
-  MOCK_METHOD1(ResetPT,
-      bool(const std::string& file_name));
-  MOCK_CONST_METHOD0(GetLockScreenIconUrl,
-      std::string());
+               bool(const std::string& file, const BinaryMessage& pt_content));
+  MOCK_METHOD1(ResetPT, bool(const std::string& file_name));
+  MOCK_CONST_METHOD0(GetLockScreenIconUrl, std::string());
   MOCK_METHOD2(GetServiceUrls,
-      void(const std::string& service_type, EndpointUrls& end_points));
-  MOCK_METHOD0(RequestPTUpdate,
-      bool());
+               void(const std::string& service_type, EndpointUrls& end_points));
+  MOCK_METHOD0(RequestPTUpdate, bool());
   MOCK_METHOD5(CheckPermissions,
-      void(const PTString& app_id, const PTString& hmi_level, const PTString& rpc, const RPCParams& rpc_params, CheckPermissionResult& result));
-  MOCK_METHOD0(ResetUserConsent,
-      bool());
-  MOCK_CONST_METHOD0(GetPolicyTableStatus,
-      std::string());
-  MOCK_METHOD1(KmsChanged,
-      void(int kilometers));
-  MOCK_METHOD0(IncrementIgnitionCycles,
-      void());
-  MOCK_METHOD0(ForcePTExchange,
-      std::string());
-  MOCK_METHOD0(ResetRetrySequence,
-      void());
-  MOCK_METHOD0(NextRetryTimeout,
-      uint32_t());
-  MOCK_METHOD0(TimeoutExchange,
-      int());
-  MOCK_METHOD0(RetrySequenceDelaysSeconds,
-      const std::vector<int>());
-  MOCK_METHOD0(OnExceededTimeout,
-      void());
-  MOCK_METHOD0(OnUpdateStarted,
-      void());
+               void(const PTString& app_id,
+                    const PTString& hmi_level,
+                    const PTString& rpc,
+                    const RPCParams& rpc_params,
+                    CheckPermissionResult& result));
+  MOCK_METHOD0(ResetUserConsent, bool());
+  MOCK_CONST_METHOD0(GetPolicyTableStatus, std::string());
+  MOCK_METHOD1(KmsChanged, void(int kilometers));
+  MOCK_METHOD0(IncrementIgnitionCycles, void());
+  MOCK_METHOD0(ForcePTExchange, std::string());
+  MOCK_METHOD0(ResetRetrySequence, void());
+  MOCK_METHOD0(NextRetryTimeout, uint32_t());
+  MOCK_METHOD0(TimeoutExchange, int());
+  MOCK_METHOD0(RetrySequenceDelaysSeconds, const std::vector<int>());
+  MOCK_METHOD0(OnExceededTimeout, void());
+  MOCK_METHOD0(OnUpdateStarted, void());
   MOCK_CONST_METHOD1(GetUserConsentForDevice,
-      DeviceConsent(const std::string& device_id));
+                     DeviceConsent(const std::string& device_id));
   MOCK_METHOD3(GetUserConsentForApp,
-      void(const std::string& device_id, const std::string& policy_app_id, std::vector<FunctionalGroupPermission>& permissions));
+               void(const std::string& device_id,
+                    const std::string& policy_app_id,
+                    std::vector<FunctionalGroupPermission>& permissions));
   MOCK_METHOD2(SetUserConsentForDevice,
-      void(const std::string& device_id, bool is_allowed));
+               void(const std::string& device_id, bool is_allowed));
   MOCK_METHOD2(ReactOnUserDevConsentForApp,
-      bool(const std::string app_id, bool is_device_allowed));
-  MOCK_METHOD2(PTUpdatedAt,
-      void(Counters counter, int value));
+               bool(const std::string app_id, bool is_device_allowed));
+  MOCK_METHOD2(PTUpdatedAt, void(Counters counter, int value));
   MOCK_METHOD3(GetInitialAppData,
-      bool(const std::string& str, StringArray* arr1, StringArray* arr2));
+               bool(const std::string& str,
+                    StringArray* arr1,
+                    StringArray* arr2));
   MOCK_METHOD2(AddDevice,
-      void(const std::string& device_id, const std::string& connection_type));
+               void(const std::string& device_id,
+                    const std::string& connection_type));
   MOCK_METHOD2(SetDeviceInfo,
-      void(const std::string& device_id, const DeviceInfo& device_info));
+               void(const std::string& device_id,
+                    const DeviceInfo& device_info));
   MOCK_METHOD1(SetUserConsentForApp,
-      void(const PermissionConsent& permissions));
+               void(const PermissionConsent& permissions));
   MOCK_CONST_METHOD2(GetDefaultHmi,
-      bool(const std::string& policy_app_id, std::string* default_hmi));
+                     bool(const std::string& policy_app_id,
+                          std::string* default_hmi));
   MOCK_CONST_METHOD2(GetPriority,
-      bool(const std::string& policy_app_id, std::string* priority));
+                     bool(const std::string& policy_app_id,
+                          std::string* priority));
   MOCK_METHOD2(GetUserFriendlyMessages,
-      std::vector<UserFriendlyMessage>(const std::vector<std::string>& message_code, const std::string& language));
-  MOCK_CONST_METHOD1(IsApplicationRevoked,
-      bool(const std::string& app_id));
+               std::vector<UserFriendlyMessage>(
+                   const std::vector<std::string>& message_code,
+                   const std::string& language));
+  MOCK_CONST_METHOD1(IsApplicationRevoked, bool(const std::string& app_id));
   MOCK_METHOD3(GetPermissionsForApp,
-      void(const std::string& device_id, const std::string& policy_app_id, std::vector<FunctionalGroupPermission>& permissions));
+               void(const std::string& device_id,
+                    const std::string& policy_app_id,
+                    std::vector<FunctionalGroupPermission>& permissions));
   MOCK_METHOD1(GetAppPermissionsChanges,
-      AppPermissions(const std::string& policy_app_id));
-  MOCK_METHOD1(RemovePendingPermissionChanges,
-      void(const std::string& app_id));
+               AppPermissions(const std::string& policy_app_id));
+  MOCK_METHOD1(RemovePendingPermissionChanges, void(const std::string& app_id));
   MOCK_CONST_METHOD1(GetCurrentDeviceId,
-      std::string&(const std::string& policy_app_id));
-  MOCK_METHOD1(SetSystemLanguage,
-      void(const std::string& language));
+                     std::string&(const std::string& policy_app_id));
+  MOCK_METHOD1(SetSystemLanguage, void(const std::string& language));
   MOCK_METHOD3(SetSystemInfo,
-      void(const std::string& ccpu_version, const std::string& wers_country_code, const std::string& language));
+               void(const std::string& ccpu_version,
+                    const std::string& wers_country_code,
+                    const std::string& language));
   MOCK_METHOD1(SendNotificationOnPermissionsUpdated,
-      void(const std::string& application_id));
-  MOCK_METHOD1(MarkUnpairedDevice,
-      void(const std::string& device_id));
-  MOCK_METHOD1(AddApplication,
-      void(const std::string& application_id));
-  MOCK_METHOD0(CleanupUnpairedDevices,
-      bool());
-  MOCK_CONST_METHOD1(CanAppKeepContext,
-      bool(const std::string& app_id));
-  MOCK_CONST_METHOD1(CanAppStealFocus,
-      bool(const std::string& app_id));
-  MOCK_METHOD0(OnSystemReady,
-      void());
+               void(const std::string& application_id));
+  MOCK_METHOD1(MarkUnpairedDevice, void(const std::string& device_id));
+  MOCK_METHOD1(AddApplication, void(const std::string& application_id));
+  MOCK_METHOD0(CleanupUnpairedDevices, bool());
+  MOCK_CONST_METHOD1(CanAppKeepContext, bool(const std::string& app_id));
+  MOCK_CONST_METHOD1(CanAppStealFocus, bool(const std::string& app_id));
+  MOCK_METHOD0(OnSystemReady, void());
   MOCK_CONST_METHOD1(GetNotificationsNumber,
-      uint32_t(const std::string& priority));
-  MOCK_METHOD1(SetVINValue,
-      void(const std::string& value));
-  MOCK_METHOD1(IsPredataPolicy,
-      bool(const std::string& policy_app_id));
-  MOCK_CONST_METHOD1(HeartBeatTimeout,
-      uint32_t(const std::string& app_id));
-  MOCK_METHOD1(SaveUpdateStatusRequired,
-      void(bool is_update_needed));
-  MOCK_METHOD0(OnAppsSearchStarted,
-      void());
-  MOCK_METHOD0(OnAppsSearchCompleted,
-      void());
-  MOCK_CONST_METHOD1(GetAppRequestTypes,
+                     uint32_t(const std::string& priority));
+  MOCK_METHOD1(SetVINValue, void(const std::string& value));
+  MOCK_METHOD1(IsPredataPolicy, bool(const std::string& policy_app_id));
+  MOCK_CONST_METHOD1(HeartBeatTimeout, uint32_t(const std::string& app_id));
+  MOCK_METHOD1(SaveUpdateStatusRequired, void(bool is_update_needed));
+  MOCK_METHOD0(OnAppsSearchStarted, void());
+  MOCK_METHOD0(OnAppsSearchCompleted, void());
+  MOCK_CONST_METHOD1(
+      GetAppRequestTypes,
       const std::vector<std::string>(const std::string policy_app_id));
-  MOCK_CONST_METHOD0(GetVehicleInfo,
-      const VehicleInfo());
+  MOCK_CONST_METHOD0(GetVehicleInfo, const VehicleInfo());
   MOCK_METHOD1(OnAppRegisteredOnMobile,
-      void(const std::string& application_id));
-  MOCK_CONST_METHOD0(RetrieveCertificate,
-      std::string());
-  MOCK_CONST_METHOD0(get_settings,
-      const PolicySettings&());
-  MOCK_METHOD0(ExceededIgnitionCycles,
-      bool());
-  MOCK_METHOD0(ExceededDays,
-      bool());
-  MOCK_METHOD0(StartPTExchange,
-      void());
+               void(const std::string& application_id));
+  MOCK_CONST_METHOD0(RetrieveCertificate, std::string());
+  MOCK_CONST_METHOD0(get_settings, const PolicySettings&());
+  MOCK_METHOD0(ExceededIgnitionCycles, bool());
+  MOCK_METHOD0(ExceededDays, bool());
+  MOCK_METHOD0(StartPTExchange, void());
 
   // --- Statistics Manager section
   MOCK_METHOD1(Increment, void(usage_statistics::GlobalCounterId type));
-  MOCK_METHOD2(Increment, void(const std::string& app_id,
-                               usage_statistics::AppCounterId type));
-  MOCK_METHOD3(Set, void(const std::string& app_id,
-                         usage_statistics::AppInfoId type,
-                         const std::string& value));
-  MOCK_METHOD3(Add, void(const std::string& app_id,
-                         usage_statistics::AppStopwatchId type,
-                         int32_t timespan_seconds));
+  MOCK_METHOD2(Increment,
+               void(const std::string& app_id,
+                    usage_statistics::AppCounterId type));
+  MOCK_METHOD3(Set,
+               void(const std::string& app_id,
+                    usage_statistics::AppInfoId type,
+                    const std::string& value));
+  MOCK_METHOD3(Add,
+               void(const std::string& app_id,
+                    usage_statistics::AppStopwatchId type,
+                    int32_t timespan_seconds));
 };
-
-
 
 }  // namespace policy_manager_test
 }  // namespace components

@@ -43,11 +43,10 @@ namespace hmi_message_handler_test {
 class MockHMIMessageObserver : public hmi_message_handler::HMIMessageObserver {
  public:
   MOCK_METHOD1(OnMessageReceived,
-      void(utils::SharedPtr<application_manager::Message> message));
+               void(utils::SharedPtr<application_manager::Message> message));
   MOCK_METHOD1(OnErrorSending,
-      void(utils::SharedPtr<application_manager::Message> message));
+               void(utils::SharedPtr<application_manager::Message> message));
 };
-
 
 }  // namespace hmi_message_handler_test
 }  // namespace components

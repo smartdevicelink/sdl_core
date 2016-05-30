@@ -45,8 +45,8 @@ namespace components {
 namespace policy_test {
 
 namespace {
-  using namespace policy;
-  namespace policy_table = rpc::policy_table_interface_base;
+using namespace policy;
+namespace policy_table = rpc::policy_table_interface_base;
 }
 
 class MockCacheManagerInterface : public CacheManagerInterface {

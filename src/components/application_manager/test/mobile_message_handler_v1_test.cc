@@ -108,7 +108,8 @@ TEST(MobileMessageHandlerTestV1Test,
   uint32_t connection_key = 1;
 
   application_manager::MobileMessage message =
-      utils::MakeShared<application_manager::Message>(protocol_handler::MessagePriority::kDefault);
+      utils::MakeShared<application_manager::Message>(
+          protocol_handler::MessagePriority::kDefault);
 
   message->set_protocol_version(application_manager::ProtocolVersion::kV1);
   message->set_json_message(data_json);

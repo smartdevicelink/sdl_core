@@ -44,12 +44,9 @@ using transport_manager::transport_adapter::Device;
 
 class MockDevice : public Device {
  public:
-  MOCK_CONST_METHOD1(IsSameAs,
-      bool(const Device* other_device));
-  MOCK_CONST_METHOD0(GetApplicationList,
-      transport_manager::ApplicationList());
-  MOCK_METHOD0(Stop,
-      void());
+  MOCK_CONST_METHOD1(IsSameAs, bool(const Device* other_device));
+  MOCK_CONST_METHOD0(GetApplicationList, transport_manager::ApplicationList());
+  MOCK_METHOD0(Stop, void());
 };
 
 }  // namespace transport_manager_test

@@ -42,10 +42,8 @@ namespace transport_manager_test {
 
 class MockTMTelemetryObserver : public transport_manager::TMTelemetryObserver {
  public:
-  MOCK_METHOD1(StartRawMsg,
-      void(const protocol_handler::RawMessage* ptr));
-  MOCK_METHOD1(StopRawMsg,
-      void(const protocol_handler::RawMessage* ptr));
+  MOCK_METHOD1(StartRawMsg, void(const protocol_handler::RawMessage* ptr));
+  MOCK_METHOD1(StopRawMsg, void(const protocol_handler::RawMessage* ptr));
 };
 
 }  // namespace transport_manager_test

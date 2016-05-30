@@ -44,9 +44,10 @@ using hmi_message_handler::MqueueAdapter;
 using application_manager::Message;
 
 // TODO {AKozoriz} : Will be fixed in planned task
- TEST(MqueueAdapter, DISABLED_Send) {
+TEST(MqueueAdapter, DISABLED_Send) {
   MockHMIMessageHandler handler;
-  hmi_message_handler::HMIMessageAdapterImpl* adapter = new MqueueAdapter(&handler);
+  hmi_message_handler::HMIMessageAdapterImpl* adapter =
+      new MqueueAdapter(&handler);
 
   MessageSharedPointer message(
       new Message(protocol_handler::MessagePriority::kDefault));
@@ -63,9 +64,10 @@ using application_manager::Message;
   delete adapter;
 }
 
- TEST(MqueueAdapter, DISABLED_Receive) {
+TEST(MqueueAdapter, DISABLED_Receive) {
   MockHMIMessageHandler handler;
-  hmi_message_handler::HMIMessageAdapterImpl* adapter = new MqueueAdapter(&handler);
+  hmi_message_handler::HMIMessageAdapterImpl* adapter =
+      new MqueueAdapter(&handler);
 
   using ::testing::Property;
   using ::testing::Pointee;

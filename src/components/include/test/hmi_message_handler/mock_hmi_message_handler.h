@@ -46,18 +46,14 @@ using hmi_message_handler::MessageSharedPointer;
 
 class MockHMIMessageHandler : public ::hmi_message_handler::HMIMessageHandler {
  public:
-    MOCK_METHOD1(AddHMIMessageAdapter,
-        void(HMIMessageAdapter* adapter));
-    MOCK_METHOD1(RemoveHMIMessageAdapter,
-        void(HMIMessageAdapter* adapter));
-    MOCK_CONST_METHOD0(get_settings,
-        const HMIMessageHandlerSettings&());
-    MOCK_METHOD1(OnMessageReceived,
-        void(utils::SharedPtr<application_manager::Message> message));
-    MOCK_METHOD1(OnErrorSending,
-        void(utils::SharedPtr<application_manager::Message> message));
-    MOCK_METHOD1(SendMessageToHMI,
-        void(MessageSharedPointer message));
+  MOCK_METHOD1(AddHMIMessageAdapter, void(HMIMessageAdapter* adapter));
+  MOCK_METHOD1(RemoveHMIMessageAdapter, void(HMIMessageAdapter* adapter));
+  MOCK_CONST_METHOD0(get_settings, const HMIMessageHandlerSettings&());
+  MOCK_METHOD1(OnMessageReceived,
+               void(utils::SharedPtr<application_manager::Message> message));
+  MOCK_METHOD1(OnErrorSending,
+               void(utils::SharedPtr<application_manager::Message> message));
+  MOCK_METHOD1(SendMessageToHMI, void(MessageSharedPointer message));
 };
 
 }  // namespace hmi_message_handler_test

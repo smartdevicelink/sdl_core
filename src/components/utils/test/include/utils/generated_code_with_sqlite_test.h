@@ -406,5 +406,4 @@ bool UpdateSection(dbms::SQLDatabase* db,
 }  // namespace components
 }  // namespace test
 
-
 #endif  // SRC_COMPONENTS_UTILS_TEST_INCLUDE_UTILS_GENERATED_CODE_WITH_SQLITE_TEST_H_

@@ -42,8 +42,7 @@ namespace hmi_message_handler_test {
 
 class MockHMIMessageSender : public hmi_message_handler::HMIMessageSender {
  public:
-  MOCK_METHOD1(SendMessageToHMI,
-      void(MessageSharedPointer message));
+  MOCK_METHOD1(SendMessageToHMI, void(MessageSharedPointer message));
 };
 
 }  // namespace hmi_message_handler_test
