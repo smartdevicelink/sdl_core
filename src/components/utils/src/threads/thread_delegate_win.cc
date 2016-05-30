@@ -44,7 +44,7 @@ ThreadDelegate::~ThreadDelegate() {
 
 void ThreadDelegate::exitThreadMain() {
   if (thread_) {
-    if (thread_->thread_handle() == GetCurrentThread()) {
+    if (thread_->IsCurrentThread()) {
       ExitThread(kThreadCancelledExitCode);
     } else {
       TerminateThread(thread_->thread_handle(), kThreadCancelledExitCode);

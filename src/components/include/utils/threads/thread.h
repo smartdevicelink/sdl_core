@@ -156,11 +156,10 @@ class Thread {
   static void yield();
 
   // Get unique ID of currently executing thread
-  static PlatformThreadHandle CurrentId();
+  static uint64_t CurrentId();
 
   // Give thread thread_id a name, helpful for debugging
-  static void SetNameForId(const PlatformThreadHandle& thread_id,
-                           std::string name);
+  static void SetNameForId(uint64_t thread_id, std::string name);
 
   /**
    * @brief Signals the thread to exit and returns once the thread has exited.

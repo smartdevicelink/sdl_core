@@ -24,6 +24,7 @@
 
 #include <time.h>
 #include <signal.h>
+#include <cstdint>
 
 #include "system.h"
 
@@ -89,6 +90,10 @@ bool Thread::Stop() {
 
 bool Thread::Join(void** ret) {
   return pthread_join(m_id, ret) == 0;
+}
+
+uint64_t Thread::GetId() const {
+  return static_cast<uint64_t>(m_id);
 }
 
 void* Thread::Call(void* arg) {
@@ -219,6 +224,10 @@ bool Thread::Join(void** ret) {
   m_id = NULL;
   *ret = (void*)val;
   return true;
+}
+
+uint64_t Thread::GetId() const {
+  return static_cast<uint64_t>(GetThreadId(m_id));
 }
 
 DWORD WINAPI Thread::Call(LPVOID arg) {
