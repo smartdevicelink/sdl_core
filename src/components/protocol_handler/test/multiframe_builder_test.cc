@@ -37,19 +37,11 @@
 #include <limits>
 #include "utils/make_shared.h"
 #include "protocol_handler/multiframe_builder.h"
+#include "utils/threads/thread.h"
 
 namespace test {
 namespace components {
 namespace protocol_handler_test {
-
-namespace {
-const int32_t MICROSECONDS_IN_MILLISECONDS = 1000;
-}
-
-#if defined(OS_WINDOWS)
-#include <winsock2.h>
-#define usleep(...) Sleep(__VA_ARGS__)
-#endif
 
 using namespace protocol_handler;
 
@@ -516,7 +508,7 @@ TEST_F(MultiFrameBuilderTest, FrameExpired_OneMSec) {
       << "First frame: " << first_frame;
 
   // Wait frame expire
-  usleep(1000);
+  threads::sleep(1);
   const ProtocolFramePtrList& list = multiframe_builder_.PopMultiframes();
   ASSERT_FALSE(list.empty());
   EXPECT_EQ(first_frame, list.front());

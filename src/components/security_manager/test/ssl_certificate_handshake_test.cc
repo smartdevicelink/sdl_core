@@ -352,7 +352,7 @@ TEST_F(SSLHandshakeTest, NoVerification) {
   GTEST_TRACE(HandshakeProcedure_Success());
 }
 
-TEST_F(SSLHandshakeTest, CAVerification_ServerSide) {
+TEST_F(SSLHandshakeTest, DISABLED_CAVerification_ServerSide) {
   ASSERT_TRUE(InitServerManagers(security_manager::TLSv1_2,
                                  server_certificate,
                                  "ALL",
@@ -369,7 +369,7 @@ TEST_F(SSLHandshakeTest, CAVerification_ServerSide) {
   GTEST_TRACE(HandshakeProcedure_Success());
 }
 
-TEST_F(SSLHandshakeTest, CAVerification_ServerSide_NoCACertificate) {
+TEST_F(SSLHandshakeTest, DISABLED_CAVerification_ServerSide_NoCACertificate) {
   ASSERT_TRUE(InitServerManagers(security_manager::TLSv1_2,
                                  server_certificate,
                                  "ALL",
@@ -396,7 +396,7 @@ TEST_F(SSLHandshakeTest, CAVerification_ServerSide_NoCACertificate) {
   GTEST_TRACE(HandshakeProcedure_Success());
 }
 
-TEST_F(SSLHandshakeTest, CAVerification_ClientSide) {
+TEST_F(SSLHandshakeTest, DISABLED_CAVerification_ClientSide) {
   ASSERT_TRUE(InitServerManagers(security_manager::TLSv1_2,
                                  server_certificate,
                                  "ALL",
@@ -413,7 +413,7 @@ TEST_F(SSLHandshakeTest, CAVerification_ClientSide) {
   GTEST_TRACE(HandshakeProcedure_Success());
 }
 
-TEST_F(SSLHandshakeTest, CAVerification_ClientSide_NoCACertificate) {
+TEST_F(SSLHandshakeTest, DISABLED_CAVerification_ClientSide_NoCACertificate) {
   ASSERT_TRUE(InitServerManagers(security_manager::TLSv1_2,
                                  server_certificate,
                                  "ALL",
@@ -442,7 +442,7 @@ TEST_F(SSLHandshakeTest, CAVerification_ClientSide_NoCACertificate) {
   GTEST_TRACE(HandshakeProcedure_Success());
 }
 
-TEST_F(SSLHandshakeTest, CAVerification_BothSides) {
+TEST_F(SSLHandshakeTest, DISABLED_CAVerification_BothSides) {
   ASSERT_TRUE(InitServerManagers(security_manager::TLSv1_2,
                                  server_certificate,
                                  "ALL",
@@ -476,7 +476,7 @@ TEST_F(SSLHandshakeTest, UnsignedCert) {
       security_manager::SSLContext::Handshake_Result_CertNotSigned));
 }
 
-TEST_F(SSLHandshakeTest, ExpiredCert) {
+TEST_F(SSLHandshakeTest, DISABLED_ExpiredCert) {
   ASSERT_TRUE(InitServerManagers(security_manager::TLSv1_2,
                                  server_expired_cert_file,
                                  "ALL",
@@ -494,7 +494,7 @@ TEST_F(SSLHandshakeTest, ExpiredCert) {
       security_manager::SSLContext::Handshake_Result_CertExpired));
 }
 
-TEST_F(SSLHandshakeTest, AppNameAndAppIDInvalid) {
+TEST_F(SSLHandshakeTest, DISABLED_AppNameAndAppIDInvalid) {
   ASSERT_TRUE(InitServerManagers(security_manager::TLSv1_2,
                                  server_certificate,
                                  "ALL",
@@ -547,7 +547,7 @@ TEST_F(SSLHandshakeTest, NoVerification_ResetConnection) {
   }
 }
 
-TEST_F(SSLHandshakeTest, CAVerification_BothSides_ResetConnection) {
+TEST_F(SSLHandshakeTest, DISABLED_CAVerification_BothSides_ResetConnection) {
   ASSERT_TRUE(InitServerManagers(security_manager::TLSv1_2,
                                  server_certificate,
                                  "ALL",

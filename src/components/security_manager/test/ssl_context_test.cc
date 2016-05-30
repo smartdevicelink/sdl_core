@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #if defined(OS_WINDOWS)
-#include <WinSock2.h>
+#include "utils/winhdr.h"
 #endif
 #include "gtest/gtest.h"
 #include <fstream>
@@ -181,7 +181,7 @@ class SSLTest : public testing::Test {
     delete client_manager_;
   }
 
-  const size_t kMaximumPayloadSize = 1000u;
+  static const size_t kMaximumPayloadSize = 1000u;
   security_manager::CryptoManager* crypto_manager_;
   security_manager::CryptoManager* client_manager_;
   utils::SharedPtr<NiceMock<security_manager_test::MockCryptoManagerSettings>>
@@ -361,7 +361,7 @@ INSTANTIATE_TEST_CASE_P(
                                         kFordCipher,
                                         kFordCipher)));
 
-// TODO {OHerasym} : ReleaseSSLContext fails
+// TODO(OHerasym) : ReleaseSSLContext fails
 TEST_F(SSLTest, DISABLED_OnTSL2Protocol_BrokenHandshake) {
   ASSERT_EQ(security_manager::SSLContext::Handshake_Result_Success,
             client_ctx->StartHandshake(&kClientBuf, &client_buf_len));
