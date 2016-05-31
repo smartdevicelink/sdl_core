@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,7 @@ namespace transport_manager_test {
 
 namespace {
 using namespace transport_manager;
-}
+}  // namespace
 
 class MockTransportManagerListener
     : public transport_manager::TransportManagerListener {

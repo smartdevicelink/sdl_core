@@ -164,10 +164,10 @@ class MobileMessageHandlerTest : public testing::Test {
   }
 
   MobileMessage CreateMessageForSending(
-      uint32_t protocol_version,
-      uint32_t function_id,
-      uint32_t correlation_id,
-      uint32_t connection_key,
+      const uint32_t protocol_version,
+      const uint32_t function_id,
+      const uint32_t correlation_id,
+      const uint32_t connection_key,
       const std::string& json_msg,
       application_manager::BinaryData* data = NULL) {
     MobileMessage message = utils::MakeShared<Message>(
@@ -218,6 +218,7 @@ class MobileMessageHandlerTest : public testing::Test {
   void TestHandlingOutgoingMessageProtocolWithBinaryData(
       const uint32_t protocol_version) {
     // Arrange
+    // Data will be destroyed with MobileMessage
     application_manager::BinaryData* bin_dat =
         new application_manager::BinaryData;
     bin_dat->push_back('\a');

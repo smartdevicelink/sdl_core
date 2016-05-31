@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,7 +47,7 @@ namespace policy_test {
 namespace {
 using namespace policy;
 namespace policy_table = rpc::policy_table_interface_base;
-}
+}  // namespace
 
 class MockCacheManagerInterface : public CacheManagerInterface {
  public:

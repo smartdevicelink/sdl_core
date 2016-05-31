@@ -49,7 +49,7 @@ namespace policy_test {
 
 namespace {
 using namespace policy;
-}
+}  // namespace
 
 namespace custom_str = utils::custom_string;
 

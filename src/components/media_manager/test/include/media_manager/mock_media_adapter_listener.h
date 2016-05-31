@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,7 @@
 #ifndef SRC_COMPONENTS_MEDIA_MANAGER_TEST_INCLUDE_MEDIA_MANAGER_MOCK_MEDIA_ADAPTER_LISTENER_H_
 #define SRC_COMPONENTS_MEDIA_MANAGER_TEST_INCLUDE_MEDIA_MANAGER_MOCK_MEDIA_ADAPTER_LISTENER_H_
 
-#include <gmock/gmock.h>
+#include "gmock/gmock.h"
 #include "media_manager/media_adapter_listener.h"
 
 namespace test {

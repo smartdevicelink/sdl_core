@@ -42,7 +42,7 @@ namespace policy_manager_test {
 
 namespace {
 using namespace policy;
-}
+}  // namespace
 
 class MockPolicyManager : public PolicyManager {
  public:

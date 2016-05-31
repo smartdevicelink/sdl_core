@@ -28,13 +28,12 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-if (BUILD_TESTS)
-  include_directories (
-    ${COMPONENTS_DIR}/dbus/include
-    ${COMPONENTS_DIR}/rpc_base/include
-    ${DBUS_INCLUDE_DIRS}
-    ${GMOCK_INCLUDE_DIRECTORY}
-    ${JSONCPP_INCLUDE_DIRECTORY}
+include_directories (
+  ${COMPONENTS_DIR}/dbus/include
+  ${COMPONENTS_DIR}/rpc_base/include
+  ${DBUS_INCLUDE_DIRS}
+  ${GMOCK_INCLUDE_DIRECTORY}
+  ${JSONCPP_INCLUDE_DIRECTORY}
 )
 
 set(LIBRARIES
@@ -56,6 +55,3 @@ if (${HMI_DBUS_API})
 endif ()
 
 create_test("rpc_base_test" "${SOURCES}" "${LIBRARIES}")
-
-endif()
-

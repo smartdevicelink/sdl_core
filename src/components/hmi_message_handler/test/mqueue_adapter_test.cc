@@ -34,6 +34,7 @@
 
 #include "hmi_message_handler/mqueue_adapter.h"
 #include "hmi_message_handler/mock_hmi_message_handler.h"
+#include "utils/make_shared.h"
 
 namespace test {
 namespace components {
@@ -50,7 +51,7 @@ TEST(MqueueAdapter, DISABLED_Send) {
       new MqueueAdapter(&handler);
 
   MessageSharedPointer message(
-      new Message(protocol_handler::MessagePriority::kDefault));
+      utils::MakeShared<Message>(protocol_handler::MessagePriority::kDefault));
   message->set_json_message("{}");
   adapter->SendMessageToHMI(message);
 

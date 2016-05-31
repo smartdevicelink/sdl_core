@@ -130,7 +130,8 @@ class StateControllerImplTest : public ::testing::Test {
       : ::testing::Test()
       , usage_stat("0",
                    utils::SharedPtr<usage_statistics::StatisticsManager>(
-                       new application_manager_test::MockStatisticsManager))
+                       utils::MakeShared<
+                           application_manager_test::MockStatisticsManager>()))
       , applications_(application_set_, applications_lock_) {}
   NiceMock<application_manager_test::MockApplicationManager> app_manager_mock_;
   NiceMock<policy_test::MockPolicyHandlerInterface> policy_interface_;
