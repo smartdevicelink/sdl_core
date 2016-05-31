@@ -1,4 +1,4 @@
-# Copyright (c) 2015, Ford Motor Company
+# Copyright (c) 2016, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -42,28 +42,44 @@ include_directories(
   ${COMPONENTS_DIR}/policy/src/policy/policy_table/table_struct
   ${COMPONENTS_DIR}/policy/src/policy/policy_table/
   ${COMPONENTS_DIR}/policy/test/include/
+  ${COMPONENTS_DIR}/policy/test/
+  ${COMPONENTS_DIR}/include/test/policy/
+  $ENV{SDL_SQLITE_DIR}
 )
 
 set(testLibraries
   gmock
+  dbms
   Utils
-  Policy
+  PolicyTestLib
   UsageStatistics
 )
 
 set(testSources
   counter_test.cc
-  shared_library_test.cc
   generated_code_test.cc
   policy_manager_impl_test.cc
   update_status_manager_test.cc
 )
 
+if (NOT QT_PORT)
   list (APPEND testSources
     sql_pt_representation_test.cc
   )
+endif()
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+    list (APPEND testSources
+      shared_library_test.cc
+)
+endif()
+
+if(WIN_NATIVE)
+    link_directories ($ENV{SDL_SQLITE_DIR})
+endif()
 
 create_test("policy_test" "${testSources}" "${testLibraries}")
+add_dependencies("policy_test" PolicyTestLib)
 
 file(COPY valid_sdl_pt_update.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY sdl_preloaded_pt.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

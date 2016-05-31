@@ -32,7 +32,6 @@
 
 #include "gtest/gtest.h"
 #include "mock_policy_listener.h"
-#include "policy/policy_manager_impl.h"
 #include "policy/update_status_manager.h"
 
 using ::policy::MockPolicyListener;
@@ -61,8 +60,9 @@ class UpdateStatusManagerTest : public ::testing::Test {
   }
 };
 
-TEST_F(UpdateStatusManagerTest,
-       StringifiedUpdateStatus_SetStatuses_ExpectCorrectStringifiedStatuses) {
+TEST_F(
+    UpdateStatusManagerTest,
+    DISABLED_StringifiedUpdateStatus_SetStatuses_ExpectCorrectStringifiedStatuses) {
   // Arrange
   manager_->OnPolicyInit(false);
   // Check
@@ -76,7 +76,7 @@ TEST_F(UpdateStatusManagerTest,
 }
 
 TEST_F(UpdateStatusManagerTest,
-       OnAppSearchStartedCompleted_ExpectAppSearchCorrectStatus) {
+       DISABLED_OnAppSearchStartedCompleted_ExpectAppSearchCorrectStatus) {
   // Arrange
   manager_->OnAppsSearchStarted();
   // Check
