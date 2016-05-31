@@ -61,6 +61,9 @@ void* Thread::threadFunc(void* arg) {
   threads::Thread* thread = static_cast<Thread*>(arg);
   DCHECK(thread);
 
+  // Sets thread id in order to be able to check that id on thread joining
+  thread->set_thread_handle(QThread::currentThread);
+
   thread->state_lock_.Acquire();
   thread->state_cond_.Broadcast();
 
@@ -113,11 +116,14 @@ bool Thread::start() {
 }
 
 uint64_t Thread::CurrentId() {
-  return QThread::currentThread();
+  // Available interfaces QThread::currentThread() and
+  // QThread::currentThreadId() return values, which can't be converted to
+  // uint64_t, thus using native WIN interface.
+  return static_cast<uint64_t>(GetCurrentThreadId());
 }
 
 bool Thread::IsCurrentThread() const {
-  return CurrentId() == thread_handle();
+  return QThread::currentThread() == thread_handle();
 }
 
 void Thread::ThreadCancelledExit() {
@@ -147,17 +153,12 @@ bool Thread::start(const ThreadOptions& options) {
 
   // state_lock 1
   if (!thread_created_) {
+    // QtConcurrent::run starts execution in QThreadPool and does not return
+    // any thread id, so thread id will be set from delegate on its start.
     future_ = QtConcurrent::run(threadFunc, this);
-    handle_ = QThread::currentThread();
-    if (NULL != handle_) {
-      LOGGER_DEBUG(logger_, "Created thread: " << name_);
-      // state_lock 0
-      // possible concurrencies: stop and threadFunc
-      state_cond_.Wait(auto_lock);
-      thread_created_ = true;
-    } else {
-      LOGGER_ERROR(logger_, "Couldn't create thread " << name_);
-    }
+    LOGGER_DEBUG(logger_, "Created thread: " << name_);
+    state_cond_.Wait(auto_lock);
+    thread_created_ = true;
   }
   stopped_ = false;
   run_cond_.NotifyOne();
