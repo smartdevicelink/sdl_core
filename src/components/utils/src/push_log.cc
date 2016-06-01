@@ -95,7 +95,9 @@ void flush_logger() {
   logger::LoggerStatus old_status = logger::logger_status;
   // Stop pushing new messages to the log queue
   logger::logger_status = logger::DeletingLoggerThread;
-  log_message_loop_thread->WaitDumpQueue();
+  if (log_message_loop_thread) {
+    log_message_loop_thread->WaitDumpQueue();
+  }
   logger::logger_status = old_status;
 }
 

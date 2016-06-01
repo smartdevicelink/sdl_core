@@ -304,11 +304,11 @@ bool PolicyHandler::LoadPolicyLibrary() {
                  "System is configured to work without policy "
                  "functionality.");
     policy_manager_.reset();
-    return NULL;
+    return false;
   }
   dl_handle_ = dlopen(kLibrary.c_str(), RTLD_LAZY);
 
-  char* error = dlerror();
+  const char* error = dlerror();
   if (!error) {
     if (CreateManager()) {
       policy_manager_->set_listener(this);
