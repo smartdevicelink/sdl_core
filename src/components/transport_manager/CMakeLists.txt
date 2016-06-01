@@ -32,7 +32,7 @@ set(target TransportManager)
 set(TM_SRC_DIR ${COMPONENTS_DIR}/transport_manager/src)
 
 include_directories (
-  include
+  ${COMPONENTS_DIR}/transport_manager/include/
   ${COMPONENTS_DIR}/utils/include/
   ${COMPONENTS_DIR}/protocol_handler/include
   ${COMPONENTS_DIR}/connection_handler/include
@@ -42,10 +42,6 @@ include_directories (
   ${LIBUSB_INCLUDE_DIRECTORY}
   ${LOG4CXX_INCLUDE_DIRECTORY}
 )
-if (BUILD_BT_SUPPORT)
-  include_directories(
-  )
-endif()
 
 set (SOURCES
   ${TM_SRC_DIR}/transport_manager_impl.cc
@@ -91,10 +87,6 @@ if (BUILD_USB_SUPPORT)
   endif()
 endif(BUILD_USB_SUPPORT)
 
-
-if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
-endif()
-
 add_library(${target} ${SOURCES})
 target_link_libraries(${target} ProtocolLibrary)
 
@@ -112,12 +104,7 @@ if (BUILD_BT_SUPPORT)
   target_link_libraries(${target} bluetooth)
 endif()
 
-if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
-endif()
-
-add_library("transport_manager" ${SOURCES}
-        ${TRANSPORT_MANAGER_SOURCES}
-)
+add_library("transport_manager" ${SOURCES} ${TRANSPORT_MANAGER_SOURCES})
 
 if(BUILD_TESTS)
   add_subdirectory(test)

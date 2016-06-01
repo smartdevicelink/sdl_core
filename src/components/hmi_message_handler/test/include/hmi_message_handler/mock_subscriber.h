@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@ struct DBusConnection;
 
 namespace test {
 namespace components {
-namespace hmi_message_handler {
+namespace hmi_message_handler_test {
 
 class MockSubscriber {
  public:
@@ -55,7 +55,7 @@ class MockSubscriber {
   DBusConnection* conn_;
 };
 
-}  // namespace hmi_message_handler
+}  // namespace hmi_message_handler_test
 }  // namespace components
 }  // namespace test
 

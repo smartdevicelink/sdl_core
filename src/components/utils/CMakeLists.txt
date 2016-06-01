@@ -72,25 +72,21 @@ if(ENABLE_LOG)
 endif()
 
 if (BUILD_BACKTRACE_SUPPORT)
-    list(APPEND SOURCES
-    ${UTILS_SRC_DIR}/back_trace.cc
-    )
+    list(APPEND SOURCES ${UTILS_SRC_DIR}/back_trace.cc)
 endif()
 
 if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
-    list(APPEND SOURCES
-    ${UTILS_SRC_DIR}/threads/pulse_thread_delegate.cc
-    )
+    list(APPEND SOURCES ${UTILS_SRC_DIR}/threads/pulse_thread_delegate.cc)
 endif()
 
 add_library("Utils" ${SOURCES})
 
 if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
     # --- QDB Wrapper 
-    add_subdirectory(./src/qdb_wrapper)
+    add_subdirectory(${UTILS_SRC_DIR}/qdb_wrapper)
 else ()
     # --- SQLite Wrapper
-    add_subdirectory(./src/sqlite_wrapper)
+    add_subdirectory(${UTILS_SRC_DIR}/sqlite_wrapper)
 endif ()
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")

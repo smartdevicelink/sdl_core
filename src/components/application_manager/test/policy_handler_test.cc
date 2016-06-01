@@ -81,6 +81,7 @@ using ::testing::SetArgReferee;
 using ::testing::SetArgPointee;
 using ::testing::DoAll;
 using ::testing::SetArgReferee;
+using application_manager::MockMessageHelper;
 
 class PolicyHandlerTest : public ::testing::Test {
  public:

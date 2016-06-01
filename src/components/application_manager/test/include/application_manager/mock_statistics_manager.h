@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Ford Motor Company
+/* Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,7 +42,10 @@ namespace test {
 namespace components {
 namespace application_manager_test {
 
+namespace {
 using namespace ::usage_statistics;
+}  // namespace
+
 class MockStatisticsManager : public StatisticsManager {
  public:
   MOCK_METHOD1(Increment, void(GlobalCounterId type));

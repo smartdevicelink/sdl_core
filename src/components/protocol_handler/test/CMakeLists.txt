@@ -31,12 +31,10 @@
 if (BUILD_TESTS)
 
 include_directories (
-  include
   ${COMPONENTS_DIR}/resumption/include
   ${GMOCK_INCLUDE_DIRECTORY}
   ${COMPONENTS_DIR}/protocol_handler/include
   ${COMPONENTS_DIR}/protocol_handler/test/include
-  ${COMPONENTS_DIR}/include/protocol
   ${JSONCPP_INCLUDE_DIRECTORY}
 )
 
@@ -50,12 +48,12 @@ set (LIBRARIES
 )
 
 set (SOURCES
-  incoming_data_handler_test.cc
-  protocol_header_validator_test.cc
-  protocol_handler_tm_test.cc
-  protocol_packet_test.cc
-  protocol_payload_test.cc
-  multiframe_builder_test.cc
+  ${COMPONENTS_DIR}/protocol_handler/test/incoming_data_handler_test.cc
+  ${COMPONENTS_DIR}/protocol_handler/test/protocol_header_validator_test.cc
+  ${COMPONENTS_DIR}/protocol_handler/test/protocol_handler_tm_test.cc
+  ${COMPONENTS_DIR}/protocol_handler/test/protocol_packet_test.cc
+  ${COMPONENTS_DIR}/protocol_handler/test/protocol_payload_test.cc
+  ${COMPONENTS_DIR}/protocol_handler/test/multiframe_builder_test.cc
 )
 
 create_test ("protocol_handler_test" "${SOURCES}" "${LIBRARIES}")

@@ -30,65 +30,63 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gtest/gtest.h>
-#include <gmock/gmock.h>
+#include "gtest/gtest.h"
 
-#include "hmi_message_handler/hmi_message_handler.h"
 #include "hmi_message_handler/mqueue_adapter.h"
+#include "hmi_message_handler/mock_hmi_message_handler.h"
+#include "utils/make_shared.h"
+
+namespace test {
+namespace components {
+namespace hmi_message_handler_test {
 
 using hmi_message_handler::MessageSharedPointer;
-using hmi_message_handler::HMIMessageHandler;
-using hmi_message_handler::HMIMessageAdapter;
 using hmi_message_handler::MqueueAdapter;
 using application_manager::Message;
 
-class MockHandler : public HMIMessageHandler {
- public:
-  MOCK_METHOD1(OnMessageReceived, void(MessageSharedPointer message));
-  MOCK_METHOD1(AddHMIMessageAdapter, void(HMIMessageAdapter* adapter));
-  MOCK_METHOD1(RemoveHMIMessageAdapter, void(HMIMessageAdapter* adapter));
-  MOCK_METHOD1(OnErrorSending, void(MessageSharedPointer message));
-  MOCK_METHOD1(SendMessageToHMI, void(MessageSharedPointer message));
-};
+// TODO {AKozoriz} : Will be fixed in planned task
+TEST(MqueueAdapter, DISABLED_Send) {
+  MockHMIMessageHandler handler;
+  hmi_message_handler::HMIMessageAdapterImpl* adapter =
+      new MqueueAdapter(&handler);
 
-// TODO{ALeshin}: APPLINK-10846
-// TEST(MqueueAdapter, Send) {
-//  MockHandler handler;
-//  HMIMessageAdapter* adapter = new MqueueAdapter(&handler);
+  MessageSharedPointer message(
+      utils::MakeShared<Message>(protocol_handler::MessagePriority::kDefault));
+  message->set_json_message("{}");
+  adapter->SendMessageToHMI(message);
 
-//  MessageSharedPointer message(
-//      new Message(protocol_handler::MessagePriority::kDefault));
-//  message->set_json_message("{}");
-//  adapter->SendMessageToHMI(message);
+  mqd_t mqd = mq_open("/sdl_to_hmi", O_RDONLY);
+  ASSERT_NE(-1, mqd);
+  static char buf[65536];
+  ssize_t sz = mq_receive(mqd, buf, 65536, NULL);
+  ASSERT_EQ(2, sz);
+  EXPECT_STREQ("{}", buf);
 
-//  mqd_t mqd = mq_open("/sdl_to_hmi", O_RDONLY);
-//  ASSERT_NE(-1, mqd);
-//  static char buf[65536];
-//  ssize_t sz = mq_receive(mqd, buf, 65536, NULL);
-//  ASSERT_EQ(2, sz);
-//  EXPECT_STREQ("{}", buf);
+  delete adapter;
+}
 
-//  delete adapter;
-//}
+TEST(MqueueAdapter, DISABLED_Receive) {
+  MockHMIMessageHandler handler;
+  hmi_message_handler::HMIMessageAdapterImpl* adapter =
+      new MqueueAdapter(&handler);
 
-// TODO{ALeshin}: APPLINK-10846
-// TEST(MqueueAdapter, Receive) {
-//  MockHandler handler;
-//  HMIMessageAdapter* adapter = new MqueueAdapter(&handler);
+  using ::testing::Property;
+  using ::testing::Pointee;
+  EXPECT_CALL(
+      handler,
+      OnMessageReceived(Property(
+          &MessageSharedPointer::get,
+          Pointee(Property(&Message::json_message, std::string("()"))))));
 
-//  using ::testing::Property;
-//  using ::testing::Pointee;
-//  EXPECT_CALL(
-//      handler,
-//      OnMessageReceived(Property(
-//          &MessageSharedPointer::get,
-//          Pointee(Property(&Message::json_message, std::string("()"))))));
+  mqd_t mqd = mq_open("/hmi_to_sdl", O_WRONLY);
+  ASSERT_NE(-1, mqd);
+  const char buf[] = "()";
+  int rc = mq_send(mqd, buf, sizeof(buf) - 1, 0);
+  ASSERT_EQ(0, rc);
 
-//  mqd_t mqd = mq_open("/hmi_to_sdl", O_WRONLY);
-//  ASSERT_NE(-1, mqd);
-//  const char buf[] = "()";
-//  int rc = mq_send(mqd, buf, sizeof(buf) - 1, 0);
-//  ASSERT_EQ(0, rc);
+  delete adapter;
+}
 
-//  delete adapter;
-//}
+}  // namespace hmi_message_handler_test
+}  // namespace components
+}  // namespace test

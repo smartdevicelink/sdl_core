@@ -47,10 +47,10 @@ set(LIBRARIES
 )
 
 set(SOURCES
-    connection_handler_impl_test.cc
-    connection_test.cc
-    device_test.cc
-    heart_beat_monitor_test.cc
+    ${COMPONENTS_DIR}/connection_handler/test/connection_handler_impl_test.cc
+    ${COMPONENTS_DIR}/connection_handler/test/connection_test.cc
+    ${COMPONENTS_DIR}/connection_handler/test/device_test.cc
+    ${COMPONENTS_DIR}/connection_handler/test/heart_beat_monitor_test.cc
 )
 
 file(COPY ${appMain_DIR}/smartDeviceLink.ini DESTINATION "./")

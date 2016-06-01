@@ -135,6 +135,6 @@ TEST_F(PolicyEventObserverTest,
   CheckResultsOnEvent(0u, 1u);
 }
 
-}  // namespace policy_event_observer
+}  // namespace policy_test
 }  // namespace components
 }  // namespace test

@@ -49,6 +49,7 @@ set(LIBRARIES
 set(SOURCES 
 ${COMPONENTS_DIR}/hmi_message_handler/test/hmi_message_handler_impl_test.cc
 ${COMPONENTS_DIR}/hmi_message_handler/test/hmi_message_adapter_test.cc
+${COMPONENTS_DIR}/hmi_message_handler/test/mqueue_adapter_test.cc
 )
 
 if(${QT_HMI})

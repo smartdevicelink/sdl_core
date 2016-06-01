@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -100,6 +100,7 @@ class Thread {
   sync_primitives::ConditionalVariable run_cond_;
 
  public:
+  static int count;
   /**
    * @brief Starts the thread.
    * @return true if the thread was successfully started.

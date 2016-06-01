@@ -30,7 +30,7 @@
 
 
 include_directories (
-    include/
+    ${COMPONENTS_DIR}/hmi_message_handler/include/
     ${COMPONENTS_DIR}/application_manager/include/
     ${COMPONENTS_DIR}/utils/include/
     ${COMPONENTS_DIR}/smart_objects/include/
@@ -39,15 +39,13 @@ include_directories (
     ${COMPONENTS_DIR}/protocol_handler/include
     ${JSONCPP_INCLUDE_DIRECTORY}
     ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
-    ${COMPONENTS_DIR}
     ${CMAKE_BINARY_DIR}/src/components/
     ${COMPONENTS_DIR}/dbus/include/
-    ${CMAKE_SOURCE_DIR}/
     ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
 IF (HMIADAPTER STREQUAL "dbus")
-    set (DBUS_SOURCE ./src/dbus_message_adapter.cc)
+    set (DBUS_SOURCE ${COMPONENTS_DIR}/hmi_message_handler/src/dbus_message_adapter.cc)
     set (DBUS_ADAPTER DBus)
 ENDIF ()
 

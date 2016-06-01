@@ -42,8 +42,7 @@ using ::testing::ContainerEq;
 
 namespace test {
 namespace components {
-namespace SmartObjects {
-namespace SmartObjectDraftTest {
+namespace smart_object_test {
 
 using NsSmartDeviceLink::NsSmartObjects::SmartObject;
 using NsSmartDeviceLink::NsSmartObjects::SmartType;
@@ -358,7 +357,7 @@ TEST(SmartObjectsDraftTest, compare_map_type) {
   ASSERT_NE(other_value2, SmartObject());
 }
 // TODO(Ezamakhov): add test for conversion string/int/double
-}  // namespace SmartObjectDraftTest
-}  // namespace SmartObjects
+
+}  // namespace smart_object_test
 }  // namespace components
 }  // namespace test

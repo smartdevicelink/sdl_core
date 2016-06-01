@@ -32,13 +32,12 @@
 set(FORMATTERS_SRC_DIR  ${COMPONENTS_DIR}/formatters/src)
 
 include_directories (
-  include/
+  ${COMPONENTS_DIR}/formatters/include/
   ${COMPONENTS_DIR}/protocol_handler/include/
   ${COMPONENTS_DIR}/utils/include/
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
   ${COMPONENTS_DIR}/smart_objects/include
-  ${COMPONENTS_DIR}/utils/include
 )
 
 set (SOURCES
@@ -54,9 +53,7 @@ set (FORMATTER_SOURCES
    ${FORMATTERS_SRC_DIR}/generic_json_formatter.cc
 )
 
-add_library("formatters" ${SOURCES}
-        ${FORMATTER_SOURCES}
-)
+add_library("formatters" ${SOURCES} ${FORMATTER_SOURCES})
 
 if(BUILD_TESTS)
   add_subdirectory(test)

@@ -43,9 +43,9 @@
 #include "policy/policy_table/enums.h"
 #include "policy/policy_table/types.h"
 #include "policy/mock_policy_settings.h"
-#include "mock_policy_listener.h"
-#include "mock_cache_manager.h"
-#include "mock_update_status_manager.h"
+#include "policy/mock_policy_listener.h"
+#include "policy/mock_cache_manager.h"
+#include "policy/mock_update_status_manager.h"
 
 #include "utils/macro.h"
 #include "utils/file_system.h"
@@ -61,11 +61,6 @@ using ::testing::SetArgReferee;
 using ::testing::AtLeast;
 using ::testing::Return;
 
-using ::policy::MockPolicyListener;
-
-using ::policy::MockCacheManagerInterface;
-using ::policy::MockUpdateStatusManager;
-
 using ::policy::PolicyManagerImpl;
 using ::policy::PolicyTable;
 
@@ -73,7 +68,7 @@ namespace policy_table = rpc::policy_table_interface_base;
 
 namespace test {
 namespace components {
-namespace policy {
+namespace policy_test {
 
 namespace custom_str = utils::custom_string;
 
@@ -804,6 +799,6 @@ TEST_F(PolicyManagerImplTest2,
             vehicle_info.vehicle_year);
 }
 
-}  // namespace policy
+}  // namespace policy_test
 }  // namespace components
 }  // namespace test

@@ -30,8 +30,10 @@
 
 if(BUILD_TESTS)
 
+set(TELEMETRY_MONITOR_TEST_DIR ${COMPONENTS_DIR}/telemetry_monitor/test)
+
 include_directories(
-  include
+  ${TELEMETRY_MONITOR_TEST_DIR}/include
   ${GMOCK_INCLUDE_DIRECTORY}
   ${COMPONENTS_DIR}/telemetry_monitor/include
   ${COMPONENTS_DIR}/utils/include
@@ -43,14 +45,14 @@ include_directories(
   
 
 set(testSources
-  metric_wrapper_test.cc
-  telemetry_monitor_test.cc
-  protocol_handler_metric_test.cc
-  protocol_handler_observer_test.cc
-  transport_manager_metric_test.cc
-  transport_manager_observer_test.cc
-  application_manager_metric_test.cc
-  application_manager_observer_test.cc
+  ${TELEMETRY_MONITOR_TEST_DIR}/metric_wrapper_test.cc
+  ${TELEMETRY_MONITOR_TEST_DIR}/telemetry_monitor_test.cc
+  ${TELEMETRY_MONITOR_TEST_DIR}/protocol_handler_metric_test.cc
+  ${TELEMETRY_MONITOR_TEST_DIR}/protocol_handler_observer_test.cc
+  ${TELEMETRY_MONITOR_TEST_DIR}/transport_manager_metric_test.cc
+  ${TELEMETRY_MONITOR_TEST_DIR}/transport_manager_observer_test.cc
+  ${TELEMETRY_MONITOR_TEST_DIR}/application_manager_metric_test.cc
+  ${TELEMETRY_MONITOR_TEST_DIR}/application_manager_observer_test.cc
 )
 
 set(testLibraries
@@ -82,7 +84,7 @@ if (BUILD_BT_SUPPORT)
   list(APPEND testLibraries bluetooth)
 endif()
 
-file(COPY log4cxx.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ${TELEMETRY_MONITOR_TEST_DIR}/log4cxx.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 create_test("telemetry_monitor_test" "${testSources}" "${testLibraries}")
 

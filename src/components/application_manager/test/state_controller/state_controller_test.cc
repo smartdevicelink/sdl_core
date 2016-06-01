@@ -39,7 +39,7 @@
 #include "connection_handler/mock_connection_handler_settings.h"
 #include "connection_handler/connection_handler_impl.h"
 #include "transport_manager/mock_transport_manager.h"
-#include "application_manager/statistics_manager_mock.h"
+#include "application_manager/mock_statistics_manager.h"
 #include "utils/lock.h"
 #include "utils/data_accessor.h"
 #include "utils/make_shared.h"
@@ -130,8 +130,8 @@ class StateControllerImplTest : public ::testing::Test {
       : ::testing::Test()
       , usage_stat("0",
                    utils::SharedPtr<usage_statistics::StatisticsManager>(
-
-                       new state_controller_test::MockStatisticsManager))
+                       utils::MakeShared<
+                           application_manager_test::MockStatisticsManager>()))
       , applications_(application_set_, applications_lock_) {}
   NiceMock<application_manager_test::MockApplicationManager> app_manager_mock_;
   NiceMock<policy_test::MockPolicyHandlerInterface> policy_interface_;

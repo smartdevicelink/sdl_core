@@ -30,6 +30,8 @@
 
 if(BUILD_TESTS)
 
+set(UTILS_TEST_DIR ${COMPONENTS_DIR}/utils/test)
+
 include_directories (
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${GMOCK_INCLUDE_DIRECTORY}
@@ -40,29 +42,29 @@ include_directories (
 )
 
 set(testSources
-  messagemeter_test.cc
-  file_system_test.cc
-  date_time_test.cc
-  system_test.cc
-  thread_validator_test.cc
-  conditional_variable_test.cc
-  message_queue_test.cc
-  resource_usage_test.cc
-  bitstream_test.cc
-  prioritized_queue_test.cc
-  data_accessor_test.cc
-  lock_posix_test.cc
-  singleton_test.cc
-  #posix_thread_test.cc
-  stl_utils_test.cc
-  rwlock_posix_test.cc
-  async_runner_test.cc
-  shared_ptr_test.cc
-  scope_guard_test.cc
-  atomic_object_test.cc
-  message_loop_thread_test.cc
-  custom_string_test.cc
-  timer_test.cc
+  ${UTILS_TEST_DIR}/messagemeter_test.cc
+  ${UTILS_TEST_DIR}/file_system_test.cc
+  ${UTILS_TEST_DIR}/date_time_test.cc
+  ${UTILS_TEST_DIR}/system_test.cc
+  ${UTILS_TEST_DIR}/thread_validator_test.cc
+  ${UTILS_TEST_DIR}/conditional_variable_test.cc
+  ${UTILS_TEST_DIR}/message_queue_test.cc
+  ${UTILS_TEST_DIR}/resource_usage_test.cc
+  ${UTILS_TEST_DIR}/bitstream_test.cc
+  ${UTILS_TEST_DIR}/prioritized_queue_test.cc
+  ${UTILS_TEST_DIR}/data_accessor_test.cc
+  ${UTILS_TEST_DIR}/lock_posix_test.cc
+  ${UTILS_TEST_DIR}/singleton_test.cc
+#  ${UTILS_TEST_DIR}/posix_thread_test.cc
+  ${UTILS_TEST_DIR}/stl_utils_test.cc
+  ${UTILS_TEST_DIR}/rwlock_posix_test.cc
+  ${UTILS_TEST_DIR}/async_runner_test.cc
+  ${UTILS_TEST_DIR}/shared_ptr_test.cc
+  ${UTILS_TEST_DIR}/scope_guard_test.cc
+  ${UTILS_TEST_DIR}/atomic_object_test.cc
+  ${UTILS_TEST_DIR}/message_loop_thread_test.cc
+  ${UTILS_TEST_DIR}/custom_string_test.cc
+  ${UTILS_TEST_DIR}/timer_test.cc
 )
 
 set(testLibraries
@@ -75,35 +77,35 @@ set(testLibraries
 if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
   # --- Tests for QDB Wrapper
   list (APPEND testSources
-    ./qdb_wrapper/sql_database_test.cc
-    ./qdb_wrapper/sql_query_test.cc
+    ${UTILS_TEST_DIR}/qdb_wrapper/sql_database_test.cc
+    ${UTILS_TEST_DIR}/qdb_wrapper/sql_query_test.cc
   )
-  file(COPY qdbserver.sh DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-  file(COPY test-qdb.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-  file(COPY policy.sql DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+  file(COPY ${UTILS_TEST_DIR}/qdbserver.sh DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+  file(COPY ${UTILS_TEST_DIR}/test-qdb.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+  file(COPY ${UTILS_TEST_DIR}/policy.sql DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 else ()
   # --- Tests for SQLite Wrapper
   find_package(Sqlite3 REQUIRED)
   list (APPEND testSources
-    ./sqlite_wrapper/sql_database_test.cc
-    ./sqlite_wrapper/sql_query_test.cc
-    generated_code_with_sqlite_test.cc
+    ${UTILS_TEST_DIR}/sqlite_wrapper/sql_database_test.cc
+    ${UTILS_TEST_DIR}/sqlite_wrapper/sql_query_test.cc
+    ${UTILS_TEST_DIR}/generated_code_with_sqlite_test.cc
   )
   list (APPEND testLibraries sqlite3)
 endif()
 
 if (ENABLE_LOG)
-  list(APPEND testSources auto_trace_test.cc)
-  list(APPEND testSources log_message_loop_thread_test.cc)
+  list(APPEND testSources ${UTILS_TEST_DIR}/auto_trace_test.cc)
+  list(APPEND testSources ${UTILS_TEST_DIR}/log_message_loop_thread_test.cc)
 endif()
 
 if (BUILD_BACKTRACE_SUPPORT)
-  list(APPEND testSources back_trace_test.cc)
+  list(APPEND testSources ${UTILS_TEST_DIR}/back_trace_test.cc)
 endif()
 
-file(COPY testscript.sh DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-file(COPY log4cxx.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-file(COPY smartDeviceLink.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ${UTILS_TEST_DIR}/testscript.sh DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ${UTILS_TEST_DIR}/log4cxx.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ${UTILS_TEST_DIR}/smartDeviceLink.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 create_test("utils_test" "${testSources}" "${testLibraries}")
 

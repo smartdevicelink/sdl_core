@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,7 @@
 #include <set>
 
 #include "formatters/CSmartFactory.h"
-#include "HMI_API_schema.h"
+#include "interfaces/HMI_API_schema.h"
 #include "smart_objects/always_true_schema_item.h"
 #include "smart_objects/always_false_schema_item.h"
 #include "smart_objects/array_schema_item.h"

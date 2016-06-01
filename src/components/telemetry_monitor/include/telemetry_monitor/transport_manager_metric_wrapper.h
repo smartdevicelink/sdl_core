@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,4 +46,4 @@ class TransportManagerMecticWrapper : public MetricWrapper {
   virtual Json::Value GetJsonMetric();
 };
 }  // namespace telemetry_monitor
-#endif  // SRC_COMPONENTS_TELEMETRY_MONITOR_INCLUDE_TELEMETRY_MONITOR_TRANSPORT_MANAGER_MECTRIC_WRAPPER_H_
+#endif  // SRC_COMPONENTS_TELEMETRY_MONITOR_INCLUDE_TELEMETRY_MONITOR_TRANSPORT_MANAGER_METRIC_WRAPPER_H_

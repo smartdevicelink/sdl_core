@@ -2,7 +2,7 @@
  * \file raw_message_matcher.h
  * \brief matcher RawMessagePtr
  *
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,7 +47,7 @@ using ::testing::MatchResultListener;
 
 namespace test {
 namespace components {
-namespace transport_manager {
+namespace transport_manager_test {
 
 using namespace ::protocol_handler;
 
@@ -68,7 +68,7 @@ inline const Matcher<RawMessagePtr> RawMessageEq(RawMessagePtr msg) {
   return MakeMatcher(new RawMessageMatcher(msg));
 }
 
-}  // namespace transport_manager
+}  // namespace transport_manager_test
 }  // namespace components
 }  // namespace test
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,12 +41,21 @@ namespace components {
 namespace hmi_message_handler_test {
 
 using hmi_message_handler::HMIMessageAdapter;
+using hmi_message_handler::HMIMessageHandlerSettings;
+using hmi_message_handler::MessageSharedPointer;
 
 class MockHMIMessageHandler : public ::hmi_message_handler::HMIMessageHandler {
  public:
   MOCK_METHOD1(AddHMIMessageAdapter, void(HMIMessageAdapter* adapter));
   MOCK_METHOD1(RemoveHMIMessageAdapter, void(HMIMessageAdapter* adapter));
+  MOCK_CONST_METHOD0(get_settings, const HMIMessageHandlerSettings&());
+  MOCK_METHOD1(OnMessageReceived,
+               void(utils::SharedPtr<application_manager::Message> message));
+  MOCK_METHOD1(OnErrorSending,
+               void(utils::SharedPtr<application_manager::Message> message));
+  MOCK_METHOD1(SendMessageToHMI, void(MessageSharedPointer message));
 };
+
 }  // namespace hmi_message_handler_test
 }  // namespace components
 }  // namespace test

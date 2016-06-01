@@ -30,7 +30,7 @@
 
 
 include_directories (
-  include
+  ${COMPONENTS_DIR}/resumption/include
   ${COMPONENTS_DIR}/utils/include/
   ${COMPONENTS_DIR}/config_profile/include/
   ${JSONCPP_INCLUDE_DIRECTORY}

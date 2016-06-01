@@ -34,8 +34,7 @@ set (AM_TEST_DIR ${AM_SOURCE_DIR}/test)
 set (AM_MOCK_DIR ${AM_TEST_DIR}/mock)
 
 include_directories (
-  include/
-  ${COMPONENTS_DIR}
+  ${COMPONENTS_DIR}/application_manager/include/
   ${COMPONENTS_DIR}/utils/include/
   ${COMPONENTS_DIR}/formatters/include/
   ${COMPONENTS_DIR}/protocol_handler/include/
@@ -47,7 +46,6 @@ include_directories (
   ${COMPONENTS_DIR}/request_watchdog/include/
   ${COMPONENTS_DIR}/resumption/include/
   ${COMPONENTS_DIR}/rpc_base/include/
-  ${COMPONENTS_DIR}/interfaces
   ${CMAKE_BINARY_DIR}/src/components/
   ${COMPONENTS_DIR}/policy/include/
   ${JSONCPP_INCLUDE_DIRECTORY}
@@ -55,18 +53,6 @@ include_directories (
   ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
   ${LOG4CXX_INCLUDE_DIRECTORY}
 )
-
-if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-  include_directories(
-    ${COMPONENTS_DIR}/utils/include/utils/sqlite_wrapper/
-  )
-endif ()
-
-if (${CMAKE_SYSTEM_NAME} MATCHES "QNX")
-  include_directories(
-    ${COMPONENTS_DIR}/utils/include/utils/qdb_wrapper/
-  )
-endif()
 
 file (GLOB SOURCES
   ${AM_SOURCE_DIR}/src/*
@@ -84,9 +70,6 @@ ${AM_SOURCE_DIR}/src/policies/delegates/app_permission_delegate.cc
 ${AM_SOURCE_DIR}/src/policies/delegates/statistics_delegate.cc
 )
 
-  include_directories(
-    ${COMPONENTS_DIR}/policy/src/policy/policy_table/table_struct
-  )
 file (GLOB EVENT_ENGINE
   ${AM_SOURCE_DIR}/src/event_engine/*
 )

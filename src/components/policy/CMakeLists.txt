@@ -77,10 +77,10 @@ add_library(UsageStatistics ${USAGE_STATISTICS_SOURCES})
 set(LIBRARIES ConfigProfile policy_struct dbms jsoncpp Utils)
 if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
   # --- QDB Wrapper 
-  include_directories (${COMPONENTS_DIR}/utils/include/utils)
+  include_directories (${COMPONENTS_DIR}/utils/include/)
 else ()
   # --- SQLite Wrapper
-  include_directories (${COMPONENTS_DIR}/utils/include/utils)
+  include_directories (${COMPONENTS_DIR}/utils/include/)
   list(APPEND LIBRARIES sqlite3)
 endif ()
 
