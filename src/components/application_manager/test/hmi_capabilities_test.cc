@@ -345,7 +345,7 @@ TEST_F(HMICapabilitiesTest, DISABLED_LoadCapabilitiesFromFile) {
 }
 
 TEST_F(HMICapabilitiesTest,
-       HmiCapabilitiesInitialized_UiVrTtsIviNotCooperating) {
+       DISABLED_HmiCapabilitiesInitialized_UiVrTtsIviNotCooperating) {
   // Precondition
   hmi_capabilities_test->set_is_vr_cooperating(false);
   hmi_capabilities_test->set_is_tts_cooperating(false);
