@@ -658,6 +658,9 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       if (commands::Command::ORIGIN_SDL == origin) {
         command.reset(new commands::OnHMIStatusNotification(
             message, application_manager));
+      } else {
+        command.reset(new commands::OnHMIStatusNotificationFromMobile(
+            message, application_manager));
       }
       break;
     }
