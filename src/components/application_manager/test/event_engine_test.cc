@@ -66,7 +66,7 @@ class EventEngineTest : public testing::Test {
   const application_manager::event_engine::Event::EventID event_id3;
   MockEventDispatcher mock_event_dispatcher_;
   MockEventObserver event_observer_mock_;
-  const int32_t correlation_id = 1121;
+  static const int32_t correlation_id = 1121;
   smart_objects::SmartObject smart_object_with_type_notification;
   smart_objects::SmartObject smart_object_with_type_response;
   smart_objects::SmartObject smart_object_with_type_error_response;

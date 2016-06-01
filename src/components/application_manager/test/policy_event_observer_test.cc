@@ -61,7 +61,7 @@ class PolicyEventObserverTest : public ::testing::Test {
   Event* event_;
   smart_objects::SmartObject smart_object_;
   const std::string field_name;
-  const int field_value = 100;
+  static const int field_value = 100;
 
   virtual void SetUp() OVERRIDE {
     policy_event_observer_ =

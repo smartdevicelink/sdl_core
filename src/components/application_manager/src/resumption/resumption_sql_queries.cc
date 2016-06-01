@@ -428,7 +428,7 @@ const std::string kUpdateHMILevel =
 
 const std::string kUpdateIgnOffCount =
     "UPDATE `application` "
-    "SET `ign_off_count` = `ign_off_count` - 1"
+    "SET `ign_off_count` = `ign_off_count` - 1 "
     "WHERE `ign_off_count` > 0";
 
 const std::string kCountApplicationsIgnOff =

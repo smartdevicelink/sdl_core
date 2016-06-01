@@ -70,6 +70,7 @@ typedef void (ApplicationImpl::*AddSet)(HmiStatePtr args);
 class ApplicationImplTest : public ::testing::Test {
  protected:
   virtual void SetUp() OVERRIDE {
+    directory_name = "./test_storage";
     app_id = 10;
     policy_app_id = "policy_app_id";
     app_name = "app_name";
@@ -116,7 +117,7 @@ class ApplicationImplTest : public ::testing::Test {
   std::string policy_app_id;
   std::string mac_address;
   custom_str::CustomString app_name;
-  const std::string directory_name = "./test_storage";
+  std::string directory_name;
   HmiState::StateID state_id;
   HmiStatePtr testHmiState;
   HMILevel::eType test_lvl;
@@ -300,7 +301,8 @@ TEST_F(ApplicationImplTest, SetPostponedState_RemovePostponedState) {
   EXPECT_EQ(NULL, state2);
 }
 
-TEST_F(ApplicationImplTest, AddStateAddRegularState_GetHmiLvlAudioSystemState) {
+TEST_F(ApplicationImplTest,
+       AddStateAddRegularState_GetHmiLvlAudioSystemState) {
   audiostate = AudioStreamingState::ATTENUATED;
   syst_context = SystemContext::SYSCTXT_ALERT;
   TestAddHmiState(HMILevel::HMI_FULL,
@@ -422,19 +424,30 @@ TEST_F(ApplicationImplTest, LoadPersistentFiles) {
   // Create test folder with diff files
 
   app_impl->MarkRegistered();
-  std::string folder_name = "";
+  const std::string folder_name = "app";
   app_impl->set_folder_name(folder_name);
 
-  file_system::CreateDirectory(directory_name);
+  const std::string test_path = file_system::ConcatPath(directory_name, folder_name);
 
-  EXPECT_TRUE(file_system::CreateFile(directory_name + "/test_file1.json"));
-  EXPECT_TRUE(file_system::CreateFile(directory_name + "/test_file2.bmp"));
-  EXPECT_TRUE(file_system::CreateFile(directory_name + "/test_file3.jpeg"));
-  EXPECT_TRUE(file_system::CreateFile(directory_name + "/test_file4.png"));
-  EXPECT_TRUE(file_system::CreateFile(directory_name + "/test_file5"));
-  EXPECT_TRUE(file_system::CreateFile(directory_name + "/test_file6.wave"));
-  EXPECT_TRUE(file_system::CreateFile(directory_name + "/test_file7.mp4"));
-  EXPECT_TRUE(file_system::CreateFile(directory_name + "/test_file8.mp3"));
+  EXPECT_TRUE(file_system::CreateDirectoryRecursively(test_path));
+
+  const std::string file1 = file_system::ConcatPath(test_path, "test_file1.json");
+  const std::string file2 = file_system::ConcatPath(test_path, "test_file2.bmp");
+  const std::string file3 = file_system::ConcatPath(test_path, "test_file3.jpeg");
+  const std::string file4 = file_system::ConcatPath(test_path, "test_file4.png");
+  const std::string file5 = file_system::ConcatPath(test_path, "test_file5");
+  const std::string file6 = file_system::ConcatPath(test_path, "test_file6.wave");
+  const std::string file7 = file_system::ConcatPath(test_path, "test_file7.mp4");
+  const std::string file8 = file_system::ConcatPath(test_path, "test_file8.mp3");
+
+  EXPECT_TRUE(file_system::CreateFile(file1));
+  EXPECT_TRUE(file_system::CreateFile(file2));
+  EXPECT_TRUE(file_system::CreateFile(file3));
+  EXPECT_TRUE(file_system::CreateFile(file4));
+  EXPECT_TRUE(file_system::CreateFile(file5));
+  EXPECT_TRUE(file_system::CreateFile(file6));
+  EXPECT_TRUE(file_system::CreateFile(file7));
+  EXPECT_TRUE(file_system::CreateFile(file8));
 
   app_impl->LoadPersistentFiles();
 
@@ -442,40 +455,41 @@ TEST_F(ApplicationImplTest, LoadPersistentFiles) {
 
   EXPECT_EQ(8u, files_map.size());
   const AppFile* test_file1 =
-      app_impl->GetFile(directory_name + "//test_file1.json");
+      app_impl->GetFile(file1);
   ASSERT_TRUE(test_file1);
   EXPECT_EQ(FileType::JSON, test_file1->file_type);
   const AppFile* test_file2 =
-      app_impl->GetFile(directory_name + "//test_file2.bmp");
+      app_impl->GetFile(file2);
   ASSERT_TRUE(test_file2);
   EXPECT_EQ(FileType::GRAPHIC_BMP, test_file2->file_type);
   const AppFile* test_file3 =
-      app_impl->GetFile(directory_name + "//test_file3.jpeg");
+      app_impl->GetFile(file3);
   ASSERT_TRUE(test_file3);
   EXPECT_EQ(FileType::GRAPHIC_JPEG, test_file3->file_type);
   const AppFile* test_file4 =
-      app_impl->GetFile(directory_name + "//test_file4.png");
+      app_impl->GetFile(file4);
   ASSERT_TRUE(test_file4);
   EXPECT_EQ(FileType::GRAPHIC_PNG, test_file4->file_type);
   const AppFile* test_file5 =
-      app_impl->GetFile(directory_name + "//test_file5");
+      app_impl->GetFile(file5);
   ASSERT_TRUE(test_file5);
   EXPECT_EQ(FileType::BINARY, test_file5->file_type);
   const AppFile* test_file6 =
-      app_impl->GetFile(directory_name + "//test_file6.wave");
+      app_impl->GetFile(file6);
   ASSERT_TRUE(test_file6);
   EXPECT_EQ(FileType::AUDIO_WAVE, test_file6->file_type);
   const AppFile* test_file7 =
-      app_impl->GetFile(directory_name + "//test_file7.mp4");
+      app_impl->GetFile(file7);
   ASSERT_TRUE(test_file7);
   EXPECT_EQ(FileType::AUDIO_AAC, test_file7->file_type);
   const AppFile* test_file8 =
-      app_impl->GetFile(directory_name + "//test_file8.mp3");
+      app_impl->GetFile(file8);
   ASSERT_TRUE(test_file8);
   EXPECT_EQ(FileType::AUDIO_MP3, test_file8->file_type);
 }
 
-TEST_F(ApplicationImplTest, IsCommandLimitsExceeded_SetLimitFromConfig) {
+TEST_F(ApplicationImplTest,
+       IsCommandLimitsExceeded_SetLimitFromConfig) {
   std::pair<uint32_t, int32_t> get_frequency;
   get_frequency.first = 5;
   get_frequency.second = 1;
@@ -537,24 +551,24 @@ TEST_F(ApplicationImplTest, SubscribeToDefaultButton_UnsubscribeFromButton) {
 }
 
 TEST_F(ApplicationImplTest, SubscribeToSoftButton_UnsubscribeFromSoftButton) {
-  const uint btn_count = 10;
-  for (uint i = 0; i < btn_count; i++) {
+  const size_t btn_count = 10;
+  for (size_t i = 0; i < btn_count; i++) {
     EXPECT_FALSE(app_impl->IsSubscribedToSoftButton(i));
   }
 
   SoftButtonID test_button;
-  for (uint i = 0; i < btn_count; i++) {
+  for (size_t i = 0; i < btn_count; i++) {
     test_button.insert(i);
   }
   app_impl->SubscribeToSoftButtons(FunctionID::ScrollableMessageID,
                                    test_button);
 
-  for (uint i = 0; i < btn_count; i++) {
+  for (size_t i = 0; i < btn_count; i++) {
     EXPECT_TRUE(app_impl->IsSubscribedToSoftButton(i));
   }
   app_impl->UnsubscribeFromSoftButtons(FunctionID::ScrollableMessageID);
 
-  for (uint i = 0; i < btn_count; i++) {
+  for (size_t i = 0; i < btn_count; i++) {
     EXPECT_FALSE(app_impl->IsSubscribedToSoftButton(i));
   }
 }
@@ -672,7 +686,8 @@ TEST_F(ApplicationImplTest, SuspendAudioStreaming) {
 }
 
 // TODO {AKozoriz} : Fix tests with streaming (APPLINK-19289)
-TEST_F(ApplicationImplTest, DISABLED_Suspend_WakeUpAudioStreaming) {
+TEST_F(ApplicationImplTest,
+       DISABLED_Suspend_WakeUpAudioStreaming) {
   protocol_handler::ServiceType type = protocol_handler::ServiceType::kAudio;
   EXPECT_CALL(mock_application_manager_, OnAppStreaming(app_id, type, false));
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
@@ -685,7 +700,8 @@ TEST_F(ApplicationImplTest, DISABLED_Suspend_WakeUpAudioStreaming) {
   app_impl->WakeUpStreaming(type);
 }
 
-TEST_F(ApplicationImplTest, DISABLED_Suspend_WakeUpNaviStreaming) {
+TEST_F(ApplicationImplTest,
+       DISABLED_Suspend_WakeUpNaviStreaming) {
   protocol_handler::ServiceType type =
       protocol_handler::ServiceType::kMobileNav;
   EXPECT_CALL(mock_application_manager_, OnAppStreaming(app_id, type, false));
