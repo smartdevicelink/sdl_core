@@ -216,16 +216,6 @@ class Thread {
     return handle_;
   }
 
-#if defined(QT_PORT)
-  /**
-   * @brief Sets handle of thread which has delegate running
-   * @param handle Thread handle
-   */
-  void set_thread_handle(PlatformThreadHandle handle) {
-      handle_ = handle;
-  }
-#endif
-
   /**
    * @brief Checks if invoked in this Thread context
    * @return True if called from this Thread class, false otherwise

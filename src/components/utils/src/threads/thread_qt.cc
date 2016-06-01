@@ -61,10 +61,12 @@ void* Thread::threadFunc(void* arg) {
   threads::Thread* thread = static_cast<Thread*>(arg);
   DCHECK(thread);
 
-  // Sets thread id in order to be able to check that id on thread joining
-  thread->set_thread_handle(QThread::currentThread);
 
   thread->state_lock_.Acquire();
+
+  // Sets thread id in order to be able to check that id on thread joining
+  thread->handle_ = QThread::currentThread();
+
   thread->state_cond_.Broadcast();
 
   while (!thread->finalized_) {
