@@ -418,7 +418,7 @@ utils::json::JsonValue CreatePTforLoad() {
   return table;
 }
 
-TEST_F(PolicyManagerImplTest, DISABLED_GetNotificationsNumber) {
+TEST_F(PolicyManagerImplTest, GetNotificationsNumber) {
   const std::string priority = "EMERGENCY";
   const uint32_t notif_number = 100u;
   EXPECT_CALL(*cache_manager, GetNotificationsNumber(priority))
@@ -482,34 +482,34 @@ TEST_F(PolicyManagerImplTest2,
   EXPECT_TRUE(manager->IsApplicationRevoked(app_id1));
 }
 
-TEST_F(PolicyManagerImplTest, DISABLED_IncrementGlobalCounter) {
+TEST_F(PolicyManagerImplTest, IncrementGlobalCounter) {
   // Assert
   EXPECT_CALL(*cache_manager, Increment(usage_statistics::SYNC_REBOOTS));
   manager->Increment(usage_statistics::SYNC_REBOOTS);
 }
 
-TEST_F(PolicyManagerImplTest, DISABLED_IncrementAppCounter) {
+TEST_F(PolicyManagerImplTest, IncrementAppCounter) {
   // Assert
   EXPECT_CALL(*cache_manager,
               Increment("12345", usage_statistics::USER_SELECTIONS));
   manager->Increment("12345", usage_statistics::USER_SELECTIONS);
 }
 
-TEST_F(PolicyManagerImplTest, DISABLED_SetAppInfo) {
+TEST_F(PolicyManagerImplTest, SetAppInfo) {
   // Assert
   EXPECT_CALL(*cache_manager,
               Set("12345", usage_statistics::LANGUAGE_GUI, "de-de"));
   manager->Set("12345", usage_statistics::LANGUAGE_GUI, "de-de");
 }
 
-TEST_F(PolicyManagerImplTest, DISABLED_AddAppStopwatch) {
+TEST_F(PolicyManagerImplTest, AddAppStopwatch) {
   // Assert
   EXPECT_CALL(*cache_manager,
               Add("12345", usage_statistics::SECONDS_HMI_FULL, 30));
   manager->Add("12345", usage_statistics::SECONDS_HMI_FULL, 30);
 }
 
-TEST_F(PolicyManagerImplTest, DISABLED_ResetPT) {
+TEST_F(PolicyManagerImplTest, ResetPT) {
   EXPECT_CALL(*cache_manager, ResetPT("filename"))
       .WillOnce(Return(true))
       .WillOnce(Return(false));
@@ -521,7 +521,7 @@ TEST_F(PolicyManagerImplTest, DISABLED_ResetPT) {
   EXPECT_FALSE(manager->ResetPT("filename"));
 }
 
-TEST_F(PolicyManagerImplTest, DISABLED_LoadPT_SetPT_PTIsLoaded) {
+TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
   // Arrange
   utils::json::JsonValue table = CreatePTforLoad();
   policy_table::Table update(table);
@@ -552,7 +552,7 @@ TEST_F(PolicyManagerImplTest, DISABLED_LoadPT_SetPT_PTIsLoaded) {
 }
 
 TEST_F(PolicyManagerImplTest,
-       DISABLED_LoadPT_SetInvalidUpdatePT_PTIsNotLoaded) {
+       LoadPT_SetInvalidUpdatePT_PTIsNotLoaded) {
   // Arrange
   utils::json::JsonValue table(utils::json::ValueType::OBJECT_VALUE);
 

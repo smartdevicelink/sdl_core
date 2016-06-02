@@ -61,7 +61,7 @@ class UpdateStatusManagerTest : public ::testing::Test {
 
 TEST_F(
     UpdateStatusManagerTest,
-    DISABLED_StringifiedUpdateStatus_SetStatuses_ExpectCorrectStringifiedStatuses) {
+    StringifiedUpdateStatus_SetStatuses_ExpectCorrectStringifiedStatuses) {
   // Arrange
   manager_->OnPolicyInit(false);
   // Check
@@ -75,7 +75,7 @@ TEST_F(
 }
 
 TEST_F(UpdateStatusManagerTest,
-       DISABLED_OnAppSearchStartedCompleted_ExpectAppSearchCorrectStatus) {
+       OnAppSearchStartedCompleted_ExpectAppSearchCorrectStatus) {
   // Arrange
   manager_->OnAppsSearchStarted();
   // Check

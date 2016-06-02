@@ -135,10 +135,9 @@ TEST(StatisticsManagerSetMethod,
   gui_language_info.Update("UA");
 }
 
-// TODO(OHerasym) : thread_qt.cc, line 195 assert fails
 TEST(
     StatisticsManagerAddMethod,
-    DISABLED_AppStopwatchStartMethod_CallONCE_StatisticsManagerAddMethodCalledONCE) {
+    AppStopwatchStartMethod_CallONCE_StatisticsManagerAddMethodCalledONCE) {
   // Arrange
   MockStatisticsManager* msm = new StrictMock<MockStatisticsManager>();
   const std::uint32_t time_out = 1;
@@ -153,7 +152,7 @@ TEST(
 }
 
 TEST(StatisticsManagerAddMethod,
-     DISABLED_AppStopwatchSwitchMethod_Call_StatisticsManagerAddMethodCalled) {
+     AppStopwatchSwitchMethod_Call_StatisticsManagerAddMethodCalled) {
   // Arrange
   MockStatisticsManager* msm = new StrictMock<MockStatisticsManager>();
   AppStopwatchImpl hmi_full_stopwatch(msm, "HelloApp");
@@ -169,7 +168,7 @@ TEST(StatisticsManagerAddMethod,
 
 TEST(
     StatisticsManagerAddMethod,
-    DISABLED_AppStopwatchSwitchMethod_CallAnd1SecSleepAfter_StatisticsManagerAddMethodCalledWith1SecTimespan) {
+    AppStopwatchSwitchMethod_CallAnd1SecSleepAfter_StatisticsManagerAddMethodCalledWith1SecTimespan) {
   // Arrange
   MockStatisticsManager* msm = new StrictMock<MockStatisticsManager>();
   const std::uint32_t time_out = 1;
