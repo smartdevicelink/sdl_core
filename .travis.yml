@@ -13,3 +13,5 @@ before_install:
   - sudo apt-get install -y cmake
 script:
   - mkdir build && cd build && cmake ../ && make && make install
+  - mkdir build_dbus && cd build_dbus && cmake ../ -DHMI2=ON -DHMI=qt && make && make install
+
