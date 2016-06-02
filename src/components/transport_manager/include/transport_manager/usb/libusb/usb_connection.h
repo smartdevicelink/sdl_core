@@ -33,12 +33,16 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_LIBUSB_USB_CONNECTION_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_LIBUSB_USB_CONNECTION_H_
 
+#if defined(OS_WINDOWS)
+#include "utils/winhdr.h"
+#endif
+
+#include <libusb.h>
 #include <list>
 
 #include "utils/lock.h"
-
-#include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "transport_manager/transport_adapter/connection.h"
+#include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "transport_manager/usb/common.h"
 
 namespace transport_manager {
@@ -90,8 +94,8 @@ class UsbConnection : public Connection {
   bool disconnecting_;
   bool waiting_in_transfer_cancel_;
   bool waiting_out_transfer_cancel_;
-  friend void InTransferCallback(struct libusb_transfer*);
-  friend void OutTransferCallback(struct libusb_transfer*);
+  friend void LIBUSB_CALL InTransferCallback(struct libusb_transfer*);
+  friend void LIBUSB_CALL OutTransferCallback(struct libusb_transfer*);
 };
 }  // namespace transport_adapter
 }  // namespace transport_manager

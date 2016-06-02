@@ -54,7 +54,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 ApplicationState::ApplicationState() {}
 
 void ApplicationState::InitState(HmiStatePtr state) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(state);
   sync_primitives::AutoLock auto_lock(hmi_states_lock_);
   hmi_states_.clear();
@@ -62,7 +62,7 @@ void ApplicationState::InitState(HmiStatePtr state) {
 }
 
 void ApplicationState::AddState(HmiStatePtr state) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(state);
   switch (state->state_id()) {
     case HmiState::StateID::STATE_ID_REGULAR:
@@ -72,7 +72,7 @@ void ApplicationState::AddState(HmiStatePtr state) {
       SetPostponedState(state);
       return;
     case HmiState::StateID::STATE_ID_CURRENT:
-      LOG4CXX_ERROR(logger_, "State of type '" << state << "' can't be added.");
+      LOGGER_ERROR(logger_, "State of type '" << state << "' can't be added.");
       return;
     default:
       AddHMIState(state);
@@ -83,13 +83,12 @@ void ApplicationState::AddState(HmiStatePtr state) {
 }
 
 void ApplicationState::RemoveState(HmiState::StateID state) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(state);
   switch (state) {
     case HmiState::StateID::STATE_ID_CURRENT:
     case HmiState::StateID::STATE_ID_REGULAR:
-      LOG4CXX_ERROR(logger_,
-                    "State of type '" << state << "'can't be removed.");
+      LOGGER_ERROR(logger_, "State of type '" << state << "'can't be removed.");
       break;
     case HmiState::StateID::STATE_ID_POSTPONED:
       RemovePostponedState();
@@ -101,29 +100,29 @@ void ApplicationState::RemoveState(HmiState::StateID state) {
 }
 
 HmiStatePtr ApplicationState::GetState(HmiState::StateID state_id) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   switch (state_id) {
     case HmiState::StateID::STATE_ID_REGULAR:
-      LOG4CXX_DEBUG(logger_, "Getting regular state.");
+      LOGGER_DEBUG(logger_, "Getting regular state.");
       return RegularHmiState();
     case HmiState::StateID::STATE_ID_POSTPONED:
-      LOG4CXX_DEBUG(logger_, "Getting postponed state.");
+      LOGGER_DEBUG(logger_, "Getting postponed state.");
       return PostponedHmiState();
     default:
-      LOG4CXX_DEBUG(logger_, "Getting current state.");
+      LOGGER_DEBUG(logger_, "Getting current state.");
       return CurrentHmiState();
   }
 }
 
 void ApplicationState::AddHMIState(HmiStatePtr state) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(state);
   sync_primitives::AutoLock auto_lock(hmi_states_lock_);
   HmiStates::iterator it = std::find_if(hmi_states_.begin(),
                                         hmi_states_.end(),
                                         StateIDComparator(state->state_id()));
   if (hmi_states_.end() != it) {
-    LOG4CXX_WARN(
+    LOGGER_WARN(
         logger_,
         "Hmi state with ID "
             << state->state_id()
@@ -135,12 +134,12 @@ void ApplicationState::AddHMIState(HmiStatePtr state) {
 }
 
 void ApplicationState::RemoveHMIState(HmiState::StateID state_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   sync_primitives::AutoLock auto_lock(hmi_states_lock_);
   HmiStates::iterator it = std::find_if(
       hmi_states_.begin(), hmi_states_.end(), StateIDComparator(state_id));
   if (it == hmi_states_.end()) {
-    LOG4CXX_ERROR(logger_, "Unsuccesful remove HmiState: " << state_id);
+    LOGGER_ERROR(logger_, "Unsuccesful remove HmiState: " << state_id);
     return;
   }
 
@@ -159,7 +158,7 @@ void ApplicationState::RemoveHMIState(HmiState::StateID state_id) {
 }
 
 void ApplicationState::RemovePostponedState() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   sync_primitives::AutoLock auto_lock(hmi_states_lock_);
   DCHECK_OR_RETURN_VOID(!hmi_states_.empty());
 
@@ -169,14 +168,14 @@ void ApplicationState::RemovePostponedState() {
       std::find_if(hmi_states_.begin(), hmi_states_.end(), finder);
 
   if (hmi_states_.end() == postponed_state) {
-    LOG4CXX_ERROR(logger_, "No postponed state is set for app.");
+    LOGGER_ERROR(logger_, "No postponed state is set for app.");
     return;
   }
   hmi_states_.erase(postponed_state);
 }
 
 void ApplicationState::SetRegularState(HmiStatePtr state) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(state);
   DCHECK_OR_RETURN_VOID(state->state_id() ==
                         HmiState::StateID::STATE_ID_REGULAR);
@@ -204,7 +203,7 @@ void ApplicationState::SetRegularState(HmiStatePtr state) {
 }
 
 void ApplicationState::SetPostponedState(HmiStatePtr state) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(state);
   DCHECK_OR_RETURN_VOID(state->state_id() ==
                         HmiState::StateID::STATE_ID_POSTPONED);

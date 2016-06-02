@@ -52,16 +52,16 @@ OnSystemRequestNotification::OnSystemRequestNotification(
 OnSystemRequestNotification::~OnSystemRequestNotification() {}
 
 void OnSystemRequestNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   using namespace application_manager;
   using namespace mobile_apis;
 
   ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app.valid()) {
-    LOG4CXX_ERROR(logger_,
-                  "Application with connection key " << connection_key()
-                                                     << " is not registered.");
+    LOGGER_ERROR(logger_,
+                 "Application with connection key " << connection_key()
+                                                    << " is not registered.");
     return;
   }
 
@@ -71,9 +71,9 @@ void OnSystemRequestNotification::Run() {
       application_manager_.GetPolicyHandler();
   if (!policy_handler.IsRequestTypeAllowed(app->policy_app_id(),
                                            request_type)) {
-    LOG4CXX_WARN(logger_,
-                 "Request type " << request_type
-                                 << " is not allowed by policies");
+    LOGGER_WARN(logger_,
+                "Request type " << request_type
+                                << " is not allowed by policies");
     return;
   }
 

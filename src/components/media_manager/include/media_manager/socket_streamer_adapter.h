@@ -36,13 +36,14 @@
 #include <string>
 #include "media_manager/streamer_adapter.h"
 #include "utils/threads/thread_delegate.h"
+#include "utils/socket.h"
 
 namespace media_manager {
 
 class SocketStreamerAdapter : public StreamerAdapter {
  public:
   SocketStreamerAdapter(const std::string& ip,
-                        uint16_t port,
+                        int32_t port,
                         const std::string& header);
   virtual ~SocketStreamerAdapter();
 
@@ -51,7 +52,7 @@ class SocketStreamerAdapter : public StreamerAdapter {
    public:
     SocketStreamer(SocketStreamerAdapter* const adapter,
                    const std::string& ip,
-                   uint16_t port,
+                   int32_t port,
                    const std::string& header);
     virtual ~SocketStreamer();
 
@@ -62,11 +63,11 @@ class SocketStreamerAdapter : public StreamerAdapter {
 
    private:
     std::string ip_;
-    uint16_t port_;
+    int32_t port_;
     std::string header_;
 
-    int32_t socket_fd_;
-    int32_t send_socket_fd_;
+    utils::TcpServerSocket server_socket_;
+    utils::TcpSocketConnection client_socket_;
     bool is_first_frame_;
   };
 };

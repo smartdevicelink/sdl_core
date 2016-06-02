@@ -1,4 +1,3 @@
-# Copyright (c) 2014, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -35,6 +34,7 @@ include_directories (
     ${COMPONENTS_DIR}/utils/include/
     ${COMPONENTS_DIR}/smart_objects/include/
     ${COMPONENTS_DIR}/formatters/include/
+    ${COMPONENTS_DIR}/config_profile/include/
     ${COMPONENTS_DIR}/media_manager/include/
     ${COMPONENTS_DIR}/protocol_handler/include
     ${JSONCPP_INCLUDE_DIRECTORY}
@@ -53,25 +53,36 @@ set (SOURCES
     ${COMPONENTS_DIR}/hmi_message_handler/src/hmi_message_handler_impl.cc
     ${COMPONENTS_DIR}/hmi_message_handler/src/messagebroker_adapter.cc
     ${COMPONENTS_DIR}/hmi_message_handler/src/hmi_message_adapter_impl.cc
-    ${COMPONENTS_DIR}/hmi_message_handler/src/mqueue_adapter.cc
     ${DBUS_SOURCE}
 )
-
-set(LIBRARIES
+if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+  set(LIBRARIES
     Utils
     ${DBUS_ADAPTER}
     ${RTLIB}
 )
-
-add_library("HMIMessageHandler" ${SOURCES})
-target_link_libraries("HMIMessageHandler" ${LIBRARIES})
-
-if(ENABLE_LOG)
-    target_link_libraries("HMIMessageHandler" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
+else()
+  set(LIBRARIES   Utils )
 endif()
 
-# Tests temporary are inactivated. For details please check
-# Readme.txt in test directory of hmi_message_handler 
+if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  set (HEADERS
+        ${COMPONENTS_DIR}/hmi_message_handler/include/hmi_message_handler/hmi_message_handler_impl.h
+        ${COMPONENTS_DIR}/hmi_message_handler/include/hmi_message_handler/messagebroker_adapter.h
+        ${COMPONENTS_DIR}/hmi_message_handler/include/hmi_message_handler/hmi_message_adapter.h
+        ${DBUS_HEADER}
+  )
+  source_group("Header Files" FILES ${HEADERS} )
+  source_group("Source Files" FILES ${SOURCES} )
+  add_library("HMIMessageHandler" ${HEADERS} ${SOURCES})
+else()
+  add_library("HMIMessageHandler" ${SOURCES})
+  if(ENABLE_LOG)
+      target_link_libraries("HMIMessageHandler" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
+  endif()
+endif()
+
+target_link_libraries("HMIMessageHandler" ${LIBRARIES})
 
 if(BUILD_TESTS)
   add_subdirectory(test)

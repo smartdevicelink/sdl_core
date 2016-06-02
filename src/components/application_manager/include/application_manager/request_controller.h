@@ -48,6 +48,7 @@
 #include "interfaces/HMI_API.h"
 
 #include "application_manager/request_info.h"
+
 #include "application_manager/request_controller_settings.h"
 
 namespace application_manager {
@@ -235,8 +236,8 @@ class RequestController {
 
   /**
    * @brief Check Posibility to add new requests, or limits was exceeded
-   * @param pending_requests_amount - maximum count of request that should be
-   * allowed for all applications
+ * @param pending_requests_amount - maximum count of request that should be
+ * allowed for all applications
    * @return True if new request could be added, false otherwise
    */
   bool CheckPendingRequestsAmount(const uint32_t& pending_requests_amount);

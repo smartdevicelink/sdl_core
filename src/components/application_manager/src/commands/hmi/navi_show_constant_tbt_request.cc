@@ -43,7 +43,7 @@ NaviShowConstantTBTRequest::NaviShowConstantTBTRequest(
 NaviShowConstantTBTRequest::~NaviShowConstantTBTRequest() {}
 
 void NaviShowConstantTBTRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   SendRequest();
 }

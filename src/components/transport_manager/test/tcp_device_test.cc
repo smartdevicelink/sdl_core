@@ -56,46 +56,40 @@ class TestDevice : public Device {
 };
 
 TEST(TcpDeviceTest, CompareWithOtherTCPDevice) {
-  uint32_t in_addr = 10;
+  utils::HostAddress host_address;
   std::string name = "tcp_device";
-  TcpDevice test_tcp_device(in_addr, name);
-  TcpDevice other(in_addr, "other");
+  TcpDevice test_tcp_device(host_address, name);
+  TcpDevice other(host_address, "other");
 
   EXPECT_TRUE(test_tcp_device.IsSameAs(&other));
 }
 
 TEST(TcpDeviceTest, CompareWithOtherNotTCPDevice) {
+  utils::HostAddress host_address;
   uint32_t in_addr = 10;
   std::string name = "tcp_device";
-  TcpDevice test_tcp_device(in_addr, name);
+  TcpDevice test_tcp_device(host_address, name);
   TestDevice other(in_addr, "other");
 
   EXPECT_FALSE(test_tcp_device.IsSameAs(&other));
 }
 
 TEST(TcpDeviceTest, AddApplications) {
-  uint32_t in_addr = 1;
+  utils::HostAddress host_address;
   std::string name = "tcp_device";
 
-  TcpDevice test_tcp_device(in_addr, name);
+  TcpDevice test_tcp_device(host_address, name);
 
   // App will be with socket = 0, incoming = false;
   int port = 12345;
 
-  EXPECT_EQ(1, test_tcp_device.AddDiscoveredApplication(port));
-
-  // App.incoming = true; app.port = 0;
-  int socket = 10;
-  EXPECT_EQ(2, test_tcp_device.AddIncomingApplication(socket));
+  test_tcp_device.AddApplication(12345, false);
+  test_tcp_device.AddApplication(23456, true);
 
   ApplicationList applist = test_tcp_device.GetApplicationList();
   ASSERT_EQ(2u, applist.size());
   EXPECT_EQ(1, applist[0]);
   EXPECT_EQ(2, applist[1]);
-
-  // Because incoming = false
-  EXPECT_EQ(-1, test_tcp_device.GetApplicationSocket(applist[0]));
-  EXPECT_EQ(10, test_tcp_device.GetApplicationSocket(applist[1]));
 
   EXPECT_EQ(port, test_tcp_device.GetApplicationPort(applist[0]));
   // Because incoming = true

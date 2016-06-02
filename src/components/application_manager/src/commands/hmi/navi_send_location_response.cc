@@ -43,7 +43,7 @@ NaviSendLocationResponse::NaviSendLocationResponse(
 NaviSendLocationResponse::~NaviSendLocationResponse() {}
 
 void NaviSendLocationResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   event_engine::Event event(hmi_apis::FunctionID::Navigation_SendLocation);
   event.set_smart_object(*message_);

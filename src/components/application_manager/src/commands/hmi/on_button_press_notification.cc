@@ -31,7 +31,6 @@
  */
 
 #include "application_manager/commands/hmi/on_button_press_notification.h"
-
 #include "application_manager/application_impl.h"
 #include "utils/logger.h"
 #include "application_manager/event_engine/event.h"
@@ -47,7 +46,7 @@ OnButtonPressNotification::OnButtonPressNotification(
     : NotificationFromHMI(message, application_manager) {}
 
 void OnButtonPressNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   event_engine::Event event(hmi_apis::FunctionID::Buttons_OnButtonPress);
   event.set_smart_object(*message_);
   event.raise(application_manager_.event_dispatcher());

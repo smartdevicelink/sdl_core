@@ -31,7 +31,6 @@
  */
 
 #include "application_manager/application_impl.h"
-
 #include "application_manager/commands/hmi/on_system_request_notification.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "interfaces/MOBILE_API.h"
@@ -50,7 +49,7 @@ OnSystemRequestNotification::OnSystemRequestNotification(
 OnSystemRequestNotification::~OnSystemRequestNotification() {}
 
 void OnSystemRequestNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   smart_objects::SmartObject& params = (*message_)[strings::params];
   smart_objects::SmartObject& msg_params = (*message_)[strings::msg_params];
@@ -76,16 +75,16 @@ void OnSystemRequestNotification::Run() {
         application_manager_.GetPolicyHandler();
     const uint32_t selected_app_id = policy_handler.GetAppIdForSending();
     if (0 == selected_app_id) {
-      LOG4CXX_WARN(logger_,
-                   "Can't select application to forward OnSystemRequest.");
+      LOGGER_WARN(logger_,
+                  "Can't select application to forward OnSystemRequest.");
       return;
     }
     app = application_manager_.application(selected_app_id);
   }
 
   if (!app.valid()) {
-    LOG4CXX_WARN(logger_,
-                 "No valid application found to forward OnSystemRequest.");
+    LOGGER_WARN(logger_,
+                "No valid application found to forward OnSystemRequest.");
     return;
   }
 

@@ -36,6 +36,7 @@
 
 #include "utils/sqlite_wrapper/sql_database.h"
 #include "utils/sqlite_wrapper/sql_query.h"
+#include "utils/sql_wrapper.h"
 
 namespace resumption {
 

@@ -47,7 +47,7 @@ namespace NsMessageBroker
          std::string wmes = m_receiverWriter.write(root);
          DBG_MSG(("Parsed JSON string:%s; length: %d\n", wmes.c_str(), wmes.length()));
          DBG_MSG(("Buffer is:%s\n", m_receivingBuffer.c_str()));
-         ssize_t beginpos = m_receivingBuffer.find(wmes);
+         ssize_t beginpos = static_cast<ssize_t>(m_receivingBuffer.find(wmes));
          if (-1 != beginpos)
          {
             m_receivingBuffer.erase(0, beginpos + wmes.length());
@@ -174,7 +174,7 @@ namespace NsMessageBroker
       DBG_MSG(("CMessageBrokerController::getDestinationComponentName()\n"));
       std::string ret = "";
       std::string method = root["method"].asString();
-      int pos = method.find(".");
+      int pos = static_cast<int>(method.find("."));
       if (-1 != pos)
       {
          ret = method.substr(0, pos);
@@ -188,7 +188,7 @@ namespace NsMessageBroker
       DBG_MSG(("CMessageBrokerController::getMethodName()\n"));
       std::string ret = "";
       std::string method = root["method"].asString();
-      int pos = method.find(".");
+      int pos = static_cast<int>(method.find("."));
       if (-1 != pos)
       {
          ret = method.substr(pos+1);

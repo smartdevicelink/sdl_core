@@ -31,10 +31,8 @@
  */
 
 #include "application_manager/commands/hmi/on_app_deactivated_notification.h"
-
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
-
 #include "utils/helpers.h"
 
 namespace application_manager {
@@ -48,7 +46,7 @@ OnAppDeactivatedNotification::OnAppDeactivatedNotification(
 OnAppDeactivatedNotification::~OnAppDeactivatedNotification() {}
 
 void OnAppDeactivatedNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   event_engine::Event event(
       hmi_apis::FunctionID::BasicCommunication_OnAppDeactivated);
   event.set_smart_object(*message_);

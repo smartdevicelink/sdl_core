@@ -55,7 +55,9 @@ struct CheckAppPolicy;
 
 class PolicyManagerImpl : public PolicyManager {
  public:
-  PolicyManagerImpl();
+  PolicyManagerImpl(const std::string& app_storage_folder,
+                    uint16_t attempts_to_open_policy_db,
+                    uint16_t open_attempt_timeout_ms);
   virtual void set_listener(PolicyListener* listener);
   PolicyListener* listener() const {
     return listener_;

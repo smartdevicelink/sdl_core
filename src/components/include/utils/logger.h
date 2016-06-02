@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,141 +34,257 @@
 #define SRC_COMPONENTS_INCLUDE_UTILS_LOGGER_H_
 
 #ifdef ENABLE_LOG
-#include <errno.h>
-#include <string.h>
+#include <cerrno>
+#include <string>
 #include <sstream>
-#include <log4cxx/propertyconfigurator.h>
-#include <log4cxx/spi/loggingevent.h>
-#include "utils/push_log.h"
-#include "utils/logger_status.h"
-#include "utils/auto_trace.h"
-#endif  // ENABLE_LOG
 
-#ifdef ENABLE_LOG
+#if defined(LOG4CXX_LOGGER)
+#include <log4cxx/logger.h>
+#endif
 
+#include "utils/pimpl.h"
+
+namespace logger {
+
+namespace LogLevel {
+enum Type { LL_TRACE, LL_DEBUG, LL_INFO, LL_WARN, LL_ERROR, LL_FATAL };
+}  // namespace LogLevel
+
+struct LogLocation {
+  LogLocation() {}
+  LogLocation(const char* file_name,
+              const char* function_name,
+              unsigned long line_number)
+      : file_name_(file_name)
+      , function_name_(function_name)
+      , line_number_(line_number) {}
+
+  const char* file_name_;
+  const char* function_name_;
+  unsigned long line_number_;
+};
+
+#if defined(LOG4CXX_LOGGER)
+typedef log4cxx::LoggerPtr LoggerType;
+#else
+typedef std::string LoggerType;
+#endif
+
+class Logger {
+ public:
+  class Impl;
+  typedef utils::Pimpl<Impl, utils::CopyAssigner<Impl> > Pimpl;
+
+  static bool InitLogger(const bool logs_enabled,
+                         const std::string& ini_file_name);
+  static bool InitLogger(const bool logs_enabled,
+                         const LogLevel::Type log_level,
+                         const std::string& log_file_name);
+  static void DeinitLogger();
+
+  static void FlushLogger();
+
+  static bool logs_enabled();
+  static void set_logs_enabled(const bool state);
+
+  static LogLevel::Type log_level();
+  static void set_log_level(const LogLevel::Type level);
+
+  static bool PushLog(const LoggerType& logger,
+                      const LogLevel::Type level,
+                      const std::string& entry,
+                      const LogLocation& location);
+
+  static void SetLogger(Pimpl& impl);
+  static Pimpl& GetLogger();
+
+ private:
+  Logger();
+  Logger(const Logger&);
+  Logger& operator=(const Logger&);
+  ~Logger();
+
+  static Pimpl impl_;
+};
+
+}  // namespace logger
+
+#undef INIT_LOGGER
+#if defined(LOG4CXX_LOGGER)
+#define INIT_LOGGER(logs_enabled) \
+  logger::Logger::InitLogger(logs_enabled, "log4cxx.properties");
+#else
+#define INIT_LOGGER(logs_enabled) \
+  logger::Logger::InitLogger(     \
+      logs_enabled, logger::LogLevel::LL_TRACE, "SmartDeviceLink.log");
+#endif
+
+#undef DEINIT_LOGGER
+#define DEINIT_LOGGER() logger::Logger::DeinitLogger()
+
+#undef FLUSH_LOGGER
+#define FLUSH_LOGGER() logger::Logger::FlushLogger()
+
+#undef SET_LOGGER
+#define SET_LOGGER(logger) logger::Logger::SetLogger(logger)
+
+#undef GET_LOGGER
+#define GET_LOGGER() logger::Logger::GetLogger()
+
+#undef CREATE_LOGGERPTR_LOCAL
+#if defined(LOG4CXX_LOGGER)
+#define CREATE_LOGGERPTR_LOCAL(logger_var, logger_name) \
+  logger::LoggerType logger_var(log4cxx::Logger::getLogger(logger_name));
+#else
+#define CREATE_LOGGERPTR_LOCAL(logger_var, logger_name) \
+  logger::LoggerType logger_var(logger_name);
+#endif
+
+#undef CREATE_LOGGERPTR_GLOBAL
 #define CREATE_LOGGERPTR_GLOBAL(logger_var, logger_name) \
   namespace {                                            \
   CREATE_LOGGERPTR_LOCAL(logger_var, logger_name);       \
   }
 
-#define CREATE_LOGGERPTR_LOCAL(logger_var, logger_name) \
-  log4cxx::LoggerPtr logger_var =                       \
-      log4cxx::LoggerPtr(log4cxx::Logger::getLogger(logger_name));
-
-#define INIT_LOGGER(file_name, logs_enabled)           \
-  log4cxx::PropertyConfigurator::configure(file_name); \
-  logger::set_logs_enabled(logs_enabled);
-
-// Logger deinitilization function and macro, need to stop log4cxx writing
-// without this deinitilization log4cxx threads continue using some instances
-// destroyed by exit()
-void deinit_logger();
-#define DEINIT_LOGGER() deinit_logger()
-
-// special macros to dump logs from queue
-// it's need, for example, when crash happend
-#define FLUSH_LOGGER() logger::flush_logger()
-
-#define LOG4CXX_IS_TRACE_ENABLED(logger) logger->isTraceEnabled()
-
-log4cxx_time_t time_now();
-
-#define LOG_WITH_LEVEL(loggerPtr, logLevel, logEvent)                \
-  do {                                                               \
-    if (logger::logs_enabled()) {                                    \
-      if (logger::logger_status != logger::DeletingLoggerThread) {   \
-        if (loggerPtr->isEnabledFor(logLevel)) {                     \
-          std::stringstream accumulator;                             \
-          accumulator << logEvent;                                   \
-          logger::push_log(                                          \
-              loggerPtr,                                             \
-              logLevel,                                              \
-              accumulator.str(),                                     \
-              time_now(),                                            \
-              LOG4CXX_LOCATION,                                      \
-              ::log4cxx::spi::LoggingEvent::getCurrentThreadName()); \
-        }                                                            \
-      }                                                              \
-    }                                                                \
+#undef LOG_WITH_LEVEL
+#define LOG_WITH_LEVEL(logger_var, level, message, line)    \
+  do {                                                      \
+    std::stringstream accumulator;                          \
+    accumulator << message;                                 \
+    logger::Logger::PushLog(                                \
+        logger_var,                                         \
+        level,                                              \
+        accumulator.str(),                                  \
+        logger::LogLocation(__FILE__, __FUNCTION__, line)); \
   } while (false)
 
-#undef LOG4CXX_TRACE
-#define LOG4CXX_TRACE(loggerPtr, logEvent) \
-  LOG_WITH_LEVEL(loggerPtr, ::log4cxx::Level::getTrace(), logEvent)
+#undef LOG_WITH_LEVEL_EXT
+#define LOG_WITH_LEVEL_EXT(logger_var, level, message, location)             \
+  do {                                                                       \
+    std::stringstream accumulator;                                           \
+    accumulator << message;                                                  \
+    logger::Logger::PushLog(logger_var, level, accumulator.str(), location); \
+  } while (false)
 
-#define LOG4CXX_AUTO_TRACE_WITH_NAME_SPECIFIED(loggerPtr, auto_trace) \
-  logger::AutoTrace auto_trace(loggerPtr, LOG4CXX_LOCATION)
-#define LOG4CXX_AUTO_TRACE(loggerPtr) \
-  LOG4CXX_AUTO_TRACE_WITH_NAME_SPECIFIED(loggerPtr, SDL_local_auto_trace_object)
+#undef LOGGER_TRACE
+#define LOGGER_TRACE(logger_var, message) \
+  LOG_WITH_LEVEL(logger_var, logger::LogLevel::LL_TRACE, message, __LINE__)
 
-#undef LOG4CXX_DEBUG
-#define LOG4CXX_DEBUG(loggerPtr, logEvent) \
-  LOG_WITH_LEVEL(loggerPtr, ::log4cxx::Level::getDebug(), logEvent)
+#undef LOGGER_DEBUG
+#define LOGGER_DEBUG(logger_var, message) \
+  LOG_WITH_LEVEL(logger_var, logger::LogLevel::LL_DEBUG, message, __LINE__)
 
-#undef LOG4CXX_INFO
-#define LOG4CXX_INFO(loggerPtr, logEvent) \
-  LOG_WITH_LEVEL(loggerPtr, ::log4cxx::Level::getInfo(), logEvent)
+#undef LOGGER_INFO
+#define LOGGER_INFO(logger_var, message) \
+  LOG_WITH_LEVEL(logger_var, logger::LogLevel::LL_INFO, message, __LINE__)
 
-#undef LOG4CXX_WARN
-#define LOG4CXX_WARN(loggerPtr, logEvent) \
-  LOG_WITH_LEVEL(loggerPtr, ::log4cxx::Level::getWarn(), logEvent)
+#undef LOGGER_WARN
+#define LOGGER_WARN(logger_var, message) \
+  LOG_WITH_LEVEL(logger_var, logger::LogLevel::LL_WARN, message, __LINE__)
 
-#undef LOG4CXX_ERROR
-#define LOG4CXX_ERROR(loggerPtr, logEvent) \
-  LOG_WITH_LEVEL(loggerPtr, ::log4cxx::Level::getError(), logEvent)
+#undef LOGGER_ERROR
+#define LOGGER_ERROR(logger_var, message) \
+  LOG_WITH_LEVEL(logger_var, logger::LogLevel::LL_ERROR, message, __LINE__)
 
-#undef LOG4CXX_FATAL
-#define LOG4CXX_FATAL(loggerPtr, logEvent) \
-  LOG_WITH_LEVEL(loggerPtr, ::log4cxx::Level::getFatal(), logEvent)
+#undef LOGGER_FATAL
+#define LOGGER_FATAL(logger_var, message) \
+  LOG_WITH_LEVEL(logger_var, logger::LogLevel::LL_FATAL, message, __LINE__)
 
-#define LOG4CXX_ERROR_WITH_ERRNO(loggerPtr, message)                           \
-  LOG4CXX_ERROR(loggerPtr,                                                     \
-                message << ", error code " << errno << " (" << strerror(errno) \
-                        << ")")
+#undef LOGGER_WARN_WITH_ERRNO
+#define LOGGER_WARN_WITH_ERRNO(logger_var, message)                          \
+  LOGGER_WARN(logger_var,                                                    \
+              message << ", error code " << errno << " (" << strerror(errno) \
+                      << ")")
 
-#define LOG4CXX_WARN_WITH_ERRNO(loggerPtr, message)                           \
-  LOG4CXX_WARN(loggerPtr,                                                     \
+#undef LOGGER_ERROR_WITH_ERRNO
+#define LOGGER_ERROR_WITH_ERRNO(logger_var, message)                          \
+  LOGGER_ERROR(logger_var,                                                    \
                message << ", error code " << errno << " (" << strerror(errno) \
                        << ")")
 
+namespace logger {
+
+class AutoTrace {
+ public:
+  AutoTrace(const LoggerType& logger, const LogLocation& location)
+      : logger_(logger), location_(location) {
+    LOG_WITH_LEVEL_EXT(logger_, LogLevel::LL_TRACE, "Enter", location_);
+  }
+
+  ~AutoTrace() {
+    LOG_WITH_LEVEL_EXT(logger_, LogLevel::LL_TRACE, "Exit", location_);
+  }
+
+ private:
+  const LoggerType logger_;
+  const LogLocation location_;
+};
+
+}  // namespace logger
+
+#undef LOGGER_AUTO_TRACE
+#define LOGGER_AUTO_TRACE(logger_var) \
+  logger::AutoTrace auto_trace(       \
+      logger_var, logger::LogLocation(__FILE__, __FUNCTION__, __LINE__));
+
 #else  // ENABLE_LOG is OFF
 
-#define CREATE_LOGGERPTR_GLOBAL(logger_var, logger_name)
+#undef INIT_LOGGER
+#define INIT_LOGGER(ini_file_name)
 
+#undef DEINIT_LOGGER
+#define DEINIT_LOGGER()
+
+#undef FLUSH_LOGGER
+#define FLUSH_LOGGER()
+
+#undef SET_LOGGER
+#define SET_LOGGER(logger)
+
+#undef GET_LOGGER
+#define GET_LOGGER()
+
+#undef CREATE_LOGGERPTR_LOCAL
 #define CREATE_LOGGERPTR_LOCAL(logger_var, logger_name)
 
-#define INIT_LOGGER(file_name)
+#undef CREATE_LOGGERPTR_GLOBAL
+#define CREATE_LOGGERPTR_GLOBAL(logger_var, logger_name)
 
-#define DEINIT_LOGGER(file_name)
+#undef LOG_WITH_LEVEL
+#define LOG_WITH_LEVEL(logger_var, level, message, line)
 
-#define LOG4CXX_IS_TRACE_ENABLED(logger) false
+#undef LOG_WITH_LEVEL_EXT
+#define LOG_WITH_LEVEL_EXT(logger_var, level, message, file, function, line)
 
-#undef LOG4CXX_TRACE
-#define LOG4CXX_TRACE(x, y)
+#undef LOGGER_TRACE
+#define LOGGER_TRACE(logger_var, message)
 
-#define LOG4CXX_AUTO_TRACE_WITH_NAME_SPECIFIED(loggerPtr, auto_trace)
-#define LOG4CXX_AUTO_TRACE(loggerPtr)
+#define LOGGER_AUTO_TRACE_WITH_NAME_SPECIFIED(loggerPtr, auto_trace)
+#define LOGGER_AUTO_TRACE(loggerPtr)
 
-#undef LOG4CXX_DEBUG
-#define LOG4CXX_DEBUG(x, y)
+#undef LOGGER_DEBUG
+#define LOGGER_DEBUG(logger_var, message)
 
-#undef LOG4CXX_INFO
-#define LOG4CXX_INFO(x, y)
+#undef LOGGER_INFO
+#define LOGGER_INFO(logger_var, message)
 
-#undef LOG4CXX_WARN
-#define LOG4CXX_WARN(x, y)
+#undef LOGGER_WARN
+#define LOGGER_WARN(logger_var, message)
 
-#undef LOG4CXX_ERROR
-#define LOG4CXX_ERROR(x, y)
+#undef LOGGER_ERROR
+#define LOGGER_ERROR(logger_var, message)
 
-#undef LOG4CXX_ERROR_WITH_ERRNO
-#define LOG4CXX_ERROR_WITH_ERRNO(x, y)
+#undef LOGGER_FATAL
+#define LOGGER_FATAL(logger_var, message)
 
-#undef LOG4CXX_WARN_WITH_ERRNO
-#define LOG4CXX_WARN_WITH_ERRNO(x, y)
+#undef LOGGER_WARN_WITH_ERRNO
+#define LOGGER_WARN_WITH_ERRNO(logger_var, message)
 
-#undef LOG4CXX_FATAL
-#define LOG4CXX_FATAL(x, y)
+#undef LOGGER_ERROR_WITH_ERRNO
+#define LOGGER_ERROR_WITH_ERRNO(logger_var, message)
+
+#undef LOGGER_AUTO_TRACE
+#define LOGGER_AUTO_TRACE(logger_var)
 #endif  // ENABLE_LOG
 
 #endif  // SRC_COMPONENTS_INCLUDE_UTILS_LOGGER_H_

@@ -32,7 +32,6 @@
  */
 
 #include "application_manager/commands/mobile/alert_response.h"
-
 #include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
@@ -48,7 +47,7 @@ AlertResponse::AlertResponse(const MessageSharedPtr& message,
 AlertResponse::~AlertResponse() {}
 
 void AlertResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   application_manager_.SendMessageToMobile(message_);
 }

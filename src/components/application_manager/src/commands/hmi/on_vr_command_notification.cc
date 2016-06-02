@@ -31,11 +31,9 @@
  */
 
 #include "application_manager/commands/hmi/on_vr_command_notification.h"
-
 #include "application_manager/policies/policy_handler.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/state_controller.h"
-
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 #include "application_manager/event_engine/event.h"
@@ -51,21 +49,21 @@ OnVRCommandNotification::OnVRCommandNotification(
 OnVRCommandNotification::~OnVRCommandNotification() {}
 
 void OnVRCommandNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   const uint32_t cmd_id =
       (*message_)[strings::msg_params][strings::cmd_id].asUInt();
   uint32_t max_cmd_id = application_manager_.get_settings().max_cmd_id();
 
   // Check if this is one of standart VR commands (i.e. "Help")
   if (cmd_id > max_cmd_id + 1) {
-    LOG4CXX_INFO(logger_, "Switched App");
+    LOGGER_INFO(logger_, "Switched App");
     const uint32_t app_id = cmd_id - max_cmd_id;
     ApplicationSharedPtr app = application_manager_.application(app_id);
     if (app) {
       application_manager_.state_controller().SetRegularState(
           app, mobile_apis::HMILevel::HMI_FULL, true);
     } else {
-      LOG4CXX_ERROR(logger_, "Unable to find appication " << app_id);
+      LOGGER_ERROR(logger_, "Unable to find appication " << app_id);
     }
     return;
   }
@@ -78,7 +76,7 @@ void OnVRCommandNotification::Run() {
       (*message_)[strings::msg_params][strings::app_id].asUInt();
   ApplicationSharedPtr app = application_manager_.application(app_id);
   if (!app) {
-    LOG4CXX_ERROR(logger_, "NULL pointer");
+    LOGGER_ERROR(logger_, "NULL pointer");
     return;
   }
   /* check if perform interaction is active

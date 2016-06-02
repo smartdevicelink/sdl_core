@@ -31,7 +31,6 @@
  */
 #include "application_manager/commands/hmi/ui_add_submenu_response.h"
 #include "application_manager/event_engine/event.h"
-
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {
@@ -45,7 +44,7 @@ UIAddSubmenuResponse::UIAddSubmenuResponse(
 UIAddSubmenuResponse::~UIAddSubmenuResponse() {}
 
 void UIAddSubmenuResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   event_engine::Event event(hmi_apis::FunctionID::UI_AddSubMenu);
   event.set_smart_object(*message_);

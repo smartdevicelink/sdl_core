@@ -43,7 +43,7 @@ UISetAppIconRequest::UISetAppIconRequest(
 UISetAppIconRequest::~UISetAppIconRequest() {}
 
 void UISetAppIconRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   SendRequest();
 }

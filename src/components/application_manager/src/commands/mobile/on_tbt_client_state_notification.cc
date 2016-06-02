@@ -32,7 +32,6 @@
  */
 
 #include "application_manager/commands/mobile/on_tbt_client_state_notification.h"
-
 #include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"
 
@@ -47,7 +46,7 @@ OnTBTClientStateNotification::OnTBTClientStateNotification(
 OnTBTClientStateNotification::~OnTBTClientStateNotification() {}
 
 void OnTBTClientStateNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   (*message_)[strings::params][strings::message_type] =
       static_cast<int32_t>(application_manager::MessageType::kNotification);

@@ -1,4 +1,5 @@
 /*
+
  Copyright (c) 2016, Ford Motor Company
  All rights reserved.
 
@@ -62,8 +63,8 @@ class DialNumberRequest : public CommandRequestImpl {
   bool Init() OVERRIDE;
 
   /**
-    * @brief Execute command
-    **/
+   * @brief Execute command
+   **/
   void Run() OVERRIDE;
 
   /**

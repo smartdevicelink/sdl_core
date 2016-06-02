@@ -31,6 +31,7 @@
  */
 
 #include "application_manager/usage_statistics.h"
+
 #include "smart_objects/smart_object.h"
 #include "smart_objects/enum_schema_item.h"
 #include "policy/usage_statistics/statistics_manager.h"

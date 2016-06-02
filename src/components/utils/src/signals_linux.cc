@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Ford Motor Company
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,26 +32,32 @@
 #include <csignal>
 #include <cstdlib>
 #include <stdint.h>
+#include <unistd.h>
 
 #include "utils/signals.h"
+#include "utils/logger.h"
 
-bool utils::UnsibscribeFromTermination() {
-  // Disable some system signals receiving in thread
-  // by blocking those signals
-  // (system signals processes only in the main thread)
-  // Mustn't block all signals!
-  // See "Advanced Programming in the UNIX Environment, 3rd Edition"
-  // (http://poincare.matf.bg.ac.rs/~ivana//courses/ps/sistemi_knjige/pomocno/apue.pdf,
-  // "12.8. Threads and Signals".
-  sigset_t signal_set;
-  sigemptyset(&signal_set);
-  sigaddset(&signal_set, SIGINT);
-  sigaddset(&signal_set, SIGTERM);
-
-  return !pthread_sigmask(SIG_BLOCK, &signal_set, NULL);
-}
+CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
 
 namespace {
+
+void SigHandler(int sig) {
+  switch (sig) {
+    case SIGINT:
+      LOGGER_INFO(logger_, "SIGINT signal has been caught");
+      break;
+    case SIGTERM:
+      LOGGER_INFO(logger_, "SIGTERM signal has been caught");
+      break;
+    case SIGSEGV:
+      LOGGER_INFO(logger_, "SIGSEGV signal has been caught");
+      break;
+    default:
+      LOGGER_INFO(logger_, "Unexpected signal has been caught");
+      break;
+  }
+}
+
 bool CatchSIGSEGV(sighandler_t handler) {
   struct sigaction act;
 
@@ -61,9 +67,12 @@ bool CatchSIGSEGV(sighandler_t handler) {
 
   return !sigaction(SIGSEGV, &act, NULL);
 }
-}  // namespace
 
-bool utils::WaitTerminationSignals(sighandler_t sig_handler) {
+}  //  namespace
+
+namespace utils {
+
+void WaitForSdlExecute() {
   sigset_t signal_set;
   int sig = -1;
 
@@ -71,13 +80,15 @@ bool utils::WaitTerminationSignals(sighandler_t sig_handler) {
   sigaddset(&signal_set, SIGINT);
   sigaddset(&signal_set, SIGTERM);
 
-  if (!CatchSIGSEGV(sig_handler)) {
-    return false;
+  if (!CatchSIGSEGV(&SigHandler) || 0 != sigwait(&signal_set, &sig)) {
+    LOGGER_FATAL(logger_, "Subscribe to system signals error");
   }
 
-  if (!sigwait(&signal_set, &sig)) {
-    sig_handler(sig);
-    return true;
-  }
-  return false;
+  SigHandler(sig);
 }
+
+void CreateSdlEvent() {}
+
+void SubscribeToTerminationSignals() {}
+
+}  //  namespace utils

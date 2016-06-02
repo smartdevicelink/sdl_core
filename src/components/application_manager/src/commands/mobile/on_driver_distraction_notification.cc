@@ -32,7 +32,6 @@
  */
 
 #include "application_manager/commands/mobile/on_driver_distraction_notification.h"
-
 #include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"
 
@@ -49,7 +48,7 @@ OnDriverDistractionNotification::OnDriverDistractionNotification(
 OnDriverDistractionNotification::~OnDriverDistractionNotification() {}
 
 void OnDriverDistractionNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   SendNotification();
 }

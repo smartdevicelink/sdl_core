@@ -44,7 +44,7 @@ OnVideoDataStreamingNotification::OnVideoDataStreamingNotification(
 OnVideoDataStreamingNotification::~OnVideoDataStreamingNotification() {}
 
 void OnVideoDataStreamingNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   SendNotification();
 }
 

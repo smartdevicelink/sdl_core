@@ -87,6 +87,12 @@ endif ()
 add_library(${target} SHARED ${SOURCES})
 target_link_libraries(${target} ${LIBRARIES} )
 
+if(BUILD_TESTS)
+  set(TestTarget PolicyTestLib)
+  add_library(${TestTarget} STATIC ${SOURCES} ${HEADERS})
+  target_link_libraries(${TestTarget} ${LIBRARIES})
+endif()
+
 if(ENABLE_LOG)
   target_link_libraries(${target} log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
 endif()
