@@ -41,8 +41,7 @@ include_directories(
 
 set(SOURCES
   ${COMPONENTS_DIR}/security_manager/test/crypto_manager_impl_test.cc
-  #TODO(OHerasym) : tests don't finish executing
-  #${COMPONENTS_DIR}/security_manager/test/security_manager_test.cc
+  ${COMPONENTS_DIR}/security_manager/test/security_manager_test.cc
   ${COMPONENTS_DIR}/security_manager/test/security_query_test.cc
   ${COMPONENTS_DIR}/security_manager/test/security_query_matcher.cc
   ${COMPONENTS_DIR}/security_manager/test/ssl_context_test.cc
