@@ -78,8 +78,7 @@ ACTION_P2(RemoveSession, conn, session_id) {
   conn->RemoveSession(session_id);
 }
 
-// TODO(OHerasym) : thread_qt.cc, line 195 assert fails
-TEST_F(HeartBeatMonitorTest, DISABLED_TimerNotStarted) {
+TEST_F(HeartBeatMonitorTest, TimerNotStarted) {
   // Whithout StartHeartBeat nothing to be call
   EXPECT_CALL(connection_handler_mock, CloseSession(_, _)).Times(0);
   EXPECT_CALL(connection_handler_mock, CloseConnection(_)).Times(0);
@@ -101,7 +100,7 @@ TEST_F(HeartBeatMonitorTest, DISABLED_TimerNotElapsed) {
       kTimeout * MICROSECONDS_IN_MILLISECONDS - MICROSECONDS_IN_SECOND);
 }
 
-TEST_F(HeartBeatMonitorTest, DISABLED_TimerElapsed) {
+TEST_F(HeartBeatMonitorTest, TimerElapsed) {
   const uint32_t session = conn->AddNewSession();
 
   EXPECT_CALL(connection_handler_mock, CloseSession(_, session, _))
@@ -150,7 +149,7 @@ TEST_F(HeartBeatMonitorTest, DISABLED_NotKeptAlive) {
   sleep(2 * kTimeout * MICROSECONDS_IN_MILLISECONDS + MICROSECONDS_IN_SECOND);
 }
 
-TEST_F(HeartBeatMonitorTest, DISABLED_TwoSessionsElapsed) {
+TEST_F(HeartBeatMonitorTest, TwoSessionsElapsed) {
   const uint32_t kSession1 = conn->AddNewSession();
   const uint32_t kSession2 = conn->AddNewSession();
 
@@ -168,7 +167,7 @@ TEST_F(HeartBeatMonitorTest, DISABLED_TwoSessionsElapsed) {
       2 * kTimeout * MICROSECONDS_IN_MILLISECONDS + MICROSECONDS_IN_SECOND);
 }
 
-TEST_F(HeartBeatMonitorTest, DISABLED_IncreaseHeartBeatTimeout) {
+TEST_F(HeartBeatMonitorTest, IncreaseHeartBeatTimeout) {
   const uint32_t kSession = conn->AddNewSession();
 
   EXPECT_CALL(connection_handler_mock, CloseSession(_, _)).Times(0);
@@ -183,7 +182,7 @@ TEST_F(HeartBeatMonitorTest, DISABLED_IncreaseHeartBeatTimeout) {
                                                  MICROSECONDS_IN_MILLISECONDS);
 }
 
-TEST_F(HeartBeatMonitorTest, DISABLED_DecreaseHeartBeatTimeout) {
+TEST_F(HeartBeatMonitorTest, DecreaseHeartBeatTimeout) {
   const uint32_t kSession = conn->AddNewSession();
 
   EXPECT_CALL(connection_handler_mock, CloseSession(_, kSession, _))
