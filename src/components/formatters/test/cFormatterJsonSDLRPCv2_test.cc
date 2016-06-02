@@ -39,7 +39,7 @@ namespace test {
 namespace components {
 namespace formatters {
 
-TEST(CFormatterJsonSDLRPCv2Test, DISABLED_EmptySmartObjectToString) {
+TEST(CFormatterJsonSDLRPCv2Test, EmptySmartObjectToString) {
   SmartObject srcObj;
 
   EXPECT_EQ(Errors::eType::OK, srcObj.validate());
@@ -49,13 +49,12 @@ TEST(CFormatterJsonSDLRPCv2Test, DISABLED_EmptySmartObjectToString) {
 
   EXPECT_TRUE(result);
 
-  std::string expectOutputJsonString = "\"\"\n";
+  std::string expectOutputJsonString = "null";
   CompactJson(jsonString);
   EXPECT_EQ(expectOutputJsonString, jsonString);
 }
 
-TEST(CFormatterJsonSDLRPCv2Test,
-     DISABLED_SmObjWithRequestWithoutMsgNotValid_ToString) {
+TEST(CFormatterJsonSDLRPCv2Test, SmObjWithRequestWithoutMsgNotValid_ToString) {
   SmartObject srcObj;
   CSmartSchema schema = initObjectSchema();
   srcObj.setSchema(schema);
@@ -72,8 +71,8 @@ TEST(CFormatterJsonSDLRPCv2Test,
   bool result = CFormatterJsonSDLRPCv2::toString(srcObj, jsonString);
   EXPECT_TRUE(result);
 
-  std::string expectOutputJsonString = "\"\"\n";
-
+  std::string expectOutputJsonString = "null";
+  CompactJson(jsonString);
   EXPECT_EQ(expectOutputJsonString, jsonString);
 }
 
@@ -220,7 +219,7 @@ TEST(CFormatterJsonSDLRPCv2Test, SmObjWithResponseToString) {
 }
 
 TEST(CFormatterJsonSDLRPCv2Test,
-     DISABLED_SmObjWithResponseWithoutSchemaWithoutParamsToString) {
+     SmObjWithResponseWithoutSchemaWithoutParamsToString) {
   SmartObject srcObj;
   srcObj[S_PARAMS][S_MESSAGE_TYPE] = MessageTypeTest::response;
   std::string jsonString;
@@ -229,7 +228,7 @@ TEST(CFormatterJsonSDLRPCv2Test,
 
   EXPECT_TRUE(result);
 
-  std::string expectOutputJsonString = "\"\"\n";
+  std::string expectOutputJsonString = "null";
   CompactJson(jsonString);
   EXPECT_EQ(expectOutputJsonString, jsonString);
 }
