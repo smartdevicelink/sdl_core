@@ -67,14 +67,18 @@ class ApplicationStateTest : public ::testing::Test {
  protected:
   static std::vector<StateID> added_states_;
   ApplicationState app_state;
-  static const StateID current_id = StateID::STATE_ID_CURRENT;
-  static const StateID postponed_id = StateID::STATE_ID_POSTPONED;
-  static const uint32_t app_id = 10;
+  static const StateID current_id;
+  static const StateID postponed_id;
+  static const uint32_t app_id;
   MockApplicationManager app_mngr_;
 };
 
 std::vector<StateID> ApplicationStateTest::added_states_ =
     GenerateCurrentStates();
+
+const uint32_t ApplicationStateTest::app_id = 10;
+const StateID ApplicationStateTest::current_id = StateID::STATE_ID_CURRENT;
+const StateID ApplicationStateTest::postponed_id = StateID::STATE_ID_POSTPONED;
 
 TEST_F(ApplicationStateTest, AddStates_GetCurrentStates) {
   std::vector<StateID>::iterator new_state = added_states_.begin();
