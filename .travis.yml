@@ -1,4 +1,5 @@
 language: cpp
+
 addons:
   apt:
     sources:
@@ -11,5 +12,12 @@ before_install:
   - sudo add-apt-repository ppa:kalakris/cmake -y
   - sudo apt-get update -q
   - sudo apt-get install -y cmake
+  - sudo add-apt-repository ppa:beineri/opt-qt521 -y
+  - sudo apt-get update -q
+  - sudo apt-get install -y qt52base qt52declarative qt52graphicaleffects qt52quick1 qt52quickcontrols qt52script
+  - sudo apt-get install mlocate
+  - sudo updatedb
 script:
+  - source /opt/qt52/bin/qt52-env.sh && mkdir build_dbus && cd build_dbus && cmake ../ -DHMI2=ON -DHMI=qt && make && make install
+  - mkdir build_dbus && cd build_dbus && cmake ../ -DHMI2=ON -DHMI=qt && make && make install
   - mkdir build && cd build && cmake ../ && make && make install
