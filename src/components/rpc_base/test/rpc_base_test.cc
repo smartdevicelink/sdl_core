@@ -34,6 +34,8 @@
 #include "json/writer.h"
 #include "rpc_base/gtest_support.h"
 #include "rpc_base/rpc_base.h"
+#include <json/writer.h>
+#include <json/reader.h>
 
 namespace test {
 namespace components {
@@ -49,6 +51,17 @@ enum TestEnum { kValue0, kValue1, kInvalidValue };
 
 bool IsValidEnum(TestEnum val) {
   return val == kValue0 || val == kValue1;
+}
+
+void CompactJson(std::string& str) {
+  Json::Value root;
+  Json::Reader reader;
+  reader.parse(str, root);
+  Json::FastWriter writer;
+  str = writer.write(root);
+  if (str[str.size() - 1] == '\n') {
+    str.erase(str.size() - 1, 1);
+  }
 }
 
 }  // namespace
@@ -190,22 +203,24 @@ TEST(ValidatedTypes, TestArrayInitializingConstructor) {
   ASSERT_RPCTYPE_VALID(arr);
 }
 
-TEST(ValidatedTypes, DISABLED_TestOptionalEmptyArray) {
+TEST(ValidatedTypes, TestOptionalEmptyArray) {
   Optional<Array<Integer<int8_t, 0, 10>, 0, 5> > int_array;
   ASSERT_RPCTYPE_VALID(int_array);
   ASSERT_FALSE(int_array.is_initialized());
   JsonValue json_value = int_array.ToJsonValue();
   std::string serialized = json_value.ToJson();
-  ASSERT_EQ(serialized, "[]\n");
+  CompactJson(serialized);
+  ASSERT_EQ(serialized, "[]");
 }
 
-TEST(ValidatedTypes, DISABLED_TestMandatoryEmptyArray) {
+TEST(ValidatedTypes, TestMandatoryEmptyArray) {
   Array<Integer<int8_t, 0, 10>, 0, 5> int_array;
   ASSERT_FALSE(int_array.is_valid());
   ASSERT_FALSE(int_array.is_initialized());
   JsonValue json_value = int_array.ToJsonValue();
   std::string serialized = json_value.ToJson();
-  ASSERT_EQ(serialized, "[]\n");
+  CompactJson(serialized);
+  ASSERT_EQ(serialized, "[]");
 }
 
 TEST(ValidatedTypes, TestMap) {
@@ -229,13 +244,14 @@ TEST(ValidatedTypes, TestMapInitializingConstructor) {
   ASSERT_RPCTYPE_VALID(map);
 }
 
-TEST(ValidatedTypes, DISABLED_TestEmptyMandatoryMap) {
+TEST(ValidatedTypes, TestEmptyMandatoryMap) {
   Map<Integer<int8_t, 0, 10>, 0, 5> im;
   ASSERT_FALSE(im.is_valid());
   ASSERT_FALSE(im.is_initialized());
   JsonValue json_value = im.ToJsonValue();
   std::string serialized = json_value.ToJson();
-  ASSERT_EQ(serialized, "{}\n");
+  CompactJson(serialized);
+  ASSERT_EQ(serialized, "{}");
 }
 
 TEST(ValidatedTypes, TestEnumConstructor) {
