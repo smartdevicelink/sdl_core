@@ -36,6 +36,7 @@
 #include "rpc_base/rpc_base.h"
 #include <json/writer.h>
 #include <json/reader.h>
+#include "FormattersJsonHelper.h"
 
 namespace test {
 namespace components {
@@ -44,6 +45,7 @@ using namespace rpc;
 
 using utils::json::JsonValue;
 using utils::json::JsonValueRef;
+using test::components::formatters::CompactJson;
 
 namespace {
 
@@ -51,17 +53,6 @@ enum TestEnum { kValue0, kValue1, kInvalidValue };
 
 bool IsValidEnum(TestEnum val) {
   return val == kValue0 || val == kValue1;
-}
-
-void CompactJson(std::string& str) {
-  Json::Value root;
-  Json::Reader reader;
-  reader.parse(str, root);
-  Json::FastWriter writer;
-  str = writer.write(root);
-  if (str[str.size() - 1] == '\n') {
-    str.erase(str.size() - 1, 1);
-  }
 }
 
 }  // namespace

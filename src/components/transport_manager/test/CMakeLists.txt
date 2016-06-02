@@ -68,9 +68,8 @@ endif()
 
 set(SOURCES
   ${TM_TEST_DIR}/transport_manager_default_test.cc
-  #TODO(OHerasym) : last_state assert fails
-#  ${TM_TEST_DIR}/transport_manager_impl_test.cc
-#  ${TM_TEST_DIR}/transport_adapter_test.cc
+  ${TM_TEST_DIR}/transport_manager_impl_test.cc
+  ${TM_TEST_DIR}/transport_adapter_test.cc
   ${TM_TEST_DIR}/transport_adapter_listener_test.cc
   ${TM_TEST_DIR}/tcp_transport_adapter_test.cc
   ${TM_TEST_DIR}/tcp_device_test.cc

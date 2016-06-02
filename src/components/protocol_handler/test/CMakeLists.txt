@@ -50,7 +50,6 @@ set (LIBRARIES
 set (SOURCES
   incoming_data_handler_test.cc
   protocol_header_validator_test.cc
-  #TODO(OHerasym) : test don't finish executing
   protocol_handler_tm_test.cc
   protocol_packet_test.cc
   protocol_payload_test.cc
