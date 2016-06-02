@@ -48,9 +48,7 @@ using hmi_message_handler::HMIMessageHandlerImpl;
 typedef utils::SharedPtr<MockHMIMessageAdapterImpl>
     MockHMIMessageAdapterImplSPtr;
 
-// TODO(OHerasym) : thread_qt.cc, line 195 assert fails
-TEST(HMIMessageAdapterImplTest,
-     DISABLED_Handler_CorrectPointer_CorrectReturnedPointer) {
+TEST(HMIMessageAdapterImplTest, Handler_CorrectPointer_CorrectReturnedPointer) {
   testing::NiceMock<MockHMIMessageHandlerSettings>
       mock_hmi_message_handler_settings;
   const uint64_t stack_size = 1000u;

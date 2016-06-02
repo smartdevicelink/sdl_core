@@ -76,9 +76,8 @@ class HMIMessageHandlerImplTest : public ::testing::Test {
   }
 };
 
-// TODO(OHerasym) : thread_qt.cc, line 195 assert fails
 TEST_F(HMIMessageHandlerImplTest,
-       DISABLED_OnErrorSending_EmptyMessage_OnErrorSendingProceeded) {
+       OnErrorSending_EmptyMessage_OnErrorSendingProceeded) {
   // Arrange
   hmi_message_handler::MessageSharedPointer empty_message;
   EXPECT_CALL(mock_hmi_message_observer_, OnErrorSending(empty_message));
@@ -87,7 +86,7 @@ TEST_F(HMIMessageHandlerImplTest,
 }
 
 TEST_F(HMIMessageHandlerImplTest,
-       DISABLED_OnErrorSending_NotEmptyMessage_ExpectOnErrorSendingProceeded) {
+       OnErrorSending_NotEmptyMessage_ExpectOnErrorSendingProceeded) {
   // Arrange
   utils::SharedPtr<application_manager::Message> message(
       utils::MakeShared<application_manager::Message>(
@@ -100,7 +99,7 @@ TEST_F(HMIMessageHandlerImplTest,
 }
 
 TEST_F(HMIMessageHandlerImplTest,
-       DISABLED_AddHMIMessageAdapter_AddExistedAdapter_ExpectAdded) {
+       AddHMIMessageAdapter_AddExistedAdapter_ExpectAdded) {
   // Check before action
   EXPECT_TRUE(hmi_handler_->message_adapters().empty());
   // Act
@@ -110,7 +109,7 @@ TEST_F(HMIMessageHandlerImplTest,
 }
 
 TEST_F(HMIMessageHandlerImplTest,
-       DISABLED_AddHMIMessageAdapter_AddUnexistedAdapter_ExpectNotAdded) {
+       AddHMIMessageAdapter_AddUnexistedAdapter_ExpectNotAdded) {
   // Check before action
   EXPECT_TRUE(hmi_handler_->message_adapters().empty());
   // Act
@@ -121,7 +120,7 @@ TEST_F(HMIMessageHandlerImplTest,
 }
 
 TEST_F(HMIMessageHandlerImplTest,
-       DISABLED_RemoveHMIMessageAdapter_ExpectRemoved) {
+       RemoveHMIMessageAdapter_ExpectRemoved) {
   // Arrange
   hmi_handler_->AddHMIMessageAdapter(mb_adapter_);
   // Act
