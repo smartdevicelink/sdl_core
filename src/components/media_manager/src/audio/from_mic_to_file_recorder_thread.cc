@@ -326,7 +326,7 @@ void media_manager::FromMicToFileRecorderThread::threadMain() {
 
   // Start up a timer for the pipeline
   if (impl_->getDuration() > 0) {
-    sleep_thread_->Start(impl_->getDuration(), true);
+    sleep_thread_->Start(impl_->getDuration(), timer::kSingleShot);
   }
 }
 

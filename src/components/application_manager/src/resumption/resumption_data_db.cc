@@ -61,19 +61,18 @@ ResumptionDataDB::ResumptionDataDB(
     : ResumptionData(application_manager) {
   if (db_storage == In_File_Storage) {
 #ifndef __QNX__
-    db_(new utils::dbms::SQLDatabase(
+    db_ = new utils::dbms::SQLDatabase(
         file_system::ConcatPath(
             application_manager_.get_settings().app_storage_folder(),
             kDatabaseName),
-        "ResumptionDatabase"));
+        "ResumptionDatabase");
 #else
     db_ = new utils::dbms::SQLDatabase(kDatabaseName);
 #endif
   } else if (db_storage == In_Memory_Storage) {
     db_ = new utils::dbms::SQLDatabase();
   } else {
-    LOG4CXX_AUTO_TRACE(logger_);
-    LOG4CXX_ERROR(logger_, "Get not existed type of database storage");
+    LOGGER_ERROR(logger_, "Get not existed type of database storage");
   }
 }
 

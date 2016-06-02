@@ -1163,12 +1163,12 @@ bool PolicyHandler::SaveSnapshot(const BinaryMessage& pt_string,
 }
 
 void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   POLICY_LIB_CHECK_VOID();
 #ifdef EXTENDED_POLICY
   std::string policy_snapshot_full_path;
   if (!SaveSnapshot(pt_string, policy_snapshot_full_path)) {
-    LOG4CXX_ERROR(logger_, "Snapshot processing skipped.");
+    LOGGER_ERROR(logger_, "Snapshot processing skipped.");
     return;
   }
   MessageHelper::SendPolicyUpdate(policy_snapshot_full_path,

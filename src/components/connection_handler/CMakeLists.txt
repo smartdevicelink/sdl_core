@@ -56,10 +56,10 @@ set(LIBRARIES
     ProtocolLibrary
 )
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-   set(HEADERS ${COMPONENTS_DIR}/connection_handler/include/connection_handler/connection.h
-               ${COMPONENTS_DIR}/connection_handler/include/connection_handler/connection_handler.h
+   set(HEADERS ${COMPONENTS_DIR}/include/connection_handler/connection_handler.h
+               ${COMPONENTS_DIR}/include/connection_handler/connection_handler_observer.h
+               ${COMPONENTS_DIR}/connection_handler/include/connection_handler/connection.h
                ${COMPONENTS_DIR}/connection_handler/include/connection_handler/connection_handler_impl.h
-               ${COMPONENTS_DIR}/connection_handler/include/connection_handler/connection_handler_observer.h
                ${COMPONENTS_DIR}/connection_handler/include/connection_handler/device.h
                ${COMPONENTS_DIR}/connection_handler/include/connection_handler/devices_discovery_starter.h
                ${COMPONENTS_DIR}/connection_handler/include/connection_handler/heartbeat_monitor.h)

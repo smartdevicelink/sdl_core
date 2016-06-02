@@ -208,7 +208,7 @@ void media_manager::FromMicToFileRecorderThread::threadMain() {
   LOGGER_TRACE(logger_, "Audio capture started ...\n");
 
   if (impl_->getDuration() > 0) {
-    sleep_thread_->Start(impl_->getDuration(), true);
+    sleep_thread_->Start(impl_->getDuration(), timer::kSingleShot);
     impl_->startRecord();
   }
 }

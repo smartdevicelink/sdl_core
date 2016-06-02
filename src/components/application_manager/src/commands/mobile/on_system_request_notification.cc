@@ -103,7 +103,7 @@ void OnSystemRequestNotification::Run() {
 
 #ifdef EXTENDED_POLICY
 void OnSystemRequestNotification::AddHeader(BinaryMessage& message) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   const int timeout = application_manager_.GetPolicyHandler().TimeoutExchange();
 
   char size_str[24];
@@ -147,8 +147,8 @@ void OnSystemRequestNotification::AddHeader(BinaryMessage& message) const {
   message.clear();
   message.assign(header.begin(), header.end());
 
-  LOG4CXX_DEBUG(
-      logger_, "Header added: " << std::string(message.begin(), message.end()));
+  LOGGER_DEBUG(logger_,
+               "Header added: " << std::string(message.begin(), message.end()));
 }
 #endif
 

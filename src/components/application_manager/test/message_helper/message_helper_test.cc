@@ -245,7 +245,6 @@ TEST(MessageHelperTestCreate,
 
 TEST(MessageHelperTestCreate,
      CreateAddCommandRequestToHMI_SendSmartObject_Equal) {
-  MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
   CommandsMap vis;
   sync_primitives::Lock lock(false);
   DataAccessor<application_manager::CommandsMap> data_accessor(vis, lock);
@@ -289,7 +288,6 @@ TEST(MessageHelperTestCreate,
 
 TEST(MessageHelperTestCreate,
      CreateAddVRCommandRequestFromChoiceToHMI_SendEmptyData_EmptyList) {
-  MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
   application_manager::ChoiceSetMap vis;
 
   sync_primitives::Lock lock(false);
@@ -308,7 +306,6 @@ TEST(MessageHelperTestCreate,
 
 TEST(MessageHelperTestCreate,
      CreateAddVRCommandRequestFromChoiceToHMI_SendObject_EqualList) {
-  MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
   application_manager::ChoiceSetMap vis;
 
   sync_primitives::Lock lock(false);
@@ -359,7 +356,6 @@ TEST(MessageHelperTestCreate,
 }
 
 TEST(MessageHelperTestCreate, CreateAddSubMenuRequestToHMI_SendObject_Equal) {
-  MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
   application_manager::SubMenuMap vis;
 
   sync_primitives::Lock lock(false);
@@ -402,7 +398,6 @@ TEST(MessageHelperTestCreate, CreateAddSubMenuRequestToHMI_SendObject_Equal) {
 
 TEST(MessageHelperTestCreate,
      CreateAddSubMenuRequestToHMI_SendEmptyMap_EmptySmartObjectList) {
-  MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
   application_manager::SubMenuMap vis;
 
   sync_primitives::Lock lock(false);
@@ -755,8 +750,6 @@ TEST_F(MessageHelperTest, VerifySoftButtonString_CorrectStrings_True) {
 
 TEST_F(MessageHelperTest,
        GetIVISubscriptionRequests_ValidApplication_HmiRequestNotEmpty) {
-  // Creating sharedPtr to MockApplication
-  MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
   // Creating data acessor
   application_manager::VehicleInfoSubscriptions vis;
 
@@ -778,8 +771,6 @@ TEST_F(MessageHelperTest,
 
 TEST_F(MessageHelperTest,
        ProcessSoftButtons_SmartObjectWithoutButtonsKey_Success) {
-  // Creating sharedPtr to MockApplication
-  MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
   // Creating input data for method
   smart_objects::SmartObject object;
   policy_handler_test::MockPolicySettings policy_settings_;
@@ -796,8 +787,6 @@ TEST_F(MessageHelperTest,
 
 TEST_F(MessageHelperTest,
        ProcessSoftButtons_IncorectSoftButonValue_InvalidData) {
-  // Creating sharedPtr to MockApplication
-  MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
   // Creating input data for method
   smart_objects::SmartObject object;
   smart_objects::SmartObject& buttons = object[strings::soft_buttons];
@@ -806,6 +795,8 @@ TEST_F(MessageHelperTest,
   policy_handler_test::MockPolicySettings policy_settings_;
   const policy::PolicyHandler policy_handler(policy_settings_,
                                              mock_application_manager);
+  // Creating sharedPtr to MockApplication
+  MockApplicationSharedPtr appSharedMock = utils::MakeShared<AppMock>();
   // Method call
   mobile_apis::Result::eType result = MessageHelper::ProcessSoftButtons(
       object, appSharedMock, policy_handler, mock_application_manager);

@@ -167,9 +167,9 @@ void ResumptionDataJson::OnSuspend() {
        itr != end;
        ++itr) {
     if ((*itr).HasMember(strings::ign_off_count)) {
-      JsonValueRef ign_off_count = (*it)[strings::ign_off_count];
+      JsonValueRef ign_off_count = (*itr)[strings::ign_off_count];
       const uint32_t counter_value = ign_off_count.AsUInt();
-      ign_off_count = counter_value + 1;
+      ign_off_count = utils::json::JsonValue::UInt(counter_value + 1);
     } else {
       LOGGER_WARN(logger_, "Unknown key among saved applications");
       (*itr)[strings::ign_off_count] = utils::json::JsonValue::UInt(1);
@@ -194,9 +194,10 @@ void ResumptionDataJson::OnAwake() {
     if ((*itr).HasMember(strings::ign_off_count)) {
       const uint32_t ign_off_count = (*itr)[strings::ign_off_count].AsUInt();
       if (0 == ign_off_count) {
-        LOG4CXX_WARN(logger_, "Application has not been suspended");
+        LOGGER_WARN(logger_, "Application has not been suspended");
       } else {
-        (*it)[strings::ign_off_count] = ign_off_count - 1;
+        (*itr)[strings::ign_off_count] =
+            utils::json::JsonValue::UInt(ign_off_count - 1);
       }
     } else {
       LOGGER_WARN(logger_, "Unknown key among saved applications");

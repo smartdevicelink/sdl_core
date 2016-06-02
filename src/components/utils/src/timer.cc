@@ -84,7 +84,7 @@ void timer::Timer::Start(const Milliseconds timeout,
       single_shot_ = false;
       break;
     }
-    default: { ASSERT("timer_type should be kSingleShot or kPeriodic"); }
+    default: { NOTREACHED() }
   };
   StartDelegate(timeout);
   StartThread();

@@ -28,6 +28,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+set(UTILS_TEST_DIR ${COMPONENTS_DIR}/utils/test)
+
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
   find_package(WinSqlite3 REQUIRED)
   if (NOT QT_PORT)
@@ -41,6 +43,7 @@ include_directories (
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${GMOCK_INCLUDE_DIRECTORY}
   ${COMPONENTS_DIR}/utils/include
+  ${COMPONENTS_DIR}/policy/include
   ${COMPONENTS_DIR}/rpc_base/include
   ${COMPONENTS_DIR}/utils/test/include
   ${SQLITE_INCLUDE_DIRECTORY}
@@ -118,5 +121,3 @@ file(COPY smartDeviceLink.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 create_test("utils_test" "${testSources}" "${testLibraries}")
 
 add_subdirectory(test_generator)
-
-endif()

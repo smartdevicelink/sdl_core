@@ -16,6 +16,7 @@ namespace dbms {
  */
 class SQLDatabase {
  public:
+  SQLDatabase();
   SQLDatabase(const std::string& database_path,
               const std::string& connection_name);
   ~SQLDatabase();

@@ -38,10 +38,10 @@
 #include "json/reader.h"
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
-#include "mock_policy_listener.h"
-#include "mock_pt_representation.h"
-#include "include/mock_cache_manager.h"
-#include "mock_update_status_manager.h"
+#include "policy/mock_policy_listener.h"
+#include "policy/mock_pt_representation.h"
+#include "policy/mock_cache_manager.h"
+#include "policy/mock_update_status_manager.h"
 #include "policy/mock_policy_settings.h"
 #include "policy/policy_manager_impl.h"
 #include "config_profile/profile.h"
@@ -53,13 +53,10 @@
 #include "policy/mock_update_status_manager.h"
 
 #include "utils/macro.h"
-#include "table_struct/enums.h"
-#include "table_struct/types.h"
 #include "utils/file_system.h"
 #include "utils/date_time.h"
 #include "utils/make_shared.h"
 #include "utils/shared_library.h"
-#include "policy/policy_manager.h"
 
 using ::testing::Return;
 using ::testing::NiceMock;

@@ -1060,7 +1060,7 @@ bool SQLPTRepresentation::SaveModuleMeta(const policy_table::ModuleMeta& meta) {
   utils::dbms::SQLQuery query(db());
 
   if (!query.Prepare(sql_pt::kSaveModuleMeta)) {
-    LOG4CXX_WARN(logger_, "Incorrect insert statement for module_meta.");
+    LOGGER_WARN(logger_, "Incorrect insert statement for module_meta.");
     return false;
   }
   const int64_t odometer = *(meta.pt_exchanged_at_odometer_x);
@@ -1070,7 +1070,7 @@ bool SQLPTRepresentation::SaveModuleMeta(const policy_table::ModuleMeta& meta) {
   query.Bind(2, *(meta.ignition_cycles_since_last_exchange));
 
   if (!query.Exec()) {
-    LOG4CXX_WARN(logger_, "Incorrect update for module_meta.");
+    LOGGER_WARN(logger_, "Incorrect update for module_meta.");
     return false;
   }
 

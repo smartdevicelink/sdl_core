@@ -38,18 +38,17 @@ include_directories(
     ${COMPONENTS_DIR}/hmi_message_handler/include/
     ${COMPONENTS_DIR}/formatters/include/
     ${COMPONENTS_DIR}/config_profile/include/
-    ${COMPONENTS_DIR}/policy/src/policy/include/
-    ${COMPONENTS_DIR}/policy/src/policy/usage_statistics/include/
+    ${COMPONENTS_DIR}/policy/include/
     ${JSONCPP_INCLUDE_DIRECTORY}
     ${CMAKE_BINARY_DIR}/src/components/
 )
 
 set(COMMON_INCLUDES
+    ${COMPONENTS_DIR}/include/media_manager/media_manager.h
     ${COMPONENTS_DIR}/media_manager/include/media_manager/file_streamer_adapter.h
     ${COMPONENTS_DIR}/media_manager/include/media_manager/media_adapter.h
     ${COMPONENTS_DIR}/media_manager/include/media_manager/media_adapter_impl.h
     ${COMPONENTS_DIR}/media_manager/include/media_manager/media_adapter_listener.h
-    ${COMPONENTS_DIR}/media_manager/include/media_manager/media_manager.h
     ${COMPONENTS_DIR}/media_manager/include/media_manager/media_manager_impl.h
     ${COMPONENTS_DIR}/media_manager/include/media_manager/pipe_streamer_adapter.h
     ${COMPONENTS_DIR}/media_manager/include/media_manager/socket_streamer_adapter.h

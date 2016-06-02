@@ -63,14 +63,14 @@ void OnSystemRequestNotification::Run() {
   ApplicationSharedPtr app;
   if (msg_params.keyExists(strings::app_id)) {
     const uint32_t app_id = msg_params[strings::app_id].asUInt();
-    LOG4CXX_DEBUG(logger_, "Received OnSystemRequest for appID " << app_id);
-    LOG4CXX_DEBUG(logger_, "Searching app to send OnSystemRequest by appID.");
+    LOGGER_DEBUG(logger_, "Received OnSystemRequest for appID " << app_id);
+    LOGGER_DEBUG(logger_, "Searching app to send OnSystemRequest by appID.");
     app = application_manager_.application(app_id);
   } else {
-    LOG4CXX_DEBUG(logger_,
-                  "Received OnSystemRequest without appID."
-                  " One of registered apps will be used.");
-    LOG4CXX_DEBUG(logger_, "Searching registered app to send OnSystemRequest.");
+    LOGGER_DEBUG(logger_,
+                 "Received OnSystemRequest without appID."
+                 " One of registered apps will be used.");
+    LOGGER_DEBUG(logger_, "Searching registered app to send OnSystemRequest.");
     const PolicyHandlerInterface& policy_handler =
         application_manager_.GetPolicyHandler();
     const uint32_t selected_app_id = policy_handler.GetAppIdForSending();
@@ -88,8 +88,8 @@ void OnSystemRequestNotification::Run() {
     return;
   }
 
-  LOG4CXX_DEBUG(logger_,
-                "Sending request with application id " << app->policy_app_id());
+  LOGGER_DEBUG(logger_,
+               "Sending request with application id " << app->policy_app_id());
 
   params[strings::connection_key] = app->app_id();
   SendNotificationToMobile(message_);

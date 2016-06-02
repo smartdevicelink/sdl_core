@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/application_impl.h"
 #include <string>
+#include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
 #include "protocol_handler/protocol_handler.h"
 #include "application_manager/application_manager.h"

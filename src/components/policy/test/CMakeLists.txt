@@ -35,11 +35,9 @@ include_directories(
   ${COMPONENTS_DIR}/rpc_base/include
   ${COMPONENTS_DIR}/config_profile/include
   ${COMPONENTS_DIR}/utils/include/
-  ${COMPONENTS_DIR}/policy/src/policy/policy_table/table_struct
-  ${COMPONENTS_DIR}/policy/src/policy/policy_table/
+  ${COMPONENTS_DIR}/policy/policy_table/
   ${COMPONENTS_DIR}/policy/test/include/
-  ${COMPONENTS_DIR}/policy/test/
-  ${COMPONENTS_DIR}/include/test/policy/
+  ${COMPONENTS_DIR}/policy/include/
   $ENV{SDL_SQLITE_DIR}
 )
 

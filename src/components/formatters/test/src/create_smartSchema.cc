@@ -32,10 +32,6 @@
 
 #include "formatters/create_smartSchema.h"
 
-namespace test {
-namespace components {
-namespace formatters {
-
 using namespace NsSmartDeviceLink::NsSmartObjects;
 using namespace NsSmartDeviceLink::NsJSONHandler::strings;
 using namespace NsSmartDeviceLink::NsJSONHandler::Formatters;
@@ -152,10 +148,6 @@ namespace test {
 namespace components {
 namespace formatters {
 
-using namespace NsSmartDeviceLink::NsJSONHandler::strings;
-using namespace NsSmartDeviceLink::NsJSONHandler::Formatters;
-using namespace NsSmartDeviceLink::NsSmartObjects;
-
 CSmartSchema initObjectSchema() {
   std::set<TestType::eType> resultCode_allowedEnumSubsetValues;
   resultCode_allowedEnumSubsetValues.insert(
@@ -240,7 +232,7 @@ CSmartSchema initObjectSchema() {
   rootMembersMap[S_PARAMS] = CObjectSchemaItem::SMember(
       CObjectSchemaItem::create(paramsMembersMap), true);
   return CSmartSchema(CObjectSchemaItem::create(rootMembersMap));
-};
+}
 
 CSmartSchema initSchemaForMetaFormatter() {
   std::set<TestType::eType> resultCode_allowedEnumSubsetValues;
@@ -422,7 +414,7 @@ CSmartSchema initSchemaForMetaFormatter() {
   rootMembersMap[S_PARAMS] = CObjectSchemaItem::SMember(
       CObjectSchemaItem::create(paramsMembersMap), true);
   return CSmartSchema(CObjectSchemaItem::create(rootMembersMap));
-};
+}
 
 }  // namespace formatters
 }  // namespace components
