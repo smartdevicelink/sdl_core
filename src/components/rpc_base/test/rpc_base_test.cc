@@ -34,6 +34,9 @@
 #include "json/writer.h"
 #include "rpc_base/gtest_support.h"
 #include "rpc_base/rpc_base.h"
+#include <json/writer.h>
+#include <json/reader.h>
+#include "FormattersJsonHelper.h"
 
 namespace test {
 namespace components {
@@ -42,6 +45,7 @@ using namespace rpc;
 
 using utils::json::JsonValue;
 using utils::json::JsonValueRef;
+using test::components::formatters::CompactJson;
 
 namespace {
 
@@ -190,22 +194,24 @@ TEST(ValidatedTypes, TestArrayInitializingConstructor) {
   ASSERT_RPCTYPE_VALID(arr);
 }
 
-TEST(ValidatedTypes, DISABLED_TestOptionalEmptyArray) {
+TEST(ValidatedTypes, TestOptionalEmptyArray) {
   Optional<Array<Integer<int8_t, 0, 10>, 0, 5> > int_array;
   ASSERT_RPCTYPE_VALID(int_array);
   ASSERT_FALSE(int_array.is_initialized());
   JsonValue json_value = int_array.ToJsonValue();
   std::string serialized = json_value.ToJson();
-  ASSERT_EQ(serialized, "[]\n");
+  CompactJson(serialized);
+  ASSERT_EQ(serialized, "[]");
 }
 
-TEST(ValidatedTypes, DISABLED_TestMandatoryEmptyArray) {
+TEST(ValidatedTypes, TestMandatoryEmptyArray) {
   Array<Integer<int8_t, 0, 10>, 0, 5> int_array;
   ASSERT_FALSE(int_array.is_valid());
   ASSERT_FALSE(int_array.is_initialized());
   JsonValue json_value = int_array.ToJsonValue();
   std::string serialized = json_value.ToJson();
-  ASSERT_EQ(serialized, "[]\n");
+  CompactJson(serialized);
+  ASSERT_EQ(serialized, "[]");
 }
 
 TEST(ValidatedTypes, TestMap) {
@@ -229,13 +235,14 @@ TEST(ValidatedTypes, TestMapInitializingConstructor) {
   ASSERT_RPCTYPE_VALID(map);
 }
 
-TEST(ValidatedTypes, DISABLED_TestEmptyMandatoryMap) {
+TEST(ValidatedTypes, TestEmptyMandatoryMap) {
   Map<Integer<int8_t, 0, 10>, 0, 5> im;
   ASSERT_FALSE(im.is_valid());
   ASSERT_FALSE(im.is_initialized());
   JsonValue json_value = im.ToJsonValue();
   std::string serialized = json_value.ToJson();
-  ASSERT_EQ(serialized, "{}\n");
+  CompactJson(serialized);
+  ASSERT_EQ(serialized, "{}");
 }
 
 TEST(ValidatedTypes, TestEnumConstructor) {

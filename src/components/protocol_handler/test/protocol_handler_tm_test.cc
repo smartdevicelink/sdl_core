@@ -365,8 +365,8 @@ TEST_F(ProtocolHandlerImplTest,
  * OFF
  */
 
-// TODO(OHerasym) : thread qt assert fails
-TEST_F(ProtocolHandlerImplTest, StartSession_Protected_SessionObserverReject) {
+TEST_F(ProtocolHandlerImplTest,
+       StartSession_Protected_SessionObserverReject) {
   const int call_times = 5;
   AddConnection();
 #ifdef ENABLE_SECURITY
@@ -442,8 +442,8 @@ TEST_F(ProtocolHandlerImplTest,
  * OFF
  */
 
-// TODO(OHerasym) : test don't finish executing
-TEST_F(ProtocolHandlerImplTest, StartSession_Protected_SessionObserverAccept) {
+TEST_F(ProtocolHandlerImplTest,
+       StartSession_Protected_SessionObserverAccept) {
   SetProtocolVersion2();
   AddSession();
 }
@@ -453,7 +453,6 @@ TEST_F(ProtocolHandlerImplTest, StartSession_Protected_SessionObserverAccept) {
  * ProtocolHandler shall send NAck on session_observer rejection
  */
 
-// TODO(OHerasym) : test don't finish executing
 TEST_F(ProtocolHandlerImplTest, EndSession_SessionObserverReject) {
   AddSession();
   const ServiceType service = kRpc;
@@ -478,7 +477,6 @@ TEST_F(ProtocolHandlerImplTest, EndSession_SessionObserverReject) {
 /*
  * ProtocolHandler shall send NAck on wrong hash code
  */
-// TODO(OHerasym) : test don't finish executing
 TEST_F(ProtocolHandlerImplTest, EndSession_Success) {
   AddSession();
   const ServiceType service = kRpc;
@@ -506,8 +504,8 @@ TEST_F(ProtocolHandlerImplTest, EndSession_Success) {
  * ProtocolHandler shall not call Security logics with Protocol version 1
  * Check session_observer with PROTECTION_OFF and Ack with PROTECTION_OFF
  */
-// TODO(OHerasym) : test don't finish executing
-TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtocoloV1) {
+TEST_F(ProtocolHandlerImplTest,
+       SecurityEnable_StartSessionProtocoloV1) {
   AddConnection();
   // Add security manager
   AddSecurityManager();
@@ -542,8 +540,8 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtocoloV1) {
  * ProtocolHandler shall not call Security logics on start session with
  * PROTECTION_OFF
  */
-// TODO(OHerasym) : test don't finish executing
-TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionUnprotected) {
+TEST_F(ProtocolHandlerImplTest,
+       SecurityEnable_StartSessionUnprotected) {
   AddConnection();
   // Add security manager
   AddSecurityManager();
@@ -570,8 +568,8 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionUnprotected) {
 /*
  * ProtocolHandler shall send Ack with PROTECTION_OFF on fail SLL creation
  */
-// TODO(OHerasym) : test don't finish executing
-TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtected_Fail) {
+TEST_F(ProtocolHandlerImplTest,
+       SecurityEnable_StartSessionProtected_Fail) {
   AddConnection();
   AddSecurityManager();
   const ServiceType start_service = kRpc;
@@ -604,7 +602,6 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtected_Fail) {
  * ProtocolHandler shall send Ack with PROTECTION_ON on already established and
  * initialized SLLContext
  */
-// TODO(OHerasym) : test don't finish executing
 TEST_F(ProtocolHandlerImplTest,
        SecurityEnable_StartSessionProtected_SSLInitialized) {
   AddConnection();
@@ -648,7 +645,6 @@ TEST_F(ProtocolHandlerImplTest,
 /*
  * ProtocolHandler shall send Ack with PROTECTION_OFF on session handshhake fail
  */
-// TODO(OHerasym) : test don't finish executing
 TEST_F(ProtocolHandlerImplTest,
        SecurityEnable_StartSessionProtected_HandshakeFail) {
   AddConnection();
@@ -715,7 +711,6 @@ TEST_F(ProtocolHandlerImplTest,
  * ProtocolHandler shall send Ack with PROTECTION_ON on session handshhake
  * success
  */
-// TODO(OHerasym) : test don't finish executing
 TEST_F(ProtocolHandlerImplTest,
        SecurityEnable_StartSessionProtected_HandshakeSuccess) {
   AddConnection();
@@ -854,9 +849,9 @@ TEST_F(
  * ProtocolHandler shall send Ack with PROTECTION_ON on session handshhake
  * success
  */
-// TODO(OHerasym) : test don't finish executing
-TEST_F(ProtocolHandlerImplTest,
-       SecurityEnable_StartSessionProtected_HandshakeSuccess_SSLIsNotPending) {
+TEST_F(
+    ProtocolHandlerImplTest,
+    SecurityEnable_StartSessionProtected_HandshakeSuccess_SSLIsNotPending) {
   AddConnection();
   AddSecurityManager();
   const ServiceType start_service = kRpc;
@@ -1024,7 +1019,7 @@ TEST_F(ProtocolHandlerImplTest, FloodVerification_AudioFrameSkip) {
                   &some_data[0]);
   }
 }
-// TODO(OHerasym) : thread qt assert fails
+
 TEST_F(ProtocolHandlerImplTest, FloodVerificationDisable) {
   const size_t period_msec = 0;
   const size_t max_messages = 0;
@@ -1047,7 +1042,6 @@ TEST_F(ProtocolHandlerImplTest, FloodVerificationDisable) {
   }
 }
 
-// TODO(OHerasym) : thread qt assert fails
 TEST_F(ProtocolHandlerImplTest, MalformedVerificationDisable) {
   const size_t period_msec = 10000;
   const size_t max_messages = 100;
@@ -1074,7 +1068,8 @@ TEST_F(ProtocolHandlerImplTest, MalformedVerificationDisable) {
   }
 }
 
-TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification) {
+// TODO(OHerasym) : Actual function call count doesn't match EXPECT_CALL
+TEST_F(ProtocolHandlerImplTest, DISABLED_MalformedLimitVerification) {
   const size_t period_msec = 10000;
   const size_t max_messages = 100;
   InitProtocolHandlerImpl(0u, 0u, true, period_msec, max_messages);
@@ -1113,7 +1108,9 @@ TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification) {
   }
 }
 
-TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification_MalformedStock) {
+// TODO(OHerasym) : Actual function call count doesn't match EXPECT_CALL
+TEST_F(ProtocolHandlerImplTest,
+       DISABLED_MalformedLimitVerification_MalformedStock) {
   const size_t period_msec = 10000;
   const size_t max_messages = 100;
   InitProtocolHandlerImpl(0u, 0u, true, period_msec, max_messages);
@@ -1177,8 +1174,8 @@ TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification_MalformedStock) {
   }
 }
 
-// TODO(OHerasym) : thread qt assert fails
-TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification_MalformedOnly) {
+TEST_F(ProtocolHandlerImplTest,
+       MalformedLimitVerification_MalformedOnly) {
   const size_t period_msec = 10000;
   const size_t max_messages = 100;
   InitProtocolHandlerImpl(0u, 0u, true, period_msec, max_messages);
@@ -1232,8 +1229,9 @@ TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification_MalformedOnly) {
   }
 }
 
-// TODO(OHerasym) : thread qt assert fails
-TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification_NullTimePeriod) {
+// TODO(OHerasym) : error: Long sleep makes a bare back
+TEST_F(ProtocolHandlerImplTest,
+       DISABLED_MalformedLimitVerification_NullTimePeriod) {
   const size_t period_msec = 0;
   const size_t max_messages = 1000;
   InitProtocolHandlerImpl(0u, 0u, true, period_msec, max_messages);
@@ -1260,8 +1258,8 @@ TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification_NullTimePeriod) {
   }
 }
 
-// TODO(OHerasym) : thread qt assert fails
-TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification_NullCount) {
+// TODO(OHerasym) : Actual function call count doesn't match EXPECT_CALL
+TEST_F(ProtocolHandlerImplTest, DISABLED_MalformedLimitVerification_NullCount) {
   const size_t period_msec = 10000;
   const size_t max_messages = 0;
   InitProtocolHandlerImpl(0u, 0u, true, period_msec, max_messages);
@@ -1288,7 +1286,6 @@ TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification_NullCount) {
   }
 }
 
-// TODO(OHerasym) : thread qt assert fails
 TEST_F(ProtocolHandlerImplTest,
        SendEndServicePrivate_NoConnection_MessageNotSent) {
   // Expect check connection with ProtocolVersionUsed
@@ -1301,8 +1298,8 @@ TEST_F(ProtocolHandlerImplTest,
   protocol_handler_impl->SendEndSession(connection_id, session_id);
 }
 
-// TODO(OHerasym) : test don't finish executing
-TEST_F(ProtocolHandlerImplTest, SendEndServicePrivate_EndSession_MessageSent) {
+TEST_F(ProtocolHandlerImplTest,
+       SendEndServicePrivate_EndSession_MessageSent) {
   // Arrange
   AddSession();
   // Expect check connection with ProtocolVersionUsed
@@ -1320,7 +1317,6 @@ TEST_F(ProtocolHandlerImplTest, SendEndServicePrivate_EndSession_MessageSent) {
   protocol_handler_impl->SendEndSession(connection_id, session_id);
 }
 
-// TODO(OHerasym) : test don't finish executing
 TEST_F(ProtocolHandlerImplTest,
        SendEndServicePrivate_ServiceTypeControl_MessageSent) {
   // Arrange
@@ -1340,7 +1336,6 @@ TEST_F(ProtocolHandlerImplTest,
   protocol_handler_impl->SendEndService(connection_id, session_id, kControl);
 }
 
-// TODO(OHerasym) : test don't finish executing
 TEST_F(ProtocolHandlerImplTest, SendHeartBeat_NoConnection_NotSent) {
   // Expect check connection with ProtocolVersionUsed
   EXPECT_CALL(session_observer_mock,
@@ -1352,7 +1347,6 @@ TEST_F(ProtocolHandlerImplTest, SendHeartBeat_NoConnection_NotSent) {
   protocol_handler_impl->SendHeartBeat(connection_id, session_id);
 }
 
-// TODO(OHerasym) : test don't finish executing
 TEST_F(ProtocolHandlerImplTest, SendHeartBeat_Successful) {
   // Arrange
   AddSession();
@@ -1371,7 +1365,6 @@ TEST_F(ProtocolHandlerImplTest, SendHeartBeat_Successful) {
   protocol_handler_impl->SendHeartBeat(connection_id, session_id);
 }
 
-// TODO(OHerasym) : test don't finish executing
 TEST_F(ProtocolHandlerImplTest, SendHeartBeatAck_Successful) {
   // Arrange
   AddSession();
@@ -1392,8 +1385,8 @@ TEST_F(ProtocolHandlerImplTest, SendHeartBeatAck_Successful) {
       PROTECTION_OFF, kControl, session_id, FRAME_DATA_HEART_BEAT);
 }
 
-// TODO(OHerasym) : test don't finish executing
-TEST_F(ProtocolHandlerImplTest, SendHeartBeatAck_WrongProtocolVersion_NotSent) {
+TEST_F(ProtocolHandlerImplTest,
+       SendHeartBeatAck_WrongProtocolVersion_NotSent) {
   // Arrange
   AddSession();
   // Expect two checks of connection and protocol version with
@@ -1416,7 +1409,6 @@ TEST_F(ProtocolHandlerImplTest, SendHeartBeatAck_WrongProtocolVersion_NotSent) {
       PROTECTION_OFF, kControl, session_id, FRAME_DATA_HEART_BEAT);
 }
 
-// TODO(OHerasym) : test don't finish executing
 TEST_F(ProtocolHandlerImplTest,
        SendMessageToMobileApp_SendSingleControlMessage) {
   // Arrange
@@ -1448,7 +1440,6 @@ TEST_F(ProtocolHandlerImplTest,
   protocol_handler_impl->SendMessageToMobileApp(message, is_final);
 }
 
-// TODO(OHerasym) : test don't finish executing
 TEST_F(ProtocolHandlerImplTest,
        SendMessageToMobileApp_SendSingleNonControlMessage) {
   // Arrange

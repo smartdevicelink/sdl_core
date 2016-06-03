@@ -31,6 +31,7 @@
 include_directories (
   ${COMPONENTS_DIR}/dbus/include
   ${COMPONENTS_DIR}/rpc_base/include
+  ${COMPONENTS_DIR}/formatters/test/include
   ${DBUS_INCLUDE_DIRS}
   ${GMOCK_INCLUDE_DIRECTORY}
   ${JSONCPP_INCLUDE_DIRECTORY}
@@ -46,6 +47,7 @@ set(SOURCES
   ${COMPONENTS_DIR}/rpc_base/test/rpc_base_json_test.cc
   ${COMPONENTS_DIR}/rpc_base/test/rpc_base_test.cc
   ${COMPONENTS_DIR}/rpc_base/test/validation_report_test.cc
+  ${COMPONENTS_DIR}/formatters/test/src/FormattersJsonHelper.cc
 )
 
 if (${HMI_DBUS_API})
