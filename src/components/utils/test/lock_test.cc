@@ -39,7 +39,7 @@ namespace utils_test {
 
 using sync_primitives::Lock;
 
-TEST(LockPosixTest, DefaultCtorTest_ExpectNonRecursiveMutexCreated) {
+TEST(LockTest, DefaultCtorTest_ExpectNonRecursiveMutexCreated) {
   // Create Lock object
   Lock test_mutex;
   // Lock mutex
@@ -50,7 +50,7 @@ TEST(LockPosixTest, DefaultCtorTest_ExpectNonRecursiveMutexCreated) {
   test_mutex.Release();
 }
 
-TEST(LockPosixTest, CtorTestWithFalseArgument_ExpectNonRecursiveMutexCreated) {
+TEST(LockTest, CtorTestWithFalseArgument_ExpectNonRecursiveMutexCreated) {
   // Create Lock object
   Lock test_mutex(false);
   // Lock mutex
@@ -61,7 +61,7 @@ TEST(LockPosixTest, CtorTestWithFalseArgument_ExpectNonRecursiveMutexCreated) {
   test_mutex.Release();
 }
 
-TEST(LockPosixTest, CtorTestWithTrueArgument_ExpectRecursiveMutexCreated) {
+TEST(LockTest, CtorTestWithTrueArgument_ExpectRecursiveMutexCreated) {
   // Create Lock object
   Lock test_mutex(true);
   // Lock mutex
@@ -73,7 +73,7 @@ TEST(LockPosixTest, CtorTestWithTrueArgument_ExpectRecursiveMutexCreated) {
   test_mutex.Release();
 }
 
-TEST(LockPosixTest, AcquireMutex_ExpectMutexLocked) {
+TEST(LockTest, AcquireMutex_ExpectMutexLocked) {
   // Create Lock object (non-recursive mutex)
   Lock test_mutex;
   // Lock mutex
@@ -83,7 +83,7 @@ TEST(LockPosixTest, AcquireMutex_ExpectMutexLocked) {
   test_mutex.Release();
 }
 
-TEST(LockPosixTest, ReleaseMutex_ExpectMutexReleased) {
+TEST(LockTest, ReleaseMutex_ExpectMutexReleased) {
   // Create Lock object (non-recursive mutex)
   Lock test_mutex;
   // Lock mutex
@@ -95,7 +95,7 @@ TEST(LockPosixTest, ReleaseMutex_ExpectMutexReleased) {
   test_mutex.Release();
 }
 
-TEST(LockPosixTest, TryLockNonRecursiveMutex_ExpectMutexNotLockedTwice) {
+TEST(LockTest, TryLockNonRecursiveMutex_ExpectMutexNotLockedTwice) {
   // Create Lock object (non-recursive mutex)
   Lock test_mutex;
   // Lock mutex
@@ -105,7 +105,7 @@ TEST(LockPosixTest, TryLockNonRecursiveMutex_ExpectMutexNotLockedTwice) {
   test_mutex.Release();
 }
 
-TEST(LockPosixTest, TryLockRecursiveMutex_ExpectMutexLockedTwice) {
+TEST(LockTest, TryLockRecursiveMutex_ExpectMutexLockedTwice) {
   // Create Lock object (recursive mutex)
   Lock test_mutex(true);
   // Lock mutex

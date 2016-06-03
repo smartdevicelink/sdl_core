@@ -58,34 +58,35 @@ set(testSources
   prioritized_queue_test.cc
   data_accessor_test.cc
   stl_utils_test.cc
-  #async_runner_test.cc
+  async_runner_test.cc
   shared_ptr_test.cc
   scope_guard_test.cc
   atomic_object_test.cc
-  #message_loop_thread_test.cc
+  message_loop_thread_test.cc
   custom_string_test.cc
-  #timer_test.cc
+  timer_test.cc
+  lock_test.cc
+  thread_test.cc
 )
+
+if (ENABLE_LOG)
+  list(APPEND testSources auto_trace_test.cc)
+endif()
+
+if (BUILD_BACKTRACE_SUPPORT)
+  list(APPEND testSources back_trace_test.cc)
+endif()
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
   list (APPEND testSources
     system_test.cc
     conditional_variable_test.cc
     message_queue_test.cc
-    lock_posix_test.cc
     singleton_test.cc
-    #posix_thread_test.cc
     rwlock_posix_test.cc
     resource_usage_test.cc
   )
 
-  if (ENABLE_LOG)
-    list(APPEND testSources auto_trace_test.cc)
-  endif()
-
-  if (BUILD_BACKTRACE_SUPPORT)
-    list(APPEND testSources back_trace_test.cc)
-  endif()
 endif()
 
 set(testLibraries

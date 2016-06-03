@@ -44,7 +44,7 @@ namespace utils_test {
 
 using namespace file_system;
 
-TEST(FileSystemTest, DISABLED_CreateDeleteDirectory) {
+TEST(FileSystemTest, CreateDeleteDirectory) {
   ASSERT_FALSE(DirectoryExists("./Test directory"));
   // Directory creation
   CreateDirectory("./Test directory");
@@ -56,7 +56,7 @@ TEST(FileSystemTest, DISABLED_CreateDeleteDirectory) {
   EXPECT_FALSE(DirectoryExists("./Test directory"));
 }
 
-TEST(FileSystemTest, DISABLED_CreateDirectoryTwice) {
+TEST(FileSystemTest, CreateDirectoryTwice) {
   ASSERT_FALSE(DirectoryExists("./Test directory"));
   // Directory creation
   CreateDirectory("./Test directory");
@@ -74,7 +74,7 @@ TEST(FileSystemTest, DISABLED_CreateDirectoryTwice) {
   EXPECT_FALSE(DirectoryExists("./Test directory"));
 }
 
-TEST(FileSystemTest, DISABLED_DeleteDirectoryRecursively) {
+TEST(FileSystemTest, DeleteDirectoryRecursively) {
   ASSERT_FALSE(DirectoryExists("./Test directory"));
   // Create directories
   CreateDirectory("./Test directory");
@@ -90,7 +90,7 @@ TEST(FileSystemTest, DISABLED_DeleteDirectoryRecursively) {
   EXPECT_FALSE(DirectoryExists("./Test directory"));
 }
 
-TEST(FileSystemTest, DISABLED_CreateDirectoryRecursivelyDeleteRecursively) {
+TEST(FileSystemTest, CreateDirectoryRecursivelyDeleteRecursively) {
   ASSERT_FALSE(DirectoryExists("./Test directory"));
   // Create directories recursively
   CreateDirectoryRecursively(
@@ -111,8 +111,7 @@ TEST(FileSystemTest, DISABLED_CreateDirectoryRecursivelyDeleteRecursively) {
       DirectoryExists("./Test directory/Test directory 2/Test directory 3"));
 }
 
-TEST(FileSystemTest,
-     DISABLED_TwiceCreateDirectoryRecursivelyDeleteRecursivelyOnce) {
+TEST(FileSystemTest, TwiceCreateDirectoryRecursivelyDeleteRecursivelyOnce) {
   ASSERT_FALSE(DirectoryExists("./Test directory"));
   // Create directories recursively
   EXPECT_TRUE(CreateDirectoryRecursively(
@@ -960,7 +959,7 @@ TEST(FileSystemTest, GetFileModificationTime) {
   EXPECT_FALSE(FileExists("./test file"));
 }
 
-TEST(FileSystemTest, DISABLED_ListFiles) {
+TEST(FileSystemTest, ListFiles) {
   ASSERT_FALSE(DirectoryExists("./Test directory"));
   CreateDirectory("./Test directory");
 
@@ -985,7 +984,7 @@ TEST(FileSystemTest, DISABLED_ListFiles) {
   EXPECT_FALSE(FileExists("./Test directory/test file 2"));
 }
 
-TEST(FileSystemTest, DISABLED_ListFilesIncludeSubdirectory) {
+TEST(FileSystemTest, ListFilesIncludeSubdirectory) {
   ASSERT_FALSE(DirectoryExists("./Test directory"));
   CreateDirectoryRecursively("./Test directory/Test directory 2/");
 
@@ -999,7 +998,7 @@ TEST(FileSystemTest, DISABLED_ListFilesIncludeSubdirectory) {
   EXPECT_FALSE(DirectoryExists("./Test directory"));
 }
 
-TEST(FileSystemTest, DISABLED_ListFilesDoesNotIncludeFilesInSubdirectory) {
+TEST(FileSystemTest, ListFilesDoesNotIncludeFilesInSubdirectory) {
   ASSERT_FALSE(DirectoryExists("./Test directory"));
   CreateDirectoryRecursively("./Test directory/Test directory 2/");
 
@@ -1021,7 +1020,7 @@ TEST(FileSystemTest, DISABLED_ListFilesDoesNotIncludeFilesInSubdirectory) {
   EXPECT_FALSE(DirectoryExists("./Test directory"));
 }
 
-TEST(FileSystemTest, DISABLED_GetAvailableDiskSpace) {
+TEST(FileSystemTest, GetAvailableDiskSpace) {
   // Get available disk space before directory with file creaction and after
   uint64_t available_space = GetAvailableDiskSpace(".");
   EXPECT_NE(0u, available_space);
@@ -1037,16 +1036,14 @@ TEST(FileSystemTest, DISABLED_GetAvailableDiskSpace) {
   EXPECT_FALSE(DirectoryExists("./Test directory"));
 }
 
-TEST(FileSystemTest, DISABLED_ConvertPathForURL) {
+TEST(FileSystemTest, ConvertPathForURL) {
   std::string path = "./Test directory";
   EXPECT_NE(path, ConvertPathForURL(path));
   std::string path_brackets = "./Test_directory_with(brackets)";
   EXPECT_NE(path_brackets, ConvertPathForURL(path));
-  std::string another_path = "./Test_directory/new_directory_without_spaces";
-  EXPECT_EQ(another_path, ConvertPathForURL(another_path));
 }
 
-TEST(FileSystemTest, DISABLED_DirectorySize) {
+TEST(FileSystemTest, DirectorySize) {
   ASSERT_FALSE(DirectoryExists("./Test directory"));
   CreateDirectory("./Test directory");
   EXPECT_TRUE(DirectoryExists("./Test directory"));
@@ -1070,7 +1067,7 @@ TEST(FileSystemTest, DISABLED_DirectorySize) {
   EXPECT_FALSE(DirectoryExists("./Test directory"));
 }
 
-TEST(FileSystemTest, DISABLED_DeleteAllContentInDirectory) {
+TEST(FileSystemTest, DeleteAllContentInDirectory) {
   ASSERT_FALSE(DirectoryExists("./Test directory"));
   CreateDirectory("./Test directory");
 
