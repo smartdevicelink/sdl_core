@@ -230,8 +230,7 @@ TEST(ProtocolPayloadTest, ExtractCorrectProtocolWithDataWithJSON) {
 }
 
 // TODO(OHerasym) : heap corruption on Windows platform
-TEST(ProtocolPayloadTest,
-     DISABLED_ExtractProtocolWithJSONWithDataWithWrongPayloadSize) {
+TEST(ProtocolPayloadTest, ExtractProtocolWithJSONWithDataWithWrongPayloadSize) {
   ProtocolPayloadV2 prot_payload_test;
 
   prot_payload_test.header.correlation_id = 1;

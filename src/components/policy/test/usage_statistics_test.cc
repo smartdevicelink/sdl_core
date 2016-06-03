@@ -131,9 +131,8 @@ TEST(StatisticsManagerSetMethod,
   gui_language_info.Update("UA");
 }
 
-TEST(
-    StatisticsManagerAddMethod,
-    DISABLED_AppStopwatchStartMethod_CallONCE_StatisticsManagerAddMethodCalledONCE) {
+TEST(StatisticsManagerAddMethod,
+     AppStopwatchStartMethod_CallONCE_StatisticsManagerAddMethodCalledONCE) {
   // Arrange
   MockStatisticsManager* msm = new StrictMock<MockStatisticsManager>();
   const std::uint32_t time_out = 1;
@@ -147,7 +146,7 @@ TEST(
 }
 
 TEST(StatisticsManagerAddMethod,
-     DISABLED_AppStopwatchStartMethod_Call_StatisticsManagerAddMethodCALLED) {
+     AppStopwatchStartMethod_Call_StatisticsManagerAddMethodCALLED) {
   // Arrange
 
   MockStatisticsManager* msm = new StrictMock<MockStatisticsManager>();
@@ -163,7 +162,7 @@ TEST(StatisticsManagerAddMethod,
 }
 
 TEST(StatisticsManagerAddMethod,
-     DISABLED_AppStopwatchSwitchMethod_Call_StatisticsManagerAddMethodCALLED) {
+     AppStopwatchSwitchMethod_Call_StatisticsManagerAddMethodCALLED) {
   // Arrange
   MockStatisticsManager* msm = new StrictMock<MockStatisticsManager>();
   AppStopwatch hmi_full_stopwatch(msm, "HelloApp");
@@ -179,7 +178,7 @@ TEST(StatisticsManagerAddMethod,
 
 TEST(
     StatisticsManagerAddMethod,
-    DISABLED_AppStopwatchStartMethod_CallAnd1SecSleepAfter_StatisticsManagerAddMethodCalledWith1SecTimespan) {
+    AppStopwatchStartMethod_CallAnd1SecSleepAfter_StatisticsManagerAddMethodCalledWith1SecTimespan) {
   // Arrange
   MockStatisticsManager* msm = new StrictMock<MockStatisticsManager>();
   AppStopwatch hmi_full_stopwatch(msm, "HelloApp");
@@ -194,7 +193,7 @@ TEST(
 
 TEST(
     StatisticsManagerAddMethod,
-    DISABLED_AppStopwatchSwitchMethod_CallAnd1SecSleepAfter_StatisticsManagerAddMethodCalledWith1SecTimespan) {
+    AppStopwatchSwitchMethod_CallAnd1SecSleepAfter_StatisticsManagerAddMethodCalledWith1SecTimespan) {
   // Arrange
   MockStatisticsManager* msm = new StrictMock<MockStatisticsManager>();
   const std::uint32_t time_out = 1;

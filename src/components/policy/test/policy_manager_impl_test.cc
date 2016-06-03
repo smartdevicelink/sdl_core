@@ -464,8 +464,7 @@ TEST_F(PolicyManagerImplTest2, DISABLED_GetNotificationsNumberAfterPTUpdate) {
   EXPECT_EQ(6u, notif_number);
 }
 
-TEST_F(PolicyManagerImplTest2,
-       DISABLED_IsAppRevoked_SetRevokedAppID_ExpectAppRevoked) {
+TEST_F(PolicyManagerImplTest2, IsAppRevoked_SetRevokedAppID_ExpectAppRevoked) {
   // Arrange
   std::ifstream ifile("sdl_preloaded_pt.json");
   Json::Reader reader;
@@ -551,8 +550,7 @@ TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
   EXPECT_TRUE(manager->LoadPT("file_pt_update.json", msg));
 }
 
-TEST_F(PolicyManagerImplTest,
-       LoadPT_SetInvalidUpdatePT_PTIsNotLoaded) {
+TEST_F(PolicyManagerImplTest, LoadPT_SetInvalidUpdatePT_PTIsNotLoaded) {
   // Arrange
   utils::json::JsonValue table(utils::json::ValueType::OBJECT_VALUE);
 
@@ -578,7 +576,7 @@ TEST_F(PolicyManagerImplTest,
 }
 
 TEST_F(PolicyManagerImplTest2,
-       DISABLED_KmsChanged_SetExceededKms_ExpectCorrectSchedule) {
+       KmsChanged_SetExceededKms_ExpectCorrectSchedule) {
   // Arrange
   CreateLocalPT("sdl_preloaded_pt.json");
   ::policy::Counters counter = ::policy::Counters::KILOMETERS;
@@ -594,7 +592,7 @@ TEST_F(PolicyManagerImplTest2,
 
 TEST_F(
     PolicyManagerImplTest2,
-    DISABLED_AddApplication_AddNewApplicationFromDeviceWithoutConsent_ExpectUpdateRequired) {
+    AddApplication_AddNewApplicationFromDeviceWithoutConsent_ExpectUpdateRequired) {
   // Arrange
   CreateLocalPT("sdl_preloaded_pt.json");
   manager->AddApplication(app_id1);
@@ -604,7 +602,7 @@ TEST_F(
 // TODO(OHerasym) : AddApplication std exception
 TEST_F(
     PolicyManagerImplTest2,
-    DISABLED_AddApplication_AddExistingApplicationFromDeviceWithoutConsent_ExpectNoUpdateRequired) {
+    AddApplication_AddExistingApplicationFromDeviceWithoutConsent_ExpectNoUpdateRequired) {
   // Arrange
   CreateLocalPT("sdl_preloaded_pt.json");
   EXPECT_EQ("UP_TO_DATE", manager->GetPolicyTableStatus());
@@ -618,7 +616,7 @@ TEST_F(
 
 // TODO(OHerasym) : AddApplication std exception
 TEST_F(PolicyManagerImplTest2,
-       DISABLED_PTUpdatedAt_DaysNotExceedLimit_ExpectNoUpdateRequired) {
+       PTUpdatedAt_DaysNotExceedLimit_ExpectNoUpdateRequired) {
   // Arrange
   CreateLocalPT("sdl_preloaded_pt.json");
   TimevalStruct current_time = date_time::DateTime::getCurrentTime();
@@ -639,7 +637,7 @@ TEST_F(PolicyManagerImplTest2,
   EXPECT_EQ("UP_TO_DATE", manager->GetPolicyTableStatus());
 }
 
-TEST_F(PolicyManagerImplTest2, DISABLED_ForcePTExchange_ExpectUpdateNeeded) {
+TEST_F(PolicyManagerImplTest2, ForcePTExchange_ExpectUpdateNeeded) {
   // Arrange
   CreateLocalPT("sdl_preloaded_pt.json");
   EXPECT_EQ("UP_TO_DATE", manager->GetPolicyTableStatus());
@@ -649,7 +647,7 @@ TEST_F(PolicyManagerImplTest2, DISABLED_ForcePTExchange_ExpectUpdateNeeded) {
   EXPECT_EQ("UPDATE_NEEDED", manager->GetPolicyTableStatus());
 }
 
-TEST_F(PolicyManagerImplTest2, DISABLED_OnSystemReady) {
+TEST_F(PolicyManagerImplTest2, OnSystemReady) {
   // Arrange
   CreateLocalPT("sdl_preloaded_pt.json");
   // Check
@@ -657,7 +655,7 @@ TEST_F(PolicyManagerImplTest2, DISABLED_OnSystemReady) {
   manager->OnSystemReady();
 }
 
-TEST_F(PolicyManagerImplTest2, DISABLED_ResetRetrySequence) {
+TEST_F(PolicyManagerImplTest2, ResetRetrySequence) {
   // Arrange
   CreateLocalPT("sdl_preloaded_pt.json");
   manager->ResetRetrySequence();
@@ -666,7 +664,7 @@ TEST_F(PolicyManagerImplTest2, DISABLED_ResetRetrySequence) {
   EXPECT_EQ("UPDATING", manager->GetPolicyTableStatus());
 }
 
-TEST_F(PolicyManagerImplTest2, DISABLED_NextRetryTimeout_ExpectTimeoutsFromPT) {
+TEST_F(PolicyManagerImplTest2, NextRetryTimeout_ExpectTimeoutsFromPT) {
   // Arrange
   std::ifstream ifile("sdl_preloaded_pt.json");
   Json::Reader reader;
@@ -691,14 +689,14 @@ TEST_F(PolicyManagerImplTest2, DISABLED_NextRetryTimeout_ExpectTimeoutsFromPT) {
   }
 }
 
-TEST_F(PolicyManagerImplTest2, DISABLED_TimeOutExchange) {
+TEST_F(PolicyManagerImplTest2, TimeOutExchange) {
   // Arrange
   CreateLocalPT("sdl_preloaded_pt.json");
   // Check value taken from PT
   EXPECT_EQ(70, manager->TimeoutExchange());
 }
 
-TEST_F(PolicyManagerImplTest2, DISABLED_GetPolicyTableStatus_ExpectUpToDate) {
+TEST_F(PolicyManagerImplTest2, GetPolicyTableStatus_ExpectUpToDate) {
   // Arrange
   CreateLocalPT("sdl_preloaded_pt.json");
   // Check
@@ -706,7 +704,7 @@ TEST_F(PolicyManagerImplTest2, DISABLED_GetPolicyTableStatus_ExpectUpToDate) {
 }
 
 TEST_F(PolicyManagerImplTest2,
-       DISABLED_RetrySequenceDelaysSeconds_Expect_CorrectValues) {
+       RetrySequenceDelaysSeconds_Expect_CorrectValues) {
   // Arrange
   std::ifstream ifile("sdl_preloaded_pt.json");
   Json::Reader reader;
@@ -727,7 +725,7 @@ TEST_F(PolicyManagerImplTest2,
 }
 
 TEST_F(PolicyManagerImplTest2,
-       DISABLED_OnExceededTimeout_GetPolicyTableStatus_ExpectUpdateNeeded) {
+       OnExceededTimeout_GetPolicyTableStatus_ExpectUpdateNeeded) {
   // Arrange
   CreateLocalPT("sdl_preloaded_pt.json");
   manager->OnExceededTimeout();
@@ -736,8 +734,7 @@ TEST_F(PolicyManagerImplTest2,
 }
 
 // TODO(OHerasym) : AddApplication std exception
-TEST_F(PolicyManagerImplTest2,
-       DISABLED_GetInitialAppData_ExpectReceivedConsentCorrect) {
+TEST_F(PolicyManagerImplTest2, GetInitialAppData_ExpectReceivedConsentCorrect) {
   // Arrange
   CreateLocalPT("sdl_preloaded_pt.json");
   manager->AddApplication(app_id2);
@@ -778,9 +775,8 @@ TEST_F(PolicyManagerImplTest2,
 }
 
 // TODO(OHerasym) : AddApplication std exception
-TEST_F(
-    PolicyManagerImplTest2,
-    DISABLED_CanAppKeepContext_SetPoliciesForAppUpdated_ExpectAppCanKeepContext) {
+TEST_F(PolicyManagerImplTest2,
+       CanAppKeepContext_SetPoliciesForAppUpdated_ExpectAppCanKeepContext) {
   // Arrange
   CreateLocalPT("sdl_preloaded_pt.json");
   manager->AddApplication(app_id2);
@@ -790,9 +786,8 @@ TEST_F(
 }
 
 // TODO(OHerasym) : AddApplication std exception
-TEST_F(
-    PolicyManagerImplTest2,
-    DISABLED_CanAppStealFocus_SetPoliciesForAppUpdated_ExpectAppCanStealFocus) {
+TEST_F(PolicyManagerImplTest2,
+       CanAppStealFocus_SetPoliciesForAppUpdated_ExpectAppCanStealFocus) {
   // Arrange
   CreateLocalPT("sdl_preloaded_pt.json");
   manager->AddApplication(app_id2);
@@ -801,7 +796,7 @@ TEST_F(
   EXPECT_TRUE(manager->CanAppKeepContext(app_id2));
 }
 
-TEST_F(PolicyManagerImplTest2, DISABLED_GetCurrentDeviceId) {
+TEST_F(PolicyManagerImplTest2, GetCurrentDeviceId) {
   // Arrange
   EXPECT_CALL(listener, OnCurrentDeviceIdUpdateRequired(app_id2)).Times(2);
   EXPECT_EQ(custom_str::CustomString(""), manager->GetCurrentDeviceId(app_id2));
@@ -809,7 +804,7 @@ TEST_F(PolicyManagerImplTest2, DISABLED_GetCurrentDeviceId) {
 }
 
 TEST_F(PolicyManagerImplTest2,
-       DISABLED_GetVehicleInfo_SetVehicleInfo_ExpectReceivedInfoCorrect) {
+       GetVehicleInfo_SetVehicleInfo_ExpectReceivedInfoCorrect) {
   // Arrange
   CreateLocalPT("sdl_preloaded_pt.json");
   GetPTU("valid_sdl_pt_update.json");

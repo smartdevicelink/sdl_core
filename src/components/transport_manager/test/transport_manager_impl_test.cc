@@ -320,7 +320,7 @@ class TransportManagerImplTest : public ::testing::Test {
 
   utils::SharedPtr<MockTransportManagerListener> tm_listener_;
 
-  static const ApplicationHandle application_id_ = 1;
+  static ApplicationHandle application_id_;
 
   ConnectionUID connection_key_;
   RawMessagePtr test_message_;
@@ -332,8 +332,10 @@ class TransportManagerImplTest : public ::testing::Test {
   BaseErrorPtr error_;
 };
 
+ApplicationHandle TransportManagerImplTest::application_id_ = 1;
+
 // TODO(OHerasym) : last_state qt assert fails
-TEST_F(TransportManagerImplTest, DISABLED_SearchDevices_AdaptersNotAdded) {
+TEST_F(TransportManagerImplTest, SearchDevices_AdaptersNotAdded) {
   EXPECT_CALL(*mock_adapter_, SearchDevices())
       .WillOnce(
           Return(transport_manager::transport_adapter::TransportAdapter::OK));
@@ -341,12 +343,12 @@ TEST_F(TransportManagerImplTest, DISABLED_SearchDevices_AdaptersNotAdded) {
 }
 
 // TODO(OHerasym) : last_state qt assert fails
-TEST_F(TransportManagerImplTest, DISABLED_AddTransportAdapterSecondTime) {
+TEST_F(TransportManagerImplTest, AddTransportAdapterSecondTime) {
   EXPECT_EQ(E_ADAPTER_EXISTS, tm_.AddTransportAdapter(mock_adapter_));
 }
 
 // TODO(OHerasym) : last_state qt assert fails
-TEST_F(TransportManagerImplTest, DISABLED_ConnectDevice) {
+TEST_F(TransportManagerImplTest, ConnectDevice) {
   HandleDeviceListUpdated();
   EXPECT_CALL(*mock_adapter_, ConnectDevice(mac_address_))
       .WillOnce(Return(TransportAdapter::OK));
@@ -660,8 +662,7 @@ TEST_F(TransportManagerImplTest, UpdateDeviceList_RemoveDevice) {
  * Tests which check correct handling and receiving events
  */
 // TODO(OHerasym) : gmock assert fails on Windows platform
-TEST_F(TransportManagerImplTest,
-       DISABLED_ReceiveEventFromDevice_OnSearchDeviceDone) {
+TEST_F(TransportManagerImplTest, ReceiveEventFromDevice_OnSearchDeviceDone) {
   const int type = static_cast<int>(
       TransportAdapterListenerImpl::EventTypeEnum::ON_SEARCH_DONE);
 
@@ -679,8 +680,7 @@ TEST_F(TransportManagerImplTest,
 }
 
 // TODO(OHerasym) : gmock assert fails on Windows platform
-TEST_F(TransportManagerImplTest,
-       DISABLED_ReceiveEventFromDevice_OnSearchDeviceFail) {
+TEST_F(TransportManagerImplTest, ReceiveEventFromDevice_OnSearchDeviceFail) {
   const int type = static_cast<int>(
       TransportAdapterListenerImpl::EventTypeEnum::ON_SEARCH_FAIL);
 
@@ -698,8 +698,7 @@ TEST_F(TransportManagerImplTest,
 }
 
 // TODO(OHerasym) : gmock assert fails on Windows platform
-TEST_F(TransportManagerImplTest,
-       DISABLED_ReceiveEventFromDevice_DeviceListUpdated) {
+TEST_F(TransportManagerImplTest, ReceiveEventFromDevice_DeviceListUpdated) {
   const int type = static_cast<int>(
       TransportAdapterListenerImpl::EventTypeEnum::ON_DEVICE_LIST_UPDATED);
 
@@ -885,7 +884,7 @@ TEST_F(TransportManagerImplTest, Visibility_TMIsNotInitialized) {
 }
 
 // TODO(OHerasym) : gmock assert fails on Windows platform
-TEST_F(TransportManagerImplTest, DISABLED_HandleMessage_ConnectionNotExist) {
+TEST_F(TransportManagerImplTest, HandleMessage_ConnectionNotExist) {
   EXPECT_CALL(*mock_adapter_,
               SendData(mac_address_, application_id_, test_message_)).Times(0);
   EXPECT_CALL(*tm_listener_, OnTMMessageSendFailed(_, test_message_));
