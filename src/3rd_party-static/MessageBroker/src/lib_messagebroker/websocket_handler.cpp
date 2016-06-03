@@ -5,17 +5,17 @@
  */
 
 #include <cstdio>
-
+#include <cstdint>
 #include <cstring>
 #include <sstream>
-#include <netinet/in.h>
 
 #ifdef _WIN32
 #include <winsock2.h>
-#endif//_WIN32
+#else
+#include <netinet/in.h>
+#endif
 
 #include "websocket_handler.hpp"
-
 #include "libMBDebugHelper.h"
 #include "md5.h"
 
@@ -182,8 +182,8 @@ namespace NsMessageBroker
 
       if (b_size <= 125)
       {
-        payload = b_size;
-        Buffer[1] = b_size;      // string length
+        payload = static_cast<unsigned char>(b_size);
+        Buffer[1] = static_cast<unsigned char>(b_size);      // string length
       } else if (b_size >= 126 && b_size <= 65535)
       {
         headerLength += 2;
@@ -199,8 +199,8 @@ namespace NsMessageBroker
 
       if (payload == 126)
       {
-         Buffer[2] = (b_size>>8);
-         Buffer[3] = b_size;
+         Buffer[2] = static_cast<unsigned char>(b_size>>8);
+         Buffer[3] = static_cast<unsigned char>(b_size);
       } else if (payload == 127)
       {
          Buffer[9] = (b_size       & 0xFF);
@@ -348,14 +348,14 @@ namespace NsMessageBroker
       if (padlen < 8)
       {
          memset(&ctxt->m.b8[padstart], 0, padlen);
-         COUNT += padlen;
+         COUNT += static_cast<unsigned char>(padlen);
          COUNT %= 64;
          sha1_step(ctxt);
          padstart = COUNT % 64;   /* should be 0 */
          padlen = 64 - padstart;   /* should be 64 */
       }
       memset(&ctxt->m.b8[padstart], 0, padlen - 8);
-      COUNT += (padlen - 8);
+      COUNT += static_cast<unsigned char>(padlen - 8);
       COUNT %= 64;
 
       PUTPAD(ctxt->c.b8[7]); PUTPAD(ctxt->c.b8[6]);
@@ -380,7 +380,7 @@ namespace NsMessageBroker
 
          copysiz = (gaplen < len - off) ? gaplen : len - off;
          memcpy(&ctxt->m.b8[gapstart], &input[off], copysiz);
-         COUNT += copysiz;
+         COUNT += static_cast<unsigned char>(copysiz);
          COUNT %= 64;
          ctxt->c.b64[0] += copysiz * 8;
          if (COUNT % 64 == 0)
@@ -555,7 +555,7 @@ namespace NsMessageBroker
 
          buf[sizeof(buf) - 1] = '\0';
          n = lws_b64_encode_string(plaintext[test],
-                     strlen(plaintext[test]), buf, sizeof buf);
+                     static_cast<int>(strlen(plaintext[test])), buf, sizeof buf);
          if (n != (int)strlen(coded[test]) || strcmp(buf, coded[test]))
          {
             fprintf(stderr, "Failed lws_b64 encode selftest "
@@ -643,7 +643,7 @@ namespace NsMessageBroker
             if (numberKey % spacesCountKey == 0)
             {
                // divide the number by the count
-               result = numberKey / spacesCountKey;
+               result = static_cast<unsigned long>(numberKey / spacesCountKey);
             }
             else
             {

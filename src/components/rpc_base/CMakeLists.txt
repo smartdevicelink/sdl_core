@@ -32,7 +32,8 @@
 set(RPC_BASE_INCLUDE_DIR ${COMPONENTS_DIR}/rpc_base/include)
 
 include_directories(
-  ${RPC_BASE_INCLUDE_DIR}
+  include
+  ${COMPONENTS_DIR}/utils/include/
   ${JSONCPP_INCLUDE_DIRECTORY}
 )
 

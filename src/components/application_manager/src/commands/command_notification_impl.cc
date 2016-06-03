@@ -60,7 +60,7 @@ void CommandNotificationImpl::SendNotification() {
   (*message_)[strings::params][strings::message_type] =
       static_cast<int32_t>(application_manager::MessageType::kNotification);
 
-  LOG4CXX_INFO(logger_, "SendNotification");
+  LOGGER_INFO(logger_, "SendNotification");
   MessageHelper::PrintSmartObject(*message_);
 
   application_manager_.SendMessageToMobile(message_);

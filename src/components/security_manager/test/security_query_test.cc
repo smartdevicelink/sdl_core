@@ -134,6 +134,7 @@ TEST_F(SecurityQueryTest, QueryHeaderCopyConstructor) {
 /*
  * Security QueryHeader shall construct with NULL fields
  */
+// TODO(OHerasym) : out of range exception on Windows platform
 TEST_F(SecurityQueryTest, QueryConstructor) {
   const SecurityQuery query;
 
@@ -151,6 +152,7 @@ TEST_F(SecurityQueryTest, QueryConstructor) {
 /*
  * Security QueryHeader shall construct with specified fields
  */
+// TODO(OHerasym) : out of range exception on Windows platform
 TEST_F(SecurityQueryTest, QueryConstructor2) {
   const SecurityQuery query(init_header, CONNECTION_KEY);
 
@@ -217,6 +219,7 @@ TEST_F(SecurityQueryTest, Setters) {
 /*
  * SecurityQuery serializes NULL data
  */
+// TODO(OHerasym) : out of range exception on Windows platform
 TEST_F(SecurityQueryTest, Parse_NullData) {
   SecurityQuery query;
   const bool result = query.SerializeQuery(NULL, 0u);

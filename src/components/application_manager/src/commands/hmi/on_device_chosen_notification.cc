@@ -43,7 +43,7 @@ OnDeviceChosenNotification::OnDeviceChosenNotification(
 OnDeviceChosenNotification::~OnDeviceChosenNotification() {}
 
 void OnDeviceChosenNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   if ((*message_)[strings::msg_params].keyExists(strings::device_info)) {
     application_manager_.ConnectToDevice(

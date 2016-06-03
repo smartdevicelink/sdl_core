@@ -43,7 +43,7 @@ VIReadDIDResponse::VIReadDIDResponse(const MessageSharedPtr& message,
 VIReadDIDResponse::~VIReadDIDResponse() {}
 
 void VIReadDIDResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   event_engine::Event event(hmi_apis::FunctionID::VehicleInfo_ReadDID);
   event.set_smart_object(*message_);

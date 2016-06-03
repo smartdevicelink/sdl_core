@@ -273,6 +273,7 @@
 #include "application_manager/commands/hmi/dial_number_response.h"
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
+
 namespace application_manager {
 
 CommandSharedPtr HMICommandFactory::CreateCommand(
@@ -280,8 +281,8 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     ApplicationManager& application_manager) {
   const int function_id =
       (*message)[strings::params][strings::function_id].asInt();
-  LOG4CXX_DEBUG(
-      logger_, "HMICommandFactory::CreateCommand function_id: " << function_id);
+  LOGGER_DEBUG(logger_,
+               "HMICommandFactory::CreateCommand function_id: " << function_id);
 
   CommandSharedPtr command(new application_manager::commands::CommandImpl(
       message, application_manager));
@@ -292,14 +293,14 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
   if (msg_type ==
       static_cast<int>(application_manager::MessageType::kResponse)) {
     is_response = true;
-    LOG4CXX_DEBUG(logger_, "HMICommandFactory::CreateCommand response");
+    LOGGER_DEBUG(logger_, "HMICommandFactory::CreateCommand response");
   } else if ((*message)[strings::params][strings::message_type] ==
              static_cast<int>(
                  application_manager::MessageType::kErrorResponse)) {
     is_response = true;
-    LOG4CXX_DEBUG(logger_, "HMICommandFactory::CreateCommand error response");
+    LOGGER_DEBUG(logger_, "HMICommandFactory::CreateCommand error response");
   } else {
-    LOG4CXX_DEBUG(logger_, "HMICommandFactory::CreateCommand request");
+    LOGGER_DEBUG(logger_, "HMICommandFactory::CreateCommand request");
   }
 
   switch (function_id) {
@@ -2236,6 +2237,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
   }
+
   return command;
 }
 

@@ -102,7 +102,7 @@ const std::string SQLQueryTest::kDatabaseName = "test-query";
 TEST_F(SQLQueryTest, Query_CreateQuery_QueryInDBEqualCreated) {
   // arrange
   const std::string kSelect("SELECT * FROM testTable WHERE integerValue = ?");
-  SQLDatabase db(kDatabaseName);
+  SQLDatabase db(kDatabaseName, "test");
 
   // assert
   ASSERT_TRUE(db.Open());
@@ -121,7 +121,7 @@ TEST_F(SQLQueryTest, ExecString_ExecuteQuery_ActWithoutError) {
       "INSERT INTO testTable"
       " (integerValue, doubleValue, stringValue)"
       " VALUES(2, 3.4, 'five-пять')");
-  SQLDatabase db(kDatabaseName);
+  SQLDatabase db(kDatabaseName, "test");
   // assert
   ASSERT_TRUE(db.Open());
 
@@ -146,7 +146,7 @@ TEST_F(SQLQueryTest,
   const double kDoubleValue = 2.3;
   const std::string kStringValue = "four";
 
-  SQLDatabase db(kDatabaseName);
+  SQLDatabase db(kDatabaseName, "test");
 
   // assert
   ASSERT_TRUE(db.Open());
@@ -217,7 +217,7 @@ TEST_F(SQLQueryTest, SetValue_InsertValues_ExpectDBHasInsertedValues) {
   const double kDoubleValue = 2.3;
   const std::string kStringValue = "four";
 
-  SQLDatabase db(kDatabaseName);
+  SQLDatabase db(kDatabaseName, "test");
 
   // assert
   ASSERT_TRUE(db.Open());
@@ -242,7 +242,7 @@ TEST_F(SQLQueryTest, EmptySelect_SelectValuesEqual0_ExecWithoutErrors) {
   const std::string kSelect(
       "SELECT integerValue, doubleValue, stringValue"
       " FROM testTable WHERE 0");
-  SQLDatabase db(kDatabaseName);
+  SQLDatabase db(kDatabaseName, "test");
 
   // assert
   ASSERT_TRUE(db.Open());
@@ -278,7 +278,7 @@ TEST_F(
   const double kDoubleValue = 2.3;
   const std::string kStringValue = "four";
 
-  SQLDatabase db(kDatabaseName);
+  SQLDatabase db(kDatabaseName, "test");
   ASSERT_TRUE(db.Open());
 
   SQLQuery query(&db);
@@ -314,7 +314,7 @@ TEST_F(SQLQueryTest, LastInsertId_InsertValuesAndBindQuery_GetExpectedId) {
   const std::string kInsert("INSERT INTO idTable (value) VALUES(?)");
 
   // act
-  SQLDatabase db(kDatabaseName);
+  SQLDatabase db(kDatabaseName, "test");
 
   // assert
   ASSERT_TRUE(db.Open());
@@ -343,7 +343,7 @@ TEST_F(SQLQueryTest, BindNull_BindWithoutValue_ActWithoutErrors) {
   const std::string kInsert(
       "INSERT INTO testTable (`integerValue`)"
       " VALUES (?)");
-  SQLDatabase db(kDatabaseName);
+  SQLDatabase db(kDatabaseName, "test");
   // assert
   ASSERT_TRUE(db.Open());
 
@@ -362,7 +362,7 @@ TEST_F(SQLQueryTest, BindNull_BindWithoutValue_ActWithoutErrors) {
 
 TEST_F(SQLQueryTest, DoublePrepare_TwicePrepareQuery_ActWithoutErrors) {
   // arrange
-  SQLDatabase db(kDatabaseName);
+  SQLDatabase db(kDatabaseName, "test");
   // assert
   ASSERT_TRUE(db.Open());
   // act

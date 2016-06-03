@@ -42,7 +42,7 @@ UpdateDeviceListResponse::UpdateDeviceListResponse(
 UpdateDeviceListResponse::~UpdateDeviceListResponse() {}
 
 void UpdateDeviceListResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   // TODO(PV): add check for correctness.
 }

@@ -37,6 +37,7 @@
 #include "interfaces/MOBILE_API.h"
 #include "json/json.h"
 #include "utils/macro.h"
+#include "utils/json_utils.h"
 #include "application_manager/hmi_language_handler.h"
 
 namespace NsSmartDeviceLink {
@@ -437,16 +438,6 @@ class HMICapabilities {
    */
   bool check_existing_json_member(const Json::Value& json_member,
                                   const char* name_of_member);
-
-  /*
-   * @brief function converts json object "languages" to smart object
-   *
-   * @param json_languages from file hmi_capabilities.json
-   * @param languages - the converted object
-   *
-   */
-  void convert_json_languages_to_obj(Json::Value& json_languages,
-                                     smart_objects::SmartObject& languages);
 
  private:
   bool is_vr_cooperating_;

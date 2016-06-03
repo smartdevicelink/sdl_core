@@ -1,4 +1,5 @@
 /*
+
  Copyright (c) 2015, Ford Motor Company
  All rights reserved.
 
@@ -125,6 +126,8 @@ class SetGlobalPropertiesRequest : public CommandRequestImpl {
    */
   bool IsWhiteSpaceExist();
 
+  DISALLOW_COPY_AND_ASSIGN(SetGlobalPropertiesRequest);
+
   bool is_ui_send_;
   bool is_tts_send_;
 
@@ -133,8 +136,6 @@ class SetGlobalPropertiesRequest : public CommandRequestImpl {
 
   hmi_apis::Common_Result::eType ui_result_;
   hmi_apis::Common_Result::eType tts_result_;
-
-  DISALLOW_COPY_AND_ASSIGN(SetGlobalPropertiesRequest);
 };
 
 }  // namespace commands

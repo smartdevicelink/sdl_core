@@ -60,7 +60,6 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
                 public application_manager::ApplicationManagerSettings {
  public:
   // Methods section
-
   /**
    * Default constructor
    *
@@ -601,8 +600,8 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
 
  private:
   /**
-   * @brief Reads a string value from the profile and interpret it
-   * as \c true on "true" value or as \c false on any other value
+ * @brief Reads a string value from the profile and interpret it
+ * as \c true on "true" value or as \c false on any other value
    *
    * @param value      The value to return
    * @param pSection   The section to read the value in
@@ -616,7 +615,7 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
                  const char* const pKey) const;
 
   /**
-   * @brief Reads a boolean value from the profile
+ * @brief Reads a boolean value from the profile
    *
    * @param value      The value to return
    * @param pSection   The section to read the value in
@@ -670,19 +669,6 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
                      uint64_t default_value,
                      const char* const pSection,
                      const char* const pKey) const;
-
-  /**
-   * @brief Checks, if path is relative
-   * @param path Path
-   * @return true, if is relative, otherwise - false
-   */
-  bool IsRelativePath(const std::string& path);
-
-  /**
-   * @brief Makes relative path absolute
-   * @param path Path
-   */
-  void MakeAbsolutePath(std::string& path);
 
   /**
    * @brief Converts input string to number

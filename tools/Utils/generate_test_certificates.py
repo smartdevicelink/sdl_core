@@ -6,6 +6,7 @@
     generate_test_certificate.py --dir=<name of directory>
 """
 
+import sys
 import os
 import subprocess
 import tempfile
@@ -54,6 +55,12 @@ def gen_cert(out_cert_file, key_file, ca_cert_file, ca_key_file, days, answer):
     openssl("x509 -hash -req -in", request_file, "-CA", ca_cert_file, "-CAkey", ca_key_file, \
         "-CAcreateserial -out", out_cert_file, "-days", days)
 
+def convertPath(path):
+    sep = os.path.sep
+    if sep != '/':
+        path = path.replace(os.path.sep, '/')
+    return path
+
 def gen_expire_cert(out_cert_file, key_file, ca_cert_file, ca_key_file, days, answer):
     """Expired certificate generator
     wrap console call
@@ -67,8 +74,11 @@ def gen_expire_cert(out_cert_file, key_file, ca_cert_file, ca_key_file, days, an
     # Create temporary files needed for expired certificate generation
     temp_dir = tempfile.mkdtemp()
     config_file_path = os.path.join(temp_dir, "database.conf")
+    print config_file_path
     database_file_path = os.path.join(temp_dir, "database")
+    print database_file_path
     serial_file_path = os.path.join(temp_dir, "serial")
+    print serial_file_path
     # create file
     open(database_file_path, 'w').close()
 
@@ -78,19 +88,20 @@ def gen_expire_cert(out_cert_file, key_file, ca_cert_file, ca_key_file, days, an
 
     current_dir = os.getcwd()
     config_file = open(config_file_path, 'w')
+
     config_file.write(
         """[ ca ]
         default_ca = ca_default
 
         [ ca_default ]
-        dir = %s""" % (temp_dir, ) + """ 
-        certs = %s""" % (current_dir, ) + """
-        new_certs_dir =  %s""" % (current_dir, ) + """
-        database = %s""" % (database_file_path, ) + """
-        serial = %s""" % (serial_file_path, ) + """
-        RANDFILE = $dir/ca.db.rand
-        certificate =  %s""" % (os.path.abspath(ca_cert_file), ) + """
-        private_key =  %s""" % (os.path.abspath(ca_key_file), ) + """
+        dir = %s""" % (convertPath(temp_dir), ) + """
+        certs = %s""" % (convertPath(current_dir), ) + """
+        new_certs_dir =  %s""" % (convertPath(current_dir), ) + """
+        database = %s""" % (convertPath(database_file_path), ) + """
+        serial = %s""" % (convertPath(serial_file_path), ) + """
+        RANDFILE = .rnd
+        certificate =  %s""" % (convertPath(os.path.abspath(ca_cert_file)), ) + """
+        private_key =  %s""" % (convertPath(os.path.abspath(ca_key_file)), ) + """
         default_days = 365
         default_crl_days = 30
         default_md = md5
@@ -115,7 +126,7 @@ def gen_pkcs12(out, key_file, cert_file, verification_certificate) :
     'openssl pkcs12 -export -out $out -inkey $key_file -in $cert_file -name 'SPT key and certificates' -certfile $certs'
     """
     openssl("pkcs12 -export -out", out, "-inkey", key_file, "-in", cert_file, \
-       "-name 'SPT key and certificates'", "-CAfile ", verification_certificate, \
+       "-name \"SPT key and certificates\"", "-CAfile ", verification_certificate, \
        " -passout pass:")
 
     """
@@ -132,10 +143,11 @@ def answers(name, app_id, country, state, locality, organization, unit, email) :
     """
     if len(country) != 2 :
         raise ValueError("Country argument need to be 2 symbol size")
-    answer ="'/C={0}/ST={1}/L={2}/O={3}".format(country, state, locality, organization)
-    answer +="/OU={0}/CN={1}/emailAddress={2}'".format(unit, name, email)
+    answer ="\"/C={0}/ST={1}/L={2}/O={3}".format(country, state, locality, organization)
+    answer +="/OU={0}/CN={1}/emailAddress={2}\"".format(unit, name, email)
     if len(app_id) > 0:
-        answer += "/serialNumber={0}".format(app_id)
+        answer = answer[:-1]
+        answer += "/serialNumber={0}\"".format(app_id)
     return answer
 
 def concat_files(out_file_name, *args) :
@@ -147,6 +159,8 @@ def concat_files(out_file_name, *args) :
 
 
 def main():
+    if sys.platform == "win32":
+        os.environ["RANDFILE"] = ".rnd"
     soft_verify_file  = os.path.join("server", "server_root.key")
     arg_parser = ArgumentParser(description='Welcome to SDL test certificate generator.')
     arg_parser.add_argument('-d', '--dir', help="directory for certificate generating")
@@ -270,8 +284,9 @@ def main():
     gen_expire_cert(client_expired_cert_file, client_key_file, ford_client_cert_file, ford_client_key_file, days, client_expired_answer)
     gen_pkcs12(client_pkcs12_expired_file, client_key_file, client_expired_cert_file, server_verification_ca_cert_file)
 
-    subprocess.call(["c_rehash", server_dir])
-    subprocess.call(["c_rehash", client_dir])
+    if sys.platform != "win32":
+        subprocess.call(["c_rehash", server_dir])
+        subprocess.call(["c_rehash", client_dir])
     print
     print "All certificates have been generated"
 

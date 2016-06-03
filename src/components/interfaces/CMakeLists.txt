@@ -78,4 +78,8 @@ IF (${HMI_DBUS_API})
   add_library(HMI_API "${CMAKE_CURRENT_BINARY_DIR}/HMI_API_schema.cc")
 ENDIF (${HMI_DBUS_API})
 
+if (MSVC)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
+endif()
+
 add_dependencies(HMI_API Utils)

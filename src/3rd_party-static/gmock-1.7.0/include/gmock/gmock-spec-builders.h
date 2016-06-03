@@ -62,6 +62,8 @@
 
 #if defined(OS_POSIX)
 #include <sys/time.h>
+#elif defined(OS_WINDOWS)
+#include "winhdr.h"
 #endif
 
 #include <map>

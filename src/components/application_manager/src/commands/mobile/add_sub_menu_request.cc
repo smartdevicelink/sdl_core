@@ -47,12 +47,12 @@ AddSubMenuRequest::AddSubMenuRequest(const MessageSharedPtr& message,
 AddSubMenuRequest::~AddSubMenuRequest() {}
 
 void AddSubMenuRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
-    LOG4CXX_ERROR(logger_, "NULL pointer");
+    LOGGER_ERROR(logger_, "NULL pointer");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -60,7 +60,7 @@ void AddSubMenuRequest::Run() {
   const int32_t menu_id =
       (*message_)[strings::msg_params][strings::menu_id].asInt();
   if (app->FindSubMenu(menu_id)) {
-    LOG4CXX_ERROR(logger_, "Menu with id " << menu_id << " is not found.");
+    LOGGER_ERROR(logger_, "Menu with id " << menu_id << " is not found.");
     SendResponse(false, mobile_apis::Result::INVALID_ID);
     return;
   }
@@ -69,13 +69,13 @@ void AddSubMenuRequest::Run() {
       (*message_)[strings::msg_params][strings::menu_name].asString();
 
   if (app->IsSubMenuNameAlreadyExist(menu_name)) {
-    LOG4CXX_ERROR(logger_, "Menu name " << menu_name << " is duplicated.");
+    LOGGER_ERROR(logger_, "Menu name " << menu_name << " is duplicated.");
     SendResponse(false, mobile_apis::Result::DUPLICATE_NAME);
     return;
   }
 
   if (!CheckSubMenuName()) {
-    LOG4CXX_ERROR(logger_, "Sub-menu name is not valid.");
+    LOGGER_ERROR(logger_, "Sub-menu name is not valid.");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
@@ -97,7 +97,7 @@ void AddSubMenuRequest::Run() {
 }
 
 void AddSubMenuRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   using namespace helpers;
   const smart_objects::SmartObject& message = event.smart_object();
 
@@ -116,7 +116,7 @@ void AddSubMenuRequest::on_event(const event_engine::Event& event) {
           application_manager_.application(connection_key());
 
       if (!application) {
-        LOG4CXX_ERROR(logger_, "NULL pointer");
+        LOGGER_ERROR(logger_, "NULL pointer");
         return;
       }
 
@@ -132,19 +132,19 @@ void AddSubMenuRequest::on_event(const event_engine::Event& event) {
       break;
     }
     default: {
-      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+      LOGGER_ERROR(logger_, "Received unknown event" << event.id());
       return;
     }
   }
 }
 
 bool AddSubMenuRequest::CheckSubMenuName() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   const char* str = NULL;
 
   str = (*message_)[strings::msg_params][strings::menu_name].asCharArray();
   if (!CheckSyntax(str)) {
-    LOG4CXX_INFO(logger_, "Invalid subMenu name.");
+    LOGGER_INFO(logger_, "Invalid subMenu name.");
     return false;
   }
   return true;

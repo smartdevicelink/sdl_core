@@ -50,7 +50,7 @@ OnDriverDistractionNotification::OnDriverDistractionNotification(
 OnDriverDistractionNotification::~OnDriverDistractionNotification() {}
 
 void OnDriverDistractionNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   const hmi_apis::Common_DriverDistractionState::eType state =
       static_cast<hmi_apis::Common_DriverDistractionState::eType>(
@@ -61,7 +61,7 @@ void OnDriverDistractionNotification::Run() {
       new smart_objects::SmartObject();
 
   if (!on_driver_distraction) {
-    LOG4CXX_ERROR(logger_, "NULL pointer");
+    LOGGER_ERROR(logger_, "NULL pointer");
     return;
   }
 

@@ -30,6 +30,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#if defined(OS_WINDOWS)
+#include "utils/winhdr.h"
+#endif
+
 #include "transport_manager/tcp/tcp_connection_factory.h"
 #include "transport_manager/tcp/tcp_socket_connection.h"
 
@@ -50,19 +54,19 @@ TransportAdapter::Error TcpConnectionFactory::Init() {
 
 TransportAdapter::Error TcpConnectionFactory::CreateConnection(
     const DeviceUID& device_uid, const ApplicationHandle& app_handle) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_,
-                "DeviceUID: " << &device_uid
-                              << ", ApplicationHandle: " << &app_handle);
+  LOGGER_AUTO_TRACE(logger_);
+  LOGGER_DEBUG(logger_,
+               "DeviceUID: " << &device_uid
+                             << ", ApplicationHandle: " << &app_handle);
   TcpServerOiginatedSocketConnection* connection(
       new TcpServerOiginatedSocketConnection(
           device_uid, app_handle, controller_));
   controller_->ConnectionCreated(connection, device_uid, app_handle);
   if (connection->Start() == TransportAdapter::OK) {
-    LOG4CXX_DEBUG(logger_, "TCP connection initialised");
+    LOGGER_DEBUG(logger_, "TCP connection initialised");
     return TransportAdapter::OK;
   } else {
-    LOG4CXX_ERROR(logger_, "Could not initialise TCP connection");
+    LOGGER_ERROR(logger_, "Could not initialise TCP connection");
     return TransportAdapter::FAIL;
   }
 }

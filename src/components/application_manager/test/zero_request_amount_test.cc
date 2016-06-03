@@ -33,7 +33,6 @@
 #include <string>
 #include <algorithm>
 #include "gtest/gtest.h"
-
 #include "application_manager/request_controller.h"
 #include "application_manager/commands/command_request_impl.h"
 #include "application_manager/application_manager_impl.h"

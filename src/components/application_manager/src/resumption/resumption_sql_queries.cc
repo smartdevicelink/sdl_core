@@ -944,7 +944,7 @@ const std::string kSelectTTSChunk =
     "WHERE `idTTSChunk` = ?;";
 
 const std::string kSelectAppTable =
-    "SELECT `appID`, `connection_key`, `grammarID`, `hashID`, `hmiAppID`, "
+    "SELECT `appID`,  `connection_key`, `grammarID`, `hashID`,   `hmiAppID`, "
     "`hmiLevel`, `ign_off_count`, "
     "`timeStamp`, `deviceID`, `isMediaApplication`, `isSubscribedForWayPoints` "
     "FROM `application` "
@@ -963,7 +963,6 @@ const std::string kSelectDBVersion =
 
 const std::string kUpdateDBVersion =
     "UPDATE `_internal_data` SET `db_version_hash` = ? ; ";
-
 const std::string kUpdateGrammarID =
     "UPDATE `application` "
     "SET `grammarID` = ? "

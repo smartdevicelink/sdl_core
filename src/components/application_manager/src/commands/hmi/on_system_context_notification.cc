@@ -31,7 +31,6 @@
  */
 
 #include "application_manager/commands/hmi/on_system_context_notification.h"
-
 #include "application_manager/application_impl.h"
 #include "application_manager/state_controller.h"
 #include "application_manager/message_helper.h"
@@ -46,7 +45,7 @@ OnSystemContextNotification::OnSystemContextNotification(
 OnSystemContextNotification::~OnSystemContextNotification() {}
 
 void OnSystemContextNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   mobile_api::SystemContext::eType system_context =
       static_cast<mobile_api::SystemContext::eType>(
@@ -70,7 +69,7 @@ void OnSystemContextNotification::Run() {
     application_manager_.state_controller().SetRegularState(app,
                                                             system_context);
   } else {
-    LOG4CXX_ERROR(logger_, "Application does not exist");
+    LOGGER_ERROR(logger_, "Application does not exist");
   }
 }
 

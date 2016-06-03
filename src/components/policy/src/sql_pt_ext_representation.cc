@@ -72,7 +72,7 @@ bool SQLPTExtRepresentation::ResetUserConsent() {
 bool SQLPTExtRepresentation::ResetDeviceConsents() {
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt_ext::kResetDeviceConsents)) {
-    LOG4CXX_WARN(logger_, "Incorrect delete statement from device_consents.");
+    LOGGER_WARN(logger_, "Incorrect delete statement from device_consents.");
     return false;
   }
   return query.Exec();
@@ -86,10 +86,10 @@ bool SQLPTExtRepresentation::GetUserPermissionsForDevice(
     const std::string& device_id,
     StringArray* consented_groups,
     StringArray* disallowed_groups) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt_ext::kSelectDeviceConsentedGroup)) {
-    LOG4CXX_WARN(logger_, "Incorrect select from device consented groups");
+    LOGGER_WARN(logger_, "Incorrect select from device consented groups");
     return false;
   }
   query.Bind(0, device_id);
@@ -114,9 +114,9 @@ bool SQLPTExtRepresentation::GetPermissionsForApp(
     const std::string& device_id,
     const std::string& policy_app_id,
     FunctionalIdType* group_types) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   if (!group_types) {
-    LOG4CXX_WARN(logger_, "Input parameter for group types is null.");
+    LOGGER_WARN(logger_, "Input parameter for group types is null.");
     return false;
   }
   // Get all app groups for specified device and application
@@ -167,7 +167,7 @@ bool SQLPTExtRepresentation::GetPermissionsForApp(
 
 bool SQLPTExtRepresentation::GetDeviceGroupsFromPolicies(
     policy_table::Strings* groups, policy_table::Strings* preconsented_groups) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   if (groups) {
     GatherAppGroup(kDeviceId, groups);
   }
@@ -185,17 +185,17 @@ bool SQLPTExtRepresentation::SetDeviceData(const std::string& device_id,
                                            const std::string& carrier,
                                            const uint32_t number_of_ports,
                                            const std::string& connection_type) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   utils::dbms::SQLQuery count_query(db());
   if (!count_query.Prepare(sql_pt_ext::kCountDevice)) {
-    LOG4CXX_WARN(logger_, "Incorrect statement for count of device.");
+    LOGGER_WARN(logger_, "Incorrect statement for count of device.");
     return false;
   }
 
   count_query.Bind(0, device_id);
 
   if (!count_query.Exec()) {
-    LOG4CXX_WARN(logger_, "Incorrect count of device.");
+    LOGGER_WARN(logger_, "Incorrect count of device.");
     return false;
   }
 
@@ -205,7 +205,7 @@ bool SQLPTExtRepresentation::SetDeviceData(const std::string& device_id,
   if (update) {
     utils::dbms::SQLQuery update_query(db());
     if (!update_query.Prepare(sql_pt_ext::kUpdateDevice)) {
-      LOG4CXX_WARN(logger_, "Incorrect statement for udpate device.");
+      LOGGER_WARN(logger_, "Incorrect statement for udpate device.");
       return false;
     }
 
@@ -219,7 +219,7 @@ bool SQLPTExtRepresentation::SetDeviceData(const std::string& device_id,
     update_query.Bind(7, connection_type);
 
     if (!update_query.Exec() || !update_query.Reset()) {
-      LOG4CXX_WARN(logger_, "Incorrect update for device.");
+      LOGGER_WARN(logger_, "Incorrect update for device.");
       return false;
     }
 
@@ -229,7 +229,7 @@ bool SQLPTExtRepresentation::SetDeviceData(const std::string& device_id,
   // Insert new data
   utils::dbms::SQLQuery insert_query(db());
   if (!insert_query.Prepare(sql_pt_ext::kInsertDevice)) {
-    LOG4CXX_WARN(logger_, "Incorrect insert statement for device.");
+    LOGGER_WARN(logger_, "Incorrect insert statement for device.");
     return false;
   }
 
@@ -243,7 +243,7 @@ bool SQLPTExtRepresentation::SetDeviceData(const std::string& device_id,
   insert_query.Bind(7, connection_type);
 
   if (!insert_query.Exec() || !insert_query.Reset()) {
-    LOG4CXX_WARN(logger_, "Incorrect insert to device.");
+    LOGGER_WARN(logger_, "Incorrect insert to device.");
     return false;
   }
 
@@ -256,17 +256,17 @@ bool SQLPTExtRepresentation::SetUserPermissionsForDevice(
     const std::string& device_id,
     const StringArray& consented_groups,
     const StringArray& disallowed_groups) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   utils::dbms::SQLQuery count_query(db());
   if (!count_query.Prepare(sql_pt_ext::kCountDeviceConsentGroup)) {
-    LOG4CXX_WARN(logger_, "Incorrect count of device consented groups");
+    LOGGER_WARN(logger_, "Incorrect count of device consented groups");
     return false;
   }
 
   count_query.Bind(0, device_id);
 
   if (!count_query.Exec()) {
-    LOG4CXX_WARN(logger_, "Failed count of device consented groups");
+    LOGGER_WARN(logger_, "Failed count of device consented groups");
     return false;
   }
 
@@ -277,7 +277,7 @@ bool SQLPTExtRepresentation::SetUserPermissionsForDevice(
   // Update old values
   if (update) {
     if (!query.Prepare(sql_pt_ext::kUpdateDeviceConsentedGroup)) {
-      LOG4CXX_WARN(
+      LOGGER_WARN(
           logger_,
           "Incorrect statement for updating consented groups on device");
       return false;
@@ -294,8 +294,8 @@ bool SQLPTExtRepresentation::SetUserPermissionsForDevice(
       query.Bind(3, *it_consented_groups);
       // TODO(AOleynik): Get this info from external data
       if (!query.Exec() || !query.Reset()) {
-        LOG4CXX_WARN(logger_,
-                     "Failed update of device allowed consented groups.");
+        LOGGER_WARN(logger_,
+                    "Failed update of device allowed consented groups.");
         return false;
       }
     }
@@ -311,8 +311,8 @@ bool SQLPTExtRepresentation::SetUserPermissionsForDevice(
       query.Bind(2, device_id);
       query.Bind(3, *it_disallowed_groups);
       if (!query.Exec() || !query.Reset()) {
-        LOG4CXX_WARN(logger_,
-                     "Failed update of device disallowed consented groups.");
+        LOGGER_WARN(logger_,
+                    "Failed update of device disallowed consented groups.");
         return false;
       }
     }
@@ -322,8 +322,8 @@ bool SQLPTExtRepresentation::SetUserPermissionsForDevice(
 
   // Insert new values
   if (!query.Prepare(sql_pt_ext::kInsertDeviceConsentedGroup)) {
-    LOG4CXX_WARN(logger_,
-                 "Incorrect statement of inserting to device consented groups");
+    LOGGER_WARN(logger_,
+                "Incorrect statement of inserting to device consented groups");
     return false;
   }
 
@@ -337,8 +337,7 @@ bool SQLPTExtRepresentation::SetUserPermissionsForDevice(
     // TODO(AOleynik): Get this info from external data
     query.Bind(3, std::string("GUI"));
     if (!query.Exec() || !query.Reset()) {
-      LOG4CXX_WARN(logger_,
-                   "Failed insert to device allowed consented groups.");
+      LOGGER_WARN(logger_, "Failed insert to device allowed consented groups.");
       return false;
     }
   }
@@ -353,8 +352,8 @@ bool SQLPTExtRepresentation::SetUserPermissionsForDevice(
     query.Bind(2, false);
     query.Bind(3);
     if (!query.Exec() || !query.Reset()) {
-      LOG4CXX_WARN(logger_,
-                   "Failed insert to device disallowed consented groups.");
+      LOGGER_WARN(logger_,
+                  "Failed insert to device disallowed consented groups.");
       return false;
     }
   }
@@ -372,15 +371,15 @@ bool SQLPTExtRepresentation::ReactOnUserDevConsentForApp(
     if (IsPredataPolicy(app_id)) {
       utils::dbms::SQLQuery query(db());
       if (!query.Prepare(sql_pt_ext::kHasAppPreloadedGroups)) {
-        LOG4CXX_WARN(logger_,
-                     "Incorrect statement for has app preloaded groups");
+        LOGGER_WARN(logger_,
+                    "Incorrect statement for has app preloaded groups");
         return false;
       }
       query.Bind(0, app_id);
       query.Bind(1, kPreDataConsentId);
       if (!query.Exec()) {
-        LOG4CXX_WARN(logger_,
-                     "Incorrect select for app has predataconsted groups");
+        LOGGER_WARN(logger_,
+                    "Incorrect select for app has predataconsted groups");
         return false;
       }
       if (query.GetInteger(0) > 0) {
@@ -404,7 +403,7 @@ bool SQLPTExtRepresentation::ReactOnUserDevConsentForApp(
 
 bool SQLPTExtRepresentation::SetUserPermissionsForApp(
     const PermissionConsent& permissions) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   // TODO(AOleynik): Handle situation, when no application was specified, i.e.
   // general permissions were set
   std::vector<FunctionalGroupPermission>::const_iterator it =
@@ -416,7 +415,7 @@ bool SQLPTExtRepresentation::SetUserPermissionsForApp(
   for (; it != it_end; ++it) {
     utils::dbms::SQLQuery counter(db());
     if (!counter.Prepare(sql_pt_ext::kCountAppConsents)) {
-      LOG4CXX_WARN(logger_, "Incorrect statement for consent group count.");
+      LOGGER_WARN(logger_, "Incorrect statement for consent group count.");
       return false;
     }
 
@@ -424,7 +423,7 @@ bool SQLPTExtRepresentation::SetUserPermissionsForApp(
     counter.Bind(1, permissions.policy_app_id);
     counter.Bind(2, static_cast<int>((*it).group_id));
     if (!counter.Exec()) {
-      LOG4CXX_WARN(logger_, "Incorrent count on consent groups.");
+      LOGGER_WARN(logger_, "Incorrent count on consent groups.");
       return false;
     }
 
@@ -433,7 +432,7 @@ bool SQLPTExtRepresentation::SetUserPermissionsForApp(
     // Update already present consent record
     if (update_required) {
       if (!query.Prepare(sql_pt_ext::kUpdateGroupPermissions)) {
-        LOG4CXX_WARN(logger_, "Incorrect statement for update consent groups.");
+        LOGGER_WARN(logger_, "Incorrect statement for update consent groups.");
         return false;
       }
 
@@ -448,9 +447,9 @@ bool SQLPTExtRepresentation::SetUserPermissionsForApp(
       query.Bind(4, permissions.device_id);
 
       if (!query.Exec() || !query.Reset()) {
-        LOG4CXX_WARN(logger_,
-                     "Incorrect update on user defined permissions "
-                     "for app groups.");
+        LOGGER_WARN(logger_,
+                    "Incorrect update on user defined permissions "
+                    "for app groups.");
         return false;
       }
       continue;
@@ -458,8 +457,8 @@ bool SQLPTExtRepresentation::SetUserPermissionsForApp(
 
     // Insert new consent record
     if (!query.Prepare(sql_pt_ext::kInsertConsentGroups)) {
-      LOG4CXX_WARN(logger_,
-                   "Incorrect statement for update app group permissions.");
+      LOGGER_WARN(logger_,
+                  "Incorrect statement for update app group permissions.");
       return false;
     }
 
@@ -474,9 +473,9 @@ bool SQLPTExtRepresentation::SetUserPermissionsForApp(
     query.Bind(4, permissions.consent_source);
 
     if (!query.Exec() || !query.Reset()) {
-      LOG4CXX_WARN(logger_,
-                   "Incorrect insert to user defined permissions "
-                   "for app groups.");
+      LOGGER_WARN(logger_,
+                  "Incorrect insert to user defined permissions "
+                  "for app groups.");
       return false;
     }
     continue;
@@ -489,7 +488,7 @@ std::vector<UserFriendlyMessage> SQLPTExtRepresentation::GetUserFriendlyMsg(
   utils::dbms::SQLQuery query(db());
   std::vector<UserFriendlyMessage> result;
   if (!query.Prepare(sql_pt_ext::kSelectFriendlyMsg)) {
-    LOG4CXX_WARN(logger_, "Incorrect statement for select friendly messages.");
+    LOGGER_WARN(logger_, "Incorrect statement for select friendly messages.");
     return result;
   }
 
@@ -507,7 +506,7 @@ std::vector<UserFriendlyMessage> SQLPTExtRepresentation::GetUserFriendlyMsg(
     query.Bind(1, msg_language);
 
     if (!query.Exec() || !query.Reset()) {
-      LOG4CXX_WARN(logger_, "Incorrect select from friendly messages.");
+      LOGGER_WARN(logger_, "Incorrect select from friendly messages.");
       return result;
     }
 
@@ -523,9 +522,9 @@ std::vector<UserFriendlyMessage> SQLPTExtRepresentation::GetUserFriendlyMsg(
     result.push_back(msg);
 
     if (!query.Reset()) {
-      LOG4CXX_WARN(logger_,
-                   "Failed reset statement for selecting friendly "
-                   "messages.");
+      LOGGER_WARN(logger_,
+                  "Failed reset statement for selecting friendly "
+                  "messages.");
       return result;
     }
   }
@@ -536,7 +535,7 @@ std::vector<UserFriendlyMessage> SQLPTExtRepresentation::GetUserFriendlyMsg(
 bool SQLPTExtRepresentation::GatherConsumerFriendlyMessages(
     policy_table::ConsumerFriendlyMessages* messages) const {
   if (NULL == messages) {
-    LOG4CXX_ERROR(logger_, "NULL pointer has been passed to fill");
+    LOGGER_ERROR(logger_, "NULL pointer has been passed to fill");
     return false;
   }
 
@@ -572,7 +571,7 @@ bool SQLPTExtRepresentation::GatherConsumerFriendlyMessages(
           msg.text_body;
     }
   } else {
-    LOG4CXX_WARN(logger_, "Incorrect statement for select friendly messages.");
+    LOGGER_WARN(logger_, "Incorrect statement for select friendly messages.");
   }
   return result;
 }
@@ -580,10 +579,10 @@ bool SQLPTExtRepresentation::GatherConsumerFriendlyMessages(
 bool SQLPTExtRepresentation::SetMetaInfo(const std::string& ccpu_version,
                                          const std::string& wers_country_code,
                                          const std::string& language) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt_ext::kUpdateMetaParams)) {
-    LOG4CXX_WARN(logger_, "Incorrect statement for insert to module meta.");
+    LOGGER_WARN(logger_, "Incorrect statement for insert to module meta.");
     return false;
   }
 
@@ -592,22 +591,22 @@ bool SQLPTExtRepresentation::SetMetaInfo(const std::string& ccpu_version,
   query.Bind(2, language);
 
   if (!query.Exec() || !query.Reset()) {
-    LOG4CXX_WARN(logger_, "Incorrect insert to module meta.");
+    LOGGER_WARN(logger_, "Incorrect insert to module meta.");
     return false;
   }
   return true;
 }
 
 bool SQLPTExtRepresentation::IsMetaInfoPresent() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt_ext::kSelectMetaParams)) {
-    LOG4CXX_WARN(logger_, "Incorrect statement for selecting meta info.");
+    LOGGER_WARN(logger_, "Incorrect statement for selecting meta info.");
     return false;
   }
 
   if (!query.Exec()) {
-    LOG4CXX_WARN(logger_, "Incorrect select from module meta.");
+    LOGGER_WARN(logger_, "Incorrect select from module meta.");
     return false;
   }
 
@@ -615,17 +614,17 @@ bool SQLPTExtRepresentation::IsMetaInfoPresent() {
 }
 
 bool SQLPTExtRepresentation::SetSystemLanguage(const std::string& language) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt_ext::kUpdateMetaLanguage)) {
-    LOG4CXX_WARN(logger_, "Incorrect statement for update meta language.");
+    LOGGER_WARN(logger_, "Incorrect statement for update meta language.");
     return false;
   }
 
   query.Bind(0, language);
 
   if (!query.Exec()) {
-    LOG4CXX_WARN(logger_, "Incorrect update for meta language.");
+    LOGGER_WARN(logger_, "Incorrect update for meta language.");
     return false;
   }
 
@@ -634,26 +633,26 @@ bool SQLPTExtRepresentation::SetSystemLanguage(const std::string& language) {
 
 bool SQLPTExtRepresentation::SaveApplicationPoliciesSection(
     const policy_table::ApplicationPoliciesSection& policies) {
-  LOG4CXX_INFO(logger_, "SaveApplicationPolicies ext");
+  LOGGER_INFO(logger_, "SaveApplicationPolicies ext");
   utils::dbms::SQLQuery query_delete(db());
   if (!query_delete.Exec(sql_pt::kDeleteAppGroup)) {
-    LOG4CXX_WARN(logger_, "Incorrect delete from app_group.");
+    LOGGER_WARN(logger_, "Incorrect delete from app_group.");
     return false;
   }
 
   utils::dbms::SQLQuery query_delete_preconsented(db());
   if (!query_delete_preconsented.Exec(sql_pt_ext::kDeletePreconsentedGroups)) {
-    LOG4CXX_WARN(logger_, "Incorrect delete from preconsented_group.");
+    LOGGER_WARN(logger_, "Incorrect delete from preconsented_group.");
     return false;
   }
 
   if (!query_delete.Exec(sql_pt::kDeleteApplication)) {
-    LOG4CXX_WARN(logger_, "Incorrect delete from application.");
+    LOGGER_WARN(logger_, "Incorrect delete from application.");
     return false;
   }
 
   if (!query_delete.Exec(sql_pt::kDeleteRequestType)) {
-    LOG4CXX_WARN(logger_, "Incorrect delete from request type.");
+    LOGGER_WARN(logger_, "Incorrect delete from request type.");
     return false;
   }
 
@@ -721,7 +720,7 @@ bool SQLPTExtRepresentation::SaveSpecificAppPolicy(
 
   utils::dbms::SQLQuery app_query(db());
   if (!app_query.Prepare(sql_pt_ext::kInsertApplication)) {
-    LOG4CXX_WARN(logger_, "Incorrect insert statement into application.");
+    LOGGER_WARN(logger_, "Incorrect insert statement into application.");
     return false;
   }
 
@@ -740,7 +739,7 @@ bool SQLPTExtRepresentation::SaveSpecificAppPolicy(
       : app_query.Bind(8, std::string());
 
   if (!app_query.Exec() || !app_query.Reset()) {
-    LOG4CXX_WARN(logger_, "Incorrect insert into application.");
+    LOGGER_WARN(logger_, "Incorrect insert into application.");
     return false;
   }
 
@@ -767,8 +766,8 @@ bool policy::SQLPTExtRepresentation::SaveDevicePolicy(
     const policy_table::DevicePolicy& device) {
   dbms::SQLQuery app_query(db());
   if (!app_query.Prepare(sql_pt_ext::kInsertApplication)) {
-    LOG4CXX_WARN(logger_,
-                 "Incorrect insert statement into application (device).");
+    LOGGER_WARN(logger_,
+                "Incorrect insert statement into application (device).");
     return false;
   }
   app_query.Bind(0, kDeviceId);
@@ -784,7 +783,7 @@ bool policy::SQLPTExtRepresentation::SaveDevicePolicy(
   app_query.Bind(8, std::string());
 
   if (!app_query.Exec() || !app_query.Reset()) {
-    LOG4CXX_WARN(logger_, "Incorrect insert into application.");
+    LOGGER_WARN(logger_, "Incorrect insert into application.");
     return false;
   }
 
@@ -800,10 +799,10 @@ bool policy::SQLPTExtRepresentation::SaveDevicePolicy(
 
 bool SQLPTExtRepresentation::GatherApplicationPoliciesSection(
     policy_table::ApplicationPoliciesSection* policies) const {
-  LOG4CXX_INFO(logger_, "Gather applications policies");
+  LOGGER_INFO(logger_, "Gather applications policies");
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt_ext::kSelectAppPolicies)) {
-    LOG4CXX_WARN(logger_, "Incorrect select from app_policies");
+    LOGGER_WARN(logger_, "Incorrect select from app_policies");
     return false;
   }
 
@@ -873,7 +872,7 @@ void SQLPTExtRepresentation::GatherPreconsentedGroup(
     const std::string& app_id, policy_table::Strings* groups) const {
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt_ext::kSelectPreconsentedGroups)) {
-    LOG4CXX_WARN(logger_, "Incorrect select from preconsented group");
+    LOGGER_WARN(logger_, "Incorrect select from preconsented group");
     return;
   }
 
@@ -885,10 +884,10 @@ void SQLPTExtRepresentation::GatherPreconsentedGroup(
 
 bool SQLPTExtRepresentation::GatherUsageAndErrorCounts(
     policy_table::UsageAndErrorCounts* counts) const {
-  LOG4CXX_INFO(logger_, "Gather Usage and Error Counts.");
+  LOGGER_INFO(logger_, "Gather Usage and Error Counts.");
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt_ext::kSelectUsageAndErrorCount) || !query.Exec()) {
-    LOG4CXX_INFO(logger_, "Failed select from user_and_error_count");
+    LOGGER_INFO(logger_, "Failed select from user_and_error_count");
     return false;
   }
 
@@ -903,9 +902,9 @@ bool SQLPTExtRepresentation::GatherAppLevels(
     policy_table::AppLevels* apps) const {
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt_ext::kSelectAppLevels)) {
-    LOG4CXX_INFO(logger_,
-                 "Failed select from app_level. SQLError = "
-                     << query.LastError().text());
+    LOGGER_INFO(logger_,
+                "Failed select from app_level. SQLError = "
+                    << query.LastError().text());
     return false;
   }
   while (query.Next()) {
@@ -934,10 +933,10 @@ bool SQLPTExtRepresentation::GatherAppLevels(
 
 void SQLPTExtRepresentation::GatherDeviceData(
     policy_table::DeviceData* data) const {
-  LOG4CXX_INFO(logger_, "Gather device data.");
+  LOGGER_INFO(logger_, "Gather device data.");
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt_ext::kSelectDeviceData)) {
-    LOG4CXX_WARN(logger_, "Incorrect select statement for device data.");
+    LOGGER_WARN(logger_, "Incorrect select statement for device data.");
     return;
   }
   data->mark_initialized();
@@ -959,12 +958,12 @@ void SQLPTExtRepresentation::GatherDeviceData(
 void SQLPTExtRepresentation::GatherConsentGroup(
     const std::string& device_id,
     policy_table::UserConsentRecords* records) const {
-  LOG4CXX_INFO(logger_, "Gather consent records.");
+  LOGGER_INFO(logger_, "Gather consent records.");
   utils::dbms::SQLQuery query(db());
   // Fill data for device
   if (!query.Prepare(sql_pt_ext::kSelectDeviceConsentedGroup)) {
-    LOG4CXX_WARN(logger_,
-                 "Incorrect select statement for device consented groups.");
+    LOGGER_WARN(logger_,
+                "Incorrect select statement for device consented groups.");
     return;
   }
 
@@ -990,8 +989,8 @@ void SQLPTExtRepresentation::GatherConsentGroup(
 
   // Fill data for applications
   if (!query.Prepare(sql_pt_ext::kSelectConsentGroup)) {
-    LOG4CXX_WARN(logger_,
-                 "Incorrect select statement for app consented groups.");
+    LOGGER_WARN(logger_,
+                "Incorrect select statement for app consented groups.");
     return;
   }
 
@@ -1015,31 +1014,31 @@ void SQLPTExtRepresentation::GatherConsentGroup(
 
 bool SQLPTExtRepresentation::SaveDeviceData(
     const policy_table::DeviceData& devices) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   utils::dbms::SQLQuery drop_device_query(db());
   const std::string drop_device = "DELETE FROM `device`";
   if (!drop_device_query.Exec(drop_device)) {
-    LOG4CXX_WARN(logger_, "Could not clear device table.");
+    LOGGER_WARN(logger_, "Could not clear device table.");
     return false;
   }
 
   utils::dbms::SQLQuery drop_device_consents_query(db());
   const std::string drop_device_consents = "DELETE FROM `device_consent_group`";
   if (!drop_device_consents_query.Exec(drop_device_consents)) {
-    LOG4CXX_WARN(logger_, "Could not clear device consents.");
+    LOGGER_WARN(logger_, "Could not clear device consents.");
     return false;
   }
 
   utils::dbms::SQLQuery drop_user_consents_query(db());
   const std::string drop_user_consents = "DELETE FROM `consent_group`";
   if (!drop_user_consents_query.Exec(drop_user_consents)) {
-    LOG4CXX_WARN(logger_, "Could not clear user consents.");
+    LOGGER_WARN(logger_, "Could not clear user consents.");
     return false;
   }
 
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt_ext::kInsertDeviceData)) {
-    LOG4CXX_WARN(logger_, "Incorrect insert statement for device data.");
+    LOGGER_WARN(logger_, "Incorrect insert statement for device data.");
     return false;
   }
 
@@ -1056,7 +1055,7 @@ bool SQLPTExtRepresentation::SaveDeviceData(
     query.Bind(7, *(it->second.connection_type));
 
     if (!query.Exec() || !query.Reset()) {
-      LOG4CXX_WARN(logger_, "Incorrect insert into device data.");
+      LOGGER_WARN(logger_, "Incorrect insert into device data.");
       return false;
     }
 
@@ -1072,7 +1071,7 @@ bool SQLPTExtRepresentation::SaveDeviceData(
 bool SQLPTExtRepresentation::SaveConsentGroup(
     const std::string& device_id,
     const policy_table::UserConsentRecords& records) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   utils::dbms::SQLQuery query(db());
 
   policy_table::UserConsentRecords::const_iterator it = records.begin();
@@ -1086,8 +1085,8 @@ bool SQLPTExtRepresentation::SaveConsentGroup(
     for (; it_groups != it_groups_end; ++it_groups) {
       if (kDeviceId == it->first) {
         if (!query.Prepare(sql_pt_ext::kInsertDeviceConsentedGroup)) {
-          LOG4CXX_WARN(logger_,
-                       "Incorrect insert statement for device consent group.");
+          LOGGER_WARN(logger_,
+                      "Incorrect insert statement for device consent group.");
           return false;
         }
         query.Bind(0, device_id);
@@ -1097,16 +1096,15 @@ bool SQLPTExtRepresentation::SaveConsentGroup(
             3,
             std::string(policy_table::EnumToJsonString(*(it->second.input))));
         query.Bind(4, std::string(*(it->second.time_stamp)));
-        LOG4CXX_INFO(logger_,
-                     "Device:"
-                         << "time stamp "
-                         << std::string(*(it->second.time_stamp)) << " group "
-                         << it_groups->first << " consent "
-                         << it_groups->second);
+        LOGGER_INFO(logger_,
+                    "Device:"
+                        << "time stamp "
+                        << std::string(*(it->second.time_stamp)) << " group "
+                        << it_groups->first << " consent "
+                        << it_groups->second);
       } else {
         if (!query.Prepare(sql_pt_ext::kInsertConsentGroups)) {
-          LOG4CXX_WARN(logger_,
-                       "Incorrect insert statement for consent group.");
+          LOGGER_WARN(logger_, "Incorrect insert statement for consent group.");
           return false;
         }
         query.Bind(0, device_id);
@@ -1117,16 +1115,16 @@ bool SQLPTExtRepresentation::SaveConsentGroup(
             4,
             std::string(policy_table::EnumToJsonString(*(it->second.input))));
         query.Bind(5, std::string(*(it->second.time_stamp)));
-        LOG4CXX_INFO(logger_,
-                     "Device:"
-                         << "time stamp "
-                         << std::string(*(it->second.time_stamp)) << " group "
-                         << it_groups->first << " consent "
-                         << it_groups->second);
+        LOGGER_INFO(logger_,
+                    "Device:"
+                        << "time stamp "
+                        << std::string(*(it->second.time_stamp)) << " group "
+                        << it_groups->first << " consent "
+                        << it_groups->second);
       }
 
       if (!query.Exec() || !query.Reset()) {
-        LOG4CXX_WARN(logger_, "Incorrect insert into consent group.");
+        LOGGER_WARN(logger_, "Incorrect insert into consent group.");
         return false;
       }
     }
@@ -1137,10 +1135,10 @@ bool SQLPTExtRepresentation::SaveConsentGroup(
 
 bool SQLPTExtRepresentation::SavePreconsentedGroup(
     const std::string& app_id, const policy_table::Strings& groups) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt_ext::kInsertPreconsentedGroups)) {
-    LOG4CXX_WARN(logger_, "Incorrect insert statement for preconsented groups");
+    LOGGER_WARN(logger_, "Incorrect insert statement for preconsented groups");
     return false;
   }
 
@@ -1149,7 +1147,7 @@ bool SQLPTExtRepresentation::SavePreconsentedGroup(
     query.Bind(0, app_id);
     query.Bind(1, *it);
     if (!query.Exec() || !query.Reset()) {
-      LOG4CXX_WARN(logger_, "Incorrect insert into preconsented groups.");
+      LOGGER_WARN(logger_, "Incorrect insert into preconsented groups.");
       return false;
     }
   }
@@ -1159,7 +1157,7 @@ bool SQLPTExtRepresentation::SavePreconsentedGroup(
 
 void SQLPTExtRepresentation::GatherModuleMeta(
     policy_table::ModuleMeta* meta) const {
-  LOG4CXX_INFO(logger_, "Gather Module Meta Info");
+  LOGGER_INFO(logger_, "Gather Module Meta Info");
   utils::dbms::SQLQuery query(db());
   if (query.Prepare(sql_pt_ext::kSelectModuleMeta) && query.Next()) {
     *meta->ccpu_version = query.GetString(0);
@@ -1177,19 +1175,19 @@ void SQLPTExtRepresentation::Increment(const std::string& type) const {
   std::string update_counter =
       "UPDATE `usage_and_error_count` SET `" + type + "` = `" + type + "` + 1";
   if (!query.Exec(update_counter)) {
-    LOG4CXX_INFO(logger_, "Failed updating global counter");
+    LOGGER_INFO(logger_, "Failed updating global counter");
   }
 }
 
 bool SQLPTExtRepresentation::IsExistAppLevel(const std::string& app_id) const {
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt_ext::kCountAppLevel)) {
-    LOG4CXX_INFO(logger_, "Incorrect statement of count app_level");
+    LOGGER_INFO(logger_, "Incorrect statement of count app_level");
     return false;
   }
   query.Bind(0, app_id);
   if (!query.Exec()) {
-    LOG4CXX_INFO(logger_, "Failed count app_level");
+    LOGGER_INFO(logger_, "Failed count app_level");
     return false;
   }
   return query.GetInteger(0) > 0;
@@ -1197,10 +1195,10 @@ bool SQLPTExtRepresentation::IsExistAppLevel(const std::string& app_id) const {
 
 bool SQLPTExtRepresentation::GetAllAppGroups(const std::string& policy_app_id,
                                              FunctionalGroupIDs& all_groups) {
-  LOG4CXX_INFO(logger_, "GetAllAppGroups for '" << policy_app_id << "'");
+  LOGGER_INFO(logger_, "GetAllAppGroups for '" << policy_app_id << "'");
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt_ext::kSelectAppGroupsId)) {
-    LOG4CXX_WARN(logger_, "Incorrect statement for select app groups id.");
+    LOGGER_WARN(logger_, "Incorrect statement for select app groups id.");
     return false;
   }
 
@@ -1218,10 +1216,10 @@ bool SQLPTExtRepresentation::GetConsentedGroups(
     const std::string& device_id,
     FunctionalGroupIDs& allowed_groups,
     FunctionalGroupIDs& disallowed_groups) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt_ext::kSelectConsentedGroupsId)) {
-    LOG4CXX_WARN(logger_, "Incorrect statement for select consent groups id.");
+    LOGGER_WARN(logger_, "Incorrect statement for select consent groups id.");
     return false;
   }
 
@@ -1241,11 +1239,11 @@ bool SQLPTExtRepresentation::GetConsentedGroups(
 
 bool SQLPTExtRepresentation::GetPreconsentedGroups(
     const std::string& policy_app_id, FunctionalGroupIDs& preconsented_groups) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt_ext::kSelectPreconsentedGroupsId)) {
-    LOG4CXX_WARN(logger_,
-                 "Incorrect statement for select preconsented groups id.");
+    LOGGER_WARN(logger_,
+                "Incorrect statement for select preconsented groups id.");
     return false;
   }
 
@@ -1260,11 +1258,11 @@ bool SQLPTExtRepresentation::GetPreconsentedGroups(
 
 bool SQLPTExtRepresentation::GetFunctionalGroupNames(
     FunctionalGroupNames& names) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt_ext::kSelectFunctionalGroupNames)) {
-    LOG4CXX_WARN(logger_,
-                 "Incorrect statement for select functional groups names.");
+    LOGGER_WARN(logger_,
+                "Incorrect statement for select functional groups names.");
     return false;
   }
 
@@ -1314,12 +1312,12 @@ void SQLPTExtRepresentation::Increment(const std::string& app_id,
                   "VALUES (?, 1)";
   }
   if (!query.Prepare(sql_counter)) {
-    LOG4CXX_INFO(logger_, "Incorrect statement of update app counter");
+    LOGGER_INFO(logger_, "Incorrect statement of update app counter");
     return;
   }
   query.Bind(0, app_id);
   if (!query.Exec()) {
-    LOG4CXX_INFO(logger_, "Failed updating app counter");
+    LOGGER_INFO(logger_, "Failed updating app counter");
   }
 }
 
@@ -1340,13 +1338,13 @@ void SQLPTExtRepresentation::Set(const std::string& app_id,
                "VALUES (?, ?)";
   }
   if (!query.Prepare(sql_info)) {
-    LOG4CXX_INFO(logger_, "Incorrect statement of update app info");
+    LOGGER_INFO(logger_, "Incorrect statement of update app info");
     return;
   }
   query.Bind(0, value);
   query.Bind(1, app_id);
   if (!query.Exec()) {
-    LOG4CXX_INFO(logger_, "Failed updating app info");
+    LOGGER_INFO(logger_, "Failed updating app info");
   }
 }
 
@@ -1366,29 +1364,29 @@ void SQLPTExtRepresentation::Add(const std::string& app_id,
                     "VALUES (?, ?)";
   }
   if (!query.Prepare(sql_stopwatch)) {
-    LOG4CXX_INFO(logger_, "Incorrect statement of update app stopwatch");
+    LOGGER_INFO(logger_, "Incorrect statement of update app stopwatch");
     return;
   }
   query.Bind(0, seconds);
   query.Bind(1, app_id);
   if (!query.Exec()) {
-    LOG4CXX_INFO(logger_, "Failed updating app stopwatch");
+    LOGGER_INFO(logger_, "Failed updating app stopwatch");
   }
 }
 
 bool SQLPTExtRepresentation::GetDefaultHMI(const std::string& policy_app_id,
                                            std::string* default_hmi) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt_ext::kSelectDefaultHmi)) {
-    LOG4CXX_INFO(logger_, "Incorrect statement for default hmi.");
+    LOGGER_INFO(logger_, "Incorrect statement for default hmi.");
     return false;
   }
 
   query.Bind(0, policy_app_id);
 
   if (!query.Exec()) {
-    LOG4CXX_INFO(logger_, "Error during default hmi getting.");
+    LOGGER_INFO(logger_, "Error during default hmi getting.");
     return false;
   }
 
@@ -1406,10 +1404,10 @@ bool SQLPTExtRepresentation::CountUnconsentedGroups(
     const std::string& policy_app_id,
     const std::string& device_id,
     int* result) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt_ext::kCountUnconsentedGroups)) {
-    LOG4CXX_WARN(logger_, "Incorrect select for unconsented groups.");
+    LOGGER_WARN(logger_, "Incorrect select for unconsented groups.");
     return false;
   }
 
@@ -1419,7 +1417,7 @@ bool SQLPTExtRepresentation::CountUnconsentedGroups(
   query.Bind(3, kPreDataConsentId);
 
   if (!query.Exec()) {
-    LOG4CXX_INFO(logger_, "Error during executing unconsented groups.");
+    LOGGER_INFO(logger_, "Error during executing unconsented groups.");
     return false;
   }
   *result = query.GetInteger(0);
@@ -1430,7 +1428,7 @@ bool SQLPTExtRepresentation::IsMsgLanguagePresent(const std::string& message,
                                                   const std::string& language) {
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt_ext::kHasMsgLanguageCode)) {
-    LOG4CXX_WARN(logger_, "Incorrect statement for message language check.");
+    LOGGER_WARN(logger_, "Incorrect statement for message language check.");
     return false;
   }
 
@@ -1438,7 +1436,7 @@ bool SQLPTExtRepresentation::IsMsgLanguagePresent(const std::string& message,
   query.Bind(1, language);
 
   if (!query.Exec()) {
-    LOG4CXX_WARN(logger_, "Failed to check message language code.");
+    LOGGER_WARN(logger_, "Failed to check message language code.");
     return false;
   }
 
@@ -1451,7 +1449,7 @@ bool SQLPTExtRepresentation::SaveMessageString(
     const policy_table::MessageString& strings) {
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt::kInsertMessageString)) {
-    LOG4CXX_WARN(logger_, "Incorrect insert statement for message.");
+    LOGGER_WARN(logger_, "Incorrect insert statement for message.");
     return false;
   }
 
@@ -1464,7 +1462,7 @@ bool SQLPTExtRepresentation::SaveMessageString(
   query.Bind(6, *strings.textBody);
 
   if (!query.Exec() || !query.Reset()) {
-    LOG4CXX_WARN(logger_, "Incorrect insert into message.");
+    LOGGER_WARN(logger_, "Incorrect insert into message.");
     return false;
   }
 
@@ -1481,7 +1479,7 @@ bool SQLPTExtRepresentation::SaveModuleMeta(
   utils::dbms::SQLQuery query(db());
 
   if (!query.Prepare(sql_pt_ext::kSaveModuleMeta)) {
-    LOG4CXX_WARN(logger_, "Incorrect insert statement for module_meta.");
+    LOGGER_WARN(logger_, "Incorrect insert statement for module_meta.");
     return false;
   }
   const int64_t odometer = *(meta.pt_exchanged_at_odometer_x);
@@ -1495,7 +1493,7 @@ bool SQLPTExtRepresentation::SaveModuleMeta(
   query.Bind(6, *(meta.vin));
 
   if (!query.Exec()) {
-    LOG4CXX_WARN(logger_, "Incorrect update for module_meta.");
+    LOGGER_WARN(logger_, "Incorrect update for module_meta.");
     return false;
   }
 
@@ -1506,11 +1504,11 @@ bool SQLPTExtRepresentation::SaveAppCounters(
     const rpc::policy_table_interface_base::AppLevels& app_levels) {
   utils::dbms::SQLQuery query(db());
   if (!query.Exec(sql_pt::kDeleteAppLevel)) {
-    LOG4CXX_WARN(logger_, "Incorrect delete from app level.");
+    LOGGER_WARN(logger_, "Incorrect delete from app level.");
     return false;
   }
   if (!query.Prepare(sql_pt::kInsertAppLevel)) {
-    LOG4CXX_WARN(logger_, "Incorrect insert statement for app level.");
+    LOGGER_WARN(logger_, "Incorrect insert statement for app level.");
     return false;
   }
 
@@ -1534,7 +1532,7 @@ bool SQLPTExtRepresentation::SaveAppCounters(
     query.Bind(15, it->second.count_of_tls_errors);
 
     if (!query.Exec() || !query.Reset()) {
-      LOG4CXX_WARN(logger_, "Incorrect insert into app level.");
+      LOGGER_WARN(logger_, "Incorrect insert into app level.");
       return false;
     }
   }
@@ -1545,7 +1543,7 @@ bool SQLPTExtRepresentation::SaveGlobalCounters(
     const rpc::policy_table_interface_base::UsageAndErrorCounts& counts) {
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt_ext::kUpdateGlobalCounters)) {
-    LOG4CXX_WARN(logger_, "Incorrect insert statement for global counters.");
+    LOGGER_WARN(logger_, "Incorrect insert statement for global counters.");
     return false;
   }
 
@@ -1554,7 +1552,7 @@ bool SQLPTExtRepresentation::SaveGlobalCounters(
   query.Bind(2, *counts.count_of_sync_reboots);
 
   if (!query.Exec()) {
-    LOG4CXX_WARN(logger_, "Incorrect insert into global counters.");
+    LOGGER_WARN(logger_, "Incorrect insert into global counters.");
     return false;
   }
 
@@ -1563,22 +1561,22 @@ bool SQLPTExtRepresentation::SaveGlobalCounters(
 
 bool SQLPTExtRepresentation::CleanupUnpairedDevices(
     const DeviceIds& device_ids) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   utils::dbms::SQLQuery delete_device_query(db());
   if (!delete_device_query.Prepare(sql_pt::kDeleteDevice)) {
-    LOG4CXX_WARN(logger_, "Incorrect statement for device delete.");
+    LOGGER_WARN(logger_, "Incorrect statement for device delete.");
     return true;
   }
 
   utils::dbms::SQLQuery delete_device_consent_query(db());
   if (!delete_device_consent_query.Prepare(sql_pt_ext::kDeleteDeviceConsent)) {
-    LOG4CXX_WARN(logger_, "Incorrect statement for delete device consent.");
+    LOGGER_WARN(logger_, "Incorrect statement for delete device consent.");
     return false;
   }
 
   utils::dbms::SQLQuery delete_app_consent_query(db());
   if (!delete_app_consent_query.Prepare(sql_pt_ext::kDeleteAppConsent)) {
-    LOG4CXX_WARN(logger_, "Incorrect statement for delete app consent.");
+    LOGGER_WARN(logger_, "Incorrect statement for delete app consent.");
     return false;
   }
 
@@ -1587,20 +1585,20 @@ bool SQLPTExtRepresentation::CleanupUnpairedDevices(
   for (; it != it_end; ++it) {
     delete_device_query.Bind(0, (*it));
     if (!delete_device_query.Exec() || !delete_device_query.Reset()) {
-      LOG4CXX_WARN(logger_, "Failed to delete from device");
+      LOGGER_WARN(logger_, "Failed to delete from device");
       return false;
     }
 
     delete_device_consent_query.Bind(0, (*it));
     if (!delete_device_consent_query.Exec() ||
         !delete_device_consent_query.Reset()) {
-      LOG4CXX_WARN(logger_, "Failed to delete from device consent.");
+      LOGGER_WARN(logger_, "Failed to delete from device consent.");
       return false;
     }
 
     delete_app_consent_query.Bind(0, (*it));
     if (!delete_app_consent_query.Exec() || !delete_app_consent_query.Reset()) {
-      LOG4CXX_WARN(logger_, "Failed to delete from app consent.");
+      LOGGER_WARN(logger_, "Failed to delete from app consent.");
       return false;
     }
   }
@@ -1610,22 +1608,22 @@ bool SQLPTExtRepresentation::CleanupUnpairedDevices(
 bool SQLPTExtRepresentation::SetDefaultPolicy(const std::string& app_id) {
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt::kDeleteAppGroupByApplicationId)) {
-    LOG4CXX_ERROR(logger_, "Incorrect statement to delete from app_group.");
+    LOGGER_ERROR(logger_, "Incorrect statement to delete from app_group.");
     return false;
   }
   query.Bind(0, app_id);
   if (!query.Exec()) {
-    LOG4CXX_ERROR(logger_, "Failed deleting from app_group.");
+    LOGGER_ERROR(logger_, "Failed deleting from app_group.");
     return false;
   }
 
   if (!query.Prepare(sql_pt_ext::kDeletePreconsentedGroupsByApplicationId)) {
-    LOG4CXX_ERROR(logger_, "Incorrect statement to delete from app_group.");
+    LOGGER_ERROR(logger_, "Incorrect statement to delete from app_group.");
     return false;
   }
   query.Bind(0, app_id);
   if (!query.Exec()) {
-    LOG4CXX_ERROR(logger_, "Failed deleting from app_group.");
+    LOGGER_ERROR(logger_, "Failed deleting from app_group.");
     return false;
   }
 
@@ -1648,26 +1646,26 @@ bool SQLPTExtRepresentation::SetDefaultPolicy(const std::string& app_id) {
 }
 
 bool SQLPTExtRepresentation::SetPredataPolicy(const std::string& app_id) {
-  LOG4CXX_INFO(logger_,
-               "SQLPTExtRepresentation::SetPredataPolicy for " << app_id);
+  LOGGER_INFO(logger_,
+              "SQLPTExtRepresentation::SetPredataPolicy for " << app_id);
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt::kDeleteAppGroupByApplicationId)) {
-    LOG4CXX_ERROR(logger_, "Incorrect statement to delete from app_group.");
+    LOGGER_ERROR(logger_, "Incorrect statement to delete from app_group.");
     return false;
   }
   query.Bind(0, app_id);
   if (!query.Exec()) {
-    LOG4CXX_ERROR(logger_, "Failed deleting from app_group.");
+    LOGGER_ERROR(logger_, "Failed deleting from app_group.");
     return false;
   }
 
   if (!query.Prepare(sql_pt_ext::kDeletePreconsentedGroupsByApplicationId)) {
-    LOG4CXX_ERROR(logger_, "Incorrect statement to delete from app_group.");
+    LOGGER_ERROR(logger_, "Incorrect statement to delete from app_group.");
     return false;
   }
   query.Bind(0, app_id);
   if (!query.Exec()) {
-    LOG4CXX_ERROR(logger_, "Failed deleting from app_group.");
+    LOGGER_ERROR(logger_, "Failed deleting from app_group.");
     return false;
   }
 
@@ -1691,13 +1689,13 @@ bool SQLPTExtRepresentation::SetPredataPolicy(const std::string& app_id) {
 bool SQLPTExtRepresentation::IsPredataPolicy(const std::string& app_id) const {
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt_ext::kSelectApplicationIsPreData)) {
-    LOG4CXX_WARN(logger_, "Incorrect select application is pre_dataConsented");
+    LOGGER_WARN(logger_, "Incorrect select application is pre_dataConsented");
     return false;
   }
 
   query.Bind(0, app_id);
   if (!query.Exec()) {
-    LOG4CXX_WARN(logger_, "Failed select application is pre_dataConsented");
+    LOGGER_WARN(logger_, "Failed select application is pre_dataConsented");
     return false;
   }
   return query.IsNull(0) ? false : query.GetBoolean(0);
@@ -1705,17 +1703,17 @@ bool SQLPTExtRepresentation::IsPredataPolicy(const std::string& app_id) const {
 
 bool SQLPTExtRepresentation::SetIsPredata(const std::string& app_id,
                                           bool is_pre_data) {
-  LOG4CXX_TRACE(logger_, "Set flag is_predata of application");
+  LOGGER_TRACE(logger_, "Set flag is_predata of application");
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt_ext::kUpdateIsPredata)) {
-    LOG4CXX_WARN(logger_, "Incorect statement for updating is_predata");
+    LOGGER_WARN(logger_, "Incorect statement for updating is_predata");
     return false;
   }
 
   query.Bind(0, is_pre_data);
   query.Bind(1, app_id);
   if (!query.Exec()) {
-    LOG4CXX_WARN(logger_, "Failed update is_predata");
+    LOGGER_WARN(logger_, "Failed update is_predata");
     return false;
   }
   return true;
@@ -1723,27 +1721,27 @@ bool SQLPTExtRepresentation::SetIsPredata(const std::string& app_id,
 
 bool SQLPTExtRepresentation::SetUnpairedDevice(const std::string& device_id,
                                                bool unpaired) const {
-  LOG4CXX_TRACE(logger_, "Set unpaired device: " << device_id);
+  LOGGER_TRACE(logger_, "Set unpaired device: " << device_id);
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt_ext::kUpdateUnpairedDevice)) {
-    LOG4CXX_WARN(logger_, "Incorect statement for updating unpaired device");
+    LOGGER_WARN(logger_, "Incorect statement for updating unpaired device");
     return false;
   }
 
   query.Bind(0, unpaired);
   query.Bind(1, device_id);
   if (!query.Exec()) {
-    LOG4CXX_WARN(logger_, "Failed update unpaired device");
+    LOGGER_WARN(logger_, "Failed update unpaired device");
     return false;
   }
   return true;
 }
 
 bool SQLPTExtRepresentation::UnpairedDevicesList(DeviceIds* device_ids) const {
-  LOG4CXX_TRACE(logger_, "Get list of unpaired devices");
+  LOGGER_TRACE(logger_, "Get list of unpaired devices");
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt_ext::kSelectUnpairedDevices)) {
-    LOG4CXX_WARN(logger_, "Incorect statement for selecting unpaired devices");
+    LOGGER_WARN(logger_, "Incorect statement for selecting unpaired devices");
     return false;
   }
 
@@ -1756,7 +1754,7 @@ bool SQLPTExtRepresentation::UnpairedDevicesList(DeviceIds* device_ids) const {
 bool SQLPTExtRepresentation::SetVINValue(const std::string& value) {
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt_ext::kUpdateModuleMetaVinParam)) {
-    LOG4CXX_WARN(logger_, "Incorect statement for updating module_meta params");
+    LOGGER_WARN(logger_, "Incorect statement for updating module_meta params");
     return false;
   }
 
@@ -1764,7 +1762,7 @@ bool SQLPTExtRepresentation::SetVINValue(const std::string& value) {
   const bool result = query.Exec();
 
   if (!result) {
-    LOG4CXX_WARN(logger_, "Failed update module_meta");
+    LOGGER_WARN(logger_, "Failed update module_meta");
   }
   return result;
 }
@@ -1774,14 +1772,14 @@ bool SQLPTExtRepresentation::RemoveAppConsentForGroup(
     const std::string& functional_group_name) const {
   utils::dbms::SQLQuery query_group_id(db());
   if (!query_group_id.Prepare(sql_pt_ext::kSelectGroupId)) {
-    LOG4CXX_WARN(logger_, "Incorect statement for select group name.");
+    LOGGER_WARN(logger_, "Incorect statement for select group name.");
     return false;
   }
 
   query_group_id.Bind(0, functional_group_name);
 
   if (!query_group_id.Exec()) {
-    LOG4CXX_WARN(logger_, "Failed to select group id.");
+    LOGGER_WARN(logger_, "Failed to select group id.");
     return false;
   }
 
@@ -1789,7 +1787,7 @@ bool SQLPTExtRepresentation::RemoveAppConsentForGroup(
 
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt_ext::kDeleteAppGroupConsent)) {
-    LOG4CXX_WARN(logger_, "Incorect statement for remove app consent.");
+    LOGGER_WARN(logger_, "Incorect statement for remove app consent.");
     return false;
   }
 
@@ -1797,7 +1795,7 @@ bool SQLPTExtRepresentation::RemoveAppConsentForGroup(
   query.Bind(1, id);
 
   if (!query.Exec()) {
-    LOG4CXX_WARN(logger_, "Failed to remove app consent.");
+    LOGGER_WARN(logger_, "Failed to remove app consent.");
     return false;
   }
 

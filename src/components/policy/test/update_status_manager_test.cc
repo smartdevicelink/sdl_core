@@ -59,8 +59,9 @@ class UpdateStatusManagerTest : public ::testing::Test {
   }
 };
 
-TEST_F(UpdateStatusManagerTest,
-       StringifiedUpdateStatus_SetStatuses_ExpectCorrectStringifiedStatuses) {
+TEST_F(
+    UpdateStatusManagerTest,
+    StringifiedUpdateStatus_SetStatuses_ExpectCorrectStringifiedStatuses) {
   // Arrange
   manager_->OnPolicyInit(false);
   // Check

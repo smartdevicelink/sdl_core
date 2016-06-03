@@ -40,10 +40,14 @@ ssize_t TcpServer::Send(int fd, const std::string& data) {
     std::string header = std::string((char*)buf, headerlen);
     rep = header + rep;
   }
-  int bytesToSend = rep.length();
+  int bytesToSend = static_cast<int>(rep.length());
   const char* ptrBuffer = rep.c_str();
   do {
+#ifdef _WIN32
+    int retVal = send(fd, ptrBuffer, bytesToSend, 0);
+#else
     int retVal = send(fd, ptrBuffer, bytesToSend, MSG_NOSIGNAL);
+#endif
     if (retVal == -1) {
       if (EPIPE == errno) {
         m_purge.push_back(fd);
@@ -53,7 +57,7 @@ ssize_t TcpServer::Send(int fd, const std::string& data) {
     bytesToSend -= retVal;
     ptrBuffer += retVal;
   } while (bytesToSend > 0);
-  return rep.length();
+  return static_cast<ssize_t>(rep.length());
 }
 
 bool TcpServer::Recv(int fd) {
@@ -145,7 +149,7 @@ bool TcpServer::Recv(int fd) {
         return false;
       }
     } else { // message is a websocket handshake
-      ssize_t webSocketKeyPos = pReceivingBuffer->find("Sec-WebSocket-Key: ");
+      ssize_t webSocketKeyPos = static_cast<ssize_t>(pReceivingBuffer->find("Sec-WebSocket-Key: "));
       if (-1 != webSocketKeyPos) {
         std::string handshakeResponse =
             "HTTP/1.1 101 Switching Protocols\r\nUpgrade: WebSocket\r\n"
@@ -172,7 +176,7 @@ bool TcpServer::checkWebSocketHandShake(int fd, std::string* pReceivingBuffer) {
   bool result = false;
   std::list<int>::iterator acceptedClientIt = find(m_AcceptedClients.begin(), m_AcceptedClients.end(), fd);
   if (m_AcceptedClients.end() != acceptedClientIt) {
-    ssize_t httpheader = pReceivingBuffer->find("GET / HTTP/1.1");
+    ssize_t httpheader = static_cast<ssize_t>(pReceivingBuffer->find("GET / HTTP/1.1"));
     if (-1 != httpheader) { // here is a header
       DBG_MSG(("HTTP header detected!\n"));
       result = true;
@@ -294,7 +298,7 @@ bool TcpServer::Accept() {
     return false;
   }
 
-  client = accept(m_sock, 0, &addrlen);
+  client = static_cast<int>(accept(m_sock, 0, &addrlen));
 
   if (client == -1) {
     return false;

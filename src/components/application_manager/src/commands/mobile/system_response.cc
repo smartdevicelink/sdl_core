@@ -44,7 +44,7 @@ SystemResponse::SystemResponse(const MessageSharedPtr& message,
 SystemResponse::~SystemResponse() {}
 
 void SystemResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   application_manager_.SendMessageToMobile(message_);
 }
