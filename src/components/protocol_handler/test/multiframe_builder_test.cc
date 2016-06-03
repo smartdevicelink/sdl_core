@@ -418,7 +418,7 @@ TEST_F(MultiFrameBuilderTest, Add_ConsecutiveFrames_OneByOne) {
 }
 
 // TODO(OHerasym) : Test do not finish working
-TEST_F(MultiFrameBuilderTest, DISABLED_Add_ConsecutiveFrames_per1) {
+TEST_F(MultiFrameBuilderTest, Add_ConsecutiveFrames_per1) {
   AddConnections();
   ASSERT_FALSE(test_data_map_.empty());
   // After processing each frame we remove it from messageId_it

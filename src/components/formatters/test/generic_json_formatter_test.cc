@@ -37,7 +37,7 @@ namespace test {
 namespace components {
 namespace formatters {
 
-TEST(GenericJsonFormatter, DISABLED_ToString) {
+TEST(GenericJsonFormatter, ToString) {
   namespace smartobj = NsSmartDeviceLink::NsSmartObjects;
   namespace formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
 
@@ -92,7 +92,7 @@ TEST(GenericJsonFormatter, DISABLED_ToString) {
       result.c_str());
 }
 
-TEST(GenericJsonFormatter, DISABLED_FromString) {
+TEST(GenericJsonFormatter, FromString) {
   namespace smartobj = NsSmartDeviceLink::NsSmartObjects;
   namespace formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
 

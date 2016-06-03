@@ -1461,7 +1461,7 @@ TEST_F(SQLPTRepresentationTest,
   EXPECT_EQ(0, dbms->FetchOneInt(query_select));
 }
 
-TEST(SQLPTRepresentationTest3, DISABLED_RemoveDB_RemoveDB_ExpectFileDeleted) {
+TEST(SQLPTRepresentationTest3, RemoveDB_RemoveDB_ExpectFileDeleted) {
   // Arrange
   policy_handler_test::MockPolicySettings policy_settings_;
   SQLPTRepresentation* reps = new SQLPTRepresentation(

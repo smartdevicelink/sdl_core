@@ -88,14 +88,14 @@ TEST(ValidatedTypesJson, BooleanAbsentValueTest) {
 }
 
 // TODO(OHerasym) : dcheck Unsupported type inside QVariant
-TEST(ValidatedTypesJson, DISABLED_BooleanFromInvalidJsonTest) {
+TEST(ValidatedTypesJson, BooleanFromInvalidJsonTest) {
   JsonValue inv(utils::ConvertInt64ToLongLongInt(7));
   Boolean boolean(inv);
   ASSERT_TRUE(boolean.is_initialized());
   ASSERT_FALSE(boolean.is_valid());
 }
 
-TEST(ValidatedTypesJson, DISABLED_IntegerFromJsonTest) {
+TEST(ValidatedTypesJson, IntegerFromJsonTest) {
   JsonValue json_value(utils::ConvertInt64ToLongLongInt(42));
   JsonValueRef int_val = json_value;
   Integer<int32_t, -5, 192> integer(int_val);
@@ -135,7 +135,7 @@ TEST(ValidatedTypesJson, IntegerFromInvalidJsonTest) {
   ASSERT_FALSE(integer.is_valid());
 }
 
-TEST(ValidatedTypesJson, DISABLED_IntegerFromOutOfRangeValueTest) {
+TEST(ValidatedTypesJson, IntegerFromOutOfRangeValueTest) {
   JsonValue json_value(utils::ConvertInt64ToLongLongInt(500));
   JsonValueRef ref = json_value;
   Integer<int8_t, 0, 100> integer(ref);
@@ -182,7 +182,7 @@ TEST(ValidatedTypesJson, StringNullTest) {
   ASSERT_FALSE(str.is_valid());
 }
 
-TEST(ValidatedTypesJson, DISABLED_StringFromInvalidJsonTest) {
+TEST(ValidatedTypesJson, StringFromInvalidJsonTest) {
   JsonValue json_value(utils::ConvertInt64ToLongLongInt(42));
   JsonValueRef ref = json_value;
   String<1, 500> str(ref);
@@ -346,7 +346,7 @@ TEST(ValidatedTypesJson, NullableIntFromNullValueTest) {
   ASSERT_TRUE(nullable_int.is_null());
 }
 
-TEST(ValidatedTypesJson, DISABLED_NullableIntFromNonNullValueTest) {
+TEST(ValidatedTypesJson, NullableIntFromNonNullValueTest) {
   JsonValue json_value(utils::ConvertInt64ToLongLongInt(3));
   JsonValueRef json = json_value;
   Nullable<Integer<int8_t, 1, 15> > nullable_int(json);
@@ -364,7 +364,7 @@ TEST(ValidatedTypesJson, NullableIntFromAbsentValueTest) {
   ASSERT_FALSE(nullable_int.is_null());
 }
 
-TEST(ValidatedTypesJson, DISABLED_OptionalIntFromJsonTest) {
+TEST(ValidatedTypesJson, OptionalIntFromJsonTest) {
   JsonValue json_value(utils::ConvertInt64ToLongLongInt(42));
   JsonValueRef int_value = json_value;
   Optional<Integer<int64_t, 42, 43> > optional_int;

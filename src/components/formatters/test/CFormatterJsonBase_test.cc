@@ -76,8 +76,7 @@ TEST(CFormatterJsonBaseTest, JSonDoubleValueToSmartObj_ExpectSuccessful) {
 }
 
 // TODO(OHerasym) : DCHECK on QT platform
-TEST(CFormatterJsonBaseTest,
-     DISABLED_JSonMinIntValueToSmartObj_ExpectSuccessful) {
+TEST(CFormatterJsonBaseTest, JSonMinIntValueToSmartObj_ExpectSuccessful) {
   // Arrange value
   const Json::Int ival = Json::Value::minInt;
   const JsonValue json_value(utils::ConvertInt64ToLongLongInt(ival));
@@ -90,8 +89,7 @@ TEST(CFormatterJsonBaseTest,
 }
 
 // TODO(OHerasym) : DCHECK on QT platform
-TEST(CFormatterJsonBaseTest,
-     DISABLED_JSonNullIntValueToSmartObj_ExpectSuccessful) {
+TEST(CFormatterJsonBaseTest, JSonNullIntValueToSmartObj_ExpectSuccessful) {
   // Arrange value
   const Json::Int ival = Json::nullValue;
   const JsonValue json_value(utils::ConvertInt64ToLongLongInt(ival));
@@ -104,8 +102,7 @@ TEST(CFormatterJsonBaseTest,
 }
 
 // TODO(OHerasym) : DCHECK on QT platform
-TEST(CFormatterJsonBaseTest,
-     DISABLED_JSonSignedMaxIntValueToSmartObj_ExpectSuccessful) {
+TEST(CFormatterJsonBaseTest, JSonSignedMaxIntValueToSmartObj_ExpectSuccessful) {
   // Arrange value
   const Json::Int ival = Json::Value::maxInt;
   const JsonValue json_value(utils::ConvertInt64ToLongLongInt(ival));
@@ -119,7 +116,7 @@ TEST(CFormatterJsonBaseTest,
 
 // TODO(OHerasym) : DCHECK on QT platform
 TEST(CFormatterJsonBaseTest,
-     DISABLED_JSonUnsignedMaxIntValueToSmartObj_ExpectSuccessful) {
+     JSonUnsignedMaxIntValueToSmartObj_ExpectSuccessful) {
   // Arrange value
   const Json::UInt ui_val = Json::Value::maxUInt;
   const JsonValue json_value(utils::ConvertInt64ToLongLongInt(ui_val));
@@ -269,8 +266,7 @@ TEST(CFormatterJsonBaseTest, DoubleSmartObjectToJSon_ExpectSuccessful) {
 }
 
 // TODO(OHerasym) : DCHECK on QT platform
-TEST(CFormatterJsonBaseTest,
-     DISABLED_ZeroIntSmartObjectToJSon_ExpectSuccessful) {
+TEST(CFormatterJsonBaseTest, ZeroIntSmartObjectToJSon_ExpectSuccessful) {
   // Arrange value
   const Json::Int ival = Json::nullValue;
   const JsonValue json_value(utils::ConvertInt64ToLongLongInt(ival));
@@ -284,8 +280,7 @@ TEST(CFormatterJsonBaseTest,
 }
 
 // TODO(OHerasym) : DCHECK on QT platform
-TEST(CFormatterJsonBaseTest,
-     DISABLED_MinIntSmartObjectToJSon_ExpectSuccessful) {
+TEST(CFormatterJsonBaseTest, MinIntSmartObjectToJSon_ExpectSuccessful) {
   // Arrange value
   const Json::Int ival = Json::Value::minInt;
   const JsonValue json_value(utils::ConvertInt64ToLongLongInt(ival));
@@ -298,8 +293,7 @@ TEST(CFormatterJsonBaseTest,
 }
 
 // TODO(OHerasym) : assert (convert <= std::numeric_limits<int32_t>::max())
-TEST(CFormatterJsonBaseTest,
-     DISABLED_UnsignedMaxIntSmartObjectToJSon_ExpectSuccessful) {
+TEST(CFormatterJsonBaseTest, UnsignedMaxIntSmartObjectToJSon_ExpectSuccessful) {
   // Arrange value
   const Json::UInt ui_val = Json::Value::maxUInt;
   const JsonValue json_value(utils::ConvertInt64ToLongLongInt(ui_val));
@@ -330,8 +324,7 @@ TEST(CFormatterJsonBaseTest, BoolSmartObjectToJSon_ExpectSuccessful) {
 }
 
 // TODO(OHerasym() : no CSTRING method in JsonValue
-TEST(CFormatterJsonBaseTest,
-     DISABLED_CStringSmartObjectToJSon_ExpectSuccessful) {
+TEST(CFormatterJsonBaseTest, CStringSmartObjectToJSon_ExpectSuccessful) {
   // Arrange value
   const char* cstr_val = "cstring_test";
   const JsonValue json_value(cstr_val);  // Json value from const char*

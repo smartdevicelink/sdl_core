@@ -210,7 +210,7 @@ TEST_F(ProtocolPacketTest, SetData) {
   EXPECT_EQ(session_id, protocol_packet.data()[3]);
 }
 
-TEST_F(ProtocolPacketTest, DISABLED_DeserializeZeroPacket) {
+TEST_F(ProtocolPacketTest, DeserializeZeroPacket) {
   uint8_t message;
   ProtocolPacket protocol_packet;
   RESULT_CODE res = protocol_packet.deserializePacket(&message, 0);

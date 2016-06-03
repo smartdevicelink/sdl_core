@@ -384,7 +384,7 @@ TEST_F(ConnectionHandlerTest, GetDefaultProtocolVersion) {
 }
 
 // TODO(OHerasym) : exception on Windows platform
-TEST_F(ConnectionHandlerTest, DISABLED_GetProtocolVersion) {
+TEST_F(ConnectionHandlerTest, GetProtocolVersion) {
   AddTestDeviceConnection();
   AddTestSession();
   ChangeProtocol(uid_, start_session_id_, PROTOCOL_VERSION_3);
@@ -397,7 +397,7 @@ TEST_F(ConnectionHandlerTest, DISABLED_GetProtocolVersion) {
 }
 
 // TODO(OHerasym) : exception on Windows platform
-TEST_F(ConnectionHandlerTest, DISABLED_IsHeartBeatSupported) {
+TEST_F(ConnectionHandlerTest, IsHeartBeatSupported) {
   AddTestDeviceConnection();
   AddTestSession();
   ChangeProtocol(uid_, start_session_id_, PROTOCOL_VERSION_3);
@@ -802,7 +802,7 @@ TEST_F(ConnectionHandlerTest, CloseRevokedConnection) {
   connection_handler_->CloseRevokedConnection(connection_key_);
 }
 
-TEST_F(ConnectionHandlerTest, DISABLED_CloseSessionWithCommonReason) {
+TEST_F(ConnectionHandlerTest, CloseSessionWithCommonReason) {
   AddTestDeviceConnection();
   AddTestSession();
   AddTestService(kAudio);
@@ -830,7 +830,7 @@ TEST_F(ConnectionHandlerTest, DISABLED_CloseSessionWithCommonReason) {
   Mock::AsyncVerifyAndClearExpectations(10000);
 }
 
-TEST_F(ConnectionHandlerTest, DISABLED_CloseSessionWithFloodReason) {
+TEST_F(ConnectionHandlerTest, CloseSessionWithFloodReason) {
   AddTestDeviceConnection();
   AddTestSession();
   AddTestService(kAudio);
@@ -858,7 +858,7 @@ TEST_F(ConnectionHandlerTest, DISABLED_CloseSessionWithFloodReason) {
   Mock::AsyncVerifyAndClearExpectations(10000);
 }
 
-TEST_F(ConnectionHandlerTest, DISABLED_CloseSessionWithMalformedMessage) {
+TEST_F(ConnectionHandlerTest, CloseSessionWithMalformedMessage) {
   AddTestDeviceConnection();
   AddTestSession();
   AddTestService(kAudio);
@@ -889,7 +889,7 @@ TEST_F(ConnectionHandlerTest, DISABLED_CloseSessionWithMalformedMessage) {
   Mock::AsyncVerifyAndClearExpectations(10000);
 }
 
-TEST_F(ConnectionHandlerTest, DISABLED_CloseConnectionSessionsWithMalformedMessage) {
+TEST_F(ConnectionHandlerTest, CloseConnectionSessionsWithMalformedMessage) {
   AddTestDeviceConnection();
   AddTestSession();
   AddTestService(kAudio);
@@ -920,7 +920,7 @@ TEST_F(ConnectionHandlerTest, DISABLED_CloseConnectionSessionsWithMalformedMessa
   Mock::AsyncVerifyAndClearExpectations(10000);
 }
 
-TEST_F(ConnectionHandlerTest, DISABLED_CloseConnectionSessionsWithCommonReason) {
+TEST_F(ConnectionHandlerTest, CloseConnectionSessionsWithCommonReason) {
   AddTestDeviceConnection();
   AddTestSession();
   AddTestService(kAudio);
@@ -949,7 +949,7 @@ TEST_F(ConnectionHandlerTest, DISABLED_CloseConnectionSessionsWithCommonReason) 
   Mock::AsyncVerifyAndClearExpectations(10000);
 }
 
-TEST_F(ConnectionHandlerTest, DISABLED_StartService_withServices) {
+TEST_F(ConnectionHandlerTest, StartService_withServices) {
   // Add virtual device and connection
   AddTestDeviceConnection();
   AddTestSession();
@@ -970,7 +970,7 @@ TEST_F(ConnectionHandlerTest, DISABLED_StartService_withServices) {
 }
 
 // TODO(OHerasym) : OnSessionEndedCallback tests don't finish executing
-TEST_F(ConnectionHandlerTest, DISABLED_ServiceStop_UnExistSession) {
+TEST_F(ConnectionHandlerTest, ServiceStop_UnExistSession) {
   AddTestDeviceConnection();
 
   const uint32_t end_session_result =
@@ -979,7 +979,7 @@ TEST_F(ConnectionHandlerTest, DISABLED_ServiceStop_UnExistSession) {
   CheckSessionExists(uid_, 0);
 }
 
-TEST_F(ConnectionHandlerTest, DISABLED_ServiceStop_UnExistService) {
+TEST_F(ConnectionHandlerTest, ServiceStop_UnExistService) {
   AddTestDeviceConnection();
   AddTestSession();
   const uint32_t end_session_result =
@@ -989,7 +989,7 @@ TEST_F(ConnectionHandlerTest, DISABLED_ServiceStop_UnExistService) {
   CheckServiceExists(uid_, start_session_id_, kAudio, false);
 }
 
-TEST_F(ConnectionHandlerTest, DISABLED_ServiceStop) {
+TEST_F(ConnectionHandlerTest, ServiceStop) {
   AddTestDeviceConnection();
   AddTestSession();
   // Check ignoring hash_id on stop non-rpc service
@@ -1008,7 +1008,7 @@ TEST_F(ConnectionHandlerTest, DISABLED_ServiceStop) {
   }
 }
 
-TEST_F(ConnectionHandlerTest, DISABLED_SessionStop_CheckHash) {
+TEST_F(ConnectionHandlerTest, SessionStop_CheckHash) {
   AddTestDeviceConnection();
   for (uint32_t session = 0; session < 0xFF; ++session) {
     AddTestSession();
@@ -1029,7 +1029,7 @@ TEST_F(ConnectionHandlerTest, DISABLED_SessionStop_CheckHash) {
   }
 }
 
-TEST_F(ConnectionHandlerTest, DISABLED_SessionStop_CheckSpecificHash) {
+TEST_F(ConnectionHandlerTest, SessionStop_CheckSpecificHash) {
   AddTestDeviceConnection();
   for (uint32_t session = 0; session < 0xFF; ++session) {
     AddTestSession();
@@ -1051,7 +1051,7 @@ TEST_F(ConnectionHandlerTest, DISABLED_SessionStop_CheckSpecificHash) {
 }
 
 // TODO(OHerasym) : fails on Windows platform
-TEST_F(ConnectionHandlerTest, DISABLED_SessionStarted_WithRpc) {
+TEST_F(ConnectionHandlerTest, SessionStarted_WithRpc) {
   // Add virtual device and connection
   AddTestDeviceConnection();
   // Expect that rpc service has started
@@ -1074,7 +1074,7 @@ TEST_F(ConnectionHandlerTest, DISABLED_SessionStarted_WithRpc) {
 
 // TODO(OHerasym) : OnSessionStartedCallback tests don't finish executing
 TEST_F(ConnectionHandlerTest,
-       DISABLED_SessionStarted_StartSession_SecureSpecific_Unprotect) {
+       SessionStarted_StartSession_SecureSpecific_Unprotect) {
   EXPECT_CALL(mock_connection_handler_settings, heart_beat_timeout())
       .WillOnce(Return(heartbeat_timeout));
   // Add virtual device and connection
@@ -1107,7 +1107,7 @@ TEST_F(ConnectionHandlerTest,
 }
 
 TEST_F(ConnectionHandlerTest,
-       DISABLED_SessionStarted_StartSession_SecureSpecific_Protect) {
+       SessionStarted_StartSession_SecureSpecific_Protect) {
   // Add virtual device and connection
   AddTestDeviceConnection();
   // Forbid start kRPC with encryption
@@ -1141,7 +1141,7 @@ TEST_F(ConnectionHandlerTest,
 }
 
 TEST_F(ConnectionHandlerTest,
-       DISABLED_SessionStarted_StartService_SecureSpecific_Unprotect) {
+       SessionStarted_StartService_SecureSpecific_Unprotect) {
   AddTestDeviceConnection();
   AddTestSession();
 
@@ -1180,7 +1180,7 @@ TEST_F(ConnectionHandlerTest,
 }
 
 TEST_F(ConnectionHandlerTest,
-       DISABLED_SessionStarted_StartService_SecureSpecific_Protect) {
+       SessionStarted_StartService_SecureSpecific_Protect) {
   AddTestDeviceConnection();
   AddTestSession();
 
@@ -1216,7 +1216,7 @@ TEST_F(ConnectionHandlerTest,
 #endif  // ENABLE_SECURITY
 }
 
-TEST_F(ConnectionHandlerTest, DISABLED_SessionStarted_DealyProtect) {
+TEST_F(ConnectionHandlerTest, SessionStarted_DealyProtect) {
   AddTestDeviceConnection();
   AddTestSession();
 
@@ -1256,7 +1256,7 @@ TEST_F(ConnectionHandlerTest, DISABLED_SessionStarted_DealyProtect) {
 #endif  // ENABLE_SECURITY
 }
 
-TEST_F(ConnectionHandlerTest, DISABLED_SessionStarted_DealyProtectBulk) {
+TEST_F(ConnectionHandlerTest, SessionStarted_DealyProtectBulk) {
   AddTestDeviceConnection();
   AddTestSession();
 
@@ -1273,7 +1273,7 @@ TEST_F(ConnectionHandlerTest, DISABLED_SessionStarted_DealyProtectBulk) {
 
 // TODO(OHerasym) : security tests don't finish executing
 #ifdef ENABLE_SECURITY
-TEST_F(ConnectionHandlerTest, DISABLED_SetSSLContext_Null) {
+TEST_F(ConnectionHandlerTest, SetSSLContext_Null) {
   // No SSLContext on start up
   EXPECT_EQ(connection_handler_->GetSSLContext(connection_key_, kControl),
             reinterpret_cast<security_manager::SSLContext*>(NULL));
@@ -1298,7 +1298,7 @@ TEST_F(ConnectionHandlerTest, DISABLED_SetSSLContext_Null) {
             reinterpret_cast<security_manager::SSLContext*>(NULL));
 }
 
-TEST_F(ConnectionHandlerTest, DISABLED_SetSSLContext) {
+TEST_F(ConnectionHandlerTest, SetSSLContext) {
   // No SSLContext on start up
   EXPECT_EQ(connection_handler_->GetSSLContext(connection_key_, kControl),
             reinterpret_cast<security_manager::SSLContext*>(NULL));
@@ -1339,7 +1339,7 @@ TEST_F(ConnectionHandlerTest, DISABLED_SetSSLContext) {
             reinterpret_cast<security_manager::SSLContext*>(NULL));
 }
 
-TEST_F(ConnectionHandlerTest, DISABLED_GetSSLContext_ByProtectedService) {
+TEST_F(ConnectionHandlerTest, GetSSLContext_ByProtectedService) {
   // No SSLContext on start up
   EXPECT_EQ(connection_handler_->GetSSLContext(connection_key_, kControl),
             reinterpret_cast<security_manager::SSLContext*>(NULL));
@@ -1368,7 +1368,7 @@ TEST_F(ConnectionHandlerTest, DISABLED_GetSSLContext_ByProtectedService) {
             &mock_ssl_context);
 }
 
-TEST_F(ConnectionHandlerTest, DISABLED_GetSSLContext_ByDealyProtectedRPC) {
+TEST_F(ConnectionHandlerTest, GetSSLContext_ByDealyProtectedRPC) {
   testing::StrictMock<security_manager_test::MockSSLContext> mock_ssl_context;
   AddTestDeviceConnection();
   AddTestSession();
@@ -1396,7 +1396,7 @@ TEST_F(ConnectionHandlerTest, DISABLED_GetSSLContext_ByDealyProtectedRPC) {
             &mock_ssl_context);
 }
 
-TEST_F(ConnectionHandlerTest, DISABLED_GetSSLContext_ByDealyProtectedBulk) {
+TEST_F(ConnectionHandlerTest, GetSSLContext_ByDealyProtectedBulk) {
   testing::StrictMock<security_manager_test::MockSSLContext> mock_ssl_context;
   AddTestDeviceConnection();
   AddTestSession();
@@ -1426,7 +1426,7 @@ TEST_F(ConnectionHandlerTest, DISABLED_GetSSLContext_ByDealyProtectedBulk) {
 #endif  // ENABLE_SECURITY
 
 // TODO(OHerasym) : test don't finish executing
-TEST_F(ConnectionHandlerTest, DISABLED_SendHeartBeat) {
+TEST_F(ConnectionHandlerTest, SendHeartBeat) {
   // Add virtual device and connection
   AddTestDeviceConnection();
   AddTestSession();
