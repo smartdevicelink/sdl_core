@@ -84,7 +84,7 @@ void UnlockAndSleep(const long usecs) {
 #if defined(OS_POSIX)
   usleep(usecs);
 #elif defined(OS_WINDOWS)
-  Sleep(usecs * kMicrosecondsInMillisecond);
+  Sleep(usecs / kMicrosecondsInMillisecond);
 #endif
   g_gmock_mutex.Lock();
 }
