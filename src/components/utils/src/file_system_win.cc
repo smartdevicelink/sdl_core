@@ -175,14 +175,14 @@ file_system::FileSizeType file_system::DirectorySize(
 
 bool file_system::CreateDirectory(const std::string& utf8_path) {
   return DirectoryExists(utf8_path) ||
-      0 == _wmkdir(ConvertUTF8ToWString(utf8_path).c_str());
+         0 == _wmkdir(ConvertUTF8ToWString(utf8_path).c_str());
 }
 
 bool file_system::CreateDirectoryRecursively(const std::string& utf8_path) {
   size_t pos = IsRelativePath(utf8_path) ? 0 : utf8_path.find_first_of(":") + 2;
   while (pos < utf8_path.length()) {
     pos = std::min(utf8_path.find_first_of("/", pos),
-        utf8_path.find_first_of("\\", pos));
+                   utf8_path.find_first_of("\\", pos));
     if (!CreateDirectory(utf8_path.substr(0, pos))) {
       return false;
     }

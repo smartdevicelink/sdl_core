@@ -119,8 +119,7 @@ TEST_F(HMIMessageHandlerImplTest,
   EXPECT_TRUE(hmi_handler_->message_adapters().empty());
 }
 
-TEST_F(HMIMessageHandlerImplTest,
-       RemoveHMIMessageAdapter_ExpectRemoved) {
+TEST_F(HMIMessageHandlerImplTest, RemoveHMIMessageAdapter_ExpectRemoved) {
   // Arrange
   hmi_handler_->AddHMIMessageAdapter(mb_adapter_);
   // Act

@@ -185,13 +185,9 @@ bool file_system::DeleteFile(const std::string& utf8_path) {
 void file_system::RemoveDirectoryContent(const std::string& utf8_path) {
   QDir dir(QString::fromUtf8(utf8_path.c_str()));
   dir.setFilter(QDir::Files | QDir::NoDotAndDotDot);
-  foreach(QString dirItem, dir.entryList())
-  {
-    dir.remove(dirItem);
-  }
+  foreach (QString dirItem, dir.entryList()) { dir.remove(dirItem); }
   dir.setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
-  foreach(QString dirItem, dir.entryList())
-  {
+  foreach (QString dirItem, dir.entryList()) {
     QDir subDir(dir.absoluteFilePath(dirItem));
     subDir.removeRecursively();
   }

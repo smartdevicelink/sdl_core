@@ -122,7 +122,8 @@ TEST(FormatterJsonRPCTest, CorrectRPCv2Request_ToString_Success) {
   EXPECT_EQ(json_string, result);
 }
 
-// TODO(OHerasym) : assertion failed: (convert <= std::numeric_limits<int32_t>::max())
+// TODO(OHerasym) : assertion failed: (convert <=
+// std::numeric_limits<int32_t>::max())
 TEST(FormatterJsonRPCTest,
      DISABLED_UpperBoundValuesInSystemRequest_ToString_Success) {
   // Create SmartObject
@@ -399,7 +400,8 @@ TEST(FormatterJsonRPCTest, ResponseToSmartObject_Success) {
   EXPECT_EQ(2, obj["params"]["protocol_version"].asInt());
 }
 
-// TODO(OHerasym) : Assertion failed: (convert <= std::numeric_limits<int32_t>::max())
+// TODO(OHerasym) : Assertion failed: (convert <=
+// std::numeric_limits<int32_t>::max())
 TEST(FormatterJsonRPCTest,
      DISABLED_StringWithUpperBoundValueToSmartObject_Success) {
   // Source Json string

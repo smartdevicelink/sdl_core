@@ -135,9 +135,8 @@ TEST(StatisticsManagerSetMethod,
   gui_language_info.Update("UA");
 }
 
-TEST(
-    StatisticsManagerAddMethod,
-    AppStopwatchStartMethod_CallONCE_StatisticsManagerAddMethodCalledONCE) {
+TEST(StatisticsManagerAddMethod,
+     AppStopwatchStartMethod_CallONCE_StatisticsManagerAddMethodCalledONCE) {
   // Arrange
   MockStatisticsManager* msm = new StrictMock<MockStatisticsManager>();
   const std::uint32_t time_out = 1;
