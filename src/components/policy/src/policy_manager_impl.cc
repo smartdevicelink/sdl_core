@@ -110,11 +110,11 @@ utils::SharedPtr<policy_table::Table> PolicyManagerImpl::ParseArray(
   JsonValue::ParseResult parse_result = JsonValue::Parse(json);
   if (parse_result.second) {
     // For PT Update received from SDL Server.
-    if (value["data"].size() != 0) {
-      Json::Value data = value["data"];
-      return new policy_table::Table(&data[0]);
+    if (parse_result.first["data"].Size() != 0) {
+      JsonValue data = parse_result.first["data"];
+      return new policy_table::Table(data[0u]);
     } else {
-      return new policy_table::Table(&value);
+      return new policy_table::Table(parse_result.first);
     }
   } else {
     return utils::SharedPtr<policy_table::Table>();
