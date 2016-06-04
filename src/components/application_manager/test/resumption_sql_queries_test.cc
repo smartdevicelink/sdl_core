@@ -1626,6 +1626,8 @@ TEST_F(ResumptionSqlQueriesTest,
   OrderedQueryParams p;
   p.push_back(app_id2);
   p.push_back(device_id);
+  p.push_back(app_id2);
+  p.push_back(device_id);
   CheckDeleteQuery(
       select_count_image, kDeleteImageFromChoiceSet, p, 1, 0, 0);
 }
@@ -1845,6 +1847,9 @@ TEST_F(ResumptionSqlQueriesTest,
   OrderedQueryParams p;
   p.push_back(app_id2);
   p.push_back(device_id);
+  p.push_back(app_id2);
+  p.push_back(device_id);
+
   CheckDeleteQuery(
       select_count_image, kDeleteImageFromGlobalProperties, p, 1, 0, 0);
 }
@@ -2011,6 +2016,8 @@ TEST_F(ResumptionSqlQueriesTest, kDeleteTTSChunk_ExpectDataDeleted) {
   // Check
   const std::string select_count_tts_chunk = "SELECT COUNT(*) FROM TTSChunk;";
   OrderedQueryParams p;
+  p.push_back(app_id1);
+  p.push_back(device_id);
   p.push_back(app_id1);
   p.push_back(device_id);
   CheckDeleteQuery(select_count_tts_chunk, kDeleteTTSChunk, p, 1, 0, 0);
