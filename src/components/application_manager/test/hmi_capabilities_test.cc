@@ -165,7 +165,7 @@ hmi_apis::Common_Language::eType TestCommonLanguageFromString(
   return hmi_apis::Common_Language::INVALID_ENUM;
 }
 
-TEST_F(HMICapabilitiesTest, DISABLED_LoadCapabilitiesFromFile) {
+TEST_F(HMICapabilitiesTest, LoadCapabilitiesFromFile) {
   const std::string hmi_capabilities_file = "hmi_capabilities.json";
   EXPECT_CALL(mock_application_manager_settings_, hmi_capabilities_file_name())
       .WillOnce(ReturnRef(hmi_capabilities_file));
@@ -352,7 +352,7 @@ TEST_F(HMICapabilitiesTest, DISABLED_LoadCapabilitiesFromFile) {
 }
 
 TEST_F(HMICapabilitiesTest,
-       DISABLED_HmiCapabilitiesInitialized_UiVrTtsIviNotCooperating) {
+       HmiCapabilitiesInitialized_UiVrTtsIviNotCooperating) {
   // Precondition
   hmi_capabilities_test->set_is_vr_cooperating(false);
   hmi_capabilities_test->set_is_tts_cooperating(false);

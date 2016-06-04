@@ -163,6 +163,9 @@ void InitCapabilities() {
       std::make_pair(std::string("sliderFooter"),
                      hmi_apis::Common_TextFieldName::sliderFooter));
   text_fields_enum_name.insert(
+      std::make_pair(std::string("navigationText"),
+                     hmi_apis::Common_TextFieldName::navigationText));
+  text_fields_enum_name.insert(
       std::make_pair(std::string("notificationText"),
                      hmi_apis::Common_TextFieldName::notificationText));
   text_fields_enum_name.insert(std::make_pair(
@@ -183,9 +186,9 @@ void InitCapabilities() {
       std::make_pair(std::string("locationDescription"),
                      hmi_apis::Common_TextFieldName::locationDescription));
   text_fields_enum_name.insert(std::make_pair(
-      std::string("addressLines"), hmi_apis::Common_TextFieldName::turnText));
+      std::string("turnText"), hmi_apis::Common_TextFieldName::turnText));
   text_fields_enum_name.insert(std::make_pair(
-      std::string("turnText"), hmi_apis::Common_TextFieldName::addressLines));
+      std::string("addressLines"), hmi_apis::Common_TextFieldName::addressLines));
   text_fields_enum_name.insert(std::make_pair(
       std::string("phoneNumber"), hmi_apis::Common_TextFieldName::phoneNumber));
   text_fields_enum_name.insert(std::make_pair(
@@ -266,6 +269,9 @@ void InitCapabilities() {
   image_field_name_enum.insert(std::make_pair(
       std::string("showConstantTBTNextTurnIcon"),
       hmi_apis::Common_ImageFieldName::showConstantTBTNextTurnIcon));
+  image_field_name_enum.insert(std::make_pair(
+      std::string("locationImage"),
+      hmi_apis::Common_ImageFieldName::locationImage));
 
   file_type_enum.insert(std::make_pair(std::string("GRAPHIC_BMP"),
                                        hmi_apis::Common_FileType::GRAPHIC_BMP));
@@ -909,21 +915,20 @@ bool HMICapabilities::load_capabilities_from_file() {
         const JsonValueRef audio_capabilities = ui["audioPassThruCapabilities"];
         smart_objects::SmartObject audio_capabilities_so =
             smart_objects::SmartObject(smart_objects::SmartType_Array);
-        int32_t i = 0;
-        audio_capabilities_so[i] =
+        audio_capabilities_so =
             smart_objects::SmartObject(smart_objects::SmartType_Map);
         if (audio_capabilities.HasMember("samplingRate")) {
-          audio_capabilities_so[i]["samplingRate"] =
+          audio_capabilities_so["samplingRate"] =
               sampling_rate_enum.find(audio_capabilities["samplingRate"]
                                           .AsString())->second;
         }
         if (audio_capabilities.HasMember("bitsPerSample")) {
-          audio_capabilities_so[i]["bitsPerSample"] =
+          audio_capabilities_so["bitsPerSample"] =
               bit_per_sample_enum.find(audio_capabilities["bitsPerSample"]
                                            .AsString())->second;
         }
         if (audio_capabilities.HasMember("audioType")) {
-          audio_capabilities_so[i]["audioType"] =
+          audio_capabilities_so["audioType"] =
               audio_type_enum.find(audio_capabilities["audioType"].AsString())
                   ->second;
         }
@@ -957,8 +962,7 @@ bool HMICapabilities::load_capabilities_from_file() {
       if (ui.HasMember("hmiZoneCapabilities")) {
         smart_objects::SmartObject hmi_zone_capabilities_so =
             smart_objects::SmartObject(smart_objects::SmartType_Array);
-        int32_t index = 0;
-        hmi_zone_capabilities_so[index] =
+        hmi_zone_capabilities_so =
             hmi_zone_enum.find(ui["hmiZoneCapabilities"].AsString())->second;
         set_hmi_zone_capabilities(hmi_zone_capabilities_so);
       }
