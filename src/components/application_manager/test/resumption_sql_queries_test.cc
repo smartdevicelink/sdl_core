@@ -133,10 +133,11 @@ class ResumptionSqlQueriesTest : public ::testing::Test {
     DeleteTablesData();
   }
 
+  typedef std::vector<std::string> OrderedQueryParams;
+
   void CheckDeleteQuery(const string& count_query,
                         const string& query_to_check,
-                        pair<int, string> app_info,
-                        pair<int, string> dev_info,
+                        const OrderedQueryParams& params,
                         const int value_before,
                         const int value_after,
                         const int position_in_result);
@@ -354,13 +355,13 @@ const int ResumptionSqlQueriesTest::ign_off_count2 = 4;
 const int ResumptionSqlQueriesTest::timeStamp = 2015;
 const int ResumptionSqlQueriesTest::timeStamp2 = 2016;
 
-void ResumptionSqlQueriesTest::CheckDeleteQuery(const string& count_query,
-                                                const string& query_to_check,
-                                                pair<int, string> app_info,
-                                                pair<int, string> dev_info,
-                                                const int value_before,
-                                                const int value_after,
-                                                const int position_in_result) {
+void ResumptionSqlQueriesTest::CheckDeleteQuery(
+    const string& count_query,
+    const string& query_to_check,
+    const OrderedQueryParams& params,
+    const int value_before,
+    const int value_after,
+    const int position_in_result) {
   SQLQuery query(db());
   EXPECT_TRUE(query.Prepare(count_query));
   EXPECT_TRUE(query.Exec());
@@ -369,12 +370,10 @@ void ResumptionSqlQueriesTest::CheckDeleteQuery(const string& count_query,
   // Act
   SQLQuery query_to_check_request(db());
   EXPECT_TRUE(query_to_check_request.Prepare(query_to_check));
-  if (!app_info.second.empty()) {
-    query_to_check_request.Bind(app_info.first, app_info.second);
+  for (size_t i = 0; i < params.size(); ++i) {
+    query_to_check_request.Bind(static_cast<int>(i), params[i]);
   }
-  if (!dev_info.second.empty()) {
-    query_to_check_request.Bind(dev_info.first, dev_info.second);
-  }
+
   EXPECT_TRUE(query_to_check_request.Exec());
   // Check after action
   EXPECT_TRUE(query.Exec());
@@ -1302,9 +1301,10 @@ TEST_F(ResumptionSqlQueriesTest, kDeleteFile_ExpectDataDeleted) {
   FillApplicationFilesArrayTable(temp_query, key1, key2);
   // Check before action
   const std::string select_count_file = "SELECT COUNT(*) from `file` ";
-  ValToPosPair p1(0, app_id2);
-  ValToPosPair p2(1, device_id);
-  CheckDeleteQuery(select_count_file, kDeleteFile, p1, p2, 1, 0, 0);
+  OrderedQueryParams p;
+  p.push_back(app_id2);
+  p.push_back(device_id);
+  CheckDeleteQuery(select_count_file, kDeleteFile, p, 1, 0, 0);
 }
 
 TEST_F(ResumptionSqlQueriesTest,
@@ -1334,12 +1334,12 @@ TEST_F(ResumptionSqlQueriesTest,
   // Check
   const std::string select_count_applicationsFilesArray =
       "SELECT COUNT(*) from `applicationFilesArray` ";
-  ValToPosPair p1(0, app_id2);
-  ValToPosPair p2(1, device_id);
+  OrderedQueryParams p;
+  p.push_back(app_id2);
+  p.push_back(device_id);
   CheckDeleteQuery(select_count_applicationsFilesArray,
                    kDeleteApplicationFilesArray,
-                   p1,
-                   p2,
+                   p,
                    1,
                    0,
                    0);
@@ -1371,9 +1371,10 @@ TEST_F(ResumptionSqlQueriesTest, kDeleteSubMenu_ExpectDataDeleted) {
   FillApplicationSubMenuArrayTable(temp_query, key, submenu_key);
   // Check
   const std::string select_count_subMenu = "SELECT COUNT(*) FROM subMenu;";
-  ValToPosPair p1(0, app_id2);
-  ValToPosPair p2(1, device_id);
-  CheckDeleteQuery(select_count_subMenu, kDeleteSubMenu, p1, p2, 1, 0, 0);
+  OrderedQueryParams p;
+  p.push_back(app_id2);
+  p.push_back(device_id);
+  CheckDeleteQuery(select_count_subMenu, kDeleteSubMenu, p, 1, 0, 0);
 }
 
 TEST_F(ResumptionSqlQueriesTest,
@@ -1405,10 +1406,11 @@ TEST_F(ResumptionSqlQueriesTest,
   // Check
   const std::string select_count_subMenu =
       "SELECT COUNT(*) FROM applicationSubMenuArray;";
-  ValToPosPair p1(0, app_id2);
-  ValToPosPair p2(1, device_id);
+  OrderedQueryParams p;
+  p.push_back(app_id2);
+  p.push_back(device_id);
   CheckDeleteQuery(
-      select_count_subMenu, kDeleteApplicationSubMenuArray, p1, p2, 1, 0, 0);
+      select_count_subMenu, kDeleteApplicationSubMenuArray, p, 1, 0, 0);
 }
 
 TEST_F(ResumptionSqlQueriesTest,
@@ -1439,12 +1441,12 @@ TEST_F(ResumptionSqlQueriesTest,
   // Check
   const std::string select_count_applicationSubscribtionsArray =
       "SELECT COUNT(*) FROM applicationSubscribtionsArray;";
-  ValToPosPair p1(0, app_id2);
-  ValToPosPair p2(1, device_id);
+  OrderedQueryParams p;
+  p.push_back(app_id2);
+  p.push_back(device_id);
   CheckDeleteQuery(select_count_applicationSubscribtionsArray,
                    kDeleteApplicationSubscribtionsArray,
-                   p1,
-                   p2,
+                   p,
                    1,
                    0,
                    0);
@@ -1475,10 +1477,11 @@ TEST_F(ResumptionSqlQueriesTest, kDeleteImageFromCommands_ExpectDataDeleted) {
   FillApplicationCommandsArrayTable(temp_query, key1, key2);
   // Check before action
   const std::string select_count_image = "SELECT COUNT(*) FROM image;";
-  ValToPosPair p1(0, app_id2);
-  ValToPosPair p2(1, device_id);
+  OrderedQueryParams p;
+  p.push_back(app_id2);
+  p.push_back(device_id);
   CheckDeleteQuery(
-      select_count_image, kDeleteImageFromCommands, p1, p2, 1, 0, 0);
+      select_count_image, kDeleteImageFromCommands, p, 1, 0, 0);
 }
 
 TEST_F(ResumptionSqlQueriesTest, kDeleteVrCommands_ExpectDataDeleted) {
@@ -1510,10 +1513,11 @@ TEST_F(ResumptionSqlQueriesTest, kDeleteVrCommands_ExpectDataDeleted) {
   // Check
   const std::string select_count_vrCommandsArray =
       "SELECT COUNT(*) FROM vrCommandsArray;";
-  ValToPosPair p1(0, app_id2);
-  ValToPosPair p2(1, device_id);
+  OrderedQueryParams p;
+  p.push_back(app_id2);
+  p.push_back(device_id);
   CheckDeleteQuery(
-      select_count_vrCommandsArray, kDeleteVrCommands, p1, p2, 1, 0, 0);
+      select_count_vrCommandsArray, kDeleteVrCommands, p, 1, 0, 0);
 }
 
 TEST_F(ResumptionSqlQueriesTest, kDeleteCommands_ExpectDataDeleted) {
@@ -1543,9 +1547,10 @@ TEST_F(ResumptionSqlQueriesTest, kDeleteCommands_ExpectDataDeleted) {
   FillApplicationCommandsArrayTable(temp_query, key1, key2);
   // Check
   const std::string select_count_command = "SELECT COUNT(*) FROM command;";
-  ValToPosPair p1(0, app_id2);
-  ValToPosPair p2(1, device_id);
-  CheckDeleteQuery(select_count_command, kDeleteCommands, p1, p2, 1, 0, 0);
+  OrderedQueryParams p;
+  p.push_back(app_id2);
+  p.push_back(device_id);
+  CheckDeleteQuery(select_count_command, kDeleteCommands, p, 1, 0, 0);
 }
 
 TEST_F(ResumptionSqlQueriesTest,
@@ -1577,21 +1582,19 @@ TEST_F(ResumptionSqlQueriesTest,
   // Check
   const std::string select_count_applicationCommandsArray =
       "SELECT COUNT(*) FROM applicationCommandsArray;";
-  ValToPosPair p1(0, app_id2);
-  ValToPosPair p2(1, device_id);
+  OrderedQueryParams p;
+  p.push_back(app_id2);
+  p.push_back(device_id);
   CheckDeleteQuery(select_count_applicationCommandsArray,
                    kDeleteApplicationCommandsArray,
-                   p1,
-                   p2,
+                   p,
                    1,
                    0,
                    0);
 }
 
-// FIXME(AOleynik): kDeleteImageFromChoiceSet uses same params twice and
-// CheckDeleteQuery does not handle this
 TEST_F(ResumptionSqlQueriesTest,
-       DISABLED_kDeleteImageFromChoiceSet_ExpectDataDeleted) {
+       kDeleteImageFromChoiceSet_ExpectDataDeleted) {
   // Arrange
   SQLQuery temp_query(db());
   int64_t key1 = FillImageTable(temp_query, 1, test_image).LastInsertId();
@@ -1620,10 +1623,11 @@ TEST_F(ResumptionSqlQueriesTest,
 
   // Check
   const std::string select_count_image = "SELECT COUNT(*) FROM image;";
-  ValToPosPair p1(0, app_id2);
-  ValToPosPair p2(1, device_id);
+  OrderedQueryParams p;
+  p.push_back(app_id2);
+  p.push_back(device_id);
   CheckDeleteQuery(
-      select_count_image, kDeleteImageFromChoiceSet, p1, p2, 1, 0, 0);
+      select_count_image, kDeleteImageFromChoiceSet, p, 1, 0, 0);
 }
 
 TEST_F(ResumptionSqlQueriesTest,
@@ -1660,12 +1664,12 @@ TEST_F(ResumptionSqlQueriesTest,
   const std::string select_count_vrCommandsArray =
       "SELECT COUNT(*) FROM vrCommandsArray;";
   // Check
-  ValToPosPair p1(0, app_id2);
-  ValToPosPair p2(1, device_id);
+  OrderedQueryParams p;
+  p.push_back(app_id2);
+  p.push_back(device_id);
   CheckDeleteQuery(select_count_vrCommandsArray,
                    kDeleteVrCommandsFromChoiceSet,
-                   p1,
-                   p2,
+                   p,
                    1,
                    0,
                    0);
@@ -1698,9 +1702,10 @@ TEST_F(ResumptionSqlQueriesTest, kDeleteChoice_ExpectDataDeleted) {
 
   // Check before action
   const std::string select_count_choice = "SELECT COUNT(*) FROM choice;";
-  ValToPosPair p1(0, app_id2);
-  ValToPosPair p2(1, device_id);
-  CheckDeleteQuery(select_count_choice, kDeleteChoice, p1, p2, 1, 0, 0);
+  OrderedQueryParams p;
+  p.push_back(app_id2);
+  p.push_back(device_id);
+  CheckDeleteQuery(select_count_choice, kDeleteChoice, p, 1, 0, 0);
 }
 
 TEST_F(ResumptionSqlQueriesTest, kDeleteChoiceArray_ExpectDataDeleted) {
@@ -1734,10 +1739,11 @@ TEST_F(ResumptionSqlQueriesTest, kDeleteChoiceArray_ExpectDataDeleted) {
   const std::string select_count_choice_array =
       "SELECT COUNT(*) FROM choiceArray;";
 
-  ValToPosPair p1(0, app_id2);
-  ValToPosPair p2(1, device_id);
+  OrderedQueryParams p;
+  p.push_back(app_id2);
+  p.push_back(device_id);
   CheckDeleteQuery(
-      select_count_choice_array, kDeleteChoiceArray, p1, p2, 1, 0, 0);
+      select_count_choice_array, kDeleteChoiceArray, p, 1, 0, 0);
 }
 
 TEST_F(ResumptionSqlQueriesTest,
@@ -1765,12 +1771,12 @@ TEST_F(ResumptionSqlQueriesTest,
   const std::string select_count_applicationChoiceSet =
       "SELECT COUNT(*) FROM applicationChoiceSet;";
 
-  ValToPosPair p1(0, app_id2);
-  ValToPosPair p2(1, device_id);
+  OrderedQueryParams p;
+  p.push_back(app_id2);
+  p.push_back(device_id);
   CheckDeleteQuery(select_count_applicationChoiceSet,
                    kDeleteApplicationChoiceSet,
-                   p1,
-                   p2,
+                   p,
                    1,
                    0,
                    0);
@@ -1800,21 +1806,19 @@ TEST_F(ResumptionSqlQueriesTest,
   // Check
   const std::string select_count_applicationChoiceSetArray =
       "SELECT COUNT(*) FROM applicationChoiceSetArray;";
-  ValToPosPair p1(0, app_id2);
-  ValToPosPair p2(1, device_id);
+  OrderedQueryParams p;
+  p.push_back(app_id2);
+  p.push_back(device_id);
   CheckDeleteQuery(select_count_applicationChoiceSetArray,
                    kDeleteApplicationChoiceSetArray,
-                   p1,
-                   p2,
+                   p,
                    1,
                    0,
                    0);
 }
 
-// FIXME(AOleynik): kDeleteImageFromGlobalProperties uses same params twice and
-// CheckDeleteQuery does not handle this
 TEST_F(ResumptionSqlQueriesTest,
-       DISABLED_kDeleteImageFromGlobalProperties_ExpectDataDeleted) {
+       kDeleteImageFromGlobalProperties_ExpectDataDeleted) {
   // Arrange
   SQLQuery temp_query(db());
   int64_t key1 = FillImageTable(temp_query, 1, test_image).LastInsertId();
@@ -1838,10 +1842,11 @@ TEST_F(ResumptionSqlQueriesTest,
                        true);
   // Check
   const std::string select_count_image = "SELECT COUNT(*) FROM image;";
-  ValToPosPair p1(0, app_id2);
-  ValToPosPair p2(1, device_id);
+  OrderedQueryParams p;
+  p.push_back(app_id2);
+  p.push_back(device_id);
   CheckDeleteQuery(
-      select_count_image, kDeleteImageFromGlobalProperties, p1, p2, 1, 0, 0);
+      select_count_image, kDeleteImageFromGlobalProperties, p, 1, 0, 0);
 }
 
 TEST_F(ResumptionSqlQueriesTest, kDeletevrHelpItem_ExpectDataDeleted) {
@@ -1869,10 +1874,11 @@ TEST_F(ResumptionSqlQueriesTest, kDeletevrHelpItem_ExpectDataDeleted) {
   // Check
   const std::string select_count_vrhelp_item =
       "SELECT COUNT(*) FROM vrHelpItem;";
-  ValToPosPair p1(0, app_id2);
-  ValToPosPair p2(1, device_id);
+  OrderedQueryParams p;
+  p.push_back(app_id2);
+  p.push_back(device_id);
   CheckDeleteQuery(
-      select_count_vrhelp_item, kDeletevrHelpItem, p1, p2, 1, 0, 0);
+      select_count_vrhelp_item, kDeletevrHelpItem, p, 1, 0, 0);
 }
 
 TEST_F(ResumptionSqlQueriesTest, kDeletevrHelpItemArray_ExpectDataDeleted) {
@@ -1900,10 +1906,11 @@ TEST_F(ResumptionSqlQueriesTest, kDeletevrHelpItemArray_ExpectDataDeleted) {
   // Check
   const std::string select_count_vrhelp_item_array =
       "SELECT COUNT(*) FROM vrHelpItemArray;";
-  ValToPosPair p1(0, app_id2);
-  ValToPosPair p2(1, device_id);
+  OrderedQueryParams p;
+  p.push_back(app_id2);
+  p.push_back(device_id);
   CheckDeleteQuery(
-      select_count_vrhelp_item_array, kDeletevrHelpItemArray, p1, p2, 1, 0, 0);
+      select_count_vrhelp_item_array, kDeletevrHelpItemArray, p, 1, 0, 0);
 }
 
 TEST_F(ResumptionSqlQueriesTest,
@@ -1933,12 +1940,12 @@ TEST_F(ResumptionSqlQueriesTest,
   // Check
   const std::string select_count_tableLimitedCharacterList =
       "SELECT COUNT(*) FROM tableLimitedCharacterList;";
-  ValToPosPair p1(0, app_id1);
-  ValToPosPair p2(1, device_id);
+  OrderedQueryParams p;
+  p.push_back(app_id1);
+  p.push_back(device_id);
   CheckDeleteQuery(select_count_tableLimitedCharacterList,
                    kDeleteTableLimitedCharacterList,
-                   p1,
-                   p2,
+                   p,
                    1,
                    0,
                    0);
@@ -1970,15 +1977,14 @@ TEST_F(ResumptionSqlQueriesTest, kDeleteCharacterArray_ExpectDataDeleted) {
   // Check
   const std::string select_count_characterArray =
       "SELECT COUNT(*) FROM characterArray;";
-  ValToPosPair p1(0, app_id1);
-  ValToPosPair p2(1, device_id);
+  OrderedQueryParams p;
+  p.push_back(app_id1);
+  p.push_back(device_id);
   CheckDeleteQuery(
-      select_count_characterArray, kDeleteCharacterArray, p1, p2, 1, 0, 0);
+      select_count_characterArray, kDeleteCharacterArray, p, 1, 0, 0);
 }
 
-// FIXME(AOleynik): kDeleteTTSChunk uses same params twice and
-// CheckDeleteQuery does not handle this
-TEST_F(ResumptionSqlQueriesTest, DISABLED_kDeleteTTSChunk_ExpectDataDeleted) {
+TEST_F(ResumptionSqlQueriesTest, kDeleteTTSChunk_ExpectDataDeleted) {
   // Arrange
   SQLQuery temp_query(db());
   int64_t tts_chunk_key =
@@ -2004,9 +2010,10 @@ TEST_F(ResumptionSqlQueriesTest, DISABLED_kDeleteTTSChunk_ExpectDataDeleted) {
   FillHelpTimeoutPromptArrayTable(temp_query, glob_prop_key, tts_chunk_key, 1);
   // Check
   const std::string select_count_tts_chunk = "SELECT COUNT(*) FROM TTSChunk;";
-  ValToPosPair p1(0, app_id1);
-  ValToPosPair p2(1, device_id);
-  CheckDeleteQuery(select_count_tts_chunk, kDeleteTTSChunk, p1, p2, 1, 0, 0);
+  OrderedQueryParams p;
+  p.push_back(app_id1);
+  p.push_back(device_id);
+  CheckDeleteQuery(select_count_tts_chunk, kDeleteTTSChunk, p, 1, 0, 0);
 }
 
 TEST_F(ResumptionSqlQueriesTest,
@@ -2029,10 +2036,11 @@ TEST_F(ResumptionSqlQueriesTest,
   // Check
   const std::string select_count_application =
       "SELECT COUNT(*) FROM application;";
-  ValToPosPair p1(0, app_id1);
-  ValToPosPair p2(1, device_id);
+  OrderedQueryParams p;
+  p.push_back(app_id1);
+  p.push_back(device_id);
   CheckDeleteQuery(
-      select_count_application, kDeleteFromApplicationTable, p1, p2, 1, 0, 0);
+      select_count_application, kDeleteFromApplicationTable, p, 1, 0, 0);
 }
 
 TEST_F(ResumptionSqlQueriesTest,
@@ -2062,12 +2070,13 @@ TEST_F(ResumptionSqlQueriesTest,
   // Check
   const std::string select_count_helpTimeoutPromptArray =
       "SELECT COUNT(*) FROM helpTimeoutPromptArray;";
-  ValToPosPair p1(0, app_id1);
-  ValToPosPair p2(1, device_id);
+  OrderedQueryParams p;
+  p.push_back(app_id1);
+  p.push_back(device_id);
+
   CheckDeleteQuery(select_count_helpTimeoutPromptArray,
                    kDeleteHelpTimeoutPromptArray,
-                   p1,
-                   p2,
+                   p,
                    1,
                    0,
                    0);
@@ -2095,10 +2104,12 @@ TEST_F(ResumptionSqlQueriesTest, kDeleteGlobalProperties_ExpectDataDeleted) {
   // Check
   const std::string select_count_globalProperties =
       "SELECT COUNT(*) FROM globalProperties;";
-  ValToPosPair p1(0, app_id1);
-  ValToPosPair p2(1, device_id);
+  OrderedQueryParams p;
+  p.push_back(app_id1);
+  p.push_back(device_id);
+
   CheckDeleteQuery(
-      select_count_globalProperties, kDeleteGlobalProperties, p1, p2, 1, 0, 0);
+      select_count_globalProperties, kDeleteGlobalProperties, p, 1, 0, 0);
 }
 
 TEST_F(ResumptionSqlQueriesTest, kSelectCountImage_ExpectDataCorrect) {
