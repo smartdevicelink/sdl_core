@@ -683,12 +683,18 @@ TEST_F(ApplicationImplTest, SuspendAudioStreaming) {
   app_impl->SuspendStreaming(type);
 }
 
-// TODO {AKozoriz} : Fix tests with streaming (APPLINK-19289)
-TEST_F(ApplicationImplTest, DISABLED_Suspend_WakeUpAudioStreaming) {
+TEST_F(ApplicationImplTest, Suspend_WakeUpAudioStreaming) {
   protocol_handler::ServiceType type = protocol_handler::ServiceType::kAudio;
-  EXPECT_CALL(mock_application_manager_, OnAppStreaming(app_id, type, false));
+
+  // Since expectations are being checked on mocks destruction and app_impl is
+  // destroyed before that such fails checks because on application destruction
+  // there are same methods are called.
+  // In order to do not mix test logic with that side effect workaround
+  // with Times(..) has been used.
+  EXPECT_CALL(mock_application_manager_, OnAppStreaming(app_id, type, false))
+      .Times(2);
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
-              SendOnDataStreaming(type, false, _));
+              SendOnDataStreaming(type, false, _)).Times(2);
   app_impl->SuspendStreaming(type);
 
   EXPECT_CALL(mock_application_manager_, OnAppStreaming(app_id, type, true));
@@ -697,12 +703,18 @@ TEST_F(ApplicationImplTest, DISABLED_Suspend_WakeUpAudioStreaming) {
   app_impl->WakeUpStreaming(type);
 }
 
-TEST_F(ApplicationImplTest, DISABLED_Suspend_WakeUpNaviStreaming) {
+TEST_F(ApplicationImplTest, Suspend_WakeUpNaviStreaming) {
   protocol_handler::ServiceType type =
       protocol_handler::ServiceType::kMobileNav;
-  EXPECT_CALL(mock_application_manager_, OnAppStreaming(app_id, type, false));
+  // Since expectations are being checked on mocks destruction and app_impl is
+  // destroyed before that such fails checks because on application destruction
+  // there are same methods are called.
+  // In order to do not mix test logic with that side effect workaround
+  // with Times(..) has been used.
+  EXPECT_CALL(mock_application_manager_, OnAppStreaming(app_id, type, false))
+      .Times(2);
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
-              SendOnDataStreaming(type, false, _));
+              SendOnDataStreaming(type, false, _)).Times(2);
   app_impl->SuspendStreaming(type);
 
   EXPECT_CALL(mock_application_manager_, OnAppStreaming(app_id, type, true));
