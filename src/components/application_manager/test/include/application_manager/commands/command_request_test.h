@@ -30,33 +30,45 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_HMI_CAPABILITIES_FOR_TESTING_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_HMI_CAPABILITIES_FOR_TESTING_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_COMMAND_RESPONSES_TEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_COMMAND_RESPONSES_TEST_H_
 
-#include "application_manager/hmi_capabilities_impl.h"
+#include <stdint.h>
+
+#include "gtest/gtest.h"
+#include "application_manager/commands/commands_test.h"
+#include "application_manager/mock_event_dispatcher.h"
 
 namespace test {
 namespace components {
-namespace application_manager_test {
+namespace commands_test {
 
-class HMICapabilitiesForTesting
-    : public ::application_manager::HMICapabilitiesImpl {
+using ::testing::ReturnRef;
+using ::testing::NiceMock;
+using ::test::components::event_engine_test::MockEventDispatcher;
+using ::application_manager::commands::Command;
+
+template <const CommandsTestMocks kIsNice = CommandsTestMocks::kNotNice>
+class CommandRequestTest : public CommandsTest<kIsNice> {
  public:
-  HMICapabilitiesForTesting(::application_manager::ApplicationManager& app_mngr)
-      : HMICapabilitiesImpl(app_mngr) {}
-  bool LoadCapabilitiesFromFile() {
-    return load_capabilities_from_file();
-  }
+  typedef typename TypeIf<kIsNice,
+                          NiceMock<MockEventDispatcher>,
+                          MockEventDispatcher>::Result MockEventDisp;
 
-  void ConvertJsonLanguagesToObj(
-      Json::Value& json_languages,
-      ::NsSmartDeviceLink::NsSmartObjects::SmartObject& languages) {
-    convert_json_languages_to_obj(json_languages, languages);
+  MockEventDisp ev_disp_;
+
+ protected:
+  CommandRequestTest() : CommandsTest<kIsNice>() {}
+
+  virtual void InitCommand(const uint32_t& default_timeout) OVERRIDE {
+    CommandsTest<kIsNice>::InitCommand(default_timeout);
+    EXPECT_CALL(CommandsTest<kIsNice>::app_mngr_, event_dispatcher())
+        .WillOnce(ReturnRef(ev_disp_));
   }
 };
 
-}  // namespace application_manager_test
+}  // namespace commands_test
 }  // namespace components
 }  // namespace test
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_HMI_CAPABILITIES_FOR_TESTING_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_COMMAND_RESPONSES_TEST_H_

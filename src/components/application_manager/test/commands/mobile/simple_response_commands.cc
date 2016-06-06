@@ -30,33 +30,52 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_HMI_CAPABILITIES_FOR_TESTING_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_HMI_CAPABILITIES_FOR_TESTING_H_
+#include <stdint.h>
+#include <string>
 
-#include "application_manager/hmi_capabilities_impl.h"
+#include "gtest/gtest.h"
+#include "utils/shared_ptr.h"
+#include "commands/commands_test.h"
+#include "application_manager/mock_application_manager.h"
+#include "mobile/read_did_response.h"
+#include "mobile/alert_maneuver_response.h"
+#include "mobile/alert_response.h"
+#include "mobile/list_files_response.h"
+#include "mobile/subscribe_button_response.h"
 
 namespace test {
 namespace components {
-namespace application_manager_test {
+namespace commands_test {
+namespace mobile_commands_test {
 
-class HMICapabilitiesForTesting
-    : public ::application_manager::HMICapabilitiesImpl {
+using ::testing::_;
+using ::testing::NotNull;
+using ::testing::Types;
+namespace commands = ::application_manager::commands;
+using commands::MessageSharedPtr;
+
+template <class Command>
+class MobileResponseCommandsTest
+    : public CommandsTest<CommandsTestMocks::kIsNice> {
  public:
-  HMICapabilitiesForTesting(::application_manager::ApplicationManager& app_mngr)
-      : HMICapabilitiesImpl(app_mngr) {}
-  bool LoadCapabilitiesFromFile() {
-    return load_capabilities_from_file();
-  }
-
-  void ConvertJsonLanguagesToObj(
-      Json::Value& json_languages,
-      ::NsSmartDeviceLink::NsSmartObjects::SmartObject& languages) {
-    convert_json_languages_to_obj(json_languages, languages);
-  }
+  typedef Command CommandType;
 };
 
-}  // namespace application_manager_test
+typedef Types<commands::ListFilesResponse,
+              commands::ReadDIDResponse,
+              commands::AlertManeuverResponse,
+              commands::AlertResponse,
+              commands::SubscribeButtonResponse> ResponseCommandsList;
+TYPED_TEST_CASE(MobileResponseCommandsTest, ResponseCommandsList);
+
+TYPED_TEST(MobileResponseCommandsTest, Run_SendResponseToMobile_SUCCESS) {
+  ::utils::SharedPtr<typename TestFixture::CommandType> command =
+      this->template CreateCommand<typename TestFixture::CommandType>();
+  EXPECT_CALL(this->app_mngr_, SendMessageToMobile(NotNull(), _));
+  command->Run();
+}
+
+}  // namespace mobile_commands_test
+}  // namespace commands_test
 }  // namespace components
 }  // namespace test
-
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_HMI_CAPABILITIES_FOR_TESTING_H_
