@@ -36,10 +36,9 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_CLIENT_LISTENER_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_CLIENT_LISTENER_H_
 
+#include "utils/socket.h"
 #include "utils/threads/thread_delegate.h"
 #include "transport_manager/transport_adapter/client_connection_listener.h"
-
-class Thread;
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -72,7 +71,7 @@ class TcpClientListener : public ClientConnectionListener {
    * @brief Run TCP client listener.
    *
    * @return Error information about possible reason of starting TCP listener
-   *listener failure.
+   * listener failure.
    */
   virtual TransportAdapter::Error Init();
 
@@ -106,10 +105,6 @@ class TcpClientListener : public ClientConnectionListener {
     return port_;
   }
 
-  int get_socket() const {
-    return socket_;
-  }
-
   threads::Thread* thread() const {
     return thread_;
   }
@@ -120,7 +115,6 @@ class TcpClientListener : public ClientConnectionListener {
   const bool enable_keepalive_;
   TransportAdapterController* controller_;
   threads::Thread* thread_;
-  int socket_;
   bool thread_stop_requested_;
 
   void Loop();

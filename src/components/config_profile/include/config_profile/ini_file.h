@@ -37,6 +37,10 @@
 
 namespace profile {
 
+#if defined(_MSC_VER)
+#define snprintf _snprintf_s
+#define strtoull _strtoui64
+#endif
 #define INI_FILE_VER 1000
 
 #if !defined TRUE

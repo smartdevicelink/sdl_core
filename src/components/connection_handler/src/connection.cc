@@ -82,7 +82,7 @@ Connection::Connection(ConnectionHandle connection_handle,
     , connection_device_handle_(connection_device_handle)
     , session_map_lock_(true)
     , heartbeat_timeout_(heartbeat_timeout) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   DCHECK(connection_handler_);
 
   heartbeat_monitor_ = new HeartBeatMonitor(heartbeat_timeout_, this);
@@ -92,7 +92,7 @@ Connection::Connection(ConnectionHandle connection_handle,
 }
 
 Connection::~Connection() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   heart_beat_monitor_thread_->join();
   delete heartbeat_monitor_;
   threads::DeleteThread(heart_beat_monitor_thread_);
@@ -115,7 +115,7 @@ uint32_t findGap(const std::map<unsigned char, T>& map) {
 }  // namespace
 
 uint32_t Connection::AddNewSession() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(session_map_lock_);
   const uint32_t session_id = findGap(session_map_);
   if (session_id > 0) {
@@ -131,7 +131,7 @@ uint32_t Connection::RemoveSession(uint8_t session_id) {
   sync_primitives::AutoLock lock(session_map_lock_);
   SessionMap::iterator it = session_map_.find(session_id);
   if (session_map_.end() == it) {
-    LOG4CXX_WARN(logger_, "Session not found in this connection!");
+    LOGGER_WARN(logger_, "Session not found in this connection!");
     return 0;
   }
   heartbeat_monitor_->RemoveSession(session_id);
@@ -145,14 +145,14 @@ bool Connection::AddNewService(uint8_t session_id,
   // Ignore wrong services
   if (protocol_handler::kControl == service_type ||
       protocol_handler::kInvalidServiceType == service_type) {
-    LOG4CXX_WARN(logger_, "Wrong service " << static_cast<int>(service_type));
+    LOGGER_WARN(logger_, "Wrong service " << static_cast<int>(service_type));
     return false;
   }
   sync_primitives::AutoLock lock(session_map_lock_);
 
   SessionMap::iterator session_it = session_map_.find(session_id);
   if (session_it == session_map_.end()) {
-    LOG4CXX_WARN(logger_, "Session not found in this connection!");
+    LOGGER_WARN(logger_, "Session not found in this connection!");
     return false;
   }
   Session& session = session_it->second;
@@ -161,17 +161,17 @@ bool Connection::AddNewService(uint8_t session_id,
   if (service) {
 #ifdef ENABLE_SECURITY
     if (!request_protection) {
-      LOG4CXX_WARN(logger_,
-                   "Session " << static_cast<int>(session_id)
-                              << " already has unprotected service "
-                              << static_cast<int>(service_type));
+      LOGGER_WARN(logger_,
+                  "Session " << static_cast<int>(session_id)
+                             << " already has unprotected service "
+                             << static_cast<int>(service_type));
       return false;
     }
     if (service->is_protected_) {
-      LOG4CXX_WARN(logger_,
-                   "Session " << static_cast<int>(session_id)
-                              << " already has protected service "
-                              << static_cast<int>(service_type));
+      LOGGER_WARN(logger_,
+                  "Session " << static_cast<int>(session_id)
+                             << " already has protected service "
+                             << static_cast<int>(service_type));
       return false;
     }
     // For unproteced service could be start protection
@@ -202,15 +202,15 @@ bool Connection::RemoveService(uint8_t session_id,
                                protocol_handler::ServiceType service_type) {
   // Ignore wrong and required for Session services
   if (is_incorrect_for_remove_service(service_type)) {
-    LOG4CXX_WARN(logger_,
-                 "Could not remove service " << static_cast<int>(service_type));
+    LOGGER_WARN(logger_,
+                "Could not remove service " << static_cast<int>(service_type));
     return false;
   }
   sync_primitives::AutoLock lock(session_map_lock_);
 
   SessionMap::iterator session_it = session_map_.find(session_id);
   if (session_map_.end() == session_it) {
-    LOG4CXX_WARN(logger_, "Session not found in this connection!");
+    LOGGER_WARN(logger_, "Session not found in this connection!");
     return false;
   }
 
@@ -218,9 +218,9 @@ bool Connection::RemoveService(uint8_t session_id,
   ServiceList::iterator service_it =
       find(service_list.begin(), service_list.end(), service_type);
   if (service_list.end() == service_it) {
-    LOG4CXX_WARN(logger_,
-                 "Session " << session_id << " didn't established"
-                                             " service " << service_type);
+    LOGGER_WARN(logger_,
+                "Session " << session_id << " didn't established"
+                                            " service " << service_type);
     return false;
   }
   service_list.erase(service_it);
@@ -233,7 +233,7 @@ int Connection::SetSSLContext(uint8_t session_id,
   sync_primitives::AutoLock lock(session_map_lock_);
   SessionMap::iterator session_it = session_map_.find(session_id);
   if (session_it == session_map_.end()) {
-    LOG4CXX_WARN(logger_, "Session not found in this connection!");
+    LOGGER_WARN(logger_, "Session not found in this connection!");
     return security_manager::SecurityManager::ERROR_INTERNAL;
   }
   Session& session = session_it->second;
@@ -244,11 +244,11 @@ int Connection::SetSSLContext(uint8_t session_id,
 security_manager::SSLContext* Connection::GetSSLContext(
     const uint8_t session_id,
     const protocol_handler::ServiceType& service_type) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(session_map_lock_);
   SessionMap::const_iterator session_it = session_map_.find(session_id);
   if (session_it == session_map_.end()) {
-    LOG4CXX_WARN(logger_, "Session not found in this connection!");
+    LOGGER_WARN(logger_, "Session not found in this connection!");
     return NULL;
   }
   const Session& session = session_it->second;
@@ -257,29 +257,29 @@ security_manager::SSLContext* Connection::GetSSLContext(
     return session.ssl_context;
   const Service* service = session.FindService(service_type);
   if (!service) {
-    LOG4CXX_WARN(logger_, "Service not found in this session!");
+    LOGGER_WARN(logger_, "Service not found in this session!");
     return NULL;
   }
   if (!service->is_protected_)
     return NULL;
-  LOG4CXX_TRACE(logger_, "SSLContext is " << session.ssl_context);
+  LOGGER_TRACE(logger_, "SSLContext is " << session.ssl_context);
   return session.ssl_context;
 }
 
 void Connection::SetProtectionFlag(
     const uint8_t session_id,
     const protocol_handler::ServiceType& service_type) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(session_map_lock_);
   SessionMap::iterator session_it = session_map_.find(session_id);
   if (session_it == session_map_.end()) {
-    LOG4CXX_WARN(logger_, "Session not found in this connection!");
+    LOGGER_WARN(logger_, "Session not found in this connection!");
     return;
   }
   Session& session = session_it->second;
   Service* service = session.FindService(service_type);
   if (!service) {
-    LOG4CXX_WARN(logger_, "Service not found in this session!");
+    LOGGER_WARN(logger_, "Service not found in this session!");
     return;
   }
   service->is_protected_ = true;
@@ -335,7 +335,7 @@ void Connection::UpdateProtocolVersionSession(uint8_t session_id,
   sync_primitives::AutoLock lock(session_map_lock_);
   SessionMap::iterator session_it = session_map_.find(session_id);
   if (session_map_.end() == session_it) {
-    LOG4CXX_WARN(logger_, "Session not found in this connection!");
+    LOGGER_WARN(logger_, "Session not found in this connection!");
     return;
   }
   Session& session = session_it->second;
@@ -343,11 +343,11 @@ void Connection::UpdateProtocolVersionSession(uint8_t session_id,
 }
 
 bool Connection::SupportHeartBeat(uint8_t session_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(session_map_lock_);
   SessionMap::iterator session_it = session_map_.find(session_id);
   if (session_map_.end() == session_it) {
-    LOG4CXX_WARN(logger_, "Session not found in this connection!");
+    LOGGER_WARN(logger_, "Session not found in this connection!");
     return false;
   }
   Session& session = session_it->second;
@@ -359,11 +359,11 @@ bool Connection::SupportHeartBeat(uint8_t session_id) {
 
 bool Connection::ProtocolVersion(uint8_t session_id,
                                  uint8_t& protocol_version) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(session_map_lock_);
   SessionMap::iterator session_it = session_map_.find(session_id);
   if (session_map_.end() == session_it) {
-    LOG4CXX_WARN(logger_, "Session not found in this connection!");
+    LOGGER_WARN(logger_, "Session not found in this connection!");
     return false;
   }
   protocol_version = (session_it->second).protocol_version;

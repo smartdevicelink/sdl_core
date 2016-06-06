@@ -480,8 +480,8 @@ TEST_F(ProfileTest, StringValueIncludeSlashesAndRussianLetters) {
   EXPECT_EQ(config_folder, profile_.app_resource_folder());
   std::string tts_delimiter_ = "";
   std::string app_storage_folder = "";
-  std::string current_dir = file_system::CurrentWorkingDirectory();
 
+  std::string current_dir = file_system::CurrentWorkingDirectory();
   profile_.config_file_name("smartDeviceLink_invalid_string.ini");
   EXPECT_EQ("smartDeviceLink_invalid_string.ini", profile_.config_file_name());
 

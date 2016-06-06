@@ -30,7 +30,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/commands/hmi/ui_get_supported_languages_response.h"
-
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {
@@ -44,7 +43,7 @@ UIGetSupportedLanguagesResponse::UIGetSupportedLanguagesResponse(
 UIGetSupportedLanguagesResponse::~UIGetSupportedLanguagesResponse() {}
 
 void UIGetSupportedLanguagesResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   const hmi_apis::Common_Result::eType code =
       static_cast<hmi_apis::Common_Result::eType>(

@@ -31,7 +31,6 @@
  */
 
 #include "application_manager/commands/hmi/on_app_activated_notification.h"
-
 #include "application_manager/message_helper.h"
 #include "interfaces/HMI_API.h"
 
@@ -46,7 +45,7 @@ OnAppActivatedNotification::OnAppActivatedNotification(
 OnAppActivatedNotification::~OnAppActivatedNotification() {}
 
 void OnAppActivatedNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   event_engine::Event event(
       hmi_apis::FunctionID::BasicCommunication_OnAppActivated);
   event.set_smart_object(*message_);

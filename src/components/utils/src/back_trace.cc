@@ -89,7 +89,7 @@ vector<string> Backtrace::CallStack() const {
   return callstack;
 }
 
-threads::PlatformThreadHandle Backtrace::ThreadId() const {
+uint64_t Backtrace::ThreadId() const {
   return thread_id_;
 }
 

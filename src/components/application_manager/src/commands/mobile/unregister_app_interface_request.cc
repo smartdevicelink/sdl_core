@@ -32,7 +32,6 @@
  */
 
 #include "application_manager/commands/mobile/unregister_app_interface_request.h"
-
 #include "application_manager/message_helper.h"
 
 namespace application_manager {
@@ -40,11 +39,11 @@ namespace application_manager {
 namespace commands {
 
 void UnregisterAppInterfaceRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   if (!application_manager_.application(connection_key())) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
-    LOG4CXX_ERROR(logger_, "Application is not registered");
+    LOGGER_ERROR(logger_, "Application is not registered");
     return;
   }
 

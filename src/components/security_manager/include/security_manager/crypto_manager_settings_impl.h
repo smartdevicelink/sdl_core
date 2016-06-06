@@ -33,7 +33,7 @@ class CryptoManagerSettingsImpl : public CryptoManagerSettings {
     if (protocol_str == "SSLv3") {
       return security_manager::SSLv3;
     }
-    LOG4CXX_ERROR(
+    LOGGER_ERROR(
         logger_,
         "Unknown protocol: " << profile_.security_manager_protocol_name());
     return static_cast<security_manager::Protocol>(-1);

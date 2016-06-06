@@ -41,7 +41,6 @@
 
 #include "application_manager/commands/command_request_impl.h"
 #include "commands/hmi/request_to_hmi.h"
-
 #include "utils/date_time.h"
 
 namespace application_manager {

@@ -27,12 +27,12 @@ const char* Resources::proc = "/proc/";
 ResourseUsage* Resources::getCurrentResourseUsage() {
   PidStats pid_stats;
   if (false == GetProcInfo(pid_stats)) {
-    LOG4CXX_ERROR(logger_, "Failed to get cpu proc info");
+    LOGGER_ERROR(logger_, "Failed to get cpu proc info");
     return NULL;
   }
   MemInfo mem_info;
   if (false == GetMemInfo(mem_info)) {
-    LOG4CXX_ERROR(logger_, "Failed to get memory info");
+    LOGGER_ERROR(logger_, "Failed to get memory info");
     return NULL;
   }
   ResourseUsage* usage = new ResourseUsage();
@@ -149,16 +149,16 @@ bool Resources::GetProcInfo(Resources::PidStats& output) {
                                &(output.guest_time),
                                &(output.cguest_time));
   if (num_succes != 43) {  // 43 is number of iteams in Resources::PidStats
-    LOG4CXX_ERROR(logger_, "Couldn't parse all iteams in /proc/PID/stat file");
+    LOGGER_ERROR(logger_, "Couldn't parse all iteams in /proc/PID/stat file");
     return false;
   }
   return true;
 #elif defined(__QNXNTO__)
   int fd = open(GetProcPath().c_str(), O_RDONLY);
   if (0 >= fd) {
-    LOG4CXX_ERROR(logger_,
-                  "Failed open process proc file : "
-                      << GetProcPath() << "; error no : " << strerror(errno));
+    LOGGER_ERROR(logger_,
+                 "Failed open process proc file : "
+                     << GetProcPath() << "; error no : " << strerror(errno));
 
     close(fd);
     return false;
@@ -174,7 +174,7 @@ bool Resources::GetMemInfo(Resources::MemInfo& output) {
 #if defined(OS_LINUX)
   Resources::PidStats pid_stat;
   if (false == GetProcInfo(pid_stat)) {
-    LOG4CXX_ERROR(logger_, "Failed to get proc info");
+    LOGGER_ERROR(logger_, "Failed to get proc info");
     result = false;
   } else {
     output = pid_stat.vsize;
@@ -186,19 +186,19 @@ bool Resources::GetMemInfo(Resources::MemInfo& output) {
   struct stat st;
   struct _dir* proc_dir = 0;
   if (0 == (proc_dir = opendir(proc))) {
-    LOG4CXX_ERROR(logger_, "Unable to access to " << proc);
+    LOGGER_ERROR(logger_, "Unable to access to " << proc);
     result = false;
     return result;
   }
   if (0 == readdir(proc_dir)) {
-    LOG4CXX_ERROR(logger_, "Unable to read : " << proc_dir);
+    LOGGER_ERROR(logger_, "Unable to read : " << proc_dir);
     closedir(proc_dir);
     result = false;
     return result;
   }
   closedir(proc_dir);
   if (-1 == stat(as_path.c_str(), &st) || 0 == st.st_size) {
-    LOG4CXX_ERROR(logger_, "Unable to stat : " << as_path.c_str());
+    LOGGER_ERROR(logger_, "Unable to stat : " << as_path.c_str());
     result = false;
     return result;
   }

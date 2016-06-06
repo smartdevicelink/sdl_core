@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2013-2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,10 @@
 #ifndef SRC_COMPONENTS_INCLUDE_UTILS_MEMORY_BARRIER_H_
 #define SRC_COMPONENTS_INCLUDE_UTILS_MEMORY_BARRIER_H_
 
-#ifdef __QNXNTO__
+#if defined(__QNXNTO__)
 #include <sys/cpuinline.h>
+#elif defined(OS_WINDOWS)
+#include "utils/winhdr.h"
 #endif
 
 namespace utils {
@@ -44,6 +46,8 @@ inline void memory_barrier() {
   __cpu_membarrier();
 #elif defined(__GNUG__)
   __sync_synchronize();
+#elif defined(OS_WINDOWS)
+  MemoryBarrier();
 #else
 #warning "memory_barrier() implementation does nothing"
 #endif

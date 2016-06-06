@@ -32,7 +32,6 @@
  */
 
 #include "application_manager/commands/mobile/show_constant_tbt_response.h"
-
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {
@@ -47,7 +46,7 @@ ShowConstantTBTResponse::ShowConstantTBTResponse(
 ShowConstantTBTResponse::~ShowConstantTBTResponse() {}
 
 void ShowConstantTBTResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   application_manager_.SendMessageToMobile(message_);
 }

@@ -43,7 +43,7 @@ NaviUnSubscribeWayPointsRequest::NaviUnSubscribeWayPointsRequest(
 NaviUnSubscribeWayPointsRequest::~NaviUnSubscribeWayPointsRequest() {}
 
 void NaviUnSubscribeWayPointsRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   SendRequest();
 }

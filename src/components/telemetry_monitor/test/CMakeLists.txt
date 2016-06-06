@@ -28,9 +28,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-if(BUILD_TESTS)
-
 set(TELEMETRY_MONITOR_TEST_DIR ${COMPONENTS_DIR}/telemetry_monitor/test)
+find_package(LibUSBx REQUIRED)
 
 include_directories(
   ${TELEMETRY_MONITOR_TEST_DIR}/include
@@ -70,14 +69,14 @@ set(testLibraries
   MessageHelper
   Resumption
   jsoncpp
-  transport_manager
+  TransportManager
   MediaManager
   ProtocolHandler
   connectionHandler
 )
 
 if (BUILD_USB_SUPPORT)
-  list(APPEND testLibraries Libusb-1.0.16)
+  list(APPEND testLibraries ${LIBUSBX_LIBRARIES})
 endif()
 
 if (BUILD_BT_SUPPORT)
@@ -87,5 +86,3 @@ endif()
 file(COPY ${TELEMETRY_MONITOR_TEST_DIR}/log4cxx.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 create_test("telemetry_monitor_test" "${testSources}" "${testLibraries}")
-
-endif()

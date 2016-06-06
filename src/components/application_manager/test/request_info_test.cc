@@ -29,7 +29,6 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
 #include "application_manager/request_info.h"
 #include <iostream>
 #include <vector>
@@ -43,7 +42,6 @@ namespace request_info = application_manager::request_controller;
 namespace test {
 namespace components {
 namespace application_manager_test {
-
 class MockRequest : public application_manager::commands::Command {
  public:
   MockRequest(uint32_t connection_key, uint32_t correlation_id)
@@ -79,7 +77,6 @@ class TestRequestInfo : public request_info::RequestInfo {
     end_time_ = end_time;
   }
 };
-
 class RequestInfoTest : public ::testing::Test {
  protected:
   virtual void SetUp() OVERRIDE {
@@ -165,7 +162,6 @@ TEST_F(RequestInfoTest, AddHMIRequests_RemoveAllRequests) {
     EXPECT_TRUE(request_info_set_.RemoveRequest(*req_it));
   }
   EXPECT_EQ(0u, request_info_set_.Size());
-
   // Delete requests by connection key
   req_it = requests.begin();
   for (; req_it != requests.end(); ++req_it) {
@@ -176,7 +172,6 @@ TEST_F(RequestInfoTest, AddHMIRequests_RemoveAllRequests) {
             request_info_set_.RemoveByConnectionKey(hmi_connection_key_));
   EXPECT_EQ(0u, request_info_set_.Size());
 }
-
 TEST_F(RequestInfoTest, CheckRequestsMaxCount) {
   const uint32_t app_hmi_level_time_scale = 100;
   const uint32_t hmi_level_count = 1000;
@@ -384,7 +379,6 @@ TEST_F(RequestInfoTest, RequestInfoSetFind) {
   request_info::RequestInfoPtr request = request_info_set_.Find(
       count_of_requests_for_test_, count_of_requests_for_test_);
   EXPECT_FALSE(request.valid());
-
   req_it = appid_connection_id.begin();
   for (; req_it != end; ++req_it) {
     request_info::RequestInfoPtr request =
@@ -481,7 +475,6 @@ TEST_F(RequestInfoTest, UpdateTimeOut) {
   TimevalStruct last_time = request->end_time();
   EXPECT_NEAR(time.tv_sec + 100, last_time.tv_sec, 500);
 }
-
 }  // namespace application_manager_test
 }  // namespace components
 }  // namespace test

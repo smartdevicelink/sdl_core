@@ -33,6 +33,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <cstdint>
 #include "gtest/gtest.h"
 #include "generated_msg_version.h"
 #include "utils/file_system.h"

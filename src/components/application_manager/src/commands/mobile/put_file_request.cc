@@ -33,10 +33,8 @@
 
 #include <algorithm>
 #include "application_manager/commands/mobile/put_file_request.h"
-
 #include "application_manager/policies/policy_handler.h"
 #include "application_manager/application_impl.h"
-
 #include "utils/file_system.h"
 
 namespace application_manager {
@@ -55,7 +53,7 @@ PutFileRequest::PutFileRequest(const MessageSharedPtr& message,
 PutFileRequest::~PutFileRequest() {}
 
 void PutFileRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr application =
       application_manager_.application(connection_key());
@@ -63,7 +61,7 @@ void PutFileRequest::Run() {
       smart_objects::SmartObject(smart_objects::SmartType_Map);
 
   if (!application) {
-    LOG4CXX_ERROR(logger_, "Application is not registered");
+    LOGGER_ERROR(logger_, "Application is not registered");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -73,8 +71,8 @@ void PutFileRequest::Run() {
           application->put_file_in_none_count()) {
     // If application is in the HMI_NONE level the quantity of allowed
     // PutFile request is limited by the configuration profile
-    LOG4CXX_ERROR(logger_,
-                  "Too many requests from the app with HMILevel HMI_NONE ");
+    LOGGER_ERROR(logger_,
+                 "Too many requests from the app with HMILevel HMI_NONE ");
     SendResponse(false,
                  mobile_apis::Result::REJECTED,
                  "Too many requests from the app with HMILevel HMI_NONE",
@@ -83,7 +81,7 @@ void PutFileRequest::Run() {
   }
 
   if (!(*message_)[strings::params].keyExists(strings::binary_data)) {
-    LOG4CXX_ERROR(logger_, "Binary data empty");
+    LOGGER_ERROR(logger_, "Binary data empty");
     SendResponse(false,
                  mobile_apis::Result::INVALID_DATA,
                  "Binary data empty",
@@ -92,7 +90,7 @@ void PutFileRequest::Run() {
   }
 
   if (!(*message_)[strings::msg_params].keyExists(strings::sync_file_name)) {
-    LOG4CXX_ERROR(logger_, "No file name");
+    LOGGER_ERROR(logger_, "No file name");
     SendResponse(false,
                  mobile_apis::Result::INVALID_DATA,
                  "No file name",
@@ -101,7 +99,7 @@ void PutFileRequest::Run() {
   }
 
   if (!(*message_)[strings::msg_params].keyExists(strings::file_type)) {
-    LOG4CXX_ERROR(logger_, "No file type");
+    LOGGER_ERROR(logger_, "No file type");
     SendResponse(false,
                  mobile_apis::Result::INVALID_DATA,
                  "No file type",
@@ -149,8 +147,9 @@ void PutFileRequest::Run() {
     response_params[strings::space_available] = 0;
     file_path = application_manager_.get_settings().system_files_path();
   } else {
-    file_path = application_manager_.get_settings().app_storage_folder();
-    file_path += "/" + application->folder_name();
+    file_path = file_system::ConcatPath(
+        application_manager_.get_settings().app_storage_folder(),
+        application->folder_name());
 
     uint32_t space_available = application->GetAvailableDiskSpace();
 
@@ -158,7 +157,7 @@ void PutFileRequest::Run() {
       response_params[strings::space_available] =
           static_cast<uint32_t>(space_available);
 
-      LOG4CXX_ERROR(logger_, "Out of memory");
+      LOGGER_ERROR(logger_, "Out of memory");
       SendResponse(false,
                    mobile_apis::Result::OUT_OF_MEMORY,
                    "Out of memory",
@@ -168,7 +167,7 @@ void PutFileRequest::Run() {
   }
 
   if (!file_system::CreateDirectoryRecursively(file_path)) {
-    LOG4CXX_ERROR(logger_, "Can't create folder");
+    LOGGER_ERROR(logger_, "Can't create folder");
     SendResponse(false,
                  mobile_apis::Result::GENERIC_ERROR,
                  "Can't create folder.",
@@ -177,26 +176,26 @@ void PutFileRequest::Run() {
   }
   const std::string full_path = file_path + "/" + sync_file_name_;
   UNUSED(full_path);
-  LOG4CXX_DEBUG(logger_,
-                "Wrtiting " << binary_data.size() << "bytes to " << full_path
-                            << " (current size is"
-                            << file_system::FileSize(full_path) << ")");
+  LOGGER_DEBUG(logger_,
+               "Wrtiting " << binary_data.size() << "bytes to " << full_path
+                           << " (current size is"
+                           << file_system::FileSize(full_path) << ")");
 
   mobile_apis::Result::eType save_result = application_manager_.SaveBinary(
       binary_data, file_path, sync_file_name_, offset_);
 
-  LOG4CXX_DEBUG(logger_,
-                "New size of " << full_path << " is "
-                               << file_system::FileSize(full_path) << " bytes");
+  LOGGER_DEBUG(logger_,
+               "New size of " << full_path << " is "
+                              << file_system::FileSize(full_path) << " bytes");
   if (!is_system_file) {
     response_params[strings::space_available] =
         static_cast<uint32_t>(application->GetAvailableDiskSpace());
   }
 
-  sync_file_name_ = file_path + "/" + sync_file_name_;
+  sync_file_name_ = file_system::ConcatPath(file_path, sync_file_name_);
   switch (save_result) {
     case mobile_apis::Result::SUCCESS: {
-      LOG4CXX_INFO(logger_, "PutFile is successful");
+      LOGGER_INFO(logger_, "PutFile is successful");
       if (!is_system_file) {
         AppFile file(sync_file_name_,
                      is_persistent_file_,
@@ -204,15 +203,15 @@ void PutFileRequest::Run() {
                      file_type_);
 
         if (0 == offset_) {
-          LOG4CXX_INFO(logger_, "New file downloading");
+          LOGGER_INFO(logger_, "New file downloading");
           if (!application->AddFile(file)) {
-            LOG4CXX_INFO(logger_,
-                         "Couldn't add file to application (File already Exist"
-                             << " in application and was rewritten on FS)");
+            LOGGER_INFO(logger_,
+                        "Couldn't add file to application (File already Exist"
+                            << " in application and was rewritten on FS)");
             /* It can be first part of new big file, so we need to update
                information about it's downloading status and persistence */
             if (!application->UpdateFile(file)) {
-              LOG4CXX_ERROR(logger_, "Couldn't update file");
+              LOGGER_ERROR(logger_, "Couldn't update file");
               /* If it is impossible to update file, application doesn't
               know about existing this file */
               SendResponse(false,
@@ -237,15 +236,14 @@ void PutFileRequest::Run() {
       break;
     }
     default:
-      LOG4CXX_WARN(logger_,
-                   "PutFile is unsuccessful. Result = " << save_result);
+      LOGGER_WARN(logger_, "PutFile is unsuccessful. Result = " << save_result);
       SendResponse(false, save_result, "Can't save file", &response_params);
       break;
   }
 }
 
 void PutFileRequest::SendOnPutFileNotification() {
-  LOG4CXX_INFO(logger_, "SendOnPutFileNotification");
+  LOGGER_INFO(logger_, "SendOnPutFileNotification");
   smart_objects::SmartObjectSPtr notification =
       new smart_objects::SmartObject(smart_objects::SmartType_Map);
 

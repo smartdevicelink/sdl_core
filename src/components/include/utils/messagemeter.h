@@ -94,8 +94,9 @@ class MessageMeter {
 
 template <class Id>
 MessageMeter<Id>::MessageMeter()
-    : time_range_(TimevalStruct{0, 0}) {
+    : time_range_() {
   time_range_.tv_sec = 1;
+  time_range_.tv_usec = 0;
 }
 
 template <class Id>
@@ -143,13 +144,10 @@ void MessageMeter<Id>::ClearIdentifiers() {
 template <class Id>
 void MessageMeter<Id>::set_time_range(const size_t time_range_msecs) {
   // TODO(EZamakhov): move to date_time::DateTime
-  const size_t secs =
-      time_range_msecs / date_time::DateTime::MILLISECONDS_IN_SECOND;
+  const size_t secs = time_range_msecs / date_time::kMillisecondsInSecond;
   time_range_.tv_sec = secs;
-  const size_t mSecs =
-      time_range_msecs % date_time::DateTime::MILLISECONDS_IN_SECOND;
-  time_range_.tv_usec =
-      mSecs * date_time::DateTime::MICROSECONDS_IN_MILLISECOND;
+  const size_t mSecs = time_range_msecs % date_time::kMillisecondsInSecond;
+  time_range_.tv_usec = mSecs * date_time::kMicrosecondsInMillisecond;
 }
 template <class Id>
 void MessageMeter<Id>::set_time_range(const TimevalStruct& time_range) {

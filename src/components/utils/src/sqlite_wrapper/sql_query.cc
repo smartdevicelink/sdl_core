@@ -50,8 +50,11 @@ bool SQLQuery::Prepare(const std::string& query) {
   sync_primitives::AutoLock auto_lock(statement_lock_);
   if (statement_)
     return false;
-  error_ = sqlite3_prepare(
-      db_.conn(), query.c_str(), query.length(), &statement_, NULL);
+  error_ = sqlite3_prepare(db_.conn(),
+                           query.c_str(),
+                           static_cast<int>(query.length()),
+                           &statement_,
+                           NULL);
   query_ = query;
   return error_ == SQLITE_OK;
 }
@@ -106,12 +109,15 @@ void SQLQuery::Bind(int pos, bool value) {
 
 void SQLQuery::Bind(int pos, const std::string& value) {
   // In SQLite the number of position for binding starts since 1.
-  error_ = sqlite3_bind_text(
-      statement_, pos + 1, value.c_str(), value.length(), SQLITE_TRANSIENT);
+  error_ = sqlite3_bind_text(statement_,
+                             pos + 1,
+                             value.c_str(),
+                             static_cast<int>(value.length()),
+                             SQLITE_TRANSIENT);
 }
 
 bool SQLQuery::GetBoolean(int pos) const {
-  return static_cast<bool>(GetInteger(pos));
+  return GetInteger(pos) != 0;
 }
 
 int SQLQuery::GetInteger(int pos) const {
