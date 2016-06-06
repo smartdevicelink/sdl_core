@@ -320,7 +320,7 @@ class TransportManagerImplTest : public ::testing::Test {
 
   utils::SharedPtr<MockTransportManagerListener> tm_listener_;
 
-  static ApplicationHandle application_id_;
+  static const ApplicationHandle application_id_;
 
   ConnectionUID connection_key_;
   RawMessagePtr test_message_;
@@ -332,7 +332,7 @@ class TransportManagerImplTest : public ::testing::Test {
   BaseErrorPtr error_;
 };
 
-ApplicationHandle TransportManagerImplTest::application_id_ = 1;
+const ApplicationHandle TransportManagerImplTest::application_id_ = 1;
 
 // TODO(OHerasym) : last_state qt assert fails
 TEST_F(TransportManagerImplTest, SearchDevices_AdaptersNotAdded) {

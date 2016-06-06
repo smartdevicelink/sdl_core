@@ -195,4 +195,4 @@
     file(COPY smartDeviceLink_test.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/resumption)
     create_test("data_resumption_test" "${ResumptionData_SOURCES}" "${testLibraries}")
 
-    #  add_subdirectory(state_controller)
+    add_subdirectory(state_controller)
