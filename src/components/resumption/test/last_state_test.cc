@@ -67,12 +67,12 @@ class LastStateTest : public ::testing::Test {
   resumption::LastState last_state_;
 };
 
-TEST_F(LastStateTest, DISABLED_Basic) {
+TEST_F(LastStateTest, Basic) {
   utils::json::JsonValue& dictionary = last_state_.dictionary();
   EXPECT_EQ("null\n", dictionary.ToJson(true));
 }
 
-TEST_F(LastStateTest, DISABLED_SetGetData) {
+TEST_F(LastStateTest, SetGetData) {
   {
     utils::json::JsonValue& dictionary = last_state_.dictionary();
     utils::json::JsonValue bluetooth_info =
