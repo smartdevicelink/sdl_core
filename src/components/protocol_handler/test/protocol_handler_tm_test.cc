@@ -145,14 +145,12 @@ class ProtocolHandlerImplTest : public ::testing::Test {
 
     // Expect ConnectionHandler support methods call (conversion, check
     // heartbeat)
-    EXPECT_CALL(session_observer_mock, KeyFromPair(connection_id, _))
-        .
-        // Return some connection_key
-        WillRepeatedly(Return(connection_key));
-    EXPECT_CALL(session_observer_mock, IsHeartBeatSupported(connection_id, _))
-        .
-        // Return false to avoid call KeepConnectionAlive
-        WillRepeatedly(Return(false));
+    ON_CALL(session_observer_mock, KeyFromPair(connection_id, _))
+        // return some connection_key
+        .WillByDefault(Return(connection_key));
+    ON_CALL(session_observer_mock, IsHeartBeatSupported(connection_id, _))
+        // return false to avoid call KeepConnectionAlive
+        .WillByDefault(Return(false));
   }
 
   void TearDown() OVERRIDE {
@@ -256,7 +254,6 @@ class ProtocolHandlerImplTest : public ::testing::Test {
   }
 
   testing::NiceMock<MockProtocolHandlerSettings> protocol_handler_settings_mock;
-  ::utils::SharedPtr<ProtocolHandlerImpl> protocol_handler_impl;
   TransportManagerListener* tm_listener;
   // Uniq connection
   ::transport_manager::ConnectionUID connection_id;
@@ -269,15 +266,16 @@ class ProtocolHandlerImplTest : public ::testing::Test {
   // Strict mocks (same as all methods EXPECT_CALL().Times(0))
   testing::NiceMock<connection_handler_test::MockConnectionHandler>
       connection_handler_mock;
-  testing::StrictMock<transport_manager_test::MockTransportManager>
+  testing::NiceMock<transport_manager_test::MockTransportManager>
       transport_manager_mock;
-  testing::StrictMock<protocol_handler_test::MockSessionObserver>
+  testing::NiceMock<protocol_handler_test::MockSessionObserver>
       session_observer_mock;
 #ifdef ENABLE_SECURITY
   testing::NiceMock<security_manager_test::MockSecurityManager>
       security_manager_mock;
   testing::NiceMock<security_manager_test::MockSSLContext> ssl_context_mock;
 #endif  // ENABLE_SECURITY
+  ::utils::SharedPtr<ProtocolHandlerImpl> protocol_handler_impl;
 };
 
 #ifdef ENABLE_SECURITY

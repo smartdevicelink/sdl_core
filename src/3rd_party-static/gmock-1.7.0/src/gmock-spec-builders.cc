@@ -761,7 +761,7 @@ bool Mock::AsyncVerifyAndClearExpectations(int timeout_msec)
   return AsyncVerifyAndClearExpectationsLocked(timeout_msec);
 }
 
-bool Mock::AsyncVerifyAndClearExpectationsLocked(const int timeout_msec_in)
+bool Mock::AsyncVerifyAndClearExpectationsLocked(int timeout_msec)
     GTEST_EXCLUSIVE_LOCK_REQUIRED_(internal::g_gmock_mutex) {
   internal::g_gmock_mutex.AssertHeld();
   MockObjectRegistry::StateMap& state_map = g_mock_object_registry.states();
@@ -773,7 +773,6 @@ bool Mock::AsyncVerifyAndClearExpectationsLocked(const int timeout_msec_in)
   // TODO(ezamakhov@gmail.com): refactor the next loops
   bool expectations_met = true;
   timeval first_register_time {0, 0};
-  int timeout_msec = timeout_msec_in;
   for (MockObjectRegistry::StateMap::iterator mock_it = state_map.begin();
       state_map.end() != mock_it; ++mock_it) {
     MockObjectState& state = mock_it->second;
@@ -825,6 +824,8 @@ bool Mock::AsyncVerifyAndClearExpectationsLocked(const int timeout_msec_in)
       } while (true);
     } // mockers iteration
 
+  } // state_map iteration
+
     if (expectations_met) {
       const long elapsed_usecs =
           // first_register_time is empty on no expectations in mocks
@@ -832,15 +833,19 @@ bool Mock::AsyncVerifyAndClearExpectationsLocked(const int timeout_msec_in)
           ? internal::UsecsElapsed(first_register_time)
           : 100 * 1000;
       // To avoid waitings very long times.
-      const long max_sleep_time = timeout_msec_in * 10 * 1000;
+      const long max_sleep_time = timeout_msec * 10 * 1000;
       if (max_sleep_time > elapsed_usecs * 2) {
-        // Wait double times
-        internal::UnlockAndSleep(elapsed_usecs * 2);
+      // Wait double times
+      internal::UnlockAndSleep(elapsed_usecs * 2);
       }
     }
 
     // Verifies and clears the expectations on each mock method in the
-    // given mock object.
+  // all mock objects.
+  for (MockObjectRegistry::StateMap::iterator mock_it = state_map.begin();
+      state_map.end() != mock_it; ++mock_it) {
+    MockObjectState& state = mock_it->second;
+    FunctionMockers& mockers = state.function_mockers;
     for (FunctionMockers::const_iterator it = mockers.begin();
          it != mockers.end(); ++it) {
       internal::UntypedFunctionMockerBase* base = *it;
@@ -850,8 +855,7 @@ bool Mock::AsyncVerifyAndClearExpectationsLocked(const int timeout_msec_in)
         expectations_met = false;
       }
     }
-  } // state_map iteration
-
+  }
   // We don't clear the content of mockers, as they may still be
   // needed by ClearDefaultActionsLocked().
   return expectations_met;

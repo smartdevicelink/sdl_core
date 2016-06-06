@@ -549,12 +549,11 @@ class ProtocolHandlerImpl
   security_manager::SecurityManager* security_manager_;
 #endif  // ENABLE_SECURITY
 
+  sync_primitives::Lock protocol_observers_lock_;
   // Thread that pumps non-parsed messages coming from mobile side.
   impl::FromMobileQueue raw_ford_messages_from_mobile_;
   // Thread that pumps messages prepared to being sent to mobile side.
   impl::ToMobileQueue raw_ford_messages_to_mobile_;
-
-  sync_primitives::Lock protocol_observers_lock_;
 
 #ifdef TELEMETRY_MONITOR
   PHTelemetryObserver* metric_observer_;
