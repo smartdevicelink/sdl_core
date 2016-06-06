@@ -36,19 +36,12 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_DEVICE_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_DEVICE_H_
 
-#include <memory.h>
-#include <signal.h>
-#include <errno.h>
-#include <arpa/inet.h>
-#include <netinet/in.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-
 #include <map>
 #include <string>
 
 #include "utils/lock.h"
 #include "transport_manager/transport_adapter/device.h"
+#include "utils/socket.h"
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -64,7 +57,7 @@ class TcpDevice : public Device {
    * @param in_addr Address.
    * @param name Device Name.
    **/
-  TcpDevice(const in_addr_t& in_addr, const std::string& name);
+  TcpDevice(const utils::HostAddress& address, const std::string& name);
 
   virtual ~TcpDevice();
 
@@ -85,18 +78,14 @@ class TcpDevice : public Device {
   virtual ApplicationList GetApplicationList() const;
 
   /**
-   * @brief Add an application to the container of applications.
-   *
-   * @param socket Value of socket.
-   */
-  ApplicationHandle AddIncomingApplication(int socket_fd);
-
-  /**
    * @brief Add application that was discovered before.
    *
-   * @param Port No.
+   * @param port Port number.
+   * @param is_incomming Whether the connection is incomming or was discovered
+   * before.
    */
-  ApplicationHandle AddDiscoveredApplication(int port);
+  ApplicationHandle AddApplication(const uint16_t port,
+                                   const bool is_incomming);
 
   /**
    * @brief Remove application from the container of applications.
@@ -106,42 +95,43 @@ class TcpDevice : public Device {
   void RemoveApplication(const ApplicationHandle app_handle);
 
   /**
-   * @brief Return application's socket value.
-   *
-   * @param app_handle Handle of application.
-   *
-   * @return Application's socket value.
-   */
-  int GetApplicationSocket(const ApplicationHandle app_handle) const;
-
-  /**
    * @brief Return application's port No.
    *
    * @param app_handle Handle of application.
    *
-   * @return Application's port No.
+   * @return Application's port No. Or -1 if application is not found.
    */
-  virtual int GetApplicationPort(const ApplicationHandle app_handle) const;
+  int GetApplicationPort(const ApplicationHandle app_handle) const;
 
   /**
    * @brief Return address.
    *
    * @return Address.
    */
-  in_addr_t in_addr() const {
-    return in_addr_;
+  utils::HostAddress Address() const {
+    return address_;
   }
 
  private:
   struct Application {
+    Application() : incoming(false), port(0) {}
+
+    Application(const bool incoming, uint16_t port)
+        : incoming(incoming), port(port) {}
+
     bool incoming;
-    int socket;
+
     uint16_t port;
   };
+
   std::map<ApplicationHandle, Application> applications_;
+
   mutable sync_primitives::Lock applications_mutex_;
-  const in_addr_t in_addr_;
+
+  const utils::HostAddress address_;
+
   const std::string name_;
+
   ApplicationHandle last_handle_;
 };
 

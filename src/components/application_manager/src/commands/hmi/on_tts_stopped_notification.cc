@@ -31,7 +31,6 @@
  */
 
 #include "application_manager/commands/hmi/on_tts_stopped_notification.h"
-
 #include "application_manager/event_engine/event.h"
 
 namespace application_manager {
@@ -45,7 +44,7 @@ OnTTSStoppedNotification::OnTTSStoppedNotification(
 OnTTSStoppedNotification::~OnTTSStoppedNotification() {}
 
 void OnTTSStoppedNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   event_engine::Event event(hmi_apis::FunctionID::TTS_Stopped);
   event.set_smart_object(*message_);

@@ -1,4 +1,5 @@
 /*
+
  Copyright (c) 2016, Ford Motor Company
  All rights reserved.
 
@@ -43,7 +44,7 @@ DialNumberResponse::DialNumberResponse(const MessageSharedPtr& message,
 DialNumberResponse::~DialNumberResponse() {}
 
 void DialNumberResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   application_manager_.SendMessageToMobile(message_);
 }

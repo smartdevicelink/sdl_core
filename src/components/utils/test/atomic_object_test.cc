@@ -44,7 +44,7 @@ TEST(AtomicObjectTest, Construct) {
   var = 8;
   EXPECT_EQ(8, var);
 
-  sync_primitives::atomic_bool flag = true;
+  sync_primitives::atomic_bool flag(true);
 
   EXPECT_TRUE(flag == true);
 

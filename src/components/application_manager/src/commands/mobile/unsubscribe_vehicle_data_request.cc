@@ -33,7 +33,6 @@
 
 #include "application_manager/commands/mobile/unsubscribe_vehicle_data_request.h"
 #include "application_manager/commands/command_impl.h"
-
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"
@@ -105,12 +104,12 @@ Subrequest subrequests[] = {
 #endif  // #ifdef HMI_DBUS_API
 
 void UnsubscribeVehicleDataRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
-    LOG4CXX_ERROR(logger_, "NULL pointer");
+    LOGGER_ERROR(logger_, "NULL pointer");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -145,25 +144,25 @@ void UnsubscribeVehicleDataRequest::Run() {
         }
 
         if (!app->UnsubscribeFromIVI(static_cast<uint32_t>(key_type))) {
-          LOG4CXX_ERROR(logger_,
-                        "Unable to unsubscribe from "
-                        "VehicleDataType: "
-                            << key_type);
+          LOGGER_ERROR(logger_,
+                       "Unable to unsubscribe from "
+                       "VehicleDataType: "
+                           << key_type);
           continue;
         }
 
-        LOG4CXX_DEBUG(logger_,
-                      "Unsubscribed app with connection key "
-                          << connection_key()
-                          << " from VehicleDataType: " << key_type);
+        LOGGER_DEBUG(logger_,
+                     "Unsubscribed app with connection key "
+                         << connection_key()
+                         << " from VehicleDataType: " << key_type);
 
         ++unsubscribed_items;
 
         if (IsSomeoneSubscribedFor(key_type)) {
-          LOG4CXX_DEBUG(logger_,
-                        "There are another apps still subscribed for "
-                        "VehicleDataType: "
-                            << key_type);
+          LOGGER_DEBUG(logger_,
+                       "There are another apps still subscribed for "
+                       "VehicleDataType: "
+                           << key_type);
 
           vi_still_subscribed_by_another_apps_.insert(key_type);
           response_params[key_name][strings::data_type] = key_type;
@@ -227,8 +226,8 @@ void UnsubscribeVehicleDataRequest::Run() {
       hmi_requests_.push_back(hmi_request);
     }
   }
-  LOG4CXX_INFO(logger_,
-               hmi_requests_.size() << " requests are going to be sent to HMI");
+  LOGGER_INFO(logger_,
+              hmi_requests_.size() << " requests are going to be sent to HMI");
 
   // Send subrequests
   for (HmiRequests::const_iterator it = hmi_requests_.begin();
@@ -243,13 +242,13 @@ void UnsubscribeVehicleDataRequest::Run() {
 }
 
 void UnsubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   using namespace helpers;
 
   const smart_objects::SmartObject& message = event.smart_object();
 
   if (hmi_apis::FunctionID::VehicleInfo_UnsubscribeVehicleData != event.id()) {
-    LOG4CXX_ERROR(logger_, "Received unknown event.");
+    LOGGER_ERROR(logger_, "Received unknown event.");
     return;
   }
 
@@ -284,10 +283,10 @@ void UnsubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
                  static_cast<mobile_apis::Result::eType>(it->status)) {
         status = mobile_api::Result::eType::GENERIC_ERROR;
       }
-      LOG4CXX_TRACE(logger_,
-                    "Status from HMI: " << it->status
-                                        << ", so response status become "
-                                        << status);
+      LOGGER_TRACE(logger_,
+                   "Status from HMI: " << it->status
+                                       << ", so response status become "
+                                       << status);
     } else {
       any_arg_success = true;
     }
@@ -302,7 +301,7 @@ void UnsubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
       }
     }
 
-    LOG4CXX_INFO(logger_, "All HMI requests are complete");
+    LOGGER_INFO(logger_, "All HMI requests are complete");
     if (true == any_arg_success) {
       SetAllowedToTerminate(false);
     }
@@ -358,10 +357,9 @@ struct SubscribedToIVIPredicate {
     return app ? app->IsSubscribedToIVI(vehicle_info_) : false;
   }
 };
-
 bool UnsubscribeVehicleDataRequest::IsSomeoneSubscribedFor(
     const uint32_t param_id) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   SubscribedToIVIPredicate finder(param_id);
   DataAccessor<ApplicationSet> accessor = application_manager_.applications();
   ApplicationSetConstIt it = std::find_if(
@@ -371,7 +369,7 @@ bool UnsubscribeVehicleDataRequest::IsSomeoneSubscribedFor(
 
 void UnsubscribeVehicleDataRequest::AddAlreadyUnsubscribedVI(
     smart_objects::SmartObject& response) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   using namespace mobile_apis;
   VehicleInfoSubscriptions::const_iterator it_same_app =
       vi_already_unsubscribed_by_this_app_.begin();
@@ -391,15 +389,15 @@ void UnsubscribeVehicleDataRequest::AddAlreadyUnsubscribedVI(
 }
 
 void UnsubscribeVehicleDataRequest::UpdateHash() const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   ApplicationSharedPtr application =
       application_manager_.application(connection_key());
   if (application) {
     application->UpdateHash();
   } else {
-    LOG4CXX_ERROR(logger_,
-                  "Application with connection_key = " << connection_key()
-                                                       << " doesn't exist.");
+    LOGGER_ERROR(logger_,
+                 "Application with connection_key = " << connection_key()
+                                                      << " doesn't exist.");
   }
   application_manager_.TerminateRequest(connection_key(), correlation_id());
 }

@@ -31,7 +31,6 @@
  */
 
 #include "application_manager/application_impl.h"
-
 #include "application_manager/commands/hmi/on_system_request_notification.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "interfaces/MOBILE_API.h"
@@ -50,7 +49,7 @@ OnSystemRequestNotification::OnSystemRequestNotification(
 OnSystemRequestNotification::~OnSystemRequestNotification() {}
 
 void OnSystemRequestNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   smart_objects::SmartObject& params = (*message_)[strings::params];
   smart_objects::SmartObject& msg_params = (*message_)[strings::msg_params];
@@ -64,33 +63,33 @@ void OnSystemRequestNotification::Run() {
   ApplicationSharedPtr app;
   if (msg_params.keyExists(strings::app_id)) {
     const uint32_t app_id = msg_params[strings::app_id].asUInt();
-    LOG4CXX_DEBUG(logger_, "Received OnSystemRequest for appID " << app_id);
-    LOG4CXX_DEBUG(logger_, "Searching app to send OnSystemRequest by appID.");
+    LOGGER_DEBUG(logger_, "Received OnSystemRequest for appID " << app_id);
+    LOGGER_DEBUG(logger_, "Searching app to send OnSystemRequest by appID.");
     app = application_manager_.application(app_id);
   } else {
-    LOG4CXX_DEBUG(logger_,
-                  "Received OnSystemRequest without appID."
-                  " One of registered apps will be used.");
-    LOG4CXX_DEBUG(logger_, "Searching registered app to send OnSystemRequest.");
+    LOGGER_DEBUG(logger_,
+                 "Received OnSystemRequest without appID."
+                 " One of registered apps will be used.");
+    LOGGER_DEBUG(logger_, "Searching registered app to send OnSystemRequest.");
     const PolicyHandlerInterface& policy_handler =
         application_manager_.GetPolicyHandler();
     const uint32_t selected_app_id = policy_handler.GetAppIdForSending();
     if (0 == selected_app_id) {
-      LOG4CXX_WARN(logger_,
-                   "Can't select application to forward OnSystemRequest.");
+      LOGGER_WARN(logger_,
+                  "Can't select application to forward OnSystemRequest.");
       return;
     }
     app = application_manager_.application(selected_app_id);
   }
 
   if (!app.valid()) {
-    LOG4CXX_WARN(logger_,
-                 "No valid application found to forward OnSystemRequest.");
+    LOGGER_WARN(logger_,
+                "No valid application found to forward OnSystemRequest.");
     return;
   }
 
-  LOG4CXX_DEBUG(logger_,
-                "Sending request with application id " << app->policy_app_id());
+  LOGGER_DEBUG(logger_,
+               "Sending request with application id " << app->policy_app_id());
 
   params[strings::connection_key] = app->app_id();
   SendNotificationToMobile(message_);

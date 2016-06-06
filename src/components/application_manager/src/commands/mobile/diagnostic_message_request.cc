@@ -33,9 +33,7 @@
 
 #include <algorithm>
 #include "application_manager/commands/mobile/diagnostic_message_request.h"
-
 #include "application_manager/application_impl.h"
-
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {
@@ -49,12 +47,12 @@ DiagnosticMessageRequest::DiagnosticMessageRequest(
 DiagnosticMessageRequest::~DiagnosticMessageRequest() {}
 
 void DiagnosticMessageRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
-    LOG4CXX_ERROR(logger_, "Application is not registered.");
+    LOGGER_ERROR(logger_, "Application is not registered.");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -70,9 +68,9 @@ void DiagnosticMessageRequest::Run() {
   if (supported_diag_modes.end() == std::find(supported_diag_modes.begin(),
                                               supported_diag_modes.end(),
                                               msg_diagnostic_mode)) {
-    LOG4CXX_ERROR(logger_,
-                  "Received diagnostic mode " << msg_diagnostic_mode
-                                              << " is not supported.");
+    LOGGER_ERROR(logger_,
+                 "Received diagnostic mode " << msg_diagnostic_mode
+                                             << " is not supported.");
     SendResponse(false,
                  mobile_apis::Result::REJECTED,
                  "Received diagnostic mode is not supported.");
@@ -88,7 +86,7 @@ void DiagnosticMessageRequest::Run() {
 }
 
 void DiagnosticMessageRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
@@ -103,7 +101,7 @@ void DiagnosticMessageRequest::on_event(const event_engine::Event& event) {
       break;
     }
     default: {
-      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+      LOGGER_ERROR(logger_, "Received unknown event" << event.id());
       return;
     }
   }

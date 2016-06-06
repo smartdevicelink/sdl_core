@@ -34,7 +34,7 @@
 #define SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_NUMBER_SCHEMA_ITEM_H_
 
 #include <typeinfo>
-#include <limits>
+
 #include "utils/shared_ptr.h"
 #include "smart_objects/default_shema_item.h"
 #include "smart_objects/schema_item_parameter.h"
@@ -125,6 +125,9 @@ bool TNumberSchemaItem<NumberType>::isValidNumberType(SmartType type) {
   }
 }
 
+#if defined(_MSC_VER)
+#pragma warning(push, 0)
+#endif
 template <typename NumberType>
 Errors::eType TNumberSchemaItem<NumberType>::validate(
     const SmartObject& Object) {
@@ -156,6 +159,9 @@ Errors::eType TNumberSchemaItem<NumberType>::validate(
   }
   return Errors::OK;
 }
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#endif
 
 template <typename NumberType>
 TNumberSchemaItem<NumberType>::TNumberSchemaItem(

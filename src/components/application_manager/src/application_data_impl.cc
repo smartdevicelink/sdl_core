@@ -416,7 +416,7 @@ void DynamicApplicationDataImpl::SetGlobalProperties(
       (this->*callback)(param);
     }
   } else {
-    LOG4CXX_WARN(logger_, "Invalid or Null smart object");
+    LOGGER_WARN(logger_, "Invalid or Null smart object");
   }
 }
 

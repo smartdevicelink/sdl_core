@@ -32,10 +32,13 @@
 
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_RESUMPTION_RESUMPTION_DATA_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_RESUMPTION_RESUMPTION_DATA_H_
-
 #include "smart_objects/smart_object.h"
 #include "application_manager/application.h"
 #include "application_manager/application_manager.h"
+
+#if defined(OS_WINDOWS)
+#define ssize_t SSIZE_T
+#endif
 
 namespace application_manager {
 class ApplicationManagerSettings;

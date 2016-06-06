@@ -30,7 +30,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/commands/hmi/vr_get_supported_languages_response.h"
-
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 
@@ -45,7 +44,7 @@ VRGetSupportedLanguagesResponse::VRGetSupportedLanguagesResponse(
 VRGetSupportedLanguagesResponse::~VRGetSupportedLanguagesResponse() {}
 
 void VRGetSupportedLanguagesResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   const hmi_apis::Common_Result::eType code =
       static_cast<hmi_apis::Common_Result::eType>(

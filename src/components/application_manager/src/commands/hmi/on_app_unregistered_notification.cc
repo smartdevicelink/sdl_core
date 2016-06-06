@@ -31,7 +31,6 @@
  */
 
 #include "application_manager/commands/hmi/on_app_unregistered_notification.h"
-
 #include "application_manager/event_engine/event.h"
 
 namespace application_manager {
@@ -45,7 +44,7 @@ OnAppUnregisteredNotification::OnAppUnregisteredNotification(
 OnAppUnregisteredNotification::~OnAppUnregisteredNotification() {}
 
 void OnAppUnregisteredNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   // sending event for delete VRCommand on PerformInteraction
   event_engine::Event event(

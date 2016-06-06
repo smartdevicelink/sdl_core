@@ -36,6 +36,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <cstdint>
 
 /**
  * \namespace connection_handler

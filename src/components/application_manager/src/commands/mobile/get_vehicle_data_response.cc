@@ -32,7 +32,6 @@
  */
 
 #include "application_manager/commands/mobile/get_vehicle_data_response.h"
-
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {
@@ -46,7 +45,7 @@ GetVehicleDataResponse::GetVehicleDataResponse(
 GetVehicleDataResponse::~GetVehicleDataResponse() {}
 
 void GetVehicleDataResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   application_manager_.SendMessageToMobile(message_);
 }

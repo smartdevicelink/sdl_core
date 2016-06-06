@@ -28,10 +28,16 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  find_package(WinOpenSSL REQUIRED)
+endif()
+
+if (VERBOSE)
+    message ("Generating project ${PROJECT_NAME} in ${CMAKE_CURRENT_BINARY_DIR}")
+endif()
 
 set (AM_SOURCE_DIR ${COMPONENTS_DIR}/application_manager)
 set (AM_TEST_DIR ${AM_SOURCE_DIR}/test)
-set (AM_MOCK_DIR ${AM_TEST_DIR}/mock)
 
 include_directories (
   ${COMPONENTS_DIR}/application_manager/include/
@@ -47,19 +53,58 @@ include_directories (
   ${COMPONENTS_DIR}/resumption/include/
   ${COMPONENTS_DIR}/rpc_base/include/
   ${CMAKE_BINARY_DIR}/src/components/
+  ${COMPONENTS_DIR}/include/
   ${COMPONENTS_DIR}/policy/include/
+  ${COMPONENTS_DIR}/application_manager/include/
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${ENCRYPTION_INCLUDE_DIRECTORY}
   ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
   ${LOG4CXX_INCLUDE_DIRECTORY}
+  ${OPENSSL_INCLUDE_DIRECTORY}
 )
+  include_directories(
+    ${COMPONENTS_DIR}/policy/src/policy/policy_table/table_struct
+  )
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+    file (GLOB_RECURSE inc RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} include/application_manager/*.h)
+
+    file( GLOB_RECURSE src RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/*.cc )
+    foreach( file ${inc};${src} )
+         get_filename_component( path ${file} PATH )
+         string( REPLACE / \\ group ${path} )
+         source_group( ${group} FILES ${file} )
+     endforeach()
+    add_library("ApplicationManager" ${inc}
+                                     ${src} )
+
+    set(LIBRARIES HMI_API
+                  Utils
+                  MOBILE_API
+                  v4_protocol_v1_2_no_extra
+                  ProtocolLibrary
+                  SmartObjects
+                  UsageStatistics
+                  formatters
+                  dbms)
+    if (${HMI_JSON_API})
+      message ("Generating project ${PROJECT_NAME} in ${CMAKE_CURRENT_BINARY_DIR} set ${HMI_JSON_API}")
+      set (HMI_COMMANDS_SOURCES ${HMI_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES_JSON})
+    endif (${HMI_JSON_API})
+    message ("Generating project ${PROJECT_NAME} in ${CMAKE_CURRENT_BINARY_DIR} set HMI_DBUS_API: ${HMI_DBUS_API}")
+    if (${HMI_DBUS_API})
+        set (HMI_COMMANDS_SOURCES ${HMI_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES_DBUS})
+    endif (${HMI_DBUS_API})
+
+    target_link_libraries("ApplicationManager" ${LIBRARIES})
+else ()
 
 file (GLOB SOURCES
   ${AM_SOURCE_DIR}/src/*
 )
 
 set (MESSAGE_HELPER_SOURCES
-  ${AM_SOURCE_DIR}/src/message_helper/message_helper.cc
+  ${AM_SOURCE_DIR}/src/message_helper.cc
 )
 
 set (POLICIES_MANAGER
@@ -375,6 +420,7 @@ if(ENABLE_LOG)
   target_link_libraries("ApplicationManager" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
 endif()
 
+endif()
 if(BUILD_TESTS)
   add_subdirectory(test)
   add_subdirectory(test/message_helper)

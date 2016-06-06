@@ -125,7 +125,6 @@ class UpdateStatusManager {
     return GetUpdateStatus();
   }
 #endif  // BUILD_TESTS
-
  private:
   /*
    * @brief Sets flag for update progress

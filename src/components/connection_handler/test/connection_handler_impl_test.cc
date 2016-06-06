@@ -253,7 +253,7 @@ class ConnectionHandlerTest : public ::testing::Test {
   std::string device_name_;
   std::string mac_address_;
 
-  const uint32_t heartbeat_timeout = 100u;
+  static const uint32_t heartbeat_timeout = 100u;
   std::vector<int> protected_services_;
   std::vector<int> unprotected_services_;
 };
@@ -380,9 +380,10 @@ TEST_F(ConnectionHandlerTest, GetDefaultProtocolVersion) {
   EXPECT_TRUE(connection_handler_->ProtocolVersionUsed(
       uid_, start_session_id_, protocol_version));
 
-  EXPECT_EQ(PROTOCOL_VERSION_2, protocol_version);
+  EXPECT_EQ(static_cast<int>(PROTOCOL_VERSION_2), protocol_version);
 }
 
+// TODO(OHerasym) : exception on Windows platform
 TEST_F(ConnectionHandlerTest, GetProtocolVersion) {
   AddTestDeviceConnection();
   AddTestSession();
@@ -392,7 +393,16 @@ TEST_F(ConnectionHandlerTest, GetProtocolVersion) {
   EXPECT_TRUE(connection_handler_->ProtocolVersionUsed(
       uid_, start_session_id_, protocol_version));
 
-  EXPECT_EQ(PROTOCOL_VERSION_3, protocol_version);
+  EXPECT_EQ(static_cast<int>(PROTOCOL_VERSION_3), protocol_version);
+}
+
+// TODO(OHerasym) : exception on Windows platform
+TEST_F(ConnectionHandlerTest, IsHeartBeatSupported) {
+  AddTestDeviceConnection();
+  AddTestSession();
+  ChangeProtocol(uid_, start_session_id_, PROTOCOL_VERSION_3);
+  EXPECT_TRUE(
+      connection_handler_->IsHeartBeatSupported(uid_, start_session_id_));
 }
 
 TEST_F(ConnectionHandlerTest, GetProtocolVersionAfterBinding) {
@@ -401,14 +411,14 @@ TEST_F(ConnectionHandlerTest, GetProtocolVersionAfterBinding) {
   uint8_t protocol_version = 0;
   EXPECT_TRUE(connection_handler_->ProtocolVersionUsed(
       uid_, start_session_id_, protocol_version));
-  EXPECT_EQ(PROTOCOL_VERSION_2, protocol_version);
+  EXPECT_EQ(static_cast<int>(PROTOCOL_VERSION_2), protocol_version);
 
   connection_handler_->BindProtocolVersionWithSession(connection_key_,
                                                       PROTOCOL_VERSION_3);
 
   EXPECT_TRUE(connection_handler_->ProtocolVersionUsed(
       uid_, start_session_id_, protocol_version));
-  EXPECT_EQ(PROTOCOL_VERSION_3, protocol_version);
+  EXPECT_EQ(static_cast<int>(PROTOCOL_VERSION_3), protocol_version);
 }
 
 TEST_F(ConnectionHandlerTest, GetPairFromKey) {
@@ -420,14 +430,6 @@ TEST_F(ConnectionHandlerTest, GetPairFromKey) {
   connection_handler_->PairFromKey(connection_key_, &test_uid, &session_id);
   EXPECT_EQ(uid_, test_uid);
   EXPECT_EQ(start_session_id_, session_id);
-}
-
-TEST_F(ConnectionHandlerTest, IsHeartBeatSupported) {
-  AddTestDeviceConnection();
-  AddTestSession();
-  ChangeProtocol(uid_, start_session_id_, PROTOCOL_VERSION_3);
-  EXPECT_TRUE(
-      connection_handler_->IsHeartBeatSupported(uid_, start_session_id_));
 }
 
 TEST_F(ConnectionHandlerTest, SendEndServiceWithoutSetProtocolHandler) {
@@ -967,6 +969,7 @@ TEST_F(ConnectionHandlerTest, StartService_withServices) {
   EXPECT_EQ(protocol_handler::HASH_ID_NOT_SUPPORTED, out_hash_id_);
 }
 
+// TODO(OHerasym) : OnSessionEndedCallback tests don't finish executing
 TEST_F(ConnectionHandlerTest, ServiceStop_UnExistSession) {
   AddTestDeviceConnection();
 
@@ -1047,6 +1050,7 @@ TEST_F(ConnectionHandlerTest, SessionStop_CheckSpecificHash) {
   }
 }
 
+// TODO(OHerasym) : fails on Windows platform
 TEST_F(ConnectionHandlerTest, SessionStarted_WithRpc) {
   // Add virtual device and connection
   AddTestDeviceConnection();
@@ -1068,6 +1072,7 @@ TEST_F(ConnectionHandlerTest, SessionStarted_WithRpc) {
   EXPECT_NE(0u, new_session_id);
 }
 
+// TODO(OHerasym) : OnSessionStartedCallback tests don't finish executing
 TEST_F(ConnectionHandlerTest,
        SessionStarted_StartSession_SecureSpecific_Unprotect) {
   EXPECT_CALL(mock_connection_handler_settings, heart_beat_timeout())
@@ -1266,6 +1271,7 @@ TEST_F(ConnectionHandlerTest, SessionStarted_DealyProtectBulk) {
 #endif  // ENABLE_SECURITY
 }
 
+// TODO(OHerasym) : security tests don't finish executing
 #ifdef ENABLE_SECURITY
 TEST_F(ConnectionHandlerTest, SetSSLContext_Null) {
   // No SSLContext on start up
@@ -1419,6 +1425,7 @@ TEST_F(ConnectionHandlerTest, GetSSLContext_ByDealyProtectedBulk) {
 }
 #endif  // ENABLE_SECURITY
 
+// TODO(OHerasym) : test don't finish executing
 TEST_F(ConnectionHandlerTest, SendHeartBeat) {
   // Add virtual device and connection
   AddTestDeviceConnection();

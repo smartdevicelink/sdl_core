@@ -68,12 +68,12 @@ bool ScrollableMessageRequest::Init() {
 }
 
 void ScrollableMessageRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
-    LOG4CXX_ERROR(logger_, "Application is not registered");
+    LOGGER_ERROR(logger_, "Application is not registered");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -87,7 +87,7 @@ void ScrollableMessageRequest::Run() {
                                         application_manager_);
 
   if (mobile_apis::Result::SUCCESS != processing_result) {
-    LOG4CXX_ERROR(logger_, "Wrong soft buttons parameters!");
+    LOGGER_ERROR(logger_, "Wrong soft buttons parameters!");
     SendResponse(false, processing_result);
     return;
   }
@@ -114,19 +114,19 @@ void ScrollableMessageRequest::Run() {
 }
 
 void ScrollableMessageRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   using namespace helpers;
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_OnResetTimeout: {
-      LOG4CXX_INFO(logger_, "Received UI_OnResetTimeout event");
+      LOGGER_INFO(logger_, "Received UI_OnResetTimeout event");
       application_manager_.updateRequestTimeout(
           connection_key(), correlation_id(), default_timeout());
       break;
     }
     case hmi_apis::FunctionID::UI_ScrollableMessage: {
-      LOG4CXX_INFO(logger_, "Received UI_ScrollableMessage event");
+      LOGGER_INFO(logger_, "Received UI_ScrollableMessage event");
 
       mobile_apis::Result::eType result_code =
           static_cast<mobile_apis::Result::eType>(
@@ -149,7 +149,7 @@ void ScrollableMessageRequest::on_event(const event_engine::Event& event) {
       break;
     }
     default: {
-      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+      LOGGER_ERROR(logger_, "Received unknown event" << event.id());
       break;
     }
   }

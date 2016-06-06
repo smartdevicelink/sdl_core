@@ -42,7 +42,7 @@ AllowAllAppsResponse::AllowAllAppsResponse(
 AllowAllAppsResponse::~AllowAllAppsResponse() {}
 
 void AllowAllAppsResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   application_manager_.SetAllAppsAllowed(
       (*message_)[strings::msg_params][hmi_response::allowed].asBool());

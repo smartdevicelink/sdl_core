@@ -31,40 +31,42 @@
 // CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
-#include "json/json.h"
-#include "formatters/CFormatterJsonBase.h"
+#include "utils/json_utils.h"
 #include "utils/convert_utils.h"
+#include "formatters/CFormatterJsonBase.h"
 
 void NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonBase::
-    jsonValueToObj(const Json::Value& value,
+    jsonValueToObj(const utils::json::JsonValueRef value,
                    NsSmartDeviceLink::NsSmartObjects::SmartObject& obj) {
+  using namespace utils::json;
   try {
-    if (value.type() == Json::objectValue) {
+    const ValueType::Type json_type = value.Type();
+    if (json_type == ValueType::OBJECT_VALUE) {
       obj = NsSmartDeviceLink::NsSmartObjects::SmartObject(
           NsSmartDeviceLink::NsSmartObjects::SmartType_Map);
 
-      Json::Value::Members members = value.getMemberNames();
-
-      for (uint32_t i = 0; i < members.size(); i++) {
-        jsonValueToObj(value[members[i]], obj[members[i]]);
+      for (JsonValue::const_iterator itr = value.begin(), end = value.end();
+           itr != end;
+           ++itr) {
+        jsonValueToObj(*itr, obj[itr.key().AsString()]);
       }
-    } else if (value.type() == Json::arrayValue) {
+    } else if (json_type == ValueType::ARRAY_VALUE) {
       obj = NsSmartDeviceLink::NsSmartObjects::SmartObject(
           NsSmartDeviceLink::NsSmartObjects::SmartType_Array);
 
-      for (uint32_t i = 0; i < value.size(); i++) {
+      for (JsonValue::ArrayIndex i = 0, size = value.Size(); i < size; ++i) {
         jsonValueToObj(value[i], obj[i]);
       }
-    } else if (value.type() == Json::intValue) {
-      obj = utils::ConvertLongLongIntToInt64(value.asInt64());
-    } else if (value.type() == Json::uintValue) {
-      obj = utils::ConvertLongLongUIntToUInt64(value.asUInt64());
-    } else if (value.type() == Json::realValue) {
-      obj = value.asDouble();
-    } else if (value.type() == Json::booleanValue) {
-      obj = value.asBool();
-    } else if (value.type() == Json::stringValue) {
-      obj = value.asString();
+    } else if (json_type == ValueType::INT_VALUE) {
+      obj = utils::ConvertLongLongIntToInt64(value.AsInt());
+    } else if (json_type == ValueType::UINT_VALUE) {
+      obj = utils::ConvertLongLongUIntToUInt64(value.AsUInt());
+    } else if (json_type == ValueType::REAL_VALUE) {
+      obj = value.AsDouble();
+    } else if (json_type == ValueType::BOOL_VALUE) {
+      obj = value.AsBool();
+    } else if (json_type == ValueType::STRING_VALUE) {
+      obj = value.AsString();
     }
   } catch (...) {
   }
@@ -74,31 +76,33 @@ void NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonBase::
 
 void NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonBase::
     objToJsonValue(const NsSmartDeviceLink::NsSmartObjects::SmartObject& obj,
-                   Json::Value& item) {
+                   utils::json::JsonValueRef item) {
+  using namespace utils::json;
   try {
     if (NsSmartDeviceLink::NsSmartObjects::SmartType_Array == obj.getType()) {
-      item = Json::arrayValue;
+      item = ValueType::ARRAY_VALUE;
 
       for (uint32_t i = 0; i < obj.length(); i++) {
-        Json::Value value(Json::nullValue);
+        JsonValue value;
 
         objToJsonValue(obj.getElement(i), value);
 
-        item.append(value);
+        item.Append(value);
       }
     } else if (NsSmartDeviceLink::NsSmartObjects::SmartType_Map ==
                obj.getType()) {
-      item = Json::objectValue;
+      item = ValueType::OBJECT_VALUE;
       std::set<std::string> keys = obj.enumerate();
 
-      for (std::set<std::string>::const_iterator key = keys.begin();
-           key != keys.end();
-           key++) {
-        Json::Value value(Json::nullValue);
+      for (std::set<std::string>::const_iterator key_itr = keys.begin(),
+                                                 end = keys.end();
+           key_itr != end;
+           ++key_itr) {
+        JsonValue value;
 
-        objToJsonValue(obj.getElement(*key), value);
+        objToJsonValue(obj.getElement(*key_itr), value);
 
-        item[*key] = value;
+        item[*key_itr] = value;
       }
     } else if (NsSmartDeviceLink::NsSmartObjects::SmartType_Boolean ==
                obj.getType()) {
@@ -114,7 +118,7 @@ void NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonBase::
       item = obj.asDouble();
     } else if (NsSmartDeviceLink::NsSmartObjects::SmartType_Null ==
                obj.getType()) {
-      item = Json::nullValue;
+      item = ValueType::NULL_VALUE;
     } else {
       item = obj.asString();
     }

@@ -33,7 +33,6 @@
  */
 
 #include "application_manager/commands/mobile/on_hash_change_notification.h"
-
 #include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"
 #include <string>
@@ -51,7 +50,7 @@ OnHashChangeNotification::OnHashChangeNotification(
 OnHashChangeNotification::~OnHashChangeNotification() {}
 
 void OnHashChangeNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   (*message_)[strings::params][strings::message_type] =
       static_cast<int32_t>(application_manager::MessageType::kNotification);
@@ -63,8 +62,8 @@ void OnHashChangeNotification::Run() {
     (*message_)[strings::msg_params][strings::hash_id] = app->curHash();
     SendNotification();
   } else {
-    LOG4CXX_WARN(logger_,
-                 "Application with app_id " << app_id << " does not exist");
+    LOGGER_WARN(logger_,
+                "Application with app_id " << app_id << " does not exist");
   }
 }
 

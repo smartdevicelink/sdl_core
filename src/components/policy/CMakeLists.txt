@@ -29,6 +29,14 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 set(target Policy)
+if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  if(NOT QT_PORT)
+      find_package(WinSqlite3 REQUIRED)
+  endif()
+else()
+  find_package(Sqlite3 REQUIRED)
+endif()
+
 set(install_destination bin)
 set(copy_destination ${CMAKE_BINARY_DIR}/src/appMain)
 set(library_name ${CMAKE_SHARED_LIBRARY_PREFIX}${target}${CMAKE_SHARED_LIBRARY_SUFFIX})
@@ -80,23 +88,50 @@ if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
   include_directories (${COMPONENTS_DIR}/utils/include/)
 else ()
   # --- SQLite Wrapper
-  include_directories (${COMPONENTS_DIR}/utils/include/)
-  list(APPEND LIBRARIES sqlite3)
+  if (NOT QT_PORT)
+    include_directories (${COMPONENTS_DIR}/utils/include/)
+    list(APPEND LIBRARIES sqlite3)
+  endif()
 endif ()
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  source_group("Header Files" FILES ${HEADERS} )
+  source_group("Source Files" FILES ${SOURCES} )
+  if(NOT QT_PORT)
+    link_directories(${SQLITE_LIB_DIRECTORY})
+  endif()
+endif()
 
 add_library(${target} SHARED ${SOURCES})
 target_link_libraries(${target} ${LIBRARIES} )
 
-if(ENABLE_LOG)
-  target_link_libraries(${target} log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
+if(BUILD_TESTS)
+  set(TestTarget PolicyTestLib)
+  add_library(${TestTarget} STATIC ${SOURCES} ${HEADERS})
+  target_link_libraries(${TestTarget} ${LIBRARIES})
 endif()
 
+if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+  if(ENABLE_LOG)
+    target_link_libraries(${target} log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
+  endif()
+endif()
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 add_custom_target(copy_library_${target} ALL
-  COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    ${CMAKE_CURRENT_BINARY_DIR}/${library_name}
-    ${copy_destination}
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    ${CMAKE_CURRENT_BINARY_DIR}/$(Configuration)/${library_name}
+    ${copy_destination}/${library_name}
     DEPENDS ${target}
     COMMENT "Copying library ${library_name}")
+ else()
+add_custom_target(copy_library_${target} ALL
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    ${CMAKE_CURRENT_BINARY_DIR}/${library_name}
+    ${copy_destination}/${library_name}
+    DEPENDS ${target}
+    COMMENT "Copying library ${library_name}")
+endif()
 
 install(TARGETS ${target}
   DESTINATION ${install_destination}

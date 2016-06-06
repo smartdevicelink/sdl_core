@@ -53,7 +53,23 @@ set (FORMATTER_SOURCES
    ${FORMATTERS_SRC_DIR}/generic_json_formatter.cc
 )
 
-add_library("formatters" ${SOURCES} ${FORMATTER_SOURCES})
+if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  set (HEADERS  ${COMPONENTS_DIR}/formatters/include/formatters/formatter_json_rpc.h
+                ${COMPONENTS_DIR}/formatters/include/formatters/generic_json_formatter.h
+                ${COMPONENTS_DIR}/formatters/include/formatters/meta_formatter.h
+                ${COMPONENTS_DIR}/formatters/include/formatters/CFormatterJsonBase.h
+                ${COMPONENTS_DIR}/formatters/include/formatters/CFormatterJsonSDLRPCv1.h
+                ${COMPONENTS_DIR}/formatters/include/formatters/CFormatterJsonSDLRPCv2.h
+                ${COMPONENTS_DIR}/formatters/include/formatters/CSmartFactory.h)
+  source_group("Header Files" FILES ${HEADERS} )
+  source_group("Source Files" FILES ${SOURCES} ${FORMATTER_SOURCES})
+
+  add_library("formatters" ${HEADERS} ${SOURCES} ${FORMATTER_SOURCES})
+else()
+  add_library("formatters" ${SOURCES}
+          ${FORMATTER_SOURCES}
+  )
+endif()
 
 if(BUILD_TESTS)
   add_subdirectory(test)

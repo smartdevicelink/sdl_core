@@ -46,6 +46,11 @@
 #include "application_manager/application_state.h"
 #include "protocol_handler/protocol_handler.h"
 
+#if defined(OS_POSIX)
+#include <strings.h>
+#elif defined(OS_WINDOWS)
+#define strcasecmp _stricmp
+#endif
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
 
@@ -762,7 +767,6 @@ class Application : public virtual InitialApplicationData,
    * @brief Load persistent files from application folder.
    */
   virtual void LoadPersistentFiles() = 0;
-
   /**
    * @brief Get available app space
    * @param name of the app folder(make + mobile app id)
@@ -778,7 +782,6 @@ class Application : public virtual InitialApplicationData,
   std::string url_;
   std::string package_name_;
   std::string device_id_;
-  ssize_t connection_id_;
   bool is_greyed_out_;
 };
 

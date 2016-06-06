@@ -27,18 +27,12 @@
 
 #ifdef _WIN32
 
-#ifndef _MSC_VER
 #include <stdint.h>
-#endif //_MSC_VER
+#include "utils/winhdr.h"
 
-#include <winsock2.h>
-#include <windows.h>
-
-#if _MSC_VER >= 1400 // VC++ 8.0
-typedef unsigned short uint16_t;
-typedef unsigned long  uint32_t;
-#define snprintf _snprintf
-#endif //_MSC_VER >= 1400
+#if defined(_MSC_VER)
+#define snprintf _snprintf_s
+#endif
 
 /* to use getaddrinfo, _WIN32_WINNT have to
  * equal at least 0x0501
@@ -69,9 +63,7 @@ typedef int socklen_t;
 #include <sys/time.h>
 
 #include <unistd.h>
-
 #include <netinet/in.h>
-
 #include <netdb.h>
 
 #endif //_WIN32

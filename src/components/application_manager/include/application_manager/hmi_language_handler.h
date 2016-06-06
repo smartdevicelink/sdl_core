@@ -68,7 +68,7 @@ class HMILanguageHandler : public event_engine::EventObserver {
    * @param interface Interface
    * @param language Language
    */
-  void set_language_for(Interface interface,
+  void set_language_for(Interface iface,
                         hmi_apis::Common_Language::eType language);
 
   /**
@@ -76,7 +76,7 @@ class HMILanguageHandler : public event_engine::EventObserver {
    * @param interface Interface
    * @return Language
    */
-  hmi_apis::Common_Language::eType get_language_for(Interface interface) const;
+  hmi_apis::Common_Language::eType get_language_for(Interface iface) const;
 
   void on_event(const event_engine::Event& event) OVERRIDE;
 

@@ -42,7 +42,7 @@ SDLPolicyUpdateResponse::SDLPolicyUpdateResponse(
 SDLPolicyUpdateResponse::~SDLPolicyUpdateResponse() {}
 
 void SDLPolicyUpdateResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   // TODO(PV): add some logic here
 }
 }  // namespace commands

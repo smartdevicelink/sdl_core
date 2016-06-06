@@ -22,7 +22,7 @@ namespace NsMessageBroker
    ssize_t TcpClient::Send(const std::string& data)
    {
       std::string rep = data;
-      int bytesToSend = rep.length();
+      int bytesToSend = static_cast<int>(rep.length());
       const char* ptrBuffer = rep.c_str();
       do
       {
@@ -34,7 +34,7 @@ namespace NsMessageBroker
          bytesToSend -= retVal;
          ptrBuffer += retVal;
       }while(bytesToSend > 0); 
-      return rep.length();
+      return static_cast<ssize_t>(rep.length());
    }
 
    ssize_t TcpClient::Recv(std::string& data)

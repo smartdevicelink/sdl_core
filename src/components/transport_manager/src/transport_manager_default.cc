@@ -32,6 +32,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+
 #include "transport_manager/transport_manager_default.h"
 #include "transport_manager/tcp/tcp_transport_adapter.h"
 #include "utils/logger.h"
@@ -52,11 +53,11 @@ TransportManagerDefault::TransportManagerDefault(
     : TransportManagerImpl(settings) {}
 
 int TransportManagerDefault::Init(resumption::LastState& last_state) {
-  LOG4CXX_TRACE(logger_, "enter");
+  LOGGER_TRACE(logger_, "enter");
   if (E_SUCCESS != TransportManagerImpl::Init(last_state)) {
-    LOG4CXX_TRACE(logger_,
-                  "exit with E_TM_IS_NOT_INITIALIZED. Condition: E_SUCCESS != "
-                  "TransportManagerImpl::Init()");
+    LOGGER_TRACE(logger_,
+                 "exit with E_TM_IS_NOT_INITIALIZED. Condition: E_SUCCESS != "
+                 "TransportManagerImpl::Init()");
     return E_TM_IS_NOT_INITIALIZED;
   }
 
@@ -97,7 +98,7 @@ int TransportManagerDefault::Init(resumption::LastState& last_state) {
   ta_usb = NULL;
 #endif  // USB_SUPPORT
 
-  LOG4CXX_TRACE(logger_, "exit with E_SUCCESS");
+  LOGGER_TRACE(logger_, "exit with E_SUCCESS");
   return E_SUCCESS;
 }
 
