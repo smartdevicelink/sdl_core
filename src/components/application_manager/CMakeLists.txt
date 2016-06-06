@@ -38,7 +38,6 @@ endif()
 
 set (AM_SOURCE_DIR ${COMPONENTS_DIR}/application_manager)
 set (AM_TEST_DIR ${AM_SOURCE_DIR}/test)
-set (AM_MOCK_DIR ${AM_TEST_DIR}/mock)
 
 include_directories (
   ${COMPONENTS_DIR}/application_manager/include/

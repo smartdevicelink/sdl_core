@@ -65,10 +65,6 @@
         ${AM_TEST_DIR}/request_controller/request_controller_test.cc
     )
 
-    set(mockedSources
-        ${AM_MOCK_DIR}/src/application_manager_impl.cc
-    )
-
     set(AM_SOURCES
         ${AM_SOURCE_DIR}/src/policies/policy_handler.cc
         ${AM_SOURCE_DIR}/src/policies/policy_event_observer.cc
