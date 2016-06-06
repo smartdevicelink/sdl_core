@@ -30,9 +30,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMI_CAPABILITIES_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMI_CAPABILITIES_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMI_CAPABILITIES_IMPL_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMI_CAPABILITIES_IMPL_H_
 
+#include "hmi_capabilities.h"
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
 #include "json/json.h"
@@ -42,31 +43,39 @@
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
 class SmartObject;
-}
-}
+}  // namespace NsSmartObjects
+}  // namespace NsSmartDeviceLink
+
 namespace resumption {
 class LastState;
-}
+}  // namespace resumption
 
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 namespace application_manager {
 class ApplicationManager;
 
-class HMICapabilities {
+class HMICapabilitiesImpl : public HMICapabilities {
  public:
+  /*
+   * @ Class constructor
+   *
+   * @param app_mngr Application manager pointer
+   */
+  explicit HMICapabilitiesImpl(ApplicationManager& app_mngr);
+
   /*
    * @brief Class destructor
    *
    */
-  virtual ~HMICapabilities() {}
+  ~HMICapabilitiesImpl();
 
   /**
    * @brief Checks if all HMI capabilities received
    *
    * @return TRUE if all information received, otherwise FALSE
    */
-  virtual bool is_hmi_capabilities_initialized() const = 0;
+  bool is_hmi_capabilities_initialized() const OVERRIDE;
 
   /*
    * @brief Checks is image type(Static/Dynamic) requested by
@@ -74,27 +83,27 @@ class HMICapabilities {
    * @param image_type recieved type of image from Enum.
    * @return Bool true if supported
    */
-  virtual bool VerifyImageType(const int32_t image_type) const = 0;
+  bool VerifyImageType(int32_t image_type) const OVERRIDE;
 
   /**
    * @brief Checks if all HMI capabilities received
    *
    * @return TRUE if all information received, otherwise FALSE
    */
-  virtual bool is_vr_cooperating() const = 0;
-  virtual void set_is_vr_cooperating(const bool value) = 0;
+  bool is_vr_cooperating() const OVERRIDE;
+  void set_is_vr_cooperating(const bool value) OVERRIDE;
 
-  virtual bool is_tts_cooperating() const = 0;
-  virtual void set_is_tts_cooperating(const bool value) = 0;
+  bool is_tts_cooperating() const OVERRIDE;
+  void set_is_tts_cooperating(const bool value) OVERRIDE;
 
-  virtual bool is_ui_cooperating() const = 0;
-  virtual void set_is_ui_cooperating(const bool value) = 0;
+  bool is_ui_cooperating() const OVERRIDE;
+  void set_is_ui_cooperating(const bool value) OVERRIDE;
 
-  virtual bool is_navi_cooperating() const = 0;
-  virtual void set_is_navi_cooperating(const bool value) = 0;
+  bool is_navi_cooperating() const OVERRIDE;
+  void set_is_navi_cooperating(const bool value) OVERRIDE;
 
-  virtual bool is_ivi_cooperating() const = 0;
-  virtual void set_is_ivi_cooperating(const bool value) = 0;
+  bool is_ivi_cooperating() const OVERRIDE;
+  void set_is_ivi_cooperating(const bool value) OVERRIDE;
 
   /*
    * @brief Interface used to store information about software version of the
@@ -102,14 +111,14 @@ class HMICapabilities {
    *
    * @param ccpu_version Received system/hmi software version
    */
-  virtual void set_ccpu_version(const std::string& ccpu_version) = 0;
+  void set_ccpu_version(const std::string& ccpu_version) OVERRIDE;
 
   /*
    * @brief Returns software version of the target
    *
    * @return TRUE if it supported, otherwise FALSE
    */
-  virtual const std::string& ccpu_version() const = 0;
+  const std::string& ccpu_version() const OVERRIDE;
 
   /*
    * @brief Retrieves if mixing audio is supported by HMI
@@ -117,273 +126,270 @@ class HMICapabilities {
    *
    * @return Current state of the mixing audio flag
    */
-  virtual bool attenuated_supported() const = 0;
+  bool attenuated_supported() const OVERRIDE;
 
   /*
    * @brief Sets state for mixing audio
    *
    * @param state New state to be set
    */
-  virtual void set_attenuated_supported(const bool state) = 0;
+  void set_attenuated_supported(const bool state) OVERRIDE;
 
   /*
    * @brief Retrieves currently active UI language
    *
    * @return Currently active UI language
    */
-  virtual const hmi_apis::Common_Language::eType active_ui_language() const = 0;
+  const hmi_apis::Common_Language::eType active_ui_language() const OVERRIDE;
 
   /*
    * @brief Sets currently active UI language
    *
    * @param language Currently active UI language
    */
-  virtual void set_active_ui_language(
-      const hmi_apis::Common_Language::eType language) = 0;
+  void set_active_ui_language(
+      const hmi_apis::Common_Language::eType language) OVERRIDE;
 
   /*
    * @brief Retrieves UI supported languages
    *
    * @return Currently supported UI languages
    */
-  virtual const smart_objects::SmartObject* ui_supported_languages() const = 0;
+  const smart_objects::SmartObject* ui_supported_languages() const OVERRIDE;
 
   /*
    * @brief Sets supported UI languages
    *
    * @param supported_languages Supported UI languages
    */
-  virtual void set_ui_supported_languages(
-      const smart_objects::SmartObject& supported_languages) = 0;
+  void set_ui_supported_languages(
+      const smart_objects::SmartObject& supported_languages) OVERRIDE;
 
   /*
    * @brief Retrieves currently active VR language
    *
    * @return Currently active VR language
    */
-  virtual const hmi_apis::Common_Language::eType active_vr_language() const = 0;
+  const hmi_apis::Common_Language::eType active_vr_language() const OVERRIDE;
 
   /*
    * @brief Sets currently active VR language
    *
    * @param language Currently active VR language
    */
-  virtual void set_active_vr_language(
-      const hmi_apis::Common_Language::eType language) = 0;
+  void set_active_vr_language(
+      const hmi_apis::Common_Language::eType language) OVERRIDE;
 
   /*
    * @brief Retrieves VR supported languages
    *
    * @return Currently supported VR languages
    */
-  virtual const smart_objects::SmartObject* vr_supported_languages() const = 0;
+  const smart_objects::SmartObject* vr_supported_languages() const OVERRIDE;
 
   /*
    * @brief Sets supported VR languages
    *
    * @param supported_languages Supported VR languages
    */
-  virtual void set_vr_supported_languages(
-      const smart_objects::SmartObject& supported_languages) = 0;
+  void set_vr_supported_languages(
+      const smart_objects::SmartObject& supported_languages) OVERRIDE;
 
   /*
    * @brief Retrieves currently active TTS language
    *
    * @return Currently active TTS language
    */
-  virtual const hmi_apis::Common_Language::eType active_tts_language()
-      const = 0;
+  const hmi_apis::Common_Language::eType active_tts_language() const OVERRIDE;
 
   /*
    * @brief Sets currently active TTS language
    *
    * @param language Currently active TTS language
    */
-  virtual void set_active_tts_language(
-      const hmi_apis::Common_Language::eType language) = 0;
+  void set_active_tts_language(
+      const hmi_apis::Common_Language::eType language) OVERRIDE;
 
   /*
    * @brief Retrieves TTS  supported languages
    *
    * @return Currently supported TTS languages
    */
-  virtual const smart_objects::SmartObject* tts_supported_languages() const = 0;
+  const smart_objects::SmartObject* tts_supported_languages() const OVERRIDE;
 
   /*
    * @brief Sets supported TTS languages
    *
    * @param supported_languages Supported TTS languages
    */
-  virtual void set_tts_supported_languages(
-      const smart_objects::SmartObject& supported_languages) = 0;
+  void set_tts_supported_languages(
+      const smart_objects::SmartObject& supported_languages) OVERRIDE;
 
   /*
    * @brief Retrieves information about the display capabilities
    *
    * @return Currently supported display capabilities
    */
-  virtual const smart_objects::SmartObject* display_capabilities() const = 0;
+  const smart_objects::SmartObject* display_capabilities() const OVERRIDE;
 
   /*
    * @brief Sets supported display capabilities
    *
    * @param display_capabilities supported display capabilities
    */
-  virtual void set_display_capabilities(
-      const smart_objects::SmartObject& display_capabilities) = 0;
+  void set_display_capabilities(
+      const smart_objects::SmartObject& display_capabilities) OVERRIDE;
 
   /*
    * @brief Retrieves information about the HMI zone capabilities
    *
    * @return Currently supported HMI zone capabilities
    */
-  virtual const smart_objects::SmartObject* hmi_zone_capabilities() const = 0;
+  const smart_objects::SmartObject* hmi_zone_capabilities() const OVERRIDE;
 
   /*
    * @brief Sets supported HMI zone capabilities
    *
    * @param hmi_zone_capabilities supported HMI zone capabilities
    */
-  virtual void set_hmi_zone_capabilities(
-      const smart_objects::SmartObject& hmi_zone_capabilities) = 0;
+  void set_hmi_zone_capabilities(
+      const smart_objects::SmartObject& hmi_zone_capabilities) OVERRIDE;
 
   /*
    * @brief Retrieves information about the SoftButton's capabilities
    *
    * @return Currently supported SoftButton's capabilities
    */
-  virtual const smart_objects::SmartObject* soft_button_capabilities()
-      const = 0;
+  const smart_objects::SmartObject* soft_button_capabilities() const OVERRIDE;
 
   /*
    * @brief Sets supported SoftButton's capabilities
    *
    * @param soft_button_capabilities supported SoftButton's capabilities
    */
-  virtual void set_soft_button_capabilities(
-      const smart_objects::SmartObject& soft_button_capabilities) = 0;
+  void set_soft_button_capabilities(
+      const smart_objects::SmartObject& soft_button_capabilities) OVERRIDE;
 
   /*
    * @brief Retrieves information about the Button's capabilities
    *
    * @return Currently supported Button's capabilities
    */
-  virtual const smart_objects::SmartObject* button_capabilities() const = 0;
+  const smart_objects::SmartObject* button_capabilities() const OVERRIDE;
 
   /*
    * @brief Sets supported Button's capabilities
    *
    * @param soft_button_capabilities supported Button's capabilities
    */
-  virtual void set_button_capabilities(
-      const smart_objects::SmartObject& button_capabilities) = 0;
+  void set_button_capabilities(
+      const smart_objects::SmartObject& button_capabilities) OVERRIDE;
 
   /*
    * @brief Sets supported speech capabilities
    *
    * @param speech_capabilities supported speech capabilities
    */
-  virtual void set_speech_capabilities(
-      const smart_objects::SmartObject& speech_capabilities) = 0;
+  void set_speech_capabilities(
+      const smart_objects::SmartObject& speech_capabilities) OVERRIDE;
 
   /*
    * @brief Retrieves information about the speech capabilities
    *
    * @return Currently supported speech capabilities
    */
-  virtual const smart_objects::SmartObject* speech_capabilities() const = 0;
+  const smart_objects::SmartObject* speech_capabilities() const OVERRIDE;
 
   /*
    * @brief Sets supported VR capabilities
    *
    * @param vr_capabilities supported VR capabilities
    */
-  virtual void set_vr_capabilities(
-      const smart_objects::SmartObject& vr_capabilities) = 0;
+  void set_vr_capabilities(
+      const smart_objects::SmartObject& vr_capabilities) OVERRIDE;
 
   /*
    * @brief Retrieves information about the VR capabilities
    *
    * @return Currently supported VR capabilities
    */
-  virtual const smart_objects::SmartObject* vr_capabilities() const = 0;
+  const smart_objects::SmartObject* vr_capabilities() const OVERRIDE;
 
   /*
    * @brief Sets supported audio_pass_thru capabilities
    *
    * @param vr_capabilities supported audio_pass_thru capabilities
    */
-  virtual void set_audio_pass_thru_capabilities(
-      const smart_objects::SmartObject& audio_pass_thru_capabilities) = 0;
+  void set_audio_pass_thru_capabilities(
+      const smart_objects::SmartObject& audio_pass_thru_capabilities) OVERRIDE;
 
   /*
    * @brief Retrieves information about the audio_pass_thru capabilities
    *
    * @return Currently supported audio_pass_thru capabilities
    */
-  virtual const smart_objects::SmartObject* audio_pass_thru_capabilities()
-      const = 0;
+  const smart_objects::SmartObject* audio_pass_thru_capabilities()
+      const OVERRIDE;
 
   /*
    * @brief Sets supported pcm_stream capabilities
    *
    * @param supported pcm_stream capabilities
    */
-  virtual void set_pcm_stream_capabilities(
-      const smart_objects::SmartObject& pcm_stream_capabilities) = 0;
+  void set_pcm_stream_capabilities(
+      const smart_objects::SmartObject& pcm_stream_capabilities) OVERRIDE;
 
   /*
    * @brief Retrieves information about the pcm_stream capabilities
    *
    * @return Currently supported pcm_streaming capabilities
    */
-  virtual const smart_objects::SmartObject* pcm_stream_capabilities() const = 0;
+  const smart_objects::SmartObject* pcm_stream_capabilities() const OVERRIDE;
 
   /*
    * @brief Retrieves information about the preset bank capabilities
    *
    * @return Currently supported preset bank capabilities
    */
-  virtual const smart_objects::SmartObject* preset_bank_capabilities()
-      const = 0;
+  const smart_objects::SmartObject* preset_bank_capabilities() const OVERRIDE;
 
   /*
    * @brief Sets supported preset bank capabilities
    *
    * @param soft_button_capabilities supported preset bank capabilities
    */
-  virtual void set_preset_bank_capabilities(
-      const smart_objects::SmartObject& preset_bank_capabilities) = 0;
+  void set_preset_bank_capabilities(
+      const smart_objects::SmartObject& preset_bank_capabilities) OVERRIDE;
 
   /*
    * @brief Sets vehicle information(make, model, modelYear)
    *
    * @param vehicle_type Cuurent vehicle information
    */
-  virtual void set_vehicle_type(
-      const smart_objects::SmartObject& vehicle_type) = 0;
+  void set_vehicle_type(
+      const smart_objects::SmartObject& vehicle_type) OVERRIDE;
 
   /*
    * @brief Retrieves vehicle information(make, model, modelYear)
    *
    * @param vehicle_type Cuurent vehicle information
    */
-  virtual const smart_objects::SmartObject* vehicle_type() const = 0;
+  const smart_objects::SmartObject* vehicle_type() const OVERRIDE;
 
   /*
    * @brief Retrieves information about the prerecorded speech
    *
    * @return Currently supported prerecorded speech
    */
-  virtual const smart_objects::SmartObject* prerecorded_speech() const = 0;
+  const smart_objects::SmartObject* prerecorded_speech() const OVERRIDE;
 
   /*
    * @brief Sets supported prerecorded speech
    *
    * @param prerecorded_speech supported prerecorded speech
    */
-  virtual void set_prerecorded_speech(
-      const smart_objects::SmartObject& prerecorded_speech) = 0;
+  void set_prerecorded_speech(
+      const smart_objects::SmartObject& prerecorded_speech) OVERRIDE;
 
   /*
    * @brief Interface used to store information if navigation
@@ -391,14 +397,14 @@ class HMICapabilities {
    *
    * @param supported Indicates if navigation supported by the system
    */
-  virtual void set_navigation_supported(const bool supported) = 0;
+  void set_navigation_supported(const bool supported) OVERRIDE;
 
   /*
    * @brief Retrieves information if navi supported by the system
    *
    * @return TRUE if it supported, otherwise FALSE
    */
-  virtual bool navigation_supported() const = 0;
+  bool navigation_supported() const OVERRIDE;
 
   /*
    * @brief Interface used to store information if phone call
@@ -406,18 +412,26 @@ class HMICapabilities {
    *
    * @param supported Indicates if navigation supported by the sustem
    */
-  virtual void set_phone_call_supported(const bool supported) = 0;
+  void set_phone_call_supported(const bool supported) OVERRIDE;
 
   /*
    * @brief Retrieves information if phone call supported by the system
    *
    * @return TRUE if it supported, otherwise FALSE
    */
-  virtual bool phone_call_supported() const = 0;
+  bool phone_call_supported() const OVERRIDE;
 
-  virtual void Init(resumption::LastState* last_state) = 0;
+  void Init(resumption::LastState* last_state) OVERRIDE;
 
  protected:
+  /*
+   * @brief Loads capabilities from local file in case SDL was launched
+   * without HMI
+   *
+   * @return TRUE if capabilities loaded successfully, otherwise FALSE.
+   */
+  bool load_capabilities_from_file();
+
   /*
    * @brief function checks if json member exists
    *
@@ -428,8 +442,8 @@ class HMICapabilities {
    * @returns TRUE if member exists and returns FALSE if
    * member does not exist.
    */
-  virtual bool check_existing_json_member(const Json::Value& json_member,
-                                          const char* name_of_member) = 0;
+  bool check_existing_json_member(const Json::Value& json_member,
+                                  const char* name_of_member) OVERRIDE;
 
   /*
    * @brief function converts json object "languages" to smart object
@@ -438,10 +452,52 @@ class HMICapabilities {
    * @param languages - the converted object
    *
    */
-  virtual void convert_json_languages_to_obj(
-      Json::Value& json_languages, smart_objects::SmartObject& languages) = 0;
+  void convert_json_languages_to_obj(
+      Json::Value& json_languages,
+      smart_objects::SmartObject& languages) OVERRIDE;
+
+ private:
+  bool is_vr_cooperating_;
+  bool is_tts_cooperating_;
+  bool is_ui_cooperating_;
+  bool is_navi_cooperating_;
+  bool is_ivi_cooperating_;
+
+  // to check if IsReady response for corresponding interface received
+  bool is_vr_ready_response_recieved_;
+  bool is_tts_ready_response_recieved_;
+  bool is_ui_ready_response_recieved_;
+  bool is_navi_ready_response_recieved_;
+  bool is_ivi_ready_response_recieved_;
+
+  bool attenuated_supported_;
+  hmi_apis::Common_Language::eType ui_language_;
+  hmi_apis::Common_Language::eType vr_language_;
+  hmi_apis::Common_Language::eType tts_language_;
+  smart_objects::SmartObject* vehicle_type_;
+  smart_objects::SmartObject* ui_supported_languages_;
+  smart_objects::SmartObject* tts_supported_languages_;
+  smart_objects::SmartObject* vr_supported_languages_;
+  smart_objects::SmartObject* display_capabilities_;
+  smart_objects::SmartObject* hmi_zone_capabilities_;
+  smart_objects::SmartObject* soft_buttons_capabilities_;
+  smart_objects::SmartObject* button_capabilities_;
+  smart_objects::SmartObject* preset_bank_capabilities_;
+  smart_objects::SmartObject* vr_capabilities_;
+  smart_objects::SmartObject* speech_capabilities_;
+  smart_objects::SmartObject* audio_pass_thru_capabilities_;
+  smart_objects::SmartObject* pcm_stream_capabilities_;
+  smart_objects::SmartObject* prerecorded_speech_;
+  bool is_navigation_supported_;
+  bool is_phone_call_supported_;
+  std::string ccpu_version_;
+
+  ApplicationManager& app_mngr_;
+  HMILanguageHandler hmi_language_handler_;
+
+  DISALLOW_COPY_AND_ASSIGN(HMICapabilitiesImpl);
 };
 
 }  //  namespace application_manager
 
-#endif  //  SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMI_CAPABILITIES_H_
+#endif  //  SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMI_CAPABILITIES_IMPL_H_
