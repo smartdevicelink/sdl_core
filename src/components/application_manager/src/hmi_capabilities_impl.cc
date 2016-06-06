@@ -238,7 +238,6 @@ HMICapabilitiesImpl::HMICapabilitiesImpl(ApplicationManager& app_mngr)
     , is_phone_call_supported_(false)
     , app_mngr_(app_mngr)
     , hmi_language_handler_(app_mngr) {
-
   if (false == load_capabilities_from_file()) {
     LOG4CXX_ERROR(logger_, "file hmi_capabilities.json was not loaded");
   } else {
@@ -716,7 +715,7 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
 
       if (check_existing_json_member(ui, "language")) {
         const std::string lang = ui.get("language", "EN-US").asString();
-        ui_language_ = (MessageHelper::CommonLanguageFromString(lang));
+        ui_language_ = MessageHelper::CommonLanguageFromString(lang);
       }
 
       if (check_existing_json_member(ui, "languages")) {

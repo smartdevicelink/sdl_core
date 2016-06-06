@@ -106,7 +106,8 @@ class HMICapabilitiesImpl : public HMICapabilities {
   void set_is_ivi_cooperating(const bool value) OVERRIDE;
 
   /*
-   * @brief Interface used to store information about software version of the target
+   * @brief Interface used to store information about software version of the
+   *target
    *
    * @param ccpu_version Received system/hmi software version
    */

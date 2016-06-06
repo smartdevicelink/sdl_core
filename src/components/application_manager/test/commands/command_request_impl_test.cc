@@ -212,8 +212,8 @@ TEST_F(CommandRequestImplTest, BasicMethodsOverloads_SUCCESS) {
   EXPECT_TRUE(command->Init());
   EXPECT_TRUE(command->CleanUp());
   EXPECT_NO_THROW(command->Run());
-  application_manager::event_engine::Event ev(kInvalidFunctionId_);
-  EXPECT_NO_THROW(command->on_event(ev));
+  application_manager::event_engine::Event event(kInvalidFunctionId_);
+  EXPECT_NO_THROW(command->on_event(event));
 }
 
 TEST_F(CommandRequestImplTest, CreateHMINotification_SUCCESS) {
@@ -417,7 +417,8 @@ TEST_F(CommandRequestImplTest, AddDisallowedParameters_SUCCESS) {
 
   CommandPtr command = CreateCommand<UCommandRequestImpl>(msg);
 
-  command->removed_parameters_permissions().disallowed_params.push_back(kDisParam);
+  command->removed_parameters_permissions().disallowed_params.push_back(
+      kDisParam);
 
   command->AddDisallowedParameters(*msg);
 
@@ -464,7 +465,8 @@ TEST_F(CommandRequestImplTest,
 
   CommandPtr command = CreateCommand<UCommandRequestImpl>(msg);
 
-  command->removed_parameters_permissions().disallowed_params.push_back(kDisParam);
+  command->removed_parameters_permissions().disallowed_params.push_back(
+      kDisParam);
 
   MessageSharedPtr result;
   EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _))

@@ -97,7 +97,8 @@ class HMICapabilities {
   virtual void set_is_ivi_cooperating(const bool value) = 0;
 
   /*
-   * @brief Interface used to store information about software version of the target
+   * @brief Interface used to store information about software version of the
+   *target
    *
    * @param ccpu_version Received system/hmi software version
    */
@@ -108,7 +109,7 @@ class HMICapabilities {
    *
    * @return TRUE if it supported, otherwise FALSE
    */
-  virtual  const std::string& ccpu_version() const = 0;
+  virtual const std::string& ccpu_version() const = 0;
 
   /*
    * @brief Retrieves if mixing audio is supported by HMI
