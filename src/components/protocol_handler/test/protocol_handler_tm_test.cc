@@ -925,11 +925,6 @@ TEST_F(ProtocolHandlerImplTest, FloodVerification) {
   EXPECT_CALL(session_observer_mock, OnApplicationFloodCallBack(connection_key))
       .Times(1);
 
-  ON_CALL(protocol_handler_settings_mock, message_frequency_time())
-      .WillByDefault(Return(period_msec));
-  ON_CALL(protocol_handler_settings_mock, message_frequency_count())
-      .WillByDefault(Return(max_messages));
-
   for (size_t i = 0; i < max_messages + 1; ++i) {
     SendTMMessage(connection_id,
                   PROTOCOL_VERSION_3,
@@ -949,11 +944,6 @@ TEST_F(ProtocolHandlerImplTest, FloodVerification_ThresholdValue) {
   InitProtocolHandlerImpl(period_msec, max_messages);
   AddConnection();
   AddSession();
-
-  ON_CALL(protocol_handler_settings_mock, message_frequency_time())
-      .WillByDefault(Return(period_msec));
-  ON_CALL(protocol_handler_settings_mock, message_frequency_count())
-      .WillByDefault(Return(max_messages));
 
   // Expect NO flood notification to CH
   EXPECT_CALL(session_observer_mock, OnApplicationFloodCallBack(connection_key))
@@ -1062,8 +1052,7 @@ TEST_F(ProtocolHandlerImplTest, MalformedVerificationDisable) {
   }
 }
 
-// TODO(OHerasym) : Actual function call count doesn't match EXPECT_CALL
-TEST_F(ProtocolHandlerImplTest, DISABLED_MalformedLimitVerification) {
+TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification) {
   const size_t period_msec = 10000;
   const size_t max_messages = 100;
   InitProtocolHandlerImpl(0u, 0u, true, period_msec, max_messages);
@@ -1102,9 +1091,7 @@ TEST_F(ProtocolHandlerImplTest, DISABLED_MalformedLimitVerification) {
   }
 }
 
-// TODO(OHerasym) : Actual function call count doesn't match EXPECT_CALL
-TEST_F(ProtocolHandlerImplTest,
-       DISABLED_MalformedLimitVerification_MalformedStock) {
+TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification_MalformedStock) {
   const size_t period_msec = 10000;
   const size_t max_messages = 100;
   InitProtocolHandlerImpl(0u, 0u, true, period_msec, max_messages);
@@ -1223,8 +1210,7 @@ TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification_MalformedOnly) {
 }
 
 // TODO(OHerasym) : error: Long sleep makes a bare back
-TEST_F(ProtocolHandlerImplTest,
-       DISABLED_MalformedLimitVerification_NullTimePeriod) {
+TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification_NullTimePeriod) {
   const size_t period_msec = 0;
   const size_t max_messages = 1000;
   InitProtocolHandlerImpl(0u, 0u, true, period_msec, max_messages);
@@ -1251,8 +1237,7 @@ TEST_F(ProtocolHandlerImplTest,
   }
 }
 
-// TODO(OHerasym) : Actual function call count doesn't match EXPECT_CALL
-TEST_F(ProtocolHandlerImplTest, DISABLED_MalformedLimitVerification_NullCount) {
+TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification_NullCount) {
   const size_t period_msec = 10000;
   const size_t max_messages = 0;
   InitProtocolHandlerImpl(0u, 0u, true, period_msec, max_messages);
