@@ -181,9 +181,16 @@ _We test only sources written by us and we don`t need to test external sources(o
 You can find it in [Coverage report](https://codecov.io/gh/smartdevicelink/sdl_core/branch/develop)
 
 ### How to get Test Coverage locally
- 1. Build project with enabled flag _-DBUILD_TESTS=on_
+ Precondition : if you dont have lcov, gcov, html2text, install it before running.
+ 1. Build project with flags _-DBUILD_TESTS=on -DENABLE_GCOV=on_
  2. Execute command 'make test'
- 3. Execute './tools/Utils/collect_coverage.sh <path_to_build_directory>'
+ 3. Execute './tools/infrastructure/collect_coverage.sh \<path_to_build_directory\>'
+
+ Note :
+   * In case of a lot of warnings probably issue is gcov ang gcc version mismatch.
+   * You should install gcov-4.9 as default gcov in you system.
+   * Please ensure that /usr/bin/gcov is 4.9 version.
+   * And execute : _sudo ln -sf /usr/bin/gcov-4.9 /usr/bin/gcov_
 
 ## Contributions
 
