@@ -30,6 +30,7 @@
 
 include_directories(
   ${GMOCK_INCLUDE_DIRECTORY}
+  ${COMPONENTS_DIR}/application_manager/include/application_manager/
   ${COMPONENTS_DIR}/application_manager/include/application_manager/commands/
   ${COMPONENTS_DIR}/application_manager/test/include/
   ${COMPONENTS_DIR}/application_manager/test/include/application_manager/
@@ -37,11 +38,18 @@ include_directories(
 
 set (SOURCES
   ${COMPONENTS_DIR}/application_manager/src/smart_object_keys.cc
-  ${AM_TEST_DIR}/commands/mobile/simple_response_commands.cc
+  ${COMPONENTS_DIR}/application_manager/test/mock_message_helper.cc
+  ${AM_TEST_DIR}/commands/mobile/simple_response_commands_test.cc
+  ${AM_TEST_DIR}/commands/mobile/list_files_request_test.cc
+  ${AM_TEST_DIR}/commands/mobile/read_did_request_test.cc
+  ${AM_TEST_DIR}/commands/mobile/alert_maneuver_request_test.cc
+  ${AM_TEST_DIR}/commands/mobile/subscribe_button_request_test.cc
+  ${AM_TEST_DIR}/commands/mobile/alert_request_test.cc
 )
 
 set(LIBRARIES
   gmock
+  jsoncpp
   Utils
   ApplicationManager
   connectionHandler

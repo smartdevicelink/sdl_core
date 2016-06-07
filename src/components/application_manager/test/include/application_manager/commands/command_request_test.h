@@ -37,16 +37,47 @@
 
 #include "gtest/gtest.h"
 #include "application_manager/commands/commands_test.h"
+#include "application_manager/commands/command_request_impl.h"
 #include "application_manager/mock_event_dispatcher.h"
+#include "application_manager/event_engine/event.h"
 
 namespace test {
 namespace components {
 namespace commands_test {
 
-using ::testing::ReturnRef;
+using ::testing::_;
+using ::testing::Return;
+using ::testing::SaveArg;
+using ::testing::DoAll;
 using ::testing::NiceMock;
 using ::test::components::event_engine_test::MockEventDispatcher;
 using ::application_manager::commands::Command;
+using ::application_manager::commands::CommandRequestImpl;
+using ::application_manager::event_engine::Event;
+
+class CallRun {
+ public:
+  CallRun(CommandRequestImpl& command) : command_(command) {}
+
+  void operator()() {
+    command_.Run();
+  }
+
+  CommandRequestImpl& command_;
+};
+
+class CallOnEvent {
+ public:
+  CallOnEvent(CommandRequestImpl& command, Event& event)
+      : command_(command), event_(event) {}
+
+  void operator()() {
+    command_.on_event(event_);
+  }
+
+  CommandRequestImpl& command_;
+  Event& event_;
+};
 
 template <const CommandsTestMocks kIsNice = CommandsTestMocks::kNotNice>
 class CommandRequestTest : public CommandsTest<kIsNice> {
@@ -55,6 +86,26 @@ class CommandRequestTest : public CommandsTest<kIsNice> {
                           NiceMock<MockEventDispatcher>,
                           MockEventDispatcher>::Result MockEventDisp;
 
+  template <class CallableT>
+  MessageSharedPtr CatchMobileCommandResult(CallableT delegate,
+                                            bool call_return = true) {
+    MessageSharedPtr result_msg;
+    EXPECT_CALL(this->app_mngr_, ManageMobileCommand(_, _))
+        .WillOnce(DoAll(SaveArg<0>(&result_msg), Return(call_return)));
+    delegate();
+    return result_msg;
+  }
+
+  template <class CallableT>
+  MessageSharedPtr CatchHMICommandResult(CallableT delegate,
+                                         bool call_return = true) {
+    MessageSharedPtr result_msg;
+    EXPECT_CALL(this->app_mngr_, ManageHMICommand(_))
+        .WillOnce(DoAll(SaveArg<0>(&result_msg), Return(call_return)));
+    delegate();
+    return result_msg;
+  }
+
   MockEventDisp event_dispatcher_;
 
  protected:
@@ -62,8 +113,8 @@ class CommandRequestTest : public CommandsTest<kIsNice> {
 
   virtual void InitCommand(const uint32_t& default_timeout) OVERRIDE {
     CommandsTest<kIsNice>::InitCommand(default_timeout);
-    EXPECT_CALL(CommandsTest<kIsNice>::app_mngr_, event_dispatcher())
-        .WillOnce(ReturnRef(event_dispatcher_));
+    ON_CALL(CommandsTest<kIsNice>::app_mngr_, event_dispatcher())
+        .WillByDefault(ReturnRef(event_dispatcher_));
   }
 };
 
