@@ -51,19 +51,20 @@ set(default_media_inc
 )
 endif()
 
-if (TIME_TESTER)
-    set(TIME_TESTER_LIB
-        TimeTester)
+if (TELEMETRY_MONITOR)
+    set(TELEMETRY_MONITOR_LIB
+        TelemetryMonitor)
 endif()
 
 set(LIBRARIES
   MediaManager
   ApplicationManager
+  MessageHelper
   HMI_API
   MOBILE_API
   v4_protocol_v1_2_no_extra
   SmartObjects
-  ${TIME_TESTER_LIB}
+  ${TELEMETRY_MONITOR_LIB}
   formatters
   ProtocolLibrary
   ProtocolHandler
@@ -86,9 +87,6 @@ endif()
 
 if (BUILD_BT_SUPPORT)
   list(APPEND LIBRARIES bluetooth)
-endif()
-if (BUILD_AVAHI_SUPPORT)
-  list(APPEND LIBRARIES avahi-client avahi-common)
 endif()
 if (BUILD_USB_SUPPORT)
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -120,15 +118,14 @@ include_directories (
   ${COMPONENTS_DIR}/request_watchdog/include
   ${COMPONENTS_DIR}/smart_objects/include/
   ${COMPONENTS_DIR}/media_manager/include/
-  ${COMPONENTS_DIR}/time_tester/include
-  ${COMPONENTS_DIR}/policy/src/policy/include/
+  ${COMPONENTS_DIR}/telemetry_monitor/include
+  ${COMPONENTS_DIR}/policy/include/
   ${COMPONENTS_DIR}/resumption/include/
   ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
   ${ENCRYPTION_INCLUDE_DIRECTORY}
   ${COMPONENTS_DIR}
   ${CMAKE_BINARY_DIR}/src/components/
   ${COMPONENTS_DIR}/dbus/include/
-  ${CMAKE_BINARY_DIR}/src/components/policy/src/policy
   ${CMAKE_SOURCE_DIR}
   ${default_media_inc}
   ${LOG4CXX_INCLUDE_DIRECTORY}

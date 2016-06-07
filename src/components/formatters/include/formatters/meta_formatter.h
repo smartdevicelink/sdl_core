@@ -33,8 +33,8 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef __SMARTDEVICELINKCORE_JSONHANDLER_FORMATTERS_METAFORMATTER_H__
-#define __SMARTDEVICELINKCORE_JSONHANDLER_FORMATTERS_METAFORMATTER_H__
+#ifndef SRC_COMPONENTS_FORMATTERS_INCLUDE_FORMATTERS_META_FORMATTER_H_
+#define SRC_COMPONENTS_FORMATTERS_INCLUDE_FORMATTERS_META_FORMATTER_H_
 
 #include "smart_objects/smart_object.h"
 #include "smart_objects/smart_schema.h"
@@ -44,7 +44,8 @@ namespace NsJSONHandler {
 namespace Formatters {
 
 /**
-  * @brief Formats to string the smart object against given schema for given formatter
+  * @brief Formats to string the smart object against given schema for given
+  *formatter
   *
   * Sample usage:
   *    CSmartFactory factory;
@@ -54,7 +55,6 @@ namespace Formatters {
   */
 class CMetaFormatter {
  public:
-
   /**
     * @brief Creates smart object by the given schema having copied
     *        matched tree elements from original object.
@@ -66,13 +66,13 @@ class CMetaFormatter {
     * @return true if successful, false - otherwise
     */
   static bool CreateObjectByPattern(
-          const NsSmartDeviceLink::NsSmartObjects::SmartObject& object,
-          const NsSmartDeviceLink::NsSmartObjects::CSmartSchema& schema,
-          NsSmartDeviceLink::NsSmartObjects::SmartObject& result_object);
+      const NsSmartDeviceLink::NsSmartObjects::SmartObject& object,
+      const NsSmartDeviceLink::NsSmartObjects::CSmartSchema& schema,
+      NsSmartDeviceLink::NsSmartObjects::SmartObject& result_object);
 };
 
-}// namespace NsSmartDeviceLink
-}// namespace NsSmartDeviceLink::NsJSONHandler
-}// namespace NsSmartDeviceLink::NsJSONHandler::Formatters
+}  // namespace NsSmartDeviceLink
+}  // namespace NsSmartDeviceLink::NsJSONHandler
+}  // namespace NsSmartDeviceLink::NsJSONHandler::Formatters
 
-#endif // __SMARTDEVICELINKCORE_JSONHANDLER_FORMATTERS_METAFORMATTER_H__
+#endif  // SRC_COMPONENTS_FORMATTERS_INCLUDE_FORMATTERS_META_FORMATTER_H_

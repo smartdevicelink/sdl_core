@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2014-2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,106 +34,43 @@
 #define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_SOCKET_STREAMER_ADAPTER_H_
 
 #include <string>
-#include "media_manager/media_adapter_impl.h"
-#include "utils/logger.h"
-#include "utils/shared_ptr.h"
-#include "utils/message_queue.h"
-#include "utils/threads/thread.h"
+#include "media_manager/streamer_adapter.h"
 #include "utils/threads/thread_delegate.h"
 
 namespace media_manager {
 
-using ::utils::MessageQueue;
+class SocketStreamerAdapter : public StreamerAdapter {
+ public:
+  SocketStreamerAdapter(const std::string& ip,
+                        uint16_t port,
+                        const std::string& header);
+  virtual ~SocketStreamerAdapter();
 
-class SocketStreamerAdapter : public MediaAdapterImpl {
-  public:
-    SocketStreamerAdapter();
-    virtual ~SocketStreamerAdapter();
-    virtual void SendData(int32_t application_key,
-                          const ::protocol_handler::RawMessagePtr message);
-    virtual void StartActivity(int32_t application_key);
-    virtual void StopActivity(int32_t application_key);
-    virtual bool is_app_performing_activity(int32_t application_key);
+ protected:
+  class SocketStreamer : public StreamerAdapter::Streamer {
+   public:
+    SocketStreamer(SocketStreamerAdapter* const adapter,
+                   const std::string& ip,
+                   uint16_t port,
+                   const std::string& header);
+    virtual ~SocketStreamer();
 
-  protected:
+   protected:
+    virtual bool Connect();
+    virtual void Disconnect();
+    virtual bool Send(protocol_handler::RawMessagePtr msg);
 
-    /*
-     * @brief Start streamer thread
-     */
-    virtual void Init();
-
-    int32_t port_;
+   private:
     std::string ip_;
+    uint16_t port_;
+    std::string header_;
 
-  private:
-    class Streamer : public threads::ThreadDelegate {
-      public:
-        /*
-         * Default constructor
-         *
-         * @param server  Server pointer
-         */
-        explicit Streamer(SocketStreamerAdapter* const server);
-
-        /*
-         * Destructor
-         */
-        ~Streamer();
-
-        /*
-         * Function called by thread on start
-         */
-        void threadMain();
-
-        /*
-         * Function called by thread on exit
-         */
-        void exitThreadMain();
-
-        /*
-         * Checks if server is ready
-         *
-         * @return TRUE if socket is ready otherwise FALSE
-         */
-        bool is_ready() const;
-
-        /*
-         * Starts server
-         *
-         */
-        void start();
-
-        /*
-         * Stops server
-         *
-         */
-        void stop();
-
-        /*
-         * Sends data to connected client
-         *
-         * @param block Pointer to the data
-         */
-        bool send(const ::protocol_handler::RawMessagePtr msg);
-
-      private:
-        SocketStreamerAdapter* const server_;
-        int32_t new_socket_fd_;
-        bool is_first_loop_;
-        volatile bool is_client_connected_;
-        volatile bool stop_flag_;
-        sync_primitives::Lock thread_lock;
-        DISALLOW_COPY_AND_ASSIGN(Streamer);
-    };
-
-    int32_t                                       socket_fd_;
-    bool                                          is_ready_;
-    Streamer*                                     streamer_;
-    threads::Thread*                              thread_;
-    MessageQueue<protocol_handler::RawMessagePtr>                   messages_;
-    DISALLOW_COPY_AND_ASSIGN(SocketStreamerAdapter);
+    int32_t socket_fd_;
+    int32_t send_socket_fd_;
+    bool is_first_frame_;
+  };
 };
-}  //  namespace media_manager
 
+}  //  namespace media_manager
 
 #endif  // SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_SOCKET_STREAMER_ADAPTER_H_

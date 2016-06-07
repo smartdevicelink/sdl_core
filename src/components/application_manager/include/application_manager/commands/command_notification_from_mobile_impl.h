@@ -47,12 +47,14 @@ namespace commands {
 
 class CommandNotificationFromMobileImpl : public CommandImpl {
  public:
-  explicit CommandNotificationFromMobileImpl(const MessageSharedPtr& message);
+  CommandNotificationFromMobileImpl(const MessageSharedPtr& message,
+                                    ApplicationManager& application_manager);
   virtual ~CommandNotificationFromMobileImpl();
   virtual bool Init();
   virtual bool CleanUp();
   virtual void Run();
   void SendNotification();
+
  private:
   DISALLOW_COPY_AND_ASSIGN(CommandNotificationFromMobileImpl);
 };

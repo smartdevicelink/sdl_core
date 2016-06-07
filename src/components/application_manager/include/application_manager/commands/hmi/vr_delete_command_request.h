@@ -49,7 +49,8 @@ class VRDeleteCommandRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit VRDeleteCommandRequest(const MessageSharedPtr& message);
+  VRDeleteCommandRequest(const MessageSharedPtr& message,
+                         ApplicationManager& application_manager);
 
   /**
    * @brief VRDeleteCommandRequest class destructor

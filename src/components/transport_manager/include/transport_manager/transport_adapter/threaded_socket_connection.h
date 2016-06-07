@@ -140,6 +140,7 @@ class ThreadedSocketConnection : public Connection {
     explicit SocketConnectionDelegate(ThreadedSocketConnection* connection);
     void threadMain() OVERRIDE;
     void exitThreadMain() OVERRIDE;
+
    private:
     ThreadedSocketConnection* connection_;
   };

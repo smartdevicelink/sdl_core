@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Ford Motor Company
+ * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,20 +38,18 @@ namespace commands {
 
 namespace hmi {
 
-DialNumberRequest::DialNumberRequest(const MessageSharedPtr& message)
-    : RequestToHMI(message) {
-}
+DialNumberRequest::DialNumberRequest(const MessageSharedPtr& message,
+                                     ApplicationManager& application_manager)
+    : RequestToHMI(message, application_manager) {}
 
-DialNumberRequest::~DialNumberRequest() {
-}
+DialNumberRequest::~DialNumberRequest() {}
 
 void DialNumberRequest::Run() {
   SendRequest();
 }
 
-} // namespace hmi
+}  // namespace hmi
 
 }  // namespace commands
 
 }  // namespace application_manager
-

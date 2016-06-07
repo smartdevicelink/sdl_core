@@ -34,16 +34,16 @@
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SIGNALS_H_
 
 #ifdef __QNXNTO__
-typedef void (*sighandler_t) (int);
+typedef void (*sighandler_t)(int);
 #else
 #include <signal.h>
 #endif
 
 namespace utils {
 
-bool SubscribeToTerminateSignal(sighandler_t func);
-bool SubscribeToFaultSignal(sighandler_t func);
+bool UnsibscribeFromTermination();
+bool WaitTerminationSignals(sighandler_t sig_handler);
 
 }  //  namespace utils
 
-#endif  //  SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SIGNALS_H_
+#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SIGNALS_H_

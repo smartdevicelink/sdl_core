@@ -32,7 +32,7 @@
  */
 
 #include "application_manager/commands/mobile/scrollable_message_response.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
 
@@ -41,22 +41,21 @@ namespace application_manager {
 namespace commands {
 
 ScrollableMessageResponse::ScrollableMessageResponse(
-  const MessageSharedPtr& message)
-  : CommandResponseImpl(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandResponseImpl(message, application_manager) {}
 
 void ScrollableMessageResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  mobile_apis::Result::eType result_code = static_cast<mobile_apis::Result::eType>(
-      (*message_)[strings::msg_params][strings::result_code].asInt());
-  ApplicationSharedPtr application =
-      ApplicationManagerImpl::instance()->application(
-          (*message_)[strings::params][strings::connection_key].asInt());
+  mobile_apis::Result::eType result_code =
+      static_cast<mobile_apis::Result::eType>(
+          (*message_)[strings::msg_params][strings::result_code].asInt());
+  ApplicationSharedPtr application = application_manager_.application(
+      (*message_)[strings::params][strings::connection_key].asInt());
   if ((mobile_apis::Result::REJECTED != result_code) && application) {
     application->UnsubscribeFromSoftButtons(
         (*message_)[strings::params][strings::function_id].asInt());
   }
-  ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
+  application_manager_.SendMessageToMobile(message_);
 }
 
 }  // namespace commands

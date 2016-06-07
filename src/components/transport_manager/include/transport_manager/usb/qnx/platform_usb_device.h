@@ -45,19 +45,30 @@ namespace transport_adapter {
 
 class PlatformUsbDevice {
  public:
-  uint8_t bus_number() const { return bus_number_; }
-  uint8_t address() const { return address_; }
-  uint16_t vendor_id() const { return vendor_id_; }
-  uint16_t product_id() const { return product_id_; }
+  uint8_t bus_number() const {
+    return bus_number_;
+  }
+  uint8_t address() const {
+    return address_;
+  }
+  uint16_t vendor_id() const {
+    return vendor_id_;
+  }
+  uint16_t product_id() const {
+    return product_id_;
+  }
   std::string GetManufacturer() const;
   std::string GetProductName() const;
   std::string GetSerialNumber() const;
-  PlatformUsbDevice(usbd_device_instance_t* instance, usbd_device* device,
+  PlatformUsbDevice(usbd_device_instance_t* instance,
+                    usbd_device* device,
                     const usbd_device_descriptor_t& device_descriptor);
   const usbd_device_instance_t& GetDeviceInstance() {
     return usbd_device_instance_;
   }
-  usbd_device* GetUsbdDevice() { return usbd_device_; }
+  usbd_device* GetUsbdDevice() {
+    return usbd_device_;
+  }
 
  private:
   std::string GetDescString(uint8_t index) const;

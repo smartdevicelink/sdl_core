@@ -36,8 +36,8 @@
 #include "application_manager/commands/mobile/on_system_request_notification.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/file_system.h"
-#include "application_manager/application_manager_impl.h"
-#include "application_manager/policies/policy_handler.h"
+#include "application_manager/application_manager.h"
+#include "application_manager/policies/policy_handler_interface.h"
 
 namespace application_manager {
 
@@ -46,8 +46,8 @@ namespace commands {
 namespace mobile {
 
 OnSystemRequestNotification::OnSystemRequestNotification(
-    const MessageSharedPtr& message)
-    : CommandNotificationImpl(message) {}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandNotificationImpl(message, application_manager) {}
 
 OnSystemRequestNotification::~OnSystemRequestNotification() {}
 
@@ -56,8 +56,7 @@ void OnSystemRequestNotification::Run() {
   using namespace application_manager;
   using namespace mobile_apis;
 
-  ApplicationSharedPtr app =
-      ApplicationManagerImpl::instance()->application(connection_key());
+  ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app.valid()) {
     LOG4CXX_ERROR(logger_,
@@ -68,9 +67,10 @@ void OnSystemRequestNotification::Run() {
 
   RequestType::eType request_type = static_cast<RequestType::eType>(
       (*message_)[strings::msg_params][strings::request_type].asInt());
-
-  if (!policy::PolicyHandler::instance()->IsRequestTypeAllowed(
-        app->mobile_app_id(), request_type)) {
+  const policy::PolicyHandlerInterface& policy_handler =
+      application_manager_.GetPolicyHandler();
+  if (!policy_handler.IsRequestTypeAllowed(app->policy_app_id(),
+                                           request_type)) {
     LOG4CXX_WARN(logger_,
                  "Request type " << request_type
                                  << " is not allowed by policies");
@@ -104,7 +104,7 @@ void OnSystemRequestNotification::Run() {
 #ifdef EXTENDED_POLICY
 void OnSystemRequestNotification::AddHeader(BinaryMessage& message) const {
   LOG4CXX_AUTO_TRACE(logger_);
-  const int timeout = policy::PolicyHandler::instance()->TimeoutExchange();
+  const int timeout = application_manager_.GetPolicyHandler().TimeoutExchange();
 
   char size_str[24];
 
@@ -119,23 +119,30 @@ void OnSystemRequestNotification::AddHeader(BinaryMessage& message) const {
 
   const std::string header =
 
-  "{"
-     " \"HTTPRequest\": {"
-          "\"headers\": {"
-              "\"ContentType\": \"application/json\","
-              "\"ConnectTimeout\": " + std::string(timeout_str) + ","
-              "\"DoOutput\": true,"
-              "\"DoInput\": true,"
-              "\"UseCaches\": false,"
-              "\"RequestMethod\": \"POST\","
-              "\"ReadTimeout\":" + std::string(timeout_str) + ","
-              "\"InstanceFollowRedirects\": false,"
-              "\"charset\": \"utf-8\","
-              "\"Content_Length\": " + std::string(size_str) +
-          "},"
-          "\"body\": \"" + std::string(message.begin(), message.end()) + "\""
+      "{"
+      " \"HTTPRequest\": {"
+      "\"headers\": {"
+      "\"ContentType\": \"application/json\","
+      "\"ConnectTimeout\": " +
+      std::string(timeout_str) +
+      ","
+      "\"DoOutput\": true,"
+      "\"DoInput\": true,"
+      "\"UseCaches\": false,"
+      "\"RequestMethod\": \"POST\","
+      "\"ReadTimeout\":" +
+      std::string(timeout_str) +
+      ","
+      "\"InstanceFollowRedirects\": false,"
+      "\"charset\": \"utf-8\","
+      "\"Content_Length\": " +
+      std::string(size_str) +
+      "},"
+      "\"body\": \"" +
+      std::string(message.begin(), message.end()) +
+      "\""
       "}"
-  "}";
+      "}";
 
   message.clear();
   message.assign(header.begin(), header.end());
@@ -145,7 +152,7 @@ void OnSystemRequestNotification::AddHeader(BinaryMessage& message) const {
 }
 #endif
 
-}  //namespace mobile
+}  // namespace mobile
 
 }  // namespace commands
 

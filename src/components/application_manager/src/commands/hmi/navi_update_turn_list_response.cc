@@ -31,6 +31,7 @@
  */
 #include "application_manager/commands/hmi/navi_update_turn_list_response.h"
 #include "application_manager/event_engine/event.h"
+
 #include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
@@ -38,18 +39,17 @@ namespace application_manager {
 namespace commands {
 
 NaviUpdateTurnListResponse::NaviUpdateTurnListResponse(
-    const MessageSharedPtr& message) : ResponseFromHMI(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {}
 
-NaviUpdateTurnListResponse::~NaviUpdateTurnListResponse() {
-}
+NaviUpdateTurnListResponse::~NaviUpdateTurnListResponse() {}
 
 void NaviUpdateTurnListResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   event_engine::Event event(hmi_apis::FunctionID::Navigation_UpdateTurnList);
   event.set_smart_object(*message_);
-  event.raise();
+  event.raise(application_manager_.event_dispatcher());
 }
 
 }  // namespace commands

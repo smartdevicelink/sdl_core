@@ -29,8 +29,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef DBUS_DBUS_MESSAGE_H
-#define DBUS_DBUS_MESSAGE_H
+#ifndef SRC_COMPONENTS_DBUS_INCLUDE_DBUS_DBUS_MESSAGE_H_
+#define SRC_COMPONENTS_DBUS_INCLUDE_DBUS_DBUS_MESSAGE_H_
 
 #include <stdint.h>
 #include <string>
@@ -46,7 +46,7 @@ enum ContainerType {
 };
 
 class MessageRefKeeper {
-public:
+ public:
   MessageRefKeeper();
   MessageRefKeeper(DBusMessage* message);
   ~MessageRefKeeper();
@@ -55,7 +55,8 @@ public:
   DBusMessage* get() const;
   DBusMessage* Pass();
   void swap(MessageRefKeeper& other);
-private:
+
+ private:
   DBusMessage* raw_message_;
 };
 
@@ -65,6 +66,7 @@ class MessageRef {
   ~MessageRef();
   std::string GetInterface() const;
   std::string GetMember() const;
+
  protected:
   MessageRefKeeper raw_message_ref_;
   friend class MessageReader;
@@ -96,29 +98,30 @@ class MessageReader {
   bool NextIsDictEntry() const;
 
   // Readers
-  bool     TakeBool();
-  uint8_t  TakeByte();
-  int16_t  TakeInt16();
+  bool TakeBool();
+  uint8_t TakeByte();
+  int16_t TakeInt16();
   uint16_t TakeUint16();
-  int32_t  TakeInt32();
+  int32_t TakeInt32();
   uint32_t TakeUint32();
-  int64_t  TakeInt64();
+  int64_t TakeInt64();
   uint64_t TakeUint64();
-  double   TakeDouble();
+  double TakeDouble();
   std::string TakeString();
 
   MessageReader TakeArrayReader();
   MessageReader TakeStructReader();
   MessageReader TakeDictEntryReader();
+
  private:
   typedef int DataType;
   // Container reader constructor
-  MessageReader(MessageReader* reader,
-                DataType container_data_type);
+  MessageReader(MessageReader* reader, DataType container_data_type);
   void MoveToNext();
   void MarkFailed();
   DataType NextValueType() const;
   void ReadNextValue(DataType type, void* value);
+
  private:
   // Fields
   MessageReader* parent_reader_;
@@ -146,13 +149,15 @@ class MessageWriter {
   void PutUint64(uint64_t value);
   void PutDouble(double value);
   void PutString(const std::string& value);
+
  private:
   typedef int DataType;
   // Main constructor
   void WriteAndCheck(DataType value_type, const void* value);
   void CloseWriter();
+
  private:
-  //Fields
+  // Fields
   bool has_opened_subcontainer_;
   MessageWriter* parent_writer_;
   DBusMessageIter iterator_;
@@ -166,11 +171,9 @@ MessageRef MethodCall(const char* bus_name,
                       const char* path,
                       const char* interface,
                       const char* method);
-MessageRef Signal(const char  *path,
-                  const char  *interface,
-                  const char  *name);
-} // namespace dbus
+MessageRef Signal(const char* path, const char* interface, const char* name);
+}  // namespace dbus
 
 #include "dbus/dbus_message_inl.h"
 
-#endif // DBUS_DBUS_MESSAGE_H
+#endif  // SRC_COMPONENTS_DBUS_INCLUDE_DBUS_DBUS_MESSAGE_H_

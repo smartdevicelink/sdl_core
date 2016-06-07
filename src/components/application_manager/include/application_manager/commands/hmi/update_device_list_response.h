@@ -43,30 +43,31 @@ namespace commands {
  * @brief UpdateDeviceListResponse command class
  **/
 class UpdateDeviceListResponse : public ResponseFromHMI {
-  public:
-    /**
-     * @brief UpdateDeviceListResponse class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit UpdateDeviceListResponse(const MessageSharedPtr& message);
+ public:
+  /**
+   * @brief UpdateDeviceListResponse class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  UpdateDeviceListResponse(const MessageSharedPtr& message,
+                           ApplicationManager& application_manager);
 
-    /**
-     * @brief UpdateDeviceListResponse class destructor
-     **/
-    virtual ~UpdateDeviceListResponse();
+  /**
+   * @brief UpdateDeviceListResponse class destructor
+   **/
+  virtual ~UpdateDeviceListResponse();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(UpdateDeviceListResponse);
+ private:
+  DISALLOW_COPY_AND_ASSIGN(UpdateDeviceListResponse);
 };
 
 }  // namespace commands
 
 }  // namespace application_manager
 
-#endif  //  SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UPDATE_DEVICE_LIST_RESPONSE_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UPDATE_DEVICE_LIST_RESPONSE_H_

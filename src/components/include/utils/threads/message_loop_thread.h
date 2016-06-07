@@ -41,6 +41,7 @@
 #include "utils/message_queue.h"
 #include "utils/threads/thread.h"
 #include "utils/shared_ptr.h"
+#include "utils/lock.h"
 
 namespace threads {
 
@@ -52,7 +53,7 @@ using ::utils::MessageQueue;
  * to it's queue. To handle messages someone, Handler must be implemented and
  * passed to MessageLoopThread constructor.
  */
-template < class Q >
+template <class Q>
 class MessageLoopThread {
  public:
   typedef Q Queue;
@@ -67,7 +68,8 @@ class MessageLoopThread {
      * Method called by MessageLoopThread to process single message
      * from it's queue. After calling this method message is discarded.
      */
-    virtual void Handle(const Message message) = 0; // TODO(dchmerev): Use reference?
+    // TODO (AKozoriz) : change to const reference (APPLINK-20235)
+    virtual void Handle(const Message message) = 0;
 
     virtual ~Handler() {}
   };
@@ -86,12 +88,21 @@ class MessageLoopThread {
   // Process already posted messages and stop thread processing. Thread-safe.
   void Shutdown();
 
+  // Added for utils/test/auto_trace_test.cc
+  size_t GetMessageQueueSize() const;
+
+  /*
+   * Wait until message queue will be empty
+   */
+  void WaitDumpQueue();
+
  private:
   /*
    * Implementation of ThreadDelegate that actually pumps the queue and is
    * able to correctly shut it down
    */
-  struct LoopThreadDelegate : public threads::ThreadDelegate {
+  class LoopThreadDelegate : public threads::ThreadDelegate {
+   public:
     LoopThreadDelegate(MessageQueue<Message, Queue>* message_queue,
                        Handler* handler);
 
@@ -116,13 +127,17 @@ class MessageLoopThread {
 
 ///////// Implementation
 
-template<class Q>
-MessageLoopThread<Q>::MessageLoopThread(const std::string&   name,
-                                        Handler*             handler,
+template <class Q>
+size_t MessageLoopThread<Q>::GetMessageQueueSize() const {
+  return message_queue_.size();
+}
+
+template <class Q>
+MessageLoopThread<Q>::MessageLoopThread(const std::string& name,
+                                        Handler* handler,
                                         const ThreadOptions& thread_opts)
-    : thread_delegate_(new LoopThreadDelegate(&message_queue_, handler)),
-      thread_(threads::CreateThread(name.c_str(),
-                                    thread_delegate_)) {
+    : thread_delegate_(new LoopThreadDelegate(&message_queue_, handler))
+    , thread_(threads::CreateThread(name.c_str(), thread_delegate_)) {
   const bool started = thread_->start(thread_opts);
   if (!started) {
     CREATE_LOGGERPTR_LOCAL(logger_, "Utils")
@@ -130,10 +145,9 @@ MessageLoopThread<Q>::MessageLoopThread(const std::string&   name,
   }
 }
 
-template<class Q>
+template <class Q>
 MessageLoopThread<Q>::~MessageLoopThread() {
   Shutdown();
-  thread_->join();
   delete thread_delegate_;
   threads::DeleteThread(thread_);
 }
@@ -145,20 +159,24 @@ void MessageLoopThread<Q>::PostMessage(const Message& message) {
 
 template <class Q>
 void MessageLoopThread<Q>::Shutdown() {
-  thread_->stop();
+  thread_->join();
+}
+
+template <class Q>
+void MessageLoopThread<Q>::WaitDumpQueue() {
+  message_queue_.WaitUntilEmpty();
 }
 
 //////////
-template<class Q>
+template <class Q>
 MessageLoopThread<Q>::LoopThreadDelegate::LoopThreadDelegate(
     MessageQueue<Message, Queue>* message_queue, Handler* handler)
-    : handler_(*handler),
-      message_queue_(*message_queue) {
+    : handler_(*handler), message_queue_(*message_queue) {
   DCHECK(handler != NULL);
   DCHECK(message_queue != NULL);
 }
 
-template<class Q>
+template <class Q>
 void MessageLoopThread<Q>::LoopThreadDelegate::threadMain() {
   CREATE_LOGGERPTR_LOCAL(logger_, "Utils")
   LOG4CXX_AUTO_TRACE(logger_);
@@ -170,18 +188,20 @@ void MessageLoopThread<Q>::LoopThreadDelegate::threadMain() {
   DrainQue();
 }
 
-template<class Q>
+template <class Q>
 void MessageLoopThread<Q>::LoopThreadDelegate::exitThreadMain() {
-  CREATE_LOGGERPTR_LOCAL(logger_, "Utils")
-  LOG4CXX_AUTO_TRACE(logger_);
   message_queue_.Shutdown();
 }
 
-template<class Q>
+template <class Q>
 void MessageLoopThread<Q>::LoopThreadDelegate::DrainQue() {
   while (!message_queue_.empty()) {
-    handler_.Handle(message_queue_.pop());
+    Message msg;
+    if (message_queue_.pop(msg)) {
+      handler_.Handle(msg);
+    }
   }
 }
+
 }  // namespace threads
 #endif  // SRC_COMPONENTS_INCLUDE_UTILS_THREADS_MESSAGE_LOOP_THREAD_H_

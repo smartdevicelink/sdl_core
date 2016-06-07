@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "SmartFactoryTestHelper.h"
-#include "formatters/CSmartFactory.hpp"
+#include "formatters/SmartFactoryTestHelper.h"
+#include "formatters/CSmartFactory.h"
 #include "gtest/gtest.h"
 
 namespace test {
@@ -51,7 +51,8 @@ TEST(CSmartFactoryTest, CreateSmartFactory_ExpectCreated) {
   EXPECT_EQ(2u, test_factory.structs_schemes().size());
 }
 
-TEST(CSmartFactoryTest, CreateSmartObjWithSchema1_ExpectCreatedObjectToCorrespondSmSchema1) {
+TEST(CSmartFactoryTest,
+     CreateSmartObjWithSchema1_ExpectCreatedObjectToCorrespondSmSchema1) {
   CSmartFactoryTest test_factory;
   // Create SmartObject with attached SmartChmema
   SmartObject obj = test_factory.CreateSmartObject(FunctionIdTest::Function1,
@@ -70,7 +71,8 @@ TEST(CSmartFactoryTest, CreateSmartObjWithSchema1_ExpectCreatedObjectToCorrespon
   EXPECT_TRUE(obj.isValid());
 }
 
-TEST(CSmartFactoryTest, CreateSmartObjWithNotExistedSchema_ExpectCreatedObjectNotValid) {
+TEST(CSmartFactoryTest,
+     CreateSmartObjWithNotExistedSchema_ExpectCreatedObjectNotValid) {
   CSmartFactoryTest test_factory;
   // Create SmartObject with attached SmartChmema
   SmartObject obj = test_factory.CreateSmartObject(
@@ -81,7 +83,9 @@ TEST(CSmartFactoryTest, CreateSmartObjWithNotExistedSchema_ExpectCreatedObjectNo
   EXPECT_TRUE(obj.isValid());
 }
 
-TEST(CSmartFactoryTest, CreateSmartObjectWithSchema1_MissedOneField_ExpectCreatedNotCorrespondSmartSchema) {
+TEST(
+    CSmartFactoryTest,
+    CreateSmartObjectWithSchema1_MissedOneField_ExpectCreatedNotCorrespondSmartSchema) {
   CSmartFactoryTest test_factory;
   // Create SmartObject with attached SmartChmema
   SmartObject obj = test_factory.CreateSmartObject(FunctionIdTest::Function1,
@@ -99,7 +103,9 @@ TEST(CSmartFactoryTest, CreateSmartObjectWithSchema1_MissedOneField_ExpectCreate
   EXPECT_FALSE(obj.isValid());
 }
 
-TEST(CSmartFactoryTest, CreateSmartObjectWithSchema1_AddOutOfRangeValue_ExpectCreatedNotCorrespondSmartSchema) {
+TEST(
+    CSmartFactoryTest,
+    CreateSmartObjectWithSchema1_AddOutOfRangeValue_ExpectCreatedNotCorrespondSmartSchema) {
   CSmartFactoryTest test_factory;
   // Create SmartObject with attached SmartChmema
   SmartObject obj = test_factory.CreateSmartObject(FunctionIdTest::Function1,
@@ -118,7 +124,9 @@ TEST(CSmartFactoryTest, CreateSmartObjectWithSchema1_AddOutOfRangeValue_ExpectCr
   EXPECT_FALSE(obj.isValid());
 }
 
-TEST(CSmartFactoryTest, CreateSmartObjectWithSchema1_AddInvalidValue_ExpectCreatedNotCorrespondSmartSchema) {
+TEST(
+    CSmartFactoryTest,
+    CreateSmartObjectWithSchema1_AddInvalidValue_ExpectCreatedNotCorrespondSmartSchema) {
   CSmartFactoryTest test_factory;
   // Create SmartObject with attached SmartChmema
   SmartObject obj = test_factory.CreateSmartObject(FunctionIdTest::Function1,
@@ -137,7 +145,8 @@ TEST(CSmartFactoryTest, CreateSmartObjectWithSchema1_AddInvalidValue_ExpectCreat
   EXPECT_FALSE(obj.isValid());
 }
 
-TEST(CSmartFactoryTest, CreateSmartObj_AttachSchema1_ExpectCreatedObjectCorrespondsSmSchema1) {
+TEST(CSmartFactoryTest,
+     CreateSmartObj_AttachSchema1_ExpectCreatedObjectCorrespondsSmSchema1) {
   CSmartFactoryTest test_factory;
   // Create empty SmartObject  without any schema
   SmartObject obj;
@@ -158,7 +167,9 @@ TEST(CSmartFactoryTest, CreateSmartObj_AttachSchema1_ExpectCreatedObjectCorrespo
   EXPECT_TRUE(obj.isValid());
 }
 
-TEST(CSmartFactoryTest, CreateSmartObj_AttachSchema1_MissOneField_ExpectCreatedObjectNotCorrespondsSmSchema1) {
+TEST(
+    CSmartFactoryTest,
+    CreateSmartObj_AttachSchema1_MissOneField_ExpectCreatedObjectNotCorrespondsSmSchema1) {
   CSmartFactoryTest test_factory;
   // Create empty SmartObject  without any schema
   SmartObject obj;
@@ -178,7 +189,8 @@ TEST(CSmartFactoryTest, CreateSmartObj_AttachSchema1_MissOneField_ExpectCreatedO
   EXPECT_FALSE(obj.isValid());
 }
 
-TEST(CSmartFactoryTest, CreateSmartObj_AttachNotExistedSchema_ExpectSmSchemaNotAttached) {
+TEST(CSmartFactoryTest,
+     CreateSmartObj_AttachNotExistedSchema_ExpectSmSchemaNotAttached) {
   CSmartFactoryTest test_factory;
   // Create empty SmartObject  without any schema
   SmartObject obj;
@@ -190,7 +202,9 @@ TEST(CSmartFactoryTest, CreateSmartObj_AttachNotExistedSchema_ExpectSmSchemaNotA
   EXPECT_TRUE(SmartType::SmartType_Map == obj.getType());
 }
 
-TEST(CSmartFactoryTest, CreateSmartObj_AttachSchema1_AddInvalidValue_ExpectCreatedObjectNotCorrespondsSmSchema1) {
+TEST(
+    CSmartFactoryTest,
+    CreateSmartObj_AttachSchema1_AddInvalidValue_ExpectCreatedObjectNotCorrespondsSmSchema1) {
   CSmartFactoryTest test_factory;
   // Create empty SmartObject  without any schema
   SmartObject obj;
@@ -211,7 +225,8 @@ TEST(CSmartFactoryTest, CreateSmartObj_AttachSchema1_AddInvalidValue_ExpectCreat
   EXPECT_FALSE(obj.isValid());
 }
 
-TEST(CSmartFactoryTest, CreateSmartObj_AttachSchema1_ExpectCreatedObjectCorrespondsSmSchema) {
+TEST(CSmartFactoryTest,
+     CreateSmartObj_AttachSchema1_ExpectCreatedObjectCorrespondsSmSchema) {
   CSmartFactoryTest test_factory;
   // Create empty SmartObject  without any schema
   SmartObject obj;
@@ -225,7 +240,9 @@ TEST(CSmartFactoryTest, CreateSmartObj_AttachSchema1_ExpectCreatedObjectCorrespo
   EXPECT_TRUE(obj.isValid());
 }
 
-TEST(CSmartFactoryTest, CreateSmartObj_AttachSchema1_OneMandatoryFieldMissed_ExpectCreatedObjectNotCorrespondsSmSchema) {
+TEST(
+    CSmartFactoryTest,
+    CreateSmartObj_AttachSchema1_OneMandatoryFieldMissed_ExpectCreatedObjectNotCorrespondsSmSchema) {
   CSmartFactoryTest test_factory;
   // Create empty SmartObject  without any schema
   SmartObject obj;
@@ -238,7 +255,8 @@ TEST(CSmartFactoryTest, CreateSmartObj_AttachSchema1_OneMandatoryFieldMissed_Exp
   EXPECT_FALSE(obj.isValid());
 }
 
-TEST(CSmartFactoryTest, CreateSmartObj_AttachSchema2_ExpectCreatedObjectCorrespondsSmSchema) {
+TEST(CSmartFactoryTest,
+     CreateSmartObj_AttachSchema2_ExpectCreatedObjectCorrespondsSmSchema) {
   CSmartFactoryTest test_factory;
   // Create empty SmartObject  without any schema
   SmartObject obj;
@@ -252,7 +270,8 @@ TEST(CSmartFactoryTest, CreateSmartObj_AttachSchema2_ExpectCreatedObjectCorrespo
   EXPECT_TRUE(obj.isValid());
 }
 
-TEST(CSmartFactoryTest, CreateSmartObj_AttachSchema_ExpectCreatedObjectCorrespondsSmSchema) {
+TEST(CSmartFactoryTest,
+     CreateSmartObj_AttachSchema_ExpectCreatedObjectCorrespondsSmSchema) {
   CSmartFactoryTest test_factory;
   // Create empty SmartObject  without any schema
   SmartObject obj;
@@ -269,11 +288,13 @@ TEST(CSmartFactoryTest, CreateSmartObj_AttachSchema_ExpectCreatedObjectCorrespon
   EXPECT_TRUE(obj.isValid());
 }
 
-TEST(CSmartFactoryTest, CreateSmartObj_WithSchemaFromStructId_ExpectCreatedObjectCorrespondsSmSchema) {
+TEST(
+    CSmartFactoryTest,
+    CreateSmartObj_WithSchemaFromStructId_ExpectCreatedObjectCorrespondsSmSchema) {
   CSmartFactoryTest test_factory;
   // Create empty SmartObject  with schema correspopnding StructId
-  SmartObject obj = test_factory.CreateSmartObject(
-      StructIdentifiersTest::Common_1);
+  SmartObject obj =
+      test_factory.CreateSmartObject(StructIdentifiersTest::Common_1);
   // Add fields
   obj["text"] = "test";
   obj["position"] = 200;
@@ -288,11 +309,13 @@ TEST(CSmartFactoryTest, CreateSmartObj_WithSchemaFromStructId_ExpectCreatedObjec
   EXPECT_TRUE(obj.isValid());
 }
 
-TEST(CSmartFactoryTest, CreateSmartObj_WithSchemaFromStructId_MissedOneField_ExpectCreatedObjectNotCorrespondsSmSchema) {
+TEST(
+    CSmartFactoryTest,
+    CreateSmartObj_WithSchemaFromStructId_MissedOneField_ExpectCreatedObjectNotCorrespondsSmSchema) {
   CSmartFactoryTest test_factory;
   // Create empty SmartObject  with schema correspopnding StructId
-  SmartObject obj = test_factory.CreateSmartObject(
-      StructIdentifiersTest::Common_1);
+  SmartObject obj =
+      test_factory.CreateSmartObject(StructIdentifiersTest::Common_1);
   // Add fields. One missed.
   obj["text"] = "test";
   obj["image"]["text"] = "test2";
@@ -306,11 +329,13 @@ TEST(CSmartFactoryTest, CreateSmartObj_WithSchemaFromStructId_MissedOneField_Exp
   EXPECT_FALSE(obj.isValid());
 }
 
-TEST(CSmartFactoryTest, CreateSmartObj_WithSchemaFromStructId2_ExpectCreatedObjectCorrespondsSmSchema) {
+TEST(
+    CSmartFactoryTest,
+    CreateSmartObj_WithSchemaFromStructId2_ExpectCreatedObjectCorrespondsSmSchema) {
   CSmartFactoryTest test_factory;
   // Create empty SmartObject  with schema correspopnding StructId
-  SmartObject obj = test_factory.CreateSmartObject(
-      StructIdentifiersTest::Common_2);
+  SmartObject obj =
+      test_factory.CreateSmartObject(StructIdentifiersTest::Common_2);
   // Add fields
   obj["text"] = "test";
   obj["position"] = 200;
@@ -325,11 +350,13 @@ TEST(CSmartFactoryTest, CreateSmartObj_WithSchemaFromStructId2_ExpectCreatedObje
   EXPECT_TRUE(obj.isValid());
 }
 
-TEST(CSmartFactoryTest, CreateSmartObj_WithSchemaFromStructId2_MissedOneField_ExpectCreatedObjectNotCorrespondsSmSchema) {
+TEST(
+    CSmartFactoryTest,
+    CreateSmartObj_WithSchemaFromStructId2_MissedOneField_ExpectCreatedObjectNotCorrespondsSmSchema) {
   CSmartFactoryTest test_factory;
   // Create empty SmartObject  with schema correspopnding StructId
-  SmartObject obj = test_factory.CreateSmartObject(
-      StructIdentifiersTest::Common_2);
+  SmartObject obj =
+      test_factory.CreateSmartObject(StructIdentifiersTest::Common_2);
   // Add fields. One missed.
   obj["text"] = "test";
   obj["image"]["text"] = "test2";
@@ -340,11 +367,13 @@ TEST(CSmartFactoryTest, CreateSmartObj_WithSchemaFromStructId2_MissedOneField_Ex
   EXPECT_FALSE(obj.isValid());
 }
 
-TEST(CSmartFactoryTest, CreateSmartObj_WithSchemaFromStructId2_InvalidValueAdded_ExpectCreatedObjectNotCorrespondsSmSchema) {
+TEST(
+    CSmartFactoryTest,
+    CreateSmartObj_WithSchemaFromStructId2_InvalidValueAdded_ExpectCreatedObjectNotCorrespondsSmSchema) {
   CSmartFactoryTest test_factory;
   // Create empty SmartObject  with schema correspopnding StructId
-  SmartObject obj = test_factory.CreateSmartObject(
-      StructIdentifiersTest::Common_2);
+  SmartObject obj =
+      test_factory.CreateSmartObject(StructIdentifiersTest::Common_2);
   // Add fields. One missed.
   obj["text"] = 111;
   obj["position"] = 200;
@@ -359,32 +388,34 @@ TEST(CSmartFactoryTest, CreateSmartObj_WithSchemaFromStructId2_InvalidValueAdded
 TEST(CSmartFactoryTest, GetSchemaWithSmartFactory_ExpectReceivedSchema) {
   CSmartFactoryTest test_factory;
   CSmartSchema schema;
-  EXPECT_TRUE(
-      test_factory.GetSchema(FunctionIdTest::Function1,
-                             MessageTypeTest::request, schema));
+  EXPECT_TRUE(test_factory.GetSchema(
+      FunctionIdTest::Function1, MessageTypeTest::request, schema));
 }
 
-TEST(CSmartFactoryTest, GetNotExistedSchemaWithSmartFactory_ExpectNotReceivedSchema) {
+TEST(CSmartFactoryTest,
+     GetNotExistedSchemaWithSmartFactory_ExpectNotReceivedSchema) {
   CSmartFactoryTest test_factory;
   CSmartSchema schema;
-  EXPECT_FALSE(
-      test_factory.GetSchema(FunctionIdTest::Function1,
-                             MessageTypeTest::INVALID_ENUM, schema));
+  EXPECT_FALSE(test_factory.GetSchema(
+      FunctionIdTest::Function1, MessageTypeTest::INVALID_ENUM, schema));
 }
 
-TEST(CSmartFactoryTest, GetSchemaWithSmartFactoryWithStructId1_ExpectReceivedSchema) {
+TEST(CSmartFactoryTest,
+     GetSchemaWithSmartFactoryWithStructId1_ExpectReceivedSchema) {
   CSmartFactoryTest test_factory;
   CSmartSchema schema;
   EXPECT_TRUE(test_factory.GetSchema(StructIdentifiersTest::Common_1, schema));
 }
 
-TEST(CSmartFactoryTest, GetSchemaWithSmartFactoryWithStructId2_ExpectReceivedSchema) {
+TEST(CSmartFactoryTest,
+     GetSchemaWithSmartFactoryWithStructId2_ExpectReceivedSchema) {
   CSmartFactoryTest test_factory;
   CSmartSchema schema;
   EXPECT_TRUE(test_factory.GetSchema(StructIdentifiersTest::Common_2, schema));
 }
 
-TEST(CSmartFactoryTest, GetNotExistedSchemaWithSmartFactoryWithStructId_ExpectNotReceivedSchema) {
+TEST(CSmartFactoryTest,
+     GetNotExistedSchemaWithSmartFactoryWithStructId_ExpectNotReceivedSchema) {
   CSmartFactoryTest test_factory;
   CSmartSchema schema;
   EXPECT_FALSE(
@@ -394,4 +425,3 @@ TEST(CSmartFactoryTest, GetNotExistedSchemaWithSmartFactoryWithStructId_ExpectNo
 }  // namespace formatters
 }  // namespace components
 }  // namespace test
-

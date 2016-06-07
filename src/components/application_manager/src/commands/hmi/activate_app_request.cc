@@ -31,41 +31,39 @@
  */
 
 #include "application_manager/commands/hmi/activate_app_request.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/message_helper.h"
 
 namespace application_manager {
 
-  namespace commands {
+namespace commands {
 
-    ActivateAppRequest::ActivateAppRequest(
-        const MessageSharedPtr& message): RequestToHMI(message) {
-    }
+ActivateAppRequest::ActivateAppRequest(const MessageSharedPtr& message,
+                                       ApplicationManager& application_manager)
+    : RequestToHMI(message, application_manager) {}
 
+ActivateAppRequest::~ActivateAppRequest() {
+  LOG4CXX_TRACE(logger_, "~ActivateAppRequest");
+}
 
-    ActivateAppRequest::~ActivateAppRequest() {
-      LOG4CXX_TRACE(logger_, "~ActivateAppRequest");
-    }
-
-    void ActivateAppRequest::Run() {
-      LOG4CXX_TRACE(logger_, "enter " << correlation_id());
-      uint32_t app_id = RequestToHMI::application_id();
-      ApplicationManagerImpl::instance()->set_application_id(correlation_id(), app_id);
+void ActivateAppRequest::Run() {
+  LOG4CXX_TRACE(logger_, "enter " << correlation_id());
+  uint32_t app_id = RequestToHMI::application_id();
+  application_manager_.set_application_id(correlation_id(), app_id);
 #ifdef ENABLE_LOG
-      if ((*message_)[strings::msg_params].keyExists(
-            strings::activate_app_hmi_level)) {
-        mobile_apis::HMILevel::eType requested_hmi_level =
-            static_cast<mobile_apis::HMILevel::eType>(
-                   (*message_)[strings::msg_params][strings::activate_app_hmi_level].asInt());
-        LOG4CXX_TRACE(logger_, "requested_hmi_level = "
-                        << requested_hmi_level);
-      }
+  if ((*message_)[strings::msg_params].keyExists(
+          strings::activate_app_hmi_level)) {
+    mobile_apis::HMILevel::eType requested_hmi_level =
+        static_cast<mobile_apis::HMILevel::eType>(
+            (*message_)[strings::msg_params][strings::activate_app_hmi_level]
+                .asInt());
+    LOG4CXX_TRACE(logger_, "requested_hmi_level = " << requested_hmi_level);
+  }
 #endif
-      SendRequest();
-      LOG4CXX_TRACE(logger_, "exit");
-    }
+  SendRequest();
+  LOG4CXX_TRACE(logger_, "exit");
+}
 
-  }  // namespace commands
+}  // namespace commands
 
 }  // namespace application_manager
-

@@ -31,24 +31,22 @@
  */
 
 #include "application_manager/commands/hmi/on_device_chosen_notification.h"
-#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
 namespace commands {
 
 OnDeviceChosenNotification::OnDeviceChosenNotification(
-    const MessageSharedPtr& message) : NotificationFromHMI(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : NotificationFromHMI(message, application_manager) {}
 
-OnDeviceChosenNotification::~OnDeviceChosenNotification() {
-}
+OnDeviceChosenNotification::~OnDeviceChosenNotification() {}
 
 void OnDeviceChosenNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   if ((*message_)[strings::msg_params].keyExists(strings::device_info)) {
-    ApplicationManagerImpl::instance()->ConnectToDevice(
+    application_manager_.ConnectToDevice(
         (*message_)[strings::msg_params][strings::device_info][strings::id]
             .asString());
   }
@@ -57,4 +55,3 @@ void OnDeviceChosenNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

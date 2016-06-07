@@ -34,19 +34,23 @@
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
 
-template<> SmartType TNumberSchemaItem<int32_t>::getSmartType() const {
+template <>
+SmartType TNumberSchemaItem<int32_t>::getSmartType() const {
   return SmartType_Integer;
 }
 
-template<> SmartType TNumberSchemaItem<uint32_t>::getSmartType() const {
+template <>
+SmartType TNumberSchemaItem<uint32_t>::getSmartType() const {
   return SmartType_Integer;
 }
 
-template<> SmartType TNumberSchemaItem<int64_t>::getSmartType() const {
+template <>
+SmartType TNumberSchemaItem<int64_t>::getSmartType() const {
   return SmartType_Integer;
 }
 
-template<> SmartType TNumberSchemaItem<double>::getSmartType() const {
+template <>
+SmartType TNumberSchemaItem<double>::getSmartType() const {
   return SmartType_Double;
 }
 

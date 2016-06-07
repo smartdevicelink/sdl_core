@@ -33,9 +33,9 @@
 #define SRC_COMPONENTS_POLICY_TEST_INCLUDE_DRIVER_DBMS_H_
 
 #ifdef __QNX__
-#  include <qdb/qdb.h>
+#include <qdb/qdb.h>
 #else  // __QNX__
-#  include <sqlite3.h>
+#include <sqlite3.h>
 #endif  // __QNX__
 
 namespace test {
@@ -45,8 +45,7 @@ namespace policy {
 #ifdef __QNX__
 class DBMS {
  public:
-  explicit DBMS(std::string db_name) : db_name_(db_name), conn_(0) {
-  }
+  explicit DBMS(std::string db_name) : db_name_(db_name), conn_(0) {}
   ~DBMS() {
     Close();
   }
@@ -61,7 +60,7 @@ class DBMS {
     return -1 != qdb_statement(conn_, query);
   }
   int FetchOneInt(const char* query) {
-    int stmt = qdb_stmt_init(conn_, query, strlen(query)+1);
+    int stmt = qdb_stmt_init(conn_, query, strlen(query) + 1);
     qdb_stmt_exec(conn_, stmt, NULL, 0);
     qdb_result_t* res = qdb_getresult(conn_);
     void* ret = qdb_cell(res, 0, 0);
@@ -73,7 +72,7 @@ class DBMS {
     return value;
   }
   double FetchOneDouble(const char* query) {
-    int stmt = qdb_stmt_init(conn_, query, strlen(query)+1);
+    int stmt = qdb_stmt_init(conn_, query, strlen(query) + 1);
     qdb_stmt_exec(conn_, stmt, NULL, 0);
     qdb_result_t* res = qdb_getresult(conn_);
     void* ret = qdb_cell(res, 0, 0);
@@ -86,7 +85,7 @@ class DBMS {
     return value;
   }
   std::string FetchOneString(const char* query) {
-    int stmt = qdb_stmt_init(conn_, query, strlen(query)+1);
+    int stmt = qdb_stmt_init(conn_, query, strlen(query) + 1);
     qdb_stmt_exec(conn_, stmt, NULL, 0);
     qdb_result_t* res = qdb_getresult(conn_);
     void* ret = qdb_cell(res, 0, 0);
@@ -104,11 +103,10 @@ class DBMS {
   qdb_hdl_t* conn_;
 };
 
-#else  // __QNX__
+#else   // __QNX__
 class DBMS {
  public:
-  explicit DBMS(std::string file_name) : file_name_(file_name), conn_(0) {
-  }
+  explicit DBMS(std::string file_name) : file_name_(file_name), conn_(0) {}
   ~DBMS() {
     Close();
   }

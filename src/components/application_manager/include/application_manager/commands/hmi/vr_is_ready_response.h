@@ -49,7 +49,8 @@ class VRIsReadyResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit VRIsReadyResponse(const MessageSharedPtr& message);
+  VRIsReadyResponse(const MessageSharedPtr& message,
+                    ApplicationManager& application_manager);
 
   /**
    * @brief VRIsReadyResponse class destructor

@@ -32,26 +32,25 @@
  */
 
 #include "application_manager/commands/mobile/delete_sub_menu_request.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
 #include "interfaces/HMI_API.h"
+#include "utils/helpers.h"
 
 namespace application_manager {
 
 namespace commands {
 
-DeleteSubMenuRequest::DeleteSubMenuRequest(const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {
-}
+DeleteSubMenuRequest::DeleteSubMenuRequest(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager) {}
 
-DeleteSubMenuRequest::~DeleteSubMenuRequest() {
-}
+DeleteSubMenuRequest::~DeleteSubMenuRequest() {}
 
 void DeleteSubMenuRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
-      (*message_)[strings::params][strings::connection_key].asUInt());
+  ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
@@ -59,15 +58,17 @@ void DeleteSubMenuRequest::Run() {
     return;
   }
 
-  if (!app->FindSubMenu(
-      (*message_)[strings::msg_params][strings::menu_id].asInt())) {
+  const int32_t menu_id =
+      (*message_)[strings::msg_params][strings::menu_id].asInt();
+
+  if (!app->FindSubMenu(menu_id)) {
+    LOG4CXX_ERROR(logger_, "Menu with id " << menu_id << " is not found.");
     SendResponse(false, mobile_apis::Result::INVALID_ID);
-    LOG4CXX_ERROR(logger_, "Invalid ID");
     return;
   }
 
-  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-      smart_objects::SmartType_Map);
+  smart_objects::SmartObject msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
 
   msg_params[strings::menu_id] =
       (*message_)[strings::msg_params][strings::menu_id];
@@ -76,7 +77,8 @@ void DeleteSubMenuRequest::Run() {
   SendHMIRequest(hmi_apis::FunctionID::UI_DeleteSubMenu, &msg_params, true);
 }
 
-void DeleteSubMenuRequest::DeleteSubMenuVRCommands(ApplicationConstSharedPtr app) {
+void DeleteSubMenuRequest::DeleteSubMenuVRCommands(
+    ApplicationConstSharedPtr app) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   const DataAccessor<CommandsMap> accessor = app->commands_map();
@@ -84,16 +86,14 @@ void DeleteSubMenuRequest::DeleteSubMenuVRCommands(ApplicationConstSharedPtr app
   CommandsMap::const_iterator it = commands.begin();
 
   for (; commands.end() != it; ++it) {
-
     if (!(*it->second).keyExists(strings::vr_commands)) {
       continue;
     }
 
-    if ((*message_)[strings::msg_params][strings::menu_id].asInt()
-        == (*it->second)[strings::menu_params]
-                         [hmi_request::parent_id].asInt()) {
-      smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-          smart_objects::SmartType_Map);
+    if ((*message_)[strings::msg_params][strings::menu_id].asInt() ==
+        (*it->second)[strings::menu_params][hmi_request::parent_id].asInt()) {
+      smart_objects::SmartObject msg_params =
+          smart_objects::SmartObject(smart_objects::SmartType_Map);
       msg_params[strings::cmd_id] = (*it->second)[strings::cmd_id].asInt();
       msg_params[strings::app_id] = app->app_id();
       msg_params[strings::grammar_id] = app->get_grammar_id();
@@ -104,7 +104,8 @@ void DeleteSubMenuRequest::DeleteSubMenuVRCommands(ApplicationConstSharedPtr app
   }
 }
 
-void DeleteSubMenuRequest::DeleteSubMenuUICommands(ApplicationSharedPtr const app) {
+void DeleteSubMenuRequest::DeleteSubMenuUICommands(
+    ApplicationSharedPtr const app) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   const DataAccessor<CommandsMap> accessor(app->commands_map());
@@ -118,11 +119,10 @@ void DeleteSubMenuRequest::DeleteSubMenuUICommands(ApplicationSharedPtr const ap
       continue;
     }
 
-    if ((*message_)[strings::msg_params][strings::menu_id].asInt()
-        == (*it->second)[strings::menu_params]
-                         [hmi_request::parent_id].asInt()) {
-      smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-          smart_objects::SmartType_Map);
+    if ((*message_)[strings::msg_params][strings::menu_id].asInt() ==
+        (*it->second)[strings::menu_params][hmi_request::parent_id].asInt()) {
+      smart_objects::SmartObject msg_params =
+          smart_objects::SmartObject(smart_objects::SmartType_Map);
       msg_params[strings::app_id] = app->app_id();
       msg_params[strings::cmd_id] = (*it->second)[strings::cmd_id].asInt();
       app->RemoveCommand((*it->second)[strings::cmd_id].asInt());
@@ -138,6 +138,7 @@ void DeleteSubMenuRequest::DeleteSubMenuUICommands(ApplicationSharedPtr const ap
 
 void DeleteSubMenuRequest::on_event(const event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
+  using namespace helpers;
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
@@ -146,10 +147,13 @@ void DeleteSubMenuRequest::on_event(const event_engine::Event& event) {
           static_cast<mobile_apis::Result::eType>(
               message[strings::params][hmi_response::code].asInt());
 
-      bool result = mobile_apis::Result::SUCCESS == result_code;
+      const bool result = Compare<mobile_api::Result::eType, EQ, ONE>(
+          result_code,
+          mobile_api::Result::SUCCESS,
+          mobile_api::Result::WARNINGS);
 
       ApplicationSharedPtr application =
-             ApplicationManagerImpl::instance()->application(connection_key());
+          application_manager_.application(connection_key());
 
       if (!application) {
         LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -162,9 +166,12 @@ void DeleteSubMenuRequest::on_event(const event_engine::Event& event) {
         DeleteSubMenuUICommands(application);
         application->RemoveSubMenu(
             (*message_)[strings::msg_params][strings::menu_id].asInt());
-       }
+      }
 
       SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
+      if (result) {
+        application->UpdateHash();
+      }
       break;
     }
     default: {
@@ -173,7 +180,6 @@ void DeleteSubMenuRequest::on_event(const event_engine::Event& event) {
     }
   }
 }
-
 
 }  // namespace commands
 

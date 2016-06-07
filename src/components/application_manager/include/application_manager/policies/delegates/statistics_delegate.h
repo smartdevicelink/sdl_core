@@ -30,8 +30,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_DELEGATES_STATISTICS_DELEGATE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_DELEGATES_STATISTICS_DELEGATE_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_POLICIES_DELEGATES_STATISTICS_DELEGATE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_POLICIES_DELEGATES_STATISTICS_DELEGATE_H_
 
 #include <string>
 
@@ -42,41 +42,45 @@
 
 namespace policy {
 
-  class StatisticsDelegate: public threads::ThreadDelegate {
-      enum StatisticType{
-        INCREMENT_GLOBAL,
-        INCREMENT_APP,
-        SET,
-        ADD
-      };
-    public:
-      explicit StatisticsDelegate(usage_statistics::GlobalCounterId type);
+class PolicyHandler;
 
-      StatisticsDelegate(const std::string& app_id,
-                        usage_statistics::AppCounterId type);
+class StatisticsDelegate : public threads::ThreadDelegate {
+  enum StatisticType { INCREMENT_GLOBAL, INCREMENT_APP, SET, ADD };
 
-      StatisticsDelegate(const std::string& app_id,
-                        usage_statistics::AppInfoId type,
-                        const std::string& value);
+ public:
+  StatisticsDelegate(PolicyHandler& policy_handler,
+                     usage_statistics::GlobalCounterId type);
 
-      StatisticsDelegate(const std::string& app_id,
-                        usage_statistics::AppStopwatchId type,
-                        int32_t timespan_seconds);
+  StatisticsDelegate(PolicyHandler& policy_handler,
+                     const std::string& app_id,
+                     usage_statistics::AppCounterId type);
 
-      virtual void threadMain();
+  StatisticsDelegate(PolicyHandler& policy_handler,
+                     const std::string& app_id,
+                     usage_statistics::AppInfoId type,
+                     const std::string& value);
 
-      virtual void exitThreadMain();
-    private:
-      StatisticType type_;
-      usage_statistics::GlobalCounterId global_counter_;
-      usage_statistics::AppCounterId app_counter_;
-      usage_statistics::AppInfoId app_info_;
-      usage_statistics::AppStopwatchId stop_watch_;
+  StatisticsDelegate(PolicyHandler& policy_handler,
+                     const std::string& app_id,
+                     usage_statistics::AppStopwatchId type,
+                     int32_t timespan_seconds);
 
-      std::string app_id_;
-      std::string value_;
-      int32_t timespan_seconds_;
-  };
-} // namespace policy
+  virtual void threadMain();
 
-#endif // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_DELEGATES_STATISTICS_DELEGATE_H_
+  virtual void exitThreadMain();
+
+ private:
+  StatisticType type_;
+  usage_statistics::GlobalCounterId global_counter_;
+  usage_statistics::AppCounterId app_counter_;
+  usage_statistics::AppInfoId app_info_;
+  usage_statistics::AppStopwatchId stop_watch_;
+
+  std::string app_id_;
+  std::string value_;
+  int32_t timespan_seconds_;
+  PolicyHandler& policy_handler_;
+};
+}  // namespace policy
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_POLICIES_DELEGATES_STATISTICS_DELEGATE_H_

@@ -43,18 +43,18 @@ namespace media_manager {
 typedef utils::SharedPtr<MediaAdapterListener> MediaListenerPtr;
 
 class MediaAdapterImpl : public MediaAdapter {
-  public:
-    virtual ~MediaAdapterImpl();
-    virtual void AddListener(const MediaListenerPtr& listener);
-    virtual void RemoveListener(const MediaListenerPtr& listener);
+ public:
+  virtual ~MediaAdapterImpl();
+  virtual void AddListener(const MediaListenerPtr& listener);
+  virtual void RemoveListener(const MediaListenerPtr& listener);
 
-  protected:
-    MediaAdapterImpl();
-    std::set<MediaListenerPtr> media_listeners_;
-    int32_t current_application_;
+ protected:
+  MediaAdapterImpl();
+  std::set<MediaListenerPtr> media_listeners_;
+  int32_t current_application_;
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(MediaAdapterImpl);
+ private:
+  DISALLOW_COPY_AND_ASSIGN(MediaAdapterImpl);
 };
 
 typedef utils::SharedPtr<MediaAdapterImpl> MediaAdapterImplPtr;

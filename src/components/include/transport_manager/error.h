@@ -84,32 +84,27 @@ typedef utils::SharedPtr<BaseError> BaseErrorPtr;
 /**
  * @brief Error that originates during device search.
  */
-class SearchDeviceError : public BaseError {
-};
+class SearchDeviceError : public BaseError {};
 
 /**
  * @brief Error that originates during connection.
  */
-class ConnectError : public BaseError {
-};
+class ConnectError : public BaseError {};
 
 /**
  * @brief Error that originates during disconnection.
  */
-class DisconnectError : public BaseError {
-};
+class DisconnectError : public BaseError {};
 
 /**
  * @brief Error that originates during device disconnection.
  */
-class DisconnectDeviceError : public BaseError {
-};
+class DisconnectDeviceError : public BaseError {};
 
 /**
  * @brief Error that originates during data receive..
  */
-class DataReceiveError : public BaseError {
-};
+class DataReceiveError : public BaseError {};
 
 /**
  * @brief Error that originates during data send.
@@ -132,15 +127,12 @@ class DataSendError : public BaseError {
 /**
  * @brief Error that originates during data sending timeout.
  */
-class DataSendTimeoutError : public DataSendError {
-};
-
+class DataSendTimeoutError : public DataSendError {};
 
 /**
  * @brief Error that originates during communication.
  */
-class CommunicationError : public BaseError {
-};
+class CommunicationError : public BaseError {};
 
 }  // namespace transport_manager
 #endif  // SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_ERROR_H_

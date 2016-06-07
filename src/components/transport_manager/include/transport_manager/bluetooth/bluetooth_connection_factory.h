@@ -48,15 +48,14 @@ class TransportAdapterController;
  */
 class BluetoothConnectionFactory : public ServerConnectionFactory {
  public:
-
   /**
    * @brief Constructor.
    *
    * @param controller Pointer to the device adapter controller.
    */
   BluetoothConnectionFactory(TransportAdapterController* controller);
- protected:
 
+ protected:
   /**
    * @brief Start BT connection factory.
    */
@@ -68,8 +67,8 @@ class BluetoothConnectionFactory : public ServerConnectionFactory {
    * @param device_uid Device unique identifier.
    * @param ap_handle Handle of application.
    */
-  virtual TransportAdapter::Error CreateConnection(const DeviceUID& device_uid,
-                                                const ApplicationHandle& app_handle);
+  virtual TransportAdapter::Error CreateConnection(
+      const DeviceUID& device_uid, const ApplicationHandle& app_handle);
 
   /**
    * @brief
@@ -88,6 +87,7 @@ class BluetoothConnectionFactory : public ServerConnectionFactory {
    * @brief Destructor.
    */
   virtual ~BluetoothConnectionFactory();
+
  private:
   TransportAdapterController* controller_;
 };
@@ -95,4 +95,4 @@ class BluetoothConnectionFactory : public ServerConnectionFactory {
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_CONNECTION_FACTORY_H_
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_CONNECTION_FACTORY_H_

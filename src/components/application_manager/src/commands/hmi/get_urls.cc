@@ -32,13 +32,15 @@
 
 #include "application_manager/commands/hmi/get_urls.h"
 #include "application_manager/message.h"
-#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_manager.h"
 #include "application_manager/policies/policy_handler.h"
 
 namespace application_manager {
 namespace commands {
 
-GetUrls::GetUrls(const MessageSharedPtr& message) : RequestFromHMI(message) {}
+GetUrls::GetUrls(const MessageSharedPtr& message,
+                 ApplicationManager& application_manager)
+    : RequestFromHMI(message, application_manager) {}
 
 GetUrls::~GetUrls() {}
 
@@ -49,7 +51,7 @@ void GetUrls::Run() {
   using namespace strings;
   using namespace hmi_apis;
 
-  if (!policy::PolicyHandler::instance()->PolicyEnabled()) {
+  if (!application_manager_.GetPolicyHandler().PolicyEnabled()) {
     SendResponseToHMI(Common_Result::DATA_NOT_AVAILABLE);
     return;
   }
@@ -59,9 +61,8 @@ void GetUrls::Run() {
       object[msg_params][hmi_request::service].asString();
 
   policy::EndpointUrls endpoints;
-  policy::PolicyHandler::instance()->GetServiceUrls(
-      object[strings::msg_params][hmi_request::service].asString(),
-      endpoints);
+  application_manager_.GetPolicyHandler().GetServiceUrls(
+      object[strings::msg_params][hmi_request::service].asString(), endpoints);
   if (endpoints.empty()) {
     LOG4CXX_ERROR(logger_, "No URLs for service " << service_to_check);
     SendResponseToHMI(Common_Result::DATA_NOT_AVAILABLE);
@@ -88,22 +89,23 @@ void GetUrls::ProcessPolicyServiceURLs(const policy::EndpointUrls& endpoints) {
   using namespace hmi_apis;
 
   const uint32_t app_id_to_send_to =
-      policy::PolicyHandler::instance()->GetAppIdForSending();
+      application_manager_.GetPolicyHandler().GetAppIdForSending();
 
   if (!app_id_to_send_to) {
     LOG4CXX_ERROR(logger_,
                   "There are no available applications for processing.");
-    ApplicationManagerImpl::instance()->ManageHMICommand(message_);
+    application_manager_.ManageHMICommand(message_);
     return;
   }
 
   ApplicationSharedPtr app =
-      ApplicationManagerImpl::instance()->application(app_id_to_send_to);
+      application_manager_.application(app_id_to_send_to);
 
   if (!app.valid()) {
     LOG4CXX_WARN(logger_,
                  "There is no registered application with "
-                 "connection key '" << app_id_to_send_to << "'");
+                 "connection key '"
+                     << app_id_to_send_to << "'");
     SendResponseToHMI(Common_Result::DATA_NOT_AVAILABLE);
     return;
   }
@@ -114,7 +116,7 @@ void GetUrls::ProcessPolicyServiceURLs(const policy::EndpointUrls& endpoints) {
 
   SmartObject& urls = object[msg_params][hmi_response::urls];
 
-  const std::string mobile_app_id = app->mobile_app_id();
+  const std::string mobile_app_id = app->policy_app_id();
   std::string default_url = "URL is not found";
 
   // Will use only one URL for particular application if it will be found
@@ -122,7 +124,6 @@ void GetUrls::ProcessPolicyServiceURLs(const policy::EndpointUrls& endpoints) {
   SmartObject service_info = SmartObject(SmartType_Map);
 
   for (size_t e = 0; e < endpoints.size(); ++e) {
-
     if (mobile_app_id == endpoints[e].app_id) {
       if (endpoints[e].url.size()) {
         service_info[url] = endpoints[e].url[0];
@@ -178,7 +179,7 @@ void GetUrls::ProcessServiceURLs(const policy::EndpointUrls& endpoints) {
 void GetUrls::SendResponseToHMI(hmi_apis::Common_Result::eType result) {
   (*message_)[strings::params][strings::message_type] = MessageType::kResponse;
   (*message_)[strings::params][hmi_response::code] = result;
-  ApplicationManagerImpl::instance()->ManageHMICommand(message_);
+  application_manager_.ManageHMICommand(message_);
 }
 
 }  // namespace commands

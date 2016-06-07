@@ -47,15 +47,13 @@ bool ISchemaItem::hasDefaultValue(SmartObject& Object) {
   return false;
 }
 
-void ISchemaItem::applySchema(SmartObject& Object, const bool RemoveFakeParameters) {
-}
+void ISchemaItem::applySchema(SmartObject& Object,
+                              const bool RemoveFakeParameters) {}
 
-void ISchemaItem::unapplySchema(SmartObject& Object) {
-}
+void ISchemaItem::unapplySchema(SmartObject& Object) {}
 
 void ISchemaItem::BuildObjectBySchema(const SmartObject& pattern_object,
-                                      SmartObject& result_object) {
-}
+                                      SmartObject& result_object) {}
 
 size_t ISchemaItem::GetMemberSize() {
   return 0;

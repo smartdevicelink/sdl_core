@@ -32,15 +32,14 @@ if(BUILD_TESTS)
 set(TM_TEST_DIR ${COMPONENTS_DIR}/transport_manager/test)
 
 include_directories(
+  include
   ${LOG4CXX_INCLUDE_DIRECTORY}
   ${GMOCK_INCLUDE_DIRECTORY}
   ${COMPONENTS_DIR}/smart_objects/include
   ${COMPONENTS_DIR}/transport_manager/include
   ${COMPONENTS_DIR}/utils/include
-  ${COMPONENTS_DIR}/include
   ${COMPONENTS_DIR}/connection_handler/include
   ${JSONCPP_INCLUDE_DIRECTORY}
-  ${CMAKE_BINARY_DIR}
 )
 
 set(LIBRARIES
@@ -62,19 +61,14 @@ if (BUILD_BT_SUPPORT)
   list(APPEND LIBRARIES bluetooth)
 endif()
 
-if (BUILD_AVAHI_SUPPORT)
-  list(APPEND LIBRARIES avahi-client avahi-common)
-endif()
-
 set(SOURCES
   ${TM_TEST_DIR}/transport_manager_default_test.cc
-  #${TM_TEST_DIR}/transport_manager_impl_test.cc
-  #${TM_TEST_DIR}/dnssd_service_browser_test.cc
+  ${TM_TEST_DIR}/transport_manager_impl_test.cc
   ${TM_TEST_DIR}/transport_adapter_test.cc
-  #${TM_TEST_DIR}/transport_adapter_listener_test.cc
+  ${TM_TEST_DIR}/transport_adapter_listener_test.cc
   ${TM_TEST_DIR}/tcp_transport_adapter_test.cc
   ${TM_TEST_DIR}/tcp_device_test.cc
-  #${TM_TEST_DIR}/tcp_client_listener_test.cc
+  ${TM_TEST_DIR}/tcp_client_listener_test.cc
 )
 
 create_test("transport_manager_test" "${SOURCES}" "${LIBRARIES}")

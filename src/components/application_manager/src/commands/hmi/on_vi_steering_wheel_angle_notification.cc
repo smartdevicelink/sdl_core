@@ -38,12 +38,10 @@ namespace application_manager {
 namespace commands {
 
 OnVISteeringWheelAngleNotification::OnVISteeringWheelAngleNotification(
-    const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : NotificationFromHMI(message, application_manager) {}
 
-OnVISteeringWheelAngleNotification::~OnVISteeringWheelAngleNotification() {
-}
+OnVISteeringWheelAngleNotification::~OnVISteeringWheelAngleNotification() {}
 
 void OnVISteeringWheelAngleNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -58,4 +56,3 @@ void OnVISteeringWheelAngleNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

@@ -31,12 +31,12 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_PUT_FILE_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_PUT_FILE_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_PUT_FILE_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_PUT_FILE_REQUEST_H_
 
 #include "application_manager/commands/command_request_impl.h"
 #include "utils/macro.h"
-#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_manager.h"
 
 namespace application_manager {
 
@@ -52,7 +52,8 @@ class PutFileRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit PutFileRequest(const MessageSharedPtr& message);
+  PutFileRequest(const MessageSharedPtr& message,
+                 ApplicationManager& application_manager);
 
   /**
    * @brief PutFileRequest class destructor
@@ -65,17 +66,17 @@ class PutFileRequest : public CommandRequestImpl {
   virtual void Run();
 
  private:
-    int64_t                     offset_;
-    std::string                  sync_file_name_;
-    int64_t                     length_;
-    mobile_apis::FileType::eType file_type_;
-    bool                         is_persistent_file_;
+  int64_t offset_;
+  std::string sync_file_name_;
+  int64_t length_;
+  mobile_apis::FileType::eType file_type_;
+  bool is_persistent_file_;
 
-    void SendOnPutFileNotification();
+  void SendOnPutFileNotification();
   DISALLOW_COPY_AND_ASSIGN(PutFileRequest);
 };
 
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_PUT_FILE_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_PUT_FILE_REQUEST_H_

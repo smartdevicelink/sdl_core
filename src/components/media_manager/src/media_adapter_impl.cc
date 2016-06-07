@@ -35,11 +35,9 @@
 
 namespace media_manager {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "MediaAdapterImpl")
+CREATE_LOGGERPTR_GLOBAL(logger_, "MediaManager")
 
-MediaAdapterImpl::MediaAdapterImpl()
-  : current_application_(0) {
-}
+MediaAdapterImpl::MediaAdapterImpl() : current_application_(0) {}
 
 MediaAdapterImpl::~MediaAdapterImpl() {
   media_listeners_.clear();

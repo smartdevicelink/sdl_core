@@ -46,7 +46,8 @@ class SDLPolicyUpdate : public RequestToHMI {
      *
      * @param message Incoming SmartObject message
      **/
-  explicit SDLPolicyUpdate(const MessageSharedPtr& message);
+  SDLPolicyUpdate(const MessageSharedPtr& message,
+                  ApplicationManager& application_manager);
 
   ~SDLPolicyUpdate() OVERRIDE;
 
@@ -63,4 +64,4 @@ class SDLPolicyUpdate : public RequestToHMI {
 
 }  // namespace application_manager
 
-#endif  //  SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_SDL_POLICY_UPDATE_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_SDL_POLICY_UPDATE_H_

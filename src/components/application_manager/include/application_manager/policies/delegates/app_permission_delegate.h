@@ -30,52 +30,53 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_DELEGATES_APP_PERMISSION_DELEGATE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_DELEGATES_APP_PERMISSION_DELEGATE_H_
-
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_POLICIES_DELEGATES_APP_PERMISSION_DELEGATE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_POLICIES_DELEGATES_APP_PERMISSION_DELEGATE_H_
 
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
 #include "utils/conditional_variable.h"
 
 #include "policy/policy_types.h"
+#include "application_manager/policies/policy_handler_interface.h"
 
 namespace policy {
+/**
+*@brief The AppPermissionDelegate class allows to call OnAppPermissionConsent
+*in async way.
+*/
+class AppPermissionDelegate : public threads::ThreadDelegate {
+ public:
+  /**
+   * @brief AppPermissionDelegate constructor, contains parameters
+   * which will be pass to the called function.
+   *
+   * @param connection_key connection key.
+   *
+   * @param permissions new permissions
+   */
+  AppPermissionDelegate(const uint32_t connection_key,
+                        const PermissionConsent& permissions,
+                        policy::PolicyHandlerInterface& policy_handler);
 
   /**
- * @brief The AppPermissionDelegate class allows to call OnAppPermissionConsent
- * in async way.
- */
-class AppPermissionDelegate: public threads::ThreadDelegate {
-  public:
-    /**
-     * @brief AppPermissionDelegate constructor, contains parameters
-     * which will be pass to the called function.
-     *
-     * @param connection_key connection key.
-     *
-     * @param permissions new permissions
-     */
-    AppPermissionDelegate(const uint32_t connection_key,
-                          const PermissionConsent &permissions);
+   * @brief threadMain run the needed function.
+   */
+  virtual void threadMain();
 
-    /**
-     * @brief threadMain run the needed function.
-     */
-    virtual void threadMain();
+  /**
+   * @brief exitThreadMain do some stuff before exit from thread
+   *
+   * @return true in case when thread has been finished properly
+   */
+  virtual void exitThreadMain();
 
-    /**
-     * @brief exitThreadMain do some stuff before exit from thread
-     *
-     * @return true in case when thread has been finished properly
-     */
-    virtual void exitThreadMain();
-
-  private:
-    uint32_t connection_key_;
-    PermissionConsent permissions_;
+ private:
+  uint32_t connection_key_;
+  PermissionConsent permissions_;
+  policy::PolicyHandlerInterface& policy_handler_;
 };
 
-} // namespace policy
+}  // namespace policy
 
-#endif // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_DELEGATES_APP_PERMISSION_DELEGATE_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_POLICIES_DELEGATES_APP_PERMISSION_DELEGATE_H_
