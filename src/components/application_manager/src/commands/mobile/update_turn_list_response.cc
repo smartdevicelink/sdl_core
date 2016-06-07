@@ -32,7 +32,6 @@
  */
 
 #include "application_manager/commands/mobile/update_turn_list_response.h"
-
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {
@@ -46,7 +45,7 @@ UpdateTurnListResponse::UpdateTurnListResponse(
 UpdateTurnListResponse::~UpdateTurnListResponse() {}
 
 void UpdateTurnListResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   application_manager_.SendMessageToMobile(message_);
 }

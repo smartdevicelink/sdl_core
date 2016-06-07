@@ -39,9 +39,7 @@
 #include "utils/custom_string.h"
 
 namespace policy {
-
 namespace custom_str = utils::custom_string;
-
 class PolicyListener {
  public:
   virtual ~PolicyListener() {}

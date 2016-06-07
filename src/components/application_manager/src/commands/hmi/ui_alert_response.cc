@@ -31,7 +31,6 @@
  */
 #include "application_manager/commands/hmi/ui_alert_response.h"
 #include "application_manager/event_engine/event.h"
-
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {
@@ -45,7 +44,7 @@ UIAlertResponse::UIAlertResponse(const MessageSharedPtr& message,
 UIAlertResponse::~UIAlertResponse() {}
 
 void UIAlertResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   event_engine::Event event(hmi_apis::FunctionID::UI_Alert);
   event.set_smart_object(*message_);

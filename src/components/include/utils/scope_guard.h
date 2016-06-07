@@ -48,7 +48,7 @@ namespace utils {
  *
  * bool SomeClass::Init() {
  *   memberObject_ = custom_allocate() // initialize member object with some
- *value
+ * value
  *   if(!some_condition) {
  *     custom_release(memberObject();
  *     return false;
@@ -66,7 +66,7 @@ namespace utils {
  *
  * bool SomeClass::Init() {
  *   memberObject_ = custom_allocate() // initialize member object with some
- *value
+ * value
  *   // The guard will call custom release function when it goes out of scope.
  *   ScopeGaurd guard = MakeGuard(custom_release, memberObject);
  *   if(!some_condition) {

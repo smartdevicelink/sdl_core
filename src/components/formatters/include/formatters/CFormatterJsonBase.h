@@ -36,7 +36,7 @@
 #define SRC_COMPONENTS_FORMATTERS_INCLUDE_FORMATTERS_CFORMATTERJSONBASE_H_
 
 #include "smart_objects/smart_object.h"
-#include "json/json.h"
+#include "utils/json_utils.h"
 
 namespace NsSmartDeviceLink {
 namespace NsJSONHandler {
@@ -98,19 +98,19 @@ class CFormatterJsonBase {
    * @param obj The resulting SmartObject.
    */
   static void jsonValueToObj(
-      const Json::Value& value,
+      const utils::json::JsonValueRef value,
       NsSmartDeviceLink::NsSmartObjects::SmartObject& obj);
 
   /**
     * @brief The method constructs a JSON object from the input SmartObject
     *
     * @param obj Input SmartObject. Can contain a complex structure of objects.
-    * @param value The resulting JSON object. It has the same structure as the
-    *input SmartObject.
+* @param value The resulting JSON object. It has the same structure as the
+* input SmartObject.
     */
   static void objToJsonValue(
       const NsSmartDeviceLink::NsSmartObjects::SmartObject& obj,
-      Json::Value& value);
+      utils::json::JsonValueRef value);
 };
 }
 }

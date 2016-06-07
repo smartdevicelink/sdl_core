@@ -158,7 +158,7 @@ class CacheManagerInterface {
    * @brief GetLockScreenIcon allows to obtain lock screen icon url;
    *
    * @return url which point to the resourse where lock screen icon could be
-   *obtained.
+   * obtained.
    */
   virtual std::string GetLockScreenIconUrl() const = 0;
 

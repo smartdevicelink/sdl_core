@@ -40,10 +40,14 @@ const std::string SQLDatabase::kInMemory = ":memory:";
 const std::string SQLDatabase::kExtension = ".sqlite";
 
 SQLDatabase::SQLDatabase()
-    : conn_(NULL), databasename_(kInMemory), error_(SQLITE_OK) {}
+    : conn_(NULL), database_path_(kInMemory), error_(SQLITE_OK) {}
 
-SQLDatabase::SQLDatabase(const std::string& db_name)
-    : conn_(NULL), databasename_(db_name + kExtension), error_(SQLITE_OK) {}
+SQLDatabase::SQLDatabase(const std::string& database_path,
+                         const std::string& connection_name)
+    : conn_(NULL)
+    , database_path_(database_path + kExtension)
+    , connection_name_(connection_name)
+    , error_(SQLITE_OK) {}
 
 SQLDatabase::~SQLDatabase() {
   Close();
@@ -53,13 +57,15 @@ bool SQLDatabase::Open() {
   sync_primitives::AutoLock auto_lock(conn_lock_);
   if (conn_)
     return true;
-  error_ = sqlite3_open(databasename_.c_str(), &conn_);
+  error_ = sqlite3_open(database_path_.c_str(), &conn_);
   return error_ == SQLITE_OK;
+  return true;
 }
 
 bool SQLDatabase::IsReadWrite() {
   const char* schema = "main";
   return sqlite3_db_readonly(conn_, schema) == 0;
+  return true;
 }
 
 void SQLDatabase::Close() {
@@ -96,16 +102,15 @@ SQLError SQLDatabase::LastError() const {
   return SQLError(Error(error_));
 }
 
+bool SQLDatabase::HasErrors() const {
+  return Error(error_) != OK;
+}
 sqlite3* SQLDatabase::conn() const {
   return conn_;
 }
 
-void SQLDatabase::set_path(const std::string& path) {
-  databasename_ = path + databasename_;
-}
-
 std::string SQLDatabase::get_path() const {
-  return databasename_;
+  return database_path_;
 }
 
 bool SQLDatabase::Backup() {

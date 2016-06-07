@@ -125,7 +125,7 @@ class StressTestHelper : public ::testing::Test {
       }
       case 2:  // double
       {
-        double dVal = 100.0 / (rand() % 200);
+        double dVal = 100.0 / (rand() % 100);
         obj = dVal;
         mVerifyMap[key_path] = to_string(dVal);
         // std::cout << "Created double, value: " << dVal << std::endl;
@@ -141,7 +141,7 @@ class StressTestHelper : public ::testing::Test {
       }
       case 4:  // string
       {
-        std::string strVal(rand() % 200, get_random_char());
+        std::string strVal(rand() % 100, get_random_char());
         obj = strVal;  // string with random char filled random size
         mVerifyMap[key_path] = strVal;
         // std::cout << "Created string, value: " << strVal << std::endl;
@@ -178,7 +178,7 @@ class StressTestHelper : public ::testing::Test {
         }
         break;
       case 7:  // binary
-        int dataSize = rand() % 200;
+        int dataSize = rand() % 100;
         char randomChar = get_random_char();
         std::string strDataVal(dataSize, randomChar);
         std::string strVal("c:");
@@ -239,7 +239,7 @@ class StressTestHelper : public ::testing::Test {
 TEST_F(StressTestHelper, StressTest) {
   SmartObject objects;
 
-  const int size = 11;
+  const int size = 5;
 
   for (int i = 0; i < size; i++) {
     SmartObject obj;

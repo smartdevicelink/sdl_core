@@ -84,13 +84,7 @@ if (TELEMETRY_MONITOR)
     add_subdirectory(./telemetry_monitor)
 endif()
 
-
 if (${HMI_DBUS_API})
 # --- DBus
     add_subdirectory(./dbus)
 endif ()
-if (${QT_HMI})
-# --- Qt HMI
-    add_subdirectory(./qt_hmi)
-endif ()
-

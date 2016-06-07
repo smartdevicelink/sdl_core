@@ -1,4 +1,4 @@
-# Copyright (c) 2015, Ford Motor Company
+# Copyright (c) 2016, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -35,29 +35,45 @@ include_directories(
   ${COMPONENTS_DIR}/rpc_base/include
   ${COMPONENTS_DIR}/config_profile/include
   ${COMPONENTS_DIR}/utils/include/
+  ${COMPONENTS_DIR}/policy/policy_table/
   ${COMPONENTS_DIR}/policy/test/include/
+  ${COMPONENTS_DIR}/policy/include/
+  $ENV{SDL_SQLITE_DIR}
 )
 
 set(testLibraries
   gmock
+  dbms
   Utils
-  Policy
+  PolicyTestLib
   UsageStatistics
 )
 
 set(testSources
-  ${COMPONENTS_DIR}/policy/test/counter_test.cc
-  ${COMPONENTS_DIR}/policy/test/shared_library_test.cc
-  ${COMPONENTS_DIR}/policy/test/generated_code_test.cc
-  ${COMPONENTS_DIR}/policy/test/policy_manager_impl_test.cc
-  ${COMPONENTS_DIR}/policy/test/update_status_manager_test.cc
+  counter_test.cc
+  generated_code_test.cc
+  policy_manager_impl_test.cc
+  update_status_manager_test.cc
 )
 
-list (APPEND testSources
-  ${COMPONENTS_DIR}/policy/test/sql_pt_representation_test.cc
+if (NOT QT_PORT)
+  list (APPEND testSources
+    sql_pt_representation_test.cc
+  )
+endif()
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+    list (APPEND testSources
+      shared_library_test.cc
 )
+endif()
+
+if(WIN_NATIVE)
+    link_directories ($ENV{SDL_SQLITE_DIR})
+endif()
 
 create_test("policy_test" "${testSources}" "${testLibraries}")
+add_dependencies("policy_test" PolicyTestLib)
 
 file(COPY valid_sdl_pt_update.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY sdl_preloaded_pt.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

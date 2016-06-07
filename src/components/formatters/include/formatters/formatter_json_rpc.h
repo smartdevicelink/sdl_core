@@ -38,9 +38,9 @@
 #include <string>
 #include <sys/stat.h>
 
-#include "smart_objects/smart_object.h"
 #include "smart_objects/enum_schema_item.h"
-#include "json/json.h"
+#include "smart_objects/smart_object.h"
+#include "utils/json_utils.h"
 
 #include "CFormatterJsonBase.h"
 #include "formatters/CSmartFactory.h"
@@ -222,7 +222,7 @@ class FormatterJsonRpc : public CFormatterJsonBase {
    *         during the parsing of the function id. 0 if no errors occurred.
    */
   template <typename FunctionId>
-  static int32_t ParseFunctionId(const Json::Value& method_value,
+  static int32_t ParseFunctionId(const utils::json::JsonValueRef method_value,
                                  NsSmartObjects::SmartObject& out);
 
   /**
@@ -238,7 +238,7 @@ class FormatterJsonRpc : public CFormatterJsonBase {
    *         value of "method" field.
    */
   static bool SetMethod(const NsSmartObjects::SmartObject& params,
-                        Json::Value& method_container);
+                        utils::json::JsonValueRef method_container);
 
   /**
    * @brief Set id.
@@ -253,13 +253,13 @@ class FormatterJsonRpc : public CFormatterJsonBase {
    *         as a value of "id" field.
    */
   static bool SetId(const NsSmartObjects::SmartObject& params,
-                    Json::Value& id_container);
+                    utils::json::JsonValueRef id_container);
 
   /**
    * @brief Set message
    *
-   * Try to extract message from response error object and set "message" field
-   *for the container
+ * Try to extract message from response error object and set "message" field
+ * for the container
    *
    * @param params Message parameters object.
    * @param id_container Container of the "message" field
@@ -268,94 +268,96 @@ class FormatterJsonRpc : public CFormatterJsonBase {
    *         as a value of "message" field.
    */
   static bool SetMessage(const NsSmartObjects::SmartObject& params,
-                         Json::Value& id_container);
+                         utils::json::JsonValueRef id_container);
 };
 
 template <typename FunctionId, typename MessageType>
 int32_t FormatterJsonRpc::FromString(const std::string& str,
                                      NsSmartObjects::SmartObject& out) {
+  using namespace utils::json;
   int32_t result = kSuccess;
   try {
-    Json::Value root;
-    Json::Reader reader;
     namespace strings = NsSmartDeviceLink::NsJSONHandler::strings;
 
-    if (false == reader.parse(str, root)) {
+    JsonValue::ParseResult parse_result = JsonValue::Parse(str);
+    if (!parse_result.second) {
       result = kParsingError | kMethodNotSpecified | kUnknownMethod |
                kUnknownMessageType;
     } else {
-      if (false == root.isMember(kJsonRpc)) {
+      JsonValue& root_json = parse_result.first;
+      if (!root_json.HasMember(kJsonRpc)) {
         result |= kInvalidFormat;
       } else {
-        const Json::Value& jsonRpcValue = root[kJsonRpc];
+        const JsonValueRef jsonRpcValue = root_json[kJsonRpc];
 
-        if ((false == jsonRpcValue.isString()) ||
-            (jsonRpcValue.asString() != kJsonRpcExpectedValue)) {
+        if (!jsonRpcValue.IsString() ||
+            (jsonRpcValue.AsString() != kJsonRpcExpectedValue)) {
           result |= kInvalidFormat;
         }
       }
 
       std::string message_type_string;
-      Json::Value response_value;
+      JsonValue response_value;
       bool response_value_found = false;
       bool is_error_response = false;
 
-      if (false == root.isMember(kId)) {
+      if (!root_json.HasMember(kId)) {
         message_type_string = kNotification;
 
-        if (false == root.isMember(kMethod)) {
+        if (!root_json.HasMember(kMethod)) {
           result |= kMethodNotSpecified | kUnknownMethod;
         } else {
-          result |= ParseFunctionId<FunctionId>(root[kMethod], out);
+          result |= ParseFunctionId<FunctionId>(root_json[kMethod], out);
         }
         out[strings::S_MSG_PARAMS] =
             NsSmartObjects::SmartObject(NsSmartObjects::SmartType_Map);
       } else {
-        const Json::Value& id_value = root[kId];
+        const JsonValueRef id_value = root_json[kId];
 
-        if (true == id_value.isString()) {
+        if (id_value.IsString()) {
           out[strings::S_PARAMS][strings::S_CORRELATION_ID] =
-              id_value.asString();
-        } else if (true == id_value.isInt()) {
-          out[strings::S_PARAMS][strings::S_CORRELATION_ID] = id_value.asInt();
-        } else if (true == id_value.isDouble()) {
+              id_value.AsString();
+        } else if (id_value.IsInt()) {
           out[strings::S_PARAMS][strings::S_CORRELATION_ID] =
-              id_value.asDouble();
-        } else if (true == id_value.isNull()) {
+              static_cast<int64_t>(id_value.AsInt());
+        } else if (id_value.IsDouble()) {
+          out[strings::S_PARAMS][strings::S_CORRELATION_ID] =
+              id_value.AsDouble();
+        } else if (id_value.IsNull()) {
           out[strings::S_PARAMS][strings::S_CORRELATION_ID] =
               NsSmartObjects::SmartObject(NsSmartObjects::SmartType_Null);
         } else {
           result |= kInvalidFormat | kInvalidId;
         }
 
-        if (true == root.isMember(kMethod)) {
+        if (root_json.HasMember(kMethod)) {
           message_type_string = kRequest;
-          result |= ParseFunctionId<FunctionId>(root[kMethod], out);
+          result |= ParseFunctionId<FunctionId>(root_json[kMethod], out);
           out[strings::S_MSG_PARAMS] =
               NsSmartObjects::SmartObject(NsSmartObjects::SmartType_Map);
         } else {
-          Json::Value method_container;
+          JsonValue method_container;
           bool method_container_found = false;
 
-          if (true == root.isMember(kResult)) {
+          if (root_json.HasMember(kResult)) {
             out[strings::S_MSG_PARAMS] =
                 NsSmartObjects::SmartObject(NsSmartObjects::SmartType_Map);
 
             message_type_string = kResponse;
-            response_value = root[kResult];
+            response_value = root_json[kResult];
             response_value_found = true;
-            method_container = root[kResult];
+            method_container = root_json[kResult];
             method_container_found = true;
-          } else if (true == root.isMember(kError)) {
+          } else if (root_json.HasMember(kError)) {
             out[strings::S_MSG_PARAMS] =
                 NsSmartObjects::SmartObject(NsSmartObjects::SmartType_Map);
             message_type_string = kErrorResponse;
-            response_value = root[kError];
+            response_value = root_json[kError];
             response_value_found = true;
             is_error_response = true;
 
-            if (true == response_value.isObject()) {
-              if (true == response_value.isMember(kData)) {
+            if (response_value.IsObject()) {
+              if (response_value.HasMember(kData)) {
                 method_container = response_value[kData];
                 method_container_found = true;
               }
@@ -364,12 +366,12 @@ int32_t FormatterJsonRpc::FromString(const std::string& str,
             result |= kUnknownMessageType;
           }
 
-          if (false == method_container_found) {
+          if (!method_container_found) {
             result |= kMethodNotSpecified | kUnknownMethod;
-          } else if (false == method_container.isObject()) {
+          } else if (!method_container.IsObject()) {
             result |= kInvalidFormat | kMethodNotSpecified | kUnknownMethod;
           } else {
-            if (false == method_container.isMember(kMethod)) {
+            if (!method_container.HasMember(kMethod)) {
               result |= kMethodNotSpecified | kUnknownMethod;
             } else {
               result |=
@@ -390,66 +392,67 @@ int32_t FormatterJsonRpc::FromString(const std::string& str,
         }
       }
 
-      if (true == root.isMember(kParams)) {
-        const Json::Value& params_value = root[kParams];
+      if (root_json.HasMember(kParams)) {
+        const JsonValueRef params_value = root_json[kParams];
 
-        if (false == params_value.isObject()) {
+        if (!params_value.IsObject()) {
           result |= kInvalidFormat;
         } else {
-          jsonValueToObj(root[kParams], out[strings::S_MSG_PARAMS]);
+          jsonValueToObj(root_json[kParams], out[strings::S_MSG_PARAMS]);
         }
-      } else if (true == root.isMember(kResult)) {
-        const Json::Value& result_value = root[kResult];
+      } else if (root_json.HasMember(kResult)) {
+        const JsonValueRef result_value = root_json[kResult];
 
-        if (false == result_value.isObject()) {
+        if (!result_value.IsObject()) {
           result |= kInvalidFormat;
         } else {
-          jsonValueToObj(root[kResult], out[strings::S_MSG_PARAMS]);
+          jsonValueToObj(root_json[kResult], out[strings::S_MSG_PARAMS]);
         }
-      } else if (true == is_error_response) {
+      } else if (is_error_response) {
         jsonValueToObj(response_value[kData], out[strings::S_PARAMS][kData]);
       }
 
       if ((kResponse == message_type_string) ||
           (kErrorResponse == message_type_string)) {
-        if (true == out.keyExists(strings::S_MSG_PARAMS)) {
+        if (out.keyExists(strings::S_MSG_PARAMS)) {
           out[strings::S_MSG_PARAMS].erase(kMethod);
           out[strings::S_MSG_PARAMS].erase(kCode);
         }
 
-        if (false == response_value_found) {
+        if (!response_value_found) {
           result |= kResponseCodeNotAvailable;
         } else {
-          if (false == response_value.isObject()) {
+          if (!response_value.IsObject()) {
             result |= kInvalidFormat | kResponseCodeNotAvailable;
 
-            if (true == is_error_response) {
+            if (is_error_response) {
               result |= kErrorResponseMessageNotAvailable;
             }
           } else {
-            if (false == response_value.isMember(kCode)) {
+            if (!response_value.HasMember(kCode)) {
               result |= kResponseCodeNotAvailable;
             } else {
-              const Json::Value& code_value = response_value[kCode];
+              const JsonValueRef code_value = response_value[kCode];
 
-              if (false == code_value.isInt()) {
+              if (!code_value.IsInt()) {
                 result |= kInvalidFormat | kResponseCodeNotAvailable;
               } else {
-                out[strings::S_PARAMS][strings::kCode] = code_value.asInt();
+                out[strings::S_PARAMS][strings::kCode] =
+                    static_cast<int64_t>(code_value.AsInt());
               }
             }
 
             if (true == is_error_response) {
-              if (false == response_value.isMember(kMessage)) {
+              if (!response_value.HasMember(kMessage)) {
                 result |= kErrorResponseMessageNotAvailable;
               } else {
-                const Json::Value& message_value = response_value[kMessage];
+                const JsonValueRef message_value = response_value[kMessage];
 
-                if (false == message_value.isString()) {
+                if (!message_value.IsString()) {
                   result |= kErrorResponseMessageNotAvailable;
                 } else {
                   out[strings::S_PARAMS][strings::kMessage] =
-                      message_value.asString();
+                      message_value.AsString();
                 }
               }
             }
@@ -468,17 +471,18 @@ int32_t FormatterJsonRpc::FromString(const std::string& str,
 }
 
 template <typename FunctionId>
-int32_t FormatterJsonRpc::ParseFunctionId(const Json::Value& method_value,
-                                          NsSmartObjects::SmartObject& out) {
+int32_t FormatterJsonRpc::ParseFunctionId(
+    const utils::json::JsonValueRef method_value,
+    NsSmartObjects::SmartObject& out) {
   int32_t result = kSuccess;
 
-  if (false == method_value.isString()) {
+  if (!method_value.IsString()) {
     result |= kInvalidFormat | kUnknownMethod;
   } else {
     FunctionId function_id;
 
     if (!NsSmartObjects::EnumConversionHelper<FunctionId>::CStringToEnum(
-            method_value.asCString(), &function_id)) {
+            method_value.AsString().c_str(), &function_id)) {
       result |= kUnknownMethod;
     } else {
       namespace strings = NsSmartDeviceLink::NsJSONHandler::strings;

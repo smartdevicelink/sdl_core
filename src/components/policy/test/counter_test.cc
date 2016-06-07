@@ -150,10 +150,8 @@ TEST(StatisticsManagerAddMethod,
   hmi_full_stopwatch.WriteTime();
 }
 
-// Tests disabled due to uncorrect behavior of timer.
-// Will be undisabled after fix.
 TEST(StatisticsManagerAddMethod,
-     DISABLED_AppStopwatchSwitchMethod_Call_StatisticsManagerAddMethodCalled) {
+     AppStopwatchSwitchMethod_Call_StatisticsManagerAddMethodCalled) {
   // Arrange
   MockStatisticsManager* msm = new StrictMock<MockStatisticsManager>();
   AppStopwatchImpl hmi_full_stopwatch(msm, "HelloApp");
@@ -169,7 +167,7 @@ TEST(StatisticsManagerAddMethod,
 
 TEST(
     StatisticsManagerAddMethod,
-    DISABLED_AppStopwatchSwitchMethod_CallAnd1SecSleepAfter_StatisticsManagerAddMethodCalledWith1SecTimespan) {
+    AppStopwatchSwitchMethod_CallAnd1SecSleepAfter_StatisticsManagerAddMethodCalledWith1SecTimespan) {
   // Arrange
   MockStatisticsManager* msm = new StrictMock<MockStatisticsManager>();
   const std::uint32_t time_out = 1;

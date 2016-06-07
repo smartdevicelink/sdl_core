@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_INCLUDE_UTILS_PRIORITIZED_QUEUE_H_
-#define SRC_COMPONENTS_INCLUDE_UTILS_PRIORITIZED_QUEUE_H_
+#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_PRIORITIZED_QUEUE_H_
+#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_PRIORITIZED_QUEUE_H_
 
 #include <queue>
 #include <map>
@@ -86,7 +86,6 @@ class PrioritizedQueue {
   QueuesMap queues_;
   size_t total_size_;
 };
+}
 
-}  // namespace utils
-
-#endif  // SRC_COMPONENTS_INCLUDE_UTILS_PRIORITIZED_QUEUE_H_
+#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_

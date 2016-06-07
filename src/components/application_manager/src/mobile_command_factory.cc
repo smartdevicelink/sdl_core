@@ -150,7 +150,6 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
           static_cast<int>(application_manager::MessageType::kRequest)) {
         command.reset(new commands::RegisterAppInterfaceRequest(
             message, application_manager));
-
       } else {
         command.reset(new commands::RegisterAppInterfaceResponse(
             message, application_manager));

@@ -33,6 +33,10 @@
 #ifndef SRC_COMPONENTS_SECURITY_MANAGER_INCLUDE_SECURITY_MANAGER_CRYPTO_MANAGER_IMPL_H_
 #define SRC_COMPONENTS_SECURITY_MANAGER_INCLUDE_SECURITY_MANAGER_CRYPTO_MANAGER_IMPL_H_
 
+#if defined(OS_WINDOWS)
+#include "utils/winhdr.h"
+#endif
+
 #include <stdint.h>
 #include <openssl/bio.h>
 #include <openssl/ssl.h>
@@ -47,6 +51,12 @@
 #include "utils/macro.h"
 #include "utils/lock.h"
 #include "utils/shared_ptr.h"
+
+#ifdef OS_WINDOWS
+#ifdef X509_NAME
+#undef X509_NAME
+#endif
+#endif
 
 namespace security_manager {
 class CryptoManagerImpl : public CryptoManager {
@@ -79,12 +89,16 @@ class CryptoManagerImpl : public CryptoManager {
     void PrintCertData(X509* cert, const std::string& cert_owner);
 
    private:
+    X509* GetCertificate() const;
     void PrintCertInfo();
     HandshakeResult CheckCertContext();
     bool ReadHandshakeData(const uint8_t** const out_data,
                            size_t* out_data_size);
     bool WriteHandshakeData(const uint8_t* const in_data, size_t in_data_size);
     HandshakeResult PerformHandshake();
+    HandshakeResult ProcessSuccessHandshake();
+    HandshakeResult ProcessHandshakeError(const int handshake_error);
+    bool CheckInitFinished();
     typedef size_t (*BlockSizeGetter)(size_t);
     void EnsureBufferSizeEnough(size_t size);
     void SetHandshakeError(const int error);
@@ -96,7 +110,7 @@ class CryptoManagerImpl : public CryptoManager {
     BIO* bioIn_;
     BIO* bioOut_;
     BIO* bioFilter_;
-    mutable sync_primitives::Lock bio_locker;
+    mutable sync_primitives::Lock ssl_locker_;
     size_t buffer_size_;
     uint8_t* buffer_;
     bool is_handshake_pending_;

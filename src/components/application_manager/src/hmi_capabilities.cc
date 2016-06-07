@@ -34,175 +34,295 @@
 
 #include <map>
 
-#include "json/json.h"
-#include "utils/file_system.h"
+#include "application_manager/application_manager_impl.h"
+#include "application_manager/message_helper.h"
+#include "application_manager/message_helper.h"
+#include "application_manager/smart_object_keys.h"
+#include "application_manager/smart_object_keys.h"
+#include "config_profile/profile.h"
+#include "formatters/CFormatterJsonBase.h"
 #include "interfaces/HMI_API.h"
 #include "smart_objects/smart_object.h"
-#include "application_manager/smart_object_keys.h"
-#include "application_manager/message_helper.h"
-#include "application_manager/smart_object_keys.h"
-#include "application_manager/application_manager.h"
-#include "application_manager/message_helper.h"
-#include "formatters/CFormatterJsonBase.h"
-
-CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
+#include "utils/file_system.h"
+#include "utils/json_utils.h"
 
 namespace application_manager {
 namespace Formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
 
+CREATE_LOGGERPTR_GLOBAL(logger_, "HMICapabilities")
+
+namespace {
+
 std::map<std::string, hmi_apis::Common_VrCapabilities::eType>
-    vr_enum_capabilities = {{"TEXT", hmi_apis::Common_VrCapabilities::VR_TEXT}};
-
-std::map<std::string, hmi_apis::Common_ButtonName::eType> button_enum_name = {
-    {"OK", hmi_apis::Common_ButtonName::OK},
-    {"SEEKLEFT", hmi_apis::Common_ButtonName::SEEKLEFT},
-    {"SEEKRIGHT", hmi_apis::Common_ButtonName::SEEKRIGHT},
-    {"TUNEUP", hmi_apis::Common_ButtonName::TUNEUP},
-    {"TUNEDOWN", hmi_apis::Common_ButtonName::TUNEDOWN},
-    {"PRESET_0", hmi_apis::Common_ButtonName::PRESET_0},
-    {"PRESET_1", hmi_apis::Common_ButtonName::PRESET_1},
-    {"PRESET_2", hmi_apis::Common_ButtonName::PRESET_2},
-    {"PRESET_3", hmi_apis::Common_ButtonName::PRESET_3},
-    {"PRESET_4", hmi_apis::Common_ButtonName::PRESET_4},
-    {"PRESET_5", hmi_apis::Common_ButtonName::PRESET_5},
-    {"PRESET_6", hmi_apis::Common_ButtonName::PRESET_6},
-    {"PRESET_7", hmi_apis::Common_ButtonName::PRESET_7},
-    {"PRESET_8", hmi_apis::Common_ButtonName::PRESET_8},
-    {"PRESET_9", hmi_apis::Common_ButtonName::PRESET_9},
-    {"CUSTOM_BUTTON", hmi_apis::Common_ButtonName::CUSTOM_BUTTON},
-    {"SEARCH", hmi_apis::Common_ButtonName::SEARCH},
-
-};
-
-std::map<std::string,
-         hmi_apis::Common_TextFieldName::eType> text_fields_enum_name = {
-    {"mainField1", hmi_apis::Common_TextFieldName::mainField1},
-    {"mainField2", hmi_apis::Common_TextFieldName::mainField2},
-    {"mainField3", hmi_apis::Common_TextFieldName::mainField3},
-    {"mainField4", hmi_apis::Common_TextFieldName::mainField4},
-    {"statusBar", hmi_apis::Common_TextFieldName::statusBar},
-    {"mediaClock", hmi_apis::Common_TextFieldName::mediaClock},
-    {"mediaTrack", hmi_apis::Common_TextFieldName::mediaTrack},
-    {"alertText1", hmi_apis::Common_TextFieldName::alertText1},
-    {"alertText2", hmi_apis::Common_TextFieldName::alertText2},
-    {"alertText3", hmi_apis::Common_TextFieldName::alertText3},
-    {"scrollableMessageBody",
-     hmi_apis::Common_TextFieldName::scrollableMessageBody},
-    {"initialInteractionText",
-     hmi_apis::Common_TextFieldName::initialInteractionText},
-    {"navigationText1", hmi_apis::Common_TextFieldName::navigationText1},
-    {"navigationText2", hmi_apis::Common_TextFieldName::navigationText2},
-    {"ETA", hmi_apis::Common_TextFieldName::ETA},
-    {"totalDistance", hmi_apis::Common_TextFieldName::totalDistance},
-    {"audioPassThruDisplayText1",
-     hmi_apis::Common_TextFieldName::audioPassThruDisplayText1},
-    {"audioPassThruDisplayText2",
-     hmi_apis::Common_TextFieldName::audioPassThruDisplayText2},
-    {"sliderHeader", hmi_apis::Common_TextFieldName::sliderHeader},
-    {"sliderFooter", hmi_apis::Common_TextFieldName::sliderFooter},
-    {"notificationText", hmi_apis::Common_TextFieldName::notificationText},
-    {"menuName", hmi_apis::Common_TextFieldName::menuName},
-    {"secondaryText", hmi_apis::Common_TextFieldName::secondaryText},
-    {"tertiaryText", hmi_apis::Common_TextFieldName::tertiaryText},
-    {"timeToDestination", hmi_apis::Common_TextFieldName::timeToDestination},
-    {"locationName", hmi_apis::Common_TextFieldName::locationName},
-    {"locationDescription",
-     hmi_apis::Common_TextFieldName::locationDescription},
-    {"addressLines", hmi_apis::Common_TextFieldName::turnText},
-    {"turnText", hmi_apis::Common_TextFieldName::addressLines},
-    {"phoneNumber", hmi_apis::Common_TextFieldName::phoneNumber},
-    {"turnText", hmi_apis::Common_TextFieldName::turnText},
-    {"menuTitle", hmi_apis::Common_TextFieldName::menuTitle},
-    {"navigationText", hmi_apis::Common_TextFieldName::navigationText},
-};
-
+    vr_enum_capabilities;
+std::map<std::string, hmi_apis::Common_ButtonName::eType> button_enum_name;
+std::map<std::string, hmi_apis::Common_TextFieldName::eType>
+    text_fields_enum_name;
 std::map<std::string, hmi_apis::Common_MediaClockFormat::eType>
-    media_clock_enum_name = {
-        {"CLOCK1", hmi_apis::Common_MediaClockFormat::CLOCK1},
-        {"CLOCK2", hmi_apis::Common_MediaClockFormat::CLOCK2},
-        {"CLOCK3", hmi_apis::Common_MediaClockFormat::CLOCK3},
-        {"CLOCKTEXT1", hmi_apis::Common_MediaClockFormat::CLOCKTEXT1},
-        {"CLOCKTEXT2", hmi_apis::Common_MediaClockFormat::CLOCKTEXT2},
-        {"CLOCKTEXT3", hmi_apis::Common_MediaClockFormat::CLOCKTEXT3},
-        {"CLOCKTEXT4", hmi_apis::Common_MediaClockFormat::CLOCKTEXT4},
-};
-
-std::map<std::string, hmi_apis::Common_ImageType::eType> image_type_enum = {
-    {"STATIC", hmi_apis::Common_ImageType::STATIC},
-    {"DYNAMIC", hmi_apis::Common_ImageType::DYNAMIC}};
-
-std::map<std::string, hmi_apis::Common_SamplingRate::eType> sampling_rate_enum =
-    {{"RATE_8KHZ", hmi_apis::Common_SamplingRate::RATE_8KHZ},
-     {"8KHZ", hmi_apis::Common_SamplingRate::RATE_8KHZ},
-     {"RATE_16KHZ", hmi_apis::Common_SamplingRate::RATE_16KHZ},
-     {"16KHZ", hmi_apis::Common_SamplingRate::RATE_16KHZ},
-     {"RATE_22KHZ", hmi_apis::Common_SamplingRate::RATE_22KHZ},
-     {"22KHZ", hmi_apis::Common_SamplingRate::RATE_22KHZ},
-     {"RATE_44KHZ", hmi_apis::Common_SamplingRate::RATE_44KHZ},
-     {"44KHZ", hmi_apis::Common_SamplingRate::RATE_44KHZ}};
-
+    media_clock_enum_name;
+std::map<std::string, hmi_apis::Common_ImageType::eType> image_type_enum;
+std::map<std::string, hmi_apis::Common_SamplingRate::eType> sampling_rate_enum;
 std::map<std::string, hmi_apis::Common_BitsPerSample::eType>
-    bit_per_sample_enum = {
-        {"RATE_8_BIT", hmi_apis::Common_BitsPerSample::RATE_8_BIT},
-        {"8_BIT", hmi_apis::Common_BitsPerSample::RATE_8_BIT},
-        {"RATE_16_BIT", hmi_apis::Common_BitsPerSample::RATE_16_BIT},
-        {"16_BIT", hmi_apis::Common_BitsPerSample::RATE_16_BIT}};
-
-std::map<std::string, hmi_apis::Common_AudioType::eType> audio_type_enum = {
-    {"PCM", hmi_apis::Common_AudioType::PCM}};
-
+    bit_per_sample_enum;
+std::map<std::string, hmi_apis::Common_AudioType::eType> audio_type_enum;
 std::map<std::string, hmi_apis::Common_HmiZoneCapabilities::eType>
-    hmi_zone_enum = {
-        {"FRONT", hmi_apis::Common_HmiZoneCapabilities::FRONT},
-        {"BACK", hmi_apis::Common_HmiZoneCapabilities::BACK},
-};
+    hmi_zone_enum;
+std::map<std::string, hmi_apis::Common_ImageFieldName::eType>
+    image_field_name_enum;
+std::map<std::string, hmi_apis::Common_FileType::eType> file_type_enum;
+std::map<std::string, hmi_apis::Common_DisplayType::eType> display_type_enum;
+std::map<std::string, hmi_apis::Common_CharacterSet::eType> character_set_enum;
 
-const std::map<std::string, hmi_apis::Common_ImageFieldName::eType>
-    image_field_name_enum = {
-        {"softButtonImage", hmi_apis::Common_ImageFieldName::softButtonImage},
-        {"choiceImage", hmi_apis::Common_ImageFieldName::choiceImage},
-        {"choiceSecondaryImage",
-         hmi_apis::Common_ImageFieldName::choiceSecondaryImage},
-        {"vrHelpItem", hmi_apis::Common_ImageFieldName::vrHelpItem},
-        {"turnIcon", hmi_apis::Common_ImageFieldName::turnIcon},
-        {"menuIcon", hmi_apis::Common_ImageFieldName::menuIcon},
-        {"cmdIcon", hmi_apis::Common_ImageFieldName::cmdIcon},
-        {"appIcon", hmi_apis::Common_ImageFieldName::appIcon},
-        {"graphic", hmi_apis::Common_ImageFieldName::graphic},
-        {"showConstantTBTIcon",
-         hmi_apis::Common_ImageFieldName::showConstantTBTIcon},
-        {"showConstantTBTNextTurnIcon",
-         hmi_apis::Common_ImageFieldName::showConstantTBTNextTurnIcon},
-        {"locationImage", hmi_apis::Common_ImageFieldName::locationImage}};
+void InitCapabilities() {
+  vr_enum_capabilities.insert(std::make_pair(
+      std::string("TEXT"), hmi_apis::Common_VrCapabilities::VR_TEXT));
 
-const std::map<std::string, hmi_apis::Common_FileType::eType> file_type_enum = {
-    {"GRAPHIC_BMP", hmi_apis::Common_FileType::GRAPHIC_BMP},
-    {"GRAPHIC_JPEG", hmi_apis::Common_FileType::GRAPHIC_JPEG},
-    {"GRAPHIC_PNG", hmi_apis::Common_FileType::GRAPHIC_PNG},
-    {"AUDIO_WAVE", hmi_apis::Common_FileType::AUDIO_WAVE},
-    {"AUDIO_MP3", hmi_apis::Common_FileType::AUDIO_MP3},
-    {"AUDIO_AAC", hmi_apis::Common_FileType::AUDIO_AAC},
-    {"BINARY", hmi_apis::Common_FileType::BINARY},
-    {"JSON", hmi_apis::Common_FileType::JSON}};
+  button_enum_name.insert(
+      std::make_pair(std::string("OK"), hmi_apis::Common_ButtonName::OK));
+  button_enum_name.insert(std::make_pair(
+      std::string("SEEKLEFT"), hmi_apis::Common_ButtonName::SEEKLEFT));
+  button_enum_name.insert(std::make_pair(
+      std::string("SEEKRIGHT"), hmi_apis::Common_ButtonName::SEEKRIGHT));
+  button_enum_name.insert(std::make_pair(std::string("TUNEUP"),
+                                         hmi_apis::Common_ButtonName::TUNEUP));
+  button_enum_name.insert(std::make_pair(
+      std::string("TUNEDOWN"), hmi_apis::Common_ButtonName::TUNEDOWN));
+  button_enum_name.insert(std::make_pair(
+      std::string("PRESET_0"), hmi_apis::Common_ButtonName::PRESET_0));
+  button_enum_name.insert(std::make_pair(
+      std::string("PRESET_1"), hmi_apis::Common_ButtonName::PRESET_1));
+  button_enum_name.insert(std::make_pair(
+      std::string("PRESET_2"), hmi_apis::Common_ButtonName::PRESET_2));
+  button_enum_name.insert(std::make_pair(
+      std::string("PRESET_3"), hmi_apis::Common_ButtonName::PRESET_3));
+  button_enum_name.insert(std::make_pair(
+      std::string("PRESET_4"), hmi_apis::Common_ButtonName::PRESET_4));
+  button_enum_name.insert(std::make_pair(
+      std::string("PRESET_5"), hmi_apis::Common_ButtonName::PRESET_5));
+  button_enum_name.insert(std::make_pair(
+      std::string("PRESET_6"), hmi_apis::Common_ButtonName::PRESET_6));
+  button_enum_name.insert(std::make_pair(
+      std::string("PRESET_7"), hmi_apis::Common_ButtonName::PRESET_7));
+  button_enum_name.insert(std::make_pair(
+      std::string("PRESET_8"), hmi_apis::Common_ButtonName::PRESET_8));
+  button_enum_name.insert(std::make_pair(
+      std::string("PRESET_9"), hmi_apis::Common_ButtonName::PRESET_9));
+  button_enum_name.insert(
+      std::make_pair(std::string("CUSTOM_BUTTON"),
+                     hmi_apis::Common_ButtonName::CUSTOM_BUTTON));
+  button_enum_name.insert(std::make_pair(std::string("SEARCH"),
+                                         hmi_apis::Common_ButtonName::SEARCH));
 
-const std::map<std::string, hmi_apis::Common_DisplayType::eType>
-    display_type_enum = {
-        {"CID", hmi_apis::Common_DisplayType::CID},
-        {"TYPE2", hmi_apis::Common_DisplayType::TYPE2},
-        {"TYPE5", hmi_apis::Common_DisplayType::TYPE5},
-        {"NGN", hmi_apis::Common_DisplayType::NGN},
-        {"GEN2_8_DMA", hmi_apis::Common_DisplayType::GEN2_8_DMA},
-        {"GEN2_6_DMA", hmi_apis::Common_DisplayType::GEN2_6_DMA},
-        {"MFD3", hmi_apis::Common_DisplayType::MFD3},
-        {"MFD4", hmi_apis::Common_DisplayType::MFD4},
-        {"MFD5", hmi_apis::Common_DisplayType::MFD5},
-        {"GEN3_8_INCH", hmi_apis::Common_DisplayType::GEN3_8_INCH}};
+  text_fields_enum_name.insert(std::make_pair(
+      std::string("mainField1"), hmi_apis::Common_TextFieldName::mainField1));
+  text_fields_enum_name.insert(std::make_pair(
+      std::string("mainField2"), hmi_apis::Common_TextFieldName::mainField2));
+  text_fields_enum_name.insert(std::make_pair(
+      std::string("mainField3"), hmi_apis::Common_TextFieldName::mainField3));
+  text_fields_enum_name.insert(std::make_pair(
+      std::string("mainField4"), hmi_apis::Common_TextFieldName::mainField4));
+  text_fields_enum_name.insert(std::make_pair(
+      std::string("statusBar"), hmi_apis::Common_TextFieldName::statusBar));
+  text_fields_enum_name.insert(std::make_pair(
+      std::string("mediaClock"), hmi_apis::Common_TextFieldName::mediaClock));
+  text_fields_enum_name.insert(std::make_pair(
+      std::string("mediaTrack"), hmi_apis::Common_TextFieldName::mediaTrack));
+  text_fields_enum_name.insert(std::make_pair(
+      std::string("alertText1"), hmi_apis::Common_TextFieldName::alertText1));
+  text_fields_enum_name.insert(std::make_pair(
+      std::string("alertText2"), hmi_apis::Common_TextFieldName::alertText2));
+  text_fields_enum_name.insert(std::make_pair(
+      std::string("alertText3"), hmi_apis::Common_TextFieldName::alertText3));
+  text_fields_enum_name.insert(
+      std::make_pair(std::string("scrollableMessageBody"),
+                     hmi_apis::Common_TextFieldName::scrollableMessageBody));
+  text_fields_enum_name.insert(
+      std::make_pair(std::string("initialInteractionText"),
+                     hmi_apis::Common_TextFieldName::initialInteractionText));
+  text_fields_enum_name.insert(
+      std::make_pair(std::string("navigationText1"),
+                     hmi_apis::Common_TextFieldName::navigationText1));
+  text_fields_enum_name.insert(
+      std::make_pair(std::string("navigationText2"),
+                     hmi_apis::Common_TextFieldName::navigationText2));
+  text_fields_enum_name.insert(
+      std::make_pair(std::string("ETA"), hmi_apis::Common_TextFieldName::ETA));
+  text_fields_enum_name.insert(
+      std::make_pair(std::string("totalDistance"),
+                     hmi_apis::Common_TextFieldName::totalDistance));
+  text_fields_enum_name.insert(std::make_pair(
+      std::string("audioPassThruDisplayText1"),
+      hmi_apis::Common_TextFieldName::audioPassThruDisplayText1));
+  text_fields_enum_name.insert(std::make_pair(
+      std::string("audioPassThruDisplayText2"),
+      hmi_apis::Common_TextFieldName::audioPassThruDisplayText2));
+  text_fields_enum_name.insert(
+      std::make_pair(std::string("sliderHeader"),
+                     hmi_apis::Common_TextFieldName::sliderHeader));
+  text_fields_enum_name.insert(
+      std::make_pair(std::string("sliderFooter"),
+                     hmi_apis::Common_TextFieldName::sliderFooter));
+  text_fields_enum_name.insert(
+      std::make_pair(std::string("navigationText"),
+                     hmi_apis::Common_TextFieldName::navigationText));
+  text_fields_enum_name.insert(
+      std::make_pair(std::string("notificationText"),
+                     hmi_apis::Common_TextFieldName::notificationText));
+  text_fields_enum_name.insert(std::make_pair(
+      std::string("menuName"), hmi_apis::Common_TextFieldName::menuName));
+  text_fields_enum_name.insert(
+      std::make_pair(std::string("secondaryText"),
+                     hmi_apis::Common_TextFieldName::secondaryText));
+  text_fields_enum_name.insert(
+      std::make_pair(std::string("tertiaryText"),
+                     hmi_apis::Common_TextFieldName::tertiaryText));
+  text_fields_enum_name.insert(
+      std::make_pair(std::string("timeToDestination"),
+                     hmi_apis::Common_TextFieldName::timeToDestination));
+  text_fields_enum_name.insert(
+      std::make_pair(std::string("locationName"),
+                     hmi_apis::Common_TextFieldName::locationName));
+  text_fields_enum_name.insert(
+      std::make_pair(std::string("locationDescription"),
+                     hmi_apis::Common_TextFieldName::locationDescription));
+  text_fields_enum_name.insert(std::make_pair(
+      std::string("turnText"), hmi_apis::Common_TextFieldName::turnText));
+  text_fields_enum_name.insert(
+      std::make_pair(std::string("addressLines"),
+                     hmi_apis::Common_TextFieldName::addressLines));
+  text_fields_enum_name.insert(std::make_pair(
+      std::string("phoneNumber"), hmi_apis::Common_TextFieldName::phoneNumber));
+  text_fields_enum_name.insert(std::make_pair(
+      std::string("turnText"), hmi_apis::Common_TextFieldName::turnText));
+  text_fields_enum_name.insert(std::make_pair(
+      std::string("menuTitle"), hmi_apis::Common_TextFieldName::menuTitle));
 
-const std::map<std::string, hmi_apis::Common_CharacterSet::eType>
-    character_set_enum = {{"TYPE2SET", hmi_apis::Common_CharacterSet::TYPE2SET},
-                          {"TYPE5SET", hmi_apis::Common_CharacterSet::TYPE5SET},
-                          {"CID1SET", hmi_apis::Common_CharacterSet::CID1SET},
-                          {"CID2SET", hmi_apis::Common_CharacterSet::CID2SET}};
+  media_clock_enum_name.insert(std::make_pair(
+      std::string("CLOCK1"), hmi_apis::Common_MediaClockFormat::CLOCK1));
+  media_clock_enum_name.insert(std::make_pair(
+      std::string("CLOCK2"), hmi_apis::Common_MediaClockFormat::CLOCK2));
+  media_clock_enum_name.insert(std::make_pair(
+      std::string("CLOCK3"), hmi_apis::Common_MediaClockFormat::CLOCK3));
+  media_clock_enum_name.insert(
+      std::make_pair(std::string("CLOCKTEXT1"),
+                     hmi_apis::Common_MediaClockFormat::CLOCKTEXT1));
+  media_clock_enum_name.insert(
+      std::make_pair(std::string("CLOCKTEXT2"),
+                     hmi_apis::Common_MediaClockFormat::CLOCKTEXT2));
+  media_clock_enum_name.insert(
+      std::make_pair(std::string("CLOCKTEXT3"),
+                     hmi_apis::Common_MediaClockFormat::CLOCKTEXT3));
+  media_clock_enum_name.insert(
+      std::make_pair(std::string("CLOCKTEXT4"),
+                     hmi_apis::Common_MediaClockFormat::CLOCKTEXT4));
+
+  image_type_enum.insert(std::make_pair(std::string("STATIC"),
+                                        hmi_apis::Common_ImageType::STATIC));
+  image_type_enum.insert(std::make_pair(std::string("DYNAMIC"),
+                                        hmi_apis::Common_ImageType::DYNAMIC));
+
+  sampling_rate_enum.insert(std::make_pair(
+      std::string("8KHZ"), hmi_apis::Common_SamplingRate::RATE_8KHZ));
+  sampling_rate_enum.insert(std::make_pair(
+      std::string("16KHZ"), hmi_apis::Common_SamplingRate::RATE_16KHZ));
+  sampling_rate_enum.insert(std::make_pair(
+      std::string("22KHZ"), hmi_apis::Common_SamplingRate::RATE_22KHZ));
+  sampling_rate_enum.insert(std::make_pair(
+      std::string("44KHZ"), hmi_apis::Common_SamplingRate::RATE_44KHZ));
+
+  bit_per_sample_enum.insert(std::make_pair(
+      std::string("RATE_8_BIT"), hmi_apis::Common_BitsPerSample::RATE_8_BIT));
+  bit_per_sample_enum.insert(std::make_pair(
+      std::string("RATE_16_BIT"), hmi_apis::Common_BitsPerSample::RATE_16_BIT));
+
+  audio_type_enum.insert(
+      std::make_pair(std::string("PCM"), hmi_apis::Common_AudioType::PCM));
+
+  hmi_zone_enum.insert(std::make_pair(
+      std::string("FRONT"), hmi_apis::Common_HmiZoneCapabilities::FRONT));
+  hmi_zone_enum.insert(std::make_pair(
+      std::string("BACK"), hmi_apis::Common_HmiZoneCapabilities::BACK));
+
+  image_field_name_enum.insert(
+      std::make_pair(std::string("softButtonImage"),
+                     hmi_apis::Common_ImageFieldName::softButtonImage));
+  image_field_name_enum.insert(
+      std::make_pair(std::string("choiceImage"),
+                     hmi_apis::Common_ImageFieldName::choiceImage));
+  image_field_name_enum.insert(
+      std::make_pair(std::string("choiceSecondaryImage"),
+                     hmi_apis::Common_ImageFieldName::choiceSecondaryImage));
+  image_field_name_enum.insert(std::make_pair(
+      std::string("vrHelpItem"), hmi_apis::Common_ImageFieldName::vrHelpItem));
+  image_field_name_enum.insert(std::make_pair(
+      std::string("turnIcon"), hmi_apis::Common_ImageFieldName::turnIcon));
+  image_field_name_enum.insert(std::make_pair(
+      std::string("menuIcon"), hmi_apis::Common_ImageFieldName::menuIcon));
+  image_field_name_enum.insert(std::make_pair(
+      std::string("cmdIcon"), hmi_apis::Common_ImageFieldName::cmdIcon));
+  image_field_name_enum.insert(std::make_pair(
+      std::string("appIcon"), hmi_apis::Common_ImageFieldName::appIcon));
+  image_field_name_enum.insert(std::make_pair(
+      std::string("graphic"), hmi_apis::Common_ImageFieldName::graphic));
+  image_field_name_enum.insert(
+      std::make_pair(std::string("showConstantTBTIcon"),
+                     hmi_apis::Common_ImageFieldName::showConstantTBTIcon));
+  image_field_name_enum.insert(std::make_pair(
+      std::string("showConstantTBTNextTurnIcon"),
+      hmi_apis::Common_ImageFieldName::showConstantTBTNextTurnIcon));
+  image_field_name_enum.insert(
+      std::make_pair(std::string("locationImage"),
+                     hmi_apis::Common_ImageFieldName::locationImage));
+
+  file_type_enum.insert(std::make_pair(std::string("GRAPHIC_BMP"),
+                                       hmi_apis::Common_FileType::GRAPHIC_BMP));
+  file_type_enum.insert(std::make_pair(
+      std::string("GRAPHIC_JPEG"), hmi_apis::Common_FileType::GRAPHIC_JPEG));
+  file_type_enum.insert(std::make_pair(std::string("GRAPHIC_PNG"),
+                                       hmi_apis::Common_FileType::GRAPHIC_PNG));
+  file_type_enum.insert(std::make_pair(std::string("AUDIO_WAVE"),
+                                       hmi_apis::Common_FileType::AUDIO_WAVE));
+  file_type_enum.insert(std::make_pair(std::string("AUDIO_MP3"),
+                                       hmi_apis::Common_FileType::AUDIO_MP3));
+  file_type_enum.insert(std::make_pair(std::string("AUDIO_AAC"),
+                                       hmi_apis::Common_FileType::AUDIO_AAC));
+  file_type_enum.insert(
+      std::make_pair(std::string("BINARY"), hmi_apis::Common_FileType::BINARY));
+  file_type_enum.insert(
+      std::make_pair(std::string("JSON"), hmi_apis::Common_FileType::JSON));
+
+  display_type_enum.insert(
+      std::make_pair(std::string("CID"), hmi_apis::Common_DisplayType::CID));
+  display_type_enum.insert(std::make_pair(std::string("TYPE2"),
+                                          hmi_apis::Common_DisplayType::TYPE2));
+  display_type_enum.insert(std::make_pair(std::string("TYPE5"),
+                                          hmi_apis::Common_DisplayType::TYPE5));
+  display_type_enum.insert(
+      std::make_pair(std::string("NGN"), hmi_apis::Common_DisplayType::NGN));
+  display_type_enum.insert(std::make_pair(
+      std::string("GEN2_8_DMA"), hmi_apis::Common_DisplayType::GEN2_8_DMA));
+  display_type_enum.insert(std::make_pair(
+      std::string("GEN2_6_DMA"), hmi_apis::Common_DisplayType::GEN2_6_DMA));
+  display_type_enum.insert(
+      std::make_pair(std::string("MFD3"), hmi_apis::Common_DisplayType::MFD3));
+  display_type_enum.insert(
+      std::make_pair(std::string("MFD4"), hmi_apis::Common_DisplayType::MFD4));
+  display_type_enum.insert(
+      std::make_pair(std::string("MFD5"), hmi_apis::Common_DisplayType::MFD5));
+  display_type_enum.insert(std::make_pair(
+      std::string("GEN3_8_INCH"), hmi_apis::Common_DisplayType::GEN3_8_INCH));
+
+  character_set_enum.insert(std::make_pair(
+      std::string("TYPE2SET"), hmi_apis::Common_CharacterSet::TYPE2SET));
+  character_set_enum.insert(std::make_pair(
+      std::string("TYPE5SET"), hmi_apis::Common_CharacterSet::TYPE5SET));
+  character_set_enum.insert(std::make_pair(
+      std::string("CID1SET"), hmi_apis::Common_CharacterSet::CID1SET));
+  character_set_enum.insert(std::make_pair(
+      std::string("CID2SET"), hmi_apis::Common_CharacterSet::CID2SET));
+}
+
+}  // namespace
 
 HMICapabilities::HMICapabilities(ApplicationManager& app_mngr)
     : is_vr_cooperating_(false)
@@ -236,7 +356,8 @@ HMICapabilities::HMICapabilities(ApplicationManager& app_mngr)
     , is_navigation_supported_(false)
     , is_phone_call_supported_(false)
     , app_mngr_(app_mngr)
-    , hmi_language_handler_(app_mngr_) {
+    , hmi_language_handler_(app_mngr) {
+  InitCapabilities();
   if (false == app_mngr_.get_settings().launch_hmi()) {
     is_vr_ready_response_recieved_ = true;
     is_tts_ready_response_recieved_ = true;
@@ -581,19 +702,42 @@ void HMICapabilities::set_navigation_supported(const bool supported) {
 void HMICapabilities::set_phone_call_supported(const bool supported) {
   is_phone_call_supported_ = supported;
 }
+namespace {
+
+/*
+* @brief function converts json object "languages" to smart object
+*
+* @param json_languages from file hmi_capabilities.json
+* @param languages - the converted object
+*/
+void convert_json_languages_to_obj(
+    const utils::json::JsonValueRef json_languages,
+    smart_objects::SmartObject& languages) {
+  using namespace utils::json;
+  uint32_t j = 0;
+  for (JsonValue::const_iterator itr = json_languages.begin(),
+                                 end = json_languages.end();
+       itr != end;
+       ++itr) {
+    languages[j++] = MessageHelper::CommonLanguageFromString((*itr).AsString());
+  }
+}
+
+}  // namespace
 
 void HMICapabilities::Init(resumption::LastState* last_state) {
   hmi_language_handler_.Init(last_state);
   if (false == load_capabilities_from_file()) {
-    LOG4CXX_ERROR(logger_, "file hmi_capabilities.json was not loaded");
+    LOGGER_ERROR(logger_, "file hmi_capabilities.json was not loaded");
   } else {
-    LOG4CXX_INFO(logger_, "file hmi_capabilities.json was loaded");
+    LOGGER_INFO(logger_, "file hmi_capabilities.json was loaded");
   }
   hmi_language_handler_.set_default_capabilities_languages(
       ui_language_, vr_language_, tts_language_);
 }
 
 bool HMICapabilities::load_capabilities_from_file() {
+  using namespace utils::json;
   std::string json_string;
   std::string file_name = app_mngr_.get_settings().hmi_capabilities_file_name();
 
@@ -606,33 +750,34 @@ bool HMICapabilities::load_capabilities_from_file() {
   }
 
   try {
-    Json::Reader reader_;
-    Json::Value root_json;
-
-    bool result = reader_.parse(json_string, root_json, false);
-    if (!result) {
+    JsonValue::ParseResult parse_result = JsonValue::Parse(json_string);
+    if (!parse_result.second) {
       return false;
     }
+    const JsonValue& root_json = parse_result.first;
     // UI
-    if (check_existing_json_member(root_json, "UI")) {
-      Json::Value ui = root_json.get("UI", Json::Value::null);
+    if (root_json.HasMember("UI")) {
+      const JsonValueRef ui = root_json["UI"];
 
-      if (check_existing_json_member(ui, "language")) {
-        const std::string lang = ui.get("language", "EN-US").asString();
+      if (ui.HasMember("language")) {
+        const std::string lang = ui["language"].AsString();
         set_active_ui_language(MessageHelper::CommonLanguageFromString(lang));
+      } else {
+        set_active_ui_language(
+            MessageHelper::CommonLanguageFromString("EN-US"));
       }
 
-      if (check_existing_json_member(ui, "languages")) {
+      if (ui.HasMember("languages")) {
         smart_objects::SmartObject ui_languages_so(
             smart_objects::SmartType_Array);
-        Json::Value languages_ui = ui.get("languages", "");
+        const JsonValueRef languages_ui = ui["languages"];
         convert_json_languages_to_obj(languages_ui, ui_languages_so);
         set_ui_supported_languages(ui_languages_so);
       }
 
-      if (check_existing_json_member(ui, "displayCapabilities")) {
+      if (ui.HasMember("displayCapabilities")) {
         smart_objects::SmartObject display_capabilities_so;
-        Json::Value display_capabilities = ui.get("displayCapabilities", "");
+        const JsonValueRef display_capabilities = ui["displayCapabilities"];
         Formatters::CFormatterJsonBase::jsonValueToObj(display_capabilities,
                                                        display_capabilities_so);
 
@@ -767,68 +912,65 @@ bool HMICapabilities::load_capabilities_from_file() {
         set_display_capabilities(display_capabilities_so);
       }
 
-      if (check_existing_json_member(ui, "audioPassThruCapabilities")) {
-        Json::Value audio_capabilities =
-            ui.get("audioPassThruCapabilities", "");
+      if (ui.HasMember("audioPassThruCapabilities")) {
+        const JsonValueRef audio_capabilities = ui["audioPassThruCapabilities"];
         smart_objects::SmartObject audio_capabilities_so =
             smart_objects::SmartObject(smart_objects::SmartType_Array);
         audio_capabilities_so =
             smart_objects::SmartObject(smart_objects::SmartType_Map);
-        if (check_existing_json_member(audio_capabilities, "samplingRate")) {
+        if (audio_capabilities.HasMember("samplingRate")) {
           audio_capabilities_so["samplingRate"] =
-              sampling_rate_enum.find(audio_capabilities.get("samplingRate", "")
-                                          .asString())->second;
+              sampling_rate_enum.find(audio_capabilities["samplingRate"]
+                                          .AsString())->second;
         }
-        if (check_existing_json_member(audio_capabilities, "bitsPerSample")) {
+        if (audio_capabilities.HasMember("bitsPerSample")) {
           audio_capabilities_so["bitsPerSample"] =
-              bit_per_sample_enum.find(audio_capabilities.get("bitsPerSample",
-                                                              "").asString())
-                  ->second;
+              bit_per_sample_enum.find(audio_capabilities["bitsPerSample"]
+                                           .AsString())->second;
         }
-        if (check_existing_json_member(audio_capabilities, "audioType")) {
+        if (audio_capabilities.HasMember("audioType")) {
           audio_capabilities_so["audioType"] =
-              audio_type_enum.find(audio_capabilities.get("audioType", "")
-                                       .asString())->second;
+              audio_type_enum.find(audio_capabilities["audioType"].AsString())
+                  ->second;
         }
         set_audio_pass_thru_capabilities(audio_capabilities_so);
       }
 
-      if (check_existing_json_member(ui, "pcmStreamCapabilities")) {
-        Json::Value pcm_capabilities = ui.get("pcmStreamCapabilities", "");
+      if (ui.HasMember("pcmStreamCapabilities")) {
+        const JsonValueRef pcm_capabilities = ui["pcmStreamCapabilities"];
         smart_objects::SmartObject pcm_capabilities_so =
             smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-        if (check_existing_json_member(pcm_capabilities, "samplingRate")) {
+        if (pcm_capabilities.HasMember("samplingRate")) {
           pcm_capabilities_so["samplingRate"] =
-              sampling_rate_enum.find(pcm_capabilities.get("samplingRate", "")
-                                          .asString())->second;
+              sampling_rate_enum.find(pcm_capabilities["samplingRate"]
+                                          .AsString())->second;
         }
-        if (check_existing_json_member(pcm_capabilities, "bitsPerSample")) {
+        if (pcm_capabilities.HasMember("bitsPerSample")) {
           pcm_capabilities_so["bitsPerSample"] =
-              bit_per_sample_enum.find(pcm_capabilities.get("bitsPerSample", "")
-                                           .asString())->second;
+              bit_per_sample_enum.find(pcm_capabilities["bitsPerSample"]
+                                           .AsString())->second;
         }
-        if (check_existing_json_member(pcm_capabilities, "audioType")) {
+        if (pcm_capabilities.HasMember("audioType")) {
           pcm_capabilities_so["audioType"] =
-              audio_type_enum.find(pcm_capabilities.get("audioType", "")
-                                       .asString())->second;
+              audio_type_enum.find(pcm_capabilities["audioType"].AsString())
+                  ->second;
         }
 
         set_pcm_stream_capabilities(pcm_capabilities_so);
       }
 
-      if (check_existing_json_member(ui, "hmiZoneCapabilities")) {
+      if (ui.HasMember("hmiZoneCapabilities")) {
         smart_objects::SmartObject hmi_zone_capabilities_so =
             smart_objects::SmartObject(smart_objects::SmartType_Array);
         hmi_zone_capabilities_so =
-            hmi_zone_enum.find(ui.get("hmiZoneCapabilities", "").asString())
-                ->second;
+            hmi_zone_enum.find(ui["hmiZoneCapabilities"].AsString())->second;
         set_hmi_zone_capabilities(hmi_zone_capabilities_so);
       }
 
-      if (check_existing_json_member(ui, "softButtonCapabilities")) {
-        Json::Value soft_button_capabilities =
-            ui.get("softButtonCapabilities", "");
+      if (ui.HasMember("softButtonCapabilities")) {
+        const JsonValueRef soft_button_capabilities =
+            ui["softButtonCapabilities"];
         smart_objects::SmartObject soft_button_capabilities_so;
         Formatters::CFormatterJsonBase::jsonValueToObj(
             soft_button_capabilities, soft_button_capabilities_so);
@@ -837,61 +979,68 @@ bool HMICapabilities::load_capabilities_from_file() {
     }  // UI end
 
     // VR
-    if (check_existing_json_member(root_json, "VR")) {
-      Json::Value vr = root_json.get("VR", "");
-      if (check_existing_json_member(vr, "language")) {
-        const std::string lang = vr.get("language", "EN-US").asString();
+    if (root_json.HasMember("VR")) {
+      const JsonValueRef vr = root_json["VR"];
+      if (vr.HasMember("language")) {
+        const std::string lang = vr["language"].AsString();
         set_active_vr_language(MessageHelper::CommonLanguageFromString(lang));
+      } else {
+        set_active_vr_language(
+            MessageHelper::CommonLanguageFromString("EN-US"));
       }
 
-      if (check_existing_json_member(vr, "languages")) {
-        Json::Value languages_vr = vr.get("languages", "");
+      if (vr.HasMember("languages")) {
+        const JsonValueRef languages_vr = vr["languages"];
         smart_objects::SmartObject vr_languages_so =
             smart_objects::SmartObject(smart_objects::SmartType_Array);
         convert_json_languages_to_obj(languages_vr, vr_languages_so);
         set_vr_supported_languages(vr_languages_so);
       }
 
-      if (check_existing_json_member(vr, "capabilities")) {
-        Json::Value capabilities = vr.get("capabilities", "");
+      if (vr.HasMember("capabilities")) {
+        const JsonValueRef capabilities = vr["capabilities"];
         smart_objects::SmartObject vr_capabilities_so =
             smart_objects::SmartObject(smart_objects::SmartType_Array);
-        for (uint32_t i = 0; i < capabilities.size(); ++i) {
+        for (JsonValue::ArrayIndex i = 0, size = capabilities.Size(); i < size;
+             ++i) {
           vr_capabilities_so[i] =
-              vr_enum_capabilities.find(capabilities[i].asString())->second;
+              vr_enum_capabilities.find(capabilities[i].AsString())->second;
         }
         set_vr_capabilities(vr_capabilities_so);
       }
     }  // VR end
 
     // TTS
-    if (check_existing_json_member(root_json, "TTS")) {
-      Json::Value tts = root_json.get("TTS", "");
+    if (root_json.HasMember("TTS")) {
+      const JsonValueRef tts = root_json["TTS"];
 
-      if (check_existing_json_member(tts, "language")) {
-        const std::string lang = tts.get("language", "EN-US").asString();
+      if (tts.HasMember("language")) {
+        const std::string lang = tts["language"].AsString();
         set_active_tts_language(MessageHelper::CommonLanguageFromString(lang));
+      } else {
+        set_active_tts_language(
+            MessageHelper::CommonLanguageFromString("EN-US"));
       }
 
-      if (check_existing_json_member(tts, "languages")) {
-        Json::Value languages_tts = tts.get("languages", "");
+      if (tts.HasMember("languages")) {
+        const JsonValueRef languages_tts = tts["languages"];
         smart_objects::SmartObject tts_languages_so =
             smart_objects::SmartObject(smart_objects::SmartType_Array);
         convert_json_languages_to_obj(languages_tts, tts_languages_so);
         set_tts_supported_languages(tts_languages_so);
       }
 
-      if (check_existing_json_member(tts, "capabilities")) {
+      if (tts.HasMember("capabilities")) {
         set_speech_capabilities(
-            smart_objects::SmartObject(tts.get("capabilities", "").asString()));
+            smart_objects::SmartObject(tts["capabilities"].AsString()));
       }
     }  // TTS end
 
     // Buttons
-    if (check_existing_json_member(root_json, "Buttons")) {
-      Json::Value buttons = root_json.get("Buttons", "");
-      if (check_existing_json_member(buttons, "capabilities")) {
-        Json::Value bt_capabilities = buttons.get("capabilities", "");
+    if (root_json.HasMember("Buttons")) {
+      const JsonValueRef buttons = root_json["Buttons"];
+      if (buttons.HasMember("capabilities")) {
+        const JsonValueRef bt_capabilities = buttons["capabilities"];
         smart_objects::SmartObject buttons_capabilities_so;
         Formatters::CFormatterJsonBase::jsonValueToObj(bt_capabilities,
                                                        buttons_capabilities_so);
@@ -910,8 +1059,8 @@ bool HMICapabilities::load_capabilities_from_file() {
         }
         set_button_capabilities(buttons_capabilities_so);
       }
-      if (check_existing_json_member(buttons, "presetBankCapabilities")) {
-        Json::Value presetBank = buttons.get("presetBankCapabilities", "");
+      if (buttons.HasMember("presetBankCapabilities")) {
+        const JsonValueRef presetBank = buttons["presetBankCapabilities"];
         smart_objects::SmartObject preset_bank_so;
         Formatters::CFormatterJsonBase::jsonValueToObj(presetBank,
                                                        preset_bank_so);
@@ -920,8 +1069,8 @@ bool HMICapabilities::load_capabilities_from_file() {
     }  // Buttons end
 
     // VehicleType
-    if (check_existing_json_member(root_json, "VehicleInfo")) {
-      Json::Value vehicle_info = root_json.get("VehicleInfo", "");
+    if (root_json.HasMember("VehicleInfo")) {
+      const JsonValueRef vehicle_info = root_json["VehicleInfo"];
       smart_objects::SmartObject vehicle_type_so;
       Formatters::CFormatterJsonBase::jsonValueToObj(vehicle_info,
                                                      vehicle_type_so);
@@ -932,19 +1081,6 @@ bool HMICapabilities::load_capabilities_from_file() {
     return false;
   }
   return true;
-}
-
-bool HMICapabilities::check_existing_json_member(const Json::Value& json_member,
-                                                 const char* name_of_member) {
-  return json_member.isMember(name_of_member);
-}
-
-void HMICapabilities::convert_json_languages_to_obj(
-    Json::Value& json_languages, smart_objects::SmartObject& languages) {
-  for (uint32_t i = 0, j = 0; i < json_languages.size(); ++i) {
-    languages[j++] =
-        MessageHelper::CommonLanguageFromString(json_languages[i].asString());
-  }
 }
 
 }  //  namespace application_manager

@@ -19,6 +19,7 @@ addons:
     - libbluetooth3
     - libbluetooth-dev
     - libudev-dev
+    - libusb-1.0
     - cmake
     - html2text
     - clang-format-3.6

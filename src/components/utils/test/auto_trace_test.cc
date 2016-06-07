@@ -35,14 +35,12 @@
 #include <ctime>
 
 #include "gtest/gtest.h"
-#include "utils/auto_trace.h"
 #include "utils/logger.h"
 #include "utils/log_message_loop_thread.h"
 #include "utils/threads/message_loop_thread.h"
 #include "utils/file_system.h"
 #include "utils/threads/thread.h"
 #include "utils/date_time.h"
-#include "utils/logger_status.h"
 #include "utils/helpers.h"
 
 namespace test {
@@ -70,13 +68,13 @@ void Preconditions() {
 
 void InitLogger() {
   // Set enabled logs
-  INIT_LOGGER("log4cxx.properties", true);
+  INIT_LOGGER(true);
   // DEINIT_LOGGER will be called in test_main.cc
 }
 
 void CreateDebugAndAutoTrace(const std::string& debug_message) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, debug_message);
+  LOGGER_AUTO_TRACE(logger_);
+  LOGGER_DEBUG(logger_, debug_message);
 }
 
 /**

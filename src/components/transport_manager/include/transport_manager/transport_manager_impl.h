@@ -251,6 +251,7 @@ class TransportManagerImpl
   const TransportManagerSettings& get_settings() const;
 
  protected:
+#if defined(SDL_CPP11)
   template <class Proc, class... Args>
   void RaiseEvent(Proc proc, Args... args) {
     for (TransportManagerListenerList::iterator it =
@@ -260,6 +261,64 @@ class TransportManagerImpl
       ((*it)->*proc)(args...);
     }
   }
+#else
+  template <class Proc>
+  void RaiseEvent(Proc proc) {
+    for (TransportManagerListenerList::iterator it =
+             transport_manager_listener_.begin();
+         it != transport_manager_listener_.end();
+         ++it) {
+      ((*it)->*proc)();
+    }
+  }
+
+  template <class Proc, class Arg1>
+  void RaiseEvent(Proc proc, const Arg1& arg1) {
+    for (TransportManagerListenerList::iterator it =
+             transport_manager_listener_.begin();
+         it != transport_manager_listener_.end();
+         ++it) {
+      ((*it)->*proc)(arg1);
+    }
+  }
+
+  template <class Proc, class Arg1, class Arg2>
+  void RaiseEvent(Proc proc, const Arg1& arg1, const Arg2& arg2) {
+    for (TransportManagerListenerList::iterator it =
+             transport_manager_listener_.begin();
+         it != transport_manager_listener_.end();
+         ++it) {
+      ((*it)->*proc)(arg1, arg2);
+    }
+  }
+
+  template <class Proc, class Arg1, class Arg2, class Arg3>
+  void RaiseEvent(Proc proc,
+                  const Arg1& arg1,
+                  const Arg2& arg2,
+                  const Arg3& arg3) {
+    for (TransportManagerListenerList::iterator it =
+             transport_manager_listener_.begin();
+         it != transport_manager_listener_.end();
+         ++it) {
+      ((*it)->*proc)(arg1, arg2, arg3);
+    }
+  }
+
+  template <class Proc, class Arg1, class Arg2, class Arg3, class Arg4>
+  void RaiseEvent(Proc proc,
+                  const Arg1& arg1,
+                  const Arg2& arg2,
+                  const Arg3& arg3,
+                  const Arg4& arg4) {
+    for (TransportManagerListenerList::iterator it =
+             transport_manager_listener_.begin();
+         it != transport_manager_listener_.end();
+         ++it) {
+      ((*it)->*proc)(arg1, arg2, arg3, arg4);
+    }
+  }
+#endif  // SDL_CPP11
 
   /**
    * @brief Put massage in the container of massages.
@@ -354,6 +413,7 @@ class TransportManagerImpl
       transport_adapter_listeners_;
   RawMessageLoopThread message_queue_;
   TransportAdapterEventLoopThread event_queue_;
+
   const TransportManagerSettings& settings_;
   typedef std::vector<std::pair<const TransportAdapter*, DeviceInfo> >
       DeviceInfoList;

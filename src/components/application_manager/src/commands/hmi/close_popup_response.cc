@@ -42,7 +42,7 @@ ClosePopupResponse::ClosePopupResponse(const MessageSharedPtr& message,
 ClosePopupResponse::~ClosePopupResponse() {}
 
 void ClosePopupResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   // TODO(VS): Process response from HMI
 }

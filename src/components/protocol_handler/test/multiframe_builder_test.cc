@@ -37,6 +37,7 @@
 #include <limits>
 #include "utils/make_shared.h"
 #include "protocol_handler/multiframe_builder.h"
+#include "utils/threads/thread.h"
 
 namespace test {
 namespace components {
@@ -416,6 +417,7 @@ TEST_F(MultiFrameBuilderTest, Add_ConsecutiveFrames_OneByOne) {
   }
 }
 
+// TODO(OHerasym) : Test do not finish working
 TEST_F(MultiFrameBuilderTest, Add_ConsecutiveFrames_per1) {
   AddConnections();
   ASSERT_FALSE(test_data_map_.empty());
@@ -506,7 +508,7 @@ TEST_F(MultiFrameBuilderTest, FrameExpired_OneMSec) {
       << "First frame: " << first_frame;
 
   // Wait frame expire
-  usleep(1000);
+  threads::sleep(1);
   const ProtocolFramePtrList& list = multiframe_builder_.PopMultiframes();
   ASSERT_FALSE(list.empty());
   EXPECT_EQ(first_frame, list.front());

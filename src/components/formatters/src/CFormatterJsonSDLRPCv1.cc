@@ -67,14 +67,14 @@ const std::string CFormatterJsonSDLRPCv1::getMessageType(
 // ----------------------------------------------------------------------------
 
 const std::string CFormatterJsonSDLRPCv1::getMessageType(
-    const Json::Value& root) {
+    const utils::json::JsonValueRef json_obj) {
   std::string type;
 
-  if (true == root.isMember(S_REQUEST)) {
+  if (json_obj.HasMember(S_REQUEST)) {
     type = S_REQUEST;
-  } else if (true == root.isMember(S_RESPONSE)) {
+  } else if (json_obj.HasMember(S_RESPONSE)) {
     type = S_RESPONSE;
-  } else if (true == root.isMember(S_NOTIFICATION)) {
+  } else if (json_obj.HasMember(S_NOTIFICATION)) {
     type = S_NOTIFICATION;
   } else {
   }
@@ -86,10 +86,11 @@ const std::string CFormatterJsonSDLRPCv1::getMessageType(
 
 bool CFormatterJsonSDLRPCv1::toString(const smart_objects_ns::SmartObject& obj,
                                       std::string& outStr) {
+  using namespace utils::json;
   bool result = false;
   try {
-    Json::Value root(Json::objectValue);
-    Json::Value params(Json::objectValue);
+    JsonValue root(ValueType::OBJECT_VALUE);
+    JsonValue params(ValueType::OBJECT_VALUE);
 
     smart_objects_ns::SmartObject formattedObj(obj);
     formattedObj.getSchema().unapplySchema(
@@ -98,7 +99,7 @@ bool CFormatterJsonSDLRPCv1::toString(const smart_objects_ns::SmartObject& obj,
     objToJsonValue(formattedObj.getElement(strings::S_MSG_PARAMS), params);
 
     std::string type = getMessageType(formattedObj);
-    root[type] = Json::Value(Json::objectValue);
+    root[type] = JsonValue(ValueType::OBJECT_VALUE);
     root[type][S_PARAMETERS] = params;
 
     if (formattedObj[strings::S_PARAMS].keyExists(strings::S_CORRELATION_ID)) {
@@ -109,7 +110,7 @@ bool CFormatterJsonSDLRPCv1::toString(const smart_objects_ns::SmartObject& obj,
     root[type][S_NAME] =
         formattedObj[strings::S_PARAMS][strings::S_FUNCTION_ID].asString();
 
-    outStr = root.toStyledString();
+    outStr = root.ToJson();
 
     result = true;
   } catch (...) {
@@ -131,8 +132,7 @@ CFormatterJsonSDLRPCv1::MetaFormatToString(
 
   smart_objects_ns::SmartObject tmp_object;
 
-  if (false ==
-      CMetaFormatter::CreateObjectByPattern(object, schema, tmp_object)) {
+  if (!CMetaFormatter::CreateObjectByPattern(object, schema, tmp_object)) {
     result_code |= meta_formatter_error_code::kErrorFailedCreateObjectBySchema;
     return result_code;
   }
@@ -149,10 +149,10 @@ CFormatterJsonSDLRPCv1::MetaFormatToString(
        object.keyExists(strings::S_PARAMS) &&
        object.keyExists(strings::S_MSG_PARAMS));
 
-  if (false == is_root_object) {
+  if (!is_root_object) {
     result_code |= meta_formatter_error_code::kErrorObjectIsNotFunction;
   }
-  if (false == is_root_object_created_by_schema) {
+  if (!is_root_object_created_by_schema) {
     result_code |= meta_formatter_error_code::kErrorSchemaIsNotFunction;
   }
 

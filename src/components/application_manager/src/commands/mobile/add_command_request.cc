@@ -33,7 +33,6 @@
 
 #include <string>
 #include "application_manager/commands/mobile/add_command_request.h"
-
 #include "application_manager/application.h"
 #include "application_manager/message_helper.h"
 #include "utils/file_system.h"
@@ -59,19 +58,19 @@ AddCommandRequest::AddCommandRequest(const MessageSharedPtr& message,
 AddCommandRequest::~AddCommandRequest() {}
 
 void AddCommandRequest::onTimeOut() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   RemoveCommand();
   CommandRequestImpl::onTimeOut();
 }
 
 void AddCommandRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app = application_manager_.application(
       (*message_)[strings::params][strings::connection_key].asUInt());
 
   if (!app) {
-    LOG4CXX_ERROR(logger_, "No application associated with session key");
+    LOGGER_ERROR(logger_, "No application associated with session key");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -83,22 +82,22 @@ void AddCommandRequest::Run() {
         application_manager_);
 
     if (mobile_apis::Result::SUCCESS != verification_result) {
-      LOG4CXX_ERROR(
-          logger_, "MessageHelper::VerifyImage return " << verification_result);
+      LOGGER_ERROR(logger_,
+                   "MessageHelper::VerifyImage return " << verification_result);
       SendResponse(false, verification_result);
       return;
     }
   }
 
   if (!((*message_)[strings::msg_params].keyExists(strings::cmd_id))) {
-    LOG4CXX_ERROR(logger_, "INVALID_DATA");
+    LOGGER_ERROR(logger_, "INVALID_DATA");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
 
   if (app->FindCommand(
           (*message_)[strings::msg_params][strings::cmd_id].asUInt())) {
-    LOG4CXX_ERROR(logger_, "INVALID_ID");
+    LOGGER_ERROR(logger_, "INVALID_ID");
     SendResponse(false, mobile_apis::Result::INVALID_ID);
     return;
   }
@@ -135,13 +134,13 @@ void AddCommandRequest::Run() {
   }
 
   if (!data_exist) {
-    LOG4CXX_ERROR(logger_, "INVALID_DATA");
+    LOGGER_ERROR(logger_, "INVALID_DATA");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
 
   if (IsWhiteSpaceExist()) {
-    LOG4CXX_ERROR(logger_, "Incoming add command has contains \t\n \\t \\n");
+    LOGGER_ERROR(logger_, "Incoming add command has contains \t\n \\t \\n");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
@@ -225,9 +224,9 @@ bool AddCommandRequest::CheckCommandName(ApplicationConstSharedPtr app) {
          (*message_)[strings::msg_params][strings::menu_params]
                     [strings::menu_name].asString()) &&
         (saved_parent_id == parent_id)) {
-      LOG4CXX_INFO(logger_,
-                   "AddCommandRequest::CheckCommandName received"
-                   " command name already exist in same level menu");
+      LOGGER_INFO(logger_,
+                  "AddCommandRequest::CheckCommandName received"
+                  " command name already exist in same level menu");
       return false;
     }
   }
@@ -259,9 +258,9 @@ bool AddCommandRequest::CheckCommandVRSynonym(ApplicationConstSharedPtr app) {
                 .asCustomString();
 
         if (vr_cmd_i.CompareIgnoreCase(vr_cmd_j)) {
-          LOG4CXX_INFO(logger_,
-                       "AddCommandRequest::CheckCommandVRSynonym"
-                       " received command vr synonym already exist");
+          LOGGER_INFO(logger_,
+                      "AddCommandRequest::CheckCommandVRSynonym"
+                      " received command vr synonym already exist");
           return false;
         }
       }
@@ -281,16 +280,16 @@ bool AddCommandRequest::CheckCommandParentId(ApplicationConstSharedPtr app) {
   smart_objects::SmartObject* parent = app->FindSubMenu(parent_id);
 
   if (!parent) {
-    LOG4CXX_INFO(logger_,
-                 "AddCommandRequest::CheckCommandParentId received"
-                 " submenu doesn't exist");
+    LOGGER_INFO(logger_,
+                "AddCommandRequest::CheckCommandParentId received"
+                " submenu doesn't exist");
     return false;
   }
   return true;
 }
 
 void AddCommandRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   using namespace helpers;
 
   const smart_objects::SmartObject& message = event.smart_object();
@@ -299,7 +298,7 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
       application_manager_.application(connection_key());
 
   if (!application) {
-    LOG4CXX_ERROR(logger_, "NULL pointer");
+    LOGGER_ERROR(logger_, "NULL pointer");
     return;
   }
 
@@ -310,7 +309,7 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
 
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_AddCommand: {
-      LOG4CXX_INFO(logger_, "Received UI_AddCommand event");
+      LOGGER_INFO(logger_, "Received UI_AddCommand event");
       is_ui_received_ = true;
       ui_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
@@ -321,7 +320,7 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
       break;
     }
     case hmi_apis::FunctionID::VR_AddCommand: {
-      LOG4CXX_INFO(logger_, "Received VR_AddCommand event");
+      LOGGER_INFO(logger_, "Received VR_AddCommand event");
       is_vr_received_ = true;
       vr_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
@@ -332,7 +331,7 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
       break;
     }
     default: {
-      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+      LOGGER_ERROR(logger_, "Received unknown event" << event.id());
       return;
     }
   }
@@ -438,14 +437,14 @@ bool AddCommandRequest::IsPendingResponseExist() {
 }
 
 bool AddCommandRequest::IsWhiteSpaceExist() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   const char* str = NULL;
 
   if ((*message_)[strings::msg_params].keyExists(strings::menu_params)) {
     str = (*message_)[strings::msg_params][strings::menu_params]
                      [strings::menu_name].asCharArray();
     if (!CheckSyntax(str)) {
-      LOG4CXX_ERROR(logger_, "Invalid menu name syntax check failed.");
+      LOGGER_ERROR(logger_, "Invalid menu name syntax check failed.");
       return true;
     }
   }
@@ -458,7 +457,7 @@ bool AddCommandRequest::IsWhiteSpaceExist() {
       str = (*message_)[strings::msg_params][strings::vr_commands][i]
                 .asCharArray();
       if (!CheckSyntax(str)) {
-        LOG4CXX_ERROR(logger_, "Invalid vr_commands syntax check failed");
+        LOGGER_ERROR(logger_, "Invalid vr_commands syntax check failed");
         return true;
       }
     }
@@ -468,7 +467,7 @@ bool AddCommandRequest::IsWhiteSpaceExist() {
     str = (*message_)[strings::msg_params][strings::cmd_icon][strings::value]
               .asCharArray();
     if (!CheckSyntax(str)) {
-      LOG4CXX_ERROR(logger_, "Invalid cmd_icon value syntax check failed");
+      LOGGER_ERROR(logger_, "Invalid cmd_icon value syntax check failed");
       return true;
     }
   }
@@ -480,10 +479,10 @@ bool AddCommandRequest::BothSend() const {
 }
 
 void AddCommandRequest::RemoveCommand() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   ApplicationSharedPtr app = application_manager_.application(connection_key());
   if (!app.valid()) {
-    LOG4CXX_ERROR(logger_, "No application associated with session key");
+    LOGGER_ERROR(logger_, "No application associated with session key");
     return;
   }
 

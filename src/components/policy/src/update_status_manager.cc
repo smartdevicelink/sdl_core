@@ -53,7 +53,7 @@ UpdateStatusManager::UpdateStatusManager()
 }
 
 UpdateStatusManager::~UpdateStatusManager() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   DCHECK(update_status_thread_delegate_);
   DCHECK(thread_);
   thread_->join();
@@ -66,7 +66,7 @@ void UpdateStatusManager::set_listener(PolicyListener* listener) {
 }
 
 void UpdateStatusManager::OnUpdateSentOut(uint32_t update_timeout) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   DCHECK(update_status_thread_delegate_);
   const unsigned milliseconds_in_second = 1000;
   update_status_thread_delegate_->updateTimeOut(update_timeout *
@@ -77,7 +77,7 @@ void UpdateStatusManager::OnUpdateSentOut(uint32_t update_timeout) {
 }
 
 void UpdateStatusManager::OnUpdateTimeoutOccurs() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   set_update_required(true);
   set_exchange_in_progress(false);
   set_exchange_pending(false);
@@ -86,14 +86,14 @@ void UpdateStatusManager::OnUpdateTimeoutOccurs() {
 }
 
 void UpdateStatusManager::OnValidUpdateReceived() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   update_status_thread_delegate_->updateTimeOut(0);  // Stop Timer
   set_exchange_pending(false);
   set_exchange_in_progress(false);
 }
 
 void UpdateStatusManager::OnWrongUpdateReceived() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   update_status_thread_delegate_->updateTimeOut(0);  // Stop Timer
   set_update_required(true);
   set_exchange_in_progress(false);
@@ -101,7 +101,7 @@ void UpdateStatusManager::OnWrongUpdateReceived() {
 }
 
 void UpdateStatusManager::OnResetDefaultPT(bool is_update_required) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   exchange_in_progress_ = false;
   update_required_ = is_update_required;
   exchange_pending_ = false;
@@ -109,7 +109,7 @@ void UpdateStatusManager::OnResetDefaultPT(bool is_update_required) {
 }
 
 void UpdateStatusManager::OnResetRetrySequence() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   if (exchange_in_progress_) {
     set_exchange_pending(true);
   }
@@ -117,17 +117,17 @@ void UpdateStatusManager::OnResetRetrySequence() {
 }
 
 void UpdateStatusManager::OnNewApplicationAdded() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   set_update_required(true);
 }
 
 void UpdateStatusManager::OnPolicyInit(bool is_update_required) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   update_required_ = is_update_required;
 }
 
 PolicyTableStatus UpdateStatusManager::GetUpdateStatus() const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   if (!exchange_in_progress_ && !exchange_pending_ && !update_required_) {
     return PolicyTableStatus::StatusUpToDate;
   }
@@ -169,28 +169,28 @@ std::string UpdateStatusManager::StringifiedUpdateStatus() const {
 }
 
 void policy::UpdateStatusManager::OnAppsSearchStarted() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(apps_search_in_progress_lock_);
   apps_search_in_progress_ = true;
 }
 
 void policy::UpdateStatusManager::OnAppsSearchCompleted() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(apps_search_in_progress_lock_);
   apps_search_in_progress_ = false;
 }
 
 bool policy::UpdateStatusManager::IsAppsSearchInProgress() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(apps_search_in_progress_lock_);
   return apps_search_in_progress_;
 }
 
 void UpdateStatusManager::CheckUpdateStatus() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   policy::PolicyTableStatus status = GetUpdateStatus();
   if (listener_ && last_update_status_ != status) {
-    LOG4CXX_INFO(logger_, "Send OnUpdateStatusChanged");
+    LOGGER_INFO(logger_, "Send OnUpdateStatusChanged");
     listener_->OnUpdateStatusChanged(StringifiedUpdateStatus());
   }
   last_update_status_ = status;
@@ -198,23 +198,22 @@ void UpdateStatusManager::CheckUpdateStatus() {
 
 void UpdateStatusManager::set_exchange_in_progress(bool value) {
   sync_primitives::AutoLock lock(exchange_in_progress_lock_);
-  LOG4CXX_INFO(logger_,
-               "Exchange in progress value is:" << std::boolalpha << value);
+  LOGGER_INFO(logger_,
+              "Exchange in progress value is:" << std::boolalpha << value);
   exchange_in_progress_ = value;
   CheckUpdateStatus();
 }
 
 void UpdateStatusManager::set_exchange_pending(bool value) {
   sync_primitives::AutoLock lock(exchange_pending_lock_);
-  LOG4CXX_INFO(logger_,
-               "Exchange pending value is:" << std::boolalpha << value);
+  LOGGER_INFO(logger_, "Exchange pending value is:" << std::boolalpha << value);
   exchange_pending_ = value;
   CheckUpdateStatus();
 }
 
 void UpdateStatusManager::set_update_required(bool value) {
   sync_primitives::AutoLock lock(update_required_lock_);
-  LOG4CXX_INFO(logger_, "Update required value is:" << std::boolalpha << value);
+  LOGGER_INFO(logger_, "Update required value is:" << std::boolalpha << value);
   update_required_ = value;
   CheckUpdateStatus();
 }
@@ -223,25 +222,26 @@ UpdateStatusManager::UpdateThreadDelegate::UpdateThreadDelegate(
     UpdateStatusManager* update_status_manager)
     : timeout_(0)
     , stop_flag_(false)
-    , state_lock_(true)
+    , state_lock_(false)
     , update_status_manager_(update_status_manager) {
-  LOG4CXX_INFO(logger_, "Create UpdateThreadDelegate");
+  LOGGER_INFO(logger_, "Create UpdateThreadDelegate");
 }
 
 UpdateStatusManager::UpdateThreadDelegate::~UpdateThreadDelegate() {
-  LOG4CXX_INFO(logger_, "Delete UpdateThreadDelegate");
+  LOGGER_INFO(logger_, "Delete UpdateThreadDelegate");
 }
 
 void UpdateStatusManager::UpdateThreadDelegate::threadMain() {
-  LOG4CXX_DEBUG(logger_, "UpdateStatusManager thread started (started normal)");
+  LOGGER_DEBUG(logger_, "UpdateStatusManager thread started (started normal)");
   sync_primitives::AutoLock auto_lock(state_lock_);
   while (false == stop_flag_) {
     if (timeout_ > 0) {
-      LOG4CXX_DEBUG(logger_, "Timeout is greater then 0");
+      LOGGER_DEBUG(logger_, "Timeout is greater then 0");
       sync_primitives::ConditionalVariable::WaitStatus wait_status =
           termination_condition_.WaitFor(auto_lock, timeout_);
       if (sync_primitives::ConditionalVariable::kTimeout == wait_status) {
         if (update_status_manager_) {
+          sync_primitives::AutoUnlock auto_unlock(auto_lock);
           update_status_manager_->OnUpdateTimeoutOccurs();
         }
       }
@@ -256,7 +256,7 @@ void UpdateStatusManager::UpdateThreadDelegate::threadMain() {
 void UpdateStatusManager::UpdateThreadDelegate::exitThreadMain() {
   sync_primitives::AutoLock auto_lock(state_lock_);
   stop_flag_ = true;
-  LOG4CXX_INFO(logger_, "before notify");
+  LOGGER_INFO(logger_, "before notify");
   termination_condition_.NotifyOne();
 }
 

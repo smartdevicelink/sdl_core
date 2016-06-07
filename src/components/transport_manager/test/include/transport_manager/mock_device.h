@@ -44,7 +44,8 @@ namespace transport_manager_test {
 
 class MockDevice : public ::transport_manager::transport_adapter::Device {
  public:
-  MockDevice(const std::string& name, const std::string& unique_device_id)
+  MockDevice(const std::string& name,
+             const transport_manager::DeviceUID& unique_device_id)
       : Device(name, unique_device_id) {}
   MOCK_CONST_METHOD1(IsSameAs, bool(const Device* other_device));
   MOCK_CONST_METHOD0(GetApplicationList, std::vector<int>());
@@ -53,7 +54,7 @@ class MockDevice : public ::transport_manager::transport_adapter::Device {
 
 class MockTCPDevice : public ::transport_manager::transport_adapter::TcpDevice {
  public:
-  MockTCPDevice(const uint32_t& in_addr_t, const std::string& name)
+  MockTCPDevice(const utils::HostAddress& in_addr_t, const std::string& name)
       : TcpDevice(in_addr_t, name) {}
   MOCK_CONST_METHOD1(IsSameAs, bool(const Device* other_device));
   MOCK_CONST_METHOD0(GetApplicationList, std::vector<int>());

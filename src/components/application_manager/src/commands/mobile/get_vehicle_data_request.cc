@@ -53,14 +53,14 @@ GetVehicleDataRequest::GetVehicleDataRequest(
 GetVehicleDataRequest::~GetVehicleDataRequest() {}
 
 void GetVehicleDataRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   int32_t app_id =
       (*message_)[strings::params][strings::connection_key].asUInt();
   ApplicationSharedPtr app = appplication_manager.application(app_id);
 
   if (!app) {
-    LOG4CXX_ERROR(logger_, "NULL pointer");
+    LOGGER_ERROR(logger_, "NULL pointer");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -136,8 +136,8 @@ void GetVehicleDataRequest::SendRequestsToHmi(const int32_t app_id) {
     }
   }
 
-  LOG4CXX_INFO(logger_,
-               hmi_requests_.size() << " requests are going to be sent to HMI");
+  LOGGER_INFO(logger_,
+              hmi_requests_.size() << " requests are going to be sent to HMI");
 
   for (HmiRequests::const_iterator it = hmi_requests_.begin();
        it != hmi_requests_.end();
@@ -147,7 +147,7 @@ void GetVehicleDataRequest::SendRequestsToHmi(const int32_t app_id) {
 }
 
 void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_INFO(logger_, "GetVehicleDataRequest::on_event " << event.id());
+  LOGGER_INFO(logger_, "GetVehicleDataRequest::on_event " << event.id());
 
   const smart_objects::SmartObject& message = event.smart_object();
 
@@ -182,10 +182,10 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
                  static_cast<mobile_apis::Result::eType>(it->status)) {
         status = mobile_api::Result::eType::GENERIC_ERROR;
       }
-      LOG4CXX_TRACE(logger_,
-                    "Status from HMI: " << it->status
-                                        << ", so response status become "
-                                        << status);
+      LOGGER_TRACE(logger_,
+                   "Status from HMI: " << it->status
+                                       << ", so response status become "
+                                       << status);
     } else {
       any_arg_success = true;
     }
@@ -200,7 +200,7 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
         response_params[it->str] = it->value;
       }
     }
-    LOG4CXX_INFO(logger_, "All HMI requests are complete");
+    LOGGER_INFO(logger_, "All HMI requests are complete");
     const char* info = NULL;
     std::string error_message;
     if (true == message[strings::params].keyExists(strings::error_msg)) {
@@ -218,14 +218,14 @@ GetVehicleDataRequest::GetVehicleDataRequest(
 GetVehicleDataRequest::~GetVehicleDataRequest() {}
 
 void GetVehicleDataRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   int32_t app_id =
       (*message_)[strings::params][strings::connection_key].asUInt();
   ApplicationSharedPtr app = application_manager_.application(app_id);
 
   if (!app) {
-    LOG4CXX_ERROR(logger_, "NULL pointer");
+    LOGGER_ERROR(logger_, "NULL pointer");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -233,7 +233,7 @@ void GetVehicleDataRequest::Run() {
   if (app->IsCommandLimitsExceeded(
           static_cast<mobile_apis::FunctionID::eType>(function_id()),
           application_manager::TLimitSource::CONFIG_FILE)) {
-    LOG4CXX_ERROR(logger_, "GetVehicleData frequency is too high.");
+    LOGGER_ERROR(logger_, "GetVehicleData frequency is too high.");
     SendResponse(false, mobile_apis::Result::REJECTED);
     return;
   }
@@ -261,7 +261,7 @@ void GetVehicleDataRequest::Run() {
 }
 
 void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   smart_objects::SmartObject message = event.smart_object();
 
   switch (event.id()) {
@@ -290,7 +290,7 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
       break;
     }
     default: {
-      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+      LOGGER_ERROR(logger_, "Received unknown event" << event.id());
       return;
     }
   }

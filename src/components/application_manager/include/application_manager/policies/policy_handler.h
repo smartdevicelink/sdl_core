@@ -39,7 +39,6 @@
 #include <vector>
 #include <list>
 #include <stdint.h>
-
 #include "policy/policy_manager.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/policies/policy_event_observer.h"
@@ -54,6 +53,7 @@
 #include "policy/usage_statistics/statistics_manager.h"
 #include "utils/threads/async_runner.h"
 #include "policy/policy_settings.h"
+#include "utils/shared_library.h"
 
 namespace Json {
 class Value;
@@ -493,7 +493,7 @@ class PolicyHandler : public PolicyHandlerInterface,
   static const std::string kLibrary;
   mutable sync_primitives::RWLock policy_manager_lock_;
   utils::SharedPtr<PolicyManager> policy_manager_;
-  void* dl_handle_;
+  utils::SharedLibrary policy_library_;
   AppIds last_used_app_ids_;
   utils::SharedPtr<PolicyEventObserver> event_observer_;
   uint32_t last_activated_app_id_;

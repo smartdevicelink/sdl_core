@@ -85,13 +85,14 @@ int connect(enum TransportProtocol protocol,
   }
 
   for (p = res ; p ; p = p->ai_next) {
-    sock = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
+    sock = static_cast<int>(socket(p->ai_family, p->ai_socktype, p->ai_protocol));
 
     if (sock == -1) {
       continue;
     }
 
-    if (protocol == TCP && ::connect(sock, (struct sockaddr*)p->ai_addr, p->ai_addrlen) == -1) {
+    if (protocol == TCP && ::connect(sock, (struct sockaddr*)p->ai_addr,
+		                             static_cast<int>(p->ai_addrlen)) == -1) {
       ::close(sock);
       sock = -1;
       continue;
@@ -102,7 +103,7 @@ int connect(enum TransportProtocol protocol,
     }
 
     if (addrlen) {
-      *addrlen = p->ai_addrlen;
+      *addrlen = static_cast<socklen_t>(p->ai_addrlen);
     }
 
     /* ok so now we have a socket bound, break the loop */
@@ -145,7 +146,7 @@ int bind(enum TransportProtocol protocol,
     int on = 1;
     on = on;
 
-    sock = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
+    sock = static_cast<int>(socket(p->ai_family, p->ai_socktype, p->ai_protocol));
 
     if (sock == -1) {
       continue;
@@ -161,7 +162,7 @@ int bind(enum TransportProtocol protocol,
     on = 0;
 #endif
 
-    if (::bind(sock, p->ai_addr, p->ai_addrlen) == -1) {
+    if (::bind(sock, p->ai_addr, static_cast<int>(p->ai_addrlen)) == -1) {
       ::close(sock);
       sock = -1;
       continue;
@@ -172,7 +173,7 @@ int bind(enum TransportProtocol protocol,
     }
 
     if (addrlen) {
-      *addrlen = p->ai_addrlen;
+      *addrlen = static_cast<socklen_t>(p->ai_addrlen);
     }
 
     /* ok so now we have a socket bound, break the loop */

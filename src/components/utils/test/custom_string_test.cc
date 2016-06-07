@@ -32,6 +32,7 @@
 
 #include <iostream>
 #include <string>
+#include <cstdint>
 #include "gtest/gtest.h"
 #include "utils/custom_string.h"
 
@@ -256,7 +257,7 @@ TEST_F(
 }
 
 TEST_F(CustomStringTest,
-       AddUTF8StringToCustomString_ExpectCorrectConvertingToWString) {
+       DISABLED_AddUTF8StringToCustomString_ExpectCorrectConvertingToWString) {
   custom_str::CustomString obj(CustomStringTest::mbstring1_);
   custom_str::CustomString obj1(CustomStringTest::mbstring2_);
   std::wstring wstr1(L"Тест");
@@ -297,7 +298,7 @@ TEST_F(
 
 TEST_F(
     CustomStringTest,
-    AddSameMultiByteStringsToCustomString_ExpectCorrectCaseInsensitiveComparing) {
+    DISABLED_AddSameMultiByteStringsToCustomString_ExpectCorrectCaseInsensitiveComparing) {
   const size_t kSizeStr = 8;
   uint8_t array[] = {0xD1,
                      0x82,
