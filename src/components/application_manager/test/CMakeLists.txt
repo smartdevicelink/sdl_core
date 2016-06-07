@@ -1,4 +1,4 @@
-# Copyright (c) 2015, Ford Motor Company
+# Copyright (c) 2016, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -169,4 +169,5 @@ OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/libPolicy.so
   create_test("resumption/data_resumption_test" "${ResumptionData_SOURCES}" "${testLibraries}")
 
   add_subdirectory(state_controller)
+  add_subdirectory(commands)
 endif()
