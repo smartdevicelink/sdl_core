@@ -59,9 +59,6 @@ void OnButtonPressNotification::Run() {
   const ApplicationSharedPtr app = application_manager_.application(
       (*message_)[strings::msg_params][strings::app_id].asUInt());
 
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
-      (*message_)[strings::msg_params][strings::app_id].asUInt());
-
   // CUSTOM_BUTTON notification
   if (static_cast<uint32_t>(mobile_apis::ButtonName::CUSTOM_BUTTON) == btn_id) {
     // app_id is mandatory for CUSTOM_BUTTON notification
@@ -111,21 +108,21 @@ void OnButtonPressNotification::Run() {
       continue;
     }
 
+    // Send ButtonPress notification only in HMI_FULL or HMI_LIMITED mode
+    if ((mobile_api::HMILevel::HMI_FULL != subscribed_app->hmi_level()) &&
+        (mobile_api::HMILevel::HMI_LIMITED != subscribed_app->hmi_level())) {
+      LOG4CXX_WARN(logger_,
+                   "OnButtonPress notification is allowed only"
+                       << "in FULL or LIMITED hmi level");
+      continue;
+    }
+    // if "appID" is present, send it to named app only if its FULL or
+    // LIMITED
     if (app.valid()) {
-      // Send ButtonPress notification only in HMI_FULL or HMI_LIMITED mode
-      if ((mobile_api::HMILevel::HMI_FULL != subscribed_app->hmi_level()) &&
-          (mobile_api::HMILevel::HMI_LIMITED != subscribed_app->hmi_level())) {
-        LOG4CXX_WARN(logger_,
-                     "OnButtonPress notification is allowed only"
-                         << "in FULL or LIMITED hmi level");
-        continue;
-      }
-      // if "appID" is present  send it to Named app , only if its FULL or
-      // LIMITED
-      if (app == subscribed_app) {
+      if (app->app_id() == subscribed_app->app_id()) {
         SendButtonPress(subscribed_app);
       }
-    } else if (mobile_api::HMILevel::HMI_FULL == subscribed_app->hmi_level()) {
+    } else if (subscribed_app->IsFullscreen()) {
       // if No "appID" - send it FULL apps only.
       SendButtonPress(subscribed_app);
     }
