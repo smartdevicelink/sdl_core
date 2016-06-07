@@ -58,6 +58,7 @@ void SDLActivateAppRequest::Run() {
     LOG4CXX_ERROR(
         logger_,
         "Can't find application within regular apps: " << application_id);
+    SendResponse(false, correlation_id(), SDL_ActivateApp, APPLICATION_NOT_REGISTERED);
     return;
   }
 
