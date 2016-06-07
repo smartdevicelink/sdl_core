@@ -42,6 +42,7 @@
 #include "application_manager/commands/command_impl.h"
 #include "application_manager/commands/command_notification_impl.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/hmi_capabilities_impl.h"
 #include "application_manager/mobile_message_handler.h"
 #include "application_manager/policies/policy_handler.h"
 #include "protocol_handler/protocol_handler.h"
@@ -135,7 +136,7 @@ ApplicationManagerImpl::ApplicationManagerImpl(
     , messages_from_hmi_("AM FromHMI", this)
     , messages_to_hmi_("AM ToHMI", this)
     , audio_pass_thru_messages_("AudioPassThru", this)
-    , hmi_capabilities_(*this)
+    , hmi_capabilities_(new HMICapabilitiesImpl(*this))
     , unregister_reason_(
           mobile_api::AppInterfaceUnregisteredReason::INVALID_ENUM)
     , resume_ctrl_(*this)
@@ -1699,7 +1700,7 @@ bool ApplicationManagerImpl::Init(resumption::LastState& last_state,
     LOGGER_ERROR(logger_, "Problem with initialization of resume controller");
     return false;
   }
-  hmi_capabilities_.Init(&last_state);
+  hmi_capabilities_->Init(&last_state);
 
   if (!(file_system::IsWritingAllowed(app_storage_folder) &&
         file_system::IsReadingAllowed(app_storage_folder))) {
@@ -2121,11 +2122,11 @@ mobile_apis::MOBILE_API& ApplicationManagerImpl::mobile_so_factory() {
 }
 
 HMICapabilities& ApplicationManagerImpl::hmi_capabilities() {
-  return hmi_capabilities_;
+  return *hmi_capabilities_;
 }
 
 const HMICapabilities& ApplicationManagerImpl::hmi_capabilities() const {
-  return hmi_capabilities_;
+  return *hmi_capabilities_;
 }
 
 void ApplicationManagerImpl::PullLanguagesInfo(const SmartObject& app_data,
