@@ -580,8 +580,8 @@ class Application : public virtual InitialApplicationData,
    * @param source Limits source, e.g. policy table, config file etc.
    * @return true, if - excedeed, otherwise - false
    */
-  virtual bool IsCommandLimitsExceeded(mobile_apis::FunctionID::eType cmd_id,
-                                       TLimitSource source) = 0;
+  virtual bool AreCommandLimitsExceeded(mobile_apis::FunctionID::eType cmd_id,
+                                        TLimitSource source) = 0;
 
   /**
    * Returns object for recording statistics

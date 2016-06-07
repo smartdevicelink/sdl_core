@@ -65,7 +65,7 @@ void ReadDIDRequest::Run() {
     return;
   }
 
-  if (app->IsCommandLimitsExceeded(
+  if (app->AreCommandLimitsExceeded(
           static_cast<mobile_apis::FunctionID::eType>(function_id()),
           application_manager::TLimitSource::CONFIG_FILE)) {
     LOG4CXX_ERROR(logger_, "ReadDID frequency is too high.");
