@@ -55,7 +55,7 @@ class CommandRequestTest : public CommandsTest<kIsNice> {
                           NiceMock<MockEventDispatcher>,
                           MockEventDispatcher>::Result MockEventDisp;
 
-  MockEventDisp ev_disp_;
+  MockEventDisp event_dispatcher_;
 
  protected:
   CommandRequestTest() : CommandsTest<kIsNice>() {}
@@ -63,7 +63,7 @@ class CommandRequestTest : public CommandsTest<kIsNice> {
   virtual void InitCommand(const uint32_t& default_timeout) OVERRIDE {
     CommandsTest<kIsNice>::InitCommand(default_timeout);
     EXPECT_CALL(CommandsTest<kIsNice>::app_mngr_, event_dispatcher())
-        .WillOnce(ReturnRef(ev_disp_));
+        .WillOnce(ReturnRef(event_dispatcher_));
   }
 };
 

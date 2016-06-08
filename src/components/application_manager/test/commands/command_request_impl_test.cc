@@ -125,7 +125,7 @@ TEST_F(CommandRequestImplTest, OnTimeOut_StateCompleted_UNSUCCESS) {
   // Should be called twice:
   // First -- on `onTimeOut` method call
   // Second -- on destruction;
-  EXPECT_CALL(ev_disp_, remove_observer(_)).Times(2);
+  EXPECT_CALL(event_dispatcher_, remove_observer(_)).Times(2);
   EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
 
   // If `command` already done, then state should change to `kCompleted`.
@@ -147,7 +147,7 @@ TEST_F(CommandRequestImplTest, OnTimeOut_StateAwaitingHMIResponse_SUCCESS) {
   // Should be called twice:
   // First -- on `onTimeOut` method call
   // Second -- on destruction;
-  EXPECT_CALL(ev_disp_, remove_observer(_)).Times(2);
+  EXPECT_CALL(event_dispatcher_, remove_observer(_)).Times(2);
   EXPECT_CALL(app_mngr_,
               ManageMobileCommand(_, Command::CommandOrigin::ORIGIN_SDL));
 
@@ -256,23 +256,23 @@ TEST_F(CommandRequestImplTest, SendHMIRequest_UseEvent_SUCCESS) {
   // Return `true` prevents call of `SendResponse` method;
   EXPECT_CALL(app_mngr_, ManageHMICommand(_)).WillOnce(Return(true));
 
-  EXPECT_CALL(ev_disp_, add_observer(_, _, _));
+  EXPECT_CALL(event_dispatcher_, add_observer(_, _, _));
 
   EXPECT_EQ(kCorrelationId_,
             command->SendHMIRequest(kInvalidFunctionId_, NULL, true));
 }
 
 TEST_F(CommandRequestImplTest, RemoveDisallowedParameters_SUCCESS) {
-  const std::string kDisParam1 = "disallowed_param1";
-  const std::string kDisParam2 = "disallowed_param2";
+  const std::string kDisallowedParam1 = "disallowed_param1";
+  const std::string kDisallowedParam2 = "disallowed_param2";
   const std::string kAlParam = "allowed_param";
   const std::string kUnParam = "undefined_params";
   const std::string kMisParam =
       ::application_manager::MessageHelper::vehicle_data().begin()->first;
 
   MessageSharedPtr msg = CreateMessage();
-  (*msg)[strings::msg_params][kDisParam1] = 0u;
-  (*msg)[strings::msg_params][kDisParam2] = 0u;
+  (*msg)[strings::msg_params][kDisallowedParam1] = 0u;
+  (*msg)[strings::msg_params][kDisallowedParam2] = 0u;
   (*msg)[strings::msg_params][kAlParam] = 0u;
   (*msg)[strings::msg_params][kUnParam] = 0u;
   (*msg)[strings::msg_params][kMisParam] = 0u;
@@ -280,15 +280,15 @@ TEST_F(CommandRequestImplTest, RemoveDisallowedParameters_SUCCESS) {
   CommandPtr command = CreateCommand<UCommandRequestImpl>(msg);
 
   CommandParametersPermissions& permission = command->parameters_permissions();
-  permission.disallowed_params.push_back(kDisParam1);
-  permission.disallowed_params.push_back(kDisParam2);
+  permission.disallowed_params.push_back(kDisallowedParam1);
+  permission.disallowed_params.push_back(kDisallowedParam2);
   permission.allowed_params.push_back(kAlParam);
   permission.undefined_params.push_back(kUnParam);
 
   command->RemoveDisallowedParameters();
 
-  EXPECT_FALSE((*msg)[strings::msg_params].keyExists(kDisParam1));
-  EXPECT_FALSE((*msg)[strings::msg_params].keyExists(kDisParam2));
+  EXPECT_FALSE((*msg)[strings::msg_params].keyExists(kDisallowedParam1));
+  EXPECT_FALSE((*msg)[strings::msg_params].keyExists(kDisallowedParam2));
   EXPECT_FALSE((*msg)[strings::msg_params].keyExists(kUnParam));
   EXPECT_FALSE((*msg)[strings::msg_params].keyExists(kMisParam));
   EXPECT_TRUE((*msg)[strings::msg_params].keyExists(kAlParam));
@@ -410,7 +410,7 @@ TEST_F(CommandRequestImplTest, CheckAllowedParameters_MsgParamsMap_SUCCESS) {
 }
 
 TEST_F(CommandRequestImplTest, AddDisallowedParameters_SUCCESS) {
-  const std::string kDisParam =
+  const std::string kDisallowedParam =
       ::application_manager::MessageHelper::vehicle_data().begin()->first;
 
   MessageSharedPtr msg;
@@ -418,11 +418,11 @@ TEST_F(CommandRequestImplTest, AddDisallowedParameters_SUCCESS) {
   CommandPtr command = CreateCommand<UCommandRequestImpl>(msg);
 
   command->removed_parameters_permissions().disallowed_params.push_back(
-      kDisParam);
+      kDisallowedParam);
 
   command->AddDisallowedParameters(*msg);
 
-  EXPECT_TRUE((*msg)[strings::msg_params].keyExists(kDisParam));
+  EXPECT_TRUE((*msg)[strings::msg_params].keyExists(kDisallowedParam));
 }
 
 TEST_F(CommandRequestImplTest, SendResponse_TimedOut_UNSUCCESS) {
@@ -458,7 +458,7 @@ TEST_F(CommandRequestImplTest, SendResponse_SUCCESS) {
 
 TEST_F(CommandRequestImplTest,
        SendResponse_AddDisallowedParametersToInfo_SUCCESS) {
-  const std::string kDisParam = "disallowed_param";
+  const std::string kDisallowedParam = "disallowed_param";
   MessageSharedPtr msg = CreateMessage();
   (*msg)[strings::params][strings::function_id] =
       mobile_apis::FunctionID::SubscribeVehicleDataID;
@@ -466,7 +466,7 @@ TEST_F(CommandRequestImplTest,
   CommandPtr command = CreateCommand<UCommandRequestImpl>(msg);
 
   command->removed_parameters_permissions().disallowed_params.push_back(
-      kDisParam);
+      kDisallowedParam);
 
   MessageSharedPtr result;
   EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _))

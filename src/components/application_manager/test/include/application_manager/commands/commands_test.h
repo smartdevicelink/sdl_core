@@ -78,14 +78,10 @@ enum CommandsTestMocks { kNotNice = 0, kIsNice };
 template <const CommandsTestMocks kIsNice = CommandsTestMocks::kNotNice>
 class CommandsTest : public ::testing::Test {
  public:
+  typedef NiceMock<MockApplicationManagerSettings> MockAppManagerSettings;
   typedef typename TypeIf<kIsNice,
                           NiceMock<MockApplicationManager>,
                           MockApplicationManager>::Result MockAppManager;
-  typedef typename TypeIf<kIsNice,
-                          NiceMock<MockApplicationManagerSettings>,
-                          MockApplicationManagerSettings>::Result
-      MockAppManagerSettings;
-
   typedef typename TypeIf<kIsNice,
                           NiceMock<MockApplication>,
                           MockApplication>::Result MockApp;
@@ -124,12 +120,14 @@ class CommandsTest : public ::testing::Test {
   enum { kDefaultTimeout_ = 100u };
 
   MockAppManager app_mngr_;
-  MockAppManagerSettings app_mngr_set_;
+  MockAppManagerSettings app_mngr_settings_;
 
  protected:
   virtual void InitCommand(const uint32_t& timeout) {
-    EXPECT_CALL(app_mngr_, get_settings()).WillOnce(ReturnRef(app_mngr_set_));
-    EXPECT_CALL(app_mngr_set_, default_timeout()).WillOnce(ReturnRef(timeout));
+    EXPECT_CALL(app_mngr_, get_settings())
+        .WillOnce(ReturnRef(app_mngr_settings_));
+    ON_CALL(app_mngr_settings_, default_timeout())
+        .WillByDefault(ReturnRef(timeout));
   }
 
   CommandsTest() {}

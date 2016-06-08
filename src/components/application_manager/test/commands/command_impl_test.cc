@@ -78,30 +78,28 @@ class CommandImplTest : public CommandsTest<CommandsTestMocks::kIsNice> {
   };
 
   // Create `SmartObject` which handle array of `SmartObjects`
-  static void CreateArray(MessageSharedPtr& msg,
-                          const size_t msg_count = kDefaultMsgCount_) {
-    if (!msg) {
-      msg = CreateMessage(smart_objects::SmartType_Array);
-    }
-    ::smart_objects::SmartArray* array = msg->asArray();
-    SmartObject obj;
+  static MessageSharedPtr CreateArrayMessage(
+      const size_t msg_count = kDefaultMsgCount_) {
+    MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Array);
+    smart_objects::SmartArray* array = msg->asArray();
     for (size_t i = 0u; i < msg_count; ++i) {
+      SmartObject obj;
       obj[strings::app_id] = i;
       array->push_back(obj);
     }
+    return msg;
   }
   // Create `SmartObject` which handle map of `SmartObjects`
-  static void CreateMap(MessageSharedPtr& msg,
-                        const size_t msg_count = kDefaultMsgCount_) {
-    if (!msg) {
-      msg = CreateMessage(smart_objects::SmartType_Map);
-    }
+  static MessageSharedPtr CreateMapMessage(
+      const size_t msg_count = kDefaultMsgCount_) {
+    MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
     char key[] = {'A', '\0'};
-    SmartObject obj;
     for (size_t i = 0u; i < msg_count; ++i, ++key[0]) {
+      SmartObject obj;
       obj[strings::app_id] = i;
       (*msg)[key] = obj;
     }
+    return msg;
   }
 
   static const uint32_t kDefaultMsgCount_ = 5u;
@@ -169,8 +167,7 @@ TEST_F(CommandImplTest, ReplaceMobileByHMIAppId_SUCCESS) {
 }
 
 TEST_F(CommandImplTest, ReplaceMobileByHMIAppId_Array_SUCCESS) {
-  MessageSharedPtr msg;
-  CreateArray(msg, kDefaultMsgCount_);
+  MessageSharedPtr msg = CreateArrayMessage(kDefaultMsgCount_);
   UCommandImplPtr command = CreateCommand<UCommandImpl>(msg);
 
   MockAppPtr app = CreateMockApp();
@@ -191,8 +188,7 @@ TEST_F(CommandImplTest, ReplaceMobileByHMIAppId_Array_SUCCESS) {
 }
 
 TEST_F(CommandImplTest, ReplaceMobileByHMIAppId_Map_SUCCESS) {
-  MessageSharedPtr msg;
-  CreateMap(msg, kDefaultMsgCount_);
+  MessageSharedPtr msg = CreateMapMessage(kDefaultMsgCount_);
   UCommandImplPtr command = CreateCommand<UCommandImpl>(msg);
 
   MockAppPtr app = CreateMockApp();
@@ -238,8 +234,7 @@ TEST_F(CommandImplTest, ReplaceHMIByMobileAppId_SUCCESS) {
 }
 
 TEST_F(CommandImplTest, ReplaceHMIByMobileAppId_Array_SUCCESS) {
-  MessageSharedPtr msg;
-  CreateArray(msg, kDefaultMsgCount_);
+  MessageSharedPtr msg = CreateArrayMessage(kDefaultMsgCount_);
 
   UCommandImplPtr command = CreateCommand<UCommandImpl>(msg);
   MockAppPtr app = CreateMockApp();
@@ -260,8 +255,7 @@ TEST_F(CommandImplTest, ReplaceHMIByMobileAppId_Array_SUCCESS) {
 }
 
 TEST_F(CommandImplTest, ReplaceHMIByMobileAppId_Map_SUCCESS) {
-  MessageSharedPtr msg;
-  CreateMap(msg, kDefaultMsgCount_);
+  MessageSharedPtr msg = CreateMapMessage(kDefaultMsgCount_);
 
   UCommandImplPtr command = CreateCommand<UCommandImpl>(msg);
   MockAppPtr app = CreateMockApp();
