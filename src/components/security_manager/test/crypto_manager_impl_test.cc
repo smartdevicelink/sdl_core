@@ -145,8 +145,7 @@ TEST_F(CryptoManagerTest, WrongInit) {
   EXPECT_CALL(*mock_security_manager_settings_, security_manager_mode())
       .WillRepeatedly(Return(security_manager::SERVER));
   EXPECT_CALL(*mock_security_manager_settings_,
-              security_manager_protocol_name())
-      .WillRepeatedly(Return(UNKNOWN));
+              security_manager_protocol_name()).WillRepeatedly(Return(UNKNOWN));
   EXPECT_CALL(*mock_security_manager_settings_, verify_peer())
       .WillRepeatedly(Return(false));
   EXPECT_CALL(*mock_security_manager_settings_, ca_cert_path())
