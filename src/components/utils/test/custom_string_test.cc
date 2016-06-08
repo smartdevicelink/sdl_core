@@ -257,7 +257,7 @@ TEST_F(
 }
 
 TEST_F(CustomStringTest,
-       DISABLED_AddUTF8StringToCustomString_ExpectCorrectConvertingToWString) {
+       AddUTF8StringToCustomString_ExpectCorrectConvertingToWString) {
   custom_str::CustomString obj(CustomStringTest::mbstring1_);
   custom_str::CustomString obj1(CustomStringTest::mbstring2_);
   std::wstring wstr1(L"Тест");
@@ -298,7 +298,7 @@ TEST_F(
 
 TEST_F(
     CustomStringTest,
-    DISABLED_AddSameMultiByteStringsToCustomString_ExpectCorrectCaseInsensitiveComparing) {
+    AddSameMultiByteStringsToCustomString_ExpectCorrectCaseInsensitiveComparing) {
   const size_t kSizeStr = 8;
   uint8_t array[] = {0xD1,
                      0x82,
