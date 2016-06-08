@@ -111,7 +111,10 @@ class Logger {
 
 #undef INIT_LOGGER
 #if defined(LOG4CXX_LOGGER)
-#define INIT_LOGGER(logs_enabled) \
+#define INIT_LOGGER(logs_enabled)             \
+  if (logs_enabled) {                         \
+    DCHECK(utils::appenders_loader.Loaded()); \
+  }                                           \
   logger::Logger::InitLogger(logs_enabled, "log4cxx.properties");
 #else
 #define INIT_LOGGER(logs_enabled) \
