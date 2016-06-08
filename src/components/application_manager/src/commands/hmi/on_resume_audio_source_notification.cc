@@ -44,7 +44,7 @@ OnResumeAudioSourceNotification::OnResumeAudioSourceNotification(
 OnResumeAudioSourceNotification::~OnResumeAudioSourceNotification() {}
 
 void OnResumeAudioSourceNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   SendNotification();
 }
 

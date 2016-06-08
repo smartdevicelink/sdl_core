@@ -37,7 +37,12 @@
 
 #include "json/reader.h"
 #include "gtest/gtest.h"
-
+#include "gmock/gmock.h"
+#include "policy/mock_policy_listener.h"
+#include "policy/mock_pt_representation.h"
+#include "policy/mock_cache_manager.h"
+#include "policy/mock_update_status_manager.h"
+#include "policy/mock_policy_settings.h"
 #include "policy/policy_manager_impl.h"
 #include "config_profile/profile.h"
 #include "policy/policy_table/enums.h"
@@ -51,18 +56,19 @@
 #include "utils/file_system.h"
 #include "utils/date_time.h"
 #include "utils/make_shared.h"
+#include "utils/shared_library.h"
 
-using ::testing::ReturnRef;
-using ::testing::DoAll;
-using ::testing::SetArgReferee;
+using ::testing::Return;
 using ::testing::NiceMock;
 using ::testing::_;
 using ::testing::SetArgReferee;
 using ::testing::AtLeast;
-using ::testing::Return;
+using ::testing::ReturnRef;
+using ::testing::DefaultValue;
 
 using ::policy::PolicyManagerImpl;
 using ::policy::PolicyTable;
+using ::policy::PolicyManager;
 
 namespace policy_table = rpc::policy_table_interface_base;
 
@@ -94,13 +100,20 @@ void SortAndCheckEquality(std::vector<T> first, std::vector<T> second) {
 }
 
 class PolicyManagerImplTest : public ::testing::Test {
+ public:
+  PolicyManagerImplTest() : kAppStorageFolder("storage1") {}
+
  protected:
   PolicyManagerImpl* manager;
   MockCacheManagerInterface* cache_manager;
   NiceMock<MockPolicyListener> listener;
+  const std::string kAppStorageFolder;
+  const static int kAttemptsToOpenPolicyDb = 1;
+  const static int kOpenAttemptTimeoutMs = 10000;
 
   void SetUp() OVERRIDE {
-    manager = new PolicyManagerImpl();
+    manager = new PolicyManagerImpl(
+        kAppStorageFolder, kAttemptsToOpenPolicyDb, kOpenAttemptTimeoutMs);
     manager->set_listener(&listener);
     cache_manager = new MockCacheManagerInterface();
     manager->set_cache_manager(cache_manager);
@@ -128,7 +141,8 @@ class PolicyManagerImplTest2 : public ::testing::Test {
       , app_id2("1766825573")
       , dev_id1("XXX123456789ZZZ")
       , dev_id2("08-00-27-CE-76-FE")
-      , PTU_request_types(Json::arrayValue) {}
+      , PTU_request_types(Json::arrayValue)
+      , kAppStorageFolder("storage1") {}
 
  protected:
   PolicyManagerImpl* manager;
@@ -143,15 +157,17 @@ class PolicyManagerImplTest2 : public ::testing::Test {
   const std::string dev_id2;
   Json::Value PTU_request_types;
   NiceMock<policy_handler_test::MockPolicySettings> policy_settings_;
-  const std::string kAppStorageFolder = "storage1";
+  const std::string kAppStorageFolder;
+  const static int kAttemptsToOpenPolicyDb = 1;
+  const static int kOpenAttemptTimeoutMs = 10000;
 
   void SetUp() OVERRIDE {
-    file_system::CreateDirectory("storage1");
+    DefaultValue<const std::string&>::Set(kAppStorageFolder);
+    file_system::CreateDirectory(kAppStorageFolder);
     file_system::DeleteFile("policy.sqlite");
 
-    manager = new PolicyManagerImpl();
-    ON_CALL(policy_settings_, app_storage_folder())
-        .WillByDefault(ReturnRef(kAppStorageFolder));
+    manager = new PolicyManagerImpl(
+        "storage1", kAttemptsToOpenPolicyDb, kOpenAttemptTimeoutMs);
     manager->set_listener(&listener);
     const char* levels[] = {"BACKGROUND", "FULL", "LIMITED", "NONE"};
     hmi_level.assign(levels, levels + sizeof(levels) / sizeof(levels[0]));
@@ -184,10 +200,8 @@ class PolicyManagerImplTest2 : public ::testing::Test {
     return root;
   }
 
-  void CreateLocalPT(const std::string& file_name) {
-    file_system::remove_directory_content("storage1");
-    ON_CALL(policy_settings_, app_storage_folder())
-        .WillByDefault(ReturnRef(kAppStorageFolder));
+  void CreateLocalPT(std::string file_name) {
+    file_system::RemoveDirectoryContent(kAppStorageFolder);
     ASSERT_TRUE(manager->InitPT(file_name, &policy_settings_));
   }
 
@@ -312,7 +326,7 @@ class PolicyManagerImplTest2 : public ::testing::Test {
   }
 };
 
-Json::Value CreatePTforLoad() {
+utils::json::JsonValue CreatePTforLoad() {
   const std::string load_table(
       "{"
       "\"policy_table\": {"
@@ -397,9 +411,10 @@ Json::Value CreatePTforLoad() {
       "}"
       "}"
       "}");
-  Json::Value table(Json::objectValue);
-  Json::Reader reader;
-  EXPECT_TRUE(reader.parse(load_table, table));
+  utils::json::JsonValue table(utils::json::ValueType::OBJECT_VALUE);
+  utils::json::JsonValue::ParseResult result =
+      utils::json::JsonValue::Parse(load_table);
+  table = result.first;
   return table;
 }
 
@@ -414,15 +429,17 @@ TEST_F(PolicyManagerImplTest, GetNotificationsNumber) {
 
 TEST_F(PolicyManagerImplTest2, GetNotificationsNumberAfterPTUpdate) {
   // Arrange
-  Json::Value table = CreatePTforLoad();
-  policy_table::Table update(&table);
+  utils::json::JsonValue table = CreatePTforLoad();
+
+  policy_table::Table update(table);
   update.SetPolicyTableType(rpc::policy_table_interface_base::PT_UPDATE);
   // Act
-  const std::string json = table.toStyledString();
+  const std::string json = table.ToJson(true);
   ::policy::BinaryMessage msg(json.begin(), json.end());
   EXPECT_CALL(listener, OnUpdateStatusChanged(_));
   EXPECT_TRUE(manager->LoadPT("file_pt_update.json", msg));
 
+  // priority is case sensistive to values in DB
   std::string priority = "emergency";
   uint32_t notif_number = manager->GetNotificationsNumber(priority);
   EXPECT_EQ(1u, notif_number);
@@ -430,10 +447,6 @@ TEST_F(PolicyManagerImplTest2, GetNotificationsNumberAfterPTUpdate) {
   priority = "navigation";
   notif_number = manager->GetNotificationsNumber(priority);
   EXPECT_EQ(2u, notif_number);
-
-  priority = "emergency";
-  notif_number = manager->GetNotificationsNumber(priority);
-  EXPECT_EQ(1u, notif_number);
 
   priority = "VOICECOMM";
   notif_number = manager->GetNotificationsNumber(priority);
@@ -506,8 +519,8 @@ TEST_F(PolicyManagerImplTest, ResetPT) {
 
 TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
   // Arrange
-  Json::Value table = CreatePTforLoad();
-  policy_table::Table update(&table);
+  utils::json::JsonValue table = CreatePTforLoad();
+  policy_table::Table update(table);
   update.SetPolicyTableType(rpc::policy_table_interface_base::PT_UPDATE);
 
   // Assert
@@ -516,7 +529,7 @@ TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
   EXPECT_CALL(*cache_manager, GetHMIAppTypeAfterUpdate(_)).Times(AtLeast(1));
 
   // Act
-  const std::string json = table.toStyledString();
+  const std::string json = table.ToJson(true);
   ::policy::BinaryMessage msg(json.begin(), json.end());
 
   utils::SharedPtr<policy_table::Table> snapshot =
@@ -536,16 +549,16 @@ TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
 
 TEST_F(PolicyManagerImplTest, LoadPT_SetInvalidUpdatePT_PTIsNotLoaded) {
   // Arrange
-  Json::Value table(Json::objectValue);
+  utils::json::JsonValue table(utils::json::ValueType::OBJECT_VALUE);
 
-  policy_table::Table update(&table);
+  policy_table::Table update(table);
   update.SetPolicyTableType(rpc::policy_table_interface_base::PT_UPDATE);
 
   // Assert update is invalid
   ASSERT_FALSE(IsValid(update));
 
   // Act
-  std::string json = table.toStyledString();
+  const std::string json = table.ToJson(true);
   ::policy::BinaryMessage msg(json.begin(), json.end());
 
   // Assert
@@ -583,6 +596,7 @@ TEST_F(
   EXPECT_EQ("UPDATE_NEEDED", manager->GetPolicyTableStatus());
 }
 
+// TODO(OHerasym) : AddApplication std exception
 TEST_F(
     PolicyManagerImplTest2,
     AddApplication_AddExistingApplicationFromDeviceWithoutConsent_ExpectNoUpdateRequired) {
@@ -597,6 +611,7 @@ TEST_F(
   EXPECT_EQ("UP_TO_DATE", manager->GetPolicyTableStatus());
 }
 
+// TODO(OHerasym) : AddApplication std exception
 TEST_F(PolicyManagerImplTest2,
        PTUpdatedAt_DaysNotExceedLimit_ExpectNoUpdateRequired) {
   // Arrange
@@ -665,7 +680,7 @@ TEST_F(PolicyManagerImplTest2, NextRetryTimeout_ExpectTimeoutsFromPT) {
       waiting_timeout += manager->TimeoutExchange();
 
       // it's in miliseconds
-      EXPECT_EQ(waiting_timeout * date_time::DateTime::MILLISECONDS_IN_SECOND,
+      EXPECT_EQ(waiting_timeout * date_time::kMillisecondsInSecond,
                 manager->NextRetryTimeout());
     }
   }
@@ -715,6 +730,7 @@ TEST_F(PolicyManagerImplTest2,
   EXPECT_EQ("UPDATE_NEEDED", manager->GetPolicyTableStatus());
 }
 
+// TODO(OHerasym) : AddApplication std exception
 TEST_F(PolicyManagerImplTest2, GetInitialAppData_ExpectReceivedConsentCorrect) {
   // Arrange
   CreateLocalPT("sdl_preloaded_pt.json");
@@ -755,6 +771,7 @@ TEST_F(PolicyManagerImplTest2, GetInitialAppData_ExpectReceivedConsentCorrect) {
   }
 }
 
+// TODO(OHerasym) : AddApplication std exception
 TEST_F(PolicyManagerImplTest2,
        CanAppKeepContext_SetPoliciesForAppUpdated_ExpectAppCanKeepContext) {
   // Arrange
@@ -765,6 +782,7 @@ TEST_F(PolicyManagerImplTest2,
   EXPECT_TRUE(manager->CanAppKeepContext(app_id2));
 }
 
+// TODO(OHerasym) : AddApplication std exception
 TEST_F(PolicyManagerImplTest2,
        CanAppStealFocus_SetPoliciesForAppUpdated_ExpectAppCanStealFocus) {
   // Arrange

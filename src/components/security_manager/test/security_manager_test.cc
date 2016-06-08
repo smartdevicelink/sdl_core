@@ -170,6 +170,8 @@ class SecurityManagerTest : public ::testing::Test {
  * SecurityManager shall not set NULL interfaces
  * and shall not call any methodes
  */
+
+// TODO(OHerasym) : thread qt assert fails
 TEST_F(SecurityManagerTest, SetNULL_Intefaces) {
   security_manager_.reset(new SecurityManagerImpl());
   security_manager_->set_session_observer(NULL);
@@ -182,6 +184,8 @@ TEST_F(SecurityManagerTest, SetNULL_Intefaces) {
 /*
  * Add/Remove NULL listeners do not any additional logics
  */
+
+// TODO(OHerasym) : thread qt assert fails
 TEST_F(SecurityManagerTest, Listeners_NULL) {
   security_manager_->AddListener(NULL);
   security_manager_->RemoveListener(NULL);
@@ -189,6 +193,8 @@ TEST_F(SecurityManagerTest, Listeners_NULL) {
 /*
  * Twice remove listener
  */
+
+// TODO(OHerasym) : thread qt assert fails
 TEST_F(SecurityManagerTest, Listeners_TwiceRemoveListeners) {
   security_manager_->RemoveListener(&mock_sm_listener);
   security_manager_->RemoveListener(&mock_sm_listener);
@@ -196,6 +202,8 @@ TEST_F(SecurityManagerTest, Listeners_TwiceRemoveListeners) {
 /*
  * Add and remove listeners
  */
+
+// TODO(OHerasym) : thread qt assert fails
 TEST_F(SecurityManagerTest, Listeners_NoListeners) {
   // Check correct removing listener
   security_manager_->RemoveListener(&mock_sm_listener);
@@ -213,6 +221,8 @@ TEST_F(SecurityManagerTest, Listeners_NoListeners) {
 /*
  * Notifying two listeners
  */
+
+// TODO(OHerasym) : thread qt assert fails
 TEST_F(SecurityManagerTest, Listeners_Notifying) {
   // Check correct removing listener
   security_manager_->RemoveListener(&mock_sm_listener);
@@ -264,6 +274,8 @@ TEST_F(SecurityManagerTest, Listeners_Notifying) {
  * SecurityManager with NULL CryptoManager shall send
  * InternallError (ERROR_NOT_SUPPORTED) on any Query
  */
+
+// TODO(OHerasym) : test don't finish executing
 TEST_F(SecurityManagerTest, SecurityManager_NULLCryptoManager) {
   // Expect InternalError with ERROR_ID
   uint32_t connection_id = 0;
@@ -287,6 +299,8 @@ TEST_F(SecurityManagerTest, SecurityManager_NULLCryptoManager) {
 /*
  * Shall skip all OnMobileMessageSent
  */
+
+// TODO(OHerasym) : thread qt assert fails
 TEST_F(SecurityManagerTest, OnMobileMessageSent) {
   const uint8_t* data_param = NULL;
   const RawMessagePtr rawMessagePtr(
@@ -296,6 +310,8 @@ TEST_F(SecurityManagerTest, OnMobileMessageSent) {
 /*
  * Shall skip all not-Secure messages
  */
+
+// TODO(OHerasym) : test don't finish executing
 TEST_F(SecurityManagerTest, GetWrongServiceType) {
   // Call with wrong Service type
   call_OnMessageReceived(NULL, 0, kRpc);
@@ -307,6 +323,8 @@ TEST_F(SecurityManagerTest, GetWrongServiceType) {
 /*
  * Shall send InternallError on null data recieved
  */
+
+// TODO(OHerasym) : test don't finish executing
 TEST_F(SecurityManagerTest, GetEmptyQuery) {
   uint32_t connection_id = 0;
   uint8_t session_id = 0;
@@ -327,6 +345,8 @@ TEST_F(SecurityManagerTest, GetEmptyQuery) {
 /*
  * Shall send InternallError on null data recieved
  */
+
+// TODO(OHerasym) : test don't finish executing
 TEST_F(SecurityManagerTest, GetWrongJSONSize) {
   SetMockCryptoManager();
   uint32_t connection_id = 0;
@@ -350,6 +370,8 @@ TEST_F(SecurityManagerTest, GetWrongJSONSize) {
 /*
  * Shall send InternallError on INVALID_QUERY_ID
  */
+
+// TODO(OHerasym) : test don't finish executing
 TEST_F(SecurityManagerTest, GetInvalidQueryId) {
   SetMockCryptoManager();
   uint32_t connection_id = 0;
@@ -374,6 +396,8 @@ TEST_F(SecurityManagerTest, GetInvalidQueryId) {
  * Shall send Internall Error on call
  * CreateSSLContext for already protected connections
  */
+
+// TODO(OHerasym) : test don't finish executing
 TEST_F(SecurityManagerTest, CreateSSLContext_ServiceAlreadyProtected) {
   SetMockCryptoManager();
 
@@ -387,6 +411,8 @@ TEST_F(SecurityManagerTest, CreateSSLContext_ServiceAlreadyProtected) {
 /*
  * Shall send Internall Error on error create SSL
  */
+
+// TODO(OHerasym) : test don't finish executing
 TEST_F(SecurityManagerTest, CreateSSLContext_ErrorCreateSSL) {
   SetMockCryptoManager();
   // Expect InternalError with ERROR_ID
@@ -414,6 +440,8 @@ TEST_F(SecurityManagerTest, CreateSSLContext_ErrorCreateSSL) {
  * Shall send InternalError with SERVICE_NOT_FOUND
  * on getting any Error with call SetSSLContext
  */
+
+// TODO(OHerasym) : test don't finish executing
 TEST_F(SecurityManagerTest, CreateSSLContext_SetSSLContextError) {
   SetMockCryptoManager();
   // Expect InternalError with ERROR_ID
@@ -446,6 +474,8 @@ TEST_F(SecurityManagerTest, CreateSSLContext_SetSSLContextError) {
 /*
  * Shall protect connection on correct call CreateSSLContext
  */
+
+// TODO(OHerasym) : test don't finish executing
 TEST_F(SecurityManagerTest, CreateSSLContext_Success) {
   SetMockCryptoManager();
   // Expect no Errors
@@ -468,6 +498,8 @@ TEST_F(SecurityManagerTest, CreateSSLContext_Success) {
 /*
  * Shall send InternallError on call StartHandshake for uprotected service
  */
+
+// TODO(OHerasym) : test don't finish executing
 TEST_F(SecurityManagerTest, StartHandshake_ServiceStillUnprotected) {
   SetMockCryptoManager();
   uint32_t connection_id = 0;
@@ -496,6 +528,8 @@ TEST_F(SecurityManagerTest, StartHandshake_ServiceStillUnprotected) {
 /*
  * Shall send InternallError on SSL error and notify listeners
  */
+
+// TODO(OHerasym) : test don't finish executing
 TEST_F(SecurityManagerTest, StartHandshake_SSLInternalError) {
   SetMockCryptoManager();
 
@@ -535,6 +569,8 @@ TEST_F(SecurityManagerTest, StartHandshake_SSLInternalError) {
 /*
  * Shall send data on call StartHandshake
  */
+
+// TODO(OHerasym) : test don't finish executing
 TEST_F(SecurityManagerTest, StartHandshake_SSLInitIsNotComplete) {
   SetMockCryptoManager();
   uint32_t connection_id = 0;
@@ -582,6 +618,8 @@ TEST_F(SecurityManagerTest, StartHandshake_SSLInitIsNotComplete) {
  * Shall notify listeners on call StartHandshake after SSLContext initialization
  * complete
  */
+
+// TODO(OHerasym) : test don't finish executing
 TEST_F(SecurityManagerTest, StartHandshake_SSLInitIsComplete) {
   SetMockCryptoManager();
   // Expect no message send
@@ -604,6 +642,8 @@ TEST_F(SecurityManagerTest, StartHandshake_SSLInitIsComplete) {
  * Shall send InternallError on
  * getting SEND_HANDSHAKE_DATA with NULL data
  */
+
+// TODO(OHerasym) : test don't finish executing
 TEST_F(SecurityManagerTest, ProccessHandshakeData_WrongDataSize) {
   SetMockCryptoManager();
   uint32_t connection_id = 0;
@@ -627,6 +667,8 @@ TEST_F(SecurityManagerTest, ProccessHandshakeData_WrongDataSize) {
  * getting SEND_HANDSHAKE_DATA from mobile side
  * for service which is not protected
  */
+
+// TODO(OHerasym) : test don't finish executing
 TEST_F(SecurityManagerTest, ProccessHandshakeData_ServiceNotProtected) {
   SetMockCryptoManager();
   // Expect InternalError with ERROR_ID
@@ -660,6 +702,8 @@ TEST_F(SecurityManagerTest, ProccessHandshakeData_ServiceNotProtected) {
  * SEND_HANDSHAKE_DATA from mobile side with invalid handshake
  * data (DoHandshakeStep return NULL pointer)
  */
+
+// TODO(OHerasym) : test don't finish executing
 TEST_F(SecurityManagerTest, ProccessHandshakeData_InvalidData) {
   SetMockCryptoManager();
 
@@ -722,6 +766,8 @@ TEST_F(SecurityManagerTest, ProccessHandshakeData_InvalidData) {
  * Shall send HandshakeData on getting SEND_HANDSHAKE_DATA from mobile side
  * with correct handshake data Check Fail and sussecc states
  */
+
+// TODO(OHerasym) : test don't finish executing
 TEST_F(SecurityManagerTest, ProccessHandshakeData_Answer) {
   SetMockCryptoManager();
   // Count handshake calls
@@ -777,6 +823,8 @@ TEST_F(SecurityManagerTest, ProccessHandshakeData_Answer) {
  * and return handshake data
  * Check Fail and sussecc states
  */
+
+// TODO(OHerasym) : test don't finish executing
 TEST_F(SecurityManagerTest, ProccessHandshakeData_HandshakeFinished) {
   SetMockCryptoManager();
   // Count handshake calls
@@ -847,6 +895,8 @@ TEST_F(SecurityManagerTest, ProccessHandshakeData_HandshakeFinished) {
 /*
  * Shall not any query on getting empty SEND_INTERNAL_ERROR
  */
+
+// TODO(OHerasym) : test don't finish executing
 TEST_F(SecurityManagerTest, GetInternalError_NullData) {
   SetMockCryptoManager();
 
@@ -857,6 +907,8 @@ TEST_F(SecurityManagerTest, GetInternalError_NullData) {
 /*
  * Shall not send any query on getting SEND_INTERNAL_ERROR
  */
+
+// TODO(OHerasym) : test don't finish executing
 TEST_F(SecurityManagerTest, GetInternalError) {
   SetMockCryptoManager();
 
@@ -868,6 +920,8 @@ TEST_F(SecurityManagerTest, GetInternalError) {
 /*
  * Shall not send any query on getting SEND_INTERNAL_ERROR with error string
  */
+
+// TODO(OHerasym) : test don't finish executing
 TEST_F(SecurityManagerTest, GetInternalError_WithErrText) {
   SetMockCryptoManager();
 
@@ -881,6 +935,8 @@ TEST_F(SecurityManagerTest, GetInternalError_WithErrText) {
 /*
  * Shall not send any query on getting SEND_INTERNAL_ERROR with error string
  */
+
+// TODO(OHerasym) : test don't finish executing
 TEST_F(SecurityManagerTest, GetInternalError_WithErrJSONText) {
   SetMockCryptoManager();
 

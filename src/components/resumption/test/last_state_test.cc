@@ -31,9 +31,7 @@
  */
 
 #include <string>
-
 #include "gtest/gtest.h"
-
 #include "resumption/last_state.h"
 #include "utils/file_system.h"
 
@@ -42,7 +40,6 @@ namespace components {
 namespace resumption_test {
 
 using namespace ::resumption;
-using namespace ::Json;
 
 const std::string kAppStorageFolder = "app_storage_folder";
 const std::string kAppInfoStorageFile = "app_info_storage";
@@ -55,9 +52,8 @@ class LastStateTest : public ::testing::Test {
 
   static void SetUpTestCase() {
     file_system::DeleteFile(kAppInfoStorageFile);
-    file_system::RemoveDirectory(kAppStorageFolder);
+    file_system::RemoveDirectory(kAppStorageFolder, false);
   }
-
   void SetUp() OVERRIDE {
     ASSERT_TRUE(file_system::CreateFile(app_info_dat_file_));
   }
@@ -65,7 +61,6 @@ class LastStateTest : public ::testing::Test {
   void TearDown() OVERRIDE {
     EXPECT_TRUE(file_system::DeleteFile((app_info_dat_file_)));
   }
-
   const std::string empty_dictionary_;
   const std::string app_info_dat_file_;
 
@@ -73,48 +68,51 @@ class LastStateTest : public ::testing::Test {
 };
 
 TEST_F(LastStateTest, Basic) {
-  const Value& dictionary = last_state_.dictionary;
-  EXPECT_EQ(empty_dictionary_, dictionary.toStyledString());
+  utils::json::JsonValue& dictionary = last_state_.dictionary();
+  EXPECT_EQ("null\n", dictionary.ToJson(true));
 }
 
 TEST_F(LastStateTest, SetGetData) {
   {
-    const Value& dictionary = last_state_.dictionary;
-    const Value& bluetooth_info =
+    utils::json::JsonValue& dictionary = last_state_.dictionary();
+    utils::json::JsonValue bluetooth_info =
         dictionary["TransportManager"]["BluetoothAdapter"];
-    EXPECT_EQ(empty_dictionary_, bluetooth_info.toStyledString());
+    EXPECT_EQ("null\n", bluetooth_info.ToJson(true));
 
-    const Value& tcp_adapter_info =
+    utils::json::JsonValue tcp_adapter_info =
         dictionary["TransportManager"]["TcpAdapter"]["devices"];
-    EXPECT_EQ(empty_dictionary_, tcp_adapter_info.toStyledString());
+    EXPECT_EQ("null\n", tcp_adapter_info.ToJson(true));
 
-    const Value& resumption_time =
+    utils::json::JsonValue resumption_time =
         dictionary["resumption"]["last_ign_off_time"];
-    EXPECT_EQ("null\n", resumption_time.toStyledString());
+    EXPECT_EQ("null\n", resumption_time.ToJson(true));
 
-    const Value& resumption_list = dictionary["resumption"]["resume_app_list"];
-    EXPECT_EQ("null\n", resumption_list.toStyledString());
+    utils::json::JsonValue resumption_list =
+        dictionary["resumption"]["resume_app_list"];
+    EXPECT_EQ("null\n", resumption_list.ToJson(true));
 
-    Value test_value;
+    utils::json::JsonValue test_value;
     test_value["name"] = "test_device";
 
-    last_state_.dictionary["TransportManager"]["TcpAdapter"]["devices"] =
-        test_value;
-    last_state_.dictionary["TransportManager"]["BluetoothAdapter"]["devices"] =
+    utils::json::JsonValue& save_dictionary = last_state_.dictionary();
+    save_dictionary["TransportManager"]["TcpAdapter"]["devices"] = test_value;
+    save_dictionary["TransportManager"]["BluetoothAdapter"]["devices"] =
         "bluetooth_device";
+    last_state_.SetDictionary(save_dictionary);
     last_state_.SaveToFileSystem();
   }
 
-  const Value& dictionary = last_state_.dictionary;
+  utils::json::JsonValue dictionary = last_state_.dictionary();
 
-  const Value& bluetooth_info =
+  utils::json::JsonValue bluetooth_info =
       dictionary["TransportManager"]["BluetoothAdapter"];
-  const Value& tcp_adapter_info = dictionary["TransportManager"]["TcpAdapter"];
+  utils::json::JsonValue tcp_adapter_info =
+      dictionary["TransportManager"]["TcpAdapter"];
   EXPECT_EQ("{\n   \"devices\" : \"bluetooth_device\"\n}\n",
-            bluetooth_info.toStyledString());
+            bluetooth_info.ToJson(true));
   EXPECT_EQ(
       "{\n   \"devices\" : {\n      \"name\" : \"test_device\"\n   }\n}\n",
-      tcp_adapter_info.toStyledString());
+      tcp_adapter_info.ToJson(true));
 }
 
 }  // namespace resumption_test

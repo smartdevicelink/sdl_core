@@ -45,7 +45,7 @@ NaviSubscribeWayPointsResponse::NaviSubscribeWayPointsResponse(
 NaviSubscribeWayPointsResponse::~NaviSubscribeWayPointsResponse() {}
 
 void NaviSubscribeWayPointsResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   event_engine::Event event(
       hmi_apis::FunctionID::Navigation_SubscribeWayPoints);

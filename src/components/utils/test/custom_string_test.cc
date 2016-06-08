@@ -32,6 +32,7 @@
 
 #include <iostream>
 #include <string>
+#include <cstdint>
 #include "gtest/gtest.h"
 #include "utils/custom_string.h"
 

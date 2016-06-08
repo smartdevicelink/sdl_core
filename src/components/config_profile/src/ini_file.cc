@@ -43,6 +43,7 @@
 #include <unistd.h>
 #else
 #define PATH_MAX _MAX_PATH
+#define snprintf _snprintf_s
 #endif
 
 #ifdef __linux__
@@ -137,7 +138,11 @@ char* ini_read_value(const char* fname,
       }
       if (INI_RIGHT_ITEM == result) {
         fclose(fp);
+#if defined(_MSC_VER)
+        snprintf(value, INI_LINE_LEN, INI_LINE_LEN, "%s", val);
+#else
         snprintf(value, INI_LINE_LEN, "%s", val);
+#endif
         return value;
       }
     }
@@ -181,22 +186,22 @@ char ini_write_value(const char* fname,
 
 #if USE_MKSTEMP
   {
-    const char* temp_str = "./";
+    char const* temp_str;
     int32_t fd = -1;
-    if (temp_str) {
-      snprintf(temp_fname, PATH_MAX, "%s/ini.XXXXXX", temp_str);
+    temp_str = static_cast<char*>(getenv("TMPDIR"));
+    if (!temp_str) {
+      temp_str = "/var/tmp";
+    }
+    snprintf(temp_fname, PATH_MAX, "%s/ini.XXXXXX", temp_str);
 
-      fd = mkstemp(temp_fname);
-      if (-1 == fd) {
-        return FALSE;
-      }
-      wr_fp = fdopen(fd, "w");
-      if (NULL == wr_fp) {
-        unlink(temp_fname);
-        close(fd);
-        return FALSE;
-      }
-    } else {
+    fd = mkstemp(temp_fname);
+    if (-1 == fd) {
+      return FALSE;
+    }
+    wr_fp = fdopen(fd, "w");
+    if (NULL == wr_fp) {
+      unlink(temp_fname);
+      close(fd);
       return FALSE;
     }
   }
@@ -284,7 +289,11 @@ Ini_search_id ini_parse_line(const char* line, const char* tag, char* value) {
   char temp_str[INI_LINE_LEN] = "";
   *temp_str = '\0';
 
+#if defined(_MSC_VER)
+  snprintf(value, INI_LINE_LEN, INI_LINE_LEN, "%s", line);
+#else
   snprintf(value, INI_LINE_LEN, "%s", line);
+#endif
 
   /* cut leading spaces */
   line_ptr = line;
@@ -298,7 +307,11 @@ Ini_search_id ini_parse_line(const char* line, const char* tag, char* value) {
     }
   }
   if ('\0' == *line_ptr) {
+#if defined(_MSC_VER)
+    snprintf(value, INI_LINE_LEN, INI_LINE_LEN, "\n");
+#else
     snprintf(value, INI_LINE_LEN, "\n");
+#endif
     return INI_NOTHING;
   }
 
@@ -341,7 +354,11 @@ Ini_search_id ini_parse_line(const char* line, const char* tag, char* value) {
       }
     }
 
+#if defined(_MSC_VER)
+    snprintf(value, INI_LINE_LEN, INI_LINE_LEN, "%s", temp_str);
+#else
     snprintf(value, INI_LINE_LEN, "%s", temp_str);
+#endif
 
     for (uint32_t i = 0; i < strlen(temp_str); i++)
       temp_str[i] = toupper(temp_str[i]);
@@ -365,7 +382,11 @@ Ini_search_id ini_parse_line(const char* line, const char* tag, char* value) {
       }
     }
 
+#if defined(_MSC_VER)
+    snprintf(value, INI_LINE_LEN, INI_LINE_LEN, "%s", temp_str);
+#else
     snprintf(value, INI_LINE_LEN, "%s", temp_str);
+#endif
 
     for (uint32_t i = 0; i < strlen(temp_str); i++)
       temp_str[i] = toupper(temp_str[i]);
@@ -383,7 +404,11 @@ Ini_search_id ini_parse_line(const char* line, const char* tag, char* value) {
         }
       }
 
+#if defined(_MSC_VER)
+      snprintf(value, INI_LINE_LEN, INI_LINE_LEN, "%s", line_ptr);
+#else
       snprintf(value, INI_LINE_LEN, "%s", line_ptr);
+#endif
 
       if (value[0] != '\0') {
         /* cut trailing stuff */

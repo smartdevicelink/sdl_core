@@ -37,8 +37,7 @@
 #include <utility>
 #include "gtest/gtest.h"
 
-#include "utils/sqlite_wrapper/sql_database.h"
-#include "utils/sqlite_wrapper/sql_query.h"
+#include "utils/sql_wrapper.h"
 #include "utils/file_system.h"
 #include "application_manager/resumption/resumption_sql_queries.h"
 #include "policy/sql_pt_queries.h"
@@ -84,7 +83,9 @@ const string kDeleteData =
     "COMMIT; "
     "VACUUM;";
 
-const std::string kJournalOff = "PRAGMA journal_mode = OFF;";
+const static std::string kJournalOff = "PRAGMA journal_mode = OFF;";
+const static std::string db_path = "test";
+const static std::string connection_name = "test_connection";
 
 class ResumptionSqlQueriesTest : public ::testing::Test {
  public:
@@ -113,7 +114,7 @@ class ResumptionSqlQueriesTest : public ::testing::Test {
   static const int timeStamp2;
 
   static void SetUpTestCase() {
-    db_ = new SQLDatabase();
+    db_ = new SQLDatabase(db_path, connection_name);
     ASSERT_TRUE(db_->Open());
     ASSERT_TRUE(db_->IsReadWrite());
     SQLQuery query(db_);
@@ -132,10 +133,11 @@ class ResumptionSqlQueriesTest : public ::testing::Test {
     DeleteTablesData();
   }
 
+  typedef std::vector<std::string> OrderedQueryParams;
+
   void CheckDeleteQuery(const string& count_query,
                         const string& query_to_check,
-                        pair<int, string> app_info,
-                        pair<int, string> dev_info,
+                        const OrderedQueryParams& params,
                         const int value_before,
                         const int value_after,
                         const int position_in_result);
@@ -194,7 +196,8 @@ class ResumptionSqlQueriesTest : public ::testing::Test {
                                  bool isMediaApplication,
                                  const string& appID,
                                  const string& deviceID,
-                                 const int64_t glob_prop_key);
+                                 const int64_t glob_prop_key,
+                                 const bool isSubscribedForWayPoints);
 
   SQLQuery& FillImageTable(SQLQuery& query,
                            const int imageType,
@@ -352,13 +355,13 @@ const int ResumptionSqlQueriesTest::ign_off_count2 = 4;
 const int ResumptionSqlQueriesTest::timeStamp = 2015;
 const int ResumptionSqlQueriesTest::timeStamp2 = 2016;
 
-void ResumptionSqlQueriesTest::CheckDeleteQuery(const string& count_query,
-                                                const string& query_to_check,
-                                                pair<int, string> app_info,
-                                                pair<int, string> dev_info,
-                                                const int value_before,
-                                                const int value_after,
-                                                const int position_in_result) {
+void ResumptionSqlQueriesTest::CheckDeleteQuery(
+    const string& count_query,
+    const string& query_to_check,
+    const OrderedQueryParams& params,
+    const int value_before,
+    const int value_after,
+    const int position_in_result) {
   SQLQuery query(db());
   EXPECT_TRUE(query.Prepare(count_query));
   EXPECT_TRUE(query.Exec());
@@ -367,12 +370,10 @@ void ResumptionSqlQueriesTest::CheckDeleteQuery(const string& count_query,
   // Act
   SQLQuery query_to_check_request(db());
   EXPECT_TRUE(query_to_check_request.Prepare(query_to_check));
-  if (!app_info.second.empty()) {
-    query_to_check_request.Bind(app_info.first, app_info.second);
+  for (size_t i = 0; i < params.size(); ++i) {
+    query_to_check_request.Bind(static_cast<int>(i), params[i]);
   }
-  if (!dev_info.second.empty()) {
-    query_to_check_request.Bind(dev_info.first, dev_info.second);
-  }
+
   EXPECT_TRUE(query_to_check_request.Exec());
   // Check after action
   EXPECT_TRUE(query.Exec());
@@ -519,7 +520,8 @@ SQLQuery& ResumptionSqlQueriesTest::FillApplicationTable(
     bool isMediaApplication,
     const string& appID,
     const string& deviceID,
-    const int64_t glob_prop_key) {
+    const int64_t glob_prop_key,
+    const bool isSubscribedForWayPoints) {
   EXPECT_TRUE(query.Prepare(kInsertApplication));
   query.Bind(0, connection_key);
   query.Bind(1, grammarID);
@@ -532,6 +534,7 @@ SQLQuery& ResumptionSqlQueriesTest::FillApplicationTable(
   query.Bind(8, isMediaApplication);
   query.Bind(9, appID);
   query.Bind(10, deviceID);
+  query.Bind(11, isSubscribedForWayPoints);
   EXPECT_TRUE(query.Exec());
   return query;
 }
@@ -818,7 +821,8 @@ TEST_F(ResumptionSqlQueriesTest, kSelectCountHMILevel_ExpectDataCorrect) {
                        false,
                        app_id1,
                        device_id,
-                       key);
+                       key,
+                       true);
 
   ValToPosPair p1(0, device_id);
   ValToPosPair p2(1, app_id1);
@@ -844,7 +848,8 @@ TEST_F(ResumptionSqlQueriesTest, kSelectHMILevel_ExpectDataCorrect) {
                        false,
                        app_id1,
                        device_id,
-                       key);
+                       key,
+                       true);
   ValToPosPair p1(0, device_id);
   ValToPosPair p2(1, app_id1);
   // Check
@@ -869,7 +874,8 @@ TEST_F(ResumptionSqlQueriesTest, kCheckHMIId_ExpectDataCorrect) {
                        false,
                        app_id1,
                        device_id,
-                       key);
+                       key,
+                       true);
   ValToPosPair p1(0, IntToString(hmiAppID));
   ValToPosPair p2(1, "");
   // Check
@@ -894,7 +900,8 @@ TEST_F(ResumptionSqlQueriesTest, kSelectHMIId_ExpectDataCorrect) {
                        false,
                        app_id1,
                        device_id,
-                       key);
+                       key,
+                       true);
   ValToPosPair p1(0, device_id);
   ValToPosPair p2(1, app_id1);
   // Check
@@ -919,7 +926,8 @@ TEST_F(ResumptionSqlQueriesTest, kSelectCountHMIId_ExpectDataCorrect) {
                        false,
                        app_id1,
                        device_id,
-                       key);
+                       key,
+                       true);
 
   ValToPosPair p1(0, device_id);
   ValToPosPair p2(1, app_id1);
@@ -945,7 +953,8 @@ TEST_F(ResumptionSqlQueriesTest, kCountHashId_ExpectDataCorrect) {
                        false,
                        app_id1,
                        device_id,
-                       key);
+                       key,
+                       true);
 
   ValToPosPair p1(0, device_id);
   ValToPosPair p2(1, app_id1);
@@ -971,7 +980,8 @@ TEST_F(ResumptionSqlQueriesTest, kSelectHashId_ExpectDataCorrect) {
                        false,
                        app_id1,
                        device_id,
-                       key);
+                       key,
+                       true);
   ValToPosPair p1(0, device_id);
   ValToPosPair p2(1, app_id1);
   // Check
@@ -1005,7 +1015,8 @@ TEST_F(ResumptionSqlQueriesTest, kCheckApplication_ExpectDataCorrect) {
                        false,
                        app_id1,
                        device_id,
-                       key);
+                       key,
+                       true);
   ValToPosPair p1(0, device_id);
   ValToPosPair p2(1, app_id1);
   // Check
@@ -1030,7 +1041,8 @@ TEST_F(ResumptionSqlQueriesTest, kCountApplications_ExpectDataCorrect) {
                        false,
                        app_id1,
                        device_id,
-                       key);
+                       key,
+                       true);
 
   key = FillImageTable(temp_query, 1, "tst_img2").LastInsertId();
   key = FillGlobalPropertiesTable(
@@ -1047,7 +1059,8 @@ TEST_F(ResumptionSqlQueriesTest, kCountApplications_ExpectDataCorrect) {
                        false,
                        app_id2,
                        device_id,
-                       key);
+                       key,
+                       true);
   // Check
   CheckSelectQuery(kCountApplications, 2, 0);
 }
@@ -1072,7 +1085,8 @@ TEST_F(ResumptionSqlQueriesTest,
                        false,
                        app_id1,
                        device_id,
-                       key);
+                       key,
+                       true);
   // Checks
   CheckSelectQuery(kSelectDataForLoadResumeData, hmiLevel, 0);
   CheckSelectQuery(kSelectDataForLoadResumeData, ign_off_count, 1);
@@ -1100,7 +1114,8 @@ TEST_F(ResumptionSqlQueriesTest, kUpdateHMILevel_ExpectDataUpdated) {
                        false,
                        app_id1,
                        device_id,
-                       key);
+                       key,
+                       true);
   // Act
   SQLQuery query_update_hmi_level(db());
   EXPECT_TRUE(query_update_hmi_level.Prepare(kUpdateHMILevel));
@@ -1132,7 +1147,8 @@ TEST_F(ResumptionSqlQueriesTest, kUpdateIgnOffCount_ExpectDataUpdated) {
                        false,
                        app_id1,
                        device_id,
-                       key);
+                       key,
+                       true);
 
   const std::string kSelectIgnOffCount =
       "SELECT ign_off_count FROM application;";
@@ -1164,7 +1180,8 @@ TEST_F(ResumptionSqlQueriesTest, kCountApplicationsIgnOff_ExpectDataCorrect) {
                        false,
                        app_id1,
                        device_id,
-                       key);
+                       key,
+                       true);
 
   FillApplicationTable(temp_query,
                        connection_key,
@@ -1177,7 +1194,8 @@ TEST_F(ResumptionSqlQueriesTest, kCountApplicationsIgnOff_ExpectDataCorrect) {
                        false,
                        app_id2,
                        device_id,
-                       key);
+                       key,
+                       true);
 
   ValToPosPair p1(0, IntToString(4));
   ValToPosPair p2(1, "");
@@ -1204,7 +1222,8 @@ TEST_F(ResumptionSqlQueriesTest,
                        false,
                        app_id1,
                        device_id,
-                       key);
+                       key,
+                       true);
 
   FillApplicationTable(temp_query,
                        connection_key,
@@ -1217,7 +1236,8 @@ TEST_F(ResumptionSqlQueriesTest,
                        false,
                        app_id2,
                        device_id,
-                       key);
+                       key,
+                       true);
 
   ValToPosPair p1(0, IntToString(4));
   ValToPosPair p2(1, "");
@@ -1244,7 +1264,8 @@ TEST_F(ResumptionSqlQueriesTest, kUpdateSuspendData_ExpectDataUpdated) {
                        false,
                        app_id1,
                        device_id,
-                       key);
+                       key,
+                       true);
 
   // Act
   SQLQuery query_update_suspend_data(db());
@@ -1273,15 +1294,17 @@ TEST_F(ResumptionSqlQueriesTest, kDeleteFile_ExpectDataDeleted) {
                               false,
                               app_id2,
                               device_id,
-                              key1).LastInsertId();
+                              key1,
+                              true).LastInsertId();
   int64_t key2 =
       FillFileTable(temp_query, 1, true, true, "tst_name").LastInsertId();
   FillApplicationFilesArrayTable(temp_query, key1, key2);
   // Check before action
   const std::string select_count_file = "SELECT COUNT(*) from `file` ";
-  ValToPosPair p1(0, app_id2);
-  ValToPosPair p2(1, device_id);
-  CheckDeleteQuery(select_count_file, kDeleteFile, p1, p2, 1, 0, 0);
+  OrderedQueryParams p;
+  p.push_back(app_id2);
+  p.push_back(device_id);
+  CheckDeleteQuery(select_count_file, kDeleteFile, p, 1, 0, 0);
 }
 
 TEST_F(ResumptionSqlQueriesTest,
@@ -1303,19 +1326,20 @@ TEST_F(ResumptionSqlQueriesTest,
                               false,
                               app_id2,
                               device_id,
-                              key1).LastInsertId();
+                              key1,
+                              true).LastInsertId();
   int64_t key2 =
       FillFileTable(temp_query, 1, true, true, "tst_name").LastInsertId();
   FillApplicationFilesArrayTable(temp_query, key1, key2);
   // Check
   const std::string select_count_applicationsFilesArray =
       "SELECT COUNT(*) from `applicationFilesArray` ";
-  ValToPosPair p1(0, app_id2);
-  ValToPosPair p2(1, device_id);
+  OrderedQueryParams p;
+  p.push_back(app_id2);
+  p.push_back(device_id);
   CheckDeleteQuery(select_count_applicationsFilesArray,
                    kDeleteApplicationFilesArray,
-                   p1,
-                   p2,
+                   p,
                    1,
                    0,
                    0);
@@ -1339,16 +1363,18 @@ TEST_F(ResumptionSqlQueriesTest, kDeleteSubMenu_ExpectDataDeleted) {
                              false,
                              app_id2,
                              device_id,
-                             key).LastInsertId();
+                             key,
+                             true).LastInsertId();
   int64_t submenu_key =
       FillSubMenuTable(temp_query, 1, "tst_menuName", 2).LastInsertId();
 
   FillApplicationSubMenuArrayTable(temp_query, key, submenu_key);
   // Check
   const std::string select_count_subMenu = "SELECT COUNT(*) FROM subMenu;";
-  ValToPosPair p1(0, app_id2);
-  ValToPosPair p2(1, device_id);
-  CheckDeleteQuery(select_count_subMenu, kDeleteSubMenu, p1, p2, 1, 0, 0);
+  OrderedQueryParams p;
+  p.push_back(app_id2);
+  p.push_back(device_id);
+  CheckDeleteQuery(select_count_subMenu, kDeleteSubMenu, p, 1, 0, 0);
 }
 
 TEST_F(ResumptionSqlQueriesTest,
@@ -1370,7 +1396,8 @@ TEST_F(ResumptionSqlQueriesTest,
                              false,
                              app_id2,
                              device_id,
-                             key).LastInsertId();
+                             key,
+                             true).LastInsertId();
 
   int64_t submenu_key =
       FillSubMenuTable(temp_query, 1, "tst_menuName", 2).LastInsertId();
@@ -1379,10 +1406,11 @@ TEST_F(ResumptionSqlQueriesTest,
   // Check
   const std::string select_count_subMenu =
       "SELECT COUNT(*) FROM applicationSubMenuArray;";
-  ValToPosPair p1(0, app_id2);
-  ValToPosPair p2(1, device_id);
+  OrderedQueryParams p;
+  p.push_back(app_id2);
+  p.push_back(device_id);
   CheckDeleteQuery(
-      select_count_subMenu, kDeleteApplicationSubMenuArray, p1, p2, 1, 0, 0);
+      select_count_subMenu, kDeleteApplicationSubMenuArray, p, 1, 0, 0);
 }
 
 TEST_F(ResumptionSqlQueriesTest,
@@ -1404,7 +1432,8 @@ TEST_F(ResumptionSqlQueriesTest,
                               false,
                               app_id2,
                               device_id,
-                              key1).LastInsertId();
+                              key1,
+                              true).LastInsertId();
   int64_t key2 =
       FillFileTable(temp_query, 1, true, true, "tst_name").LastInsertId();
   key1 = FillApplicationFilesArrayTable(temp_query, key1, key2).LastInsertId();
@@ -1412,12 +1441,12 @@ TEST_F(ResumptionSqlQueriesTest,
   // Check
   const std::string select_count_applicationSubscribtionsArray =
       "SELECT COUNT(*) FROM applicationSubscribtionsArray;";
-  ValToPosPair p1(0, app_id2);
-  ValToPosPair p2(1, device_id);
+  OrderedQueryParams p;
+  p.push_back(app_id2);
+  p.push_back(device_id);
   CheckDeleteQuery(select_count_applicationSubscribtionsArray,
                    kDeleteApplicationSubscribtionsArray,
-                   p1,
-                   p2,
+                   p,
                    1,
                    0,
                    0);
@@ -1443,14 +1472,15 @@ TEST_F(ResumptionSqlQueriesTest, kDeleteImageFromCommands_ExpectDataDeleted) {
                               false,
                               app_id2,
                               device_id,
-                              key1).LastInsertId();
+                              key1,
+                              true).LastInsertId();
   FillApplicationCommandsArrayTable(temp_query, key1, key2);
   // Check before action
   const std::string select_count_image = "SELECT COUNT(*) FROM image;";
-  ValToPosPair p1(0, app_id2);
-  ValToPosPair p2(1, device_id);
-  CheckDeleteQuery(
-      select_count_image, kDeleteImageFromCommands, p1, p2, 1, 0, 0);
+  OrderedQueryParams p;
+  p.push_back(app_id2);
+  p.push_back(device_id);
+  CheckDeleteQuery(select_count_image, kDeleteImageFromCommands, p, 1, 0, 0);
 }
 
 TEST_F(ResumptionSqlQueriesTest, kDeleteVrCommands_ExpectDataDeleted) {
@@ -1473,7 +1503,8 @@ TEST_F(ResumptionSqlQueriesTest, kDeleteVrCommands_ExpectDataDeleted) {
                               false,
                               app_id2,
                               device_id,
-                              key1).LastInsertId();
+                              key1,
+                              true).LastInsertId();
 
   FillVRCommandsArrayTable(
       temp_query, "tst_vr_command", kVRCommandFromCommand, key2);
@@ -1481,10 +1512,10 @@ TEST_F(ResumptionSqlQueriesTest, kDeleteVrCommands_ExpectDataDeleted) {
   // Check
   const std::string select_count_vrCommandsArray =
       "SELECT COUNT(*) FROM vrCommandsArray;";
-  ValToPosPair p1(0, app_id2);
-  ValToPosPair p2(1, device_id);
-  CheckDeleteQuery(
-      select_count_vrCommandsArray, kDeleteVrCommands, p1, p2, 1, 0, 0);
+  OrderedQueryParams p;
+  p.push_back(app_id2);
+  p.push_back(device_id);
+  CheckDeleteQuery(select_count_vrCommandsArray, kDeleteVrCommands, p, 1, 0, 0);
 }
 
 TEST_F(ResumptionSqlQueriesTest, kDeleteCommands_ExpectDataDeleted) {
@@ -1508,14 +1539,16 @@ TEST_F(ResumptionSqlQueriesTest, kDeleteCommands_ExpectDataDeleted) {
                               false,
                               app_id2,
                               device_id,
-                              key1).LastInsertId();
+                              key1,
+                              true).LastInsertId();
 
   FillApplicationCommandsArrayTable(temp_query, key1, key2);
   // Check
   const std::string select_count_command = "SELECT COUNT(*) FROM command;";
-  ValToPosPair p1(0, app_id2);
-  ValToPosPair p2(1, device_id);
-  CheckDeleteQuery(select_count_command, kDeleteCommands, p1, p2, 1, 0, 0);
+  OrderedQueryParams p;
+  p.push_back(app_id2);
+  p.push_back(device_id);
+  CheckDeleteQuery(select_count_command, kDeleteCommands, p, 1, 0, 0);
 }
 
 TEST_F(ResumptionSqlQueriesTest,
@@ -1540,18 +1573,19 @@ TEST_F(ResumptionSqlQueriesTest,
                               false,
                               app_id2,
                               device_id,
-                              key1).LastInsertId();
+                              key1,
+                              true).LastInsertId();
 
   FillApplicationCommandsArrayTable(temp_query, key1, key2);
   // Check
   const std::string select_count_applicationCommandsArray =
       "SELECT COUNT(*) FROM applicationCommandsArray;";
-  ValToPosPair p1(0, app_id2);
-  ValToPosPair p2(1, device_id);
+  OrderedQueryParams p;
+  p.push_back(app_id2);
+  p.push_back(device_id);
   CheckDeleteQuery(select_count_applicationCommandsArray,
                    kDeleteApplicationCommandsArray,
-                   p1,
-                   p2,
+                   p,
                    1,
                    0,
                    0);
@@ -1578,17 +1612,20 @@ TEST_F(ResumptionSqlQueriesTest, kDeleteImageFromChoiceSet_ExpectDataDeleted) {
                                       false,
                                       app_id2,
                                       device_id,
-                                      key1).LastInsertId();
+                                      key1,
+                                      true).LastInsertId();
   int64_t key4 = FillApplicationChoiceSetTable(temp_query, 1, 2).LastInsertId();
   FillChoiceArrayTable(temp_query, key4, key2);
   FillApplicationChoiceSetArrayTable(temp_query, key4, key3);
 
   // Check
   const std::string select_count_image = "SELECT COUNT(*) FROM image;";
-  ValToPosPair p1(0, app_id2);
-  ValToPosPair p2(1, device_id);
-  CheckDeleteQuery(
-      select_count_image, kDeleteImageFromChoiceSet, p1, p2, 1, 0, 0);
+  OrderedQueryParams p;
+  p.push_back(app_id2);
+  p.push_back(device_id);
+  p.push_back(app_id2);
+  p.push_back(device_id);
+  CheckDeleteQuery(select_count_image, kDeleteImageFromChoiceSet, p, 1, 0, 0);
 }
 
 TEST_F(ResumptionSqlQueriesTest,
@@ -1611,7 +1648,8 @@ TEST_F(ResumptionSqlQueriesTest,
                               false,
                               app_id2,
                               device_id,
-                              key1).LastInsertId();
+                              key1,
+                              true).LastInsertId();
 
   FillVRCommandsArrayTable(
       temp_query, "tst_vr_command", kVRCommandFromChoice, key2);
@@ -1624,15 +1662,11 @@ TEST_F(ResumptionSqlQueriesTest,
   const std::string select_count_vrCommandsArray =
       "SELECT COUNT(*) FROM vrCommandsArray;";
   // Check
-  ValToPosPair p1(0, app_id2);
-  ValToPosPair p2(1, device_id);
-  CheckDeleteQuery(select_count_vrCommandsArray,
-                   kDeleteVrCommandsFromChoiceSet,
-                   p1,
-                   p2,
-                   1,
-                   0,
-                   0);
+  OrderedQueryParams p;
+  p.push_back(app_id2);
+  p.push_back(device_id);
+  CheckDeleteQuery(
+      select_count_vrCommandsArray, kDeleteVrCommandsFromChoiceSet, p, 1, 0, 0);
 }
 
 TEST_F(ResumptionSqlQueriesTest, kDeleteChoice_ExpectDataDeleted) {
@@ -1654,16 +1688,18 @@ TEST_F(ResumptionSqlQueriesTest, kDeleteChoice_ExpectDataDeleted) {
                               false,
                               app_id2,
                               device_id,
-                              key1).LastInsertId();
+                              key1,
+                              true).LastInsertId();
   int64_t key3 = FillApplicationChoiceSetTable(temp_query, 1, 2).LastInsertId();
   FillChoiceArrayTable(temp_query, key3, key2);
   FillApplicationChoiceSetArrayTable(temp_query, key3, key1);
 
   // Check before action
   const std::string select_count_choice = "SELECT COUNT(*) FROM choice;";
-  ValToPosPair p1(0, app_id2);
-  ValToPosPair p2(1, device_id);
-  CheckDeleteQuery(select_count_choice, kDeleteChoice, p1, p2, 1, 0, 0);
+  OrderedQueryParams p;
+  p.push_back(app_id2);
+  p.push_back(device_id);
+  CheckDeleteQuery(select_count_choice, kDeleteChoice, p, 1, 0, 0);
 }
 
 TEST_F(ResumptionSqlQueriesTest, kDeleteChoiceArray_ExpectDataDeleted) {
@@ -1687,7 +1723,8 @@ TEST_F(ResumptionSqlQueriesTest, kDeleteChoiceArray_ExpectDataDeleted) {
                                                        false,
                                                        app_id2,
                                                        device_id,
-                                                       1).LastInsertId();
+                                                       1,
+                                                       true).LastInsertId();
   FillApplicationChoiceSetArrayTable(
       temp_query, application_choiceset_table_key, application_table_key);
   FillChoiceArrayTable(
@@ -1696,10 +1733,10 @@ TEST_F(ResumptionSqlQueriesTest, kDeleteChoiceArray_ExpectDataDeleted) {
   const std::string select_count_choice_array =
       "SELECT COUNT(*) FROM choiceArray;";
 
-  ValToPosPair p1(0, app_id2);
-  ValToPosPair p2(1, device_id);
-  CheckDeleteQuery(
-      select_count_choice_array, kDeleteChoiceArray, p1, p2, 1, 0, 0);
+  OrderedQueryParams p;
+  p.push_back(app_id2);
+  p.push_back(device_id);
+  CheckDeleteQuery(select_count_choice_array, kDeleteChoiceArray, p, 1, 0, 0);
 }
 
 TEST_F(ResumptionSqlQueriesTest,
@@ -1717,7 +1754,8 @@ TEST_F(ResumptionSqlQueriesTest,
                                       false,
                                       app_id2,
                                       device_id,
-                                      1).LastInsertId();
+                                      1,
+                                      true).LastInsertId();
 
   int64_t key2 = FillApplicationChoiceSetTable(temp_query, 1, 2).LastInsertId();
   FillApplicationChoiceSetArrayTable(temp_query, key2, key1);
@@ -1726,12 +1764,12 @@ TEST_F(ResumptionSqlQueriesTest,
   const std::string select_count_applicationChoiceSet =
       "SELECT COUNT(*) FROM applicationChoiceSet;";
 
-  ValToPosPair p1(0, app_id2);
-  ValToPosPair p2(1, device_id);
+  OrderedQueryParams p;
+  p.push_back(app_id2);
+  p.push_back(device_id);
   CheckDeleteQuery(select_count_applicationChoiceSet,
                    kDeleteApplicationChoiceSet,
-                   p1,
-                   p2,
+                   p,
                    1,
                    0,
                    0);
@@ -1752,7 +1790,8 @@ TEST_F(ResumptionSqlQueriesTest,
                                       false,
                                       app_id2,
                                       device_id,
-                                      1).LastInsertId();
+                                      1,
+                                      true).LastInsertId();
 
   int64_t key2 = FillApplicationChoiceSetTable(temp_query, 1, 2).LastInsertId();
   FillApplicationChoiceSetArrayTable(temp_query, key2, key1);
@@ -1760,12 +1799,12 @@ TEST_F(ResumptionSqlQueriesTest,
   // Check
   const std::string select_count_applicationChoiceSetArray =
       "SELECT COUNT(*) FROM applicationChoiceSetArray;";
-  ValToPosPair p1(0, app_id2);
-  ValToPosPair p2(1, device_id);
+  OrderedQueryParams p;
+  p.push_back(app_id2);
+  p.push_back(device_id);
   CheckDeleteQuery(select_count_applicationChoiceSetArray,
                    kDeleteApplicationChoiceSetArray,
-                   p1,
-                   p2,
+                   p,
                    1,
                    0,
                    0);
@@ -1792,13 +1831,18 @@ TEST_F(ResumptionSqlQueriesTest,
                        false,
                        app_id2,
                        device_id,
-                       key2);
+                       key2,
+                       true);
   // Check
   const std::string select_count_image = "SELECT COUNT(*) FROM image;";
-  ValToPosPair p1(0, app_id2);
-  ValToPosPair p2(1, device_id);
+  OrderedQueryParams p;
+  p.push_back(app_id2);
+  p.push_back(device_id);
+  p.push_back(app_id2);
+  p.push_back(device_id);
+
   CheckDeleteQuery(
-      select_count_image, kDeleteImageFromGlobalProperties, p1, p2, 1, 0, 0);
+      select_count_image, kDeleteImageFromGlobalProperties, p, 1, 0, 0);
 }
 
 TEST_F(ResumptionSqlQueriesTest, kDeletevrHelpItem_ExpectDataDeleted) {
@@ -1821,14 +1865,15 @@ TEST_F(ResumptionSqlQueriesTest, kDeletevrHelpItem_ExpectDataDeleted) {
                        false,
                        app_id2,
                        device_id,
-                       key2);
+                       key2,
+                       true);
   // Check
   const std::string select_count_vrhelp_item =
       "SELECT COUNT(*) FROM vrHelpItem;";
-  ValToPosPair p1(0, app_id2);
-  ValToPosPair p2(1, device_id);
-  CheckDeleteQuery(
-      select_count_vrhelp_item, kDeletevrHelpItem, p1, p2, 1, 0, 0);
+  OrderedQueryParams p;
+  p.push_back(app_id2);
+  p.push_back(device_id);
+  CheckDeleteQuery(select_count_vrhelp_item, kDeletevrHelpItem, p, 1, 0, 0);
 }
 
 TEST_F(ResumptionSqlQueriesTest, kDeletevrHelpItemArray_ExpectDataDeleted) {
@@ -1851,14 +1896,16 @@ TEST_F(ResumptionSqlQueriesTest, kDeletevrHelpItemArray_ExpectDataDeleted) {
                        false,
                        app_id2,
                        device_id,
-                       key2);
+                       key2,
+                       true);
   // Check
   const std::string select_count_vrhelp_item_array =
       "SELECT COUNT(*) FROM vrHelpItemArray;";
-  ValToPosPair p1(0, app_id2);
-  ValToPosPair p2(1, device_id);
+  OrderedQueryParams p;
+  p.push_back(app_id2);
+  p.push_back(device_id);
   CheckDeleteQuery(
-      select_count_vrhelp_item_array, kDeletevrHelpItemArray, p1, p2, 1, 0, 0);
+      select_count_vrhelp_item_array, kDeletevrHelpItemArray, p, 1, 0, 0);
 }
 
 TEST_F(ResumptionSqlQueriesTest,
@@ -1882,17 +1929,18 @@ TEST_F(ResumptionSqlQueriesTest,
                        false,
                        app_id1,
                        device_id,
-                       key2);
+                       key2,
+                       true);
   FillCharacterArrayTable(temp_query, key2, key1);
   // Check
   const std::string select_count_tableLimitedCharacterList =
       "SELECT COUNT(*) FROM tableLimitedCharacterList;";
-  ValToPosPair p1(0, app_id1);
-  ValToPosPair p2(1, device_id);
+  OrderedQueryParams p;
+  p.push_back(app_id1);
+  p.push_back(device_id);
   CheckDeleteQuery(select_count_tableLimitedCharacterList,
                    kDeleteTableLimitedCharacterList,
-                   p1,
-                   p2,
+                   p,
                    1,
                    0,
                    0);
@@ -1918,15 +1966,17 @@ TEST_F(ResumptionSqlQueriesTest, kDeleteCharacterArray_ExpectDataDeleted) {
                        false,
                        app_id1,
                        device_id,
-                       key2);
+                       key2,
+                       true);
   FillCharacterArrayTable(temp_query, key2, key1);
   // Check
   const std::string select_count_characterArray =
       "SELECT COUNT(*) FROM characterArray;";
-  ValToPosPair p1(0, app_id1);
-  ValToPosPair p2(1, device_id);
+  OrderedQueryParams p;
+  p.push_back(app_id1);
+  p.push_back(device_id);
   CheckDeleteQuery(
-      select_count_characterArray, kDeleteCharacterArray, p1, p2, 1, 0, 0);
+      select_count_characterArray, kDeleteCharacterArray, p, 1, 0, 0);
 }
 
 TEST_F(ResumptionSqlQueriesTest, kDeleteTTSChunk_ExpectDataDeleted) {
@@ -1949,14 +1999,18 @@ TEST_F(ResumptionSqlQueriesTest, kDeleteTTSChunk_ExpectDataDeleted) {
                        false,
                        app_id1,
                        device_id,
-                       glob_prop_key);
+                       glob_prop_key,
+                       true);
 
   FillHelpTimeoutPromptArrayTable(temp_query, glob_prop_key, tts_chunk_key, 1);
   // Check
   const std::string select_count_tts_chunk = "SELECT COUNT(*) FROM TTSChunk;";
-  ValToPosPair p1(0, app_id1);
-  ValToPosPair p2(1, device_id);
-  CheckDeleteQuery(select_count_tts_chunk, kDeleteTTSChunk, p1, p2, 1, 0, 0);
+  OrderedQueryParams p;
+  p.push_back(app_id1);
+  p.push_back(device_id);
+  p.push_back(app_id1);
+  p.push_back(device_id);
+  CheckDeleteQuery(select_count_tts_chunk, kDeleteTTSChunk, p, 1, 0, 0);
 }
 
 TEST_F(ResumptionSqlQueriesTest,
@@ -1974,14 +2028,16 @@ TEST_F(ResumptionSqlQueriesTest,
                        false,
                        app_id1,
                        device_id,
-                       1);
+                       1,
+                       true);
   // Check
   const std::string select_count_application =
       "SELECT COUNT(*) FROM application;";
-  ValToPosPair p1(0, app_id1);
-  ValToPosPair p2(1, device_id);
+  OrderedQueryParams p;
+  p.push_back(app_id1);
+  p.push_back(device_id);
   CheckDeleteQuery(
-      select_count_application, kDeleteFromApplicationTable, p1, p2, 1, 0, 0);
+      select_count_application, kDeleteFromApplicationTable, p, 1, 0, 0);
 }
 
 TEST_F(ResumptionSqlQueriesTest,
@@ -2004,18 +2060,20 @@ TEST_F(ResumptionSqlQueriesTest,
                        false,
                        app_id1,
                        device_id,
-                       glob_prop_key);
+                       glob_prop_key,
+                       true);
 
   FillHelpTimeoutPromptArrayTable(temp_query, glob_prop_key, tts_chunk_key, 1);
   // Check
   const std::string select_count_helpTimeoutPromptArray =
       "SELECT COUNT(*) FROM helpTimeoutPromptArray;";
-  ValToPosPair p1(0, app_id1);
-  ValToPosPair p2(1, device_id);
+  OrderedQueryParams p;
+  p.push_back(app_id1);
+  p.push_back(device_id);
+
   CheckDeleteQuery(select_count_helpTimeoutPromptArray,
                    kDeleteHelpTimeoutPromptArray,
-                   p1,
-                   p2,
+                   p,
                    1,
                    0,
                    0);
@@ -2038,14 +2096,17 @@ TEST_F(ResumptionSqlQueriesTest, kDeleteGlobalProperties_ExpectDataDeleted) {
                        false,
                        app_id1,
                        device_id,
-                       glob_prop_key);
+                       glob_prop_key,
+                       true);
   // Check
   const std::string select_count_globalProperties =
       "SELECT COUNT(*) FROM globalProperties;";
-  ValToPosPair p1(0, app_id1);
-  ValToPosPair p2(1, device_id);
+  OrderedQueryParams p;
+  p.push_back(app_id1);
+  p.push_back(device_id);
+
   CheckDeleteQuery(
-      select_count_globalProperties, kDeleteGlobalProperties, p1, p2, 1, 0, 0);
+      select_count_globalProperties, kDeleteGlobalProperties, p, 1, 0, 0);
 }
 
 TEST_F(ResumptionSqlQueriesTest, kSelectCountImage_ExpectDataCorrect) {
@@ -2440,7 +2501,8 @@ TEST_F(ResumptionSqlQueriesTest, kInsertApplication_ExpectDataInserted) {
                        false,
                        app_id1,
                        device_id,
-                       9);
+                       9,
+                       true);
   // Checks
   const std::string select_count_application =
       "SELECT COUNT(*) FROM application;";
@@ -2488,7 +2550,8 @@ TEST_F(ResumptionSqlQueriesTest, kSelectCountFiles_ExpectDataCorrect) {
                                          false,
                                          app_id1,
                                          device_id,
-                                         9).LastInsertId();
+                                         9,
+                                         true).LastInsertId();
   int64_t file_key =
       FillFileTable(temp_query, 1, true, true, "tst_name").LastInsertId();
   FillApplicationFilesArrayTable(temp_query, app_key, file_key);
@@ -2513,7 +2576,8 @@ TEST_F(ResumptionSqlQueriesTest, kSelectFiles_ExpectDataCorrect) {
                                          false,
                                          app_id1,
                                          device_id,
-                                         9).LastInsertId();
+                                         9,
+                                         true).LastInsertId();
   int64_t file_key =
       FillFileTable(temp_query, 1, true, true, "tst_name").LastInsertId();
   FillApplicationFilesArrayTable(temp_query, app_key, file_key);
@@ -2540,7 +2604,8 @@ TEST_F(ResumptionSqlQueriesTest, kSelectCountSubMenu_ExpectDataCorrect) {
                                          false,
                                          app_id1,
                                          device_id,
-                                         9).LastInsertId();
+                                         9,
+                                         true).LastInsertId();
   int64_t submenu_key =
       FillSubMenuTable(temp_query, 1, "menu_name", 1).LastInsertId();
   FillApplicationSubMenuArrayTable(temp_query, app_key, submenu_key);
@@ -2564,8 +2629,10 @@ TEST_F(ResumptionSqlQueriesTest, kSelectSubMenu_ExpectDataCorrect) {
                                          false,
                                          app_id1,
                                          device_id,
-                                         9).LastInsertId();
+                                         9,
+                                         true).LastInsertId();
   int64_t submenu_key =
+
       FillSubMenuTable(temp_query, 1, "menu_name", 1).LastInsertId();
 
   FillApplicationSubMenuArrayTable(temp_query, app_key, submenu_key);
@@ -2591,7 +2658,8 @@ TEST_F(ResumptionSqlQueriesTest, kSelectCountCommands_ExpectDataCorrect) {
                                          false,
                                          app_id1,
                                          device_id,
-                                         9).LastInsertId();
+                                         9,
+                                         true).LastInsertId();
   int64_t command_key =
       FillCommandTable(temp_query, 1, "menu_name", 1, 2, 5).LastInsertId();
   FillApplicationCommandsArrayTable(temp_query, app_key, command_key);
@@ -2615,7 +2683,8 @@ TEST_F(ResumptionSqlQueriesTest, kSelectCommandsFromCommand_ExpectDataCorrect) {
                                          false,
                                          app_id1,
                                          device_id,
-                                         9).LastInsertId();
+                                         9,
+                                         true).LastInsertId();
   int64_t image_key = FillImageTable(temp_query, 2, "tst_image").LastInsertId();
 
   FillChoiceTable(
@@ -2655,7 +2724,8 @@ TEST_F(ResumptionSqlQueriesTest, kSelectCommandsFromChoice_ExpectDataCorrect) {
                                          false,
                                          app_id1,
                                          device_id,
-                                         9).LastInsertId();
+                                         9,
+                                         true).LastInsertId();
   int64_t image_key = FillImageTable(temp_query, 2, "tst_image").LastInsertId();
 
   int64_t choice_key =
@@ -2708,7 +2778,8 @@ TEST_F(ResumptionSqlQueriesTest, kSelectCountSubscriptions_ExpectDataCorrect) {
                                          false,
                                          app_id1,
                                          device_id,
-                                         9).LastInsertId();
+                                         9,
+                                         true).LastInsertId();
   FillAppSubscriptionsArrayTable(temp_query, 2, 3, app_key);
   ValToPosPair p1(0, app_id1);
   ValToPosPair p2(1, device_id);
@@ -2730,7 +2801,8 @@ TEST_F(ResumptionSqlQueriesTest, kSelectSubscriptions_ExpectDataCorrect) {
                                          false,
                                          app_id1,
                                          device_id,
-                                         9).LastInsertId();
+                                         9,
+                                         true).LastInsertId();
   FillAppSubscriptionsArrayTable(temp_query, 2, 3, app_key);
   ValToPosPair p1(0, app_id1);
   ValToPosPair p2(1, device_id);
@@ -2753,7 +2825,8 @@ TEST_F(ResumptionSqlQueriesTest, kSelectCountChoiceSet_ExpectDataCorrect) {
                                          false,
                                          app_id1,
                                          device_id,
-                                         9).LastInsertId();
+                                         9,
+                                         true).LastInsertId();
   FillApplicationChoiceSetArrayTable(temp_query, 2, app_key);
   ValToPosPair p1(0, app_id1);
   ValToPosPair p2(1, device_id);
@@ -2775,7 +2848,8 @@ TEST_F(ResumptionSqlQueriesTest, kSelectChoiceSets_ExpectDataCorrect) {
                                          false,
                                          app_id1,
                                          device_id,
-                                         9).LastInsertId();
+                                         9,
+                                         true).LastInsertId();
   int64_t image_key = FillImageTable(temp_query, 2, "tst_image").LastInsertId();
   int64_t choice_key =
       FillChoiceTable(
@@ -2835,7 +2909,8 @@ TEST_F(ResumptionSqlQueriesTest,
                        false,
                        app_id1,
                        device_id,
-                       glob_prop_key).LastInsertId();
+                       glob_prop_key,
+                       true).LastInsertId();
 
   // Check
   ValToPosPair p1(0, app_id1);
@@ -2862,7 +2937,8 @@ TEST_F(ResumptionSqlQueriesTest, kSelectGlobalProperties_ExpectDataCorrect) {
                        false,
                        app_id1,
                        device_id,
-                       glob_prop_key).LastInsertId();
+                       glob_prop_key,
+                       true).LastInsertId();
   FillHelpTimeoutPromptArrayTable(temp_query, glob_prop_key, 3, 7);
 
   // Check
@@ -2965,7 +3041,8 @@ TEST_F(ResumptionSqlQueriesTest, kSelectAllApps_ExpectDataCorrect) {
                        false,
                        app_id1,
                        device_id,
-                       1);
+                       1,
+                       true);
 
   FillApplicationTable(temp_query,
                        connection_key,
@@ -2978,7 +3055,8 @@ TEST_F(ResumptionSqlQueriesTest, kSelectAllApps_ExpectDataCorrect) {
                        false,
                        app_id2,
                        device_id2,
-                       2);
+                       2,
+                       true);
   // Checks
   SQLQuery query(db());
   EXPECT_TRUE(query.Prepare(kSelectAllApps) && query.Exec());
@@ -3003,7 +3081,8 @@ TEST_F(ResumptionSqlQueriesTest, kUpdateApplicationData_ExpectDataCorrect) {
                        false,
                        app_id1,
                        device_id,
-                       1);
+                       1,
+                       true);
   string select_hmi_level_and_time_stamp =
       "SELECT `hmiLevel`, `timeStamp`FROM `application` "
       "WHERE `appID` = ? AND `deviceID` = ?;";
@@ -3068,7 +3147,8 @@ TEST_F(ResumptionSqlQueriesTest, kSelectAppTable_ExpectDataCorrect) {
                        true,
                        app_id1,
                        device_id,
-                       1);
+                       1,
+                       true);
 
   ValToPosPair p1(0, app_id1);
   ValToPosPair p2(1, device_id);

@@ -140,7 +140,6 @@ typedef std::vector<SmartObjectSPtr> SmartObjectList;
  * like bool, int32_t, char, double, string and as complex type like array and
  *map.
  **/
-
 class SmartObject FINAL {
  public:
   /**
@@ -231,13 +230,20 @@ class SmartObject FINAL {
    **/
   bool operator==(const int32_t Value) const;
 
-  // Support of type: uint32_t
   /**
-   * @brief Constructor for creating object of type: int32_t
+   * @brief Constructor for creating object of type: uint32_t
    *
    * @param InitialValue Initial object value
    **/
   explicit SmartObject(const uint32_t InitialValue);
+
+  // Support of type: uint64_t
+  /**
+   * @brief Constructor for creating object of type: uint64_t
+   *
+   * @param InitialValue Initial object value
+   **/
+  explicit SmartObject(const uint64_t InitialValue);
 
   /**
    * @brief Returns current object converted to uint64_t
@@ -297,11 +303,6 @@ class SmartObject FINAL {
   bool operator==(const int64_t Value) const;
 
   /**
-    * @name Support of type: uint64_t
-    * @{
-   **/
-
-  /**
    * @brief Assignment operator for type: uint64_t
    *
    * @param  NewValue New object value
@@ -309,12 +310,6 @@ class SmartObject FINAL {
    **/
   SmartObject& operator=(const uint64_t NewValue);
 
-  /** @} */
-
-  /**
-   * @name Support of type: double
-   * @{
-   */
   /**
    * @brief Constructor for creating object of type: double
    *
@@ -822,6 +817,10 @@ class SmartObject FINAL {
   /** @} */
 
   /**
+   * @name Support of type: string (internal)
+   * @{
+   */
+  /**
    * @brief Sets new string value to the object.
    *
    * This method changes also internal object type
@@ -848,7 +847,6 @@ class SmartObject FINAL {
    *possible
    **/
   inline std::string convert_string() const;
-  /** @} */
 
   /**
    * @brief Converts object to CustomString type
@@ -857,6 +855,8 @@ class SmartObject FINAL {
    * invalid_string_value if conversion not possible
    **/
   inline custom_str::CustomString convert_custom_string() const;
+
+  /** @} */
 
   /**
    * @name Support of type: binary (internal)

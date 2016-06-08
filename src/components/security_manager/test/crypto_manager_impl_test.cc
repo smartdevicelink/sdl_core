@@ -29,7 +29,9 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
+#if defined(OS_WINDOWS)
+#include "utils/winhdr.h"
+#endif
 #ifdef __QNXNTO__
 #include <openssl/ssl3.h>
 #else
@@ -136,16 +138,22 @@ TEST_F(CryptoManagerTest, WrongInit) {
   // We have to cast (-1) to security_manager::Protocol Enum to be accepted by
   // crypto_manager_->Init(...)
   // Unknown protocol version
-  security_manager::Protocol UNKNOWN =
+  const security_manager::Protocol UNKNOWN =
       static_cast<security_manager::Protocol>(-1);
+  const std::string cert_path = "";
 
   EXPECT_CALL(*mock_security_manager_settings_, security_manager_mode())
       .WillRepeatedly(Return(security_manager::SERVER));
   EXPECT_CALL(*mock_security_manager_settings_,
-              security_manager_protocol_name()).WillOnce(Return(UNKNOWN));
-  EXPECT_FALSE(crypto_manager_->Init());
+              security_manager_protocol_name()).WillRepeatedly(Return(UNKNOWN));
+  EXPECT_CALL(*mock_security_manager_settings_, verify_peer())
+      .WillRepeatedly(Return(false));
+  EXPECT_CALL(*mock_security_manager_settings_, ca_cert_path())
+      .WillRepeatedly(ReturnRef(cert_path));
 
+  EXPECT_FALSE(crypto_manager_->Init());
   EXPECT_NE(std::string(), crypto_manager_->LastError());
+
   // Unexistent cipher value
   const std::string invalid_cipher = "INVALID_UNKNOWN_CIPHER";
   EXPECT_CALL(*mock_security_manager_settings_,
@@ -155,8 +163,8 @@ TEST_F(CryptoManagerTest, WrongInit) {
       .WillOnce(ReturnRef(certificate_data_base64_));
   EXPECT_CALL(*mock_security_manager_settings_, ciphers_list())
       .WillRepeatedly(ReturnRef(invalid_cipher));
-  EXPECT_FALSE(crypto_manager_->Init());
 
+  EXPECT_FALSE(crypto_manager_->Init());
   EXPECT_NE(std::string(), crypto_manager_->LastError());
 }
 

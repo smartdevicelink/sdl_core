@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Ford Motor Company
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,7 @@
 #include "smart_objects/smart_object.h"
 
 #include <errno.h>
-#include <inttypes.h>
+#include <cstdint>
 #include <limits>
 #include <stdlib.h>
 #include <algorithm>
@@ -178,7 +178,9 @@ int64_t SmartObject::asInt() const {
   if (invalid_int64_value == convert) {
     return invalid_int_value;
   }
-  return convert;
+  DCHECK(convert >= std::numeric_limits<int64_t>::min());
+  DCHECK(convert <= std::numeric_limits<int64_t>::max());
+  return static_cast<int64_t>(convert);
 }
 
 SmartObject& SmartObject::operator=(const int32_t NewValue) {
@@ -235,6 +237,8 @@ uint64_t SmartObject::asUInt() const {
   if (convert <= invalid_int_value) {
     return invalid_unsigned_int_value;
   }
+  DCHECK(convert >= std::numeric_limits<uint32_t>::min());
+  DCHECK(convert <= std::numeric_limits<uint32_t>::max());
   return static_cast<uint64_t>(convert);
 }
 
@@ -272,6 +276,12 @@ bool SmartObject::operator==(const int64_t Value) const {
     return false;
   }
   return comp == Value;
+}
+
+SmartObject::SmartObject(const uint64_t InitialValue)
+    : m_type(SmartType_Null), m_schema() {
+  m_data.str_value = NULL;
+  set_value_integer(InitialValue);
 }
 
 SmartObject& SmartObject::operator=(const uint64_t NewValue) {
@@ -417,20 +427,16 @@ char SmartObject::convert_char() const {
   return invalid_char_value;
 }
 
-// =============================================================
-// STD::STRING TYPE SUPPORT
-// =============================================================
+SmartObject::SmartObject(const std::string& InitialValue)
+    : m_type(SmartType_Null), m_schema() {
+  m_data.str_value = NULL;
+  set_value_string(custom_str::CustomString(InitialValue));
+}
 
 SmartObject::SmartObject(const custom_str::CustomString& InitialValue)
     : m_type(SmartType_Null), m_schema() {
   m_data.str_value = NULL;
   set_value_string(InitialValue);
-}
-
-SmartObject::SmartObject(const std::string& InitialValue)
-    : m_type(SmartType_Null), m_schema() {
-  m_data.str_value = NULL;
-  set_value_string(custom_str::CustomString(InitialValue));
 }
 
 std::string SmartObject::asString() const {
@@ -477,6 +483,8 @@ void SmartObject::set_value_string(const custom_str::CustomString& NewValue) {
 
 std::string SmartObject::convert_string() const {
   switch (m_type) {
+    case SmartType_String:
+      return (m_data.str_value)->AsMBString();
     case SmartType_Integer: {
       std::stringstream stream;
       stream << m_data.int_value;
@@ -486,8 +494,6 @@ std::string SmartObject::convert_string() const {
       return std::string(1, m_data.char_value);
     case SmartType_Double:
       return convert_double_to_string(m_data.double_value);
-    case SmartType_String:
-      return (m_data.str_value)->AsMBString();
     default:
       break;
   }
@@ -502,10 +508,6 @@ custom_str::CustomString SmartObject::convert_custom_string() const {
       return custom_str::CustomString(convert_string());
   }
 }
-
-// =============================================================
-// CHAR* TYPE SUPPORT
-// =============================================================
 
 SmartObject::SmartObject(const char* const InitialValue)
     : m_type(SmartType_Null), m_schema() {
@@ -534,9 +536,6 @@ void SmartObject::set_value_cstr(const char* NewValue) {
                             : custom_str::CustomString());
 }
 
-// =============================================================
-// BINARY TYPE SUPPORT
-// =============================================================
 SmartObject::SmartObject(const SmartBinary& InitialValue)
     : m_type(SmartType_Null), m_schema() {
   m_data.str_value = NULL;
@@ -586,10 +585,6 @@ SmartBinary SmartObject::convert_binary() const {
   return invalid_binary_value;
 }
 
-// =============================================================
-// ARRAY INTERFACE SUPPORT
-// =============================================================
-
 SmartObject& SmartObject::operator[](const int32_t Index) {
   return handle_array_access(Index);
 }
@@ -620,10 +615,6 @@ inline SmartObject& SmartObject::handle_array_access(const int32_t Index) {
   // FIXME(EZamakhov): return always the same reference - multi-thread problem?
   return invalid_object_value;
 }
-
-// =============================================================
-// MAP INTERFACE SUPPORT
-// =============================================================
 
 SmartObject& SmartObject::operator[](const std::string& Key) {
   return handle_map_access(Key);
@@ -683,9 +674,6 @@ SmartObject& SmartObject::handle_map_access(const std::string& Key) {
   return map[Key];
 }
 
-// =============================================================
-// OTHER METHODS
-// =============================================================
 void SmartObject::duplicate(const SmartObject& OtherObject) {
   SmartData newData;
   const SmartType newType = OtherObject.m_type;
@@ -699,6 +687,9 @@ void SmartObject::duplicate(const SmartObject& OtherObject) {
       newData.array_value = new SmartArray(*OtherObject.m_data.array_value);
       break;
     case SmartType_Integer:
+      newData.int_value = OtherObject.m_data.int_value;
+      break;
+    case SmartType_UInteger:
       newData.int_value = OtherObject.m_data.int_value;
       break;
     case SmartType_Double:

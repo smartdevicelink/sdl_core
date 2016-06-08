@@ -132,8 +132,16 @@ class StateControllerImplTest : public ::testing::Test {
                    utils::SharedPtr<usage_statistics::StatisticsManager>(
                        utils::MakeShared<
                            application_manager_test::MockStatisticsManager>()))
-      , applications_(application_set_, applications_lock_) {}
-  NiceMock<application_manager_test::MockApplicationManager> app_manager_mock_;
+      , applications_(application_set_, applications_lock_)
+      , simple_app_id_(1721)
+      , navi_app_id_(1762)
+      , media_app_id_(1801)
+      , vc_app_id_(1825)
+      , media_navi_app_id_(1855)
+      , media_vc_app_id_(1881)
+      , navi_vc_app_id_(1894)
+      , media_navi_vc_app_id_(1922) {}
+
   NiceMock<policy_test::MockPolicyHandlerInterface> policy_interface_;
   NiceMock<connection_handler_test::MockConnectionHandler>
       mock_connection_handler_;
@@ -149,35 +157,35 @@ class StateControllerImplTest : public ::testing::Test {
 
   am::ApplicationSharedPtr simple_app_;
   NiceMock<application_manager_test::MockApplication>* simple_app_ptr_;
-  uint32_t simple_app_id_ = 1721;
+  uint32_t simple_app_id_;
 
   am::ApplicationSharedPtr navi_app_;
   NiceMock<application_manager_test::MockApplication>* navi_app_ptr_;
-  uint32_t navi_app_id_ = 1762;
+  uint32_t navi_app_id_;
 
   am::ApplicationSharedPtr media_app_;
   NiceMock<application_manager_test::MockApplication>* media_app_ptr_;
-  uint32_t media_app_id_ = 1801;
+  uint32_t media_app_id_;
 
   am::ApplicationSharedPtr vc_app_;
   NiceMock<application_manager_test::MockApplication>* vc_app_ptr_;
-  uint32_t vc_app_id_ = 1825;
+  uint32_t vc_app_id_;
 
   am::ApplicationSharedPtr media_navi_app_;
   NiceMock<application_manager_test::MockApplication>* media_navi_app_ptr_;
-  uint32_t media_navi_app_id_ = 1855;
+  uint32_t media_navi_app_id_;
 
   am::ApplicationSharedPtr media_vc_app_;
   NiceMock<application_manager_test::MockApplication>* media_vc_app_ptr_;
-  uint32_t media_vc_app_id_ = 1881;
+  uint32_t media_vc_app_id_;
 
   am::ApplicationSharedPtr navi_vc_app_;
   NiceMock<application_manager_test::MockApplication>* navi_vc_app_ptr_;
-  uint32_t navi_vc_app_id_ = 1894;
+  uint32_t navi_vc_app_id_;
 
   am::ApplicationSharedPtr media_navi_vc_app_;
   NiceMock<application_manager_test::MockApplication>* media_navi_vc_app_ptr_;
-  uint32_t media_navi_vc_app_id_ = 1922;
+  uint32_t media_navi_vc_app_id_;
 
   std::vector<am::HmiStatePtr> valid_states_for_audio_app_;
   std::vector<am::HmiStatePtr> valid_states_for_not_audio_app_;
@@ -191,6 +199,13 @@ class StateControllerImplTest : public ::testing::Test {
       mock_connection_handler__settings;
   transport_manager_test::MockTransportManager mock_transport_manager;
   connection_handler::ConnectionHandlerImpl* conn_handler;
+
+  // In case of QT there is an exception thrown in each test and the root
+  // cause is seems to be the order of destruction of components, which
+  // uses DataAccessor. So if AM is destroyed as very last - everything is
+  // okay, otherwise DataAccessor is being deleted and that invalidates all
+  // its other instances.
+  NiceMock<application_manager_test::MockApplicationManager> app_manager_mock_;
 
   am::HmiStatePtr createHmiState(
       mobile_apis::HMILevel::eType hmi_level,
@@ -835,7 +850,6 @@ class StateControllerImplTest : public ::testing::Test {
     ON_CALL(app_manager_mock_, event_dispatcher())
         .WillByDefault(ReturnRef(mock_event_dispatcher_));
     state_ctrl_ = utils::MakeShared<am::StateControllerImpl>(app_manager_mock_);
-
     ON_CALL(app_manager_mock_, applications())
         .WillByDefault(Return(applications_));
     ConfigureApps();
@@ -1738,7 +1752,6 @@ TEST_F(StateControllerImplTest, DISABLED_ActivateAppSuccessReceivedFromHMI) {
       new smart_objects::SmartObject();
   (*bc_activate_app_request)[am::strings::params][am::strings::correlation_id] =
       corr_id;
-
   for (; it != hmi_states.end(); ++it) {
     am::HmiStatePtr hmi_state = it->first;
     am::HmiStatePtr initial_hmi_state = it->first;

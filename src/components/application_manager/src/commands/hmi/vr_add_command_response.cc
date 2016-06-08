@@ -31,7 +31,6 @@
  */
 #include "application_manager/commands/hmi/vr_add_command_response.h"
 #include "application_manager/event_engine/event.h"
-
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {
@@ -45,7 +44,7 @@ VRAddCommandResponse::VRAddCommandResponse(
 VRAddCommandResponse::~VRAddCommandResponse() {}
 
 void VRAddCommandResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   event_engine::Event event(hmi_apis::FunctionID::VR_AddCommand);
   event.set_smart_object(*message_);

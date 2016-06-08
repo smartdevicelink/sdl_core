@@ -68,10 +68,11 @@ const std::string kCreateSchema =
     "  `exchange_after_x_kilometers` INTEGER NOT NULL, "
     "  `exchange_after_x_days` INTEGER NOT NULL, "
     "  `timeout_after_x_seconds` INTEGER NOT NULL, "
-    "  `certificate` TEXT, "
     "  `vehicle_make` VARCHAR(45), "
     "  `vehicle_model` VARCHAR(45), "
-    "  `vehicle_year` VARCHAR(4) "
+    "  `vehicle_year` VARCHAR(4), "
+    "  `preloaded_date` VARCHAR (10), "
+    "  `certificate` VARCHAR (45) "
     "); "
     "CREATE TABLE IF NOT EXISTS `functional_group`( "
     "  `id` INTEGER PRIMARY KEY NOT NULL, "
@@ -521,8 +522,9 @@ const std::string kUpdateModuleConfig =
     "UPDATE `module_config` SET `preloaded_pt` = ?, "
     "  `exchange_after_x_ignition_cycles` = ?,"
     "  `exchange_after_x_kilometers` = ?, `exchange_after_x_days` = ?, "
-    "  `timeout_after_x_seconds` = ?, `certificate` = ?, `vehicle_make` = ?, "
-    "  `vehicle_model` = ?, `vehicle_year` = ?";
+    "  `timeout_after_x_seconds` = ?, `vehicle_make` = ?, "
+    "  `vehicle_model` = ?, `vehicle_year` = ?, `preloaded_date` = ?, "
+    "`certificate` = ?";
 
 const std::string kInsertEndpoint =
     "INSERT INTO `endpoint` (`service`, `url`, `application_id`) "
@@ -569,8 +571,8 @@ const std::string kDeleteAppGroup = "DELETE FROM `app_group`";
 const std::string kSelectModuleConfig =
     "SELECT `preloaded_pt`, `exchange_after_x_ignition_cycles`, "
     " `exchange_after_x_kilometers`, `exchange_after_x_days`, "
-    " `timeout_after_x_seconds`, `certificate`, `vehicle_make`,"
-    " `vehicle_model`, `vehicle_year` "
+    " `timeout_after_x_seconds`, `vehicle_make`,"
+    " `vehicle_model`, `vehicle_year`, `preloaded_date`, `certificate` "
     " FROM `module_config`";
 
 const std::string kSelectEndpoints =

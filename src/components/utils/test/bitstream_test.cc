@@ -30,7 +30,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <unistd.h>
 #include "gtest/gtest.h"
 #include "utils/macro.h"
 #include "utils/bitstream.h"

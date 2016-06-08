@@ -41,6 +41,7 @@ void MessageHelper::SendHashUpdateNotification(uint32_t const app_id,
   MockMessageHelper::message_helper_mock()->SendHashUpdateNotification(
       app_id, app_mngr);
 }
+
 void MessageHelper::SendNaviStartStream(int32_t connection_key,
                                         ApplicationManager& app_mngr) {
   MockMessageHelper::message_helper_mock()->SendNaviStartStream(connection_key,

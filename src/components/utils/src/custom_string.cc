@@ -37,9 +37,16 @@
 #include <cwctype>
 #include <new>
 #include <algorithm>
-#include <string.h>
+#include <vector>
 #include "utils/logger.h"
 #include "utils/macro.h"
+
+#if defined(OS_WINDOWS)
+#include <string.h>
+#define strcasecmp _stricmp
+#elif defined(OS_POSIX)
+#include <strings.h>
+#endif  // OS_WINDOWS
 
 namespace {
 namespace custom_str = utils::custom_string;

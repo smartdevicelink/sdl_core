@@ -36,8 +36,12 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_LIBUSB_PLATFORM_USB_DEVICE_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_LIBUSB_PLATFORM_USB_DEVICE_H_
 
+#if defined(OS_WINDOWS)
+#include "utils/winhdr.h"
+#endif
+
+#include <libusb.h>
 #include <string>
-#include <libusb/libusb.h>
 
 namespace transport_manager {
 

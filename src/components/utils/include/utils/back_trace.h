@@ -61,10 +61,10 @@ class Backtrace {
 
   // Captured symbols in order from topmost stack frame to last captured
   std::vector<std::string> CallStack() const;
-  threads::PlatformThreadHandle ThreadId() const;
+  uint64_t ThreadId() const;
 
  private:
-  threads::PlatformThreadHandle thread_id_;
+  uint64_t thread_id_;
   std::vector<void*> backtrace_;
 };
 

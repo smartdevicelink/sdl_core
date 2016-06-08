@@ -36,6 +36,11 @@
 #include "application_manager/request_info.h"
 
 #include <algorithm>
+
+#if defined(OS_WINDOWS)
+#define ssize_t SSIZE_T
+#endif
+
 namespace application_manager {
 
 namespace request_controller {
@@ -119,7 +124,7 @@ FakeRequestInfo::FakeRequestInfo(uint32_t app_id, uint32_t correaltion_id) {
 
 bool RequestInfoSet::Add(RequestInfoPtr request_info) {
   DCHECK_OR_RETURN(request_info, false);
-  LOG4CXX_DEBUG(
+  LOGGER_DEBUG(
       logger_,
       "Add request app_id = " << request_info->app_id()
                               << "; corr_id = " << request_info->requestId());
@@ -137,10 +142,10 @@ bool RequestInfoSet::Add(RequestInfoPtr request_info) {
     CheckSetSizes();
     return true;
   } else {
-    LOG4CXX_ERROR(logger_,
-                  "Request with app_id = "
-                      << request_info->app_id() << "; corr_id "
-                      << request_info->requestId() << " Already exist ");
+    LOGGER_ERROR(logger_,
+                 "Request with app_id = "
+                     << request_info->app_id() << "; corr_id "
+                     << request_info->requestId() << " Already exist ");
   }
   CheckSetSizes();
   return false;
@@ -175,7 +180,7 @@ RequestInfoPtr RequestInfoSet::Front() {
 }
 
 RequestInfoPtr RequestInfoSet::FrontWithNotNullTimeout() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(this_lock_);
   RequestInfoPtr result;
   TimeSortedRequestInfoSet::iterator it = time_sorted_pending_requests_.begin();
@@ -194,7 +199,7 @@ RequestInfoPtr RequestInfoSet::FrontWithNotNullTimeout() {
 bool RequestInfoSet::Erase(const RequestInfoPtr request_info) {
   DCHECK(request_info);
   if (!request_info) {
-    LOG4CXX_ERROR(logger_, "NULL ponter request_info");
+    LOGGER_ERROR(logger_, "NULL ponter request_info");
     return false;
   }
   CheckSetSizes();
@@ -206,7 +211,7 @@ bool RequestInfoSet::Erase(const RequestInfoPtr request_info) {
         time_sorted_pending_requests_.find(request_info);
     DCHECK(it != time_sorted_pending_requests_.end());
     if (it == time_sorted_pending_requests_.end()) {
-      LOG4CXX_ERROR(logger_, "Can't find request in time_sorted_requests_");
+      LOGGER_ERROR(logger_, "Can't find request in time_sorted_requests_");
       return false;
     }
     const RequestInfoPtr found = *it;
@@ -226,7 +231,7 @@ bool RequestInfoSet::RemoveRequest(const RequestInfoPtr request_info) {
 
 uint32_t RequestInfoSet::RemoveRequests(
     const RequestInfoSet::AppIdCompararator& filter) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   uint32_t erased = 0;
 
   sync_primitives::AutoLock lock(this_lock_);
@@ -245,13 +250,13 @@ uint32_t RequestInfoSet::RemoveRequests(
 }
 
 uint32_t RequestInfoSet::RemoveByConnectionKey(uint32_t connection_key) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   return RemoveRequests(
       AppIdCompararator(AppIdCompararator::Equal, connection_key));
 }
 
 uint32_t RequestInfoSet::RemoveMobileRequests() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   return RemoveRequests(AppIdCompararator(AppIdCompararator::NotEqual,
                                           RequestInfo::HmiConnectoinKey));
 }
@@ -272,7 +277,7 @@ bool RequestInfoSet::CheckTimeScaleMaxRequest(
     uint32_t app_id,
     uint32_t app_time_scale,
     uint32_t max_request_per_time_scale) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   if (max_request_per_time_scale > 0 && app_time_scale > 0) {
     TimevalStruct end = date_time::DateTime::getCurrentTime();
     TimevalStruct start = {0, 0};
@@ -284,15 +289,15 @@ bool RequestInfoSet::CheckTimeScaleMaxRequest(
                                          time_sorted_pending_requests_.end(),
                                          scale);
     if (count >= max_request_per_time_scale) {
-      LOG4CXX_WARN(logger_,
-                   "Processing requests count " << count
-                                                << " exceed application limit "
-                                                << max_request_per_time_scale);
+      LOGGER_WARN(logger_,
+                  "Processing requests count " << count
+                                               << " exceed application limit "
+                                               << max_request_per_time_scale);
       return false;
     }
-    LOG4CXX_DEBUG(logger_, "Requests count " << count);
+    LOGGER_DEBUG(logger_, "Requests count " << count);
   } else {
-    LOG4CXX_DEBUG(logger_, "CheckTimeScaleMaxRequest disabled");
+    LOGGER_DEBUG(logger_, "CheckTimeScaleMaxRequest disabled");
   }
   return true;
 }
@@ -302,7 +307,7 @@ bool RequestInfoSet::CheckHMILevelTimeScaleMaxRequest(
     uint32_t app_id,
     uint32_t app_time_scale,
     uint32_t max_request_per_time_scale) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   if (max_request_per_time_scale > 0 && app_time_scale > 0) {
     TimevalStruct end = date_time::DateTime::getCurrentTime();
     TimevalStruct start = {0, 0};
@@ -314,16 +319,16 @@ bool RequestInfoSet::CheckHMILevelTimeScaleMaxRequest(
                                          time_sorted_pending_requests_.end(),
                                          scale);
     if (count >= max_request_per_time_scale) {
-      LOG4CXX_WARN(logger_,
-                   "Processing requests count "
-                       << count << " exceed application limit "
-                       << max_request_per_time_scale << " in hmi level "
-                       << hmi_level);
+      LOGGER_WARN(logger_,
+                  "Processing requests count "
+                      << count << " exceed application limit "
+                      << max_request_per_time_scale << " in hmi level "
+                      << hmi_level);
       return false;
     }
-    LOG4CXX_DEBUG(logger_, "Requests count " << count);
+    LOGGER_DEBUG(logger_, "Requests count " << count);
   } else {
-    LOG4CXX_DEBUG(logger_, "CheckHMILevelTimeScaleMaxRequest disabled");
+    LOGGER_DEBUG(logger_, "CheckHMILevelTimeScaleMaxRequest disabled");
   }
   return true;
 }

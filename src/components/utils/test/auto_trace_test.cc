@@ -35,15 +35,14 @@
 #include <ctime>
 
 #include "gtest/gtest.h"
-#include "utils/auto_trace.h"
 #include "utils/logger.h"
 #include "utils/log_message_loop_thread.h"
 #include "utils/threads/message_loop_thread.h"
 #include "utils/file_system.h"
 #include "utils/threads/thread.h"
 #include "utils/date_time.h"
-#include "utils/logger_status.h"
 #include "utils/helpers.h"
+#include "utils/appenders_loader.h"
 
 namespace test {
 namespace components {
@@ -70,13 +69,13 @@ void Preconditions() {
 
 void InitLogger() {
   // Set enabled logs
-  INIT_LOGGER("log4cxx.properties", true);
+  INIT_LOGGER(true);
   // DEINIT_LOGGER will be called in test_main.cc
 }
 
 void CreateDebugAndAutoTrace(const std::string& debug_message) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, debug_message);
+  LOGGER_AUTO_TRACE(logger_);
+  LOGGER_DEBUG(logger_, debug_message);
 }
 
 /**
@@ -109,7 +108,7 @@ typedef std::pair<std::string, std::string> LogWithLevel;
  * @return index of first element from search_for vector or -1 if all elements
  * exists in stream
  */
-ssize_t CheckIfIstreamContains(std::ifstream& stream,
+int32_t CheckIfIstreamContains(std::ifstream& stream,
                                const std::vector<LogWithLevel>& search_for) {
   std::vector<LogWithLevel>::const_iterator it = search_for.begin();
   std::string line;
@@ -141,7 +140,7 @@ TEST(AutoTraceTest, DISABLED_AutoTrace_WriteToFile_ReadCorrectString) {
   log_messages.push_back(LogWithLevel(trace_log_level, enter_message));
   log_messages.push_back(LogWithLevel(debug_log_level, debug_message));
   log_messages.push_back(LogWithLevel(trace_log_level, exit_message));
-  const ssize_t index_of_missed_element =
+  const int32_t index_of_missed_element =
       CheckIfIstreamContains(file_log, log_messages);
   if (index_of_missed_element != -1) {
     const std::string missed_log = log_messages[index_of_missed_element].first +

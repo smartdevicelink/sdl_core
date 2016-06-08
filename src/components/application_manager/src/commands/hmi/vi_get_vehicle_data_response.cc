@@ -43,7 +43,7 @@ VIGetVehicleDataResponse::VIGetVehicleDataResponse(
 VIGetVehicleDataResponse::~VIGetVehicleDataResponse() {}
 
 void VIGetVehicleDataResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   event_engine::Event event(hmi_apis::FunctionID::VehicleInfo_GetVehicleData);
 

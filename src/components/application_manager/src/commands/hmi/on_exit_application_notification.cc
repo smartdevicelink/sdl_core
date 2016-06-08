@@ -31,7 +31,6 @@
  */
 
 #include "application_manager/commands/hmi/on_exit_application_notification.h"
-
 #include "application_manager/application_impl.h"
 #include "application_manager/state_controller.h"
 #include "application_manager/message_helper.h"
@@ -49,7 +48,7 @@ OnExitApplicationNotification::OnExitApplicationNotification(
 OnExitApplicationNotification::~OnExitApplicationNotification() {}
 
 void OnExitApplicationNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   using namespace mobile_apis;
   using namespace hmi_apis;
@@ -58,7 +57,7 @@ void OnExitApplicationNotification::Run() {
   ApplicationSharedPtr app_impl = application_manager_.application(app_id);
 
   if (!(app_impl.valid())) {
-    LOG4CXX_ERROR(logger_, "Application does not exist");
+    LOGGER_ERROR(logger_, "Application does not exist");
     return;
   }
 
@@ -96,16 +95,17 @@ void OnExitApplicationNotification::Run() {
       return;
     }
     default: {
-      LOG4CXX_WARN(logger_, "Unhandled reason");
+      LOGGER_WARN(logger_, "Unhandled reason");
       return;
     }
   }
+
   ApplicationSharedPtr app = application_manager_.application(app_id);
   if (app) {
     application_manager_.state_controller().SetRegularState(
         app, HMILevel::HMI_NONE, AudioStreamingState::NOT_AUDIBLE, false);
   } else {
-    LOG4CXX_ERROR(logger_, "Unable to find appication " << app_id);
+    LOGGER_ERROR(logger_, "Unable to find appication " << app_id);
   }
 }
 

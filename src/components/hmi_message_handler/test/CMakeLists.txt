@@ -47,10 +47,15 @@ set(LIBRARIES
 )
 
 set(SOURCES 
-${COMPONENTS_DIR}/hmi_message_handler/test/hmi_message_handler_impl_test.cc
-${COMPONENTS_DIR}/hmi_message_handler/test/hmi_message_adapter_test.cc
-${COMPONENTS_DIR}/hmi_message_handler/test/mqueue_adapter_test.cc
+    ${COMPONENTS_DIR}/hmi_message_handler/test/hmi_message_handler_impl_test.cc
+    ${COMPONENTS_DIR}/hmi_message_handler/test/hmi_message_adapter_test.cc
 )
+
+if(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  list(APPEND SOURCES
+    ${COMPONENTS_DIR}/hmi_message_handler/test/mqueue_adapter_test.cc
+  )
+endif()
 
 if(${QT_HMI})
     list (APPEND SOURCES  
@@ -58,6 +63,11 @@ if(${QT_HMI})
     ${COMPONENTS_DIR}/hmi_message_handler/test/dbus_message_adapter_test.cc
   )
 endif()
+
 create_test("hmi_message_handler_test" "${SOURCES}" "${LIBRARIES}")
+
+if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  target_link_libraries("hmi_message_handler_test" ws2_32)
+endif()
 
 endif()

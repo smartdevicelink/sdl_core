@@ -35,9 +35,7 @@
 
 #include <string>
 #include <vector>
-
 #include "gmock/gmock.h"
-
 #include "application_manager/application_manager.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_manager_settings.h"
@@ -59,6 +57,7 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                bool(resumption::LastState& last_state,
                     media_manager::MediaManager* media_manager));
   MOCK_METHOD0(Stop, bool());
+
   MOCK_METHOD1(set_hmi_message_handler,
                void(hmi_message_handler::HMIMessageHandler* handler));
   MOCK_METHOD1(set_protocol_handler,
@@ -234,7 +233,6 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_CONST_METHOD0(IsAnyAppSubscribedForWayPoints, bool());
   MOCK_CONST_METHOD0(GetAppsSubscribedForWayPoints, const std::set<int32_t>());
 };
-
 }  // namespace application_manager_test
 }  // namespace components
 }  // namespace test

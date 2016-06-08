@@ -33,7 +33,6 @@
 
 #include <cstring>
 #include "application_manager/commands/mobile/show_constant_tbt_request.h"
-
 #include "application_manager/policies/policy_handler.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
@@ -52,19 +51,19 @@ ShowConstantTBTRequest::ShowConstantTBTRequest(
 ShowConstantTBTRequest::~ShowConstantTBTRequest() {}
 
 void ShowConstantTBTRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app = application_manager_.application(
       (*message_)[strings::params][strings::connection_key].asUInt());
 
   if (!app) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
-    LOG4CXX_ERROR(logger_, "Application is not registered");
+    LOGGER_ERROR(logger_, "Application is not registered");
     return;
   }
   // SDLAQ-CRS-664, VC3.1
   if ((*message_)[strings::msg_params].empty()) {
-    LOG4CXX_ERROR(logger_, "INVALID_DATA!");
+    LOGGER_ERROR(logger_, "INVALID_DATA!");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
@@ -74,8 +73,8 @@ void ShowConstantTBTRequest::Run() {
   msg_params = (*message_)[strings::msg_params];
 
   if (IsWhiteSpaceExist()) {
-    LOG4CXX_ERROR(logger_,
-                  "Incoming show constant TBT has contains \t\n \\t \\n");
+    LOGGER_ERROR(logger_,
+                 "Incoming show constant TBT has contains \t\n \\t \\n");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
@@ -89,7 +88,7 @@ void ShowConstantTBTRequest::Run() {
                                         application_manager_);
 
   if (mobile_apis::Result::SUCCESS != processing_result) {
-    LOG4CXX_ERROR(logger_, "INVALID_DATA!");
+    LOGGER_ERROR(logger_, "INVALID_DATA!");
     SendResponse(false, processing_result);
     return;
   }
@@ -99,7 +98,7 @@ void ShowConstantTBTRequest::Run() {
     verification_result = MessageHelper::VerifyImage(
         msg_params[strings::turn_icon], app, application_manager_);
     if (mobile_apis::Result::SUCCESS != verification_result) {
-      LOG4CXX_ERROR(logger_, "VerifyImage INVALID_DATA!");
+      LOGGER_ERROR(logger_, "VerifyImage INVALID_DATA!");
       SendResponse(false, verification_result);
       return;
     }
@@ -109,7 +108,7 @@ void ShowConstantTBTRequest::Run() {
     verification_result = MessageHelper::VerifyImage(
         msg_params[strings::next_turn_icon], app, application_manager_);
     if (mobile_apis::Result::SUCCESS != verification_result) {
-      LOG4CXX_ERROR(logger_, "VerifyImage INVALID_DATA!");
+      LOGGER_ERROR(logger_, "VerifyImage INVALID_DATA!");
       SendResponse(false, verification_result);
       return;
     }
@@ -177,12 +176,12 @@ void ShowConstantTBTRequest::Run() {
 }
 
 void ShowConstantTBTRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
     case hmi_apis::FunctionID::Navigation_ShowConstantTBT: {
-      LOG4CXX_INFO(logger_, "Received Navigation_ShowConstantTBT event");
+      LOGGER_INFO(logger_, "Received Navigation_ShowConstantTBT event");
       std::string return_info;
 
       mobile_apis::Result::eType result_code =
@@ -207,21 +206,21 @@ void ShowConstantTBTRequest::on_event(const event_engine::Event& event) {
       break;
     }
     default: {
-      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+      LOGGER_ERROR(logger_, "Received unknown event" << event.id());
       break;
     }
   }
 }
 
 bool ShowConstantTBTRequest::IsWhiteSpaceExist() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   const char* str = NULL;
 
   if ((*message_)[strings::msg_params].keyExists(strings::turn_icon)) {
     str = (*message_)[strings::msg_params][strings::turn_icon][strings::value]
               .asCharArray();
     if (!CheckSyntax(str)) {
-      LOG4CXX_ERROR(logger_, "Invalid turn_icon value syntax check failed");
+      LOGGER_ERROR(logger_, "Invalid turn_icon value syntax check failed");
       return true;
     }
   }
@@ -230,8 +229,7 @@ bool ShowConstantTBTRequest::IsWhiteSpaceExist() {
     str = (*message_)[strings::msg_params][strings::next_turn_icon]
                      [strings::value].asCharArray();
     if (!CheckSyntax(str)) {
-      LOG4CXX_ERROR(logger_,
-                    "Invalid next_turn_icon value syntax check failed");
+      LOGGER_ERROR(logger_, "Invalid next_turn_icon value syntax check failed");
       return true;
     }
   }
@@ -240,8 +238,8 @@ bool ShowConstantTBTRequest::IsWhiteSpaceExist() {
     str = (*message_)[strings::msg_params][strings::navigation_text_1]
               .asCharArray();
     if (strlen(str) && !CheckSyntax(str)) {
-      LOG4CXX_ERROR(logger_,
-                    "Invalid navigation_text_1 value syntax check failed");
+      LOGGER_ERROR(logger_,
+                   "Invalid navigation_text_1 value syntax check failed");
       return true;
     }
   }
@@ -250,8 +248,8 @@ bool ShowConstantTBTRequest::IsWhiteSpaceExist() {
     str = (*message_)[strings::msg_params][strings::navigation_text_2]
               .asCharArray();
     if (strlen(str) && !CheckSyntax(str)) {
-      LOG4CXX_ERROR(logger_,
-                    "Invalid navigation_text_2 value syntax check failed");
+      LOGGER_ERROR(logger_,
+                   "Invalid navigation_text_2 value syntax check failed");
       return true;
     }
   }
@@ -259,7 +257,7 @@ bool ShowConstantTBTRequest::IsWhiteSpaceExist() {
   if ((*message_)[strings::msg_params].keyExists(strings::eta)) {
     str = (*message_)[strings::msg_params][strings::eta].asCharArray();
     if (strlen(str) && !CheckSyntax(str)) {
-      LOG4CXX_ERROR(logger_, "Invalid eta value syntax check failed");
+      LOGGER_ERROR(logger_, "Invalid eta value syntax check failed");
       return true;
     }
   }
@@ -268,8 +266,7 @@ bool ShowConstantTBTRequest::IsWhiteSpaceExist() {
     str =
         (*message_)[strings::msg_params][strings::total_distance].asCharArray();
     if (strlen(str) && !CheckSyntax(str)) {
-      LOG4CXX_ERROR(logger_,
-                    "Invalid total_distance value syntax check failed");
+      LOGGER_ERROR(logger_, "Invalid total_distance value syntax check failed");
       return true;
     }
   }
@@ -279,8 +276,8 @@ bool ShowConstantTBTRequest::IsWhiteSpaceExist() {
     str = (*message_)[strings::msg_params][strings::time_to_destination]
               .asCharArray();
     if (strlen(str) && !CheckSyntax(str)) {
-      LOG4CXX_ERROR(logger_,
-                    "Invalid time_to_destination value syntax check failed");
+      LOGGER_ERROR(logger_,
+                   "Invalid time_to_destination value syntax check failed");
       return true;
     }
   }
