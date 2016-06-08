@@ -86,6 +86,8 @@ class TransportManagerImplTest : public ::testing::Test {
     EXPECT_CALL(*mock_adapter_, AddListener(_));
     EXPECT_CALL(*mock_adapter_, IsInitialised()).WillOnce(Return(true));
     EXPECT_EQ(E_SUCCESS, tm_.AddTransportAdapter(mock_adapter_));
+    EXPECT_CALL(*mock_adapter_, GetDeviceType())
+        .WillRepeatedly(Return(transport_adapter::DeviceType::BLUETOOTH));
 
     connection_key_ = 1;
     error_ = MakeShared<BaseError>();
@@ -469,8 +471,7 @@ TEST_F(TransportManagerImplTest, SearchDevices_DeviceConnected) {
   HandleSearchDone();
 }
 
-// TODO(OHerasym): exception in SearchDevices method
-TEST_F(TransportManagerImplTest, DISABLED_SearchDevices_DeviceNotFound) {
+TEST_F(TransportManagerImplTest, SearchDevices_DeviceNotFound) {
   HandleDeviceListUpdated();
 
   EXPECT_CALL(*mock_adapter_, SearchDevices())
@@ -478,8 +479,7 @@ TEST_F(TransportManagerImplTest, DISABLED_SearchDevices_DeviceNotFound) {
   EXPECT_EQ(E_ADAPTERS_FAIL, tm_.SearchDevices());
 }
 
-// TODO(OHerasym): exception in SearchDevices method
-TEST_F(TransportManagerImplTest, DISABLED_SearchDevices_AdapterNotSupported) {
+TEST_F(TransportManagerImplTest, SearchDevices_AdapterNotSupported) {
   HandleDeviceListUpdated();
 
   EXPECT_CALL(*mock_adapter_, SearchDevices())
@@ -487,8 +487,7 @@ TEST_F(TransportManagerImplTest, DISABLED_SearchDevices_AdapterNotSupported) {
   EXPECT_EQ(E_ADAPTERS_FAIL, tm_.SearchDevices());
 }
 
-// TODO(OHerasym): exception in SearchDevices method
-TEST_F(TransportManagerImplTest, DISABLED_SearchDevices_AdapterWithBadState) {
+TEST_F(TransportManagerImplTest, SearchDevices_AdapterWithBadState) {
   HandleDeviceListUpdated();
 
   EXPECT_CALL(*mock_adapter_, SearchDevices())
@@ -496,8 +495,7 @@ TEST_F(TransportManagerImplTest, DISABLED_SearchDevices_AdapterWithBadState) {
   EXPECT_EQ(E_ADAPTERS_FAIL, tm_.SearchDevices());
 }
 
-// TODO(OHerasym): exception in SendMessageToDevice method
-TEST_F(TransportManagerImplTest, DISABLED_SendMessageToDevice) {
+TEST_F(TransportManagerImplTest, SendMessageToDevice) {
   // Arrange
   HandleConnection();
 
@@ -901,15 +899,14 @@ TEST_F(TransportManagerImplTest, SearchDevices_TMIsNotInitialized) {
   EXPECT_EQ(E_TM_IS_NOT_INITIALIZED, tm_.SearchDevices());
 }
 
-TEST_F(TransportManagerImplTest,
-       DISABLED_SetVisibilityOn_TransportAdapterNotSupported) {
+TEST_F(TransportManagerImplTest, SetVisibilityOn_TransportAdapterNotSupported) {
   EXPECT_CALL(*mock_adapter_, StartClientListening())
       .WillOnce(Return(TransportAdapter::NOT_SUPPORTED));
   EXPECT_EQ(E_SUCCESS, tm_.Visibility(true));
 }
 
 TEST_F(TransportManagerImplTest,
-       DISABLED_SetVisibilityOff_TransportAdapterNotSupported) {
+       SetVisibilityOff_TransportAdapterNotSupported) {
   EXPECT_CALL(*mock_adapter_, StopClientListening())
       .WillOnce(Return(TransportAdapter::NOT_SUPPORTED));
   EXPECT_EQ(E_SUCCESS, tm_.Visibility(false));

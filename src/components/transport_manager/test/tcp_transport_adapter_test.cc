@@ -71,7 +71,7 @@ class TcpAdapterTest : public ::testing::Test {
   const utils::HostAddress host_address;
 };
 
-TEST_F(TcpAdapterTest, DISABLED_StoreDataWithOneDeviceAndOneApplication) {
+TEST_F(TcpAdapterTest, StoreDataWithOneDeviceAndOneApplication) {
   // Prepare
   MockTCPTransportAdapter transport_adapter(
       port, last_state_, transport_manager_settings);
@@ -113,7 +113,7 @@ TEST_F(TcpAdapterTest, DISABLED_StoreDataWithOneDeviceAndOneApplication) {
   EXPECT_EQ(uniq_id, tcp_dict["devices"][index]["name"].AsString());
 }
 
-TEST_F(TcpAdapterTest, DISABLED_StoreDataWithSeveralDevicesAndOneApplication) {
+TEST_F(TcpAdapterTest, StoreDataWithSeveralDevicesAndOneApplication) {
   // Prepare
   MockTCPTransportAdapter transport_adapter(
       port, last_state_, transport_manager_settings);
@@ -167,8 +167,7 @@ TEST_F(TcpAdapterTest, DISABLED_StoreDataWithSeveralDevicesAndOneApplication) {
   }
 }
 
-TEST_F(TcpAdapterTest,
-       DISABLED_StoreDataWithSeveralDevicesAndSeveralApplications) {
+TEST_F(TcpAdapterTest, StoreDataWithSeveralDevicesAndSeveralApplications) {
   // Prepare
   MockTCPTransportAdapter transport_adapter(
       port, last_state_, transport_manager_settings);
@@ -269,7 +268,7 @@ TEST_F(TcpAdapterTest, RestoreData_DataNotStored) {
   EXPECT_TRUE(transport_adapter.CallRestore());
 }
 
-TEST_F(TcpAdapterTest, DISABLED_StoreDataWithOneDevice_RestoreData) {
+TEST_F(TcpAdapterTest, StoreDataWithOneDevice_RestoreData) {
   MockTCPTransportAdapter transport_adapter(
       port, last_state_, transport_manager_settings);
   std::string uniq_id = "unique_device_name";
@@ -304,7 +303,7 @@ TEST_F(TcpAdapterTest, DISABLED_StoreDataWithOneDevice_RestoreData) {
   EXPECT_EQ(uniq_id, devList[0]);
 }
 
-TEST_F(TcpAdapterTest, DISABLED_StoreDataWithSeveralDevices_RestoreData) {
+TEST_F(TcpAdapterTest, StoreDataWithSeveralDevices_RestoreData) {
   MockTCPTransportAdapter transport_adapter(
       port, last_state_, transport_manager_settings);
   const uint32_t count_dev = 10;
