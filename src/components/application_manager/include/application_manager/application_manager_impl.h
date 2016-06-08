@@ -39,6 +39,7 @@
 #include <set>
 #include <deque>
 #include <algorithm>
+#include <memory>
 
 #include "application_manager/hmi_command_factory.h"
 #include "application_manager/application_manager.h"
@@ -1416,7 +1417,7 @@ class ApplicationManagerImpl
   // Thread that pumps messages audio pass thru to mobile.
   impl::AudioPassThruQueue audio_pass_thru_messages_;
 
-  HMICapabilities hmi_capabilities_;
+  std::auto_ptr<HMICapabilities> hmi_capabilities_;
   // The reason of HU shutdown
   mobile_api::AppInterfaceUnregisteredReason::eType unregister_reason_;
 
