@@ -427,7 +427,7 @@ TEST_F(PolicyManagerImplTest, GetNotificationsNumber) {
   EXPECT_EQ(notif_number, manager->GetNotificationsNumber(priority));
 }
 
-TEST_F(PolicyManagerImplTest2, DISABLED_GetNotificationsNumberAfterPTUpdate) {
+TEST_F(PolicyManagerImplTest2, GetNotificationsNumberAfterPTUpdate) {
   // Arrange
   utils::json::JsonValue table = CreatePTforLoad();
 
@@ -439,17 +439,14 @@ TEST_F(PolicyManagerImplTest2, DISABLED_GetNotificationsNumberAfterPTUpdate) {
   EXPECT_CALL(listener, OnUpdateStatusChanged(_));
   EXPECT_TRUE(manager->LoadPT("file_pt_update.json", msg));
 
-  std::string priority = "EMERGENCY";
+  // priority is case sensistive to values in DB
+  std::string priority = "emergency";
   uint32_t notif_number = manager->GetNotificationsNumber(priority);
   EXPECT_EQ(1u, notif_number);
 
   priority = "navigation";
   notif_number = manager->GetNotificationsNumber(priority);
   EXPECT_EQ(2u, notif_number);
-
-  priority = "emergency";
-  notif_number = manager->GetNotificationsNumber(priority);
-  EXPECT_EQ(1u, notif_number);
 
   priority = "VOICECOMM";
   notif_number = manager->GetNotificationsNumber(priority);

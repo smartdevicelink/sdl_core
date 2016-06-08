@@ -224,20 +224,17 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
     utils::json::JsonValueRef module_config = policy_table["module_config"];
     module_config["preloaded_pt"] = utils::json::JsonValue(true);
     module_config["preloaded_date"] = utils::json::JsonValue("");
-    module_config["exchange_after_x_ignition_cycles"] =
-        JsonValue(static_cast<double>(10));
-    module_config["exchange_after_x_kilometers"] =
-        JsonValue(static_cast<double>(100));
-    module_config["exchange_after_x_days"] = JsonValue(static_cast<double>(5));
-    module_config["timeout_after_x_seconds"] =
-        JsonValue(static_cast<double>(500));
+    module_config["exchange_after_x_ignition_cycles"] = JsonValue::Int(10);
+    module_config["exchange_after_x_kilometers"] = JsonValue::Int(100);
+    module_config["exchange_after_x_days"] = JsonValue::Int(5);
+    module_config["timeout_after_x_seconds"] = JsonValue::Int(500);
     module_config["seconds_between_retries"] =
         utils::json::ValueType::ARRAY_VALUE;
     utils::json::JsonValueRef seconds_between_retries =
         module_config["seconds_between_retries"];
-    seconds_between_retries[uint32_t(0)] = JsonValue(static_cast<double>(10));
-    seconds_between_retries[1] = JsonValue(static_cast<double>(20));
-    seconds_between_retries[2] = JsonValue(static_cast<double>(30));
+    seconds_between_retries[uint32_t(0)] = JsonValue::Int(10);
+    seconds_between_retries[1] = JsonValue::Int(20);
+    seconds_between_retries[2] = JsonValue::Int(30);
     module_config["endpoints"] = utils::json::ValueType::OBJECT_VALUE;
     utils::json::JsonValueRef endpoins = module_config["endpoints"];
     endpoins["0x00"] = utils::json::ValueType::OBJECT_VALUE;
@@ -247,21 +244,20 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
     module_config["notifications_per_minute_by_priority"] =
         utils::json::ValueType::OBJECT_VALUE;
     module_config["notifications_per_minute_by_priority"]["emergency"] =
-        JsonValue(static_cast<double>(1));
+        JsonValue::Int(1);
     module_config["notifications_per_minute_by_priority"]["navigation"] =
-        JsonValue(static_cast<double>(2));
-    ;
+        JsonValue::Int(2);
     module_config["notifications_per_minute_by_priority"]["VOICECOMM"] =
-        JsonValue(static_cast<double>(3));
+        JsonValue::Int(3);
     module_config["notifications_per_minute_by_priority"]["communication"] =
-        JsonValue(static_cast<double>(4));
+        JsonValue::Int(4);
     module_config["notifications_per_minute_by_priority"]["normal"] =
-        JsonValue(static_cast<double>(5));
+        JsonValue::Int(5);
     module_config["notifications_per_minute_by_priority"]["none"] =
-        JsonValue(static_cast<double>(6));
-    module_config["vehicle_make"] = JsonValue("");
-    module_config["vehicle_model"] = JsonValue("");
-    module_config["vehicle_year"] = JsonValue("");
+        JsonValue::Int(6);
+    module_config["vehicle_make"] = JsonValue("Ford");
+    module_config["vehicle_model"] = JsonValue("Mustang");
+    module_config["vehicle_year"] = JsonValue("2016");
     module_config["certificate"] = JsonValue("");
 
     utils::json::JsonValueRef functional_groupings =
@@ -299,9 +295,8 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
     utils::json::JsonValueRef app_policies = policy_table["app_policies"];
     app_policies["default"] = utils::json::ValueType::OBJECT_VALUE;
     app_policies["default"]["priority"] = JsonValue("EMERGENCY");
-    app_policies["default"]["memory_kb"] = JsonValue(static_cast<double>(50));
-    app_policies["default"]["heart_beat_timeout_ms"] =
-        JsonValue(static_cast<double>(100));
+    app_policies["default"]["memory_kb"] = JsonValue::Int(50);
+    app_policies["default"]["heart_beat_timeout_ms"] = JsonValue::Int(100);
     app_policies["default"]["groups"] = utils::json::ValueType::ARRAY_VALUE;
     app_policies["default"]["groups"][uint32_t(0)] = JsonValue("default");
     app_policies["default"]["priority"] = JsonValue("EMERGENCY");
@@ -311,10 +306,9 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
     app_policies["default"]["steal_focus"] = utils::json::JsonValue(true);
 
     app_policies["pre_DataConsent"] = utils::json::ValueType::OBJECT_VALUE;
-    app_policies["pre_DataConsent"]["memory_kb"] =
-        JsonValue(static_cast<double>(40));
+    app_policies["pre_DataConsent"]["memory_kb"] = JsonValue::Int(40);
     app_policies["pre_DataConsent"]["heart_beat_timeout_ms"] =
-        JsonValue(static_cast<double>(90));
+        JsonValue::Int(90);
     app_policies["pre_DataConsent"]["groups"] =
         utils::json::ValueType::ARRAY_VALUE;
     app_policies["pre_DataConsent"]["groups"][uint32_t(0)] =
@@ -329,9 +323,8 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
     app_policies["pre_DataConsent"]["steal_focus"] =
         utils::json::JsonValue(true);
     app_policies["1234"] = utils::json::ValueType::OBJECT_VALUE;
-    app_policies["1234"]["memory_kb"] = JsonValue(static_cast<double>(150));
-    app_policies["1234"]["heart_beat_timeout_ms"] =
-        JsonValue(static_cast<double>(200));
+    app_policies["1234"]["memory_kb"] = JsonValue::Int(150);
+    app_policies["1234"]["heart_beat_timeout_ms"] = JsonValue::Int(200);
     app_policies["1234"]["groups"] = utils::json::ValueType::ARRAY_VALUE;
     app_policies["1234"]["groups"][uint32_t(0)] = JsonValue("default");
     app_policies["1234"]["priority"] = JsonValue("EMERGENCY");
@@ -1024,22 +1017,20 @@ TEST(SQLPTRepresentationTest3, Init_InitNewDataBase_ExpectResultSuccess) {
   delete reps;
 }
 
-// TODO(OHerasym) : no set_path method in SQLdatabase
 TEST(SQLPTRepresentationTest3,
-     DISABLED_Init_TryInitNotExistingDataBase_ExpectResultFail) {
+     Init_TryInitNotExistingDataBase_ExpectResultFail) {
   // Arrange
   NiceMock<policy_handler_test::MockPolicySettings> policy_settings_;
   ON_CALL(policy_settings_, app_storage_folder())
       .WillByDefault(ReturnRef(kAppStorageFolder));
   SQLPTRepresentation reps(
-      kStorageFolder, kAttemptsToOpenPolicyDb, kOpenAttemptTimeoutMs);
-  // (reps.db())->set_path("/home/");
+      "/wrong_path", kAttemptsToOpenPolicyDb, kOpenAttemptTimeoutMs);
   // Check
   EXPECT_EQ(::policy::FAIL, reps.Init(&policy_settings_));
 }
 
 TEST(SQLPTRepresentationTest3,
-     DISABLED_Close_InitNewDataBaseThenClose_ExpectResultSuccess) {
+     Close_InitNewDataBaseThenClose_ExpectResultSuccess) {
   // Arrange
   NiceMock<policy_handler_test::MockPolicySettings> policy_settings_;
   ON_CALL(policy_settings_, app_storage_folder())
@@ -1520,8 +1511,7 @@ TEST_F(SQLPTRepresentationTest,
             snapshot->ToJsonValue().ToJson(true));
 }
 
-TEST_F(SQLPTRepresentationTest,
-       DISABLED_Save_SetPolicyTableThenSave_ExpectSavedToPT) {
+TEST_F(SQLPTRepresentationTest, Save_SetPolicyTableThenSave_ExpectSavedToPT) {
   // Arrange
   utils::json::JsonValue table(utils::json::ValueType::OBJECT_VALUE);
   PolicyTableUpdatePrepare(table);
@@ -1566,7 +1556,7 @@ TEST_F(SQLPTRepresentationTest,
   policy_table::UsageAndErrorCounts counts;
   GatherUsageAndErrorCounts(&counts);
   EXPECT_EQ(0u, counts.app_level->size());
-  // ASSERT_TRUE(IsValid(update));
+  ASSERT_TRUE(IsValid(update));
   // Act
   ASSERT_TRUE(reps->Save(update));
 
@@ -1636,12 +1626,12 @@ TEST_F(SQLPTRepresentationTest,
 
   GatherModuleConfig(&config);
   // Check Module Config section
-  ASSERT_FALSE(*config.preloaded_pt);
+  ASSERT_TRUE(*config.preloaded_pt);
   ASSERT_EQ("", static_cast<std::string>(*config.certificate));
   ASSERT_EQ("", static_cast<std::string>(*config.preloaded_date));
-  ASSERT_EQ("", static_cast<std::string>(*config.vehicle_year));
-  ASSERT_EQ("", static_cast<std::string>(*config.vehicle_model));
-  ASSERT_EQ("", static_cast<std::string>(*config.vehicle_make));
+  ASSERT_EQ("2016", static_cast<std::string>(*config.vehicle_year));
+  ASSERT_EQ("Mustang", static_cast<std::string>(*config.vehicle_model));
+  ASSERT_EQ("Ford", static_cast<std::string>(*config.vehicle_make));
   ASSERT_EQ(10, config.exchange_after_x_ignition_cycles);
   ASSERT_EQ(100, config.exchange_after_x_kilometers);
   ASSERT_EQ(5, config.exchange_after_x_days);
