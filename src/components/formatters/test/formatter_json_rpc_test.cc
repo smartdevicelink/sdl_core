@@ -122,10 +122,7 @@ TEST(FormatterJsonRPCTest, CorrectRPCv2Request_ToString_Success) {
   EXPECT_EQ(json_string, result);
 }
 
-// TODO(OHerasym) : assertion failed: (convert <=
-// std::numeric_limits<int32_t>::max())
-TEST(FormatterJsonRPCTest,
-     DISABLED_UpperBoundValuesInSystemRequest_ToString_Success) {
+TEST(FormatterJsonRPCTest, UpperBoundValuesInSystemRequest_ToString_Success) {
   // Create SmartObject
   SmartObject obj;
   obj[S_PARAMS][S_FUNCTION_ID] =
@@ -400,10 +397,7 @@ TEST(FormatterJsonRPCTest, ResponseToSmartObject_Success) {
   EXPECT_EQ(2, obj["params"]["protocol_version"].asInt());
 }
 
-// TODO(OHerasym) : Assertion failed: (convert <=
-// std::numeric_limits<int32_t>::max())
-TEST(FormatterJsonRPCTest,
-     DISABLED_StringWithUpperBoundValueToSmartObject_Success) {
+TEST(FormatterJsonRPCTest, StringWithUpperBoundValueToSmartObject_Success) {
   // Source Json string
   const std::string json_string(
       "{\"jsonrpc\":\"2.0\",\"method\":\"BasicCommunication.OnSystemRequest\","

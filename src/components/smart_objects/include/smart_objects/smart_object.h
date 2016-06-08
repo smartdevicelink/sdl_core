@@ -230,13 +230,20 @@ class SmartObject FINAL {
    **/
   bool operator==(const int32_t Value) const;
 
-  // Support of type: uint32_t
   /**
-   * @brief Constructor for creating object of type: int32_t
+   * @brief Constructor for creating object of type: uint32_t
    *
    * @param InitialValue Initial object value
    **/
   explicit SmartObject(const uint32_t InitialValue);
+
+  // Support of type: uint64_t
+  /**
+   * @brief Constructor for creating object of type: uint64_t
+   *
+   * @param InitialValue Initial object value
+   **/
+  explicit SmartObject(const uint64_t InitialValue);
 
   /**
    * @brief Returns current object converted to uint64_t
