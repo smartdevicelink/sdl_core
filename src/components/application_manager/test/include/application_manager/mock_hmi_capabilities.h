@@ -45,7 +45,7 @@ namespace application_manager_test {
 class MockHMICapabilities : public ::application_manager::HMICapabilities {
  public:
   MOCK_CONST_METHOD0(is_hmi_capabilities_initialized, bool());
-  MOCK_CONST_METHOD1(VerifyImageType, bool(int32_t image_type));
+  MOCK_CONST_METHOD1(VerifyImageType, bool(const int32_t image_type));
 
   MOCK_CONST_METHOD0(is_vr_cooperating, bool());
   MOCK_METHOD1(set_is_vr_cooperating, void(const bool value));
@@ -159,8 +159,8 @@ class MockHMICapabilities : public ::application_manager::HMICapabilities {
 
  protected:
   MOCK_CONST_METHOD2(check_existing_json_member,
-               bool(const Json::Value& json_member,
-                    const char* name_of_member));
+                     bool(const Json::Value& json_member,
+                          const char* name_of_member));
 
   MOCK_CONST_METHOD2(convert_json_languages_to_obj,
                      void(const Json::Value& json_languages,

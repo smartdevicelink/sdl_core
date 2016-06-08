@@ -33,7 +33,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMI_CAPABILITIES_IMPL_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMI_CAPABILITIES_IMPL_H_
 
-#include "hmi_capabilities.h"
+#include "application_manager/hmi_capabilities.h"
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
 #include "json/json.h"
@@ -83,7 +83,7 @@ class HMICapabilitiesImpl : public HMICapabilities {
    * @param image_type recieved type of image from Enum.
    * @return Bool true if supported
    */
-  bool VerifyImageType(int32_t image_type) const OVERRIDE;
+  bool VerifyImageType(const int32_t image_type) const OVERRIDE;
 
   /**
    * @brief Checks if all HMI capabilities received

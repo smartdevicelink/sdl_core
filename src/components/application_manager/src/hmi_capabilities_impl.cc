@@ -314,7 +314,7 @@ bool HMICapabilitiesImpl::is_hmi_capabilities_initialized() const {
   return result;
 }
 
-bool HMICapabilitiesImpl::VerifyImageType(int32_t image_type) const {
+bool HMICapabilitiesImpl::VerifyImageType(const int32_t image_type) const {
   if (!display_capabilities_) {
     return false;
   }
@@ -332,7 +332,7 @@ bool HMICapabilitiesImpl::VerifyImageType(int32_t image_type) const {
   return false;
 }
 
-void HMICapabilitiesImpl::set_is_vr_cooperating(bool value) {
+void HMICapabilitiesImpl::set_is_vr_cooperating(const bool value) {
   is_vr_ready_response_recieved_ = true;
   is_vr_cooperating_ = value;
   if (is_vr_cooperating_) {
@@ -352,7 +352,7 @@ void HMICapabilitiesImpl::set_is_vr_cooperating(bool value) {
   }
 }
 
-void HMICapabilitiesImpl::set_is_tts_cooperating(bool value) {
+void HMICapabilitiesImpl::set_is_tts_cooperating(const bool value) {
   is_tts_ready_response_recieved_ = true;
   is_tts_cooperating_ = value;
   if (is_tts_cooperating_) {
@@ -372,7 +372,7 @@ void HMICapabilitiesImpl::set_is_tts_cooperating(bool value) {
   }
 }
 
-void HMICapabilitiesImpl::set_is_ui_cooperating(bool value) {
+void HMICapabilitiesImpl::set_is_ui_cooperating(const bool value) {
   is_ui_ready_response_recieved_ = true;
   is_ui_cooperating_ = value;
   if (is_ui_cooperating_) {
@@ -392,12 +392,12 @@ void HMICapabilitiesImpl::set_is_ui_cooperating(bool value) {
   }
 }
 
-void HMICapabilitiesImpl::set_is_navi_cooperating(bool value) {
+void HMICapabilitiesImpl::set_is_navi_cooperating(const bool value) {
   is_navi_ready_response_recieved_ = true;
   is_navi_cooperating_ = value;
 }
 
-void HMICapabilitiesImpl::set_is_ivi_cooperating(bool value) {
+void HMICapabilitiesImpl::set_is_ivi_cooperating(const bool value) {
   is_ivi_ready_response_recieved_ = true;
   is_ivi_cooperating_ = value;
   if (is_ivi_cooperating_) {
@@ -408,7 +408,7 @@ void HMICapabilitiesImpl::set_is_ivi_cooperating(bool value) {
   }
 }
 
-void HMICapabilitiesImpl::set_attenuated_supported(bool state) {
+void HMICapabilitiesImpl::set_attenuated_supported(const bool state) {
   attenuated_supported_ = state;
 }
 
@@ -576,10 +576,10 @@ void HMICapabilitiesImpl::set_prerecorded_speech(
   prerecorded_speech_ = new smart_objects::SmartObject(prerecorded_speech);
 }
 
-void HMICapabilitiesImpl::set_navigation_supported(bool supported) {
+void HMICapabilitiesImpl::set_navigation_supported(const bool supported) {
   is_navigation_supported_ = supported;
 }
-void HMICapabilitiesImpl::set_phone_call_supported(bool supported) {
+void HMICapabilitiesImpl::set_phone_call_supported(const bool supported) {
   is_phone_call_supported_ = supported;
 }
 
@@ -745,7 +745,7 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
         }
 
         if (display_capabilities_so.keyExists(hmi_response::text_fields)) {
-          uint32_t len =
+          const uint32_t len =
               display_capabilities_so[hmi_response::text_fields].length();
           for (uint32_t i = 0; i < len; ++i) {
             if ((display_capabilities_so[hmi_response::text_fields][i])
@@ -852,10 +852,10 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
                                             .asString())->second;
           }
           if (check_existing_json_member(pcm_capabilities, "bitsPerSample")) {
+            std::string bitsPerSample =
+                pcm_capabilities.get("bitsPerSample", "").asString();
             pcm_capabilities_so["bitsPerSample"] =
-                bit_per_sample_enum.find(pcm_capabilities.get("bitsPerSample",
-                                                              "").asString())
-                    ->second;
+                bit_per_sample_enum.find(bitsPerSample)->second;
           }
           if (check_existing_json_member(pcm_capabilities, "audioType")) {
             pcm_capabilities_so["audioType"] =
