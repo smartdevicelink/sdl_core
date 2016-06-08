@@ -40,7 +40,7 @@ namespace profile_test {
 
 using namespace ::profile;
 
-TEST(IniFileTest, DISABLED_WriteItemReadItem) {
+TEST(IniFileTest, WriteItemReadItem) {
   // Write line in chapter
   const char* fname = "./test_ini_file.ini";
   const char* chapter = "Chapter";
@@ -58,7 +58,7 @@ TEST(IniFileTest, DISABLED_WriteItemReadItem) {
   EXPECT_TRUE(file_system::DeleteFile("./test_ini_file.ini"));
 }
 
-TEST(IniFileTest, DISABLED_WriteItemWithoutValueReadItem) {
+TEST(IniFileTest, WriteItemWithoutValueReadItem) {
   // Write line in chapter
   const char* fname = "./test_ini_file.ini";
   const char* chapter = "Chapter";
@@ -79,7 +79,7 @@ TEST(IniFileTest, DISABLED_WriteItemWithoutValueReadItem) {
   EXPECT_TRUE(file_system::DeleteFile("./test_ini_file.ini"));
 }
 
-TEST(IniFileTest, DISABLED_WriteSameItemInDifferentChapters) {
+TEST(IniFileTest, WriteSameItemInDifferentChapters) {
   // Write line in chapter
   const char* fname = "./test_ini_file.ini";
   const char* chapter1 = "Chapter1";
@@ -111,7 +111,7 @@ TEST(IniFileTest, DISABLED_WriteSameItemInDifferentChapters) {
   EXPECT_TRUE(file_system::DeleteFile("./test_ini_file.ini"));
 }
 
-TEST(IniFileTest, DISABLED_RewriteItem) {
+TEST(IniFileTest, RewriteItem) {
   // Write line in chapter
   const char* fname = "./test_ini_file.ini";
   const char* chapter = "Chapter";
@@ -141,7 +141,7 @@ TEST(IniFileTest, DISABLED_RewriteItem) {
   EXPECT_TRUE(file_system::DeleteFile("./test_ini_file.ini"));
 }
 
-TEST(IniFileTest, DISABLED_WriteTwoItemsInOneChapter) {
+TEST(IniFileTest, WriteTwoItemsInOneChapter) {
   // Write line in chapter
   const char* fname = "./test_ini_file.ini";
   const char* chapter = "Chapter";

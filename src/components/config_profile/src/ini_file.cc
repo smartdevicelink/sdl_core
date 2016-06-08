@@ -186,23 +186,22 @@ char ini_write_value(const char* fname,
 
 #if USE_MKSTEMP
   {
-    char* temp_str;
+    char const* temp_str;
     int32_t fd = -1;
     temp_str = static_cast<char*>(getenv("TMPDIR"));
-    if (temp_str) {
-      snprintf(temp_fname, PATH_MAX, "%s/ini.XXXXXX", temp_str);
+    if (!temp_str) {
+      temp_str = "/var/tmp";
+    }
+    snprintf(temp_fname, PATH_MAX, "%s/ini.XXXXXX", temp_str);
 
-      fd = mkstemp(temp_fname);
-      if (-1 == fd) {
-        return FALSE;
-      }
-      wr_fp = fdopen(fd, "w");
-      if (NULL == wr_fp) {
-        unlink(temp_fname);
-        close(fd);
-        return FALSE;
-      }
-    } else {
+    fd = mkstemp(temp_fname);
+    if (-1 == fd) {
+      return FALSE;
+    }
+    wr_fp = fdopen(fd, "w");
+    if (NULL == wr_fp) {
+      unlink(temp_fname);
+      close(fd);
       return FALSE;
     }
   }

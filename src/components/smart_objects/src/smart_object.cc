@@ -178,8 +178,8 @@ int64_t SmartObject::asInt() const {
   if (invalid_int64_value == convert) {
     return invalid_int_value;
   }
-  DCHECK(convert >= std::numeric_limits<int32_t>::min());
-  DCHECK(convert <= std::numeric_limits<int32_t>::max());
+  DCHECK(convert >= std::numeric_limits<int64_t>::min());
+  DCHECK(convert <= std::numeric_limits<int64_t>::max());
   return static_cast<int64_t>(convert);
 }
 
@@ -276,6 +276,12 @@ bool SmartObject::operator==(const int64_t Value) const {
     return false;
   }
   return comp == Value;
+}
+
+SmartObject::SmartObject(const uint64_t InitialValue)
+    : m_type(SmartType_Null), m_schema() {
+  m_data.str_value = NULL;
+  set_value_integer(InitialValue);
 }
 
 SmartObject& SmartObject::operator=(const uint64_t NewValue) {
