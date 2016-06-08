@@ -42,6 +42,7 @@
 #include "utils/threads/thread.h"
 #include "utils/date_time.h"
 #include "utils/helpers.h"
+#include "utils/appenders_loader.h"
 
 namespace test {
 namespace components {

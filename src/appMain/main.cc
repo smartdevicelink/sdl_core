@@ -34,6 +34,7 @@
 #include "utils/logger.h"
 #include "config_profile/profile.h"
 #include "life_cycle.h"
+#include "utils/appenders_loader.h"
 
 /**
  * \brief Entry point of the program.
