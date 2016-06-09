@@ -96,7 +96,7 @@ void AudioStartStreamRequest::on_event(const event_engine::Event& event) {
               message[strings::params][hmi_response::code].asInt());
 
       if (hmi_apis::Common_Result::SUCCESS == code) {
-        LOGGER_INFO(logger_, "StartAudioStream response SUCCESS");
+        LOG4CXX_INFO(logger_, "AudioStartStream response SUCCESS");
         if (application_manager_.HMILevelAllowsStreaming(app->app_id(),
                                                          ServiceType::kAudio)) {
           app->set_audio_streaming_approved(true);
@@ -110,6 +110,8 @@ void AudioStartStreamRequest::on_event(const event_engine::Event& event) {
       if (hmi_apis::Common_Result::REJECTED == code) {
         LOGGER_INFO(logger_, "StartAudioStream response REJECTED");
         RetryStartSession();
+        application_manager_.TerminateRequest(connection_key(),
+                                              correlation_id());
         break;
       }
     }
@@ -122,7 +124,6 @@ void AudioStartStreamRequest::on_event(const event_engine::Event& event) {
 
 void AudioStartStreamRequest::onTimeOut() {
   RetryStartSession();
-
   application_manager_.TerminateRequest(connection_key(), correlation_id());
 }
 
@@ -143,25 +144,24 @@ void AudioStartStreamRequest::RetryStartSession() {
   }
 
   if (app->audio_streaming_approved()) {
-    LOGGER_INFO(logger_,
-                "AudioStartStream retry sequence stopped. "
-                    << "SUCCESS received");
+    LOG4CXX_DEBUG(logger_,
+                  "AudioStartStream retry sequence stopped. "
+                      << "Audio streaming is approved");
     app->set_audio_stream_retry_number(0);
     return;
   }
 
   uint32_t curr_retry_number = app->audio_stream_retry_number();
   if (curr_retry_number < retry_number_ - 1) {
-    LOGGER_DEBUG(
+    LOG4CXX_DEBUG(
         logger_,
         "Send AudioStartStream retry. retry_number = " << curr_retry_number);
     MessageHelper::SendAudioStartStream(app->app_id(), application_manager_);
     app->set_audio_stream_retry_number(++curr_retry_number);
   } else {
-    LOGGER_DEBUG(logger_,
-                 "Audio start stream retry sequence stopped. "
-                     << "Attempts expired.");
-
+    LOG4CXX_DEBUG(logger_,
+                  "Audio start stream retry sequence stopped. "
+                      << "Attempts expired.");
     application_manager_.EndNaviServices(app->app_id());
   }
 }
