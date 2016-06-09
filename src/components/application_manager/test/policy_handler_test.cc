@@ -417,7 +417,7 @@ TEST_F(PolicyHandlerTest, CheckPermissions) {
   // Arrange
   EnablePolicyAndPolicyManagerMock();
   CheckPermissionResult result;
-  RPCParams kRpc_params;
+  policy::RPCParams kRpc_params;
   // Check expectations
   EXPECT_CALL(
       *mock_policy_manager_,
