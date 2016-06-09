@@ -1,6 +1,6 @@
 /*
 
-Copyright (c) 2013, Ford Motor Company
+Copyright (c) 2016, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -32,6 +32,7 @@ Copyright (c) 2013, Ford Motor Company
  */
 
 #include "application_manager/commands/mobile/system_request.h"
+
 #include <vector>
 #include <string>
 #include <stdio.h>
@@ -61,14 +62,8 @@ const char* kQueryAppsValidationFailedPrefix =
 
 const unsigned int kVrSynonymLengthMax = 40U;
 const unsigned int kVrSynonymLengthMin = 1U;
-const unsigned int kTtsNameLengthMax = 500U;
 const unsigned int kVrArraySizeMax = 100U;
 const unsigned int kVrArraySizeMin = 1U;
-const unsigned int kUrlSchemaLengthMax = 255U;
-const unsigned int kPackageNameLengthMax = 255U;
-const unsigned int kAppIdLengthMax = 40U;
-const unsigned int kAppNameLengthMax = 100U;
-const unsigned int kLanguageArraySizeMax = 100U;
 
 class QueryAppsDataValidator {
  public:
@@ -90,7 +85,7 @@ class QueryAppsDataValidator {
     if (!HasResponseKey()) {
       return false;
     }
-    return ValidateAppDataAndOsAndLanguagesData();
+    return true;
   }
 
  private:
@@ -100,237 +95,6 @@ class QueryAppsDataValidator {
                   kQueryAppsValidationFailedPrefix
                       << "QueryApps response does not contain '"
                       << json::response << "' parameter.");
-      return false;
-    }
-    return true;
-  }
-
-  bool ValidateAppDataAndOsAndLanguagesData() const {
-    const smart_objects::SmartArray* objects_array =
-        data_[json::response].asArray();
-    if (!objects_array) {
-      LOGGER_WARN(logger_,
-                  kQueryAppsValidationFailedPrefix
-                      << "QueryApps response is not array.");
-      return false;
-    }
-    const std::size_t arr_size(objects_array->size());
-    SynonymsMap synonyms_map;
-    for (std::size_t idx = 0; idx < arr_size; ++idx) {
-      const smart_objects::SmartObject& app_data = (*objects_array)[idx];
-
-      if (!app_data.isValid()) {
-        LOGGER_WARN(logger_,
-                    kQueryAppsValidationFailedPrefix
-                        << "Wrong application data in json file.");
-        return false;
-      }
-      std::set<std::string> app_ids_set;
-      if (!ValidateAppIdAndAppName(app_data, app_ids_set)) {
-        return false;
-      }
-      // Verify os and dependent languages data
-      std::string os_type;
-      if (app_data.keyExists(json::ios)) {
-        os_type = json::ios;
-        if (!app_data[os_type].keyExists(json::urlScheme)) {
-          LOGGER_WARN(logger_,
-                      kQueryAppsValidationFailedPrefix
-                          << "Can't find URL scheme in json file.");
-          return false;
-        }
-        if (app_data[os_type][json::urlScheme].asString().length() >
-            kUrlSchemaLengthMax) {
-          LOGGER_WARN(
-              logger_,
-              kQueryAppsValidationFailedPrefix
-                  << "An urlscheme length exceeds maximum allowed ["
-                  << app_data[os_type][json::urlScheme].asString().length()
-                  << "]>[" << kUrlSchemaLengthMax << "]");
-          return false;
-        }
-      }
-      if (os_type.empty()) {
-        if (app_data.keyExists(json::android)) {
-          os_type = json::android;
-          if (!app_data[os_type].keyExists(json::packageName)) {
-            LOGGER_WARN(logger_,
-                        kQueryAppsValidationFailedPrefix
-                            << "Can't find package name in json file.");
-            return false;
-          }
-          if (app_data[json::android][json::packageName].asString().length() >
-              kPackageNameLengthMax) {
-            LOGGER_WARN(logger_,
-                        kQueryAppsValidationFailedPrefix
-                            << "Package name length ["
-                            << app_data[json::android][json::packageName]
-                                   .asString()
-                                   .length() << "] exceeds max length ["
-                            << kPackageNameLengthMax << "]in json file.");
-            return false;
-          }
-        }
-      }
-
-      if (os_type.empty()) {
-        LOGGER_WARN(logger_,
-                    kQueryAppsValidationFailedPrefix
-                        << "Can't find mobile OS type in json file.");
-        return false;
-      }
-
-      // Languages verification
-      if (!app_data[os_type].keyExists(json::languages)) {
-        LOGGER_WARN(logger_,
-                    kQueryAppsValidationFailedPrefix
-                        << "'languages' doesn't exist");
-        return false;
-      }
-      if (!ValidateLanguages(app_data[os_type][json::languages],
-                             synonyms_map)) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  bool ValidateAppIdAndAppName(const smart_objects::SmartObject& app_data,
-                               std::set<std::string>& app_ids_set) const {
-    // Verify appid
-    if (!app_data.keyExists(json::appId)) {
-      LOGGER_WARN(logger_,
-                  kQueryAppsValidationFailedPrefix
-                      << "Can't find app ID in json file.");
-      return false;
-    }
-    // Verify appid length
-    const std::string app_id(app_data[json::appId].asString());
-    if (app_id.length() > kAppIdLengthMax) {
-      LOGGER_WARN(logger_,
-                  kQueryAppsValidationFailedPrefix
-                      << "An Object ID length exceeds maximum allowed ["
-                      << app_id.length() << "]>[" << kAppIdLengthMax << "]");
-      return false;
-    }
-
-    // Verify that appid is unique
-    if (app_ids_set.find(app_id) != app_ids_set.end()) {
-      LOGGER_WARN(logger_,
-                  kQueryAppsValidationFailedPrefix
-                      << "An Object ID is not unigue [" << app_id << "]");
-      return false;
-    }
-    app_ids_set.insert(app_id);
-
-    // Verify that app is not registered yet
-    ApplicationSharedPtr registered_app =
-        manager_.application_by_policy_id(app_id);
-    if (registered_app) {
-      LOGGER_WARN(logger_,
-                  kQueryAppsValidationFailedPrefix
-                      << "Application with the same id: " << app_id
-                      << " is registered already.");
-      return false;
-    }
-    // Verify app name exist
-    if (!app_data.keyExists(json::name)) {
-      LOGGER_WARN(logger_,
-                  kQueryAppsValidationFailedPrefix
-                      << "Can't find app name in json file.");
-      return false;
-    }
-    // And app name length
-    const std::string appName(app_data[json::name].asString());
-    if (appName.length() > kAppNameLengthMax) {
-      LOGGER_WARN(logger_,
-                  kQueryAppsValidationFailedPrefix
-                      << "Name of application exceeds maximum allowed ["
-                      << appName.length() << "]>[" << kAppNameLengthMax
-                      << "].");
-      return false;
-    }
-    return true;
-  }
-
-  bool ValidateLanguages(const smart_objects::SmartObject& languages,
-                         SynonymsMap& synonyms_map) const {
-    bool default_language_found = false;
-    const size_t languages_array_size = languages.length();
-    if (languages_array_size > kLanguageArraySizeMax) {
-      LOGGER_WARN(logger_,
-                  kQueryAppsValidationFailedPrefix
-                      << "'languages' array exceeds max size ["
-                      << languages_array_size << "]>[" << kLanguageArraySizeMax
-                      << "]");
-      return false;
-    }
-    // Every language has ttsname string and vrsynonyms array
-    for (size_t idx = 0; idx < languages_array_size; ++idx) {
-      const smart_objects::SmartObject& language = languages.getElement(idx);
-      if (smart_objects::SmartType_Map != language.getType()) {
-        LOGGER_WARN(logger_,
-                    kQueryAppsValidationFailedPrefix
-                        << "language is not a map.");
-        return false;
-      }
-      if (language.length() != 1) {
-        LOGGER_WARN(logger_,
-                    kQueryAppsValidationFailedPrefix
-                        << "language map size is not equal 1.");
-        return false;
-      }
-      const std::string language_name = (*language.map_begin()).first;
-      if (!language_name.length()) {
-        LOGGER_WARN(logger_,
-                    kQueryAppsValidationFailedPrefix
-                        << "language name is empty");
-        return false;
-      }
-      // Verify default language defined
-      if (!(language_name).compare(json::default_)) {
-        default_language_found = true;
-      }
-      // Add set for synonyms' duplicates validation
-      if (synonyms_map.find(language_name) == synonyms_map.end()) {
-        synonyms_map[language_name] = SynonymsSet();
-      }
-      // ttsName verification
-      if (!language[language_name].keyExists(json::ttsName)) {
-        LOGGER_WARN(logger_,
-                    kQueryAppsValidationFailedPrefix
-                        << "'languages.ttsName' doesn't exist");
-        return false;
-      }
-      const smart_objects::SmartObject& ttsNameObject =
-          language[language_name][json::ttsName];
-      // ttsName is string
-      if (smart_objects::SmartType_String == ttsNameObject.getType()) {
-        const std::string ttsName =
-            language[language_name][json::ttsName].asString();
-        if (ttsName.length() > kTtsNameLengthMax) {
-          LOGGER_WARN(logger_,
-                      kQueryAppsValidationFailedPrefix
-                          << "ttsName string exceeds max length ["
-                          << ttsName.length() << "]>[" << kTtsNameLengthMax
-                          << "]");
-          return false;
-        }
-      } else {
-        LOGGER_WARN(logger_,
-                    kQueryAppsValidationFailedPrefix
-                        << "ttsName is not the string type.");
-        return false;
-      }
-
-      if (!ValidateSynonymsAtLanguage(language, language_name, synonyms_map)) {
-        return false;
-      }
-    }
-    if (!default_language_found) {
-      LOGGER_WARN(logger_,
-                  kQueryAppsValidationFailedPrefix
-                      << " 'languages'.default' doesn't exist");
       return false;
     }
     return true;
