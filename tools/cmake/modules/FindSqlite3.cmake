@@ -23,7 +23,7 @@ else (SQLITE3_LIBRARIES AND SQLITE3_INCLUDE_DIRS)
   else (PKG_CONFIG_FOUND)
     message(WARNING "PkgConfig isn't installed. You need to sure sqlite3>=3.7.11")
   endif (PKG_CONFIG_FOUND)
-  
+
   find_path(SQLITE3_INCLUDE_DIR
     NAMES
       sqlite3.h

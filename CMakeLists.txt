@@ -171,7 +171,7 @@ project (${PROJECT})
 
 #ADD_DEPENDENCIES(${PROJECT} Policy)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/tools/cmake/modules/")
 
 # Please do not change compiler/linker flags if You do not know how particular
 # flag is handled by CMake
