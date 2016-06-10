@@ -30,19 +30,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/hmi_capabilities.h"
-
 #include <map>
 
+#include "application_manager/hmi_capabilities_impl.h"
 #include "application_manager/application_manager_impl.h"
+#include "smart_objects/smart_object.h"
 #include "application_manager/message_helper.h"
-#include "application_manager/message_helper.h"
-#include "application_manager/smart_object_keys.h"
 #include "application_manager/smart_object_keys.h"
 #include "config_profile/profile.h"
 #include "formatters/CFormatterJsonBase.h"
 #include "interfaces/HMI_API.h"
-#include "smart_objects/smart_object.h"
 #include "utils/file_system.h"
 #include "utils/json_utils.h"
 
@@ -324,7 +321,7 @@ void InitCapabilities() {
 
 }  // namespace
 
-HMICapabilities::HMICapabilities(ApplicationManager& app_mngr)
+HMICapabilitiesImpl::HMICapabilitiesImpl(ApplicationManager& app_mngr)
     : is_vr_cooperating_(false)
     , is_tts_cooperating_(false)
     , is_ui_cooperating_(false)
@@ -373,7 +370,7 @@ HMICapabilities::HMICapabilities(ApplicationManager& app_mngr)
   }
 }
 
-HMICapabilities::~HMICapabilities() {
+HMICapabilitiesImpl::~HMICapabilitiesImpl() {
   delete vehicle_type_;
   delete ui_supported_languages_;
   delete tts_supported_languages_;
@@ -390,7 +387,7 @@ HMICapabilities::~HMICapabilities() {
   delete prerecorded_speech_;
 }
 
-bool HMICapabilities::is_hmi_capabilities_initialized() const {
+bool HMICapabilitiesImpl::is_hmi_capabilities_initialized() const {
   bool result = true;
 
   if (is_vr_ready_response_recieved_ && is_tts_ready_response_recieved_ &&
@@ -429,7 +426,7 @@ bool HMICapabilities::is_hmi_capabilities_initialized() const {
   return result;
 }
 
-bool HMICapabilities::VerifyImageType(int32_t image_type) const {
+bool HMICapabilitiesImpl::VerifyImageType(const int32_t image_type) const {
   if (!display_capabilities_) {
     return false;
   }
@@ -447,7 +444,7 @@ bool HMICapabilities::VerifyImageType(int32_t image_type) const {
   return false;
 }
 
-void HMICapabilities::set_is_vr_cooperating(bool value) {
+void HMICapabilitiesImpl::set_is_vr_cooperating(const bool value) {
   is_vr_ready_response_recieved_ = true;
   is_vr_cooperating_ = value;
   if (is_vr_cooperating_) {
@@ -467,7 +464,7 @@ void HMICapabilities::set_is_vr_cooperating(bool value) {
   }
 }
 
-void HMICapabilities::set_is_tts_cooperating(bool value) {
+void HMICapabilitiesImpl::set_is_tts_cooperating(const bool value) {
   is_tts_ready_response_recieved_ = true;
   is_tts_cooperating_ = value;
   if (is_tts_cooperating_) {
@@ -487,7 +484,7 @@ void HMICapabilities::set_is_tts_cooperating(bool value) {
   }
 }
 
-void HMICapabilities::set_is_ui_cooperating(bool value) {
+void HMICapabilitiesImpl::set_is_ui_cooperating(const bool value) {
   is_ui_ready_response_recieved_ = true;
   is_ui_cooperating_ = value;
   if (is_ui_cooperating_) {
@@ -507,12 +504,12 @@ void HMICapabilities::set_is_ui_cooperating(bool value) {
   }
 }
 
-void HMICapabilities::set_is_navi_cooperating(bool value) {
+void HMICapabilitiesImpl::set_is_navi_cooperating(const bool value) {
   is_navi_ready_response_recieved_ = true;
   is_navi_cooperating_ = value;
 }
 
-void HMICapabilities::set_is_ivi_cooperating(bool value) {
+void HMICapabilitiesImpl::set_is_ivi_cooperating(const bool value) {
   is_ivi_ready_response_recieved_ = true;
   is_ivi_cooperating_ = value;
   if (is_ivi_cooperating_) {
@@ -523,32 +520,32 @@ void HMICapabilities::set_is_ivi_cooperating(bool value) {
   }
 }
 
-void HMICapabilities::set_attenuated_supported(bool state) {
+void HMICapabilitiesImpl::set_attenuated_supported(const bool state) {
   attenuated_supported_ = state;
 }
 
-void HMICapabilities::set_active_ui_language(
-    const hmi_apis::Common_Language::eType& language) {
+void HMICapabilitiesImpl::set_active_ui_language(
+    const hmi_apis::Common_Language::eType language) {
   ui_language_ = language;
   hmi_language_handler_.set_language_for(HMILanguageHandler::INTERFACE_UI,
                                          language);
 }
 
-void HMICapabilities::set_active_vr_language(
-    const hmi_apis::Common_Language::eType& language) {
+void HMICapabilitiesImpl::set_active_vr_language(
+    const hmi_apis::Common_Language::eType language) {
   vr_language_ = language;
   hmi_language_handler_.set_language_for(HMILanguageHandler::INTERFACE_VR,
                                          language);
 }
 
-void HMICapabilities::set_active_tts_language(
-    const hmi_apis::Common_Language::eType& language) {
+void HMICapabilitiesImpl::set_active_tts_language(
+    const hmi_apis::Common_Language::eType language) {
   tts_language_ = language;
   hmi_language_handler_.set_language_for(HMILanguageHandler::INTERFACE_TTS,
                                          language);
 }
 
-const hmi_apis::Common_Language::eType HMICapabilities::active_ui_language()
+const hmi_apis::Common_Language::eType HMICapabilitiesImpl::active_ui_language()
     const {
   using namespace hmi_apis;
   const Common_Language::eType language =
@@ -556,7 +553,7 @@ const hmi_apis::Common_Language::eType HMICapabilities::active_ui_language()
   return Common_Language::INVALID_ENUM != language ? language : ui_language_;
 }
 
-const hmi_apis::Common_Language::eType HMICapabilities::active_vr_language()
+const hmi_apis::Common_Language::eType HMICapabilitiesImpl::active_vr_language()
     const {
   using namespace hmi_apis;
   const Common_Language::eType language =
@@ -564,15 +561,15 @@ const hmi_apis::Common_Language::eType HMICapabilities::active_vr_language()
   return Common_Language::INVALID_ENUM != language ? language : vr_language_;
 }
 
-const hmi_apis::Common_Language::eType HMICapabilities::active_tts_language()
-    const {
+const hmi_apis::Common_Language::eType
+HMICapabilitiesImpl::active_tts_language() const {
   using namespace hmi_apis;
   const Common_Language::eType language =
       hmi_language_handler_.get_language_for(HMILanguageHandler::INTERFACE_TTS);
   return Common_Language::INVALID_ENUM != language ? language : tts_language_;
 }
 
-void HMICapabilities::set_ui_supported_languages(
+void HMICapabilitiesImpl::set_ui_supported_languages(
     const smart_objects::SmartObject& supported_languages) {
   if (ui_supported_languages_) {
     delete ui_supported_languages_;
@@ -580,7 +577,7 @@ void HMICapabilities::set_ui_supported_languages(
   ui_supported_languages_ = new smart_objects::SmartObject(supported_languages);
 }
 
-void HMICapabilities::set_tts_supported_languages(
+void HMICapabilitiesImpl::set_tts_supported_languages(
     const smart_objects::SmartObject& supported_languages) {
   if (tts_supported_languages_) {
     delete tts_supported_languages_;
@@ -589,7 +586,7 @@ void HMICapabilities::set_tts_supported_languages(
       new smart_objects::SmartObject(supported_languages);
 }
 
-void HMICapabilities::set_vr_supported_languages(
+void HMICapabilitiesImpl::set_vr_supported_languages(
     const smart_objects::SmartObject& supported_languages) {
   if (vr_supported_languages_) {
     delete vr_supported_languages_;
@@ -597,7 +594,7 @@ void HMICapabilities::set_vr_supported_languages(
   vr_supported_languages_ = new smart_objects::SmartObject(supported_languages);
 }
 
-void HMICapabilities::set_display_capabilities(
+void HMICapabilitiesImpl::set_display_capabilities(
     const smart_objects::SmartObject& display_capabilities) {
   if (display_capabilities_) {
     delete display_capabilities_;
@@ -605,7 +602,7 @@ void HMICapabilities::set_display_capabilities(
   display_capabilities_ = new smart_objects::SmartObject(display_capabilities);
 }
 
-void HMICapabilities::set_hmi_zone_capabilities(
+void HMICapabilitiesImpl::set_hmi_zone_capabilities(
     const smart_objects::SmartObject& hmi_zone_capabilities) {
   if (hmi_zone_capabilities_) {
     delete hmi_zone_capabilities_;
@@ -614,7 +611,7 @@ void HMICapabilities::set_hmi_zone_capabilities(
       new smart_objects::SmartObject(hmi_zone_capabilities);
 }
 
-void HMICapabilities::set_soft_button_capabilities(
+void HMICapabilitiesImpl::set_soft_button_capabilities(
     const smart_objects::SmartObject& soft_button_capabilities) {
   if (soft_buttons_capabilities_) {
     delete soft_buttons_capabilities_;
@@ -623,7 +620,7 @@ void HMICapabilities::set_soft_button_capabilities(
       new smart_objects::SmartObject(soft_button_capabilities);
 }
 
-void HMICapabilities::set_button_capabilities(
+void HMICapabilitiesImpl::set_button_capabilities(
     const smart_objects::SmartObject& button_capabilities) {
   if (button_capabilities_) {
     delete button_capabilities_;
@@ -631,7 +628,7 @@ void HMICapabilities::set_button_capabilities(
   button_capabilities_ = new smart_objects::SmartObject(button_capabilities);
 }
 
-void HMICapabilities::set_vr_capabilities(
+void HMICapabilitiesImpl::set_vr_capabilities(
     const smart_objects::SmartObject& vr_capabilities) {
   if (vr_capabilities_) {
     delete vr_capabilities_;
@@ -639,7 +636,7 @@ void HMICapabilities::set_vr_capabilities(
   vr_capabilities_ = new smart_objects::SmartObject(vr_capabilities);
 }
 
-void HMICapabilities::set_speech_capabilities(
+void HMICapabilitiesImpl::set_speech_capabilities(
     const smart_objects::SmartObject& speech_capabilities) {
   if (speech_capabilities_) {
     delete speech_capabilities_;
@@ -647,7 +644,7 @@ void HMICapabilities::set_speech_capabilities(
   speech_capabilities_ = new smart_objects::SmartObject(speech_capabilities);
 }
 
-void HMICapabilities::set_audio_pass_thru_capabilities(
+void HMICapabilitiesImpl::set_audio_pass_thru_capabilities(
     const smart_objects::SmartObject& audio_pass_thru_capabilities) {
   if (audio_pass_thru_capabilities_) {
     delete audio_pass_thru_capabilities_;
@@ -656,7 +653,7 @@ void HMICapabilities::set_audio_pass_thru_capabilities(
       new smart_objects::SmartObject(audio_pass_thru_capabilities);
 }
 
-void HMICapabilities::set_pcm_stream_capabilities(
+void HMICapabilitiesImpl::set_pcm_stream_capabilities(
     const smart_objects::SmartObject& pcm_stream_capabilities) {
   if (pcm_stream_capabilities_) {
     delete pcm_stream_capabilities_;
@@ -665,7 +662,7 @@ void HMICapabilities::set_pcm_stream_capabilities(
       new smart_objects::SmartObject(pcm_stream_capabilities);
 }
 
-void HMICapabilities::set_preset_bank_capabilities(
+void HMICapabilitiesImpl::set_preset_bank_capabilities(
     const smart_objects::SmartObject& preset_bank_capabilities) {
   if (preset_bank_capabilities_) {
     delete preset_bank_capabilities_;
@@ -674,7 +671,7 @@ void HMICapabilities::set_preset_bank_capabilities(
       new smart_objects::SmartObject(preset_bank_capabilities);
 }
 
-void HMICapabilities::set_vehicle_type(
+void HMICapabilitiesImpl::set_vehicle_type(
     const smart_objects::SmartObject& vehicle_type) {
   if (vehicle_type_) {
     delete vehicle_type_;
@@ -682,7 +679,7 @@ void HMICapabilities::set_vehicle_type(
   vehicle_type_ = new smart_objects::SmartObject(vehicle_type);
 }
 
-void HMICapabilities::set_prerecorded_speech(
+void HMICapabilitiesImpl::set_prerecorded_speech(
     const smart_objects::SmartObject& prerecorded_speech) {
   if (prerecorded_speech_) {
     delete prerecorded_speech_;
@@ -691,15 +688,10 @@ void HMICapabilities::set_prerecorded_speech(
   prerecorded_speech_ = new smart_objects::SmartObject(prerecorded_speech);
 }
 
-void HMICapabilities::set_ccpu_version(const std::string& ccpu_version) {
-  ccpu_version_ = ccpu_version;
-}
-
-void HMICapabilities::set_navigation_supported(const bool supported) {
+void HMICapabilitiesImpl::set_navigation_supported(const bool supported) {
   is_navigation_supported_ = supported;
 }
-
-void HMICapabilities::set_phone_call_supported(const bool supported) {
+void HMICapabilitiesImpl::set_phone_call_supported(const bool supported) {
   is_phone_call_supported_ = supported;
 }
 namespace {
@@ -710,8 +702,8 @@ namespace {
 * @param json_languages from file hmi_capabilities.json
 * @param languages - the converted object
 */
-void convert_json_languages_to_obj(
-    const utils::json::JsonValueRef json_languages,
+void convert_json_languages_to_sm_obj(
+    const utils::json::JsonValueRef& json_languages,
     smart_objects::SmartObject& languages) {
   using namespace utils::json;
   uint32_t j = 0;
@@ -725,7 +717,7 @@ void convert_json_languages_to_obj(
 
 }  // namespace
 
-void HMICapabilities::Init(resumption::LastState* last_state) {
+void HMICapabilitiesImpl::Init(resumption::LastState* last_state) {
   hmi_language_handler_.Init(last_state);
   if (false == load_capabilities_from_file()) {
     LOGGER_ERROR(logger_, "file hmi_capabilities.json was not loaded");
@@ -736,8 +728,107 @@ void HMICapabilities::Init(resumption::LastState* last_state) {
       ui_language_, vr_language_, tts_language_);
 }
 
-bool HMICapabilities::load_capabilities_from_file() {
-  using namespace utils::json;
+bool HMICapabilitiesImpl::is_ui_cooperating() const {
+  return is_ui_cooperating_;
+}
+
+bool HMICapabilitiesImpl::is_vr_cooperating() const {
+  return is_vr_cooperating_;
+}
+
+bool HMICapabilitiesImpl::is_tts_cooperating() const {
+  return is_tts_cooperating_;
+}
+
+bool HMICapabilitiesImpl::is_navi_cooperating() const {
+  return is_navi_cooperating_;
+}
+
+bool HMICapabilitiesImpl::is_ivi_cooperating() const {
+  return is_ivi_cooperating_;
+}
+
+const smart_objects::SmartObject* HMICapabilitiesImpl::ui_supported_languages()
+    const {
+  return ui_supported_languages_;
+}
+
+const smart_objects::SmartObject* HMICapabilitiesImpl::vr_supported_languages()
+    const {
+  return vr_supported_languages_;
+}
+
+const smart_objects::SmartObject* HMICapabilitiesImpl::tts_supported_languages()
+    const {
+  return tts_supported_languages_;
+}
+
+const smart_objects::SmartObject* HMICapabilitiesImpl::display_capabilities()
+    const {
+  return display_capabilities_;
+}
+
+const smart_objects::SmartObject* HMICapabilitiesImpl::hmi_zone_capabilities()
+    const {
+  return hmi_zone_capabilities_;
+}
+
+const smart_objects::SmartObject*
+HMICapabilitiesImpl::soft_button_capabilities() const {
+  return soft_buttons_capabilities_;
+}
+
+const smart_objects::SmartObject* HMICapabilitiesImpl::button_capabilities()
+    const {
+  return button_capabilities_;
+}
+
+const smart_objects::SmartObject* HMICapabilitiesImpl::speech_capabilities()
+    const {
+  return speech_capabilities_;
+}
+
+const smart_objects::SmartObject* HMICapabilitiesImpl::vr_capabilities() const {
+  return vr_capabilities_;
+}
+
+const smart_objects::SmartObject*
+HMICapabilitiesImpl::audio_pass_thru_capabilities() const {
+  return audio_pass_thru_capabilities_;
+}
+
+const smart_objects::SmartObject* HMICapabilitiesImpl::pcm_stream_capabilities()
+    const {
+  return pcm_stream_capabilities_;
+}
+
+const smart_objects::SmartObject*
+HMICapabilitiesImpl::preset_bank_capabilities() const {
+  return preset_bank_capabilities_;
+}
+
+bool HMICapabilitiesImpl::attenuated_supported() const {
+  return attenuated_supported_;
+}
+
+const smart_objects::SmartObject* HMICapabilitiesImpl::vehicle_type() const {
+  return vehicle_type_;
+}
+
+const smart_objects::SmartObject* HMICapabilitiesImpl::prerecorded_speech()
+    const {
+  return prerecorded_speech_;
+}
+
+bool HMICapabilitiesImpl::navigation_supported() const {
+  return is_navigation_supported_;
+}
+
+bool HMICapabilitiesImpl::phone_call_supported() const {
+  return is_phone_call_supported_;
+}
+
+bool HMICapabilitiesImpl::load_capabilities_from_file() {
   std::string json_string;
   std::string file_name = app_mngr_.get_settings().hmi_capabilities_file_name();
 
@@ -750,14 +841,15 @@ bool HMICapabilities::load_capabilities_from_file() {
   }
 
   try {
-    JsonValue::ParseResult parse_result = JsonValue::Parse(json_string);
+    utils::json::JsonValue::ParseResult parse_result =
+        utils::json::JsonValue::Parse(json_string);
     if (!parse_result.second) {
       return false;
     }
-    const JsonValue& root_json = parse_result.first;
+    const utils::json::JsonValue& root_json = parse_result.first;
     // UI
     if (root_json.HasMember("UI")) {
-      const JsonValueRef ui = root_json["UI"];
+      const utils::json::JsonValueRef ui = root_json["UI"];
 
       if (ui.HasMember("language")) {
         const std::string lang = ui["language"].AsString();
@@ -770,14 +862,15 @@ bool HMICapabilities::load_capabilities_from_file() {
       if (ui.HasMember("languages")) {
         smart_objects::SmartObject ui_languages_so(
             smart_objects::SmartType_Array);
-        const JsonValueRef languages_ui = ui["languages"];
-        convert_json_languages_to_obj(languages_ui, ui_languages_so);
+        const utils::json::JsonValueRef languages_ui = ui["languages"];
+        convert_json_languages_to_sm_obj(languages_ui, ui_languages_so);
         set_ui_supported_languages(ui_languages_so);
       }
 
       if (ui.HasMember("displayCapabilities")) {
         smart_objects::SmartObject display_capabilities_so;
-        const JsonValueRef display_capabilities = ui["displayCapabilities"];
+        const utils::json::JsonValueRef display_capabilities =
+            ui["displayCapabilities"];
         Formatters::CFormatterJsonBase::jsonValueToObj(display_capabilities,
                                                        display_capabilities_so);
 
@@ -794,10 +887,10 @@ bool HMICapabilities::load_capabilities_from_file() {
         }
 
         if (display_capabilities_so.keyExists(hmi_response::text_fields)) {
-          uint32_t len =
+          const uint32_t kLen =
               display_capabilities_so[hmi_response::text_fields].length();
 
-          for (uint32_t i = 0; i < len; ++i) {
+          for (uint32_t i = 0; i < kLen; ++i) {
             if ((display_capabilities_so[hmi_response::text_fields][i])
                     .keyExists(strings::name)) {
               std::map<std::string,
@@ -913,7 +1006,8 @@ bool HMICapabilities::load_capabilities_from_file() {
       }
 
       if (ui.HasMember("audioPassThruCapabilities")) {
-        const JsonValueRef audio_capabilities = ui["audioPassThruCapabilities"];
+        const utils::json::JsonValueRef audio_capabilities =
+            ui["audioPassThruCapabilities"];
         smart_objects::SmartObject audio_capabilities_so =
             smart_objects::SmartObject(smart_objects::SmartType_Array);
         audio_capabilities_so =
@@ -937,7 +1031,8 @@ bool HMICapabilities::load_capabilities_from_file() {
       }
 
       if (ui.HasMember("pcmStreamCapabilities")) {
-        const JsonValueRef pcm_capabilities = ui["pcmStreamCapabilities"];
+        const utils::json::JsonValueRef pcm_capabilities =
+            ui["pcmStreamCapabilities"];
         smart_objects::SmartObject pcm_capabilities_so =
             smart_objects::SmartObject(smart_objects::SmartType_Map);
 
@@ -969,7 +1064,7 @@ bool HMICapabilities::load_capabilities_from_file() {
       }
 
       if (ui.HasMember("softButtonCapabilities")) {
-        const JsonValueRef soft_button_capabilities =
+        const utils::json::JsonValueRef soft_button_capabilities =
             ui["softButtonCapabilities"];
         smart_objects::SmartObject soft_button_capabilities_so;
         Formatters::CFormatterJsonBase::jsonValueToObj(
@@ -980,7 +1075,7 @@ bool HMICapabilities::load_capabilities_from_file() {
 
     // VR
     if (root_json.HasMember("VR")) {
-      const JsonValueRef vr = root_json["VR"];
+      const utils::json::JsonValueRef vr = root_json["VR"];
       if (vr.HasMember("language")) {
         const std::string lang = vr["language"].AsString();
         set_active_vr_language(MessageHelper::CommonLanguageFromString(lang));
@@ -990,18 +1085,20 @@ bool HMICapabilities::load_capabilities_from_file() {
       }
 
       if (vr.HasMember("languages")) {
-        const JsonValueRef languages_vr = vr["languages"];
+        const utils::json::JsonValueRef languages_vr = vr["languages"];
         smart_objects::SmartObject vr_languages_so =
             smart_objects::SmartObject(smart_objects::SmartType_Array);
-        convert_json_languages_to_obj(languages_vr, vr_languages_so);
+        convert_json_languages_to_sm_obj(languages_vr, vr_languages_so);
         set_vr_supported_languages(vr_languages_so);
       }
 
       if (vr.HasMember("capabilities")) {
-        const JsonValueRef capabilities = vr["capabilities"];
+        const utils::json::JsonValueRef capabilities = vr["capabilities"];
         smart_objects::SmartObject vr_capabilities_so =
             smart_objects::SmartObject(smart_objects::SmartType_Array);
-        for (JsonValue::ArrayIndex i = 0, size = capabilities.Size(); i < size;
+        for (utils::json::JsonValue::ArrayIndex i = 0,
+                                                size = capabilities.Size();
+             i < size;
              ++i) {
           vr_capabilities_so[i] =
               vr_enum_capabilities.find(capabilities[i].AsString())->second;
@@ -1012,7 +1109,7 @@ bool HMICapabilities::load_capabilities_from_file() {
 
     // TTS
     if (root_json.HasMember("TTS")) {
-      const JsonValueRef tts = root_json["TTS"];
+      const utils::json::JsonValueRef tts = root_json["TTS"];
 
       if (tts.HasMember("language")) {
         const std::string lang = tts["language"].AsString();
@@ -1023,10 +1120,10 @@ bool HMICapabilities::load_capabilities_from_file() {
       }
 
       if (tts.HasMember("languages")) {
-        const JsonValueRef languages_tts = tts["languages"];
+        const utils::json::JsonValueRef languages_tts = tts["languages"];
         smart_objects::SmartObject tts_languages_so =
             smart_objects::SmartObject(smart_objects::SmartType_Array);
-        convert_json_languages_to_obj(languages_tts, tts_languages_so);
+        convert_json_languages_to_sm_obj(languages_tts, tts_languages_so);
         set_tts_supported_languages(tts_languages_so);
       }
 
@@ -1038,9 +1135,10 @@ bool HMICapabilities::load_capabilities_from_file() {
 
     // Buttons
     if (root_json.HasMember("Buttons")) {
-      const JsonValueRef buttons = root_json["Buttons"];
+      const utils::json::JsonValueRef buttons = root_json["Buttons"];
       if (buttons.HasMember("capabilities")) {
-        const JsonValueRef bt_capabilities = buttons["capabilities"];
+        const utils::json::JsonValueRef bt_capabilities =
+            buttons["capabilities"];
         smart_objects::SmartObject buttons_capabilities_so;
         Formatters::CFormatterJsonBase::jsonValueToObj(bt_capabilities,
                                                        buttons_capabilities_so);
@@ -1060,7 +1158,8 @@ bool HMICapabilities::load_capabilities_from_file() {
         set_button_capabilities(buttons_capabilities_so);
       }
       if (buttons.HasMember("presetBankCapabilities")) {
-        const JsonValueRef presetBank = buttons["presetBankCapabilities"];
+        const utils::json::JsonValueRef presetBank =
+            buttons["presetBankCapabilities"];
         smart_objects::SmartObject preset_bank_so;
         Formatters::CFormatterJsonBase::jsonValueToObj(presetBank,
                                                        preset_bank_so);
@@ -1070,7 +1169,7 @@ bool HMICapabilities::load_capabilities_from_file() {
 
     // VehicleType
     if (root_json.HasMember("VehicleInfo")) {
-      const JsonValueRef vehicle_info = root_json["VehicleInfo"];
+      const utils::json::JsonValueRef vehicle_info = root_json["VehicleInfo"];
       smart_objects::SmartObject vehicle_type_so;
       Formatters::CFormatterJsonBase::jsonValueToObj(vehicle_info,
                                                      vehicle_type_so);
@@ -1081,6 +1180,28 @@ bool HMICapabilities::load_capabilities_from_file() {
     return false;
   }
   return true;
+}
+
+void HMICapabilitiesImpl::set_ccpu_version(const std::string& ccpu_version) {
+  ccpu_version_ = ccpu_version;
+}
+
+const std::string& HMICapabilitiesImpl::ccpu_version() const {
+  return ccpu_version_;
+}
+
+bool HMICapabilitiesImpl::check_existing_json_member(
+    const Json::Value& json_member, const char* name_of_member) const {
+  return json_member.isMember(name_of_member);
+}
+
+void HMICapabilitiesImpl::convert_json_languages_to_obj(
+    const Json::Value& json_languages,
+    smart_objects::SmartObject& languages) const {
+  for (uint32_t i = 0, j = 0; i < json_languages.size(); ++i) {
+    languages[j++] =
+        MessageHelper::CommonLanguageFromString(json_languages[i].asString());
+  }
 }
 
 }  //  namespace application_manager
