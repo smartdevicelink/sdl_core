@@ -1,4 +1,5 @@
 Test line to be deleted. Added just to trigger build on CI server.
+Test line2  to be deleted. Added just to trigger build on CI server.
 
 [![Slack Status](http://sdlslack.herokuapp.com/badge.svg)](http://slack.smartdevicelink.org)
 
