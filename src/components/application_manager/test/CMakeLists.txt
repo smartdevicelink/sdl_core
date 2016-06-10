@@ -199,3 +199,4 @@
     create_test("data_resumption_test" "${ResumptionData_SOURCES}" "${testLibraries}")
 
     add_subdirectory(state_controller)
+    add_subdirectory(commands)
