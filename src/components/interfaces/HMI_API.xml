@@ -3240,7 +3240,7 @@
   </function>
 </interface>
 
-<interface name="Navigation" version="1.1" date="2016-05-11">
+<interface name="Navigation" version="1.2" date="2016-06-09">
 
   <function name="IsReady" messagetype="request">
     <description>Method is invoked at system startup. Response must provide the information about presence of UI Navigation module and its readiness to cooperate with SDL.</description>
@@ -3410,6 +3410,9 @@
     <param name="wayPointType" type="Common.WayPointType" defvalue="ALL" mandatory="false">
       <description>To request for either the destination only or for all waypoints including destination</description>
     </param>
+    <param name="appID" type="Integer" mandatory="true"> 
+      <description>ID of the application.</description> 
+    </param> 
   </function>
   <function name="GetWayPoints" functionID="GetWayPointsID" messagetype="response">
     <param name="appID" type="Integer" mandatory="true">
