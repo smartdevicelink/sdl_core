@@ -108,7 +108,7 @@ void NaviStartStreamRequest::on_event(const event_engine::Event& event) {
         break;
       }
       if (hmi_apis::Common_Result::REJECTED == code) {
-        LOG4CXX_INFO(logger_, "StartStream response REJECTED ");
+        LOGGER_INFO(logger_, "StartStream response REJECTED ");
         RetryStartSession();
         application_manager_.TerminateRequest(connection_key(),
                                               correlation_id());
@@ -144,24 +144,24 @@ void NaviStartStreamRequest::RetryStartSession() {
   }
 
   if (app->video_streaming_approved()) {
-    LOG4CXX_DEBUG(logger_,
-                  "NaviStartStream retry sequence stopped. "
-                      << "Video streaming is approved");
+    LOGGER_DEBUG(logger_,
+                 "NaviStartStream retry sequence stopped. "
+                     << "Video streaming is approved");
     app->set_video_stream_retry_number(0);
     return;
   }
 
   uint32_t curr_retry_number = app->video_stream_retry_number();
   if (curr_retry_number < retry_number_ - 1) {
-    LOG4CXX_DEBUG(
+    LOGGER_DEBUG(
         logger_,
         "Send NaviStartStream retry. retry_number = " << curr_retry_number);
     MessageHelper::SendNaviStartStream(app->app_id(), application_manager_);
     app->set_video_stream_retry_number(++curr_retry_number);
   } else {
-    LOG4CXX_DEBUG(logger_,
-                  "NaviStartStream retry sequence stopped. "
-                      << "Attempts expired");
+    LOGGER_DEBUG(logger_,
+                 "NaviStartStream retry sequence stopped. "
+                     << "Attempts expired");
     application_manager_.EndNaviServices(app->app_id());
   }
 }

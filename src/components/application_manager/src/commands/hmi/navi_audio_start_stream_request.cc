@@ -96,7 +96,7 @@ void AudioStartStreamRequest::on_event(const event_engine::Event& event) {
               message[strings::params][hmi_response::code].asInt());
 
       if (hmi_apis::Common_Result::SUCCESS == code) {
-        LOG4CXX_INFO(logger_, "AudioStartStream response SUCCESS");
+        LOGGER_INFO(logger_, "AudioStartStream response SUCCESS");
         if (application_manager_.HMILevelAllowsStreaming(app->app_id(),
                                                          ServiceType::kAudio)) {
           app->set_audio_streaming_approved(true);
@@ -144,24 +144,24 @@ void AudioStartStreamRequest::RetryStartSession() {
   }
 
   if (app->audio_streaming_approved()) {
-    LOG4CXX_DEBUG(logger_,
-                  "AudioStartStream retry sequence stopped. "
-                      << "Audio streaming is approved");
+    LOGGER_DEBUG(logger_,
+                 "AudioStartStream retry sequence stopped. "
+                     << "Audio streaming is approved");
     app->set_audio_stream_retry_number(0);
     return;
   }
 
   uint32_t curr_retry_number = app->audio_stream_retry_number();
   if (curr_retry_number < retry_number_ - 1) {
-    LOG4CXX_DEBUG(
+    LOGGER_DEBUG(
         logger_,
         "Send AudioStartStream retry. retry_number = " << curr_retry_number);
     MessageHelper::SendAudioStartStream(app->app_id(), application_manager_);
     app->set_audio_stream_retry_number(++curr_retry_number);
   } else {
-    LOG4CXX_DEBUG(logger_,
-                  "Audio start stream retry sequence stopped. "
-                      << "Attempts expired.");
+    LOGGER_DEBUG(logger_,
+                 "Audio start stream retry sequence stopped. "
+                     << "Attempts expired.");
     application_manager_.EndNaviServices(app->app_id());
   }
 }
