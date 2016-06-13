@@ -63,6 +63,7 @@ typedef utils::SharedPtr<application_manager::Application> ApplicationSharedPtr;
 
 using testing::AtLeast;
 using testing::Return;
+using testing::ReturnRef;
 
 TEST(MessageHelperTestCreate,
      CreateBlockedByPoliciesResponse_SmartObject_Equal) {
@@ -535,11 +536,11 @@ class MessageHelperTest : public ::testing::Test {
     mobile_result_strings.push_back("WARNINGS");
     mobile_result_strings.push_back("GENERIC_ERROR");
     mobile_result_strings.push_back("USER_DISALLOWED");
+    mobile_result_strings.push_back("TRUNCATED_DATA");
     mobile_result_strings.push_back("UNSUPPORTED_VERSION");
     mobile_result_strings.push_back("VEHICLE_DATA_NOT_ALLOWED");
     mobile_result_strings.push_back("FILE_NOT_FOUND");
     mobile_result_strings.push_back("CANCEL_ROUTE");
-    mobile_result_strings.push_back("TRUNCATED_DATA");
     mobile_result_strings.push_back("SAVED");
     mobile_result_strings.push_back("INVALID_CERT");
     mobile_result_strings.push_back("EXPIRED_CERT");
@@ -954,6 +955,115 @@ TEST_F(MessageHelperTest, SubscribeApplicationToSoftButton_CallFromApp) {
               SubscribeToSoftButtons(function_id, SoftButtonID())).Times(1);
   MessageHelper::SubscribeApplicationToSoftButton(
       message_params, appSharedPtr, function_id);
+}
+
+TEST(MessageHelperTestCreate,
+   CreateHashUpdateNotification_FunctionId_Equal) {
+  uint32_t app_id = 0;
+  smart_objects::SmartObjectSPtr ptr =
+      MessageHelper::CreateHashUpdateNotification(app_id);
+
+  EXPECT_TRUE(ptr);
+
+  smart_objects::SmartObject& obj = *ptr;
+
+  int function_id =
+      static_cast<int>(mobile_apis::FunctionID::OnHashChangeID);
+  int notification = static_cast<int>(::application_manager::kNotification);
+
+  EXPECT_EQ(function_id, obj[strings::params][strings::function_id].asInt());
+  EXPECT_EQ(app_id, obj[strings::params][strings::connection_key].asUInt());
+  EXPECT_EQ(notification,
+      obj[strings::params][strings::message_type].asInt());
+}
+
+TEST(MessageHelperTestCreate, CreateAppVrHelp_AppName_Equal) {
+  MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
+
+  application_manager::CommandsMap vis;
+  DataAccessor< ::application_manager::CommandsMap>
+      data_accessor(vis, true);
+
+  const smart_objects::SmartObject* objPtr = NULL;
+  const std::string app = "213";
+  const utils::custom_string::CustomString app_name(app);
+  EXPECT_CALL(*appSharedMock, name() ).WillOnce(ReturnRef(app_name));
+  EXPECT_CALL(*appSharedMock,
+      vr_synonyms() ).Times(AtLeast(1)).WillRepeatedly(Return(objPtr));
+  EXPECT_CALL(*appSharedMock,
+      commands_map() ).WillOnce(Return(data_accessor));
+
+  smart_objects::SmartObjectSPtr ptr =
+      MessageHelper::CreateAppVrHelp(appSharedMock);
+
+  EXPECT_TRUE(ptr);
+
+  smart_objects::SmartObject& obj = *ptr;
+
+  EXPECT_EQ(app_name, obj[strings::vr_help_title].asString());
+}
+
+TEST_F(MessageHelperTest,
+    MobileResultFromString_StringValueOfEnum_CorrectEType) {
+  MobileResults::eType tested_enum;
+  MobileResults::eType converted;
+  // Check enums >=0
+  for (size_t array_index = 0;
+      array_index < mobile_result_strings.size();
+      ++array_index) {
+    tested_enum = static_cast<MobileResults::eType>(array_index);
+    converted = MessageHelper::MobileResultFromString(
+        mobile_result_strings[array_index]);
+    EXPECT_EQ(tested_enum, converted);
+  }
+  // Check invalid enums == -1
+  tested_enum = MobileResults::INVALID_ENUM;
+  converted = MessageHelper::MobileResultFromString("");
+  EXPECT_EQ(tested_enum, converted);
+}
+
+TEST_F(MessageHelperTest,
+    MobileResultToString_ETypeValueOfEnum_CorrectString) {
+  std::string string_from_enum;
+  MobileResults::eType casted_enum;
+  // Check all results >=0
+  for (size_t array_index = 0;
+      array_index < mobile_result_strings.size();
+      ++array_index) {
+    casted_enum = static_cast<MobileResults::eType>(array_index);
+    string_from_enum = MessageHelper::MobileResultToString(casted_enum);
+    EXPECT_EQ(mobile_result_strings[array_index], string_from_enum);
+  }
+  // Check InvalidEnum == -1
+  string_from_enum = MessageHelper::MobileResultToString(
+        MobileResults::INVALID_ENUM);
+  EXPECT_EQ("", string_from_enum);
+}
+
+TEST_F(MessageHelperTest,
+    MobileToHMIResult_MobileResultEType_GetCorrectHmiResultEType) {
+  HmiResults::eType tested_enum;
+  MobileResults::eType casted_mobile_enum;
+  HmiResults::eType converted_enum;
+  // Check enums >=0
+  for (size_t enum_index = 0;
+      enum_index < mobile_result_strings.size();
+      ++enum_index) {
+    tested_enum =
+        MessageHelper::HMIResultFromString(mobile_result_strings[enum_index]);
+    casted_mobile_enum = static_cast<MobileResults::eType>(enum_index);
+    converted_enum = MessageHelper::MobileToHMIResult(casted_mobile_enum);
+    EXPECT_EQ(tested_enum, converted_enum);
+  }
+  // Check invalid enums == -1
+  tested_enum = HmiResults::INVALID_ENUM;
+  converted_enum =
+      MessageHelper::MobileToHMIResult(MobileResults::INVALID_ENUM);
+  EXPECT_EQ(tested_enum, converted_enum);
+  // Check when out of range (true == result.empty())
+  casted_mobile_enum = static_cast<MobileResults::eType>(INT_MAX);
+  converted_enum = MessageHelper::MobileToHMIResult(casted_mobile_enum);
+  EXPECT_EQ(tested_enum, converted_enum);
 }
 
 }  // namespace application_manager_test
