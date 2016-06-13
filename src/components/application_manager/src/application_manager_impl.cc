@@ -220,6 +220,22 @@ ApplicationSharedPtr FindApp(DataAccessor<ApplicationSet> accessor,
 }
 
 template <class UnaryPredicate>
+ApplicationSharedPtr FindApp(
+    DataAccessor<ApplicationManagerImpl::AppsWaitRegistrationSet> accessor,
+    UnaryPredicate finder) {
+  ApplicationManagerImpl::AppsWaitRegistrationSet::const_iterator it =
+      std::find_if(
+          accessor.GetData().begin(), accessor.GetData().end(), finder);
+  if (accessor.GetData().end() == it) {
+    LOGGER_DEBUG(logger_, "Unable to find application");
+    return ApplicationSharedPtr();
+  }
+  ApplicationSharedPtr app = *it;
+  LOGGER_DEBUG(logger_, " Found Application app_id = " << app->app_id());
+  return app;
+}
+
+template <class UnaryPredicate>
 std::vector<ApplicationSharedPtr> FindAllApps(
     DataAccessor<ApplicationSet> accessor, UnaryPredicate finder) {
   std::vector<ApplicationSharedPtr> result;
@@ -255,6 +271,14 @@ ApplicationSharedPtr ApplicationManagerImpl::application_by_policy_id(
     const std::string& policy_app_id) const {
   PolicyAppIdPredicate finder(policy_app_id);
   DataAccessor<ApplicationSet> accessor = applications();
+  return FindApp(accessor, finder);
+}
+
+ApplicationSharedPtr ApplicationManagerImpl::FindAppToRegister(
+    const uint32_t app_id) const {
+  HmiAppIdPredicate finder(app_id);
+  DataAccessor<AppsWaitRegistrationSet> accessor(apps_to_register_,
+                                                 apps_to_register_list_lock_);
   return FindApp(accessor, finder);
 }
 

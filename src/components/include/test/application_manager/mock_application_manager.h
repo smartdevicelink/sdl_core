@@ -73,6 +73,9 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_CONST_METHOD1(
       application_by_hmi_app,
       application_manager::ApplicationSharedPtr(uint32_t hmi_app_id));
+  MOCK_CONST_METHOD1(
+      FindAppToRegister,
+      application_manager::ApplicationSharedPtr(const uint32_t app_id));
   MOCK_CONST_METHOD1(application_by_policy_id,
                      application_manager::ApplicationSharedPtr(
                          const std::string& policy_app_id));

@@ -55,9 +55,15 @@ void SDLActivateAppRequest::Run() {
       application_manager_.application(application_id);
 
   if (!app) {
-    LOGGER_ERROR(
-        logger_,
-        "Can't find application within regular apps: " << application_id);
+    LOGGER_INFO(logger_, "Can't find app_id in applications list");
+    LOGGER_DEBUG(logger_, "Try find app_id in app_to_register list");
+    app = application_manager_.FindAppToRegister(application_id);
+  }
+
+  if (!app) {
+    LOGGER_ERROR(logger_,
+                 "Can't find application in any lists within regular apps: "
+                     << application_id);
     return;
   }
 
