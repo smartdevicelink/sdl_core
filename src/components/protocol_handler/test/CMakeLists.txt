@@ -46,7 +46,7 @@ set(LIBRARIES
   protocol_handler
   connectionHandler
   Utils
-  ConfigProfile
+  config_profile
 )
 
 create_test(protocol_handler_test "${SOURCES}" "${LIBRARIES}")

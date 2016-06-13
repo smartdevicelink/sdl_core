@@ -28,9 +28,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-  find_package(WinOpenSSL REQUIRED)
-endif()
+find_package(SDLOpenSSL REQUIRED)
 
 set(CH_SRC_DIR ${COMPONENTS_DIR}/connection_handler/src)
 
@@ -52,7 +50,7 @@ set (SOURCES
 )
 
 set(LIBRARIES
-    ConfigProfile
+    config_profile
     protocol
 )
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")

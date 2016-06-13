@@ -31,6 +31,7 @@
 cmake_minimum_required(VERSION 2.8.11)
 
 find_package(LibUSBx REQUIRED)
+find_package(SDLOpenSSL REQUIRED)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows" AND NOT QT_PORT)
   add_custom_target(copy_sqlite_dll ALL
@@ -41,7 +42,6 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows" AND NOT QT_PORT)
 endif()
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-  find_package(WinOpenSSL REQUIRED)
   if(NOT QT_PORT)
     find_package(WinSqlite3 REQUIRED)
   endif()
@@ -93,7 +93,7 @@ set(LIBRARIES
   ${BROKER_LIBRARIES}
   Utils
   jsoncpp
-  ConfigProfile
+  config_profile
   resumption
   UsageStatistics
 )

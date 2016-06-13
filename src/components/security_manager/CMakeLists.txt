@@ -28,9 +28,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-  find_package(WinOpenSSL REQUIRED)
-endif()
+find_package(SDLOpenSSL REQUIRED)
 
 include_directories(
   ${COMPONENTS_DIR}/security_manager/include/
@@ -55,7 +53,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     string( REPLACE / \\ group ${inc} )
     source_group("Header Files" FILES ${inc} )
     add_library("SecurityManager" ${inc} ${SOURCES})
-    target_link_libraries(SecurityManager libeay32 ssleay32 protocol_handler jsoncpp protocol)
+    target_link_libraries(SecurityManager ${OPENSSL_LIBRARIES} protocol_handler jsoncpp protocol)
 else()
   add_library(SecurityManager ${SOURCES})
   target_link_libraries(SecurityManager crypto ssl protocol_handler jsoncpp protocol)

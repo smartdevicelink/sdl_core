@@ -1,4 +1,4 @@
-# Copyright (c) 2015, Ford Motor Company
+# Copyright (c) 2016, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,23 +28,19 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-if(BUILD_TESTS)
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
-include_directories (
+include_directories(
   ${GMOCK_INCLUDE_DIRECTORY}
-  ${COMPONENTS_DIR}/config_profile/include
-  )
-  
-
-set(testSources
-  ${COMPONENTS_DIR}/config_profile/test/profile_test.cc
-  ${COMPONENTS_DIR}/config_profile/test/ini_file_test.cc
 )
 
-set(testLibraries
+set(LIBRARIES
   gmock
-  ConfigProfile
+  config_profile
 )
+
+collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}")
+create_test(config_profile_test "${SOURCES}" "${LIBRARIES}")
  
 file(COPY smartDeviceLink.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY smartDeviceLink_test.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
@@ -52,6 +48,3 @@ file(COPY smartDeviceLink_invalid_pairs.ini DESTINATION ${CMAKE_CURRENT_BINARY_D
 file(COPY smartDeviceLink_invalid_string.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY smartDeviceLink_invalid_int.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR}) 
 file(COPY smartDeviceLink_invalid_boolean.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR}) 
-create_test("config_profile_test" "${testSources}" "${testLibraries}")
-
-endif()

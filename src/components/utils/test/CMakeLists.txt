@@ -93,7 +93,7 @@ set(testLibraries
   gmock
   Utils
   Policy
-  ConfigProfile
+  config_profile
 )
 
 if (CMAKE_SYSTEM_NAME STREQUAL "QNX")

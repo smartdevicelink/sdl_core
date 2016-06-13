@@ -32,6 +32,8 @@ cmake_minimum_required(VERSION 2.8.11)
 
 set (PROJECT smartDeviceLinkCore)
 
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/platform.cmake)
+
 #Jenkins integration section
 #dont modify this section if you dont know details about integration with Jenkins!!!
 set (HMI "web" CACHE STRING "HMI type")

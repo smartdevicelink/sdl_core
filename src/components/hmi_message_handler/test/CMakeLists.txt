@@ -43,7 +43,7 @@ set(LIBRARIES
     jsoncpp
     MessageBrokerClient
     MessageBrokerServer
-    ConfigProfile
+    config_profile
 )
 
 set(SOURCES 

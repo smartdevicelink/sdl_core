@@ -130,7 +130,7 @@
       UsageStatistics
       dl
       protocol
-      ConfigProfile
+      config_profile
       MediaManager
       resumption
       protocol_handler

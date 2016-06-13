@@ -1,4 +1,4 @@
-# Copyright (c) 2015, Ford Motor Company
+# Copyright (c) 2016, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,34 +28,30 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-  find_package(WinOpenSSL REQUIRED)
-endif()
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
-include_directories (
+find_package(SDLOpenSSL REQUIRED)
+
+include_directories(
+  ${COMPONENTS_DIR}/include
   ${COMPONENTS_DIR}/config_profile/include
-  ${COMPONENTS_DIR}/utils/include/
-  ${LOG4CXX_INCLUDE_DIRECTORY}
+  ${COMPONENTS_DIR}/utils/include
   ${OPENSSL_INCLUDE_DIRECTORY}
 )
 
-set (SOURCES
-    ${COMPONENTS_DIR}/config_profile/src/profile.cc
-    ${COMPONENTS_DIR}/config_profile/src/ini_file.cc
-)
-set (HEADERS
-    ${COMPONENTS_DIR}/config_profile/include/config_profile/ini_file.h
-    ${COMPONENTS_DIR}/config_profile/include/config_profile/profile.h
+set(PATHS
+  ${CMAKE_CURRENT_SOURCE_DIR}/include
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-   source_group("Header Files" FILES ${HEADERS} )
-   source_group("Source Files" FILES ${SOURCES})
-endif()
+set(LIBRARIES
+  Utils
+)
+
+collect_sources(SOURCES "${PATHS}")
+add_library(config_profile ${SOURCES})
+target_link_libraries(config_profile ${LIBRARIES})
 
 if(BUILD_TESTS)
   add_subdirectory(test)
 endif()
-
-add_library("ConfigProfile" ${HEADERS} ${SOURCES})
-target_link_libraries("ConfigProfile" Utils)

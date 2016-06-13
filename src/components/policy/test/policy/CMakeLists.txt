@@ -18,7 +18,7 @@ set(LIBRARIES
   gmock
   gmock_main
   Policy
-  ConfigProfile
+  config_profile
   ${RTLIB}
 )
 

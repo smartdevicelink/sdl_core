@@ -82,7 +82,7 @@ set(USAGE_STATISTICS_SOURCES
 add_library(UsageStatistics ${USAGE_STATISTICS_SOURCES})
 # --- end of Usage statistics section
 
-set(LIBRARIES ConfigProfile policy_struct dbms jsoncpp Utils)
+set(LIBRARIES config_profile policy_struct dbms jsoncpp Utils)
 if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
   # --- QDB Wrapper 
   include_directories (${COMPONENTS_DIR}/utils/include/)

@@ -47,10 +47,9 @@ include_directories(
 
 set(LIBRARIES
   gmock
-  ConfigProfile
+  config_profile
   TransportManager
   Utils
-  ConfigProfile
   protocol
   resumption
   jsoncpp

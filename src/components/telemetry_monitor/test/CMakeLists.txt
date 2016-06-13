@@ -64,7 +64,7 @@ set(testLibraries
   v4_protocol_v1_2_no_extra
   smart_object
   protocol
-  ConfigProfile
+  config_profile
   ApplicationManager
   MessageHelper
   resumption

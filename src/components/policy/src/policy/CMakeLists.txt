@@ -78,7 +78,7 @@ add_subdirectory(usage_statistics)
 include_directories(./policy_table/table_struct)
 add_subdirectory(policy_table/table_struct)
 
-set(LIBRARIES ConfigProfile policy_struct dbms jsoncpp Utils)
+set(LIBRARIES config_profile policy_struct dbms jsoncpp Utils)
 if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
   # --- QDB Wrapper
   include_directories (${COMPONENTS_DIR}/utils/include/utils)

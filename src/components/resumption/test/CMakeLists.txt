@@ -39,7 +39,7 @@ collect_sources(SOURCES ${CMAKE_CURRENT_SOURCE_DIR})
 
 set(LIBRARIES
   gmock
-  ConfigProfile
+  config_profile
   Utils
   resumption
   jsoncpp
