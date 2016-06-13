@@ -34,7 +34,7 @@
 
 <interfaces name="SmartDeviceLink HMI API">
 
-<interface name="Common" version="1.4" date="2016-05-11">
+<interface name="Common" version="1.5" date="2016-07-04">
 
 <enum name="Result">
     <element name="SUCCESS" value="0"/>
@@ -235,21 +235,6 @@
   <element name="TESTING" />
   <element name="SYSTEM" />
 </enum>
-
-  <enum name="WayPointType">
-    <description>Describes what kind of waypoint is requested/provided.</description>
-    <element name="ALL" />
-    <element name="DESTINATION" />
-  </enum>
-
-  <struct name="Coordinate">
-    <param name="latitudeDegrees" minvalue="-90" maxvalue="90" type="Double" mandatory="true">
-      <description>Latitude of the location.</description>
-    </param>
-    <param name="longitudeDegrees" minvalue="-180" maxvalue="180" type="Double" mandatory="true">
-      <description>Longitude of the location.</description>
-    </param>
-  </struct>
 
 <enum name="LayoutMode">
   <description>For touchscreen interactions, the mode of how the choices are presented.</description>
@@ -1226,6 +1211,11 @@
     <element name="UNKNOWN"/>
     <element name="UNPAIRED"/>
   </enum>
+  <enum name="WayPointType">
+    <description>Describes what kind of waypoint is requested/provided.</description>
+    <element name="ALL" />
+    <element name="DESTINATION" />
+  </enum>
   <struct name="UserFriendlyMessage" scope="internal">
     <param name="messageCode" type="String" mandatory="true"/>
     <param name="ttsString" type="String" mandatory="false"/>
@@ -1333,7 +1323,7 @@
 </struct>
 
 <struct name="Image">
-  <param name="value" maxlength="65535" type="String" mandatory="true">
+  <param name="value" minlength="0" maxlength="65535" type="String" mandatory="true">
     <description>The path to the dynamic image stored on HU or the static binary image itself.</description>
   </param>
   <param name="imageType" type="Common.ImageType" mandatory="true">
@@ -1979,32 +1969,14 @@
 </struct>
 <!--end of IVI part-->
 
-<struct name="DateTime">
-       <param name="second" type="Integer" minvalue="0" maxvalue="60" mandatory="true">
-          <description>Seconds part of time</description>
-       </param>
-       <param name="minute" type="Integer" minvalue="0" maxvalue="59" mandatory="true">
-          <description>Minutes part of time</description>
-       </param>
-       <param name="hour" type="Integer" minvalue="0" maxvalue="23" mandatory="true">
-          <description>Hours part of time. Note that this structure accepts time only in 24 Hr format</description>
-       </param>
-       <param name="day" type="Integer" minvalue="1" maxvalue="31" mandatory="true">
-          <description>Day of the month</description>
-       </param>
-       <param name="month" type="Integer" minvalue="1" maxvalue="12" mandatory="true">
-          <description>Month of the year</description>
-       </param>
-       <param name="year" type="Integer" maxvalue="4095" mandatory="true">
-          <description>The year in YYYY format</description>
-       </param>
-       <param name="tz_hour" type="Integer" minvalue="-12" maxvalue="14" defvalue="0" mandatory="true">
-          <description>Time zone offset in Hours wrt UTC.</description>
-       </param>
-       <param name="tz_minute" type="Integer" minvalue="0" maxvalue="59" defvalue="0" mandatory="true">
-          <description>Time zone offset in Min wrt UTC.</description>
-       </param>
-    </struct>
+<struct name="Coordinate">
+  <param name="latitudeDegrees" minvalue="-90" maxvalue="90" type="Double" mandatory="true">
+    <description>Latitude of the location.</description>
+  </param>
+  <param name="longitudeDegrees" minvalue="-180" maxvalue="180" type="Double" mandatory="true">
+    <description>Longitude of the location.</description>
+  </param>
+</struct>
 
 <struct name="OASISAddress">
   <param name="countryName" minlength="0" maxlength="200" type="String" mandatory="false">
@@ -2036,30 +2008,56 @@
   </param>
 </struct>
 
-  <struct name="LocationDetails">
-    <param name="coordinate" type="Coordinate" mandatory="false">
-      <description>Latitude/Longitude of the location.</description>
-    </param>
-    <param name="locationName" type="String" maxlength="500" mandatory="false">
-      <description>Name of location.</description>
-    </param>
-    <param name="addressLines" type="String" maxlength="500" minsize="0" maxsize="4" array="true" mandatory="false">
-      <description>Location address for display purposes only</description>
-    </param>
-    <param name="locationDescription" type="String" maxlength="500" mandatory="false">
-      <description>Description intended location / establishment (if applicable)</description>
-    </param>
-    <param name="phoneNumber" type="String" maxlength="500" mandatory="false">
-      <description>Phone number of location / establishment.</description>
-    </param>
-    <param name="locationImage" type="Image" mandatory="false">
-      <description>Image / icon of intended location.</description>
-    </param>
-    <param name="searchAddress" type="OASISAddress" mandatory="false">
-      <description>Address to be used by navigation engines for search</description>
-    </param>
-  </struct>
+<struct name="LocationDetails">
+  <param name="coordinate" type="Common.Coordinate" mandatory="false">
+    <description>Latitude/Longitude of the location.</description>
+  </param>
+  <param name="locationName" type="String" maxlength="500" mandatory="false">
+    <description>Name of location.</description>
+  </param>
+  <param name="addressLines" type="String" maxlength="500" minsize="0" maxsize="4" array="true" mandatory="false">
+    <description>Location address for display purposes only</description>
+  </param>
+  <param name="locationDescription" type="String" maxlength="500" mandatory="false">
+    <description>Description intended location / establishment (if applicable)</description>
+  </param>
+  <param name="phoneNumber" type="String" maxlength="500" mandatory="false">
+    <description>Phone number of location / establishment.</description>
+  </param>
+  <param name="locationImage" type="Common.Image" mandatory="false">
+    <description>Image / icon of intended location.</description>
+  </param>
+  <param name="searchAddress" type="Common.OASISAddress" mandatory="false">
+    <description>Address to be used by navigation engines for search</description>
+  </param>
+</struct>
 
+<struct name="DateTime">
+       <param name="second" type="Integer" minvalue="0" maxvalue="60" mandatory="true">
+          <description>Seconds part of time</description>
+       </param>
+       <param name="minute" type="Integer" minvalue="0" maxvalue="59" mandatory="true">
+          <description>Minutes part of time</description>
+       </param>
+       <param name="hour" type="Integer" minvalue="0" maxvalue="23" mandatory="true">
+          <description>Hours part of time. Note that this structure accepts time only in 24 Hr format</description>
+       </param>
+       <param name="day" type="Integer" minvalue="1" maxvalue="31" mandatory="true">
+          <description>Day of the month</description>
+       </param>
+       <param name="month" type="Integer" minvalue="1" maxvalue="12" mandatory="true">
+          <description>Month of the year</description>
+       </param>
+       <param name="year" type="Integer" maxvalue="4095" mandatory="true">
+          <description>The year in YYYY format</description>
+       </param>
+       <param name="tz_hour" type="Integer" minvalue="-12" maxvalue="14" defvalue="0" mandatory="true">
+          <description>Time zone offset in Hours wrt UTC.</description>
+       </param>
+       <param name="tz_minute" type="Integer" minvalue="0" maxvalue="59" defvalue="0" mandatory="true">
+          <description>Time zone offset in Min wrt UTC.</description>
+       </param>
+    </struct>
 </interface>
 
 <interface name="Buttons" version="1.0" date="2013-04-12">
@@ -3240,7 +3238,7 @@
   </function>
 </interface>
 
-<interface name="Navigation" version="1.3" date="2016-06-30">
+<interface name="Navigation" version="1.4" date="2016-07-4">
 
   <function name="IsReady" messagetype="request">
     <description>Method is invoked at system startup. Response must provide the information about presence of UI Navigation module and its readiness to cooperate with SDL.</description>
@@ -3405,16 +3403,16 @@
       <description>If "true" - video data started. If "false" - video data stopped.</description>
     </param>
   </function>
-  <function name="GetWayPoints" functionID="GetWayPointsID" messagetype="request">
+  <function name="GetWayPoints" messagetype="request">
     <description>Request for getting waypoint/destination data.</description>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of the application.</description>
+    </param>
     <param name="wayPointType" type="Common.WayPointType" defvalue="ALL" mandatory="true">
       <description>To request for either the destination only or for all waypoints including destination</description>
     </param>
-    <param name="appID" type="Integer" mandatory="true"> 
-      <description>ID of the application.</description> 
-    </param> 
   </function>
-  <function name="GetWayPoints" functionID="GetWayPointsID" messagetype="response">
+  <function name="GetWayPoints" messagetype="response">
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of the application.</description>
     </param>
@@ -3422,25 +3420,25 @@
       <description>See LocationDetails</description>
     </param>
   </function>
-  <function name="OnWayPointChange" functionID="OnWayPointChangeID" messagetype="notification">
+  <function name="OnWayPointChange" messagetype="notification">
     <description>Notification which provides the entire LocationDetails when there is a change to any waypoints or destination.</description>
     <param name="wayPoints" type="Common.LocationDetails" mandatory="true" array="true" minsize="1" maxsize="10">
       <description>See LocationDetails</description>
     </param>
   </function>
 
-  <function name="SubscribeWayPoints" functionID="SubscribeWayPointsID" messagetype="request">
+  <function name="SubscribeWayPoints" messagetype="request">
     <description>To subscribe in getting changes for Waypoints/destinations</description>
   </function>
 
-  <function name="SubscribeWayPoints" functionID="SubscribeWayPointsID" messagetype="response">
+  <function name="SubscribeWayPoints" messagetype="response">
   </function>
 
-  <function name="UnsubscribeWayPoints" functionID="UnsubscribeWayPointsID" messagetype="request">
+  <function name="UnsubscribeWayPoints" messagetype="request">
     <description>Request to unsubscribe from WayPoints and Destination</description>
   </function>
 
-  <function name="UnsubscribeWayPoints" functionID="UnsubscribeWayPointsID" messagetype="response">
+  <function name="UnsubscribeWayPoints" messagetype="response">
   </function>
 
 </interface>
