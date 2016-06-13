@@ -188,6 +188,42 @@ class MockMessageHelper {
                                      const uint32_t correlation_id,
                                      uint32_t connection_key));
   MOCK_METHOD0(vehicle_data, const VehicleData&());
+  MOCK_METHOD4(SendLaunchApp,
+               void(const uint32_t connection_key,
+                    const std::string& urlSchema,
+                    const std::string& packageName,
+                    ApplicationManager& app_man));
+
+  MOCK_METHOD3(VerifyImage,
+               mobile_apis::Result::eType(smart_objects::SmartObject& image,
+                                          ApplicationConstSharedPtr app,
+                                          ApplicationManager& app_mngr));
+
+  MOCK_METHOD2(SendQueryApps,
+               void(const uint32_t connection_key,
+                    ApplicationManager& app_man));
+
+  MOCK_METHOD1(CreateAppVrHelp,
+               smart_objects::SmartObjectSPtr(ApplicationConstSharedPtr app));
+
+  MOCK_METHOD3(VerifyImageVrHelpItems,
+               mobile_apis::Result::eType(smart_objects::SmartObject& message,
+                                          ApplicationConstSharedPtr app,
+                                          ApplicationManager& app_mngr));
+
+  MOCK_METHOD2(SendChangeRegistrationRequestToHMI,
+               void(ApplicationConstSharedPtr app,
+                    ApplicationManager& app_mngr));
+
+  MOCK_METHOD1(GetPriorityCode, const uint32_t(const std::string& priority));
+
+  MOCK_METHOD1(PrintSmartObject,
+               bool(const smart_objects::SmartObject& object));
+
+  MOCK_METHOD3(SendTTSGlobalProperties,
+               void(ApplicationSharedPtr app,
+                    const bool default_help_prompt,
+                    ApplicationManager& app_man));
 
   static MockMessageHelper* message_helper_mock();
 };

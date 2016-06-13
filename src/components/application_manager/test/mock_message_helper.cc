@@ -347,4 +347,60 @@ const VehicleData& MessageHelper::vehicle_data() {
   return MockMessageHelper::message_helper_mock()->vehicle_data();
 }
 
+void MessageHelper::SendLaunchApp(const uint32_t connection_key,
+                                  const std::string& urlSchema,
+                                  const std::string& packageName,
+                                  ApplicationManager& app_man) {
+  MockMessageHelper::message_helper_mock()->SendLaunchApp(
+      connection_key, urlSchema, packageName, app_man);
+}
+
+mobile_apis::Result::eType MessageHelper::VerifyImage(
+    smart_objects::SmartObject& image,
+    ApplicationConstSharedPtr app,
+    ApplicationManager& app_mngr) {
+  return MockMessageHelper::message_helper_mock()->VerifyImage(
+      image, app, app_mngr);
+}
+
+void MessageHelper::SendQueryApps(const uint32_t connection_key,
+                                  ApplicationManager& app_man) {
+  MockMessageHelper::message_helper_mock()->SendQueryApps(connection_key,
+                                                          app_man);
+}
+
+smart_objects::SmartObjectSPtr MessageHelper::CreateAppVrHelp(
+    ApplicationConstSharedPtr app) {
+  return MockMessageHelper::message_helper_mock()->CreateAppVrHelp(app);
+}
+
+mobile_apis::Result::eType MessageHelper::VerifyImageVrHelpItems(
+    smart_objects::SmartObject& message,
+    ApplicationConstSharedPtr app,
+    ApplicationManager& app_mngr) {
+  return MockMessageHelper::message_helper_mock()->VerifyImageVrHelpItems(
+      message, app, app_mngr);
+}
+
+void MessageHelper::SendChangeRegistrationRequestToHMI(
+    ApplicationConstSharedPtr app, ApplicationManager& app_mngr) {
+  MockMessageHelper::message_helper_mock()->SendChangeRegistrationRequestToHMI(
+      app, app_mngr);
+}
+
+const uint32_t MessageHelper::GetPriorityCode(const std::string& priority) {
+  return MockMessageHelper::message_helper_mock()->GetPriorityCode(priority);
+}
+
+void MessageHelper::SendTTSGlobalProperties(ApplicationSharedPtr app,
+                                            const bool default_help_prompt,
+                                            ApplicationManager& app_man) {
+  MockMessageHelper::message_helper_mock()->SendTTSGlobalProperties(
+      app, default_help_prompt, app_man);
+}
+
+bool MessageHelper::PrintSmartObject(const smart_objects::SmartObject& object) {
+  return MockMessageHelper::message_helper_mock()->PrintSmartObject(object);
+}
+
 }  // namespace application_manager
