@@ -957,98 +957,99 @@ TEST_F(MessageHelperTest, SubscribeApplicationToSoftButton_CallFromApp) {
       message_params, appSharedPtr, function_id);
 }
 
-TEST(MessageHelperTestCreate,
-   CreateHashUpdateNotification_FunctionId_Equal) {
-  uint32_t app_id = 0;
-  smart_objects::SmartObjectSPtr ptr =
-      MessageHelper::CreateHashUpdateNotification(app_id);
+TEST(MessageHelperTestCreate, CreateHashUpdateNotification_FunctionId_Equal) {
+  const uint32_t kApplicationId = 0;
+  const smart_objects::SmartObjectSPtr kNotificationSPtr =
+      MessageHelper::CreateHashUpdateNotification(kApplicationId);
 
-  EXPECT_TRUE(ptr);
+  ASSERT_TRUE(kNotificationSPtr.valid());
 
-  smart_objects::SmartObject& obj = *ptr;
+  const smart_objects::SmartObject& kNotificationRef = *kNotificationSPtr;
 
-  int function_id =
+  const int kFunctionId =
       static_cast<int>(mobile_apis::FunctionID::OnHashChangeID);
-  int notification = static_cast<int>(::application_manager::kNotification);
+  const int kMessageType =
+      static_cast<int>(::application_manager::kNotification);
 
-  EXPECT_EQ(function_id, obj[strings::params][strings::function_id].asInt());
-  EXPECT_EQ(app_id, obj[strings::params][strings::connection_key].asUInt());
-  EXPECT_EQ(notification,
-      obj[strings::params][strings::message_type].asInt());
+  EXPECT_EQ(kFunctionId,
+            kNotificationRef[strings::params][strings::function_id].asInt());
+  EXPECT_EQ(
+      kApplicationId,
+      kNotificationRef[strings::params][strings::connection_key].asUInt());
+  EXPECT_EQ(kMessageType,
+            kNotificationRef[strings::params][strings::message_type].asInt());
 }
 
 TEST(MessageHelperTestCreate, CreateAppVrHelp_AppName_Equal) {
-  MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
+  const MockApplicationSharedPtr kMockApplicationSPtr =
+      utils::MakeShared<MockApplication>();
 
-  application_manager::CommandsMap vis;
-  DataAccessor< ::application_manager::CommandsMap>
-      data_accessor(vis, true);
+  application_manager::CommandsMap commands_map;
+  DataAccessor< ::application_manager::CommandsMap> data_accessor(commands_map,
+                                                                  true);
 
-  const smart_objects::SmartObject* objPtr = NULL;
-  const std::string app = "213";
-  const utils::custom_string::CustomString app_name(app);
-  EXPECT_CALL(*appSharedMock, name() ).WillOnce(ReturnRef(app_name));
-  EXPECT_CALL(*appSharedMock,
-      vr_synonyms() ).Times(AtLeast(1)).WillRepeatedly(Return(objPtr));
-  EXPECT_CALL(*appSharedMock,
-      commands_map() ).WillOnce(Return(data_accessor));
+  const smart_objects::SmartObject* kVrSynonymsPrt = NULL;
+  const utils::custom_string::CustomString kApplicationName("213");
 
-  smart_objects::SmartObjectSPtr ptr =
-      MessageHelper::CreateAppVrHelp(appSharedMock);
+  EXPECT_CALL(*kMockApplicationSPtr, name())
+      .WillOnce(ReturnRef(kApplicationName));
+  EXPECT_CALL(*kMockApplicationSPtr, vr_synonyms())
+      .Times(AtLeast(1))
+      .WillRepeatedly(Return(kVrSynonymsPrt));
+  EXPECT_CALL(*kMockApplicationSPtr, commands_map())
+      .WillOnce(Return(data_accessor));
 
-  EXPECT_TRUE(ptr);
+  const smart_objects::SmartObjectSPtr kNotificationPtr =
+      MessageHelper::CreateAppVrHelp(kMockApplicationSPtr);
 
-  smart_objects::SmartObject& obj = *ptr;
+  ASSERT_TRUE(kNotificationPtr.valid());
 
-  EXPECT_EQ(app_name, obj[strings::vr_help_title].asString());
+  EXPECT_EQ(kApplicationName,
+            (*kNotificationPtr)[strings::vr_help_title].asString());
 }
 
 TEST_F(MessageHelperTest,
-    MobileResultFromString_StringValueOfEnum_CorrectEType) {
+       MobileResultFromString_StringValueOfEnum_CorrectEType) {
   MobileResults::eType tested_enum;
-  MobileResults::eType converted;
+  MobileResults::eType converted_enum;
   // Check enums >=0
-  for (size_t array_index = 0;
-      array_index < mobile_result_strings.size();
-      ++array_index) {
+  for (size_t array_index = 0; array_index < mobile_result_strings.size();
+       ++array_index) {
     tested_enum = static_cast<MobileResults::eType>(array_index);
-    converted = MessageHelper::MobileResultFromString(
+    converted_enum = MessageHelper::MobileResultFromString(
         mobile_result_strings[array_index]);
-    EXPECT_EQ(tested_enum, converted);
+    EXPECT_EQ(tested_enum, converted_enum);
   }
   // Check invalid enums == -1
   tested_enum = MobileResults::INVALID_ENUM;
-  converted = MessageHelper::MobileResultFromString("");
-  EXPECT_EQ(tested_enum, converted);
+  converted_enum = MessageHelper::MobileResultFromString("");
+  EXPECT_EQ(tested_enum, converted_enum);
 }
 
-TEST_F(MessageHelperTest,
-    MobileResultToString_ETypeValueOfEnum_CorrectString) {
+TEST_F(MessageHelperTest, MobileResultToString_ETypeValueOfEnum_CorrectString) {
   std::string string_from_enum;
   MobileResults::eType casted_enum;
   // Check all results >=0
-  for (size_t array_index = 0;
-      array_index < mobile_result_strings.size();
-      ++array_index) {
+  for (size_t array_index = 0; array_index < mobile_result_strings.size();
+       ++array_index) {
     casted_enum = static_cast<MobileResults::eType>(array_index);
     string_from_enum = MessageHelper::MobileResultToString(casted_enum);
     EXPECT_EQ(mobile_result_strings[array_index], string_from_enum);
   }
   // Check InvalidEnum == -1
-  string_from_enum = MessageHelper::MobileResultToString(
-        MobileResults::INVALID_ENUM);
+  string_from_enum =
+      MessageHelper::MobileResultToString(MobileResults::INVALID_ENUM);
   EXPECT_EQ("", string_from_enum);
 }
 
 TEST_F(MessageHelperTest,
-    MobileToHMIResult_MobileResultEType_GetCorrectHmiResultEType) {
+       MobileToHMIResult_MobileResultEType_GetCorrectHmiResultEType) {
   HmiResults::eType tested_enum;
   MobileResults::eType casted_mobile_enum;
   HmiResults::eType converted_enum;
   // Check enums >=0
-  for (size_t enum_index = 0;
-      enum_index < mobile_result_strings.size();
-      ++enum_index) {
+  for (size_t enum_index = 0; enum_index < mobile_result_strings.size();
+       ++enum_index) {
     tested_enum =
         MessageHelper::HMIResultFromString(mobile_result_strings[enum_index]);
     casted_mobile_enum = static_cast<MobileResults::eType>(enum_index);
