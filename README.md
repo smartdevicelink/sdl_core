@@ -72,7 +72,7 @@ environment variable
 **Note:** It looks like starting from Qt5.6 there is no more msvc2010 32-bit support, so check whether such option is present. If no - use Qt5.5.
  Create new environment variable called `SDL_QT_DIR` and assign your qt install dir to this variable. I.e `set SDL_QT_DIR=C:\Qt`
 
-##### Not required steps
+##### Optional steps
 * Download and install [Doxygen] (http://sourceforge.net/projects/doxygen/files/latest/download) and add it to `Path` envronment variable
 
 #### Build project
