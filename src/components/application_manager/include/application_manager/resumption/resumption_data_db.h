@@ -85,7 +85,7 @@ class ResumptionDataDB : public ResumptionData {
    * @return false if DB doesn't initialize
    * otherwise returns true
    */
-  virtual bool Init();
+  bool Init() OVERRIDE;
 
   /**
    * @brief Save application persistent info for future resuming to db
@@ -97,7 +97,7 @@ class ResumptionDataDB : public ResumptionData {
    * @param hmi_app_id - hmi application id
    * @return true if exist, otherwise false
    */
-  virtual bool IsHMIApplicationIdExist(uint32_t hmi_app_id) const;
+  bool IsHMIApplicationIdExist(uint32_t hmi_app_id) const OVERRIDE;
   /**
    * @brief Retrieves HMI app ID for the given mobile app ID
    * and device ID from stored data.
@@ -105,14 +105,14 @@ class ResumptionDataDB : public ResumptionData {
    * @param device_id - contains id of device on which is running application
    * @return HMI app ID
    */
-  virtual uint32_t GetHMIApplicationID(const std::string& policy_app_id,
-                                       const std::string& device_id) const;
+  uint32_t GetHMIApplicationID(const std::string& policy_app_id,
+                               const std::string& device_id) const OVERRIDE;
 
   /**
    * @brief Increments ignition counter for all registered applications
    * and remember ign_off time stamp
    */
-  virtual void OnSuspend();
+  void OnSuspend() OVERRIDE;
 
   /**
    * @brief Retrieves hash ID for the given mobile app ID
@@ -124,15 +124,14 @@ class ResumptionDataDB : public ResumptionData {
    * @return TRUE if application will be found in saved data otherwise
    * returns FALSE
    */
-  virtual bool GetHashId(const std::string& policy_app_id,
-                         const std::string& device_id,
-                         std::string& hash_id) const;
+  bool GetHashId(const std::string& policy_app_id, const std::string& device_id,
+                 std::string& hash_id) const OVERRIDE;
 
   /**
    * @brief Decrements ignition counter for all registered applications
    * and remember ign_off time stamp
    */
-  virtual void OnAwake();
+  void OnAwake() OVERRIDE;
 
   /**
    * @brief Retrieves data of saved application for the given mobile app ID
@@ -143,9 +142,10 @@ class ResumptionDataDB : public ResumptionData {
    * @return TRUE if application will be found in saved data otherwise
    * returns FALSE
    */
-  virtual bool GetSavedApplication(const std::string& policy_app_id,
-                                   const std::string& device_id,
-                                   smart_objects::SmartObject& saved_app) const;
+  bool GetSavedApplication(const std::string& policy_app_id,
+                           const std::string& device_id,
+                           smart_objects::SmartObject& saved_app) const
+                               OVERRIDE;
 
   /**
    * @brief Remove application from list of saved applications
@@ -153,14 +153,14 @@ class ResumptionDataDB : public ResumptionData {
    * @param device_id - contains id of device on which is running application
    * @return return true, if success, otherwise return false
    */
-  virtual bool RemoveApplicationFromSaved(const std::string& policy_app_id,
-                                          const std::string& device_id);
+  bool RemoveApplicationFromSaved(const std::string& policy_app_id,
+                                  const std::string& device_id) OVERRIDE;
 
   /**
    * @brief Get the last ignition off time from LastState
    * @return the last ignition off time from LastState
    */
-  virtual uint32_t GetIgnOffTime() const;
+  uint32_t GetIgnOffTime() const OVERRIDE;
 
   /**
    * @brief Checks if saved data have application
@@ -168,15 +168,15 @@ class ResumptionDataDB : public ResumptionData {
    * @param device_id - contains id of device on which is running application
    * @return 0 if saved data contains application otherwise returns -1
    */
-  virtual ssize_t IsApplicationSaved(const std::string& policy_app_id,
-                                     const std::string& device_id) const;
+  ssize_t IsApplicationSaved(const std::string& policy_app_id,
+                             const std::string& device_id) const OVERRIDE;
 
   /**
    * @brief Retrieves data from saved application
    * @param  will contain data for resume_ctrl
    */
-  virtual void GetDataForLoadResumeData(
-      smart_objects::SmartObject& saved_data) const;
+  void GetDataForLoadResumeData(smart_objects::SmartObject& saved_data) const
+      OVERRIDE;
 
   /**
    * @brief Updates HMI level of saved application
@@ -184,9 +184,9 @@ class ResumptionDataDB : public ResumptionData {
    * @param device_id - contains id of device on which is running application
    * @param hmi_level - contains hmi level for saved application
    */
-  virtual void UpdateHmiLevel(const std::string& policy_app_id,
-                              const std::string& device_id,
-                              mobile_apis::HMILevel::eType hmi_level);
+  void UpdateHmiLevel(const std::string& policy_app_id,
+                      const std::string& device_id,
+                      mobile_apis::HMILevel::eType hmi_level) OVERRIDE;
 
   /**
    * @brief Re-creates and re-init DB
