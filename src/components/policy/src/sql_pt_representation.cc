@@ -66,9 +66,8 @@ void InsertUnique(K value, T* array) {
     array->push_back(value);
   }
 }
+const char* kDatabaseName = "policy";
 }  //  namespace
-
-const std::string SQLPTRepresentation::kDatabaseName = "policy";
 
 SQLPTRepresentation::SQLPTRepresentation(const std::string& app_storage_folder,
                                          uint16_t attempts_to_open_policy_db,

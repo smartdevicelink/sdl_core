@@ -36,8 +36,10 @@
 namespace utils {
 namespace dbms {
 
-const std::string SQLDatabase::kInMemory = ":memory:";
-const std::string SQLDatabase::kExtension = ".sqlite";
+namespace {
+const char* kInMemory = ":memory:";
+const char* kExtension = ".sqlite";
+}  // namespace
 
 SQLDatabase::SQLDatabase()
     : conn_(NULL), database_path_(kInMemory), error_(SQLITE_OK) {}
