@@ -49,7 +49,7 @@
 #include "application_manager/application_manager_settings.h"
 
 namespace {
-const std::string kDatabaseName = "resumption";
+const char* kDatabaseName = "resumption";
 }
 
 namespace resumption {

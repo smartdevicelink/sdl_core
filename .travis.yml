@@ -25,7 +25,7 @@ addons:
     - clang-format-3.6
 before_install:
   - sudo apt-get -qq update
-  - sudo apt-get -q -y install libavahi-client-dev bluez-tools sqlite3 libsqlite3-dev automake1.11
+  - sudo apt-get -q -y install libavahi-client-dev bluez-tools sqlite3 libsqlite3-dev automake1.11 gdb
   - wget http://archive.ubuntu.com/ubuntu/pool/main/l/lcov/lcov_1.11-3_all.deb
   - sudo dpkg -i lcov_1.11-3_all.deb
 script:
@@ -33,8 +33,11 @@ script:
   - bash -e tools/infrastructure/check_style.sh
   - mkdir build && cd build && cmake ../ -DBUILD_TESTS=ON -DENABLE_GCOV=ON && make install
   - sudo ldconfig
+  - ulimit -c unlimited
   - make test
-  - bash ../tools/infrastructure/show_disabled.sh 
+  - cd src/components/application_manager/test/
+  - gdb --batch -ex "thread apply all bt" --core=$(ls | grep core) --exec=application_manager_test
+  - bash ../tools/infrastructure/show_disabled.sh
   - bash -ex ../tools/infrastructure/collect_coverage.sh ./
 env:
   global:

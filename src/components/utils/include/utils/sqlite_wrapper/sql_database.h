@@ -149,17 +149,6 @@ class SQLDatabase {
   int error_;
 
   /**
-   *  The temporary in-memory database
-   *  @see SQLite manual
-   */
-  static const std::string kInMemory;
-
-  /**
-   * The extension of filename of database
-   */
-  static const std::string kExtension;
-
-  /**
    * Execs query for internal using in this class
    * @param query sql query without return results
    * @return true if query was executed successfully
