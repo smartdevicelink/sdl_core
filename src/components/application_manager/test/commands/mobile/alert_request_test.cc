@@ -124,7 +124,7 @@ TEST_F(AlertRequestTest, Run_AlertFrequencyIsTooHigh_UNSUCCESS) {
 
   ON_CALL(*app, hmi_level())
       .WillByDefault(Return(mobile_apis::HMILevel::HMI_BACKGROUND));
-  ON_CALL(*app, IsCommandLimitsExceeded(_, _)).WillByDefault(Return(true));
+  ON_CALL(*app, AreCommandLimitsExceeded(_, _)).WillByDefault(Return(true));
 
   MessageSharedPtr result_msg(CatchMobileCommandResult(CallRun(*command)));
   EXPECT_EQ(mobile_apis::Result::REJECTED,
@@ -143,7 +143,7 @@ TEST_F(AlertRequestTest, Run_FailToProcessSoftButtons_UNSUCCESS) {
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
   ON_CALL(*app, hmi_level())
       .WillByDefault(Return(mobile_apis::HMILevel::HMI_BACKGROUND));
-  ON_CALL(*app, IsCommandLimitsExceeded(_, _)).WillByDefault(Return(false));
+  ON_CALL(*app, AreCommandLimitsExceeded(_, _)).WillByDefault(Return(false));
 
   ON_CALL(app_mngr_, GetPolicyHandler())
       .WillByDefault(
@@ -165,7 +165,7 @@ TEST_F(AlertRequestTest, Run_MandatoryParametersAreMissed_UNSUCCESS) {
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
   ON_CALL(*app, hmi_level())
       .WillByDefault(Return(mobile_apis::HMILevel::HMI_BACKGROUND));
-  ON_CALL(*app, IsCommandLimitsExceeded(_, _)).WillByDefault(Return(false));
+  ON_CALL(*app, AreCommandLimitsExceeded(_, _)).WillByDefault(Return(false));
 
   ON_CALL(app_mngr_, GetPolicyHandler())
       .WillByDefault(
@@ -193,7 +193,7 @@ TEST_F(AlertRequestTest, Run_MandatoryParametersAreInvalid_UNSUCCESS) {
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
   ON_CALL(*app, hmi_level())
       .WillByDefault(Return(mobile_apis::HMILevel::HMI_BACKGROUND));
-  ON_CALL(*app, IsCommandLimitsExceeded(_, _)).WillByDefault(Return(false));
+  ON_CALL(*app, AreCommandLimitsExceeded(_, _)).WillByDefault(Return(false));
 
   MessageSharedPtr result_msg(CatchMobileCommandResult(CallRun(*command)));
   EXPECT_EQ(mobile_apis::Result::INVALID_DATA,
@@ -215,7 +215,7 @@ TEST_F(AlertRequestTest, Run_SUCCESS) {
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
   ON_CALL(*app, hmi_level())
       .WillByDefault(Return(mobile_apis::HMILevel::HMI_BACKGROUND));
-  ON_CALL(*app, IsCommandLimitsExceeded(_, _)).WillByDefault(Return(false));
+  ON_CALL(*app, AreCommandLimitsExceeded(_, _)).WillByDefault(Return(false));
 
   ON_CALL(app_mngr_, GetPolicyHandler())
       .WillByDefault(

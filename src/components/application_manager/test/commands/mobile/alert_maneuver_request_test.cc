@@ -127,7 +127,7 @@ TEST_F(AlertManeuverRequestTest, Run_IsWhiteSpaceExist_UNSUCCESS) {
       SmartObject(smart_objects::SmartType_Array);
 
   SmartObject tts_chunk(smart_objects::SmartType_Map);
-  tts_chunk[am::strings::text] = "wrong chank syntax\t\n";
+  tts_chunk[am::strings::text] = "wrong chunk syntax\t\n";
 
   (*msg)[am::strings::msg_params][am::strings::tts_chunks].asArray()->push_back(
       tts_chunk);

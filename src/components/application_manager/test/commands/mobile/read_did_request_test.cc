@@ -112,7 +112,7 @@ TEST_F(ReadDIDRequestTest, Run_CommandLimitsExceeded_UNSUCCESS) {
   MockAppPtr app(CreateMockApp());
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
 
-  ON_CALL(*app, IsCommandLimitsExceeded(_, _)).WillByDefault(Return(true));
+  ON_CALL(*app, AreCommandLimitsExceeded(_, _)).WillByDefault(Return(true));
 
   MessageSharedPtr result_msg(CatchMobileCommandResult(CallRun(*command)));
   EXPECT_EQ(mobile_apis::Result::REJECTED,
@@ -127,7 +127,7 @@ TEST_F(ReadDIDRequestTest, Run_EmptyDidLocation_UNSUCCESS) {
 
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
 
-  ON_CALL(*app, IsCommandLimitsExceeded(_, _)).WillByDefault(Return(false));
+  ON_CALL(*app, AreCommandLimitsExceeded(_, _)).WillByDefault(Return(false));
 
   MessageSharedPtr result_msg(CatchMobileCommandResult(CallRun(*command)));
   EXPECT_EQ(mobile_apis::Result::INVALID_DATA,
@@ -144,7 +144,7 @@ TEST_F(ReadDIDRequestTest, Run_SUCCESS) {
 
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
 
-  ON_CALL(*app, IsCommandLimitsExceeded(_, _)).WillByDefault(Return(false));
+  ON_CALL(*app, AreCommandLimitsExceeded(_, _)).WillByDefault(Return(false));
 
   MessageSharedPtr result_msg(CatchHMICommandResult(CallRun(*command)));
   EXPECT_EQ(hmi_apis::FunctionID::VehicleInfo_ReadDID,

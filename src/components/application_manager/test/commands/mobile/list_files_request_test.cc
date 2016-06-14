@@ -83,13 +83,13 @@ TEST_F(ListFilesRequestTest, Run_TooManyHmiNone_UNSUCCESS) {
   ON_CALL(*app, hmi_level())
       .WillByDefault(Return(mobile_apis::HMILevel::HMI_NONE));
 
-  const uint32_t kListFilesInNoneAlowed = 1u;
+  const uint32_t kListFilesInNoneAllowed = 1u;
   const uint32_t kListFilesInNoneCount = 2u;
 
   EXPECT_CALL(app_mngr_, get_settings())
       .WillOnce(ReturnRef(app_mngr_settings_));
   ON_CALL(app_mngr_settings_, list_files_in_none())
-      .WillByDefault(ReturnRef(kListFilesInNoneAlowed));
+      .WillByDefault(ReturnRef(kListFilesInNoneAllowed));
   ON_CALL(*app, list_files_in_none_count())
       .WillByDefault(Return(kListFilesInNoneCount));
 
@@ -112,8 +112,8 @@ TEST_F(ListFilesRequestTest, Run_SUCCESS) {
 
   ON_CALL(*app, GetAvailableDiskSpace()).WillByDefault(Return(0));
 
-  am::AppFilesMap filesMap;
-  ON_CALL(*app, getAppFiles()).WillByDefault(ReturnRef(filesMap));
+  am::AppFilesMap files_map;
+  ON_CALL(*app, getAppFiles()).WillByDefault(ReturnRef(files_map));
 
   MessageSharedPtr result_msg(CatchMobileCommandResult(CallRun(*command)));
   EXPECT_EQ(mobile_apis::Result::SUCCESS,

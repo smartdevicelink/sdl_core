@@ -142,7 +142,7 @@ class MockApplication : public ::application_manager::Application {
   MOCK_CONST_METHOD1(IsSubscribedToIVI, bool(uint32_t vehicle_info_type));
   MOCK_METHOD1(UnsubscribeFromIVI, bool(uint32_t vehicle_info_type));
   MOCK_METHOD0(ResetDataInNone, void());
-  MOCK_METHOD2(IsCommandLimitsExceeded,
+  MOCK_METHOD2(AreCommandLimitsExceeded,
                bool(mobile_apis::FunctionID::eType cmd_id,
                     ::application_manager::TLimitSource source));
   MOCK_METHOD0(usage_report, ::application_manager::UsageStatistics&());
