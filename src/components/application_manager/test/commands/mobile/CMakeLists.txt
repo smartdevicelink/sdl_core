@@ -37,14 +37,14 @@ include_directories(
 )
 
 set (SOURCES
-  ${COMPONENTS_DIR}/application_manager/src/smart_object_keys.cc
-  ${COMPONENTS_DIR}/application_manager/test/mock_message_helper.cc
-  ${AM_TEST_DIR}/commands/mobile/simple_response_commands_test.cc
-  ${AM_TEST_DIR}/commands/mobile/list_files_request_test.cc
-  ${AM_TEST_DIR}/commands/mobile/read_did_request_test.cc
-  ${AM_TEST_DIR}/commands/mobile/alert_maneuver_request_test.cc
-  ${AM_TEST_DIR}/commands/mobile/subscribe_button_request_test.cc
-  ${AM_TEST_DIR}/commands/mobile/alert_request_test.cc
+  ${AM_SOURCE_DIR}/src/smart_object_keys.cc
+  ${AM_SOURCE_DIR}/test/mock_message_helper.cc
+  ${COMMANDS_TEST_SOURCE_DIR}/mobile/simple_response_commands_test.cc
+  ${COMMANDS_TEST_SOURCE_DIR}/mobile/list_files_request_test.cc
+  ${COMMANDS_TEST_SOURCE_DIR}/mobile/read_did_request_test.cc
+  ${COMMANDS_TEST_SOURCE_DIR}/mobile/alert_maneuver_request_test.cc
+  ${COMMANDS_TEST_SOURCE_DIR}/mobile/subscribe_button_request_test.cc
+  ${COMMANDS_TEST_SOURCE_DIR}/mobile/alert_request_test.cc
 )
 
 set(LIBRARIES

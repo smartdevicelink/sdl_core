@@ -34,10 +34,14 @@ include_directories(
   ${COMPONENTS_DIR}/application_manager/test/include/
 )
 
+set(COMMANDS_TEST_SOURCE_DIR
+  ${COMPONENTS_DIR}/application_manager/test/commands
+)
+
 set (SOURCES
-  ${AM_TEST_DIR}/commands/command_impl_test.cc
-  ${AM_TEST_DIR}/commands/command_response_impl_test.cc
-  ${AM_TEST_DIR}/commands/command_request_impl_test.cc
+  ${COMMANDS_TEST_SOURCE_DIR}/command_impl_test.cc
+  ${COMMANDS_TEST_SOURCE_DIR}/command_response_impl_test.cc
+  ${COMMANDS_TEST_SOURCE_DIR}/command_request_impl_test.cc
 )
 
 set(LIBRARIES
