@@ -87,7 +87,7 @@ environment variable
 * Run setup_VS2013_x64.cmd to generate solution for Visual Studio 2013.
 **Note:** In case Visual Studio has been installed to non-default location -- modify path in .cmd file.
 **Note:** Double click on file or run from windows command prompt. DO NOT run in "git bash".
-* After scrip execution finish, go to build directory which is located one directory upper and open smartDeviceLinkCore.sln file using Visual Studio 2013
+* After script execution finish, go to build directory which is located one directory upper and open smartDeviceLinkCore.sln file using Visual Studio 2013
 * Set smartDeviceLinkCore project as a startup in order to be able to run or debug it from Visual Studio
 * Press `ctrl+alt+F7` to run solution building process in Visual Studio
 * After building done the executable file will be located in `%BUILD_DIR%\src\appMain\Debug|Release\`
@@ -159,7 +159,7 @@ If there are problems with drivers then install them next way.
 * From the drivers list there may be one or more drivers with the name "Windows Mobile-Based Device Support" with different driver versions. Select one or the latest.
 * Ignore any warnings and keep pressing next and then Finish at last. If all goes well, the last screen will show the message that device driver is successfully installed.
 
-After all drivers has been installed allow SyncProxy service:
+After all drivers have been installed allow SyncProxy service:
 * On the device try to add bluetooth session in the SPT. It will not succeed. It will just wait.
 * Configure access on the PC:
 "Bluetooth tray icon" -> "Show bluetooth devices" -> "Right click device" -> "Properties" -> "Services" -> check "SyncProxy" -> "Apply"
