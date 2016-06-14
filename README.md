@@ -1,8 +1,12 @@
-Empty line deleted
+
 [![Slack Status](http://sdlslack.herokuapp.com/badge.svg)](http://slack.smartdevicelink.org)
 
 [![Build Status](https://travis-ci.org/smartdevicelink/sdl_core.svg?branch=master)](https://travis-ci.org/smartdevicelink/sdl_core)
 
+<a href="http://172.30.19.153/viewType.html?buildTypeId=WinSdlDevelop_WinX64withUt&guest=1">
+<img src="http://172.30.19.153/app/rest/builds/buildType:WinSdlDevelop_WinX64withUt/statusIcon"/>
+</a>
+http://172.30.19.153/app/rest/builds/buildType:WinSdlDevelop_WinX64withUt/statusIcon
  [![codecov.io](https://codecov.io/github/smartdevicelink/sdl_core/coverage.svg?branch=develop)](https://codecov.io/github/smartdevicelink/sdl_core?branch=develop)
 
 # SmartDeviceLink (SDL)
