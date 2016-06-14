@@ -442,31 +442,6 @@ ssize_t ResumptionDataJson::GetObjectIndex(const std::string& policy_app_id,
   return -1;
 }
 
-bool ResumptionDataJson::IsResumptionDataValid(uint32_t index) const {
-  using namespace app_mngr;
-  using namespace utils::json;
-  SDL_AUTO_TRACE();
-  sync_primitives::AutoLock autolock(resumption_lock_);
-  const JsonValueRef json_app = GetSavedApplications()[index];
-  if (!json_app.HasMember(strings::app_id) ||
-      !json_app.HasMember(strings::ign_off_count) ||
-      !json_app.HasMember(strings::hmi_level) ||
-      !json_app.HasMember(strings::hmi_app_id) ||
-      !json_app.HasMember(strings::time_stamp) ||
-      !json_app.HasMember(strings::device_id)) {
-    SDL_ERROR("Wrong resumption data");
-    return false;
-  }
-
-  if (json_app.HasMember(strings::hmi_app_id) &&
-      0 >= json_app[strings::hmi_app_id].AsUInt()) {
-    SDL_ERROR("Wrong resumption hmi app ID");
-    return false;
-  }
-
-  return true;
-}
-
 void ResumptionDataJson::SetSavedApplication(
     utils::json::JsonValueRef apps_json) {
   SDL_AUTO_TRACE();

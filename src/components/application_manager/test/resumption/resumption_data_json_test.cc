@@ -224,6 +224,10 @@ TEST_F(ResumptionDataJsonTest, UpdateHmiLevel) {
   CheckSavedJson();
 }
 
+TEST_F(ResumptionDataJsonTest, Init) {
+  EXPECT_TRUE(res_json.Init());
+}
+
 TEST_F(ResumptionDataJsonTest, IsHMIApplicationIdExist_AppIsSaved) {
   PrepareData();
   res_json.SaveApplication(app_mock);
@@ -281,6 +285,10 @@ TEST_F(ResumptionDataJsonTest, OnSuspendFourTimes) {
   res_json.OnSuspend();
 
   EXPECT_TRUE(-1 != res_json.IsApplicationSaved(policy_app_id_, kMacAddress_));
+}
+
+TEST_F(ResumptionDataJsonTest, Persist) {
+  res_json.Persist();
 }
 
 TEST_F(ResumptionDataJsonTest, OnSuspendOnAwake) {

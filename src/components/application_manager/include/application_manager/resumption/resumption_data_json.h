@@ -219,13 +219,6 @@ class ResumptionDataJson : public ResumptionData {
    */
   void SetLastIgnOffTime(time_t ign_off_time);
 
-  /*
-   * @brief Return true if application resumption data is valid,
-   * otherwise false
-   * @param index application index in the resumption list
-   */
-  bool IsResumptionDataValid(uint32_t index) const;
-
   LastState& last_state_;
   DISALLOW_COPY_AND_ASSIGN(ResumptionDataJson);
 };
