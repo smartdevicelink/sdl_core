@@ -60,7 +60,7 @@ void AddSubMenuRequest::Run() {
   const int32_t menu_id =
       (*message_)[strings::msg_params][strings::menu_id].asInt();
   if (app->FindSubMenu(menu_id)) {
-    SDL_ERROR("Menu with id " << menu_id << " is not found.");
+    SDL_ERROR("Menu with id " << menu_id << " already exists.");
     SendResponse(false, mobile_apis::Result::INVALID_ID);
     return;
   }
