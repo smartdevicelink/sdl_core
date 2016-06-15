@@ -94,7 +94,7 @@ set(LIBRARIES
   Utils
   jsoncpp
   ConfigProfile
-  Resumption
+  resumption
   UsageStatistics
 )
 

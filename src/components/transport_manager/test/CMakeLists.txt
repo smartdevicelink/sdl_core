@@ -52,7 +52,7 @@ set(LIBRARIES
   Utils
   ConfigProfile
   protocol
-  Resumption
+  resumption
   jsoncpp
 )
 

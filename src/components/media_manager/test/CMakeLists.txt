@@ -59,7 +59,7 @@ set(LIBRARIES
     gmock
     connectionHandler
     encryption
-    Resumption
+    resumption
     Policy
     ${SecurityManagerLibrary}
 )

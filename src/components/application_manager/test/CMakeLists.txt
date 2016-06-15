@@ -132,7 +132,7 @@
       protocol
       ConfigProfile
       MediaManager
-      Resumption
+      resumption
       protocol_handler
       SecurityManager
     )

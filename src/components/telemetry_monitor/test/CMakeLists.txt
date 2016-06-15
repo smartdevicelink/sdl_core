@@ -67,7 +67,7 @@ set(testLibraries
   ConfigProfile
   ApplicationManager
   MessageHelper
-  Resumption
+  resumption
   jsoncpp
   TransportManager
   MediaManager

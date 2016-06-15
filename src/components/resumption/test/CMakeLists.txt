@@ -1,4 +1,4 @@
-# Copyright (c) 2015, Ford Motor Company
+# Copyright (c) 2016, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,30 +28,21 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-if(BUILD_TESTS)
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
 include_directories(
-  ${LOG4CXX_INCLUDE_DIRECTORY}
   ${GMOCK_INCLUDE_DIRECTORY}
-  ${COMPONENTS_DIR}/utils/include
-  ${COMPONENTS_DIR}/resumption/include
-  ${COMPONENTS_DIR}/config_profile/include
   ${JSONCPP_INCLUDE_DIRECTORY}
 )
 
+collect_sources(SOURCES ${CMAKE_CURRENT_SOURCE_DIR})
+
 set(LIBRARIES
-    gmock 
-    ConfigProfile 
-    Utils    
-    Resumption  
-    jsoncpp
-    ConfigProfile
+  gmock
+  ConfigProfile
+  Utils
+  resumption
+  jsoncpp
 )
 
-set(SOURCES
-  ${COMPONENTS_DIR}/resumption/test/last_state_test.cc
-)          
-
-create_test("resumption_test" "${SOURCES}" "${LIBRARIES}")
-
-endif()
+create_test(resumption_test "${SOURCES}" "${LIBRARIES}")
