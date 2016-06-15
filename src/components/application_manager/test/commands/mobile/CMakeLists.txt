@@ -48,7 +48,6 @@ set(LIBRARIES
   HMI_API
   MOBILE_API
   SmartObjects
-  MessageHelper
 )
 
 create_test("mobile_commands_test" "${SOURCES}" "${LIBRARIES}" )
