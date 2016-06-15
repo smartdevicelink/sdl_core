@@ -28,52 +28,44 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
+
 include_directories(
+  ${COMPONENTS_DIR}/policy/test/include/
+  ${COMPONENTS_DIR}/include/test/
   ${GMOCK_INCLUDE_DIRECTORY}
   ${JSONCPP_INCLUDE_DIRECTORY}
-  ${COMPONENTS_DIR}/policy/include
-  ${COMPONENTS_DIR}/rpc_base/include
-  ${COMPONENTS_DIR}/config_profile/include
-  ${COMPONENTS_DIR}/utils/include/
-  ${COMPONENTS_DIR}/policy/policy_table/
-  ${COMPONENTS_DIR}/policy/test/include/
-  ${COMPONENTS_DIR}/policy/include/
-  $ENV{SDL_SQLITE_DIR}
 )
 
-set(testLibraries
+# Temporary exclude some resumption tests from build due to compile errors
+set(EXCLUDE_PATHS
+  usage_statistics_test.cc
+  policy_manager_impl_stress_test.cc
+)
+
+get_os(OS)
+if(NOT ${OS} STREQUAL "posix")
+  list(APPEND EXCLUDE_PATHS shared_library_test.cc)
+endif()
+
+get_sdk(SDK)
+if(SDK)
+  if(${SDK} STREQUAL "qt")
+    list(APPEND EXCLUDE_PATHS sql_pt_representation_test.cc)
+  endif()
+endif()
+
+collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}" "${EXCLUDE_PATHS}")
+
+set(LIBRARIES
   gmock
   dbms
   Utils
-  PolicyTestLib
-  UsageStatistics
+  usage_statistics
+  Policy_static
 )
 
-set(testSources
-  counter_test.cc
-  generated_code_test.cc
-  policy_manager_impl_test.cc
-  update_status_manager_test.cc
-)
-
-if (NOT QT_PORT)
-  list (APPEND testSources
-    sql_pt_representation_test.cc
-  )
-endif()
-
-if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-    list (APPEND testSources
-      shared_library_test.cc
-)
-endif()
-
-if(WIN_NATIVE)
-    link_directories ($ENV{SDL_SQLITE_DIR})
-endif()
-
-create_test("policy_test" "${testSources}" "${testLibraries}")
-add_dependencies("policy_test" PolicyTestLib)
+create_test(policy_test "${SOURCES}" "${LIBRARIES}")
 
 file(COPY valid_sdl_pt_update.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY sdl_preloaded_pt.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

@@ -31,15 +31,11 @@
 set(target dbms)
 set(SQLITE_SRC_DIR ${COMPONENTS_DIR}/utils/src/sqlite_wrapper)
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-  find_package(WinSqlite3 REQUIRED)
-else()
-  find_package(Sqlite3 REQUIRED)
-endif()
+find_package(SDLSqlite3 REQUIRED)
 
 include_directories(
   ${COMPONENTS_DIR}/utils/include/utils
-  ${SQLITE_INCLUDE_DIRECTORY}
+  ${SQLITE3_INCLUDE_DIRECTORY}
 )
 
 set(SOURCES

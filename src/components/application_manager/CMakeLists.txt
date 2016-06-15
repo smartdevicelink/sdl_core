@@ -82,7 +82,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
                   v4_protocol_v1_2_no_extra
                   protocol
                   smart_object
-                  UsageStatistics
+                  usage_statistics
                   formatters
                   dbms)
     if (${HMI_JSON_API})
@@ -384,7 +384,7 @@ SET (LIBRARIES
   v4_protocol_v1_2_no_extra
   protocol
   smart_object
-  UsageStatistics
+  usage_statistics
   dl
   formatters
   dbms

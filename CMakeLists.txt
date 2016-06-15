@@ -718,7 +718,7 @@ add_subdirectory(./src/plugins)
 
 
 ADD_DEPENDENCIES(${PROJECT} Policy)
-ADD_DEPENDENCIES(${PROJECT} copy_library_Policy)
+ADD_DEPENDENCIES(${PROJECT} copy_policy_library)
 
 # Building tests
 if(BUILD_TESTS)

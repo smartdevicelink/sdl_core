@@ -127,7 +127,7 @@
       smart_object
       formatters
       gmock_main
-      UsageStatistics
+      usage_statistics
       dl
       protocol
       config_profile

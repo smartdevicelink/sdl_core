@@ -30,14 +30,7 @@
 
 set(UTILS_TEST_DIR ${COMPONENTS_DIR}/utils/test)
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-  find_package(WinSqlite3 REQUIRED)
-  if (NOT QT_PORT)
-    link_directories ($ENV{SDL_SQLITE_DIR})
-  endif()
-else()
-  find_package(Sqlite3 REQUIRED)
-endif()
+find_package(SDLSqlite3 REQUIRED)
 
 include_directories (
   ${JSONCPP_INCLUDE_DIRECTORY}
@@ -46,7 +39,7 @@ include_directories (
   ${COMPONENTS_DIR}/policy/include
   ${COMPONENTS_DIR}/rpc_base/include
   ${COMPONENTS_DIR}/utils/test/include
-  ${SQLITE_INCLUDE_DIRECTORY}
+  ${SQLITE3_INCLUDE_DIRECTORY}
 )
 
 set(testSources
@@ -112,7 +105,6 @@ elseif(NOT QT_PORT)
     ${UTILS_TEST_DIR}/sqlite_wrapper/sql_query_test.cc
     ${UTILS_TEST_DIR}/generated_code_with_sqlite_test.cc
   )
-  list (APPEND testLibraries sqlite3)
 endif()
 
 file(COPY testscript.sh DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

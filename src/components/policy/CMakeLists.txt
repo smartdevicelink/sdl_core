@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Ford Motor Company
+# Copyright (c) 2016, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,118 +28,100 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-set(target Policy)
-if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-  if(NOT QT_PORT)
-      find_package(WinSqlite3 REQUIRED)
-  endif()
-else()
-  find_package(Sqlite3 REQUIRED)
-endif()
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/platform.cmake)
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
-set(install_destination bin)
-set(copy_destination ${CMAKE_BINARY_DIR}/src/appMain)
-set(library_name ${CMAKE_SHARED_LIBRARY_PREFIX}${target}${CMAKE_SHARED_LIBRARY_SUFFIX})
+find_package(SDLSqlite3 REQUIRED)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
-
-include_directories (
+include_directories(
+  ${COMPONENTS_DIR}/include
   ${COMPONENTS_DIR}/policy/include
   ${COMPONENTS_DIR}/rpc_base/include
-  ${JSONCPP_INCLUDE_DIRECTORY}
   ${COMPONENTS_DIR}/utils/include/
   ${COMPONENTS_DIR}/config_profile/include
-  ${LOG4CXX_INCLUDE_DIRECTORY}
+  ${JSONCPP_INCLUDE_DIRECTORY}
+  ${SQLITE3_INCLUDE_DIRECTORY}
 )
 
-set(SOURCES
-  ${COMPONENTS_DIR}/policy/src/policy_manager_impl.cc
-  ${COMPONENTS_DIR}/policy/src/policy_helper.cc
-  ${COMPONENTS_DIR}/policy/src/policy_table.cc
-  ${COMPONENTS_DIR}/policy/src/sql_pt_queries.cc
-  ${COMPONENTS_DIR}/policy/src/sql_pt_representation.cc
-  ${COMPONENTS_DIR}/policy/src/update_status_manager.cc
-  ${COMPONENTS_DIR}/policy/src/cache_manager.cc
-  ${COMPONENTS_DIR}/rpc_base/src/rpc_base/rpc_base.cc
+set(POLICY_TABLE_PATHS
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/policy/policy_table
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/policy_table
+)
+collect_sources(POLICY_TABLE_SOURCES "${POLICY_TABLE_PATHS}")
+
+set(USAGE_STATISTICS_PATHS
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/policy/usage_statistics
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/usage_statistics
+)
+collect_sources(USAGE_STATISTICS_SOURCES "${USAGE_STATISTICS_PATHS}")
+
+set(EXCLUDE_PATHS
+  ${POLICY_TABLE_PATHS}
+  ${USAGE_STATISTICS_PATHS}
 )
 
-# --- Table struct section
-set(policy_struct_target policy_struct)
-set(POLICY_TABLE_SOURCES
-  ${COMPONENTS_DIR}/policy/src/policy_table/enums.cc
-  ${COMPONENTS_DIR}/policy/src/policy_table/types.cc
-  ${COMPONENTS_DIR}/policy/src/policy_table/validation.cc
+set(PATHS
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/
+)
+collect_sources(SOURCES "${PATHS}" "${EXCLUDE_PATHS}")
+
+set(LIBRARIES
+  config_profile
+  dbms
+  jsoncpp
+  Utils
+  ${SQLITE3_LIBRARIES}
 )
 
-add_library(${policy_struct_target} ${POLICY_TABLE_SOURCES})
-target_link_libraries(${policy_struct_target} Utils)
-# --- end of Table struct section
-
-# --- Usage statistics section
-set(USAGE_STATISTICS_SOURCES
-  ${COMPONENTS_DIR}/policy/src/usage_statistics/counter.cc
-)
-add_library(UsageStatistics ${USAGE_STATISTICS_SOURCES})
-# --- end of Usage statistics section
-
-set(LIBRARIES config_profile policy_struct dbms jsoncpp Utils)
-if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
-  # --- QDB Wrapper 
-  include_directories (${COMPONENTS_DIR}/utils/include/)
-else ()
-  # --- SQLite Wrapper
-  if (NOT QT_PORT)
-    include_directories (${COMPONENTS_DIR}/utils/include/)
-    list(APPEND LIBRARIES sqlite3)
-  endif()
-endif ()
-
-if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-  source_group("Header Files" FILES ${HEADERS} )
-  source_group("Source Files" FILES ${SOURCES} )
-  if(NOT QT_PORT)
-    link_directories(${SQLITE_LIB_DIRECTORY})
-  endif()
+if(LOG4CXX_LOGGER)
+  list(APPEND LIBRARIES log4cxx)
 endif()
 
-add_library(${target} SHARED ${SOURCES})
-target_link_libraries(${target} ${LIBRARIES} )
+add_library(policy_table ${POLICY_TABLE_SOURCES})
+target_link_libraries(policy_table ${LIBRARIES})
 
-if(BUILD_TESTS)
-  set(TestTarget PolicyTestLib)
-  add_library(${TestTarget} STATIC ${SOURCES} ${HEADERS})
-  target_link_libraries(${TestTarget} ${LIBRARIES})
+add_library(usage_statistics ${USAGE_STATISTICS_SOURCES})
+target_link_libraries(usage_statistics ${LIBRARIES})
+
+list(APPEND LIBRARIES
+  policy_table
+  usage_statistics
+)
+
+add_library(Policy SHARED ${SOURCES})
+target_link_libraries(Policy ${LIBRARIES})
+
+set(LIBRARY_NAME ${CMAKE_SHARED_LIBRARY_PREFIX}Policy${CMAKE_SHARED_LIBRARY_SUFFIX})
+
+get_os(OS)
+get_sdk(SDK)
+if(${OS} STREQUAL "win" AND NOT SDK)
+  set(TARGET_LOCATION ${CMAKE_CURRENT_BINARY_DIR}/$(CONFIGURATION)/${LIBRARY_NAME})
+else()
+  set(TARGET_LOCATION ${CMAKE_CURRENT_BINARY_DIR}/${LIBRARY_NAME})
 endif()
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-  if(ENABLE_LOG)
-    target_link_libraries(${target} log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
-  endif()
-endif()
+set(INSTALL_DESTINATION bin)
+set(COPY_DESTINATION ${CMAKE_BINARY_DIR}/src/appMain)
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-add_custom_target(copy_library_${target} ALL
+add_custom_target(copy_policy_library ALL
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    ${CMAKE_CURRENT_BINARY_DIR}/$(Configuration)/${library_name}
-    ${copy_destination}/${library_name}
-    DEPENDS ${target}
-    COMMENT "Copying library ${library_name}")
- else()
-add_custom_target(copy_library_${target} ALL
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    ${CMAKE_CURRENT_BINARY_DIR}/${library_name}
-    ${copy_destination}/${library_name}
-    DEPENDS ${target}
-    COMMENT "Copying library ${library_name}")
-endif()
+    ${TARGET_LOCATION}
+    ${COPY_DESTINATION}/${LIBRARY_NAME}
+    DEPENDS Policy
+    COMMENT "Copying library ${LIBRARY_NAME}"
+)
 
-install(TARGETS ${target}
-  DESTINATION ${install_destination}
+install(TARGETS Policy
+  DESTINATION ${INSTALL_DESTINATION}
   PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
     GROUP_READ GROUP_EXECUTE
     WORLD_READ WORLD_EXECUTE
 )
 
 if(BUILD_TESTS)
+  add_library(Policy_static ${SOURCES})
+  target_link_libraries(Policy_static ${LIBRARIES})
   add_subdirectory(test)
-endif() # BUILD_TESTS
+endif()
