@@ -252,6 +252,8 @@ class ApplicationManagerImpl
   ApplicationSharedPtr get_limited_navi_application() const OVERRIDE;
   ApplicationSharedPtr get_limited_voice_application() const OVERRIDE;
 
+  ApplicationSharedPtr FindAppToRegister(const uint32_t app_id) const OVERRIDE;
+
   uint32_t application_id(const int32_t correlation_id) OVERRIDE;
   void set_application_id(const int32_t correlation_id,
                           const uint32_t app_id) OVERRIDE;
