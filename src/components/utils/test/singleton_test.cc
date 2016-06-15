@@ -32,7 +32,11 @@
 
 #include "gtest/gtest.h"
 #include "utils/singleton.h"
+#if defined(OS_POSIX)
 #include <pthread.h>
+#endif
+#include "utils/threads/thread.h"
+#include "utils/threads/thread_delegate.h"
 
 namespace test {
 namespace components {
@@ -106,38 +110,55 @@ TEST(SingletonTest, DeleteSingletonCreateAnother) {
   SingletonTest::destroy();
 }
 
-void* func_pthread1(void*) {
-  SingletonTest* singleton_in_other_thread = SingletonTest::instance();
-  pthread_exit(singleton_in_other_thread);
-  return NULL;
-}
+class CreateSingletonDelegate : public threads::ThreadDelegate {
+ public:
+  void threadMain() {
+    SingletonTest::instance();
+  }
+  void exitThreadMain() {}
+};
 
-void* func_pthread2(void* value) {
-  SingletonTest* instance = reinterpret_cast<SingletonTest*>(value);
-  instance->destroy();
-  pthread_exit(NULL);
-  return NULL;
-}
+class DestroySingletonDelegate : public threads::ThreadDelegate {
+ public:
+  DestroySingletonDelegate() {}
+  DestroySingletonDelegate(void* value) : value_(value) {}
+  void threadMain() {
+    SingletonTest* instance = reinterpret_cast<SingletonTest*>(value_);
+    instance->destroy();
+  }
+  void exitThreadMain() {}
+
+ private:
+  void* value_;
+};
 
 TEST(SingletonTest, CreateSingletonInDifferentThreads) {
   // arrange
   SingletonTest::instance();
   ASSERT_TRUE(SingletonTest::exists());
 
-  pthread_t thread1;
-  pthread_create(&thread1, NULL, func_pthread1, NULL);
-
-  void* instance2;
-  pthread_join(thread1, &instance2);
-  SingletonTest* instance_2 = reinterpret_cast<SingletonTest*>(instance2);
-
-  // assert
-  ASSERT_EQ(SingletonTest::instance(), instance_2);
+  threads::Thread* thread1 =
+      threads::CreateThread("test thread", new CreateSingletonDelegate());
+  threads::Thread* thread2 =
+      threads::CreateThread("test thread", new CreateSingletonDelegate());
+  thread1->start();
+  thread2->start();
+  thread1->join();
+  thread2->join();
+  threads::DeleteThread(thread1);
+  threads::DeleteThread(thread2);
 
   // act
   SingletonTest::destroy();
   // assert
   ASSERT_FALSE(SingletonTest::exists());
+}
+
+#if defined(OS_POSIX)
+void* func_pthread1(void*) {
+  SingletonTest* singleton_in_other_thread = SingletonTest::instance();
+  pthread_exit(singleton_in_other_thread);
+  return NULL;
 }
 
 TEST(SingletonTest, CreateDeleteSingletonInDifferentThreads) {
@@ -169,19 +190,21 @@ TEST(SingletonTest, CreateDeleteSingletonInDifferentThreads) {
   ASSERT_FALSE(instance_1->exists());
   ASSERT_FALSE(instance_2->exists());
 }
+#endif
 
-TEST(SingletonTest, DeleteSingletonInDifferentThread) {
+TEST(SingletonTest, DISABLED_DeleteSingletonInDifferentThread) {
   // arrange
   SingletonTest::instance();
   ASSERT_TRUE(SingletonTest::exists());
 
-  pthread_t thread1;
-  pthread_create(&thread1, NULL, func_pthread2, SingletonTest::instance());
-
-  pthread_join(thread1, NULL);
+  threads::Thread* thread1 = threads::CreateThread(
+      "test thread", new DestroySingletonDelegate(SingletonTest::instance()));
+  thread1->start();
+  thread1->join();
 
   // assert
   ASSERT_FALSE(SingletonTest::exists());
+  threads::DeleteThread(thread1);
 }
 
 }  // namespace utils_test

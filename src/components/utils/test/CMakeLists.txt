@@ -60,10 +60,6 @@ get_os(OS)
 if(NOT ${OS} STREQUAL "posix")
   list(APPEND EXCLUDE_PATHS
     system_test.cc
-    conditional_variable_test.cc
-    message_queue_test.cc
-    singleton_test.cc
-    rwlock_posix_test.cc
     resource_usage_test.cc
   )
 endif()
