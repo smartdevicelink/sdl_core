@@ -48,12 +48,12 @@
 #include "utils/file_system.h"
 #include "application_manager/application_manager_settings.h"
 
-namespace {
-const std::string kDatabaseName = "resumption";
-}
-
 namespace resumption {
 CREATE_LOGGERPTR_GLOBAL(logger_, "Resumption")
+
+namespace {
+const char* kDatabaseName = "resumption";
+}  // namespace
 
 ResumptionDataDB::ResumptionDataDB(
     DbStorage db_storage,

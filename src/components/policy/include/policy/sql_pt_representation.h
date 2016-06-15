@@ -193,7 +193,6 @@ class SQLPTRepresentation : public virtual PTRepresentation {
   virtual bool UpdateDBVersion() const OVERRIDE;
 
  private:
-  static const std::string kDatabaseName;
   utils::dbms::SQLDatabase* db_;
 
 #ifdef BUILD_TESTS
