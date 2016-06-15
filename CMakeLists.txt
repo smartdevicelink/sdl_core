@@ -179,7 +179,7 @@ set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR})
 set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
 
 if(MSVC)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /GF /GR /EHsc /W3 /D_CONSOLE")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /GF /GR /EHsc /W3 /D_CONSOLE /bigobj")
   # /WD4996 - disable warning C4996.
   # 'inet_ntoa': Use inet_ntop() or InetNtop() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS
   # to disable deprecated API warnings
