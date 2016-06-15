@@ -28,42 +28,25 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-if (BUILD_TESTS)
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
-include_directories (
+include_directories(
   ${COMPONENTS_DIR}/resumption/include
-  ${GMOCK_INCLUDE_DIRECTORY}
   ${COMPONENTS_DIR}/protocol_handler/include
   ${COMPONENTS_DIR}/protocol_handler/test/include
   ${JSONCPP_INCLUDE_DIRECTORY}
+  ${GMOCK_INCLUDE_DIRECTORY}
 )
 
-set (LIBRARIES
+collect_sources(SOURCES ${CMAKE_CURRENT_SOURCE_DIR})
+
+set(LIBRARIES
   gmock
-  ProtocolHandler
+  protocol
+  protocol_handler
   connectionHandler
   Utils
   ConfigProfile
-  ProtocolLibrary
 )
 
-set (SOURCES
-  incoming_data_handler_test.cc
-  protocol_header_validator_test.cc
-  protocol_handler_tm_test.cc
-  protocol_packet_test.cc
-  protocol_payload_test.cc
-  multiframe_builder_test.cc
-)
-
-if(QT_PORT)
-  link_directories (${CMAKE_SOURCE_DIR}/build/openssl_win_x86/lib)
-endif()
-
-if(NOT QT_PORT AND ${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-  link_directories(${CMAKE_SOURCE_DIR}/build/openssl_win_x64/lib/)
-endif()
-
-create_test ("protocol_handler_test" "${SOURCES}" "${LIBRARIES}")
-
-endif ()
+create_test(protocol_handler_test "${SOURCES}" "${LIBRARIES}")

@@ -55,10 +55,10 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     string( REPLACE / \\ group ${inc} )
     source_group("Header Files" FILES ${inc} )
     add_library("SecurityManager" ${inc} ${SOURCES})
-    target_link_libraries(SecurityManager libeay32 ssleay32 ProtocolHandler jsoncpp ProtocolLibrary)
+    target_link_libraries(SecurityManager libeay32 ssleay32 protocol_handler jsoncpp protocol)
 else()
   add_library(SecurityManager ${SOURCES})
-  target_link_libraries(SecurityManager crypto ssl ProtocolHandler jsoncpp ProtocolLibrary)
+  target_link_libraries(SecurityManager crypto ssl protocol_handler jsoncpp protocol)
 endif()
 
 

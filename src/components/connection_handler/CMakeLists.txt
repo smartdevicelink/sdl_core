@@ -53,7 +53,7 @@ set (SOURCES
 
 set(LIBRARIES
     ConfigProfile
-    ProtocolLibrary
+    protocol
 )
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
    set(HEADERS ${COMPONENTS_DIR}/include/connection_handler/connection_handler.h

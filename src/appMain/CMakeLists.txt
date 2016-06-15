@@ -83,8 +83,8 @@ set(LIBRARIES
   smart_object
   ${TELEMETRY_MONITOR_LIB}
   formatters
-  ProtocolLibrary
-  ProtocolHandler
+  protocol
+  protocol_handler
   connectionHandler
   TransportManager
   ${SecurityManagerLibrary}

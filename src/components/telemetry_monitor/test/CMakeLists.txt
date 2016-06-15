@@ -60,10 +60,10 @@ set(testLibraries
   jsoncpp
   Utils
   MediaManager
-  ProtocolHandler
+  protocol_handler
   v4_protocol_v1_2_no_extra
   smart_object
-  ProtocolLibrary
+  protocol
   ConfigProfile
   ApplicationManager
   MessageHelper
@@ -71,7 +71,6 @@ set(testLibraries
   jsoncpp
   TransportManager
   MediaManager
-  ProtocolHandler
   connectionHandler
 )
 

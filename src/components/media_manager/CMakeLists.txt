@@ -92,7 +92,7 @@ set(VIDEO_SOURCES
 )
 
 set(LIBRARIES
-    ProtocolLibrary
+    protocol
     ApplicationManager
 )
 

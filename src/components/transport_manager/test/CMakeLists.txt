@@ -51,7 +51,7 @@ set(LIBRARIES
   TransportManager
   Utils
   ConfigProfile
-  ProtocolLibrary
+  protocol
   Resumption
   jsoncpp
 )

@@ -43,7 +43,7 @@ set(LIBRARIES
     Utils
     MediaManager
     connectionHandler
-    ProtocolHandler
+    protocol_handler
 )
 
 set(SOURCES

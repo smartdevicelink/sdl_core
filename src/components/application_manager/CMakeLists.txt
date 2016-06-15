@@ -82,7 +82,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
                   Utils
                   MOBILE_API
                   v4_protocol_v1_2_no_extra
-                  ProtocolLibrary
+                  protocol
                   smart_object
                   UsageStatistics
                   formatters
@@ -384,7 +384,7 @@ SET (LIBRARIES
   HMI_API
   MOBILE_API
   v4_protocol_v1_2_no_extra
-  ProtocolLibrary
+  protocol
   smart_object
   UsageStatistics
   dl

@@ -129,11 +129,11 @@
       gmock_main
       UsageStatistics
       dl
-      ProtocolLibrary
+      protocol
       ConfigProfile
       MediaManager
       Resumption
-      ProtocolHandler
+      protocol_handler
       SecurityManager
     )
 

@@ -53,9 +53,9 @@ set(SOURCES
 set(LIBRARIES
     smart_object
     MediaManager
-    ProtocolLibrary
+    protocol
     ApplicationManager
-    ProtocolHandler
+    protocol_handler
     gmock
     connectionHandler
     encryption
