@@ -38,7 +38,7 @@ include_directories (
 
 set(LIBRARIES    
     gmock
-    ApplicationManager
+    application_manager
     HMIMessageHandler
     jsoncpp
     MessageBrokerClient

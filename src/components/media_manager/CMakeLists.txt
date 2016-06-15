@@ -93,7 +93,7 @@ set(VIDEO_SOURCES
 
 set(LIBRARIES
     protocol
-    ApplicationManager
+    application_manager
 )
 
 if(LOG4CXX_LOGGER)

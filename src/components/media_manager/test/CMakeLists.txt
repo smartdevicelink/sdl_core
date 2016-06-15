@@ -54,7 +54,7 @@ set(LIBRARIES
     smart_object
     MediaManager
     protocol
-    ApplicationManager
+    application_manager
     protocol_handler
     gmock
     connection_handler

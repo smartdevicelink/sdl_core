@@ -45,7 +45,7 @@
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 #include "application_manager/smart_object_keys.h"
-#include "event_engine/event.h"
+#include "application_manager/event_engine/event.h"
 
 namespace test {
 namespace components {

@@ -48,6 +48,10 @@
 #include "application_manager/mock_event_dispatcher.h"
 #include "application_manager/mock_state_controller.h"
 
+#if defined(_MSC_VER)
+#define snprintf _snprintf_s
+#endif
+
 namespace test {
 namespace components {
 namespace resumption_test {
@@ -186,7 +190,7 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithFiles) {
   char numb[max_size];
   for (uint32_t i = 0; i < count_of_files; i++) {
     file_types[i] = i;
-    std::snprintf(numb, max_size, "%d", i);
+    snprintf(numb, max_size, "%d", i);
     file_names[i] = "test_file" + std::string(numb);
   }
 
@@ -317,7 +321,7 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithChoiceSet) {
   const size_t max_size = 12;
   char numb[max_size];
   for (uint32_t i = 0; i < count_of_choice; ++i) {
-    std::snprintf(numb, max_size, "%d", i);
+    snprintf(numb, max_size, "%d", i);
     choice[application_manager::strings::vr_commands] =
         "VrCommand" + std::string(numb);
     choice[application_manager::strings::choice_id] = i;
@@ -434,7 +438,7 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithSubscriptionToIVI) {
   smart_objects::SmartObject app_vi;
 
   int vtype = application_manager::VehicleDataType::GPS;
-  uint i = 0;
+  uint32_t i = 0;
   for (; vtype < application_manager::VehicleDataType::STEERINGWHEEL;
        ++i, ++vtype) {
     app_vi[i] = vtype;

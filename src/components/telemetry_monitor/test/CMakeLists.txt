@@ -65,7 +65,7 @@ set(testLibraries
   smart_object
   protocol
   config_profile
-  ApplicationManager
+  application_manager
   MessageHelper
   resumption
   jsoncpp
