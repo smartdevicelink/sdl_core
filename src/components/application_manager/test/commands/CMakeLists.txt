@@ -35,7 +35,6 @@ include_directories(
 )
 
 set (SOURCES
-  ${COMPONENTS_DIR}/application_manager/src/message_helper.cc
   ${AM_TEST_DIR}/commands/command_impl_test.cc
   ${AM_TEST_DIR}/commands/command_response_impl_test.cc
   ${AM_TEST_DIR}/commands/command_request_impl_test.cc
@@ -50,7 +49,6 @@ set(LIBRARIES
   MOBILE_API
   SmartObjects
   jsoncpp
-  MessageHelper
 )
 
 create_test("commands_test" "${SOURCES}" "${LIBRARIES}" )

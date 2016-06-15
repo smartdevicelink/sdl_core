@@ -62,6 +62,12 @@ using ::test::components::application_manager_test::MockApplication;
 
 typedef SharedPtr<MockApplication> MockAppPtr;
 
+namespace {
+static const uint32_t kDefaultMsgCount_ = 5u;
+static const uint32_t kAppId1_ = 5u;
+static const uint32_t kAppId2_ = 10u;
+}  // namespace
+
 class CommandImplTest : public CommandsTest<CommandsTestMocks::kIsNice> {
  public:
   class UnwrappedCommandImpl : CommandImpl {
@@ -101,10 +107,6 @@ class CommandImplTest : public CommandsTest<CommandsTestMocks::kIsNice> {
     }
     return msg;
   }
-
-  static const uint32_t kDefaultMsgCount_ = 5u;
-  const uint32_t kAppId1_ = 5u;
-  const uint32_t kAppId2_ = 10u;
 };
 
 typedef CommandImplTest::UnwrappedCommandImpl UCommandImpl;
