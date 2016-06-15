@@ -68,7 +68,7 @@ environment variable
 ##### Steps for Qt platform
 * Install [Visual Studio 2010](http://go.microsoft.com/?linkid=9709969)
 * Then install [Visual Studio SP1](https://www.microsoft.com/en-us/download/confirmation.aspx?id=23691)
-* Install [Qt framework](http://download.qt.io/official_releases/online_installers/qt-unified-windows-x86-online.exe).
+* Install [Qt framework](http://download.qt.io/archive/qt/5.5/5.5.1/qt-opensource-windows-x86-msvc2010-5.5.1.exe).
 **Note:** It looks like starting from Qt5.6 there is no more msvc2010 32-bit support, so check whether such option is present. If no - use Qt5.5.
  Create new environment variable called `SDL_QT_DIR` and assign your qt install dir to this variable. I.e `set SDL_QT_DIR=C:\Qt`
 
