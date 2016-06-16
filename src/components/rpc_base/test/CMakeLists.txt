@@ -1,4 +1,4 @@
-# Copyright (c) 2015, Ford Motor Company
+# Copyright (c) 2016, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,33 +28,27 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-include_directories (
-  ${COMPONENTS_DIR}/dbus/include
-  ${COMPONENTS_DIR}/rpc_base/include
-  ${COMPONENTS_DIR}/formatters/test/include
-  ${DBUS_INCLUDE_DIRS}
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
+
+include_directories(
   ${GMOCK_INCLUDE_DIRECTORY}
-  ${JSONCPP_INCLUDE_DIRECTORY}
 )
 
 set(LIBRARIES
-  jsoncpp
   rpc_base
   gmock
 )
 
-set(SOURCES
-  ${COMPONENTS_DIR}/rpc_base/test/rpc_base_json_test.cc
-  ${COMPONENTS_DIR}/rpc_base/test/rpc_base_test.cc
-  ${COMPONENTS_DIR}/rpc_base/test/validation_report_test.cc
-  ${COMPONENTS_DIR}/formatters/test/src/FormattersJsonHelper.cc
-)
-
-if (${HMI_DBUS_API})
-  # Build dbus tests
+if(HMI_DBUS_API)
   include_directories(${DBUS_INCLUDE_DIRS})
-  set (LIBRARIES ${LIBRARIES} DBus)
-  set (SOURCES ${SOURCES} ${COMPONENTS_DIR}/rpc_base/test/rpc_base_dbus_test.cc)
-endif ()
+  list(APPEND LIBRARIES
+    DBus
+  )
+else()
+  set(EXCLUDE_PATHS
+    rpc_base_dbus_test.cc
+  )
+endif()
 
-create_test("rpc_base_test" "${SOURCES}" "${LIBRARIES}")
+collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}" "${EXCLUDE_PATHS}")
+create_test(rpc_base_test "${SOURCES}" "${LIBRARIES}")
