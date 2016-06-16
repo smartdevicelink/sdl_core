@@ -29,8 +29,8 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef SRC_COMPONENTS_CONNECTION_HANDLER_INCLUDE_HEARTBEAT_MONITOR_H_
-#define SRC_COMPONENTS_CONNECTION_HANDLER_INCLUDE_HEARTBEAT_MONITOR_H_
+#ifndef SRC_COMPONENTS_CONNECTION_HANDLER_INCLUDE_CONNECTION_HANDLER_HEARTBEAT_MONITOR_H_
+#define SRC_COMPONENTS_CONNECTION_HANDLER_INCLUDE_CONNECTION_HANDLER_HEARTBEAT_MONITOR_H_
 
 #include <stdint.h>
 #include <map>
@@ -48,10 +48,9 @@ class Connection;
 /*
  * Starts hearbeat timer for session and when it elapses closes it
  */
-class HeartBeatMonitor: public threads::ThreadDelegate {
+class HeartBeatMonitor : public threads::ThreadDelegate {
  public:
-  HeartBeatMonitor(int32_t heartbeat_timeout_seconds,
-                   Connection *connection);
+  HeartBeatMonitor(uint32_t heartbeat_timeout_mseconds, Connection* connection);
 
   /**
    * Thread procedure.
@@ -73,34 +72,38 @@ class HeartBeatMonitor: public threads::ThreadDelegate {
    * \brief Thread exit procedure.
    */
   virtual void exitThreadMain();
-
-  void set_heartbeat_timeout_seconds(int32_t timeout, uint8_t session_id);
+  /**
+   * @brief Update heart beat timeout for session
+   * @param timeout contains timeout for updating
+   * @param session_id contain id session for which update timeout
+   * timeout
+   **/
+  void set_heartbeat_timeout_milliseconds(uint32_t timeout, uint8_t session_id);
 
  private:
-
-  // \brief Heartbeat timeout, should be read from profile
-  int32_t default_heartbeat_timeout_;
+  // \brief Heartbeat timeout
+  uint32_t default_heartbeat_timeout_;
   // \brief Connection that must be closed when timeout elapsed
-  Connection *connection_;
+  Connection* connection_;
 
-  //Default HeartBeat cycle timeout (in miliseconds)
+  // Default HeartBeat cycle timeout (in miliseconds)
   static const int32_t kDefaultCycleTimeout = 100;
 
   class SessionState {
-    public:
-      explicit SessionState(int32_t heartbeat_timeout_seconds = 0);
-      void UpdateTimeout(int32_t heartbeat_timeout_seconds);
-      void PrepareToClose();
-      bool IsReadyToClose() const;
-      void KeepAlive();
-      bool HasTimeoutElapsed();
-    private:
-      void RefreshExpiration();
+   public:
+    explicit SessionState(uint32_t heartbeat_timeout_mseconds = 0);
+    void UpdateTimeout(uint32_t heartbeat_timeout_mseconds);
+    void PrepareToClose();
+    bool IsReadyToClose() const;
+    void KeepAlive();
+    bool HasTimeoutElapsed();
 
-      int32_t heartbeat_timeout_seconds_;
-      TimevalStruct heartbeat_expiration;
-      bool is_heartbeat_sent;
+   private:
+    void RefreshExpiration();
 
+    uint32_t heartbeat_timeout_mseconds_;
+    TimevalStruct heartbeat_expiration_;
+    bool is_heartbeat_sent_;
   };
 
   // \brief monitored sessions collection
@@ -108,7 +111,7 @@ class HeartBeatMonitor: public threads::ThreadDelegate {
   typedef std::map<uint8_t, SessionState> SessionMap;
   SessionMap sessions_;
 
-  sync_primitives::Lock sessions_list_lock_; // recurcive
+  sync_primitives::Lock sessions_list_lock_;  // recurcive
   sync_primitives::Lock main_thread_lock_;
   mutable sync_primitives::Lock heartbeat_timeout_seconds_lock_;
   sync_primitives::ConditionalVariable heartbeat_monitor_;
@@ -120,6 +123,6 @@ class HeartBeatMonitor: public threads::ThreadDelegate {
   DISALLOW_COPY_AND_ASSIGN(HeartBeatMonitor);
 };
 
-} // namespace connection_handler
+}  // namespace connection_handler
 
-#endif  // SRC_COMPONENTS_CONNECTION_HANDLER_INCLUDE_HEARTBEAT_MONITOR_H_
+#endif  // SRC_COMPONENTS_CONNECTION_HANDLER_INCLUDE_CONNECTION_HANDLER_HEARTBEAT_MONITOR_H_

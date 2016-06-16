@@ -30,24 +30,21 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <unistd.h>
-
 #include "gtest/gtest.h"
 
 #include "utils/threads/thread_validator.h"
 
 namespace test {
 namespace components {
-namespace utils {
+namespace utils_test {
 
 using namespace ::threads;
 
 TEST(ThreadValidatorTest, CompareID_CurrentThreadAndPthread_AreEqual) {
   SingleThreadSimpleValidator object;
-  ASSERT_EQ(object.creation_thread_id(), pthread_self());
-
+  ASSERT_EQ(object.creation_thread_id(), Thread::CurrentId());
 }
 
-} // namespace utils
-} // namespace components
-} // namespace test
+}  // namespace utils_test
+}  // namespace components
+}  // namespace test

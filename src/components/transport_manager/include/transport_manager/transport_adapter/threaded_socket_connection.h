@@ -35,13 +35,14 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_THREADED_SOCKET_CONNECTION_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_THREADED_SOCKET_CONNECTION_H_
 
-#include <poll.h>
 #include <queue>
 
 #include "transport_manager/transport_adapter/connection.h"
 #include "protocol/common.h"
 #include "utils/threads/thread_delegate.h"
 #include "utils/lock.h"
+#include "utils/socket.h"
+#include "utils/atomic_object.h"
 
 using ::transport_manager::transport_adapter::Connection;
 
@@ -55,7 +56,8 @@ class TransportAdapterController;
 /**
  * @brief Class responsible for communication over sockets.
  */
-class ThreadedSocketConnection : public Connection {
+class ThreadedSocketConnection : public Connection,
+                                 public utils::TcpConnectionEventHandler {
  public:
   /**
    * @brief Send data frame.
@@ -81,18 +83,21 @@ class ThreadedSocketConnection : public Connection {
   TransportAdapter::Error Start();
 
   /**
-   * @brief Checks is queue with frames to send empty or not.
-   *
-   * @return Information about queue is empty or not.
+   * @brief Set variable that hold socket No. Takes the ownership.
    */
-  bool IsFramesToSendQueueEmpty() const;
+  void SetSocket(utils::TcpSocketConnection& socket_connection);
 
-  /**
-   * @brief Set variable that hold socket No.
-   */
-  void set_socket(int socket) {
-    socket_ = socket;
-  }
+  // Implementation of the TcpConnectionEventHandler
+
+  void OnError(int error) OVERRIDE;
+
+  void OnData(const uint8_t* const buffer, std::size_t buffer_size) OVERRIDE;
+
+  void OnCanWrite() OVERRIDE;
+
+  void OnClose() OVERRIDE;
+
+  // End of implementation
 
  protected:
   /**
@@ -140,18 +145,17 @@ class ThreadedSocketConnection : public Connection {
     explicit SocketConnectionDelegate(ThreadedSocketConnection* connection);
     void threadMain() OVERRIDE;
     void exitThreadMain() OVERRIDE;
+
    private:
     ThreadedSocketConnection* connection_;
   };
 
-  int read_fd_;
-  int write_fd_;
   void threadMain();
   void Transmit();
   void Finalize();
-  TransportAdapter::Error Notify() const;
+  TransportAdapter::Error Notify();
   bool Receive();
-  bool Send();
+  void Send();
   void Abort();
 
   TransportAdapterController* controller_;
@@ -162,9 +166,11 @@ class ThreadedSocketConnection : public Connection {
   FrameQueue frames_to_send_;
   mutable sync_primitives::Lock frames_to_send_mutex_;
 
-  int socket_;
-  bool terminate_flag_;
-  bool unexpected_disconnect_;
+  utils::TcpSocketConnection socket_connection_;
+
+  sync_primitives::atomic_bool terminate_flag_;
+  sync_primitives::atomic_bool unexpected_disconnect_;
+
   const DeviceUID device_uid_;
   const ApplicationHandle app_handle_;
   threads::Thread* thread_;

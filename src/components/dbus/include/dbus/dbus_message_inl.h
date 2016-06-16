@@ -29,8 +29,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef DBUS_MESSAGE_INL_H
-#define DBUS_MESSAGE_INL_H
+#ifndef SRC_COMPONENTS_DBUS_INCLUDE_DBUS_DBUS_MESSAGE_INL_H_
+#define SRC_COMPONENTS_DBUS_INCLUDE_DBUS_DBUS_MESSAGE_INL_H_
 
 #include "dbus/dbus_message.h"
 
@@ -161,13 +161,10 @@ inline std::string MessageReader::TakeString() {
   return value;
 }
 
-
 inline MessageReader::DataType MessageReader::NextValueType() const {
   DBusMessageIter* iter = const_cast<DBusMessageIter*>(&iterator_);
   return failed_ ? DBUS_TYPE_INVALID : dbus_message_iter_get_arg_type(iter);
 }
-
-
 
 // Message writer methods
 inline void MessageWriter::PutBool(bool value) {
@@ -212,7 +209,6 @@ inline void MessageWriter::PutString(const std::string& value) {
   WriteAndCheck(DBUS_TYPE_STRING, &pointer);
 }
 
-
 }  // namespace dbus
 
-#endif // DBUS_MESSAGE_INL_H
+#endif  // SRC_COMPONENTS_DBUS_INCLUDE_DBUS_DBUS_MESSAGE_INL_H_

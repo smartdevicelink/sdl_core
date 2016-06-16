@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_DEVICE_LIST_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_DEVICE_LIST_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UPDATE_DEVICE_LIST_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UPDATE_DEVICE_LIST_REQUEST_H_
 
 #include "application_manager/commands/hmi/request_to_hmi.h"
 #include "application_manager/event_engine/event_observer.h"
@@ -53,7 +53,8 @@ class UpdateDeviceListRequest : public RequestToHMI,
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UpdateDeviceListRequest(const MessageSharedPtr& message);
+  UpdateDeviceListRequest(const MessageSharedPtr& message,
+                          ApplicationManager& application_manager);
 
   /**
    * @brief UpdateDeviceListRequest class destructor
@@ -73,14 +74,14 @@ class UpdateDeviceListRequest : public RequestToHMI,
    */
   virtual void on_event(const event_engine::Event& event);
 
- /**
-  * @brief Need to stop execution StopMethod if HMI did not started
-  */
+  /**
+   * @brief Need to stop execution StopMethod if HMI did not started
+   */
   virtual bool CleanUp();
 
  private:
-  sync_primitives::Lock                            wait_hmi_lock;
-  sync_primitives::ConditionalVariable             termination_condition_;
+  sync_primitives::Lock wait_hmi_lock;
+  sync_primitives::ConditionalVariable termination_condition_;
 
   DISALLOW_COPY_AND_ASSIGN(UpdateDeviceListRequest);
 };
@@ -89,4 +90,4 @@ class UpdateDeviceListRequest : public RequestToHMI,
 
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_DEVICE_LIST_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UPDATE_DEVICE_LIST_REQUEST_H_

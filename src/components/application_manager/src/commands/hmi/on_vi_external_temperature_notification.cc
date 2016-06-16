@@ -38,15 +38,13 @@ namespace application_manager {
 namespace commands {
 
 OnVIExternalTemperatureNotification::OnVIExternalTemperatureNotification(
-    const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : NotificationFromHMI(message, application_manager) {}
 
-OnVIExternalTemperatureNotification::~OnVIExternalTemperatureNotification() {
-}
+OnVIExternalTemperatureNotification::~OnVIExternalTemperatureNotification() {}
 
 void OnVIExternalTemperatureNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   // prepare SmartObject for mobile factory
   (*message_)[strings::params][strings::function_id] =
@@ -58,4 +56,3 @@ void OnVIExternalTemperatureNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

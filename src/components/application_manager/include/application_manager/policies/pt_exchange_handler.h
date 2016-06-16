@@ -30,18 +30,18 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_POLICY_INCLUDE_POLICY_PT_EXCHANGE_HANDLER_H_
-#define SRC_COMPONENTS_POLICY_INCLUDE_POLICY_PT_EXCHANGE_HANDLER_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_POLICIES_PT_EXCHANGE_HANDLER_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_POLICIES_PT_EXCHANGE_HANDLER_H_
 
 #include "policy/policy_manager.h"
 
 namespace policy {
 class PTExchangeHandler {
-  public:
-    virtual ~PTExchangeHandler() {};
-    virtual void Start() = 0;
-    virtual void Stop() = 0;
+ public:
+  virtual ~PTExchangeHandler(){};
+  virtual void Start() = 0;
+  virtual void Stop() = 0;
 };
 }  //  namespace policy
 
-#endif  //  SRC_COMPONENTS_POLICY_INCLUDE_POLICY_PT_EXCHANGE_HANDLER_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_POLICIES_PT_EXCHANGE_HANDLER_H_

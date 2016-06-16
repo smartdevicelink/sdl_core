@@ -1223,7 +1223,7 @@ class CodeGenerator(object):
 
     _hpp_schema_file_tempalte = string.Template(
         u'''/**\n'''
-        u''' * @file ${class_name}.hpp\n'''
+        u''' * @file ${class_name}.h\n'''
         u''' * @brief Generated class ${class_name} header file.\n'''
         u''' *\n'''
         u''' * This class is a part of SmartObjects solution. It provides\n'''
@@ -1280,7 +1280,7 @@ class CodeGenerator(object):
         u'''#ifndef $guard\n'''
         u'''#define $guard\n'''
         u'''\n'''
-        u'''#include "formatters/CSmartFactory.hpp"\n'''
+        u'''#include "formatters/CSmartFactory.h"\n'''
         u'''#include "smart_objects/smart_schema.h"\n'''
         u'''#include "smart_objects/schema_item.h"\n'''
         u'''#include "utils/shared_ptr.h"\n'''

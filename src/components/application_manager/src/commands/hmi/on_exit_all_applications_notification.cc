@@ -33,36 +33,37 @@
 #include "application_manager/commands/hmi/on_exit_all_applications_notification.h"
 
 #include <sys/types.h>
-#include <unistd.h>
 #include <signal.h>
 
-#include "application_manager/application_manager_impl.h"
-#include "interfaces/HMI_API.h"
+#if defined(OS_POSIX)
+#include <unistd.h>
+#endif
 
+#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_manager.h"
+#include "application_manager/resumption/resume_ctrl.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
 namespace commands {
 
 OnExitAllApplicationsNotification::OnExitAllApplicationsNotification(
-    const MessageSharedPtr& message) : NotificationFromHMI(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : NotificationFromHMI(message, application_manager) {}
 
-OnExitAllApplicationsNotification::~OnExitAllApplicationsNotification() {
-}
+OnExitAllApplicationsNotification::~OnExitAllApplicationsNotification() {}
 
 void OnExitAllApplicationsNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   const hmi_apis::Common_ApplicationsCloseReason::eType reason =
       static_cast<hmi_apis::Common_ApplicationsCloseReason::eType>(
           (*message_)[strings::msg_params][hmi_request::reason].asInt());
-  LOG4CXX_DEBUG(logger_, "Reason " << reason);
+  LOGGER_DEBUG(logger_, "Reason " << reason);
 
   mobile_api::AppInterfaceUnregisteredReason::eType mob_reason =
       mobile_api::AppInterfaceUnregisteredReason::INVALID_ENUM;
-
-  ApplicationManagerImpl* app_manager = ApplicationManagerImpl::instance();
 
   switch (reason) {
     case hmi_apis::Common_ApplicationsCloseReason::IGNITION_OFF: {
@@ -81,36 +82,41 @@ void OnExitAllApplicationsNotification::Run() {
       SendOnSDLPersistenceComplete();
       return;
     }
-    default : {
-      LOG4CXX_ERROR(logger_, "Unknown Application close reason" << reason);
+    default: {
+      LOGGER_ERROR(logger_, "Unknown Application close reason" << reason);
       return;
     }
   }
 
-  app_manager->SetUnregisterAllApplicationsReason(mob_reason);
+  application_manager_.SetUnregisterAllApplicationsReason(mob_reason);
 
   if (mobile_api::AppInterfaceUnregisteredReason::MASTER_RESET == mob_reason ||
-      mobile_api::AppInterfaceUnregisteredReason::FACTORY_DEFAULTS == mob_reason) {
-    app_manager->HeadUnitReset(mob_reason);
+      mobile_api::AppInterfaceUnregisteredReason::FACTORY_DEFAULTS ==
+          mob_reason) {
+    application_manager_.HeadUnitReset(mob_reason);
   }
+#if defined(OS_POSIX)
   kill(getpid(), SIGINT);
+#elif defined(OS_WINDOWS)
+  raise(SIGINT);
+#endif
 }
 
 void OnExitAllApplicationsNotification::SendOnSDLPersistenceComplete() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   smart_objects::SmartObjectSPtr message =
       new smart_objects::SmartObject(smart_objects::SmartType_Map);
   (*message)[strings::params][strings::function_id] =
       hmi_apis::FunctionID::BasicCommunication_OnSDLPersistenceComplete;
-  (*message)[strings::params][strings::message_type] = MessageType::kNotification;
+  (*message)[strings::params][strings::message_type] =
+      MessageType::kNotification;
   (*message)[strings::params][strings::correlation_id] =
-      ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
+      application_manager_.GetNextHMICorrelationID();
 
-   ApplicationManagerImpl::instance()->ManageHMICommand(message);
+  application_manager_.ManageHMICommand(message);
 }
 
 }  // namespace commands
 
 }  // namespace application_manager
-

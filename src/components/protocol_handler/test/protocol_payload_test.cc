@@ -49,7 +49,8 @@ void prepare_data(uint8_t* data_for_sending, ProtocolPayloadV2& message) {
   uint8_t offset = 0;
 
   uint32_t function_id = message.header.rpc_function_id;
-  data_for_sending[offset++] = ((rpc_type_flag << 4) & 0xF0) | (function_id >> 24);
+  data_for_sending[offset++] =
+      ((rpc_type_flag << 4) & 0xF0) | (function_id >> 24);
   data_for_sending[offset++] = function_id >> 16;
   data_for_sending[offset++] = function_id >> 8;
   data_for_sending[offset++] = function_id;
@@ -67,13 +68,14 @@ void prepare_data(uint8_t* data_for_sending, ProtocolPayloadV2& message) {
   data_for_sending[offset++] = jsonSize;
 
   if (message.json.length() != 0) {
-    memcpy(data_for_sending + offset, message.json.c_str(),
-           message.json.size());
+    memcpy(
+        data_for_sending + offset, message.json.c_str(), message.json.size());
   }
 
   if (message.data.size() != 0) {
-    uint8_t* current_pointer = data_for_sending + offset + message.json.length();
-    u_int32_t binarySize = message.data.size();
+    uint8_t* current_pointer =
+        data_for_sending + offset + message.json.length();
+    size_t binarySize = message.data.size();
     for (uint32_t i = 0; i < binarySize; ++i) {
       current_pointer[i] = message.data[i];
     }
@@ -116,8 +118,9 @@ TEST(ProtocolPayloadTest, ExtractCorrectProtocolWithDataWithoutJSON) {
   prot_payload_test.header.rpc_function_id = 2;
   prot_payload_test.header.json_size = 0;
   prot_payload_test.header.rpc_type = kRpcTypeNotification;
-  prot_payload_test.data = {1, 2, 3};
-
+  prot_payload_test.data.push_back(1);
+  prot_payload_test.data.push_back(2);
+  prot_payload_test.data.push_back(3);
   const size_t data_for_sending_size = PROTOCOL_HEADER_V2_SIZE +
                                        prot_payload_test.data.size() +
                                        prot_payload_test.json.length();
@@ -163,7 +166,7 @@ TEST(ProtocolPayloadTest, ExtractCorrectProtocolWithoutDataWithJSON) {
   const size_t data_for_sending_size = PROTOCOL_HEADER_V2_SIZE +
                                        prot_payload_test.data.size() +
                                        prot_payload_test.json.length();
-  uint8_t *data_for_sending = new uint8_t[data_for_sending_size];
+  uint8_t* data_for_sending = new uint8_t[data_for_sending_size];
   prepare_data(data_for_sending, prot_payload_test);
 
   BitStream bs(data_for_sending, data_for_sending_size);
@@ -189,8 +192,9 @@ TEST(ProtocolPayloadTest, ExtractCorrectProtocolWithDataWithJSON) {
   prot_payload_test.header.correlation_id = 1;
   prot_payload_test.header.rpc_function_id = 2;
   prot_payload_test.header.rpc_type = kRpcTypeRequest;
-  prot_payload_test.data = {1, 2, 3};
-
+  prot_payload_test.data.push_back(1);
+  prot_payload_test.data.push_back(2);
+  prot_payload_test.data.push_back(3);
   std::string expect_output_json_string =
       "{\n \" : {\n \"name\" : \"\",\n\"parameters\" : \"\"\n}\n}\n";
 
@@ -225,6 +229,7 @@ TEST(ProtocolPayloadTest, ExtractCorrectProtocolWithDataWithJSON) {
   delete[] data_for_sending;
 }
 
+// TODO(OHerasym) : heap corruption on Windows platform
 TEST(ProtocolPayloadTest, ExtractProtocolWithJSONWithDataWithWrongPayloadSize) {
   ProtocolPayloadV2 prot_payload_test;
 
@@ -232,7 +237,9 @@ TEST(ProtocolPayloadTest, ExtractProtocolWithJSONWithDataWithWrongPayloadSize) {
   prot_payload_test.header.rpc_function_id = 2;
 
   prot_payload_test.header.rpc_type = kRpcTypeResponse;
-  prot_payload_test.data = {1, 2, 3};
+  prot_payload_test.data.push_back(1);
+  prot_payload_test.data.push_back(2);
+  prot_payload_test.data.push_back(3);
 
   std::string expect_output_json_string =
       "{\n \" : {\n \"name\" : \"\",\n\"parameters\" : \"\"\n}\n}\n";

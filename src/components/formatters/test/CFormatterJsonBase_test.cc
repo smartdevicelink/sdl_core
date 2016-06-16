@@ -32,11 +32,11 @@
 
 #include <string>
 #include <algorithm>
-#include "json/value.h"
 #include "gtest/gtest.h"
-#include "json/reader.h"
-#include "formatters/CFormatterJsonBase.hpp"
+#include "formatters/CFormatterJsonBase.h"
 #include "formatters/generic_json_formatter.h"
+#include "utils/json_utils.h"
+#include "utils/convert_utils.h"
 
 namespace test {
 namespace components {
@@ -45,94 +45,96 @@ namespace formatters {
 using namespace NsSmartDeviceLink::NsSmartObjects;
 using namespace NsSmartDeviceLink::NsJSONHandler::Formatters;
 
+using utils::json::JsonValue;
+using utils::json::JsonValueRef;
+
 TEST(CFormatterJsonBaseTest, JSonStringValueToSmartObj_ExpectSuccessful) {
   // Arrange value
-  std::string string_val("test_string");
-  Json::Value json_value(string_val);  // Json value from string
+  const std::string string_val("test_string");
+  const JsonValue json_value(string_val);
   SmartObject object;
   // Convert json to smart object
-  CFormatterJsonBase::jsonValueToObj(json_value, object);
+  const JsonValueRef json_value_ref = json_value;
+  CFormatterJsonBase::jsonValueToObj(json_value_ref, object);
   // Check conversion was successful
   EXPECT_EQ(string_val, object.asString());
 }
 
 TEST(CFormatterJsonBaseTest, JSonDoubleValueToSmartObj_ExpectSuccessful) {
   // Arrange value
-  double dval = 3.512;
-  Json::Value json_value(dval);  // Json value from double
+  const double dval = 3.512;
+  const JsonValue json_value(dval);
   SmartObject object;
   // Convert json to smart object
-  CFormatterJsonBase::jsonValueToObj(json_value, object);
+  const JsonValueRef json_value_ref = json_value;
+  CFormatterJsonBase::jsonValueToObj(json_value_ref, object);
   // Check conversion was successful
   EXPECT_DOUBLE_EQ(dval, object.asDouble());
 }
 
 TEST(CFormatterJsonBaseTest, JSonMinIntValueToSmartObj_ExpectSuccessful) {
   // Arrange value
-  Json::Int ival = Json::Value::minInt;
-  Json::Value json_value(ival);  // Json value from possible minimum signed int
+  const JsonValue::Int ival = std::numeric_limits<JsonValue::Int>::min();
+  const JsonValue json_value(ival);
   SmartObject object;
   // Convert json to smart object
-  CFormatterJsonBase::jsonValueToObj(json_value, object);
+  const JsonValueRef json_value_ref = json_value;
+  CFormatterJsonBase::jsonValueToObj(json_value_ref, object);
   // Check conversion was successful
   EXPECT_EQ(ival, object.asInt());
 }
 
 TEST(CFormatterJsonBaseTest, JSonNullIntValueToSmartObj_ExpectSuccessful) {
   // Arrange value
-  Json::Int ival = Json::nullValue;
-  Json::Value json_value(ival);  // Json value from null int value
+  const JsonValue::Int ival = utils::json::ValueType::NULL_VALUE;
+  const JsonValue json_value(ival);
   SmartObject object;
   // Convert json to smart object
-  CFormatterJsonBase::jsonValueToObj(json_value, object);
+  const JsonValueRef json_value_ref = json_value;
+  CFormatterJsonBase::jsonValueToObj(json_value_ref, object);
   // Check conversion was successful
   EXPECT_EQ(ival, object.asInt());
 }
 
 TEST(CFormatterJsonBaseTest, JSonSignedMaxIntValueToSmartObj_ExpectSuccessful) {
   // Arrange value
-  Json::Int ival = Json::Value::maxInt;
-  Json::Value json_value(ival);  // Json value from maximum possible signed int
+  const JsonValue::Int ival = std::numeric_limits<JsonValue::Int>::max();
+  const JsonValue json_value(ival);
   SmartObject object;
   // Convert json to smart object
-  CFormatterJsonBase::jsonValueToObj(json_value, object);
+  const JsonValueRef json_value_ref = json_value;
+  CFormatterJsonBase::jsonValueToObj(json_value_ref, object);
   // Check conversion was successful
   EXPECT_EQ(ival, object.asInt());
 }
 
-TEST(CFormatterJsonBaseTest, DISABLED_JSonUnsignedMaxIntValueToSmartObj_ExpectSuccessful) {
+// TODO (ANosach): SmartObject does not support uint64_t correctly
+TEST(CFormatterJsonBaseTest,
+     DISABLED_JSonUnsignedMaxIntValueToSmartObj_ExpectSuccessful) {
   // Arrange value
-  Json::UInt ui_val = Json::Value::maxUInt;
-  Json::Value json_value(ui_val);  // Json value from maximum possible unsigned int
+  const JsonValue::UInt ui_val = std::numeric_limits<JsonValue::UInt>::max();
+  const JsonValue json_value(ui_val);
   SmartObject object;
   // Convert json to smart object
-  CFormatterJsonBase::jsonValueToObj(json_value, object);
+  const JsonValueRef json_value_ref = json_value;
+  CFormatterJsonBase::jsonValueToObj(json_value_ref, object);
   // Check conversion was successful
   EXPECT_EQ(ui_val, object.asUInt());
 }
 
-TEST(CFormatterJsonBaseTest, JSonSignedMaxInt64ValueToSmartObj_ExpectFailed) {
-  // Arrange value
-  Json::Int64 ival = Json::Value::maxInt64;
-  Json::Value json_value(ival);  // Json value from maximum possible signed int
-  SmartObject object;
-  // Convert json to smart object
-  CFormatterJsonBase::jsonValueToObj(json_value, object);
-  // Check conversion was not successful as there is no such conversion
-  EXPECT_EQ(invalid_int64_value, object.asInt64());
-}
-
 TEST(CFormatterJsonBaseTest, JSonBoolValueToSmartObj_ExpectSuccessful) {
   // Arrange value
-  bool bval1 = true;
-  bool bval2 = false;
-  Json::Value json_value1(bval1);  // Json value from bool
-  Json::Value json_value2(bval2);  // Json value from bool
+  const bool bval1 = true;
+  const bool bval2 = false;
+  const JsonValue json_value1(bval1);
+  const JsonValue json_value2(bval2);
   SmartObject object1;
   SmartObject object2;
   // Convert json to smart object
-  CFormatterJsonBase::jsonValueToObj(json_value1, object1);
-  CFormatterJsonBase::jsonValueToObj(json_value2, object2);
+  const JsonValueRef json_value_ref1 = json_value1;
+  const JsonValueRef json_value_ref2 = json_value2;
+  CFormatterJsonBase::jsonValueToObj(json_value_ref1, object1);
+  CFormatterJsonBase::jsonValueToObj(json_value_ref2, object2);
   // Check conversion was successful
   EXPECT_TRUE(object1.asBool());
   EXPECT_FALSE(object2.asBool());
@@ -141,48 +143,51 @@ TEST(CFormatterJsonBaseTest, JSonBoolValueToSmartObj_ExpectSuccessful) {
 TEST(CFormatterJsonBaseTest, JSonCStringValueToSmartObj_ExpectSuccessful) {
   // Arrange value
   const char* cstr_val = "cstring_test";
-  Json::Value json_value(cstr_val);  // Json value from const char*
+  const JsonValue json_value(cstr_val);
   SmartObject object;
   // Convert json to smart object
-  CFormatterJsonBase::jsonValueToObj(json_value, object);
+  const JsonValueRef json_value_ref = json_value;
+  CFormatterJsonBase::jsonValueToObj(json_value_ref, object);
   // Check conversion was successful
   EXPECT_STREQ(cstr_val, object.asCharArray());
 }
 
 TEST(CFormatterJsonBaseTest, JSonArrayValueToSmartObj_ExpectSuccessful) {
   // Arrange value
-  const char* json_array = "[\"test1\", \"test2\", \"test3\"]";  // Array in json format
-  Json::Value json_value;  // Json value from array. Will be initialized later
+  const char* json_array =
+      "[\"test1\", \"test2\", \"test3\"]";  // Array in json format
+
+  JsonValue::ParseResult json_value_parse = JsonValue::Parse(json_array);
+  const JsonValue json_value = json_value_parse.first;
   SmartObject object;
-  Json::Reader reader;  // Json reader - Needed for correct parsing
-  // Parse array to json value
-  ASSERT_TRUE(reader.parse(json_array, json_value));
-  // Convert json array to SmartObject
-  CFormatterJsonBase::jsonValueToObj(json_value, object);
+  const JsonValueRef json_value_ref = json_value;
+  CFormatterJsonBase::jsonValueToObj(json_value_ref, object);
   // Check conversion was successful
-  EXPECT_TRUE(json_value.isArray());
+  EXPECT_TRUE(json_value.IsArray());
   EXPECT_EQ(3u, object.asArray()->size());
-  SmartArray *ptr = NULL;  // Smart Array pointer;
+  SmartArray* ptr = NULL;  // Smart Array pointer;
   EXPECT_NE(ptr, object.asArray());
 }
 
 TEST(CFormatterJsonBaseTest, JSonObjectValueToSmartObj_ExpectSuccessful) {
   // Arrange value
   const char* json_object =
-      "{ \"json_test_object\": [\"test1\", \"test2\", \"test3\"], \"json_test_object2\": [\"test11\", \"test12\", \"test13\" ]}";  // Json object
-  Json::Value json_value;  // Json value from object. Will be initialized later
+      "{ \"json_test_object\": [\"test1\", \"test2\", \"test3\"], "
+      "\"json_test_object2\": [\"test11\", \"test12\", \"test13\" ]}";
+  JsonValue::ParseResult json_value_parse = JsonValue::Parse(json_object);
+  const JsonValue json_value = json_value_parse.first;
+  // Json value from object. Will be initialized later
   SmartObject object;
-  Json::Reader reader;  // Json reader - Needed for correct parsing
-  ASSERT_TRUE(reader.parse(json_object, json_value));  // If parsing not successful - no sense to continue
-  CFormatterJsonBase::jsonValueToObj(json_value, object);
+  // If parsing not successful - no sense to continue
+  const JsonValueRef json_value_ref = json_value;
+  CFormatterJsonBase::jsonValueToObj(json_value_ref, object);
   // Check conversion was successful
-  EXPECT_TRUE(json_value.isObject());
-  EXPECT_TRUE(json_value.type() == Json::objectValue);
+  EXPECT_TRUE(json_value.IsObject());
   // Get keys collection from Smart Object
   std::set<std::string> keys = object.enumerate();
   std::set<std::string>::iterator it1 = keys.begin();
   // Get members names(keys) from Json object
-  Json::Value::Members mems = json_value.getMemberNames();
+  JsonValue::Members mems = json_value.GetMemberNames();
   std::vector<std::string>::iterator it;
   // Compare sizes
   EXPECT_EQ(mems.size(), keys.size());
@@ -193,132 +198,132 @@ TEST(CFormatterJsonBaseTest, JSonObjectValueToSmartObj_ExpectSuccessful) {
     EXPECT_EQ(*it, *it1);
     ++it1;
   }
-  ASSERT(it == mems.end() && it1 == keys.end());
+  EXPECT_TRUE(it == mems.end() && it1 == keys.end());
 }
 
 TEST(CFormatterJsonBaseTest, StringSmartObjectToJSon_ExpectSuccessful) {
   // Arrange value
-  std::string string_val("test_string");
+  const std::string string_val("test_string");
   SmartObject object(string_val);
-  Json::Value json_value;  // Json value from string
+  const JsonValue json_value;
   // Convert smart object to json
-  CFormatterJsonBase::objToJsonValue(object, json_value);
+  const JsonValueRef json_value_ref = json_value;
+  CFormatterJsonBase::objToJsonValue(object, json_value_ref);
   // Check conversion was successful
-  EXPECT_EQ(string_val, json_value.asString());
+  EXPECT_EQ(string_val, json_value.AsString());
 }
 
 TEST(CFormatterJsonBaseTest, DoubleSmartObjectToJSon_ExpectSuccessful) {
   // Arrange value
-  double dval = 3.512;
-  Json::Value json_value;  // Json value from double
+  const double dval = 3.512;
   SmartObject object(dval);
-  // Convert json to smart object
-  CFormatterJsonBase::objToJsonValue(object, json_value);
+  const JsonValue json_value;
+  // Convert smart object to json
+  const JsonValueRef json_value_ref = json_value;
+  CFormatterJsonBase::objToJsonValue(object, json_value_ref);
   // Check conversion was successful
-  EXPECT_DOUBLE_EQ(dval, json_value.asDouble());
+  EXPECT_DOUBLE_EQ(dval, json_value.AsDouble());
 }
 
 TEST(CFormatterJsonBaseTest, ZeroIntSmartObjectToJSon_ExpectSuccessful) {
   // Arrange value
-  Json::Int ival = Json::nullValue;
-  Json::Value json_value;  // Json value from zero int
-  SmartObject object(ival);
-  // Convert json to smart object
-  CFormatterJsonBase::objToJsonValue(object, json_value);
+  const JsonValue::Int ival = utils::json::ValueType::NULL_VALUE;
+  SmartObject object(utils::ConvertLongLongIntToInt64(ival));
+  const JsonValue json_value;
+  // Convert smart object to json
+  const JsonValueRef json_value_ref = json_value;
+  CFormatterJsonBase::objToJsonValue(object, json_value_ref);
   // Check conversion was successful
-  EXPECT_EQ(ival, json_value.asInt());
+  EXPECT_EQ(ival, json_value.AsInt());
 }
 
 TEST(CFormatterJsonBaseTest, MinIntSmartObjectToJSon_ExpectSuccessful) {
   // Arrange value
-  Json::Int ival = Json::Value::minInt;
-  Json::Value json_value;  // Json value from mimimum possible signed int
-  SmartObject object(ival);
-  // Convert json to smart object
-  CFormatterJsonBase::objToJsonValue(object, json_value);
+  const JsonValue::Int ival = std::numeric_limits<JsonValue::Int>::min();
+  SmartObject object(utils::ConvertLongLongIntToInt64(ival));
+  const JsonValue json_value;
+  // Convert smart object to json
+  const JsonValueRef json_value_ref = json_value;
+  CFormatterJsonBase::objToJsonValue(object, json_value_ref);
   // Check conversion was successful
-  EXPECT_EQ(ival, json_value.asInt());
+  EXPECT_EQ(ival, json_value.AsInt());
 }
 
-TEST(CFormatterJsonBaseTest, DISABLED_UnsignedMaxIntSmartObjectToJSon_ExpectSuccessful) {
+// TODO (ANosach): SmartObject does not support uint64_t correctly
+TEST(CFormatterJsonBaseTest,
+     DISABLED_UnsignedMaxIntSmartObjectToJSon_ExpectSuccessful) {
   // Arrange value
-  Json::UInt ui_val = Json::Value::maxUInt;
-  Json::Value json_value;  // Json value from maximum unsigned int
-  SmartObject object(ui_val);
-  // Convert json to smart object
-  CFormatterJsonBase::objToJsonValue(object, json_value);
+  const JsonValue::UInt ui_val = std::numeric_limits<JsonValue::UInt>::max();
+  SmartObject object(utils::ConvertLongLongUIntToUInt64(ui_val));
+  const JsonValue json_value;
+  // Convert smart object to json
+  const JsonValueRef json_value_ref = json_value;
+  CFormatterJsonBase::objToJsonValue(object, json_value_ref);
   // Check conversion was successful
-  EXPECT_EQ(ui_val, json_value.asUInt());
+  EXPECT_EQ(ui_val, json_value.AsUInt());
 }
 
 TEST(CFormatterJsonBaseTest, BoolSmartObjectToJSon_ExpectSuccessful) {
   // Arrange value
-  bool bval1 = true;
-  bool bval2 = false;
-  Json::Value json_value1;  // Json value from bool
-  Json::Value json_value2;  // Json value from bool
+  const bool bval1 = true;
+  const bool bval2 = false;
+  const JsonValue json_value1;
+  const JsonValue json_value2;
   SmartObject object1(bval1);
   SmartObject object2(bval2);
-  // Convert json to smart object
-  CFormatterJsonBase::objToJsonValue(object1, json_value1);
-  CFormatterJsonBase::objToJsonValue(object2, json_value2);
+  // Convert smart object to json
+  const JsonValueRef json_value_ref1 = json_value1;
+  const JsonValueRef json_value_ref2 = json_value2;
+  CFormatterJsonBase::objToJsonValue(object1, json_value_ref1);
+  CFormatterJsonBase::objToJsonValue(object2, json_value_ref2);
   // Check conversion was successful
-  EXPECT_TRUE(json_value1.asBool());
-  EXPECT_FALSE(json_value2.asBool());
-}
-
-TEST(CFormatterJsonBaseTest, CStringSmartObjectToJSon_ExpectSuccessful) {
-  // Arrange value
-  const char* cstr_val = "cstring_test";
-  Json::Value json_value;  // Json value from const char*
-  SmartObject object(cstr_val);
-  // Convert json to smart object
-  CFormatterJsonBase::objToJsonValue(object, json_value);
-  // Check conversion was successful
-  EXPECT_STREQ(cstr_val, json_value.asCString());
+  EXPECT_TRUE(json_value1.AsBool());
+  EXPECT_FALSE(json_value2.AsBool());
 }
 
 TEST(CFormatterJsonBaseTest, ArraySmartObjectToJSon_ExpectSuccessful) {
   // Arrange value
-  const char* json_array = "[\"test1\", \"test2\", \"test3\"]";  // Array in json format
-  Json::Value json_value;  // Json value from array. Will be initialized later
-  Json::Value result;  // Json value from array. Will be initialized later
+  const char* json_array =
+      "[\"test1\", \"test2\", \"test3\"]";  // Array in json format
+  JsonValue::ParseResult json_value_parse_result = JsonValue::Parse(json_array);
+  const JsonValue json_value(json_value_parse_result.first);
+  JsonValue result;
+
   SmartObject object;
-  Json::Reader reader;  // Json reader - Needed for correct parsing
-  // Parse array to json value
-  ASSERT_TRUE(reader.parse(json_array, json_value));  // Convert json array to SmartObject
   // Convert json array to SmartObject
-  CFormatterJsonBase::jsonValueToObj(json_value, object);
+  const JsonValueRef json_value_ref = json_value;
+  const JsonValueRef json_value_result = result;
+  CFormatterJsonBase::jsonValueToObj(json_value_ref, object);
   // Convert SmartObject to JSon
-  CFormatterJsonBase::objToJsonValue(object, result);
+  CFormatterJsonBase::objToJsonValue(object, json_value_result);
   // Check conversion was successful
-  EXPECT_TRUE(result.isArray());
-  EXPECT_EQ(3u, result.size());
+  EXPECT_TRUE(result.IsArray());
+  EXPECT_EQ(3u, result.Size());
 }
 
 TEST(CFormatterJsonBaseTest, JSonObjectValueToObj_ExpectSuccessful) {
   // Arrange value
   const char* json_object =
-      "{ \"json_test_object\": [\"test1\", \"test2\", \"test3\"], \"json_test_object2\": [\"test11\", \"test12\", \"test13\" ]}";  // Json object
-  Json::Value json_value;  // Json value from json object. Will be initialized later
-  Json::Value result;  // Json value from Smart object. Will keep conversion result
+      "{ \"json_test_object\": [\"test1\", \"test2\", \"test3\"], "
+      "\"json_test_object2\": [\"test11\", \"test12\", \"test13\" ]}";
+  JsonValue::ParseResult json_value_parse = JsonValue::Parse(json_object);
+  const JsonValue json_value(json_value_parse.first);
+  JsonValue result;
+
   SmartObject object;
-  Json::Reader reader;  // Json reader - Needed for correct parsing
-  // Parse json object to correct json value
-  ASSERT_TRUE(reader.parse(json_object, json_value));  // If parsing not successful - no sense to continue
   // Convert json array to SmartObject
-  CFormatterJsonBase::jsonValueToObj(json_value, object);
+  const JsonValueRef json_value_ref = json_value;
+  const JsonValueRef json_value_result = result;
+  CFormatterJsonBase::jsonValueToObj(json_value_ref, object);
   // Convert SmartObject to JSon
-  CFormatterJsonBase::objToJsonValue(object, result);
+  CFormatterJsonBase::objToJsonValue(object, json_value_result);
   // Check conversion was successful
-  EXPECT_TRUE(result.isObject());
-  EXPECT_TRUE(result.type() == Json::objectValue);
-  EXPECT_TRUE(result == json_value);
+  EXPECT_TRUE(result.IsObject());
   // Get keys collection from Smart Object
   std::set<std::string> keys = object.enumerate();
   std::set<std::string>::iterator it1 = keys.begin();
   // Get members names(keys) from Json object
-  Json::Value::Members mems = result.getMemberNames();
+  JsonValue::Members mems = result.GetMemberNames();
   std::vector<std::string>::iterator it;
   // Compare sizes
   EXPECT_EQ(mems.size(), keys.size());
@@ -329,7 +334,7 @@ TEST(CFormatterJsonBaseTest, JSonObjectValueToObj_ExpectSuccessful) {
     EXPECT_EQ(*it, *it1);
     ++it1;
   }
-  ASSERT(it == mems.end() && it1 == keys.end());
+  EXPECT_TRUE(it == mems.end() && it1 == keys.end());
 }
 
 }  // namespace formatters

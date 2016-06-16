@@ -38,20 +38,18 @@ namespace application_manager {
 namespace commands {
 
 SubscribeButtonResponse::SubscribeButtonResponse(
-    const MessageSharedPtr& message)
-    : CommandResponseImpl(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandResponseImpl(message, application_manager) {}
 
-SubscribeButtonResponse::~SubscribeButtonResponse() {
-}
+SubscribeButtonResponse::~SubscribeButtonResponse() {}
 
 void SubscribeButtonResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   // check if response false
   if (true == (*message_)[strings::msg_params].keyExists(strings::success)) {
     if ((*message_)[strings::msg_params][strings::success].asBool() == false) {
-      LOG4CXX_ERROR(logger_, "Success = false");
+      LOGGER_ERROR(logger_, "Success = false");
       SendResponse(false);
       return;
     }

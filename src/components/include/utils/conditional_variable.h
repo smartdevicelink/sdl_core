@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2013-2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,11 +34,15 @@
 
 #if defined(OS_POSIX)
 #include <pthread.h>
+#elif defined(WIN_NATIVE)
+#include "utils/winhdr.h"
+#elif defined(QT_PORT)
+#include <QtCore>
 #else
-#error Please implement conditional variable for your OS
+#error "Condition variable is not defined for this platform"
 #endif
-#include <stdint.h>
 
+#include <stdint.h>
 #include "utils/macro.h"
 
 namespace sync_primitives {
@@ -48,6 +52,12 @@ class Lock;
 namespace impl {
 #if defined(OS_POSIX)
 typedef pthread_cond_t PlatformConditionalVariable;
+#elif defined(WIN_NATIVE)
+typedef CONDITION_VARIABLE PlatformConditionalVariable;
+#elif defined(QT_PORT)
+typedef QWaitCondition PlatformConditionalVariable;
+#else
+#error "Condition variable is not defined for this platform"
 #endif
 }  // namespace impl
 
@@ -83,7 +93,8 @@ class ConditionalVariable {
   // Wait forever or up to milliseconds time limit
   bool Wait(AutoLock& auto_lock);
   bool Wait(Lock& lock);
-  WaitStatus WaitFor(AutoLock& auto_lock, int32_t milliseconds);
+  WaitStatus WaitFor(AutoLock& auto_lock, uint32_t milliseconds);
+
  private:
   impl::PlatformConditionalVariable cond_var_;
 

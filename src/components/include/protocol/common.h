@@ -79,12 +79,14 @@ enum {
    *@brief Constant: number of protocol version (4).
    * This protocol is compatibility with version 3
    * Support SSL with Encryption, Video and Audio services
-   * Support ControlFrame, End Service to/from mobile support, HeartBeat feature,
+   * Support ControlFrame, End Service to/from mobile support, HeartBeat
+   *feature,
    * SDL4.0 feature.
    */
   PROTOCOL_VERSION_4 = 0x04,
   /**
-   *\brief Maximum value of packet version field (size 4-bit) specified AppLink Protocol v.7
+   *\brief Maximum value of packet version field (size 4-bit) specified AppLink
+   *Protocol v.7
    */
   PROTOCOL_VERSION_MAX = 0x0F
 };
@@ -93,7 +95,7 @@ enum {
  *\brief Flag of protection packet
  * 1-bit field of AppLink protocol packet
  */
-const bool PROTECTION_ON  = true;
+const bool PROTECTION_ON = true;
 const bool PROTECTION_OFF = false;
 
 /**
@@ -184,7 +186,8 @@ enum {
    */
   FRAME_DATA_LAST_CONSECUTIVE = 0x00,
   /**
-   *\brief Maximum of consecutive frame numbers after which count has to roll over to 0x01
+   *\brief Maximum of consecutive frame numbers after which count has to roll
+   *over to 0x01
    */
   FRAME_DATA_MAX_CONSECUTIVE = 0xFF,
 

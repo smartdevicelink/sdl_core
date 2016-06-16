@@ -36,9 +36,7 @@ include_directories(
   ${COMPONENTS_DIR}/utils/include
   ${COMPONENTS_DIR}/resumption/include
   ${COMPONENTS_DIR}/config_profile/include
-  ${COMPONENTS_DIR}/include
   ${JSONCPP_INCLUDE_DIRECTORY}
-  ${CMAKE_BINARY_DIR}
 )
 
 set(LIBRARIES
@@ -47,14 +45,12 @@ set(LIBRARIES
     Utils    
     Resumption  
     jsoncpp
+    ConfigProfile
 )
 
 set(SOURCES
   ${COMPONENTS_DIR}/resumption/test/last_state_test.cc
 )          
-
-#file(COPY smartDeviceLink_test.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-#file(COPY app_info.dat DESTINATION ${CMAKE_CURRENT_BINARY_DIR}) 
 
 create_test("resumption_test" "${SOURCES}" "${LIBRARIES}")
 

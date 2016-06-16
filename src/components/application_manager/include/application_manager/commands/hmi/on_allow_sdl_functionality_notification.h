@@ -43,30 +43,31 @@ namespace commands {
  * @brief OnAllowSDLFunctionalityNotification command class
  **/
 class OnAllowSDLFunctionalityNotification : public NotificationFromHMI {
-  public:
-    /**
-     * @brief OnAllowSDLFunctionalityNotification class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit OnAllowSDLFunctionalityNotification(const MessageSharedPtr& message);
+ public:
+  /**
+   * @brief OnAllowSDLFunctionalityNotification class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  OnAllowSDLFunctionalityNotification(const MessageSharedPtr& message,
+                                      ApplicationManager& application_manager);
 
-    /**
-     * @brief OnAllowSDLFunctionalityNotification class destructor
-     **/
-    virtual ~OnAllowSDLFunctionalityNotification();
+  /**
+   * @brief OnAllowSDLFunctionalityNotification class destructor
+   **/
+  virtual ~OnAllowSDLFunctionalityNotification();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(OnAllowSDLFunctionalityNotification);
+ private:
+  DISALLOW_COPY_AND_ASSIGN(OnAllowSDLFunctionalityNotification);
 };
 
 }  // namespace commands
 
 }  // namespace application_manager
 
-#endif  //  SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_ALLOW_SDL_FUNCTIONALITY_NOTIFICATION_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_ALLOW_SDL_FUNCTIONALITY_NOTIFICATION_H_

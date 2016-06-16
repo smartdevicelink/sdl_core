@@ -23,6 +23,8 @@
  */
 
 #include <time.h>
+#include <signal.h>
+#include <cstdint>
 
 #include "system.h"
 
@@ -90,7 +92,18 @@ bool Thread::Join(void** ret) {
   return pthread_join(m_id, ret) == 0;
 }
 
+uint64_t Thread::GetId() const {
+  return static_cast<uint64_t>(m_id);
+}
+
 void* Thread::Call(void* arg) {
+  // Disable system signals receiving in thread
+  // by setting empty signal mask
+  // (system signals processes only in the main thread)
+  sigset_t set;
+  sigfillset(&set);
+  pthread_sigmask(SIG_SETMASK, &set, NULL);
+
   Thread* thread = static_cast<Thread*>(arg);
 
   /* call our specific object method */
@@ -200,7 +213,7 @@ bool Thread::Start(bool detach) {
 }
 
 bool Thread::Stop() {
-  return TerminateThread(m_id, (DWORD) - 1);
+  return TerminateThread(m_id, (DWORD) - 1) != 0;
 }
 
 bool Thread::Join(void** ret) {
@@ -213,12 +226,16 @@ bool Thread::Join(void** ret) {
   return true;
 }
 
+uint64_t Thread::GetId() const {
+  return static_cast<uint64_t>(GetThreadId(m_id));
+}
+
 DWORD WINAPI Thread::Call(LPVOID arg) {
   Thread* thread = static_cast<Thread*>(arg);
 
   /* call our specific object method */
 #ifdef _WIN64
-  return (DWORD64)thread->m_arg->Call();
+  return (DWORD)thread->m_arg->Call();
 #else
   return (DWORD)thread->m_arg->Call();
 #endif
@@ -250,7 +267,58 @@ bool Mutex::Unlock() {
     return false;
   }
 
-  return ReleaseMutex(m_mutex);
+  return ReleaseMutex(m_mutex) != 0;
+}
+
+BinarySemaphore::BinarySemaphore() :
+  m_isUp(false) {
+  InitializeCriticalSection(&m_mutex);
+  InitializeConditionVariable(&m_cond);
+}
+
+BinarySemaphore::~BinarySemaphore() {
+  DeleteCriticalSection(&m_mutex);
+}
+
+void BinarySemaphore::Wait() {
+  // try to get exclusive access to the flag
+  EnterCriticalSection(&m_mutex);
+  // success: no other thread can get here unless
+  // the current thread unlocks the mutex
+
+  // wait until the flag is up
+  while (!m_isUp) {
+    SleepConditionVariableCS(&m_cond, &m_mutex, INFINITE);
+    // when the current thread executes this, it will be
+    // blocked on m_cond, and automatically unlocks the
+    // mutex! Unlocking the mutex will let other threads
+    // in to test the flag.
+  }
+
+  // here we know that flag is upand this thread has now
+  // successfully passed the semaphore
+
+  // this will cause all other threads that execute the Wait()
+  // call to wait in the above loop
+  m_isUp = false;
+
+  // release the exclusive access to the flag
+  LeaveCriticalSection(&m_mutex);
+}
+
+void BinarySemaphore::Notify() {
+  // try to get exclusive access to the flag
+  EnterCriticalSection(&m_mutex);
+
+  // this call may resume a thread that is blocked on m_cond
+  // (in the Wait() call). if there was none, this does nothing
+  WakeConditionVariable(&m_cond);
+
+  // up the flag
+  m_isUp = true;
+
+  // release the exclusive access to the flag
+  LeaveCriticalSection(&m_mutex);
 }
 
 #endif

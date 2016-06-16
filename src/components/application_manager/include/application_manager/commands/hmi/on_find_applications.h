@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_DEVICE_LIST_UPDATED_NOTIFICATION_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_DEVICE_LIST_UPDATED_NOTIFICATION_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_FIND_APPLICATIONS_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_FIND_APPLICATIONS_H_
 
 #include "application_manager/commands/hmi/notification_from_hmi.h"
 
@@ -49,7 +49,8 @@ class OnFindApplications : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnFindApplications(const MessageSharedPtr& message);
+  OnFindApplications(const MessageSharedPtr& message,
+                     ApplicationManager& application_manager);
 
   /**
    * @brief OnFindApplications class destructor
@@ -69,4 +70,4 @@ class OnFindApplications : public NotificationFromHMI {
 
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_DEVICE_LIST_UPDATED_NOTIFICATION_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_FIND_APPLICATIONS_H_

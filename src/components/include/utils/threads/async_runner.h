@@ -30,8 +30,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_INCLUDE_UTILS_ASYNC_RUNNER_H_
-#define SRC_COMPONENTS_INCLUDE_UTILS_ASYNC_RUNNER_H_
+#ifndef SRC_COMPONENTS_INCLUDE_UTILS_THREADS_ASYNC_RUNNER_H_
+#define SRC_COMPONENTS_INCLUDE_UTILS_THREADS_ASYNC_RUNNER_H_
 
 #include <string>
 #include <queue>
@@ -52,76 +52,75 @@ namespace threads {
  * is kind of manager for async functions.
  */
 class AsyncRunner {
-  public:
-    /**
-     * @brief AsyncRunner constructor, allows to create and run new thread.
-     * The thread will be removed in destructor and appropriate delegate will
-     * be removed some time latter after pthred_join.
-     *
-     * @param thread_name thread's name.
-     *
-     * @param delegate delegate to run within thread.
-     */
-    explicit AsyncRunner(const std::string& thread_name);
+ public:
+  /**
+   * @brief AsyncRunner constructor, allows to create and run new thread.
+   * The thread will be removed in destructor and appropriate delegate will
+   * be removed some time latter after pthred_join.
+   *
+   * @param thread_name thread's name.
+   *
+   * @param delegate delegate to run within thread.
+   */
+  explicit AsyncRunner(const std::string& thread_name);
+
+  /**
+   * @brief AsyncRun pass obtained delegate into internal queue
+   *
+   * @param delegate the objet which has to be concuremtly run
+   */
+  void AsyncRun(threads::ThreadDelegate* delegate);
+  /**
+   * @brief Stop delegates activity
+   */
+  void Stop();
+
+  ~AsyncRunner();
+
+ private:
+  class AsyncRunnerDelegate : public threads::ThreadDelegate {
+   public:
+    AsyncRunnerDelegate();
 
     /**
-     * @brief AsyncRun pass obtained delegate into internal queue
-     *
-     * @param delegate the objet which has to be concuremtly run
+     * @brief threadMain runs delegates queue handling.
      */
-    void AsyncRun(threads::ThreadDelegate* delegate);
+    virtual void threadMain();
+
     /**
-     * @brief Stop delegates activity
+     * @brief exitThreadMain doing stuff before exit from thread.
      */
-    void Stop();
+    virtual void exitThreadMain();
 
-    ~AsyncRunner();
+    /**
+     * @brief runDelegate push obtained delegate into specific queue
+     *
+     * @param delegate object that has to be executed.
+     */
+    void runDelegate(threads::ThreadDelegate* delegate);
 
-  private:
+   private:
+    /**
+     * @brief processDelegate allows to pop delegate
+     * from queue and process it.
+     */
+    void processDelegate();
 
-    class AsyncRunnerDelegate: public threads::ThreadDelegate {
-      public:
-        AsyncRunnerDelegate();
+    /**
+     * @brief waitForDelegate wait while delegates queue is empty.
+     */
+    void waitForDelegate();
 
-        /**
-         * @brief threadMain runs delegates queue handling.
-         */
-        virtual void threadMain();
+    std::queue<threads::ThreadDelegate*> delegates_queue_;
+    sync_primitives::ConditionalVariable delegate_notifier_;
+    sync_primitives::Lock delegates_queue_lock_;
+    volatile bool stop_flag_;
+  };
 
-        /**
-         * @brief exitThreadMain doing stuff before exit from thread.
-         */
-        virtual void exitThreadMain();
-
-        /**
-         * @brief runDelegate push obtained delegate into specific queue
-         *
-         * @param delegate object that has to be executed.
-         */
-        void runDelegate(threads::ThreadDelegate* delegate);
-
-      private:
-        /**
-         * @brief processDelegate allows to pop delegate
-         * from queue and process it.
-         */
-        void processDelegate();
-
-        /**
-         * @brief waitForDelegate wait while delegates queue is empty.
-         */
-        void waitForDelegate();
-
-        std::queue<threads::ThreadDelegate*> delegates_queue_;
-        sync_primitives::ConditionalVariable delegate_notifier_;
-        sync_primitives::Lock delegates_queue_lock_;
-        volatile bool stop_flag_;
-    };
-
-    threads::Thread* thread_;
-    AsyncRunnerDelegate* executor_;
+  threads::Thread* thread_;
+  AsyncRunnerDelegate* executor_;
 };
 
-} // namespace threads
+}  // namespace threads
 
-#endif // SRC_COMPONENTS_INCLUDE_UTILS_ASYNC_RUNNER_H_
+#endif  // SRC_COMPONENTS_INCLUDE_UTILS_THREADS_ASYNC_RUNNER_H_

@@ -37,15 +37,13 @@ namespace application_manager {
 namespace commands {
 
 VRChangeRegistrationRequest::VRChangeRegistrationRequest(
-    const MessageSharedPtr& message)
-    : RequestToHMI(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : RequestToHMI(message, application_manager) {}
 
-VRChangeRegistrationRequest::~VRChangeRegistrationRequest() {
-}
+VRChangeRegistrationRequest::~VRChangeRegistrationRequest() {}
 
 void VRChangeRegistrationRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   SendRequest();
 }
@@ -53,4 +51,3 @@ void VRChangeRegistrationRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

@@ -43,22 +43,23 @@ class Thread;
 namespace media_manager {
 
 class FromMicRecorderAdapter : public MediaAdapterImpl {
-  public:
-    FromMicRecorderAdapter();
-    ~FromMicRecorderAdapter();
-    void SendData(int32_t application_key,
-                  const ::protocol_handler::RawMessagePtr message) {}
-    void StartActivity(int32_t application_key);
-    void StopActivity(int32_t application_key);
-    bool is_app_performing_activity(int32_t application_key);
-    void set_output_file(const std::string& output_file);
-    void set_duration(int32_t duration);
-  private:
-    threads::Thread* recorder_thread_;
-    std::string output_file_;
-    const int32_t kDefaultDuration;
-    int32_t duration_;
-    DISALLOW_COPY_AND_ASSIGN(FromMicRecorderAdapter);
+ public:
+  FromMicRecorderAdapter();
+  ~FromMicRecorderAdapter();
+  void SendData(int32_t application_key,
+                const ::protocol_handler::RawMessagePtr message) {}
+  void StartActivity(int32_t application_key);
+  void StopActivity(int32_t application_key);
+  bool is_app_performing_activity(int32_t application_key) const;
+  void set_output_file(const std::string& output_file);
+  void set_duration(int32_t duration);
+
+ private:
+  threads::Thread* recorder_thread_;
+  std::string output_file_;
+  const int32_t kDefaultDuration;
+  int32_t duration_;
+  DISALLOW_COPY_AND_ASSIGN(FromMicRecorderAdapter);
 };
 }  // namespace media_manager
 

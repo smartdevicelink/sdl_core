@@ -39,22 +39,23 @@
 
 namespace test {
 namespace components {
-namespace SmartObjects {
-namespace SchemaItem {
+namespace smart_object_test {
 
 /**
  * Test StringSchemaItem no default value
  *
- * Create SchemaItem without default value. Method setDefaultValue should always return false
+ * Create SchemaItem without default value. Method setDefaultValue should always
+ *return false
  * and leave SmartObject in previous state.
  **/
 TEST(test_no_default_value, test_StringSchemaItemTest) {
   using namespace NsSmartDeviceLink::NsSmartObjects;
   SmartObject obj;
 
-  ISchemaItemPtr item = CStringSchemaItem::create();  // No default value, no max length
+  ISchemaItemPtr item =
+      CStringSchemaItem::create();  // No default value, no max length
 
-  //Object - valid string
+  // Object - valid string
   obj = "New valid string";
   ASSERT_EQ(std::string("New valid string"), obj.asString());
 
@@ -64,7 +65,7 @@ TEST(test_no_default_value, test_StringSchemaItemTest) {
   EXPECT_FALSE(resDefault);
   EXPECT_EQ(std::string("New valid string"), obj.asString());
 
-  //Obj - bool
+  // Obj - bool
   obj = true;
 
   resultType = item->validate(obj);
@@ -73,7 +74,7 @@ TEST(test_no_default_value, test_StringSchemaItemTest) {
   EXPECT_FALSE(resDefault);
   EXPECT_TRUE(obj.asBool());
 
-  //Object - number
+  // Object - number
   obj = 3.1415926;
 
   resultType = item->validate(obj);
@@ -89,19 +90,23 @@ TEST(test_no_default_value, test_StringSchemaItemTest) {
 /**
  * Test StringSchemaItem with default value
  *
- * Create SchemaItem with default value. Method setDefaultValue should return true,
+ * Create SchemaItem with default value. Method setDefaultValue should return
+ *true,
  * String SmartObject should contain default value.
- * Not string SmartObject should converted to StringObject and setted up by the default value.
+ * Not string SmartObject should converted to StringObject and setted up by the
+ *default value.
  **/
 TEST(test_item_with_default_value, test_StringSchemaItemTest) {
   using namespace NsSmartDeviceLink::NsSmartObjects;
   SmartObject obj;
 
   ISchemaItemPtr item = CStringSchemaItem::create(
-      TSchemaItemParameter<size_t>(), TSchemaItemParameter<size_t>(),
-      TSchemaItemParameter<std::string>("Default string"));  // Default value, no max length
+      TSchemaItemParameter<size_t>(),
+      TSchemaItemParameter<size_t>(),
+      TSchemaItemParameter<std::string>(
+          "Default string"));  // Default value, no max length
 
-  //Object - valid string
+  // Object - valid string
   obj = "New valid string";
   ASSERT_EQ(std::string("New valid string"), obj.asString());
 
@@ -111,7 +116,7 @@ TEST(test_item_with_default_value, test_StringSchemaItemTest) {
   EXPECT_TRUE(resDefault);
   EXPECT_EQ(std::string("Default string"), obj.asString());
 
-  //Obj - bool
+  // Obj - bool
   obj = true;
 
   resultType = item->validate(obj);
@@ -120,7 +125,7 @@ TEST(test_item_with_default_value, test_StringSchemaItemTest) {
   EXPECT_TRUE(resDefault);
   EXPECT_EQ(std::string("Default string"), obj.asString());
 
-  //Object - number
+  // Object - number
   obj = 3.1415926;
 
   resultType = item->validate(obj);
@@ -141,10 +146,11 @@ TEST(test_item_with_max_length, test_StringSchemaItemTest) {
   SmartObject obj;
 
   ISchemaItemPtr item = CStringSchemaItem::create(
-      TSchemaItemParameter<size_t>(0), TSchemaItemParameter<size_t>(25),
+      TSchemaItemParameter<size_t>(0),
+      TSchemaItemParameter<size_t>(25),
       TSchemaItemParameter<std::string>("Default string"));
 
-  //Object - valid string
+  // Object - valid string
   obj = "New valid string";
   ASSERT_EQ(std::string("New valid string"), obj.asString());
 
@@ -154,7 +160,7 @@ TEST(test_item_with_max_length, test_StringSchemaItemTest) {
   EXPECT_TRUE(resDefault);
   EXPECT_EQ(std::string("Default string"), obj.asString());
 
-  //Object - too long string
+  // Object - too long string
   obj = "New very very loooooong string";
   ASSERT_EQ(std::string("New very very loooooong string"), obj.asString());
 
@@ -173,7 +179,8 @@ TEST(test_map_validate, test_StringSchemaItemTest) {
   SmartObject obj;
 
   ISchemaItemPtr item = CStringSchemaItem::create(
-      TSchemaItemParameter<size_t>(0), TSchemaItemParameter<size_t>(25),
+      TSchemaItemParameter<size_t>(0),
+      TSchemaItemParameter<size_t>(25),
       TSchemaItemParameter<std::string>("Default string"));
 
   obj["str"] = "New valid string";
@@ -233,7 +240,8 @@ TEST(test_array_validate, test_StringSchemaItemTest) {
   SmartObject obj;
 
   ISchemaItemPtr item = CStringSchemaItem::create(
-      TSchemaItemParameter<size_t>(0), TSchemaItemParameter<size_t>(25),
+      TSchemaItemParameter<size_t>(0),
+      TSchemaItemParameter<size_t>(25),
       TSchemaItemParameter<std::string>("Default string"));
 
   obj[0] = "New valid string";
@@ -267,7 +275,7 @@ TEST(test_array_validate, test_StringSchemaItemTest) {
   resDefault = item->setDefaultValue(obj[4]);
   EXPECT_TRUE(resDefault);
 
-  //Set default value for non-initialized element
+  // Set default value for non-initialized element
   resDefault = item->setDefaultValue(obj[5]);
   EXPECT_TRUE(resDefault);
 
@@ -296,7 +304,7 @@ TEST(test_array_validate, test_StringSchemaItemTest) {
   resultType = item->validate(obj);
   EXPECT_EQ(Errors::OK, resultType);
 }
-}  // namespace SchemaItem
-}  // namespace SmartObjects
+
+}  // namespace smart_object_test
 }  // namespace components
 }  // namespace test

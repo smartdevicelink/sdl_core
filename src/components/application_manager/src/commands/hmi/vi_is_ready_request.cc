@@ -36,15 +36,14 @@ namespace application_manager {
 
 namespace commands {
 
-VIIsReadyRequest::VIIsReadyRequest(const MessageSharedPtr& message)
-    : RequestToHMI(message) {
-}
+VIIsReadyRequest::VIIsReadyRequest(const MessageSharedPtr& message,
+                                   ApplicationManager& application_manager)
+    : RequestToHMI(message, application_manager) {}
 
-VIIsReadyRequest::~VIIsReadyRequest() {
-}
+VIIsReadyRequest::~VIIsReadyRequest() {}
 
 void VIIsReadyRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   SendRequest();
 }
@@ -52,4 +51,3 @@ void VIIsReadyRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

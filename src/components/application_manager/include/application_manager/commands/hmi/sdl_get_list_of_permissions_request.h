@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_LIST_OF_PERMISSIONS_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_LIST_OF_PERMISSIONS_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_SDL_GET_LIST_OF_PERMISSIONS_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_SDL_GET_LIST_OF_PERMISSIONS_REQUEST_H_
 
 #include "application_manager/commands/hmi/request_from_hmi.h"
 
@@ -43,29 +43,30 @@ namespace commands {
  * @brief SDLGetListOfPermissionsRequest command class
  **/
 class SDLGetListOfPermissionsRequest : public RequestFromHMI {
-  public:
-    /**
-     * @brief SDLGetListOfPermissionsRequest class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit SDLGetListOfPermissionsRequest(const MessageSharedPtr& message);
+ public:
+  /**
+   * @brief SDLGetListOfPermissionsRequest class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  SDLGetListOfPermissionsRequest(const MessageSharedPtr& message,
+                                 ApplicationManager& application_manager);
 
-    /**
-     * @brief SDLGetListOfPermissionsRequest class destructor
-     **/
-    virtual ~SDLGetListOfPermissionsRequest();
+  /**
+   * @brief SDLGetListOfPermissionsRequest class destructor
+   **/
+  virtual ~SDLGetListOfPermissionsRequest();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(SDLGetListOfPermissionsRequest);
+ private:
+  DISALLOW_COPY_AND_ASSIGN(SDLGetListOfPermissionsRequest);
 };
 
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  //  SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_LIST_OF_PERMISSIONS_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_SDL_GET_LIST_OF_PERMISSIONS_REQUEST_H_

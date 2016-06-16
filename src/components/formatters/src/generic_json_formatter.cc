@@ -33,6 +33,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 #include "formatters/generic_json_formatter.h"
+#include "utils/json_utils.h"
 
 namespace NsSmartDeviceLink {
 namespace NsJSONHandler {
@@ -40,24 +41,25 @@ namespace Formatters {
 
 void GenericJsonFormatter::ToString(const NsSmartObjects::SmartObject& obj,
                                     std::string& out_str) {
-  Json::Value json_root;
+  utils::json::JsonValue json_root(utils::json::ValueType::OBJECT_VALUE);
   objToJsonValue(obj, json_root);
-  out_str = json_root.toStyledString();
+  out_str = json_root.ToJson();
 }
 
 bool GenericJsonFormatter::FromString(const std::string& str,
                                       NsSmartObjects::SmartObject& out) {
-  Json::Value json_root;
-  Json::Reader reader;
-  bool result = reader.parse(str, json_root);
+  using namespace utils::json;
 
-  if (true == result) {
-    jsonValueToObj(json_root, out);
+  JsonValue::ParseResult parse_result = JsonValue::Parse(str);
+  if (!parse_result.second) {
+    return false;
   }
+  JsonValue& json_root = parse_result.first;
 
-  return result;
+  jsonValueToObj(json_root, out);
+  return true;
 }
 
-} // namespace Formatters
-} // namespace NsJSONHandler
-} // namespace NsSmartDeviceLink
+}  // namespace Formatters
+}  // namespace NsJSONHandler
+}  // namespace NsSmartDeviceLink

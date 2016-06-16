@@ -31,52 +31,64 @@
  */
 
 #include "resumption/last_state.h"
-#include "config_profile/profile.h"
 #include "utils/file_system.h"
 #include "utils/logger.h"
 
 namespace resumption {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "LastState");
+CREATE_LOGGERPTR_GLOBAL(logger_, "Resumption")
 
-void LastState::SaveToFileSystem() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  const std::string file =
-      profile::Profile::instance()->app_info_storage();
-  const std::string& str = dictionary.toStyledString();
-  const std::vector<uint8_t> char_vector_pdata(
-    str.begin(), str.end());
-
-  DCHECK(file_system::CreateDirectoryRecursively(
-        profile::Profile::instance()->app_storage_folder()));
-
-  LOG4CXX_INFO(logger_, "LastState::SaveToFileSystem " << file
-               << str);
-
-  DCHECK(file_system::Write(file, char_vector_pdata));
-
-}
-
-void LastState::LoadFromFileSystem() {
-  const std::string file =
-      profile::Profile::instance()->app_info_storage();
-  std::string buffer;
-  bool result = file_system::ReadFile(file, buffer);
-  Json::Reader m_reader;
-  if (result && m_reader.parse(buffer, dictionary)) {
-    LOG4CXX_INFO(logger_, "Valid last state was found."
-                 << dictionary.toStyledString());
-    return;
-  }
-  LOG4CXX_WARN(logger_, "No valid last state was found.");
-}
-
-LastState::LastState() {
+LastState::LastState(const std::string& app_storage_folder,
+                     const std::string& app_info_storage)
+    : app_storage_folder_(app_storage_folder)
+    , app_info_storage_(app_info_storage) {
   LoadFromFileSystem();
+  LOGGER_AUTO_TRACE(logger_);
 }
 
 LastState::~LastState() {
+  LOGGER_AUTO_TRACE(logger_);
   SaveToFileSystem();
 }
 
+void LastState::SaveToFileSystem() {
+  LOGGER_AUTO_TRACE(logger_);
+  const std::string str = dictionary_.ToJson();
+  const std::vector<uint8_t> char_vector_pdata(str.begin(), str.end());
+
+  DCHECK(file_system::CreateDirectoryRecursively(app_storage_folder_));
+  LOGGER_INFO(logger_,
+              "LastState::SaveToFileSystem " << app_info_storage_ << str);
+  DCHECK(file_system::Write(app_info_storage_, char_vector_pdata));
+}
+
+utils::json::JsonValue& LastState::dictionary() {
+  return dictionary_;
+}
+
+void LastState::LoadFromFileSystem() {
+  using namespace utils::json;
+  std::string buffer;
+  bool result = file_system::ReadFile(app_info_storage_, buffer);
+  if (!result) {
+    LOGGER_WARN(logger_,
+                "Failed to load last state. Cannot read file "
+                    << app_info_storage_);
+    return;
+  }
+  if (buffer.empty()) {
+    LOGGER_DEBUG(logger_, "Buffer is empty.");
+    return;
+  }
+
+  JsonValue::ParseResult parse_result = JsonValue::Parse(buffer);
+  if (!parse_result.second) {
+    LOGGER_WARN(logger_,
+                "Failed to load last state. Cannot parse json:\n" << buffer);
+    return;
+  }
+  dictionary_ = parse_result.first;
+  LOGGER_INFO(logger_, "Valid last state was found." << dictionary_.ToJson());
+  return;
+}
 }

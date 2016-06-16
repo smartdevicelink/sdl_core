@@ -36,15 +36,14 @@ namespace application_manager {
 
 namespace commands {
 
-OnFindApplications::OnFindApplications(const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
-}
+OnFindApplications::OnFindApplications(const MessageSharedPtr& message,
+                                       ApplicationManager& application_manager)
+    : NotificationFromHMI(message, application_manager) {}
 
-OnFindApplications::~OnFindApplications() {
-}
+OnFindApplications::~OnFindApplications() {}
 
 void OnFindApplications::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   // TODO(PV): add UpdateAppsOnDevice to ApplicationManager
 }
@@ -52,4 +51,3 @@ void OnFindApplications::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

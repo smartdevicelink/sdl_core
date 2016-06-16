@@ -24,7 +24,7 @@
  * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
  * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * FERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
@@ -36,242 +36,238 @@
 
 namespace test {
 namespace components {
-namespace profile {
+namespace profile_test {
 
 using namespace ::profile;
 
-TEST(IniFileTest, DISABLED_WriteItemReadItem) {
+TEST(IniFileTest, WriteItemReadItem) {
   // Write line in chapter
-  const char * fname = "./test_ini_file.ini";
-  const char *chapter = "Chapter";
-  const char * item = "Test_item";
-  const char * value = "test_value";
-  const bool write_result = ini_write_value(fname, chapter, item, value,
-                                            INI_FLAG_ITEM_UP_CREA);
+  const char* fname = "./test_ini_file.ini";
+  const char* chapter = "Chapter";
+  const char* item = "Test_item";
+  const char* value = "test_value";
+  const bool write_result =
+      ini_write_value(fname, chapter, item, value, INI_FLAG_ITEM_UP_CREA);
   EXPECT_TRUE(write_result);
-
-  // Read value from file
-  char search_value[INI_LINE_LEN] = "";
+  char search_value[INI_LINE_LEN] = {0};
   const bool read_result = ini_read_value(fname, chapter, item, search_value);
+  const char* res = search_value;
 
   EXPECT_TRUE(read_result);
-  EXPECT_EQ(*search_value, *value);
+  EXPECT_STREQ(res, value);
   EXPECT_TRUE(file_system::DeleteFile("./test_ini_file.ini"));
 }
 
-TEST(IniFileTest, DISABLED_WriteItemWithoutValueReadItem) {
+TEST(IniFileTest, WriteItemWithoutValueReadItem) {
   // Write line in chapter
-  const char * fname = "./test_ini_file.ini";
-  const char *chapter = "Chapter";
-  const char * test_item = "Test_item";
-  const char * value = "";
-  const bool write_result = ini_write_value(fname, chapter, test_item, value,
-                                            INI_FLAG_ITEM_UP_CREA);
+  const char* fname = "./test_ini_file.ini";
+  const char* chapter = "Chapter";
+  const char* test_item = "Test_item";
+  const char* value = "";
+  const bool write_result =
+      ini_write_value(fname, chapter, test_item, value, INI_FLAG_ITEM_UP_CREA);
   EXPECT_TRUE(write_result);
 
   // Read value from file
-  char search_value[INI_LINE_LEN] = "";
-  const bool read_result = ini_read_value(fname, chapter, test_item, search_value);
-
+  char search_value[INI_LINE_LEN] = {0};
+  const bool read_result =
+      ini_read_value(fname, chapter, test_item, search_value);
+  const char* res = search_value;
   EXPECT_TRUE(read_result);
-  EXPECT_EQ(*search_value, *value);
+  EXPECT_STREQ(res, value);
 
   EXPECT_TRUE(file_system::DeleteFile("./test_ini_file.ini"));
 }
 
-TEST(IniFileTest, DISABLED_WriteSameItemInDifferentChapters) {
+TEST(IniFileTest, WriteSameItemInDifferentChapters) {
   // Write line in chapter
-  const char * fname = "./test_ini_file.ini";
-  const char *chapter1 = "Chapter1";
-  const char * test_item = "Test_item";
-  const char * value = "test_value";
-  const bool write_result = ini_write_value(fname, chapter1, test_item, value,
-                                            INI_FLAG_ITEM_UP_CREA);
+  const char* fname = "./test_ini_file.ini";
+  const char* chapter1 = "Chapter1";
+  const char* test_item = "Test_item";
+  const char* value = "test_value";
+  const bool write_result =
+      ini_write_value(fname, chapter1, test_item, value, INI_FLAG_ITEM_UP_CREA);
   EXPECT_TRUE(write_result);
-
-  char search_value[INI_LINE_LEN] = "";
-  const bool read_result = ini_read_value(fname, chapter1, test_item, search_value);
-
+  char search_value[INI_LINE_LEN] = {0};
+  const bool read_result =
+      ini_read_value(fname, chapter1, test_item, search_value);
+  const char* res = search_value;
   EXPECT_TRUE(read_result);
-  EXPECT_EQ(*search_value, *value);
+  EXPECT_STREQ(res, value);
 
   // Create new chapter and write the same value
-  const char *chapter2 = "Chapter2";
+  const char* chapter2 = "Chapter2";
 
-  const bool write_result2 = ini_write_value(fname, chapter2, test_item, value,
-                                             INI_FLAG_ITEM_UP_CREA);
+  const bool write_result2 =
+      ini_write_value(fname, chapter2, test_item, value, INI_FLAG_ITEM_UP_CREA);
 
   EXPECT_TRUE(write_result2);
 
   char value2[INI_LINE_LEN] = "test_value";
   const bool read_result2 = ini_read_value(fname, chapter2, test_item, value2);
-
+  const char* res2 = value2;
   EXPECT_TRUE(read_result2);
-  EXPECT_EQ(*value2, *value);
-
+  EXPECT_STREQ(res2, res);
   EXPECT_TRUE(file_system::DeleteFile("./test_ini_file.ini"));
 }
 
-TEST(IniFileTest, DISABLED_RewriteItem) {
+TEST(IniFileTest, RewriteItem) {
   // Write line in chapter
-  const char * fname = "./test_ini_file.ini";
-  const char *chapter = "Chapter";
-  const char * item = "Test_item";
-  const char * value = "test_value";
-  bool write_result = ini_write_value(fname, chapter, item, value,
-                                      INI_FLAG_ITEM_UP_CREA);
+  const char* fname = "./test_ini_file.ini";
+  const char* chapter = "Chapter";
+  const char* item = "Test_item";
+  const char* value = "test_value";
+  bool write_result =
+      ini_write_value(fname, chapter, item, value, INI_FLAG_ITEM_UP_CREA);
 
   EXPECT_TRUE(write_result);
-
-  char search_value[INI_LINE_LEN] = "";
+  char search_value[INI_LINE_LEN] = {0};
   bool read_result = ini_read_value(fname, chapter, item, search_value);
-
+  const char* res = search_value;
   EXPECT_TRUE(read_result);
-  EXPECT_EQ(*search_value, *value);
+  EXPECT_STREQ(res, value);
 
   // Write item again
-  const char * newvalue = "new_test_value";
-  write_result = ini_write_value(fname, chapter, item, newvalue,
-                                 INI_FLAG_ITEM_UP_CREA);
+  const char* newvalue = "new_test_value";
+  write_result =
+      ini_write_value(fname, chapter, item, newvalue, INI_FLAG_ITEM_UP_CREA);
 
   EXPECT_TRUE(write_result);
-
-  char new_search_value[INI_LINE_LEN] = "";
+  char new_search_value[INI_LINE_LEN] = {0};
   read_result = ini_read_value(fname, chapter, item, new_search_value);
-
+  const char* new_res = new_search_value;
   EXPECT_TRUE(read_result);
-  EXPECT_EQ(*new_search_value, *newvalue);
+  EXPECT_STREQ(new_res, newvalue);
   EXPECT_TRUE(file_system::DeleteFile("./test_ini_file.ini"));
 }
 
-TEST(IniFileTest, DISABLED_WriteTwoItemsInOneChapter) {
+TEST(IniFileTest, WriteTwoItemsInOneChapter) {
   // Write line in chapter
-  const char * fname = "./test_ini_file.ini";
-  const char *chapter = "Chapter";
-  const char * item = "Test_item";
-  const char * value1 = "test_value";
+  const char* fname = "./test_ini_file.ini";
+  const char* chapter = "Chapter";
+  const char* item = "Test_item";
+  const char* value1 = "test_value";
 
-  bool write_result = ini_write_value(fname, chapter, item, value1,
-                                      INI_FLAG_ITEM_UP_CREA);
+  bool write_result =
+      ini_write_value(fname, chapter, item, value1, INI_FLAG_ITEM_UP_CREA);
   EXPECT_TRUE(write_result);
 
   // Write another line in the same chapter
-  const char * item2 = "Test_item2";
-  const char * value2 = "test_value2";
+  const char* item2 = "Test_item2";
+  const char* value2 = "test_value2";
 
-  write_result = ini_write_value(fname, chapter, item2, value2,
-                                 INI_FLAG_ITEM_UP_CREA);
+  write_result =
+      ini_write_value(fname, chapter, item2, value2, INI_FLAG_ITEM_UP_CREA);
   EXPECT_TRUE(write_result);
 
   // Search both values
-  char search_value[INI_LINE_LEN] = "";
+  char search_value[INI_LINE_LEN] = {0};
   bool read_result = ini_read_value(fname, chapter, item, search_value);
-
+  const char* res = search_value;
   EXPECT_TRUE(read_result);
-  EXPECT_EQ(*search_value, *value1);
+  EXPECT_STREQ(res, value1);
 
-  char search_value2[INI_LINE_LEN] = "";
+  char search_value2[INI_LINE_LEN] = {0};
   read_result = ini_read_value(fname, chapter, item2, search_value2);
-
+  const char* res2 = search_value2;
   EXPECT_TRUE(read_result);
-  EXPECT_EQ(*search_value2, *value2);
-
+  EXPECT_STREQ(res2, value2);
   EXPECT_TRUE(file_system::DeleteFile("./test_ini_file.ini"));
 }
 
 TEST(IniFileTest, WriteEmptyItemWithValueReadItem) {
-  const char * fname = "./test_ini_file.ini";
-  const char *chapter = "Chapter";
-  const char * test_item = "";
-  const char * value = "test_value";
-  bool result = ini_write_value(fname, chapter, test_item, value,
-                                INI_FLAG_ITEM_UP_CREA);
+  const char* fname = "./test_ini_file.ini";
+  const char* chapter = "Chapter";
+  const char* test_item = "";
+  const char* value = "test_value";
+  bool result =
+      ini_write_value(fname, chapter, test_item, value, INI_FLAG_ITEM_UP_CREA);
   EXPECT_FALSE(result);
 }
 
 TEST(IniFileTest, WriteEmptyItemWithEmptyValue_ExpectFalse) {
   // Write empty line in chapter
-  const char * fname = "./test_ini_file.ini";
-  const char *chapter = "Chapter";
-  const char * test_item = "";
-  const char * value = "";
-  bool result = ini_write_value(fname, chapter, test_item, value,
-                                INI_FLAG_ITEM_UP_CREA);
+  const char* fname = "./test_ini_file.ini";
+  const char* chapter = "Chapter";
+  const char* test_item = "";
+  const char* value = "";
+  bool result =
+      ini_write_value(fname, chapter, test_item, value, INI_FLAG_ITEM_UP_CREA);
   EXPECT_FALSE(result);
 }
 
 TEST(IniFileTest, WriteItemInEmptyChapter_ExpectFalse) {
   // Write line in empty chapter
-  const char * fname = "./test_ini_file.ini";
-  const char *chapter = "";
-  const char * test_item = "Test_item";
-  const char * value = "test_value";
-  bool result = ini_write_value(fname, chapter, test_item, value,
-                                INI_FLAG_ITEM_UP_CREA);
+  const char* fname = "./test_ini_file.ini";
+  const char* chapter = "";
+  const char* test_item = "Test_item";
+  const char* value = "test_value";
+  bool result =
+      ini_write_value(fname, chapter, test_item, value, INI_FLAG_ITEM_UP_CREA);
   EXPECT_FALSE(result);
 }
 
-TEST(IniFileTest,ParseEmptyLine) {
-  char line[INI_LINE_LEN] = "";
-  char val[INI_LINE_LEN] = "";
-  char tag[INI_LINE_LEN] = "HMI";
+TEST(IniFileTest, ParseEmptyLine) {
+  char line[INI_LINE_LEN] = {0};
+  char val[INI_LINE_LEN] = {0};
+  const char* tag = "HMI";
 
   Ini_search_id result;
   result = ini_parse_line(line, tag, val);
   EXPECT_EQ(INI_NOTHING, result);
 }
 
-TEST(IniFileTest,ParseChapter) {
-  char line[INI_LINE_LEN] = "[HMI]";
-  char val[INI_LINE_LEN] = "";
-  char tag[INI_LINE_LEN] = "HMI";
+TEST(IniFileTest, ParseChapter) {
+  const char* line = "[HMI]";
+  char val[INI_LINE_LEN] = {0};
+  const char* tag = "HMI";
 
   Ini_search_id result;
   result = ini_parse_line(line, tag, val);
   EXPECT_EQ(INI_RIGHT_CHAPTER, result);
 }
 
-TEST(IniFileTest,ParseChapterTagEmpty) {
-  char line[INI_LINE_LEN] = "[HMI]";
-  char val[INI_LINE_LEN] = "";
-  char tag[INI_LINE_LEN] = "";
+TEST(IniFileTest, ParseChapterTagEmpty) {
+  const char* line = "[HMI]";
+  char val[INI_LINE_LEN] = {0};
+  char tag[INI_LINE_LEN] = {0};
 
   Ini_search_id result;
   result = ini_parse_line(line, tag, val);
   EXPECT_EQ(INI_WRONG_CHAPTER, result);
 }
 
-TEST(IniFileTest,ParseChapterWithUppercaseTag) {
-  char line[INI_LINE_LEN] = "[Security Manager]";
-  char val[INI_LINE_LEN] = "";
-  char tag[INI_LINE_LEN] = "SECURITY MANAGER";
+TEST(IniFileTest, ParseChapterWithUppercaseTag) {
+  const char* line = "[Security Manager]";
+  char val[INI_LINE_LEN] = {0};
+  const char* tag = "SECURITY MANAGER";
 
   Ini_search_id result;
   result = ini_parse_line(line, tag, val);
   EXPECT_EQ(INI_RIGHT_CHAPTER, result);
 }
 
-TEST(IniFileTest,ParseChapterWithLowcaseTag) {
-  char line[INI_LINE_LEN] = "[Security Manager]";
-  char val[INI_LINE_LEN] = "";
-  char tag[INI_LINE_LEN] = "Security Manager";
+TEST(IniFileTest, ParseChapterWithLowcaseTag) {
+  const char* line = "[Security Manager]";
+  char val[INI_LINE_LEN] = {0};
+  const char* tag = "Security Manager";
 
   Ini_search_id result;
   result = ini_parse_line(line, tag, val);
   EXPECT_EQ(INI_WRONG_CHAPTER, result);
 }
 
-TEST(IniFileTest,ParseWithWrongChapter) {
-  char line[INI_LINE_LEN] = "[HMI]";
-  char val[INI_LINE_LEN] = "";
-  char tag[INI_LINE_LEN] = "MAIN";
+TEST(IniFileTest, ParseWithWrongChapter) {
+  const char* line = "[HMI]";
+  char val[INI_LINE_LEN] = {0};
+  const char* tag = "MAIN";
 
   Ini_search_id result;
   result = ini_parse_line(line, tag, val);
   EXPECT_EQ(INI_WRONG_CHAPTER, result);
 }
 
-TEST(IniFileTest,ParseLineWithItem) {
+TEST(IniFileTest, ParseLineWithItem) {
   char line[INI_LINE_LEN] = "LaunchHMI = true";
   char val[INI_LINE_LEN] = "";
   char tag[INI_LINE_LEN] = "LAUNCHHMI";
@@ -284,52 +280,51 @@ TEST(IniFileTest,ParseLineWithItem) {
   EXPECT_EQ(*check_val, *val);
 }
 
-TEST(IniFileTest,ParseLineWithoutItem) {
-  char line[INI_LINE_LEN] = "LaunchHMI = ";
-  char val[INI_LINE_LEN] = "";
-  char tag[INI_LINE_LEN] = "LAUNCHHMI";
+TEST(IniFileTest, ParseLineWithoutItem) {
+  const char* line = "LaunchHMI = ";
+  char val[INI_LINE_LEN] = {0};
+  const char* tag = "LAUNCHHMI";
 
   Ini_search_id result;
   result = ini_parse_line(line, tag, val);
+  const char* res = val;
+  const char* check_val = "";
   EXPECT_EQ(INI_RIGHT_ITEM, result);
-
-  char check_val[INI_LINE_LEN] = "";
-  EXPECT_EQ(*check_val, *val);
+  EXPECT_STREQ(check_val, res);
 }
 
-TEST(IniFileTest,ParseLineWithEmptytag) {
-  char line[INI_LINE_LEN] = "LaunchHMI = true";
-  char val[INI_LINE_LEN] = "";
-  char tag[INI_LINE_LEN] = "";
+TEST(IniFileTest, ParseLineWithEmptytag) {
+  const char* line = "LaunchHMI = true";
+  char val[INI_LINE_LEN] = {0};
+  char tag[INI_LINE_LEN] = {0};
 
   Ini_search_id result;
   result = ini_parse_line(line, tag, val);
   EXPECT_EQ(INI_WRONG_ITEM, result);
 }
 
-TEST(IniFileTest,ParseLineWithLowcaseTag) {
-  char line[INI_LINE_LEN] = "LaunchHMI = true";
-  char val[INI_LINE_LEN] = "";
-  char tag[INI_LINE_LEN] = "LaunchHmi";
+TEST(IniFileTest, ParseLineWithLowcaseTag) {
+  const char* line = "LaunchHMI = true";
+  char val[INI_LINE_LEN] = {0};
+  const char* tag = "LaunchHmi";
 
   Ini_search_id result;
   result = ini_parse_line(line, tag, val);
   EXPECT_EQ(INI_WRONG_ITEM, result);
 }
 
-TEST(IniFileTest,ParseLineWithComment) {
-  char line[INI_LINE_LEN] = "; [HMI]";
-  char val[INI_LINE_LEN] = "";
-  char tag[INI_LINE_LEN] = "HMI";
+TEST(IniFileTest, ParseLineWithComment) {
+  const char* line = "; [HMI]";
+  char val[INI_LINE_LEN] = {0};
+  const char* tag = "HMI";
 
   Ini_search_id result;
   result = ini_parse_line(line, tag, val);
+  const char* res = val;
   EXPECT_EQ(INI_REMARK, result);
-
-  char check_val[INI_LINE_LEN] = ";";
-  EXPECT_EQ(*check_val, *val);
+  EXPECT_STREQ(line, res);
 }
 
-}  // namespace profile
+}  // namespace profile_test
 }  // namespace components
 }  // namespace test

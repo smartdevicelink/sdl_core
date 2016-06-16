@@ -80,8 +80,9 @@ class ISchemaItem {
    * @param RemoveFakeParameters contains true if need to remove fake parameters
    * from smart object otherwise contains false.
    **/
-  virtual void applySchema(NsSmartDeviceLink::NsSmartObjects::SmartObject& Object,
-                           const bool RemoveFakeParameters);
+  virtual void applySchema(
+      NsSmartDeviceLink::NsSmartObjects::SmartObject& Object,
+      const bool RemoveFakeParameters);
 
   /**
    * @brief Unapply schema.
@@ -98,8 +99,8 @@ class ISchemaItem {
    * @param pattern_object pattern object
    * @param result_object object to build
    */
-  virtual void BuildObjectBySchema(
-      const SmartObject& pattern_object, SmartObject& result_object);
+  virtual void BuildObjectBySchema(const SmartObject& pattern_object,
+                                   SmartObject& result_object);
 
   /**
    * @brief Get value param, depends of children
@@ -108,7 +109,7 @@ class ISchemaItem {
    */
   virtual size_t GetMemberSize();
 
-  virtual ~ISchemaItem() { }
+  virtual ~ISchemaItem() {}
 };
 typedef utils::SharedPtr<ISchemaItem> ISchemaItemPtr;
 }  // namespace NsSmartObjects

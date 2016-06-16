@@ -45,11 +45,14 @@ namespace transport_adapter {
 
 class UsbDevice : public Device {
  public:
-  UsbDevice(PlatformUsbDevice* usb_device, const std::string& name,
+  UsbDevice(PlatformUsbDevice* usb_device,
+            const std::string& name,
             const DeviceUID& unique_device_id)
       : Device(name, unique_device_id), usb_device_(usb_device) {}
 
-  PlatformUsbDevice* usb_device() const { return usb_device_; }
+  PlatformUsbDevice* usb_device() const {
+    return usb_device_;
+  }
 
  protected:
   virtual ~UsbDevice() {}
@@ -71,4 +74,4 @@ class UsbDevice : public Device {
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_USB_DEVICE
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_USB_DEVICE_H_

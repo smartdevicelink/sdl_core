@@ -38,10 +38,10 @@
 #include "qt_version.h"
 
 #if QT_4
-#  include <QtDeclarative/QDeclarativeExtensionPlugin>
+#include <QtDeclarative/QDeclarativeExtensionPlugin>
 typedef QDeclarativeExtensionPlugin ExtensionPlugin;
 #elif QT_5
-#  include <QtQml/QQmlExtensionPlugin>
+#include <QtQml/QQmlExtensionPlugin>
 typedef QQmlExtensionPlugin ExtensionPlugin;
 #endif  // QT_5
 

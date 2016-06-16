@@ -1,1 +1,0 @@
-../../../../include/application_manager/application_data_impl.h

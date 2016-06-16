@@ -31,16 +31,14 @@
 if(BUILD_TESTS)
 
 include_directories (
-  ${CMAKE_SOURCE_DIR}/src/3rd_party-static/gmock-1.7.0/include
-  ${CMAKE_SOURCE_DIR}/src/3rd_party-static/gmock-1.7.0/gtest/include
-  ${COMPONENTS_DIR}/include/utils
+  ${GMOCK_INCLUDE_DIRECTORY}
   ${COMPONENTS_DIR}/config_profile/include
   )
   
 
 set(testSources
-  profile_test.cc
-  ini_file_test.cc
+  ${COMPONENTS_DIR}/config_profile/test/profile_test.cc
+  ${COMPONENTS_DIR}/config_profile/test/ini_file_test.cc
 )
 
 set(testLibraries

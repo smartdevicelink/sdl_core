@@ -38,18 +38,16 @@
 
 namespace media_manager {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "FromMicRecorderAdapter")
+CREATE_LOGGERPTR_GLOBAL(logger_, "MediaManager")
 
 FromMicRecorderAdapter::FromMicRecorderAdapter()
-  : recorder_thread_(NULL)
-  , output_file_("default_recorded_audio.wav")
-  , kDefaultDuration(1000)
-  , duration_(kDefaultDuration) {
-
-}
+    : recorder_thread_(NULL)
+    , output_file_("audio.8bit.wav")  // default file within SDL appMain
+    , kDefaultDuration(1000)
+    , duration_(kDefaultDuration) {}
 
 FromMicRecorderAdapter::~FromMicRecorderAdapter() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   if (recorder_thread_) {
     recorder_thread_->join();
     delete recorder_thread_->delegate();
@@ -58,20 +56,18 @@ FromMicRecorderAdapter::~FromMicRecorderAdapter() {
 }
 
 void FromMicRecorderAdapter::StartActivity(int32_t application_key) {
-  LOG4CXX_DEBUG(logger_, "Start with app " << application_key);
+  LOGGER_DEBUG(logger_, "Start with app " << application_key);
   if (application_key == current_application_) {
-    LOG4CXX_WARN(logger_, "Running recording from mic for "
-                 << current_application_);
+    LOGGER_WARN(logger_,
+                "Running recording from mic for " << current_application_);
     return;
   }
 
-// Todd: No gstreamer recorder thread
+  // Todd: No gstreamer recorder thread
   if (!recorder_thread_) {
     FromMicToFileRecorderThread* thread_delegate =
-      new FromMicToFileRecorderThread(
-      output_file_, duration_);
-    recorder_thread_ = threads::CreateThread("MicrophoneRec",
-                                           thread_delegate);
+        new FromMicToFileRecorderThread(output_file_, duration_);
+    recorder_thread_ = threads::CreateThread("MicrophoneRec", thread_delegate);
   }
 
   if (NULL != recorder_thread_) {
@@ -81,11 +77,11 @@ void FromMicRecorderAdapter::StartActivity(int32_t application_key) {
 }
 
 void FromMicRecorderAdapter::StopActivity(int32_t application_key) {
-  LOG4CXX_INFO(logger_, "FromMicRecorderAdapter::StopActivity "
-               << application_key);
+  LOGGER_INFO(logger_,
+              "FromMicRecorderAdapter::StopActivity " << application_key);
   if (application_key != current_application_) {
-    LOG4CXX_WARN(logger_, "Running activity on other app key "
-                 << current_application_);
+    LOGGER_WARN(logger_,
+                "Running activity on other app key " << current_application_);
     return;
   }
 
@@ -98,8 +94,8 @@ void FromMicRecorderAdapter::StopActivity(int32_t application_key) {
   current_application_ = 0;
 }
 
-bool FromMicRecorderAdapter::is_app_performing_activity(int32_t
-                                                        application_key) {
+bool FromMicRecorderAdapter::is_app_performing_activity(
+    int32_t application_key) const {
   return (application_key == current_application_);
 }
 

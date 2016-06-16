@@ -44,20 +44,21 @@ namespace transport_adapter {
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 PlatformUsbDevice::PlatformUsbDevice(
-    usbd_device_instance_t* instance, usbd_device* device,
+    usbd_device_instance_t* instance,
+    usbd_device* device,
     const usbd_device_descriptor_t& device_descriptor)
-    : bus_number_(instance->path),
-      address_(instance->devno),
-      vendor_id_(instance->ident.vendor),
-      product_id_(instance->ident.device),
-      device_descriptor_(device_descriptor),
-      usbd_device_instance_(*instance),
-      usbd_device_(device) {}
+    : bus_number_(instance->path)
+    , address_(instance->devno)
+    , vendor_id_(instance->ident.vendor)
+    , product_id_(instance->ident.device)
+    , device_descriptor_(device_descriptor)
+    , usbd_device_instance_(*instance)
+    , usbd_device_(device) {}
 
 std::string PlatformUsbDevice::GetDescString(uint8_t index) const {
   char* str = usbd_string(usbd_device_, index, 0);
   if (NULL == str) {
-    LOG4CXX_INFO(logger_, "Failed to get USB string descriptor");
+    LOGGER_INFO(logger_, "Failed to get USB string descriptor");
     return "";
   }
   return std::string(str);

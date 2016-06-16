@@ -65,9 +65,7 @@ class Info {
    *
    * @param name Info class object name.
    */
-  explicit Info(std::string name)
-    : name_(name) {
-  }
+  explicit Info(std::string name) : name_(name) {}
 
   /**
    * @brief Return string with name.
@@ -110,13 +108,14 @@ class DeviceInfo : public Info {
    * @param mac_address MAC address of device.
    * @param name Name of device.
    */
-  DeviceInfo(DeviceHandle device_handle, std::string mac_address,
-             std::string name, const ConnectionType& connection_type)
-    : Info(name),
-      mac_address_(mac_address),
-      device_handle_(device_handle),
-      connection_type_(connection_type) {
-  }
+  DeviceInfo(DeviceHandle device_handle,
+             std::string mac_address,
+             std::string name,
+             const ConnectionType& connection_type)
+      : Info(name)
+      , mac_address_(mac_address)
+      , device_handle_(device_handle)
+      , connection_type_(connection_type) {}
 
   /**
    * @brief Return mac_address.
@@ -143,10 +142,10 @@ class DeviceInfo : public Info {
   /**
    * @brief Overloaded operator "==".
    */
-  friend bool operator ==(const DeviceInfo& first, const DeviceInfo& second);
+  friend bool operator==(const DeviceInfo& first, const DeviceInfo& second);
 
   // Needed for std::set container
-  bool operator <(const DeviceInfo& than) const {
+  bool operator<(const DeviceInfo& than) const {
     return device_handle_ < than.device_handle_;
   }
 };
@@ -154,10 +153,10 @@ class DeviceInfo : public Info {
 /**
  * @brief Assign fields of one DeviceInfo class to another.
  */
-inline bool operator ==(const DeviceInfo& first, const DeviceInfo& second) {
-  return first.name_ == second.name_
-         && first.mac_address_ == second.mac_address_
-         && first.device_handle_ == second.device_handle_;
+inline bool operator==(const DeviceInfo& first, const DeviceInfo& second) {
+  return first.name_ == second.name_ &&
+         first.mac_address_ == second.mac_address_ &&
+         first.device_handle_ == second.device_handle_;
 }
 }  // namespace transport_manager
 #endif  // SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_INFO_H_

@@ -38,15 +38,13 @@ namespace application_manager {
 namespace commands {
 
 OnVIAccPedalPositionNotification::OnVIAccPedalPositionNotification(
-    const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : NotificationFromHMI(message, application_manager) {}
 
-OnVIAccPedalPositionNotification::~OnVIAccPedalPositionNotification() {
-}
+OnVIAccPedalPositionNotification::~OnVIAccPedalPositionNotification() {}
 
 void OnVIAccPedalPositionNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   // prepare SmartObject for mobile factory
   (*message_)[strings::params][strings::function_id] =
@@ -58,4 +56,3 @@ void OnVIAccPedalPositionNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-
