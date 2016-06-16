@@ -101,7 +101,7 @@ class MessageHelper {
    * @brief Sends OnLanguageChange notification to application
    * @param connection_key Connection key of application
    */
-  static void SendOnLanguageChangeToMobile(uint32_t connection_key);
+  static void SendOnLanguageChangeToMobile(const uint32_t connection_key);
 
   /*
    * @brief Retrieve vehicle data map for param name in mobile request
@@ -117,7 +117,7 @@ class MessageHelper {
    * @return stringified value for enum if succedeed, otherwise - empty string
    */
   static std::string HMIResultToString(
-      hmi_apis::Common_Result::eType hmi_result);
+      const hmi_apis::Common_Result::eType hmi_result);
 
   /**
    * @brief Converts string to HMI Result enum value
@@ -134,7 +134,7 @@ class MessageHelper {
    * @return stringified value for enum if succedeed, otherwise - empty string
    */
   static std::string MobileResultToString(
-      mobile_apis::Result::eType mobile_result);
+      const mobile_apis::Result::eType mobile_result);
 
   /**
    * @brief Converts string to mobile Result enum value
@@ -177,20 +177,20 @@ class MessageHelper {
   * @param hmi_level Desired HMI Level
   */
   static std::string StringifiedHMILevel(
-      mobile_apis::HMILevel::eType hmi_level);
+      const mobile_apis::HMILevel::eType hmi_level);
 
   /*
   * @brief Used to obtain function name by its id
   * @param function_id Function ID
   */
   static std::string StringifiedFunctionID(
-      mobile_apis::FunctionID::eType function_id);
+      const mobile_apis::FunctionID::eType function_id);
 
   static smart_objects::SmartObjectSPtr CreateBlockedByPoliciesResponse(
-      mobile_apis::FunctionID::eType function_id,
-      mobile_apis::Result::eType result,
+      const mobile_apis::FunctionID::eType function_id,
+      const mobile_apis::Result::eType result,
       const uint32_t correlation_id,
-      uint32_t connection_key);
+      const uint32_t connection_key);
 
   /*
    * @brief Prepare GetDeviceListResponse
@@ -205,10 +205,10 @@ class MessageHelper {
       ApplicationManager& app_mngr);
 
   static smart_objects::SmartObjectSPtr CreateModuleInfoSO(
-      uint32_t function_id, ApplicationManager& app_mngr);
+      const uint32_t function_id, ApplicationManager& app_mngr);
 
   static smart_objects::SmartObjectSPtr CreateSetAppIcon(
-      const std::string& path_to_icon, uint32_t app_id);
+      const std::string& path_to_icon, const uint32_t app_id);
 
   /**
    * @brief Sends IVI subscription requests
@@ -272,13 +272,13 @@ class MessageHelper {
   static void SendChangeRegistrationRequestToHMI(ApplicationConstSharedPtr app,
                                                  ApplicationManager& app_mngr);
   static void SendAddVRCommandToHMI(
-      uint32_t cmd_id,
+      const uint32_t cmd_id,
       const smart_objects::SmartObject& vr_commands,
       const uint32_t app_id,
       ApplicationManager& app_mngr);
 
   static smart_objects::SmartObjectSPtr CreateAddVRCommandToHMI(
-      uint32_t cmd_id,
+      const uint32_t cmd_id,
       const smart_objects::SmartObject& vr_commands,
       const uint32_t app_id,
       ApplicationManager& app_mngr);
@@ -307,16 +307,17 @@ class MessageHelper {
    * @param is_unexpected_disconnect
    * Indicates if connection was unexpectedly lost by TM or HB
    */
-  static void SendOnAppUnregNotificationToHMI(ApplicationConstSharedPtr app,
-                                              bool is_unexpected_disconnect,
-                                              ApplicationManager& app_mngr);
+  static void SendOnAppUnregNotificationToHMI(
+      ApplicationConstSharedPtr app,
+      const bool is_unexpected_disconnect,
+      ApplicationManager& app_mngr);
 
   static NsSmartDeviceLink::NsSmartObjects::SmartObjectSPtr
   GetBCActivateAppRequestToHMI(
       ApplicationConstSharedPtr app,
       const protocol_handler::SessionObserver& session_observer,
       const policy::PolicyHandlerInterface& policy_handler,
-      hmi_apis::Common_HMILevel::eType level,
+      const hmi_apis::Common_HMILevel::eType level,
       bool send_policy_priority,
       ApplicationManager& app_mngr);
 
@@ -328,7 +329,7 @@ class MessageHelper {
   * @param permissions response parameters
   */
   static void SendSDLActivateAppResponse(policy::AppPermissions& permissions,
-                                         uint32_t correlation_id,
+                                         const uint32_t correlation_id,
                                          ApplicationManager& app_mngr);
 
   /**
@@ -346,7 +347,7 @@ class MessageHelper {
     * @param retries Seconds between retries
     */
   static void SendPolicyUpdate(const std::string& file_path,
-                               int timeout,
+                               const int timeout,
                                const std::vector<int>& retries,
                                ApplicationManager& app_mngr);
 
@@ -357,7 +358,7 @@ class MessageHelper {
    */
   static void SendGetUserFriendlyMessageResponse(
       const std::vector<policy::UserFriendlyMessage>& msg,
-      uint32_t correlation_id,
+      const uint32_t correlation_id,
       ApplicationManager& app_mngr);
 
   /**
@@ -367,7 +368,7 @@ class MessageHelper {
    */
   static void SendGetListOfPermissionsResponse(
       const std::vector<policy::FunctionalGroupPermission>& permissions,
-      uint32_t correlation_id,
+      const uint32_t correlation_id,
       ApplicationManager& app_mngr);
 
   /*
@@ -376,7 +377,8 @@ class MessageHelper {
    * @param connection_key  Application connection key
    *
    */
-  static void SendNaviStartStream(int32_t app_id, ApplicationManager& app_mngr);
+  static void SendNaviStartStream(const int32_t app_id,
+                                  ApplicationManager& app_mngr);
 
   /*
    * @brief Sends notification to HMI to stop video streaming
@@ -384,7 +386,8 @@ class MessageHelper {
    * @param connection_key  Application connection key
    *
    */
-  static void SendNaviStopStream(int32_t app_id, ApplicationManager& app_mngr);
+  static void SendNaviStopStream(const int32_t app_id,
+                                 ApplicationManager& app_mngr);
 
   /*
   * @brief Send notification for Update of Policy Table
@@ -395,13 +398,13 @@ class MessageHelper {
   * @param timeout If -1 no timeout is provdied
   */
   static void SendPolicySnapshotNotification(
-      uint32_t connection_key,
+      const uint32_t connection_key,
       const std::vector<uint8_t>& policy_data,
       const std::string& url,
       ApplicationManager& app_mngr);
 
   static void SendSystemRequestNotification(
-      uint32_t connection_key,
+      const uint32_t connection_key,
       NsSmartDeviceLink::NsSmartObjects::SmartObject& content,
       ApplicationManager& app_mngr);
 
@@ -432,7 +435,7 @@ class MessageHelper {
   * @param permissions updated permissions for application
   */
   static void SendOnPermissionsChangeNotification(
-      uint32_t connection_key,
+      const uint32_t connection_key,
       const policy::Permissions& permissions,
       ApplicationManager& app_mngr);
 
@@ -483,7 +486,7 @@ class MessageHelper {
    * @param connection_key  Application connection key
    *
    */
-  static void SendAudioStartStream(int32_t app_id,
+  static void SendAudioStartStream(const int32_t app_id,
                                    ApplicationManager& app_mngr);
 
   /*
@@ -492,11 +495,11 @@ class MessageHelper {
    * @param connection_key  Application connection key
    *
    */
-  static void SendAudioStopStream(int32_t connection_key,
+  static void SendAudioStopStream(const int32_t connection_key,
                                   ApplicationManager& app_mngr);
 
-  static void SendOnDataStreaming(protocol_handler::ServiceType service,
-                                  bool available,
+  static void SendOnDataStreaming(const protocol_handler::ServiceType service,
+                                  const bool available,
                                   ApplicationManager& app_mngr);
 
   /*
@@ -515,10 +518,10 @@ class MessageHelper {
   static bool SendUnsubscribedWayPoints(ApplicationManager& app_mngr);
 
   static smart_objects::SmartObjectSPtr CreateNegativeResponse(
-      uint32_t connection_key,
-      int32_t function_id,
+      const uint32_t connection_key,
+      const int32_t function_id,
       const uint32_t correlation_id,
-      int32_t result_code);
+      const int32_t result_code);
 
   /*
    * @brief Verify image and add image file full path
@@ -583,7 +586,7 @@ class MessageHelper {
   static void SubscribeApplicationToSoftButton(
       smart_objects::SmartObject& message_params,
       ApplicationSharedPtr app,
-      int32_t function_id);
+      const int32_t function_id);
 
   static bool PrintSmartObject(const smart_objects::SmartObject& object);
 
@@ -600,7 +603,7 @@ class MessageHelper {
    * @return Common language string representation
    */
   static std::string CommonLanguageToString(
-      hmi_apis::Common_Language::eType language);
+      const hmi_apis::Common_Language::eType language);
 
   /**
    * @brief Converts string to mobile language enum value
@@ -665,7 +668,7 @@ class MessageHelper {
       const std::string& language);
   static smart_objects::SmartObjectSPtr
   GetOnAppInterfaceUnregisteredNotificationToMobile(
-      int32_t connection_key,
+      const int32_t connection_key,
       mobile_api::AppInterfaceUnregisteredReason::eType reason);
 
  private:
