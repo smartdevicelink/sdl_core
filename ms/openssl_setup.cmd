@@ -29,6 +29,8 @@ if not exist %OPENSSL_BUILD_DIR% (
   pushd %OPENSSL_SRC_DIR%
   call git.exe clean -fxd
   call git.exe checkout origin/OpenSSL_1_0_2-stable
+rem The following commit is stable
+  call git.exe checkout 688c10544d2ba32428830d0634e91233c20920c1
 
   set OPENSSL_CONFIG_CMD=perl.exe Configure !OPENSSL_CONFIG_OPT! --prefix=!OPENSSL_BUILD_DIR!
   @echo Build OpenSSL for VC %BUILD_TYPE%: !OPENSSL_CONFIG_CMD!
