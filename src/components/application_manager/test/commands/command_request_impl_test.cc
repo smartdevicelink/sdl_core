@@ -75,6 +75,16 @@ using ::application_manager::RPCParams;
 typedef ::application_manager::commands::CommandRequestImpl::RequestState
     RequestState;
 
+namespace {
+const uint32_t kConnectionKey_ = 5u;
+const uint32_t kCorrelationId_ = 3u;
+const hmi_apis::FunctionID::eType kInvalidFunctionId_ =
+    hmi_apis::FunctionID::INVALID_ENUM;
+const std::string kPolicyAppId_ = "Test";
+const mobile_apis::Result::eType kMobResultSuccess_ =
+    mobile_apis::Result::SUCCESS;
+}  // namespace
+
 class CommandRequestImplTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
@@ -115,13 +125,6 @@ class CommandRequestImplTest
     return app;
   }
 
-  const uint32_t kConnectionKey_ = 5u;
-  const uint32_t kCorrelationId_ = 3u;
-  const hmi_apis::FunctionID::eType kInvalidFunctionId_ =
-      hmi_apis::FunctionID::INVALID_ENUM;
-  const std::string kPolicyAppId_ = "Test";
-  const mobile_apis::Result::eType kMobResultSuccess_ =
-      mobile_apis::Result::SUCCESS;
   sync_primitives::Lock app_set_lock_;
 };
 
