@@ -38,34 +38,38 @@ include_directories(
   ${GMOCK_INCLUDE_DIRECTORY}
 )
 
+#=============== COMMANDS =====================
 set(COMMANDS_PATHS
   ${CMAKE_CURRENT_SOURCE_DIR}/commands
-  ${CMAKE_CURRENT_SOURCE_DIR}/commands/hmi/hmi_notifications
 )
 collect_sources(COMMANDS_SOURCES "${COMMANDS_PATHS}")
 
-list(APPEND COMMANDS_SOURCES
-  ${CMAKE_CURRENT_SOURCE_DIR}/mock_message_helper.cc
+#=============== MESSAGE HELPER =====================
+set(MESSAGE_HELPER_SOURCES
+  ${CMAKE_CURRENT_SOURCE_DIR}/message_helper/message_helper_test.cc
 )
 
-set(MESSAGE_HELPER_PATHS
-  ${CMAKE_CURRENT_SOURCE_DIR}/message_helper
+#=============== MOCK MESSAGE HELPER LIB =====================
+set(MOCK_MESSAGE_HELPER_SOURCE
+  ${CMAKE_CURRENT_SOURCE_DIR}/message_helper/mock_message_helper.cc
 )
-collect_sources(MESSAGE_HELPER_SOURCES "${MESSAGE_HELPER_PATHS}")
 
+#=============== REQUEST CONTROLLER =====================
 set(REQUEST_CONTROLLER_PATHS
   ${CMAKE_CURRENT_SOURCE_DIR}/request_controller
 )
-# Temporary exclude some resumption tests from build due to compile errors
+# Temporary exclude some resumption tests from build due to compile errors APPLINK-26346
 set(REQUEST_CONTROLLER_EXCLUDE
   request_controller_test.cc
+  zero_request_amount_test.cc
 )
 collect_sources(REQUEST_CONTROLLER_SOURCES "${REQUEST_CONTROLLER_PATHS}" "${REQUEST_CONTROLLER_EXCLUDE}")
 
+#=============== RESUMPTION =====================
 set(RESUMPTION_PATHS
   ${CMAKE_CURRENT_SOURCE_DIR}/resumption
 )
-# Temporary exclude some resumption tests from build due to compile errors
+# Temporary exclude some resumption tests from build due to compile errors APPLINK-26346
 set(RESUMPTION_EXCLUDE
   resumption_data_json_test.cc
   resumption_data_db_test.cc
@@ -74,43 +78,53 @@ set(RESUMPTION_EXCLUDE
 get_sdk(SDK)
 if(SDK)
   if(${SDK} STREQUAL "qt")
+    # Temporary exclude some resumption tests from build due to compile errors APPLINK-26346
     list(APPEND RESUMPTION_EXCLUDE resumption_data_test.cc)
+    list(APPEND RESUMPTION_EXCLUDE resumption_sql_queries_test.cc)
   endif()
 endif()
 
 collect_sources(RESUMPTION_SOURCES "${RESUMPTION_PATHS}" "${RESUMPTION_EXCLUDE}")
 
-list(APPEND RESUMPTION_SOURCES
-  ${CMAKE_CURRENT_SOURCE_DIR}/mock_message_helper.cc
-)
-
+#=============== STATE CONTROLLER =====================
 set(STATE_CONTROLLER_PATHS
   ${CMAKE_CURRENT_SOURCE_DIR}/state_controller
 )
 collect_sources(STATE_CONTROLLER_SOURCES "${STATE_CONTROLLER_PATHS}")
 
-list(APPEND STATE_CONTROLLER_SOURCES
-  ${CMAKE_CURRENT_SOURCE_DIR}/mock_message_helper.cc
+#=============== MOBILE MESSAGE HANDLER=====================
+set(MOBILE_MESSAGE_HANDLER_PATHS
+  ${CMAKE_CURRENT_SOURCE_DIR}/mobile_message_handler
+)
+collect_sources(MOBILE_MESSAGE_HANDLER_SOURCES "${MOBILE_MESSAGE_HANDLER_PATHS}")
+
+#=============== APPLICATION =====================
+set(APPLICATION_SOURCES
+  ${CMAKE_CURRENT_SOURCE_DIR}/application_impl/
+)
+collect_sources(APPLICATION_SOURCES "${APPLICATION_PATHS}")
+
+#=============== APPLICATION_MANAGER =====================
+set(APPLICATION_MANAGER_SOURCES
+  ${CMAKE_CURRENT_SOURCE_DIR}/application_manager_impl_test.cc
 )
 
-set(EXCLUDE_PATHS
-  ${COMMANDS_PATHS}
-  ${MESSAGE_HELPER_PATHS}
-  ${REQUEST_CONTROLLER_PATHS}
-  ${RESUMPTION_PATHS}
-  ${STATE_CONTROLLER_PATHS}
+#=============== EVENT ENGINE =====================
+set(AM_EVENT_ENGINE_PATHS
+  ${CMAKE_CURRENT_SOURCE_DIR}/event_engine/event_engine_test.cc
+)
+collect_sources(AM_EVENT_ENGINE_SOURCES "${AM_EVENT_ENGINE_PATHS}")
+
+#=============== HMI CAPABILITIES =====================
+set(AM_HMI_CAPABILITIES_SOURCES
+  ${CMAKE_CURRENT_SOURCE_DIR}/hmi_capabilities_test.cc
 )
 
-set(PATHS
-  ${CMAKE_CURRENT_SOURCE_DIR}/include
-  ${CMAKE_CURRENT_SOURCE_DIR}
+##=============== POLICIES =====================
+set(AM_POLICIES_PATHS
+  ${CMAKE_CURRENT_SOURCE_DIR}/policies
 )
-# Temporary exclude some resumption tests from build due to compile errors
-list(APPEND EXCLUDE_PATHS
-  zero_request_amount_test.cc
-)
-
-collect_sources(SOURCES "${PATHS}" "${EXCLUDE_PATHS}")
+collect_sources(AM_POLICIES_SOURCES "${AM_POLICIES_PATHS}")
 
 set(LIBRARIES
   gmock
@@ -123,18 +137,40 @@ set(LIBRARIES
   connection_handler
   protocol_handler
   usage_statistics
+  smart_object
   formatters
   utils
   resumption
   jsoncpp
 )
 
-create_test(am_commands_test "${COMMANDS_SOURCES}" "${LIBRARIES}")
+add_library(mock_message_helper_library ${MOCK_MESSAGE_HELPER_SOURCE})
+
+create_test(application_manager_test "${APPLICATION_MANAGER_SOURCES}" "${LIBRARIES}")
+create_test(am_event_engine_test "${AM_EVENT_ENGINE_SOURCES}" "${LIBRARIES}")
+create_test(am_mobile_handler_test "${MOBILE_MESSAGE_HANDLER_SOURCES}" "${LIBRARIES}")
 create_test(am_message_helper_test "${MESSAGE_HELPER_SOURCES}" "${LIBRARIES}")
 create_test(am_request_controller_test "${REQUEST_CONTROLLER_SOURCES}" "${LIBRARIES}")
+
+list(REMOVE_ITEM LIBRARIES
+  am_message_helper
+)
+
+list(APPEND LIBRARIES
+  mock_message_helper_library
+)
+
+create_test(am_hmi_capabilities_test "${AM_HMI_CAPABILITIES_SOURCES}" "${LIBRARIES}")
+create_test(am_application_test "${APPLICATION_SOURCES}" "${LIBRARIES}")
+create_test(am_commands_test "${COMMANDS_SOURCES}" "${LIBRARIES}")
 create_test(am_resumption_test "${RESUMPTION_SOURCES}" "${LIBRARIES}")
 create_test(am_state_controller_test "${STATE_CONTROLLER_SOURCES}" "${LIBRARIES}")
-create_test(application_manager_test "${SOURCES}" "${LIBRARIES}")
+
+list(APPEND LIBRARIES
+  application_manager
+)
+
+create_test(am_policies_test "${AM_POLICIES_SOURCES}" "${LIBRARIES}")
 
 set(POLICY_LIBRARY_NAME ${CMAKE_SHARED_LIBRARY_PREFIX}Policy${CMAKE_SHARED_LIBRARY_SUFFIX})
 get_os(OS)

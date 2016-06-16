@@ -74,6 +74,8 @@ class MockResumeCtrl : public ResumeCtrl {
                void(const std::string& policy_app_id,
                     const std::string& device_id));
   MOCK_METHOD0(OnAppRegistrationEnd, void());
+  MOCK_METHOD1(set_resumption_storage,
+               void(utils::SharedPtr<ResumptionData> mock_storage));
 };
 
 }  // namespace resumption
