@@ -39,7 +39,7 @@
 #include "transport_manager/transport_adapter/transport_adapter_event.h"
 
 namespace transport_manager {
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
+SDL_CREATE_LOGGER("TransportManager")
 
 TransportAdapterListenerImpl::TransportAdapterListenerImpl(
     TransportManager* manager, TransportAdapter* adapter)
@@ -47,7 +47,7 @@ TransportAdapterListenerImpl::TransportAdapterListenerImpl(
 
 void TransportAdapterListenerImpl::OnSearchDeviceDone(
     const TransportAdapter* adapter) {
-  LOGGER_TRACE(logger_, "enter. adapter* " << adapter);
+  SDL_TRACE("enter. adapter* " << adapter);
   const TransportAdapterEvent event(
       TransportAdapterListenerImpl::EventTypeEnum::ON_SEARCH_DONE,
       transport_adapter_,
@@ -58,14 +58,14 @@ void TransportAdapterListenerImpl::OnSearchDeviceDone(
   if (transport_manager_ != NULL &&
       transport_manager::E_SUCCESS !=
           transport_manager_->ReceiveEventFromDevice(event)) {
-    LOGGER_WARN(logger_, "Failed to receive event from device");
+    SDL_WARN("Failed to receive event from device");
   }
-  LOGGER_TRACE(logger_, "exit");
+  SDL_TRACE("exit");
 }
 
 void TransportAdapterListenerImpl::OnSearchDeviceFailed(
     const TransportAdapter* adapter, const SearchDeviceError& error) {
-  LOGGER_TRACE(logger_, "enter. adapter: " << adapter << ", error: " << &error);
+  SDL_TRACE("enter. adapter: " << adapter << ", error: " << &error);
   SearchDeviceError* err = new SearchDeviceError(error);
   const TransportAdapterEvent event(
       TransportAdapterListenerImpl::EventTypeEnum::ON_SEARCH_FAIL,
@@ -77,14 +77,14 @@ void TransportAdapterListenerImpl::OnSearchDeviceFailed(
   if (transport_manager_ != NULL &&
       transport_manager::E_SUCCESS !=
           transport_manager_->ReceiveEventFromDevice(event)) {
-    LOGGER_WARN(logger_, "Failed to receive event from device");
+    SDL_WARN("Failed to receive event from device");
   }
-  LOGGER_TRACE(logger_, "exit");
+  SDL_TRACE("exit");
 }
 
 void TransportAdapterListenerImpl::OnDeviceListUpdated(
     const TransportAdapter* adapter) {
-  LOGGER_TRACE(logger_, "enter. adapter* " << adapter);
+  SDL_TRACE("enter. adapter* " << adapter);
   const TransportAdapterEvent event(
       TransportAdapterListenerImpl::EventTypeEnum::ON_DEVICE_LIST_UPDATED,
       transport_adapter_,
@@ -95,14 +95,14 @@ void TransportAdapterListenerImpl::OnDeviceListUpdated(
   if (transport_manager_ != NULL &&
       transport_manager::E_SUCCESS !=
           transport_manager_->ReceiveEventFromDevice(event)) {
-    LOGGER_WARN(logger_, "Failed to receive event from device");
+    SDL_WARN("Failed to receive event from device");
   }
-  LOGGER_TRACE(logger_, "exit");
+  SDL_TRACE("exit");
 }
 
 void TransportAdapterListenerImpl::OnFindNewApplicationsRequest(
     const TransportAdapter* adapter) {
-  LOGGER_TRACE(logger_, "enter. adapter* " << adapter);
+  SDL_TRACE("enter. adapter* " << adapter);
   const TransportAdapterEvent event(
       TransportAdapterListenerImpl::ON_FIND_NEW_APPLICATIONS_REQUEST,
       transport_adapter_,
@@ -113,18 +113,17 @@ void TransportAdapterListenerImpl::OnFindNewApplicationsRequest(
   if (transport_manager_ != NULL &&
       transport_manager::E_SUCCESS !=
           transport_manager_->ReceiveEventFromDevice(event)) {
-    LOGGER_WARN(logger_, "Failed to receive event from device");
+    SDL_WARN("Failed to receive event from device");
   }
-  LOGGER_TRACE(logger_, "exit");
+  SDL_TRACE("exit");
 }
 
 void TransportAdapterListenerImpl::OnConnectDone(
     const TransportAdapter* adapter,
     const DeviceUID& device,
     const ApplicationHandle& application_id) {
-  LOGGER_TRACE(logger_,
-               "enter adapter*: " << adapter << ", device: " << &device
-                                  << ", application_id: " << &application_id);
+  SDL_TRACE("enter adapter*: " << adapter << ", device: " << &device
+                               << ", application_id: " << &application_id);
   const TransportAdapterEvent event(
       TransportAdapterListenerImpl::EventTypeEnum::ON_CONNECT_DONE,
       transport_adapter_,
@@ -135,9 +134,9 @@ void TransportAdapterListenerImpl::OnConnectDone(
   if (transport_manager_ != NULL &&
       transport_manager::E_SUCCESS !=
           transport_manager_->ReceiveEventFromDevice(event)) {
-    LOGGER_WARN(logger_, "Failed to receive event from device");
+    SDL_WARN("Failed to receive event from device");
   }
-  LOGGER_TRACE(logger_, "exit");
+  SDL_TRACE("exit");
 }
 
 void TransportAdapterListenerImpl::OnConnectFailed(
@@ -145,10 +144,9 @@ void TransportAdapterListenerImpl::OnConnectFailed(
     const DeviceUID& device,
     const ApplicationHandle& app_id,
     const ConnectError& error) {
-  LOGGER_TRACE(logger_,
-               "enter. adapter: " << adapter << ", device: " << &device
-                                  << ", application_id: " << &app_id
-                                  << ", error: " << &error);
+  SDL_TRACE("enter. adapter: " << adapter << ", device: " << &device
+                               << ", application_id: " << &app_id
+                               << ", error: " << &error);
   ConnectError* err = new ConnectError(error);
   const TransportAdapterEvent event(
       TransportAdapterListenerImpl::EventTypeEnum::ON_CONNECT_FAIL,
@@ -160,18 +158,17 @@ void TransportAdapterListenerImpl::OnConnectFailed(
   if (transport_manager_ != NULL &&
       transport_manager::E_SUCCESS !=
           transport_manager_->ReceiveEventFromDevice(event)) {
-    LOGGER_WARN(logger_, "Failed to receive event from device");
+    SDL_WARN("Failed to receive event from device");
   }
-  LOGGER_TRACE(logger_, "exit");
+  SDL_TRACE("exit");
 }
 
 void TransportAdapterListenerImpl::OnDisconnectDone(
     const TransportAdapter* adapter,
     const DeviceUID& device,
     const ApplicationHandle& app_id) {
-  LOGGER_TRACE(logger_,
-               "enter. adapter: " << adapter << ", device: " << &device
-                                  << ", application_id: " << &app_id);
+  SDL_TRACE("enter. adapter: " << adapter << ", device: " << &device
+                               << ", application_id: " << &app_id);
   const TransportAdapterEvent event(
       TransportAdapterListenerImpl::EventTypeEnum::ON_DISCONNECT_DONE,
       transport_adapter_,
@@ -182,9 +179,9 @@ void TransportAdapterListenerImpl::OnDisconnectDone(
   if (transport_manager_ != NULL &&
       transport_manager::E_SUCCESS !=
           transport_manager_->ReceiveEventFromDevice(event)) {
-    LOGGER_WARN(logger_, "Failed to receive event from device");
+    SDL_WARN("Failed to receive event from device");
   }
-  LOGGER_TRACE(logger_, "exit");
+  SDL_TRACE("exit");
 }
 
 void TransportAdapterListenerImpl::OnDisconnectFailed(
@@ -192,10 +189,9 @@ void TransportAdapterListenerImpl::OnDisconnectFailed(
     const DeviceUID& device,
     const ApplicationHandle& app_id,
     const DisconnectError& error) {
-  LOGGER_TRACE(logger_,
-               "enter. adapter: " << adapter << ", device: " << &device
-                                  << ", application_id: " << &app_id
-                                  << ", error: " << &error);
+  SDL_TRACE("enter. adapter: " << adapter << ", device: " << &device
+                               << ", application_id: " << &app_id
+                               << ", error: " << &error);
   DisconnectError* err = new DisconnectError(error);
   const TransportAdapterEvent event(
       TransportAdapterListenerImpl::EventTypeEnum::ON_DISCONNECT_FAIL,
@@ -207,9 +203,9 @@ void TransportAdapterListenerImpl::OnDisconnectFailed(
   if (transport_manager_ != NULL &&
       transport_manager::E_SUCCESS !=
           transport_manager_->ReceiveEventFromDevice(event)) {
-    LOGGER_WARN(logger_, "Failed to receive event from device");
+    SDL_WARN("Failed to receive event from device");
   }
-  LOGGER_TRACE(logger_, "exit");
+  SDL_TRACE("exit");
 }
 
 void TransportAdapterListenerImpl::OnDisconnectDeviceDone(
@@ -225,10 +221,9 @@ void TransportAdapterListenerImpl::OnDataReceiveDone(
     const DeviceUID& device,
     const ApplicationHandle& app_id,
     const ::protocol_handler::RawMessagePtr data_container) {
-  LOGGER_TRACE(logger_,
-               "enter. adapter: " << adapter << ", device: " << &device
-                                  << ", application_id: " << &app_id
-                                  << ", data_container: " << data_container);
+  SDL_TRACE("enter. adapter: " << adapter << ", device: " << &device
+                               << ", application_id: " << &app_id
+                               << ", data_container: " << data_container);
   const TransportAdapterEvent event(
       TransportAdapterListenerImpl::EventTypeEnum::ON_RECEIVED_DONE,
       transport_adapter_,
@@ -239,9 +234,9 @@ void TransportAdapterListenerImpl::OnDataReceiveDone(
   if (transport_manager_ != NULL &&
       transport_manager::E_SUCCESS !=
           transport_manager_->ReceiveEventFromDevice(event)) {
-    LOGGER_WARN(logger_, "Failed to receive event from device");
+    SDL_WARN("Failed to receive event from device");
   }
-  LOGGER_TRACE(logger_, "exit");
+  SDL_TRACE("exit");
 }
 
 void TransportAdapterListenerImpl::OnDataReceiveFailed(
@@ -249,10 +244,9 @@ void TransportAdapterListenerImpl::OnDataReceiveFailed(
     const DeviceUID& device,
     const ApplicationHandle& app_id,
     const DataReceiveError& error) {
-  LOGGER_TRACE(logger_,
-               "enter. adapter: " << adapter << ", device: " << &device
-                                  << ", application_id: " << &app_id
-                                  << ", error: " << &error);
+  SDL_TRACE("enter. adapter: " << adapter << ", device: " << &device
+                               << ", application_id: " << &app_id
+                               << ", error: " << &error);
   DataReceiveError* err = new DataReceiveError(error);
   const TransportAdapterEvent event(
       TransportAdapterListenerImpl::EventTypeEnum::ON_RECEIVED_FAIL,
@@ -264,9 +258,9 @@ void TransportAdapterListenerImpl::OnDataReceiveFailed(
   if (transport_manager_ != NULL &&
       transport_manager::E_SUCCESS !=
           transport_manager_->ReceiveEventFromDevice(event)) {
-    LOGGER_WARN(logger_, "Failed to receive event from device");
+    SDL_WARN("Failed to receive event from device");
   }
-  LOGGER_TRACE(logger_, "exit");
+  SDL_TRACE("exit");
 }
 
 void TransportAdapterListenerImpl::OnDataSendDone(
@@ -274,10 +268,9 @@ void TransportAdapterListenerImpl::OnDataSendDone(
     const DeviceUID& device,
     const ApplicationHandle& app_id,
     const ::protocol_handler::RawMessagePtr data_container) {
-  LOGGER_TRACE(logger_,
-               "enter. adapter: " << adapter << ", device: " << &device
-                                  << ", application_id: " << &app_id
-                                  << ", data_container: " << data_container);
+  SDL_TRACE("enter. adapter: " << adapter << ", device: " << &device
+                               << ", application_id: " << &app_id
+                               << ", data_container: " << data_container);
   const TransportAdapterEvent event(
       TransportAdapterListenerImpl::EventTypeEnum::ON_SEND_DONE,
       transport_adapter_,
@@ -288,9 +281,9 @@ void TransportAdapterListenerImpl::OnDataSendDone(
   if (transport_manager_ != NULL &&
       transport_manager::E_SUCCESS !=
           transport_manager_->ReceiveEventFromDevice(event)) {
-    LOGGER_WARN(logger_, "Failed to receive event from device");
+    SDL_WARN("Failed to receive event from device");
   }
-  LOGGER_TRACE(logger_, "exit");
+  SDL_TRACE("exit");
 }
 
 void TransportAdapterListenerImpl::OnDataSendFailed(
@@ -299,11 +292,10 @@ void TransportAdapterListenerImpl::OnDataSendFailed(
     const ApplicationHandle& app_id,
     const ::protocol_handler::RawMessagePtr data_container,
     const DataSendError& error) {
-  LOGGER_TRACE(logger_,
-               "enter. adapter: " << adapter << ", device: " << &device
-                                  << ", application_id: " << &app_id
-                                  << ", data_container: " << data_container
-                                  << ", error: " << &error);
+  SDL_TRACE("enter. adapter: " << adapter << ", device: " << &device
+                               << ", application_id: " << &app_id
+                               << ", data_container: " << data_container
+                               << ", error: " << &error);
   DataSendError* err = new DataSendError(error);
   const TransportAdapterEvent event(
       TransportAdapterListenerImpl::EventTypeEnum::ON_SEND_FAIL,
@@ -315,9 +307,9 @@ void TransportAdapterListenerImpl::OnDataSendFailed(
   if (transport_manager_ != NULL &&
       transport_manager::E_SUCCESS !=
           transport_manager_->ReceiveEventFromDevice(event)) {
-    LOGGER_WARN(logger_, "Failed to receive event from device");
+    SDL_WARN("Failed to receive event from device");
   }
-  LOGGER_TRACE(logger_, "exit");
+  SDL_TRACE("exit");
 }
 
 void TransportAdapterListenerImpl::OnConnectRequested(
@@ -330,10 +322,9 @@ void TransportAdapterListenerImpl::OnUnexpectedDisconnect(
     const DeviceUID& device,
     const ApplicationHandle& application,
     const CommunicationError& error) {
-  LOGGER_TRACE(logger_,
-               "enter. adapter: " << adapter << ", device: " << &device
-                                  << ", application: " << &application
-                                  << ", error: " << &error);
+  SDL_TRACE("enter. adapter: " << adapter << ", device: " << &device
+                               << ", application: " << &application
+                               << ", error: " << &error);
   CommunicationError* err = new CommunicationError(error);
   const TransportAdapterEvent event(
       TransportAdapterListenerImpl::EventTypeEnum::ON_UNEXPECTED_DISCONNECT,
@@ -345,18 +336,17 @@ void TransportAdapterListenerImpl::OnUnexpectedDisconnect(
   if (transport_manager_ != NULL &&
       transport_manager::E_SUCCESS !=
           transport_manager_->ReceiveEventFromDevice(event)) {
-    LOGGER_WARN(logger_, "Failed to receive event from device");
+    SDL_WARN("Failed to receive event from device");
   }
-  LOGGER_TRACE(logger_, "exit");
+  SDL_TRACE("exit");
 }
 
 void TransportAdapterListenerImpl::OnCommunicationError(
     const TransportAdapter* adapter,
     const DeviceUID& device,
     const ApplicationHandle& app_id) {
-  LOGGER_TRACE(logger_,
-               "enter. adapter: " << adapter << ", device: " << &device
-                                  << ", application_id: " << &app_id);
+  SDL_TRACE("enter. adapter: " << adapter << ", device: " << &device
+                               << ", application_id: " << &app_id);
   const TransportAdapterEvent event(
       TransportAdapterListenerImpl::EventTypeEnum::ON_COMMUNICATION_ERROR,
       transport_adapter_,
@@ -367,8 +357,8 @@ void TransportAdapterListenerImpl::OnCommunicationError(
   if (transport_manager_ != NULL &&
       transport_manager::E_SUCCESS !=
           transport_manager_->ReceiveEventFromDevice(event)) {
-    LOGGER_WARN(logger_, "Failed to receive event from device");
+    SDL_WARN("Failed to receive event from device");
   }
-  LOGGER_TRACE(logger_, "exit");
+  SDL_TRACE("exit");
 }
 }  // namespace transport_manager

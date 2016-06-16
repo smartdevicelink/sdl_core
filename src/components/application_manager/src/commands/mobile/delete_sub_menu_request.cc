@@ -47,13 +47,13 @@ DeleteSubMenuRequest::DeleteSubMenuRequest(
 DeleteSubMenuRequest::~DeleteSubMenuRequest() {}
 
 void DeleteSubMenuRequest::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
-    LOGGER_ERROR(logger_, "Application is not registered");
+    SDL_ERROR("Application is not registered");
     return;
   }
 
@@ -61,7 +61,7 @@ void DeleteSubMenuRequest::Run() {
       (*message_)[strings::msg_params][strings::menu_id].asInt();
 
   if (!app->FindSubMenu(menu_id)) {
-    LOGGER_ERROR(logger_, "Menu with id " << menu_id << " is not found.");
+    SDL_ERROR("Menu with id " << menu_id << " is not found.");
     SendResponse(false, mobile_apis::Result::INVALID_ID);
     return;
   }
@@ -78,7 +78,7 @@ void DeleteSubMenuRequest::Run() {
 
 void DeleteSubMenuRequest::DeleteSubMenuVRCommands(
     ApplicationConstSharedPtr app) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   const DataAccessor<CommandsMap> accessor = app->commands_map();
   const CommandsMap& commands = accessor.GetData();
@@ -105,7 +105,7 @@ void DeleteSubMenuRequest::DeleteSubMenuVRCommands(
 
 void DeleteSubMenuRequest::DeleteSubMenuUICommands(
     ApplicationSharedPtr const app) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   const DataAccessor<CommandsMap> accessor(app->commands_map());
   const CommandsMap& commands = accessor.GetData();
@@ -113,7 +113,7 @@ void DeleteSubMenuRequest::DeleteSubMenuUICommands(
 
   while (commands.end() != it) {
     if (!(*it->second).keyExists(strings::menu_params)) {
-      LOGGER_ERROR(logger_, "menu_params not exist");
+      SDL_ERROR("menu_params not exist");
       ++it;
       continue;
     }
@@ -136,7 +136,7 @@ void DeleteSubMenuRequest::DeleteSubMenuUICommands(
 }
 
 void DeleteSubMenuRequest::on_event(const event_engine::Event& event) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   using namespace helpers;
   const smart_objects::SmartObject& message = event.smart_object();
 
@@ -155,7 +155,7 @@ void DeleteSubMenuRequest::on_event(const event_engine::Event& event) {
           application_manager_.application(connection_key());
 
       if (!application) {
-        LOGGER_ERROR(logger_, "NULL pointer");
+        SDL_ERROR("NULL pointer");
         return;
       }
 
@@ -174,7 +174,7 @@ void DeleteSubMenuRequest::on_event(const event_engine::Event& event) {
       break;
     }
     default: {
-      LOGGER_ERROR(logger_, "Received unknown event" << event.id());
+      SDL_ERROR("Received unknown event" << event.id());
       return;
     }
   }

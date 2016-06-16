@@ -36,29 +36,28 @@
 
 namespace resumption {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "Resumption")
+SDL_CREATE_LOGGER("Resumption")
 
 LastState::LastState(const std::string& app_storage_folder,
                      const std::string& app_info_storage)
     : app_storage_folder_(app_storage_folder)
     , app_info_storage_(app_info_storage) {
   LoadFromFileSystem();
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 }
 
 LastState::~LastState() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   SaveToFileSystem();
 }
 
 void LastState::SaveToFileSystem() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   const std::string str = dictionary_.ToJson();
   const std::vector<uint8_t> char_vector_pdata(str.begin(), str.end());
 
   DCHECK(file_system::CreateDirectoryRecursively(app_storage_folder_));
-  LOGGER_INFO(logger_,
-              "LastState::SaveToFileSystem " << app_info_storage_ << str);
+  SDL_INFO("LastState::SaveToFileSystem " << app_info_storage_ << str);
   DCHECK(file_system::Write(app_info_storage_, char_vector_pdata));
 }
 
@@ -71,24 +70,22 @@ void LastState::LoadFromFileSystem() {
   std::string buffer;
   bool result = file_system::ReadFile(app_info_storage_, buffer);
   if (!result) {
-    LOGGER_WARN(logger_,
-                "Failed to load last state. Cannot read file "
-                    << app_info_storage_);
+    SDL_WARN("Failed to load last state. Cannot read file "
+             << app_info_storage_);
     return;
   }
   if (buffer.empty()) {
-    LOGGER_DEBUG(logger_, "Buffer is empty.");
+    SDL_DEBUG("Buffer is empty.");
     return;
   }
 
   JsonValue::ParseResult parse_result = JsonValue::Parse(buffer);
   if (!parse_result.second) {
-    LOGGER_WARN(logger_,
-                "Failed to load last state. Cannot parse json:\n" << buffer);
+    SDL_WARN("Failed to load last state. Cannot parse json:\n" << buffer);
     return;
   }
   dictionary_ = parse_result.first;
-  LOGGER_INFO(logger_, "Valid last state was found." << dictionary_.ToJson());
+  SDL_INFO("Valid last state was found." << dictionary_.ToJson());
   return;
 }
 }

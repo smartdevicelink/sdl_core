@@ -44,7 +44,7 @@ OnVIHeadLampStatusNotification::OnVIHeadLampStatusNotification(
 OnVIHeadLampStatusNotification::~OnVIHeadLampStatusNotification() {}
 
 void OnVIHeadLampStatusNotification::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   // prepare SmartObject for mobile factory
   (*message_)[strings::params][strings::function_id] =

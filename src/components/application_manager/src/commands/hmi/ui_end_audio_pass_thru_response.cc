@@ -44,7 +44,7 @@ UIEndAudioPassThruResponse::UIEndAudioPassThruResponse(
 UIEndAudioPassThruResponse::~UIEndAudioPassThruResponse() {}
 
 void UIEndAudioPassThruResponse::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   event_engine::Event event(hmi_apis::FunctionID::UI_EndAudioPassThru);
   event.set_smart_object(*message_);

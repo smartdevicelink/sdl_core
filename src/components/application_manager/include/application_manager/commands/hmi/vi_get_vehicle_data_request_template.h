@@ -60,7 +60,7 @@ class VIGetVehicleDataRequestTemplate : public RequestToHMI {
    * @brief Execute command with sending DBus thin request to HMI
    **/
   virtual void Run() {
-    LOGGER_AUTO_TRACE(logger_);
+    SDL_AUTO_TRACE();
     SendRequest();
   }
 

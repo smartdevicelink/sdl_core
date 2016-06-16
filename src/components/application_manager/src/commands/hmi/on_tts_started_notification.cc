@@ -43,7 +43,7 @@ OnTTSStartedNotification::OnTTSStartedNotification(
 OnTTSStartedNotification::~OnTTSStartedNotification() {}
 
 void OnTTSStartedNotification::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   event_engine::Event event(hmi_apis::FunctionID::TTS_Started);
   event.set_smart_object(*message_);
   event.raise(application_manager_.event_dispatcher());

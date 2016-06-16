@@ -46,7 +46,7 @@ namespace resumption {
 
 namespace Formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "Resumption")
+SDL_CREATE_LOGGER("Resumption")
 
 ResumptionDataJson::ResumptionDataJson(
     LastState& last_state,
@@ -57,13 +57,12 @@ void ResumptionDataJson::SaveApplication(
     app_mngr::ApplicationSharedPtr application) {
   using namespace app_mngr;
   using namespace utils::json;
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   DCHECK_OR_RETURN_VOID(application);
 
   const std::string& policy_app_id = application->policy_app_id();
-  LOGGER_DEBUG(logger_,
-               "app_id : " << application->app_id()
-                           << " policy_app_id : " << policy_app_id);
+  SDL_DEBUG("app_id : " << application->app_id()
+                        << " policy_app_id : " << policy_app_id);
   const std::string hash = application->curHash();
   const uint32_t grammar_id = application->get_grammar_id();
   const utils::json::JsonValue::UInt time_stamp =
@@ -108,13 +107,13 @@ void ResumptionDataJson::SaveApplication(
   json_app[strings::application_files] = tmp;
   json_app[strings::time_stamp] = time_stamp;
   json_app[strings::subscribed_for_way_points] = is_subscribed_for_way_points;
-  LOGGER_DEBUG(logger_, "SaveApplication : " << json_app.ToJson());
+  SDL_DEBUG("SaveApplication : " << json_app.ToJson());
 }
 
 bool ResumptionDataJson::IsHMIApplicationIdExist(uint32_t hmi_app_id) const {
   using namespace app_mngr;
   using namespace utils::json;
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   sync_primitives::AutoLock autolock(resumption_lock_);
   const JsonValueRef saved_applications = GetSavedApplications();
   for (JsonValue::const_iterator itr = saved_applications.begin(),
@@ -135,13 +134,13 @@ uint32_t ResumptionDataJson::GetHMIApplicationID(
   using namespace app_mngr;
   using namespace utils::json;
 
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   sync_primitives::AutoLock autolock(resumption_lock_);
   uint32_t hmi_app_id = 0;
 
   const int idx = GetObjectIndex(policy_app_id, device_id);
   if (-1 == idx) {
-    LOGGER_WARN(logger_, "Application not saved");
+    SDL_WARN("Application not saved");
     return hmi_app_id;
   }
 
@@ -150,7 +149,7 @@ uint32_t ResumptionDataJson::GetHMIApplicationID(
       json_app.HasMember(strings::device_id)) {
     hmi_app_id = json_app[strings::hmi_app_id].AsUInt();
   }
-  LOGGER_DEBUG(logger_, "hmi_app_id :" << hmi_app_id);
+  SDL_DEBUG("hmi_app_id :" << hmi_app_id);
   return hmi_app_id;
 }
 
@@ -158,7 +157,7 @@ void ResumptionDataJson::OnSuspend() {
   using namespace app_mngr;
   using namespace utils::json;
 
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   sync_primitives::AutoLock autolock(resumption_lock_);
   JsonValue to_save;
   JsonValueRef saved_applications = GetSavedApplications();
@@ -171,20 +170,20 @@ void ResumptionDataJson::OnSuspend() {
       const uint32_t counter_value = ign_off_count.AsUInt();
       ign_off_count = utils::json::JsonValue::UInt(counter_value + 1);
     } else {
-      LOGGER_WARN(logger_, "Unknown key among saved applications");
+      SDL_WARN("Unknown key among saved applications");
       (*itr)[strings::ign_off_count] = utils::json::JsonValue::UInt(1);
     }
     to_save.Append(*itr);
   }
   SetSavedApplication(to_save);
   SetLastIgnOffTime(time(NULL));
-  LOGGER_DEBUG(logger_, GetResumptionData().ToJson());
+  SDL_DEBUG(GetResumptionData().ToJson());
 }
 
 void ResumptionDataJson::OnAwake() {
   using namespace app_mngr;
   using namespace utils::json;
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   sync_primitives::AutoLock autolock(resumption_lock_);
   JsonValueRef saved_applications = GetSavedApplications();
   for (JsonValue::iterator itr = saved_applications.begin(),
@@ -194,13 +193,13 @@ void ResumptionDataJson::OnAwake() {
     if ((*itr).HasMember(strings::ign_off_count)) {
       const uint32_t ign_off_count = (*itr)[strings::ign_off_count].AsUInt();
       if (0 == ign_off_count) {
-        LOGGER_WARN(logger_, "Application has not been suspended");
+        SDL_WARN("Application has not been suspended");
       } else {
         (*itr)[strings::ign_off_count] =
             utils::json::JsonValue::UInt(ign_off_count - 1);
       }
     } else {
-      LOGGER_WARN(logger_, "Unknown key among saved applications");
+      SDL_WARN("Unknown key among saved applications");
       (*itr)[strings::ign_off_count] = utils::json::JsonValue::UInt(0);
     }
   }
@@ -211,22 +210,22 @@ bool ResumptionDataJson::GetHashId(const std::string& policy_app_id,
                                    std::string& hash_id) const {
   using namespace app_mngr;
   using namespace utils::json;
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   sync_primitives::AutoLock autolock(resumption_lock_);
   const int idx = GetObjectIndex(policy_app_id, device_id);
   if (-1 == idx) {
-    LOGGER_WARN(logger_, "Application not saved");
+    SDL_WARN("Application not saved");
     return false;
   }
 
   const JsonValueRef json_app = GetSavedApplications()[idx];
-  LOGGER_DEBUG(logger_, "Saved_application_data: " << json_app.ToJson());
+  SDL_DEBUG("Saved_application_data: " << json_app.ToJson());
   if (json_app.HasMember(strings::hash_id) &&
       json_app.HasMember(strings::time_stamp)) {
     hash_id = json_app[strings::hash_id].AsString();
     return true;
   }
-  LOGGER_WARN(logger_, "There are some unknown keys in the dictionary.");
+  SDL_WARN("There are some unknown keys in the dictionary.");
   return false;
 }
 
@@ -235,7 +234,7 @@ bool ResumptionDataJson::GetSavedApplication(
     const std::string& device_id,
     smart_objects::SmartObject& saved_app) const {
   using namespace utils::json;
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   sync_primitives::AutoLock autolock(resumption_lock_);
   const int idx = GetObjectIndex(policy_app_id, device_id);
   if (-1 == idx) {
@@ -250,7 +249,7 @@ bool ResumptionDataJson::RemoveApplicationFromSaved(
     const std::string& policy_app_id, const std::string& device_id) {
   using namespace app_mngr;
   using namespace utils::json;
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   sync_primitives::AutoLock autolock(resumption_lock_);
   bool result = false;
   std::vector<JsonValue> temp;
@@ -276,7 +275,7 @@ bool ResumptionDataJson::RemoveApplicationFromSaved(
   }
 
   if (false == result) {
-    LOGGER_TRACE(logger_, "EXIT result: " << (result ? "true" : "false"));
+    SDL_TRACE("EXIT result: " << (result ? "true" : "false"));
     return result;
   }
 
@@ -285,26 +284,26 @@ bool ResumptionDataJson::RemoveApplicationFromSaved(
        ++it) {
     saved_applications.Append((*it));
   }
-  LOGGER_TRACE(logger_, "EXIT result: " << (result ? "true" : "false"));
+  SDL_TRACE("EXIT result: " << (result ? "true" : "false"));
   return result;
 }
 
 uint32_t ResumptionDataJson::GetIgnOffTime() const {
   using namespace app_mngr;
   using namespace utils::json;
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   sync_primitives::AutoLock autolock(resumption_lock_);
   JsonValueRef resumption = GetResumptionData();
   if (!resumption.HasMember(strings::last_ign_off_time)) {
     resumption[strings::last_ign_off_time] = utils::json::JsonValue::UInt(0);
-    LOGGER_WARN(logger_, "last_save_time section is missed");
+    SDL_WARN("last_save_time section is missed");
   }
   return resumption[strings::last_ign_off_time].AsUInt();
 }
 
 ssize_t ResumptionDataJson::IsApplicationSaved(
     const std::string& policy_app_id, const std::string& device_id) const {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   sync_primitives::AutoLock autolock(resumption_lock_);
   return GetObjectIndex(policy_app_id, device_id);
 }
@@ -313,7 +312,7 @@ utils::json::JsonValueRef ResumptionDataJson::GetFromSavedOrAppend(
     const std::string& policy_app_id, const std::string& device_id) const {
   using namespace app_mngr;
   using namespace utils::json;
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   sync_primitives::AutoLock autolock(resumption_lock_);
   JsonValueRef saved_applications = GetSavedApplications();
   for (JsonValue::iterator itr = saved_applications.begin(),
@@ -333,7 +332,7 @@ void ResumptionDataJson::GetDataForLoadResumeData(
     smart_objects::SmartObject& saved_data) const {
   using namespace app_mngr;
   using namespace utils::json;
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   sync_primitives::AutoLock autolock(resumption_lock_);
   smart_objects::SmartObject so_array_data(smart_objects::SmartType_Array);
   int i = 0;
@@ -370,14 +369,13 @@ void ResumptionDataJson::UpdateHmiLevel(
     const std::string& policy_app_id,
     const std::string& device_id,
     mobile_apis::HMILevel::eType hmi_level) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   using namespace app_mngr;
 
   int idx = GetObjectIndex(policy_app_id, device_id);
   if (-1 == idx) {
-    LOGGER_WARN(logger_,
-                "Application isn't saved with mobile_app_id = "
-                    << policy_app_id << " device_id = " << device_id);
+    SDL_WARN("Application isn't saved with mobile_app_id = "
+             << policy_app_id << " device_id = " << device_id);
     return;
   }
   GetSavedApplications()[idx][strings::hmi_level] =
@@ -387,16 +385,16 @@ void ResumptionDataJson::UpdateHmiLevel(
 utils::json::JsonValueRef ResumptionDataJson::GetSavedApplications() const {
   using namespace app_mngr;
   using namespace utils::json;
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   sync_primitives::AutoLock autolock(resumption_lock_);
   JsonValueRef resumption = GetResumptionData();
   if (!resumption.HasMember(strings::resume_app_list)) {
     resumption[strings::resume_app_list] = JsonValue(ValueType::ARRAY_VALUE);
-    LOGGER_WARN(logger_, "app_list section is missed");
+    SDL_WARN("app_list section is missed");
   }
   JsonValueRef resume_app_list = resumption[strings::resume_app_list];
   if (!resume_app_list.IsArray()) {
-    LOGGER_ERROR(logger_, "resume_app_list type INVALID rewrite");
+    SDL_ERROR("resume_app_list type INVALID rewrite");
     resume_app_list = JsonValue(ValueType::ARRAY_VALUE);
   }
   return resume_app_list;
@@ -405,16 +403,16 @@ utils::json::JsonValueRef ResumptionDataJson::GetSavedApplications() const {
 utils::json::JsonValueRef ResumptionDataJson::GetResumptionData() const {
   using namespace app_mngr;
   using namespace utils::json;
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   sync_primitives::AutoLock autolock(resumption_lock_);
   JsonValue& last_state = last_state_.dictionary();
   if (!last_state.HasMember(strings::resumption)) {
     last_state[strings::resumption] = JsonValue(ValueType::OBJECT_VALUE);
-    LOGGER_WARN(logger_, "resumption section is missed");
+    SDL_WARN("resumption section is missed");
   }
   utils::json::JsonValueRef resumption = last_state[strings::resumption];
   if (!resumption.IsObject()) {
-    LOGGER_ERROR(logger_, "resumption type INVALID rewrite");
+    SDL_ERROR("resumption type INVALID rewrite");
     resumption = JsonValue(ValueType::OBJECT_VALUE);
   }
   return resumption;
@@ -424,7 +422,7 @@ ssize_t ResumptionDataJson::GetObjectIndex(const std::string& policy_app_id,
                                            const std::string& device_id) const {
   using namespace app_mngr;
   using namespace utils::json;
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   sync_primitives::AutoLock autolock(resumption_lock_);
   const JsonValueRef apps = GetSavedApplications();
   const JsonValue::ArrayIndex size = apps.Size();
@@ -436,7 +434,7 @@ ssize_t ResumptionDataJson::GetObjectIndex(const std::string& policy_app_id,
       const std::string& saved_device_id =
           apps[idx][strings::device_id].AsString();
       if (device_id == saved_device_id && policy_app_id == saved_app_id) {
-        LOGGER_DEBUG(logger_, "Found " << idx);
+        SDL_DEBUG("Found " << idx);
         return idx;
       }
     }
@@ -447,7 +445,7 @@ ssize_t ResumptionDataJson::GetObjectIndex(const std::string& policy_app_id,
 bool ResumptionDataJson::IsResumptionDataValid(uint32_t index) const {
   using namespace app_mngr;
   using namespace utils::json;
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   sync_primitives::AutoLock autolock(resumption_lock_);
   const JsonValueRef json_app = GetSavedApplications()[index];
   if (!json_app.HasMember(strings::app_id) ||
@@ -456,13 +454,13 @@ bool ResumptionDataJson::IsResumptionDataValid(uint32_t index) const {
       !json_app.HasMember(strings::hmi_app_id) ||
       !json_app.HasMember(strings::time_stamp) ||
       !json_app.HasMember(strings::device_id)) {
-    LOGGER_ERROR(logger_, "Wrong resumption data");
+    SDL_ERROR("Wrong resumption data");
     return false;
   }
 
   if (json_app.HasMember(strings::hmi_app_id) &&
       0 >= json_app[strings::hmi_app_id].AsUInt()) {
-    LOGGER_ERROR(logger_, "Wrong resumption hmi app ID");
+    SDL_ERROR("Wrong resumption hmi app ID");
     return false;
   }
 
@@ -471,7 +469,7 @@ bool ResumptionDataJson::IsResumptionDataValid(uint32_t index) const {
 
 void ResumptionDataJson::SetSavedApplication(
     utils::json::JsonValueRef apps_json) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   sync_primitives::AutoLock autolock(resumption_lock_);
   utils::json::JsonValueRef app_list = GetSavedApplications();
   app_list = apps_json;
@@ -479,30 +477,29 @@ void ResumptionDataJson::SetSavedApplication(
 
 void ResumptionDataJson::SetLastIgnOffTime(time_t ign_off_time) {
   using namespace app_mngr;
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   sync_primitives::AutoLock autolock(resumption_lock_);
-  LOGGER_WARN(logger_, "ign_off_time = " << ign_off_time);
+  SDL_WARN("ign_off_time = " << ign_off_time);
   utils::json::JsonValueRef resumption = GetResumptionData();
   resumption[strings::last_ign_off_time] =
       utils::json::JsonValue::UInt(ign_off_time);
 }
 
 bool ResumptionDataJson::Init() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   return true;
 }
 
 bool ResumptionDataJson::DropAppDataResumption(const std::string& device_id,
                                                const std::string& app_id) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   using namespace app_mngr;
   sync_primitives::AutoLock autolock(resumption_lock_);
   utils::json::JsonValueRef application =
       GetFromSavedOrAppend(app_id, device_id);
   if (application.IsNull()) {
-    LOGGER_DEBUG(logger_,
-                 "Application " << app_id << " with device_id " << device_id
-                                << " hasn't been found in resumption data.");
+    SDL_DEBUG("Application " << app_id << " with device_id " << device_id
+                             << " hasn't been found in resumption data.");
     return false;
   }
   application[strings::application_commands].Clear();
@@ -514,10 +511,9 @@ bool ResumptionDataJson::DropAppDataResumption(const std::string& device_id,
   // Seems there is no interface for json wrapper - needs to be created
   // application.removeMember(strings::grammar_id);
   application[strings::grammar_id].Clear();
-  LOGGER_DEBUG(logger_,
-               "Resumption data for application "
-                   << app_id << " with device_id " << device_id
-                   << " has been dropped.");
+  SDL_DEBUG("Resumption data for application " << app_id << " with device_id "
+                                               << device_id
+                                               << " has been dropped.");
   return true;
 }
 

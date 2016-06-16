@@ -35,7 +35,7 @@
 
 namespace sync_primitives {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
+SDL_CREATE_LOGGER("Utils")
 
 Lock::Lock()
 #ifndef NDEBUG
@@ -58,7 +58,7 @@ Lock::Lock(bool is_recursive)
 Lock::~Lock() {
 #ifndef NDEBUG
   if (0 < lock_taken_) {
-    LOGGER_ERROR(logger_, "Destroying non-released mutex " << &mutex_);
+    SDL_ERROR("Destroying non-released mutex " << &mutex_);
   }
 #endif
   delete mutex_;

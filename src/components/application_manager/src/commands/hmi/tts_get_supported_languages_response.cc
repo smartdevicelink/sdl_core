@@ -43,7 +43,7 @@ TTSGetSupportedLanguagesResponse::TTSGetSupportedLanguagesResponse(
 TTSGetSupportedLanguagesResponse::~TTSGetSupportedLanguagesResponse() {}
 
 void TTSGetSupportedLanguagesResponse::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   const hmi_apis::Common_Result::eType code =
       static_cast<hmi_apis::Common_Result::eType>(

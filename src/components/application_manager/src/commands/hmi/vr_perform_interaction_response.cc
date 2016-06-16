@@ -43,7 +43,7 @@ VRPerformInteractionResponse::VRPerformInteractionResponse(
 VRPerformInteractionResponse::~VRPerformInteractionResponse() {}
 
 void VRPerformInteractionResponse::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   event_engine::Event event(hmi_apis::FunctionID::VR_PerformInteraction);
   event.set_smart_object(*message_);
   event.raise(application_manager_.event_dispatcher());

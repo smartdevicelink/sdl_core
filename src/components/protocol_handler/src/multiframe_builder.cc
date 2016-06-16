@@ -41,7 +41,7 @@
 
 namespace protocol_handler {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "ProtocolHandler")
+SDL_CREATE_LOGGER("ProtocolHandler")
 
 MultiFrameBuilder::MultiFrameBuilder() : consecutive_frame_wait_msecs_(0u) {}
 
@@ -50,19 +50,18 @@ void MultiFrameBuilder::set_waiting_timeout(
   consecutive_frame_wait_msecs_ =
       static_cast<int64_t>(consecutive_frame_wait_msecs);
   if (consecutive_frame_wait_msecs == 0) {
-    LOGGER_WARN(logger_, "Waiting timout disabled");
+    SDL_WARN("Waiting timout disabled");
   } else {
-    LOGGER_DEBUG(logger_,
-                 "Waiting time in msec: " << consecutive_frame_wait_msecs_);
+    SDL_DEBUG("Waiting time in msec: " << consecutive_frame_wait_msecs_);
   }
 }
 
 bool MultiFrameBuilder::AddConnection(const ConnectionID connection_id) {
-  LOGGER_DEBUG(logger_, "Adding connection_id: " << connection_id);
-  LOGGER_DEBUG(logger_, "Current state is: " << multiframes_map_);
+  SDL_DEBUG("Adding connection_id: " << connection_id);
+  SDL_DEBUG("Current state is: " << multiframes_map_);
   const MultiFrameMap::const_iterator it = multiframes_map_.find(connection_id);
   if (it != multiframes_map_.end()) {
-    LOGGER_ERROR(logger_, "Exists connection_id: " << connection_id);
+    SDL_ERROR("Exists connection_id: " << connection_id);
     return false;
   }
   multiframes_map_[connection_id] = SessionToFrameMap();
@@ -70,62 +69,59 @@ bool MultiFrameBuilder::AddConnection(const ConnectionID connection_id) {
 }
 
 bool MultiFrameBuilder::RemoveConnection(const ConnectionID connection_id) {
-  LOGGER_DEBUG(logger_, "Removing connection_id: " << connection_id);
-  LOGGER_DEBUG(logger_, "Current state is: " << multiframes_map_);
+  SDL_DEBUG("Removing connection_id: " << connection_id);
+  SDL_DEBUG("Current state is: " << multiframes_map_);
   const MultiFrameMap::iterator it = multiframes_map_.find(connection_id);
   if (it == multiframes_map_.end()) {
-    LOGGER_ERROR(logger_, "Non-existent connection_id: " << connection_id);
+    SDL_ERROR("Non-existent connection_id: " << connection_id);
     return false;
   }
   const SessionToFrameMap& session_to_frame_map = it->second;
   if (!session_to_frame_map.empty()) {
     // FIXME(EZamakhov): Ask ReqManager - do we need to send GenericError
-    LOGGER_WARN(logger_,
-                "For connection_id: " << connection_id
-                                      << " waiting: " << multiframes_map_);
+    SDL_WARN("For connection_id: " << connection_id
+                                   << " waiting: " << multiframes_map_);
   }
   multiframes_map_.erase(it);
   return true;
 }
 
 ProtocolFramePtrList MultiFrameBuilder::PopMultiframes() {
-  LOGGER_AUTO_TRACE(logger_);
-  LOGGER_DEBUG(logger_, "Current state is: " << multiframes_map_);
+  SDL_AUTO_TRACE();
+  SDL_DEBUG("Current state is: " << multiframes_map_);
   ProtocolFramePtrList outpute_frame_list;
   for (MultiFrameMap::iterator connection_it = multiframes_map_.begin();
        connection_it != multiframes_map_.end();
        ++connection_it) {
-    LOGGER_TRACE(logger_, "Step over connection: " << connection_it->first);
+    SDL_TRACE("Step over connection: " << connection_it->first);
     SessionToFrameMap& session_map = connection_it->second;
 
     for (SessionToFrameMap::iterator session_it = session_map.begin();
          session_it != session_map.end();
          ++session_it) {
-      LOGGER_TRACE(
-          logger_,
-          "Step over session: " << static_cast<int>(session_it->first));
+      SDL_TRACE("Step over session: " << static_cast<int>(session_it->first));
       MessageIDToFrameMap& messageId_map = session_it->second;
 
       MessageIDToFrameMap::iterator messageId_it = messageId_map.begin();
       while (messageId_it != messageId_map.end()) {
-        LOGGER_TRACE(logger_, "Step over messageId: " << messageId_it->first);
+        SDL_TRACE("Step over messageId: " << messageId_it->first);
         ProtocolFrameData& frame_data = messageId_it->second;
         ProtocolFramePtr frame = frame_data.frame;
 
         if (frame && frame->frame_data() == FRAME_DATA_LAST_CONSECUTIVE &&
             frame->payload_size() > 0u) {
-          LOGGER_DEBUG(logger_, "Ready frame: " << frame);
+          SDL_DEBUG("Ready frame: " << frame);
           outpute_frame_list.push_back(frame);
           messageId_map.erase(messageId_it++);
           continue;
         }
         if (consecutive_frame_wait_msecs_ != 0) {
-          LOGGER_TRACE(logger_, "Expiration verification");
+          SDL_TRACE("Expiration verification");
           const int64_t time_left =
               date_time::DateTime::calculateTimeSpan(frame_data.append_time);
-          LOGGER_DEBUG(logger_, "mSecs left: " << time_left);
+          SDL_DEBUG("mSecs left: " << time_left);
           if (time_left >= consecutive_frame_wait_msecs_) {
-            LOGGER_WARN(logger_, "Expired frame: " << frame);
+            SDL_WARN("Expired frame: " << frame);
             outpute_frame_list.push_back(frame);
             messageId_map.erase(messageId_it++);
             continue;
@@ -135,27 +131,27 @@ ProtocolFramePtrList MultiFrameBuilder::PopMultiframes() {
       }  // iteration over messageId_map
     }    // iteration over session_map
   }      // iteration over multiframes_map_
-  LOGGER_DEBUG(logger_, "Result frames count: " << outpute_frame_list.size());
+  SDL_DEBUG("Result frames count: " << outpute_frame_list.size());
   return outpute_frame_list;
 }
 
 RESULT_CODE MultiFrameBuilder::AddFrame(const ProtocolFramePtr packet) {
-  LOGGER_AUTO_TRACE(logger_);
-  LOGGER_DEBUG(logger_, "Handling frame: " << packet);
-  LOGGER_DEBUG(logger_, "Current state is: " << multiframes_map_);
+  SDL_AUTO_TRACE();
+  SDL_DEBUG("Handling frame: " << packet);
+  SDL_DEBUG("Current state is: " << multiframes_map_);
   if (!packet) {
-    LOGGER_ERROR(logger_, "Skip empty frame");
+    SDL_ERROR("Skip empty frame");
     return RESULT_FAIL;
   }
   switch (packet->frame_type()) {
     case FRAME_TYPE_FIRST:
-      LOGGER_TRACE(logger_, "FRAME_TYPE_FIRST");
+      SDL_TRACE("FRAME_TYPE_FIRST");
       return HandleFirstFrame(packet);
     case FRAME_TYPE_CONSECUTIVE:
-      LOGGER_TRACE(logger_, "FRAME_TYPE_CONSECUTIVE");
+      SDL_TRACE("FRAME_TYPE_CONSECUTIVE");
       return HandleConsecutiveFrame(packet);
     default:
-      LOGGER_ERROR(logger_, "Frame is not FIRST or CONSECUTIVE :" << packet);
+      SDL_ERROR("Frame is not FIRST or CONSECUTIVE :" << packet);
       break;
   }
   return RESULT_FAIL;
@@ -163,17 +159,17 @@ RESULT_CODE MultiFrameBuilder::AddFrame(const ProtocolFramePtr packet) {
 
 RESULT_CODE MultiFrameBuilder::HandleFirstFrame(const ProtocolFramePtr packet) {
   DCHECK_OR_RETURN(packet->frame_type() == FRAME_TYPE_FIRST, RESULT_FAIL);
-  LOGGER_DEBUG(logger_, "Waiting : " << multiframes_map_);
-  LOGGER_DEBUG(logger_, "Handling FIRST frame: " << packet);
+  SDL_DEBUG("Waiting : " << multiframes_map_);
+  SDL_DEBUG("Handling FIRST frame: " << packet);
   if (packet->payload_size() != 0u) {
-    LOGGER_ERROR(logger_, "First frame shall have no data:" << packet);
+    SDL_ERROR("First frame shall have no data:" << packet);
     return RESULT_FAIL;
   }
 
   const ConnectionID connection_id = packet->connection_id();
   MultiFrameMap::iterator connection_it = multiframes_map_.find(connection_id);
   if (connection_it == multiframes_map_.end()) {
-    LOGGER_ERROR(logger_, "Unknown connection_id: " << connection_id);
+    SDL_ERROR("Unknown connection_id: " << connection_id);
     return RESULT_FAIL;
   }
   SessionToFrameMap& session_map = connection_it->second;
@@ -185,19 +181,16 @@ RESULT_CODE MultiFrameBuilder::HandleFirstFrame(const ProtocolFramePtr packet) {
   const MessageID message_id = packet->message_id();
   MessageIDToFrameMap::iterator messageId_it = messageId_map.find(message_id);
   if (messageId_it != messageId_map.end()) {
-    LOGGER_ERROR(logger_,
-                 "Already waiting message for connection_id: "
-                     << connection_id
-                     << ", session_id: " << static_cast<int>(session_id)
-                     << ", message_id: " << message_id);
+    SDL_ERROR("Already waiting message for connection_id: "
+              << connection_id
+              << ", session_id: " << static_cast<int>(session_id)
+              << ", message_id: " << message_id);
     return RESULT_FAIL;
   }
 
-  LOGGER_DEBUG(logger_,
-               "Start waiting frames for connection_id: "
-                   << connection_id
-                   << ", session_id: " << static_cast<int>(session_id)
-                   << ", message_id: " << message_id);
+  SDL_DEBUG("Start waiting frames for connection_id: "
+            << connection_id << ", session_id: " << static_cast<int>(session_id)
+            << ", message_id: " << message_id);
   ProtocolFrameData frame_data;
   frame_data.frame = packet;
   frame_data.append_time = date_time::DateTime::getCurrentTime();
@@ -208,12 +201,12 @@ RESULT_CODE MultiFrameBuilder::HandleFirstFrame(const ProtocolFramePtr packet) {
 RESULT_CODE MultiFrameBuilder::HandleConsecutiveFrame(
     const ProtocolFramePtr packet) {
   DCHECK_OR_RETURN(packet->frame_type() == FRAME_TYPE_CONSECUTIVE, RESULT_FAIL);
-  LOGGER_DEBUG(logger_, "Handling CONSECUTIVE frame: " << packet);
+  SDL_DEBUG("Handling CONSECUTIVE frame: " << packet);
 
   const ConnectionID connection_id = packet->connection_id();
   MultiFrameMap::iterator connection_it = multiframes_map_.find(connection_id);
   if (connection_it == multiframes_map_.end()) {
-    LOGGER_ERROR(logger_, "Unknown connection_id: " << connection_id);
+    SDL_ERROR("Unknown connection_id: " << connection_id);
     return RESULT_FAIL;
   }
   SessionToFrameMap& session_map = connection_it->second;
@@ -225,11 +218,10 @@ RESULT_CODE MultiFrameBuilder::HandleConsecutiveFrame(
   const MessageID message_id = packet->message_id();
   MessageIDToFrameMap::iterator messageId_it = messageId_map.find(message_id);
   if (messageId_it == messageId_map.end()) {
-    LOGGER_ERROR(logger_,
-                 "No waiting message for connection_id: "
-                     << connection_id
-                     << ", session_id: " << static_cast<int>(session_id)
-                     << ", message_id: " << message_id);
+    SDL_ERROR("No waiting message for connection_id: "
+              << connection_id
+              << ", session_id: " << static_cast<int>(session_id)
+              << ", message_id: " << message_id);
     return RESULT_FAIL;
   }
 
@@ -244,7 +236,7 @@ RESULT_CODE MultiFrameBuilder::HandleConsecutiveFrame(
 
   if (is_last_consecutive) {
     // TODO(EZamakhov): implement count of frames and result size verification
-    LOGGER_DEBUG(logger_, "Last CONSECUTIVE frame");
+    SDL_DEBUG("Last CONSECUTIVE frame");
   } else {
     uint8_t previous_frame_data = assembling_frame->frame_data();
     if (previous_frame_data == std::numeric_limits<uint8_t>::max()) {
@@ -252,34 +244,29 @@ RESULT_CODE MultiFrameBuilder::HandleConsecutiveFrame(
     }
     // The next frame data is bigger at 1
     if (new_frame_data != (previous_frame_data + 1)) {
-      LOGGER_ERROR(logger_,
-                   "Unexpected CONSECUTIVE frame for connection_id: "
-                       << connection_id
-                       << ", session_id: " << static_cast<int>(session_id)
-                       << ", message_id: " << message_id
-                       << ", frame: " << packet);
+      SDL_ERROR("Unexpected CONSECUTIVE frame for connection_id: "
+                << connection_id
+                << ", session_id: " << static_cast<int>(session_id)
+                << ", message_id: " << message_id << ", frame: " << packet);
       return RESULT_FAIL;
     }
   }
 
   assembling_frame->set_frame_data(new_frame_data);
 
-  LOGGER_DEBUG(logger_,
-               "Appending " << packet->data_size() << " bytes "
-                            << "; frame_data "
-                            << static_cast<int>(new_frame_data)
-                            << "; for connection_id: " << connection_id
-                            << ", session_id: " << static_cast<int>(session_id)
-                            << ", message_id: " << message_id);
+  SDL_DEBUG("Appending " << packet->data_size() << " bytes "
+                         << "; frame_data " << static_cast<int>(new_frame_data)
+                         << "; for connection_id: " << connection_id
+                         << ", session_id: " << static_cast<int>(session_id)
+                         << ", message_id: " << message_id);
 
   if (assembling_frame->appendData(packet->data(), packet->data_size()) !=
       RESULT_OK) {
-    LOGGER_ERROR(logger_, "Failed to append frame for multiframe message.");
+    SDL_ERROR("Failed to append frame for multiframe message.");
     return RESULT_FAIL;
   }
-  LOGGER_INFO(logger_,
-              "Assembled frame with payload size: "
-                  << assembling_frame->payload_size());
+  SDL_INFO("Assembled frame with payload size: "
+           << assembling_frame->payload_size());
   frame_data.append_time = date_time::DateTime::getCurrentTime();
   return RESULT_OK;
 }

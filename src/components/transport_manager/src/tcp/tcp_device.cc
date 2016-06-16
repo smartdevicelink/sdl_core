@@ -36,35 +36,34 @@
 namespace transport_manager {
 namespace transport_adapter {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
+SDL_CREATE_LOGGER("TransportManager")
 
 TcpDevice::TcpDevice(const utils::HostAddress& address, const std::string& name)
     : Device(name, name)
     , applications_mutex_()
     , address_(address)
     , last_handle_(0) {
-  LOGGER_AUTO_TRACE(logger_);
-  LOGGER_DEBUG(logger_, "Created TCPDevice with name " << name);
+  SDL_AUTO_TRACE();
+  SDL_DEBUG("Created TCPDevice with name " << name);
 }
 
 bool TcpDevice::IsSameAs(const Device* other) const {
-  LOGGER_AUTO_TRACE(logger_);
-  LOGGER_DEBUG(logger_, "Device: " << other);
+  SDL_AUTO_TRACE();
+  SDL_DEBUG("Device: " << other);
   const TcpDevice* other_tcp_device = static_cast<const TcpDevice*>(other);
 
   if (other_tcp_device->address_ == address_) {
-    LOGGER_TRACE(
-        logger_,
+    SDL_TRACE(
         "exit with TRUE. Condition: other_tcp_device->address_ == address_");
     return true;
   } else {
-    LOGGER_TRACE(logger_, "exit with FALSE");
+    SDL_TRACE("exit with FALSE");
     return false;
   }
 }
 
 ApplicationList TcpDevice::GetApplicationList() const {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   ApplicationList app_list;
   app_list.reserve(applications_.size());
   sync_primitives::AutoLock locker(applications_mutex_);
@@ -79,41 +78,41 @@ ApplicationList TcpDevice::GetApplicationList() const {
 
 ApplicationHandle TcpDevice::AddApplication(const uint16_t port,
                                             const bool is_incomming) {
-  LOGGER_AUTO_TRACE(logger_);
-  LOGGER_DEBUG(logger_, "Port " << port);
+  SDL_AUTO_TRACE();
+  SDL_DEBUG("Port " << port);
   Application appplication(is_incomming, port);
   sync_primitives::AutoLock locker(applications_mutex_);
   const ApplicationHandle app_handle = ++last_handle_;
   applications_[app_handle] = appplication;
-  LOGGER_DEBUG(logger_, "App_handle " << app_handle);
+  SDL_DEBUG("App_handle " << app_handle);
   return app_handle;
 }
 
 void TcpDevice::RemoveApplication(const ApplicationHandle app_handle) {
-  LOGGER_AUTO_TRACE(logger_);
-  LOGGER_DEBUG(logger_, "ApplicationHandle: " << app_handle);
+  SDL_AUTO_TRACE();
+  SDL_DEBUG("ApplicationHandle: " << app_handle);
   sync_primitives::AutoLock locker(applications_mutex_);
   applications_.erase(app_handle);
 }
 
 TcpDevice::~TcpDevice() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 }
 
 int TcpDevice::GetApplicationPort(const ApplicationHandle app_handle) const {
-  LOGGER_AUTO_TRACE(logger_);
-  LOGGER_DEBUG(logger_, "ApplicationHandle: " << app_handle);
+  SDL_AUTO_TRACE();
+  SDL_DEBUG("ApplicationHandle: " << app_handle);
   std::map<ApplicationHandle, Application>::const_iterator it =
       applications_.find(app_handle);
   if (applications_.end() == it) {
-    LOGGER_WARN(logger_, "Application was not found");
+    SDL_WARN("Application was not found");
     return -1;
   }
   if (it->second.incoming) {
-    LOGGER_DEBUG(logger_, "Application is incoming");
+    SDL_DEBUG("Application is incoming");
     return -1;
   }
-  LOGGER_DEBUG(logger_, "port " << it->second.port);
+  SDL_DEBUG("port " << it->second.port);
   return it->second.port;
 }
 

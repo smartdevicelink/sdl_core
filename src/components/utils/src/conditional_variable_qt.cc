@@ -37,7 +37,7 @@
 
 namespace sync_primitives {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
+SDL_CREATE_LOGGER("Utils")
 
 ConditionalVariable::ConditionalVariable() : cond_var_() {}
 
@@ -61,7 +61,7 @@ bool ConditionalVariable::Wait(Lock& lock) {
   const bool wait_status = cond_var_.wait(lock.mutex_);
   lock.AssertFreeAndMarkTaken();
   if (!wait_status) {
-    LOGGER_ERROR(logger_, "Failed to wait for conditional variable");
+    SDL_ERROR("Failed to wait for conditional variable");
     return false;
   }
   return true;

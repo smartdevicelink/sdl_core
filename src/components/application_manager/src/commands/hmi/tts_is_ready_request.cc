@@ -43,7 +43,7 @@ TTSIsReadyRequest::TTSIsReadyRequest(const MessageSharedPtr& message,
 TTSIsReadyRequest::~TTSIsReadyRequest() {}
 
 void TTSIsReadyRequest::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   SendRequest();
 }

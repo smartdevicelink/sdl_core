@@ -42,7 +42,7 @@
 namespace transport_manager {
 namespace transport_adapter {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
+SDL_CREATE_LOGGER("TransportManager")
 
 TcpConnectionFactory::TcpConnectionFactory(
     TransportAdapterController* controller)
@@ -54,19 +54,18 @@ TransportAdapter::Error TcpConnectionFactory::Init() {
 
 TransportAdapter::Error TcpConnectionFactory::CreateConnection(
     const DeviceUID& device_uid, const ApplicationHandle& app_handle) {
-  LOGGER_AUTO_TRACE(logger_);
-  LOGGER_DEBUG(logger_,
-               "DeviceUID: " << &device_uid
-                             << ", ApplicationHandle: " << &app_handle);
+  SDL_AUTO_TRACE();
+  SDL_DEBUG("DeviceUID: " << &device_uid
+                          << ", ApplicationHandle: " << &app_handle);
   TcpServerOiginatedSocketConnection* connection(
       new TcpServerOiginatedSocketConnection(
           device_uid, app_handle, controller_));
   controller_->ConnectionCreated(connection, device_uid, app_handle);
   if (connection->Start() == TransportAdapter::OK) {
-    LOGGER_DEBUG(logger_, "TCP connection initialised");
+    SDL_DEBUG("TCP connection initialised");
     return TransportAdapter::OK;
   } else {
-    LOGGER_ERROR(logger_, "Could not initialise TCP connection");
+    SDL_ERROR("Could not initialise TCP connection");
     return TransportAdapter::FAIL;
   }
 }

@@ -43,7 +43,7 @@ VISubscribeVehicleDataResponse::VISubscribeVehicleDataResponse(
 VISubscribeVehicleDataResponse::~VISubscribeVehicleDataResponse() {}
 
 void VISubscribeVehicleDataResponse::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   event_engine::Event event(
       hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData);
   event.set_smart_object(*message_);

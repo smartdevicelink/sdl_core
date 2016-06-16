@@ -42,9 +42,9 @@
  * \param argv array of arguments
  * \return EXIT_SUCCESS or EXIT_FAILURE
  */
+
 int main(int argc, char* argv[]) {
   PLATFORM_INIT(argc, argv);
-
   profile::Profile profile_instance;
   if ((argc > 1) && (0 != argv)) {
     profile_instance.config_file_name(argv[1]);
@@ -54,35 +54,32 @@ int main(int argc, char* argv[]) {
 
   threads::Thread::SetNameForId(threads::Thread::CurrentId(), "MainThread");
 
-  INIT_LOGGER(profile_instance.logs_enabled());
-  CREATE_LOGGERPTR_LOCAL(logger_, "SDLMain")
+  logger::LoggerAutoPtr logger_auto_ptr(profile_instance.logs_enabled());
+  SDL_CREATE_LOGGER("SDLMain");
 
-  LOGGER_INFO(logger_, "Application started!");
-  LOGGER_INFO(logger_, "SDL version: " << profile_instance.sdl_version());
+  SDL_INFO("Application started!");
+  SDL_INFO("SDL version: " << profile_instance.sdl_version());
 
   main_namespace::LifeCycle life_cycle(profile_instance);
   if (!life_cycle.StartComponents()) {
-    LOGGER_FATAL(logger_, "Failed to start components");
+    SDL_FATAL("Failed to start components");
     life_cycle.StopComponents();
-    DEINIT_LOGGER();
     exit(EXIT_FAILURE);
   }
-  LOGGER_INFO(logger_, "Components have been started");
+  SDL_INFO("Components have been started");
 
   if (!life_cycle.InitMessageSystem()) {
-    LOGGER_FATAL(logger_, "Failed to init message system");
+    SDL_FATAL("Failed to init message system");
     life_cycle.StopComponents();
-    DEINIT_LOGGER();
     exit(EXIT_FAILURE);
   }
-  LOGGER_INFO(logger_, "Message system has been initialized");
+  SDL_INFO("Message system has been initialized");
 
   life_cycle.Run();
-  LOGGER_INFO(logger_, "Stop SDL due to caught signal");
+  SDL_INFO("Stop SDL due to caught signal");
 
   life_cycle.StopComponents();
-  LOGGER_INFO(logger_, "Application has been stopped successfuly");
+  SDL_INFO("Application has been stopped successfuly");
 
-  DEINIT_LOGGER();
   return EXIT_SUCCESS;
 }

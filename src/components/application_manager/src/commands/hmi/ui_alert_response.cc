@@ -44,7 +44,7 @@ UIAlertResponse::UIAlertResponse(const MessageSharedPtr& message,
 UIAlertResponse::~UIAlertResponse() {}
 
 void UIAlertResponse::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   event_engine::Event event(hmi_apis::FunctionID::UI_Alert);
   event.set_smart_object(*message_);

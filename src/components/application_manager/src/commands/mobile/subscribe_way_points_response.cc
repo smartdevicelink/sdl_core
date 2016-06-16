@@ -12,7 +12,7 @@ SubscribeWayPointsResponse::SubscribeWayPointsResponse(
 SubscribeWayPointsResponse::~SubscribeWayPointsResponse() {}
 
 void SubscribeWayPointsResponse::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   application_manager_.SendMessageToMobile(message_);
 }

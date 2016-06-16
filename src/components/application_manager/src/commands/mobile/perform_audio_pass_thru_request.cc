@@ -54,7 +54,7 @@ PerformAudioPassThruRequest::PerformAudioPassThruRequest(
 PerformAudioPassThruRequest::~PerformAudioPassThruRequest() {}
 
 void PerformAudioPassThruRequest::onTimeOut() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   FinishTTSSpeak();
   CommandRequestImpl::onTimeOut();
@@ -67,27 +67,27 @@ bool PerformAudioPassThruRequest::Init() {
 }
 
 void PerformAudioPassThruRequest::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
-    LOGGER_ERROR(logger_, "APPLICATION_NOT_REGISTERED");
+    SDL_ERROR("APPLICATION_NOT_REGISTERED");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
   if (mobile_api::HMILevel::HMI_NONE == app->hmi_level()) {
-    LOGGER_ERROR(logger_, "application isn't activated");
+    SDL_ERROR("application isn't activated");
     SendResponse(false, mobile_apis::Result::REJECTED);
     return;
   }
 
   if (IsWhiteSpaceExist()) {
-    LOGGER_ERROR(logger_,
-                 "Incoming perform audio pass thru has contains "
-                 "\\t\\n \\\\t \\\\n"
-                 " text contains only whitespace in initialPrompt");
+    SDL_ERROR(
+        "Incoming perform audio pass thru has contains "
+        "\\t\\n \\\\t \\\\n"
+        " text contains only whitespace in initialPrompt");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
@@ -105,17 +105,17 @@ void PerformAudioPassThruRequest::Run() {
 }
 
 void PerformAudioPassThruRequest::on_event(const event_engine::Event& event) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   using namespace helpers;
 
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_PerformAudioPassThru: {
-      LOGGER_TRACE(logger_, "Received UI_PerformAudioPassThru");
+      SDL_TRACE("Received UI_PerformAudioPassThru");
 
       if (!WaitTTSSpeak()) {
-        LOGGER_DEBUG(logger_, "TTS.Speak is absent");
+        SDL_DEBUG("TTS.Speak is absent");
         return;
       }
 
@@ -125,7 +125,7 @@ void PerformAudioPassThruRequest::on_event(const event_engine::Event& event) {
 
       // in case perform audio is started by other request skip stopping
       if (mobile_apis::Result::REJECTED == mobile_code) {
-        LOGGER_ERROR(logger_, "Request was rejected");
+        SDL_ERROR("Request was rejected");
         SendResponse(false, mobile_code, NULL, &(message[strings::msg_params]));
         return;
       }
@@ -157,7 +157,7 @@ void PerformAudioPassThruRequest::on_event(const event_engine::Event& event) {
       break;
     }
     case hmi_apis::FunctionID::TTS_Speak: {
-      LOGGER_INFO(logger_, "Received TTS_Speak event");
+      SDL_INFO("Received TTS_Speak event");
       result_tts_speak_ =
           GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
               message[strings::params][hmi_response::code].asUInt()));
@@ -173,21 +173,21 @@ void PerformAudioPassThruRequest::on_event(const event_engine::Event& event) {
       break;
     }
     case hmi_apis::FunctionID::TTS_OnResetTimeout: {
-      LOGGER_INFO(logger_, "Received TTS_OnResetTimeout event");
+      SDL_INFO("Received TTS_OnResetTimeout event");
 
       application_manager_.updateRequestTimeout(
           connection_key(), correlation_id(), default_timeout());
       break;
     }
     default: {
-      LOGGER_ERROR(logger_, "Received unknown event" << event.id());
+      SDL_ERROR("Received unknown event" << event.id());
       return;
     }
   }
 }
 
 void PerformAudioPassThruRequest::SendSpeakRequest() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   using namespace hmi_apis;
   using namespace smart_objects;
@@ -213,7 +213,7 @@ void PerformAudioPassThruRequest::SendSpeakRequest() {
 }
 
 void PerformAudioPassThruRequest::SendPerformAudioPassThruRequest() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   smart_objects::SmartObject msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
@@ -257,7 +257,7 @@ void PerformAudioPassThruRequest::SendPerformAudioPassThruRequest() {
 }
 
 void PerformAudioPassThruRequest::SendRecordStartNotification() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   smart_objects::SmartObject msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
@@ -267,7 +267,7 @@ void PerformAudioPassThruRequest::SendRecordStartNotification() {
 }
 
 void PerformAudioPassThruRequest::StartMicrophoneRecording() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   application_manager_.BeginAudioPassThrough();
 
@@ -281,7 +281,7 @@ void PerformAudioPassThruRequest::StartMicrophoneRecording() {
 }
 
 bool PerformAudioPassThruRequest::IsWhiteSpaceExist() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   const char* str = NULL;
 
   if ((*message_)[strings::msg_params].keyExists(strings::initial_prompt)) {
@@ -294,7 +294,7 @@ bool PerformAudioPassThruRequest::IsWhiteSpaceExist() {
     for (; it_ip != it_ip_end; ++it_ip) {
       str = (*it_ip)[strings::text].asCharArray();
       if (std::strlen(str) && !CheckSyntax(str)) {
-        LOGGER_ERROR(logger_, "Invalid initial_prompt syntax check failed");
+        SDL_ERROR("Invalid initial_prompt syntax check failed");
         return true;
       }
     }
@@ -305,9 +305,7 @@ bool PerformAudioPassThruRequest::IsWhiteSpaceExist() {
     str = (*message_)[strings::msg_params][strings::audio_pass_display_text1]
               .asCharArray();
     if (!CheckSyntax(str)) {
-      LOGGER_ERROR(
-          logger_,
-          "Invalid audio_pass_display_text1 value syntax check failed");
+      SDL_ERROR("Invalid audio_pass_display_text1 value syntax check failed");
       return true;
     }
   }
@@ -317,9 +315,7 @@ bool PerformAudioPassThruRequest::IsWhiteSpaceExist() {
     str = (*message_)[strings::msg_params][strings::audio_pass_display_text2]
               .asCharArray();
     if (!CheckSyntax(str)) {
-      LOGGER_ERROR(
-          logger_,
-          "Invalid audio_pass_display_text2 value syntax check failed");
+      SDL_ERROR("Invalid audio_pass_display_text2 value syntax check failed");
       return true;
     }
   }
@@ -327,13 +323,13 @@ bool PerformAudioPassThruRequest::IsWhiteSpaceExist() {
 }
 
 void PerformAudioPassThruRequest::FinishTTSSpeak() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   if (application_manager_.EndAudioPassThrough()) {
-    LOGGER_DEBUG(logger_, "Stop AudioPassThru.");
+    SDL_DEBUG("Stop AudioPassThru.");
     application_manager_.StopAudioPassThru(connection_key());
   }
   if (!is_active_tts_speak_) {
-    LOGGER_WARN(logger_, "TTS Speak is inactive.");
+    SDL_WARN("TTS Speak is inactive.");
     return;
   }
   is_active_tts_speak_ = false;
@@ -341,7 +337,7 @@ void PerformAudioPassThruRequest::FinishTTSSpeak() {
 }
 
 bool PerformAudioPassThruRequest::WaitTTSSpeak() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   uint64_t default_timeout_msec =
       application_manager_.get_settings().default_timeout();
   const TimevalStruct start_time = date_time::DateTime::getCurrentTime();
@@ -352,7 +348,7 @@ bool PerformAudioPassThruRequest::WaitTTSSpeak() {
         date_time::DateTime::calculateTimeSpan(start_time);
     // Send GENERIC_ERROR after default timeout
     if (difference_between_start_current_time > default_timeout_msec) {
-      LOGGER_WARN(logger_, "Expired timeout for TTS.Speak response");
+      SDL_WARN("Expired timeout for TTS.Speak response");
       // Don't use onTimeOut(), because default_timeout_ is bigger than
       // Default time in *.ini file
       FinishTTSSpeak();

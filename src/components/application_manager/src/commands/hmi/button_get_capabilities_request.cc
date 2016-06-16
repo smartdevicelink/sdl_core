@@ -44,7 +44,7 @@ ButtonGetCapabilitiesRequest::ButtonGetCapabilitiesRequest(
 ButtonGetCapabilitiesRequest::~ButtonGetCapabilitiesRequest() {}
 
 void ButtonGetCapabilitiesRequest::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   SendRequest();
 }

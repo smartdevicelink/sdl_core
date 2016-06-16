@@ -44,7 +44,7 @@ OnTTSStoppedNotification::OnTTSStoppedNotification(
 OnTTSStoppedNotification::~OnTTSStoppedNotification() {}
 
 void OnTTSStoppedNotification::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   event_engine::Event event(hmi_apis::FunctionID::TTS_Stopped);
   event.set_smart_object(*message_);

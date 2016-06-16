@@ -43,7 +43,7 @@ namespace application_manager {
 namespace commands {
 
 void RegisterAppInterfaceResponse::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   mobile_apis::Result::eType result_code = mobile_apis::Result::SUCCESS;
   bool success = (*message_)[strings::msg_params][strings::success].asBool();
@@ -70,9 +70,8 @@ void RegisterAppInterfaceResponse::Run() {
   application_manager::ApplicationSharedPtr application =
       application_manager_.application(connection_key());
   if (!application) {
-    LOGGER_ERROR(logger_,
-                 "Application with connection key " << connection_key()
-                                                    << " is not registered.");
+    SDL_ERROR("Application with connection key " << connection_key()
+                                                 << " is not registered.");
     return;
   }
 
@@ -90,7 +89,7 @@ void RegisterAppInterfaceResponse::Run() {
 
 void RegisterAppInterfaceResponse::SetHeartBeatTimeout(
     uint32_t connection_key, const std::string& mobile_app_id) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   policy::PolicyHandlerInterface& policy_handler =
       application_manager_.GetPolicyHandler();
   if (policy_handler.PolicyEnabled()) {
@@ -100,7 +99,7 @@ void RegisterAppInterfaceResponse::SetHeartBeatTimeout(
           connection_key, timeout);
     }
   } else {
-    LOGGER_INFO(logger_, "Policy is turn off");
+    SDL_INFO("Policy is turn off");
   }
 }
 

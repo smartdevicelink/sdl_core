@@ -44,7 +44,7 @@ VRGetLanguageResponse::VRGetLanguageResponse(
 VRGetLanguageResponse::~VRGetLanguageResponse() {}
 
 void VRGetLanguageResponse::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   using namespace hmi_apis;
 
   Common_Language::eType language = Common_Language::INVALID_ENUM;
@@ -57,10 +57,8 @@ void VRGetLanguageResponse::Run() {
 
   application_manager_.hmi_capabilities().set_active_vr_language(language);
 
-  LOGGER_DEBUG(logger_,
-               "Raising event for function_id " << function_id()
-                                                << " and correlation_id "
-                                                << correlation_id());
+  SDL_DEBUG("Raising event for function_id "
+            << function_id() << " and correlation_id " << correlation_id());
   event_engine::Event event(FunctionID::VR_GetLanguage);
   event.set_smart_object(*message_);
   event.raise(application_manager_.event_dispatcher());

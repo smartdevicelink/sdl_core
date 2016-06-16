@@ -48,7 +48,7 @@
 namespace transport_manager {
 namespace transport_adapter {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
+SDL_CREATE_LOGGER("TransportManager")
 
 UsbConnection::UsbConnection(const DeviceUID& device_uid,
                              const ApplicationHandle& app_handle,
@@ -76,11 +76,11 @@ UsbConnection::UsbConnection(const DeviceUID& device_uid,
     , waiting_out_transfer_cancel_(false) {}
 
 UsbConnection::~UsbConnection() {
-  LOGGER_TRACE(logger_, "enter with this" << this);
+  SDL_TRACE("enter with this" << this);
   Finalise();
   libusb_free_transfer(in_transfer_);
   delete[] in_buffer_;
-  LOGGER_TRACE(logger_, "exit");
+  SDL_TRACE("exit");
 }
 
 // Callback for handling income and outcome data from lib_usb
@@ -93,7 +93,7 @@ void LIBUSB_CALL OutTransferCallback(libusb_transfer* transfer) {
 }
 
 bool UsbConnection::PostInTransfer() {
-  LOGGER_TRACE(logger_, "enter");
+  SDL_TRACE("enter");
   libusb_fill_bulk_transfer(in_transfer_,
                             device_handle_,
                             in_endpoint_,
@@ -104,15 +104,13 @@ bool UsbConnection::PostInTransfer() {
                             0);
   const int libusb_ret = libusb_submit_transfer(in_transfer_);
   if (LIBUSB_SUCCESS != libusb_ret) {
-    LOGGER_ERROR(
-        logger_,
+    SDL_ERROR(
         "libusb_submit_transfer failed: " << libusb_error_name(libusb_ret));
-    LOGGER_TRACE(
-        logger_,
+    SDL_TRACE(
         "exit with FALSE. Condition: LIBUSB_SUCCESS != libusb_submit_transfer");
     return false;
   }
-  LOGGER_TRACE(logger_, "exit with TRUE");
+  SDL_TRACE("exit with TRUE");
   return true;
 }
 
@@ -127,19 +125,17 @@ std::string hex_data(const unsigned char* const buffer,
 }
 
 void UsbConnection::OnInTransfer(libusb_transfer* transfer) {
-  LOGGER_TRACE(logger_, "enter with Libusb_transfer*: " << transfer);
+  SDL_TRACE("enter with Libusb_transfer*: " << transfer);
   if (transfer->status == LIBUSB_TRANSFER_COMPLETED) {
-    LOGGER_DEBUG(logger_,
-                 "USB incoming transfer, size:"
-                     << transfer->actual_length << ", data:"
-                     << hex_data(transfer->buffer, transfer->actual_length));
+    SDL_DEBUG("USB incoming transfer, size:"
+              << transfer->actual_length << ", data:"
+              << hex_data(transfer->buffer, transfer->actual_length));
     ::protocol_handler::RawMessagePtr data(new protocol_handler::RawMessage(
         0, 0, in_buffer_, transfer->actual_length));
     controller_->DataReceiveDone(device_uid_, app_handle_, data);
   } else {
-    LOGGER_ERROR(logger_,
-                 "USB incoming transfer failed: "
-                     << libusb_error_name(transfer->status));
+    SDL_ERROR("USB incoming transfer failed: "
+              << libusb_error_name(transfer->status));
     controller_->DataReceiveFailed(
         device_uid_, app_handle_, DataReceiveError());
   }
@@ -147,17 +143,16 @@ void UsbConnection::OnInTransfer(libusb_transfer* transfer) {
     waiting_in_transfer_cancel_ = false;
   } else {
     if (!PostInTransfer()) {
-      LOGGER_ERROR(logger_,
-                   "USB incoming transfer failed with "
-                       << "LIBUSB_TRANSFER_NO_DEVICE. Abort connection.");
+      SDL_ERROR("USB incoming transfer failed with "
+                << "LIBUSB_TRANSFER_NO_DEVICE. Abort connection.");
       AbortConnection();
     }
   }
-  LOGGER_TRACE(logger_, "exit");
+  SDL_TRACE("exit");
 }
 
 void UsbConnection::PopOutMessage() {
-  LOGGER_TRACE(logger_, "enter");
+  SDL_TRACE("enter");
   bytes_sent_ = 0;
   if (out_messages_.empty()) {
     current_out_message_.reset();
@@ -166,15 +161,15 @@ void UsbConnection::PopOutMessage() {
     out_messages_.pop_front();
     PostOutTransfer();
   }
-  LOGGER_TRACE(logger_, "exit");
+  SDL_TRACE("exit");
 }
 
 bool UsbConnection::PostOutTransfer() {
-  LOGGER_TRACE(logger_, "enter");
+  SDL_TRACE("enter");
   out_transfer_ = libusb_alloc_transfer(0);
   if (0 == out_transfer_) {
-    LOGGER_ERROR(logger_, "libusb_alloc_transfer failed");
-    LOGGER_TRACE(logger_, "exit with FALSE. Condition: 0 == out_transfer_");
+    SDL_ERROR("libusb_alloc_transfer failed");
+    SDL_TRACE("exit with FALSE. Condition: 0 == out_transfer_");
     return false;
   }
   libusb_fill_bulk_transfer(out_transfer_,
@@ -187,34 +182,29 @@ bool UsbConnection::PostOutTransfer() {
                             0);
   const int libusb_ret = libusb_submit_transfer(out_transfer_);
   if (LIBUSB_SUCCESS != libusb_ret) {
-    LOGGER_ERROR(logger_,
-                 "libusb_submit_transfer failed: "
-                     << libusb_error_name(libusb_ret) << ". Abort connection.");
+    SDL_ERROR("libusb_submit_transfer failed: " << libusb_error_name(libusb_ret)
+                                                << ". Abort connection.");
     AbortConnection();
-    LOGGER_TRACE(logger_,
-                 "exit with FALSE. Condition: "
-                     << "LIBUSB_SUCCESS != libusb_fill_bulk_transfer");
+    SDL_TRACE("exit with FALSE. Condition: "
+              << "LIBUSB_SUCCESS != libusb_fill_bulk_transfer");
     return false;
   }
-  LOGGER_TRACE(logger_, "exit with TRUE");
+  SDL_TRACE("exit with TRUE");
   return true;
 }
 
 void UsbConnection::OnOutTransfer(libusb_transfer* transfer) {
-  LOGGER_TRACE(logger_, "enter with  Libusb_transfer*: " << transfer);
+  SDL_TRACE("enter with  Libusb_transfer*: " << transfer);
   sync_primitives::AutoLock locker(out_messages_mutex_);
   if (transfer->status == LIBUSB_TRANSFER_COMPLETED) {
     bytes_sent_ += transfer->actual_length;
     if (bytes_sent_ == current_out_message_->data_size()) {
-      LOGGER_DEBUG(
-          logger_,
-          "USB out transfer, data sent: " << current_out_message_.get());
+      SDL_DEBUG("USB out transfer, data sent: " << current_out_message_.get());
       controller_->DataSendDone(device_uid_, app_handle_, current_out_message_);
       PopOutMessage();
     }
   } else {
-    LOGGER_ERROR(
-        logger_,
+    SDL_ERROR(
         "USB out transfer failed: " << libusb_error_name(transfer->status));
     controller_->DataSendFailed(
         device_uid_, app_handle_, current_out_message_, DataSendError());
@@ -225,16 +215,15 @@ void UsbConnection::OnOutTransfer(libusb_transfer* transfer) {
     out_transfer_ = NULL;
     waiting_out_transfer_cancel_ = false;
   }
-  LOGGER_TRACE(logger_, "exit");
+  SDL_TRACE("exit");
 }
 
 TransportAdapter::Error UsbConnection::SendData(
     ::protocol_handler::RawMessagePtr message) {
-  LOGGER_TRACE(logger_, "enter with RawMessagePtr: " << message.get());
+  SDL_TRACE("enter with RawMessagePtr: " << message.get());
   if (disconnecting_) {
-    LOGGER_TRACE(logger_,
-                 "exit with TransportAdapter::BAD_STATE. Condition: "
-                     << "disconnecting_");
+    SDL_TRACE("exit with TransportAdapter::BAD_STATE. Condition: "
+              << "disconnecting_");
     return TransportAdapter::BAD_STATE;
   }
   sync_primitives::AutoLock locker(out_messages_mutex_);
@@ -245,19 +234,18 @@ TransportAdapter::Error UsbConnection::SendData(
     if (!PostOutTransfer()) {
       controller_->DataSendFailed(
           device_uid_, app_handle_, message, DataSendError());
-      LOGGER_TRACE(
-          logger_,
+      SDL_TRACE(
           "exit with TransportAdapter::FAIL. Condition: !PostOutTransfer()");
       return TransportAdapter::FAIL;
     }
   }
-  LOGGER_TRACE(logger_, "exit with TransportAdapter::OK.");
+  SDL_TRACE("exit with TransportAdapter::OK.");
   return TransportAdapter::OK;
 }
 
 void UsbConnection::Finalise() {
-  LOGGER_TRACE(logger_, "enter");
-  LOGGER_DEBUG(logger_, "Finalise USB connection " << device_uid_);
+  SDL_TRACE("enter");
+  SDL_DEBUG("Finalise USB connection " << device_uid_);
   {
     sync_primitives::AutoLock locker(out_messages_mutex_);
     disconnecting_ = true;
@@ -288,15 +276,15 @@ void UsbConnection::Finalise() {
     SwitchToThread();
 #endif
   }
-  LOGGER_TRACE(logger_, "exit");
+  SDL_TRACE("exit");
 }
 
 void UsbConnection::AbortConnection() {
-  LOGGER_TRACE(logger_, "enter");
+  SDL_TRACE("enter");
   controller_->ConnectionAborted(
       device_uid_, app_handle_, CommunicationError());
   Disconnect();
-  LOGGER_TRACE(logger_, "exit");
+  SDL_TRACE("exit");
 }
 
 TransportAdapter::Error UsbConnection::Disconnect() {
@@ -306,44 +294,42 @@ TransportAdapter::Error UsbConnection::Disconnect() {
 }
 
 bool UsbConnection::Init() {
-  LOGGER_TRACE(logger_, "enter");
+  SDL_TRACE("enter");
   if (!FindEndpoints()) {
-    LOGGER_ERROR(logger_, "EndPoints was not found");
-    LOGGER_TRACE(logger_, "exit with FALSE. Condition: !FindEndpoints()");
+    SDL_ERROR("EndPoints was not found");
+    SDL_TRACE("exit with FALSE. Condition: !FindEndpoints()");
     return false;
   }
   in_buffer_ = new unsigned char[in_endpoint_max_packet_size_];
   in_transfer_ = libusb_alloc_transfer(0);
   if (NULL == in_transfer_) {
-    LOGGER_ERROR(logger_, "libusb_alloc_transfer failed");
-    LOGGER_TRACE(logger_, "exit with FALSE. Condition: NULL == in_transfer_");
+    SDL_ERROR("libusb_alloc_transfer failed");
+    SDL_TRACE("exit with FALSE. Condition: NULL == in_transfer_");
     return false;
   }
 
   controller_->ConnectDone(device_uid_, app_handle_);
   if (!PostInTransfer()) {
-    LOGGER_ERROR(logger_, "PostInTransfer failed. Call ConnectionAborted");
+    SDL_ERROR("PostInTransfer failed. Call ConnectionAborted");
     controller_->ConnectionAborted(
         device_uid_, app_handle_, CommunicationError());
-    LOGGER_TRACE(logger_, "exit with FALSE. Condition: !PostInTransfer()");
+    SDL_TRACE("exit with FALSE. Condition: !PostInTransfer()");
     return false;
   }
 
-  LOGGER_TRACE(logger_, "exit with TRUE");
+  SDL_TRACE("exit with TRUE");
   return true;
 }
 
 bool UsbConnection::FindEndpoints() {
-  LOGGER_TRACE(logger_, "enter");
+  SDL_TRACE("enter");
   struct libusb_config_descriptor* config;
   const int libusb_ret =
       libusb_get_active_config_descriptor(libusb_device_, &config);
   if (LIBUSB_SUCCESS != libusb_ret) {
-    LOGGER_ERROR(logger_,
-                 "libusb_get_active_config_descriptor failed: "
-                     << libusb_error_name(libusb_ret));
-    LOGGER_TRACE(logger_,
-                 "exit with FALSE. Condition: LIBUSB_SUCCESS != libusb_ret");
+    SDL_ERROR("libusb_get_active_config_descriptor failed: "
+              << libusb_error_name(libusb_ret));
+    SDL_TRACE("exit with FALSE. Condition: LIBUSB_SUCCESS != libusb_ret");
     return false;
   }
 
@@ -375,7 +361,7 @@ bool UsbConnection::FindEndpoints() {
   libusb_free_config_descriptor(config);
 
   const bool result = !(find_in_endpoint || find_out_endpoint);
-  LOGGER_TRACE(logger_, "exit with " << (result ? "TRUE" : "FALSE"));
+  SDL_TRACE("exit with " << (result ? "TRUE" : "FALSE"));
   return result;
 }
 }  // namespace transport_adapter

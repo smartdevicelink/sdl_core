@@ -41,7 +41,7 @@
 
 namespace media_manager {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "FromMicToFileRecorderThread")
+SDL_CREATE_LOGGER("FromMicToFileRecorderThread")
 
 ////////////////////////////////////////////////////////////////////////////////
 /// media_manager::FromMicToFileRecorderThread::Impl
@@ -89,13 +89,13 @@ media_manager::FromMicToFileRecorderThread::Impl::Impl(
                    SIGNAL(durationChanged(qint64)),
                    this,
                    SLOT(updateProgress(qint64)));
-  LOGGER_INFO(logger_, "Add input device:" << device_.toStdString());
+  SDL_INFO("Add input device:" << device_.toStdString());
 
   device_ = audioRecorder_->audioInputs().first();
   audioRecorder_->setAudioInput(device_);
 
   codec_ = audioRecorder_->supportedAudioCodecs().first();
-  LOGGER_INFO(logger_, "Set audio codec:" << codec_.toStdString());
+  SDL_INFO("Set audio codec:" << codec_.toStdString());
   settings_.setCodec(codec_);
   settings_.setSampleRate(audioRecorder_->supportedAudioSampleRates().first());
   settings_.setBitRate(128000);
@@ -154,8 +154,7 @@ void media_manager::FromMicToFileRecorderThread::Impl::stopRecord() {
 }
 
 void media_manager::FromMicToFileRecorderThread::Impl::displayErrorMessage() {
-  LOGGER_ERROR(
-      logger_,
+  SDL_ERROR(
       "QAudioRecorder eroor: " << audioRecorder_->errorString().toStdString());
 }
 
@@ -168,7 +167,7 @@ media_manager::FromMicToFileRecorderThread::FromMicToFileRecorderThread(
     : threads::ThreadDelegate()
     , impl_(new Impl(output_file))
     , output_file_name_(output_file) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   setRecordDuration(duration);
   sleep_thread_ = FromMicToFileRecorderThreadPtr(new timer::Timer(
       "AudioFromMicSuspend",
@@ -178,7 +177,7 @@ media_manager::FromMicToFileRecorderThread::FromMicToFileRecorderThread(
 }
 
 media_manager::FromMicToFileRecorderThread::~FromMicToFileRecorderThread() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   delete impl_;
   impl_ = NULL;
   if (sleep_thread_) {
@@ -188,24 +187,24 @@ media_manager::FromMicToFileRecorderThread::~FromMicToFileRecorderThread() {
 
 void media_manager::FromMicToFileRecorderThread::setRecordDuration(
     int32_t duration) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   impl_->setDuration(duration);
 }
 
 void media_manager::FromMicToFileRecorderThread::threadMain() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   impl_->setShouldBeStoped(false);
 
   if (output_file_name_.empty()) {
-    LOGGER_ERROR(logger_, "Must supply destination");
+    SDL_ERROR("Must supply destination");
   }
 
-  LOGGER_TRACE(logger_, "Reading from device: " << impl_->getDeviceName());
-  LOGGER_TRACE(logger_, "Saving pipeline output to: " << output_file_name_);
-  LOGGER_TRACE(logger_, "Duration set to: " << impl_->getDuration());
+  SDL_TRACE("Reading from device: " << impl_->getDeviceName());
+  SDL_TRACE("Saving pipeline output to: " << output_file_name_);
+  SDL_TRACE("Duration set to: " << impl_->getDuration());
 
-  LOGGER_TRACE(logger_, "Audio capture started ...\n");
+  SDL_TRACE("Audio capture started ...\n");
 
   if (impl_->getDuration() > 0) {
     sleep_thread_->Start(impl_->getDuration(), timer::kSingleShot);
@@ -215,20 +214,20 @@ void media_manager::FromMicToFileRecorderThread::threadMain() {
 
 void media_manager::FromMicToFileRecorderThread::
     onFromMicToFileRecorderThreadSuspned() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   impl_->stopRecord();
-  LOGGER_TRACE(logger_, "Set should be stopped flag\n");
+  SDL_TRACE("Set should be stopped flag\n");
   impl_->setShouldBeStoped(true);
 }
 
 void media_manager::FromMicToFileRecorderThread::exitThreadMain() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   if (sleep_thread_) {
-    LOGGER_DEBUG(logger_, "Stop sleep thread\n");
+    SDL_DEBUG("Stop sleep thread\n");
     sleep_thread_->Stop();
   }
 
-  LOGGER_TRACE(logger_, "Set should be stopped flag\n");
+  SDL_TRACE("Set should be stopped flag\n");
   impl_->setShouldBeStoped(true);
   impl_->stopRecord();
 }

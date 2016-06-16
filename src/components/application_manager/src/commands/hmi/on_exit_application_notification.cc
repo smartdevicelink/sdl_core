@@ -48,7 +48,7 @@ OnExitApplicationNotification::OnExitApplicationNotification(
 OnExitApplicationNotification::~OnExitApplicationNotification() {}
 
 void OnExitApplicationNotification::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   using namespace mobile_apis;
   using namespace hmi_apis;
@@ -57,7 +57,7 @@ void OnExitApplicationNotification::Run() {
   ApplicationSharedPtr app_impl = application_manager_.application(app_id);
 
   if (!(app_impl.valid())) {
-    LOGGER_ERROR(logger_, "Application does not exist");
+    SDL_ERROR("Application does not exist");
     return;
   }
 
@@ -95,7 +95,7 @@ void OnExitApplicationNotification::Run() {
       return;
     }
     default: {
-      LOGGER_WARN(logger_, "Unhandled reason");
+      SDL_WARN("Unhandled reason");
       return;
     }
   }
@@ -105,7 +105,7 @@ void OnExitApplicationNotification::Run() {
     application_manager_.state_controller().SetRegularState(
         app, HMILevel::HMI_NONE, AudioStreamingState::NOT_AUDIBLE, false);
   } else {
-    LOGGER_ERROR(logger_, "Unable to find appication " << app_id);
+    SDL_ERROR("Unable to find appication " << app_id);
   }
 }
 

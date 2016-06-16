@@ -43,7 +43,7 @@ UISliderRequest::UISliderRequest(const MessageSharedPtr& message,
 UISliderRequest::~UISliderRequest() {}
 
 void UISliderRequest::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   SendRequest();
 }

@@ -44,7 +44,7 @@ UIPerformAudioPassThruResponse::UIPerformAudioPassThruResponse(
 UIPerformAudioPassThruResponse::~UIPerformAudioPassThruResponse() {}
 
 void UIPerformAudioPassThruResponse::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   event_engine::Event event(hmi_apis::FunctionID::UI_PerformAudioPassThru);
   event.set_smart_object(*message_);

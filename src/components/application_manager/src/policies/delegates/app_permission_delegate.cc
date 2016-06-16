@@ -34,7 +34,7 @@
 #include "application_manager/application_manager.h"
 
 namespace policy {
-CREATE_LOGGERPTR_GLOBAL(logger_, "PolicyHandler")
+SDL_CREATE_LOGGER("PolicyHandler")
 
 AppPermissionDelegate::AppPermissionDelegate(
     const uint32_t connection_key,
@@ -45,7 +45,7 @@ AppPermissionDelegate::AppPermissionDelegate(
     , policy_handler_(policy_handler) {}
 
 void AppPermissionDelegate::threadMain() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   policy_handler_.OnAppPermissionConsentInternal(connection_key_, permissions_);
 }
 

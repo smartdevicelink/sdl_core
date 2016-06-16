@@ -46,7 +46,7 @@ OnPermissionsChangeNotification::OnPermissionsChangeNotification(
 OnPermissionsChangeNotification::~OnPermissionsChangeNotification() {}
 
 void OnPermissionsChangeNotification::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   (*message_)[strings::params][strings::message_type] =
       static_cast<int32_t>(application_manager::MessageType::kNotification);

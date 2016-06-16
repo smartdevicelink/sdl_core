@@ -44,7 +44,7 @@ OnLanguageChangeNotification::OnLanguageChangeNotification(
 OnLanguageChangeNotification::~OnLanguageChangeNotification() {}
 
 void OnLanguageChangeNotification::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   SendNotification();
 }

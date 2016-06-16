@@ -45,13 +45,13 @@ OnCommandNotification::OnCommandNotification(
 OnCommandNotification::~OnCommandNotification() {}
 
 void OnCommandNotification::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   ApplicationSharedPtr app = application_manager_.application(
       (*message_)[strings::msg_params][strings::app_id].asInt());
 
   if (!app) {
-    LOGGER_ERROR(logger_, "No application associated with session key");
+    SDL_ERROR("No application associated with session key");
     return;
   }
 
@@ -59,7 +59,7 @@ void OnCommandNotification::Run() {
       (*message_)[strings::msg_params][strings::cmd_id].asUInt();
 
   if (!app->FindCommand(cmd_id)) {
-    LOGGER_ERROR(logger_, " No applications found for the command " << cmd_id);
+    SDL_ERROR(" No applications found for the command " << cmd_id);
     return;
   }
 

@@ -49,7 +49,7 @@ OnKeyBoardInputNotification::OnKeyBoardInputNotification(
 OnKeyBoardInputNotification::~OnKeyBoardInputNotification() {}
 
 void OnKeyBoardInputNotification::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   ApplicationSharedPtr app_to_notify;
 
@@ -59,14 +59,13 @@ void OnKeyBoardInputNotification::Run() {
     // if there is app with active perform interaction use it for notification
     ApplicationSharedPtr app = *it;
     if (app->is_perform_interaction_active()) {
-      LOGGER_INFO(logger_,
-                  "There is application with active PerformInteraction");
+      SDL_INFO("There is application with active PerformInteraction");
       app_to_notify = app;
       break;
     }
 
     if (mobile_apis::HMILevel::eType::HMI_FULL == app->hmi_level()) {
-      LOGGER_INFO(logger_, "There is application in HMI_FULL level");
+      SDL_INFO("There is application in HMI_FULL level");
       app_to_notify = app;
     }
   }

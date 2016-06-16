@@ -45,12 +45,12 @@ DeleteFileResponse::DeleteFileResponse(const MessageSharedPtr& message,
 DeleteFileResponse::~DeleteFileResponse() {}
 
 void DeleteFileResponse::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   uint32_t app_id =
       (*message_)[strings::params][strings::connection_key].asUInt();
   ApplicationSharedPtr app = application_manager_.application(app_id);
   if (!app) {
-    LOGGER_ERROR(logger_, "Application not registered");
+    SDL_ERROR("Application not registered");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }

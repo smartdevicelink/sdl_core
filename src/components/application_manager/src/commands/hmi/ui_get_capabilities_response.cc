@@ -42,7 +42,7 @@ UIGetCapabilitiesResponse::UIGetCapabilitiesResponse(
 UIGetCapabilitiesResponse::~UIGetCapabilitiesResponse() {}
 
 void UIGetCapabilitiesResponse::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   HMICapabilities& hmi_capabilities = application_manager_.hmi_capabilities();
 

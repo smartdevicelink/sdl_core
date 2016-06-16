@@ -44,7 +44,7 @@ UIChangeRegistratioResponse::UIChangeRegistratioResponse(
 UIChangeRegistratioResponse::~UIChangeRegistratioResponse() {}
 
 void UIChangeRegistratioResponse::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   event_engine::Event event(hmi_apis::FunctionID::UI_ChangeRegistration);
   event.set_smart_object(*message_);

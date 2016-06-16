@@ -43,7 +43,7 @@ VRGetCapabilitiesRequest::VRGetCapabilitiesRequest(
 VRGetCapabilitiesRequest::~VRGetCapabilitiesRequest() {}
 
 void VRGetCapabilitiesRequest::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   SendRequest();
 }

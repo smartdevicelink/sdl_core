@@ -85,7 +85,7 @@ OnDeviceStateChangedNotification::OnDeviceStateChangedNotification(
 OnDeviceStateChangedNotification::~OnDeviceStateChangedNotification() {}
 
 void OnDeviceStateChangedNotification::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   if ((*message_)[strings::msg_params]["deviceState"] ==
       hmi_apis::Common_DeviceState::UNPAIRED) {
@@ -100,11 +100,11 @@ void OnDeviceStateChangedNotification::Run() {
       }
     } else {
       // Policy uses hashed MAC address as device_id
-      LOGGER_DEBUG(logger_, "Device_id from HMI: " << device_id);
+      SDL_DEBUG("Device_id from HMI: " << device_id);
       std::string bt_mac = convert_to_bt_mac(device_id);
-      LOGGER_DEBUG(logger_, "Device_id as BT MAC: " << bt_mac);
+      SDL_DEBUG("Device_id as BT MAC: " << bt_mac);
       device_id = encryption::MakeHash(bt_mac);
-      LOGGER_DEBUG(logger_, "Device_id hashed as BT MAC : " << device_id);
+      SDL_DEBUG("Device_id hashed as BT MAC : " << device_id);
     }
     application_manager_.GetPolicyHandler().RemoveDevice(device_id);
   }

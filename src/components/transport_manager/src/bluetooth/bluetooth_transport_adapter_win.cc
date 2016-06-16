@@ -56,7 +56,7 @@
 namespace transport_manager {
 namespace transport_adapter {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
+SDL_CREATE_LOGGER("TransportManager")
 
 BluetoothTransportAdapter::BluetoothTransportAdapter(
     resumption::LastState& last_state, const TransportManagerSettings& settings)
@@ -78,7 +78,7 @@ DeviceType BluetoothTransportAdapter::GetDeviceType() const {
 
 void BluetoothTransportAdapter::Store() const {
   using namespace utils::json;
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   JsonValue bluetooth_adapter_dictionary;
   JsonValue devices_dictionary;
   DeviceList device_ids = GetDeviceList();
@@ -104,12 +104,12 @@ void BluetoothTransportAdapter::Store() const {
   JsonValue& dictionary = last_state().dictionary();
   dictionary["TransportManager"]["BluetoothAdapter"] =
       bluetooth_adapter_dictionary;
-  LOGGER_TRACE(logger_, "exit");
+  SDL_TRACE("exit");
 }
 
 bool BluetoothTransportAdapter::Restore() {
   using namespace utils::json;
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   bool errors_occured = false;
 
   const JsonValue& bluetooth_adapter_dictionary =
@@ -189,9 +189,9 @@ bool BluetoothTransportAdapter::Restore() {
   }
   bool result = !errors_occured;
   if (result) {
-    LOGGER_TRACE(logger_, "exit with TRUE");
+    SDL_TRACE("exit with TRUE");
   } else {
-    LOGGER_TRACE(logger_, "exit with FALSE");
+    SDL_TRACE("exit with FALSE");
   }
   return result;
 }

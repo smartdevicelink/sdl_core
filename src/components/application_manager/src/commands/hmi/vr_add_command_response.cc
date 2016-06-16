@@ -44,7 +44,7 @@ VRAddCommandResponse::VRAddCommandResponse(
 VRAddCommandResponse::~VRAddCommandResponse() {}
 
 void VRAddCommandResponse::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   event_engine::Event event(hmi_apis::FunctionID::VR_AddCommand);
   event.set_smart_object(*message_);

@@ -42,7 +42,7 @@
 namespace transport_manager {
 namespace transport_adapter {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
+SDL_CREATE_LOGGER("TransportManager")
 
 TcpClientListener::TcpClientListener(TransportAdapterController* controller,
                                      const uint16_t port,
@@ -57,14 +57,14 @@ TcpClientListener::TcpClientListener(TransportAdapterController* controller,
 }
 
 TransportAdapter::Error TcpClientListener::Init() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   thread_stop_requested_ = false;
 
   return TransportAdapter::OK;
 }
 
 void TcpClientListener::Terminate() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 }
 
 bool TcpClientListener::IsInitialised() const {
@@ -72,7 +72,7 @@ bool TcpClientListener::IsInitialised() const {
 }
 
 TcpClientListener::~TcpClientListener() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   StopListening();
   delete thread_->delegate();
   threads::DeleteThread(thread_);
@@ -80,14 +80,13 @@ TcpClientListener::~TcpClientListener() {
 }
 
 void TcpClientListener::Loop() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   utils::TcpServerSocket server_socket;
   // Moved from init for compatibility with the Qt
   const int kBacklog = 128;
   const utils::HostAddress address(utils::SpecialAddress::Any);
   if (!server_socket.Listen(address, port_, kBacklog)) {
-    LOGGER_ERROR(logger_,
-                 "Failed to listen on " << address.ToString() << ":" << port_);
+    SDL_ERROR("Failed to listen on " << address.ToString() << ":" << port_);
     return;
   }
   while (!thread_stop_requested_) {
@@ -95,20 +94,19 @@ void TcpClientListener::Loop() {
     utils::TcpSocketConnection client_connection = server_socket.Accept();
 
     if (thread_stop_requested_) {
-      LOGGER_DEBUG(logger_, "thread_stop_requested_");
+      SDL_DEBUG("thread_stop_requested_");
       client_connection.Close();
       break;
     }
 
     if (!client_connection.IsValid()) {
-      LOGGER_ERROR(logger_, "Failed to accept new client connection");
+      SDL_ERROR("Failed to accept new client connection");
       continue;
     }
 
     const utils::HostAddress client_address = client_connection.GetAddress();
-    LOGGER_INFO(logger_,
-                "Connected client " << client_address.ToString() << ":"
-                                    << client_connection.GetPort());
+    SDL_INFO("Connected client " << client_address.ToString() << ":"
+                                 << client_connection.GetPort());
 
     if (enable_keepalive_) {
       client_connection.EnableKeepalive();
@@ -131,40 +129,37 @@ void TcpClientListener::Loop() {
     }
   }
   if (server_socket.Close()) {
-    LOGGER_DEBUG(logger_, "Server socket successfully closed");
+    SDL_DEBUG("Server socket successfully closed");
   } else {
-    LOGGER_ERROR(logger_, "Failed to close server socket");
+    SDL_ERROR("Failed to close server socket");
   }
 }
 
 void TcpClientListener::StopLoop() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   thread_stop_requested_ = true;
   // We need to connect to the listening socket to unblock accept() call
   // "0.0.0.0" is not valid address to connect to.
   utils::TcpSocketConnection byesocket;
   utils::HostAddress address(utils::SpecialAddress::LoopBack);
   if (!byesocket.Connect(address, port_)) {
-    LOGGER_ERROR(logger_,
-                 "Bye socket has failed to connect to the server "
-                     << address.ToString() << ":" << port_);
+    SDL_ERROR("Bye socket has failed to connect to the server "
+              << address.ToString() << ":" << port_);
   }
 }
 
 TransportAdapter::Error TcpClientListener::StartListening() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   if (thread_->is_running()) {
-    LOGGER_WARN(
-        logger_,
-        "TransportAdapter::BAD_STATE. Listener has already been started");
+    SDL_WARN("TransportAdapter::BAD_STATE. Listener has already been started");
     return TransportAdapter::BAD_STATE;
   }
 
   if (!thread_->start()) {
-    LOGGER_ERROR(logger_, "Tcp client listener thread start failed");
+    SDL_ERROR("Tcp client listener thread start failed");
     return TransportAdapter::FAIL;
   }
-  LOGGER_INFO(logger_, "Tcp client listener has started successfully");
+  SDL_INFO("Tcp client listener has started successfully");
   return TransportAdapter::OK;
 }
 
@@ -181,15 +176,15 @@ TcpClientListener::ListeningThreadDelegate::ListeningThreadDelegate(
     : parent_(parent) {}
 
 TransportAdapter::Error TcpClientListener::StopListening() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   if (!thread_->is_running()) {
-    LOGGER_DEBUG(logger_, "TcpClientListener is not running now");
+    SDL_DEBUG("TcpClientListener is not running now");
     return TransportAdapter::BAD_STATE;
   }
 
   thread_->join();
 
-  LOGGER_INFO(logger_, "Tcp client listener has stopped successfully");
+  SDL_INFO("Tcp client listener has stopped successfully");
   return TransportAdapter::OK;
 }
 

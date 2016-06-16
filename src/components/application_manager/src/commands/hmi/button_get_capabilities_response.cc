@@ -43,13 +43,13 @@ ButtonGetCapabilitiesResponse::ButtonGetCapabilitiesResponse(
 ButtonGetCapabilitiesResponse::~ButtonGetCapabilitiesResponse() {}
 
 void ButtonGetCapabilitiesResponse::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   const hmi_apis::Common_Result::eType code =
       static_cast<hmi_apis::Common_Result::eType>(
           (*message_)[strings::params][hmi_response::code].asInt());
 
   if (hmi_apis::Common_Result::SUCCESS != code) {
-    LOGGER_ERROR(logger_, "Error is returned. Capabilities won't be updated.");
+    SDL_ERROR("Error is returned. Capabilities won't be updated.");
     return;
   }
 

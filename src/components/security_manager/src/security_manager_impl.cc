@@ -40,7 +40,7 @@
 
 namespace security_manager {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "SecurityManager")
+SDL_CREATE_LOGGER("SecurityManager")
 
 static const char* kErrId = "id";
 static const char* kErrText = "text";
@@ -63,7 +63,7 @@ void SecurityManagerImpl::OnMessageReceived(
   if (!result) {
     // result will be false only if data less then query header
     const std::string error_text("Incorrect message received");
-    LOGGER_ERROR(logger_, error_text);
+    SDL_ERROR(error_text);
     SendInternalError(
         message->connection_key(), ERROR_INVALID_QUERY_SIZE, error_text);
     return;
@@ -80,7 +80,7 @@ void SecurityManagerImpl::OnMobileMessageSent(
 void SecurityManagerImpl::set_session_observer(
     protocol_handler::SessionObserver* observer) {
   if (!observer) {
-    LOGGER_ERROR(logger_, "Invalid (NULL) pointer to SessionObserver.");
+    SDL_ERROR("Invalid (NULL) pointer to SessionObserver.");
     return;
   }
   session_observer_ = observer;
@@ -89,7 +89,7 @@ void SecurityManagerImpl::set_session_observer(
 void SecurityManagerImpl::set_protocol_handler(
     protocol_handler::ProtocolHandler* handler) {
   if (!handler) {
-    LOGGER_ERROR(logger_, "Invalid (NULL) pointer to ProtocolHandler.");
+    SDL_ERROR("Invalid (NULL) pointer to ProtocolHandler.");
     return;
   }
   protocol_handler_ = handler;
@@ -97,7 +97,7 @@ void SecurityManagerImpl::set_protocol_handler(
 
 void SecurityManagerImpl::set_crypto_manager(CryptoManager* crypto_manager) {
   if (!crypto_manager) {
-    LOGGER_ERROR(logger_, "Invalid (NULL) pointer to CryptoManager.");
+    SDL_ERROR("Invalid (NULL) pointer to CryptoManager.");
     return;
   }
   crypto_manager_ = crypto_manager;
@@ -105,10 +105,10 @@ void SecurityManagerImpl::set_crypto_manager(CryptoManager* crypto_manager) {
 
 void SecurityManagerImpl::Handle(const SecurityMessage message) {
   DCHECK(message);
-  LOGGER_INFO(logger_, "Received Security message from Mobile side");
+  SDL_INFO("Received Security message from Mobile side");
   if (!crypto_manager_) {
     const std::string error_text("Invalid (NULL) CryptoManager.");
-    LOGGER_ERROR(logger_, error_text);
+    SDL_ERROR(error_text);
     SendInternalError(
         message->get_connection_key(), ERROR_NOT_SUPPORTED, error_text);
     return;
@@ -116,18 +116,18 @@ void SecurityManagerImpl::Handle(const SecurityMessage message) {
   switch (message->get_header().query_id) {
     case SecurityQuery::SEND_HANDSHAKE_DATA:
       if (!ProccessHandshakeData(message)) {
-        LOGGER_ERROR(logger_, "Proccess HandshakeData failed");
+        SDL_ERROR("Proccess HandshakeData failed");
       }
       break;
     case SecurityQuery::SEND_INTERNAL_ERROR:
       if (!ProccessInternalError(message)) {
-        LOGGER_ERROR(logger_, "Processing income InternalError failed");
+        SDL_ERROR("Processing income InternalError failed");
       }
       break;
     default: {
       // SecurityQuery::InvalidQuery
       const std::string error_text("Unknown query identifier.");
-      LOGGER_ERROR(logger_, error_text);
+      SDL_ERROR(error_text);
       SendInternalError(message->get_connection_key(),
                         ERROR_INVALID_QUERY_ID,
                         error_text,
@@ -138,7 +138,7 @@ void SecurityManagerImpl::Handle(const SecurityMessage message) {
 
 security_manager::SSLContext* SecurityManagerImpl::CreateSSLContext(
     const uint32_t& connection_key) {
-  LOGGER_INFO(logger_, "ProtectService processing");
+  SDL_INFO("ProtectService processing");
   DCHECK(session_observer_);
   DCHECK(crypto_manager_);
 
@@ -152,7 +152,7 @@ security_manager::SSLContext* SecurityManagerImpl::CreateSSLContext(
   ssl_context = crypto_manager_->CreateSSLContext();
   if (!ssl_context) {
     const std::string error_text("CryptoManager could not create SSL context.");
-    LOGGER_ERROR(logger_, error_text);
+    SDL_ERROR(error_text);
     // Generate response query and post to security_messages_
     SendInternalError(connection_key, ERROR_INTERNAL, error_text);
     return NULL;
@@ -168,20 +168,20 @@ security_manager::SSLContext* SecurityManagerImpl::CreateSSLContext(
   }
   DCHECK(session_observer_->GetSSLContext(connection_key,
                                           protocol_handler::kControl));
-  LOGGER_DEBUG(logger_, "Set SSL context to connection_key " << connection_key);
+  SDL_DEBUG("Set SSL context to connection_key " << connection_key);
   return ssl_context;
 }
 
 void SecurityManagerImpl::StartHandshake(uint32_t connection_key) {
   DCHECK(session_observer_);
-  LOGGER_INFO(logger_, "StartHandshake: connection_key " << connection_key);
+  SDL_INFO("StartHandshake: connection_key " << connection_key);
   security_manager::SSLContext* ssl_context = session_observer_->GetSSLContext(
       connection_key, protocol_handler::kControl);
   if (!ssl_context) {
     const std::string error_text(
         "StartHandshake failed, "
         "connection is not protected");
-    LOGGER_ERROR(logger_, error_text);
+    SDL_ERROR(error_text);
     SendInternalError(connection_key, ERROR_INTERNAL, error_text);
     NotifyListenersOnHandshakeDone(connection_key,
                                    SSLContext::Handshake_Result_Fail);
@@ -208,7 +208,7 @@ void SecurityManagerImpl::StartHandshake(uint32_t connection_key) {
       ssl_context->StartHandshake(&data, &data_size);
   if (security_manager::SSLContext::Handshake_Result_Success != result) {
     const std::string error_text("StartHandshake failed, handshake step fail");
-    LOGGER_ERROR(logger_, error_text);
+    SDL_ERROR(error_text);
     SendInternalError(connection_key, ERROR_INTERNAL, error_text);
     NotifyListenersOnHandshakeDone(connection_key,
                                    SSLContext::Handshake_Result_Fail);
@@ -221,7 +221,7 @@ void SecurityManagerImpl::StartHandshake(uint32_t connection_key) {
 }
 void SecurityManagerImpl::AddListener(SecurityManagerListener* const listener) {
   if (!listener) {
-    LOGGER_ERROR(logger_, "Invalid (NULL) pointer to SecurityManagerListener.");
+    SDL_ERROR("Invalid (NULL) pointer to SecurityManagerListener.");
     return;
   }
   listeners_.push_back(listener);
@@ -229,14 +229,14 @@ void SecurityManagerImpl::AddListener(SecurityManagerListener* const listener) {
 void SecurityManagerImpl::RemoveListener(
     SecurityManagerListener* const listener) {
   if (!listener) {
-    LOGGER_ERROR(logger_, "Invalid (NULL) pointer to SecurityManagerListener.");
+    SDL_ERROR("Invalid (NULL) pointer to SecurityManagerListener.");
     return;
   }
   listeners_.remove(listener);
 }
 void SecurityManagerImpl::NotifyListenersOnHandshakeDone(
     const uint32_t& connection_key, SSLContext::HandshakeResult error) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   std::list<SecurityManagerListener*>::iterator it = listeners_.begin();
   while (it != listeners_.end()) {
     if ((*it)->OnHandshakeDone(connection_key, error)) {
@@ -249,7 +249,7 @@ void SecurityManagerImpl::NotifyListenersOnHandshakeDone(
 }
 
 void SecurityManagerImpl::NotifyOnCertififcateUpdateRequired() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   std::list<SecurityManagerListener*>::iterator it = listeners_.begin();
   while (it != listeners_.end()) {
     (*it)->OnCertificateUpdateRequired();
@@ -259,20 +259,19 @@ void SecurityManagerImpl::NotifyOnCertififcateUpdateRequired() {
 
 bool SecurityManagerImpl::ProccessHandshakeData(
     const SecurityMessage& inMessage) {
-  LOGGER_INFO(logger_, "SendHandshakeData processing");
+  SDL_INFO("SendHandshakeData processing");
   DCHECK(inMessage);
   DCHECK(inMessage->get_header().query_id ==
          SecurityQuery::SEND_HANDSHAKE_DATA);
   const uint32_t seqNumber = inMessage->get_header().seq_number;
   const uint32_t connection_key = inMessage->get_connection_key();
 
-  LOGGER_DEBUG(logger_,
-               "Received " << inMessage->get_data_size()
-                           << " bytes handshake data ");
+  SDL_DEBUG("Received " << inMessage->get_data_size()
+                        << " bytes handshake data ");
 
   if (!inMessage->get_data_size()) {
     const std::string error_text("SendHandshakeData: null arguments size.");
-    LOGGER_ERROR(logger_, error_text);
+    SDL_ERROR(error_text);
     SendInternalError(
         connection_key, ERROR_INVALID_QUERY_SIZE, error_text, seqNumber);
     return false;
@@ -282,7 +281,7 @@ bool SecurityManagerImpl::ProccessHandshakeData(
       connection_key, protocol_handler::kControl);
   if (!sslContext) {
     const std::string error_text("SendHandshakeData: No ssl context.");
-    LOGGER_ERROR(logger_, error_text);
+    SDL_ERROR(error_text);
     SendInternalError(
         connection_key, ERROR_SERVICE_NOT_PROTECTED, error_text, seqNumber);
     NotifyListenersOnHandshakeDone(connection_key,
@@ -299,8 +298,7 @@ bool SecurityManagerImpl::ProccessHandshakeData(
   if (handshake_result == SSLContext::Handshake_Result_AbnormalFail) {
     // Do not return handshake data on AbnormalFail or null returned values
     const std::string erorr_text(sslContext->LastError());
-    LOGGER_ERROR(logger_,
-                 "SendHandshakeData: Handshake failed: " << erorr_text);
+    SDL_ERROR("SendHandshakeData: Handshake failed: " << erorr_text);
     SendInternalError(
         connection_key, ERROR_SSL_INVALID_DATA, erorr_text, seqNumber);
     NotifyListenersOnHandshakeDone(connection_key,
@@ -310,12 +308,12 @@ bool SecurityManagerImpl::ProccessHandshakeData(
   }
   if (sslContext->IsInitCompleted()) {
     // On handshake success
-    LOGGER_DEBUG(logger_, "SSL initialization finished success.");
+    SDL_DEBUG("SSL initialization finished success.");
     NotifyListenersOnHandshakeDone(connection_key,
                                    SSLContext::Handshake_Result_Success);
   } else if (handshake_result != SSLContext::Handshake_Result_Success) {
     // On handshake fail
-    LOGGER_WARN(logger_, "SSL initialization finished with fail.");
+    SDL_WARN("SSL initialization finished with fail.");
     NotifyListenersOnHandshakeDone(connection_key, handshake_result);
   }
 
@@ -329,8 +327,7 @@ bool SecurityManagerImpl::ProccessHandshakeData(
 bool SecurityManagerImpl::ProccessInternalError(
     const SecurityMessage& inMessage) {
   std::string json_message = inMessage->get_json_message();
-  LOGGER_INFO(logger_,
-              "Received InternalError with Json message" << json_message);
+  SDL_INFO("Received InternalError with Json message" << json_message);
   using namespace utils::json;
   JsonValue::ParseResult parse_result = JsonValue::Parse(json_message);
   if (!parse_result.second) {
@@ -339,10 +336,9 @@ bool SecurityManagerImpl::ProccessInternalError(
 #if defined(ENABLE_LOG)
   JsonValue& root_json = parse_result.first;
 #endif
-  LOGGER_DEBUG(logger_,
-               "Received InternalError id "
-                   << root_json[kErrId].AsString()
-                   << ", text: " << root_json[kErrText].AsString());
+  SDL_DEBUG("Received InternalError id "
+            << root_json[kErrId].AsString()
+            << ", text: " << root_json[kErrText].AsString());
   return true;
 }
 void SecurityManagerImpl::SendHandshakeBinData(const uint32_t connection_key,
@@ -356,7 +352,7 @@ void SecurityManagerImpl::SendHandshakeBinData(const uint32_t connection_key,
   const SecurityQuery query =
       SecurityQuery(header, connection_key, data, data_size);
   SendQuery(query, connection_key);
-  LOGGER_DEBUG(logger_, "Sent " << data_size << " bytes handshake data ");
+  SDL_DEBUG("Sent " << data_size << " bytes handshake data ");
 }
 
 void SecurityManagerImpl::SendInternalError(const uint32_t connection_key,
@@ -383,9 +379,8 @@ void SecurityManagerImpl::SendInternalError(const uint32_t connection_key,
   const SecurityQuery query(
       header, connection_key, &data_sending[0], data_sending.size());
   SendQuery(query, connection_key);
-  LOGGER_DEBUG(logger_,
-               "Sent Internal error id " << static_cast<int>(error_id)
-                                         << " : \"" << erorr_text << "\".");
+  SDL_DEBUG("Sent Internal error id " << static_cast<int>(error_id) << " : \""
+                                      << erorr_text << "\".");
 }
 
 void SecurityManagerImpl::SendQuery(const SecurityQuery& query,

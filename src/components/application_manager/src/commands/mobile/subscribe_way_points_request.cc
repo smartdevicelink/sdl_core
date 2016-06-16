@@ -12,14 +12,13 @@ SubscribeWayPointsRequest::SubscribeWayPointsRequest(
 SubscribeWayPointsRequest::~SubscribeWayPointsRequest() {}
 
 void SubscribeWayPointsRequest::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
-    LOGGER_ERROR(logger_,
-                 "An application with connection key "
-                     << connection_key() << " is not registered.");
+    SDL_ERROR("An application with connection key " << connection_key()
+                                                    << " is not registered.");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -40,12 +39,12 @@ void SubscribeWayPointsRequest::Run() {
 }
 
 void SubscribeWayPointsRequest::on_event(const event_engine::Event& event) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   ApplicationSharedPtr app = application_manager_.application(connection_key());
   const smart_objects::SmartObject& message = event.smart_object();
   switch (event.id()) {
     case hmi_apis::FunctionID::Navigation_SubscribeWayPoints: {
-      LOGGER_INFO(logger_, "Received Navigation_SubscribeWayPoints event");
+      SDL_INFO("Received Navigation_SubscribeWayPoints event");
       mobile_apis::Result::eType result_code =
           GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
               message[strings::params][hmi_response::code].asUInt()));
@@ -57,7 +56,7 @@ void SubscribeWayPointsRequest::on_event(const event_engine::Event& event) {
       break;
     }
     default: {
-      LOGGER_ERROR(logger_, "Received unknown event" << event.id());
+      SDL_ERROR("Received unknown event" << event.id());
       break;
     }
   }

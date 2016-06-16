@@ -42,7 +42,7 @@
 namespace transport_manager {
 namespace transport_adapter {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
+SDL_CREATE_LOGGER("TransportManager")
 UsbAoaAdapter::UsbAoaAdapter(resumption::LastState& last_state,
                              const TransportManagerSettings& settings)
     : TransportAdapterImpl(new UsbDeviceScanner(this),
@@ -68,23 +68,21 @@ bool UsbAoaAdapter::IsInitialised() const {
 }
 
 TransportAdapter::Error UsbAoaAdapter::Init() {
-  LOGGER_TRACE(logger_, "enter");
+  SDL_TRACE("enter");
   TransportAdapter::Error error = usb_handler_->Init();
   if (error != TransportAdapter::OK) {
-    LOGGER_TRACE(logger_,
-                 "exit with error "
-                     << error << ". Condition: error != TransportAdapter::OK");
+    SDL_TRACE("exit with error "
+              << error << ". Condition: error != TransportAdapter::OK");
     return error;
   }
   error = TransportAdapterImpl::Init();
   if (error != TransportAdapter::OK) {
-    LOGGER_TRACE(logger_,
-                 "exit with error "
-                     << error << ". Condition: error != TransportAdapter::OK");
+    SDL_TRACE("exit with error "
+              << error << ". Condition: error != TransportAdapter::OK");
     return error;
   }
   is_initialised_ = true;
-  LOGGER_TRACE(logger_, "exit with TransportAdapter::OK");
+  SDL_TRACE("exit with TransportAdapter::OK");
   return TransportAdapter::OK;
 }
 

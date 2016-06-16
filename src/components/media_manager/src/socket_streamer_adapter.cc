@@ -35,7 +35,7 @@
 
 namespace media_manager {
 
-CREATE_LOGGERPTR_GLOBAL(logger, "SocketStreamerAdapter")
+SDL_CREATE_LOGGER("SocketStreamerAdapter")
 
 SocketStreamerAdapter::SocketStreamerAdapter(const std::string& ip,
                                              int32_t port,
@@ -60,39 +60,39 @@ SocketStreamerAdapter::SocketStreamer::SocketStreamer(
 SocketStreamerAdapter::SocketStreamer::~SocketStreamer() {}
 
 bool SocketStreamerAdapter::SocketStreamer::Connect() {
-  LOGGER_AUTO_TRACE(logger);
+  SDL_AUTO_TRACE();
 
   const int backlog = 5;
   if (!server_socket_.Listen(utils::HostAddress(ip_), port_, backlog)) {
-    LOGGER_ERROR(logger, "Unable to listen");
+    SDL_ERROR("Unable to listen");
     return false;
   }
 
   client_socket_ = server_socket_.Accept();
   if (!client_socket_.IsValid()) {
-    LOGGER_ERROR(logger, "Unable to accept");
+    SDL_ERROR("Unable to accept");
     return false;
   }
 
   is_first_frame_ = true;
-  LOGGER_INFO(logger, "Client connected");
+  SDL_INFO("Client connected");
   return true;
 }
 
 void SocketStreamerAdapter::SocketStreamer::Disconnect() {
-  LOGGER_AUTO_TRACE(logger);
+  SDL_AUTO_TRACE();
   client_socket_.Close();
   server_socket_.Close();
 }
 
 bool SocketStreamerAdapter::SocketStreamer::Send(
     protocol_handler::RawMessagePtr msg) {
-  LOGGER_AUTO_TRACE(logger);
+  SDL_AUTO_TRACE();
   std::size_t written = 0u;
   if (is_first_frame_) {
     bool sent = client_socket_.Send(header_.c_str(), header_.size(), written);
     if (!sent || written != header_.size()) {
-      LOGGER_ERROR(logger, "Unable to send data to socket");
+      SDL_ERROR("Unable to send data to socket");
       return false;
     }
     is_first_frame_ = false;
@@ -100,15 +100,15 @@ bool SocketStreamerAdapter::SocketStreamer::Send(
 
   bool sent = client_socket_.Send(msg->data(), msg->data_size(), written);
   if (!sent) {
-    LOGGER_ERROR(logger, "Unable to send data to socket");
+    SDL_ERROR("Unable to send data to socket");
     return false;
   }
 
   if (written != msg->data_size()) {
-    LOGGER_WARN(logger, "Couldn't send all the data to socket");
+    SDL_WARN("Couldn't send all the data to socket");
   }
 
-  LOGGER_INFO(logger, "Streamer::sent " << msg->data_size());
+  SDL_INFO("Streamer::sent " << msg->data_size());
   return true;
 }
 

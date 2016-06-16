@@ -44,7 +44,7 @@ ReadDIDResponse::ReadDIDResponse(const MessageSharedPtr& message,
 ReadDIDResponse::~ReadDIDResponse() {}
 
 void ReadDIDResponse::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   application_manager_.SendMessageToMobile(message_);
 }

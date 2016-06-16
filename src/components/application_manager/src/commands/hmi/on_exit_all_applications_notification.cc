@@ -55,12 +55,12 @@ OnExitAllApplicationsNotification::OnExitAllApplicationsNotification(
 OnExitAllApplicationsNotification::~OnExitAllApplicationsNotification() {}
 
 void OnExitAllApplicationsNotification::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   const hmi_apis::Common_ApplicationsCloseReason::eType reason =
       static_cast<hmi_apis::Common_ApplicationsCloseReason::eType>(
           (*message_)[strings::msg_params][hmi_request::reason].asInt());
-  LOGGER_DEBUG(logger_, "Reason " << reason);
+  SDL_DEBUG("Reason " << reason);
 
   mobile_api::AppInterfaceUnregisteredReason::eType mob_reason =
       mobile_api::AppInterfaceUnregisteredReason::INVALID_ENUM;
@@ -83,7 +83,7 @@ void OnExitAllApplicationsNotification::Run() {
       return;
     }
     default: {
-      LOGGER_ERROR(logger_, "Unknown Application close reason" << reason);
+      SDL_ERROR("Unknown Application close reason" << reason);
       return;
     }
   }
@@ -103,7 +103,7 @@ void OnExitAllApplicationsNotification::Run() {
 }
 
 void OnExitAllApplicationsNotification::SendOnSDLPersistenceComplete() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   smart_objects::SmartObjectSPtr message =
       new smart_objects::SmartObject(smart_objects::SmartType_Map);

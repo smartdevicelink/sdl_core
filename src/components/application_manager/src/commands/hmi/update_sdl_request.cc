@@ -44,7 +44,7 @@ UpdateSDLRequest::UpdateSDLRequest(const MessageSharedPtr& message,
 UpdateSDLRequest::~UpdateSDLRequest() {}
 
 void UpdateSDLRequest::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   application_manager_.GetPolicyHandler().PTExchangeAtUserRequest(
       (*message_)[strings::params][strings::correlation_id].asInt());

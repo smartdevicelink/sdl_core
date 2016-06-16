@@ -488,9 +488,8 @@ class ApplicationManagerImpl
                 mobile_apis::AudioStreamingState::eType audio_state) {
     ApplicationSharedPtr app = application(app_id);
     if (!app) {
-      CREATE_LOGGERPTR_LOCAL(logger_, "ApplicationManager")
-      LOGGER_ERROR(logger_,
-                   "Application with appID=" << app_id << " does not exist");
+      SDL_CREATE_LOGGER("ApplicationManager")
+      SDL_ERROR("Application with appID=" << app_id << " does not exist");
       return;
     }
     state_ctrl_.SetRegularState(app, audio_state);
@@ -506,9 +505,8 @@ class ApplicationManagerImpl
   void SetState(uint32_t app_id, HmiStatePtr new_state) {
     ApplicationSharedPtr app = application(app_id);
     if (!app) {
-      CREATE_LOGGERPTR_LOCAL(logger_, "ApplicationManager")
-      LOGGER_ERROR(logger_,
-                   "Application with appID=" << app_id << " does not exist");
+      SDL_CREATE_LOGGER("ApplicationManager")
+      SDL_ERROR("Application with appID=" << app_id << " does not exist");
       return;
     }
     state_ctrl_.SetRegularState(app, new_state, SendActivateApp);
@@ -523,9 +521,8 @@ class ApplicationManagerImpl
   void SetState(uint32_t app_id, mobile_apis::HMILevel::eType hmi_level) {
     ApplicationSharedPtr app = application(app_id);
     if (!app) {
-      CREATE_LOGGERPTR_LOCAL(logger_, "ApplicationManager")
-      LOGGER_ERROR(logger_,
-                   "Application with appID=" << app_id << " does not exist");
+      SDL_CREATE_LOGGER("ApplicationManager")
+      SDL_ERROR("Application with appID=" << app_id << " does not exist");
       return;
     }
     state_ctrl_.SetRegularState(app, hmi_level, SendActivateApp);
@@ -544,9 +541,8 @@ class ApplicationManagerImpl
                 mobile_apis::AudioStreamingState::eType audio_state) {
     ApplicationSharedPtr app = application(app_id);
     if (!app) {
-      CREATE_LOGGERPTR_LOCAL(logger_, "ApplicationManager")
-      LOGGER_ERROR(logger_,
-                   "Application with appID=" << app_id << " does not exist");
+      SDL_CREATE_LOGGER("ApplicationManager")
+      SDL_ERROR("Application with appID=" << app_id << " does not exist");
       return;
     }
     state_ctrl_.SetRegularState(app, hmi_level, audio_state, SendActivateApp);
@@ -566,9 +562,8 @@ class ApplicationManagerImpl
                 mobile_apis::SystemContext::eType system_context) {
     ApplicationSharedPtr app = application(app_id);
     if (!app) {
-      CREATE_LOGGERPTR_LOCAL(logger_, "ApplicationManager")
-      LOGGER_ERROR(logger_,
-                   "Application with appID=" << app_id << " does not exist");
+      SDL_CREATE_LOGGER("ApplicationManager")
+      SDL_ERROR("Application with appID=" << app_id << " does not exist");
       return;
     }
     state_ctrl_.SetRegularState(
@@ -584,9 +579,8 @@ class ApplicationManagerImpl
                 mobile_apis::SystemContext::eType system_context) {
     ApplicationSharedPtr app = application(app_id);
     if (!app) {
-      CREATE_LOGGERPTR_LOCAL(logger_, "ApplicationManager")
-      LOGGER_ERROR(logger_,
-                   "Application with appID=" << app_id << " does not exist");
+      SDL_CREATE_LOGGER("ApplicationManager")
+      SDL_ERROR("Application with appID=" << app_id << " does not exist");
       return;
     }
     state_ctrl_.SetRegularState(app, system_context);
@@ -600,9 +594,8 @@ class ApplicationManagerImpl
   void SetHmiState(uint32_t app_id, mobile_apis::HMILevel::eType hmi_level) {
     ApplicationSharedPtr app = application(app_id);
     if (!app) {
-      CREATE_LOGGERPTR_LOCAL(logger_, "ApplicationManager")
-      LOGGER_ERROR(logger_,
-                   "Application with appID=" << app_id << " does not exist");
+      SDL_CREATE_LOGGER("ApplicationManager")
+      SDL_ERROR("Application with appID=" << app_id << " does not exist");
       return;
     }
     state_ctrl_.SetRegularState(app, hmi_level);
@@ -616,9 +609,8 @@ class ApplicationManagerImpl
   void SetState(uint32_t app_id, HmiStatePtr state) {
     ApplicationSharedPtr app = application(app_id);
     if (!app) {
-      CREATE_LOGGERPTR_LOCAL(logger_, "ApplicationManager")
-      LOGGER_ERROR(logger_,
-                   "Application with appID=" << app_id << " does not exist");
+      SDL_CREATE_LOGGER("ApplicationManager")
+      SDL_ERROR("Application with appID=" << app_id << " does not exist");
       return;
     }
     state_ctrl_.SetRegularState(app, state);
@@ -1181,14 +1173,14 @@ class ApplicationManagerImpl
   void PrepareApplicationListSO(ApplicationList app_list,
                                 smart_objects::SmartObject& applications,
                                 ApplicationManager& app_mngr) {
-    CREATE_LOGGERPTR_LOCAL(logger_, "ApplicationManager");
+    SDL_CREATE_LOGGER("ApplicationManager");
 
     smart_objects::SmartArray* app_array = applications.asArray();
     uint32_t app_count = NULL == app_array ? 0 : app_array->size();
     typename ApplicationList::const_iterator it;
     for (it = app_list.begin(); it != app_list.end(); ++it) {
       if (!it->valid()) {
-        LOGGER_ERROR(logger_, "Application not found ");
+        SDL_ERROR("Application not found ");
         continue;
       }
 
@@ -1202,12 +1194,12 @@ class ApplicationManagerImpl
                                                     app_mngr)) {
         applications[app_count++] = hmi_application;
       } else {
-        LOGGER_DEBUG(logger_, "Can't CreateHMIApplicationStruct ");
+        SDL_DEBUG("Can't CreateHMIApplicationStruct ");
       }
     }
 
     if (0 == app_count) {
-      LOGGER_WARN(logger_, "Empty applications list");
+      SDL_WARN("Empty applications list");
     }
   }
 

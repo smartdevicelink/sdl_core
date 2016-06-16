@@ -101,8 +101,8 @@ bool logger::Logger::Impl::InitLogger(const bool logs_enabled,
 }
 
 void logger::Logger::Impl::DeinitLogger() {
-  CREATE_LOGGERPTR_LOCAL(logger_, "Logger");
-  LOGGER_DEBUG(logger_, "Logger deinitialization");
+  SDL_CREATE_LOGGER("Logger");
+  SDL_DEBUG("Logger deinitialization");
 
   set_logs_enabled(false);
   set_log_level(LogLevel::LL_TRACE);

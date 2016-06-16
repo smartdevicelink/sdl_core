@@ -59,7 +59,7 @@ class VIGetVehicleDataResponseTemplate : public ResponseFromHMI {
    * @brief Execute command
    **/
   virtual void Run() {
-    LOGGER_AUTO_TRACE(logger_);
+    SDL_AUTO_TRACE();
     event_engine::Event event(eventID);
     event.set_smart_object(*message_);
     event.raise(application_manager_.event_dispatcher());

@@ -42,7 +42,7 @@ NaviStopStreamResponse::NaviStopStreamResponse(
 NaviStopStreamResponse::~NaviStopStreamResponse() {}
 
 void NaviStopStreamResponse::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 }
 
 }  // namespace commands

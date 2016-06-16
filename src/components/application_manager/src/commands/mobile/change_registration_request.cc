@@ -66,7 +66,7 @@ ChangeRegistrationRequest::ChangeRegistrationRequest(
 ChangeRegistrationRequest::~ChangeRegistrationRequest() {}
 
 void ChangeRegistrationRequest::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   using namespace smart_objects;
 
   const HMICapabilities& hmi_capabilities =
@@ -74,14 +74,13 @@ void ChangeRegistrationRequest::Run() {
 
   ApplicationSharedPtr app = application_manager_.application(connection_key());
   if (!app) {
-    LOGGER_ERROR(logger_, "NULL pointer");
+    SDL_ERROR("NULL pointer");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
   if (IsWhiteSpaceExist()) {
-    LOGGER_INFO(logger_,
-                "Incoming request contains \t\n \\t \\n or whitespace");
+    SDL_INFO("Incoming request contains \t\n \\t \\n or whitespace");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
@@ -113,14 +112,14 @@ void ChangeRegistrationRequest::Run() {
   if (false == (IsLanguageSupportedByUI(hmi_language) &&
                 IsLanguageSupportedByVR(language) &&
                 IsLanguageSupportedByTTS(language))) {
-    LOGGER_ERROR(logger_, "Language is not supported");
+    SDL_ERROR("Language is not supported");
     SendResponse(false, mobile_apis::Result::REJECTED);
     return;
   }
 
   if (msg_params.keyExists(strings::app_name) &&
       !IsNicknameAllowed(msg_params[strings::app_name].asCustomString())) {
-    LOGGER_ERROR(logger_, "Nickname is not allowed.");
+    SDL_ERROR("Nickname is not allowed.");
     SendResponse(false, mobile_apis::Result::DISALLOWED);
     return;
   }
@@ -184,35 +183,35 @@ bool ChangeRegistrationRequest::AllHmiResponsesSuccess(
 }
 
 void ChangeRegistrationRequest::on_event(const event_engine::Event& event) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   const smart_objects::SmartObject& message = event.smart_object();
 
   hmi_apis::FunctionID::eType event_id = event.id();
 
   switch (event_id) {
     case hmi_apis::FunctionID::UI_ChangeRegistration: {
-      LOGGER_INFO(logger_, "Received UI_ChangeRegistration event");
+      SDL_INFO("Received UI_ChangeRegistration event");
       pending_requests_.Remove(event_id);
       ui_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
       break;
     }
     case hmi_apis::FunctionID::VR_ChangeRegistration: {
-      LOGGER_INFO(logger_, "Received VR_ChangeRegistration event");
+      SDL_INFO("Received VR_ChangeRegistration event");
       pending_requests_.Remove(event_id);
       vr_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
       break;
     }
     case hmi_apis::FunctionID::TTS_ChangeRegistration: {
-      LOGGER_INFO(logger_, "Received TTS_ChangeRegistration event");
+      SDL_INFO("Received TTS_ChangeRegistration event");
       pending_requests_.Remove(event_id);
       tts_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
       break;
     }
     default: {
-      LOGGER_ERROR(logger_, "Received unknown event" << event_id);
+      SDL_ERROR("Received unknown event" << event_id);
       return;
     }
   }
@@ -222,7 +221,7 @@ void ChangeRegistrationRequest::on_event(const event_engine::Event& event) {
         application_manager_.application(connection_key());
 
     if (!application) {
-      LOGGER_ERROR(logger_, "NULL pointer");
+      SDL_ERROR("NULL pointer");
       return;
     }
 
@@ -249,9 +248,9 @@ void ChangeRegistrationRequest::on_event(const event_engine::Event& event) {
                  NULL,
                  &(message[strings::msg_params]));
   } else {
-    LOGGER_INFO(logger_,
-                "There are some pending responses from HMI."
-                "ChangeRegistrationRequest still waiting.");
+    SDL_INFO(
+        "There are some pending responses from HMI."
+        "ChangeRegistrationRequest still waiting.");
   }
 }
 
@@ -263,7 +262,7 @@ bool ChangeRegistrationRequest::IsLanguageSupportedByUI(
       hmi_capabilities.ui_supported_languages();
 
   if (!ui_languages) {
-    LOGGER_ERROR(logger_, "NULL pointer");
+    SDL_ERROR("NULL pointer");
     return false;
   }
 
@@ -273,7 +272,7 @@ bool ChangeRegistrationRequest::IsLanguageSupportedByUI(
     }
   }
 
-  LOGGER_ERROR(logger_, "Language isn't supported by UI");
+  SDL_ERROR("Language isn't supported by UI");
 
   return false;
 }
@@ -286,7 +285,7 @@ bool ChangeRegistrationRequest::IsLanguageSupportedByVR(
       hmi_capabilities.vr_supported_languages();
 
   if (!vr_languages) {
-    LOGGER_ERROR(logger_, "NULL pointer");
+    SDL_ERROR("NULL pointer");
     return false;
   }
 
@@ -296,7 +295,7 @@ bool ChangeRegistrationRequest::IsLanguageSupportedByVR(
     }
   }
 
-  LOGGER_ERROR(logger_, "Language isn't supported by VR");
+  SDL_ERROR("Language isn't supported by VR");
 
   return false;
 }
@@ -309,7 +308,7 @@ bool ChangeRegistrationRequest::IsLanguageSupportedByTTS(
       hmi_capabilities.tts_supported_languages();
 
   if (!tts_languages) {
-    LOGGER_ERROR(logger_, "NULL pointer");
+    SDL_ERROR("NULL pointer");
     return false;
   }
 
@@ -320,7 +319,7 @@ bool ChangeRegistrationRequest::IsLanguageSupportedByTTS(
     }
   }
 
-  LOGGER_ERROR(logger_, "Language isn't supported by TTS");
+  SDL_ERROR("Language isn't supported by TTS");
   return false;
 }
 
@@ -330,7 +329,7 @@ bool ChangeRegistrationRequest::IsWhiteSpaceExist() {
   if ((*message_)[strings::msg_params].keyExists(strings::app_name)) {
     str = (*message_)[strings::msg_params][strings::app_name].asCharArray();
     if (!CheckSyntax(str)) {
-      LOGGER_ERROR(logger_, "Invalid app_name syntax check failed");
+      SDL_ERROR("Invalid app_name syntax check failed");
       return true;
     }
   }
@@ -345,7 +344,7 @@ bool ChangeRegistrationRequest::IsWhiteSpaceExist() {
     for (; it_tn != it_tn_end; ++it_tn) {
       str = (*it_tn)[strings::text].asCharArray();
       if (strlen(str) && !CheckSyntax(str)) {
-        LOGGER_ERROR(logger_, "Invalid tts_name syntax check failed");
+        SDL_ERROR("Invalid tts_name syntax check failed");
         return true;
       }
     }
@@ -356,8 +355,7 @@ bool ChangeRegistrationRequest::IsWhiteSpaceExist() {
     str = (*message_)[strings::msg_params][strings::ngn_media_screen_app_name]
               .asCharArray();
     if (!CheckSyntax(str)) {
-      LOGGER_ERROR(logger_,
-                   "Invalid ngn_media_screen_app_name syntax check failed");
+      SDL_ERROR("Invalid ngn_media_screen_app_name syntax check failed");
       return true;
     }
   }
@@ -372,7 +370,7 @@ bool ChangeRegistrationRequest::IsWhiteSpaceExist() {
     for (; it_vs != it_vs_end; ++it_vs) {
       str = (*it_vs).asCharArray();
       if (!CheckSyntax(str)) {
-        LOGGER_ERROR(logger_, "Invalid vr_synonyms syntax check failed");
+        SDL_ERROR("Invalid vr_synonyms syntax check failed");
         return true;
       }
     }
@@ -381,7 +379,7 @@ bool ChangeRegistrationRequest::IsWhiteSpaceExist() {
 }
 
 mobile_apis::Result::eType ChangeRegistrationRequest::CheckCoincidence() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   const smart_objects::SmartObject& msg_params =
       (*message_)[strings::msg_params];
@@ -402,7 +400,7 @@ mobile_apis::Result::eType ChangeRegistrationRequest::CheckCoincidence() {
     const custom_str::CustomString& cur_name = (*it)->name();
     if (msg_params.keyExists(strings::app_name)) {
       if (app_name.CompareIgnoreCase(cur_name)) {
-        LOGGER_ERROR(logger_, "Application name is known already.");
+        SDL_ERROR("Application name is known already.");
         return mobile_apis::Result::DUPLICATE_NAME;
       }
 
@@ -413,7 +411,7 @@ mobile_apis::Result::eType ChangeRegistrationRequest::CheckCoincidence() {
         CoincidencePredicateVR v(app_name);
 
         if (0 != std::count_if(curr_vr->begin(), curr_vr->end(), v)) {
-          LOGGER_ERROR(logger_, "Application name is known already.");
+          SDL_ERROR("Application name is known already.");
           return mobile_apis::Result::DUPLICATE_NAME;
         }
       }
@@ -426,7 +424,7 @@ mobile_apis::Result::eType ChangeRegistrationRequest::CheckCoincidence() {
 
       CoincidencePredicateVR v(cur_name);
       if (0 != std::count_if(new_vr->begin(), new_vr->end(), v)) {
-        LOGGER_ERROR(logger_, "vr_synonyms duplicated with app_name .");
+        SDL_ERROR("vr_synonyms duplicated with app_name .");
         return mobile_apis::Result::DUPLICATE_NAME;
       }
     }  // end vr check
@@ -436,13 +434,11 @@ mobile_apis::Result::eType ChangeRegistrationRequest::CheckCoincidence() {
 
 bool ChangeRegistrationRequest::IsNicknameAllowed(
     const custom_str::CustomString& app_name) const {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
-    LOGGER_ERROR(logger_,
-                 "Can't find appication with connection key "
-                     << connection_key());
+    SDL_ERROR("Can't find appication with connection key " << connection_key());
     return false;
   }
 
@@ -455,9 +451,8 @@ bool ChangeRegistrationRequest::IsNicknameAllowed(
       policy_app_id, &app_nicknames, &app_hmi_types);
 
   if (!init_result) {
-    LOGGER_ERROR(logger_,
-                 "Error during getting of nickname list for application "
-                     << policy_app_id);
+    SDL_ERROR("Error during getting of nickname list for application "
+              << policy_app_id);
     return false;
   }
 
@@ -466,7 +461,7 @@ bool ChangeRegistrationRequest::IsNicknameAllowed(
     policy::StringArray::const_iterator it =
         std::find_if(app_nicknames.begin(), app_nicknames.end(), compare);
     if (app_nicknames.end() == it) {
-      LOGGER_WARN(logger_, "Application name was not found in nicknames list.");
+      SDL_WARN("Application name was not found in nicknames list.");
 
       usage_statistics::AppCounter count_of_rejections_nickname_mismatch(
           application_manager_.GetPolicyHandler().GetStatisticManager(),

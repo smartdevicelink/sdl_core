@@ -43,20 +43,19 @@ AudioStartStreamRequest::AudioStartStreamRequest(
     : RequestToHMI(message, application_manager)
     , EventObserver(application_manager.event_dispatcher())
     , retry_number_(0) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   std::pair<uint32_t, int32_t> stream_retry =
       application_manager_.get_settings().start_stream_retry_amount();
   default_timeout_ = stream_retry.second;
   retry_number_ = stream_retry.first;
-  LOGGER_DEBUG(logger_,
-               "default_timeout_ = " << default_timeout_
-                                     << "; retry_number_ = " << retry_number_);
+  SDL_DEBUG("default_timeout_ = " << default_timeout_
+                                  << "; retry_number_ = " << retry_number_);
 }
 
 AudioStartStreamRequest::~AudioStartStreamRequest() {}
 
 void AudioStartStreamRequest::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   SetAllowedToTerminate(false);
   subscribe_on_event(hmi_apis::FunctionID::Navigation_StartAudioStream,
@@ -68,47 +67,44 @@ void AudioStartStreamRequest::Run() {
     app->set_audio_streaming_allowed(true);
     SendRequest();
   } else {
-    LOGGER_ERROR(logger_,
-                 "Applcation with hmi_app_id " << application_id()
-                                               << " does not exist");
+    SDL_ERROR("Applcation with hmi_app_id " << application_id()
+                                            << " does not exist");
   }
 }
 
 void AudioStartStreamRequest::on_event(const event_engine::Event& event) {
   using namespace protocol_handler;
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   ApplicationSharedPtr app =
       application_manager_.application_by_hmi_app(application_id());
   if (!app) {
-    LOGGER_ERROR(logger_,
-                 "StartAudioStreamRequest aborted. Application not found");
+    SDL_ERROR("StartAudioStreamRequest aborted. Application not found");
     return;
   }
 
   const smart_objects::SmartObject& message = event.smart_object();
   switch (event.id()) {
     case hmi_apis::FunctionID::Navigation_StartAudioStream: {
-      LOGGER_DEBUG(logger_, "Received StartStream event");
+      SDL_DEBUG("Received StartStream event");
 
       const hmi_apis::Common_Result::eType code =
           static_cast<hmi_apis::Common_Result::eType>(
               message[strings::params][hmi_response::code].asInt());
 
       if (hmi_apis::Common_Result::SUCCESS == code) {
-        LOGGER_INFO(logger_, "AudioStartStream response SUCCESS");
+        SDL_INFO("AudioStartStream response SUCCESS");
         if (application_manager_.HMILevelAllowsStreaming(app->app_id(),
                                                          ServiceType::kAudio)) {
           app->set_audio_streaming_approved(true);
         } else {
-          LOGGER_WARN(
-              logger_,
+          SDL_WARN(
               "StartAudioStreamRequest aborted. Application can not stream");
         }
         break;
       }
       if (hmi_apis::Common_Result::REJECTED == code) {
-        LOGGER_INFO(logger_, "StartAudioStream response REJECTED");
+        SDL_INFO("StartAudioStream response REJECTED");
         RetryStartSession();
         application_manager_.TerminateRequest(connection_key(),
                                               correlation_id());
@@ -116,7 +112,7 @@ void AudioStartStreamRequest::on_event(const event_engine::Event& event) {
       }
     }
     default: {
-      LOGGER_ERROR(logger_, "Received unknown event" << event.id());
+      SDL_ERROR("Received unknown event" << event.id());
       return;
     }
   }
@@ -128,40 +124,36 @@ void AudioStartStreamRequest::onTimeOut() {
 }
 
 void AudioStartStreamRequest::RetryStartSession() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   ApplicationSharedPtr app =
       application_manager_.application_by_hmi_app(application_id());
   if (!app) {
-    LOGGER_ERROR(logger_,
-                 "StartAudioStreamRequest aborted. Application not found");
+    SDL_ERROR("StartAudioStreamRequest aborted. Application not found");
     return;
   }
 
   if (!app->audio_streaming_allowed()) {
-    LOGGER_WARN(logger_, "Audio streaming not allowed");
+    SDL_WARN("Audio streaming not allowed");
     return;
   }
 
   if (app->audio_streaming_approved()) {
-    LOGGER_DEBUG(logger_,
-                 "AudioStartStream retry sequence stopped. "
-                     << "Audio streaming is approved");
+    SDL_INFO("AudioStartStream retry sequence stopped. "
+             << "Audio streaming is approved");
     app->set_audio_stream_retry_number(0);
     return;
   }
 
   uint32_t curr_retry_number = app->audio_stream_retry_number();
   if (curr_retry_number < retry_number_ - 1) {
-    LOGGER_DEBUG(
-        logger_,
+    SDL_DEBUG(
         "Send AudioStartStream retry. retry_number = " << curr_retry_number);
     MessageHelper::SendAudioStartStream(app->app_id(), application_manager_);
     app->set_audio_stream_retry_number(++curr_retry_number);
   } else {
-    LOGGER_DEBUG(logger_,
-                 "Audio start stream retry sequence stopped. "
-                     << "Attempts expired.");
+    SDL_DEBUG("Audio start stream retry sequence stopped. "
+              << "Attempts expired.");
     application_manager_.EndNaviServices(app->app_id());
   }
 }

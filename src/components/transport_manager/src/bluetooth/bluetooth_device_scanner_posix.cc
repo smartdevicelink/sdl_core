@@ -57,7 +57,7 @@
 namespace transport_manager {
 namespace transport_adapter {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
+SDL_CREATE_LOGGER("TransportManager")
 
 namespace {
 char* SplitToAddr(char* dev_list_entry) {
@@ -71,14 +71,14 @@ char* SplitToAddr(char* dev_list_entry) {
 }
 
 int FindPairedDevs(std::vector<bdaddr_t>* result) {
-  LOGGER_TRACE(logger_, "enter. result adress: " << result);
+  SDL_TRACE("enter. result adress: " << result);
   DCHECK(result != NULL);
 
   const char* cmd = "bt-device -l";
 
   FILE* pipe = popen(cmd, "r");
   if (!pipe) {
-    LOGGER_TRACE(logger_, "exit -1. Condition: !pipe");
+    SDL_TRACE("exit -1. Condition: !pipe");
     return -1;
   }
   char* buffer = new char[1028];
@@ -96,7 +96,7 @@ int FindPairedDevs(std::vector<bdaddr_t>* result) {
     buffer = new char[1028];
   }
   pclose(pipe);
-  LOGGER_TRACE(logger_, "exit with 0");
+  SDL_TRACE("exit with 0");
   return 0;
 }
 }  //  namespace
@@ -147,7 +147,7 @@ bool BluetoothDeviceScanner::IsInitialised() const {
 }
 
 void BluetoothDeviceScanner::UpdateTotalDeviceList() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   DeviceVector devices;
   devices.insert(devices.end(),
                  paired_devices_with_sdl_.begin(),
@@ -159,11 +159,11 @@ void BluetoothDeviceScanner::UpdateTotalDeviceList() {
 }
 
 void BluetoothDeviceScanner::DoInquiry() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   const int device_id = hci_get_route(0);
   if (device_id < 0) {
-    LOGGER_INFO(logger_, "HCI device is not available");
+    SDL_INFO("HCI device is not available");
     shutdown_requested_ = true;
     controller_->SearchDeviceFailed(SearchDeviceError());
     return;
@@ -176,23 +176,22 @@ void BluetoothDeviceScanner::DoInquiry() {
   }
 
   if (paired_devices_.empty()) {
-    LOGGER_INFO(logger_, "Searching for paired devices.");
+    SDL_INFO("Searching for paired devices.");
     if (-1 == FindPairedDevs(&paired_devices_)) {
-      LOGGER_ERROR(logger_, "Failed to retrieve list of paired devices.");
+      SDL_ERROR("Failed to retrieve list of paired devices.");
       controller_->SearchDeviceFailed(SearchDeviceError());
     }
   }
 
-  LOGGER_INFO(logger_,
-              "Check rfcomm channel on " << paired_devices_.size()
-                                         << " paired devices.");
+  SDL_INFO("Check rfcomm channel on " << paired_devices_.size()
+                                      << " paired devices.");
 
   paired_devices_with_sdl_.clear();
   CheckSDLServiceOnDevices(
       paired_devices_, device_handle, &paired_devices_with_sdl_);
   UpdateTotalDeviceList();
 
-  LOGGER_INFO(logger_, "Starting hci_inquiry on device " << device_id);
+  SDL_INFO("Starting hci_inquiry on device " << device_id);
   const uint8_t inquiry_time = 8u;  // Time unit is 1.28 seconds
   const size_t max_devices = 256u;
   inquiry_info* inquiry_info_list = new inquiry_info[max_devices];
@@ -205,8 +204,7 @@ void BluetoothDeviceScanner::DoInquiry() {
                                             IREQ_CACHE_FLUSH);
 
   if (number_of_devices >= 0) {
-    LOGGER_INFO(logger_,
-                "hci_inquiry: found " << number_of_devices << " devices");
+    SDL_INFO("hci_inquiry: found " << number_of_devices << " devices");
     std::vector<bdaddr_t> found_devices(number_of_devices);
     for (int i = 0; i < number_of_devices; ++i) {
       found_devices[i] = inquiry_info_list[i].bdaddr;
@@ -222,7 +220,7 @@ void BluetoothDeviceScanner::DoInquiry() {
   delete[] inquiry_info_list;
 
   if (number_of_devices < 0) {
-    LOGGER_DEBUG(logger_, "number_of_devices < 0");
+    SDL_DEBUG("number_of_devices < 0");
     controller_->SearchDeviceFailed(SearchDeviceError());
   }
 }
@@ -231,10 +229,9 @@ void BluetoothDeviceScanner::CheckSDLServiceOnDevices(
     const std::vector<bdaddr_t>& bd_addresses,
     int device_handle,
     DeviceVector* discovered_devices) {
-  LOGGER_TRACE(logger_,
-               "enter. bd_addresses: "
-                   << &bd_addresses << ", device_handle: " << device_handle
-                   << ", discovered_devices: " << discovered_devices);
+  SDL_TRACE("enter. bd_addresses: "
+            << &bd_addresses << ", device_handle: " << device_handle
+            << ", discovered_devices: " << discovered_devices);
   std::vector<RfcommChannelVector> sdl_rfcomm_channels =
       DiscoverSmartDeviceLinkRFCOMMChannels(bd_addresses);
 
@@ -253,7 +250,7 @@ void BluetoothDeviceScanner::CheckSDLServiceOnDevices(
                              0);
 
     if (hci_read_remote_name_ret != 0) {
-      LOGGER_ERROR_WITH_ERRNO(logger_, "hci_read_remote_name failed");
+      SDL_ERROR_WITH_ERRNO("hci_read_remote_name failed");
       strncpy(deviceName,
               BluetoothDevice::GetUniqueDeviceId(bd_address).c_str(),
               sizeof(deviceName) / sizeof(deviceName[0]));
@@ -262,19 +259,19 @@ void BluetoothDeviceScanner::CheckSDLServiceOnDevices(
     Device* bluetooth_device =
         new BluetoothDevice(bd_address, deviceName, sdl_rfcomm_channels[i]);
     if (bluetooth_device) {
-      LOGGER_INFO(logger_, "Bluetooth device created successfully");
+      SDL_INFO("Bluetooth device created successfully");
       discovered_devices->push_back(bluetooth_device);
     } else {
-      LOGGER_WARN(logger_, "Can't create bluetooth device " << deviceName);
+      SDL_WARN("Can't create bluetooth device " << deviceName);
     }
   }
-  LOGGER_TRACE(logger_, "exit");
+  SDL_TRACE("exit");
 }
 
 std::vector<BluetoothDeviceScanner::RfcommChannelVector>
 BluetoothDeviceScanner::DiscoverSmartDeviceLinkRFCOMMChannels(
     const std::vector<bdaddr_t>& device_addresses) {
-  LOGGER_TRACE(logger_, "enter device_addresses: " << &device_addresses);
+  SDL_TRACE("enter device_addresses: " << &device_addresses);
   const size_t size = device_addresses.size();
   std::vector<RfcommChannelVector> result(size);
 
@@ -299,17 +296,14 @@ BluetoothDeviceScanner::DiscoverSmartDeviceLinkRFCOMMChannels(
     }
     sleep(attempt_timeout);
   }
-  LOGGER_TRACE(
-      logger_,
-      "exit with vector<RfcommChannelVector>: size = " << result.size());
+  SDL_TRACE("exit with vector<RfcommChannelVector>: size = " << result.size());
   return result;
 }
 
 bool BluetoothDeviceScanner::DiscoverSmartDeviceLinkRFCOMMChannels(
     const bdaddr_t& device_address, RfcommChannelVector* channels) {
-  LOGGER_TRACE(logger_,
-               "enter. device_address: " << &device_address
-                                         << ", channels: " << channels);
+  SDL_TRACE("enter. device_address: " << &device_address
+                                      << ", channels: " << channels);
   static bdaddr_t any_address = {{0, 0, 0, 0, 0, 0}};
 
   sdp_session_t* sdp_session = sdp_connect(
@@ -317,9 +311,9 @@ bool BluetoothDeviceScanner::DiscoverSmartDeviceLinkRFCOMMChannels(
   if (sdp_session == 0) {
     bool result = !(errno == 31 || errno == 16 || errno == 117 || errno == 114);
     if (result) {
-      LOGGER_TRACE(logger_, "exit with TRUE. Condition: sdp_session == 0");
+      SDL_TRACE("exit with TRUE. Condition: sdp_session == 0");
     } else {
-      LOGGER_TRACE(logger_, "exit with FALSE. Condition: sdp_session == 0");
+      SDL_TRACE("exit with FALSE. Condition: sdp_session == 0");
     }
     return result;
   }
@@ -377,7 +371,7 @@ bool BluetoothDeviceScanner::DiscoverSmartDeviceLinkRFCOMMChannels(
   sdp_close(sdp_session);
 
   if (!channels->empty()) {
-    LOGGER_INFO(logger_, "channels not empty");
+    SDL_INFO("channels not empty");
     std::stringstream rfcomm_channels_string;
 
     for (RfcommChannelVector::const_iterator it = channels->begin();
@@ -389,22 +383,19 @@ bool BluetoothDeviceScanner::DiscoverSmartDeviceLinkRFCOMMChannels(
       rfcomm_channels_string << static_cast<uint32_t>(*it);
     }
 
-    LOGGER_INFO(
-        logger_,
-        "SmartDeviceLink service was discovered on device "
-            << BluetoothDevice::GetUniqueDeviceId(device_address)
-            << " at channel(s): " << rfcomm_channels_string.str().c_str());
+    SDL_INFO("SmartDeviceLink service was discovered on device "
+             << BluetoothDevice::GetUniqueDeviceId(device_address)
+             << " at channel(s): " << rfcomm_channels_string.str().c_str());
   } else {
-    LOGGER_INFO(logger_,
-                "SmartDeviceLink service was not discovered on device "
-                    << BluetoothDevice::GetUniqueDeviceId(device_address));
+    SDL_INFO("SmartDeviceLink service was not discovered on device "
+             << BluetoothDevice::GetUniqueDeviceId(device_address));
   }
-  LOGGER_TRACE(logger_, "exit with TRUE");
+  SDL_TRACE("exit with TRUE");
   return true;
 }
 
 void BluetoothDeviceScanner::Thread() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   ready_ = true;
   if (auto_repeat_search_) {
     while (!shutdown_requested_) {
@@ -427,10 +418,10 @@ void BluetoothDeviceScanner::Thread() {
 }
 
 void BluetoothDeviceScanner::TimedWaitForDeviceScanRequest() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   if (auto_repeat_pause_sec_ == 0) {
-    LOGGER_TRACE(logger_, "exit. Condition: auto_repeat_pause_sec_ == 0");
+    SDL_TRACE("exit. Condition: auto_repeat_pause_sec_ == 0");
     return;
   }
 
@@ -441,7 +432,7 @@ void BluetoothDeviceScanner::TimedWaitForDeviceScanRequest() {
           device_scan_requested_cv_.WaitFor(auto_lock,
                                             auto_repeat_pause_sec_ * 1000);
       if (wait_status == sync_primitives::ConditionalVariable::kTimeout) {
-        LOGGER_INFO(logger_, "Bluetooth scanner timeout, performing scan");
+        SDL_INFO("Bluetooth scanner timeout, performing scan");
         device_scan_requested_ = true;
       }
     }
@@ -449,17 +440,17 @@ void BluetoothDeviceScanner::TimedWaitForDeviceScanRequest() {
 }
 
 TransportAdapter::Error BluetoothDeviceScanner::Init() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   if (!thread_->start()) {
-    LOGGER_ERROR(logger_, "Bluetooth device scanner thread start failed");
+    SDL_ERROR("Bluetooth device scanner thread start failed");
     return TransportAdapter::FAIL;
   }
-  LOGGER_INFO(logger_, "Bluetooth device scanner thread started");
+  SDL_INFO("Bluetooth device scanner thread started");
   return TransportAdapter::OK;
 }
 
 void BluetoothDeviceScanner::Terminate() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   shutdown_requested_ = true;
   if (thread_) {
     {
@@ -467,17 +458,16 @@ void BluetoothDeviceScanner::Terminate() {
       device_scan_requested_ = false;
       device_scan_requested_cv_.NotifyOne();
     }
-    LOGGER_INFO(logger_,
-                "Waiting for bluetooth device scanner thread termination");
+    SDL_INFO("Waiting for bluetooth device scanner thread termination");
     thread_->stop();
-    LOGGER_INFO(logger_, "Bluetooth device scanner thread stopped");
+    SDL_INFO("Bluetooth device scanner thread stopped");
   }
 }
 
 TransportAdapter::Error BluetoothDeviceScanner::Scan() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   if ((!IsInitialised()) || shutdown_requested_) {
-    LOGGER_WARN(logger_, "BAD_STATE");
+    SDL_WARN("BAD_STATE");
     return TransportAdapter::BAD_STATE;
   }
   if (auto_repeat_pause_sec_ == 0) {
@@ -487,12 +477,12 @@ TransportAdapter::Error BluetoothDeviceScanner::Scan() {
 
   sync_primitives::AutoLock auto_lock(device_scan_requested_lock_);
   if (!device_scan_requested_) {
-    LOGGER_TRACE(logger_, "Requesting device Scan");
+    SDL_TRACE("Requesting device Scan");
     device_scan_requested_ = true;
     device_scan_requested_cv_.NotifyOne();
   } else {
     ret = TransportAdapter::BAD_STATE;
-    LOGGER_WARN(logger_, "BAD_STATE");
+    SDL_WARN("BAD_STATE");
   }
   return ret;
 }
@@ -502,7 +492,7 @@ BluetoothDeviceScanner::BluetoothDeviceScannerDelegate::
     : scanner_(scanner) {}
 
 void BluetoothDeviceScanner::BluetoothDeviceScannerDelegate::threadMain() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   DCHECK(scanner_);
   scanner_->Thread();
 }

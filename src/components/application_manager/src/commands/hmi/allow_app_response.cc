@@ -43,7 +43,7 @@ AllowAppResponse::AllowAppResponse(const MessageSharedPtr& message,
 AllowAppResponse::~AllowAppResponse() {}
 
 void AllowAppResponse::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   uint32_t connection_key =
       (*message_)[strings::params][strings::connection_key].asInt();
@@ -51,7 +51,7 @@ void AllowAppResponse::Run() {
   ApplicationSharedPtr app = application_manager_.application(connection_key);
 
   if (!app) {
-    LOGGER_ERROR(logger_, "NULL pointer");
+    SDL_ERROR("NULL pointer");
     return;
   }
   app->set_app_allowed(

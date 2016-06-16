@@ -44,7 +44,7 @@ VRChangeRegistrationResponse::VRChangeRegistrationResponse(
 VRChangeRegistrationResponse::~VRChangeRegistrationResponse() {}
 
 void VRChangeRegistrationResponse::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   event_engine::Event event(hmi_apis::FunctionID::VR_ChangeRegistration);
   event.set_smart_object(*message_);

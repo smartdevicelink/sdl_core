@@ -42,7 +42,7 @@ TTSIsReadyResponse::TTSIsReadyResponse(const MessageSharedPtr& message,
 TTSIsReadyResponse::~TTSIsReadyResponse() {}
 
 void TTSIsReadyResponse::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   smart_objects::SmartObject& object = *message_;
 
   bool is_available = false;

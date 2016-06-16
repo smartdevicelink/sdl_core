@@ -46,13 +46,13 @@ OnHMIStatusNotification::OnHMIStatusNotification(
 OnHMIStatusNotification::~OnHMIStatusNotification() {}
 
 void OnHMIStatusNotification::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   (*message_)[strings::params][strings::message_type] =
       static_cast<int32_t>(application_manager::MessageType::kNotification);
   ApplicationSharedPtr app = application_manager_.application(connection_key());
   if (!app.valid()) {
-    LOGGER_ERROR(logger_, "OnHMIStatusNotification application doesn't exist");
+    SDL_ERROR("OnHMIStatusNotification application doesn't exist");
     return;
   }
 
@@ -63,17 +63,16 @@ void OnHMIStatusNotification::Run() {
       (mobile_apis::HMILevel::HMI_NONE == hmi_level)) {
     if (!(app->tts_properties_in_none())) {
       app->set_tts_properties_in_none(true);
-      LOGGER_INFO(logger_,
-                  "OnHMIStatusNotification::Send TTS GlobalProperties"
-                  " with empty array to HMI");
+      SDL_INFO(
+          "OnHMIStatusNotification::Send TTS GlobalProperties"
+          " with empty array to HMI");
       MessageHelper::SendTTSGlobalProperties(app, false, application_manager_);
     }
   } else if ((mobile_apis::HMILevel::HMI_FULL == hmi_level) ||
              (mobile_apis::HMILevel::HMI_LIMITED == hmi_level)) {
     if (!(app->tts_properties_in_full())) {
       app->set_tts_properties_in_full(true);
-      LOGGER_INFO(logger_,
-                  "OnHMIStatusNotification AddAppToTTSGlobalPropertiesList");
+      SDL_INFO("OnHMIStatusNotification AddAppToTTSGlobalPropertiesList");
       application_manager_.AddAppToTTSGlobalPropertiesList(app->app_id());
     }
   }

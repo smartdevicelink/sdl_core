@@ -43,7 +43,7 @@ NaviSendLocationRequest::NaviSendLocationRequest(
 NaviSendLocationRequest::~NaviSendLocationRequest() {}
 
 void NaviSendLocationRequest::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   SendRequest();
 }

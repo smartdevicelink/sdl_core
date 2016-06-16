@@ -42,7 +42,7 @@ OnUpdateDeviceList::OnUpdateDeviceList(const MessageSharedPtr& message,
 OnUpdateDeviceList::~OnUpdateDeviceList() {}
 
 void OnUpdateDeviceList::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 }
 
 }  // namespace commands

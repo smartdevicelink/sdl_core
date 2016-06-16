@@ -36,7 +36,7 @@
 
 namespace media_manager {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "MediaManager")
+SDL_CREATE_LOGGER("MediaManager")
 
 StreamerListener::StreamerListener(MediaManager& media_manager)
     : current_application_(0), media_manager_(media_manager) {}
@@ -52,23 +52,22 @@ void StreamerListener::OnDataReceived(int32_t application_key,
 
 void StreamerListener::OnErrorReceived(int32_t application_key,
                                        const DataForListener& data) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 }
 
 void StreamerListener::OnActivityStarted(int32_t application_key) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   if (current_application_ == application_key) {
-    LOGGER_WARN(logger_, "Already performing activity for " << application_key);
+    SDL_WARN("Already performing activity for " << application_key);
     return;
   }
   current_application_ = application_key;
 }
 
 void StreamerListener::OnActivityEnded(int32_t application_key) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   if (current_application_ != application_key) {
-    LOGGER_WARN(logger_,
-                "Already not performing activity for " << application_key);
+    SDL_WARN("Already not performing activity for " << application_key);
     return;
   }
   current_application_ = 0;

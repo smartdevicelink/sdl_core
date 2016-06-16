@@ -45,7 +45,7 @@ AddStatisticsInfoNotification::AddStatisticsInfoNotification(
 AddStatisticsInfoNotification::~AddStatisticsInfoNotification() {}
 
 void AddStatisticsInfoNotification::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   int type = (*message_)[strings::msg_params][hmi_notification::statistic_type]
                  .asInt();

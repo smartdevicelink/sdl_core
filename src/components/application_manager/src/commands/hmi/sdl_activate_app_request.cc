@@ -45,7 +45,7 @@ SDLActivateAppRequest::SDLActivateAppRequest(
 SDLActivateAppRequest::~SDLActivateAppRequest() {}
 
 void SDLActivateAppRequest::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   using namespace hmi_apis::FunctionID;
   using namespace hmi_apis::Common_Result;
 
@@ -55,24 +55,23 @@ void SDLActivateAppRequest::Run() {
       application_manager_.application(application_id);
 
   if (!app) {
-    LOGGER_INFO(logger_, "Can't find app_id in applications list");
-    LOGGER_DEBUG(logger_, "Try find app_id in app_to_register list");
+    SDL_INFO("Can't find app_id in applications list");
+    SDL_DEBUG("Try find app_id in app_to_register list");
     app = application_manager_.FindAppToRegister(application_id);
   }
 
   if (!app) {
-    LOGGER_ERROR(logger_,
-                 "Can't find application in any lists within regular apps: "
-                     << application_id);
+    SDL_ERROR("Can't find application in any lists within regular apps: "
+              << application_id);
     return;
   }
 
   DevicesApps devices_apps = FindAllAppOnParticularDevice(app->device());
   if (!devices_apps.first && devices_apps.second.empty()) {
-    LOGGER_ERROR(logger_,
-                 "Can't find regular foreground app with the same "
-                 "connection id:"
-                     << app->device());
+    SDL_ERROR(
+        "Can't find regular foreground app with the same "
+        "connection id:"
+        << app->device());
     SendResponse(false, correlation_id(), SDL_ActivateApp, NO_APPS_REGISTERED);
     return;
   }
@@ -131,8 +130,7 @@ void SDLActivateAppRequest::on_event(const event_engine::Event& event) {
   ApplicationSharedPtr app =
       application_manager_.application_by_hmi_app(hmi_application_id);
   if (!app) {
-    LOGGER_ERROR(logger_,
-                 "Application not found by HMI app id: " << hmi_application_id);
+    SDL_ERROR("Application not found by HMI app id: " << hmi_application_id);
     return;
   }
   application_manager_.GetPolicyHandler().OnActivateApp(app->app_id(),
@@ -145,7 +143,7 @@ uint32_t SDLActivateAppRequest::app_id() const {
       return (*message_)[strings::msg_params][strings::app_id].asUInt();
     }
   }
-  LOGGER_DEBUG(logger_, "app_id section is absent in the message.");
+  SDL_DEBUG("app_id section is absent in the message.");
   return 0;
 }
 
@@ -160,7 +158,7 @@ uint32_t SDLActivateAppRequest::hmi_app_id(
       }
     }
   }
-  LOGGER_DEBUG(logger_, "Can't find app_id section is absent in the message.");
+  SDL_DEBUG("Can't find app_id section is absent in the message.");
   return 0;
 }
 
