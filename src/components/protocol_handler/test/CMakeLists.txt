@@ -44,7 +44,7 @@ set(LIBRARIES
   gmock
   protocol
   protocol_handler
-  connectionHandler
+  connection_handler
   Utils
   config_profile
 )

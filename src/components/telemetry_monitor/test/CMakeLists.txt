@@ -71,7 +71,7 @@ set(testLibraries
   jsoncpp
   TransportManager
   MediaManager
-  connectionHandler
+  connection_handler
 )
 
 if (BUILD_USB_SUPPORT)

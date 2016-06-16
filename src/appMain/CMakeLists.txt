@@ -85,7 +85,7 @@ set(LIBRARIES
   formatters
   protocol
   protocol_handler
-  connectionHandler
+  connection_handler
   TransportManager
   ${SecurityManagerLibrary}
   HMIMessageHandler

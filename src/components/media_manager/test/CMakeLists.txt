@@ -57,7 +57,7 @@ set(LIBRARIES
     ApplicationManager
     protocol_handler
     gmock
-    connectionHandler
+    connection_handler
     encryption
     resumption
     Policy
