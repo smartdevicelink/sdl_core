@@ -62,7 +62,7 @@ set(testLibraries
   MediaManager
   ProtocolHandler
   v4_protocol_v1_2_no_extra
-  SmartObjects
+  smart_object
   ProtocolLibrary
   ConfigProfile
   ApplicationManager

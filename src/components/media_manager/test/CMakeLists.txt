@@ -51,7 +51,7 @@ set(SOURCES
 )
 
 set(LIBRARIES
-    SmartObjects
+    smart_object
     MediaManager
     ProtocolLibrary
     ApplicationManager

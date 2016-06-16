@@ -55,7 +55,7 @@ set(LIBRARIES
   connectionHandler
   HMI_API
   MOBILE_API
-  SmartObjects
+  smart_object
 )
 
 create_test("mobile_commands_test" "${SOURCES}" "${LIBRARIES}" )

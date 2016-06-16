@@ -124,7 +124,7 @@
       HMI_API
       MOBILE_API
       v4_protocol_v1_2_no_extra
-      SmartObjects
+      smart_object
       formatters
       gmock_main
       UsageStatistics
