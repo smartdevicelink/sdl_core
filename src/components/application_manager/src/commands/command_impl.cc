@@ -38,10 +38,10 @@ namespace application_manager {
 namespace commands {
 
 #if defined(LOG4CXX_LOGGER)
-  logger::LoggerType CommandImpl::logger_module_ptr(
-      log4cxx::Logger::getLogger("Commands"));
+logger::LoggerType CommandImpl::logger_module_ptr(
+    log4cxx::Logger::getLogger("Commands"));
 #else
-  logger::LoggerType CommandImpl::logger_module_ptr("Commands");
+logger::LoggerType CommandImpl::logger_module_ptr("Commands");
 #endif
 
 const int32_t CommandImpl::hmi_protocol_type_ = 1;
