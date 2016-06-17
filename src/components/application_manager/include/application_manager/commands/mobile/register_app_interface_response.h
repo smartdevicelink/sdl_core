@@ -59,7 +59,7 @@ class RegisterAppInterfaceResponse : public CommandResponseImpl {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   void SetHeartBeatTimeout(uint32_t connection_key,

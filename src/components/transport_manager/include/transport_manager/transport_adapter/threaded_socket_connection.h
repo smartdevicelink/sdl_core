@@ -66,14 +66,15 @@ class ThreadedSocketConnection : public Connection,
    *
    * @return Error Information about possible reason of sending data failure.
    */
-  TransportAdapter::Error SendData(::protocol_handler::RawMessagePtr message);
+  TransportAdapter::Error SendData(
+      ::protocol_handler::RawMessagePtr message) OVERRIDE;
 
   /**
    * @brief Disconnect the current connection.
    *
    * @return Error Information about possible reason of Disconnect failure.
    */
-  TransportAdapter::Error Disconnect();
+  TransportAdapter::Error Disconnect() OVERRIDE;
 
   /**
    * @brief Start thread creation.

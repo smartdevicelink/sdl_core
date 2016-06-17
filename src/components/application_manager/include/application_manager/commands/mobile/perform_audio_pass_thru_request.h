@@ -65,24 +65,24 @@ class PerformAudioPassThruRequest : public CommandRequestImpl {
    * has exceed it's limit
    *
    */
-  virtual void onTimeOut();
+  void onTimeOut() OVERRIDE;
 
   /**
    * @brief Init required by command resources
    **/
-  bool Init();
+  bool Init() OVERRIDE;
 
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
   /**
    * @brief Interface method that is called whenever new event received
    *
    * @param event The received event
    */
-  void on_event(const event_engine::Event& event);
+  void on_event(const event_engine::Event& event) OVERRIDE;
 
  private:
   /*

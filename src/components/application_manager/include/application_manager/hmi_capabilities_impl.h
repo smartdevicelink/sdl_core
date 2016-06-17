@@ -422,7 +422,7 @@ class HMICapabilitiesImpl : public HMICapabilities {
    */
   bool phone_call_supported() const OVERRIDE;
 
-  void Init(resumption::LastState* last_state);
+  void Init(resumption::LastState* last_state) OVERRIDE;
 
  protected:
   /*

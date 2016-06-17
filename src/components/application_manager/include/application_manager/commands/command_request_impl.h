@@ -57,24 +57,24 @@ class CommandRequestImpl : public CommandImpl,
   CommandRequestImpl(const MessageSharedPtr& message,
                      ApplicationManager& application_manager);
   virtual ~CommandRequestImpl();
-  virtual bool CheckPermissions();
-  virtual bool Init();
-  virtual bool CleanUp();
-  virtual void Run();
+  bool CheckPermissions() OVERRIDE;
+  bool Init() OVERRIDE;
+  bool CleanUp() OVERRIDE;
+  void Run() OVERRIDE;
 
   /*
    * @brief Function is called by RequestController when request execution time
    * has exceed it's limit
    *
    */
-  virtual void onTimeOut();
+  void onTimeOut() OVERRIDE;
 
   /**
    * @brief Default EvenObserver's pure virtual method implementation
    *
    * @param event The received event
    */
-  virtual void on_event(const event_engine::Event& event);
+  virtual void on_event(const event_engine::Event& event) OVERRIDE;
 
   /*
    * @brief Creates Mobile response

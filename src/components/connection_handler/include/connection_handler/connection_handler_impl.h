@@ -175,7 +175,7 @@ class ConnectionHandlerImpl
       const uint8_t session_id,
       const protocol_handler::ServiceType& service_type,
       const bool is_protected,
-      uint32_t* hash_id);
+      uint32_t* hash_id) OVERRIDE;
 
   /**
    * \brief Callback function used by ProtocolHandler
@@ -378,7 +378,8 @@ class ConnectionHandlerImpl
    * \brief Keep connection associated with the key from being closed by
    * heartbeat monitor
    */
-  void KeepConnectionAlive(uint32_t connection_key, uint8_t session_id);
+  void KeepConnectionAlive(uint32_t connection_key,
+                           uint8_t session_id) OVERRIDE;
 
   /**
    * \brief binds protocol version with session
@@ -420,8 +421,8 @@ class ConnectionHandlerImpl
 
   const ConnectionHandlerSettings& get_settings() const OVERRIDE;
 
-  const protocol_handler::SessionObserver& get_session_observer();
-  DevicesDiscoveryStarter& get_device_discovery_starter();
+  const protocol_handler::SessionObserver& get_session_observer() OVERRIDE;
+  DevicesDiscoveryStarter& get_device_discovery_starter() OVERRIDE;
 
  private:
   /**

@@ -82,95 +82,96 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
    * that is currently executed (i.e. on HMI).
    * @return smart_objects::SmartObject * Active message
    */
-  const smart_objects::SmartObject* active_message() const;
-  void CloseActiveMessage();
-  bool IsFullscreen() const;
+  const smart_objects::SmartObject* active_message() const OVERRIDE;
+  void CloseActiveMessage() OVERRIDE;
+  bool IsFullscreen() const OVERRIDE;
 
   /**
    * @brief change supporting COMMUNICATION NAVIGATION
    */
-  virtual void ChangeSupportingAppHMIType();
+  virtual void ChangeSupportingAppHMIType() OVERRIDE;
 
-  inline bool is_navi() const {
+  inline bool is_navi() const OVERRIDE {
     return is_navi_;
   }
-  void set_is_navi(bool allow);
+  void set_is_navi(bool allow) OVERRIDE;
 
-  bool video_streaming_approved() const;
-  void set_video_streaming_approved(bool state);
-  bool audio_streaming_approved() const;
-  void set_audio_streaming_approved(bool state);
+  bool video_streaming_approved() const OVERRIDE;
+  void set_video_streaming_approved(bool state) OVERRIDE;
+  bool audio_streaming_approved() const OVERRIDE;
+  void set_audio_streaming_approved(bool state) OVERRIDE;
 
-  bool video_streaming_allowed() const;
-  void set_video_streaming_allowed(bool state);
-  bool audio_streaming_allowed() const;
-  void set_audio_streaming_allowed(bool state);
+  bool video_streaming_allowed() const OVERRIDE;
+  void set_video_streaming_allowed(bool state) OVERRIDE;
+  bool audio_streaming_allowed() const OVERRIDE;
+  void set_audio_streaming_allowed(bool state) OVERRIDE;
 
-  void StartStreaming(protocol_handler::ServiceType service_type);
-  void StopStreamingForce(protocol_handler::ServiceType service_type);
-  void StopStreaming(protocol_handler::ServiceType service_type);
-  void SuspendStreaming(protocol_handler::ServiceType service_type);
-  void WakeUpStreaming(protocol_handler::ServiceType service_type);
+  void StartStreaming(protocol_handler::ServiceType service_type) OVERRIDE;
+  void StopStreamingForce(protocol_handler::ServiceType service_type) OVERRIDE;
+  void StopStreaming(protocol_handler::ServiceType service_type) OVERRIDE;
+  void SuspendStreaming(protocol_handler::ServiceType service_type) OVERRIDE;
+  void WakeUpStreaming(protocol_handler::ServiceType service_type) OVERRIDE;
 
-  virtual bool is_voice_communication_supported() const;
+  virtual bool is_voice_communication_supported() const OVERRIDE;
   virtual void set_voice_communication_supported(
-      bool is_voice_communication_supported);
-  inline bool app_allowed() const;
-  bool has_been_activated() const;
-  bool set_activated(bool is_active);
+      bool is_voice_communication_supported) OVERRIDE;
+  inline bool app_allowed() const OVERRIDE;
+  bool has_been_activated() const OVERRIDE;
+  bool set_activated(bool is_active) OVERRIDE;
 
-  const Version& version() const;
-  void set_hmi_application_id(uint32_t hmi_app_id);
-  inline uint32_t hmi_app_id() const;
-  inline uint32_t app_id() const;
-  const custom_str::CustomString& name() const;
+  const Version& version() const OVERRIDE;
+  void set_hmi_application_id(uint32_t hmi_app_id) OVERRIDE;
+  inline uint32_t hmi_app_id() const OVERRIDE;
+  inline uint32_t app_id() const OVERRIDE;
+  const custom_str::CustomString& name() const OVERRIDE;
   void set_folder_name(const std::string& folder_name) OVERRIDE;
-  const std::string folder_name() const;
-  bool is_media_application() const;
+  const std::string folder_name() const OVERRIDE;
+  bool is_media_application() const OVERRIDE;
   bool is_foreground() const OVERRIDE;
   void set_foreground(const bool is_foreground) OVERRIDE;
-  const mobile_apis::HMILevel::eType hmi_level() const;
-  const uint32_t put_file_in_none_count() const;
-  const uint32_t delete_file_in_none_count() const;
-  const uint32_t list_files_in_none_count() const;
-  const mobile_api::SystemContext::eType system_context() const;
+  const mobile_apis::HMILevel::eType hmi_level() const OVERRIDE;
+  const uint32_t put_file_in_none_count() const OVERRIDE;
+  const uint32_t delete_file_in_none_count() const OVERRIDE;
+  const uint32_t list_files_in_none_count() const OVERRIDE;
+  const mobile_api::SystemContext::eType system_context() const OVERRIDE;
   inline const mobile_apis::AudioStreamingState::eType audio_streaming_state()
-      const;
-  const std::string& app_icon_path() const;
-  connection_handler::DeviceHandle device() const;
+      const OVERRIDE;
+  const std::string& app_icon_path() const OVERRIDE;
+  connection_handler::DeviceHandle device() const OVERRIDE;
   const std::string& mac_address() const OVERRIDE;
-  void set_tts_properties_in_none(bool active);
-  bool tts_properties_in_none();
-  void set_tts_properties_in_full(bool active);
-  bool tts_properties_in_full();
-  void set_version(const Version& ver);
-  void set_name(const custom_str::CustomString& name);
-  void set_is_media_application(bool is_media);
-  void increment_put_file_in_none_count();
-  void increment_delete_file_in_none_count();
-  void increment_list_files_in_none_count();
-  bool set_app_icon_path(const std::string& path);
-  void set_app_allowed(const bool allowed);
-  void set_device(connection_handler::DeviceHandle device);
-  virtual uint32_t get_grammar_id() const;
-  virtual void set_grammar_id(uint32_t value);
+  void set_tts_properties_in_none(bool active) OVERRIDE;
+  bool tts_properties_in_none() OVERRIDE;
+  void set_tts_properties_in_full(bool active) OVERRIDE;
+  bool tts_properties_in_full() OVERRIDE;
+  void set_version(const Version& ver) OVERRIDE;
+  void set_name(const custom_str::CustomString& name) OVERRIDE;
+  void set_is_media_application(bool is_media) OVERRIDE;
+  void increment_put_file_in_none_count() OVERRIDE;
+  void increment_delete_file_in_none_count() OVERRIDE;
+  void increment_list_files_in_none_count() OVERRIDE;
+  bool set_app_icon_path(const std::string& path) OVERRIDE;
+  void set_app_allowed(const bool allowed) OVERRIDE;
+  void set_device(connection_handler::DeviceHandle device) OVERRIDE;
+  virtual uint32_t get_grammar_id() const OVERRIDE;
+  virtual void set_grammar_id(uint32_t value) OVERRIDE;
 
-  virtual void set_protocol_version(const ProtocolVersion& protocol_version);
-  virtual ProtocolVersion protocol_version() const;
+  virtual void set_protocol_version(
+      const ProtocolVersion& protocol_version) OVERRIDE;
+  virtual ProtocolVersion protocol_version() const OVERRIDE;
 
-  virtual void set_is_resuming(bool is_resuming);
-  virtual bool is_resuming() const;
+  virtual void set_is_resuming(bool is_resuming) OVERRIDE;
+  virtual bool is_resuming() const OVERRIDE;
 
-  bool AddFile(const AppFile& file);
-  bool UpdateFile(const AppFile& file);
-  bool DeleteFile(const std::string& file_name);
-  virtual const AppFilesMap& getAppFiles() const;
+  bool AddFile(const AppFile& file) OVERRIDE;
+  bool UpdateFile(const AppFile& file) OVERRIDE;
+  bool DeleteFile(const std::string& file_name) OVERRIDE;
+  virtual const AppFilesMap& getAppFiles() const OVERRIDE;
 
-  virtual const AppFile* GetFile(const std::string& file_name);
+  virtual const AppFile* GetFile(const std::string& file_name) OVERRIDE;
 
-  bool SubscribeToButton(mobile_apis::ButtonName::eType btn_name);
-  bool IsSubscribedToButton(mobile_apis::ButtonName::eType btn_name);
-  bool UnsubscribeFromButton(mobile_apis::ButtonName::eType btn_name);
+  bool SubscribeToButton(mobile_apis::ButtonName::eType btn_name) OVERRIDE;
+  bool IsSubscribedToButton(mobile_apis::ButtonName::eType btn_name) OVERRIDE;
+  bool UnsubscribeFromButton(mobile_apis::ButtonName::eType btn_name) OVERRIDE;
 
   bool SubscribeToIVI(uint32_t vehicle_info_type) OVERRIDE;
   bool IsSubscribedToIVI(uint32_t vehicle_info_type) const OVERRIDE;
@@ -181,35 +182,36 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   /**
    * @brief ResetDataInNone reset data counters in NONE
    */
-  virtual void ResetDataInNone();
+  virtual void ResetDataInNone() OVERRIDE;
 
   virtual DataAccessor<ButtonSubscriptions> SubscribedButtons() const OVERRIDE;
 
-  virtual const std::string& curHash() const;
+  virtual const std::string& curHash() const OVERRIDE;
 #ifdef CUSTOMER_PASA
   virtual bool flag_sending_hash_change_after_awake() const;
-  virtual void set_flag_sending_hash_change_after_awake(bool flag);
+  virtual void set_flag_sending_hash_change_after_awake(bool flag) OVERRIDE;
 #endif  // CUSTOMER_PASA
         /**
          * @brief Change Hash for current application
          * and send notification to mobile
          * @return updated_hash
          */
-  virtual void UpdateHash();
+  virtual void UpdateHash() OVERRIDE;
 
-  UsageStatistics& usage_report();
+  UsageStatistics& usage_report() OVERRIDE;
 
   bool AreCommandLimitsExceeded(mobile_apis::FunctionID::eType cmd_id,
-                                TLimitSource source);
-  virtual void SubscribeToSoftButtons(int32_t cmd_id,
-                                      const SoftButtonID& softbuttons_id);
-  virtual bool IsSubscribedToSoftButton(const uint32_t softbutton_id);
+                                TLimitSource source) OVERRIDE;
+  virtual void SubscribeToSoftButtons(
+      int32_t cmd_id, const SoftButtonID& softbuttons_id) OVERRIDE;
+  virtual bool IsSubscribedToSoftButton(const uint32_t softbutton_id) OVERRIDE;
 
-  virtual void UnsubscribeFromSoftButtons(int32_t cmd_id);
+  virtual void UnsubscribeFromSoftButtons(int32_t cmd_id) OVERRIDE;
 
-  virtual bool is_application_data_changed() const;
+  virtual bool is_application_data_changed() const OVERRIDE;
 
-  virtual void set_is_application_data_changed(bool state_application_data);
+  virtual void set_is_application_data_changed(
+      bool state_application_data) OVERRIDE;
 
   /**
    * @brief Check's if it is media, voice communication or navigation
@@ -217,14 +219,14 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
    *
    * @return true if application is media, voice communication or navigation
    */
-  virtual bool IsAudioApplication() const;
+  virtual bool IsAudioApplication() const OVERRIDE;
 
   /**
   * @brief SetRegularState set permanent state of application
   *
   * @param state state to setup
   */
-  virtual void SetRegularState(HmiStatePtr state);
+  virtual void SetRegularState(HmiStatePtr state) OVERRIDE;
 
   /**
   * @brief SetPostponedState sets postponed state to application.
@@ -232,9 +234,9 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   *
   * @param state state to setup
   */
-  virtual void SetPostponedState(HmiStatePtr state);
+  virtual void SetPostponedState(HmiStatePtr state) OVERRIDE;
 
-  virtual void RemovePostponedState();
+  virtual void RemovePostponedState() OVERRIDE;
 
   /**
    * @brief AddHMIState the function that will change application's
@@ -244,7 +246,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
    *
    * @param state new hmi state for certain application.
    */
-  virtual void AddHMIState(HmiStatePtr state);
+  virtual void AddHMIState(HmiStatePtr state) OVERRIDE;
 
   /**
    * @brief RemoveHMIState the function that will turn back hmi_level after end
@@ -254,19 +256,19 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
    *
    * @param state_id that should be removed
    */
-  virtual void RemoveHMIState(HmiState::StateID state_id);
+  virtual void RemoveHMIState(HmiState::StateID state_id) OVERRIDE;
 
   /**
    * @brief HmiState of application within active events PhoneCall, TTS< etc ...
    * @return Active HmiState of application
    */
-  virtual const HmiStatePtr CurrentHmiState() const;
+  virtual const HmiStatePtr CurrentHmiState() const OVERRIDE;
 
   /**
    * @brief RegularHmiState of application without active events VR, TTS etc ...
    * @return HmiState of application
    */
-  virtual const HmiStatePtr RegularHmiState() const;
+  virtual const HmiStatePtr RegularHmiState() const OVERRIDE;
 
   /**
    * @brief PostponedHmiState returns postponed hmi state of application
@@ -274,15 +276,17 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
    *
    * @return Postponed hmi state of application
    */
-  virtual const HmiStatePtr PostponedHmiState() const;
+  virtual const HmiStatePtr PostponedHmiState() const OVERRIDE;
 
-  uint32_t audio_stream_retry_number() const;
+  uint32_t audio_stream_retry_number() const OVERRIDE;
 
-  void set_audio_stream_retry_number(const uint32_t& audio_stream_retry_number);
+  void set_audio_stream_retry_number(
+      const uint32_t& audio_stream_retry_number) OVERRIDE;
 
-  uint32_t video_stream_retry_number() const;
+  uint32_t video_stream_retry_number() const OVERRIDE;
 
-  void set_video_stream_retry_number(const uint32_t& video_stream_retry_number);
+  void set_video_stream_retry_number(
+      const uint32_t& video_stream_retry_number) OVERRIDE;
 
   /**
    * @brief Load persistent files from application folder.

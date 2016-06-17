@@ -44,9 +44,9 @@ class NotificationToHMI : public CommandImpl {
   NotificationToHMI(const MessageSharedPtr& message,
                     ApplicationManager& application_manager);
   virtual ~NotificationToHMI();
-  virtual bool Init();
-  virtual bool CleanUp();
-  virtual void Run();
+  bool Init() OVERRIDE;
+  bool CleanUp() OVERRIDE;
+  void Run() OVERRIDE;
   void SendNotification();
 
  private:

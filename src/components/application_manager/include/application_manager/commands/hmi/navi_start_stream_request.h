@@ -61,17 +61,17 @@ class NaviStartStreamRequest : public RequestToHMI,
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
   /**
    * @brief On event callback
    **/
-  virtual void on_event(const event_engine::Event& event);
+  virtual void on_event(const event_engine::Event& event) OVERRIDE;
 
   /**
    * @brief onTimeOut from requrst Controller
    */
-  virtual void onTimeOut();
+  void onTimeOut() OVERRIDE;
 
   /**
  * @brief RetryStartSession resend HMI startSession request if needed.

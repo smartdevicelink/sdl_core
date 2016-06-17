@@ -70,12 +70,12 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
   /**
    * @brief Init required by command resources
    **/
-  virtual bool Init();
+  bool Init() OVERRIDE;
 
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
   /**
    * @brief Sends RegisterAppInterface response to mobile

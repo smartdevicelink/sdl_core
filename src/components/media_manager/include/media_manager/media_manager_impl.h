@@ -57,24 +57,24 @@ class MediaManagerImpl : public MediaManager,
   MediaManagerImpl(application_manager::ApplicationManager& application_manager,
                    protocol_handler::ProtocolHandler& protocol_handler,
                    const MediaManagerSettings& settings);
-  virtual ~MediaManagerImpl();
+  virtual ~MediaManagerImpl() OVERRIDE;
 
-  virtual void StartMicrophoneRecording(int32_t application_key,
-                                        const std::string& outputFileName,
-                                        int32_t duration);
-  virtual void StopMicrophoneRecording(int32_t application_key);
+  void StartMicrophoneRecording(int32_t application_key,
+                                const std::string& outputFileName,
+                                int32_t duration) OVERRIDE;
+  void StopMicrophoneRecording(int32_t application_key) OVERRIDE;
 
-  virtual void StartStreaming(int32_t application_key,
-                              protocol_handler::ServiceType service_type);
-  virtual void StopStreaming(int32_t application_key,
-                             protocol_handler::ServiceType service_type);
-  virtual void OnMessageReceived(
-      const ::protocol_handler::RawMessagePtr message);
-  virtual void OnMobileMessageSent(
-      const ::protocol_handler::RawMessagePtr message);
-  virtual void FramesProcessed(int32_t application_key, int32_t frame_number);
+  void StartStreaming(int32_t application_key,
+                      protocol_handler::ServiceType service_type) OVERRIDE;
+  void StopStreaming(int32_t application_key,
+                     protocol_handler::ServiceType service_type) OVERRIDE;
+  void OnMessageReceived(
+      const ::protocol_handler::RawMessagePtr message) OVERRIDE;
+  void OnMobileMessageSent(
+      const ::protocol_handler::RawMessagePtr message) OVERRIDE;
+  void FramesProcessed(int32_t application_key, int32_t frame_number) OVERRIDE;
 
-  virtual const MediaManagerSettings& settings() const OVERRIDE;
+  const MediaManagerSettings& settings() const OVERRIDE;
 
 #ifdef BUILD_TESTS
   void set_mock_mic_listener(MediaListenerPtr media_listener);
@@ -86,7 +86,7 @@ class MediaManagerImpl : public MediaManager,
 #endif  // BUILD_TESTS
 
  protected:
-  virtual void Init();
+  void Init();
 
   const MediaManagerSettings& settings_;
 

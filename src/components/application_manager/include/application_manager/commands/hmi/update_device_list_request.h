@@ -64,7 +64,7 @@ class UpdateDeviceListRequest : public RequestToHMI,
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
   /**
    * @brief Interface method that is called whenever new event received
@@ -72,12 +72,12 @@ class UpdateDeviceListRequest : public RequestToHMI,
    * when HMI will be ready
    * @param event The received event
    */
-  virtual void on_event(const event_engine::Event& event);
+  virtual void on_event(const event_engine::Event& event) OVERRIDE;
 
   /**
    * @brief Need to stop execution StopMethod if HMI did not started
    */
-  virtual bool CleanUp();
+  bool CleanUp() OVERRIDE;
 
  private:
   sync_primitives::Lock wait_hmi_lock;

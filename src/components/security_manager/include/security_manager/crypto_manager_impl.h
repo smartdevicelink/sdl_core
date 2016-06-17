@@ -66,7 +66,7 @@ class CryptoManagerImpl : public CryptoManager {
     SSLContextImpl(SSL* conn, Mode mode, size_t maximum_payload_size);
     ~SSLContextImpl();
     virtual HandshakeResult StartHandshake(const uint8_t** const out_data,
-                                           size_t* out_data_size);
+                                           size_t* out_data_size) OVERRIDE;
     virtual HandshakeResult DoHandshakeStep(const uint8_t* const in_data,
                                             size_t in_data_size,
                                             const uint8_t** const out_data,
