@@ -39,10 +39,10 @@ namespace utils_test {
 
 TEST(AtomicObjectTest, Construct) {
   sync_primitives::atomic_int var(5);
-  EXPECT_EQ(5, var);
+  EXPECT_EQ(5, static_cast<int>(var));
 
   var = 8;
-  EXPECT_EQ(8, var);
+  EXPECT_EQ(8, static_cast<int>(var));
 
   sync_primitives::atomic_bool flag(true);
 
