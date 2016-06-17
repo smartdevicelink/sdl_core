@@ -3,9 +3,9 @@
 
 [![Build Status](https://travis-ci.org/smartdevicelink/sdl_core.svg?branch=master)](https://travis-ci.org/smartdevicelink/sdl_core)
 
-[![Build Status](http://109.166.244.153/app/rest/builds/buildType:WinSdl_WINx64withUT/statusIcon)](http://109.166.244.153/viewType.html?buildTypeId=WinSdl_WINx64withUT&guest=1)  **Windows native**
+[![Build Status](http://109.166.244.153/app/rest/builds/buildType:WinSdlDevelop_WinX64withUt/statusIcon)](http://109.166.244.153/viewType.html?buildTypeId=WinSdlDevelop_WinX64withUt&guest=1)  **Windows native**
 
-[![Build Status](http://109.166.244.153/app/rest/builds/buildType:WinSdlDevelop_WinX64withUt/statusIcon)](http://109.166.244.153/viewType.html?buildTypeId=WinSdlDevelop_WinX64withUt&guest=1)  **QT** 
+[![Build Status](http://109.166.244.153/app/rest/builds/buildType:QtSdlDevelop_QtX86withUt/statusIcon)](http://109.166.244.153/viewType.html?buildTypeId=QtSdlDevelop_QtX86withUt&guest=1)  **QT** 
 
 
  [![codecov.io](https://codecov.io/github/smartdevicelink/sdl_core/coverage.svg?branch=develop)](https://codecov.io/github/smartdevicelink/sdl_core?branch=develop)
