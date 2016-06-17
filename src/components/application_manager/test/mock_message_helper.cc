@@ -307,4 +307,44 @@ MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
                                                           reason);
 }
 
+mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
+    smart_objects::SmartObject& message_params,
+    ApplicationConstSharedPtr app,
+    const policy::PolicyHandlerInterface& policy_handler,
+    ApplicationManager& app_mngr) {
+  return MockMessageHelper::message_helper_mock()->ProcessSoftButtons(
+      message_params, app, policy_handler, app_mngr);
+}
+
+void MessageHelper::SubscribeApplicationToSoftButton(
+    smart_objects::SmartObject& message_params,
+    ApplicationSharedPtr app,
+    int32_t function_id) {
+  return MockMessageHelper::message_helper_mock()
+      ->SubscribeApplicationToSoftButton(message_params, app, function_id);
+}
+
+smart_objects::SmartObjectSPtr MessageHelper::CreateNegativeResponse(
+    uint32_t connection_key,
+    int32_t function_id,
+    const uint32_t correlation_id,
+    int32_t result_code) {
+  return MockMessageHelper::message_helper_mock()->CreateNegativeResponse(
+      connection_key, function_id, correlation_id, result_code);
+}
+
+smart_objects::SmartObjectSPtr MessageHelper::CreateBlockedByPoliciesResponse(
+    mobile_apis::FunctionID::eType function_id,
+    mobile_apis::Result::eType result,
+    const uint32_t correlation_id,
+    uint32_t connection_key) {
+  return MockMessageHelper::message_helper_mock()
+      ->CreateBlockedByPoliciesResponse(
+          function_id, result, correlation_id, connection_key);
+}
+
+const VehicleData& MessageHelper::vehicle_data() {
+  return MockMessageHelper::message_helper_mock()->vehicle_data();
+}
+
 }  // namespace application_manager

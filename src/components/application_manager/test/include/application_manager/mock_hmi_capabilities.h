@@ -157,6 +157,9 @@ class MockHMICapabilities : public ::application_manager::HMICapabilities {
 
   MOCK_METHOD1(Init, void(resumption::LastState* last_state));
 
+  MOCK_CONST_METHOD0(ccpu_version, const std::string&());
+  MOCK_METHOD1(set_ccpu_version, void(const std::string& ccpu_version));
+
  protected:
   MOCK_CONST_METHOD2(check_existing_json_member,
                      bool(const Json::Value& json_member,

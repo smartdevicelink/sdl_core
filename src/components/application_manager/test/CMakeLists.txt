@@ -78,12 +78,12 @@
         ${AM_SOURCE_DIR}/src/event_engine/event_observer.cc
         ${AM_SOURCE_DIR}/src/event_engine/event.cc
 
-        ${AM_SOURCE_DIR}/src/commands/command_impl.cc
-        ${AM_SOURCE_DIR}/src/commands/command_request_impl.cc
-        ${AM_SOURCE_DIR}/src/commands/command_response_impl.cc
-        ${AM_SOURCE_DIR}/src/commands/command_notification_impl.cc
-        ${AM_SOURCE_DIR}/src/commands/command_notification_from_mobile_impl.cc
-        ${AM_SOURCE_DIR}/src/commands/pending.cc
+        ${COMMANDS_SOURCE_DIR}/command_impl.cc
+        ${COMMANDS_SOURCE_DIR}/command_request_impl.cc
+        ${COMMANDS_SOURCE_DIR}/command_response_impl.cc
+        ${COMMANDS_SOURCE_DIR}/command_notification_impl.cc
+        ${COMMANDS_SOURCE_DIR}/command_notification_from_mobile_impl.cc
+        ${COMMANDS_SOURCE_DIR}/pending.cc
 
         ${AM_SOURCE_DIR}/src/resumption/resume_ctrl.cc
         ${AM_SOURCE_DIR}/src/resumption/resumption_data_db.cc
@@ -108,12 +108,12 @@
         ${AM_SOURCE_DIR}/src/application_data_impl.cc
         ${AM_SOURCE_DIR}/src/request_controller.cc
 
-        ${AM_SOURCE_DIR}/src/commands/mobile/register_app_interface_request.cc
-        ${AM_SOURCE_DIR}/src/commands/mobile/unregister_app_interface_request.cc
+        ${COMMANDS_SOURCE_DIR}/mobile/register_app_interface_request.cc
+        ${COMMANDS_SOURCE_DIR}/mobile/unregister_app_interface_request.cc
 
         ${AM_SOURCE_DIR}/src/mobile_message_handler.cc
-        ${AM_SOURCE_DIR}/src/commands/mobile/put_file_request.cc
-        ${AM_SOURCE_DIR}/src/commands/command_request_impl.cc
+        ${COMMANDS_SOURCE_DIR}/mobile/put_file_request.cc
+        ${COMMANDS_SOURCE_DIR}/command_request_impl.cc
     )
 
     set(testLibraries

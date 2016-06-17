@@ -227,7 +227,7 @@ void GetVehicleDataRequest::Run() {
     return;
   }
 
-  if (app->IsCommandLimitsExceeded(
+  if (app->AreCommandLimitsExceeded(
           static_cast<mobile_apis::FunctionID::eType>(function_id()),
           application_manager::TLimitSource::CONFIG_FILE)) {
     SDL_ERROR("GetVehicleData frequency is too high.");
