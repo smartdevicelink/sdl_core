@@ -53,10 +53,12 @@ class Fraction {
   Fraction();
   // Constructs fraction from given values
   Fraction(int64_t numer, int64_t denumer);
-  // Parses string |literal| containing float point string definition, result is stored in
+  // Parses string |literal| containing float point string definition, result is
+  // stored in
   // |fraction| parameter.
   // If |literal| can not be parsed, returns false.
-  static bool FromFloatPointString(const std::string& literal, Fraction* fraction);
+  static bool FromFloatPointString(const std::string& literal,
+                                   Fraction* fraction);
   // Field accessors
   int64_t numer() const;
   int64_t denumer() const;
@@ -64,7 +66,6 @@ class Fraction {
  private:
   int64_t numer_;
   int64_t denumer_;
-
 };
 
 /*
@@ -73,14 +74,12 @@ class Fraction {
  * Allows value or another range to be tested for inclusion.
  * Range boundaries are always included in tests.
  */
-template<typename T>
+template <typename T>
 class BasicRange {
  public:
   typedef T value_type;
   // Create a range with specified bounds
-  BasicRange(value_type min, value_type max)
-      : min_(min),
-        max_(max) {
+  BasicRange(value_type min, value_type max) : min_(min), max_(max) {
     Fraction::FromFloatPointString(NumberToString(min_), &min_fract_);
     Fraction::FromFloatPointString(NumberToString(max_), &max_fract_);
   }
@@ -88,12 +87,11 @@ class BasicRange {
   // Used to avoid converting fractional boundaries to floating point
   // Representation.
   BasicRange(const std::string& min_str, const std::string& max_str)
-      : min_(0),
-        max_(0) {
-    bool valid_min = StringToNumber(min, &min_)
-        && Fraction::FromFloatPointString(min, &min_fract_);
-    bool valid_max = StringToNumber(max, &max_)
-        && Fraction::FromFloatPointString(max, &max_fract_);
+      : min_(0), max_(0) {
+    bool valid_min = StringToNumber(min_str, &min_) &&
+                     Fraction::FromFloatPointString(min_str, &min_fract_);
+    bool valid_max = StringToNumber(max_str, &max_) &&
+                     Fraction::FromFloatPointString(max_str, &max_fract_);
     assert(valid_min && valid_max);
   }
   // Tells if |value| belongs to current range (boundaries are included)
@@ -120,6 +118,7 @@ class BasicRange {
   const Fraction& max_fract() const {
     return max_fract_;
   }
+
  private:
   value_type min_;
   value_type max_;
@@ -127,6 +126,6 @@ class BasicRange {
   Fraction max_fract_;
 };
 
-} // namespace codegen
+}  // namespace codegen
 
 #endif /* COMMON_TYPES_H_ */
