@@ -43,7 +43,7 @@ namespace utils {
 class Pipe {
  public:
   Pipe(const std::string& name);
-
+  ~Pipe();
   bool Open();
   void Close();
   bool IsOpen() const;
