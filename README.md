@@ -1,8 +1,12 @@
 [![Slack Status](http://sdlslack.herokuapp.com/badge.svg)](http://slack.smartdevicelink.org)
 
-[![Build Status](https://travis-ci.org/smartdevicelink/sdl_core.svg?branch=master)](https://travis-ci.org/smartdevicelink/sdl_core)
+[![Build Status](https://travis-ci.org/smartdevicelink/sdl_core.svg?branch=master)](https://travis-ci.org/smartdevicelink/sdl_core)  **LINUX**
 
- [![codecov.io](https://codecov.io/github/smartdevicelink/sdl_core/coverage.svg?branch=develop)](https://codecov.io/github/smartdevicelink/sdl_core?branch=develop)
+[![Build Status](http://109.166.244.153/app/rest/builds/buildType:WinSdlDevelop_WinX64withUt/statusIcon)](http://109.166.244.153/viewType.html?buildTypeId=WinSdlDevelop_WinX64withUt&guest=1)  **Windows native**
+
+[![Build Status](http://109.166.244.153/app/rest/builds/buildType:QtSdlDevelop_QtX86withUt/statusIcon)](http://109.166.244.153/viewType.html?buildTypeId=QtSdlDevelop_QtX86withUt&guest=1)  **QT**
+
+[![codecov.io](https://codecov.io/github/smartdevicelink/sdl_core/coverage.svg?branch=develop)](https://codecov.io/github/smartdevicelink/sdl_core?branch=develop)
 
 # SmartDeviceLink (SDL)
 
@@ -95,7 +99,7 @@ environment variable
 ##### Steps for Qt platform
 
 * Go to directory with cloned repository.
-* Run setup_Qt_x86.cmd to generate build dir for the Qt project. This will prepare the DEBUG build. 
+* Run setup_Qt_x86.cmd to generate build dir for the Qt project. This will prepare the DEBUG build.
 **Note:** In case Visual Studio has been installed to non-default location -- modify path in .cmd file
 **Note:** Double click on file or run from windows command prompt. DO NOT run in "git bash".
 * Open Qt Creator (tested on v3.6.0)
@@ -146,7 +150,7 @@ install them manually.
 * Right click on "bluetooth system tray" icon. Click "Add Device".
 * Pick the correct device
 * Approve the pin code on the device.
-* Install the device (mobile) drivers to the PC. 
+* Install the device (mobile) drivers to the PC.
 Double check: right click "bluetooth tray icon" -> "Show bluetooth devices" -> "Right click device" -> "Properties" -> "Hardware" tab. All items in the list should be "ok" (no red and yellow icons).
 If there are problems with drivers then install them next way.
 
@@ -240,16 +244,16 @@ This leads to the next situation with some devices. Before drivers update we can
 But after the update we don't see the device. This can be unacceptable in some use cases.
 
 #####Tested devices
- 
+
 Devices which work via USB:
 - HTC One
 - Nexus 4
 - Samsung Galaxy S4 mini
 - Sony Xperia C2305
- 
+
 Devices which don't work. Win drivers were updated, but SDL doesn't register them. There is no message transfer.
 - Alcatel OneTouch
- 
+
 Devices which don't work. There are no win drivers
 - Acer S500
 
