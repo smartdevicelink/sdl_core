@@ -52,6 +52,7 @@
 #include "policy/mock_cache_manager.h"
 #include "policy/mock_update_status_manager.h"
 
+#include "utils/sql_wrapper.h"
 #include "utils/macro.h"
 #include "utils/file_system.h"
 #include "utils/date_time.h"

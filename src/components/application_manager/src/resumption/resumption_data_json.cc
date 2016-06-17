@@ -483,12 +483,10 @@ bool ResumptionDataJson::DropAppDataResumption(const std::string& device_id,
   application[strings::application_global_properties].Clear();
   application[strings::application_subscribtions].Clear();
   application[strings::application_files].Clear();
-  // Seems there is no interface for json wrapper - needs to be created
-  // application.removeMember(strings::grammar_id);
-  application[strings::grammar_id].Clear();
-  SDL_DEBUG("Resumption data for application " << app_id << " with device_id "
-                                               << device_id
-                                               << " has been dropped.");
+  application.RemoveMember(strings::grammar_id);
+  SDL_DEBUG("Resumption data for application "
+                   << app_id << " with device_id " << device_id
+                   << " has been dropped.");
   return true;
 }
 
