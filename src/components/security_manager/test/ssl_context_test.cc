@@ -51,7 +51,7 @@ using ::testing::ReturnRef;
 using ::testing::NiceMock;
 
 namespace {
-const size_t kUpdatesBeforeHour = 24;
+// const size_t kUpdatesBeforeHour = 24;
 const std::string kCaPath = "";
 const uint8_t* kServerBuf;
 const uint8_t* kClientBuf;

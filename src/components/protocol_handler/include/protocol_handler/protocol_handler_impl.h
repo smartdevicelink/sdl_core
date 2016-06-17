@@ -513,12 +513,6 @@ class ProtocolHandlerImpl
   MessagesOverNaviMap message_over_navi_session_;
 
   /**
-   * \brief Untill specified otherwise, amount of message recievied
-   * over streaming session to send Ack
-   */
-  const uint32_t kPeriodForNaviAck;
-
-  /**
    *\brief Counter of messages sent in each session.
    * Used ad unique message identifier
    */
