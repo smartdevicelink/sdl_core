@@ -63,20 +63,20 @@ class SDLActivateAppRequest : public RequestFromHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
   /**
    * @brief onTimeOut allows to process case when timeout has appeared
    * during request execution.
    */
-  virtual void onTimeOut();
+  void onTimeOut() OVERRIDE;
 
   /**
    * @brief on_event allows to handle events
    *
    * @param event event type that current request subscribed on.
    */
-  virtual void on_event(const event_engine::Event& event);
+  virtual void on_event(const event_engine::Event& event) OVERRIDE;
 
  private:
   uint32_t app_id() const;

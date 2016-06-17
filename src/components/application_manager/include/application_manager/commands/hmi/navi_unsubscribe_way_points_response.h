@@ -60,7 +60,7 @@ class NaviUnsubscribeWayPointsResponse : public ResponseFromHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run() OVERRIDE;
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(NaviUnsubscribeWayPointsResponse);

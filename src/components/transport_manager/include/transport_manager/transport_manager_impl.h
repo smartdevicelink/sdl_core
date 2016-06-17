@@ -327,8 +327,8 @@ class TransportManagerImpl
    **/
   void PostMessage(const ::protocol_handler::RawMessagePtr message);
 
-  void Handle(::protocol_handler::RawMessagePtr msg);
-  void Handle(TransportAdapterEvent msg);
+  void Handle(::protocol_handler::RawMessagePtr msg) OVERRIDE;
+  void Handle(TransportAdapterEvent msg) OVERRIDE;
 
   /**
    * @brief Post event to the container of events.

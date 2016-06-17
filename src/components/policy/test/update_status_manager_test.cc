@@ -50,7 +50,7 @@ class UpdateStatusManagerTest : public ::testing::Test {
  public:
   UpdateStatusManagerTest() : k_timeout_(1) {}
 
-  void SetUp() {
+  void SetUp() OVERRIDE {
     manager_ = new UpdateStatusManager();
   }
 

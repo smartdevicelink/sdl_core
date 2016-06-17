@@ -88,14 +88,14 @@ class HMIMessageHandlerImpl : public HMIMessageHandler,
  public:
   explicit HMIMessageHandlerImpl(const HMIMessageHandlerSettings& settings);
   ~HMIMessageHandlerImpl();
-  void OnMessageReceived(MessageSharedPointer message);
-  void SendMessageToHMI(MessageSharedPointer message);
-  void set_message_observer(HMIMessageObserver* observer);
-  void OnErrorSending(MessageSharedPointer message);
-  void AddHMIMessageAdapter(HMIMessageAdapter* adapter);
-  void RemoveHMIMessageAdapter(HMIMessageAdapter* adapter);
+  void OnMessageReceived(MessageSharedPointer message) OVERRIDE;
+  void SendMessageToHMI(MessageSharedPointer message) OVERRIDE;
+  void OnErrorSending(MessageSharedPointer message) OVERRIDE;
+  void AddHMIMessageAdapter(HMIMessageAdapter* adapter) OVERRIDE;
+  void RemoveHMIMessageAdapter(HMIMessageAdapter* adapter) OVERRIDE;
 
-  virtual const HMIMessageHandlerSettings& get_settings() const OVERRIDE;
+  void set_message_observer(HMIMessageObserver* observer);
+  const HMIMessageHandlerSettings& get_settings() const OVERRIDE;
 
 #ifdef BUILD_TESTS
   std::set<HMIMessageAdapter*> message_adapters() const {

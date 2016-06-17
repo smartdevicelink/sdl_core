@@ -84,7 +84,7 @@ class ResumptionDataDB : public ResumptionData {
   /**
    * @brief allows to destroy ResumptionDataDB object
    */
-  virtual ~ResumptionDataDB();
+  ~ResumptionDataDB();
 
   /**
    * @brief Creates or opens DB and initialize it

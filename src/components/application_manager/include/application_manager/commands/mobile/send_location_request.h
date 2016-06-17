@@ -60,14 +60,14 @@ class SendLocationRequest : public CommandRequestImpl {
   /**
    * @brief Execute command
    */
-  virtual void Run();
+  void Run() OVERRIDE;
 
   /**
    * @brief Interface method that is called whenever new event received
    *
    * @param event The received event
    */
-  virtual void on_event(const event_engine::Event& event);
+  virtual void on_event(const event_engine::Event& event) OVERRIDE;
 
  private:
   /**

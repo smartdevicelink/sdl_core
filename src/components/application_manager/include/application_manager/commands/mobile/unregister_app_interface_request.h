@@ -61,7 +61,7 @@ class UnregisterAppInterfaceRequest : public CommandRequestImpl {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
   // virtual void cleanUp() = 0;
 
  private:

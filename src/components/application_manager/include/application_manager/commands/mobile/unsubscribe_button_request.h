@@ -62,7 +62,7 @@ class UnsubscribeButtonRequest : public CommandRequestImpl {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   /**

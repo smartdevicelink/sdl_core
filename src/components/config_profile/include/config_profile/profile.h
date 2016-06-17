@@ -100,12 +100,12 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   /**
     * @brief Returns application storage path
     */
-  const std::string& app_storage_folder() const;
+  const std::string& app_storage_folder() const OVERRIDE;
 
   /**
    * @brief Return application resourse folder
    */
-  const std::string& app_resource_folder() const;
+  const std::string& app_resource_folder() const OVERRIDE;
 
   /**
    * @brief Returns true, if SDL 4.0 is enabled
@@ -136,12 +136,12 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   /**
    * @brief Sets the path to the config file
    */
-  void config_file_name(const std::string& fileName);
+  void config_file_name(const std::string& fileName) OVERRIDE;
 
   /**
    * @brief Returns server address
    */
-  const std::string& server_address() const;
+  const std::string& server_address() const OVERRIDE;
 
   /**
    * @brief Returns server port
@@ -156,12 +156,12 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   /**
     * @brief Returns port for audio streaming
     */
-  const uint16_t audio_streaming_port() const;
+  const uint16_t audio_streaming_port() const OVERRIDE;
 
   /**
    * @brief Returns streaming timeout
    */
-  uint32_t stop_streaming_timeout() const;
+  uint32_t stop_streaming_timeout() const OVERRIDE;
 
   /**
     * @brief Returns port for time reports
@@ -171,7 +171,7 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   /**
    * @brief Returns hmi capabilities file name
    */
-  const std::string& hmi_capabilities_file_name() const;
+  const std::string& hmi_capabilities_file_name() const OVERRIDE;
 
   /**
    * @brief Returns help promt vector
@@ -181,7 +181,7 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   /**
    * @brief Returns help promt vector
    */
-  const std::vector<std::string>& time_out_promt() const;
+  const std::vector<std::string>& time_out_promt() const OVERRIDE;
 
   /**
    * @brief Returns vr commands default for all apps
@@ -192,28 +192,28 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   /**
    * @brief Maximum command id available for mobile app
    */
-  const uint32_t& max_cmd_id() const;
+  const uint32_t& max_cmd_id() const OVERRIDE;
 
   /**
    * @brief Default timeout for waiting for response to mobile app
    */
-  const uint32_t& default_timeout() const;
+  const uint32_t& default_timeout() const OVERRIDE;
 
   /**
    * @brief Default timeout for waiting for resuming
    */
-  const uint32_t& app_resuming_timeout() const;
-  const uint32_t& app_resumption_save_persistent_data_timeout() const;
+  const uint32_t& app_resuming_timeout() const OVERRIDE;
+  const uint32_t& app_resumption_save_persistent_data_timeout() const OVERRIDE;
 
   /**
    * @brief Returns desirable thread stack size
    */
-  const uint64_t& thread_min_stack_size() const;
+  const uint64_t& thread_min_stack_size() const OVERRIDE;
 
   /**
     * @brief Returns true if audio mixing is supported
     */
-  bool is_mixing_audio_supported() const;
+  bool is_mixing_audio_supported() const OVERRIDE;
 
   /**
     * @brief Returns true if video re-decoding enabled
@@ -228,78 +228,78 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   /**
     * @brief Returns application directory quota size
     */
-  const uint32_t& app_dir_quota() const;
+  const uint32_t& app_dir_quota() const OVERRIDE;
 
   /**
     * @brief Returns the video server type
     */
-  const std::string& video_server_type() const;
+  const std::string& video_server_type() const OVERRIDE;
 
   /**
     * @brief Returns the audio server type
     */
-  const std::string& audio_server_type() const;
+  const std::string& audio_server_type() const OVERRIDE;
 
   /**
     * @brief Returns the video pipe path
     */
-  const std::string& named_video_pipe_path() const;
+  const std::string& named_video_pipe_path() const OVERRIDE;
 
   /**
    * @brief Returns the audio pipe path
    */
-  const std::string& named_audio_pipe_path() const;
+  const std::string& named_audio_pipe_path() const OVERRIDE;
 
   /**
    * @brief Returns time scale for max amount of requests for application
    * in hmi level none.
    */
-  const uint32_t& app_hmi_level_none_time_scale() const;
+  const uint32_t& app_hmi_level_none_time_scale() const OVERRIDE;
 
   /**
     * @brief Returns path to testing file to which redirects video stream
     */
-  const std::string& video_stream_file() const;
+  const std::string& video_stream_file() const OVERRIDE;
 
   /**
     * @brief Returns path to testing file to which redirects audio stream
     */
-  const std::string& audio_stream_file() const;
+  const std::string& audio_stream_file() const OVERRIDE;
 
   /**
    * @brief Returns timeout for SDL to wait for the next package of raw data
    * over audio service
    */
-  const std::uint32_t audio_data_stopped_timeout() const;
+  const std::uint32_t audio_data_stopped_timeout() const OVERRIDE;
 
   /**
    * @brief Returns timeout for SDL to wait for the next package of raw data
    * over video service
    */
-  const std::uint32_t video_data_stopped_timeout() const;
+  const std::uint32_t video_data_stopped_timeout() const OVERRIDE;
 
   /**
    * @brief Returns allowable max amount of requests per time scale for
    * application in hmi level none
    *
    */
-  const uint32_t& app_hmi_level_none_time_scale_max_requests() const;
+  const uint32_t& app_hmi_level_none_time_scale_max_requests() const OVERRIDE;
 
   /**
    * @brief Returns application time scale for max amount of requests per it.
    */
-  const uint32_t& app_time_scale() const;
+  const uint32_t& app_time_scale() const OVERRIDE;
 
   /**
    * @brief Returns allowable max amount of requests per application
    * time scale
    */
-  const uint32_t& app_time_scale_max_requests() const;
+  const uint32_t& app_time_scale_max_requests() const OVERRIDE;
 
   /**
    * @brief Returns allowable amount of the system pending requests
    */
-  const uint32_t& pending_requests_amount() const;
+  const uint32_t& pending_requests_amount() const OVERRIDE;
 
   /**
    * @brief Returns Max allowed number of PutFile requests for one
@@ -327,19 +327,19 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   /*
    * @brief Path to preloaded policy file
    */
-  const std::string& preloaded_pt_file() const;
+  const std::string& preloaded_pt_file() const OVERRIDE;
 
   /**
    * @brief Path to policies snapshot file
    * @return file path
    */
-  const std::string& policies_snapshot_file_name() const;
+  const std::string& policies_snapshot_file_name() const OVERRIDE;
 
   /**
    * @brief Should Policy be turned off? (Library not loaded)
    * @return Flag
    */
-  bool enable_policy() const;
+  bool enable_policy() const OVERRIDE;
 
   // TransportManageSettings interface
 
@@ -523,7 +523,7 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   /**
    * @brief Returns max allowed threads number for handling mobile requests
    */
-  uint32_t thread_pool_size() const;
+  uint32_t thread_pool_size() const OVERRIDE;
 
   /*
    * ProtocolHandler section
@@ -553,15 +553,15 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
 #endif  // ENABLE_SECURITY
   // ProtocolHandler section end
 
-  uint16_t attempts_to_open_policy_db() const;
+  uint16_t attempts_to_open_policy_db() const OVERRIDE;
 
-  uint16_t open_attempt_timeout_ms() const;
+  uint16_t open_attempt_timeout_ms() const OVERRIDE;
 
-  uint32_t resumption_delay_before_ign() const;
+  uint32_t resumption_delay_before_ign() const OVERRIDE;
 
-  uint32_t resumption_delay_after_ign() const;
+  uint32_t resumption_delay_after_ign() const OVERRIDE;
 
-  uint32_t hash_string_size() const;
+  uint32_t hash_string_size() const OVERRIDE;
 
   bool logs_enabled() const;
 
@@ -569,17 +569,17 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
    * @brief Returns true if resumption ctrl uses db, returns false if
    * resumption ctrl uses JSON.
    */
-  bool use_db_for_resumption() const;
+  bool use_db_for_resumption() const OVERRIDE;
 
   /**
    * @brief Returns amount of attempts for opening resumption db
    */
-  uint16_t attempts_to_open_resumption_db() const;
+  uint16_t attempts_to_open_resumption_db() const OVERRIDE;
 
   /**
    * @brief Returns timeout between attempts
    */
-  uint16_t open_attempt_timeout_ms_resumption_db() const;
+  uint16_t open_attempt_timeout_ms_resumption_db() const OVERRIDE;
 
   /*
    * @brief Updates all related values from ini file

@@ -78,24 +78,6 @@ SQLPTRepresentation::SQLPTRepresentation()
 #else
     : db_(new utils::dbms::SQLDatabaseImpl(kDatabaseName, kConnectionName)) {
 #endif
-  is_in_memory = false;
-}
-
-SQLPTRepresentation::SQLPTRepresentation(bool in_memory) {
-  is_in_memory = in_memory;
-#ifdef __QNX__
-  db_ = new utils::dbms::SQLDatabaseImpl(kDatabaseName);
-#else  // __QNX__
-  if (in_memory) {
-    db_ = new utils::dbms::SQLDatabaseImpl();
-  } else {
-#ifndef QT_PORT
-    db_ = new utils::dbms::SQLDatabaseImpl(kDatabaseName);
-#else
-    db_ = new utils::dbms::SQLDatabaseImpl(kDatabaseName, kConnectionName);
-#endif
-  }
-#endif  // __QNX__
 }
 
 SQLPTRepresentation::SQLPTRepresentation(const std::string& app_storage_folder,
