@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,12 +30,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SQLITE_WRAPPER_SQL_DATABASE_H_
-#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SQLITE_WRAPPER_SQL_DATABASE_H_
+#ifndef SRC_COMPONENTS_INCLUDE_UTILS_SQL_DATABASE_H_
+#define SRC_COMPONENTS_INCLUDE_UTILS_SQL_DATABASE_H_
 
 #include <string>
-#include "utils/sqlite_wrapper/sql_error.h"
-#include "utils/lock.h"
 
 struct sqlite3;
 
@@ -43,122 +41,88 @@ namespace utils {
 namespace dbms {
 
 class SQLQuery;
+class SQLError;
 
 /**
  * Represents a connection to a database.
  */
 class SQLDatabase {
  public:
-  SQLDatabase();
-  SQLDatabase(const std::string& database_path,
-              const std::string& connection_name);
-  ~SQLDatabase();
-
+  virtual ~SQLDatabase() {}
   /**
    * Opens connection to the temporary in-memory database
    * @return true if successfully
    */
-  bool Open();
+  virtual bool Open() = 0;
 
   /**
    * Closes connection to the database
    */
-  void Close();
+  virtual void Close() = 0;
 
   /**
    * Begins a transaction on the database
    * @return true if successfully
    */
-  bool BeginTransaction();
+  virtual bool BeginTransaction() = 0;
 
   /**
    * Commits a transaction to the database
    * @return true if successfully
    */
-  bool CommitTransaction();
+  virtual bool CommitTransaction() = 0;
 
   /**
    * Rolls back a transaction on the database
    * @return true if successfully
    */
-  bool RollbackTransaction();
+  virtual bool RollbackTransaction() = 0;
 
   /**
    * Gets information about the last error that occurred on the database
    * @return last error
    */
-  SQLError LastError() const;
+  virtual SQLError LastError() const = 0;
 
   /**
    * @brief HasErrors Indicate the status of the last executed operation.
    *
    * @return true in case last operation has any errors, false otherwise.
    */
-  bool HasErrors() const;
+  virtual bool HasErrors() const = 0;
+
+  /**
+   * Sets path to database
+   * If the database is already opened then need reopen it
+   */
+  virtual void set_path(const std::string& path) = 0;
 
   /**
    * @brief get_path databse location path.
    *
    * @return the path to the database location
    */
-  std::string get_path() const;
+  virtual std::string get_path() const = 0;
 
   /**
    * Checks if database is read/write
    * @return true if database is read/write
    */
-  bool IsReadWrite();
+  virtual bool IsReadWrite() = 0;
 
   /**
    * Call backup for opened DB
    */
-  bool Backup();
+  virtual bool Backup() = 0;
 
- protected:
-#ifndef QT_PORT
   /**
-    * Gets connection to the SQLite database
-    * @return pointer to connection
-    */
-  sqlite3* conn() const;
-#endif  // QT_PORT
-
- private:
-#ifndef QT_PORT
-  /**
-   * The connection to the SQLite database
+   * Gets connection to the SQLite database
+   * @return pointer to connection
    */
-  sqlite3* conn_;
-#endif  // QT_PORT
-
-  /**
-   * Lock for guarding connection to database
-   */
-  sync_primitives::Lock conn_lock_;
-
-  /**
-   * The filename of database
-   */
-  const std::string database_path_;
-
-  /**
-   * The database connection name
-   */
-  const std::string connection_name_;
-
-  int error_;
-
-  /**
-   * Execs query for internal using in this class
-   * @param query sql query without return results
-   * @return true if query was executed successfully
-   */
-  inline bool Exec(const std::string& query);
-
-  friend class SQLQuery;
+  virtual sqlite3* conn() const = 0;
 };
 
 }  // namespace dbms
 }  // namespace utils
 
-#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SQLITE_WRAPPER_SQL_DATABASE_H_
+#endif  // SRC_COMPONENTS_INCLUDE_UTILS_SQL_DATABASE_H_

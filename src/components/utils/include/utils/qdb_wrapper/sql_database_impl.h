@@ -30,11 +30,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_QDB_WRAPPER_SQL_DATABASE_H_
-#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_QDB_WRAPPER_SQL_DATABASE_H_
+#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_QDB_WRAPPER_SQL_DATABASE_IMPL_H_
+#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_QDB_WRAPPER_SQL_DATABASE_IMPL_H_
 
 #include <qdb/qdb.h>
 #include <string>
+#include "utils/sql_database.h"
 #include "qdb_wrapper/sql_error.h"
 #include "utils/lock.h"
 
@@ -46,45 +47,45 @@ class SQLQuery;
 /**
  * Represents a connection to a database.
  */
-class SQLDatabase {
+class SQLDatabaseImpl : public SQLDatabase {
  public:
-  explicit SQLDatabase(const std::string& db_name);
-  ~SQLDatabase();
+  explicit SQLDatabaseImpl(const std::string& db_name);
+  ~SQLDatabaseImpl();
 
   /**
    * Opens connection to the temporary in-memory database
    * @return true if successfully
    */
-  bool Open();
+  bool Open() OVERRIDE;
 
   /**
    * Closes connection to the database
    */
-  void Close();
+  void Close() OVERRIDE;
 
   /**
    * Begins a transaction on the database
    * @return true if successfully
    */
-  bool BeginTransaction();
+  bool BeginTransaction() OVERRIDE;
 
   /**
    * Commits a transaction to the database
    * @return true if successfully
    */
-  bool CommitTransaction();
+  bool CommitTransaction() OVERRIDE;
 
   /**
    * Rolls back a transaction on the database
    * @return true if successfully
    */
-  bool RollbackTransaction();
+  bool RollbackTransaction() OVERRIDE;
 
   /**
    * Gets information about the last error that occurred on the database
    * @return last error
    */
-  SQLError LastError() const;
+  SQLError LastError() const OVERRIDE;
 
   /**
    * @brief HasErrors Indicate the status of the last executed operation.
@@ -98,12 +99,13 @@ class SQLDatabase {
    */
   bool Backup();
 
- protected:
+  std::string get_path() const OVERRIDE;
+
   /**
    * Gets connection to the SQLite database
    * @return pointer to connection
    */
-  qdb_hdl_t* conn() const;
+  qdb_hdl_t* conn() const OVERRIDE;
 
  private:
   /**
@@ -139,4 +141,4 @@ class SQLDatabase {
 }  // namespace dbms
 }  // namespace utils
 
-#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_QDB_WRAPPER_SQL_DATABASE_H_
+#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_QDB_WRAPPER_SQL_DATABASE_IMPL_H_
