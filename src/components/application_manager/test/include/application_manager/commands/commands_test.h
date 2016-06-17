@@ -78,6 +78,8 @@ enum CommandsTestMocks { kNotNice = 0, kIsNice };
 template <const CommandsTestMocks kIsNice = CommandsTestMocks::kNotNice>
 class CommandsTest : public ::testing::Test {
  public:
+  enum { kMocksIsNice = kIsNice };
+
   typedef NiceMock<MockApplicationManagerSettings> MockAppManagerSettings;
   typedef typename TypeIf<kIsNice,
                           NiceMock<MockApplicationManager>,

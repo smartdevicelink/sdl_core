@@ -199,8 +199,8 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
 
   UsageStatistics& usage_report();
 
-  bool IsCommandLimitsExceeded(mobile_apis::FunctionID::eType cmd_id,
-                               TLimitSource source);
+  bool AreCommandLimitsExceeded(mobile_apis::FunctionID::eType cmd_id,
+                                TLimitSource source);
   virtual void SubscribeToSoftButtons(int32_t cmd_id,
                                       const SoftButtonID& softbuttons_id);
   virtual bool IsSubscribedToSoftButton(const uint32_t softbutton_id);
