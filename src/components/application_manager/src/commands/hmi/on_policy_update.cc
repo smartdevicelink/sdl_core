@@ -43,7 +43,7 @@ OnPolicyUpdate::OnPolicyUpdate(const MessageSharedPtr& message,
 OnPolicyUpdate::~OnPolicyUpdate() {}
 
 void OnPolicyUpdate::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   application_manager_.GetPolicyHandler().OnPTExchangeNeeded();
 }
 

@@ -37,23 +37,23 @@
 #include "utils/signals.h"
 #include "utils/logger.h"
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
+SDL_CREATE_LOGGER("Utils")
 
 namespace {
 
 void SigHandler(int sig) {
   switch (sig) {
     case SIGINT:
-      LOGGER_INFO(logger_, "SIGINT signal has been caught");
+      SDL_INFO("SIGINT signal has been caught");
       break;
     case SIGTERM:
-      LOGGER_INFO(logger_, "SIGTERM signal has been caught");
+      SDL_INFO("SIGTERM signal has been caught");
       break;
     case SIGSEGV:
-      LOGGER_INFO(logger_, "SIGSEGV signal has been caught");
+      SDL_INFO("SIGSEGV signal has been caught");
       break;
     default:
-      LOGGER_INFO(logger_, "Unexpected signal has been caught");
+      SDL_INFO("Unexpected signal has been caught");
       break;
   }
 }
@@ -81,7 +81,7 @@ void WaitForSdlExecute() {
   sigaddset(&signal_set, SIGTERM);
 
   if (!CatchSIGSEGV(&SigHandler) || 0 != sigwait(&signal_set, &sig)) {
-    LOGGER_FATAL(logger_, "Subscribe to system signals error");
+    SDL_FATAL("Subscribe to system signals error");
   }
 
   SigHandler(sig);

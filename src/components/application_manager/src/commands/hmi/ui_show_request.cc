@@ -43,7 +43,7 @@ UIShowRequest::UIShowRequest(const MessageSharedPtr& message,
 UIShowRequest::~UIShowRequest() {}
 
 void UIShowRequest::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   SendRequest();
 }

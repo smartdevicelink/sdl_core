@@ -36,7 +36,7 @@
 
 namespace media_manager {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "PipeStreamerAdapter")
+SDL_CREATE_LOGGER("PipeStreamerAdapter")
 
 PipeStreamerAdapter::PipeStreamerAdapter(const std::string& named_pipe_path,
                                          const std::string& app_storage_folder)
@@ -56,44 +56,44 @@ PipeStreamerAdapter::PipeStreamer::PipeStreamer(
 PipeStreamerAdapter::PipeStreamer::~PipeStreamer() {}
 
 bool PipeStreamerAdapter::PipeStreamer::Connect() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   if (!file_system::CreateDirectoryRecursively(app_storage_folder_)) {
-    LOGGER_ERROR(logger_, "Cannot create app folder");
+    SDL_ERROR("Cannot create app folder");
     return false;
   }
 
   if (!pipe_.Open()) {
-    LOGGER_ERROR(logger_, "Cannot open pipe");
+    SDL_ERROR("Cannot open pipe");
     return false;
   }
 
-  LOGGER_INFO(logger_, "Streamer connected to pipe");
+  SDL_INFO("Streamer connected to pipe");
   return true;
 }
 
 void PipeStreamerAdapter::PipeStreamer::Disconnect() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   pipe_.Close();
-  LOGGER_INFO(logger_, "Streamer disconnected from pipe");
+  SDL_INFO("Streamer disconnected from pipe");
 }
 
 bool PipeStreamerAdapter::PipeStreamer::Send(
     protocol_handler::RawMessagePtr msg) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   size_t sent = 0;
   if (!pipe_.Write(msg->data(), msg->data_size(), sent)) {
-    LOGGER_ERROR(logger_, "Cannot write to pipe");
+    SDL_ERROR("Cannot write to pipe");
     return false;
   }
 
   if (sent != msg->data_size()) {
-    LOGGER_WARN(logger_, "Couldn't write all the data to pipe");
+    SDL_WARN("Couldn't write all the data to pipe");
   }
 
-  LOGGER_INFO(logger_, "Streamer sent to pipe " << sent << " bytes");
+  SDL_INFO("Streamer sent to pipe " << sent << " bytes");
   return true;
 }
 

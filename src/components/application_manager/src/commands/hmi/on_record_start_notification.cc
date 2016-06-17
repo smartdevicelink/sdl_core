@@ -43,7 +43,7 @@ OnRecordStartdNotification::OnRecordStartdNotification(
 OnRecordStartdNotification::~OnRecordStartdNotification() {}
 
 void OnRecordStartdNotification::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   SendNotification();
 }

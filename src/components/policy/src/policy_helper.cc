@@ -47,7 +47,7 @@ namespace policy {
 namespace custom_str = utils::custom_string;
 namespace {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "Policy")
+SDL_CREATE_LOGGER("Policy")
 
 bool Compare(const StringsValueType& first, const StringsValueType& second) {
   const std::string& first_str = first;
@@ -232,7 +232,7 @@ std::vector<FunctionalGroupPermission> policy::CheckAppPolicy::GetRevokedGroups(
 
   FunctionalGroupNames groups_attributes;
   if (!pm_->cache_->GetFunctionalGroupNames(groups_attributes)) {
-    LOGGER_WARN(logger_, "Can't get functional group names");
+    SDL_WARN("Can't get functional group names");
     return std::vector<FunctionalGroupPermission>();
   }
 
@@ -275,8 +275,7 @@ void CheckAppPolicy::SendPermissionsToApp(
 
   const std::string device_id = pm_->GetCurrentDeviceId(app_id);
   if (device_id.empty()) {
-    LOGGER_WARN(logger_,
-                "Couldn't find device info for application id: " << app_id);
+    SDL_WARN("Couldn't find device info for application id: " << app_id);
     return;
   }
   std::vector<FunctionalGroupPermission> group_permissons;
@@ -288,7 +287,7 @@ void CheckAppPolicy::SendPermissionsToApp(
                                group_permissons,
                                notification_data);
 
-  LOGGER_INFO(logger_, "Send notification for application_id: " << app_id);
+  SDL_INFO("Send notification for application_id: " << app_id);
   // Default_hmi is Ford-specific and should not be used with basic policy
   const std::string default_hmi;
   pm_->listener()->OnPermissionsUpdated(app_id, notification_data, default_hmi);
@@ -296,7 +295,7 @@ void CheckAppPolicy::SendPermissionsToApp(
 
 bool CheckAppPolicy::IsAppRevoked(
     const AppPoliciesValueType& app_policy) const {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   // Application params are not initialized = application revoked
   // i.e. "123":null
   return app_policy.second.is_null();
@@ -326,8 +325,7 @@ bool CheckAppPolicy::operator()(const AppPoliciesValueType& app_policy) {
   const std::string app_id = app_policy.first;
 
   if (!IsKnownAppication(app_id)) {
-    LOGGER_WARN(logger_,
-                "Application:" << app_id << " is not present in snapshot.");
+    SDL_WARN("Application:" << app_id << " is not present in snapshot.");
     return true;
   }
 
@@ -349,14 +347,11 @@ bool CheckAppPolicy::operator()(const AppPoliciesValueType& app_policy) {
     NotifySystem(app_policy);
   }
   if (RESULT_NO_CHANGES == result) {
-    LOGGER_INFO(logger_,
-                "Permissions for application:" << app_id << " wasn't changed.");
+    SDL_INFO("Permissions for application:" << app_id << " wasn't changed.");
     return true;
   }
 
-  LOGGER_INFO(logger_,
-              "Permissions for application:" << app_id
-                                             << " have been changed.");
+  SDL_INFO("Permissions for application:" << app_id << " have been changed.");
 
   if (!IsPredefinedApp(app_policy) && RESULT_CONSENT_NOT_REQIURED != result) {
     SetPendingPermissions(app_policy, result);
@@ -699,7 +694,7 @@ void FillFunctionalGroupPermissions(
     FunctionalGroupNames& names,
     GroupConsent state,
     std::vector<FunctionalGroupPermission>& permissions) {
-  LOGGER_INFO(logger_, "FillFunctionalGroupPermissions");
+  SDL_INFO("FillFunctionalGroupPermissions");
   FunctionalGroupIDs::const_iterator it = ids.begin();
   FunctionalGroupIDs::const_iterator it_end = ids.end();
   for (; it != it_end; ++it) {
@@ -719,7 +714,7 @@ bool IsPredefinedApp(const AppPoliciesValueType& app) {
 
 FunctionalGroupIDs ExcludeSame(const FunctionalGroupIDs& from,
                                const FunctionalGroupIDs& what) {
-  LOGGER_INFO(logger_, "Exclude same groups");
+  SDL_INFO("Exclude same groups");
   FunctionalGroupIDs from_copy(from);
   FunctionalGroupIDs what_copy(what);
 
@@ -741,7 +736,7 @@ FunctionalGroupIDs ExcludeSame(const FunctionalGroupIDs& from,
 
 FunctionalGroupIDs Merge(const FunctionalGroupIDs& first,
                          const FunctionalGroupIDs& second) {
-  LOGGER_INFO(logger_, "Merge groups");
+  SDL_INFO("Merge groups");
   FunctionalGroupIDs first_copy(first);
   FunctionalGroupIDs second_copy(second);
 
@@ -763,7 +758,7 @@ FunctionalGroupIDs Merge(const FunctionalGroupIDs& first,
 
 FunctionalGroupIDs FindSame(const FunctionalGroupIDs& first,
                             const FunctionalGroupIDs& second) {
-  LOGGER_INFO(logger_, "Find same groups");
+  SDL_INFO("Find same groups");
   FunctionalGroupIDs first_copy(first);
   FunctionalGroupIDs second_copy(second);
 
@@ -794,9 +789,9 @@ bool UnwrapAppPolicies(policy_table::ApplicationPolicies& app_policies) {
         (*it).second = (*it_default).second;
         it->second.set_to_string(kDefaultId);
       } else {
-        LOGGER_ERROR(logger_,
-                     "There is no default application policy was "
-                     "found in PTU.");
+        SDL_ERROR(
+            "There is no default application policy was "
+            "found in PTU.");
         return false;
       }
     }

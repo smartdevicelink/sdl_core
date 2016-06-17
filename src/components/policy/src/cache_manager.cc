@@ -55,22 +55,22 @@ namespace policy_table = rpc::policy_table_interface_base;
 
 namespace policy {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "Policy")
+SDL_CREATE_LOGGER("Policy")
 
-#define CACHE_MANAGER_CHECK(return_value)                           \
-  {                                                                 \
-    if (!pt_) {                                                     \
-      LOGGER_WARN(logger_, "The cache manager is not initialized"); \
-      return return_value;                                          \
-    }                                                               \
+#define CACHE_MANAGER_CHECK(return_value)               \
+  {                                                     \
+    if (!pt_) {                                         \
+      SDL_WARN("The cache manager is not initialized"); \
+      return return_value;                              \
+    }                                                   \
   }
 
-#define CACHE_MANAGER_CHECK_VOID()                                  \
-  {                                                                 \
-    if (!pt_) {                                                     \
-      LOGGER_WARN(logger_, "The cache manager is not initialized"); \
-      return;                                                       \
-    }                                                               \
+#define CACHE_MANAGER_CHECK_VOID()                      \
+  {                                                     \
+    if (!pt_) {                                         \
+      SDL_WARN("The cache manager is not initialized"); \
+      return;                                           \
+    }                                                   \
   }
 
 struct LanguageFinder {
@@ -92,14 +92,14 @@ CacheManager::CacheManager(const std::string& app_storage_folder,
                                       attempts_to_open_policy_db,
                                       open_attempt_timeout_ms))
     , update_required(false) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   backuper_ = new BackgroundBackuper(this);
   backup_thread_ = threads::CreateThread("Backup thread", backuper_);
   backup_thread_->start();
 }
 
 CacheManager::~CacheManager() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   sync_primitives::AutoLock lock(backuper_locker_);
   backup_thread_->join();
   delete backup_thread_->delegate();
@@ -148,17 +148,17 @@ bool CacheManager::GetUserPermissionsForDevice(
     const std::string& device_id,
     StringArray& consented_groups,
     StringArray& disallowed_groups) const {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   CACHE_MANAGER_CHECK(false);
   return true;
 }
 
 void CacheManager::GetAllAppGroups(const std::string& app_id,
                                    FunctionalGroupIDs& all_group_ids) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   CACHE_MANAGER_CHECK_VOID();
   if (kDeviceId == app_id) {
-    LOGGER_INFO(logger_, "Devices doesn't have groups");
+    SDL_INFO("Devices doesn't have groups");
     return;
   }
 
@@ -180,7 +180,7 @@ void CacheManager::GetAllAppGroups(const std::string& app_id,
 
 void CacheManager::GetPreConsentedGroups(
     const std::string& app_id, FunctionalGroupIDs& preconsented_groups) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   CACHE_MANAGER_CHECK_VOID();
 }
 
@@ -188,7 +188,7 @@ void CacheManager::GetConsentedGroups(const std::string& device_id,
                                       const std::string& app_id,
                                       FunctionalGroupIDs& allowed_groups,
                                       FunctionalGroupIDs& disallowed_groups) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   CACHE_MANAGER_CHECK_VOID();
 }
 
@@ -196,7 +196,7 @@ void CacheManager::GetUnconsentedGroups(
     const std::string& device_id,
     const std::string& policy_app_id,
     FunctionalGroupIDs& unconsented_groups) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   CACHE_MANAGER_CHECK_VOID();
 }
 
@@ -206,7 +206,7 @@ void CacheManager::RemoveAppConsentForGroup(const std::string& app_id,
 }
 
 bool CacheManager::ApplyUpdate(const policy_table::Table& update_pt) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   CACHE_MANAGER_CHECK(false);
   sync_primitives::AutoLock auto_lock(cache_lock_);
   pt_->policy_table.functional_groupings =
@@ -227,7 +227,7 @@ bool CacheManager::ApplyUpdate(const policy_table::Table& update_pt) {
           update_pt.policy_table.app_policies_section.apps.find(kDefaultId);
       if (update_pt.policy_table.app_policies_section.apps.end() ==
           iter_default) {
-        LOGGER_ERROR(logger_, "The default section was not found in PTU");
+        SDL_ERROR("The default section was not found in PTU");
         continue;
       }
       pt_->policy_table.app_policies_section.apps[iter->first] =
@@ -253,7 +253,7 @@ bool CacheManager::ApplyUpdate(const policy_table::Table& update_pt) {
 
 void CacheManager::GetHMIAppTypeAfterUpdate(
     std::map<std::string, StringArray>& app_hmi_types) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   CACHE_MANAGER_CHECK_VOID();
   policy_table::ApplicationPolicies::const_iterator policy_iter_begin =
       pt_->policy_table.app_policies_section.apps.begin();
@@ -295,7 +295,7 @@ std::string CacheManager::currentDateTime() {
 bool CacheManager::GetPermissionsForApp(const std::string& device_id,
                                         const std::string& app_id,
                                         FunctionalIdType& group_types) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   GetAllAppGroups(app_id, group_types[kTypeGeneral]);
   GetAllAppGroups(kDefaultId, group_types[kTypeDefault]);
   GetAllAppGroups(kPreDataConsentId, group_types[kTypePreDataConsented]);
@@ -305,14 +305,14 @@ bool CacheManager::GetPermissionsForApp(const std::string& device_id,
 bool CacheManager::GetDeviceGroupsFromPolicies(
     policy_table::Strings& groups,
     policy_table::Strings& preconsented_groups) const {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   CACHE_MANAGER_CHECK(false);
   return true;
 }
 
 bool CacheManager::AddDevice(const std::string& device_id,
                              const std::string& connection_type) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   sync_primitives::AutoLock auto_lock(cache_lock_);
   CACHE_MANAGER_CHECK(false);
@@ -328,7 +328,7 @@ bool CacheManager::SetDeviceData(const std::string& device_id,
                                  const std::string& carrier,
                                  const uint32_t number_of_ports,
                                  const std::string& connection_type) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   sync_primitives::AutoLock auto_lock(cache_lock_);
   CACHE_MANAGER_CHECK(false);
@@ -340,7 +340,7 @@ bool CacheManager::SetUserPermissionsForDevice(
     const std::string& device_id,
     const StringArray& consented_groups,
     const StringArray& disallowed_groups) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   sync_primitives::AutoLock auto_lock(cache_lock_);
   CACHE_MANAGER_CHECK(false);
   Backup();
@@ -349,7 +349,7 @@ bool CacheManager::SetUserPermissionsForDevice(
 
 bool CacheManager::ReactOnUserDevConsentForApp(const std::string& app_id,
                                                bool is_device_allowed) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   CACHE_MANAGER_CHECK(false);
   bool result = true;
   Backup();
@@ -374,7 +374,7 @@ void CacheManager::GetGroupNameByHashID(const int32_t group_id,
 
 bool CacheManager::SetUserPermissionsForApp(
     const PermissionConsent& permissions) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   sync_primitives::AutoLock auto_lock(cache_lock_);
   CACHE_MANAGER_CHECK(false);
   Backup();
@@ -405,13 +405,12 @@ void CacheManager::CheckPermissions(const PTString& app_id,
                                     const PTString& hmi_level,
                                     const PTString& rpc,
                                     CheckPermissionResult& result) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   CACHE_MANAGER_CHECK_VOID();
 
   if (pt_->policy_table.app_policies_section.apps.end() ==
       pt_->policy_table.app_policies_section.apps.find(app_id)) {
-    LOGGER_ERROR(logger_,
-                 "Application id " << app_id << " was not found in policy DB.");
+    SDL_ERROR("Application id " << app_id << " was not found in policy DB.");
     return;
   }
 
@@ -470,13 +469,13 @@ int CacheManager::IgnitionCyclesBeforeExchange() {
       static_cast<int>(
           pt_->policy_table.module_config.exchange_after_x_ignition_cycles),
       0);
-  LOGGER_DEBUG(logger_, "IgnitionCyclesBeforeExchange limit:" << limit);
+  SDL_DEBUG("IgnitionCyclesBeforeExchange limit:" << limit);
   uint8_t current = 0;
 
   const int last_exch = static_cast<int>(
       *pt_->policy_table.module_meta->ignition_cycles_since_last_exchange);
   current = std::max(last_exch, 0);
-  LOGGER_DEBUG(logger_, "IgnitionCyclesBeforeExchange current:" << current);
+  SDL_DEBUG("IgnitionCyclesBeforeExchange current:" << current);
 
   return std::max(limit - current, 0);
 }
@@ -487,16 +486,16 @@ int CacheManager::KilometersBeforeExchange(int current) {
       std::max(static_cast<int>(
                    pt_->policy_table.module_config.exchange_after_x_kilometers),
                0);
-  LOGGER_DEBUG(logger_, "KilometersBeforeExchange limit:" << limit);
+  SDL_DEBUG("KilometersBeforeExchange limit:" << limit);
   int last = 0;
 
   const int odo_val = static_cast<int>(
       *pt_->policy_table.module_meta->pt_exchanged_at_odometer_x);
   last = std::max(odo_val, 0);
-  LOGGER_DEBUG(logger_, "KilometersBeforeExchange last:" << last);
+  SDL_DEBUG("KilometersBeforeExchange last:" << last);
 
   const int actual = std::max((current - last), 0);
-  LOGGER_DEBUG(logger_, "KilometersBeforeExchange actual:" << actual);
+  SDL_DEBUG("KilometersBeforeExchange actual:" << actual);
   return std::max(limit - actual, 0);
 }
 
@@ -506,18 +505,15 @@ bool CacheManager::SetCountersPassedForSuccessfulUpdate(
   switch (counter) {
     case KILOMETERS:
       *pt_->policy_table.module_meta->pt_exchanged_at_odometer_x = value;
-      LOGGER_DEBUG(logger_,
-                   "SetCountersPassedForSuccessfulUpdate km:" << value);
+      SDL_DEBUG("SetCountersPassedForSuccessfulUpdate km:" << value);
       break;
     case DAYS_AFTER_EPOCH:
       *pt_->policy_table.module_meta->pt_exchanged_x_days_after_epoch = value;
-      LOGGER_DEBUG(
-          logger_,
+      SDL_DEBUG(
           "SetCountersPassedForSuccessfulUpdate days after epoch:" << value);
       break;
     default:
-      LOGGER_DEBUG(logger_,
-                   "Unknown counter was requested to set: " << counter);
+      SDL_DEBUG("Unknown counter was requested to set: " << counter);
       return false;
   }
 
@@ -526,19 +522,18 @@ bool CacheManager::SetCountersPassedForSuccessfulUpdate(
 }
 
 int CacheManager::DaysBeforeExchange(int current) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   CACHE_MANAGER_CHECK(0);
   const uint8_t limit = pt_->policy_table.module_config.exchange_after_x_days;
-  LOGGER_DEBUG(logger_,
-               "Exchange after: " << static_cast<int>(limit) << " days");
+  SDL_DEBUG("Exchange after: " << static_cast<int>(limit) << " days");
 
   const uint16_t days_after_epoch =
       (*pt_->policy_table.module_meta->pt_exchanged_x_days_after_epoch);
-  LOGGER_DEBUG(logger_, "Epoch since last update: " << days_after_epoch);
+  SDL_DEBUG("Epoch since last update: " << days_after_epoch);
 
   const uint16_t actual =
       std::max(static_cast<uint16_t>(current - days_after_epoch), uint16_t(0));
-  LOGGER_DEBUG(logger_, "The days since last update: " << actual);
+  SDL_DEBUG("The days since last update: " << actual);
 
   return std::max(limit - actual, 0);
 }
@@ -549,7 +544,7 @@ void CacheManager::IncrementIgnitionCycles() {
       *pt_->policy_table.module_meta->ignition_cycles_since_last_exchange);
   (*pt_->policy_table.module_meta->ignition_cycles_since_last_exchange) =
       ign_val + 1;
-  LOGGER_DEBUG(logger_, "IncrementIgnitionCycles ignitions:" << ign_val);
+  SDL_DEBUG("IncrementIgnitionCycles ignitions:" << ign_val);
   Backup();
 }
 
@@ -587,17 +582,15 @@ const policy::VehicleInfo CacheManager::GetVehicleInfo() const {
   vehicle_info.vehicle_make = *module_config.vehicle_make;
   vehicle_info.vehicle_model = *module_config.vehicle_model;
   vehicle_info.vehicle_year = *module_config.vehicle_year;
-  LOGGER_DEBUG(
-      logger_,
-      "Vehicle info (make, model, year):" << vehicle_info.vehicle_make << ","
-                                          << vehicle_info.vehicle_model << ","
-                                          << vehicle_info.vehicle_year);
+  SDL_DEBUG("Vehicle info (make, model, year):"
+            << vehicle_info.vehicle_make << "," << vehicle_info.vehicle_model
+            << "," << vehicle_info.vehicle_year);
   return vehicle_info;
 }
 
 std::vector<UserFriendlyMessage> CacheManager::GetUserFriendlyMsg(
     const std::vector<std::string>& msg_codes, const std::string& language) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   std::vector<UserFriendlyMessage> result;
   CACHE_MANAGER_CHECK(result);
 
@@ -616,10 +609,8 @@ std::vector<UserFriendlyMessage> CacheManager::GetUserFriendlyMsg(
         msg_languages.languages.begin(), msg_languages.languages.end(), finder);
 
     if (msg_languages.languages.end() == it_language) {
-      LOGGER_WARN(logger_,
-                  "Language "
-                      << language
-                      << " haven't been found for message code: " << *it);
+      SDL_WARN("Language " << language
+                           << " haven't been found for message code: " << *it);
 
       LanguageFinder fallback_language_finder("en-us");
 
@@ -629,8 +620,7 @@ std::vector<UserFriendlyMessage> CacheManager::GetUserFriendlyMsg(
                        fallback_language_finder);
 
       if (msg_languages.languages.end() == it_fallback_language) {
-        LOGGER_ERROR(logger_,
-                     "No fallback language found for message code: " << *it);
+        SDL_ERROR("No fallback language found for message code: " << *it);
         continue;
       }
 
@@ -648,14 +638,14 @@ std::vector<UserFriendlyMessage> CacheManager::GetUserFriendlyMsg(
 
 void CacheManager::GetServiceUrls(const std::string& service_type,
                                   EndpointUrls& end_points) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   CACHE_MANAGER_CHECK_VOID();
   std::string search_value;
   if (!IsNumberService(service_type, search_value)) {
     search_value = service_type;
   }
 
-  LOGGER_DEBUG(logger_, "Search service value is: " << search_value);
+  SDL_DEBUG("Search service value is: " << search_value);
 
   policy_table::ServiceEndpoints::const_iterator iter =
       pt_->policy_table.module_config.endpoints.find(search_value);
@@ -724,7 +714,7 @@ bool CacheManager::GetPriority(const std::string& policy_app_id,
 void CacheManager::CheckSnapshotInitialization() {
   CACHE_MANAGER_CHECK_VOID();
   if (!snapshot_) {
-    LOGGER_ERROR(logger_, "Snapshot pointer is not initialized");
+    SDL_ERROR("Snapshot pointer is not initialized");
     return;
   }
 
@@ -741,8 +731,7 @@ void CacheManager::CheckSnapshotInitialization() {
     snapshot_->policy_table.consumer_friendly_messages->messages =
         rpc::Optional<policy_table::Messages>();
   } else {
-    LOGGER_WARN(logger_,
-                "policy_table.consumer_friendly_messages is not initialized");
+    SDL_WARN("policy_table.consumer_friendly_messages is not initialized");
   }
 
   /* policy_table.usage_and_error_counts are required for PTS and
@@ -817,13 +806,12 @@ void CacheManager::CheckSnapshotInitialization() {
       }
     }
   } else {
-    LOGGER_WARN(logger_,
-                "usage_and_error_counts or app_level is not initialized");
+    SDL_WARN("usage_and_error_counts or app_level is not initialized");
   }
 }
 
 void CacheManager::PersistData() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   if (backup_.valid()) {
     if (pt_.valid()) {
       cache_lock_.Acquire();
@@ -878,7 +866,7 @@ void CacheManager::PersistData() {
 }
 
 void CacheManager::ResetCalculatedPermissions() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   sync_primitives::AutoLock lock(calculated_permissions_lock_);
   calculated_permissions_.clear();
 }
@@ -886,9 +874,8 @@ void CacheManager::ResetCalculatedPermissions() {
 void CacheManager::AddCalculatedPermissions(const std::string& device_id,
                                             const std::string& policy_app_id,
                                             const Permissions& permissions) {
-  LOGGER_DEBUG(logger_,
-               "AddCalculatedPermissions for device: "
-                   << device_id << " and app: " << policy_app_id);
+  SDL_DEBUG("AddCalculatedPermissions for device: " << device_id << " and app: "
+                                                    << policy_app_id);
   sync_primitives::AutoLock lock(calculated_permissions_lock_);
   calculated_permissions_[device_id][policy_app_id] = permissions;
 }
@@ -896,9 +883,8 @@ void CacheManager::AddCalculatedPermissions(const std::string& device_id,
 bool CacheManager::IsPermissionsCalculated(const std::string& device_id,
                                            const std::string& policy_app_id,
                                            Permissions& permission) {
-  LOGGER_DEBUG(logger_,
-               "IsPermissionsCalculated for device: "
-                   << device_id << " and app: " << policy_app_id);
+  SDL_DEBUG("IsPermissionsCalculated for device: " << device_id << " and app: "
+                                                   << policy_app_id);
   sync_primitives::AutoLock lock(calculated_permissions_lock_);
   CalculatedPermissions::const_iterator it =
       calculated_permissions_.find(device_id);
@@ -973,7 +959,7 @@ utils::SharedPtr<policy_table::Table> CacheManager::GenerateSnapshot() {
 bool CacheManager::GetInitialAppData(const std::string& app_id,
                                      StringArray& nicknames,
                                      StringArray& app_hmi_types) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   CACHE_MANAGER_CHECK(false);
   policy_table::ApplicationPolicies::const_iterator policy_iter =
       pt_->policy_table.app_policies_section.apps.find(app_id);
@@ -995,7 +981,7 @@ bool CacheManager::GetInitialAppData(const std::string& app_id,
 
 bool CacheManager::GetFunctionalGroupings(
     policy_table::FunctionalGroupings& groups) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   CACHE_MANAGER_CHECK(false);
   const policy_table::FunctionalGroupings& f_groupings =
       pt_->policy_table.functional_groupings;
@@ -1006,9 +992,9 @@ bool CacheManager::GetFunctionalGroupings(
 
 int CacheManager::CountUnconsentedGroups(const std::string& policy_app_id,
                                          const std::string& device_id) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   CACHE_MANAGER_CHECK(false);
-  LOGGER_DEBUG(logger_, "Application id: " << policy_app_id);
+  SDL_DEBUG("Application id: " << policy_app_id);
   int result = 0;
   return result;
 }
@@ -1039,7 +1025,7 @@ bool CacheManager::SetSystemLanguage(const std::string& language) {
 }
 
 bool CacheManager::GetFunctionalGroupNames(FunctionalGroupNames& names) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   CACHE_MANAGER_CHECK(false);
   rpc::policy_table_interface_base::FunctionalGroupings::iterator iter =
       pt_->policy_table.functional_groupings.begin();
@@ -1110,7 +1096,7 @@ void CacheManager::Increment(const std::string& app_id,
             .count_of_tls_errors;
       break;
     default:
-      LOGGER_WARN(logger_, "Type app counter is unknown");
+      SDL_WARN("Type app counter is unknown");
       return;
   }
   Backup();
@@ -1177,9 +1163,8 @@ bool CacheManager::SetPredataPolicy(const std::string& app_id) {
       pt_->policy_table.app_policies_section.apps.find(kPreDataConsentId);
 
   if (pt_->policy_table.app_policies_section.apps.end() == iter) {
-    LOGGER_ERROR(logger_,
-                 "Could not set " << kPreDataConsentId
-                                  << " permissions for app " << app_id);
+    SDL_ERROR("Could not set " << kPreDataConsentId << " permissions for app "
+                               << app_id);
     return false;
   }
 
@@ -1220,20 +1205,18 @@ bool CacheManager::SetUnpairedDevice(const std::string& device_id,
   const bool result = pt_->policy_table.device_data->end() !=
                       pt_->policy_table.device_data->find(device_id);
   if (!result) {
-    LOGGER_DEBUG(logger_,
-                 "Couldn't set unpaired flag for device id "
-                     << device_id << " , since it wasn't found.");
+    SDL_DEBUG("Couldn't set unpaired flag for device id "
+              << device_id << " , since it wasn't found.");
     return false;
   }
 
   sync_primitives::AutoLock lock(unpaired_lock_);
   if (unpaired) {
     is_unpaired_.insert(device_id);
-    LOGGER_DEBUG(logger_, "Unpaired flag was set for device id " << device_id);
+    SDL_DEBUG("Unpaired flag was set for device id " << device_id);
   } else {
     is_unpaired_.erase(device_id);
-    LOGGER_DEBUG(logger_,
-                 "Unpaired flag was removed for device id " << device_id);
+    SDL_DEBUG("Unpaired flag was removed for device id " << device_id);
   }
   return result;
 }
@@ -1256,20 +1239,20 @@ bool CacheManager::IsApplicationRepresented(const std::string& app_id) const {
 
 bool CacheManager::Init(const std::string& file_name,
                         const PolicySettings* settings) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   settings_ = settings;
   InitResult init_result = backup_->Init(settings);
 
   bool result = true;
   switch (init_result) {
     case InitResult::EXISTS: {
-      LOGGER_INFO(logger_, "Policy Table exists, was loaded correctly.");
+      SDL_INFO("Policy Table exists, was loaded correctly.");
       result = LoadFromBackup();
       if (result) {
         if (!backup_->IsDBVersionActual()) {
-          LOGGER_INFO(logger_, "DB version is NOT actual");
+          SDL_INFO("DB version is NOT actual");
           if (!backup_->RefreshDB()) {
-            LOGGER_ERROR(logger_, "RefreshDB() failed");
+            SDL_ERROR("RefreshDB() failed");
             return false;
           }
           backup_->UpdateDBVersion();
@@ -1279,14 +1262,13 @@ bool CacheManager::Init(const std::string& file_name,
       }
     } break;
     case InitResult::SUCCESS: {
-      LOGGER_INFO(logger_, "Policy Table was inited successfully");
+      SDL_INFO("Policy Table was inited successfully");
 
       result = LoadFromFile(file_name, *pt_);
 
       utils::SharedPtr<policy_table::Table> snapshot = GenerateSnapshot();
       result &= snapshot->is_valid();
-      LOGGER_DEBUG(logger_,
-                   "Check if snapshot is valid: " << std::boolalpha << result);
+      SDL_DEBUG("Check if snapshot is valid: " << std::boolalpha << result);
       if (!result) {
         rpc::ValidationReport report("policy_table");
         snapshot->ReportErrors(&report);
@@ -1298,7 +1280,7 @@ bool CacheManager::Init(const std::string& file_name,
     } break;
     default: {
       result = false;
-      LOGGER_ERROR(logger_, "Failed to init policy table.");
+      SDL_ERROR("Failed to init policy table.");
     } break;
   }
 
@@ -1320,34 +1302,33 @@ bool CacheManager::LoadFromBackup() {
 bool CacheManager::LoadFromFile(const std::string& file_name,
                                 policy_table::Table& table) {
   using namespace utils::json;
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   BinaryMessage json_string;
   if (!file_system::ReadBinaryFile(file_name, json_string)) {
-    LOGGER_FATAL(logger_, "Failed to read pt file.");
+    SDL_FATAL("Failed to read pt file.");
     return false;
   }
 
   std::string json(json_string.begin(), json_string.end());
   JsonValue::ParseResult parse_result = JsonValue::Parse(json);
   if (!parse_result.second) {
-    LOGGER_FATAL(logger_, "Preloaded PT is corrupted.");
+    SDL_FATAL("Preloaded PT is corrupted.");
     return false;
   }
   const JsonValue& value = parse_result.first;
 
-  LOGGER_TRACE(logger_, "Start create PT");
+  SDL_TRACE("Start create PT");
   sync_primitives::AutoLock locker(cache_lock_);
 
   table = policy_table::Table(value);
 
-  LOGGER_DEBUG(logger_, "PT out:");
-  LOGGER_DEBUG(logger_, table.ToJsonValue().ToJson());
+  SDL_DEBUG("PT out:");
+  SDL_DEBUG(table.ToJsonValue().ToJson());
 
   if (!table.is_valid()) {
     rpc::ValidationReport report("policy_table");
     table.ReportErrors(&report);
-    LOGGER_FATAL(logger_,
-                 "Parsed table is not valid " << rpc::PrettyFormat(report));
+    SDL_FATAL("Parsed table is not valid " << rpc::PrettyFormat(report));
     return false;
   }
   return true;
@@ -1387,13 +1368,12 @@ int32_t CacheManager::GenerateHash(const std::string& str_to_hash) {
 void CacheManager::GetAppRequestTypes(
     const std::string& policy_app_id,
     std::vector<std::string>& request_types) const {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   CACHE_MANAGER_CHECK_VOID();
   policy_table::ApplicationPolicies::iterator policy_iter =
       pt_->policy_table.app_policies_section.apps.find(policy_app_id);
   if (pt_->policy_table.app_policies_section.apps.end() == policy_iter) {
-    LOGGER_DEBUG(logger_,
-                 "Can't find request types for app_id " << policy_app_id);
+    SDL_DEBUG("Can't find request types for app_id " << policy_app_id);
     return;
   }
   policy_table::RequestTypes::iterator it_request_type =
@@ -1414,10 +1394,10 @@ std::string CacheManager::GetCertificate() const {
 }
 
 void CacheManager::MergePreloadPT(const std::string& file_name) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   policy_table::Table table;
   if (!LoadFromFile(file_name, table)) {
-    LOGGER_DEBUG(logger_, "Unable to load preloaded PT.");
+    SDL_DEBUG("Unable to load preloaded PT.");
     return;
   }
 
@@ -1437,7 +1417,7 @@ void CacheManager::MergePreloadPT(const std::string& file_name) {
 
 void CacheManager::MergeMC(const policy_table::PolicyTable& new_pt,
                            policy_table::PolicyTable& pt) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   policy_table::ModuleConfig copy(pt.module_config);
 
   pt.module_config = new_pt.module_config;
@@ -1448,19 +1428,19 @@ void CacheManager::MergeMC(const policy_table::PolicyTable& new_pt,
 
 void CacheManager::MergeFG(const policy_table::PolicyTable& new_pt,
                            policy_table::PolicyTable& pt) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   policy_table::FunctionalGroupings::const_iterator it =
       new_pt.functional_groupings.begin();
 
   for (; it != new_pt.functional_groupings.end(); ++it) {
-    LOGGER_DEBUG(logger_, "Merge functional group: " << it->first);
+    SDL_DEBUG("Merge functional group: " << it->first);
     pt.functional_groupings[it->first] = it->second;
   }
 }
 
 void CacheManager::MergeAP(const policy_table::PolicyTable& new_pt,
                            policy_table::PolicyTable& pt) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   pt.app_policies_section.device = const_cast<policy_table::PolicyTable&>(
                                        new_pt).app_policies_section.device;
 
@@ -1475,7 +1455,7 @@ void CacheManager::MergeAP(const policy_table::PolicyTable& new_pt,
 
 void CacheManager::MergeCFM(const policy_table::PolicyTable& new_pt,
                             policy_table::PolicyTable& pt) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   if (new_pt.consumer_friendly_messages.is_initialized()) {
     if (!pt.consumer_friendly_messages.is_initialized()) {
       pt.consumer_friendly_messages = new_pt.consumer_friendly_messages;
@@ -1486,9 +1466,9 @@ void CacheManager::MergeCFM(const policy_table::PolicyTable& new_pt,
       pt.consumer_friendly_messages->version =
           new_pt.consumer_friendly_messages->version;
       for (; it != new_pt.consumer_friendly_messages->messages->end(); ++it) {
-        LOGGER_DEBUG(logger_, "Merge CFM: " << it->first);
+        SDL_DEBUG("Merge CFM: " << it->first);
         if (!(pt.consumer_friendly_messages->messages.is_initialized())) {
-          LOGGER_DEBUG(logger_, "CFM not initialized.");
+          SDL_DEBUG("CFM not initialized.");
         }
         (*pt.consumer_friendly_messages->messages)[it->first] = it->second;
       }
@@ -1507,26 +1487,26 @@ CacheManager::BackgroundBackuper::BackgroundBackuper(
     : cache_manager_(cache_manager)
     , stop_flag_(false)
     , new_data_available_(false) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 }
 
 CacheManager::BackgroundBackuper::~BackgroundBackuper() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 }
 
 void CacheManager::BackgroundBackuper::InternalBackup() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   DCHECK(cache_manager_);
 
   while (new_data_available_) {
     new_data_available_ = false;
-    LOGGER_DEBUG(logger_, "DoBackup");
+    SDL_DEBUG("DoBackup");
     cache_manager_->PersistData();
   }
 }
 
 void CacheManager::BackgroundBackuper::threadMain() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   sync_primitives::AutoLock lock(need_backup_lock_);
   while (!stop_flag_) {
     need_backup_lock_.Release();
@@ -1535,20 +1515,20 @@ void CacheManager::BackgroundBackuper::threadMain() {
     if (new_data_available_ || stop_flag_) {
       continue;
     }
-    LOGGER_DEBUG(logger_, "Wait for a next backup");
+    SDL_DEBUG("Wait for a next backup");
     backup_notifier_.Wait(need_backup_lock_);
   }
 }
 
 void CacheManager::BackgroundBackuper::exitThreadMain() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   sync_primitives::AutoLock auto_lock(need_backup_lock_);
   stop_flag_ = true;
   backup_notifier_.NotifyOne();
 }
 
 void CacheManager::BackgroundBackuper::DoBackup() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   sync_primitives::AutoLock auto_lock(need_backup_lock_);
   new_data_available_ = true;
   backup_notifier_.NotifyOne();

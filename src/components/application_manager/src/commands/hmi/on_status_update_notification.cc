@@ -43,7 +43,7 @@ OnStatusUpdateNotification::OnStatusUpdateNotification(
 OnStatusUpdateNotification::~OnStatusUpdateNotification() {}
 
 void OnStatusUpdateNotification::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   SendNotification();
 }
 

@@ -40,7 +40,7 @@ namespace sos = NsSmartDeviceLink::NsJSONHandler::strings;
 
 namespace hmi_message_handler {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "HMIMessageHandler")
+SDL_CREATE_LOGGER("HMIMessageHandler")
 
 const std::string DBusMessageAdapter::SDL_SERVICE_NAME = "com.ford.sdl.core";
 const std::string DBusMessageAdapter::SDL_OBJECT_PATH = "/";
@@ -64,13 +64,13 @@ DBusMessageAdapter::DBusMessageAdapter(HMIMessageHandler* hmi_msg_handler)
                             SDL_OBJECT_PATH,
                             HMI_SERVICE_NAME,
                             HMI_OBJECT_PATH) {
-  LOGGER_INFO(logger_, "Created DBusMessageAdapter");
+  SDL_INFO("Created DBusMessageAdapter");
 }
 
 DBusMessageAdapter::~DBusMessageAdapter() {}
 
 void DBusMessageAdapter::SendMessageToHMI(MessageSharedPointer message) {
-  LOGGER_INFO(logger_, "DBusMessageAdapter::sendMessageToHMI");
+  SDL_INFO("DBusMessageAdapter::sendMessageToHMI");
 
   const smart_objects::SmartObject& smart = message->smart_object();
   switch (smart[sos::S_PARAMS][sos::S_MESSAGE_TYPE].asInt()) {
@@ -88,12 +88,12 @@ void DBusMessageAdapter::SendMessageToHMI(MessageSharedPointer message) {
       break;
     case hmi_apis::messageType::INVALID_ENUM:
     default:
-      LOGGER_WARN(logger_, "Message type is invalid");
+      SDL_WARN("Message type is invalid");
   }
 }
 
 void DBusMessageAdapter::SubscribeTo() {
-  LOGGER_INFO(logger_, "DBusMessageAdapter::subscribeTo");
+  SDL_INFO("DBusMessageAdapter::subscribeTo");
   DBusMessageController::SubscribeTo("Buttons", "OnButtonEvent");
   DBusMessageController::SubscribeTo("Buttons", "OnButtonPress");
   DBusMessageController::SubscribeTo("UI", "OnCommand");
@@ -162,15 +162,15 @@ void DBusMessageAdapter::SubscribeTo() {
   DBusMessageController::SubscribeTo("SDL", "AddStatisticsInfo");
   DBusMessageController::SubscribeTo("SDL", "OnDeviceStateChanged");
 
-  LOGGER_INFO(logger_, "Subscribed to notifications.");
+  SDL_INFO("Subscribed to notifications.");
 }
 
 void DBusMessageAdapter::SendMessageToCore(
     const smart_objects::SmartObject& obj) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   if (!handler()) {
-    LOGGER_WARN(logger_, "DBusMessageAdapter hasn't handler");
+    SDL_WARN("DBusMessageAdapter hasn't handler");
     return;
   }
 
@@ -184,11 +184,11 @@ void DBusMessageAdapter::SendMessageToCore(
   message->set_protocol_version(application_manager::ProtocolVersion::kHMI);
   message->set_smart_object(obj);
   handler()->OnMessageReceived(message);
-  LOGGER_INFO(logger_, "Successfully sent to observer");
+  SDL_INFO("Successfully sent to observer");
 }
 
 void DBusMessageAdapter::Request(const smart_objects::SmartObject& obj) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   dbus::MessageId func_id = static_cast<dbus::MessageId>(
       obj[sos::S_PARAMS][sos::S_FUNCTION_ID].asInt());
   dbus::MessageName name = get_schema().getMessageName(func_id);
@@ -197,7 +197,7 @@ void DBusMessageAdapter::Request(const smart_objects::SmartObject& obj) {
 }
 
 void DBusMessageAdapter::Notification(const smart_objects::SmartObject& obj) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   dbus::MessageId func_id = static_cast<dbus::MessageId>(
       obj[sos::S_PARAMS][sos::S_FUNCTION_ID].asInt());
   dbus::MessageName name = get_schema().getMessageName(func_id);
@@ -205,7 +205,7 @@ void DBusMessageAdapter::Notification(const smart_objects::SmartObject& obj) {
 }
 
 void DBusMessageAdapter::Response(const smart_objects::SmartObject& obj) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   dbus::MessageId func_id = static_cast<dbus::MessageId>(
       obj[sos::S_PARAMS][sos::S_FUNCTION_ID].asInt());
   dbus::MessageName name = get_schema().getMessageName(func_id);
@@ -214,7 +214,7 @@ void DBusMessageAdapter::Response(const smart_objects::SmartObject& obj) {
 }
 
 void DBusMessageAdapter::ErrorResponse(const smart_objects::SmartObject& obj) {
-  LOGGER_DEBUG(logger_, "Error");
+  SDL_DEBUG("Error");
   std::string error = obj[sos::S_PARAMS][sos::kCode].asString();
   std::string description = obj[sos::S_PARAMS][sos::kMessage].asString();
   uint id = obj[sos::S_PARAMS][sos::S_CORRELATION_ID].asInt();

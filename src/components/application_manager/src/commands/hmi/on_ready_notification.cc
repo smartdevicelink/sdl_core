@@ -43,7 +43,7 @@ OnReadyNotification::OnReadyNotification(
 OnReadyNotification::~OnReadyNotification() {}
 
 void OnReadyNotification::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   application_manager_.OnHMIStartedCooperation();
   event_engine::Event event(hmi_apis::FunctionID::BasicCommunication_OnReady);

@@ -43,7 +43,7 @@ VISubscribeVehicleDataRequest::VISubscribeVehicleDataRequest(
 VISubscribeVehicleDataRequest::~VISubscribeVehicleDataRequest() {}
 
 void VISubscribeVehicleDataRequest::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   SendRequest();
 }

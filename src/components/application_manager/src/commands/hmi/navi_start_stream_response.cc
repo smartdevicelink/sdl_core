@@ -42,7 +42,7 @@ NaviStartStreamResponse::NaviStartStreamResponse(
 NaviStartStreamResponse::~NaviStartStreamResponse() {}
 
 void NaviStartStreamResponse::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   event_engine::Event event(hmi_apis::FunctionID::Navigation_StartStream);
   event.set_smart_object(*message_);

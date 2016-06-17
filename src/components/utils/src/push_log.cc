@@ -91,7 +91,7 @@ void delete_log_message_loop_thread() {
   log_message_loop_thread = NULL;
 }
 
-void flush_logger() {
+void FLUSH_SDL_LOGGER() {
   logger::LoggerStatus old_status = logger::logger_status;
   // Stop pushing new messages to the log queue
   logger::logger_status = logger::DeletingLoggerThread;

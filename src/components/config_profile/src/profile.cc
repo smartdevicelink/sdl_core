@@ -48,19 +48,16 @@
 #endif  // ENABLE_SECURITY
 
 namespace {
-#define LOG_UPDATED_VALUE(value, key, section)                             \
-  {                                                                        \
-    LOGGER_INFO(logger_,                                                   \
-                "Setting value '" << value << "' for key '" << key         \
-                                  << "' in section '" << section << "'."); \
+#define LOG_UPDATED_VALUE(value, key, section)                          \
+  {                                                                     \
+    SDL_INFO("Setting value '" << value << "' for key '" << key         \
+                               << "' in section '" << section << "'."); \
   }
 
-#define LOG_UPDATED_BOOL_VALUE(value, key, section)                           \
-  {                                                                           \
-    LOGGER_INFO(logger_,                                                      \
-                "Setting value '" << std::boolalpha << value << "' for key '" \
-                                  << key << "' in section '" << section       \
-                                  << "'.");                                   \
+#define LOG_UPDATED_BOOL_VALUE(value, key, section)                            \
+  {                                                                            \
+    SDL_INFO("Setting value '" << std::boolalpha << value << "' for key '"     \
+                               << key << "' in section '" << section << "'."); \
   }
 
 const char* kDefaultConfigFileName = "smartDeviceLink.ini";
@@ -284,7 +281,7 @@ const uint16_t kDefaultOpenAttemptTimeoutMsResumptionDB = 500;
 
 namespace profile {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "Profile")
+SDL_CREATE_LOGGER("Profile")
 
 Profile::Profile()
     : sdl_version_(kDefaultSDLVersion)
@@ -825,7 +822,7 @@ uint16_t Profile::open_attempt_timeout_ms_resumption_db() const {
 }
 
 void Profile::UpdateValues() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   // SDL version
   ReadStringValue(

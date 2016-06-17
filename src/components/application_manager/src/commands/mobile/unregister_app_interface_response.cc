@@ -38,7 +38,7 @@ namespace application_manager {
 namespace commands {
 
 void UnregisterAppInterfaceResponse::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   SendResponse((*message_)[strings::msg_params][strings::success].asBool());
 }

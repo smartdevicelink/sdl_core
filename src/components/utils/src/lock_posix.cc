@@ -39,7 +39,7 @@
 
 namespace sync_primitives {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
+SDL_CREATE_LOGGER("Utils")
 
 Lock::Lock()
 #ifndef NDEBUG
@@ -62,23 +62,21 @@ Lock::Lock(bool is_recursive)
 Lock::~Lock() {
 #ifndef NDEBUG
   if (lock_taken_ > 0) {
-    LOGGER_ERROR(logger_, "Destroying non-released mutex " << &mutex_);
+    SDL_ERROR("Destroying non-released mutex " << &mutex_);
   }
 #endif
   int32_t status = pthread_mutex_destroy(&mutex_);
   if (status != 0) {
-    LOGGER_ERROR(logger_,
-                 "Failed to destroy mutex " << &mutex_ << ": "
-                                            << strerror(status));
+    SDL_ERROR("Failed to destroy mutex " << &mutex_ << ": "
+                                         << strerror(status));
   }
 }
 
 void Lock::Acquire() {
   const int32_t status = pthread_mutex_lock(&mutex_);
   if (status != 0) {
-    LOGGER_FATAL(logger_,
-                 "Failed to acquire mutex " << &mutex_ << ": "
-                                            << strerror(status));
+    SDL_FATAL("Failed to acquire mutex " << &mutex_ << ": "
+                                         << strerror(status));
     DCHECK(status != 0);
   } else {
     AssertFreeAndMarkTaken();
@@ -89,9 +87,7 @@ void Lock::Release() {
   AssertTakenAndMarkFree();
   const int32_t status = pthread_mutex_unlock(&mutex_);
   if (status != 0) {
-    LOGGER_ERROR(logger_,
-                 "Failed to unlock mutex" << &mutex_ << ": "
-                                          << strerror(status));
+    SDL_ERROR("Failed to unlock mutex" << &mutex_ << ": " << strerror(status));
   }
 }
 
@@ -111,14 +107,14 @@ bool Lock::Try() {
 #ifndef NDEBUG
 void Lock::AssertFreeAndMarkTaken() {
   if ((lock_taken_ > 0) && !is_mutex_recursive_) {
-    LOGGER_ERROR(logger_, "Locking already taken not recursive mutex");
+    SDL_ERROR("Locking already taken not recursive mutex");
     NOTREACHED();
   }
   lock_taken_++;
 }
 void Lock::AssertTakenAndMarkFree() {
   if (lock_taken_ == 0) {
-    LOGGER_ERROR(logger_, "Unlocking a mutex that is not taken");
+    SDL_ERROR("Unlocking a mutex that is not taken");
     NOTREACHED();
   }
   lock_taken_--;
@@ -138,8 +134,7 @@ void Lock::Init(bool is_recursive) {
   pthread_mutexattr_destroy(&attr);
 
   if (status != 0) {
-    LOGGER_FATAL(logger_,
-                 "Failed to initialize mutex. " << std::strerror(status));
+    SDL_FATAL("Failed to initialize mutex. " << std::strerror(status));
     DCHECK(status != 0);
   }
 }

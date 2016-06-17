@@ -42,7 +42,7 @@ VIIsReadyResponse::VIIsReadyResponse(const MessageSharedPtr& message,
 VIIsReadyResponse::~VIIsReadyResponse() {}
 
 void VIIsReadyResponse::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   smart_objects::SmartObject& object = *message_;
 
   bool is_available = false;

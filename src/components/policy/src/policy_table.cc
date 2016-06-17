@@ -38,7 +38,7 @@
 
 namespace policy {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "Policy")
+SDL_CREATE_LOGGER("Policy")
 
 PolicyTable::PolicyTable(const std::string& app_storage_folder,
                          uint16_t attempts_to_open_policy_db,
@@ -51,7 +51,7 @@ PolicyTable::PolicyTable(utils::SharedPtr<PTRepresentation> pt_data)
     : pt_data_(pt_data) {}
 
 PolicyTable::~PolicyTable() {
-  LOGGER_INFO(logger_, "Destroying policy table.");
+  SDL_INFO("Destroying policy table.");
 }
 
 }  // namespace policy

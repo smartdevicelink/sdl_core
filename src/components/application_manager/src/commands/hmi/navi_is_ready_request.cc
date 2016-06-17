@@ -43,7 +43,7 @@ NaviIsReadyRequest::NaviIsReadyRequest(const MessageSharedPtr& message,
 NaviIsReadyRequest::~NaviIsReadyRequest() {}
 
 void NaviIsReadyRequest::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   SendRequest();
 }

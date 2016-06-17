@@ -42,7 +42,7 @@ AudioStopStreamResponse::AudioStopStreamResponse(
 AudioStopStreamResponse::~AudioStopStreamResponse() {}
 
 void AudioStopStreamResponse::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 }
 
 }  // namespace commands

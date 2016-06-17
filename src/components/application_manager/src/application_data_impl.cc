@@ -37,7 +37,7 @@
 #include "utils/logger.h"
 
 namespace application_manager {
-CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
+SDL_CREATE_LOGGER("ApplicationManager")
 
 InitialApplicationDataImpl::InitialApplicationDataImpl()
     : app_types_(NULL)
@@ -416,7 +416,7 @@ void DynamicApplicationDataImpl::SetGlobalProperties(
       (this->*callback)(param);
     }
   } else {
-    LOGGER_WARN(logger_, "Invalid or Null smart object");
+    SDL_WARN("Invalid or Null smart object");
   }
 }
 

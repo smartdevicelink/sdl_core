@@ -45,7 +45,7 @@ GetUrls::GetUrls(const MessageSharedPtr& message,
 GetUrls::~GetUrls() {}
 
 void GetUrls::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   using namespace smart_objects;
   using namespace application_manager;
   using namespace strings;
@@ -64,7 +64,7 @@ void GetUrls::Run() {
   application_manager_.GetPolicyHandler().GetServiceUrls(
       object[strings::msg_params][hmi_request::service].asString(), endpoints);
   if (endpoints.empty()) {
-    LOGGER_ERROR(logger_, "No URLs for service " << service_to_check);
+    SDL_ERROR("No URLs for service " << service_to_check);
     SendResponseToHMI(Common_Result::DATA_NOT_AVAILABLE);
     return;
   }
@@ -82,7 +82,7 @@ void GetUrls::Run() {
 
 #ifdef EXTENDED_POLICY
 void GetUrls::ProcessPolicyServiceURLs(const policy::EndpointUrls& endpoints) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   using namespace smart_objects;
   using namespace application_manager;
   using namespace strings;
@@ -92,8 +92,7 @@ void GetUrls::ProcessPolicyServiceURLs(const policy::EndpointUrls& endpoints) {
       application_manager_.GetPolicyHandler().GetAppIdForSending();
 
   if (!app_id_to_send_to) {
-    LOGGER_ERROR(logger_,
-                 "There are no available applications for processing.");
+    SDL_ERROR("There are no available applications for processing.");
     application_manager_.ManageHMICommand(message_);
     return;
   }
@@ -102,10 +101,10 @@ void GetUrls::ProcessPolicyServiceURLs(const policy::EndpointUrls& endpoints) {
       application_manager_.application(app_id_to_send_to);
 
   if (!app.valid()) {
-    LOGGER_WARN(logger_,
-                "There is no registered application with "
-                "connection key '"
-                    << app_id_to_send_to << "'");
+    SDL_WARN(
+        "There is no registered application with "
+        "connection key '"
+        << app_id_to_send_to << "'");
     SendResponseToHMI(Common_Result::DATA_NOT_AVAILABLE);
     return;
   }

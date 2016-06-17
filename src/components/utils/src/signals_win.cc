@@ -33,13 +33,13 @@
 #include "utils/signals.h"
 #include "utils/logger.h"
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
+SDL_CREATE_LOGGER("Utils")
 
 namespace {
 HANDLE signal_handle = NULL;
 
 void HandleSignals(HANDLE& signal_handle, const char* log_name) {
-  LOGGER_INFO(logger_, log_name);
+  SDL_INFO(log_name);
   SetEvent(signal_handle);
 }
 
@@ -67,7 +67,7 @@ void WaitForSdlExecute() {
   if (signal_handle) {
     WaitForSingleObject(signal_handle, INFINITE);
   } else {
-    LOGGER_FATAL(logger_, "SDL is not subscribed to signal events");
+    SDL_FATAL("SDL is not subscribed to signal events");
   }
 }
 
@@ -79,7 +79,7 @@ void SubscribeToTerminationSignals() {
   if ((signal(SIGINT, &SigHandler) == SIG_ERR) ||
       (signal(SIGTERM, &SigHandler) == SIG_ERR) ||
       (signal(SIGSEGV, &SigHandler) == SIG_ERR)) {
-    LOGGER_FATAL(logger_, "Subscribe to system signals error");
+    SDL_FATAL("Subscribe to system signals error");
   }
 }
 }  //  namespace utils

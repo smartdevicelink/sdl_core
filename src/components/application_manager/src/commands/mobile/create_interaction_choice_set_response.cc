@@ -46,12 +46,12 @@ CreateInteractionChoiceSetResponse::CreateInteractionChoiceSetResponse(
 CreateInteractionChoiceSetResponse::~CreateInteractionChoiceSetResponse() {}
 
 void CreateInteractionChoiceSetResponse::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   // check if response false
   if (true == (*message_)[strings::msg_params].keyExists(strings::success)) {
     if ((*message_)[strings::msg_params][strings::success].asBool() == false) {
-      LOGGER_ERROR(logger_, "Success = false");
+      SDL_ERROR("Success = false");
       SendResponse(false);
       return;
     }

@@ -38,7 +38,7 @@
 
 namespace sync_primitives {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
+SDL_CREATE_LOGGER("Utils")
 
 ConditionalVariable::ConditionalVariable() {
   InitializeConditionVariable(&cond_var_);
@@ -65,7 +65,7 @@ bool ConditionalVariable::Wait(Lock& lock) {
       SleepConditionVariableCS(&cond_var_, &lock.mutex_, INFINITE);
   lock.AssertFreeAndMarkTaken();
   if (wait_status == 0) {
-    LOGGER_ERROR(logger_, "Failed to wait for conditional variable");
+    SDL_ERROR("Failed to wait for conditional variable");
     return false;
   }
   return true;

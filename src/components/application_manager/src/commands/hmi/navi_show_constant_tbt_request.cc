@@ -43,7 +43,7 @@ NaviShowConstantTBTRequest::NaviShowConstantTBTRequest(
 NaviShowConstantTBTRequest::~NaviShowConstantTBTRequest() {}
 
 void NaviShowConstantTBTRequest::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   SendRequest();
 }

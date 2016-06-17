@@ -55,7 +55,7 @@ using sync_primitives::AutoLock;
 const int32_t AudioStreamSenderThread::kAudioPassThruTimeout = 1;
 const uint32_t kMqueueMessageSize = 4095;
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "MediaManager")
+SDL_CREATE_LOGGER("MediaManager")
 
 AudioStreamSenderThread::AudioStreamSenderThread(
     const std::string& fileName,
@@ -67,13 +67,13 @@ AudioStreamSenderThread::AudioStreamSenderThread(
     , shouldBeStoped_lock_()
     , shouldBeStoped_cv_()
     , application_manager_(app_mngr) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 }
 
 AudioStreamSenderThread::~AudioStreamSenderThread() {}
 
 void AudioStreamSenderThread::threadMain() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   offset_ = 0;
 
@@ -85,30 +85,30 @@ void AudioStreamSenderThread::threadMain() {
 }
 
 void AudioStreamSenderThread::sendAudioChunkToMobile() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   std::vector<uint8_t> binaryData;
   std::vector<uint8_t>::iterator from;
   std::vector<uint8_t>::iterator to;
 
   if (!file_system::ReadBinaryFile(fileName_, binaryData)) {
-    LOGGER_ERROR(logger_, "Unable to read file." << fileName_);
+    SDL_ERROR("Unable to read file." << fileName_);
 
     return;
   }
 
   if (binaryData.empty()) {
-    LOGGER_ERROR(logger_, "Binary data is empty.");
+    SDL_ERROR("Binary data is empty.");
     return;
   }
 
-  LOGGER_INFO(logger_, "offset = " << offset_);
+  SDL_INFO("offset = " << offset_);
 
   from = binaryData.begin() + offset_;
   to = binaryData.end();
 
   if (from < binaryData.end() /*from != binaryData.end()*/) {
-    LOGGER_INFO(logger_, "from != binaryData.end()");
+    SDL_INFO("from != binaryData.end()");
 
     offset_ = offset_ + to - from;
     std::vector<uint8_t> data(from, to);
@@ -135,7 +135,7 @@ void AudioStreamSenderThread::setShouldBeStopped(bool should_stop) {
 }
 
 void AudioStreamSenderThread::exitThreadMain() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   setShouldBeStopped(true);
 }
 

@@ -54,14 +54,14 @@ ResetGlobalPropertiesRequest::ResetGlobalPropertiesRequest(
 ResetGlobalPropertiesRequest::~ResetGlobalPropertiesRequest() {}
 
 void ResetGlobalPropertiesRequest::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   uint32_t app_id =
       (*message_)[strings::params][strings::connection_key].asUInt();
   ApplicationSharedPtr app = application_manager_.application(app_id);
 
   if (!app) {
-    LOGGER_ERROR(logger_, "No application associated with session key");
+    SDL_ERROR("No application associated with session key");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -70,7 +70,7 @@ void ResetGlobalPropertiesRequest::Run() {
       (*message_)[strings::msg_params][strings::properties].length();
   // if application waits for sending ttsGlobalProperties need to remove this
   // application from tts_global_properties_app_list_
-  LOGGER_INFO(logger_, "RemoveAppFromTTSGlobalPropertiesList");
+  SDL_INFO("RemoveAppFromTTSGlobalPropertiesList");
   application_manager_.RemoveAppFromTTSGlobalPropertiesList(app_id);
 
   bool helpt_promt = false;
@@ -186,7 +186,7 @@ void ResetGlobalPropertiesRequest::Run() {
 bool ResetGlobalPropertiesRequest::ResetHelpPromt(
     application_manager::ApplicationSharedPtr app) {
   if (!app) {
-    LOGGER_ERROR(logger_, "Null pointer");
+    SDL_ERROR("Null pointer");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return false;
   }
@@ -199,7 +199,7 @@ bool ResetGlobalPropertiesRequest::ResetHelpPromt(
 bool ResetGlobalPropertiesRequest::ResetTimeoutPromt(
     application_manager::ApplicationSharedPtr const app) {
   if (!app) {
-    LOGGER_ERROR(logger_, "Null pointer");
+    SDL_ERROR("Null pointer");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return false;
   }
@@ -226,7 +226,7 @@ bool ResetGlobalPropertiesRequest::ResetTimeoutPromt(
 bool ResetGlobalPropertiesRequest::ResetVrHelpTitleItems(
     application_manager::ApplicationSharedPtr const app) {
   if (!app) {
-    LOGGER_ERROR(logger_, "Null pointer");
+    SDL_ERROR("Null pointer");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return false;
   }
@@ -237,7 +237,7 @@ bool ResetGlobalPropertiesRequest::ResetVrHelpTitleItems(
 }
 
 void ResetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   const smart_objects::SmartObject& message = event.smart_object();
 
   ApplicationSharedPtr application =
@@ -245,21 +245,21 @@ void ResetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
 
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_SetGlobalProperties: {
-      LOGGER_INFO(logger_, "Received UI_SetGlobalProperties event");
+      SDL_INFO("Received UI_SetGlobalProperties event");
       is_ui_received_ = true;
       ui_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
       break;
     }
     case hmi_apis::FunctionID::TTS_SetGlobalProperties: {
-      LOGGER_INFO(logger_, "Received TTS_SetGlobalProperties event");
+      SDL_INFO("Received TTS_SetGlobalProperties event");
       is_tts_received_ = true;
       tts_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
       break;
     }
     default: {
-      LOGGER_ERROR(logger_, "Received unknown event" << event.id());
+      SDL_ERROR("Received unknown event" << event.id());
       return;
     }
   }
@@ -297,7 +297,7 @@ void ResetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
                  &(message[strings::msg_params]));
 
     if (!application) {
-      LOGGER_ERROR(logger_, "NULL pointer");
+      SDL_ERROR("NULL pointer");
       return;
     }
 
@@ -305,7 +305,7 @@ void ResetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
       application->UpdateHash();
     }
   } else {
-    LOGGER_WARN(logger_, "unable to find application: " << connection_key());
+    SDL_WARN("unable to find application: " << connection_key());
   }
 }
 

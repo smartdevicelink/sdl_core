@@ -44,13 +44,13 @@ EndAudioPassThruRequest::EndAudioPassThruRequest(
 EndAudioPassThruRequest::~EndAudioPassThruRequest() {}
 
 void EndAudioPassThruRequest::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   SendHMIRequest(hmi_apis::FunctionID::UI_EndAudioPassThru, NULL, true);
 }
 
 void EndAudioPassThruRequest::on_event(const event_engine::Event& event) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
@@ -72,7 +72,7 @@ void EndAudioPassThruRequest::on_event(const event_engine::Event& event) {
       break;
     }
     default: {
-      LOGGER_ERROR(logger_, "Received unknown event" << event.id());
+      SDL_ERROR("Received unknown event" << event.id());
       return;
     }
   }

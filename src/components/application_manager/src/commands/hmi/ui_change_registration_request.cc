@@ -43,7 +43,7 @@ UIChangeRegistrationRequest::UIChangeRegistrationRequest(
 UIChangeRegistrationRequest::~UIChangeRegistrationRequest() {}
 
 void UIChangeRegistrationRequest::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   SendRequest();
 }

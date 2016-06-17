@@ -42,7 +42,7 @@ GetSystemInfoResponse::GetSystemInfoResponse(
 GetSystemInfoResponse::~GetSystemInfoResponse() {}
 
 void GetSystemInfoResponse::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   const hmi_apis::Common_Result::eType code =
       static_cast<hmi_apis::Common_Result::eType>(
@@ -61,7 +61,7 @@ const SystemInfo GetSystemInfoResponse::GetSystemInfo(
   SystemInfo info;
 
   if (hmi_apis::Common_Result::SUCCESS != code) {
-    LOGGER_WARN(logger_, "GetSystemError returns an error code " << code);
+    SDL_WARN("GetSystemError returns an error code " << code);
     return info;
   }
   info.ccpu_version =

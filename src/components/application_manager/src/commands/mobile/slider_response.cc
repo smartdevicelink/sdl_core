@@ -44,7 +44,7 @@ SliderResponse::SliderResponse(const MessageSharedPtr& message,
 SliderResponse::~SliderResponse() {}
 
 void SliderResponse::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   application_manager_.SendMessageToMobile(message_);
 }

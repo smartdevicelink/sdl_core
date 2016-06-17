@@ -43,12 +43,12 @@ ActivateAppResponse::ActivateAppResponse(
 ActivateAppResponse::~ActivateAppResponse() {}
 
 void ActivateAppResponse::Run() {
-  LOGGER_TRACE(logger_, "enter");
+  SDL_TRACE("enter");
   event_engine::Event event(
       hmi_apis::FunctionID::BasicCommunication_ActivateApp);
   event.set_smart_object(*message_);
   event.raise(application_manager_.event_dispatcher());
-  LOGGER_TRACE(logger_, "exit");
+  SDL_TRACE("exit");
 }
 
 }  // namespace commands

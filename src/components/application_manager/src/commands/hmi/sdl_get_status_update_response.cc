@@ -43,7 +43,7 @@ SDLGetStatusUpdateResponse::SDLGetStatusUpdateResponse(
 SDLGetStatusUpdateResponse::~SDLGetStatusUpdateResponse() {}
 
 void SDLGetStatusUpdateResponse::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   (*message_)[strings::params][strings::protocol_type] = hmi_protocol_type_;
   (*message_)[strings::params][strings::protocol_version] = protocol_version_;
 

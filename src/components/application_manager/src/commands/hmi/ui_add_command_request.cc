@@ -43,7 +43,7 @@ UIAddCommandRequest::UIAddCommandRequest(
 UIAddCommandRequest::~UIAddCommandRequest() {}
 
 void UIAddCommandRequest::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   SendRequest();
 }

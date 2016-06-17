@@ -44,7 +44,7 @@ PerformAudioPassThruResponse::PerformAudioPassThruResponse(
 PerformAudioPassThruResponse::~PerformAudioPassThruResponse() {}
 
 void PerformAudioPassThruResponse::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   application_manager_.SendMessageToMobile(message_);
 }

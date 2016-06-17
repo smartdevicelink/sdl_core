@@ -46,13 +46,13 @@ GetDTCsRequest::GetDTCsRequest(const MessageSharedPtr& message,
 GetDTCsRequest::~GetDTCsRequest() {}
 
 void GetDTCsRequest::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   ApplicationSharedPtr app = application_manager_.application(
       (*message_)[strings::params][strings::connection_key].asUInt());
 
   if (!app) {
-    LOGGER_ERROR(logger_, "NULL pointer");
+    SDL_ERROR("NULL pointer");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -74,7 +74,7 @@ void GetDTCsRequest::Run() {
 }
 
 void GetDTCsRequest::on_event(const event_engine::Event& event) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
@@ -89,7 +89,7 @@ void GetDTCsRequest::on_event(const event_engine::Event& event) {
       break;
     }
     default: {
-      LOGGER_ERROR(logger_, "Received unknown event" << event.id());
+      SDL_ERROR("Received unknown event" << event.id());
       return;
     }
   }

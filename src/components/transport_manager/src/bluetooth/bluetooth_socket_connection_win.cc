@@ -40,21 +40,18 @@
 
 #include "utils/logger.h"
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
+SDL_CREATE_LOGGER("TransportManager")
 namespace {
 
 bool CloseSocket(SOCKET& socket) {
-  LOGGER_AUTO_TRACE(logger_);
-  LOGGER_DEBUG(logger_, "Closing socket " << socket);
+  SDL_AUTO_TRACE();
+  SDL_DEBUG("Closing socket " << socket);
   if (NULL == socket) {
-    LOGGER_DEBUG(logger_,
-                 "Socket " << socket << " is not valid. Skip closing.");
+    SDL_DEBUG("Socket " << socket << " is not valid. Skip closing.");
     return true;
   }
   if (SOCKET_ERROR == closesocket(socket)) {
-    LOGGER_WARN(logger_,
-                "Failed to close socket " << socket << ": "
-                                          << WSAGetLastError());
+    SDL_WARN("Failed to close socket " << socket << ": " << WSAGetLastError());
     return false;
   }
   socket = NULL;
@@ -62,7 +59,7 @@ bool CloseSocket(SOCKET& socket) {
 }
 
 HANDLE CreateNotifyEvent() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   HANDLE result = CreateEvent(NULL,   // no security attribute
                               true,   // is manual-reset event
                               false,  // initial state = non-signaled
@@ -94,7 +91,7 @@ BluetoothSocketConnection::BluetoothSocketConnection(
 }
 
 BluetoothSocketConnection::~BluetoothSocketConnection() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   Disconnect();
   thread_->join();
   delete thread_->delegate();
@@ -102,33 +99,33 @@ BluetoothSocketConnection::~BluetoothSocketConnection() {
 }
 
 TransportAdapter::Error BluetoothSocketConnection::Start() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   if (!thread_->start()) {
-    LOGGER_ERROR(logger_, "thread creation failed");
+    SDL_ERROR("thread creation failed");
     return TransportAdapter::FAIL;
   }
-  LOGGER_INFO(logger_, "thread created");
+  SDL_INFO("thread created");
   return TransportAdapter::OK;
 }
 
 void BluetoothSocketConnection::threadMain() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   controller_->ConnectionCreated(this, device_uid_, app_handle_);
   ConnectError* connect_error = NULL;
   if (!Establish(&connect_error)) {
-    LOGGER_ERROR(logger_, "Connection Establish failed");
+    SDL_ERROR("Connection Establish failed");
     delete connect_error;
   }
-  LOGGER_DEBUG(logger_, "Connection established");
+  SDL_DEBUG("Connection established");
   controller_->ConnectDone(device_handle(), application_handle());
   while (!terminate_flag_) {
     Transmit();
   }
-  LOGGER_DEBUG(logger_, "Connection is to finalize");
+  SDL_DEBUG("Connection is to finalize");
   Finalize();
   sync_primitives::AutoLock auto_lock(frames_to_send_mutex_);
   while (!frames_to_send_.empty()) {
-    LOGGER_INFO(logger_, "removing message");
+    SDL_INFO("removing message");
     ::protocol_handler::RawMessagePtr message = frames_to_send_.front();
     frames_to_send_.pop();
     controller_->DataSendFailed(
@@ -137,11 +134,11 @@ void BluetoothSocketConnection::threadMain() {
 }
 
 void BluetoothSocketConnection::Transmit() {
-  LOGGER_AUTO_TRACE(logger_);
-  LOGGER_DEBUG(logger_, "Waiting for connection events. " << this);
+  SDL_AUTO_TRACE();
+  SDL_DEBUG("Waiting for connection events. " << this);
 
   if (!IsValid()) {
-    LOGGER_ERROR(logger_, "Cannot wait. Not connected.");
+    SDL_ERROR("Cannot wait. Not connected.");
     Close();
     return;
   }
@@ -165,14 +162,12 @@ void BluetoothSocketConnection::Transmit() {
   const bool is_notify_event = (waited_index == WAIT_OBJECT_0 + 1);
 
   if (is_socket_event || is_notify_event) {
-    LOGGER_DEBUG(logger_,
-                 "Waited event for the connection "
-                     << rfcomm_socket_ << ". Socket event: " << is_socket_event
-                     << ". Notify event: " << is_notify_event);
+    SDL_DEBUG("Waited event for the connection "
+              << rfcomm_socket_ << ". Socket event: " << is_socket_event
+              << ". Notify event: " << is_notify_event);
   } else {
-    LOGGER_ERROR(logger_,
-                 "Wait for socket or notification has failed with error: "
-                     << WSAGetLastError());
+    SDL_ERROR("Wait for socket or notification has failed with error: "
+              << WSAGetLastError());
     OnError(WSAGetLastError());
     return;
   }
@@ -181,24 +176,22 @@ void BluetoothSocketConnection::Transmit() {
     if (WSAEnumNetworkEvents(rfcomm_socket_,
                              events_to_wait[waited_index - WAIT_OBJECT_0],
                              &net_events) == SOCKET_ERROR) {
-      LOGGER_ERROR(logger_,
-                   "Failed to enum socket events: " << WSAGetLastError());
+      SDL_ERROR("Failed to enum socket events: " << WSAGetLastError());
       OnError(WSAGetLastError());
       return;
     }
     if (net_events.lNetworkEvents & FD_READ) {
-      LOGGER_DEBUG(logger_, "Network event: FD_READ");
+      SDL_DEBUG("Network event: FD_READ");
       OnRead();
       return;
     }
     if (net_events.lNetworkEvents & FD_WRITE) {
-      LOGGER_DEBUG(logger_, "Network event: FD_WRITE");
+      SDL_DEBUG("Network event: FD_WRITE");
       is_can_write = true;
     }
     if (net_events.lNetworkEvents & FD_CLOSE) {
-      LOGGER_DEBUG(logger_,
-                   "Network event: FD_CLOSE. "
-                       << "Connection " << this << " terminated");
+      SDL_DEBUG("Network event: FD_CLOSE. "
+                << "Connection " << this << " terminated");
       OnClose();
       return;
     }
@@ -211,12 +204,12 @@ void BluetoothSocketConnection::Transmit() {
   if (is_notify_event || is_can_write) {
     OnWrite();
   }
-  LOGGER_DEBUG(logger_, "Waited for connection events: " << this);
+  SDL_DEBUG("Waited for connection events: " << this);
 }
 
 void BluetoothSocketConnection::Send() {
-  LOGGER_AUTO_TRACE(logger_);
-  LOGGER_DEBUG(logger_, "Trying to send data if available");
+  SDL_AUTO_TRACE();
+  SDL_DEBUG("Trying to send data if available");
   FrameQueue frames_to_send;
   {
     sync_primitives::AutoLock auto_lock(frames_to_send_mutex_);
@@ -232,7 +225,7 @@ void BluetoothSocketConnection::Send() {
              frame->data_size() - offset,
              bytes_sent);
     if (!sent) {
-      LOGGER_ERROR(logger_, "Send failed for connection " << this);
+      SDL_ERROR("Send failed for connection " << this);
       frames_to_send.pop();
       offset = 0;
       controller_->DataSendFailed(
@@ -256,7 +249,7 @@ bool BluetoothSocketConnection::Send(const char* const buffer,
                                      std::size_t& bytes_written) {
   bytes_written = 0u;
   if (!IsValid()) {
-    LOGGER_ERROR(logger_, "Failed to send data socket is not valid");
+    SDL_ERROR("Failed to send data socket is not valid");
     return false;
   }
   const int flags = 0;
@@ -264,7 +257,7 @@ bool BluetoothSocketConnection::Send(const char* const buffer,
   int socket_error = WSAGetLastError();
   if (SOCKET_ERROR == written) {
     if (WSAEWOULDBLOCK != socket_error) {
-      LOGGER_ERROR(logger_, "Failed to send data: " << socket_error);
+      SDL_ERROR("Failed to send data: " << socket_error);
       return false;
     } else {
       return true;
@@ -273,14 +266,13 @@ bool BluetoothSocketConnection::Send(const char* const buffer,
   // Lets double chek written because we have signed to unsigned conversion
   DCHECK(written >= 0);
   bytes_written = static_cast<size_t>(written);
-  LOGGER_DEBUG(logger_,
-               "Sent " << written << " bytes to socket " << rfcomm_socket_);
+  SDL_DEBUG("Sent " << written << " bytes to socket " << rfcomm_socket_);
   return true;
 }
 
 bool BluetoothSocketConnection::Close() {
   if (!IsValid()) {
-    LOGGER_DEBUG(logger_, "Connection is not valid. Nothing to close.");
+    SDL_DEBUG("Connection is not valid. Nothing to close.");
     return true;
   }
   // Possibly we're waiting on Wait. We have to interrupt this.
@@ -288,12 +280,12 @@ bool BluetoothSocketConnection::Close() {
 
   const BOOL event_closed = CloseHandle(notify_event_);
   if (!event_closed) {
-    LOGGER_WARN(logger_, "Failed to close event handler");
+    SDL_WARN("Failed to close event handler");
   }
 
   const bool socket_closed = CloseSocket(rfcomm_socket_);
   if (!socket_closed) {
-    LOGGER_WARN(logger_, "Failed to close socket handler");
+    SDL_WARN("Failed to close socket handler");
   }
 
   return event_closed && socket_closed;
@@ -304,7 +296,7 @@ bool BluetoothSocketConnection::IsValid() const {
 }
 
 void BluetoothSocketConnection::OnError(int error) {
-  LOGGER_ERROR(logger_, "Connection error: " << error);
+  SDL_ERROR("Connection error: " << error);
   Abort();
 }
 
@@ -316,67 +308,63 @@ void BluetoothSocketConnection::OnData(const uint8_t* const buffer,
 }
 
 void BluetoothSocketConnection::OnCanWrite() {
-  LOGGER_DEBUG(logger_, "OnCanWrite event. Trying to send data.");
+  SDL_DEBUG("OnCanWrite event. Trying to send data.");
   Send();
 }
 
 bool BluetoothSocketConnection::Establish(ConnectError** error) {
-  LOGGER_AUTO_TRACE(logger_);
-  LOGGER_DEBUG(logger_, "error: " << error);
+  SDL_AUTO_TRACE();
+  SDL_DEBUG("error: " << error);
   DeviceSptr device = controller()->FindDevice(device_handle());
   BluetoothDevice* bluetooth_device =
       static_cast<BluetoothDevice*>(device.get());
   SOCKADDR_BTH bthAddr = bluetooth_device->getSocketBthAddr();
 
   if (bthAddr.port == NULL) {
-    LOGGER_DEBUG(logger_,
-                 "Application " << application_handle() << " not found");
+    SDL_DEBUG("Application " << application_handle() << " not found");
     *error = new ConnectError();
-    LOGGER_TRACE(logger_, "exit with FALSE");
+    SDL_TRACE("exit with FALSE");
     return false;
   }
 
   int attempts = 4;
   int connect_status = 0;
-  LOGGER_DEBUG(logger_, "start rfcomm Connect attempts");
+  SDL_DEBUG("start rfcomm Connect attempts");
   do {
     rfcomm_socket_ = socket(AF_BTH, SOCK_STREAM, BTHPROTO_RFCOMM);
     if (-1 == rfcomm_socket_) {
-      LOGGER_ERROR_WITH_ERRNO(logger_,
-                              "Failed to create RFCOMM socket for device "
-                                  << device_handle());
-      LOGGER_TRACE(logger_, "exit with FALSE");
+      SDL_ERROR_WITH_ERRNO("Failed to create RFCOMM socket for device "
+                           << device_handle());
+      SDL_TRACE("exit with FALSE");
       return false;
     }
     const sockaddr* p_sockaddr = reinterpret_cast<const sockaddr*>(&bthAddr);
     connect_status = connect(rfcomm_socket_, p_sockaddr, sizeof(SOCKADDR_BTH));
     if (0 == connect_status) {
-      LOGGER_DEBUG(logger_, "rfcomm Connect ok");
+      SDL_DEBUG("rfcomm Connect ok");
       break;
     }
     if (errno != 111 && errno != 104) {
-      LOGGER_DEBUG(logger_, "rfcomm Connect errno " << errno);
+      SDL_DEBUG("rfcomm Connect errno " << errno);
       break;
     }
     if (errno) {
-      LOGGER_DEBUG(logger_, "rfcomm Connect errno " << errno);
+      SDL_DEBUG("rfcomm Connect errno " << errno);
       CloseSocket(rfcomm_socket_);
     }
     Sleep(2);
   } while (--attempts > 0);
-  LOGGER_INFO(logger_, "rfcomm Connect attempts finished");
+  SDL_INFO("rfcomm Connect attempts finished");
   if (0 != connect_status) {
-    LOGGER_TRACE(logger_, "exit with FALSE");
-    LOGGER_DEBUG(
-        logger_,
-        "Failed to Connect to remote device "
-            << BluetoothDevice::GetUniqueDeviceId(bluetooth_device->address())
-            << " for session " << this);
+    SDL_TRACE("exit with FALSE");
+    SDL_DEBUG("Failed to Connect to remote device "
+              << BluetoothDevice::GetUniqueDeviceId(bluetooth_device->address())
+              << " for session " << this);
     *error = new ConnectError();
     return false;
   }
   notify_event_ = CreateNotifyEvent();
-  LOGGER_TRACE(logger_, "exit with TRUE");
+  SDL_TRACE("exit with TRUE");
   return true;
 }
 
@@ -386,19 +374,19 @@ TransportAdapter::Error BluetoothSocketConnection::Notify() {
 }
 
 void BluetoothSocketConnection::Abort() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   unexpected_disconnect_ = true;
   terminate_flag_ = true;
 }
 
 void BluetoothSocketConnection::Finalize() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   if (unexpected_disconnect_) {
-    LOGGER_DEBUG(logger_, "unexpected_disconnect");
+    SDL_DEBUG("unexpected_disconnect");
     controller_->ConnectionAborted(
         device_handle(), application_handle(), CommunicationError());
   } else {
-    LOGGER_DEBUG(logger_, "not unexpected_disconnect");
+    SDL_DEBUG("not unexpected_disconnect");
     controller_->ConnectionFinished(device_handle(), application_handle());
   }
   CloseSocket(rfcomm_socket_);
@@ -406,14 +394,14 @@ void BluetoothSocketConnection::Finalize() {
 
 TransportAdapter::Error BluetoothSocketConnection::SendData(
     ::protocol_handler::RawMessagePtr message) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   sync_primitives::AutoLock auto_lock(frames_to_send_mutex_);
   frames_to_send_.push(message);
   return Notify();
 }
 
 TransportAdapter::Error BluetoothSocketConnection::Disconnect() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   terminate_flag_ = true;
   return Notify();
 }
@@ -431,7 +419,7 @@ ApplicationHandle BluetoothSocketConnection::application_handle() const {
 }
 
 void BluetoothSocketConnection::OnRead() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   const std::size_t buffer_size = 4096u;
   char buffer[buffer_size];
   int bytes_read = -1;
@@ -439,23 +427,20 @@ void BluetoothSocketConnection::OnRead() {
   do {
     bytes_read = recv(rfcomm_socket_, buffer, sizeof(buffer), 0);
     if (bytes_read > 0) {
-      LOGGER_DEBUG(logger_,
-                   "Received " << bytes_read << " bytes from socket "
-                               << rfcomm_socket_);
+      SDL_DEBUG("Received " << bytes_read << " bytes from socket "
+                            << rfcomm_socket_);
       uint8_t* casted_buffer = reinterpret_cast<uint8_t*>(buffer);
       OnData(casted_buffer, bytes_read);
     } else if (bytes_read < 0) {
       int socket_error = WSAGetLastError();
       if (bytes_read == SOCKET_ERROR && WSAEWOULDBLOCK != socket_error) {
-        LOGGER_ERROR(logger_,
-                     "recv() failed for connection "
-                         << rfcomm_socket_ << ". Error: " << socket_error);
+        SDL_ERROR("recv() failed for connection "
+                  << rfcomm_socket_ << ". Error: " << socket_error);
         OnError(socket_error);
         return;
       }
     } else {
-      LOGGER_WARN(logger_,
-                  "Socket " << rfcomm_socket_ << " closed by remote peer");
+      SDL_WARN("Socket " << rfcomm_socket_ << " closed by remote peer");
       OnError(WSAGetLastError());
       return;
     }
@@ -479,13 +464,13 @@ BluetoothSocketConnection::BthConnectionDelegate::BthConnectionDelegate(
     : connection_(connection) {}
 
 void BluetoothSocketConnection::BthConnectionDelegate::threadMain() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   DCHECK(connection_);
   connection_->threadMain();
 }
 
 void BluetoothSocketConnection::BthConnectionDelegate::exitThreadMain() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 }
 
 }  // namespace transport_adapter

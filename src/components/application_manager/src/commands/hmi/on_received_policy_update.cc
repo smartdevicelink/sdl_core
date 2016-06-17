@@ -46,21 +46,21 @@ OnReceivedPolicyUpdate::OnReceivedPolicyUpdate(
 OnReceivedPolicyUpdate::~OnReceivedPolicyUpdate() {}
 
 void OnReceivedPolicyUpdate::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 #ifdef EXTENDED_POLICY
   const std::string& file_path =
       (*message_)[strings::msg_params][hmi_notification::policyfile].asString();
   policy::BinaryMessage file_content;
   if (!file_system::ReadBinaryFile(file_path, file_content)) {
-    LOGGER_ERROR(logger_, "Failed to read Update file.");
+    SDL_ERROR("Failed to read Update file.");
     return;
   }
   application_manager_.GetPolicyHandler().ReceiveMessageFromSDK(file_path,
                                                                 file_content);
 #else
-  LOG4CXX_WARN(logger_,
-               "This RPC is part of extended policy flow."
-               "Please re-build with extended policy mode enabled.");
+  LOG4CXX_WARN(
+      "This RPC is part of extended policy flow."
+      "Please re-build with extended policy mode enabled.");
 #endif
 }
 

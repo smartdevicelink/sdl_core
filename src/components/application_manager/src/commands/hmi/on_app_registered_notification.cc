@@ -43,7 +43,7 @@ OnAppRegisteredNotification::OnAppRegisteredNotification(
 OnAppRegisteredNotification::~OnAppRegisteredNotification() {}
 
 void OnAppRegisteredNotification::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   // SDL must notify system about app registration before any dependent actions
   // will be started
   SendNotification();

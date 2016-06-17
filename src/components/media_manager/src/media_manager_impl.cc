@@ -54,7 +54,7 @@
 
 namespace media_manager {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "MediaManager")
+SDL_CREATE_LOGGER("MediaManager")
 
 MediaManagerImpl::MediaManagerImpl(
     application_manager::ApplicationManager& application_manager,
@@ -101,7 +101,7 @@ void MediaManagerImpl::set_mock_streamer_listener(
 
 void MediaManagerImpl::Init() {
   using namespace protocol_handler;
-  LOGGER_INFO(logger_, "MediaManagerImpl::Init()");
+  SDL_INFO("MediaManagerImpl::Init()");
 
   if ("socket" == settings().video_server_type()) {
     streamer_[ServiceType::kMobileNav] = new SocketVideoStreamerAdapter(
@@ -142,8 +142,7 @@ void MediaManagerImpl::Init() {
 void MediaManagerImpl::StartMicrophoneRecording(int32_t application_key,
                                                 const std::string& output_file,
                                                 int32_t duration) {
-  LOGGER_INFO(logger_,
-              "MediaManagerImpl::StartMicrophoneRecording to " << output_file);
+  SDL_INFO("MediaManagerImpl::StartMicrophoneRecording to " << output_file);
   application_manager::ApplicationSharedPtr app =
       application_manager_.application(application_key);
   std::string file_path = settings().app_storage_folder();
@@ -162,11 +161,11 @@ void MediaManagerImpl::StartMicrophoneRecording(int32_t application_key,
   }
 #else
   if (file_system::FileExists(file_path)) {
-    LOGGER_INFO(logger_, "File " << output_file << " exists, removing");
+    SDL_INFO("File " << output_file << " exists, removing");
     if (file_system::DeleteFile(file_path)) {
-      LOGGER_INFO(logger_, "File " << output_file << " removed");
+      SDL_INFO("File " << output_file << " removed");
     } else {
-      LOGGER_WARN(logger_, "Could not remove file " << output_file);
+      SDL_WARN("Could not remove file " << output_file);
     }
   }
   const std::string record_file_source = settings().app_resource_folder() +
@@ -175,21 +174,19 @@ void MediaManagerImpl::StartMicrophoneRecording(int32_t application_key,
   std::vector<uint8_t> buf;
   if (file_system::ReadBinaryFile(record_file_source, buf)) {
     if (file_system::Write(file_path, buf)) {
-      LOGGER_INFO(logger_,
-                  "File " << record_file_source << " copied to "
-                          << output_file);
+      SDL_INFO("File " << record_file_source << " copied to " << output_file);
     } else {
-      LOGGER_WARN(logger_, "Could not write to file " << output_file);
+      SDL_WARN("Could not write to file " << output_file);
     }
   } else {
-    LOGGER_WARN(logger_, "Could not read file " << record_file_source);
+    SDL_WARN("Could not read file " << record_file_source);
   }
 #endif
   from_mic_listener_->OnActivityStarted(application_key);
 }
 
 void MediaManagerImpl::StopMicrophoneRecording(int32_t application_key) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 #if defined(EXTENDED_MEDIA_MODE)
   if (from_mic_recorder_) {
     from_mic_recorder_->StopActivity(application_key);
@@ -207,7 +204,7 @@ void MediaManagerImpl::StopMicrophoneRecording(int32_t application_key) {
 
 void MediaManagerImpl::StartStreaming(
     int32_t application_key, protocol_handler::ServiceType service_type) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   if (streamer_[service_type]) {
     streamer_[service_type]->StartActivity(application_key);
@@ -216,7 +213,7 @@ void MediaManagerImpl::StartStreaming(
 
 void MediaManagerImpl::StopStreaming(
     int32_t application_key, protocol_handler::ServiceType service_type) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   if (streamer_[service_type]) {
     streamer_[service_type]->StopActivity(application_key);
@@ -228,21 +225,20 @@ void MediaManagerImpl::OnMessageReceived(
   using namespace protocol_handler;
   using namespace application_manager;
   using namespace helpers;
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   const uint32_t streaming_app_id = message->connection_key();
   const ServiceType service_type = message->service_type();
 
   if (Compare<ServiceType, NEQ, ALL>(
           service_type, ServiceType::kMobileNav, ServiceType::kAudio)) {
-    LOGGER_DEBUG(logger_, "Unsupported service type in MediaManager");
+    SDL_DEBUG("Unsupported service type in MediaManager");
     return;
   }
 
   if (!application_manager_.CanAppStream(streaming_app_id, service_type)) {
     application_manager_.ForbidStreaming(streaming_app_id);
-    LOGGER_ERROR(logger_,
-                 "The application trying to stream when it should not.");
+    SDL_ERROR("The application trying to stream when it should not.");
     return;
   }
 

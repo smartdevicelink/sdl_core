@@ -50,7 +50,7 @@ namespace utils_test {
 
 using namespace ::logger;
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "AutoTraceTestLog")
+SDL_CREATE_LOGGER("AutoTraceTestLog")
 
 namespace {
 const std::string kFileName =
@@ -61,7 +61,6 @@ void Preconditions() {
   // Delete file with previous logs
   if (file_system::FileExists(kFileName)) {
     // If logger is active now deleting log file cause undefined befaviour.
-    DEINIT_LOGGER();
     ASSERT_TRUE(file_system::DeleteFile(kFileName))
         << "Can't delete AutoTraceTestLogFile.log";
   }
@@ -69,13 +68,13 @@ void Preconditions() {
 
 void InitLogger() {
   // Set enabled logs
-  INIT_LOGGER(true);
+  logger::LoggerAutoPtr logger_(true);
   // DEINIT_LOGGER will be called in test_main.cc
 }
 
 void CreateDebugAndAutoTrace(const std::string& debug_message) {
-  LOGGER_AUTO_TRACE(logger_);
-  LOGGER_DEBUG(logger_, debug_message);
+  SDL_AUTO_TRACE();
+  SDL_DEBUG(debug_message);
 }
 
 /**
@@ -132,7 +131,7 @@ TEST(AutoTraceTest, DISABLED_AutoTrace_WriteToFile_ReadCorrectString) {
   InitLogger();
   CreateDebugAndAutoTrace(debug_message);
 
-  FLUSH_LOGGER();
+  SDL_FLUSH_LOGGER();
   std::ifstream file_log(kFileName);
   ASSERT_TRUE(file_log.is_open()) << "Unable to open log file";
 

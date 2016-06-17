@@ -45,7 +45,7 @@ UpdateDeviceListRequest::UpdateDeviceListRequest(
 UpdateDeviceListRequest::~UpdateDeviceListRequest() {}
 
 void UpdateDeviceListRequest::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   sync_primitives::AutoLock auto_lock(wait_hmi_lock);
   // Fix problem with SDL and HMI HTML. This problem is not actual for HMI PASA.
   // Flag conditional compilation for specific customer is used in order to
@@ -53,10 +53,10 @@ void UpdateDeviceListRequest::Run() {
   // hit code to RTC
   if (true == application_manager_.get_settings().launch_hmi()) {
     if (!application_manager_.IsHMICooperating()) {
-      LOGGER_INFO(logger_, "Wait for HMI Cooperation");
+      SDL_INFO("Wait for HMI Cooperation");
       subscribe_on_event(hmi_apis::FunctionID::BasicCommunication_OnReady);
       termination_condition_.Wait(auto_lock);
-      LOGGER_DEBUG(logger_, "HMI Cooperation OK");
+      SDL_DEBUG("HMI Cooperation OK");
     }
   }
 
@@ -64,17 +64,17 @@ void UpdateDeviceListRequest::Run() {
 }
 
 void UpdateDeviceListRequest::on_event(const event_engine::Event& event) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   sync_primitives::AutoLock auto_lock(wait_hmi_lock);
   switch (event.id()) {
     case hmi_apis::FunctionID::BasicCommunication_OnReady: {
-      LOGGER_INFO(logger_, "received OnReady");
+      SDL_INFO("received OnReady");
       unsubscribe_from_event(hmi_apis::FunctionID::BasicCommunication_OnReady);
       termination_condition_.Broadcast();
       break;
     };
     default: {
-      LOGGER_ERROR(logger_, "Unknown event ");
+      SDL_ERROR("Unknown event ");
       break;
     };
   }

@@ -56,7 +56,7 @@
 namespace transport_manager {
 namespace transport_adapter {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
+SDL_CREATE_LOGGER("TransportManager")
 
 TcpTransportAdapter::TcpTransportAdapter(
     const uint16_t port,
@@ -75,7 +75,7 @@ DeviceType TcpTransportAdapter::GetDeviceType() const {
 }
 
 void TcpTransportAdapter::Store() const {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   using namespace utils::json;
 
   JsonValue tcp_adapter_dictionary;
@@ -121,7 +121,7 @@ void TcpTransportAdapter::Store() const {
 }
 
 bool TcpTransportAdapter::Restore() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   using namespace utils::json;
   bool errors_occurred = false;
   const JsonValue& dictionary = last_state().dictionary();
@@ -154,7 +154,7 @@ bool TcpTransportAdapter::Restore() {
     }
   }
   bool result = !errors_occurred;
-  LOGGER_DEBUG(logger_, "result " << std::boolalpha << result);
+  SDL_DEBUG("result " << std::boolalpha << result);
   return result;
 }
 

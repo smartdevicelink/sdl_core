@@ -42,7 +42,7 @@ VRGetCapabilitiesResponse::VRGetCapabilitiesResponse(
 VRGetCapabilitiesResponse::~VRGetCapabilitiesResponse() {}
 
 void VRGetCapabilitiesResponse::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   HMICapabilities& hmi_capabilities = application_manager_.hmi_capabilities();
 

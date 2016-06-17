@@ -7,6 +7,5 @@ int main(int argc, char** argv) {
   ::testing::DefaultValue<custom_str::CustomString>::Set(
       custom_str::CustomString(""));
   const int result = RUN_ALL_TESTS();
-  DEINIT_LOGGER();
   return result;
 }

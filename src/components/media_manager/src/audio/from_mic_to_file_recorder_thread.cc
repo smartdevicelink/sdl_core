@@ -43,13 +43,13 @@
 
 namespace media_manager {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "MediaManager")
+SDL_CREATE_LOGGER("MediaManager")
 
 gboolean HandleBusMessage(GstBus* bus, GstMessage* message, gpointer data) {
   GMainLoop* loop = static_cast<GMainLoop*>(data);
   switch (GST_MESSAGE_TYPE(message)) {
     case GST_MESSAGE_EOS: {
-      LOGGER_INFO(logger_, "End of stream");
+      SDL_INFO("End of stream");
 
       g_main_loop_quit(loop);
       break;
@@ -61,7 +61,7 @@ gboolean HandleBusMessage(GstBus* bus, GstMessage* message, gpointer data) {
       gst_message_parse_error(message, &error, &debug);
       g_free(debug);
 
-      LOGGER_ERROR(logger_, error->message);
+      SDL_ERROR(error->message);
       g_error_free(error);
 
       g_main_loop_quit(loop);
@@ -160,7 +160,7 @@ void media_manager::FromMicToFileRecorderThread::Impl::stopGstLoop() {
 }
 
 void media_manager::FromMicToFileRecorderThread::Impl::startGstLoop() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   GstElement* alsasrc, *wavenc, *filesink;
   GstBus* bus;
 
@@ -210,9 +210,9 @@ void media_manager::FromMicToFileRecorderThread::Impl::startGstLoop() {
     g_error("Must supply destination (-d FILE)\n");
   }
 
-  LOGGER_TRACE(logger_, "Reading from device: " << device);
-  LOGGER_TRACE(logger_, "Saving pipeline output to: " << outfile);
-  LOGGER_TRACE(logger_, "Duration set to: " << duration);
+  SDL_TRACE("Reading from device: " << device);
+  SDL_TRACE("Saving pipeline output to: " << outfile);
+  SDL_TRACE("Duration set to: " << duration);
 
   // Initialize gstreamer and setup the main loop information
   gst_init(&argc_, &argv_);
@@ -246,7 +246,7 @@ void media_manager::FromMicToFileRecorderThread::Impl::startGstLoop() {
 
   gst_element_set_state(pipeline_, GST_STATE_PLAYING);
 
-  LOGGER_TRACE(logger_, "Initializing pipeline ...");
+  SDL_TRACE("Initializing pipeline ...");
   while (GST_STATE(pipeline_) != GST_STATE_PLAYING) {
     bool shouldBeStoped;
     {
@@ -267,7 +267,7 @@ void media_manager::FromMicToFileRecorderThread::Impl::startGstLoop() {
       return;
     }
   }
-  LOGGER_TRACE(logger_, "Pipeline started ...\n");
+  SDL_TRACE("Pipeline started ...\n");
 
   loop = g_main_loop_new(NULL, FALSE);
 
@@ -275,7 +275,7 @@ void media_manager::FromMicToFileRecorderThread::Impl::startGstLoop() {
 
   gst_element_set_state(pipeline_, GST_STATE_NULL);
 
-  LOGGER_TRACE(logger_, "Deleting pipeline\n");
+  SDL_TRACE("Deleting pipeline\n");
   gst_object_unref(GST_OBJECT(pipeline_));
   g_main_loop_unref(loop);
   g_option_context_free(context);
@@ -296,7 +296,7 @@ media_manager::FromMicToFileRecorderThread::FromMicToFileRecorderThread(
     const std::string& output_file, int32_t duration)
     : threads::ThreadDelegate()
     , impl_(new Impl("-o", "-t", output_file, duration)) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   sleep_thread_ = FromMicToFileRecorderThreadPtr(new timer::Timer(
       "AudioFromMicSuspend",
       new timer::TimerTaskImpl<FromMicToFileRecorderThread>(
@@ -305,7 +305,7 @@ media_manager::FromMicToFileRecorderThread::FromMicToFileRecorderThread(
 }
 
 media_manager::FromMicToFileRecorderThread::~FromMicToFileRecorderThread() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   if (sleep_thread_) {
     sleep_thread_->Stop();
   }
@@ -314,12 +314,12 @@ media_manager::FromMicToFileRecorderThread::~FromMicToFileRecorderThread() {
 }
 void media_manager::FromMicToFileRecorderThread::setRecordDuration(
     int32_t duration) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   impl_->setDuration(duration);
 }
 
 void media_manager::FromMicToFileRecorderThread::threadMain() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   impl_->setShouldBeStoped(false);
   impl_->startGstLoop();
@@ -332,21 +332,21 @@ void media_manager::FromMicToFileRecorderThread::threadMain() {
 
 void media_manager::FromMicToFileRecorderThread::
     onFromMicToFileRecorderThreadSuspned() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   impl_->stopGstLoop();
-  LOGGER_TRACE(logger_, "Set should be stopped flag\n");
+  SDL_TRACE("Set should be stopped flag\n");
   impl_->setShouldBeStoped(true);
 }
 
 void media_manager::FromMicToFileRecorderThread::exitThreadMain() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   impl_->stopGstLoop();
   if (sleep_thread_) {
-    LOGGER_DEBUG(logger_, "Stop sleep thread\n");
+    SDL_DEBUG("Stop sleep thread\n");
     sleep_thread_->Stop();
   }
 
-  LOGGER_TRACE(logger_, "Set should be stopped flag\n");
+  SDL_TRACE("Set should be stopped flag\n");
   impl_->setShouldBeStoped(true);
 }

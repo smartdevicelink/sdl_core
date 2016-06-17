@@ -47,7 +47,7 @@ SpeakResponse::SpeakResponse(const MessageSharedPtr& message,
 SpeakResponse::~SpeakResponse() {}
 
 void SpeakResponse::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   application_manager_.SendMessageToMobile(message_);
 }

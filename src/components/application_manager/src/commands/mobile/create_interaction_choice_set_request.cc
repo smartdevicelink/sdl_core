@@ -52,16 +52,16 @@ CreateInteractionChoiceSetRequest::CreateInteractionChoiceSetRequest(
     , error_from_hmi_(false) {}
 
 CreateInteractionChoiceSetRequest::~CreateInteractionChoiceSetRequest() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 }
 
 void CreateInteractionChoiceSetRequest::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   using namespace mobile_apis;
   ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
-    LOGGER_ERROR(logger_, "NULL pointer");
+    SDL_ERROR("NULL pointer");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -88,7 +88,7 @@ void CreateInteractionChoiceSetRequest::Run() {
     }
     if (verification_result_image == Result::INVALID_DATA ||
         verification_result_secondary_image == Result::INVALID_DATA) {
-      LOGGER_ERROR(logger_, "Image verification failed.");
+      SDL_ERROR("Image verification failed.");
       SendResponse(false, Result::INVALID_DATA);
       return;
     }
@@ -99,8 +99,7 @@ void CreateInteractionChoiceSetRequest::Run() {
           .asInt();
 
   if (app->FindChoiceSet(choice_set_id_)) {
-    LOGGER_ERROR(logger_,
-                 "Choice set with id " << choice_set_id_ << " is not found.");
+    SDL_ERROR("Choice set with id " << choice_set_id_ << " is not found.");
     SendResponse(false, Result::INVALID_ID);
     return;
   }
@@ -119,7 +118,7 @@ void CreateInteractionChoiceSetRequest::Run() {
 mobile_apis::Result::eType CreateInteractionChoiceSetRequest::CheckChoiceSet(
     ApplicationConstSharedPtr app) {
   using namespace smart_objects;
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   std::set<uint32_t> choice_id_set;
 
@@ -132,15 +131,14 @@ mobile_apis::Result::eType CreateInteractionChoiceSetRequest::CheckChoiceSet(
     std::pair<std::set<uint32_t>::iterator, bool> ins_res =
         choice_id_set.insert((*choice_set_it)[strings::choice_id].asInt());
     if (!ins_res.second) {
-      LOGGER_ERROR(logger_,
-                   "Choise with ID "
-                       << (*choice_set_it)[strings::choice_id].asInt()
-                       << " already exists");
+      SDL_ERROR("Choise with ID "
+                << (*choice_set_it)[strings::choice_id].asInt()
+                << " already exists");
       return mobile_apis::Result::INVALID_ID;
     }
 
     if (IsWhiteSpaceExist(*choice_set_it)) {
-      LOGGER_ERROR(logger_, "Incoming choice set has contains \t\n \\t \\n");
+      SDL_ERROR("Incoming choice set has contains \t\n \\t \\n");
       return mobile_apis::Result::INVALID_DATA;
     }
   }
@@ -165,9 +163,8 @@ bool CreateInteractionChoiceSetRequest::compareSynonyms(
                           CreateInteractionChoiceSetRequest::compareStr);
 
   if (it != vr_cmds_1->end()) {
-    LOGGER_INFO(logger_,
-                "Incoming choice set has duplicated VR synonyms "
-                    << it->asString());
+    SDL_INFO("Incoming choice set has duplicated VR synonyms "
+             << it->asString());
     return true;
   }
 
@@ -182,19 +179,19 @@ bool CreateInteractionChoiceSetRequest::compareStr(
 
 bool CreateInteractionChoiceSetRequest::IsWhiteSpaceExist(
     const smart_objects::SmartObject& choice_set) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   const char* str = NULL;
 
   str = choice_set[strings::menu_name].asCharArray();
   if (!CheckSyntax(str)) {
-    LOGGER_ERROR(logger_, "Invalid menu_name syntax check failed");
+    SDL_ERROR("Invalid menu_name syntax check failed");
     return true;
   }
 
   if (choice_set.keyExists(strings::secondary_text)) {
     str = choice_set[strings::secondary_text].asCharArray();
     if (!CheckSyntax(str)) {
-      LOGGER_ERROR(logger_, "Invalid secondary_text syntax check failed");
+      SDL_ERROR("Invalid secondary_text syntax check failed");
       return true;
     }
   }
@@ -202,7 +199,7 @@ bool CreateInteractionChoiceSetRequest::IsWhiteSpaceExist(
   if (choice_set.keyExists(strings::tertiary_text)) {
     str = choice_set[strings::tertiary_text].asCharArray();
     if (!CheckSyntax(str)) {
-      LOGGER_ERROR(logger_, "Invalid tertiary_text syntax check failed");
+      SDL_ERROR("Invalid tertiary_text syntax check failed");
       return true;
     }
   }
@@ -213,7 +210,7 @@ bool CreateInteractionChoiceSetRequest::IsWhiteSpaceExist(
     for (size_t i = 0; i < len; ++i) {
       str = choice_set[strings::vr_commands][i].asCharArray();
       if (!CheckSyntax(str)) {
-        LOGGER_ERROR(logger_, "Invalid vr_commands syntax check failed");
+        SDL_ERROR("Invalid vr_commands syntax check failed");
         return true;
       }
     }
@@ -222,7 +219,7 @@ bool CreateInteractionChoiceSetRequest::IsWhiteSpaceExist(
   if (choice_set.keyExists(strings::image)) {
     str = choice_set[strings::image][strings::value].asCharArray();
     if (!CheckSyntax(str)) {
-      LOGGER_ERROR(logger_, "Invalid image value syntax check failed");
+      SDL_ERROR("Invalid image value syntax check failed");
       return true;
     }
   }
@@ -230,9 +227,9 @@ bool CreateInteractionChoiceSetRequest::IsWhiteSpaceExist(
   if (choice_set.keyExists(strings::secondary_image)) {
     str = choice_set[strings::secondary_image][strings::value].asCharArray();
     if (!CheckSyntax(str)) {
-      LOGGER_ERROR(logger_,
-                   "Invalid secondary_image value. "
-                   "Syntax check failed");
+      SDL_ERROR(
+          "Invalid secondary_image value. "
+          "Syntax check failed");
       return true;
     }
   }
@@ -241,7 +238,7 @@ bool CreateInteractionChoiceSetRequest::IsWhiteSpaceExist(
 
 void CreateInteractionChoiceSetRequest::SendVRAddCommandRequests(
     application_manager::ApplicationSharedPtr const app) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   smart_objects::SmartObject& choice_set = (*message_)[strings::msg_params];
   smart_objects::SmartObject msg_params =
@@ -258,8 +255,7 @@ void CreateInteractionChoiceSetRequest::SendVRAddCommandRequests(
     {
       sync_primitives::AutoLock error_lock(error_from_hmi_lock_);
       if (error_from_hmi_) {
-        LOGGER_WARN(logger_,
-                    "Error from HMI received. Stop sending VRCommands");
+        SDL_WARN("Error from HMI received. Stop sending VRCommands");
         break;
       }
     }
@@ -278,27 +274,24 @@ void CreateInteractionChoiceSetRequest::SendVRAddCommandRequests(
 
     VRCommandInfo vr_command(vr_cmd_id);
     sent_commands_map_[vr_corr_id] = vr_command;
-    LOGGER_DEBUG(logger_,
-                 "VR_command sent corr_id " << vr_corr_id << " cmd_id "
-                                            << vr_corr_id);
+    SDL_DEBUG("VR_command sent corr_id " << vr_corr_id << " cmd_id "
+                                         << vr_corr_id);
   }
   expected_chs_count_ = chs_num;
-  LOGGER_DEBUG(logger_, "expected_chs_count_ = " << expected_chs_count_);
+  SDL_DEBUG("expected_chs_count_ = " << expected_chs_count_);
 }
 
 void CreateInteractionChoiceSetRequest::on_event(
     const event_engine::Event& event) {
   using namespace hmi_apis;
   using namespace helpers;
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   const smart_objects::SmartObject& message = event.smart_object();
   if (event.id() == hmi_apis::FunctionID::VR_AddCommand) {
     received_chs_count_++;
-    LOGGER_DEBUG(logger_,
-                 "Got VR.AddCommand response, there are "
-                     << expected_chs_count_ - received_chs_count_
-                     << " more to wait.");
+    SDL_DEBUG("Got VR.AddCommand response, there are "
+              << expected_chs_count_ - received_chs_count_ << " more to wait.");
 
     uint32_t corr_id = static_cast<uint32_t>(
         message[strings::params][strings::correlation_id].asUInt());
@@ -306,7 +299,7 @@ void CreateInteractionChoiceSetRequest::on_event(
       sync_primitives::AutoLock commands_lock(vr_commands_lock_);
       SentCommandsMap::iterator it = sent_commands_map_.find(corr_id);
       if (sent_commands_map_.end() == it) {
-        LOGGER_WARN(logger_, "HMI response for unknown VR command received");
+        SDL_WARN("HMI response for unknown VR command received");
         return;
       }
 
@@ -320,10 +313,8 @@ void CreateInteractionChoiceSetRequest::on_event(
         VRCommandInfo& vr_command = it->second;
         vr_command.succesful_response_received_ = true;
       } else {
-        LOGGER_DEBUG(logger_,
-                     "Hmi response is not Success: "
-                         << vr_result
-                         << ". Stop sending VRAddCommand requests");
+        SDL_DEBUG("Hmi response is not Success: "
+                  << vr_result << ". Stop sending VRAddCommand requests");
         if (!error_from_hmi_) {
           error_from_hmi_ = true;
           SendResponse(false, GetMobileResultCode(vr_result));
@@ -334,7 +325,7 @@ void CreateInteractionChoiceSetRequest::on_event(
     if (received_chs_count_ < expected_chs_count_) {
       application_manager_.updateRequestTimeout(
           connection_key(), correlation_id(), default_timeout());
-      LOGGER_DEBUG(logger_, "Timeout for request was updated");
+      SDL_DEBUG("Timeout for request was updated");
       return;
     }
     OnAllHMIResponsesReceived();
@@ -342,7 +333,7 @@ void CreateInteractionChoiceSetRequest::on_event(
 }
 
 void CreateInteractionChoiceSetRequest::onTimeOut() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   if (!error_from_hmi_) {
     SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
@@ -357,12 +348,12 @@ void CreateInteractionChoiceSetRequest::onTimeOut() {
 }
 
 void CreateInteractionChoiceSetRequest::DeleteChoices() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   ApplicationSharedPtr application =
       application_manager_.application(connection_key());
   if (!application) {
-    LOGGER_ERROR(logger_, "NULL pointer");
+    SDL_ERROR("NULL pointer");
     return;
   }
   application->RemoveChoiceSet(choice_set_id_);
@@ -378,16 +369,15 @@ void CreateInteractionChoiceSetRequest::DeleteChoices() {
       msg_param[strings::cmd_id] = vr_command_info.cmd_id_;
       SendHMIRequest(hmi_apis::FunctionID::VR_DeleteCommand, &msg_param);
     } else {
-      LOGGER_WARN(logger_,
-                  "Succesfull response has not been received for cmd_id =  "
-                      << vr_command_info.cmd_id_);
+      SDL_WARN("Succesfull response has not been received for cmd_id =  "
+               << vr_command_info.cmd_id_);
     }
   }
   sent_commands_map_.clear();
 }
 
 void CreateInteractionChoiceSetRequest::OnAllHMIResponsesReceived() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   if (!error_from_hmi_) {
     SendResponse(true, mobile_apis::Result::SUCCESS);
@@ -395,7 +385,7 @@ void CreateInteractionChoiceSetRequest::OnAllHMIResponsesReceived() {
     ApplicationSharedPtr application =
         application_manager_.application(connection_key());
     if (!application) {
-      LOGGER_ERROR(logger_, "NULL pointer");
+      SDL_ERROR("NULL pointer");
       return;
     }
     application->UpdateHash();

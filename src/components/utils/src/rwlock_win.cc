@@ -34,7 +34,7 @@
 #include "utils/logger.h"
 #include "utils/pimpl_impl.h"
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
+SDL_CREATE_LOGGER("Utils")
 
 namespace sync_primitives {
 
@@ -96,7 +96,7 @@ void sync_primitives::RWLock::Impl::AcquireForReading() {
 
 bool sync_primitives::RWLock::Impl::TryAcquireForReading() {
   if (!TryAcquireSRWLockShared(&rwlock_)) {
-    LOGGER_DEBUG(logger_, "Cannot acquire rwlock for reading");
+    SDL_DEBUG("Cannot acquire rwlock for reading");
     return false;
   }
   return true;
@@ -108,7 +108,7 @@ void sync_primitives::RWLock::Impl::AcquireForWriting() {
 
 bool sync_primitives::RWLock::Impl::TryAcquireForWriting() {
   if (!TryAcquireSRWLockExclusive(&rwlock_)) {
-    LOGGER_DEBUG(logger_, "Cannot acquire rwlock for writing");
+    SDL_DEBUG("Cannot acquire rwlock for writing");
     return false;
   }
   return true;

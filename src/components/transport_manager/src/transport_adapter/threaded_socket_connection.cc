@@ -36,7 +36,7 @@
 #include "utils/logger.h"
 #include "utils/threads/thread.h"
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
+SDL_CREATE_LOGGER("TransportManager")
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -63,7 +63,7 @@ ThreadedSocketConnection::ThreadedSocketConnection(
 }
 
 ThreadedSocketConnection::~ThreadedSocketConnection() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   Disconnect();
   thread_->join();
   delete thread_->delegate();
@@ -71,7 +71,7 @@ ThreadedSocketConnection::~ThreadedSocketConnection() {
 }
 
 void ThreadedSocketConnection::Abort() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   unexpected_disconnect_ = true;
   terminate_flag_ = true;
 }
@@ -83,66 +83,66 @@ void ThreadedSocketConnection::SetSocket(
 }
 
 TransportAdapter::Error ThreadedSocketConnection::Start() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   if (!thread_->start()) {
-    LOGGER_ERROR(logger_, "thread creation failed");
+    SDL_ERROR("thread creation failed");
     return TransportAdapter::FAIL;
   }
-  LOGGER_INFO(logger_, "thread created");
+  SDL_INFO("thread created");
   return TransportAdapter::OK;
 }
 
 void ThreadedSocketConnection::Finalize() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   if (unexpected_disconnect_) {
-    LOGGER_DEBUG(logger_, "unexpected_disconnect");
+    SDL_DEBUG("unexpected_disconnect");
     controller_->ConnectionAborted(
         device_handle(), application_handle(), CommunicationError());
   } else {
-    LOGGER_DEBUG(logger_, "not unexpected_disconnect");
+    SDL_DEBUG("not unexpected_disconnect");
     controller_->ConnectionFinished(device_handle(), application_handle());
   }
   socket_connection_.Close();
 }
 
 TransportAdapter::Error ThreadedSocketConnection::Notify() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   return socket_connection_.Notify() ? TransportAdapter::OK
                                      : TransportAdapter::FAIL;
 }
 
 TransportAdapter::Error ThreadedSocketConnection::SendData(
     ::protocol_handler::RawMessagePtr message) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   sync_primitives::AutoLock auto_lock(frames_to_send_mutex_);
   frames_to_send_.push(message);
   return Notify();
 }
 
 TransportAdapter::Error ThreadedSocketConnection::Disconnect() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   terminate_flag_ = true;
   return Notify();
 }
 
 void ThreadedSocketConnection::threadMain() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   controller_->ConnectionCreated(this, device_uid_, app_handle_);
   ConnectError* connect_error = NULL;
   if (!Establish(&connect_error)) {
-    LOGGER_ERROR(logger_, "Connection Establish failed");
+    SDL_ERROR("Connection Establish failed");
     delete connect_error;
   }
-  LOGGER_DEBUG(logger_, "Connection established");
+  SDL_DEBUG("Connection established");
   controller_->ConnectDone(device_handle(), application_handle());
   while (!terminate_flag_) {
     Transmit();
   }
-  LOGGER_DEBUG(logger_, "Connection is to finalize");
+  SDL_DEBUG("Connection is to finalize");
   Finalize();
   sync_primitives::AutoLock auto_lock(frames_to_send_mutex_);
   while (!frames_to_send_.empty()) {
-    LOGGER_INFO(logger_, "removing message");
+    SDL_INFO("removing message");
     ::protocol_handler::RawMessagePtr message = frames_to_send_.front();
     frames_to_send_.pop();
     controller_->DataSendFailed(
@@ -151,16 +151,16 @@ void ThreadedSocketConnection::threadMain() {
 }
 
 void ThreadedSocketConnection::Transmit() {
-  LOGGER_AUTO_TRACE(logger_);
-  LOGGER_DEBUG(logger_, "Waiting for connection events. " << this);
+  SDL_AUTO_TRACE();
+  SDL_DEBUG("Waiting for connection events. " << this);
   socket_connection_.Wait();
 
-  LOGGER_DEBUG(logger_, "Waited for connection events: " << this);
+  SDL_DEBUG("Waited for connection events: " << this);
 }
 
 void ThreadedSocketConnection::Send() {
-  LOGGER_AUTO_TRACE(logger_);
-  LOGGER_DEBUG(logger_, "Trying to send data if available");
+  SDL_AUTO_TRACE();
+  SDL_DEBUG("Trying to send data if available");
   FrameQueue frames_to_send;
   {
     sync_primitives::AutoLock auto_lock(frames_to_send_mutex_);
@@ -174,7 +174,7 @@ void ThreadedSocketConnection::Send() {
     const bool sent = socket_connection_.Send(
         frame->data() + offset, frame->data_size() - offset, bytes_sent);
     if (!sent) {
-      LOGGER_ERROR(logger_, "Send failed for connection " << this);
+      SDL_ERROR("Send failed for connection " << this);
       frames_to_send.pop();
       offset = 0;
       controller_->DataSendFailed(
@@ -195,7 +195,7 @@ void ThreadedSocketConnection::Send() {
 }
 
 void ThreadedSocketConnection::OnError(int error) {
-  LOGGER_ERROR(logger_, "Connection error: " << error);
+  SDL_ERROR("Connection error: " << error);
   Abort();
 }
 
@@ -207,12 +207,12 @@ void ThreadedSocketConnection::OnData(const uint8_t* const buffer,
 }
 
 void ThreadedSocketConnection::OnCanWrite() {
-  LOGGER_DEBUG(logger_, "OnCanWrite event. Trying to send data.");
+  SDL_DEBUG("OnCanWrite event. Trying to send data.");
   Send();
 }
 
 void ThreadedSocketConnection::OnClose() {
-  LOGGER_DEBUG(logger_, "Connection has been closed");
+  SDL_DEBUG("Connection has been closed");
   Abort();
 }
 
@@ -225,13 +225,13 @@ ThreadedSocketConnection::SocketConnectionDelegate::SocketConnectionDelegate(
     : connection_(connection) {}
 
 void ThreadedSocketConnection::SocketConnectionDelegate::threadMain() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   DCHECK(connection_);
   connection_->threadMain();
 }
 
 void ThreadedSocketConnection::SocketConnectionDelegate::exitThreadMain() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 }
 
 }  // namespace transport_adapter

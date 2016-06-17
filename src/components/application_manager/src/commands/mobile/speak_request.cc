@@ -50,20 +50,20 @@ SpeakRequest::SpeakRequest(const MessageSharedPtr& message,
 SpeakRequest::~SpeakRequest() {}
 
 void SpeakRequest::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
-    LOGGER_ERROR(logger_, "NULL pointer");
+    SDL_ERROR("NULL pointer");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
   if (IsWhiteSpaceExist()) {
-    LOGGER_ERROR(logger_,
-                 "Incoming speak has contains \\t\\n \\\\t \\\\n "
-                 " text contains only whitespace in ttsChunks");
+    SDL_ERROR(
+        "Incoming speak has contains \\t\\n \\\\t \\\\n "
+        " text contains only whitespace in ttsChunks");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
@@ -77,23 +77,23 @@ void SpeakRequest::Run() {
 }
 
 void SpeakRequest::on_event(const event_engine::Event& event) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   switch (event.id()) {
     case hmi_apis::FunctionID::TTS_Speak: {
-      LOGGER_INFO(logger_, "Received TTS_Speak event");
+      SDL_INFO("Received TTS_Speak event");
 
       ProcessTTSSpeakResponse(event.smart_object());
       break;
     }
     case hmi_apis::FunctionID::TTS_OnResetTimeout: {
-      LOGGER_INFO(logger_, "Received TTS_OnResetTimeout event");
+      SDL_INFO("Received TTS_OnResetTimeout event");
 
       application_manager_.updateRequestTimeout(
           connection_key(), correlation_id(), default_timeout());
       break;
     }
     default: {
-      LOGGER_ERROR(logger_, "Received unknown event" << event.id());
+      SDL_ERROR("Received unknown event" << event.id());
       break;
     }
   }
@@ -101,14 +101,14 @@ void SpeakRequest::on_event(const event_engine::Event& event) {
 
 void SpeakRequest::ProcessTTSSpeakResponse(
     const smart_objects::SmartObject& message) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   using namespace helpers;
 
   ApplicationSharedPtr application =
       application_manager_.application(connection_key());
 
   if (!application) {
-    LOGGER_ERROR(logger_, "NULL pointer");
+    SDL_ERROR("NULL pointer");
     return;
   }
 
@@ -143,7 +143,7 @@ void SpeakRequest::ProcessTTSSpeakResponse(
 }
 
 bool SpeakRequest::IsWhiteSpaceExist() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   const char* str = NULL;
 
   if ((*message_)[strings::msg_params].keyExists(strings::tts_chunks)) {
@@ -156,7 +156,7 @@ bool SpeakRequest::IsWhiteSpaceExist() {
     for (; it_tc != it_tc_end; ++it_tc) {
       str = (*it_tc)[strings::text].asCharArray();
       if (strlen(str) && !CheckSyntax(str)) {
-        LOGGER_ERROR(logger_, "Invalid tts_chunks syntax check failed");
+        SDL_ERROR("Invalid tts_chunks syntax check failed");
         return true;
       }
     }

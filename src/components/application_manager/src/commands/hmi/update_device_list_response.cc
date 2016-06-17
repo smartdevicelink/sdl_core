@@ -42,7 +42,7 @@ UpdateDeviceListResponse::UpdateDeviceListResponse(
 UpdateDeviceListResponse::~UpdateDeviceListResponse() {}
 
 void UpdateDeviceListResponse::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   // TODO(PV): add check for correctness.
 }

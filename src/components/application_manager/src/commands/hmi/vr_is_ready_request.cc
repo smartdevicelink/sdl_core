@@ -43,7 +43,7 @@ VRIsReadyRequest::VRIsReadyRequest(const MessageSharedPtr& message,
 VRIsReadyRequest::~VRIsReadyRequest() {}
 
 void VRIsReadyRequest::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   SendRequest();
 }

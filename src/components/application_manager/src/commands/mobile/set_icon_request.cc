@@ -50,12 +50,12 @@ SetIconRequest::SetIconRequest(const MessageSharedPtr& message,
 SetIconRequest::~SetIconRequest() {}
 
 void SetIconRequest::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
-    LOGGER_ERROR(logger_, "Application is not registered");
+    SDL_ERROR("Application is not registered");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -69,7 +69,7 @@ void SetIconRequest::Run() {
       sync_file_name);
 
   if (!file_system::FileExists(full_file_path)) {
-    LOGGER_ERROR(logger_, "No such file " << full_file_path);
+    SDL_ERROR("No such file " << full_file_path);
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
@@ -99,7 +99,7 @@ void SetIconRequest::Run() {
 }
 
 void SetIconRequest::on_event(const event_engine::Event& event) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
@@ -119,15 +119,14 @@ void SetIconRequest::on_event(const event_engine::Event& event) {
                        [strings::value].asString();
         app->set_app_icon_path(path);
 
-        LOGGER_INFO(logger_,
-                    "Icon path was set to '" << app->app_icon_path() << "'");
+        SDL_INFO("Icon path was set to '" << app->app_icon_path() << "'");
       }
 
       SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
       break;
     }
     default: {
-      LOGGER_ERROR(logger_, "Received unknown event" << event.id());
+      SDL_ERROR("Received unknown event" << event.id());
       return;
     }
   }

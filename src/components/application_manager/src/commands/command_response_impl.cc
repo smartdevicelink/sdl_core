@@ -57,7 +57,7 @@ void CommandResponseImpl::SendResponse(
     bool success,
     const mobile_apis::Result::eType& result_code,
     bool final_message) {
-  LOGGER_INFO(logger_, "Trying to send response");
+  SDL_INFO("Trying to send response");
 
   (*message_)[strings::params][strings::protocol_type] = mobile_protocol_type_;
   (*message_)[strings::params][strings::protocol_version] = protocol_version_;

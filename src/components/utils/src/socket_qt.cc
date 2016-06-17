@@ -37,7 +37,7 @@
 #include "utils/pimpl_impl.h"
 #include "utils/socket_utils.h"
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
+SDL_CREATE_LOGGER("Utils")
 
 namespace {
 
@@ -164,10 +164,10 @@ void utils::TcpSocketConnection::Impl::Copy(TcpSocketConnection& rhs) {
 bool utils::TcpSocketConnection::Impl::Send(const char* buffer,
                                             const std::size_t size,
                                             std::size_t& bytes_written) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   bytes_written = 0;
   if (!IsValid()) {
-    LOGGER_WARN(logger_, "Cannot send. Socket is not valid.");
+    SDL_WARN("Cannot send. Socket is not valid.");
     return false;
   }
   if (!tcp_socket_) {
@@ -183,17 +183,16 @@ bool utils::TcpSocketConnection::Impl::Send(const char* buffer,
     DCHECK(written >= 0)
     bytes_written = static_cast<std::size_t>(written);
   } else {
-    LOGGER_WARN(logger_,
-                "Failed to send: " << tcp_socket_->errorString().toStdString());
+    SDL_WARN("Failed to send: " << tcp_socket_->errorString().toStdString());
     return false;
   }
   return true;
 }
 
 bool utils::TcpSocketConnection::Impl::Close() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   if (!IsValid()) {
-    LOGGER_DEBUG(logger_, "Not valid. Exit Close");
+    SDL_DEBUG("Not valid. Exit Close");
     return true;
   }
   if (tcp_socket_) {
@@ -270,9 +269,8 @@ void utils::TcpSocketConnection::Impl::OnRead() {
     buffer = tcp_socket_->readAll();
     bytes_read = buffer.size();
     if (bytes_read > 0) {
-      LOGGER_DEBUG(logger_,
-                   "Received " << bytes_read << " bytes from socket "
-                               << socket_descriptor_);
+      SDL_DEBUG("Received " << bytes_read << " bytes from socket "
+                            << socket_descriptor_);
       emit DataReceivedSignal(buffer, bytes_read);
     }
   }
@@ -307,9 +305,9 @@ void utils::TcpSocketConnection::Impl::InitSocketSignals() {
 }
 
 void utils::TcpSocketConnection::Impl::Wait() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   if (!IsValid()) {
-    LOGGER_ERROR(logger_, "Cannot wait. Not connected.");
+    SDL_ERROR("Cannot wait. Not connected.");
     return;
   }
   if (!is_initiated_) {
@@ -326,10 +324,9 @@ void utils::TcpSocketConnection::Impl::Wait() {
 }
 
 void utils::TcpSocketConnection::Impl::OnErrorSlot() {
-  LOGGER_DEBUG(logger_,
-               "Socket error code:#["
-                   << tcp_socket_->error() << "]. "
-                   << tcp_socket_->errorString().toStdString().c_str());
+  SDL_DEBUG("Socket error code:#["
+            << tcp_socket_->error() << "]. "
+            << tcp_socket_->errorString().toStdString().c_str());
   if (tcp_socket_->error() != QAbstractSocket::RemoteHostClosedError) {
     OnError(tcp_socket_->error());
   }
@@ -348,14 +345,14 @@ void utils::TcpSocketConnection::Impl::OnDataReceivedSlot(QByteArray buffer,
 }
 
 bool utils::TcpSocketConnection::Impl::Notify() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   emit NotifySignal();
   return true;
 }
 
 void utils::TcpSocketConnection::Impl::SetEventHandler(
     TcpConnectionEventHandler* event_handler) {
-  LOGGER_DEBUG(logger_, "Setting event handle to " << event_handler);
+  SDL_DEBUG("Setting event handle to " << event_handler);
   event_handler_ = event_handler;
 }
 
@@ -448,7 +445,7 @@ class utils::TcpServerSocket::Impl {
 utils::TcpServerSocket::Impl::Impl() : server_socket_(NULL) {}
 
 utils::TcpServerSocket::Impl::~Impl() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   Close();
 }
 
@@ -468,12 +465,11 @@ bool utils::TcpServerSocket::Impl::Close() {
 bool utils::TcpServerSocket::Impl::Listen(const HostAddress& address,
                                           const uint16_t port,
                                           const int backlog) {
-  LOGGER_AUTO_TRACE(logger_);
-  LOGGER_DEBUG(logger_,
-               "Start listening on " << address.ToString() << ":" << port);
+  SDL_AUTO_TRACE();
+  SDL_DEBUG("Start listening on " << address.ToString() << ":" << port);
 
   if (server_socket_) {
-    LOGGER_WARN(logger_, "Cannot listen. server_socket_ is null");
+    SDL_WARN("Cannot listen. server_socket_ is null");
     return false;
   }
 
@@ -481,42 +477,37 @@ bool utils::TcpServerSocket::Impl::Listen(const HostAddress& address,
 
   server_socket_->setMaxPendingConnections(backlog);
 
-  LOGGER_DEBUG(logger_,
-               "Start listening on " << address.ToString() << ":" << port);
+  SDL_DEBUG("Start listening on " << address.ToString() << ":" << port);
 
   if (!server_socket_->listen(FromHostAddress(address), port)) {
-    LOGGER_WARN(logger_,
-                "Failed to listen on "
-                    << address.ToString() << ":" << port << ". Error: "
-                    << server_socket_->errorString().toStdString());
+    SDL_WARN("Failed to listen on "
+             << address.ToString() << ":" << port
+             << ". Error: " << server_socket_->errorString().toStdString());
     return false;
   }
 
-  LOGGER_DEBUG(logger_, "Listening on " << address.ToString() << ":" << port);
+  SDL_DEBUG("Listening on " << address.ToString() << ":" << port);
   return true;
 }
 
 utils::TcpSocketConnection utils::TcpServerSocket::Impl::Accept() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   bool waited = server_socket_->waitForNewConnection(-1);
   if (!waited) {
-    LOGGER_WARN(logger_,
-                "Failed to wait for the new connection: "
-                    << server_socket_->errorString().toStdString());
+    SDL_WARN("Failed to wait for the new connection: "
+             << server_socket_->errorString().toStdString());
     return utils::TcpSocketConnection();
   }
 
   QTcpSocket* client_connection = server_socket_->nextPendingConnection();
   if (!client_connection) {
-    LOGGER_WARN(logger_,
-                "Failed to get new connection: "
-                    << server_socket_->errorString().toStdString());
+    SDL_WARN("Failed to get new connection: "
+             << server_socket_->errorString().toStdString());
     return utils::TcpSocketConnection();
   }
-  LOGGER_DEBUG(logger_,
-               "Accepted new client connection "
-                   << client_connection->peerAddress().toString().toStdString()
-                   << ":" << client_connection->peerPort());
+  SDL_DEBUG("Accepted new client connection "
+            << client_connection->peerAddress().toString().toStdString() << ":"
+            << client_connection->peerPort());
   const HostAddress host_address =
       ToHostAddress(client_connection->peerAddress());
   const uint16_t port = static_cast<uint16_t>(client_connection->peerPort());

@@ -45,7 +45,7 @@ OnButtonSubscriptionNotification::OnButtonSubscriptionNotification(
 OnButtonSubscriptionNotification::~OnButtonSubscriptionNotification() {}
 
 void OnButtonSubscriptionNotification::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   SendNotification();
 }

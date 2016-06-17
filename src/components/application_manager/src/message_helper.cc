@@ -64,7 +64,7 @@
 #define snprintf _snprintf_s
 #endif
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
+SDL_CREATE_LOGGER("ApplicationManager")
 
 namespace application_manager {
 namespace {
@@ -272,7 +272,7 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateRequestObject(
 
 smart_objects::SmartObjectSPtr MessageHelper::CreateHashUpdateNotification(
     const uint32_t app_id) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   smart_objects::SmartObjectSPtr message =
       utils::MakeShared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
@@ -286,16 +286,16 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateHashUpdateNotification(
 
 void MessageHelper::SendHashUpdateNotification(const uint32_t app_id,
                                                ApplicationManager& app_mngr) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   ApplicationSharedPtr app = app_mngr.application(app_id);
   if (!app) {
-    LOGGER_ERROR(logger_, "Application not found by appID");
+    SDL_ERROR("Application not found by appID");
     return;
   }
   smart_objects::SmartObjectSPtr so = CreateHashUpdateNotification(app_id);
   PrintSmartObject(*so);
   if (!app_mngr.ManageMobileCommand(so, commands::Command::ORIGIN_SDL)) {
-    LOGGER_ERROR(logger_, "Failed to send HashUpdate notification.");
+    SDL_ERROR("Failed to send HashUpdate notification.");
     return;
   }
   app_mngr.resume_controller().ApplicationsDataUpdated();
@@ -305,7 +305,7 @@ smart_objects::SmartObjectSPtr
 MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
     int32_t connection_key,
     mobile_api::AppInterfaceUnregisteredReason::eType reason) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   smart_objects::SmartObjectSPtr notification =
       utils::MakeShared<smart_objects::SmartObject>();
@@ -414,7 +414,7 @@ std::string MessageHelper::StringifiedHMILevel(
 
 std::string MessageHelper::StringifiedFunctionID(
     mobile_apis::FunctionID::eType function_id) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   using namespace NsSmartDeviceLink::NsSmartObjects;
   const char* str = 0;
   if (EnumConversionHelper<mobile_apis::FunctionID::eType>::EnumToCString(
@@ -502,7 +502,7 @@ void MessageHelper::CreateGetVehicleDataRequest(
     const uint32_t correlation_id,
     const std::vector<std::string>& params,
     ApplicationManager& app_mngr) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 #ifdef HMI_DBUS_API
   for (std::vector<std::string>::const_iterator it = params.begin();
        it != params.end();
@@ -550,7 +550,7 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateBlockedByPoliciesResponse(
     mobile_apis::Result::eType result,
     const uint32_t correlation_id,
     uint32_t connection_key) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   smart_objects::SmartObjectSPtr response =
       utils::MakeShared<smart_objects::SmartObject>();
 
@@ -574,7 +574,7 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateDeviceListSO(
     const connection_handler::DeviceMap& devices,
     const policy::PolicyHandlerInterface& policy_handler,
     ApplicationManager& app_mngr) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   smart_objects::SmartObjectSPtr device_list_so =
       utils::MakeShared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
@@ -605,7 +605,7 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateDeviceListSO(
 
 smart_objects::SmartObjectSPtr MessageHelper::CreateModuleInfoSO(
     uint32_t function_id, ApplicationManager& app_mngr) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   smart_objects::SmartObjectSPtr module_info =
       utils::MakeShared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
@@ -621,7 +621,7 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateModuleInfoSO(
 
 smart_objects::SmartObjectSPtr MessageHelper::CreateSetAppIcon(
     const std::string& path_to_icon, uint32_t app_id) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   smart_objects::SmartObjectSPtr set_icon =
       utils::MakeShared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
@@ -642,13 +642,13 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateSetAppIcon(
 
 bool MessageHelper::SendIVISubscribtions(const uint32_t app_id,
                                          ApplicationManager& app_mngr) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   bool result = true;
   ApplicationSharedPtr app = app_mngr.application(app_id);
 
   if (!app.valid()) {
-    LOGGER_ERROR(logger_, "Invalid application " << app_id);
+    SDL_ERROR("Invalid application " << app_id);
     return result;
   }
 
@@ -666,11 +666,11 @@ bool MessageHelper::SendIVISubscribtions(const uint32_t app_id,
 
 smart_objects::SmartObjectList MessageHelper::GetIVISubscriptionRequests(
     ApplicationSharedPtr app, ApplicationManager& app_mngr) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   smart_objects::SmartObjectList hmi_requests;
   if (!app.valid()) {
-    LOGGER_ERROR(logger_, "Invalid application pointer ");
+    SDL_ERROR("Invalid application pointer ");
     return hmi_requests;
   }
 
@@ -720,12 +720,12 @@ void MessageHelper::SendOnButtonSubscriptionNotification(
     ApplicationManager& app_mngr) {
   using namespace smart_objects;
   using namespace hmi_apis;
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   SmartObjectSPtr notification_ptr =
       utils::MakeShared<SmartObject>(SmartType_Map);
   if (!notification_ptr) {
-    LOGGER_ERROR(logger_, "Memory allocation failed.");
+    SDL_ERROR("Memory allocation failed.");
     return;
   }
   SmartObject& notification = *notification_ptr;
@@ -746,7 +746,7 @@ void MessageHelper::SendOnButtonSubscriptionNotification(
   notification[strings::msg_params] = msg_params;
 
   if (!app_mngr.ManageHMICommand(notification_ptr)) {
-    LOGGER_ERROR(logger_, "Unable to send HMI notification");
+    SDL_ERROR("Unable to send HMI notification");
   }
 }
 
@@ -755,10 +755,10 @@ void MessageHelper::SendAllOnButtonSubscriptionNotificationsForApp(
   using namespace smart_objects;
   using namespace hmi_apis;
   using namespace mobile_apis;
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   if (!app.valid()) {
-    LOGGER_ERROR(logger_, "Invalid application pointer ");
+    SDL_ERROR("Invalid application pointer ");
     return;
   }
 
@@ -800,7 +800,7 @@ void MessageHelper::SendSetAppIcon(
 
 void MessageHelper::SendAppDataToHMI(ApplicationConstSharedPtr app,
                                      ApplicationManager& app_man) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   if (app) {
     SendSetAppIcon(app, app->app_icon_path(), app_man);
     SendGlobalPropertiesToHMI(app, app_man);
@@ -811,7 +811,7 @@ void MessageHelper::SendAppDataToHMI(ApplicationConstSharedPtr app,
 void MessageHelper::SendGlobalPropertiesToHMI(ApplicationConstSharedPtr app,
                                               ApplicationManager& app_mngr) {
   if (!app.valid()) {
-    LOGGER_ERROR(logger_, "Invalid application");
+    SDL_ERROR("Invalid application");
     return;
   }
 
@@ -827,11 +827,11 @@ void MessageHelper::SendGlobalPropertiesToHMI(ApplicationConstSharedPtr app,
 smart_objects::SmartObjectList
 MessageHelper::CreateGlobalPropertiesRequestsToHMI(
     ApplicationConstSharedPtr app, const uint32_t correlation_id) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   smart_objects::SmartObjectList requests;
   if (!app.valid()) {
-    LOGGER_ERROR(logger_, "Invalid application");
+    SDL_ERROR("Invalid application");
     return requests;
   }
 
@@ -902,7 +902,7 @@ MessageHelper::CreateGlobalPropertiesRequestsToHMI(
 void MessageHelper::SendTTSGlobalProperties(ApplicationSharedPtr app,
                                             bool default_help_prompt,
                                             ApplicationManager& app_man) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   if (!app) {
     return;
   }
@@ -979,7 +979,7 @@ smart_objects::SmartObjectList MessageHelper::CreateShowRequestToHMI(
     ApplicationConstSharedPtr app, const uint32_t correlation_id) {
   smart_objects::SmartObjectList requests;
   if (!app) {
-    LOGGER_ERROR(logger_, "Invalid application");
+    SDL_ERROR("Invalid application");
     return requests;
   }
 
@@ -1048,7 +1048,7 @@ smart_objects::SmartObjectList MessageHelper::CreateAddCommandRequestToHMI(
     ApplicationConstSharedPtr app, ApplicationManager& app_mngr) {
   smart_objects::SmartObjectList requests;
   if (!app) {
-    LOGGER_ERROR(logger_, "Invalid application");
+    SDL_ERROR("Invalid application");
     return requests;
   }
 
@@ -1099,7 +1099,7 @@ MessageHelper::CreateAddVRCommandRequestFromChoiceToHMI(
     ApplicationConstSharedPtr app, ApplicationManager& app_mngr) {
   smart_objects::SmartObjectList requests;
   if (!app) {
-    LOGGER_ERROR(logger_, "Invalid application");
+    SDL_ERROR("Invalid application");
     return requests;
   }
 
@@ -1169,7 +1169,7 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateChangeRegistration(
 void MessageHelper::SendUIChangeRegistrationRequestToHMI(
     ApplicationConstSharedPtr app, ApplicationManager& app_mngr) {
   if (!app.valid()) {
-    LOGGER_ERROR(logger_, "Application is not valid");
+    SDL_ERROR("Application is not valid");
     return;
   }
 
@@ -1284,7 +1284,7 @@ bool MessageHelper::CreateHMIApplicationStruct(
   DCHECK_OR_RETURN(output, false);
   SmartObject& message = *output;
   if (!app) {
-    LOGGER_WARN(logger_, "Application is not valid");
+    SDL_WARN("Application is not valid");
     return false;
   }
 
@@ -1297,8 +1297,7 @@ bool MessageHelper::CreateHMIApplicationStruct(
   if (-1 ==
       session_observer.GetDataOnDeviceID(
           app->device(), &device_name, NULL, &mac_address, &transport_type)) {
-    LOGGER_ERROR(logger_,
-                 "Failed to extract information for device " << app->device());
+    SDL_ERROR("Failed to extract information for device " << app->device());
   }
 
   message = smart_objects::SmartObject(smart_objects::SmartType_Map);
@@ -1345,7 +1344,7 @@ bool MessageHelper::CreateHMIApplicationStruct(
 void MessageHelper::SendAddSubMenuRequestToHMI(ApplicationConstSharedPtr app,
                                                ApplicationManager& app_mngr) {
   if (!app.valid()) {
-    LOGGER_ERROR(logger_, "Invalid application");
+    SDL_ERROR("Invalid application");
     return;
   }
 
@@ -1460,11 +1459,11 @@ smart_objects::SmartObjectSPtr MessageHelper::GetBCActivateAppRequestToHMI(
 
 void MessageHelper::SendOnResumeAudioSourceToHMI(const uint32_t app_id,
                                                  ApplicationManager& app_mngr) {
-  LOGGER_WARN(logger_, "SendOnResumeAudioSourceToHMI app_id: " << app_id);
+  SDL_WARN("SendOnResumeAudioSourceToHMI app_id: " << app_id);
   application_manager::ApplicationConstSharedPtr app =
       app_mngr.application(app_id);
   if (!app) {
-    LOGGER_WARN(logger_, "Invalid app_id: " << app_id);
+    SDL_WARN("Invalid app_id: " << app_id);
     return;
   }
 
@@ -1574,7 +1573,7 @@ void MessageHelper::SendGetUserFriendlyMessageResponse(
     const std::vector<policy::UserFriendlyMessage>& msg,
     uint32_t correlation_id,
     ApplicationManager& app_mngr) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   smart_objects::SmartObjectSPtr message =
       utils::MakeShared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
@@ -1677,7 +1676,7 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateNegativeResponse(
 
 void MessageHelper::SendNaviStartStream(const int32_t app_id,
                                         ApplicationManager& app_mngr) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   smart_objects::SmartObjectSPtr start_stream =
       CreateRequestObject(app_mngr.GetNextHMICorrelationID());
   if (!start_stream) {
@@ -1716,7 +1715,7 @@ void MessageHelper::SendNaviStartStream(const int32_t app_id,
 
 void MessageHelper::SendNaviStopStream(const int32_t app_id,
                                        ApplicationManager& app_mngr) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   smart_objects::SmartObjectSPtr stop_stream =
       CreateRequestObject(app_mngr.GetNextHMICorrelationID());
   if (!stop_stream) {
@@ -1733,7 +1732,7 @@ void MessageHelper::SendNaviStopStream(const int32_t app_id,
 
 void MessageHelper::SendAudioStartStream(const int32_t app_id,
                                          ApplicationManager& app_mngr) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   smart_objects::SmartObjectSPtr start_stream =
       CreateRequestObject(app_mngr.GetNextHMICorrelationID());
 
@@ -1773,7 +1772,7 @@ void MessageHelper::SendAudioStartStream(const int32_t app_id,
 
 void MessageHelper::SendAudioStopStream(const int32_t app_id,
                                         ApplicationManager& app_mngr) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   smart_objects::SmartObjectSPtr stop_stream =
       CreateRequestObject(app_mngr.GetNextHMICorrelationID());
   if (!stop_stream) {
@@ -1821,7 +1820,7 @@ void MessageHelper::SendOnDataStreaming(
 }
 
 bool MessageHelper::SendStopAudioPathThru(ApplicationManager& app_mngr) {
-  LOGGER_INFO(logger_, "MessageHelper::SendAudioStopAudioPathThru");
+  SDL_INFO("MessageHelper::SendAudioStopAudioPathThru");
 
   smart_objects::SmartObjectSPtr result =
       CreateRequestObject(app_mngr.GetNextHMICorrelationID());
@@ -1833,7 +1832,7 @@ bool MessageHelper::SendStopAudioPathThru(ApplicationManager& app_mngr) {
 }
 
 bool MessageHelper::SendUnsubscribedWayPoints(ApplicationManager& app_mngr) {
-  LOGGER_INFO(logger_, "MessageHelper::SendUnsubscribedWayPoints");
+  SDL_INFO("MessageHelper::SendUnsubscribedWayPoints");
 
   smart_objects::SmartObjectSPtr result =
       CreateRequestObject(app_mngr.GetNextHMICorrelationID());
@@ -1855,7 +1854,7 @@ void MessageHelper::SendPolicySnapshotNotification(
     content[strings::msg_params][strings::url] =
         url;  // Doesn't work with mobile_notification::syncp_url ("URL")
   } else {
-    LOGGER_WARN(logger_, "No service URLs");
+    SDL_WARN("No service URLs");
   }
 
   content[strings::msg_params][strings::request_type] =
@@ -2215,7 +2214,7 @@ mobile_apis::Result::eType MessageHelper::VerifyImageFiles(
       mobile_apis::Result::eType res =
           VerifyImageFiles(message[i], app, app_mngr);
       if (mobile_apis::Result::SUCCESS != res) {
-        LOGGER_DEBUG(logger_, "VerifyImageFiles result:" << res);
+        SDL_DEBUG("VerifyImageFiles result:" << res);
         return res;
       }
     }
@@ -2226,8 +2225,7 @@ mobile_apis::Result::eType MessageHelper::VerifyImageFiles(
           VerifyImage(message, app, app_mngr);
 
       if (mobile_apis::Result::SUCCESS != verification_result) {
-        LOGGER_DEBUG(logger_,
-                     "VerifyImageFiles result:" << verification_result);
+        SDL_DEBUG("VerifyImageFiles result:" << verification_result);
         return verification_result;  // exit point
       }
     } else {
@@ -2240,7 +2238,7 @@ mobile_apis::Result::eType MessageHelper::VerifyImageFiles(
           mobile_apis::Result::eType res =
               VerifyImageFiles(message[*key], app, app_mngr);
           if (mobile_apis::Result::SUCCESS != res) {
-            LOGGER_DEBUG(logger_, "VerifyImageFiles result:" << res);
+            SDL_DEBUG("VerifyImageFiles result:" << res);
             return res;
           }
         }
@@ -2327,9 +2325,9 @@ bool MessageHelper::VerifySoftButtonString(const std::string& str) {
       (std::string::npos != str.find("\\n")) ||
       (std::string::npos != str.find("\\t")) ||
       (std::string::npos == str.find_first_not_of(' '))) {
-    LOGGER_ERROR(logger_,
-                 "MessageHelper::VerifySoftButtonString"
-                 "string contains incorrect character");
+    SDL_ERROR(
+        "MessageHelper::VerifySoftButtonString"
+        "string contains incorrect character");
     return false;
   }
   return true;

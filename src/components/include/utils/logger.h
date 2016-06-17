@@ -40,6 +40,7 @@
 
 #if defined(LOG4CXX_LOGGER)
 #include <log4cxx/logger.h>
+#include "appenders_loader.h"
 #endif
 
 #include "utils/pimpl.h"
@@ -107,103 +108,103 @@ class Logger {
   static Pimpl impl_;
 };
 
+class LoggerAutoPtr {
+ public:
+  LoggerAutoPtr(const bool logs_enabled) {
+#if defined(LOG4CXX_LOGGER)
+    if (logs_enabled && utils::appenders_loader.Loaded()) {
+      logger::Logger::InitLogger(logs_enabled, "log4cxx.properties");
+    }
+#else
+    logger::Logger::InitLogger(
+        logs_enabled, logger::LogLevel::LL_TRACE, "SmartDeviceLink.log");
+#endif
+  }
+  ~LoggerAutoPtr() {
+    logger::Logger::DeinitLogger();
+  }
+};
+
 }  // namespace logger
 
-#undef INIT_LOGGER
+#undef SDL_EMPTY_WHILE
+#define SDL_EMPTY_WHILE(body) \
+  do {                        \
+    body                      \
+  } while (false);
+
+#undef SDL_FLUSH_LOGGER
+#define SDL_FLUSH_LOGGER() SDL_EMPTY_WHILE(logger::Logger::FlushLogger();)
+
+#undef SDL_SET_LOGGER
+#define SET_SDL_LOGGER(logger) \
+  SDL_EMPTY_WHILE(logger::Logger::SetLogger(logger);)
+
+#undef SDL_GET_LOGGER
+#define SDL_GET_LOGGER() logger::Logger::GetLogger()
+
+#undef SDL_CREATE_LOGGER
 #if defined(LOG4CXX_LOGGER)
-#define INIT_LOGGER(logs_enabled)             \
-  if (logs_enabled) {                         \
-    DCHECK(utils::appenders_loader.Loaded()); \
-  }                                           \
-  logger::Logger::InitLogger(logs_enabled, "log4cxx.properties");
+#define SDL_CREATE_LOGGER(logger_name)         \
+  static logger::LoggerType logger_module_ptr( \
+      log4cxx::Logger::getLogger(logger_name));
 #else
-#define INIT_LOGGER(logs_enabled) \
-  logger::Logger::InitLogger(     \
-      logs_enabled, logger::LogLevel::LL_TRACE, "SmartDeviceLink.log");
+#define SDL_CREATE_LOGGER(logger_name) \
+  static logger::LoggerType logger_module_ptr(logger_name);
 #endif
 
-#undef DEINIT_LOGGER
-#define DEINIT_LOGGER() logger::Logger::DeinitLogger()
-
-#undef FLUSH_LOGGER
-#define FLUSH_LOGGER() logger::Logger::FlushLogger()
-
-#undef SET_LOGGER
-#define SET_LOGGER(logger) logger::Logger::SetLogger(logger)
-
-#undef GET_LOGGER
-#define GET_LOGGER() logger::Logger::GetLogger()
-
-#undef CREATE_LOGGERPTR_LOCAL
-#if defined(LOG4CXX_LOGGER)
-#define CREATE_LOGGERPTR_LOCAL(logger_var, logger_name) \
-  logger::LoggerType logger_var(log4cxx::Logger::getLogger(logger_name));
-#else
-#define CREATE_LOGGERPTR_LOCAL(logger_var, logger_name) \
-  logger::LoggerType logger_var(logger_name);
-#endif
-
-#undef CREATE_LOGGERPTR_GLOBAL
-#define CREATE_LOGGERPTR_GLOBAL(logger_var, logger_name) \
-  namespace {                                            \
-  CREATE_LOGGERPTR_LOCAL(logger_var, logger_name);       \
-  }
-
-#undef LOG_WITH_LEVEL
-#define LOG_WITH_LEVEL(logger_var, level, message, line)    \
-  do {                                                      \
-    std::stringstream accumulator;                          \
-    accumulator << message;                                 \
-    logger::Logger::PushLog(                                \
-        logger_var,                                         \
-        level,                                              \
-        accumulator.str(),                                  \
-        logger::LogLocation(__FILE__, __FUNCTION__, line)); \
+#undef SDL_LOG_WITH_LEVEL
+#define SDL_LOG_WITH_LEVEL(logger_var, level, message, line) \
+  do {                                                       \
+    std::stringstream accumulator;                           \
+    accumulator << message;                                  \
+    logger::Logger::PushLog(                                 \
+        logger_var,                                          \
+        level,                                               \
+        accumulator.str(),                                   \
+        logger::LogLocation(__FILE__, __FUNCTION__, line));  \
   } while (false)
 
-#undef LOG_WITH_LEVEL_EXT
-#define LOG_WITH_LEVEL_EXT(logger_var, level, message, location)             \
+#undef SDL_LOG_WITH_LEVEL_EXT
+#define SDL_LOG_WITH_LEVEL_EXT(logger_var, level, message, location)         \
   do {                                                                       \
     std::stringstream accumulator;                                           \
     accumulator << message;                                                  \
     logger::Logger::PushLog(logger_var, level, accumulator.str(), location); \
   } while (false)
 
-#undef LOGGER_TRACE
-#define LOGGER_TRACE(logger_var, message) \
-  LOG_WITH_LEVEL(logger_var, logger::LogLevel::LL_TRACE, message, __LINE__)
+#undef SDL_LOG_MESSAGE
+#define SDL_LOG_MESSAGE(log_level, message) \
+  SDL_LOG_WITH_LEVEL(                       \
+      logger_module_ptr, logger::LogLevel::log_level, message, __LINE__)
 
-#undef LOGGER_DEBUG
-#define LOGGER_DEBUG(logger_var, message) \
-  LOG_WITH_LEVEL(logger_var, logger::LogLevel::LL_DEBUG, message, __LINE__)
+#undef SDL_TRACE
+#define SDL_TRACE(message) SDL_LOG_MESSAGE(LL_TRACE, message)
 
-#undef LOGGER_INFO
-#define LOGGER_INFO(logger_var, message) \
-  LOG_WITH_LEVEL(logger_var, logger::LogLevel::LL_INFO, message, __LINE__)
+#undef SDL_DEBUG
+#define SDL_DEBUG(message) SDL_LOG_MESSAGE(LL_DEBUG, message)
 
-#undef LOGGER_WARN
-#define LOGGER_WARN(logger_var, message) \
-  LOG_WITH_LEVEL(logger_var, logger::LogLevel::LL_WARN, message, __LINE__)
+#undef SDL_INFO
+#define SDL_INFO(message) SDL_LOG_MESSAGE(LL_INFO, message)
 
-#undef LOGGER_ERROR
-#define LOGGER_ERROR(logger_var, message) \
-  LOG_WITH_LEVEL(logger_var, logger::LogLevel::LL_ERROR, message, __LINE__)
+#undef SDL_WARN
+#define SDL_WARN(message) SDL_LOG_MESSAGE(LL_WARN, message)
 
-#undef LOGGER_FATAL
-#define LOGGER_FATAL(logger_var, message) \
-  LOG_WITH_LEVEL(logger_var, logger::LogLevel::LL_FATAL, message, __LINE__)
+#undef SDL_ERROR
+#define SDL_ERROR(message) SDL_LOG_MESSAGE(LL_ERROR, message)
 
-#undef LOGGER_WARN_WITH_ERRNO
-#define LOGGER_WARN_WITH_ERRNO(logger_var, message)                          \
-  LOGGER_WARN(logger_var,                                                    \
-              message << ", error code " << errno << " (" << strerror(errno) \
-                      << ")")
+#undef SDL_FATAL
+#define SDL_FATAL(message) SDL_LOG_MESSAGE(LL_FATAL, message)
 
-#undef LOGGER_ERROR_WITH_ERRNO
-#define LOGGER_ERROR_WITH_ERRNO(logger_var, message)                          \
-  LOGGER_ERROR(logger_var,                                                    \
-               message << ", error code " << errno << " (" << strerror(errno) \
-                       << ")")
+#undef SDL_WARN_WITH_ERRNO
+#define SDL_WARN_WITH_ERRNO(message)                                      \
+  SDL_WARN(message << ", error code " << errno << " (" << strerror(errno) \
+                   << ")")
+
+#undef SDL_ERROR_WITH_ERRNO
+#define SDL_ERROR_WITH_ERRNO(message)                                      \
+  SDL_ERROR(message << ", error code " << errno << " (" << strerror(errno) \
+                    << ")")
 
 namespace logger {
 
@@ -211,11 +212,11 @@ class AutoTrace {
  public:
   AutoTrace(const LoggerType& logger, const LogLocation& location)
       : logger_(logger), location_(location) {
-    LOG_WITH_LEVEL_EXT(logger_, LogLevel::LL_TRACE, "Enter", location_);
+    SDL_LOG_WITH_LEVEL_EXT(logger_, LogLevel::LL_TRACE, "Enter", location_);
   }
 
   ~AutoTrace() {
-    LOG_WITH_LEVEL_EXT(logger_, LogLevel::LL_TRACE, "Exit", location_);
+    SDL_LOG_WITH_LEVEL_EXT(logger_, LogLevel::LL_TRACE, "Exit", location_);
   }
 
  private:
@@ -225,69 +226,60 @@ class AutoTrace {
 
 }  // namespace logger
 
-#undef LOGGER_AUTO_TRACE
-#define LOGGER_AUTO_TRACE(logger_var) \
-  logger::AutoTrace auto_trace(       \
-      logger_var, logger::LogLocation(__FILE__, __FUNCTION__, __LINE__));
+#undef SDL_AUTO_TRACE
+#define SDL_AUTO_TRACE()        \
+  logger::AutoTrace auto_trace( \
+      logger_module_ptr,        \
+      logger::LogLocation(__FILE__, __FUNCTION__, __LINE__));
 
 #else  // ENABLE_LOG is OFF
 
-#undef INIT_LOGGER
-#define INIT_LOGGER(ini_file_name)
+#undef SDL_FLUSH_LOGGER
+#define SDL_FLUSH_LOGGER()
 
-#undef DEINIT_LOGGER
-#define DEINIT_LOGGER()
+#undef SDL_SET_LOGGER
+#define SDL_SET_LOGGER(logger)
 
-#undef FLUSH_LOGGER
-#define FLUSH_LOGGER()
+#undef SDL_GET_LOGGER
+#define SDL_GET_LOGGER()
 
-#undef SET_LOGGER
-#define SET_LOGGER(logger)
+#undef SDL_CREATE_LOGGER
+#define SDL_CREATE_LOGGER(logger_name)
 
-#undef GET_LOGGER
-#define GET_LOGGER()
+#undef SDL_LOG_WITH_LEVEL
+#define SDL_LOG_WITH_LEVEL(level, message, line)
 
-#undef CREATE_LOGGERPTR_LOCAL
-#define CREATE_LOGGERPTR_LOCAL(logger_var, logger_name)
+#undef SDL_LOG_WITH_LEVEL_EXT
+#define SDL_LOG_WITH_LEVEL_EXT(level, message, file, function, line)
 
-#undef CREATE_LOGGERPTR_GLOBAL
-#define CREATE_LOGGERPTR_GLOBAL(logger_var, logger_name)
+#undef SDL_TRACE
+#define SDL_TRACE(message)
 
-#undef LOG_WITH_LEVEL
-#define LOG_WITH_LEVEL(logger_var, level, message, line)
+#define SDL_AUTO_TRACE()
 
-#undef LOG_WITH_LEVEL_EXT
-#define LOG_WITH_LEVEL_EXT(logger_var, level, message, file, function, line)
+#undef SDL_DEBUG
+#define SDL_DEBUG(message)
 
-#undef LOGGER_TRACE
-#define LOGGER_TRACE(logger_var, message)
+#undef SDL_INFO
+#define SDL_INFO(message)
 
-#define LOGGER_AUTO_TRACE_WITH_NAME_SPECIFIED(loggerPtr, auto_trace)
-#define LOGGER_AUTO_TRACE(loggerPtr)
+#undef SDL_WARN
+#define SDL_WARN(message)
 
-#undef LOGGER_DEBUG
-#define LOGGER_DEBUG(logger_var, message)
+#undef SDL_ERROR
+#define SDL_ERROR(message)
 
-#undef LOGGER_INFO
-#define LOGGER_INFO(logger_var, message)
+#undef SDL_FATAL
+#define SDL_FATAL(message)
 
-#undef LOGGER_WARN
-#define LOGGER_WARN(logger_var, message)
+#undef SDL_WARN_WITH_ERRNO
+#define SDL_WARN_WITH_ERRNO(message)
 
-#undef LOGGER_ERROR
-#define LOGGER_ERROR(logger_var, message)
+#undef SDL_ERROR_WITH_ERRNO
+#define SDL_ERROR_WITH_ERRNO(message)
 
-#undef LOGGER_FATAL
-#define LOGGER_FATAL(logger_var, message)
-
-#undef LOGGER_WARN_WITH_ERRNO
-#define LOGGER_WARN_WITH_ERRNO(logger_var, message)
-
-#undef LOGGER_ERROR_WITH_ERRNO
-#define LOGGER_ERROR_WITH_ERRNO(logger_var, message)
-
-#undef LOGGER_AUTO_TRACE
-#define LOGGER_AUTO_TRACE(logger_var)
+#undef SDL_AUTO_TRACE
+#define SDL_AUTO_TRACE()
 #endif  // ENABLE_LOG
 
 #endif  // SRC_COMPONENTS_INCLUDE_UTILS_LOGGER_H_

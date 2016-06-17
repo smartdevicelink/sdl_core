@@ -44,7 +44,7 @@ ScrollableMessageResponse::ScrollableMessageResponse(
     : CommandResponseImpl(message, application_manager) {}
 
 void ScrollableMessageResponse::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   mobile_apis::Result::eType result_code =
       static_cast<mobile_apis::Result::eType>(
           (*message_)[strings::msg_params][strings::result_code].asInt());

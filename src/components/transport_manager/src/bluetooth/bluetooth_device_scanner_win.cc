@@ -54,7 +54,7 @@
 namespace transport_manager {
 namespace transport_adapter {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
+SDL_CREATE_LOGGER("TransportManager")
 
 BluetoothDeviceScanner::BluetoothDeviceScanner(
     TransportAdapterController* controller,
@@ -107,7 +107,7 @@ bool BluetoothDeviceScanner::IsInitialised() const {
 }
 
 void BluetoothDeviceScanner::UpdateTotalDeviceList() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   DeviceVector devices;
   devices.insert(devices.end(),
                  paired_devices_with_sdl_.begin(),
@@ -127,7 +127,7 @@ void BluetoothDeviceScanner::DoInquiry() {
       BluetoothFindFirstRadio(&bluetooth_find_param, &radio_handle);
 
   if (!hdbluetooth_dev_find_res) {
-    LOGGER_ERROR(logger_, "Failed to find first radio: " << GetLastError());
+    SDL_ERROR("Failed to find first radio: " << GetLastError());
     return;
   }
 
@@ -147,9 +147,8 @@ void BluetoothDeviceScanner::DoInquiry() {
       BLUETOOTH_RADIO_INFO radio_info;
       radio_info.dwSize = sizeof(radio_info);
       if (ERROR_SUCCESS != BluetoothGetRadioInfo(radio_handle, &radio_info)) {
-        LOGGER_WARN(logger_,
-                    "Bluetooth device not found. Error: "
-                        << utils::GetLastErrorMessage(GetLastError()));
+        SDL_WARN("Bluetooth device not found. Error: "
+                 << utils::GetLastErrorMessage(GetLastError()));
         return;
       }
       HANDLE device_find =
@@ -182,7 +181,7 @@ void BluetoothDeviceScanner::DoInquiry() {
     controller_->FindNewApplicationsRequest();
   }
   if (found_devices.empty()) {
-    LOGGER_DEBUG(logger_, "No devices were found");
+    SDL_DEBUG("No devices were found");
     controller_->SearchDeviceFailed(SearchDeviceError());
   }
 }
@@ -191,9 +190,8 @@ void BluetoothDeviceScanner::QueryBthProtocolInfo() {
   SOCKET bth_socket = ::socket(AF_BTH, SOCK_STREAM, BTHPROTO_RFCOMM);
   DWORD lastError = ::GetLastError();
   if (bth_socket == INVALID_SOCKET) {
-    LOGGER_ERROR(logger_,
-                 "Failed to get bluetooth socket! "
-                     << utils::GetLastErrorMessage(lastError));
+    SDL_ERROR("Failed to get bluetooth socket! "
+              << utils::GetLastErrorMessage(lastError));
     return;
   }
   int protocol_info_size = sizeof(protocol_info_);
@@ -205,9 +203,8 @@ void BluetoothDeviceScanner::QueryBthProtocolInfo() {
   lastError = ::GetLastError();
   closesocket(bth_socket);
   if (retVal) {
-    LOGGER_ERROR(logger_,
-                 "Failed to get bluetooth socket options! "
-                     << utils::GetLastErrorMessage(lastError));
+    SDL_ERROR("Failed to get bluetooth socket options! "
+              << utils::GetLastErrorMessage(lastError));
   }
 }
 
@@ -236,7 +233,7 @@ void BluetoothDeviceScanner::CheckSDLServiceOnDevices(
                     NI_NUMERICSERV);
 
     if (hci_read_remote_name_ret != 0) {
-      LOGGER_ERROR_WITH_ERRNO(logger_, "hci_read_remote_name failed");
+      SDL_ERROR_WITH_ERRNO("hci_read_remote_name failed");
       strncpy(deviceName,
               BluetoothDevice::GetUniqueDeviceId(bd_address).c_str(),
               sizeof(deviceName) / sizeof(deviceName[0]));
@@ -246,10 +243,10 @@ void BluetoothDeviceScanner::CheckSDLServiceOnDevices(
         bd_address, deviceName, sdl_rfcomm_channels[i], sock_addr_bth_server_);
 
     if (bluetooth_device) {
-      LOGGER_INFO(logger_, "Bluetooth device created successfully");
+      SDL_INFO("Bluetooth device created successfully");
       discovered_devices->push_back(bluetooth_device);
     } else {
-      LOGGER_WARN(logger_, "Can't create bluetooth device " << deviceName);
+      SDL_WARN("Can't create bluetooth device " << deviceName);
     }
   }
 }
@@ -315,9 +312,7 @@ bool BluetoothDeviceScanner::DiscoverSmartDeviceLinkRFCOMMChannels(
               handle_service_search, flags, &bufferLength, pResults)) {
         DWORD error = GetLastError();
         if (WSA_E_NO_MORE != error) {
-          LOGGER_WARN(
-              logger_,
-              "Service scan error: " << utils::GetLastErrorMessage(error));
+          SDL_WARN("Service scan error: " << utils::GetLastErrorMessage(error));
         }
         break;
       } else {
@@ -349,8 +344,7 @@ bool BluetoothDeviceScanner::DiscoverSmartDeviceLinkRFCOMMChannels(
     }
     WSALookupServiceEnd(handle_service_search);
   } else {
-    LOGGER_ERROR(
-        logger_,
+    SDL_ERROR(
         "Service search error:" << utils::GetLastErrorMessage(GetLastError()));
     return false;
   }
@@ -358,7 +352,7 @@ bool BluetoothDeviceScanner::DiscoverSmartDeviceLinkRFCOMMChannels(
 }
 
 void BluetoothDeviceScanner::Thread() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   ready_ = true;
   if (auto_repeat_search_) {
     while (!shutdown_requested_) {
@@ -392,7 +386,7 @@ void BluetoothDeviceScanner::TimedWaitForDeviceScanRequest() {
           device_scan_requested_cv_.WaitFor(auto_lock,
                                             auto_repeat_pause_sec_ * 1000);
       if (wait_status == sync_primitives::ConditionalVariable::kTimeout) {
-        LOGGER_INFO(logger_, "Bluetooth scanner timeout, performing scan");
+        SDL_INFO("Bluetooth scanner timeout, performing scan");
         device_scan_requested_ = true;
       }
     }
@@ -400,17 +394,17 @@ void BluetoothDeviceScanner::TimedWaitForDeviceScanRequest() {
 }
 
 TransportAdapter::Error BluetoothDeviceScanner::Init() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   if (!thread_->start()) {
-    LOGGER_ERROR(logger_, "Bluetooth device scanner thread start failed");
+    SDL_ERROR("Bluetooth device scanner thread start failed");
     return TransportAdapter::FAIL;
   }
-  LOGGER_INFO(logger_, "Bluetooth device scanner thread started");
+  SDL_INFO("Bluetooth device scanner thread started");
   return TransportAdapter::OK;
 }
 
 void BluetoothDeviceScanner::Terminate() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   shutdown_requested_ = true;
   if (thread_) {
     {
@@ -418,17 +412,16 @@ void BluetoothDeviceScanner::Terminate() {
       device_scan_requested_ = false;
       device_scan_requested_cv_.NotifyOne();
     }
-    LOGGER_INFO(logger_,
-                "Waiting for bluetooth device scanner thread termination");
+    SDL_INFO("Waiting for bluetooth device scanner thread termination");
     thread_->stop();
-    LOGGER_INFO(logger_, "Bluetooth device scanner thread stopped");
+    SDL_INFO("Bluetooth device scanner thread stopped");
   }
 }
 
 TransportAdapter::Error BluetoothDeviceScanner::Scan() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   if ((!IsInitialised()) || shutdown_requested_) {
-    LOGGER_WARN(logger_, "BAD_STATE");
+    SDL_WARN("BAD_STATE");
     return TransportAdapter::BAD_STATE;
   }
   if (auto_repeat_pause_sec_ == 0) {
@@ -438,12 +431,12 @@ TransportAdapter::Error BluetoothDeviceScanner::Scan() {
 
   sync_primitives::AutoLock auto_lock(device_scan_requested_lock_);
   if (!device_scan_requested_) {
-    LOGGER_TRACE(logger_, "Requesting device Scan");
+    SDL_TRACE("Requesting device Scan");
     device_scan_requested_ = true;
     device_scan_requested_cv_.NotifyOne();
   } else {
     ret = TransportAdapter::BAD_STATE;
-    LOGGER_WARN(logger_, "BAD_STATE");
+    SDL_WARN("BAD_STATE");
   }
   return ret;
 }
@@ -453,7 +446,7 @@ BluetoothDeviceScanner::BluetoothDeviceScannerDelegate::
     : scanner_(scanner) {}
 
 void BluetoothDeviceScanner::BluetoothDeviceScannerDelegate::threadMain() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   DCHECK(scanner_);
   scanner_->Thread();
 }

@@ -39,11 +39,11 @@ namespace application_manager {
 namespace commands {
 
 void UnregisterAppInterfaceRequest::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   if (!application_manager_.application(connection_key())) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
-    LOGGER_ERROR(logger_, "Application is not registered");
+    SDL_ERROR("Application is not registered");
     return;
   }
 

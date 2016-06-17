@@ -49,7 +49,7 @@ OnSystemRequestNotification::OnSystemRequestNotification(
 OnSystemRequestNotification::~OnSystemRequestNotification() {}
 
 void OnSystemRequestNotification::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   smart_objects::SmartObject& params = (*message_)[strings::params];
   smart_objects::SmartObject& msg_params = (*message_)[strings::msg_params];
@@ -63,33 +63,30 @@ void OnSystemRequestNotification::Run() {
   ApplicationSharedPtr app;
   if (msg_params.keyExists(strings::app_id)) {
     const uint32_t app_id = msg_params[strings::app_id].asUInt();
-    LOGGER_DEBUG(logger_, "Received OnSystemRequest for appID " << app_id);
-    LOGGER_DEBUG(logger_, "Searching app to send OnSystemRequest by appID.");
+    SDL_DEBUG("Received OnSystemRequest for appID " << app_id);
+    SDL_DEBUG("Searching app to send OnSystemRequest by appID.");
     app = application_manager_.application(app_id);
   } else {
-    LOGGER_DEBUG(logger_,
-                 "Received OnSystemRequest without appID."
-                 " One of registered apps will be used.");
-    LOGGER_DEBUG(logger_, "Searching registered app to send OnSystemRequest.");
+    SDL_DEBUG(
+        "Received OnSystemRequest without appID."
+        " One of registered apps will be used.");
+    SDL_DEBUG("Searching registered app to send OnSystemRequest.");
     const PolicyHandlerInterface& policy_handler =
         application_manager_.GetPolicyHandler();
     const uint32_t selected_app_id = policy_handler.GetAppIdForSending();
     if (0 == selected_app_id) {
-      LOGGER_WARN(logger_,
-                  "Can't select application to forward OnSystemRequest.");
+      SDL_WARN("Can't select application to forward OnSystemRequest.");
       return;
     }
     app = application_manager_.application(selected_app_id);
   }
 
   if (!app.valid()) {
-    LOGGER_WARN(logger_,
-                "No valid application found to forward OnSystemRequest.");
+    SDL_WARN("No valid application found to forward OnSystemRequest.");
     return;
   }
 
-  LOGGER_DEBUG(logger_,
-               "Sending request with application id " << app->policy_app_id());
+  SDL_DEBUG("Sending request with application id " << app->policy_app_id());
 
   params[strings::connection_key] = app->app_id();
   SendNotificationToMobile(message_);

@@ -48,14 +48,13 @@ DeleteInteractionChoiceSetRequest::DeleteInteractionChoiceSetRequest(
 DeleteInteractionChoiceSetRequest::~DeleteInteractionChoiceSetRequest() {}
 
 void DeleteInteractionChoiceSetRequest::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
-    LOGGER_ERROR(logger_,
-                 "No application associated with connection key "
-                     << connection_key());
+    SDL_ERROR("No application associated with connection key "
+              << connection_key());
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -65,14 +64,13 @@ void DeleteInteractionChoiceSetRequest::Run() {
           .asInt();
 
   if (!app->FindChoiceSet(choice_set_id)) {
-    LOGGER_ERROR(logger_,
-                 "Choice set with id " << choice_set_id << " is not found.");
+    SDL_ERROR("Choice set with id " << choice_set_id << " is not found.");
     SendResponse(false, mobile_apis::Result::INVALID_ID);
     return;
   }
 
   if (ChoiceSetInUse(app)) {
-    LOGGER_ERROR(logger_, "Choice set currently in use.");
+    SDL_ERROR("Choice set currently in use.");
     SendResponse(false, mobile_apis::Result::IN_USE);
     return;
   }
@@ -96,7 +94,7 @@ void DeleteInteractionChoiceSetRequest::Run() {
 
 bool DeleteInteractionChoiceSetRequest::ChoiceSetInUse(
     ApplicationConstSharedPtr app) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   if (!app->is_perform_interaction_active()) {
     return false;
   }
@@ -114,8 +112,7 @@ bool DeleteInteractionChoiceSetRequest::ChoiceSetInUse(
     PerformChoice::const_iterator choice_it = choice.begin();
     for (; choice.end() != choice_it; ++choice_it) {
       if (choice_it->first == choice_set_id) {
-        LOGGER_ERROR(logger_,
-                     "Choice set with id " << choice_set_id << " is in use.");
+        SDL_ERROR("Choice set with id " << choice_set_id << " is in use.");
         return true;
       }
     }
@@ -125,7 +122,7 @@ bool DeleteInteractionChoiceSetRequest::ChoiceSetInUse(
 
 void DeleteInteractionChoiceSetRequest::SendVrDeleteCommand(
     application_manager::ApplicationSharedPtr app) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   const uint32_t choice_set_id =
       (*message_)[strings::msg_params][strings::interaction_choice_set_id]
@@ -134,8 +131,7 @@ void DeleteInteractionChoiceSetRequest::SendVrDeleteCommand(
   smart_objects::SmartObject* choice_set = app->FindChoiceSet(choice_set_id);
 
   if (!choice_set) {
-    LOGGER_ERROR(logger_,
-                 "Choice set with id " << choice_set_id << " is not found.");
+    SDL_ERROR("Choice set with id " << choice_set_id << " is not found.");
     return;
   }
 

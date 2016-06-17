@@ -35,22 +35,19 @@
 #include "utils/pimpl_impl.h"
 #include "utils/socket_utils.h"
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
+SDL_CREATE_LOGGER("Utils")
 
 namespace {
 
 bool CloseSocket(SOCKET& socket) {
-  LOGGER_AUTO_TRACE(logger_);
-  LOGGER_DEBUG(logger_, "Closing socket " << socket);
+  SDL_AUTO_TRACE();
+  SDL_DEBUG("Closing socket " << socket);
   if (NULL == socket) {
-    LOGGER_DEBUG(logger_,
-                 "Socket " << socket << " is not valid. Skip closing.");
+    SDL_DEBUG("Socket " << socket << " is not valid. Skip closing.");
     return true;
   }
   if (SOCKET_ERROR == closesocket(socket)) {
-    LOGGER_WARN(logger_,
-                "Failed to close socket " << socket << ": "
-                                          << WSAGetLastError());
+    SDL_WARN("Failed to close socket " << socket << ": " << WSAGetLastError());
     return false;
   }
   socket = NULL;
@@ -58,7 +55,7 @@ bool CloseSocket(SOCKET& socket) {
 }
 
 HANDLE CreateNotifyEvent() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   HANDLE result = CreateEvent(NULL,   // no security attribute
                               true,   // is manual-reset event
                               false,  // initial state = non-signaled
@@ -143,9 +140,8 @@ utils::TcpSocketConnection::Impl::Impl(const SOCKET tcp_socket,
   // Set socket to non-block mode
   unsigned long socket_mode = 1;
   if (!ioctlsocket(tcp_socket_, FIONBIO, &socket_mode) == 0) {
-    LOGGER_ERROR(logger_,
-                 "Failed to set socket to non blocking mode. Error: "
-                     << WSAGetLastError());
+    SDL_ERROR("Failed to set socket to non blocking mode. Error: "
+              << WSAGetLastError());
     CloseSocket(tcp_socket_);
   }
 }
@@ -159,7 +155,7 @@ bool utils::TcpSocketConnection::Impl::Send(const char* const buffer,
                                             std::size_t& bytes_written) {
   bytes_written = 0u;
   if (!IsValid()) {
-    LOGGER_ERROR(logger_, "Failed to send data socket is not valid");
+    SDL_ERROR("Failed to send data socket is not valid");
     return false;
   }
   const int flags = 0;
@@ -167,7 +163,7 @@ bool utils::TcpSocketConnection::Impl::Send(const char* const buffer,
   int socket_error = WSAGetLastError();
   if (SOCKET_ERROR == written) {
     if (WSAEWOULDBLOCK != socket_error) {
-      LOGGER_ERROR(logger_, "Failed to send data: " << socket_error);
+      SDL_ERROR("Failed to send data: " << socket_error);
       return false;
     } else {
       return true;
@@ -176,30 +172,28 @@ bool utils::TcpSocketConnection::Impl::Send(const char* const buffer,
   // Lets double chek written because we have signed to unsigned conversion
   DCHECK(written >= 0);
   bytes_written = static_cast<size_t>(written);
-  LOGGER_DEBUG(logger_,
-               "Sent " << written << " bytes to socket " << tcp_socket_);
+  SDL_DEBUG("Sent " << written << " bytes to socket " << tcp_socket_);
   return true;
 }
 
 bool utils::TcpSocketConnection::Impl::Close() {
   if (!IsValid()) {
-    LOGGER_DEBUG(logger_, "Connection is not valid. Nothing to close.");
+    SDL_DEBUG("Connection is not valid. Nothing to close.");
     return true;
   }
-  LOGGER_DEBUG(logger_,
-               "Closing connection " << address_.ToString() << ":" << port_);
+  SDL_DEBUG("Closing connection " << address_.ToString() << ":" << port_);
 
   // Possibly we're waiting on Wait. We have to interrupt this.
   Notify();
 
   const BOOL event_closed = CloseHandle(notify_event_);
   if (!event_closed) {
-    LOGGER_WARN(logger_, "Failed to close event handler");
+    SDL_WARN("Failed to close event handler");
   }
 
   const bool socket_closed = CloseSocket(tcp_socket_);
   if (!socket_closed) {
-    LOGGER_WARN(logger_, "Failed to close socket handler");
+    SDL_WARN("Failed to close socket handler");
   }
 
   return event_closed && socket_closed;
@@ -229,15 +223,13 @@ uint16_t utils::TcpSocketConnection::Impl::GetPort() const {
 bool utils::TcpSocketConnection::Impl::Connect(const HostAddress& address,
                                                const uint16_t port) {
   if (IsValid()) {
-    LOGGER_ERROR(logger_, "Already connected. Closing existing connection.");
+    SDL_ERROR("Already connected. Closing existing connection.");
     Close();
     return false;
   }
   SOCKET client_socket = socket(AF_INET, SOCK_STREAM, 0);
   if (INVALID_SOCKET == client_socket) {
-    LOGGER_ERROR(
-        logger_,
-        "Failed to create client socket. Error: " << WSAGetLastError());
+    SDL_ERROR("Failed to create client socket. Error: " << WSAGetLastError());
     return false;
   }
   sockaddr_in server_address = {0};
@@ -247,10 +239,9 @@ bool utils::TcpSocketConnection::Impl::Connect(const HostAddress& address,
   if (!connect(client_socket,
                reinterpret_cast<sockaddr*>(&server_address),
                sizeof(server_address)) == 0) {
-    LOGGER_ERROR(logger_,
-                 "Failed to connect to the server "
-                     << address.ToString() << ":" << port
-                     << ". Error: " << WSAGetLastError());
+    SDL_ERROR("Failed to connect to the server "
+              << address.ToString() << ":" << port
+              << ". Error: " << WSAGetLastError());
     CloseSocket(client_socket);
     return false;
   }
@@ -269,7 +260,7 @@ void utils::TcpSocketConnection::Impl::OnError(int error) {
 }
 
 void utils::TcpSocketConnection::Impl::OnRead() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   if (!event_handler_) {
     return;
   }
@@ -280,23 +271,20 @@ void utils::TcpSocketConnection::Impl::OnRead() {
   do {
     bytes_read = recv(tcp_socket_, buffer, sizeof(buffer), 0);
     if (bytes_read > 0) {
-      LOGGER_DEBUG(logger_,
-                   "Received " << bytes_read << " bytes from socket "
-                               << tcp_socket_);
+      SDL_DEBUG("Received " << bytes_read << " bytes from socket "
+                            << tcp_socket_);
       uint8_t* casted_buffer = reinterpret_cast<uint8_t*>(buffer);
       event_handler_->OnData(casted_buffer, bytes_read);
     } else if (bytes_read < 0) {
       int socket_error = WSAGetLastError();
       if (bytes_read == SOCKET_ERROR && WSAEWOULDBLOCK != socket_error) {
-        LOGGER_ERROR(logger_,
-                     "recv() failed for connection "
-                         << tcp_socket_ << ". Error: " << socket_error);
+        SDL_ERROR("recv() failed for connection "
+                  << tcp_socket_ << ". Error: " << socket_error);
         OnError(socket_error);
         return;
       }
     } else {
-      LOGGER_WARN(logger_,
-                  "Socket " << tcp_socket_ << " closed by remote peer");
+      SDL_WARN("Socket " << tcp_socket_ << " closed by remote peer");
       OnError(WSAGetLastError());
       return;
     }
@@ -319,7 +307,7 @@ void utils::TcpSocketConnection::Impl::OnClose() {
 
 void utils::TcpSocketConnection::Impl::Wait() {
   if (!IsValid()) {
-    LOGGER_ERROR(logger_, "Cannot wait. Not connected.");
+    SDL_ERROR("Cannot wait. Not connected.");
     Close();
     return;
   }
@@ -343,14 +331,12 @@ void utils::TcpSocketConnection::Impl::Wait() {
   const bool is_notify_event = (waited_index == WAIT_OBJECT_0 + 1);
 
   if (is_socket_event || is_notify_event) {
-    LOGGER_DEBUG(logger_,
-                 "Waited event for the connection "
-                     << tcp_socket_ << ". Socket event: " << is_socket_event
-                     << ". Notify event: " << is_notify_event);
+    SDL_DEBUG("Waited event for the connection "
+              << tcp_socket_ << ". Socket event: " << is_socket_event
+              << ". Notify event: " << is_notify_event);
   } else {
-    LOGGER_ERROR(logger_,
-                 "Wait for socket or notification has failed with error: "
-                     << WSAGetLastError());
+    SDL_ERROR("Wait for socket or notification has failed with error: "
+              << WSAGetLastError());
     OnError(WSAGetLastError());
     return;
   }
@@ -359,24 +345,22 @@ void utils::TcpSocketConnection::Impl::Wait() {
     if (WSAEnumNetworkEvents(tcp_socket_,
                              events_to_wait[waited_index - WAIT_OBJECT_0],
                              &net_events) == SOCKET_ERROR) {
-      LOGGER_ERROR(logger_,
-                   "Failed to enum socket events: " << WSAGetLastError());
+      SDL_ERROR("Failed to enum socket events: " << WSAGetLastError());
       OnError(WSAGetLastError());
       return;
     }
     if (net_events.lNetworkEvents & FD_READ) {
-      LOGGER_DEBUG(logger_, "Network event: FD_READ");
+      SDL_DEBUG("Network event: FD_READ");
       OnRead();
       return;
     }
     if (net_events.lNetworkEvents & FD_WRITE) {
-      LOGGER_DEBUG(logger_, "Network event: FD_WRITE");
+      SDL_DEBUG("Network event: FD_WRITE");
       is_can_write = true;
     }
     if (net_events.lNetworkEvents & FD_CLOSE) {
-      LOGGER_DEBUG(logger_,
-                   "Network event: FD_CLOSE. "
-                       << "Connection " << this << " terminated");
+      SDL_DEBUG("Network event: FD_CLOSE. "
+                << "Connection " << this << " terminated");
       OnClose();
       return;
     }
@@ -397,7 +381,7 @@ bool utils::TcpSocketConnection::Impl::Notify() {
 
 void utils::TcpSocketConnection::Impl::SetEventHandler(
     TcpConnectionEventHandler* event_handler) {
-  LOGGER_DEBUG(logger_, "Setting event handle to " << event_handler);
+  SDL_DEBUG("Setting event handle to " << event_handler);
   event_handler_ = event_handler;
 }
 
@@ -520,32 +504,28 @@ bool utils::TcpServerSocket::Impl::Close() {
 bool utils::TcpServerSocket::Impl::Listen(const HostAddress& address,
                                           const uint16_t port,
                                           const int backlog) {
-  LOGGER_AUTO_TRACE(logger_);
-  LOGGER_DEBUG(logger_,
-               "Start listening on " << address.ToString() << ":" << port);
+  SDL_AUTO_TRACE();
+  SDL_DEBUG("Start listening on " << address.ToString() << ":" << port);
 
   if (IsListening()) {
-    LOGGER_ERROR(logger_,
-                 "Cannot listen " << address.ToString() << ":" << port
-                                  << ". Already listeneing.");
+    SDL_ERROR("Cannot listen " << address.ToString() << ":" << port
+                               << ". Already listeneing.");
     return false;
   }
 
   SOCKET server_socket = socket(AF_INET, SOCK_STREAM, 0);
 
   if (INVALID_SOCKET == server_socket) {
-    LOGGER_ERROR(logger_,
-                 "Failed to create server socket: " << WSAGetLastError());
+    SDL_ERROR("Failed to create server socket: " << WSAGetLastError());
     return false;
   }
-  LOGGER_DEBUG(logger_, "Created server socket " << socket);
+  SDL_DEBUG("Created server socket " << socket);
 
   char optval = 1;
   if (SOCKET_ERROR ==
       setsockopt(
           server_socket, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval))) {
-    LOGGER_ERROR(
-        logger_,
+    SDL_ERROR(
         "Failed to to set sockopt SO_REUSEADDR. Error: " << WSAGetLastError());
     return false;
   }
@@ -558,20 +538,18 @@ bool utils::TcpServerSocket::Impl::Listen(const HostAddress& address,
   if (SOCKET_ERROR == bind(server_socket,
                            reinterpret_cast<struct sockaddr*>(&server_address),
                            sizeof(server_address))) {
-    LOGGER_ERROR(logger_,
-                 "Failed to bind to " << address.ToString() << ":" << port
-                                      << ". Error: " << WSAGetLastError());
+    SDL_ERROR("Failed to bind to " << address.ToString() << ":" << port
+                                   << ". Error: " << WSAGetLastError());
     return false;
   }
 
   if (SOCKET_ERROR == listen(server_socket, backlog)) {
-    LOGGER_WARN(logger_,
-                "Failed to listen on " << address.ToString() << ":" << port
-                                       << ". Error: " << WSAGetLastError());
+    SDL_WARN("Failed to listen on " << address.ToString() << ":" << port
+                                    << ". Error: " << WSAGetLastError());
     return false;
   }
 
-  LOGGER_DEBUG(logger_, "Listening on " << address.ToString() << ":" << port);
+  SDL_DEBUG("Listening on " << address.ToString() << ":" << port);
 
   server_socket_ = server_socket;
   is_listening_ = true;
@@ -579,7 +557,7 @@ bool utils::TcpServerSocket::Impl::Listen(const HostAddress& address,
 }
 
 utils::TcpSocketConnection utils::TcpServerSocket::Impl::Accept() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   struct sockaddr_in client_address = {0};
   int client_address_length = sizeof(client_address);
@@ -587,22 +565,19 @@ utils::TcpSocketConnection utils::TcpServerSocket::Impl::Accept() {
                                 reinterpret_cast<sockaddr*>(&client_address),
                                 &client_address_length);
   if (SOCKET_ERROR == client_socket) {
-    LOGGER_ERROR(logger_,
-                 "Failed to accept client socket: " << WSAGetLastError());
+    SDL_ERROR("Failed to accept client socket: " << WSAGetLastError());
     return utils::TcpSocketConnection();
   }
   if (AF_INET != client_address.sin_family) {
-    LOGGER_ERROR(logger_,
-                 "Address of the connected client is invalid. Not AF_INET.");
+    SDL_ERROR("Address of the connected client is invalid. Not AF_INET.");
     CloseSocket(client_socket);
     return utils::TcpSocketConnection();
   }
   const HostAddress accepted_client_address(client_address.sin_addr.s_addr,
                                             false);
-  LOGGER_DEBUG(logger_,
-               "Accepted new client connection "
-                   << client_socket << " " << accepted_client_address.ToString()
-                   << ":" << client_address.sin_port);
+  SDL_DEBUG("Accepted new client connection "
+            << client_socket << " " << accepted_client_address.ToString() << ":"
+            << client_address.sin_port);
   return TcpSocketConnection(new TcpSocketConnection::Impl(
       client_socket, accepted_client_address, client_address.sin_port));
 }

@@ -43,7 +43,7 @@ VIGetDTCsRequest::VIGetDTCsRequest(const MessageSharedPtr& message,
 VIGetDTCsRequest::~VIGetDTCsRequest() {}
 
 void VIGetDTCsRequest::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   SendRequest();
 }

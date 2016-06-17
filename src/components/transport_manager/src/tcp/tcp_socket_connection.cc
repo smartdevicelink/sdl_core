@@ -41,7 +41,7 @@
 namespace transport_manager {
 namespace transport_adapter {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
+SDL_CREATE_LOGGER("TransportManager")
 
 TcpSocketConnection::TcpSocketConnection(const DeviceUID& device_uid,
                                          const ApplicationHandle& app_handle,
@@ -63,12 +63,12 @@ TcpServerOiginatedSocketConnection::TcpServerOiginatedSocketConnection(
 TcpServerOiginatedSocketConnection::~TcpServerOiginatedSocketConnection() {}
 
 bool TcpServerOiginatedSocketConnection::Establish(ConnectError** error) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   DCHECK(error);
-  LOGGER_DEBUG(logger_, "error " << error);
+  SDL_DEBUG("error " << error);
   DeviceSptr device = controller()->FindDevice(device_handle());
   if (!device.valid()) {
-    LOGGER_ERROR(logger_, "Device " << device_handle() << " not found");
+    SDL_ERROR("Device " << device_handle() << " not found");
     *error = new ConnectError();
     return false;
   }
@@ -76,21 +76,18 @@ bool TcpServerOiginatedSocketConnection::Establish(ConnectError** error) {
 
   const int port = tcp_device->GetApplicationPort(application_handle());
   if (-1 == port) {
-    LOGGER_ERROR(logger_,
-                 "Application port for " << application_handle()
-                                         << " not found");
+    SDL_ERROR("Application port for " << application_handle() << " not found");
     *error = new ConnectError();
     return false;
   }
 
   const std::string address = tcp_device->Address().ToString();
-  LOGGER_DEBUG(logger_, "Connecting to " << address << ":" << port);
+  SDL_DEBUG("Connecting to " << address << ":" << port);
   utils::TcpSocketConnection connection;
   if (!connection.Connect(tcp_device->Address(), port)) {
-    LOGGER_ERROR(logger_,
-                 "Failed to connect to the server " << address << ":" << port
-                                                    << " for application "
-                                                    << application_handle());
+    SDL_ERROR("Failed to connect to the server " << address << ":" << port
+                                                 << " for application "
+                                                 << application_handle());
     *error = new ConnectError();
     return false;
   }

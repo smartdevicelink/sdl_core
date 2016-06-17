@@ -161,12 +161,8 @@ class CommandImpl : public Command {
   bool allowed_to_terminate_;
   ApplicationManager& application_manager_;
 #ifdef ENABLE_LOG
-#if defined(OS_POSIX)
-  static log4cxx::LoggerPtr logger_;
-#elif defined(OS_WINDOWS)
-  static std::string logger_;
+  static logger::LoggerType logger_module_ptr;
 #endif
-#endif  // ENABLE_LOG
 
  private:
   DISALLOW_COPY_AND_ASSIGN(CommandImpl);

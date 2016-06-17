@@ -47,12 +47,12 @@ DiagnosticMessageRequest::DiagnosticMessageRequest(
 DiagnosticMessageRequest::~DiagnosticMessageRequest() {}
 
 void DiagnosticMessageRequest::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
-    LOGGER_ERROR(logger_, "Application is not registered.");
+    SDL_ERROR("Application is not registered.");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -68,9 +68,8 @@ void DiagnosticMessageRequest::Run() {
   if (supported_diag_modes.end() == std::find(supported_diag_modes.begin(),
                                               supported_diag_modes.end(),
                                               msg_diagnostic_mode)) {
-    LOGGER_ERROR(logger_,
-                 "Received diagnostic mode " << msg_diagnostic_mode
-                                             << " is not supported.");
+    SDL_ERROR("Received diagnostic mode " << msg_diagnostic_mode
+                                          << " is not supported.");
     SendResponse(false,
                  mobile_apis::Result::REJECTED,
                  "Received diagnostic mode is not supported.");
@@ -86,7 +85,7 @@ void DiagnosticMessageRequest::Run() {
 }
 
 void DiagnosticMessageRequest::on_event(const event_engine::Event& event) {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
@@ -101,7 +100,7 @@ void DiagnosticMessageRequest::on_event(const event_engine::Event& event) {
       break;
     }
     default: {
-      LOGGER_ERROR(logger_, "Received unknown event" << event.id());
+      SDL_ERROR("Received unknown event" << event.id());
       return;
     }
   }

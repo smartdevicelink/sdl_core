@@ -43,7 +43,7 @@ UpdateAppListRequest::UpdateAppListRequest(
 UpdateAppListRequest::~UpdateAppListRequest() {}
 
 void UpdateAppListRequest::Run() {
-  LOGGER_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   SendRequest();
 }
