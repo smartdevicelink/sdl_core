@@ -51,6 +51,7 @@
 #include "policy/mock_policy_listener.h"
 #include "policy/mock_cache_manager.h"
 #include "policy/mock_update_status_manager.h"
+#include "policy/sql_wrapper.h"
 
 #include "utils/sql_wrapper.h"
 #include "utils/macro.h"
