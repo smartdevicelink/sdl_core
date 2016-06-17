@@ -53,7 +53,6 @@ namespace media_manager {
 using sync_primitives::AutoLock;
 
 const int32_t AudioStreamSenderThread::kAudioPassThruTimeout = 1;
-const uint32_t kMqueueMessageSize = 4095;
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "MediaManager")
 

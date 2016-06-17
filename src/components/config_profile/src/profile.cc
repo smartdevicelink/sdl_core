@@ -264,7 +264,6 @@ const std::pair<uint32_t, uint32_t> kStartStreamRetryAmount =
 const uint32_t kDefaultMaxThreadPoolSize = 2;
 const int kDefaultIAP2HubConnectAttempts = 0;
 const int kDefaultIAPHubConnectionWaitTimeout = 10000;
-const int kDefaultIAPArmEventTimeout = 500;
 const uint16_t kDefaultTTSGlobalPropertiesTimeout = 20;
 // TCP MTU - header size = 1500 - 12
 const size_t kDefaultMaximumPayloadSize = 1500 - 12;
