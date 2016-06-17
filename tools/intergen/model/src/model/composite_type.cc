@@ -332,6 +332,7 @@ bool NullableType::operator<(const NullableType& that) const {
   if (type_ != that.type_) {
     return type_ < that.type_;
   }
+  return false;
 }
 
 TypeCodeGenerator* NullableType::Apply(
