@@ -68,7 +68,6 @@ ProtocolHandlerImpl::ProtocolHandlerImpl(
     , session_observer_(session_observer)
     , connection_handler_(connection_handler)
     , transport_manager_(transport_manager)
-    , kPeriodForNaviAck(5)
     ,
 #ifdef ENABLE_SECURITY
     security_manager_(NULL)

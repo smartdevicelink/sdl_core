@@ -25,285 +25,286 @@ namespace NsMessageBroker {
  * \brief CMessage class implementation.
  */
 class CMessage {
-  public:
-    /**
-     * \brief Constructor.
-     */
-    CMessage(int aSenderFp, Json::Value aMessage) {
-      mSenderFd = aSenderFp;
-      mMessage = aMessage;
-    }
+ public:
+  /**
+   * \brief Constructor.
+   */
+  CMessage(int aSenderFp, Json::Value aMessage) {
+    mSenderFd = aSenderFp;
+    mMessage = aMessage;
+  }
 
-    /**
-     * \brief Destructor.
-     */
-    ~CMessage() {
-    }
+  /**
+   * \brief Destructor.
+   */
+  ~CMessage() {}
 
-    /**
-     * \brief getter for Json::Value message.
-     * \return Json::Value message.
-     */
-    Json::Value getMessage() const {
-      return mMessage;
-    }
+  /**
+   * \brief getter for Json::Value message.
+   * \return Json::Value message.
+   */
+  Json::Value getMessage() const {
+    return mMessage;
+  }
 
-    /**
-     * \brief getter for sender FileDescriptor.
-     * \return sender FileDescriptor.
-     */
-    int getSenderFd() const {
-      return mSenderFd;
-    }
-  private:
-    /**
-     * \brief sender FileDescriptor.
-     */
-    int mSenderFd;
+  /**
+   * \brief getter for sender FileDescriptor.
+   * \return sender FileDescriptor.
+   */
+  int getSenderFd() const {
+    return mSenderFd;
+  }
 
-    /**
-     * \brief Json::Value message.
-     */
-    Json::Value mMessage;
+ private:
+  /**
+   * \brief sender FileDescriptor.
+   */
+  int mSenderFd;
+
+  /**
+   * \brief Json::Value message.
+   */
+  Json::Value mMessage;
 };
-
 
 class CMessageBroker_Private {
-  public:
-    /**
-     * \brief Constructor.
-     */
-    CMessageBroker_Private();
+ public:
+  /**
+   * \brief Constructor.
+   */
+  CMessageBroker_Private();
 
-    /**
-     * \brief Check if que empty (Thread safe).
-     * \return True when empty.
-     */
-    bool isEventQueueEmpty();
+  /**
+   * \brief Check if que empty (Thread safe).
+   * \return True when empty.
+   */
+  bool isEventQueueEmpty();
 
-    /**
-     * \brief Pop message from que (Thread safe).
-     * \return Pointer to CMessage.
-     */
-    CMessage* popMessage();
+  /**
+   * \brief Pop message from que (Thread safe).
+   * \return Pointer to CMessage.
+   */
+  CMessage* popMessage();
 
-    /**
-     * \brief Push message to que (Thread safe).
-     * \param pMessage pointer to new CMessage object.
-     */
-    void pushMessage(CMessage* pMessage);
+  /**
+   * \brief Push message to que (Thread safe).
+   * \param pMessage pointer to new CMessage object.
+   */
+  void pushMessage(CMessage* pMessage);
 
-    /**
-     * \brief gets  destination component name.
-     * \param pMessage JSON message.
-     * \return string destination component name.
-     */
-    std::string getDestinationComponentName(CMessage* pMessage);
+  /**
+   * \brief gets  destination component name.
+   * \param pMessage JSON message.
+   * \return string destination component name.
+   */
+  std::string getDestinationComponentName(CMessage* pMessage);
 
-    /**
-     * \brief gets  method name.
-     * \param pMessage JSON message.
-     * \return string method name.
-     */
-    std::string getMethodName(CMessage* pMessage);
+  /**
+   * \brief gets  method name.
+   * \param pMessage JSON message.
+   * \return string method name.
+   */
+  std::string getMethodName(CMessage* pMessage);
 
-    /**
-     * \brief checks is message notification or not.
-     * \param pMessage JSON message.
-     * \return true if notification.
-     */
-    bool isNotification(CMessage* pMessage);
+  /**
+   * \brief checks is message notification or not.
+   * \param pMessage JSON message.
+   * \return true if notification.
+   */
+  bool isNotification(CMessage* pMessage);
 
-    /**
-     * \brief checks is message response or not.
-     * \param pMessage JSON message.
-     * \return true if response.
-     */
-    bool isResponse(CMessage* pMessage);
+  /**
+   * \brief checks is message response or not.
+   * \param pMessage JSON message.
+   * \return true if response.
+   */
+  bool isResponse(CMessage* pMessage);
 
-    /**
-     * \brief checks message.
-     * \param pMessage JSON message.
-     * \param error JSON message to fill in case of any errors.
-     * \return true if message is good.
-     */
-    bool checkMessage(CMessage* pMessage, Json::Value& error);
+  /**
+   * \brief checks message.
+   * \param pMessage JSON message.
+   * \param error JSON message to fill in case of any errors.
+   * \return true if message is good.
+   */
+  bool checkMessage(CMessage* pMessage, Json::Value& error);
 
-    /**
-     * \brief Process internal MessageBrocker message
-     *
-     * \brief Register controller in MessageBroker.
-     *  Use following JSON command to register new component:
-     * \code
-     *  {"jsonrpc": "2.0", "method": "MB.registerComponent", "params": "<ComponentName>"}
-     * \endcode
-     *
-     * \brief Unregister controller in MessageBroker.
-     *  Use following JSON command to unregister component:
-     * \code
-     *  {"jsonrpc": "2.0", "method": "MB.unregisterComponent", "params": "<ComponentName>"}
-     * \endcode
-     *
-     * \brief Subscribe controller on property change.
-     *  Use following JSON command to subscribe to notifications:
-     * \code
-     *  {"jsonrpc": "2.0", "method": "MB.subscribeTo", "params": "<ComponentName>.<NotificationName>"}
-     * \endcode
-     *
-     * \brief Unsubscribe controller from property change.
-     *  Use following JSON command to unsubscribe from notifications:
-     * \code
-     *  {"jsonrpc": "2.0", "method": "MB.unsubscribeFrom", "params": "<ComponentName>.<NotificationName>"}
-     * \endcode
-     *
-     * \param pMessage JSON message.
-     */
-    void processInternalMessage(CMessage* pMessage);
+  /**
+   * \brief Process internal MessageBrocker message
+   *
+   * \brief Register controller in MessageBroker.
+   *  Use following JSON command to register new component:
+   * \code
+   *  {"jsonrpc": "2.0", "method": "MB.registerComponent", "params":
+   *"<ComponentName>"}
+   * \endcode
+   *
+   * \brief Unregister controller in MessageBroker.
+   *  Use following JSON command to unregister component:
+   * \code
+   *  {"jsonrpc": "2.0", "method": "MB.unregisterComponent", "params":
+   *"<ComponentName>"}
+   * \endcode
+   *
+   * \brief Subscribe controller on property change.
+   *  Use following JSON command to subscribe to notifications:
+   * \code
+   *  {"jsonrpc": "2.0", "method": "MB.subscribeTo", "params":
+   *"<ComponentName>.<NotificationName>"}
+   * \endcode
+   *
+   * \brief Unsubscribe controller from property change.
+   *  Use following JSON command to unsubscribe from notifications:
+   * \code
+   *  {"jsonrpc": "2.0", "method": "MB.unsubscribeFrom", "params":
+   *"<ComponentName>.<NotificationName>"}
+   * \endcode
+   *
+   * \param pMessage JSON message.
+   */
+  void processInternalMessage(CMessage* pMessage);
 
-    /**
-     * \brief process external message.
-     * \param pMessage JSON message.
-     */
-    void processExternalMessage(CMessage* pMessage);
+  /**
+   * \brief process external message.
+   * \param pMessage JSON message.
+   */
+  void processExternalMessage(CMessage* pMessage);
 
-    /**
-     * \brief process response.
-     * \param pMessage JSON message.
-     */
-    void processResponse(CMessage* pMessage);
+  /**
+   * \brief process response.
+   * \param pMessage JSON message.
+   */
+  void processResponse(CMessage* pMessage);
 
-    /**
-     * \brief Process notification message.
-     * \brief Notify subscribers about property change.
-     * expected notification format example:
-     * \code
-     * {"jsonrpc": "2.0", "method": "<ComponentName>.<NotificationName>", "params": <list of params>}
-     * \endcode
-     * \param pMessage JSON message.
-     */
-    void processNotification(CMessage* pMessage);
+  /**
+   * \brief Process notification message.
+   * \brief Notify subscribers about property change.
+   * expected notification format example:
+   * \code
+   * {"jsonrpc": "2.0", "method": "<ComponentName>.<NotificationName>",
+   * "params": <list of params>}
+   * \endcode
+   * \param pMessage JSON message.
+   */
+  void processNotification(CMessage* pMessage);
 
-    /**
-     * \brief send error message.
-     * \param pMessage JSON message.
-     */
-    void processError(CMessage* pMessage);
+  /**
+   * \brief send error message.
+   * \param pMessage JSON message.
+   */
+  void processError(CMessage* pMessage);
 
-    /**
-     * \brief send Json message.
-     * \param fd FileDescriptor of socket.
-     * \param message JSON message.
-     */
-    void sendJsonMessage(int fd, Json::Value message);
+  /**
+   * \brief send Json message.
+   * \param fd FileDescriptor of socket.
+   * \param message JSON message.
+   */
+  void sendJsonMessage(int fd, Json::Value message);
 
-    /**
-     * \brief push message to wait response que.
-     * \param pMessage JSON message.
-     */
-    void pushMessageToWaitQue(CMessage* pMessage);
+  /**
+   * \brief push message to wait response que.
+   * \param pMessage JSON message.
+   */
+  void pushMessageToWaitQue(CMessage* pMessage);
 
-    /**
-     * \brief Returns start position for Id's generator of controller.
-     * \return start position for Id's generator of controller (1000 id's).
-     */
-    int getNextControllerIdDiapason() {
-      return 1000 * mControllersIdCounter++;
-    }
+  /**
+   * \brief Returns start position for Id's generator of controller.
+   * \return start position for Id's generator of controller (1000 id's).
+   */
+  int getNextControllerIdDiapason() {
+    return 1000 * mControllersIdCounter++;
+  }
 
-    /**
-     * \brief pop message from wait response que.
-     * \param pMessage JSON message.
-     */
-    int popMessageFromWaitQue(CMessage* pMessage);
+  /**
+   * \brief pop message from wait response que.
+   * \param pMessage JSON message.
+   */
+  int popMessageFromWaitQue(CMessage* pMessage);
 
-    /**
-     * \brief Tries to remove the parsed part of the buffer
-     * \param root Parsed JSON value
-     * \param aJSONData The string buffer
-     * \return true on success, false on failure
-     */
-    bool cutParsedJSON(const Json::Value& root, std::string& aJSONData);
+  /**
+   * \brief Tries to remove the parsed part of the buffer
+   * \param root Parsed JSON value
+   * \param aJSONData The string buffer
+   * \return true on success, false on failure
+   */
+  bool cutParsedJSON(const Json::Value& root, std::string& aJSONData);
 
-    /**
-     * \brief Finds the position just after a JSON object or array in a buffer
-     * \param isObject Must be true for object, false for array
-     * \param aJSONData The string buffer
-     * \return The position in the buffer after the object or array on success,
-     *         std::strin::npos on failure
-     */
-    size_t jumpOverJSONObjectOrArray(bool isObject, const std::string& aJSONData);
+  /**
+   * \brief Finds the position just after a JSON object or array in a buffer
+   * \param isObject Must be true for object, false for array
+   * \param aJSONData The string buffer
+   * \return The position in the buffer after the object or array on success,
+   *         std::strin::npos on failure
+   */
+  size_t jumpOverJSONObjectOrArray(bool isObject, const std::string& aJSONData);
 
-    /**
-     * \brief Finds the position just after a JSON string in a buffer
-     * \param aJSONData The string buffer
-     * \return The position in the buffer after the string on success,
-     *         std::strin::npos on failure
-     */
-    size_t jumpOverJSONString(const std::string& aJSONData);
+  /**
+   * \brief Finds the position just after a JSON string in a buffer
+   * \param aJSONData The string buffer
+   * \return The position in the buffer after the string on success,
+   *         std::strin::npos on failure
+   */
+  size_t jumpOverJSONString(const std::string& aJSONData);
 
-    /**
-     * \brief Que of messages.
-     */
-    std::deque<CMessage*> mMessagesQueue;
+  /**
+   * \brief Que of messages.
+   */
+  std::deque<CMessage*> mMessagesQueue;
 
-    /**
-     * \brief Counter of messages Id's diapason for the next controllers
-     * From mControllersIdCounter*1000 to mControllersIdCounter*1000+999.
-     */
-    int mControllersIdCounter;
+  /**
+   * \brief Counter of messages Id's diapason for the next controllers
+   * From mControllersIdCounter*1000 to mControllersIdCounter*1000+999.
+   */
+  int mControllersIdCounter;
 
-    /**
-     * \brief Que of messages which are waiting the response in format: MessageId:SenderFd.
-     */
-    std::map<int, int> mWaitResponseQueue;
+  /**
+   * \brief Que of messages which are waiting the response in format:
+   * MessageId:SenderFd.
+   */
+  std::map<int, int> mWaitResponseQueue;
 
-    /**
-     * \brief Pointer to sender.
-     */
-    CSender* mpSender;
+  /**
+   * \brief Pointer to sender.
+   */
+  CSender* mpSender;
 
-    /**
-     * \brief Pointer to registry.
-     */
-    CMessageBrokerRegistry* mpRegistry;
+  /**
+   * \brief Pointer to registry.
+   */
+  CMessageBrokerRegistry* mpRegistry;
 
-    /**
-     * \brief JSON reader.
-     */
-    Json::Reader m_reader;
+  /**
+   * \brief JSON reader.
+   */
+  Json::Reader m_reader;
 
-    /**
-     * \brief JSON writer.
-     */
-    Json::FastWriter m_writer;
+  /**
+   * \brief JSON writer.
+   */
+  Json::FastWriter m_writer;
 
-    /**
-     * \brief JSON writer for receiver.
-     */
-    Json::FastWriter m_recieverWriter;
+  /**
+   * \brief JSON writer for receiver.
+   */
+  Json::FastWriter m_recieverWriter;
 
-    /**
-     * \brief Messages que mutex.
-     */
-    System::Mutex mMessagesQueueMutex;
+  /**
+   * \brief Messages que mutex.
+   */
+  System::Mutex mMessagesQueueMutex;
 
-    /**
-     * \brief Binary semaphore that is used to notify the
-     * messaging thread that a new message is available.
-     */
-    System::BinarySemaphore m_messageQueueSemaphore;
+  /**
+   * \brief Binary semaphore that is used to notify the
+   * messaging thread that a new message is available.
+   */
+  System::BinarySemaphore m_messageQueueSemaphore;
 };
 
-CMessageBroker_Private::CMessageBroker_Private() :
-  mControllersIdCounter(1),
-  mpSender(NULL) {
+CMessageBroker_Private::CMessageBroker_Private()
+    : mControllersIdCounter(1), mpSender(NULL) {
   mpRegistry = CMessageBrokerRegistry::getInstance();
 }
 
-
-CMessageBroker::CMessageBroker() :
-  p(new CMessageBroker_Private()) {
-}
+CMessageBroker::CMessageBroker() : p(new CMessageBroker_Private()) {}
 
 CMessageBroker::~CMessageBroker() {
   delete p, p = 0;
@@ -314,25 +315,26 @@ CMessageBroker* CMessageBroker::getInstance() {
   return &instance;
 }
 
-
-size_t CMessageBroker_Private::jumpOverJSONObjectOrArray(bool isObject,
-                                                 const std::string& aJSONData) {
-  const char openBracket  = isObject? '{' : '[';
-  const char closeBracket = isObject? '}' : ']';
+size_t CMessageBroker_Private::jumpOverJSONObjectOrArray(
+    bool isObject, const std::string& aJSONData) {
+  const char openBracket = isObject ? '{' : '[';
+  const char closeBracket = isObject ? '}' : ']';
   int open_minus_close_brackets(1);
-  size_t position = aJSONData.find(openBracket);  // Find the beginning of the object
+  size_t position =
+      aJSONData.find(openBracket);  // Find the beginning of the object
 
   while ((position != std::string::npos) && (open_minus_close_brackets > 0)) {
-    position = aJSONData.find_first_of(std::string("\"")+openBracket+closeBracket,
-                                       position+1);
+    position = aJSONData.find_first_of(
+        std::string("\"") + openBracket + closeBracket, position + 1);
     if (std::string::npos == position) {
       break;
     }
     if ('"' == aJSONData[position]) {
       // Ignore string interior, which might contain brackets and escaped "-s
       do {
-        position = aJSONData.find('"', position+1);  // Find the closing quote
-      } while ((std::string::npos != position) && ('\\' == aJSONData[position-1]));
+        position = aJSONData.find('"', position + 1);  // Find the closing quote
+      } while ((std::string::npos != position) &&
+               ('\\' == aJSONData[position - 1]));
     } else if (openBracket == aJSONData[position]) {
       ++open_minus_close_brackets;
     } else if (closeBracket == aJSONData[position]) {
@@ -349,13 +351,14 @@ size_t CMessageBroker_Private::jumpOverJSONObjectOrArray(bool isObject,
   return position;
 }
 
-
-size_t CMessageBroker_Private::jumpOverJSONString(const std::string& aJSONData) {
+size_t CMessageBroker_Private::jumpOverJSONString(
+    const std::string& aJSONData) {
   size_t position = aJSONData.find('"');  // Find the beginning of the string
 
   do {
-    position = aJSONData.find('"', position+1);  // Find the closing quote
-  } while ((std::string::npos != position) && ('\\' == aJSONData[position-1]));
+    position = aJSONData.find('"', position + 1);  // Find the closing quote
+  } while ((std::string::npos != position) &&
+           ('\\' == aJSONData[position - 1]));
 
   if (std::string::npos != position) {
     ++position;  // Move after the closing quote
@@ -363,7 +366,6 @@ size_t CMessageBroker_Private::jumpOverJSONString(const std::string& aJSONData) 
 
   return position;
 }
-
 
 bool CMessageBroker_Private::cutParsedJSON(const Json::Value& root,
                                            std::string& aJSONData) {
@@ -385,7 +387,7 @@ bool CMessageBroker_Private::cutParsedJSON(const Json::Value& root,
 
   // JSON writer puts '\n' at the end. Remove it.
   const size_t final_lf_pos = parsed_json_str.rfind('\n');
-  if (final_lf_pos == parsed_json_str.length()-1) {
+  if (final_lf_pos == parsed_json_str.length() - 1) {
     parsed_json_str.erase(final_lf_pos, 1);
   }
 
@@ -396,7 +398,8 @@ bool CMessageBroker_Private::cutParsedJSON(const Json::Value& root,
   size_t position(std::string::npos);
 
   if (0 == aJSONData.find(parsed_json_str)) {
-    // If by chance parsed JSON is the same in the buffer and is at the beginning
+    // If by chance parsed JSON is the same in the buffer and is at the
+    // beginning
     position = parsed_json_str.length();
   } else if (root.isObject() || root.isArray()) {
     position = jumpOverJSONObjectOrArray(root.isObject(), aJSONData);
@@ -426,7 +429,7 @@ bool CMessageBroker_Private::cutParsedJSON(const Json::Value& root,
   }
 
   if ((position >= aJSONData.length()) ||
-      ((position == aJSONData.length()-1) && isspace(aJSONData[position]))) {
+      ((position == aJSONData.length() - 1) && isspace(aJSONData[position]))) {
     // No next object. Clear entire aJSONData.
     aJSONData = "";
   } else {
@@ -437,19 +440,22 @@ bool CMessageBroker_Private::cutParsedJSON(const Json::Value& root,
   return true;
 }
 
+void CMessageBroker::onMessageReceived(int fd,
+                                       std::string& aJSONData,
+                                       bool tryHard) {
+  DBG_MSG(
+      ("CMessageBroker::onMessageReceived(%d, '%s')\n", fd, aJSONData.c_str()));
 
-void CMessageBroker::onMessageReceived(int fd, std::string& aJSONData, bool tryHard) {
-  DBG_MSG(("CMessageBroker::onMessageReceived(%d, '%s')\n", fd, aJSONData.c_str()));
-
-  while (! aJSONData.empty()) {
+  while (!aJSONData.empty()) {
     Json::Value root;
-    if ((! p->m_reader.parse(aJSONData, root)) || root.isNull()) {
+    if ((!p->m_reader.parse(aJSONData, root)) || root.isNull()) {
       DBG_MSG_ERROR(("Unable to parse JSON!"));
-      if (! tryHard) {
+      if (!tryHard) {
         return;
       }
       uint8_t first_byte = static_cast<uint8_t>(aJSONData[0]);
-      if ((first_byte <= 0x08) || ((first_byte >= 0x80) && (first_byte <= 0x88))) {
+      if ((first_byte <= 0x08) ||
+          ((first_byte >= 0x80) && (first_byte <= 0x88))) {
         DBG_MSG((" There is an unparsed websocket header probably.\n"));
         /* Websocket headers can have FIN flag set in the first byte (0x80).
          * Then there are 3 zero bits and 4 bits for opcode (from 0x00 to 0x0A).
@@ -467,18 +473,18 @@ void CMessageBroker::onMessageReceived(int fd, std::string& aJSONData, bool tryH
         continue;
       }
 
-    } else if (! root.isObject()) {
+    } else if (!root.isObject()) {
       /* JSON RPC 2.0 messages are objects. Batch calls must be pre-rpocessed,
        * so no need for "and !root.isArray()" */
       DBG_MSG_ERROR(("Parsed JSON is not an object!\n"));
-      if (! tryHard) {
+      if (!tryHard) {
         return;
       }
       // Cut parsed data from the buffer below and continue
 
-    } else if ((!root.isMember("jsonrpc")) || (root["jsonrpc"]!="2.0")) {
+    } else if ((!root.isMember("jsonrpc")) || (root["jsonrpc"] != "2.0")) {
       DBG_MSG_ERROR(("'jsonrpc' is not set correctly in parsed JSON!\n"));
-      if (! tryHard) {
+      if (!tryHard) {
         return;
       }
       // Cut parsed object from the buffer below and continue
@@ -497,22 +503,27 @@ void CMessageBroker::onMessageReceived(int fd, std::string& aJSONData, bool tryH
 void CMessageBroker::Test() {
   Json::Value root, err;
   std::string ReceivingBuffer =
-    "{\"id\":0,\"jsonrpc\":\"2.0\",\"method\":\"MB.registerComponent\",\"params\":{\"componentName\":\"AVA\"}}123{\"id\":0,\"jsonrpc\":\"2.0\",\"method\":\"MB.registerComponent\",\"params\":{\"componentName\":\"AVA\"}}";
+      "{\"id\":0,\"jsonrpc\":\"2.0\",\"method\":\"MB.registerComponent\","
+      "\"params\":{\"componentName\":\"AVA\"}}123{\"id\":0,\"jsonrpc\":\"2.0\","
+      "\"method\":\"MB.registerComponent\",\"params\":{\"componentName\":"
+      "\"AVA\"}}";
   DBG_MSG(("String is:%s\n", ReceivingBuffer.c_str()));
   while (1) {
     if (!p->m_reader.parse(ReceivingBuffer, root)) {
-      DBG_MSG_ERROR(("Received not JSON string! %s\n", ReceivingBuffer.c_str()));
+      DBG_MSG_ERROR(
+          ("Received not JSON string! %s\n", ReceivingBuffer.c_str()));
       return;
     }
     std::string wmes = p->m_recieverWriter.write(root);
-    DBG_MSG(("Parsed JSON string:%s; length: %d\n", wmes.c_str(), wmes.length()));
+    DBG_MSG(
+        ("Parsed JSON string:%s; length: %d\n", wmes.c_str(), wmes.length()));
     DBG_MSG(("Buffer is:%s\n", ReceivingBuffer.c_str()));
     ssize_t beginpos = static_cast<ssize_t>(ReceivingBuffer.find(wmes));
     ReceivingBuffer.erase(0, beginpos + wmes.length());
     DBG_MSG(("Buffer after cut is:%s\n", ReceivingBuffer.c_str()));
     CMessage message(0, root);
     if (p->checkMessage(&message, err)) {
-      //here put message to que
+      // here put message to que
     } else {
       DBG_MSG_ERROR(("Wrong message:%s\n", wmes.c_str()));
     }
@@ -542,7 +553,7 @@ CMessage* CMessageBroker_Private::popMessage() {
   mMessagesQueueMutex.Lock();
   if (false == mMessagesQueue.empty()) {
     ret = mMessagesQueue.front();
-    mMessagesQueue.pop_front();// delete message from que
+    mMessagesQueue.pop_front();  // delete message from que
   } else {
     DBG_MSG(("Que is empty!\n"));
   }
@@ -571,7 +582,8 @@ bool CMessageBroker_Private::isEventQueueEmpty() {
   return bResult;
 }
 
-std::string CMessageBroker_Private::getDestinationComponentName(CMessage* pMessage) {
+std::string CMessageBroker_Private::getDestinationComponentName(
+    CMessage* pMessage) {
   DBG_MSG(("CMessageBroker::getDestinationComponentName()\n"));
   std::string ret = "";
   if (pMessage) {
@@ -631,7 +643,8 @@ void CMessageBroker_Private::pushMessageToWaitQue(CMessage* pMessage) {
   DBG_MSG(("CMessageBroker::pushMessageToWaitQue()\n"));
   if (pMessage) {
     Json::Value root = pMessage->getMessage();
-    mWaitResponseQueue.insert(std::map<int, int>::value_type(root["id"].asInt(), pMessage->getSenderFd()));
+    mWaitResponseQueue.insert(std::map<int, int>::value_type(
+        root["id"].asInt(), pMessage->getSenderFd()));
   } else {
     DBG_MSG_ERROR(("NULL pointer!\n"));
   }
@@ -643,7 +656,7 @@ int CMessageBroker_Private::popMessageFromWaitQue(CMessage* pMessage) {
   if (pMessage) {
     Json::Value root = pMessage->getMessage();
     int messageId = root["id"].asInt();
-    std::map <int, int>::iterator it;
+    std::map<int, int>::iterator it;
     it = mWaitResponseQueue.find(messageId);
     if (it != mWaitResponseQueue.end()) {
       result = (*it).second;
@@ -664,9 +677,11 @@ void CMessageBroker_Private::processInternalMessage(CMessage* pMessage) {
     Json::Value root = pMessage->getMessage();
     if ("registerComponent" == amethodName) {
       Json::Value params = root["params"];
-      if (params.isMember("componentName") && params["componentName"].isString()) {
+      if (params.isMember("componentName") &&
+          params["componentName"].isString()) {
         std::string controllerName = params["componentName"].asString();
-        if (mpRegistry->addController(pMessage->getSenderFd(), controllerName)) {
+        if (mpRegistry->addController(pMessage->getSenderFd(),
+                                      controllerName)) {
           Json::Value response;
           response["id"] = root["id"];
           response["jsonrpc"] = "2.0";
@@ -692,7 +707,8 @@ void CMessageBroker_Private::processInternalMessage(CMessage* pMessage) {
       }
     } else if ("subscribeTo" == amethodName) {
       Json::Value params = root["params"];
-      if (params.isMember("propertyName") && params["propertyName"].isString()) {
+      if (params.isMember("propertyName") &&
+          params["propertyName"].isString()) {
         std::string propertyName = params["propertyName"].asString();
         if (mpRegistry->addSubscriber(pMessage->getSenderFd(), propertyName)) {
           Json::Value response;
@@ -720,7 +736,8 @@ void CMessageBroker_Private::processInternalMessage(CMessage* pMessage) {
       }
     } else if ("unregisterComponent" == amethodName) {
       Json::Value params = root["params"];
-      if (params.isMember("componentName") && params["componentName"].isString()) {
+      if (params.isMember("componentName") &&
+          params["componentName"].isString()) {
         std::string controllerName = params["componentName"].asString();
         mpRegistry->deleteController(controllerName);
         Json::Value response;
@@ -739,7 +756,8 @@ void CMessageBroker_Private::processInternalMessage(CMessage* pMessage) {
       }
     } else if ("unsubscribeFrom" == amethodName) {
       Json::Value params = root["params"];
-      if (params.isMember("propertyName") && params["propertyName"].isString()) {
+      if (params.isMember("propertyName") &&
+          params["propertyName"].isString()) {
         std::string propertyName = params["propertyName"].asString();
         mpRegistry->deleteSubscriber(pMessage->getSenderFd(), propertyName);
         Json::Value response;
@@ -838,7 +856,7 @@ void CMessageBroker_Private::processError(CMessage* pMessage) {
   DBG_MSG(("CMessageBroker::processError()\n"));
   if (pMessage) {
     sendJsonMessage(pMessage->getSenderFd(), pMessage->getMessage());
-    delete pMessage;// delete CMessage object with error description!!!
+    delete pMessage;  // delete CMessage object with error description!!!
   } else {
     DBG_MSG_ERROR(("NULL pointer\n"));
   }
@@ -860,7 +878,7 @@ void CMessageBroker_Private::sendJsonMessage(int fd, Json::Value message) {
 }
 
 void* CMessageBroker::MethodForThread(void* arg) {
-  arg = arg; // to avoid compiler warnings
+  UNUSED(arg);  // to avoid compiler warnings
   while (1) {
     while (!p->isEventQueueEmpty()) {
       CMessage* message = p->popMessage();
@@ -891,7 +909,7 @@ void* CMessageBroker::MethodForThread(void* arg) {
             DBG_MSG_ERROR(("NULL pointer!\n"));
           }
         }
-        delete message;// delete message object
+        delete message;  // delete message object
       }
     }
     p->m_messageQueueSemaphore.Wait();
@@ -900,14 +918,16 @@ void* CMessageBroker::MethodForThread(void* arg) {
   return NULL;
 }
 
-bool CMessageBroker_Private::checkMessage(CMessage* pMessage, Json::Value& error) {
+bool CMessageBroker_Private::checkMessage(CMessage* pMessage,
+                                          Json::Value& error) {
   DBG_MSG(("CMessageBroker::checkMessage()\n"));
   Json::Value root;
   root = pMessage->getMessage();
   Json::Value err;
 
   /* check the JSON-RPC version => 2.0 */
-  if (!root.isObject() || !root.isMember("jsonrpc") || root["jsonrpc"] != "2.0") {
+  if (!root.isObject() || !root.isMember("jsonrpc") ||
+      root["jsonrpc"] != "2.0") {
     error["id"] = Json::Value::null;
     error["jsonrpc"] = "2.0";
     err["code"] = INVALID_REQUEST;
@@ -917,7 +937,8 @@ bool CMessageBroker_Private::checkMessage(CMessage* pMessage, Json::Value& error
   }
 
   /* Check the id of message */
-  if (root.isMember("id") && (root["id"].isArray() || root["id"].isObject() || root["id"].isString())) {
+  if (root.isMember("id") && (root["id"].isArray() || root["id"].isObject() ||
+                              root["id"].isString())) {
     error["id"] = Json::Value::null;
     error["jsonrpc"] = "2.0";
     err["code"] = INVALID_REQUEST;
