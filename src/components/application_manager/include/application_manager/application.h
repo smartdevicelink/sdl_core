@@ -767,6 +767,7 @@ class Application : public virtual InitialApplicationData,
    * @brief Load persistent files from application folder.
    */
   virtual void LoadPersistentFiles() = 0;
+  virtual bool IsAppSubscribedForWayPoints(const uint32_t app_id) const = 0;
   /**
    * @brief Get available app space
    * @param name of the app folder(make + mobile app id)
