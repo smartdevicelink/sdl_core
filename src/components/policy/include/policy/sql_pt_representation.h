@@ -74,40 +74,43 @@ class SQLPTRepresentation : public virtual PTRepresentation {
   virtual void CheckPermissions(const PTString& app_id,
                                 const PTString& hmi_level,
                                 const PTString& rpc,
-                                CheckPermissionResult& result);
+                                CheckPermissionResult& result) OVERRIDE;
 
-  virtual bool IsPTPreloaded();
-  virtual int IgnitionCyclesBeforeExchange();
-  virtual int KilometersBeforeExchange(int current);
-  virtual bool SetCountersPassedForSuccessfulUpdate(int kilometers,
-                                                    int days_after_epoch);
-  virtual int DaysBeforeExchange(int current);
-  virtual void IncrementIgnitionCycles();
-  virtual void ResetIgnitionCycles();
-  virtual int TimeoutResponse();
-  virtual bool SecondsBetweenRetries(std::vector<int>* seconds);
-  virtual bool RefreshDB();
-  virtual const VehicleInfo GetVehicleInfo() const;
+  virtual bool IsPTPreloaded() OVERRIDE;
+  virtual int IgnitionCyclesBeforeExchange() OVERRIDE;
+  virtual int KilometersBeforeExchange(int current) OVERRIDE;
+  virtual bool SetCountersPassedForSuccessfulUpdate(
+      int kilometers, int days_after_epoch) OVERRIDE;
+  virtual int DaysBeforeExchange(int current) OVERRIDE;
+  virtual void IncrementIgnitionCycles() OVERRIDE;
+  virtual void ResetIgnitionCycles() OVERRIDE;
+  virtual int TimeoutResponse() OVERRIDE;
+  virtual bool SecondsBetweenRetries(std::vector<int>* seconds) OVERRIDE;
+  virtual bool RefreshDB() OVERRIDE;
+  virtual const VehicleInfo GetVehicleInfo() const OVERRIDE;
 
   virtual std::vector<UserFriendlyMessage> GetUserFriendlyMsg(
-      const std::vector<std::string>& msg_codes, const std::string& language);
+      const std::vector<std::string>& msg_codes,
+      const std::string& language) OVERRIDE;
 
-  virtual EndpointUrls GetUpdateUrls(int service_type);
-  virtual std::string GetLockScreenIconUrl() const;
-  virtual int GetNotificationsNumber(const std::string& priority);
+  virtual EndpointUrls GetUpdateUrls(int service_type) OVERRIDE;
+  virtual std::string GetLockScreenIconUrl() const OVERRIDE;
+  virtual int GetNotificationsNumber(const std::string& priority) OVERRIDE;
   virtual bool GetPriority(const std::string& policy_app_id,
-                           std::string* priority);
-  InitResult Init(const PolicySettings* settings);
-  bool Close();
-  bool Clear();
-  bool Drop();
-  virtual void WriteDb();
-  virtual utils::SharedPtr<policy_table::Table> GenerateSnapshot() const;
-  virtual bool Save(const policy_table::Table& table);
+                           std::string* priority) OVERRIDE;
+  InitResult Init(const PolicySettings* settings) OVERRIDE;
+  bool Close() OVERRIDE;
+  bool Clear() OVERRIDE;
+  bool Drop() OVERRIDE;
+  virtual void WriteDb() OVERRIDE;
+  virtual utils::SharedPtr<policy_table::Table> GenerateSnapshot()
+      const OVERRIDE;
+  virtual bool Save(const policy_table::Table& table) OVERRIDE;
   bool GetInitialAppData(const std::string& app_id,
                          StringArray* nicknames = NULL,
-                         StringArray* app_hmi_types = NULL);
-  bool GetFunctionalGroupings(policy_table::FunctionalGroupings& groups);
+                         StringArray* app_hmi_types = NULL) OVERRIDE;
+  bool GetFunctionalGroupings(
+      policy_table::FunctionalGroupings& groups) OVERRIDE;
 
 #ifdef BUILD_TESTS
   uint32_t open_counter() {
@@ -139,7 +142,7 @@ class SQLPTRepresentation : public virtual PTRepresentation {
   virtual bool SaveApplicationCustomData(const std::string& app_id,
                                          bool is_revoked,
                                          bool is_default,
-                                         bool is_predata);
+                                         bool is_predata) OVERRIDE;
 
   virtual bool SaveModuleMeta(const policy_table::ModuleMeta& meta);
   virtual bool SaveModuleConfig(const policy_table::ModuleConfig& config);
@@ -170,20 +173,20 @@ class SQLPTRepresentation : public virtual PTRepresentation {
                        const policy_table::RequestTypes& types);
 
  public:
-  bool UpdateRequired() const;
-  void SaveUpdateRequired(bool value);
+  bool UpdateRequired() const OVERRIDE;
+  void SaveUpdateRequired(bool value) OVERRIDE;
 
-  bool IsApplicationRepresented(const std::string& app_id) const;
+  bool IsApplicationRepresented(const std::string& app_id) const OVERRIDE;
   bool CopyApplication(const std::string& source,
                        const std::string& destination);
 
-  bool IsApplicationRevoked(const std::string& app_id) const;
-  virtual bool IsDefaultPolicy(const std::string& app_id) const;
-  virtual bool IsPredataPolicy(const std::string& app_id) const;
-  virtual bool SetDefaultPolicy(const std::string& app_id);
+  bool IsApplicationRevoked(const std::string& app_id) const OVERRIDE;
+  virtual bool IsDefaultPolicy(const std::string& app_id) const OVERRIDE;
+  virtual bool IsPredataPolicy(const std::string& app_id) const OVERRIDE;
+  virtual bool SetDefaultPolicy(const std::string& app_id) OVERRIDE;
   virtual void SetPreloaded(bool value);
 
-  virtual bool SetVINValue(const std::string& value);
+  virtual bool SetVINValue(const std::string& value) OVERRIDE;
 
   virtual utils::dbms::SQLDatabase* db() const;
   virtual bool SetIsDefault(const std::string& app_id, bool is_default) const;
@@ -212,8 +215,6 @@ class SQLPTRepresentation : public virtual PTRepresentation {
       const policy_table::NumberOfNotificationsPerMinute& notifications);
   bool SaveMessageType(const std::string& type);
   bool SaveLanguage(const std::string& code);
-
-  bool is_in_memory;
 };
 }  //  namespace policy
 

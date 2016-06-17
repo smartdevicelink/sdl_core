@@ -54,9 +54,9 @@ class ResponseFromHMI : public CommandImpl {
   ResponseFromHMI(const MessageSharedPtr& message,
                   ApplicationManager& application_manager);
   virtual ~ResponseFromHMI();
-  virtual bool Init();
-  virtual bool CleanUp();
-  virtual void Run();
+  bool Init() OVERRIDE;
+  bool CleanUp() OVERRIDE;
+  void Run() OVERRIDE;
   void SendResponseToMobile(const MessageSharedPtr& message,
                             ApplicationManager& application_manager);
 

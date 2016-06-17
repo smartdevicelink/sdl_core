@@ -69,7 +69,7 @@ class CreateInteractionChoiceSetRequest : public CommandRequestImpl {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   /**
@@ -77,13 +77,13 @@ class CreateInteractionChoiceSetRequest : public CommandRequestImpl {
    *
    * @param event The received event
    */
-  virtual void on_event(const event_engine::Event& event);
+  virtual void on_event(const event_engine::Event& event) OVERRIDE;
 
   /**
    * @brief Function is called by RequestController when request execution time
    * has exceed it's limit
    */
-  virtual void onTimeOut();
+  void onTimeOut() OVERRIDE;
   /**
    * @brief DeleteChoices allows to walk through the sent commands collection
    * in order to sent appropriate DeleteCommand request.

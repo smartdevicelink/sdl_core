@@ -69,7 +69,7 @@ class ResumptionDataJson : public ResumptionData {
    * @param hmi_app_id - hmi application id
    * @return true if exist, false otherwise
    */
-  virtual bool IsHMIApplicationIdExist(uint32_t hmi_app_id) const;
+  virtual bool IsHMIApplicationIdExist(uint32_t hmi_app_id) const OVERRIDE;
 
   /**
    * @brief Retrieves HMI app ID for the given mobile app ID
@@ -78,20 +78,21 @@ class ResumptionDataJson : public ResumptionData {
    * @param device_id - contains id of device on which is running application
    * @return HMI app ID
    */
-  virtual uint32_t GetHMIApplicationID(const std::string& policy_app_id,
-                                       const std::string& device_id) const;
+  virtual uint32_t GetHMIApplicationID(
+      const std::string& policy_app_id,
+      const std::string& device_id) const OVERRIDE;
 
   /**
    * @brief Increments ignition counter for all registered applications
    * and remember ign_off time stamp
    */
-  virtual void OnSuspend();
+  virtual void OnSuspend() OVERRIDE;
 
   /**
    * @brief Increments ignition counter for all registered applications
    * and remember ign_off time stamp
    */
-  virtual void OnAwake();
+  virtual void OnAwake() OVERRIDE;
 
   /**
    * @brief Retrieves hash ID for the given mobile app ID
@@ -105,7 +106,7 @@ class ResumptionDataJson : public ResumptionData {
    */
   virtual bool GetHashId(const std::string& policy_app_id,
                          const std::string& device_id,
-                         std::string& hash_id) const;
+                         std::string& hash_id) const OVERRIDE;
 
   /**
    * @brief Retrieves data of saved application for the given mobile app ID
@@ -116,9 +117,10 @@ class ResumptionDataJson : public ResumptionData {
    * @return TRUE if application will be found in saved data otherwise
    * returns FALSE
    */
-  virtual bool GetSavedApplication(const std::string& policy_app_id,
-                                   const std::string& device_id,
-                                   smart_objects::SmartObject& saved_app) const;
+  virtual bool GetSavedApplication(
+      const std::string& policy_app_id,
+      const std::string& device_id,
+      smart_objects::SmartObject& saved_app) const OVERRIDE;
 
   /**
    * @brief Remove application from list of saved applications
@@ -126,14 +128,14 @@ class ResumptionDataJson : public ResumptionData {
    * @param device_id - contains id of device on which is running application
    * @return return true, if success, otherwise return false
    */
-  virtual bool RemoveApplicationFromSaved(const std::string& policy_app_id,
-                                          const std::string& device_id);
+  virtual bool RemoveApplicationFromSaved(
+      const std::string& policy_app_id, const std::string& device_id) OVERRIDE;
 
   /**
    * @brief Get the last ignition off time from LastState
    * @return the last ignition off time from LastState
    */
-  virtual uint32_t GetIgnOffTime() const;
+  virtual uint32_t GetIgnOffTime() const OVERRIDE;
 
   /**
    * @brief Checks if saved data have application
@@ -141,15 +143,16 @@ class ResumptionDataJson : public ResumptionData {
    * @param device_id - contains id of device on which is running application
    * @return index if data of application exists, otherwise returns -1
    */
-  virtual ssize_t IsApplicationSaved(const std::string& policy_app_id,
-                                     const std::string& device_id) const;
+  virtual ssize_t IsApplicationSaved(
+      const std::string& policy_app_id,
+      const std::string& device_id) const OVERRIDE;
 
   /**
    * @brief Retrieves data from saved application
    * @param  will be contain data for resume_ctrl
    */
   virtual void GetDataForLoadResumeData(
-      smart_objects::SmartObject& saved_data) const;
+      smart_objects::SmartObject& saved_data) const OVERRIDE;
 
   /**
    * @brief Updates HMI level of saved application
@@ -159,9 +162,9 @@ class ResumptionDataJson : public ResumptionData {
    */
   virtual void UpdateHmiLevel(const std::string& policy_app_id,
                               const std::string& device_id,
-                              mobile_apis::HMILevel::eType hmi_level);
+                              mobile_apis::HMILevel::eType hmi_level) OVERRIDE;
 
-  virtual bool Init();
+  bool Init() OVERRIDE;
   bool DropAppDataResumption(const std::string& device_id,
                              const std::string& app_id) OVERRIDE;
 

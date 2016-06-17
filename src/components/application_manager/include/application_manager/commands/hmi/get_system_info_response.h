@@ -67,7 +67,7 @@ class GetSystemInfoResponse : public ResponseFromHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   const SystemInfo GetSystemInfo(

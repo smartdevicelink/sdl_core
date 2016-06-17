@@ -53,9 +53,9 @@ class NotificationFromHMI : public CommandImpl {
   NotificationFromHMI(const MessageSharedPtr& message,
                       ApplicationManager& application_manager);
   virtual ~NotificationFromHMI();
-  virtual bool Init();
-  virtual bool CleanUp();
-  virtual void Run();
+  bool Init() OVERRIDE;
+  bool CleanUp() OVERRIDE;
+  void Run() OVERRIDE;
   void SendNotificationToMobile(const MessageSharedPtr& message);
   void CreateHMIRequest(const hmi_apis::FunctionID::eType& function_id,
                         const smart_objects::SmartObject& msg_params) const;

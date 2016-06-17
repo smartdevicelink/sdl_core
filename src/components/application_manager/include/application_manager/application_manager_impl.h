@@ -273,7 +273,8 @@ class ApplicationManagerImpl
    *
    * @return true if exist otherwise false
    */
-  bool IsAppTypeExistsInFullOrLimited(ApplicationConstSharedPtr app) const;
+  bool IsAppTypeExistsInFullOrLimited(
+      ApplicationConstSharedPtr app) const OVERRIDE;
   /**
    * @brief Checks if Application is subscribed for way points
    * @param Application AppID
@@ -318,8 +319,8 @@ class ApplicationManagerImpl
 
   void OnApplicationRegistered(ApplicationSharedPtr app) OVERRIDE;
 
-  HMICapabilities& hmi_capabilities();
-  const HMICapabilities& hmi_capabilities() const;
+  HMICapabilities& hmi_capabilities() OVERRIDE;
+  const HMICapabilities& hmi_capabilities() const OVERRIDE;
 
   /**
    * @brief ProcessQueryApp executes logic related to QUERY_APP system request.
@@ -693,13 +694,16 @@ class ApplicationManagerImpl
    * @return Corresponding HMI TransporType value
    */
   hmi_apis::Common_TransportType::eType GetDeviceTransportType(
-      const std::string& transport_type);
+      const std::string& transport_type) OVERRIDE;
 
-  void set_hmi_message_handler(hmi_message_handler::HMIMessageHandler* handler);
-  void set_connection_handler(connection_handler::ConnectionHandler* handler);
-  void set_protocol_handler(protocol_handler::ProtocolHandler* handler);
+  void set_hmi_message_handler(
+      hmi_message_handler::HMIMessageHandler* handler) OVERRIDE;
+  void set_connection_handler(
+      connection_handler::ConnectionHandler* handler) OVERRIDE;
+  void set_protocol_handler(
+      protocol_handler::ProtocolHandler* handler) OVERRIDE;
 
-  void StartDevicesDiscovery();
+  void StartDevicesDiscovery() OVERRIDE;
 
   // Put message to the queue to be sent to mobile.
   // if |final_message| parameter is set connection to mobile will be closed
@@ -839,7 +843,7 @@ class ApplicationManagerImpl
                       bool state) OVERRIDE;
 
   mobile_api::HMILevel::eType GetDefaultHmiLevel(
-      ApplicationConstSharedPtr application) const;
+      ApplicationConstSharedPtr application) const OVERRIDE;
 
   /**
     * Getter for resume_controller

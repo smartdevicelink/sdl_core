@@ -64,7 +64,7 @@ class HeartBeatMonitorTest : public testing::Test {
   static const connection_handler::ConnectionHandle kConnectionHandle =
       0xABCDEF;
 
-  virtual void SetUp() {
+  void SetUp() OVERRIDE {
     conn = new connection_handler::Connection(
         kConnectionHandle, 0, &connection_handler_mock, kTimeout);
   }
