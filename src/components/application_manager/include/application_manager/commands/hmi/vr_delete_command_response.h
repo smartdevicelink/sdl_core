@@ -49,7 +49,8 @@ class VRDeleteCommandResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit VRDeleteCommandResponse(const MessageSharedPtr& message);
+  VRDeleteCommandResponse(const MessageSharedPtr& message,
+                          ApplicationManager& application_manager);
 
   /**
    * @brief VRDeleteCommandResponse class destructor
@@ -59,7 +60,7 @@ class VRDeleteCommandResponse : public ResponseFromHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(VRDeleteCommandResponse);

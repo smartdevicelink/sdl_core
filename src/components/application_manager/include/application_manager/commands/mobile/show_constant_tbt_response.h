@@ -51,7 +51,8 @@ class ShowConstantTBTResponse : public CommandResponseImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit ShowConstantTBTResponse(const MessageSharedPtr& message);
+  ShowConstantTBTResponse(const MessageSharedPtr& message,
+                          ApplicationManager& application_manager);
 
   /**
    * @brief ShowConstantTBTResponse class destructor
@@ -61,7 +62,7 @@ class ShowConstantTBTResponse : public CommandResponseImpl {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(ShowConstantTBTResponse);

@@ -49,7 +49,8 @@ class AllowAppRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit AllowAppRequest(const MessageSharedPtr& message);
+  AllowAppRequest(const MessageSharedPtr& message,
+                  ApplicationManager& application_manager);
 
   /**
    * @brief AllowAppRequest class destructor
@@ -59,7 +60,7 @@ class AllowAppRequest : public RequestToHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(AllowAppRequest);

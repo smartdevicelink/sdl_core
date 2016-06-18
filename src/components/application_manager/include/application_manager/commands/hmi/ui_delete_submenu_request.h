@@ -49,7 +49,8 @@ class UIDeleteSubmenuRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UIDeleteSubmenuRequest(const MessageSharedPtr& message);
+  UIDeleteSubmenuRequest(const MessageSharedPtr& message,
+                         ApplicationManager& application_manager);
 
   /**
    * @brief UIDeleteSubmenuRequest class destructor
@@ -59,7 +60,7 @@ class UIDeleteSubmenuRequest : public RequestToHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(UIDeleteSubmenuRequest);

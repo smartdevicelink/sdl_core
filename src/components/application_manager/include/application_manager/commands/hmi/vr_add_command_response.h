@@ -49,7 +49,8 @@ class VRAddCommandResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit VRAddCommandResponse(const MessageSharedPtr& message);
+  VRAddCommandResponse(const MessageSharedPtr& message,
+                       ApplicationManager& application_manager);
 
   /**
    * @brief VRAddCommandResponse class destructor
@@ -59,7 +60,7 @@ class VRAddCommandResponse : public ResponseFromHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(VRAddCommandResponse);

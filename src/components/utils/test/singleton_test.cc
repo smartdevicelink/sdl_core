@@ -36,13 +36,12 @@
 
 namespace test {
 namespace components {
-namespace utils {
+namespace utils_test {
 
 using ::utils::Singleton;
 
 class SingletonTest : public ::utils::Singleton<SingletonTest> {
  public:
-
   void SetValue(int value) {
     test_value = value;
   }
@@ -50,128 +49,129 @@ class SingletonTest : public ::utils::Singleton<SingletonTest> {
     return test_value;
   }
 
-  FRIEND_BASE_SINGLETON_CLASS (SingletonTest);
+  FRIEND_BASE_SINGLETON_CLASS(SingletonTest);
+
  private:
   int test_value;
 };
 
 TEST(SingletonTest, CreateAndDestroySingleton) {
-  //assert
+  // assert
   ASSERT_EQ(SingletonTest::instance(), SingletonTest::instance());
   ASSERT_EQ(0, SingletonTest::instance()->GetValue());
   ASSERT_TRUE(SingletonTest::exists());
   SingletonTest::instance()->SetValue(5);
   ASSERT_EQ(5, SingletonTest::instance()->GetValue());
 
-  //act
+  // act
   SingletonTest::destroy();
 
-  //assert
+  // assert
   ASSERT_FALSE(SingletonTest::exists());
 }
 
 TEST(SingletonTest, DestroySingletonTwice) {
-  //assert
+  // assert
   ASSERT_EQ(0, SingletonTest::instance()->GetValue());
   ASSERT_TRUE(SingletonTest::exists());
 
-  //act
+  // act
   SingletonTest::destroy();
-  //assert
+  // assert
   ASSERT_FALSE(SingletonTest::exists());
 
-  //act
+  // act
   SingletonTest::destroy();
-  //assert
+  // assert
   ASSERT_FALSE(SingletonTest::exists());
 }
 
 TEST(SingletonTest, DeleteSingletonCreateAnother) {
-  //arrange
+  // arrange
   SingletonTest::instance()->SetValue(10);
-  //assert
+  // assert
   ASSERT_TRUE(SingletonTest::exists());
   ASSERT_EQ(10, SingletonTest::instance()->GetValue());
-  //act
+  // act
   SingletonTest::destroy();
-  //assert
+  // assert
   ASSERT_FALSE(SingletonTest::exists());
 
-  //act
+  // act
   SingletonTest::instance();
 
-  //assert
+  // assert
   ASSERT_EQ(0, SingletonTest::instance()->GetValue());
   ASSERT_TRUE(SingletonTest::exists());
   SingletonTest::destroy();
 }
 
 void* func_pthread1(void*) {
-  SingletonTest* singleton_in_other_thread =  SingletonTest::instance();
+  SingletonTest* singleton_in_other_thread = SingletonTest::instance();
   pthread_exit(singleton_in_other_thread);
   return NULL;
 }
 
-void* func_pthread2(void * value) {
-  SingletonTest * instance = reinterpret_cast<SingletonTest *>(value);
+void* func_pthread2(void* value) {
+  SingletonTest* instance = reinterpret_cast<SingletonTest*>(value);
   instance->destroy();
-  pthread_exit (NULL);
+  pthread_exit(NULL);
   return NULL;
 }
 
 TEST(SingletonTest, CreateSingletonInDifferentThreads) {
-  //arrange
+  // arrange
   SingletonTest::instance();
   ASSERT_TRUE(SingletonTest::exists());
 
   pthread_t thread1;
   pthread_create(&thread1, NULL, func_pthread1, NULL);
 
-  void *instance2;
+  void* instance2;
   pthread_join(thread1, &instance2);
-  SingletonTest * instance_2 = reinterpret_cast<SingletonTest *>(instance2);
+  SingletonTest* instance_2 = reinterpret_cast<SingletonTest*>(instance2);
 
-  //assert
+  // assert
   ASSERT_EQ(SingletonTest::instance(), instance_2);
 
-  //act
+  // act
   SingletonTest::destroy();
-  //assert
+  // assert
   ASSERT_FALSE(SingletonTest::exists());
 }
 
 TEST(SingletonTest, CreateDeleteSingletonInDifferentThreads) {
-  //arrange
+  // arrange
   pthread_t thread1;
   pthread_create(&thread1, NULL, func_pthread1, NULL);
 
   pthread_t thread2;
   pthread_create(&thread2, NULL, func_pthread1, NULL);
 
-  void *instance1;
+  void* instance1;
   pthread_join(thread1, &instance1);
-  SingletonTest * instance_1 = reinterpret_cast<SingletonTest *>(instance1);
+  SingletonTest* instance_1 = reinterpret_cast<SingletonTest*>(instance1);
 
-  void *instance2;
+  void* instance2;
   pthread_join(thread2, &instance2);
-  SingletonTest * instance_2 = reinterpret_cast<SingletonTest *>(instance2);
+  SingletonTest* instance_2 = reinterpret_cast<SingletonTest*>(instance2);
 
-  //assert
+  // assert
   ASSERT_TRUE(instance_1->exists());
   ASSERT_TRUE(instance_2->exists());
 
   ASSERT_EQ(instance_1, instance_2);
 
-  //act
+  // act
   SingletonTest::destroy();
 
-  //assert
+  // assert
   ASSERT_FALSE(instance_1->exists());
   ASSERT_FALSE(instance_2->exists());
 }
 
 TEST(SingletonTest, DeleteSingletonInDifferentThread) {
-  //arrange
+  // arrange
   SingletonTest::instance();
   ASSERT_TRUE(SingletonTest::exists());
 
@@ -180,10 +180,10 @@ TEST(SingletonTest, DeleteSingletonInDifferentThread) {
 
   pthread_join(thread1, NULL);
 
-  //assert
+  // assert
   ASSERT_FALSE(SingletonTest::exists());
 }
 
-}  // namespace utils
+}  // namespace utils_test
 }  // namespace components
 }  // namespace test

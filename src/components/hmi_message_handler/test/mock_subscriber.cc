@@ -30,30 +30,23 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <dbus/dbus.h>
-#include "include/mock_subscriber.h"
-
+#include "dbus/dbus.h"
+#include "hmi_message_handler/mock_subscriber.h"
 
 namespace test {
 namespace components {
-namespace hmi_message_handler {
+namespace hmi_message_handler_test {
 
-MockSubscriber::MockSubscriber(
-    const std::string & nameService, const std::string & path)
-    : nameService_(nameService),
-      path_(path),
-      conn_(NULL) {
-}
+MockSubscriber::MockSubscriber(const std::string& nameService,
+                               const std::string& path)
+    : nameService_(nameService), path_(path), conn_(NULL) {}
 
-MockSubscriber::~MockSubscriber() {
-}
+MockSubscriber::~MockSubscriber() {}
 
-void MockSubscriber::Receive() {
-}
+void MockSubscriber::Receive() {}
 
 bool MockSubscriber::Start() {
   DBusError err;
-  //int ret;
   dbus_error_init(&err);
   conn_ = dbus_bus_get(DBUS_BUS_SESSION, &err);
   if (dbus_error_is_set(&err)) {
@@ -61,21 +54,18 @@ bool MockSubscriber::Start() {
     return false;
   }
 
-
   std::string rule = "type='signal',interface='" + nameService_ + "'";
   dbus_bus_add_match(conn_, rule.c_str(), &err);
   dbus_connection_flush(conn_);
   if (dbus_error_is_set(&err)) {
-	dbus_error_free(&err);
+    dbus_error_free(&err);
     return false;
   }
   return true;
 }
 
-void MockSubscriber::Send(const std::string& message) {
- // int a = message.length();
-}
+void MockSubscriber::Send(const std::string& message) {}
 
-}  // namespace hmi_message_handler
+}  // namespace hmi_message_handler_test
 }  // namespace components
 }  // namespace test

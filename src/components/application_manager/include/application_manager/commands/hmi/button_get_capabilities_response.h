@@ -49,7 +49,8 @@ class ButtonGetCapabilitiesResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit ButtonGetCapabilitiesResponse(const MessageSharedPtr& message);
+  ButtonGetCapabilitiesResponse(const MessageSharedPtr& message,
+                                ApplicationManager& application_manager);
 
   /**
    * @brief ButtonGetCapabilitiesResponse class destructor
@@ -59,7 +60,7 @@ class ButtonGetCapabilitiesResponse : public ResponseFromHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(ButtonGetCapabilitiesResponse);

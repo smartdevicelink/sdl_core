@@ -49,7 +49,8 @@ class OnAppDeactivatedNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnAppDeactivatedNotification(const MessageSharedPtr& message);
+  OnAppDeactivatedNotification(const MessageSharedPtr& message,
+                               ApplicationManager& application_manager);
 
   /**
    * @brief OnAppDeactivatedNotification class destructor
@@ -59,7 +60,7 @@ class OnAppDeactivatedNotification : public NotificationFromHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(OnAppDeactivatedNotification);

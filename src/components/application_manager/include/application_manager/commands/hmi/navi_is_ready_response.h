@@ -49,7 +49,8 @@ class NaviIsReadyResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit NaviIsReadyResponse(const MessageSharedPtr& message);
+  NaviIsReadyResponse(const MessageSharedPtr& message,
+                      ApplicationManager& application_manager);
 
   /**
    * @brief NaviIsReadyResponse class destructor
@@ -59,7 +60,7 @@ class NaviIsReadyResponse : public ResponseFromHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(NaviIsReadyResponse);

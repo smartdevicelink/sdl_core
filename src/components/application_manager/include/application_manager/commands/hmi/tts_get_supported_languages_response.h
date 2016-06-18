@@ -49,7 +49,8 @@ class TTSGetSupportedLanguagesResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit TTSGetSupportedLanguagesResponse(const MessageSharedPtr& message);
+  TTSGetSupportedLanguagesResponse(const MessageSharedPtr& message,
+                                   ApplicationManager& application_manager);
 
   /**
    * @brief TTSGetSupportedLanguagesResponse class destructor
@@ -59,7 +60,7 @@ class TTSGetSupportedLanguagesResponse : public ResponseFromHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(TTSGetSupportedLanguagesResponse);

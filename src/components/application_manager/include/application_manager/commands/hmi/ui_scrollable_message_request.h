@@ -49,7 +49,8 @@ class UIScrollableMessageRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UIScrollableMessageRequest(const MessageSharedPtr& message);
+  UIScrollableMessageRequest(const MessageSharedPtr& message,
+                             ApplicationManager& application_manager);
 
   /**
    * @brief UIScrollableMessageRequest class destructor
@@ -59,7 +60,7 @@ class UIScrollableMessageRequest : public RequestToHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(UIScrollableMessageRequest);

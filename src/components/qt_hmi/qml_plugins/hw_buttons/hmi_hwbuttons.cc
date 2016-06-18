@@ -35,16 +35,16 @@
 #include "hmi_hwbuttons.h"
 
 #if QT_4
-#  include <QtDeclarative/qdeclarative.h>
-#  include <QtGui/QGraphicsColorizeEffect>
+#include <QtDeclarative/qdeclarative.h>
+#include <QtGui/QGraphicsColorizeEffect>
 #elif QT_5
-#  include <QtQml>
+#include <QtQml>
 #endif  // QT_VERSION
 
 #include "masked_container.h"
 #include "attributed_mouse_event.h"
 
-void HmiHWButtons::registerTypes(const char *uri) {
+void HmiHWButtons::registerTypes(const char* uri) {
   // @uri com.ford.hmi_framework
   qmlRegisterType<MaskedContainer>(uri, 1, 0, "MaskedContainer");
   qmlRegisterType<AttributedMouseEvent>();

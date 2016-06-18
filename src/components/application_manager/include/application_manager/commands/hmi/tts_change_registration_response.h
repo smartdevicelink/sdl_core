@@ -49,7 +49,8 @@ class TTSChangeRegistratioResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit TTSChangeRegistratioResponse(const MessageSharedPtr& message);
+  TTSChangeRegistratioResponse(const MessageSharedPtr& message,
+                               ApplicationManager& application_manager);
 
   /**
    * @brief TTSChangeRegistratioResponse class destructor
@@ -59,7 +60,7 @@ class TTSChangeRegistratioResponse : public ResponseFromHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(TTSChangeRegistratioResponse);

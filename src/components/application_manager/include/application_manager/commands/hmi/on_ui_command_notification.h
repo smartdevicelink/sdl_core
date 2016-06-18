@@ -49,7 +49,8 @@ class OnUICommandNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnUICommandNotification(const MessageSharedPtr& message);
+  OnUICommandNotification(const MessageSharedPtr& message,
+                          ApplicationManager& application_manager);
 
   /**
    * @brief OnUICommandNotification class destructor
@@ -59,7 +60,7 @@ class OnUICommandNotification : public NotificationFromHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(OnUICommandNotification);

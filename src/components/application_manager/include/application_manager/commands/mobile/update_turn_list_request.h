@@ -52,7 +52,8 @@ class UpdateTurnListRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UpdateTurnListRequest(const MessageSharedPtr& message);
+  UpdateTurnListRequest(const MessageSharedPtr& message,
+                        ApplicationManager& application_manager);
 
   /**
    * @brief UpdateTurnListRequest class destructor
@@ -62,14 +63,14 @@ class UpdateTurnListRequest : public CommandRequestImpl {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
   /**
    * @brief Interface method that is called whenever new event received
    *
    * @param event The received event
    */
-  virtual void on_event(const event_engine::Event& event);
+  virtual void on_event(const event_engine::Event& event) OVERRIDE;
 
  private:
   /**

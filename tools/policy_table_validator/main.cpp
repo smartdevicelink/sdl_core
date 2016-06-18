@@ -1,6 +1,6 @@
 #include <iostream>
 #include <cstdlib>
-#include "policy_table/table_struct/types.h"
+#include "policy/policy_table/types.h"
 
 #include "json/reader.h"
 #include "utils/file_system.h"

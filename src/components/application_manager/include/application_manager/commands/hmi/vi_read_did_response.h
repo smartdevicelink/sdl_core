@@ -49,7 +49,8 @@ class VIReadDIDResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit VIReadDIDResponse(const MessageSharedPtr& message);
+  VIReadDIDResponse(const MessageSharedPtr& message,
+                    ApplicationManager& application_manager);
 
   /**
    * @brief VIReadDIDResponse class destructor
@@ -59,7 +60,7 @@ class VIReadDIDResponse : public ResponseFromHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(VIReadDIDResponse);

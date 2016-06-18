@@ -30,21 +30,25 @@
 
 if(BUILD_TESTS)
 
-set(appMain_DIR ${CMAKE_SOURCE_DIR}/src/appMain)
-
 include_directories(
     ${GMOCK_INCLUDE_DIRECTORY}
-    ${COMPONENTS_DIR}/application_manager/test/state_controller/include
+    ${COMPONENTS_DIR}/application_manager/test/include
 )
 
 set(LIBRARIES
   gmock
   ApplicationManager
+  connectionHandler
 )
 
 set(SOURCES
-    state_controller_test.cc
+    ${COMPONENTS_DIR}/application_manager/test/state_controller/state_controller_test.cc
+    ${COMPONENTS_DIR}/application_manager/test/mock_message_helper.cc
 )
+
+if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj" )
+endif()
 
 create_test("state_controller_test" "${SOURCES}" "${LIBRARIES}")
 

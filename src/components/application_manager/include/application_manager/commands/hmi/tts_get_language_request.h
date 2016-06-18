@@ -49,7 +49,8 @@ class TTSGetLanguageRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit TTSGetLanguageRequest(const MessageSharedPtr& message);
+  TTSGetLanguageRequest(const MessageSharedPtr& message,
+                        ApplicationManager& application_manager);
 
   /**
    * @brief TTSGetLanguageRequest class destructor
@@ -59,7 +60,7 @@ class TTSGetLanguageRequest : public RequestToHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(TTSGetLanguageRequest);

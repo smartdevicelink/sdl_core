@@ -27,12 +27,12 @@ const char* Resources::proc = "/proc/";
 ResourseUsage* Resources::getCurrentResourseUsage() {
   PidStats pid_stats;
   if (false == GetProcInfo(pid_stats)) {
-    LOG4CXX_ERROR(logger_, "Failed to get cpu proc info");
+    LOGGER_ERROR(logger_, "Failed to get cpu proc info");
     return NULL;
   }
   MemInfo mem_info;
   if (false == GetMemInfo(mem_info)) {
-    LOG4CXX_ERROR(logger_, "Failed to get memory info");
+    LOGGER_ERROR(logger_, "Failed to get memory info");
     return NULL;
   }
   ResourseUsage* usage = new ResourseUsage();
@@ -47,7 +47,7 @@ bool Resources::ReadStatFile(std::string& output) {
   if (false == file_system::FileExists(filename)) {
     return false;
   }
-  if (false == file_system::ReadFile(filename,output)) {
+  if (false == file_system::ReadFile(filename, output)) {
     return false;
   }
   return true;
@@ -60,70 +60,105 @@ bool Resources::GetProcInfo(Resources::PidStats& output) {
     return false;
   }
   uint32_t num_succes = sscanf(proc_buf.c_str(),
-         "%d" //pid
-         " %*s"//com
-         " %c" //state
-         " %d" //ppid
-         " %d" //pgrp
-         " %d" //session
-         " %d" //tty_nr
-         " %d" //tpgid
-         " %u" //flags
-         " %lu" //minflt
-         " %lu" //cminflt
-         " %lu" //majflt
-         " %lu" //cmajflt
-         " %lu" //utime
-         " %lu" //stime
-         " %ld" //cutime
-         " %ld" //cstime
-         " %ld" //priority
-         " %ld" //nice
-         " %ld" //num_threads
-         " %ld" //itrealvalue
-         " %llu" //starttime
-         " %lu" //vsize
-         " %ld" //rss
-         " %lu" //rsslim
-         " %lu" //startcode
-         " %lu" //endcode
-         " %lu" //startstack
-         " %lu" //kstkesp
-         " %lu" //kstkip
-         " %lu" //signal
-         " %lu" //blocked
-         " %lu" //sigignore
-         " %lu" //sigcatch
-         " %lu" //wchan
-         " %lu" //nswap
-         " %lu" //cnswap
-         " %d" //exit_signal
-         " %d" //processor
-         " %u" //rt_priority
-         " %u" //policy
-         " %llu" //delayacct_blkio_ticks
-         " %lu" //guest_time
-         " %ld" //cguest_time
-         ,&(output.pid), &(output.state), &(output.ppid), &(output.pgrp), &(output.session),
-         &(output.tty_nr), &(output.tpgid), &(output.flags), &(output.minflt), &(output.cminflt),
-         &(output.majflt), &(output.cmajflt), &(output.utime), &(output.stime), &(output.cutime),
-         &(output.cstime), &(output.priority), &( output.nice), &(output.num_threads), &(output.itrealvalue),
-         &(output.starttime), &(output.vsize), &(output.rss), &(output.rsslim), &(output.startcode),
-         &(output.endcode), &(output.startstack), &(output.kstkesp), &(output.kstkeip), &(output.signal),
-         &(output.blocked), &(output.sigignore), &(output.sigcatch), &(output.wchan), &(output.nswap),
-         &(output.cnswap), &(output.exit_signal), &(output.processor), &(output.rt_priority), &(output.policy),
-         &(output.delayacct_blkio_ticks), &(output.guest_time), &(output.cguest_time)
-  );
-  if(num_succes != 43) { // 43 is number of iteams in Resources::PidStats
-    LOG4CXX_ERROR(logger_, "Couldn't parse all iteams in /proc/PID/stat file");
+                               "%d"     // pid
+                               " %*s"   // com
+                               " %c"    // state
+                               " %d"    // ppid
+                               " %d"    // pgrp
+                               " %d"    // session
+                               " %d"    // tty_nr
+                               " %d"    // tpgid
+                               " %u"    // flags
+                               " %lu"   // minflt
+                               " %lu"   // cminflt
+                               " %lu"   // majflt
+                               " %lu"   // cmajflt
+                               " %lu"   // utime
+                               " %lu"   // stime
+                               " %ld"   // cutime
+                               " %ld"   // cstime
+                               " %ld"   // priority
+                               " %ld"   // nice
+                               " %ld"   // num_threads
+                               " %ld"   // itrealvalue
+                               " %llu"  // starttime
+                               " %lu"   // vsize
+                               " %ld"   // rss
+                               " %lu"   // rsslim
+                               " %lu"   // startcode
+                               " %lu"   // endcode
+                               " %lu"   // startstack
+                               " %lu"   // kstkesp
+                               " %lu"   // kstkip
+                               " %lu"   // signal
+                               " %lu"   // blocked
+                               " %lu"   // sigignore
+                               " %lu"   // sigcatch
+                               " %lu"   // wchan
+                               " %lu"   // nswap
+                               " %lu"   // cnswap
+                               " %d"    // exit_signal
+                               " %d"    // processor
+                               " %u"    // rt_priority
+                               " %u"    // policy
+                               " %llu"  // delayacct_blkio_ticks
+                               " %lu"   // guest_time
+                               " %ld"   // cguest_time
+                               ,
+                               &(output.pid),
+                               &(output.state),
+                               &(output.ppid),
+                               &(output.pgrp),
+                               &(output.session),
+                               &(output.tty_nr),
+                               &(output.tpgid),
+                               &(output.flags),
+                               &(output.minflt),
+                               &(output.cminflt),
+                               &(output.majflt),
+                               &(output.cmajflt),
+                               &(output.utime),
+                               &(output.stime),
+                               &(output.cutime),
+                               &(output.cstime),
+                               &(output.priority),
+                               &(output.nice),
+                               &(output.num_threads),
+                               &(output.itrealvalue),
+                               &(output.starttime),
+                               &(output.vsize),
+                               &(output.rss),
+                               &(output.rsslim),
+                               &(output.startcode),
+                               &(output.endcode),
+                               &(output.startstack),
+                               &(output.kstkesp),
+                               &(output.kstkeip),
+                               &(output.signal),
+                               &(output.blocked),
+                               &(output.sigignore),
+                               &(output.sigcatch),
+                               &(output.wchan),
+                               &(output.nswap),
+                               &(output.cnswap),
+                               &(output.exit_signal),
+                               &(output.processor),
+                               &(output.rt_priority),
+                               &(output.policy),
+                               &(output.delayacct_blkio_ticks),
+                               &(output.guest_time),
+                               &(output.cguest_time));
+  if (num_succes != 43) {  // 43 is number of iteams in Resources::PidStats
+    LOGGER_ERROR(logger_, "Couldn't parse all iteams in /proc/PID/stat file");
     return false;
   }
   return true;
 #elif defined(__QNXNTO__)
   int fd = open(GetProcPath().c_str(), O_RDONLY);
   if (0 >= fd) {
-    LOG4CXX_ERROR(logger_, "Failed open process proc file : " << GetProcPath() <<
-                  "; error no : " << strerror( errno ) );
+    LOGGER_ERROR(logger_,
+                 "Failed open process proc file : "
+                     << GetProcPath() << "; error no : " << strerror(errno));
 
     close(fd);
     return false;
@@ -134,12 +169,12 @@ bool Resources::GetProcInfo(Resources::PidStats& output) {
 #endif
 }
 
-bool Resources::GetMemInfo(Resources::MemInfo &output) {
+bool Resources::GetMemInfo(Resources::MemInfo& output) {
   bool result = false;
-  #if defined(OS_LINUX)
+#if defined(OS_LINUX)
   Resources::PidStats pid_stat;
   if (false == GetProcInfo(pid_stat)) {
-    LOG4CXX_ERROR(logger_, "Failed to get proc info");
+    LOGGER_ERROR(logger_, "Failed to get proc info");
     result = false;
   } else {
     output = pid_stat.vsize;
@@ -151,21 +186,21 @@ bool Resources::GetMemInfo(Resources::MemInfo &output) {
   struct stat st;
   struct _dir* proc_dir = 0;
   if (0 == (proc_dir = opendir(proc))) {
-    LOG4CXX_ERROR(logger_, "Unable to access to " << proc);
+    LOGGER_ERROR(logger_, "Unable to access to " << proc);
     result = false;
     return result;
-  }  
+  }
   if (0 == readdir(proc_dir)) {
-    LOG4CXX_ERROR(logger_, "Unable to read : " << proc_dir);
+    LOGGER_ERROR(logger_, "Unable to read : " << proc_dir);
     closedir(proc_dir);
     result = false;
     return result;
   }
   closedir(proc_dir);
   if (-1 == stat(as_path.c_str(), &st) || 0 == st.st_size) {
-     LOG4CXX_ERROR(logger_, "Unable to stat : " << as_path.c_str());
-     result = false;
-     return result;
+    LOGGER_ERROR(logger_, "Unable to stat : " << as_path.c_str());
+    result = false;
+    return result;
   }
   output = st.st_size;
   result = true;
@@ -186,9 +221,9 @@ std::string Resources::GetStatPath() {
 std::string Resources::GetProcPath() {
   char buffer[1024];
   pid_t my_pid = getpid();
-  snprintf(buffer, sizeof(buffer), "%s%d/", proc , my_pid);
+  snprintf(buffer, sizeof(buffer), "%s%d/", proc, my_pid);
   std::string filename(buffer);
   return filename;
 }
 
-} // namespace utils
+}  // namespace utils

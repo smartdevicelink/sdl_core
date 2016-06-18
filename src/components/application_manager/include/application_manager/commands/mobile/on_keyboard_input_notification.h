@@ -53,7 +53,8 @@ class OnKeyBoardInputNotification : public CommandNotificationImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnKeyBoardInputNotification(const MessageSharedPtr& message);
+  OnKeyBoardInputNotification(const MessageSharedPtr& message,
+                              ApplicationManager& application_manager);
 
   /**
    * @brief OnKeyBoardInputNotification class destructor
@@ -63,7 +64,7 @@ class OnKeyBoardInputNotification : public CommandNotificationImpl {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(OnKeyBoardInputNotification);

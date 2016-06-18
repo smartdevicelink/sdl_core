@@ -50,35 +50,31 @@ namespace commands {
 namespace NsSmart = NsSmartDeviceLink::NsSmartObjects;
 
 class CommandRequestImpl : public CommandImpl,
-    public event_engine::EventObserver   {
+                           public event_engine::EventObserver {
  public:
+  enum RequestState { kAwaitingHMIResponse = 0, kTimedOut, kCompleted };
 
-  enum RequestState {
-    kAwaitingHMIResponse = 0,
-    kTimedOut,
-    kCompleted
-  };
-
-  explicit CommandRequestImpl(const MessageSharedPtr& message);
+  CommandRequestImpl(const MessageSharedPtr& message,
+                     ApplicationManager& application_manager);
   virtual ~CommandRequestImpl();
-  virtual bool CheckPermissions();
-  virtual bool Init();  
-  virtual bool CleanUp();
-  virtual void Run();
+  bool CheckPermissions() OVERRIDE;
+  bool Init() OVERRIDE;
+  bool CleanUp() OVERRIDE;
+  void Run() OVERRIDE;
 
   /*
    * @brief Function is called by RequestController when request execution time
    * has exceed it's limit
    *
    */
-  virtual void onTimeOut();
+  void onTimeOut() OVERRIDE;
 
   /**
    * @brief Default EvenObserver's pure virtual method implementation
    *
    * @param event The received event
    */
-  virtual void on_event(const event_engine::Event& event);
+  virtual void on_event(const event_engine::Event& event) OVERRIDE;
 
   /*
    * @brief Creates Mobile response
@@ -99,7 +95,7 @@ class CommandRequestImpl : public CommandImpl,
    * @param allow_empty_string if true methods allow empty sting
    * @return true if success otherwise return false
    */
-  bool CheckSyntax(std::string str, bool allow_empty_line = false);
+  bool CheckSyntax(const std::string& str, bool allow_empty_line = false);
 
   /*
    * @brief Sends HMI request
@@ -110,8 +106,8 @@ class CommandRequestImpl : public CommandImpl,
    * @return hmi correlation id
    */
   uint32_t SendHMIRequest(const hmi_apis::FunctionID::eType& function_id,
-                      const smart_objects::SmartObject* msg_params = NULL,
-                      bool use_events = false);
+                          const smart_objects::SmartObject* msg_params = NULL,
+                          bool use_events = false);
 
   /*
    * @brief Creates HMI request
@@ -131,8 +127,7 @@ class CommandRequestImpl : public CommandImpl,
   mobile_apis::Result::eType GetMobileResultCode(
       const hmi_apis::Common_Result::eType& hmi_code) const;
 
-protected:
-
+ protected:
   /**
    * @brief Checks message permissions and parameters according to policy table
    * permissions
@@ -141,10 +136,8 @@ protected:
 
   /**
    * @brief Remove from current message parameters disallowed by policy table
-   * @param params_permissions Parameters permissions from policy table
    */
-  void RemoveDisallowedParameters(
-      const CommandParametersPermissions& params_permissions);
+  void RemoveDisallowedParameters();
 
   /**
    * @brief Adds disallowed parameters back to response with appropriate
@@ -161,13 +154,19 @@ protected:
   bool HasDisallowedParams() const;
 
  protected:
-  RequestState                  current_state_;
-  sync_primitives::Lock         state_lock_;
-  CommandParametersPermissions  parameters_permissions_;
+  /**
+   * @brief Returns policy parameters permissions
+   * @return Parameters permissions struct reference
+   */
+  const CommandParametersPermissions& parameters_permissions() const;
+
+  RequestState current_state_;
+  sync_primitives::Lock state_lock_;
+  CommandParametersPermissions parameters_permissions_;
+  CommandParametersPermissions removed_parameters_permissions_;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(CommandRequestImpl);
-
 
   /**
    * @brief Adds param to disallowed parameters enumeration
@@ -181,7 +180,8 @@ protected:
    * @brief Adds disallowed parameters to response info
    * @param response Response message, which info should be extended
    */
-  void AddDisallowedParametersToInfo(smart_objects::SmartObject& response) const;
+  void AddDisallowedParametersToInfo(
+      smart_objects::SmartObject& response) const;
 };
 
 }  // namespace commands

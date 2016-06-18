@@ -49,7 +49,8 @@ class TTSGetCapabilitiesResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit TTSGetCapabilitiesResponse(const MessageSharedPtr& message);
+  TTSGetCapabilitiesResponse(const MessageSharedPtr& message,
+                             ApplicationManager& application_manager);
 
   /**
    * @brief TTSGetCapabilitiesResponse class destructor
@@ -59,7 +60,7 @@ class TTSGetCapabilitiesResponse : public ResponseFromHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(TTSGetCapabilitiesResponse);

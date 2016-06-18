@@ -49,7 +49,8 @@ class UIPerformInteractionRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UIPerformInteractionRequest(const MessageSharedPtr& message);
+  UIPerformInteractionRequest(const MessageSharedPtr& message,
+                              ApplicationManager& application_manager);
 
   /**
    * @brief UIPerformInteractionRequest class destructor
@@ -59,7 +60,7 @@ class UIPerformInteractionRequest : public RequestToHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(UIPerformInteractionRequest);
@@ -69,4 +70,4 @@ class UIPerformInteractionRequest : public RequestToHMI {
 
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UI_CREATE_INTERACTION_SET_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UI_PERFORM_INTERACTION_REQUEST_H_

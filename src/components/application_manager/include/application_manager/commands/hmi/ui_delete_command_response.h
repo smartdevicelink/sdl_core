@@ -49,7 +49,8 @@ class UIDeleteCommandResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UIDeleteCommandResponse(const MessageSharedPtr& message);
+  UIDeleteCommandResponse(const MessageSharedPtr& message,
+                          ApplicationManager& application_manager);
 
   /**
    * @brief UIDeleteCommandResponse class destructor
@@ -59,7 +60,7 @@ class UIDeleteCommandResponse : public ResponseFromHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(UIDeleteCommandResponse);

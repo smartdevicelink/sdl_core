@@ -31,9 +31,7 @@
 
 include_directories (
   ${DBUS_INCLUDE_DIRS}
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/
-  ${CMAKE_SOURCE_DIR}/
-  ${COMPONENTS_DIR}
+  ${COMPONENTS_DIR}/dbus/include/
   ${COMPONENTS_DIR}/formatters/include/
   ${COMPONENTS_DIR}/smart_objects/include/
   ${COMPONENTS_DIR}/utils/include/
@@ -43,34 +41,41 @@ include_directories (
 set (SOURCES
   ${CMAKE_CURRENT_BINARY_DIR}/introspection_xml.cc
   ${CMAKE_CURRENT_BINARY_DIR}/message_descriptions.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/dbus_adapter.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/dbus_message.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/dbus_message_controller.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/schema.cc
+  ${COMPONENTS_DIR}/dbus/src/dbus_adapter.cc
+  ${COMPONENTS_DIR}/dbus/src/dbus_message.cc
+  ${COMPONENTS_DIR}/dbus/src/dbus_message_controller.cc
+  ${COMPONENTS_DIR}/dbus/src/schema.cc
 )
-
-set (LIBRARIES dbus-1 -L${DBUS_LIBS_DIRECTORY})
-
+if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+  set (LIBRARIES dbus-1 -L${DBUS_LIBS_DIRECTORY})
+endif()
 
 add_custom_command(
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/message_descriptions.cc
-  COMMAND python ${CMAKE_CURRENT_SOURCE_DIR}/codegen/make_message_descriptions.py
-  --infile ${CMAKE_CURRENT_SOURCE_DIR}/../interfaces/QT_HMI_API.xml
+  COMMAND python ${COMPONENTS_DIR}/dbus/codegen/make_message_descriptions.py
+  --infile ${COMPONENTS_DIR}/interfaces/QT_HMI_API.xml
   --outdir ${CMAKE_CURRENT_BINARY_DIR}
-  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/../interfaces/QT_HMI_API.xml
-    ${CMAKE_CURRENT_SOURCE_DIR}/codegen/make_message_descriptions.py
+  DEPENDS ${COMPONENTS_DIR}/interfaces/QT_HMI_API.xml
+    ${COMPONENTS_DIR}/dbus/codegen/make_message_descriptions.py
 )
 
 add_custom_command(
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/introspection_xml.cc
-  COMMAND python ${CMAKE_CURRENT_SOURCE_DIR}/codegen/make_introspection_c.py
-  --infile ${CMAKE_CURRENT_SOURCE_DIR}/../interfaces/QT_HMI_API.xml
+  COMMAND python ${COMPONENTS_DIR}/dbus/codegen/make_introspection_c.py
+  --infile ${COMPONENTS_DIR}/interfaces/QT_HMI_API.xml
   --outdir ${CMAKE_CURRENT_BINARY_DIR}
-  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/../interfaces/QT_HMI_API.xml
-    ${CMAKE_CURRENT_SOURCE_DIR}/codegen/make_introspection_c.py
+  DEPENDS ${COMPONENTS_DIR}/interfaces/QT_HMI_API.xml
+    ${COMPONENTS_DIR}/dbus/codegen/make_introspection_c.py
 )
+if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  set(HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/include/dbus/*.h)
+  source_group("Header Files" FILES ${HEADERS} )
+  source_group("Source Files" FILES ${SOURCES})
+  add_library("DBus" ${HEADERS} ${SOURCES})
+else()
+  add_library("DBus" ${SOURCES})
+endif()
 
-add_library("DBus" ${SOURCES})
 ADD_DEPENDENCIES("DBus" Utils install-3rd_party_dbus)
 
 target_link_libraries("DBus" "${LIBRARIES}")

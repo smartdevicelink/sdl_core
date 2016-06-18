@@ -51,7 +51,8 @@ class ResetGlobalPropertiesResponse : public CommandResponseImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit ResetGlobalPropertiesResponse(const MessageSharedPtr& message);
+  ResetGlobalPropertiesResponse(const MessageSharedPtr& message,
+                                ApplicationManager& application_manager);
 
   /**
    * @brief ResetGlobalPropertiesResponse class destructor
@@ -61,7 +62,7 @@ class ResetGlobalPropertiesResponse : public CommandResponseImpl {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(ResetGlobalPropertiesResponse);

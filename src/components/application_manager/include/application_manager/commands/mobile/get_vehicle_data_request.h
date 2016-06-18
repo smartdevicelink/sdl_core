@@ -31,8 +31,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_GET_VEHICLE_DATA_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_GET_VEHICLE_DATA_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_GET_VEHICLE_DATA_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_GET_VEHICLE_DATA_REQUEST_H_
 
 #include "application_manager/commands/command_request_impl.h"
 #include "utils/macro.h"
@@ -53,7 +53,8 @@ class GetVehicleDataRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit GetVehicleDataRequest(const MessageSharedPtr& message);
+  GetVehicleDataRequest(const MessageSharedPtr& message,
+                        ApplicationManager& application_manager);
 
   /**
    * @brief GetVehicleDataRequest class destructor
@@ -63,11 +64,10 @@ class GetVehicleDataRequest : public CommandRequestImpl {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
-
+  void Run() OVERRIDE;
 
  protected:
-  virtual void on_event(const event_engine::Event& event);
+  virtual void on_event(const event_engine::Event& event) OVERRIDE;
 
 #ifdef HMI_DBUS_API
  private:
@@ -83,7 +83,7 @@ class GetVehicleDataRequest : public CommandRequestImpl {
 
   typedef std::vector<HmiRequest> HmiRequests;
   HmiRequests hmi_requests_;
-#endif // #ifdef HMI_DBUS_API
+#endif  // #ifdef HMI_DBUS_API
 
   DISALLOW_COPY_AND_ASSIGN(GetVehicleDataRequest);
 };
@@ -91,4 +91,4 @@ class GetVehicleDataRequest : public CommandRequestImpl {
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_GET_VEHICLE_DATA_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_GET_VEHICLE_DATA_REQUEST_H_

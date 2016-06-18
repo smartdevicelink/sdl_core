@@ -49,7 +49,8 @@ class NaviAlertManeuverRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit NaviAlertManeuverRequest(const MessageSharedPtr& message);
+  NaviAlertManeuverRequest(const MessageSharedPtr& message,
+                           ApplicationManager& application_manager);
 
   /**
    * @brief NaviAlertManeuverRequest class destructor
@@ -59,7 +60,7 @@ class NaviAlertManeuverRequest : public RequestToHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(NaviAlertManeuverRequest);

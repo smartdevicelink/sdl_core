@@ -49,7 +49,8 @@ class OnTTSLanguageChangeNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnTTSLanguageChangeNotification(const MessageSharedPtr& message);
+  OnTTSLanguageChangeNotification(const MessageSharedPtr& message,
+                                  ApplicationManager& application_manager);
 
   /**
    * @brief OnTTSLanguageChangeNotification class destructor
@@ -59,7 +60,7 @@ class OnTTSLanguageChangeNotification : public NotificationFromHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(OnTTSLanguageChangeNotification);

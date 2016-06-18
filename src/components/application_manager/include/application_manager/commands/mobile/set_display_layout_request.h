@@ -51,7 +51,8 @@ class SetDisplayLayoutRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit SetDisplayLayoutRequest(const MessageSharedPtr& message);
+  SetDisplayLayoutRequest(const MessageSharedPtr& message,
+                          ApplicationManager& application_manager);
 
   /**
    * @brief SetDisplayLayoutRequest class destructor
@@ -63,12 +64,12 @@ class SetDisplayLayoutRequest : public CommandRequestImpl {
    *
    * @param event The received event
    **/
-  virtual void on_event(const event_engine::Event& event);
+  virtual void on_event(const event_engine::Event& event) OVERRIDE;
 
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(SetDisplayLayoutRequest);

@@ -31,8 +31,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ADD_COMMAND_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ADD_COMMAND_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_ADD_COMMAND_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_ADD_COMMAND_REQUEST_H_
 
 #include "application_manager/application.h"
 #include "application_manager/commands/command_request_impl.h"
@@ -52,7 +52,8 @@ class AddCommandRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit AddCommandRequest(const MessageSharedPtr& message);
+  AddCommandRequest(const MessageSharedPtr& message,
+                    ApplicationManager& application_manager);
 
   /**
    * @brief AddCommandRequest class destructor
@@ -62,17 +63,16 @@ class AddCommandRequest : public CommandRequestImpl {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
   /**
    * @brief Interface method that is called whenever new event received
    *
    * @param event The received event
    */
-  void on_event(const event_engine::Event& event);
+  void on_event(const event_engine::Event& event) OVERRIDE;
 
  private:
-
   /*
    * @brief Check if command name doesn't exist in application
    * Please see SDLAQ-CRS-407 for more information
@@ -106,7 +106,7 @@ class AddCommandRequest : public CommandRequestImpl {
    * @brief Function is called by RequestController when request execution time
    * has exceed it's limit
    */
-  virtual void onTimeOut();
+  void onTimeOut() OVERRIDE;
 
   /**
    * @brief Removes command from list when HMI sends negative response or
@@ -146,4 +146,4 @@ class AddCommandRequest : public CommandRequestImpl {
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ADD_COMMAND_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_ADD_COMMAND_REQUEST_H_

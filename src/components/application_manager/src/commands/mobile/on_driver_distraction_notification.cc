@@ -32,7 +32,6 @@
  */
 
 #include "application_manager/commands/mobile/on_driver_distraction_notification.h"
-#include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"
 
@@ -43,15 +42,13 @@ namespace commands {
 namespace mobile {
 
 OnDriverDistractionNotification::OnDriverDistractionNotification(
-    const MessageSharedPtr& message)
-    : CommandNotificationImpl(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandNotificationImpl(message, application_manager) {}
 
-OnDriverDistractionNotification::~OnDriverDistractionNotification() {
-}
+OnDriverDistractionNotification::~OnDriverDistractionNotification() {}
 
 void OnDriverDistractionNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   SendNotification();
 }

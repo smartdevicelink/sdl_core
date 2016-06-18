@@ -34,7 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_VI_MY_KEY_NOTIFICATION_H_
 
 #include "application_manager/commands/hmi/notification_from_hmi.h"
-#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_manager.h"
 
 namespace application_manager {
 
@@ -50,7 +50,8 @@ class OnVIMyKeyNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnVIMyKeyNotification(const MessageSharedPtr& message);
+  OnVIMyKeyNotification(const MessageSharedPtr& message,
+                        ApplicationManager& application_manager);
 
   /**
    * @brief OnVIMyKeyNotification class destructor
@@ -60,7 +61,7 @@ class OnVIMyKeyNotification : public NotificationFromHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(OnVIMyKeyNotification);

@@ -38,19 +38,18 @@ namespace application_manager {
 
 namespace commands {
 
-TTSSpeakResponse::TTSSpeakResponse(const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+TTSSpeakResponse::TTSSpeakResponse(const MessageSharedPtr& message,
+                                   ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {}
 
-TTSSpeakResponse::~TTSSpeakResponse() {
-}
+TTSSpeakResponse::~TTSSpeakResponse() {}
 
 void TTSSpeakResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   event_engine::Event event(hmi_apis::FunctionID::TTS_Speak);
   event.set_smart_object(*message_);
-  event.raise();
+  event.raise(application_manager_.event_dispatcher());
 }
 
 }  // namespace commands

@@ -53,7 +53,8 @@ class OnDriverDistractionNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnDriverDistractionNotification(const MessageSharedPtr& message);
+  OnDriverDistractionNotification(const MessageSharedPtr& message,
+                                  ApplicationManager& application_manager);
 
   /**
    * @brief OnDriverDistractionNotification class destructor
@@ -63,7 +64,7 @@ class OnDriverDistractionNotification : public NotificationFromHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(OnDriverDistractionNotification);

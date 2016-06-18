@@ -49,7 +49,8 @@ class VISubscribeVehicleDataResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit VISubscribeVehicleDataResponse(const MessageSharedPtr& message);
+  VISubscribeVehicleDataResponse(const MessageSharedPtr& message,
+                                 ApplicationManager& application_manager);
 
   /**
    * @brief VISubscribeVehicleDataResponse class destructor
@@ -59,7 +60,7 @@ class VISubscribeVehicleDataResponse : public ResponseFromHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(VISubscribeVehicleDataResponse);

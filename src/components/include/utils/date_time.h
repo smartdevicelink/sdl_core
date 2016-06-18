@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,24 +34,24 @@
 
 #if defined(OS_POSIX)
 #include <sys/time.h>
-typedef struct timeval TimevalStruct;
+#elif defined(OS_WINDOWS)
+#include "utils/winhdr.h"
 #endif
 #include <stdint.h>
 
+typedef struct timeval TimevalStruct;
 namespace date_time {
 
-enum TimeCompare {
-  LESS,
-  EQUAL,
-  GREATER
-};
+enum TimeCompare { LESS, EQUAL, GREATER };
+
+const uint64_t kDeltaEpochInMicrosecs = 11644473600000000u;
+const uint32_t kMillisecondsInSecond = 1000u;
+const uint32_t kMicrosecondsInMillisecond = 1000u;
+const uint32_t kMicrosecondsInSecond =
+    kMillisecondsInSecond * kMicrosecondsInMillisecond;
 
 class DateTime {
  public:
-  static const int32_t MILLISECONDS_IN_SECOND = 1000;
-  static const int32_t MICROSECONDS_IN_MILLISECONDS = 1000;
-  static const int32_t MICROSECONDS_IN_SECOND = 1000 * 1000;
-
   static TimevalStruct getCurrentTime();
 
   // return SECONDS count
@@ -69,6 +69,14 @@ class DateTime {
   static int64_t calculateTimeDiff(const TimevalStruct& time1,
                                    const TimevalStruct& time2);
 
+  /**
+   * @brief Adds milliseconds to time struct
+   * @param time contains time struct
+   * @param milliseconds contains value which need to
+   * add to time struct
+   **/
+  static void AddMilliseconds(TimevalStruct& time, uint32_t milliseconds);
+
   static TimevalStruct Sub(const TimevalStruct& time1,
                            const TimevalStruct& time2);
 
@@ -78,9 +86,14 @@ class DateTime {
   static bool Greater(const TimevalStruct& time1, const TimevalStruct& time2);
   static bool Less(const TimevalStruct& time1, const TimevalStruct& time2);
   static bool Equal(const TimevalStruct& time1, const TimevalStruct& time2);
+
+ private:
+  static TimevalStruct ConvertionUsecs(const TimevalStruct& time);
 };
 
 }  // namespace date_time
 bool operator<(const TimevalStruct& time1, const TimevalStruct& time2);
 bool operator==(const TimevalStruct& time1, const TimevalStruct& time2);
+const TimevalStruct operator-(const TimevalStruct& time1,
+                              const TimevalStruct& time2);
 #endif  // SRC_COMPONENTS_INCLUDE_UTILS_DATE_TIME_H_

@@ -49,7 +49,8 @@ class OnVRStoppedNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnVRStoppedNotification(const MessageSharedPtr& message);
+  OnVRStoppedNotification(const MessageSharedPtr& message,
+                          ApplicationManager& application_manager);
 
   /**
    * @brief OnVRStoppedNotification class destructor
@@ -59,7 +60,7 @@ class OnVRStoppedNotification : public NotificationFromHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(OnVRStoppedNotification);

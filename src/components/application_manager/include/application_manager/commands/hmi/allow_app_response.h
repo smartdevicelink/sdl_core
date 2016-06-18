@@ -49,7 +49,8 @@ class AllowAppResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit AllowAppResponse(const MessageSharedPtr& message);
+  AllowAppResponse(const MessageSharedPtr& message,
+                   ApplicationManager& application_manager);
 
   /**
    * @brief AllowAppResponse class destructor
@@ -59,7 +60,7 @@ class AllowAppResponse : public ResponseFromHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(AllowAppResponse);

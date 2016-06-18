@@ -49,20 +49,19 @@ class UnregisterAppInterfaceRequest : public CommandRequestImpl {
   /**
    * \brief UnregisterAppInterfaceRequest class constructor
    **/
-  explicit UnregisterAppInterfaceRequest(const MessageSharedPtr& message)
-      : CommandRequestImpl(message) {
-  }
+  UnregisterAppInterfaceRequest(const MessageSharedPtr& message,
+                                ApplicationManager& application_manager)
+      : CommandRequestImpl(message, application_manager) {}
 
   /**
    * \brief UnregisterAppInterfaceRequest class destructor
    **/
-  virtual ~UnregisterAppInterfaceRequest() {
-  }
+  virtual ~UnregisterAppInterfaceRequest() {}
 
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
   // virtual void cleanUp() = 0;
 
  private:

@@ -49,7 +49,8 @@ class OnUpdateDeviceList : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnUpdateDeviceList(const MessageSharedPtr& message);
+  OnUpdateDeviceList(const MessageSharedPtr& message,
+                     ApplicationManager& application_manager);
 
   /**
    * @brief OnUpdateDeviceList class destructor
@@ -59,7 +60,7 @@ class OnUpdateDeviceList : public NotificationFromHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(OnUpdateDeviceList);

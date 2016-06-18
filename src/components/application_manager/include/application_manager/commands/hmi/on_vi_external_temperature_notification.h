@@ -34,7 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_VI_EXTERNAL_TEMPERATURE_NOTIFICATION_H_
 
 #include "application_manager/commands/hmi/notification_from_hmi.h"
-#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_manager.h"
 
 namespace application_manager {
 
@@ -50,7 +50,8 @@ class OnVIExternalTemperatureNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnVIExternalTemperatureNotification(const MessageSharedPtr& message);
+  OnVIExternalTemperatureNotification(const MessageSharedPtr& message,
+                                      ApplicationManager& application_manager);
 
   /**
    * @brief OnVIExternalTemperatureNotification class destructor
@@ -60,7 +61,7 @@ class OnVIExternalTemperatureNotification : public NotificationFromHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(OnVIExternalTemperatureNotification);

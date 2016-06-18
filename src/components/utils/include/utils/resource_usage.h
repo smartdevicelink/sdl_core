@@ -44,8 +44,8 @@
 
 #include "utils/logger.h"
 
-#define MAX_COMM_LEN	128
-#define MAX_CMDLINE_LEN	128
+#define MAX_COMM_LEN 128
+#define MAX_CMDLINE_LEN 128
 
 namespace utils {
 
@@ -56,7 +56,7 @@ struct ResourseUsage {
 };
 
 class Resources {
-  public:
+ public:
   typedef uint32_t MemInfo;
 #if defined(__QNXNTO__)
   typedef procfs_info PidStats;
@@ -108,19 +108,18 @@ class Resources {
     unsigned long long delayacct_blkio_ticks;
     unsigned long guest_time;
     long int cguest_time;
-    };
+  };
 #else
 
 #endif
-  public:
-    /*
-     * @brief Returns current resource usage of process
-     * @return Raw pointer on  ResourseUsage if success, otherwise return NULL
-     */
+ public:
+  /*
+   * @brief Returns current resource usage of process
+   * @return Raw pointer on  ResourseUsage if success, otherwise return NULL
+   */
   static ResourseUsage* getCurrentResourseUsage();
 
-private:
-
+ private:
 #ifdef BUILD_TESTS
   friend class ResourceUsagePrivateTest;
   FRIEND_TEST(ResourceUsagePrivateTest, ReadStatFileTest);
@@ -134,7 +133,8 @@ private:
   /*
    * @brief reads /proc/PID/stat file on linux
    *        do not work on QNX ( return false, output wan't be changed )
-   * @param output - storage for result string ( there will be separated content of /proc/PID/stat )
+   * @param output - storage for result string ( there will be separated content
+   * of /proc/PID/stat )
    * @return true on succes false onb fail
    */
   static bool ReadStatFile(std::string& output);
@@ -171,9 +171,6 @@ private:
    */
   static const char* proc;
 };
-
 }
 
-
-
-#endif /* SRC_COMPONENTS_UTILS_INCLUDE_UTILS_RESOURCE_USAGE_H_ */
+#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_RESOURCE_USAGE_H_

@@ -1,0 +1,102 @@
+#!/bin/bash
+
+# Hide all unstaged changes to prevent any influence of the further checks
+function POP_STASHED() {
+    # pop stashed changes if working directory isn't clean
+    if [ -n "$IS_DIRTY" ]; then
+        git reset --hard HEAD > /dev/null
+        skipped=$(git ls-files -t | grep ^S | cut -d' ' -f2-)
+        git stash pop --index > /dev/null
+        echo "$skipped" | while read file; do git update-index --skip-worktree "$file"; done
+    fi
+}
+
+# determine working tree status
+IS_DIRTY=`[[ $(git diff --shortstat 2> /dev/null | tail -n1) != "" ]] && echo '*'`
+
+# stash not staged for commit changes
+if [ -n "$IS_DIRTY" ]; then
+    git stash save --keep-index
+    trap POP_STASHED EXIT
+fi
+# End of stashing
+
+if git rev-parse --verify HEAD >/dev/null 2>&1
+then
+    against=HEAD
+else
+    # Initial commit: diff against an empty tree object
+    against=4b825dc642cb6eb9a060e54bf8d69288fbee4904
+fi
+
+# If you want to allow non-ASCII filenames set this variable to true.
+allownonascii=$(git config --bool hooks.allownonascii)
+
+# Redirect output to stderr.
+exec 1>&2
+
+# Cross platform projects tend to avoid non-ASCII filenames; prevent
+# them from being added to the repository. We exploit the fact that the
+# printable range starts at the space character and ends with tilde.
+if [ "$allownonascii" != "true" ] &&
+    # Note that the use of brackets around a tr range is ok here, (it's
+    # even required, for portability to Solaris 10's /usr/bin/tr), since
+    # the square bracket bytes happen to fall in the designated range.
+    test $(git diff --cached --name-only --diff-filter=A -z $against |
+      LC_ALL=C tr -d '[ -~]\0' | wc -c) != 0
+then
+    cat <<\EOF
+Error: Attempt to add a non-ASCII file name.
+
+This can cause problems if you want to work with people on other platforms.
+
+To be portable it is advisable to rename the file.
+
+If you know what you are doing you can disable this check using:
+
+  git config hooks.allownonascii true
+EOF
+    exit 1
+fi
+
+TEXT_DEFAULT="\\033[0;39m"
+TEXT_INFO="\\033[1;32m"
+TEXT_ERROR="\\033[1;31m"
+TEXT_UNDERLINE="\\0033[4m"
+TEXT_BOLD="\\0033[1m"
+
+# check for odd whitespace
+git diff --check --cached --color
+if [ "$?" -ne "0" ]; then
+    echo -e "$TEXT_ERROR" "Your changes introduce whitespace errors" "$TEXT_DEFAULT"
+    exit 1
+fi
+
+# Auto update c++ files with clang-format-3.6
+CLANG_FORMAT=clang-format-3.6
+# Verify clang-format
+CLANG_FORMAT_REQUIRED_VERSION=3.6
+CLANG_FORMAT_CURRENT_VERSION=$($CLANG_FORMAT -version)
+if [[ $CLANG_FORMAT_CURRENT_VERSION != *$CLANG_FORMAT_REQUIRED_VERSION* ]]
+then
+  echo -e "$TEXT_ERROR" "Wrong version of the clang-format. Required: $CLANG_FORMAT_REQUIRED_VERSION. Got: $CLANG_FORMAT_CURRENT_VERSION" "$TEXT_DEFAULT"
+  exit 1
+fi
+
+CPP_SRC_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E "(\.cc$|\.cpp$|\.h$|\.hpp$)" | grep -v "3rd_party")
+if [ -n "$CPP_SRC_FILES" ]; then
+    $CLANG_FORMAT -i -style=file $CPP_SRC_FILES
+    # Add possible changes after formating to the index
+    git add $CPP_SRC_FILES
+fi
+
+# Auto-check for pep8 in python code
+PYTHON_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -e '\.py$')
+
+if [ -n "$PYTHON_FILES" ]; then
+    flake8 $PYTHON_FILES
+    if [ "$?" -ne "0" ]; then
+        echo -e "$TEXT_ERROR" "Flake8 reports about the issues in the python scripts" "$TEXT_DEFAULT"
+        exit 2
+    fi
+fi

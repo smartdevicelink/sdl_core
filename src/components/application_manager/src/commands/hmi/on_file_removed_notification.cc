@@ -31,21 +31,19 @@
  */
 
 #include "application_manager/commands/hmi/on_file_removed_notification.h"
-#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
 namespace commands {
 
 OnFileRemovedNotification::OnFileRemovedNotification(
-    const MessageSharedPtr& message) : NotificationToHMI(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : NotificationToHMI(message, application_manager) {}
 
-OnFileRemovedNotification::~OnFileRemovedNotification() {
-}
+OnFileRemovedNotification::~OnFileRemovedNotification() {}
 
 void OnFileRemovedNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   SendNotification();
 }
@@ -53,4 +51,3 @@ void OnFileRemovedNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

@@ -36,15 +36,14 @@ namespace application_manager {
 
 namespace commands {
 
-NaviIsReadyRequest::NaviIsReadyRequest(const MessageSharedPtr& message)
-    : RequestToHMI(message) {
-}
+NaviIsReadyRequest::NaviIsReadyRequest(const MessageSharedPtr& message,
+                                       ApplicationManager& application_manager)
+    : RequestToHMI(message, application_manager) {}
 
-NaviIsReadyRequest::~NaviIsReadyRequest() {
-}
+NaviIsReadyRequest::~NaviIsReadyRequest() {}
 
 void NaviIsReadyRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   SendRequest();
 }
@@ -52,4 +51,3 @@ void NaviIsReadyRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

@@ -36,12 +36,18 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_DEVICE_SCANNER_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_DEVICE_SCANNER_H_
 
+#ifdef OS_WINDOWS
+#include "utils/winhdr.h"
+#include <ws2bth.h>
+#include <BluetoothAPIs.h>
+#else
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/hci.h>
 #include <bluetooth/hci_lib.h>
 #include <bluetooth/sdp.h>
 #include <bluetooth/sdp_lib.h>
 #include <bluetooth/rfcomm.h>
+#endif
 
 #include "transport_manager/transport_adapter/device_scanner.h"
 #include "utils/conditional_variable.h"
@@ -62,11 +68,14 @@ class BluetoothDeviceScanner : public DeviceScanner {
   /**
    * @brief Constructor.
    * @param controller Transport adapter controller
-   * @param auto_repeat_search true - autorepeated or continous device search, false - search on demand
-   * @param repeat_search_pause_sec - pause between device searches, 0 means continous search
+   * @param auto_repeat_search true - autorepeated or continous device search,
+   * false - search on demand
+   * @param repeat_search_pause_sec - pause between device searches, 0 means
+   * continous search
    */
   BluetoothDeviceScanner(TransportAdapterController* controller,
-                         bool auto_repeat_search, int repeat_search_pause_sec);
+                         bool auto_repeat_search,
+                         int repeat_search_pause_sec);
   /**
    * @brief Destructor.
    */
@@ -75,8 +84,8 @@ class BluetoothDeviceScanner : public DeviceScanner {
    * @brief Main thread initialization.
    */
   void Thread();
- protected:
 
+ protected:
   /**
    * @brief Start device scanner.
    *
@@ -103,12 +112,13 @@ class BluetoothDeviceScanner : public DeviceScanner {
    * false - not initialized.
    */
   virtual bool IsInitialised() const;
- private:
 
-  class BluetoothDeviceScannerDelegate: public threads::ThreadDelegate {
+ private:
+  class BluetoothDeviceScannerDelegate : public threads::ThreadDelegate {
    public:
     explicit BluetoothDeviceScannerDelegate(BluetoothDeviceScanner* scanner);
     void threadMain() OVERRIDE;
+
    private:
     BluetoothDeviceScanner* scanner_;
   };
@@ -116,28 +126,47 @@ class BluetoothDeviceScanner : public DeviceScanner {
   typedef std::vector<uint8_t> RfcommChannelVector;
 
   /**
-   * @brief Waits for external scan request or time out for repeated search or terminate request
+   * @brief Waits for external scan request or time out for repeated search or
+   * terminate request
    */
   void TimedWaitForDeviceScanRequest();
 
-  /**
-   * @brief Finds RFCOMM-channels of SDL enabled applications for set of devices
-   * @param device_addresses Bluetooth addresses to search on
-   * @return List of RFCOMM-channels lists
-   */
+/**
+ * @brief Finds RFCOMM-channels of SDL enabled applications for set of devices
+ * @param device_addresses Bluetooth addresses to search on
+ * @return List of RFCOMM-channels lists
+ */
+#ifdef OS_WINDOWS
   std::vector<RfcommChannelVector> DiscoverSmartDeviceLinkRFCOMMChannels(
-    const std::vector<bdaddr_t>& device_addresses);
+      const std::vector<BLUETOOTH_DEVICE_INFO>& device_addresses);
+#else
+  std::vector<RfcommChannelVector> DiscoverSmartDeviceLinkRFCOMMChannels(
+      const std::vector<bdaddr_t>& device_addresses);
+
+#endif
+/**
+ * @brief Finds RFCOMM-channels of SDL enabled applications for given device
+ * @param[out] discovered List of RFCOMM-channels to fill
+ * @return true - if search was OK, false if it failed
+ */
+#ifdef OS_WINDOWS
+  bool DiscoverSmartDeviceLinkRFCOMMChannels(
+      const BLUETOOTH_DEVICE_INFO& device_address,
+      RfcommChannelVector* discovered,
+      SOCKADDR_BTH& sock_addr_bth_server);
 
   /**
-   * @brief Finds RFCOMM-channels of SDL enabled applications for given device
-   * @param[out] discovered List of RFCOMM-channels to fill
-   * @return true - if search was OK, false if it failed
-   */
+  * @brief Query to bluetooth socket  of protocol info
+  **/
+  void QueryBthProtocolInfo();
+#else
   bool DiscoverSmartDeviceLinkRFCOMMChannels(const bdaddr_t& device_address,
-      RfcommChannelVector* discovered);
+                                             RfcommChannelVector* discovered);
+#endif
 
   /**
-   * @brief Summarizes the total list of devices (paired and scanned) and notifies controller
+   * @brief Summarizes the total list of devices (paired and scanned) and
+   * notifies controller
    */
   void UpdateTotalDeviceList();
 
@@ -146,16 +175,25 @@ class BluetoothDeviceScanner : public DeviceScanner {
    */
   void DoInquiry();
 
-  /**
-   * @brief Checks if given devices have SDL service and creates appropriate BluetoothDevice objects
-   * @param bd_address List of bluetooth addresses to check
-   * @param device_handle HCI handle
-   * @param[out] discovered_devices List of created BluetoothDevice objects to fill
-   */
+/**
+*@brief Checks if given devices have SDL service and creates appropriate
+*BluetoothDevice objects
+ * @param bd_address List of bluetooth addresses to check
+ * @param device_handle HCI handle
+*@param[out] discovered_devices List of created BluetoothDevice objects to
+*fill
+ */
+#ifdef OS_WINDOWS
+  void CheckSDLServiceOnDevices(
+      const std::vector<BLUETOOTH_DEVICE_INFO>& bd_address,
+      int device_handle,
+      DeviceVector* discovered_devices);
+#else
   void CheckSDLServiceOnDevices(const std::vector<bdaddr_t>& bd_address,
                                 int device_handle,
                                 DeviceVector* discovered_devices);
 
+#endif
   TransportAdapterController* controller_;
   threads::Thread* thread_;
   bool shutdown_requested_;
@@ -164,15 +202,36 @@ class BluetoothDeviceScanner : public DeviceScanner {
   sync_primitives::Lock device_scan_requested_lock_;
   sync_primitives::ConditionalVariable device_scan_requested_cv_;
 
+#ifdef OS_WINDOWS
+  std::vector<BLUETOOTH_DEVICE_INFO> paired_devices_;
+#else
   std::vector<bdaddr_t> paired_devices_;
+#endif
 
   DeviceVector paired_devices_with_sdl_;
   DeviceVector found_devices_with_sdl_;
 
-  /**
-   * @brief UUID of SmartDeviceLink service.
-   **/
+/**
+ * @brief UUID of SmartDeviceLink service.
+ **/
+#ifdef OS_POSIX
   uuid_t smart_device_link_service_uuid_;
+#elif defined(OS_WINDOWS)
+  GUID smart_device_link_service_uuid_;
+
+  /**
+  * @brief windows socket bluetooth protocol info
+  **/
+  WSAPROTOCOL_INFO protocol_info_;
+
+  /**
+  * @brief windows struct for bluetooth connection
+  **/
+  SOCKADDR_BTH sock_addr_bth_server_;
+
+  std::string service_uuid_str_;
+
+#endif
 
   const bool auto_repeat_search_;
   const int auto_repeat_pause_sec_;
@@ -180,4 +239,4 @@ class BluetoothDeviceScanner : public DeviceScanner {
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
-#endif /* BLUETOOTH_DEVICE_SCANNER_H_ */
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_DEVICE_SCANNER_H_

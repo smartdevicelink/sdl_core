@@ -49,7 +49,8 @@ class TTSIsReadyResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit TTSIsReadyResponse(const MessageSharedPtr& message);
+  TTSIsReadyResponse(const MessageSharedPtr& message,
+                     ApplicationManager& application_manager);
 
   /**
    * @brief TTSIsReadyResponse class destructor
@@ -59,7 +60,7 @@ class TTSIsReadyResponse : public ResponseFromHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(TTSIsReadyResponse);

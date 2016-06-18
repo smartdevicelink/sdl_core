@@ -49,7 +49,8 @@ class UISliderResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UISliderResponse(const MessageSharedPtr& message);
+  UISliderResponse(const MessageSharedPtr& message,
+                   ApplicationManager& application_manager);
 
   /**
    * @brief UISliderResponse class destructor
@@ -59,7 +60,7 @@ class UISliderResponse : public ResponseFromHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(UISliderResponse);

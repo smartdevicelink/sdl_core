@@ -44,35 +44,32 @@ struct Description {
 };
 
 struct IsId : public std::unary_function<const Description*, bool> {
-  explicit IsId(MessageId id)
-      : id_(id) {
-  }
+  explicit IsId(MessageId id) : id_(id) {}
   bool operator()(const Description* desc) {
     return desc->id == id_;
   }
+
  private:
   MessageId id_;
 };
 
 struct IsName : public std::unary_function<const Description*, bool> {
-  explicit IsName(const MessageName& name)
-      : name_(name) {
-  }
+  explicit IsName(const MessageName& name) : name_(name) {}
   bool operator()(const Description* desc) {
     return desc->name == name_;
   }
+
  private:
   MessageName name_;
 };
 
 struct IsIdType : public std::unary_function<const Description*, bool> {
   explicit IsIdType(const MessageId& id, const MessageType& type)
-      : id_(id),
-        type_(type) {
-  }
+      : id_(id), type_(type) {}
   bool operator()(const Description* desc) {
     return desc->id == id_ && desc->type == type_;
   }
+
  private:
   MessageId id_;
   MessageType type_;
@@ -80,12 +77,11 @@ struct IsIdType : public std::unary_function<const Description*, bool> {
 
 struct IsNameType : public std::unary_function<const Description*, bool> {
   explicit IsNameType(const MessageName& name, const MessageType& type)
-      : name_(name),
-        type_(type) {
-  }
+      : name_(name), type_(type) {}
   bool operator()(const Description* desc) {
     return desc->name == name_ && desc->type == type_;
   }
+
  private:
   MessageName name_;
   MessageType type_;
@@ -94,7 +90,7 @@ struct IsNameType : public std::unary_function<const Description*, bool> {
 DBusSchema::DBusSchema(const MessageDescription** array) {
   const MessageDescription** msg = array;
   while (*msg != NULL) {
-    Description *desc = new Description();
+    Description* desc = new Description();
     desc->id = (*msg)->function_id;
     desc->name = std::make_pair((*msg)->interface, (*msg)->name);
     desc->type = (*msg)->message_type;
@@ -110,8 +106,8 @@ DBusSchema::DBusSchema(const MessageDescription** array) {
 }
 
 MessageName DBusSchema::getMessageName(MessageId id) const {
-  Messages::const_iterator it = std::find_if(msgs_.begin(), msgs_.end(),
-                                             IsId(id));
+  Messages::const_iterator it =
+      std::find_if(msgs_.begin(), msgs_.end(), IsId(id));
   if (msgs_.end() != it) {
     return (*it)->name;
   }
@@ -119,8 +115,8 @@ MessageName DBusSchema::getMessageName(MessageId id) const {
 }
 
 MessageId DBusSchema::getMessageId(const MessageName& name) const {
-  Messages::const_iterator it = std::find_if(msgs_.begin(), msgs_.end(),
-                                             IsName(name));
+  Messages::const_iterator it =
+      std::find_if(msgs_.begin(), msgs_.end(), IsName(name));
   if (msgs_.end() != it) {
     return (*it)->id;
   }
@@ -128,8 +124,8 @@ MessageId DBusSchema::getMessageId(const MessageName& name) const {
 }
 
 ListArgs DBusSchema::getListArgs(MessageId id, MessageType type) const {
-  Messages::const_iterator it = std::find_if(msgs_.begin(), msgs_.end(),
-                                             IsIdType(id, type));
+  Messages::const_iterator it =
+      std::find_if(msgs_.begin(), msgs_.end(), IsIdType(id, type));
   if (msgs_.end() != it) {
     return (*it)->args;
   }
@@ -138,8 +134,8 @@ ListArgs DBusSchema::getListArgs(MessageId id, MessageType type) const {
 
 ListArgs DBusSchema::getListArgs(const MessageName& name,
                                  MessageType type) const {
-  Messages::const_iterator it = std::find_if(msgs_.begin(), msgs_.end(),
-                                             IsNameType(name, type));
+  Messages::const_iterator it =
+      std::find_if(msgs_.begin(), msgs_.end(), IsNameType(name, type));
   if (msgs_.end() != it) {
     return (*it)->args;
   }

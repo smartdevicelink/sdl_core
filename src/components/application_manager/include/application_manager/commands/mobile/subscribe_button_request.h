@@ -52,7 +52,8 @@ class SubscribeButtonRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit SubscribeButtonRequest(const MessageSharedPtr& message);
+  SubscribeButtonRequest(const MessageSharedPtr& message,
+                         ApplicationManager& application_manager);
 
   /**
    * @brief SubscribeButtonRequest class destructor
@@ -62,10 +63,9 @@ class SubscribeButtonRequest : public CommandRequestImpl {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
-
   /**
    * @brief Checks if button subscription allowed. In case non-media
    * application trying to subscribe on buttons(tune, seek) negative result will

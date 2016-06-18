@@ -51,7 +51,8 @@ class ReadDIDResponse : public CommandResponseImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit ReadDIDResponse(const MessageSharedPtr& message);
+  ReadDIDResponse(const MessageSharedPtr& message,
+                  ApplicationManager& application_manager);
 
   /**
    * @brief ReadDIDResponse class destructor
@@ -61,7 +62,7 @@ class ReadDIDResponse : public CommandResponseImpl {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(ReadDIDResponse);

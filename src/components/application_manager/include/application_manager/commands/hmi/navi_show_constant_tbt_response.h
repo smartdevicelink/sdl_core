@@ -49,7 +49,8 @@ class NaviShowConstantTBTResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit NaviShowConstantTBTResponse(const MessageSharedPtr& message);
+  NaviShowConstantTBTResponse(const MessageSharedPtr& message,
+                              ApplicationManager& application_manager);
 
   /**
    * @brief NaviShowConstantTBTResponse class destructor
@@ -59,7 +60,7 @@ class NaviShowConstantTBTResponse : public ResponseFromHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(NaviShowConstantTBTResponse);

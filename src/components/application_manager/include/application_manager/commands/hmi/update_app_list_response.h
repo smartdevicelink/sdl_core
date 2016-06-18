@@ -49,7 +49,8 @@ class UpdateAppListResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UpdateAppListResponse(const MessageSharedPtr& message);
+  UpdateAppListResponse(const MessageSharedPtr& message,
+                        ApplicationManager& application_manager);
 
   /**
    * @brief UpdateAppListResponse class destructor
@@ -59,7 +60,7 @@ class UpdateAppListResponse : public ResponseFromHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(UpdateAppListResponse);

@@ -49,7 +49,8 @@ class UIChangeRegistrationRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UIChangeRegistrationRequest(const MessageSharedPtr& message);
+  UIChangeRegistrationRequest(const MessageSharedPtr& message,
+                              ApplicationManager& application_manager);
 
   /**
    * @brief UIChangeRegistrationRequest class destructor
@@ -59,7 +60,7 @@ class UIChangeRegistrationRequest : public RequestToHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(UIChangeRegistrationRequest);

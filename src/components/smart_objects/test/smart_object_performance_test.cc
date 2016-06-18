@@ -39,8 +39,12 @@
 
 using namespace NsSmartDeviceLink::NsSmartObjects;
 
+namespace test {
+namespace components {
+namespace smart_object_test {
+
 namespace {
-void MakeMapObject(SmartObject &obj, const int size) {
+void MakeMapObject(SmartObject& obj, const int size) {
   char i_key[8], j_key[8];
 
   SmartObject array;
@@ -60,7 +64,7 @@ TEST(SmartObjectPerformanceTest, SmartObjectPerformance) {
   SmartObject object;
   MakeMapObject(object, 100);
 
-  std::set < std::string > keys = object.enumerate();
+  std::set<std::string> keys = object.enumerate();
   for (std::set<std::string>::iterator i = keys.begin(); i != keys.end(); ++i) {
     printf("%s - ", i->c_str());
     SmartArray* array = object[*i].asArray();
@@ -73,3 +77,7 @@ TEST(SmartObjectPerformanceTest, SmartObjectPerformance) {
     }
   }
 }
+
+}  // namespace smart_object_test
+}  // namespace components
+}  // namespace test

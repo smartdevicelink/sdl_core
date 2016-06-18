@@ -49,7 +49,8 @@ class UIAddCommandResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UIAddCommandResponse(const MessageSharedPtr& message);
+  UIAddCommandResponse(const MessageSharedPtr& message,
+                       ApplicationManager& application_manager);
 
   /**
    * @brief UIAddCommandResponse class destructor
@@ -59,7 +60,7 @@ class UIAddCommandResponse : public ResponseFromHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(UIAddCommandResponse);

@@ -36,15 +36,14 @@ namespace application_manager {
 
 namespace commands {
 
-AllowAllAppsRequest::AllowAllAppsRequest(const MessageSharedPtr& message)
-    : RequestToHMI(message) {
-}
+AllowAllAppsRequest::AllowAllAppsRequest(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : RequestToHMI(message, application_manager) {}
 
-AllowAllAppsRequest::~AllowAllAppsRequest() {
-}
+AllowAllAppsRequest::~AllowAllAppsRequest() {}
 
 void AllowAllAppsRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   SendRequest();
 }
@@ -52,4 +51,3 @@ void AllowAllAppsRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

@@ -49,7 +49,8 @@ class UISetGlobalPropertiesResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UISetGlobalPropertiesResponse(const MessageSharedPtr& message);
+  UISetGlobalPropertiesResponse(const MessageSharedPtr& message,
+                                ApplicationManager& application_manager);
 
   /**
    * @brief UISetGlobalPropertiesResponse class destructor
@@ -59,7 +60,7 @@ class UISetGlobalPropertiesResponse : public ResponseFromHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(UISetGlobalPropertiesResponse);

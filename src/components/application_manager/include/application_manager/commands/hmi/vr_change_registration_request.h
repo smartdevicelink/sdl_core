@@ -49,7 +49,8 @@ class VRChangeRegistrationRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit VRChangeRegistrationRequest(const MessageSharedPtr& message);
+  VRChangeRegistrationRequest(const MessageSharedPtr& message,
+                              ApplicationManager& application_manager);
 
   /**
    * @brief VRChangeRegistrationRequest class destructor
@@ -59,7 +60,7 @@ class VRChangeRegistrationRequest : public RequestToHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(VRChangeRegistrationRequest);

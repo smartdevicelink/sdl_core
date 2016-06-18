@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,17 +33,18 @@
 #ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SIGNALS_H_
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SIGNALS_H_
 
-#ifdef __QNXNTO__
-typedef void (*sighandler_t) (int);
+#if defined(__QNXNTO__)
+typedef void (*sighandler_t)(int);
 #else
 #include <signal.h>
 #endif
 
 namespace utils {
 
-bool SubscribeToTerminateSignal(sighandler_t func);
-bool SubscribeToFaultSignal(sighandler_t func);
+void CreateSdlEvent();
+void WaitForSdlExecute();
+void SubscribeToTerminationSignals();
 
 }  //  namespace utils
 
-#endif  //  SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SIGNALS_H_
+#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SIGNALS_H_

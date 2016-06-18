@@ -49,7 +49,8 @@ class UIScrollableMessageResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UIScrollableMessageResponse(const MessageSharedPtr& message);
+  UIScrollableMessageResponse(const MessageSharedPtr& message,
+                              ApplicationManager& application_manager);
 
   /**
    * @brief UIScrollableMessageResponse class destructor
@@ -59,7 +60,7 @@ class UIScrollableMessageResponse : public ResponseFromHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(UIScrollableMessageResponse);

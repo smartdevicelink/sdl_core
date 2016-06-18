@@ -49,7 +49,8 @@ class NaviUpdateTurnListResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit NaviUpdateTurnListResponse(const MessageSharedPtr& message);
+  NaviUpdateTurnListResponse(const MessageSharedPtr& message,
+                             ApplicationManager& application_manager);
 
   /**
    * @brief NaviUpdateTurnListResponse class destructor
@@ -59,7 +60,7 @@ class NaviUpdateTurnListResponse : public ResponseFromHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(NaviUpdateTurnListResponse);

@@ -30,24 +30,21 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/commands/hmi/on_update_device_list.h"
-#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
 namespace commands {
 
-OnUpdateDeviceList::OnUpdateDeviceList(const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
-}
+OnUpdateDeviceList::OnUpdateDeviceList(const MessageSharedPtr& message,
+                                       ApplicationManager& application_manager)
+    : NotificationFromHMI(message, application_manager) {}
 
-OnUpdateDeviceList::~OnUpdateDeviceList() {
-}
+OnUpdateDeviceList::~OnUpdateDeviceList() {}
 
 void OnUpdateDeviceList::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 }
 
 }  // namespace commands
 
 }  // namespace application_manager
-

@@ -49,7 +49,8 @@ class VIReadDIDRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit VIReadDIDRequest(const MessageSharedPtr& message);
+  VIReadDIDRequest(const MessageSharedPtr& message,
+                   ApplicationManager& application_manager);
 
   /**
    * @brief VIReadDIDRequest class destructor
@@ -59,7 +60,7 @@ class VIReadDIDRequest : public RequestToHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(VIReadDIDRequest);

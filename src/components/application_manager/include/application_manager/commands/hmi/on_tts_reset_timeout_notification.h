@@ -51,7 +51,8 @@ class OnTTSResetTimeoutNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnTTSResetTimeoutNotification(const MessageSharedPtr& message);
+  OnTTSResetTimeoutNotification(const MessageSharedPtr& message,
+                                ApplicationManager& application_manager);
 
   /**
    * @brief OnTTSResetTimeoutNotification class destructor
@@ -61,7 +62,7 @@ class OnTTSResetTimeoutNotification : public NotificationFromHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(OnTTSResetTimeoutNotification);

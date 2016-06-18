@@ -49,7 +49,8 @@ class VIGetVehicleTypeResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit VIGetVehicleTypeResponse(const MessageSharedPtr& message);
+  VIGetVehicleTypeResponse(const MessageSharedPtr& message,
+                           ApplicationManager& application_manager);
 
   /**
    * @brief VIGetVehicleTypeResponse class destructor
@@ -59,7 +60,7 @@ class VIGetVehicleTypeResponse : public ResponseFromHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(VIGetVehicleTypeResponse);

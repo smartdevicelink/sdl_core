@@ -49,7 +49,8 @@ class UIGetLanguageRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UIGetLanguageRequest(const MessageSharedPtr& message);
+  UIGetLanguageRequest(const MessageSharedPtr& message,
+                       ApplicationManager& application_manager);
 
   /**
    * @brief UIGetLanguageRequest class destructor
@@ -59,7 +60,7 @@ class UIGetLanguageRequest : public RequestToHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(UIGetLanguageRequest);

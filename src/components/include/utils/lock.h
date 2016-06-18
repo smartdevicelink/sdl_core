@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,8 +35,13 @@
 #if defined(OS_POSIX)
 #include <pthread.h>
 #include <sched.h>
+#elif defined(WIN_NATIVE)
+#include "utils/winhdr.h"
+#elif defined(QT_PORT)
+#include <QThread>
+#include <QMutex>
 #else
-#error Please implement lock for your OS
+#error "Lock is not defined for this platform"
 #endif
 #include <stdint.h>
 #include "utils/macro.h"
@@ -48,21 +53,39 @@ namespace sync_primitives {
 namespace impl {
 #if defined(OS_POSIX)
 typedef pthread_mutex_t PlatformMutex;
+#elif defined(QT_PORT)
+typedef QMutex* PlatformMutex;
+#elif defined(WIN_NATIVE)
+typedef CRITICAL_SECTION PlatformMutex;
+#else
+#error "Lock is not defined for this platform"
 #endif
-} // namespace impl
-
+}  // namespace impl
 
 class SpinMutex {
  public:
-  SpinMutex()
-    : state_(0) { }
+  SpinMutex() : state_(0) {}
   void Lock() {
+#ifdef QT_PORT
+    if (state_.testAndSetAcquire(0, 1)) {
+#else
     if (atomic_post_set(&state_) == 0) {
+#endif
       return;
     }
-    for(;;) {
+    for (;;) {
+#if defined(OS_POSIX)
       sched_yield();
+#elif defined(WIN_NATIVE)
+      SwitchToThread();
+#elif defined(QT_PORT)
+    QThread::yieldCurrentThread();
+#endif
+#ifdef QT_PORT
+      if (state_ == 0 && state_.testAndSetAcquire(0, 1)) {
+#else
       if (state_ == 0 && atomic_post_set(&state_) == 0) {
+#endif
         return;
       }
     }
@@ -70,10 +93,14 @@ class SpinMutex {
   void Unlock() {
     state_ = 0;
   }
-  ~SpinMutex() {
-  }
+  ~SpinMutex() {}
+
  private:
+#ifdef QT_PORT
+  QAtomicInteger<unsigned int> state_;
+#else
   volatile unsigned int state_;
+#endif
 };
 
 /* Platform-indepenednt NON-RECURSIVE lock (mutex) wrapper
@@ -92,7 +119,7 @@ class SpinMutex {
 class Lock {
  public:
   Lock();
-  Lock(bool is_mutex_recursive);
+  Lock(bool is_recursive);
   ~Lock();
 
   // Ackquire the lock. Must be called only once on a thread.
@@ -113,7 +140,8 @@ class Lock {
 
 #ifndef NDEBUG
   /**
-  * @brief Basic debugging aid, a flag that signals wether this lock is currently taken
+  * @brief Basic debugging aid, a flag that signals wether this lock is
+  * currently taken
   * Allows detection of abandoned and recursively captured mutexes
   */
   uint32_t lock_taken_;
@@ -130,6 +158,7 @@ class Lock {
   void AssertTakenAndMarkFree() {}
 #endif
 
+  void Init(bool is_recursive);
 
   friend class ConditionalVariable;
   DISALLOW_COPY_AND_ASSIGN(Lock);
@@ -138,11 +167,17 @@ class Lock {
 // This class is used to automatically acquire and release the a lock
 class AutoLock {
  public:
-  explicit AutoLock(Lock& lock)
-    : lock_(lock) { lock_.Acquire(); }
-  ~AutoLock()     { lock_.Release();  }
+  explicit AutoLock(Lock& lock) : lock_(lock) {
+    lock_.Acquire();
+  }
+  ~AutoLock() {
+    lock_.Release();
+  }
+
  private:
-  Lock& GetLock(){ return lock_;     }
+  Lock& GetLock() {
+    return lock_;
+  }
   Lock& lock_;
 
  private:
@@ -154,9 +189,16 @@ class AutoLock {
 // This class is used to temporarly unlock autolocked lock
 class AutoUnlock {
  public:
-  explicit AutoUnlock(AutoLock& lock)
-    : lock_(lock.GetLock()) { lock_.Release(); }
-  ~AutoUnlock()             { lock_.Acquire();  }
+  explicit AutoUnlock(Lock& lock) : lock_(lock) {
+    lock_.Release();
+  }
+  explicit AutoUnlock(AutoLock& lock) : lock_(lock.GetLock()) {
+    lock_.Release();
+  }
+  ~AutoUnlock() {
+    lock_.Acquire();
+  }
+
  private:
   Lock& lock_;
 

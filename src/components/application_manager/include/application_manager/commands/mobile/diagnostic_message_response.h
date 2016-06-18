@@ -31,8 +31,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DIAGNOSTIC_MESSAGE_RESPONSE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DIAGNOSTIC_MESSAGE_RESPONSE_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_DIAGNOSTIC_MESSAGE_RESPONSE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_DIAGNOSTIC_MESSAGE_RESPONSE_H_
 
 #include "application_manager/commands/command_response_impl.h"
 #include "utils/macro.h"
@@ -51,7 +51,8 @@ class DiagnosticMessageResponse : public CommandResponseImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit DiagnosticMessageResponse(const MessageSharedPtr& message);
+  DiagnosticMessageResponse(const MessageSharedPtr& message,
+                            ApplicationManager& application_manager);
 
   /**
    * @brief DiagnosticMessageResponse class destructor
@@ -61,7 +62,7 @@ class DiagnosticMessageResponse : public CommandResponseImpl {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(DiagnosticMessageResponse);
@@ -70,4 +71,4 @@ class DiagnosticMessageResponse : public CommandResponseImpl {
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DIAGNOSTIC_MESSAGE_RESPONSE_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_DIAGNOSTIC_MESSAGE_RESPONSE_H_

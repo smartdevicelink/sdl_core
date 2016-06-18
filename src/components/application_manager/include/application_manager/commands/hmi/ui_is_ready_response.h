@@ -49,7 +49,8 @@ class UIIsReadyResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UIIsReadyResponse(const MessageSharedPtr& message);
+  UIIsReadyResponse(const MessageSharedPtr& message,
+                    ApplicationManager& application_manager);
 
   /**
    * @brief UIIsReadyResponse class destructor
@@ -59,7 +60,7 @@ class UIIsReadyResponse : public ResponseFromHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(UIIsReadyResponse);

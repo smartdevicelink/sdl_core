@@ -51,7 +51,8 @@ class ReadDIDRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit ReadDIDRequest(const MessageSharedPtr& message);
+  ReadDIDRequest(const MessageSharedPtr& message,
+                 ApplicationManager& application_manager);
 
   /**
    * @brief ReadDIDRequest class destructor
@@ -63,12 +64,12 @@ class ReadDIDRequest : public CommandRequestImpl {
    *
    * @param event The received event
    */
-  void on_event(const event_engine::Event& event);
+  void on_event(const event_engine::Event& event) OVERRIDE;
 
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(ReadDIDRequest);

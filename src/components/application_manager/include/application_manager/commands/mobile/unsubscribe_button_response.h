@@ -51,7 +51,8 @@ class UnsubscribeButtonResponse : public CommandResponseImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UnsubscribeButtonResponse(const MessageSharedPtr& message);
+  UnsubscribeButtonResponse(const MessageSharedPtr& message,
+                            ApplicationManager& application_manager);
 
   /**
    * @brief UnsubscribeButtonResponse class destructor
@@ -61,7 +62,7 @@ class UnsubscribeButtonResponse : public CommandResponseImpl {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(UnsubscribeButtonResponse);

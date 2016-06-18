@@ -30,16 +30,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gtest/gtest.h>
 #include <vector>
 #include <string>
+
+#include "gtest/gtest.h"
 #include "security_manager/security_query.h"
 #include "protocol_handler/protocol_payload.h"
 #include "utils/byte_order.h"
-#include "include/security_manager_mock.h"
+#include "security_manager/mock_security_manager.h"
 
 // Test values for compare after serialization and byteorder conversion
-#define SEQ_NUMBER    0x12345678u
+#define SEQ_NUMBER 0x12345678u
 #define CONNECTION_KEY 0xABCDEF0u
 
 namespace test {
@@ -68,7 +69,7 @@ class SecurityQueryTest : public ::testing::Test {
    * Used for handling header and data array to byte array for serialization
    */
   std::vector<uint8_t> DeserializeData(SecurityQuery::QueryHeader header,
-                                       const uint8_t * const binary_data,
+                                       const uint8_t* const binary_data,
                                        const size_t bin_data_size) const {
     // convert to Big-Endian (network) order
     const uint32_t query_id = header.query_id << 8;
@@ -91,8 +92,8 @@ class SecurityQueryTest : public ::testing::Test {
  * for correct working on Mobile side (3*8 byte)
  */
 TEST_F(SecurityQueryTest, Equal_RPCHeader) {
-  ASSERT_EQ(sizeof(SecurityQuery::QueryHeader)*8,
-      ::protocol_handler::ProtocolPayloadV2SizeBits());
+  ASSERT_EQ(sizeof(SecurityQuery::QueryHeader) * 8,
+            ::protocol_handler::ProtocolPayloadV2SizeBits());
 }
 /*
  * Security QueryHeader default construction
@@ -107,16 +108,16 @@ TEST_F(SecurityQueryTest, QueryHeaderConstructor) {
  */
 TEST_F(SecurityQueryTest, QueryHeaderConstructor2) {
   SecurityQuery::QueryHeader new_header(SecurityQuery::NOTIFICATION,
-      SecurityQuery::SEND_HANDSHAKE_DATA,
-      SEQ_NUMBER);
+                                        SecurityQuery::SEND_HANDSHAKE_DATA,
+                                        SEQ_NUMBER);
   ASSERT_EQ(new_header.query_type, SecurityQuery::NOTIFICATION);
   ASSERT_EQ(new_header.query_id, SecurityQuery::SEND_HANDSHAKE_DATA);
   ASSERT_EQ(new_header.seq_number, SEQ_NUMBER);
   ASSERT_EQ(new_header.json_size, 0u);
 
   SecurityQuery::QueryHeader new_header2(SecurityQuery::RESPONSE,
-      SecurityQuery::SEND_INTERNAL_ERROR,
-      SEQ_NUMBER + 1);
+                                         SecurityQuery::SEND_INTERNAL_ERROR,
+                                         SEQ_NUMBER + 1);
   ASSERT_EQ(new_header2.query_type, SecurityQuery::RESPONSE);
   ASSERT_EQ(new_header2.query_id, SecurityQuery::SEND_INTERNAL_ERROR);
   ASSERT_EQ(new_header2.seq_number, SEQ_NUMBER + 1);
@@ -133,12 +134,13 @@ TEST_F(SecurityQueryTest, QueryHeaderCopyConstructor) {
 /*
  * Security QueryHeader shall construct with NULL fields
  */
+// TODO(OHerasym) : out of range exception on Windows platform
 TEST_F(SecurityQueryTest, QueryConstructor) {
   const SecurityQuery query;
 
   ASSERT_EQ(query.get_connection_key(), 0u);
   ASSERT_EQ(query.get_data_size(), 0u);
-  ASSERT_EQ(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
+  ASSERT_EQ(query.get_data(), reinterpret_cast<uint8_t*>(NULL));
   ASSERT_TRUE(query.get_json_message().empty());
   EXPECT_PRED_FORMAT2(QueryHeader_EQ, query.get_header(), invalid_header);
 
@@ -150,12 +152,13 @@ TEST_F(SecurityQueryTest, QueryConstructor) {
 /*
  * Security QueryHeader shall construct with specified fields
  */
+// TODO(OHerasym) : out of range exception on Windows platform
 TEST_F(SecurityQueryTest, QueryConstructor2) {
   const SecurityQuery query(init_header, CONNECTION_KEY);
 
   ASSERT_EQ(query.get_connection_key(), CONNECTION_KEY);
   ASSERT_EQ(query.get_data_size(), 0u);
-  ASSERT_EQ(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
+  ASSERT_EQ(query.get_data(), reinterpret_cast<uint8_t*>(NULL));
   ASSERT_TRUE(query.get_json_message().empty());
   EXPECT_PRED_FORMAT2(QueryHeader_EQ, query.get_header(), init_header);
 
@@ -169,17 +172,14 @@ TEST_F(SecurityQueryTest, QueryConstructor2) {
  */
 TEST_F(SecurityQueryTest, QueryConstructor3) {
   uint8_t raw_data[] = {0x0, 0x1, 0x2};
-  const size_t raw_data_size =
-  sizeof(raw_data)/sizeof(raw_data[0]);
+  const size_t raw_data_size = sizeof(raw_data) / sizeof(raw_data[0]);
 
-  SecurityQuery query(init_header,
-      CONNECTION_KEY,
-      raw_data, raw_data_size);
+  SecurityQuery query(init_header, CONNECTION_KEY, raw_data, raw_data_size);
 
   ASSERT_EQ(query.get_connection_key(), CONNECTION_KEY);
   ASSERT_EQ(query.get_data_size(), raw_data_size);
   // query shall handle own array of byte data
-  ASSERT_NE(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
+  ASSERT_NE(query.get_data(), reinterpret_cast<uint8_t*>(NULL));
   for (size_t i = 0; i < raw_data_size; ++i) {
     ASSERT_EQ(query.get_data()[i], raw_data[i]);
   }
@@ -188,7 +188,7 @@ TEST_F(SecurityQueryTest, QueryConstructor3) {
 
   // Deserialization shall return vector equal header + data array
   const std::vector<uint8_t> vector =
-  DeserializeData(init_header, raw_data, raw_data_size);
+      DeserializeData(init_header, raw_data, raw_data_size);
   const std::vector<uint8_t> deserialize_vector = query.DeserializeQuery();
   ASSERT_EQ(deserialize_vector, vector);
 }
@@ -198,8 +198,7 @@ TEST_F(SecurityQueryTest, QueryConstructor3) {
 TEST_F(SecurityQueryTest, Setters) {
   const std::string str = "test example string";
   uint8_t raw_data[] = {0x6, 0x7, 0x8};
-  const size_t raw_data_size =
-  sizeof(raw_data)/sizeof(raw_data[0]);
+  const size_t raw_data_size = sizeof(raw_data) / sizeof(raw_data[0]);
 
   SecurityQuery query;
   query.set_connection_key(CONNECTION_KEY);
@@ -210,7 +209,7 @@ TEST_F(SecurityQueryTest, Setters) {
   ASSERT_EQ(query.get_connection_key(), CONNECTION_KEY);
   ASSERT_EQ(query.get_data_size(), raw_data_size);
   // query shall handle own array of byte data
-  ASSERT_NE(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
+  ASSERT_NE(query.get_data(), reinterpret_cast<uint8_t*>(NULL));
   for (size_t i = 0; i < raw_data_size; ++i) {
     ASSERT_EQ(query.get_data()[i], raw_data[i]);
   }
@@ -220,6 +219,7 @@ TEST_F(SecurityQueryTest, Setters) {
 /*
  * SecurityQuery serializes NULL data
  */
+// TODO(OHerasym) : out of range exception on Windows platform
 TEST_F(SecurityQueryTest, Parse_NullData) {
   SecurityQuery query;
   const bool result = query.SerializeQuery(NULL, 0u);
@@ -228,7 +228,7 @@ TEST_F(SecurityQueryTest, Parse_NullData) {
   // check side-effects
   ASSERT_EQ(query.get_connection_key(), 0u);
   ASSERT_EQ(query.get_data_size(), 0u);
-  ASSERT_EQ(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
+  ASSERT_EQ(query.get_data(), reinterpret_cast<uint8_t*>(NULL));
   ASSERT_TRUE(query.get_json_message().empty());
   EXPECT_PRED_FORMAT2(QueryHeader_EQ, query.get_header(), invalid_header);
 }
@@ -245,7 +245,7 @@ TEST_F(SecurityQueryTest, Parse_LessHeaderData) {
   // check side-effects
   ASSERT_EQ(query.get_connection_key(), 0u);
   ASSERT_EQ(query.get_data_size(), 0u);
-  ASSERT_EQ(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
+  ASSERT_EQ(query.get_data(), reinterpret_cast<uint8_t*>(NULL));
   ASSERT_TRUE(query.get_json_message().empty());
   EXPECT_PRED_FORMAT2(QueryHeader_EQ, query.get_header(), invalid_header);
 }
@@ -253,8 +253,7 @@ TEST_F(SecurityQueryTest, Parse_LessHeaderData) {
  * SecurityQuery serializes data equal header size
  */
 TEST_F(SecurityQueryTest, Parse_HeaderData) {
-  const std::vector<uint8_t> vector =
-  DeserializeData(init_header, NULL, 0u);
+  const std::vector<uint8_t> vector = DeserializeData(init_header, NULL, 0u);
 
   SecurityQuery query;
   const bool result = query.SerializeQuery(&vector[0], vector.size());
@@ -263,7 +262,7 @@ TEST_F(SecurityQueryTest, Parse_HeaderData) {
   // check side-effects
   ASSERT_EQ(query.get_connection_key(), 0u);
   ASSERT_EQ(query.get_data_size(), 0u);
-  ASSERT_EQ(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
+  ASSERT_EQ(query.get_data(), reinterpret_cast<uint8_t*>(NULL));
   ASSERT_TRUE(query.get_json_message().empty());
   EXPECT_PRED_FORMAT2(QueryHeader_EQ, query.get_header(), init_header);
 
@@ -277,8 +276,7 @@ TEST_F(SecurityQueryTest, Parse_HeaderData) {
 TEST_F(SecurityQueryTest, Parse_HeaderDataWrong) {
   // Wrong json size
   init_header.json_size = 0x0FFFFFFF;
-  const std::vector<uint8_t> vector =
-  DeserializeData(init_header, NULL, 0u);
+  const std::vector<uint8_t> vector = DeserializeData(init_header, NULL, 0u);
 
   SecurityQuery query;
   const bool result = query.SerializeQuery(&vector[0], vector.size());
@@ -287,7 +285,7 @@ TEST_F(SecurityQueryTest, Parse_HeaderDataWrong) {
   // check side-effects
   ASSERT_EQ(query.get_connection_key(), 0u);
   ASSERT_EQ(query.get_data_size(), 0u);
-  ASSERT_EQ(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
+  ASSERT_EQ(query.get_data(), reinterpret_cast<uint8_t*>(NULL));
   ASSERT_TRUE(query.get_json_message().empty());
   EXPECT_PRED_FORMAT2(QueryHeader_EQ, query.get_header(), init_header);
 
@@ -307,11 +305,10 @@ TEST_F(SecurityQueryTest, Parse_InvalidQuery) {
 
   // some sample data
   uint8_t raw_data[] = {0x6, 0x7, 0x8};
-  const size_t raw_data_size =
-  sizeof(raw_data)/sizeof(raw_data[0]);
+  const size_t raw_data_size = sizeof(raw_data) / sizeof(raw_data[0]);
 
   const std::vector<uint8_t> vector =
-  DeserializeData(invalid_query_header, raw_data, raw_data_size);
+      DeserializeData(invalid_query_header, raw_data, raw_data_size);
 
   SecurityQuery query;
   const bool result = query.SerializeQuery(&vector[0], vector.size());
@@ -320,9 +317,9 @@ TEST_F(SecurityQueryTest, Parse_InvalidQuery) {
   EXPECT_PRED_FORMAT2(QueryHeader_EQ, query.get_header(), invalid_query_header);
   ASSERT_EQ(query.get_data_size(), raw_data_size);
   // query shall handle own array of byte data
-  ASSERT_NE(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
+  ASSERT_NE(query.get_data(), reinterpret_cast<uint8_t*>(NULL));
   for (size_t i = 0; i < raw_data_size; ++i) {
-    ASSERT_EQ(query.get_data()[i], raw_data[+ i]);
+    ASSERT_EQ(query.get_data()[i], raw_data[+i]);
   }
   // check side-effects
   ASSERT_EQ(query.get_connection_key(), 0u);
@@ -344,7 +341,7 @@ TEST_F(SecurityQueryTest, Parse_InvalidQuery_UnknownTypeId) {
       SEQ_NUMBER);
 
   const std::vector<uint8_t> vector =
-  DeserializeData(invalid_type_id_header, NULL, 0u);
+      DeserializeData(invalid_type_id_header, NULL, 0u);
 
   SecurityQuery query;
   const bool result = query.SerializeQuery(&vector[0], vector.size());
@@ -352,10 +349,11 @@ TEST_F(SecurityQueryTest, Parse_InvalidQuery_UnknownTypeId) {
   // Parse set all unknown types and ids to INVALID_QUERY_ID
   invalid_type_id_header.query_type = SecurityQuery::INVALID_QUERY_TYPE;
   invalid_type_id_header.query_id = SecurityQuery::INVALID_QUERY_ID;
-  EXPECT_PRED_FORMAT2(QueryHeader_EQ, query.get_header(), invalid_type_id_header);
+  EXPECT_PRED_FORMAT2(
+      QueryHeader_EQ, query.get_header(), invalid_type_id_header);
   // check side-effects
   ASSERT_EQ(query.get_data_size(), 0u);
-  ASSERT_EQ(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
+  ASSERT_EQ(query.get_data(), reinterpret_cast<uint8_t*>(NULL));
   ASSERT_EQ(query.get_connection_key(), 0u);
   ASSERT_TRUE(query.get_json_message().empty());
 }
@@ -370,7 +368,7 @@ TEST_F(SecurityQueryTest, Parse_InvalidQuery_UnknownId_Response) {
       SecurityQuery::INVALID_QUERY_ID - 2,
       SEQ_NUMBER);
   const std::vector<uint8_t> vector =
-  DeserializeData(invalid_id_header, NULL, 0u);
+      DeserializeData(invalid_id_header, NULL, 0u);
 
   SecurityQuery query;
   const bool result = query.SerializeQuery(&vector[0], vector.size());
@@ -380,7 +378,7 @@ TEST_F(SecurityQueryTest, Parse_InvalidQuery_UnknownId_Response) {
   EXPECT_PRED_FORMAT2(QueryHeader_EQ, query.get_header(), invalid_id_header);
   // check side-effects
   ASSERT_EQ(query.get_data_size(), 0u);
-  ASSERT_EQ(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
+  ASSERT_EQ(query.get_data(), reinterpret_cast<uint8_t*>(NULL));
   ASSERT_EQ(query.get_connection_key(), 0u);
   ASSERT_TRUE(query.get_json_message().empty());
 }
@@ -395,11 +393,10 @@ TEST_F(SecurityQueryTest, Parse_Handshake) {
       SEQ_NUMBER);
   // some sample data
   uint8_t raw_data[] = {0x6, 0x7, 0x8};
-  const size_t raw_data_size =
-  sizeof(raw_data)/sizeof(raw_data[0]);
+  const size_t raw_data_size = sizeof(raw_data) / sizeof(raw_data[0]);
 
   const std::vector<uint8_t> vector =
-  DeserializeData(handshake_header, raw_data, raw_data_size);
+      DeserializeData(handshake_header, raw_data, raw_data_size);
 
   SecurityQuery query;
   const bool result = query.SerializeQuery(&vector[0], vector.size());
@@ -407,9 +404,9 @@ TEST_F(SecurityQueryTest, Parse_Handshake) {
   EXPECT_PRED_FORMAT2(QueryHeader_EQ, query.get_header(), handshake_header);
   ASSERT_EQ(query.get_data_size(), raw_data_size);
   // query shall handle own array of byte data
-  ASSERT_NE(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
+  ASSERT_NE(query.get_data(), reinterpret_cast<uint8_t*>(NULL));
   for (size_t i = 0; i < raw_data_size; ++i) {
-    ASSERT_EQ(query.get_data()[i], raw_data[+ i]);
+    ASSERT_EQ(query.get_data()[i], raw_data[+i]);
   }
   // check side-effects
   ASSERT_EQ(query.get_connection_key(), 0u);
@@ -426,23 +423,22 @@ TEST_F(SecurityQueryTest, Parse_Handshake) {
 TEST_F(SecurityQueryTest, Parse_InternalError) {
   std::string error_str = "{some error}";
   SecurityQuery::QueryHeader internal_error_header(
-      SecurityQuery::REQUEST,
-      SecurityQuery::SEND_INTERNAL_ERROR,
-      SEQ_NUMBER);
+      SecurityQuery::REQUEST, SecurityQuery::SEND_INTERNAL_ERROR, SEQ_NUMBER);
   internal_error_header.json_size = error_str.size();
 
   const uint8_t* raw_data = reinterpret_cast<const uint8_t*>(error_str.c_str());
 
   const std::vector<uint8_t> vector =
-  DeserializeData(internal_error_header, raw_data, error_str.size());
+      DeserializeData(internal_error_header, raw_data, error_str.size());
 
   SecurityQuery query;
   const bool result = query.SerializeQuery(&vector[0], vector.size());
   ASSERT_TRUE(result);
-  EXPECT_PRED_FORMAT2(QueryHeader_EQ, query.get_header(), internal_error_header);
+  EXPECT_PRED_FORMAT2(
+      QueryHeader_EQ, query.get_header(), internal_error_header);
   // check side-effects
   ASSERT_EQ(query.get_data_size(), 0u);
-  ASSERT_EQ(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
+  ASSERT_EQ(query.get_data(), reinterpret_cast<uint8_t*>(NULL));
   ASSERT_EQ(query.get_connection_key(), 0u);
   ASSERT_EQ(query.get_json_message(), error_str);
 
@@ -451,6 +447,6 @@ TEST_F(SecurityQueryTest, Parse_InternalError) {
   ASSERT_EQ(deserialize_vector, vector);
 }
 
-} // namespace security_manager_test
-} // namespace components
-} // namespace test
+}  // namespace security_manager_test
+}  // namespace components
+}  // namespace test

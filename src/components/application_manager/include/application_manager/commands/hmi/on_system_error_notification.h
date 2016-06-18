@@ -49,7 +49,8 @@ class OnSystemErrorNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnSystemErrorNotification(const MessageSharedPtr& message);
+  OnSystemErrorNotification(const MessageSharedPtr& message,
+                            ApplicationManager& application_manager);
 
   /**
    * @brief OnSystemErrorNotification class destructor
@@ -59,7 +60,7 @@ class OnSystemErrorNotification : public NotificationFromHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(OnSystemErrorNotification);

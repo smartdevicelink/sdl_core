@@ -49,7 +49,8 @@ class VRGetSupportedLanguagesResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit VRGetSupportedLanguagesResponse(const MessageSharedPtr& message);
+  VRGetSupportedLanguagesResponse(const MessageSharedPtr& message,
+                                  ApplicationManager& application_manager);
 
   /**
    * @brief VRGetSupportedLanguagesResponse class destructor
@@ -59,7 +60,7 @@ class VRGetSupportedLanguagesResponse : public ResponseFromHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(VRGetSupportedLanguagesResponse);

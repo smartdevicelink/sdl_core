@@ -49,7 +49,8 @@ class UpdateSDLResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UpdateSDLResponse(const MessageSharedPtr& message);
+  UpdateSDLResponse(const MessageSharedPtr& message,
+                    ApplicationManager& application_manager);
 
   /**
    * @brief UpdateSDLResponse class destructor
@@ -59,7 +60,7 @@ class UpdateSDLResponse : public ResponseFromHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(UpdateSDLResponse);

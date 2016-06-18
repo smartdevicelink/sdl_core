@@ -1,4 +1,5 @@
 /*
+
  Copyright (c) 2016, Ford Motor Company
  All rights reserved.
 
@@ -33,20 +34,20 @@
 #include <algorithm>
 #include <string>
 #include "application_manager/commands/mobile/dial_number_request.h"
-#include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 
 namespace application_manager {
 
 namespace commands {
 
-DialNumberRequest::DialNumberRequest(const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {}
+DialNumberRequest::DialNumberRequest(const MessageSharedPtr& message,
+                                     ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager) {}
 
 DialNumberRequest::~DialNumberRequest() {}
 
 bool DialNumberRequest::Init() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   default_timeout_ = 0;
 
@@ -54,26 +55,26 @@ bool DialNumberRequest::Init() {
 }
 
 void DialNumberRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr application =
-      ApplicationManagerImpl::instance()->application(connection_key());
+      application_manager_.application(connection_key());
 
   if (!application) {
-    LOG4CXX_ERROR(logger_, "NULL pointer");
+    LOGGER_ERROR(logger_, "NULL pointer");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
   std::string number =
       (*message_)[strings::msg_params][strings::number].asString();
   if (!CheckSyntax(number)) {
-    LOG4CXX_ERROR(logger_, "Invalid incoming data");
+    LOGGER_ERROR(logger_, "Invalid incoming data");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
   StripNumberParam(number);
   if (number.empty()) {
-    LOG4CXX_WARN(logger_,
+    LOGGER_ERROR(logger_,
                  "After strip number param is empty. Invalid incoming data");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
@@ -89,11 +90,12 @@ void DialNumberRequest::Run() {
 }
 
 void DialNumberRequest::on_event(const event_engine::Event& event) {
+  LOGGER_AUTO_TRACE(logger_);
   ApplicationSharedPtr application =
-      ApplicationManagerImpl::instance()->application(connection_key());
+      application_manager_.application(connection_key());
 
   if (!application) {
-    LOG4CXX_ERROR(logger_, "NULL pointer");
+    LOGGER_ERROR(logger_, "NULL pointer");
     return;
   }
 
@@ -101,14 +103,14 @@ void DialNumberRequest::on_event(const event_engine::Event& event) {
   mobile_apis::Result::eType result_code = mobile_apis::Result::SUCCESS;
   switch (event.id()) {
     case hmi_apis::FunctionID::BasicCommunication_DialNumber: {
-      LOG4CXX_INFO(logger_, "Received DialNumber event");
+      LOGGER_INFO(logger_, "Received DialNumber event");
       result_code = CommandRequestImpl::GetMobileResultCode(
           static_cast<hmi_apis::Common_Result::eType>(
               message[strings::params][hmi_response::code].asInt()));
       break;
     }
     default: {
-      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+      LOGGER_ERROR(logger_, "Received unknown event" << event.id());
       return;
     }
   }
@@ -130,7 +132,7 @@ void DialNumberRequest::on_event(const event_engine::Event& event) {
 void DialNumberRequest::StripNumberParam(std::string& number) {
   std::size_t found = 0;
   while (std::string::npos !=
-         (found = number.find_first_not_of("+*#,;0123456789"))) {
+         (found = number.find_first_not_of("0123456789*#,;+"))) {
     number.erase(number.begin() + found);
   }
   (*message_)[strings::msg_params][strings::number] = number;

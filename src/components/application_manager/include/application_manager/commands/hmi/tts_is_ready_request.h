@@ -49,7 +49,8 @@ class TTSIsReadyRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit TTSIsReadyRequest(const MessageSharedPtr& message);
+  TTSIsReadyRequest(const MessageSharedPtr& message,
+                    ApplicationManager& application_manager);
 
   /**
    * @brief TTSIsReadyRequest class destructor
@@ -59,7 +60,7 @@ class TTSIsReadyRequest : public RequestToHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(TTSIsReadyRequest);

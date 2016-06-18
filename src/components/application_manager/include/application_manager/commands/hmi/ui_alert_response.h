@@ -49,7 +49,8 @@ class UIAlertResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UIAlertResponse(const MessageSharedPtr& message);
+  UIAlertResponse(const MessageSharedPtr& message,
+                  ApplicationManager& application_manager);
 
   /**
    * @brief UIAlertResponse class destructor
@@ -59,7 +60,7 @@ class UIAlertResponse : public ResponseFromHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(UIAlertResponse);

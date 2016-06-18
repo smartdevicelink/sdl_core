@@ -49,7 +49,8 @@ class UIShowRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UIShowRequest(const MessageSharedPtr& message);
+  UIShowRequest(const MessageSharedPtr& message,
+                ApplicationManager& application_manager);
 
   /**
    * @brief UIShowRequest class destructor
@@ -59,7 +60,7 @@ class UIShowRequest : public RequestToHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(UIShowRequest);

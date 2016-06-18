@@ -53,7 +53,8 @@ class OnTouchEventNotification : public CommandNotificationImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnTouchEventNotification(const MessageSharedPtr& message);
+  OnTouchEventNotification(const MessageSharedPtr& message,
+                           ApplicationManager& application_manager);
 
   /**
    * @brief OnTouchEventNotification class destructor
@@ -63,7 +64,7 @@ class OnTouchEventNotification : public CommandNotificationImpl {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(OnTouchEventNotification);

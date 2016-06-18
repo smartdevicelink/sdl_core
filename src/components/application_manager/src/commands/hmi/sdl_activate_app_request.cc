@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,69 +31,79 @@
  */
 
 #include "application_manager/commands/hmi/sdl_activate_app_request.h"
-#include "application_manager/policies/policy_handler.h"
+#include "application_manager/state_controller.h"
 #include "application_manager/message_helper.h"
 
 namespace application_manager {
 
 namespace commands {
 
-SDLActivateAppRequest::SDLActivateAppRequest(const MessageSharedPtr& message)
-    : RequestFromHMI(message) {
-}
+SDLActivateAppRequest::SDLActivateAppRequest(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : RequestFromHMI(message, application_manager) {}
 
-SDLActivateAppRequest::~SDLActivateAppRequest() {
-}
+SDLActivateAppRequest::~SDLActivateAppRequest() {}
 
 void SDLActivateAppRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   using namespace hmi_apis::FunctionID;
   using namespace hmi_apis::Common_Result;
 
   const uint32_t application_id = app_id();
 
   ApplicationConstSharedPtr app =
-      ApplicationManagerImpl::instance()->application(application_id);
+      application_manager_.application(application_id);
 
   if (!app) {
-    LOG4CXX_WARN(logger_, "Can't find application within regular apps: "
-                  << application_id);
-
-    app = ApplicationManagerImpl::instance()->waiting_app(application_id);
-
-    if (!app) {
-      LOG4CXX_WARN(logger_, "Can't find application within waiting apps: "
-                    << application_id);
-      return;
-    }
+    LOGGER_INFO(logger_, "Can't find app_id in applications list");
+    LOGGER_DEBUG(logger_, "Try find app_id in app_to_register list");
+    app = application_manager_.FindAppToRegister(application_id);
   }
 
+  if (!app) {
+    LOGGER_ERROR(logger_,
+                 "Can't find application in any lists within regular apps: "
+                     << application_id);
+    return;
+  }
+
+  DevicesApps devices_apps = FindAllAppOnParticularDevice(app->device());
+  if (!devices_apps.first && devices_apps.second.empty()) {
+    LOGGER_ERROR(logger_,
+                 "Can't find regular foreground app with the same "
+                 "connection id:"
+                     << app->device());
+    SendResponse(false, correlation_id(), SDL_ActivateApp, NO_APPS_REGISTERED);
+    return;
+  }
   if (!app->IsRegistered()) {
-    DevicesApps devices_apps =
-        FindAllAppOnParticularDevice(app->device());
-    if (!devices_apps.first && devices_apps.second.empty()) {
-      LOG4CXX_ERROR(logger_, "Can't find regular foreground app with the same "
-                    "connection id:" << app->device());
-      SendResponse(correlation_id(),
-                   SDL_ActivateApp, NO_APPS_REGISTERED);
-      return;
-    }
     if (devices_apps.first) {
       MessageHelper::SendLaunchApp(devices_apps.first->app_id(),
                                    app->SchemaUrl(),
-                                   app->PackageName());
+                                   app->PackageName(),
+                                   application_manager_);
     } else {
-      std::vector<ApplicationSharedPtr>::const_iterator it = devices_apps.second.begin();
+      std::vector<ApplicationSharedPtr>::const_iterator it =
+          devices_apps.second.begin();
       for (; it != devices_apps.second.end(); ++it) {
         MessageHelper::SendLaunchApp((*it)->app_id(),
                                      app->SchemaUrl(),
-                                     app->PackageName());
+                                     app->PackageName(),
+                                     application_manager_);
       }
     }
     subscribe_on_event(BasicCommunication_OnAppRegistered);
   } else {
-    policy::PolicyHandler::instance()->OnActivateApp(application_id,
-                                                     correlation_id());
+    if (devices_apps.first) {
+      MessageHelper::SendLaunchApp(devices_apps.first->app_id(),
+                                   app->SchemaUrl(),
+                                   app->PackageName(),
+                                   application_manager_);
+    } else {
+      const uint32_t application_id = app_id();
+      application_manager_.GetPolicyHandler().OnActivateApp(application_id,
+                                                            correlation_id());
+    }
   }
 }
 
@@ -102,8 +112,8 @@ void SDLActivateAppRequest::onTimeOut() {
   using namespace hmi_apis::Common_Result;
   using namespace application_manager;
   unsubscribe_from_event(BasicCommunication_OnAppRegistered);
-  SendResponse(correlation_id(),
-               SDL_ActivateApp, APPLICATION_NOT_REGISTERED);
+  SendResponse(
+      false, correlation_id(), SDL_ActivateApp, APPLICATION_NOT_REGISTERED);
 }
 
 void SDLActivateAppRequest::on_event(const event_engine::Event& event) {
@@ -119,54 +129,51 @@ void SDLActivateAppRequest::on_event(const event_engine::Event& event) {
   const uint32_t hmi_application_id = hmi_app_id(event.smart_object());
 
   ApplicationSharedPtr app =
-      application_manager::ApplicationManagerImpl::instance()->
-      application_by_hmi_app(hmi_application_id);
+      application_manager_.application_by_hmi_app(hmi_application_id);
   if (!app) {
-    LOG4CXX_ERROR(logger_, "Application not found by HMI app id: "
-                  << hmi_application_id);
+    LOGGER_ERROR(logger_,
+                 "Application not found by HMI app id: " << hmi_application_id);
     return;
   }
-  policy::PolicyHandler::instance()->OnActivateApp(app->app_id(),
-                                                   correlation_id());
+  application_manager_.GetPolicyHandler().OnActivateApp(app->app_id(),
+                                                        correlation_id());
 }
 
 uint32_t SDLActivateAppRequest::app_id() const {
   if ((*message_).keyExists(strings::msg_params)) {
-    if ((*message_)[strings::msg_params].keyExists(strings::app_id)){
-        return (*message_)[strings::msg_params][strings::app_id].asUInt();
+    if ((*message_)[strings::msg_params].keyExists(strings::app_id)) {
+      return (*message_)[strings::msg_params][strings::app_id].asUInt();
     }
   }
-  LOG4CXX_DEBUG(logger_, "app_id section is absent in the message.");
+  LOGGER_DEBUG(logger_, "app_id section is absent in the message.");
   return 0;
 }
 
 uint32_t SDLActivateAppRequest::hmi_app_id(
     const smart_objects::SmartObject& so) const {
   if (so.keyExists(strings::params)) {
-    if (so[strings::msg_params].keyExists(strings::application)){
-      if (so[strings::msg_params][strings::application].
-          keyExists(strings::app_id)) {
-        return so[strings::msg_params][strings::application]
-            [strings::app_id].asUInt();
+    if (so[strings::msg_params].keyExists(strings::application)) {
+      if (so[strings::msg_params][strings::application].keyExists(
+              strings::app_id)) {
+        return so[strings::msg_params][strings::application][strings::app_id]
+            .asUInt();
       }
     }
   }
-  LOG4CXX_DEBUG(logger_, "Can't find app_id section is absent in the message.");
+  LOGGER_DEBUG(logger_, "Can't find app_id section is absent in the message.");
   return 0;
 }
 
-DevicesApps
-SDLActivateAppRequest::FindAllAppOnParticularDevice(
+DevicesApps SDLActivateAppRequest::FindAllAppOnParticularDevice(
     const connection_handler::DeviceHandle handle) {
   DevicesApps apps;
 
-  ApplicationManagerImpl::ApplicationListAccessor accessor;
-  ApplicationManagerImpl::ApplictionSet app_list = accessor.GetData();
+  const ApplicationSet app_list = application_manager_.applications().GetData();
 
-  ApplicationManagerImpl::ApplictionSetIt it = app_list.begin();
-  ApplicationManagerImpl::ApplictionSetIt it_end = app_list.end();
+  ApplicationSetIt it = app_list.begin();
+  ApplicationSetIt it_end = app_list.end();
 
-  for (;it != it_end; ++it) {
+  for (; it != it_end; ++it) {
     if (handle == (*it)->device()) {
       if ((*it)->is_foreground()) {
         apps.first = *it;
@@ -179,4 +186,3 @@ SDLActivateAppRequest::FindAllAppOnParticularDevice(
 
 }  // namespace commands
 }  // namespace application_manager
-

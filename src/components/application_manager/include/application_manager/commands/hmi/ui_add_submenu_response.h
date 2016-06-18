@@ -49,7 +49,8 @@ class UIAddSubmenuResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UIAddSubmenuResponse(const MessageSharedPtr& message);
+  UIAddSubmenuResponse(const MessageSharedPtr& message,
+                       ApplicationManager& application_manager);
 
   /**
    * @brief UIAddSubmenuResponse class destructor
@@ -59,7 +60,7 @@ class UIAddSubmenuResponse : public ResponseFromHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(UIAddSubmenuResponse);

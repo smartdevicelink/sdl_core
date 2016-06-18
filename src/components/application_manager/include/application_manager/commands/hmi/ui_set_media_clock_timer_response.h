@@ -49,7 +49,8 @@ class UISetMediaClockTimerResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UISetMediaClockTimerResponse(const MessageSharedPtr& message);
+  UISetMediaClockTimerResponse(const MessageSharedPtr& message,
+                               ApplicationManager& application_manager);
 
   /**
    * @brief UISetMediaClockTimerResponse class destructor
@@ -59,7 +60,7 @@ class UISetMediaClockTimerResponse : public ResponseFromHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(UISetMediaClockTimerResponse);

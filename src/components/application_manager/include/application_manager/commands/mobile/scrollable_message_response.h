@@ -45,18 +45,18 @@ class ScrollableMessageResponse : public CommandResponseImpl {
   /**
    * \brief ScrollableMessageResponse class constructor
    **/
-  explicit ScrollableMessageResponse(const MessageSharedPtr& message);
+  ScrollableMessageResponse(const MessageSharedPtr& message,
+                            ApplicationManager& application_manager);
 
   /**
    * \brief SpeakResponseCommand class destructor
    **/
-  virtual ~ScrollableMessageResponse() {
-  }
+  virtual ~ScrollableMessageResponse() {}
 
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(ScrollableMessageResponse);

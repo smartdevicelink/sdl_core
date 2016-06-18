@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UPDATE_SDL_REQUEST_H_
 
 #include "application_manager/commands/hmi/request_to_hmi.h"
+#include "application_manager/application_manager.h"
 
 namespace application_manager {
 
@@ -49,7 +50,8 @@ class UpdateSDLRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UpdateSDLRequest(const MessageSharedPtr& message);
+  UpdateSDLRequest(const MessageSharedPtr& message,
+                   ApplicationManager& application_manager);
 
   /**
    * @brief UpdateSDLRequest class destructor
@@ -59,7 +61,7 @@ class UpdateSDLRequest : public RequestToHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(UpdateSDLRequest);

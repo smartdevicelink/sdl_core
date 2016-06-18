@@ -49,7 +49,8 @@ class UIGetCapabilitiesRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UIGetCapabilitiesRequest(const MessageSharedPtr& message);
+  UIGetCapabilitiesRequest(const MessageSharedPtr& message,
+                           ApplicationManager& application_manager);
 
   /**
    * @brief UIGetCapabilitiesRequest class destructor
@@ -59,7 +60,7 @@ class UIGetCapabilitiesRequest : public RequestToHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(UIGetCapabilitiesRequest);

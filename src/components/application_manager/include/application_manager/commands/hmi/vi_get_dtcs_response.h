@@ -49,7 +49,8 @@ class VIGetDTCsResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit VIGetDTCsResponse(const MessageSharedPtr& message);
+  VIGetDTCsResponse(const MessageSharedPtr& message,
+                    ApplicationManager& application_manager);
 
   /**
    * @brief VIGetDTCsResponse class destructor
@@ -59,7 +60,7 @@ class VIGetDTCsResponse : public ResponseFromHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(VIGetDTCsResponse);

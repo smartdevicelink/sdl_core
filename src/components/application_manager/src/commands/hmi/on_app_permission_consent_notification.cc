@@ -32,23 +32,22 @@
  */
 
 #include "application_manager/commands/hmi/on_app_permission_consent_notification.h"
-#include "application_manager/application_manager_impl.h"
-#include "application_manager/message_helper.h"
+#include "application_manager/application_manager.h"
 #include "application_manager/policies/policy_handler.h"
+#include "application_manager/message_helper.h"
 
 namespace application_manager {
 
 namespace commands {
 
-OnAppPermissionConsentNotification::OnAppPermissionConsentNotification(const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
-}
+OnAppPermissionConsentNotification::OnAppPermissionConsentNotification(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : NotificationFromHMI(message, application_manager) {}
 
-OnAppPermissionConsentNotification::~OnAppPermissionConsentNotification() {
-}
+OnAppPermissionConsentNotification::~OnAppPermissionConsentNotification() {}
 
 void OnAppPermissionConsentNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   smart_objects::SmartObject& msg_params = (*message_)[strings::msg_params];
 
   uint32_t connection_key = 0;
@@ -62,28 +61,29 @@ void OnAppPermissionConsentNotification::Run() {
 
   if (msg_params.keyExists("consentedFunctions")) {
     smart_objects::SmartArray* user_consent =
-      msg_params["consentedFunctions"].asArray();
+        msg_params["consentedFunctions"].asArray();
 
-  smart_objects::SmartArray::const_iterator it = user_consent->begin();
-  smart_objects::SmartArray::const_iterator it_end = user_consent->end();
-  for (; it != it_end; ++it) {
-    policy::FunctionalGroupPermission permissions;
-    permissions.group_id = (*it)["id"].asInt();
-    permissions.group_alias = (*it)["name"].asString();
-    if ((*it).keyExists("allowed")) {
-      permissions.state = (*it)["allowed"].asBool() ? policy::kGroupAllowed :
-                                                      policy::kGroupDisallowed;
-    } else {
-      permissions.state = policy::kGroupUndefined;
-    }
+    smart_objects::SmartArray::const_iterator it = user_consent->begin();
+    smart_objects::SmartArray::const_iterator it_end = user_consent->end();
+    for (; it != it_end; ++it) {
+      policy::FunctionalGroupPermission permissions;
+      permissions.group_id = (*it)["id"].asInt();
+      permissions.group_alias = (*it)["name"].asString();
+      if ((*it).keyExists("allowed")) {
+        permissions.state = (*it)["allowed"].asBool()
+                                ? policy::kGroupAllowed
+                                : policy::kGroupDisallowed;
+      } else {
+        permissions.state = policy::kGroupUndefined;
+      }
 
       permission_consent.group_permissions.push_back(permissions);
     }
 
     permission_consent.consent_source = msg_params["source"].asString();
 
-    policy::PolicyHandler::instance()->OnAppPermissionConsent(connection_key,
-      permission_consent);
+    application_manager_.GetPolicyHandler().OnAppPermissionConsent(
+        connection_key, permission_consent);
   }
 }
 

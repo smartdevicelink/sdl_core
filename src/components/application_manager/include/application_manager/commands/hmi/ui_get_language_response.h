@@ -49,7 +49,8 @@ class UIGetLanguageResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UIGetLanguageResponse(const MessageSharedPtr& message);
+  UIGetLanguageResponse(const MessageSharedPtr& message,
+                        ApplicationManager& application_manager);
 
   /**
    * @brief UIGetLanguageResponse class destructor
@@ -59,7 +60,7 @@ class UIGetLanguageResponse : public ResponseFromHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(UIGetLanguageResponse);

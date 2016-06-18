@@ -31,8 +31,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_END_AUDIO_PASS_THRU_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_END_AUDIO_PASS_THRU_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_END_AUDIO_PASS_THRU_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_END_AUDIO_PASS_THRU_REQUEST_H_
 
 #include "application_manager/commands/command_request_impl.h"
 #include "utils/macro.h"
@@ -51,7 +51,8 @@ class EndAudioPassThruRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit EndAudioPassThruRequest(const MessageSharedPtr& message);
+  EndAudioPassThruRequest(const MessageSharedPtr& message,
+                          ApplicationManager& application_manager);
 
   /**
    * @brief EndAudioPassThruRequest class destructor
@@ -61,14 +62,14 @@ class EndAudioPassThruRequest : public CommandRequestImpl {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
   /**
    * @brief Interface method that is called whenever new event received
    *
    * @param event The received event
    */
-  void on_event(const event_engine::Event& event);
+  void on_event(const event_engine::Event& event) OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(EndAudioPassThruRequest);
@@ -77,4 +78,4 @@ class EndAudioPassThruRequest : public CommandRequestImpl {
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_END_AUDIO_PASS_THRU_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_END_AUDIO_PASS_THRU_REQUEST_H_

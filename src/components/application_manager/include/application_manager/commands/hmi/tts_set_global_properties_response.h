@@ -49,7 +49,8 @@ class TTSSetGlobalPropertiesResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit TTSSetGlobalPropertiesResponse(const MessageSharedPtr& message);
+  TTSSetGlobalPropertiesResponse(const MessageSharedPtr& message,
+                                 ApplicationManager& application_manager);
 
   /**
    * @brief TTSSetGlobalPropertiesResponse class destructor
@@ -59,7 +60,7 @@ class TTSSetGlobalPropertiesResponse : public ResponseFromHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(TTSSetGlobalPropertiesResponse);

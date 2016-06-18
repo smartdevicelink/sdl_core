@@ -51,7 +51,8 @@ class UnsubscribeVehicleDataResponse : public CommandResponseImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UnsubscribeVehicleDataResponse(const MessageSharedPtr& message);
+  UnsubscribeVehicleDataResponse(const MessageSharedPtr& message,
+                                 ApplicationManager& application_manager);
 
   /**
    * @brief UnsubscribeVehicleDataResponse class destructor
@@ -61,7 +62,7 @@ class UnsubscribeVehicleDataResponse : public CommandResponseImpl {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(UnsubscribeVehicleDataResponse);

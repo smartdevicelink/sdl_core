@@ -35,16 +35,16 @@
 #include "named_pipe_notifier_plugin.h"
 
 #if QT_4
-# include <QtDeclarative/qdeclarative.h>
+#include <QtDeclarative/qdeclarative.h>
 #elif QT_5
-#  include <QtQml/qqml.h>
+#include <QtQml/qqml.h>
 #endif  // QT_VERSION
 
 #include "named_pipe_notifier.h"
 
 void NamedPipeNotifierPlugin::registerTypes(const char* uri) {
-    // @uri com.ford.sdl.hmi.named_pipe_notifier
-    qmlRegisterType<NamedPipeNotifier>(uri, 1, 0, "NamedPipeNotifier");
+  // @uri com.ford.sdl.hmi.named_pipe_notifier
+  qmlRegisterType<NamedPipeNotifier>(uri, 1, 0, "NamedPipeNotifier");
 }
 
 #if QT_4

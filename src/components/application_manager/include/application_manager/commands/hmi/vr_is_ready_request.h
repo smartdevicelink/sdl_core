@@ -49,7 +49,8 @@ class VRIsReadyRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit VRIsReadyRequest(const MessageSharedPtr& message);
+  VRIsReadyRequest(const MessageSharedPtr& message,
+                   ApplicationManager& application_manager);
 
   /**
    * @brief VRIsReadyRequest class destructor
@@ -59,7 +60,7 @@ class VRIsReadyRequest : public RequestToHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(VRIsReadyRequest);

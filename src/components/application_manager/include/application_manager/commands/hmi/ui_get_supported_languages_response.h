@@ -49,7 +49,8 @@ class UIGetSupportedLanguagesResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UIGetSupportedLanguagesResponse(const MessageSharedPtr& message);
+  UIGetSupportedLanguagesResponse(const MessageSharedPtr& message,
+                                  ApplicationManager& application_manager);
 
   /**
    * @brief UIGetSupportedLanguagesResponse class destructor
@@ -59,7 +60,7 @@ class UIGetSupportedLanguagesResponse : public ResponseFromHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(UIGetSupportedLanguagesResponse);

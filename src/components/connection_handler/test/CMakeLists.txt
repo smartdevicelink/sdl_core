@@ -28,37 +28,39 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-if(BUILD_TESTS)
-
 set(appMain_DIR ${CMAKE_SOURCE_DIR}/src/appMain)
 
 include_directories(
     ${GMOCK_INCLUDE_DIRECTORY}
     ${COMPONENTS_DIR}/connection_handler/include
-    ${COMPONENTS_DIR}/security_manager/test/include
-    ${COMPONENTS_DIR}/protocol_handler/test/include
-    ${COMPONENTS_DIR}/security_manager/include
     ${COMPONENTS_DIR}/connection_handler/test/include
-    ${COMPONENTS_DIR}/transport_manager/test/include
+    ${COMPONENTS_DIR}/resumption/include
+    ${JSONCPP_INCLUDE_DIRECTORY}
 )
 
 set(LIBRARIES
     gmock
+    Utils
+    MediaManager
     connectionHandler
-    ConfigProfile
     ProtocolHandler
-    TransportManager
 )
 
 set(SOURCES
-    #connection_handler_impl_test.cc
+    connection_handler_impl_test.cc
     connection_test.cc
     device_test.cc
-    #heart_beat_monitor_test.cc
+    heart_beat_monitor_test.cc
 )
 
 file(COPY ${appMain_DIR}/smartDeviceLink.ini DESTINATION "./")
 
-create_test("connection_handler_test" "${SOURCES}" "${LIBRARIES}")
-
+if(QT_PORT)
+  link_directories (${CMAKE_SOURCE_DIR}/build/openssl_win_x86/lib)
 endif()
+
+if(NOT QT_PORT AND ${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  link_directories(${CMAKE_SOURCE_DIR}/build/openssl_win_x64/lib/)
+endif()
+
+create_test("connection_handler_test" "${SOURCES}" "${LIBRARIES}")

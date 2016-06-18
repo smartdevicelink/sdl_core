@@ -48,7 +48,8 @@ class AudioStopStreamResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit AudioStopStreamResponse(const MessageSharedPtr& message);
+  AudioStopStreamResponse(const MessageSharedPtr& message,
+                          ApplicationManager& application_manager);
 
   /**
    * @brief OnNaviStopStreamResponse class destructor
@@ -58,7 +59,7 @@ class AudioStopStreamResponse : public ResponseFromHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(AudioStopStreamResponse);

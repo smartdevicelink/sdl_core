@@ -51,7 +51,8 @@ class OnUIResetTimeoutNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnUIResetTimeoutNotification(const MessageSharedPtr& message);
+  OnUIResetTimeoutNotification(const MessageSharedPtr& message,
+                               ApplicationManager& application_manager);
 
   /**
    * @brief OnUIResetTimeoutNotification class destructor
@@ -61,7 +62,7 @@ class OnUIResetTimeoutNotification : public NotificationFromHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(OnUIResetTimeoutNotification);

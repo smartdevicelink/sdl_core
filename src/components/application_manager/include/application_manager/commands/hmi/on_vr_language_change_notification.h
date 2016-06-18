@@ -49,7 +49,8 @@ class OnVRLanguageChangeNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnVRLanguageChangeNotification(const MessageSharedPtr& message);
+  OnVRLanguageChangeNotification(const MessageSharedPtr& message,
+                                 ApplicationManager& application_manager);
 
   /**
    * @brief OnVRLanguageChangeNotification class destructor
@@ -59,7 +60,7 @@ class OnVRLanguageChangeNotification : public NotificationFromHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(OnVRLanguageChangeNotification);

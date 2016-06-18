@@ -36,8 +36,12 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_LIBUSB_PLATFORM_USB_DEVICE_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_LIBUSB_PLATFORM_USB_DEVICE_H_
 
+#if defined(OS_WINDOWS)
+#include "utils/winhdr.h"
+#endif
+
+#include <libusb.h>
 #include <string>
-#include <libusb/libusb.h>
 
 namespace transport_manager {
 
@@ -45,19 +49,32 @@ namespace transport_adapter {
 
 class PlatformUsbDevice {
  public:
-  uint8_t bus_number() const { return bus_number_; }
-  uint8_t address() const { return address_; }
-  uint16_t vendor_id() const { return vendor_id_; }
-  uint16_t product_id() const { return product_id_; }
+  uint8_t bus_number() const {
+    return bus_number_;
+  }
+  uint8_t address() const {
+    return address_;
+  }
+  uint16_t vendor_id() const {
+    return vendor_id_;
+  }
+  uint16_t product_id() const {
+    return product_id_;
+  }
   std::string GetManufacturer() const;
   std::string GetProductName() const;
   std::string GetSerialNumber() const;
-  PlatformUsbDevice(uint8_t bus, uint8_t address,
+  PlatformUsbDevice(uint8_t bus,
+                    uint8_t address,
                     const libusb_device_descriptor& device_descriptor,
                     libusb_device* device_libusb,
                     libusb_device_handle* device_handle_libusb);
-  libusb_device_handle* GetLibusbHandle() { return libusb_device_handle_; }
-  libusb_device* GetLibusbDevice() { return libusb_device_; }
+  libusb_device_handle* GetLibusbHandle() {
+    return libusb_device_handle_;
+  }
+  libusb_device* GetLibusbDevice() {
+    return libusb_device_;
+  }
 
  private:
   std::string GetDescString(uint8_t index) const;

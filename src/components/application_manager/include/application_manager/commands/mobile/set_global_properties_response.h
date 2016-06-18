@@ -51,7 +51,8 @@ class SetGlobalPropertiesResponse : public CommandResponseImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit SetGlobalPropertiesResponse(const MessageSharedPtr& message);
+  SetGlobalPropertiesResponse(const MessageSharedPtr& message,
+                              ApplicationManager& application_manager);
 
   /**
    * @brief SetGlobalPropertiesResponse class destructor
@@ -61,7 +62,7 @@ class SetGlobalPropertiesResponse : public CommandResponseImpl {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(SetGlobalPropertiesResponse);

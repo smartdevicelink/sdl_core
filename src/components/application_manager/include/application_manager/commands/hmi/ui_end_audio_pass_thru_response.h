@@ -49,7 +49,8 @@ class UIEndAudioPassThruResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UIEndAudioPassThruResponse(const MessageSharedPtr& message);
+  UIEndAudioPassThruResponse(const MessageSharedPtr& message,
+                             ApplicationManager& application_manager);
 
   /**
    * @brief UIEndAudioPassThruResponse class destructor
@@ -59,7 +60,7 @@ class UIEndAudioPassThruResponse : public ResponseFromHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(UIEndAudioPassThruResponse);

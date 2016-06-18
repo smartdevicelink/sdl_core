@@ -49,7 +49,8 @@ class OnFileRemovedNotification : public NotificationToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnFileRemovedNotification(const MessageSharedPtr& message);
+  OnFileRemovedNotification(const MessageSharedPtr& message,
+                            ApplicationManager& application_manager);
 
   /**
    * @brief OnFileRemovedNotification class destructor
@@ -59,7 +60,7 @@ class OnFileRemovedNotification : public NotificationToHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(OnFileRemovedNotification);

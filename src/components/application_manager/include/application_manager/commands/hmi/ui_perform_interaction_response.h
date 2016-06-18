@@ -49,7 +49,8 @@ class UIPerformInteractionResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UIPerformInteractionResponse(const MessageSharedPtr& message);
+  UIPerformInteractionResponse(const MessageSharedPtr& message,
+                               ApplicationManager& application_manager);
 
   /**
    * @brief UIPerformInteractionResponse class destructor
@@ -59,7 +60,7 @@ class UIPerformInteractionResponse : public ResponseFromHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(UIPerformInteractionResponse);

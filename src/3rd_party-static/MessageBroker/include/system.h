@@ -9,7 +9,7 @@
 
 #ifdef _WIN32
 
-#include <windows.h>
+#include "utils/winhdr.h"
 
 #else
 
@@ -191,14 +191,7 @@ namespace System
        */
       bool Join(void** ret = NULL);
 
-#ifdef _WIN32
-      HANDLE
-#else
-      pthread_t
-#endif
-      GetId() const {
-        return m_id;
-      }
+      uint64_t GetId() const;
 
     private:
       /**
@@ -267,9 +260,6 @@ namespace System
 #endif
   };
 
-#ifdef _WIN32
-#warning "BinarySemaphore is implemented for POSIX systems only"
-#else
   /**
    * \class BinarySemaphore
    * \brief Binary semaphore implementation.
@@ -300,21 +290,27 @@ namespace System
     /**
       * \brief Mutex to prevent concurrent access to the flag.
       */
+#ifdef _WIN32
+    CRITICAL_SECTION m_mutex;
+#else
     pthread_mutex_t m_mutex;
+#endif
 
     /**
       * \brief Conditional variable to block threads.
       */
+#ifdef _WIN32
+    CONDITION_VARIABLE m_cond;
+#else
     pthread_cond_t m_cond;
+#endif
 
     /**
       * \brief Semaphore state: false = down, true = up.
       */
     bool m_isUp;
   };
-#endif /* _WIN32 */
 
 } /* namespace System */
 
 #endif /* SYSTEM_H */
-

@@ -49,7 +49,8 @@ class OnRecordStartdNotification : public NotificationToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnRecordStartdNotification(const MessageSharedPtr& message);
+  OnRecordStartdNotification(const MessageSharedPtr& message,
+                             ApplicationManager& application_manager);
 
   /**
    * @brief OnRecordStartdNotification class destructor
@@ -59,7 +60,7 @@ class OnRecordStartdNotification : public NotificationToHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(OnRecordStartdNotification);

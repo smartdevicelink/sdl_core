@@ -45,7 +45,8 @@ class SliderResponse : public CommandResponseImpl {
   /**
    * \brief SliderResponse class constructor
    **/
-  explicit SliderResponse(const MessageSharedPtr& message);
+  SliderResponse(const MessageSharedPtr& message,
+                 ApplicationManager& application_manager);
 
   /**
    * \brief SpeakResponseCommand class destructor
@@ -55,7 +56,7 @@ class SliderResponse : public CommandResponseImpl {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(SliderResponse);

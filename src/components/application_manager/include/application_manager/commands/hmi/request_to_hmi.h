@@ -34,19 +34,20 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_REQUEST_TO_HMI_H_
 
 #include "application_manager/commands/command_impl.h"
+#include "application_manager/application_manager.h"
 
 namespace application_manager {
 
 namespace commands {
 
-
 class RequestToHMI : public CommandImpl {
  public:
-  explicit RequestToHMI(const MessageSharedPtr& message);
+  RequestToHMI(const MessageSharedPtr& message,
+               ApplicationManager& application_manager);
   virtual ~RequestToHMI();
-  virtual bool Init();
-  virtual bool CleanUp();
-  virtual void Run();
+  bool Init() OVERRIDE;
+  bool CleanUp() OVERRIDE;
+  void Run() OVERRIDE;
   void SendRequest();
 
   /*

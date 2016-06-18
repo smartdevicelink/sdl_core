@@ -51,7 +51,8 @@ class UpdateTurnListResponse : public CommandResponseImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UpdateTurnListResponse(const MessageSharedPtr& message);
+  UpdateTurnListResponse(const MessageSharedPtr& message,
+                         ApplicationManager& application_manager);
 
   /**
    * @brief UpdateTurnListResponse class destructor
@@ -61,7 +62,7 @@ class UpdateTurnListResponse : public CommandResponseImpl {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(UpdateTurnListResponse);

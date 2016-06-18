@@ -45,7 +45,8 @@ class SetMediaClockTimerResponse : public CommandResponseImpl {
   /**
    * \brief SetMediaClockTimerResponse class constructor
    **/
-  explicit SetMediaClockTimerResponse(const MessageSharedPtr& message);
+  SetMediaClockTimerResponse(const MessageSharedPtr& message,
+                             ApplicationManager& application_manager);
 
   /**
    * \brief SetMediaClockTimerResponse class destructor
@@ -55,7 +56,7 @@ class SetMediaClockTimerResponse : public CommandResponseImpl {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(SetMediaClockTimerResponse);

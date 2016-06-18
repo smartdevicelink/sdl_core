@@ -48,15 +48,17 @@ namespace commands {
 
 class CommandResponseImpl : public CommandImpl {
  public:
-  explicit CommandResponseImpl(const MessageSharedPtr& message);
+  CommandResponseImpl(const MessageSharedPtr& message,
+                      ApplicationManager& application_manager);
   virtual ~CommandResponseImpl();
-  virtual bool Init();
-  virtual bool CleanUp();
-  virtual void Run();
+  bool Init() OVERRIDE;
+  bool CleanUp() OVERRIDE;
+  void Run() OVERRIDE;
   void SendResponse(bool successe,
                     const mobile_apis::Result::eType& result_code =
                         mobile_apis::Result::INVALID_ENUM,
                     bool final_message = false);
+
  private:
   DISALLOW_COPY_AND_ASSIGN(CommandResponseImpl);
 };

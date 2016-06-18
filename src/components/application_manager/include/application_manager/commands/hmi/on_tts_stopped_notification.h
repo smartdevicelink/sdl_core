@@ -49,7 +49,8 @@ class OnTTSStoppedNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject OnTTSStartedNotificationmessage
    **/
-  explicit OnTTSStoppedNotification(const MessageSharedPtr& message);
+  OnTTSStoppedNotification(const MessageSharedPtr& message,
+                           ApplicationManager& application_manager);
 
   /**
    * @brief OnTTSStoppedNotification class destructor
@@ -59,7 +60,7 @@ class OnTTSStoppedNotification : public NotificationFromHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(OnTTSStoppedNotification);

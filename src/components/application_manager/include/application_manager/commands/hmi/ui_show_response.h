@@ -49,7 +49,8 @@ class UIShowResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UIShowResponse(const MessageSharedPtr& message);
+  UIShowResponse(const MessageSharedPtr& message,
+                 ApplicationManager& application_manager);
 
   /**
    * @brief UIShowResponse class destructor
@@ -59,7 +60,7 @@ class UIShowResponse : public ResponseFromHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(UIShowResponse);

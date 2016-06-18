@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -30,8 +30,8 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef TEST_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_DBUS_SUBSCRIBER_H_
-#define TEST_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_DBUS_SUBSCRIBER_H_
+#ifndef SRC_COMPONENTS_HMI_MESSAGE_HANDLER_TEST_INCLUDE_HMI_MESSAGE_HANDLER_MOCK_SUBSCRIBER_H_
+#define SRC_COMPONENTS_HMI_MESSAGE_HANDLER_TEST_INCLUDE_HMI_MESSAGE_HANDLER_MOCK_SUBSCRIBER_H_
 
 #include <string>
 
@@ -39,7 +39,7 @@ struct DBusConnection;
 
 namespace test {
 namespace components {
-namespace hmi_message_handler {
+namespace hmi_message_handler_test {
 
 class MockSubscriber {
  public:
@@ -55,8 +55,8 @@ class MockSubscriber {
   DBusConnection* conn_;
 };
 
-}  // namespace hmi_message_handler
+}  // namespace hmi_message_handler_test
 }  // namespace components
 }  // namespace test
 
-#endif  // TEST_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_DBUS_SUBSCRIBER_H_
+#endif  // SRC_COMPONENTS_HMI_MESSAGE_HANDLER_TEST_INCLUDE_HMI_MESSAGE_HANDLER_MOCK_SUBSCRIBER_H_

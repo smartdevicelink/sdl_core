@@ -49,7 +49,8 @@ class OnAppRegisteredNotification : public NotificationToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnAppRegisteredNotification(const MessageSharedPtr& message);
+  OnAppRegisteredNotification(const MessageSharedPtr& message,
+                              ApplicationManager& application_manager);
 
   /**
    * @brief OnAppRegisteredNotification class destructor
@@ -59,7 +60,7 @@ class OnAppRegisteredNotification : public NotificationToHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(OnAppRegisteredNotification);

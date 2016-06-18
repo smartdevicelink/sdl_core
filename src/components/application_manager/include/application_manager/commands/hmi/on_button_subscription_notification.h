@@ -51,7 +51,8 @@ class OnButtonSubscriptionNotification : public NotificationToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnButtonSubscriptionNotification(const MessageSharedPtr& message);
+  OnButtonSubscriptionNotification(const MessageSharedPtr& message,
+                                   ApplicationManager& application_manager);
 
   /**
    * @brief OnButtonSubscriptionNotification class destructor
@@ -61,7 +62,7 @@ class OnButtonSubscriptionNotification : public NotificationToHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(OnButtonSubscriptionNotification);

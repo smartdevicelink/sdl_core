@@ -32,7 +32,6 @@
  */
 
 #include "application_manager/commands/mobile/set_media_clock_timer_request.h"
-#include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
@@ -41,47 +40,45 @@ namespace application_manager {
 
 namespace commands {
 
-SetMediaClockRequest::SetMediaClockRequest(const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {
-}
+SetMediaClockRequest::SetMediaClockRequest(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager) {}
 
-SetMediaClockRequest::~SetMediaClockRequest() {
-}
+SetMediaClockRequest::~SetMediaClockRequest() {}
 
 void SetMediaClockRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
-  ApplicationSharedPtr app =
-      ApplicationManagerImpl::instance()->application(connection_key());
+  ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
-    LOG4CXX_ERROR(logger_, "Application is not registered");
+    LOGGER_ERROR(logger_, "Application is not registered");
     return;
   }
 
   if (!app->is_media_application()) {
-    LOG4CXX_ERROR(logger_, "Application is not media application");
+    LOGGER_ERROR(logger_, "Application is not media application");
     SendResponse(false, mobile_apis::Result::REJECTED);
     return;
   }
 
   if (isDataValid()) {
-    smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-        smart_objects::SmartType_Map);
+    smart_objects::SmartObject msg_params =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
     // copy entirely msg
     msg_params = (*message_)[strings::msg_params];
     msg_params[strings::app_id] = app->app_id();
 
-    SendHMIRequest(hmi_apis::FunctionID::UI_SetMediaClockTimer,
-                   &msg_params, true);
+    SendHMIRequest(
+        hmi_apis::FunctionID::UI_SetMediaClockTimer, &msg_params, true);
   } else {
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
   }
 }
 
 void SetMediaClockRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
@@ -96,7 +93,7 @@ void SetMediaClockRequest::on_event(const event_engine::Event& event) {
       break;
     }
     default: {
-      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+      LOGGER_ERROR(logger_, "Received unknown event" << event.id());
       return;
     }
   }
@@ -110,9 +107,8 @@ bool SetMediaClockRequest::isDataValid() {
 
   if (update_mode == mobile_apis::UpdateMode::COUNTUP ||
       update_mode == mobile_apis::UpdateMode::COUNTDOWN) {
-
     if (!msg_params.keyExists(strings::start_time)) {
-      LOG4CXX_INFO(logger_, "Invalid data");
+      LOGGER_INFO(logger_, "Invalid data");
       return false;
     }
 
@@ -134,16 +130,16 @@ bool SetMediaClockRequest::isDataValid() {
           (msg_params[strings::end_time][strings::seconds].asUInt());
 
       if (((end_time_in_seconds > start_time_in_seconds) &&
-          (update_mode == mobile_apis::UpdateMode::COUNTDOWN)) ||
+           (update_mode == mobile_apis::UpdateMode::COUNTDOWN)) ||
           ((end_time_in_seconds < start_time_in_seconds) &&
-          (update_mode == mobile_apis::UpdateMode::COUNTUP))) {
-        LOG4CXX_INFO(logger_, "Invalid data");
+           (update_mode == mobile_apis::UpdateMode::COUNTUP))) {
+        LOGGER_INFO(logger_, "Invalid data");
         return false;
       }
     }
   }
 
-  LOG4CXX_INFO(logger_, "Data is valid");
+  LOGGER_INFO(logger_, "Data is valid");
   return true;
 }
 

@@ -52,7 +52,8 @@ class ShowConstantTBTRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit ShowConstantTBTRequest(const MessageSharedPtr& message);
+  ShowConstantTBTRequest(const MessageSharedPtr& message,
+                         ApplicationManager& application_manager);
 
   /**
    * @brief ShowConstantTBTRequest class destructor
@@ -62,14 +63,14 @@ class ShowConstantTBTRequest : public CommandRequestImpl {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
   /**
    * @brief Interface method that is called whenever new event received
    *
    * @param event The received event
    */
-  virtual void on_event(const event_engine::Event& event);
+  virtual void on_event(const event_engine::Event& event) OVERRIDE;
 
  private:
   /**

@@ -48,7 +48,8 @@ class NaviStopStreamResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit NaviStopStreamResponse(const MessageSharedPtr& message);
+  NaviStopStreamResponse(const MessageSharedPtr& message,
+                         ApplicationManager& application_manager);
 
   /**
    * @brief OnNaviStopStreamResponse class destructor
@@ -58,7 +59,7 @@ class NaviStopStreamResponse : public ResponseFromHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(NaviStopStreamResponse);

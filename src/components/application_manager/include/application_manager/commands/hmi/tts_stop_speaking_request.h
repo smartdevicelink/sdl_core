@@ -49,7 +49,8 @@ class TTSStopSpeakingRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit TTSStopSpeakingRequest(const MessageSharedPtr& message);
+  TTSStopSpeakingRequest(const MessageSharedPtr& message,
+                         ApplicationManager& application_manager);
 
   /**
    * @brief TTSStopSpeakingRequest class destructor
@@ -59,7 +60,7 @@ class TTSStopSpeakingRequest : public RequestToHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(TTSStopSpeakingRequest);

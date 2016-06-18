@@ -49,7 +49,8 @@ class AddStatisticsInfoNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit AddStatisticsInfoNotification(const MessageSharedPtr& message);
+  AddStatisticsInfoNotification(const MessageSharedPtr& message,
+                                ApplicationManager& application_manager);
 
   /**
    * @brief AddStatisticsInfoNotification class destructor
@@ -59,7 +60,7 @@ class AddStatisticsInfoNotification : public NotificationFromHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(AddStatisticsInfoNotification);

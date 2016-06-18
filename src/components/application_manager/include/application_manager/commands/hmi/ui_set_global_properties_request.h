@@ -49,7 +49,8 @@ class UISetGlobalPropertiesRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UISetGlobalPropertiesRequest(const MessageSharedPtr& message);
+  UISetGlobalPropertiesRequest(const MessageSharedPtr& message,
+                               ApplicationManager& application_manager);
 
   /**
    * @brief UIShowRequest class destructor
@@ -59,7 +60,7 @@ class UISetGlobalPropertiesRequest : public RequestToHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(UISetGlobalPropertiesRequest);
