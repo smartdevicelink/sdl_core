@@ -15,6 +15,8 @@ addons:
     packages:
     - gcc-4.9
     - g++-4.9
+    - clang
+    - llvm
     - libssl-dev
     - libbluetooth3
     - libbluetooth-dev
@@ -34,14 +36,14 @@ script:
   - mkdir build && cd build && cmake ../ -DBUILD_TESTS=ON -DENABLE_GCOV=ON && make install
   - sudo ldconfig
   - make test
-  - bash ../tools/infrastructure/show_disabled.sh 
+  - bash ../tools/infrastructure/show_disabled.sh
   - bash -ex ../tools/infrastructure/collect_coverage.sh ./
 env:
   global:
   - LC_CTYPE=en_US.UTF-8
   - CTEST_OUTPUT_ON_FAILURE=TRUE
-  - CMAKE_CXX_COMPILER=g++-4.9
-  - CMAKE_C_COMPILER=gcc-4.9
+  - CMAKE_CXX_COMPILER=clang++
+  - CMAKE_C_COMPILER=clang
   - LD_LIBRARY_PATH=.
 after_success:
   - pwd ; bash <(curl -s https://codecov.io/bash) -f ./coverage/coverage.info || echo "Codecov did not collect coverage reports"
