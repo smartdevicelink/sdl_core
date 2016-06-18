@@ -262,7 +262,7 @@ bool utils::TcpSocketConnection::Impl::Connect(const HostAddress& address,
   server_address.sin_addr.s_addr = address.ToIp4Address(false);
   if (-1 == connect(client_socket,
                     reinterpret_cast<sockaddr*>(&server_address),
-                    sizeof(server_address)) == 0) {
+                    sizeof(server_address))) {
     LOGGER_ERROR(logger_,
                  "Failed to connect to the server " << address.ToString() << ":"
                                                     << port
