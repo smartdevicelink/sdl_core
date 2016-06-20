@@ -1163,50 +1163,50 @@
 	<element name="INVALID" />
   </enum>
 
-  <struct name="BeltStatus">
-	<param name="driverBeltDeployed" type="VehicleDataEventStatus">
+<struct name="BeltStatus">
+	<param name="driverBeltDeployed" type="VehicleDataEventStatus" mandatory="false">
 	  <description>References signal "VedsDrvBelt_D_Ltchd". See VehicleDataEventStatus.</description>
 	</param>
-	<param name="passengerBeltDeployed" type="VehicleDataEventStatus">
+	<param name="passengerBeltDeployed" type="VehicleDataEventStatus" mandatory="false">
 	  <description>References signal "VedsPasBelt_D_Ltchd". See VehicleDataEventStatus.</description>
 	</param>
-	<param name="passengerBuckleBelted" type="VehicleDataEventStatus">
+	<param name="passengerBuckleBelted" type="VehicleDataEventStatus" mandatory="false">
 	  <description>References signal "VedsRw1PasBckl_D_Ltchd". See VehicleDataEventStatus.</description>
 	</param>
-	<param name="driverBuckleBelted" type="VehicleDataEventStatus">
+	<param name="driverBuckleBelted" type="VehicleDataEventStatus" mandatory="false">
 	  <description>References signal "VedsRw1DrvBckl_D_Ltchd". See VehicleDataEventStatus.</description>
 	</param>
-	<param name="leftRow2BuckleBelted" type="VehicleDataEventStatus">
+	<param name="leftRow2BuckleBelted" type="VehicleDataEventStatus" mandatory="false">
 	  <description>References signal "VedsRw2lBckl_D_Ltchd". See VehicleDataEventStatus.</description>
 	</param>
-	<param name="passengerChildDetected" type="VehicleDataEventStatus">
+	<param name="passengerChildDetected" type="VehicleDataEventStatus" mandatory="false">
 	  <description>References signal "VedsRw1PasChld_D_Ltchd". See VehicleDataEventStatus.</description>
 	</param>
-	<param name="rightRow2BuckleBelted" type="VehicleDataEventStatus">
+	<param name="rightRow2BuckleBelted" type="VehicleDataEventStatus" mandatory="false">
 	  <description>References signal "VedsRw2rBckl_D_Ltchd". See VehicleDataEventStatus.</description>
 	</param>
-	<param name="middleRow2BuckleBelted" type="VehicleDataEventStatus">
+	<param name="middleRow2BuckleBelted" type="VehicleDataEventStatus" mandatory="false">
 	  <description>References signal "VedsRw2mBckl_D_Ltchd". See VehicleDataEventStatus.</description>
 	</param>
-	<param name="middleRow3BuckleBelted" type="VehicleDataEventStatus">
+	<param name="middleRow3BuckleBelted" type="VehicleDataEventStatus" mandatory="false">
 	  <description>References signal "VedsRw3mBckl_D_Ltchd". See VehicleDataEventStatus.</description>
 	</param>
-	<param name="leftRow3BuckleBelted" type="VehicleDataEventStatus">
+	<param name="leftRow3BuckleBelted" type="VehicleDataEventStatus" mandatory="false">
 	  <description>References signal "VedsRw3lBckl_D_Ltchd". See VehicleDataEventStatus.</description>
 	</param>
-	<param name="rightRow3BuckleBelted" type="VehicleDataEventStatus">
+	<param name="rightRow3BuckleBelted" type="VehicleDataEventStatus" mandatory="false">
 	  <description>References signal "VedsRw3rBckl_D_Ltchd". See VehicleDataEventStatus.</description>
 	</param>
-	<param name="leftRearInflatableBelted" type="VehicleDataEventStatus">
+	<param name="leftRearInflatableBelted" type="VehicleDataEventStatus" mandatory="false">
 	  <description>References signal "VedsRw2lRib_D_Ltchd". See VehicleDataEventStatus.</description>
 	</param>
-	<param name="rightRearInflatableBelted" type="VehicleDataEventStatus">
+	<param name="rightRearInflatableBelted" type="VehicleDataEventStatus" mandatory="false">
 	  <description>References signal "VedsRw2rRib_D_Ltchd". See VehicleDataEventStatus.</description>
 	</param>
-	<param name="middleRow1BeltDeployed" type="VehicleDataEventStatus">
+	<param name="middleRow1BeltDeployed" type="VehicleDataEventStatus" mandatory="false">
 	  <description>References signal "VedsRw1mBelt_D_Ltchd". See VehicleDataEventStatus.</description>
 	</param>
-	<param name="middleRow1BuckleBelted" type="VehicleDataEventStatus">
+	<param name="middleRow1BuckleBelted" type="VehicleDataEventStatus" mandatory="false">
 	  <description>References signal "VedsRw1mBckl_D_Ltchd". See VehicleDataEventStatus.</description>
 	</param>
   </struct>
