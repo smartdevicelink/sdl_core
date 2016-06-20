@@ -116,8 +116,8 @@ void OnSystemRequestNotification::AddHeader(BinaryMessage& message) const {
   if (0 > sprintf(timeout_str, "%d", timeout)) {
     memset(timeout_str, 0, sizeof(timeout_str));
   }
-  std::string temp_string = std::string(message.begin(), message.end());
-  std::string policy_table_string = ParsePTString(temp_string);
+  std::string policy_table_string = std::string(message.begin(), message.end());
+  ParsePTString(policy_table_string);
   const std::string header =
 
   "{"
@@ -145,11 +145,11 @@ void OnSystemRequestNotification::AddHeader(BinaryMessage& message) const {
       logger_, "Header added: " << std::string(message.begin(), message.end()));
 }
 
-std::string OnSystemRequestNotification::ParsePTString(std::string& pt_string) const{
+void OnSystemRequestNotification::ParsePTString(std::string& pt_string) const{
   std::string result;
-  int length = pt_string.length();  
+  size_t length = pt_string.length();  
   result.reserve(length*2);
-  for(int i=0;i<length;++i){
+  for(size_t i=0;i<length;++i){
     if(pt_string[i]=='\"' || pt_string[i]=='\\'){
       result += '\\';
     } else if(pt_string[i] == '\n') {
@@ -157,7 +157,7 @@ std::string OnSystemRequestNotification::ParsePTString(std::string& pt_string) c
     }
     result += pt_string[i];
   }
-  return result;
+  pt_string = result;
 }
 #endif
 
