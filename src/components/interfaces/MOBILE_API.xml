@@ -2547,7 +2547,7 @@
 	</param>
 
 	<param name="hmiCapabilities" type="HMICapabilities" mandatory="false">
-	  <description>Specifies the HMIÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢s capabilities. See HMICapabilities.</description>
+	  <description>Specifies the HMI capabilities. See HMICapabilities.</description>
 	</param>
 
 	<param name="sdlVersion" type="String" maxlength="100" mandatory="false" platform="documentation">
