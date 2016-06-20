@@ -4838,8 +4838,12 @@
 	<param name="address" type="OASISAddress" mandatory="false">
 		<description>Address to be used for setting destination</description>
 	</param>
-	<param name="deliveryMode" type="DeliveryMode" mandatory="false">
-	  <description>Defines the mode of prompt for user</description>
+	<param name="deliveryMode" type="DeliveryMode" defvalue="PROMPT" mandatory="false">
+	  <description>
+	  Prompt =>User should be prompted on HMI.
+	  No Prompt Set as Destination => Set the location as destination without prompting the user.
+	  No Prompt Add to Queue =>Add the current location to navigation queue.
+	  </description>
 	</param>
   </function>
 
