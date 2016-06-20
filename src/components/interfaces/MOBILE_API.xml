@@ -1511,25 +1511,25 @@
   <struct name="TireStatus">
 	  <description>The status and pressure of the tires.</description>
 
-	<param name="pressureTelltale" type="WarningLightStatus">
+	<param name="pressureTelltale" type="WarningLightStatus" mandatory="false">
 	  <description>Status of the Tire Pressure Telltale. See WarningLightStatus.</description>
 	</param>
-	<param name="leftFront" type="SingleTireStatus">
+	<param name="leftFront" type="SingleTireStatus" mandatory="false">
 	  <description>The status of the left front tire.</description>
 	</param>
-	<param name="rightFront" type="SingleTireStatus">
+	<param name="rightFront" type="SingleTireStatus" mandatory="false">
 	  <description>The status of the right front tire.</description>
 	</param>
-	<param name="leftRear" type="SingleTireStatus">
+	<param name="leftRear" type="SingleTireStatus" mandatory="false">
 	  <description>The status of the left rear tire.</description>
 	</param>
-	<param name="rightRear" type="SingleTireStatus">
+	<param name="rightRear" type="SingleTireStatus" mandatory="false">
 	  <description>The status of the right rear tire.</description>
 	</param>
-	<param name="innerLeftRear" type="SingleTireStatus">
+	<param name="innerLeftRear" type="SingleTireStatus" mandatory="false">
 	  <description>The status of the inner left rear.</description>
 	</param>
-	<param name="innerRightRear" type="SingleTireStatus">
+	<param name="innerRightRear" type="SingleTireStatus" mandatory="false">
 	  <description>The status of the inner right rear.</description>
 	</param>
   </struct>
