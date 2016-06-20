@@ -2778,6 +2778,7 @@
 	  <element name="REJECTED"/>
 	  <element name="INVALID_ID"/>
 	  <element name="IN_USE"/>
+	  <element name="WARNINGS"/>
 	</param>
 
 	<param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
@@ -2809,6 +2810,7 @@
 	</param>
   </function>
 
+
   <function name="AddSubMenu" functionID="AddSubMenuID" messagetype="response">
 	<param name="success" type="Boolean" platform="documentation">
 		<description> true if successful; false, if failed </description>
@@ -2825,6 +2827,7 @@
 	  <element name="REJECTED"/>
 	  <element name="INVALID_ID"/>
 	  <element name="DUPLICATE_NAME"/>
+	  <element name="WARNINGS"/>
 	</param>
 
 	<param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
@@ -2858,6 +2861,7 @@
 	  <element name="REJECTED"/>
 	  <element name="INVALID_ID"/>
 	  <element name="IN_USE"/>
+	  <element name="WARNINGS"/>
 	</param>
 
 	<param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
@@ -2893,6 +2897,7 @@
 	  <element name="INVALID_ID"/>
 	  <element name="DUPLICATE_NAME"/>
 	  <element name="UNSUPPORTED_RESOURCE"/>
+	  <element name="WARNINGS"/>
 	</param>
 
 	<param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
@@ -3037,6 +3042,7 @@
 	  <element name="REJECTED"/>
 	  <element name="INVALID_ID"/>
 	  <element name="IN_USE"/>
+	  <element name="WARNINGS"/>
 	</param>
 
 	<param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
@@ -3485,7 +3491,6 @@
 	  <element name="GENERIC_ERROR"/>
 	  <element name="UNSUPPORTED_RESOURCE" />
 	  <element name="IGNORED" />
-	  <element name="REJECTED"/>
 	</param>
 
 	<param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
@@ -3963,7 +3968,6 @@
 	  <element name="APPLICATION_NOT_REGISTERED"/>
 	  <element name="GENERIC_ERROR"/>
 	  <element name="REJECTED"/>
-	  <element name="VEHICLE_DATA_NOT_ALLOWED"/>
 	  <element name="VEHICLE_DATA_NOT_AVAILABLE"/>
 	  <element name="USER_DISALLOWED"/>
 	</param>
@@ -4228,6 +4232,7 @@
 	  <element name="UNSUPPORTED_RESOURCE"/>
 	  <element name="REJECTED"/>
 	  <element name="ABORTED"/>
+	  <element name="WARNINGS"/>
 	</param>
 
 	<param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
@@ -4272,7 +4277,6 @@
 	<param name="resultCode" type="Result" platform="documentation">
 	  <description>See Result</description>
 	  <element name="SUCCESS"/>
-	  <element name="SAVED"/>
 	  <element name="INVALID_DATA"/>
 	  <element name="OUT_OF_MEMORY"/>
 	  <element name="TOO_MANY_PENDING_REQUESTS"/>
@@ -4283,6 +4287,7 @@
 	  <element name="REJECTED"/>
 	  <element name="ABORTED"/>
 	  <element name="TIMED_OUT"/>
+	  <element name="WARNINGS"/>
 	</param>
 
 	<param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
@@ -4688,6 +4693,7 @@
 	  <element name="GENERIC_ERROR"/>
 	  <element name="REJECTED"/>
 	  <element name="UNSUPPORTED_REQUEST"/>
+	  <element name="WARNINGS"/>
 	</param>
 
 	<param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
@@ -4782,8 +4788,6 @@
 	  <element name="APPLICATION_NOT_REGISTERED"/>
 	  <element name="GENERIC_ERROR"/>
 	  <element name="REJECTED"/>
-	  <element name="INVALID_CERT"/>
-	  <element name="EXPIRED_CERT"/>
 	  <element name="UNSUPPORTED_REQUEST"/>
 	  <element name="UNSUPPORTED_RESOURCE"/>
 	  <element name="DISALLOWED"/>
@@ -4854,7 +4858,10 @@
 	  <element name="GENERIC_ERROR"/>
 	  <element name="REJECTED"/>
 	  <element name="UNSUPPORTED_RESOURCE"/>
+	  <element name="USER_DISALLOWED"/>
 	  <element name="DISALLOWED"/>
+	  <element name="ABORTED"/>
+	  <element name="SAVED"/>
 	</param>
 
 	<param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
@@ -4888,6 +4895,8 @@
 	  <element name="APPLICATION_NOT_REGISTERED"/>
 	  <element name="GENERIC_ERROR"/>
 	  <element name="REJECTED"/>
+	  <element name="ABORTED"/>
+	  <element name="TIMED_OUT"/>
 	</param>
 
 	<param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
