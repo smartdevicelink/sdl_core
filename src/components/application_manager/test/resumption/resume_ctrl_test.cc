@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/resumption/resume_ctrl.h"
+#include "application_manager/resumption/resume_ctrl_impl.h"
 #include <string>
 #include <algorithm>
 #include "gtest/gtest.h"
@@ -90,7 +90,7 @@ class ResumeCtrlTest : public ::testing::Test {
         ::utils::MakeShared<NiceMock<resumption_test::MockResumptionData>>(
             mock_app_mngr_);
     app_mock = utils::MakeShared<NiceMock<MockApplication>>();
-    res_ctrl = utils::MakeShared<ResumeCtrl>(mock_app_mngr_);
+    res_ctrl = utils::MakeShared<ResumeCtrlImpl>(mock_app_mngr_);
     res_ctrl->set_resumption_storage(mock_storage);
 
     ON_CALL(mock_app_mngr_, state_controller())
@@ -116,7 +116,7 @@ class ResumeCtrlTest : public ::testing::Test {
       mock_application_manager_settings_;
   application_manager_test::MockApplicationManager mock_app_mngr_;
   MockStateController state_controller_;
-  utils::SharedPtr<ResumeCtrl> res_ctrl;
+  utils::SharedPtr<ResumeCtrlImpl> res_ctrl;
   utils::SharedPtr<NiceMock<resumption_test::MockResumptionData>> mock_storage;
   utils::SharedPtr<NiceMock<MockApplication>> app_mock;
   // app_mock.app_id() will return this value

@@ -838,7 +838,7 @@ class ApplicationManagerImpl
     * @return Resume Controller
     */
   resumption::ResumeCtrl& resume_controller() OVERRIDE {
-    return resume_ctrl_;
+    return *resume_ctrl_.get();
   }
 
   /**
@@ -1422,7 +1422,7 @@ class ApplicationManagerImpl
    * about persistent application data on disk, and save session ID for resuming
    * application in case INGITION_OFF or MASTER_RESSET
    */
-  resumption::ResumeCtrl resume_ctrl_;
+  std::auto_ptr<resumption::ResumeCtrl> resume_ctrl_;
 
   NaviServiceStatusMap navi_service_status_;
   std::deque<uint32_t> navi_app_to_stop_;

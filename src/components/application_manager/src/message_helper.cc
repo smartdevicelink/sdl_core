@@ -640,30 +640,6 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateSetAppIcon(
   return set_icon;
 }
 
-bool MessageHelper::SendIVISubscribtions(const uint32_t app_id,
-                                         ApplicationManager& app_mngr) {
-  SDL_AUTO_TRACE();
-
-  bool result = true;
-  ApplicationSharedPtr app = app_mngr.application(app_id);
-
-  if (!app.valid()) {
-    SDL_ERROR("Invalid application " << app_id);
-    return result;
-  }
-
-  smart_objects::SmartObjectList requests =
-      GetIVISubscriptionRequests(app, app_mngr);
-  for (smart_objects::SmartObjectList::const_iterator it = requests.begin();
-       it != requests.end();
-       ++it) {
-    if (!app_mngr.ManageHMICommand(*it)) {
-      result = false;
-    }
-  }
-  return result;
-}
-
 smart_objects::SmartObjectList MessageHelper::GetIVISubscriptionRequests(
     ApplicationSharedPtr app, ApplicationManager& app_mngr) {
   SDL_AUTO_TRACE();
@@ -1593,7 +1569,10 @@ void MessageHelper::SendGetUserFriendlyMessageResponse(
   smart_objects::SmartObjectSPtr message =
       utils::MakeShared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
-
+  if (!message) {
+    SDL_ERROR("Memory allocation for message failed.");
+    return;
+  }
   (*message)[strings::params][strings::function_id] =
       hmi_apis::FunctionID::SDL_GetUserFriendlyMessage;
   (*message)[strings::params][strings::message_type] = MessageType::kResponse;

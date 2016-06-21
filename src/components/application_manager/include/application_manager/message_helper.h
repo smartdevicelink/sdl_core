@@ -211,12 +211,6 @@ class MessageHelper {
       const std::string& path_to_icon, const uint32_t app_id);
 
   /**
-   * @brief Sends IVI subscription requests
-   */
-  static bool SendIVISubscribtions(const uint32_t app_id,
-                                   ApplicationManager& app_mngr);
-
-  /**
    * @brief Returns IVI subscription requests
    */
   static smart_objects::SmartObjectList GetIVISubscriptionRequests(
