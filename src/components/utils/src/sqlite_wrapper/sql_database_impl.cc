@@ -53,8 +53,9 @@ SQLDatabaseImpl::~SQLDatabaseImpl() {
 
 bool SQLDatabaseImpl::Open() {
   sync_primitives::AutoLock auto_lock(conn_lock_);
-  if (conn_)
+  if (conn_) {
     return true;
+  }
   error_ = sqlite3_open(database_name_.c_str(), &conn_);
   return error_ == SQLITE_OK;
   return true;

@@ -765,30 +765,30 @@ TEST_F(ResumeCtrlTest, IsHMIApplicationIdExist) {
 
 TEST_F(ResumeCtrlTest, GetHMIApplicationID) {
   uint32_t hmi_app_id = 10;
-  const std::string device_id = "test_device_id";
+  const std::string kDeviceId = "test_device_id";
 
-  EXPECT_CALL(*mock_storage, GetHMIApplicationID(kTestPolicyAppId_, device_id))
+  EXPECT_CALL(*mock_storage, GetHMIApplicationID(kTestPolicyAppId_, kDeviceId))
       .WillOnce(Return(hmi_app_id));
   EXPECT_EQ(hmi_app_id,
-            res_ctrl->GetHMIApplicationID(kTestPolicyAppId_, device_id));
+            res_ctrl->GetHMIApplicationID(kTestPolicyAppId_, kDeviceId));
 }
 
 TEST_F(ResumeCtrlTest, IsApplicationSaved) {
-  const std::string policy_app_id = "policy_app_id";
-  const std::string device_id = "device_id";
+  const std::string kPolicyAppId = "policy_app_id";
+  const std::string kDeviceId = "device_id";
 
-  EXPECT_CALL(*mock_storage, IsApplicationSaved(policy_app_id, device_id))
+  EXPECT_CALL(*mock_storage, IsApplicationSaved(kPolicyAppId, kDeviceId))
       .WillOnce(Return(0));
-  EXPECT_TRUE(res_ctrl->IsApplicationSaved(policy_app_id, device_id));
+  EXPECT_TRUE(res_ctrl->IsApplicationSaved(kPolicyAppId, kDeviceId));
 }
 
 TEST_F(ResumeCtrlTest, OnAppRegistrationStart) {
-  const std::string policy_app_id = "policy_app_id";
-  const std::string device_id = "device_id";
+  const std::string kPolicyAppId = "policy_app_id";
+  const std::string kDeviceId = "device_id";
 
-  EXPECT_CALL(*mock_storage, IsApplicationSaved(policy_app_id, device_id))
+  EXPECT_CALL(*mock_storage, IsApplicationSaved(kPolicyAppId, kDeviceId))
       .WillOnce(Return(0));
-  res_ctrl->OnAppRegistrationStart(policy_app_id, device_id);
+  res_ctrl->OnAppRegistrationStart(kPolicyAppId, kDeviceId);
 }
 
 TEST_F(ResumeCtrlTest, OnAppRegistrationEnd) {
@@ -800,9 +800,9 @@ TEST_F(ResumeCtrlTest, OnAppRegistrationEnd) {
 }
 
 TEST_F(ResumeCtrlTest, CheckPersistenceFiles_WithoutCommandAndChoiceSets) {
-  const uint32_t ign_off_count = 0;
+  const uint32_t kIggnOffCount = 0;
   smart_objects::SmartObject saved_app;
-  saved_app[application_manager::strings::ign_off_count] = ign_off_count;
+  saved_app[application_manager::strings::ign_off_count] = kIggnOffCount;
   saved_app[application_manager::strings::hmi_level] = HMI_FULL;
 
   GetInfoFromApp();
@@ -814,9 +814,9 @@ TEST_F(ResumeCtrlTest, CheckPersistenceFiles_WithoutCommandAndChoiceSets) {
 
 TEST_F(ResumeCtrlTest, CheckPersistenceFilesForResumption_WithCommands) {
   smart_objects::SmartObject test_application_commands;
-  const uint32_t ign_off_count = 0;
+  const uint32_t kIggnOffCount = 0;
   smart_objects::SmartObject saved_app;
-  saved_app[application_manager::strings::ign_off_count] = ign_off_count;
+  saved_app[application_manager::strings::ign_off_count] = kIggnOffCount;
   saved_app[application_manager::strings::hmi_level] = HMI_FULL;
   saved_app[application_manager::strings::application_commands] =
       test_application_commands;
@@ -834,9 +834,9 @@ TEST_F(ResumeCtrlTest, CheckPersistenceFilesForResumption_WithCommands) {
 
 TEST_F(ResumeCtrlTest, CheckPersistenceFilesForResumption_WithChoiceSet) {
   smart_objects::SmartObject test_choice_sets;
-  const uint32_t ign_off_count = 0;
+  const uint32_t kIggnOffCount = 0;
   smart_objects::SmartObject saved_app;
-  saved_app[application_manager::strings::ign_off_count] = ign_off_count;
+  saved_app[application_manager::strings::ign_off_count] = kIggnOffCount;
   saved_app[application_manager::strings::hmi_level] = HMI_FULL;
   saved_app[application_manager::strings::application_choice_sets] =
       test_choice_sets;

@@ -366,15 +366,13 @@ bool ResumptionDataDB::GetSavedApplication(
 bool ResumptionDataDB::RemoveApplicationFromSaved(
     const std::string& policy_app_id, const std::string& device_id) {
   SDL_AUTO_TRACE();
+  bool result = false;
   bool application_exist = false;
   if (!CheckExistenceApplication(policy_app_id, device_id, application_exist) ||
       !application_exist) {
-    SDL_ERROR(
-        "Problem with access to DB or application does not"
-        " exist");
-    return false;
+    SDL_ERROR("Problem with access to DB or application does not exist");
+    return result;
   }
-  bool result = false;
   if (DeleteSavedApplication(policy_app_id, device_id)) {
     WriteDb();
     result = true;

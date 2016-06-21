@@ -76,7 +76,7 @@ const std::string kPath =
 }
 class ResumptionDataDBTest : public ResumptionDataTest {
  protected:
-  virtual void SetUp() {
+  void SetUp() OVERRIDE {
     app_mock = ::utils::MakeShared<
         NiceMock<application_manager_test::MockApplication> >();
     policy_app_id_ = "test_policy_app_id";
@@ -88,7 +88,7 @@ class ResumptionDataDBTest : public ResumptionDataTest {
     ign_off_count_ = 0;
     grammar_id_ = 16;
   }
-  virtual void TearDown() {
+  void TearDown() OVERRIDE {
     ::utils::dbms::SQLQuery query(test_db());
     EXPECT_TRUE(query.Prepare(remove_all_tables));
     EXPECT_TRUE(query.Exec());
