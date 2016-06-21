@@ -75,7 +75,7 @@ set(LIBRARIES
   connection_handler
   TransportManager
   ${SecurityManagerLibrary}
-  HMIMessageHandler
+  hmi_message_handler
   MessageBroker
   ${BROKER_LIBRARIES}
   Utils

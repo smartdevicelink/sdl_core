@@ -1,4 +1,4 @@
-# Copyright (c) 2014, Ford Motor Company
+# Copyright (c) 2016, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,46 +28,44 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-if(BUILD_TESTS)
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/platform.cmake)
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
-include_directories (
-    ${GMOCK_INCLUDE_DIRECTORY}
-    ${COMPONENTS_DIR}/hmi_message_handler/include
-    ${COMPONENTS_DIR}/hmi_message_handler/test/include
+include_directories(
+  ${COMPONENTS_DIR}/hmi_message_handler/include
+  ${COMPONENTS_DIR}/hmi_message_handler/test/include
+  ${GMOCK_INCLUDE_DIRECTORY}
 )
 
-set(LIBRARIES    
-    gmock
-    application_manager
-    HMIMessageHandler
-    jsoncpp
-    MessageBrokerClient
-    MessageBrokerServer
-    config_profile
+set(EXCLUDE_PATHS)
+
+set(LIBRARIES
+  gmock
+  application_manager
+  hmi_message_handler
+  config_profile
+  jsoncpp
+  MessageBrokerClient
+  MessageBrokerServer
 )
 
-set(SOURCES 
-    ${COMPONENTS_DIR}/hmi_message_handler/test/hmi_message_handler_impl_test.cc
-    ${COMPONENTS_DIR}/hmi_message_handler/test/hmi_message_adapter_test.cc
-)
-
-if(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-  list(APPEND SOURCES
-    ${COMPONENTS_DIR}/hmi_message_handler/test/mqueue_adapter_test.cc
+get_os(OS)
+if(${OS} STREQUAL "win")
+  list(APPEND EXCLUDE_PATHS
+    mqueue_adapter_test.cc
+  )
+  list(APPEND LIBRARIES
+    ws2_32
   )
 endif()
 
-if(${QT_HMI})
-    list (APPEND SOURCES  
-    ${COMPONENTS_DIR}/hmi_message_handler/test/mock_subscriber.cc 
-    ${COMPONENTS_DIR}/hmi_message_handler/test/dbus_message_adapter_test.cc
+if(NOT HMI_DBUS_API)
+  list(APPEND EXCLUDE_PATHS
+    mock_subscriber.cc
+    dbus_message_adapter_test.cc
   )
 endif()
 
-create_test("hmi_message_handler_test" "${SOURCES}" "${LIBRARIES}")
+collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}" "${EXCLUDE_PATHS}")
 
-if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-  target_link_libraries("hmi_message_handler_test" ws2_32)
-endif()
-
-endif()
+create_test(hmi_message_handler_test "${SOURCES}" "${LIBRARIES}")

@@ -1,3 +1,4 @@
+# Copyright (c) 2016, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -27,65 +28,55 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/platform.cmake)
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
-include_directories (
-    ${COMPONENTS_DIR}/hmi_message_handler/include/
-    ${COMPONENTS_DIR}/application_manager/include/
-    ${COMPONENTS_DIR}/utils/include/
-    ${COMPONENTS_DIR}/smart_objects/include/
-    ${COMPONENTS_DIR}/formatters/include/
-    ${COMPONENTS_DIR}/config_profile/include/
-    ${COMPONENTS_DIR}/media_manager/include/
-    ${COMPONENTS_DIR}/protocol_handler/include
-    ${JSONCPP_INCLUDE_DIRECTORY}
-    ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
-    ${CMAKE_BINARY_DIR}/src/components/
-    ${COMPONENTS_DIR}/dbus/include/
-    ${LOG4CXX_INCLUDE_DIRECTORY}
+include_directories(
+  ${COMPONENTS_DIR}/hmi_message_handler/include/
+  ${COMPONENTS_DIR}/application_manager/include/
+  ${COMPONENTS_DIR}/utils/include/
+  ${COMPONENTS_DIR}/smart_objects/include/
+  ${COMPONENTS_DIR}/formatters/include/
+  ${COMPONENTS_DIR}/config_profile/include/
+  ${COMPONENTS_DIR}/media_manager/include/
+  ${COMPONENTS_DIR}/protocol_handler/include
+  ${CMAKE_BINARY_DIR}/src/components/
+  ${COMPONENTS_DIR}/dbus/include/
+  ${JSONCPP_INCLUDE_DIRECTORY}
+  ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
 )
 
-IF (HMIADAPTER STREQUAL "dbus")
-    set (DBUS_SOURCE ${COMPONENTS_DIR}/hmi_message_handler/src/dbus_message_adapter.cc)
-    set (DBUS_ADAPTER dbus)
-ENDIF ()
-
-set (SOURCES
-    ${COMPONENTS_DIR}/hmi_message_handler/src/hmi_message_handler_impl.cc
-    ${COMPONENTS_DIR}/hmi_message_handler/src/messagebroker_adapter.cc
-    ${COMPONENTS_DIR}/hmi_message_handler/src/hmi_message_adapter_impl.cc
-    ${DBUS_SOURCE}
+set(PATHS
+  ${CMAKE_CURRENT_SOURCE_DIR}/include
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
-if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-  set(LIBRARIES
-    Utils
+
+set(EXCLUDE_PATHS)
+
+set(LIBRARIES
+  Utils
+)
+
+get_os(OS)
+if(${OS} STREQUAL "win")
+  list(APPEND EXCLUDE_PATHS
+    mqueue_adapter.cc
+  )
+endif()
+
+if(NOT HMI_DBUS_API)
+  list(APPEND EXCLUDE_PATHS
+    dbus_message_adapter.cc
+  )
+  list(APPEND LIBRARIES
     ${DBUS_ADAPTER}
-    ${RTLIB}
-)
-else()
-  set(LIBRARIES   Utils )
+  )
 endif()
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-  set (HEADERS
-        ${COMPONENTS_DIR}/include/hmi_message_handler/hmi_message_adapter.h
-        ${COMPONENTS_DIR}/hmi_message_handler/include/hmi_message_handler/hmi_message_handler_impl.h
-        ${COMPONENTS_DIR}/hmi_message_handler/include/hmi_message_handler/messagebroker_adapter.h
-        ${DBUS_HEADER}
-  )
-  source_group("Header Files" FILES ${HEADERS} )
-  source_group("Source Files" FILES ${SOURCES} )
-  add_library("HMIMessageHandler" ${HEADERS} ${SOURCES})
-else()
-  list(APPEND SOURCES
-    ${COMPONENTS_DIR}/hmi_message_handler/src/mqueue_adapter.cc
-  )
-  add_library("HMIMessageHandler" ${SOURCES})
-  if(ENABLE_LOG)
-      target_link_libraries("HMIMessageHandler" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
-  endif()
-endif()
+collect_sources(SOURCES "${PATHS}" "${EXCLUDE_PATHS}")
 
-target_link_libraries("HMIMessageHandler" ${LIBRARIES})
+add_library(hmi_message_handler ${SOURCES})
+target_link_libraries(hmi_message_handler ${LIBRARIES})
 
 if(BUILD_TESTS)
   add_subdirectory(test)
