@@ -46,7 +46,7 @@ include_directories (
 
 IF (HMIADAPTER STREQUAL "dbus")
     set (DBUS_SOURCE ${COMPONENTS_DIR}/hmi_message_handler/src/dbus_message_adapter.cc)
-    set (DBUS_ADAPTER DBus)
+    set (DBUS_ADAPTER dbus)
 ENDIF ()
 
 set (SOURCES

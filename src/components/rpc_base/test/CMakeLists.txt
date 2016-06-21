@@ -42,7 +42,7 @@ set(LIBRARIES
 if(HMI_DBUS_API)
   include_directories(${DBUS_INCLUDE_DIRS})
   list(APPEND LIBRARIES
-    DBus
+    dbus
   )
 else()
   set(EXCLUDE_PATHS

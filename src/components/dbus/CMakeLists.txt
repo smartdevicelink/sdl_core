@@ -1,4 +1,4 @@
-# Copyright (c) 2014, Ford Motor Company
+# Copyright (c) 2016, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,27 +28,30 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
-include_directories (
+include_directories(
+  ${COMPONENTS_DIR}/dbus/include
+  ${COMPONENTS_DIR}/formatters/include
+  ${COMPONENTS_DIR}/smart_objects/include
+  ${COMPONENTS_DIR}/utils/include
+  ${CMAKE_BINARY_DIR}/src/components
   ${DBUS_INCLUDE_DIRS}
-  ${COMPONENTS_DIR}/dbus/include/
-  ${COMPONENTS_DIR}/formatters/include/
-  ${COMPONENTS_DIR}/smart_objects/include/
-  ${COMPONENTS_DIR}/utils/include/
-  ${CMAKE_BINARY_DIR}/src/components/
 )
 
-set (SOURCES
-  ${CMAKE_CURRENT_BINARY_DIR}/introspection_xml.cc
-  ${CMAKE_CURRENT_BINARY_DIR}/message_descriptions.cc
-  ${COMPONENTS_DIR}/dbus/src/dbus_adapter.cc
-  ${COMPONENTS_DIR}/dbus/src/dbus_message.cc
-  ${COMPONENTS_DIR}/dbus/src/dbus_message_controller.cc
-  ${COMPONENTS_DIR}/dbus/src/schema.cc
+set(PATHS
+  ${CMAKE_CURRENT_SOURCE_DIR}/include
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
-if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-  set (LIBRARIES dbus-1 -L${DBUS_LIBS_DIRECTORY})
-endif()
+collect_sources(SOURCES "${PATHS}")
+
+set(LIBRARIES
+  dbus-1
+  ${DBUS_LIBRARIES}
+)
+
+add_library(dbus ${SOURCES})
+target_link_libraries(dbus ${LIBRARIES})
 
 add_custom_command(
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/message_descriptions.cc
@@ -67,18 +70,8 @@ add_custom_command(
   DEPENDS ${COMPONENTS_DIR}/interfaces/QT_HMI_API.xml
     ${COMPONENTS_DIR}/dbus/codegen/make_introspection_c.py
 )
-if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-  set(HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/include/dbus/*.h)
-  source_group("Header Files" FILES ${HEADERS} )
-  source_group("Source Files" FILES ${SOURCES})
-  add_library("DBus" ${HEADERS} ${SOURCES})
-else()
-  add_library("DBus" ${SOURCES})
-endif()
 
-ADD_DEPENDENCIES("DBus" Utils install-3rd_party_dbus)
-
-target_link_libraries("DBus" "${LIBRARIES}")
+add_dependencies(dbus Utils install-3rd_party_dbus)
 
 if(BUILD_TESTS)
   add_subdirectory(test)
