@@ -58,4 +58,8 @@
       link_directories(${CMAKE_SOURCE_DIR}/build/openssl_win_x64/lib/)
     endif()
 
+    if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
+    endif()
+
     create_test("message_helper_test" "${SOURCES}" "${LIBRARIES}")
