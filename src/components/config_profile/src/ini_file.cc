@@ -166,12 +166,11 @@ char ini_write_value(const char* fname,
   char line[INI_LINE_LEN] = "";
   char val[INI_LINE_LEN] = "";
   char tag[INI_LINE_LEN] = "";
-  char temp_fname[PATH_MAX] = "";
+  char temp_fname[PATH_MAX] = "fileXXXXXX";
   Ini_search_id result;
   *line = '\0';
   *val = '\0';
   *tag = '\0';
-  *temp_fname = '\0';
 
   if ((NULL == fname) || (NULL == chapter) || (NULL == item) || (NULL == value))
     return FALSE;
@@ -206,7 +205,8 @@ char ini_write_value(const char* fname,
     }
   }
 #else   // #if USE_MKSTEMP
-  tmpnam(temp_fname);
+  const char temp_directory[] = "";
+  _tempnam(temp_directory, temp_fname);
   if (0 == (wr_fp = fopen(temp_fname, "w"))) {
     fclose(rd_fp);
     return FALSE;
