@@ -1,4 +1,4 @@
-# Copyright (c) 2015, Ford Motor Company
+# Copyright (c) 2016, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,37 +28,37 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
+
 find_package(SDLOpenSSL REQUIRED)
 
 include_directories(
-  ${COMPONENTS_DIR}/security_manager/include/
-  ${COMPONENTS_DIR}/protocol_handler/include/
+  ${COMPONENTS_DIR}include
+  ${COMPONENTS_DIR}/utils/include
+  ${COMPONENTS_DIR}/security_manager/include
+  ${COMPONENTS_DIR}/protocol_handler/include
   ${COMPONENTS_DIR}/connection_handler/include
-  ${COMPONENTS_DIR}/config_profile/include/
-  ${COMPONENTS_DIR}/utils/include/
-  ${COMPONENTS_DIR}/application_manager/include/
+  ${COMPONENTS_DIR}/config_profile/include
+  ${COMPONENTS_DIR}/application_manager/include
   ${JSONCPP_INCLUDE_DIRECTORY}
-  ${APR_INCLUDE_DIRECTORY}
   ${OPENSSL_INCLUDE_DIRECTORY}
 )
 
-set (SOURCES
-  ${COMPONENTS_DIR}/security_manager/src/security_manager_impl.cc
-  ${COMPONENTS_DIR}/security_manager/src/security_query.cc
-  ${COMPONENTS_DIR}/security_manager/src/crypto_manager_impl.cc
-  ${COMPONENTS_DIR}/security_manager/src/ssl_context_impl.cc
+set(PATHS
+  ${CMAKE_CURRENT_SOURCE_DIR}/include
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
-if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-    file (GLOB inc ${COMPONENTS_DIR}/security_manager/include/security_manager/*.h)
-    string( REPLACE / \\ group ${inc} )
-    source_group("Header Files" FILES ${inc} )
-    add_library("SecurityManager" ${inc} ${SOURCES})
-    target_link_libraries(SecurityManager ${OPENSSL_LIBRARIES} protocol_handler jsoncpp protocol)
-else()
-  add_library(SecurityManager ${SOURCES})
-  target_link_libraries(SecurityManager crypto ssl protocol_handler jsoncpp protocol)
-endif()
+collect_sources(SOURCES "${PATHS}")
 
+set(LIBRARIES
+  protocol
+  protocol_handler
+  jsoncpp
+  ${OPENSSL_LIBRARIES}
+)
+
+add_library(security_manager ${SOURCES})
+target_link_libraries(security_manager ${LIBRARIES})
 
 if(BUILD_TESTS)
   add_subdirectory(test)

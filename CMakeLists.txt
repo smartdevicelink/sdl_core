@@ -674,7 +674,7 @@ endif()
 
 if(ENABLE_SECURITY)
   add_definitions(-DENABLE_SECURITY)
-  set(SecurityManagerLibrary SecurityManager)
+  set(SecurityManagerLibrary security_manager)
   set(SecurityManagerIncludeDir ${COMPONENTS_DIR}/security_manager/include)
   #set(SecurityManagerTestIncludeDir ${CMAKE_SOURCE_DIR}/test/components/security_manager/include)
 endif()

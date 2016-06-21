@@ -1,4 +1,4 @@
-# Copyright (c) 2014, Ford Motor Company
+# Copyright (c) 2016, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,30 +28,23 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-if (BUILD_TESTS)
-  
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
+
 include_directories(
   ${GMOCK_INCLUDE_DIRECTORY}
   ${COMPONENTS_DIR}/protocol_handler/test/include
   ${COMPONENTS_DIR}/transport_manager/test/include
-  ${COMPONENTS_DIR}/security_manager/include
-  ${COMPONENTS_DIR}/resumption/include
   ${JSONCPP_INCLUDE_DIRECTORY}
 )
 
-set(SOURCES
-  ${COMPONENTS_DIR}/security_manager/test/crypto_manager_impl_test.cc
-  ${COMPONENTS_DIR}/security_manager/test/security_manager_test.cc
-  ${COMPONENTS_DIR}/security_manager/test/security_query_test.cc
-  ${COMPONENTS_DIR}/security_manager/test/security_query_matcher.cc
-  ${COMPONENTS_DIR}/security_manager/test/ssl_context_test.cc
-  ${COMPONENTS_DIR}/security_manager/test/ssl_certificate_handshake_test.cc
- )
+collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}")
 
 set(LIBRARIES
   gmock
-  ${SecurityManagerLibrary}
+  security_manager
 )
+
+create_test(security_manager_test "${SOURCES}" "${LIBRARIES}")
 
 set(CERT_LIST 
   ${CMAKE_SOURCE_DIR}/mycert.pem
@@ -64,23 +57,8 @@ add_custom_target(generate_certificates
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 )
 
-foreach( file_i ${CERT_LIST})
-  file(COPY ${file_i} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-endforeach( file_i )
+foreach(CERT_ENTRY ${CERT_LIST})
+  file(COPY ${CERT_ENTRY} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+endforeach()
 
-if(QT_PORT)
-  link_directories (${CMAKE_SOURCE_DIR}/build/openssl_win_x86/lib)
-endif()
-
-if(NOT QT_PORT AND ${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-  link_directories(${CMAKE_SOURCE_DIR}/build/openssl_win_x64/lib/)
-endif()
-
-create_test (security_manager_test "${SOURCES}" "${LIBRARIES}")
 add_dependencies(security_manager_test generate_certificates)
-
-if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-  target_link_libraries("security_manager_test" ws2_32)
-endif()
-
-endif ()
