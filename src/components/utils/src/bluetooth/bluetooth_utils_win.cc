@@ -31,8 +31,8 @@
  */
 
 #include <sstream>
-#include "utils/bluetooth_win/bluetooth_utils.h"
-#include "utils/bluetooth_win/bluetooth_uuid.h"
+#include "utils/bluetooth/bluetooth_utils_win.h"
+#include "utils/bluetooth/bluetooth_uuid_win.h"
 
 std::string utils::GetLastErrorMessage(const DWORD last_error) {
   TCHAR errmsg[512];

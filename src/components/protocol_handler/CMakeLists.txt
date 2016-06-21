@@ -45,7 +45,7 @@ collect_sources(SOURCES "${PATHS}")
 
 set(LIBRARIES
   protocol
-  Utils
+  utils
 )
 
 add_library(protocol_handler ${SOURCES})

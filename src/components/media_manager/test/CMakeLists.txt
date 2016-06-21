@@ -51,17 +51,11 @@ set(SOURCES
 )
 
 set(LIBRARIES
-    smart_object
-    MediaManager
-    protocol
-    application_manager
-    protocol_handler
-    gmock
-    connection_handler
-    encryption
-    resumption
-    Policy
-    ${SecurityManagerLibrary}
+  media_manager
+  application_manager
+  protocol_handler
+  utils
+  gmock
 )
 
 if(EXTENDED_MEDIA_MODE)

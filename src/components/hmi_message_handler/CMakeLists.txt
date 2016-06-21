@@ -54,7 +54,7 @@ set(PATHS
 set(EXCLUDE_PATHS)
 
 set(LIBRARIES
-  Utils
+  utils
 )
 
 get_os(OS)

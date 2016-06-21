@@ -29,7 +29,7 @@ set (MESSAGE_BROKER_SERVER_SOURCES
 )
 
 add_library("MessageBroker" ${MESSAGE_BROKER_SOURCES})
-target_link_libraries(MessageBroker Utils)
+target_link_libraries(MessageBroker utils)
 
 
 add_library("MessageBrokerClient" ${MESSAGE_BROKER_CLIENT_SOURCES})

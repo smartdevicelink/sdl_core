@@ -33,7 +33,8 @@
  */
 #ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_BLUETOOTH_BLUETOOTH_UUID_WIN_H_
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_BLUETOOTH_BLUETOOTH_UUID_WIN_H_
-#include "utils/bluetooth_win/bluetooth_utils.h"
+
+#include "utils/bluetooth/bluetooth_utils_win.h"
 
 namespace utils {
 /**

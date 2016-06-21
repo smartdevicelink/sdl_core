@@ -118,7 +118,7 @@ set(LIBRARIES
   protocol_handler
   usage_statistics
   formatters
-  Utils
+  utils
   resumption
   jsoncpp
 )

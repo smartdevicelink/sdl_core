@@ -71,7 +71,7 @@ add_custom_command(
     ${COMPONENTS_DIR}/dbus/codegen/make_introspection_c.py
 )
 
-add_dependencies(dbus Utils install-3rd_party_dbus)
+add_dependencies(dbus utils install-3rd_party_dbus)
 
 if(BUILD_TESTS)
   add_subdirectory(test)

@@ -78,7 +78,7 @@ set(LIBRARIES
   hmi_message_handler
   MessageBroker
   ${BROKER_LIBRARIES}
-  Utils
+  utils
   jsoncpp
   config_profile
   resumption

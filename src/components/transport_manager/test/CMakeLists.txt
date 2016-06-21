@@ -50,7 +50,7 @@ set(LIBRARIES
   gmock
   config_profile
   transport_manager
-  Utils
+  utils
   protocol
   resumption
   jsoncpp

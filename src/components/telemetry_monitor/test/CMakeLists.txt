@@ -58,7 +58,7 @@ set(testLibraries
   gmock
   TelemetryMonitor
   jsoncpp
-  Utils
+  utils
   MediaManager
   protocol_handler
   v4_protocol_v1_2_no_extra
