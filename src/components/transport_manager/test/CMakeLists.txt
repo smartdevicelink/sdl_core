@@ -1,4 +1,4 @@
-# Copyright (c) 2015, Ford Motor Company
+# Copyright (c) 2016, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,58 +28,34 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-find_package(LibUSBx REQUIRED)
-
-set(TM_TEST_DIR ${COMPONENTS_DIR}/transport_manager/test)
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
 include_directories(
-  ${COMPONENTS_DIR}
-  include
-  ${LOG4CXX_INCLUDE_DIRECTORY}
-  ${GMOCK_INCLUDE_DIRECTORY}
   ${COMPONENTS_DIR}/smart_objects/include
   ${COMPONENTS_DIR}/transport_manager/include
-  ${COMPONENTS_DIR}/transport_manager/test/include/
+  ${COMPONENTS_DIR}/transport_manager/test/include
   ${COMPONENTS_DIR}/utils/include
   ${COMPONENTS_DIR}/connection_handler/include
   ${JSONCPP_INCLUDE_DIRECTORY}
+  ${GMOCK_INCLUDE_DIRECTORY}
 )
+
+set(EXCLUDE_PATHS
+  raw_message_matcher.cc
+)
+
+collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}" "${EXCLUDE_PATHS}")
 
 set(LIBRARIES
   gmock
   config_profile
-  TransportManager
+  transport_manager
   Utils
   protocol
   resumption
   jsoncpp
 )
 
-if (BUILD_USB_SUPPORT)
-  list(APPEND LIBRARIES ${LIBUSBX_LIBRARIES})
-endif()
-
-if (BUILD_BT_SUPPORT)
- if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-  list(APPEND LIBRARIES bluetooth)
- endif()
-endif()
-
-set(SOURCES
-  ${TM_TEST_DIR}/transport_manager_default_test.cc
-  ${TM_TEST_DIR}/transport_manager_impl_test.cc
-  ${TM_TEST_DIR}/transport_adapter_test.cc
-  ${TM_TEST_DIR}/transport_adapter_listener_test.cc
-  ${TM_TEST_DIR}/tcp_transport_adapter_test.cc
-  ${TM_TEST_DIR}/tcp_device_test.cc
-  ${TM_TEST_DIR}/tcp_client_listener_test.cc
-)
-
-create_test("transport_manager_test" "${SOURCES}" "${LIBRARIES}")
+create_test(transport_manager_test "${SOURCES}" "${LIBRARIES}")
 
 file(COPY smartDeviceLink_test.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-
-if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-  target_link_libraries("transport_manager_test" ws2_32)
-  target_link_libraries(transport_manager_test Bthprops.lib)
-endif()

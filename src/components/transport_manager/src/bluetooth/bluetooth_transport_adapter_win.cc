@@ -51,7 +51,7 @@
 #include "transport_manager/bluetooth/bluetooth_transport_adapter.h"
 
 #include "utils/logger.h"
-#include "utils/bluetooth_win/bluetooth_utils.h"
+#include "utils/bluetooth/bluetooth_utils_win.h"
 
 namespace transport_manager {
 namespace transport_adapter {

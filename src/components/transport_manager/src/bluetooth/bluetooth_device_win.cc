@@ -32,7 +32,7 @@
  */
 
 #include "transport_manager/bluetooth/bluetooth_device.h"
-#include "utils/bluetooth_win/bluetooth_utils.h"
+#include "utils/bluetooth/bluetooth_utils_win.h"
 
 #include <errno.h>
 #include <sys/types.h>

@@ -29,7 +29,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 set(TELEMETRY_MONITOR_TEST_DIR ${COMPONENTS_DIR}/telemetry_monitor/test)
-find_package(LibUSBx REQUIRED)
+find_package(SDLLibUSB REQUIRED)
 
 include_directories(
   ${TELEMETRY_MONITOR_TEST_DIR}/include
@@ -69,7 +69,7 @@ set(testLibraries
   MessageHelper
   resumption
   jsoncpp
-  TransportManager
+  transport_manager
   MediaManager
   connection_handler
 )

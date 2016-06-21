@@ -30,7 +30,7 @@
 
 cmake_minimum_required(VERSION 2.8.11)
 
-find_package(LibUSBx REQUIRED)
+find_package(SDLLibUSB REQUIRED)
 find_package(SDLOpenSSL REQUIRED)
 find_package(SDLSqlite3 REQUIRED)
 
@@ -73,7 +73,7 @@ set(LIBRARIES
   protocol
   protocol_handler
   connection_handler
-  TransportManager
+  transport_manager
   ${SecurityManagerLibrary}
   hmi_message_handler
   MessageBroker
