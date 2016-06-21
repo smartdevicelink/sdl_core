@@ -37,6 +37,7 @@
 #include "config_profile/profile.h"
 #include "utils/file_system.h"
 #include "utils/threads/thread.h"
+#include "utils/file_system.h"
 
 namespace test {
 namespace components {
@@ -490,7 +491,7 @@ TEST_F(ProfileTest, StringValueIncludeSlashesAndRussianLetters) {
   EXPECT_EQ(tts_delimiter_, profile_.tts_delimiter());
   std::string server_address = "127.0.0.1 + слово";
   EXPECT_EQ(server_address, profile_.server_address());
-  app_storage_folder = "/\" \"";
+  app_storage_folder = file_system::GetPathDelimiter() + "\" \"";
   EXPECT_EQ(current_dir + app_storage_folder, profile_.app_storage_folder());
 
   // Update config file
