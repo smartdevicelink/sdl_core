@@ -484,9 +484,9 @@ bool ResumptionDataJson::DropAppDataResumption(const std::string& device_id,
   application[strings::application_subscribtions].Clear();
   application[strings::application_files].Clear();
   application.RemoveMember(strings::grammar_id);
-  SDL_DEBUG("Resumption data for application "
-                   << app_id << " with device_id " << device_id
-                   << " has been dropped.");
+  SDL_DEBUG("Resumption data for application " << app_id << " with device_id "
+                                               << device_id
+                                               << " has been dropped.");
   return true;
 }
 
