@@ -38,12 +38,12 @@
 #include "utils/shared_ptr.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
-#include "commands/commands_test.h"
-#include "commands/command_request_test.h"
+#include "application_manager/test/include/application_manager/commands/commands_test.h"
+#include "application_manager/test/include/application_manager/commands/command_request_test.h"
 #include "application_manager/application.h"
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/event_engine/event.h"
-#include "mobile/end_audio_pass_thru_request.h"
+#include "application_manager/commands/mobile/end_audio_pass_thru_request.h"
 #include "interfaces/MOBILE_API.h"
 
 namespace test {

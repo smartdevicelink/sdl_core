@@ -32,6 +32,7 @@ include_directories(
   ${GMOCK_INCLUDE_DIRECTORY}
   ${COMPONENTS_DIR}/application_manager/include/
   ${COMPONENTS_DIR}/application_manager/test/include/
+  ${COMPONENTS_DIR}/application_manager/test/include/commands/
 )
 
 set(COMMANDS_TEST_SOURCE_DIR

@@ -41,10 +41,11 @@
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_application.h"
 
-#include "command_impl.h"
-#include "commands/commands_test.h"
-#include "mobile/on_button_event_notification.h"
-#include "mobile/on_button_press_notification.h"
+#include "application_manager/include/application_manager/commands/command_impl.h"
+#include "application_manager/test/include/application_manager/commands/commands_test.h"
+#include "application_manager/test/include/application_manager/commands/command_request_test.h"
+#include "application_manager/commands/mobile/on_button_event_notification.h"
+#include "application_manager/commands/mobile/on_button_press_notification.h"
 
 namespace test {
 namespace components {

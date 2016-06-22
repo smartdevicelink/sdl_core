@@ -32,6 +32,8 @@
 
 #include <stdint.h>
 #include <string>
+#include <algorithm>
+#include <functional>
 #include <set>
 
 #include "gtest/gtest.h"
@@ -63,10 +65,18 @@ using ::test::components::application_manager_test::MockApplication;
 typedef SharedPtr<MockApplication> MockAppPtr;
 
 namespace {
-static const uint32_t kDefaultMsgCount_ = 5u;
-static const uint32_t kAppId1_ = 5u;
-static const uint32_t kAppId2_ = 10u;
+const uint32_t kDefaultMsgCount = 5u;
+const uint32_t kAppId1 = 5u;
+const uint32_t kAppId2 = 10u;
 }  // namespace
+
+void ExpectEqualAppId(const smart_objects::SmartObject& obj) {
+  EXPECT_EQ(kAppId2, obj[strings::app_id].asUInt());
+}
+
+void ExpectEqualKeyAppId(const std::string obj, MessageSharedPtr msg) {
+  EXPECT_EQ(kAppId2, (*msg)[obj][strings::app_id].asUInt());
+}
 
 class CommandImplTest : public CommandsTest<CommandsTestMocks::kIsNice> {
  public:
@@ -78,14 +88,11 @@ class CommandImplTest : public CommandsTest<CommandsTestMocks::kIsNice> {
     UnwrappedCommandImpl(const MessageSharedPtr& message,
                          ApplicationManager& application_manager)
         : CommandImpl(message, application_manager) {}
-
-   private:
-    DISALLOW_COPY_AND_ASSIGN(UnwrappedCommandImpl);
   };
 
   // Create `SmartObject` which handle array of `SmartObjects`
   static MessageSharedPtr CreateArrayMessage(
-      const size_t msg_count = kDefaultMsgCount_) {
+      const size_t msg_count = kDefaultMsgCount) {
     MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Array);
     smart_objects::SmartArray* array = msg->asArray();
     for (size_t i = 0u; i < msg_count; ++i) {
@@ -97,7 +104,7 @@ class CommandImplTest : public CommandsTest<CommandsTestMocks::kIsNice> {
   }
   // Create `SmartObject` which handle map of `SmartObjects`
   static MessageSharedPtr CreateMapMessage(
-      const size_t msg_count = kDefaultMsgCount_) {
+      const size_t msg_count = kDefaultMsgCount) {
     MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
     char key[] = {'A', '\0'};
     for (size_t i = 0u; i < msg_count; ++i, ++key[0]) {
@@ -154,59 +161,55 @@ TEST_F(CommandImplTest, ReplaceMobileByHMIAppId_NoAppIdInMessage_UNSUCCESS) {
 
 TEST_F(CommandImplTest, ReplaceMobileByHMIAppId_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
-  (*msg)[strings::app_id] = kAppId1_;
+  (*msg)[strings::app_id] = kAppId1;
 
   UCommandImplPtr command = CreateCommand<UCommandImpl>(msg);
 
   MockAppPtr app = CreateMockApp();
 
-  EXPECT_CALL(app_mngr_, application(kAppId1_)).WillOnce(Return(app));
-  ON_CALL(*app, hmi_app_id()).WillByDefault(Return(kAppId2_));
+  EXPECT_CALL(app_mngr_, application(kAppId1)).WillOnce(Return(app));
+  ON_CALL(*app, hmi_app_id()).WillByDefault(Return(kAppId2));
 
   command->ReplaceMobileByHMIAppId(*msg);
 
-  EXPECT_EQ(kAppId2_, (*msg)[strings::app_id].asUInt());
+  EXPECT_EQ(kAppId2, (*msg)[strings::app_id].asUInt());
 }
 
 TEST_F(CommandImplTest, ReplaceMobileByHMIAppId_Array_SUCCESS) {
-  MessageSharedPtr msg = CreateArrayMessage(kDefaultMsgCount_);
+  MessageSharedPtr msg = CreateArrayMessage(kDefaultMsgCount);
   UCommandImplPtr command = CreateCommand<UCommandImpl>(msg);
 
   MockAppPtr app = CreateMockApp();
 
   EXPECT_CALL(app_mngr_, application(_))
-      .Times(kDefaultMsgCount_)
+      .Times(kDefaultMsgCount)
       .WillRepeatedly(Return(app));
-  ON_CALL(*app, hmi_app_id()).WillByDefault(Return(kAppId2_));
+  ON_CALL(*app, hmi_app_id()).WillByDefault(Return(kAppId2));
 
   command->ReplaceMobileByHMIAppId(*msg);
 
   EXPECT_TRUE(msg->asArray());
-  smart_objects::SmartArray::const_iterator it(msg->asArray()->begin());
-  const smart_objects::SmartArray::const_iterator it_end(msg->asArray()->end());
-  for (; it != it_end; ++it) {
-    EXPECT_EQ(kAppId2_, (*it)[strings::app_id].asUInt());
-  }
+  std::for_each(
+      msg->asArray()->begin(), msg->asArray()->end(), ExpectEqualAppId);
 }
 
 TEST_F(CommandImplTest, ReplaceMobileByHMIAppId_Map_SUCCESS) {
-  MessageSharedPtr msg = CreateMapMessage(kDefaultMsgCount_);
+  MessageSharedPtr msg = CreateMapMessage(kDefaultMsgCount);
   UCommandImplPtr command = CreateCommand<UCommandImpl>(msg);
 
   MockAppPtr app = CreateMockApp();
 
   EXPECT_CALL(app_mngr_, application(_))
-      .Times(kDefaultMsgCount_)
+      .Times(kDefaultMsgCount)
       .WillRepeatedly(Return(app));
-  ON_CALL(*app, hmi_app_id()).WillByDefault(Return(kAppId2_));
+  ON_CALL(*app, hmi_app_id()).WillByDefault(Return(kAppId2));
 
   command->ReplaceMobileByHMIAppId(*msg);
 
   std::set<std::string> keys(msg->enumerate());
-  std::set<std::string>::const_iterator key(keys.begin());
-  for (; key != keys.end(); ++key) {
-    EXPECT_EQ(kAppId2_, (*msg)[*key][strings::app_id].asUInt());
-  }
+  std::for_each(keys.begin(),
+                keys.end(),
+                std::bind2nd(std::ptr_fun(&ExpectEqualKeyAppId), msg));
 }
 
 TEST_F(CommandImplTest, ReplaceHMIByMobileAppId_NoHMIAppIdInMessage_UNSUCCESS) {
@@ -220,60 +223,55 @@ TEST_F(CommandImplTest, ReplaceHMIByMobileAppId_NoHMIAppIdInMessage_UNSUCCESS) {
 
 TEST_F(CommandImplTest, ReplaceHMIByMobileAppId_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
-  (*msg)[strings::app_id] = kAppId1_;
+  (*msg)[strings::app_id] = kAppId1;
 
   UCommandImplPtr command = CreateCommand<UCommandImpl>(msg);
 
   MockAppPtr app = CreateMockApp();
 
-  EXPECT_CALL(app_mngr_, application_by_hmi_app(kAppId1_))
-      .WillOnce(Return(app));
-  ON_CALL(*app, app_id()).WillByDefault(Return(kAppId2_));
+  EXPECT_CALL(app_mngr_, application_by_hmi_app(kAppId1)).WillOnce(Return(app));
+  ON_CALL(*app, app_id()).WillByDefault(Return(kAppId2));
 
   command->ReplaceHMIByMobileAppId(*msg);
 
-  EXPECT_EQ(kAppId2_, (*msg)[strings::app_id].asUInt());
+  EXPECT_EQ(kAppId2, (*msg)[strings::app_id].asUInt());
 }
 
 TEST_F(CommandImplTest, ReplaceHMIByMobileAppId_Array_SUCCESS) {
-  MessageSharedPtr msg = CreateArrayMessage(kDefaultMsgCount_);
+  MessageSharedPtr msg = CreateArrayMessage(kDefaultMsgCount);
 
   UCommandImplPtr command = CreateCommand<UCommandImpl>(msg);
   MockAppPtr app = CreateMockApp();
 
   EXPECT_CALL(app_mngr_, application_by_hmi_app(_))
-      .Times(kDefaultMsgCount_)
+      .Times(kDefaultMsgCount)
       .WillRepeatedly(Return(app));
-  ON_CALL(*app, app_id()).WillByDefault(Return(kAppId2_));
+  ON_CALL(*app, app_id()).WillByDefault(Return(kAppId2));
 
   command->ReplaceHMIByMobileAppId(*msg);
 
   EXPECT_TRUE(msg->asArray());
-  smart_objects::SmartArray::const_iterator it(msg->asArray()->begin());
-  const smart_objects::SmartArray::const_iterator it_end(msg->asArray()->end());
-  for (; it != it_end; ++it) {
-    EXPECT_EQ(kAppId2_, (*it)[strings::app_id].asUInt());
-  }
+  std::for_each(
+      msg->asArray()->begin(), msg->asArray()->end(), ExpectEqualAppId);
 }
 
 TEST_F(CommandImplTest, ReplaceHMIByMobileAppId_Map_SUCCESS) {
-  MessageSharedPtr msg = CreateMapMessage(kDefaultMsgCount_);
+  MessageSharedPtr msg = CreateMapMessage(kDefaultMsgCount);
 
   UCommandImplPtr command = CreateCommand<UCommandImpl>(msg);
   MockAppPtr app = CreateMockApp();
 
   EXPECT_CALL(app_mngr_, application_by_hmi_app(_))
-      .Times(kDefaultMsgCount_)
+      .Times(kDefaultMsgCount)
       .WillRepeatedly(Return(app));
-  ON_CALL(*app, app_id()).WillByDefault(Return(kAppId2_));
+  ON_CALL(*app, app_id()).WillByDefault(Return(kAppId2));
 
   command->ReplaceHMIByMobileAppId(*msg);
 
   std::set<std::string> keys = msg->enumerate();
-  std::set<std::string>::const_iterator key = keys.begin();
-  for (; key != keys.end(); ++key) {
-    EXPECT_EQ(kAppId2_, (*msg)[*key][strings::app_id].asUInt());
-  }
+  std::for_each(keys.begin(),
+                keys.end(),
+                std::bind2nd(std::ptr_fun(&ExpectEqualKeyAppId), msg));
 }
 
 }  // namespace commands_test

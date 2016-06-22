@@ -48,6 +48,7 @@
 #include "application_manager/mock_application.h"
 #include "application_manager/event_engine/event.h"
 #include "application_manager/mock_message_helper.h"
+#include "application_manager/mock_hmi_interface.h"
 #include "interfaces/MOBILE_API.h"
 
 namespace test {
@@ -72,6 +73,7 @@ using am::commands::CommandRequestImpl;
 using am::ApplicationManager;
 using am::ApplicationSet;
 using am::RPCParams;
+using am::MockHmiInterfaces;
 
 typedef am::commands::CommandRequestImpl::RequestState RequestState;
 
@@ -266,6 +268,12 @@ TEST_F(CommandRequestImplTest, SendHMIRequest_NoUseEvent_SUCCESS) {
 
   EXPECT_CALL(app_mngr_, GetNextHMICorrelationID())
       .WillOnce(Return(kCorrelationId));
+  MockHmiInterfaces hmi_interfaces;
+  EXPECT_CALL(app_mngr_, hmi_interfaces()).WillOnce(ReturnRef(hmi_interfaces));
+  EXPECT_CALL(hmi_interfaces, GetInterfaceFromFunction(_))
+      .WillOnce(Return(am::HmiInterfaces::HMI_INTERFACE_BasicCommunication));
+  EXPECT_CALL(hmi_interfaces, GetInterfaceState(_))
+      .WillOnce(Return(am::HmiInterfaces::STATE_AVAILABLE));
   // Return `true` prevents call of `SendResponse` method;
   EXPECT_CALL(app_mngr_, ManageHMICommand(_)).WillOnce(Return(true));
 
@@ -278,6 +286,12 @@ TEST_F(CommandRequestImplTest, SendHMIRequest_UseEvent_SUCCESS) {
 
   EXPECT_CALL(app_mngr_, GetNextHMICorrelationID())
       .WillOnce(Return(kCorrelationId));
+  MockHmiInterfaces hmi_interfaces;
+  EXPECT_CALL(app_mngr_, hmi_interfaces()).WillOnce(ReturnRef(hmi_interfaces));
+  EXPECT_CALL(hmi_interfaces, GetInterfaceFromFunction(_))
+      .WillOnce(Return(am::HmiInterfaces::HMI_INTERFACE_BasicCommunication));
+  EXPECT_CALL(hmi_interfaces, GetInterfaceState(_))
+      .WillOnce(Return(am::HmiInterfaces::STATE_AVAILABLE));
   // Return `true` prevents call of `SendResponse` method;
   EXPECT_CALL(app_mngr_, ManageHMICommand(_)).WillOnce(Return(true));
 
@@ -496,7 +510,8 @@ TEST_F(CommandRequestImplTest,
   EXPECT_EQ(RequestState::kCompleted, command->current_state());
 
   EXPECT_TRUE((*result)[strings::msg_params].keyExists(strings::info));
-  EXPECT_NE("", (*result)[strings::msg_params][strings::info].asString());
+  EXPECT_FALSE(
+      (*result)[strings::msg_params][strings::info].asString().empty());
 }
 
 }  // namespace commands_test

@@ -31,7 +31,10 @@
  */
 
 #include "application_manager/application_impl.h"
+
+#include <stdint.h>
 #include <iostream>
+
 #include "gtest/gtest.h"
 #include "application_manager/hmi_state.h"
 #include "utils/file_system.h"
@@ -499,6 +502,7 @@ TEST_F(ApplicationImplTest, AreCommandLimitsExceeded_SetLimitFromConfig) {
 }
 
 TEST_F(ApplicationImplTest, AreCommandLimitsExceeded_LimitFromPT) {
+  const uint32_t cmd_limit = 100u;
   policy_test::MockPolicyHandlerInterface policy_interface;
   EXPECT_CALL(mock_application_manager_, GetPolicyHandler())
       .WillRepeatedly(ReturnRef(policy_interface));
@@ -506,12 +510,12 @@ TEST_F(ApplicationImplTest, AreCommandLimitsExceeded_LimitFromPT) {
       .WillRepeatedly(Return(false));
 
   EXPECT_CALL(policy_interface, GetNotificationsNumber(_))
-      .WillOnce(Return(100u));
+      .WillOnce(Return(cmd_limit));
   EXPECT_FALSE(app_impl->AreCommandLimitsExceeded(FunctionID::ReadDIDID,
                                                   TLimitSource::POLICY_TABLE));
 
   EXPECT_CALL(policy_interface, GetNotificationsNumber(_))
-      .WillOnce(Return(100u));
+      .WillOnce(Return(cmd_limit));
   EXPECT_FALSE(app_impl->AreCommandLimitsExceeded(FunctionID::GetVehicleDataID,
                                                   TLimitSource::POLICY_TABLE));
   EXPECT_CALL(policy_interface, GetNotificationsNumber(_))

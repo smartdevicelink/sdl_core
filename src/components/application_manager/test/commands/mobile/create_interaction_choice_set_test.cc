@@ -34,7 +34,7 @@
 #include <string>
 #include <set>
 
-#include "application_manager/commands/mobile/add_command_request.h"
+#include "application_manager/commands/mobile/create_interaction_choice_set_request.h"
 
 #include "gtest/gtest.h"
 #include "utils/shared_ptr.h"
@@ -65,7 +65,7 @@ using ::testing::_;
 using ::utils::SharedPtr;
 using ::testing::Return;
 using ::testing::ReturnRef;
-using am::commands::AddCommandRequest;
+using am::commands::CreateInteractionChoiceSetRequest;
 using ::test::components::application_manager_test::MockApplication;
 
 namespace custom_str = utils::custom_string;
@@ -81,7 +81,7 @@ const uint32_t kCmdId = 1u;
 const uint32_t kConnectionKey = 2u;
 }  // namespace
 
-class AddCommandRequestTest
+class CreateInteractionChoiceSetRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
   sync_primitives::Lock lock_;
@@ -103,28 +103,20 @@ class AddCommandRequestTest
     return msg;
   }
 };
-
-TEST_F(AddCommandRequestTest, OnTimeout_GENERIC_ERROR) {
+TEST_F(CreateInteractionChoiceSetRequestTest, OnTimeout_GENERIC_ERROR) {
   MessageSharedPtr msg_vr = CreateMessage(smart_objects::SmartType_Map);
   (*msg_vr)[strings::msg_params][strings::result_code] =
       am::mobile_api::Result::GENERIC_ERROR;
   (*msg_vr)[strings::msg_params][strings::success] = false;
 
-  utils::SharedPtr<AddCommandRequest> req_vr =
-      CreateCommand<AddCommandRequest>();
+  utils::SharedPtr<CreateInteractionChoiceSetRequest> req_vr =
+      CreateCommand<CreateInteractionChoiceSetRequest>();
 
   MockAppPtr mock_app = CreateMockApp();
   EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(mock_app));
   ON_CALL(*mock_app, app_id()).WillByDefault(Return(kConnectionKey));
   ON_CALL(*mock_app, get_grammar_id()).WillByDefault(Return(kConnectionKey));
   ON_CALL(*mock_app, RemoveCommand(_)).WillByDefault(Return());
-
-  MockMessageHelper* mock_message_helper =
-      MockMessageHelper::message_helper_mock();
-  EXPECT_CALL(
-      *mock_message_helper,
-      CreateNegativeResponse(_, _, _, am::mobile_api::Result::GENERIC_ERROR))
-      .WillOnce(Return(msg_vr));
 
   MessageSharedPtr vr_command_result;
   EXPECT_CALL(
@@ -141,36 +133,29 @@ TEST_F(AddCommandRequestTest, OnTimeout_GENERIC_ERROR) {
       static_cast<int32_t>(am::mobile_api::Result::GENERIC_ERROR));
 }
 
-TEST_F(AddCommandRequestTest, OnEvent_VR_UNSUPPORTED_RESOURCE) {
+TEST_F(CreateInteractionChoiceSetRequestTest, OnEvent_VR_UNSUPPORTED_RESOURCE) {
   MessageSharedPtr msg_vr = CreateFullParamsVRSO();
-  (*msg_vr)[strings::msg_params][strings::menu_params]
-           [am::hmi_request::parent_id] = 10u;
-  (*msg_vr)[strings::msg_params][strings::menu_params][strings::menu_name] =
+  (*msg_vr)[strings::msg_params][strings::choice_set][0][strings::choice_id] =
+      10;
+  (*msg_vr)[strings::msg_params][strings::choice_set][0][strings::menu_name] =
       "menu_name";
-
-  utils::SharedPtr<AddCommandRequest> req_vr =
-      CreateCommand<AddCommandRequest>(msg_vr);
+  (*msg_vr)[strings::msg_params][strings::interaction_choice_set_id] = 11;
+  utils::SharedPtr<CreateInteractionChoiceSetRequest> req_vr =
+      CreateCommand<CreateInteractionChoiceSetRequest>(msg_vr);
 
   MockAppPtr mock_app = CreateMockApp();
-  ON_CALL(app_mngr_, application(kConnectionKey))
-      .WillByDefault(Return(mock_app));
-  ON_CALL(*mock_app, app_id()).WillByDefault(Return(1));
-  ON_CALL(*mock_app, FindSubMenu(_)).WillByDefault(Return(&(*msg_vr)));
-  MockHmiInterfaces hmi_interfaces;
-  ON_CALL(app_mngr_, hmi_interfaces()).WillByDefault(ReturnRef(hmi_interfaces));
-  ON_CALL(hmi_interfaces, GetInterfaceFromFunction(_))
-      .WillByDefault(
-          Return(am::HmiInterfaces::HMI_INTERFACE_BasicCommunication));
-  ON_CALL(hmi_interfaces, GetInterfaceState(_))
-      .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
+  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app));
+  ON_CALL(*mock_app, app_id()).WillByDefault(Return(kConnectionKey));
+  smart_objects::SmartObject* null_obj = NULL;
+  ON_CALL(*mock_app, FindChoiceSet(_)).WillByDefault(Return(null_obj));
 
   MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
   (*msg)[strings::params][hmi_response::code] =
       hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
-  (*msg)[strings::msg_params][strings::info] = "info";
+  (*msg)[strings::msg_params][strings::info] = "VR is not supported by system";
   (*msg)[strings::msg_params][strings::cmd_id] = kCommandId;
 
-  Event event(hmi_apis::FunctionID::VR_AddCommand);
+  am::event_engine::Event event(hmi_apis::FunctionID::VR_AddCommand);
   event.set_smart_object(*msg);
 
   smart_objects::SmartObject* ptr = NULL;
@@ -182,31 +167,20 @@ TEST_F(AddCommandRequestTest, OnEvent_VR_UNSUPPORTED_RESOURCE) {
   ON_CALL(*mock_message_helper, HMIToMobileResult(_))
       .WillByDefault(Return(mobile_apis::Result::SUCCESS));
 
-  EXPECT_CALL(*mock_app, AddCommand(kCmdId, (*msg_vr)[strings::msg_params]));
-
   am::CommandsMap commands_map;
   ON_CALL(*mock_app, commands_map())
       .WillByDefault(
           Return(DataAccessor<am::CommandsMap>(commands_map, lock_)));
-
-  EXPECT_CALL(
-      app_mngr_,
-      ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
-      .WillOnce(Return(true))
-      .WillOnce(Return(true));
-
-  EXPECT_CALL(*mock_app, UpdateHash());
-
-  MessageSharedPtr msg_ui(CreateMessage(smart_objects::SmartType_Map));
-  (*msg_ui)[am::strings::params][am::hmi_response::code] =
-      hmi_apis::Common_Result::SUCCESS;
-  (*msg_ui)[am::strings::params][am::strings::info] = "info";
-
-  Event event_ui(hmi_apis::FunctionID::UI_AddCommand);
-  event_ui.set_smart_object(*msg_ui);
+  MockHmiInterfaces hmi_interfaces;
+  ON_CALL(app_mngr_, hmi_interfaces()).WillByDefault(ReturnRef(hmi_interfaces));
+  ON_CALL(hmi_interfaces, GetInterfaceFromFunction(_))
+      .WillByDefault(
+          Return(am::HmiInterfaces::HMI_INTERFACE_BasicCommunication));
+  ON_CALL(hmi_interfaces, GetInterfaceState(_))
+      .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
+  EXPECT_CALL(app_mngr_, ManageHMICommand(_)).WillOnce(Return(true));
 
   req_vr->Run();
-  req_vr->on_event(event_ui);
 
   MessageSharedPtr vr_command_result;
   EXPECT_CALL(
@@ -218,7 +192,7 @@ TEST_F(AddCommandRequestTest, OnEvent_VR_UNSUPPORTED_RESOURCE) {
 
   EXPECT_EQ(
       (*vr_command_result)[strings::msg_params][strings::success].asBool(),
-      true);
+      false);
   EXPECT_EQ(
       (*vr_command_result)[strings::msg_params][strings::result_code].asInt(),
       static_cast<int32_t>(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE));

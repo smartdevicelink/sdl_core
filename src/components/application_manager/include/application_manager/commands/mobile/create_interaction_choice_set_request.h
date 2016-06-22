@@ -71,7 +71,6 @@ class CreateInteractionChoiceSetRequest : public CommandRequestImpl {
    **/
   virtual void Run();
 
- private:
   /**
    * @brief Interface method that is called whenever new event received
    *
@@ -88,6 +87,8 @@ class CreateInteractionChoiceSetRequest : public CommandRequestImpl {
    * @brief DeleteChoices allows to walk through the sent commands collection
    * in order to sent appropriate DeleteCommand request.
    */
+
+ private:
   void DeleteChoices();
 
   /**

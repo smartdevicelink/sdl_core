@@ -37,8 +37,8 @@
 #include "application_manager/mock_message_helper.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
 #include "application_manager/mock_message_helper.h"
-#include "commands/commands_test.h"
-#include "command_impl.h"
+#include "application_manager/test/include/application_manager/commands/commands_test.h"
+#include "application_manager/commands/command_impl.h"
 #include "interfaces/MOBILE_API.h"
 
 namespace test {

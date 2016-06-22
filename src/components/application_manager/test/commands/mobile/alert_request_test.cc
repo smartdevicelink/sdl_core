@@ -37,16 +37,17 @@
 #include "utils/shared_ptr.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
-#include "commands/commands_test.h"
-#include "commands/command_request_test.h"
+#include "application_manager/commands/commands_test.h"
+#include "application_manager/commands/command_request_test.h"
 #include "application_manager/application.h"
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_message_helper.h"
 #include "event_engine/event.h"
-#include "mobile/alert_request.h"
+#include "application_manager/commands/mobile/alert_request.h"
 #include "interfaces/MOBILE_API.h"
 #include "application_manager/policies/policy_handler_interface.h"
+#include "application_manager/policies/mock_policy_handler_interface.h"
 
 namespace test {
 namespace components {
@@ -66,6 +67,8 @@ using am::MockMessageHelper;
 typedef SharedPtr<AlertRequest> CommandPtr;
 
 class AlertRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
+ protected:
+  NiceMock<policy_test::MockPolicyHandlerInterface> policy_interface_;
 };
 
 class CallOnTimeOut {
@@ -146,8 +149,7 @@ TEST_F(AlertRequestTest, Run_FailToProcessSoftButtons_UNSUCCESS) {
   ON_CALL(*app, AreCommandLimitsExceeded(_, _)).WillByDefault(Return(false));
 
   ON_CALL(app_mngr_, GetPolicyHandler())
-      .WillByDefault(
-          ReturnRef(*static_cast<policy::PolicyHandlerInterface*>(NULL)));
+      .WillByDefault(ReturnRef(policy_interface_));
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
               ProcessSoftButtons(_, _, _, _)).WillOnce(Return(kResultCode));
 
@@ -168,8 +170,7 @@ TEST_F(AlertRequestTest, Run_MandatoryParametersAreMissed_UNSUCCESS) {
   ON_CALL(*app, AreCommandLimitsExceeded(_, _)).WillByDefault(Return(false));
 
   ON_CALL(app_mngr_, GetPolicyHandler())
-      .WillByDefault(
-          ReturnRef(*static_cast<policy::PolicyHandlerInterface*>(NULL)));
+      .WillByDefault(ReturnRef(policy_interface_));
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
               ProcessSoftButtons(_, _, _, _))
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
@@ -218,8 +219,7 @@ TEST_F(AlertRequestTest, Run_SUCCESS) {
   ON_CALL(*app, AreCommandLimitsExceeded(_, _)).WillByDefault(Return(false));
 
   ON_CALL(app_mngr_, GetPolicyHandler())
-      .WillByDefault(
-          ReturnRef(*static_cast<policy::PolicyHandlerInterface*>(NULL)));
+      .WillByDefault(ReturnRef(policy_interface_));
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
               ProcessSoftButtons(_, _, _, _))
       .WillOnce(Return(mobile_apis::Result::SUCCESS));

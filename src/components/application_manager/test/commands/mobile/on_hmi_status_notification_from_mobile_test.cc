@@ -32,7 +32,7 @@
 
 #include "gtest/gtest.h"
 #include "application_manager/commands/mobile/on_hmi_status_notification_from_mobile.h"
-#include "commands/commands_test.h"
+#include "application_manager/test/include/application_manager/commands/commands_test.h"
 #include <application_manager/smart_object_keys.h>
 #include "application_manager/message.h"
 #include "application_manager/application_manager.h"

@@ -39,7 +39,7 @@
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/commands/commands_test.h"
 #include "application_manager/commands/command_impl.h"
-#include "mobile/on_command_notification.h"
+#include "application_manager/commands/mobile/on_command_notification.h"
 
 namespace test {
 namespace components {

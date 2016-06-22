@@ -34,7 +34,7 @@
 #include <set>
 
 #include "gtest/gtest.h"
-#include "mobile/on_way_point_change_notification.h"
+#include "application_manager/commands/mobile/on_way_point_change_notification.h"
 #include "utils/shared_ptr.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"

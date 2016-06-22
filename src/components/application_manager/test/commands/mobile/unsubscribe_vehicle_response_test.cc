@@ -30,12 +30,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "mobile/unsubscribe_vehicle_data_response.h"
+#include "application_manager/commands/mobile/unsubscribe_vehicle_data_response.h"
 #include <stdint.h>
 #include <string>
 #include "gtest/gtest.h"
 #include "utils/shared_ptr.h"
-#include "commands/commands_test.h"
+#include "application_manager/commands/commands_test.h"
 #include "application_manager/mock_application_manager.h"
 
 namespace test {

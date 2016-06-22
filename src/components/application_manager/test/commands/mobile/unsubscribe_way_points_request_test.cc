@@ -33,13 +33,13 @@
 #include "gtest/gtest.h"
 #include "utils/shared_ptr.h"
 #include "smart_objects/smart_object.h"
-#include "commands/commands_test.h"
-#include "commands/command_request_test.h"
+#include "application_manager/test/include/application_manager/commands/commands_test.h"
+#include "application_manager/test/include/application_manager/commands/command_request_test.h"
 #include "application_manager/application.h"
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_hmi_capabilities.h"
-#include "mobile/unsubscribe_way_points_request.h"
+#include "application_manager/commands/mobile/unsubscribe_way_points_request.h"
 #include "interfaces/MOBILE_API.h"
 #include "application_manager/smart_object_keys.h"
 
@@ -61,13 +61,7 @@ using am::commands::MessageSharedPtr;
 typedef SharedPtr<UnSubscribeWayPointsRequest> CommandPtr;
 
 class UnsubscribeWayPointsRequestTest
-    : public CommandRequestTest<CommandsTestMocks::kIsNice> {
- public:
-  typedef TypeIf<kMocksIsNice,
-                 NiceMock<application_manager_test::MockHMICapabilities>,
-                 application_manager_test::MockHMICapabilities>::Result
-      MockHMICapabilities;
-};
+    : public CommandRequestTest<CommandsTestMocks::kIsNice> {};
 
 TEST_F(UnsubscribeWayPointsRequestTest, OnEvent_SUCCESS) {
   CommandPtr command(CreateCommand<UnSubscribeWayPointsRequest>());

@@ -32,11 +32,11 @@
 
 #include "gtest/gtest.h"
 #include "application_manager/commands/mobile/on_keyboard_input_notification.h"
-#include "commands/commands_test.h"
+#include "application_manager/test/include/application_manager/commands/commands_test.h"
 #include <application_manager/smart_object_keys.h>
 #include "application_manager/message.h"
 #include "application_manager/mock_message_helper.h"
-#include "command_impl.h"
+#include "application_manager/commands/command_impl.h"
 
 namespace test {
 namespace components {

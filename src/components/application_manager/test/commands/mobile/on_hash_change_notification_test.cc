@@ -36,8 +36,8 @@
 #include "application_manager/commands/mobile/on_hash_change_notification.h"
 #include "application_manager/mock_message_helper.h"
 #include "application_manager/smart_object_keys.h"
-#include "command_impl.h"
-#include "commands/commands_test.h"
+#include "application_manager/commands/command_impl.h"
+#include "application_manager/test/include/application_manager/commands/commands_test.h"
 
 namespace test {
 namespace components {

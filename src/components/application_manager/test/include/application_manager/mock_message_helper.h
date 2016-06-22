@@ -225,9 +225,6 @@ class MockMessageHelper {
                mobile_apis::Result::eType(smart_objects::SmartObject& message,
                                           ApplicationConstSharedPtr app,
                                           ApplicationManager& app_mngr));
-  MOCK_METHOD2(SendChangeRegistrationRequestToHMI,
-               void(ApplicationConstSharedPtr app,
-                    ApplicationManager& app_mngr));
 
   MOCK_METHOD1(GetPriorityCode, const uint32_t(const std::string& priority));
 

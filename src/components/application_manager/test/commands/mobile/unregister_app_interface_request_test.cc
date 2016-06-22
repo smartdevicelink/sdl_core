@@ -35,10 +35,10 @@
 
 #include "gtest/gtest.h"
 #include "utils/shared_ptr.h"
-#include "commands/command_request_test.h"
+#include "application_manager/commands/command_request_test.h"
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_message_helper.h"
-#include "mobile/unregister_app_interface_request.h"
+#include "application_manager/commands/mobile/unregister_app_interface_request.h"
 
 namespace test {
 namespace components {

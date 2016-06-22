@@ -34,12 +34,12 @@
 #include <string>
 
 #include "gtest/gtest.h"
-#include "mobile/update_turn_list_request.h"
+#include "application_manager/commands/mobile/update_turn_list_request.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/shared_ptr.h"
 #include "smart_objects/smart_object.h"
-#include "commands/commands_test.h"
-#include "commands/command_request_test.h"
+#include "application_manager/commands/commands_test.h"
+#include "application_manager/commands/command_request_test.h"
 #include "application_manager/application.h"
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_application.h"

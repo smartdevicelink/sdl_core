@@ -422,12 +422,6 @@ mobile_apis::Result::eType MessageHelper::VerifyImageVrHelpItems(
       message, app, app_mngr);
 }
 
-void MessageHelper::SendChangeRegistrationRequestToHMI(
-    ApplicationConstSharedPtr app, ApplicationManager& app_mngr) {
-  MockMessageHelper::message_helper_mock()->SendChangeRegistrationRequestToHMI(
-      app, app_mngr);
-}
-
 const uint32_t MessageHelper::GetPriorityCode(const std::string& priority) {
   return MockMessageHelper::message_helper_mock()->GetPriorityCode(priority);
 }

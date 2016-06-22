@@ -32,9 +32,9 @@
 
 #include "gtest/gtest.h"
 #include "application_manager/commands/mobile/on_hmi_status_notification.h"
-#include "commands/commands_test.h"
+#include "application_manager/test/include/application_manager/commands/commands_test.h"
 #include "application_manager/mock_message_helper.h"
-#include "command_impl.h"
+#include "application_manager/commands/command_impl.h"
 
 namespace test {
 namespace components {

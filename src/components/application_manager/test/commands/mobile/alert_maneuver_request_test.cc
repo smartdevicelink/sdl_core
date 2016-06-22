@@ -37,16 +37,17 @@
 #include "utils/shared_ptr.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
-#include "commands/commands_test.h"
-#include "commands/command_request_test.h"
+#include "application_manager/commands/commands_test.h"
+#include "application_manager/commands/command_request_test.h"
 #include "application_manager/application.h"
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_message_helper.h"
 #include "event_engine/event.h"
-#include "mobile/alert_maneuver_request.h"
+#include "application_manager/commands/mobile/alert_maneuver_request.h"
 #include "interfaces/MOBILE_API.h"
 #include "application_manager/policies/policy_handler_interface.h"
+#include "application_manager/policies/mock_policy_handler_interface.h"
 
 namespace test {
 namespace components {
@@ -64,7 +65,10 @@ using am::event_engine::Event;
 typedef SharedPtr<AlertManeuverRequest> CommandPtr;
 
 class AlertManeuverRequestTest
-    : public CommandRequestTest<CommandsTestMocks::kIsNice> {};
+    : public CommandRequestTest<CommandsTestMocks::kIsNice> {
+ protected:
+  NiceMock<policy_test::MockPolicyHandlerInterface> policy_interface_;
+};
 
 TEST_F(AlertManeuverRequestTest, Run_RequiredFieldsDoesNotExist_UNSUCCESS) {
   CommandPtr command(CreateCommand<AlertManeuverRequest>());
@@ -103,8 +107,7 @@ TEST_F(AlertManeuverRequestTest, Run_ProcessingResult_UNSUCCESS) {
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
 
   ON_CALL(app_mngr_, GetPolicyHandler())
-      .WillByDefault(
-          ReturnRef(*static_cast<policy::PolicyHandlerInterface*>(NULL)));
+      .WillByDefault(ReturnRef(policy_interface_));
 
   const mobile_apis::Result::eType kProcessingResult =
       mobile_apis::Result::ABORTED;
@@ -154,8 +157,7 @@ TEST_F(AlertManeuverRequestTest, Run_ProcessingResult_SUCCESS) {
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
 
   ON_CALL(app_mngr_, GetPolicyHandler())
-      .WillByDefault(
-          ReturnRef(*static_cast<policy::PolicyHandlerInterface*>(NULL)));
+      .WillByDefault(ReturnRef(policy_interface_));
 
   EXPECT_CALL(*(am::MockMessageHelper::message_helper_mock()),
               ProcessSoftButtons(_, _, _, _))
