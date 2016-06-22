@@ -111,9 +111,6 @@
 	<element name="UNSUPPORTED_VERSION">
 	  <description>Sync doesn't support the protocol that is requested by the mobile application</description>
 	</element>
-	<element name="VEHICLE_DATA_NOT_ALLOWED">
-	  <description>The user has turned off access to vehicle data, and it is globally unavailable to mobile applications.</description>
-	</element>
 	<element name="FILE_NOT_FOUND">
 	  <description>A specified file could not be found on Sync.</description>
 	</element>
@@ -122,12 +119,6 @@
 	</element>
 	<element name="SAVED">
 	  <description>The RPC (e.g. Slider) executed successfully and the user elected to save the current position / value.</description>
-	</element>
-	<element name="INVALID_CERT">
-	  <description>The certificate provided during authentication is invalid.</description>
-	</element>
-	<element name="EXPIRED_CERT">
-	  <description>The certificate provided during authentication is expired.</description>
 	</element>
 	<element name="RESUME_FAILED">
 	  <description>The provided hash ID does not match the hash of the current set of registered data or the core could not resume the previous data.</description>

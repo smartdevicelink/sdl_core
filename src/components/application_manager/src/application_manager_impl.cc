@@ -2531,10 +2531,6 @@ void ApplicationManagerImpl::UnregisterApplication(
       break;
     case mobile_apis::Result::USER_DISALLOWED:
       break;
-    case mobile_apis::Result::INVALID_CERT:
-      break;
-    case mobile_apis::Result::EXPIRED_CERT:
-      break;
     case mobile_apis::Result::TOO_MANY_PENDING_REQUESTS: {
       ApplicationSharedPtr app_ptr = application(app_id);
       if (app_ptr) {
