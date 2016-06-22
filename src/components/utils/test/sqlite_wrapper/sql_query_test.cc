@@ -49,8 +49,7 @@ namespace dbms_test {
 
 class SQLQueryTest : public ::testing::Test {
  public:
-  SQLQueryTest() : db_(kDatabaseName_) {  }
-
+  SQLQueryTest() : db_(kDatabaseName_) {}
 
   static sqlite3* conn_;
   static const std::string kDatabaseName_;
@@ -106,7 +105,6 @@ const std::string SQLQueryTest::kDatabaseName_ = "test-query";
 TEST_F(SQLQueryTest, Query_CreateQuery_QueryInDBEqualCreated) {
   // arrange
   const std::string kSelect("SELECT * FROM testTable WHERE integerValue = ?");
-
 
   // assert
   ASSERT_TRUE(db_.Open());
@@ -219,8 +217,6 @@ TEST_F(SQLQueryTest, SetValue_InsertValues_ExpectDBHasInsertedValues) {
   const double kDoubleValue = 2.3;
   const std::string kStringValue = "four";
 
-
-
   // assert
   ASSERT_TRUE(db_.Open());
 
@@ -244,7 +240,6 @@ TEST_F(SQLQueryTest, EmptySelect_SelectValuesEqual0_ExecWithoutErrors) {
   const std::string kSelect(
       "SELECT integerValue, doubleValue, stringValue"
       " FROM testTable WHERE 0");
-
 
   // assert
   ASSERT_TRUE(db_.Open());
@@ -279,7 +274,6 @@ TEST_F(
   const int kIntegerValue = 1;
   const double kDoubleValue = 2.3;
   const std::string kStringValue = "four";
-
 
   ASSERT_TRUE(db_.Open());
 
@@ -316,7 +310,6 @@ TEST_F(SQLQueryTest, LastInsertId_InsertValuesAndBindQuery_GetExpectedId) {
   const std::string kInsert("INSERT INTO idTable (value) VALUES(?)");
 
   // act
-
 
   // assert
   ASSERT_TRUE(db_.Open());

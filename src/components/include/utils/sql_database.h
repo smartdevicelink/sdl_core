@@ -85,6 +85,14 @@ class SQLDatabase {
   virtual SQLError LastError() const = 0;
 
   /**
+   * @brief get_path databse location path.
+   *
+   * @return the path to the database location
+   */
+  virtual std::string get_path() const = 0;
+
+#ifndef __QNX__
+  /**
    * @brief HasErrors Indicate the status of the last executed operation.
    *
    * @return true in case last operation has any errors, false otherwise.
@@ -98,28 +106,28 @@ class SQLDatabase {
   virtual void set_path(const std::string& path) = 0;
 
   /**
-   * @brief get_path databse location path.
-   *
-   * @return the path to the database location
-   */
-  virtual std::string get_path() const = 0;
-
-  /**
    * Checks if database is read/write
    * @return true if database is read/write
    */
   virtual bool IsReadWrite() = 0;
+
+#endif  // __QNX__
 
   /**
    * Call backup for opened DB
    */
   virtual bool Backup() = 0;
 
-  /**
-   * Gets connection to the SQLite database
-   * @return pointer to connection
-   */
+/**
+ * Gets connection to the SQLite database
+ * @return pointer to connection
+ */
+#ifdef __QNX__
+  virtual qdb_hdl_t* conn() const = 0;
+#elif defined(OS_LINUX) || \
+    (defined(OS_WINDOWS) && !defined(QT_PORT))  // __QNX__
   virtual sqlite3* conn() const = 0;
+#endif                                          // __QNX__
 };
 
 }  // namespace dbms

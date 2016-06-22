@@ -67,10 +67,17 @@ void InsertUnique(K value, T* array) {
   }
 }
 const char* kDatabaseName = "policy";
+#ifdef QT_PORT
+const char* kConnectionName = "policy_connection";
+#endif
 }  //  namespace
 
 SQLPTRepresentation::SQLPTRepresentation()
+#ifndef QT_PORT
     : db_(new utils::dbms::SQLDatabaseImpl(kDatabaseName)) {
+#else
+    : db_(new utils::dbms::SQLDatabaseImpl(kDatabaseName, kConnectionName)) {
+#endif
   is_in_memory = false;
 }
 
@@ -78,11 +85,15 @@ SQLPTRepresentation::SQLPTRepresentation(bool in_memory) {
   is_in_memory = in_memory;
 #ifdef __QNX__
   db_ = new utils::dbms::SQLDatabaseImpl(kDatabaseName);
-#else   // __QNX__
+#else  // __QNX__
   if (in_memory) {
     db_ = new utils::dbms::SQLDatabaseImpl();
   } else {
+#ifndef QT_PORT
     db_ = new utils::dbms::SQLDatabaseImpl(kDatabaseName);
+#else
+    db_ = new utils::dbms::SQLDatabaseImpl(kDatabaseName, kConnectionName);
+#endif
   }
 #endif  // __QNX__
 }
@@ -90,8 +101,10 @@ SQLPTRepresentation::SQLPTRepresentation(bool in_memory) {
 SQLPTRepresentation::SQLPTRepresentation(const std::string& app_storage_folder,
                                          uint16_t attempts_to_open_policy_db,
                                          uint16_t open_attempt_timeout_ms)
-#if defined(__QNX__)
+#ifdef __QNX__
     : db_(new utils::dbms::SQLDatabaseImpl(kDatabaseName)
+#elif QT_PORT
+    : db_(new utils::dbms::SQLDatabaseImpl(kDatabaseName, kConnectionName))
 #else
     : db_(new utils::dbms::SQLDatabaseImpl(
           file_system::ConcatPath(app_storage_folder, kDatabaseName)))

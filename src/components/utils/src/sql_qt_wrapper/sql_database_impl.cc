@@ -69,7 +69,7 @@ bool SQLDatabaseImpl::HasErrors() const {
 }
 
 void SQLDatabaseImpl::set_path(const std::string& path) {
-    database_path_ = path.c_str();
+  database_path_ = path.c_str();
 }
 
 std::string SQLDatabaseImpl::get_path() const {

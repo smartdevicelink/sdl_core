@@ -53,6 +53,9 @@ SDL_CREATE_LOGGER("Resumption")
 
 namespace {
 const char* kDatabaseName = "resumption";
+#ifdef QT_PORT
+const char* kConnectionName = "resumption_connection";
+#endif
 }  // namespace
 
 ResumptionDataDB::ResumptionDataDB(
@@ -60,12 +63,14 @@ ResumptionDataDB::ResumptionDataDB(
     const application_manager::ApplicationManager& application_manager)
     : ResumptionData(application_manager) {
   if (db_storage == In_File_Storage) {
-#ifndef __QNX__
+#ifdef __QNX__
+    db_ = new utils::dbms::SQLDatabaseImpl(kDatabaseName);
+#elif QT_PORT
+    db_ = new utils::dbms::SQLDatabaseImpl(kDatabaseName, kConnectionName);
+#else
     db_ = new utils::dbms::SQLDatabaseImpl(file_system::ConcatPath(
         application_manager_.get_settings().app_storage_folder(),
         kDatabaseName));
-#else
-    db_ = new utils::dbms::SQLDatabaseImpl(kDatabaseName);
 #endif
   } else if (db_storage == In_Memory_Storage) {
     db_ = new utils::dbms::SQLDatabaseImpl();

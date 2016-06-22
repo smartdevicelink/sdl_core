@@ -292,6 +292,10 @@ void utils::json::JsonValueRef::Clear() {
   ClearStorage(*storage_);
 }
 
+void utils::json::JsonValueRef::RemoveMember(const char* key) {
+  storage_->clear();
+}
+
 utils::json::JsonValueRef::Kind utils::json::JsonValueRef::GetKind(
     const ValueType::Type type) {
   JsonValueRef::Kind kind = JsonValueRef::None;

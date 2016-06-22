@@ -50,6 +50,10 @@
 #include "utils/mock_sql_database.h"
 #include "application_manager/mock_application_manager_settings.h"
 
+#if defined(_MSC_VER)
+#define snprintf _snprintf_s
+#endif
+
 namespace test {
 namespace components {
 namespace resumption_test {
@@ -394,7 +398,7 @@ void ResumptionDataDBTest::CheckCommandsData() {
   while (select_commands.Next()) {
     if (command_key != select_commands.GetLongInt(0)) {
       ++i;
-      uint cmd = (*test_commands_map[i])[am::strings::cmd_id].asUInt();
+      uint32_t cmd = (*test_commands_map[i])[am::strings::cmd_id].asUInt();
       EXPECT_EQ(cmd, select_commands.GetUInteger(1));
       std::string name =
           (*test_commands_map[i])[am::strings::menu_params]
@@ -527,7 +531,7 @@ void ResumptionDataDBTest::CheckAppFilesData() {
   int i = 0;
   while (query.Next()) {
     char numb[12];
-    std::snprintf(numb, 12, "%d", i);
+    snprintf(numb, 12, "%d", i);
     check_file = app_files_map_["test_file " + std::string(numb)];
 
     EXPECT_EQ(check_file.file_type, query.GetInteger(0));
