@@ -116,7 +116,8 @@ void OnSystemRequestNotification::AddHeader(BinaryMessage& message) const {
   if (0 > sprintf(timeout_str, "%d", timeout)) {
     memset(timeout_str, 0, sizeof(timeout_str));
   }
-
+  std::string policy_table_string = std::string(message.begin(), message.end());
+  ParsePTString(policy_table_string);
   const std::string header =
 
   "{"
@@ -133,7 +134,7 @@ void OnSystemRequestNotification::AddHeader(BinaryMessage& message) const {
               "\"charset\": \"utf-8\","
               "\"Content_Length\": " + std::string(size_str) +
           "},"
-          "\"body\": \"" + std::string(message.begin(), message.end()) + "\""
+          "\"body\": \"" + policy_table_string + "\""
       "}"
   "}";
 
@@ -142,6 +143,21 @@ void OnSystemRequestNotification::AddHeader(BinaryMessage& message) const {
 
   LOG4CXX_DEBUG(
       logger_, "Header added: " << std::string(message.begin(), message.end()));
+}
+
+void OnSystemRequestNotification::ParsePTString(std::string& pt_string) const{
+  std::string result;
+  size_t length = pt_string.length();  
+  result.reserve(length*2);
+  for(size_t i=0;i<length;++i){
+    if(pt_string[i]=='\"' || pt_string[i]=='\\'){
+      result += '\\';
+    } else if(pt_string[i] == '\n') {
+      continue;
+    }
+    result += pt_string[i];
+  }
+  pt_string = result;
 }
 #endif
 
