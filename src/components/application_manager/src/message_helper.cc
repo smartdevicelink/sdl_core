@@ -798,16 +798,6 @@ void MessageHelper::SendSetAppIcon(
   }
 }
 
-void MessageHelper::SendAppDataToHMI(ApplicationConstSharedPtr app,
-                                     ApplicationManager& app_man) {
-  SDL_AUTO_TRACE();
-  if (app) {
-    SendSetAppIcon(app, app->app_icon_path(), app_man);
-    SendGlobalPropertiesToHMI(app, app_man);
-    SendShowRequestToHMI(app, app_man);
-  }
-}
-
 void MessageHelper::SendGlobalPropertiesToHMI(ApplicationConstSharedPtr app,
                                               ApplicationManager& app_mngr) {
   if (!app.valid()) {

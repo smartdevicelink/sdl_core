@@ -34,14 +34,21 @@
 #include <vector>
 
 #include "gmock/gmock.h"
+#include "application_manager/message_helper.h"
 #include "utils/make_shared.h"
 #include "utils/custom_string.h"
 #include "utils/lock.h"
+#include "utils/data_accessor.h"
 #include "application_manager/policies/policy_handler.h"
 #include "application_manager/mock_application.h"
 #include "policy/mock_policy_settings.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager.h"
+#include "application_manager/mock_application_manager_settings.h"
+#include "application_manager/policies/mock_policy_handler_interface.h"
+#include "connection_handler/device.h"
+#include "protocol_handler/mock_session_observer.h"
+#include "utils/custom_string.h"
 
 namespace test {
 namespace components {
@@ -464,10 +471,10 @@ TEST(MessageHelperTestCreate, CreateNegativeResponse_SendSmartObject_Equal) {
 class MessageHelperTest : public ::testing::Test {
  public:
   MessageHelperTest()
-      : kDeltaFromFunctionsId(32768)
-      , kAppId(1u)
-      , kAvailable(true)
-      , kConnectionKey(1u) {
+      : kDeltaFromFunctionsId_(32768)
+      , kAppId_(1u)
+      , kAvailable_(true)
+      , kConnectionKey_(1u) {
     language_strings_.push_back("EN-US");
     language_strings_.push_back("ES-MX");
     language_strings_.push_back("FR-CA");
@@ -630,11 +637,12 @@ class MessageHelperTest : public ::testing::Test {
   StringArray function_id_strings_;
   StringArray events_id_strings_;
   StringArray hmi_level_strings_;
+  sync_primitives::Lock lock_;
 
-  const size_t kDeltaFromFunctionsId;
-  const uint32_t kAppId;
-  const bool kAvailable;
-  const uint32_t kConnectionKey;
+  const size_t kDeltaFromFunctionsId_;
+  const uint32_t kAppId_;
+  const bool kAvailable_;
+  const uint32_t kConnectionKey_;
 };
 
 TEST_F(MessageHelperTest,
@@ -933,12 +941,12 @@ TEST_F(MessageHelperTest,
     EXPECT_EQ(function_id_strings_[i], converted);
   }
   // EventIDs emum strarts from delta_from_functions_id = 32768
-  for (size_t i = kDeltaFromFunctionsId;
-       i < events_id_strings_.size() + kDeltaFromFunctionsId;
+  for (size_t i = kDeltaFromFunctionsId_;
+       i < events_id_strings_.size() + kDeltaFromFunctionsId_;
        ++i) {
     casted_enum = static_cast<mobile_apis::FunctionID::eType>(i);
     converted = MessageHelper::StringifiedFunctionID(casted_enum);
-    EXPECT_EQ(events_id_strings_[i - kDeltaFromFunctionsId], converted);
+    EXPECT_EQ(events_id_strings_[i - kDeltaFromFunctionsId_], converted);
   }
 }
 
@@ -1022,7 +1030,7 @@ TEST_F(MessageHelperTest, SendOnButtonSubscriptionNotification) {
   const bool kIsSubscribed = true;
 
   smart_objects::SmartObject msg_params(smart_objects::SmartType_Map);
-  msg_params[strings::app_id] = kAppId;
+  msg_params[strings::app_id] = kAppId_;
   msg_params[strings::name] = kButton;
   msg_params[strings::is_suscribed] = kIsSubscribed;
 
@@ -1031,7 +1039,7 @@ TEST_F(MessageHelperTest, SendOnButtonSubscriptionNotification) {
       .WillOnce(DoAll(SaveArg<0>(&test_notification), Return(true)));
 
   MessageHelper::SendOnButtonSubscriptionNotification(
-      kAppId, kButton, kIsSubscribed, mock_application_manager_);
+      kAppId_, kButton, kIsSubscribed, mock_application_manager_);
 
   EXPECT_EQ(
       application_manager::MessageType::kNotification,
@@ -1060,7 +1068,7 @@ TEST_F(MessageHelperTest, SendOnDataStreaming_Audio) {
       .WillOnce(DoAll(SaveArg<0>(&test_notification), Return(true)));
 
   MessageHelper::SendOnDataStreaming(
-      kService, kAvailable, mock_application_manager_);
+      kService, kAvailable_, mock_application_manager_);
 
   EXPECT_EQ(
       hmi_apis::FunctionID::Navigation_OnAudioDataStreaming,
@@ -1074,7 +1082,7 @@ TEST_F(MessageHelperTest, SendOnDataStreaming_Audio) {
   EXPECT_EQ(
       commands::CommandImpl::hmi_protocol_type_,
       (*test_notification)[strings::params][strings::protocol_type].asInt());
-  EXPECT_EQ(kAvailable,
+  EXPECT_EQ(kAvailable_,
             (*test_notification)[strings::msg_params]["available"].asInt());
 }
 
@@ -1087,7 +1095,7 @@ TEST_F(MessageHelperTest, SendOnDataStreaming_MobileNav) {
       .WillOnce(DoAll(SaveArg<0>(&test_notification), Return(true)));
 
   MessageHelper::SendOnDataStreaming(
-      kService, kAvailable, mock_application_manager_);
+      kService, kAvailable_, mock_application_manager_);
 
   EXPECT_EQ(
       hmi_apis::FunctionID::Navigation_OnVideoDataStreaming,
@@ -1101,7 +1109,7 @@ TEST_F(MessageHelperTest, SendOnDataStreaming_MobileNav) {
   EXPECT_EQ(
       commands::CommandImpl::hmi_protocol_type_,
       (*test_notification)[strings::params][strings::protocol_type].asInt());
-  EXPECT_EQ(kAvailable,
+  EXPECT_EQ(kAvailable_,
             (*test_notification)[strings::msg_params]["available"].asInt());
 }
 
@@ -1112,7 +1120,7 @@ TEST_F(MessageHelperTest, SendOnDataStreaming_Fail) {
   EXPECT_CALL(mock_application_manager_, ManageHMICommand(_)).Times(0);
 
   MessageHelper::SendOnDataStreaming(
-      kService, kAvailable, mock_application_manager_);
+      kService, kAvailable_, mock_application_manager_);
 }
 
 TEST_F(MessageHelperTest, SendOnPermissionsChangeNotification) {
@@ -1144,7 +1152,7 @@ TEST_F(MessageHelperTest, SendOnPermissionsChangeNotification) {
       .WillOnce(DoAll(SaveArg<0>(&test_notification), Return(true)));
 
   MessageHelper::SendOnPermissionsChangeNotification(
-      kConnectionKey, permissions, mock_application_manager_);
+      kConnectionKey_, permissions, mock_application_manager_);
 
   EXPECT_EQ(
       mobile_apis::FunctionID::OnPermissionsChangeID,
@@ -1156,7 +1164,7 @@ TEST_F(MessageHelperTest, SendOnPermissionsChangeNotification) {
       commands::CommandImpl::mobile_protocol_type_,
       (*test_notification)[strings::params][strings::protocol_type].asInt());
   EXPECT_EQ(
-      kConnectionKey,
+      kConnectionKey_,
       (*test_notification)[strings::params][strings::connection_key].asUInt());
 
   // Permissions Data check
@@ -1224,7 +1232,7 @@ TEST_F(MessageHelperTest, SendOnPermissionsChangeNotification) {
 
 TEST_F(MessageHelperTest, SendOnResumeAudioSourceToHMI) {
   MockApplicationSharedPtr mock_app = utils::MakeShared<AppMock>();
-  EXPECT_CALL(mock_application_manager_, application(kAppId))
+  EXPECT_CALL(mock_application_manager_, application(kAppId_))
       .WillOnce(Return(mock_app));
   EXPECT_EQ(mock_app, true);
 
@@ -1235,7 +1243,7 @@ TEST_F(MessageHelperTest, SendOnResumeAudioSourceToHMI) {
   EXPECT_CALL(mock_application_manager_, ManageHMICommand(_))
       .WillOnce(DoAll(SaveArg<0>(&test_notification), Return(true)));
 
-  MessageHelper::SendOnResumeAudioSourceToHMI(kAppId,
+  MessageHelper::SendOnResumeAudioSourceToHMI(kAppId_,
                                               mock_application_manager_);
 
   EXPECT_EQ(
@@ -1247,19 +1255,19 @@ TEST_F(MessageHelperTest, SendOnResumeAudioSourceToHMI) {
   EXPECT_EQ(
       kCorrelationId,
       (*test_notification)[strings::params][strings::correlation_id].asUInt());
-  EXPECT_EQ(kAppId,
+  EXPECT_EQ(kAppId_,
             (*test_notification)[strings::msg_params][strings::app_id].asInt());
 }
 
 TEST_F(MessageHelperTest, SendOnResumeAudioSourceToHMI_InvalidAppId) {
   MockApplicationSharedPtr mock_app;
-  EXPECT_CALL(mock_application_manager_, application(kAppId))
+  EXPECT_CALL(mock_application_manager_, application(kAppId_))
       .WillOnce(Return(MockApplicationSharedPtr()));
   EXPECT_EQ(mock_app, false);
   EXPECT_CALL(mock_application_manager_, GetNextHMICorrelationID()).Times(0);
   EXPECT_CALL(mock_application_manager_, ManageHMICommand(_)).Times(0);
 
-  MessageHelper::SendOnResumeAudioSourceToHMI(kAppId,
+  MessageHelper::SendOnResumeAudioSourceToHMI(kAppId_,
                                               mock_application_manager_);
 }
 
@@ -1315,7 +1323,7 @@ TEST_F(MessageHelperTest, SendPolicySnapshotNotification) {
       .WillOnce(DoAll(SaveArg<0>(&test_notification), Return(true)));
 
   MessageHelper::SendPolicySnapshotNotification(
-      kConnectionKey, kPolicyData, kUrl, mock_application_manager_);
+      kConnectionKey_, kPolicyData, kUrl, mock_application_manager_);
 
   EXPECT_EQ(
       mobile_apis::FunctionID::OnSystemRequestID,
@@ -1330,7 +1338,7 @@ TEST_F(MessageHelperTest, SendPolicySnapshotNotification) {
       commands::CommandImpl::protocol_version_,
       (*test_notification)[strings::params][strings::protocol_version].asInt());
   EXPECT_EQ(
-      kConnectionKey,
+      kConnectionKey_,
       (*test_notification)[strings::params][strings::connection_key].asInt());
   EXPECT_EQ(kUrl,
             (*test_notification)[strings::msg_params][strings::url].asString());
@@ -1500,6 +1508,581 @@ TEST_F(MessageHelperTest,
   casted_mobile_enum = static_cast<MobileResults::eType>(INT_MAX);
   converted_enum = MessageHelper::MobileToHMIResult(casted_mobile_enum);
   EXPECT_EQ(tested_enum, converted_enum);
+}
+
+TEST_F(MessageHelperTest,
+       SendUIChangeRegistrationRequestToHMI_AppNotValid_UNSUCCESS) {
+  MockApplicationSharedPtr app;
+  EXPECT_CALL(mock_application_manager_, ManageHMICommand(_)).Times(0);
+
+  MessageHelper::SendUIChangeRegistrationRequestToHMI(
+      app, mock_application_manager_);
+}
+
+TEST_F(MessageHelperTest,
+       SendUIChangeRegistrationRequestToHMI_NoAppTypes_UNSUCCESS) {
+  MockApplicationSharedPtr app = ::utils::MakeShared<MockApplication>();
+
+  EXPECT_CALL(*app, app_types())
+      .WillOnce(Return(static_cast<smart_objects::SmartObject*>(NULL)));
+  EXPECT_CALL(mock_application_manager_, ManageHMICommand(_)).Times(0);
+  MessageHelper::SendUIChangeRegistrationRequestToHMI(
+      app, mock_application_manager_);
+}
+
+TEST_F(MessageHelperTest, SendUIChangeRegistrationRequestToHMI_SUCCESS) {
+  MockApplicationSharedPtr app = ::utils::MakeShared<MockApplication>();
+
+  ON_CALL(*app, app_id()).WillByDefault(Return(kAppId_));
+
+  smart_objects::SmartObject dummy_app_types(smart_objects::SmartType_Null);
+  ON_CALL(*app, app_types()).WillByDefault(Return(&dummy_app_types));
+
+  const mobile_api::Language::eType kDummyLanguage =
+      mobile_api::Language::INVALID_ENUM;
+  ON_CALL(*app, ui_language()).WillByDefault(ReturnRef(kDummyLanguage));
+
+  smart_objects::SmartObjectSPtr result;
+  EXPECT_CALL(mock_application_manager_, ManageHMICommand(_))
+      .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
+
+  MessageHelper::SendUIChangeRegistrationRequestToHMI(
+      app, mock_application_manager_);
+  ASSERT_TRUE(result.valid());
+
+  EXPECT_EQ(hmi_apis::FunctionID::UI_ChangeRegistration,
+            (*result)[strings::params][strings::function_id].asInt());
+  EXPECT_EQ(kAppId_, (*result)[strings::msg_params][strings::app_id].asInt());
+}
+
+TEST_F(MessageHelperTest, CreateDeviceListSO_EmptyDeviceList_SUCCESS) {
+  connection_handler::DeviceMap devices;
+
+  smart_objects::SmartObjectSPtr result(MessageHelper::CreateDeviceListSO(
+      devices,
+      *static_cast<policy::PolicyHandlerInterface*>(NULL),
+      mock_application_manager_));
+
+  ASSERT_TRUE(result.valid());
+
+  EXPECT_EQ(smart_objects::SmartType_Array,
+            (*result)[strings::device_list].getType());
+  EXPECT_EQ(0u, (*result)[strings::device_list].length());
+}
+
+TEST_F(MessageHelperTest, CreateDeviceListSO_SUCCESS) {
+  connection_handler::DeviceMap devices;
+  policy_test::MockPolicyHandlerInterface policy_handler;
+
+  const uint32_t kDeviceHandle = 0u;
+  const std::string kDeviceName = "test_device";
+  connection_handler::Device device(kDeviceHandle, kDeviceName);
+
+  devices.insert(std::pair<uint32_t, connection_handler::Device>(0, device));
+
+  ON_CALL(policy_handler, GetUserConsentForDevice(_))
+      .WillByDefault(Return(policy::DeviceConsent::kDeviceAllowed));
+  ON_CALL(mock_application_manager_, GetDeviceTransportType(_))
+      .WillByDefault(Return(hmi_apis::Common_TransportType::INVALID_ENUM));
+
+  smart_objects::SmartObjectSPtr result(MessageHelper::CreateDeviceListSO(
+      devices, policy_handler, mock_application_manager_));
+
+  ASSERT_TRUE(result.valid());
+
+  EXPECT_EQ(smart_objects::SmartType_Array,
+            (*result)[strings::device_list].getType());
+  EXPECT_TRUE(0 < (*result)[strings::device_list].length());
+}
+
+TEST_F(MessageHelperTest, CreateGetVehicleDataRequest_NoParams_SUCCESS) {
+  const uint32_t kCorrelationId = 1u;
+  const std::vector<std::string> kDummyMsgParams;
+
+  smart_objects::SmartObjectSPtr result;
+  EXPECT_CALL(mock_application_manager_, ManageHMICommand(_))
+      .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
+
+  MessageHelper::CreateGetVehicleDataRequest(
+      kCorrelationId, kDummyMsgParams, mock_application_manager_);
+
+  ASSERT_TRUE(result.valid());
+
+  EXPECT_EQ(kCorrelationId,
+            (*result)[strings::params][strings::correlation_id].asUInt());
+}
+
+TEST_F(MessageHelperTest, CreateGetVehicleDataRequest_SUCCESS) {
+  const uint32_t kCorrelationId = 1u;
+  const std::string kTestParam = "test_param";
+  std::vector<std::string> msg_params;
+  msg_params.push_back(kTestParam);
+
+  smart_objects::SmartObjectSPtr result;
+  EXPECT_CALL(mock_application_manager_, ManageHMICommand(_))
+      .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
+
+  MessageHelper::CreateGetVehicleDataRequest(
+      kCorrelationId, msg_params, mock_application_manager_);
+
+  ASSERT_TRUE(result.valid());
+
+  EXPECT_EQ(kCorrelationId,
+            (*result)[strings::params][strings::correlation_id].asUInt());
+  EXPECT_TRUE((*result)[strings::msg_params].keyExists(kTestParam));
+}
+
+TEST_F(MessageHelperTest, CreateHMIApplicationStruct_SUCCESS) {
+  MockApplicationSharedPtr app = ::utils::MakeShared<MockApplication>();
+  protocol_handler_test::MockSessionObserver session_observer;
+  policy_test::MockPolicyHandlerInterface policy_handler;
+
+  smart_objects::SmartObject dummy_so(smart_objects::SmartType_Map);
+  dummy_so["dummy_param"] = 0;
+  ON_CALL(*app, tts_name()).WillByDefault(Return(&dummy_so));
+  ON_CALL(*app, vr_synonyms()).WillByDefault(Return(&dummy_so));
+  ON_CALL(*app, ngn_media_screen_name()).WillByDefault(Return(&dummy_so));
+  ON_CALL(*app, app_types()).WillByDefault(Return(&dummy_so));
+  const mobile_api::Language::eType kUiLanguage =
+      mobile_api::Language::INVALID_ENUM;
+  ON_CALL(*app, ui_language()).WillByDefault(ReturnRef(kUiLanguage));
+
+  ON_CALL(policy_handler, GetUserConsentForDevice(_))
+      .WillByDefault(Return(policy::DeviceConsent::kDeviceAllowed));
+  ON_CALL(mock_application_manager_, GetDeviceTransportType(_))
+      .WillByDefault(Return(hmi_apis::Common_TransportType::INVALID_ENUM));
+
+  const ::utils::custom_string::CustomString kAppName("app_name");
+  ON_CALL(*app, name()).WillByDefault(ReturnRef(kAppName));
+  const std::string kAppIconPath("AppIconPath");
+  ON_CALL(*app, app_icon_path()).WillByDefault(ReturnRef(kAppIconPath));
+  ON_CALL(*app, IsRegistered()).WillByDefault(Return(true));
+
+  smart_objects::SmartObject result(smart_objects::SmartType_Null);
+  EXPECT_TRUE(
+      MessageHelper::CreateHMIApplicationStruct(app,
+                                                session_observer,
+                                                policy_handler,
+                                                &result,
+                                                mock_application_manager_));
+
+  EXPECT_EQ(smart_objects::SmartType_Map, result.getType());
+  EXPECT_NE(result.length(), 0u);
+}
+
+TEST_F(MessageHelperTest, SendStopAudioPathThru_SUCCESS) {
+  smart_objects::SmartObjectSPtr result;
+  EXPECT_CALL(mock_application_manager_, ManageHMICommand(_))
+      .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
+
+  MessageHelper::SendStopAudioPathThru(mock_application_manager_);
+
+  ASSERT_TRUE(result.valid());
+
+  EXPECT_EQ(hmi_apis::FunctionID::UI_EndAudioPassThru,
+            (*result)[strings::params][strings::function_id].asInt());
+}
+
+TEST_F(MessageHelperTest, SendSetAppIcon_SUCCESS) {
+  const std::string kAppIconPath("AppIconPath");
+
+  smart_objects::SmartObjectSPtr result;
+  EXPECT_CALL(mock_application_manager_, ManageHMICommand(_))
+      .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
+
+  MessageHelper::SendSetAppIcon(
+      kAppId_, kAppIconPath, mock_application_manager_);
+
+  ASSERT_TRUE(result.valid());
+
+  EXPECT_EQ(hmi_apis::FunctionID::UI_SetAppIcon,
+            (*result)[strings::params][strings::function_id].asInt());
+  EXPECT_EQ(kAppId_, (*result)[strings::msg_params][strings::app_id].asUInt());
+}
+
+TEST_F(MessageHelperTest, SendSDLActivateAppResponse_SUCCESS) {
+  const uint32_t kCorrelationId = 0u;
+  const std::string kStrAppId("Application_ID");
+  policy::AppPermissions permissions(kStrAppId);
+  permissions.isSDLAllowed = true;
+  permissions.isAppPermissionsRevoked = false;
+  permissions.appRevoked = false;
+
+  smart_objects::SmartObjectSPtr result;
+  EXPECT_CALL(mock_application_manager_, ManageHMICommand(_))
+      .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
+
+  MessageHelper::SendSDLActivateAppResponse(
+      permissions, kCorrelationId, mock_application_manager_);
+
+  ASSERT_TRUE(result.valid());
+
+  EXPECT_EQ(hmi_apis::FunctionID::SDL_ActivateApp,
+            (*result)[strings::params][strings::function_id].asInt());
+}
+
+TEST_F(MessageHelperTest, SendQueryApps_SUCCESS) {
+  policy_test::MockPolicyHandlerInterface policy_handler;
+
+  ON_CALL(mock_application_manager_, GetPolicyHandler())
+      .WillByDefault(ReturnRef(policy_handler));
+  ON_CALL(policy_handler, RemoteAppsUrl()).WillByDefault(Return("url"));
+
+  smart_objects::SmartObjectSPtr result;
+  EXPECT_CALL(mock_application_manager_, ManageMobileCommand(_, _))
+      .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
+
+  MessageHelper::SendQueryApps(kConnectionKey_, mock_application_manager_);
+
+  ASSERT_TRUE(result.valid());
+
+  EXPECT_EQ(mobile_apis::FunctionID::OnSystemRequestID,
+            (*result)[strings::params][strings::function_id].asInt());
+}
+
+TEST_F(MessageHelperTest, SendPolicyUpdate_SUCCESS) {
+  const std::string kFilePath("file_path");
+  const int kTimeout = 0u;
+  std::vector<int> dummy_retries;
+  dummy_retries.push_back(5);
+
+  smart_objects::SmartObjectSPtr result;
+  EXPECT_CALL(mock_application_manager_, ManageHMICommand(_))
+      .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
+
+  MessageHelper::SendPolicyUpdate(
+      kFilePath, kTimeout, dummy_retries, mock_application_manager_);
+
+  ASSERT_TRUE(result.valid());
+
+  EXPECT_EQ(hmi_apis::FunctionID::BasicCommunication_PolicyUpdate,
+            (*result)[strings::params][strings::function_id].asInt());
+}
+
+TEST_F(MessageHelperTest, SendSystemRequestNotification_SUCCESS) {
+  smart_objects::SmartObject result;
+  EXPECT_CALL(mock_application_manager_, ManageMobileCommand(_, _))
+      .WillOnce(Return(true));
+
+  MessageHelper::SendSystemRequestNotification(
+      kConnectionKey_, result, mock_application_manager_);
+
+  EXPECT_EQ(mobile_apis::FunctionID::OnSystemRequestID,
+            result[strings::params][strings::function_id].asInt());
+}
+
+TEST_F(MessageHelperTest, SendTTSGlobalProperties_SUCCESS) {
+  const bool kDefaultHelpPrompt = true;
+  MockApplicationSharedPtr app(::utils::MakeShared<MockApplication>());
+
+  CommandsMap commands_map;
+
+  smart_objects::SmartObject command(smart_objects::SmartType_Map);
+  command[strings::menu_params][strings::menu_name] = "dummy_menu_name";
+
+  commands_map.insert(CommandsMap::value_type(0u, &command));
+
+  ON_CALL(*app, commands_map())
+      .WillByDefault(Return(DataAccessor<CommandsMap>(commands_map, lock_)));
+
+  smart_objects::SmartObjectSPtr result;
+  EXPECT_CALL(mock_application_manager_, ManageHMICommand(_))
+      .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
+
+  MessageHelper::SendTTSGlobalProperties(
+      app, kDefaultHelpPrompt, mock_application_manager_);
+
+  ASSERT_TRUE(result.valid());
+
+  EXPECT_EQ(hmi_apis::FunctionID::TTS_SetGlobalProperties,
+            (*result)[strings::params][strings::function_id].asInt());
+}
+
+TEST_F(MessageHelperTest, SendShowRequestToHMI_NoApp_UNSUCCESS) {
+  EXPECT_CALL(mock_application_manager_, ManageHMICommand(_)).Times(0);
+
+  ApplicationSharedPtr dummy_app;
+  MessageHelper::SendShowRequestToHMI(dummy_app, mock_application_manager_);
+}
+
+TEST_F(MessageHelperTest, SendShowRequestToHMI_SUCCESS) {
+  MockApplicationSharedPtr app(::utils::MakeShared<MockApplication>());
+
+  smart_objects::SmartObject dummy_show_command(smart_objects::SmartType_Map);
+
+  ON_CALL(*app, show_command()).WillByDefault(Return(&dummy_show_command));
+
+  smart_objects::SmartObjectSPtr result;
+  EXPECT_CALL(mock_application_manager_, ManageHMICommand(_))
+      .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
+
+  MessageHelper::SendShowRequestToHMI(app, mock_application_manager_);
+
+  ASSERT_TRUE(result.valid());
+
+  EXPECT_EQ(hmi_apis::FunctionID::UI_Show,
+            (*result)[strings::params][strings::function_id].asInt());
+}
+
+TEST_F(MessageHelperTest, SendAddVRCommandToHMI_SUCCESS) {
+  const uint32_t kCmdId = 0u;
+  const smart_objects::SmartObject kDummyVrCommands;
+  MockApplicationSharedPtr app(::utils::MakeShared<MockApplication>());
+
+  ON_CALL(*app, app_id()).WillByDefault(Return(kAppId_));
+
+  ON_CALL(mock_application_manager_, application(_)).WillByDefault(Return(app));
+
+  smart_objects::SmartObjectSPtr result;
+  EXPECT_CALL(mock_application_manager_, ManageHMICommand(_))
+      .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
+
+  MessageHelper::SendAddVRCommandToHMI(
+      kCmdId, kDummyVrCommands, kAppId_, mock_application_manager_);
+
+  ASSERT_TRUE(result.valid());
+
+  EXPECT_EQ(hmi_apis::FunctionID::VR_AddCommand,
+            (*result)[strings::params][strings::function_id].asInt());
+  EXPECT_EQ(kAppId_, (*result)[strings::msg_params][strings::app_id].asUInt());
+}
+
+TEST_F(MessageHelperTest, SendAudioStopStream_SUCCESS) {
+  smart_objects::SmartObjectSPtr result;
+  EXPECT_CALL(mock_application_manager_, ManageHMICommand(_))
+      .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
+
+  MessageHelper::SendAudioStopStream(kAppId_, mock_application_manager_);
+
+  ASSERT_TRUE(result.valid());
+
+  EXPECT_EQ(hmi_apis::FunctionID::Navigation_StopAudioStream,
+            (*result)[strings::params][strings::function_id].asInt());
+  EXPECT_EQ(kAppId_, (*result)[strings::msg_params][strings::app_id].asUInt());
+}
+
+TEST_F(MessageHelperTest, SendGetStatusUpdateResponse_SUCCESS) {
+  const uint32_t kCorrelationId = 0u;
+  const std::string kStatus("test_status");
+
+  smart_objects::SmartObjectSPtr result;
+  EXPECT_CALL(mock_application_manager_, ManageHMICommand(_))
+      .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
+
+  MessageHelper::SendGetStatusUpdateResponse(
+      kStatus, kCorrelationId, mock_application_manager_);
+
+  ASSERT_TRUE(result.valid());
+
+  EXPECT_EQ(hmi_apis::FunctionID::SDL_GetStatusUpdate,
+            (*result)[strings::params][strings::function_id].asInt());
+}
+
+TEST_F(MessageHelperTest,
+       SendChangeRegistrationRequestToHMI_NotValidAppPtr_UNSUCCESS) {
+  ApplicationSharedPtr app;
+  EXPECT_CALL(mock_application_manager_, ManageHMICommand(_)).Times(0);
+
+  MessageHelper::SendChangeRegistrationRequestToHMI(app,
+                                                    mock_application_manager_);
+}
+
+TEST_F(MessageHelperTest, SendChangeRegistrationRequestToHMI_SUCCESS) {
+  MockApplicationSharedPtr app(::utils::MakeShared<MockApplication>());
+
+  const mobile_api::Language::eType kAppLanguage = mobile_api::Language::RU_RU;
+
+  ON_CALL(*app, app_id()).WillByDefault(Return(kAppId_));
+  ON_CALL(*app, language()).WillByDefault(ReturnRef(kAppLanguage));
+  ON_CALL(*app, ui_language()).WillByDefault(ReturnRef(kAppLanguage));
+
+  smart_objects::SmartObjectSPtr vr_command_result;
+  smart_objects::SmartObjectSPtr tts_command_result;
+  smart_objects::SmartObjectSPtr ui_command_result;
+  {
+    ::testing::InSequence sequence;
+    EXPECT_CALL(mock_application_manager_, ManageHMICommand(_))
+        .WillOnce(DoAll(SaveArg<0>(&vr_command_result), Return(true)));
+    EXPECT_CALL(mock_application_manager_, ManageHMICommand(_))
+        .WillOnce(DoAll(SaveArg<0>(&tts_command_result), Return(true)));
+    EXPECT_CALL(mock_application_manager_, ManageHMICommand(_))
+        .WillOnce(DoAll(SaveArg<0>(&ui_command_result), Return(true)));
+  }
+  MessageHelper::SendChangeRegistrationRequestToHMI(app,
+                                                    mock_application_manager_);
+
+  ASSERT_TRUE(vr_command_result.valid());
+  ASSERT_TRUE(tts_command_result.valid());
+  ASSERT_TRUE(ui_command_result.valid());
+  EXPECT_EQ(
+      hmi_apis::FunctionID::VR_ChangeRegistration,
+      (*vr_command_result)[strings::params][strings::function_id].asInt());
+  EXPECT_EQ(
+      hmi_apis::FunctionID::TTS_ChangeRegistration,
+      (*tts_command_result)[strings::params][strings::function_id].asInt());
+  EXPECT_EQ(
+      hmi_apis::FunctionID::UI_ChangeRegistration,
+      (*ui_command_result)[strings::params][strings::function_id].asInt());
+  EXPECT_EQ(
+      kAppId_,
+      (*vr_command_result)[strings::msg_params][strings::app_id].asBool());
+  EXPECT_EQ(
+      kAppId_,
+      (*tts_command_result)[strings::msg_params][strings::app_id].asBool());
+  EXPECT_EQ(
+      kAppId_,
+      (*ui_command_result)[strings::msg_params][strings::app_id].asBool());
+}
+
+TEST_F(MessageHelperTest, SendAddCommandRequestToHMI_NoApp_UNSUCCESS) {
+  EXPECT_CALL(mock_application_manager_, ManageHMICommand(_)).Times(0);
+
+  ApplicationSharedPtr dummy_app;
+  MessageHelper::SendAddCommandRequestToHMI(dummy_app,
+                                            mock_application_manager_);
+}
+
+TEST_F(MessageHelperTest, SendAddCommandRequestToHMI_SUCCESS) {
+  MockApplicationSharedPtr app(::utils::MakeShared<MockApplication>());
+  ON_CALL(*app, app_id()).WillByDefault(Return(kAppId_));
+
+  CommandsMap commands_map;
+
+  smart_objects::SmartObject command(smart_objects::SmartType_Map);
+  command[strings::menu_params][strings::menu_name] = "dummy_menu_name";
+  command[strings::cmd_icon][strings::value] = "dummy_cmd_icon_value";
+
+  commands_map.insert(CommandsMap::value_type(0u, &command));
+
+  ON_CALL(*app, commands_map())
+      .WillByDefault(Return(DataAccessor<CommandsMap>(commands_map, lock_)));
+
+  smart_objects::SmartObjectSPtr result;
+  EXPECT_CALL(mock_application_manager_, ManageHMICommand(_))
+      .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
+
+  MessageHelper::SendAddCommandRequestToHMI(app, mock_application_manager_);
+
+  ASSERT_TRUE(result.valid());
+
+  EXPECT_EQ(hmi_apis::FunctionID::UI_AddCommand,
+            (*result)[strings::params][strings::function_id].asInt());
+  EXPECT_EQ(kAppId_, (*result)[strings::msg_params][strings::app_id].asUInt());
+}
+
+TEST_F(MessageHelperTest, SendAddSubMenuRequestToHMI_NoApp_UNSUCCESS) {
+  EXPECT_CALL(mock_application_manager_, ManageHMICommand(_)).Times(0);
+
+  ApplicationSharedPtr dummy_app;
+  MessageHelper::SendAddSubMenuRequestToHMI(dummy_app,
+                                            mock_application_manager_);
+}
+
+TEST_F(MessageHelperTest, SendAddSubMenuRequestToHMI_SUCCESS) {
+  MockApplicationSharedPtr app(::utils::MakeShared<MockApplication>());
+
+  SubMenuMap commands_map;
+  smart_objects::SmartObject command(smart_objects::SmartType_Map);
+  commands_map.insert(SubMenuMap::value_type(0u, &command));
+
+  ON_CALL(*app, app_id()).WillByDefault(Return(kAppId_));
+  ON_CALL(*app, sub_menu_map())
+      .WillByDefault(Return(DataAccessor<SubMenuMap>(commands_map, lock_)));
+
+  smart_objects::SmartObjectSPtr result;
+  EXPECT_CALL(mock_application_manager_, ManageHMICommand(_))
+      .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
+
+  MessageHelper::SendAddSubMenuRequestToHMI(app, mock_application_manager_);
+
+  ASSERT_TRUE(result.valid());
+
+  EXPECT_EQ(hmi_apis::FunctionID::UI_AddSubMenu,
+            (*result)[strings::params][strings::function_id].asInt());
+  EXPECT_EQ(kAppId_, (*result)[strings::msg_params][strings::app_id].asUInt());
+}
+
+TEST_F(MessageHelperTest,
+       SendAllOnButtonSubscriptionNotificationsForApp_NoApp_UNSUCCESS) {
+  EXPECT_CALL(mock_application_manager_, ManageHMICommand(_)).Times(0);
+
+  ApplicationSharedPtr dummy_app;
+  MessageHelper::SendAllOnButtonSubscriptionNotificationsForApp(
+      dummy_app, mock_application_manager_);
+}
+
+TEST_F(MessageHelperTest,
+       SendAllOnButtonSubscriptionNotificationsForApp_SUCCESS) {
+  MockApplicationSharedPtr app(::utils::MakeShared<MockApplication>());
+
+  ON_CALL(*app, hmi_app_id()).WillByDefault(Return(kAppId_));
+
+  ButtonSubscriptions subscribed_buttons;
+  subscribed_buttons.insert(mobile_apis::ButtonName::CUSTOM_BUTTON);
+
+  ON_CALL(*app, SubscribedButtons())
+      .WillByDefault(
+          Return(DataAccessor<ButtonSubscriptions>(subscribed_buttons, lock_)));
+
+  smart_objects::SmartObjectSPtr result;
+  EXPECT_CALL(mock_application_manager_, ManageHMICommand(_))
+      .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
+
+  MessageHelper::SendAllOnButtonSubscriptionNotificationsForApp(
+      app, mock_application_manager_);
+
+  ASSERT_TRUE(result.valid());
+
+  EXPECT_EQ(hmi_apis::FunctionID::Buttons_OnButtonSubscription,
+            (*result)[strings::params][strings::function_id].asInt());
+  EXPECT_EQ(kAppId_, (*result)[strings::msg_params][strings::app_id].asUInt());
+}
+
+TEST_F(MessageHelperTest, SendAudioStartStream_SUCCESS) {
+  MockApplicationManagerSettings app_mngr_settings;
+
+  ON_CALL(mock_application_manager_, get_settings())
+      .WillByDefault(ReturnRef(app_mngr_settings));
+
+  const std::string kAudioServerType("test_audio_server_type");
+  ON_CALL(app_mngr_settings, audio_server_type())
+      .WillByDefault(ReturnRef(kAudioServerType));
+
+  const std::string kAudioStreamFile("test_audio_stream_file");
+  ON_CALL(app_mngr_settings, audio_stream_file())
+      .WillByDefault(ReturnRef(kAudioStreamFile));
+
+  smart_objects::SmartObjectSPtr result;
+  EXPECT_CALL(mock_application_manager_, ManageHMICommand(_))
+      .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
+
+  MessageHelper::SendAudioStartStream(kAppId_, mock_application_manager_);
+
+  ASSERT_TRUE(result.valid());
+
+  EXPECT_EQ(hmi_apis::FunctionID::Navigation_StartAudioStream,
+            (*result)[strings::params][strings::function_id].asInt());
+  EXPECT_EQ(kAppId_, (*result)[strings::msg_params][strings::app_id].asUInt());
+}
+
+TEST_F(MessageHelperTest, SendGetListOfPermissionsResponse_SUCCESS) {
+  std::vector<policy::FunctionalGroupPermission> permissions;
+  policy::FunctionalGroupPermission permission;
+  permission.state = policy::GroupConsent::kGroupAllowed;
+  permissions.push_back(permission);
+
+  smart_objects::SmartObjectSPtr result;
+  EXPECT_CALL(mock_application_manager_, ManageHMICommand(_))
+      .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
+
+  const uint32_t kCorrelationId = 0u;
+  MessageHelper::SendGetListOfPermissionsResponse(
+      permissions, kCorrelationId, mock_application_manager_);
+
+  ASSERT_TRUE(result.valid());
+
+  EXPECT_EQ(hmi_apis::FunctionID::SDL_GetListOfPermissions,
+            (*result)[strings::params][strings::function_id].asInt());
 }
 
 }  // namespace application_manager_test

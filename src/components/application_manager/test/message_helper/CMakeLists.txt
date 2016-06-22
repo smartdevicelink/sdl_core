@@ -28,38 +28,38 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-    include_directories(
-        ${GMOCK_INCLUDE_DIRECTORY}
-        ${COMPONENTS_DIR}/include/test
-        ${COMPONENTS_DIR}/application_manager/test/include
-    )
+include_directories(
+    ${GMOCK_INCLUDE_DIRECTORY}
+    ${COMPONENTS_DIR}/include/test
+    ${COMPONENTS_DIR}/application_manager/test/include
+)
 
-    set(LIBRARIES
-        gmock
-        ApplicationManager
-        jsoncpp
-        connectionHandler
-        Utils
-    )
+set(LIBRARIES
+    gmock
+    ApplicationManager
+    jsoncpp
+    connectionHandler
+    Utils
+)
 
-    if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-      list(APPEND LIBRARIES MessageHelper)
-    endif()
+if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+  list(APPEND LIBRARIES MessageHelper)
+endif()
 
-    set(SOURCES
-        message_helper_test.cc
-    )
+set(SOURCES
+    message_helper_test.cc
+)
 
-    if(QT_PORT)
-      link_directories (${CMAKE_SOURCE_DIR}/build/openssl_win_x86/lib)
-    endif()
+if(QT_PORT)
+  link_directories (${CMAKE_SOURCE_DIR}/build/openssl_win_x86/lib)
+endif()
 
-    if(NOT QT_PORT AND ${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-      link_directories(${CMAKE_SOURCE_DIR}/build/openssl_win_x64/lib/)
-    endif()
+if(NOT QT_PORT AND ${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  link_directories(${CMAKE_SOURCE_DIR}/build/openssl_win_x64/lib/)
+endif()
 
-    if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
-    endif()
+if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
+endif()
 
-    create_test("message_helper_test" "${SOURCES}" "${LIBRARIES}")
+create_test("message_helper_test" "${SOURCES}" "${LIBRARIES}")
