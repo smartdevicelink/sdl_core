@@ -6,6 +6,7 @@
 #line 3
 #line 4
 #line 5
+#line 6
 [![Build Status](https://travis-ci.org/smartdevicelink/sdl_core.svg?branch=develop)](https://travis-ci.org/smartdevicelink/sdl_core)  **Ubuntu Linux 14.04 x64**
 
 [![Build Status](http://109.166.244.153/app/rest/builds/buildType:WinSdlDevelop_WinX64withUt/statusIcon)](http://109.166.244.153/viewType.html?buildTypeId=WinSdlDevelop_WinX64withUt&guest=1)  **Windows 7 x64**
