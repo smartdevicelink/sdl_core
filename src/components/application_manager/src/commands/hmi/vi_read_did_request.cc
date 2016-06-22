@@ -36,15 +36,14 @@ namespace application_manager {
 
 namespace commands {
 
-VIReadDIDRequest::VIReadDIDRequest(const MessageSharedPtr& message)
-    : RequestToHMI(message) {
-}
+VIReadDIDRequest::VIReadDIDRequest(const MessageSharedPtr& message,
+                                   ApplicationManager& application_manager)
+    : RequestToHMI(message, application_manager) {}
 
-VIReadDIDRequest::~VIReadDIDRequest() {
-}
+VIReadDIDRequest::~VIReadDIDRequest() {}
 
 void VIReadDIDRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   SendRequest();
 }
@@ -52,4 +51,3 @@ void VIReadDIDRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

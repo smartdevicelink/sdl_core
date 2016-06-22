@@ -37,15 +37,13 @@ namespace application_manager {
 namespace commands {
 
 OnAudioPassThruNotification::OnAudioPassThruNotification(
-    const MessageSharedPtr& message)
-    : CommandNotificationImpl(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandNotificationImpl(message, application_manager) {}
 
-OnAudioPassThruNotification::~OnAudioPassThruNotification() {
-}
+OnAudioPassThruNotification::~OnAudioPassThruNotification() {}
 
 void OnAudioPassThruNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   SendNotification();
 }

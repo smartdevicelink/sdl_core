@@ -30,21 +30,19 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/commands/hmi/vr_is_ready_response.h"
-#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
 namespace commands {
 
-VRIsReadyResponse::VRIsReadyResponse(const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+VRIsReadyResponse::VRIsReadyResponse(const MessageSharedPtr& message,
+                                     ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {}
 
-VRIsReadyResponse::~VRIsReadyResponse() {
-}
+VRIsReadyResponse::~VRIsReadyResponse() {}
 
 void VRIsReadyResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   smart_objects::SmartObject& object = *message_;
 
   bool is_available = false;
@@ -52,8 +50,7 @@ void VRIsReadyResponse::Run() {
     is_available = object[strings::msg_params][strings::available].asBool();
   }
 
-  HMICapabilities& hmi_capabilities =
-      ApplicationManagerImpl::instance()->hmi_capabilities();
+  HMICapabilities& hmi_capabilities = application_manager_.hmi_capabilities();
   hmi_capabilities.set_is_vr_cooperating(is_available);
 }
 

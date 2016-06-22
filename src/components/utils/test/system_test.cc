@@ -35,7 +35,7 @@
 
 namespace test {
 namespace components {
-namespace utils {
+namespace utils_test {
 
 using namespace ::utils;
 
@@ -62,7 +62,6 @@ TEST(SystemTest, Constructor_WithFileNameCommandName_ExpectArgsStored) {
   // Check if actual number of arguments arec correct
   int vec_size = object.argv().size();
   ASSERT_EQ(vec_size, 1);  // Correct number of arguments is 1
-
 }
 
 TEST(SystemTest, AddTwoArgsToCommand_ExpectTwoArgsAdded) {
@@ -93,33 +92,39 @@ TEST(SystemTest, AddTwoArgsToCommand_CheckOrder_ExpectOrderCorrect) {
   EXPECT_STREQ(object.argv()[2].c_str(), args[1]);
 }
 
-
-
 TEST(SystemTest, SynchronousInvokeWithExistingCommand_ExpectSuccessfull) {
   const std::string test_command("./testscript.sh");
   System object(test_command);
 
-  // Check if Execute() method is working properly with synchronous command invoke
+  // Check if Execute() method is working properly with synchronous command
+  // invoke
   ASSERT_TRUE(object.Execute(true));
 }
 
-TEST(SystemTest, SynchronousInvokeWithEmptyCommand_IncorrectCommand_ExpectFailed) {
+TEST(SystemTest,
+     SynchronousInvokeWithEmptyCommand_IncorrectCommand_ExpectFailed) {
   const std::string test_command("");  // any incorrect command
   System object(test_command);
 
-  // Check if Execute() method will fail with not correct command (synchronous command invoke)
+  // Check if Execute() method will fail with not correct command (synchronous
+  // command invoke)
   ASSERT_FALSE(object.Execute(true));
 }
 
 TEST(SystemTest, ASynchronousInvokeEmptyCommand_InvokeSuccessfull) {
-  const std::string test_command("");            // Possible to put here any command (existing or incorrect)
-  const std::string test_list_args("anything");  // as command will never be executed from child process
-  System object(test_command, test_list_args);   // as parrent process does not wait for child process to be finished
+  const std::string test_command(
+      "");  // Possible to put here any command (existing or incorrect)
+  const std::string test_list_args(
+      "anything");  // as command will never be executed from child process
+  System object(test_command, test_list_args);  // as parrent process does not
+                                                // wait for child process to be
+                                                // finished
 
-  // Check if Execute() method is working properly with asynchronous command invoke
+  // Check if Execute() method is working properly with asynchronous command
+  // invoke
   ASSERT_TRUE(object.Execute());
 }
 
-} // namespace utils
-} // namespace components
-} // namespace test
+}  // namespace utils_test
+}  // namespace components
+}  // namespace test

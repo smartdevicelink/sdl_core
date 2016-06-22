@@ -35,44 +35,51 @@
 
 #include <string>
 
+#include "utils/json_utils.h"
 #include "utils/macro.h"
-#include "utils/singleton.h"
-#include "json/json.h"
 
 namespace resumption {
 
-class LastState : public utils::Singleton<LastState> {
+class LastState {
  public:
+  /**
+   * @brief Constructor
+   */
+  LastState(const std::string& app_storage_folder,
+            const std::string& app_info_storage);
+
+  /**
+   * @brief Destructor
+   */
+  ~LastState();
+
   /**
    * @brief Saving dictionary to filesystem
    */
   void SaveToFileSystem();
 
   /**
-   * @brief public dictionary
+   * @brief refference to dictionary
    */
-  Json::Value dictionary;
+  utils::json::JsonValue& dictionary();
+
+#ifdef BUILD_TESTS
+  void SetDictionary(utils::json::JsonValue dictionary) {
+    dictionary_ = dictionary;
+  }
+#endif
 
  private:
-
   /**
    * @brief Load dictionary from filesystem
    */
   void LoadFromFileSystem();
 
-  /**
-   * @brief Private default constructor
-   */
-  LastState();
-
-  /**
-   * @brief Private destructor
-   */
-  ~LastState();
+  std::string app_storage_folder_;
+  std::string app_info_storage_;
+  utils::json::JsonValue dictionary_;
 
   DISALLOW_COPY_AND_ASSIGN(LastState);
-
-  FRIEND_BASE_SINGLETON_CLASS(LastState);
 };
 
 }  // namespace resumption

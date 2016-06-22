@@ -35,15 +35,14 @@ namespace application_manager {
 
 namespace commands {
 
-ClosePopupResponse::ClosePopupResponse(const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+ClosePopupResponse::ClosePopupResponse(const MessageSharedPtr& message,
+                                       ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {}
 
-ClosePopupResponse::~ClosePopupResponse() {
-}
+ClosePopupResponse::~ClosePopupResponse() {}
 
 void ClosePopupResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   // TODO(VS): Process response from HMI
 }

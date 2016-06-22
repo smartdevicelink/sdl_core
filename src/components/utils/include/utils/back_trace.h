@@ -61,15 +61,15 @@ class Backtrace {
 
   // Captured symbols in order from topmost stack frame to last captured
   std::vector<std::string> CallStack() const;
-  threads::PlatformThreadHandle ThreadId() const;
+  uint64_t ThreadId() const;
 
  private:
-  threads::PlatformThreadHandle thread_id_;
+  uint64_t thread_id_;
   std::vector<void*> backtrace_;
 };
 
-std::ostream& operator<< (std::ostream& os, const Backtrace& bt);
+std::ostream& operator<<(std::ostream& os, const Backtrace& bt);
 
-} // namespace utils
+}  // namespace utils
 
-#endif // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_BACK_TRACE_H_
+#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_BACK_TRACE_H_

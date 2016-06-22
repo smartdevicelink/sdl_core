@@ -36,11 +36,13 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_SOCKET_CONNECTION_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_SOCKET_CONNECTION_H_
 
+#include <sys/types.h>
+#ifdef OS_POSIX
 #include <arpa/inet.h>
 #include <netinet/in.h>
-#include <sys/types.h>
 #include <sys/socket.h>
-
+#elif defined(OS_WINDOWS)
+#endif
 #include "transport_manager/transport_adapter/threaded_socket_connection.h"
 
 namespace transport_manager {
@@ -77,7 +79,8 @@ class TcpSocketConnection : public ThreadedSocketConnection {
 };
 
 /**
- * @brief Class responsible for communication over sockets that originated by server.
+ * @brief Class responsible for communication over sockets that originated by
+ * server.
  */
 class TcpServerOiginatedSocketConnection : public ThreadedSocketConnection {
  public:
@@ -89,8 +92,8 @@ class TcpServerOiginatedSocketConnection : public ThreadedSocketConnection {
    * @param controller Pointer to the device adapter controller.
    */
   TcpServerOiginatedSocketConnection(const DeviceUID& device_uid,
-                      const ApplicationHandle& app_handle,
-                      TransportAdapterController* controller);
+                                     const ApplicationHandle& app_handle,
+                                     TransportAdapterController* controller);
 
   /**
    * @brief Destructor.

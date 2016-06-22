@@ -30,37 +30,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <pthread.h>
 #include <iostream>
-
-#include "lock.h"
-#include "macro.h"
+#include <pthread.h>
 
 #include "gtest/gtest.h"
+
+#include "utils/lock.h"
+#include "utils/macro.h"
 #include "utils/conditional_variable.h"
 
 namespace test {
 namespace components {
-namespace utils {
+namespace utils_test {
 
 class ConditionalVariableTest : public ::testing::Test {
  public:
-  ConditionalVariableTest()
-      : test_value_("initialized"),
-        counter_(0) {
-  }
+  ConditionalVariableTest() : test_value_("initialized"), counter_(0) {}
   void check_counter();
   void task_one();
 
-  static void* check_counter_helper(void *context) {
-    (reinterpret_cast<ConditionalVariableTest *>(context))->check_counter();
+  static void* check_counter_helper(void* context) {
+    (reinterpret_cast<ConditionalVariableTest*>(context))->check_counter();
     return NULL;
   }
 
-  static void* task_one_helper(void *context) {
-    (reinterpret_cast<ConditionalVariableTest *>(context))->task_one();
+  static void* task_one_helper(void* context) {
+    (reinterpret_cast<ConditionalVariableTest*>(context))->task_one();
     return NULL;
   }
+
  protected:
   std::string test_value_;
   sync_primitives::ConditionalVariable cond_var_;
@@ -73,10 +71,13 @@ void ConditionalVariableTest::check_counter() {
   sync_primitives::AutoLock test_lock(test_mutex_);
   if (counter_ <= 1) {
     counter_++;
-    cond_var_.Wait(test_mutex_);  // Mutex unlock & Thread sleeps until Notification
-  }
-  else if(counter_ == 2) {  // Checking for equal 2 in this specific case. Because we were waiting for 2 threads to be finished
-    cond_var_.Broadcast();  // Notify All threads waiting on conditional variable
+    cond_var_.Wait(
+        test_mutex_);  // Mutex unlock & Thread sleeps until Notification
+  } else if (counter_ == 2) {  // Checking for equal 2 in this specific case.
+                               // Because we were waiting for 2 threads to be
+                               // finished
+    cond_var_
+        .Broadcast();  // Notify All threads waiting on conditional variable
   }
 }
 
@@ -84,18 +85,18 @@ void ConditionalVariableTest::check_counter() {
 void ConditionalVariableTest::task_one() {
   sync_primitives::AutoLock test_lock(test_mutex_);
   test_value_ = "changed by thread 1";
-  cond_var_.NotifyOne();  // Notify At least one thread waiting on conditional variable
+  cond_var_.NotifyOne();  // Notify At least one thread waiting on conditional
+                          // variable
   test_value_ = "changed again by thread 1";
 }
 
-TEST_F(ConditionalVariableTest, CheckNotifyOne_OneThreadNotified_ExpectSuccessful) {
+TEST_F(ConditionalVariableTest,
+       CheckNotifyOne_OneThreadNotified_ExpectSuccessful) {
   pthread_t thread1;
   sync_primitives::AutoLock test_lock(test_mutex_);
   test_value_ = "changed by main thread";
-  const bool thread_created = pthread_create(&thread1,
-      NULL,
-      &ConditionalVariableTest::task_one_helper,
-      this);
+  const bool thread_created = pthread_create(
+      &thread1, NULL, &ConditionalVariableTest::task_one_helper, this);
   ASSERT_FALSE(thread_created) << "thread1 is not created!";
   test_value_ = "changed twice by main thread";
   cond_var_.WaitFor(test_lock, 2000);
@@ -103,30 +104,29 @@ TEST_F(ConditionalVariableTest, CheckNotifyOne_OneThreadNotified_ExpectSuccessfu
   EXPECT_EQ(last_value, test_value_);
 }
 
-TEST_F(ConditionalVariableTest, CheckBroadcast_AllThreadsNotified_ExpectSuccessful) {
+TEST_F(ConditionalVariableTest,
+       CheckBroadcast_AllThreadsNotified_ExpectSuccessful) {
   pthread_t thread1;
   pthread_t thread2;
-  bool thread_created = pthread_create(&thread1,
-      NULL,
-      &ConditionalVariableTest::check_counter_helper,
-      this);
+  bool thread_created = pthread_create(
+      &thread1, NULL, &ConditionalVariableTest::check_counter_helper, this);
   ASSERT_FALSE(thread_created) << "thread1 is not created!";
-  thread_created = pthread_create(&thread2,
-      NULL,
-      &ConditionalVariableTest::check_counter_helper,
-      this);
+  thread_created = pthread_create(
+      &thread2, NULL, &ConditionalVariableTest::check_counter_helper, this);
   ASSERT_FALSE(thread_created) << "thread2 is not created!";
   check_counter();
   EXPECT_EQ(2u, counter_);
 }
 
-TEST_F(ConditionalVariableTest, CheckWaitForWithTimeout1sec_ThreadBlockedForTimeout_ExpectSuccessfulWakeUp) {
+TEST_F(
+    ConditionalVariableTest,
+    CheckWaitForWithTimeout1sec_ThreadBlockedForTimeout_ExpectSuccessfulWakeUp) {
   sync_primitives::AutoLock test_lock(test_mutex_);
-  sync_primitives::ConditionalVariable::WaitStatus wait_st = cond_var_.WaitFor(test_lock, 1000);
+  sync_primitives::ConditionalVariable::WaitStatus wait_st =
+      cond_var_.WaitFor(test_lock, 1000);
   EXPECT_EQ(sync_primitives::ConditionalVariable::kTimeout, wait_st);
 }
 
-}  // namespace utils
+}  // namespace utils_test
 }  // namespace components
 }  // namespace test
-

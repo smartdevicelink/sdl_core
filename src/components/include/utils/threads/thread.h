@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,10 +35,18 @@
 
 #if defined(OS_POSIX)
 #include <pthread.h>
+#elif defined(WIN_NATIVE)
+#include "utils/winhdr.h"
+#elif defined(QT_PORT)
+#include <QtCore>
+#include <QThread>
+#else
+#error "Thread is not defined for this platform"
 #endif
 
 #include <ostream>
 #include <string>
+#include <cstdint>
 
 #include "utils/macro.h"
 #include "utils/threads/thread_delegate.h"
@@ -50,8 +58,13 @@ namespace threads {
 
 #if defined(OS_POSIX)
 typedef pthread_t PlatformThreadHandle;
+#elif defined(WIN_NATIVE)
+typedef HANDLE PlatformThreadHandle;
+const int32_t kThreadCancelledExitCode = -1;
+#elif defined(QT_PORT)
+typedef Qt::HANDLE PlatformThreadHandle;
 #else
-#error Please implement thread for your OS
+#error "Thread is not defined for this platform"
 #endif
 
 /**
@@ -78,11 +91,19 @@ typedef pthread_t PlatformThreadHandle;
 
 class Thread;
 void enqueue_to_join(Thread* thread);
+void sleep(uint32_t ms);
 
 Thread* CreateThread(const char* name, ThreadDelegate* delegate);
 void DeleteThread(Thread* thread);
 
+#if defined(QT_PORT)
+class Thread : public QObject {
+  Q_OBJECT
+ public slots:
+  void ThreadCancelledExit();
+#else
 class Thread {
+#endif
  private:
   const std::string name_;
   // Should be locked to protect delegate_ value
@@ -92,7 +113,7 @@ class Thread {
   ThreadOptions thread_options_;
   // Should be locked to protect isThreadRunning_ and thread_created_ values
   sync_primitives::Lock state_lock_;
-  volatile unsigned int isThreadRunning_;
+  volatile bool isThreadRunning_;
   volatile bool stopped_;
   volatile bool finalized_;
   bool thread_created_;
@@ -100,6 +121,7 @@ class Thread {
   sync_primitives::ConditionalVariable run_cond_;
 
  public:
+  static int count;
   /**
    * @brief Starts the thread.
    * @return true if the thread was successfully started.
@@ -119,12 +141,11 @@ class Thread {
     return delegate_lock_;
   }
 
-  ThreadDelegate *delegate() const {
+  ThreadDelegate* delegate() const {
     return delegate_;
   }
 
-  void set_delegate(ThreadDelegate *delegate) {
-    DCHECK(!isThreadRunning_);
+  void set_delegate(ThreadDelegate* delegate) {
     delegate_ = delegate;
   }
 
@@ -132,12 +153,14 @@ class Thread {
   friend void DeleteThread(Thread* thread);
 
  public:
+  // Yield current thread
+  static void yield();
+
   // Get unique ID of currently executing thread
-  static PlatformThreadHandle CurrentId();
+  static uint64_t CurrentId();
 
   // Give thread thread_id a name, helpful for debugging
-  static void SetNameForId(const PlatformThreadHandle& thread_id,
-                           std::string name);
+  static void SetNameForId(uint64_t thread_id, std::string name);
 
   /**
    * @brief Signals the thread to exit and returns once the thread has exited.
@@ -195,6 +218,12 @@ class Thread {
   }
 
   /**
+   * @brief Checks if invoked in this Thread context
+   * @return True if called from this Thread class, false otherwise
+   */
+  bool IsCurrentThread() const;
+
+  /**
    * @brief Thread options.
    * @return thread options.
    */
@@ -211,17 +240,22 @@ class Thread {
   sync_primitives::ConditionalVariable state_cond_;
 
  private:
-  /**
-   * Ctor.
-   * @param name - display string to identify the thread.
-   * @param delegate - thread procedure delegate. Look for
-   * 'threads/thread_delegate.h' for details.
-   * LifeCycle thread , otherwise it will be joined in stop method
-   * NOTE: delegate will be deleted after thread will be joined
-   *       This constructor made private to prevent
-   *       Thread object to be created on stack
-   */
+/**
+ * Ctor.
+ * @param name - display string to identify the thread.
+ * @param delegate - thread procedure delegate. Look for
+ * 'threads/thread_delegate.h' for details.
+ * LifeCycle thread , otherwise it will be joined in stop method
+ * NOTE: delegate will be deleted after thread will be joined
+ *       This constructor made private to prevent
+ *       Thread object to be created on stack
+ */
+#if defined(QT_PORT)
+  Thread(const char* name, ThreadDelegate* delegate, QObject* parent = 0);
+  QFuture<void> future_;
+#else
   Thread(const char* name, ThreadDelegate* delegate);
+#endif
   virtual ~Thread();
   static void* threadFunc(void* arg);
   static void cleanup(void* arg);

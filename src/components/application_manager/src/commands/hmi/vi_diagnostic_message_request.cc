@@ -36,15 +36,14 @@ namespace application_manager {
 
 namespace commands {
 
-VIDiagnosticMessageRequest::VIDiagnosticMessageRequest(const MessageSharedPtr& message)
-    : RequestToHMI(message) {
-}
+VIDiagnosticMessageRequest::VIDiagnosticMessageRequest(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : RequestToHMI(message, application_manager) {}
 
-VIDiagnosticMessageRequest::~VIDiagnosticMessageRequest() {
-}
+VIDiagnosticMessageRequest::~VIDiagnosticMessageRequest() {}
 
 void VIDiagnosticMessageRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   SendRequest();
 }
@@ -52,4 +51,3 @@ void VIDiagnosticMessageRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

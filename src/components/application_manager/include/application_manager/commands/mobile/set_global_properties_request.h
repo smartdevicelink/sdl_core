@@ -1,6 +1,6 @@
 /*
 
- Copyright (c) 2013, Ford Motor Company
+ Copyright (c) 2015, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -36,6 +36,7 @@
 
 #include "application_manager/commands/command_request_impl.h"
 #include "utils/macro.h"
+#include "application_manager/application.h"
 
 namespace application_manager {
 
@@ -51,7 +52,8 @@ class SetGlobalPropertiesRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit SetGlobalPropertiesRequest(const MessageSharedPtr& message);
+  SetGlobalPropertiesRequest(const MessageSharedPtr& message,
+                             ApplicationManager& application_manager);
 
   /**
    * @brief SetGlobalPropertiesRequest class destructor
@@ -71,21 +73,42 @@ class SetGlobalPropertiesRequest : public CommandRequestImpl {
   void on_event(const event_engine::Event& event);
 
  private:
-  /*
-   * @brief Chec if HelpItems order is correct
-   *
-   * @return TRUE on success, otherwise FALSE
-   */
-  bool CheckVrHelpItemsOrder();
+  // Verify correctness VrHelptitle value
+  static bool ValidateVRHelpTitle(
+      const smart_objects::SmartObject* const vr_help_so_ptr);
 
-  /*
+  // prepare UI sending data (VrHelps, Menus, Keyboard) to SmartObject
+  static void PrepareUIRequestVRHelpData(
+      const ApplicationSharedPtr app,
+      const smart_objects::SmartObject& msg_params,
+      smart_objects::SmartObject& out_params);
+
+  static bool PrepareUIRequestDefaultVRHelpData(
+      const ApplicationSharedPtr app, smart_objects::SmartObject& out_params);
+
+  static void PrepareUIRequestMenuAndKeyboardData(
+      const ApplicationSharedPtr app,
+      const smart_objects::SmartObject& msg_params,
+      smart_objects::SmartObject& out_params);
+
+  // Send TTS request to HMI
+  void SendTTSRequest(const smart_objects::SmartObject& params,
+                      bool use_events);
+
+  // Send UI request to HMI
+  void SendUIRequest(const smart_objects::SmartObject& params, bool use_events);
+
+  // VRHelp shall contain sequential positions and start from 1
+  static bool CheckVrHelpItemsOrder(const smart_objects::SmartObject& vr_help);
+
+  /**
    * @brief Check if there some not delivered hmi responses exist
    *
    * @return true if all responses received
    */
   bool IsPendingResponseExist();
 
-  /*
+  /**
    * @brief Checks if request has at least one parameter
    *
    * @param params request parameters

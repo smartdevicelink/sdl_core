@@ -35,14 +35,12 @@
 
 namespace test {
 namespace components {
-namespace SmartObjects {
-namespace SmartObjectUnitTest {
+namespace smart_object_test {
 
 using namespace NsSmartDeviceLink::NsSmartObjects;
 
 class TestHelper : public ::testing::Test {
  protected:
-
   void makeMapObject(SmartObject& obj, const int size) const {
     char i_key[8], j_key[8], k_key[8], value[8];
 
@@ -68,51 +66,54 @@ class TestHelper : public ::testing::Test {
           sprintf(k_key, "k_%d", k);
           sprintf(value, "%d", i + j + k);
 
-          ASSERT_EQ(std::string(value), obj[i_key][j_key][k_key].asString())<<
-          "Wrong value in the map at [" << i_key << "][" << j_key << "][" << k_key << "]";
+          ASSERT_EQ(std::string(value), obj[i_key][j_key][k_key].asString())
+              << "Wrong value in the map at [" << i_key << "][" << j_key << "]["
+              << k_key << "]";
         }
-      }
+  }
 
-      void makeArrayObject(SmartObject& obj, int size, int base = 0) {
-        for (int i = 0; i < size; i++)
-        for (int j = 0; j < size; j++)
+  void makeArrayObject(SmartObject& obj, int size, int base = 0) {
+    for (int i = 0; i < size; i++)
+      for (int j = 0; j < size; j++)
         for (int k = 0; k < size; k++) {
           obj[i][j][k] = base + i + j + k;
         }
-      }
+  }
 
-      void checkArrayObject(SmartObject& obj, int size, int base = 0) {
-        for (int i = 0; i < size; i++)
-        for (int j = 0; j < size; j++)
+  void checkArrayObject(SmartObject& obj, int size, int base = 0) {
+    for (int i = 0; i < size; i++)
+      for (int j = 0; j < size; j++)
         for (int k = 0; k < size; k++) {
-          ASSERT_EQ(base + i + j + k, obj[i][j][k].asInt()) <<
-          "Wrong value in the array at index: " << i << ", " << j << ", " << k;
+          ASSERT_EQ(base + i + j + k, obj[i][j][k].asInt())
+              << "Wrong value in the array at index: " << i << ", " << j << ", "
+              << k;
         }
-      }
-    };
+  }
+};
 
-    /*
-     * Tests different types sequentially
-     */
+/*
+ * Tests different types sequentially
+ */
 TEST(BasicMixtedTypes, test_SmartObjectUnitTest) {
   SmartObject obj;
 
-  ASSERT_EQ(invalid_int_value, obj.asInt())<< "Wrong cast to int just after construction";
+  ASSERT_EQ(invalid_int_value, obj.asInt())
+      << "Wrong cast to int just after construction";
 
   obj = 10;
-  ASSERT_EQ(10, obj.asInt())<< "Wrong cast to int";
+  ASSERT_EQ(10, obj.asInt()) << "Wrong cast to int";
 
   obj = "some string";
-  ASSERT_EQ("some string", obj.asString())<< "Wrong cast to std::string";
+  ASSERT_EQ("some string", obj.asString()) << "Wrong cast to std::string";
 
   obj = false;
-  ASSERT_FALSE(obj.asBool())<< "Wrong cast to bool";
+  ASSERT_FALSE(obj.asBool()) << "Wrong cast to bool";
 
   obj = 'A';
-  ASSERT_EQ('A', obj.asChar())<< "Wrong cast to char";
+  ASSERT_EQ('A', obj.asChar()) << "Wrong cast to char";
 
   obj = 3.14;
-  ASSERT_EQ(3.14, obj.asDouble())<< "Wrong cast to double";
+  ASSERT_EQ(3.14, obj.asDouble()) << "Wrong cast to double";
 
   // array test
   for (int i = 0; i < 100; i++) {
@@ -132,23 +133,23 @@ TEST(BasicMixtedTypes, test_SmartObjectUnitTest) {
 TEST_F(TestHelper, BasicArrayTest) {
   SmartObject obj;
 
-  ASSERT_EQ(invalid_int_value,
-      obj[0].asInt())<< "Wrong value at accessing non existent index";
-  ASSERT_EQ(invalid_int_value,
-      obj["non_existent_key"].asInt())<< "Wrong value at accessing non existent key";
+  ASSERT_EQ(invalid_int_value, obj[0].asInt())
+      << "Wrong value at accessing non existent index";
+  ASSERT_EQ(invalid_int_value, obj["non_existent_key"].asInt())
+      << "Wrong value at accessing non existent key";
 
   obj[0] = 1;
-  ASSERT_EQ(1, obj[0].asInt())<< "Wrong value at 0 index";
+  ASSERT_EQ(1, obj[0].asInt()) << "Wrong value at 0 index";
   obj[1] = 2;
-  ASSERT_EQ(2, obj[1].asInt())<< "Wrong value at 1 index";
+  ASSERT_EQ(2, obj[1].asInt()) << "Wrong value at 1 index";
 
   obj[0][0] = 3;
   obj[1][0] = 1;
-  ASSERT_EQ(3, obj[0][0].asInt())<< "Wrong value at index 0, 0";
+  ASSERT_EQ(3, obj[0][0].asInt()) << "Wrong value at index 0, 0";
 
   obj[0][0][0] = 4;
   obj[0][1][0] = 5;
-  ASSERT_EQ(4, obj[0][0][0].asInt())<< "Wrong value at index 0, 0, 0";
+  ASSERT_EQ(4, obj[0][0][0].asInt()) << "Wrong value at index 0, 0, 0";
 
   const int size = 32;
   makeArrayObject(obj, size);
@@ -159,16 +160,17 @@ TEST_F(TestHelper, BasicArrayTest) {
 TEST_F(TestHelper, BasicMapTest) {
   SmartObject obj;
 
-  ASSERT_EQ(invalid_int_value,
-      obj["non_existent_key"].asInt())<< "Wrong value for non existent key";
+  ASSERT_EQ(invalid_int_value, obj["non_existent_key"].asInt())
+      << "Wrong value for non existent key";
 
   obj["abc"]["def"]["ghi"] = 5;
-  ASSERT_EQ(5, obj["abc"]["def"]["ghi"].asInt())<< "Wrong value for triple map";
+  ASSERT_EQ(5, obj["abc"]["def"]["ghi"].asInt())
+      << "Wrong value for triple map";
 
   obj["123"]["456"]["789"] = "string test";
 
-  ASSERT_EQ("string test", obj["123"]["456"]["789"].asString())<<
-  "Wrong value for triple map";
+  ASSERT_EQ("string test", obj["123"]["456"]["789"].asString())
+      << "Wrong value for triple map";
 
   const int size = 32;
 
@@ -179,33 +181,36 @@ TEST_F(TestHelper, BasicMapTest) {
 
 TEST(ConstructorsTest, test_SmartObjectUnitTest) {
   SmartObject objInt(5678);
-  ASSERT_EQ(5678, objInt.asInt())<< "Wrong constructor with int param";
+  ASSERT_EQ(5678, objInt.asInt()) << "Wrong constructor with int param";
 
   const char* c_str = "test c_string";
   SmartObject obj_c_str(c_str);
-  ASSERT_EQ("test c_string", obj_c_str.asString())<< "Wrong constructor with c_str param";
+  ASSERT_EQ("test c_string", obj_c_str.asString())
+      << "Wrong constructor with c_str param";
 
   SmartObject obj_std_str(std::string("test std_string"));
   ASSERT_EQ(std::string("test std_string"), obj_std_str.asString());
 
   SmartObject obj_char('R');
-  ASSERT_EQ('R', obj_char.asChar())<< "Wrong constructor with char param";
+  ASSERT_EQ('R', obj_char.asChar()) << "Wrong constructor with char param";
 
   SmartObject obj_double(-0.4321);
-  ASSERT_EQ(-0.4321, obj_double.asDouble())<< "Wrong constructor with double param";
+  ASSERT_EQ(-0.4321, obj_double.asDouble())
+      << "Wrong constructor with double param";
 
   SmartObject obj_bool(true);
-  ASSERT_TRUE(obj_bool.asBool())<< "Wrong constructor with bool param";
+  ASSERT_TRUE(obj_bool.asBool()) << "Wrong constructor with bool param";
 
   SmartObject src_obj;
 
-  src_obj["key_1"] = "value_1";     // FIXME: String assignment crashes test
+  src_obj["key_1"] = "value_1";  // FIXME: String assignment crashes test
   src_obj["key_2"]["sub_key_1"] = "value_2";
 
   SmartObject dst_obj(src_obj);
-  ASSERT_EQ("value_1", dst_obj["key_1"].asString())<< "Copy constructor is not correct";
-  ASSERT_EQ("value_2", dst_obj["key_2"]["sub_key_1"].asString())<<
-  "Copy constructor is not correct";
+  ASSERT_EQ("value_1", dst_obj["key_1"].asString())
+      << "Copy constructor is not correct";
+  ASSERT_EQ("value_2", dst_obj["key_2"]["sub_key_1"].asString())
+      << "Copy constructor is not correct";
 }
 
 TEST(FromString, TypeConversion) {
@@ -379,7 +384,7 @@ TEST(FromDouble, TypeConversion) {
   SmartObject obj;
 
   obj = 0.1;
-  ASSERT_EQ("0.1", obj.asString());        // FIXME: result 0.100000
+  ASSERT_EQ("0.1", obj.asString());  // FIXME: result 0.100000
   ASSERT_EQ(0, obj.asInt());
   ASSERT_EQ(invalid_char_value, obj.asChar());
   ASSERT_EQ(0.1, obj.asDouble());
@@ -438,23 +443,23 @@ TEST_F(TestHelper, AssignmentTest) {
   objSrc = -6;
   objDst = 7;
   objDst = objSrc;
-  ASSERT_EQ(-6, objDst.asInt())<< "Wrong assignment for int object";
+  ASSERT_EQ(-6, objDst.asInt()) << "Wrong assignment for int object";
 
   objSrc = "Some test string";
   objDst = "Other string";
   objDst = objSrc;
-  ASSERT_EQ("Some test string",
-      objDst.asString())<< "Wrong assignment for std::string object";
+  ASSERT_EQ("Some test string", objDst.asString())
+      << "Wrong assignment for std::string object";
 
   objSrc = 0.5;
   objDst = 4;
   objDst = objSrc;
-  ASSERT_EQ(0.5, objDst.asDouble())<< "Wrong assignment for double object";
+  ASSERT_EQ(0.5, objDst.asDouble()) << "Wrong assignment for double object";
 
   objSrc = true;
   objDst = false;
   objDst = objSrc;
-  ASSERT_TRUE(objDst.asBool())<< "Wrong assignment for bool object";
+  ASSERT_TRUE(objDst.asBool()) << "Wrong assignment for bool object";
 
   const int size = 32;
   makeMapObject(objSrc, size);
@@ -471,30 +476,30 @@ TEST_F(TestHelper, AssignmentTest) {
 TEST_F(TestHelper, SizeTest) {
   SmartObject obj;
 
-  ASSERT_EQ(0u, obj.length())<< "Wrong size for the uninitialized object";
+  ASSERT_EQ(0u, obj.length()) << "Wrong size for the uninitialized object";
 
   obj = 1234;
-  ASSERT_EQ(0u, obj.length())<< "Wrong size for the int object";
+  ASSERT_EQ(0u, obj.length()) << "Wrong size for the int object";
 
   std::string str("Some test very long string");
   obj = str;
-  ASSERT_EQ(str.size(), obj.length())<<
-  "The size of the object containing string is not correct";
+  ASSERT_EQ(str.size(), obj.length())
+      << "The size of the object containing string is not correct";
 
   obj = true;
-  ASSERT_EQ(0u, obj.length())<< "Wrong size of the true";
+  ASSERT_EQ(0u, obj.length()) << "Wrong size of the true";
 
   obj = 0.1234;
-  ASSERT_EQ(0u, obj.length())<< "Wrong size of the double";
+  ASSERT_EQ(0u, obj.length()) << "Wrong size of the double";
 
   obj = 'A';
-  ASSERT_EQ(0u, obj.length())<< "Wrong size of the char";
+  ASSERT_EQ(0u, obj.length()) << "Wrong size of the char";
 
   makeMapObject(obj, 12);
-  ASSERT_EQ(12u, obj.length())<< "Wrong size of the object containing map";
+  ASSERT_EQ(12u, obj.length()) << "Wrong size of the object containing map";
 
   makeArrayObject(obj, 21);
-  ASSERT_EQ(21u, obj.length())<< "Wrong size of the object containing array";
+  ASSERT_EQ(21u, obj.length()) << "Wrong size of the object containing array";
 }
 
 TEST(CopyObjectsTest, SmartObjectTest) {
@@ -537,7 +542,8 @@ TEST(MapEraseTest, SmartObjectTest) {
 
   ASSERT_EQ(2u, srcObj.length());
   ASSERT_EQ(-1, srcObj["two"].asInt());
-  // The element "two" was accessed in the previous line so the element has been created
+  // The element "two" was accessed in the previous line so the element has been
+  // created
   ASSERT_EQ(3u, srcObj.length());
 
   srcObj["two"] = 2;
@@ -574,11 +580,11 @@ TEST(MapEraseTest, SmartObjectTest) {
   ASSERT_TRUE(srcObj["one"].erase("two"));
   ASSERT_EQ(0u, srcObj["one"].length());
 
-  srcObj = 1234;       // not a map
+  srcObj = 1234;  // not a map
   ASSERT_FALSE(srcObj.erase("one"));
 }
 // TODO: Add a test to check accessing an array at strange indexes.
-}// namespace SmartObjectUnitTest
-}  // namespace SmartObjects
+
+}  // namespace smart_object_test
 }  // namespace components
 }  // namespace test

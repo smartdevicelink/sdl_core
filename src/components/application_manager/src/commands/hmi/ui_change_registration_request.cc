@@ -37,15 +37,13 @@ namespace application_manager {
 namespace commands {
 
 UIChangeRegistrationRequest::UIChangeRegistrationRequest(
-    const MessageSharedPtr& message)
-    : RequestToHMI(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : RequestToHMI(message, application_manager) {}
 
-UIChangeRegistrationRequest::~UIChangeRegistrationRequest() {
-}
+UIChangeRegistrationRequest::~UIChangeRegistrationRequest() {}
 
 void UIChangeRegistrationRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   SendRequest();
 }
@@ -53,4 +51,3 @@ void UIChangeRegistrationRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

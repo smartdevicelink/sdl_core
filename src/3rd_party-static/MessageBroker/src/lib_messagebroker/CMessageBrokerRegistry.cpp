@@ -184,7 +184,7 @@ namespace NsMessageBroker
          }
       }
 
-      res = result.size();
+      res = static_cast<int>(result.size());
       DBG_MSG(("Result vector size: %d\n", res));
       return res;
    }

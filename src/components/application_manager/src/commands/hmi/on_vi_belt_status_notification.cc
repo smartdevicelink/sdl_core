@@ -38,15 +38,13 @@ namespace application_manager {
 namespace commands {
 
 OnVIBeltStatusNotification::OnVIBeltStatusNotification(
-    const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : NotificationFromHMI(message, application_manager) {}
 
-OnVIBeltStatusNotification::~OnVIBeltStatusNotification() {
-}
+OnVIBeltStatusNotification::~OnVIBeltStatusNotification() {}
 
 void OnVIBeltStatusNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   // prepare SmartObject for mobile factory
   (*message_)[strings::params][strings::function_id] =
@@ -58,4 +56,3 @@ void OnVIBeltStatusNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

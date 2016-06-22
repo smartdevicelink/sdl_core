@@ -35,26 +35,21 @@
 #include "gtest/gtest.h"
 
 #include "application_manager/usage_statistics.h"
-#include "include/application_mock.h"
-#include "include/resumption_data_mock.h"
-
-#include "application_manager/application_manager_impl.h"
+#include "application_manager/mock_resumption_data.h"
+#include "utils/custom_string.h"
 #include "application_manager/application.h"
 #include "utils/data_accessor.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/resumption_data_test.h"
 
-#include "include/resumption_data_test.h"
-
-std::string application_manager::MessageHelper::GetDeviceMacAddressForHandle(
-    const uint32_t device_handle) {
-  std::string device_mac_address = "12345";
-  return device_mac_address;
-}
+#if defined(_MSC_VER)
+#define snprintf _snprintf_s
+#endif
 
 namespace test {
 namespace components {
 namespace resumption_test {
-
+namespace custom_str = utils::custom_string;
 using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::ReturnPointee;
@@ -66,8 +61,9 @@ void ResumptionDataTest::CheckSavedApp(sm::SmartObject& resume_app_list) {
   EXPECT_EQ(hmi_app_id_, resume_app_list[am::strings::hmi_app_id].asUInt());
   EXPECT_EQ(ign_off_count_,
             resume_app_list[am::strings::ign_off_count].asUInt());
-  EXPECT_EQ(hmi_level_, static_cast<HMILevel::eType>(
-                            resume_app_list[am::strings::hmi_level].asInt()));
+  EXPECT_EQ(hmi_level_,
+            static_cast<HMILevel::eType>(
+                resume_app_list[am::strings::hmi_level].asInt()));
   EXPECT_EQ(is_audio_,
             resume_app_list[am::strings::is_media_application].asBool());
   EXPECT_EQ("12345", resume_app_list[am::strings::device_id].asString());
@@ -83,7 +79,7 @@ void ResumptionDataTest::CheckSavedApp(sm::SmartObject& resume_app_list) {
 }
 
 void ResumptionDataTest::CheckCommands(sm::SmartObject& res_list) {
-  for (uint32_t i = 0; i < count_of_commands; ++i) {
+  for (uint32_t i = 0; i < kCountOfCommands_; ++i) {
     EXPECT_EQ(i, res_list[i][am::strings::cmd_id].asUInt());
     std::string name =
         (*test_commands_map[i])[am::strings::menu_params]
@@ -118,7 +114,7 @@ void ResumptionDataTest::CheckCommands(sm::SmartObject& res_list) {
         icon_type,
         res_list[i][am::strings::cmd_icon][am::strings::image_type].asInt());
 
-    for (uint32_t j = 0; j < count_of_choice; ++j) {
+    for (uint32_t j = 0; j < kCountOfChoice_; ++j) {
       std::string vr =
           (*test_commands_map[i])[am::strings::vr_commands][j].asString();
       EXPECT_EQ(vr, res_list[i][am::strings::vr_commands][j].asString());
@@ -127,7 +123,7 @@ void ResumptionDataTest::CheckCommands(sm::SmartObject& res_list) {
 }
 
 void ResumptionDataTest::CheckSubmenues(sm::SmartObject& res_list) {
-  for (uint32_t i = 0; i < count_of_submenues; ++i) {
+  for (uint32_t i = 0; i < kCountOfSubmenues_; ++i) {
     uint32_t test_id =
         (*test_submenu_map[i + 10])[am::strings::menu_id].asUInt();
     std::string name =
@@ -155,7 +151,7 @@ void ResumptionDataTest::CheckChoiceSet(sm::SmartObject& res_list) {
       sm::SmartObject command = res_list[i][am::strings::choice_set][j];
       EXPECT_EQ(i + j, command[am::strings::choice_id].asUInt());
       char numb[12];
-      std::snprintf(numb, 12, "%d", i + j);
+      snprintf(numb, 12, "%d", i + j);
       std::string test_choice =
           (*test_choiceset_map[i])[am::strings::choice_set][j]
                                   [am::strings::vr_commands][0].asString();
@@ -214,10 +210,9 @@ void ResumptionDataTest::CheckChoiceSet(sm::SmartObject& res_list) {
 
 void ResumptionDataTest::CheckAppFiles(sm::SmartObject& res_list) {
   am::AppFile check_file;
-
-  for (uint i = 0; i < count_of_files; ++i) {
+  for (size_t i = 0; i < kCountOfFiles_; ++i) {
     char numb[12];
-    std::snprintf(numb, 12, "%d", i);
+    snprintf(numb, 12, "%lu", i);
     check_file = app_files_map_["test_file " + std::string(numb)];
     EXPECT_EQ(check_file.file_name,
               res_list[i][am::strings::sync_file_name].asString());
@@ -252,7 +247,7 @@ void ResumptionDataTest::CheckKeyboardProperties(sm::SmartObject& res_list) {
   std::string auto_complete_text =
       (*keyboard_props_)[am::strings::auto_complete_text].asString();
 
-  for (uint i = 0;
+  for (size_t i = 0;
        i < (*keyboard_props_)[am::strings::limited_character_list].length();
        i++) {
     std::string character =
@@ -261,13 +256,15 @@ void ResumptionDataTest::CheckKeyboardProperties(sm::SmartObject& res_list) {
               res_list[am::strings::limited_character_list][i].asString());
   }
 
-  EXPECT_EQ(testlanguage, static_cast<Language::eType>(
-                              res_list[am::strings::language].asInt()));
+  EXPECT_EQ(
+      testlanguage,
+      static_cast<Language::eType>(res_list[am::strings::language].asInt()));
   EXPECT_EQ(testlayout,
             static_cast<KeyboardLayout::eType>(
                 res_list[am::hmi_request::keyboard_layout].asInt()));
-  EXPECT_EQ(testmode, static_cast<KeypressMode::eType>(
-                          res_list[am::strings::key_press_mode].asInt()));
+  EXPECT_EQ(testmode,
+            static_cast<KeypressMode::eType>(
+                res_list[am::strings::key_press_mode].asInt()));
   EXPECT_EQ(auto_complete_text,
             res_list[am::strings::auto_complete_text].asString());
 }
@@ -283,12 +280,13 @@ void ResumptionDataTest::CheckMenuIcon(sm::SmartObject& res_list) {
       (*menu_icon_)[am::strings::image_type].asInt());
 
   EXPECT_EQ(value, res_list[am::strings::value].asString());
-  EXPECT_EQ(type, static_cast<ImageType::eType>(
-                      res_list[am::strings::image_type].asInt()));
+  EXPECT_EQ(
+      type,
+      static_cast<ImageType::eType>(res_list[am::strings::image_type].asInt()));
 }
 
 void ResumptionDataTest::CheckHelpPrompt(sm::SmartObject& res_list) {
-  for (uint i = 0; i < tts_chunks_count; ++i) {
+  for (size_t i = 0; i < tts_chunks_count; ++i) {
     std::string promt = (*help_prompt_)[i][am::strings::help_prompt].asString();
     std::string dict_promt = res_list[i][am::strings::help_prompt].asString();
     EXPECT_EQ(promt, dict_promt);
@@ -297,20 +295,21 @@ void ResumptionDataTest::CheckHelpPrompt(sm::SmartObject& res_list) {
 
 void ResumptionDataTest::CheckTimeoutPrompt(
     NsSmartDeviceLink::NsSmartObjects::SmartObject& res_list) {
-  for (uint i = 0; i < tts_chunks_count; ++i) {
+  for (size_t i = 0; i < tts_chunks_count; ++i) {
     std::string text = (*timeout_prompt_)[i][am::strings::text].asString();
     SpeechCapabilities::eType speech = static_cast<SpeechCapabilities::eType>(
         (*timeout_prompt_)[i][am::strings::type].asInt());
     EXPECT_EQ(text, res_list[i][am::strings::text].asString());
-    EXPECT_EQ(speech, static_cast<SpeechCapabilities::eType>(
-                          res_list[i][am::strings::type].asInt()));
+    EXPECT_EQ(speech,
+              static_cast<SpeechCapabilities::eType>(
+                  res_list[i][am::strings::type].asInt()));
   }
 }
 
 void ResumptionDataTest::CheckVRHelp(sm::SmartObject& res_list) {
   std::string text;
   int position;
-  for (uint i = 0; i < count_of_vrhelptitle; ++i) {
+  for (size_t i = 0; i < kCountOfVrhelptitle_; ++i) {
     text = (*vr_help_)[i][am::strings::text].asString();
     EXPECT_EQ(text, res_list[i][am::strings::text].asString());
     position = (*vr_help_)[i][am::strings::position].asInt();
@@ -342,6 +341,7 @@ void ResumptionDataTest::PrepareData() {
   ON_CALL(*app_mock, is_application_data_changed()).WillByDefault(Return(true));
 
   ON_CALL(*app_mock, policy_app_id()).WillByDefault(Return(policy_app_id_));
+  ON_CALL(*app_mock, mac_address()).WillByDefault(ReturnRef(kMacAddress_));
   ON_CALL(*app_mock, curHash()).WillByDefault(ReturnRef(hash_));
   ON_CALL(*app_mock, get_grammar_id()).WillByDefault(Return(grammar_id_));
   ON_CALL(*app_mock, device()).WillByDefault(Return(device_handle_));
@@ -379,6 +379,7 @@ void ResumptionDataTest::SetGlobalProporties() {
 }
 
 void ResumptionDataTest::SetMenuTitleAndIcon() {
+  custom_str::CustomString icon_name("test icon");
   sm::SmartObject sm_icon;
   sm_icon[am::strings::value] = "test icon";
   sm_icon[am::strings::image_type] = ImageType::STATIC;
@@ -393,16 +394,16 @@ void ResumptionDataTest::SetHelpAndTimeoutPrompt() {
   sm::SmartObject help_prompt;
   sm::SmartObject timeout_prompt;
 
-  for (uint i = 0; i < tts_chunks_count + 3; ++i) {
+  for (size_t i = 0; i < tts_chunks_count + 3; ++i) {
     char numb[12];
-    std::snprintf(numb, 12, "%d", i);
+    snprintf(numb, 12, "%lu", i);
     help_prompt[i][am::strings::text] = "help prompt name" + std::string(numb);
     help_prompt[i][am::strings::type] = SpeechCapabilities::PRE_RECORDED;
   }
   help_prompt_ = new sm::SmartObject(help_prompt);
-  for (uint i = 0; i < tts_chunks_count; ++i) {
+  for (size_t i = 0; i < tts_chunks_count; ++i) {
     char numb[12];
-    std::snprintf(numb, 12, "%d", i);
+    snprintf(numb, 12, "%lu", i);
     timeout_prompt[i][am::strings::text] = "timeout test" + std::string(numb);
     timeout_prompt[i][am::strings::type] = SpeechCapabilities::SC_TEXT;
   }
@@ -415,9 +416,9 @@ void ResumptionDataTest::SetVRHelpTitle() {
   vr_help_title = "vr help title";
 
   sm::SmartObject vr_help;
-  for (uint i = 0; i < count_of_vrhelptitle; ++i) {
+  for (size_t i = 0; i < kCountOfVrhelptitle_; ++i) {
     char numb[12];
-    std::snprintf(numb, 12, "%d", i);
+    snprintf(numb, 12, "%lu", i);
     vr_help[i][am::strings::text] = "vr help " + std::string(numb);
     vr_help[i][am::strings::position] = i;
   }
@@ -431,18 +432,18 @@ void ResumptionDataTest::SetCommands() {
 
   sm::SmartObject vr_commandsvector;
   sm::SmartObject sm_icon;
-  for (uint32_t i = 0; i < count_of_commands; ++i) {
+  for (uint32_t i = 0; i < kCountOfCommands_; ++i) {
     char numb[12];
-    std::snprintf(numb, 12, "%d", i);
+    snprintf(numb, 12, "%d", i);
     sm_comm[am::strings::cmd_id] = i;
     sm_comm[am::strings::menu_params][am::strings::position] = i;
     sm_comm[am::strings::menu_params][am::hmi_request::parent_id] = i;
     sm_comm[am::strings::menu_params][am::strings::menu_name] =
         "Command" + std::string(numb);
 
-    for (uint32_t j = 0; j < count_of_choice; ++j) {
+    for (size_t j = 0; j < kCountOfChoice_; ++j) {
       char vr[12];
-      std::snprintf(vr, 12, "%d", i + j);
+      snprintf(numb, 12, "%lu", i + j);
       vr_commandsvector[j] = "VrCommand " + std::string(vr);
     }
     sm_comm[am::strings::vr_commands] = vr_commandsvector;
@@ -458,9 +459,9 @@ void ResumptionDataTest::SetCommands() {
 
 void ResumptionDataTest::SetSubmenues() {
   sm::SmartObject sm_comm;
-  for (uint32_t i = 10; i < count_of_submenues + 10; ++i) {
+  for (size_t i = 10; i < kCountOfSubmenues_ + 10; ++i) {
     char numb[12];
-    std::snprintf(numb, 12, "%d", i);
+    snprintf(numb, 12, "%lu", i);
     sm_comm[am::strings::menu_id] = i;
     sm_comm[am::strings::position] = i;
     sm_comm[am::strings::menu_name] = "SubMenu" + std::string(numb);
@@ -476,10 +477,10 @@ void ResumptionDataTest::SetChoiceSet() {
   sm::SmartObject sec_icon;
   sm::SmartObject app_choice_set;
   sm::SmartObject application_choice_sets;
-  for (uint32_t i = 0; i < count_of_choice_sets; ++i) {
-    for (uint32_t j = 0; j < count_of_choice; ++j) {
+  for (size_t i = 0; i < kCountOfChoiceSets_; ++i) {
+    for (size_t j = 0; j < kCountOfChoice_; ++j) {
       char numb[12];
-      std::snprintf(numb, 12, "%d", i + j);
+      snprintf(numb, 12, "%lu", i + j);
 
       choice[am::strings::choice_id] = i + j;
       vr_commandsvector[0] = "ChoiceSet VrCommand " + std::string(numb);
@@ -513,9 +514,9 @@ void ResumptionDataTest::SetChoiceSet() {
 void ResumptionDataTest::SetAppFiles() {
   am::AppFile test_file;
   int file_types;
-  for (uint i = 0; i < count_of_files; ++i) {
+  for (size_t i = 0; i < kCountOfFiles_; ++i) {
     char numb[12];
-    std::snprintf(numb, 12, "%d", i);
+    snprintf(numb, 12, "%lu", i);
     file_types = i;
     test_file.is_persistent = true;
     test_file.is_download_complete = true;

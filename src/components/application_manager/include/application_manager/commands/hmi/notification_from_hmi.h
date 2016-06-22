@@ -50,14 +50,16 @@ namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 class NotificationFromHMI : public CommandImpl {
  public:
-  explicit NotificationFromHMI(const MessageSharedPtr& message);
+  NotificationFromHMI(const MessageSharedPtr& message,
+                      ApplicationManager& application_manager);
   virtual ~NotificationFromHMI();
   virtual bool Init();
   virtual bool CleanUp();
   virtual void Run();
   void SendNotificationToMobile(const MessageSharedPtr& message);
   void CreateHMIRequest(const hmi_apis::FunctionID::eType& function_id,
-                          const smart_objects::SmartObject& msg_params) const;
+                        const smart_objects::SmartObject& msg_params) const;
+
  private:
   DISALLOW_COPY_AND_ASSIGN(NotificationFromHMI);
 };

@@ -38,15 +38,13 @@ namespace application_manager {
 namespace commands {
 
 OnVIPrndlNotification::OnVIPrndlNotification(
-    const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : NotificationFromHMI(message, application_manager) {}
 
-OnVIPrndlNotification::~OnVIPrndlNotification() {
-}
+OnVIPrndlNotification::~OnVIPrndlNotification() {}
 
 void OnVIPrndlNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   // prepare SmartObject for mobile factory
   (*message_)[strings::params][strings::function_id] =
@@ -58,4 +56,3 @@ void OnVIPrndlNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

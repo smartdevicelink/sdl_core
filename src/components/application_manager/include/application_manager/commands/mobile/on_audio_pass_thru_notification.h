@@ -31,8 +31,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_AUDIO_PASS_THRU_NOTIFICATION_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_AUDIO_PASS_THRU_NOTIFICATION_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_ON_AUDIO_PASS_THRU_NOTIFICATION_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_ON_AUDIO_PASS_THRU_NOTIFICATION_H_
 
 #include "application_manager/commands/command_notification_impl.h"
 #include "utils/macro.h"
@@ -42,7 +42,8 @@ namespace application_manager {
 namespace commands {
 
 /**
- * @brief OnAudioPassThruNotification class used to send notification with binary data written from
+ * @brief OnAudioPassThruNotification class used to send notification with
+ *binary data written from
  * microphone to mobile device while PerformAudioPassThru is active.
  **/
 class OnAudioPassThruNotification : public CommandNotificationImpl {
@@ -52,7 +53,8 @@ class OnAudioPassThruNotification : public CommandNotificationImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnAudioPassThruNotification(const MessageSharedPtr& message);
+  OnAudioPassThruNotification(const MessageSharedPtr& message,
+                              ApplicationManager& application_manager);
 
   /**
    * @brief OnAudioPassThruNotification class destructor
@@ -71,4 +73,4 @@ class OnAudioPassThruNotification : public CommandNotificationImpl {
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_AUDIO_PASS_THRU_NOTIFICATION_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_ON_AUDIO_PASS_THRU_NOTIFICATION_H_

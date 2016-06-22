@@ -38,16 +38,9 @@
 
 namespace usage_statistics {
 
-enum GlobalCounterId {
-  IAP_BUFFER_FULL,
-  SYNC_OUT_OF_MEMORY,
-  SYNC_REBOOTS
-};
+enum GlobalCounterId { IAP_BUFFER_FULL, SYNC_OUT_OF_MEMORY, SYNC_REBOOTS };
 
-enum AppInfoId {
-  LANGUAGE_GUI,
-  LANGUAGE_VUI
-};
+enum AppInfoId { LANGUAGE_GUI, LANGUAGE_VUI };
 
 enum AppStopwatchId {
   SECONDS_HMI_FULL,
@@ -64,7 +57,8 @@ enum AppCounterId {
   REJECTED_RPC_CALLS,
   RPCS_IN_HMI_NONE,
   REMOVALS_MISBEHAVED,
-  RUN_ATTEMPTS_WHILE_REVOKED
+  RUN_ATTEMPTS_WHILE_REVOKED,
+  COUNT_OF_TLS_ERRORS,
 };
 
 class StatisticsManager {
@@ -72,7 +66,8 @@ class StatisticsManager {
   virtual ~StatisticsManager() {}
   virtual void Increment(GlobalCounterId type) = 0;
   virtual void Increment(const std::string& app_id, AppCounterId type) = 0;
-  virtual void Set(const std::string& app_id, AppInfoId type,
+  virtual void Set(const std::string& app_id,
+                   AppInfoId type,
                    const std::string& value) = 0;
   virtual void Add(const std::string& app_id,
                    AppStopwatchId type,

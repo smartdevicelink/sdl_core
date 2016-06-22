@@ -38,15 +38,13 @@ namespace application_manager {
 namespace commands {
 
 OnUICommandNotification::OnUICommandNotification(
-    const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : NotificationFromHMI(message, application_manager) {}
 
-OnUICommandNotification::~OnUICommandNotification() {
-}
+OnUICommandNotification::~OnUICommandNotification() {}
 
 void OnUICommandNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   (*message_)[strings::params][strings::function_id] =
       static_cast<int32_t>(mobile_apis::FunctionID::eType::OnCommandID);
@@ -59,4 +57,3 @@ void OnUICommandNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

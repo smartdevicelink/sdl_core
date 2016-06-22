@@ -1,4 +1,4 @@
-# Copyright (c) 2015, Ford Motor Company
+# Copyright (c) 2014, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -30,19 +30,21 @@
 
 
 include_directories (
-  include
+  ${COMPONENTS_DIR}/resumption/include
   ${COMPONENTS_DIR}/utils/include/
   ${COMPONENTS_DIR}/config_profile/include/
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${LOG4CXX_INCLUDE_DIRECTORY}
 )
-
+set (HEADERS
+  ${COMPONENTS_DIR}/resumption/include/resumption/last_state.h
+)
 set (SOURCES
   ${COMPONENTS_DIR}/resumption/src/last_state.cc
 )
 
-add_library("Resumption" ${SOURCES})
-
 if(BUILD_TESTS)
   add_subdirectory(test)
 endif()
+
+add_library("Resumption" ${HEADERS} ${SOURCES})

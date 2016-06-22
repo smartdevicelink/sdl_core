@@ -37,19 +37,16 @@ namespace application_manager {
 namespace commands {
 
 OnAudioDataStreamingNotification::OnAudioDataStreamingNotification(
-    const MessageSharedPtr& message)
-    : NotificationToHMI(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : NotificationToHMI(message, application_manager) {}
 
-OnAudioDataStreamingNotification::~OnAudioDataStreamingNotification() {
-}
+OnAudioDataStreamingNotification::~OnAudioDataStreamingNotification() {}
 
 void OnAudioDataStreamingNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   SendNotification();
 }
 
 }  // namespace commands
 
 }  // namespace application_manager
-

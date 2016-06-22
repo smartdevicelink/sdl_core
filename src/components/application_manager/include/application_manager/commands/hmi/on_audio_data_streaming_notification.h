@@ -43,31 +43,31 @@ namespace commands {
  * @brief OnAudioDataStreamingNotification command class
  **/
 class OnAudioDataStreamingNotification : public NotificationToHMI {
-  public:
-    /**
-     * @brief OnAudioDataStreamingNotification class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit OnAudioDataStreamingNotification(const MessageSharedPtr& message);
+ public:
+  /**
+   * @brief OnAudioDataStreamingNotification class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  OnAudioDataStreamingNotification(const MessageSharedPtr& message,
+                                   ApplicationManager& application_manager);
 
-    /**
-     * @brief OnAudioDataStreamingNotification class destructor
-     **/
-    virtual ~OnAudioDataStreamingNotification();
+  /**
+   * @brief OnAudioDataStreamingNotification class destructor
+   **/
+  virtual ~OnAudioDataStreamingNotification();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(OnAudioDataStreamingNotification);
+ private:
+  DISALLOW_COPY_AND_ASSIGN(OnAudioDataStreamingNotification);
 };
 
 }  // namespace commands
 
 }  // namespace application_manager
 
-#endif  //  SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_AUDIO_DATA_STREAMING_NOTIFICATION_H_
-
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_AUDIO_DATA_STREAMING_NOTIFICATION_H_

@@ -32,32 +32,63 @@
 #include <csignal>
 #include <cstdlib>
 #include <stdint.h>
+#include <unistd.h>
 
 #include "utils/signals.h"
+#include "utils/logger.h"
 
-namespace utils {
+SDL_CREATE_LOGGER("Utils")
 
-bool SubscribeToTerminateSignal(sighandler_t func) {
+namespace {
+
+void SigHandler(int sig) {
+  switch (sig) {
+    case SIGINT:
+      SDL_INFO("SIGINT signal has been caught");
+      break;
+    case SIGTERM:
+      SDL_INFO("SIGTERM signal has been caught");
+      break;
+    case SIGSEGV:
+      SDL_INFO("SIGSEGV signal has been caught");
+      break;
+    default:
+      SDL_INFO("Unexpected signal has been caught");
+      break;
+  }
+}
+
+bool CatchSIGSEGV(sighandler_t handler) {
   struct sigaction act;
-  act.sa_handler = func;
+
+  act.sa_handler = handler;
   sigemptyset(&act.sa_mask);
   act.sa_flags = 0;
 
-  bool sigint_subscribed = (sigaction(SIGINT, &act, NULL) == 0);
-  bool sigterm_subscribed = (sigaction(SIGTERM, &act, NULL) == 0);
-
-  return sigint_subscribed && sigterm_subscribed;
+  return !sigaction(SIGSEGV, &act, NULL);
 }
 
-bool SubscribeToFaultSignal(sighandler_t func) {
-  struct sigaction act;
-  act.sa_handler = func;
-  sigemptyset(&act.sa_mask);
-  act.sa_flags = SA_RESETHAND; // we only want to catch SIGSEGV once to flush logger queue
+}  //  namespace
 
-  bool sigsegv_subscribed = (sigaction(SIGSEGV, &act, NULL) == 0);
+namespace utils {
 
-  return sigsegv_subscribed;
+void WaitForSdlExecute() {
+  sigset_t signal_set;
+  int sig = -1;
+
+  sigemptyset(&signal_set);
+  sigaddset(&signal_set, SIGINT);
+  sigaddset(&signal_set, SIGTERM);
+
+  if (!CatchSIGSEGV(&SigHandler) || 0 != sigwait(&signal_set, &sig)) {
+    SDL_FATAL("Subscribe to system signals error");
+  }
+
+  SigHandler(sig);
 }
+
+void CreateSdlEvent() {}
+
+void SubscribeToTerminationSignals() {}
 
 }  //  namespace utils

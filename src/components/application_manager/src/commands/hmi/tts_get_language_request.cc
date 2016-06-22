@@ -36,15 +36,14 @@ namespace application_manager {
 
 namespace commands {
 
-TTSGetLanguageRequest::TTSGetLanguageRequest(const MessageSharedPtr& message)
-    : RequestToHMI(message) {
-}
+TTSGetLanguageRequest::TTSGetLanguageRequest(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : RequestToHMI(message, application_manager) {}
 
-TTSGetLanguageRequest::~TTSGetLanguageRequest() {
-}
+TTSGetLanguageRequest::~TTSGetLanguageRequest() {}
 
 void TTSGetLanguageRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   SendRequest();
 }
@@ -52,4 +51,3 @@ void TTSGetLanguageRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

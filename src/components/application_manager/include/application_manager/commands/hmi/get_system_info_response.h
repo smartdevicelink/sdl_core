@@ -34,39 +34,50 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_SYSTEM_INFO_RESPONSE_H_
 
 #include "application_manager/commands/hmi/response_from_hmi.h"
+#include "application_manager/application_manager.h"
 
 namespace application_manager {
 
 namespace commands {
 
+struct SystemInfo {
+  std::string ccpu_version;
+  std::string wers_country_code;
+  std::string language;
+};
+
 /**
  * @brief GetSystemInfoResponse command class
  **/
 class GetSystemInfoResponse : public ResponseFromHMI {
-  public:
-    /**
-     * @brief GetSystemInfoResponse class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit GetSystemInfoResponse(const MessageSharedPtr& message);
+ public:
+  /**
+   * @brief GetSystemInfoResponse class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  GetSystemInfoResponse(const MessageSharedPtr& message,
+                        ApplicationManager& application_manager);
 
-    /**
-     * @brief GetSystemInfoResponse class destructor
-     **/
-    virtual ~GetSystemInfoResponse();
+  /**
+   * @brief GetSystemInfoResponse class destructor
+   **/
+  virtual ~GetSystemInfoResponse();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(GetSystemInfoResponse);
+ private:
+  const SystemInfo GetSystemInfo(
+      const hmi_apis::Common_Result::eType code) const;
+
+  DISALLOW_COPY_AND_ASSIGN(GetSystemInfoResponse);
 };
 
 }  // namespace commands
 
 }  // namespace application_manager
 
-#endif  //  SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_SYSTEM_INFO_RESPONSE_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_SYSTEM_INFO_RESPONSE_H_

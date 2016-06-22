@@ -33,11 +33,6 @@
 
 #include "transport_manager/tcp/tcp_socket_connection.h"
 
-#include <memory.h>
-#include <signal.h>
-#include <errno.h>
-#include <unistd.h>
-
 #include "utils/logger.h"
 #include "utils/threads/thread.h"
 #include "transport_manager/tcp/tcp_device.h"
@@ -46,37 +41,34 @@
 namespace transport_manager {
 namespace transport_adapter {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
+SDL_CREATE_LOGGER("TransportManager")
 
 TcpSocketConnection::TcpSocketConnection(const DeviceUID& device_uid,
                                          const ApplicationHandle& app_handle,
                                          TransportAdapterController* controller)
-    : ThreadedSocketConnection(device_uid, app_handle, controller) {
-}
+    : ThreadedSocketConnection(device_uid, app_handle, controller) {}
 
-TcpSocketConnection::~TcpSocketConnection() {
-}
+TcpSocketConnection::~TcpSocketConnection() {}
 
 bool TcpSocketConnection::Establish(ConnectError** error) {
   return true;
 }
 
 TcpServerOiginatedSocketConnection::TcpServerOiginatedSocketConnection(
-    const DeviceUID& device_uid, const ApplicationHandle& app_handle,
+    const DeviceUID& device_uid,
+    const ApplicationHandle& app_handle,
     TransportAdapterController* controller)
-    : ThreadedSocketConnection(device_uid, app_handle, controller) {
-}
+    : ThreadedSocketConnection(device_uid, app_handle, controller) {}
 
-TcpServerOiginatedSocketConnection::~TcpServerOiginatedSocketConnection() {
-}
+TcpServerOiginatedSocketConnection::~TcpServerOiginatedSocketConnection() {}
 
 bool TcpServerOiginatedSocketConnection::Establish(ConnectError** error) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   DCHECK(error);
-  LOG4CXX_DEBUG(logger_, "error " << error);
+  SDL_DEBUG("error " << error);
   DeviceSptr device = controller()->FindDevice(device_handle());
   if (!device.valid()) {
-    LOG4CXX_ERROR(logger_, "Device " << device_handle() << " not found");
+    SDL_ERROR("Device " << device_handle() << " not found");
     *error = new ConnectError();
     return false;
   }
@@ -84,37 +76,24 @@ bool TcpServerOiginatedSocketConnection::Establish(ConnectError** error) {
 
   const int port = tcp_device->GetApplicationPort(application_handle());
   if (-1 == port) {
-    LOG4CXX_ERROR(
-        logger_,
-        "Application port for " << application_handle() << " not found");
+    SDL_ERROR("Application port for " << application_handle() << " not found");
     *error = new ConnectError();
     return false;
   }
 
-  const int socket = ::socket(AF_INET, SOCK_STREAM, 0);
-  if (socket < 0) {
-    LOG4CXX_ERROR(logger_, "Failed to create socket");
+  const std::string address = tcp_device->Address().ToString();
+  SDL_DEBUG("Connecting to " << address << ":" << port);
+  utils::TcpSocketConnection connection;
+  if (!connection.Connect(tcp_device->Address(), port)) {
+    SDL_ERROR("Failed to connect to the server " << address << ":" << port
+                                                 << " for application "
+                                                 << application_handle());
     *error = new ConnectError();
     return false;
   }
 
-  struct sockaddr_in addr = { 0 };
-  addr.sin_family = AF_INET;
-  addr.sin_addr.s_addr = tcp_device->in_addr();
-  addr.sin_port = htons(port);
-
-  LOG4CXX_DEBUG(logger_,
-               "Connecting " << inet_ntoa(addr.sin_addr) << ":" << port);
-  if (::connect(socket, (struct sockaddr*) &addr, sizeof(addr)) < 0) {
-    LOG4CXX_ERROR(
-        logger_,
-        "Failed to connect for application " << application_handle() << ", error " << errno);
-    *error = new ConnectError();
-    ::close(socket);
-    return false;
-  }
-
-  set_socket(socket);
+  // Transfer ownership on the connection
+  SetSocket(connection);
   return true;
 }
 

@@ -37,14 +37,13 @@ namespace application_manager {
 namespace commands {
 
 NaviAlertManeuverRequest::NaviAlertManeuverRequest(
-  const MessageSharedPtr& message) : RequestToHMI(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : RequestToHMI(message, application_manager) {}
 
-NaviAlertManeuverRequest::~NaviAlertManeuverRequest() {
-}
+NaviAlertManeuverRequest::~NaviAlertManeuverRequest() {}
 
 void NaviAlertManeuverRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   SendRequest();
 }
@@ -52,4 +51,3 @@ void NaviAlertManeuverRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

@@ -43,30 +43,31 @@ namespace commands {
  * @brief OnSDLPersistenceCompleteNotification command class
  **/
 class OnSDLPersistenceCompleteNotification : public NotificationToHMI {
-  public:
-    /**
-     * @brief OnSDLPersistenceCompleteNotification class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit OnSDLPersistenceCompleteNotification(const MessageSharedPtr& message);
+ public:
+  /**
+   * @brief OnSDLPersistenceCompleteNotification class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  OnSDLPersistenceCompleteNotification(const MessageSharedPtr& message,
+                                       ApplicationManager& application_manager);
 
-    /**
-     * @brief OnSDLPersistenceCompleteNotification class destructor
-     **/
-    virtual ~OnSDLPersistenceCompleteNotification();
+  /**
+   * @brief OnSDLPersistenceCompleteNotification class destructor
+   **/
+  virtual ~OnSDLPersistenceCompleteNotification();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(OnSDLPersistenceCompleteNotification);
+ private:
+  DISALLOW_COPY_AND_ASSIGN(OnSDLPersistenceCompleteNotification);
 };
 
 }  // namespace commands
 
 }  // namespace application_manager
 
-#endif  //  SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_SDL_PERSISTENCE_COMPLETE_NOTIFICATION_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_SDL_PERSISTENCE_COMPLETE_NOTIFICATION_H_

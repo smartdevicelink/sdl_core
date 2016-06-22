@@ -32,7 +32,6 @@
  */
 
 #include "application_manager/commands/mobile/delete_interaction_choice_set_response.h"
-#include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
@@ -42,20 +41,18 @@ namespace application_manager {
 namespace commands {
 
 DeleteInteractionChoiceSetResponse::DeleteInteractionChoiceSetResponse(
-    const MessageSharedPtr& message)
-    : CommandResponseImpl(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandResponseImpl(message, application_manager) {}
 
-DeleteInteractionChoiceSetResponse::~DeleteInteractionChoiceSetResponse() {
-}
+DeleteInteractionChoiceSetResponse::~DeleteInteractionChoiceSetResponse() {}
 
 void DeleteInteractionChoiceSetResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   // check if response false
   if (true == (*message_)[strings::msg_params].keyExists(strings::success)) {
     if ((*message_)[strings::msg_params][strings::success].asBool() == false) {
-      LOG4CXX_ERROR(logger_, "Success = false");
+      SDL_ERROR("Success = false");
       SendResponse(false);
       return;
     }

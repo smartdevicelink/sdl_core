@@ -30,7 +30,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/commands/hmi/tts_get_supported_languages_response.h"
-#include "application_manager/application_manager_impl.h"
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {
@@ -38,23 +37,20 @@ namespace application_manager {
 namespace commands {
 
 TTSGetSupportedLanguagesResponse::TTSGetSupportedLanguagesResponse(
-    const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {}
 
-TTSGetSupportedLanguagesResponse::~TTSGetSupportedLanguagesResponse() {
-}
+TTSGetSupportedLanguagesResponse::~TTSGetSupportedLanguagesResponse() {}
 
 void TTSGetSupportedLanguagesResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   const hmi_apis::Common_Result::eType code =
       static_cast<hmi_apis::Common_Result::eType>(
           (*message_)[strings::params][hmi_response::code].asInt());
 
   if (hmi_apis::Common_Result::SUCCESS == code) {
-    HMICapabilities& hmi_capabilities =
-        ApplicationManagerImpl::instance()->hmi_capabilities();
+    HMICapabilities& hmi_capabilities = application_manager_.hmi_capabilities();
 
     hmi_capabilities.set_tts_supported_languages(
         (*message_)[strings::msg_params][hmi_response::languages]);

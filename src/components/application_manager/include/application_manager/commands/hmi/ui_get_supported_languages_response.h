@@ -49,7 +49,8 @@ class UIGetSupportedLanguagesResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UIGetSupportedLanguagesResponse(const MessageSharedPtr& message);
+  UIGetSupportedLanguagesResponse(const MessageSharedPtr& message,
+                                  ApplicationManager& application_manager);
 
   /**
    * @brief UIGetSupportedLanguagesResponse class destructor

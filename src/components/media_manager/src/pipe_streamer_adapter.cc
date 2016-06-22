@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,201 +30,71 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <errno.h>
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <unistd.h>
 #include "utils/logger.h"
 #include "utils/file_system.h"
-#include "config_profile/profile.h"
 #include "media_manager/pipe_streamer_adapter.h"
 
 namespace media_manager {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "PipeStreamerAdapter")
+SDL_CREATE_LOGGER("PipeStreamerAdapter")
 
-PipeStreamerAdapter::PipeStreamerAdapter()
-  : is_ready_(false),
-    thread_(threads::CreateThread("PipeStreamer", new Streamer(this))),
-    messages_() {
-  LOG4CXX_AUTO_TRACE(logger_);
-}
+PipeStreamerAdapter::PipeStreamerAdapter(const std::string& named_pipe_path,
+                                         const std::string& app_storage_folder)
+    : StreamerAdapter(
+          new PipeStreamer(this, named_pipe_path, app_storage_folder)) {}
 
-PipeStreamerAdapter::~PipeStreamerAdapter() {
-  LOG4CXX_AUTO_TRACE(logger_);
+PipeStreamerAdapter::~PipeStreamerAdapter() {}
 
-  if ((0 != current_application_ ) && (is_ready_)) {
-    StopActivity(current_application_);
+PipeStreamerAdapter::PipeStreamer::PipeStreamer(
+    PipeStreamerAdapter* const adapter,
+    const std::string& named_pipe_path,
+    const std::string& app_storage_folder)
+    : Streamer(adapter)
+    , pipe_(named_pipe_path)
+    , app_storage_folder_(app_storage_folder) {}
+
+PipeStreamerAdapter::PipeStreamer::~PipeStreamer() {}
+
+bool PipeStreamerAdapter::PipeStreamer::Connect() {
+  SDL_AUTO_TRACE();
+
+  if (!file_system::CreateDirectoryRecursively(app_storage_folder_)) {
+    SDL_ERROR("Cannot create app folder");
+    return false;
   }
 
-  thread_->join();
-  delete thread_->delegate();
-  threads::DeleteThread(thread_);
-}
-
-void PipeStreamerAdapter::SendData(
-  int32_t application_key,
-  const ::protocol_handler::RawMessagePtr message) {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  if (application_key != current_application_) {
-    LOG4CXX_WARN(logger_, "Wrong application " << application_key);
-    return;
+  if (!pipe_.Open()) {
+    SDL_ERROR("Cannot open pipe");
+    return false;
   }
 
-  if (is_ready_) {
-    messages_.push(message);
-  }
+  SDL_INFO("Streamer connected to pipe");
+  return true;
 }
 
-void PipeStreamerAdapter::StartActivity(int32_t application_key) {
-  LOG4CXX_AUTO_TRACE(logger_);
+void PipeStreamerAdapter::PipeStreamer::Disconnect() {
+  SDL_AUTO_TRACE();
 
-  if (application_key == current_application_) {
-    LOG4CXX_WARN(logger_, "Already started activity for " << application_key);
-    return;
-  }
-
-  current_application_ = application_key;
-  is_ready_ = true;
-
-  for (std::set<MediaListenerPtr>::iterator it = media_listeners_.begin();
-       media_listeners_.end() != it;
-       ++it) {
-    (*it)->OnActivityStarted(application_key);
-  }
-
-  LOG4CXX_DEBUG(logger_, "Pipe was opened for writing " << named_pipe_path_);
+  pipe_.Close();
+  SDL_INFO("Streamer disconnected from pipe");
 }
 
-void PipeStreamerAdapter::StopActivity(int32_t application_key) {
-  LOG4CXX_AUTO_TRACE(logger_);
+bool PipeStreamerAdapter::PipeStreamer::Send(
+    protocol_handler::RawMessagePtr msg) {
+  SDL_AUTO_TRACE();
 
-  if (application_key != current_application_) {
-    LOG4CXX_WARN(logger_, "Not performing activity for " << application_key);
-    return;
+  size_t sent = 0;
+  if (!pipe_.Write(msg->data(), msg->data_size(), sent)) {
+    SDL_ERROR("Cannot write to pipe");
+    return false;
   }
 
-  is_ready_ = false;
-  current_application_ = 0;
-
-  messages_.Reset();
-
-  for (std::set<MediaListenerPtr>::iterator it = media_listeners_.begin();
-       media_listeners_.end() != it;
-       ++it) {
-    (*it)->OnActivityEnded(application_key);
-  }
-}
-
-bool PipeStreamerAdapter::is_app_performing_activity( int32_t application_key) {
-  return (application_key == current_application_);
-}
-
-void PipeStreamerAdapter::Init() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  if (thread_->is_running()) {
-    thread_->stop();
-    thread_->join();
-  }
-  LOG4CXX_DEBUG(logger_, "Start sending thread");
-  const size_t kStackSize = 16384;
-  thread_->start(threads::ThreadOptions(kStackSize));
-}
-
-PipeStreamerAdapter::Streamer::Streamer(
-  PipeStreamerAdapter* server)
-  : server_(server),
-    pipe_fd_(0),
-    stop_flag_(false) {
-}
-
-PipeStreamerAdapter::Streamer::~Streamer() {
-  server_ = NULL;
-}
-
-void PipeStreamerAdapter::Streamer::threadMain() {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  open();
-
-  while (!stop_flag_) {
-    while (!server_->messages_.empty()) {
-      ::protocol_handler::RawMessagePtr msg = server_->messages_.pop();
-      if (!msg) {
-        LOG4CXX_ERROR(logger_, "Null pointer message");
-        continue;
-      }
-
-      ssize_t ret = write(pipe_fd_, msg.get()->data(),
-                          msg.get()->data_size());
-
-      if (ret == -1) {
-        LOG4CXX_ERROR(logger_, "Failed writing data to pipe "
-                      << server_->named_pipe_path_);
-
-        std::set<MediaListenerPtr>::iterator it =
-            server_->media_listeners_.begin();
-        for (;server_->media_listeners_.end() != it; ++it) {
-          (*it)->OnErrorReceived(server_->current_application_, -1);
-        }
-      } else if (static_cast<uint32_t>(ret) != msg.get()->data_size()) {
-        LOG4CXX_WARN(logger_, "Couldn't write all the data to pipe "
-                     << server_->named_pipe_path_);
-      }
-
-      static int32_t messsages_for_session = 0;
-      ++messsages_for_session;
-
-      LOG4CXX_DEBUG(logger_, "Handling map streaming message. This is "
-                   << messsages_for_session << " the message for "
-                   << server_->current_application_);
-      std::set<MediaListenerPtr>::iterator it =
-          server_->media_listeners_.begin();
-      for (; server_->media_listeners_.end() != it; ++it) {
-        (*it)->OnDataReceived(server_->current_application_,
-                              messsages_for_session);
-      }
-    }
-    server_->messages_.wait();
-  }
-  close();
-}
-
-void PipeStreamerAdapter::Streamer::exitThreadMain() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  stop_flag_ = true;
-  server_->messages_.Shutdown();
-}
-
-void PipeStreamerAdapter::Streamer::open() {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  DCHECK(file_system::CreateDirectoryRecursively(
-      profile::Profile::instance()->app_storage_folder()));
-
-  if ((mkfifo(server_->named_pipe_path_.c_str(),
-              S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH) < 0)
-      && (errno != EEXIST)) {
-    LOG4CXX_ERROR(logger_, "Cannot create pipe " << server_->named_pipe_path_);
-    return;
+  if (sent != msg->data_size()) {
+    SDL_WARN("Couldn't write all the data to pipe");
   }
 
-  pipe_fd_ = ::open(server_->named_pipe_path_.c_str(), O_RDWR, 0);
-  if (-1 == pipe_fd_) {
-    LOG4CXX_ERROR(logger_, "Cannot open pipe for writing "
-                  << server_->named_pipe_path_);
-    return;
-  }
-
-  LOG4CXX_DEBUG(logger_, "Pipe " << server_->named_pipe_path_
-                << " was successfully created");
-}
-
-void PipeStreamerAdapter::Streamer::close() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  ::close(pipe_fd_);
-  unlink(server_->named_pipe_path_.c_str());
+  SDL_INFO("Streamer sent to pipe " << sent << " bytes");
+  return true;
 }
 
 }  // namespace media_manager

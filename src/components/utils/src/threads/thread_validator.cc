@@ -36,62 +36,42 @@
 
 namespace threads {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
+SDL_CREATE_LOGGER("Utils")
 
 SingleThreadSimpleValidator::SingleThreadSimpleValidator()
-    : creation_thread_id_(Thread::CurrentId()) {
-}
+    : creation_thread_id_(Thread::CurrentId()) {}
 
-SingleThreadSimpleValidator::~SingleThreadSimpleValidator() {
-}
+SingleThreadSimpleValidator::~SingleThreadSimpleValidator() {}
 
 void SingleThreadSimpleValidator::AssertRunningOnCreationThread() const {
-  PlatformThreadHandle current_id = Thread::CurrentId();
+  uint64_t current_id = Thread::CurrentId();
   if (creation_thread_id_ != current_id) {
-    LOG4CXX_ERROR(logger_, "Single-threaded object created at thread "
-                          << creation_thread_id_
-                          <<" is accessed from thread "
-                          << current_id
-#ifdef BACKTRACE_SUPPORT
-                          << "\n"
-                          << utils::Backtrace()
-#endif
-    );
+    SDL_ERROR("Single-threaded object created at thread "
+              << creation_thread_id_ << " is accessed from thread "
+              << current_id);
   }
 }
 
-PlatformThreadHandle SingleThreadSimpleValidator::creation_thread_id() const
-{
+uint64_t SingleThreadSimpleValidator::creation_thread_id() const {
   return creation_thread_id_;
 }
 
-
 SingleThreadValidator::SingleThreadValidator()
-    : owning_thread_id_(Thread::CurrentId()){
-}
+    : owning_thread_id_(Thread::CurrentId()) {}
 
-SingleThreadValidator::~SingleThreadValidator() {
-}
+SingleThreadValidator::~SingleThreadValidator() {}
 
-void SingleThreadValidator::PassToThread(PlatformThreadHandle thread_id) const {
+void SingleThreadValidator::PassToThread(uint64_t thread_id) const {
   owning_thread_id_ = thread_id;
 }
 
 void SingleThreadValidator::AssertRunningOnValidThread() const {
-  PlatformThreadHandle current_id = Thread::CurrentId();
+  uint64_t current_id = Thread::CurrentId();
   if (owning_thread_id_ != current_id) {
-    LOG4CXX_ERROR(logger_, "Single-threaded object owned by thread "
-                         << owning_thread_id_
-                         << " is accessed from thread "
-                         << current_id << "\n"
-#ifdef BACKTRACE_SUPPORT
-                         << utils::Backtrace()
-#endif
-                         );
+    SDL_ERROR("Single-threaded object owned by thread "
+              << owning_thread_id_ << " is accessed from thread " << current_id
+              << "\n");
   }
 }
 
-
-} // namespace threads
-
-// vim: set ts=2 sw=2 et:
+}  // namespace threads

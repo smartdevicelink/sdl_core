@@ -49,6 +49,6 @@
 
 namespace threads {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
+SDL_CREATE_LOGGER("Utils")
 
-} // namespace threads
+}  // namespace threads

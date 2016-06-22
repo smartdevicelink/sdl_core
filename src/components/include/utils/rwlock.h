@@ -33,28 +33,20 @@
 #ifndef SRC_COMPONENTS_INCLUDE_UTILS_RWLOCK_H_
 #define SRC_COMPONENTS_INCLUDE_UTILS_RWLOCK_H_
 
-#if defined(OS_POSIX)
-#include <pthread.h>
-#endif
-
 #include "utils/macro.h"
+#include "utils/pimpl.h"
 
 namespace sync_primitives {
 
-namespace impl {
-#if defined(OS_POSIX)
-typedef pthread_rwlock_t PlatformRWLock;
-#else
-#error Please implement rwlock for your OS
-#endif
-}  // namespace impl
-
 /**
  * RW locks wrapper
- * Read-write locks permit concurrent reads and exclusive writes to a protected shared resource.
- * The read-write lock is a single entity that can be locked in read or write mode.
+ * Read-write locks permit concurrent reads and exclusive writes to a protected
+ * shared resource.
+ * The read-write lock is a single entity that can be locked in read or write
+ * mode.
  * To modify a resource, a thread must first acquire the exclusive write lock.
- * An exclusive write lock is not permitted until all read locks have been released.
+ * An exclusive write lock is not permitted until all read locks have been
+ * released.
  */
 
 class RWLock {
@@ -67,17 +59,21 @@ class RWLock {
    * The calling thread acquires the read lock if a writer does not
    * hold the lock and there are no writers blocked on the lock.
    * It is unspecified whether the calling thread acquires the lock
-   * when a writer does not hold the lock and there are writers waiting for the lock.
-   * If a writer holds the lock, the calling thread will not acquire the read lock.
+   * when a writer does not hold the lock and there are writers waiting for the
+   * lock.
+   * If a writer holds the lock, the calling thread will not acquire the read
+   * lock.
    * If the read lock is not acquired, the calling thread blocks
-   * (that is, it does not return from the AcquireForReading()) until it can acquire the lock.
-   * Results are undefined if the calling thread holds a write lock on rwlock at the time the call is made.
+   * (that is, it does not return from the AcquireForReading()) until it can
+   * acquire the lock.
+   * Results are undefined if the calling thread holds a write lock on rwlock at
+   * the time the call is made.
    * A thread can hold multiple concurrent read locks on rwlock
    * (that is, successfully call AcquireForReading() n times)
-   * If so, the thread must perform matching unlocks (that is, it must call Release() n times).
-   * @returns true if lock was acquired and false if was not
+   * If so, the thread must perform matching unlocks (that is, it must call
+   * Release() n times)
    */
-  bool AcquireForReading();
+  void AcquireForReading();
 
   /**
    * @brief try to Acqure read-write lock for reading.
@@ -90,39 +86,52 @@ class RWLock {
   bool TryAcquireForReading();
 
   /**
-     * @brief Try to Acqure read-write lock for writing.
-     * Applies a write lock like AcquireForWriting(), with the exception that the
-     * function fails if any thread currently holds rwlock (for reading or writing)
-     * Invoke of TryAcquireForWriting will not block calling thread and returns "false"
-     * @returns true if lock was acquired and false if was not
-     */
-  bool TryAcquireForWriting();
-
-  /**
    * @brief Acqure read-write lock for writing.
    * Applies a write lock to the read-write lock.
-   * The calling thread acquires the write lock if no other thread (reader or writer)
+   * The calling thread acquires the write lock if no other thread (reader or
+   * writer)
    * holds the read-write lock rwlock. Otherwise, the thread blocks
    * (that is, does not return from the AcquireForWriting() call)
    * until it can acquire the lock.
-   * Results are undefined if the calling thread holds the read-write lock (whether a read or write lock)
+   * Results are undefined if the calling thread holds the read-write lock
+   * (whether a read or write lock)
    * at the time the call is made.
-   * The thread must perform matching unlock (that is, it must call Release()).
-   * @returns true if lock was acquired and false if was not
+   * The thread must perform matching unlock (that is, it must call Release())
    */
-  bool AcquireForWriting();
+  void AcquireForWriting();
 
   /**
-     * @brief Release read-write lock.
+   * @brief Try to Acqure read-write lock for writing.
+   * Applies a write lock like AcquireForWriting(), with the exception that the
+   * function fails if any thread currently holds rwlock (for reading or
+   * writing)
+   * Invoke of TryAcquireForWriting will not block calling thread and returns
+   * "false"
+   * @returns true if lock was acquired and false if was not
+   */
+  bool TryAcquireForWriting();
+
+  /**
+   * @brief Release read-write lock acquired for reading.
      * Releases a lock held on the read-write lock object.
      * Results are undefined if the read-write lock rwlock
-     * is not held by the calling thread.
-     * @returns true if lock was released and false if was not
+   * is not held for reading by the calling thread
      */
-  bool Release();
+  void ReleaseForReading();
+
+  /**
+   * @brief Release read-write lock acquired for writing.
+   * Releases a lock held on the read-write lock object.
+   * Results are undefined if the read-write lock rwlock
+   * is not held for writing by the calling thread
+   */
+  void ReleaseForWriting();
 
  private:
-  impl::PlatformRWLock rwlock_;
+  class Impl;
+  utils::Pimpl<Impl> impl_;
+
+  DISALLOW_COPY_AND_ASSIGN(RWLock);
 };
 
 /**
@@ -132,12 +141,11 @@ class RWLock {
 
 class AutoReadLock {
  public:
-  explicit AutoReadLock(RWLock& rwlock)
-      : rwlock_(rwlock) {
+  explicit AutoReadLock(RWLock& rwlock) : rwlock_(rwlock) {
     rwlock_.AcquireForReading();
   }
   ~AutoReadLock() {
-    rwlock_.Release();
+    rwlock_.ReleaseForReading();
   }
 
  private:
@@ -147,16 +155,16 @@ class AutoReadLock {
 
 /**
  * @brief Makes auto lock read-write locks for writing
- * Please use AutoWriteLock to acquire for writing and (automatically) release it
+ * Please use AutoWriteLock to acquire for writing and (automatically) release
+ * it
  */
 class AutoWriteLock {
  public:
-  explicit AutoWriteLock(RWLock& rwlock)
-      : rwlock_(rwlock) {
+  explicit AutoWriteLock(RWLock& rwlock) : rwlock_(rwlock) {
     rwlock_.AcquireForWriting();
   }
   ~AutoWriteLock() {
-    rwlock_.Release();
+    rwlock_.ReleaseForWriting();
   }
 
  private:

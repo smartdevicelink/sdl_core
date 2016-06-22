@@ -36,12 +36,11 @@
 #include "transport_manager/common.h"
 #include "transport_manager/transport_adapter/transport_adapter_listener.h"
 #include "transport_manager/transport_adapter/transport_adapter.h"
+#include "transport_manager/transport_manager.h"
 
 namespace transport_manager {
 
 using transport_manager::transport_adapter::TransportAdapter;
-
-class TransportManagerImpl;
 
 /**
  * @brief Implementation of TransportAdapterListener class.
@@ -72,10 +71,10 @@ class TransportAdapterListenerImpl
   /**
    * @brief Constructor.
    *
-   * @param manager Pointer to the transport manager implementation class.
+   * @param manager Pointer to the transport manager class.
    * @param adapter Pointer to the transport adapter associated with listener.
    */
-  TransportAdapterListenerImpl(TransportManagerImpl* manager,
+  TransportAdapterListenerImpl(TransportManager* manager,
                                TransportAdapter* adapter);
 
   /**
@@ -100,7 +99,7 @@ class TransportAdapterListenerImpl
                                     const SearchDeviceError& error);
 
   /**
-   * @brief Passes notification to TransportManagerImpl
+   * @brief Passes notification to TransportManager
    *
    * @param adapter Transport adapter that sent notification
    */
@@ -223,10 +222,11 @@ class TransportAdapterListenerImpl
    * @param app_id Handle of application.
    * @param data_container Smart pointer to the raw message.
    */
-  virtual void OnDataReceiveDone(const TransportAdapter* adapter,
-                                 const DeviceUID& device,
-                                 const ApplicationHandle& app_id,
-                                 const ::protocol_handler::RawMessagePtr data_container);
+  virtual void OnDataReceiveDone(
+      const TransportAdapter* adapter,
+      const DeviceUID& device,
+      const ApplicationHandle& app_id,
+      const ::protocol_handler::RawMessagePtr data_container);
 
   /**
    * @brief Search specified device adapter in the container of shared pointers
@@ -254,21 +254,23 @@ class TransportAdapterListenerImpl
    * @param app_id Handle of application.
    * @param data_container Smart pointer to the raw message.
    */
-  virtual void OnDataSendDone(const TransportAdapter* adapter,
-                              const DeviceUID& device,
-                              const ApplicationHandle& app_id,
-                              const ::protocol_handler::RawMessagePtr data_container);
+  virtual void OnDataSendDone(
+      const TransportAdapter* adapter,
+      const DeviceUID& device,
+      const ApplicationHandle& app_id,
+      const ::protocol_handler::RawMessagePtr data_container);
 
   /**
    * @brief Search specified device adapter in the container of shared pointers
    * to device adapters to be sure it is available, create data send error,
    * launch event ON_SEND_FAIL in transport manager.
    */
-  virtual void OnDataSendFailed(const TransportAdapter* adapter,
-                                const DeviceUID& device,
-                                const ApplicationHandle& app_id,
-                                const ::protocol_handler::RawMessagePtr data_container,
-                                const DataSendError& error);
+  virtual void OnDataSendFailed(
+      const TransportAdapter* adapter,
+      const DeviceUID& device,
+      const ApplicationHandle& app_id,
+      const ::protocol_handler::RawMessagePtr data_container,
+      const DataSendError& error);
 
   /**
    * @brief Search specified device adapter in the container of shared pointers
@@ -284,9 +286,9 @@ class TransportAdapterListenerImpl
                                     const ApplicationHandle& app_id);
 
  private:
-  TransportManagerImpl* transport_manager_impl_;
+  TransportManager* transport_manager_;
   TransportAdapter* transport_adapter_;
 };
 }  // namespace transport_manager
 
-#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_transport_adapter_transport_adapter_LISTENER_IMPL_H
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_LISTENER_IMPL_H_

@@ -33,63 +33,59 @@
 
 #include <algorithm>
 #include "application_manager/commands/mobile/diagnostic_message_request.h"
-#include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
-#include "config_profile/profile.h"
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
 namespace commands {
 
-DiagnosticMessageRequest::DiagnosticMessageRequest(const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {
-}
+DiagnosticMessageRequest::DiagnosticMessageRequest(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager) {}
 
-DiagnosticMessageRequest::~DiagnosticMessageRequest() {
-}
+DiagnosticMessageRequest::~DiagnosticMessageRequest() {}
 
 void DiagnosticMessageRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
-  ApplicationSharedPtr app =
-      ApplicationManagerImpl::instance()->application(connection_key());
+  ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
-    LOG4CXX_ERROR(logger_, "Application is not registered.");
+    SDL_ERROR("Application is not registered.");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
   const std::vector<uint32_t>& supported_diag_modes =
-      profile::Profile::instance()->supported_diag_modes();
+      application_manager_.get_settings().supported_diag_modes();
 
-  uint32_t message_data_length =
-     (*message_)[strings::msg_params][strings::message_data].length();
-  for (uint32_t i = 0; i < message_data_length; ++i) {
-    uint32_t message_data =
-        (*message_)[strings::msg_params][strings::message_data][i].asUInt();
-    if (supported_diag_modes.end() == std::find(supported_diag_modes.begin(),
-                                                supported_diag_modes.end(),
-                                                message_data)) {
-      LOG4CXX_ERROR(logger_, "Received message data " << message_data <<
-                             " not supported");
-      SendResponse(false, mobile_apis::Result::REJECTED,
-                   "Received message data not supported");
-      return;
-    }
+  smart_objects::SmartObject& msg_data =
+      (*message_)[strings::msg_params][strings::message_data];
+
+  const uint8_t mode_position = 0;
+  const uint32_t msg_diagnostic_mode = msg_data[mode_position].asUInt();
+  if (supported_diag_modes.end() == std::find(supported_diag_modes.begin(),
+                                              supported_diag_modes.end(),
+                                              msg_diagnostic_mode)) {
+    SDL_ERROR("Received diagnostic mode " << msg_diagnostic_mode
+                                          << " is not supported.");
+    SendResponse(false,
+                 mobile_apis::Result::REJECTED,
+                 "Received diagnostic mode is not supported.");
+    return;
   }
 
   // Add app_id for HMI request
   (*message_)[strings::msg_params][strings::app_id] = app->app_id();
 
   SendHMIRequest(hmi_apis::FunctionID::VehicleInfo_DiagnosticMessage,
-                 &(*message_)[strings::msg_params], true);
-
+                 &(*message_)[strings::msg_params],
+                 true);
 }
 
 void DiagnosticMessageRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
@@ -104,7 +100,7 @@ void DiagnosticMessageRequest::on_event(const event_engine::Event& event) {
       break;
     }
     default: {
-      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+      SDL_ERROR("Received unknown event" << event.id());
       return;
     }
   }

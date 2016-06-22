@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_MOBILE_MESSAGE_HANDLER_IMPL_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_MOBILE_MESSAGE_HANDLER_IMPL_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_MOBILE_MESSAGE_HANDLER_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_MOBILE_MESSAGE_HANDLER_H_
 
 #include "utils/macro.h"
 #include "protocol/common.h"
@@ -40,30 +40,30 @@
 namespace application_manager {
 typedef utils::SharedPtr<application_manager::Message> MobileMessage;
 class MobileMessageHandler {
-  public:
-    static application_manager::Message* HandleIncomingMessageProtocol(
+ public:
+  static application_manager::Message* HandleIncomingMessageProtocol(
       const protocol_handler::RawMessagePtr message);
 
-    static protocol_handler::RawMessage* HandleOutgoingMessageProtocol(
+  static protocol_handler::RawMessage* HandleOutgoingMessageProtocol(
       const MobileMessage& message);
-    //! -------------------------------------------------------------
-  private:
-    static application_manager::Message* HandleIncomingMessageProtocolV1(
+  //! -------------------------------------------------------------
+ private:
+  static application_manager::Message* HandleIncomingMessageProtocolV1(
       const protocol_handler::RawMessagePtr message);
 
-    static application_manager::Message* HandleIncomingMessageProtocolV2(
+  static application_manager::Message* HandleIncomingMessageProtocolV2(
       const protocol_handler::RawMessagePtr message);
 
-	//! -------------------------------------------------------------
+  //! -------------------------------------------------------------
 
-    static protocol_handler::RawMessage* HandleOutgoingMessageProtocolV1(
+  static protocol_handler::RawMessage* HandleOutgoingMessageProtocolV1(
       const MobileMessage& message);
 
-    static protocol_handler::RawMessage* HandleOutgoingMessageProtocolV2(
+  static protocol_handler::RawMessage* HandleOutgoingMessageProtocolV2(
       const MobileMessage& message);
 
-    DISALLOW_COPY_AND_ASSIGN(MobileMessageHandler);
+  DISALLOW_COPY_AND_ASSIGN(MobileMessageHandler);
 };
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_MOBILE_MESSAGE_HANDLER_IMPL_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_MOBILE_MESSAGE_HANDLER_H_

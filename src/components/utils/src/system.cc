@@ -30,13 +30,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #ifdef __QNX__
-#  include <process.h>
-#else  // __QNX__
-#  include <sys/types.h>
-#  include <sys/wait.h>
-#  include <sys/stat.h>
-#  include <fcntl.h>
-#  include <unistd.h>
+#include <process.h>
+#elif defined(OS_POSIX)
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#else
+#include <fcntl.h>
 #endif  // __QNX__
 
 #include <algorithm>
@@ -49,16 +51,15 @@
 
 namespace utils {
 
-CREATE_LOGGERPTR_LOCAL(logger_, "Utils")
+SDL_CREATE_LOGGER("Utils")
 
 struct GetCString {
-  char * operator ()(const std::string& string) {
+  char* operator()(const std::string& string) {
     return const_cast<char*>(string.c_str());
   }
 };
 
-System::System(const std::string& command)
-    : command_(command) {
+System::System(const std::string& command) : command_(command) {
   argv_.push_back(command);
 }
 
@@ -88,7 +89,7 @@ bool System::Execute() {
 
 bool System::Execute(bool wait) {
   size_t size = argv_.size();
-  char * *argv = new char*[size + 1];
+  char** argv = new char* [size + 1];
   std::transform(argv_.begin(), argv_.end(), argv, GetCString());
   argv[size] = NULL;
 
@@ -97,8 +98,8 @@ bool System::Execute(bool wait) {
   delete[] argv;
 
   if (ret == -1) {
-    LOG4CXX_ERROR(logger_, "Can't execute command: " << command_
-        << " Errno is: " << std::strerror(errno));
+    SDL_ERROR("Can't execute command: " << command_ << " Errno is: "
+                                        << std::strerror(errno));
     return false;
   }
 
@@ -108,8 +109,12 @@ bool System::Execute(bool wait) {
 
   return true;
 }
+#elif defined(OS_WINDOWS)
+bool System::Execute(bool wait) {
+  return true;
+}
 
-#else  // __QNX__
+#elif defined(OS_POSIX)
 
 bool System::Execute(bool wait) {
   // Create a child process.
@@ -117,13 +122,13 @@ bool System::Execute(bool wait) {
 
   switch (pid_command) {
     case -1: {  // Error
-      LOG4CXX_FATAL(logger_, "fork() failed!");
+      SDL_FATAL("fork() failed!");
       return false;
     }
     case 0: {  // Child process
       int32_t fd_dev0 = open("/dev/null", O_RDWR, S_IWRITE);
       if (0 > fd_dev0) {
-        LOG4CXX_FATAL(logger_, "Open dev0 failed!");
+        SDL_FATAL("Open dev0 failed!");
         return false;
       }
       // close input/output file descriptors.
@@ -137,13 +142,13 @@ bool System::Execute(bool wait) {
       dup2(fd_dev0, STDERR_FILENO);
 
       size_t size = argv_.size();
-      char * *argv = new char*[size + 1];
+      char** argv = new char* [size + 1];
       std::transform(argv_.begin(), argv_.end(), argv, GetCString());
       argv[size] = NULL;
 
       // Execute the program.
       if (execvp(command_.c_str(), argv) == -1) {
-        LOG4CXX_ERROR(logger_, "Can't execute command: " << command_);
+        SDL_ERROR("Can't execute command: " << command_);
         _exit(EXIT_FAILURE);
       }
       delete[] argv;
@@ -151,14 +156,14 @@ bool System::Execute(bool wait) {
       return true;
     }
     default: { /* Parent process */
-      LOG4CXX_INFO(logger_, "Process created with pid " << pid_command);
+      SDL_INFO("Process created with pid " << pid_command);
       if (wait) {
         int status;
         pid_t wait_pid;
         do {
           wait_pid = waitpid(pid_command, &status, WUNTRACED | WCONTINUED);
           if (wait_pid == -1) {
-            LOG4CXX_ERROR_WITH_ERRNO(logger_, "Can't wait");
+            SDL_ERROR_WITH_ERRNO("Can't wait");
             _exit(EXIT_FAILURE);
             return false;
           }

@@ -37,7 +37,7 @@
 
 namespace protocol_handler {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "ProtocolHandler")
+SDL_CREATE_LOGGER("ProtocolHandler")
 
 namespace {
 bool IsSupported(RpcType rpc_type) {
@@ -56,7 +56,7 @@ RpcType RpcTypeFromByte(uint8_t byte) {
   RpcType type = RpcType(byte);
   bool supported_type = IsSupported(type);
   if (!supported_type) {
-    LOG4CXX_INFO(logger_, "Invalid service type: " << int32_t(byte));
+    SDL_INFO("Invalid service type: " << int32_t(byte));
   }
 
   return supported_type ? type : kRpcTypeReserved;
@@ -67,7 +67,7 @@ uint8_t RpcTypeToByte(RpcType type) {
   return uint8_t(type);
 }
 
-const char *RpcTypeToString(RpcType type) {
+const char* RpcTypeToString(RpcType type) {
   switch (type) {
     case kRpcTypeRequest:
       return "kRpcTypeRequest";
@@ -80,7 +80,7 @@ const char *RpcTypeToString(RpcType type) {
   }
 }
 
-std::ostream &operator<<(std::ostream &os, RpcType rpc_type) {
+std::ostream& operator<<(std::ostream& os, RpcType rpc_type) {
   return os << RpcTypeToString(rpc_type);
 }
 }  // namespace protocol_handler

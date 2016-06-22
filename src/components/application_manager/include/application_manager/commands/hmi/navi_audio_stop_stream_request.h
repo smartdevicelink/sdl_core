@@ -48,7 +48,8 @@ class AudioStopStreamRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit AudioStopStreamRequest(const MessageSharedPtr& message);
+  AudioStopStreamRequest(const MessageSharedPtr& message,
+                         ApplicationManager& application_manager);
 
   /**
    * @brief NaviStopStreamRequest class destructor

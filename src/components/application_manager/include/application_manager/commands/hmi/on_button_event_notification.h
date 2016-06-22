@@ -53,7 +53,8 @@ class OnButtonEventNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnButtonEventNotification(const MessageSharedPtr& message);
+  OnButtonEventNotification(const MessageSharedPtr& message,
+                            ApplicationManager& application_manager);
 
   /**
    * @brief Execute command
@@ -64,7 +65,7 @@ class OnButtonEventNotification : public NotificationFromHMI {
   DISALLOW_COPY_AND_ASSIGN(OnButtonEventNotification);
 };
 
-} // namespace hmi
+}  // namespace hmi
 
 }  // namespace commands
 

@@ -37,15 +37,13 @@ namespace application_manager {
 namespace commands {
 
 UIEndAudioPassThruRequest::UIEndAudioPassThruRequest(
-    const MessageSharedPtr& message)
-    : RequestToHMI(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : RequestToHMI(message, application_manager) {}
 
-UIEndAudioPassThruRequest::~UIEndAudioPassThruRequest() {
-}
+UIEndAudioPassThruRequest::~UIEndAudioPassThruRequest() {}
 
 void UIEndAudioPassThruRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   SendRequest();
 }
@@ -53,4 +51,3 @@ void UIEndAudioPassThruRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

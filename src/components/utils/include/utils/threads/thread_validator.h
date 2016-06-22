@@ -29,8 +29,8 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef SRC_COMPONENTS_UTILS_INCLUDE_THREADS_THREAD_VALIDATOR_H_
-#define SRC_COMPONENTS_UTILS_INCLUDE_THREADS_THREAD_VALIDATOR_H_
+#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_THREADS_THREAD_VALIDATOR_H_
+#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_THREADS_THREAD_VALIDATOR_H_
 
 #include "utils/threads/thread.h"
 
@@ -67,11 +67,11 @@ class SingleThreadSimpleValidator {
   // This method should be called in every public method
   // of classes being checked for absence of concurrent access
   void AssertRunningOnCreationThread() const;
-  PlatformThreadHandle creation_thread_id() const;
- private:
-  const PlatformThreadHandle creation_thread_id_;
-};
+  uint64_t creation_thread_id() const;
 
+ private:
+  const uint64_t creation_thread_id_;
+};
 
 /*
  * This is bit more sophisticated debug helper which allows
@@ -92,15 +92,16 @@ class SingleThreadValidator {
 
   // Must be called prior to transferring object being validated to
   // another thread or when passing it back
-  void PassToThread(PlatformThreadHandle thread_id) const;
+  void PassToThread(uint64_t thread_id) const;
   // This method should be called in every public method
   // of classes being checked for absence of unintended concurrent
   // access
   void AssertRunningOnValidThread() const;
+
  private:
-  mutable PlatformThreadHandle owning_thread_id_;
+  mutable uint64_t owning_thread_id_;
 };
 
-} // namespace threads
+}  // namespace threads
 
-#endif // SRC_COMPONENTS_UTILS_INCLUDE_THREADS_THREAD_VALIDATOR_H_
+#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_THREADS_THREAD_VALIDATOR_H_

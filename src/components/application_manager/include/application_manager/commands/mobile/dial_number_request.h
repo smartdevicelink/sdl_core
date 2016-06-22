@@ -1,4 +1,5 @@
 /*
+
  Copyright (c) 2016, Ford Motor Company
  All rights reserved.
 
@@ -30,8 +31,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DIAL_NUMBER_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DIAL_NUMBER_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_DIAL_NUMBER_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_DIAL_NUMBER_REQUEST_H_
 
 #include "application_manager/commands/command_request_impl.h"
 #include "utils/macro.h"
@@ -48,7 +49,8 @@ class DialNumberRequest : public CommandRequestImpl {
   /**
    * \brief DialNumberRequest class constructor
    **/
-  explicit DialNumberRequest(const MessageSharedPtr& message);
+  DialNumberRequest(const MessageSharedPtr& message,
+                    ApplicationManager& application_manager);
 
   /**
    * \brief DialNumberRequest class destructor
@@ -58,7 +60,7 @@ class DialNumberRequest : public CommandRequestImpl {
   /**
     * @brief Initialize request params
    **/
-   bool Init() OVERRIDE;
+  bool Init() OVERRIDE;
 
   /**
    * @brief Execute command
@@ -73,13 +75,12 @@ class DialNumberRequest : public CommandRequestImpl {
   void on_event(const event_engine::Event& event);
 
  private:
-
   /**
    * @brief Removes from number param all characters
    * except the + character and digits.
    *
    */
-  void StripNumberParam(std::string &number);
+  void StripNumberParam(std::string& number);
 
   DISALLOW_COPY_AND_ASSIGN(DialNumberRequest);
 };
@@ -88,4 +89,4 @@ class DialNumberRequest : public CommandRequestImpl {
 
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DIAL_NUMBER_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_DIAL_NUMBER_REQUEST_H_

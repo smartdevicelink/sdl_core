@@ -36,15 +36,14 @@ namespace application_manager {
 
 namespace commands {
 
-NaviSendLocationRequest::NaviSendLocationRequest(const MessageSharedPtr& message)
-    : RequestToHMI(message) {
-}
+NaviSendLocationRequest::NaviSendLocationRequest(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : RequestToHMI(message, application_manager) {}
 
-NaviSendLocationRequest::~NaviSendLocationRequest() {
-}
+NaviSendLocationRequest::~NaviSendLocationRequest() {}
 
 void NaviSendLocationRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
   SendRequest();
 }
@@ -52,4 +51,3 @@ void NaviSendLocationRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

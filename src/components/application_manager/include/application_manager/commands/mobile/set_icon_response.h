@@ -35,6 +35,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_SET_ICON_RESPONSE_H_
 
 #include "application_manager/commands/command_response_impl.h"
+#include "application_manager/application_manager.h"
 #include "utils/macro.h"
 
 namespace application_manager {
@@ -51,7 +52,7 @@ class SetIconResponse : public CommandResponseImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit SetIconResponse(const MessageSharedPtr& message);
+  SetIconResponse(const MessageSharedPtr& message, ApplicationManager& app_man);
 
   /**
    * @brief SetIconResponse class destructor

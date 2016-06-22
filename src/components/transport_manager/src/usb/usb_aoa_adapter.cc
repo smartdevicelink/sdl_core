@@ -42,15 +42,19 @@
 namespace transport_manager {
 namespace transport_adapter {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
-UsbAoaAdapter::UsbAoaAdapter()
-  : TransportAdapterImpl(new UsbDeviceScanner(this),
-                         new UsbConnectionFactory(this), 0),
-  is_initialised_(false),
-  usb_handler_(new UsbHandler()) {
+SDL_CREATE_LOGGER("TransportManager")
+UsbAoaAdapter::UsbAoaAdapter(resumption::LastState& last_state,
+                             const TransportManagerSettings& settings)
+    : TransportAdapterImpl(new UsbDeviceScanner(this),
+                           new UsbConnectionFactory(this),
+                           NULL,
+                           last_state,
+                           settings)
+    , is_initialised_(false)
+    , usb_handler_(new UsbHandler()) {
   static_cast<UsbDeviceScanner*>(device_scanner_)->SetUsbHandler(usb_handler_);
   static_cast<UsbConnectionFactory*>(server_connection_factory_)
-  ->SetUsbHandler(usb_handler_);
+      ->SetUsbHandler(usb_handler_);
 }
 
 UsbAoaAdapter::~UsbAoaAdapter() {}
@@ -64,21 +68,21 @@ bool UsbAoaAdapter::IsInitialised() const {
 }
 
 TransportAdapter::Error UsbAoaAdapter::Init() {
-  LOG4CXX_TRACE(logger_, "enter");
+  SDL_TRACE("enter");
   TransportAdapter::Error error = usb_handler_->Init();
   if (error != TransportAdapter::OK) {
-    LOG4CXX_TRACE(logger_, "exit with error " << error <<
-                  ". Condition: error != TransportAdapter::OK");
+    SDL_TRACE("exit with error "
+              << error << ". Condition: error != TransportAdapter::OK");
     return error;
   }
   error = TransportAdapterImpl::Init();
   if (error != TransportAdapter::OK) {
-    LOG4CXX_TRACE(logger_, "exit with error " << error <<
-                  ". Condition: error != TransportAdapter::OK");
+    SDL_TRACE("exit with error "
+              << error << ". Condition: error != TransportAdapter::OK");
     return error;
   }
   is_initialised_ = true;
-  LOG4CXX_TRACE(logger_, "exit with TransportAdapter::OK");
+  SDL_TRACE("exit with TransportAdapter::OK");
   return TransportAdapter::OK;
 }
 

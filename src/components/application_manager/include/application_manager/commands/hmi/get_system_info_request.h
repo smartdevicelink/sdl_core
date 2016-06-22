@@ -43,30 +43,31 @@ namespace commands {
  * @brief GetSystemInfoRequest command class
  **/
 class GetSystemInfoRequest : public RequestToHMI {
-  public:
-    /**
-     * @brief GetSystemInfoRequest class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit GetSystemInfoRequest(const MessageSharedPtr& message);
+ public:
+  /**
+   * @brief GetSystemInfoRequest class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  GetSystemInfoRequest(const MessageSharedPtr& message,
+                       ApplicationManager& application_manager);
 
-    /**
-     * @brief GetSystemInfoRequest class destructor
-     **/
-    virtual ~GetSystemInfoRequest();
+  /**
+   * @brief GetSystemInfoRequest class destructor
+   **/
+  virtual ~GetSystemInfoRequest();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(GetSystemInfoRequest);
+ private:
+  DISALLOW_COPY_AND_ASSIGN(GetSystemInfoRequest);
 };
 
 }  // namespace commands
 
 }  // namespace application_manager
 
-#endif  //  SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_SYSTEM_INFO_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_SYSTEM_INFO_REQUEST_H_

@@ -32,7 +32,6 @@
  */
 
 #include "application_manager/commands/mobile/get_dtcs_request.h"
-#include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "interfaces/HMI_API.h"
 
@@ -40,27 +39,26 @@ namespace application_manager {
 
 namespace commands {
 
-GetDTCsRequest::GetDTCsRequest(const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {
-}
+GetDTCsRequest::GetDTCsRequest(const MessageSharedPtr& message,
+                               ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager) {}
 
-GetDTCsRequest::~GetDTCsRequest() {
-}
+GetDTCsRequest::~GetDTCsRequest() {}
 
 void GetDTCsRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
 
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
+  ApplicationSharedPtr app = application_manager_.application(
       (*message_)[strings::params][strings::connection_key].asUInt());
 
   if (!app) {
-    LOG4CXX_ERROR(logger_, "NULL pointer");
+    SDL_ERROR("NULL pointer");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
-  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-      smart_objects::SmartType_Map);
+  smart_objects::SmartObject msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
 
   msg_params[strings::ecu_name] =
       (*message_)[strings::msg_params][strings::ecu_name];
@@ -76,7 +74,7 @@ void GetDTCsRequest::Run() {
 }
 
 void GetDTCsRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_AUTO_TRACE();
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
@@ -91,7 +89,7 @@ void GetDTCsRequest::on_event(const event_engine::Event& event) {
       break;
     }
     default: {
-      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+      SDL_ERROR("Received unknown event" << event.id());
       return;
     }
   }

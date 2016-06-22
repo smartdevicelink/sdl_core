@@ -31,7 +31,7 @@
  */
 
 #include "application_manager/commands/command_notification_impl.h"
-#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_manager.h"
 #include "application_manager/message_helper.h"
 
 namespace application_manager {
@@ -39,12 +39,10 @@ namespace application_manager {
 namespace commands {
 
 CommandNotificationImpl::CommandNotificationImpl(
-    const MessageSharedPtr& message)
-    : CommandImpl(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandImpl(message, application_manager) {}
 
-CommandNotificationImpl::~CommandNotificationImpl() {
-}
+CommandNotificationImpl::~CommandNotificationImpl() {}
 
 bool CommandNotificationImpl::Init() {
   return true;
@@ -54,8 +52,7 @@ bool CommandNotificationImpl::CleanUp() {
   return true;
 }
 
-void CommandNotificationImpl::Run() {
-}
+void CommandNotificationImpl::Run() {}
 
 void CommandNotificationImpl::SendNotification() {
   (*message_)[strings::params][strings::protocol_type] = mobile_protocol_type_;
@@ -63,10 +60,10 @@ void CommandNotificationImpl::SendNotification() {
   (*message_)[strings::params][strings::message_type] =
       static_cast<int32_t>(application_manager::MessageType::kNotification);
 
-  LOG4CXX_INFO(logger_, "SendNotification");
+  SDL_INFO("SendNotification");
   MessageHelper::PrintSmartObject(*message_);
 
-  ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
+  application_manager_.SendMessageToMobile(message_);
 }
 
 }  // namespace commands
