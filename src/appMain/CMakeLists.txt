@@ -58,7 +58,7 @@ endif()
 
 if (TELEMETRY_MONITOR)
     set(TELEMETRY_MONITOR_LIB
-        TelemetryMonitor)
+        telemetry_monitor)
 endif()
 
 set(LIBRARIES

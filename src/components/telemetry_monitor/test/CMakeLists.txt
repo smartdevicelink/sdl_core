@@ -1,4 +1,4 @@
-# Copyright (c) 2015, Ford Motor Company
+# Copyright (c) 2016, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,36 +28,24 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-set(TELEMETRY_MONITOR_TEST_DIR ${COMPONENTS_DIR}/telemetry_monitor/test)
-find_package(SDLLibUSB REQUIRED)
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
 include_directories(
-  ${TELEMETRY_MONITOR_TEST_DIR}/include
-  ${GMOCK_INCLUDE_DIRECTORY}
   ${COMPONENTS_DIR}/telemetry_monitor/include
+  ${COMPONENTS_DIR}/telemetry_monitor/test/include
   ${COMPONENTS_DIR}/utils/include
   ${COMPONENTS_DIR}/protocol_handler/include
   ${COMPONENTS_DIR}/application_manager/include
   ${COMPONENTS_DIR}/resumption/include
   ${JSONCPP_INCLUDE_DIRECTORY}
-)
-  
-
-set(testSources
-  ${TELEMETRY_MONITOR_TEST_DIR}/metric_wrapper_test.cc
-  ${TELEMETRY_MONITOR_TEST_DIR}/telemetry_monitor_test.cc
-  ${TELEMETRY_MONITOR_TEST_DIR}/protocol_handler_metric_test.cc
-  ${TELEMETRY_MONITOR_TEST_DIR}/protocol_handler_observer_test.cc
-  ${TELEMETRY_MONITOR_TEST_DIR}/transport_manager_metric_test.cc
-  ${TELEMETRY_MONITOR_TEST_DIR}/transport_manager_observer_test.cc
-  ${TELEMETRY_MONITOR_TEST_DIR}/application_manager_metric_test.cc
-  ${TELEMETRY_MONITOR_TEST_DIR}/application_manager_observer_test.cc
+  ${GMOCK_INCLUDE_DIRECTORY}
 )
 
-set(testLibraries
+collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}")
+
+set(LIBRARIES
   gmock
-  TelemetryMonitor
-  jsoncpp
+  telemetry_monitor
   utils
   media_manager
   protocol_handler
@@ -66,21 +54,12 @@ set(testLibraries
   protocol
   config_profile
   application_manager
-  MessageHelper
   resumption
   jsoncpp
   transport_manager
   connection_handler
 )
 
-if (BUILD_USB_SUPPORT)
-  list(APPEND testLibraries ${LIBUSBX_LIBRARIES})
-endif()
+create_test(telemetry_monitor_test "${SOURCES}" "${LIBRARIES}")
 
-if (BUILD_BT_SUPPORT)
-  list(APPEND testLibraries bluetooth)
-endif()
-
-file(COPY ${TELEMETRY_MONITOR_TEST_DIR}/log4cxx.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-
-create_test("telemetry_monitor_test" "${testSources}" "${testLibraries}")
+file(COPY ${COMPONENTS_DIR}/telemetry_monitor/test/log4cxx.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
