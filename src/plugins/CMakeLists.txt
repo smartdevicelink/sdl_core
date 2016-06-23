@@ -1,4 +1,4 @@
-# Copyright (c) 2014, Ford Motor Company
+# Copyright (c) 2016, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,6 +28,6 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-if((ENABLE_LOG) AND (CMAKE_SYSTEM_NAME STREQUAL "Linux"))
-add_subdirectory(appenders)
+if(LOG4CXX_LOGGER)
+  add_subdirectory(appenders)
 endif()
