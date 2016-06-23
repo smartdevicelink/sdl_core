@@ -301,10 +301,6 @@ extern const char* is_suscribed;
 extern const char* message_data;
 
 extern const char* delivery_mode;
-
-extern const char* consented_functions;
-extern const char* consent_source;
-extern const char* allowed;
 }  // namespace strings
 
 namespace json {

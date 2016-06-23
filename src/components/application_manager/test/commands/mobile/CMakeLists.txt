@@ -55,7 +55,6 @@ set(LIBRARIES
   connectionHandler
   HMI_API
   MOBILE_API
-  jsoncpp
   SmartObjects
 )
 
