@@ -52,14 +52,19 @@ RequestController::RequestController(const RequestControlerSettings& settings)
     , timer_("AM RequestCtrlTimer",
              new timer::TimerTaskImpl<RequestController>(
                  this, &RequestController::onTimer))
+	, stop_flag_(false)
     , is_low_voltage_(false)
     , settings_(settings) {
   LOG4CXX_AUTO_TRACE(logger_);
   InitializeThreadpool();
+  timer_.Start(0, timer::kSingleShot);
 }
 
 RequestController::~RequestController() {
   LOG4CXX_AUTO_TRACE(logger_);
+  stop_flag_ = true;
+  timer_condition_.Broadcast();
+  timer_.Stop();
   if (pool_state_ != TPoolState::STOPPED) {
     DestroyThreadpool();
   }
@@ -372,18 +377,36 @@ void RequestController::onTimer() {
   LOG4CXX_DEBUG(
       logger_,
       "ENTER Waiting fore response count: " << waiting_for_response_.Size());
-  RequestInfoPtr probably_expired =
-      waiting_for_response_.FrontWithNotNullTimeout();
-  while (probably_expired && probably_expired->isExpired()) {
+  while(!stop_flag_) {
+    RequestInfoPtr probably_expired =
+        waiting_for_response_.FrontWithNotNullTimeout();
+    if (!probably_expired) {
+	  sync_primitives::AutoLock auto_lock(timer_lock);
+	  timer_condition_.Wait(auto_lock);
+	  continue;
+	}
+	if (!probably_expired->isExpired()) {
+	  LOG4CXX_INFO(logger_, "onTimer:isExpired");
+	  sync_primitives::AutoLock auto_lock(timer_lock);
+	  const TimevalStruct current_time = date_time::DateTime::getCurrentTime();
+	  const TimevalStruct end_time = probably_expired->end_time();
+	  if (current_time < end_time) {
+	    const uint32_t msecs = 
+			static_cast<uint32_t>(date_time::DateTime::getmSecs(end_time - current_time));
+		LOG4CXX_DEBUG(logger_, "Sleep for" << msecs << " millisecs");
+		timer_condition_.WaitFor(auto_lock, msecs);
+	  }
+	  continue;
+	}
     LOG4CXX_INFO(logger_,
-                 "Timeout for "
-                     << (RequestInfo::HMIRequest ==
-                                 probably_expired->requst_type()
+				 "Timeout for "
+             		 << (RequestInfo::HMIRequest ==
+							    probably_expired->requst_type()
                              ? "HMI"
-                             : "Mobile")
-                     << " request id: " << probably_expired->requestId()
-                     << " connection_key: " << probably_expired->app_id()
-                     << " is expired");
+                     		 : "Mobile")
+             		 << " request id: " << probably_expired->requestId()
+             		 << " connection_key: " << probably_expired->app_id()
+             		 << " is expired");
     const uint32_t experied_request_id = probably_expired->requestId();
     const uint32_t experied_app_id = probably_expired->app_id();
 
@@ -483,35 +506,7 @@ void RequestController::Worker::exitThreadMain() {
 
 void RequestController::UpdateTimer() {
   LOG4CXX_AUTO_TRACE(logger_);
-  RequestInfoPtr front = waiting_for_response_.FrontWithNotNullTimeout();
-  // Buffer for sending request
-  const uint32_t delay_time = 100u;
-  if (front) {
-    const TimevalStruct current_time = date_time::DateTime::getCurrentTime();
-    TimevalStruct end_time = front->end_time();
-    date_time::DateTime::AddMilliseconds(end_time, delay_time);
-    if (current_time < end_time) {
-      const uint32_t msecs = static_cast<uint32_t>(
-          date_time::DateTime::getmSecs(end_time - current_time));
-      LOG4CXX_DEBUG(logger_, "Sleep for " << msecs << " millisecs");
-      // Timeout for bigger than 5 minutes is a mistake
-      timer_.Start(msecs, true);
-    } else {
-      LOG4CXX_WARN(
-          logger_,
-          "Request app_id: "
-              << front->app_id() << " correlation_id: " << front->requestId()
-              << " is expired. "
-              << "End time (ms): " << date_time::DateTime::getmSecs(end_time)
-              << " Current time (ms): "
-              << date_time::DateTime::getmSecs(current_time)
-              << " Diff (current - end) (ms): "
-              << date_time::DateTime::getmSecs(current_time - end_time)
-              << " Request timeout (sec): "
-              << front->timeout_msec() /
-                     date_time::DateTime::MILLISECONDS_IN_SECOND);
-    }
-  }
+  timer_condition_.NotifyOne();
 }
 
 }  //  namespace request_controller
