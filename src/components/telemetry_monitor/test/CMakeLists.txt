@@ -59,7 +59,7 @@ set(testLibraries
   TelemetryMonitor
   jsoncpp
   utils
-  MediaManager
+  media_manager
   protocol_handler
   v4_protocol_v1_2_no_extra
   smart_object
@@ -70,7 +70,6 @@ set(testLibraries
   resumption
   jsoncpp
   transport_manager
-  MediaManager
   connection_handler
 )
 

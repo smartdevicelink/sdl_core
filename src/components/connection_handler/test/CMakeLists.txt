@@ -38,7 +38,7 @@ include_directories(
 set(LIBRARIES
   gmock
   utils
-  MediaManager
+  media_manager
   connection_handler
   protocol_handler
 )

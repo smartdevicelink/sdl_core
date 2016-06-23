@@ -62,7 +62,7 @@ if (TELEMETRY_MONITOR)
 endif()
 
 set(LIBRARIES
-  MediaManager
+  media_manager
   application_manager
   HMI_API
   MOBILE_API
