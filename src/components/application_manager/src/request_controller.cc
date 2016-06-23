@@ -52,7 +52,7 @@ RequestController::RequestController(const RequestControlerSettings& settings)
     , timer_("AM RequestCtrlTimer",
              new timer::TimerTaskImpl<RequestController>(
                  this, &RequestController::onTimer))
-	, stop_flag_(false)
+    , stop_flag_(false)
     , is_low_voltage_(false)
     , settings_(settings) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -391,9 +391,9 @@ void RequestController::onTimer() {
 	  const TimevalStruct current_time = date_time::DateTime::getCurrentTime();
 	  const TimevalStruct end_time = probably_expired->end_time();
 	  if (current_time < end_time) {
-	    const uint32_t msecs = 
-			static_cast<uint32_t>(date_time::DateTime::getmSecs(end_time - current_time));
-		LOG4CXX_DEBUG(logger_, "Sleep for" << msecs << " millisecs");
+	    const uint32_t msecs = static_cast<uint32_t>(
+			date_time::DateTime::getmSecs(end_time - current_time));
+		LOG4CXX_DEBUG(logger_, "Sleep for " << msecs << " millisecs");
 		timer_condition_.WaitFor(auto_lock, msecs);
 	  }
 	  continue;
