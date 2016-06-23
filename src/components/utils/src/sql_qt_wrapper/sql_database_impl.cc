@@ -1,4 +1,4 @@
-#include "sql_qt_wrapper/sql_database.h"
+#include "sql_qt_wrapper/sql_database_impl.h"
 
 #include <QSqlError>
 
@@ -9,16 +9,16 @@ const QString kDatabaseExtension = ".sqlite";
 namespace utils {
 namespace dbms {
 
-SQLDatabase::SQLDatabase() : database_path_() {}
+SQLDatabaseImpl::SQLDatabaseImpl() : database_path_() {}
 
-SQLDatabase::SQLDatabase(const std::string& database_path,
-                         const std::string& connection_name)
+SQLDatabaseImpl::SQLDatabaseImpl(const std::string& database_path,
+                                 const std::string& connection_name)
     : database_path_((database_path + kDatabaseExtension.toStdString()).c_str())
     , connection_name_(connection_name.c_str()) {
   db_ = QSqlDatabase::addDatabase("QSQLITE", connection_name_);
 }
 
-SQLDatabase::~SQLDatabase() {
+SQLDatabaseImpl::~SQLDatabaseImpl() {
   Close();
   sync_primitives::AutoLock auto_lock(conn_lock_);
   /*
@@ -30,57 +30,61 @@ SQLDatabase::~SQLDatabase() {
   QSqlDatabase::removeDatabase(connection_name_);
 }
 
-bool SQLDatabase::Open() {
+bool SQLDatabaseImpl::Open() {
   sync_primitives::AutoLock auto_lock(conn_lock_);
   db_.setDatabaseName(database_path_);
   return db_.open();
 }
 
-void SQLDatabase::Close() {
+void SQLDatabaseImpl::Close() {
   sync_primitives::AutoLock auto_lock(conn_lock_);
   if (db_.isOpen()) {
     db_.close();
   }
 }
 
-bool SQLDatabase::BeginTransaction() {
+bool SQLDatabaseImpl::BeginTransaction() {
   sync_primitives::AutoLock auto_lock(conn_lock_);
   return db_.transaction();
 }
 
-bool SQLDatabase::CommitTransaction() {
+bool SQLDatabaseImpl::CommitTransaction() {
   sync_primitives::AutoLock auto_lock(conn_lock_);
   return db_.commit();
 }
 
-bool SQLDatabase::RollbackTransaction() {
+bool SQLDatabaseImpl::RollbackTransaction() {
   sync_primitives::AutoLock auto_lock(conn_lock_);
   return db_.rollback();
 }
 
-SQLError SQLDatabase::LastError() const {
+SQLError SQLDatabaseImpl::LastError() const {
   sync_primitives::AutoLock auto_lock(conn_lock_);
   return SQLError(db_.lastError());
 }
 
-bool SQLDatabase::HasErrors() const {
+bool SQLDatabaseImpl::HasErrors() const {
   sync_primitives::AutoLock auto_lock(conn_lock_);
   return db_.lastError().type() != QSqlError::NoError;
 }
 
-std::string SQLDatabase::get_path() const {
+void SQLDatabaseImpl::set_path(const std::string& path) {
+    database_path_ = path.c_str();
+}
+
+std::string SQLDatabaseImpl::get_path() const {
   return database_path_.toStdString();
 }
 
-bool SQLDatabase::IsReadWrite() {
+bool SQLDatabaseImpl::IsReadWrite() {
   return true;
 }
 
-SQLDatabase::operator QSqlDatabase() const {
+SQLDatabaseImpl::operator QSqlDatabase() const {
   return db_;
 }
 
-bool SQLDatabase::Backup() {
+bool SQLDatabaseImpl::Backup() {
   return true;
 }
 
