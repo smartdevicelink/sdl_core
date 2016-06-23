@@ -46,15 +46,12 @@ set (SOURCES
 
 set(LIBRARIES
   gmock
-  Utils
   ApplicationManager
   connectionHandler
-  HMI_API
-  MOBILE_API
-  SmartObjects
   jsoncpp
 )
 
 create_test("commands_test" "${SOURCES}" "${LIBRARIES}" )
 
 add_subdirectory(mobile)
+add_subdirectory(hmi/hmi_notifications)
