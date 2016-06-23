@@ -1602,6 +1602,8 @@ void MessageHelper::SendPolicyUpdate(
     object[strings::msg_params][hmi_request::retry][i] = retries[i];
   }
   ApplicationManagerImpl::instance()->ManageHMICommand(message);
+  // to Reset the update_required_ flag
+  policy::PolicyHandler::instance()->OnUpdateRequestSentToMobile();
 }
 
 void MessageHelper::SendGetUserFriendlyMessageResponse(
