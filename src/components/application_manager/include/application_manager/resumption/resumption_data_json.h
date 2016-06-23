@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -218,13 +218,6 @@ class ResumptionDataJson : public ResumptionData {
    * @param ign_off_time - igition off time
    */
   void SetLastIgnOffTime(time_t ign_off_time);
-
-  /*
-   * @brief Return true if application resumption data is valid,
-   * otherwise false
-   * @param index application index in the resumption list
-   */
-  bool IsResumptionDataValid(uint32_t index) const;
 
   LastState& last_state_;
   DISALLOW_COPY_AND_ASSIGN(ResumptionDataJson);

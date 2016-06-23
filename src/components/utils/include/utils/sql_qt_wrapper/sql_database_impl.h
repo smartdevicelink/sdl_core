@@ -1,5 +1,5 @@
-#ifndef SRC_COMPONENTS_POLICY_SQLITE_WRAPPER_INCLUDE_SQL_QT_WRAPPER_SQL_DATABASE
-#define SRC_COMPONENTS_POLICY_SQLITE_WRAPPER_INCLUDE_SQL_QT_WRAPPER_SQL_DATABASE
+#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SQL_QT_WRAPPER_SQL_DATABASE_IMPL_H_
+#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SQL_QT_WRAPPER_SQL_DATABASE_IMPL_H_
 
 #include <string>
 
@@ -7,6 +7,7 @@
 
 #include "utils/lock.h"
 #include "utils/sql_qt_wrapper/sql_error.h"
+#include "utils/sql_database.h"
 
 namespace utils {
 namespace dbms {
@@ -14,12 +15,12 @@ namespace dbms {
 /**
  * Represents a connection to a database.
  */
-class SQLDatabase {
+class SQLDatabaseImpl : public SQLDatabase {
  public:
-  SQLDatabase();
-  SQLDatabase(const std::string& database_path,
-              const std::string& connection_name);
-  ~SQLDatabase();
+  SQLDatabaseImpl();
+  SQLDatabaseImpl(const std::string& database_path,
+                  const std::string& connection_name);
+  ~SQLDatabaseImpl();
 
   /**
    * Opens connection to the temporary in-memory database
@@ -105,4 +106,4 @@ class SQLDatabase {
 }  // namespace dbms
 }  // namespace utils
 
-#endif  // SRC_COMPONENTS_POLICY_SQLITE_WRAPPER_INCLUDE_SQL_QT_WRAPPER_SQL_DATABASE
+#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SQL_QT_WRAPPER_SQL_DATABASE_IMPL_H_

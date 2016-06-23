@@ -33,8 +33,8 @@
 
 #include "gtest/gtest.h"
 
-#include "qdb_wrapper/sql_error.h"
-#include "qdb_wrapper/sql_database.h"
+#include "utils/qdb_wrapper/sql_error.h"
+#include "utils/qdb_wrapper/sql_database_impl.h"
 
 using ::utils::dbms::SQLError;
 using ::utils::dbms::SQLDatabase;

@@ -41,7 +41,7 @@
 #include <cassert>
 #include <limits>
 
-#include "sql_qt_wrapper/sql_database.h"
+#include "utils/sql_database.h"
 #include "utils/macro.h"
 
 namespace utils {

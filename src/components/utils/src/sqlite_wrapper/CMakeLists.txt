@@ -43,7 +43,7 @@ include_directories(
 )
 
 set(SOURCES
-  ${SQLITE_SRC_DIR}/sql_database.cc
+  ${SQLITE_SRC_DIR}/sql_database_impl.cc
   ${SQLITE_SRC_DIR}/sql_query.cc
   ${SQLITE_SRC_DIR}/sql_error.cc
 )
