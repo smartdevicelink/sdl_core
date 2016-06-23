@@ -267,10 +267,6 @@ const char* is_suscribed = "isSubscribed";
 const char* message_data = "messageData";
 
 const char* delivery_mode = "deliveryMode";
-
-const char* consented_functions = "consentedFunctions";
-const char* consent_source = "source";
-const char* allowed = "allowed";
 }  // namespace strings
 
 namespace json {
