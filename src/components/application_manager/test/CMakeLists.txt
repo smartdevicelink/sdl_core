@@ -178,10 +178,10 @@
 
     # TODO [AKozoriz] : Fix not buildable tests
     set(ResumptionData_SOURCES
-        ${AM_TEST_DIR}/resumption/resumption_data_test.cc
-        ${AM_TEST_DIR}/resumption/resumption_data_db_test.cc
-        ${AM_TEST_DIR}/resumption/resumption_data_json_test.cc
-        ${AM_TEST_DIR}/resumption/resume_ctrl_test.cc
+    #    ${AM_TEST_DIR}/resumption/resumption_data_test.cc
+    #    ${AM_TEST_DIR}/resumption/resumption_data_db_test.cc
+    #    ${AM_TEST_DIR}/resumption/resumption_data_json_test.cc
+    #    ${AM_TEST_DIR}/resumption/resume_ctrl_test.cc
         ${AM_TEST_DIR}/mock_message_helper.cc
       )
 

@@ -442,6 +442,31 @@ ssize_t ResumptionDataJson::GetObjectIndex(const std::string& policy_app_id,
   return -1;
 }
 
+bool ResumptionDataJson::IsResumptionDataValid(uint32_t index) const {
+  using namespace app_mngr;
+  using namespace utils::json;
+  SDL_AUTO_TRACE();
+  sync_primitives::AutoLock autolock(resumption_lock_);
+  const JsonValueRef json_app = GetSavedApplications()[index];
+  if (!json_app.HasMember(strings::app_id) ||
+      !json_app.HasMember(strings::ign_off_count) ||
+      !json_app.HasMember(strings::hmi_level) ||
+      !json_app.HasMember(strings::hmi_app_id) ||
+      !json_app.HasMember(strings::time_stamp) ||
+      !json_app.HasMember(strings::device_id)) {
+    SDL_ERROR("Wrong resumption data");
+    return false;
+  }
+
+  if (json_app.HasMember(strings::hmi_app_id) &&
+      0 >= json_app[strings::hmi_app_id].AsUInt()) {
+    SDL_ERROR("Wrong resumption hmi app ID");
+    return false;
+  }
+
+  return true;
+}
+
 void ResumptionDataJson::SetSavedApplication(
     utils::json::JsonValueRef apps_json) {
   SDL_AUTO_TRACE();
@@ -483,7 +508,9 @@ bool ResumptionDataJson::DropAppDataResumption(const std::string& device_id,
   application[strings::application_global_properties].Clear();
   application[strings::application_subscribtions].Clear();
   application[strings::application_files].Clear();
-  application.RemoveMember(strings::grammar_id);
+  // Seems there is no interface for json wrapper - needs to be created
+  // application.removeMember(strings::grammar_id);
+  application[strings::grammar_id].Clear();
   SDL_DEBUG("Resumption data for application " << app_id << " with device_id "
                                                << device_id
                                                << " has been dropped.");

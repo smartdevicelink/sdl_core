@@ -31,10 +31,10 @@
 
 #include "gtest/gtest.h"
 #include "utils/sqlite_wrapper/sql_error.h"
-#include "utils/sqlite_wrapper/sql_database_impl.h"
+#include "utils/sqlite_wrapper/sql_database.h"
 
 using ::utils::dbms::SQLError;
-using ::utils::dbms::SQLDatabaseImpl;
+using ::utils::dbms::SQLDatabase;
 
 namespace test {
 namespace components {
@@ -49,9 +49,9 @@ namespace dbms_test {
   }
 }
 
-TEST(SQLDatabaseImplTest, OpenCloseMemory_OpenAndCloseDB_ActsWithoutError) {
+TEST(SQLDatabaseTest, OpenCloseMemory_OpenAndCloseDB_ActsWithoutError) {
   // arrange
-  SQLDatabaseImpl db;
+  SQLDatabase db("test-database", "test");
   bool ret = db.Open();
 
   // assert
@@ -65,10 +65,9 @@ TEST(SQLDatabaseImplTest, OpenCloseMemory_OpenAndCloseDB_ActsWithoutError) {
   EXPECT_FALSE(IsError(db.LastError()));
 }
 
-TEST(SQLDatabaseImplTest,
-     OpenCloseFile_OpenAndCloseSpecifiedDB_ActsWithoutError) {
+TEST(SQLDatabaseTest, OpenCloseFile_OpenAndCloseSpecifiedDB_ActsWithoutError) {
   // arrange
-  SQLDatabaseImpl db("test-database");
+  SQLDatabase db("test-database", "test");
   bool ret = db.Open();
 
   // assert
@@ -84,9 +83,9 @@ TEST(SQLDatabaseImplTest,
   remove("test-database.sqlite");
 }
 
-TEST(SQLDatabaseImplTest, OpenDBTwice_NoError) {
+TEST(SQLDatabaseTest, OpenDBTwice_NoError) {
   // arrange
-  SQLDatabaseImpl db;
+  SQLDatabase db("test-database", "test");
   bool ret = db.Open();
 
   // assert
@@ -103,9 +102,9 @@ TEST(SQLDatabaseImplTest, OpenDBTwice_NoError) {
   db.Close();
 }
 
-TEST(SQLDatabaseImplTest, CloseDBTwice_NoError) {
+TEST(SQLDatabaseTest, CloseDBTwice_NoError) {
   // arrange
-  SQLDatabaseImpl db;
+  SQLDatabase db("test-database", "test");
   bool ret = db.Open();
 
   // assert
@@ -125,19 +124,19 @@ TEST(SQLDatabaseImplTest, CloseDBTwice_NoError) {
   EXPECT_FALSE(IsError(db.LastError()));
 }
 
-TEST(SQLDatabaseImplTest, Close_DBWasNotOpened_NoError) {
+TEST(SQLDatabaseTest, Close_DBWasNotOpened_NoError) {
   // act
-  SQLDatabaseImpl db;
+  SQLDatabase db("test-database", "test");
   db.Close();
 
   // assert
   EXPECT_FALSE(IsError(db.LastError()));
 }
 
-TEST(SQLDatabaseImplTest,
+TEST(SQLDatabaseTest,
      CommitTransaction_StartAndCommitTransaction_ExpectActsWithoutError) {
   // arrange
-  SQLDatabaseImpl db;
+  SQLDatabase db("test-database", "test");
 
   // assert
   ASSERT_TRUE(db.Open());
@@ -149,10 +148,10 @@ TEST(SQLDatabaseImplTest,
   db.Close();
 }
 
-TEST(SQLDatabaseImplTest,
+TEST(SQLDatabaseTest,
      RollbackTransaction_StartAndRollbackTransaction_ExpectActsWithoutError) {
   // arrange
-  SQLDatabaseImpl db;
+  SQLDatabase db("test-database", "test");
 
   // assert
   ASSERT_TRUE(db.Open());
@@ -164,10 +163,10 @@ TEST(SQLDatabaseImplTest,
   db.Close();
 }
 
-TEST(SQLDatabaseImplTest,
+TEST(SQLDatabaseTest,
      FailedCommitTransaction_CommitTransactionWithoutBeginning_ExpectError) {
   // arrange
-  SQLDatabaseImpl db;
+  SQLDatabase db("test-database", "test");
 
   // assert
   ASSERT_TRUE(db.Open());
@@ -178,10 +177,10 @@ TEST(SQLDatabaseImplTest,
 }
 
 TEST(
-    SQLDatabaseImplTest,
+    SQLDatabaseTest,
     FailedRollbackTransaction_RollbackTransactionWithoutBeginning_ExpectError) {
   // arrange
-  SQLDatabaseImpl db;
+  SQLDatabase db("test-database", "test");
 
   // assert
   ASSERT_TRUE(db.Open());
@@ -191,19 +190,18 @@ TEST(
   db.Close();
 }
 
-TEST(SQLDatabaseImplTest,
-     BadTransaction_BeginTransitionWithoutOpenDB_ExpectError) {
+TEST(SQLDatabaseTest, BadTransaction_BeginTransitionWithoutOpenDB_ExpectError) {
   // arrange
-  SQLDatabaseImpl db;
+  SQLDatabase db("test-database", "test");
 
   // assert
   EXPECT_FALSE(db.BeginTransaction());
   EXPECT_TRUE(IsError(db.LastError()));
 }
 
-TEST(SQLDatabaseImplTest, IsReadWrite_FirstOpenDBIsRWSecondIsNot) {
+TEST(SQLDatabaseTest, IsReadWrite_FirstOpenDBIsRWSecondIsNot) {
   // arrange
-  SQLDatabaseImpl db("test-database");
+  SQLDatabase db("test-database", "test");
 
   // assert
   ASSERT_TRUE(db.Open());

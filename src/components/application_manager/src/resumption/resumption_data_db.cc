@@ -61,25 +61,20 @@ ResumptionDataDB::ResumptionDataDB(
     : ResumptionData(application_manager) {
   if (db_storage == In_File_Storage) {
 #ifndef __QNX__
-    db_ = new utils::dbms::SQLDatabaseImpl(file_system::ConcatPath(
-        application_manager_.get_settings().app_storage_folder(),
-        kDatabaseName));
+    db_ = new utils::dbms::SQLDatabase(
+        file_system::ConcatPath(
+            application_manager_.get_settings().app_storage_folder(),
+            kDatabaseName),
+        "ResumptionDatabase");
 #else
-    db_ = new utils::dbms::SQLDatabaseImpl(kDatabaseName);
+    db_ = new utils::dbms::SQLDatabase(kDatabaseName);
 #endif
   } else if (db_storage == In_Memory_Storage) {
-    db_ = new utils::dbms::SQLDatabaseImpl();
+    db_ = new utils::dbms::SQLDatabase();
   } else {
     SDL_ERROR("Get not existed type of database storage");
   }
 }
-
-#ifdef BUILD_TESTS
-ResumptionDataDB::ResumptionDataDB(
-    utils::dbms::SQLDatabase* db,
-    const application_manager::ApplicationManager& application_manager)
-    : ResumptionData(application_manager), db_(db) {}
-#endif  // BUILD_TESTS
 
 ResumptionDataDB::~ResumptionDataDB() {
   db_->Close();
@@ -366,13 +361,15 @@ bool ResumptionDataDB::GetSavedApplication(
 bool ResumptionDataDB::RemoveApplicationFromSaved(
     const std::string& policy_app_id, const std::string& device_id) {
   SDL_AUTO_TRACE();
-  bool result = false;
   bool application_exist = false;
   if (!CheckExistenceApplication(policy_app_id, device_id, application_exist) ||
       !application_exist) {
-    SDL_ERROR("Problem with access to DB or application does not exist");
-    return result;
+    SDL_ERROR(
+        "Problem with access to DB or application does not"
+        " exist");
+    return false;
   }
+  bool result = false;
   if (DeleteSavedApplication(policy_app_id, device_id)) {
     WriteDb();
     result = true;
@@ -402,6 +399,32 @@ void ResumptionDataDB::GetDataForLoadResumeData(
     smart_objects::SmartObject& saved_data) const {
   SDL_AUTO_TRACE();
   SelectDataForLoadResumeData(saved_data);
+}
+
+bool ResumptionDataDB::SelectHMILevel(const std::string& policy_app_id,
+                                      const std::string& device_id,
+                                      int& hmi_level) const {
+  SDL_AUTO_TRACE();
+  utils::dbms::SQLQuery query_count(db());
+  utils::dbms::SQLQuery query_select(db());
+  if (query_count.Prepare(kSelectCountHMILevel) &&
+      query_select.Prepare(kSelectHMILevel)) {
+    /* Positions of binding data for "query_count" and "query_select" :
+       field "deviceID" from table "application" = 0
+       field "appID" from table "application" = 1 */
+    query_count.Bind(0, device_id);
+    query_count.Bind(1, policy_app_id);
+    query_select.Bind(0, device_id);
+    query_select.Bind(1, policy_app_id);
+    /* Position of data in "query_select" :
+       field "hmiLevel" from table "application" = 0 */
+    if (query_count.Exec() && query_count.GetInteger(0) &&
+        query_select.Exec()) {
+      hmi_level = query_select.GetInteger(0);
+      return true;
+    }
+  }
+  return false;
 }
 
 bool ResumptionDataDB::CheckExistenceHMIId(uint32_t hmi_app_id) const {
@@ -2698,14 +2721,13 @@ bool ResumptionDataDB::UpdateGrammarID(const std::string& policy_app_id,
 }
 
 utils::dbms::SQLDatabase* ResumptionDataDB::db() const {
-#ifdef __QNX__
-  utils::dbms::SQLDatabase* db =
-      new utils::dbms::SQLDatabaseImpl(kDatabaseName);
+#if defined(__QNX__)
+  utils::dbms::SQLDatabase* db = new utils::dbms::SQLDatabase(kDatabaseName);
   db->Open();
   return db;
 #else
   return db_;
-#endif  // __QNX__
+#endif
 }
 
 ApplicationParams::ApplicationParams(

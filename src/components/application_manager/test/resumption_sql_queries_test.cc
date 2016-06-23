@@ -37,8 +37,7 @@
 #include <utility>
 #include "gtest/gtest.h"
 
-#include "utils/sqlite_wrapper/sql_database_impl.h"
-#include "utils/sqlite_wrapper/sql_query.h"
+#include "utils/sql_wrapper.h"
 #include "utils/file_system.h"
 #include "application_manager/resumption/resumption_sql_queries.h"
 #include "policy/sql_pt_queries.h"
@@ -51,7 +50,6 @@ using namespace ::resumption;
 
 using std::string;
 using std::pair;
-using utils::dbms::SQLDatabaseImpl;
 using utils::dbms::SQLDatabase;
 using utils::dbms::SQLQuery;
 
@@ -116,7 +114,7 @@ class ResumptionSqlQueriesTest : public ::testing::Test {
   static const int timeStamp2;
 
   static void SetUpTestCase() {
-    db_ = new SQLDatabaseImpl();
+    db_ = new SQLDatabase(db_path, connection_name);
     ASSERT_TRUE(db_->Open());
     ASSERT_TRUE(db_->IsReadWrite());
     SQLQuery query(db_);

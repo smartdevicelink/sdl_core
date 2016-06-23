@@ -36,7 +36,7 @@ include_directories(
 )
 
 set(SOURCES
-  ./sql_database_impl.cc
+  ./sql_database.cc
   ./sql_error.cc
   ./sql_query.cc
 )

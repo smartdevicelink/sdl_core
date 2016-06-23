@@ -35,11 +35,11 @@
 #include "gtest/gtest.h"
 
 #include "utils/sqlite_wrapper/sql_error.h"
-#include "utils/sqlite_wrapper/sql_database_impl.h"
+#include "utils/sqlite_wrapper/sql_database.h"
 #include "utils/sqlite_wrapper/sql_query.h"
 
 using ::utils::dbms::SQLError;
-using ::utils::dbms::SQLDatabaseImpl;
+using ::utils::dbms::SQLDatabase;
 using ::utils::dbms::SQLQuery;
 
 namespace test {
@@ -102,7 +102,7 @@ const std::string SQLQueryTest::kDatabaseName = "test-query";
 TEST_F(SQLQueryTest, Query_CreateQuery_QueryInDBEqualCreated) {
   // arrange
   const std::string kSelect("SELECT * FROM testTable WHERE integerValue = ?");
-  SQLDatabaseImpl db(kDatabaseName);
+  SQLDatabase db(kDatabaseName, "test");
 
   // assert
   ASSERT_TRUE(db.Open());
@@ -121,7 +121,7 @@ TEST_F(SQLQueryTest, ExecString_ExecuteQuery_ActWithoutError) {
       "INSERT INTO testTable"
       " (integerValue, doubleValue, stringValue)"
       " VALUES(2, 3.4, 'five-пять')");
-  SQLDatabaseImpl db(kDatabaseName);
+  SQLDatabase db(kDatabaseName, "test");
   // assert
   ASSERT_TRUE(db.Open());
 
@@ -146,7 +146,7 @@ TEST_F(SQLQueryTest,
   const double kDoubleValue = 2.3;
   const std::string kStringValue = "four";
 
-  SQLDatabaseImpl db(kDatabaseName);
+  SQLDatabase db(kDatabaseName, "test");
 
   // assert
   ASSERT_TRUE(db.Open());
@@ -217,7 +217,7 @@ TEST_F(SQLQueryTest, SetValue_InsertValues_ExpectDBHasInsertedValues) {
   const double kDoubleValue = 2.3;
   const std::string kStringValue = "four";
 
-  SQLDatabaseImpl db(kDatabaseName);
+  SQLDatabase db(kDatabaseName, "test");
 
   // assert
   ASSERT_TRUE(db.Open());
@@ -242,7 +242,7 @@ TEST_F(SQLQueryTest, EmptySelect_SelectValuesEqual0_ExecWithoutErrors) {
   const std::string kSelect(
       "SELECT integerValue, doubleValue, stringValue"
       " FROM testTable WHERE 0");
-  SQLDatabaseImpl db(kDatabaseName);
+  SQLDatabase db(kDatabaseName, "test");
 
   // assert
   ASSERT_TRUE(db.Open());
@@ -278,7 +278,7 @@ TEST_F(
   const double kDoubleValue = 2.3;
   const std::string kStringValue = "four";
 
-  SQLDatabaseImpl db(kDatabaseName);
+  SQLDatabase db(kDatabaseName, "test");
   ASSERT_TRUE(db.Open());
 
   SQLQuery query(&db);
@@ -314,7 +314,7 @@ TEST_F(SQLQueryTest, LastInsertId_InsertValuesAndBindQuery_GetExpectedId) {
   const std::string kInsert("INSERT INTO idTable (value) VALUES(?)");
 
   // act
-  SQLDatabaseImpl db(kDatabaseName);
+  SQLDatabase db(kDatabaseName, "test");
 
   // assert
   ASSERT_TRUE(db.Open());
@@ -343,7 +343,7 @@ TEST_F(SQLQueryTest, BindNull_BindWithoutValue_ActWithoutErrors) {
   const std::string kInsert(
       "INSERT INTO testTable (`integerValue`)"
       " VALUES (?)");
-  SQLDatabaseImpl db(kDatabaseName);
+  SQLDatabase db(kDatabaseName, "test");
   // assert
   ASSERT_TRUE(db.Open());
 
@@ -362,7 +362,7 @@ TEST_F(SQLQueryTest, BindNull_BindWithoutValue_ActWithoutErrors) {
 
 TEST_F(SQLQueryTest, DoublePrepare_TwicePrepareQuery_ActWithoutErrors) {
   // arrange
-  SQLDatabaseImpl db(kDatabaseName);
+  SQLDatabase db(kDatabaseName, "test");
   // assert
   ASSERT_TRUE(db.Open());
   // act

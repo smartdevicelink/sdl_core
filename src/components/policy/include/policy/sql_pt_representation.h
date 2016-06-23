@@ -67,12 +67,9 @@ class Query : public utils::dbms::SQLQuery {
 };
 class SQLPTRepresentation : public virtual PTRepresentation {
  public:
-  SQLPTRepresentation();
-  SQLPTRepresentation(bool in_memory);
   SQLPTRepresentation(const std::string& app_storage_folder,
                       uint16_t attempts_to_open_policy_db,
                       uint16_t open_attempt_timeout_ms);
-
   ~SQLPTRepresentation();
   virtual void CheckPermissions(const PTString& app_id,
                                 const PTString& hmi_level,
