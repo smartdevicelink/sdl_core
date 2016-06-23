@@ -140,10 +140,6 @@ utils::json::JsonValueRef::JsonValueRef(JsonValue::Storage& storage,
   }
 }
 
-void utils::json::JsonValueRef::RemoveMember(const char* key) {
-  storage_->removeMember(key);
-}
-
 void utils::json::JsonValueRef::Clear() {
   DCHECK(IsValid());
   storage_->clear();

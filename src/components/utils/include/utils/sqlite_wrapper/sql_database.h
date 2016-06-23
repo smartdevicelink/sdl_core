@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Ford Motor Company
+ * Copyright (c) 2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,14 +30,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_QDB_WRAPPER_SQL_DATABASE_IMPL_H_
-#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_QDB_WRAPPER_SQL_DATABASE_IMPL_H_
+#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SQLITE_WRAPPER_SQL_DATABASE_H_
+#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SQLITE_WRAPPER_SQL_DATABASE_H_
 
-#include <qdb/qdb.h>
 #include <string>
-#include "utils/sql_database.h"
-#include "qdb_wrapper/sql_error.h"
+#include "utils/sqlite_wrapper/sql_error.h"
 #include "utils/lock.h"
+
+struct sqlite3;
 
 namespace utils {
 namespace dbms {
@@ -47,45 +47,47 @@ class SQLQuery;
 /**
  * Represents a connection to a database.
  */
-class SQLDatabaseImpl : public SQLDatabase {
+class SQLDatabase {
  public:
-  explicit SQLDatabaseImpl(const std::string& db_name);
-  ~SQLDatabaseImpl();
+  SQLDatabase();
+  SQLDatabase(const std::string& database_path,
+              const std::string& connection_name);
+  ~SQLDatabase();
 
   /**
    * Opens connection to the temporary in-memory database
    * @return true if successfully
    */
-  bool Open() OVERRIDE;
+  bool Open();
 
   /**
    * Closes connection to the database
    */
-  void Close() OVERRIDE;
+  void Close();
 
   /**
    * Begins a transaction on the database
    * @return true if successfully
    */
-  bool BeginTransaction() OVERRIDE;
+  bool BeginTransaction();
 
   /**
    * Commits a transaction to the database
    * @return true if successfully
    */
-  bool CommitTransaction() OVERRIDE;
+  bool CommitTransaction();
 
   /**
    * Rolls back a transaction on the database
    * @return true if successfully
    */
-  bool RollbackTransaction() OVERRIDE;
+  bool RollbackTransaction();
 
   /**
    * Gets information about the last error that occurred on the database
    * @return last error
    */
-  SQLError LastError() const OVERRIDE;
+  SQLError LastError() const;
 
   /**
    * @brief HasErrors Indicate the status of the last executed operation.
@@ -95,23 +97,39 @@ class SQLDatabaseImpl : public SQLDatabase {
   bool HasErrors() const;
 
   /**
+   * @brief get_path databse location path.
+   *
+   * @return the path to the database location
+   */
+  std::string get_path() const;
+
+  /**
+   * Checks if database is read/write
+   * @return true if database is read/write
+   */
+  bool IsReadWrite();
+
+  /**
    * Call backup for opened DB
    */
   bool Backup();
 
-  std::string get_path() const OVERRIDE;
-
+ protected:
+#ifndef QT_PORT
   /**
-   * Gets connection to the SQLite database
-   * @return pointer to connection
-   */
-  qdb_hdl_t* conn() const OVERRIDE;
+    * Gets connection to the SQLite database
+    * @return pointer to connection
+    */
+  sqlite3* conn() const;
+#endif  // QT_PORT
 
  private:
+#ifndef QT_PORT
   /**
    * The connection to the SQLite database
    */
-  qdb_hdl_t* conn_;
+  sqlite3* conn_;
+#endif  // QT_PORT
 
   /**
    * Lock for guarding connection to database
@@ -119,14 +137,16 @@ class SQLDatabaseImpl : public SQLDatabase {
   sync_primitives::Lock conn_lock_;
 
   /**
-   * The database name
+   * The filename of database
    */
-  std::string db_name_;
+  const std::string database_path_;
 
   /**
-   * The last error that occurred on the database
+   * The database connection name
    */
-  Error error_;
+  const std::string connection_name_;
+
+  int error_;
 
   /**
    * Execs query for internal using in this class
@@ -141,4 +161,4 @@ class SQLDatabaseImpl : public SQLDatabase {
 }  // namespace dbms
 }  // namespace utils
 
-#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_QDB_WRAPPER_SQL_DATABASE_IMPL_H_
+#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SQLITE_WRAPPER_SQL_DATABASE_H_

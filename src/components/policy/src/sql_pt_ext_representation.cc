@@ -33,7 +33,7 @@
 #include <utility>
 #include "utils/logger.h"
 #include "policy/sql_pt_ext_representation.h"
-#include "utils/sql_wrapper.h"
+#include "policy/sql_wrapper.h"
 #include "policy/sql_pt_queries.h"
 #include "policy/sql_pt_ext_queries.h"
 #include "policy/policy_helper.h"

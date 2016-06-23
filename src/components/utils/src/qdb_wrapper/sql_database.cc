@@ -31,7 +31,7 @@
  */
 
 #include <cstring>
-#include "qdb_wrapper/sql_database_impl.h"
+#include "qdb_wrapper/sql_database.h"
 #include "utils/logger.h"
 
 namespace utils {
@@ -39,14 +39,14 @@ namespace dbms {
 
 SDL_CREATE_LOGGER("SQLDatabase")
 
-SQLDatabaseImpl::SQLDatabaseImpl(const std::string& db_name)
+SQLDatabase::SQLDatabase(const std::string& db_name)
     : conn_(NULL), db_name_(db_name), error_(Error::OK) {}
 
-SQLDatabaseImpl::~SQLDatabaseImpl() {
+SQLDatabase::~SQLDatabase() {
   Close();
 }
 
-bool SQLDatabaseImpl::Open() {
+bool SQLDatabase::Open() {
   sync_primitives::AutoLock auto_lock(conn_lock_);
   if (conn_)
     return true;
@@ -58,7 +58,7 @@ bool SQLDatabaseImpl::Open() {
   return true;
 }
 
-void SQLDatabaseImpl::Close() {
+void SQLDatabase::Close() {
   sync_primitives::AutoLock auto_lock(conn_lock_);
   if (conn_) {
     if (qdb_disconnect(conn_) != -1) {
@@ -69,19 +69,19 @@ void SQLDatabaseImpl::Close() {
   }
 }
 
-bool SQLDatabaseImpl::BeginTransaction() {
+bool SQLDatabase::BeginTransaction() {
   return Exec("BEGIN TRANSACTION");
 }
 
-bool SQLDatabaseImpl::CommitTransaction() {
+bool SQLDatabase::CommitTransaction() {
   return Exec("COMMIT TRANSACTION");
 }
 
-bool SQLDatabaseImpl::RollbackTransaction() {
+bool SQLDatabase::RollbackTransaction() {
   return Exec("ROLLBACK TRANSACTION");
 }
 
-bool SQLDatabaseImpl::Exec(const std::string& query) {
+bool SQLDatabase::Exec(const std::string& query) {
   sync_primitives::AutoLock auto_lock(conn_lock_);
   if (qdb_statement(conn_, query.c_str()) == -1) {
     error_ = Error::ERROR;
@@ -90,7 +90,7 @@ bool SQLDatabaseImpl::Exec(const std::string& query) {
   return true;
 }
 
-SQLError SQLDatabaseImpl::LastError() const {
+SQLError SQLDatabase::LastError() const {
   return SQLError(error_, qdb_geterrmsg(conn_));
 }
 
@@ -98,15 +98,11 @@ bool SQLDatabase::HasErrors() const {
   return Error(error_) != OK;
 }
 
-qdb_hdl_t* SQLDatabaseImpl::conn() const {
+qdb_hdl_t* SQLDatabase::conn() const {
   return conn_;
 }
 
-std::string SQLDatabaseImpl::get_path() const {
-  return db_name_;
-}
-
-bool SQLDatabaseImpl::Backup() {
+bool SQLDatabase::Backup() {
   if (qdb_backup(conn_, QDB_ATTACH_DEFAULT) == -1) {
     error_ = Error::ERROR;
     SDL_ERROR("Backup returned error: " << std::strerror(errno));

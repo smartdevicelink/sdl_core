@@ -45,7 +45,7 @@
 #include "utils/file_system.h"
 #include "utils/gen_hash.h"
 #include "policy/sql_pt_representation.h"
-#include "utils/sql_wrapper.h"
+#include "policy/sql_wrapper.h"
 #include "policy/sql_pt_queries.h"
 #include "policy/policy_helper.h"
 #include "policy/cache_manager.h"
@@ -69,32 +69,15 @@ void InsertUnique(K value, T* array) {
 const char* kDatabaseName = "policy";
 }  //  namespace
 
-SQLPTRepresentation::SQLPTRepresentation()
-    : db_(new utils::dbms::SQLDatabaseImpl(kDatabaseName)) {
-  is_in_memory = false;
-}
-
-SQLPTRepresentation::SQLPTRepresentation(bool in_memory) {
-  is_in_memory = in_memory;
-#ifdef __QNX__
-  db_ = new utils::dbms::SQLDatabaseImpl(kDatabaseName);
-#else   // __QNX__
-  if (in_memory) {
-    db_ = new utils::dbms::SQLDatabaseImpl();
-  } else {
-    db_ = new utils::dbms::SQLDatabaseImpl(kDatabaseName);
-  }
-#endif  // __QNX__
-}
-
 SQLPTRepresentation::SQLPTRepresentation(const std::string& app_storage_folder,
                                          uint16_t attempts_to_open_policy_db,
                                          uint16_t open_attempt_timeout_ms)
 #if defined(__QNX__)
-    : db_(new utils::dbms::SQLDatabaseImpl(kDatabaseName)
+    : db_(new utils::dbms::SQLDatabase(kDatabaseName)
 #else
-    : db_(new utils::dbms::SQLDatabaseImpl(
-          file_system::ConcatPath(app_storage_folder, kDatabaseName)))
+    : db_(new utils::dbms::SQLDatabase(
+          file_system::ConcatPath(app_storage_folder, kDatabaseName),
+          "PolicyDatabase"))
 #endif
 {}
 
@@ -1641,15 +1624,14 @@ const int32_t SQLPTRepresentation::GetDBVersion() const {
 }
 
 utils::dbms::SQLDatabase* SQLPTRepresentation::db() const {
-#ifdef __QNX__
-  utils::dbms::SQLDatabase* db =
-      new utils::dbms::SQLDatabaseImpl(kDatabaseName);
+#if defined(__QNX__)
+  utils::dbms::SQLDatabase* db = new utils::dbms::SQLDatabase(kDatabaseName);
   const bool result = db->Open();
   DCHECK(result);
   return db;
 #else
   return db_;
-#endif  // __QNX__
+#endif
 }
 
 bool SQLPTRepresentation::CopyApplication(const std::string& source,

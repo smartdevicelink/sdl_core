@@ -69,29 +69,28 @@ class ResumeCtrlTest : public ::testing::Test {
  protected:
   ResumeCtrlTest()
       : kTestAppId_(10u)
-      , kTestPolicyAppId_("kTestPolicyAppId_")
+      , kTestPolicyAppId_("test_policy_app_id")
       , kMacAddress_("12345")
       , kDefaultTestLevel_(eType::HMI_NONE)
       , kCorId_(7u)
       , kTestDevId_(5u)
       , kTestGrammarId_(10)
       , kHash_("saved_hash")
-      , kAppResumingTimeout_(30000000u)
-      , kTestTimeStamp_(1452074434) {}
+      , kAppResumingTimeout_(30000000u) {}
 
   virtual void SetUp() OVERRIDE {
-    ON_CALL(mock_app_mngr_, event_dispatcher())
+    ON_CALL(app_mngr_, event_dispatcher())
         .WillByDefault(ReturnRef(mock_event_dispatcher_));
     mock_storage =
         ::utils::MakeShared<NiceMock<resumption_test::MockResumptionData>>(
-            mock_app_mngr_);
+            app_mngr_);
     app_mock = utils::MakeShared<NiceMock<MockApplication>>();
-    res_ctrl = utils::MakeShared<ResumeCtrl>(mock_app_mngr_);
+    res_ctrl = utils::MakeShared<ResumeCtrl>(app_mngr_);
     res_ctrl->set_resumption_storage(mock_storage);
 
-    ON_CALL(mock_app_mngr_, state_controller())
+    ON_CALL(app_mngr_, state_controller())
         .WillByDefault(ReturnRef(state_controller_));
-    ON_CALL(mock_app_mngr_, get_settings())
+    ON_CALL(app_mngr_, get_settings())
         .WillByDefault(ReturnRef(mock_application_manager_settings_));
 
     ON_CALL(mock_application_manager_settings_, use_db_for_resumption())
@@ -110,7 +109,7 @@ class ResumeCtrlTest : public ::testing::Test {
   NiceMock<event_engine_test::MockEventDispatcher> mock_event_dispatcher_;
   application_manager_test::MockApplicationManagerSettings
       mock_application_manager_settings_;
-  application_manager_test::MockApplicationManager mock_app_mngr_;
+  application_manager_test::MockApplicationManager app_mngr_;
   MockStateController state_controller_;
   utils::SharedPtr<ResumeCtrl> res_ctrl;
   utils::SharedPtr<NiceMock<resumption_test::MockResumptionData>> mock_storage;
@@ -126,8 +125,6 @@ class ResumeCtrlTest : public ::testing::Test {
   const uint32_t kTestGrammarId_;
   const std::string kHash_;
   const uint32_t kAppResumingTimeout_;
-  const uint32_t kTestTimeStamp_;
-  sync_primitives::Lock app_set_lock_;
 };
 
 /**
@@ -141,7 +138,7 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithGrammarId) {
 
   // Check RestoreApplicationData
   GetInfoFromApp();
-  EXPECT_CALL(mock_app_mngr_, GetDefaultHmiLevel(_))
+  EXPECT_CALL(app_mngr_, GetDefaultHmiLevel(_))
       .WillRepeatedly(Return(kDefaultTestLevel_));
   EXPECT_CALL(*mock_storage,
               GetSavedApplication(kTestPolicyAppId_, kMacAddress_, _))
@@ -149,7 +146,7 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithGrammarId) {
   EXPECT_CALL(*app_mock, UpdateHash());
   EXPECT_CALL(*app_mock, set_grammar_id(kTestGrammarId_));
 
-  const bool res = res_ctrl->StartResumption(app_mock, kHash_);
+  bool res = res_ctrl->StartResumption(app_mock, kHash_);
   EXPECT_TRUE(res);
 }
 
@@ -165,7 +162,7 @@ TEST_F(ResumeCtrlTest, StartResumption_WithoutGrammarId) {
   saved_app[application_manager::strings::hash_id] = kHash_;
 
   GetInfoFromApp();
-  EXPECT_CALL(mock_app_mngr_, GetDefaultHmiLevel(_))
+  EXPECT_CALL(app_mngr_, GetDefaultHmiLevel(_))
       .WillRepeatedly(Return(kDefaultTestLevel_));
   // Check RestoreApplicationData
   EXPECT_CALL(*mock_storage, GetSavedApplication(_, _, _))
@@ -173,7 +170,7 @@ TEST_F(ResumeCtrlTest, StartResumption_WithoutGrammarId) {
   EXPECT_CALL(*app_mock, UpdateHash());
   EXPECT_CALL(*app_mock, set_grammar_id(kTestGrammarId_)).Times(0);
 
-  const bool res = res_ctrl->StartResumption(app_mock, kHash_);
+  bool res = res_ctrl->StartResumption(app_mock, kHash_);
   EXPECT_FALSE(res);
 }
 
@@ -212,7 +209,7 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithFiles) {
       test_application_files;
 
   // Check RestoreApplicationData
-  EXPECT_CALL(mock_app_mngr_, GetDefaultHmiLevel(_))
+  EXPECT_CALL(app_mngr_, GetDefaultHmiLevel(_))
       .WillRepeatedly(Return(kDefaultTestLevel_));
   EXPECT_CALL(*mock_storage, GetSavedApplication(_, _, _))
       .WillRepeatedly(DoAll(SetArgReferee<2>(saved_app), Return(true)));
@@ -227,7 +224,7 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithFiles) {
                     static_cast<mobile_apis::FileType::eType>(file_types[i]))));
   }
 
-  const bool res = res_ctrl->StartResumption(app_mock, kHash_);
+  bool res = res_ctrl->StartResumption(app_mock, kHash_);
   EXPECT_TRUE(res);
 }
 
@@ -249,7 +246,7 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithSubmenues) {
       test_application_submenues;
 
   // Check RestoreApplicationData
-  EXPECT_CALL(mock_app_mngr_, GetDefaultHmiLevel(_))
+  EXPECT_CALL(app_mngr_, GetDefaultHmiLevel(_))
       .WillRepeatedly(Return(kDefaultTestLevel_));
   EXPECT_CALL(*mock_storage, GetSavedApplication(_, _, _))
       .WillRepeatedly(DoAll(SetArgReferee<2>(saved_app), Return(true)));
@@ -261,14 +258,14 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithSubmenues) {
   }
   smart_objects::SmartObjectList requests;
 
-  EXPECT_CALL(mock_app_mngr_, GetNextHMICorrelationID())
+  EXPECT_CALL(app_mngr_, GetNextHMICorrelationID())
       .WillRepeatedly(Return(kCorId_));
   EXPECT_CALL(*application_manager::MockMessageHelper::message_helper_mock(),
               CreateAddSubMenuRequestToHMI(_, kCorId_))
       .WillRepeatedly(Return(requests));
 
   EXPECT_CALL(*app_mock, UpdateHash());
-  const bool res = res_ctrl->StartResumption(app_mock, kHash_);
+  bool res = res_ctrl->StartResumption(app_mock, kHash_);
   EXPECT_TRUE(res);
 }
 
@@ -289,7 +286,7 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithCommands) {
   saved_app[application_manager::strings::application_commands] =
       test_application_commands;
 
-  EXPECT_CALL(mock_app_mngr_, GetDefaultHmiLevel(_))
+  EXPECT_CALL(app_mngr_, GetDefaultHmiLevel(_))
       .WillRepeatedly(Return(kDefaultTestLevel_));
   // Check RestoreApplicationData
   EXPECT_CALL(*mock_storage, GetSavedApplication(_, _, _))
@@ -306,7 +303,7 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithCommands) {
               CreateAddCommandRequestToHMI(_, _))
       .WillRepeatedly(Return(requests));
 
-  const bool res = res_ctrl->StartResumption(app_mock, kHash_);
+  bool res = res_ctrl->StartResumption(app_mock, kHash_);
   EXPECT_TRUE(res);
 }
 
@@ -340,7 +337,7 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithChoiceSet) {
       application_choice_sets;
 
   // Check RestoreApplicationData
-  EXPECT_CALL(mock_app_mngr_, GetDefaultHmiLevel(_))
+  EXPECT_CALL(app_mngr_, GetDefaultHmiLevel(_))
       .WillRepeatedly(Return(kDefaultTestLevel_));
   GetInfoFromApp();
   EXPECT_CALL(*mock_storage, GetSavedApplication(_, _, _))
@@ -357,7 +354,7 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithChoiceSet) {
               CreateAddVRCommandRequestFromChoiceToHMI(_))
       .WillRepeatedly(Return(requests));
 
-  const bool res = res_ctrl->StartResumption(app_mock, kHash_);
+  bool res = res_ctrl->StartResumption(app_mock, kHash_);
   EXPECT_TRUE(res);
 }
 
@@ -371,7 +368,7 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithGlobalProperties) {
       test_global_properties;
 
   // Check RestoreApplicationData
-  EXPECT_CALL(mock_app_mngr_, GetDefaultHmiLevel(_))
+  EXPECT_CALL(app_mngr_, GetDefaultHmiLevel(_))
       .WillRepeatedly(Return(kDefaultTestLevel_));
   GetInfoFromApp();
   EXPECT_CALL(*mock_storage, GetSavedApplication(_, _, _))
@@ -385,7 +382,7 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithGlobalProperties) {
   EXPECT_CALL(*app_mock, load_global_properties(test_global_properties));
 
   EXPECT_CALL(*app_mock, UpdateHash());
-  const bool res = res_ctrl->StartResumption(app_mock, kHash_);
+  bool res = res_ctrl->StartResumption(app_mock, kHash_);
   EXPECT_TRUE(res);
 }
 
@@ -409,7 +406,7 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithSubscribeOnButtons) {
       test_subscriptions;
 
   // Check RestoreApplicationData
-  EXPECT_CALL(mock_app_mngr_, GetDefaultHmiLevel(_))
+  EXPECT_CALL(app_mngr_, GetDefaultHmiLevel(_))
       .WillRepeatedly(Return(kDefaultTestLevel_));
   GetInfoFromApp();
   EXPECT_CALL(*mock_storage, GetSavedApplication(_, _, _))
@@ -427,7 +424,7 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithSubscribeOnButtons) {
   EXPECT_CALL(*application_manager::MockMessageHelper::message_helper_mock(),
               SendAllOnButtonSubscriptionNotificationsForApp(_, _)).Times(2);
 
-  const bool res = res_ctrl->StartResumption(app_mock, kHash_);
+  bool res = res_ctrl->StartResumption(app_mock, kHash_);
   EXPECT_TRUE(res);
 }
 
@@ -453,7 +450,7 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithSubscriptionToIVI) {
       test_subscriptions;
 
   // Check RestoreApplicationData
-  EXPECT_CALL(mock_app_mngr_, GetDefaultHmiLevel(_))
+  EXPECT_CALL(app_mngr_, GetDefaultHmiLevel(_))
       .WillRepeatedly(Return(kDefaultTestLevel_));
   GetInfoFromApp();
   EXPECT_CALL(*mock_storage, GetSavedApplication(_, _, _))
@@ -472,44 +469,25 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithSubscriptionToIVI) {
               GetIVISubscriptionRequests(_)).WillRepeatedly(Return(requests));
 
   EXPECT_CALL(*app_mock, UpdateHash());
-  const bool res = res_ctrl->StartResumption(app_mock, kHash_);
-  EXPECT_TRUE(res);
-}
-
-TEST_F(ResumeCtrlTest, StartResumption_AppWithSubscriptionToWayPoints) {
-  smart_objects::SmartObject saved_app;
-  saved_app[application_manager::strings::hash_id] = kHash_;
-  saved_app[application_manager::strings::grammar_id] = kTestGrammarId_;
-  saved_app[application_manager::strings::subscribed_for_way_points] = true;
-  saved_app[application_manager::strings::time_stamp] = kTestTimeStamp_;
-
-  GetInfoFromApp();
-  EXPECT_CALL(*mock_storage, GetSavedApplication(_, _, _))
-      .Times(2)
-      .WillRepeatedly(DoAll(SetArgReferee<2>(saved_app), Return(true)));
-  EXPECT_CALL(*app_mock, set_grammar_id(kTestGrammarId_));
-  EXPECT_CALL(mock_app_mngr_, SubscribeAppForWayPoints(_));
-  EXPECT_CALL(mock_app_mngr_, GetDefaultHmiLevel(_)).WillOnce(Return(HMI_FULL));
-
-  const bool res = res_ctrl->StartResumption(app_mock, kHash_);
+  bool res = res_ctrl->StartResumption(app_mock, kHash_);
   EXPECT_TRUE(res);
 }
 
 TEST_F(ResumeCtrlTest, StartResumptionOnlyHMILevel) {
   smart_objects::SmartObject saved_app;
 
-  EXPECT_CALL(mock_app_mngr_, GetDefaultHmiLevel(_))
+  EXPECT_CALL(app_mngr_, GetDefaultHmiLevel(_))
       .WillOnce(Return(kDefaultTestLevel_));
   GetInfoFromApp();
   EXPECT_CALL(*mock_storage, GetSavedApplication(kTestPolicyAppId_, _, _))
       .WillOnce(DoAll(SetArgReferee<2>(saved_app), Return(true)));
-  const bool res = res_ctrl->StartResumptionOnlyHMILevel(app_mock);
+  bool res = res_ctrl->StartResumptionOnlyHMILevel(app_mock);
   EXPECT_TRUE(res);
 }
 
 TEST_F(ResumeCtrlTest, StartAppHmiStateResumption_AppInFull) {
   mobile_apis::HMILevel::eType restored_test_type = eType::HMI_FULL;
-  const uint32_t ign_off_count = 0;
+  uint32_t ign_off_count = 0;
   smart_objects::SmartObject saved_app;
   saved_app[application_manager::strings::ign_off_count] = ign_off_count;
   saved_app[application_manager::strings::hmi_level] = restored_test_type;
@@ -523,20 +501,20 @@ TEST_F(ResumeCtrlTest, StartAppHmiStateResumption_AppInFull) {
   EXPECT_CALL(*mock_storage, RemoveApplicationFromSaved(_, _))
       .WillOnce(Return(true));
 
-  EXPECT_CALL(mock_app_mngr_, GetUserConsentForDevice("12345"))
+  EXPECT_CALL(app_mngr_, GetUserConsentForDevice("12345"))
       .WillRepeatedly(Return(policy::kDeviceAllowed));
   res_ctrl->StartAppHmiStateResumption(app_mock);
 }
 
 TEST_F(ResumeCtrlTest, StartAppHmiStateResumption_AppInBackground) {
-  const uint32_t ign_off_count = 0;
+  uint32_t ign_off_count = 0;
   smart_objects::SmartObject saved_app;
 
   mobile_apis::HMILevel::eType restored_test_type = eType::HMI_BACKGROUND;
   saved_app[application_manager::strings::ign_off_count] = ign_off_count;
   saved_app[application_manager::strings::hmi_level] = restored_test_type;
 
-  EXPECT_CALL(mock_app_mngr_, state_controller()).Times(0);
+  EXPECT_CALL(app_mngr_, state_controller()).Times(0);
   GetInfoFromApp();
   EXPECT_CALL(*mock_storage, GetSavedApplication(kTestPolicyAppId_, _, _))
       .WillRepeatedly(DoAll(SetArgReferee<2>(saved_app), Return(true)));
@@ -562,11 +540,11 @@ TEST_F(ResumeCtrlTest, RestoreAppHMIState_RestoreHMILevelFull) {
   EXPECT_CALL(*mock_storage, GetSavedApplication(_, _, _))
       .WillOnce(DoAll(SetArgReferee<2>(saved_app), Return(true)));
 
-  EXPECT_CALL(mock_app_mngr_, GetUserConsentForDevice("12345"))
+  EXPECT_CALL(app_mngr_, GetUserConsentForDevice("12345"))
       .WillOnce(Return(policy::kDeviceAllowed));
   EXPECT_CALL(*app_mock, set_is_resuming(true));
 
-  const bool res = res_ctrl->RestoreAppHMIState(app_mock);
+  bool res = res_ctrl->RestoreAppHMIState(app_mock);
   EXPECT_TRUE(res);
 }
 
@@ -575,45 +553,18 @@ TEST_F(ResumeCtrlTest, SetupDefaultHMILevel) {
 
   saved_app[application_manager::strings::hmi_level] = kDefaultTestLevel_;
 
-  EXPECT_CALL(mock_app_mngr_, GetDefaultHmiLevel(_))
+  EXPECT_CALL(app_mngr_, GetDefaultHmiLevel(_))
       .WillRepeatedly(Return(kDefaultTestLevel_));
   GetInfoFromApp();
-  EXPECT_CALL(mock_app_mngr_, GetUserConsentForDevice("12345")).Times(0);
+  EXPECT_CALL(app_mngr_, GetUserConsentForDevice("12345")).Times(0);
 
-  EXPECT_CALL(mock_app_mngr_, GetDefaultHmiLevel(_))
+  EXPECT_CALL(app_mngr_, GetDefaultHmiLevel(_))
       .WillOnce(Return(kDefaultTestLevel_));
 
   EXPECT_CALL(state_controller_, SetRegularState(_, kDefaultTestLevel_))
       .Times(AtLeast(1));
 
   res_ctrl->SetupDefaultHMILevel(app_mock);
-}
-
-TEST_F(ResumeCtrlTest, ApplicationResumptiOnTimer_AppInFull) {
-  EXPECT_CALL(mock_app_mngr_, application(_)).WillRepeatedly(Return(app_mock));
-
-  mobile_apis::HMILevel::eType restored_test_type = eType::HMI_FULL;
-  const uint32_t ign_off_count = 0;
-  smart_objects::SmartObject saved_app;
-  saved_app[application_manager::strings::ign_off_count] = ign_off_count;
-  saved_app[application_manager::strings::hmi_level] = restored_test_type;
-
-  MockStateController state_controller_;
-  EXPECT_CALL(mock_app_mngr_, state_controller())
-      .WillOnce(ReturnRef(state_controller_));
-  EXPECT_CALL(state_controller_, SetRegularState(_, restored_test_type))
-      .Times(AtLeast(1));
-  GetInfoFromApp();
-  EXPECT_CALL(*mock_storage, GetSavedApplication(kTestPolicyAppId_, _, _))
-      .Times(2)
-      .WillRepeatedly(DoAll(SetArgReferee<2>(saved_app), Return(true)));
-
-  EXPECT_CALL(*mock_storage, RemoveApplicationFromSaved(_, _))
-      .WillOnce(Return(true));
-
-  EXPECT_CALL(mock_app_mngr_, GetUserConsentForDevice("12345"))
-      .WillRepeatedly(Return(policy::kDeviceAllowed));
-  res_ctrl->StartAppHmiStateResumption(app_mock);
 }
 
 /**
@@ -623,25 +574,24 @@ TEST_F(ResumeCtrlTest, ApplicationResumptiOnTimer_AppInFull) {
 TEST_F(ResumeCtrlTest, SetAppHMIState_HMINone_WithoutCheckPolicy) {
   GetInfoFromApp();
 
-  EXPECT_CALL(mock_app_mngr_, GetUserConsentForDevice("12345")).Times(0);
+  EXPECT_CALL(app_mngr_, GetUserConsentForDevice("12345")).Times(0);
 
   EXPECT_CALL(*app_mock, set_is_resuming(true));
   EXPECT_CALL(state_controller_, SetRegularState(_, kDefaultTestLevel_))
       .Times(AtLeast(1));
-  const bool res =
-      res_ctrl->SetAppHMIState(app_mock, kDefaultTestLevel_, false);
+  bool res = res_ctrl->SetAppHMIState(app_mock, kDefaultTestLevel_, false);
   EXPECT_TRUE(res);
 }
 
 TEST_F(ResumeCtrlTest, SetAppHMIState_HMILimited_WithoutCheckPolicy) {
   mobile_apis::HMILevel::eType test_type = eType::HMI_LIMITED;
   GetInfoFromApp();
-  EXPECT_CALL(mock_app_mngr_, GetUserConsentForDevice("12345")).Times(0);
+  EXPECT_CALL(app_mngr_, GetUserConsentForDevice("12345")).Times(0);
 
   EXPECT_CALL(*app_mock, set_is_resuming(true));
   EXPECT_CALL(state_controller_, SetRegularState(_, test_type))
       .Times(AtLeast(1));
-  const bool res = res_ctrl->SetAppHMIState(app_mock, test_type, false);
+  bool res = res_ctrl->SetAppHMIState(app_mock, test_type, false);
   EXPECT_TRUE(res);
 }
 
@@ -649,14 +599,14 @@ TEST_F(ResumeCtrlTest, SetAppHMIState_HMIFull_WithoutCheckPolicy) {
   mobile_apis::HMILevel::eType test_type = eType::HMI_FULL;
   GetInfoFromApp();
   // GetDefaultHmiLevel should not be called
-  EXPECT_CALL(mock_app_mngr_, GetDefaultHmiLevel(_)).Times(0);
-  EXPECT_CALL(mock_app_mngr_, GetUserConsentForDevice("12345")).Times(0);
+  EXPECT_CALL(app_mngr_, GetDefaultHmiLevel(_)).Times(0);
+  EXPECT_CALL(app_mngr_, GetUserConsentForDevice("12345")).Times(0);
 
   EXPECT_CALL(*app_mock, set_is_resuming(true));
   EXPECT_CALL(state_controller_, SetRegularState(_, test_type))
       .Times(AtLeast(1));
 
-  const bool res = res_ctrl->SetAppHMIState(app_mock, test_type, false);
+  bool res = res_ctrl->SetAppHMIState(app_mock, test_type, false);
   EXPECT_TRUE(res);
 }
 
@@ -664,14 +614,14 @@ TEST_F(ResumeCtrlTest, SetAppHMIState_HMIFull_WithPolicy_DevAllowed) {
   mobile_apis::HMILevel::eType test_type = eType::HMI_FULL;
 
   GetInfoFromApp();
-  EXPECT_CALL(mock_app_mngr_, GetUserConsentForDevice("12345"))
+  EXPECT_CALL(app_mngr_, GetUserConsentForDevice("12345"))
       .WillOnce(Return(policy::kDeviceAllowed));
 
   EXPECT_CALL(*app_mock, set_is_resuming(true));
   EXPECT_CALL(state_controller_, SetRegularState(_, test_type))
       .Times(AtLeast(1));
 
-  const bool res = res_ctrl->SetAppHMIState(app_mock, test_type, true);
+  bool res = res_ctrl->SetAppHMIState(app_mock, test_type, true);
   EXPECT_TRUE(res);
 }
 
@@ -679,45 +629,16 @@ TEST_F(ResumeCtrlTest, SetAppHMIState_HMIFull_WithPolicy_DevDisallowed) {
   mobile_apis::HMILevel::eType test_type = eType::HMI_FULL;
 
   GetInfoFromApp();
-  EXPECT_CALL(mock_app_mngr_, GetUserConsentForDevice("12345"))
+  EXPECT_CALL(app_mngr_, GetUserConsentForDevice("12345"))
       .WillOnce(Return(policy::kDeviceDisallowed));
 
   EXPECT_CALL(*app_mock, set_is_resuming(true));
-  EXPECT_CALL(mock_app_mngr_, GetDefaultHmiLevel(_))
+  EXPECT_CALL(app_mngr_, GetDefaultHmiLevel(_))
       .WillOnce(Return(kDefaultTestLevel_));
   EXPECT_CALL(state_controller_, SetRegularState(_, kDefaultTestLevel_))
       .Times(AtLeast(1));
-  const bool res = res_ctrl->SetAppHMIState(app_mock, test_type, true);
+  bool res = res_ctrl->SetAppHMIState(app_mock, test_type, true);
   EXPECT_FALSE(res);
-}
-
-TEST_F(ResumeCtrlTest, SaveAllApplications) {
-  utils::SharedPtr<application_manager::Application> app_sh_mock =
-      ::utils::MakeShared<application_manager_test::MockApplication>();
-
-  application_manager::ApplicationSet app_set;
-  app_set.insert(app_sh_mock);
-
-  DataAccessor<application_manager::ApplicationSet> accessor(app_set,
-                                                             app_set_lock_);
-
-  EXPECT_CALL(mock_app_mngr_, applications()).WillRepeatedly(Return(accessor));
-  EXPECT_CALL(*mock_storage, SaveApplication(app_sh_mock)).Times(1);
-  res_ctrl->SaveAllApplications();
-}
-
-TEST_F(ResumeCtrlTest, SaveAllApplications_EmptyApplicationlist) {
-  utils::SharedPtr<application_manager::Application> app_sh_mock =
-      ::utils::MakeShared<application_manager_test::MockApplication>();
-
-  application_manager::ApplicationSet app_set;
-
-  DataAccessor<application_manager::ApplicationSet> accessor(app_set,
-                                                             app_set_lock_);
-
-  EXPECT_CALL(mock_app_mngr_, applications()).WillRepeatedly(Return(accessor));
-  EXPECT_CALL(*mock_storage, SaveApplication(app_sh_mock)).Times(0);
-  res_ctrl->SaveAllApplications();
 }
 
 TEST_F(ResumeCtrlTest, SaveApplication) {
@@ -732,13 +653,13 @@ TEST_F(ResumeCtrlTest, OnAppActivated_ResumptionHasStarted) {
   smart_objects::SmartObject saved_app;
   GetInfoFromApp();
 
-  EXPECT_CALL(mock_app_mngr_, GetDefaultHmiLevel(_))
+  EXPECT_CALL(app_mngr_, GetDefaultHmiLevel(_))
       .WillOnce(Return(kDefaultTestLevel_));
   EXPECT_CALL(*mock_storage, GetSavedApplication(kTestPolicyAppId_, _, _))
       .WillOnce(DoAll(SetArgReferee<2>(saved_app), Return(true)));
   ON_CALL(*app_mock, app_id()).WillByDefault(Return(kTestAppId_));
 
-  const bool res = res_ctrl->StartResumptionOnlyHMILevel(app_mock);
+  bool res = res_ctrl->StartResumptionOnlyHMILevel(app_mock);
   EXPECT_TRUE(res);
 
   utils::SharedPtr<application_manager_test::MockApplication> app_sh_mock =
@@ -765,44 +686,27 @@ TEST_F(ResumeCtrlTest, IsHMIApplicationIdExist) {
 
 TEST_F(ResumeCtrlTest, GetHMIApplicationID) {
   uint32_t hmi_app_id = 10;
-  const std::string kDeviceId = "test_device_id";
+  std::string device_id = "test_device_id";
 
-  EXPECT_CALL(*mock_storage, GetHMIApplicationID(kTestPolicyAppId_, kDeviceId))
+  EXPECT_CALL(*mock_storage, GetHMIApplicationID(kTestPolicyAppId_, device_id))
       .WillOnce(Return(hmi_app_id));
   EXPECT_EQ(hmi_app_id,
-            res_ctrl->GetHMIApplicationID(kTestPolicyAppId_, kDeviceId));
+            res_ctrl->GetHMIApplicationID(kTestPolicyAppId_, device_id));
 }
 
 TEST_F(ResumeCtrlTest, IsApplicationSaved) {
-  const std::string kPolicyAppId = "policy_app_id";
-  const std::string kDeviceId = "device_id";
+  std::string policy_app_id = "policy_app_id";
+  std::string device_id = "device_id";
 
-  EXPECT_CALL(*mock_storage, IsApplicationSaved(kPolicyAppId, kDeviceId))
-      .WillOnce(Return(0));
-  EXPECT_TRUE(res_ctrl->IsApplicationSaved(kPolicyAppId, kDeviceId));
-}
-
-TEST_F(ResumeCtrlTest, OnAppRegistrationStart) {
-  const std::string kPolicyAppId = "policy_app_id";
-  const std::string kDeviceId = "device_id";
-
-  EXPECT_CALL(*mock_storage, IsApplicationSaved(kPolicyAppId, kDeviceId))
-      .WillOnce(Return(0));
-  res_ctrl->OnAppRegistrationStart(kPolicyAppId, kDeviceId);
-}
-
-TEST_F(ResumeCtrlTest, OnAppRegistrationEnd) {
-  uint32_t timeout = 10u;
-  EXPECT_CALL(mock_application_manager_settings_,
-              app_resumption_save_persistent_data_timeout())
-      .WillOnce(ReturnRef(timeout));
-  res_ctrl->OnAppRegistrationEnd();
+  EXPECT_CALL(*mock_storage, IsApplicationSaved(policy_app_id, device_id))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(res_ctrl->IsApplicationSaved(policy_app_id, device_id));
 }
 
 TEST_F(ResumeCtrlTest, CheckPersistenceFiles_WithoutCommandAndChoiceSets) {
-  const uint32_t kIggnOffCount = 0;
+  uint32_t ign_off_count = 0;
   smart_objects::SmartObject saved_app;
-  saved_app[application_manager::strings::ign_off_count] = kIggnOffCount;
+  saved_app[application_manager::strings::ign_off_count] = ign_off_count;
   saved_app[application_manager::strings::hmi_level] = HMI_FULL;
 
   GetInfoFromApp();
@@ -814,9 +718,9 @@ TEST_F(ResumeCtrlTest, CheckPersistenceFiles_WithoutCommandAndChoiceSets) {
 
 TEST_F(ResumeCtrlTest, CheckPersistenceFilesForResumption_WithCommands) {
   smart_objects::SmartObject test_application_commands;
-  const uint32_t kIggnOffCount = 0;
+  uint32_t ign_off_count = 0;
   smart_objects::SmartObject saved_app;
-  saved_app[application_manager::strings::ign_off_count] = kIggnOffCount;
+  saved_app[application_manager::strings::ign_off_count] = ign_off_count;
   saved_app[application_manager::strings::hmi_level] = HMI_FULL;
   saved_app[application_manager::strings::application_commands] =
       test_application_commands;
@@ -834,9 +738,9 @@ TEST_F(ResumeCtrlTest, CheckPersistenceFilesForResumption_WithCommands) {
 
 TEST_F(ResumeCtrlTest, CheckPersistenceFilesForResumption_WithChoiceSet) {
   smart_objects::SmartObject test_choice_sets;
-  const uint32_t kIggnOffCount = 0;
+  uint32_t ign_off_count = 0;
   smart_objects::SmartObject saved_app;
-  saved_app[application_manager::strings::ign_off_count] = kIggnOffCount;
+  saved_app[application_manager::strings::ign_off_count] = ign_off_count;
   saved_app[application_manager::strings::hmi_level] = HMI_FULL;
   saved_app[application_manager::strings::application_choice_sets] =
       test_choice_sets;
@@ -848,38 +752,9 @@ TEST_F(ResumeCtrlTest, CheckPersistenceFilesForResumption_WithChoiceSet) {
   EXPECT_TRUE(res_ctrl->CheckPersistenceFilesForResumption(app_mock));
 }
 
-TEST_F(ResumeCtrlTest, OnSuspend) {
-  utils::SharedPtr<application_manager::Application> app_sh_mock =
-      ::utils::MakeShared<application_manager_test::MockApplication>();
-
-  application_manager::ApplicationSet app_set;
-  app_set.insert(app_sh_mock);
-
-  DataAccessor<application_manager::ApplicationSet> accessor(app_set,
-                                                             app_set_lock_);
-
-  EXPECT_CALL(mock_app_mngr_, applications()).WillRepeatedly(Return(accessor));
-  EXPECT_CALL(*mock_storage, SaveApplication(app_sh_mock)).Times(1);
-
+// TODO (VVeremjova) APPLINK-16718
+TEST_F(ResumeCtrlTest, DISABLED_OnSuspend) {
   EXPECT_CALL(*mock_storage, OnSuspend());
-  EXPECT_CALL(*mock_storage, Persist());
-  res_ctrl->OnSuspend();
-}
-
-TEST_F(ResumeCtrlTest, OnSuspend_EmptyApplicationlist) {
-  utils::SharedPtr<application_manager::Application> app_sh_mock =
-      ::utils::MakeShared<application_manager_test::MockApplication>();
-
-  application_manager::ApplicationSet app_set;
-
-  DataAccessor<application_manager::ApplicationSet> accessor(app_set,
-                                                             app_set_lock_);
-
-  EXPECT_CALL(mock_app_mngr_, applications()).WillRepeatedly(Return(accessor));
-  EXPECT_CALL(*mock_storage, SaveApplication(app_sh_mock)).Times(0);
-
-  EXPECT_CALL(*mock_storage, OnSuspend());
-  EXPECT_CALL(*mock_storage, Persist());
   res_ctrl->OnSuspend();
 }
 
@@ -899,11 +774,9 @@ TEST_F(ResumeCtrlTest, RemoveApplicationFromSaved) {
   EXPECT_TRUE(res_ctrl->RemoveApplicationFromSaved(app_mock));
 }
 
-TEST_F(ResumeCtrlTest, CheckApplicationHash) {
+TEST_F(ResumeCtrlTest, CheckApplicationkHash_) {
   smart_objects::SmartObject saved_app;
-
-  const std::string test_hash = "saved_hash";
-  saved_app[application_manager::strings::hash_id] = test_hash;
+  saved_app[application_manager::strings::hash_id] = kHash_;
 
   GetInfoFromApp();
   EXPECT_CALL(*mock_storage, GetSavedApplication(kTestPolicyAppId_, _, _))

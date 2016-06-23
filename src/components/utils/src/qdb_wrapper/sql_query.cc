@@ -34,7 +34,7 @@
 #include <string.h>
 #include <cassert>
 #include <algorithm>
-#include "utils/sql_database.h"
+#include "qdb_wrapper/sql_database.h"
 #include "utils/logger.h"
 #include <errno.h>
 

@@ -34,14 +34,11 @@
 #define SRC_COMPONENTS_POLICY_INCLUDE_POLICY_SQL_WRAPPER_H_
 
 #if __QNX__
-#include "qdb_wrapper/sql_database.h"
-#include "qdb_wrapper/sql_query.h"
-#elif defined QT_PORT
-#include "sql_qt_wrapper/sql_database.h"
-#include "sql_qt_wrapper/sql_query.h"
+#include "utils/qdb_wrapper/sql_database.h"
+#include "utils/qdb_wrapper/sql_query.h"
 #else  // __QNX__
-#include "sqlite_wrapper/sql_database.h"
-#include "sqlite_wrapper/sql_query.h"
+#include "utils/sqlite_wrapper/sql_database.h"
+#include "utils/sqlite_wrapper/sql_query.h"
 #endif  // __QNX__
 
 #endif  // SRC_COMPONENTS_POLICY_INCLUDE_POLICY_SQL_WRAPPER_H_

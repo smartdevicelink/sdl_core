@@ -39,7 +39,6 @@
 #include "application_manager/mock_resumption_data.h"
 #include "interfaces/MOBILE_API.h"
 #include "resumption/last_state.h"
-#include "utils/json_utils.h"
 
 #include "application_manager/resumption_data_test.h"
 #include "formatters/CFormatterJsonBase.h"
@@ -79,20 +78,18 @@ class ResumptionDataJsonTest : public ResumptionDataTest {
     hmi_level_ = HMILevel::eType::HMI_FULL;
     hmi_app_id_ = 8;
     ign_off_count_ = 0;
-    is_subscribed_for_way_points_ = true;
   }
 
   void CheckSavedJson() {
-    utils::json::JsonValue& dictionary = last_state_.dictionary();
-    //    std::cout << dictionary.ToJson() << std::endl;
-    ASSERT_TRUE(dictionary[am::strings::resumption].IsObject());
+    Value& dictionary = last_state_.dictionary;
+    ASSERT_TRUE(dictionary[am::strings::resumption].isObject());
     ASSERT_TRUE(
         dictionary[am::strings::resumption][am::strings::resume_app_list]
-            .IsArray());
-    utils::json::JsonValueRef resume_app_list =
+            .isArray());
+    Value& resume_app_list =
         dictionary[am::strings::resumption][am::strings::resume_app_list];
     sm::SmartObject res_app_list;
-    for (uint32_t i = 0; i < resume_app_list.Size(); i++) {
+    for (uint32_t i = 0; i < resume_app_list.size(); i++) {
       Formatters::CFormatterJsonBase::jsonValueToObj(resume_app_list[i],
                                                      res_app_list);
       CheckSavedApp(res_app_list);
@@ -100,14 +97,18 @@ class ResumptionDataJsonTest : public ResumptionDataTest {
   }
 
   void SetZeroIgnOff() {
-    utils::json::JsonValue& dictionary = last_state_.dictionary();
-    utils::json::JsonValueRef res = dictionary[am::strings::resumption];
-    res[am::strings::last_ign_off_time] = 0ll;
+    Value& dictionary = last_state_.dictionary;
+    Value& res = dictionary[am::strings::resumption];
+    res[am::strings::last_ign_off_time] = 0;
     last_state_.SaveToFileSystem();
   }
 
   resumption::LastState last_state_;
   ResumptionDataJson res_json;
+
+  application_manager_test::MockApplicationManagerSettings
+      mock_application_manager_settings_;
+  std::string policy_app_id_;
 };
 
 TEST_F(ResumptionDataJsonTest, SaveApplication) {
@@ -223,10 +224,6 @@ TEST_F(ResumptionDataJsonTest, UpdateHmiLevel) {
   CheckSavedJson();
 }
 
-TEST_F(ResumptionDataJsonTest, Init) {
-  EXPECT_TRUE(res_json.Init());
-}
-
 TEST_F(ResumptionDataJsonTest, IsHMIApplicationIdExist_AppIsSaved) {
   PrepareData();
   res_json.SaveApplication(app_mock);
@@ -284,10 +281,6 @@ TEST_F(ResumptionDataJsonTest, OnSuspendFourTimes) {
   res_json.OnSuspend();
 
   EXPECT_TRUE(-1 != res_json.IsApplicationSaved(policy_app_id_, kMacAddress_));
-}
-
-TEST_F(ResumptionDataJsonTest, Persist) {
-  res_json.Persist();
 }
 
 TEST_F(ResumptionDataJsonTest, OnSuspendOnAwake) {

@@ -36,7 +36,7 @@
 #include "policy/policy_table/types.h"
 #include "rpc_base/rpc_base.h"
 #include "utils/sqlite_wrapper/sql_query.h"
-#include "utils/sqlite_wrapper/sql_database_impl.h"
+#include "utils/sqlite_wrapper/sql_database.h"
 
 namespace test {
 namespace components {

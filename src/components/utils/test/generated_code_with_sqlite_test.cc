@@ -90,7 +90,7 @@ const std::string GeneratedCodeTest::kGroupsCreation =
 TEST_F(GeneratedCodeTest,
        FindSectionEndpoints_OpenDBSetDefaultUrl_ExpectDefaultUrl) {
   // arrange
-  utils::dbms::SQLDatabaseImpl db(GeneratedCodeTest::kDatabaseName);
+  dbms::SQLDatabase db(GeneratedCodeTest::kDatabaseName, "test");
 
   // assert
   EXPECT_TRUE(db.Open());
@@ -110,7 +110,7 @@ TEST_F(GeneratedCodeTest,
 TEST_F(GeneratedCodeTest,
        RemoveSectionEndpoints_RemoveSectionEndpoints_Expect0EndPoints) {
   // arrange
-  utils::dbms::SQLDatabaseImpl db(GeneratedCodeTest::kDatabaseName);
+  dbms::SQLDatabase db(GeneratedCodeTest::kDatabaseName, "test");
 
   // assert
   EXPECT_TRUE(db.Open());
@@ -135,7 +135,7 @@ TEST_F(GeneratedCodeTest,
 TEST_F(GeneratedCodeTest,
        UpdateSectionEndpoints_SetUrlPoint_ExpectPointEqualsUrl) {
   // arrange
-  utils::dbms::SQLDatabaseImpl db(GeneratedCodeTest::kDatabaseName);
+  dbms::SQLDatabase db(GeneratedCodeTest::kDatabaseName, "test");
 
   // assert
   EXPECT_TRUE(db.Open());
@@ -178,7 +178,7 @@ TEST_F(GeneratedCodeTest,
 TEST_F(GeneratedCodeTest,
        UpdateSectionAppPolicies_SetAppParams_ExpectDBHasThem) {
   // arrange
-  utils::dbms::SQLDatabaseImpl db(GeneratedCodeTest::kDatabaseName);
+  dbms::SQLDatabase db(GeneratedCodeTest::kDatabaseName, "test");
 
   // assert
   EXPECT_TRUE(db.Open());
