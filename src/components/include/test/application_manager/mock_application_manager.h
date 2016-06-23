@@ -187,7 +187,9 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                                  const std::string& file_name,
                                  const int64_t offset));
   MOCK_METHOD1(SetAllAppsAllowed, void(const bool allowed));
-  MOCK_METHOD1(set_driver_distraction, void(bool is_distracting));
+  MOCK_METHOD1(
+      set_driver_distraction_state,
+      void(const hmi_apis::Common_DriverDistractionState::eType state));
   MOCK_METHOD6(StartAudioPassThruThread,
                void(int32_t session_key,
                     int32_t correlation_id,

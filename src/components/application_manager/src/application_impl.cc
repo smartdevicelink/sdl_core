@@ -1089,4 +1089,16 @@ void ApplicationImpl::RemoveExtensions() {
 }
 #endif  // SDL_REMOTE_CONTROL
 
+void ApplicationImpl::PushMobileMessage(
+    smart_objects::SmartObjectSPtr mobile_message) {
+  sync_primitives::AutoLock lock(mobile_message_lock_);
+  mobile_message_queue_.push_back(mobile_message);
+}
+
+void ApplicationImpl::SwapMobileMessageQueue(
+    MobileMessageQueue& mobile_messages) {
+  sync_primitives::AutoLock lock(mobile_message_lock_);
+  mobile_messages.swap(mobile_message_queue_);
+}
+
 }  // namespace application_manager

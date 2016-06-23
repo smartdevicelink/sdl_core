@@ -424,7 +424,8 @@ class ApplicationManager {
    *
    * @param state New state to be set
    */
-  virtual void set_driver_distraction(bool is_distracting) = 0;
+  virtual void set_driver_distraction_state(
+      const hmi_apis::Common_DriverDistractionState::eType state) = 0;
 
   /*
    * @brief Starts audio pass thru thread

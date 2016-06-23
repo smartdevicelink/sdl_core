@@ -180,6 +180,11 @@ ACTION_P(GetEventId, event_id) {
 ACTION_P(GetArg, arg) {
   *arg = arg0;
 }
+
+ACTION_P(GetArg3, result) {
+  arg3 = *result;
+}
+
 ACTION_P2(GetConnectIdPermissionConsent, connect_id, consent) {
   *connect_id = arg0;
   std::vector<policy::FunctionalGroupPermission>::const_iterator it =
@@ -1896,7 +1901,7 @@ TEST_F(HMICommandsNotificationsTest, OnDriverDistractionNotificationEmptyData) {
   utils::SharedPtr<Command> command =
       CreateCommand<hmi::OnDriverDistractionNotification>(message);
 
-  EXPECT_CALL(app_mngr_, set_driver_distraction(state));
+  EXPECT_CALL(app_mngr_, set_driver_distraction_state(state));
   EXPECT_CALL(app_mngr_, applications()).WillOnce(Return(applications_));
 
   EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
@@ -1931,12 +1936,18 @@ TEST_F(HMICommandsNotificationsTest, OnDriverDistractionNotificationValidApp) {
       CreateCommand<hmi::OnDriverDistractionNotification>(message);
 
   application_set_.insert(app_);
-
   EXPECT_CALL(app_mngr_, applications()).WillOnce(Return(applications_));
+  policy::CheckPermissionResult result;
+  result.hmi_level_permitted = policy::kRpcAllowed;
+  EXPECT_CALL(app_mngr_, GetPolicyHandler())
+      .WillOnce(ReturnRef(policy_interface_));
+  EXPECT_CALL(policy_interface_, CheckPermissions(_, _, _, _))
+      .WillOnce(GetArg3(&result));
   EXPECT_CALL(app_mngr_,
               ManageMobileCommand(_, Command::CommandOrigin::ORIGIN_SDL))
       .WillOnce(GetMessage(message));
   EXPECT_CALL(*app_ptr_, app_id()).WillRepeatedly(Return(kAppId_));
+
   command->Run();
   EXPECT_EQ(
       static_cast<int32_t>(am::mobile_api::FunctionID::OnDriverDistractionID),
