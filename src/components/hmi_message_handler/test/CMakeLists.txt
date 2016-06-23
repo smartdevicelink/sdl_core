@@ -45,8 +45,8 @@ set(LIBRARIES
   hmi_message_handler
   config_profile
   jsoncpp
-  MessageBrokerClient
-  MessageBrokerServer
+  message_broker_client
+  message_broker_server
 )
 
 get_os(OS)

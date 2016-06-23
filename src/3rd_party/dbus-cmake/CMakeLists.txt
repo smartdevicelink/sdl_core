@@ -72,7 +72,7 @@ add_custom_target(dbus ALL make
             cd ${CMAKE_CURRENT_SOURCE_DIR} &&
             git log --pretty=\\"format:%H\\" -1 ${DBUS_SOURCE_DIRECTORY} > /tmp/commit_hash 2>/dev/null &&
             echo \\"Adding .commit_hash section\\" &&
-            ${objcopy} --add-section .commit_hash=/tmp/commit_hash ${DBUS_BUILD_DIRECTORY}/dbus/.libs/libdbus-1.so ${DBUS_BUILD_DIRECTORY}/dbus/.libs/libdbus-1.so 1>/dev/null 2>&1\;
+            objcopy --add-section .commit_hash=/tmp/commit_hash ${DBUS_BUILD_DIRECTORY}/dbus/.libs/libdbus-1.so ${DBUS_BUILD_DIRECTORY}/dbus/.libs/libdbus-1.so 1>/dev/null 2>&1\;
           fi;
         fi\"
   DEPENDS ${DBUS_BUILD_DIRECTORY}/Makefile

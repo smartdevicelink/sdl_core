@@ -1,4 +1,4 @@
-# Copyright (c) 2015, Ford Motor Company
+# Copyright (c) 2016, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,24 +28,23 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
+
 find_package(SDLOpenSSL REQUIRED)
 
 set(ENCRYPTION_INCLUDE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include)
 set(ENCRYPTION_INCLUDE_DIRECTORY ${ENCRYPTION_INCLUDE_DIRECTORY} PARENT_SCOPE)
 
-include_directories (
+include_directories(
   ${ENCRYPTION_INCLUDE_DIRECTORY}
   ${OPENSSL_INCLUDE_DIRECTORY}
 )
 
-set (SOURCES
-  ./src/Base64.cpp
-  ./src/hashing.cc
+collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}")
+
+set(LIBRARIES
+  ${OPENSSL_LIBRARIES}
 )
-if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-  set (LIBRARIES ${OPENSSL_LIBRARIES})
-else()
-  set (LIBRARIES crypto)
-endif()
-add_library("encryption" ${SOURCES})
-target_link_libraries("encryption" "${LIBRARIES}")
+
+add_library(encryption ${SOURCES})
+target_link_libraries(encryption "${LIBRARIES}")
