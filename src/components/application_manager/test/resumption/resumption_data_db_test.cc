@@ -36,7 +36,7 @@
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager_settings.h"
 #include "interfaces/MOBILE_API.h"
-#include "utils/sqlite_wrapper/sql_database.h"
+#include "utils/sql_database.h"
 #include "utils/sqlite_wrapper/sql_query.h"
 #include "utils/make_shared.h"
 #include "utils/file_system.h"
@@ -46,15 +46,25 @@
 #include "application_manager/resumption/resumption_sql_queries.h"
 #include "application_manager/resumption/resumption_data_db.h"
 
+#include "utils/sqlite_wrapper/sql_database_impl.h"
+#include "utils/mock_sql_database.h"
+#include "application_manager/mock_application_manager_settings.h"
+
 namespace test {
 namespace components {
 namespace resumption_test {
 
 using ::testing::NiceMock;
+using ::testing::Return;
+using ::testing::ReturnNull;
 using ::testing::ReturnRef;
+using ::testing::_;
 using application_manager_test::MockApplication;
 
+using ::test::components::utils::dbms::MockSQLDatabase;
+
 namespace am = application_manager;
+namespace smart_objects = ::NsSmartDeviceLink::NsSmartObjects;
 using namespace file_system;
 
 using namespace resumption;
@@ -67,7 +77,8 @@ const std::string kPath =
 class ResumptionDataDBTest : public ResumptionDataTest {
  protected:
   void SetUp() OVERRIDE {
-    app_mock = utils::MakeShared<NiceMock<MockApplication> >();
+    app_mock = ::utils::MakeShared<
+        NiceMock<application_manager_test::MockApplication> >();
     policy_app_id_ = "test_policy_app_id";
     app_id_ = 10;
     is_audio_ = true;
@@ -78,19 +89,17 @@ class ResumptionDataDBTest : public ResumptionDataTest {
     grammar_id_ = 16;
   }
   void TearDown() OVERRIDE {
-    utils::dbms::SQLQuery query(test_db());
+    ::utils::dbms::SQLQuery query(test_db());
     EXPECT_TRUE(query.Prepare(remove_all_tables));
     EXPECT_TRUE(query.Exec());
   }
 
   static void SetUpTestCase() {
-    kDatabaseName = "resumption";
     if (is_in_file) {
       path_ = "test_storage";
-      CreateDirectory(file_system::CurrentWorkingDirectory() + "/" + path_);
-      CreateDirectory(kPath);
-      test_db_ = new utils::dbms::SQLDatabase(kDatabaseName);
-      test_db_->set_path(kPath + "/");
+      CreateDirectory("./" + path_);
+      test_db_ = new ::utils::dbms::SQLDatabaseImpl(kDatabaseName);
+      test_db_->set_path(path_ + "/");
       res_db_ = new TestResumptionDataDB(In_File_Storage);
     } else {
       res_db_ = new TestResumptionDataDB(In_Memory_Storage);
@@ -101,7 +110,7 @@ class ResumptionDataDBTest : public ResumptionDataTest {
     EXPECT_TRUE(test_db_->IsReadWrite());
   }
 
-  static utils::dbms::SQLDatabase* test_db_;
+  static ::utils::dbms::SQLDatabase* test_db_;
   static std::string kDatabaseName;
   static std::string path_;
 
@@ -113,7 +122,7 @@ class ResumptionDataDBTest : public ResumptionDataTest {
     delete res_db_;
   }
 
-  utils::dbms::SQLDatabase* test_db() {
+  ::utils::dbms::SQLDatabase* test_db() {
     return test_db_;
   }
   std::string path() {
@@ -121,8 +130,8 @@ class ResumptionDataDBTest : public ResumptionDataTest {
   }
 
   void SetZeroIgnOffTime() {
-    utils::dbms::SQLQuery query(test_db());
-    EXPECT_TRUE(query.Prepare(KUpdateLastIgnOffTime));
+    ::utils::dbms::SQLQuery query(test_db());
+    EXPECT_TRUE(query.Prepare(resumption::KUpdateLastIgnOffTime));
     query.Bind(0, 0);
     EXPECT_TRUE(query.Exec());
   }
@@ -180,16 +189,16 @@ class ResumptionDataDBTest : public ResumptionDataTest {
   void CheckCharacters(int64_t global_properties_key);
   void CheckVRHelpItem(int64_t global_properties_key);
 
-  void BindId(utils::dbms::SQLQuery& query);
+  void BindId(::utils::dbms::SQLQuery& query);
 };
 
-utils::dbms::SQLDatabase* ResumptionDataDBTest::test_db_ = NULL;
+::utils::dbms::SQLDatabase* ResumptionDataDBTest::test_db_ = NULL;
 TestResumptionDataDB* ResumptionDataDBTest::res_db_ = NULL;
 std::string ResumptionDataDBTest::kDatabaseName = "";
 std::string ResumptionDataDBTest::path_ = "";
 
 void ResumptionDataDBTest::CheckSavedDB() {
-  utils::dbms::SQLQuery query_checks(test_db());
+  ::utils::dbms::SQLQuery query_checks(test_db());
   EXPECT_TRUE(query_checks.Prepare(kChecksResumptionData));
   EXPECT_TRUE(query_checks.Exec());
   EXPECT_EQ(1, query_checks.GetInteger(0));
@@ -206,7 +215,7 @@ void ResumptionDataDBTest::CheckSavedDB() {
 }
 
 void ResumptionDataDBTest::CheckExistenceApplication() {
-  utils::dbms::SQLQuery query(test_db());
+  ::utils::dbms::SQLQuery query(test_db());
   EXPECT_TRUE(query.Prepare(kCheckApplication));
   query.Bind(0, kMacAddress_);
   query.Bind(1, policy_app_id_);
@@ -215,7 +224,7 @@ void ResumptionDataDBTest::CheckExistenceApplication() {
 }
 
 void ResumptionDataDBTest::CheckAppData() {
-  utils::dbms::SQLQuery query(test_db());
+  ::utils::dbms::SQLQuery query(test_db());
   EXPECT_TRUE(query.Prepare(kSelectAppTable));
   BindId(query);
   EXPECT_TRUE(query.Exec());
@@ -233,7 +242,7 @@ void ResumptionDataDBTest::CheckAppData() {
 }
 
 void ResumptionDataDBTest::CheckGlobalProportiesData() {
-  utils::dbms::SQLQuery select_globalproperties(test_db());
+  ::utils::dbms::SQLQuery select_globalproperties(test_db());
 
   EXPECT_TRUE(select_globalproperties.Prepare(kSelectCountGlobalProperties));
   BindId(select_globalproperties);
@@ -263,7 +272,7 @@ void ResumptionDataDBTest::CheckGlobalProportiesData() {
                 select_globalproperties.GetString(7));
 
       EXPECT_FALSE(select_globalproperties.IsNull(3));
-      utils::dbms::SQLQuery select_image(test_db());
+      ::utils::dbms::SQLQuery select_image(test_db());
       EXPECT_TRUE(select_image.Prepare(kSelectImage));
       select_image.Bind(0, select_globalproperties.GetLongInt(3));
       EXPECT_TRUE(select_image.Exec());
@@ -273,7 +282,7 @@ void ResumptionDataDBTest::CheckGlobalProportiesData() {
                 select_image.GetString(1));
     }
     if (!select_globalproperties.IsNull(8)) {
-      utils::dbms::SQLQuery select_tts_chunk(test_db());
+      ::utils::dbms::SQLQuery select_tts_chunk(test_db());
       EXPECT_TRUE(select_tts_chunk.Prepare(kSelectTTSChunk));
       select_tts_chunk.Bind(0, select_globalproperties.GetLongInt(8));
       EXPECT_TRUE(select_tts_chunk.Exec());
@@ -286,7 +295,7 @@ void ResumptionDataDBTest::CheckGlobalProportiesData() {
       help_prompt_idx++;
     }
     if (!select_globalproperties.IsNull(9)) {
-      utils::dbms::SQLQuery select_tts_chunk(test_db());
+      ::utils::dbms::SQLQuery select_tts_chunk(test_db());
       EXPECT_TRUE(select_tts_chunk.Prepare(kSelectTTSChunk));
       select_tts_chunk.Bind(0, select_globalproperties.GetLongInt(9));
       EXPECT_TRUE(select_tts_chunk.Exec());
@@ -304,13 +313,13 @@ void ResumptionDataDBTest::CheckGlobalProportiesData() {
   }
 }
 void ResumptionDataDBTest::CheckVRHelpItem(int64_t global_properties_key) {
-  utils::dbms::SQLQuery checks_vrhelp_item(test_db());
+  ::utils::dbms::SQLQuery checks_vrhelp_item(test_db());
   EXPECT_TRUE(checks_vrhelp_item.Prepare(kChecksVrHelpItem));
   checks_vrhelp_item.Bind(0, global_properties_key);
   EXPECT_TRUE(checks_vrhelp_item.Exec());
   EXPECT_NE(0, checks_vrhelp_item.GetInteger(0));
   if (!checks_vrhelp_item.GetInteger(0)) {
-    utils::dbms::SQLQuery select_vrhelp_item(test_db());
+    ::utils::dbms::SQLQuery select_vrhelp_item(test_db());
     EXPECT_TRUE(select_vrhelp_item.Prepare(kSelectVrHelpItem));
     select_vrhelp_item.Bind(0, global_properties_key);
     size_t vr_help_item_idx = 0;
@@ -326,13 +335,13 @@ void ResumptionDataDBTest::CheckVRHelpItem(int64_t global_properties_key) {
 }
 
 void ResumptionDataDBTest::CheckCharacters(int64_t global_properties_key) {
-  utils::dbms::SQLQuery checks_characters(test_db());
+  ::utils::dbms::SQLQuery checks_characters(test_db());
   EXPECT_TRUE(checks_characters.Prepare(kChecksCharacter));
   checks_characters.Bind(0, global_properties_key);
   EXPECT_TRUE(checks_characters.Exec());
   EXPECT_NE(0, checks_characters.GetInteger(0));
   if (!checks_characters.GetInteger(0)) {
-    utils::dbms::SQLQuery select_characters(test_db());
+    ::utils::dbms::SQLQuery select_characters(test_db());
     EXPECT_TRUE(select_characters.Prepare(kSelectCharacter));
     select_characters.Bind(0, global_properties_key);
     size_t characters_idx = 0;
@@ -346,7 +355,7 @@ void ResumptionDataDBTest::CheckCharacters(int64_t global_properties_key) {
 }
 
 void ResumptionDataDBTest::CheckSubmenuData() {
-  utils::dbms::SQLQuery select_submenu(test_db());
+  ::utils::dbms::SQLQuery select_submenu(test_db());
 
   EXPECT_TRUE(select_submenu.Prepare(kSelectCountSubMenu));
   BindId(select_submenu);
@@ -369,7 +378,7 @@ void ResumptionDataDBTest::CheckSubmenuData() {
 }
 
 void ResumptionDataDBTest::CheckCommandsData() {
-  utils::dbms::SQLQuery select_commands(test_db());
+  ::utils::dbms::SQLQuery select_commands(test_db());
 
   EXPECT_TRUE(select_commands.Prepare(kSelectCountCommands));
   BindId(select_commands);
@@ -418,7 +427,7 @@ void ResumptionDataDBTest::CheckCommandsData() {
 }
 
 void ResumptionDataDBTest::CheckChoiceSetData() {
-  utils::dbms::SQLQuery select_choice_set(test_db());
+  ::utils::dbms::SQLQuery select_choice_set(test_db());
   EXPECT_TRUE(select_choice_set.Prepare(kSelectCountChoiceSet));
   BindId(select_choice_set);
   EXPECT_TRUE(select_choice_set.Exec());
@@ -469,7 +478,7 @@ void ResumptionDataDBTest::CheckChoiceSetData() {
       EXPECT_EQ(tertiary_text, select_choice_set.GetString(7));
 
       EXPECT_FALSE(select_choice_set.IsNull(8));
-      utils::dbms::SQLQuery select_image(test_db());
+      ::utils::dbms::SQLQuery select_image(test_db());
       EXPECT_TRUE(select_image.Prepare(kSelectImage));
       select_image.Bind(0, select_choice_set.GetLongInt(8));
       EXPECT_TRUE(select_image.Exec());
@@ -506,7 +515,7 @@ void ResumptionDataDBTest::CheckChoiceSetData() {
 }
 
 void ResumptionDataDBTest::CheckAppFilesData() {
-  utils::dbms::SQLQuery query(test_db());
+  ::utils::dbms::SQLQuery query(test_db());
   EXPECT_TRUE(query.Prepare(kSelectCountFiles));
   BindId(query);
   EXPECT_TRUE(query.Exec());
@@ -529,13 +538,414 @@ void ResumptionDataDBTest::CheckAppFilesData() {
   }
 }
 
-void ResumptionDataDBTest::BindId(utils::dbms::SQLQuery& query) {
+void ResumptionDataDBTest::BindId(::utils::dbms::SQLQuery& query) {
   query.Bind(0, policy_app_id_);
   query.Bind(1, kMacAddress_);
 }
 
+class ResumptionDBTest_WithMockStorage : public ::testing::Test {
+ public:
+  ResumptionDBTest_WithMockStorage()
+      // Mock database will be destroyed by resumption_data_db in ~Destr.
+      : mock_database_(new MockSQLDatabase()),
+        resumption_data_db_(mock_database_, mock_am_) {}
+
+  void SetUp() OVERRIDE {
+    ON_CALL(mock_am_settings_, attempts_to_open_resumption_db())
+        .WillByDefault(Return(1));
+    ON_CALL(mock_am_settings_, open_attempt_timeout_ms_resumption_db())
+        .WillByDefault(Return(1));
+    ON_CALL(mock_am_, get_settings())
+        .WillByDefault(ReturnRef(mock_am_settings_));
+  }
+  void TearDown() OVERRIDE {
+    EXPECT_CALL(*mock_database_, Close());
+  }
+
+  void InitRealDB() {
+    real_db_.Open();
+
+    EXPECT_CALL(*mock_database_, Open()).WillOnce(Return(true));
+    EXPECT_CALL(*mock_database_, IsReadWrite()).WillOnce(Return(true));
+    EXPECT_CALL(*mock_database_, conn())
+        .WillRepeatedly(Return(real_db_.conn()));
+
+    EXPECT_TRUE(resumption_data_db_.Init());
+  }
+
+  void ApplicationParamsCreateCalls(MockApplication* mock_app) {
+    EXPECT_CALL(*mock_app, curHash()).WillOnce(ReturnRef(kEmptyString_));
+    EXPECT_CALL(*mock_app, get_grammar_id()).WillOnce(Return(1u));
+    EXPECT_CALL(*mock_app, app_id()).WillRepeatedly(Return(1u));
+    EXPECT_CALL(*mock_app, hmi_app_id()).WillOnce(Return(1u));
+    EXPECT_CALL(*mock_app, IsAudioApplication()).WillOnce(Return(true));
+    EXPECT_CALL(mock_am_, IsAppSubscribedForWayPoints(_))
+        .WillOnce(Return(false));
+  }
+
+  void PrepareApplicationSO(smart_objects::SmartObject& app_data) {
+    app_data[ ::application_manager::strings::app_id] = "1";
+    app_data[ ::application_manager::strings::hash_id] = "1";
+    app_data[ ::application_manager::strings::grammar_id] = 1;
+    app_data[ ::application_manager::strings::connection_key] = 1;
+    app_data[ ::application_manager::strings::hmi_app_id] = 1;
+    app_data[ ::application_manager::strings::hmi_level] = HMILevel::HMI_FULL;
+    app_data[ ::application_manager::strings::is_media_application] = true;
+    app_data[ ::application_manager::strings::subscribed_for_way_points] =
+        false;
+    app_data[ ::application_manager::strings::ign_off_count] = 0;
+    app_data[ ::application_manager::strings::device_id] = "0";
+  }
+
+  void GetCorrectAppData(smart_objects::SmartObject& data) {
+    data =
+        smart_objects::SmartObject(smart_objects::SmartType::SmartType_Array);
+    data[0] = smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+    smart_objects::SmartObject& application_data = data[0];
+
+    application_data["globalProperties"] =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+    application_data["applicationFiles"] =
+        smart_objects::SmartObject(smart_objects::SmartType_Array);
+    application_data["applicationSubMenus"] =
+        smart_objects::SmartObject(smart_objects::SmartType_Array);
+    application_data["applicationCommands"] =
+        smart_objects::SmartObject(smart_objects::SmartType_Array);
+    application_data["subscribtions"] =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+    application_data["applicationChoiceSets"] =
+        smart_objects::SmartObject(smart_objects::SmartType_Array);
+
+    // Filling app_data with correct application values
+    PrepareApplicationSO(application_data);
+  }
+
+  void TestIncorrectAdditionalAppDataForWriting(const std::string& data_key) {
+    // Processing of Application_data needed real DB frow write
+    InitRealDB();
+    // Correct data smart object
+    smart_objects::SmartObject data;
+    GetCorrectAppData(data);
+    smart_objects::SmartObject& application_data = data[0];
+
+    application_data[data_key][0] = kEmptyString_;
+
+    EXPECT_CALL(*mock_database_, BeginTransaction()).Times(1);
+    EXPECT_CALL(*mock_database_, conn())
+        // Two times return reall db  connection to correct writing
+        // of app_data to DB
+        .WillOnce(Return(real_db_.conn()))
+        .WillOnce(Return(real_db_.conn()))
+        // Null connection for unsuccessful processing of FilesData
+        .WillOnce(ReturnNull());
+    EXPECT_CALL(*mock_database_, RollbackTransaction()).Times(1);
+    EXPECT_FALSE(resumption_data_db_.SaveAllData(data));
+  }
+
+  void AddApplicationsToDB(smart_objects::SmartObject& apps) {
+    EXPECT_CALL(*mock_database_, BeginTransaction()).Times(1);
+    EXPECT_CALL(*mock_database_, conn())
+        .WillRepeatedly(Return(real_db_.conn()));
+    EXPECT_CALL(*mock_database_, RollbackTransaction()).Times(0);
+    EXPECT_CALL(*mock_database_, CommitTransaction()).Times(1);
+
+    EXPECT_TRUE(resumption_data_db_.SaveAllData(apps));
+  }
+
+  MockSQLDatabase* mock_database_;
+  NiceMock<application_manager_test::MockApplicationManager> mock_am_;
+  NiceMock<application_manager_test::MockApplicationManagerSettings>
+      mock_am_settings_;
+  ResumptionDataDB resumption_data_db_;
+  ::utils::dbms::SQLDatabaseImpl real_db_;
+  const std::string kEmptyString_ = "";
+};
+
+TEST_F(ResumptionDBTest_WithMockStorage, Init_DBNotOpened_AttemptsOpened) {
+  EXPECT_CALL(*mock_database_, Open())
+      .WillOnce(Return(false))
+      .WillOnce(Return(true));
+  EXPECT_CALL(*mock_database_, IsReadWrite()).WillOnce(Return(false));
+
+  EXPECT_FALSE(resumption_data_db_.Init());
+}
+
+TEST_F(ResumptionDBTest_WithMockStorage,
+       Init_DBNotOpened_AttemptsNotOpenedToo) {
+  EXPECT_CALL(*mock_database_, Open()).WillRepeatedly(Return(false));
+  EXPECT_CALL(*mock_database_, IsReadWrite()).Times(0);
+
+  EXPECT_FALSE(resumption_data_db_.Init());
+}
+
+TEST_F(ResumptionDBTest_WithMockStorage, Init_CannotCreateSchema) {
+  EXPECT_CALL(*mock_database_, Open()).WillOnce(Return(true));
+  EXPECT_CALL(*mock_database_, IsReadWrite()).WillOnce(Return(true));
+  EXPECT_CALL(*mock_database_, conn()).WillOnce(ReturnNull());
+
+  EXPECT_FALSE(resumption_data_db_.Init());
+}
+
+TEST_F(ResumptionDBTest_WithMockStorage, Init_CannotChecksResumptionData) {
+  ::utils::dbms::SQLDatabaseImpl real_db;
+  real_db.Open();
+
+  EXPECT_CALL(*mock_database_, Open()).WillOnce(Return(true));
+  EXPECT_CALL(*mock_database_, IsReadWrite()).WillOnce(Return(true));
+  EXPECT_CALL(*mock_database_, conn())
+      .WillOnce(Return(real_db.conn()))
+      .WillOnce(ReturnNull());
+
+  EXPECT_FALSE(resumption_data_db_.Init());
+}
+
+TEST_F(ResumptionDBTest_WithMockStorage, Init_CannotInsertInitData) {
+  ::utils::dbms::SQLDatabaseImpl real_db;
+  real_db.Open();
+
+  EXPECT_CALL(*mock_database_, Open()).WillOnce(Return(true));
+  EXPECT_CALL(*mock_database_, IsReadWrite()).WillOnce(Return(true));
+  EXPECT_CALL(*mock_database_, conn())
+      .WillOnce(Return(real_db.conn()))
+      .WillOnce(Return(real_db.conn()))
+      .WillOnce(ReturnNull());
+
+  EXPECT_FALSE(resumption_data_db_.Init());
+}
+
+TEST_F(ResumptionDBTest_WithMockStorage, Init_Positive) {
+  ::utils::dbms::SQLDatabaseImpl real_db;
+  real_db.Open();
+
+  EXPECT_CALL(*mock_database_, Open()).WillOnce(Return(true));
+  EXPECT_CALL(*mock_database_, IsReadWrite()).WillOnce(Return(true));
+  EXPECT_CALL(*mock_database_, conn()).WillRepeatedly(Return(real_db.conn()));
+
+  EXPECT_TRUE(resumption_data_db_.Init());
+}
+
+TEST_F(ResumptionDBTest_WithMockStorage, RefreshDB_CannotDropSchema) {
+  EXPECT_CALL(*mock_database_, conn()).WillOnce(ReturnNull());
+
+  EXPECT_FALSE(resumption_data_db_.RefreshDB());
+}
+
+TEST_F(ResumptionDBTest_WithMockStorage, RefreshDB_CannotCreateSchema) {
+  ::utils::dbms::SQLDatabaseImpl real_db;
+  real_db.Open();
+
+  EXPECT_CALL(*mock_database_, conn())
+      .WillOnce(Return(real_db.conn()))
+      .WillOnce(ReturnNull());
+
+  EXPECT_FALSE(resumption_data_db_.RefreshDB());
+}
+
+TEST_F(ResumptionDBTest_WithMockStorage, RefreshDB_CannotInsertInitData) {
+  ::utils::dbms::SQLDatabaseImpl real_db;
+  real_db.Open();
+
+  EXPECT_CALL(*mock_database_, conn())
+      .WillOnce(Return(real_db.conn()))
+      .WillOnce(Return(real_db.conn()))
+      .WillOnce(ReturnNull());
+
+  EXPECT_FALSE(resumption_data_db_.RefreshDB());
+}
+
+TEST_F(ResumptionDBTest_WithMockStorage, RefreshDB_Positive) {
+  ::utils::dbms::SQLDatabaseImpl real_db;
+  real_db.Open();
+
+  EXPECT_CALL(*mock_database_, conn()).WillRepeatedly(Return(real_db.conn()));
+
+  EXPECT_TRUE(resumption_data_db_.RefreshDB());
+}
+
+TEST_F(ResumptionDBTest_WithMockStorage,
+       IsDBVersionActual_CannotSelectDBVersion) {
+  EXPECT_CALL(*mock_database_, conn()).WillOnce(ReturnNull());
+
+  EXPECT_FALSE(resumption_data_db_.IsDBVersionActual());
+}
+
+TEST_F(ResumptionDBTest_WithMockStorage, IsDBVersionActual_Positive) {
+  ::utils::dbms::SQLDatabaseImpl real_db;
+  real_db.Open();
+
+  EXPECT_CALL(*mock_database_, conn()).WillOnce(Return(real_db.conn()));
+
+  EXPECT_FALSE(resumption_data_db_.IsDBVersionActual());
+}
+
+TEST_F(ResumptionDBTest_WithMockStorage, UpdateDBVersion_CannotPrepare) {
+  EXPECT_CALL(*mock_database_, conn()).WillOnce(ReturnNull());
+
+  EXPECT_FALSE(resumption_data_db_.UpdateDBVersion());
+}
+
+TEST_F(ResumptionDBTest_WithMockStorage, UpdateDBVersion_Positive) {
+  ::utils::dbms::SQLDatabaseImpl real_db;
+  real_db.Open();
+
+  EXPECT_CALL(*mock_database_, conn()).WillOnce(Return(real_db.conn()));
+
+  EXPECT_FALSE(resumption_data_db_.UpdateDBVersion());
+}
+
+TEST_F(ResumptionDBTest_WithMockStorage,
+       SaveApplication_AppNotChanged_AppExist) {
+  InitRealDB();
+  MockApplication* app_ptr = new MockApplication();
+  application_manager::ApplicationSharedPtr app_sptr(app_ptr);
+
+  const std::string kPolicyAppId = "1";
+  const std::string kMacAdress = "xx";
+
+  ApplicationParamsCreateCalls(app_ptr);
+
+  EXPECT_CALL(*app_ptr, policy_app_id()).WillRepeatedly(Return(kPolicyAppId));
+  EXPECT_CALL(*app_ptr, mac_address()).WillRepeatedly(ReturnRef(kMacAdress));
+  EXPECT_CALL(*app_ptr, is_application_data_changed())
+      .WillRepeatedly(Return(false));
+  EXPECT_CALL(*app_ptr, hmi_level()).WillRepeatedly(Return(HMILevel::HMI_FULL));
+  EXPECT_CALL(*mock_database_, conn()).WillRepeatedly(Return(real_db_.conn()));
+  EXPECT_CALL(*mock_database_, Backup()).Times(2);
+
+  // App_not exists -> adding it to db
+  resumption_data_db_.SaveApplication(app_sptr);
+  // App exists update it in DB
+  resumption_data_db_.SaveApplication(app_sptr);
+}
+
+TEST_F(ResumptionDBTest_WithMockStorage,
+       SaveApplication_AppNotChanged_AppExist_DBProblem) {
+  InitRealDB();
+  MockApplication* app_ptr = new MockApplication();
+  application_manager::ApplicationSharedPtr app_sptr(app_ptr);
+
+  const std::string kPolicyAppId = "1";
+  const std::string kMacAdress = "xx";
+
+  ApplicationParamsCreateCalls(app_ptr);
+
+  EXPECT_CALL(*app_ptr, policy_app_id()).WillRepeatedly(Return(kPolicyAppId));
+  EXPECT_CALL(*app_ptr, mac_address()).WillRepeatedly(ReturnRef(kMacAdress));
+  EXPECT_CALL(*app_ptr, is_application_data_changed())
+      .WillRepeatedly(Return(false));
+  EXPECT_CALL(*app_ptr, hmi_level()).WillRepeatedly(Return(HMILevel::HMI_FULL));
+  EXPECT_CALL(*mock_database_, conn())
+      .WillOnce(Return(real_db_.conn()))
+      .WillOnce(Return(real_db_.conn()))
+      .WillOnce(Return(real_db_.conn()))
+      .WillOnce(ReturnNull());
+  EXPECT_CALL(*mock_database_, Backup()).Times(1);
+
+  // App_not exists -> adding it to db
+  resumption_data_db_.SaveApplication(app_sptr);
+  // App exists update it in DB
+  resumption_data_db_.SaveApplication(app_sptr);
+}
+
+TEST_F(ResumptionDBTest_WithMockStorage, SaveAllData_DataNotArray) {
+  smart_objects::SmartObject data(smart_objects::SmartType::SmartType_Map);
+
+  EXPECT_CALL(*mock_database_, BeginTransaction()).Times(0);
+
+  EXPECT_FALSE(resumption_data_db_.SaveAllData(data));
+}
+
+TEST_F(ResumptionDBTest_WithMockStorage,
+       SaveAllData_IncorrectGlobalProperties) {
+  // Correct smart type
+  smart_objects::SmartObject data(smart_objects::SmartType::SmartType_Array);
+  data[0] = smart_objects::SmartObject(smart_objects::SmartType_Map);
+  smart_objects::SmartObject& application_data = data[0];
+
+  application_data["globalProperties"]["property_1"] = 1u;
+
+  EXPECT_CALL(*mock_database_, BeginTransaction()).Times(1);
+  EXPECT_CALL(*mock_database_, RollbackTransaction()).Times(1);
+  // Will create error while processing globalProperties
+  EXPECT_CALL(*mock_database_, conn()).WillOnce(ReturnNull());
+
+  EXPECT_FALSE(resumption_data_db_.SaveAllData(data));
+}
+
+TEST_F(ResumptionDBTest_WithMockStorage, SaveAllData_IncorrectApplicationData) {
+  // Correct smart type
+  smart_objects::SmartObject data(smart_objects::SmartType::SmartType_Array);
+  data[0] = smart_objects::SmartObject(smart_objects::SmartType_Map);
+  smart_objects::SmartObject& application_data = data[0];
+  // When global properties empty processing returns true
+  application_data["globalProperties"] =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  // App data havent any fields for application (app_id, hmi_level)
+
+  EXPECT_CALL(*mock_database_, BeginTransaction()).Times(1);
+  EXPECT_CALL(*mock_database_, RollbackTransaction()).Times(1);
+
+  EXPECT_FALSE(resumption_data_db_.SaveAllData(data));
+}
+
+TEST_F(ResumptionDBTest_WithMockStorage, SaveAllData_IncorrectFilesData) {
+  TestIncorrectAdditionalAppDataForWriting("applicationFiles");
+}
+
+TEST_F(ResumptionDBTest_WithMockStorage, SaveAllData_IncorrectSubMenu) {
+  TestIncorrectAdditionalAppDataForWriting("applicationSubMenus");
+}
+
+TEST_F(ResumptionDBTest_WithMockStorage, SaveAllData_IncorrectCommandsData) {
+  TestIncorrectAdditionalAppDataForWriting("applicationCommands");
+}
+
+TEST_F(ResumptionDBTest_WithMockStorage,
+       SaveAllData_IncorrectSubscriptionsData) {
+  TestIncorrectAdditionalAppDataForWriting("subscribtions");
+}
+
+TEST_F(ResumptionDBTest_WithMockStorage, SaveAllData_IncorrectChoiceSetData) {
+  TestIncorrectAdditionalAppDataForWriting("applicationChoiceSets");
+}
+
+TEST_F(ResumptionDBTest_WithMockStorage, SaveAllData_Positive) {
+  // Processing of Application_data needed real DB frow write
+  InitRealDB();
+  // Correct smart type
+  smart_objects::SmartObject data;
+  GetCorrectAppData(data);
+
+  AddApplicationsToDB(data);
+}
+
+TEST_F(ResumptionDBTest_WithMockStorage, GetAllData_DBProblem) {
+  InitRealDB();
+  EXPECT_CALL(*mock_database_, conn()).WillOnce(ReturnNull());
+
+  smart_objects::SmartObject data;
+  resumption_data_db_.GetAllData(data);
+}
+
+TEST_F(ResumptionDBTest_WithMockStorage, GetAllData_Positive) {
+  InitRealDB();
+  smart_objects::SmartObject input_data;
+  GetCorrectAppData(input_data);
+  AddApplicationsToDB(input_data);
+
+  smart_objects::SmartObject output_data;
+  EXPECT_TRUE(resumption_data_db_.GetAllData(output_data));
+
+  // Timestamp added with writing to DB
+  output_data[0].erase("timeStamp");
+
+  EXPECT_TRUE(input_data == output_data);
+}
+
 TEST_F(ResumptionDataDBTest, Init) {
-  utils::dbms::SQLQuery query_checks(test_db());
+  ::utils::dbms::SQLQuery query_checks(test_db());
 
   EXPECT_TRUE(res_db()->Init());
 

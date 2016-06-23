@@ -62,7 +62,8 @@ using namespace mobile_apis;
 class ResumptionDataTest : public ::testing::Test {
  protected:
   ResumptionDataTest()
-      : kCountOfCommands_(5u)
+      : is_subscribed_for_way_points_(false)
+      , kCountOfCommands_(5u)
       , kCountOfChoice_(2u)
       , kCountOfChoiceSets_(4u)
       , kCountOfSubmenues_(3u)
@@ -83,6 +84,7 @@ class ResumptionDataTest : public ::testing::Test {
   std::string policy_app_id_;
   size_t ign_off_count_;
   const size_t tts_chunks_count = 4;
+  bool is_subscribed_for_way_points_;
 
   size_t grammar_id_;
   std::string hash_;
