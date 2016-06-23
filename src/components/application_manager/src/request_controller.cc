@@ -59,7 +59,7 @@ RequestController::RequestController(const RequestControlerSettings& settings)
     , timer_("AM RequestCtrlTimer",
              new timer::TimerTaskImpl<RequestController>(
                  this, &RequestController::onTimer))
-	, stop_flag_(false)
+	  , stop_flag_(false)
     , is_low_voltage_(false)
     , settings_(settings) {
   SDL_AUTO_TRACE();
@@ -376,20 +376,20 @@ void RequestController::onTimer() {
 	  sync_primitives::AutoLock auto_lock(timer_lock);
 	  timer_condition_.Wait(auto_lock);
 	  continue;
-	}
-	if (!probably_expired->isExpired()) {
-	  SDL_INFO("onTimer:isExpired");
-	  sync_primitives::AutoLock auto_lock(timer_lock);
-	  const TimevalStruct current_time = date_time::DateTime::getCurrentTime();
-	  const TimevalStruct end_time = probably_expired->end_time();
-	  if (current_time < end_time) {
-	    const uint32_t msecs = 
-			static_cast<uint32_t>(date_time::DateTime::getmSecs(end_time - current_time));
-		SDL_DEBUG("Sleep for" << msecs << " millisecs");
-		timer_condition_.WaitFor(auto_lock, msecs);
+	  }
+	  if (!probably_expired->isExpired()) {
+	    SDL_INFO("onTimer:isExpired");
+	    sync_primitives::AutoLock auto_lock(timer_lock);
+	    const TimevalStruct current_time = date_time::DateTime::getCurrentTime();
+	    const TimevalStruct end_time = probably_expired->end_time();
+	    if (current_time < end_time) {
+	      const uint32_t msecs = 
+			  static_cast<uint32_t>(date_time::DateTime::getmSecs(end_time - current_time));
+		    SDL_DEBUG("Sleep for" << msecs << " millisecs");
+		    timer_condition_.WaitFor(auto_lock, msecs);
 	  }
 	  continue;
-	}
+	  }
     SDL_INFO("Timeout for "
              << (RequestInfo::HMIRequest == probably_expired->requst_type()
                      ? "HMI"
