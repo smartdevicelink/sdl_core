@@ -371,6 +371,7 @@ bool ProtocolPacket::operator==(const ProtocolPacket& other) const {
     }
     // Compare payload data
     if (packet_data_.data && other.packet_data_.data &&
+        packet_data_.totalDataBytes == other.packet_data_.totalDataBytes &&
         0 == memcmp(packet_data_.data,
                     other.packet_data_.data,
                     packet_data_.totalDataBytes)) {

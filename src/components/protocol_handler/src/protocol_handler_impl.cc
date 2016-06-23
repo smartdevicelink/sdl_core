@@ -1037,7 +1037,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
   const bool protection = false;
 #endif  // ENABLE_SECURITY
 
-  uint32_t hash_id;
+  uint32_t hash_id = protocol_handler::HASH_ID_WRONG;
   const ConnectionID connection_id = packet.connection_id();
   const uint32_t session_id = session_observer_.OnSessionStartedCallback(
       connection_id, packet.session_id(), service_type, protection, &hash_id);
