@@ -39,6 +39,7 @@ set(COMMANDS_TEST_SOURCE_DIR
 )
 
 set (SOURCES
+  ${COMPONENTS_DIR}/application_manager/test/mock_message_helper.cc
   ${COMMANDS_TEST_SOURCE_DIR}/command_impl_test.cc
   ${COMMANDS_TEST_SOURCE_DIR}/command_response_impl_test.cc
   ${COMMANDS_TEST_SOURCE_DIR}/command_request_impl_test.cc
