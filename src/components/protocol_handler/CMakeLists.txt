@@ -1,4 +1,4 @@
-# Copyright (c) 2014, Ford Motor Company
+# Copyright (c) 2016, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,43 +28,28 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
 include_directories(
-  ${COMPONENTS_DIR}/utils/include/
-  ${COMPONENTS_DIR}/protocol_handler/include/
-  ${COMPONENTS_DIR}/connection_handler/include/
-  ${COMPONENTS_DIR}/config_profile/include/
-  ${LOG4CXX_INCLUDE_DIRECTORY}
+  ${COMPONENTS_DIR}/utils/include
+  ${COMPONENTS_DIR}/protocol_handler/include
+  ${COMPONENTS_DIR}/connection_handler/include
+  ${COMPONENTS_DIR}/config_profile/include
 )
 
-set(SOURCES
-    ${COMPONENTS_DIR}/protocol_handler/src/incoming_data_handler.cc
-    ${COMPONENTS_DIR}/protocol_handler/src/protocol_handler_impl.cc
-    ${COMPONENTS_DIR}/protocol_handler/src/protocol_packet.cc
-    ${COMPONENTS_DIR}/protocol_handler/src/protocol_payload.cc
-    ${COMPONENTS_DIR}/protocol_handler/src/multiframe_builder.cc
+set(PATHS
+  ${CMAKE_CURRENT_SOURCE_DIR}/include
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
+collect_sources(SOURCES "${PATHS}")
 
 set(LIBRARIES
-  ProtocolLibrary
+  protocol
   Utils
 )
 
-get_property(dirs DIRECTORY "" PROPERTY LIBRARIES)
-foreach(dir ${dirs})
-  message(STATUS "libraries='${dir}'")
-endforeach()
-
-if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-  file (GLOB inc ${COMPONENTS_DIR}/protocol_handler/include/protocol_handler/*.h)
-  string( REPLACE / \\ group ${inc} )
-  source_group("Header Files" FILES ${inc} )
-  add_library(ProtocolHandler ${inc} ${SOURCES})
-else()
-  add_library(ProtocolHandler ${SOURCES})
-endif()
-
-target_link_libraries(ProtocolHandler ${LIBRARIES})
+add_library(protocol_handler ${SOURCES})
+target_link_libraries(protocol_handler ${LIBRARIES})
 
 if(BUILD_TESTS)
   add_subdirectory(test)

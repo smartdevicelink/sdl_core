@@ -39,7 +39,7 @@ set (LIBRARIES
     gmock
     DBus
     formatters
-    SmartObjects
+    smart_object
 )
 
 set(testSources

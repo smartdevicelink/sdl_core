@@ -31,21 +31,8 @@
 cmake_minimum_required(VERSION 2.8.11)
 
 find_package(LibUSBx REQUIRED)
-
-if (${CMAKE_SYSTEM_NAME} MATCHES "Windows" AND NOT QT_PORT)
-  add_custom_target(copy_sqlite_dll ALL
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-	%SDL_SQLITE_DIR%/sqlite3.dll
-	${CMAKE_CURRENT_BINARY_DIR}/sqlite3.dll
-    COMMENT "Copying sqlite")
-endif()
-
-if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-  find_package(WinOpenSSL REQUIRED)
-  if(NOT QT_PORT)
-    find_package(WinSqlite3 REQUIRED)
-  endif()
-endif()
+find_package(SDLOpenSSL REQUIRED)
+find_package(SDLSqlite3 REQUIRED)
 
 IF (HMIADAPTER STREQUAL "messagebroker")
 set (BROKER_LIBRARIES
@@ -76,16 +63,16 @@ endif()
 
 set(LIBRARIES
   MediaManager
-  ApplicationManager
+  application_manager
   HMI_API
   MOBILE_API
   v4_protocol_v1_2_no_extra
-  SmartObjects
+  smart_object
   ${TELEMETRY_MONITOR_LIB}
   formatters
-  ProtocolLibrary
-  ProtocolHandler
-  connectionHandler
+  protocol
+  protocol_handler
+  connection_handler
   TransportManager
   ${SecurityManagerLibrary}
   HMIMessageHandler
@@ -93,9 +80,9 @@ set(LIBRARIES
   ${BROKER_LIBRARIES}
   Utils
   jsoncpp
-  ConfigProfile
-  Resumption
-  UsageStatistics
+  config_profile
+  resumption
+  usage_statistics
 )
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -165,8 +152,8 @@ set (HEADERS
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
   if(NOT QT_PORT)
-    list(APPEND LIBRARIES sqlite3 bthprops)
-    link_directories(${SQLITE_LIB_DIRECTORY})
+    list(APPEND LIBRARIES ${SQLITE3_LIBRARIES} bthprops)
+    link_directories(${SQLITE3_LIB_DIRECTORY})
   endif()
   link_directories (${OPENSSL_LIB_DIRECTORY})
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /INCREMENTAL:NO" )
@@ -278,7 +265,3 @@ if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
     PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ
       GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 endif ()
-
-if (${CMAKE_SYSTEM_NAME} MATCHES "Windows" AND NOT QT_PORT)
-    add_dependencies(${PROJECT} copy_sqlite_dll)
-endif()

@@ -38,12 +38,12 @@ include_directories (
 
 set(LIBRARIES    
     gmock
-    ApplicationManager
+    application_manager
     HMIMessageHandler
     jsoncpp
     MessageBrokerClient
     MessageBrokerServer
-    ConfigProfile
+    config_profile
 )
 
 set(SOURCES 

@@ -51,15 +51,15 @@ set(SOURCES
 )
 
 set(LIBRARIES
-    SmartObjects
+    smart_object
     MediaManager
-    ProtocolLibrary
-    ApplicationManager
-    ProtocolHandler
+    protocol
+    application_manager
+    protocol_handler
     gmock
-    connectionHandler
+    connection_handler
     encryption
-    Resumption
+    resumption
     Policy
     ${SecurityManagerLibrary}
 )

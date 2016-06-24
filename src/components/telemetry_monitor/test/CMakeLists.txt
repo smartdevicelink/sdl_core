@@ -60,19 +60,18 @@ set(testLibraries
   jsoncpp
   Utils
   MediaManager
-  ProtocolHandler
+  protocol_handler
   v4_protocol_v1_2_no_extra
-  SmartObjects
-  ProtocolLibrary
-  ConfigProfile
-  ApplicationManager
+  smart_object
+  protocol
+  config_profile
+  application_manager
   MessageHelper
-  Resumption
+  resumption
   jsoncpp
   TransportManager
   MediaManager
-  ProtocolHandler
-  connectionHandler
+  connection_handler
 )
 
 if (BUILD_USB_SUPPORT)

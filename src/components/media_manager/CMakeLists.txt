@@ -92,8 +92,8 @@ set(VIDEO_SOURCES
 )
 
 set(LIBRARIES
-    ProtocolLibrary
-    ApplicationManager
+    protocol
+    application_manager
 )
 
 if(LOG4CXX_LOGGER)

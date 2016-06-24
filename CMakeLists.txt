@@ -32,6 +32,8 @@ cmake_minimum_required(VERSION 2.8.11)
 
 set (PROJECT smartDeviceLinkCore)
 
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/platform.cmake)
+
 #Jenkins integration section
 #dont modify this section if you dont know details about integration with Jenkins!!!
 set (HMI "web" CACHE STRING "HMI type")
@@ -171,7 +173,7 @@ project (${PROJECT})
 
 #ADD_DEPENDENCIES(${PROJECT} Policy)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/tools/cmake/modules/")
 
 # Please do not change compiler/linker flags if You do not know how particular
 # flag is handled by CMake
@@ -179,7 +181,7 @@ set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR})
 set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
 
 if(MSVC)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /GF /GR /EHsc /W3 /D_CONSOLE")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /GF /GR /EHsc /W3 /D_CONSOLE /bigobj")
   # /WD4996 - disable warning C4996.
   # 'inet_ntoa': Use inet_ntop() or InetNtop() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS
   # to disable deprecated API warnings
@@ -716,7 +718,7 @@ add_subdirectory(./src/plugins)
 
 
 ADD_DEPENDENCIES(${PROJECT} Policy)
-ADD_DEPENDENCIES(${PROJECT} copy_library_Policy)
+ADD_DEPENDENCIES(${PROJECT} copy_policy_library)
 
 # Building tests
 if(BUILD_TESTS)

@@ -1,4 +1,4 @@
-# Copyright (c) 2014, Ford Motor Company
+# Copyright (c) 2016, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,49 +28,37 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-  find_package(WinOpenSSL REQUIRED)
-endif()
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
-set(CH_SRC_DIR ${COMPONENTS_DIR}/connection_handler/src)
+find_package(SDLOpenSSL REQUIRED)
 
-include_directories (
-    ${COMPONENTS_DIR}/connection_handler/include
-    ${COMPONENTS_DIR}/protocol_handler/include/
-    ${COMPONENTS_DIR}/config_profile/include/
-    ${COMPONENTS_DIR}/utils/include/
-    ${ENCRYPTION_INCLUDE_DIRECTORY}
-    ${OPENSSL_INCLUDE_DIRECTORY}
-    ${LOG4CXX_INCLUDE_DIRECTORY}
+include_directories(
+  ${COMPONENTS_DIR}/include
+  ${COMPONENTS_DIR}/connection_handler/include
+  ${COMPONENTS_DIR}/protocol_handler/include
+  ${COMPONENTS_DIR}/config_profile/include
+  ${COMPONENTS_DIR}/utils/include
+  ${COMPONENTS_DIR}/resumption/include
+  ${OPENSSL_INCLUDE_DIRECTORY}
+  ${ENCRYPTION_INCLUDE_DIRECTORY}
 )
 
-set (SOURCES
-    ${CH_SRC_DIR}/connection_handler_impl.cc
-    ${CH_SRC_DIR}/connection.cc
-    ${CH_SRC_DIR}/device.cc
-    ${CH_SRC_DIR}/heartbeat_monitor.cc
+set(PATHS
+  ${CMAKE_CURRENT_SOURCE_DIR}/include
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
 set(LIBRARIES
-    ConfigProfile
-    ProtocolLibrary
+  config_profile
+  protocol
+  encryption
+  ${OPENSSL_LIBRARIES}
 )
-if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-   set(HEADERS ${COMPONENTS_DIR}/include/connection_handler/connection_handler.h
-               ${COMPONENTS_DIR}/include/connection_handler/connection_handler_observer.h
-               ${COMPONENTS_DIR}/connection_handler/include/connection_handler/connection.h
-               ${COMPONENTS_DIR}/connection_handler/include/connection_handler/connection_handler_impl.h
-               ${COMPONENTS_DIR}/connection_handler/include/connection_handler/device.h
-               ${COMPONENTS_DIR}/connection_handler/include/connection_handler/devices_discovery_starter.h
-               ${COMPONENTS_DIR}/connection_handler/include/connection_handler/heartbeat_monitor.h)
-   source_group("Header Files" FILES ${HEADERS} )
-   source_group("Source Files" FILES ${SOURCES})
-   add_library(connectionHandler ${HEADERS} ${SOURCES})
-else()
-  add_library(connectionHandler ${SOURCES})
-endif()
-target_link_libraries(connectionHandler encryption)
+
+collect_sources(SOURCES "${PATHS}")
+add_library(connection_handler ${SOURCES})
+target_link_libraries(connection_handler ${LIBRARIES})
 
 if(BUILD_TESTS)
-    add_subdirectory(test)
+  add_subdirectory(test)
 endif()

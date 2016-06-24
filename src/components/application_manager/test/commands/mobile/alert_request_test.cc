@@ -43,7 +43,7 @@
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_message_helper.h"
-#include "event_engine/event.h"
+#include "application_manager/event_engine/event.h"
 #include "mobile/alert_request.h"
 #include "interfaces/MOBILE_API.h"
 #include "application_manager/policies/policy_handler_interface.h"

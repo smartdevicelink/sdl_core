@@ -139,7 +139,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
                                    ${usb_libinc}  ${usb_libsrc}
     )
 
-    target_link_libraries("TransportManager" ProtocolLibrary )
+    target_link_libraries("TransportManager" protocol )
 else()
     if (BUILD_BT_SUPPORT)
       include_directories(
@@ -191,7 +191,7 @@ if (BUILD_USB_SUPPORT)
 endif(BUILD_USB_SUPPORT)
 
 add_library(${target} ${SOURCES})
-target_link_libraries(${target} ProtocolLibrary)
+target_link_libraries(${target} protocol)
 
 if (BUILD_USB_SUPPORT)
   if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
