@@ -153,8 +153,8 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithGrammarId) {
   EXPECT_CALL(*app_mock, UpdateHash());
   EXPECT_CALL(*app_mock, set_grammar_id(kTestGrammarId_));
 
-  const bool res = res_ctrl->StartResumption(app_mock, kHash_);
-  EXPECT_TRUE(res);
+  const bool kResult = res_ctrl->StartResumption(app_mock, kHash_);
+  EXPECT_TRUE(kResult);
 }
 
 MATCHER_P4(CheckAppFile, is_persistent, is_download, file_name, file_type, "") {
@@ -177,8 +177,8 @@ TEST_F(ResumeCtrlTest, StartResumption_WithoutGrammarId) {
   EXPECT_CALL(*app_mock, UpdateHash());
   EXPECT_CALL(*app_mock, set_grammar_id(kTestGrammarId_)).Times(0);
 
-  const bool res = res_ctrl->StartResumption(app_mock, kHash_);
-  EXPECT_FALSE(res);
+  const bool kResult = res_ctrl->StartResumption(app_mock, kHash_);
+  EXPECT_FALSE(kResult);
 }
 
 TEST_F(ResumeCtrlTest, StartResumption_AppWithFiles) {
@@ -231,8 +231,8 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithFiles) {
                     static_cast<mobile_apis::FileType::eType>(file_types[i]))));
   }
 
-  const bool res = res_ctrl->StartResumption(app_mock, kHash_);
-  EXPECT_TRUE(res);
+  const bool kResult = res_ctrl->StartResumption(app_mock, kHash_);
+  EXPECT_TRUE(kResult);
 }
 
 TEST_F(ResumeCtrlTest, StartResumption_AppWithSubmenues) {
@@ -272,8 +272,8 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithSubmenues) {
       .WillRepeatedly(Return(requests));
 
   EXPECT_CALL(*app_mock, UpdateHash());
-  const bool res = res_ctrl->StartResumption(app_mock, kHash_);
-  EXPECT_TRUE(res);
+  const bool kResult = res_ctrl->StartResumption(app_mock, kHash_);
+  EXPECT_TRUE(kResult);
 }
 
 TEST_F(ResumeCtrlTest, StartResumption_AppWithCommands) {
@@ -310,8 +310,8 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithCommands) {
               CreateAddCommandRequestToHMI(_, _))
       .WillRepeatedly(Return(requests));
 
-  const bool res = res_ctrl->StartResumption(app_mock, kHash_);
-  EXPECT_TRUE(res);
+  const bool kResult = res_ctrl->StartResumption(app_mock, kHash_);
+  EXPECT_TRUE(kResult);
 }
 
 TEST_F(ResumeCtrlTest, StartResumption_AppWithChoiceSet) {
@@ -361,8 +361,8 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithChoiceSet) {
               CreateAddVRCommandRequestFromChoiceToHMI(_))
       .WillRepeatedly(Return(requests));
 
-  const bool res = res_ctrl->StartResumption(app_mock, kHash_);
-  EXPECT_TRUE(res);
+  const bool kResult = res_ctrl->StartResumption(app_mock, kHash_);
+  EXPECT_TRUE(kResult);
 }
 
 TEST_F(ResumeCtrlTest, StartResumption_AppWithGlobalProperties) {
@@ -389,8 +389,8 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithGlobalProperties) {
   EXPECT_CALL(*app_mock, load_global_properties(test_global_properties));
 
   EXPECT_CALL(*app_mock, UpdateHash());
-  const bool res = res_ctrl->StartResumption(app_mock, kHash_);
-  EXPECT_TRUE(res);
+  const bool kResult = res_ctrl->StartResumption(app_mock, kHash_);
+  EXPECT_TRUE(kResult);
 }
 
 TEST_F(ResumeCtrlTest, StartResumption_AppWithSubscribeOnButtons) {
@@ -431,8 +431,8 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithSubscribeOnButtons) {
   EXPECT_CALL(*application_manager::MockMessageHelper::message_helper_mock(),
               SendAllOnButtonSubscriptionNotificationsForApp(_, _)).Times(2);
 
-  const bool res = res_ctrl->StartResumption(app_mock, kHash_);
-  EXPECT_TRUE(res);
+  const bool kResult = res_ctrl->StartResumption(app_mock, kHash_);
+  EXPECT_TRUE(kResult);
 }
 
 TEST_F(ResumeCtrlTest, StartResumption_AppWithSubscriptionToIVI) {
@@ -476,8 +476,8 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithSubscriptionToIVI) {
               GetIVISubscriptionRequests(_)).WillRepeatedly(Return(requests));
 
   EXPECT_CALL(*app_mock, UpdateHash());
-  const bool res = res_ctrl->StartResumption(app_mock, kHash_);
-  EXPECT_TRUE(res);
+  const bool kResult = res_ctrl->StartResumption(app_mock, kHash_);
+  EXPECT_TRUE(kResult);
 }
 
 TEST_F(ResumeCtrlTest, StartResumption_AppWithSubscriptionToWayPoints) {
@@ -495,8 +495,8 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithSubscriptionToWayPoints) {
   EXPECT_CALL(mock_app_mngr_, SubscribeAppForWayPoints(_));
   EXPECT_CALL(mock_app_mngr_, GetDefaultHmiLevel(_)).WillOnce(Return(HMI_FULL));
 
-  const bool res = res_ctrl->StartResumption(app_mock, kHash_);
-  EXPECT_TRUE(res);
+  const bool kResult = res_ctrl->StartResumption(app_mock, kHash_);
+  EXPECT_TRUE(kResult);
 }
 
 TEST_F(ResumeCtrlTest, StartResumptionOnlyHMILevel) {
@@ -507,8 +507,8 @@ TEST_F(ResumeCtrlTest, StartResumptionOnlyHMILevel) {
   GetInfoFromApp();
   EXPECT_CALL(*mock_storage, GetSavedApplication(kTestPolicyAppId_, _, _))
       .WillOnce(DoAll(SetArgReferee<2>(saved_app), Return(true)));
-  const bool res = res_ctrl->StartResumptionOnlyHMILevel(app_mock);
-  EXPECT_TRUE(res);
+  const bool kResult = res_ctrl->StartResumptionOnlyHMILevel(app_mock);
+  EXPECT_TRUE(kResult);
 }
 
 TEST_F(ResumeCtrlTest, StartAppHmiStateResumption_AppInFull) {
@@ -527,7 +527,7 @@ TEST_F(ResumeCtrlTest, StartAppHmiStateResumption_AppInFull) {
   EXPECT_CALL(*mock_storage, RemoveApplicationFromSaved(_, _))
       .WillOnce(Return(true));
 
-  EXPECT_CALL(mock_app_mngr_, GetUserConsentForDevice("12345"))
+  EXPECT_CALL(mock_app_mngr_, GetUserConsentForDevice(kMacAddress_))
       .WillRepeatedly(Return(policy::kDeviceAllowed));
   res_ctrl->StartAppHmiStateResumption(app_mock);
 }
@@ -566,12 +566,12 @@ TEST_F(ResumeCtrlTest, RestoreAppHMIState_RestoreHMILevelFull) {
   EXPECT_CALL(*mock_storage, GetSavedApplication(_, _, _))
       .WillOnce(DoAll(SetArgReferee<2>(saved_app), Return(true)));
 
-  EXPECT_CALL(mock_app_mngr_, GetUserConsentForDevice("12345"))
+  EXPECT_CALL(mock_app_mngr_, GetUserConsentForDevice(kMacAddress_))
       .WillOnce(Return(policy::kDeviceAllowed));
   EXPECT_CALL(*app_mock, set_is_resuming(true));
 
-  const bool res = res_ctrl->RestoreAppHMIState(app_mock);
-  EXPECT_TRUE(res);
+  const bool kResult = res_ctrl->RestoreAppHMIState(app_mock);
+  EXPECT_TRUE(kResult);
 }
 
 TEST_F(ResumeCtrlTest, SetupDefaultHMILevel) {
@@ -582,7 +582,7 @@ TEST_F(ResumeCtrlTest, SetupDefaultHMILevel) {
   EXPECT_CALL(mock_app_mngr_, GetDefaultHmiLevel(_))
       .WillRepeatedly(Return(kDefaultTestLevel_));
   GetInfoFromApp();
-  EXPECT_CALL(mock_app_mngr_, GetUserConsentForDevice("12345")).Times(0);
+  EXPECT_CALL(mock_app_mngr_, GetUserConsentForDevice(kMacAddress_)).Times(0);
 
   EXPECT_CALL(mock_app_mngr_, GetDefaultHmiLevel(_))
       .WillOnce(Return(kDefaultTestLevel_));
@@ -615,7 +615,7 @@ TEST_F(ResumeCtrlTest, ApplicationResumptiOnTimer_AppInFull) {
   EXPECT_CALL(*mock_storage, RemoveApplicationFromSaved(_, _))
       .WillOnce(Return(true));
 
-  EXPECT_CALL(mock_app_mngr_, GetUserConsentForDevice("12345"))
+  EXPECT_CALL(mock_app_mngr_, GetUserConsentForDevice(kMacAddress_))
       .WillRepeatedly(Return(policy::kDeviceAllowed));
   res_ctrl->StartAppHmiStateResumption(app_mock);
 }
@@ -627,20 +627,20 @@ TEST_F(ResumeCtrlTest, ApplicationResumptiOnTimer_AppInFull) {
 TEST_F(ResumeCtrlTest, SetAppHMIState_HMINone_WithoutCheckPolicy) {
   GetInfoFromApp();
 
-  EXPECT_CALL(mock_app_mngr_, GetUserConsentForDevice("12345")).Times(0);
+  EXPECT_CALL(mock_app_mngr_, GetUserConsentForDevice(kMacAddress_)).Times(0);
 
   EXPECT_CALL(*app_mock, set_is_resuming(true));
   EXPECT_CALL(state_controller_, SetRegularState(_, kDefaultTestLevel_))
       .Times(AtLeast(1));
-  const bool res =
+  const bool kResult =
       res_ctrl->SetAppHMIState(app_mock, kDefaultTestLevel_, false);
-  EXPECT_TRUE(res);
+  EXPECT_TRUE(kResult);
 }
 
 TEST_F(ResumeCtrlTest, SetAppHMIState_HMILimited_WithoutCheckPolicy) {
   mobile_apis::HMILevel::eType test_type = eType::HMI_LIMITED;
   GetInfoFromApp();
-  EXPECT_CALL(mock_app_mngr_, GetUserConsentForDevice("12345")).Times(0);
+  EXPECT_CALL(mock_app_mngr_, GetUserConsentForDevice(kMacAddress_)).Times(0);
 
   EXPECT_CALL(*app_mock, set_is_resuming(true));
   EXPECT_CALL(state_controller_, SetRegularState(_, test_type))
@@ -654,36 +654,36 @@ TEST_F(ResumeCtrlTest, SetAppHMIState_HMIFull_WithoutCheckPolicy) {
   GetInfoFromApp();
   // GetDefaultHmiLevel should not be called
   EXPECT_CALL(mock_app_mngr_, GetDefaultHmiLevel(_)).Times(0);
-  EXPECT_CALL(mock_app_mngr_, GetUserConsentForDevice("12345")).Times(0);
+  EXPECT_CALL(mock_app_mngr_, GetUserConsentForDevice(kMacAddress_)).Times(0);
 
   EXPECT_CALL(*app_mock, set_is_resuming(true));
   EXPECT_CALL(state_controller_, SetRegularState(_, test_type))
       .Times(AtLeast(1));
 
-  const bool res = res_ctrl->SetAppHMIState(app_mock, test_type, false);
-  EXPECT_TRUE(res);
+  const bool kResult = res_ctrl->SetAppHMIState(app_mock, test_type, false);
+  EXPECT_TRUE(kResult);
 }
 
 TEST_F(ResumeCtrlTest, SetAppHMIState_HMIFull_WithPolicy_DevAllowed) {
   mobile_apis::HMILevel::eType test_type = eType::HMI_FULL;
 
   GetInfoFromApp();
-  EXPECT_CALL(mock_app_mngr_, GetUserConsentForDevice("12345"))
+  EXPECT_CALL(mock_app_mngr_, GetUserConsentForDevice(kMacAddress_))
       .WillOnce(Return(policy::kDeviceAllowed));
 
   EXPECT_CALL(*app_mock, set_is_resuming(true));
   EXPECT_CALL(state_controller_, SetRegularState(_, test_type))
       .Times(AtLeast(1));
 
-  const bool res = res_ctrl->SetAppHMIState(app_mock, test_type, true);
-  EXPECT_TRUE(res);
+  const bool kResult = res_ctrl->SetAppHMIState(app_mock, test_type, true);
+  EXPECT_TRUE(kResult);
 }
 
 TEST_F(ResumeCtrlTest, SetAppHMIState_HMIFull_WithPolicy_DevDisallowed) {
   mobile_apis::HMILevel::eType test_type = eType::HMI_FULL;
 
   GetInfoFromApp();
-  EXPECT_CALL(mock_app_mngr_, GetUserConsentForDevice("12345"))
+  EXPECT_CALL(mock_app_mngr_, GetUserConsentForDevice(kMacAddress_))
       .WillOnce(Return(policy::kDeviceDisallowed));
 
   EXPECT_CALL(*app_mock, set_is_resuming(true));
@@ -691,8 +691,8 @@ TEST_F(ResumeCtrlTest, SetAppHMIState_HMIFull_WithPolicy_DevDisallowed) {
       .WillOnce(Return(kDefaultTestLevel_));
   EXPECT_CALL(state_controller_, SetRegularState(_, kDefaultTestLevel_))
       .Times(AtLeast(1));
-  const bool res = res_ctrl->SetAppHMIState(app_mock, test_type, true);
-  EXPECT_FALSE(res);
+  const bool kResult = res_ctrl->SetAppHMIState(app_mock, test_type, true);
+  EXPECT_FALSE(kResult);
 }
 
 TEST_F(ResumeCtrlTest, SaveAllApplications) {
@@ -742,8 +742,8 @@ TEST_F(ResumeCtrlTest, OnAppActivated_ResumptionHasStarted) {
       .WillOnce(DoAll(SetArgReferee<2>(saved_app), Return(true)));
   ON_CALL(*app_mock, app_id()).WillByDefault(Return(kTestAppId_));
 
-  const bool res = res_ctrl->StartResumptionOnlyHMILevel(app_mock);
-  EXPECT_TRUE(res);
+  const bool kResult = res_ctrl->StartResumptionOnlyHMILevel(app_mock);
+  EXPECT_TRUE(kResult);
 
   utils::SharedPtr<application_manager_test::MockApplication> app_sh_mock =
       ::utils::MakeShared<application_manager_test::MockApplication>();
@@ -796,17 +796,17 @@ TEST_F(ResumeCtrlTest, OnAppRegistrationStart) {
 }
 
 TEST_F(ResumeCtrlTest, OnAppRegistrationEnd) {
-  uint32_t timeout = 10u;
+  const uint32_t kTimeout = 10u;
   EXPECT_CALL(mock_application_manager_settings_,
               app_resumption_save_persistent_data_timeout())
-      .WillOnce(ReturnRef(timeout));
+      .WillOnce(ReturnRef(kTimeout));
   res_ctrl->OnAppRegistrationEnd();
 }
 
 TEST_F(ResumeCtrlTest, CheckPersistenceFiles_WithoutCommandAndChoiceSets) {
-  const uint32_t kIggnOffCount = 0;
+  const uint32_t kIgnOffCount = 0;
   smart_objects::SmartObject saved_app;
-  saved_app[application_manager::strings::ign_off_count] = kIggnOffCount;
+  saved_app[application_manager::strings::ign_off_count] = kIgnOffCount;
   saved_app[application_manager::strings::hmi_level] = HMI_FULL;
 
   GetInfoFromApp();
@@ -818,9 +818,9 @@ TEST_F(ResumeCtrlTest, CheckPersistenceFiles_WithoutCommandAndChoiceSets) {
 
 TEST_F(ResumeCtrlTest, CheckPersistenceFilesForResumption_WithCommands) {
   smart_objects::SmartObject test_application_commands;
-  const uint32_t kIggnOffCount = 0;
+  const uint32_t kIgnOffCount = 0;
   smart_objects::SmartObject saved_app;
-  saved_app[application_manager::strings::ign_off_count] = kIggnOffCount;
+  saved_app[application_manager::strings::ign_off_count] = kIgnOffCount;
   saved_app[application_manager::strings::hmi_level] = HMI_FULL;
   saved_app[application_manager::strings::application_commands] =
       test_application_commands;
@@ -838,9 +838,9 @@ TEST_F(ResumeCtrlTest, CheckPersistenceFilesForResumption_WithCommands) {
 
 TEST_F(ResumeCtrlTest, CheckPersistenceFilesForResumption_WithChoiceSet) {
   smart_objects::SmartObject test_choice_sets;
-  const uint32_t kIggnOffCount = 0;
+  const uint32_t kIgnOffCount = 0;
   smart_objects::SmartObject saved_app;
-  saved_app[application_manager::strings::ign_off_count] = kIggnOffCount;
+  saved_app[application_manager::strings::ign_off_count] = kIgnOffCount;
   saved_app[application_manager::strings::hmi_level] = HMI_FULL;
   saved_app[application_manager::strings::application_choice_sets] =
       test_choice_sets;
@@ -888,10 +888,10 @@ TEST_F(ResumeCtrlTest, OnSuspend_EmptyApplicationlist) {
 }
 
 TEST_F(ResumeCtrlTest, OnAwake) {
-  uint32_t timeout = 10u;
+  const uint32_t kTimeout = 10u;
   EXPECT_CALL(mock_application_manager_settings_,
               app_resumption_save_persistent_data_timeout())
-      .WillOnce(ReturnRef(timeout));
+      .WillOnce(ReturnRef(kTimeout));
   EXPECT_CALL(*mock_storage, OnAwake());
   res_ctrl->OnAwake();
 }

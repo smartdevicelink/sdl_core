@@ -48,13 +48,17 @@ namespace utils_test {
 namespace dbms_test {
 
 class SQLQueryTest : public ::testing::Test {
- protected:
-  static sqlite3* conn;
-  static const std::string kDatabaseName;
+ public:
+  SQLQueryTest() : db_(kDatabaseName_) {  }
+
+
+  static sqlite3* conn_;
+  static const std::string kDatabaseName_;
+  SQLDatabaseImpl db_;
 
   static void SetUpTestCase() {
-    sqlite3_open((kDatabaseName + ".sqlite").c_str(), &conn);
-    sqlite3_exec(conn,
+    sqlite3_open((kDatabaseName_ + ".sqlite").c_str(), &conn_);
+    sqlite3_exec(conn_,
                  "CREATE TABLE testTable (integerValue INTEGER,"
                  " doubleValue REAL, stringValue TEXT)",
                  NULL,
@@ -63,12 +67,12 @@ class SQLQueryTest : public ::testing::Test {
   }
 
   static void TearDownTestCase() {
-    sqlite3_close(conn);
-    remove((kDatabaseName + ".sqlite").c_str());
+    sqlite3_close(conn_);
+    remove((kDatabaseName_ + ".sqlite").c_str());
   }
 
   void SetUp() {
-    sqlite3_exec(conn, "DELETE FROM testTable", NULL, NULL, NULL);
+    sqlite3_exec(conn_, "DELETE FROM testTable", NULL, NULL, NULL);
   }
 
   ::testing::AssertionResult IsError(SQLError error) {
@@ -96,19 +100,19 @@ class SQLQueryTest : public ::testing::Test {
   }
 };
 
-sqlite3* SQLQueryTest::conn = 0;
-const std::string SQLQueryTest::kDatabaseName = "test-query";
+sqlite3* SQLQueryTest::conn_ = 0;
+const std::string SQLQueryTest::kDatabaseName_ = "test-query";
 
 TEST_F(SQLQueryTest, Query_CreateQuery_QueryInDBEqualCreated) {
   // arrange
   const std::string kSelect("SELECT * FROM testTable WHERE integerValue = ?");
-  SQLDatabaseImpl db(kDatabaseName);
+
 
   // assert
-  ASSERT_TRUE(db.Open());
+  ASSERT_TRUE(db_.Open());
 
   // act
-  SQLQuery query(&db);
+  SQLQuery query(&db_);
   query.Prepare(kSelect);
 
   // assert
@@ -121,12 +125,12 @@ TEST_F(SQLQueryTest, ExecString_ExecuteQuery_ActWithoutError) {
       "INSERT INTO testTable"
       " (integerValue, doubleValue, stringValue)"
       " VALUES(2, 3.4, 'five-пять')");
-  SQLDatabaseImpl db(kDatabaseName);
+
   // assert
-  ASSERT_TRUE(db.Open());
+  ASSERT_TRUE(db_.Open());
 
   // act
-  SQLQuery query(&db);
+  SQLQuery query(&db_);
 
   // assert
   EXPECT_TRUE(query.Exec(kInsert));
@@ -146,13 +150,11 @@ TEST_F(SQLQueryTest,
   const double kDoubleValue = 2.3;
   const std::string kStringValue = "four";
 
-  SQLDatabaseImpl db(kDatabaseName);
-
   // assert
-  ASSERT_TRUE(db.Open());
+  ASSERT_TRUE(db_.Open());
 
   // act
-  SQLQuery query1(&db);
+  SQLQuery query1(&db_);
 
   // assert
   EXPECT_TRUE(query1.Prepare(kInsert1));
@@ -165,7 +167,7 @@ TEST_F(SQLQueryTest,
   EXPECT_TRUE(IsDone(query1.LastError()));
 
   // act
-  SQLQuery query2(&db);
+  SQLQuery query2(&db_);
   // assert
   EXPECT_TRUE(query2.Prepare(kInsert2));
   EXPECT_FALSE(IsError(query2.LastError()));
@@ -176,7 +178,7 @@ TEST_F(SQLQueryTest,
   EXPECT_TRUE(IsDone(query2.LastError()));
 
   // act
-  SQLQuery query3(&db);
+  SQLQuery query3(&db_);
   EXPECT_TRUE(query3.Prepare(kInsert3));
   EXPECT_FALSE(IsError(query3.LastError()));
   query3.Bind(0, kStringValue);
@@ -186,7 +188,7 @@ TEST_F(SQLQueryTest,
   EXPECT_TRUE(IsDone(query3.LastError()));
 
   // act
-  SQLQuery query4(&db);
+  SQLQuery query4(&db_);
   // assert
   EXPECT_TRUE(query4.Prepare(kInsert4));
   EXPECT_FALSE(IsError(query4.LastError()));
@@ -207,7 +209,7 @@ TEST_F(SQLQueryTest, SetValue_InsertValues_ExpectDBHasInsertedValues) {
       "VALUES (1, 2.3, 'four');";
 
   // assert
-  ASSERT_EQ(SQLITE_OK, sqlite3_exec(conn, insert, NULL, NULL, NULL));
+  ASSERT_EQ(SQLITE_OK, sqlite3_exec(conn_, insert, NULL, NULL, NULL));
 
   // act
   const std::string kSelect(
@@ -217,13 +219,13 @@ TEST_F(SQLQueryTest, SetValue_InsertValues_ExpectDBHasInsertedValues) {
   const double kDoubleValue = 2.3;
   const std::string kStringValue = "four";
 
-  SQLDatabaseImpl db(kDatabaseName);
+
 
   // assert
-  ASSERT_TRUE(db.Open());
+  ASSERT_TRUE(db_.Open());
 
   // act
-  SQLQuery query(&db);
+  SQLQuery query(&db_);
 
   // assert
   EXPECT_TRUE(query.Prepare(kSelect));
@@ -242,13 +244,13 @@ TEST_F(SQLQueryTest, EmptySelect_SelectValuesEqual0_ExecWithoutErrors) {
   const std::string kSelect(
       "SELECT integerValue, doubleValue, stringValue"
       " FROM testTable WHERE 0");
-  SQLDatabaseImpl db(kDatabaseName);
+
 
   // assert
-  ASSERT_TRUE(db.Open());
+  ASSERT_TRUE(db_.Open());
 
   // act
-  SQLQuery query(&db);
+  SQLQuery query(&db_);
 
   // assert
   EXPECT_TRUE(query.Prepare(kSelect));
@@ -267,7 +269,7 @@ TEST_F(
       "VALUES (1, 2.3, 'four');";
 
   // assert
-  ASSERT_EQ(SQLITE_OK, sqlite3_exec(conn, insert, NULL, NULL, NULL));
+  ASSERT_EQ(SQLITE_OK, sqlite3_exec(conn_, insert, NULL, NULL, NULL));
 
   const std::string kSelect(
       "SELECT integerValue, doubleValue, stringValue"
@@ -278,10 +280,10 @@ TEST_F(
   const double kDoubleValue = 2.3;
   const std::string kStringValue = "four";
 
-  SQLDatabaseImpl db(kDatabaseName);
-  ASSERT_TRUE(db.Open());
 
-  SQLQuery query(&db);
+  ASSERT_TRUE(db_.Open());
+
+  SQLQuery query(&db_);
 
   // assert
   ASSERT_TRUE(query.Prepare(kSelect));
@@ -307,20 +309,20 @@ TEST_F(SQLQueryTest, LastInsertId_InsertValuesAndBindQuery_GetExpectedId) {
       "value TEXT)";
 
   // assert
-  ASSERT_EQ(SQLITE_OK, sqlite3_exec(conn, create, NULL, NULL, NULL));
+  ASSERT_EQ(SQLITE_OK, sqlite3_exec(conn_, create, NULL, NULL, NULL));
 
   const int64_t kExpectId = 1;
   const std::string kValue("Test last id of insert row");
   const std::string kInsert("INSERT INTO idTable (value) VALUES(?)");
 
   // act
-  SQLDatabaseImpl db(kDatabaseName);
+
 
   // assert
-  ASSERT_TRUE(db.Open());
+  ASSERT_TRUE(db_.Open());
 
   // act
-  SQLQuery query(&db);
+  SQLQuery query(&db_);
 
   // assert
   ASSERT_TRUE(query.Prepare(kInsert));
@@ -335,7 +337,7 @@ TEST_F(SQLQueryTest, LastInsertId_InsertValuesAndBindQuery_GetExpectedId) {
   EXPECT_EQ(kExpectId, query.LastInsertId());
 
   ASSERT_EQ(SQLITE_OK,
-            sqlite3_exec(conn, "DROP TABLE idTable", NULL, NULL, NULL));
+            sqlite3_exec(conn_, "DROP TABLE idTable", NULL, NULL, NULL));
 }
 
 TEST_F(SQLQueryTest, BindNull_BindWithoutValue_ActWithoutErrors) {
@@ -343,12 +345,12 @@ TEST_F(SQLQueryTest, BindNull_BindWithoutValue_ActWithoutErrors) {
   const std::string kInsert(
       "INSERT INTO testTable (`integerValue`)"
       " VALUES (?)");
-  SQLDatabaseImpl db(kDatabaseName);
+
   // assert
-  ASSERT_TRUE(db.Open());
+  ASSERT_TRUE(db_.Open());
 
   // act
-  SQLQuery query(&db);
+  SQLQuery query(&db_);
 
   // assert
   ASSERT_TRUE(query.Prepare(kInsert));
@@ -362,11 +364,11 @@ TEST_F(SQLQueryTest, BindNull_BindWithoutValue_ActWithoutErrors) {
 
 TEST_F(SQLQueryTest, DoublePrepare_TwicePrepareQuery_ActWithoutErrors) {
   // arrange
-  SQLDatabaseImpl db(kDatabaseName);
+
   // assert
-  ASSERT_TRUE(db.Open());
+  ASSERT_TRUE(db_.Open());
   // act
-  SQLQuery query(&db);
+  SQLQuery query(&db_);
   // assert
   EXPECT_TRUE(query.Prepare("SELECT * FROM testTable"));
   EXPECT_FALSE(IsError(query.LastError()));

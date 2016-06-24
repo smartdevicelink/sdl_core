@@ -99,7 +99,7 @@ class ResumptionDataJsonTest : public ResumptionDataTest {
     }
   }
 
-  void SetZeroIgnOff() {
+  void SetZeroLastIgnOffTime() {
     utils::json::JsonValue& dictionary = last_state_.dictionary();
     utils::json::JsonValueRef res = dictionary[am::strings::resumption];
     res[am::strings::last_ign_off_time] = 0ll;
@@ -258,7 +258,7 @@ TEST_F(ResumptionDataJsonTest, GetHMIApplicationID_AppNotSaved) {
 }
 
 TEST_F(ResumptionDataJsonTest, OnSuspend) {
-  SetZeroIgnOff();
+  SetZeroLastIgnOffTime();
   PrepareData();
 
   res_json.SaveApplication(app_mock);
@@ -271,7 +271,7 @@ TEST_F(ResumptionDataJsonTest, OnSuspend) {
 
 TEST_F(ResumptionDataJsonTest, OnSuspendFourTimes) {
   PrepareData();
-  SetZeroIgnOff();
+  SetZeroLastIgnOffTime();
   res_json.SaveApplication(app_mock);
   CheckSavedJson();
 
@@ -292,7 +292,7 @@ TEST_F(ResumptionDataJsonTest, Persist) {
 
 TEST_F(ResumptionDataJsonTest, OnSuspendOnAwake) {
   PrepareData();
-  SetZeroIgnOff();
+  SetZeroLastIgnOffTime();
   res_json.SaveApplication(app_mock);
   CheckSavedJson();
 
@@ -306,7 +306,7 @@ TEST_F(ResumptionDataJsonTest, OnSuspendOnAwake) {
 }
 
 TEST_F(ResumptionDataJsonTest, Awake_AppNotSuspended) {
-  SetZeroIgnOff();
+  SetZeroLastIgnOffTime();
   PrepareData();
   res_json.SaveApplication(app_mock);
   CheckSavedJson();
@@ -317,7 +317,7 @@ TEST_F(ResumptionDataJsonTest, Awake_AppNotSuspended) {
 }
 
 TEST_F(ResumptionDataJsonTest, TwiceAwake_AppNotSuspended) {
-  SetZeroIgnOff();
+  SetZeroLastIgnOffTime();
   PrepareData();
   res_json.SaveApplication(app_mock);
   CheckSavedJson();
@@ -344,7 +344,7 @@ TEST_F(ResumptionDataJsonTest, GetHashId) {
 TEST_F(ResumptionDataJsonTest, GetIgnOffTime_AfterSuspendAndAwake) {
   uint32_t last_ign_off_time;
   PrepareData();
-  SetZeroIgnOff();
+  SetZeroLastIgnOffTime();
   res_json.SaveApplication(app_mock);
   CheckSavedJson();
   last_ign_off_time = res_json.GetIgnOffTime();
@@ -365,7 +365,7 @@ TEST_F(ResumptionDataJsonTest, GetIgnOffTime_AfterSuspendAndAwake) {
 
 TEST_F(ResumptionDataJsonTest, DropAppDataResumption) {
   PrepareData();
-  SetZeroIgnOff();
+  SetZeroLastIgnOffTime();
   res_json.SaveApplication(app_mock);
   CheckSavedJson();
 
