@@ -557,12 +557,9 @@ class MessageHelperTest : public ::testing::Test {
     mobile_result_strings_.push_back("USER_DISALLOWED");
     mobile_result_strings_.push_back("TRUNCATED_DATA");
     mobile_result_strings_.push_back("UNSUPPORTED_VERSION");
-    mobile_result_strings_.push_back("VEHICLE_DATA_NOT_ALLOWED");
     mobile_result_strings_.push_back("FILE_NOT_FOUND");
     mobile_result_strings_.push_back("CANCEL_ROUTE");
     mobile_result_strings_.push_back("SAVED");
-    mobile_result_strings_.push_back("INVALID_CERT");
-    mobile_result_strings_.push_back("EXPIRED_CERT");
     mobile_result_strings_.push_back("RESUME_FAILED");
 
     function_id_strings_.push_back("RESERVED");
