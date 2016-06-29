@@ -154,6 +154,11 @@ class MockMessageHelper {
                mobile_apis::Result::eType(smart_objects::SmartObject& message,
                                           ApplicationConstSharedPtr app,
                                           ApplicationManager& app_mngr));
+  MOCK_METHOD3(VerifyImage,
+               mobile_apis::Result::eType(smart_objects::SmartObject& message,
+                                          ApplicationConstSharedPtr app,
+                                          ApplicationManager& app_mngr));
+
   MOCK_METHOD6(GetBCActivateAppRequestToHMI,
                smart_objects::SmartObjectSPtr(
                    ApplicationConstSharedPtr app,
