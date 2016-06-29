@@ -48,9 +48,14 @@ TcpDevice::TcpDevice(const utils::HostAddress& address, const std::string& name)
 }
 
 bool TcpDevice::IsSameAs(const Device* other) const {
-  SDL_AUTO_TRACE();
-  SDL_DEBUG("Device: " << other);
-  const TcpDevice* other_tcp_device = static_cast<const TcpDevice*>(other);
+  SDL_TRACE("enter. Device: " << other->unique_device_id());
+
+  // TODO(AKutsan): remove dynamic cast after APPLINK-25700
+  const TcpDevice* other_tcp_device = dynamic_cast<const TcpDevice*>(other);
+  if (NULL == other_tcp_device) {
+      SDL_TRACE("exit with FALSE. comapre with not TCP device");
+      return false;
+  }
 
   if (other_tcp_device->address_ == address_) {
     SDL_TRACE(
