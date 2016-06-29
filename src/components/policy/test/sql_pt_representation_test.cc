@@ -117,6 +117,7 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
     delete reps;
     dbms->Close();
     policy_settings_.reset();
+    file_system::DeleteFile("policy.sqlite");
   }
 
   virtual utils::dbms::SQLDatabase* db() const {
@@ -1015,6 +1016,7 @@ TEST(SQLPTRepresentationTest3, Init_InitNewDataBase_ExpectResultSuccess) {
   EXPECT_EQ(::policy::EXISTS, reps->Init(&policy_settings_));
   reps->RemoveDB();
   delete reps;
+  file_system::DeleteFile("policy.sqlite");
 }
 
 TEST(SQLPTRepresentationTest3,
@@ -1038,6 +1040,7 @@ TEST(SQLPTRepresentationTest3,
   SQLPTRepresentation reps(
       kStorageFolder, kAttemptsToOpenPolicyDb, kOpenAttemptTimeoutMs);
   EXPECT_EQ(::policy::SUCCESS, reps.Init(&policy_settings_));
+
   EXPECT_TRUE(reps.Close());
   utils::dbms::SQLError error(utils::dbms::Error::OK);
   // Checks
@@ -1461,6 +1464,7 @@ TEST(SQLPTRepresentationTest3, RemoveDB_RemoveDB_ExpectFileDeleted) {
   EXPECT_EQ(::policy::EXISTS, reps->Init(&policy_settings_));
   std::string path = (reps->db())->get_path();
   // Act
+  reps->db()->Close();
   reps->RemoveDB();
   // Check
   EXPECT_FALSE(file_system::FileExists(path));
