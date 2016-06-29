@@ -28,7 +28,20 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 FILE_NAMES=$(find src -name \*.h -print -o -name \*.cpp -print  -o -name \*.cc -print | grep -v 3rd_party)
-for FILE_NAME in $FILE_NAMES
-do
-	clang-format-3.6 -style=file $FILE_NAME | diff $FILE_NAME -
-done
+
+
+check_style() {
+	clang-format-3.6 -style=file $1 | diff $1 -
+}
+
+fix_style() {
+	clang-format-3.6 -style=file -i $1
+}
+
+if [ "$1" = "--fix" ]
+then
+  for FILE_NAME in $FILE_NAMES; do fix_style $FILE_NAME; done
+else
+  for FILE_NAME in $FILE_NAMES; do check_style $FILE_NAME; done
+fi
+

@@ -53,8 +53,8 @@ bool TcpDevice::IsSameAs(const Device* other) const {
   // TODO(AKutsan): remove dynamic cast after APPLINK-25700
   const TcpDevice* other_tcp_device = dynamic_cast<const TcpDevice*>(other);
   if (NULL == other_tcp_device) {
-      SDL_TRACE("exit with FALSE. comapre with not TCP device");
-      return false;
+    SDL_TRACE("Exit with FALSE. Comparison with non TCP device");
+    return false;
   }
 
   if (other_tcp_device->address_ == address_) {
