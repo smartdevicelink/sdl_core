@@ -31,7 +31,7 @@
  */
 
 #include <cstring>
-#include "qdb_wrapper/sql_database_impl.h"
+#include "utils/qdb_wrapper/sql_database_impl.h"
 #include "utils/logger.h"
 
 namespace utils {
