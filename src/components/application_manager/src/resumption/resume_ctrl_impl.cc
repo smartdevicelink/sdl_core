@@ -29,7 +29,7 @@
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
  */
-#include "application_manager/resumption/resume_ctrl.h"
+#include "application_manager/resumption/resume_ctrl_impl.h"
 
 #include <fstream>
 #include <algorithm>
@@ -56,28 +56,28 @@ using namespace application_manager;
 
 SDL_CREATE_LOGGER("Resumption")
 
-ResumeCtrl::ResumeCtrl(ApplicationManager& application_manager)
+ResumeCtrlImpl::ResumeCtrlImpl(ApplicationManager& application_manager)
     : event_engine::EventObserver(application_manager.event_dispatcher())
     , queue_lock_(false)
     , restore_hmi_level_timer_(
           "RsmCtrlRstore",
-          new timer::TimerTaskImpl<ResumeCtrl>(
-              this, &ResumeCtrl::ApplicationResumptiOnTimer))
+          new timer::TimerTaskImpl<ResumeCtrlImpl>(
+              this, &ResumeCtrlImpl::ApplicationResumptiOnTimer))
     , save_persistent_data_timer_("RsmCtrlPercist",
-                                  new timer::TimerTaskImpl<ResumeCtrl>(
-                                      this, &ResumeCtrl::SaveDataOnTimer))
+                                  new timer::TimerTaskImpl<ResumeCtrlImpl>(
+                                      this, &ResumeCtrlImpl::SaveDataOnTimer))
     , is_resumption_active_(false)
     , is_data_saved_(false)
     , launch_time_(time(NULL))
     , application_manager_(application_manager) {}
 #ifdef BUILD_TESTS
-void ResumeCtrl::set_resumption_storage(
+void ResumeCtrlImpl::set_resumption_storage(
     utils::SharedPtr<ResumptionData> mock_storage) {
   resumption_storage_ = mock_storage;
 }
 #endif  // BUILD_TESTS
 
-bool ResumeCtrl::Init(resumption::LastState& last_state) {
+bool ResumeCtrlImpl::Init(resumption::LastState& last_state) {
   bool use_db = application_manager_.get_settings().use_db_for_resumption();
   if (use_db) {
     resumption_storage_.reset(
@@ -120,28 +120,30 @@ bool ResumeCtrl::Init(resumption::LastState& last_state) {
   return true;
 }
 
-ResumeCtrl::~ResumeCtrl() {}
+ResumeCtrlImpl::~ResumeCtrlImpl() {}
 
-void ResumeCtrl::SaveAllApplications() {
+void ResumeCtrlImpl::SaveAllApplications() {
   DataAccessor<ApplicationSet> accessor(application_manager_.applications());
-  std::for_each(accessor.GetData().begin(),
-                accessor.GetData().end(),
-                std::bind1st(std::mem_fun(&ResumeCtrl::SaveApplication), this));
+  std::for_each(
+      accessor.GetData().begin(),
+      accessor.GetData().end(),
+      std::bind1st(std::mem_fun(&ResumeCtrlImpl::SaveApplication), this));
 }
 
-void ResumeCtrl::SaveApplication(ApplicationSharedPtr application) {
+void ResumeCtrlImpl::SaveApplication(ApplicationSharedPtr application) {
   SDL_AUTO_TRACE();
+
   DCHECK_OR_RETURN_VOID(application);
   SDL_INFO("application with appID " << application->app_id()
                                      << " will be saved");
   resumption_storage_->SaveApplication(application);
 }
 
-void ResumeCtrl::on_event(const event_engine::Event& event) {
+void ResumeCtrlImpl::on_event(const event_engine::Event& event) {
   SDL_DEBUG("Event received" << event.id());
 }
 
-bool ResumeCtrl::RestoreAppHMIState(ApplicationSharedPtr application) {
+bool ResumeCtrlImpl::RestoreAppHMIState(ApplicationSharedPtr application) {
   using namespace mobile_apis;
   SDL_AUTO_TRACE();
   DCHECK_OR_RETURN(application, false);
@@ -169,7 +171,7 @@ bool ResumeCtrl::RestoreAppHMIState(ApplicationSharedPtr application) {
   return result;
 }
 
-bool ResumeCtrl::SetupDefaultHMILevel(ApplicationSharedPtr application) {
+bool ResumeCtrlImpl::SetupDefaultHMILevel(ApplicationSharedPtr application) {
   SDL_AUTO_TRACE();
   DCHECK_OR_RETURN(application, false);
   mobile_apis::HMILevel::eType default_hmi =
@@ -177,7 +179,7 @@ bool ResumeCtrl::SetupDefaultHMILevel(ApplicationSharedPtr application) {
   return SetAppHMIState(application, default_hmi, false);
 }
 
-void ResumeCtrl::ApplicationResumptiOnTimer() {
+void ResumeCtrlImpl::ApplicationResumptiOnTimer() {
   SDL_AUTO_TRACE();
   sync_primitives::AutoLock auto_lock(queue_lock_);
   WaitingForTimerList::iterator it = waiting_for_timer_.begin();
@@ -195,22 +197,23 @@ void ResumeCtrl::ApplicationResumptiOnTimer() {
   StartSavePersistentDataTimer();
 }
 
-void ResumeCtrl::OnAppActivated(ApplicationSharedPtr application) {
+void ResumeCtrlImpl::OnAppActivated(ApplicationSharedPtr application) {
   if (is_resumption_active_) {
     RemoveFromResumption(application->app_id());
   }
 }
 
-void ResumeCtrl::RemoveFromResumption(uint32_t app_id) {
+void ResumeCtrlImpl::RemoveFromResumption(uint32_t app_id) {
   SDL_AUTO_TRACE();
   queue_lock_.Acquire();
   waiting_for_timer_.remove(app_id);
   queue_lock_.Release();
 }
 
-bool ResumeCtrl::SetAppHMIState(ApplicationSharedPtr application,
-                                const mobile_apis::HMILevel::eType hmi_level,
-                                bool check_policy) {
+bool ResumeCtrlImpl::SetAppHMIState(
+    ApplicationSharedPtr application,
+    const mobile_apis::HMILevel::eType hmi_level,
+    bool check_policy) {
   using namespace mobile_apis;
   SDL_AUTO_TRACE();
   DCHECK_OR_RETURN(application, false);
@@ -232,30 +235,30 @@ bool ResumeCtrl::SetAppHMIState(ApplicationSharedPtr application,
   return true;
 }
 
-bool ResumeCtrl::IsHMIApplicationIdExist(uint32_t hmi_app_id) {
+bool ResumeCtrlImpl::IsHMIApplicationIdExist(uint32_t hmi_app_id) {
   SDL_DEBUG("hmi_app_id :" << hmi_app_id);
   return resumption_storage_->IsHMIApplicationIdExist(hmi_app_id);
 }
 
-bool ResumeCtrl::IsApplicationSaved(const std::string& policy_app_id,
-                                    const std::string& device_id) {
+bool ResumeCtrlImpl::IsApplicationSaved(const std::string& policy_app_id,
+                                        const std::string& device_id) {
   return -1 !=
          resumption_storage_->IsApplicationSaved(policy_app_id, device_id);
 }
 
-uint32_t ResumeCtrl::GetHMIApplicationID(const std::string& policy_app_id,
-                                         const std::string& device_mac) const {
+uint32_t ResumeCtrlImpl::GetHMIApplicationID(
+    const std::string& policy_app_id, const std::string& device_mac) const {
   return resumption_storage_->GetHMIApplicationID(policy_app_id, device_mac);
 }
 
-bool ResumeCtrl::RemoveApplicationFromSaved(
+bool ResumeCtrlImpl::RemoveApplicationFromSaved(
     ApplicationConstSharedPtr application) {
   const std::string& device_mac = application->mac_address();
   return resumption_storage_->RemoveApplicationFromSaved(
       application->policy_app_id(), device_mac);
 }
 
-void ResumeCtrl::OnSuspend() {
+void ResumeCtrlImpl::OnSuspend() {
   SDL_AUTO_TRACE();
   StopSavePersistentDataTimer();
   SaveAllApplications();
@@ -263,13 +266,13 @@ void ResumeCtrl::OnSuspend() {
   resumption_storage_->Persist();
 }
 
-void ResumeCtrl::OnAwake() {
+void ResumeCtrlImpl::OnAwake() {
   ResetLaunchTime();
   StartSavePersistentDataTimer();
   return resumption_storage_->OnAwake();
 }
 
-void ResumeCtrl::StartSavePersistentDataTimer() {
+void ResumeCtrlImpl::StartSavePersistentDataTimer() {
   SDL_AUTO_TRACE();
   if (!save_persistent_data_timer_.is_running()) {
     save_persistent_data_timer_.Start(
@@ -279,15 +282,15 @@ void ResumeCtrl::StartSavePersistentDataTimer() {
   }
 }
 
-void ResumeCtrl::StopSavePersistentDataTimer() {
+void ResumeCtrlImpl::StopSavePersistentDataTimer() {
   SDL_AUTO_TRACE();
   if (save_persistent_data_timer_.is_running()) {
     save_persistent_data_timer_.Stop();
   }
 }
 
-bool ResumeCtrl::StartResumption(ApplicationSharedPtr application,
-                                 const std::string& hash) {
+bool ResumeCtrlImpl::StartResumption(ApplicationSharedPtr application,
+                                     const std::string& hash) {
   SDL_AUTO_TRACE();
   DCHECK_OR_RETURN(application, false);
   SDL_DEBUG(" Resume app_id = " << application->app_id() << " hmi_app_id = "
@@ -308,7 +311,8 @@ bool ResumeCtrl::StartResumption(ApplicationSharedPtr application,
   return result;
 }
 
-bool ResumeCtrl::StartResumptionOnlyHMILevel(ApplicationSharedPtr application) {
+bool ResumeCtrlImpl::StartResumptionOnlyHMILevel(
+    ApplicationSharedPtr application) {
   // sync_primitives::AutoLock lock(resumtion_lock_);
   SDL_AUTO_TRACE();
   if (!application) {
@@ -332,7 +336,8 @@ bool ResumeCtrl::StartResumptionOnlyHMILevel(ApplicationSharedPtr application) {
   return result;
 }
 
-void ResumeCtrl::StartAppHmiStateResumption(ApplicationSharedPtr application) {
+void ResumeCtrlImpl::StartAppHmiStateResumption(
+    ApplicationSharedPtr application) {
   using namespace date_time;
   SDL_AUTO_TRACE();
   DCHECK_OR_RETURN_VOID(application);
@@ -355,13 +360,12 @@ void ResumeCtrl::StartAppHmiStateResumption(ApplicationSharedPtr application) {
              << application->policy_app_id());
   }
 }
-
-void ResumeCtrl::ResetLaunchTime() {
+void ResumeCtrlImpl::ResetLaunchTime() {
   SDL_AUTO_TRACE();
   launch_time_ = time(NULL);
 }
 
-bool ResumeCtrl::CheckPersistenceFilesForResumption(
+bool ResumeCtrlImpl::CheckPersistenceFilesForResumption(
     ApplicationSharedPtr application) {
   SDL_AUTO_TRACE();
   DCHECK_OR_RETURN(application, false);
@@ -387,8 +391,8 @@ bool ResumeCtrl::CheckPersistenceFilesForResumption(
   return true;
 }
 
-bool ResumeCtrl::CheckApplicationHash(ApplicationSharedPtr application,
-                                      const std::string& hash) {
+bool ResumeCtrlImpl::CheckApplicationHash(ApplicationSharedPtr application,
+                                          const std::string& hash) {
   SDL_AUTO_TRACE();
   DCHECK_OR_RETURN(application, false);
   SDL_DEBUG("app_id : " << application->app_id() << " hash : " << hash);
@@ -399,7 +403,7 @@ bool ResumeCtrl::CheckApplicationHash(ApplicationSharedPtr application,
   return result ? saved_app[strings::hash_id].asString() == hash : false;
 }
 
-void ResumeCtrl::SaveDataOnTimer() {
+void ResumeCtrlImpl::SaveDataOnTimer() {
   SDL_AUTO_TRACE();
   if (is_resumption_active_) {
     SDL_WARN("Resumption timer is active skip saving");
@@ -415,14 +419,14 @@ void ResumeCtrl::SaveDataOnTimer() {
   }
 }
 
-bool ResumeCtrl::IsDeviceMacAddressEqual(ApplicationSharedPtr application,
-                                         const std::string& saved_device_mac) {
+bool ResumeCtrlImpl::IsDeviceMacAddressEqual(
+    ApplicationSharedPtr application, const std::string& saved_device_mac) {
   SDL_AUTO_TRACE();
   const std::string device_mac = application->mac_address();
   return device_mac == saved_device_mac;
 }
 
-bool ResumeCtrl::RestoreApplicationData(ApplicationSharedPtr application) {
+bool ResumeCtrlImpl::RestoreApplicationData(ApplicationSharedPtr application) {
   SDL_AUTO_TRACE();
   DCHECK_OR_RETURN(application, false);
   SDL_DEBUG("app_id : " << application->app_id());
@@ -453,8 +457,8 @@ bool ResumeCtrl::RestoreApplicationData(ApplicationSharedPtr application) {
   return result;
 }
 
-void ResumeCtrl::AddFiles(ApplicationSharedPtr application,
-                          const smart_objects::SmartObject& saved_app) {
+void ResumeCtrlImpl::AddFiles(ApplicationSharedPtr application,
+                              const smart_objects::SmartObject& saved_app) {
   SDL_AUTO_TRACE();
 
   if (saved_app.keyExists(strings::application_files)) {
@@ -481,8 +485,8 @@ void ResumeCtrl::AddFiles(ApplicationSharedPtr application,
   }
 }
 
-void ResumeCtrl::AddSubmenues(ApplicationSharedPtr application,
-                              const smart_objects::SmartObject& saved_app) {
+void ResumeCtrlImpl::AddSubmenues(ApplicationSharedPtr application,
+                                  const smart_objects::SmartObject& saved_app) {
   SDL_AUTO_TRACE();
 
   if (saved_app.keyExists(strings::application_submenus)) {
@@ -499,8 +503,8 @@ void ResumeCtrl::AddSubmenues(ApplicationSharedPtr application,
   }
 }
 
-void ResumeCtrl::AddCommands(ApplicationSharedPtr application,
-                             const smart_objects::SmartObject& saved_app) {
+void ResumeCtrlImpl::AddCommands(ApplicationSharedPtr application,
+                                 const smart_objects::SmartObject& saved_app) {
   SDL_AUTO_TRACE();
 
   if (saved_app.keyExists(strings::application_commands)) {
@@ -518,8 +522,9 @@ void ResumeCtrl::AddCommands(ApplicationSharedPtr application,
   }
 }
 
-void ResumeCtrl::AddChoicesets(ApplicationSharedPtr application,
-                               const smart_objects::SmartObject& saved_app) {
+void ResumeCtrlImpl::AddChoicesets(
+    ApplicationSharedPtr application,
+    const smart_objects::SmartObject& saved_app) {
   SDL_AUTO_TRACE();
 
   if (saved_app.keyExists(strings::application_choice_sets)) {
@@ -538,7 +543,7 @@ void ResumeCtrl::AddChoicesets(ApplicationSharedPtr application,
   }
 }
 
-void ResumeCtrl::SetGlobalProperties(
+void ResumeCtrlImpl::SetGlobalProperties(
     ApplicationSharedPtr application,
     const smart_objects::SmartObject& saved_app) {
   SDL_AUTO_TRACE();
@@ -551,7 +556,7 @@ void ResumeCtrl::SetGlobalProperties(
   }
 }
 
-void ResumeCtrl::AddWayPointsSubscription(
+void ResumeCtrlImpl::AddWayPointsSubscription(
     app_mngr::ApplicationSharedPtr application,
     const smart_objects::SmartObject& saved_app) {
   SDL_AUTO_TRACE();
@@ -565,8 +570,9 @@ void ResumeCtrl::AddWayPointsSubscription(
   }
 }
 
-void ResumeCtrl::AddSubscriptions(ApplicationSharedPtr application,
-                                  const smart_objects::SmartObject& saved_app) {
+void ResumeCtrlImpl::AddSubscriptions(
+    ApplicationSharedPtr application,
+    const smart_objects::SmartObject& saved_app) {
   SDL_AUTO_TRACE();
   if (saved_app.keyExists(strings::application_subscribtions)) {
     const smart_objects::SmartObject& subscribtions =
@@ -599,7 +605,7 @@ void ResumeCtrl::AddSubscriptions(ApplicationSharedPtr application,
   }
 }
 
-bool ResumeCtrl::CheckIgnCycleRestrictions(
+bool ResumeCtrlImpl::CheckIgnCycleRestrictions(
     const smart_objects::SmartObject& saved_app) {
   SDL_AUTO_TRACE();
   bool result = true;
@@ -616,7 +622,7 @@ bool ResumeCtrl::CheckIgnCycleRestrictions(
   return result;
 }
 
-bool ResumeCtrl::DisconnectedJustBeforeIgnOff(
+bool ResumeCtrlImpl::DisconnectedJustBeforeIgnOff(
     const smart_objects::SmartObject& saved_app) {
   using namespace date_time;
   SDL_AUTO_TRACE();
@@ -637,7 +643,7 @@ bool ResumeCtrl::DisconnectedJustBeforeIgnOff(
          application_manager_.get_settings().resumption_delay_before_ign();
 }
 
-bool ResumeCtrl::CheckAppRestrictions(
+bool ResumeCtrlImpl::CheckAppRestrictions(
     ApplicationConstSharedPtr application,
     const smart_objects::SmartObject& saved_app) {
   using namespace mobile_apis;
@@ -659,8 +665,8 @@ bool ResumeCtrl::CheckAppRestrictions(
   return result;
 }
 
-bool ResumeCtrl::CheckIcons(ApplicationSharedPtr application,
-                            smart_objects::SmartObject& obj) {
+bool ResumeCtrlImpl::CheckIcons(ApplicationSharedPtr application,
+                                smart_objects::SmartObject& obj) {
   using namespace smart_objects;
   SDL_AUTO_TRACE();
   const mobile_apis::Result::eType verify_images =
@@ -668,7 +674,7 @@ bool ResumeCtrl::CheckIcons(ApplicationSharedPtr application,
   return mobile_apis::Result::INVALID_DATA != verify_images;
 }
 
-bool ResumeCtrl::CheckDelayAfterIgnOn() {
+bool ResumeCtrlImpl::CheckDelayAfterIgnOn() {
   using namespace date_time;
   SDL_AUTO_TRACE();
   const time_t curr_time = time(NULL);
@@ -683,16 +689,16 @@ bool ResumeCtrl::CheckDelayAfterIgnOn() {
   return seconds_from_sdl_start <= wait_time;
 }
 
-time_t ResumeCtrl::launch_time() const {
+time_t ResumeCtrlImpl::launch_time() const {
   return launch_time_;
 }
 
-time_t ResumeCtrl::GetIgnOffTime() {
+time_t ResumeCtrlImpl::GetIgnOffTime() {
   return resumption_storage_->GetIgnOffTime();
 }
 
-bool ResumeCtrl::ProcessHMIRequest(smart_objects::SmartObjectSPtr request,
-                                   bool use_events) {
+bool ResumeCtrlImpl::ProcessHMIRequest(smart_objects::SmartObjectSPtr request,
+                                       bool use_events) {
   SDL_AUTO_TRACE();
   if (use_events) {
     const hmi_apis::FunctionID::eType function_id =
@@ -710,7 +716,7 @@ bool ResumeCtrl::ProcessHMIRequest(smart_objects::SmartObjectSPtr request,
   return true;
 }
 
-void ResumeCtrl::ProcessHMIRequests(
+void ResumeCtrlImpl::ProcessHMIRequests(
     const smart_objects::SmartObjectList& requests) {
   for (smart_objects::SmartObjectList::const_iterator it = requests.begin(),
                                                       total = requests.end();
@@ -720,7 +726,7 @@ void ResumeCtrl::ProcessHMIRequests(
   }
 }
 
-void ResumeCtrl::AddToResumptionTimerQueue(const uint32_t app_id) {
+void ResumeCtrlImpl::AddToResumptionTimerQueue(const uint32_t app_id) {
   SDL_AUTO_TRACE();
   queue_lock_.Acquire();
   waiting_for_timer_.push_back(app_id);
@@ -735,7 +741,7 @@ void ResumeCtrl::AddToResumptionTimerQueue(const uint32_t app_id) {
   }
 }
 
-void ResumeCtrl::LoadResumeData() {
+void ResumeCtrlImpl::LoadResumeData() {
   SDL_AUTO_TRACE();
   smart_objects::SmartObject so_applications_data;
   resumption_storage_->GetDataForLoadResumeData(so_applications_data);
@@ -755,8 +761,8 @@ void ResumeCtrl::LoadResumeData() {
   }
 }
 
-void ResumeCtrl::OnAppRegistrationStart(const std::string& policy_app_id,
-                                        const std::string& device_id) {
+void ResumeCtrlImpl::OnAppRegistrationStart(const std::string& policy_app_id,
+                                            const std::string& device_id) {
   SDL_AUTO_TRACE();
   if (IsApplicationSaved(policy_app_id, device_id)) {
     SDL_INFO(
@@ -766,12 +772,12 @@ void ResumeCtrl::OnAppRegistrationStart(const std::string& policy_app_id,
   }
 }
 
-void ResumeCtrl::OnAppRegistrationEnd() {
+void ResumeCtrlImpl::OnAppRegistrationEnd() {
   SDL_AUTO_TRACE();
   StartSavePersistentDataTimer();
 }
 
-bool ResumeCtrl::IsAppDataResumptionExpired(
+bool ResumeCtrlImpl::IsAppDataResumptionExpired(
     const smart_objects::SmartObject& application) const {
   const int32_t max_ign_off_count = 3;
   return max_ign_off_count <= application[strings::ign_off_count].asInt();

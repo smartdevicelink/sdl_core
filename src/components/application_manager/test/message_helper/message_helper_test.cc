@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,6 +32,9 @@
 
 #include <string>
 #include <vector>
+#include <set>
+#include <algorithm>
+#include <iostream>
 
 #include "gmock/gmock.h"
 #include "application_manager/message_helper.h"
@@ -49,10 +52,16 @@
 #include "application_manager/policies/mock_policy_handler_interface.h"
 #include "connection_handler/device.h"
 #include "protocol_handler/mock_session_observer.h"
+#include "application_manager/mock_resume_ctrl.h"
 
 namespace test {
 namespace components {
 namespace application_manager_test {
+
+namespace {
+const uint32_t kCorrelationId = 1;
+const uint32_t kAppId = 123;
+}  // namespace
 
 namespace HmiLanguage = hmi_apis::Common_Language;
 namespace HmiResults = hmi_apis::Common_Result;
@@ -71,6 +80,7 @@ typedef utils::SharedPtr<application_manager::Application> ApplicationSharedPtr;
 using ::testing::AtLeast;
 using ::testing::Return;
 using ::testing::ReturnRef;
+using ::testing::ReturnPointee;
 using ::testing::_;
 using ::testing::DoAll;
 using ::testing::SaveArg;
@@ -627,6 +637,161 @@ class MessageHelperTest : public ::testing::Test {
     hmi_level_strings_.push_back("LIMITED");
     hmi_level_strings_.push_back("BACKGROUND");
     hmi_level_strings_.push_back("NONE");
+  }
+
+  /**
+   * @brief Check GetUserFriendly message which is sent to HMI
+   * @param msg contain message for sending to HMI.
+   */
+  void CheckSendingGetUserFriendlyMessage(
+      const std::vector<policy::UserFriendlyMessage>& msg) {
+    smart_objects::SmartObjectSPtr result;
+    EXPECT_CALL(mock_application_manager_, ManageHMICommand(_))
+        .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
+
+    MessageHelper::SendGetUserFriendlyMessageResponse(
+        msg, kCorrelationId, mock_application_manager_);
+    ASSERT_TRUE(result.valid());
+    EXPECT_EQ(hmi_apis::FunctionID::SDL_GetUserFriendlyMessage,
+              (*result)[strings::params][strings::function_id].asInt());
+    EXPECT_EQ(kCorrelationId,
+              (*result)[strings::params][strings::correlation_id].asInt());
+    if (msg.empty()) {
+      EXPECT_FALSE((*result)[strings::msg_params].keyExists("messages"));
+    } else {
+      smart_objects::SmartObject& user_friendly_messages =
+          (*result)[strings::msg_params]["messages"];
+      EXPECT_TRUE(user_friendly_messages.length() == msg.size());
+      std::vector<policy::UserFriendlyMessage>::const_iterator it = msg.begin();
+      for (int i = 0; it != msg.end(); ++i, ++it) {
+        EXPECT_TRUE(it->message_code ==
+                    user_friendly_messages[i]["messageCode"].asString());
+      }
+    }
+  }
+
+  /**
+   * @brief Check LaunchApp message which is sent to HMI
+   * @param urlSchema parameter for filling of message structure .
+   * @param packageName parameter for filling of message structure .
+   */
+  void CheckParametersLaunchAppMessage(const std::string& urlSchema,
+                                       const std::string& packageName) {
+    smart_objects::SmartObjectSPtr result;
+    EXPECT_CALL(mock_application_manager_, ManageMobileCommand(_, _))
+        .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
+    MessageHelper::SendLaunchApp(
+        kAppId, urlSchema, packageName, mock_application_manager_);
+
+    ASSERT_TRUE(result.valid());
+    if (!urlSchema.empty() || !packageName.empty()) {
+      EXPECT_TRUE((*result)[strings::msg_params].keyExists(strings::url));
+    } else {
+      EXPECT_FALSE((*result)[strings::msg_params].keyExists(strings::url));
+    }
+
+    if (!urlSchema.empty()) {
+      EXPECT_EQ((*result)[strings::msg_params][strings::url].asString(),
+                urlSchema);
+    } else if (!packageName.empty()) {
+      EXPECT_EQ((*result)[strings::msg_params][strings::url].asString(),
+                packageName);
+    }
+    EXPECT_TRUE(
+        (*result)[strings::msg_params].keyExists(strings::request_type));
+    EXPECT_EQ((*result)[strings::msg_params][strings::request_type].asInt(),
+              mobile_apis::RequestType::LAUNCH_APP);
+    CheckParamsOfMessage(result, true, false);
+    EXPECT_TRUE((*result)[strings::params].keyExists(strings::function_id));
+    EXPECT_EQ((*result)[strings::params][strings::function_id].asInt(),
+              mobile_apis::FunctionID::OnSystemRequestID);
+  }
+
+  /**
+   * @brief Check NaviStartStream message which is sent to HMI
+   * @param url parameter for filling of message structure.
+   * @param video_server_type type of servise that is used for streaming.
+   * @param server_path contains name of pipe, file or adres of socket
+   * @param port contains port for socket.
+   */
+  void CheckParametersNaviStartStreamMessage(
+      const std::string& url,
+      const std::string& video_server_type,
+      const std::string& server_path,
+      const uint16_t port = 0) {
+    MockApplicationManagerSettings mock_app_mngr_settings;
+    EXPECT_CALL(mock_application_manager_, GetNextHMICorrelationID())
+        .WillOnce(Return(kCorrelationId));
+    EXPECT_CALL(mock_application_manager_, get_settings())
+        .WillRepeatedly(ReturnRef(mock_app_mngr_settings));
+    EXPECT_CALL(mock_app_mngr_settings, video_server_type())
+        .WillRepeatedly(ReturnRef(video_server_type));
+    if (video_server_type == "socket") {
+      EXPECT_CALL(mock_app_mngr_settings, server_address())
+          .WillOnce(ReturnRef(server_path));
+      EXPECT_CALL(mock_app_mngr_settings, video_streaming_port())
+          .WillOnce(Return(port));
+    } else if (video_server_type == "pipe") {
+      EXPECT_CALL(mock_app_mngr_settings, named_video_pipe_path())
+          .WillOnce(ReturnRef(server_path));
+    } else {
+      EXPECT_CALL(mock_app_mngr_settings, video_stream_file())
+          .WillOnce(ReturnRef(server_path));
+    }
+    smart_objects::SmartObjectSPtr result;
+    EXPECT_CALL(mock_application_manager_, ManageHMICommand(_))
+        .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
+    MessageHelper::SendNaviStartStream(kAppId, mock_application_manager_);
+
+    ASSERT_TRUE(result.valid());
+    EXPECT_TRUE((*result)[strings::params].keyExists(strings::function_id));
+    EXPECT_EQ((*result)[strings::params][strings::function_id].asInt(),
+              hmi_apis::FunctionID::Navigation_StartStream);
+    CheckParamsOfMessage(result, true, true);
+    EXPECT_TRUE((*result)[strings::msg_params].keyExists(strings::url));
+    EXPECT_TRUE((*result)[strings::msg_params][strings::url].asString() == url);
+  }
+
+  /**
+   * @brief Check common parameters from message
+   * @param result contains message which need to check
+   * @param is_app_id flag for checking application id parameter
+   * @param is_corr_id flag for checking correlation id parameter
+   */
+  void CheckParamsOfMessage(smart_objects::SmartObjectSPtr result,
+                            bool is_app_id,
+                            bool is_corr_id) {
+    if (is_app_id) {
+      EXPECT_TRUE((*result)[strings::msg_params].keyExists(strings::app_id));
+      EXPECT_EQ((*result)[strings::msg_params][strings::app_id].asInt(),
+                kAppId);
+    }
+
+    if (is_corr_id) {
+      EXPECT_TRUE(
+          (*result)[strings::params].keyExists(strings::correlation_id));
+      EXPECT_EQ(kCorrelationId,
+                (*result)[strings::params][strings::correlation_id].asInt());
+    }
+  }
+
+  /**
+   * @brief Fill structure for testing
+   * @param obj structure wich need to fill
+   * @param group_alias parameter from structure
+   * @param group_name parameter from structure
+   * @param group_id parameter from structure
+   * @param state parameter from structure
+   */
+  void FillFunctionalGroupPermissionObj(policy::FunctionalGroupPermission& obj,
+                                        const std::string& group_alias,
+                                        const std::string& group_name,
+                                        const int32_t group_id,
+                                        const policy::GroupConsent state) {
+    obj.group_alias = group_alias;
+    obj.group_name = group_name;
+    obj.group_id = group_id;
+    obj.state = state;
   }
 
  protected:
@@ -2489,6 +2654,309 @@ TEST_F(MessageHelperTest, SendGetListOfPermissionsResponse_SUCCESS) {
 
   EXPECT_EQ(hmi_apis::FunctionID::SDL_GetListOfPermissions,
             (*result)[strings::params][strings::function_id].asInt());
+}
+TEST_F(MessageHelperTest,
+       SendGetSystemInfoRequest_ExpectSendCorrectMessageToHMI) {
+  EXPECT_CALL(mock_application_manager_, GetNextHMICorrelationID())
+      .WillOnce(Return(kCorrelationId));
+  smart_objects::SmartObjectSPtr result;
+  EXPECT_CALL(mock_application_manager_, ManageHMICommand(_))
+      .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
+
+  MessageHelper::SendGetSystemInfoRequest(mock_application_manager_);
+
+  ASSERT_TRUE(result.valid());
+  EXPECT_EQ(hmi_apis::FunctionID::BasicCommunication_GetSystemInfo,
+            (*result)[strings::params][strings::function_id].asInt());
+  CheckParamsOfMessage(result, false, true);
+}
+
+TEST_F(
+    MessageHelperTest,
+    SendGetUserFriendlyMessageResponseWithEmptyMessages_ExpectSendCorrectMessageToHMI) {
+  std::vector<policy::UserFriendlyMessage> msg;
+  CheckSendingGetUserFriendlyMessage(msg);
+}
+
+TEST_F(
+    MessageHelperTest,
+    SendGetUserFriendlyMessageResponseWithMessages_ExpectSendCorrectMessageToHMI) {
+  policy::UserFriendlyMessage arr[] = {
+      {"first_code"}, {"second_code"}, {"third_code"}};
+  std::vector<policy::UserFriendlyMessage> msg(arr, arr + 3);
+  CheckSendingGetUserFriendlyMessage(msg);
+}
+
+TEST_F(MessageHelperTest,
+       SendGlobalPropertiesToHMIApplicationIsNotValid_ExpectReturnFromMethod) {
+  MockApplicationSharedPtr app;
+  EXPECT_CALL(mock_application_manager_, ManageHMICommand(_)).Times(0);
+  MessageHelper::SendGlobalPropertiesToHMI(app, mock_application_manager_);
+}
+
+TEST_F(
+    MessageHelperTest,
+    SendGlobalPropertiesToHMIWithUIGlobalProperties_ExpectSendCorrectMessageToHMI) {
+  MockApplicationSharedPtr app = ::utils::MakeShared<AppMock>();
+  const uint8_t number_msg_params = 6;
+  EXPECT_CALL(mock_application_manager_, GetNextHMICorrelationID())
+      .WillOnce(Return(kCorrelationId));
+  smart_objects::SmartObject dummy_so(smart_objects::SmartType_Map);
+  dummy_so["dummy_param"] = "dummy_param";
+  EXPECT_CALL(*app, vr_help_title()).Times(3).WillRepeatedly(Return(&dummy_so));
+  EXPECT_CALL(*app, vr_help()).Times(2).WillRepeatedly(Return(&dummy_so));
+  EXPECT_CALL(*app, keyboard_props())
+      .Times(2)
+      .WillRepeatedly(Return(&dummy_so));
+  EXPECT_CALL(*app, menu_title()).Times(2).WillRepeatedly(Return(&dummy_so));
+  EXPECT_CALL(*app, menu_icon()).Times(2).WillRepeatedly(Return(&dummy_so));
+  EXPECT_CALL(*app, app_id()).WillOnce(Return(kAppId));
+  EXPECT_CALL(*app, help_prompt())
+      .WillOnce(Return(static_cast<smart_objects::SmartObject*>(NULL)));
+  EXPECT_CALL(*app, timeout_prompt())
+      .WillOnce(Return(static_cast<smart_objects::SmartObject*>(NULL)));
+
+  smart_objects::SmartObjectSPtr result;
+  EXPECT_CALL(mock_application_manager_, ManageHMICommand(_))
+      .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
+  MessageHelper::SendGlobalPropertiesToHMI(app, mock_application_manager_);
+
+  ASSERT_TRUE(result.valid());
+  smart_objects::SmartObject& global_properties_msg_params =
+      (*result)[strings::msg_params];
+
+  EXPECT_EQ((*result)[strings::params][strings::function_id].asInt(),
+            hmi_apis::FunctionID::UI_SetGlobalProperties);
+  CheckParamsOfMessage(result, true, true);
+
+  EXPECT_EQ(global_properties_msg_params.length(), number_msg_params);
+  EXPECT_TRUE(global_properties_msg_params.keyExists(strings::vr_help_title));
+  EXPECT_TRUE(global_properties_msg_params.keyExists(strings::vr_help));
+  EXPECT_TRUE(
+      global_properties_msg_params.keyExists(strings::keyboard_properties));
+  EXPECT_TRUE(global_properties_msg_params.keyExists(strings::menu_title));
+  EXPECT_TRUE(global_properties_msg_params.keyExists(strings::menu_icon));
+  std::set<std::string> keys = global_properties_msg_params.enumerate();
+  keys.erase(strings::app_id);
+  for (std::set<std::string>::iterator it = keys.begin(); it != keys.end();
+       ++it) {
+    EXPECT_TRUE(global_properties_msg_params[(*it)] == dummy_so);
+  }
+}
+
+TEST_F(
+    MessageHelperTest,
+    SendGlobalPropertiesToHMIWithTTSGlobalProperties_ExpectSendCorrectMessageToHMI) {
+  MockApplicationSharedPtr app = ::utils::MakeShared<AppMock>();
+  const uint8_t number_msg_params = 3;
+  EXPECT_CALL(mock_application_manager_, GetNextHMICorrelationID())
+      .WillOnce(Return(kCorrelationId));
+  smart_objects::SmartObject dummy_so(smart_objects::SmartType_Map);
+  dummy_so["dummy_param"] = "dummy_param";
+  EXPECT_CALL(*app, vr_help_title())
+      .WillOnce(Return(static_cast<smart_objects::SmartObject*>(NULL)));
+  EXPECT_CALL(*app, vr_help())
+      .WillOnce(Return(static_cast<smart_objects::SmartObject*>(NULL)));
+  EXPECT_CALL(*app, help_prompt()).Times(3).WillRepeatedly(Return(&dummy_so));
+  EXPECT_CALL(*app, timeout_prompt())
+      .Times(2)
+      .WillRepeatedly(Return(&dummy_so));
+  EXPECT_CALL(*app, app_id()).WillOnce(Return(kAppId));
+
+  smart_objects::SmartObjectSPtr result;
+  EXPECT_CALL(mock_application_manager_, ManageHMICommand(_))
+      .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
+  MessageHelper::SendGlobalPropertiesToHMI(app, mock_application_manager_);
+
+  ASSERT_TRUE(result.valid());
+  smart_objects::SmartObject& global_properties_msg_params =
+      (*result)[strings::msg_params];
+
+  EXPECT_EQ((*result)[strings::params][strings::function_id].asInt(),
+            hmi_apis::FunctionID::TTS_SetGlobalProperties);
+  CheckParamsOfMessage(result, true, true);
+  EXPECT_EQ(global_properties_msg_params.length(), number_msg_params);
+  EXPECT_TRUE(global_properties_msg_params.keyExists(strings::help_prompt));
+  EXPECT_TRUE(global_properties_msg_params.keyExists(strings::timeout_prompt));
+  std::set<std::string> keys = global_properties_msg_params.enumerate();
+  keys.erase(strings::app_id);
+  for (std::set<std::string>::iterator it = keys.begin(); it != keys.end();
+       ++it) {
+    EXPECT_TRUE(global_properties_msg_params[(*it)] == dummy_so);
+  }
+}
+
+TEST_F(MessageHelperTest,
+       SendHashUpdateNotificationApplicationIsNotValid_ExpectReturnFromMethod) {
+  MockApplicationSharedPtr app;
+  EXPECT_CALL(mock_application_manager_, application(_)).WillOnce(Return(app));
+  EXPECT_CALL(mock_application_manager_, ManageMobileCommand(_, _)).Times(0);
+  MessageHelper::SendHashUpdateNotification(kAppId, mock_application_manager_);
+}
+
+TEST_F(MessageHelperTest,
+       SendHashUpdateNotification_ExpectSendCorrectMessageToMobile) {
+  MockApplicationSharedPtr app = ::utils::MakeShared<AppMock>();
+  resumption::MockResumeCtrl mock_resume_ctrl;
+  EXPECT_CALL(mock_application_manager_, application(_)).WillOnce(Return(app));
+  smart_objects::SmartObjectSPtr result;
+  EXPECT_CALL(mock_application_manager_, ManageMobileCommand(_, _))
+      .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
+  EXPECT_CALL(mock_application_manager_, resume_controller())
+      .WillOnce(ReturnRef(mock_resume_ctrl));
+  EXPECT_CALL(mock_resume_ctrl, ApplicationsDataUpdated()).Times(1);
+  MessageHelper::SendHashUpdateNotification(kAppId, mock_application_manager_);
+  ASSERT_TRUE(result.valid());
+  EXPECT_EQ((*result)[strings::params][strings::function_id].asInt(),
+            mobile_apis::FunctionID::OnHashChangeID);
+  EXPECT_EQ((*result)[strings::params][strings::connection_key].asInt(),
+            kAppId);
+}
+
+TEST_F(MessageHelperTest, SendLaunchApp_ExpectSendCorrectMessageToMobile) {
+  std::string urlSchema;
+  std::string packageName;
+  CheckParametersLaunchAppMessage(urlSchema, packageName);
+  urlSchema = "url_shema";
+  CheckParametersLaunchAppMessage(urlSchema, packageName);
+  urlSchema = "";
+  packageName = "package_name";
+  CheckParametersLaunchAppMessage(urlSchema, packageName);
+}
+
+TEST_F(MessageHelperTest, SendNaviStartStream_ExpectSendCorrectMessageToHMI) {
+  uint16_t video_streaming_port = 8080;
+  CheckParametersNaviStartStreamMessage(
+      "http://127.0.0.1:8080", "socket", "127.0.0.1", video_streaming_port);
+  CheckParametersNaviStartStreamMessage("pipe_name", "pipe", "pipe_name");
+  CheckParametersNaviStartStreamMessage("file_name", "file", "file_name");
+}
+
+TEST_F(MessageHelperTest, SendNaviStopStream_ExpectSendCorrectMessageToHMI) {
+  smart_objects::SmartObjectSPtr result;
+  EXPECT_CALL(mock_application_manager_, GetNextHMICorrelationID())
+      .WillOnce(Return(kCorrelationId));
+  EXPECT_CALL(mock_application_manager_, ManageHMICommand(_))
+      .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
+  MessageHelper::SendNaviStopStream(kAppId, mock_application_manager_);
+
+  ASSERT_TRUE(result.valid());
+  EXPECT_TRUE((*result)[strings::params].keyExists(strings::function_id));
+  EXPECT_EQ((*result)[strings::params][strings::function_id].asInt(),
+            hmi_apis::FunctionID::Navigation_StopStream);
+  CheckParamsOfMessage(result, true, true);
+}
+
+TEST_F(MessageHelperTest,
+       SendOnAppPermissionsChangedNotification_ExpectSendCorrectMessageToHMI) {
+  std::string policy_app_id("policyappid");
+  policy::AppPermissions dummy_permissions(policy_app_id);
+  dummy_permissions.appRevoked = true;
+  dummy_permissions.isAppPermissionsRevoked = true;
+  std::vector<policy::FunctionalGroupPermission> functional_group_permissions;
+  policy::FunctionalGroupPermission obj;
+  FillFunctionalGroupPermissionObj(obj,
+                                   "group_alias1",
+                                   "group_name1",
+                                   1,
+                                   policy::GroupConsent::kGroupAllowed);
+  functional_group_permissions.push_back(obj);
+  FillFunctionalGroupPermissionObj(obj,
+                                   "group_alias2",
+                                   "group_name2",
+                                   2,
+                                   policy::GroupConsent::kGroupDisallowed);
+  functional_group_permissions.push_back(obj);
+  FillFunctionalGroupPermissionObj(obj,
+                                   "group_alias3",
+                                   "group_name3",
+                                   3,
+                                   policy::GroupConsent::kGroupUndefined);
+  dummy_permissions.appRevokedPermissions = functional_group_permissions;
+  dummy_permissions.appPermissionsConsentNeeded = true;
+  dummy_permissions.appUnauthorized = true;
+  dummy_permissions.priority = "NORMAL";
+  dummy_permissions.requestTypeChanged = true;
+  std::vector<std::string> request_type(3, "dummy");
+  dummy_permissions.requestType = request_type;
+  smart_objects::SmartObjectSPtr result;
+  EXPECT_CALL(mock_application_manager_, ManageHMICommand(_))
+      .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
+  MessageHelper::SendOnAppPermissionsChangedNotification(
+      kAppId, dummy_permissions, mock_application_manager_);
+  ASSERT_TRUE(result.valid());
+  EXPECT_TRUE((*result)[strings::params].keyExists(strings::function_id));
+  EXPECT_EQ((*result)[strings::params][strings::function_id].asInt(),
+            hmi_apis::FunctionID::SDL_OnAppPermissionChanged);
+  CheckParamsOfMessage(result, true, false);
+  uint16_t number_msg_params = 8;
+  std::string app_revoked("appRevoked");
+  std::string is_app_permissions_revoked("isAppPermissionsRevoked");
+  std::string app_revoked_permissions("appRevokedPermissions");
+  std::string allowed("allowed");
+  std::string name("name");
+  std::string id("id");
+
+  EXPECT_EQ((*result)[strings::msg_params].length(), number_msg_params);
+  EXPECT_TRUE((*result)[strings::msg_params].keyExists(app_revoked));
+  EXPECT_TRUE((*result)[strings::msg_params][app_revoked].asBool());
+  EXPECT_TRUE(
+      (*result)[strings::msg_params].keyExists(is_app_permissions_revoked));
+  EXPECT_TRUE(
+      (*result)[strings::msg_params][is_app_permissions_revoked].asBool());
+  EXPECT_TRUE(
+      (*result)[strings::msg_params].keyExists(app_revoked_permissions));
+  EXPECT_TRUE(
+      ((*result)[strings::msg_params][app_revoked_permissions].length() ==
+       functional_group_permissions.size()));
+  uint16_t number_revoked_params = 3;
+  uint16_t number_revoked_params_without_allowed = 2;
+  smart_objects::SmartObject& revoked_items =
+      (*result)[strings::msg_params][app_revoked_permissions];
+  for (uint16_t i = 0; i < revoked_items.length(); ++i) {
+    if (policy::GroupConsent::kGroupUndefined ==
+        functional_group_permissions[i].state) {
+      EXPECT_TRUE(revoked_items[i].length() ==
+                  number_revoked_params_without_allowed);
+      EXPECT_FALSE(revoked_items[i].keyExists(allowed));
+    } else {
+      EXPECT_TRUE(revoked_items[i].length() == number_revoked_params);
+      EXPECT_TRUE(revoked_items[i].keyExists(allowed));
+      if (policy::kGroupAllowed == functional_group_permissions[i].state) {
+        EXPECT_TRUE(revoked_items[i][allowed].asBool());
+      } else {
+        EXPECT_FALSE(revoked_items[i][allowed].asBool());
+      }
+    }
+    EXPECT_TRUE(revoked_items[i].keyExists(name));
+    EXPECT_TRUE(revoked_items[i][name].asString() ==
+                functional_group_permissions[i].group_alias);
+    EXPECT_TRUE(revoked_items[i].keyExists(id));
+    EXPECT_TRUE(revoked_items[i][id].asInt() ==
+                functional_group_permissions[i].group_id);
+  }
+
+  std::string app_permissions_consent_needed("appPermissionsConsentNeeded");
+  std::string app_unauthorized("appUnauthorized");
+  std::string priority("priority");
+  EXPECT_TRUE(
+      (*result)[strings::msg_params].keyExists(app_permissions_consent_needed));
+  EXPECT_TRUE(
+      (*result)[strings::msg_params][app_permissions_consent_needed].asBool());
+  EXPECT_TRUE((*result)[strings::msg_params].keyExists(app_unauthorized));
+  EXPECT_TRUE((*result)[strings::msg_params][app_unauthorized].asBool());
+  EXPECT_TRUE((*result)[strings::msg_params].keyExists(priority));
+  EXPECT_EQ((*result)[strings::msg_params][priority].asInt(),
+            hmi_apis::Common_AppPriority::NORMAL);
+  EXPECT_TRUE((*result)[strings::msg_params].keyExists(strings::request_type));
+  smart_objects::SmartObject& request_types_array =
+      (*result)[strings::msg_params][strings::request_type];
+  EXPECT_TRUE(request_types_array.length() ==
+              dummy_permissions.requestType.size());
+  for (uint16_t i = 0; i < request_types_array.length(); ++i) {
+    EXPECT_TRUE(request_types_array[i].asString() ==
+                dummy_permissions.requestType[i]);
+  }
 }
 
 }  // namespace application_manager_test
