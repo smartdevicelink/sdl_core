@@ -35,7 +35,6 @@ find_package(SDLOpenSSL REQUIRED)
 find_package(SDLSqlite3 REQUIRED)
 
 include_directories(
-  ${COMPONENTS_DIR}/include
   ${COMPONENTS_DIR}/application_manager/include
   ${COMPONENTS_DIR}/utils/include
   ${COMPONENTS_DIR}/formatters/include

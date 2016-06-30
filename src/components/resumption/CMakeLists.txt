@@ -31,7 +31,6 @@
 include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
 include_directories(
-  ${COMPONENTS_DIR}/include
   ${COMPONENTS_DIR}/resumption/include
   ${COMPONENTS_DIR}/utils/include
   ${COMPONENTS_DIR}/config_profile/include

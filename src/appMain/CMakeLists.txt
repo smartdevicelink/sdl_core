@@ -30,6 +30,8 @@
 
 include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
+find_package(SDLOpenSSL REQUIRED)
+
 include_directories(
   ${COMPONENTS_DIR}/protocol_handler/include
   ${COMPONENTS_DIR}/application_manager/include
@@ -51,6 +53,7 @@ include_directories(
   ${CMAKE_BINARY_DIR}/src/components
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${LOG4CXX_INCLUDE_DIRECTORY}
+  ${OPENSSL_INCLUDE_DIRECTORY}
   ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
 )
 

@@ -55,6 +55,7 @@ log4cxx::LevelPtr GetLog4cxxLogLevel(const logger::LogLevel::Type level) {
     default:
       NOTREACHED();
   }
+  return log4cxx::Level::getTrace();
 }
 
 }  // namespace

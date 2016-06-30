@@ -34,7 +34,6 @@ include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 find_package(SDLSqlite3 REQUIRED)
 
 include_directories(
-  ${COMPONENTS_DIR}/include
   ${COMPONENTS_DIR}/policy/include
   ${COMPONENTS_DIR}/rpc_base/include
   ${COMPONENTS_DIR}/utils/include/

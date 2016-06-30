@@ -33,7 +33,6 @@ include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 find_package(SDLOpenSSL REQUIRED)
 
 include_directories(
-  ${COMPONENTS_DIR}/include
   ${COMPONENTS_DIR}/config_profile/include
   ${COMPONENTS_DIR}/utils/include
   ${OPENSSL_INCLUDE_DIRECTORY}

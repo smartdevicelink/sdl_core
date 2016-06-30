@@ -57,6 +57,10 @@ if(${OS} STREQUAL "win")
   list(APPEND LIBRARIES
     ws2_32
   )
+elseif(${OS} STREQUAL "posix")
+  list(APPEND LIBRARIES
+    rt
+  )
 endif()
 
 if(NOT HMI_DBUS_API)

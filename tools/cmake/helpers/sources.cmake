@@ -133,3 +133,11 @@ function(collect_sources SOURCES PATHS)
   endif()
   set(${SOURCES} ${SOURCES_LOCAL} PARENT_SCOPE)
 endfunction()
+
+function(create_test NAME SOURCES LIBS)
+  add_executable("${NAME}" ${CMAKE_SOURCE_DIR}/src/components/test_main.cc ${SOURCES})
+  target_link_libraries("${NAME}" ${LIBS})
+  target_link_libraries("${NAME}" utils)
+  add_test(NAME ${NAME}
+  COMMAND ${NAME} --gtest_output=xml:${CMAKE_BINARY_DIR}/test_results/)
+endfunction()
