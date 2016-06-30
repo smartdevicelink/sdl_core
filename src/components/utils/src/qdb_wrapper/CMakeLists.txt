@@ -34,7 +34,7 @@ set(QDB_SRC_DIR ${COMPONENTS_DIR}/utils/src/qdb_wrapper)
 include_directories(${COMPONENTS_DIR}/utils/include/)
 
 set(SOURCES
-  ${QDB_SRC_DIR}/sql_database.cc
+  ${QDB_SRC_DIR}/sql_database_impl.cc
   ${QDB_SRC_DIR}/sql_query.cc
   ${QDB_SRC_DIR}/sql_error.cc
 )

@@ -256,6 +256,8 @@ class JsonValueRef {
 
   JsonValueRef Append(const JsonValue& value);
 
+  void RemoveMember(const char* key);
+
   void Clear();
 
   bool IsValid() const;

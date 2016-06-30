@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utils/sqlite_wrapper/sql_database.h"
+#include "sqlite_wrapper/sql_database_impl.h"
 #include <sqlite3.h>
 
 namespace utils {
@@ -41,36 +41,33 @@ const char* kInMemory = ":memory:";
 const char* kExtension = ".sqlite";
 }  // namespace
 
-SQLDatabase::SQLDatabase()
-    : conn_(NULL), database_path_(kInMemory), error_(SQLITE_OK) {}
+SQLDatabaseImpl::SQLDatabaseImpl()
+    : conn_(NULL), database_name_(kInMemory), error_(SQLITE_OK) {}
 
-SQLDatabase::SQLDatabase(const std::string& database_path,
-                         const std::string& connection_name)
-    : conn_(NULL)
-    , database_path_(database_path + kExtension)
-    , connection_name_(connection_name)
-    , error_(SQLITE_OK) {}
+SQLDatabaseImpl::SQLDatabaseImpl(const std::string& db_name)
+    : conn_(NULL), database_name_(db_name + kExtension), error_(SQLITE_OK) {}
 
-SQLDatabase::~SQLDatabase() {
+SQLDatabaseImpl::~SQLDatabaseImpl() {
   Close();
 }
 
-bool SQLDatabase::Open() {
+bool SQLDatabaseImpl::Open() {
   sync_primitives::AutoLock auto_lock(conn_lock_);
-  if (conn_)
+  if (conn_) {
     return true;
-  error_ = sqlite3_open(database_path_.c_str(), &conn_);
+  }
+  error_ = sqlite3_open(database_name_.c_str(), &conn_);
   return error_ == SQLITE_OK;
   return true;
 }
 
-bool SQLDatabase::IsReadWrite() {
+bool SQLDatabaseImpl::IsReadWrite() {
   const char* schema = "main";
   return sqlite3_db_readonly(conn_, schema) == 0;
   return true;
 }
 
-void SQLDatabase::Close() {
+void SQLDatabaseImpl::Close() {
   if (!conn_) {
     return;
   }
@@ -82,40 +79,45 @@ void SQLDatabase::Close() {
   }
 }
 
-bool SQLDatabase::BeginTransaction() {
+bool SQLDatabaseImpl::BeginTransaction() {
   return Exec("BEGIN TRANSACTION");
 }
 
-bool SQLDatabase::CommitTransaction() {
+bool SQLDatabaseImpl::CommitTransaction() {
   return Exec("COMMIT TRANSACTION");
 }
 
-bool SQLDatabase::RollbackTransaction() {
+bool SQLDatabaseImpl::RollbackTransaction() {
   return Exec("ROLLBACK TRANSACTION");
 }
 
-bool SQLDatabase::Exec(const std::string& query) {
+bool SQLDatabaseImpl::Exec(const std::string& query) {
   sync_primitives::AutoLock auto_lock(conn_lock_);
   error_ = sqlite3_exec(conn_, query.c_str(), NULL, NULL, NULL);
   return error_ == SQLITE_OK;
 }
 
-SQLError SQLDatabase::LastError() const {
+SQLError SQLDatabaseImpl::LastError() const {
   return SQLError(Error(error_));
 }
 
-bool SQLDatabase::HasErrors() const {
+bool SQLDatabaseImpl::HasErrors() const {
   return Error(error_) != OK;
 }
-sqlite3* SQLDatabase::conn() const {
+
+sqlite3* SQLDatabaseImpl::conn() const {
   return conn_;
 }
 
-std::string SQLDatabase::get_path() const {
-  return database_path_;
+void SQLDatabaseImpl::set_path(const std::string& path) {
+  database_name_ = path + database_name_;
 }
 
-bool SQLDatabase::Backup() {
+std::string SQLDatabaseImpl::get_path() const {
+  return database_name_;
+}
+
+bool SQLDatabaseImpl::Backup() {
   return true;
 }
 }  // namespace dbms

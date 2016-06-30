@@ -30,33 +30,39 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_TEST_RESUMPTION_DATA_DB_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_TEST_RESUMPTION_DATA_DB_H_
+#ifndef SRC_COMPONENTS_INCLUDE_TEST_UTILS_MOCK_SQL_DATABASE_H_
+#define SRC_COMPONENTS_INCLUDE_TEST_UTILS_MOCK_SQL_DATABASE_H_
+
+#include <string>
 
 #include "utils/sql_database.h"
-#include "application_manager/resumption/resumption_data_db.h"
-#include "application_manager/mock_application_manager_settings.h"
-#include "application_manager/mock_application_manager.h"
 
-using ::resumption::ResumptionDataDB;
+struct sqlite3;
 
 namespace test {
 namespace components {
-namespace resumption_test {
+namespace utils {
+namespace dbms {
 
-class TestResumptionDataDB : public ResumptionDataDB {
+class MockSQLDatabase : public ::utils::dbms::SQLDatabase {
  public:
-  utils::dbms::SQLDatabase* get_db_handle() {
-    return db();
-  }
-
-  application_manager_test::MockApplicationManager mock_application_manager_;
-  TestResumptionDataDB(DbStorage db_storage)
-      : ResumptionDataDB(db_storage, mock_application_manager_) {}
+  MOCK_METHOD0(Open, bool());
+  MOCK_METHOD0(Close, void());
+  MOCK_METHOD0(BeginTransaction, bool());
+  MOCK_METHOD0(CommitTransaction, bool());
+  MOCK_METHOD0(RollbackTransaction, bool());
+  MOCK_CONST_METHOD0(LastError, ::utils::dbms::SQLError());
+  MOCK_METHOD1(set_path, void(const std::string& path));
+  MOCK_CONST_METHOD0(get_path, std::string());
+  MOCK_METHOD0(IsReadWrite, bool());
+  MOCK_METHOD0(Backup, bool());
+  MOCK_CONST_METHOD0(conn, sqlite3*());
+  MOCK_CONST_METHOD0(HasErrors, bool());
 };
 
-}  // namespace resumption_test
+}  // namespace dbms
+}  // namespace utils
 }  // namespace components
 }  // namespace test
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_TEST_RESUMPTION_DATA_DB_H_
+#endif  // SRC_COMPONENTS_INCLUDE_TEST_UTILS_MOCK_SQL_DATABASE_H_

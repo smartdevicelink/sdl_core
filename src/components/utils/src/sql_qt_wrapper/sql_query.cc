@@ -41,8 +41,9 @@
 #include <cassert>
 #include <limits>
 
-#include "sql_qt_wrapper/sql_database.h"
+#include "utils/sql_database.h"
 #include "utils/macro.h"
+#include "utils/sql_qt_wrapper/sql_database_impl.h"
 
 namespace utils {
 namespace dbms {
@@ -64,7 +65,8 @@ void PreparePullValue(QSqlQuery& query) {
 }  // namespace
 
 SQLQuery::SQLQuery(SQLDatabase* db)
-    : query_(static_cast<QSqlDatabase>(*db)), queries_cache_() {}
+    : query_(static_cast<QSqlDatabase>(*dynamic_cast<SQLDatabaseImpl*>(db)))
+    , queries_cache_() {}
 
 SQLQuery::~SQLQuery() {
   Finalize();
