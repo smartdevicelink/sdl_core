@@ -284,7 +284,7 @@ class RequestController {
   /*
    * Timer for lock
    */
-  bool stop_flag_;
+  volatile bool timer_stop_flag_;
   sync_primitives::Lock timer_lock;
   sync_primitives::ConditionalVariable timer_condition_;
 

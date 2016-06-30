@@ -52,7 +52,7 @@ RequestController::RequestController(const RequestControlerSettings& settings)
     , timer_("AM RequestCtrlTimer",
              new timer::TimerTaskImpl<RequestController>(
                  this, &RequestController::onTimer))
-    , stop_flag_(false)
+    , timer_stop_flag_(false)
     , is_low_voltage_(false)
     , settings_(settings) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -62,7 +62,7 @@ RequestController::RequestController(const RequestControlerSettings& settings)
 
 RequestController::~RequestController() {
   LOG4CXX_AUTO_TRACE(logger_);
-  stop_flag_ = true;
+  timer_stop_flag_ = true;
   timer_condition_.Broadcast();
   timer_.Stop();
   if (pool_state_ != TPoolState::STOPPED) {
@@ -377,7 +377,7 @@ void RequestController::onTimer() {
   LOG4CXX_DEBUG(
       logger_,
       "ENTER Waiting fore response count: " << waiting_for_response_.Size());
-  while(!stop_flag_) {
+  while(!timer_stop_flag_) {
     RequestInfoPtr probably_expired =
         waiting_for_response_.FrontWithNotNullTimeout();
     if (!probably_expired) {
