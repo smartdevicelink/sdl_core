@@ -5256,7 +5256,7 @@
 
   <function name="GetWayPoints" functionID="GetWayPointsID" messagetype="request">
 	<description>Request for getting waypoint/destination data.</description>
-	<param name="wayPointType" type="WayPointType" defvalue="ALL" mandatory="false">
+	<param name="wayPointType" type="WayPointType" defvalue="ALL" mandatory="true">
 	  <description>To request for either the destination only or for all waypoints including destination</description>
 	</param>
   </function>
