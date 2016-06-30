@@ -48,20 +48,21 @@ class InitialApplicationDataImpl : public virtual Application {
   InitialApplicationDataImpl();
   ~InitialApplicationDataImpl();
 
-  const smart_objects::SmartObject* app_types() const;
-  const smart_objects::SmartObject* vr_synonyms() const;
-  virtual std::string policy_app_id() const;
-  const smart_objects::SmartObject* tts_name() const;
-  const smart_objects::SmartObject* ngn_media_screen_name() const;
-  const mobile_api::Language::eType& language() const;
-  const mobile_api::Language::eType& ui_language() const;
-  void set_app_types(const smart_objects::SmartObject& app_types);
-  void set_vr_synonyms(const smart_objects::SmartObject& vr_synonyms);
-  void set_mobile_app_id(const std::string& policy_app_id);
-  void set_tts_name(const smart_objects::SmartObject& tts_name);
-  void set_ngn_media_screen_name(const smart_objects::SmartObject& ngn_name);
-  void set_language(const mobile_api::Language::eType& language);
-  void set_ui_language(const mobile_api::Language::eType& ui_language);
+  const smart_objects::SmartObject* app_types() const OVERRIDE;
+  const smart_objects::SmartObject* vr_synonyms() const OVERRIDE;
+  virtual std::string policy_app_id() const OVERRIDE;
+  const smart_objects::SmartObject* tts_name() const OVERRIDE;
+  const smart_objects::SmartObject* ngn_media_screen_name() const OVERRIDE;
+  const mobile_api::Language::eType& language() const OVERRIDE;
+  const mobile_api::Language::eType& ui_language() const OVERRIDE;
+  void set_app_types(const smart_objects::SmartObject& app_types) OVERRIDE;
+  void set_vr_synonyms(const smart_objects::SmartObject& vr_synonyms) OVERRIDE;
+  void set_mobile_app_id(const std::string& policy_app_id) OVERRIDE;
+  void set_tts_name(const smart_objects::SmartObject& tts_name) OVERRIDE;
+  void set_ngn_media_screen_name(
+      const smart_objects::SmartObject& ngn_name) OVERRIDE;
+  void set_language(const mobile_api::Language::eType& language) OVERRIDE;
+  void set_ui_language(const mobile_api::Language::eType& ui_language) OVERRIDE;
 
   void set_perform_interaction_layout(
       mobile_api::LayoutMode::eType layout) OVERRIDE;
@@ -85,65 +86,73 @@ class DynamicApplicationDataImpl : public virtual Application {
  public:
   DynamicApplicationDataImpl();
   ~DynamicApplicationDataImpl();
-  const smart_objects::SmartObject* help_prompt() const;
-  const smart_objects::SmartObject* timeout_prompt() const;
-  const smart_objects::SmartObject* vr_help_title() const;
-  const smart_objects::SmartObject* vr_help() const;
-  const mobile_api::TBTState::eType& tbt_state() const;
-  const smart_objects::SmartObject* show_command() const;
-  const smart_objects::SmartObject* tbt_show_command() const;
-  const smart_objects::SmartObject* keyboard_props() const;
-  const smart_objects::SmartObject* menu_title() const;
-  const smart_objects::SmartObject* menu_icon() const;
+  const smart_objects::SmartObject* help_prompt() const OVERRIDE;
+  const smart_objects::SmartObject* timeout_prompt() const OVERRIDE;
+  const smart_objects::SmartObject* vr_help_title() const OVERRIDE;
+  const smart_objects::SmartObject* vr_help() const OVERRIDE;
+  const mobile_api::TBTState::eType& tbt_state() const OVERRIDE;
+  const smart_objects::SmartObject* show_command() const OVERRIDE;
+  const smart_objects::SmartObject* tbt_show_command() const OVERRIDE;
+  const smart_objects::SmartObject* keyboard_props() const OVERRIDE;
+  const smart_objects::SmartObject* menu_title() const OVERRIDE;
+  const smart_objects::SmartObject* menu_icon() const OVERRIDE;
 
-  void load_global_properties(const smart_objects::SmartObject& properties_so);
-  void set_help_prompt(const smart_objects::SmartObject& help_prompt);
-  void set_timeout_prompt(const smart_objects::SmartObject& timeout_prompt);
-  void set_vr_help_title(const smart_objects::SmartObject& vr_help_title);
-  void reset_vr_help_title();
-  void set_vr_help(const smart_objects::SmartObject& vr_help);
-  void reset_vr_help();
-  void set_tbt_state(const mobile_api::TBTState::eType& tbt_state);
-  void set_show_command(const smart_objects::SmartObject& show_command);
-  void set_tbt_show_command(const smart_objects::SmartObject& tbt_show);
-  void set_keyboard_props(const smart_objects::SmartObject& keyboard_props);
-  void set_menu_title(const smart_objects::SmartObject& menu_title);
-  void set_menu_icon(const smart_objects::SmartObject& menu_icon);
+  void load_global_properties(
+      const smart_objects::SmartObject& properties_so) OVERRIDE;
+  void set_help_prompt(const smart_objects::SmartObject& help_prompt) OVERRIDE;
+  void set_timeout_prompt(
+      const smart_objects::SmartObject& timeout_prompt) OVERRIDE;
+  void set_vr_help_title(
+      const smart_objects::SmartObject& vr_help_title) OVERRIDE;
+  void reset_vr_help_title() OVERRIDE;
+  void set_vr_help(const smart_objects::SmartObject& vr_help) OVERRIDE;
+  void reset_vr_help() OVERRIDE;
+  void set_tbt_state(const mobile_api::TBTState::eType& tbt_state) OVERRIDE;
+  void set_show_command(
+      const smart_objects::SmartObject& show_command) OVERRIDE;
+  void set_tbt_show_command(
+      const smart_objects::SmartObject& tbt_show) OVERRIDE;
+  void set_keyboard_props(
+      const smart_objects::SmartObject& keyboard_props) OVERRIDE;
+  void set_menu_title(const smart_objects::SmartObject& menu_title) OVERRIDE;
+  void set_menu_icon(const smart_objects::SmartObject& menu_icon) OVERRIDE;
   /*
    * @brief Adds a command to the in application menu
    */
-  void AddCommand(uint32_t cmd_id, const smart_objects::SmartObject& command);
+  void AddCommand(uint32_t cmd_id,
+                  const smart_objects::SmartObject& command) OVERRIDE;
 
   /*
  * @brief Deletes all commands from the application menu with the specified
  * command id
    */
-  void RemoveCommand(uint32_t cmd_id);
+  void RemoveCommand(uint32_t cmd_id) OVERRIDE;
 
   /*
    * @brief Finds command with the specified command id
    */
-  smart_objects::SmartObject* FindCommand(uint32_t cmd_id);
+  smart_objects::SmartObject* FindCommand(uint32_t cmd_id) OVERRIDE;
 
   /*
    * @brief Adds a menu to the application
    */
-  void AddSubMenu(uint32_t menu_id, const smart_objects::SmartObject& menu);
+  void AddSubMenu(uint32_t menu_id,
+                  const smart_objects::SmartObject& menu) OVERRIDE;
 
   /*
    * @brief Deletes menu from the application menu
    */
-  void RemoveSubMenu(uint32_t menu_id);
+  void RemoveSubMenu(uint32_t menu_id) OVERRIDE;
 
   /*
    * @brief Finds menu with the specified id
    */
-  smart_objects::SmartObject* FindSubMenu(uint32_t menu_id) const;
+  smart_objects::SmartObject* FindSubMenu(uint32_t menu_id) const OVERRIDE;
 
   /*
    * @brief Returns true if sub menu with such name already exist
    */
-  bool IsSubMenuNameAlreadyExist(const std::string& name);
+  bool IsSubMenuNameAlreadyExist(const std::string& name) OVERRIDE;
 
   /*
    * @brief Adds a interaction choice set to the application
@@ -152,21 +161,21 @@ class DynamicApplicationDataImpl : public virtual Application {
    * @param choice_set SmartObject that represent choice set
    */
   void AddChoiceSet(uint32_t choice_set_id,
-                    const smart_objects::SmartObject& choice_set);
+                    const smart_objects::SmartObject& choice_set) OVERRIDE;
 
   /*
    * @brief Deletes choice set from the application
    *
    * @param choice_set_id Unique ID of the interaction choice set
    */
-  void RemoveChoiceSet(uint32_t choice_set_id);
+  void RemoveChoiceSet(uint32_t choice_set_id) OVERRIDE;
 
   /*
    * @brief Finds choice set with the specified choice_set_id id
    *
    * @param choice_set_id Unique ID of the interaction choice set
    */
-  smart_objects::SmartObject* FindChoiceSet(uint32_t choice_set_id);
+  smart_objects::SmartObject* FindChoiceSet(uint32_t choice_set_id) OVERRIDE;
 
   /*
    * @brief Adds perform interaction choice set to the application
@@ -178,14 +187,14 @@ class DynamicApplicationDataImpl : public virtual Application {
   void AddPerformInteractionChoiceSet(
       uint32_t correlation_id,
       uint32_t choice_set_id,
-      const smart_objects::SmartObject& choice_set);
+      const smart_objects::SmartObject& choice_set) OVERRIDE;
 
   /*
    * @brief Deletes entirely perform interaction choice set map
    * @param correlation_id Unique ID of the request that added this choice set
    *
    */
-  void DeletePerformInteractionChoiceSet(uint32_t correlation_id);
+  void DeletePerformInteractionChoiceSet(uint32_t correlation_id) OVERRIDE;
 
   /*
    * @brief Retrieves entirely ChoiceSet - VR commands map
@@ -193,64 +202,64 @@ class DynamicApplicationDataImpl : public virtual Application {
    * @return ChoiceSet map that is currently in use
    */
   inline DataAccessor<PerformChoiceSetMap> performinteraction_choice_set_map()
-      const;
+      const OVERRIDE;
 
   /*
    * @brief Retrieve application commands
    */
-  inline DataAccessor<CommandsMap> commands_map() const;
+  inline DataAccessor<CommandsMap> commands_map() const OVERRIDE;
 
   /*
    * @brief Retrieve application sub menus
    */
-  inline DataAccessor<SubMenuMap> sub_menu_map() const;
+  inline DataAccessor<SubMenuMap> sub_menu_map() const OVERRIDE;
 
   /*
    * @brief Retrieve application choice set map
    */
-  inline DataAccessor<ChoiceSetMap> choice_set_map() const;
+  inline DataAccessor<ChoiceSetMap> choice_set_map() const OVERRIDE;
 
   /*
    * @brief Sets perform interaction state
    *
    * @param active Current state of the perform interaction
    */
-  void set_perform_interaction_active(uint32_t active);
+  void set_perform_interaction_active(uint32_t active) OVERRIDE;
 
   /*
    * @brief Retrieves perform interaction state
    *
    * @return TRUE if perform interaction active, otherwise FALSE
    */
-  inline uint32_t is_perform_interaction_active() const;
+  inline uint32_t is_perform_interaction_active() const OVERRIDE;
 
   /*
    * @brief Sets the mode for perform interaction: UI/VR/BOTH
    *
    * @param mode Mode that was selected (MENU; VR; BOTH)
    */
-  void set_perform_interaction_mode(int32_t mode);
+  void set_perform_interaction_mode(int32_t mode) OVERRIDE;
 
   /*
    * @brief Retrieve the mode that was PerformInteraction sent in
    *
    * @return mode of PerformInteraction
    */
-  inline int32_t perform_interaction_mode() const;
+  inline int32_t perform_interaction_mode() const OVERRIDE;
 
   /*
    * @brief Sets reset global properties state
    *
    * @param active Current state of the reset global properties
    */
-  void set_reset_global_properties_active(bool active);
+  void set_reset_global_properties_active(bool active) OVERRIDE;
 
   /*
    * @brief Retrieves reset global properties state
    *
    * @return TRUE if perform interaction active, otherwise FALSE
    */
-  inline bool is_reset_global_properties_active() const;
+  inline bool is_reset_global_properties_active() const OVERRIDE;
 
  protected:
   smart_objects::SmartObject* help_prompt_;

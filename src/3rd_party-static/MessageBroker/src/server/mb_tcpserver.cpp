@@ -15,11 +15,14 @@
 
 #include "mb_tcpserver.hpp"
 #include "CMessageBroker.hpp"
+#include "utils/macro.h"
 
 namespace NsMessageBroker {
 
-TcpServer::TcpServer(const std::string& address, uint16_t port, NsMessageBroker::CMessageBroker* pMessageBroker) :
-  Server(address, port) {
+TcpServer::TcpServer(const std::string& address,
+                     uint16_t port,
+                     NsMessageBroker::CMessageBroker* pMessageBroker)
+    : Server(address, port) {
   m_protocol = networking::TCP;
   mpMessageBroker = pMessageBroker;
 }
@@ -36,7 +39,7 @@ ssize_t TcpServer::Send(int fd, const std::string& data) {
   if (isWebSocket(fd)) {
     unsigned char buf[10] = {'\0'};
     ssize_t headerlen = mWebSocketHandler.prepareWebSocketDataHeader(
-                          (unsigned char*)buf, (unsigned long)rep.length());
+        (unsigned char*)buf, (unsigned long)rep.length());
     std::string header = std::string((char*)buf, headerlen);
     rep = header + rep;
   }
@@ -68,23 +71,23 @@ bool TcpServer::Recv(int fd) {
 
   std::vector<char> buf;
   buf.reserve(RECV_BUFFER_LENGTH + pReceivingBuffer->size());
-  DBG_MSG(("Left in  pReceivingBuffer: %d \n",
-           pReceivingBuffer->size()));
+  DBG_MSG(("Left in  pReceivingBuffer: %d \n", pReceivingBuffer->size()));
   buf.assign(pReceivingBuffer->c_str(),
              pReceivingBuffer->c_str() + pReceivingBuffer->size());
   buf.resize(RECV_BUFFER_LENGTH + pReceivingBuffer->size());
 
-  int received_bytes = recv(fd, &buf[pReceivingBuffer->size()], MAX_RECV_DATA, 0);
+  int received_bytes =
+      recv(fd, &buf[pReceivingBuffer->size()], MAX_RECV_DATA, 0);
   if (received_bytes <= 0) {
-    DBG_MSG(("Received %d bytes from %d; error = %d\n",
-             received_bytes, fd, errno));
+    DBG_MSG(
+        ("Received %d bytes from %d; error = %d\n", received_bytes, fd, errno));
     m_purge.push_back(fd);
     return false;
   }
 
   unsigned int nb = received_bytes;
-  std::vector<char> last_msg_buf(buf.begin()+pReceivingBuffer->size(),
-                                 buf.begin()+pReceivingBuffer->size()+nb);
+  std::vector<char> last_msg_buf(buf.begin() + pReceivingBuffer->size(),
+                                 buf.begin() + pReceivingBuffer->size() + nb);
   DBG_MSG(("Recieved %d from %d\n", nb, fd));
   nb += static_cast<unsigned int>(pReceivingBuffer->size());
   DBG_MSG(("Recieved with buffer %d from %d\n", nb, fd));
@@ -107,26 +110,32 @@ bool TcpServer::Recv(int fd) {
 
     *pReceivingBuffer = std::string(&buf[0], nb);
     DBG_MSG(("pReceivingBuffer before onMessageReceived:%d : %s\n",
-             pReceivingBuffer->size(), pReceivingBuffer->c_str()));
+             pReceivingBuffer->size(),
+             pReceivingBuffer->c_str()));
 
     // we need to check for websocket handshake
-    if (!checkWebSocketHandShake(fd, pReceivingBuffer))
-    { //JSON MESSAGE received. Send data in CMessageBroker.
+    if (!checkWebSocketHandShake(
+            fd, pReceivingBuffer)) {  // JSON MESSAGE received. Send data in
+                                      // CMessageBroker.
       if (mpMessageBroker) {
         size_t buffer_size_before = pReceivingBuffer->size();
         mpMessageBroker->onMessageReceived(fd, *pReceivingBuffer, true);
 
-        if (buffer_was_not_empty && (pReceivingBuffer->size() == buffer_size_before)) {
+        if (buffer_was_not_empty &&
+            (pReceivingBuffer->size() == buffer_size_before)) {
           /* We couldn't parse the buffer (with the last message at the end)
            * Try to parse ONLY the last message */
-          DBG_MSG_ERROR(("Couldn't parse the whole buffer! Try only the last message.\n"));
+          DBG_MSG_ERROR((
+              "Couldn't parse the whole buffer! Try only the last message.\n"));
 
           nb = static_cast<unsigned int>(last_msg_buf.size());
           if (isWebSocket(fd)) {
             const unsigned int data_length =
-                mWebSocketHandler.parseWebSocketDataLength(&last_msg_buf[0], nb);
+                mWebSocketHandler.parseWebSocketDataLength(&last_msg_buf[0],
+                                                           nb);
             if (data_length > nb) {
-              DBG_MSG_ERROR(("The last message may be incomplete. Don't do anything.\n"));
+              DBG_MSG_ERROR(
+                  ("The last message may be incomplete. Don't do anything.\n"));
               /* Should we replace the buffer with the last message?
                * Probably not. It may not be a real websocket message.
                * Wait for a full message. */
@@ -138,18 +147,20 @@ bool TcpServer::Recv(int fd) {
           std::string last_message = std::string(&last_msg_buf[0], nb);
           buffer_size_before = last_message.size();
           mpMessageBroker->onMessageReceived(fd, last_message, false);
-          if ( last_message.size() < buffer_size_before ) {
+          if (last_message.size() < buffer_size_before) {
             /* Parsing last message successful! Discard the old data and
              * keep only what is left from the last message */
-            DBG_MSG_ERROR(("Parsing last message successful! Discard the old data.\n"));
+            DBG_MSG_ERROR(
+                ("Parsing last message successful! Discard the old data.\n"));
             *pReceivingBuffer = last_message;
           }
         }
       } else {
         return false;
       }
-    } else { // message is a websocket handshake
-      ssize_t webSocketKeyPos = static_cast<ssize_t>(pReceivingBuffer->find("Sec-WebSocket-Key: "));
+    } else {  // message is a websocket handshake
+      ssize_t webSocketKeyPos =
+          static_cast<ssize_t>(pReceivingBuffer->find("Sec-WebSocket-Key: "));
       if (-1 != webSocketKeyPos) {
         std::string handshakeResponse =
             "HTTP/1.1 101 Switching Protocols\r\nUpgrade: WebSocket\r\n"
@@ -174,13 +185,15 @@ bool TcpServer::Recv(int fd) {
 
 bool TcpServer::checkWebSocketHandShake(int fd, std::string* pReceivingBuffer) {
   bool result = false;
-  std::list<int>::iterator acceptedClientIt = find(m_AcceptedClients.begin(), m_AcceptedClients.end(), fd);
+  std::list<int>::iterator acceptedClientIt =
+      find(m_AcceptedClients.begin(), m_AcceptedClients.end(), fd);
   if (m_AcceptedClients.end() != acceptedClientIt) {
-    ssize_t httpheader = static_cast<ssize_t>(pReceivingBuffer->find("GET / HTTP/1.1"));
-    if (-1 != httpheader) { // here is a header
+    ssize_t httpheader =
+        static_cast<ssize_t>(pReceivingBuffer->find("GET / HTTP/1.1"));
+    if (-1 != httpheader) {  // here is a header
       DBG_MSG(("HTTP header detected!\n"));
       result = true;
-    } else { // not winsocket client
+    } else {  // not winsocket client
       m_AcceptedClients.erase(acceptedClientIt);
     }
   }
@@ -190,7 +203,8 @@ bool TcpServer::checkWebSocketHandShake(int fd, std::string* pReceivingBuffer) {
 
 bool TcpServer::isWebSocket(int fd) {
   bool result = false;
-  std::list<int>::iterator wsClientIt = find(m_WebSocketClients.begin(), m_WebSocketClients.end(), fd);
+  std::list<int>::iterator wsClientIt =
+      find(m_WebSocketClients.begin(), m_WebSocketClients.end(), fd);
   if (m_WebSocketClients.end() != wsClientIt) {
     result = true;
   }
@@ -199,11 +213,11 @@ bool TcpServer::isWebSocket(int fd) {
 
 std::string* TcpServer::getBufferFor(int fd) {
   std::string* res = 0;
-  std::map <int, std::string*>::iterator it;
+  std::map<int, std::string*>::iterator it;
   it = m_receivingBuffers.find(fd);
   if (it != m_receivingBuffers.end()) {
     res = (*it).second;
-  } else { // create a new buffer...
+  } else {  // create a new buffer...
     res = new std::string("");
     printf("getBufferFor method!\n");
     m_receivingBuffers.insert(std::map<int, std::string*>::value_type(fd, res));
@@ -230,7 +244,8 @@ void TcpServer::WaitMessage(uint32_t ms) {
 #endif
 
   for (std::map<int, std::string*>::iterator it = m_receivingBuffers.begin();
-       it != m_receivingBuffers.end() ; it++) {
+       it != m_receivingBuffers.end();
+       it++) {
 #ifdef _WIN32
     FD_SET((SOCKET)((*it).first), &fdsr);
 #else
@@ -250,19 +265,21 @@ void TcpServer::WaitMessage(uint32_t ms) {
     }
 
     for (std::map<int, std::string*>::iterator it = m_receivingBuffers.begin();
-         it != m_receivingBuffers.end() ; it++) {
+         it != m_receivingBuffers.end();
+         it++) {
       if (FD_ISSET(((*it).first), &fdsr)) {
         Recv((*it).first);
       }
     }
 
     /* remove disconnect socket descriptor */
-    for (std::list<int>::iterator it = m_purge.begin();
-         it != m_purge.end() ; it++) {
-      std::map <int, std::string*>::iterator itr;
+    for (std::list<int>::iterator it = m_purge.begin(); it != m_purge.end();
+         it++) {
+      std::map<int, std::string*>::iterator itr;
       itr = m_receivingBuffers.find((*it));
-      if (itr != m_receivingBuffers.end())
-      { // delete receiving buffer of disconnected client
+      if (itr !=
+          m_receivingBuffers
+              .end()) {  // delete receiving buffer of disconnected client
         mpMessageBroker->OnSocketClosed(itr->first);
         delete itr->second;
         m_receivingBuffers.erase(itr);
@@ -271,8 +288,7 @@ void TcpServer::WaitMessage(uint32_t ms) {
 
     /* purge disconnected list */
     m_purge.erase(m_purge.begin(), m_purge.end());
-  }
-  else {
+  } else {
     /* error */
   }
 }
@@ -290,7 +306,6 @@ bool TcpServer::Listen() const {
 }
 
 bool TcpServer::Accept() {
-
   int client = -1;
   socklen_t addrlen = sizeof(struct sockaddr_storage);
 
@@ -305,7 +320,8 @@ bool TcpServer::Accept() {
   }
 
   std::string* res = new std::string("");
-  m_receivingBuffers.insert(std::map<int, std::string*>::value_type(client, res));
+  m_receivingBuffers.insert(
+      std::map<int, std::string*>::value_type(client, res));
   m_AcceptedClients.push_back(client);
   return true;
 }
@@ -313,10 +329,11 @@ bool TcpServer::Accept() {
 void TcpServer::Close() {
   /* close all client sockets */
   for (std::map<int, std::string*>::iterator it = m_receivingBuffers.begin();
-       it != m_receivingBuffers.end() ; it++) {
+       it != m_receivingBuffers.end();
+       it++) {
     ::close((*it).first);
     if ((*it).second) {
-      delete(*it).second;
+      delete (*it).second;
     }
   }
   m_receivingBuffers.clear();
@@ -325,7 +342,7 @@ void TcpServer::Close() {
 }
 
 void* TcpServer::MethodForThread(void* arg) {
-  arg = arg;
+  UNUSED(arg);
   while (1) {
     WaitMessage(1000);
   }

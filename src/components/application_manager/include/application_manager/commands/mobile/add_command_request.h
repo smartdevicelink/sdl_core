@@ -63,14 +63,14 @@ class AddCommandRequest : public CommandRequestImpl {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
   /**
    * @brief Interface method that is called whenever new event received
    *
    * @param event The received event
    */
-  void on_event(const event_engine::Event& event);
+  void on_event(const event_engine::Event& event) OVERRIDE;
 
  private:
   /*
@@ -106,7 +106,7 @@ class AddCommandRequest : public CommandRequestImpl {
    * @brief Function is called by RequestController when request execution time
    * has exceed it's limit
    */
-  virtual void onTimeOut();
+  void onTimeOut() OVERRIDE;
 
   /**
    * @brief Removes command from list when HMI sends negative response or

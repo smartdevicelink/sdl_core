@@ -60,7 +60,7 @@ class VRAddCommandRequest : public RequestToHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(VRAddCommandRequest);

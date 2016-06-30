@@ -72,9 +72,9 @@ class MockPTRepresentation : public policy::PTRepresentation {
       GetUserFriendlyMsg,
       std::vector<UserFriendlyMessage>(const std::vector<std::string>& msg_code,
                                        const std::string& language));
-  MOCK_METHOD2(GetUpdateUrls, void(int service_type, EndpointUrls&));
+  MOCK_METHOD1(GetUpdateUrls, ::policy::EndpointUrls(int service_type));
   MOCK_METHOD1(GetNotificationsNumber, int(const std::string& priority));
-  MOCK_METHOD0(Init, InitResult());
+  MOCK_METHOD1(Init, InitResult(const PolicySettings* settings));
   MOCK_METHOD0(Close, bool());
   MOCK_METHOD0(Clear, bool());
   MOCK_METHOD0(Drop, bool());

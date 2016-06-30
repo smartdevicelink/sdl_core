@@ -26,6 +26,7 @@
 #include <cstring>
 
 #include "networking.h"
+#include "utils/macro.h"
 
 namespace networking {
 #ifdef _WIN32
@@ -58,7 +59,8 @@ void cleanup() {
 
 int connect(enum TransportProtocol protocol,
             const std::string& address,
-            uint16_t port, struct sockaddr_storage* sockaddr,
+            uint16_t port,
+            struct sockaddr_storage* sockaddr,
             socklen_t* addrlen) {
   struct addrinfo hints;
   struct addrinfo* res = NULL;
@@ -79,20 +81,22 @@ int connect(enum TransportProtocol protocol,
   hints.ai_protocol = protocol;
   hints.ai_flags = 0;
 
-  if (getaddrinfo(address.c_str(),
-      service, &hints, &res) != 0) {
+  if (getaddrinfo(address.c_str(), service, &hints, &res) != 0) {
     return -1;
   }
 
-  for (p = res ; p ; p = p->ai_next) {
-    sock = static_cast<int>(socket(p->ai_family, p->ai_socktype, p->ai_protocol));
+  for (p = res; p; p = p->ai_next) {
+    sock =
+        static_cast<int>(socket(p->ai_family, p->ai_socktype, p->ai_protocol));
 
     if (sock == -1) {
       continue;
     }
 
-    if (protocol == TCP && ::connect(sock, (struct sockaddr*)p->ai_addr,
-		                             static_cast<int>(p->ai_addrlen)) == -1) {
+    if (protocol == TCP &&
+        ::connect(sock,
+                  (struct sockaddr*)p->ai_addr,
+                  static_cast<int>(p->ai_addrlen)) == -1) {
       ::close(sock);
       sock = -1;
       continue;
@@ -117,8 +121,10 @@ int connect(enum TransportProtocol protocol,
 }
 
 int bind(enum TransportProtocol protocol,
-        const std::string& address, uint16_t port,
-        struct sockaddr_storage* sockaddr, socklen_t* addrlen) {
+         const std::string& address,
+         uint16_t port,
+         struct sockaddr_storage* sockaddr,
+         socklen_t* addrlen) {
   struct addrinfo hints;
   struct addrinfo* res = NULL;
   struct addrinfo* p = NULL;
@@ -142,11 +148,12 @@ int bind(enum TransportProtocol protocol,
     return -1;
   }
 
-  for (p = res ; p ; p = p->ai_next) {
+  for (p = res; p; p = p->ai_next) {
     int on = 1;
-    on = on;
+    UNUSED(on);
 
-    sock = static_cast<int>(socket(p->ai_family, p->ai_socktype, p->ai_protocol));
+    sock =
+        static_cast<int>(socket(p->ai_family, p->ai_socktype, p->ai_protocol));
 
     if (sock == -1) {
       continue;
@@ -187,4 +194,3 @@ int bind(enum TransportProtocol protocol,
 }
 
 } /* namespace networking */
-

@@ -168,7 +168,7 @@ class ProtocolHandlerImpl
    * \param observer Pointer to object of the class implementing
    * IProtocolObserver
    */
-  void AddProtocolObserver(ProtocolObserver* observer);
+  void AddProtocolObserver(ProtocolObserver* observer) OVERRIDE;
 
   void RemoveProtocolObserver(ProtocolObserver* observer) OVERRIDE;
 
@@ -201,7 +201,8 @@ class ProtocolHandlerImpl
    * \param number_of_frames Number of frames processed by
    * streaming server and displayed to user.
    */
-  void SendFramesNumber(uint32_t connection_key, int32_t number_of_frames);
+  void SendFramesNumber(uint32_t connection_key,
+                        int32_t number_of_frames) OVERRIDE;
 
 #ifdef TELEMETRY_MONITOR
   /**
@@ -215,7 +216,7 @@ class ProtocolHandlerImpl
   /*
    * Prepare and send heartbeat message to mobile
    */
-  void SendHeartBeat(int32_t connection_id, uint8_t session_id);
+  void SendHeartBeat(int32_t connection_id, uint8_t session_id) OVERRIDE;
 
   /**
     * \brief Sends ending session to mobile application
@@ -223,11 +224,11 @@ class ProtocolHandlerImpl
     * session exists
     * \param session_id ID of session to be ended
     */
-  void SendEndSession(int32_t connection_id, uint8_t session_id);
+  void SendEndSession(int32_t connection_id, uint8_t session_id) OVERRIDE;
 
   void SendEndService(int32_t connection_id,
                       uint8_t session_id,
-                      uint8_t service_type);
+                      uint8_t service_type) OVERRIDE;
 
   // TODO(Ezamakhov): move Ack/Nack as interface for StartSessionHandler
   /**
@@ -451,9 +452,9 @@ class ProtocolHandlerImpl
 
   // threads::MessageLoopThread<*>::Handler implementations
   // CALLED ON raw_ford_messages_from_mobile_ thread!
-  void Handle(const impl::RawFordMessageFromMobile message);
+  void Handle(const impl::RawFordMessageFromMobile message) OVERRIDE;
   // CALLED ON raw_ford_messages_to_mobile_ thread!
-  void Handle(const impl::RawFordMessageToMobile message);
+  void Handle(const impl::RawFordMessageToMobile message) OVERRIDE;
 
 #ifdef ENABLE_SECURITY
   /**
@@ -510,12 +511,6 @@ class ProtocolHandlerImpl
    * for map streaming.
    */
   MessagesOverNaviMap message_over_navi_session_;
-
-  /**
-   * \brief Untill specified otherwise, amount of message recievied
-   * over streaming session to send Ack
-   */
-  const uint32_t kPeriodForNaviAck;
 
   /**
    *\brief Counter of messages sent in each session.

@@ -276,7 +276,7 @@ bool TypeRegistry::GetNonArray(const pugi::xml_node& params,
       type_found = builtin_type_registry_->GetType(builtin_type, params, type);
     } else if (IsExternalType(type_name_str)) {
       type_found = GetExternalType(type_name_str, type);
-    } else if (*type = GetType(type_name_str)) {
+    } else if ((*type = GetType(type_name_str))) {
       type_found = true;
     } else {
       std::cerr << "Unregistered type: " << type_name_str << std::endl;
