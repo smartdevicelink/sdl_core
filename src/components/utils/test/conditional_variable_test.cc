@@ -31,13 +31,14 @@
  */
 
 #include <iostream>
-#include <pthread.h>
 
 #include "gtest/gtest.h"
 
 #include "utils/lock.h"
 #include "utils/macro.h"
 #include "utils/conditional_variable.h"
+#include "utils/threads/thread.h"
+#include "utils/threads/thread_delegate.h"
 
 namespace test {
 namespace components {
@@ -45,29 +46,45 @@ namespace utils_test {
 
 class ConditionalVariableTest : public ::testing::Test {
  public:
-  ConditionalVariableTest() : test_value_("initialized"), counter_(0) {}
-  void check_counter();
-  void task_one();
-
-  static void* check_counter_helper(void* context) {
-    (reinterpret_cast<ConditionalVariableTest*>(context))->check_counter();
-    return NULL;
-  }
-
-  static void* task_one_helper(void* context) {
-    (reinterpret_cast<ConditionalVariableTest*>(context))->task_one();
-    return NULL;
-  }
+  ConditionalVariableTest() {}
+  /**
+   * @brief Defines threads behaviour which depends on counter value
+   */
+  static void CheckCounter();
+  /**
+   * @brief Tasks for threads to begin with
+   */
+  static void TaskOne();
 
  protected:
-  std::string test_value_;
-  sync_primitives::ConditionalVariable cond_var_;
-  sync_primitives::Lock test_mutex_;
-  unsigned counter_;
+  static std::string test_value_;
+  static sync_primitives::ConditionalVariable cond_var_;
+  static sync_primitives::Lock test_mutex_;
+  static unsigned counter_;
 };
 
-// Defines threads behaviour which depends on counter value
-void ConditionalVariableTest::check_counter() {
+unsigned ConditionalVariableTest::counter_ = 0;
+std::string ConditionalVariableTest::test_value_;
+sync_primitives::Lock ConditionalVariableTest::test_mutex_;
+sync_primitives::ConditionalVariable ConditionalVariableTest::cond_var_;
+
+class TaskOneDelegate : public threads::ThreadDelegate {
+ public:
+  void threadMain() {
+    ConditionalVariableTest::TaskOne();
+  }
+  void exitThreadMain() {}
+};
+
+class CheckCounterDelegate : public threads::ThreadDelegate {
+ public:
+  void threadMain() {
+    ConditionalVariableTest::CheckCounter();
+  }
+  void exitThreadMain() {}
+};
+
+void ConditionalVariableTest::CheckCounter() {
   sync_primitives::AutoLock test_lock(test_mutex_);
   if (counter_ <= 1) {
     counter_++;
@@ -81,8 +98,7 @@ void ConditionalVariableTest::check_counter() {
   }
 }
 
-// Tasks for threads to begin with
-void ConditionalVariableTest::task_one() {
+void ConditionalVariableTest::TaskOne() {
   sync_primitives::AutoLock test_lock(test_mutex_);
   test_value_ = "changed by thread 1";
   cond_var_.NotifyOne();  // Notify At least one thread waiting on conditional
@@ -92,30 +108,34 @@ void ConditionalVariableTest::task_one() {
 
 TEST_F(ConditionalVariableTest,
        CheckNotifyOne_OneThreadNotified_ExpectSuccessful) {
-  pthread_t thread1;
+  threads::Thread* thread =
+      threads::CreateThread("test thread", new TaskOneDelegate());
   sync_primitives::AutoLock test_lock(test_mutex_);
+  thread->start();
   test_value_ = "changed by main thread";
-  const bool thread_created = pthread_create(
-      &thread1, NULL, &ConditionalVariableTest::task_one_helper, this);
-  ASSERT_FALSE(thread_created) << "thread1 is not created!";
+  ASSERT_TRUE(thread->CurrentId()) << "thread1 is not created!";
   test_value_ = "changed twice by main thread";
   cond_var_.WaitFor(test_lock, 2000);
   std::string last_value("changed again by thread 1");
   EXPECT_EQ(last_value, test_value_);
+  thread->join();
+  threads::DeleteThread(thread);
 }
 
 TEST_F(ConditionalVariableTest,
        CheckBroadcast_AllThreadsNotified_ExpectSuccessful) {
-  pthread_t thread1;
-  pthread_t thread2;
-  bool thread_created = pthread_create(
-      &thread1, NULL, &ConditionalVariableTest::check_counter_helper, this);
-  ASSERT_FALSE(thread_created) << "thread1 is not created!";
-  thread_created = pthread_create(
-      &thread2, NULL, &ConditionalVariableTest::check_counter_helper, this);
-  ASSERT_FALSE(thread_created) << "thread2 is not created!";
-  check_counter();
+  threads::Thread* thread1 =
+      threads::CreateThread("test thread", new CheckCounterDelegate());
+  thread1->start();
+  ASSERT_TRUE(thread1->CurrentId()) << "thread1 is not created!";
+  threads::Thread* thread2 =
+      threads::CreateThread("test thread", new CheckCounterDelegate());
+  thread2->start();
+  ASSERT_TRUE(thread2->CurrentId()) << "thread2 is not created!";
+  CheckCounter();
   EXPECT_EQ(2u, counter_);
+  threads::DeleteThread(thread1);
+  threads::DeleteThread(thread2);
 }
 
 TEST_F(
