@@ -31,7 +31,6 @@
 include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
 include_directories(
-  ${COMPONENTS_DIR}/include
   ${COMPONENTS_DIR}/formatters/include
   ${COMPONENTS_DIR}/protocol_handler/include
   ${COMPONENTS_DIR}/utils/include

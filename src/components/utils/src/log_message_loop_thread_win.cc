@@ -59,6 +59,7 @@ std::string GetLogTypeStringByLevel(const logger::LogLevel::Type level) {
     default:
       NOTREACHED();
   }
+  return "TRACE";
 }
 
 }  // namespace

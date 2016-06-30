@@ -1,4 +1,4 @@
-# Copyright (c) 2014, Ford Motor Company
+# Copyright (c) 2016, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,38 +28,36 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-cmake_minimum_required(VERSION 2.8.11)
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
-find_package(SDLLibUSB REQUIRED)
 find_package(SDLOpenSSL REQUIRED)
-find_package(SDLSqlite3 REQUIRED)
 
-IF (HMIADAPTER STREQUAL "messagebroker")
-set (BROKER_LIBRARIES
-  MessageBrokerClient
-  MessageBrokerServer
+include_directories(
+  ${COMPONENTS_DIR}/protocol_handler/include
+  ${COMPONENTS_DIR}/application_manager/include
+  ${COMPONENTS_DIR}/formatters/include
+  ${COMPONENTS_DIR}/transport_manager/include
+  ${COMPONENTS_DIR}/security_manager/include
+  ${COMPONENTS_DIR}/security_manager/include
+  ${COMPONENTS_DIR}/config_profile/include
+  ${COMPONENTS_DIR}/utils/include
+  ${COMPONENTS_DIR}/connection_handler/include
+  ${COMPONENTS_DIR}/hmi_message_handler/include
+  ${COMPONENTS_DIR}/request_watchdog/include
+  ${COMPONENTS_DIR}/smart_objects/include
+  ${COMPONENTS_DIR}/media_manager/include
+  ${COMPONENTS_DIR}/telemetry_monitor/include
+  ${COMPONENTS_DIR}/policy/include
+  ${COMPONENTS_DIR}/resumption/include
+  ${COMPONENTS_DIR}/dbus/include
+  ${CMAKE_BINARY_DIR}/src/components
+  ${JSONCPP_INCLUDE_DIRECTORY}
+  ${LOG4CXX_INCLUDE_DIRECTORY}
+  ${OPENSSL_INCLUDE_DIRECTORY}
+  ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
 )
-ENDIF ()
 
-cmake_policy(PUSH)
-# make link_directories() treat paths relative to the source dir
-# info: cmake --help-policy CMP0015
-cmake_policy(SET CMP0015 NEW)
-link_directories(${LIBUSB_LIBS_DIRECTORY})
-cmake_policy(POP)
-
-if (EXTENDED_MEDIA_MODE)
-set(default_media_inc ${GSTREAMER_gst_INCLUDE_DIR}
-)
-else(EXTENDED_MEDIA_MODE)
-set(default_media_inc
-)
-endif()
-
-if (TELEMETRY_MONITOR)
-    set(TELEMETRY_MONITOR_LIB
-        telemetry_monitor)
-endif()
+collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}")
 
 set(LIBRARIES
   media_manager
@@ -68,16 +66,15 @@ set(LIBRARIES
   MOBILE_API
   v4_protocol_v1_2_no_extra
   smart_object
-  ${TELEMETRY_MONITOR_LIB}
   formatters
   protocol
   protocol_handler
   connection_handler
   transport_manager
-  ${SecurityManagerLibrary}
   hmi_message_handler
-  MessageBroker
-  ${BROKER_LIBRARIES}
+  message_broker
+  message_broker_client
+  message_broker_server
   utils
   jsoncpp
   config_profile
@@ -85,116 +82,20 @@ set(LIBRARIES
   usage_statistics
 )
 
-if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-  list(APPEND LIBRARIES pthread)
-  list(APPEND LIBRARIES dl)
+if(ENABLE_SECURITY)
+  list(APPEND LIBRARIES
+    security_manager
+  )
 endif()
 
-if (BUILD_BT_SUPPORT)
-  if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    list(APPEND LIBRARIES bluetooth)
-  endif()
-endif()
-if (BUILD_USB_SUPPORT)
- list(APPEND LIBRARIES ${LIBUSBX_LIBRARIES})
-endif()
-if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-  if(ENABLE_LOG)
-    list(APPEND LIBRARIES log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
-    list(APPEND LIBRARIES apr-1 -L${APR_LIBS_DIRECTORY})
-    list(APPEND LIBRARIES aprutil-1 -L${APR_UTIL_LIBS_DIRECTORY})
-    list(APPEND LIBRARIES expat -L${EXPAT_LIBS_DIRECTORY})
-  endif()
+if(TELEMETRY_MONITOR)
+  list(APPEND LIBRARIES
+    telemetry_monitor
+  )
 endif()
 
-include_directories (
-  ./
-  ${COMPONENTS_DIR}/protocol_handler/include/
-  ${JSONCPP_INCLUDE_DIRECTORY}
-  ${COMPONENTS_DIR}/application_manager/include
-  ${COMPONENTS_DIR}/formatters/include
-  ${COMPONENTS_DIR}/transport_manager/include
-  ${COMPONENTS_DIR}/security_manager/include
-  ${SecurityManagerIncludeDir}
-  ${COMPONENTS_DIR}/security_manager/include
-  ${COMPONENTS_DIR}/config_profile/include
-  ${COMPONENTS_DIR}/utils/include/
-  ${COMPONENTS_DIR}/connection_handler/include/
-  ${COMPONENTS_DIR}/hmi_message_handler/include
-  ${COMPONENTS_DIR}/request_watchdog/include
-  ${COMPONENTS_DIR}/smart_objects/include/
-  ${COMPONENTS_DIR}/media_manager/include/
-  ${COMPONENTS_DIR}/telemetry_monitor/include
-  ${COMPONENTS_DIR}/policy/include/
-  ${COMPONENTS_DIR}/resumption/include/
-  ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
-  ${ENCRYPTION_INCLUDE_DIRECTORY}
-  ${COMPONENTS_DIR}
-  ${CMAKE_BINARY_DIR}/src/components/
-  ${COMPONENTS_DIR}/dbus/include/
-  ${CMAKE_SOURCE_DIR}
-  ${default_media_inc}
-  ${LOG4CXX_INCLUDE_DIRECTORY}
-  ${OPENSSL_INCLUDE_DIRECTORY}
-  ${CMAKE_SOURCE_DIR}/src/3rd_party/dbus-1.7.8
-  ${CMAKE_SOURCE_DIR}/src/3rd_party/dbus-1.7.8/dbus/
-)
-
-set (SOURCES
-  main.cc
-  life_cycle.cc
-)
-
-set (HEADERS
-     btinclude.h
-     life_cycle.h
-)
-
-if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-  if(NOT QT_PORT)
-    list(APPEND LIBRARIES ${SQLITE3_LIBRARIES} bthprops)
-    link_directories(${SQLITE3_LIB_DIRECTORY})
-  endif()
-  link_directories (${OPENSSL_LIB_DIRECTORY})
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /INCREMENTAL:NO" )
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /FORCE:MULTIPLE" )
-  # /IGNORE:4099 - flag of linker. Ignored 'warning LNK4099' if linker was not found PBD files.
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /IGNORE:4099" )
-
-endif()
-
-if( NOT CMAKE_BUILD_TYPE )
-  set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build. Options are: None, Debug, Release, RelWithDebInfo, MinSizeRel." FORCE)
-endif()
-
-add_executable(${PROJECT} ${HEADERS} ${SOURCES})
-
-if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-  target_link_libraries(${PROJECT} ws2_32 ${LIBRARIES})
-  if (BUILD_BT_SUPPORT)
-    target_link_libraries(${PROJECT} irprops ${LIBRARIES})
-  endif()
-endif()
-
-if(QT_PORT)
-    if(EXTENDED_MEDIA_MODE)
-      find_package(Qt5 REQUIRED Multimedia)
-      target_link_libraries(${PROJECT} Qt5::Multimedia ${LIBRARIES})
-    endif()
-    target_link_libraries(${PROJECT} Qt5::Core ${LIBRARIES})
-else()
-    target_link_libraries(${PROJECT} ${LIBRARIES})
-endif()
-
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/log4cxx.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/audio.8bit.wav DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/smartDeviceLink.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/hmi_capabilities.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/sdl_preloaded_pt.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
-  file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/init_policy.sh DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-endif ()
+add_executable(${PROJECT} ${SOURCES})
+target_link_libraries(${PROJECT} ${LIBRARIES})
 
 # Replace commit in ini file
 set(GITCOMMIT "")
@@ -218,25 +119,6 @@ if(EXISTS ${CMAKE_SOURCE_DIR}/.git)
   endif(GIT_FOUND)
 endif()
 
-if (${QT_HMI})
-  set(main_qml "hmi/MainWindow.qml")
-  set(plugins_dir "hmi/plugins")
-
-  if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
-    set(start_command "./start-qml.sh")
-    set(command_arguments "${main_qml} ${plugins_dir}")
-  else ()
-    execute_process(
-      COMMAND ${CMAKE_SOURCE_DIR}/FindQt.sh -v ${qt_version} -b qmlscene
-      OUTPUT_VARIABLE start_command
-    )
-    set(command_arguments "${main_qml} -I ${plugins_dir}")
-  endif ()
-
-  file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/start_hmi.sh
-    "#!/bin/sh\n${start_command} ${command_arguments}\n")
-endif ()
-
 # Install rules
 install(TARGETS ${PROJECT} DESTINATION bin)
 install(
@@ -245,23 +127,3 @@ install(
     ${CMAKE_SOURCE_DIR}/mycert.pem ${CMAKE_SOURCE_DIR}/mykey.pem
   DESTINATION bin
 )
-
-if (${WEB_HMI})
-  if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    install( DIRECTORY ${CMAKE_HOME_DIRECTORY}/src/components/HMI/ DESTINATION bin/HMI)
-  endif ()
-elseif (${QT_HMI})
-  if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
-    install(FILES start-qml.sh DESTINATION bin
-      PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ
-        GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
-  endif ()
-  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/start_hmi.sh DESTINATION bin
-    PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ
-      GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
-endif ()
-if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
-  install(FILES init_policy.sh DESTINATION bin
-    PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ
-      GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
-endif ()

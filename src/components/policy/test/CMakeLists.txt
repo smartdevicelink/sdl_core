@@ -32,7 +32,6 @@ include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
 include_directories(
   ${COMPONENTS_DIR}/policy/test/include/
-  ${COMPONENTS_DIR}/include/test/
   ${GMOCK_INCLUDE_DIRECTORY}
   ${JSONCPP_INCLUDE_DIRECTORY}
 )

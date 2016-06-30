@@ -28,24 +28,23 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/generators.cmake)
+
 include_directories(
-  ${COMPONENTS_DIR}/utils/include/utils
   ${COMPONENTS_DIR}/include/utils
-  ${CMAKE_SOURCE_DIR}/src/3rd_party-static/gmock-1.7.0/include
-  ${CMAKE_SOURCE_DIR}/src/3rd_party-static/gmock-1.7.0/gtest/include
-  ${CMAKE_SOURCE_DIR}/tools/interfaceGenerator
+  ${COMPONENTS_DIR}/utils/include/utils
   ${CMAKE_CURRENT_BINARY_DIR}
   ${JSONCPP_INCLUDE_DIRECTORY}
+  ${GMOCK_INCLUDE_DIRECTORY}
 )
 
-set(FULL_XML_NAME ${CMAKE_CURRENT_SOURCE_DIR}/MOBILE_API.xml)
-
+set(XML_NAME ${CMAKE_CURRENT_SOURCE_DIR}/MOBILE_API.xml)
 add_custom_target(generate_version
-                  COMMAND ${INTEFRACE_GENERATOR_CMD} ${FULL_XML_NAME} "mobile_apis"
+                  COMMAND ${INTEFRACE_GENERATOR_CMD} ${XML_NAME} "mobile_apis"
                   ${CMAKE_CURRENT_BINARY_DIR} "--parser-type" "sdlrpcv2"
-                  DEPENDS ${INTERFACE_GENERATOR_DEPENDENCIES} ${FULL_XML_NAME}
+                  DEPENDS ${INTERFACE_GENERATOR_DEPENDENCIES} ${XML_NAME}
                   VERBATIM
-                  )
+)
 
 set(LIBRARIES
   gmock

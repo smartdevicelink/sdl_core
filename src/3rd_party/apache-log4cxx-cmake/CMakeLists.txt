@@ -74,7 +74,7 @@ add_custom_target(liblog4cxx ALL make
             cd ${CMAKE_CURRENT_SOURCE_DIR} &&
             git log --pretty=\\"format:%H\\" -1 ${LOG4CXX_SOURCE_DIRECTORY} > /tmp/commit_hash 2>/dev/null &&
             echo \\"Adding .commit_hash section\\" &&
-            ${objcopy} --add-section .commit_hash=/tmp/commit_hash ${LOG4CXX_LIBS_DIRECTORY}/liblog4cxx.so ${LOG4CXX_LIBS_DIRECTORY}/liblog4cxx.so 1>/dev/null 2>&1\;
+            objcopy --add-section .commit_hash=/tmp/commit_hash ${LOG4CXX_LIBS_DIRECTORY}/liblog4cxx.so ${LOG4CXX_LIBS_DIRECTORY}/liblog4cxx.so 1>/dev/null 2>&1\;
           fi;
         fi\"
   DEPENDS ${LOG4CXX_BUILD_DIRECTORY}/Makefile

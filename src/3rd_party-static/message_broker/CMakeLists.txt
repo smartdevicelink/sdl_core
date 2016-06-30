@@ -1,4 +1,4 @@
-# Copyright (c) 2014, Ford Motor Company
+# Copyright (c) 2016, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,27 +28,51 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-set(3RD_PARTY_INSTALL_PREFIX "$ENV{THIRD_PARTY_INSTALL_PREFIX}")
-set(USE_DEFAULT_3RD_PARTY_PATH "true")
-if(3RD_PARTY_INSTALL_PREFIX)
-  set(USE_DEFAULT_3RD_PARTY_PATH "false")
-  set(3RD_PARTY_INSTALL_PREFIX_ARCH "$ENV{THIRD_PARTY_INSTALL_PREFIX_ARCH}")
-  if(3RD_PARTY_INSTALL_PREFIX_ARCH)
-  else()
-    set(3RD_PARTY_INSTALL_PREFIX_ARCH ${3RD_PARTY_INSTALL_PREFIX})
-  endif()
-else()
-  if(CMAKE_SYSTEM_NAME STREQUAL "QNX")
-    set(3RD_PARTY_INSTALL_PREFIX "$ENV{QNX_TARGET}/usr")  
-    if(CMAKE_SYSTEM_PROCESSOR STREQUAL "armv7")
-      set(QNX_ARCH "armle-v7")
-    else() 
-      set(QNX_ARCH ${CMAKE_SYSTEM_PROCESSOR})
-    endif()
-    set(3RD_PARTY_INSTALL_PREFIX_ARCH "$ENV{QNX_TARGET}/${QNX_ARCH}/usr")
-  else()
-    set(3RD_PARTY_INSTALL_PREFIX "/usr/local")
-    set(3RD_PARTY_INSTALL_PREFIX_ARCH ${3RD_PARTY_INSTALL_PREFIX})
-  endif()
-endif()
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
+set(MESSAGE_BROKER_INCLUDE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include)
+set(MESSAGE_BROKER_INCLUDE_DIRECTORY ${MESSAGE_BROKER_INCLUDE_DIRECTORY} PARENT_SCOPE)
+
+include_directories(
+  ${CMAKE_CURRENT_SOURCE_DIR}/include
+  ${JSONCPP_INCLUDE_DIRECTORY}
+)
+
+set(CLIENT_PATHS
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/client
+)
+collect_sources(CLIENT_SOURCES "${CLIENT_PATHS}")
+
+set(SERVER_PATHS
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/server
+)
+collect_sources(SERVER_SOURCES "${SERVER_PATHS}")
+
+set(EXCLUDE_PATHS
+  ${CLIENT_PATHS}
+  ${SERVER_PATHS}
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/example
+)
+
+set(PATHS
+  ${CMAKE_CURRENT_SOURCE_DIR}/include
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
+collect_sources(SOURCES "${PATHS}" "${EXCLUDE_PATHS}")
+
+set(LIBRARIES
+  utils
+)
+
+add_library(message_broker ${SOURCES})
+target_link_libraries(message_broker ${LIBRARIES})
+
+list(APPEND LIBRARIES
+  message_broker
+)
+
+add_library(message_broker_client ${CLIENT_SOURCES})
+target_link_libraries(message_broker_client ${LIBRARIES})
+
+add_library(message_broker_server ${SERVER_SOURCES})
+target_link_libraries(message_broker_server ${LIBRARIES})

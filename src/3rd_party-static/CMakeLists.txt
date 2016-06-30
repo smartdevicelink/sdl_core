@@ -1,4 +1,4 @@
-# Copyright (c) 2014, Ford Motor Company
+# Copyright (c) 2016, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -32,14 +32,17 @@
 add_subdirectory(./jsoncpp)
 set(JSONCPP_INCLUDE_DIRECTORY ${JSONCPP_INCLUDE_DIRECTORY} PARENT_SCOPE)
 
-# --- MessageBroker
-add_subdirectory(./MessageBroker)
+# --- Message Broker
+add_subdirectory(./message_broker)
 set(MESSAGE_BROKER_INCLUDE_DIRECTORY ${MESSAGE_BROKER_INCLUDE_DIRECTORY} PARENT_SCOPE)
 
 # --- encryption
 add_subdirectory(./encryption)
 set(ENCRYPTION_INCLUDE_DIRECTORY ${ENCRYPTION_INCLUDE_DIRECTORY} PARENT_SCOPE)
 
+# --- gmock
 if(BUILD_TESTS)
+  add_subdirectory(./gmock-1.7.0)
+  set(GMOCK_INCLUDE_DIRECTORY ${GMOCK_INCLUDE_DIRECTORY} PARENT_SCOPE)
   add_subdirectory(test)
 endif()
