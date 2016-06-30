@@ -1,4 +1,4 @@
-# Copyright (c) 2014, Ford Motor Company
+# Copyright (c) 2016, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -30,61 +30,62 @@
 
 set(COMPONENTS_DIR ${CMAKE_SOURCE_DIR}/src/components)
 
-# --- HMI_API interfaces
+# --- HMI, MOBILE Interfaces
 add_subdirectory(./interfaces)
 
-# --- ProtocolHandler
+# --- Protocol Handler
 add_subdirectory(./protocol)
 
-# --- TransportManager
+# --- Transport Manager
 add_subdirectory(./transport_manager)
 
-# --- Policies
+# --- Resumption
 add_subdirectory(./resumption)
 
-# --- formatters
+# --- Formatters
 add_subdirectory(./formatters)
 
-# --- ProtocolHandler
+# --- Protocol Handler
 add_subdirectory(./protocol_handler)
 
-# --- ConnectionHandler
+# --- Connection Handler
 add_subdirectory(./connection_handler)
 
 # --- Utils
 add_subdirectory(./utils)
 
-# --- Security manager
+# --- Security Manager
 if(ENABLE_SECURITY)
   add_subdirectory(./security_manager)
 endif()
-#
-# --- Policy_impl
+
+# --- Policy
 add_subdirectory(./policy)
 
-# --- Validated types
+# --- Validated Types
 add_subdirectory(./rpc_base)
 
-# --- SmartObjects
+# --- Smart Objects
 add_subdirectory(./smart_objects)
 
-# --- Application manager
+# --- Application Manager
 add_subdirectory(./application_manager)
 
 # --- HMI Message Handler
 add_subdirectory(./hmi_message_handler)
 
-# --- Config
+# --- Config Profile
 add_subdirectory(./config_profile)
 
-# --- AudioManager
+# --- Media Manager
 add_subdirectory(./media_manager)
 
-if (TELEMETRY_MONITOR)
-    add_subdirectory(./telemetry_monitor)
+# --- Telemetry Monitor
+if(TELEMETRY_MONITOR)
+  add_subdirectory(./telemetry_monitor)
 endif()
 
-if (${HMI_DBUS_API})
 # --- DBus
-    add_subdirectory(./dbus)
-endif ()
+if(HMI_DBUS_API)
+  add_subdirectory(./dbus)
+endif()

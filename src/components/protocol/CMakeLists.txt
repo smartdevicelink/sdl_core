@@ -38,7 +38,7 @@ include_directories(
 collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}")
 
 set(LIBRARIES
-  Utils
+  utils
 )
 
 add_library(protocol ${SOURCES})

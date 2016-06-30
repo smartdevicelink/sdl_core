@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "qdb_wrapper/sql_query.h"
+#include "utils/qdb_wrapper/sql_query.h"
 #include <string.h>
 #include <cassert>
 #include <algorithm>

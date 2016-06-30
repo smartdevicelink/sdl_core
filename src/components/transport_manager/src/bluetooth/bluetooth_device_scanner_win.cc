@@ -45,8 +45,8 @@
 #include <sstream>
 #include "transport_manager/bluetooth/bluetooth_transport_adapter.h"
 #include "transport_manager/bluetooth/bluetooth_device.h"
-#include "utils/bluetooth_win/bluetooth_service_record.h"
-#include "utils/bluetooth_win/bluetooth_uuid.h"
+#include "utils/bluetooth/bluetooth_service_record_win.h"
+#include "utils/bluetooth/bluetooth_uuid_win.h"
 
 #include "utils/logger.h"
 #include "utils/threads/thread.h"

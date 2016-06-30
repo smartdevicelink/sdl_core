@@ -45,7 +45,7 @@ set(LIBRARIES
   protocol
   protocol_handler
   connection_handler
-  Utils
+  utils
   config_profile
 )
 

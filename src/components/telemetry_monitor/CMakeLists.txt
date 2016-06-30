@@ -28,10 +28,9 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
-set(TELEMETRY_MONITOR_SRC_DIR ${COMPONENTS_DIR}/telemetry_monitor/src)
-
-include_directories (
+include_directories(
   ${COMPONENTS_DIR}/telemetry_monitor/include/
   ${COMPONENTS_DIR}/utils/include/
   ${COMPONENTS_DIR}/protocol_handler/include/
@@ -44,25 +43,23 @@ include_directories (
   ${COMPONENTS_DIR}/media_manager/include/
   ${COMPONENTS_DIR}/smart_objects/include/
   ${COMPONENTS_DIR}/config_profile/include/
-  ${JSONCPP_INCLUDE_DIRECTORY}
   ${CMAKE_BINARY_DIR}/src/components/
-  ${LOG4CXX_INCLUDE_DIRECTORY}
+  ${JSONCPP_INCLUDE_DIRECTORY}
 )
 
-set(SOURCES
-    ${TELEMETRY_MONITOR_SRC_DIR}/metric_wrapper.cc
-    ${TELEMETRY_MONITOR_SRC_DIR}/telemetry_monitor.cc
-    ${TELEMETRY_MONITOR_SRC_DIR}/application_manager_observer.cc
-    ${TELEMETRY_MONITOR_SRC_DIR}/transport_manager_observer.cc
-    ${TELEMETRY_MONITOR_SRC_DIR}/protocol_handler_observer.cc
-    ${TELEMETRY_MONITOR_SRC_DIR}/application_manager_metric_wrapper.cc
-    ${TELEMETRY_MONITOR_SRC_DIR}/transport_manager_metric_wrapper.cc
-    ${TELEMETRY_MONITOR_SRC_DIR}/protocol_handler_metric_wrapper.cc
+set(PATHS
+  ${CMAKE_CURRENT_SOURCE_DIR}/include
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
+collect_sources(SOURCES "${PATHS}")
+
+set(LIBRARIES
+  HMI_API
+  MOBILE_API
 )
 
-add_library("TelemetryMonitor" ${SOURCES})
-target_link_libraries("TelemetryMonitor" ${LIBRARIES})
-add_dependencies("TelemetryMonitor" HMI_API MOBILE_API)
+add_library(telemetry_monitor ${SOURCES})
+target_link_libraries(telemetry_monitor ${LIBRARIES})
 
 if(BUILD_TESTS)
   add_subdirectory(test)

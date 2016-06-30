@@ -70,7 +70,7 @@ set(LIBRARIES
   config_profile
   dbms
   jsoncpp
-  Utils
+  utils
   ${SQLITE3_LIBRARIES}
 )
 

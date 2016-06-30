@@ -28,75 +28,24 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-if(BUILD_TESTS)
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
 include_directories(
-    ${GMOCK_INCLUDE_DIRECTORY}
-    ${COMPONENTS_DIR}/media_manager/include
-    ${COMPONENTS_DIR}/media_manager/test/include
-    ${COMPONENTS_DIR}/application_manager/test/include
-    ${COMPONENTS_DIR}/resumption/include
-
+  ${COMPONENTS_DIR}/media_manager/include
+  ${COMPONENTS_DIR}/media_manager/test/include
+  ${COMPONENTS_DIR}/application_manager/test/include
+  ${COMPONENTS_DIR}/resumption/include
+  ${GMOCK_INCLUDE_DIRECTORY}
 )
 
-if(EXTENDED_MEDIA_MODE)
-  include_directories (
-    ${GSTREAMER_gst_INCLUDE_DIR}
-    ${GLIB_glib_2_INCLUDE_DIR}
-  )
-endif()
-
-set(SOURCES
-    ${COMPONENTS_DIR}/media_manager/test/media_manager_impl_test.cc
-)
+collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}")
 
 set(LIBRARIES
-    smart_object
-    MediaManager
-    protocol
-    application_manager
-    protocol_handler
-    gmock
-    connection_handler
-    encryption
-    resumption
-    Policy
-    ${SecurityManagerLibrary}
+  media_manager
+  application_manager
+  protocol_handler
+  utils
+  gmock
 )
 
-if(EXTENDED_MEDIA_MODE)
-  list(APPEND LIBRARIES
-    ${GSTREAMER_gstreamer_LIBRARY})
-endif()
-
-if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-    link_directories ($ENV{SDL_SQLITE_DIR})
-endif()
-
-if(QT_PORT)
-  find_package(Qt5 REQUIRED Multimedia)
-  link_directories (${CMAKE_SOURCE_DIR}/build/openssl_win_x86/lib)
-endif()
-
-if(NOT QT_PORT AND ${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-  link_directories(${CMAKE_SOURCE_DIR}/build/openssl_win_x64/lib/)
-endif()
-
-create_test("media_manager_test" "${SOURCES}" "${LIBRARIES}")
-
-if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-  target_link_libraries("media_manager_test" ws2_32)
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /IGNORE:4099" )
-endif()
-
-if(ENABLE_LOG AND POSIX)
-    target_link_libraries("media_manager_test" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
-endif()
-
-if(QT_PORT)
-  target_link_libraries("media_manager_test" Qt5::Multimedia)
-endif()
-
-endif()
-
-# vim: set ts=2 sw=2 et:
+create_test(media_manager_test "${SOURCES}" "${LIBRARIES}")

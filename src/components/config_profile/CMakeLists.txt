@@ -45,7 +45,7 @@ set(PATHS
 )
 
 set(LIBRARIES
-  Utils
+  utils
 )
 
 collect_sources(SOURCES "${PATHS}")

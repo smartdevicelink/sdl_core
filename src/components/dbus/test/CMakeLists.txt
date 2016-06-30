@@ -1,4 +1,4 @@
-# Copyright (c) 2014, Ford Motor Company
+# Copyright (c) 2016, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,26 +28,20 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-if(BUILD_TESTS)
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
-include_directories (
-  ${GMOCK_INCLUDE_DIRECTORY}
+include_directories(
   ${COMPONENTS_DIR}/dbus/include/
+  ${GMOCK_INCLUDE_DIRECTORY}
 )
 
-set (LIBRARIES
-    gmock
-    DBus
-    formatters
-    smart_object
+collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}")
+
+set(LIBRARIES
+  gmock
+  dbus
+  formatters
+  smart_object
 )
 
-set(testSources
-    ${COMPONENTS_DIR}/dbus/test/schema_test.cc
-    ${COMPONENTS_DIR}/dbus/test/dbus_adapter_test.cc
-)
-
-create_test("test_DBus_test" "${testSources}" "${LIBRARIES}")
-
-endif()
-
+create_test(dbus_test "${SOURCES}" "${LIBRARIES}")

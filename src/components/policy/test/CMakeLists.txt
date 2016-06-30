@@ -60,7 +60,7 @@ collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}" "${EXCLUDE_PATHS}")
 set(LIBRARIES
   gmock
   dbms
-  Utils
+  utils
   usage_statistics
   Policy_static
 )

@@ -30,7 +30,7 @@
 
 cmake_minimum_required(VERSION 2.8.11)
 
-find_package(LibUSBx REQUIRED)
+find_package(SDLLibUSB REQUIRED)
 find_package(SDLOpenSSL REQUIRED)
 find_package(SDLSqlite3 REQUIRED)
 
@@ -58,11 +58,11 @@ endif()
 
 if (TELEMETRY_MONITOR)
     set(TELEMETRY_MONITOR_LIB
-        TelemetryMonitor)
+        telemetry_monitor)
 endif()
 
 set(LIBRARIES
-  MediaManager
+  media_manager
   application_manager
   HMI_API
   MOBILE_API
@@ -73,12 +73,12 @@ set(LIBRARIES
   protocol
   protocol_handler
   connection_handler
-  TransportManager
+  transport_manager
   ${SecurityManagerLibrary}
-  HMIMessageHandler
+  hmi_message_handler
   MessageBroker
   ${BROKER_LIBRARIES}
-  Utils
+  utils
   jsoncpp
   config_profile
   resumption

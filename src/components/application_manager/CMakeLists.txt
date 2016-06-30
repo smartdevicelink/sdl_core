@@ -57,7 +57,7 @@ include_directories(
 )
 
 set(COMMANDS_PATHS
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/commands
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/application_manager/commands
   ${CMAKE_CURRENT_SOURCE_DIR}/src/commands
 )
 collect_sources(COMMANDS_SOURCES "${COMMANDS_PATHS}")
@@ -88,8 +88,8 @@ set(EXCLUDE_PATHS
 )
 
 set(PATHS
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/
+  ${CMAKE_CURRENT_SOURCE_DIR}/include
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 collect_sources(SOURCES "${PATHS}" "${EXCLUDE_PATHS}")
 

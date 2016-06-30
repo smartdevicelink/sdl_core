@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sql_qt_wrapper/sql_error.h"
+#include "utils/sql_qt_wrapper/sql_error.h"
 
 namespace utils {
 namespace dbms {

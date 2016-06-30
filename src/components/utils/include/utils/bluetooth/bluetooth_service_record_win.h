@@ -33,8 +33,9 @@
  */
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_SERVICE_RECORD_WIN_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_SERVICE_RECORD_WIN_H_
+
 #include "utils/winhdr.h"
-#include "utils/bluetooth_win/bluetooth_uuid.h"
+#include "utils/bluetooth/bluetooth_uuid_win.h"
 
 #include <string>
 #include <vector>
