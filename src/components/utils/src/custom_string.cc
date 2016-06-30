@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,7 @@
 
 #if defined(OS_WINDOWS)
 #include <string.h>
+#include "utils/winhdr.h"
 #define strcasecmp _stricmp
 #elif defined(OS_POSIX)
 #include <strings.h>
@@ -65,14 +66,19 @@ size_t CalculateLengthOfString(const char* str) {
 
 // Converts string to unicode string.
 std::wstring ConvertUTFToWString(const char* str) {
-  size_t size = CalculateLengthOfString(str);
-  std::vector<wchar_t> wchar_array(size + 1, L'\0');
+  const size_t kSize = CalculateLengthOfString(str);
+  std::wstring wide_str(kSize, L'\0');
 
-  std::string current_locale = setlocale(LC_ALL, NULL);
+#if defined(OS_WINDOWS)
+  const size_t kTrueSize = strlen(str);
+  MultiByteToWideChar(CP_UTF8, 0, str, kTrueSize, &(wide_str.front()), kSize);
+#else
+  const std::string kCurrentLocale = setlocale(LC_ALL, NULL);
   setlocale(LC_ALL, "");  // system locale
-  mbstowcs(&(wchar_array.front()), str, size);
-  setlocale(LC_ALL, current_locale.c_str());
-  return std::wstring(&(wchar_array.front()));
+  mbstowcs(&(wide_str.front()), str, kSize);
+  setlocale(LC_ALL, kCurrentLocale.c_str());
+#endif  // OS_WINDOWS
+  return wide_str;
 }
 
 // Converts string to lower case unicode string.
