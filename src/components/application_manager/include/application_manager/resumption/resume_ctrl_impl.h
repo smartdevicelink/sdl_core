@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_RESUME_CTRL_H
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_RESUME_CTRL_H
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_RESUMPTION_RESUME_CTRL_IMPL_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_RESUMPTION_RESUME_CTRL_IMPL_H_
 
 #include <stdint.h>
 #include <vector>
@@ -74,7 +74,7 @@ class ResumeCtrlImpl : public ResumeCtrl,
    * @brief Event, that raised if application get resumption response from HMI
    * @param event : event object, that contains smart_object with HMI message
    */
-  virtual void on_event(const app_mngr::event_engine::Event& event);
+  void on_event(const app_mngr::event_engine::Event& event) OVERRIDE;
 
   /**
    * @brief Save all applications info to the file system
@@ -85,7 +85,7 @@ class ResumeCtrlImpl : public ResumeCtrl,
    * @brief Save application persistent info for future resuming
    * @param application is application witch need to be saved
    */
-  void SaveApplication(app_mngr::ApplicationSharedPtr application);
+  void SaveApplication(app_mngr::ApplicationSharedPtr application) OVERRIDE;
 
   /**
    * @brief Set application HMI Level and ausio_state as saved
@@ -120,19 +120,17 @@ class ResumeCtrlImpl : public ResumeCtrl,
    * @return return true, if success, otherwise return false
    */
   bool RemoveApplicationFromSaved(
-      app_mngr::ApplicationConstSharedPtr application);
+      app_mngr::ApplicationConstSharedPtr application) OVERRIDE;
 
   /**
-   * @brief Increments ignition counter for all registered applications
-   * and remember ign_off time stamp
+   * @brief Processes resumption data after receiving signal "Suspend"
    */
-  void OnSuspend();
+  void OnSuspend() OVERRIDE;
 
   /**
-   * @brief Increments ignition counter for all registered applications
-   * and remember ign_off time stamp
+   * @brief Processes resumption data after receiving signal "Awake"
    */
-  void OnAwake();
+  void OnAwake() OVERRIDE;
 
   /**
    * @brief Method starts timer "RsmCtrlPercist" when
@@ -145,7 +143,7 @@ class ResumeCtrlImpl : public ResumeCtrl,
    * receives OnExitAllApplication notification
    * with reason "SUSPEND"
    */
-  void StopSavePersistentDataTimer();
+  void StopSavePersistentDataTimer() OVERRIDE;
 
   /**
    * @brief Start timer for resumption applications
@@ -154,7 +152,7 @@ class ResumeCtrlImpl : public ResumeCtrl,
    * @return true if it was saved, otherwise return false
    */
   bool StartResumption(app_mngr::ApplicationSharedPtr application,
-                       const std::string& hash);
+                       const std::string& hash) OVERRIDE;
 
   /**
    * @brief Start timer for resumption applications
@@ -162,7 +160,8 @@ class ResumeCtrlImpl : public ResumeCtrl,
    * @param application that is need to be restored
    * @return true if it was saved, otherwise return false
    */
-  bool StartResumptionOnlyHMILevel(app_mngr::ApplicationSharedPtr application);
+  bool StartResumptionOnlyHMILevel(
+      app_mngr::ApplicationSharedPtr application) OVERRIDE;
 
   /**
    * @brief Check if there are all files need for resumption
@@ -170,7 +169,7 @@ class ResumeCtrlImpl : public ResumeCtrl,
    * @return true if it all files exist, otherwise return false
    */
   bool CheckPersistenceFilesForResumption(
-      app_mngr::ApplicationSharedPtr application);
+      app_mngr::ApplicationSharedPtr application) OVERRIDE;
 
   /**
    * @brief Check application hash
@@ -178,14 +177,14 @@ class ResumeCtrlImpl : public ResumeCtrl,
    * @return true if it was saved, otherwise return false
    */
   bool CheckApplicationHash(app_mngr::ApplicationSharedPtr application,
-                            const std::string& hash);
+                            const std::string& hash) OVERRIDE;
 
   /**
    * @brief Checks if Resume controller have saved application with hmi app id
    * @param hmi_app_id - hmi application id
    * @return true if exist, false otherwise
    */
-  bool IsHMIApplicationIdExist(uint32_t hmi_app_id);
+  bool IsHMIApplicationIdExist(uint32_t hmi_app_id) OVERRIDE;
 
   /**
    * @brief Check if Resume controller have saved instance of application
@@ -194,7 +193,7 @@ class ResumeCtrlImpl : public ResumeCtrl,
    * @return true if exist, false otherwise
    */
   bool IsApplicationSaved(const std::string& policy_app_id,
-                          const std::string& device_id);
+                          const std::string& device_id) OVERRIDE;
 
   /**
    * @brief Function is used for application resume. HMI app ID must be
@@ -205,12 +204,12 @@ class ResumeCtrlImpl : public ResumeCtrl,
    * @return HMI app ID
    */
   uint32_t GetHMIApplicationID(const std::string& policy_app_id,
-                               const std::string& device_id) const;
+                               const std::string& device_id) const OVERRIDE;
 
   /**
    * @brief Updates flag for saving application data
    */
-  void ApplicationsDataUpdated() {
+  void ApplicationsDataUpdated() OVERRIDE {
     is_data_saved_ = false;
   }
 
@@ -224,7 +223,7 @@ class ResumeCtrlImpl : public ResumeCtrl,
   /**
    * @brief Update launch_time_ to current
    */
-  void ResetLaunchTime();
+  void ResetLaunchTime() OVERRIDE;
 
   /**
    * @brief Timer callback for  restoring HMI Level
@@ -237,21 +236,21 @@ class ResumeCtrlImpl : public ResumeCtrl,
    *
    * @param application application witch need to be removed from resumption
    */
-  void OnAppActivated(app_mngr::ApplicationSharedPtr application);
+  void OnAppActivated(app_mngr::ApplicationSharedPtr application) OVERRIDE;
 
   /**
    * @brief Removes app from resumption list
    *
    * app_id Application to remove
    */
-  void RemoveFromResumption(uint32_t app_id);
+  void RemoveFromResumption(uint32_t app_id) OVERRIDE;
 
   /**
    * @brief Initialization data for Resume controller
    * @return true if initialization is success otherwise
    * returns false
    */
-  bool Init(LastState& last_state);
+  bool Init(LastState& last_state) OVERRIDE;
 
   /**
    * @brief Notify resume controller about new application
@@ -259,12 +258,12 @@ class ResumeCtrlImpl : public ResumeCtrl,
    * @param device_id - id of device where application is run
    */
   void OnAppRegistrationStart(const std::string& policy_app_id,
-                              const std::string& device_id);
+                              const std::string& device_id) OVERRIDE;
 
   /**
    * @brief Notify resume controller about delete new application
    */
-  void OnAppRegistrationEnd();
+  void OnAppRegistrationEnd() OVERRIDE;
 
 #ifdef BUILD_TESTS
   void set_resumption_storage(utils::SharedPtr<ResumptionData> mock_storage);
@@ -461,4 +460,4 @@ class ResumeCtrlImpl : public ResumeCtrl,
 };
 
 }  // namespace resumption
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_RESUME_CTRL_H
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_RESUMPTION_RESUME_CTRL_IMPL_H_

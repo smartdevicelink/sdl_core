@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -715,9 +715,9 @@ class MessageHelperTest : public ::testing::Test {
    * @param port contains port for socket.
    */
   void CheckParametersNaviStartStreamMessage(
-      const std::string url,
-      const std::string video_server_type,
-      const std::string server_path,
+      const std::string& url,
+      const std::string& video_server_type,
+      const std::string& server_path,
       const uint16_t port = 0) {
     MockApplicationManagerSettings mock_app_mngr_settings;
     EXPECT_CALL(mock_application_manager_, GetNextHMICorrelationID())
@@ -753,7 +753,7 @@ class MessageHelperTest : public ::testing::Test {
   }
 
   /**
-   * @brief Check common parameters from messag
+   * @brief Check common parameters from message
    * @param result contains message which need to check
    * @param is_app_id flag for checking application id parameter
    * @param is_corr_id flag for checking correlation id parameter
@@ -784,8 +784,8 @@ class MessageHelperTest : public ::testing::Test {
    * @param state parameter from structure
    */
   void FillFunctionalGroupPermissionObj(policy::FunctionalGroupPermission& obj,
-                                        const std::string group_alias,
-                                        const std::string group_name,
+                                        const std::string& group_alias,
+                                        const std::string& group_name,
                                         const int32_t group_id,
                                         const policy::GroupConsent state) {
     obj.group_alias = group_alias;
@@ -2890,52 +2890,63 @@ TEST_F(MessageHelperTest,
             hmi_apis::FunctionID::SDL_OnAppPermissionChanged);
   CheckParamsOfMessage(result, true, false);
   uint16_t number_msg_params = 8;
+  std::string app_revoked("appRevoked");
+  std::string is_app_permissions_revoked("isAppPermissionsRevoked");
+  std::string app_revoked_permissions("appRevokedPermissions");
+  std::string allowed("allowed");
+  std::string name("name");
+  std::string id("id");
+
   EXPECT_EQ((*result)[strings::msg_params].length(), number_msg_params);
-  EXPECT_TRUE((*result)[strings::msg_params].keyExists("appRevoked"));
-  EXPECT_TRUE((*result)[strings::msg_params]["appRevoked"].asBool());
+  EXPECT_TRUE((*result)[strings::msg_params].keyExists(app_revoked));
+  EXPECT_TRUE((*result)[strings::msg_params][app_revoked].asBool());
   EXPECT_TRUE(
-      (*result)[strings::msg_params].keyExists("isAppPermissionsRevoked"));
+      (*result)[strings::msg_params].keyExists(is_app_permissions_revoked));
   EXPECT_TRUE(
-      (*result)[strings::msg_params]["isAppPermissionsRevoked"].asBool());
+      (*result)[strings::msg_params][is_app_permissions_revoked].asBool());
   EXPECT_TRUE(
-      (*result)[strings::msg_params].keyExists("appRevokedPermissions"));
+      (*result)[strings::msg_params].keyExists(app_revoked_permissions));
   EXPECT_TRUE(
-      ((*result)[strings::msg_params]["appRevokedPermissions"].length() ==
+      ((*result)[strings::msg_params][app_revoked_permissions].length() ==
        functional_group_permissions.size()));
   uint16_t number_revoked_params = 3;
   uint16_t number_revoked_params_without_allowed = 2;
   smart_objects::SmartObject& revoked_items =
-      (*result)[strings::msg_params]["appRevokedPermissions"];
+      (*result)[strings::msg_params][app_revoked_permissions];
   for (uint16_t i = 0; i < revoked_items.length(); ++i) {
     if (policy::GroupConsent::kGroupUndefined ==
         functional_group_permissions[i].state) {
       EXPECT_TRUE(revoked_items[i].length() ==
                   number_revoked_params_without_allowed);
-      EXPECT_FALSE(revoked_items[i].keyExists("allowed"));
+      EXPECT_FALSE(revoked_items[i].keyExists(allowed));
     } else {
       EXPECT_TRUE(revoked_items[i].length() == number_revoked_params);
-      EXPECT_TRUE(revoked_items[i].keyExists("allowed"));
+      EXPECT_TRUE(revoked_items[i].keyExists(allowed));
       if (policy::kGroupAllowed == functional_group_permissions[i].state) {
-        EXPECT_TRUE(revoked_items[i]["allowed"].asBool());
+        EXPECT_TRUE(revoked_items[i][allowed].asBool());
       } else {
-        EXPECT_FALSE(revoked_items[i]["allowed"].asBool());
+        EXPECT_FALSE(revoked_items[i][allowed].asBool());
       }
     }
-    EXPECT_TRUE(revoked_items[i].keyExists("name"));
-    EXPECT_TRUE(revoked_items[i]["name"].asString() ==
+    EXPECT_TRUE(revoked_items[i].keyExists(name));
+    EXPECT_TRUE(revoked_items[i][name].asString() ==
                 functional_group_permissions[i].group_alias);
-    EXPECT_TRUE(revoked_items[i].keyExists("id"));
-    EXPECT_TRUE(revoked_items[i]["id"].asInt() ==
+    EXPECT_TRUE(revoked_items[i].keyExists(id));
+    EXPECT_TRUE(revoked_items[i][id].asInt() ==
                 functional_group_permissions[i].group_id);
   }
+
+  std::string app_permissions_consent_needed("appPermissionsConsentNeeded");
+  std::string app_unauthorized("appUnauthorized");
+  std::string priority("priority");
   EXPECT_TRUE(
-      (*result)[strings::msg_params].keyExists("appPermissionsConsentNeeded"));
+      (*result)[strings::msg_params].keyExists(app_permissions_consent_needed));
   EXPECT_TRUE(
-      (*result)[strings::msg_params]["appPermissionsConsentNeeded"].asBool());
-  EXPECT_TRUE((*result)[strings::msg_params].keyExists("appUnauthorized"));
-  EXPECT_TRUE((*result)[strings::msg_params]["appUnauthorized"].asBool());
-  EXPECT_TRUE((*result)[strings::msg_params].keyExists("priority"));
-  EXPECT_EQ((*result)[strings::msg_params]["priority"].asInt(),
+      (*result)[strings::msg_params][app_permissions_consent_needed].asBool());
+  EXPECT_TRUE((*result)[strings::msg_params].keyExists(app_unauthorized));
+  EXPECT_TRUE((*result)[strings::msg_params][app_unauthorized].asBool());
+  EXPECT_TRUE((*result)[strings::msg_params].keyExists(priority));
+  EXPECT_EQ((*result)[strings::msg_params][priority].asInt(),
             hmi_apis::Common_AppPriority::NORMAL);
   EXPECT_TRUE((*result)[strings::msg_params].keyExists(strings::request_type));
   smart_objects::SmartObject& request_types_array =

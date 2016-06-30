@@ -68,14 +68,12 @@ class ResumeCtrl {
   virtual bool RemoveApplicationFromSaved(
       app_mngr::ApplicationConstSharedPtr application) = 0;
   /**
-   * @brief Increments ignition counter for all registered applications
-   * and remember ign_off time stamp
+   * @brief Processes resumption data after receiving signal "Suspend"
    */
   virtual void OnSuspend() = 0;
 
   /**
-   * @brief Increments ignition counter for all registered applications
-   * and remember ign_off time stamp
+   * @brief Processes resumption data after receiving signal "Awake"
    */
   virtual void OnAwake() = 0;
 
