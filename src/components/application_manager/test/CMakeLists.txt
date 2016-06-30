@@ -114,6 +114,8 @@ set(LIBRARIES
   HMI_API
   MOBILE_API
   application_manager
+  am_policies
+  am_resumption
   connection_handler
   protocol_handler
   usage_statistics
