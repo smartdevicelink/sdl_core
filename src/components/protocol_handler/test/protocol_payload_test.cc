@@ -229,7 +229,6 @@ TEST(ProtocolPayloadTest, ExtractCorrectProtocolWithDataWithJSON) {
   delete[] data_for_sending;
 }
 
-// TODO(OHerasym) : heap corruption on Windows platform
 TEST(ProtocolPayloadTest, ExtractProtocolWithJSONWithDataWithWrongPayloadSize) {
   ProtocolPayloadV2 prot_payload_test;
 
@@ -247,9 +246,11 @@ TEST(ProtocolPayloadTest, ExtractProtocolWithJSONWithDataWithWrongPayloadSize) {
   prot_payload_test.json = expect_output_json_string;
   prot_payload_test.header.json_size = prot_payload_test.json.length();
 
-  const size_t data_for_sending_size =
-      PROTOCOL_HEADER_V2_SIZE + prot_payload_test.json.length();
-  uint8_t* data_for_sending = new uint8_t[data_for_sending_size];
+  const size_t data_for_sending_size = PROTOCOL_HEADER_V2_SIZE +
+                                       prot_payload_test.json.length() +
+                                       prot_payload_test.data.size();
+  std::vector<uint8_t> data_for_sending_container(data_for_sending_size);
+  uint8_t* data_for_sending = &data_for_sending_container[0];
   prepare_data(data_for_sending, prot_payload_test);
 
   BitStream bs(data_for_sending, data_for_sending_size);
@@ -269,7 +270,6 @@ TEST(ProtocolPayloadTest, ExtractProtocolWithJSONWithDataWithWrongPayloadSize) {
   EXPECT_EQ(prot_payload_test.json.length(), prot_payload.json.length());
   EXPECT_EQ(prot_payload_test.json, prot_payload.json);
   EXPECT_EQ(0u, prot_payload.data.size());
-  delete[] data_for_sending;
 }
 
 }  // namespace protocol_handler_test

@@ -54,16 +54,12 @@ class IncomingDataHandlerTest : public ::testing::Test {
     EXPECT_NE(uid2, uid_unknown);
     some_data_size = 4;
     some_data2_size = 512;
-    some_data = new uint8_t[some_data_size];
-    some_data2 = new uint8_t[some_data2_size];
+    some_data.assign(some_data_size, 0xAB);
+    some_data2.assign(some_data2_size, 0xAB);
     protov1_message_id = 0x0;
     some_message_id = 0xABCDEF0;
     some_session_id = 0xFEDCBA0;
     payload_bigger_mtu.resize(MAXIMUM_FRAME_DATA_V2_SIZE + 1);
-  }
-  void TearDown() OVERRIDE {
-    delete[] some_data;
-    delete[] some_data2;
   }
   void ProcessData(transport_manager::ConnectionUID uid,
                    const uint8_t* const data,
@@ -91,7 +87,7 @@ class IncomingDataHandlerTest : public ::testing::Test {
   FrameList actual_frames;
   RESULT_CODE result_code;
   size_t malformed_occurs;
-  uint8_t* some_data, *some_data2;
+  std::vector<uint8_t> some_data, some_data2;
   size_t some_data_size, some_data2_size;
   uint32_t protov1_message_id;
   uint32_t some_message_id;
@@ -201,7 +197,7 @@ TEST_F(IncomingDataHandlerTest, MixedPayloadData_TwoConnections) {
                                               some_session_id,
                                               some_data_size,
                                               protov1_message_id,
-                                              some_data));
+                                              &some_data[0]));
   // consecutive packet Audio
   mobile_packets.push_back(new ProtocolPacket(uid1,
                                               PROTOCOL_VERSION_2,
@@ -212,7 +208,7 @@ TEST_F(IncomingDataHandlerTest, MixedPayloadData_TwoConnections) {
                                               ++some_session_id,
                                               some_data2_size,
                                               some_message_id,
-                                              some_data2));
+                                              &some_data2[0]));
   // single packet Nav
   mobile_packets.push_back(new ProtocolPacket(uid1,
                                               PROTOCOL_VERSION_3,
@@ -223,7 +219,7 @@ TEST_F(IncomingDataHandlerTest, MixedPayloadData_TwoConnections) {
                                               ++some_session_id,
                                               some_data_size,
                                               ++some_message_id,
-                                              some_data));
+                                              &some_data[0]));
   // consecutive packet Bulk
   mobile_packets.push_back(new ProtocolPacket(uid1,
                                               PROTOCOL_VERSION_3,
@@ -234,7 +230,7 @@ TEST_F(IncomingDataHandlerTest, MixedPayloadData_TwoConnections) {
                                               ++some_session_id,
                                               some_data2_size,
                                               ++some_message_id,
-                                              some_data2));
+                                              &some_data2[0]));
   for (FrameList::iterator it = mobile_packets.begin();
        it != mobile_packets.end();
        ++it) {
@@ -248,7 +244,6 @@ TEST_F(IncomingDataHandlerTest, MixedPayloadData_TwoConnections) {
   for (FrameList::const_iterator it = actual_frames.begin();
        it != actual_frames.end();
        ++it, ++it_exp) {
-    // TODO(EZamakhov): investigate valgrind warning (unitialized value)
     EXPECT_EQ(**it, **it_exp) << "Element number "
                               << std::distance(mobile_packets.begin(), it_exp);
   }
@@ -538,7 +533,7 @@ TEST_F(IncomingDataHandlerTest, MalformedPacket_AdditionalByte) {
                                               some_session_id,
                                               some_data_size,
                                               protov1_message_id,
-                                              some_data));
+                                              &some_data[0]));
   AppendPacketToTMData(*mobile_packets.back());
   // Add malformed byte
   tm_data.insert(tm_data.end(), 1, 0x1);
@@ -553,7 +548,7 @@ TEST_F(IncomingDataHandlerTest, MalformedPacket_AdditionalByte) {
                                               ++some_session_id,
                                               some_data2_size,
                                               some_message_id,
-                                              some_data2));
+                                              &some_data2[0]));
   AppendPacketToTMData(*mobile_packets.back());
   // Add malformed bytes
   tm_data.insert(tm_data.end(), 2, 0x2);
@@ -568,7 +563,7 @@ TEST_F(IncomingDataHandlerTest, MalformedPacket_AdditionalByte) {
                                               ++some_session_id,
                                               some_data_size,
                                               ++some_message_id,
-                                              some_data));
+                                              &some_data[0]));
   AppendPacketToTMData(*mobile_packets.back());
   // Add malformed bytes
   tm_data.insert(tm_data.end(), 3, 0x3);
@@ -583,7 +578,7 @@ TEST_F(IncomingDataHandlerTest, MalformedPacket_AdditionalByte) {
                                               ++some_session_id,
                                               some_data2_size,
                                               ++some_message_id,
-                                              some_data2));
+                                              &some_data2[0]));
   AppendPacketToTMData(*mobile_packets.back());
   // Add malformed bytes
   tm_data.insert(tm_data.end(), 4, 0x4);
@@ -598,7 +593,7 @@ TEST_F(IncomingDataHandlerTest, MalformedPacket_AdditionalByte) {
                                               some_session_id,
                                               some_data_size,
                                               protov1_message_id,
-                                              some_data));
+                                              &some_data[0]));
   AppendPacketToTMData(*mobile_packets.back());
   // Add malformed bytes
   tm_data.insert(tm_data.end(), 5, 0x5);
@@ -613,7 +608,7 @@ TEST_F(IncomingDataHandlerTest, MalformedPacket_AdditionalByte) {
                                               some_session_id,
                                               some_data_size,
                                               protov1_message_id,
-                                              some_data));
+                                              &some_data[0]));
   AppendPacketToTMData(*mobile_packets.back());
   // Add malformed bytes
   tm_data.insert(tm_data.end(), 6, 0x6);
@@ -628,7 +623,7 @@ TEST_F(IncomingDataHandlerTest, MalformedPacket_AdditionalByte) {
                                               some_session_id,
                                               some_data_size,
                                               protov1_message_id,
-                                              some_data));
+                                              &some_data[0]));
   AppendPacketToTMData(*mobile_packets.back());
 
   ProcessData(uid1, &tm_data[0], tm_data.size());
@@ -641,7 +636,6 @@ TEST_F(IncomingDataHandlerTest, MalformedPacket_AdditionalByte) {
   for (FrameList::const_iterator it = actual_frames.begin();
        it != actual_frames.end();
        ++it, ++it_exp) {
-    // TODO(EZamakhov): investigate valgrind warning (unitialized value)
     EXPECT_EQ(**it, **it_exp) << "Element number "
                               << std::distance(mobile_packets.begin(), it_exp);
   }
@@ -660,7 +654,7 @@ TEST_F(IncomingDataHandlerTest, MalformedPacket_Mix) {
                                               some_session_id,
                                               some_data_size,
                                               protov1_message_id,
-                                              some_data));
+                                              &some_data[0]));
   AppendPacketToTMData(*mobile_packets.back());
 
   // consecutive packet Audio
@@ -673,7 +667,7 @@ TEST_F(IncomingDataHandlerTest, MalformedPacket_Mix) {
                                               ++some_session_id,
                                               some_data2_size,
                                               some_message_id,
-                                              some_data2));
+                                              &some_data2[0]));
   AppendPacketToTMData(*mobile_packets.back());
 
   // Malformed packet 1
@@ -687,7 +681,7 @@ TEST_F(IncomingDataHandlerTest, MalformedPacket_Mix) {
                                          ++some_session_id,
                                          some_data_size,
                                          ++some_message_id,
-                                         some_data);
+                                         &some_data[0]);
   AppendPacketToTMData(malformed_packet1);
 
   // consecutive packet Bulk
@@ -700,7 +694,7 @@ TEST_F(IncomingDataHandlerTest, MalformedPacket_Mix) {
                                               ++some_session_id,
                                               some_data2_size,
                                               ++some_message_id,
-                                              some_data2));
+                                              &some_data2[0]));
   AppendPacketToTMData(*mobile_packets.back());
 
   // Malformed packet 2
@@ -714,7 +708,7 @@ TEST_F(IncomingDataHandlerTest, MalformedPacket_Mix) {
                                    some_session_id,
                                    some_data_size,
                                    protov1_message_id,
-                                   some_data);
+                                   &some_data[0]);
   AppendPacketToTMData(malformed_packet2);
 
   // Audio packet
@@ -727,7 +721,7 @@ TEST_F(IncomingDataHandlerTest, MalformedPacket_Mix) {
                                               some_session_id,
                                               some_data_size,
                                               protov1_message_id,
-                                              some_data));
+                                              &some_data[0]));
   AppendPacketToTMData(*mobile_packets.back());
 
   ProcessData(uid1, &tm_data[0], tm_data.size());
@@ -738,7 +732,6 @@ TEST_F(IncomingDataHandlerTest, MalformedPacket_Mix) {
   for (FrameList::const_iterator it = actual_frames.begin();
        it != actual_frames.end();
        ++it, ++it_exp) {
-    // TODO(EZamakhov): investigate valgrind warning (unitialized value)
     EXPECT_EQ(**it, **it_exp) << "Element number "
                               << std::distance(mobile_packets.begin(), it_exp);
   }

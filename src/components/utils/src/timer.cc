@@ -47,8 +47,8 @@ timer::Timer::Timer(const std::string& name, TimerTask* task)
     : name_(name)
     , task_(task)
     , state_lock_()
-    , delegate_(this, state_lock_)
-    , thread_(threads::CreateThread(name_.c_str(), &delegate_))
+    , delegate_(new TimerDelegate(this, state_lock_))
+    , thread_(threads::CreateThread(name_.c_str(), delegate_.get()))
     , single_shot_(true) {
   SDL_AUTO_TRACE();
   DCHECK(!name_.empty());
@@ -64,6 +64,8 @@ timer::Timer::~Timer() {
   StopDelegate();
   single_shot_ = true;
 
+  thread_->set_delegate(NULL);
+  delegate_.reset();
   DeleteThread(thread_);
   DCHECK(task_);
   delete task_;
@@ -102,26 +104,26 @@ void timer::Timer::Stop() {
 
 bool timer::Timer::is_running() const {
   sync_primitives::AutoLock auto_lock(state_lock_);
-  return !delegate_.stop_flag();
+  return !delegate_->stop_flag();
 }
 
 timer::Milliseconds timer::Timer::timeout() const {
   sync_primitives::AutoLock auto_lock(state_lock_);
-  return delegate_.timeout();
+  return delegate_->timeout();
 }
 
 void timer::Timer::StartDelegate(const Milliseconds timeout) const {
-  delegate_.set_stop_flag(false);
-  delegate_.set_timeout(timeout);
+  delegate_->set_stop_flag(false);
+  delegate_->set_timeout(timeout);
 }
 
 void timer::Timer::StopDelegate() const {
-  delegate_.set_stop_flag(true);
-  delegate_.set_timeout(0);
+  delegate_->set_stop_flag(true);
+  delegate_->set_timeout(0);
 }
 
 void timer::Timer::StartThread() {
-  if (delegate_.finalized_flag()) {
+  if (delegate_->finalized_flag()) {
     return;
   }
 
@@ -132,18 +134,18 @@ void timer::Timer::StartThread() {
 }
 
 void timer::Timer::StopThread() {
-  if (delegate_.finalized_flag()) {
+  if (delegate_->finalized_flag()) {
     return;
   }
 
   DCHECK_OR_RETURN_VOID(thread_);
   if (!thread_->IsCurrentThread()) {
-    delegate_.set_finalized_flag(true);
+    delegate_->set_finalized_flag(true);
     {
       sync_primitives::AutoUnlock auto_unlock(state_lock_);
       thread_->join();
     }
-    delegate_.set_finalized_flag(false);
+    delegate_->set_finalized_flag(false);
   }
 }
 

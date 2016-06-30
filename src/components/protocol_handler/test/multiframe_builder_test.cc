@@ -417,71 +417,58 @@ TEST_F(MultiFrameBuilderTest, Add_ConsecutiveFrames_OneByOne) {
   }
 }
 
-// TODO(OHerasym) : Test do not finish working
 TEST_F(MultiFrameBuilderTest, Add_ConsecutiveFrames_per1) {
   AddConnections();
   ASSERT_FALSE(test_data_map_.empty());
   // After processing each frame we remove it from messageId_it
   // After processing all session data - it removes from session_map
   // and so on
-  // TODO(Ezamakhov): optimize speed of test by skipping erasing data
-  while (!test_data_map_.empty()) {
-    MultiFrameTestMap::iterator connection_it = test_data_map_.begin();
-    while (connection_it != test_data_map_.end()) {
-      SessionToMutiframeDataTestMap& session_map = connection_it->second;
+  MultiFrameTestMap::iterator connection_it = test_data_map_.begin();
+  while (test_data_map_.end() != connection_it) {
+    SessionToMutiframeDataTestMap& session_map = connection_it->second;
 
-      SessionToMutiframeDataTestMap::iterator session_it = session_map.begin();
-      while (session_it != session_map.end()) {
-        MessageIDToMutiframeDataTestMap& messageId_map = session_it->second;
+    SessionToMutiframeDataTestMap::iterator session_it = session_map.begin();
+    while (session_it != session_map.end()) {
+      MessageIDToMutiframeDataTestMap& messageId_map = session_it->second;
 
-        MessageIDToMutiframeDataTestMap::iterator messageId_it =
-            messageId_map.begin();
-        while (messageId_it != messageId_map.end()) {
-          MutiframeData& multiframe_data = messageId_it->second;
-          ProtocolFramePtrList& multiframes = multiframe_data.multiframes;
-          ASSERT_FALSE(multiframes.empty());
+      MessageIDToMutiframeDataTestMap::iterator messageId_it =
+          messageId_map.begin();
+      while (messageId_it != messageId_map.end()) {
+        MutiframeData& multiframe_data = messageId_it->second;
+        ProtocolFramePtrList& multiframes = multiframe_data.multiframes;
+        ASSERT_FALSE(multiframes.empty());
 
-          const ProtocolFramePtr frame = multiframes.front();
-          ASSERT_TRUE(frame);
+        const ProtocolFramePtr frame = multiframes.front();
+        ASSERT_TRUE(frame);
 
-          EXPECT_EQ(RESULT_OK, multiframe_builder_.AddFrame(frame))
-              << "Frame: " << frame;
+        EXPECT_EQ(RESULT_OK, multiframe_builder_.AddFrame(frame))
+            << "Frame: " << frame;
 
-          multiframes.pop_front();
+        multiframes.pop_front();
 
-          // If all frames are assembled
-          if (multiframes.empty()) {
-            const ProtocolFramePtrList& multiframe_list =
-                multiframe_builder_.PopMultiframes();
-            ASSERT_EQ(1u, multiframe_list.size());
+        // If all frames are assembled
+        if (multiframes.empty()) {
+          const ProtocolFramePtrList& multiframe_list =
+              multiframe_builder_.PopMultiframes();
+          ASSERT_EQ(1u, multiframe_list.size());
 
-            const ProtocolFramePtr result_multiframe = multiframe_list.front();
-            const UCharDataVector& binary_data = multiframe_data.binary_data;
-            EXPECT_EQ(binary_data,
-                      UCharDataVector(result_multiframe->data(),
-                                      result_multiframe->data() +
-                                          result_multiframe->payload_size()));
-            messageId_map.erase(messageId_it++);
-          } else {
-            // Multiframe is not completed
-            EXPECT_EQ(ProtocolFramePtrList(),
-                      multiframe_builder_.PopMultiframes())
-                << "Frame: " << frame;
-            ++messageId_it;
-          }
-        }
-        if (messageId_map.empty()) {
-          session_map.erase(session_it++);
+          const ProtocolFramePtr result_multiframe = multiframe_list.front();
+          const UCharDataVector& binary_data = multiframe_data.binary_data;
+          EXPECT_EQ(binary_data,
+                    UCharDataVector(result_multiframe->data(),
+                                    result_multiframe->data() +
+                                        result_multiframe->payload_size()));
         } else {
-          ++session_it;
+          // Multiframe is not completed
+          EXPECT_EQ(ProtocolFramePtrList(),
+                    multiframe_builder_.PopMultiframes())
+              << "Frame: " << frame;
         }
+        ++messageId_it;
       }
-      if (session_map.empty()) {
-        test_data_map_.erase(connection_it++);
-      } else {
-        ++connection_it;
-      }
+      ++session_it;
     }
+    ++connection_it;
   }
 }
 

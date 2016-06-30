@@ -225,8 +225,7 @@ class ConnectionHandlerTest : public ::testing::Test {
                       const uint8_t protocol_version) {
     ConnectionList connection_list = connection_handler_->getConnectionList();
 
-    ConnectionList::const_iterator conn_it =
-        (connection_handler_->getConnectionList()).find(connectionId);
+    ConnectionList::const_iterator conn_it = connection_list.find(connectionId);
     ASSERT_NE(conn_it, connection_list.end());
     Connection* connection = conn_it->second;
     ASSERT_TRUE(connection != NULL);
@@ -1050,7 +1049,6 @@ TEST_F(ConnectionHandlerTest, SessionStop_CheckSpecificHash) {
   }
 }
 
-// TODO(OHerasym) : fails on Windows platform
 TEST_F(ConnectionHandlerTest, SessionStarted_WithRpc) {
   // Add virtual device and connection
   AddTestDeviceConnection();
@@ -1059,10 +1057,18 @@ TEST_F(ConnectionHandlerTest, SessionStarted_WithRpc) {
       mock_connection_handler_observer;
   connection_handler_->set_connection_handler_observer(
       &mock_connection_handler_observer);
-  uint32_t session_key =
-      connection_handler_->KeyFromPair(uid_, start_session_id_);
+
+  const ConnectionList connection_list =
+      connection_handler_->getConnectionList();
+  ConnectionList::const_iterator it = connection_list.find(uid_);
+  Connection* connection = it->second;
+  const uint32_t kSessionId = connection->AddNewSession();
+
+  const uint32_t kSessionKey =
+      connection_handler_->KeyFromPair(uid_, kSessionId);
+  connection->RemoveSession(kSessionId);
   EXPECT_CALL(mock_connection_handler_observer,
-              OnServiceStartedCallback(device_handle_, session_key, kRpc))
+              OnServiceStartedCallback(device_handle_, kSessionKey, kRpc))
       .WillOnce(Return(true));
 
   // Start new session with RPC service
