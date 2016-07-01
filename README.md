@@ -1,11 +1,7 @@
 [![Slack Status](http://sdlslack.herokuapp.com/badge.svg)](http://slack.smartdevicelink.org)
-
-[![Build Status](https://travis-ci.org/smartdevicelink/sdl_core.svg?branch=master)](https://travis-ci.org/smartdevicelink/sdl_core)  **LINUX**
-
-[![Build Status](http://109.166.244.153/app/rest/builds/buildType:WinSdlDevelop_WinX64withUt/statusIcon)](http://109.166.244.153/viewType.html?buildTypeId=WinSdlDevelop_WinX64withUt&guest=1)  **Windows native**
-
-[![Build Status](http://109.166.244.153/app/rest/builds/buildType:QtSdlDevelop_QtX86withUt/statusIcon)](http://109.166.244.153/viewType.html?buildTypeId=QtSdlDevelop_QtX86withUt&guest=1)  **QT**
-
+[![Linux build Status](https://travis-ci.org/smartdevicelink/sdl_core.svg?branch=master)](https://travis-ci.org/smartdevicelink/sdl_core)
+[![Windows native build Status](http://109.166.244.153/app/rest/builds/buildType:WinSdlDevelop_WinX64withUt/statusIcon)](http://109.166.244.153/viewType.html?buildTypeId=WinSdlDevelop_WinX64withUt&guest=1)
+[![Qt build Status](http://109.166.244.153/app/rest/builds/buildType:QtSdlDevelop_QtX86withUt/statusIcon)](http://109.166.244.153/viewType.html?buildTypeId=QtSdlDevelop_QtX86withUt&guest=1)
 [![codecov.io](https://codecov.io/github/smartdevicelink/sdl_core/coverage.svg?branch=develop)](https://codecov.io/github/smartdevicelink/sdl_core?branch=develop)
 
 # SmartDeviceLink (SDL)
