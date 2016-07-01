@@ -30,6 +30,9 @@
 
 cmake_minimum_required(VERSION 2.8.11)
 
+set(PROJECT smartDeviceLinkCore)
+project(${PROJECT})
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/tools/cmake/modules/")
 
 include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/platform.cmake)
@@ -45,8 +48,6 @@ get_sdk(SDK)
 if(SDK)
   message(STATUS "SDK: " ${SDK})
 endif()
-
-set(PROJECT smartDeviceLinkCore)
 
 # Build options
 option(QT_HMI "Use Qt HMI" OFF)
@@ -188,7 +189,6 @@ endif()
 
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/src/components/include
-  ${CMAKE_BINARY_DIR}/bin/include
 )
 
 if(BUILD_TESTS)
@@ -201,7 +201,7 @@ if(BUILD_TESTS)
 endif()
 
 # --- 3rd party libs
-add_subdirectory(./src/3rd_party)
+add_subdirectory(./src/3rd_party EXCLUDE_FROM_ALL)
 
 # --- 3rd party libs (static)
 add_subdirectory(./src/3rd_party-static)

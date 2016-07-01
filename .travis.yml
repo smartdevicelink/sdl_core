@@ -33,7 +33,7 @@ script:
   - bash -e tools/infrastructure/check_style.sh
   - mkdir build && cd build && cmake ../ -DBUILD_TESTS=ON -DENABLE_GCOV=ON && make install
   - sudo ldconfig
-  - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:`pwd`/bin/lib ; make test
+  - make test
   - bash ../tools/infrastructure/show_disabled.sh 
   - bash -ex ../tools/infrastructure/collect_coverage.sh ./
 env:

@@ -163,7 +163,7 @@ collect_sources(SOURCES "${PATHS}" "${EXCLUDE_PATHS}")
 add_library(utils ${SOURCES})
 target_link_libraries(utils ${LIBRARIES})
 
-if(ENABLE_LOG AND LOG4CXX_LOGGER)
+if(LOG4CXX_LOGGER)
   add_dependencies(utils install-3rd_party_logger)
 endif()
 
