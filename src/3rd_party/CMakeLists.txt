@@ -30,7 +30,12 @@
 
 set(3RD_PARTY_INSTALL_PREFIX $ENV{THIRD_PARTY_INSTALL_PREFIX})
 if(NOT 3RD_PARTY_INSTALL_PREFIX)
-  set(3RD_PARTY_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/bin)
+  # set default 3rd party install path
+  # TODO ANosach: change default 3rd party install path (APPLINK-25980)
+  set(3RD_PARTY_INSTALL_PREFIX /usr/local)
+  set(USE_DEFAULT_3RD_PARTY_PATH "true")
+else()
+  set(USE_DEFAULT_3RD_PARTY_PATH "false")
 endif()
 
 set(3RD_PARTY_INSTALL_PREFIX_ARCH $ENV{THIRD_PARTY_INSTALL_PREFIX_ARCH})
