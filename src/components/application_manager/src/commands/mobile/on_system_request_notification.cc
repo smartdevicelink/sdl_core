@@ -106,7 +106,7 @@ void OnSystemRequestNotification::AddHeader(BinaryMessage& message) const {
   LOG4CXX_AUTO_TRACE(logger_);
   const int timeout = policy::PolicyHandler::instance()->TimeoutExchange();
 
-  size_t contentLength;
+  size_t content_length;
   char size_str[24];  
   char timeout_str[24];
 
@@ -120,11 +120,10 @@ void OnSystemRequestNotification::AddHeader(BinaryMessage& message) const {
   calculated before additional escape characters are added to the 
   policy table string. The mobile proxy will remove the escape 
   characters after receiving this request. */
-  contentLength = policy_table_string.length();
 
-  ParsePTString(policy_table_string, contentLength);
+  content_length = ParsePTString(policy_table_string);
   
-  if (0 > sprintf(size_str, "%zu", contentLength)) {
+  if (0 > sprintf(size_str, "%zu", content_length)) {
     memset(size_str, 0, sizeof(size_str));
   }
 
@@ -155,20 +154,22 @@ void OnSystemRequestNotification::AddHeader(BinaryMessage& message) const {
       logger_, "Header added: " << std::string(message.begin(), message.end()));
 }
 
-void OnSystemRequestNotification::ParsePTString(std::string& pt_string, size_t& contentLength) const{
+size_t OnSystemRequestNotification::ParsePTString(std::string& pt_string) const{
   std::string result;
   size_t length = pt_string.length();  
+  size_t result_length = length;
   result.reserve(length*2);
   for(size_t i=0;i<length;++i){
     if(pt_string[i]=='\"' || pt_string[i]=='\\'){
       result += '\\';
     } else if(pt_string[i] == '\n') {
-      contentLength--;  // contentLength is adjusted when this character is not copied to result.
+      result_length--;  // contentLength is adjusted when this character is not copied to result.
       continue;
     }
     result += pt_string[i];
   }
   pt_string = result;
+  return result_length;
 }
 #endif
 
