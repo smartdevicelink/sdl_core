@@ -51,6 +51,7 @@
 using ::testing::_;
 using ::testing::AtLeast;
 using ::testing::Return;
+using ::testing::Truly;
 
 using ::protocol_handler::RawMessage;
 using ::protocol_handler::RawMessagePtr;
@@ -637,22 +638,39 @@ TEST_F(TransportManagerImplTest, UpdateDeviceList_AddNewDevice) {
   device_list_.pop_back();
 }
 
+struct DeviceInfoComparator {
+    const transport_manager::DeviceInfo& val_;
+    DeviceInfoComparator(const transport_manager::DeviceInfo& val):
+    val_(val){
+
+    }
+
+    bool operator()(const transport_manager::DeviceInfo& val) const {
+      return val_.name() == val.name() &&
+             val_.mac_address() == val.mac_address() &&
+             val_.device_handle() == val.device_handle();
+    }
+};
+
 TEST_F(TransportManagerImplTest, UpdateDeviceList_RemoveDevice) {
   device_list_.push_back(dev_info_.mac_address());
 
-  ::testing::InSequence seq;
-  EXPECT_CALL(*mock_adapter_, GetDeviceList()).WillOnce(Return(device_list_));
   EXPECT_CALL(*mock_adapter_, GetConnectionType())
       .WillOnce(Return(dev_info_.connection_type()));
   EXPECT_CALL(*mock_adapter_, DeviceName(dev_info_.mac_address()))
       .WillOnce(Return(dev_info_.name()));
-  EXPECT_CALL(*tm_listener_, OnDeviceAdded(dev_info_));
+
+  ::testing::InSequence seq;
+  EXPECT_CALL(*mock_adapter_, GetDeviceList()).WillOnce(Return(device_list_));
+  DeviceInfoComparator cmp(dev_info_) ;
+  EXPECT_CALL(*tm_listener_, OnDeviceAdded(Truly(cmp)));
   tm_.UpdateDeviceList(mock_adapter_);
   device_list_.pop_back();
 
   // Device list is empty now
   EXPECT_CALL(*mock_adapter_, GetDeviceList()).WillOnce(Return(device_list_));
-  EXPECT_CALL(*tm_listener_, OnDeviceRemoved(dev_info_));
+  DeviceInfoComparator cmp2(dev_info_) ;
+  EXPECT_CALL(*tm_listener_, OnDeviceRemoved(Truly(cmp2)));
   tm_.UpdateDeviceList(mock_adapter_);
 }
 
