@@ -62,10 +62,11 @@ Note: it will ask you about adding to the `PATH` environment variable. Press `Ye
 environment variable
 * Download and install [perl](http://www.activestate.com/activeperl/downloads/thank-you?dl=http://downloads.activestate.com/ActivePerl/releases/5.20.2.2002/ActivePerl-5.20.2.2002-MSWin32-x86-64int-299195.msi). Add it to `PATH`
 * Download and install [git](https://git-scm.com/download/win)
-* Download and install [GStreamer SDK](http://docs.gstreamer.com/display/GstSDK/Installing+on+Windows). You will need both Runtime and Development files. Add path to **bin** folder to `PATH`. Create new environment variable SDL_GSTREAMER_DIR with path to SDK (e.g. `D:\gstreamer-sdk\0.10\x86_64`).
+* Download and install [GStreamer SDK](http://docs.gstreamer.com/display/GstSDK/Installing+on+Windows). You will need both Runtime and Development files. Add path to **bin** folder to `PATH`. Create new environment variable `SDL_GSTREAMER_DIR` with path to SDK (e.g. `D:\gstreamer-sdk\0.10\x86_64`).
 
 ##### Steps for Windows platform
-* Download [sqlite3 sources](https://www.sqlite.org/2015/sqlite-amalgamation-3090200.zip) and [sqlite3 binaries](https://www.sqlite.org/2015/sqlite-dll-win64-x64-3090200.zip). Extract all files to the same directory. Create new  environment variable `SDL_SQLITE_DIR` and assign path where sqlite sources and binaries were extracted to this variable.
+* Download [sqlite3 sources](https://www.sqlite.org/2015/sqlite-amalgamation-3090200.zip) and extract them. Create new environment variable `SDL_SQLITE_DIR` and assign path where sqlite sources were extracted to this variable.
+* Download [sqlite3 binaries](https://www.sqlite.org/2015/sqlite-dll-win64-x64-3090200.zip). Extract them and add this folder to `PATH`.
 * Install [Windows SDK 7.1](https://www.microsoft.com/en-us/download/details.aspx?id=8442)
 * Install [Visual Studio 2013](https://www.microsoft.com/en-us/download/confirmation.aspx?id=44914)
 
