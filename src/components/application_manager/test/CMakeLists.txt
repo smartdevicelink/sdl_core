@@ -39,6 +39,7 @@ include_directories(
 
 set(COMMANDS_PATHS
   ${CMAKE_CURRENT_SOURCE_DIR}/commands
+  ${CMAKE_CURRENT_SOURCE_DIR}/commands/hmi/hmi_notifications
 )
 collect_sources(COMMANDS_SOURCES "${COMMANDS_PATHS}")
 
