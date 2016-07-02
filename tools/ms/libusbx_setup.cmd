@@ -4,15 +4,14 @@ setlocal EnableDelayedExpansion
 if [%1]==[] goto usage
 
 set BUILD_TYPE=%1
-set LIBS_DIR="%SDL_ROOT%\src\3rd_party-static"
+set LIBS_DIR="%SDL_ROOT_DIR%\src\3rd_party-static"
 set LIBUSBX_SRC_DIR_NAME=libusbx-1.0.17
 set LIBUSBX_SRC_DIR=%LIBS_DIR%\%LIBUSBX_SRC_DIR_NAME%
-set LIBUSBX_BUILD_DIR=%BUILD_DIR%\libusbx_win_%BUILD_TYPE%
+set LIBUSBX_BUILD_DIR=%SDL_BUILD_DIR%\libusbx_win_%BUILD_TYPE%
 
 if not exist %LIBUSBX_SRC_DIR% (
   pushd %LIBS_DIR%
   @echo Cloning libusbx to the %LIBUSBX_SRC_DIR%
-
   git.exe clone https://github.com/dickens/libusbx-hp.git %LIBUSBX_SRC_DIR_NAME%
   popd
 )
