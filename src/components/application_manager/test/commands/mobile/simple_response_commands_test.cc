@@ -42,6 +42,7 @@
 #include "mobile/alert_response.h"
 #include "mobile/list_files_response.h"
 #include "mobile/subscribe_button_response.h"
+#include "mobile/add_sub_menu_response.h"
 
 namespace test {
 namespace components {
@@ -65,7 +66,8 @@ typedef Types<commands::ListFilesResponse,
               commands::ReadDIDResponse,
               commands::AlertManeuverResponse,
               commands::AlertResponse,
-              commands::SubscribeButtonResponse> ResponseCommandsList;
+              commands::SubscribeButtonResponse,
+              commands::AddSubMenuResponse> ResponseCommandsList;
 TYPED_TEST_CASE(MobileResponseCommandsTest, ResponseCommandsList);
 
 TYPED_TEST(MobileResponseCommandsTest, Run_SendResponseToMobile_SUCCESS) {
