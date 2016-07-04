@@ -53,25 +53,23 @@ const std::string kHmiCapabilitiesFile("hmi_capabilities.json");
 const uint32_t kThreadPoolSize = 1;
 const bool kHmiLaunch = false;
 const uint32_t kStopStreamingTimeout = 10000;
-static uint32_t app_id;
 }  // namespace
 
 class ApplicationManagerImplTest : public ::testing::Test {
- public:
+ protected:
   virtual void SetUp() OVERRIDE {
     app_manager_impl.reset(new am::ApplicationManagerImpl(
-        mock_application_manager_settings, mock_policy_settings));
+        mock_application_manager_settings_, mock_policy_settings_));
 
-    app_id = 10;
+    app_id_ = 10;
   }
 
-  virtual void TearDown() OVERRIDE {}
+  uint32_t app_id_;
+  MockApplicationManagerSettings mock_application_manager_settings_;
+  policy_test::MockPolicySettings mock_policy_settings_;
 
-  MockApplicationManagerSettings mock_application_manager_settings;
-  policy_test::MockPolicySettings mock_policy_settings;
-
-  am::ApplicationManagerImpl* get_app_manager() {
-    return app_manager_impl.get();
+  am::ApplicationManagerImpl& get_app_manager() {
+    return (*app_manager_impl.get());
   }
 
  private:
@@ -80,34 +78,36 @@ class ApplicationManagerImplTest : public ::testing::Test {
 
 TEST_F(ApplicationManagerImplTest,
        SubscribeAppForWayPoints_ExpectSubscriptionApp) {
-  get_app_manager()->SubscribeAppForWayPoints(app_id);
-  EXPECT_TRUE(get_app_manager()->IsAppSubscribedForWayPoints(app_id));
+  get_app_manager().SubscribeAppForWayPoints(app_id_);
+  EXPECT_TRUE(get_app_manager().IsAppSubscribedForWayPoints(app_id_));
 }
 
 TEST_F(ApplicationManagerImplTest,
        UnsubscribeAppForWayPoints_ExpectUnsubscriptionApp) {
-  get_app_manager()->SubscribeAppForWayPoints(app_id);
-  EXPECT_TRUE(get_app_manager()->IsAppSubscribedForWayPoints(app_id));
-  get_app_manager()->UnsubscribeAppFromWayPoints(app_id);
-  EXPECT_FALSE(get_app_manager()->IsAppSubscribedForWayPoints(app_id));
-  std::set<int32_t> result = get_app_manager()->GetAppsSubscribedForWayPoints();
+  get_app_manager().SubscribeAppForWayPoints(app_id_);
+  EXPECT_TRUE(get_app_manager().IsAppSubscribedForWayPoints(app_id_));
+  get_app_manager().UnsubscribeAppFromWayPoints(app_id_);
+  EXPECT_FALSE(get_app_manager().IsAppSubscribedForWayPoints(app_id_));
+  const std::set<int32_t> result =
+      get_app_manager().GetAppsSubscribedForWayPoints();
   EXPECT_TRUE(result.empty());
 }
 
 TEST_F(
     ApplicationManagerImplTest,
-    UnsubscribeSubscribeApp_ExpectCorrectResultIsAnyAppSubscribedForWayPoints) {
-  EXPECT_FALSE(get_app_manager()->IsAnyAppSubscribedForWayPoints());
-  get_app_manager()->SubscribeAppForWayPoints(app_id);
-  EXPECT_TRUE(get_app_manager()->IsAnyAppSubscribedForWayPoints());
+    IsAnyAppSubscribedForWayPoints_SubcribeAppForWayPoints_ExpectCorrectResult) {
+  EXPECT_FALSE(get_app_manager().IsAnyAppSubscribedForWayPoints());
+  get_app_manager().SubscribeAppForWayPoints(app_id_);
+  EXPECT_TRUE(get_app_manager().IsAnyAppSubscribedForWayPoints());
 }
 
-TEST_F(ApplicationManagerImplTest,
-       SubscribeApp_ExpectCorrectResultGetAppsSubscribedForWayPoints) {
-  get_app_manager()->SubscribeAppForWayPoints(app_id);
-  std::set<int32_t> result = get_app_manager()->GetAppsSubscribedForWayPoints();
+TEST_F(
+    ApplicationManagerImplTest,
+    GetAppsSubscribedForWayPoints_SubcribeAppForWayPoints_ExpectCorrectResult) {
+  get_app_manager().SubscribeAppForWayPoints(app_id_);
+  std::set<int32_t> result = get_app_manager().GetAppsSubscribedForWayPoints();
   EXPECT_TRUE(result.size() == 1);
-  EXPECT_TRUE(result.find(app_id) != result.end());
+  EXPECT_TRUE(result.find(app_id_) != result.end());
 }
 
 }  // application_manager_test

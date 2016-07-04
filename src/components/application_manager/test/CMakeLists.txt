@@ -109,6 +109,7 @@ set(PATHS
 list(APPEND EXCLUDE_PATHS
   zero_request_amount_test.cc
 )
+
 collect_sources(SOURCES "${PATHS}" "${EXCLUDE_PATHS}")
 
 set(LIBRARIES
@@ -116,6 +117,7 @@ set(LIBRARIES
   HMI_API
   MOBILE_API
   application_manager
+  am_message_helper
   am_policies
   am_resumption
   connection_handler

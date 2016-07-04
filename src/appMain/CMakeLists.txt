@@ -62,6 +62,7 @@ collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}")
 set(LIBRARIES
   media_manager
   application_manager
+  am_message_helper
   HMI_API
   MOBILE_API
   v4_protocol_v1_2_no_extra

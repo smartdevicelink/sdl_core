@@ -80,7 +80,6 @@ set(RESUMPTION_PATHS
 collect_sources(RESUMPTION_SOURCES "${RESUMPTION_PATHS}")
 
 set(AM_MESSAGE_HELPER_SOURCES
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/application_manager/message_helper.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/message_helper.cc
 )
 
