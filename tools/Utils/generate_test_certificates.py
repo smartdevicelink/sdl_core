@@ -287,6 +287,13 @@ def main():
     if sys.platform != "win32":
         subprocess.call(["c_rehash", server_dir])
         subprocess.call(["c_rehash", client_dir])
+    else :    
+        current_working_dir = os.path.dirname(os.path.realpath(__file__))
+        server_dir = os.path.realpath(server_dir)
+        client_dir = os.path.realpath(client_dir)
+        os.system("python " + current_working_dir + "\\c_rehash.py -i " + server_dir)
+        os.system("python " + current_working_dir + "\\c_rehash.py -i " + client_dir)
+	
     print
     print "All certificates have been generated"
 
