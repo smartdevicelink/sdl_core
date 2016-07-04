@@ -172,10 +172,10 @@ const SecurityQuery::QueryHeader& SecurityQuery::get_header() const {
 }
 
 const uint8_t* SecurityQuery::get_data() const {
-  if (0 != data_.size()) { 
-	return &data_[0];
+  if (!data_.empty()) {
+    return &data_[0];
   }
-  return NULL; 
+  return NULL;
 }
 
 size_t SecurityQuery::get_data_size() const {
