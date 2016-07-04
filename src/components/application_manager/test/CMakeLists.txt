@@ -28,6 +28,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/platform.cmake)
 include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
 include_directories(
@@ -133,15 +134,21 @@ create_test(am_resumption_test "${RESUMPTION_SOURCES}" "${LIBRARIES}")
 create_test(am_state_controller_test "${STATE_CONTROLLER_SOURCES}" "${LIBRARIES}")
 create_test(application_manager_test "${SOURCES}" "${LIBRARIES}")
 
-set(COPY_DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-set(LIBRARY_NAME ${CMAKE_SHARED_LIBRARY_PREFIX}Policy${CMAKE_SHARED_LIBRARY_SUFFIX})
+set(POLICY_LIBRARY_NAME ${CMAKE_SHARED_LIBRARY_PREFIX}Policy${CMAKE_SHARED_LIBRARY_SUFFIX})
+get_os(OS)
+get_sdk(SDK)
+if(${OS} STREQUAL "win" AND NOT SDK)
+  set(POLICY_LIBRARY_PATH ${CMAKE_BINARY_DIR}/src/components/policy/$(CONFIGURATION)/${POLICY_LIBRARY_NAME})
+else()
+  set(POLICY_LIBRARY_PATH ${CMAKE_BINARY_DIR}/src/components/policy/${POLICY_LIBRARY_NAME})
+endif()
 
 add_custom_target(am_test_copy_policy_library ALL
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    ${CMAKE_BINARY_DIR}/src/appMain/${LIBRARY_NAME}
-    ${COPY_DESTINATION}/${LIBRARY_NAME}
-    DEPENDS copy_policy_library
-    COMMENT "Copying library ${LIBRARY_NAME}"
+    ${POLICY_LIBRARY_PATH}
+    ${CMAKE_CURRENT_BINARY_DIR}/${POLICY_LIBRARY_NAME}
+    DEPENDS Policy
+    COMMENT "Copying library ${POLICY_LIBRARY_NAME}"
 )
 
 file(COPY smartDeviceLink_test2.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

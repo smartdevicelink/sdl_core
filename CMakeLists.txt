@@ -79,6 +79,8 @@ if(${OS} STREQUAL "posix")
     set(LOG4CXX_LOGGER ON)
     add_definitions(-DLOG4CXX_LOGGER)
   endif()
+
+  set(INSTALL_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 elseif(${OS} STREQUAL "win")
   add_definitions(-DOS_WINDOWS)
 
@@ -117,6 +119,8 @@ elseif(${OS} STREQUAL "win")
   else()
     add_definitions(-DWIN_NATIVE)
   endif()
+
+  set(INSTALL_DIRECTORY ${CMAKE_BINARY_DIR}/src/appMain)
 endif()
 
 if(QT_HMI)
@@ -217,9 +221,6 @@ add_subdirectory(./src/appMain)
 
 # --- Plugins
 add_subdirectory(./src/plugins)
-
-add_dependencies(${PROJECT} Policy)
-add_dependencies(${PROJECT} copy_policy_library)
 
 # Building documentation
 # At first creating directory for generated documentation. Unfortunately doxygen
