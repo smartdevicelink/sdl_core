@@ -378,14 +378,20 @@ void RequestController::onTimer() {
       continue;
     }
     if (!probably_expired->isExpired()) {
-      SDL_INFO("onTimer:isExpired");
+      SDL_INFO("onTimer for "
+               << (RequestInfo::HMIRequest == probably_expired->requst_type()
+                       ? "HMI"
+                       : "Mobile")
+               << " request id: " << probably_expired->requestId()
+               << " connection_key: " << probably_expired->app_id()
+               << " NOT expired");
       sync_primitives::AutoLock auto_lock(timer_lock);
       const TimevalStruct current_time = date_time::DateTime::getCurrentTime();
       const TimevalStruct end_time = probably_expired->end_time();
       if (current_time < end_time) {
         const uint32_t msecs = static_cast<uint32_t>(
             date_time::DateTime::getmSecs(end_time - current_time));
-        SDL_DEBUG("Sleep for" << msecs << " millisecs");
+        SDL_DEBUG("Sleep for " << msecs << " millisecs");
         timer_condition_.WaitFor(auto_lock, msecs);
       }
       continue;
