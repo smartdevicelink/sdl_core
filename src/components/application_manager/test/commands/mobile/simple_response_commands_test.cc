@@ -38,6 +38,7 @@
 #include "commands/commands_test.h"
 #include "application_manager/mock_application_manager.h"
 #include "mobile/read_did_response.h"
+#include "mobile/delete_command_response.h"
 #include "mobile/alert_maneuver_response.h"
 #include "mobile/alert_response.h"
 #include "mobile/list_files_response.h"
@@ -64,6 +65,7 @@ class MobileResponseCommandsTest
 
 typedef Types<commands::ListFilesResponse,
               commands::ReadDIDResponse,
+              commands::DeleteCommandResponse,
               commands::AlertManeuverResponse,
               commands::AlertResponse,
               commands::SubscribeButtonResponse,
