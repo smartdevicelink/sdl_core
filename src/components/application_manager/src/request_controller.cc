@@ -377,7 +377,7 @@ void RequestController::onTimer() {
   LOG4CXX_DEBUG(
       logger_,
       "ENTER Waiting fore response count: " << waiting_for_response_.Size());
-  while(!timer_stop_flag_) {
+  while (!timer_stop_flag_) {
     RequestInfoPtr probably_expired =
         waiting_for_response_.FrontWithNotNullTimeout();
     if (!probably_expired) {
@@ -386,7 +386,15 @@ void RequestController::onTimer() {
 	  continue;
 	}
 	if (!probably_expired->isExpired()) {
-	  LOG4CXX_INFO(logger_, "onTimer:isExpired");
+      LOG4CXX_DEBUG(logger_,
+				    "Timeout for "
+               	        << (RequestInfo::HMIRequest ==
+							        probably_expired->requst_type()
+                                ? "HMI"
+                                : "Mobile")
+                        << " request id: " << probably_expired->requestId()
+                        << " connection_key: " << probably_expired->app_id()
+                        << " NOT expired");
 	  sync_primitives::AutoLock auto_lock(timer_lock);
 	  const TimevalStruct current_time = date_time::DateTime::getCurrentTime();
 	  const TimevalStruct end_time = probably_expired->end_time();
