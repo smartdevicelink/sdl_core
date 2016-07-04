@@ -46,8 +46,6 @@ A quick guide to installing, configuring, and running an instance of the SDL Cor
 ```
 %make
 %make install
-%cp bin/mykey.pem src/appMain
-%cp bin/mycert.pem src/appMain
 ```
 
 ####Windows
@@ -94,8 +92,8 @@ environment variable
 **Note:** Double click on file or run from windows command prompt. DO NOT run in "git bash".
 * After script execution finish, go to build directory which is located one directory upper and open smartDeviceLinkCore.sln file using Visual Studio 2013
 * Set smartDeviceLinkCore project as a startup in order to be able to run or debug it from Visual Studio
-* Press `ctrl+alt+F7` to run solution building process in Visual Studio
-* After building done the executable file will be located in `%BUILD_DIR%\src\appMain\Debug|Release\`
+* Run smartDeviceLinkCore project build
+* Run INSTALL project build to install SDL
 
 ##### Steps for Qt platform
 
@@ -116,15 +114,17 @@ To setup the DEBUG build use:
 ```
 -DCMAKE_BUILD_TYPE=Debug
 ```
-
+* Add `install` target to build in `Projects->Run` tab in Qt Creator.
+* Press `build` button in Qt Creator to start SDL build.
 
 ## Start SDL Core
-Once SDL Core is compiled and installed you can start it from the executable in the bin folder
+Once SDL Core is compiled and installed you can start it from the executable in the build folder (`bin` subdirectory for Linux and `src/appMain` for Windows)
 
 ####Linux
 
 ```
-%cd src/appMain
+%cd bin
+%export LD_LIBRARY_PATH=./
 %./smartDeviceLinkCore
 ```
 
@@ -139,6 +139,8 @@ Once SDL Core is compiled and installed you can start it from the executable in 
     * In the list choose your cell phone
     * Pick the WinUSB (v6.1.7600.16385) driver for the cell phone. If there was some driver already (field Driver is not empty), then reinstall it. See ** usb notes ** for additional info.
 * Download and install [Visual C++ 2013 Redistributable] (https://www.microsoft.com/en-us/download/details.aspx?id=40784) in case it has not been instaled during previous steps
+* To run SDL in the IDE just click run button.
+* To run SDL from the console go to the `%BUILD_DIR%\src\appMain` and run `smartDeviceLinkCore.exe`.
 
 ##### Bluetooth transport setup
 
@@ -182,14 +184,8 @@ There should be one paired device.
 ##### Steps for Qt platform
 
 * Download and install [Visual C++ 2010 Redistributable] (https://www.microsoft.com/en-us/download/details.aspx?id=5555) in case it has not been instaled during previous steps
-
-Executable is available in
-Windows native: <build dir>\sdl_win_x64\src\appMain\<Debug or Release>
-Windows Qt: <build>\sdl_win_qt_x86\src\appMain
-
-Notes for developer:
-* to run in the IDE just click run|debug buttons.
-* To run from the console do next. Go to the `%BUILD_DIR%\src\appMain` and run `smartDeviceLinkCore.exe`. Make sure that Qt dlls are in your PATH or are placed near executable. List of required dlls which expected by executable: `Qt5Core.dll`, `Qt5Network.dll`, `Qt5Core.dll`, `sqldrivers\qsqlite.dll` (this one is expected to be in sub-directory)
+* To run SDL in the IDE just click run|debug buttons.
+* To run SDL from the console go to the `%BUILD_DIR%\src\appMain` and run `smartDeviceLinkCore.exe`. Make sure that Qt dlls are in your PATH or are placed near executable. List of required dlls which expected by executable: `Qt5Core.dll`, `Qt5Network.dll`, `Qt5Core.dll`, `sqldrivers\qsqlite.dll` (this one is expected to be in sub-directory)
 
 ## Start WEB HMI
 Web HMI is separated from SDL Core and located in another repository. So to make it workable please do next steps.
@@ -223,7 +219,7 @@ All dependencies described in **Build project** section
 ####Linux
 
   * log4cxx - We know that the version of log4cxx on a linux machine can conflict with the one used, which is why it is provided in the repository. To avoid the conflict, we recommend removing liblog4cxx*.
-  * libusb - is needed for USB support. Install command: `sudo apt-get install libusb-1.0-0`
+  * libusb - is needed for USB support. Install command: `sudo apt-get install libusb-1.0`
   * cmake - on some versions of linux, the included cmake package doesn't have the right version. If apt-get is your package manager, you can find the correct version using
 ```
 sudo apt-get install cmake
