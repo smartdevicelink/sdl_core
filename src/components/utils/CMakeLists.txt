@@ -56,6 +56,7 @@ set(EXCLUDE_PATHS
 
 set(LIBRARIES
   config_profile
+  jsoncpp
   ${SQLITE3_LIBRARIES}
 )
 
