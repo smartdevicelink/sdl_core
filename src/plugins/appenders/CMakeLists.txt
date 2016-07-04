@@ -44,7 +44,7 @@ add_library(appenders SHARED ${SOURCES})
 target_link_libraries(appenders ${LIBRARIES})
 
 install(TARGETS appenders
-  DESTINATION bin
+  DESTINATION ${INSTALL_DIRECTORY}
   PERMISSIONS
     OWNER_READ OWNER_WRITE OWNER_EXECUTE
     GROUP_READ GROUP_EXECUTE

@@ -97,6 +97,8 @@ endif()
 add_executable(${PROJECT} ${SOURCES})
 target_link_libraries(${PROJECT} ${LIBRARIES})
 
+add_dependencies(${PROJECT} Policy)
+
 # Replace commit in ini file
 set(GITCOMMIT "")
 if(EXISTS ${CMAKE_SOURCE_DIR}/.git)
@@ -120,10 +122,17 @@ if(EXISTS ${CMAKE_SOURCE_DIR}/.git)
 endif()
 
 # Install rules
-install(TARGETS ${PROJECT} DESTINATION bin)
+install(TARGETS ${PROJECT}
+  DESTINATION ${INSTALL_DIRECTORY}
+  PERMISSIONS
+    OWNER_READ OWNER_WRITE OWNER_EXECUTE
+    GROUP_READ GROUP_EXECUTE
+    WORLD_READ WORLD_EXECUTE
+)
+
 install(
   FILES log4cxx.properties audio.8bit.wav test.txt smartDeviceLink.ini
     hmi_capabilities.json sdl_preloaded_pt.json
     ${CMAKE_SOURCE_DIR}/mycert.pem ${CMAKE_SOURCE_DIR}/mykey.pem
-  DESTINATION bin
+  DESTINATION ${INSTALL_DIRECTORY}
 )
