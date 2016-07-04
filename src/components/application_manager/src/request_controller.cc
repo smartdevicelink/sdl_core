@@ -369,7 +369,7 @@ void RequestController::onTimer() {
   SDL_AUTO_TRACE();
   SDL_DEBUG(
       "ENTER Waiting fore response count: " << waiting_for_response_.Size());
-  while(!timer_stop_flag_) {
+  while (!timer_stop_flag_) {
     RequestInfoPtr probably_expired =
         waiting_for_response_.FrontWithNotNullTimeout();
     if (!probably_expired) {
@@ -378,7 +378,7 @@ void RequestController::onTimer() {
       continue;
     }
     if (!probably_expired->isExpired()) {
-      SDL_INFO("onTimer for "
+      SDL_DEBUG("onTimer for "
                << (RequestInfo::HMIRequest == probably_expired->requst_type()
                        ? "HMI"
                        : "Mobile")
