@@ -4,22 +4,19 @@ setlocal EnableDelayedExpansion
 if [%1]==[] goto usage
 
 set BUILD_TYPE=%1
-set LIBS_DIR="%SDL_ROOT%\src\3rd_party-static"
+set LIBS_DIR="%SDL_ROOT_DIR%\src\3rd_party-static"
 set OPENSSL_SRC_DIR_NAME=openssl-1.0.2
 set OPENSSL_SRC_DIR=%LIBS_DIR%\%OPENSSL_SRC_DIR_NAME%
-set OPENSSL_BUILD_DIR=%BUILD_DIR%\openssl_win_%BUILD_TYPE%
+set OPENSSL_BUILD_DIR=%SDL_BUILD_DIR%\openssl_win_%BUILD_TYPE%
 
 if not exist %OPENSSL_SRC_DIR% (
   pushd %LIBS_DIR%
   @echo Cloning OpenSSL to the %OPENSSL_SRC_DIR%
-
   git.exe clone https://github.com/openssl/openssl.git %OPENSSL_SRC_DIR_NAME%
-
   popd
 )
 
 if not exist %OPENSSL_BUILD_DIR% (
-
   if %BUILD_TYPE%==x86 (
     set OPENSSL_CONFIG_OPT=VC-WIN32 no-asm no-shared
   ) else if %BUILD_TYPE%==x64 (
@@ -45,7 +42,6 @@ rem The following commit is stable
 
   nmake -f ms\nt.mak
   nmake -f ms\nt.mak install
-
   popd
 )
 
