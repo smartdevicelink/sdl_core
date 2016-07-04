@@ -379,12 +379,12 @@ void RequestController::onTimer() {
     }
     if (!probably_expired->isExpired()) {
       SDL_DEBUG("onTimer for "
-               << (RequestInfo::HMIRequest == probably_expired->requst_type()
-                       ? "HMI"
-                       : "Mobile")
-               << " request id: " << probably_expired->requestId()
-               << " connection_key: " << probably_expired->app_id()
-               << " NOT expired");
+                << (RequestInfo::HMIRequest == probably_expired->requst_type()
+                        ? "HMI"
+                        : "Mobile")
+                << " request id: " << probably_expired->requestId()
+                << " connection_key: " << probably_expired->app_id()
+                << " NOT expired");
       sync_primitives::AutoLock auto_lock(timer_lock);
       const TimevalStruct current_time = date_time::DateTime::getCurrentTime();
       const TimevalStruct end_time = probably_expired->end_time();
