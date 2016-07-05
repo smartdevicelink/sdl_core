@@ -36,6 +36,9 @@
 #include <stdint.h>
 
 #include "gtest/gtest.h"
+#include "utils/shared_ptr.h"
+#include "smart_objects/smart_object.h"
+#include "application_manager/smart_object_keys.h"
 #include "application_manager/commands/commands_test.h"
 #include "application_manager/commands/command_request_impl.h"
 #include "application_manager/mock_event_dispatcher.h"
@@ -51,9 +54,10 @@ using ::testing::SaveArg;
 using ::testing::DoAll;
 using ::testing::NiceMock;
 using ::test::components::event_engine_test::MockEventDispatcher;
-using ::application_manager::commands::Command;
-using ::application_manager::commands::CommandRequestImpl;
-using ::application_manager::event_engine::Event;
+namespace am = ::application_manager;
+using am::commands::Command;
+using am::commands::CommandRequestImpl;
+using am::event_engine::Event;
 
 class CallRun {
  public:
@@ -117,6 +121,18 @@ class CommandRequestTest : public CommandsTest<kIsNice> {
         .WillByDefault(ReturnRef(event_dispatcher_));
   }
 };
+
+MATCHER_P(MobileResultCodeIs, result_code, "") {
+  return result_code ==
+         static_cast<mobile_apis::Result::eType>(
+             (*arg)[am::strings::msg_params][am::strings::result_code].asInt());
+}
+
+MATCHER_P(HMIResultCodeIs, result_code, "") {
+  return result_code ==
+         static_cast<hmi_apis::FunctionID::eType>(
+             (*arg)[am::strings::params][am::strings::function_id].asInt());
+}
 
 }  // namespace commands_test
 }  // namespace components

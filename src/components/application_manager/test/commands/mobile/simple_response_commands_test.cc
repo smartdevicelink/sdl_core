@@ -44,6 +44,11 @@
 #include "mobile/list_files_response.h"
 #include "mobile/subscribe_button_response.h"
 #include "mobile/add_sub_menu_response.h"
+#include "mobile/diagnostic_message_response.h"
+#include "mobile/dial_number_response.h"
+#include "mobile/end_audio_pass_thru_response.h"
+#include "mobile/get_dtcs_response.h"
+#include "mobile/get_vehicle_data_response.h"
 
 namespace test {
 namespace components {
@@ -69,7 +74,12 @@ typedef Types<commands::ListFilesResponse,
               commands::AlertManeuverResponse,
               commands::AlertResponse,
               commands::SubscribeButtonResponse,
-              commands::AddSubMenuResponse> ResponseCommandsList;
+              commands::AddSubMenuResponse,
+              commands::DiagnosticMessageResponse,
+              commands::DialNumberResponse,
+              commands::EndAudioPassThruResponse,
+              commands::GetDTCsResponse,
+              commands::GetVehicleDataResponse> ResponseCommandsList;
 TYPED_TEST_CASE(MobileResponseCommandsTest, ResponseCommandsList);
 
 TYPED_TEST(MobileResponseCommandsTest, Run_SendResponseToMobile_SUCCESS) {
