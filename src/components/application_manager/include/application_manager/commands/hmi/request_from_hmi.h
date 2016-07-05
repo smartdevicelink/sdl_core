@@ -53,10 +53,11 @@ class RequestFromHMI : public CommandImpl, public event_engine::EventObserver {
   RequestFromHMI(const MessageSharedPtr& message,
                  ApplicationManager& application_manager);
   virtual ~RequestFromHMI();
-  virtual bool Init();
-  virtual bool CleanUp();
-  virtual void Run();
-  virtual void on_event(const event_engine::Event& event);
+  bool Init() OVERRIDE;
+  bool CleanUp() OVERRIDE;
+  void Run() OVERRIDE;
+  void on_event(const event_engine::Event& event) OVERRIDE;
+  ;
   /**
    * @brief SendResponse allows to send response to hmi
    * @param correlation_id the correlation id for the rfesponse.

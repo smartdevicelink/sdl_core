@@ -41,8 +41,6 @@
 
 namespace {
 const int32_t MILLISECONDS_IN_SECOND = 1000;
-const int32_t MICROSECONDS_IN_MILLISECONDS = 1000;
-const int32_t MICROSECONDS_IN_SECOND = 1000 * 1000;
 }
 
 namespace test {
@@ -64,7 +62,7 @@ class HeartBeatMonitorTest : public testing::Test {
   static const connection_handler::ConnectionHandle kConnectionHandle =
       0xABCDEF;
 
-  virtual void SetUp() {
+  void SetUp() OVERRIDE {
     conn = new connection_handler::Connection(
         kConnectionHandle, 0, &connection_handler_mock, kTimeout);
   }

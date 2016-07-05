@@ -60,7 +60,7 @@ class StateControllerImpl : public event_engine::EventObserver,
 
   virtual void SetRegularState(ApplicationSharedPtr app,
                                HmiStatePtr state,
-                               const bool SendActivateApp);
+                               const bool SendActivateApp) OVERRIDE;
 
   /**
    * @brief SetRegularState Change regular hmi level and audio state
@@ -72,7 +72,7 @@ class StateControllerImpl : public event_engine::EventObserver,
       ApplicationSharedPtr app,
       const mobile_apis::HMILevel::eType hmi_level,
       const mobile_apis::AudioStreamingState::eType audio_state,
-      const bool SendActivateApp);
+      const bool SendActivateApp) OVERRIDE;
 
   /**
    * @brief SetRegularState Change regular hmi level
@@ -82,7 +82,7 @@ class StateControllerImpl : public event_engine::EventObserver,
    */
   virtual void SetRegularState(ApplicationSharedPtr app,
                                const mobile_apis::HMILevel::eType hmi_level,
-                               const bool SendActivateApp);
+                               const bool SendActivateApp) OVERRIDE;
 
   /**
    * @brief SetRegularState Change regular hmi level, audio state and system
@@ -97,7 +97,7 @@ class StateControllerImpl : public event_engine::EventObserver,
       const mobile_apis::HMILevel::eType hmi_level,
       const mobile_apis::AudioStreamingState::eType audio_state,
       const mobile_apis::SystemContext::eType system_context,
-      const bool SendActivateApp);
+      const bool SendActivateApp) OVERRIDE;
 
   /**
    * @brief SetRegularState Sets regular state with new hmi level
@@ -105,8 +105,9 @@ class StateControllerImpl : public event_engine::EventObserver,
    * @param app appication to setup regular state
    * @param hmi_level new hmi level for application
    */
-  virtual void SetRegularState(ApplicationSharedPtr app,
-                               const mobile_apis::HMILevel::eType hmi_level);
+  virtual void SetRegularState(
+      ApplicationSharedPtr app,
+      const mobile_apis::HMILevel::eType hmi_level) OVERRIDE;
 
   /**
    * @brief SetRegularState Change regular audio state
@@ -115,7 +116,7 @@ class StateControllerImpl : public event_engine::EventObserver,
    */
   virtual void SetRegularState(
       ApplicationSharedPtr app,
-      const mobile_apis::AudioStreamingState::eType audio_state);
+      const mobile_apis::AudioStreamingState::eType audio_state) OVERRIDE;
 
   /**
    * @brief SetRegularState Change regular  system context
@@ -124,17 +125,18 @@ class StateControllerImpl : public event_engine::EventObserver,
    */
   virtual void SetRegularState(
       ApplicationSharedPtr app,
-      const mobile_apis::SystemContext::eType system_context);
+      const mobile_apis::SystemContext::eType system_context) OVERRIDE;
 
   /**
    * @brief SetRegularState Sets new regular state to application
    * @param app appication to setup regular state
    * @param state new hmi state for application
    */
-  virtual void SetRegularState(ApplicationSharedPtr app, HmiStatePtr state);
+  virtual void SetRegularState(ApplicationSharedPtr app,
+                               HmiStatePtr state) OVERRIDE;
 
   // EventObserver interface
-  void on_event(const event_engine::Event& event);
+  void on_event(const event_engine::Event& event) OVERRIDE;
 
   /**
    * @brief Sets default application state and apply currently active HMI states
@@ -144,17 +146,17 @@ class StateControllerImpl : public event_engine::EventObserver,
    */
   virtual void OnApplicationRegistered(
       ApplicationSharedPtr app,
-      const mobile_apis::HMILevel::eType default_level);
+      const mobile_apis::HMILevel::eType default_level) OVERRIDE;
 
   /**
    * @brief OnNaviStreamingStarted process Navi streaming started
    */
-  virtual void OnNaviStreamingStarted();
+  virtual void OnNaviStreamingStarted() OVERRIDE;
 
   /**
    * @brief OnNaviStreamingStopped process Navi streaming stopped
    */
-  virtual void OnNaviStreamingStopped();
+  virtual void OnNaviStreamingStopped() OVERRIDE;
 
   /**
    * @brief OnStateChanged send HMIStatusNotification if neded
@@ -164,19 +166,19 @@ class StateControllerImpl : public event_engine::EventObserver,
    */
   virtual void OnStateChanged(ApplicationSharedPtr app,
                               HmiStatePtr old_state,
-                              HmiStatePtr new_state);
+                              HmiStatePtr new_state) OVERRIDE;
 
   /**
    * @brief Checks activity of Deactivate HMI state.
    * @return Returns TRUE if deactivate HMI state is active, otherwise returns
    * FALSE.
    */
-  virtual bool IsStateActive(HmiState::StateID state_id) const;
+  virtual bool IsStateActive(HmiState::StateID state_id) const OVERRIDE;
 
  private:
   int64_t SendBCActivateApp(ApplicationConstSharedPtr app,
                             hmi_apis::Common_HMILevel::eType level,
-                            bool send_policy_priority);
+                            bool send_policy_priority) OVERRIDE;
   /**
    * @brief The HmiLevelConflictResolver struct
    * Move other application to HmiStates if applied moved to FULL or LIMITED

@@ -180,7 +180,7 @@ Float<minnum, maxnum, minden, maxden>::Float(
 template <int64_t minnum, int64_t maxnum, int64_t minden, int64_t maxden>
 Float<minnum, maxnum, minden, maxden>::Float(
     const utils::json::JsonValueRef& value, double def_value)
-    : PrimitiveType(InitHelper(value, &utils::json::JsonValue::IsDouble))
+    : PrimitiveType(InitHelper(value, &utils::json::JsonValueRef::IsDouble))
     , value_(def_value) {
   if (!is_initialized()) {
     value_state_ = kValid;
@@ -309,7 +309,9 @@ Map<T, minsize, maxsize>::Map(utils::json::JsonValueRef& value)
                                             end = value.end();
            i != end;
            ++i) {
-        this->insert(typename MapType::value_type(i.key().AsString(), T(&*i)));
+        const utils::json::JsonValueRef& json_ref = *i;
+        this->insert(
+            typename MapType::value_type(i.key().AsString(), T(&json_ref)));
       }
     } else {
       // Map is empty, empty initialized or uninitialized

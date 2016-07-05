@@ -109,4 +109,24 @@ typedef Atomic<bool> atomic_bool;
 
 }  // namespace sync_primitives
 
+template <typename T>
+bool operator==(const sync_primitives::Atomic<T>& lval, const T& rval) {
+  return static_cast<T>(lval) == rval;
+}
+
+template <typename T>
+bool operator==(const T& lval, const sync_primitives::Atomic<T>& rval) {
+  return static_cast<T>(rval) == lval;
+}
+
+template <typename T>
+bool operator<(const sync_primitives::Atomic<T>& lval, const T& rval) {
+  return static_cast<T>(lval) < rval;
+}
+
+template <typename T>
+bool operator<(const T& lval, const sync_primitives::Atomic<T>& rval) {
+  return lval < static_cast<T>(rval);
+}
+
 #endif  // SRC_COMPONENTS_INCLUDE_UTILS_ATOMIC_OBJECT_H_

@@ -43,13 +43,6 @@
 #include <memory>
 #include <string>
 
-namespace {
-const uint8_t kRequest = 0x0;
-const uint8_t kResponse = 0x1;
-const uint8_t kNotification = 0x2;
-const uint8_t kUnknown = 0xF;
-}
-
 namespace application_manager {
 using protocol_handler::Extract;
 

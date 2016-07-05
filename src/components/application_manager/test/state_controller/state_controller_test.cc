@@ -1747,7 +1747,6 @@ TEST_F(StateControllerImplTest, DISABLED_ActivateAppSuccessReceivedFromHMI) {
                      Common_HMILevel::NONE));
   std::vector<StateLevelPair> initial_hmi_states = hmi_states;
   std::vector<StateLevelPair>::iterator it = hmi_states.begin();
-  std::vector<StateLevelPair>::iterator it2 = initial_hmi_states.begin();
   smart_objects::SmartObjectSPtr bc_activate_app_request =
       new smart_objects::SmartObject();
   (*bc_activate_app_request)[am::strings::params][am::strings::correlation_id] =

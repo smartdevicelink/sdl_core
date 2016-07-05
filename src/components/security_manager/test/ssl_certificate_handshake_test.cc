@@ -66,8 +66,6 @@ const std::string server_expired_cert_file =
 const bool verify_peer = true;
 const bool skip_peer_verification = false;
 
-const size_t updates_before_hour = 24;
-
 }  // namespace
 
 class SSLHandshakeTest : public testing::Test {

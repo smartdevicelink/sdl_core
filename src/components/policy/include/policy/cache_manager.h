@@ -67,70 +67,70 @@ class CacheManager : public CacheManagerInterface {
    * @return CheckPermissionResult containing flag if HMI Level is allowed
    * and list of allowed params.
    */
-  virtual void CheckPermissions(const PTString& app_id,
-                                const PTString& hmi_level,
-                                const PTString& rpc,
-                                CheckPermissionResult& result);
+  void CheckPermissions(const PTString& app_id,
+                        const PTString& hmi_level,
+                        const PTString& rpc,
+                        CheckPermissionResult& result) OVERRIDE;
 
   /**
    * @brief Returns true if Policy Table was not updated yet
    * from preloaded pt file.
    */
-  virtual bool IsPTPreloaded();
+  bool IsPTPreloaded() OVERRIDE;
 
   /**
    * Gets number of ignition cycles before next update policy table
    * @return number of ignition cycles
    */
-  virtual int IgnitionCyclesBeforeExchange();
+  int IgnitionCyclesBeforeExchange() OVERRIDE;
 
   /**
    * Gets value in kilometers before next update policy table
    * @param current value in kilometers from the odometers
    * @return value in kilometers
    */
-  virtual int KilometersBeforeExchange(int current);
+  int KilometersBeforeExchange(int current) OVERRIDE;
 
   /**
    * @brief Sets counter value that passed for recieved successful PT UPdate
    */
-  virtual bool SetCountersPassedForSuccessfulUpdate(Counters counter,
-                                                    int value);
+  bool SetCountersPassedForSuccessfulUpdate(Counters counter,
+                                            int value) OVERRIDE;
 
   /**
    * Gets value in days before next update policy table
    * @param current value in days after epoch
    * @return value in days
    */
-  virtual int DaysBeforeExchange(int current);
+  int DaysBeforeExchange(int current) OVERRIDE;
 
   /**
    * @brief Increment number of ignition cycles since last exchange by 1
    */
-  virtual void IncrementIgnitionCycles();
+  void IncrementIgnitionCycles() OVERRIDE;
 
   /**
    * @brief Reset number of ignition cycles since last exchange to 0
    */
-  virtual void ResetIgnitionCycles();
+  void ResetIgnitionCycles() OVERRIDE;
 
   /**
    * @brief Returns timeout to wait for a response of PT update
    * @return value in seconds
    */
-  virtual int TimeoutResponse();
+  int TimeoutResponse() OVERRIDE;
 
   /**
    * @brief Returns number of seconds between each try of sending PTS
    * @param seconds Return value: array of 5 elements
    * @return bool Success of operation
    */
-  virtual bool SecondsBetweenRetries(std::vector<int>& seconds);
+  bool SecondsBetweenRetries(std::vector<int>& seconds) OVERRIDE;
 
   /**
    * @brief Get information about vehicle
    */
-  virtual const VehicleInfo GetVehicleInfo() const;
+  const VehicleInfo GetVehicleInfo() const OVERRIDE;
 
   /**
    * @brief Allows to update 'vin' field in module_meta table.
@@ -140,7 +140,7 @@ class CacheManager : public CacheManagerInterface {
    * @return true in case when data has been successfully updated,
    * false otherwise.
    */
-  bool SetVINValue(const std::string& value);
+  bool SetVINValue(const std::string& value) OVERRIDE;
 
   /**
    * @brief Get message text for displaying/pronouncing for user
@@ -151,15 +151,16 @@ class CacheManager : public CacheManagerInterface {
    * @return Array of appropriate messages parameters
    */
   std::vector<UserFriendlyMessage> GetUserFriendlyMsg(
-      const std::vector<std::string>& msg_codes, const std::string& language);
+      const std::vector<std::string>& msg_codes,
+      const std::string& language) OVERRIDE;
 
   /**
    * @brief Get list of URLs related to particular service
    * @param service_type If URLs for specific service are preset,
    * return them otherwise default URLs.
    */
-  virtual void GetServiceUrls(const std::string& service_type,
-                              EndpointUrls& end_points);
+  void GetServiceUrls(const std::string& service_type,
+                      EndpointUrls& end_points) OVERRIDE;
 
   /**
    * @brief GetLockScreenIcon allows to obtain lock screen icon url;
@@ -167,15 +168,15 @@ class CacheManager : public CacheManagerInterface {
    * @return url which point to the resourse where lock screen icon could be
    * obtained.
    */
-  virtual std::string GetLockScreenIconUrl() const;
+  std::string GetLockScreenIconUrl() const OVERRIDE;
 
   /**
    * @brief Get allowed number of notifications
    * depending on application priority.
    * @param priority Priority of application
    */
-  virtual rpc::policy_table_interface_base::NumberOfNotificationsType
-  GetNotificationsNumber(const std::string& priority);
+  rpc::policy_table_interface_base::NumberOfNotificationsType
+  GetNotificationsNumber(const std::string& priority) OVERRIDE;
 
   /**
    * @brief Get priority for given application
@@ -183,14 +184,15 @@ class CacheManager : public CacheManagerInterface {
    * @param priority Priority for application or empty, if value was not set
    * @return true, if succedeed, otherwise - false
    */
-  virtual bool GetPriority(const std::string& policy_app_id,
-                           std::string& priority) const OVERRIDE;
+  bool GetPriority(const std::string& policy_app_id,
+                   std::string& priority) const OVERRIDE;
 
   /**
    * @brief Initialized Policy Table (load)
    * @return bool Success of operation
    */
-  bool Init(const std::string& file_name, const PolicySettings* settings);
+  bool Init(const std::string& file_name,
+            const PolicySettings* settings) OVERRIDE;
 
   /**
    * @brief Get snapshot of Policy Table
@@ -198,33 +200,33 @@ class CacheManager : public CacheManagerInterface {
    * device_info, statistics, excluding user messages
    * @return Generated structure for obtaining Json string.
    */
-  virtual utils::SharedPtr<policy_table::Table> GenerateSnapshot();
+  utils::SharedPtr<policy_table::Table> GenerateSnapshot() OVERRIDE;
 
   /**
    * Applies policy table to the current table
    * @param update_pt policy table
    * @return true if successfully
    */
-  bool ApplyUpdate(const policy_table::Table& update_pt);
+  bool ApplyUpdate(const policy_table::Table& update_pt) OVERRIDE;
 
   /**
    * @brief Gets list of appHMIType associated with mobile appID
    * @param container of appHMIType
    */
-  virtual void GetHMIAppTypeAfterUpdate(
-      std::map<std::string, StringArray>& app_hmi_types);
+  void GetHMIAppTypeAfterUpdate(
+      std::map<std::string, StringArray>& app_hmi_types) OVERRIDE;
 
   /**
    * Gets flag updateRequired
    * @return true if update is required
    */
-  bool UpdateRequired() const;
+  bool UpdateRequired() const OVERRIDE;
 
   /**
    * @brief Saves flag updateRequired
    * @param status update status if true then update required.
    */
-  void SaveUpdateRequired(bool status);
+  void SaveUpdateRequired(bool status) OVERRIDE;
 
   /**
    * @brief GetInitialAppData Retrieves data from app_policies
@@ -238,56 +240,57 @@ class CacheManager : public CacheManagerInterface {
    */
   bool GetInitialAppData(const std::string& app_id,
                          StringArray& nicknames,
-                         StringArray& app_hmi_types);
+                         StringArray& app_hmi_types) OVERRIDE;
 
   /**
    * Checks if the application is revoked
    * @param app_id application id
    * @return true if application is revoked
    */
-  bool IsApplicationRevoked(const std::string& app_id) const;
+  bool IsApplicationRevoked(const std::string& app_id) const OVERRIDE;
 
   /**
    * @brief Get functional groupings from DB
    * @param groups Known functional groupings
    * @return true, if succeeded, otherwise - false
    */
-  bool GetFunctionalGroupings(policy_table::FunctionalGroupings& groups);
+  bool GetFunctionalGroupings(
+      policy_table::FunctionalGroupings& groups) OVERRIDE;
 
   /**
    * Checks if the application is represented in policy table
    * @param app_id application id
    * @return true if application is represented in policy table
    */
-  bool IsApplicationRepresented(const std::string& app_id) const;
+  bool IsApplicationRepresented(const std::string& app_id) const OVERRIDE;
 
   /**
    * Checks if the application has default policy
    * @param app_id application id
    * @return true if application has default policy
    */
-  bool IsDefaultPolicy(const std::string& app_id);
+  bool IsDefaultPolicy(const std::string& app_id) OVERRIDE;
 
   /**
    * @brief SetIsDefault Sets is_default flag for application
    * @param app_id app specific application
    * @return  true in case opperation was done successfully.
    */
-  bool SetIsDefault(const std::string& app_id);
+  bool SetIsDefault(const std::string& app_id) OVERRIDE;
 
   /**
    * Checks if the application has pre_data policy
    * @param app_id application id
    * @return true if application has pre_data policy
    */
-  bool IsPredataPolicy(const std::string& app_id);
+  bool IsPredataPolicy(const std::string& app_id) OVERRIDE;
 
   /**
    * Sets default policy for application
    * @param app_id application id
    * @return true if success
    */
-  bool SetDefaultPolicy(const std::string& app_id);
+  bool SetDefaultPolicy(const std::string& app_id) OVERRIDE;
 
   /**
    * @brief Is application allowed to send notifications while in
@@ -302,7 +305,7 @@ class CacheManager : public CacheManagerInterface {
    * @param app_id Application id
    * @return bool Allowed/disallowed.
    */
-  bool CanAppStealFocus(const std::string& app_id) const;
+  bool CanAppStealFocus(const std::string& app_id) const OVERRIDE;
 
   /**
    * @brief Gets default_hmi for given application
@@ -311,13 +314,14 @@ class CacheManager : public CacheManagerInterface {
    * not set
    * @return true, if succedeed, otherwise - false
    */
-  bool GetDefaultHMI(const std::string& app_id, std::string& default_hmi) const;
+  bool GetDefaultHMI(const std::string& app_id,
+                     std::string& default_hmi) const OVERRIDE;
 
   /**
    * @brief Reset user consent for device data and applications permissions
    * @return
    */
-  bool ResetUserConsent();
+  bool ResetUserConsent() OVERRIDE;
 
   /**
    * @brief Get user permissions for device data usage
@@ -326,9 +330,10 @@ class CacheManager : public CacheManagerInterface {
    * @param disallowed_groups Groups not consented by user
    * @return true, if query was successfull, otherwise - false
    */
-  bool GetUserPermissionsForDevice(const std::string& device_id,
-                                   StringArray& consented_groups,
-                                   StringArray& disallowed_groups) const;
+  bool GetUserPermissionsForDevice(
+      const std::string& device_id,
+      StringArray& consented_groups,
+      StringArray& disallowed_groups) const OVERRIDE;
 
   /**
    * @brief Gets list of groups permissions from policy table
@@ -339,7 +344,7 @@ class CacheManager : public CacheManagerInterface {
    */
   bool GetPermissionsForApp(const std::string& device_id,
                             const std::string& app_id,
-                            FunctionalIdType& group_types);
+                            FunctionalIdType& group_types) OVERRIDE;
 
   /**
    * @brief Get device groups and preconsented groups from policies section
@@ -349,7 +354,8 @@ class CacheManager : public CacheManagerInterface {
    */
   bool GetDeviceGroupsFromPolicies(
       rpc::policy_table_interface_base::Strings& groups,
-      rpc::policy_table_interface_base::Strings& preconsented_groups) const;
+      rpc::policy_table_interface_base::Strings& preconsented_groups)
+      const OVERRIDE;
 
   /**
    * @brief Add's information about mobile device in Policy Table.
@@ -358,7 +364,7 @@ class CacheManager : public CacheManagerInterface {
    * @return bool Success of operation
    */
   bool AddDevice(const std::string& device_id,
-                 const std::string& connection_type);
+                 const std::string& connection_type) OVERRIDE;
 
   /**
    * @brief Record information about mobile device in Policy Table.
@@ -372,7 +378,7 @@ class CacheManager : public CacheManagerInterface {
                      const std::string& os_version = "",
                      const std::string& carrier = "",
                      const uint32_t number_of_ports = 0,
-                     const std::string& connection_type = "");
+                     const std::string& connection_type = "") OVERRIDE;
 
   /**
    * @brief Sets user consent for particular mobile device,
@@ -382,21 +388,21 @@ class CacheManager : public CacheManagerInterface {
   bool SetUserPermissionsForDevice(
       const std::string& device_id,
       const StringArray& consented_groups = StringArray(),
-      const StringArray& disallowed_groups = StringArray());
+      const StringArray& disallowed_groups = StringArray()) OVERRIDE;
 
   /**
    * @brief Update Application Policies as reaction
    * on User allowing/disallowing device this app is running on.
    */
   bool ReactOnUserDevConsentForApp(const std::string& app_id,
-                                   bool is_device_allowed);
+                                   bool is_device_allowed) OVERRIDE;
 
   /**
    * @brief Set user consent on functional groups
    * @param permissions User consent on functional group
    * @return true, if operation succedeed, otherwise - false
    */
-  bool SetUserPermissionsForApp(const PermissionConsent& permissions);
+  bool SetUserPermissionsForApp(const PermissionConsent& permissions) OVERRIDE;
 
   /**
    * @brief Records information about head unit system to PT
@@ -404,26 +410,26 @@ class CacheManager : public CacheManagerInterface {
    */
   bool SetMetaInfo(const std::string& ccpu_version,
                    const std::string& wers_country_code,
-                   const std::string& language);
+                   const std::string& language) OVERRIDE;
 
   /**
    * @brief Checks, if specific head unit is present in PT
    * @return boot Suceess, if present, otherwise - false
    */
-  bool IsMetaInfoPresent() const;
+  bool IsMetaInfoPresent() const OVERRIDE;
 
   /**
    * @brief Set current system language
    * @param language System language
    * @return true, if succedeed, otherwise - false
    */
-  bool SetSystemLanguage(const std::string& language);
+  bool SetSystemLanguage(const std::string& language) OVERRIDE;
 
   /**
    * Increments global counter
    * @param type type of counter
    */
-  void Increment(usage_statistics::GlobalCounterId type);
+  void Increment(usage_statistics::GlobalCounterId type) OVERRIDE;
 
   /**
    * Increments counter of application
@@ -431,7 +437,7 @@ class CacheManager : public CacheManagerInterface {
    * @param type type of counter
    */
   void Increment(const std::string& app_id,
-                 usage_statistics::AppCounterId type);
+                 usage_statistics::AppCounterId type) OVERRIDE;
 
   /**
    * Sets value of application information
@@ -441,7 +447,7 @@ class CacheManager : public CacheManagerInterface {
    */
   void Set(const std::string& app_id,
            usage_statistics::AppInfoId type,
-           const std::string& value);
+           const std::string& value) OVERRIDE;
 
   /**
    * Adds value to stopwatch of application
@@ -451,7 +457,7 @@ class CacheManager : public CacheManagerInterface {
    */
   void Add(const std::string& app_id,
            usage_statistics::AppStopwatchId type,
-           int seconds);
+           int seconds) OVERRIDE;
 
   /**
    * @brief CountUnconsentedGroups allows to obtain the count of unconsented
@@ -461,14 +467,14 @@ class CacheManager : public CacheManagerInterface {
    * @return the count of unconsented groups
    */
   int CountUnconsentedGroups(const std::string& policy_app_id,
-                             const std::string& device_id);
+                             const std::string& device_id) OVERRIDE;
 
   /**
    * @brief Gets functional group names and user_consent_prompts, if any
    * @param Array to be filled with group ids, names and functional prompts
    * @return true, if succeeded, otherwise - false
    */
-  bool GetFunctionalGroupNames(FunctionalGroupNames& names);
+  bool GetFunctionalGroupNames(FunctionalGroupNames& names) OVERRIDE;
 
   /**
    * @brief GetAllAppGroups allows to obtain all groups for certain application.
@@ -476,7 +482,7 @@ class CacheManager : public CacheManagerInterface {
    * @param all_group_ids parameter to fill.
    */
   void GetAllAppGroups(const std::string& app_id,
-                       FunctionalGroupIDs& all_group_ids);
+                       FunctionalGroupIDs& all_group_ids) OVERRIDE;
   /**
    * @brief GetPreConsentedGroups allows to obtain all pre-consented groups for
    * specific application.
@@ -484,7 +490,7 @@ class CacheManager : public CacheManagerInterface {
    * @param preconsented_groups parameter to fill.
    */
   void GetPreConsentedGroups(const std::string& app_id,
-                             FunctionalGroupIDs& preconsented_groups);
+                             FunctionalGroupIDs& preconsented_groups) OVERRIDE;
   /**
    * @brief GetConsentedGroups allows to obtain list of allowed and disallowed
    * groups for specific application on certain device.
@@ -496,7 +502,7 @@ class CacheManager : public CacheManagerInterface {
   void GetConsentedGroups(const std::string& device_id,
                           const std::string& app_id,
                           FunctionalGroupIDs& allowed_groups,
-                          FunctionalGroupIDs& disallowed_groups);
+                          FunctionalGroupIDs& disallowed_groups) OVERRIDE;
 
   /**
    * @brief GetUnconsentedGroups allows to obtain list of allowed and disallowed
@@ -507,23 +513,23 @@ class CacheManager : public CacheManagerInterface {
    */
   void GetUnconsentedGroups(const std::string& device_id,
                             const std::string& policy_app_id,
-                            FunctionalGroupIDs& unconsented_groups);
+                            FunctionalGroupIDs& unconsented_groups) OVERRIDE;
 
   void RemoveAppConsentForGroup(const std::string& app_id,
-                                const std::string& group_name);
+                                const std::string& group_name) OVERRIDE;
 
   /**
    * @brief Set app policy to pre_DataConsented policy
    * @param app_id Policy ID of application to be changed
    * @return true, if succeeded, otherwise - false
    */
-  bool SetPredataPolicy(const std::string& app_id);
+  bool SetPredataPolicy(const std::string& app_id) OVERRIDE;
 
   /**
    * @brief Removes unpaired devices
    * @return true if success
    */
-  bool CleanupUnpairedDevices();
+  bool CleanupUnpairedDevices() OVERRIDE;
 
   /**
    * Sets flag of unpaired device
@@ -531,32 +537,34 @@ class CacheManager : public CacheManagerInterface {
    * @param unpaired True, if should be marked as unpaired, otherwise - false
    * @return true if success
    */
-  bool SetUnpairedDevice(const std::string& device_id, bool unpaired = true);
+  bool SetUnpairedDevice(const std::string& device_id,
+                         bool unpaired = true) OVERRIDE;
 
   /**
    * Resets Policy Table
    * @param file_name Path to preloaded PT file
    * @return true if successfully
    */
-  bool ResetPT(const std::string& file_name);
+  bool ResetPT(const std::string& file_name) OVERRIDE;
 
   /**
    * @brief LoadFromBackup allows to load policy into the cache from backup.
    * @return true in case operation was successful.
    */
-  bool LoadFromBackup();
+  bool LoadFromBackup() OVERRIDE;
 
   /**
    * @brief LoadFromFile allows to load policy cache from preloaded table.
    * @param file_name preloaded
    * @return
    */
-  bool LoadFromFile(const std::string& file_name, policy_table::Table& table);
+  bool LoadFromFile(const std::string& file_name,
+                    policy_table::Table& table) OVERRIDE;
 
   /**
    * @brief Backup allows to save cache onto hard drive.
    */
-  void Backup();
+  void Backup() OVERRIDE;
 
   /**
    * Returns heart beat timeout
@@ -564,7 +572,7 @@ class CacheManager : public CacheManagerInterface {
    * @return if timeout was set then value in milliseconds greater zero
    * otherwise heart beat for specific application isn't set
    */
-  uint32_t HeartBeatTimeout(const std::string& app_id) const;
+  uint32_t HeartBeatTimeout(const std::string& app_id) const OVERRIDE;
 
   /**
    * @brief Allows to generate hash from the specified string.
@@ -579,8 +587,9 @@ class CacheManager : public CacheManagerInterface {
    * @param policy_app_id Unique application id
    * @param request_types Request types of application
    */
-  void GetAppRequestTypes(const std::string& policy_app_id,
-                          std::vector<std::string>& request_types) const;
+  void GetAppRequestTypes(
+      const std::string& policy_app_id,
+      std::vector<std::string>& request_types) const OVERRIDE;
 
   /**
    * @brief GetCertificate allows to obtain certificate in order to
@@ -588,7 +597,7 @@ class CacheManager : public CacheManagerInterface {
    *
    * @return The certificate in PKCS#7.
    */
-  virtual std::string GetCertificate() const OVERRIDE;
+  std::string GetCertificate() const OVERRIDE;
 
   /**
    * @brief MergePreloadPT allows to load policy table from certain JSON file,
@@ -679,7 +688,7 @@ class CacheManager : public CacheManagerInterface {
   const PolicySettings& get_settings() const;
 
 #ifdef BUILD_TESTS
-  utils::SharedPtr<policy_table::Table> GetPT() const {
+  utils::SharedPtr<policy_table::Table> GetPT() const OVERRIDE {
     return pt_;
   }
 #endif
@@ -705,15 +714,16 @@ class CacheManager : public CacheManagerInterface {
 
   void PersistData();
 
-  void ResetCalculatedPermissions();
+  void ResetCalculatedPermissions() OVERRIDE;
 
-  void AddCalculatedPermissions(const std::string& device_id,
-                                const std::string& policy_app_id,
-                                const policy::Permissions& permissions);
+  void AddCalculatedPermissions(
+      const std::string& device_id,
+      const std::string& policy_app_id,
+      const policy::Permissions& permissions) OVERRIDE;
 
   bool IsPermissionsCalculated(const std::string& device_id,
                                const std::string& policy_app_id,
-                               policy::Permissions& permission);
+                               policy::Permissions& permission) OVERRIDE;
 
  private:
   /**
@@ -747,8 +757,8 @@ class CacheManager : public CacheManagerInterface {
    public:
     BackgroundBackuper(CacheManager* cache_manager);
     ~BackgroundBackuper();
-    virtual void threadMain();
-    virtual void exitThreadMain();
+    void threadMain();
+    void exitThreadMain();
     void DoBackup();
 
    private:

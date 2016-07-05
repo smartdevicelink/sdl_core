@@ -120,33 +120,33 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
     file_system::DeleteFile("policy.sqlite");
   }
 
-  virtual utils::dbms::SQLDatabase* db() const {
+  virtual utils::dbms::SQLDatabase* db() const OVERRIDE {
     return reps->db();
   }
 
-  void GatherModuleMeta(policy_table::ModuleMeta* meta) const {
+  void GatherModuleMeta(policy_table::ModuleMeta* meta) const OVERRIDE {
     ::SQLPTRepresentation::GatherModuleMeta(meta);
   }
 
-  void GatherModuleConfig(policy_table::ModuleConfig* config) const {
+  void GatherModuleConfig(policy_table::ModuleConfig* config) const OVERRIDE {
     ::SQLPTRepresentation::GatherModuleConfig(config);
   }
 
   bool GatherUsageAndErrorCounts(
-      policy_table::UsageAndErrorCounts* counts) const {
+      policy_table::UsageAndErrorCounts* counts) const OVERRIDE {
     return ::SQLPTRepresentation::GatherUsageAndErrorCounts(counts);
   }
 
   bool GatherApplicationPoliciesSection(
-      policy_table::ApplicationPoliciesSection* policies) const {
+      policy_table::ApplicationPoliciesSection* policies) const OVERRIDE {
     return ::SQLPTRepresentation::GatherApplicationPoliciesSection(policies);
   }
-  virtual void GatherDeviceData(policy_table::DeviceData* data) const {
+  virtual void GatherDeviceData(policy_table::DeviceData* data) const OVERRIDE {
     ::SQLPTRepresentation::GatherDeviceData(data);
   }
 
   virtual bool GatherConsumerFriendlyMessages(
-      policy_table::ConsumerFriendlyMessages* messages) const {
+      policy_table::ConsumerFriendlyMessages* messages) const OVERRIDE {
     return ::SQLPTRepresentation::GatherConsumerFriendlyMessages(messages);
   }
 

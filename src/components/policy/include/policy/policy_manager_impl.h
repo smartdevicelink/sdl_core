@@ -58,156 +58,156 @@ class PolicyManagerImpl : public PolicyManager {
   PolicyManagerImpl(const std::string& app_storage_folder,
                     uint16_t attempts_to_open_policy_db,
                     uint16_t open_attempt_timeout_ms);
-  virtual void set_listener(PolicyListener* listener);
+  void set_listener(PolicyListener* listener) OVERRIDE;
   PolicyListener* listener() const {
     return listener_;
   }
-  virtual bool InitPT(const std::string& file_name,
-                      const PolicySettings* settings);
-  virtual bool LoadPT(const std::string& file, const BinaryMessage& pt_content);
-  virtual bool ResetPT(const std::string& file_name);
+  bool InitPT(const std::string& file_name,
+              const PolicySettings* settings) OVERRIDE;
+  bool LoadPT(const std::string& file,
+              const BinaryMessage& pt_content) OVERRIDE;
+  bool ResetPT(const std::string& file_name) OVERRIDE;
 
-  virtual void GetServiceUrls(const std::string& service_type,
-                              EndpointUrls& end_points);
+  void GetServiceUrls(const std::string& service_type,
+                      EndpointUrls& end_points) OVERRIDE;
 
-  virtual std::string GetLockScreenIconUrl() const;
-  virtual bool RequestPTUpdate();
-  virtual void CheckPermissions(const PTString& app_id,
-                                const PTString& hmi_level,
-                                const PTString& rpc,
-                                const RPCParams& rpc_params,
-                                CheckPermissionResult& result);
-  virtual bool ResetUserConsent();
-  virtual void KmsChanged(int kilometers);
-  virtual void IncrementIgnitionCycles();
-  virtual std::string ForcePTExchange();
-  virtual std::string GetPolicyTableStatus() const;
-  virtual void ResetRetrySequence();
-  virtual uint32_t NextRetryTimeout();
-  virtual int TimeoutExchange();
-  virtual const std::vector<int> RetrySequenceDelaysSeconds();
-  virtual void OnExceededTimeout();
-  virtual void OnUpdateStarted();
-  virtual void PTUpdatedAt(Counters counter, int value);
+  std::string GetLockScreenIconUrl() const OVERRIDE;
+  bool RequestPTUpdate() OVERRIDE;
+  void CheckPermissions(const PTString& app_id,
+                        const PTString& hmi_level,
+                        const PTString& rpc,
+                        const RPCParams& rpc_params,
+                        CheckPermissionResult& result) OVERRIDE;
+  bool ResetUserConsent() OVERRIDE;
+  void KmsChanged(int kilometers) OVERRIDE;
+  void IncrementIgnitionCycles() OVERRIDE;
+  std::string ForcePTExchange() OVERRIDE;
+  std::string GetPolicyTableStatus() const OVERRIDE;
+  void ResetRetrySequence() OVERRIDE;
+  uint32_t NextRetryTimeout() OVERRIDE;
+  int TimeoutExchange() OVERRIDE;
+  const std::vector<int> RetrySequenceDelaysSeconds() OVERRIDE;
+  void OnExceededTimeout() OVERRIDE;
+  void OnUpdateStarted() OVERRIDE;
+  void PTUpdatedAt(Counters counter, int value) OVERRIDE;
 
   /**
    * Refresh data about retry sequence from policy table
    */
-  virtual void RefreshRetrySequence();
-  virtual DeviceConsent GetUserConsentForDevice(
+  void RefreshRetrySequence();
+  DeviceConsent GetUserConsentForDevice(
       const std::string& device_id) const OVERRIDE;
-  virtual void GetUserConsentForApp(
+  void GetUserConsentForApp(
       const std::string& device_id,
       const std::string& policy_app_id,
-      std::vector<FunctionalGroupPermission>& permissions);
-  virtual void SetUserConsentForDevice(const std::string& device_id,
-                                       bool is_allowed);
-  virtual bool ReactOnUserDevConsentForApp(const std::string app_id,
-                                           bool is_device_allowed);
-  virtual bool GetInitialAppData(const std::string& application_id,
-                                 StringArray* nicknames = NULL,
-                                 StringArray* app_hmi_types = NULL);
+      std::vector<FunctionalGroupPermission>& permissions) OVERRIDE;
+  void SetUserConsentForDevice(const std::string& device_id,
+                               bool is_allowed) OVERRIDE;
+  bool ReactOnUserDevConsentForApp(const std::string app_id,
+                                   bool is_device_allowed) OVERRIDE;
+  bool GetInitialAppData(const std::string& application_id,
+                         StringArray* nicknames = NULL,
+                         StringArray* app_hmi_types = NULL) OVERRIDE;
 
-  virtual void AddDevice(const std::string& device_id,
-                         const std::string& connection_type);
+  void AddDevice(const std::string& device_id,
+                 const std::string& connection_type) OVERRIDE;
 
-  virtual void SetDeviceInfo(const std::string& device_id,
-                             const DeviceInfo& device_info);
+  void SetDeviceInfo(const std::string& device_id,
+                     const DeviceInfo& device_info) OVERRIDE;
 
-  virtual void SetUserConsentForApp(const PermissionConsent& permissions);
+  void SetUserConsentForApp(const PermissionConsent& permissions) OVERRIDE;
 
-  virtual bool GetDefaultHmi(const std::string& policy_app_id,
-                             std::string* default_hmi) const;
+  bool GetDefaultHmi(const std::string& policy_app_id,
+                     std::string* default_hmi) const OVERRIDE;
 
-  virtual bool GetPriority(const std::string& policy_app_id,
-                           std::string* priority) const;
+  bool GetPriority(const std::string& policy_app_id,
+                   std::string* priority) const OVERRIDE;
 
-  virtual std::vector<UserFriendlyMessage> GetUserFriendlyMessages(
+  std::vector<UserFriendlyMessage> GetUserFriendlyMessages(
       const std::vector<std::string>& message_code,
-      const std::string& language);
+      const std::string& language) OVERRIDE;
 
-  virtual bool IsApplicationRevoked(const std::string& app_id) const;
+  bool IsApplicationRevoked(const std::string& app_id) const OVERRIDE;
 
-  virtual void GetPermissionsForApp(
+  void GetPermissionsForApp(
       const std::string& device_id,
       const std::string& policy_app_id,
-      std::vector<FunctionalGroupPermission>& permissions);
+      std::vector<FunctionalGroupPermission>& permissions) OVERRIDE;
 
-  virtual std::string& GetCurrentDeviceId(
-      const std::string& policy_app_id) const;
+  std::string& GetCurrentDeviceId(
+      const std::string& policy_app_id) const OVERRIDE;
 
-  virtual void SetSystemLanguage(const std::string& language);
+  void SetSystemLanguage(const std::string& language) OVERRIDE;
 
-  virtual void SetSystemInfo(const std::string& ccpu_version,
-                             const std::string& wers_country_code,
-                             const std::string& language);
-  virtual void OnSystemReady();
+  void SetSystemInfo(const std::string& ccpu_version,
+                     const std::string& wers_country_code,
+                     const std::string& language) OVERRIDE;
+  void OnSystemReady() OVERRIDE;
 
-  virtual uint32_t GetNotificationsNumber(
-      const std::string& priority) const OVERRIDE;
+  uint32_t GetNotificationsNumber(const std::string& priority) const OVERRIDE;
 
-  virtual void SetVINValue(const std::string& value);
+  void SetVINValue(const std::string& value) OVERRIDE;
 
   // Interface StatisticsManager (begin)
-  virtual void Increment(usage_statistics::GlobalCounterId type);
-  virtual void Increment(const std::string& app_id,
-                         usage_statistics::AppCounterId type);
-  virtual void Set(const std::string& app_id,
-                   usage_statistics::AppInfoId type,
-                   const std::string& value);
-  virtual void Add(const std::string& app_id,
-                   usage_statistics::AppStopwatchId type,
-                   int32_t timespan_seconds);
+  void Increment(usage_statistics::GlobalCounterId type) OVERRIDE;
+  void Increment(const std::string& app_id,
+                 usage_statistics::AppCounterId type) OVERRIDE;
+  void Set(const std::string& app_id,
+           usage_statistics::AppInfoId type,
+           const std::string& value) OVERRIDE;
+  void Add(const std::string& app_id,
+           usage_statistics::AppStopwatchId type,
+           int32_t timespan_seconds) OVERRIDE;
   // Interface StatisticsManager (end)
 
-  AppPermissions GetAppPermissionsChanges(const std::string& policy_app_id);
-  void RemovePendingPermissionChanges(const std::string& app_id);
+  AppPermissions GetAppPermissionsChanges(
+      const std::string& policy_app_id) OVERRIDE;
+  void RemovePendingPermissionChanges(const std::string& app_id) OVERRIDE;
 
-  void SendNotificationOnPermissionsUpdated(const std::string& application_id);
+  void SendNotificationOnPermissionsUpdated(
+      const std::string& application_id) OVERRIDE;
 
-  bool CleanupUnpairedDevices();
+  bool CleanupUnpairedDevices() OVERRIDE;
 
-  bool CanAppKeepContext(const std::string& app_id) const;
-  bool CanAppStealFocus(const std::string& app_id) const;
-  void MarkUnpairedDevice(const std::string& device_id);
+  bool CanAppKeepContext(const std::string& app_id) const OVERRIDE;
+  bool CanAppStealFocus(const std::string& app_id) const OVERRIDE;
+  void MarkUnpairedDevice(const std::string& device_id) OVERRIDE;
 
-  void AddApplication(const std::string& application_id);
+  void AddApplication(const std::string& application_id) OVERRIDE;
 
-  virtual void RemoveAppConsentForGroup(const std::string& app_id,
-                                        const std::string& group_name);
+  void RemoveAppConsentForGroup(const std::string& app_id,
+                                const std::string& group_name);
 
-  virtual uint32_t HeartBeatTimeout(const std::string& app_id) const;
+  uint32_t HeartBeatTimeout(const std::string& app_id) const OVERRIDE;
 
-  virtual void SaveUpdateStatusRequired(bool is_update_needed);
+  void SaveUpdateStatusRequired(bool is_update_needed) OVERRIDE;
 
-  virtual bool IsPredataPolicy(const std::string& policy_app_id);
+  bool IsPredataPolicy(const std::string& policy_app_id) OVERRIDE;
   void set_cache_manager(CacheManagerInterface* cache_manager);
 
-  virtual void OnAppsSearchStarted();
+  void OnAppsSearchStarted() OVERRIDE;
 
-  virtual void OnAppsSearchCompleted();
+  void OnAppsSearchCompleted() OVERRIDE;
 
 #ifdef BUILD_TESTS
   inline CacheManagerInterfaceSPtr GetCache() {
     return cache_;
   }
 #endif  // BUILD_TESTS
-  virtual const std::vector<std::string> GetAppRequestTypes(
-      const std::string policy_app_id) const;
+  const std::vector<std::string> GetAppRequestTypes(
+      const std::string policy_app_id) const OVERRIDE;
 
-  virtual const VehicleInfo GetVehicleInfo() const;
+  const VehicleInfo GetVehicleInfo() const OVERRIDE;
 
-  virtual void OnAppRegisteredOnMobile(
-      const std::string& application_id) OVERRIDE;
+  void OnAppRegisteredOnMobile(const std::string& application_id) OVERRIDE;
 
-  virtual std::string RetrieveCertificate() const OVERRIDE;
+  std::string RetrieveCertificate() const OVERRIDE;
 
  protected:
 #ifdef USE_HMI_PTU_DECRYPTION
-  virtual utils::SharedPtr<policy_table::Table> Parse(
-      const BinaryMessage& pt_content);
+  utils::SharedPtr<policy_table::Table> Parse(const BinaryMessage& pt_content);
 #else
-  virtual utils::SharedPtr<policy_table::Table> ParseArray(
+  utils::SharedPtr<policy_table::Table> ParseArray(
       const BinaryMessage& pt_content);
 #endif
 
@@ -283,7 +283,7 @@ class PolicyManagerImpl : public PolicyManager {
    * @brief Checks whether need ask the permission of users
    * @return true if user consent is needed
    */
-  virtual bool IsConsentNeeded(const std::string& app_id);
+  bool IsConsentNeeded(const std::string& app_id);
 
   /**
    * @brief Changes isConsentNeeded for app pending permissions, in case
@@ -295,9 +295,9 @@ class PolicyManagerImpl : public PolicyManager {
       const std::string& policy_app_id,
       const std::vector<FunctionalGroupPermission>& current_permissions);
 
-  virtual void StartPTExchange();
-  virtual bool ExceededDays();
-  virtual bool ExceededIgnitionCycles();
+  void StartPTExchange() OVERRIDE;
+  bool ExceededDays() OVERRIDE;
+  bool ExceededIgnitionCycles() OVERRIDE;
   bool IsPTValid(utils::SharedPtr<policy_table::Table> policy_table,
                  policy_table::PolicyTableType type) const;
 

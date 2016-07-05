@@ -63,7 +63,7 @@ class DeleteSubMenuRequest : public CommandRequestImpl {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
   /*
@@ -89,7 +89,7 @@ class DeleteSubMenuRequest : public CommandRequestImpl {
    *
    * @param event The received event
    */
-  void on_event(const event_engine::Event& event);
+  void on_event(const event_engine::Event& event) OVERRIDE;
 
   DISALLOW_COPY_AND_ASSIGN(DeleteSubMenuRequest);
 };

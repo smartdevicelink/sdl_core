@@ -222,13 +222,11 @@ void BluetoothSocketConnection::Send() {
       Abort();
       return;
     }
-    if (bytes_sent >= 0) {
-      offset += bytes_sent;
-      if (offset == frame->data_size()) {
-        frames_to_send.pop();
-        offset = 0;
-        controller_->DataSendDone(device_handle(), application_handle(), frame);
-      }
+    offset += bytes_sent;
+    if (offset == frame->data_size()) {
+      frames_to_send.pop();
+      offset = 0;
+      controller_->DataSendDone(device_handle(), application_handle(), frame);
     }
   }
 }
