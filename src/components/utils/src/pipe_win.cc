@@ -164,6 +164,7 @@ utils::Pipe::Pipe(const std::string& name) {
 bool utils::Pipe::Open() {
   return impl_->Open();
 }
+utils::Pipe::~Pipe() {}
 
 void utils::Pipe::Close() {
   impl_->Close();
