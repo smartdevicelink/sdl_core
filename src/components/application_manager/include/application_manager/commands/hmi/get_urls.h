@@ -83,6 +83,14 @@ class GetUrls : public RequestFromHMI {
    */
   void SendResponseToHMI(hmi_apis::Common_Result::eType result);
 
+  /**
+   * @brief fills structure for sending to HMI with default urls
+   * @param urls structure for filling
+   * @param endpoints Endpoints section of policy table
+   */
+  void FillSODefaultUrls(NsSmartDeviceLink::NsSmartObjects::SmartObject& urls,
+                         const policy::EndpointUrls& endpoints);
+
   DISALLOW_COPY_AND_ASSIGN(GetUrls);
 };
 
