@@ -50,7 +50,6 @@ using ::testing::ReturnRef;
 using ::testing::NiceMock;
 
 namespace {
-// const size_t kUpdatesBeforeHour = 24;
 const std::string kAllCiphers = "ALL";
 const std::string kCaCertPath = "";
 

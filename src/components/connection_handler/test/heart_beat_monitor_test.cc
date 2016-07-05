@@ -41,8 +41,6 @@
 
 namespace {
 const int32_t MILLISECONDS_IN_SECOND = 1000;
-// const int32_t MICROSECONDS_IN_MILLISECONDS = 1000;
-// const int32_t MICROSECONDS_IN_SECOND = 1000 * 1000;
 }
 
 namespace test {
