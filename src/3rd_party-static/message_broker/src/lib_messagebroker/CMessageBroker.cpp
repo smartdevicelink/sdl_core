@@ -555,7 +555,7 @@ CMessage* CMessageBroker_Private::popMessage() {
     ret = mMessagesQueue.front();
     mMessagesQueue.pop_front();  // delete message from que
   } else {
-    DBG_MSG(("Que is empty!\n"));
+    DBG_MSG(("Queue is empty!\n"));
   }
   mMessagesQueueMutex.Unlock();
   return ret;
