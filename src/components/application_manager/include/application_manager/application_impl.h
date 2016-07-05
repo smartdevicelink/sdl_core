@@ -89,7 +89,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   /**
    * @brief change supporting COMMUNICATION NAVIGATION
    */
-  virtual void ChangeSupportingAppHMIType() OVERRIDE;
+  void ChangeSupportingAppHMIType() OVERRIDE;;
 
   inline bool is_navi() const OVERRIDE {
     return is_navi_;
@@ -112,7 +112,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   void SuspendStreaming(protocol_handler::ServiceType service_type) OVERRIDE;
   void WakeUpStreaming(protocol_handler::ServiceType service_type) OVERRIDE;
 
-  virtual bool is_voice_communication_supported() const OVERRIDE;
+  bool is_voice_communication_supported() const OVERRIDE;;
   virtual void set_voice_communication_supported(
       bool is_voice_communication_supported) OVERRIDE;
   inline bool app_allowed() const OVERRIDE;
@@ -152,22 +152,22 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   bool set_app_icon_path(const std::string& path) OVERRIDE;
   void set_app_allowed(const bool allowed) OVERRIDE;
   void set_device(connection_handler::DeviceHandle device) OVERRIDE;
-  virtual uint32_t get_grammar_id() const OVERRIDE;
-  virtual void set_grammar_id(uint32_t value) OVERRIDE;
+  uint32_t get_grammar_id() const OVERRIDE;;
+  void set_grammar_id(uint32_t value) OVERRIDE;;
 
   virtual void set_protocol_version(
       const ProtocolVersion& protocol_version) OVERRIDE;
-  virtual ProtocolVersion protocol_version() const OVERRIDE;
+  ProtocolVersion protocol_version() const OVERRIDE;;
 
-  virtual void set_is_resuming(bool is_resuming) OVERRIDE;
-  virtual bool is_resuming() const OVERRIDE;
+  void set_is_resuming(bool is_resuming) OVERRIDE;;
+  bool is_resuming() const OVERRIDE;;
 
   bool AddFile(const AppFile& file) OVERRIDE;
   bool UpdateFile(const AppFile& file) OVERRIDE;
   bool DeleteFile(const std::string& file_name) OVERRIDE;
-  virtual const AppFilesMap& getAppFiles() const OVERRIDE;
+  const AppFilesMap& getAppFiles() const OVERRIDE;;
 
-  virtual const AppFile* GetFile(const std::string& file_name) OVERRIDE;
+  const AppFile* GetFile(const std::string& file_name) OVERRIDE;;
 
   bool SubscribeToButton(mobile_apis::ButtonName::eType btn_name) OVERRIDE;
   bool IsSubscribedToButton(mobile_apis::ButtonName::eType btn_name) OVERRIDE;
@@ -182,21 +182,21 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   /**
    * @brief ResetDataInNone reset data counters in NONE
    */
-  virtual void ResetDataInNone() OVERRIDE;
+  void ResetDataInNone() OVERRIDE;;
 
-  virtual DataAccessor<ButtonSubscriptions> SubscribedButtons() const OVERRIDE;
+  DataAccessor<ButtonSubscriptions> SubscribedButtons() const OVERRIDE;;
 
-  virtual const std::string& curHash() const OVERRIDE;
+  const std::string& curHash() const OVERRIDE;;
 #ifdef CUSTOMER_PASA
   virtual bool flag_sending_hash_change_after_awake() const;
-  virtual void set_flag_sending_hash_change_after_awake(bool flag) OVERRIDE;
+  void set_flag_sending_hash_change_after_awake(bool flag) OVERRIDE;;
 #endif  // CUSTOMER_PASA
         /**
          * @brief Change Hash for current application
          * and send notification to mobile
          * @return updated_hash
          */
-  virtual void UpdateHash() OVERRIDE;
+  void UpdateHash() OVERRIDE;;
 
   UsageStatistics& usage_report() OVERRIDE;
 
@@ -204,11 +204,11 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
                                 TLimitSource source) OVERRIDE;
   virtual void SubscribeToSoftButtons(
       int32_t cmd_id, const SoftButtonID& softbuttons_id) OVERRIDE;
-  virtual bool IsSubscribedToSoftButton(const uint32_t softbutton_id) OVERRIDE;
+  bool IsSubscribedToSoftButton(const uint32_t softbutton_id) OVERRIDE;;
 
-  virtual void UnsubscribeFromSoftButtons(int32_t cmd_id) OVERRIDE;
+  void UnsubscribeFromSoftButtons(int32_t cmd_id) OVERRIDE;;
 
-  virtual bool is_application_data_changed() const OVERRIDE;
+  bool is_application_data_changed() const OVERRIDE;;
 
   virtual void set_is_application_data_changed(
       bool state_application_data) OVERRIDE;
@@ -219,14 +219,14 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
    *
    * @return true if application is media, voice communication or navigation
    */
-  virtual bool IsAudioApplication() const OVERRIDE;
+  bool IsAudioApplication() const OVERRIDE;;
 
   /**
   * @brief SetRegularState set permanent state of application
   *
   * @param state state to setup
   */
-  virtual void SetRegularState(HmiStatePtr state) OVERRIDE;
+  void SetRegularState(HmiStatePtr state) OVERRIDE;;
 
   /**
   * @brief SetPostponedState sets postponed state to application.
@@ -234,9 +234,9 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   *
   * @param state state to setup
   */
-  virtual void SetPostponedState(HmiStatePtr state) OVERRIDE;
+  void SetPostponedState(HmiStatePtr state) OVERRIDE;;
 
-  virtual void RemovePostponedState() OVERRIDE;
+  void RemovePostponedState() OVERRIDE;;
 
   /**
    * @brief AddHMIState the function that will change application's
@@ -246,7 +246,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
    *
    * @param state new hmi state for certain application.
    */
-  virtual void AddHMIState(HmiStatePtr state) OVERRIDE;
+  void AddHMIState(HmiStatePtr state) OVERRIDE;;
 
   /**
    * @brief RemoveHMIState the function that will turn back hmi_level after end
@@ -256,19 +256,19 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
    *
    * @param state_id that should be removed
    */
-  virtual void RemoveHMIState(HmiState::StateID state_id) OVERRIDE;
+  void RemoveHMIState(HmiState::StateID state_id) OVERRIDE;;
 
   /**
    * @brief HmiState of application within active events PhoneCall, TTS< etc ...
    * @return Active HmiState of application
    */
-  virtual const HmiStatePtr CurrentHmiState() const OVERRIDE;
+  const HmiStatePtr CurrentHmiState() const OVERRIDE;;
 
   /**
    * @brief RegularHmiState of application without active events VR, TTS etc ...
    * @return HmiState of application
    */
-  virtual const HmiStatePtr RegularHmiState() const OVERRIDE;
+  const HmiStatePtr RegularHmiState() const OVERRIDE;;
 
   /**
    * @brief PostponedHmiState returns postponed hmi state of application
@@ -276,7 +276,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
    *
    * @return Postponed hmi state of application
    */
-  virtual const HmiStatePtr PostponedHmiState() const OVERRIDE;
+  const HmiStatePtr PostponedHmiState() const OVERRIDE;;
 
   uint32_t audio_stream_retry_number() const OVERRIDE;
 

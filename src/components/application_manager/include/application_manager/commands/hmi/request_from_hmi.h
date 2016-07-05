@@ -56,7 +56,7 @@ class RequestFromHMI : public CommandImpl, public event_engine::EventObserver {
   bool Init() OVERRIDE;
   bool CleanUp() OVERRIDE;
   void Run() OVERRIDE;
-  virtual void on_event(const event_engine::Event& event) OVERRIDE;
+  void on_event(const event_engine::Event& event) OVERRIDE;;
   /**
    * @brief SendResponse allows to send response to hmi
    * @param correlation_id the correlation id for the rfesponse.
