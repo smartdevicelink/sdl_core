@@ -217,6 +217,7 @@ class SQLPTRepresentation : public virtual PTRepresentation {
       const policy_table::NumberOfNotificationsPerMinute& notifications);
   bool SaveMessageType(const std::string& type);
   bool SaveLanguage(const std::string& code);
-}; }  //  namespace policy
+};
+}  //  namespace policy
 
 #endif  // SRC_COMPONENTS_POLICY_INCLUDE_POLICY_SQL_PT_REPRESENTATION_H_

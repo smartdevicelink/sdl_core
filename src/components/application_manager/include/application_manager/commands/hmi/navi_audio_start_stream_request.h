@@ -71,7 +71,8 @@ class AudioStartStreamRequest : public RequestToHMI,
   /**
    * @brief On event callback
    **/
-  void on_event(const event_engine::Event& event) OVERRIDE;;
+  void on_event(const event_engine::Event& event) OVERRIDE;
+  ;
 
   /**
  * @brief RetryStartSession resend HMI startSession request if needed.

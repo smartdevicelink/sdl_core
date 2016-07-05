@@ -76,7 +76,8 @@ class SDLActivateAppRequest : public RequestFromHMI {
    *
    * @param event event type that current request subscribed on.
    */
-  void on_event(const event_engine::Event& event) OVERRIDE;;
+  void on_event(const event_engine::Event& event) OVERRIDE;
+  ;
 
  private:
   uint32_t app_id() const;
