@@ -244,11 +244,11 @@ bool ResumptionDataJson::RemoveApplicationFromSaved(
       const std::string& saved_policy_app_id =
           (*it)[strings::app_id].asString();
       const std::string& saved_device_id = (*it)[strings::device_id].asString();
-      if (saved_policy_app_id != policy_app_id &&
-          saved_device_id != device_id) {
-        temp.push_back((*it));
-      } else {
+      if (saved_policy_app_id == policy_app_id &&
+          saved_device_id == device_id) {
         result = true;
+      } else {
+        temp.push_back((*it));
       }
     }
   }
