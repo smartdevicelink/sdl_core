@@ -35,6 +35,18 @@
 #include "application_manager/application_manager.h"
 #include "application_manager/policies/policy_handler.h"
 
+namespace {
+struct PolicyAppIdComparator {
+  PolicyAppIdComparator(const std::string& policy_app_id)
+      : policy_app_id_(policy_app_id) {}
+
+  bool operator()(const policy::EndpointData& data) {
+    return data.app_id == policy_app_id_;
+  }
+  std::string policy_app_id_;
+};
+}
+
 namespace application_manager {
 namespace commands {
 
@@ -94,7 +106,13 @@ void GetUrls::ProcessPolicyServiceURLs(const policy::EndpointUrls& endpoints) {
   if (!app_id_to_send_to) {
     LOG4CXX_ERROR(logger_,
                   "There are no available applications for processing.");
-    application_manager_.ManageHMICommand(message_);
+    SmartObject urls(SmartType_Array);
+    FillSODefaultUrls(urls, endpoints);
+    if (!urls.empty()) {
+      (*message_)[msg_params][hmi_response::urls] = urls;
+    }
+    (*message_).erase(hmi_request::service);
+    SendResponseToHMI(Common_Result::SUCCESS);
     return;
   }
 
@@ -113,9 +131,7 @@ void GetUrls::ProcessPolicyServiceURLs(const policy::EndpointUrls& endpoints) {
   SmartObject& object = *message_;
   object[msg_params].erase(hmi_request::service);
   object[msg_params][hmi_response::urls] = SmartObject(SmartType_Array);
-
   SmartObject& urls = object[msg_params][hmi_response::urls];
-
   const std::string mobile_app_id = app->policy_app_id();
   std::string default_url = "URL is not found";
 
@@ -174,6 +190,23 @@ void GetUrls::ProcessServiceURLs(const policy::EndpointUrls& endpoints) {
     }
   }
   SendResponseToHMI(Common_Result::SUCCESS);
+}
+
+void GetUrls::FillSODefaultUrls(smart_objects::SmartObject& urls,
+                                const policy::EndpointUrls& endpoints) {
+  using namespace smart_objects;
+  LOG4CXX_AUTO_TRACE(logger_);
+  PolicyAppIdComparator comparator(policy::kDefaultId);
+  policy::EndpointUrls::const_iterator it =
+      std::find_if(endpoints.begin(), endpoints.end(), comparator);
+  if (it == endpoints.end()) {
+    return;
+  }
+  SmartObject service_info = SmartObject(SmartType_Map);
+  for (size_t i = 0; i < (*it).url.size(); ++i) {
+    service_info[strings::url] = (*it).url[i];
+    urls[i] = service_info;
+  }
 }
 
 void GetUrls::SendResponseToHMI(hmi_apis::Common_Result::eType result) {
