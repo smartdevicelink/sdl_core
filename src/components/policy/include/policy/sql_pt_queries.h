@@ -60,6 +60,7 @@ extern const std::string kSelectFunctionalGroups;
 extern const std::string kSelectAllRpcs;
 extern const std::string kSelectUserMsgsVersion;
 extern const std::string kSelectAppPolicies;
+extern const std::string kCollectFriendlyMsg;
 extern const std::string kSelectAppGroups;
 extern const std::string kSelectNicknames;
 extern const std::string kSelectAppTypes;

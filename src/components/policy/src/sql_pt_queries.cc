@@ -595,6 +595,8 @@ const std::string kSelectAppPolicies =
     "SELECT `id`, `priority_value`, `memory_kb`, "
     " `heart_beat_timeout_ms`, `certificate` FROM `application`";
 
+const std::string kCollectFriendlyMsg = "SELECT * FROM `message`";
+
 const std::string kSelectAppGroups =
     "SELECT `f`.`name` FROM `app_group` AS `a`"
     "  LEFT JOIN `functional_group` AS `f` "

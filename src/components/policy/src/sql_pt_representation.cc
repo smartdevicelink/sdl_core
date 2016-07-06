@@ -579,10 +579,11 @@ void SQLPTRepresentation::GatherDeviceData(
 
   utils::dbms::SQLQuery query(db());
   if (query.Prepare(sql_pt::kSelectDeviceData)) {
-    policy_table::DeviceParams device_data_empty;
-    device_data_empty.mark_initialized();
+    policy_table::DeviceParams device_data;
+    device_data.mark_initialized();
     while (query.Next()) {
-      (*data)[query.GetString(0)] = device_data_empty;
+      const std::string device_id = query.GetString(0);
+      (*data)[device_id] = device_data;
     }
   }
 }
@@ -638,7 +639,22 @@ bool SQLPTRepresentation::GatherConsumerFriendlyMessages(
     LOG4CXX_WARN(logger_, "Incorrect select from consumer_friendly_messages");
     return false;
   }
+
   messages->version = query.GetString(0);
+
+  if (query.Prepare(sql_pt::kCollectFriendlyMsg)) {
+    while (query.Next()) {
+
+      UserFriendlyMessage msg;
+      msg.message_code = query.GetString(7);
+      std::string language = query.GetString(6);
+
+      (*messages->messages)[msg.message_code].languages[language];
+    }
+  } else {
+    LOG4CXX_WARN(logger_, "Incorrect statement for select friendly messages.");
+  }
+
   return true;
 }
 
@@ -1307,7 +1323,7 @@ bool SQLPTRepresentation::SaveDeviceData(
   policy_table::DeviceData::const_iterator it;
   for (it = devices.begin(); it != devices.end(); ++it) {
     query.Bind(0, it->first);
-    if (!query.Exec()) {
+    if (!query.Exec() || !query.Reset()) {
       LOG4CXX_WARN(logger_, "Incorrect insert into device data.");
       return false;
     }
