@@ -1174,7 +1174,6 @@ bool SQLPTRepresentation::SaveConsumerFriendlyMessages(
     }
 
     policy_table::Messages::const_iterator it;
-    // TODO(IKozyrenko): Check logic if optional container is missing
     for (it = messages.messages->begin(); it != messages.messages->end();
          ++it) {
       if (!SaveMessageType(it->first)) {
@@ -1234,7 +1233,19 @@ bool SQLPTRepresentation::SaveMessageString(
     const std::string& type,
     const std::string& lang,
     const policy_table::MessageString& strings) {
-  // Section is empty for SDL specific
+  utils::dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kInsertMessageString)) {
+    LOG4CXX_WARN(logger_, "Incorrect insert statement for message.");
+    return false;
+  }
+
+  query.Bind(0, lang);
+  query.Bind(1, type);
+
+  if (!query.Exec() || !query.Reset()) {
+    LOG4CXX_WARN(logger_, "Incorrect insert into message.");
+    return false;
+  }
   return true;
 }
 
