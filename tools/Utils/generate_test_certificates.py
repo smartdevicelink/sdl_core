@@ -12,6 +12,7 @@ import subprocess
 import tempfile
 from argparse import ArgumentParser
 from subprocess import check_call
+import c_rehash as c_rehash_tools
 
 def run(command, *args):
     """Application caller
@@ -287,6 +288,10 @@ def main():
     if sys.platform != "win32":
         subprocess.call(["c_rehash", server_dir])
         subprocess.call(["c_rehash", client_dir])
+    else :    
+        c_rehash_tools.process_dir(server_dir)
+        c_rehash_tools.process_dir(client_dir)
+	
     print
     print "All certificates have been generated"
 
