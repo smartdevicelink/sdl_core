@@ -1,0 +1,162 @@
+/*
+ * Copyright (c) 2016, Ford Motor Company
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following
+ * disclaimer in the documentation and/or other materials provided with the
+ * distribution.
+ *
+ * Neither the name of the Ford Motor Company nor the names of its contributors
+ * may be used to endorse or promote products derived from this software
+ * without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include <stdint.h>
+
+#include "gtest/gtest.h"
+#include "utils/shared_ptr.h"
+#include "smart_objects/smart_object.h"
+#include "application_manager/smart_object_keys.h"
+#include "application_manager/commands/commands_test.h"
+#include "application_manager/commands/command.h"
+#include "application_manager/mock_event_dispatcher.h"
+#include "application_manager/mock_hmi_capabilities.h"
+#include "application_manager/policies/mock_policy_handler_interface.h"
+#include "hmi/vi_read_did_response.h"
+#include "hmi/vi_subscribe_vehicle_data_response.h"
+#include "hmi/vi_get_vehicle_type_response.h"
+#include "hmi/vi_is_ready_response.h"
+
+namespace test {
+namespace components {
+namespace commands_test {
+namespace hmi_commands_test {
+
+using ::testing::_;
+using ::testing::ReturnRef;
+using ::testing::Types;
+using ::testing::Eq;
+
+using ::utils::SharedPtr;
+using ::test::components::event_engine_test::MockEventDispatcher;
+
+namespace am = ::application_manager;
+namespace commands = am::commands;
+using commands::MessageSharedPtr;
+
+template <class CommandD>
+class ResponseFromHMICommandsTest
+    : public CommandsTest<CommandsTestMocks::kIsNice> {
+ public:
+  typedef CommandD CommandData;
+  MockEventDispatcher event_dispatcher_;
+
+  ResponseFromHMICommandsTest() {
+    ON_CALL(app_mngr_, event_dispatcher())
+        .WillByDefault(ReturnRef(event_dispatcher_));
+  }
+};
+
+template <class Command, hmi_apis::FunctionID::eType kExpectedEventId>
+struct CommandData {
+  typedef Command CommandType;
+  enum { kEventId = kExpectedEventId };
+};
+
+typedef Types<
+    CommandData<commands::VIReadDIDResponse,
+                hmi_apis::FunctionID::VehicleInfo_ReadDID>,
+    CommandData<commands::VISubscribeVehicleDataResponse,
+                hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData> >
+    ResponseCommandsList;
+
+TYPED_TEST_CASE(ResponseFromHMICommandsTest, ResponseCommandsList);
+
+MATCHER_P(EventIdIsEqualTo, function_id, "") {
+  return static_cast<hmi_apis::FunctionID::eType>(function_id) == arg.id();
+}
+
+TYPED_TEST(ResponseFromHMICommandsTest, Run_SendMessageToHMI_SUCCESS) {
+  typedef typename TestFixture::CommandData CommandData;
+  typedef typename CommandData::CommandType CommandType;
+
+  SharedPtr<CommandType> command = this->template CreateCommand<CommandType>();
+
+  EXPECT_CALL(this->event_dispatcher_,
+              raise_event(EventIdIsEqualTo(CommandData::kEventId)));
+
+  command->Run();
+}
+
+class OtherResponseFromHMICommandsTest
+    : public CommandsTest<CommandsTestMocks::kIsNice> {};
+
+MATCHER_P(VehicleTypeIsEqualTo, vehicle_type, "") {
+  return (*vehicle_type) == arg.asString();
+}
+
+TEST_F(OtherResponseFromHMICommandsTest, VIGetVehicleTypeResponse_Run_SUCCESS) {
+  const std::string kVehicleType = "Test";
+
+  MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*command_msg)[am::strings::msg_params][am::hmi_response::vehicle_type] =
+      kVehicleType;
+
+  SharedPtr<commands::VIGetVehicleTypeResponse> command(
+      CreateCommand<commands::VIGetVehicleTypeResponse>(command_msg));
+
+  application_manager_test::MockHMICapabilities hmi_capabilities;
+  EXPECT_CALL(app_mngr_, hmi_capabilities())
+      .WillOnce(ReturnRef(hmi_capabilities));
+
+  EXPECT_CALL(hmi_capabilities,
+              set_vehicle_type(VehicleTypeIsEqualTo(&kVehicleType)));
+
+  command->Run();
+}
+
+TEST_F(OtherResponseFromHMICommandsTest, VIIsReadyResponse_Run_SUCCESS) {
+  MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*command_msg)[am::strings::msg_params][am::strings::available] = true;
+
+  SharedPtr<commands::VIIsReadyResponse> command(
+      CreateCommand<commands::VIIsReadyResponse>(command_msg));
+
+  application_manager_test::MockHMICapabilities hmi_capabilities;
+  EXPECT_CALL(app_mngr_, hmi_capabilities())
+      .WillOnce(ReturnRef(hmi_capabilities));
+
+  EXPECT_CALL(hmi_capabilities, set_is_ivi_cooperating(Eq(true)));
+
+  policy_test::MockPolicyHandlerInterface policy_handler;
+  EXPECT_CALL(app_mngr_, GetPolicyHandler())
+      .WillOnce(ReturnRef(policy_handler));
+
+  EXPECT_CALL(policy_handler, OnVIIsReady());
+
+  command->Run();
+}
+
+}  // hmi_commands_test
+}  // namespace commands_test
+}  // namespace components
+}  // namespace test
