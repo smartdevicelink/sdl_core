@@ -560,13 +560,16 @@ bool SQLPTRepresentation::GatherUsageAndErrorCounts(
   LOG4CXX_INFO(logger_, "Gather Usage and Error Counts.");
   utils::dbms::SQLQuery query(db());
   if (query.Prepare(sql_pt::kSelectAppLevels)) {
-    policy_table::AppLevel app_level_empty;
-    app_level_empty.mark_initialized();
+    policy_table::AppLevel app_level;
+    app_level.mark_initialized();
     while (query.Next()) {
-      (*counts->app_level)[query.GetString(0)] = app_level_empty;
+      app_level.count_of_tls_errors = query.GetInteger(1);
+      const std::string app_id = query.GetString(0);
+      (*counts->app_level)[app_id] = app_level;
     }
+    return true;
   }
-  return true;
+  return false;
 }
 
 void SQLPTRepresentation::GatherDeviceData(
@@ -1320,7 +1323,8 @@ bool SQLPTRepresentation::SaveUsageAndErrorCounts(
   const_cast<policy_table::AppLevels&>(*counts.app_level).mark_initialized();
   for (it = app_levels.begin(); it != app_levels.end(); ++it) {
     query.Bind(0, it->first);
-    if (!query.Exec()) {
+    query.Bind(1, it->second.count_of_tls_errors);
+    if (!query.Exec() || !query.Reset()) {
       LOG4CXX_WARN(logger_, "Incorrect insert into app level.");
       return false;
     }
