@@ -36,8 +36,8 @@
 #include "application_manager/policies/policy_handler.h"
 
 namespace {
-struct PolicyAppIdComporator {
-  PolicyAppIdComporator(const std::string& policy_app_id)
+struct PolicyAppIdComparator {
+  PolicyAppIdComparator(const std::string& policy_app_id)
       : policy_app_id_(policy_app_id) {}
 
   bool operator()(const policy::EndpointData& data) {
@@ -192,11 +192,11 @@ void GetUrls::ProcessServiceURLs(const policy::EndpointUrls& endpoints) {
   SendResponseToHMI(Common_Result::SUCCESS);
 }
 
-void GetUrls::FillSODefaultUrls(NsSmartDeviceLink::NsSmartObjects::SmartObject& urls,
+void GetUrls::FillSODefaultUrls(smart_objects::SmartObject& urls,
                                 const policy::EndpointUrls& endpoints) {
   using namespace smart_objects;
   LOG4CXX_AUTO_TRACE(logger_);
-  PolicyAppIdComporator comparator(policy::kDefaultId);
+  PolicyAppIdComparator comparator(policy::kDefaultId);
   policy::EndpointUrls::const_iterator it =
       std::find_if(endpoints.begin(), endpoints.end(), comparator);
   if (it == endpoints.end()) {

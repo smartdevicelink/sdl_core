@@ -38,7 +38,7 @@
 
 namespace application_manager {
 namespace commands {
-
+namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 /**
  * @brief GetUrls command class
  **/
@@ -88,7 +88,7 @@ class GetUrls : public RequestFromHMI {
    * @param urls structure for filling
    * @param endpoints Endpoints section of policy table
    */
-  void FillSODefaultUrls(NsSmartDeviceLink::NsSmartObjects::SmartObject& urls,
+  void FillSODefaultUrls(smart_objects::SmartObject& urls,
                          const policy::EndpointUrls& endpoints);
 
   DISALLOW_COPY_AND_ASSIGN(GetUrls);
