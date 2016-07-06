@@ -210,6 +210,8 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
     policy_table["functional_groupings"] = Json::Value(Json::objectValue);
     policy_table["consumer_friendly_messages"] = Json::Value(Json::objectValue);
     policy_table["app_policies"] = Json::Value(Json::objectValue);
+    policy_table["usage_and_error_counts"] = Json::Value(Json::objectValue);
+    policy_table["device_data"] = Json::Value(Json::objectValue);
 
     // 'module_config' section start
     Json::Value& module_config = policy_table["module_config"];
@@ -268,18 +270,13 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
 
     Json::Value& consumer_friendly_messages =
         policy_table["consumer_friendly_messages"];
-    consumer_friendly_messages["version"] = Json::Value("1.2");
+    consumer_friendly_messages["version"] = Json::Value("some_msg_version");
     consumer_friendly_messages["messages"] = Json::Value(Json::objectValue);
-    consumer_friendly_messages["messages"]["MSG1"] =
+    consumer_friendly_messages["messages"]["MSG_CODE"] =
         Json::Value(Json::objectValue);
-    Json::Value& msg1 = consumer_friendly_messages["messages"]["MSG1"];
+    Json::Value& msg1 = consumer_friendly_messages["messages"]["MSG_CODE"];
     msg1["languages"] = Json::Value(Json::objectValue);
     msg1["languages"]["en-us"] = Json::Value(Json::objectValue);
-    msg1["languages"]["en-us"]["tts"] = Json::Value("TTS message");
-    msg1["languages"]["en-us"]["label"] = Json::Value("LABEL message");
-    msg1["languages"]["en-us"]["line1"] = Json::Value("LINE1 message");
-    msg1["languages"]["en-us"]["line2"] = Json::Value("LINE2 message");
-    msg1["languages"]["en-us"]["textBody"] = Json::Value("TEXTBODY message");
     // 'functional_groupings' section end
 
     // 'app_policies' section start
@@ -325,6 +322,19 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
     app_policies["device"]["keep_context"] = Json::Value(true);
     app_policies["device"]["steal_focus"] = Json::Value(true);
     // 'app_policies' section end
+
+    Json::Value& usage_and_error_counts =
+        policy_table["usage_and_error_counts"];
+    usage_and_error_counts["app_level"] = Json::Value(Json::objectValue);
+    usage_and_error_counts["app_level"]["some_app_id"] =
+        Json::Value(Json::objectValue);
+    usage_and_error_counts["app_level"]["some_app_id"]["count_of_tls_errors"] =
+        Json::Value(5);
+
+    Json::Value& device_data = policy_table["device_data"];
+    device_data["device_id_hash_1"] = Json::Value(Json::objectValue);
+    device_data["device_id_hash_2"] = Json::Value(Json::objectValue);
+    device_data["device_id_hash_3"] = Json::Value(Json::objectValue);
   }
 
   ::testing::AssertionResult IsValid(const policy_table::Table& table) {
@@ -1533,12 +1543,15 @@ TEST_F(SQLPTRepresentationTest, Save_SetPolicyTableThenSave_ExpectSavedToPT) {
   policy_table::ConsumerFriendlyMessages messages;
   GatherConsumerFriendlyMessages(&messages);
   EXPECT_EQ("0", static_cast<std::string>(messages.version));
+
   policy_table::DeviceData devices;
   GatherDeviceData(&devices);
   EXPECT_EQ(0u, devices.size());
+
   policy_table::UsageAndErrorCounts counts;
   GatherUsageAndErrorCounts(&counts);
-  EXPECT_EQ(0u, counts.app_level->size());
+  EXPECT_TRUE(0u == counts.app_level->size());
+
   // ASSERT_TRUE(IsValid(update));
   // Act
   ASSERT_TRUE(reps->Save(update));
@@ -1638,8 +1651,18 @@ TEST_F(SQLPTRepresentationTest, Save_SetPolicyTableThenSave_ExpectSavedToPT) {
   EXPECT_EQ("default", url_list.begin()->first);
   policy_table::URL& url = url_list.begin()->second;
   EXPECT_EQ("http://ford.com/cloud/default", static_cast<std::string>(url[0]));
+
   GatherConsumerFriendlyMessages(&messages);
-  EXPECT_EQ("1.2", static_cast<std::string>(messages.version));
+  EXPECT_EQ("some_msg_version", static_cast<std::string>(messages.version));
+  EXPECT_TRUE(0u != messages.messages->size());
+  EXPECT_TRUE(0u != (*messages.messages)["MSG_CODE"].languages.size());
+
+  GatherUsageAndErrorCounts(&counts);
+  EXPECT_FALSE(0u == counts.app_level->size());
+  EXPECT_EQ(5u, (*counts.app_level)["some_app_id"].count_of_tls_errors);
+
+  GatherDeviceData(&devices);
+  EXPECT_EQ(3u, devices.size());
 }
 
 }  // namespace policy
