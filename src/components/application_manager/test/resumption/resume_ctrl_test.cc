@@ -358,7 +358,7 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithChoiceSet) {
 
   smart_objects::SmartObjectList requests;
   EXPECT_CALL(*application_manager::MockMessageHelper::message_helper_mock(),
-              CreateAddVRCommandRequestFromChoiceToHMI(_))
+              CreateAddVRCommandRequestFromChoiceToHMI(_, _))
       .WillRepeatedly(Return(requests));
 
   const bool kResult = res_ctrl->StartResumption(app_mock, kHash_);
@@ -384,7 +384,7 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithGlobalProperties) {
   EXPECT_CALL(*app_mock, set_grammar_id(kTestGrammarId_));
 
   EXPECT_CALL(*application_manager::MockMessageHelper::message_helper_mock(),
-              SendGlobalPropertiesToHMI(_));
+              SendGlobalPropertiesToHMI(_, _));
 
   EXPECT_CALL(*app_mock, load_global_properties(test_global_properties));
 
@@ -473,7 +473,8 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithSubscriptionToIVI) {
 
   smart_objects::SmartObjectList requests;
   EXPECT_CALL(*application_manager::MockMessageHelper::message_helper_mock(),
-              GetIVISubscriptionRequests(_)).WillRepeatedly(Return(requests));
+              GetIVISubscriptionRequests(_, _))
+      .WillRepeatedly(Return(requests));
 
   EXPECT_CALL(*app_mock, UpdateHash());
   const bool kResult = res_ctrl->StartResumption(app_mock, kHash_);

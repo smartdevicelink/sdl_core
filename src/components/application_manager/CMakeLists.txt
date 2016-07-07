@@ -79,11 +79,16 @@ set(RESUMPTION_PATHS
 )
 collect_sources(RESUMPTION_SOURCES "${RESUMPTION_PATHS}")
 
+set(AM_MESSAGE_HELPER_SOURCES
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/message_helper.cc
+)
+
 set(EXCLUDE_PATHS
   ${COMMANDS_PATHS}
   ${EVENT_ENGINE_PATHS}
   ${POLICIES_PATHS}
   ${RESUMPTION_PATHS}
+  ${AM_MESSAGE_HELPER_SOURCES}
 )
 
 set(PATHS
@@ -120,6 +125,9 @@ target_link_libraries(am_policies ${LIBRARIES})
 
 add_library(am_resumption ${RESUMPTION_SOURCES} )
 target_link_libraries(am_resumption ${LIBRARIES})
+
+add_library(am_message_helper ${AM_MESSAGE_HELPER_SOURCES} )
+target_link_libraries(am_message_helper ${LIBRARIES})
 
 list(APPEND LIBRARIES
   am_commands_library
