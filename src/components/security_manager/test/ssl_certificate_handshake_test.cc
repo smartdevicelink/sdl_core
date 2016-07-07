@@ -168,9 +168,10 @@ class SSLHandshakeTest : public testing::Test {
       return false;
     }
 
-    security_manager::SSLContext::HandshakeContext ctx;
-    server_ctx->SetHandshakeContext(ctx.make_context(
-        custom_str::CustomString("SPT"), custom_str::CustomString("client")));
+    server_ctx->SetHandshakeContext(
+        security_manager::SSLContext::HandshakeContext(
+            custom_str::CustomString("SPT"),
+            custom_str::CustomString("client")));
 
     return true;
   }
@@ -201,9 +202,10 @@ class SSLHandshakeTest : public testing::Test {
       return false;
     }
 
-    security_manager::SSLContext::HandshakeContext ctx;
-    client_ctx->SetHandshakeContext(ctx.make_context(
-        custom_str::CustomString("SPT"), custom_str::CustomString("server")));
+    client_ctx->SetHandshakeContext(
+        security_manager::SSLContext::HandshakeContext(
+            custom_str::CustomString("SPT"),
+            custom_str::CustomString("server")));
 
     return true;
   }
@@ -508,16 +510,19 @@ TEST_F(SSLHandshakeTest, AppNameAndAppIDInvalid) {
                                  server_ca_cert_filename))
       << client_manager->LastError();
 
-  security_manager::SSLContext::HandshakeContext ctx;
-  client_ctx->SetHandshakeContext(ctx.make_context(
-      custom_str::CustomString("server"), custom_str::CustomString("Wrong")));
+  client_ctx->SetHandshakeContext(
+      security_manager::SSLContext::HandshakeContext(
+          custom_str::CustomString("server"),
+          custom_str::CustomString("Wrong")));
 
   GTEST_TRACE(HandshakeProcedure_ClientSideFail(
       security_manager::SSLContext::Handshake_Result_AppNameMismatch));
 
   ResetConnections();
-  client_ctx->SetHandshakeContext(ctx.make_context(
-      custom_str::CustomString("Wrong"), custom_str::CustomString("server")));
+  client_ctx->SetHandshakeContext(
+      security_manager::SSLContext::HandshakeContext(
+          custom_str::CustomString("Wrong"),
+          custom_str::CustomString("server")));
 
   GTEST_TRACE(HandshakeProcedure_ClientSideFail(
       security_manager::SSLContext::Handshake_Result_AppIDMismatch));
