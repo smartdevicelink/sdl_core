@@ -44,7 +44,7 @@ typedef Map<URLList, 1, 255> ServiceEndpoints;
 
 typedef uint8_t NumberOfNotificationsType;
 typedef Map<Integer<NumberOfNotificationsType, 0, 255>, 0, 6>
-	NumberOfNotificationsPerMinute;
+    NumberOfNotificationsPerMinute;
 
 typedef Array<Integer<uint16_t, 1, 1000>, 0, 10> SecondsBetweenRetries;
 
@@ -55,7 +55,7 @@ typedef Map<MessageLanguages, 0, 255> Messages;
 typedef Map<AppLevel, 0, 255> AppLevels;
 
 typedef Map<Stringifyable<Nullable<ApplicationParams>>, 1, 1000>
-	ApplicationPolicies;
+    ApplicationPolicies;
 
 typedef Map<Rpcs, 1, 255> FunctionalGroupings;
 
@@ -125,7 +125,7 @@ struct ApplicationPoliciesSection : CompositeType {
  public:
   ApplicationPoliciesSection();
   ApplicationPoliciesSection(const ApplicationPolicies& apps,
-							 const DevicePolicy& device);
+                             const DevicePolicy& device);
   ~ApplicationPoliciesSection();
   explicit ApplicationPoliciesSection(const Json::Value* value__);
   Json::Value ToJsonValue() const;
@@ -201,13 +201,13 @@ struct ModuleConfig : CompositeType {
  public:
   ModuleConfig();
   ModuleConfig(uint8_t exchange_after_x_ignition_cycles,
-			   int64_t exchange_after_x_kilometers,
-			   uint8_t exchange_after_x_days,
-			   uint16_t timeout_after_x_seconds,
-			   const SecondsBetweenRetries& seconds_between_retries,
-			   const ServiceEndpoints& endpoints,
-			   const NumberOfNotificationsPerMinute&
-				   notifications_per_minute_by_priority);
+               int64_t exchange_after_x_kilometers,
+               uint8_t exchange_after_x_days,
+               uint16_t timeout_after_x_seconds,
+               const SecondsBetweenRetries& seconds_between_retries,
+               const ServiceEndpoints& endpoints,
+               const NumberOfNotificationsPerMinute&
+                   notifications_per_minute_by_priority);
   ~ModuleConfig();
   explicit ModuleConfig(const Json::Value* value__);
   void SafeCopyFrom(const ModuleConfig& from);
@@ -265,7 +265,7 @@ struct MessageLanguages : CompositeType {
   bool Validate() const;
 };
 
-struct	ConsumerFriendlyMessages : CompositeType {
+struct ConsumerFriendlyMessages : CompositeType {
  public:
   String<1, 100> version;
   Optional<Messages> messages;
@@ -327,20 +327,20 @@ struct AppLevel : CompositeType {
  public:
   AppLevel();
   AppLevel(uint16_t minutes_in_hmi_full,
-		   const std::string& app_registration_language_gui,
-		   const std::string& app_registration_language_vui,
-		   uint16_t minutes_in_hmi_limited,
-		   uint16_t minutes_in_hmi_background,
-		   uint16_t minutes_in_hmi_none,
-		   uint16_t count_of_user_selections,
-		   uint16_t count_of_rejections_sync_out_of_memory,
-		   uint16_t count_of_rejections_nickname_mismatch,
-		   uint16_t count_of_rejections_duplicate_name,
-		   uint16_t count_of_rejected_rpc_calls,
-		   uint16_t count_of_rpcs_sent_in_hmi_none,
-		   uint16_t count_of_removals_for_bad_behavior,
-		   uint16_t count_of_tls_errors,
-		   uint16_t count_of_run_attempts_while_revoked);
+           const std::string& app_registration_language_gui,
+           const std::string& app_registration_language_vui,
+           uint16_t minutes_in_hmi_limited,
+           uint16_t minutes_in_hmi_background,
+           uint16_t minutes_in_hmi_none,
+           uint16_t count_of_user_selections,
+           uint16_t count_of_rejections_sync_out_of_memory,
+           uint16_t count_of_rejections_nickname_mismatch,
+           uint16_t count_of_rejections_duplicate_name,
+           uint16_t count_of_rejected_rpc_calls,
+           uint16_t count_of_rpcs_sent_in_hmi_none,
+           uint16_t count_of_removals_for_bad_behavior,
+           uint16_t count_of_tls_errors,
+           uint16_t count_of_run_attempts_while_revoked);
   ~AppLevel();
   explicit AppLevel(const Json::Value* value__);
   Json::Value ToJsonValue() const;
@@ -401,9 +401,9 @@ struct PolicyTable : CompositeType {
  public:
   PolicyTable();
   PolicyTable(const ApplicationPoliciesSection& app_policies_section,
-			  const FunctionalGroupings& functional_groupings,
-			  const ConsumerFriendlyMessages& consumer_friendly_messages,
-			  const ModuleConfig& module_config);
+              const FunctionalGroupings& functional_groupings,
+              const ConsumerFriendlyMessages& consumer_friendly_messages,
+              const ModuleConfig& module_config);
   ~PolicyTable();
   explicit PolicyTable(const Json::Value* value__);
   Json::Value ToJsonValue() const;
