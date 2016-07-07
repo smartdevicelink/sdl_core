@@ -530,7 +530,15 @@ void SystemRequest::Run() {
 
   LOG4CXX_DEBUG(logger_, "Binary data ok.");
 
-  if (mobile_apis::RequestType::QUERY_APPS == request_type) {
+  if (mobile_apis::RequestType::HTTP == request_type &&
+      (*message_)[strings::msg_params].keyExists(strings::file_name)) {
+    const std::string& file =
+        (*message_)[strings::msg_params][strings::file_name].asString();
+    application_manager_.GetPolicyHandler().ReceiveMessageFromSDK(file,
+                                                                  binary_data);
+    SendResponse(true, mobile_apis::Result::SUCCESS);
+    return;
+  } else if (mobile_apis::RequestType::QUERY_APPS == request_type) {
     using namespace NsSmartDeviceLink::NsJSONHandler::Formatters;
 
     smart_objects::SmartObject sm_object;
