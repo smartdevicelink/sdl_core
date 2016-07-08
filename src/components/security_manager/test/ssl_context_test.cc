@@ -157,9 +157,9 @@ class SSLTest : public testing::Test {
         .WillRepeatedly(Return(security_manager::CLIENT));
     client_ctx = client_manager_->CreateSSLContext();
 
-    security_manager::SSLContext::HandshakeContext ctx;
-    ctx.make_context(custom_str::CustomString("SPT"),
-                     custom_str::CustomString("client"));
+    using custom_str::CustomString;
+    security_manager::SSLContext::HandshakeContext ctx(CustomString("SPT"),
+                                                       CustomString("client"));
     server_ctx->SetHandshakeContext(ctx);
 
     ctx.expected_cn = "server";
@@ -236,9 +236,9 @@ class SSLTestParam : public testing::TestWithParam<ProtocolAndCipher> {
     server_ctx = crypto_manager->CreateSSLContext();
     client_ctx = client_manager->CreateSSLContext();
 
-    security_manager::SSLContext::HandshakeContext ctx;
-    ctx.make_context(custom_str::CustomString("SPT"),
-                     custom_str::CustomString("client"));
+    using custom_str::CustomString;
+    security_manager::SSLContext::HandshakeContext ctx(CustomString("SPT"),
+                                                       CustomString("client"));
     server_ctx->SetHandshakeContext(ctx);
 
     ctx.expected_cn = "server";

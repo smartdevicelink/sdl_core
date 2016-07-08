@@ -77,15 +77,14 @@ class SSLContext {
   };
 
   struct HandshakeContext {
+    HandshakeContext() : expected_sn(""), expected_cn("") {}
+
+    HandshakeContext(const custom_str::CustomString& exp_sn,
+                     const custom_str::CustomString& exp_cn)
+        : expected_sn(exp_sn), expected_cn(exp_cn) {}
+
     custom_str::CustomString expected_sn;
     custom_str::CustomString expected_cn;
-
-    HandshakeContext& make_context(const custom_str::CustomString& sn,
-                                   const custom_str::CustomString& cn) {
-      expected_sn = sn;
-      expected_cn = cn;
-      return *this;
-    }
   };
 
   virtual HandshakeResult StartHandshake(const uint8_t** const out_data,
