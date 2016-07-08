@@ -311,6 +311,16 @@ bool CacheManager::AddDevice(const std::string& device_id,
 
   sync_primitives::AutoLock auto_lock(cache_lock_);
   CACHE_MANAGER_CHECK(false);
+  policy_table::DeviceParams& params =
+      (*(pt_->policy_table.device_data))[device_id];
+
+  // Open SDL stored just device id in policy
+  UNUSED(params);
+
+  // We have to set preloaded flag as false in policy table on adding new
+  // information (SDLAQ-CRS-2365). It can happens only after device addition.
+  *pt_->policy_table.module_config.preloaded_pt = false;
+
   Backup();
   return true;
 }

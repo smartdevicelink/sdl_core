@@ -514,8 +514,8 @@ const std::string kInsertLanguage =
     "INSERT OR IGNORE INTO `language` (`code`) VALUES (?)";
 
 const std::string kInsertMessageString =
-    "INSERT INTO `message` (`tts`, `label`, `line1`, `line2`, `language_code`, "
-    "  `message_type_name`, `textBody`) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    "INSERT INTO `message` (`language_code`, `message_type_name`) "
+    "VALUES (?, ?)";
 
 const std::string kUpdateModuleConfig =
     "UPDATE `module_config` SET `preloaded_pt` = ?, "
@@ -540,16 +540,8 @@ const std::string kInsertDeviceData =
     "INSERT OR IGNORE INTO `device` (`id`) VALUES (?)";
 
 const std::string kInsertAppLevel =
-    "INSERT INTO `app_level` (`application_id`, `minutes_in_hmi_full`,"
-    "`minutes_in_hmi_limited` ,`minutes_in_hmi_background`,"
-    "`minutes_in_hmi_none`,`count_of_user_selections`,"
-    "`count_of_rejections_sync_out_of_memory`,"
-    "`count_of_rejections_nickname_mismatch`,"
-    "`count_of_rejections_duplicate_name`,`count_of_rejected_rpcs_calls`,"
-    "`count_of_rpcs_sent_in_hmi_none`,`count_of_removals_for_bad_behavior`,"
-    "`count_of_run_attempts_while_revoked`,`app_registration_language_gui`,"
-    "`app_registration_language_vui`, `count_of_tls_errors`) "
-    "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+    "INSERT INTO `app_level` (`application_id`, `count_of_tls_errors`) "
+    "VALUES(?,?)";
 
 const std::string kDeleteSecondsBetweenRetries =
     "DELETE FROM `seconds_between_retry`";
@@ -582,7 +574,9 @@ const std::string kSelectNotificationsPerMin =
 const std::string kSelectNotificationsPerPriority =
     "SELECT `value` FROM notifications_by_priority WHERE `priority_value` = ? ";
 
-const std::string kSelectAppLevels = "SELECT `application_id` FROM `app_level`";
+const std::string kSelectAppLevels =
+    "SELECT `application_id`, `count_of_tls_errors` "
+    "FROM `app_level`";
 
 const std::string kSelectDeviceData = "SELECT * FROM `device`";
 
@@ -600,6 +594,8 @@ const std::string kSelectUserMsgsVersion =
 const std::string kSelectAppPolicies =
     "SELECT `id`, `priority_value`, `memory_kb`, "
     " `heart_beat_timeout_ms`, `certificate` FROM `application`";
+
+const std::string kCollectFriendlyMsg = "SELECT * FROM `message`";
 
 const std::string kSelectAppGroups =
     "SELECT `f`.`name` FROM `app_group` AS `a`"

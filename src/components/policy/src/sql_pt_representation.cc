@@ -560,13 +560,16 @@ bool SQLPTRepresentation::GatherUsageAndErrorCounts(
   LOG4CXX_INFO(logger_, "Gather Usage and Error Counts.");
   utils::dbms::SQLQuery query(db());
   if (query.Prepare(sql_pt::kSelectAppLevels)) {
-    policy_table::AppLevel app_level_empty;
-    app_level_empty.mark_initialized();
+    policy_table::AppLevel app_level;
+    app_level.mark_initialized();
     while (query.Next()) {
-      (*counts->app_level)[query.GetString(0)] = app_level_empty;
+      app_level.count_of_tls_errors = query.GetInteger(1);
+      const std::string app_id = query.GetString(0);
+      (*counts->app_level)[app_id] = app_level;
     }
+    return true;
   }
-  return true;
+  return false;
 }
 
 void SQLPTRepresentation::GatherDeviceData(
@@ -576,10 +579,11 @@ void SQLPTRepresentation::GatherDeviceData(
 
   utils::dbms::SQLQuery query(db());
   if (query.Prepare(sql_pt::kSelectDeviceData)) {
-    policy_table::DeviceParams device_data_empty;
-    device_data_empty.mark_initialized();
+    policy_table::DeviceParams device_data;
+    device_data.mark_initialized();
     while (query.Next()) {
-      (*data)[query.GetString(0)] = device_data_empty;
+      const std::string device_id = query.GetString(0);
+      (*data)[device_id] = device_data;
     }
   }
 }
@@ -635,7 +639,22 @@ bool SQLPTRepresentation::GatherConsumerFriendlyMessages(
     LOG4CXX_WARN(logger_, "Incorrect select from consumer_friendly_messages");
     return false;
   }
+
   messages->version = query.GetString(0);
+
+  if (query.Prepare(sql_pt::kCollectFriendlyMsg)) {
+    while (query.Next()) {
+
+      UserFriendlyMessage msg;
+      msg.message_code = query.GetString(7);
+      std::string language = query.GetString(6);
+
+      (*messages->messages)[msg.message_code].languages[language];
+    }
+  } else {
+    LOG4CXX_WARN(logger_, "Incorrect statement for select friendly messages.");
+  }
+
   return true;
 }
 
@@ -1171,7 +1190,6 @@ bool SQLPTRepresentation::SaveConsumerFriendlyMessages(
     }
 
     policy_table::Messages::const_iterator it;
-    // TODO(IKozyrenko): Check logic if optional container is missing
     for (it = messages.messages->begin(); it != messages.messages->end();
          ++it) {
       if (!SaveMessageType(it->first)) {
@@ -1231,7 +1249,19 @@ bool SQLPTRepresentation::SaveMessageString(
     const std::string& type,
     const std::string& lang,
     const policy_table::MessageString& strings) {
-  // Section is empty for SDL specific
+  utils::dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kInsertMessageString)) {
+    LOG4CXX_WARN(logger_, "Incorrect insert statement for message.");
+    return false;
+  }
+
+  query.Bind(0, lang);
+  query.Bind(1, type);
+
+  if (!query.Exec() || !query.Reset()) {
+    LOG4CXX_WARN(logger_, "Incorrect insert into message.");
+    return false;
+  }
   return true;
 }
 
@@ -1293,7 +1323,7 @@ bool SQLPTRepresentation::SaveDeviceData(
   policy_table::DeviceData::const_iterator it;
   for (it = devices.begin(); it != devices.end(); ++it) {
     query.Bind(0, it->first);
-    if (!query.Exec()) {
+    if (!query.Exec() || !query.Reset()) {
       LOG4CXX_WARN(logger_, "Incorrect insert into device data.");
       return false;
     }
@@ -1320,7 +1350,8 @@ bool SQLPTRepresentation::SaveUsageAndErrorCounts(
   const_cast<policy_table::AppLevels&>(*counts.app_level).mark_initialized();
   for (it = app_levels.begin(); it != app_levels.end(); ++it) {
     query.Bind(0, it->first);
-    if (!query.Exec()) {
+    query.Bind(1, it->second.count_of_tls_errors);
+    if (!query.Exec() || !query.Reset()) {
       LOG4CXX_WARN(logger_, "Incorrect insert into app level.");
       return false;
     }
