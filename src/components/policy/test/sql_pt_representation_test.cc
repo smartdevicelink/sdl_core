@@ -201,13 +201,17 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
   }
 
   void PolicyTableUpdatePrepare(Json::Value& table) {
+    // Root
     table["policy_table"] = Json::Value(Json::objectValue);
+
+    // 1st level
     Json::Value& policy_table = table["policy_table"];
     policy_table["module_config"] = Json::Value(Json::objectValue);
     policy_table["functional_groupings"] = Json::Value(Json::objectValue);
     policy_table["consumer_friendly_messages"] = Json::Value(Json::objectValue);
     policy_table["app_policies"] = Json::Value(Json::objectValue);
 
+    // 'module_config' section start
     Json::Value& module_config = policy_table["module_config"];
     module_config["preloaded_pt"] = Json::Value(false);
     module_config["preloaded_date"] = Json::Value("");
@@ -216,12 +220,14 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
     module_config["exchange_after_x_days"] = Json::Value(5);
     module_config["timeout_after_x_seconds"] = Json::Value(500);
     module_config["seconds_between_retries"] = Json::Value(Json::arrayValue);
+
     Json::Value& seconds_between_retries =
         module_config["seconds_between_retries"];
     seconds_between_retries[0] = Json::Value(10);
     seconds_between_retries[1] = Json::Value(20);
     seconds_between_retries[2] = Json::Value(30);
     module_config["endpoints"] = Json::Value(Json::objectValue);
+
     Json::Value& endpoins = module_config["endpoints"];
     endpoins["0x00"] = Json::Value(Json::objectValue);
     endpoins["0x00"]["default"] = Json::Value(Json::arrayValue);
@@ -244,8 +250,10 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
     module_config["vehicle_make"] = Json::Value("");
     module_config["vehicle_model"] = Json::Value("");
     module_config["vehicle_year"] = Json::Value("");
-    module_config["certificate"] = Json::Value("");
+    module_config["certificate"] = Json::Value("encrypted_certificate_content");
+    // 'module_config' section end
 
+    // 'functional_groupings' section start
     Json::Value& functional_groupings = policy_table["functional_groupings"];
     functional_groupings["default"] = Json::Value(Json::objectValue);
     Json::Value& default_group = functional_groupings["default"];
@@ -272,7 +280,9 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
     msg1["languages"]["en-us"]["line1"] = Json::Value("LINE1 message");
     msg1["languages"]["en-us"]["line2"] = Json::Value("LINE2 message");
     msg1["languages"]["en-us"]["textBody"] = Json::Value("TEXTBODY message");
+    // 'functional_groupings' section end
 
+    // 'app_policies' section start
     Json::Value& app_policies = policy_table["app_policies"];
     app_policies["default"] = Json::Value(Json::objectValue);
     app_policies["default"]["priority"] = Json::Value("EMERGENCY");
@@ -314,6 +324,7 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
     app_policies["device"]["default_hmi"] = Json::Value("FULL");
     app_policies["device"]["keep_context"] = Json::Value(true);
     app_policies["device"]["steal_focus"] = Json::Value(true);
+    // 'app_policies' section end
   }
 
   ::testing::AssertionResult IsValid(const policy_table::Table& table) {
@@ -1599,7 +1610,8 @@ TEST_F(SQLPTRepresentationTest, Save_SetPolicyTableThenSave_ExpectSavedToPT) {
   GatherModuleConfig(&config);
   // Check Module Config section
   ASSERT_FALSE(*config.preloaded_pt);
-  ASSERT_EQ("", static_cast<std::string>(*config.certificate));
+  ASSERT_EQ("encrypted_certificate_content",
+            static_cast<std::string>(*config.certificate));
   ASSERT_EQ("", static_cast<std::string>(*config.preloaded_date));
   ASSERT_EQ("", static_cast<std::string>(*config.vehicle_year));
   ASSERT_EQ("", static_cast<std::string>(*config.vehicle_model));

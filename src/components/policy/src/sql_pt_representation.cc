@@ -516,11 +516,11 @@ void SQLPTRepresentation::GatherModuleConfig(
     config->exchange_after_x_kilometers = query.GetInteger(2);
     config->exchange_after_x_days = query.GetInteger(3);
     config->timeout_after_x_seconds = query.GetInteger(4);
-    *config->vehicle_make = query.GetString(5);
-    *config->vehicle_model = query.GetString(6);
-    *config->vehicle_year = query.GetString(7);
-    *config->preloaded_date = query.GetString(8);
-    *config->certificate = query.GetString(9);
+    *config->certificate = query.GetString(5);
+    *config->vehicle_make = query.GetString(6);
+    *config->vehicle_model = query.GetString(7);
+    *config->vehicle_year = query.GetString(8);
+    *config->preloaded_date = query.GetString(9);
   }
 
   utils::dbms::SQLQuery endpoints(db());
