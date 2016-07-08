@@ -34,6 +34,7 @@
 
 #include <string>
 #include <stdint.h>
+#include <memory>
 
 #include "utils/macro.h"
 #include "utils/lock.h"
@@ -200,7 +201,7 @@ class Timer {
 
   mutable sync_primitives::Lock state_lock_;
 
-  mutable TimerDelegate delegate_;
+  mutable std::auto_ptr<TimerDelegate> delegate_;
   threads::Thread* thread_;
 
   /**
