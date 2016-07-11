@@ -160,6 +160,11 @@ class MockMessageHelper {
                mobile_apis::Result::eType(smart_objects::SmartObject& message,
                                           ApplicationConstSharedPtr app,
                                           ApplicationManager& app_mngr));
+  MOCK_METHOD3(VerifyImage,
+               mobile_apis::Result::eType(smart_objects::SmartObject& message,
+                                          ApplicationConstSharedPtr app,
+                                          ApplicationManager& app_mngr));
+
   MOCK_METHOD6(GetBCActivateAppRequestToHMI,
                smart_objects::SmartObjectSPtr(
                    ApplicationConstSharedPtr app,
@@ -216,10 +221,7 @@ class MockMessageHelper {
                     const std::string& packageName,
                     ApplicationManager& app_man));
   MOCK_METHOD1(SendUnsubscribedWayPoints, bool(ApplicationManager& app_mngr));
-  MOCK_METHOD3(VerifyImage,
-               mobile_apis::Result::eType(smart_objects::SmartObject& image,
-                                          ApplicationConstSharedPtr app,
-                                          ApplicationManager& app_mngr));
+
   MOCK_METHOD2(SendQueryApps,
                void(const uint32_t connection_key,
                     ApplicationManager& app_man));
