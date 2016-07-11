@@ -280,6 +280,15 @@ mobile_apis::Result::eType MessageHelper::VerifyImageFiles(
   return MockMessageHelper::message_helper_mock()->VerifyImageFiles(
       message, app, app_mngr);
 }
+
+mobile_apis::Result::eType MessageHelper::VerifyImage(
+    smart_objects::SmartObject& message,
+    ApplicationConstSharedPtr app,
+    ApplicationManager& app_mngr) {
+  return MockMessageHelper::message_helper_mock()->VerifyImage(
+      message, app, app_mngr);
+}
+
 std::string MessageHelper::CommonLanguageToString(
     const hmi_apis::Common_Language::eType lang) {
   return MockMessageHelper::message_helper_mock()->CommonLanguageToString(lang);
