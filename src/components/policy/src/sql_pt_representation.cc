@@ -1594,11 +1594,21 @@ bool SQLPTRepresentation::SetDefaultPolicy(const std::string& app_id) {
   SetPreloaded(false);
 
   policy_table::Strings default_groups;
-  if (GatherAppGroup(kDefaultId, &default_groups) &&
-      SaveAppGroup(app_id, default_groups)) {
-    return SetIsDefault(app_id, true);
+  if (!GatherAppGroup(kDefaultId, &default_groups) ||
+      !SaveAppGroup(app_id, default_groups)) {
+    return false;
   }
-  return false;
+  policy_table::RequestTypes request_types;
+  if (!GatherRequestType(kDefaultId, &request_types) ||
+      !SaveRequestType(app_id, request_types)) {
+    return false;
+  }
+  policy_table::AppHMITypes app_types;
+  if (!GatherAppType(kDefaultId, &app_types) ||
+      !SaveAppType(app_id, app_types)) {
+    return false;
+  }
+  return SetIsDefault(app_id, true);
 }
 
 bool SQLPTRepresentation::SetIsDefault(const std::string& app_id,

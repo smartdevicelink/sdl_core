@@ -1381,27 +1381,60 @@ TEST_F(SQLPTRepresentationTest, Drop_DropExistedPT_ExpectZeroTables) {
 TEST_F(SQLPTRepresentationTest,
        SetDefaultPolicy_SetDefaultPolicyThenCheck_ExpectDefaultPolicySet) {
   // Arrange
-  const char* query_insert_app =
-      "INSERT OR IGNORE INTO `application`(`id`, `keep_context`, "
+  const std::string kDefaultId = "default";
+  const std::string kAppId = "app_1234567";
+  const std::string kRequestType = "HTTP";
+  const std::string kHmiType = "MEDIA";
+
+  const std::string query_insert_default_app =
+      "INSERT INTO `application`(`id`, `keep_context`, "
       "`steal_focus`, "
       " `default_hmi`, `priority_value`, `is_revoked`, `is_default`, "
       "`is_predata`, `memory_kb`, "
-      " `heart_beat_timeout_ms`) VALUES( 'default', 0, 0, 'NONE', 'NONE', 0, "
-      "0, "
-      "0, 64, 10) ";
-  ASSERT_TRUE(dbms->Exec(query_insert_app));
+      " `heart_beat_timeout_ms`) "
+      "VALUES( '" +
+      kDefaultId + "', 0, 0, 'NONE', 'NONE', 0, 0, 0, 64, 10) ";
 
-  query_insert_app =
-      "INSERT OR IGNORE INTO `application`(`id`, `keep_context`, "
+  ASSERT_TRUE(dbms->Exec(query_insert_default_app.c_str()));
+
+  const std::string query_insert_default_app_request_types =
+      "INSERT INTO `request_type` (`application_id`, `request_type`)  "
+      "VALUES ('" +
+      kDefaultId + "', '" + kRequestType + "')";
+
+  ASSERT_TRUE(dbms->Exec(query_insert_default_app_request_types.c_str()));
+
+  const std::string query_insert_default_app_hmi_types =
+      "INSERT INTO `app_type` (`application_id`, `name`)  "
+      "VALUES ('" +
+      kDefaultId + "', '" + kHmiType + "')";
+
+  ASSERT_TRUE(dbms->Exec(query_insert_default_app_hmi_types.c_str()));
+
+  const std::string query_insert_new_app =
+      "INSERT INTO `application`(`id`, `keep_context`, "
       "`steal_focus`, `default_hmi`, `priority_value`, `is_revoked`, "
       "`is_default`, `is_predata`, `memory_kb`, `heart_beat_timeout_ms`) "
-      "VALUES( '1234567', 0, 0, 'NONE', 'NONE', 0, 0, 1, 64, 10) ";
-  ASSERT_TRUE(dbms->Exec(query_insert_app));
-  EXPECT_FALSE(reps->IsDefaultPolicy("1234567"));
+      "VALUES('" +
+      kAppId + "', 0, 0, 'NONE', 'NONE', 0, 0, 1, 64, 10)";
+
+  ASSERT_TRUE(dbms->Exec(query_insert_new_app.c_str()));
+
+  EXPECT_FALSE(reps->IsDefaultPolicy(kAppId));
   // Act
-  ASSERT_TRUE(reps->SetDefaultPolicy("1234567"));
+  ASSERT_TRUE(reps->SetDefaultPolicy(kAppId));
   // Check
-  EXPECT_TRUE(reps->IsDefaultPolicy("1234567"));
+  EXPECT_TRUE(reps->IsDefaultPolicy(kAppId));
+
+  policy_table::RequestTypes request_types;
+  GatherRequestType(kAppId, &request_types);
+  ASSERT_TRUE(1 == request_types.size());
+  EXPECT_EQ(policy_table::RT_HTTP, *request_types.begin());
+
+  policy_table::AppHMITypes hmi_types;
+  GatherAppType(kAppId, &hmi_types);
+  ASSERT_TRUE(1 == hmi_types.size());
+  EXPECT_EQ(policy_table::AHT_MEDIA, *hmi_types.begin());
 }
 
 TEST_F(SQLPTRepresentationTest,
