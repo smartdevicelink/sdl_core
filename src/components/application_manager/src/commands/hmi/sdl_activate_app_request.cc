@@ -58,6 +58,24 @@ void SDLActivateAppRequest::Run() {
     LOG4CXX_ERROR(
         logger_,
         "Can't find application within regular apps: " << application_id);
+
+    // Here is the hack - in fact SDL gets hmi_app_id in appID field and
+    // replaces it with connection_key only for normally registered apps, but
+    // for apps_to_be_registered (waiting) it keeps original value (hmi_app_id)
+    // so method does lookup for hmi_app_id
+    app = application_manager_.app_to_be_registered(application_id);
+
+    if (!app) {
+      LOG4CXX_WARN(
+          logger_,
+          "Can't find application within waiting apps: " << application_id);
+      return;
+    }
+  }
+
+  if (app->IsRegistered()) {
+    application_manager_.GetPolicyHandler().OnActivateApp(application_id,
+                                                          correlation_id());
     return;
   }
 
@@ -71,34 +89,22 @@ void SDLActivateAppRequest::Run() {
     return;
   }
 
-  if (!app->IsRegistered()) {
-    if (devices_apps.first) {
-      MessageHelper::SendLaunchApp(devices_apps.first->app_id(),
+  if (devices_apps.first) {
+    MessageHelper::SendLaunchApp(devices_apps.first->app_id(),
+                                 app->SchemaUrl(),
+                                 app->PackageName(),
+                                 application_manager_);
+  } else {
+    std::vector<ApplicationSharedPtr>::const_iterator it =
+        devices_apps.second.begin();
+    for (; it != devices_apps.second.end(); ++it) {
+      MessageHelper::SendLaunchApp((*it)->app_id(),
                                    app->SchemaUrl(),
                                    app->PackageName(),
                                    application_manager_);
-    } else {
-      std::vector<ApplicationSharedPtr>::const_iterator it =
-          devices_apps.second.begin();
-      for (; it != devices_apps.second.end(); ++it) {
-        MessageHelper::SendLaunchApp((*it)->app_id(),
-                                     app->SchemaUrl(),
-                                     app->PackageName(),
-                                     application_manager_);
-      }
     }
     subscribe_on_event(BasicCommunication_OnAppRegistered);
-  } else {
-    if (devices_apps.first) {
-      MessageHelper::SendLaunchApp(devices_apps.first->app_id(),
-                                   app->SchemaUrl(),
-                                   app->PackageName(),
-                                   application_manager_);
-    } else {
-      const uint32_t application_id = app_id();
-      application_manager_.GetPolicyHandler().OnActivateApp(application_id,
-                                                            correlation_id());
-    }
+    return;
   }
 }
 
