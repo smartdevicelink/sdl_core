@@ -63,7 +63,9 @@ struct RequestInfo {
   RequestInfo(RequestPtr request,
               const RequestType requst_type,
               const uint64_t timeout_msec)
-      : request_(request), timeout_msec_(timeout_msec) {
+      : request_(request)
+      , timeout_msec_(timeout_msec)
+      , hmi_level_(mobile_apis::HMILevel::INVALID_ENUM) {
     start_time_ = date_time::DateTime::getCurrentTime();
     updateEndTime();
     requst_type_ = requst_type;

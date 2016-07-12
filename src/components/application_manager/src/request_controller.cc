@@ -190,8 +190,8 @@ RequestController::TResult RequestController::addHMIRequest(
 
   const uint64_t timeout_in_mseconds =
       static_cast<uint64_t>(request->default_timeout());
-  RequestInfoPtr request_info_ptr(
-      new HMIRequestInfo(request, timeout_in_mseconds));
+  RequestInfoPtr request_info_ptr =
+      utils::MakeShared<HMIRequestInfo>(request, timeout_in_mseconds);
 
   if (0 == timeout_in_mseconds) {
     LOG4CXX_DEBUG(logger_,
@@ -446,8 +446,8 @@ void RequestController::Worker::threadMain() {
                                           // default timeout
 
     const uint32_t timeout_in_mseconds = request_ptr->default_timeout();
-    RequestInfoPtr request_info_ptr(
-        new MobileRequestInfo(request_ptr, timeout_in_mseconds));
+    RequestInfoPtr request_info_ptr =
+        utils::MakeShared<MobileRequestInfo>(request_ptr, timeout_in_mseconds);
 
     request_controller_->waiting_for_response_.Add(request_info_ptr);
     LOG4CXX_DEBUG(logger_, "timeout_in_mseconds " << timeout_in_mseconds);
