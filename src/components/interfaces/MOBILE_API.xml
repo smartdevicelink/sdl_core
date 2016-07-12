@@ -5280,6 +5280,9 @@
 	<param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
 	   <description>Provides additional human readable info regarding the result.</description>
 	</param>
+	<param name="wayPoints" type="LocationDetails" mandatory="false" array="true" minsize="1" maxsize="10">
+	   <description>See LocationDetails</description>
+	</param>
   </function>
 
   <function name="UnsubscribeWayPoints" functionID="UnsubscribeWayPointsID" messagetype="request">
