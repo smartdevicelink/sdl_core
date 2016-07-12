@@ -58,6 +58,7 @@ void SDLActivateAppRequest::Run() {
     LOG4CXX_WARN(
         logger_,
         "Can't find application within regular apps: " << application_id);
+    return;
   }
 
   DevicesApps devices_apps = FindAllAppOnParticularDevice(app->device());
