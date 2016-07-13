@@ -131,8 +131,10 @@ void HMILanguageHandler::on_event(const event_engine::Event& event) {
       is_tts_language_received_ = true;
       break;
     case hmi_apis::FunctionID::BasicCommunication_OnAppRegistered:
-      CheckApplication(
-          std::make_pair(msg[strings::params][strings::app_id].asUInt(), true));
+      if (msg[strings::params].keyExists(strings::app_id)) {
+        CheckApplication(std::make_pair(
+            msg[strings::params][strings::app_id].asUInt(), true));
+      }
       return;
     default:
       return;
@@ -288,11 +290,14 @@ void HMILanguageHandler::HandleWrongLanguageApp(const Apps::value_type& app) {
                       << " is not found within apps with wrong language.");
     return;
   }
+  apps_.erase(it);
+  if (0 == apps_.size()) {
+    LOG4CXX_DEBUG(logger_,
+                  "All apps processed. Unsubscribing from all events.");
+    unsubscribe_from_all_events();
+  }
 
-  LOG4CXX_INFO(logger_,
-               "Unregistering application with app_id "
-                   << app.first << " because of HMI language(s) mismatch.");
-
+  sync_primitives::AutoUnlock un_lock(apps_lock_);
   SendOnLanguageChangeToMobile(app.first);
   application_manager_.ManageMobileCommand(
       MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
@@ -301,12 +306,9 @@ void HMILanguageHandler::HandleWrongLanguageApp(const Apps::value_type& app) {
       commands::Command::ORIGIN_SDL);
   application_manager_.UnregisterApplication(
       app.first, mobile_apis::Result::SUCCESS, false);
-  apps_.erase(it);
-  if (0 == apps_.size()) {
-    LOG4CXX_DEBUG(logger_,
-                  "All apps processed. Unsubscribing from all events.");
-    unsubscribe_from_all_events();
-  }
+  LOG4CXX_INFO(logger_,
+               "Unregistering application with app_id "
+                   << app.first << " because of HMI language(s) mismatch.");
 }
 
 void HMILanguageHandler::CheckApplication(const Apps::value_type app) {
@@ -330,6 +332,12 @@ void HMILanguageHandler::Init(resumption::LastState* value) {
   persisted_ui_language_ = get_language_for(INTERFACE_UI);
   persisted_vr_language_ = get_language_for(INTERFACE_VR);
   persisted_tts_language_ = get_language_for(INTERFACE_TTS);
+}
+
+void HMILanguageHandler::OnUnregisterApplication(uint32_t app_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(apps_lock_);
+  apps_.erase(app_id);
 }
 
 }  // namespace application_manager

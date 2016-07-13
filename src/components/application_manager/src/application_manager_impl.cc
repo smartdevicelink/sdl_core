@@ -320,6 +320,7 @@ std::vector<ApplicationSharedPtr> ApplicationManagerImpl::IviInfoUpdated(
 }
 
 void ApplicationManagerImpl::OnApplicationRegistered(ApplicationSharedPtr app) {
+  LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(app);
   sync_primitives::AutoLock lock(applications_list_lock_);
   const mobile_apis::HMILevel::eType default_level = GetDefaultHmiLevel(app);
@@ -2586,6 +2587,7 @@ void ApplicationManagerImpl::UnregisterApplication(
       resume_ctrl_.RemoveApplicationFromSaved(app_to_remove);
     }
     applications_.erase(app_to_remove);
+    hmi_capabilities_.OnUnregisterApplication(app_id);
     AppV4DevicePredicate finder(handle);
     ApplicationSharedPtr app = FindApp(accessor, finder);
     if (!app) {

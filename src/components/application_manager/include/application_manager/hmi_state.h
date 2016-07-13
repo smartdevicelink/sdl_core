@@ -151,7 +151,7 @@ class HmiState {
 
   /**
    * @brief state_id state type
-   * @return reutrn state type
+   * @return return state type
    */
   StateID state_id() const {
     return state_id_;
@@ -163,6 +163,14 @@ class HmiState {
    */
   virtual void set_state_id(StateID state_id) {
     state_id_ = state_id;
+  }
+
+  /**
+   * @brief return application id
+   * @return return application id
+   */
+  uint32_t app_id() {
+    return app_id_;
   }
 
  protected:

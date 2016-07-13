@@ -61,19 +61,16 @@ void HmiState::set_parent(HmiStatePtr parent) {
 
 bool HmiState::is_navi_app(const uint32_t app_id) const {
   const ApplicationSharedPtr app = app_mngr_.application(app_id);
-  DCHECK_OR_RETURN(app, false);
   return app ? app->is_navi() : false;
 }
 
 bool HmiState::is_media_app(const uint32_t app_id) const {
   const ApplicationSharedPtr app = app_mngr_.application(app_id);
-  DCHECK_OR_RETURN(app, false);
   return app ? app->is_media_application() : false;
 }
 
 bool HmiState::is_voice_communication_app(const uint32_t app_id) const {
   const ApplicationSharedPtr app = app_mngr_.application(app_id);
-  DCHECK_OR_RETURN(app, false);
   return app ? app->is_voice_communication_supported() : false;
 }
 

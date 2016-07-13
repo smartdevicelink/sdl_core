@@ -416,6 +416,13 @@ class HMICapabilities {
 
   void Init(resumption::LastState* last_state);
 
+  /**
+   * @brief Removes application from container after
+   * removing application from core
+   * @param app_id id application for removing
+   */
+  void OnUnregisterApplication(uint32_t app_id);
+
  protected:
   /*
    * @brief Loads capabilities from local file in case SDL was launched
