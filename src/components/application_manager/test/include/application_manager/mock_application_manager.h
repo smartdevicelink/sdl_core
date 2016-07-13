@@ -233,6 +233,12 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD1(UnsubscribeAppFromWayPoints, void(const uint32_t));
   MOCK_CONST_METHOD0(IsAnyAppSubscribedForWayPoints, bool());
   MOCK_CONST_METHOD0(GetAppsSubscribedForWayPoints, const std::set<int32_t>());
+  MOCK_CONST_METHOD1(
+      app_to_be_registered,
+      application_manager::ApplicationConstSharedPtr(const uint32_t));
+  MOCK_CONST_METHOD0(
+      apps_waiting_for_registration,
+      DataAccessor<application_manager::AppsWaitRegistrationSet>());
 };
 
 }  // namespace application_manager_test
