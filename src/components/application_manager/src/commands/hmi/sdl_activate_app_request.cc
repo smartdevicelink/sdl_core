@@ -38,6 +38,43 @@ namespace application_manager {
 
 namespace commands {
 
+namespace {
+struct SDL4AppsOnDevice
+    : std::unary_function<ApplicationSharedPtr , bool> {
+  connection_handler::DeviceHandle handle_;
+  SDL4AppsOnDevice(const connection_handler::DeviceHandle handle)
+      : handle_(handle) {}
+  bool operator()(const ApplicationSharedPtr app) const {
+    return app
+               ? handle_ == app->device() &&
+                     ProtocolVersion::kV4 == app->protocol_version()
+               : false;
+  }
+};
+
+struct ForegroundApp
+    : std::unary_function<SDLActivateAppRequest::SDL4Apps::value_type, bool> {
+  bool operator()(const SDLActivateAppRequest::SDL4Apps::value_type ptr) const {
+    return ptr.valid() ? ptr->is_foreground() : false;
+  }
+};
+
+struct SendLaunchApp
+    : std::unary_function<SDLActivateAppRequest::SDL4Apps::value_type, bool> {
+  ApplicationConstSharedPtr app_to_launch_;
+  ApplicationManager& application_manager_;
+  SendLaunchApp(ApplicationConstSharedPtr app_to_launch, ApplicationManager& am)
+      : app_to_launch_(app_to_launch), application_manager_(am) {}
+  bool operator()(const SDLActivateAppRequest::SDL4Apps::value_type ptr) const {
+    MessageHelper::SendLaunchApp((*ptr).app_id(),
+                                 app_to_launch_->SchemaUrl(),
+                                 app_to_launch_->PackageName(),
+                                 application_manager_);
+    return true;
+  }
+};
+}
+
 SDLActivateAppRequest::SDLActivateAppRequest(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
     : RequestFromHMI(message, application_manager) {}
@@ -51,11 +88,11 @@ void SDLActivateAppRequest::Run() {
 
   const uint32_t application_id = app_id();
 
-  ApplicationConstSharedPtr app =
+  ApplicationConstSharedPtr app_to_activate =
       application_manager_.application(application_id);
 
-  if (!app) {
-    LOG4CXX_ERROR(
+  if (!app_to_activate) {
+    LOG4CXX_WARN(
         logger_,
         "Can't find application within regular apps: " << application_id);
 
@@ -63,9 +100,9 @@ void SDLActivateAppRequest::Run() {
     // replaces it with connection_key only for normally registered apps, but
     // for apps_to_be_registered (waiting) it keeps original value (hmi_app_id)
     // so method does lookup for hmi_app_id
-    app = application_manager_.app_to_be_registered(application_id);
+    app_to_activate = application_manager_.app_to_be_registered(application_id);
 
-    if (!app) {
+    if (!app_to_activate) {
       LOG4CXX_WARN(
           logger_,
           "Can't find application within waiting apps: " << application_id);
@@ -73,39 +110,50 @@ void SDLActivateAppRequest::Run() {
     }
   }
 
-  if (app->IsRegistered()) {
+  LOG4CXX_DEBUG(logger_,
+                "Found application to activate. Application id is "
+                    << app_to_activate->app_id());
+
+  if (app_to_activate->IsRegistered()) {
+    LOG4CXX_DEBUG(logger_, "Application is registered. Activating.");
     application_manager_.GetPolicyHandler().OnActivateApp(application_id,
                                                           correlation_id());
     return;
   }
 
-  DevicesApps devices_apps = FindAllAppOnParticularDevice(app->device());
-  if (!devices_apps.first && devices_apps.second.empty()) {
+  connection_handler::DeviceHandle device_handle = app_to_activate->device();
+  ApplicationSharedPtr foreground_sdl4_app = get_foreground_app(device_handle);
+  SDL4Apps sdl4_apps = get_sdl4_apps(device_handle);
+
+  if (!foreground_sdl4_app.valid() && sdl4_apps.empty()) {
     LOG4CXX_ERROR(logger_,
                   "Can't find regular foreground app with the same "
                   "connection id:"
-                      << app->device());
+                      << device_handle);
     SendResponse(false, correlation_id(), SDL_ActivateApp, NO_APPS_REGISTERED);
     return;
   }
 
-  if (devices_apps.first) {
-    MessageHelper::SendLaunchApp(devices_apps.first->app_id(),
-                                 app->SchemaUrl(),
-                                 app->PackageName(),
+  LOG4CXX_DEBUG(logger_,
+                "Application is not registered yet. "
+                "Sending launch request.");
+
+  if (foreground_sdl4_app.valid()) {
+    LOG4CXX_DEBUG(logger_, "Sending request to foreground application.");
+    MessageHelper::SendLaunchApp(foreground_sdl4_app->app_id(),
+                                 app_to_activate->SchemaUrl(),
+                                 app_to_activate->PackageName(),
                                  application_manager_);
   } else {
-    std::vector<ApplicationSharedPtr>::const_iterator it =
-        devices_apps.second.begin();
-    for (; it != devices_apps.second.end(); ++it) {
-      MessageHelper::SendLaunchApp((*it)->app_id(),
-                                   app->SchemaUrl(),
-                                   app->PackageName(),
-                                   application_manager_);
-    }
-    subscribe_on_event(BasicCommunication_OnAppRegistered);
-    return;
+    LOG4CXX_DEBUG(logger_,
+                  "No preffered (foreground) application is found. "
+                  "Sending request to all v4 applications.");
+    std::for_each(sdl4_apps.begin(),
+                  sdl4_apps.end(),
+                  SendLaunchApp(app_to_activate, application_manager_));
   }
+
+  subscribe_on_event(BasicCommunication_OnAppRegistered);
 }
 
 void SDLActivateAppRequest::onTimeOut() {
@@ -141,47 +189,56 @@ void SDLActivateAppRequest::on_event(const event_engine::Event& event) {
 }
 
 uint32_t SDLActivateAppRequest::app_id() const {
-  if ((*message_).keyExists(strings::msg_params)) {
-    if ((*message_)[strings::msg_params].keyExists(strings::app_id)) {
-      return (*message_)[strings::msg_params][strings::app_id].asUInt();
-    }
+  using namespace strings;
+  if (!(*message_).keyExists(msg_params)) {
+    LOG4CXX_DEBUG(logger_, msg_params << " section is absent in the message.");
+    return 0;
   }
-  LOG4CXX_DEBUG(logger_, "app_id section is absent in the message.");
-  return 0;
+  if (!(*message_)[msg_params].keyExists(strings::app_id)) {
+    LOG4CXX_DEBUG(logger_,
+                  strings::app_id << " section is absent in the message.");
+    return 0;
+  }
+  return (*message_)[msg_params][strings::app_id].asUInt();
 }
 
 uint32_t SDLActivateAppRequest::hmi_app_id(
     const smart_objects::SmartObject& so) const {
-  if (so.keyExists(strings::params)) {
-    if (so[strings::msg_params].keyExists(strings::application)) {
-      if (so[strings::msg_params][strings::application].keyExists(
-              strings::app_id)) {
-        return so[strings::msg_params][strings::application][strings::app_id]
-            .asUInt();
-      }
-    }
+  using namespace strings;
+  if (!so.keyExists(params)) {
+    LOG4CXX_DEBUG(logger_, params << " section is absent in the message.");
+    return 0;
   }
-  LOG4CXX_DEBUG(logger_, "Can't find app_id section is absent in the message.");
-  return 0;
+  if (!so[msg_params].keyExists(application)) {
+    LOG4CXX_DEBUG(logger_, application << " section is absent in the message.");
+    return 0;
+  }
+  if (so[msg_params][application].keyExists(strings::app_id)) {
+    LOG4CXX_DEBUG(logger_,
+                  strings::app_id << " section is absent in the message.");
+    return 0;
+  }
+  return so[msg_params][application][strings::app_id].asUInt();
 }
 
-DevicesApps SDLActivateAppRequest::FindAllAppOnParticularDevice(
-    const connection_handler::DeviceHandle handle) {
-  DevicesApps apps;
+SDLActivateAppRequest::SDL4Apps SDLActivateAppRequest::get_sdl4_apps(
+    const connection_handler::DeviceHandle handle) const {
   const ApplicationSet app_list = application_manager_.applications().GetData();
+  SDL4Apps sdl4_apps;
+  std::copy_if(app_list.begin(),
+               app_list.end(),
+               std::back_inserter(sdl4_apps),
+               SDL4AppsOnDevice(handle));
+  return sdl4_apps;
+}
 
-  ApplicationSetIt it = app_list.begin();
-  ApplicationSetIt it_end = app_list.end();
-
-  for (; it != it_end; ++it) {
-    if (handle == (*it)->device()) {
-      if ((*it)->is_foreground()) {
-        apps.first = *it;
-      }
-      apps.second.push_back(*it);
-    }
-  }
-  return apps;
+ApplicationSharedPtr SDLActivateAppRequest::get_foreground_app(
+    const connection_handler::DeviceHandle handle) const {
+  SDL4Apps sdl4_apps = get_sdl4_apps(handle);
+  SDL4Apps::iterator foreground_app =
+      std::find_if(sdl4_apps.begin(), sdl4_apps.end(), ForegroundApp());
+  return foreground_app != sdl4_apps.end() ? *foreground_app
+                                           : ApplicationSharedPtr();
 }
 
 }  // namespace commands

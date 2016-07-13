@@ -40,13 +40,13 @@ namespace application_manager {
 
 namespace commands {
 
-typedef std::pair<ApplicationSharedPtr, std::vector<ApplicationSharedPtr> >
-    DevicesApps;
 /**
  * @brief SDLActivateAppRequest command class
  **/
 class SDLActivateAppRequest : public RequestFromHMI {
  public:
+  typedef std::vector<application_manager::ApplicationSharedPtr> SDL4Apps;
+
   /**
    * @brief SDLActivateAppRequest class constructor
    *
@@ -58,32 +58,45 @@ class SDLActivateAppRequest : public RequestFromHMI {
   /**
    * @brief SDLActivateAppRequest class destructor
    **/
-  virtual ~SDLActivateAppRequest();
+  ~SDLActivateAppRequest() OVERRIDE;
 
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
   /**
    * @brief onTimeOut allows to process case when timeout has appeared
    * during request execution.
    */
-  virtual void onTimeOut();
+  void onTimeOut() OVERRIDE;
 
   /**
    * @brief on_event allows to handle events
    *
    * @param event event type that current request subscribed on.
    */
-  virtual void on_event(const event_engine::Event& event);
+  void on_event(const event_engine::Event& event) OVERRIDE;
 
  private:
   uint32_t app_id() const;
   uint32_t hmi_app_id(const smart_objects::SmartObject& so) const;
 
-  DevicesApps FindAllAppOnParticularDevice(
-      const connection_handler::DeviceHandle handle);
+  /**
+   * @brief Retrieves all v4 protocol applications for particular device
+   * @param handle Device handle
+   * @return List of applications registered over v4 protocol
+   */
+  SDL4Apps get_sdl4_apps(const connection_handler::DeviceHandle handle) const;
+
+  /**
+   * @brief Get v4 protocol application reported as forgrounded on device
+   * @param handle Device
+   * @return Pointer to application or empty pointer
+   */
+  ApplicationSharedPtr get_foreground_app(
+      const connection_handler::DeviceHandle handle) const;
+
   DISALLOW_COPY_AND_ASSIGN(SDLActivateAppRequest);
 };
 
