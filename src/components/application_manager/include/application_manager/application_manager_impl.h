@@ -1080,10 +1080,10 @@ class ApplicationManagerImpl
   void MarkAppsGreyOut(const connection_handler::DeviceHandle handle,
                        bool is_greyed_out) OVERRIDE;
 
-  ApplicationConstSharedPtr app_to_be_registered(
+  ApplicationConstSharedPtr WaitingApplicationByID(
       const uint32_t hmi_id) const OVERRIDE;
 
-  DataAccessor<AppsWaitRegistrationSet> apps_waiting_for_registration()
+  DataAccessor<AppsWaitRegistrationSet> AppsWaitingForRegistration()
       const OVERRIDE;
 
   /**

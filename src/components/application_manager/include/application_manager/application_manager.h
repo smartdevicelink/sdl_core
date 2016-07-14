@@ -347,14 +347,14 @@ class ApplicationManager {
    * @param hmi_id HMI application id
    * @return Pointer to application or uninitialized shared pointer
    */
-  virtual ApplicationConstSharedPtr app_to_be_registered(
+  virtual ApplicationConstSharedPtr WaitingApplicationByID(
       const uint32_t hmi_id) const = 0;
 
   /**
    * @brief Returns list of applications-to-be-registered (QUERY_APP list)
    * @return Locked list of applications
    */
-  virtual DataAccessor<AppsWaitRegistrationSet> apps_waiting_for_registration()
+  virtual DataAccessor<AppsWaitRegistrationSet> AppsWaitingForRegistration()
       const = 0;
 
   virtual bool IsAppsQueriedFrom(

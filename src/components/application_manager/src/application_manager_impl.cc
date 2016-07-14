@@ -834,9 +834,9 @@ void ApplicationManagerImpl::OnMessageReceived(
   messages_from_hmi_.PostMessage(impl::MessageFromHmi(message));
 }
 
-ApplicationConstSharedPtr
-ApplicationManagerImpl::app_to_be_registered(const uint32_t hmi_id) const {
-  AppsWaitRegistrationSet app_list = apps_waiting_for_registration().GetData();
+ApplicationConstSharedPtr ApplicationManagerImpl::WaitingApplicationByID(
+    const uint32_t hmi_id) const {
+  AppsWaitRegistrationSet app_list = AppsWaitingForRegistration().GetData();
 
   AppsWaitRegistrationSet::const_iterator it_end = app_list.end();
 
@@ -850,10 +850,9 @@ ApplicationManagerImpl::app_to_be_registered(const uint32_t hmi_id) const {
 }
 
 DataAccessor<AppsWaitRegistrationSet>
-ApplicationManagerImpl::apps_waiting_for_registration() const {
-  return DataAccessor<AppsWaitRegistrationSet>(
-      apps_to_register_,
-      apps_to_register_list_lock_);
+ApplicationManagerImpl::AppsWaitingForRegistration() const {
+  return DataAccessor<AppsWaitRegistrationSet>(apps_to_register_,
+                                               apps_to_register_list_lock_);
 }
 
 bool ApplicationManagerImpl::IsAppsQueriedFrom(

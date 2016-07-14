@@ -103,7 +103,8 @@ void SDLActivateAppRequest::Run() {
     // replaces it with connection_key only for normally registered apps, but
     // for apps_to_be_registered (waiting) it keeps original value (hmi_app_id)
     // so method does lookup for hmi_app_id
-    app_to_activate = application_manager_.app_to_be_registered(application_id);
+    app_to_activate =
+        application_manager_.WaitingApplicationByID(application_id);
 
     if (!app_to_activate) {
       LOG4CXX_WARN(
