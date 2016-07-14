@@ -264,16 +264,27 @@ std::string CryptoManagerImpl::LastError() const {
 bool CryptoManagerImpl::IsCertificateUpdateRequired() const {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  const time_t now = time(NULL);
   const time_t cert_date = mktime(&expiration_time_);
 
+  if (cert_date == -1) {
+    LOG4CXX_WARN(logger_,
+                 "The certifiacte expiration time cannot be represented.");
+    return false;
+  }
+  const time_t now = time(NULL);
   const double seconds = difftime(cert_date, now);
-  LOG4CXX_DEBUG(
-      logger_,
-      "Certificate time: " << asctime(&expiration_time_)
-                           << ". Host time: " << asctime(localtime(&now))
-                           << ". Seconds before expiration: " << seconds);
-  return seconds <= get_settings().update_before_hours();
+
+  LOG4CXX_DEBUG(logger_, "Certificate time: " << asctime(&expiration_time_));
+  LOG4CXX_DEBUG(logger_,
+                "Host time: " << asctime(localtime(&now))
+                              << ". Seconds before expiration: " << seconds);
+  if (seconds < 0) {
+    LOG4CXX_DEBUG(logger_, "Certificate is expired already.");
+    return true;
+  }
+
+  const uint16_t seconds_in_hour = 3600;
+  return seconds <= (get_settings().update_before_hours() * seconds_in_hour);
 }
 
 const CryptoManagerSettings& CryptoManagerImpl::get_settings() const {
