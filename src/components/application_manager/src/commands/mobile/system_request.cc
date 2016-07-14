@@ -72,11 +72,11 @@ class QueryAppsDataValidator {
   typedef std::set<std::string> SynonymsSet;
   typedef std::map<std::string, SynonymsSet> SynonymsMap;
 
-  QueryAppsDataValidator(const smart_objects::SmartObject& object,
+  QueryAppsDataValidator(smart_objects::SmartObject& object,
                          const ApplicationManager& manager)
       : data_(object), manager_(manager) {}
 
-  bool Validate() const {
+  bool Validate() {
     LOG4CXX_AUTO_TRACE(logger_);
     if (!data_.isValid()) {
       LOG4CXX_ERROR(logger_,
@@ -102,19 +102,25 @@ class QueryAppsDataValidator {
     return true;
   }
 
-  bool ValidateAppDataAndOsAndLanguagesData() const {
-    const smart_objects::SmartArray* objects_array =
-        data_[json::response].asArray();
+  bool ValidateAppDataAndOsAndLanguagesData() {
+    smart_objects::SmartArray* objects_array = data_[json::response].asArray();
+
     if (!objects_array) {
       LOG4CXX_WARN(logger_,
                    kQueryAppsValidationFailedPrefix
                        << "QueryApps response is not array.");
       return false;
     }
-    const std::size_t arr_size(objects_array->size());
+
     SynonymsMap synonyms_map;
-    for (std::size_t idx = 0; idx < arr_size; ++idx) {
-      const smart_objects::SmartObject& app_data = (*objects_array)[idx];
+    bool has_response_valid_application = false;
+
+    smart_objects::SmartArray::iterator applications_iterator =
+        objects_array->begin();
+
+    for (; applications_iterator != objects_array->end();
+         ++applications_iterator) {
+      const smart_objects::SmartObject& app_data = *applications_iterator;
 
       if (!app_data.isValid()) {
         LOG4CXX_WARN(logger_,
@@ -122,59 +128,50 @@ class QueryAppsDataValidator {
                          << "Wrong application data in json file.");
         return false;
       }
-      std::set<std::string> app_ids_set;
-      if (!ValidateAppIdAndAppName(app_data, app_ids_set)) {
+
+      if (!CheckMandatoryParametersPresent(app_data)) {
+        LOG4CXX_WARN(logger_,
+                     "Application hasn`t some of mandatory parameters. "
+                     "Application will be skipped.");
+        objects_array->erase(applications_iterator);
+        continue;
+      }
+
+      if (!ValidateAppIdAndAppName(app_data)) {
         return false;
       }
+
+      // If we dont have any of android/ios field
+      // we skip this json in  CheckMandatoryParametersPresent
+      const std::string os_type =
+          (app_data.keyExists(json::android)) ? json::android : json::ios;
+
       // Verify os and dependent languages data
-      std::string os_type;
-      if (app_data.keyExists(json::ios)) {
-        os_type = json::ios;
-        if (!app_data[os_type].keyExists(json::urlScheme)) {
-          LOG4CXX_WARN(logger_,
-                       kQueryAppsValidationFailedPrefix
-                           << "Can't find URL scheme in json file.");
-          return false;
-        }
-        if (app_data[os_type][json::urlScheme].asString().length() >
+      if (json::ios == os_type) {
+        if (app_data[json::ios][json::urlScheme].asString().length() >
             kUrlSchemaLengthMax) {
           LOG4CXX_WARN(
               logger_,
               kQueryAppsValidationFailedPrefix
                   << "An urlscheme length exceeds maximum allowed ["
-                  << app_data[os_type][json::urlScheme].asString().length()
+                  << app_data[json::ios][json::urlScheme].asString().length()
                   << "]>[" << kUrlSchemaLengthMax << "]");
           return false;
         }
       }
-      if (os_type.empty()) {
-        if (app_data.keyExists(json::android)) {
-          os_type = json::android;
-          if (!app_data[os_type].keyExists(json::packageName)) {
-            LOG4CXX_WARN(logger_,
-                         kQueryAppsValidationFailedPrefix
-                             << "Can't find package name in json file.");
-            return false;
-          }
-          if (app_data[json::android][json::packageName].asString().length() >
-              kPackageNameLengthMax) {
-            LOG4CXX_WARN(logger_,
-                         kQueryAppsValidationFailedPrefix
-                             << "Package name length ["
-                             << app_data[json::android][json::packageName]
-                                    .asString()
-                                    .length() << "] exceeds max length ["
-                             << kPackageNameLengthMax << "]in json file.");
-            return false;
-          }
-        }
-      }
 
-      if (os_type.empty()) {
-        LOG4CXX_WARN(logger_,
-                     kQueryAppsValidationFailedPrefix
-                         << "Can't find mobile OS type in json file.");
-        return false;
+      if (json::android == os_type) {
+        if (app_data[json::android][json::packageName].asString().length() >
+            kPackageNameLengthMax) {
+          LOG4CXX_WARN(logger_,
+                       kQueryAppsValidationFailedPrefix
+                           << "Package name length ["
+                           << app_data[json::android][json::packageName]
+                                  .asString()
+                                  .length() << "] exceeds max length ["
+                           << kPackageNameLengthMax << "]in json file.");
+          return false;
+        }
       }
 
       // Languages verification
@@ -188,19 +185,12 @@ class QueryAppsDataValidator {
                              synonyms_map)) {
         return false;
       }
+      has_response_valid_application = true;
     }
-    return true;
+    return has_response_valid_application;
   }
 
-  bool ValidateAppIdAndAppName(const smart_objects::SmartObject& app_data,
-                               std::set<std::string>& app_ids_set) const {
-    // Verify appid
-    if (!app_data.keyExists(json::appId)) {
-      LOG4CXX_WARN(logger_,
-                   kQueryAppsValidationFailedPrefix
-                       << "Can't find app ID in json file.");
-      return false;
-    }
+  bool ValidateAppIdAndAppName(const smart_objects::SmartObject& app_data) {
     // Verify appid length
     const std::string app_id(app_data[json::appId].asString());
     if (app_id.length() > kAppIdLengthMax) {
@@ -212,13 +202,13 @@ class QueryAppsDataValidator {
     }
 
     // Verify that appid is unique
-    if (app_ids_set.find(app_id) != app_ids_set.end()) {
+    if (applications_id_set_.find(app_id) != applications_id_set_.end()) {
       LOG4CXX_WARN(logger_,
                    kQueryAppsValidationFailedPrefix
                        << "An Object ID is not unigue [" << app_id << "]");
       return false;
     }
-    app_ids_set.insert(app_id);
+    applications_id_set_.insert(app_id);
 
     // Verify that app is not registered yet
     ApplicationSharedPtr registered_app =
@@ -228,13 +218,6 @@ class QueryAppsDataValidator {
                    kQueryAppsValidationFailedPrefix
                        << "Application with the same id: " << app_id
                        << " is registered already.");
-      return false;
-    }
-    // Verify app name exist
-    if (!app_data.keyExists(json::name)) {
-      LOG4CXX_WARN(logger_,
-                   kQueryAppsValidationFailedPrefix
-                       << "Can't find app name in json file.");
       return false;
     }
     // And app name length
@@ -404,7 +387,35 @@ class QueryAppsDataValidator {
     return true;
   }
 
-  const smart_objects::SmartObject& data_;
+  bool CheckMandatoryParametersPresent(
+      const smart_objects::SmartObject& app_data) const {
+    if (!app_data.keyExists(json::android) && !app_data.keyExists(json::ios)) {
+      return false;
+    }
+
+    if (app_data.keyExists(json::android) &&
+        !app_data[json::android].keyExists(json::packageName)) {
+      return false;
+    }
+
+    if (app_data.keyExists(json::ios) &&
+        !app_data[json::ios].keyExists(json::urlScheme)) {
+      return false;
+    }
+
+    if (!app_data.keyExists(json::appId)) {
+      return false;
+    }
+
+    if (!app_data.keyExists(json::name)) {
+      return false;
+    }
+
+    return true;
+  }
+
+  smart_objects::SmartObject& data_;
+  std::set<std::string> applications_id_set_;
   const ApplicationManager& manager_;
 
   DISALLOW_COPY_AND_ASSIGN(QueryAppsDataValidator);
@@ -620,7 +631,7 @@ void SystemRequest::on_event(const event_engine::Event& event) {
 }
 
 bool SystemRequest::ValidateQueryAppData(
-    const smart_objects::SmartObject& data) const {
+    smart_objects::SmartObject& data) const {
   if (!data.isValid()) {
     LOG4CXX_ERROR(logger_,
                   kQueryAppsValidationFailedPrefix
