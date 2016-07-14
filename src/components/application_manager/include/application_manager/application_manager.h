@@ -83,26 +83,25 @@ typedef std::vector<std::string> RPCParams;
 
 struct ApplicationsAppIdSorter {
   bool operator()(const ApplicationSharedPtr lhs,
-				  const ApplicationSharedPtr rhs) const {
-	return lhs->app_id() < rhs->app_id();
+                  const ApplicationSharedPtr rhs) const {
+    return lhs->app_id() < rhs->app_id();
   }
 };
 
 struct ApplicationsPolicyAppIdSorter {
   bool operator()(const ApplicationSharedPtr lhs,
-				  const ApplicationSharedPtr rhs) {
-	if (lhs->policy_app_id() == rhs->policy_app_id()) {
-	  return lhs->device() < rhs->device();
-	}
-	return lhs->policy_app_id() < rhs->policy_app_id();
+                  const ApplicationSharedPtr rhs) {
+    if (lhs->policy_app_id() == rhs->policy_app_id()) {
+      return lhs->device() < rhs->device();
+    }
+    return lhs->policy_app_id() < rhs->policy_app_id();
   }
 };
 
 typedef std::set<ApplicationSharedPtr, ApplicationsAppIdSorter> ApplicationSet;
 
 typedef std::set<ApplicationSharedPtr, ApplicationsPolicyAppIdSorter>
-	AppsWaitRegistrationSet;
-
+    AppsWaitRegistrationSet;
 
 // typedef for Applications list iterator
 typedef ApplicationSet::iterator ApplicationSetIt;
@@ -118,7 +117,7 @@ class ApplicationManager {
    * Inits application manager
    */
   virtual bool Init(resumption::LastState& last_state,
-					media_manager::MediaManager* media_manager) = 0;
+                    media_manager::MediaManager* media_manager) = 0;
 
   /**
    * @brief Stop work.
@@ -128,11 +127,11 @@ class ApplicationManager {
   virtual bool Stop() = 0;
 
   virtual void set_hmi_message_handler(
-	  hmi_message_handler::HMIMessageHandler* handler) = 0;
+      hmi_message_handler::HMIMessageHandler* handler) = 0;
   virtual void set_protocol_handler(
-	  protocol_handler::ProtocolHandler* handler) = 0;
+      protocol_handler::ProtocolHandler* handler) = 0;
   virtual void set_connection_handler(
-	  connection_handler::ConnectionHandler* handler) = 0;
+      connection_handler::ConnectionHandler* handler) = 0;
 
   virtual DataAccessor<ApplicationSet> applications() const = 0;
 
@@ -145,13 +144,13 @@ class ApplicationManager {
    * Don't use it inside Core
    */
   virtual ApplicationSharedPtr application_by_hmi_app(
-	  uint32_t hmi_app_id) const = 0;
+      uint32_t hmi_app_id) const = 0;
 
   virtual ApplicationSharedPtr application_by_policy_id(
-	  const std::string& policy_app_id) const = 0;
+      const std::string& policy_app_id) const = 0;
 
   virtual std::vector<ApplicationSharedPtr> applications_by_button(
-	  uint32_t button) = 0;
+      uint32_t button) = 0;
   virtual std::vector<ApplicationSharedPtr> applications_with_navi() = 0;
 
   /**
@@ -195,7 +194,7 @@ class ApplicationManager {
    * @param app_id Application ID
    */
   virtual void set_application_id(const int32_t correlation_id,
-								  const uint32_t app_id) = 0;
+                                  const uint32_t app_id) = 0;
 
   /**
    * @brief OnHMILevelChanged the callback that allows SDL to react when
@@ -207,8 +206,8 @@ class ApplicationManager {
    * @param to current HMILevel.
    */
   virtual void OnHMILevelChanged(uint32_t app_id,
-								 mobile_apis::HMILevel::eType from,
-								 mobile_apis::HMILevel::eType to) = 0;
+                                 mobile_apis::HMILevel::eType from,
+                                 mobile_apis::HMILevel::eType to) = 0;
 
   /**
    * @brief Sends HMI status notification to mobile
@@ -217,7 +216,7 @@ class ApplicationManager {
    *
    **/
   virtual void SendHMIStatusNotification(
-	  const utils::SharedPtr<Application> app) = 0;
+      const utils::SharedPtr<Application> app) = 0;
 
   /**
    * @brief Checks if Application is subscribed for way points
@@ -252,15 +251,15 @@ class ApplicationManager {
   virtual const std::set<int32_t> GetAppsSubscribedForWayPoints() const = 0;
 
   virtual void SendMessageToMobile(const commands::MessageSharedPtr message,
-								   bool final_message = false) = 0;
+                                   bool final_message = false) = 0;
 
   virtual void SendMessageToHMI(const commands::MessageSharedPtr message) = 0;
 
   virtual bool ManageHMICommand(const commands::MessageSharedPtr message) = 0;
   virtual bool ManageMobileCommand(const commands::MessageSharedPtr message,
-								   commands::Command::CommandOrigin origin) = 0;
+                                   commands::Command::CommandOrigin origin) = 0;
   virtual mobile_api::HMILevel::eType GetDefaultHmiLevel(
-	  ApplicationConstSharedPtr application) const = 0;
+      ApplicationConstSharedPtr application) const = 0;
   /**
    * @brief hmi_capabilities return capabilities of hmi
    * @return capabilities of hmi
@@ -270,7 +269,7 @@ class ApplicationManager {
   virtual const HMICapabilities& hmi_capabilities() const = 0;
 
   virtual void ProcessQueryApp(const smart_objects::SmartObject& sm_object,
-							   const uint32_t connection_key) = 0;
+                               const uint32_t connection_key) = 0;
 
   virtual bool is_attenuated_supported() const = 0;
 
@@ -284,7 +283,7 @@ class ApplicationManager {
    * @return true if exist otherwise false
    */
   virtual bool IsAppTypeExistsInFullOrLimited(
-	  ApplicationConstSharedPtr app) const = 0;
+      ApplicationConstSharedPtr app) const = 0;
 
   /**
    * @brief Sets default HMI level and configure application after its
@@ -332,15 +331,15 @@ class ApplicationManager {
    * @param new value (for integer values currently) of vehicle data
    */
   virtual std::vector<ApplicationSharedPtr> IviInfoUpdated(
-	  VehicleDataType vehicle_info, int value) = 0;
+      VehicleDataType vehicle_info, int value) = 0;
 
   virtual ApplicationSharedPtr RegisterApplication(const utils::SharedPtr<
-	  smart_objects::SmartObject>& request_for_registration) = 0;
+      smart_objects::SmartObject>& request_for_registration) = 0;
 
   virtual void SendUpdateAppList() = 0;
 
   virtual void MarkAppsGreyOut(const connection_handler::DeviceHandle handle,
-							   bool is_greyed_out) = 0;
+                               bool is_greyed_out) = 0;
 
   /**
    * @brief Returns pointer to application-to-be-registered (from QUERY_APP
@@ -348,29 +347,28 @@ class ApplicationManager {
    * @param hmi_id HMI application id
    * @return Pointer to application or uninitialized shared pointer
    */
-  virtual ApplicationConstSharedPtr
-  app_to_be_registered(const uint32_t hmi_id) const = 0;
+  virtual ApplicationConstSharedPtr app_to_be_registered(
+      const uint32_t hmi_id) const = 0;
 
   /**
    * @brief Returns list of applications-to-be-registered (QUERY_APP list)
    * @return Locked list of applications
    */
-  virtual DataAccessor<AppsWaitRegistrationSet>
-  apps_waiting_for_registration() const = 0;
-
+  virtual DataAccessor<AppsWaitRegistrationSet> apps_waiting_for_registration()
+      const = 0;
 
   virtual bool IsAppsQueriedFrom(
-	  const connection_handler::DeviceHandle handle) const = 0;
+      const connection_handler::DeviceHandle handle) const = 0;
 
   virtual bool IsStopping() const = 0;
 
   virtual void RemoveAppFromTTSGlobalPropertiesList(const uint32_t app_id) = 0;
 
   virtual mobile_apis::Result::eType SaveBinary(
-	  const std::vector<uint8_t>& binary_data,
-	  const std::string& file_path,
-	  const std::string& file_name,
-	  const int64_t offset) = 0;
+      const std::vector<uint8_t>& binary_data,
+      const std::string& file_path,
+      const std::string& file_name,
+      const int64_t offset) = 0;
   /*
    * @brief Sets SDL access to all mobile apps
    *
@@ -396,11 +394,11 @@ class ApplicationManager {
    * @param audio_type      Type of audio data
    */
   virtual void StartAudioPassThruThread(int32_t session_key,
-										int32_t correlation_id,
-										int32_t max_duration,
-										int32_t sampling_rate,
-										int32_t bits_per_sample,
-										int32_t audio_type) = 0;
+                                        int32_t correlation_id,
+                                        int32_t max_duration,
+                                        int32_t sampling_rate,
+                                        int32_t bits_per_sample,
+                                        int32_t audio_type) = 0;
 
   virtual void StartDevicesDiscovery() = 0;
 
@@ -424,9 +422,9 @@ class ApplicationManager {
    * Indicates if connection was unexpectedly lost(TM layer, HB)
    */
   virtual void UnregisterApplication(const uint32_t& app_id,
-									 mobile_apis::Result::eType reason,
-									 bool is_resuming = false,
-									 bool is_unexpected_disconnect = false) = 0;
+                                     mobile_apis::Result::eType reason,
+                                     bool is_resuming = false,
+                                     bool is_unexpected_disconnect = false) = 0;
 
   /**
    * @ Updates request timeout
@@ -436,13 +434,13 @@ class ApplicationManager {
    * @param new_timeout_value New timeout in milliseconds to be set
    */
   virtual void updateRequestTimeout(uint32_t connection_key,
-									uint32_t mobile_correlation_id,
-									uint32_t new_timeout_value) = 0;
+                                    uint32_t mobile_correlation_id,
+                                    uint32_t new_timeout_value) = 0;
 
   virtual StateController& state_controller() = 0;
 
   virtual void SetUnregisterAllApplicationsReason(
-	  mobile_api::AppInterfaceUnregisteredReason::eType reason) = 0;
+      mobile_api::AppInterfaceUnregisteredReason::eType reason) = 0;
 
   /*
    * @brief Called on Master_reset or Factory_defaults
@@ -450,7 +448,7 @@ class ApplicationManager {
    * Resets Policy Table if applicable.
    */
   virtual void HeadUnitReset(
-	  mobile_api::AppInterfaceUnregisteredReason::eType reason) = 0;
+      mobile_api::AppInterfaceUnregisteredReason::eType reason) = 0;
 
   /**
    * @brief Checks HMI level and returns true if streaming is allowed
@@ -459,7 +457,7 @@ class ApplicationManager {
    * @return True if streaming is allowed, false in other case
    */
   virtual bool HMILevelAllowsStreaming(
-	  uint32_t app_id, protocol_handler::ServiceType service_type) const = 0;
+      uint32_t app_id, protocol_handler::ServiceType service_type) const = 0;
 
   /**
    * @brief Checks, if given RPC is allowed at current HMI level for specific
@@ -472,11 +470,11 @@ class ApplicationManager {
    * @return SUCCESS, if allowed, otherwise result code of check
    */
   virtual mobile_apis::Result::eType CheckPolicyPermissions(
-	  const std::string& policy_app_id,
-	  mobile_apis::HMILevel::eType hmi_level,
-	  mobile_apis::FunctionID::eType function_id,
-	  const RPCParams& rpc_params,
-	  CommandParametersPermissions* params_permissions = NULL) = 0;
+      const std::string& policy_app_id,
+      mobile_apis::HMILevel::eType hmi_level,
+      mobile_apis::FunctionID::eType function_id,
+      const RPCParams& rpc_params,
+      CommandParametersPermissions* params_permissions = NULL) = 0;
 
   /**
    * @brief IsApplicationForbidden allows to distinguish if application is
@@ -489,7 +487,7 @@ class ApplicationManager {
    * @return true in case application is allowed to register, false otherwise.
    */
   virtual bool IsApplicationForbidden(
-	  uint32_t connection_key, const std::string& policy_app_id) const = 0;
+      uint32_t connection_key, const std::string& policy_app_id) const = 0;
 
   virtual resumption::ResumeCtrl& resume_controller() = 0;
   /*
@@ -501,7 +499,7 @@ class ApplicationManager {
    * @return Corresponding HMI TransporType value
    */
   virtual hmi_apis::Common_TransportType::eType GetDeviceTransportType(
-	  const std::string& transport_type) = 0;
+      const std::string& transport_type) = 0;
 
   /**
    * @brief method adds application
@@ -519,7 +517,7 @@ class ApplicationManager {
   virtual uint32_t GenerateGrammarID() = 0;
 
   virtual policy::DeviceConsent GetUserConsentForDevice(
-	  const std::string& device_id) const = 0;
+      const std::string& device_id) const = 0;
 
   /**
   * @brief Handle sequence for unauthorized application
@@ -536,8 +534,8 @@ class ApplicationManager {
    * @param state Shows if streaming started or stopped
    */
   virtual void OnAppStreaming(uint32_t app_id,
-							  protocol_handler::ServiceType service_type,
-							  bool state) = 0;
+                              protocol_handler::ServiceType service_type,
+                              bool state) = 0;
 
   /**
    * @brief CreateRegularState create regular HMI state for application
@@ -548,13 +546,13 @@ class ApplicationManager {
    * @return new regular HMI state
    */
   virtual HmiStatePtr CreateRegularState(
-	  uint32_t app_id,
-	  mobile_apis::HMILevel::eType hmi_level,
-	  mobile_apis::AudioStreamingState::eType audio_state,
-	  mobile_apis::SystemContext::eType system_context) const = 0;
+      uint32_t app_id,
+      mobile_apis::HMILevel::eType hmi_level,
+      mobile_apis::AudioStreamingState::eType audio_state,
+      mobile_apis::SystemContext::eType system_context) const = 0;
 
   virtual void SendAudioPassThroughNotification(
-	  uint32_t session_key, std::vector<uint8_t>& binary_data) = 0;
+      uint32_t session_key, std::vector<uint8_t>& binary_data) = 0;
 
   /**
    * @brief Checks if application can stream (streaming service is started and
@@ -564,7 +562,7 @@ class ApplicationManager {
    * @return True if streaming is allowed, false in other case
    */
   virtual bool CanAppStream(
-	  uint32_t app_id, protocol_handler::ServiceType service_type) const = 0;
+      uint32_t app_id, protocol_handler::ServiceType service_type) const = 0;
 
   /**
    * @brief ForbidStreaming forbid the stream over the certain application.
