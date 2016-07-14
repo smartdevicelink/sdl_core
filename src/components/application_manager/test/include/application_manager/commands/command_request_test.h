@@ -122,28 +122,6 @@ class CommandRequestTest : public CommandsTest<kIsNice> {
   }
 };
 
-MATCHER_P(MobileResultCodeIs, result_code, "") {
-  return result_code ==
-         static_cast<mobile_apis::Result::eType>(
-             (*arg)[am::strings::msg_params][am::strings::result_code].asInt());
-}
-
-MATCHER_P(HMIResultCodeIs, result_code, "") {
-  return result_code ==
-         static_cast<hmi_apis::FunctionID::eType>(
-             (*arg)[am::strings::params][am::strings::function_id].asInt());
-}
-
-MATCHER_P3(MobileResponseIs, result_code, result_info, result_success, "") {
-  mobile_apis::Result::eType code = static_cast<mobile_apis::Result::eType>(
-      (*arg)[am::strings::msg_params][am::strings::result_code].asInt());
-  std::string info =
-      (*arg)[am::strings::msg_params][am::strings::info].asString();
-  bool success = (*arg)[am::strings::msg_params][am::strings::success].asBool();
-  return result_code == code && result_info == info &&
-         result_success == success;
-}
-
 }  // namespace commands_test
 }  // namespace components
 }  // namespace test
