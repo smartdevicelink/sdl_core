@@ -39,10 +39,9 @@ namespace application_manager {
 namespace commands {
 
 namespace {
-struct SDL4AppsOnDevice
-    : std::unary_function<ApplicationSharedPtr , bool> {
+struct ProtoV4AppsOnDevice : std::unary_function<ApplicationSharedPtr, bool> {
   connection_handler::DeviceHandle handle_;
-  SDL4AppsOnDevice(const connection_handler::DeviceHandle handle)
+  ProtoV4AppsOnDevice(const connection_handler::DeviceHandle handle)
       : handle_(handle) {}
   bool operator()(const ApplicationSharedPtr app) const {
     return app
@@ -53,19 +52,23 @@ struct SDL4AppsOnDevice
 };
 
 struct ForegroundApp
-    : std::unary_function<SDLActivateAppRequest::SDL4Apps::value_type, bool> {
-  bool operator()(const SDLActivateAppRequest::SDL4Apps::value_type ptr) const {
+    : std::unary_function<SDLActivateAppRequest::V4ProtoApps::value_type,
+                          bool> {
+  bool operator()(
+      const SDLActivateAppRequest::V4ProtoApps::value_type ptr) const {
     return ptr.valid() ? ptr->is_foreground() : false;
   }
 };
 
 struct SendLaunchApp
-    : std::unary_function<SDLActivateAppRequest::SDL4Apps::value_type, bool> {
+    : std::unary_function<SDLActivateAppRequest::V4ProtoApps::value_type,
+                          bool> {
   ApplicationConstSharedPtr app_to_launch_;
   ApplicationManager& application_manager_;
   SendLaunchApp(ApplicationConstSharedPtr app_to_launch, ApplicationManager& am)
       : app_to_launch_(app_to_launch), application_manager_(am) {}
-  bool operator()(const SDLActivateAppRequest::SDL4Apps::value_type ptr) const {
+  bool operator()(
+      const SDLActivateAppRequest::V4ProtoApps::value_type ptr) const {
     MessageHelper::SendLaunchApp((*ptr).app_id(),
                                  app_to_launch_->SchemaUrl(),
                                  app_to_launch_->PackageName(),
@@ -123,9 +126,9 @@ void SDLActivateAppRequest::Run() {
 
   connection_handler::DeviceHandle device_handle = app_to_activate->device();
   ApplicationSharedPtr foreground_sdl4_app = get_foreground_app(device_handle);
-  SDL4Apps sdl4_apps = get_sdl4_apps(device_handle);
+  V4ProtoApps v4_proto_apps = get_v4_proto_apps(device_handle);
 
-  if (!foreground_sdl4_app.valid() && sdl4_apps.empty()) {
+  if (!foreground_sdl4_app.valid() && v4_proto_apps.empty()) {
     LOG4CXX_ERROR(logger_,
                   "Can't find regular foreground app with the same "
                   "connection id:"
@@ -148,8 +151,8 @@ void SDLActivateAppRequest::Run() {
     LOG4CXX_DEBUG(logger_,
                   "No preffered (foreground) application is found. "
                   "Sending request to all v4 applications.");
-    std::for_each(sdl4_apps.begin(),
-                  sdl4_apps.end(),
+    std::for_each(v4_proto_apps.begin(),
+                  v4_proto_apps.end(),
                   SendLaunchApp(app_to_activate, application_manager_));
   }
 
@@ -221,24 +224,24 @@ uint32_t SDLActivateAppRequest::hmi_app_id(
   return so[msg_params][application][strings::app_id].asUInt();
 }
 
-SDLActivateAppRequest::SDL4Apps SDLActivateAppRequest::get_sdl4_apps(
+SDLActivateAppRequest::V4ProtoApps SDLActivateAppRequest::get_v4_proto_apps(
     const connection_handler::DeviceHandle handle) const {
   const ApplicationSet app_list = application_manager_.applications().GetData();
-  SDL4Apps sdl4_apps;
+  V4ProtoApps v4_proto_apps;
   std::copy_if(app_list.begin(),
                app_list.end(),
-               std::back_inserter(sdl4_apps),
-               SDL4AppsOnDevice(handle));
-  return sdl4_apps;
+               std::back_inserter(v4_proto_apps),
+               ProtoV4AppsOnDevice(handle));
+  return v4_proto_apps;
 }
 
 ApplicationSharedPtr SDLActivateAppRequest::get_foreground_app(
     const connection_handler::DeviceHandle handle) const {
-  SDL4Apps sdl4_apps = get_sdl4_apps(handle);
-  SDL4Apps::iterator foreground_app =
-      std::find_if(sdl4_apps.begin(), sdl4_apps.end(), ForegroundApp());
-  return foreground_app != sdl4_apps.end() ? *foreground_app
-                                           : ApplicationSharedPtr();
+  V4ProtoApps v4_proto_apps = get_v4_proto_apps(handle);
+  V4ProtoApps::iterator foreground_app =
+      std::find_if(v4_proto_apps.begin(), v4_proto_apps.end(), ForegroundApp());
+  return foreground_app != v4_proto_apps.end() ? *foreground_app
+                                               : ApplicationSharedPtr();
 }
 
 }  // namespace commands

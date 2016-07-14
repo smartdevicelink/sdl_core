@@ -45,7 +45,10 @@ namespace commands {
  **/
 class SDLActivateAppRequest : public RequestFromHMI {
  public:
-  typedef std::vector<application_manager::ApplicationSharedPtr> SDL4Apps;
+  /**
+   * @brief Applications registered over protocol v4
+   */
+  typedef std::vector<application_manager::ApplicationSharedPtr> V4ProtoApps;
 
   /**
    * @brief SDLActivateAppRequest class constructor
@@ -87,7 +90,8 @@ class SDLActivateAppRequest : public RequestFromHMI {
    * @param handle Device handle
    * @return List of applications registered over v4 protocol
    */
-  SDL4Apps get_sdl4_apps(const connection_handler::DeviceHandle handle) const;
+  V4ProtoApps get_v4_proto_apps(
+      const connection_handler::DeviceHandle handle) const;
 
   /**
    * @brief Get v4 protocol application reported as forgrounded on device
