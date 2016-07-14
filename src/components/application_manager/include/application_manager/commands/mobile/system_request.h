@@ -86,7 +86,7 @@ class SystemRequest : public CommandRequestImpl {
    * @param data Data
    * @return true, if data is valid, otherwise - false
    */
-  bool ValidateQueryAppData(const smart_objects::SmartObject& data) const;
+  bool ValidateQueryAppData(smart_objects::SmartObject& data) const;
 
  private:
   static uint32_t index;
