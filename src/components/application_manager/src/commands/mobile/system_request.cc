@@ -224,11 +224,9 @@ class QueryAppsDataValidator {
     ApplicationSharedPtr registered_app =
         manager_.application_by_policy_id(app_id);
     if (registered_app) {
-      LOG4CXX_WARN(logger_,
-                   kQueryAppsValidationFailedPrefix
-                       << "Application with the same id: " << app_id
-                       << " is registered already.");
-      return false;
+      LOG4CXX_INFO(logger_,
+                   "Application with the id: " << app_id
+                                               << " is already registered.");
     }
     // Verify app name exist
     if (!app_data.keyExists(json::name)) {
