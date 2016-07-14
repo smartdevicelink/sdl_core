@@ -32,6 +32,7 @@ void SubscribeWayPointsRequest::Run() {
   if (application_manager_.IsAnyAppSubscribedForWayPoints()) {
     application_manager_.SubscribeAppForWayPoints(app->app_id());
     SendResponse(true, mobile_apis::Result::SUCCESS);
+    app->UpdateHash();
     return;
   }
 
@@ -54,6 +55,9 @@ void SubscribeWayPointsRequest::on_event(const event_engine::Event& event) {
         application_manager_.SubscribeAppForWayPoints(app->app_id());
       }
       SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
+      if (result) {
+        app->UpdateHash();
+      }
       break;
     }
     default: {
