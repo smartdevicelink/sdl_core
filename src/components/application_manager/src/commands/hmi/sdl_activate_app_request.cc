@@ -125,10 +125,10 @@ void SDLActivateAppRequest::Run() {
   }
 
   connection_handler::DeviceHandle device_handle = app_to_activate->device();
-  ApplicationSharedPtr foreground_sdl4_app = get_foreground_app(device_handle);
+  ApplicationSharedPtr foreground_v4_app = get_foreground_app(device_handle);
   V4ProtoApps v4_proto_apps = get_v4_proto_apps(device_handle);
 
-  if (!foreground_sdl4_app.valid() && v4_proto_apps.empty()) {
+  if (!foreground_v4_app.valid() && v4_proto_apps.empty()) {
     LOG4CXX_ERROR(logger_,
                   "Can't find regular foreground app with the same "
                   "connection id:"
@@ -141,9 +141,9 @@ void SDLActivateAppRequest::Run() {
                 "Application is not registered yet. "
                 "Sending launch request.");
 
-  if (foreground_sdl4_app.valid()) {
+  if (foreground_v4_app.valid()) {
     LOG4CXX_DEBUG(logger_, "Sending request to foreground application.");
-    MessageHelper::SendLaunchApp(foreground_sdl4_app->app_id(),
+    MessageHelper::SendLaunchApp(foreground_v4_app->app_id(),
                                  app_to_activate->SchemaUrl(),
                                  app_to_activate->PackageName(),
                                  application_manager_);
