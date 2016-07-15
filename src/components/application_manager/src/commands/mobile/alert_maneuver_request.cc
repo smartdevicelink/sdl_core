@@ -195,8 +195,7 @@ void AlertManeuverRequest::on_event(const event_engine::Event& event) {
     if (result && hmi_apis::Common_Result::UNSUPPORTED_RESOURCE ==
         static_cast<hmi_apis::Common_Result::eType>(tts_speak_result_code_)) {
       result_code = mobile_apis::Result::WARNINGS;
-      return_info =
-          std::string("Unsupported phoneme type sent in a prompt").c_str();
+      return_info = "Unsupported phoneme type sent in a prompt";
     }
 
     SendResponse(result, result_code, return_info,

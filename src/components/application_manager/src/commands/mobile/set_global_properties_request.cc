@@ -344,12 +344,11 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
 
     mobile_apis::Result::eType result_code;
     const char* return_info = NULL;
-    const std::string return_string = "Unsupported phoneme type sent in a prompt";
 
     if (result) {
       if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == tts_result_) {
         result_code = mobile_apis::Result::WARNINGS;
-        return_info = return_string.c_str();
+        return_info = "Unsupported phoneme type sent in a prompt";
       } else {
         result_code = static_cast<mobile_apis::Result::eType>(
                         std::max(ui_result_, tts_result_));
