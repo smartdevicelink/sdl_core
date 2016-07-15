@@ -57,7 +57,6 @@ TransportAdapter::Error TcpConnectionFactory::CreateConnection(
   TcpServerOiginatedSocketConnection* connection(
       new TcpServerOiginatedSocketConnection(
           device_uid, app_handle, controller_));
-  controller_->ConnectionCreated(connection, device_uid, app_handle);
   if (connection->Start() == TransportAdapter::OK) {
     LOG4CXX_DEBUG(logger_, "TCP connection initialised");
     return TransportAdapter::OK;

@@ -41,11 +41,12 @@ namespace components {
 namespace transport_manager_test {
 
 using ::testing::Return;
+
 TEST(TestTransportManagerDefault, Init_LastStateNotUsed) {
   MockTransportManagerSettings transport_manager_settings;
   transport_manager::TransportManagerDefault transport_manager(
       transport_manager_settings);
-  resumption::LastState last_state("app_storage_folder", "app_info_storage");
+  resumption::LastState last_state("app_storage_folder", "app_info_storage2");
 
   EXPECT_CALL(transport_manager_settings, use_last_state())
       .WillRepeatedly(Return(false));
@@ -54,18 +55,19 @@ TEST(TestTransportManagerDefault, Init_LastStateNotUsed) {
   transport_manager.Init(last_state);
 }
 
-// TODO(VVeremjova) APPLINK-22021
-TEST(TestTransportManagerDefault, DISABLED_Init_LastStateUsed) {
+TEST(TestTransportManagerDefault, Init_LastStateUsed) {
   MockTransportManagerSettings transport_manager_settings;
   transport_manager::TransportManagerDefault transport_manager(
       transport_manager_settings);
-  resumption::LastState last_state("app_storage_folder", "app_info_storage");
+  resumption::LastState last_state("app_storage_folder", "app_info_storage2");
 
   EXPECT_CALL(transport_manager_settings, use_last_state())
       .WillRepeatedly(Return(true));
   EXPECT_CALL(transport_manager_settings, transport_manager_tcp_adapter_port())
       .WillRepeatedly(Return(1u));
+
   transport_manager.Init(last_state);
+  transport_manager.Stop();
 }
 
 }  // namespace transport_manager_test
