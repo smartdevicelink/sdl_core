@@ -765,88 +765,51 @@ void PerformInteractionRequest::DisablePerformInteraction() {
   app->DeletePerformInteractionChoiceSet(correlation_id());
 }
 
+bool PerformInteractionRequest::IsFieldHaveWhiteSpaces(
+    const std::string& field_name) {
+  if (!(*message_)[strings::msg_params].keyExists(field_name)) {
+    return false;
+  }
+  const char* str = NULL;
+  const smart_objects::SmartArray* data_array =
+      (*message_)[strings::msg_params][field_name].asArray();
+
+  smart_objects::SmartArray::const_iterator it_data = data_array->begin();
+  smart_objects::SmartArray::const_iterator it_data_end = data_array->end();
+  for (; it_data != it_data_end; ++it_data) {
+    str = (*it_data)[strings::text].asCharArray();
+    if (strlen(str) && !CheckSyntax(str)) {
+      SDL_ERROR("Invalid " + field_name + " syntax check failed");
+      return true;
+    }
+    if ((*it_data).keyExists(strings::image)) {
+      str = (*it_data)[strings::image][strings::value].asCharArray();
+      if (!CheckSyntax(str)) {
+        SDL_ERROR("Invalid vr_help image value syntax check failed");
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 bool PerformInteractionRequest::IsWhiteSpaceExist() {
   SDL_AUTO_TRACE();
-  const char* str = NULL;
 
-  str = (*message_)[strings::msg_params][strings::initial_text].asCharArray();
+  const char* str =
+      (*message_)[strings::msg_params][strings::initial_text].asCharArray();
   if (!CheckSyntax(str)) {
     SDL_ERROR("Invalid initial_text syntax check failed");
     return true;
   }
 
-  if ((*message_)[strings::msg_params].keyExists(strings::initial_prompt)) {
-    const smart_objects::SmartArray* ip_array =
-        (*message_)[strings::msg_params][strings::initial_prompt].asArray();
+  bool is_fields_have_whitespaces =
+      IsFieldHaveWhiteSpaces(strings::initial_prompt) ||
+      IsFieldHaveWhiteSpaces(strings::help_prompt) ||
+      IsFieldHaveWhiteSpaces(strings::timeout_prompt) ||
+      IsFieldHaveWhiteSpaces(strings::vr_help);
 
-    smart_objects::SmartArray::const_iterator it_ip = ip_array->begin();
-    smart_objects::SmartArray::const_iterator it_ip_end = ip_array->end();
-
-    for (; it_ip != it_ip_end; ++it_ip) {
-      str = (*it_ip)[strings::text].asCharArray();
-      if (strlen(str) && !CheckSyntax(str)) {
-        SDL_ERROR("Invalid initial_prompt syntax check failed");
-        return true;
-      }
-    }
-  }
-
-  if ((*message_)[strings::msg_params].keyExists(strings::help_prompt)) {
-    const smart_objects::SmartArray* hp_array =
-        (*message_)[strings::msg_params][strings::help_prompt].asArray();
-
-    smart_objects::SmartArray::const_iterator it_hp = hp_array->begin();
-    smart_objects::SmartArray::const_iterator it_hp_end = hp_array->end();
-
-    for (; it_hp != it_hp_end; ++it_hp) {
-      str = (*it_hp)[strings::text].asCharArray();
-      if (strlen(str) && !CheckSyntax(str)) {
-        SDL_ERROR("Invalid help_prompt syntax check failed");
-        return true;
-      }
-    }
-  }
-
-  if ((*message_)[strings::msg_params].keyExists(strings::timeout_prompt)) {
-    const smart_objects::SmartArray* tp_array =
-        (*message_)[strings::msg_params][strings::timeout_prompt].asArray();
-
-    smart_objects::SmartArray::const_iterator it_tp = tp_array->begin();
-    smart_objects::SmartArray::const_iterator it_tp_end = tp_array->end();
-
-    for (; it_tp != it_tp_end; ++it_tp) {
-      str = (*it_tp)[strings::text].asCharArray();
-      if (strlen(str) && !CheckSyntax(str)) {
-        SDL_ERROR("Invalid timeout_prompt syntax check failed");
-        return true;
-      }
-    }
-  }
-
-  if ((*message_)[strings::msg_params].keyExists(strings::vr_help)) {
-    const smart_objects::SmartArray* vh_array =
-        (*message_)[strings::msg_params][strings::vr_help].asArray();
-
-    smart_objects::SmartArray::const_iterator it_vh = vh_array->begin();
-    smart_objects::SmartArray::const_iterator it_vh_end = vh_array->end();
-
-    for (; it_vh != it_vh_end; ++it_vh) {
-      str = (*it_vh)[strings::text].asCharArray();
-      if (!CheckSyntax(str)) {
-        SDL_ERROR("Invalid vr_help syntax check failed");
-        return true;
-      }
-
-      if ((*it_vh).keyExists(strings::image)) {
-        str = (*it_vh)[strings::image][strings::value].asCharArray();
-        if (!CheckSyntax(str)) {
-          SDL_ERROR("Invalid vr_help image value syntax check failed");
-          return true;
-        }
-      }
-    }
-  }
-  return false;
+  return is_fields_have_whitespaces;
 }
 
 void PerformInteractionRequest::TerminatePerformInteraction() {
@@ -976,6 +939,26 @@ void PerformInteractionRequest::SendBothModeResponse(
   TerminatePerformInteraction();
   SendResponse(result, perform_interaction_result_code, NULL, response_params);
 }
+
+#if BUILD_TESTS
+bool PerformInteractionRequest::CallCheckMethod(CheckMethod method) {
+  ApplicationSharedPtr app = application_manager_.application(connection_key());
+  switch (method) {
+    case CheckMethod::kCheckVrSynonyms: {
+      return CheckChoiceSetVRSynonyms(app);
+    }
+    case CheckMethod::kCheckMenuNames: {
+      return CheckChoiceSetMenuNames(app);
+    }
+    case CheckMethod::kCheckVrHelpItem: {
+      return CheckVrHelpItemPositions(app);
+    }
+    default:
+      break;
+  }
+  return false;
+}
+#endif  // BUILD_TESTS
 
 }  // namespace commands
 

@@ -79,7 +79,20 @@ class PerformInteractionRequest : public CommandRequestImpl {
    */
   virtual void on_event(const event_engine::Event& event) OVERRIDE;
 
- private:
+#if BUILD_TESTS
+  enum CheckMethod {
+    kCheckVrSynonyms = 0,
+    kCheckMenuNames,
+    kCheckVrHelpItem
+  };
+
+  /**
+   * @brief Method for easier check methods in unit tests.
+   * Needed because Run method have ways which cannot be validated.
+   */
+  bool CallCheckMethod(CheckMethod);
+#endif  // BUILD_TESTS
+
   /*
    * @brief Function is called by RequestController when request execution time
    * has exceed it's limit
@@ -87,6 +100,7 @@ class PerformInteractionRequest : public CommandRequestImpl {
    */
   void onTimeOut() OVERRIDE;
 
+ private:
   /*
    * @brief Function will be called when VR_OnCommand event
    * comes
@@ -179,6 +193,16 @@ class PerformInteractionRequest : public CommandRequestImpl {
    * FALSE otherwise
    */
   bool IsWhiteSpaceExist();
+
+  /**
+   * @brief Help function for IsWhiteSpaceExist, which validate one of fields
+   * for white space existence
+   * @param field_name - name for find field in message smart object.
+   * Field must have type Array of Strings
+   * and could have [image][value] field inside
+   * @return false if whitespace not exists and vice versa
+   */
+  bool IsFieldHaveWhiteSpaces(const std::string& field_name);
 
   /**
    * @brief Send HMI close PopUp and call DisablePerformInteraction
