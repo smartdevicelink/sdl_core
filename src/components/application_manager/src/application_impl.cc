@@ -210,7 +210,6 @@ bool ApplicationImpl::IsAudioApplication() const {
 
 void ApplicationImpl::SetRegularState(HmiStatePtr state) {
   LOG4CXX_AUTO_TRACE(logger_);
-  DCHECK_OR_RETURN_VOID(state->app_id() == app_id());
   state_.AddState(state);
 }
 
@@ -221,7 +220,6 @@ void ApplicationImpl::RemovePostponedState() {
 
 void ApplicationImpl::SetPostponedState(HmiStatePtr state) {
   LOG4CXX_AUTO_TRACE(logger_);
-  DCHECK_OR_RETURN_VOID(state->app_id() == app_id());
   state_.AddState(state);
 }
 
@@ -235,7 +233,6 @@ struct StateIDComparator {
 
 void ApplicationImpl::AddHMIState(HmiStatePtr state) {
   LOG4CXX_AUTO_TRACE(logger_);
-  DCHECK_OR_RETURN_VOID(state->app_id() == app_id());
   state_.AddState(state);
 }
 

@@ -165,14 +165,6 @@ class HmiState {
     state_id_ = state_id;
   }
 
-  /**
-   * @brief return application id
-   * @return return application id
-   */
-  uint32_t app_id() {
-    return app_id_;
-  }
-
  protected:
   uint32_t app_id_;
   StateID state_id_;

@@ -417,11 +417,13 @@ class HMICapabilities {
   void Init(resumption::LastState* last_state);
 
   /**
-   * @brief Removes application from container after
-   * removing application from core
-   * @param app_id id application for removing
+   * @brief return component which follows for correctness of
+   * languages
+   * @return HMI language handler
    */
-  void OnUnregisterApplication(uint32_t app_id);
+  HMILanguageHandler& get_hmi_language_handler() {
+    return hmi_language_handler_;
+  }
 
  protected:
   /*

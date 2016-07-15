@@ -131,10 +131,12 @@ void HMILanguageHandler::on_event(const event_engine::Event& event) {
       is_tts_language_received_ = true;
       break;
     case hmi_apis::FunctionID::BasicCommunication_OnAppRegistered:
-      if (msg[strings::params].keyExists(strings::app_id)) {
-        CheckApplication(std::make_pair(
-            msg[strings::params][strings::app_id].asUInt(), true));
+      if (!(msg[strings::params].keyExists(strings::app_id))) {
+        LOG4CXX_ERROR(logger_, "Message doesn't contain parameter app_id");
+        return;
       }
+      CheckApplication(
+          std::make_pair(msg[strings::params][strings::app_id].asUInt(), true));
       return;
     default:
       return;
@@ -275,29 +277,31 @@ void HMILanguageHandler::VerifyWithPersistedLanguages() {
   sync_primitives::AutoLock lock(apps_lock_);
   if (0 == apps_.size()) {
     LOG4CXX_DEBUG(logger_,
-                  "No registered apps found. Unsubscribing from all events.");
+                  "No registered apps found. HMILanguageHandler unsubscribed "
+                  "from all events.");
     unsubscribe_from_all_events();
   }
 }
 
 void HMILanguageHandler::HandleWrongLanguageApp(const Apps::value_type& app) {
   LOG4CXX_AUTO_TRACE(logger_);
-  Apps::iterator it = apps_.find(app.first);
-  if (apps_.end() == it) {
-    LOG4CXX_DEBUG(logger_,
-                  "Application id "
-                      << app.first
-                      << " is not found within apps with wrong language.");
-    return;
+  {
+    sync_primitives::AutoLock lock(apps_lock_);
+    Apps::iterator it = apps_.find(app.first);
+    if (apps_.end() == it) {
+      LOG4CXX_DEBUG(logger_,
+                    "Application id "
+                        << app.first
+                        << " is not found within apps with wrong language.");
+      return;
+    }
+    apps_.erase(it);
+    if (0 == apps_.size()) {
+      LOG4CXX_DEBUG(logger_,
+                    "HMILanguageHandler unsubscribed from all events.");
+      unsubscribe_from_all_events();
+    }
   }
-  apps_.erase(it);
-  if (0 == apps_.size()) {
-    LOG4CXX_DEBUG(logger_,
-                  "All apps processed. Unsubscribing from all events.");
-    unsubscribe_from_all_events();
-  }
-
-  sync_primitives::AutoUnlock un_lock(apps_lock_);
   SendOnLanguageChangeToMobile(app.first);
   application_manager_.ManageMobileCommand(
       MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
@@ -313,16 +317,21 @@ void HMILanguageHandler::HandleWrongLanguageApp(const Apps::value_type& app) {
 
 void HMILanguageHandler::CheckApplication(const Apps::value_type app) {
   LOG4CXX_AUTO_TRACE(logger_);
-  sync_primitives::AutoLock lock(apps_lock_);
-  Apps::iterator it = apps_.find(app.first);
-  if (apps_.end() == it) {
-    LOG4CXX_INFO(logger_,
-                 "Adding application id "
-                     << app.first << " Application registered: " << app.second);
-    apps_.insert(app);
-    return;
+  bool is_need_handle_wrong_language = false;
+  {
+    sync_primitives::AutoLock lock(apps_lock_);
+    Apps::iterator it = apps_.find(app.first);
+    if (apps_.end() == it) {
+      LOG4CXX_INFO(logger_,
+                   "Adding application id "
+                       << app.first
+                       << " Application registered: " << app.second);
+      apps_.insert(app);
+      return;
+    }
+    is_need_handle_wrong_language = apps_[app.first];
   }
-  if (apps_[app.first]) {
+  if (is_need_handle_wrong_language) {
     HandleWrongLanguageApp(app);
   }
 }

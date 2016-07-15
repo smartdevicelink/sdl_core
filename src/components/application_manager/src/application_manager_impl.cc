@@ -2587,7 +2587,8 @@ void ApplicationManagerImpl::UnregisterApplication(
       resume_ctrl_.RemoveApplicationFromSaved(app_to_remove);
     }
     applications_.erase(app_to_remove);
-    hmi_capabilities_.OnUnregisterApplication(app_id);
+    (hmi_capabilities_.get_hmi_language_handler())
+        .OnUnregisterApplication(app_id);
     AppV4DevicePredicate finder(handle);
     ApplicationSharedPtr app = FindApp(accessor, finder);
     if (!app) {

@@ -947,8 +947,4 @@ void HMICapabilities::convert_json_languages_to_obj(
   }
 }
 
-void HMICapabilities::OnUnregisterApplication(uint32_t app_id) {
-  hmi_language_handler_.OnUnregisterApplication(app_id);
-}
-
 }  //  namespace application_manager
