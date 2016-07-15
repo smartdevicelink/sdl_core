@@ -41,31 +41,40 @@ namespace components {
 namespace transport_manager_test {
 
 using ::testing::Return;
+
+namespace {
+const std::string kAppStorageFolder = "app_storage_folder";
+const std::string kAppInfoStorage = "app_info_storage2.txt";
+}  // namespace
+
 TEST(TestTransportManagerDefault, Init_LastStateNotUsed) {
   MockTransportManagerSettings transport_manager_settings;
   transport_manager::TransportManagerDefault transport_manager(
       transport_manager_settings);
-  resumption::LastState last_state("app_storage_folder", "app_info_storage");
+  resumption::LastState last_state(kAppStorageFolder, kAppInfoStorage);
 
   EXPECT_CALL(transport_manager_settings, use_last_state())
       .WillRepeatedly(Return(false));
   EXPECT_CALL(transport_manager_settings, transport_manager_tcp_adapter_port())
       .WillRepeatedly(Return(1u));
   transport_manager.Init(last_state);
+  transport_manager.Stop();
 }
 
-// TODO(VVeremjova) APPLINK-22021
+// TODO(VlAntonov) APPLINK-27939
 TEST(TestTransportManagerDefault, DISABLED_Init_LastStateUsed) {
   MockTransportManagerSettings transport_manager_settings;
   transport_manager::TransportManagerDefault transport_manager(
       transport_manager_settings);
-  resumption::LastState last_state("app_storage_folder", "app_info_storage");
+  resumption::LastState last_state(kAppStorageFolder, kAppInfoStorage);
 
   EXPECT_CALL(transport_manager_settings, use_last_state())
       .WillRepeatedly(Return(true));
   EXPECT_CALL(transport_manager_settings, transport_manager_tcp_adapter_port())
       .WillRepeatedly(Return(1u));
+
   transport_manager.Init(last_state);
+  transport_manager.Stop();
 }
 
 }  // namespace transport_manager_test

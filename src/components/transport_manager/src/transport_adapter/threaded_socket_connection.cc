@@ -127,7 +127,7 @@ TransportAdapter::Error ThreadedSocketConnection::Disconnect() {
 
 void ThreadedSocketConnection::threadMain() {
   SDL_AUTO_TRACE();
-  controller_->ConnectionCreated(this, device_uid_, app_handle_);
+  controller_->ConnectionCreated(this, device_handle(), application_handle());
   ConnectError* connect_error = NULL;
   if (!Establish(&connect_error)) {
     SDL_ERROR("Connection Establish failed");
@@ -229,6 +229,7 @@ void ThreadedSocketConnection::SocketConnectionDelegate::threadMain() {
 
 void ThreadedSocketConnection::SocketConnectionDelegate::exitThreadMain() {
   SDL_AUTO_TRACE();
+  connection_->Abort();
 }
 
 }  // namespace transport_adapter

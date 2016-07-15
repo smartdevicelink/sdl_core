@@ -92,7 +92,7 @@ BluetoothDeviceScanner::BluetoothDeviceScanner(
   service_uuid_str_ =
       utils::BluetoothUUID(utils::GuidToStr(smart_device_link_service_uuid_))
           .Value();
-  thread_ = threads::CreateThread("BT Device Scaner",
+  thread_ = threads::CreateThread("BT Device Scanner",
                                   new BluetoothDeviceScannerDelegate(this));
 }
 
@@ -192,6 +192,7 @@ void BluetoothDeviceScanner::QueryBthProtocolInfo() {
   if (bth_socket == INVALID_SOCKET) {
     SDL_ERROR("Failed to get bluetooth socket! "
               << utils::GetLastErrorMessage(lastError));
+    closesocket(bth_socket);
     return;
   }
   int protocol_info_size = sizeof(protocol_info_);
@@ -449,6 +450,12 @@ void BluetoothDeviceScanner::BluetoothDeviceScannerDelegate::threadMain() {
   SDL_AUTO_TRACE();
   DCHECK(scanner_);
   scanner_->Thread();
+}
+
+void BluetoothDeviceScanner::BluetoothDeviceScannerDelegate::exitThreadMain() {
+  scanner_->shutdown_requested_ = true;
+  sync_primitives::AutoLock auto_lock(scanner_->device_scan_requested_lock_);
+  scanner_->device_scan_requested_cv_.NotifyOne();
 }
 
 }  // namespace transport_adapter

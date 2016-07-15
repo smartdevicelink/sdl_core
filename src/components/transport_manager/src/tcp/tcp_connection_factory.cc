@@ -60,7 +60,6 @@ TransportAdapter::Error TcpConnectionFactory::CreateConnection(
   TcpServerOiginatedSocketConnection* connection(
       new TcpServerOiginatedSocketConnection(
           device_uid, app_handle, controller_));
-  controller_->ConnectionCreated(connection, device_uid, app_handle);
   if (connection->Start() == TransportAdapter::OK) {
     SDL_DEBUG("TCP connection initialised");
     return TransportAdapter::OK;

@@ -47,6 +47,7 @@
 #include "transport_manager/usb/usb_control_transfer.h"
 
 #include "utils/threads/thread.h"
+#include "utils/atomic_object.h"
 
 class Thread;
 
@@ -81,12 +82,13 @@ class UsbHandler {
    public:
     explicit UsbHandlerDelegate(UsbHandler* handler);
     void threadMain() OVERRIDE;
+    void exitThreadMain() OVERRIDE;
 
    private:
     UsbHandler* handler_;
   };
 
-  bool shutdown_requested_;
+  sync_primitives::atomic_bool shutdown_requested_;
   threads::Thread* thread_;
 
   friend class UsbDeviceListener;

@@ -90,20 +90,24 @@ UsbHandler::UsbHandler()
 
 UsbHandler::~UsbHandler() {
   shutdown_requested_ = true;
-  if (libusb_context_ != 0) {
-    libusb_hotplug_deregister_callback(libusb_context_,
-                                       arrived_callback_handle_);
-    libusb_hotplug_deregister_callback(libusb_context_, left_callback_handle_);
-  }
-  thread_->stop();
-  SDL_INFO("UsbHandler thread finished");
-  if (libusb_context_) {
-    libusb_exit(libusb_context_);
-    libusb_context_ = 0;
-  }
   thread_->join(threads::Thread::kForceStop);
   delete thread_->delegate();
   threads::DeleteThread(thread_);
+  SDL_INFO("UsbHandler thread finished");
+
+  if (libusb_context_ != NULL) {
+    libusb_hotplug_deregister_callback(libusb_context_,
+                                       arrived_callback_handle_);
+    libusb_hotplug_deregister_callback(libusb_context_, left_callback_handle_);
+
+// TODO(VlAntonov) APPLINK-27938
+// This fix prevents crash under Windows but causes memory leaks
+#if defined(OS_POSIX)
+    libusb_exit(libusb_context_);
+#endif
+
+    libusb_context_ = NULL;
+  }
 }
 
 void UsbHandler::DeviceArrived(libusb_device* device_libusb) {
@@ -499,6 +503,16 @@ void UsbHandler::UsbHandlerDelegate::threadMain() {
   SDL_AUTO_TRACE();
   DCHECK(handler_);
   handler_->Thread();
+}
+
+void UsbHandler::UsbHandlerDelegate::exitThreadMain() {
+  handler_->shutdown_requested_ = true;
+  if (handler_->libusb_context_ != NULL) {
+    libusb_hotplug_deregister_callback(handler_->libusb_context_,
+                                       handler_->arrived_callback_handle_);
+    libusb_hotplug_deregister_callback(handler_->libusb_context_,
+                                       handler_->left_callback_handle_);
+  }
 }
 
 }  // namespace transport_adapter

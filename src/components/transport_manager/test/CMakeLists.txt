@@ -59,3 +59,4 @@ set(LIBRARIES
 create_test(transport_manager_test "${SOURCES}" "${LIBRARIES}")
 
 file(COPY smartDeviceLink_test.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY app_info_storage2.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

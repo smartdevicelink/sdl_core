@@ -47,6 +47,7 @@ void ThreadDelegate::exitThreadMain() {
     if (thread_->IsCurrentThread()) {
       DCHECK(!"Cannot terminate self");
     } else {
+      DCHECK(!"Thread termination by force should be avoided!")
       emit TerminateThread();
     }
   }

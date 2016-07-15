@@ -42,7 +42,8 @@ class PolicyHandler;
 class RetrySequence : public threads::ThreadDelegate {
  public:
   explicit RetrySequence(PolicyHandler* const policy_handler);
-  void threadMain();
+  void threadMain() OVERRIDE;
+  void exitThreadMain() OVERRIDE;
 
  private:
   PolicyHandler* const policy_handler_;

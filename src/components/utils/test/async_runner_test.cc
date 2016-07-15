@@ -37,6 +37,7 @@
 
 #include "utils/lock.h"
 #include "utils/conditional_variable.h"
+#include "utils/atomic_object.h"
 #include "utils/threads/async_runner.h"
 
 namespace test {
@@ -53,9 +54,10 @@ uint32_t check_value = 0;
 // ThreadDelegate successor
 class TestThreadDelegate : public ThreadDelegate {
  public:
-  void threadMain() {
+  void threadMain() OVERRIDE {
     ++check_value;
   }
+  void exitThreadMain() OVERRIDE {}
 };
 
 class AsyncRunnerTest : public ::testing::Test {

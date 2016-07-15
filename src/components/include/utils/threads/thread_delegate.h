@@ -68,7 +68,9 @@ class ThreadDelegate {
    * Should be called to free all resources allocated in threadMain
    * and exiting threadMain
    * This function should be blocking and return only when threadMain() will be
-   * finished in other case segmantation failes are possible
+   * finished in other case segmentation faults are possible.
+   * WARNING: The use of the thread cancellation should be avoided
+   * as it can cause deadlocks under Windows!
    */
   virtual void exitThreadMain();
 
