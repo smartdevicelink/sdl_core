@@ -40,12 +40,14 @@
 #include <fstream>
 #include <iostream>
 #include <stdio.h>
+#include <ctime>
 #include "security_manager/security_manager.h"
 
 #include "utils/logger.h"
 #include "utils/atomic.h"
 #include "utils/macro.h"
 #include "utils/scope_guard.h"
+#include "utils/date_time.h"
 
 #define TLS1_1_MINIMAL_VERSION 0x1000103fL
 #define CONST_SSL_METHOD_MINIMAL_VERSION 0x00909000L
@@ -274,17 +276,18 @@ bool CryptoManagerImpl::IsCertificateUpdateRequired() const {
   const time_t now = time(NULL);
   const double seconds = difftime(cert_date, now);
 
-  LOG4CXX_DEBUG(logger_, "Certificate time: " << asctime(&expiration_time_));
+  LOG4CXX_DEBUG(logger_,
+                "Certificate expiration time: " << asctime(&expiration_time_));
   LOG4CXX_DEBUG(logger_,
                 "Host time: " << asctime(localtime(&now))
                               << ". Seconds before expiration: " << seconds);
   if (seconds < 0) {
-    LOG4CXX_DEBUG(logger_, "Certificate is expired already.");
+    LOG4CXX_WARN(logger_, "Certificate is already expired.");
     return true;
   }
 
-  const uint16_t seconds_in_hour = 3600;
-  return seconds <= (get_settings().update_before_hours() * seconds_in_hour);
+  return seconds <= (get_settings().update_before_hours() *
+                     date_time::DateTime::SECONDS_IN_HOUR);
 }
 
 const CryptoManagerSettings& CryptoManagerImpl::get_settings() const {

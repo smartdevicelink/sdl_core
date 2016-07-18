@@ -47,6 +47,7 @@ class DateTime {
   static const int32_t MILLISECONDS_IN_SECOND = 1000;
   static const int32_t MICROSECONDS_IN_MILLISECOND = 1000;
   static const int32_t NANOSECONDS_IN_MICROSECOND = 1000;
+  static const int32_t SECONDS_IN_HOUR = 3600;
   static const int32_t MICROSECONDS_IN_SECOND =
       MILLISECONDS_IN_SECOND * MICROSECONDS_IN_MILLISECOND;
   static const int32_t NANOSECONDS_IN_MILLISECOND =
