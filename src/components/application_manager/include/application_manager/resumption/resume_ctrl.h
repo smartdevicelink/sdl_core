@@ -35,6 +35,7 @@
 
 #include <stdint.h>
 #include "utils/shared_ptr.h"
+#include "application_manager/resumption/resumption_data.h"
 
 namespace application_manager {
 class ApplicationManager;
@@ -187,6 +188,11 @@ class ResumeCtrl {
    * @brief Notify resume controller about delete new application
    */
   virtual void OnAppRegistrationEnd() = 0;
+
+#ifdef BUILD_TESTS
+  virtual void set_resumption_storage(
+      utils::SharedPtr<ResumptionData> mock_storage) = 0;
+#endif  // BUILD_TESTS
 };
 
 }  // namespace resumption

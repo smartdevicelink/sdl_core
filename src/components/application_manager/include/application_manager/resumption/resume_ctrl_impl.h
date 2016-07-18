@@ -266,7 +266,8 @@ class ResumeCtrlImpl : public ResumeCtrl,
   void OnAppRegistrationEnd() OVERRIDE;
 
 #ifdef BUILD_TESTS
-  void set_resumption_storage(utils::SharedPtr<ResumptionData> mock_storage);
+  void set_resumption_storage(
+      utils::SharedPtr<ResumptionData> mock_storage) OVERRIDE;
 #endif  // BUILD_TESTS
  private:
   /**
