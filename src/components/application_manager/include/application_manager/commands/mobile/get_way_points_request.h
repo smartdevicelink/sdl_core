@@ -66,7 +66,31 @@ class GetWayPointsRequest : public CommandRequestImpl {
    */
   virtual void on_event(const event_engine::Event& event) OVERRIDE;
 
+  /**
+   * @brief Will caled by request controller, when default will be expired.
+   */
+  void onTimeOut() OVERRIDE;
+
  private:
+  /**
+   * @brief Validate response from HMI
+   *
+   * @param message from HMI to check
+   */
+  bool ValidateResponseFromHMI(const smart_objects::SmartObject& obj);
+  /**
+   * @brief Check message syntax
+   *
+   * @param message from HMI to check
+   */
+  bool CheckResponseSyntax(const smart_objects::SmartObject& obj);
+  /**
+   * @brief Validate SmartMap message from HMI
+   *
+   * @param message from HMI to check
+   */
+  bool ValidateSmartMapResponse(const smart_objects::SmartObject& obj,
+                                std::set<std::string>::const_iterator key);
   DISALLOW_COPY_AND_ASSIGN(GetWayPointsRequest);
 };
 

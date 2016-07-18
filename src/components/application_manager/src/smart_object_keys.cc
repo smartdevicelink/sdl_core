@@ -125,6 +125,7 @@ const char* speech_capabilities = "speechCapabilities";
 const char* vr_capabilities = "vrCapabilities";
 const char* audio_pass_thru_capabilities = "audioPassThruCapabilities";
 const char* pcm_stream_capabilities = "pcmStreamCapabilities";
+const char* way_points = "wayPoints";
 // PutFile
 const char* sync_file_name = "syncFileName";
 const char* file_name = "fileName";

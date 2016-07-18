@@ -30,17 +30,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stdint.h>
-#include <string>
-
 #include "gtest/gtest.h"
-#include "application_manager/commands/command_request_test.h"
-#include "application_manager/mock_application.h"
-
-#include "mobile/get_way_points_request.h"
-
 #include "utils/shared_ptr.h"
-#include "utils/make_shared.h"
+#include "commands/commands_test.h"
+#include "commands/command_request_test.h"
+#include "application_manager/application.h"
+#include "application_manager/mock_application_manager.h"
+#include "application_manager/mock_application.h"
+#include "mobile/get_way_points_request.h"
+#include "application_manager/smart_object_keys.h"
+#include "mock_message_helper.h"
+#include "interfaces/HMI_API.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace test {
 namespace components {
@@ -48,10 +49,14 @@ namespace commands_test {
 namespace mobile_commands_test {
 namespace get_way_points_request {
 
-using namespace application_manager;
-
+using namespace mobile_apis::Result;
 using ::testing::Return;
 using ::testing::_;
+using application_manager::commands::GetWayPointsRequest;
+using application_manager::MockMessageHelper;
+
+typedef SharedPtr<GetWayPointsRequest> CommandPtr;
+typedef mobile_apis::Result::eType MobileResult;
 
 namespace {
 const uint32_t kCorrelationId = 2u;
@@ -65,7 +70,7 @@ class GetWayPointsRequestTest
  public:
   void SetUp() OVERRIDE {
     message_ = utils::MakeShared<SmartObject>(::smart_objects::SmartType_Map);
-    (*message_)[strings::msg_params] =
+    (*message_)[am::strings::msg_params] =
         ::smart_objects::SmartObject(::smart_objects::SmartType_Map);
 
     command_sptr_ =
@@ -77,14 +82,51 @@ class GetWayPointsRequestTest
 
   MockAppPtr mock_app_;
   MessageSharedPtr message_;
-  utils::SharedPtr<commands::GetWayPointsRequest> command_sptr_;
+  utils::SharedPtr<application_manager::commands::GetWayPointsRequest> command_sptr_;
+};
+
+class GetWayPointsRequestTest2
+    : public CommandRequestTest<CommandsTestMocks::kIsNice> {
+ public:
+  GetWayPointsRequestTest2() : app_(CreateMockApp()) {}
+
+  void CheckOnEventResponse(const std::string& wayPointsParam,
+                            const MobileResult ResultCode,
+                            const bool success) {
+    Event event(Event::EventID::Navigation_GetWayPoints);
+    CommandPtr command(CreateCommand<GetWayPointsRequest>());
+    MessageSharedPtr event_msg(CreateMessage(smart_objects::SmartType_Map));
+    (*event_msg)[am::strings::params][am::hmi_response::code] = ResultCode;
+    if ("0" == wayPointsParam) {
+      (*event_msg)[am::strings::msg_params] = 0;
+    } else {
+      (*event_msg)[am::strings::msg_params][am::strings::way_points][0]["123"] =
+          wayPointsParam;
+    }
+
+    event.set_smart_object(*event_msg);
+
+    MessageSharedPtr result_msg(
+        CatchMobileCommandResult(CallOnEvent(*command, event)));
+    EXPECT_EQ(
+        ResultCode,
+        static_cast<mobile_apis::Result::eType>(
+            (*result_msg)[am::strings::msg_params][am::strings::result_code]
+                .asInt()));
+    EXPECT_EQ(
+        success,
+        (*result_msg)[am::strings::msg_params][am::strings::success].asBool());
+  }
+
+ protected:
+  MockAppPtr app_;
 };
 
 TEST_F(GetWayPointsRequestTest,
        Run_InvalidApp_ApplicationNotRegisteredResponce) {
-  (*message_)[strings::params][strings::connection_key] = kConnectionKey;
+  (*message_)[am::strings::params][am::strings::connection_key] = kConnectionKey;
 
-  utils::SharedPtr<Application> null_application_sptr;
+  utils::SharedPtr<am::Application> null_application_sptr;
   EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
       .WillOnce(Return(null_application_sptr));
 
@@ -92,15 +134,15 @@ TEST_F(GetWayPointsRequestTest,
 
   MessageSharedPtr result_message = CatchMobileCommandResult(caller);
 
-  const mobile_api::Result::eType result =
-      static_cast<mobile_api::Result::eType>(
-          (*result_message)[strings::msg_params][strings::result_code].asInt());
+  const mobile_apis::Result::eType result =
+      static_cast<mobile_apis::Result::eType>(
+          (*result_message)[am::strings::msg_params][am::strings::result_code].asInt());
 
-  EXPECT_EQ(mobile_api::Result::APPLICATION_NOT_REGISTERED, result);
+  EXPECT_EQ(mobile_apis::Result::APPLICATION_NOT_REGISTERED, result);
 }
 
 TEST_F(GetWayPointsRequestTest, Run_ApplicationRegistered_Success) {
-  (*message_)[strings::params][strings::connection_key] = kConnectionKey;
+  (*message_)[am::strings::params][am::strings::connection_key] = kConnectionKey;
 
   MockAppPtr application_sptr = CreateMockApp();
 
@@ -117,19 +159,19 @@ TEST_F(GetWayPointsRequestTest, Run_ApplicationRegistered_Success) {
 
   const hmi_apis::FunctionID::eType result_function_id =
       static_cast<hmi_apis::FunctionID::eType>(
-          (*result_message)[strings::params][strings::function_id].asInt());
+          (*result_message)[am::strings::params][am::strings::function_id].asInt());
 
   EXPECT_EQ(hmi_apis::FunctionID::Navigation_GetWayPoints, result_function_id);
   EXPECT_EQ(
       kCorrelationId,
-      (*result_message)[strings::params][strings::correlation_id].asUInt());
+      (*result_message)[am::strings::params][am::strings::correlation_id].asUInt());
 }
 
 TEST_F(GetWayPointsRequestTest,
        OnEvent_NavigationGetWayPointsEvent_SendResponce) {
-  event_engine::Event event(hmi_apis::FunctionID::Navigation_GetWayPoints);
+  am::event_engine::Event event(hmi_apis::FunctionID::Navigation_GetWayPoints);
 
-  (*message_)[strings::params][hmi_response::code] =
+  (*message_)[am::strings::params][am::hmi_response::code] =
       hmi_apis::Common_Result::SUCCESS;
 
   event.set_smart_object(*message_);
@@ -138,15 +180,15 @@ TEST_F(GetWayPointsRequestTest,
 
   MessageSharedPtr result_message = CatchMobileCommandResult(caller);
 
-  const mobile_api::Result::eType result =
-      static_cast<mobile_api::Result::eType>(
-          (*result_message)[strings::msg_params][strings::result_code].asInt());
+  const mobile_apis::Result::eType result =
+      static_cast<mobile_apis::Result::eType>(
+          (*result_message)[am::strings::msg_params][am::strings::result_code].asInt());
 
-  EXPECT_EQ(mobile_api::Result::SUCCESS, result);
+  EXPECT_EQ(mobile_apis::Result::SUCCESS, result);
 }
 
 TEST_F(GetWayPointsRequestTest, OnEvent_DefaultCase) {
-  event_engine::Event event(hmi_apis::FunctionID::INVALID_ENUM);
+  am::event_engine::Event event(hmi_apis::FunctionID::INVALID_ENUM);
 
   event.set_smart_object(*message_);
 
@@ -155,6 +197,42 @@ TEST_F(GetWayPointsRequestTest, OnEvent_DefaultCase) {
 
   CallOnEvent caller(*command_sptr_, event);
   caller();
+}
+
+TEST_F(GetWayPointsRequestTest2, OnEvent_WrongEventId_UNSUCCESS) {
+  Event event(Event::EventID::INVALID_ENUM);
+  CommandPtr command(CreateCommand<GetWayPointsRequest>());
+
+  EXPECT_CALL(mock_app_manager_, ManageMobileCommand(_, _)).Times(0);
+  command->on_event(event);
+}
+
+TEST_F(GetWayPointsRequestTest2, OnEvent_Expect_SUCCESS_Case1) {
+  CheckOnEventResponse("0", SUCCESS, true);
+}
+
+TEST_F(GetWayPointsRequestTest2, OnEvent_Expect_SUCCESS_Case2) {
+  CheckOnEventResponse("", SUCCESS, true);
+}
+
+TEST_F(GetWayPointsRequestTest2, OnEvent_Expect_SUCCESS_Case3) {
+  CheckOnEventResponse("test", SUCCESS, true);
+}
+
+TEST_F(GetWayPointsRequestTest2, OnEvent_Expect_GENERIC_ERROR_Case1) {
+  CheckOnEventResponse("    ", GENERIC_ERROR, false);
+}
+
+TEST_F(GetWayPointsRequestTest2, OnEvent_Expect_GENERIC_ERROR_Case2) {
+  CheckOnEventResponse("test\t", GENERIC_ERROR, false);
+}
+
+TEST_F(GetWayPointsRequestTest2, OnEvent_Expect_GENERIC_ERROR_Case3) {
+  CheckOnEventResponse("test\n", GENERIC_ERROR, false);
+}
+
+TEST_F(GetWayPointsRequestTest2, OnEvent_Expect_GENERIC_ERROR_Case4) {
+  CheckOnEventResponse("test\t\n", GENERIC_ERROR, false);
 }
 
 }  // namespace get_way_points_request
