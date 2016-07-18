@@ -56,24 +56,24 @@ struct ForegroundApp
                           bool> {
   bool operator()(
       const SDLActivateAppRequest::V4ProtoApps::value_type ptr) const {
-    return ptr.valid() ? ptr->is_foreground() : false;
+    return ptr ? ptr->is_foreground() : false;
   }
 };
 
 struct SendLaunchApp
     : std::unary_function<SDLActivateAppRequest::V4ProtoApps::value_type,
-                          bool> {
+                          void> {
   ApplicationConstSharedPtr app_to_launch_;
   ApplicationManager& application_manager_;
   SendLaunchApp(ApplicationConstSharedPtr app_to_launch, ApplicationManager& am)
       : app_to_launch_(app_to_launch), application_manager_(am) {}
-  bool operator()(
+  void operator()(
       const SDLActivateAppRequest::V4ProtoApps::value_type ptr) const {
     MessageHelper::SendLaunchApp((*ptr).app_id(),
                                  app_to_launch_->SchemaUrl(),
                                  app_to_launch_->PackageName(),
                                  application_manager_);
-    return true;
+    return;
   }
 };
 }
@@ -129,7 +129,7 @@ void SDLActivateAppRequest::Run() {
   ApplicationSharedPtr foreground_v4_app = get_foreground_app(device_handle);
   V4ProtoApps v4_proto_apps = get_v4_proto_apps(device_handle);
 
-  if (!foreground_v4_app.valid() && v4_proto_apps.empty()) {
+  if (!foreground_v4_app && v4_proto_apps.empty()) {
     LOG4CXX_ERROR(logger_,
                   "Can't find regular foreground app with the same "
                   "connection id:"
@@ -142,7 +142,7 @@ void SDLActivateAppRequest::Run() {
                 "Application is not registered yet. "
                 "Sending launch request.");
 
-  if (foreground_v4_app.valid()) {
+  if (foreground_v4_app) {
     LOG4CXX_DEBUG(logger_, "Sending request to foreground application.");
     MessageHelper::SendLaunchApp(foreground_v4_app->app_id(),
                                  app_to_activate->SchemaUrl(),
