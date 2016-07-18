@@ -38,6 +38,9 @@ namespace policy {
   StatisticsDelegate::StatisticsDelegate(usage_statistics::GlobalCounterId type)
     : type_(INCREMENT_GLOBAL),
       global_counter_(type),
+      app_counter_(usage_statistics::AppCounterId::APP_COUNTER_NONE),
+      app_info_(usage_statistics::AppInfoId::APP_INFO_NONE),
+      stop_watch_(usage_statistics::AppStopwatchId::STOPWATCH_NONE),
       app_id_(""),
       value_(""),
       timespan_seconds_(0) {
@@ -47,7 +50,10 @@ namespace policy {
   StatisticsDelegate::StatisticsDelegate(const std::string& app_id,
                                        usage_statistics::AppCounterId type)
     : type_(INCREMENT_APP),
+      global_counter_(usage_statistics::GlobalCounterId::GLOBAL_COUNTER_NONE),
       app_counter_(type),
+      app_info_(usage_statistics::AppInfoId::APP_INFO_NONE),
+      stop_watch_(usage_statistics::AppStopwatchId::STOPWATCH_NONE),
       app_id_(app_id),
       value_(""),
       timespan_seconds_(0) {
@@ -58,7 +64,10 @@ namespace policy {
                                        usage_statistics::AppInfoId type,
                                        const std::string& value)
     : type_(SET),
+      global_counter_(usage_statistics::GlobalCounterId::GLOBAL_COUNTER_NONE),
+      app_counter_(usage_statistics::AppCounterId::APP_COUNTER_NONE),
       app_info_(type),
+      stop_watch_(usage_statistics::AppStopwatchId::STOPWATCH_NONE),
       app_id_(app_id),
       value_(value),
       timespan_seconds_(0) {
@@ -69,6 +78,9 @@ namespace policy {
                                        usage_statistics::AppStopwatchId type,
                                        int32_t timespan_seconds)
     : type_(ADD),
+      global_counter_(usage_statistics::GlobalCounterId::GLOBAL_COUNTER_NONE),
+      app_counter_(usage_statistics::AppCounterId::APP_COUNTER_NONE),
+      app_info_(usage_statistics::AppInfoId::APP_INFO_NONE),
       stop_watch_(type),
       app_id_(app_id),
       value_(""),

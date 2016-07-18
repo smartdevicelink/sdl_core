@@ -39,17 +39,20 @@
 namespace usage_statistics {
 
 enum GlobalCounterId {
+  GLOBAL_COUNTER_NONE,
   IAP_BUFFER_FULL,
   SYNC_OUT_OF_MEMORY,
   SYNC_REBOOTS
 };
 
 enum AppInfoId {
+  APP_INFO_NONE,
   LANGUAGE_GUI,
   LANGUAGE_VUI
 };
 
 enum AppStopwatchId {
+  STOPWATCH_NONE,
   SECONDS_HMI_FULL,
   SECONDS_HMI_LIMITED,
   SECONDS_HMI_BACKGROUND,
@@ -57,6 +60,7 @@ enum AppStopwatchId {
 };
 
 enum AppCounterId {
+  APP_COUNTER_NONE,
   USER_SELECTIONS,
   REJECTIONS_SYNC_OUT_OF_MEMORY,
   REJECTIONS_NICKNAME_MISMATCH,
