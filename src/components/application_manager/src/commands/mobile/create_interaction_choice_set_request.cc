@@ -99,7 +99,9 @@ void CreateInteractionChoiceSetRequest::Run() {
           .asInt();
 
   if (app->FindChoiceSet(choice_set_id_)) {
-    SDL_ERROR("Choice set with id " << choice_set_id_ << " is not found.");
+    SDL_WARN("Choice set with id " << choice_set_id_
+                                   << " already exists in application with id "
+                                   << app->app_id());
     SendResponse(false, Result::INVALID_ID);
     return;
   }
