@@ -72,6 +72,32 @@ mobile_apis::AppHMIType::eType StringToAppHMIType(const std::string &str) {
   }
 }
 
+std::string AppHMITypeToString(mobile_apis::AppHMIType::eType type) {
+  if (mobile_apis::AppHMIType::DEFAULT == type) {
+    return "DEFAULT";
+  } else if (mobile_apis::AppHMIType::COMMUNICATION == type) {
+    return "COMMUNICATION";
+  } else if (mobile_apis::AppHMIType::MEDIA == type) {
+    return "MEDIA";
+  } else if (mobile_apis::AppHMIType::MESSAGING == type) {
+    return "MESSAGING";
+  } else if (mobile_apis::AppHMIType::NAVIGATION == type) {
+    return "NAVIGATION";
+  } else if (mobile_apis::AppHMIType::INFORMATION == type) {
+    return "INFORMATION";
+  } else if (mobile_apis::AppHMIType::SOCIAL == type) {
+    return "SOCIAL";
+  } else if (mobile_apis::AppHMIType::BACKGROUND_PROCESS == type) {
+    return "BACKGROUND_PROCESS";
+  } else if (mobile_apis::AppHMIType::TESTING == type) {
+    return "TESTING";
+  } else if (mobile_apis::AppHMIType::SYSTEM == type) {
+    return "SYSTEM";
+  } else {
+    return NULL;
+  }
+}
+
 struct AppHMITypeInserter {
   AppHMITypeInserter(smart_objects::SmartObject &so_array)
       : index_(0), so_array_(so_array) {}
@@ -93,7 +119,7 @@ struct CheckMissedTypes {
       : policy_app_types_(policy_app_types), log_(log) {}
 
   bool operator()(const smart_objects::SmartArray::value_type &value) {
-    std::string app_type_str = value.asString();
+    std::string app_type_str = AppHMITypeToString((mobile_apis::AppHMIType::eType)value.asUInt());
     policy::StringArray::const_iterator it = policy_app_types_.begin();
     policy::StringArray::const_iterator it_end = policy_app_types_.end();
     for (; it != it_end; ++it) {
