@@ -835,9 +835,9 @@ class ApplicationManagerImpl
       ApplicationConstSharedPtr application) const;
 
   /**
-    * Getter for resume_controller
-    * @return Resume Controller
-    */
+  * Getter for resume_controller
+  * @return Resume Controller
+  */
   resumption::ResumeCtrl& resume_controller() OVERRIDE {
     return resume_ctrl_;
   }
@@ -991,20 +991,7 @@ class ApplicationManagerImpl
     }
   };
 
-  struct ApplicationsPolicyAppIdSorter {
-    bool operator()(const ApplicationSharedPtr lhs,
-                    const ApplicationSharedPtr rhs) {
-      if (lhs->policy_app_id() == rhs->policy_app_id()) {
-        return lhs->device() < rhs->device();
-      }
-      return lhs->policy_app_id() < rhs->policy_app_id();
-    }
-  };
-
   // typedef for Applications list
-  typedef std::set<ApplicationSharedPtr, ApplicationsPolicyAppIdSorter>
-      AppsWaitRegistrationSet;
-
   typedef std::set<std::string> ForbiddenApps;
 
   struct AppIdPredicate {
@@ -1092,6 +1079,12 @@ class ApplicationManagerImpl
    */
   void MarkAppsGreyOut(const connection_handler::DeviceHandle handle,
                        bool is_greyed_out) OVERRIDE;
+
+  ApplicationConstSharedPtr WaitingApplicationByID(
+      const uint32_t hmi_id) const OVERRIDE;
+
+  DataAccessor<AppsWaitRegistrationSet> AppsWaitingForRegistration()
+      const OVERRIDE;
 
   /**
    * @brief Checks, if apps list had been queried already from certain device

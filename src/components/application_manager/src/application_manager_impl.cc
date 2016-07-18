@@ -835,6 +835,27 @@ void ApplicationManagerImpl::OnMessageReceived(
   messages_from_hmi_.PostMessage(impl::MessageFromHmi(message));
 }
 
+ApplicationConstSharedPtr ApplicationManagerImpl::WaitingApplicationByID(
+    const uint32_t hmi_id) const {
+  AppsWaitRegistrationSet app_list = AppsWaitingForRegistration().GetData();
+
+  AppsWaitRegistrationSet::const_iterator it_end = app_list.end();
+
+  HmiAppIdPredicate finder(hmi_id);
+  ApplicationSharedPtr result;
+  ApplicationSetConstIt it_app = std::find_if(app_list.begin(), it_end, finder);
+  if (it_app != it_end) {
+    result = *it_app;
+  }
+  return result;
+}
+
+DataAccessor<AppsWaitRegistrationSet>
+ApplicationManagerImpl::AppsWaitingForRegistration() const {
+  return DataAccessor<AppsWaitRegistrationSet>(apps_to_register_,
+                                               apps_to_register_list_lock_);
+}
+
 bool ApplicationManagerImpl::IsAppsQueriedFrom(
     const connection_handler::DeviceHandle handle) const {
   sync_primitives::AutoLock lock(apps_to_register_list_lock_);

@@ -87,7 +87,21 @@ struct ApplicationsAppIdSorter {
     return lhs->app_id() < rhs->app_id();
   }
 };
+
+struct ApplicationsPolicyAppIdSorter {
+  bool operator()(const ApplicationSharedPtr lhs,
+                  const ApplicationSharedPtr rhs) {
+    if (lhs->policy_app_id() == rhs->policy_app_id()) {
+      return lhs->device() < rhs->device();
+    }
+    return lhs->policy_app_id() < rhs->policy_app_id();
+  }
+};
+
 typedef std::set<ApplicationSharedPtr, ApplicationsAppIdSorter> ApplicationSet;
+
+typedef std::set<ApplicationSharedPtr, ApplicationsPolicyAppIdSorter>
+    AppsWaitRegistrationSet;
 
 // typedef for Applications list iterator
 typedef ApplicationSet::iterator ApplicationSetIt;
@@ -326,6 +340,23 @@ class ApplicationManager {
 
   virtual void MarkAppsGreyOut(const connection_handler::DeviceHandle handle,
                                bool is_greyed_out) = 0;
+
+  /**
+   * @brief Returns pointer to application-to-be-registered (from QUERY_APP
+   * list)
+   * @param hmi_id HMI application id
+   * @return Pointer to application or uninitialized shared pointer
+   */
+  virtual ApplicationConstSharedPtr WaitingApplicationByID(
+      const uint32_t hmi_id) const = 0;
+
+  /**
+   * @brief Returns list of applications-to-be-registered (QUERY_APP list)
+   * @return Locked list of applications
+   */
+  virtual DataAccessor<AppsWaitRegistrationSet> AppsWaitingForRegistration()
+      const = 0;
+
   virtual bool IsAppsQueriedFrom(
       const connection_handler::DeviceHandle handle) const = 0;
 
