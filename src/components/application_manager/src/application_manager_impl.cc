@@ -1286,8 +1286,8 @@ ApplicationManagerImpl::GetHandshakeContext(uint32_t key) const {
   using security_manager::SSLContext;
   ApplicationConstSharedPtr app = application(key);
   if (app) {
-    SSLContext::HandshakeContext(custom_str::CustomString(app->policy_app_id()),
-                                 app->name());
+    return SSLContext::HandshakeContext(
+        custom_str::CustomString(app->policy_app_id()), app->name());
   }
   return SSLContext::HandshakeContext();
 }
