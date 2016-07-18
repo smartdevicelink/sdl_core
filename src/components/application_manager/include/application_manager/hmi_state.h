@@ -151,7 +151,7 @@ class HmiState {
 
   /**
    * @brief state_id state type
-   * @return reutrn state type
+   * @return return state type
    */
   StateID state_id() const {
     return state_id_;

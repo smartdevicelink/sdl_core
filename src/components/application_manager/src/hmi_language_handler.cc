@@ -131,6 +131,10 @@ void HMILanguageHandler::on_event(const event_engine::Event& event) {
       is_tts_language_received_ = true;
       break;
     case hmi_apis::FunctionID::BasicCommunication_OnAppRegistered:
+      if (!(msg[strings::params].keyExists(strings::app_id))) {
+        LOG4CXX_ERROR(logger_, "Message doesn't contain parameter app_id");
+        return;
+      }
       CheckApplication(
           std::make_pair(msg[strings::params][strings::app_id].asUInt(), true));
       return;
@@ -273,26 +277,31 @@ void HMILanguageHandler::VerifyWithPersistedLanguages() {
   sync_primitives::AutoLock lock(apps_lock_);
   if (0 == apps_.size()) {
     LOG4CXX_DEBUG(logger_,
-                  "No registered apps found. Unsubscribing from all events.");
+                  "No registered apps found. HMILanguageHandler unsubscribed "
+                  "from all events.");
     unsubscribe_from_all_events();
   }
 }
 
 void HMILanguageHandler::HandleWrongLanguageApp(const Apps::value_type& app) {
   LOG4CXX_AUTO_TRACE(logger_);
-  Apps::iterator it = apps_.find(app.first);
-  if (apps_.end() == it) {
-    LOG4CXX_DEBUG(logger_,
-                  "Application id "
-                      << app.first
-                      << " is not found within apps with wrong language.");
-    return;
+  {
+    sync_primitives::AutoLock lock(apps_lock_);
+    Apps::iterator it = apps_.find(app.first);
+    if (apps_.end() == it) {
+      LOG4CXX_DEBUG(logger_,
+                    "Application id "
+                        << app.first
+                        << " is not found within apps with wrong language.");
+      return;
+    }
+    apps_.erase(it);
+    if (0 == apps_.size()) {
+      LOG4CXX_DEBUG(logger_,
+                    "HMILanguageHandler unsubscribed from all events.");
+      unsubscribe_from_all_events();
+    }
   }
-
-  LOG4CXX_INFO(logger_,
-               "Unregistering application with app_id "
-                   << app.first << " because of HMI language(s) mismatch.");
-
   SendOnLanguageChangeToMobile(app.first);
   application_manager_.ManageMobileCommand(
       MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
@@ -301,26 +310,28 @@ void HMILanguageHandler::HandleWrongLanguageApp(const Apps::value_type& app) {
       commands::Command::ORIGIN_SDL);
   application_manager_.UnregisterApplication(
       app.first, mobile_apis::Result::SUCCESS, false);
-  apps_.erase(it);
-  if (0 == apps_.size()) {
-    LOG4CXX_DEBUG(logger_,
-                  "All apps processed. Unsubscribing from all events.");
-    unsubscribe_from_all_events();
-  }
+  LOG4CXX_INFO(logger_,
+               "Unregistering application with app_id "
+                   << app.first << " because of HMI language(s) mismatch.");
 }
 
 void HMILanguageHandler::CheckApplication(const Apps::value_type app) {
   LOG4CXX_AUTO_TRACE(logger_);
-  sync_primitives::AutoLock lock(apps_lock_);
-  Apps::iterator it = apps_.find(app.first);
-  if (apps_.end() == it) {
-    LOG4CXX_INFO(logger_,
-                 "Adding application id "
-                     << app.first << " Application registered: " << app.second);
-    apps_.insert(app);
-    return;
+  bool is_need_handle_wrong_language = false;
+  {
+    sync_primitives::AutoLock lock(apps_lock_);
+    Apps::iterator it = apps_.find(app.first);
+    if (apps_.end() == it) {
+      LOG4CXX_INFO(logger_,
+                   "Adding application id "
+                       << app.first
+                       << " Application registered: " << app.second);
+      apps_.insert(app);
+      return;
+    }
+    is_need_handle_wrong_language = apps_[app.first];
   }
-  if (apps_[app.first]) {
+  if (is_need_handle_wrong_language) {
     HandleWrongLanguageApp(app);
   }
 }
@@ -330,6 +341,12 @@ void HMILanguageHandler::Init(resumption::LastState* value) {
   persisted_ui_language_ = get_language_for(INTERFACE_UI);
   persisted_vr_language_ = get_language_for(INTERFACE_VR);
   persisted_tts_language_ = get_language_for(INTERFACE_TTS);
+}
+
+void HMILanguageHandler::OnUnregisterApplication(uint32_t app_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(apps_lock_);
+  apps_.erase(app_id);
 }
 
 }  // namespace application_manager

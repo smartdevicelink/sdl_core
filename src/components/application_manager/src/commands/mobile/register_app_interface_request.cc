@@ -542,16 +542,25 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
       *(application.get()), resumption, need_restore_vr);
   SendResponse(true, result_code, add_info.c_str(), &response_params);
 
-  if (result_code != mobile_apis::Result::RESUME_FAILED) {
-    resumer.StartResumption(application, hash_id);
-  } else {
-    resumer.StartResumptionOnlyHMILevel(application);
-  }
+  // Check if application exists, because application might be unregestered
+  // during sending reponse to mobile.
+  application = application_manager_.application(key);
+  if (application) {
+    LOG4CXX_DEBUG(logger_, "Application with app_id = " << key << " exists.");
+    if (result_code != mobile_apis::Result::RESUME_FAILED) {
+      resumer.StartResumption(application, hash_id);
+    } else {
+      resumer.StartResumptionOnlyHMILevel(application);
+    }
 
-  // By default app subscribed to CUSTOM_BUTTON
-  SendSubscribeCustomButtonNotification();
-  MessageHelper::SendChangeRegistrationRequestToHMI(application,
-                                                    application_manager_);
+    // By default app subscribed to CUSTOM_BUTTON
+    SendSubscribeCustomButtonNotification();
+    MessageHelper::SendChangeRegistrationRequestToHMI(application,
+                                                      application_manager_);
+  } else {
+    LOG4CXX_DEBUG(logger_,
+                  "Application with app_id = " << key << " doesn't exist.");
+  }
 }
 
 void RegisterAppInterfaceRequest::SendOnAppRegisteredNotificationToHMI(
