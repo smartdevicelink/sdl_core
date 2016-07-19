@@ -162,7 +162,7 @@ TransportAdapter::Error ThreadedSocketConnection::Disconnect() {
 
 void ThreadedSocketConnection::threadMain() {
   LOG4CXX_AUTO_TRACE(logger_);
-  controller_->ConnectionCreated(this, device_uid_, app_handle_);
+  controller_->ConnectionCreated(this, device_handle(), application_handle());
   ConnectError* connect_error = NULL;
   if (!Establish(&connect_error)) {
     LOG4CXX_ERROR(logger_, "Connection Establish failed");
