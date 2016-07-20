@@ -64,30 +64,30 @@ void ResumptionDataJson::SaveApplication(
   const std::string& policy_app_id = application->policy_app_id();
   SDL_DEBUG("app_id : " << application->app_id()
                         << " policy_app_id : " << policy_app_id);
-  const std::string hash = application->curHash();
-  const uint32_t grammar_id = application->get_grammar_id();
-  const utils::json::JsonValue::UInt time_stamp =
+  const std::string kHash = application->curHash();
+  const uint32_t kGrammarId = application->get_grammar_id();
+  const utils::json::JsonValue::UInt kTimeStamp =
       static_cast<uint32_t>(time(NULL));
-  const std::string device_mac = application->mac_address();
-  const mobile_apis::HMILevel::eType hmi_level = application->hmi_level();
-  const bool is_subscribed_for_way_points =
+  const std::string kDeviceMac = application->mac_address();
+  const mobile_apis::HMILevel::eType kHmiLevel = application->hmi_level();
+  const bool kIsSubscribedForWayPoints =
       application->IsAppSubscribedForWayPoints(application->app_id());
 
   sync_primitives::AutoLock autolock(resumption_lock_);
   JsonValue tmp;
-  JsonValueRef json_app = GetFromSavedOrAppend(policy_app_id, device_mac);
+  JsonValueRef json_app = GetFromSavedOrAppend(policy_app_id, kDeviceMac);
 
-  json_app[strings::device_id] = device_mac;
+  json_app[strings::device_id] = kDeviceMac;
   json_app[strings::app_id] = policy_app_id;
-  json_app[strings::grammar_id] = utils::json::JsonValue::UInt(grammar_id);
+  json_app[strings::grammar_id] = utils::json::JsonValue::UInt(kGrammarId);
   json_app[strings::connection_key] =
       utils::json::JsonValue::UInt(application->app_id());
   json_app[strings::hmi_app_id] =
       utils::json::JsonValue::UInt(application->hmi_app_id());
   json_app[strings::is_media_application] = application->IsAudioApplication();
-  json_app[strings::hmi_level] = utils::json::JsonValue::Int(hmi_level);
+  json_app[strings::hmi_level] = utils::json::JsonValue::Int(kHmiLevel);
   json_app[strings::ign_off_count] = utils::json::JsonValue::UInt(0);
-  json_app[strings::hash_id] = hash;
+  json_app[strings::hash_id] = kHash;
   Formatters::CFormatterJsonBase::objToJsonValue(
       GetApplicationCommands(application), tmp);
   json_app[strings::application_commands] = tmp;
@@ -106,8 +106,8 @@ void ResumptionDataJson::SaveApplication(
   Formatters::CFormatterJsonBase::objToJsonValue(
       GetApplicationFiles(application), tmp);
   json_app[strings::application_files] = tmp;
-  json_app[strings::time_stamp] = time_stamp;
-  json_app[strings::subscribed_for_way_points] = is_subscribed_for_way_points;
+  json_app[strings::time_stamp] = kTimeStamp;
+  json_app[strings::subscribed_for_way_points] = kIsSubscribedForWayPoints;
   SDL_DEBUG("SaveApplication : " << json_app.ToJson());
 }
 
