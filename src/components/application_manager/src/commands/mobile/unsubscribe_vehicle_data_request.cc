@@ -245,8 +245,7 @@ void UnsubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
   if (result) {
     if (IsAnythingAlreadyUnsubscribed(message[strings::msg_params])) {
       result_code = mobile_apis::Result::IGNORED;
-      return_info =
-          std::string("Some provided VehicleData was not subscribed.").c_str();
+      return_info = "Some provided VehicleData was not subscribed.";
     }
   }
 

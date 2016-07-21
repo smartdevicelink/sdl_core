@@ -254,8 +254,7 @@ void SubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
   if (result) {
     if (IsAnythingAlreadySubscribed(message[strings::msg_params])) {
       result_code = mobile_apis::Result::IGNORED;
-      return_info =
-        std::string("Already subscribed on some provided VehicleData.").c_str();
+      return_info = "Already subscribed on some provided VehicleData.";
     }
   }
 
