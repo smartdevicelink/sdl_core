@@ -37,7 +37,6 @@
 #include "application_manager/resumption/resumption_data_db.h"
 #include "application_manager/mock_application_manager_settings.h"
 #include "application_manager/mock_application_manager.h"
-#include "application_manager/mock_application_manager_settings.h"
 
 using ::resumption::ResumptionDataDB;
 

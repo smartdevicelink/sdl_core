@@ -326,8 +326,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
    */
   uint32_t GetAvailableDiskSpace() OVERRIDE;
 
-  virtual bool IsAppSubscribedForWayPoints(
-      const uint32_t app_id) const OVERRIDE;
+  bool IsAppSubscribedForWayPoints(const uint32_t app_id) const OVERRIDE;
 
  protected:
   /**

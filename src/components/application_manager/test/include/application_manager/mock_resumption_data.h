@@ -37,7 +37,6 @@
 #include "application_manager/application.h"
 #include "application_manager/mock_application_manager_settings.h"
 #include "application_manager/mock_application_manager.h"
-#include "application_manager/mock_application_manager_settings.h"
 
 namespace test {
 namespace components {
