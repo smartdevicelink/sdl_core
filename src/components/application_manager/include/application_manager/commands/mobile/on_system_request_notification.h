@@ -1,6 +1,5 @@
 /*
-
- Copyright (c) 2013, Ford Motor Company
+ Copyright (c) 2016, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -34,8 +33,8 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_SYSTEM_REQUEST_NOTIFICATION_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_SYSTEM_REQUEST_NOTIFICATION_H_
 
-
 #include "application_manager/commands/command_notification_impl.h"
+#include <vector>
 
 namespace application_manager {
 
@@ -48,6 +47,7 @@ namespace mobile {
  **/
 class OnSystemRequestNotification : public CommandNotificationImpl {
  public:
+  typedef std::vector<uint8_t> BinaryMessage;
   /**
    * @brief OnSystemRequestNotification class constructor
    *
@@ -58,13 +58,23 @@ class OnSystemRequestNotification : public CommandNotificationImpl {
   /**
    * @brief OnSystemRequestNotification class destructor
    **/
-  virtual ~OnSystemRequestNotification();
+  ~OnSystemRequestNotification() OVERRIDE;
 
   /**
    * @brief Execute command
    **/
-  virtual void Run();
-  private:
+  void Run() OVERRIDE;
+
+ private:
+#ifdef EXTENDED_POLICY
+  /**
+   * @brief Adds HTTP header to message
+   * @param message Message
+   */
+  void AddHeader(BinaryMessage& message) const;
+  void ParsePTString(std::string& pt_string) const;
+#endif
+
   DISALLOW_COPY_AND_ASSIGN(OnSystemRequestNotification);
 };
 

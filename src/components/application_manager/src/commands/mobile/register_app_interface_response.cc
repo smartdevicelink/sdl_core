@@ -47,11 +47,13 @@ void RegisterAppInterfaceResponse::Run() {
   mobile_apis::Result::eType result_code = mobile_apis::Result::INVALID_ENUM;
   bool success = (*message_)[strings::msg_params][strings::success].asBool();
   bool last_message = !success;
-  // Do not close connection in case of APPLICATION_NOT_REGISTERED despite it is an error
-  if (!success && (*message_)[strings::msg_params].keyExists(strings::result_code)) {
+  // Do not close connection in case of APPLICATION_NOT_REGISTERED despite it is
+  // an error
+  if (!success &&
+      (*message_)[strings::msg_params].keyExists(strings::result_code)) {
     result_code = static_cast<mobile_apis::Result::eType>(
         (*message_)[strings::msg_params][strings::result_code].asInt());
-    if (result_code ==  mobile_apis::Result::APPLICATION_REGISTERED_ALREADY) {
+    if (result_code == mobile_apis::Result::APPLICATION_REGISTERED_ALREADY) {
       last_message = false;
     }
   }
@@ -60,32 +62,44 @@ void RegisterAppInterfaceResponse::Run() {
 
   // Add registered application to the policy db right after response sent to
   // mobile to be able to check all other API according to app permissions
-  application_manager::ApplicationConstSharedPtr app =
-      application_manager::ApplicationManagerImpl::instance()->
-      application(connection_key());
-  if (app.valid()) {
-    policy::PolicyHandler *policy_handler = policy::PolicyHandler::instance();
-    std::string mobile_app_id = app->mobile_app_id();
-    policy_handler->AddApplication(mobile_app_id);
-    SetHeartBeatTimeout(connection_key(), mobile_app_id);
+  application_manager::ApplicationSharedPtr application =
+      application_manager::ApplicationManagerImpl::instance()->application(
+          connection_key());
+
+  if (!application) {
+    LOG4CXX_ERROR(logger_, "Application with connection key "
+                               << connection_key() << " is not registered.");
+    return;
   }
+
+  SetHeartBeatTimeout(connection_key(), application->mobile_app_id());
+
+  // Default HMI level should be set before any permissions validation, since it
+  // relies on HMI level.
+  ApplicationManagerImpl::instance()->OnApplicationRegistered(application);
+
+  // Sends OnPermissionChange notification to mobile right after RAI response
+  // and HMI level set-up
+  policy::PolicyHandler::instance()->OnAppRegisteredOnMobile(
+      application->mobile_app_id());
 }
 
 void RegisterAppInterfaceResponse::SetHeartBeatTimeout(
-    uint32_t connection_key, const std::string& mobile_app_id) {
+    uint32_t connection_key, const std::string &mobile_app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   policy::PolicyHandler *policy_handler = policy::PolicyHandler::instance();
   if (policy_handler->PolicyEnabled()) {
     const int32_t timeout = policy_handler->HeartBeatTimeout(mobile_app_id) /
-        date_time::DateTime::MILLISECONDS_IN_SECOND;
+                            date_time::DateTime::MILLISECONDS_IN_SECOND;
     if (timeout > 0) {
-      application_manager::ApplicationManagerImpl::instance()->
-          connection_handler()->SetHeartBeatTimeout(connection_key, timeout);
+      application_manager::ApplicationManagerImpl::instance()
+          ->connection_handler()
+          ->SetHeartBeatTimeout(connection_key, timeout);
     }
   } else {
     LOG4CXX_INFO(logger_, "Policy is turn off");
   }
 }
 
-}  // namespace commands
-}  // namespace application_manager
+} // namespace commands
+} // namespace application_manager

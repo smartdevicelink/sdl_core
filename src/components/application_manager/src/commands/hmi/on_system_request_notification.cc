@@ -60,29 +60,34 @@ void OnSystemRequestNotification::Run() {
   params[strings::function_id] =
     static_cast<int32_t>(mobile_apis::FunctionID::eType::OnSystemRequestID);
 
-  const std::string app_id = msg_params[strings::app_id].asString();
-  LOG4CXX_DEBUG(logger_, "Received OnSystemRequest for " << app_id );
-
   ApplicationSharedPtr app;
-  if (strings::default_app_id == app_id) {
+  if (!msg_params.keyExists(strings::app_id)) {
+    LOG4CXX_DEBUG(logger_,
+                  "No application specified, trying to choose automatically.");
     PolicyHandler* policy_handler = PolicyHandler::instance();
     uint32_t selected_app_id = policy_handler->GetAppIdForSending();
     if (0 == selected_app_id) {
       LOG4CXX_WARN(logger_,
-                   "Can't select application to forward OnSystemRequestNotification");
+                   "Can't select application to forward OnSystemRequest.");
       return;
     }
     ApplicationManagerImpl* app_mgr = ApplicationManagerImpl::instance();
     app = app_mgr->application(selected_app_id);
   } else {
-    app = ApplicationManagerImpl::instance()->application_by_policy_id(app_id);
+    const uint32_t app_id = msg_params[strings::app_id].asUInt();
+    LOG4CXX_WARN(logger_, "Looking for application with connection key "
+                 << app_id);
+    app = ApplicationManagerImpl::instance()->application(app_id);
   }
 
   if (!app.valid()) {
-    LOG4CXX_WARN(logger_, "Application with connection key " << app_id <<
-                 "is not registered.");
+    LOG4CXX_WARN(logger_,
+                 "No valid application found to forward OnSystemRequest.");
     return;
   }
+
+  LOG4CXX_DEBUG(logger_,
+                "Sending request with application id " << app->mobile_app_id());
 
   params[strings::connection_key] = app->app_id();
   SendNotificationToMobile(message_);
