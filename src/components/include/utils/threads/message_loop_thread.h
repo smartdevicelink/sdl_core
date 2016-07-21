@@ -158,7 +158,7 @@ void MessageLoopThread<Q>::PostMessage(const Message& message) {
 
 template <class Q>
 void MessageLoopThread<Q>::Shutdown() {
-  thread_->join();
+  thread_->join(threads::Thread::kForceStop);
 }
 
 template <class Q>

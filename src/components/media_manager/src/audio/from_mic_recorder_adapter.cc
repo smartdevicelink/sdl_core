@@ -49,7 +49,7 @@ FromMicRecorderAdapter::FromMicRecorderAdapter()
 FromMicRecorderAdapter::~FromMicRecorderAdapter() {
   SDL_AUTO_TRACE();
   if (recorder_thread_) {
-    recorder_thread_->join();
+    recorder_thread_->join(threads::Thread::kForceStop);
     delete recorder_thread_->delegate();
     threads::DeleteThread(recorder_thread_);
   }
@@ -83,7 +83,7 @@ void FromMicRecorderAdapter::StopActivity(int32_t application_key) {
   }
 
   if (recorder_thread_) {
-    recorder_thread_->join();
+    recorder_thread_->join(threads::Thread::kForceStop);
     delete recorder_thread_->delegate();
     threads::DeleteThread(recorder_thread_);
     recorder_thread_ = NULL;

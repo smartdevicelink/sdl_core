@@ -101,7 +101,7 @@ CacheManager::CacheManager(const std::string& app_storage_folder,
 CacheManager::~CacheManager() {
   SDL_AUTO_TRACE();
   sync_primitives::AutoLock lock(backuper_locker_);
-  backup_thread_->join();
+  backup_thread_->join(threads::Thread::kForceStop);
   delete backup_thread_->delegate();
   threads::DeleteThread(backup_thread_);
 }

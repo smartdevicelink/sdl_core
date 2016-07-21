@@ -104,7 +104,7 @@ MqueueAdapter::MqueueAdapter(HMIMessageHandler* hmi_message_handler)
 }
 
 MqueueAdapter::~MqueueAdapter() {
-  receiver_thread_->join();
+  receiver_thread_->join(threads::Thread::kForceStop);
   delete receiver_thread_delegate_;
   threads::DeleteThread(receiver_thread_);
   if (-1 != hmi_to_sdl_mqueue_)

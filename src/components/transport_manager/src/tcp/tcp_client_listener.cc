@@ -182,7 +182,7 @@ TransportAdapter::Error TcpClientListener::StopListening() {
     return TransportAdapter::BAD_STATE;
   }
 
-  thread_->join();
+  thread_->join(threads::Thread::kForceStop);
 
   SDL_INFO("Tcp client listener has stopped successfully");
   return TransportAdapter::OK;

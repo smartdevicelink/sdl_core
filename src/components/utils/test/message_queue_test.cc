@@ -129,12 +129,12 @@ TEST_F(MessageQueueTest, DefaultCtorTest_ExpectEmptyQueueCreated) {
 }
 
 TEST_F(MessageQueueTest,
-       DISABLED_MessageQueuePushThreeElementsTest_ExpectThreeElementsAdded) {
+       MessageQueuePushThreeElementsTest_ExpectThreeElementsAdded) {
   MessageQueue<std::string> test_queue1;
   threads::Thread* thread = threads::CreateThread(
       "test thread", new AddThreeElementsDelegate(test_queue1));
   thread->start();
-  thread->join();
+  thread->join(threads::Thread::kNoStop);
   ASSERT_EQ(3u, test_queue1.size());
   threads::DeleteThread(thread);
 }
@@ -152,17 +152,16 @@ TEST_F(MessageQueueTest, NotEmptyMessageQueueResetTest_ExpectEmptyQueue) {
   ASSERT_EQ(0u, test_queue.size());
 }
 
-TEST_F(
-    MessageQueueTest,
-    DISABLED_MessageQueuePopOneElementTest_ExpectOneElementRemovedFromQueue) {
+TEST_F(MessageQueueTest,
+       MessageQueuePopOneElementTest_ExpectOneElementRemovedFromQueue) {
   threads::Thread* thread1 =
       threads::CreateThread("test thread", new AddOneElementDelegate());
   threads::Thread* thread2 =
       threads::CreateThread("test thread", new ExtractFromQueueDelegate());
   thread1->start();
   thread2->start();
-  thread1->join();
-  thread2->join();
+  thread1->join(threads::Thread::kNoStop);
+  thread2->join(threads::Thread::kNoStop);
 
   // Check if first element was removed successfully
   ASSERT_EQ(test_val_1, test_line);
@@ -173,17 +172,17 @@ TEST_F(
 }
 
 TEST_F(MessageQueueTest,
-       DISABLED_MessageQueueShutdownTest_ExpectMessageQueueWillBeShutDown) {
+       MessageQueueShutdownTest_ExpectMessageQueueWillBeShutDown) {
   threads::Thread* thread1 =
       threads::CreateThread("test thread", new ShutDownQueueDelegate());
   thread1->start();
-  thread1->join();
-  threads::DeleteThread(thread1);
+  thread1->join(threads::Thread::kNoStop);
 
   // Primary thread sleeps until thread1 will make queue shutdown
   test_queue.wait();
   check_value = true;
   ASSERT_TRUE(check_value);
+  threads::DeleteThread(thread1);
 }
 
 }  // namespace utils_test

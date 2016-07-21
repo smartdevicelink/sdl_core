@@ -56,7 +56,7 @@ UpdateStatusManager::~UpdateStatusManager() {
   SDL_AUTO_TRACE();
   DCHECK(update_status_thread_delegate_);
   DCHECK(thread_);
-  thread_->join();
+  thread_->join(threads::Thread::kForceStop);
   delete update_status_thread_delegate_;
   threads::DeleteThread(thread_);
 }

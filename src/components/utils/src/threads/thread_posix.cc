@@ -75,23 +75,12 @@ void Thread::cleanup(void* arg) {
   SDL_AUTO_TRACE();
   Thread* thread = static_cast<Thread*>(arg);
   sync_primitives::AutoLock auto_lock(thread->state_lock_);
-  thread->isThreadRunning_ = false;
+  thread->thread_state_ = kThreadStateNone;
+  thread->thread_command_ = kThreadCommandNone;
   thread->state_cond_.Broadcast();
 }
 
 void* Thread::threadFunc(void* arg) {
-  // 0 - state_lock unlocked
-  //     stopped   = 0
-  //     running   = 0
-  //     finalized = 0
-  // 4 - state_lock unlocked
-  //     stopped = 1
-  //     running = 1
-  //     finalized = 0
-  // 5 - state_lock unlocked
-  //     stopped = 1
-  //     running = 1
-  //     finalized = 1
   pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
 
   threads::Thread* thread = static_cast<Thread*>(arg);
@@ -100,26 +89,49 @@ void* Thread::threadFunc(void* arg) {
   pthread_cleanup_push(&cleanup, thread);
 
   thread->state_lock_.Acquire();
+  thread->thread_state_ = kThreadStateIdle;
   thread->state_cond_.Broadcast();
 
-  while (!thread->finalized_) {
+  // We have special variable for controlling iterations/exiting thread
+  // in order to separate decision logic (continue iterations or exit?)
+  // from controlling while cycle
+  bool continueIterations = true;
+
+  while (continueIterations) {
     SDL_DEBUG("Thread #" << pthread_self() << " iteration");
-    thread->run_cond_.Wait(thread->state_lock_);
-    SDL_DEBUG("Thread #" << pthread_self() << " execute. "
-                         << "stopped_ = " << thread->stopped_
-                         << "; finalized_ = " << thread->finalized_);
-    if (!thread->stopped_ && !thread->finalized_) {
-      thread->isThreadRunning_ = true;
-      pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-      pthread_testcancel();
-
-      thread->state_lock_.Release();
-      thread->delegate_->threadMain();
-      thread->state_lock_.Acquire();
-
-      pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
-      thread->isThreadRunning_ = false;
+    while (kThreadCommandNone == thread->thread_command_) {
+      thread->run_cond_.Wait(thread->state_lock_);
     }
+    SDL_DEBUG("Thread #" << pthread_self() << " execute. "
+                         << "thread_command_ = " << thread->thread_command_);
+
+    switch (thread->thread_command_) {
+      case kThreadCommandRun:
+        thread->thread_state_ = kThreadStateRunning;
+        pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+        pthread_testcancel();
+        thread->state_lock_.Release();
+        thread->delegate_->threadMain();
+        thread->state_lock_.Acquire();
+        pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
+        thread->thread_state_ = kThreadStateIdle;
+        break;
+
+      case kThreadCommandFinalize:
+        continueIterations = false;
+        break;
+
+      default:
+        // check for not expected command:
+        if ((kThreadCommandNone > thread->thread_command_) &&
+            (kThreadCommandFinalize < thread->thread_command_)) {
+          SDL_ERROR("Incorrect thread command: " << thread->thread_command_);
+        }
+        // else - nothing to do
+        break;
+    }
+
+    thread->thread_command_ = kThreadCommandNone;  // consumed
     thread->state_cond_.Broadcast();
     SDL_DEBUG("Thread #" << pthread_self() << " finished iteration");
   }
@@ -147,10 +159,8 @@ Thread::Thread(const char* name, ThreadDelegate* delegate)
     , delegate_(delegate)
     , handle_(0)
     , thread_options_()
-    , isThreadRunning_(false)
-    , stopped_(false)
-    , finalized_(false)
-    , thread_created_(false) {}
+    , thread_command_(kThreadCommandNone)
+    , thread_state_(kThreadStateNone) {}
 
 bool Thread::start() {
   return start(thread_options_);
@@ -178,7 +188,7 @@ bool Thread::start(const ThreadOptions& options) {
     return false;
   }
 
-  if (isThreadRunning_) {
+  if (kThreadStateRunning == thread_state_) {
     SDL_TRACE("EXIT thread " << name_ << " #" << handle_
                              << " is already running");
     return true;
@@ -218,23 +228,24 @@ bool Thread::start(const ThreadOptions& options) {
     thread_options_ = thread_options_temp;
   }
 
-  if (!thread_created_) {
+  if (kThreadStateNone == thread_state_) {
     // state_lock 1
     pthread_result = pthread_create(&handle_, &attributes, threadFunc, this);
     if (pthread_result == EOK) {
       SDL_DEBUG("Created thread: " << name_);
       SetNameForId(handle_, name_);
       // state_lock 0
-      // possible concurrencies: stop and threadFunc
-      state_cond_.Wait(auto_lock);
-      thread_created_ = true;
+      while (kThreadStateNone == thread_state_) {
+        state_cond_.Wait(auto_lock);
+      }
     } else {
       SDL_ERROR("Couldn't create thread "
                 << name_ << ". Error code = " << pthread_result << " (\""
                 << strerror(pthread_result) << "\")");
     }
   }
-  stopped_ = false;
+
+  thread_command_ = kThreadCommandRun;
   run_cond_.NotifyOne();
   SDL_DEBUG("Thread " << name_ << " #" << handle_
                       << " started. pthread_result = " << pthread_result);
@@ -249,36 +260,60 @@ void Thread::yield() {
 void Thread::stop() {
   SDL_AUTO_TRACE();
   sync_primitives::AutoLock auto_lock(state_lock_);
+  StopUnsafe();
+}
 
-  stopped_ = true;
+void Thread::join(const JoinOptionStop force_stop) {
+  SDL_AUTO_TRACE();
+  DCHECK_OR_RETURN_VOID(!IsCurrentThread());
+  sync_primitives::AutoLock auto_lock(state_lock_);
+  JoinUnsafe(force_stop);
+}
 
+void Thread::JoinUnsafe(const JoinOptionStop force_stop) {
+  SDL_AUTO_TRACE();
+  DCHECK_OR_RETURN_VOID(!IsCurrentThread());
+  // if thread still exist at all
+  if (kThreadStateNone != thread_state_) {
+    if (kForceStop == force_stop) {
+      StopUnsafe();
+    }
+    while ((kThreadStateRunning == thread_state_) ||
+           (kThreadCommandNone != thread_command_)) {
+      state_cond_.Wait(state_lock_);
+    }
+  }
+}
+
+void Thread::StopUnsafe() {
+  SDL_AUTO_TRACE();
+  thread_command_ = kThreadCommandNone;  // cancel all active commands
   SDL_DEBUG("Stopping thread #" << handle_ << " \"" << name_ << " \"");
 
-  if (delegate_ && isThreadRunning_) {
+  if (delegate_ && (kThreadStateRunning == thread_state_)) {
     delegate_->exitThreadMain();
   }
 
   SDL_DEBUG("Stopped thread #" << handle_ << " \"" << name_ << " \"");
 }
 
-void Thread::join() {
-  SDL_AUTO_TRACE();
-  DCHECK_OR_RETURN_VOID(!IsCurrentThread());
-
-  stop();
-
-  sync_primitives::AutoLock auto_lock(state_lock_);
-  run_cond_.NotifyOne();
-  if (isThreadRunning_) {
-    state_cond_.Wait(auto_lock);
-  }
-}
-
 Thread::~Thread() {
-  finalized_ = true;
-  stopped_ = true;
-  join();
-  pthread_join(handle_, NULL);
+  if (0 != handle_) {
+    state_lock_.Acquire();
+    if (kThreadStateNone != thread_state_) {
+      JoinUnsafe(kForceStop);
+      thread_command_ = kThreadCommandFinalize;
+      run_cond_.NotifyOne();
+    }
+    state_lock_.Release();
+    if (thread_options_.is_joinable()) {
+      int join_res = pthread_join(handle_, NULL);
+      if (0 != join_res) {
+        SDL_ERROR("pthread_join() for thread " << handle_ << " returned "
+                                               << join_res);
+      }
+    }
+  }
 }
 
 Thread* CreateThread(const char* name, ThreadDelegate* delegate) {
@@ -290,5 +325,4 @@ Thread* CreateThread(const char* name, ThreadDelegate* delegate) {
 void DeleteThread(Thread* thread) {
   delete thread;
 }
-
 }  // namespace threads

@@ -118,7 +118,7 @@ TEST_F(ConditionalVariableTest,
   cond_var_.WaitFor(test_lock, 2000);
   std::string last_value("changed again by thread 1");
   EXPECT_EQ(last_value, test_value_);
-  thread->join();
+  thread->join(threads::Thread::kForceStop);
   threads::DeleteThread(thread);
 }
 

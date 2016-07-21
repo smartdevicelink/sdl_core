@@ -44,7 +44,7 @@ StreamerAdapter::StreamerAdapter(Streamer* const streamer)
 }
 
 StreamerAdapter::~StreamerAdapter() {
-  thread_->join();
+  thread_->join(threads::Thread::kForceStop);
   threads::DeleteThread(thread_);
   delete streamer_;
 }
