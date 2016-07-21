@@ -367,7 +367,8 @@ class Application : public virtual InitialApplicationData,
     };
 
   public:
-    Application() :
+    Application() : app_state_(ApplicationState::kWaitingForRegistration),
+      connection_id_(0),
       is_greyed_out_(false) {
     }
 
