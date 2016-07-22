@@ -52,7 +52,8 @@ CryptoManagerImpl::SSLContextImpl::SSLContextImpl(SSL *conn, Mode mode)
     buffer_size_(1500),
     buffer_(new uint8_t[buffer_size_]),
     is_handshake_pending_(false),
-    mode_(mode) {
+    mode_(mode),
+    max_block_size_(0) {
   SSL_set_bio(connection_, bioIn_, bioOut_);
 }
 
