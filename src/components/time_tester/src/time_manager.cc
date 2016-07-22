@@ -50,6 +50,7 @@ namespace time_tester {
 CREATE_LOGGERPTR_GLOBAL(logger_, "TimeManager")
 
 TimeManager::TimeManager():
+  is_ready_(false),
   thread_(NULL),
   streamer_(NULL),
   app_observer(this),
