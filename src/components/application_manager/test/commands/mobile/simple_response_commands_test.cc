@@ -49,16 +49,20 @@
 #include "mobile/end_audio_pass_thru_response.h"
 #include "mobile/get_dtcs_response.h"
 #include "mobile/get_vehicle_data_response.h"
+#include "mobile/unregister_app_interface_response.h"
+#include "mobile/unsubscribe_button_response.h"
 
 namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
 
+namespace commands = ::application_manager::commands;
+
 using ::testing::_;
 using ::testing::NotNull;
 using ::testing::Types;
-namespace commands = ::application_manager::commands;
+
 using commands::MessageSharedPtr;
 
 template <class Command>
@@ -79,7 +83,9 @@ typedef Types<commands::ListFilesResponse,
               commands::DialNumberResponse,
               commands::EndAudioPassThruResponse,
               commands::GetDTCsResponse,
-              commands::GetVehicleDataResponse> ResponseCommandsList;
+              commands::GetVehicleDataResponse,
+              commands::UnregisterAppInterfaceResponse,
+              commands::UnsubscribeButtonResponse> ResponseCommandsList;
 TYPED_TEST_CASE(MobileResponseCommandsTest, ResponseCommandsList);
 
 TYPED_TEST(MobileResponseCommandsTest, Run_SendResponseToMobile_SUCCESS) {
