@@ -262,8 +262,8 @@ class RequestController {
   uint32_t pool_size_;
   sync_primitives::ConditionalVariable cond_var_;
 
-  std::list<RequestPtr> mobile_request_list_;
-  sync_primitives::Lock mobile_request_list_lock_;
+  std::list<RequestInfoPtr> mobile_request_info_list_;
+  sync_primitives::Lock mobile_request_info_list_lock_;
 
   /*
    * Requests, that are waiting for responses
@@ -288,7 +288,7 @@ class RequestController {
 #ifdef BUILD_TESTS
  public:
   RequestInfoSet& get_waiting_for_response();
-  const std::list<RequestInfoPtr> get_mobile_request_info_list() const;
+  const std::list<RequestInfoPtr>& get_mobile_request_info_list() const;
   const std::list<RequestPtr>& get_notification_list() const;
 #endif  // BUILD_TESTS
 };
