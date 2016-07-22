@@ -55,16 +55,27 @@ namespace request_controller {
   typedef utils::SharedPtr<commands::Command> RequestPtr;
 
   struct RequestInfo {
-    enum RequestType {MobileRequest, HMIRequest};
+    enum RequestType {RequestNone, MobileRequest, HMIRequest};
 
-    RequestInfo() {}
+    RequestInfo()
+      : timeout_sec_(0),
+        app_id_(0),
+        hmi_level_(mobile_apis::HMILevel::INVALID_ENUM),
+        requst_type_(RequestNone),
+        correlation_id_(0) {
+          start_time_ = date_time::DateTime::getCurrentTime();
+          updateEndTime();
+        }
     virtual ~RequestInfo() {}
 
     RequestInfo(RequestPtr request,
                 const RequestType requst_type,
                 const uint64_t timeout_sec)
       : request_(request),
-        timeout_sec_(timeout_sec) {
+        timeout_sec_(timeout_sec),
+        app_id_(0),
+        hmi_level_(mobile_apis::HMILevel::INVALID_ENUM),
+        correlation_id_(0) {
         start_time_ = date_time::DateTime::getCurrentTime();
         updateEndTime();
         requst_type_ = requst_type;

@@ -84,7 +84,8 @@ RequestInfo::RequestInfo(RequestPtr request,
                          const uint64_t timeout_sec):
   request_(request),
   start_time_(start_time),
-  timeout_sec_(timeout_sec) {
+  timeout_sec_(timeout_sec),
+  hmi_level_(mobile_apis::HMILevel::INVALID_ENUM) {
   updateEndTime();
   requst_type_ = requst_type;
   correlation_id_ = request_->correlation_id();
