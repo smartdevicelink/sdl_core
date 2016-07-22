@@ -55,7 +55,7 @@ HMIRequestInfo::HMIRequestInfo(RequestPtr request, const uint64_t timeout_msec)
                   HMIRequest,
                   timeout_msec,
                   RequestInfo::HmiConnectoinKey,
-                  request_->correlation_id()) {}
+                  request->correlation_id()) {}
 
 MobileRequestInfo::MobileRequestInfo(RequestPtr request,
                                      const uint64_t timeout_msec)
