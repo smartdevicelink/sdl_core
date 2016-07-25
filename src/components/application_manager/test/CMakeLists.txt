@@ -120,6 +120,11 @@ set(AM_HMI_CAPABILITIES_SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/hmi_capabilities_test.cc
 )
 
+#=============== HMI LANGUAGE HANDLER =====================
+set(AM_HMI_LANGUAGE_HANDLER
+  ${CMAKE_CURRENT_SOURCE_DIR}/hmi_language_handler_test.cc
+)
+
 ##=============== POLICIES =====================
 set(AM_POLICIES_PATHS
   ${CMAKE_CURRENT_SOURCE_DIR}/policies
@@ -165,6 +170,8 @@ create_test(am_application_test "${APPLICATION_SOURCES}" "${LIBRARIES}")
 create_test(am_commands_test "${COMMANDS_SOURCES}" "${LIBRARIES}")
 create_test(am_resumption_test "${RESUMPTION_SOURCES}" "${LIBRARIES}")
 create_test(am_state_controller_test "${STATE_CONTROLLER_SOURCES}" "${LIBRARIES}")
+create_test(am_hmi_language_handler_test "${AM_HMI_LANGUAGE_HANDLER}" "${LIBRARIES}")
+
 
 list(APPEND LIBRARIES
   application_manager

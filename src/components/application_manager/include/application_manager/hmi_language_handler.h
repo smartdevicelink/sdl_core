@@ -173,6 +173,10 @@ class HMILanguageHandler : public event_engine::EventObserver {
   bool is_tts_language_received_;
   resumption::LastState* last_state_;
   ApplicationManager& application_manager_;
+#ifdef BUILD_TESTS
+ public:
+  const Apps& get_apps() const;
+#endif  // BUILD_TESTS
 };
 
 }  // namespace application_manager
