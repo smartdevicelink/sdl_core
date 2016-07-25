@@ -68,7 +68,8 @@ Message::Message(protocol_handler::MessagePriority priority)
 }
 
 Message::Message(const Message& message)
-    : priority_(message.priority_) {
+    : priority_(message.priority_),
+      binary_data_(NULL) {
   *this = message;
 }
 
