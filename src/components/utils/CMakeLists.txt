@@ -112,8 +112,6 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 endif()
 
 target_link_libraries("Utils" ${LIBRARIES})
-
-
 if(BUILD_TESTS)
   add_subdirectory(test)
 endif()

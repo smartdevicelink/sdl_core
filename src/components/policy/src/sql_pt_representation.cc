@@ -644,7 +644,6 @@ bool SQLPTRepresentation::GatherConsumerFriendlyMessages(
 
   if (query.Prepare(sql_pt::kCollectFriendlyMsg)) {
     while (query.Next()) {
-
       UserFriendlyMessage msg;
       msg.message_code = query.GetString(7);
       std::string language = query.GetString(6);

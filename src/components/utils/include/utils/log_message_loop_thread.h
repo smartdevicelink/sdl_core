@@ -35,6 +35,8 @@
 
 #include <string>
 #include <queue>
+#include <list>
+#include <deque>
 #include <log4cxx/logger.h>
 
 #include "utils/macro.h"
@@ -52,9 +54,24 @@ typedef struct {
 } LogMessage;
 
 typedef std::queue<LogMessage> LogMessageQueue;
+class LogMessageLoopThreadTemplate
+    : public threads::MessageLoopThread<LogMessageQueue> {
+ public:
+  // Places a message to the therad's queue. Thread-safe.
+  void PostMessage(const Message& message) OVERRIDE {
+    threads::MessageLoopThread<LogMessageQueue>::PostMessage(message);
 
-typedef threads::MessageLoopThread<LogMessageQueue>
-    LogMessageLoopThreadTemplate;
+    // LOG_MESSAGE_QUEUE_SIZE defined in Utils CMakeLists
+    if (GetMessageQueueSize() > LOG_MESSAGE_QUEUE_SIZE) {
+      // TODO (AKutsan): Avoid stopping thread if message queue is full.
+      // Prefere Handle multiple messages from Message loop thread
+      WaitDumpQueue();
+    }
+  }
+
+  LogMessageLoopThreadTemplate(const std::string& name, Handler* handler)
+      : MessageLoopThread<LogMessageQueue>(name, handler) {}
+};
 
 class LogMessageHandler : public LogMessageLoopThreadTemplate::Handler {
  public:

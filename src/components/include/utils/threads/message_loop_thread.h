@@ -80,10 +80,10 @@ class MessageLoopThread {
   MessageLoopThread(const std::string& name,
                     Handler* handler,
                     const ThreadOptions& thread_opts = ThreadOptions());
-  ~MessageLoopThread();
+  virtual ~MessageLoopThread();
 
   // Places a message to the therad's queue. Thread-safe.
-  void PostMessage(const Message& message);
+  virtual void PostMessage(const Message& message);
 
   // Process already posted messages and stop thread processing. Thread-safe.
   void Shutdown();
