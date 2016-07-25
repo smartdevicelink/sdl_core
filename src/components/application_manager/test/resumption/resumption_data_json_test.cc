@@ -67,7 +67,7 @@ class ResumptionDataJsonTest : public ResumptionDataTest {
  protected:
   ResumptionDataJsonTest()
       : last_state_("app_storage_folder", "app_info_storage")
-      , res_json(last_state_, mock_application_manager_) {}
+      , res_json(last_state_, mock_application_manager_settings_) {}
   virtual void SetUp() {
     app_mock = new NiceMock<application_manager_test::MockApplication>();
 

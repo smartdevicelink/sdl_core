@@ -54,6 +54,7 @@ struct ApplicationParams {
   mobile_apis::HMILevel::eType m_hmi_level;
   bool m_is_media_application;
   bool m_is_valid;
+  bool m_is_subscribed_for_way_points;
 };
 
 /**
@@ -71,15 +72,9 @@ class ResumptionDataDB : public ResumptionData {
    * @brief Constructor of ResumptionDataDB
    * @param db_storage show database should be saved in a disk file or in memory
    */
-  ResumptionDataDB(
-      DbStorage db_storage,
-      const application_manager::ApplicationManager& application_manager);
-
-#ifdef BUILD_TESTS
-  ResumptionDataDB(utils::dbms::SQLDatabase* db,
-                   const application_manager::ApplicationManager&
+  ResumptionDataDB(DbStorage db_storage,
+                   const application_manager::ApplicationManagerSettings&
                        application_manager_settings);
-#endif  // BUILD_TESTS
 
   /**
    * @brief allows to destroy ResumptionDataDB object

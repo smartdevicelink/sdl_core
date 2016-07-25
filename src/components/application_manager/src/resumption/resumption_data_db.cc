@@ -60,8 +60,9 @@ const char* kConnectionName = "resumption_connection";
 
 ResumptionDataDB::ResumptionDataDB(
     DbStorage db_storage,
-    const application_manager::ApplicationManager& application_manager)
-    : ResumptionData(application_manager) {
+    const application_manager::ApplicationManagerSettings&
+        application_manager_settings)
+    : ResumptionData(application_manager_settings) {
   if (db_storage == In_File_Storage) {
 #ifdef __QNX__
     db_ = new utils::dbms::SQLDatabaseImpl(kDatabaseName);
@@ -69,8 +70,7 @@ ResumptionDataDB::ResumptionDataDB(
     db_ = new utils::dbms::SQLDatabaseImpl(kDatabaseName, kConnectionName);
 #else
     db_ = new utils::dbms::SQLDatabaseImpl(file_system::ConcatPath(
-        application_manager_.get_settings().app_storage_folder(),
-        kDatabaseName));
+        application_manager_settings.app_storage_folder(), kDatabaseName));
 #endif
   } else if (db_storage == In_Memory_Storage) {
     db_ = new utils::dbms::SQLDatabaseImpl();
@@ -78,13 +78,6 @@ ResumptionDataDB::ResumptionDataDB(
     SDL_ERROR("Get not existed type of database storage");
   }
 }
-
-#ifdef BUILD_TESTS
-ResumptionDataDB::ResumptionDataDB(
-    utils::dbms::SQLDatabase* db,
-    const application_manager::ApplicationManager& application_manager)
-    : ResumptionData(application_manager), db_(db) {}
-#endif  // BUILD_TESTS
 
 ResumptionDataDB::~ResumptionDataDB() {
   db_->Close();
@@ -98,12 +91,11 @@ bool ResumptionDataDB::Init() {
     SDL_ERROR("Failed opening database.");
     SDL_INFO("Starting opening retries.");
     const uint16_t attempts =
-        application_manager_.get_settings().attempts_to_open_resumption_db();
+        application_manager_settings_.attempts_to_open_resumption_db();
     SDL_DEBUG("Total attempts number is: " << attempts);
     bool is_opened = false;
     const uint16_t open_attempt_timeout_ms =
-        application_manager_.get_settings()
-            .open_attempt_timeout_ms_resumption_db();
+        application_manager_settings_.open_attempt_timeout_ms_resumption_db();
 #if defined(OS_POSIX)
     const useconds_t sleep_interval_mcsec = open_attempt_timeout_ms * 1000;
     SDL_DEBUG("Open attempt timeout(ms) is: " << open_attempt_timeout_ms);
@@ -2531,7 +2523,7 @@ bool ResumptionDataDB::InsertApplicationData(
   const mobile_apis::HMILevel::eType hmi_level = application.m_hmi_level;
   bool is_media_application = application.m_is_media_application;
   bool is_subscribed_for_way_points =
-      application_manager_.IsAppSubscribedForWayPoints(connection_key);
+      application.m_is_subscribed_for_way_points;
 
   if (!query.Prepare(kInsertApplication)) {
     SDL_WARN(
@@ -2721,13 +2713,15 @@ ApplicationParams::ApplicationParams(
     , m_hmi_app_id(0)
     , m_hmi_level(mobile_apis::HMILevel::INVALID_ENUM)
     , m_is_media_application(false)
-    , m_is_valid(false) {
+    , m_is_valid(false)
+    , m_is_subscribed_for_way_points(false) {
   using namespace app_mngr::strings;
   if (!application.keyExists(app_id) || !application.keyExists(hash_id) ||
       !application.keyExists(grammar_id) ||
       !application.keyExists(connection_key) ||
       !application.keyExists(hmi_app_id) || !application.keyExists(hmi_level) ||
-      !application.keyExists(is_media_application)) {
+      !application.keyExists(is_media_application) ||
+      !application.keyExists(subscribed_for_way_points)) {
     return;
   }
   m_is_valid = true;
@@ -2738,6 +2732,8 @@ ApplicationParams::ApplicationParams(
   m_hmi_level =
       static_cast<mobile_apis::HMILevel::eType>(application[hmi_level].asInt());
   m_is_media_application = application[is_media_application].asBool();
+  m_is_subscribed_for_way_points =
+      application[subscribed_for_way_points].asBool();
 }
 
 ApplicationParams::ApplicationParams(app_mngr::ApplicationSharedPtr application)
@@ -2747,7 +2743,8 @@ ApplicationParams::ApplicationParams(app_mngr::ApplicationSharedPtr application)
     , m_hmi_app_id(0)
     , m_hmi_level(mobile_apis::HMILevel::INVALID_ENUM)
     , m_is_media_application(false)
-    , m_is_valid(false) {
+    , m_is_valid(false)
+    , m_is_subscribed_for_way_points(false) {
   if (application) {
     m_is_valid = true;
     m_hash = application->curHash();
@@ -2756,6 +2753,8 @@ ApplicationParams::ApplicationParams(app_mngr::ApplicationSharedPtr application)
     m_hmi_app_id = application->hmi_app_id();
     m_hmi_level = application->hmi_level();
     m_is_media_application = application->IsAudioApplication();
+    m_is_subscribed_for_way_points =
+        application->IsAppSubscribedForWayPoints(m_connection_key);
   }
 }
 

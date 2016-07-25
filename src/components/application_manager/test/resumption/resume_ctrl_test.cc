@@ -88,7 +88,7 @@ class ResumeCtrlTest : public ::testing::Test {
         .WillByDefault(ReturnRef(mock_event_dispatcher_));
     mock_storage =
         ::utils::MakeShared<NiceMock<resumption_test::MockResumptionData>>(
-            mock_app_mngr_);
+            mock_application_manager_settings_);
     app_mock = utils::MakeShared<NiceMock<MockApplication>>();
     res_ctrl = utils::MakeShared<ResumeCtrlImpl>(mock_app_mngr_);
     res_ctrl->set_resumption_storage(mock_storage);

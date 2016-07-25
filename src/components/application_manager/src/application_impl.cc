@@ -943,4 +943,8 @@ void ApplicationImpl::UnsubscribeFromSoftButtons(int32_t cmd_id) {
   }
 }
 
+bool ApplicationImpl::IsAppSubscribedForWayPoints(const uint32_t app_id) const {
+  return application_manager_.IsAppSubscribedForWayPoints(app_id);
+}
+
 }  // namespace application_manager
