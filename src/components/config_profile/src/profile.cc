@@ -258,6 +258,7 @@ Profile::Profile()
       server_port_(kDefaultServerPort),
       video_streaming_port_(kDefaultVideoStreamingPort),
       audio_streaming_port_(kDefaultAudioStreamingPort),
+      stop_streaming_timeout_(kDefaultStopStreamingTimeout),
       time_testing_port_(kDefaultTimeTestingPort),
       hmi_capabilities_file_name_(kDefaultHmiCapabilitiesFileName),
       help_prompt_(),
@@ -268,6 +269,7 @@ Profile::Profile()
       max_cmd_id_(kDefaultMaxCmdId),
       default_timeout_(kDefaultTimeout),
       app_resuming_timeout_(kDefaultAppResumingTimeout),
+      app_resumption_save_persistent_data_timeout_(kDefaultAppSavePersistentDataTimeout),
       app_dir_quota_(kDefaultDirQuota),
       app_hmi_level_none_time_scale_max_requests_(
           kDefaultAppHmiLevelNoneTimeScaleMaxRequests),
@@ -298,6 +300,8 @@ Profile::Profile()
       recording_file_source_(kDefaultRecordingFileSourceName),
       recording_file_name_(kDefaultRecordingFileName),
       application_list_update_timeout_(kDefaultApplicationListUpdateTimeout),
+      max_thread_pool_size_(kDefaultMaxThreadPoolSize),
+      default_hub_protocol_index_(kDefaultHubProtocolIndex),
       iap_legacy_protocol_mask_(kDefaultLegacyProtocolMask),
       iap_hub_protocol_mask_(kDefaultHubProtocolMask),
       iap_pool_protocol_mask_(kDefaultPoolProtocolMask),
@@ -308,6 +312,8 @@ Profile::Profile()
       tts_global_properties_timeout_(kDefaultTTSGlobalPropertiesTimeout),
       attempts_to_open_policy_db_(kDefaultAttemptsToOpenPolicyDB),
       open_attempt_timeout_ms_(kDefaultAttemptsToOpenPolicyDB),
+      resumption_delay_before_ign_(kDefaultResumptionDelayBeforeIgn),
+      resumption_delay_after_ign_(kDefaultResumptionDelayAfterIgn),
       hash_string_size_(kDefaultHashStringSize) {
   ReadStringValue(&sdl_version_, kDefaultSDLVersion,
                   kMainSection, kSDLVersionKey);
