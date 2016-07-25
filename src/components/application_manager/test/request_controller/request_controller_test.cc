@@ -80,6 +80,7 @@ const uint32_t kMaxRequestAmount = 2u;
 const uint32_t kDefaultCorrelationID = 1u;
 const uint32_t kDefaultConnectionKey = 0u;
 const uint32_t kDefaultTimeout = 100u;
+const uint32_t kThreadPoolSize = 1u;
 }  // namespace
 
 class RequestControllerTestClass : public ::testing::Test {
@@ -107,17 +108,17 @@ class RequestControllerTestClass : public ::testing::Test {
 
   RequestControllerTestClass() {
     ON_CALL(mock_request_controller_settings_, thread_pool_size())
-        .WillByDefault(Return(kThreadPoolSize_));
+        .WillByDefault(Return(kThreadPoolSize));
     request_ctrl_ =
         utils::MakeShared<RequestController>(mock_request_controller_settings_);
   }
 
   RequestPtr GetMockRequest(
       const uint32_t correlation_id = kDefaultCorrelationID,
-      const uint32_t connection_key = kDefaultConnectionKey,
+      const uint32_t kConnectionKey = kDefaultConnectionKey,
       const uint32_t default_timeout = kDefaultTimeout) {
     RequestPtr output =
-        utils::MakeShared<MRequest>(connection_key, correlation_id);
+        utils::MakeShared<MRequest>(kConnectionKey, correlation_id);
     ON_CALL(*output, default_timeout()).WillByDefault(Return(default_timeout));
     return output;
   }
@@ -179,7 +180,6 @@ class RequestControllerTestClass : public ::testing::Test {
   RequestControllerSPtr request_ctrl_;
   RequestPtr empty_mock_request_;
   const TestSettings kDefaultSettings_;
-  const uint32_t kThreadPoolSize_ = 1u;
 };
 
 TEST_F(RequestControllerTestClass,
@@ -368,7 +368,7 @@ TEST_F(RequestControllerTestClass,
   EXPECT_EQ(1u, waiting_for_response.Size());
 
   // Call is not expected because request termination will be forced
-  EXPECT_CALL(*mock_request, AllowedToTerminate()).Times(0u);
+  EXPECT_CALL(*mock_request, AllowedToTerminate()).Times(0);
 
   request_ctrl_->terminateRequest(
       kDefaultCorrelationID, kDefaultConnectionKey, force_terminate);
@@ -396,9 +396,9 @@ TEST_F(RequestControllerTestClass,
 
   // Trying to terminate request from not existing connection key
   const uint32_t correlation_id = 2u;
-  const uint32_t connection_key = 1u;
+  const uint32_t kConnectionKey = 1u;
   request_ctrl_->terminateRequest(
-      correlation_id, connection_key, force_terminate);
+      correlation_id, kConnectionKey, force_terminate);
 
   // Check if request is still in waiting_for_response list
   EXPECT_EQ(1u, waiting_for_response.Size());
@@ -448,16 +448,16 @@ TEST_F(RequestControllerTestClass, AddNotification_RemoveNotification_SUCCESS) {
 
 TEST_F(RequestControllerTestClass,
        TerminateWaitingForResponseAppRequests_SUCCESS) {
-  const uint32_t connection_key = RequestInfo::HmiConnectoinKey;
+  const uint32_t kConnectionKey = RequestInfo::HmiConnectoinKey;
 
   EXPECT_EQ(RequestController::SUCCESS,
             AddRequest(kDefaultSettings_,
-                       GetMockRequest(1u, connection_key),
+                       GetMockRequest(1u, kConnectionKey),
                        RequestInfo::RequestType::HMIRequest));
 
   EXPECT_EQ(RequestController::SUCCESS,
             AddRequest(kDefaultSettings_,
-                       GetMockRequest(2u, connection_key),
+                       GetMockRequest(2u, kConnectionKey),
                        RequestInfo::RequestType::HMIRequest));
 
   RequestInfoSet& waiting_for_response =
@@ -475,18 +475,18 @@ TEST_F(RequestControllerTestClass,
 
 TEST_F(RequestControllerTestClass,
        TerminateWaitingForExecutionAppRequests_SUCCESS) {
-  const uint32_t connection_key = 3u;
+  const uint32_t kConnectionKey = 3u;
 
   request_ctrl_->DestroyThreadpool();
 
   EXPECT_EQ(RequestController::SUCCESS,
             AddRequest(kDefaultSettings_,
-                       GetMockRequest(1u, connection_key),
+                       GetMockRequest(1u, kConnectionKey),
                        RequestInfo::RequestType::MobileRequest));
 
   EXPECT_EQ(RequestController::SUCCESS,
             AddRequest(kDefaultSettings_,
-                       GetMockRequest(2u, connection_key),
+                       GetMockRequest(2u, kConnectionKey),
                        RequestInfo::RequestType::MobileRequest));
 
   const RequestInfoPtrList& mobile_request_info_list =
@@ -495,7 +495,7 @@ TEST_F(RequestControllerTestClass,
   // Checking size of waiting_for_response list before terminating all requests
   EXPECT_EQ(2u, mobile_request_info_list.size());
 
-  request_ctrl_->terminateAppRequests(connection_key);
+  request_ctrl_->terminateAppRequests(kConnectionKey);
 
   // Expect empty mobile_request_info_list list
   EXPECT_EQ(0u, mobile_request_info_list.size());
