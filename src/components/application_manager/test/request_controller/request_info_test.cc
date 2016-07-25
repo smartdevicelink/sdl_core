@@ -69,11 +69,11 @@ class MockRequest : public application_manager::commands::Command {
 };
 
 namespace {
-const uint32_t kCountOfRequestsForTest = 1000;
-const uint32_t kHmiConnectionKey = 0;
-const uint32_t kMobileConnectionKey1 = 65431;
-const uint32_t kMobileConnectionKey2 = 65123;
-const uint32_t kDefaultTimeout = 10;
+const uint32_t kCountOfRequestsForTest = 1000u;
+const uint32_t kHmiConnectionKey = 0u;
+const uint32_t kMobileConnectionKey1 = 65431u;
+const uint32_t kMobileConnectionKey2 = 65123u;
+const uint32_t kDefaultTimeout = 10u;
 }  // namespace
 
 class RequestInfoTest : public ::testing::Test {
@@ -160,12 +160,12 @@ TEST_F(RequestInfoTest, AddHMIRequests_RemoveAllRequests) {
 }
 
 TEST_F(RequestInfoTest, CheckRequestsMaxCount) {
-  const uint32_t app_hmi_level_time_scale = 100;
-  const uint32_t hmi_level_count = 1000;
+  const uint32_t kAppHmiLevelTimeScale = 100u;
+  const uint32_t kHmiLevelCount = 1000u;
 
   // Count of added requests is less than max possible
   std::vector<utils::SharedPtr<RequestInfoForTesting>> requests;
-  for (uint32_t i = 0; i < hmi_level_count - 1; ++i) {
+  for (uint32_t i = 0; i < kHmiLevelCount - 1; ++i) {
     utils::SharedPtr<RequestInfoForTesting> request =
         CreateTestInfo(kMobileConnectionKey1,
                        i,
@@ -176,46 +176,46 @@ TEST_F(RequestInfoTest, CheckRequestsMaxCount) {
     requests.push_back(request);
     EXPECT_TRUE(request_info_set_.Add(request));
   }
-  EXPECT_EQ(hmi_level_count - 1, request_info_set_.Size());
+  EXPECT_EQ(kHmiLevelCount - 1, request_info_set_.Size());
 
   EXPECT_TRUE(request_info_set_.CheckHMILevelTimeScaleMaxRequest(
       mobile_apis::HMILevel::HMI_FULL,
       kMobileConnectionKey1,
-      app_hmi_level_time_scale,
-      hmi_level_count));
+      kAppHmiLevelTimeScale,
+      kHmiLevelCount));
 
   // Adding new request is correct
   utils::SharedPtr<RequestInfoForTesting> new_request =
       CreateTestInfo(kMobileConnectionKey1,
-                     hmi_level_count,
+                     kHmiLevelCount,
                      request_info::RequestInfo::MobileRequest,
                      kDefaultTimeout);
   new_request->set_hmi_level(mobile_apis::HMILevel::HMI_FULL);
   EXPECT_TRUE(request_info_set_.Add(new_request));
-  EXPECT_EQ(hmi_level_count, request_info_set_.Size());
+  EXPECT_EQ(kHmiLevelCount, request_info_set_.Size());
 
   // Count of added requests is max
   EXPECT_FALSE(request_info_set_.CheckHMILevelTimeScaleMaxRequest(
       mobile_apis::HMILevel::HMI_FULL,
       kMobileConnectionKey1,
-      app_hmi_level_time_scale,
-      hmi_level_count));
+      kAppHmiLevelTimeScale,
+      kHmiLevelCount));
 
   utils::SharedPtr<RequestInfoForTesting> new_request2 =
       CreateTestInfo(kMobileConnectionKey1,
-                     hmi_level_count + 1,
+                     kHmiLevelCount + 1,
                      request_info::RequestInfo::MobileRequest,
                      kDefaultTimeout);
   EXPECT_TRUE(request_info_set_.Add(new_request2));
 }
 
 TEST_F(RequestInfoTest, CheckMaxCountOfRequest) {
-  const uint32_t app_hmi_level_time_scale = 100;
-  const uint32_t hmi_level_count = 1000;
+  const uint32_t kAppHmiLevelTimeScale = 100u;
+  const uint32_t kHmiLevelCount = 1000u;
 
   // Count of added requests is less than max possible
   std::vector<utils::SharedPtr<RequestInfoForTesting>> requests;
-  for (uint32_t i = 0; i < hmi_level_count - 1; ++i) {
+  for (uint32_t i = 0; i < kHmiLevelCount - 1; ++i) {
     utils::SharedPtr<RequestInfoForTesting> request =
         CreateTestInfo(kMobileConnectionKey1,
                        i,
@@ -225,28 +225,28 @@ TEST_F(RequestInfoTest, CheckMaxCountOfRequest) {
     requests.push_back(request);
     EXPECT_TRUE(request_info_set_.Add(request));
   }
-  EXPECT_EQ(hmi_level_count - 1, request_info_set_.Size());
+  EXPECT_EQ(kHmiLevelCount - 1, request_info_set_.Size());
 
   EXPECT_TRUE(request_info_set_.CheckTimeScaleMaxRequest(
-      kMobileConnectionKey1, app_hmi_level_time_scale, hmi_level_count));
+      kMobileConnectionKey1, kAppHmiLevelTimeScale, kHmiLevelCount));
 
   // Adding new request is correct
   utils::SharedPtr<RequestInfoForTesting> new_request =
       CreateTestInfo(kMobileConnectionKey1,
-                     hmi_level_count,
+                     kHmiLevelCount,
                      request_info::RequestInfo::MobileRequest,
                      kDefaultTimeout);
   new_request->set_hmi_level(mobile_apis::HMILevel::HMI_FULL);
   EXPECT_TRUE(request_info_set_.Add(new_request));
-  EXPECT_EQ(hmi_level_count, request_info_set_.Size());
+  EXPECT_EQ(kHmiLevelCount, request_info_set_.Size());
 
   // Count of added requests is max
   EXPECT_FALSE(request_info_set_.CheckTimeScaleMaxRequest(
-      kMobileConnectionKey1, app_hmi_level_time_scale, hmi_level_count));
+      kMobileConnectionKey1, kAppHmiLevelTimeScale, kHmiLevelCount));
 
   utils::SharedPtr<RequestInfoForTesting> new_request2 =
       CreateTestInfo(kMobileConnectionKey1,
-                     hmi_level_count + 1,
+                     kHmiLevelCount + 1,
                      request_info::RequestInfo::MobileRequest,
                      kDefaultTimeout);
   EXPECT_TRUE(request_info_set_.Add(new_request2));
@@ -272,9 +272,9 @@ TEST_F(RequestInfoTest, AddMobileRequests_RemoveMobileRequests) {
 
 TEST_F(RequestInfoTest, AddMobileRequests_RemoveMobileRequestsByConnectionKey) {
   std::vector<utils::SharedPtr<RequestInfoForTesting>> requests;
-  const uint32_t count_of_mobile_request1 = 200;
-  const uint32_t count_of_mobile_request2 = 100;
-  for (uint32_t i = 0; i < count_of_mobile_request1; ++i) {
+  const uint32_t kCountOfMobileequest1 = 200u;
+  const uint32_t kCountOfMobileequest2 = 100u;
+  for (uint32_t i = 0; i < kCountOfMobileequest1; ++i) {
     utils::SharedPtr<RequestInfoForTesting> mobile_request1 =
         CreateTestInfo(kMobileConnectionKey1,
                        i,
@@ -284,9 +284,9 @@ TEST_F(RequestInfoTest, AddMobileRequests_RemoveMobileRequestsByConnectionKey) {
     requests.push_back(mobile_request1);
     EXPECT_TRUE(request_info_set_.Add(mobile_request1));
   }
-  EXPECT_EQ(count_of_mobile_request1, request_info_set_.Size());
+  EXPECT_EQ(kCountOfMobileequest1, request_info_set_.Size());
 
-  for (uint32_t i = 0; i < count_of_mobile_request2; ++i) {
+  for (uint32_t i = 0; i < kCountOfMobileequest2; ++i) {
     utils::SharedPtr<RequestInfoForTesting> mobile_request2 =
         CreateTestInfo(kMobileConnectionKey2,
                        i,
@@ -296,12 +296,12 @@ TEST_F(RequestInfoTest, AddMobileRequests_RemoveMobileRequestsByConnectionKey) {
     requests.push_back(mobile_request2);
     EXPECT_TRUE(request_info_set_.Add(mobile_request2));
   }
-  EXPECT_EQ(count_of_mobile_request1 + count_of_mobile_request2,
+  EXPECT_EQ(kCountOfMobileequest1 + kCountOfMobileequest2,
             request_info_set_.Size());
 
-  EXPECT_EQ(count_of_mobile_request1,
+  EXPECT_EQ(kCountOfMobileequest1,
             request_info_set_.RemoveByConnectionKey(kMobileConnectionKey1));
-  EXPECT_EQ(count_of_mobile_request2,
+  EXPECT_EQ(kCountOfMobileequest2,
             request_info_set_.RemoveByConnectionKey(kMobileConnectionKey2));
   EXPECT_EQ(0u, request_info_set_.Size());
 }
@@ -362,11 +362,11 @@ TEST_F(RequestInfoTest, RequestInfoSetFind) {
 
 TEST_F(RequestInfoTest, RequestInfoSetEqualHash) {
   request_info::RequestInfoSet request_info_set;
-  const uint32_t connection_key = 65483;
-  const uint32_t corr_id = 65483;
+  const uint32_t kConnectionKey = 65483u;
+  const uint32_t kCorrId = 65483u;
   utils::SharedPtr<RequestInfoForTesting> request =
-      CreateTestInfo(connection_key,
-                     corr_id,
+      CreateTestInfo(kConnectionKey,
+                     kCorrId,
                      request_info::RequestInfo::HMIRequest,
                      kDefaultTimeout);
   EXPECT_TRUE(request_info_set.Add(request));
@@ -374,7 +374,7 @@ TEST_F(RequestInfoTest, RequestInfoSetEqualHash) {
   EXPECT_FALSE(request_info_set.Add(request));
   EXPECT_EQ(1u, request_info_set.Size());
   request_info::RequestInfoPtr found =
-      request_info_set.Find(connection_key, corr_id);
+      request_info_set.Find(kConnectionKey, kCorrId);
   EXPECT_TRUE(found.valid());
   EXPECT_TRUE(request_info_set.RemoveRequest(found));
   EXPECT_EQ(0u, request_info_set.Size());
