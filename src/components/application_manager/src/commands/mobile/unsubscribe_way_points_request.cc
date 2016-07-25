@@ -48,6 +48,9 @@ void UnSubscribeWayPointsRequest::on_event(const event_engine::Event& event) {
         application_manager_.UnsubscribeAppFromWayPoints(app->app_id());
       }
       SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
+      if (result) {
+        app->UpdateHash();
+      }
       break;
     }
     default: {
