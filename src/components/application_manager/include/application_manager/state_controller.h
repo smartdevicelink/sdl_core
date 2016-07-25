@@ -241,7 +241,7 @@ private:
     StateController *state_ctrl_;
     HmiLevelConflictResolver(ApplicationSharedPtr app, HmiStatePtr state,
                              StateController *state_ctrl)
-        : applied_(app), state_(state) {}
+        : applied_(app), state_(state), state_ctrl_(state_ctrl) {}
     void operator()(ApplicationSharedPtr to_resolve);
   };
 
