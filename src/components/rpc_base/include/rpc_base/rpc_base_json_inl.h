@@ -356,7 +356,8 @@ inline Json::Value Nullable<T>::ToJsonValue() const {
 template<typename T>
 template<typename U>
 Optional<T>::Optional(const Json::Value* value, const U& def_value)
-  : value_(value, def_value) {
+  : policy_table_type_(policy_table_interface_base::INVALID_PT_TYPE),
+    value_(value, def_value) {
 }
 
 template<typename T>
