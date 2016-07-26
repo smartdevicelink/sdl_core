@@ -42,7 +42,8 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "FromMicRecorderListener")
 FromMicRecorderListener::FromMicRecorderListener(
   const std::string& file_name)
   : reader_(NULL)
-  , file_name_(file_name) {
+  , file_name_(file_name)
+  , current_application_(0) {
 }
 
 FromMicRecorderListener::~FromMicRecorderListener() {

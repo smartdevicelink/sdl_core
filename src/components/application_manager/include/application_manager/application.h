@@ -88,7 +88,10 @@ struct Version {
 
 struct AppFile {
     // need to use in std::map;
-    AppFile() {
+    AppFile()
+      : is_persistent(false),
+        is_download_complete(false),
+        file_type(mobile_apis::FileType::INVALID_ENUM) {
     }
     AppFile(const std::string& name, bool persistent, bool download_complete,
           mobile_apis::FileType::eType type)
@@ -367,7 +370,8 @@ class Application : public virtual InitialApplicationData,
     };
 
   public:
-    Application() :
+    Application() : app_state_(ApplicationState::kWaitingForRegistration),
+      connection_id_(0),
       is_greyed_out_(false) {
     }
 

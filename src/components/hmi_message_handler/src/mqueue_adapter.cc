@@ -78,6 +78,7 @@ MqueueAdapter::MqueueAdapter(HMIMessageHandler* hmi_message_handler)
     : HMIMessageAdapter(hmi_message_handler),
       sdl_to_hmi_mqueue_(-1),
       hmi_to_sdl_mqueue_(-1),
+      receiver_thread_delegate_(NULL),
       receiver_thread_(NULL) {
   mq_attr mq_attributes;
   mq_attributes.mq_maxmsg = kMqueueSize;

@@ -63,6 +63,7 @@ AudioStreamSenderThread::AudioStreamSenderThread(
   const std::string fileName, uint32_t session_key)
   : session_key_(session_key),
     fileName_(fileName),
+    offset_(0),
     shouldBeStoped_(false),
     shouldBeStoped_lock_(),
     shouldBeStoped_cv_() {

@@ -47,9 +47,11 @@ namespace commands {
 CreateInteractionChoiceSetRequest::CreateInteractionChoiceSetRequest(
   const MessageSharedPtr& message)
   : CommandRequestImpl(message),
+    choice_set_id_(0),
     expected_chs_count_(0),
     received_chs_count_(0),
-    error_from_hmi_(false) {
+    error_from_hmi_(false),
+    is_timed_out_(false) {
 }
 
 CreateInteractionChoiceSetRequest::~CreateInteractionChoiceSetRequest() {
