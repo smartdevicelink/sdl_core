@@ -36,6 +36,7 @@
 #include "application_manager/request_info.h"
 
 #include <algorithm>
+#include "utils/make_shared.h"
 
 #if defined(OS_WINDOWS)
 #define ssize_t SSIZE_T
@@ -50,44 +51,19 @@ SDL_CREATE_LOGGER("RequestController")
 uint32_t RequestInfo::HmiConnectoinKey = 0;
 
 HMIRequestInfo::HMIRequestInfo(RequestPtr request, const uint64_t timeout_msec)
-    : RequestInfo(request, HMIRequest, timeout_msec) {
-  correlation_id_ = request_->correlation_id();
-  app_id_ = RequestInfo::HmiConnectoinKey;
-}
-
-HMIRequestInfo::HMIRequestInfo(RequestPtr request,
-                               const TimevalStruct& start_time,
-                               const uint64_t timeout_msec)
-    : RequestInfo(request, HMIRequest, start_time, timeout_msec) {
-  correlation_id_ = request_->correlation_id();
-  app_id_ = RequestInfo::HmiConnectoinKey;
-}
+    : RequestInfo(request,
+                  HMIRequest,
+                  timeout_msec,
+                  RequestInfo::HmiConnectoinKey,
+                  request->correlation_id()) {}
 
 MobileRequestInfo::MobileRequestInfo(RequestPtr request,
                                      const uint64_t timeout_msec)
-    : RequestInfo(request, MobileRequest, timeout_msec) {
-  correlation_id_ = request_.get()->correlation_id();
-  app_id_ = request_.get()->connection_key();
-}
-
-MobileRequestInfo::MobileRequestInfo(RequestPtr request,
-                                     const TimevalStruct& start_time,
-                                     const uint64_t timeout_msec)
-    : RequestInfo(request, MobileRequest, start_time, timeout_msec) {
-  correlation_id_ = request_.get()->correlation_id();
-  app_id_ = request_.get()->connection_key();
-}
-
-RequestInfo::RequestInfo(RequestPtr request,
-                         const RequestInfo::RequestType requst_type,
-                         const TimevalStruct& start_time,
-                         const uint64_t timeout_msec)
-    : request_(request), start_time_(start_time), timeout_msec_(timeout_msec) {
-  updateEndTime();
-  requst_type_ = requst_type;
-  correlation_id_ = request_->correlation_id();
-  app_id_ = request_->connection_key();
-}
+    : RequestInfo(request,
+                  MobileRequest,
+                  timeout_msec,
+                  request->connection_key(),
+                  request->correlation_id()) {}
 
 void application_manager::request_controller::RequestInfo::updateEndTime() {
   end_time_ = date_time::DateTime::getCurrentTime();
@@ -153,8 +129,8 @@ RequestInfoPtr RequestInfoSet::Find(const uint32_t connection_key,
   RequestInfoPtr result;
 
   // Request info for searching in request info set by log_n time
-  utils::SharedPtr<FakeRequestInfo> request_info_for_search(
-      new FakeRequestInfo(connection_key, correlation_id));
+  utils::SharedPtr<FakeRequestInfo> request_info_for_search =
+      utils::MakeShared<FakeRequestInfo>(connection_key, correlation_id);
 
   sync_primitives::AutoLock lock(this_lock_);
   HashSortedRequestInfoSet::iterator it =
