@@ -65,7 +65,7 @@ typedef SharedPtr<SubscribeButtonRequest> CommandPtr;
 class SubscribeButtonRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
-  typedef TypeIf<kMocksIsNice,
+  typedef TypeIf<kMocksAreNice,
                  NiceMock<application_manager_test::MockHMICapabilities>,
                  application_manager_test::MockHMICapabilities>::Result
       MockHMICapabilities;
