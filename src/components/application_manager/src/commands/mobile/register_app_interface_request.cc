@@ -36,6 +36,7 @@
 #include <unistd.h>
 #include <algorithm>
 #include <map>
+#include <stdexcept>
 #include <string.h>
 
 #include "application_manager/application_manager_impl.h"
@@ -89,7 +90,7 @@ std::string AppHMITypeToString(mobile_apis::AppHMIType::eType type) {
   try {
     return appHMITypeMap.at(type);
   }
-  catch (const std::out_of_range ex) {
+  catch (const std::out_of_range &ex) {
     return "";
   }
 }
