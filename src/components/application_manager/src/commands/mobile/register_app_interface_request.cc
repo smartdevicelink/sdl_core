@@ -35,6 +35,7 @@
 
 #include <unistd.h>
 #include <algorithm>
+#include <map>
 #include <string.h>
 
 #include "application_manager/application_manager_impl.h"
@@ -73,20 +74,23 @@ mobile_apis::AppHMIType::eType StringToAppHMIType(const std::string &str) {
 }
 
 std::string AppHMITypeToString(mobile_apis::AppHMIType::eType type) {
-  switch(type) {
-    case mobile_apis::AppHMIType::DEFAULT:            return "DEFAULT";
-    case mobile_apis::AppHMIType::COMMUNICATION:      return "COMMUNICATION";
-    case mobile_apis::AppHMIType::MEDIA:              return "MEDIA";
-    case mobile_apis::AppHMIType::MESSAGING:          return "MESSAGING";
-    case mobile_apis::AppHMIType::NAVIGATION:         return "NAVIGATION";
-    case mobile_apis::AppHMIType::INFORMATION:        return "INFORMATION";
-    case mobile_apis::AppHMIType::SOCIAL:             return "SOCIAL";
-    case mobile_apis::AppHMIType::BACKGROUND_PROCESS: return "BACKGROUND_PROCESS";
-    case mobile_apis::AppHMIType::TESTING:            return "TESTING";
-    case mobile_apis::AppHMIType::SYSTEM:             return "SYSTEM";
-    default:
-      NOTREACHED();
-      return NULL;
+  const std::map<mobile_apis::AppHMIType::eType, std::string> appHMITypeMap = {
+    {mobile_apis::AppHMIType::DEFAULT, "DEFAULT"},
+    {mobile_apis::AppHMIType::COMMUNICATION, "COMMUNICATION"},
+    {mobile_apis::AppHMIType::MEDIA, "MEDIA"},
+    {mobile_apis::AppHMIType::MESSAGING, "MESSAGING"},
+    {mobile_apis::AppHMIType::NAVIGATION, "NAVIGATION"},
+    {mobile_apis::AppHMIType::INFORMATION, "INFORMATION"},
+    {mobile_apis::AppHMIType::SOCIAL, "SOCIAL"},
+    {mobile_apis::AppHMIType::BACKGROUND_PROCESS, "BACKGROUND_PROCESS"},
+    {mobile_apis::AppHMIType::TESTING, "TESTING"},
+    {mobile_apis::AppHMIType::SYSTEM, "SYSTEM"}
+  };
+  try {
+    return appHMITypeMap.at(type);
+  }
+  catch (const std::out_of_range ex) {
+    return "";
   }
 }
 
@@ -112,11 +116,13 @@ struct CheckMissedTypes {
 
   bool operator()(const smart_objects::SmartArray::value_type &value) {
     std::string app_type_str = AppHMITypeToString(static_cast<mobile_apis::AppHMIType::eType>(value.asInt()));
-    policy::StringArray::const_iterator it = policy_app_types_.begin();
-    policy::StringArray::const_iterator it_end = policy_app_types_.end();
-    for (; it != it_end; ++it) {
-      if (app_type_str == *it) {
-        return true;
+    if (!app_type_str.empty()) {
+      policy::StringArray::const_iterator it = policy_app_types_.begin();
+      policy::StringArray::const_iterator it_end = policy_app_types_.end();
+      for (; it != it_end; ++it) {
+        if (app_type_str == *it) {
+          return true;
+        }
       }
     }
 
