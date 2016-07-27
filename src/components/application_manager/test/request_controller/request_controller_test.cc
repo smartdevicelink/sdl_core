@@ -30,8 +30,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <stdint.h>
+
 #include "gtest/gtest.h"
 #include "application_manager/request_controller.h"
+#include "application_manager/request_info.h"
 #include "application_manager/mock_request.h"
 #include "utils/shared_ptr.h"
 #include "smart_objects/smart_object.h"
@@ -52,91 +55,232 @@ namespace test {
 namespace components {
 namespace request_controller_test {
 
-using application_manager::request_controller::RequestController;
-using application_manager::request_controller::RequestInfo;
+using ::application_manager::request_controller::RequestController;
+using ::application_manager::request_controller::RequestInfo;
+using ::application_manager::request_controller::HMIRequestInfo;
+using ::application_manager::request_controller::MobileRequestInfo;
 
 using ::testing::Return;
 using ::testing::ReturnRef;
+using ::testing::NiceMock;
+using ::application_manager::request_controller::RequestInfoPtr;
+using ::application_manager::request_controller::RequestInfoSet;
 
-typedef utils::SharedPtr<application_manager_test::MockRequest> RequestPtr;
+typedef NiceMock<application_manager_test::MockRequest> MRequest;
+typedef utils::SharedPtr<MRequest> RequestPtr;
 typedef utils::SharedPtr<RequestController> RequestControllerSPtr;
+typedef std::list<RequestInfoPtr> RequestInfoPtrList;
+typedef std::list<::application_manager::request_controller::RequestPtr>
+    RequestPtrList;
+
+namespace {
+const size_t kNumberOfRequests = 10u;
+const uint32_t kTimeScale = 5000u;  // 5 seconds
+const uint32_t kMaxRequestAmount = 2u;
+const uint32_t kDefaultCorrelationID = 1u;
+const uint32_t kDefaultConnectionKey = 0u;
+const uint32_t kDefaultTimeout = 100u;
+const uint32_t kThreadPoolSize = 1u;
+}  // namespace
 
 class RequestControllerTestClass : public ::testing::Test {
  public:
-  RequestControllerTestClass()
-      : request_ctrl_(utils::MakeShared<RequestController>(
-            mock_request_controller_settings_)) {
-    register_request_ = GetMockRequest();
+  struct TestSettings {
+    uint32_t app_hmi_level_none_requests_time_scale_;
+    uint32_t app_hmi_level_none_time_scale_max_requests_;
+    uint32_t app_time_scale_max_requests_;
+    uint32_t app_requests_time_scale_;
+    uint32_t pending_requests_amount_;
+
+    TestSettings(const uint32_t app_hmi_level_none_requests_time_scale = 0u,
+                 const uint32_t app_hmi_level_none_time_scale_max_requests = 0u,
+                 const uint32_t app_time_scale_max_requests = 0u,
+                 const uint32_t app_requests_time_scale = 0u,
+                 const uint32_t pending_requests_amount = 0u)
+        : app_hmi_level_none_requests_time_scale_(
+              app_hmi_level_none_requests_time_scale)
+        , app_hmi_level_none_time_scale_max_requests_(
+              app_hmi_level_none_time_scale_max_requests)
+        , app_time_scale_max_requests_(app_time_scale_max_requests)
+        , app_requests_time_scale_(app_requests_time_scale)
+        , pending_requests_amount_(pending_requests_amount) {}
+  };
+
+  RequestControllerTestClass() {
+    ON_CALL(mock_request_controller_settings_, thread_pool_size())
+        .WillByDefault(Return(kThreadPoolSize));
+    request_ctrl_ =
+        utils::MakeShared<RequestController>(mock_request_controller_settings_);
+  }
+
+  RequestPtr GetMockRequest(
+      const uint32_t correlation_id = kDefaultCorrelationID,
+      const uint32_t kConnectionKey = kDefaultConnectionKey,
+      const uint32_t default_timeout = kDefaultTimeout) {
+    RequestPtr output =
+        utils::MakeShared<MRequest>(kConnectionKey, correlation_id);
+    ON_CALL(*output, default_timeout()).WillByDefault(Return(default_timeout));
+    return output;
+  }
+
+  RequestInfoPtr GetRequestInfo(RequestPtr request,
+                                const RequestInfo::RequestType request_type =
+                                    RequestInfo::RequestType::HMIRequest,
+                                const mobile_apis::HMILevel::eType& hmi_level =
+                                    mobile_apis::HMILevel::INVALID_ENUM) {
+    RequestInfoPtr request_info_ptr;
+    if (request_type == RequestInfo::RequestType::HMIRequest) {
+      request_info_ptr = utils::MakeShared<HMIRequestInfo>(
+          request, request->default_timeout());
+    } else {
+      request_info_ptr = utils::MakeShared<MobileRequestInfo>(
+          request, request->default_timeout());
+    }
+    request_info_ptr->set_hmi_level(hmi_level);
+
+    return request_info_ptr;
   }
 
   RequestController::TResult AddRequest(
-      const RequestInfo::RequestType request_type,
-      const bool RegisterRequest = false,
+      const TestSettings& settings,
+      RequestPtr request,
+      const RequestInfo::RequestType request_type =
+          RequestInfo::RequestType::HMIRequest,
       const mobile_apis::HMILevel::eType& hmi_level =
           mobile_apis::HMILevel::INVALID_ENUM) {
-    RequestPtr request;
-    if (RegisterRequest) {
-      request = register_request_;
-      EXPECT_CALL(*register_request_, default_timeout()).WillOnce(Return(0));
-    } else {
-      request = empty_register_request_;
-    }
     if (RequestInfo::RequestType::HMIRequest == request_type) {
       return request_ctrl_->addHMIRequest(request);
     }
+    CallSettings(settings);
     return request_ctrl_->addMobileRequest(request, hmi_level);
   }
 
-  RequestPtr GetMockRequest(const uint32_t id = 1,
-                            const uint32_t connection_key = 0) {
-    return utils::MakeShared<application_manager_test::MockRequest>(
-        connection_key, id);
-  }
-  void CallSettings() {
-    EXPECT_CALL(mock_request_controller_settings_,
-                app_hmi_level_none_time_scale())
-        .WillOnce(ReturnRef(kDefaultAppHmiLevelNoneRequestsTimeScale));
-    EXPECT_CALL(mock_request_controller_settings_,
-                app_hmi_level_none_time_scale_max_requests())
-        .WillOnce(ReturnRef(kDefaultAppHmiLevelNoneTimeScaleMaxRequests));
+  void CallSettings(const TestSettings& settings) const {
+    ON_CALL(mock_request_controller_settings_, app_hmi_level_none_time_scale())
+        .WillByDefault(
+            ReturnRef(settings.app_hmi_level_none_requests_time_scale_));
 
-    EXPECT_CALL(mock_request_controller_settings_, app_time_scale())
-        .WillOnce(ReturnRef(kDefaultAppRequestsTimeScale));
-    EXPECT_CALL(mock_request_controller_settings_,
-                app_time_scale_max_requests())
-        .WillOnce(ReturnRef(kDefaultAppTimeScaleMaxRequests));
+    ON_CALL(mock_request_controller_settings_,
+            app_hmi_level_none_time_scale_max_requests())
+        .WillByDefault(
+            ReturnRef(settings.app_hmi_level_none_time_scale_max_requests_));
 
-    EXPECT_CALL(mock_request_controller_settings_, pending_requests_amount())
-        .WillOnce(ReturnRef(kDefaultPendingRequestsAmount));
+    ON_CALL(mock_request_controller_settings_, app_time_scale())
+        .WillByDefault(ReturnRef(settings.app_requests_time_scale_));
+
+    ON_CALL(mock_request_controller_settings_, app_time_scale_max_requests())
+        .WillByDefault(ReturnRef(settings.app_time_scale_max_requests_));
+
+    ON_CALL(mock_request_controller_settings_, pending_requests_amount())
+        .WillByDefault(ReturnRef(settings.pending_requests_amount_));
   }
 
-  application_manager_test::MockRequestControlerSettings
+  NiceMock<application_manager_test::MockRequestControlerSettings>
       mock_request_controller_settings_;
-  RequestPtr register_request_;
-  RequestPtr empty_register_request_;
   RequestControllerSPtr request_ctrl_;
-
-  const uint32_t kDefaultAppHmiLevelNoneRequestsTimeScale = 10;
-  const uint32_t kDefaultAppHmiLevelNoneTimeScaleMaxRequests = 100u;
-  const uint32_t kDefaultAppTimeScaleMaxRequests = 0;
-  const uint32_t kDefaultAppRequestsTimeScale = 0;
-  const uint32_t kDefaultPendingRequestsAmount = 0;
+  RequestPtr empty_mock_request_;
+  const TestSettings kDefaultSettings_;
 };
 
-TEST_F(RequestControllerTestClass, CheckPosibilitytoAdd_HMI_FULL_SUCCESS) {
-  CallSettings();
-  EXPECT_EQ(RequestController::TResult::SUCCESS,
-            AddRequest(RequestInfo::RequestType::MobileRequest,
-                       true,
+TEST_F(RequestControllerTestClass,
+       CheckPosibilitytoAdd_ZeroValueLimiters_SUCCESS) {
+  // Test case than pending_requests_amount,
+  // app_time_scale_max_requests_ and
+  // app_hmi_level_none_time_scale_max_requests_ equals 0
+  // (in the default settings they setted to 0)
+  for (size_t i = 0; i < kMaxRequestAmount; ++i) {
+    EXPECT_EQ(RequestController::SUCCESS,
+              AddRequest(kDefaultSettings_,
+                         GetMockRequest(i),
+                         RequestInfo::RequestType::MobileRequest,
+                         mobile_apis::HMILevel::HMI_FULL));
+  }
+}
+
+TEST_F(
+    RequestControllerTestClass,
+    CheckPosibilitytoAdd_ExcessPendingRequestsAmount_TooManyPendingRequests) {
+  TestSettings settings;
+  settings.pending_requests_amount_ = kNumberOfRequests;
+
+  request_ctrl_->DestroyThreadpool();
+
+  // Adding requests to fit in pending_requests_amount_
+  for (size_t i = 0; i < kNumberOfRequests; ++i) {
+    EXPECT_EQ(RequestController::TResult::SUCCESS,
+              AddRequest(settings,
+                         GetMockRequest(),
+                         RequestInfo::RequestType::MobileRequest,
+                         mobile_apis::HMILevel::HMI_FULL));
+  }
+
+  // Trying to add one more extra request
+  // Expect overflow and TOO_MANY_PENDING_REQUESTS result
+  EXPECT_EQ(RequestController::TResult::TOO_MANY_PENDING_REQUESTS,
+            AddRequest(settings,
+                       GetMockRequest(),
+                       RequestInfo::RequestType::MobileRequest,
                        mobile_apis::HMILevel::HMI_FULL));
 }
 
-TEST_F(RequestControllerTestClass, CheckPosibilitytoAdd_HMI_NONE_SUCCESS) {
-  CallSettings();
-  EXPECT_EQ(RequestController::TResult::SUCCESS,
-            AddRequest(RequestInfo::RequestType::MobileRequest,
-                       true,
+TEST_F(
+    RequestControllerTestClass,
+    CheckPosibilitytoAdd_ExcessHMILevelNoneTimeScaleMaxRequests_NoneHMILevelManyRequests) {
+  TestSettings settings;
+  // Setting time scale and max requests amount per it
+  // for none HMILevel type of requests
+  settings.app_hmi_level_none_requests_time_scale_ = kTimeScale;
+  settings.app_hmi_level_none_time_scale_max_requests_ = kNumberOfRequests;
+
+  request_ctrl_->DestroyThreadpool();
+
+  RequestInfoSet& waiting_for_response =
+      request_ctrl_->get_waiting_for_response();
+
+  // Artificially adding requests to waiting_for_response list
+  size_t i = 0;
+  for (; i < kNumberOfRequests; ++i) {
+    waiting_for_response.Add(
+        GetRequestInfo(GetMockRequest(i),
+                       RequestInfo::RequestType::MobileRequest,
                        mobile_apis::HMILevel::HMI_NONE));
+  }
+  // Trying to add one more extra request
+  // Expect overflow and NONE_HMI_LEVEL_MANY_REQUESTS result
+  EXPECT_EQ(RequestController::TResult::NONE_HMI_LEVEL_MANY_REQUESTS,
+            AddRequest(settings,
+                       GetMockRequest(i),
+                       RequestInfo::RequestType::MobileRequest,
+                       mobile_apis::HMILevel::HMI_NONE));
+}
+
+TEST_F(RequestControllerTestClass,
+       CheckPosibilitytoAdd_ExcessTimeScaleMaxRequest_ToManyRequests) {
+  TestSettings settings;
+  // Setting time scale and max requests amount per it
+  settings.app_requests_time_scale_ = kTimeScale;
+  settings.app_time_scale_max_requests_ = kNumberOfRequests;
+
+  request_ctrl_->DestroyThreadpool();
+
+  RequestInfoSet& waiting_for_response =
+      request_ctrl_->get_waiting_for_response();
+
+  // Artificially adding requests to waiting_for_response list
+  size_t i = 0u;
+  for (; i < kNumberOfRequests; ++i) {
+    waiting_for_response.Add(
+        GetRequestInfo(GetMockRequest(i),
+                       RequestInfo::RequestType::MobileRequest,
+                       mobile_apis::HMILevel::INVALID_ENUM));
+  }
+  // Trying to add one more extra request
+  // Expect overflow and TOO_MANY_REQUESTS result
+  EXPECT_EQ(RequestController::TResult::TOO_MANY_REQUESTS,
+            AddRequest(settings,
+                       GetMockRequest(i),
+                       RequestInfo::RequestType::MobileRequest,
+                       mobile_apis::HMILevel::INVALID_ENUM));
 }
 
 TEST_F(RequestControllerTestClass, IsLowVoltage_SetOnLowVoltage_TRUE) {
@@ -151,34 +295,226 @@ TEST_F(RequestControllerTestClass, IsLowVoltage_SetOnWakeUp_FALSE) {
   EXPECT_EQ(result, request_ctrl_->IsLowVoltage());
 }
 
+TEST_F(RequestControllerTestClass, AddMobileRequest_SetValidData_SUCCESS) {
+  EXPECT_EQ(RequestController::SUCCESS,
+            AddRequest(kDefaultSettings_,
+                       GetMockRequest(),
+                       RequestInfo::RequestType::MobileRequest,
+                       mobile_apis::HMILevel::HMI_FULL));
+}
+
 TEST_F(RequestControllerTestClass,
        AddMobileRequest_SetInvalidData_INVALID_DATA) {
   EXPECT_EQ(RequestController::INVALID_DATA,
-            AddRequest(RequestInfo::RequestType::MobileRequest,
-                       false,
+            AddRequest(kDefaultSettings_,
+                       empty_mock_request_,
+                       RequestInfo::RequestType::MobileRequest,
                        mobile_apis::HMILevel::HMI_NONE));
 }
 
-TEST_F(RequestControllerTestClass, addHMIRequest_AddRequest_SUCCESS) {
+TEST_F(RequestControllerTestClass, AddHMIRequest_AddRequest_SUCCESS) {
   EXPECT_EQ(RequestController::SUCCESS,
-            AddRequest(RequestInfo::RequestType::HMIRequest, true));
+            AddRequest(kDefaultSettings_,
+                       GetMockRequest(),
+                       RequestInfo::RequestType::HMIRequest));
 }
 
-TEST_F(RequestControllerTestClass, addHMIRequest_AddInvalidData_INVALID_DATA) {
+TEST_F(RequestControllerTestClass, AddHMIRequest_AddInvalidData_INVALID_DATA) {
   EXPECT_EQ(RequestController::INVALID_DATA,
-            AddRequest(RequestInfo::RequestType::HMIRequest));
+            AddRequest(kDefaultSettings_,
+                       empty_mock_request_,
+                       RequestInfo::RequestType::HMIRequest));
 }
 
-TEST_F(RequestControllerTestClass, ZeroValuePendingRequestsAmount) {
-  // Bigger than pending_requests_amount count
-  const uint32_t big_count_of_requests_for_test_ = 10;
-  for (uint32_t i = 0; i < big_count_of_requests_for_test_; ++i) {
-    CallSettings();
-    EXPECT_EQ(RequestController::SUCCESS,
-              AddRequest(RequestInfo::RequestType::MobileRequest,
-                         true,
-                         mobile_apis::HMILevel::HMI_FULL));
+TEST_F(RequestControllerTestClass,
+       TerminateRequest_TerminateExistingRequest_SUCCESS) {
+  const bool force_terminate = false;
+  RequestPtr mock_request =
+      GetMockRequest(kDefaultCorrelationID, kDefaultConnectionKey);
+
+  RequestInfoSet& waiting_for_response =
+      request_ctrl_->get_waiting_for_response();
+
+  EXPECT_EQ(RequestController::SUCCESS,
+            AddRequest(kDefaultSettings_, mock_request));
+
+  // Check if request is added to waiting_for_response list
+  EXPECT_EQ(1u, waiting_for_response.Size());
+
+  // Expect call of 'AllowedToTerminate method' cause 'force_terminate' is
+  // 'false'
+  EXPECT_CALL(*mock_request, AllowedToTerminate()).WillOnce(Return(true));
+
+  request_ctrl_->terminateRequest(
+      kDefaultCorrelationID, kDefaultConnectionKey, force_terminate);
+
+  // Check if request is terminated
+  EXPECT_EQ(0u, waiting_for_response.Size());
+}
+
+TEST_F(RequestControllerTestClass,
+       TerminateRequest_ForceToTerminateExistingRequest_SUCCESS) {
+  const bool force_terminate = true;
+  RequestPtr mock_request =
+      GetMockRequest(kDefaultCorrelationID, kDefaultConnectionKey);
+
+  RequestInfoSet& waiting_for_response =
+      request_ctrl_->get_waiting_for_response();
+
+  EXPECT_EQ(RequestController::SUCCESS,
+            AddRequest(kDefaultSettings_, mock_request));
+
+  // Check if request is added to waiting_for_response list
+  EXPECT_EQ(1u, waiting_for_response.Size());
+
+  // Call is not expected because request termination will be forced
+  EXPECT_CALL(*mock_request, AllowedToTerminate()).Times(0);
+
+  request_ctrl_->terminateRequest(
+      kDefaultCorrelationID, kDefaultConnectionKey, force_terminate);
+
+  // Check if request is terminated
+  EXPECT_EQ(0u, waiting_for_response.Size());
+}
+
+TEST_F(RequestControllerTestClass,
+       TerminateRequest_TerminateNotExistingRequest_UNSUCCESS) {
+  const bool force_terminate = false;
+  RequestPtr mock_request =
+      GetMockRequest(kDefaultCorrelationID, kDefaultConnectionKey);
+
+  RequestInfoSet& waiting_for_response =
+      request_ctrl_->get_waiting_for_response();
+
+  EXPECT_EQ(RequestController::SUCCESS,
+            AddRequest(kDefaultSettings_, mock_request));
+
+  // Check if request is added to waiting_for_response list
+  EXPECT_EQ(1u, waiting_for_response.Size());
+
+  EXPECT_CALL(*mock_request, AllowedToTerminate()).Times(0u);
+
+  // Trying to terminate request from not existing connection key
+  const uint32_t correlation_id = 2u;
+  const uint32_t kConnectionKey = 1u;
+  request_ctrl_->terminateRequest(
+      correlation_id, kConnectionKey, force_terminate);
+
+  // Check if request is still in waiting_for_response list
+  EXPECT_EQ(1u, waiting_for_response.Size());
+}
+
+TEST_F(RequestControllerTestClass,
+       UpdateRequestTimeout_UpdateTimeoutToExistingRequest_SUCCESS) {
+  const uint32_t default_timeout = 15u;
+  const uint32_t updated_timeout = 20u;
+  RequestPtr mock_request = GetMockRequest(
+      kDefaultCorrelationID, kDefaultConnectionKey, default_timeout);
+
+  EXPECT_EQ(RequestController::SUCCESS,
+            AddRequest(kDefaultSettings_, mock_request));
+
+  request_ctrl_->updateRequestTimeout(
+      kDefaultConnectionKey, kDefaultCorrelationID, updated_timeout);
+
+  // Getting updated request
+  RequestInfoSet& waiting_for_response =
+      request_ctrl_->get_waiting_for_response();
+  const RequestInfoPtr& request =
+      waiting_for_response.Find(kDefaultConnectionKey, kDefaultCorrelationID);
+
+  EXPECT_EQ(updated_timeout, request->timeout_msec());
+}
+
+TEST_F(RequestControllerTestClass, AddNotification_RemoveNotification_SUCCESS) {
+  RequestPtr mock_requests[kNumberOfRequests];
+
+  for (size_t i = 0u; i < kNumberOfRequests; ++i) {
+    mock_requests[i] = GetMockRequest(i);
+    request_ctrl_->addNotification(mock_requests[i]);
   }
+
+  const RequestPtrList& notification_list =
+      request_ctrl_->get_notification_list();
+
+  EXPECT_EQ(kNumberOfRequests, notification_list.size());
+
+  for (size_t i = 0u; i < kNumberOfRequests; ++i) {
+    request_ctrl_->removeNotification(mock_requests[i].get());
+  }
+
+  EXPECT_EQ(0u, notification_list.size());
+}
+
+TEST_F(RequestControllerTestClass,
+       TerminateWaitingForResponseAppRequests_SUCCESS) {
+  const uint32_t kConnectionKey = RequestInfo::HmiConnectoinKey;
+
+  EXPECT_EQ(RequestController::SUCCESS,
+            AddRequest(kDefaultSettings_,
+                       GetMockRequest(1u, kConnectionKey),
+                       RequestInfo::RequestType::HMIRequest));
+
+  EXPECT_EQ(RequestController::SUCCESS,
+            AddRequest(kDefaultSettings_,
+                       GetMockRequest(2u, kConnectionKey),
+                       RequestInfo::RequestType::HMIRequest));
+
+  RequestInfoSet& waiting_for_response =
+      request_ctrl_->get_waiting_for_response();
+
+  // Checking size of waiting_for_response list before terminating all HMI
+  // requests
+  EXPECT_EQ(2u, waiting_for_response.Size());
+
+  request_ctrl_->terminateAllHMIRequests();
+
+  // Expect empty waiting_for_response list
+  EXPECT_EQ(0u, waiting_for_response.Size());
+}
+
+TEST_F(RequestControllerTestClass,
+       TerminateWaitingForExecutionAppRequests_SUCCESS) {
+  const uint32_t kConnectionKey = 3u;
+
+  request_ctrl_->DestroyThreadpool();
+
+  EXPECT_EQ(RequestController::SUCCESS,
+            AddRequest(kDefaultSettings_,
+                       GetMockRequest(1u, kConnectionKey),
+                       RequestInfo::RequestType::MobileRequest));
+
+  EXPECT_EQ(RequestController::SUCCESS,
+            AddRequest(kDefaultSettings_,
+                       GetMockRequest(2u, kConnectionKey),
+                       RequestInfo::RequestType::MobileRequest));
+
+  const RequestInfoPtrList& mobile_request_info_list =
+      request_ctrl_->get_mobile_request_info_list();
+
+  // Checking size of waiting_for_response list before terminating all requests
+  EXPECT_EQ(2u, mobile_request_info_list.size());
+
+  request_ctrl_->terminateAppRequests(kConnectionKey);
+
+  // Expect empty mobile_request_info_list list
+  EXPECT_EQ(0u, mobile_request_info_list.size());
+}
+
+TEST_F(RequestControllerTestClass, OnTimer_SUCCESS) {
+  const uint32_t request_timeout = 1u;
+  RequestPtr mock_request = GetMockRequest(
+      kDefaultCorrelationID, kDefaultConnectionKey, request_timeout);
+
+  EXPECT_EQ(RequestController::SUCCESS,
+            AddRequest(kDefaultSettings_,
+                       mock_request,
+                       RequestInfo::RequestType::MobileRequest));
+
+  EXPECT_CALL(*mock_request, onTimeOut());
+
+  // Waiting for call of `onTimeOut` for `kTimeScale` seconds
+  testing::Mock::AsyncVerifyAndClearExpectations(kTimeScale);
 }
 
 }  // namespace request_controller_test

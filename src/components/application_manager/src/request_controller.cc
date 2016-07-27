@@ -88,7 +88,7 @@ void RequestController::InitializeThreadpool() {
 void RequestController::DestroyThreadpool() {
   SDL_AUTO_TRACE();
   {
-    AutoLock auto_lock(mobile_request_list_lock_);
+    AutoLock auto_lock(mobile_request_info_list_lock_);
     pool_state_ = TPoolState::STOPPED;
     SDL_DEBUG("Broadcasting STOP signal to all threads...");
     cond_var_.Broadcast();  // notify all threads we are shutting down
@@ -146,7 +146,7 @@ bool RequestController::CheckPendingRequestsAmount(
     const uint32_t& pending_requests_amount) {
   SDL_AUTO_TRACE();
   if (pending_requests_amount > 0) {
-    const size_t pending_requests_size = mobile_request_list_.size();
+    const size_t pending_requests_size = mobile_request_info_list_.size();
     const bool available_to_add =
         pending_requests_amount > pending_requests_size;
     if (!available_to_add) {
@@ -173,9 +173,14 @@ RequestController::TResult RequestController::addMobileRequest(
                                 << request->connection_key());
   RequestController::TResult result = CheckPosibilitytoAdd(request);
   if (SUCCESS == result) {
-    AutoLock auto_lock_list(mobile_request_list_lock_);
-    mobile_request_list_.push_back(request);
-    SDL_DEBUG("Waiting for execution: " << mobile_request_list_.size());
+    RequestInfoPtr request_info_ptr(utils::MakeShared<MobileRequestInfo>(
+        request, request->default_timeout()));
+    request_info_ptr->set_hmi_level(hmi_level);
+
+    AutoLock auto_lock_list(mobile_request_info_list_lock_);
+    mobile_request_info_list_.push_back(request_info_ptr);
+
+    SDL_DEBUG("Waiting for execution: " << mobile_request_info_list_.size());
     // wake up one thread that is waiting for a task to be available
   }
   cond_var_.NotifyOne();
@@ -266,18 +271,20 @@ void RequestController::terminateWaitingForExecutionAppRequests(
     const uint32_t& app_id) {
   SDL_AUTO_TRACE();
   SDL_DEBUG("app_id: " << app_id << "Waiting for execution"
-                       << mobile_request_list_.size());
-  AutoLock auto_lock(mobile_request_list_lock_);
-  std::list<RequestPtr>::iterator request_it = mobile_request_list_.begin();
-  while (mobile_request_list_.end() != request_it) {
-    RequestPtr request = (*request_it);
-    if ((request.valid()) && (request->connection_key() == app_id)) {
-      mobile_request_list_.erase(request_it++);
+                       << mobile_request_info_list_.size());
+  AutoLock auto_lock(mobile_request_info_list_lock_);
+  std::list<RequestInfoPtr>::iterator request_it =
+      mobile_request_info_list_.begin();
+  while (mobile_request_info_list_.end() != request_it) {
+    RequestInfoPtr request_info = (*request_it);
+    if ((request_info.valid()) &&
+        (request_info->request()->connection_key() == app_id)) {
+      mobile_request_info_list_.erase(request_it++);
     } else {
       ++request_it;
     }
   }
-  SDL_DEBUG("Waiting for execution " << mobile_request_list_.size());
+  SDL_DEBUG("Waiting for execution " << mobile_request_info_list_.size());
 }
 
 void RequestController::terminateWaitingForResponseAppRequests(
@@ -290,7 +297,7 @@ void RequestController::terminateWaitingForResponseAppRequests(
 void RequestController::terminateAppRequests(const uint32_t& app_id) {
   SDL_AUTO_TRACE();
   SDL_DEBUG("app_id : " << app_id << "Requests waiting for execution count : "
-                        << mobile_request_list_.size()
+                        << mobile_request_info_list_.size()
                         << "Requests waiting for response count : "
                         << waiting_for_response_.Size());
 
@@ -308,8 +315,8 @@ void RequestController::terminateAllMobileRequests() {
   SDL_AUTO_TRACE();
   waiting_for_response_.RemoveMobileRequests();
   SDL_DEBUG("Mobile Requests waiting for response cleared");
-  AutoLock waiting_execution_auto_lock(mobile_request_list_lock_);
-  mobile_request_list_.clear();
+  AutoLock waiting_execution_auto_lock(mobile_request_info_list_lock_);
+  mobile_request_info_list_.clear();
   SDL_DEBUG("Mobile Requests waiting for execution cleared");
   UpdateTimer();
 }
@@ -406,10 +413,10 @@ void RequestController::Worker::threadMain() {
   AutoLock auto_lock(thread_lock_);
   while (!stop_flag_) {
     // Try to pick a request
-    AutoLock auto_lock(request_controller_->mobile_request_list_lock_);
+    AutoLock auto_lock(request_controller_->mobile_request_info_list_lock_);
 
     while ((request_controller_->pool_state_ != TPoolState::STOPPED) &&
-           (request_controller_->mobile_request_list_.empty())) {
+           (request_controller_->mobile_request_info_list_.empty())) {
       // Wait until there is a task in the queue
       // Unlock mutex while wait, then lock it back when signaled
       SDL_INFO("Unlocking and waiting");
@@ -422,22 +429,24 @@ void RequestController::Worker::threadMain() {
       break;
     }
 
-    if (request_controller_->mobile_request_list_.empty()) {
+    if (request_controller_->mobile_request_info_list_.empty()) {
       SDL_WARN("Mobile request list is empty");
       break;
     }
 
-    RequestPtr request_ptr(request_controller_->mobile_request_list_.front());
-    request_controller_->mobile_request_list_.pop_front();
-
-    bool init_res = request_ptr->Init();  // to setup specific
-                                          // default timeout
-
-    const uint32_t timeout_in_mseconds = request_ptr->default_timeout();
     RequestInfoPtr request_info_ptr(
-        new MobileRequestInfo(request_ptr, timeout_in_mseconds));
+        request_controller_->mobile_request_info_list_.front());
+    request_controller_->mobile_request_info_list_.pop_front();
 
-    request_controller_->waiting_for_response_.Add(request_info_ptr);
+    bool init_res = request_info_ptr->request()->Init();  // to setup specific
+                                                          // default timeout
+
+    const uint32_t timeout_in_mseconds =
+        request_info_ptr->request()->default_timeout();
+    if (!request_controller_->waiting_for_response_.Add(request_info_ptr)) {
+      SDL_ERROR("Request has not been added. Execution skipped.");
+      continue;
+    }
     SDL_DEBUG("timeout_in_mseconds " << timeout_in_mseconds);
 
     if (0 != timeout_in_mseconds) {
@@ -453,11 +462,11 @@ void RequestController::Worker::threadMain() {
 
     // execute
     if ((false == request_controller_->IsLowVoltage()) &&
-        request_ptr->CheckPermissions() && init_res) {
+        request_info_ptr->request()->CheckPermissions() && init_res) {
       SDL_DEBUG("Execute MobileRequest corr_id = "
                 << request_info_ptr->requestId()
                 << " with timeout: " << timeout_in_mseconds);
-      request_ptr->Run();
+      request_info_ptr->request()->Run();
     }
   }
 }
@@ -497,6 +506,21 @@ void RequestController::UpdateTimer() {
     }
   }
 }
+
+#ifdef BUILD_TESTS
+RequestInfoSet& RequestController::get_waiting_for_response() {
+  return waiting_for_response_;
+}
+
+const std::list<RequestInfoPtr>&
+RequestController::get_mobile_request_info_list() const {
+  return mobile_request_info_list_;
+}
+
+const std::list<RequestPtr>& RequestController::get_notification_list() const {
+  return notification_list_;
+}
+#endif  // BUILD_TESTS
 
 }  //  namespace request_controller
 }  //  namespace application_manager

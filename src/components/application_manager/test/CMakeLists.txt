@@ -59,11 +59,10 @@ set(REQUEST_CONTROLLER_PATHS
   ${CMAKE_CURRENT_SOURCE_DIR}/request_controller
 )
 # Temporary exclude some resumption tests from build due to compile errors APPLINK-26346
-set(REQUEST_CONTROLLER_EXCLUDE
-  request_controller_test.cc
-  zero_request_amount_test.cc
+set(REQUEST_CONTROLLER_SOURCES
+  request_controller/request_info_test.cc
+  request_controller/request_controller_test.cc
 )
-collect_sources(REQUEST_CONTROLLER_SOURCES "${REQUEST_CONTROLLER_PATHS}" "${REQUEST_CONTROLLER_EXCLUDE}")
 
 #=============== RESUMPTION =====================
 set(RESUMPTION_PATHS
