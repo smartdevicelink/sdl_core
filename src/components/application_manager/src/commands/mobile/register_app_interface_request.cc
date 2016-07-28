@@ -36,7 +36,6 @@
 #include <unistd.h>
 #include <algorithm>
 #include <map>
-#include <stdexcept>
 #include <string.h>
 
 #include "application_manager/application_manager_impl.h"
@@ -87,11 +86,13 @@ std::string AppHMITypeToString(mobile_apis::AppHMIType::eType type) {
     {mobile_apis::AppHMIType::TESTING, "TESTING"},
     {mobile_apis::AppHMIType::SYSTEM, "SYSTEM"}
   };
-  try {
-    return appHMITypeMap.at(type);
-  }
-  catch (const std::out_of_range &ex) {
+
+  std::map<mobile_apis::AppHMIType::eType, std::string>::const_iterator iter =
+      appHMITypeMap.find(type);
+  if (appHMITypeMap.end() == iter) {
     return "";
+  } else {
+    return iter->second;
   }
 }
 
@@ -116,7 +117,8 @@ struct CheckMissedTypes {
       : policy_app_types_(policy_app_types), log_(log) {}
 
   bool operator()(const smart_objects::SmartArray::value_type &value) {
-    std::string app_type_str = AppHMITypeToString(static_cast<mobile_apis::AppHMIType::eType>(value.asInt()));
+    std::string app_type_str = AppHMITypeToString(
+        static_cast<mobile_apis::AppHMIType::eType>(value.asInt()));
     if (!app_type_str.empty()) {
       policy::StringArray::const_iterator it = policy_app_types_.begin();
       policy::StringArray::const_iterator it_end = policy_app_types_.end();
