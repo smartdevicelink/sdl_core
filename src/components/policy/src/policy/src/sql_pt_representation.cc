@@ -372,7 +372,9 @@ InitResult SQLPTRepresentation::Init() {
                                         << check_first_run.GetBoolean(0));
               if (check_first_run.GetBoolean(0)) {
                 dbms::SQLQuery set_not_first_run(db());
-                set_not_first_run.Exec(sql_pt::kSetNotFirstRun);
+                if (!set_not_first_run.Exec(sql_pt::kSetNotFirstRun)) {
+                  LOG4CXX_WARN(logger_, "Failed update is_first_run");
+                }
                 return InitResult::SUCCESS;
               }
             } else {
