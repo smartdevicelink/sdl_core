@@ -2468,9 +2468,10 @@ void ApplicationManagerImpl::Handle(const impl::AudioData message) {
   LOG4CXX_INFO_EXT(logger_, "Send data");
   CommandSharedPtr command(MobileCommandFactory::CreateCommand(
       on_audio_pass, commands::Command::ORIGIN_SDL));
-  command->Init();
-  command->Run();
-  command->CleanUp();
+  if (command->Init()) {
+    command->Run();
+    command->CleanUp();
+  }
 }
 
 mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
