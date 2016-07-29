@@ -175,11 +175,9 @@ void AlertManeuverRequest::on_event(const event_engine::Event& event) {
   if (pending_requests_.IsFinal(event_id)) {
 
     bool result = ((mobile_apis::Result::SUCCESS == tts_speak_result_code_ ||
-        mobile_apis::Result::UNSUPPORTED_RESOURCE == 
-          tts_speak_result_code_ ||
+        mobile_apis::Result::UNSUPPORTED_RESOURCE == tts_speak_result_code_ ||
         mobile_apis::Result::INVALID_ENUM == tts_speak_result_code_) &&
-        mobile_apis::Result::SUCCESS == 
-          navi_alert_maneuver_result_code_) ||
+        mobile_apis::Result::SUCCESS == navi_alert_maneuver_result_code_) ||
             (mobile_apis::Result::SUCCESS == tts_speak_result_code_ && 
             mobile_apis::Result::UNSUPPORTED_RESOURCE == 
                 navi_alert_maneuver_result_code_);
