@@ -283,7 +283,9 @@ Thread::~Thread() {
     finalized_ = true;
     stopped_ = true;
     join();
-    pthread_join(handle_, NULL);
+    if (thread_options_.is_joinable()) {
+      pthread_join(handle_, NULL);
+    }
   }
 }
 

@@ -36,11 +36,24 @@
 #include "utils/threads/thread.h"
 
 namespace threads {
-
+/**
+ * @brief The ThreadCounter class is helpful for debugging purpose.
+ * Helps to find and resolve multi threading issues.
+ */
 class ThreadCounter {
  public:
+  /**
+ * @brief Increment method increments thread counter
+ */
   static void Increment();
+  /**
+   * @brief Decrement method decrements thread counter
+   */
   static void Decrement();
+  /**
+   * @brief GetValue method gets thread counter
+   * @return thread counter
+   */
   static size_t GetValue();
 
  private:

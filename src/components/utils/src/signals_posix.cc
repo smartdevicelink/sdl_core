@@ -56,6 +56,7 @@ void SigHandler(int sig) {
       break;
     default:
       SDL_INFO("Unexpected signal has been caught");
+      exit(EXIT_FAILURE);
       break;
   }
 }
