@@ -128,6 +128,12 @@ if(NOT BUILD_BACKTRACE_SUPPORT)
   )
 endif()
 
+if(NOT THREAD_COUNTING)
+  list(APPEND EXCLUDE_PATHS
+    ${CMAKE_CURRENT_SOURCE_DIR}/threads/thread_counter.cc
+  )
+endif()
+
 if(NOT BUILD_BT_SUPPORT)
   list(APPEND EXCLUDE_PATHS
     ${CMAKE_CURRENT_SOURCE_DIR}/include/utils/bluetooth

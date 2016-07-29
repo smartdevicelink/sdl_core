@@ -43,7 +43,9 @@
 #include "pthread.h"
 #include "utils/atomic.h"
 #include "utils/threads/thread_delegate.h"
+#ifdef THREAD_COUNTING
 #include "utils/threads/thread_counter.h"
+#endif  // THREAD_COUNTING
 #include "utils/logger.h"
 #include <chrono>
 #include <string.h>
@@ -152,7 +154,9 @@ Thread::Thread(const char* name, ThreadDelegate* delegate)
     , stopped_(false)
     , finalized_(false)
     , thread_created_(false) {
+#ifdef THREAD_COUNTING
   ThreadCounter::Increment();
+#endif  // THREAD_COUNTING
 }
 
 bool Thread::start() {
@@ -278,7 +282,9 @@ void Thread::join() {
 }
 
 Thread::~Thread() {
+#ifdef THREAD_COUNTING
   ThreadCounter::Decrement();
+#endif  // THREAD_COUNTING
   {
     sync_primitives::AutoLock auto_lock(state_lock_);
     finalized_ = true;
