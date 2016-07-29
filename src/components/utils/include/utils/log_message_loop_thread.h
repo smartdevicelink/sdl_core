@@ -87,7 +87,9 @@ class LogMessageLoopThread : public LogMessageLoopThreadTemplate {
   LogMessageLoopThread()
       : LogMessageLoopThreadTemplate("Logger", new LogMessageHandler()) {}
 
-  ~LogMessageLoopThread() {}
+  ~LogMessageLoopThread() {
+    logger::Logger::FlushLogger();
+  }
 
  private:
   DISALLOW_COPY_AND_ASSIGN(LogMessageLoopThread);
