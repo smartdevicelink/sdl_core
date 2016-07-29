@@ -766,7 +766,8 @@ void ConnectionHandlerImpl::CloseSession(ConnectionHandle connection_handle,
                                          uint8_t session_id,
                                          CloseSessionReason close_reason) {
   LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, "Closing session with id: " << session_id);
+  LOG4CXX_DEBUG(logger_,
+                "Closing session with id: " << static_cast<int>(session_id));
 
   // In case of malformed message the connection should be broke up without
   // any other notification to mobile.

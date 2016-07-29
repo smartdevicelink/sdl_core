@@ -374,7 +374,6 @@ struct UsageAndErrorCounts : CompositeType {
 
 struct DeviceParams : CompositeType {
  public:
- public:
   DeviceParams();
   ~DeviceParams();
   explicit DeviceParams(const Json::Value* value__);
