@@ -278,14 +278,14 @@ void Thread::join() {
 }
 
 Thread::~Thread() {
-  if (!finalized_) {
-    ThreadCounter::Decrement();
+  ThreadCounter::Decrement();
+  {
+    sync_primitives::AutoLock auto_lock(state_lock_);
     finalized_ = true;
-    stopped_ = true;
-    join();
-    if (thread_options_.is_joinable()) {
-      pthread_join(handle_, NULL);
-    }
+  }
+  join();
+  if (thread_options_.is_joinable()) {
+    pthread_join(handle_, NULL);
   }
 }
 
