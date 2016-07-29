@@ -50,7 +50,9 @@ void SigHandler(int sig) {
       SDL_INFO("SIGTERM signal has been caught");
       break;
     case SIGSEGV:
+      SDL_FLUSH_LOGGER();
       SDL_INFO("SIGSEGV signal has been caught");
+      abort();
       break;
     default:
       SDL_INFO("Unexpected signal has been caught");
