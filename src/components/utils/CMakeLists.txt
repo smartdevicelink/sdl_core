@@ -48,8 +48,6 @@ set(DBMS_PATHS
 )
 
 set(EXCLUDE_PATHS
-  thread_manager.cc
-  pulse_thread_delegate.cc
   qdb_wrapper
   ${DBMS_PATHS}
 )
