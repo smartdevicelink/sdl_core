@@ -51,6 +51,8 @@
 #include "mobile/get_vehicle_data_response.h"
 #include "mobile/unregister_app_interface_response.h"
 #include "mobile/unsubscribe_button_response.h"
+#include "mobile/unsubscribe_way_points_response.h"
+#include "mobile/update_turn_list_response.h"
 
 namespace test {
 namespace components {
@@ -85,6 +87,8 @@ typedef Types<commands::ListFilesResponse,
               commands::GetDTCsResponse,
               commands::GetVehicleDataResponse,
               commands::UnregisterAppInterfaceResponse,
+              commands::UnsubscribeWayPointsResponse,
+              commands::UpdateTurnListResponse,
               commands::UnsubscribeButtonResponse> ResponseCommandsList;
 TYPED_TEST_CASE(MobileResponseCommandsTest, ResponseCommandsList);
 

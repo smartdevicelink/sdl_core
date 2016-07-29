@@ -78,7 +78,7 @@ enum CommandsTestMocks { kNotNice = 0, kIsNice };
 template <const CommandsTestMocks kIsNice = CommandsTestMocks::kNotNice>
 class CommandsTest : public ::testing::Test {
  public:
-  enum { kMocksIsNice = kIsNice };
+  enum { kMocksAreNice = kIsNice };
 
   typedef NiceMock<MockApplicationManagerSettings> MockAppManagerSettings;
   typedef typename TypeIf<kIsNice,
@@ -121,7 +121,7 @@ class CommandsTest : public ::testing::Test {
     return ::utils::MakeShared<Command>(msg, app_mngr_);
   }
 
-  enum { kDefaultTimeout_ = 100u };
+  enum { kDefaultTimeout_ = 100 };
 
   MockAppManager app_mngr_;
   MockAppManagerSettings app_mngr_settings_;
