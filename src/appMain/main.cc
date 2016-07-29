@@ -52,7 +52,7 @@ int main(int argc, char* argv[]) {
   } else {
     profile_instance.config_file_name("smartDeviceLink.ini");
   }
-#ifdef THREAD_COUNTING
+#ifdef THREAD_COUNT
   threads::ThreadCounter thread_counter;
 #endif
   threads::Thread::SetNameForId(threads::Thread::CurrentId(), "MainThread");

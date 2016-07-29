@@ -128,7 +128,7 @@ if(NOT BUILD_BACKTRACE_SUPPORT)
   )
 endif()
 
-if(NOT THREAD_COUNTING)
+if(NOT THREAD_COUNT)
   list(APPEND EXCLUDE_PATHS
     ${CMAKE_CURRENT_SOURCE_DIR}/threads/thread_counter.cc
   )
