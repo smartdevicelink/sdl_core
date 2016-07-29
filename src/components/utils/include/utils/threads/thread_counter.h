@@ -42,6 +42,8 @@ namespace threads {
  */
 class ThreadCounter {
  public:
+  ThreadCounter();
+  ~ThreadCounter();
   /**
  * @brief Increment method increments thread counter
  */

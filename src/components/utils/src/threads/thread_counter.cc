@@ -37,6 +37,14 @@ namespace threads {
 
 SDL_CREATE_LOGGER("Utils")
 
+ThreadCounter::ThreadCounter() {
+  DCHECK(ThreadCounter::GetValue() == 0);
+}
+
+ThreadCounter::~ThreadCounter() {
+  DCHECK(ThreadCounter::GetValue() == 0);
+}
+
 void ThreadCounter::Increment() {
   sync_primitives::AutoLock auto_lock(counter_lock_);
   thread_counter_++;

@@ -35,6 +35,7 @@
 #include "config_profile/profile.h"
 #include "life_cycle.h"
 #include "utils/appenders_loader.h"
+#include "utils/threads/thread_counter.h"
 
 /**
  * \brief Entry point of the program.
@@ -51,6 +52,8 @@ int main(int argc, char* argv[]) {
   } else {
     profile_instance.config_file_name("smartDeviceLink.ini");
   }
+
+  threads::ThreadCounter thread_counter;
 
   threads::Thread::SetNameForId(threads::Thread::CurrentId(), "MainThread");
 
