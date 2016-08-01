@@ -108,6 +108,16 @@ void logger::Logger::Impl::DeinitLogger() {
   set_log_level(LogLevel::LL_TRACE);
   delete message_loop_thread_;
   message_loop_thread_ = NULL;
+  log4cxx::LoggerPtr rootLogger = log4cxx::Logger::getRootLogger();
+  log4cxx::spi::LoggerRepositoryPtr repository =
+      rootLogger->getLoggerRepository();
+  log4cxx::LoggerList loggers = repository->getCurrentLoggers();
+  for (log4cxx::LoggerList::iterator i = loggers.begin(); i != loggers.end();
+       ++i) {
+    log4cxx::LoggerPtr logger = *i;
+    logger->removeAllAppenders();
+  }
+  rootLogger->removeAllAppenders();
 }
 
 void logger::Logger::Impl::FlushLogger() {

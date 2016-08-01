@@ -48,8 +48,6 @@ set(DBMS_PATHS
 )
 
 set(EXCLUDE_PATHS
-  thread_manager.cc
-  pulse_thread_delegate.cc
   qdb_wrapper
   ${DBMS_PATHS}
 )
@@ -127,6 +125,12 @@ endif()
 if(NOT BUILD_BACKTRACE_SUPPORT)
   list(APPEND EXCLUDE_PATHS
     back_trace.cc
+  )
+endif()
+
+if(NOT THREAD_COUNT)
+  list(APPEND EXCLUDE_PATHS
+    ${CMAKE_CURRENT_SOURCE_DIR}/threads/thread_counter.cc
   )
 endif()
 

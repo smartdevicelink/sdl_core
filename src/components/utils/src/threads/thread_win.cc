@@ -121,7 +121,11 @@ Thread::Thread(const char* name, ThreadDelegate* delegate)
     , isThreadRunning_(false)
     , stopped_(false)
     , finalized_(false)
-    , thread_created_(false) {}
+    , thread_created_(false) {
+#ifdef THREAD_COUNT
+  ThreadCounter::Increment();
+#endif  // THREAD_COUNT
+}
 
 bool Thread::start() {
   return start(thread_options_);
@@ -219,6 +223,9 @@ void Thread::join() {
 }
 
 Thread::~Thread() {
+#ifdef THREAD_COUNT
+  ThreadCounter::Decrement();
+#endif  // THREAD_COUNT
   finalized_ = true;
   stopped_ = true;
   join();
