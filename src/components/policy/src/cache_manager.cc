@@ -481,7 +481,9 @@ int CacheManager::IgnitionCyclesBeforeExchange() {
   const int last_exch = static_cast<int>(
       *pt_->policy_table.module_meta->ignition_cycles_since_last_exchange);
   current = std::max(last_exch, 0);
-  LOG4CXX_DEBUG(logger_, "IgnitionCyclesBeforeExchange current:" << current);
+  LOG4CXX_DEBUG(
+      logger_,
+      "IgnitionCyclesBeforeExchange current:" << static_cast<int>(current));
 
   return std::max(limit - current, 0);
 }
@@ -755,8 +757,7 @@ void CacheManager::CheckSnapshotInitialization() {
   rpc::Optional<policy_table::UsageAndErrorCounts>& usage_and_error_counts =
       snapshot_->policy_table.usage_and_error_counts;
 
-  if (usage_and_error_counts->is_initialized() &&
-      usage_and_error_counts->app_level->is_initialized()) {
+  if (usage_and_error_counts->app_level->is_initialized()) {
     policy_table::AppLevels::iterator it =
         usage_and_error_counts->app_level->begin();
     policy_table::AppLevels::const_iterator it_end =
@@ -822,8 +823,7 @@ void CacheManager::CheckSnapshotInitialization() {
       }
     }
   } else {
-    LOG4CXX_WARN(logger_,
-                 "usage_and_error_counts or app_level is not initialized");
+    LOG4CXX_WARN(logger_, "app_level is not initialized");
   }
 }
 
@@ -1125,6 +1125,20 @@ void CacheManager::Set(const std::string& app_id,
                        usage_statistics::AppInfoId type,
                        const std::string& value) {
   CACHE_MANAGER_CHECK_VOID();
+  sync_primitives::AutoLock lock(cache_lock_);
+  switch (type) {
+    case usage_statistics::LANGUAGE_GUI:
+      (*pt_->policy_table.usage_and_error_counts->app_level)[app_id]
+          .app_registration_language_gui = value;
+      break;
+    case usage_statistics::LANGUAGE_VUI:
+      (*pt_->policy_table.usage_and_error_counts->app_level)[app_id]
+          .app_registration_language_vui = value;
+      break;
+    default:
+      LOG4CXX_WARN(logger_, "Type app info is unknown");
+      return;
+  }
   Backup();
 }
 
@@ -1132,6 +1146,29 @@ void CacheManager::Add(const std::string& app_id,
                        usage_statistics::AppStopwatchId type,
                        int seconds) {
   CACHE_MANAGER_CHECK_VOID();
+  sync_primitives::AutoLock lock(cache_lock_);
+  const int minutes = ConvertSecondsToMinute(seconds);
+  switch (type) {
+    case usage_statistics::SECONDS_HMI_FULL:
+      (*pt_->policy_table.usage_and_error_counts->app_level)[app_id]
+          .minutes_in_hmi_full += minutes;
+      break;
+    case usage_statistics::SECONDS_HMI_LIMITED:
+      (*pt_->policy_table.usage_and_error_counts->app_level)[app_id]
+          .minutes_in_hmi_limited += minutes;
+      break;
+    case usage_statistics::SECONDS_HMI_BACKGROUND:
+      (*pt_->policy_table.usage_and_error_counts->app_level)[app_id]
+          .minutes_in_hmi_background += minutes;
+      break;
+    case usage_statistics::SECONDS_HMI_NONE:
+      (*pt_->policy_table.usage_and_error_counts->app_level)[app_id]
+          .minutes_in_hmi_none += minutes;
+      break;
+    default:
+      LOG4CXX_WARN(logger_, "Type app stopwatch is unknown");
+      return;
+  }
   Backup();
 }
 
