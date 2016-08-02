@@ -47,6 +47,23 @@ namespace timer {
 typedef uint32_t Milliseconds;
 
 /**
+ * @brief Enumeration listing of possible timer types.
+ * Single shot timer signals only once and then stops counting.
+ * Periodic timer signals every time specific value is reached
+ * and then restarts.
+ */
+enum TimerType {
+  /**
+   * @brief Periodic calls to task
+   */
+  kPeriodic = 0,
+  /**
+   * @brief Single call to task
+   */
+  kSingleShot = 1
+};
+
+/**
  * @brief Timer calls custom callback function after
  * specified timeout has been elapsed.
  * Thread-safe class
@@ -70,9 +87,9 @@ class Timer {
   /**
    * @brief Starts timer with specified timeout
    * @param timeout Timer timeout
-   * @param single_shot Single shot flag for timer
+   * @param enum timer_type Timer type enum value.
    */
-  void Start(const Milliseconds timeout, const bool single_shot);
+  void Start(const Milliseconds timeout, const TimerType timer_type);
 
   /**
    * @brief Stops timer if it's running

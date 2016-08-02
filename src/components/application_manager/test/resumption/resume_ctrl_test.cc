@@ -30,10 +30,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/resumption/resume_ctrl.h"
 #include <string>
 #include <algorithm>
+
 #include "gtest/gtest.h"
+#include "application_manager/resumption/resume_ctrl_impl.h"
 #include "application_manager/usage_statistics.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_resumption_data.h"
@@ -85,7 +86,7 @@ class ResumeCtrlTest : public ::testing::Test {
         ::utils::MakeShared<NiceMock<resumption_test::MockResumptionData>>(
             app_mngr_);
     app_mock = utils::MakeShared<NiceMock<MockApplication>>();
-    res_ctrl = utils::MakeShared<ResumeCtrl>(app_mngr_);
+    res_ctrl = utils::MakeShared<ResumeCtrlImpl>(app_mngr_);
     res_ctrl->set_resumption_storage(mock_storage);
 
     ON_CALL(app_mngr_, state_controller())

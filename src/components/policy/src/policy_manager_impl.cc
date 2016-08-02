@@ -311,7 +311,7 @@ void PolicyManagerImpl::StartPTExchange() {
     if (update_status_manager_.IsUpdateRequired()) {
       if (RequestPTUpdate() && !timer_retry_sequence_.is_running()) {
         // Start retry sequency
-        timer_retry_sequence_.Start(NextRetryTimeout(), false);
+        timer_retry_sequence_.Start(NextRetryTimeout(), timer::kPeriodic);
       }
     }
   }
@@ -1008,7 +1008,7 @@ void PolicyManagerImpl::RetrySequence() {
     return;
   }
 
-  timer_retry_sequence_.Start(timeout, false);
+  timer_retry_sequence_.Start(timeout, timer::kPeriodic);
 }
 
 }  //  namespace policy
