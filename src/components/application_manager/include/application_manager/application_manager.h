@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -494,7 +494,7 @@ class ApplicationManager {
 
   virtual resumption::ResumeCtrl& resume_controller() = 0;
 
-   virtual app_launch::AppLaunchCtrl& app_launch_ctrl() = 0;
+  virtual app_launch::AppLaunchCtrl& app_launch_ctrl() = 0;
   /*
    * @brief Converts connection string transport type representation
    * to HMI Common_TransportType

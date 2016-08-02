@@ -67,8 +67,8 @@ struct AppLauncherFinder {
 void AppsLauncher::StopLaunching(ApplicationDataPtr app_data) {
   sync_primitives::AutoLock lock(launchers_lock_);
   const AppLaunchers::iterator it = std::find_if(works_launchers_.begin(),
-                                           works_launchers_.end(),
-                                           AppLauncherFinder(app_data));
+                                                 works_launchers_.end(),
+                                                 AppLauncherFinder(app_data));
   if (it != works_launchers_.end()) {
     LauncherPtr launcher = *it;
     launcher->Clear();
@@ -109,7 +109,7 @@ void AppsLauncher::Launcher::PosponedLaunch(
   app_data_ = app_data;
   retry_index_ = 0;
   retry_timer_.Start(app_launch_retry_wait_time_, timer::kPeriodic);
-LOG4CXX_DEBUG(logger_,
+  LOG4CXX_DEBUG(logger_,
                 "Applicaiton " << app_data->mobile_app_id_ << " on device "
                                << app_data->device_mac_
                                << " will be launched in "

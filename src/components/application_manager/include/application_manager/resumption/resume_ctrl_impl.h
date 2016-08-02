@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -445,7 +445,8 @@ class ResumeCtrlImpl : public ResumeCtrl,
 
   /**
    * @brief Add application to queue to restore HMI level
-   * @param time_stamp contains time when application was stored to resumption data
+   * @param time_stamp contains time when application was stored to resumption
+   * data
    * @param app_id contains id of application
    */
   void AddToResumptionTimerQueue(const uint32_t app_id);

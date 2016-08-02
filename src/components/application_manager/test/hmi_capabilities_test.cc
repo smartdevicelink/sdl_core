@@ -98,7 +98,7 @@ class HMICapabilitiesTest : public ::testing::Test {
   resumption::LastState last_state_;
   MockApplicationManagerSettings mock_application_manager_settings_;
   utils::SharedPtr<HMICapabilitiesForTesting> hmi_capabilities_test;
-  std::string file_name_;
+  const std::string file_name_;
 };
 
 const char* const cstring_values_[] = {

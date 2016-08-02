@@ -359,8 +359,8 @@ void TransportManagerImpl::RunAppOnDevice(const DeviceHandle device_handle,
   transport_adapter::TransportAdapter* ta = it->second;
 
   if (!ta) {
-    LOG4CXX_ERROR(logger_, "Transport adapter for device: " << device_id
-                                                            << " is NULL");
+    LOG4CXX_ERROR(logger_,
+                  "Transport adapter for device: " << device_id << " is NULL");
     return;
   }
 

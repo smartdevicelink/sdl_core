@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -86,7 +86,7 @@ class Device {
     UNUSED(bundle_id);
   }
 
-  virtual void Stop() { }
+  virtual void Stop() {}
 
   inline const DeviceUID& unique_device_id() const {
     return unique_device_id_;

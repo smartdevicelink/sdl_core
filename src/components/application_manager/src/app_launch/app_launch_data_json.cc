@@ -104,10 +104,9 @@ Json::Value& AppLaunchDataJson::GetApplicationListAndIndex(
           apps_list[idx][strings::bundle_id].asString();
       const std::string appID = apps_list[idx][strings::app_id].asString();
 
-      if (deviceID == app_data.device_mac_ &&
-          bundleID == app_data.bundle_id_ &&
+      if (deviceID == app_data.device_mac_ && bundleID == app_data.bundle_id_ &&
           appID == app_data.mobile_app_id_) {
-            founded_index = idx;
+        founded_index = idx;
       }
     }
   }

@@ -555,7 +555,8 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
     add_info = "ttsChunks is sent but is not supported";
   }
 
-  app_launch::AppLaunchCtrl& app_launch_ctrl = application_manager_.app_launch_ctrl();
+  app_launch::AppLaunchCtrl& app_launch_ctrl =
+      application_manager_.app_launch_ctrl();
   app_launch_ctrl.OnAppRegistered(*application);
   SendOnAppRegisteredNotificationToHMI(
       *(application.get()), resumption, need_restore_vr);

@@ -23,17 +23,17 @@ class AppLaunchSettings;
 class DeviceAppsLauncher {
  public:
   DeviceAppsLauncher(application_manager::ApplicationManager& app_mngr,
-                      app_launch::AppsLauncher& apps_launcher,
-                      const AppLaunchSettings& settings);
+                     app_launch::AppsLauncher& apps_launcher,
+                     const AppLaunchSettings& settings);
 
   bool LaunchAppsOnDevice(
       const std::string& device_mac,
       const std::vector<ApplicationDataPtr>& applications_to_launch);
   bool StopLaunchingAppsOnDevice(const std::string& device_mac);
 
-  const AppLaunchSettings &settings() const;
+  const AppLaunchSettings& settings() const;
 
-private:
+ private:
   application_manager::ApplicationManager& app_mngr_;
   const AppLaunchSettings& settings_;
   std::auto_ptr<DeviceAppsLauncherImpl> impl_;

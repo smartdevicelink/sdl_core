@@ -431,8 +431,7 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
 
   LOG4CXX_DEBUG(logger_, "Restarting application list update timer");
   GetPolicyHandler().OnAppsSearchStarted();
-  uint32_t timeout =
-      get_settings().application_list_update_timeout();
+  uint32_t timeout = get_settings().application_list_update_timeout();
   application_list_update_timer_.Start(timeout, timer::kSingleShot);
 
   if (!is_all_apps_allowed_) {
@@ -952,8 +951,7 @@ void ApplicationManagerImpl::OnDeviceListUpdated(
 void ApplicationManagerImpl::OnFindNewApplicationsRequest() {
   connection_handler().ConnectToAllDevices();
   LOG4CXX_DEBUG(logger_, "Starting application list update timer");
-  uint32_t timeout =
-      get_settings().application_list_update_timeout();
+  uint32_t timeout = get_settings().application_list_update_timeout();
   application_list_update_timer_.Start(timeout, timer::kSingleShot);
   GetPolicyHandler().OnAppsSearchStarted();
 }
@@ -1759,10 +1757,8 @@ bool ApplicationManagerImpl::Init(resumption::LastState& last_state,
     app_launch_dto_.reset(
         new app_launch::AppLaunchDataJson(settings_, last_state));
   }
-  app_launch_ctrl_.reset(
-      new app_launch::AppLaunchCtrlImpl(*app_launch_dto_.get(),
-                                        *this,
-                                        settings_));
+  app_launch_ctrl_.reset(new app_launch::AppLaunchCtrlImpl(
+      *app_launch_dto_.get(), *this, settings_));
 
   return true;
 }
@@ -2995,10 +2991,9 @@ void ApplicationManagerImpl::EndNaviServices(uint32_t app_id) {
     navi_app_to_stop_.push_back(app_id);
 
     TimerSPtr close_timer(utils::MakeShared<timer::Timer>(
-                             "CloseNaviAppTimer",
-                             new TimerTaskImpl<ApplicationManagerImpl>(
-                                 this,
-                                 &ApplicationManagerImpl::CloseNaviApp)));
+        "CloseNaviAppTimer",
+        new TimerTaskImpl<ApplicationManagerImpl>(
+            this, &ApplicationManagerImpl::CloseNaviApp)));
     close_timer->Start(navi_close_app_timeout_, timer::kPeriodic);
 
     sync_primitives::AutoLock lock(timer_pool_lock_);
@@ -3037,11 +3032,9 @@ void ApplicationManagerImpl::OnHMILevelChanged(
       LOG4CXX_TRACE(logger_, "HMILevel from FULL or LIMITED");
       navi_app_to_end_stream_.push_back(app_id);
       TimerSPtr end_stream_timer(utils::MakeShared<timer::Timer>(
-                                 "AppShouldFinishStreaming",
-                                 new TimerTaskImpl<ApplicationManagerImpl>(
-                                     this,
-                                     &ApplicationManagerImpl::EndNaviStreaming)
-                                 ));
+          "AppShouldFinishStreaming",
+          new TimerTaskImpl<ApplicationManagerImpl>(
+              this, &ApplicationManagerImpl::EndNaviStreaming)));
       end_stream_timer->Start(navi_end_stream_timeout_, timer::kPeriodic);
 
       sync_primitives::AutoLock lock(timer_pool_lock_);
@@ -3486,11 +3479,11 @@ ProtocolVersion ApplicationManagerImpl::SupportedSDLVersion() const {
 }
 
 event_engine::EventDispatcher& ApplicationManagerImpl::event_dispatcher() {
-    return event_dispatcher_;
+  return event_dispatcher_;
 }
 
-app_launch::AppLaunchCtrl &ApplicationManagerImpl::app_launch_ctrl() {
-    return * app_launch_ctrl_;
+app_launch::AppLaunchCtrl& ApplicationManagerImpl::app_launch_ctrl() {
+  return *app_launch_ctrl_;
 }
 
 const std::string ApplicationManagerImpl::DirectoryTypeToString(

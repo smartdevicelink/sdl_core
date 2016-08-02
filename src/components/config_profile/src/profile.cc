@@ -380,8 +380,7 @@ Profile::Profile()
     , remove_bundle_id_attempts_(kDefaultRemoveBundleIDattempts)
     , max_number_of_ios_device_(kDefaultMaxNumberOfiOSDevice)
     , wait_time_between_apps_(kDefaultWaitTimeBetweenApps)
-    , enable_app_launch_ios_(kDefaultEnableAppLaunchIOS)
-{
+    , enable_app_launch_ios_(kDefaultEnableAppLaunchIOS) {
   // SDL version
   ReadStringValue(
       &sdl_version_, kDefaultSDLVersion, kMainSection, kSDLVersionKey);
@@ -1735,47 +1734,64 @@ void Profile::UpdateValues() {
                     kResumptionSection);
 
   // Read parameters from App Launch section
-  ReadUIntValue(&app_launch_wait_time_, kDefaultAppLaunchWaitTime,
-                kAppLaunchSection, kAppLaunchWaitTimeKey);
+  ReadUIntValue(&app_launch_wait_time_,
+                kDefaultAppLaunchWaitTime,
+                kAppLaunchSection,
+                kAppLaunchWaitTimeKey);
 
-  LOG_UPDATED_VALUE(app_launch_wait_time_, kAppLaunchWaitTimeKey,
+  LOG_UPDATED_VALUE(
+      app_launch_wait_time_, kAppLaunchWaitTimeKey, kAppLaunchSection);
+
+  ReadUIntValue(&app_launch_max_retry_attempt_,
+                kDefaultAppLaunchMaxRetryAttempt,
+                kAppLaunchSection,
+                kAppLaunchMaxRetryAttemptKey);
+
+  LOG_UPDATED_VALUE(app_launch_max_retry_attempt_,
+                    kAppLaunchMaxRetryAttemptKey,
                     kAppLaunchSection);
 
-  ReadUIntValue(&app_launch_max_retry_attempt_, kDefaultAppLaunchMaxRetryAttempt,
-               kAppLaunchSection, kAppLaunchMaxRetryAttemptKey);
+  ReadUIntValue(&app_launch_retry_wait_time_,
+                kDefaultAppLaunchRetryWaitTime,
+                kAppLaunchSection,
+                kAppLaunchRetryWaitTimeKey);
 
-  LOG_UPDATED_VALUE(app_launch_max_retry_attempt_, kAppLaunchMaxRetryAttemptKey,
+  LOG_UPDATED_VALUE(app_launch_retry_wait_time_,
+                    kAppLaunchRetryWaitTimeKey,
                     kAppLaunchSection);
 
-  ReadUIntValue(&app_launch_retry_wait_time_, kDefaultAppLaunchRetryWaitTime,
-                kAppLaunchSection, kAppLaunchRetryWaitTimeKey);
+  ReadUIntValue(&remove_bundle_id_attempts_,
+                kDefaultRemoveBundleIDattempts,
+                kAppLaunchSection,
+                kRemoveBundleIDattemptsKey);
 
-  LOG_UPDATED_VALUE(app_launch_retry_wait_time_, kAppLaunchRetryWaitTimeKey,
+  LOG_UPDATED_VALUE(remove_bundle_id_attempts_,
+                    kRemoveBundleIDattemptsKey,
                     kAppLaunchSection);
 
-  ReadUIntValue(&remove_bundle_id_attempts_, kDefaultRemoveBundleIDattempts,
-               kAppLaunchSection, kRemoveBundleIDattemptsKey);
+  ReadUIntValue(&max_number_of_ios_device_,
+                kDefaultMaxNumberOfiOSDevice,
+                kAppLaunchSection,
+                kMaxNumberOfiOSDeviceKey);
 
-  LOG_UPDATED_VALUE(remove_bundle_id_attempts_, kRemoveBundleIDattemptsKey,
-                    kAppLaunchSection);
+  LOG_UPDATED_VALUE(
+      max_number_of_ios_device_, kMaxNumberOfiOSDeviceKey, kAppLaunchSection);
 
-  ReadUIntValue(&max_number_of_ios_device_, kDefaultMaxNumberOfiOSDevice,
-               kAppLaunchSection, kMaxNumberOfiOSDeviceKey);
+  ReadUIntValue(&wait_time_between_apps_,
+                kDefaultWaitTimeBetweenApps,
+                kAppLaunchSection,
+                kWaitTimeBetweenAppsKey);
 
-  LOG_UPDATED_VALUE(max_number_of_ios_device_, kMaxNumberOfiOSDeviceKey,
-                    kAppLaunchSection);
+  LOG_UPDATED_VALUE(
+      wait_time_between_apps_, kWaitTimeBetweenAppsKey, kAppLaunchSection);
 
-  ReadUIntValue(&wait_time_between_apps_, kDefaultWaitTimeBetweenApps,
-                kAppLaunchSection, kWaitTimeBetweenAppsKey);
+  ReadBoolValue(&enable_app_launch_ios_,
+                kDefaultEnableAppLaunchIOS,
+                kAppLaunchSection,
+                kEnableAppLaunchIOSKey);
 
-  LOG_UPDATED_VALUE(wait_time_between_apps_, kWaitTimeBetweenAppsKey,
-                    kAppLaunchSection);
-
-  ReadBoolValue(&enable_app_launch_ios_, kDefaultEnableAppLaunchIOS,
-                kAppLaunchSection, kEnableAppLaunchIOSKey);
-
-  LOG_UPDATED_BOOL_VALUE(enable_app_launch_ios_, kEnableAppLaunchIOSKey,
-                         kAppLaunchSection);
+  LOG_UPDATED_BOOL_VALUE(
+      enable_app_launch_ios_, kEnableAppLaunchIOSKey, kAppLaunchSection);
 }
 
 bool Profile::ReadValue(bool* value,
