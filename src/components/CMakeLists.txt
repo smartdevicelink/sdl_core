@@ -85,6 +85,7 @@ add_subdirectory(./functional_module)
 if (REMOTE_CONTROL)
   # --- CAN Module
   add_subdirectory(./can_cooperation)
+  add_subdirectory(./vr_cooperation)
 endif ()
 
 if (TIME_TESTER)
