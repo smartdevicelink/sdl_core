@@ -74,7 +74,7 @@ mobile_apis::AppHMIType::eType StringToAppHMIType(const std::string &str) {
 }
 
 std::string AppHMITypeToString(mobile_apis::AppHMIType::eType type) {
-  const std::map<mobile_apis::AppHMIType::eType, std::string> appHMITypeMap = {
+  const std::map<mobile_apis::AppHMIType::eType, std::string> app_hmi_type_map = {
     {mobile_apis::AppHMIType::DEFAULT, "DEFAULT"},
     {mobile_apis::AppHMIType::COMMUNICATION, "COMMUNICATION"},
     {mobile_apis::AppHMIType::MEDIA, "MEDIA"},
@@ -88,9 +88,9 @@ std::string AppHMITypeToString(mobile_apis::AppHMIType::eType type) {
   };
 
   std::map<mobile_apis::AppHMIType::eType, std::string>::const_iterator iter =
-      appHMITypeMap.find(type);
-  
-  return appHMITypeMap.end() == iter ? iter->second : std::string("");
+      app_hmi_type_map.find(type);
+
+  return app_hmi_type_map.end() == iter ? iter->second : std::string("");
 }
 
 struct AppHMITypeInserter {
