@@ -114,10 +114,10 @@ ApplicationManagerImpl::ApplicationManagerImpl(
     , messages_from_hmi_("AM FromHMI", this)
     , messages_to_hmi_("AM ToHMI", this)
     , audio_pass_thru_messages_("AudioPassThru", this)
-    , hmi_capabilities_(*this)
+    , hmi_capabilities_(new HMICapabilitiesImpl(*this))
     , unregister_reason_(
           mobile_api::AppInterfaceUnregisteredReason::INVALID_ENUM)
-    , resume_ctrl_(*this)
+    , resume_ctrl_(new resumption::ResumeCtrlImpl(*this))
     , navi_close_app_timeout_(am_settings.stop_streaming_timeout())
     , navi_end_stream_timeout_(am_settings.stop_streaming_timeout())
     , stopping_application_mng_lock_(true)
@@ -535,16 +535,18 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
 
   if (!application->hmi_app_id()) {
     const bool is_saved =
-        resume_ctrl_.IsApplicationSaved(policy_app_id, device_mac);
+        resume_controller().IsApplicationSaved(policy_app_id, device_mac);
     application->set_hmi_application_id(
-        is_saved ? resume_ctrl_.GetHMIApplicationID(policy_app_id, device_mac)
-                 : GenerateNewHMIAppID());
+        is_saved
+            ? resume_controller().GetHMIApplicationID(policy_app_id, device_mac)
+            : GenerateNewHMIAppID());
   }
 
   // Stops timer of saving data to resumption in order to
   // doesn't erase data from resumption storage.
   // Timer will be started after hmi level resumption.
-  resume_ctrl_.OnAppRegistrationStart(policy_app_id, device_mac);
+  resume_controller().OnAppRegistrationStart(policy_app_id, device_mac);
+
   // Add application to registered app list and set appropriate mark.
   // Lock has to be released before adding app to policy DB to avoid possible
   // deadlock with simultaneous PTU processing
@@ -1011,7 +1013,7 @@ uint32_t ApplicationManagerImpl::GenerateNewHMIAppID() {
   uint32_t hmi_app_id = get_rand_from_range(1);
   LOG4CXX_DEBUG(logger_, "GenerateNewHMIAppID value is: " << hmi_app_id);
 
-  while (resume_ctrl_.IsHMIApplicationIdExist(hmi_app_id)) {
+  while (resume_controller().IsHMIApplicationIdExist(hmi_app_id)) {
     LOG4CXX_DEBUG(logger_, "HMI appID " << hmi_app_id << " is exists.");
     hmi_app_id = get_rand_from_range(1);
     LOG4CXX_DEBUG(logger_, "Trying new value: " << hmi_app_id);
@@ -1698,11 +1700,11 @@ bool ApplicationManagerImpl::Init(resumption::LastState& last_state,
       !IsReadWriteAllowed(app_storage_folder, TYPE_STORAGE)) {
     return false;
   }
-  if (!resume_ctrl_.Init(last_state)) {
+  if (!resume_controller().Init(last_state)) {
     LOG4CXX_ERROR(logger_, "Problem with initialization of resume controller");
     return false;
   }
-  hmi_capabilities_.Init(&last_state);
+  hmi_capabilities_->Init(&last_state);
 
   if (!(file_system::IsWritingAllowed(app_storage_folder) &&
         file_system::IsReadingAllowed(app_storage_folder))) {
@@ -2124,11 +2126,11 @@ mobile_apis::MOBILE_API& ApplicationManagerImpl::mobile_so_factory() {
 }
 
 HMICapabilities& ApplicationManagerImpl::hmi_capabilities() {
-  return hmi_capabilities_;
+  return *hmi_capabilities_;
 }
 
 const HMICapabilities& ApplicationManagerImpl::hmi_capabilities() const {
-  return hmi_capabilities_;
+  return *hmi_capabilities_;
 }
 
 void ApplicationManagerImpl::PullLanguagesInfo(const SmartObject& app_data,
@@ -2259,8 +2261,8 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
         device_id, NULL, NULL, &device_mac, NULL);
 
     const uint32_t hmi_app_id =
-        resume_ctrl_.IsApplicationSaved(policy_app_id, device_mac)
-            ? resume_ctrl_.GetHMIApplicationID(policy_app_id, device_mac)
+        resume_controller().IsApplicationSaved(policy_app_id, device_mac)
+            ? resume_controller().GetHMIApplicationID(policy_app_id, device_mac)
             : GenerateNewHMIAppID();
 
     // AppId = 0 because this is query_app(provided by hmi for download, but not
@@ -2605,12 +2607,12 @@ void ApplicationManagerImpl::UnregisterApplication(
       return;
     }
     if (is_resuming) {
-      resume_ctrl_.SaveApplication(app_to_remove);
+      resume_controller().SaveApplication(app_to_remove);
     } else {
-      resume_ctrl_.RemoveApplicationFromSaved(app_to_remove);
+      resume_controller().RemoveApplicationFromSaved(app_to_remove);
     }
     applications_.erase(app_to_remove);
-    (hmi_capabilities_.get_hmi_language_handler())
+    (hmi_capabilities_->get_hmi_language_handler())
         .OnUnregisterApplication(app_id);
     AppV4DevicePredicate finder(handle);
     ApplicationSharedPtr app = FindApp(accessor, finder);

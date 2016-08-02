@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_MANAGER_IMPL_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_MANAGER_IMPL_H_
 
 #include <stdint.h>
 #include <vector>
@@ -39,6 +39,7 @@
 #include <set>
 #include <deque>
 #include <algorithm>
+#include <memory>
 
 #include "application_manager/hmi_command_factory.h"
 #include "application_manager/application_manager.h"
@@ -318,8 +319,8 @@ class ApplicationManagerImpl
 
   void OnApplicationRegistered(ApplicationSharedPtr app) OVERRIDE;
 
-  HMICapabilities& hmi_capabilities();
-  const HMICapabilities& hmi_capabilities() const;
+  HMICapabilities& hmi_capabilities() OVERRIDE;
+  const HMICapabilities& hmi_capabilities() const OVERRIDE;
 
   /**
    * @brief ProcessQueryApp executes logic related to QUERY_APP system request.
@@ -840,7 +841,7 @@ class ApplicationManagerImpl
   * @return Resume Controller
   */
   resumption::ResumeCtrl& resume_controller() OVERRIDE {
-    return resume_ctrl_;
+    return *resume_ctrl_.get();
   }
 
   /**
@@ -1412,7 +1413,7 @@ class ApplicationManagerImpl
   // Thread that pumps messages audio pass thru to mobile.
   impl::AudioPassThruQueue audio_pass_thru_messages_;
 
-  HMICapabilities hmi_capabilities_;
+  std::auto_ptr<HMICapabilities> hmi_capabilities_;
   // The reason of HU shutdown
   mobile_api::AppInterfaceUnregisteredReason::eType unregister_reason_;
 
@@ -1421,7 +1422,7 @@ class ApplicationManagerImpl
    * about persistent application data on disk, and save session ID for resuming
    * application in case INGITION_OFF or MASTER_RESSET
    */
-  resumption::ResumeCtrl resume_ctrl_;
+  std::auto_ptr<resumption::ResumeCtrl> resume_ctrl_;
 
   NaviServiceStatusMap navi_service_status_;
   std::deque<uint32_t> navi_app_to_stop_;
