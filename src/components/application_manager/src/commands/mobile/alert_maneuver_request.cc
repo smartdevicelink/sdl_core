@@ -174,17 +174,13 @@ void AlertManeuverRequest::on_event(const event_engine::Event& event) {
 
   if (pending_requests_.IsFinal(event_id)) {
 
-    bool result = ((hmi_apis::Common_Result::SUCCESS ==
-        static_cast<hmi_apis::Common_Result::eType>(tts_speak_result_code_) ||
-        hmi_apis::Common_Result::UNSUPPORTED_RESOURCE ==
-            static_cast<hmi_apis::Common_Result::eType>(tts_speak_result_code_) ||
-            (hmi_apis::Common_Result::INVALID_ENUM ==
-                static_cast<hmi_apis::Common_Result::eType>(tts_speak_result_code_))) &&
-                (hmi_apis::Common_Result::SUCCESS ==
-                    static_cast<hmi_apis::Common_Result::eType>(navi_alert_maneuver_result_code_))) ||
-        (hmi_apis::Common_Result::SUCCESS == static_cast<hmi_apis::Common_Result::eType>(
-            tts_speak_result_code_) && hmi_apis::Common_Result::UNSUPPORTED_RESOURCE ==
-                static_cast<hmi_apis::Common_Result::eType>(navi_alert_maneuver_result_code_));
+    bool result = ((mobile_apis::Result::SUCCESS == tts_speak_result_code_ ||
+        mobile_apis::Result::UNSUPPORTED_RESOURCE == tts_speak_result_code_ ||
+        mobile_apis::Result::INVALID_ENUM == tts_speak_result_code_) &&
+        mobile_apis::Result::SUCCESS == navi_alert_maneuver_result_code_) ||
+            (mobile_apis::Result::SUCCESS == tts_speak_result_code_ && 
+            mobile_apis::Result::UNSUPPORTED_RESOURCE == 
+                navi_alert_maneuver_result_code_);
 
     mobile_apis::Result::eType result_code =
         static_cast<mobile_apis::Result::eType>(std::max(tts_speak_result_code_,
@@ -192,8 +188,8 @@ void AlertManeuverRequest::on_event(const event_engine::Event& event) {
 
     const char* return_info = NULL;
 
-    if (result && hmi_apis::Common_Result::UNSUPPORTED_RESOURCE ==
-        static_cast<hmi_apis::Common_Result::eType>(tts_speak_result_code_)) {
+    if (result && mobile_apis::Result::UNSUPPORTED_RESOURCE == 
+        tts_speak_result_code_) {
       result_code = mobile_apis::Result::WARNINGS;
       return_info = "Unsupported phoneme type sent in a prompt";
     }

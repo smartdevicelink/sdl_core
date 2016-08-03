@@ -130,10 +130,11 @@ void SliderRequest::on_event(const event_engine::Event& event) {
   //event_id == hmi_apis::FunctionID::UI_Slider:
   LOG4CXX_INFO(logger_, "Received UI_Slider event");
 
-  const int response_code =
-      message[strings::params][hmi_response::code].asInt();
+  const mobile_apis::Result::eType response_code = 
+      static_cast<mobile_apis::Result::eType>(
+        message[strings::params][hmi_response::code].asInt());
   smart_objects::SmartObject response_msg_params = message[strings::msg_params];
-  if (response_code == hmi_apis::Common_Result::ABORTED &&
+  if (response_code == mobile_apis::Result::ABORTED &&
       message[strings::params][strings::data].keyExists(strings::slider_position)) {
     //Copy slider_position info to msg_params section
 	response_msg_params[strings::slider_position] =
