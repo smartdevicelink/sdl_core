@@ -35,6 +35,7 @@
 
 #include <unistd.h>
 #include <algorithm>
+#include <map>
 #include <string.h>
 
 #include "application_manager/application_manager_impl.h"
@@ -72,6 +73,26 @@ mobile_apis::AppHMIType::eType StringToAppHMIType(const std::string &str) {
   }
 }
 
+std::string AppHMITypeToString(mobile_apis::AppHMIType::eType type) {
+  const std::map<mobile_apis::AppHMIType::eType, std::string> app_hmi_type_map = {
+    {mobile_apis::AppHMIType::DEFAULT, "DEFAULT"},
+    {mobile_apis::AppHMIType::COMMUNICATION, "COMMUNICATION"},
+    {mobile_apis::AppHMIType::MEDIA, "MEDIA"},
+    {mobile_apis::AppHMIType::MESSAGING, "MESSAGING"},
+    {mobile_apis::AppHMIType::NAVIGATION, "NAVIGATION"},
+    {mobile_apis::AppHMIType::INFORMATION, "INFORMATION"},
+    {mobile_apis::AppHMIType::SOCIAL, "SOCIAL"},
+    {mobile_apis::AppHMIType::BACKGROUND_PROCESS, "BACKGROUND_PROCESS"},
+    {mobile_apis::AppHMIType::TESTING, "TESTING"},
+    {mobile_apis::AppHMIType::SYSTEM, "SYSTEM"}
+  };
+
+  std::map<mobile_apis::AppHMIType::eType, std::string>::const_iterator iter =
+      app_hmi_type_map.find(type);
+
+  return app_hmi_type_map.end() == iter ? iter->second : std::string("");
+}
+
 struct AppHMITypeInserter {
   AppHMITypeInserter(smart_objects::SmartObject &so_array)
       : index_(0), so_array_(so_array) {}
@@ -93,12 +114,15 @@ struct CheckMissedTypes {
       : policy_app_types_(policy_app_types), log_(log) {}
 
   bool operator()(const smart_objects::SmartArray::value_type &value) {
-    std::string app_type_str = value.asString();
-    policy::StringArray::const_iterator it = policy_app_types_.begin();
-    policy::StringArray::const_iterator it_end = policy_app_types_.end();
-    for (; it != it_end; ++it) {
-      if (app_type_str == *it) {
-        return true;
+    std::string app_type_str = AppHMITypeToString(
+        static_cast<mobile_apis::AppHMIType::eType>(value.asInt()));
+    if (!app_type_str.empty()) {
+      policy::StringArray::const_iterator it = policy_app_types_.begin();
+      policy::StringArray::const_iterator it_end = policy_app_types_.end();
+      for (; it != it_end; ++it) {
+        if (app_type_str == *it) {
+          return true;
+        }
       }
     }
 
