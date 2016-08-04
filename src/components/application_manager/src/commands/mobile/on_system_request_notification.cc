@@ -106,18 +106,27 @@ void OnSystemRequestNotification::AddHeader(BinaryMessage& message) const {
   LOG4CXX_AUTO_TRACE(logger_);
   const int timeout = policy::PolicyHandler::instance()->TimeoutExchange();
 
-  char size_str[24];
-
-  if (0 > sprintf(size_str, "%zu", static_cast<size_t>(message.size()))) {
-    memset(size_str, 0, sizeof(size_str));
-  }
-
+  size_t content_length;
+  char size_str[24];  
   char timeout_str[24];
+
   if (0 > sprintf(timeout_str, "%d", timeout)) {
     memset(timeout_str, 0, sizeof(timeout_str));
   }
+
   std::string policy_table_string = std::string(message.begin(), message.end());
-  ParsePTString(policy_table_string);
+  
+  /* The Content-Length to be sent in the HTTP Request header should be 
+  calculated before additional escape characters are added to the 
+  policy table string. The mobile proxy will remove the escape 
+  characters after receiving this request. */
+
+  content_length = ParsePTString(policy_table_string);
+  
+  if (0 > sprintf(size_str, "%zu", content_length)) {
+    memset(size_str, 0, sizeof(size_str));
+  }
+
   const std::string header =
 
   "{"
@@ -132,7 +141,7 @@ void OnSystemRequestNotification::AddHeader(BinaryMessage& message) const {
               "\"ReadTimeout\":" + std::string(timeout_str) + ","
               "\"InstanceFollowRedirects\": false,"
               "\"charset\": \"utf-8\","
-              "\"Content_Length\": " + std::string(size_str) +
+              "\"Content-Length\": " + std::string(size_str) +
           "},"
           "\"body\": \"" + policy_table_string + "\""
       "}"
@@ -145,19 +154,22 @@ void OnSystemRequestNotification::AddHeader(BinaryMessage& message) const {
       logger_, "Header added: " << std::string(message.begin(), message.end()));
 }
 
-void OnSystemRequestNotification::ParsePTString(std::string& pt_string) const{
+size_t OnSystemRequestNotification::ParsePTString(std::string& pt_string) const{
   std::string result;
   size_t length = pt_string.length();  
+  size_t result_length = length;
   result.reserve(length*2);
   for(size_t i=0;i<length;++i){
     if(pt_string[i]=='\"' || pt_string[i]=='\\'){
       result += '\\';
     } else if(pt_string[i] == '\n') {
+      result_length--;  // contentLength is adjusted when this character is not copied to result.
       continue;
     }
     result += pt_string[i];
   }
   pt_string = result;
+  return result_length;
 }
 #endif
 
