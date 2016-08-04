@@ -47,6 +47,7 @@
 #include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/application_manager_settings.h"
 #include "application_manager/state_controller.h"
+#include "application_manager/hmi_interfaces.h"
 
 namespace resumption {
 class LastState;
@@ -459,6 +460,8 @@ class ApplicationManager {
       uint32_t connection_key, const std::string& policy_app_id) const = 0;
 
   virtual resumption::ResumeCtrl& resume_controller() = 0;
+
+  virtual HmiInterfaces& hmi_interfaces() = 0;
   /*
    * @brief Converts connection string transport type representation
    * to HMI Common_TransportType
