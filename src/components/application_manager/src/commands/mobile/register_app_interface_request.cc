@@ -456,15 +456,15 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
     result_code = mobile_apis::Result::WRONG_LANGUAGE;
   }
 
-  if (application_manager_.hmi_interfaces().GetInterfaceState(
-          HmiInterfaces::HMI_INTERFACE_VR) !=
-      HmiInterfaces::STATE_NOT_AVAILABLE) {
+  if (HmiInterfaces::STATE_NOT_AVAILABLE !=
+      application_manager_.hmi_interfaces().GetInterfaceState(
+          HmiInterfaces::HMI_INTERFACE_VR)) {
     FillVRRelatedFields(response_params, hmi_capabilities);
   }
 
-  if (application_manager_.hmi_interfaces().GetInterfaceState(
-          HmiInterfaces::HMI_INTERFACE_UI) !=
-      HmiInterfaces::STATE_NOT_AVAILABLE) {
+  if (HmiInterfaces::STATE_NOT_AVAILABLE !=
+      application_manager_.hmi_interfaces().GetInterfaceState(
+          HmiInterfaces::HMI_INTERFACE_UI)) {
     FillUIRelatedFields(response_params, hmi_capabilities);
   }
 
