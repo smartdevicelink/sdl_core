@@ -37,7 +37,6 @@
 #include "application_manager/application_manager.h"
 #include "application_manager/message_helper.h"
 #include "smart_objects/smart_object.h"
-
 namespace application_manager {
 
 namespace commands {

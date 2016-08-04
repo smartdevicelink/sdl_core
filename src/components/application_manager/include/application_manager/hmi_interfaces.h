@@ -35,6 +35,7 @@
  * (Buttons, BasicCommunication, VR, TTS, UI, Navigation,VehicleInfo,
  *  SDL) and provides this information through public interfaces.
  */
+
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMI_INTERFACES_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMI_INTERFACES_H_
 
