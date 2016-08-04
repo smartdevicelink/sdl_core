@@ -272,7 +272,11 @@ Thread::~Thread() {
   finalized_ = true;
   stopped_ = true;
   join();
-  pthread_join(handle_, NULL);
+  // in some platforms pthread_join behaviour is undefined when thread is
+  // not created(pthread_create) and call pthread_join.
+  if(handle_) {
+    pthread_join(handle_, NULL);
+  }
 }
 
 Thread* CreateThread(const char* name, ThreadDelegate* delegate) {
