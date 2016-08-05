@@ -952,6 +952,21 @@ TransportAdapter::Error TransportAdapterImpl::ConnectDevice(DeviceSptr device) {
   }
 }
 
+void TransportAdapterImpl::RunAppOnDevice(const DeviceUID& device_uid,
+                                          const std::string& bundle_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  DeviceSptr device = FindDevice(device_uid);
+  if (!device) {
+    LOG4CXX_WARN(logger_,
+                 "Device with id: " << device_uid << " Not found"
+                                    << "withing list of connected deviced");
+    return;
+  }
+
+  device->LaunchApp(bundle_id);
+}
+
 void TransportAdapterImpl::RemoveDevice(const DeviceUID& device_handle) {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "Device_handle: " << &device_handle);

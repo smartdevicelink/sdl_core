@@ -319,9 +319,7 @@ class TransportManagerImplTest : public ::testing::Test {
   MockTransportAdapter* mock_adapter_;
 
   utils::SharedPtr<TransportManagerListenerMock> tm_listener_;
-
   const ApplicationHandle application_id_ = 1;
-
   ConnectionUID connection_key_;
   RawMessagePtr test_message_;
   DeviceHandle device_handle_;
@@ -508,9 +506,9 @@ TEST_F(TransportManagerImplTest, SendMessageToDevice_SendingFailed) {
   // Arrange
   HandleConnection();
 
-  MockTMTelemetryObserver* mock_metric_observer = new MockTMTelemetryObserver();
-  tm_.SetTelemetryObserver(mock_metric_observer);
-  EXPECT_CALL(*mock_metric_observer, StartRawMsg(_));
+#ifdef TELEMETRY_MONITOR
+  EXPECT_CALL(mock_metric_observer_, StartRawMsg(_));
+#endif  // TELEMETRY_MONITOR
 
   EXPECT_CALL(*mock_adapter_,
               SendData(mac_address_, application_id_, test_message_))
@@ -518,26 +516,25 @@ TEST_F(TransportManagerImplTest, SendMessageToDevice_SendingFailed) {
 
   EXPECT_CALL(*tm_listener_, OnTMMessageSendFailed(_, test_message_));
   EXPECT_EQ(E_SUCCESS, tm_.SendMessageToDevice(test_message_));
+#ifdef TELEMETRY_MONITOR
+  EXPECT_CALL(mock_metric_observer_, StopRawMsg(_)).Times(0);
+#endif  // TELEMETRY_MONITOR
 
-  EXPECT_CALL(*mock_metric_observer, StopRawMsg(_)).Times(0);
-
-  delete mock_metric_observer;
   testing::Mock::AsyncVerifyAndClearExpectations(kAsyncExpectationsTimeout);
 }
 
 TEST_F(TransportManagerImplTest, SendMessageToDevice_StartTimeObserver) {
   // Arrange
   HandleConnection();
-
-  MockTMTelemetryObserver* mock_metric_observer = new MockTMTelemetryObserver();
-  tm_.SetTelemetryObserver(mock_metric_observer);
   EXPECT_CALL(*mock_adapter_,
               SendData(mac_address_, application_id_, test_message_))
       .WillOnce(Return(TransportAdapter::OK));
-  EXPECT_CALL(*mock_metric_observer, StartRawMsg(_));
+
+#ifdef TELEMETRY_MONITOR
+  EXPECT_CALL(mock_metric_observer_, StartRawMsg(_));
+#endif  // TELEMETRY_MONITOR
 
   EXPECT_EQ(E_SUCCESS, tm_.SendMessageToDevice(test_message_));
-  delete mock_metric_observer;
   testing::Mock::AsyncVerifyAndClearExpectations(kAsyncExpectationsTimeout);
 }
 
@@ -548,7 +545,9 @@ TEST_F(TransportManagerImplTest, SendMessageToDevice_SendDone) {
   EXPECT_CALL(*mock_adapter_,
               SendData(mac_address_, application_id_, test_message_))
       .WillOnce(Return(TransportAdapter::OK));
+#ifdef TELEMETRY_MONITOR
   EXPECT_CALL(mock_metric_observer_, StartRawMsg(test_message_.get()));
+#endif  // TELEMETRY_MONITOR
   EXPECT_EQ(E_SUCCESS, tm_.SendMessageToDevice(test_message_));
 
   HandleSendDone();
@@ -563,7 +562,9 @@ TEST_F(TransportManagerImplTest, SendMessageFailed_GetHandleSendFailed) {
   EXPECT_CALL(*mock_adapter_,
               SendData(mac_address_, application_id_, test_message_))
       .WillOnce(Return(TransportAdapter::FAIL));
+#ifdef TELEMETRY_MONITOR
   EXPECT_CALL(mock_metric_observer_, StartRawMsg(test_message_.get()));
+#endif  // TELEMETRY_MONITOR
   EXPECT_CALL(*tm_listener_, OnTMMessageSendFailed(_, test_message_));
   EXPECT_EQ(E_SUCCESS, tm_.SendMessageToDevice(test_message_));
 

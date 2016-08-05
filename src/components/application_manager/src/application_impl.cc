@@ -318,6 +318,10 @@ const std::string& ApplicationImpl::app_icon_path() const {
   return app_icon_path_;
 }
 
+const std::string& ApplicationImpl::bundle_id() const {
+  return bundle_id_;
+}
+
 connection_handler::DeviceHandle ApplicationImpl::device() const {
   return device_;
 }
@@ -489,7 +493,8 @@ void ApplicationImpl::WakeUpStreaming(
           ServiceType::kMobileNav, true, application_manager_);
       video_streaming_suspended_ = false;
     }
-    video_stream_suspend_timer_.Start(video_stream_suspend_timeout_, false);
+    video_stream_suspend_timer_.Start(video_stream_suspend_timeout_,
+                                      timer::kPeriodic);
   } else if (ServiceType::kAudio == service_type) {
     sync_primitives::AutoLock lock(audio_streaming_suspended_lock_);
     if (audio_streaming_suspended_) {
@@ -498,7 +503,8 @@ void ApplicationImpl::WakeUpStreaming(
           ServiceType::kAudio, true, application_manager_);
       audio_streaming_suspended_ = false;
     }
-    audio_stream_suspend_timer_.Start(audio_stream_suspend_timeout_, false);
+    audio_stream_suspend_timer_.Start(audio_stream_suspend_timeout_,
+                                      timer::kPeriodic);
   }
 }
 
@@ -568,6 +574,10 @@ uint32_t ApplicationImpl::get_grammar_id() const {
 
 void ApplicationImpl::set_grammar_id(uint32_t value) {
   grammar_id_ = value;
+}
+
+void ApplicationImpl::set_bundle_id(const std::string& bundle_id) {
+  bundle_id_ = bundle_id;
 }
 
 void ApplicationImpl::ResetDataInNone() {

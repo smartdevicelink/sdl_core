@@ -1517,6 +1517,26 @@
 
   </struct>
 
+  <struct name="AppInfo">
+    <description>Contains detailed information about the registered application.</description>
+
+    <param name="appDisplayName" type="String" maxlength="100" mandatory="true">
+    <description>The name displayed for the mobile application on the mobile device (can differ from the app name set in the initial RAI request).</description>
+    </param>
+
+    <param name="appBundleID" type="String" maxlength="256" mandatory="true">
+    <description>The AppBundleID of an iOS application or package name of the Android application. This supports App Launch strategies for each platform.</description>
+    </param>
+
+    <param name="appVersion" type="String" maxlength="256" mandatory="true">
+    <description>Represents the build version number of this particular mobile app.</description>
+    </param>
+
+    <param name="appIcon" type="String" maxlength="500" mandatory="false">
+    <description>A file reference to the icon utilized by this app (simplifies the process of setting an app icon during app registration).</description>
+    </param>
+  </struct>
+
   <enum name="FileType">
     <description>Enumeration listing possible file types.</description>
     <element name="GRAPHIC_BMP" />
@@ -2358,6 +2378,11 @@
     </param>
     <param name="appID" type="String" maxlength="100" mandatory="true">
       <description>ID used to validate app with policy table entries</description>
+    </param>
+    <param name="appInfo" type="AppInfo" mandatory="false">
+      <description>
+        See AppInfo.
+      </description>
     </param>
   </function>
 

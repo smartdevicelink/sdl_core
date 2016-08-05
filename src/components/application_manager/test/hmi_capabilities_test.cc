@@ -30,6 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <string>
+
 #include "application_manager/hmi_capabilities.h"
 #include "gtest/gtest.h"
 #include "smart_objects/smart_object.h"
@@ -62,14 +64,16 @@ using namespace application_manager;
 
 class HMICapabilitiesTest : public ::testing::Test {
  protected:
-  HMICapabilitiesTest() : last_state_("app_storage_folder", "app_info_data") {}
+  HMICapabilitiesTest()
+      : last_state_("app_storage_folder", "app_info_data")
+      , file_name_("hmi_capabilities.json") {}
   virtual void SetUp() OVERRIDE {
     EXPECT_CALL(app_mngr_, event_dispatcher())
         .WillOnce(ReturnRef(mock_event_dispatcher));
     EXPECT_CALL(app_mngr_, get_settings())
         .WillRepeatedly(ReturnRef(mock_application_manager_settings_));
     EXPECT_CALL(mock_application_manager_settings_,
-                hmi_capabilities_file_name()).WillOnce(ReturnRef(kFileName));
+                hmi_capabilities_file_name()).WillOnce(ReturnRef(file_name_));
     EXPECT_CALL(mock_event_dispatcher, add_observer(_, _, _)).Times(1);
     EXPECT_CALL(mock_event_dispatcher, remove_observer(_)).Times(1);
     EXPECT_CALL(mock_application_manager_settings_, launch_hmi())
@@ -94,7 +98,7 @@ class HMICapabilitiesTest : public ::testing::Test {
   resumption::LastState last_state_;
   MockApplicationManagerSettings mock_application_manager_settings_;
   utils::SharedPtr<HMICapabilitiesForTesting> hmi_capabilities_test;
-  const std::string kFileName = "hmi_capabilities.json";
+  const std::string file_name_;
 };
 
 const char* const cstring_values_[] = {
@@ -347,29 +351,6 @@ TEST_F(HMICapabilitiesTest, LoadCapabilitiesFromFile) {
   EXPECT_EQ("Fiesta", vehicle_type_so["model"].asString());
   EXPECT_EQ("2013", vehicle_type_so["modelYear"].asString());
   EXPECT_EQ("SE", vehicle_type_so["trim"].asString());
-}
-
-TEST_F(HMICapabilitiesTest, ConvertJsonLanguagesToObj) {
-  Json::Value json_languages(Json::arrayValue);
-  json_languages[0] = "EN_US";
-  json_languages[1] = "ES_MX";
-  smart_objects::SmartObject sm_obj =
-      smart_objects::SmartObject(smart_objects::SmartType_Array);
-
-  EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
-              CommonLanguageFromString(json_languages[0].asString()))
-      .WillOnce(Return(hmi_apis::Common_Language::EN_US));
-
-  EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
-              CommonLanguageFromString(json_languages[1].asString()))
-      .WillOnce(Return(hmi_apis::Common_Language::ES_MX));
-
-  hmi_capabilities_test->ConvertJsonLanguagesToObj(json_languages, sm_obj);
-
-  EXPECT_EQ(hmi_apis::Common_Language::EN_US,
-            static_cast<hmi_apis::Common_Language::eType>(sm_obj[0].asInt()));
-  EXPECT_EQ(hmi_apis::Common_Language::ES_MX,
-            static_cast<hmi_apis::Common_Language::eType>(sm_obj[1].asInt()));
 }
 
 TEST_F(HMICapabilitiesTest,

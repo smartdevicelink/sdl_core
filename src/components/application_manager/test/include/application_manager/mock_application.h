@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2016, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -36,6 +36,7 @@
 #include "application_manager/application.h"
 #include "smart_objects/smart_object.h"
 #include "utils/custom_string.h"
+#include "application_manager/usage_statistics.h"
 
 namespace test {
 namespace components {
@@ -271,6 +272,8 @@ class MockApplication : public ::application_manager::Application {
   MOCK_CONST_METHOD0(is_reset_global_properties_active, bool());
   MOCK_CONST_METHOD0(app_id, uint32_t());
   MOCK_CONST_METHOD0(mac_address, const std::string&());
+  MOCK_CONST_METHOD0(bundle_id, const std::string&());
+  MOCK_METHOD1(set_bundle_id, void(const std::string& bundle_id));
   MOCK_METHOD0(GetAvailableDiskSpace, uint32_t());
   MOCK_METHOD1(set_mobile_app_id, void(const std::string& policy_app_id));
   MOCK_CONST_METHOD0(is_foreground, bool());

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -65,6 +65,7 @@ class MockTransportManager : public ::transport_manager::TransportManager,
   MOCK_METHOD1(DisconnectForce, int(const ConnectionUID));
   MOCK_METHOD1(SendMessageToDevice,
                int(const ::protocol_handler::RawMessagePtr));
+  MOCK_METHOD2(RunAppOnDevice, void(const DeviceHandle, const std::string&));
   MOCK_METHOD1(ReceiveEventFromDevice, int(const TransportAdapterEvent&));
   MOCK_METHOD1(AddTransportAdapter, int(TransportAdapter* adapter));
   MOCK_METHOD1(AddEventListener, int(TransportManagerListener* listener));

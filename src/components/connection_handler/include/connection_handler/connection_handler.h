@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -67,6 +67,18 @@ class ConnectionHandler {
 
   virtual void ConnectToDevice(
       connection_handler::DeviceHandle device_handle) = 0;
+
+  /**
+   * @brief RunAppOnDevice allows to run specific application on the certain
+   *device.
+   *
+   * @param device_handle device identifier to run application on.
+   *
+   * @param app_id application id also known as bundle id on some devices to
+   *run.
+   */
+  virtual void RunAppOnDevice(const std::string& device_handle,
+                              const std::string& bundle_id) const = 0;
 
   virtual void ConnectToAllDevices() = 0;
 

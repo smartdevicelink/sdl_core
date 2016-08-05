@@ -41,6 +41,7 @@
 #include "application_manager/application_manager.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/application_impl.h"
+#include "application_manager/app_launch/app_launch_ctrl.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/resumption/resume_ctrl.h"
 #include "interfaces/MOBILE_API.h"
@@ -538,6 +539,25 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
                                             application->mac_address());
   }
 
+  hmi_apis::Common_SpeechCapabilities::eType tts_name_type =
+      hmi_apis::Common_SpeechCapabilities::INVALID_ENUM;
+  if ((*message_)[strings::msg_params].keyExists(strings::tts_name)) {
+    tts_name_type = static_cast<hmi_apis::Common_SpeechCapabilities::eType>(
+        (*message_)[strings::msg_params][strings::tts_name][0][strings::type]
+            .asInt());
+  }
+
+  if (hmi_apis::Common_SpeechCapabilities::SAPI_PHONEMES == tts_name_type ||
+      hmi_apis::Common_SpeechCapabilities::LHPLUS_PHONEMES == tts_name_type ||
+      hmi_apis::Common_SpeechCapabilities::PRE_RECORDED == tts_name_type ||
+      hmi_apis::Common_SpeechCapabilities::SILENCE == tts_name_type) {
+    result_code = mobile_apis::Result::WARNINGS;
+    add_info = "ttsChunks is sent but is not supported";
+  }
+
+  app_launch::AppLaunchCtrl& app_launch_ctrl =
+      application_manager_.app_launch_ctrl();
+  app_launch_ctrl.OnAppRegistered(*application);
   SendOnAppRegisteredNotificationToHMI(
       *(application.get()), resumption, need_restore_vr);
   SendResponse(true, result_code, add_info.c_str(), &response_params);
