@@ -98,6 +98,13 @@ class HMILanguageHandler : public event_engine::EventObserver {
                                           hmi_apis::Common_Language::eType tts);
   void Init(resumption::LastState* value);
 
+  /**
+   * @brief Removes application from container after
+   * removing application from core
+   * @param app_id id application for removing
+  */
+  void OnUnregisterApplication(const uint32_t app_id);
+
  private:
   void SendOnLanguageChangeToMobile(uint32_t connection_key);
 
