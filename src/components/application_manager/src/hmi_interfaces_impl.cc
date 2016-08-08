@@ -5,8 +5,7 @@ namespace application_manager {
 std::map<hmi_apis::FunctionID::eType, HmiInterfaces::InterfaceID>
 generate_function_to_interface_convert_map() {
   using namespace hmi_apis::FunctionID;
-  std::map<hmi_apis::FunctionID::eType, HmiInterfaces::InterfaceID>
-      convert_map;
+  std::map<hmi_apis::FunctionID::eType, HmiInterfaces::InterfaceID> convert_map;
   convert_map[Buttons_GetCapabilities] = HmiInterfaces::HMI_INTERFACE_Buttons;
   convert_map[Buttons_OnButtonEvent] = HmiInterfaces::HMI_INTERFACE_Buttons;
   convert_map[Buttons_OnButtonPress] = HmiInterfaces::HMI_INTERFACE_Buttons;
@@ -193,6 +192,25 @@ generate_function_to_interface_convert_map() {
   return convert_map;
 }
 
+HmiInterfacesImpl::HmiInterfacesImpl() {
+  interfaces_states_[HmiInterfaces::HMI_INTERFACE_BasicCommunication] =
+      HmiInterfaces::STATE_NOT_RESPONSE;
+  interfaces_states_[HmiInterfaces::HMI_INTERFACE_Buttons] =
+      HmiInterfaces::STATE_NOT_RESPONSE;
+  interfaces_states_[HmiInterfaces::HMI_INTERFACE_Navigation] =
+      HmiInterfaces::STATE_NOT_RESPONSE;
+  interfaces_states_[HmiInterfaces::HMI_INTERFACE_SDL] =
+      HmiInterfaces::STATE_NOT_RESPONSE;
+  interfaces_states_[HmiInterfaces::HMI_INTERFACE_TTS] =
+      HmiInterfaces::STATE_NOT_RESPONSE;
+  interfaces_states_[HmiInterfaces::HMI_INTERFACE_UI] =
+      HmiInterfaces::STATE_NOT_RESPONSE;
+  interfaces_states_[HmiInterfaces::HMI_INTERFACE_VehicleInfo] =
+      HmiInterfaces::STATE_NOT_RESPONSE;
+  interfaces_states_[HmiInterfaces::HMI_INTERFACE_VR] =
+      HmiInterfaces::STATE_NOT_RESPONSE;
+}
+
 HmiInterfaces::InterfaceState HmiInterfacesImpl::GetInterfaceState(
     HmiInterfaces::InterfaceID interface) const {
   const InterfaceStatesMap::const_iterator it =
@@ -203,7 +221,8 @@ HmiInterfaces::InterfaceState HmiInterfacesImpl::GetInterfaceState(
 }
 
 void HmiInterfacesImpl::SetInterfaceState(HmiInterfaces::InterfaceID interface,
-                                         HmiInterfaces::InterfaceState state) {
+                                          HmiInterfaces::InterfaceState state) {
+  DCHECK(interfaces_states_.find(interface) != interfaces_states_.end());
   interfaces_states_[interface] = state;
 }
 
@@ -211,10 +230,10 @@ HmiInterfaces::InterfaceID HmiInterfacesImpl::GetInterfaceFromFunction(
     hmi_apis::FunctionID::eType function) const {
   // TODO(AKutsan): Generate map of functionid to inteface automaticaly from
   // HMI_API.xml
-  static const std::map<hmi_apis::FunctionID::eType, InterfaceID>
-      convert_map = generate_function_to_interface_convert_map();
-  const std::map<hmi_apis::FunctionID::eType, InterfaceID>::const_iterator
-      it = convert_map.find(function);
+  static const std::map<hmi_apis::FunctionID::eType, InterfaceID> convert_map =
+      generate_function_to_interface_convert_map();
+  const std::map<hmi_apis::FunctionID::eType, InterfaceID>::const_iterator it =
+      convert_map.find(function);
   return it != convert_map.end() ? it->second : HMI_INTERFACE_INVALID_ENUM;
 }
 }

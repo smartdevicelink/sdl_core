@@ -7,7 +7,7 @@
 namespace application_manager {
 class HmiInterfacesImpl : public HmiInterfaces {
  public:
-  HmiInterfacesImpl() {}
+  HmiInterfacesImpl();
   ~HmiInterfacesImpl() {}
   InterfaceState GetInterfaceState(InterfaceID interface) const OVERRIDE;
   InterfaceID GetInterfaceFromFunction(
