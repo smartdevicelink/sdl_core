@@ -214,7 +214,7 @@ bool CommandRequestImpl::ProcessHMIInterfacesAvailability(
     const uint32_t hmi_correlation_id,
     const hmi_apis::FunctionID::eType& function_id) {
   HmiInterfaces& hmi_interfaces = application_manager_.hmi_interfaces();
-  HmiInterfaces::InterfaceName interface =
+  HmiInterfaces::InterfaceID interface =
       hmi_interfaces.GetInterfaceFromFunction(function_id);
   DCHECK(interface != HmiInterfaces::HMI_INTERFACE_INVALID_ENUM);
   const HmiInterfaces::InterfaceState state =

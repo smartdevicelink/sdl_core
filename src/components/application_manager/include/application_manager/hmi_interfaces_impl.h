@@ -9,13 +9,13 @@ class HmiInterfacesImpl : public HmiInterfaces {
  public:
   HmiInterfacesImpl() {}
   ~HmiInterfacesImpl() {}
-  InterfaceState GetInterfaceState(InterfaceName interface) const OVERRIDE;
-  InterfaceName GetInterfaceFromFunction(
+  InterfaceState GetInterfaceState(InterfaceID interface) const OVERRIDE;
+  InterfaceID GetInterfaceFromFunction(
       hmi_apis::FunctionID::eType function) const OVERRIDE;
-  void SetInterfaceState(InterfaceName interface, InterfaceState state) OVERRIDE;
+  void SetInterfaceState(InterfaceID interface, InterfaceState state) OVERRIDE;
 
  private:
-  typedef std::map<InterfaceName, InterfaceState> InterfaceStatesMap;
+  typedef std::map<InterfaceID, InterfaceState> InterfaceStatesMap;
   InterfaceStatesMap interfaces_states_;
 };
 }

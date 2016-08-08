@@ -2,10 +2,10 @@
 #include "application_manager/hmi_interfaces_impl.h"
 namespace application_manager {
 
-std::map<hmi_apis::FunctionID::eType, HmiInterfaces::InterfaceName>
+std::map<hmi_apis::FunctionID::eType, HmiInterfaces::InterfaceID>
 generate_function_to_interface_convert_map() {
   using namespace hmi_apis::FunctionID;
-  std::map<hmi_apis::FunctionID::eType, HmiInterfaces::InterfaceName>
+  std::map<hmi_apis::FunctionID::eType, HmiInterfaces::InterfaceID>
       convert_map;
   convert_map[Buttons_GetCapabilities] = HmiInterfaces::HMI_INTERFACE_Buttons;
   convert_map[Buttons_OnButtonEvent] = HmiInterfaces::HMI_INTERFACE_Buttons;
@@ -194,7 +194,7 @@ generate_function_to_interface_convert_map() {
 }
 
 HmiInterfaces::InterfaceState HmiInterfacesImpl::GetInterfaceState(
-    HmiInterfaces::InterfaceName interface) const {
+    HmiInterfaces::InterfaceID interface) const {
   const InterfaceStatesMap::const_iterator it =
       interfaces_states_.find(interface);
   // all interfaces should be presented in interfaces_states_ map.
@@ -202,18 +202,18 @@ HmiInterfaces::InterfaceState HmiInterfacesImpl::GetInterfaceState(
   return it->second;
 }
 
-void HmiInterfacesImpl::SetInterfaceState(HmiInterfaces::InterfaceName interface,
+void HmiInterfacesImpl::SetInterfaceState(HmiInterfaces::InterfaceID interface,
                                          HmiInterfaces::InterfaceState state) {
   interfaces_states_[interface] = state;
 }
 
-HmiInterfaces::InterfaceName HmiInterfacesImpl::GetInterfaceFromFunction(
+HmiInterfaces::InterfaceID HmiInterfacesImpl::GetInterfaceFromFunction(
     hmi_apis::FunctionID::eType function) const {
   // TODO(AKutsan): Generate map of functionid to inteface automaticaly from
   // HMI_API.xml
-  static const std::map<hmi_apis::FunctionID::eType, InterfaceName>
+  static const std::map<hmi_apis::FunctionID::eType, InterfaceID>
       convert_map = generate_function_to_interface_convert_map();
-  const std::map<hmi_apis::FunctionID::eType, InterfaceName>::const_iterator
+  const std::map<hmi_apis::FunctionID::eType, InterfaceID>::const_iterator
       it = convert_map.find(function);
   return it != convert_map.end() ? it->second : HMI_INTERFACE_INVALID_ENUM;
 }

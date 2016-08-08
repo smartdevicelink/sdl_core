@@ -6,7 +6,7 @@ namespace application_manager {
 
 class HmiInterfaces {
  public:
-  enum InterfaceName {
+  enum InterfaceID {
     HMI_INTERFACE_INVALID_ENUM,
     HMI_INTERFACE_Buttons,
     HMI_INTERFACE_BasicCommunication,
@@ -24,10 +24,10 @@ class HmiInterfaces {
     STATE_NOT_AVAILABLE
   };
 
-  virtual InterfaceState GetInterfaceState(InterfaceName interface) const = 0;
-  virtual InterfaceName GetInterfaceFromFunction(
+  virtual InterfaceState GetInterfaceState(InterfaceID interface) const = 0;
+  virtual InterfaceID GetInterfaceFromFunction(
       hmi_apis::FunctionID::eType function) const = 0;
-  virtual void SetInterfaceState(InterfaceName interface,
+  virtual void SetInterfaceState(InterfaceID interface,
                                 InterfaceState state) = 0;
   virtual ~HmiInterfaces() {}
 };
