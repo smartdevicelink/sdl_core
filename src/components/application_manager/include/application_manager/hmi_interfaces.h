@@ -20,8 +20,8 @@ class HmiInterfaces {
 
   enum InterfaceState {
     STATE_NOT_RESPONSE,
-    STATE_AVALIABLE,
-    STATE_NOT_AVALIABLE
+    STATE_AVAILABLE,
+    STATE_NOT_AVAILABLE
   };
 
   virtual InterfaceState GetInterfaceState(InterfaceName interface) const = 0;
