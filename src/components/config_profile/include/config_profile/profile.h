@@ -64,6 +64,11 @@ class Profile : public utils::Singleton<Profile> {
     const std::string& sdl_version() const;
 
     /**
+     * @brief Returns true if logging is enabled, otherwise false
+     */
+    bool logs_enabled() const;
+
+    /**
       * @brief Returns true if HMI should be started, otherwise false
       */
     bool launch_hmi() const;
@@ -625,6 +630,7 @@ class Profile : public utils::Singleton<Profile> {
 
 private:
     std::string                     sdl_version_;
+    bool                            logs_enabled_;
     bool                            launch_hmi_;
 #ifdef WEB_HMI
     std::string                     link_to_web_hmi_;
