@@ -311,6 +311,15 @@ void RegisterAppInterfaceRequest::Run() {
   SendRegisterAppInterfaceResponseToMobile();
 }
 
+void FillVRRelatedFields(smart_objects::SmartObject& response_params,
+                         const HMICapabilities& hmi_capabilities) {
+  response_params[strings::language] = hmi_capabilities.active_vr_language();
+  if (hmi_capabilities.vr_capabilities()) {
+    response_params[strings::vr_capabilities] =
+        *hmi_capabilities.vr_capabilities();
+  }
+}
+
 void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObject response_params(smart_objects::SmartType_Map);
@@ -338,7 +347,6 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
   response_params[strings::sync_msg_version][strings::minor_version] =
       minor_version;  // From generated file interfaces/generated_msg_version.h
 
-  response_params[strings::language] = hmi_capabilities.active_vr_language();
   response_params[strings::hmi_display_language] =
       hmi_capabilities.active_ui_language();
 
@@ -366,6 +374,10 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
     result_code = mobile_apis::Result::WRONG_LANGUAGE;
   }
 
+  if (application_manager_.hmi_interfaces().GetInterfaceState(
+          HmiInterfaces::HMI_INTERFACE_VR)) {
+    FillVRRelatedFields(response_params, hmi_capabilities);
+  }
   if (hmi_capabilities.display_capabilities()) {
     response_params[hmi_response::display_capabilities] =
         smart_objects::SmartObject(smart_objects::SmartType_Map);
@@ -449,10 +461,7 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
     response_params[strings::speech_capabilities] =
         *hmi_capabilities.speech_capabilities();
   }
-  if (hmi_capabilities.vr_capabilities()) {
-    response_params[strings::vr_capabilities] =
-        *hmi_capabilities.vr_capabilities();
-  }
+
   if (hmi_capabilities.audio_pass_thru_capabilities()) {
     if (smart_objects::SmartType_Array ==
         hmi_capabilities.audio_pass_thru_capabilities()->getType()) {
