@@ -198,14 +198,15 @@ smart_objects::SmartObject CreateUnsupportedResourceResponse(
     const hmi_apis::FunctionID::eType function_id,
     const uint32_t hmi_correlation_id) {
   smart_objects::SmartObject response;
-  response[strings::params][strings::message_type] = MessageType::kResponse;
-  response[strings::params][strings::correlation_id] = hmi_correlation_id;
-  response[strings::params][strings::protocol_type] =
+  smart_objects::SmartObject& params = response[strings::params];
+  params[strings::message_type] = MessageType::kResponse;
+  params[strings::correlation_id] = hmi_correlation_id;
+  params[strings::protocol_type] =
       CommandImpl::hmi_protocol_type_;
-  response[strings::params][strings::protocol_version] =
+  params[strings::protocol_version] =
       CommandImpl::protocol_version_;
-  response[strings::params][strings::function_id] = function_id;
-  response[strings::params][hmi_response::code] =
+  params[strings::function_id] = function_id;
+  params[hmi_response::code] =
       hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
   return response;
 }
