@@ -113,8 +113,8 @@ typedef Types<commands::ListFilesResponse,
               commands::SetGlobalPropertiesResponse,
               commands::SetMediaClockTimerResponse,
               commands::ShowConstantTBTResponse,
-              commands::ShowResponse> ResponseCommandsList;
-
+              commands::ShowResponse,
+              commands::SystemResponse> ResponseCommandsList;
 TYPED_TEST_CASE(MobileResponseCommandsTest, ResponseCommandsList);
 
 TYPED_TEST(MobileResponseCommandsTest, Run_SendResponseToMobile_SUCCESS) {
