@@ -198,7 +198,7 @@ HmiInterfaces::InterfaceState HmiInterfacesImpl::GetInterfaceState(
   const InterfaceStatesMap::const_iterator it =
       interfaces_states_.find(interface);
   // all interfaces should be presented in interfaces_states_ map.
-  DCHECK(it != interfaces_states_.end());
+  DCHECK_OR_RETURN(it != interfaces_states_.end(), STATE_NOT_RESPONSE);
   return it->second;
 }
 
