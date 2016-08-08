@@ -1204,4 +1204,8 @@ void HMICapabilitiesImpl::convert_json_languages_to_obj(
   }
 }
 
+HMILanguageHandler& HMICapabilitiesImpl::get_hmi_language_handler() {
+  return hmi_language_handler_;
+}
+
 }  //  namespace application_manager

@@ -424,9 +424,7 @@ class HMICapabilitiesImpl : public HMICapabilities {
 
   void Init(resumption::LastState* last_state) OVERRIDE;
 
-  HMILanguageHandler& get_hmi_language_handler() OVERRIDE {
-    return hmi_language_handler_;
-  }
+  HMILanguageHandler& get_hmi_language_handler() OVERRIDE;
 
  protected:
   /*
