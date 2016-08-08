@@ -56,7 +56,7 @@ void VRIsReadyResponse::Run() {
       is_available ? HmiInterfaces::STATE_AVAILABLE
                    : HmiInterfaces::STATE_NOT_AVAILABLE;
   HmiInterfaces& hmi_interfaces = application_manager_.hmi_interfaces();
-  hmi_interfaces.SetIntefaceState(HmiInterfaces::HMI_INTERFACE_VR,
+  hmi_interfaces.SetInterfaceState(HmiInterfaces::HMI_INTERFACE_VR,
                                   inteface_state);
 }
 

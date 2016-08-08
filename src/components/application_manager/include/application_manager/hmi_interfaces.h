@@ -27,7 +27,7 @@ class HmiInterfaces {
   virtual InterfaceState GetInterfaceState(InterfaceName interface) const = 0;
   virtual InterfaceName GetInterfaceFromFunction(
       hmi_apis::FunctionID::eType function) const = 0;
-  virtual void SetIntefaceState(InterfaceName interface,
+  virtual void SetInterfaceState(InterfaceName interface,
                                 InterfaceState state) = 0;
   virtual ~HmiInterfaces() {}
 };

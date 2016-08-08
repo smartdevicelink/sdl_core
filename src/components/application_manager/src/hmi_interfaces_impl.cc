@@ -202,7 +202,7 @@ HmiInterfaces::InterfaceState HmiInterfacesImpl::GetInterfaceState(
   return it->second;
 }
 
-void HmiInterfacesImpl::SetIntefaceState(HmiInterfaces::InterfaceName interface,
+void HmiInterfacesImpl::SetInterfaceState(HmiInterfaces::InterfaceName interface,
                                          HmiInterfaces::InterfaceState state) {
   interfaces_states_[interface] = state;
 }

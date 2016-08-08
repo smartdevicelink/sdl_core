@@ -12,7 +12,7 @@ class HmiInterfacesImpl : public HmiInterfaces {
   InterfaceState GetInterfaceState(InterfaceName interface) const OVERRIDE;
   InterfaceName GetInterfaceFromFunction(
       hmi_apis::FunctionID::eType function) const OVERRIDE;
-  void SetIntefaceState(InterfaceName interface, InterfaceState state) OVERRIDE;
+  void SetInterfaceState(InterfaceName interface, InterfaceState state) OVERRIDE;
 
  private:
   typedef std::map<InterfaceName, InterfaceState> InterfaceStatesMap;
