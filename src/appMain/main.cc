@@ -150,6 +150,11 @@ int32_t main(int32_t argc, char** argv) {
       profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
   }
 
+  if (!profile::Profile::instance()->logs_enabled()) {
+    LOG4CXX_INFO(logger_, "Logging option is not enabled, disabling logger now");
+    DISABLE_LOGGER();
+  }
+
 #ifdef __QNX__
   if (profile::Profile::instance()->enable_policy()) {
     if (!utils::System("./init_policy.sh").Execute(true)) {

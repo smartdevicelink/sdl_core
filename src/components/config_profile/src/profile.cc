@@ -74,6 +74,7 @@ const char* kSDL4Section = "SDL4";
 const char* kResumptionSection = "Resumption";
 
 const char* kSDLVersionKey = "SDLVersion";
+const char* kLogsEnabledKey = "LogsEnabled";
 const char* kHmiCapabilitiesKey = "HMICapabilities";
 const char* kPathToSnapshotKey = "PathToSnapshot";
 const char* kPreloadedPTKey = "PreloadedPT";
@@ -242,6 +243,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "Profile")
 
 Profile::Profile()
     : sdl_version_(kDefaultSDLVersion),
+      logs_enabled_(true),
       launch_hmi_(true),
 #ifdef WEB_HMI
       link_to_web_hmi_(kDefaultLinkToWebHMI),
@@ -331,6 +333,10 @@ const std::string& Profile::config_file_name() const {
 
 const std::string& Profile::sdl_version() const {
   return sdl_version_;
+}
+
+bool Profile::logs_enabled() const {
+  return logs_enabled_;
 }
 
 bool Profile::launch_hmi() const {
@@ -701,6 +707,17 @@ void Profile::UpdateValues() {
                   kMainSection, kSDLVersionKey);
 
   LOG_UPDATED_VALUE(sdl_version_, kSDLVersionKey, kMainSection);
+
+  // Logs Enabled Parameter
+  std::string logs_enabled;
+  if (ReadValue(&logs_enabled, kMainSection, kLogsEnabledKey) &&
+      0 == strcmp("true", logs_enabled.c_str())) {
+    logs_enabled_ = true;
+  } else {
+    logs_enabled_ = false;
+  }
+
+  LOG_UPDATED_BOOL_VALUE(logs_enabled_, kLogsEnabledKey, kMainSection);
 
   // Launch HMI parameter
   std::string launch_value;

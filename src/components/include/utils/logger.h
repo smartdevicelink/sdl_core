@@ -41,6 +41,7 @@
   #include <sstream>
   #include <log4cxx/propertyconfigurator.h>
   #include <log4cxx/spi/loggingevent.h>
+  #include <log4cxx/logmanager.h>
   #include "utils/push_log.h"
   #include "utils/logger_status.h"
   #include "utils/auto_trace.h"
@@ -63,6 +64,8 @@
     // without this deinitilization log4cxx threads continue using some instances destroyed by exit()
     void deinit_logger ();
     #define DEINIT_LOGGER() deinit_logger()
+
+    #define DISABLE_LOGGER() ::log4cxx::LogManager::getLoggerRepository()->setThreshold(::log4cxx::Level::getOff())
 
     #define LOG4CXX_IS_TRACE_ENABLED(logger) logger->isTraceEnabled()
 

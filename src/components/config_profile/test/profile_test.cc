@@ -187,12 +187,14 @@ TEST_F(ProfileTest, UpdateIntValues) {
 TEST_F(ProfileTest, UpdateBoolValues) {
   // Default values
   EXPECT_EQ("smartDeviceLink.ini", Profile::instance()->config_file_name());
+  EXPECT_TRUE(profile::Profile::instance()->logs_enabled());
   EXPECT_TRUE(profile::Profile::instance()->launch_hmi());
   EXPECT_FALSE(profile::Profile::instance()->enable_policy());
 
   // Set config file
   Profile::instance()->config_file_name("smartDeviceLink.ini");
   // Check values
+  EXPECT_TRUE(profile::Profile::instance()->logs_enabled());
   EXPECT_TRUE(profile::Profile::instance()->launch_hmi());
   EXPECT_TRUE(profile::Profile::instance()->enable_policy());
   EXPECT_FALSE(profile::Profile::instance()->is_redecoding_enabled());
@@ -200,6 +202,7 @@ TEST_F(ProfileTest, UpdateBoolValues) {
   // Update config file again
   profile::Profile::instance()->UpdateValues();
   // Values are same
+  EXPECT_TRUE(profile::Profile::instance()->logs_enabled());
   EXPECT_TRUE(profile::Profile::instance()->launch_hmi());
   EXPECT_TRUE(profile::Profile::instance()->enable_policy());
   EXPECT_FALSE(profile::Profile::instance()->is_redecoding_enabled());
@@ -210,6 +213,7 @@ TEST_F(ProfileTest, UpdateBoolValues) {
             Profile::instance()->config_file_name());
 
   // Parameters after updating
+  EXPECT_FALSE(profile::Profile::instance()->logs_enabled());
   EXPECT_FALSE(profile::Profile::instance()->launch_hmi());
   EXPECT_FALSE(profile::Profile::instance()->enable_policy());
   EXPECT_TRUE(profile::Profile::instance()->is_redecoding_enabled());
@@ -218,6 +222,7 @@ TEST_F(ProfileTest, UpdateBoolValues) {
   profile::Profile::instance()->UpdateValues();
 
   // Parameters are same
+  EXPECT_FALSE(profile::Profile::instance()->logs_enabled());
   EXPECT_FALSE(profile::Profile::instance()->launch_hmi());
   EXPECT_FALSE(profile::Profile::instance()->enable_policy());
   EXPECT_TRUE(profile::Profile::instance()->is_redecoding_enabled());
