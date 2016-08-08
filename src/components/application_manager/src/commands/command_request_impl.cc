@@ -217,9 +217,9 @@ bool CommandRequestImpl::ProcessHMIInterfacesAvailability(
   HmiInterfaces::InterfaceName interface =
       hmi_interfaces.GetInterfaceFromFunction(function_id);
   DCHECK(interface != HmiInterfaces::HMI_INTERFACE_INVALID_ENUM);
-  HmiInterfaces::InterfaceState state =
+  const HmiInterfaces::InterfaceState state =
       hmi_interfaces.GetInterfaceState(interface);
-  if (state == HmiInterfaces::STATE_NOT_AVAILABLE) {
+  if (HmiInterfaces::STATE_NOT_AVAILABLE == state) {
     event_engine::Event event(function_id);
     event.set_smart_object(
         CreateUnsupportedResourceResponse(function_id, hmi_correlation_id));
