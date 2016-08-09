@@ -45,6 +45,17 @@
 #include "hmi/vi_subscribe_vehicle_data_response.h"
 #include "hmi/vi_get_vehicle_type_response.h"
 #include "hmi/vi_is_ready_response.h"
+#include "hmi/dial_number_response.h"
+#include "hmi/close_popup_response.h"
+#include "hmi/tts_set_global_properties_response.h"
+#include "hmi/tts_speak_response.h"
+#include "hmi/tts_stop_speaking_response.h"
+#include "hmi/ui_add_command_response.h"
+#include "hmi/ui_add_command_response.h"
+#include "hmi/ui_add_submenu_response.h"
+#include "hmi/ui_alert_response.h"
+#include "hmi/ui_change_registration_response.h"
+#include "hmi/ui_delete_command_response.h"
 
 namespace test {
 namespace components {
@@ -85,9 +96,24 @@ struct CommandData {
 typedef Types<
     CommandData<commands::VIReadDIDResponse,
                 hmi_apis::FunctionID::VehicleInfo_ReadDID>,
+    CommandData<commands::TTSSpeakResponse, hmi_apis::FunctionID::TTS_Speak>,
     CommandData<commands::VISubscribeVehicleDataResponse,
-                hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData> >
-    ResponseCommandsList;
+                hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData>,
+    CommandData<commands::hmi::DialNumberResponse,
+                hmi_apis::FunctionID::BasicCommunication_DialNumber>,
+    CommandData<commands::TTSSetGlobalPropertiesResponse,
+                hmi_apis::FunctionID::TTS_SetGlobalProperties>,
+    CommandData<commands::TTSStopSpeakingResponse,
+                hmi_apis::FunctionID::TTS_StopSpeaking>,
+    CommandData<commands::UIAddCommandResponse,
+                hmi_apis::FunctionID::UI_AddCommand>,
+    CommandData<commands::UIAddSubmenuResponse,
+                hmi_apis::FunctionID::UI_AddSubMenu>,
+    CommandData<commands::UIAlertResponse, hmi_apis::FunctionID::UI_Alert>,
+    CommandData<commands::UIChangeRegistratioResponse,
+                hmi_apis::FunctionID::UI_ChangeRegistration>,
+    CommandData<commands::UIDeleteCommandResponse,
+                hmi_apis::FunctionID::UI_DeleteCommand> > ResponseCommandsList;
 
 TYPED_TEST_CASE(ResponseFromHMICommandsTest, ResponseCommandsList);
 
