@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_EVENT_DISPATCHER_H_
 
 #include <list>
+#include "gmock/gmock.h"
 #include "application_manager/event_engine/event.h"
 #include "application_manager/event_engine/event_dispatcher.h"
 #include "application_manager/event_engine/event_observer.h"

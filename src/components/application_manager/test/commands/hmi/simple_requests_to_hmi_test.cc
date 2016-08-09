@@ -36,6 +36,27 @@
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/commands/commands_test.h"
 #include "application_manager/commands/command.h"
+#include "hmi/allow_app_request.h"
+#include "hmi/allow_all_apps_request.h"
+#include "hmi/basic_communication_system_request.h"
+#include "hmi/button_get_capabilities_request.h"
+#include "hmi/navi_alert_maneuver_request.h"
+#include "hmi/navi_audio_stop_stream_request.h"
+#include "hmi/navi_get_way_points_request.h"
+#include "hmi/navi_is_ready_request.h"
+#include "hmi/navi_send_location_request.h"
+#include "hmi/navi_show_constant_tbt_request.h"
+#include "hmi/navi_stop_stream_request.h"
+#include "hmi/navi_subscribe_way_points_request.h"
+#include "hmi/navi_unsubscribe_way_points_request.h"
+#include "hmi/navi_update_turn_list_request.h"
+#include "hmi/sdl_activate_app_response.h"
+#include "hmi/sdl_get_list_of_permissions_response.h"
+#include "hmi/sdl_get_status_update_response.h"
+#include "hmi/ui_scrollable_message_request.h"
+#include "hmi/ui_set_app_icon_request.h"
+#include "hmi/ui_set_display_layout_request.h"
+#include "hmi/ui_set_global_properties_request.h"
 #include "hmi/request_to_hmi.h"
 #include "hmi/vi_get_vehicle_type_request.h"
 #include "hmi/vi_is_ready_request.h"
@@ -153,7 +174,22 @@ typedef Types<commands::VIIsReadyRequest,
               commands::UISliderRequest,
               commands::TTSChangeRegistrationRequest,
               commands::TTSGetCapabilitiesRequest,
-              commands::TTSGetLanguageRequest> RequestCommandsList;
+              commands::TTSGetLanguageRequest,
+              commands::AllowAllAppsRequest,
+              commands::BasicCommunicationSystemRequest,
+              commands::ButtonGetCapabilitiesRequest,
+              commands::NaviSendLocationRequest,
+              commands::NaviShowConstantTBTRequest,
+              commands::NaviStopStreamRequest,
+              commands::NaviSubscribeWayPointsRequest,
+              commands::NaviAlertManeuverRequest,
+              commands::AudioStopStreamRequest,
+              commands::NaviGetWayPointsRequest,
+              commands::NaviIsReadyRequest,
+              commands::UIScrollableMessageRequest,
+              commands::UISetAppIconRequest,
+              commands::UiSetDisplayLayoutRequest,
+              commands::UISetGlobalPropertiesRequest> RequestCommandsList;
 
 TYPED_TEST_CASE(RequestToHMICommandsTest, RequestCommandsList);
 
