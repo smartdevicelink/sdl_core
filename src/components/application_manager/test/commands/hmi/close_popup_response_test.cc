@@ -29,24 +29,42 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+
+#include <stdint.h>
+#include <string>
+
+#include "gtest/gtest.h"
+#include "utils/shared_ptr.h"
+#include "smart_objects/smart_object.h"
+#include "application_manager/smart_object_keys.h"
+#include "application_manager/commands/command.h"
+#include "commands/commands_test.h"
+#include "application_manager/commands/hmi/response_from_hmi.h"
 #include "application_manager/commands/hmi/close_popup_response.h"
 
-namespace application_manager {
+namespace test {
+namespace components {
+namespace commands_test {
+namespace hmi_commands_test {
 
-namespace commands {
+using ::utils::SharedPtr;
+namespace am = ::application_manager;
+using am::commands::ResponseFromHMI;
+using am::commands::ClosePopupResponse;
+using am::commands::CommandImpl;
 
-ClosePopupResponse::ClosePopupResponse(const MessageSharedPtr& message,
-                                       ApplicationManager& application_manager)
-    : ResponseFromHMI(message, application_manager) {}
+typedef SharedPtr<ResponseFromHMI> ResponseFromHMIPtr;
 
-ClosePopupResponse::~ClosePopupResponse() {}
+class ClosePopupResponseTest : public CommandsTest<CommandsTestMocks::kIsNice> {
+};
 
-void ClosePopupResponse::Run() {
-  SDL_AUTO_TRACE();
+TEST_F(ClosePopupResponseTest, RUN_SUCCESS) {
+  MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
+  ResponseFromHMIPtr command(CreateCommand<ClosePopupResponse>(command_msg));
 
-  // TODO(VS): Process response from HMI
+  command->Run();
 }
-
-}  // namespace commands
-
-}  // namespace application_manager
+}  // hmi_commands_test
+}  // namespace commands_test
+}  // namespace components
+}  // namespace test
