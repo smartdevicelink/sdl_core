@@ -1645,11 +1645,6 @@ void ApplicationManagerImpl::SendMessageToHMI(
     return;
   }
 #endif  // HMI_DBUS_API
-  SDL_INFO("MESSAGE_APP_ID: " << message_to_send->correlation_id());
-  SDL_INFO("MESSAGE_POLICY_ID: " << message_to_send->connection_key());
-  SDL_INFO("MESSAGE_MSG_APP_ID: " << message_to_send->json_message());
-  SDL_INFO("MESSAGE_MSG_POLICY_ID: " << message_to_send->function_id());
-
   messages_to_hmi_.PostMessage(impl::MessageToHmi(message_to_send));
 }
 

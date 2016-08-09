@@ -134,7 +134,7 @@ void HMILanguageHandler::on_event(const event_engine::Event& event) {
       break;
     case hmi_apis::FunctionID::BasicCommunication_OnAppRegistered:
       if (!(msg[strings::params].keyExists(strings::app_id))) {
-        SDL_INFO("Message doesn't contain parameter app_id");
+        SDL_WARN("Message doesn't contain parameter app_id");
         return;
       }
       CheckApplication(
@@ -288,7 +288,7 @@ void HMILanguageHandler::HandleWrongLanguageApp(const Apps::value_type& app) {
       return;
     }
     apps_.erase(it);
-    if (0 == apps_.size()) {
+    if (apps_.empty()) {
       SDL_DEBUG("HMILanguageHandler unsubscribed from all events.");
       unsubscribe_from_all_events();
     }
