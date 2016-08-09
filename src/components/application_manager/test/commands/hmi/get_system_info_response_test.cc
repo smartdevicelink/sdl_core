@@ -51,7 +51,6 @@ namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
 
-using ::testing::_;
 using ::testing::Return;
 using ::utils::SharedPtr;
 using ::testing::NiceMock;
@@ -100,7 +99,7 @@ class GetSystemInfoResponseTest
   SmartObject capabilities_;
 };
 
-TEST_F(GetSystemInfoResponseTest, RUN_SUCCESS) {
+TEST_F(GetSystemInfoResponseTest, GetSystemInfo_SUCCESS) {
   MessageSharedPtr command_msg = CreateCommandMsg();
   (*command_msg)[strings::params][hmi_response::code] =
       hmi_apis::Common_Result::SUCCESS;

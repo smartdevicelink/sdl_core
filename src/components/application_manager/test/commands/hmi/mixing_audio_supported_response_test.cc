@@ -52,7 +52,6 @@ namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
 
-using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::NiceMock;
