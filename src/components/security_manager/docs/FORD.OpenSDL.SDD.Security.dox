@@ -1,0 +1,241 @@
+/**
+\page security_manager Security Manager Detailed Design
+## Table of contents
+- \subpage security_manager_intoduction
+  + \ref security_manager_rationale                "1.1 Rationale"
+  + \ref security_manager_scope                    "1.2 Scope"
+  + \ref security_manager_abbreviations            "1.3 Abbreviations"
+- \subpage security_manager_detail_design
+  + \ref security_manager_design_solutions         "2.1 Design solutions"
+  + \ref security_manager_class_structure          "2.2 Class Structure"
+  + \ref security_manager_sequence_diagram         "2.3 Sequence diagram"
+  + \ref security_manager_state_chart              "2.4 State chart diagram"
+- \subpage security_manager_interfaces
+  + \ref security_manager_public_interfaces        "3.1 Public interfaces description"
+  + \ref security_manager_internal_interfaces      "3.2 Internal interfaces description"
+  + \ref security_manager_derived_interfaces       "3.3 Derived interfaces and dependencies"
+- \subpage security_manager_data_structure_resources
+  + \ref security_manager_data_structure           "4.1 Element Data Structure"
+  + \ref security_manager_resources                "4.2 Resource usage"
+- \subpage security_manager_references_and_history
+  + \ref security_manager_references               "5.1 References"
+  + \ref security_manager_history                  "5.2 Document history change and approve"
+*/
+//-----------------------------------------------------------
+/**
+\page security_manager_intoduction 1 Introduction
+The document is intended to support software developers, 
+maintenance and integration engineers with sufficient,
+detailed information concerning the design, development and
+deployment concepts, to accomplish their respective tasks without reliance on the authors.
+
+\anchor security_manager_rationale
+## 1.1 Rationale
+Security Manager implements SDL Architectural Solution according to:
+- https://smartdevicelink.com/en/guides/core/software-architecture-document/components-view/#security-manager
+
+\anchor security_manager_scope
+## 1.2 Scope
+Security Manager component extracted as a separate module for
+Ford channel data protection.
+This components is used to:
+- Provide security communications
+- Protect income and outcome business layer data from interception
+- Verify the relation between a mobile application certificate and its owner
+
+\anchor security_manager_abbreviations
+## 1.3 Abbreviations
+Abbreviations used in this document please find in the table below.
+| Abbreviation     | Expansion                        |
+|------------------|----------------------------------|
+| SSL              | Secure Sockets Layer cryptographic protocol |
+| TLS              | Transport Layer Security cryptographic protocol |
+| DTLS             | Datagram TLS cryptographic protocol |
+
+Definitions used in this document are in the table below.
+
+| Definition                | Description                       |
+|---------------------------|-----------------------------------|
+| SSL/TLS/DTL               | Cryptographic protocols that provide communications security over a computer network |
+*/
+//-----------------------------------------------------------
+/**
+\page security_manager_detail_design 2 Component detail design
+\anchor security_manager_design_solutions
+### 2.1 Design solutions
+The following design approaches and pattern was used for Security Manager:
+- Protection, creation and business logic is spitted to separates interfaces
+  + SecurityManager for handling Security queries from mobile side
+  + SSLContext provides for SSL connection establishing, encryption and decryption
+  + CryptoManager provides a factory for SSLContext
+- [Abstract Factory pattern design](https://sourcemaking.com/design_patterns/abstract_factory) 
+ used for SSLContext objects creation
+  + It also guaranty correctness of SSLContext destruction by the 
+    same Compiled SecurityManager object
+
+#### Design description
+security_manager::SSLContext is an interface for TLS connection establishing, data encryption and
+decryption within this connection.
+security_manager::SSLContextImpl implements SSLContext and wraps OpenSSL library handshake procedure, 
+encryption and decryption, contains handshake procedure error handling.
+_Note:_ security_manager::SSLContext objects are stored in connection_handler::ConnectionHandlerImpl,
+which implements protocol_handler::SessionObserver interface.
+
+security_manager::CryptoManager is an interface for SSLContext creation and destruction, 
+CA certificate update and last SSL error providing.
+security_manager::CryptoManagerImpl implements security_manager::CryptoManager and hides
+all OpenSSL initialization logics and SSL internal structures creation.
+
+security_manager::SecurityManager is a Facade of security_manager component and provides 
+external interface for security_manager::SSLContext creation and sending security error 
+via control service.
+security_manager::SecurityManagerImpl implements security_manager::SecurityManager and
+encapsulates control service data (security internal errors, handshake data) handling.
+
+security_manager::SecurityManagerListener is an interface for protection result notification 
+to other components.
+security_manager::SecurityManagerListener is implemented in a protocol_handler::ProtocolHandlerImpl for sending 
+protocol layer response on handshake procedure finish.
+
+
+\anchor security_manager_class_structure
+### 2.2 Class Structure
+The following UML class digram shows the component structure.
+![Security Manager class diagram](sm_class_digram.png)
+For more information about class digram follow:
+- http://www.uml-diagrams.org/class-diagrams-overview.htqml
+- https://sourcemaking.com/uml/modeling-it-systems/structural-view/class-diagram
+
+\anchor security_manager_sequence_diagram
+### 2.3 Sequence diagram
+The following UML sequence digram shows the component dynamic behavior.
+For more information about sequence digram follow:
+- http://www.uml-diagrams.org/sequence-diagrams.html
+- https://sourcemaking.com/uml/modeling-it-systems/external-view/use-case-sequence-diagram
+
+Security first initialization on session:
+![Start encryption](sm_sequence_digram_init.png)
+
+Security initialization for service on session with already initialized security:
+![Initialization](sm_sequence_digram_verify.png)
+
+Decryption procedure:
+![Decryption](sm_sequence_digram_decryption.png)
+
+Encryption procedure:
+![Encryption](sm_sequence_digram_encryption.png)
+
+\anchor security_manager_state_chart
+### 2.4 State chart diagram
+Not applicable for Security Manager.
+*/
+//-----------------------------------------------------------
+/**
+\page security_manager_interfaces 3 Component Interfaces
+\anchor security_manager_public_interfaces
+### 3.1 Public interfaces description
+Security Manager provides functionality with following interfaces:
+- security_manager::SecurityManager        
+- security_manager::SecurityManagerListener
+- security_manager::SSLContext
+
+\anchor security_manager_internal_interfaces
+### 3.2 Internal interfaces description
+The following interfaces are provided by component for internal usage only:
+  - security_manager::CryptoManager
+  - security_manager::CryptoManagerSettings
+
+\anchor security_manager_derived_interfaces       
+### 3.3 Derived interfaces and dependencies
+Security Manager required following 3d-party libraries:
+  -  OpenSSL library v 1.0.1g and higher to meet TLS cipher restricts
+
+The following interfaces are required by component:
+- \ref src/components/include/utils Utils
+- protocol_handler::ProtocolObserver for getting Protocol notifications
+- implements protocol_handler::SessionObserver for providing SSLContext object managing
+- [OpenSSL API](https://www.openssl.org/docs/manmaster/ssl/)
+  + [SSL_library_init()](https://www.openssl.org/docs/manmaster/ssl/SSL_library_init.html)
+    - registers the available SSL/TLS ciphers and digests.
+  + [SSL_METHOD](https://www.openssl.org/docs/manmaster/ssl/ssl.html)
+    - That's a dispatch structure describing the internal ssl library methods/functions which implement the various protocol versions (SSLv3 TLSv1, ...). It's needed to create an SSL_CTX.
+  + [(D)TLSv1(_1/2)_(server/client)_method, ]
+  (https://www.openssl.org/docs/manmaster/ssl/SSL_CTX_new.html)
+    - TLS/SSL connections established with these methods will understand the TLSv1 protocol.
+    - A client will send out TLSv1 client hello messages and will indicate that it only understands TLSv1. A server will only understand TLSv1 client hello messages.
+  + [SSL_CTX_new](https://www.openssl.org/docs/manmaster/ssl/SSL_CTX_new.html)
+    - creates a new SSL_CTX object as framework to establish TLS/SSL enabled connections.
+  + [SSL_CTX_free](https://www.openssl.org/docs/manmaster/ssl/SSL_CTX_free.html)
+    - decrements the reference count of ctx, and removes the SSL_CTX object pointed to by ctx and frees up the allocated memory if the the reference count has reached 0.
+  + [SSL_CTX_use_certificate_file, SSL_CTX_use_PrivateKey_file, SSL_CTX_check_private_key]
+  (https://www.openssl.org/docs/manmaster/ssl/SSL_CTX_use_certificate.html)
+    - load certificate and key data
+  + [SSL_CTX_set_cipher_list](https://www.openssl.org/docs/manmaster/ssl/SSL_CTX_set_cipher_list.html)
+    - choose list of available [cipher suites](https://en.wikipedia.org/wiki/Cipher_suite)
+  + [SSL_new](https://www.openssl.org/docs/manmaster/ssl/SSL_new.html)
+    - creates a new SSL structure which is needed to hold the data for a TLS/SSL connection. The new structure inherits the settings of the underlying context ctx: connection method, options, verification settings, timeout settings.
+  + [SSL_CTX_set_verify](https://www.openssl.org/docs/manmaster/ssl/SSL_CTX_set_verify.html)
+    - sets the verification flags for ctx to be mode and specifies the verify_callback function to be used. 
+  + [SSL_CTX_load_verify_locations](https://www.openssl.org/docs/manmaster/ssl/SSL_CTX_load_verify_locations.html)
+    - specifies the locations for ctx, at which CA certificates for verification purposes are located. 
+  + [X509_STORE_CTX_get_error, X509_STORE_CTX_set_error](https://www.openssl.org/docs/manmaster/crypto/X509_STORE_CTX_set_error.html)
+    - get or set certificate verification status information
+  + [SSL_do_handshake](https://www.openssl.org/docs/manmaster/ssl/SSL_do_handshake.html)
+    - waits for a SSL/TLS handshake to take place. If the connection is in client mode, the handshake will be started.
+    - The handshake routines may have to be explicitly set in advance using either SSL_set_connect_state or SSL_set_accept_state.
+  + [SSL_shutdown](https://www.openssl.org/docs/manmaster/ssl/SSL_shutdown.html)
+    - shuts down an active TLS/SSL connection. It sends the "close notify" shutdown alert to the peer.
+  + [SSL_free](https://www.openssl.org/docs/manmaster/ssl/SSL_free.html)
+    - decrements the reference count of ssl, and removes the SSL structure pointed to by ssl
+    - frees up the allocated memory if the reference count has reached 0.
+  +[BIO_new, BIO_set, BIO_free, BIO_vfree, BIO_free_all](https://www.openssl.org/docs/manmaster/crypto/bio.html)
+    - BIO allocation and freeing functions
+  + [BIO_read, BIO_write, BIO_gets, BIO_puts](https://www.openssl.org/docs/manmaster/crypto/BIO_read.html)
+    - BIO I/O functions
+*/
+//-----------------------------------------------------------
+/**
+\page security_manager_data_structure_resources 4 Component data and resources
+\anchor security_manager_data_structure
+### 4.1 Element Data Structure
+The following data types are used by the Component:
+  - security_manager::SecurityQuery
+  - protocol_handler::ProtocolPacket
+
+The format of certificate data exchange is: 
+  - PEM certificates according to [APPLINK-21512](https://adc.luxoft.com/jira/browse/APPLINK-21512)
+
+\anchor security_manager_resources
+### 4.2 Resource usage
+Security Manager get an assess to certificate and private key
+data using OpenSSl API.
+*/
+//-----------------------------------------------------------
+/**
+\page security_manager_references_and_history 5 References and history
+\anchor security_manager_references
+### 5.1 References
+- [Software Architecture Document](https://smartdevicelink.com/en/guides/core/software-architecture-document/table-of-contents/)
+- [OpenSSL API](https://www.openssl.org/docs/manmaster/ssl/)
+- [TLS 1.1 RFC](https://tools.ietf.org/html/rfc4346)
+- [TLS 1.2 RFC](https://tools.ietf.org/html/rfc5246)
+- [DTLS RFC](https://tools.ietf.org/html/rfc4347)
+
+\anchor security_manager_history
+### 5.2 Document history
+Document change history
+
+| Version     | Data       | Author/Editor                          | Change description  |
+|-------------|------------|----------------------------------------|---------------------|
+| 0.1         | 08/11/2016 | [EZamakhov](https://github.com/pestOO) | Initial version from the previous [SDL SDD](https://adc.luxoft.com/confluence/pages/viewpage.action?pageId=279677125) |
+
+Document approve history
+
+| Version     | Data       | Author/Editor               | Change description  |
+|-------------|------------|-----------------------------|---------------------|
+| | | | |
+
+For more precise document change history follow github history -
+- https://github.com/smartdevicelink/sdl_core/commits/master/src/components/security_manager/docs/security_manager_software_detailed_design.dox
+- https://github.com/smartdevicelink/sdl_core/commits/develop/src/components/security_manager/docs/security_manager_software_detailed_design.dox
+*/
