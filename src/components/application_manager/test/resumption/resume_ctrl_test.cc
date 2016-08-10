@@ -785,6 +785,30 @@ TEST_F(ResumeCtrlTest, CheckApplicationkHash_) {
   EXPECT_TRUE(res_ctrl->CheckApplicationHash(app_mock, kHash_));
 }
 
+TEST_F(ResumeCtrlTest, GetSavedAppHmiLevel_NoAskedApp_INVALID_ENUM) {
+  const std::string app_id = "test_app_id";
+  const std::string device_id = "test_device_id";
+  EXPECT_CALL(*mock_storage, GetSavedApplication(app_id, device_id, _))
+      .WillOnce(Return(false));
+  EXPECT_EQ(mobile_apis::HMILevel::INVALID_ENUM,
+            res_ctrl->GetSavedAppHmiLevel(app_id, device_id));
+}
+
+ACTION_P(SetHmiLevel, hmi_level) {
+  arg2[am::strings::hmi_level] = hmi_level;
+}
+
+TEST_F(ResumeCtrlTest, GetSavedAppHmiLevel_AskedAppFound_INVALID_ENUM) {
+  const std::string app_id = "test_app_id";
+  const std::string device_id = "test_device_id";
+  const mobile_apis::HMILevel::eType hmi_level =
+      mobile_apis::HMILevel::HMI_FULL;
+
+  EXPECT_CALL(*mock_storage, GetSavedApplication(app_id, device_id, _))
+      .WillOnce(DoAll(SetHmiLevel(hmi_level), Return(true)));
+  EXPECT_EQ(hmi_level, res_ctrl->GetSavedAppHmiLevel(app_id, device_id));
+}
+
 }  // namespace resumption_test
 }  // namespace components
 }  // namespace test

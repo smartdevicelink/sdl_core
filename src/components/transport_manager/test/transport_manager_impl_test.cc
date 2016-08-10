@@ -52,6 +52,7 @@
 using ::testing::_;
 using ::testing::AtLeast;
 using ::testing::Return;
+using ::testing::ReturnRef;
 
 using ::protocol_handler::RawMessage;
 using ::protocol_handler::RawMessagePtr;
@@ -1067,6 +1068,13 @@ TEST_F(TransportManagerImplTest,
   // Act and Assert
   EXPECT_CALL(*tm_listener_, OnUnexpectedDisconnect(_, _)).Times(0);
   tm_.TestHandle(test_event);
+}
+
+TEST_F(TransportManagerImplTest, RunAppOnDevice_TransportAdapterFound_SUCCESS) {
+  HandleDeviceListUpdated();
+  const std::string bundle_id = "test_bundle_id";
+  EXPECT_CALL(*mock_adapter_, RunAppOnDevice(mac_address_, bundle_id));
+  tm_.RunAppOnDevice(device_handle_, bundle_id);
 }
 
 }  // namespace transport_manager_test

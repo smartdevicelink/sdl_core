@@ -414,6 +414,18 @@ class TransportAdapterImpl : public TransportAdapter,
    */
   std::string GetConnectionType() const OVERRIDE;
 
+  /**
+   * @brief RunAppOnDevice allows run specific application on the certain
+   *device.
+   *
+   * @param device_handle device identifier to run application on.
+   *
+   * @param bundle_id application id also known as bundle id on some devices to
+   *run.
+   */
+  void RunAppOnDevice(const DeviceUID& device_uid,
+                      const std::string& bundle_id) OVERRIDE;
+
 #ifdef TELEMETRY_MONITOR
   /**
    * @brief Setup observer for time metric.
@@ -477,18 +489,6 @@ class TransportAdapterImpl : public TransportAdapter,
    * @return Error information about connecting applications on device
    */
   TransportAdapter::Error ConnectDevice(DeviceSptr device);
-
-  /**
-   * @brief RunAppOnDevice allows run specific application on the certain
-   *device.
-   *
-   * @param device_handle device identifier to run application on.
-   *
-   * @param bundle_id application id alsow known as bundle id on some devices to
-   *run.
-   */
-  void RunAppOnDevice(const DeviceUID& device_uid,
-                      const std::string& bundle_id) OVERRIDE;
 
   /**
    * @brief Remove specified device
