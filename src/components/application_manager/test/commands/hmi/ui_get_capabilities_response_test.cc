@@ -40,7 +40,6 @@
 #include "smart_objects/smart_object.h"
 #include "interfaces/MOBILE_API.h"
 #include "application_manager/mock_hmi_capabilities.h"
-#include "application_manager/commands/command_request_test.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/commands/commands_test.h"
 #include "application_manager/commands/command_impl.h"
@@ -101,10 +100,11 @@ TEST_F(UIGetCapabilitiesResponseTest, RUN_SetDisplay_SUCCESSS) {
   EXPECT_CALL(app_mngr_, hmi_capabilities())
       .WillOnce(ReturnRef(mock_hmi_capabilities_));
 
+  smart_objects::SmartObject display_capabilities_so =
+      (*command_msg)[strings::msg_params][hmi_response::display_capabilities];
+
   EXPECT_CALL(mock_hmi_capabilities_,
-              set_display_capabilities(
-                  (*command_msg)[strings::msg_params]
-                                [hmi_response::display_capabilities]));
+              set_display_capabilities(display_capabilities_so));
 
   command->Run();
 }
@@ -122,10 +122,11 @@ TEST_F(UIGetCapabilitiesResponseTest, SetSoftButton_SUCCESS) {
   EXPECT_CALL(app_mngr_, hmi_capabilities())
       .WillOnce(ReturnRef(mock_hmi_capabilities_));
 
+  smart_objects::SmartObject soft_button_capabilities_so = (*command_msg)
+      [strings::msg_params][hmi_response::soft_button_capabilities];
+
   EXPECT_CALL(mock_hmi_capabilities_,
-              set_soft_button_capabilities(
-                  (*command_msg)[strings::msg_params]
-                                [hmi_response::soft_button_capabilities]));
+              set_soft_button_capabilities(soft_button_capabilities_so));
 
   command->Run();
 }
@@ -143,10 +144,11 @@ TEST_F(UIGetCapabilitiesResponseTest, SetHmiZone_SUCCESS) {
   EXPECT_CALL(app_mngr_, hmi_capabilities())
       .WillOnce(ReturnRef(mock_hmi_capabilities_));
 
+  smart_objects::SmartObject hmi_zone_capabilities_so =
+      (*command_msg)[strings::msg_params][hmi_response::hmi_zone_capabilities];
+
   EXPECT_CALL(mock_hmi_capabilities_,
-              set_hmi_zone_capabilities(
-                  (*command_msg)[strings::msg_params]
-                                [hmi_response::hmi_zone_capabilities]));
+              set_hmi_zone_capabilities(hmi_zone_capabilities_so));
 
   command->Run();
 }
@@ -162,10 +164,11 @@ TEST_F(UIGetCapabilitiesResponseTest, SetAudioPassThru_SUCCESS) {
   EXPECT_CALL(app_mngr_, hmi_capabilities())
       .WillOnce(ReturnRef(mock_hmi_capabilities_));
 
-  EXPECT_CALL(mock_hmi_capabilities_,
-              set_audio_pass_thru_capabilities(
-                  (*command_msg)[strings::msg_params]
-                                [strings::audio_pass_thru_capabilities]));
+  smart_objects::SmartObject audio_pass_thru_capabilities_so = (*command_msg)
+      [strings::msg_params][strings::audio_pass_thru_capabilities];
+  EXPECT_CALL(
+      mock_hmi_capabilities_,
+      set_audio_pass_thru_capabilities(audio_pass_thru_capabilities_so));
 
   command->Run();
 }
@@ -183,10 +186,11 @@ TEST_F(UIGetCapabilitiesResponseTest, SetNavigation_SUCCESS) {
   EXPECT_CALL(app_mngr_, hmi_capabilities())
       .WillOnce(ReturnRef(mock_hmi_capabilities_));
 
+  smart_objects::SmartObject hmi_capabilities_so =
+      (*command_msg)[strings::msg_params][strings::hmi_capabilities];
   EXPECT_CALL(mock_hmi_capabilities_,
               set_navigation_supported(
-                  (*command_msg)[strings::msg_params][strings::hmi_capabilities]
-                                [strings::navigation].asBool()));
+                  hmi_capabilities_so[strings::navigation].asBool()));
 
   command->Run();
 }
@@ -204,10 +208,11 @@ TEST_F(UIGetCapabilitiesResponseTest, SePhoneCall_SUCCESS) {
   EXPECT_CALL(app_mngr_, hmi_capabilities())
       .WillOnce(ReturnRef(mock_hmi_capabilities_));
 
+  smart_objects::SmartObject hmi_capabilities_so =
+      (*command_msg)[strings::msg_params][strings::hmi_capabilities];
   EXPECT_CALL(mock_hmi_capabilities_,
               set_phone_call_supported(
-                  (*command_msg)[strings::msg_params][strings::hmi_capabilities]
-                                [strings::phone_call].asBool()));
+                  hmi_capabilities_so[strings::phone_call].asBool()));
 
   command->Run();
 }
