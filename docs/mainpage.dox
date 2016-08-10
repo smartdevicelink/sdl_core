@@ -6,5 +6,6 @@
  * For getting SmartDeviceLink overview, please, refer to [Software Architecture Document](https://smartdevicelink.com/en/docs/core/master/software-architecture-document/table-of-contents/) 
  * 
  * ##Table of contents
+ * - \ref security_manager
  */
  //-----------------------------------------------------------
