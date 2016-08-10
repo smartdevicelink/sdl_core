@@ -245,7 +245,7 @@ pkg_check_modules(GLIB2 REQUIRED glib-2.0)
 add_definitions(${GLIB2_CFLAGS})
 endif()
 
-set(CMAKE_CXX_FLAGS "-fPIC -std=gnu++0x -Wall -Werror")
+set(CMAKE_CXX_FLAGS "-fPIC -std=gnu++0x -Wall -Werror -Wno-error=deprecated-declarations")
 if (CMAKE_BUILD_TYPE)
   if (${CMAKE_BUILD_TYPE} STREQUAL "Release")
     set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
