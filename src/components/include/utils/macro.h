@@ -111,6 +111,11 @@
     return TypeName::instance(); \
   }
 
+#define PLUGIN_FACTORY(TypeName) \
+  TypeName* Create() { \
+    return new TypeName(); \
+  }
+
 #define NOTREACHED() DCHECK(!"Unreachable code")
 
 // Allows to perform static check that virtual function from base class is

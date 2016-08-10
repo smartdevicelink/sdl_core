@@ -87,6 +87,9 @@ if (REMOTE_CONTROL)
   add_subdirectory(./can_cooperation)
 endif ()
 
+# --- VR module
+add_subdirectory(./vr_module)
+
 if (TIME_TESTER)
     add_subdirectory(./time_tester)
 endif()
