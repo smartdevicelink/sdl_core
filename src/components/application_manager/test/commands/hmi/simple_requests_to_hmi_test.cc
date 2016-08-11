@@ -56,6 +56,11 @@
 #include "hmi/ui_delete_submenu_request.h"
 #include "hmi/ui_end_audio_pass_thru_request.h"
 #include "hmi/ui_get_capabilities_request.h"
+#include "hmi/ui_get_language_request.h"
+#include "hmi/ui_get_supported_languages_request.h"
+#include "hmi/ui_is_ready_request.h"
+#include "hmi/ui_perform_audio_pass_thru_request.h"
+#include "hmi/ui_perform_interaction_request.h"
 
 namespace test {
 namespace components {
@@ -117,7 +122,12 @@ typedef Types<commands::VIIsReadyRequest,
               commands::UIDeleteCommandRequest,
               commands::UIDeleteSubmenuRequest,
               commands::UIEndAudioPassThruRequest,
-              commands::UIGetCapabilitiesRequest> RequestCommandsList;
+              commands::UIGetCapabilitiesRequest,
+              commands::UIGetLanguageRequest,
+              commands::UIGetSupportedLanguagesRequest,
+              commands::UIIsReadyRequest,
+              commands::UIPerformAudioPassThruRequest,
+              commands::UIPerformInteractionRequest> RequestCommandsList;
 
 TYPED_TEST_CASE(RequestToHMICommandsTest, RequestCommandsList);
 

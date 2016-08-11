@@ -58,6 +58,8 @@
 #include "hmi/ui_delete_command_response.h"
 #include "hmi/ui_delete_submenu_response.h"
 #include "hmi/ui_end_audio_pass_thru_response.h"
+#include "hmi/ui_perform_audio_pass_thru_response.h"
+#include "hmi/ui_perform_interaction_response.h"
 
 namespace test {
 namespace components {
@@ -119,7 +121,12 @@ typedef Types<
     CommandData<commands::UIChangeRegistratioResponse,
                 hmi_apis::FunctionID::UI_ChangeRegistration>,
     CommandData<commands::UIDeleteCommandResponse,
-                hmi_apis::FunctionID::UI_DeleteCommand> > ResponseCommandsList;
+                hmi_apis::FunctionID::UI_DeleteCommand>,
+    CommandData<commands::UIPerformAudioPassThruResponse,
+                hmi_apis::FunctionID::UI_PerformAudioPassThru>,
+    CommandData<commands::UIPerformInteractionResponse,
+                hmi_apis::FunctionID::UI_PerformInteraction>>
+    ResponseCommandsList;
 
 TYPED_TEST_CASE(ResponseFromHMICommandsTest, ResponseCommandsList);
 
