@@ -195,7 +195,7 @@ TEST_F(UIGetCapabilitiesResponseTest, SetNavigation_SUCCESS) {
   command->Run();
 }
 
-TEST_F(UIGetCapabilitiesResponseTest, SePhoneCall_SUCCESS) {
+TEST_F(UIGetCapabilitiesResponseTest, SetPhoneCall_SUCCESS) {
   MessageSharedPtr command_msg = CreateCommandMsg();
   (*command_msg)[strings::msg_params][strings::hmi_capabilities] =
       smart_objects::SmartObject(smart_objects::SmartType_Map);

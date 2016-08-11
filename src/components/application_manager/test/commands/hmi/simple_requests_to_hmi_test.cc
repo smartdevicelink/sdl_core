@@ -42,7 +42,17 @@
 #include "hmi/vi_read_did_request.h"
 #include "hmi/vi_subscribe_vehicle_data_request.h"
 #include "hmi/dial_number_request.h"
+#include "hmi/tts_is_ready_request.h"
+#include "hmi/tts_set_global_properties_request.h"
+#include "hmi/tts_speak_request.h"
+#include "hmi/tts_stop_speaking_request.h"
+#include "hmi/tts_get_supported_languages_request.h"
 #include "hmi/close_popup_request.h"
+#include "hmi/ui_add_command_request.h"
+#include "hmi/ui_add_submenu_request.h"
+#include "hmi/ui_alert_request.h"
+#include "hmi/ui_change_registration_request.h"
+#include "hmi/ui_delete_command_request.h"
 #include "hmi/ui_delete_submenu_request.h"
 #include "hmi/ui_end_audio_pass_thru_request.h"
 #include "hmi/ui_get_capabilities_request.h"
@@ -95,6 +105,16 @@ typedef Types<commands::VIIsReadyRequest,
               commands::VISubscribeVehicleDataRequest,
               commands::hmi::DialNumberRequest,
               commands::ClosePopupRequest,
+              commands::TTSIsReadyRequest,
+              commands::TTSSetGlobalPropertiesRequest,
+              commands::TTSSpeakRequest,
+              commands::TTSStopSpeakingRequest,
+              commands::TTSGetSupportedLanguagesRequest,
+              commands::UIAddCommandRequest,
+              commands::UIAddSubmenuRequest,
+              commands::UIAlertRequest,
+              commands::UIChangeRegistrationRequest,
+              commands::UIDeleteCommandRequest,
               commands::UIDeleteSubmenuRequest,
               commands::UIEndAudioPassThruRequest,
               commands::UIGetCapabilitiesRequest> RequestCommandsList;
