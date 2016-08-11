@@ -30,6 +30,7 @@ include_directories (
   ${LOG4CXX_INCLUDE_DIRECTORY}
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${CMAKE_BINARY_DIR}/src/components/
+  ${GPB_INCLUDE_DIRECTORY}
 )
 
 set (SOURCES
@@ -42,9 +43,17 @@ set (LIBRARIES
     FunctionalModule
     ConfigProfile
     Utils
+    protobuf
+    MobileProto
+    HmiProto
 )
 
+generate_proto(${CMAKE_CURRENT_SOURCE_DIR}/interface/mobile.proto MobileProto)
+generate_proto(${CMAKE_CURRENT_SOURCE_DIR}/interface/hmi.proto HmiProto)
+
+link_directories(${LINK_DIRECTORIES} ${GPB_LIBS_DIRECTORY})
 add_library(${target} SHARED ${SOURCES})
+add_dependencies(${target} LibGPB)
 target_link_libraries(${target} ${LIBRARIES} )
 
 if(ENABLE_LOG)
