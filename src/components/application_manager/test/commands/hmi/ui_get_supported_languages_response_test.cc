@@ -68,6 +68,9 @@ typedef NiceMock<
 
 namespace {
 const uint32_t kConnectionKey = 2u;
+const std::string kStringNum = "123";
+const std::string kLanguage = "EN_US";
+const smart_objects::SmartObject supported_languages(kLanguage);
 }  // namespace
 
 class UIGetSupportedLanguagesResponseTest
@@ -78,10 +81,8 @@ class UIGetSupportedLanguagesResponseTest
 };
 
 TEST_F(UIGetSupportedLanguagesResponseTest, RUN_SUCCESS) {
-  smart_objects::SmartObject supported_languages("EN_US");
-
   MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
-  (*command_msg)[strings::msg_params][strings::number] = "123";
+  (*command_msg)[strings::msg_params][strings::number] = kStringNum;
   (*command_msg)[strings::params][strings::connection_key] = kConnectionKey;
   (*command_msg)[strings::params][hmi_response::code] =
       hmi_apis::Common_Result::SUCCESS;
@@ -103,10 +104,8 @@ TEST_F(UIGetSupportedLanguagesResponseTest, RUN_SUCCESS) {
   command->Run();
 }
 TEST_F(UIGetSupportedLanguagesResponseTest, RUN_UNSUCCESS) {
-  smart_objects::SmartObject supported_languages("EN_US");
-
   MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
-  (*command_msg)[strings::msg_params][strings::number] = "123";
+  (*command_msg)[strings::msg_params][strings::number] = kStringNum;
   (*command_msg)[strings::params][strings::connection_key] = kConnectionKey;
   (*command_msg)[strings::params][hmi_response::code] =
       hmi_apis::Common_Result::WRONG_LANGUAGE;

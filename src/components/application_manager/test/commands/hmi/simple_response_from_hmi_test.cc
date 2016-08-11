@@ -125,7 +125,11 @@ typedef Types<
     CommandData<commands::UIPerformAudioPassThruResponse,
                 hmi_apis::FunctionID::UI_PerformAudioPassThru>,
     CommandData<commands::UIPerformInteractionResponse,
-                hmi_apis::FunctionID::UI_PerformInteraction>>
+                hmi_apis::FunctionID::UI_PerformInteraction>,
+    CommandData<commands::UIDeleteSubmenuResponse,
+                hmi_apis::FunctionID::UI_DeleteSubMenu>,
+    CommandData<commands::UIEndAudioPassThruResponse,
+                hmi_apis::FunctionID::UI_EndAudioPassThru>>
     ResponseCommandsList;
 
 TYPED_TEST_CASE(ResponseFromHMICommandsTest, ResponseCommandsList);

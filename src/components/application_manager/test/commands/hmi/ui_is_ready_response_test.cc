@@ -36,22 +36,16 @@
 #include "gtest/gtest.h"
 #include "utils/shared_ptr.h"
 #include "smart_objects/smart_object.h"
-#include "application_manager/smart_object_keys.h"
 #include "commands/commands_test.h"
-#include "application_manager/application.h"
 #include "application_manager/mock_hmi_capabilities.h"
-#include "application_manager/mock_message_helper.h"
-#include "application_manager/mock_application_manager.h"
 #include "application_manager/commands/hmi/response_from_hmi.h"
 #include "application_manager/commands/hmi/ui_is_ready_response.h"
-#include "application_manager/policies/mock_policy_handler_interface.h"
 
 namespace test {
 namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
 
-using ::testing::_;
 using ::testing::Return;
 using ::utils::SharedPtr;
 using ::testing::NiceMock;
@@ -60,7 +54,6 @@ namespace strings = ::application_manager::strings;
 namespace hmi_response = am::hmi_response;
 using am::commands::ResponseFromHMI;
 using am::commands::UIIsReadyResponse;
-using am::commands::CommandImpl;
 
 typedef SharedPtr<ResponseFromHMI> ResponseFromHMIPtr;
 typedef NiceMock<
@@ -69,6 +62,7 @@ typedef NiceMock<
 
 namespace {
 const uint32_t kConnectionKey = 2u;
+const std::string kStringNum = "123";
 const bool kIsAvailable = true;
 const bool kIsNotAvailable = false;
 }  // namespace
@@ -81,7 +75,7 @@ class UIIsReadyResponseTest : public CommandsTest<CommandsTestMocks::kIsNice> {
 
 TEST_F(UIIsReadyResponseTest, RUN_SUCCESS) {
   MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
-  (*command_msg)[strings::msg_params][strings::number] = "123";
+  (*command_msg)[strings::msg_params][strings::number] = kStringNum;
   (*command_msg)[strings::params][strings::connection_key] = kConnectionKey;
   (*command_msg)[strings::params][hmi_response::code] =
       hmi_apis::Common_Result::SUCCESS;
@@ -101,7 +95,7 @@ TEST_F(UIIsReadyResponseTest, RUN_SUCCESS) {
 
 TEST_F(UIIsReadyResponseTest, RUN_NoKeyAvailable) {
   MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
-  (*command_msg)[strings::msg_params][strings::number] = "123";
+  (*command_msg)[strings::msg_params][strings::number] = kStringNum;
   (*command_msg)[strings::params][strings::connection_key] = kConnectionKey;
   (*command_msg)[strings::params][hmi_response::code] =
       hmi_apis::Common_Result::SUCCESS;

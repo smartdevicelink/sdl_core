@@ -45,7 +45,6 @@ namespace hmi_commands_test {
 
 using utils::SharedPtr;
 using application_manager::commands::UIGetLanguageResponse;
-// using test::components::application_manager_test::MockHMICapabilities;
 using test::components::event_engine_test::MockEventDispatcher;
 using testing::_;
 using testing::ReturnRef;
@@ -59,12 +58,16 @@ typedef NiceMock<
     ::test::components::application_manager_test::MockHMICapabilities>
     MockHMICapabilities;
 
+namespace {
+const hmi_apis::Common_Language::eType kLanguage = Common_Language::EN_GB;
+}  // namespace
+
 class UIGetLanguageResponseTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {};
 
 TEST_F(UIGetLanguageResponseTest, Run_LanguageSet_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
-  (*msg)[strings::msg_params][hmi_response::language] = Common_Language::EN_GB;
+  (*msg)[strings::msg_params][hmi_response::language] = kLanguage;
 
   SharedPtr<UIGetLanguageResponse> command(
       CreateCommand<UIGetLanguageResponse>(msg));
@@ -72,8 +75,7 @@ TEST_F(UIGetLanguageResponseTest, Run_LanguageSet_SUCCESS) {
   MockHMICapabilities mock_hmi_capabilities;
   EXPECT_CALL(app_mngr_, hmi_capabilities())
       .WillOnce(ReturnRef(mock_hmi_capabilities));
-  EXPECT_CALL(mock_hmi_capabilities,
-              set_active_ui_language(Common_Language::EN_GB));
+  EXPECT_CALL(mock_hmi_capabilities, set_active_ui_language(kLanguage));
 
   MockEventDispatcher mock_event_dispatcher;
   EXPECT_CALL(app_mngr_, event_dispatcher())
