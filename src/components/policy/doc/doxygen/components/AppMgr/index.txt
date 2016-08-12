@@ -1,5 +1,0 @@
-/*! \page components_appmgr App Manager
-
-Here will be information about App Manager component
-
-*/

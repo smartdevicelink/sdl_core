@@ -1,9 +1,0 @@
-/*! \page components_jsonhandler_formatters Smart Objects Formatters
-
-In order to create JSON string representation from Smart Object or create Smart Object data structure from JSON string representation JSON Handler component has special classes called formatters.
-
-The interface of formatter is quite simple and defined by NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonBase class. Actually it has two methods - NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonBase::objToJsonValue to convert JSON string to object and NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonBase::jsonValueToObj to create JSON string from object.
-
-Current implementation has two different implementations of NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonBase class: NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv1 for ALRPC.v1 and NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv2 for ALRPC.v2. These implementations handle specifics of each format.
-
-*/
