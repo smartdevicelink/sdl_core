@@ -35,6 +35,7 @@ include_directories (
 
 set (SOURCES
     src/vr_module.cc
+    src/vr_proxy.cc
 )
 
 set (LIBRARIES

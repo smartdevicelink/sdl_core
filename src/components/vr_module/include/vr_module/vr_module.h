@@ -36,13 +36,16 @@
 #include "functional_module/generic_module.h"
 #include "json/value.h"
 #include "utils/macro.h"
+#include "vr_module/vr_proxy.h"
+#include "vr_module/vr_proxy_listener.h"
 
 namespace vr_module {
 
 typedef Json::Value MessageFromMobile;
 
 class VRModule
-    : public functional_modules::GenericModule {
+    : public functional_modules::GenericModule,
+      public VRProxyListener {
  public:
   VRModule();
   ~VRModule();
@@ -72,6 +75,9 @@ class VRModule
   static uint32_t GetNextCorrelationID() {
     return next_correlation_id_++;
   }
+
+  virtual void OnReceived(const vr_hmi_api::Message& message);
+
  private:
 
   /**
@@ -84,6 +90,7 @@ class VRModule
   functional_modules::PluginInfo plugin_info_;
 
   static uint32_t next_correlation_id_;
+  VRProxy proxy_;
 
   DISALLOW_COPY_AND_ASSIGN(VRModule);
 };
