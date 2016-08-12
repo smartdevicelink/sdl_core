@@ -56,6 +56,8 @@
 #include "hmi/ui_alert_response.h"
 #include "hmi/ui_change_registration_response.h"
 #include "hmi/ui_delete_command_response.h"
+#include "hmi/ui_delete_submenu_response.h"
+#include "hmi/ui_end_audio_pass_thru_response.h"
 
 namespace test {
 namespace components {
@@ -101,6 +103,10 @@ typedef Types<
                 hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData>,
     CommandData<commands::hmi::DialNumberResponse,
                 hmi_apis::FunctionID::BasicCommunication_DialNumber>,
+    CommandData<commands::UIDeleteSubmenuResponse,
+                hmi_apis::FunctionID::UI_DeleteSubMenu>,
+    CommandData<commands::UIEndAudioPassThruResponse,
+                hmi_apis::FunctionID::UI_EndAudioPassThru>,
     CommandData<commands::TTSSetGlobalPropertiesResponse,
                 hmi_apis::FunctionID::TTS_SetGlobalProperties>,
     CommandData<commands::TTSStopSpeakingResponse,

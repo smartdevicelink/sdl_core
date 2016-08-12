@@ -53,6 +53,9 @@
 #include "hmi/ui_alert_request.h"
 #include "hmi/ui_change_registration_request.h"
 #include "hmi/ui_delete_command_request.h"
+#include "hmi/ui_delete_submenu_request.h"
+#include "hmi/ui_end_audio_pass_thru_request.h"
+#include "hmi/ui_get_capabilities_request.h"
 
 namespace test {
 namespace components {
@@ -111,7 +114,10 @@ typedef Types<commands::VIIsReadyRequest,
               commands::UIAddSubmenuRequest,
               commands::UIAlertRequest,
               commands::UIChangeRegistrationRequest,
-              commands::UIDeleteCommandRequest> RequestCommandsList;
+              commands::UIDeleteCommandRequest,
+              commands::UIDeleteSubmenuRequest,
+              commands::UIEndAudioPassThruRequest,
+              commands::UIGetCapabilitiesRequest> RequestCommandsList;
 
 TYPED_TEST_CASE(RequestToHMICommandsTest, RequestCommandsList);
 
