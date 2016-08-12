@@ -356,6 +356,22 @@ TEST_F(HmiLanguageHandlerTest,
   EXPECT_EQ(kDefaultAppsSize, kApps.size());
 }
 
+TEST_F(HmiLanguageHandlerTest, OnUnregisterApp_SUCCESS) {
+  const uint32_t app_id = 5u;
+  smart_objects::SmartObject msg;
+  msg[am::strings::params][am::strings::app_id] = app_id;
+
+  Event event(hmi_apis::FunctionID::BasicCommunication_OnAppRegistered);
+  event.set_smart_object(msg);
+
+  hmi_language_handler_->on_event(event);
+
+  EXPECT_EQ(1u, hmi_language_handler_->get_apps().size());
+
+  hmi_language_handler_->OnUnregisterApplication(app_id);
+  EXPECT_EQ(kDefaultAppsSize, hmi_language_handler_->get_apps().size());
+}
+
 }  // namespace hmi_language_handler
 }  // namespace components
 }  // namespace test

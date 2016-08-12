@@ -424,6 +424,8 @@ class HMICapabilitiesImpl : public HMICapabilities {
 
   void Init(resumption::LastState* last_state) OVERRIDE;
 
+  HMILanguageHandler& get_hmi_language_handler() OVERRIDE;
+
  protected:
   /*
    * @brief Loads capabilities from local file in case SDL was launched

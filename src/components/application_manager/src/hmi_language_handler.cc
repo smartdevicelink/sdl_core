@@ -133,6 +133,10 @@ void HMILanguageHandler::on_event(const event_engine::Event& event) {
       is_tts_language_received_ = true;
       break;
     case hmi_apis::FunctionID::BasicCommunication_OnAppRegistered:
+      if (!(msg[strings::params].keyExists(strings::app_id))) {
+        SDL_WARN("Message doesn't contain parameter app_id");
+        return;
+      }
       CheckApplication(
           std::make_pair(msg[strings::params][strings::app_id].asUInt(), true));
       return;
@@ -274,13 +278,21 @@ void HMILanguageHandler::VerifyWithPersistedLanguages() {
 
 void HMILanguageHandler::HandleWrongLanguageApp(const Apps::value_type& app) {
   SDL_AUTO_TRACE();
-  Apps::iterator it = apps_.find(app.first);
-  if (apps_.end() == it) {
-    SDL_DEBUG("Application id "
-              << app.first << " is not found within apps with wrong language.");
-    return;
+  {
+    sync_primitives::AutoLock lock(apps_lock_);
+    Apps::iterator it = apps_.find(app.first);
+    if (apps_.end() == it) {
+      SDL_DEBUG("Application id "
+                << app.first
+                << " is not found within apps with wrong language.");
+      return;
+    }
+    apps_.erase(it);
+    if (apps_.empty()) {
+      SDL_DEBUG("HMILanguageHandler unsubscribed from all events.");
+      unsubscribe_from_all_events();
+    }
   }
-
   SDL_INFO("Unregistering application with app_id "
            << app.first << " because of HMI language(s) mismatch.");
 
@@ -292,24 +304,23 @@ void HMILanguageHandler::HandleWrongLanguageApp(const Apps::value_type& app) {
       commands::Command::ORIGIN_SDL);
   application_manager_.UnregisterApplication(
       app.first, mobile_apis::Result::SUCCESS, false);
-  apps_.erase(it);
-  if (0 == apps_.size()) {
-    SDL_DEBUG("All apps processed. Unsubscribing from all events.");
-    unsubscribe_from_all_events();
-  }
 }
 
 void HMILanguageHandler::CheckApplication(const Apps::value_type app) {
   SDL_AUTO_TRACE();
-  sync_primitives::AutoLock lock(apps_lock_);
-  Apps::iterator it = apps_.find(app.first);
-  if (apps_.end() == it) {
-    SDL_INFO("Adding application id "
-             << app.first << " Application registered: " << app.second);
-    apps_.insert(app);
-    return;
+  bool is_need_handle_wrong_language = false;
+  {
+    sync_primitives::AutoLock lock(apps_lock_);
+    Apps::iterator it = apps_.find(app.first);
+    if (apps_.end() == it) {
+      SDL_INFO("Adding application id "
+               << app.first << " Application registered: " << app.second);
+      apps_.insert(app);
+      return;
+    }
+    is_need_handle_wrong_language = apps_[app.first];
   }
-  if (apps_[app.first]) {
+  if (is_need_handle_wrong_language) {
     HandleWrongLanguageApp(app);
   }
 }
@@ -326,5 +337,11 @@ const HMILanguageHandler::Apps& HMILanguageHandler::get_apps() const {
   return apps_;
 }
 #endif  // BUILD_TESTS
+
+void HMILanguageHandler::OnUnregisterApplication(const uint32_t app_id) {
+  SDL_AUTO_TRACE();
+  sync_primitives::AutoLock lock(apps_lock_);
+  apps_.erase(app_id);
+}
 
 }  // namespace application_manager

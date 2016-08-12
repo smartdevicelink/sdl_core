@@ -418,6 +418,13 @@ class HMICapabilities {
 
   virtual void Init(resumption::LastState* last_state) = 0;
 
+  /**
+   * @brief return component which follows for correctness of
+   * languages
+   * @return HMI language handler
+   */
+  virtual HMILanguageHandler& get_hmi_language_handler() = 0;
+
  protected:
   /*
    * @brief function checks if json member exists
