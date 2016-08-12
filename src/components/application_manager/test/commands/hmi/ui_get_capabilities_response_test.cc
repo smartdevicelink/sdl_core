@@ -31,8 +31,6 @@
  */
 
 #include <stdint.h>
-#include <string>
-#include <set>
 
 #include "gtest/gtest.h"
 #include "utils/shared_ptr.h"
