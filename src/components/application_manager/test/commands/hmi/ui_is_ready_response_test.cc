@@ -38,7 +38,6 @@
 #include "smart_objects/smart_object.h"
 #include "commands/commands_test.h"
 #include "application_manager/mock_hmi_capabilities.h"
-#include "application_manager/commands/hmi/response_from_hmi.h"
 #include "application_manager/commands/hmi/ui_is_ready_response.h"
 
 namespace test {
@@ -52,10 +51,9 @@ using ::testing::NiceMock;
 namespace am = ::application_manager;
 namespace strings = ::application_manager::strings;
 namespace hmi_response = am::hmi_response;
-using am::commands::ResponseFromHMI;
 using am::commands::UIIsReadyResponse;
 
-typedef SharedPtr<ResponseFromHMI> ResponseFromHMIPtr;
+typedef SharedPtr<UIIsReadyResponse> UIIsReadyResponsePtr;
 typedef NiceMock<
     ::test::components::application_manager_test::MockHMICapabilities>
     MockHMICapabilities;
@@ -83,7 +81,7 @@ TEST_F(UIIsReadyResponseTest, RUN_SUCCESS) {
       (capabilities_);
   (*command_msg)[strings::msg_params][strings::available] = kIsAvailable;
 
-  ResponseFromHMIPtr command(CreateCommand<UIIsReadyResponse>(command_msg));
+  UIIsReadyResponsePtr command(CreateCommand<UIIsReadyResponse>(command_msg));
 
   EXPECT_CALL(app_mngr_, hmi_capabilities())
       .WillOnce(ReturnRef(mock_hmi_capabilities_));
@@ -102,7 +100,7 @@ TEST_F(UIIsReadyResponseTest, RUN_NoKeyAvailable) {
   (*command_msg)[strings::msg_params][hmi_response::capabilities] =
       (capabilities_);
 
-  ResponseFromHMIPtr command(CreateCommand<UIIsReadyResponse>(command_msg));
+  UIIsReadyResponsePtr command(CreateCommand<UIIsReadyResponse>(command_msg));
 
   EXPECT_CALL(app_mngr_, hmi_capabilities())
       .WillOnce(ReturnRef(mock_hmi_capabilities_));

@@ -41,7 +41,6 @@
 #include "commands/commands_test.h"
 #include "application_manager/mock_hmi_capabilities.h"
 #include "application_manager/mock_application_manager.h"
-#include "application_manager/commands/hmi/response_from_hmi.h"
 #include "application_manager/commands/hmi/ui_get_supported_languages_response.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
 
@@ -50,18 +49,16 @@ namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
 
-using ::testing::_;
 using ::testing::Return;
 using ::utils::SharedPtr;
 using ::testing::NiceMock;
 namespace am = ::application_manager;
 namespace strings = ::application_manager::strings;
 namespace hmi_response = am::hmi_response;
-using am::commands::ResponseFromHMI;
 using am::commands::UIGetSupportedLanguagesResponse;
-using am::commands::CommandImpl;
 
-typedef SharedPtr<ResponseFromHMI> ResponseFromHMIPtr;
+typedef SharedPtr<UIGetSupportedLanguagesResponse>
+    UIGetSupportedLanguagesResponsePtr;
 typedef NiceMock<
     ::test::components::application_manager_test::MockHMICapabilities>
     MockHMICapabilities;
@@ -91,15 +88,14 @@ TEST_F(UIGetSupportedLanguagesResponseTest, RUN_SUCCESS) {
   (*command_msg)[strings::msg_params][hmi_response::languages] =
       supported_languages;
 
-  ResponseFromHMIPtr command(
+  UIGetSupportedLanguagesResponsePtr command(
       CreateCommand<UIGetSupportedLanguagesResponse>(command_msg));
 
   EXPECT_CALL(app_mngr_, hmi_capabilities())
       .WillOnce(ReturnRef(mock_hmi_capabilities_));
 
   EXPECT_CALL(mock_hmi_capabilities_,
-              set_ui_supported_languages((
-                  *command_msg)[strings::msg_params][hmi_response::languages]));
+              set_ui_supported_languages((supported_languages)));
 
   command->Run();
 }
@@ -112,7 +108,7 @@ TEST_F(UIGetSupportedLanguagesResponseTest, RUN_UNSUCCESS) {
   (*command_msg)[strings::msg_params][hmi_response::capabilities] =
       (capabilities_);
 
-  ResponseFromHMIPtr command(
+  UIGetSupportedLanguagesResponsePtr command(
       CreateCommand<UIGetSupportedLanguagesResponse>(command_msg));
 
   EXPECT_CALL(mock_hmi_capabilities_,
