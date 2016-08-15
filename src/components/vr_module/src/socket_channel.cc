@@ -30,51 +30,27 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_VR_PROXY_H_
-#define SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_VR_PROXY_H_
-
-#include <queue>
-
-#include "utils/lock.h"
-#include "utils/threads/message_loop_thread.h"
-#include "vr_module/interface/hmi.pb.h"
-
-namespace threads {
-class Thread;
-}  // namespace threads
+#include "vr_module/socket_channel.h"
 
 namespace vr_module {
 
-typedef std::queue<vr_hmi_api::Message> MessageQueue;
+SocketChannel::SocketChannel() {
+}
 
-class VRProxyListener;
-class Channel;
+bool SocketChannel::Start() {
+  return false;
+}
 
-class VRProxy : public threads::MessageLoopThread<MessageQueue>::Handler {
- public:
-  explicit VRProxy(VRProxyListener *listener);
-  ~VRProxy();
+bool SocketChannel::Stop() {
+  return false;
+}
 
-  /**
-   * Sends message to HMI(Applink)
-   * @param message to send
-   * @return true if success
-   */
-  bool Send(const vr_hmi_api::Message& message);
+bool SocketChannel::Send(const std::string& data) {
+  return false;
+}
 
- private:
-  void Receive();
-  void Handle(vr_hmi_api::Message message);
-  void OnReceived(const vr_hmi_api::Message& message);
-  std::string SizeToString(int32_t value);
-  int32_t SizeFromString(const std::string& value);
-  VRProxyListener *listener_;
-  threads::MessageLoopThread<MessageQueue> incoming_;
-  Channel *channel_;
-  threads::Thread* channel_thread_;
-  friend class Receiver;
-};
+bool SocketChannel::Receive(int size, std::string* buffer) {
+  return false;
+}
 
 }  // namespace vr_module
-
-#endif  // SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_VR_PROXY_H_

@@ -33,15 +33,61 @@
 #include "vr_module/vr_proxy.h"
 
 #include "utils/logger.h"
+#include "utils/threads/thread.h"
+#include "utils/threads/thread_delegate.h"
+#include "vr_module/channel.h"
+#include "vr_module/socket_channel.h"
 #include "vr_module/vr_proxy_listener.h"
 
 namespace vr_module {
 
+static const int kHeaderSize = 4;
+
 CREATE_LOGGERPTR_GLOBAL(logger_, "VRModule")
+
+class Receiver : public threads::ThreadDelegate {
+ public:
+  explicit Receiver(VRProxy *parent)
+      : parent_(parent),
+        stop_(false) {
+  }
+  virtual void threadMain() {
+    LOG4CXX_AUTO_TRACE(logger_);
+    if (!parent_->channel_->Start()) {
+      LOG4CXX_ERROR(logger_, "Could not start channel");
+      return;
+    }
+    while (!stop_) {
+      parent_->Receive();
+    }
+  }
+  virtual void exitThreadMain() {
+    LOG4CXX_AUTO_TRACE(logger_);
+    stop_ = true;
+    parent_->channel_->Stop();
+  }
+
+ private:
+  VRProxy *parent_;
+  bool stop_;
+};
 
 VRProxy::VRProxy(VRProxyListener *listener)
     : listener_(listener),
-      incoming_("VrIncoming", this) {
+      incoming_("VrIncoming", this),
+      channel_(0),
+      channel_thread_(0) {
+  channel_ = new SocketChannel();
+  channel_thread_ = threads::CreateThread("ChannelReceiver",
+                                          new Receiver(this));
+  channel_thread_->start();
+}
+
+VRProxy::~VRProxy() {
+  channel_thread_->join();
+  delete channel_thread_->delegate();
+  threads::DeleteThread(channel_thread_);
+  delete channel_;
 }
 
 void VRProxy::OnReceived(const vr_hmi_api::Message& message) {
@@ -54,10 +100,61 @@ void VRProxy::Handle(vr_hmi_api::Message message) {
   listener_->OnReceived(message);
 }
 
+std::string VRProxy::SizeToString(int32_t value) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  unsigned char result[kHeaderSize] = { 0 };
+  result[0] = (value & 0x000000ff);
+  result[1] = (value & 0x0000ff00) >> 8;
+  result[2] = (value & 0x00ff0000) >> 16;
+  result[3] = (value & 0xff000000) >> 24;
+  std::string size(result, result + kHeaderSize);
+  DCHECK(size.size() == kHeaderSize)
+  return size;
+}
+
+int32_t VRProxy::SizeFromString(const std::string& value) {
+  DCHECK(value.size() == kHeaderSize)
+  int32_t size = int32_t(value[0]) + int32_t(value[1] << 8)
+      + int32_t(value[2] << 16) + int32_t(value[3] << 24);
+  return size;
+}
+
 bool VRProxy::Send(const vr_hmi_api::Message& message) {
   LOG4CXX_AUTO_TRACE(logger_);
-  // TODO(KKolodiy): should be implemented
-  return false;
+  std::string data;
+  bool serialized = message.SerializeToString(&data);
+  if (!serialized) {
+    LOG4CXX_WARN(logger_, "Could not serialize message");
+    return false;
+  }
+  std::string buffer = SizeToString(data.size()) + data;
+  DCHECK(buffer.size() == kHeaderSize + data.size())
+  if (!channel_) {
+    LOG4CXX_ERROR(logger_, "Connection to HMI(Applink) is not established");
+    return false;
+  }
+  return channel_->Send(data);
+}
+
+void VRProxy::Receive() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  std::string data;
+  if (channel_->Receive(kHeaderSize, &data)) {
+    int size = SizeFromString(data);
+    if (channel_->Receive(size, &data)) {
+      vr_hmi_api::Message message;
+      bool parsed = message.ParseFromString(data);
+      if (parsed) {
+        OnReceived(message);
+      } else {
+        LOG4CXX_WARN(logger_, "Could not parse message");
+      }
+    } else {
+      LOG4CXX_WARN(logger_, "Could not read message");
+    }
+  } else {
+    LOG4CXX_WARN(logger_, "Could not read size of message");
+  }
 }
 
 }  // namespace vr_module
