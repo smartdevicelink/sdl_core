@@ -54,4 +54,10 @@ void VRProxy::Handle(vr_hmi_api::Message message) {
   listener_->OnReceived(message);
 }
 
+bool VRProxy::Send(const vr_hmi_api::Message& message) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  // TODO(KKolodiy): should be implemented
+  return false;
+}
+
 }  // namespace vr_module

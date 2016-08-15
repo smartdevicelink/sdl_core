@@ -55,6 +55,13 @@ class VRProxy : public threads::MessageLoopThread<MessageQueue>::Handler {
    */
   void OnReceived(const vr_hmi_api::Message& message);
 
+  /**
+   * Sends message to HMI(Applink)
+   * @param message to send
+   * @return true if success
+   */
+  bool Send(const vr_hmi_api::Message& message);
+
  private:
   void Handle(vr_hmi_api::Message message);
   VRProxyListener *listener_;
