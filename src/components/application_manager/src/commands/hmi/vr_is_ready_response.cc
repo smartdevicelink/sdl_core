@@ -52,6 +52,13 @@ void VRIsReadyResponse::Run() {
 
   HMICapabilities& hmi_capabilities = application_manager_.hmi_capabilities();
   hmi_capabilities.set_is_vr_cooperating(is_available);
+
+  const HmiInterfaces::InterfaceState inteface_state =
+      is_available ? HmiInterfaces::STATE_AVAILABLE
+                   : HmiInterfaces::STATE_NOT_AVAILABLE;
+  HmiInterfaces& hmi_interfaces = application_manager_.hmi_interfaces();
+  hmi_interfaces.SetInterfaceState(HmiInterfaces::HMI_INTERFACE_VR,
+                                   inteface_state);
 }
 
 }  // namespace commands
