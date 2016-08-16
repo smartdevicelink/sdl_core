@@ -38,7 +38,6 @@
 
 namespace application_manager {
 
-
 /**
  * @brief The HmiInterfacesImpl class handles
  *  hmi interfaces states
