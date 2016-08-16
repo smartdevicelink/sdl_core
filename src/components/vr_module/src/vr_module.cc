@@ -50,13 +50,18 @@ PLUGIN_FACTORY(VRModule)
 uint32_t VRModule::next_correlation_id_ = 1;
 
 VRModule::VRModule()
-    : GenericModule(kModuleID) {
+    : GenericModule(kModuleID),
+      proxy_(this) {
   plugin_info_.name = "VRModulePlugin";
   plugin_info_.version = 1;
   SubscribeToRpcMessages();
 }
 
 VRModule::~VRModule() {
+}
+
+void VRModule::OnReceived(const vr_hmi_api::Message& message) {
+  // TODO(KKolodiy): this should be implemented with according logic
 }
 
 void VRModule::SubscribeToRpcMessages() {
