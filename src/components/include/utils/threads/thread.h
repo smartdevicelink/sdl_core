@@ -104,6 +104,40 @@ class Thread : public QObject {
 #else
 class Thread {
 #endif
+
+ public:
+  /**
+   * @brief ThreadCommand is used to command the thread
+   * kThreadCommandNone - no command, used to indicate that there is no pending
+   * command
+   * kThreadCommandRun - commands thread to run (do another iteration)
+   * kThreadCommandFinalize - informs thread that must exit
+   */
+  enum ThreadCommand {
+    kThreadCommandNone,  // must be first
+    kThreadCommandRun,
+    kThreadCommandFinalize  // keep last
+    // in case of new commands - update/check threadFunc()
+  };
+
+  /**
+   * @brief ThreadState informs outside world about its state
+   * kThreadStateNone - there is no thread at all
+   * kThreadStateIdle - the thread is in state idle
+   * kThreadStateRunning - thread is in state running (executing delegates
+   * threadMain())
+   */
+  enum ThreadState { kThreadStateNone, kThreadStateIdle, kThreadStateRunning };
+
+  /**
+   * @brief JoinOptionStop is used only in join() and JoinUnsafe() to control
+   * calling of stop()
+   * kNoStop - commands join to not call stop()
+   * kForceStop - join and JoinUnsafe will call stop() first before waiting
+   * thread to stop.
+   */
+  enum JoinOptionStop { kNoStop, kForceStop };
+
  private:
   const std::string name_;
   // Should be locked to protect delegate_ value
@@ -111,14 +145,23 @@ class Thread {
   ThreadDelegate* delegate_;
   PlatformThreadHandle handle_;
   ThreadOptions thread_options_;
-  // Should be locked to protect isThreadRunning_ and thread_created_ values
+  // Used for state_cond_ and in Thread public methods for commands
   sync_primitives::Lock state_lock_;
-  volatile bool isThreadRunning_;
-  volatile bool stopped_;
-  volatile bool finalized_;
-  bool thread_created_;
-  // Signalled when Thread::start() is called
+
+  /**
+   * \brief Signalled when Thread::start() is called
+   */
   sync_primitives::ConditionalVariable run_cond_;
+
+  /**
+   * \brief Used to request actions from worker thread.
+   */
+  volatile ThreadCommand thread_command_;
+
+  /**
+   * \brief Used from worker thread to inform about its status.
+   */
+  volatile ThreadState thread_state_;
 
  public:
   static int count;
@@ -168,11 +211,22 @@ class Thread {
    * be used as if it were newly constructed (i.e., Start may be called again).
    *
    * Stop may be called multiple times and is simply ignored if the thread is
-   * already stopped.
+   * already stopped. Thread safe.
    */
   void stop();
 
-  void join();
+  /**
+   * @brief Starts join procedure.
+   * @param[in] force_stop for controlling call of stop() method first.
+   * If it is kForceStop stop() is called and stopped_ flag is set to true in
+   * order
+   * to command/force the thread to stop.
+   * If it is kNoStop stop() method is not called and stopped_ flag is not set.
+   * It is up to the thread delegate when/how will end.
+   * In both cases join() waits thread delegate to finish.
+   * This is thread safe version.
+   */
+  void join(const JoinOptionStop force_stop);
 
   /**
    * @brief Get thread name.
@@ -187,8 +241,9 @@ class Thread {
    * When a thread is running, the thread_id_ is non-zero.
    * @return true if the thread has been started, and not yet stopped.
    */
-  bool is_running() const {
-    return isThreadRunning_;
+  bool is_running() {
+    sync_primitives::AutoLock auto_lock(state_lock_);
+    return (kThreadStateRunning == thread_state_);
   }
 
   void set_running(bool running);
@@ -260,6 +315,30 @@ class Thread {
   static void* threadFunc(void* arg);
   static void cleanup(void* arg);
   DISALLOW_COPY_AND_ASSIGN(Thread);
+
+  /**
+   * \brief Signals the thread to exit and returns once the thread has exited.
+   * After this method returns, the Thread object is completely reset and may
+   * be used as if it were newly constructed (i.e., Start may be called again).
+   *
+   * Stop may be called multiple times and is simply ignored if the thread is
+   * already stopped. Doesn't acquire any locks. Not thread safe.
+   * To be called only by other thread safe methods.
+   */
+  void StopUnsafe();
+
+  /**
+   * \brief Starts join procedure.
+   * \param[in] force_stop for controlling call of stop() method first.
+   * If it is kForceStop stop() is called and stopped_ flag is set to true in
+   * order
+   * to command/force the thread to stop.
+   * If it is kNoStop stop() method is not called and stopped_ flag is not set.
+   * It is up to the thread delegate when/how will end.
+   * In both cases join() waits thread delegate to finish.
+   * Not thread safe.
+   */
+  void JoinUnsafe(const JoinOptionStop force_stop);
 };
 
 }  // namespace threads

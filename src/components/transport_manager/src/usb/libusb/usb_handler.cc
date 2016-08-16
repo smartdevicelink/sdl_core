@@ -101,7 +101,7 @@ UsbHandler::~UsbHandler() {
     libusb_exit(libusb_context_);
     libusb_context_ = 0;
   }
-  thread_->join();
+  thread_->join(threads::Thread::kForceStop);
   delete thread_->delegate();
   threads::DeleteThread(thread_);
 }

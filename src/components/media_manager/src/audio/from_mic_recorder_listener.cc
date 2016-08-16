@@ -47,7 +47,7 @@ FromMicRecorderListener::FromMicRecorderListener(
 FromMicRecorderListener::~FromMicRecorderListener() {
   SDL_AUTO_TRACE();
   if (reader_) {
-    reader_->join();
+    reader_->join(threads::Thread::kForceStop);
     delete reader_->delegate();
     threads::DeleteThread(reader_);
   }
@@ -83,7 +83,7 @@ void FromMicRecorderListener::OnActivityEnded(int32_t application_key) {
     return;
   }
   if (reader_) {
-    reader_->join();
+    reader_->join(threads::Thread::kForceStop);
     delete reader_->delegate();
     threads::DeleteThread(reader_);
     reader_ = NULL;

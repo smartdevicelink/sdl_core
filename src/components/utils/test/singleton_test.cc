@@ -143,15 +143,15 @@ TEST(SingletonTest, CreateSingletonInDifferentThreads) {
       threads::CreateThread("test thread", new CreateSingletonDelegate());
   thread1->start();
   thread2->start();
-  thread1->join();
-  thread2->join();
-  threads::DeleteThread(thread1);
-  threads::DeleteThread(thread2);
+  thread1->join(threads::Thread::kNoStop);
+  thread2->join(threads::Thread::kNoStop);
 
   // act
   SingletonTest::destroy();
   // assert
   ASSERT_FALSE(SingletonTest::exists());
+  threads::DeleteThread(thread1);
+  threads::DeleteThread(thread2);
 }
 
 #if defined(OS_POSIX)
@@ -192,7 +192,7 @@ TEST(SingletonTest, CreateDeleteSingletonInDifferentThreads) {
 }
 #endif
 
-TEST(SingletonTest, DISABLED_DeleteSingletonInDifferentThread) {
+TEST(SingletonTest, DeleteSingletonInDifferentThread) {
   // arrange
   SingletonTest::instance();
   ASSERT_TRUE(SingletonTest::exists());
@@ -200,7 +200,7 @@ TEST(SingletonTest, DISABLED_DeleteSingletonInDifferentThread) {
   threads::Thread* thread1 = threads::CreateThread(
       "test thread", new DestroySingletonDelegate(SingletonTest::instance()));
   thread1->start();
-  thread1->join();
+  thread1->join(threads::Thread::kNoStop);
 
   // assert
   ASSERT_FALSE(SingletonTest::exists());

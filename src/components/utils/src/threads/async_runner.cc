@@ -54,12 +54,12 @@ void AsyncRunner::AsyncRun(ThreadDelegate* delegate) {
 
 void AsyncRunner::Stop() {
   SDL_AUTO_TRACE();
-  thread_->join();
+  thread_->join(threads::Thread::kForceStop);
 }
 
 AsyncRunner::~AsyncRunner() {
   SDL_AUTO_TRACE();
-  thread_->join();
+  thread_->join(threads::Thread::kForceStop);
   delete executor_;
   threads::DeleteThread(thread_);
 }

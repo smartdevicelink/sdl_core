@@ -143,7 +143,7 @@ void timer::Timer::StopThread() {
     delegate_->set_finalized_flag(true);
     {
       sync_primitives::AutoUnlock auto_unlock(state_lock_);
-      thread_->join();
+      thread_->join(threads::Thread::kForceStop);
     }
     delegate_->set_finalized_flag(false);
   }

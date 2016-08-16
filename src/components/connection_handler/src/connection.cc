@@ -93,7 +93,7 @@ Connection::Connection(ConnectionHandle connection_handle,
 
 Connection::~Connection() {
   SDL_AUTO_TRACE();
-  heart_beat_monitor_thread_->join();
+  heart_beat_monitor_thread_->join(threads::Thread::kForceStop);
   delete heartbeat_monitor_;
   threads::DeleteThread(heart_beat_monitor_thread_);
   sync_primitives::AutoLock lock(session_map_lock_);

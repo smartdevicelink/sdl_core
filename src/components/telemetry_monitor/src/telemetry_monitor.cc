@@ -110,7 +110,7 @@ void TelemetryMonitor::Stop() {
   SDL_AUTO_TRACE();
   if (thread_) {
     thread_->stop();
-    thread_->join();
+    thread_->join(threads::Thread::kForceStop);
     threads::DeleteThread(thread_);
   }
   thread_ = NULL;

@@ -49,7 +49,8 @@ size_t Thread::kMinStackSize = 0;
 void Thread::cleanup(void* arg) {
   SDL_AUTO_TRACE();
   Thread* thread = static_cast<Thread*>(arg);
-  thread->isThreadRunning_ = false;
+  thread->thread_state_ = kThreadStateNone;
+  thread->thread_command_ = kThreadCommandNone;
   thread->state_cond_.Broadcast();
 }
 
@@ -64,22 +65,46 @@ void* Thread::threadFunc(void* arg) {
 
   // Sets thread id in order to be able to check that id on thread joining
   thread->handle_ = QThread::currentThread();
-
+  thread->thread_state_ = kThreadStateIdle;
   thread->state_cond_.Broadcast();
 
-  while (!thread->finalized_) {
+  // We have special variable for controlling iterations/exiting thread
+  // in order to separate decision logic (continue iterations or exit?)
+  // from controlling while cycle
+  bool continueIterations = true;
+
+  while (continueIterations) {
     SDL_DEBUG("Thread #" << QThread::currentThreadId() << " iteration");
-    thread->run_cond_.Wait(thread->state_lock_);
-    SDL_DEBUG("Thread #" << QThread::currentThreadId() << " execute. "
-                         << "stopped_ = " << thread->stopped_
-                         << "; finalized_ = " << thread->finalized_);
-    if (!thread->stopped_ && !thread->finalized_) {
-      thread->isThreadRunning_ = true;
-      thread->state_lock_.Release();
-      thread->delegate_->threadMain();
-      thread->state_lock_.Acquire();
-      thread->isThreadRunning_ = false;
+    while (kThreadCommandNone == thread->thread_command_) {
+      thread->run_cond_.Wait(thread->state_lock_);
     }
+    SDL_DEBUG("Thread #" << QThread::currentThreadId() << " execute. "
+                         << "thread_command_ = " << thread->thread_command_);
+
+    switch (thread->thread_command_) {
+      case kThreadCommandRun:
+        thread->thread_state_ = kThreadStateRunning;
+        thread->state_lock_.Release();
+        thread->delegate_->threadMain();
+        thread->state_lock_.Acquire();
+        thread->thread_state_ = kThreadStateIdle;
+        break;
+
+      case kThreadCommandFinalize:
+        continueIterations = false;
+        break;
+
+      default:
+        // check for not expected command:
+        if ((kThreadCommandNone > thread->thread_command_) &&
+            (kThreadCommandFinalize < thread->thread_command_)) {
+          SDL_ERROR("Incorrect thread command: " << thread->thread_command_);
+        }
+        // else - nothing to do
+        break;
+    }
+
+    thread->thread_command_ = kThreadCommandNone;  // consumed
     thread->state_cond_.Broadcast();
     SDL_DEBUG("Thread #" << QThread::currentThreadId()
                          << " finished iteration");
@@ -98,10 +123,8 @@ Thread::Thread(const char* name, ThreadDelegate* delegate, QObject* parent)
     , delegate_(delegate)
     , handle_(0)
     , thread_options_()
-    , isThreadRunning_(false)
-    , stopped_(false)
-    , finalized_(false)
-    , thread_created_(false) {
+    , thread_command_(kThreadCommandNone)
+    , thread_state_(kThreadStateNone) {
   qRegisterMetaType<QThread*>("QThread*");
 }
 
@@ -137,7 +160,7 @@ bool Thread::start(const ThreadOptions& options) {
     // 0 - state_lock unlocked
   }
 
-  if (isThreadRunning_) {
+  if (kThreadStateRunning == thread_state_) {
     SDL_TRACE("EXIT thread " << name_ << " #" << handle_
                              << " is already running");
   }
@@ -145,15 +168,16 @@ bool Thread::start(const ThreadOptions& options) {
   thread_options_ = options;
 
   // state_lock 1
-  if (!thread_created_) {
+  if (kThreadStateNone == thread_state_) {
     // QtConcurrent::run starts execution in QThreadPool and does not return
     // any thread id, so thread id will be set from delegate on its start.
     future_ = QtConcurrent::run(threadFunc, this);
     SDL_DEBUG("Created thread: " << name_);
-    state_cond_.Wait(auto_lock);
-    thread_created_ = true;
+    while (kThreadStateNone == thread_state_) {
+      state_cond_.Wait(auto_lock);
+    }
   }
-  stopped_ = false;
+  thread_command_ = kThreadCommandRun;
   run_cond_.NotifyOne();
   SDL_DEBUG("Thread " << name_ << " #" << handle_ << " started");
   return NULL != handle_;
@@ -166,40 +190,59 @@ void Thread::yield() {
 void Thread::stop() {
   SDL_AUTO_TRACE();
   sync_primitives::AutoLock auto_lock(state_lock_);
+  StopUnsafe();
+}
 
-  stopped_ = true;
+void Thread::join(const JoinOptionStop force_stop) {
+  SDL_AUTO_TRACE();
+  DCHECK_OR_RETURN_VOID(!IsCurrentThread());
+  sync_primitives::AutoLock auto_lock(state_lock_);
+  JoinUnsafe(force_stop);
+}
 
+void Thread::JoinUnsafe(const JoinOptionStop force_stop) {
+  SDL_AUTO_TRACE();
+  DCHECK_OR_RETURN_VOID(!IsCurrentThread());
+  // if thread still exist at all
+  if (kThreadStateNone != thread_state_) {
+    if (kForceStop == force_stop) {
+      StopUnsafe();
+    }
+    while ((kThreadStateRunning == thread_state_) ||
+           (kThreadCommandNone != thread_command_)) {
+      state_cond_.Wait(state_lock_);
+    }
+  }
+}
+
+void Thread::StopUnsafe() {
+  SDL_AUTO_TRACE();
+  thread_command_ = kThreadCommandNone;  // cancel all active commands
   SDL_DEBUG("Stopping thread #" << handle_ << " \"" << name_ << " \"");
+
   if (future_.isCanceled()) {
     cleanup(static_cast<void*>(this));
   }
 
-  if (delegate_ && isThreadRunning_) {
+  if (delegate_ && (kThreadStateRunning == thread_state_)) {
     delegate_->exitThreadMain();
   }
 
   SDL_DEBUG("Stopped thread #" << handle_ << " \"" << name_ << " \"");
 }
 
-void Thread::join() {
-  SDL_AUTO_TRACE();
-  DCHECK_OR_RETURN_VOID(!IsCurrentThread());
-
-  stop();
-
-  sync_primitives::AutoLock auto_lock(state_lock_);
-  run_cond_.NotifyOne();
-  if (isThreadRunning_) {
-    state_cond_.Wait(auto_lock);
-  }
-}
-
 Thread::~Thread() {
-  finalized_ = true;
-  stopped_ = true;
-  join();
-  if (thread_options_.is_joinable()) {
-    future_.waitForFinished();
+  if (0 != handle_) {
+    state_lock_.Acquire();
+    if (kThreadStateNone != thread_state_) {
+      JoinUnsafe(kForceStop);
+      thread_command_ = kThreadCommandFinalize;
+      run_cond_.NotifyOne();
+    }
+    state_lock_.Release();
+    if (thread_options_.is_joinable()) {
+      future_.waitForFinished();
+    }
   }
 }
 

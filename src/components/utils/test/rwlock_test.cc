@@ -50,7 +50,7 @@ class RWlockTest : public ::testing::Test {
       ASSERT_TRUE(thread[i]->CurrentId());
     }
     for (uint8_t i = 0; i < kNum_threads_; ++i) {
-      thread[i]->join();
+      thread[i]->join(threads::Thread::kForceStop);
       threads::DeleteThread(thread[i]);
     }
   }

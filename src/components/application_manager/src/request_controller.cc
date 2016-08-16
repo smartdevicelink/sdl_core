@@ -95,7 +95,7 @@ void RequestController::DestroyThreadpool() {
   }
   for (size_t i = 0; i < pool_.size(); i++) {
     threads::Thread* thread = pool_[i];
-    thread->join();
+    thread->join(threads::Thread::kForceStop);
     delete thread->delegate();
     threads::DeleteThread(thread);
   }

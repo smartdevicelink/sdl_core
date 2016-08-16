@@ -93,7 +93,7 @@ BluetoothSocketConnection::BluetoothSocketConnection(
 BluetoothSocketConnection::~BluetoothSocketConnection() {
   SDL_AUTO_TRACE();
   Disconnect();
-  thread_->join();
+  thread_->join(threads::Thread::kForceStop);
   delete thread_->delegate();
   threads::DeleteThread(thread_);
 }
