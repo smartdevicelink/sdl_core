@@ -200,6 +200,7 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                      bool(uint32_t connection_key,
                           const std::string& policy_app_id));
   MOCK_METHOD0(resume_controller, resumption::ResumeCtrl&());
+  MOCK_METHOD0(hmi_interfaces, application_manager::HmiInterfaces&());
   MOCK_METHOD0(app_launch_ctrl, app_launch::AppLaunchCtrl&());
   MOCK_METHOD1(
       GetDeviceTransportType,

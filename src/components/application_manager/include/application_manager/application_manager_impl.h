@@ -53,6 +53,7 @@
 #include "application_manager/app_launch/app_launch_data.h"
 #include "application_manager/application_manager_settings.h"
 #include "application_manager/event_engine/event_dispatcher_impl.h"
+#include "application_manager/hmi_interfaces_impl.h"
 
 #include "protocol_handler/protocol_observer.h"
 #include "protocol_handler/protocol_handler.h"
@@ -844,6 +845,10 @@ class ApplicationManagerImpl
     return *resume_ctrl_.get();
   }
 
+  HmiInterfaces& hmi_interfaces() OVERRIDE {
+    return hmi_interfaces_;
+  }
+
   /**
    * Generate grammar ID
    *
@@ -1423,6 +1428,8 @@ class ApplicationManagerImpl
    * application in case INGITION_OFF or MASTER_RESSET
    */
   std::auto_ptr<resumption::ResumeCtrl> resume_ctrl_;
+
+  HmiInterfacesImpl hmi_interfaces_;
 
   NaviServiceStatusMap navi_service_status_;
   std::deque<uint32_t> navi_app_to_stop_;

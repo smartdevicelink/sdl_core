@@ -182,6 +182,10 @@ class CommandRequestImpl : public CommandImpl,
    */
   void AddDisallowedParametersToInfo(
       smart_objects::SmartObject& response) const;
+
+  bool ProcessHMIInterfacesAvailability(
+      const uint32_t hmi_correlation_id,
+      const hmi_apis::FunctionID::eType& function_id);
 };
 
 }  // namespace commands
