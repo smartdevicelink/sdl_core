@@ -37,21 +37,42 @@
 #include "utils/macro.h"
 #include "utils/lock.h"
 
-
 namespace application_manager {
+
+/**
+ * @brief The HmiInterfacesImpl class handles
+ *  hmi interfaces states
+ */
 class HmiInterfacesImpl : public HmiInterfaces {
  public:
   HmiInterfacesImpl();
-  ~HmiInterfacesImpl() {}
+
+  /**
+   * @brief GetInterfaceState return currecnt state of hmi interface
+   * @param interface to get state
+   * @return state of interface
+   */
   InterfaceState GetInterfaceState(InterfaceID interface) const OVERRIDE;
+
+  /**
+   * @brief SetInterfaceState set interface to some state
+   * @param interface interface to set state
+   * @param state to setup
+   */
+  void SetInterfaceState(InterfaceID interface, InterfaceState state) OVERRIDE;
+
+  /**
+   * @brief GetInterfaceFromFunction extract interface name fron function id
+   * @param function to extract interface name
+   * @return extracted interface name
+   */
   InterfaceID GetInterfaceFromFunction(
       hmi_apis::FunctionID::eType function) const OVERRIDE;
-  void SetInterfaceState(InterfaceID interface, InterfaceState state) OVERRIDE;
 
  private:
   typedef std::map<InterfaceID, InterfaceState> InterfaceStatesMap;
   InterfaceStatesMap interfaces_states_;
-  sync_primitives::Lock interfaces_states_lock_;
+  mutable sync_primitives::Lock interfaces_states_lock_;
 };
 }  // namespace application_manager
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMI_INTERFACES_IMPL_H_

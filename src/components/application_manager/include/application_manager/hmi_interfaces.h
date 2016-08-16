@@ -38,6 +38,11 @@
 
 namespace application_manager {
 
+
+/**
+ * @brief The HmiInterfacesImpl class handles
+ *  hmi interfaces states
+ */
 class HmiInterfaces {
  public:
   enum InterfaceID {
@@ -64,9 +69,26 @@ class HmiInterfaces {
     STATE_NOT_AVAILABLE
   };
 
+  /**
+   * @brief GetInterfaceState return currecnt state of hmi interface
+   * @param interface to get state
+   * @return state of interface
+   */
   virtual InterfaceState GetInterfaceState(InterfaceID interface) const = 0;
+
+  /**
+   * @brief SetInterfaceState set interface to some state
+   * @param interface interface to set state
+   * @param state to setup
+   */
   virtual InterfaceID GetInterfaceFromFunction(
       hmi_apis::FunctionID::eType function) const = 0;
+
+  /**
+   * @brief GetInterfaceFromFunction extract interface name fron function id
+   * @param function to extract interface name
+   * @return extracted interface name
+   */
   virtual void SetInterfaceState(InterfaceID interface,
                                  InterfaceState state) = 0;
   virtual ~HmiInterfaces() {}
