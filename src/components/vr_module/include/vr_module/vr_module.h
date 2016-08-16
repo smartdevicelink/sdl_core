@@ -76,6 +76,10 @@ class VRModule
     return next_correlation_id_++;
   }
 
+  /**
+   * Handles received message from HMI (Applink)
+   * @param message is GPB message according with protocol
+   */
   virtual void OnReceived(const vr_hmi_api::Message& message);
 
  private:
