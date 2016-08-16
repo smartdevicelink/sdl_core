@@ -33,6 +33,7 @@
 
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ADD_COMMAND_REQUEST_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ADD_COMMAND_REQUEST_H_
+#include <string>
 
 #include "application_manager/application.h"
 #include "application_manager/commands/command_request_impl.h"
@@ -141,6 +142,7 @@ class AddCommandRequest : public CommandRequestImpl {
 
   hmi_apis::Common_Result::eType ui_result_;
   hmi_apis::Common_Result::eType vr_result_;
+  std::string info_;
 };
 
 }  // namespace commands
