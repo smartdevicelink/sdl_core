@@ -35,6 +35,8 @@
 #include <map>
 #include "application_manager/hmi_interfaces.h"
 #include "utils/macro.h"
+#include "utils/lock.h"
+
 
 namespace application_manager {
 class HmiInterfacesImpl : public HmiInterfaces {
@@ -49,6 +51,7 @@ class HmiInterfacesImpl : public HmiInterfaces {
  private:
   typedef std::map<InterfaceID, InterfaceState> InterfaceStatesMap;
   InterfaceStatesMap interfaces_states_;
+  sync_primitives::Lock interfaces_states_lock_;
 };
 }  // namespace application_manager
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMI_INTERFACES_IMPL_H_

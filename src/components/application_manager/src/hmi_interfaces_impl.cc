@@ -224,6 +224,7 @@ generate_function_to_interface_convert_map() {
 }
 
 HmiInterfacesImpl::HmiInterfacesImpl() {
+  sync_primitives::AutoLock autolock(interfaces_states_lock_);
   interfaces_states_[HmiInterfaces::HMI_INTERFACE_BasicCommunication] =
       HmiInterfaces::STATE_NOT_RESPONSE;
   interfaces_states_[HmiInterfaces::HMI_INTERFACE_Buttons] =
@@ -244,6 +245,7 @@ HmiInterfacesImpl::HmiInterfacesImpl() {
 
 HmiInterfaces::InterfaceState HmiInterfacesImpl::GetInterfaceState(
     HmiInterfaces::InterfaceID interface) const {
+  sync_primitives::AutoLock autolock(interfaces_states_lock_);
   const InterfaceStatesMap::const_iterator it =
       interfaces_states_.find(interface);
   // all interfaces should be presented in interfaces_states_ map.
@@ -253,6 +255,7 @@ HmiInterfaces::InterfaceState HmiInterfacesImpl::GetInterfaceState(
 
 void HmiInterfacesImpl::SetInterfaceState(HmiInterfaces::InterfaceID interface,
                                           HmiInterfaces::InterfaceState state) {
+  sync_primitives::AutoLock autolock(interfaces_states_lock_);
   DCHECK(interfaces_states_.find(interface) != interfaces_states_.end());
   interfaces_states_[interface] = state;
 }
