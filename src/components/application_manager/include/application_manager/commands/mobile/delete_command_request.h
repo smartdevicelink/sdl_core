@@ -33,6 +33,7 @@
 
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DELETE_COMMAND_REQUEST_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DELETE_COMMAND_REQUEST_H_
+#include <string>
 
 #include "application_manager/commands/command_request_impl.h"
 #include "utils/macro.h"
@@ -81,6 +82,13 @@ class DeleteCommandRequest : public CommandRequestImpl {
    */
   bool IsPendingResponseExist();
 
+  /**
+   * @brief CalculateResult calculate mobile result from received ui and vr
+   * results
+   * @return calculated mobile result
+  */
+  bool CalculateResult();
+
   bool is_ui_send_;
   bool is_vr_send_;
 
@@ -89,6 +97,7 @@ class DeleteCommandRequest : public CommandRequestImpl {
 
   hmi_apis::Common_Result::eType ui_result_;
   hmi_apis::Common_Result::eType vr_result_;
+  std::string info_;
 };
 
 }  // namespace commands

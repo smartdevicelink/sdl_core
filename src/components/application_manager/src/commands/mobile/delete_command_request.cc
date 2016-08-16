@@ -111,12 +111,93 @@ void DeleteCommandRequest::Run() {
   }
 }
 
+bool DeleteCommandRequest::CalculateResult() {
+  using namespace helpers;
+  // Invalid enum means that request didn't sent
+  const bool is_vr_success_invalid =
+      Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
+          vr_result_,
+          hmi_apis::Common_Result::SUCCESS,
+          hmi_apis::Common_Result::WARNINGS,
+          hmi_apis::Common_Result::WRONG_LANGUAGE,
+          hmi_apis::Common_Result::RETRY,
+          hmi_apis::Common_Result::SAVED,
+          hmi_apis::Common_Result::INVALID_ENUM);
+
+  const bool is_ui_success_invalid =
+      Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
+          ui_result_,
+          hmi_apis::Common_Result::SUCCESS,
+          hmi_apis::Common_Result::WARNINGS,
+          hmi_apis::Common_Result::WRONG_LANGUAGE,
+          hmi_apis::Common_Result::RETRY,
+          hmi_apis::Common_Result::SAVED,
+          hmi_apis::Common_Result::INVALID_ENUM);
+
+  const bool is_vr_ui_invalid =
+      Compare<hmi_apis::Common_Result::eType, EQ, ALL>(
+          hmi_apis::Common_Result::INVALID_ENUM, vr_result_, ui_result_);
+
+  const bool is_ui_warning = Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
+      ui_result_, hmi_apis::Common_Result::WARNINGS);
+
+  const bool is_vr_warning = Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
+      vr_result_, hmi_apis::Common_Result::WARNINGS);
+
+  const bool is_vr_unsupported =
+      vr_result_ == hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
+  const bool is_ui_unsupported =
+      ui_result_ == hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
+
+  const bool is_ui_success_warnings =
+      Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
+          ui_result_,
+          hmi_apis::Common_Result::SUCCESS,
+          hmi_apis::Common_Result::WARNINGS,
+          hmi_apis::Common_Result::WRONG_LANGUAGE,
+          hmi_apis::Common_Result::RETRY,
+          hmi_apis::Common_Result::SAVED,
+          hmi_apis::Common_Result::UNSUPPORTED_RESOURCE);
+
+  const bool is_vr_success_warnings =
+      Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
+          vr_result_,
+          hmi_apis::Common_Result::SUCCESS,
+          hmi_apis::Common_Result::WARNINGS,
+          hmi_apis::Common_Result::WRONG_LANGUAGE,
+          hmi_apis::Common_Result::RETRY,
+          hmi_apis::Common_Result::SAVED,
+          hmi_apis::Common_Result::UNSUPPORTED_RESOURCE);
+
+  // At least one (VR or UI is success or didn't sent)
+  bool result =
+      (is_vr_success_invalid && is_ui_success_invalid && !is_vr_ui_invalid);
+
+  // VR is succeed on didn't send, but UI respond with WARNING
+  result = result || (is_vr_success_invalid && is_ui_warning);
+
+  // UI is succeed on didn't send, but VR respond with WARNINGS
+  result = result || (is_ui_success_invalid && is_vr_warning);
+
+  // If VR is unsupported UI should be SUCCESS or WARNINGS
+  result = result || (is_vr_unsupported && is_ui_success_warnings);
+
+  // If VR is unsupported UI should be SUCCESS or WARNINGS
+  result = result || (is_ui_unsupported && is_vr_success_warnings);
+
+  LOG4CXX_DEBUG(logger_, "Result is " << (result ? "true" : "false"));
+
+  return result;
+}
+
 void DeleteCommandRequest::on_event(const event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace helpers;
 
   const smart_objects::SmartObject& message = event.smart_object();
-
+  if (message[strings::msg_params].keyExists(strings::info)) {
+    info_ += message[strings::msg_params][strings::info].asString();
+  }
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_DeleteCommand: {
       is_ui_received_ = true;
@@ -168,34 +249,16 @@ void DeleteCommandRequest::on_event(const event_engine::Event& event) {
     return;
   }
 
-  const bool is_vr_success_invalid =
-      Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
-          vr_result_,
-          hmi_apis::Common_Result::SUCCESS,
-          hmi_apis::Common_Result::INVALID_ENUM);
-
-  const bool is_ui_success_invalid =
-      Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
-          ui_result_,
-          hmi_apis::Common_Result::SUCCESS,
-          hmi_apis::Common_Result::INVALID_ENUM);
-
-  const bool is_vr_ui_invalid =
-      Compare<hmi_apis::Common_Result::eType, EQ, ALL>(
-          hmi_apis::Common_Result::INVALID_ENUM, vr_result_, ui_result_);
+  bool result = CalculateResult();
 
   const bool is_vr_or_ui_warning =
       Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
           hmi_apis::Common_Result::WARNINGS, ui_result_, vr_result_);
-
-  const bool result =
-      // In case of UI/VR is SUCCESS and other is SUCCESS/INVALID_ENUM
-      (is_vr_success_invalid && is_ui_success_invalid && !is_vr_ui_invalid) ||
-      // or one of them is WARNINGS
-      is_vr_or_ui_warning;
-
-  LOG4CXX_DEBUG(logger_, "Result code is " << (result ? "true" : "false"));
-
+  const bool is_vr_or_ui_unsupported =
+      Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
+          hmi_apis::Common_Result::UNSUPPORTED_RESOURCE,
+          ui_result_,
+          vr_result_);
   if (result) {
     application->RemoveCommand(msg_params[strings::cmd_id].asInt());
   }
@@ -203,6 +266,9 @@ void DeleteCommandRequest::on_event(const event_engine::Event& event) {
   mobile_apis::Result::eType result_code = mobile_apis::Result::INVALID_ENUM;
   if (!result && hmi_apis::Common_Result::REJECTED == ui_result_) {
     result_code = MessageHelper::HMIToMobileResult(vr_result_);
+  } else if (result && is_vr_or_ui_unsupported) {
+    LOG4CXX_DEBUG(logger_, "VR or UI result is unsupported resource");
+    result_code = mobile_apis::Result::UNSUPPORTED_RESOURCE;
   } else if (is_vr_or_ui_warning) {
     LOG4CXX_DEBUG(logger_, "VR or UI result is warning");
     result_code = mobile_apis::Result::WARNINGS;
@@ -211,7 +277,8 @@ void DeleteCommandRequest::on_event(const event_engine::Event& event) {
         MessageHelper::HMIToMobileResult(std::max(ui_result_, vr_result_));
   }
 
-  SendResponse(result, result_code, NULL, &msg_params);
+  SendResponse(
+      result, result_code, info_.empty() ? NULL : info_.c_str(), &msg_params);
   if (result) {
     application->UpdateHash();
   }
