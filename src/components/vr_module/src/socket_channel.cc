@@ -32,25 +32,96 @@
 
 #include "vr_module/socket_channel.h"
 
+#include "net/connected_socket_impl.h"
+#include "utils/logger.h"
+#include "utils/macro.h"
+#include "utils/scope_guard.h"
+
 namespace vr_module {
 
-SocketChannel::SocketChannel() {
+CREATE_LOGGERPTR_GLOBAL(logger_, "VRModule")
+
+SocketChannel::SocketChannel()
+    : socket_(0) {
+}
+
+SocketChannel::~SocketChannel() {
+  if (socket_) {
+    socket_->close();
+  }
+  delete socket_;
 }
 
 bool SocketChannel::Start() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  std::string address = "127.0.0.1";
+  UInt32 port = 5431;
+  socket_ = net::ConnectedSocketImpl::ConnectToHost(address.c_str(), port);
   return false;
 }
 
 bool SocketChannel::Stop() {
-  return false;
+  LOG4CXX_AUTO_TRACE(logger_);
+  DCHECK_OR_RETURN(socket_, false);
+  socket_->shutdown();
+  return true;
 }
 
 bool SocketChannel::Send(const std::string& data) {
-  return false;
+  LOG4CXX_AUTO_TRACE(logger_);
+  DCHECK_OR_RETURN(socket_, false);
+  const size_t kChunkSize = 1000;
+  const size_t total_size = data.size();
+  size_t size_to_send = total_size < kChunkSize ? total_size : kChunkSize;
+  UInt8* data_bytes = new UInt8[size_to_send];
+
+  utils::ScopeGuard ppsdata_guard = utils::MakeGuard(
+      utils::ArrayDeleter<UInt8*>, data_bytes);
+  UNUSED(ppsdata_guard);
+
+  size_t data_sent = 0;
+  while (total_size > data_sent) {
+    memcpy(data_bytes, data.c_str() + data_sent, size_to_send);
+    size_t chunksent = socket_->send(data_bytes, size_to_send,
+                                     net::NET_MSG_NOSIGNAL);
+    data_sent += chunksent;
+    memset(data_bytes, 0, size_to_send);
+    if ((data_sent + kChunkSize) > total_size) {
+      size_to_send = total_size - data_sent;
+    }
+  } LOG4CXX_INFO(logger_, "Sent " << data_sent);
+  return true;
 }
 
-bool SocketChannel::Receive(int size, std::string* buffer) {
-  return false;
+bool SocketChannel::Receive(size_t size, std::string* buffer) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  DCHECK_OR_RETURN(socket_, false);
+  const size_t kChunkSize = 1000;
+  size_t to_recv = size < kChunkSize ? size : kChunkSize;
+
+  size_t received = 0;
+  UInt8* data_bytes = new UInt8[size];
+  while (size > received) {
+    ssize_t rev_size = socket_->recv(data_bytes, to_recv, 0);
+    if (rev_size <= 0) {
+      LOG4CXX_INFO(logger_, "recv error " << size);
+      return false;
+    }
+
+    std::string partial;
+    partial.assign(reinterpret_cast<char*>(data_bytes), rev_size);
+    buffer->append(partial);
+    memset(data_bytes, 0, rev_size);
+
+    received += rev_size;
+    if (received + kChunkSize > size) {
+      to_recv = size - received;
+    }
+  }
+
+  LOG4CXX_INFO(logger_, "Total received " << received);
+  LOG4CXX_INFO(logger_, "String size " << buffer->size());
+  return true;
 }
 
 }  // namespace vr_module

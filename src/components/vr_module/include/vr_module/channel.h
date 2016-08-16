@@ -65,7 +65,7 @@ class Channel {
    * @param buffer container to keep received data
    * @return true if size of received data less or equal expected size
    */
-  virtual bool Receive(int size, std::string *buffer) = 0;
+  virtual bool Receive(size_t size, std::string *buffer) = 0;
 };
 
 }  // namespace vr_module

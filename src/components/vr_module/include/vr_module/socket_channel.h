@@ -34,19 +34,26 @@
 #define SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_SOCKET_CHANNEL_H_
 
 #include <string>
+
 #include "vr_module/channel.h"
+
+namespace net {
+class ConnectedSocket;
+}  // namespace net
 
 namespace vr_module {
 
 class SocketChannel : public Channel {
  public:
   SocketChannel();
+  ~SocketChannel();
   virtual bool Start();
   virtual bool Stop();
   virtual bool Send(const std::string& data);
-  virtual bool Receive(int size, std::string *buffer);
+  virtual bool Receive(size_t size, std::string *buffer);
 
  private:
+  net::ConnectedSocket *socket_;
 };
 
 }  // namespace vr_module

@@ -141,4 +141,6 @@ friend class test_case_name##_##test_name##_Test
 #define FRIEND_TEST(test_case_name, test_name)
 #endif  // BUILD_TESTS
 
+#define UNUSED(x) (void) x;
+
 #endif  // SRC_COMPONENTS_INCLUDE_UTILS_MACRO_H_

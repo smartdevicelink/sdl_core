@@ -69,7 +69,7 @@ class Receiver : public threads::ThreadDelegate {
 
  private:
   VRProxy *parent_;
-  bool stop_;
+  volatile bool stop_;
 };
 
 VRProxy::VRProxy(VRProxyListener *listener)
@@ -113,7 +113,10 @@ std::string VRProxy::SizeToString(int32_t value) {
 }
 
 int32_t VRProxy::SizeFromString(const std::string& value) {
-  DCHECK(value.size() == kHeaderSize)
+  if (value.size() != kHeaderSize) {
+    LOG4CXX_WARN(logger_, "Incorrect length of header");
+    return 0;
+  }
   int32_t size = int32_t(value[0]) + int32_t(value[1] << 8)
       + int32_t(value[2] << 16) + int32_t(value[3] << 24);
   return size;
