@@ -78,12 +78,26 @@ VRProxy::VRProxy(VRProxyListener *listener)
       channel_(0),
       channel_thread_(0) {
   channel_ = new SocketChannel();
+  StartChannel();
+}
+
+VRProxy::VRProxy(VRProxyListener* listener, Channel* channel)
+    : listener_(listener),
+      incoming_("VrIncoming", this),
+      channel_(channel),
+      channel_thread_(0) {
+  StartChannel();
+}
+
+void VRProxy::StartChannel() {
+  LOG4CXX_AUTO_TRACE(logger_);
   channel_thread_ = threads::CreateThread("ChannelReceiver",
                                           new Receiver(this));
   channel_thread_->start();
 }
 
 VRProxy::~VRProxy() {
+  LOG4CXX_AUTO_TRACE(logger_);
   channel_thread_->join();
   delete channel_thread_->delegate();
   threads::DeleteThread(channel_thread_);
@@ -117,8 +131,10 @@ int32_t VRProxy::SizeFromString(const std::string& value) {
     LOG4CXX_WARN(logger_, "Incorrect length of header");
     return 0;
   }
-  int32_t size = int32_t(value[0]) + int32_t(value[1] << 8)
-      + int32_t(value[2] << 16) + int32_t(value[3] << 24);
+  unsigned char result[kHeaderSize] = { 0 };
+  memcpy(result, value.c_str(), kHeaderSize);
+  int32_t size = int32_t(result[0]) + int32_t(result[1] << 8)
+      + int32_t(result[2] << 16) + int32_t(result[3] << 24);
   return size;
 }
 

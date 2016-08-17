@@ -30,56 +30,47 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_VR_PROXY_H_
-#define SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_VR_PROXY_H_
+#include <dlfcn.h>
+#include "gtest/gtest.h"
+#include "vr_module/vr_module.h"
 
-#include <queue>
-
-#include "utils/lock.h"
-#include "utils/macro.h"
-#include "utils/threads/message_loop_thread.h"
-#include "vr_module/interface/hmi.pb.h"
-
-namespace threads {
-class Thread;
-}  // namespace threads
+using functional_modules::PluginInfo;
 
 namespace vr_module {
 
-typedef std::queue<vr_hmi_api::Message> MessageQueue;
+::testing::AssertionResult IsError(void* error) {
+  if (error) {
+    return ::testing::AssertionSuccess() << static_cast<const char*>(error);
+  } else {
+    return ::testing::AssertionFailure() << error;
+  }
+}
 
-class VRProxyListener;
-class Channel;
+TEST(VRModuleLibraryTest, Load) {
+  const std::string kLibraryPath = "libvrmoduleplugin.so";
 
-class VRProxy : public threads::MessageLoopThread<MessageQueue>::Handler {
- public:
-  explicit VRProxy(VRProxyListener *listener);
-  VRProxy(VRProxyListener *listener, Channel *channel);
-  ~VRProxy();
+  void* handle = dlopen(kLibraryPath.c_str(), RTLD_LAZY);
+  EXPECT_FALSE(IsError(dlerror()));
+  ASSERT_TRUE(handle != NULL);
 
-  /**
-   * Sends message to HMI(Applink)
-   * @param message to send
-   * @return true if success
-   */
-  bool Send(const vr_hmi_api::Message& message);
+  const std::string kSymbol = "Create";
+  void* symbol = dlsym(handle, kSymbol.c_str());
+  EXPECT_FALSE(IsError(dlerror()));
+  ASSERT_TRUE(symbol != NULL);
 
- private:
-  inline void StartChannel();
-  void Receive();
-  void Handle(vr_hmi_api::Message message);
-  void OnReceived(const vr_hmi_api::Message& message);
-  std::string SizeToString(int32_t value);
-  int32_t SizeFromString(const std::string& value);
-  VRProxyListener *listener_;
-  threads::MessageLoopThread<MessageQueue> incoming_;
-  Channel *channel_;
-  threads::Thread *channel_thread_;
-  friend class Receiver;
-  FRIEND_TEST(VRProxyTest, SizeToString);
-  FRIEND_TEST(VRProxyTest, SizeFromString);
-};
+  typedef VRModule* (*Create)();
+  Create create_manager = reinterpret_cast<Create>(symbol);
+  VRModule* module = create_manager();
+  ASSERT_TRUE(module != NULL);
+
+  PluginInfo plugin = module->GetPluginInfo();
+  EXPECT_EQ(plugin.name, "VRModulePlugin");
+  EXPECT_EQ(plugin.version, 1);
+
+  delete module;
+  int ret = dlclose(handle);
+  EXPECT_FALSE(ret);
+  EXPECT_FALSE(IsError(dlerror()));
+}
 
 }  // namespace vr_module
-
-#endif  // SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_VR_PROXY_H_

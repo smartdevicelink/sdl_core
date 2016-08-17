@@ -62,8 +62,9 @@ bool SocketChannel::Start() {
 
 bool SocketChannel::Stop() {
   LOG4CXX_AUTO_TRACE(logger_);
-  DCHECK_OR_RETURN(socket_, false);
-  socket_->shutdown();
+  if (socket_) {
+    socket_->shutdown();
+  }
   return true;
 }
 
