@@ -58,7 +58,7 @@ void UIIsReadyResponse::Run() {
                    : HmiInterfaces::STATE_NOT_AVAILABLE;
   HmiInterfaces& hmi_interfaces = application_manager_.hmi_interfaces();
   hmi_interfaces.SetInterfaceState(HmiInterfaces::HMI_INTERFACE_UI,
-                                   inteface_state);
+                                   interface_state);
 }
 
 }  // namespace commands
