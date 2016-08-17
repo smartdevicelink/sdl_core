@@ -90,7 +90,7 @@ std::string AppHMITypeToString(mobile_apis::AppHMIType::eType type) {
   std::map<mobile_apis::AppHMIType::eType, std::string>::const_iterator iter =
       app_hmi_type_map.find(type);
 
-  return app_hmi_type_map.end() == iter ? iter->second : std::string("");
+  return app_hmi_type_map.end() != iter ? iter->second : std::string("");
 }
 
 struct AppHMITypeInserter {
