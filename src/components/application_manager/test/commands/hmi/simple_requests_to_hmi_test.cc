@@ -61,6 +61,9 @@
 #include "hmi/ui_is_ready_request.h"
 #include "hmi/ui_perform_audio_pass_thru_request.h"
 #include "hmi/ui_perform_interaction_request.h"
+#include "hmi/vi_diagnostic_message_request.h"
+#include "hmi/vi_get_dtcs_request.h"
+#include "hmi/vi_get_vehicle_data_request.h"
 
 namespace test {
 namespace components {
@@ -127,7 +130,10 @@ typedef Types<commands::VIIsReadyRequest,
               commands::UIGetSupportedLanguagesRequest,
               commands::UIIsReadyRequest,
               commands::UIPerformAudioPassThruRequest,
-              commands::UIPerformInteractionRequest> RequestCommandsList;
+              commands::UIPerformInteractionRequest,
+              commands::VIDiagnosticMessageRequest,
+              commands::VIGetDTCsRequest,
+              commands::VIGetVehicleDataRequest> RequestCommandsList;
 
 TYPED_TEST_CASE(RequestToHMICommandsTest, RequestCommandsList);
 

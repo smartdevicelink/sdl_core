@@ -60,6 +60,8 @@
 #include "hmi/ui_end_audio_pass_thru_response.h"
 #include "hmi/ui_perform_audio_pass_thru_response.h"
 #include "hmi/ui_perform_interaction_response.h"
+#include "hmi/vi_diagnostic_message_response.h"
+#include "hmi/vi_get_dtcs_response.h"
 
 namespace test {
 namespace components {
@@ -129,7 +131,11 @@ typedef Types<
     CommandData<commands::UIDeleteSubmenuResponse,
                 hmi_apis::FunctionID::UI_DeleteSubMenu>,
     CommandData<commands::UIEndAudioPassThruResponse,
-                hmi_apis::FunctionID::UI_EndAudioPassThru>>
+                hmi_apis::FunctionID::UI_EndAudioPassThru>,
+    CommandData<commands::VIDiagnosticMessageResponse,
+                hmi_apis::FunctionID::VehicleInfo_DiagnosticMessage>,
+    CommandData<commands::VIGetDTCsResponse,
+                hmi_apis::FunctionID::VehicleInfo_GetDTCs>>
     ResponseCommandsList;
 
 TYPED_TEST_CASE(ResponseFromHMICommandsTest, ResponseCommandsList);
