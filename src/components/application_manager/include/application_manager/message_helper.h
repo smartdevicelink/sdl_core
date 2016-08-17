@@ -269,8 +269,6 @@ class MessageHelper {
    */
   static void SendUIChangeRegistrationRequestToHMI(
       ApplicationConstSharedPtr app, ApplicationManager& app_mngr);
-  static void SendChangeRegistrationRequestToHMI(ApplicationConstSharedPtr app,
-                                                 ApplicationManager& app_mngr);
   static void SendAddVRCommandToHMI(
       uint32_t cmd_id,
       const smart_objects::SmartObject& vr_commands,

@@ -1156,51 +1156,6 @@ void MessageHelper::SendUIChangeRegistrationRequestToHMI(
   }
 }
 
-void MessageHelper::SendChangeRegistrationRequestToHMI(
-    ApplicationConstSharedPtr app, ApplicationManager& app_mngr) {
-  if (!app.valid()) {
-    return;
-  }
-  if (mobile_apis::Language::INVALID_ENUM != app->language()) {
-    smart_objects::SmartObjectSPtr vr_command =
-        CreateChangeRegistration(hmi_apis::FunctionID::VR_ChangeRegistration,
-                                 app->language(),
-                                 app->app_id(),
-                                 NULL,
-                                 app_mngr);
-
-    if (vr_command) {
-      app_mngr.ManageHMICommand(vr_command);
-    }
-  }
-
-  if (mobile_apis::Language::INVALID_ENUM != app->language()) {
-    smart_objects::SmartObjectSPtr tts_command =
-        CreateChangeRegistration(hmi_apis::FunctionID::TTS_ChangeRegistration,
-                                 app->language(),
-                                 app->app_id(),
-                                 NULL,
-                                 app_mngr);
-
-    if (tts_command) {
-      app_mngr.ManageHMICommand(tts_command);
-    }
-  }
-
-  if (mobile_apis::Language::INVALID_ENUM != app->ui_language()) {
-    smart_objects::SmartObjectSPtr ui_command =
-        CreateChangeRegistration(hmi_apis::FunctionID::UI_ChangeRegistration,
-                                 app->ui_language(),
-                                 app->app_id(),
-                                 NULL,
-                                 app_mngr);
-
-    if (ui_command) {
-      app_mngr.ManageHMICommand(ui_command);
-    }
-  }
-}
-
 void MessageHelper::SendAddVRCommandToHMI(
     const uint32_t cmd_id,
     const smart_objects::SmartObject& vr_commands,

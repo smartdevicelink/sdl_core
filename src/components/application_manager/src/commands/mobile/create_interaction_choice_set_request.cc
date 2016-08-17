@@ -50,7 +50,8 @@ CreateInteractionChoiceSetRequest::CreateInteractionChoiceSetRequest(
     : CommandRequestImpl(message, application_manager)
     , expected_chs_count_(0)
     , received_chs_count_(0)
-    , error_from_hmi_(false) {}
+    , error_from_hmi_(false)
+    , vr_commands_lock_(true) {}
 
 CreateInteractionChoiceSetRequest::~CreateInteractionChoiceSetRequest() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -287,6 +288,48 @@ void CreateInteractionChoiceSetRequest::SendVRAddCommandRequests(
   LOG4CXX_DEBUG(logger_, "expected_chs_count_ = " << expected_chs_count_);
 }
 
+void CreateInteractionChoiceSetRequest::ProcessHmiError(
+    const hmi_apis::Common_Result::eType vr_result) {
+  LOG4CXX_DEBUG(logger_,
+                "Hmi response is not Success: "
+                    << vr_result << ". Stop sending VRAddCommand requests");
+  if (!error_from_hmi_) {
+    error_from_hmi_ = true;
+    std::string info =
+        vr_result == hmi_apis::Common_Result::UNSUPPORTED_RESOURCE
+            ? "VR is not supported by system"
+            : "";
+    SendResponse(false, GetMobileResultCode(vr_result), info.c_str());
+  }
+}
+
+bool CreateInteractionChoiceSetRequest::ProcessSuccesfulHMIResponse(
+    const uint32_t corr_id) {
+  SentCommandsMap::iterator it = sent_commands_map_.find(corr_id);
+  if (sent_commands_map_.end() == it) {
+    LOG4CXX_WARN(logger_, "HMI response for unknown VR command received");
+    return false;
+  }
+  VRCommandInfo& vr_command = it->second;
+  vr_command.succesful_response_received_ = true;
+  return true;
+}
+
+void CreateInteractionChoiceSetRequest::CountReceivedVRResponses() {
+  received_chs_count_++;
+  LOG4CXX_DEBUG(logger_,
+                "Got VR.AddCommand response, there are "
+                    << expected_chs_count_ - received_chs_count_
+                    << " more to wait.");
+  if (received_chs_count_ < expected_chs_count_) {
+    application_manager_.updateRequestTimeout(
+        connection_key(), correlation_id(), default_timeout());
+    LOG4CXX_DEBUG(logger_, "Timeout for request was updated");
+  } else {
+    OnAllHMIResponsesReceived();
+  }
+}
+
 void CreateInteractionChoiceSetRequest::on_event(
     const event_engine::Event& event) {
   using namespace hmi_apis;
@@ -294,50 +337,25 @@ void CreateInteractionChoiceSetRequest::on_event(
   LOG4CXX_AUTO_TRACE(logger_);
 
   const smart_objects::SmartObject& message = event.smart_object();
+  const Common_Result::eType result = static_cast<Common_Result::eType>(
+      message[strings::params][hmi_response::code].asInt());
+  const bool is_no_error = Compare<Common_Result::eType, EQ, ONE>(
+      result, Common_Result::SUCCESS, Common_Result::WARNINGS);
+  uint32_t corr_id = static_cast<uint32_t>(
+      message[strings::params][strings::correlation_id].asUInt());
   if (event.id() == hmi_apis::FunctionID::VR_AddCommand) {
-    received_chs_count_++;
-    LOG4CXX_DEBUG(logger_,
-                  "Got VR.AddCommand response, there are "
-                      << expected_chs_count_ - received_chs_count_
-                      << " more to wait.");
-
-    uint32_t corr_id = static_cast<uint32_t>(
-        message[strings::params][strings::correlation_id].asUInt());
     {
       sync_primitives::AutoLock commands_lock(vr_commands_lock_);
-      SentCommandsMap::iterator it = sent_commands_map_.find(corr_id);
-      if (sent_commands_map_.end() == it) {
-        LOG4CXX_WARN(logger_, "HMI response for unknown VR command received");
-        return;
-      }
-
-      Common_Result::eType vr_result = static_cast<Common_Result::eType>(
-          message[strings::params][hmi_response::code].asInt());
-
-      const bool is_vr_no_error = Compare<Common_Result::eType, EQ, ONE>(
-          vr_result, Common_Result::SUCCESS, Common_Result::WARNINGS);
-
-      if (is_vr_no_error) {
-        VRCommandInfo& vr_command = it->second;
-        vr_command.succesful_response_received_ = true;
-      } else {
-        LOG4CXX_DEBUG(logger_,
-                      "Hmi response is not Success: "
-                          << vr_result
-                          << ". Stop sending VRAddCommand requests");
-        if (!error_from_hmi_) {
-          error_from_hmi_ = true;
-          SendResponse(false, GetMobileResultCode(vr_result));
+      if (is_no_error) {
+        if (!ProcessSuccesfulHMIResponse(corr_id)) {
+          return;
         }
+      } else {
+        ProcessHmiError(result);
       }
     }
-    if (received_chs_count_ < expected_chs_count_) {
-      application_manager_.updateRequestTimeout(
-          connection_key(), correlation_id(), default_timeout());
-      LOG4CXX_DEBUG(logger_, "Timeout for request was updated");
-      return;
-    }
-    OnAllHMIResponsesReceived();
+
+    CountReceivedVRResponses();
   }
 }
 
@@ -379,7 +397,7 @@ void CreateInteractionChoiceSetRequest::DeleteChoices() {
       SendHMIRequest(hmi_apis::FunctionID::VR_DeleteCommand, &msg_param);
     } else {
       LOG4CXX_WARN(logger_,
-                   "Succesfull response has not been received for cmd_id =  "
+                   "succesful response has not been received for cmd_id =  "
                        << vr_command_info.cmd_id_);
     }
   }

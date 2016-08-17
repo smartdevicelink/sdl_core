@@ -32,6 +32,7 @@
 
 #include <algorithm>
 #include <string>
+#include "utils/macro.h"
 #include "application_manager/commands/command_request_impl.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/message_helper.h"
@@ -194,6 +195,59 @@ bool CommandRequestImpl::CheckSyntax(const std::string& str,
   return true;
 }
 
+smart_objects::SmartObject CreateUnsupportedResourceResponse(
+    const hmi_apis::FunctionID::eType function_id,
+    const uint32_t hmi_correlation_id,
+    HmiInterfaces::InterfaceID interface) {
+  smart_objects::SmartObject response(smart_objects::SmartType_Map);
+  smart_objects::SmartObject& params = response[strings::params];
+  params[strings::message_type] = MessageType::kResponse;
+  params[strings::correlation_id] = hmi_correlation_id;
+  params[strings::protocol_type] = CommandImpl::hmi_protocol_type_;
+  params[strings::protocol_version] = CommandImpl::protocol_version_;
+  params[strings::function_id] = function_id;
+  params[hmi_response::code] = hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
+  smart_objects::SmartObject& msg_params = response[strings::msg_params];
+
+  switch (interface) {
+    case HmiInterfaces::HMI_INTERFACE_VR: {
+      msg_params[strings::info] = "VR is not supported by system";
+      break;
+    }
+    case HmiInterfaces::HMI_INTERFACE_VehicleInfo: {
+      msg_params[strings::info] = "VehicleInfo is not supported by system";
+      break;
+    }
+    case HmiInterfaces::HMI_INTERFACE_UI: {
+      msg_params[strings::info] = "UI is not supported by system";
+      break;
+    }
+    default:
+      break;
+  }
+  return response;
+}
+
+bool CommandRequestImpl::ProcessHMIInterfacesAvailability(
+    const uint32_t hmi_correlation_id,
+    const hmi_apis::FunctionID::eType& function_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  HmiInterfaces& hmi_interfaces = application_manager_.hmi_interfaces();
+  HmiInterfaces::InterfaceID interface =
+      hmi_interfaces.GetInterfaceFromFunction(function_id);
+  DCHECK(interface != HmiInterfaces::HMI_INTERFACE_INVALID_ENUM);
+  const HmiInterfaces::InterfaceState state =
+      hmi_interfaces.GetInterfaceState(interface);
+  if (HmiInterfaces::STATE_NOT_AVAILABLE == state) {
+    event_engine::Event event(function_id);
+    event.set_smart_object(CreateUnsupportedResourceResponse(
+        function_id, hmi_correlation_id, interface));
+    event.raise(application_manager_.event_dispatcher());
+    return false;
+  }
+  return true;
+}
+
 uint32_t CommandRequestImpl::SendHMIRequest(
     const hmi_apis::FunctionID::eType& function_id,
     const smart_objects::SmartObject* msg_params,
@@ -202,12 +256,6 @@ uint32_t CommandRequestImpl::SendHMIRequest(
 
   const uint32_t hmi_correlation_id =
       application_manager_.GetNextHMICorrelationID();
-  if (use_events) {
-    LOG4CXX_DEBUG(logger_,
-                  "subscribe_on_event " << function_id << " "
-                                        << hmi_correlation_id);
-    subscribe_on_event(function_id, hmi_correlation_id);
-  }
 
   smart_objects::SmartObject& request = *result;
   request[strings::params][strings::message_type] = MessageType::kRequest;
@@ -222,9 +270,19 @@ uint32_t CommandRequestImpl::SendHMIRequest(
     request[strings::msg_params] = *msg_params;
   }
 
-  if (!application_manager_.ManageHMICommand(result)) {
-    LOG4CXX_ERROR(logger_, "Unable to send request");
-    SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
+  if (use_events) {
+    LOG4CXX_DEBUG(logger_,
+                  "subscribe_on_event " << function_id << " "
+                                        << hmi_correlation_id);
+    subscribe_on_event(function_id, hmi_correlation_id);
+  }
+  if (ProcessHMIInterfacesAvailability(hmi_correlation_id, function_id)) {
+    if (!application_manager_.ManageHMICommand(result)) {
+      LOG4CXX_ERROR(logger_, "Unable to send request");
+      SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
+    }
+  } else {
+    LOG4CXX_DEBUG(logger_, "Interface is not available");
   }
   return hmi_correlation_id;
 }

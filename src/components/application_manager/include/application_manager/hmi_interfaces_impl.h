@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,40 +29,50 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "application_manager/commands/hmi/vi_is_ready_response.h"
+
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMI_INTERFACES_IMPL_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMI_INTERFACES_IMPL_H_
+#include <map>
+#include "application_manager/hmi_interfaces.h"
+#include "utils/macro.h"
+#include "utils/lock.h"
 
 namespace application_manager {
 
-namespace commands {
+/**
+ * @brief The HmiInterfacesImpl class handles
+ *  hmi interfaces states
+ */
+class HmiInterfacesImpl : public HmiInterfaces {
+ public:
+  HmiInterfacesImpl();
 
-VIIsReadyResponse::VIIsReadyResponse(const MessageSharedPtr& message,
-                                     ApplicationManager& application_manager)
-    : ResponseFromHMI(message, application_manager) {}
+  /**
+   * @brief GetInterfaceState return currecnt state of hmi interface
+   * @param interface to get state
+   * @return state of interface
+   */
+  InterfaceState GetInterfaceState(InterfaceID interface) const OVERRIDE;
 
-VIIsReadyResponse::~VIIsReadyResponse() {}
+  /**
+   * @brief SetInterfaceState set interface to some state
+   * @param interface interface to set state
+   * @param state to setup
+   */
+  void SetInterfaceState(InterfaceID interface, InterfaceState state) OVERRIDE;
 
-void VIIsReadyResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  smart_objects::SmartObject& object = *message_;
+  /**
+   * @brief GetInterfaceFromFunction extract interface name fron function id
+   * @param function to extract interface name
+   * @return extracted interface name
+   */
+  InterfaceID GetInterfaceFromFunction(
+      hmi_apis::FunctionID::eType function) const OVERRIDE;
 
-  bool is_available = false;
-  if (object[strings::msg_params].keyExists(strings::available)) {
-    is_available = object[strings::msg_params][strings::available].asBool();
-  }
-
-  HMICapabilities& hmi_capabilities = application_manager_.hmi_capabilities();
-  hmi_capabilities.set_is_ivi_cooperating(is_available);
-
-  const HmiInterfaces::InterfaceState interface_state =
-      is_available ? HmiInterfaces::STATE_AVAILABLE
-                   : HmiInterfaces::STATE_NOT_AVAILABLE;
-  HmiInterfaces& hmi_interfaces = application_manager_.hmi_interfaces();
-  hmi_interfaces.SetInterfaceState(HmiInterfaces::HMI_INTERFACE_VehicleInfo,
-                                   inteface_state);
-
-  application_manager_.GetPolicyHandler().OnVIIsReady();
-}
-
-}  // namespace commands
-
+ private:
+  typedef std::map<InterfaceID, InterfaceState> InterfaceStatesMap;
+  InterfaceStatesMap interfaces_states_;
+  mutable sync_primitives::Lock interfaces_states_lock_;
+};
 }  // namespace application_manager
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMI_INTERFACES_IMPL_H_

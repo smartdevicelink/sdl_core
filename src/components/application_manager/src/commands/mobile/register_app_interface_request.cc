@@ -312,61 +312,27 @@ void RegisterAppInterfaceRequest::Run() {
   SendRegisterAppInterfaceResponseToMobile();
 }
 
-void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  smart_objects::SmartObject response_params(smart_objects::SmartType_Map);
-
-  mobile_apis::Result::eType result_code = mobile_apis::Result::SUCCESS;
-
-  const HMICapabilities& hmi_capabilities =
-      application_manager_.hmi_capabilities();
-
-  const uint32_t key = connection_key();
-  ApplicationSharedPtr application = application_manager_.application(key);
-
-  resumption::ResumeCtrl& resumer = application_manager_.resume_controller();
-
-  if (!application) {
-    LOG4CXX_ERROR(logger_,
-                  "There is no application for such connection key" << key);
-    LOG4CXX_DEBUG(logger_, "Need to start resume data persistent timer");
-    resumer.OnAppRegistrationEnd();
-    return;
-  }
-
-  response_params[strings::sync_msg_version][strings::major_version] =
-      major_version;  // From generated file interfaces/generated_msg_version.h
-  response_params[strings::sync_msg_version][strings::minor_version] =
-      minor_version;  // From generated file interfaces/generated_msg_version.h
-
+void FillVRRelatedFields(smart_objects::SmartObject& response_params,
+                         const HMICapabilities& hmi_capabilities) {
   response_params[strings::language] = hmi_capabilities.active_vr_language();
+  if (hmi_capabilities.vr_capabilities()) {
+    response_params[strings::vr_capabilities] =
+        *hmi_capabilities.vr_capabilities();
+  }
+}
+
+void FillVIRelatedFields(smart_objects::SmartObject& response_params,
+                         const HMICapabilities& hmi_capabilities) {
+  if (hmi_capabilities.vehicle_type()) {
+    response_params[hmi_response::vehicle_type] =
+        *hmi_capabilities.vehicle_type();
+  }
+}
+
+void FillUIRelatedFields(smart_objects::SmartObject& response_params,
+                         const HMICapabilities& hmi_capabilities) {
   response_params[strings::hmi_display_language] =
       hmi_capabilities.active_ui_language();
-
-  const smart_objects::SmartObject& msg_params =
-      (*message_)[strings::msg_params];
-
-  if (msg_params[strings::language_desired].asInt() !=
-          hmi_capabilities.active_vr_language() ||
-      msg_params[strings::hmi_display_language_desired].asInt() !=
-          hmi_capabilities.active_ui_language()) {
-    LOG4CXX_WARN(logger_,
-                 "Wrong language on registering application "
-                     << application->name().c_str());
-
-    LOG4CXX_ERROR(
-        logger_,
-        "VR language desired code is "
-            << msg_params[strings::language_desired].asInt()
-            << " , active VR language code is "
-            << hmi_capabilities.active_vr_language() << ", UI language code is "
-            << msg_params[strings::hmi_display_language_desired].asInt()
-            << " , active UI language code is "
-            << hmi_capabilities.active_ui_language());
-
-    result_code = mobile_apis::Result::WRONG_LANGUAGE;
-  }
-
   if (hmi_capabilities.display_capabilities()) {
     response_params[hmi_response::display_capabilities] =
         smart_objects::SmartObject(smart_objects::SmartType_Map);
@@ -402,13 +368,10 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
         hmi_capabilities.display_capabilities()->getElement(
             hmi_response::num_custom_presets_available);
 
-    if (hmi_capabilities.display_capabilities()
-            ->getElement(hmi_response::image_capabilities)
-            .length() > 0) {
-      display_caps[hmi_response::graphic_supported] = true;
-    } else {
-      display_caps[hmi_response::graphic_supported] = false;
-    }
+    display_caps[hmi_response::graphic_supported] =
+        (hmi_capabilities.display_capabilities()
+             ->getElement(hmi_response::image_capabilities)
+             .length() > 0);
 
     display_caps[hmi_response::templates_available] =
         hmi_capabilities.display_capabilities()->getElement(
@@ -421,6 +384,88 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
     display_caps[hmi_response::num_custom_presets_available] =
         hmi_capabilities.display_capabilities()->getElement(
             hmi_response::num_custom_presets_available);
+  }
+
+  if (hmi_capabilities.audio_pass_thru_capabilities()) {
+    if (smart_objects::SmartType_Array ==
+        hmi_capabilities.audio_pass_thru_capabilities()->getType()) {
+      // hmi_capabilities json contains array and HMI response object
+      response_params[strings::audio_pass_thru_capabilities] =
+          *hmi_capabilities.audio_pass_thru_capabilities();
+    } else {
+      response_params[strings::audio_pass_thru_capabilities][0] =
+          *hmi_capabilities.audio_pass_thru_capabilities();
+    }
+  }
+  response_params[strings::hmi_capabilities] =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+  response_params[strings::hmi_capabilities][strings::navigation] =
+      hmi_capabilities.navigation_supported();
+  response_params[strings::hmi_capabilities][strings::phone_call] =
+      hmi_capabilities.phone_call_supported();
+}
+
+void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  smart_objects::SmartObject response_params(smart_objects::SmartType_Map);
+
+  mobile_apis::Result::eType result_code = mobile_apis::Result::SUCCESS;
+
+  const HMICapabilities& hmi_capabilities =
+      application_manager_.hmi_capabilities();
+
+  const uint32_t key = connection_key();
+  ApplicationSharedPtr application = application_manager_.application(key);
+
+  resumption::ResumeCtrl& resumer = application_manager_.resume_controller();
+
+  if (!application) {
+    LOG4CXX_ERROR(logger_,
+                  "There is no application for such connection key" << key);
+    LOG4CXX_DEBUG(logger_, "Need to start resume data persistent timer");
+    resumer.OnAppRegistrationEnd();
+    return;
+  }
+
+  response_params[strings::sync_msg_version][strings::major_version] =
+      major_version;  // From generated file interfaces/generated_msg_version.h
+  response_params[strings::sync_msg_version][strings::minor_version] =
+      minor_version;  // From generated file interfaces/generated_msg_version.h
+
+  const smart_objects::SmartObject& msg_params =
+      (*message_)[strings::msg_params];
+
+  if (msg_params[strings::language_desired].asInt() !=
+          hmi_capabilities.active_vr_language() ||
+      msg_params[strings::hmi_display_language_desired].asInt() !=
+          hmi_capabilities.active_ui_language()) {
+    LOG4CXX_WARN(logger_,
+                 "Wrong language on registering application "
+                     << application->name().c_str());
+
+    LOG4CXX_ERROR(
+        logger_,
+        "VR language desired code is "
+            << msg_params[strings::language_desired].asInt()
+            << " , active VR language code is "
+            << hmi_capabilities.active_vr_language() << ", UI language code is "
+            << msg_params[strings::hmi_display_language_desired].asInt()
+            << " , active UI language code is "
+            << hmi_capabilities.active_ui_language());
+
+    result_code = mobile_apis::Result::WRONG_LANGUAGE;
+  }
+
+  if (application_manager_.hmi_interfaces().GetInterfaceState(
+          HmiInterfaces::HMI_INTERFACE_VR) !=
+      HmiInterfaces::STATE_NOT_AVAILABLE) {
+    FillVRRelatedFields(response_params, hmi_capabilities);
+  }
+
+  if (application_manager_.hmi_interfaces().GetInterfaceState(
+          HmiInterfaces::HMI_INTERFACE_UI) !=
+      HmiInterfaces::STATE_NOT_AVAILABLE) {
+    FillUIRelatedFields(response_params, hmi_capabilities);
   }
 
   if (hmi_capabilities.button_capabilities()) {
@@ -450,29 +495,18 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
     response_params[strings::speech_capabilities] =
         *hmi_capabilities.speech_capabilities();
   }
-  if (hmi_capabilities.vr_capabilities()) {
-    response_params[strings::vr_capabilities] =
-        *hmi_capabilities.vr_capabilities();
-  }
-  if (hmi_capabilities.audio_pass_thru_capabilities()) {
-    if (smart_objects::SmartType_Array ==
-        hmi_capabilities.audio_pass_thru_capabilities()->getType()) {
-      // hmi_capabilities json contains array and HMI response object
-      response_params[strings::audio_pass_thru_capabilities] =
-          *hmi_capabilities.audio_pass_thru_capabilities();
-    } else {
-      response_params[strings::audio_pass_thru_capabilities][0] =
-          *hmi_capabilities.audio_pass_thru_capabilities();
-    }
-  }
+
   if (hmi_capabilities.pcm_stream_capabilities()) {
     response_params[strings::pcm_stream_capabilities] =
         *hmi_capabilities.pcm_stream_capabilities();
   }
-  if (hmi_capabilities.vehicle_type()) {
-    response_params[hmi_response::vehicle_type] =
-        *hmi_capabilities.vehicle_type();
+
+  if (HmiInterfaces::STATE_NOT_AVAILABLE !=
+      application_manager_.hmi_interfaces().GetInterfaceState(
+          HmiInterfaces::HMI_INTERFACE_VehicleInfo)) {
+    FillVIRelatedFields(response_params, hmi_capabilities);
   }
+
   if (hmi_capabilities.prerecorded_speech()) {
     response_params[strings::prerecorded_speech] =
         *(hmi_capabilities.prerecorded_speech());
@@ -488,13 +522,6 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
       ++index;
     }
   }
-
-  response_params[strings::hmi_capabilities] =
-      smart_objects::SmartObject(smart_objects::SmartType_Map);
-  response_params[strings::hmi_capabilities][strings::navigation] =
-      hmi_capabilities.navigation_supported();
-  response_params[strings::hmi_capabilities][strings::phone_call] =
-      hmi_capabilities.phone_call_supported();
   response_params[strings::sdl_version] =
       application_manager_.get_settings().sdl_version();
   const std::string ccpu_version =
@@ -539,48 +566,51 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
                                             application->mac_address());
   }
 
-  hmi_apis::Common_SpeechCapabilities::eType tts_name_type =
-      hmi_apis::Common_SpeechCapabilities::INVALID_ENUM;
-  if ((*message_)[strings::msg_params].keyExists(strings::tts_name)) {
-    tts_name_type = static_cast<hmi_apis::Common_SpeechCapabilities::eType>(
-        (*message_)[strings::msg_params][strings::tts_name][0][strings::type]
-            .asInt());
-  }
-
-  if (hmi_apis::Common_SpeechCapabilities::SAPI_PHONEMES == tts_name_type ||
-      hmi_apis::Common_SpeechCapabilities::LHPLUS_PHONEMES == tts_name_type ||
-      hmi_apis::Common_SpeechCapabilities::PRE_RECORDED == tts_name_type ||
-      hmi_apis::Common_SpeechCapabilities::SILENCE == tts_name_type) {
-    result_code = mobile_apis::Result::WARNINGS;
-    add_info = "ttsChunks is sent but is not supported";
-  }
-
-  app_launch::AppLaunchCtrl& app_launch_ctrl =
-      application_manager_.app_launch_ctrl();
-  app_launch_ctrl.OnAppRegistered(*application);
   SendOnAppRegisteredNotificationToHMI(
       *(application.get()), resumption, need_restore_vr);
   SendResponse(true, result_code, add_info.c_str(), &response_params);
 
-  // Check if application exists, because application might be unregestered
-  // during sending reponse to mobile.
-  application = application_manager_.application(key);
-  if (application) {
-    LOG4CXX_DEBUG(logger_, "Application with app_id = " << key << " exists.");
-    if (result_code != mobile_apis::Result::RESUME_FAILED) {
-      resumer.StartResumption(application, hash_id);
-    } else {
-      resumer.StartResumptionOnlyHMILevel(application);
-    }
-
-    // By default app subscribed to CUSTOM_BUTTON
-    SendSubscribeCustomButtonNotification();
-    MessageHelper::SendChangeRegistrationRequestToHMI(application,
-                                                      application_manager_);
+  if (result_code != mobile_apis::Result::RESUME_FAILED) {
+    resumer.StartResumption(application, hash_id);
   } else {
-    LOG4CXX_DEBUG(logger_,
-                  "Application with app_id = " << key << " doesn't exist.");
+    resumer.StartResumptionOnlyHMILevel(application);
   }
+
+  // By default app subscribed to CUSTOM_BUTTON
+  SendSubscribeCustomButtonNotification();
+  SendChangeRagistrationOnHMI(application);
+}
+
+void RegisterAppInterfaceRequest::SendChangeRegistration(
+    const hmi_apis::FunctionID::eType function_id,
+    const int32_t language,
+    const uint32_t app_id) {
+  using helpers::Compare;
+  using helpers::EQ;
+  using helpers::ONE;
+  const HmiInterfaces& hmi_interfaces = application_manager_.hmi_interfaces();
+  const HmiInterfaces::InterfaceID interface =
+      hmi_interfaces.GetInterfaceFromFunction(function_id);
+  if (hmi_interfaces.GetInterfaceState(interface) !=
+      HmiInterfaces::STATE_NOT_AVAILABLE) {
+    smart_objects::SmartObject msg_params(smart_objects::SmartType_Map);
+    msg_params[strings::language] = language;
+    msg_params[strings::app_id] = app_id;
+    SendHMIRequest(function_id, &msg_params);
+  } else {
+    LOG4CXX_DEBUG(logger_, "Interface " << interface << "is not avaliable");
+  }
+}
+
+void RegisterAppInterfaceRequest::SendChangeRagistrationOnHMI(
+    ApplicationConstSharedPtr app) {
+  using namespace hmi_apis::FunctionID;
+  DCHECK_OR_RETURN_VOID(app);
+  DCHECK_OR_RETURN_VOID(mobile_apis::Language::INVALID_ENUM != app->language());
+  SendChangeRegistration(VR_ChangeRegistration, app->language(), app->app_id());
+  SendChangeRegistration(
+      TTS_ChangeRegistration, app->language(), app->app_id());
+  SendChangeRegistration(UI_ChangeRegistration, app->language(), app->app_id());
 }
 
 void RegisterAppInterfaceRequest::SendOnAppRegisteredNotificationToHMI(

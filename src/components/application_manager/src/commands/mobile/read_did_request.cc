@@ -102,13 +102,7 @@ void ReadDIDRequest::on_event(const event_engine::Event& event) {
 
       bool result = mobile_apis::Result::SUCCESS == result_code;
 
-      const std::string return_info =
-          message[strings::msg_params][hmi_response::message].asString();
-
-      SendResponse(result,
-                   result_code,
-                   return_info.c_str(),
-                   &(message[strings::msg_params]));
+      SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
       break;
     }
     default: {
