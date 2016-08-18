@@ -79,7 +79,7 @@ TEST_F(UpdateSDLResponseTest, RUN_SendRequest_SUCCESS) {
             CommandImpl::protocol_version_);
 }
 
-}  // hmi_commands_test
+}  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components
 }  // namespace test
