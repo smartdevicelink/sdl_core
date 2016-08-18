@@ -104,12 +104,12 @@ VRProxy::~VRProxy() {
   delete channel_;
 }
 
-void VRProxy::OnReceived(const vr_hmi_api::Message& message) {
+void VRProxy::OnReceived(const vr_hmi_api::ServiceMessage& message) {
   LOG4CXX_AUTO_TRACE(logger_);
   incoming_.PostMessage(message);
 }
 
-void VRProxy::Handle(vr_hmi_api::Message message) {
+void VRProxy::Handle(vr_hmi_api::ServiceMessage message) {
   LOG4CXX_AUTO_TRACE(logger_);
   listener_->OnReceived(message);
 }
@@ -138,7 +138,7 @@ int32_t VRProxy::SizeFromString(const std::string& value) {
   return size;
 }
 
-bool VRProxy::Send(const vr_hmi_api::Message& message) {
+bool VRProxy::Send(const vr_hmi_api::ServiceMessage& message) {
   LOG4CXX_AUTO_TRACE(logger_);
   std::string data;
   bool serialized = message.SerializeToString(&data);
@@ -161,7 +161,7 @@ void VRProxy::Receive() {
   if (channel_->Receive(kHeaderSize, &data)) {
     int size = SizeFromString(data);
     if (channel_->Receive(size, &data)) {
-      vr_hmi_api::Message message;
+      vr_hmi_api::ServiceMessage message;
       bool parsed = message.ParseFromString(data);
       if (parsed) {
         OnReceived(message);

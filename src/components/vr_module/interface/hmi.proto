@@ -1,5 +1,95 @@
 syntax = "proto2";
 package vr_hmi_api;
 
-message Message {
+//----------------COMMON STRUCTURES--------------------------------------------
+enum MessageType {
+  REQUEST = 0;
+  RESPONSE = 1;
+  NOTIFICATION = 2;
+}
+
+enum ResultCode{
+  SUCCESS = 0;
+  INVALID_DATA = 1;
+  GENERIC_ERROR = 2;
+  UNSUPPORTED_RESOURCE = 3;
+  WARNINGS = 4;
+  REJECTED = 5;
+}
+
+enum RPCName{
+  ON_REGISTER = 0;
+  ACTIVATE = 1;
+  ON_DEACTIVATED = 2;
+  PROCESS_DATA = 3;
+  ON_DEFAULT_CHOSEN = 4;
+  SUPPORT_SERVICE = 5;
+}
+
+//----------------SDL <=> HU- valid for SDL-RC Services approach only----------
+
+message ServiceMessage {
+  required RPCName rpc = 1;
+  required MessageType rpc_type = 2;
+  required int32 correlation_id = 3;
+  optional bytes params = 4;
+}
+
+// sent from HU-subsystem -> SDL
+// contains the raw binary data to be processed by mobile application
+message ProcessDataRequest{
+  required bytes raw = 1; 
+}
+
+// sent from SDL -> HU-subsystem
+message ProcessDataResponse{
+  required ResultCode result = 1;
+  optional string text = 2;
+  // information which the app may provide to the SDL/HU
+  optional string info = 3;
+}
+
+// sent from HU-subsystem -> SDL
+// transfered from HU to activate the definit service
+message ActivateServiceRequest{
+  required int32 appID = 1;
+}
+
+// sent from HU-subsystem -> SDL
+message ActivateServiceResponse{
+    required ResultCode result = 1;
+}
+
+// Must be sent by SDL to HU-subsystem on service registering
+message OnRegisterServiceNotification{
+  // defines if the service has been previously stored as default on SDL
+  required bool default = 1;
+  optional int32 appID = 2;
+}
+
+// sent from HU-subsystem -> SDL
+// to notify about the default service choosen by the User
+message OnDefaultServiceChosenNotification{
+  // appID which service is choosen by user to be default.
+  // In case of no appID defined, default service has been reset and
+  // HU-native service is uses by default
+  optional int32 appID = 1;
+}
+
+// sent from HU-subsystem -> SDL
+// notifies SDL about active service being switched off when
+// the user starts to use native service module on HMI or
+// deactivates service to use other one
+message OnServiceDeactivatedNotification{
+}
+
+// Must be sent by SDL to HU-subsystem before service registering to let
+// SDL know if HU may recognize and support the functions of the service
+message SupportServiceRequest{
+}
+
+// Sent from HU-subsystem to SDL
+// defines if the service functions are supported and
+// may be recognized/substituted by HU-subsystem
+message SupportServiceResponse{
 }

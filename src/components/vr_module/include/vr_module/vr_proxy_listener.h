@@ -34,7 +34,7 @@
 #define SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_VR_PROXY_LISTENER_H_
 
 namespace vr_hmi_api {
-class Message;
+class ServiceMessage;
 }  // namespace vr_hmi_api
 
 namespace vr_module {
@@ -48,7 +48,7 @@ class VRProxyListener {
    * Handles receiving GPB message from IVDCM
    * @param message GPB message according with hmi.proto file
    */
-  virtual void OnReceived(const vr_hmi_api::Message& message) = 0;
+  virtual void OnReceived(const vr_hmi_api::ServiceMessage& message) = 0;
 };
 
 }  // namespace vr_module

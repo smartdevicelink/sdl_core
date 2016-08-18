@@ -46,7 +46,7 @@ class Thread;
 
 namespace vr_module {
 
-typedef std::queue<vr_hmi_api::Message> MessageQueue;
+typedef std::queue<vr_hmi_api::ServiceMessage> MessageQueue;
 
 class VRProxyListener;
 class Channel;
@@ -62,13 +62,13 @@ class VRProxy : public threads::MessageLoopThread<MessageQueue>::Handler {
    * @param message to send
    * @return true if success
    */
-  bool Send(const vr_hmi_api::Message& message);
+  bool Send(const vr_hmi_api::ServiceMessage& message);
 
  private:
   inline void StartChannel();
   void Receive();
-  void Handle(vr_hmi_api::Message message);
-  void OnReceived(const vr_hmi_api::Message& message);
+  void Handle(vr_hmi_api::ServiceMessage message);
+  void OnReceived(const vr_hmi_api::ServiceMessage& message);
   std::string SizeToString(int32_t value);
   int32_t SizeFromString(const std::string& value);
   VRProxyListener *listener_;
