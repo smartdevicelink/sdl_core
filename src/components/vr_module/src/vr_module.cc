@@ -60,7 +60,7 @@ VRModule::VRModule()
 VRModule::~VRModule() {
 }
 
-void VRModule::OnReceived(const vr_hmi_api::Message& message) {
+void VRModule::OnReceived(const vr_hmi_api::ServiceMessage& message) {
   // TODO(KKolodiy): this should be implemented with according logic
 }
 

@@ -1,2 +1,55 @@
 syntax = "proto2";
 package vr_mobile_api;
+
+//----------------COMMON STRUCTURES--------------------------------------------
+enum MessageType {
+  REQUEST = 0;
+  RESPONSE = 1;
+  NOTIFICATION = 2;
+}
+
+enum ResultCode{
+    SUCCESS = 0;
+    INVALID_DATA = 1;
+    GENERIC_ERROR = 2;
+    REJECTED = 3;
+    WARNINNG = 4;
+}
+
+enum RPCName{
+    ACTIVATE = 0;
+    ON_DEACTIVATED = 1;
+    PROCESS_DATA = 2;
+}
+
+//----------------APP <=> SDL valid for SDL-RC Services approach only----------
+
+message ServiceMessage {
+  required RPCName rpc = 1;
+  required MessageType rpc_type = 2;
+  required int32 correlation_id = 3; 
+  optional bytes params = 4; // optional for messages with no additional parameters except of defined in ServiceMessage structure
+}
+// sent from SDL -> APP, contains the raw binary data to be processed by mobile application (in case of VR, a transfered recorded user's speech to be interpretated by phone Voice-engine service)
+message ProcessDataRequest{
+    required bytes raw = 1; //raw data from HU-subsystem
+}
+
+// from APP-> SDL, contans a response for raw data processing by service
+message ProcessDataResponse{
+    required ResultCode result = 1;
+    optional string text = 2; //UTF-8 encoded or 7-bit ASCII text, mandatory for VOICE_RECOGNITION serviceType, contains VR command(s) for reproduction on HU
+    optional string info = 3; //information which the app may provide to the SDL/HU
+}
+
+// sent from SDL -> APP, transfered from HU to activate the definit service the User wants to use for a definite ServiceType)
+message ActivateServiceRequest{
+}
+
+// sent from APP -> SDL, result of activating the service on mobile side
+message ActivateServiceResponse{
+    required ResultCode result = 1;
+}
+// sent from HMI -> SDL, notifies SDL about active service being switched off when the user starts to use native service module on HMI (e.g. VR engine, Navigation etc) or being switched to other one
+message OnServiceDeactivatedNotification{
+}

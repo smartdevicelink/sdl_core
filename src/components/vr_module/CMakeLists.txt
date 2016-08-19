@@ -22,6 +22,7 @@ if (CMAKE_BUILD_TYPE)
 endif()
 
 include_directories (
+  ${CMAKE_CURRENT_SOURCE_DIR}
   ./include/
   ../include/
   ../functional_module/include/
@@ -36,6 +37,7 @@ include_directories (
 set (SOURCES
     src/vr_module.cc
     src/vr_proxy.cc
+    src/socket_channel.cc
     # src/request_controller.cc
     src/vr_module_event.cc
 )
@@ -46,6 +48,7 @@ set (LIBRARIES
     FunctionalModule
     ConfigProfile
     Utils
+    Net
     protobuf
     MobileProto
     HmiProto
@@ -74,6 +77,8 @@ install(
   FILES ${FILES_FOR_COPY}
   DESTINATION ${install_destination}
 )
+
+add_subdirectory(net)
 
 if(BUILD_TESTS)
   add_subdirectory(test)

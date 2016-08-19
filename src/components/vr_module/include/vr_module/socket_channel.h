@@ -30,56 +30,32 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_VR_PROXY_H_
-#define SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_VR_PROXY_H_
+#ifndef SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_SOCKET_CHANNEL_H_
+#define SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_SOCKET_CHANNEL_H_
 
-#include <queue>
+#include <string>
 
-#include "utils/lock.h"
-#include "utils/macro.h"
-#include "utils/threads/message_loop_thread.h"
-#include "vr_module/interface/hmi.pb.h"
+#include "vr_module/channel.h"
 
-namespace threads {
-class Thread;
-}  // namespace threads
+namespace net {
+class ConnectedSocket;
+}  // namespace net
 
 namespace vr_module {
 
-typedef std::queue<vr_hmi_api::ServiceMessage> MessageQueue;
-
-class VRProxyListener;
-class Channel;
-
-class VRProxy : public threads::MessageLoopThread<MessageQueue>::Handler {
+class SocketChannel : public Channel {
  public:
-  explicit VRProxy(VRProxyListener *listener);
-  VRProxy(VRProxyListener *listener, Channel *channel);
-  ~VRProxy();
-
-  /**
-   * Sends message to HMI(Applink)
-   * @param message to send
-   * @return true if success
-   */
-  bool Send(const vr_hmi_api::ServiceMessage& message);
+  SocketChannel();
+  ~SocketChannel();
+  virtual bool Start();
+  virtual bool Stop();
+  virtual bool Send(const std::string& data);
+  virtual bool Receive(size_t size, std::string *buffer);
 
  private:
-  inline void StartChannel();
-  void Receive();
-  void Handle(vr_hmi_api::ServiceMessage message);
-  void OnReceived(const vr_hmi_api::ServiceMessage& message);
-  std::string SizeToString(int32_t value);
-  int32_t SizeFromString(const std::string& value);
-  VRProxyListener *listener_;
-  threads::MessageLoopThread<MessageQueue> incoming_;
-  Channel *channel_;
-  threads::Thread *channel_thread_;
-  friend class Receiver;
-  FRIEND_TEST(VRProxyTest, SizeToString);
-  FRIEND_TEST(VRProxyTest, SizeFromString);
+  net::ConnectedSocket *socket_;
 };
 
 }  // namespace vr_module
 
-#endif  // SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_VR_PROXY_H_
+#endif  // SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_SOCKET_CHANNEL_H_
