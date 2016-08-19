@@ -1938,7 +1938,7 @@
 
 </interface>
 
-<interface name="Buttons" version="1.0" date="2013-04-12">
+<interface name="Buttons" version="1.1" date="2016-08-18">
     <function name="GetCapabilities" messagetype="request">
       <description>Method is invoked at system start-up. SDL requests the information about all supported hardware buttons and their capabilities</description>
     </function>
@@ -1961,8 +1961,10 @@
       </param>
       <param name="appID" type="Integer" mandatory="false">
         <description>
-                In case the ButtonName is CUSTOM_BUTTON, HMI must include appID parameters to OnButtonPress notification sent to SDL.
-                Otherwise, if appID is not sent together with CUSTOM_BUTTON, this notification will be ignored by SDL.
+                In case the ButtonName is CUSTOM_BUTTON or OK, HMI must include appID parameters to OnButtonPress notification sent to SDL.
+                If appID is not sent together with CUSTOM_BUTTON, this notification will be ignored by SDL.
+                If appID is present for OK button -> SDL transfers notification to the named app only if if is in FULL or LIMITED (ignores if app is in NONE or BACKGROUND).
+                If appID is omited for OK button -> SDL transfers notification to app in FULL
         </description>
       </param>
     </function>
@@ -1976,8 +1978,10 @@
         </param>
         <param name="appID" type="Integer" mandatory="false">
             <description>
-                In case the ButtonName is CUSTOM_BUTTON, HMI must include appID parameters to OnButtonEvent notification sent to SDL.
-                Otherwise, if appID is not sent together with CUSTOM_BUTTON, this notification will be ignored by SDL.
+                In case the ButtonName is CUSTOM_BUTTON or OK, HMI must include appID parameters to OnButtonEvent notification sent to SDL.
+                If appID is not sent together with CUSTOM_BUTTON, this notification will be ignored by SDL.
+                If appID is present for OK button -> SDL transfers notification to the named app only if if is in FULL or LIMITED (ignores if app is in NONE or BACKGROUND).
+                If appID is omited for OK button -> SDL transfers notification to app in FULL
             </description>
         </param>
     </function>

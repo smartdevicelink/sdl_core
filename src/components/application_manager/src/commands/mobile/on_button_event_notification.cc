@@ -57,6 +57,9 @@ void OnButtonEventNotification::Run() {
       static_cast<uint32_t>(
           (*message_)[strings::msg_params][hmi_response::button_name].asInt());
 
+  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
+      (*message_)[strings::msg_params][strings::app_id].asUInt());
+
   // CUSTOM_BUTTON notification
   if (static_cast<uint32_t>(mobile_apis::ButtonName::CUSTOM_BUTTON) == btn_id) {
     // app_id is mandatory for CUSTOM_BUTTON notification
@@ -73,10 +76,7 @@ void OnButtonEventNotification::Run() {
       return;
     }
 
-    ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
-        (*message_)[strings::msg_params][strings::app_id].asUInt());
-
-    if (false == app.valid()) {
+    if (!app) {
       LOG4CXX_ERROR_EXT(logger_, "Application doesn't exist.");
       return;
     }
@@ -106,20 +106,24 @@ void OnButtonEventNotification::Run() {
       continue;
     }
 
-    //Send ButtonEvent notification only in HMI_FULL or HMI_LIMITED mode
+    // Send ButtonEvent notification only in HMI_FULL or HMI_LIMITED mode
     if ((mobile_api::HMILevel::HMI_FULL != subscribed_app->hmi_level()) &&
         (mobile_api::HMILevel::HMI_LIMITED != subscribed_app->hmi_level())) {
       LOG4CXX_WARN_EXT(logger_, "OnButtonEvent in HMI_BACKGROUND or NONE");
       continue;
     }
 
-    //Send ButtonEvent notification for OK button only in HMI_FULL mode
-    if ((static_cast<uint32_t>(mobile_apis::ButtonName::OK) == btn_id) &&
-        (!subscribed_app->IsFullscreen())) {
-      continue;
-    }
+    if (app) {
+      // if "appID" is present  send it to Named app , only if its FULL or
+      // LIMITED
+      if (app->app_id() == subscribed_app->app_id()) {
+        SendButtonEvent(subscribed_app);
+      }
 
-    SendButtonEvent(subscribed_app);
+    } else if (subscribed_app->IsFullscreen()) {
+      // if No "appID" - send it FULL apps only.
+      SendButtonEvent(subscribed_app);
+    }
   }
 }
 
