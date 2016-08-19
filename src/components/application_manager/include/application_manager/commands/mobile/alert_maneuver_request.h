@@ -74,14 +74,15 @@ class AlertManeuverRequest : public CommandRequestImpl {
   virtual void on_event(const event_engine::Event& event);
 
  private:
+
   /**
    * @brief Prepare parameters for  sending to mobile application
    * @param result_code contains result code for sending to mobile application
+   * @param return_info contains result result info for sending to mobil application
    * @return result for sending to mobile application.
    */
   bool PrepareResponseParameters(mobile_apis::Result::eType& result_code,
                                  std::string& return_info);
-
   /**
    * @brief Checks alert maneuver params(ttsChunks, ...).
    * When type is String there is a check on the contents \t\n \\t \\n

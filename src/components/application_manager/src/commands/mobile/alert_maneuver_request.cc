@@ -179,7 +179,6 @@ void AlertManeuverRequest::on_event(const event_engine::Event& event) {
   std::string return_info;
   mobile_apis::Result::eType result_code;
   const bool result = PrepareResponseParameters(result_code, return_info);
-
   bool must_be_empty_info = false;
   if (return_info.find("\n") != std::string::npos ||
       return_info.find("\t") != std::string::npos) {

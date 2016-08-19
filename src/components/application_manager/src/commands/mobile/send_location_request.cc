@@ -144,12 +144,14 @@ void SendLocationRequest::on_event(const event_engine::Event& event) {
     mobile_apis::Result::eType result_code =
         GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
             message[strings::params][hmi_response::code].asUInt()));
-    const bool result =
-        Compare<Result::eType, EQ, ONE>(result_code,
-                                        Result::SAVED,
-                                        Result::SUCCESS,
-                                        Result::WARNINGS,
-                                        Result::UNSUPPORTED_RESOURCE);
+    bool result = Compare<Result::eType, EQ, ONE>(
+        result_code, Result::SAVED, Result::SUCCESS, Result::WARNINGS);
+    result =
+        result || (Result::UNSUPPORTED_RESOURCE == result &&
+                   HmiInterfaces::STATE_AVAILABLE ==
+                       application_manager_.hmi_interfaces().GetInterfaceState(
+                           HmiInterfaces::HMI_INTERFACE_Navigation));
+
     SendResponse(result, result_code, NULL, &(message[strings::params]));
     return;
   }

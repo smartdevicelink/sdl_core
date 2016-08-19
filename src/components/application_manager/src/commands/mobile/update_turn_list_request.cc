@@ -158,14 +158,13 @@ void UpdateTurnListRequest::on_event(const event_engine::Event& event) {
       mobile_apis::Result::eType result_code =
           static_cast<mobile_apis::Result::eType>(
               message[strings::params][hmi_response::code].asInt());
-      HMICapabilities& hmi_capabilities =
-          application_manager_.hmi_capabilities();
 
-      bool result =
-          (mobile_apis::Result::SUCCESS == result_code) ||
-          ((mobile_apis::Result::UNSUPPORTED_RESOURCE == result_code) &&
-           (hmi_capabilities.is_ui_cooperating()));
-
+      bool result = mobile_apis::Result::SUCCESS == result_code;
+      result =
+          result || (mobile_apis::Result::UNSUPPORTED_RESOURCE == result_code &&
+                     (HmiInterfaces::STATE_AVAILABLE ==
+                      application_manager_.hmi_interfaces().GetInterfaceState(
+                          HmiInterfaces::HMI_INTERFACE_Navigation)));
       SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
       break;
     }
