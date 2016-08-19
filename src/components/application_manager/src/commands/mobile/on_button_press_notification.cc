@@ -57,6 +57,10 @@ void OnButtonPressNotification::Run() {
       static_cast<uint32_t>(
           (*message_)[strings::msg_params][hmi_response::button_name].asInt());
 
+  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
+     (*message_)[strings::msg_params][strings::app_id].asUInt());
+
+
   // CUSTOM_BUTTON notification
   if (static_cast<uint32_t>(mobile_apis::ButtonName::CUSTOM_BUTTON) == btn_id) {
     // app_id is mandatory for CUSTOM_BUTTON notification
@@ -69,12 +73,9 @@ void OnButtonPressNotification::Run() {
     if (false == (*message_)[strings::msg_params].keyExists(
         hmi_response::custom_button_id)) {
       LOG4CXX_ERROR_EXT(logger_,
-                       "CUSTOM_BUTTON OnButtonPress without custom_button_id.");
+                    "CUSTOM_BUTTON OnButtonPress without custom_button_id.");
       return;
     }
-
-    ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
-        (*message_)[strings::msg_params][strings::app_id].asUInt());
 
     if (false == app.valid()) {
       LOG4CXX_ERROR_EXT(logger_, "Application doesn't exist.");
@@ -105,21 +106,24 @@ void OnButtonPressNotification::Run() {
       LOG4CXX_WARN_EXT(logger_, "Null pointer to subscribed app.");
       continue;
     }
-
     //Send ButtonPress notification only in HMI_FULL or HMI_LIMITED mode
     if ((mobile_api::HMILevel::HMI_FULL != subscribed_app->hmi_level()) &&
         (mobile_api::HMILevel::HMI_LIMITED != subscribed_app->hmi_level())) {
-      LOG4CXX_WARN_EXT(logger_, "OnButtonPress in HMI_BACKGROUND or NONE");
+      LOG4CXX_WARN_EXT(logger_, "OnButtonPress notification is allowed only"
+                       << "in FULL or LIMITED hmi level when AppID is present");
       continue;
     }
+    
+    if(app.valid()) {
+      //if "appID" is present  send it to Named app , only if its FULL or LIMITED
+      if( app->app_id() == subscribed_app->app_id()) {
+        SendButtonPress(subscribed_app);
+      }
 
-    //Send ButtonPress notification for OK button only in HMI_FULL mode
-    if ((static_cast<uint32_t>(mobile_apis::ButtonName::OK) == btn_id) &&
-        (mobile_api::HMILevel::HMI_FULL != subscribed_app->hmi_level())) {
-      continue;
+    } else if (subscribed_app->IsFullscreen()) {
+      // if No "appID" - send it FULL apps only.
+      SendButtonPress(subscribed_app);
     }
-
-    SendButtonPress(subscribed_app);
   }
 }
 
