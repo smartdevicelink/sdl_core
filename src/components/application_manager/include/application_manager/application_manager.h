@@ -496,13 +496,14 @@ class ApplicationManager {
   virtual resumption::ResumeCtrl& resume_controller() = 0;
 
   /**
- * @brief hmi_interfaces getter for hmi_interfaces component, that handle
- * hmi_instrfaces state
- * @return reference to hmi_interfaces component
- */
+  * @brief hmi_interfaces getter for hmi_interfaces component, that handle
+  * hmi_instrfaces state
+  * @return reference to hmi_interfaces component
+  */
   virtual HmiInterfaces& hmi_interfaces() = 0;
 
   virtual app_launch::AppLaunchCtrl& app_launch_ctrl() = 0;
+
   /*
    * @brief Converts connection string transport type representation
    * to HMI Common_TransportType

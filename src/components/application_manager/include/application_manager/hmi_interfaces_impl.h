@@ -36,13 +36,12 @@
 #include "application_manager/hmi_interfaces.h"
 #include "utils/macro.h"
 #include "utils/lock.h"
-
-namespace application_manager {
-
 /**
  * @brief The HmiInterfacesImpl class handles
  *  hmi interfaces states
  */
+namespace application_manager {
+
 class HmiInterfacesImpl : public HmiInterfaces {
  public:
   HmiInterfacesImpl();

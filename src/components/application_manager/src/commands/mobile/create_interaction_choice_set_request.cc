@@ -354,7 +354,6 @@ void CreateInteractionChoiceSetRequest::on_event(
         ProcessHmiError(result);
       }
     }
-
     CountReceivedVRResponses();
   }
 }
