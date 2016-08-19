@@ -70,6 +70,10 @@ struct TypeIf<false, ThenT, ElseT> {
   typedef ElseT Result;
 };
 
+template <class MockT, bool kIsNice>
+struct IsNiceMock : public TypeIf<kIsNice, ::testing::NiceMock<MockT>, MockT> {
+};
+
 // If `kIsNice` is `true` then all used mock types
 // will be wrapped by a `NiceMock`
 
@@ -128,8 +132,8 @@ class CommandsTest : public ::testing::Test {
 
  protected:
   virtual void InitCommand(const uint32_t& timeout) {
-    EXPECT_CALL(app_mngr_, get_settings())
-        .WillOnce(ReturnRef(app_mngr_settings_));
+    ON_CALL(app_mngr_, get_settings())
+        .WillByDefault(ReturnRef(app_mngr_settings_));
     ON_CALL(app_mngr_settings_, default_timeout())
         .WillByDefault(ReturnRef(timeout));
   }
