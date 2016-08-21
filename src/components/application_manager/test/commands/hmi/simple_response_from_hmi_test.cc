@@ -62,6 +62,7 @@
 #include "hmi/ui_perform_interaction_response.h"
 #include "hmi/vi_diagnostic_message_response.h"
 #include "hmi/vi_get_dtcs_response.h"
+#include "hmi/vr_perform_interaction_response.h"
 
 namespace test {
 namespace components {
@@ -135,7 +136,9 @@ typedef Types<
     CommandData<commands::VIDiagnosticMessageResponse,
                 hmi_apis::FunctionID::VehicleInfo_DiagnosticMessage>,
     CommandData<commands::VIGetDTCsResponse,
-                hmi_apis::FunctionID::VehicleInfo_GetDTCs>>
+                hmi_apis::FunctionID::VehicleInfo_GetDTCs>,
+    CommandData<commands::VRPerformInteractionResponse,
+                hmi_apis::FunctionID::VR_PerformInteraction>>
     ResponseCommandsList;
 
 TYPED_TEST_CASE(ResponseFromHMICommandsTest, ResponseCommandsList);
