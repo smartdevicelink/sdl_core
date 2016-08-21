@@ -64,11 +64,10 @@
 #include "hmi/vi_diagnostic_message_request.h"
 #include "hmi/vi_get_dtcs_request.h"
 #include "hmi/vi_get_vehicle_data_request.h"
-#include "hmi/vr_get_capabilities_request.h"
-#include "hmi/vr_get_supported_languages_request.h"
-#include "hmi/vr_get_language_request.h"
-#include "hmi/vr_is_ready_request.h"
-#include "hmi/vr_perform_interaction_request.h"
+#include "hmi/vi_unsubscribe_vehicle_data_request.h"
+#include "hmi/vr_add_command_request.h"
+#include "hmi/vr_change_registration_request.h"
+#include "hmi/vr_delete_command_request.h"
 
 namespace test {
 namespace components {
@@ -139,11 +138,10 @@ typedef Types<commands::VIIsReadyRequest,
               commands::VIDiagnosticMessageRequest,
               commands::VIGetDTCsRequest,
               commands::VIGetVehicleDataRequest,
-              commands::VRGetCapabilitiesRequest,
-              commands::VRGetSupportedLanguagesRequest,
-              commands::VRGetLanguageRequest,
-              commands::VRPerformInteractionRequest,
-              commands::VRIsReadyRequest> RequestCommandsList;
+              commands::VIUnsubscribeVehicleDataRequest,
+              commands::VRAddCommandRequest,
+              commands::VRChangeRegistrationRequest,
+              commands::VRDeleteCommandRequest> RequestCommandsList;
 
 TYPED_TEST_CASE(RequestToHMICommandsTest, RequestCommandsList);
 
@@ -157,7 +155,7 @@ TYPED_TEST(RequestToHMICommandsTest, Run_SendMessageToHMI_SUCCESS) {
   command->Run();
 }
 
-}  // namespace hmi_commands_test
+}  // hmi_commands_test
 }  // namespace commands_test
 }  // namespace components
 }  // namespace test
