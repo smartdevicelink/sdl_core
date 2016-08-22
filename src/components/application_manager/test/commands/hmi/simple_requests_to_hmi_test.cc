@@ -155,7 +155,7 @@ TYPED_TEST(RequestToHMICommandsTest, Run_SendMessageToHMI_SUCCESS) {
   command->Run();
 }
 
-}  // hmi_commands_test
+}  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components
 }  // namespace test
