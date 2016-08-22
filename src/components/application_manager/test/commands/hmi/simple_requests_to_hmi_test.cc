@@ -142,7 +142,8 @@ typedef Types<commands::VIIsReadyRequest,
               commands::VRGetCapabilitiesRequest,
               commands::VRGetSupportedLanguagesRequest,
               commands::VRGetLanguageRequest,
-              commands::VRPerformInteractionRequest> RequestCommandsList;
+              commands::VRPerformInteractionRequest,
+              commands::VRIsReadyRequest> RequestCommandsList;
 
 TYPED_TEST_CASE(RequestToHMICommandsTest, RequestCommandsList);
 
@@ -156,7 +157,7 @@ TYPED_TEST(RequestToHMICommandsTest, Run_SendMessageToHMI_SUCCESS) {
   command->Run();
 }
 
-}  // hmi_commands_test
+}  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components
 }  // namespace test

@@ -34,7 +34,6 @@
 
 #include "gtest/gtest.h"
 #include "utils/shared_ptr.h"
-#include "utils/make_shared.h"
 #include "smart_objects/smart_object.h"
 #include "interfaces/MOBILE_API.h"
 #include "application_manager/mock_hmi_capabilities.h"
@@ -84,7 +83,7 @@ class VRGetCapabilitiesResponseTest
   SmartObject capabilities_;
 };
 
-TEST_F(VRGetCapabilitiesResponseTest, RUN_SetDisplay_SUCCESSS) {
+TEST_F(VRGetCapabilitiesResponseTest, RUN_SUCCESSS) {
   MessageSharedPtr command_msg = CreateCommandMsg();
   (*command_msg)[strings::msg_params][strings::vr_capabilities] =
       smart_objects::SmartObject(smart_objects::SmartType_Array);
@@ -105,7 +104,7 @@ TEST_F(VRGetCapabilitiesResponseTest, RUN_SetDisplay_SUCCESSS) {
   command->Run();
 }
 
-}  // hmi_commands_test
+}  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components
 }  // namespace test

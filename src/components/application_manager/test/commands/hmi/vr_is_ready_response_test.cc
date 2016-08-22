@@ -113,7 +113,7 @@ TEST_F(VRIsReadyResponseTest, RUN_NoKeyAvailable) {
       (*command_msg)[strings::msg_params].keyExists(strings::available));
 }
 
-}  // hmi_commands_test
+}  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components
 }  // namespace test

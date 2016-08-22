@@ -119,7 +119,7 @@ TEST_F(VRGetSupportedLanguagesResponseTest, RUN_UNSUCCESS) {
   EXPECT_FALSE((*command_msg)[am::strings::msg_params].keyExists(
       am::hmi_response::languages));
 }
-}  // hmi_commands_test
+}  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components
 }  // namespace test
