@@ -153,16 +153,27 @@ class RegisterAppInterfaceRequestTest
   sync_primitives::Lock lock_;
   am::ApplicationSet app_set_;
 
-  typename IsNiceMock<policy_test::MockPolicyHandlerInterface,
-                      kMocksAreNice>::Result mock_policy_handler_;
-  typename IsNiceMock<resumption::MockResumeCtrl, kMocksAreNice>::Result
-      mock_resume_crt_;
-  typename IsNiceMock<connection_handler_test::MockConnectionHandler,
-                      kMocksAreNice>::Result mock_connection_handler_;
-  typename IsNiceMock<protocol_handler_test::MockSessionObserver,
-                      kMocksAreNice>::Result mock_session_observer_;
-  typename IsNiceMock<application_manager_test::MockHMICapabilities,
-                      kMocksAreNice>::Result mock_hmi_capabilities_;
+  typedef IsNiceMock<policy_test::MockPolicyHandlerInterface,
+                     kMocksAreNice>::Result MockPolicyHandlerInterface;
+
+  typedef IsNiceMock<resumption::MockResumeCtrl, kMocksAreNice>::Result
+      MockResumeCtrl;
+
+  typedef IsNiceMock<connection_handler_test::MockConnectionHandler,
+                     kMocksAreNice>::Result MockConnectionHandler;
+
+  typedef IsNiceMock<protocol_handler_test::MockSessionObserver,
+                     kMocksAreNice>::Result MockSessionObserver;
+
+  typedef IsNiceMock<application_manager_test::MockHMICapabilities,
+                     kMocksAreNice>::Result MockHMICapabilities;
+
+  MockPolicyHandlerInterface mock_policy_handler_;
+  MockResumeCtrl mock_resume_crt_;
+  MockConnectionHandler mock_connection_handler_;
+  MockSessionObserver mock_session_observer_;
+  MockHMICapabilities mock_hmi_capabilities_;
+
   am::MockMessageHelper& mock_message_helper_;
 };
 
