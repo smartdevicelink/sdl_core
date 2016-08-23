@@ -30,6 +30,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <stdint.h>
+#include <string>
+
 #include "gtest/gtest.h"
 #include "utils/shared_ptr.h"
 #include "smart_objects/smart_object.h"
@@ -38,8 +41,7 @@
 #include "application_manager/application.h"
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_application.h"
-#include "application_manager/mock_hmi_capabilities.h"
-#include "application_manager/commands/mobile/unsubscribe_way_points_request.h"
+#include "application_manager/commands/mobile/list_files_request.h"
 #include "interfaces/MOBILE_API.h"
 #include "application_manager/smart_object_keys.h"
 
@@ -53,38 +55,71 @@ using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::DoAll;
 using ::testing::SaveArg;
-using ::testing::InSequence;
 namespace am = ::application_manager;
-using am::commands::UnSubscribeWayPointsRequest;
+using am::commands::ListFilesRequest;
 using am::commands::MessageSharedPtr;
 
-typedef SharedPtr<UnSubscribeWayPointsRequest> CommandPtr;
-
-class UnsubscribeWayPointsRequestTest
+class ListFilesRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {};
 
-TEST_F(UnsubscribeWayPointsRequestTest, OnEvent_SUCCESS) {
-  CommandPtr command(CreateCommand<UnSubscribeWayPointsRequest>());
+TEST_F(ListFilesRequestTest, Run_AppNotRegistered_UNSUCCESS) {
+  SharedPtr<ListFilesRequest> command(CreateCommand<ListFilesRequest>());
+
+  ON_CALL(app_mngr_, application(_))
+      .WillByDefault(Return(SharedPtr<am::Application>()));
+
+  MessageSharedPtr result_msg(CatchMobileCommandResult(CallRun(*command)));
+  EXPECT_EQ(mobile_apis::Result::APPLICATION_NOT_REGISTERED,
+            static_cast<mobile_apis::Result::eType>(
+                (*result_msg)[am::strings::msg_params][am::strings::result_code]
+                    .asInt()));
+}
+
+TEST_F(ListFilesRequestTest, Run_TooManyHmiNone_UNSUCCESS) {
   MockAppPtr app(CreateMockApp());
-  Event event(hmi_apis::FunctionID::Navigation_UnsubscribeWayPoints);
-
-  MessageSharedPtr event_msg(CreateMessage(smart_objects::SmartType_Map));
-  (*event_msg)[am::strings::params][am::hmi_response::code] =
-      mobile_apis::Result::SUCCESS;
-  (*event_msg)[am::strings::msg_params] = 0;
-
-  event.set_smart_object(*event_msg);
+  SharedPtr<ListFilesRequest> command(CreateCommand<ListFilesRequest>());
 
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
+  ON_CALL(*app, hmi_level())
+      .WillByDefault(Return(mobile_apis::HMILevel::HMI_NONE));
 
-  {
-    InSequence dummy;
-    EXPECT_CALL(app_mngr_, UnsubscribeAppFromWayPoints(_));
-    EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _));
-    EXPECT_CALL(*app, UpdateHash());
-  }
+  const uint32_t kListFilesInNoneAllowed = 1u;
+  const uint32_t kListFilesInNoneCount = 2u;
 
-  command->on_event(event);
+  EXPECT_CALL(app_mngr_, get_settings())
+      .WillOnce(ReturnRef(app_mngr_settings_));
+  ON_CALL(app_mngr_settings_, list_files_in_none())
+      .WillByDefault(ReturnRef(kListFilesInNoneAllowed));
+  ON_CALL(*app, list_files_in_none_count())
+      .WillByDefault(Return(kListFilesInNoneCount));
+
+  MessageSharedPtr result_msg(CatchMobileCommandResult(CallRun(*command)));
+  EXPECT_EQ(mobile_apis::Result::REJECTED,
+            static_cast<mobile_apis::Result::eType>(
+                (*result_msg)[am::strings::msg_params][am::strings::result_code]
+                    .asInt()));
+}
+
+TEST_F(ListFilesRequestTest, Run_SUCCESS) {
+  MockAppPtr app(CreateMockApp());
+  SharedPtr<ListFilesRequest> command(CreateCommand<ListFilesRequest>());
+
+  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
+  ON_CALL(*app, hmi_level())
+      .WillByDefault(Return(mobile_apis::HMILevel::HMI_FULL));
+
+  ON_CALL(*app, increment_list_files_in_none_count()).WillByDefault(Return());
+
+  ON_CALL(*app, GetAvailableDiskSpace()).WillByDefault(Return(0));
+
+  am::AppFilesMap files_map;
+  ON_CALL(*app, getAppFiles()).WillByDefault(ReturnRef(files_map));
+
+  MessageSharedPtr result_msg(CatchMobileCommandResult(CallRun(*command)));
+  EXPECT_EQ(mobile_apis::Result::SUCCESS,
+            static_cast<mobile_apis::Result::eType>(
+                (*result_msg)[am::strings::msg_params][am::strings::result_code]
+                    .asInt()));
 }
 
 }  // namespace mobile_commands_test

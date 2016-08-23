@@ -73,6 +73,12 @@ class AddCommandRequest : public CommandRequestImpl {
    */
   void on_event(const event_engine::Event& event);
 
+  /**
+   * @brief Function is called by RequestController when request execution time
+   * has exceed it's limit
+   */
+  virtual void onTimeOut();
+
  private:
   /*
    * @brief Check if command name doesn't exist in application
@@ -102,12 +108,6 @@ class AddCommandRequest : public CommandRequestImpl {
    * @return TRUE on success, otherwise FALSE
    */
   bool CheckCommandParentId(ApplicationConstSharedPtr app);
-
-  /**
-   * @brief Function is called by RequestController when request execution time
-   * has exceed it's limit
-   */
-  virtual void onTimeOut();
 
   /**
    * @brief Removes command from list when HMI sends negative response or

@@ -30,18 +30,21 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <stdint.h>
+#include <string>
+#include <vector>
+
 #include "gtest/gtest.h"
 #include "utils/shared_ptr.h"
 #include "smart_objects/smart_object.h"
+#include "application_manager/smart_object_keys.h"
 #include "application_manager/test/include/application_manager/commands/commands_test.h"
 #include "application_manager/test/include/application_manager/commands/command_request_test.h"
 #include "application_manager/application.h"
 #include "application_manager/mock_application_manager.h"
-#include "application_manager/mock_application.h"
-#include "application_manager/mock_hmi_capabilities.h"
-#include "application_manager/commands/mobile/unsubscribe_way_points_request.h"
+#include "application_manager/event_engine/event.h"
+#include "application_manager/commands/mobile/end_audio_pass_thru_request.h"
 #include "interfaces/MOBILE_API.h"
-#include "application_manager/smart_object_keys.h"
 
 namespace test {
 namespace components {
@@ -50,39 +53,61 @@ namespace mobile_commands_test {
 
 using ::testing::_;
 using ::testing::Return;
-using ::testing::ReturnRef;
-using ::testing::DoAll;
-using ::testing::SaveArg;
-using ::testing::InSequence;
 namespace am = ::application_manager;
-using am::commands::UnSubscribeWayPointsRequest;
 using am::commands::MessageSharedPtr;
+using am::commands::EndAudioPassThruRequest;
+using am::event_engine::Event;
+namespace mobile_result = mobile_apis::Result;
 
-typedef SharedPtr<UnSubscribeWayPointsRequest> CommandPtr;
+typedef SharedPtr<EndAudioPassThruRequest> EndAudioPassThruRequestPtr;
 
-class UnsubscribeWayPointsRequestTest
+class EndAudioPassThruRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {};
 
-TEST_F(UnsubscribeWayPointsRequestTest, OnEvent_SUCCESS) {
-  CommandPtr command(CreateCommand<UnSubscribeWayPointsRequest>());
-  MockAppPtr app(CreateMockApp());
-  Event event(hmi_apis::FunctionID::Navigation_UnsubscribeWayPoints);
+TEST_F(EndAudioPassThruRequestTest, Run_SUCCESS) {
+  EndAudioPassThruRequestPtr command(CreateCommand<EndAudioPassThruRequest>());
+
+  EXPECT_CALL(app_mngr_,
+              ManageHMICommand(
+                  HMIResultCodeIs(hmi_apis::FunctionID::UI_EndAudioPassThru)));
+
+  command->Run();
+}
+
+TEST_F(EndAudioPassThruRequestTest, OnEvent_UnknownEvent_UNSUCCESS) {
+  EndAudioPassThruRequestPtr command(CreateCommand<EndAudioPassThruRequest>());
+
+  Event event(hmi_apis::FunctionID::INVALID_ENUM);
+
+  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
+
+  command->on_event(event);
+}
+
+TEST_F(EndAudioPassThruRequestTest, OnEvent_SUCCESS) {
+  const uint32_t kConnectionKey = 2u;
+
+  MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*command_msg)[am::strings::params][am::strings::connection_key] =
+      kConnectionKey;
+
+  EndAudioPassThruRequestPtr command(
+      CreateCommand<EndAudioPassThruRequest>(command_msg));
 
   MessageSharedPtr event_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*event_msg)[am::strings::msg_params] = 0;
   (*event_msg)[am::strings::params][am::hmi_response::code] =
       mobile_apis::Result::SUCCESS;
-  (*event_msg)[am::strings::msg_params] = 0;
 
+  Event event(hmi_apis::FunctionID::UI_EndAudioPassThru);
   event.set_smart_object(*event_msg);
 
-  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
+  EXPECT_CALL(app_mngr_, EndAudioPassThrough()).WillOnce(Return(true));
+  EXPECT_CALL(app_mngr_, StopAudioPassThru(kConnectionKey));
 
-  {
-    InSequence dummy;
-    EXPECT_CALL(app_mngr_, UnsubscribeAppFromWayPoints(_));
-    EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _));
-    EXPECT_CALL(*app, UpdateHash());
-  }
+  EXPECT_CALL(
+      app_mngr_,
+      ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS), _));
 
   command->on_event(event);
 }

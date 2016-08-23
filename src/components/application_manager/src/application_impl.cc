@@ -698,7 +698,7 @@ UsageStatistics& ApplicationImpl::usage_report() {
   return usage_report_;
 }
 
-bool ApplicationImpl::IsCommandLimitsExceeded(
+bool ApplicationImpl::AreCommandLimitsExceeded(
     mobile_apis::FunctionID::eType cmd_id, TLimitSource source) {
   TimevalStruct current = date_time::DateTime::getCurrentTime();
   switch (source) {

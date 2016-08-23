@@ -79,7 +79,6 @@ class PerformInteractionRequest : public CommandRequestImpl {
    */
   virtual void on_event(const event_engine::Event& event);
 
- private:
   /*
    * @brief Function is called by RequestController when request execution time
    * has exceed it's limit
@@ -87,6 +86,7 @@ class PerformInteractionRequest : public CommandRequestImpl {
    */
   virtual void onTimeOut();
 
+ private:
   /*
    * @brief Function will be called when VR_OnCommand event
    * comes
