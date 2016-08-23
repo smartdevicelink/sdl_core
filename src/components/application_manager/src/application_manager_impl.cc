@@ -3122,12 +3122,14 @@ void ApplicationManagerImpl::EndNaviStreaming() {
   using namespace mobile_apis::AppInterfaceUnregisteredReason;
   using namespace mobile_apis::Result;
 
-  uint32_t app_id = navi_app_to_end_stream_.front();
-  navi_app_to_end_stream_.pop_front();
+  if(!navi_app_to_end_stream_.empty()) {
+   const  uint32_t app_id = navi_app_to_end_stream_.front();
+    navi_app_to_end_stream_.pop_front();
 
-  if (navi_app_to_stop_.end() ==
-      std::find(navi_app_to_stop_.begin(), navi_app_to_stop_.end(), app_id)) {
-    DisallowStreaming(app_id);
+    if (navi_app_to_stop_.end() ==
+        std::find(navi_app_to_stop_.begin(), navi_app_to_stop_.end(), app_id)) {
+        DisallowStreaming(app_id);
+    }
   }
 }
 
