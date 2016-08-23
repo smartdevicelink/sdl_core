@@ -59,14 +59,14 @@ using testing::ReturnRef;
 using testing::Return;
 using ::testing::NiceMock;
 using test::components::event_engine_test::MockEventDispatcher;
-using ::test::components::application_manager_test::MockApplicationManagerSettings;
+using ::test::components::application_manager_test::
+    MockApplicationManagerSettings;
 namespace am = ::application_manager;
 namespace strings = am::strings;
 namespace hmi_response = am::hmi_response;
 using am::event_engine::Event;
 using am::commands::UpdateDeviceListRequest;
 using am::commands::CommandImpl;
-
 
 typedef SharedPtr<UpdateDeviceListRequest> UpdateDeviceListRequestPtr;
 
@@ -94,15 +94,14 @@ class UpdateDeviceListRequestTest
 TEST_F(UpdateDeviceListRequestTest, RUN_LaunchHMIReturnsFalse) {
   MessageSharedPtr command_msg = CreateCommandMsg();
 
-    EXPECT_CALL(app_mngr_, event_dispatcher())
-        .WillOnce(ReturnRef(mock_event_dispatcher));
-     EXPECT_CALL(mock_event_dispatcher, remove_observer(_));
+  EXPECT_CALL(app_mngr_, event_dispatcher())
+      .WillOnce(ReturnRef(mock_event_dispatcher));
+  EXPECT_CALL(mock_event_dispatcher, remove_observer(_));
 
   UpdateDeviceListRequestPtr command(
       CreateCommand<UpdateDeviceListRequest>(command_msg));
 
-  EXPECT_CALL(app_mngr_, get_settings())
-      .WillOnce(ReturnRef(settings_));
+  EXPECT_CALL(app_mngr_, get_settings()).WillOnce(ReturnRef(settings_));
 
   EXPECT_CALL(settings_, launch_hmi()).WillOnce(Return(false));
 
@@ -118,19 +117,17 @@ TEST_F(UpdateDeviceListRequestTest, RUN_LaunchHMIReturnsFalse) {
             CommandImpl::protocol_version_);
 }
 
- TEST_F(UpdateDeviceListRequestTest, RUN_HMICooperatingReturnsTrue_SUCCESSS)
- {
+TEST_F(UpdateDeviceListRequestTest, RUN_HMICooperatingReturnsTrue_SUCCESSS) {
   MessageSharedPtr command_msg = CreateCommandMsg();
 
   EXPECT_CALL(app_mngr_, event_dispatcher())
       .WillOnce(ReturnRef(mock_event_dispatcher));
-   EXPECT_CALL(mock_event_dispatcher, remove_observer(_));
+  EXPECT_CALL(mock_event_dispatcher, remove_observer(_));
 
   UpdateDeviceListRequestPtr command(
       CreateCommand<UpdateDeviceListRequest>(command_msg));
 
-  EXPECT_CALL(app_mngr_, get_settings())
-      .WillOnce(ReturnRef(settings_));
+  EXPECT_CALL(app_mngr_, get_settings()).WillOnce(ReturnRef(settings_));
 
   EXPECT_CALL(settings_, launch_hmi()).WillOnce(Return(true));
 
@@ -146,33 +143,29 @@ TEST_F(UpdateDeviceListRequestTest, RUN_LaunchHMIReturnsFalse) {
             CommandImpl::protocol_version_);
 }
 
- TEST_F(UpdateDeviceListRequestTest, OnEvent_WrongEventId_UNSUCCESS) {
+TEST_F(UpdateDeviceListRequestTest, OnEvent_WrongEventId_UNSUCCESS) {
+  Event event(Event::EventID::INVALID_ENUM);
 
-   Event event(Event::EventID::INVALID_ENUM);
+  EXPECT_CALL(app_mngr_, event_dispatcher())
+      .WillOnce(ReturnRef(mock_event_dispatcher));
+  EXPECT_CALL(mock_event_dispatcher, remove_observer(_));
 
-   EXPECT_CALL(app_mngr_, event_dispatcher())
-         .WillOnce(ReturnRef(mock_event_dispatcher));
-   EXPECT_CALL(mock_event_dispatcher, remove_observer(_));
+  UpdateDeviceListRequestPtr command(CreateCommand<UpdateDeviceListRequest>());
 
-   UpdateDeviceListRequestPtr command(
-       CreateCommand<UpdateDeviceListRequest>());
+  command->on_event(event);
+}
 
-   command->on_event(event);
- }
+TEST_F(UpdateDeviceListRequestTest, OnEvent_SUCCESS) {
+  Event event(Event::EventID::BasicCommunication_OnReady);
 
- TEST_F(UpdateDeviceListRequestTest, OnEvent_SUCCESS) {
+  EXPECT_CALL(app_mngr_, event_dispatcher())
+      .WillOnce(ReturnRef(mock_event_dispatcher));
+  EXPECT_CALL(mock_event_dispatcher, remove_observer(_, _));
 
-   Event event(Event::EventID::BasicCommunication_OnReady);
+  UpdateDeviceListRequestPtr command(CreateCommand<UpdateDeviceListRequest>());
 
-   EXPECT_CALL(app_mngr_, event_dispatcher())
-         .WillOnce(ReturnRef(mock_event_dispatcher));
-   EXPECT_CALL(mock_event_dispatcher, remove_observer(_,_));
-
-   UpdateDeviceListRequestPtr command(
-       CreateCommand<UpdateDeviceListRequest>());
-
-   command->on_event(event);
- }
+  command->on_event(event);
+}
 }  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components

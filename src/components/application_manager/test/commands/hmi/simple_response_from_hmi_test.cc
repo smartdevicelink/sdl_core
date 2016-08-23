@@ -141,10 +141,9 @@ typedef Types<
                 hmi_apis::FunctionID::VehicleInfo_GetDTCs>,
     CommandData<commands::UISetMediaClockTimerResponse,
                 hmi_apis::FunctionID::UI_SetMediaClockTimer>,
-    CommandData<commands::UIShowResponse,
-                hmi_apis::FunctionID::UI_Show>,
-    CommandData<commands::UISliderResponse,
-                hmi_apis::FunctionID::UI_Slider>>ResponseCommandsList;
+    CommandData<commands::UIShowResponse, hmi_apis::FunctionID::UI_Show>,
+    CommandData<commands::UISliderResponse, hmi_apis::FunctionID::UI_Slider>>
+    ResponseCommandsList;
 
 TYPED_TEST_CASE(ResponseFromHMICommandsTest, ResponseCommandsList);
 
