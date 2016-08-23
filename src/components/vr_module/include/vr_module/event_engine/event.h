@@ -37,6 +37,12 @@
 
 namespace event_engine {
 
+enum MessageType {
+  kNotification,
+  kRequest,
+  kResponse
+};
+
 template<typename EventMessage, typename EventID>
 class Event {
  public:
@@ -85,7 +91,7 @@ class Event {
   /*
    * @brief Retrieves event message response type
    */
-  virtual int32_t event_message_type() const = 0;
+  virtual MessageType event_message_type() const = 0;
 
  protected:
   EventMessage event_message_;

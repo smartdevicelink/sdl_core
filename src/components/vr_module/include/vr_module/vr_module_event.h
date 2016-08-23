@@ -38,23 +38,22 @@
 #include "application_manager/message.h"  // TODO(VS): Will be deleted when MessagePtr will be replaced with gpb generated class
 
 #include "vr_module/event_engine/event.h"
+#include "vr_module/interface/hmi.pb.h"
 
 #include "functional_module/function_ids.h"
 
 namespace vr_module {
 
 class VRModuleEvent :
-    public event_engine::Event<application_manager::MessagePtr,
-    functional_modules::MobileFunctionID> {
+    public event_engine::Event<vr_hmi_api::ServiceMessage,
+    vr_hmi_api::RPCName> {
  public:
   /**
    * @brief Constructor with parameters
    *
-   * @param id Event ID. (mobile function name)
-   * @param message Params in mobile response
+   * @param message GPB
    */
-  VRModuleEvent(const application_manager::MessagePtr& message, // TODO(VS): MessagePtr will be replaced with gpb generated class
-             const functional_modules::MobileFunctionID& id);
+  explicit VRModuleEvent(const vr_hmi_api::ServiceMessage& message);
 
   /**
    * @brief Destructor
@@ -74,7 +73,7 @@ class VRModuleEvent :
   /*
    * @brief Retrieves event message response type
    */
-  virtual int32_t event_message_type() const;
+  virtual event_engine::MessageType event_message_type() const;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(VRModuleEvent);

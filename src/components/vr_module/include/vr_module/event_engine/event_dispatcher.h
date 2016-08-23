@@ -42,8 +42,6 @@
 #include "vr_module/event_engine/event.h"
 #include "vr_module/event_engine/event_observer.h"
 
-#include "interfaces/MOBILE_API.h"
-
 namespace event_engine {
 
 template<typename EventMessage, typename EventID>
@@ -130,7 +128,7 @@ void EventDispatcher<EventMessage, EventID>::raise_event(
   {
     sync_primitives::AutoLock auto_lock(state_lock_);
     // check if event is notification
-    if (mobile_apis::messageType::notification ==
+    if (MessageType::kNotification ==
         event.event_message_type()) {
       typename ObserversMap::iterator it = observers_[event.id()].begin();
       for (; observers_[event.id()].end() != it; ++it) {
@@ -138,7 +136,7 @@ void EventDispatcher<EventMessage, EventID>::raise_event(
       }
     }
 
-    if ((mobile_apis::messageType::response  ==
+    if ((MessageType::kResponse ==
         event.event_message_type())) {
       list = observers_[event.id()][event.event_message_correlation_id()];
     }
