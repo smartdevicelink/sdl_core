@@ -30,35 +30,52 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_HMI_EVENT_H_
+#define SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_HMI_EVENT_H_
 
-#include "vr_module/vr_module_event.h"
+#include <string>
+
+#include "utils/macro.h"
+#include "vr_module/event_engine/event.h"
+#include "vr_module/interface/hmi.pb.h"
 
 namespace vr_module {
 
-VRModuleEvent::VRModuleEvent(const vr_hmi_api::ServiceMessage& message)
-  : event_engine::Event<vr_hmi_api::ServiceMessage,
-                        vr_hmi_api::RPCName>(message, message.rpc()) {
-}
+class HmiEvent :
+    public event_engine::Event<vr_hmi_api::ServiceMessage,
+    vr_hmi_api::RPCName> {
+ public:
+  /**
+   * @brief Constructor with parameters
+   *
+   * @param message GPB
+   */
+  explicit HmiEvent(const vr_hmi_api::ServiceMessage& message);
 
+  /**
+   * @brief Destructor
+   */
+  virtual ~HmiEvent();
 
-VRModuleEvent::~VRModuleEvent() {
-}
+  /*
+   * @brief Retrieves event message request ID
+   */
+  virtual int32_t event_message_function_id() const;
 
-int32_t VRModuleEvent::event_message_function_id() const {
-  return int32_t(event_message_.rpc());
-}
+  /*
+   * @brief Retrieves event message correlation ID
+   */
+  virtual int32_t event_message_correlation_id() const;
 
-int32_t VRModuleEvent::event_message_correlation_id() const {
-  return event_message_.correlation_id();
-}
+  /*
+   * @brief Retrieves event message response type
+   */
+  virtual event_engine::MessageType event_message_type() const;
 
-event_engine::MessageType VRModuleEvent::event_message_type() const {
-  switch (event_message_.rpc_type()) {
-    case vr_hmi_api::NOTIFICATION: return event_engine::kNotification;
-    case vr_hmi_api::REQUEST: return event_engine::kRequest;
-    case vr_hmi_api::RESPONSE: return event_engine::kResponse;
-    default: return event_engine::kRequest;
-  }
-}
+ private:
+  DISALLOW_COPY_AND_ASSIGN(HmiEvent);
+};
 
-}  //  namespace vr_module
+}  // namespace vr_module
+
+#endif  // SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_HMI_EVENT_H_

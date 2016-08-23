@@ -33,10 +33,14 @@
 #include "vr_module/vr_module.h"
 
 #include "utils/logger.h"
+#include "vr_module/commands/factory.h"
+#include "vr_module/event_engine/event_dispatcher.h"
+#include "vr_module/hmi_event.h"
+#include "vr_module/mobile_event.h"
 
 namespace vr_module {
 
-//using event_engine::EventDispatcher;
+using event_engine::EventDispatcher;
 
 using functional_modules::ProcessResult;
 using functional_modules::GenericModule;
@@ -51,7 +55,8 @@ uint32_t VRModule::next_correlation_id_ = 1;
 
 VRModule::VRModule()
     : GenericModule(kModuleID),
-      proxy_(this) {
+      proxy_(this),
+      factory_(commands::Factory()) {
   plugin_info_.name = "VRModulePlugin";
   plugin_info_.version = 1;
   SubscribeToRpcMessages();
@@ -61,7 +66,57 @@ VRModule::~VRModule() {
 }
 
 void VRModule::OnReceived(const vr_hmi_api::ServiceMessage& message) {
-  // TODO(KKolodiy): this should be implemented with according logic
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (message.rpc_type() == vr_hmi_api::RESPONSE) {
+    EmitEvent(message);
+  } else {
+    RunCommand(message);
+  }
+}
+
+void VRModule::OnReceived(const vr_mobile_api::ServiceMessage& message) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (message.rpc_type() == vr_mobile_api::RESPONSE) {
+    EmitEvent(message);
+  } else {
+    RunCommand(message);
+  }
+}
+
+void VRModule::EmitEvent(const vr_hmi_api::ServiceMessage& message) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  HmiEvent event(message);
+  EventDispatcher<vr_hmi_api::ServiceMessage,
+      vr_hmi_api::RPCName>::instance()->raise_event(event);
+}
+
+void VRModule::EmitEvent(const vr_mobile_api::ServiceMessage& message) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  MobileEvent event(message);
+  EventDispatcher<vr_mobile_api::ServiceMessage,
+      vr_mobile_api::RPCName>::instance()->raise_event(event);
+}
+
+void VRModule::RunCommand(const vr_hmi_api::ServiceMessage& message) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  commands::CommandPtr command(factory_.Create(message));
+  if (command) {
+    if (message.rpc_type() == vr_hmi_api::REQUEST) {
+      request_controller_.AddRequest(uint32_t(message.rpc()), command);
+    }
+    command->Execute();
+  }
+}
+
+void VRModule::RunCommand(const vr_mobile_api::ServiceMessage& message) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  commands::CommandPtr command(factory_.Create(message));
+  if (command) {
+    if (message.rpc_type() == vr_mobile_api::REQUEST) {
+      request_controller_.AddRequest(uint32_t(message.rpc()), command);
+    }
+    command->Execute();
+  }
 }
 
 void VRModule::SubscribeToRpcMessages() {

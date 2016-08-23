@@ -36,6 +36,8 @@
 #include "functional_module/generic_module.h"
 #include "json/value.h"
 #include "utils/macro.h"
+#include "vr_module/commands/factory_interface.h"
+#include "vr_module/request_controller.h"
 #include "vr_module/vr_proxy.h"
 #include "vr_module/vr_proxy_listener.h"
 
@@ -91,10 +93,21 @@ class VRModule
 
  private:
   static const functional_modules::ModuleID kModuleID = 405;
+  /**
+   * Handles received message from Mobile application
+   * @param message is GPB message according with protocol
+   */
+  void OnReceived(const vr_mobile_api::ServiceMessage& message);
+  void EmitEvent(const vr_hmi_api::ServiceMessage& message);
+  void EmitEvent(const vr_mobile_api::ServiceMessage& message);
+  void RunCommand(const vr_hmi_api::ServiceMessage& message);
+  void RunCommand(const vr_mobile_api::ServiceMessage& message);
   functional_modules::PluginInfo plugin_info_;
 
   static uint32_t next_correlation_id_;
   VRProxy proxy_;
+  const commands::FactoryInterface& factory_;
+  request_controller::RequestController request_controller_;
 
   DISALLOW_COPY_AND_ASSIGN(VRModule);
 };
