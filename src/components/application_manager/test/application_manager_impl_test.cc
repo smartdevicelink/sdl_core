@@ -101,7 +101,7 @@ class ApplicationManagerImplTest : public ::testing::Test {
         .WillByDefault(ReturnRef(mock_session_observer));
 
     mock_storage =
-        ::utils::MakeShared<NiceMock<resumption_test::MockResumptionData>>(
+        ::utils::MakeShared<NiceMock<resumption_test::MockResumptionData> >(
             mock_application_manager_settings_);
 
     app_manager_impl_->resume_controller().set_resumption_storage(mock_storage);
@@ -140,7 +140,7 @@ class ApplicationManagerImplTest : public ::testing::Test {
 
   uint32_t app_id_;
   NiceMock<policy_test::MockPolicySettings> mock_policy_settings_;
-  utils::SharedPtr<NiceMock<resumption_test::MockResumptionData>> mock_storage;
+  utils::SharedPtr<NiceMock<resumption_test::MockResumptionData> > mock_storage;
   NiceMock<con_test::MockConnectionHandler> mock_connection_handler;
   NiceMock<protocol_handler_test::MockSessionObserver> mock_session_observer;
   NiceMock<hmi_message_handler_test::MockHMIMessageHandler>

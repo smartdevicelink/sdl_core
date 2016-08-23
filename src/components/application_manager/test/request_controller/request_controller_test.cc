@@ -70,7 +70,7 @@ typedef NiceMock<application_manager_test::MockRequest> MRequest;
 typedef utils::SharedPtr<MRequest> RequestPtr;
 typedef utils::SharedPtr<RequestController> RequestControllerSPtr;
 typedef std::list<RequestInfoPtr> RequestInfoPtrList;
-typedef std::list<::application_manager::request_controller::RequestPtr>
+typedef std::list< ::application_manager::request_controller::RequestPtr>
     RequestPtrList;
 
 namespace {
