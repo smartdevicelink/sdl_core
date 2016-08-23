@@ -143,6 +143,7 @@ void OnSystemRequestNotification::AddHeader(BinaryMessage& message) const {
 
   message.clear();
   message.assign(header.begin(), header.end());
+  message.push_back(0u);
 
   SDL_DEBUG("Header added: " << std::string(message.begin(), message.end()));
 }

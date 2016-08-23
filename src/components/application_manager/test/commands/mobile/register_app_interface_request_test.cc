@@ -217,7 +217,7 @@ ACTION_P(SetHmiType, hmi_type) {
 }
 
 // TODO(SLevchenko): Enable test after fixes from PR #702 and #764 will be
-// merged in current branch.
+// merged in current branch. APPLINK-27253
 TEST_F(RegisterAppInterfaceRequestTest, DISABLED_Run_AppHmiTypes_SUCCESS) {
   const mobile_apis::AppHMIType::eType app_hmi_type =
       mobile_apis::AppHMIType::DEFAULT;

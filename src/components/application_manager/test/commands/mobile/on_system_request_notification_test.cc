@@ -31,6 +31,9 @@
  */
 
 #include <string>
+#include <set>
+#include <algorithm>
+#include <functional>
 
 #include "gtest/gtest.h"
 #include "application_manager/commands/mobile/on_system_request_notification.h"
@@ -40,6 +43,7 @@
 #include "commands/commands_test.h"
 #include "command_impl.h"
 #include "interfaces/MOBILE_API.h"
+#include "utils/json_utils.h"
 
 namespace test {
 namespace components {
@@ -78,7 +82,62 @@ class OnSystemRequestNotificationTest
   MockMessageHelper& message_helper_;
 };
 
-TEST_F(OnSystemRequestNotificationTest, Run_ProprietaryType_SUCCESS) {
+#ifdef EXTENDED_POLICY
+bool CheckHeader(MessageSharedPtr msg) {
+  struct DataValidator {
+    bool is_valid_;
+    const utils::json::JsonValue& json_data_;
+
+    DataValidator(const utils::json::JsonValue& data)
+        : is_valid_(true), json_data_(data) {}
+
+    void operator()(const std::string& str) {
+      if (!json_data_.HasMember(str)) {
+        is_valid_ = false;
+      }
+    }
+  };
+
+  OnSystemRequestNotification::BinaryMessage binary_data =
+      (*msg)[strings::params][strings::binary_data].asBinary();
+  std::string data_string(reinterpret_cast<const char*>(&binary_data[0]));
+
+  utils::json::JsonValue json_data(
+      utils::json::JsonValue::Parse(data_string).first);
+
+  const std::string http_request = "HTTPRequest";
+  if (!json_data.HasMember(http_request)) {
+    return false;
+  }
+  json_data = json_data.Get(http_request, json_data);
+
+  const std::string headers = "headers";
+  if (!json_data.HasMember(headers)) {
+    return false;
+  }
+  json_data = json_data.Get(headers, json_data);
+
+  std::set<std::string> required_members;
+  required_members.insert("ContentType");
+  required_members.insert("ConnectTimeout");
+  required_members.insert("DoOutput");
+  required_members.insert("Content-Length");
+  required_members.insert("DoInput");
+  required_members.insert("UseCaches");
+  required_members.insert("RequestMethod");
+  required_members.insert("ReadTimeout");
+  required_members.insert("InstanceFollowRedirects");
+  required_members.insert("charset");
+
+  return std::for_each(required_members.begin(),
+                       required_members.end(),
+                       DataValidator(json_data)).is_valid_;
+}
+#endif  // EXTENDED_POLICY
+
+// TODO(SLevchenko): Enable test after fixes from PR #642 merged in current
+// branch. APPLINK-27274
+TEST_F(OnSystemRequestNotificationTest, DISABLED_Run_ProprietaryType_SUCCESS) {
   const RequestType::eType kRequestType = RequestType::PROPRIETARY;
 
   MessageSharedPtr msg = CreateMessage();
@@ -104,21 +163,24 @@ TEST_F(OnSystemRequestNotificationTest, Run_ProprietaryType_SUCCESS) {
       .Times(2)
       .WillRepeatedly(ReturnRef(mock_policy_handler));
   EXPECT_CALL(mock_policy_handler, TimeoutExchange()).WillOnce(Return(5u));
-#endif
+#endif  // EXTENDED_POLICY
 
   EXPECT_CALL(message_helper_, PrintSmartObject(_)).WillOnce(Return(false));
   EXPECT_CALL(app_mngr_, SendMessageToMobile(msg, _));
 
   command->Run();
 
-  ASSERT_EQ(FileType::JSON,
+  EXPECT_EQ(FileType::JSON,
             (*msg)[strings::msg_params][strings::file_type].asInt());
-  ASSERT_EQ(application_manager::MessageType::kNotification,
+  EXPECT_EQ(application_manager::MessageType::kNotification,
             (*msg)[strings::params][strings::message_type].asInt());
-  ASSERT_EQ(CommandImpl::mobile_protocol_type_,
+  EXPECT_EQ(CommandImpl::mobile_protocol_type_,
             (*msg)[strings::params][strings::protocol_type].asInt());
-  ASSERT_EQ(CommandImpl::protocol_version_,
+  EXPECT_EQ(CommandImpl::protocol_version_,
             (*msg)[strings::params][strings::protocol_version].asInt());
+#ifdef EXTENDED_POLICY
+  EXPECT_TRUE(CheckHeader(msg));
+#endif  // EXTENDED_POLICY
 }
 
 TEST_F(OnSystemRequestNotificationTest, Run_HTTPType_SUCCESS) {
