@@ -35,11 +35,9 @@
 
 namespace vr_module {
 
-// TODO(VS): MessagePtr will be replaced with gpb generated class
-VRModuleEvent::VRModuleEvent(const application_manager::MessagePtr& message,
-                       const functional_modules::MobileFunctionID& id)
-  : event_engine::Event<application_manager::MessagePtr,
-                        functional_modules::MobileFunctionID>(message, id) {
+VRModuleEvent::VRModuleEvent(const vr_hmi_api::ServiceMessage& message)
+  : event_engine::Event<vr_hmi_api::ServiceMessage,
+                        vr_hmi_api::RPCName>(message, message.rpc()) {
 }
 
 
@@ -47,15 +45,20 @@ VRModuleEvent::~VRModuleEvent() {
 }
 
 int32_t VRModuleEvent::event_message_function_id() const {
-  return event_message_->function_id();
+  return int32_t(event_message_.rpc());
 }
 
 int32_t VRModuleEvent::event_message_correlation_id() const {
-  return event_message_->correlation_id();
+  return event_message_.correlation_id();
 }
 
-int32_t VRModuleEvent::event_message_type() const {
-  return event_message_->type();
+event_engine::MessageType VRModuleEvent::event_message_type() const {
+  switch (event_message_.rpc_type()) {
+    case vr_hmi_api::NOTIFICATION: return event_engine::kNotification;
+    case vr_hmi_api::REQUEST: return event_engine::kRequest;
+    case vr_hmi_api::RESPONSE: return event_engine::kResponse;
+    default: return event_engine::kRequest;
+  }
 }
 
 }  //  namespace vr_module
