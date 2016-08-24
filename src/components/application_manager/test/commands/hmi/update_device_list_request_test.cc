@@ -57,7 +57,6 @@ using ::utils::SharedPtr;
 using testing::_;
 using testing::ReturnRef;
 using testing::Return;
-using ::testing::NiceMock;
 using test::components::event_engine_test::MockEventDispatcher;
 using ::test::components::application_manager_test::
     MockApplicationManagerSettings;
@@ -88,15 +87,15 @@ class UpdateDeviceListRequestTest
   }
 
   MockApplicationManagerSettings settings_;
-  MockEventDispatcher mock_event_dispatcher;
+  MockEventDispatcher mock_event_dispatcher_;
 };
 
 TEST_F(UpdateDeviceListRequestTest, RUN_LaunchHMIReturnsFalse) {
   MessageSharedPtr command_msg = CreateCommandMsg();
 
   EXPECT_CALL(app_mngr_, event_dispatcher())
-      .WillOnce(ReturnRef(mock_event_dispatcher));
-  EXPECT_CALL(mock_event_dispatcher, remove_observer(_));
+      .WillOnce(ReturnRef(mock_event_dispatcher_));
+  EXPECT_CALL(mock_event_dispatcher_, remove_observer(_));
 
   UpdateDeviceListRequestPtr command(
       CreateCommand<UpdateDeviceListRequest>(command_msg));
@@ -121,8 +120,8 @@ TEST_F(UpdateDeviceListRequestTest, RUN_HMICooperatingReturnsTrue_SUCCESSS) {
   MessageSharedPtr command_msg = CreateCommandMsg();
 
   EXPECT_CALL(app_mngr_, event_dispatcher())
-      .WillOnce(ReturnRef(mock_event_dispatcher));
-  EXPECT_CALL(mock_event_dispatcher, remove_observer(_));
+      .WillOnce(ReturnRef(mock_event_dispatcher_));
+  EXPECT_CALL(mock_event_dispatcher_, remove_observer(_));
 
   UpdateDeviceListRequestPtr command(
       CreateCommand<UpdateDeviceListRequest>(command_msg));
@@ -147,8 +146,8 @@ TEST_F(UpdateDeviceListRequestTest, OnEvent_WrongEventId_UNSUCCESS) {
   Event event(Event::EventID::INVALID_ENUM);
 
   EXPECT_CALL(app_mngr_, event_dispatcher())
-      .WillOnce(ReturnRef(mock_event_dispatcher));
-  EXPECT_CALL(mock_event_dispatcher, remove_observer(_));
+      .WillOnce(ReturnRef(mock_event_dispatcher_));
+  EXPECT_CALL(mock_event_dispatcher_, remove_observer(_));
 
   UpdateDeviceListRequestPtr command(CreateCommand<UpdateDeviceListRequest>());
 
@@ -159,8 +158,8 @@ TEST_F(UpdateDeviceListRequestTest, OnEvent_SUCCESS) {
   Event event(Event::EventID::BasicCommunication_OnReady);
 
   EXPECT_CALL(app_mngr_, event_dispatcher())
-      .WillOnce(ReturnRef(mock_event_dispatcher));
-  EXPECT_CALL(mock_event_dispatcher, remove_observer(_, _));
+      .WillOnce(ReturnRef(mock_event_dispatcher_));
+  EXPECT_CALL(mock_event_dispatcher_, remove_observer(_, _));
 
   UpdateDeviceListRequestPtr command(CreateCommand<UpdateDeviceListRequest>());
 
