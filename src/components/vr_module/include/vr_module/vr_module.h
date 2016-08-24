@@ -100,7 +100,6 @@ class VRModule
   }
 
  private:
-
   /**
    * @brief Subscribes plugin to mobie rpc messages
    */

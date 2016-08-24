@@ -32,14 +32,15 @@
 
 #include "vr_module/commands/support_service.h"
 
+#include "utils/logger.h"
 #include "vr_module/event_engine/event_dispatcher.h"
 #include "vr_module/hmi_event.h"
-#include "vr_module/interface/hmi.pb.h"
-#include "vr_module/interface/mobile.pb.h"
 #include "vr_module/vr_module.h"
 
 namespace vr_module {
 namespace commands {
+
+CREATE_LOGGERPTR_GLOBAL(logger_, "VRModule")
 
 using event_engine::EventDispatcher;
 
@@ -54,9 +55,8 @@ SupportService::SupportService(const vr_hmi_api::ServiceMessage& message,
 
 bool SupportService::Execute() {
   LOG4CXX_AUTO_TRACE(logger_);
-  EventDispatcher<vr_hmi_api::ServiceMessage,
-      vr_hmi_api::RPCName>::instance()->
-      add_observer(message_.rpc(), message_.correlation_id(), this);
+  EventDispatcher<vr_hmi_api::ServiceMessage, vr_hmi_api::RPCName>::instance()
+      ->add_observer(message_.rpc(), message_.correlation_id(), this);
   return module_->SendToHmi(message_);
 }
 
@@ -65,7 +65,8 @@ void SupportService::OnTimeout() {
   // TODO(KKolodiy): add timeout processing
 }
 
-void SupportService::on_event(const HmiEvent& event) {
+void SupportService::on_event(
+    const event_engine::Event<vr_hmi_api::ServiceMessage, vr_hmi_api::RPCName>& event) {
   LOG4CXX_AUTO_TRACE(logger_);
   bool supported = false;  // TODO(KKolodiy): protocol is not completed
   module_->set_supported(supported);

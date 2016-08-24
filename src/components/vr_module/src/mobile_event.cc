@@ -30,14 +30,13 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include "vr_module/mobile_event.h"
 
 namespace vr_module {
 
 MobileEvent::MobileEvent(const vr_mobile_api::ServiceMessage& message)
-  : event_engine::Event<vr_mobile_api::ServiceMessage,
-    vr_mobile_api::RPCName>(message, message.rpc()) {
+    : event_engine::Event<vr_mobile_api::ServiceMessage, vr_mobile_api::RPCName>(
+        message, message.rpc()) {
 }
 
 MobileEvent::~MobileEvent() {
@@ -53,10 +52,14 @@ int32_t MobileEvent::event_message_correlation_id() const {
 
 event_engine::MessageType MobileEvent::event_message_type() const {
   switch (event_message_.rpc_type()) {
-    case vr_mobile_api::NOTIFICATION: return event_engine::kNotification;
-    case vr_mobile_api::REQUEST: return event_engine::kRequest;
-    case vr_mobile_api::RESPONSE: return event_engine::kResponse;
-    default: return event_engine::kRequest;
+    case vr_mobile_api::NOTIFICATION:
+      return event_engine::kNotification;
+    case vr_mobile_api::REQUEST:
+      return event_engine::kRequest;
+    case vr_mobile_api::RESPONSE:
+      return event_engine::kResponse;
+    default:
+      return event_engine::kRequest;
   }
 }
 

@@ -34,26 +34,23 @@
 #define SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_SUPPORT_SERVICE_H_
 
 #include "vr_module/commands/command.h"
-
-namespace vr_hmi_api {
-class ServiceMessage;
-}  // namespace vr_hmi_api
+#include "vr_module/event_engine/event_dispatcher.h"
+#include "vr_module/interface/hmi.pb.h"
 
 namespace vr_module {
 
 class VRModule;
-class HmiEvent;
 
 namespace commands {
 
-class SupportService : public Command,
-    public event_engine::EventObserver<vr_hmi_api::ServiceMessage,
-                                       vr_hmi_api::RPCName> {
+class SupportService : public Command, public event_engine::EventObserver<
+    vr_hmi_api::ServiceMessage, vr_hmi_api::RPCName> {
  public:
   SupportService(const vr_hmi_api::ServiceMessage& message, VRModule* module);
   bool Execute();
   void OnTimeout();
-  void on_event(const HmiEvent& event);
+  void on_event(
+      const event_engine::Event<vr_hmi_api::ServiceMessage, vr_hmi_api::RPCName>& event);
 
  private:
   VRModule* module_;

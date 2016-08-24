@@ -43,13 +43,21 @@ namespace commands {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "VRModule")
 
-Factory::Factory(VRModule* module) : module_(module) {
+Factory::Factory(VRModule* module)
+    : module_(module) {
 }
 
 Command* Factory::Create(const vr_hmi_api::ServiceMessage& message) const {
   LOG4CXX_AUTO_TRACE(logger_);
   switch (message.rpc()) {
-    case vr_hmi_api::SUPPORT_SERVICE: return new SupportService(module_);
+    case vr_hmi_api::SUPPORT_SERVICE:
+      return new SupportService(message, module_);
+    case vr_hmi_api::ACTIVATE:
+    case vr_hmi_api::PROCESS_DATA:
+    case vr_hmi_api::ON_REGISTER:
+    case vr_hmi_api::ON_DEFAULT_CHOSEN:
+    case vr_hmi_api::ON_DEACTIVATED:
+    default: return 0;
   }
   return 0;
 }

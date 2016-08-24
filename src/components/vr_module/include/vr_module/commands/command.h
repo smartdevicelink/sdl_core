@@ -74,7 +74,7 @@ class Command {
 
 typedef utils::SharedPtr<commands::Command> CommandPtr;
 
-}  // commands
-}  // vr_module
+}  // namespace commands
+}  // namespace vr_module
 
 #endif  // SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_COMMAND_H_

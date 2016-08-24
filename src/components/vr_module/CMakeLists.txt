@@ -41,6 +41,8 @@ set (SOURCES
     src/request_controller.cc
     src/hmi_event.cc
     src/mobile_event.cc
+    src/commands/factory.cc
+    src/commands/support_service.cc
 )
 
 set (LIBRARIES

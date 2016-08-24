@@ -30,14 +30,13 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include "vr_module/hmi_event.h"
 
 namespace vr_module {
 
 HmiEvent::HmiEvent(const vr_hmi_api::ServiceMessage& message)
-  : event_engine::Event<vr_hmi_api::ServiceMessage,
-                        vr_hmi_api::RPCName>(message, message.rpc()) {
+    : event_engine::Event<vr_hmi_api::ServiceMessage, vr_hmi_api::RPCName>(
+        message, message.rpc()) {
 }
 
 HmiEvent::~HmiEvent() {
@@ -53,10 +52,14 @@ int32_t HmiEvent::event_message_correlation_id() const {
 
 event_engine::MessageType HmiEvent::event_message_type() const {
   switch (event_message_.rpc_type()) {
-    case vr_hmi_api::NOTIFICATION: return event_engine::kNotification;
-    case vr_hmi_api::REQUEST: return event_engine::kRequest;
-    case vr_hmi_api::RESPONSE: return event_engine::kResponse;
-    default: return event_engine::kRequest;
+    case vr_hmi_api::NOTIFICATION:
+      return event_engine::kNotification;
+    case vr_hmi_api::REQUEST:
+      return event_engine::kRequest;
+    case vr_hmi_api::RESPONSE:
+      return event_engine::kResponse;
+    default:
+      return event_engine::kRequest;
   }
 }
 

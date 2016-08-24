@@ -41,8 +41,7 @@
 
 namespace vr_module {
 
-class MobileEvent :
-    public event_engine::Event<vr_mobile_api::ServiceMessage,
+class MobileEvent : public event_engine::Event<vr_mobile_api::ServiceMessage,
     vr_mobile_api::RPCName> {
  public:
   /**

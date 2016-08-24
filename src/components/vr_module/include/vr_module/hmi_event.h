@@ -41,8 +41,7 @@
 
 namespace vr_module {
 
-class HmiEvent :
-    public event_engine::Event<vr_hmi_api::ServiceMessage,
+class HmiEvent : public event_engine::Event<vr_hmi_api::ServiceMessage,
     vr_hmi_api::RPCName> {
  public:
   /**
