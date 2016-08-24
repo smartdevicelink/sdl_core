@@ -92,4 +92,5 @@ message SupportServiceRequest{
 // defines if the service functions are supported and
 // may be recognized/substituted by HU-subsystem
 message SupportServiceResponse{
+  required ResultCode result = 1;
 }

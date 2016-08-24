@@ -53,6 +53,11 @@ SupportService::SupportService(const vr_hmi_api::ServiceMessage& message,
   message_.set_correlation_id(Command::id());
 }
 
+vr_module::commands::SupportService::~SupportService() {
+  EventDispatcher<vr_hmi_api::ServiceMessage, vr_hmi_api::RPCName>::instance()
+      ->remove_observer(this);
+}
+
 bool SupportService::Execute() {
   LOG4CXX_AUTO_TRACE(logger_);
   EventDispatcher<vr_hmi_api::ServiceMessage, vr_hmi_api::RPCName>::instance()
@@ -68,8 +73,20 @@ void SupportService::OnTimeout() {
 void SupportService::on_event(
     const event_engine::Event<vr_hmi_api::ServiceMessage, vr_hmi_api::RPCName>& event) {
   LOG4CXX_AUTO_TRACE(logger_);
-  bool supported = false;  // TODO(KKolodiy): protocol is not completed
-  module_->set_supported(supported);
+  const vr_hmi_api::ServiceMessage message = event.event_message();
+  if (!message.has_params()) {
+    LOG4CXX_WARN(logger_, "Message does not contain params");
+    return;
+  }
+  vr_hmi_api::SupportServiceResponse response;
+  bool ret = response.ParseFromString(message.params());
+  if (ret) {
+    bool supported = response.result() == vr_hmi_api::SUCCESS;
+    module_->set_supported(supported);
+    module_->OnCommandFinished(Command::id());
+  } else {
+    LOG4CXX_WARN(logger_, "Could not parse params");
+  }
 }
 
 }  // namespace commands

@@ -85,6 +85,12 @@ class VRModule
   virtual void OnReceived(const vr_hmi_api::ServiceMessage& message);
 
   /**
+   * Handles finished command
+   * @param id unique id of command
+   */
+  void OnCommandFinished(uint32_t id);
+
+  /**
    * Sends message to HMI (Applink)
    * @param message is GPB message according with protocol
    * @return true if message was sent successful

@@ -59,8 +59,8 @@ class FactoryInterface {
   virtual Command* Create(const vr_hmi_api::ServiceMessage& message) const = 0;
 
   /**
-   * Creates command from GPB HMI message
-   * @param message GPB HMI message
+   * Creates command from GPB Mobile message
+   * @param message GPB Mobile message
    * @return command
    */
   virtual Command* Create(

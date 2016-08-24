@@ -211,6 +211,9 @@ void VRModule::OnAppHMILevelChanged(application_manager::ApplicationSharedPtr ap
   // TODO(VSemenyuk): here should be implemented the corresponding logic
 }
 
+void VRModule::OnCommandFinished(uint32_t correlation_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  request_controller_.DeleteRequest(correlation_id);
+}
 
 }  //  namespace vr_module
-
