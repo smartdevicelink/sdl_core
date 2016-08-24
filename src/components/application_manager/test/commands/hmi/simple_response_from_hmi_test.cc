@@ -62,10 +62,9 @@
 #include "hmi/ui_perform_interaction_response.h"
 #include "hmi/vi_diagnostic_message_response.h"
 #include "hmi/vi_get_dtcs_response.h"
-#include "hmi/vi_unsubscribe_vehicle_data_response.h"
-#include "hmi/vr_add_command_response.h"
-#include "hmi/vr_change_registration_response.h"
-#include "hmi/vr_delete_command_response.h"
+#include "hmi/ui_set_media_clock_timer_response.h"
+#include "hmi/ui_show_response.h"
+#include "hmi/ui_slider_response.h"
 
 namespace test {
 namespace components {
@@ -140,14 +139,11 @@ typedef Types<
                 hmi_apis::FunctionID::VehicleInfo_DiagnosticMessage>,
     CommandData<commands::VIGetDTCsResponse,
                 hmi_apis::FunctionID::VehicleInfo_GetDTCs>,
-    CommandData<commands::VIUnsubscribeVehicleDataResponse,
-                hmi_apis::FunctionID::VehicleInfo_UnsubscribeVehicleData>,
-    CommandData<commands::VRAddCommandResponse,
-                hmi_apis::FunctionID::VR_AddCommand>,
-    CommandData<commands::VRChangeRegistrationResponse,
-                hmi_apis::FunctionID::VR_ChangeRegistration>,
-    CommandData<commands::VRDeleteCommandResponse,
-                hmi_apis::FunctionID::VR_DeleteCommand>> ResponseCommandsList;
+    CommandData<commands::UISetMediaClockTimerResponse,
+                hmi_apis::FunctionID::UI_SetMediaClockTimer>,
+    CommandData<commands::UIShowResponse, hmi_apis::FunctionID::UI_Show>,
+    CommandData<commands::UISliderResponse, hmi_apis::FunctionID::UI_Slider>>
+    ResponseCommandsList;
 
 TYPED_TEST_CASE(ResponseFromHMICommandsTest, ResponseCommandsList);
 

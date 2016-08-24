@@ -64,10 +64,9 @@
 #include "hmi/vi_diagnostic_message_request.h"
 #include "hmi/vi_get_dtcs_request.h"
 #include "hmi/vi_get_vehicle_data_request.h"
-#include "hmi/vi_unsubscribe_vehicle_data_request.h"
-#include "hmi/vr_add_command_request.h"
-#include "hmi/vr_change_registration_request.h"
-#include "hmi/vr_delete_command_request.h"
+#include "hmi/ui_set_media_clock_timer_request.h"
+#include "hmi/ui_show_request.h"
+#include "hmi/ui_slider_request.h"
 
 namespace test {
 namespace components {
@@ -138,10 +137,9 @@ typedef Types<commands::VIIsReadyRequest,
               commands::VIDiagnosticMessageRequest,
               commands::VIGetDTCsRequest,
               commands::VIGetVehicleDataRequest,
-              commands::VIUnsubscribeVehicleDataRequest,
-              commands::VRAddCommandRequest,
-              commands::VRChangeRegistrationRequest,
-              commands::VRDeleteCommandRequest> RequestCommandsList;
+              commands::UISetMediaClockTimerRequest,
+              commands::UIShowRequest,
+              commands::UISliderRequest> RequestCommandsList;
 
 TYPED_TEST_CASE(RequestToHMICommandsTest, RequestCommandsList);
 
