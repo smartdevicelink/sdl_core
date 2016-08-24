@@ -84,6 +84,21 @@ class VRModule
    */
   virtual void OnReceived(const vr_hmi_api::ServiceMessage& message);
 
+  /**
+   * Sends message to HMI (Applink)
+   * @param message is GPB message according with protocol
+   * @return true if message was sent successful
+   */
+  bool SendToHmi(const vr_hmi_api::ServiceMessage& message);
+
+  bool supported() const {
+    return supported_;
+  }
+
+  void set_supported(bool value) {
+    supported_ = value;
+  }
+
  private:
 
   /**
@@ -93,6 +108,7 @@ class VRModule
 
  private:
   static const functional_modules::ModuleID kModuleID = 405;
+  void CheckSupport();
   /**
    * Handles received message from Mobile application
    * @param message is GPB message according with protocol
@@ -100,14 +116,15 @@ class VRModule
   void OnReceived(const vr_mobile_api::ServiceMessage& message);
   void EmitEvent(const vr_hmi_api::ServiceMessage& message);
   void EmitEvent(const vr_mobile_api::ServiceMessage& message);
-  void RunCommand(const vr_hmi_api::ServiceMessage& message);
-  void RunCommand(const vr_mobile_api::ServiceMessage& message);
+  void RunCommand(commands::CommandPtr command);
+
   functional_modules::PluginInfo plugin_info_;
 
   static uint32_t next_correlation_id_;
   VRProxy proxy_;
   const commands::FactoryInterface& factory_;
   request_controller::RequestController request_controller_;
+  bool supported_;
 
   DISALLOW_COPY_AND_ASSIGN(VRModule);
 };

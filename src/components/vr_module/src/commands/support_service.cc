@@ -30,51 +30,46 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_COMMAND_H_
-#define SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_COMMAND_H_
+#include "vr_module/commands/support_service.h"
 
-#include "utils/shared_ptr.h"
+#include "vr_module/event_engine/event_dispatcher.h"
+#include "vr_module/hmi_event.h"
+#include "vr_module/interface/hmi.pb.h"
+#include "vr_module/interface/mobile.pb.h"
+#include "vr_module/vr_module.h"
 
 namespace vr_module {
 namespace commands {
 
-class Command {
- public:
-  explicit Command(int32_t id = 0)
-      : id_(id),
-        is_request_(id != 0) {
-  }
+using event_engine::EventDispatcher;
 
-  virtual ~Command() {
-  }
+SupportService::SupportService(const vr_hmi_api::ServiceMessage& message,
+                               VRModule* module)
+    : Command(module_->GetNextCorrelationID()),
+      module_(module),
+      message_(message) {
+  message_.set_rpc_type(vr_hmi_api::REQUEST);
+  message_.set_correlation_id(Command::id());
+}
 
-  /**
-   * Executes command
-   * @return true if command was started successful
-   */
-  virtual bool Execute() = 0;
+bool SupportService::Execute() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  EventDispatcher<vr_hmi_api::ServiceMessage,
+      vr_hmi_api::RPCName>::instance()->
+      add_observer(message_.rpc(), message_.correlation_id(), this);
+  return module_->SendToHmi(message_);
+}
 
-  /**
-   * Command on timeout reaction
-   */
-  virtual void OnTimeout() = 0;
+void SupportService::OnTimeout() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  // TODO(KKolodiy): add timeout processing
+}
 
-  int32_t id() const {
-    return id_;
-  }
+void SupportService::on_event(const HmiEvent& event) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  bool supported = false;  // TODO(KKolodiy): protocol is not completed
+  module_->set_supported(supported);
+}
 
-  bool is_request() const {
-    return is_request_;
-  }
-
- private:
-  const int32_t id_;
-  const bool is_request_;
-};
-
-typedef utils::SharedPtr<commands::Command> CommandPtr;
-
-}  // commands
-}  // vr_module
-
-#endif  // SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_COMMAND_H_
+}  // namespace commands
+}  // namespace vr_module

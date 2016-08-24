@@ -31,15 +31,26 @@
  */
 
 #include "vr_module/commands/factory.h"
+
 #include "utils/logger.h"
+
+#include "vr_module/commands/support_service.h"
+#include "vr_module/interface/hmi.pb.h"
+#include "vr_module/interface/mobile.pb.h"
 
 namespace vr_module {
 namespace commands {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "VRModule")
 
+Factory::Factory(VRModule* module) : module_(module) {
+}
+
 Command* Factory::Create(const vr_hmi_api::ServiceMessage& message) const {
   LOG4CXX_AUTO_TRACE(logger_);
+  switch (message.rpc()) {
+    case vr_hmi_api::SUPPORT_SERVICE: return new SupportService(module_);
+  }
   return 0;
 }
 
@@ -50,5 +61,3 @@ Command* Factory::Create(const vr_mobile_api::ServiceMessage& message) const {
 
 }  // namespace commands
 }  // namespace vr_module
-
-

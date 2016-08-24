@@ -34,8 +34,14 @@
 #define SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_FACTORY_INTERFACE_H_
 
 #include "vr_module/commands/command.h"
-#include "vr_module/interface/hmi.pb.h"
-#include "vr_module/interface/mobile.pb.h"
+
+namespace vr_hmi_api {
+class ServiceMessage;
+}  // namespace vr_hmi_api
+
+namespace vr_mobile_api {
+class ServiceMessage;
+}  // namespace vr_mobile_api
 
 namespace vr_module {
 namespace commands {

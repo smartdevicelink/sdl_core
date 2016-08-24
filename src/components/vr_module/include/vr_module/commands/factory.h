@@ -36,12 +36,19 @@
 #include "vr_module/commands/factory_interface.h"
 
 namespace vr_module {
+
+class VRModule;
+
 namespace commands {
 
 class Factory : public FactoryInterface {
  public:
+  explicit Factory(VRModule* module);
   virtual Command* Create(const vr_hmi_api::ServiceMessage& message) const;
   virtual Command* Create(const vr_mobile_api::ServiceMessage& message) const;
+
+ private:
+  VRModule* module_;
 };
 
 }  // namespace commands

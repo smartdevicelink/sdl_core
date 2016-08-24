@@ -30,51 +30,37 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_COMMAND_H_
-#define SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_COMMAND_H_
+#ifndef SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_SUPPORT_SERVICE_H_
+#define SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_SUPPORT_SERVICE_H_
 
-#include "utils/shared_ptr.h"
+#include "vr_module/commands/command.h"
+
+namespace vr_hmi_api {
+class ServiceMessage;
+}  // namespace vr_hmi_api
 
 namespace vr_module {
+
+class VRModule;
+class HmiEvent;
+
 namespace commands {
 
-class Command {
+class SupportService : public Command,
+    public event_engine::EventObserver<vr_hmi_api::ServiceMessage,
+                                       vr_hmi_api::RPCName> {
  public:
-  explicit Command(int32_t id = 0)
-      : id_(id),
-        is_request_(id != 0) {
-  }
-
-  virtual ~Command() {
-  }
-
-  /**
-   * Executes command
-   * @return true if command was started successful
-   */
-  virtual bool Execute() = 0;
-
-  /**
-   * Command on timeout reaction
-   */
-  virtual void OnTimeout() = 0;
-
-  int32_t id() const {
-    return id_;
-  }
-
-  bool is_request() const {
-    return is_request_;
-  }
+  SupportService(const vr_hmi_api::ServiceMessage& message, VRModule* module);
+  bool Execute();
+  void OnTimeout();
+  void on_event(const HmiEvent& event);
 
  private:
-  const int32_t id_;
-  const bool is_request_;
+  VRModule* module_;
+  vr_hmi_api::ServiceMessage message_;
 };
 
-typedef utils::SharedPtr<commands::Command> CommandPtr;
+}  // namespace commands
+}  // namespace vr_module
 
-}  // commands
-}  // vr_module
-
-#endif  // SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_COMMAND_H_
+#endif  // SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_SUPPORT_SERVICE_H_
