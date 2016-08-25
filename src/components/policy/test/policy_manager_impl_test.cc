@@ -245,6 +245,7 @@ TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
   app_policies["default"]["keep_context"] = Json::Value(true);
   app_policies["default"]["steal_focus"] = Json::Value(true);
   app_policies["default"]["certificate"] = Json::Value("sign");
+
   app_policies["1234"] = Json::Value(Json::objectValue);
   app_policies["1234"]["memory_kb"] = Json::Value(50);
   app_policies["1234"]["heart_beat_timeout_ms"] = Json::Value(100);
@@ -255,6 +256,22 @@ TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
   app_policies["1234"]["keep_context"] = Json::Value(true);
   app_policies["1234"]["steal_focus"] = Json::Value(true);
   app_policies["1234"]["certificate"] = Json::Value("sign");
+
+  app_policies["device"] = Json::Value(Json::objectValue);
+  app_policies["device"]["keep_context"] = Json::Value(false);
+  app_policies["device"]["steal_focus"] = Json::Value(false);
+  app_policies["device"]["priority"] = Json::Value("NONE");
+  app_policies["device"]["default_hmi"] = Json::Value("NONE");
+  app_policies["device"]["groups"] = Json::Value(Json::arrayValue);
+  app_policies["device"]["groups"][0] = Json::Value("DataConsent-2");  
+
+  app_policies["pre_DataConsent"] = Json::Value(Json::objectValue);
+  app_policies["pre_DataConsent"]["keep_context"] = Json::Value(false);
+  app_policies["pre_DataConsent"]["steal_focus"] = Json::Value(false);
+  app_policies["pre_DataConsent"]["priority"] = Json::Value("NONE");
+  app_policies["pre_DataConsent"]["default_hmi"] = Json::Value("NONE");
+  app_policies["pre_DataConsent"]["groups"] = Json::Value(Json::arrayValue);
+  app_policies["pre_DataConsent"]["groups"][0] = Json::Value("BaseBeforeDataConsent");
 
   policy_table::Table update(&table);
   update.SetPolicyTableType(rpc::policy_table_interface_base::PT_UPDATE);
