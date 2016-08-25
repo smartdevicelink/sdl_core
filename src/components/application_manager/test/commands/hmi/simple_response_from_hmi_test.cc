@@ -65,6 +65,10 @@
 #include "hmi/ui_set_media_clock_timer_response.h"
 #include "hmi/ui_show_response.h"
 #include "hmi/ui_slider_response.h"
+#include "hmi/vi_unsubscribe_vehicle_data_response.h"
+#include "hmi/vr_add_command_response.h"
+#include "hmi/vr_change_registration_response.h"
+#include "hmi/vr_delete_command_response.h"
 
 namespace test {
 namespace components {
@@ -142,6 +146,14 @@ typedef Types<
     CommandData<commands::UISetMediaClockTimerResponse,
                 hmi_apis::FunctionID::UI_SetMediaClockTimer>,
     CommandData<commands::UIShowResponse, hmi_apis::FunctionID::UI_Show>,
+    CommandData<commands::VIUnsubscribeVehicleDataResponse,
+                hmi_apis::FunctionID::VehicleInfo_UnsubscribeVehicleData>,
+    CommandData<commands::VRAddCommandResponse,
+                hmi_apis::FunctionID::VR_AddCommand>,
+    CommandData<commands::VRChangeRegistrationResponse,
+                hmi_apis::FunctionID::VR_ChangeRegistration>,
+    CommandData<commands::VRDeleteCommandResponse,
+                hmi_apis::FunctionID::VR_DeleteCommand>,
     CommandData<commands::UISliderResponse, hmi_apis::FunctionID::UI_Slider> >
     ResponseCommandsList;
 
