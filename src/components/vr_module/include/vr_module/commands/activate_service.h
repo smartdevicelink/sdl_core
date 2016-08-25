@@ -30,44 +30,38 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "vr_module/commands/factory.h"
+#ifndef SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_ACTIVATE_SERVICE_H_
+#define SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_ACTIVATE_SERVICE_H_
 
-#include "utils/logger.h"
-
-#include "vr_module/commands/activate_service.h"
-#include "vr_module/commands/support_service.h"
+#include "vr_module/commands/command.h"
+#include "vr_module/event_engine/event_dispatcher.h"
 #include "vr_module/interface/hmi.pb.h"
 #include "vr_module/interface/mobile.pb.h"
 
 namespace vr_module {
+
+class VRModule;
+
 namespace commands {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "VRModule")
+class ActivateService : public Command, public event_engine::EventObserver<
+    vr_mobile_api::ServiceMessage, vr_mobile_api::RPCName> {
+ public:
+  ActivateService(const vr_hmi_api::ServiceMessage& message, VRModule* module);
+  ~ActivateService();
+  bool Execute();
+  void OnTimeout();
+  void on_event(
+      const event_engine::Event<vr_mobile_api::ServiceMessage,
+          vr_mobile_api::RPCName>& event);
 
-Factory::Factory(VRModule* module)
-    : module_(module) {
-}
-
-Command* Factory::Create(const vr_hmi_api::ServiceMessage& message) const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  switch (message.rpc()) {
-    case vr_hmi_api::SUPPORT_SERVICE:
-      return new SupportService(message, module_);
-    case vr_hmi_api::ACTIVATE:
-      return new ActivateService(message, module_);
-    case vr_hmi_api::PROCESS_DATA:
-    case vr_hmi_api::ON_REGISTER:
-    case vr_hmi_api::ON_DEFAULT_CHOSEN:
-    case vr_hmi_api::ON_DEACTIVATED:
-    default: return 0;
-  }
-  return 0;
-}
-
-Command* Factory::Create(const vr_mobile_api::ServiceMessage& message) const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  return 0;
-}
+ private:
+  VRModule* module_;
+  vr_hmi_api::ServiceMessage message_;
+  vr_mobile_api::ServiceMessage request_;
+};
 
 }  // namespace commands
 }  // namespace vr_module
+
+#endif  // SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_ACTIVATE_SERVICE_H_

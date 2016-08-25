@@ -108,6 +108,12 @@ void VRModule::EmitEvent(const vr_mobile_api::ServiceMessage& message) {
       vr_mobile_api::RPCName>::instance()->raise_event(event);
 }
 
+bool VRModule::SendToMobile(const vr_mobile_api::ServiceMessage& message) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  // TODO(KKolodiy): should be implemented
+  return false;
+}
+
 void VRModule::RunCommand(commands::Command* command) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (command) {
@@ -219,4 +225,15 @@ void VRModule::UnregisterRequest(uint32_t correlation_id) {
   request_controller_.DeleteRequest(correlation_id);
 }
 
+void VRModule::ActivateService(int32_t app_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  // TODO(KKolodiy): should be implemented, only internal logic, no sending any messages
+}
+
+void VRModule::DeactivateService() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  // TODO(KKolodiy): should be implemented, only internal logic, no sending any messages
+}
+
 }  //  namespace vr_module
+
