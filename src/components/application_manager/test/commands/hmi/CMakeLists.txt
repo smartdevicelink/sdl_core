@@ -30,34 +30,28 @@
 
 include_directories(
   ${GMOCK_INCLUDE_DIRECTORY}
-  ${COMPONENTS_DIR}/application_manager/include/
+  ${COMPONENTS_DIR}/application_manager/include/application_manager/
+  ${COMPONENTS_DIR}/application_manager/include/application_manager/commands/
   ${COMPONENTS_DIR}/application_manager/test/include/
-  ${COMPONENTS_DIR}/application_manager/test/include/commands/
-)
-
-set(COMMANDS_TEST_SOURCE_DIR
-  ${COMPONENTS_DIR}/application_manager/test/commands
+  ${COMPONENTS_DIR}/application_manager/test/include/application_manager/commands/
 )
 
 set (SOURCES
-  ${COMPONENTS_DIR}/application_manager/test/mock_message_helper.cc
-  ${COMMANDS_TEST_SOURCE_DIR}/command_impl_test.cc
-  ${COMMANDS_TEST_SOURCE_DIR}/command_response_impl_test.cc
-  ${COMMANDS_TEST_SOURCE_DIR}/command_request_impl_test.cc
+  ${AM_SOURCE_DIR}/src/smart_object_keys.cc
+  ${AM_SOURCE_DIR}/test/mock_message_helper.cc
+  ${COMMANDS_TEST_SOURCE_DIR}/hmi/vi_is_ready_response_test.cc
+  ${COMMANDS_TEST_SOURCE_DIR}/hmi/vr_is_ready_response_test.cc
 )
 
 set(LIBRARIES
   gmock
+  jsoncpp
   Utils
   ApplicationManager
   connectionHandler
   HMI_API
   MOBILE_API
   SmartObjects
-  jsoncpp
 )
 
-create_test("commands_test" "${SOURCES}" "${LIBRARIES}" )
-
-add_subdirectory(mobile)
-add_subdirectory(hmi)
+create_test("hmi_commands_test" "${SOURCES}" "${LIBRARIES}" )
