@@ -70,7 +70,7 @@ VRModule::~VRModule() {
 void VRModule::CheckSupport() {
   vr_hmi_api::ServiceMessage message;
   message.set_rpc(vr_hmi_api::SUPPORT_SERVICE);
-  commands::CommandPtr command(factory_.Create(message));
+  commands::Command* command = factory_.Create(message);
   RunCommand(command);
 }
 
@@ -79,7 +79,7 @@ void VRModule::OnReceived(const vr_hmi_api::ServiceMessage& message) {
   if (message.rpc_type() == vr_hmi_api::RESPONSE) {
     EmitEvent(message);
   } else {
-    commands::CommandPtr command(factory_.Create(message));
+    commands::Command* command = factory_.Create(message);
     RunCommand(command);
   }
 }
@@ -89,7 +89,7 @@ void VRModule::OnReceived(const vr_mobile_api::ServiceMessage& message) {
   if (message.rpc_type() == vr_mobile_api::RESPONSE) {
     EmitEvent(message);
   } else {
-    commands::CommandPtr command(factory_.Create(message));
+    commands::Command* command = factory_.Create(message);
     RunCommand(command);
   }
 }
@@ -108,12 +108,9 @@ void VRModule::EmitEvent(const vr_mobile_api::ServiceMessage& message) {
       vr_mobile_api::RPCName>::instance()->raise_event(event);
 }
 
-void VRModule::RunCommand(commands::CommandPtr command) {
+void VRModule::RunCommand(commands::Command* command) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (command) {
-    if (command->is_request()) {
-      request_controller_.AddRequest(command->id(), command);
-    }
     command->Execute();
   }
 }
@@ -211,7 +208,13 @@ void VRModule::OnAppHMILevelChanged(application_manager::ApplicationSharedPtr ap
   // TODO(VSemenyuk): here should be implemented the corresponding logic
 }
 
-void VRModule::OnCommandFinished(uint32_t correlation_id) {
+void VRModule::RegisterRequest(uint32_t correlation_id,
+                               commands::CommandPtr command) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  request_controller_.AddRequest(correlation_id, command);
+}
+
+void VRModule::UnregisterRequest(uint32_t correlation_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   request_controller_.DeleteRequest(correlation_id);
 }

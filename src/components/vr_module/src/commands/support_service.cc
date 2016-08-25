@@ -46,11 +46,11 @@ using event_engine::EventDispatcher;
 
 SupportService::SupportService(const vr_hmi_api::ServiceMessage& message,
                                VRModule* module)
-    : Command(module_->GetNextCorrelationID()),
-      module_(module),
+    : module_(module),
       message_(message) {
   message_.set_rpc_type(vr_hmi_api::REQUEST);
-  message_.set_correlation_id(Command::id());
+  message_.set_correlation_id(module_->GetNextCorrelationID());
+  module_->RegisterRequest(message_.correlation_id(), this);
 }
 
 vr_module::commands::SupportService::~SupportService() {
@@ -83,7 +83,7 @@ void SupportService::on_event(
   if (ret) {
     bool supported = response.result() == vr_hmi_api::SUCCESS;
     module_->set_supported(supported);
-    module_->OnCommandFinished(Command::id());
+    module_->UnregisterRequest(message.correlation_id());
   } else {
     LOG4CXX_WARN(logger_, "Could not parse params");
   }

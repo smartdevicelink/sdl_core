@@ -33,8 +33,6 @@
 #ifndef SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_FACTORY_INTERFACE_H_
 #define SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_FACTORY_INTERFACE_H_
 
-#include "vr_module/commands/command.h"
-
 namespace vr_hmi_api {
 class ServiceMessage;
 }  // namespace vr_hmi_api
@@ -45,6 +43,8 @@ class ServiceMessage;
 
 namespace vr_module {
 namespace commands {
+
+class Command;
 
 class FactoryInterface {
  public:

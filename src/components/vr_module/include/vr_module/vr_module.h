@@ -85,10 +85,16 @@ class VRModule
   virtual void OnReceived(const vr_hmi_api::ServiceMessage& message);
 
   /**
-   * Handles finished command
-   * @param id unique id of command
+   * Registers request to HMI or Mobile side
+   * @param correlation_id unique id of request
    */
-  void OnCommandFinished(uint32_t id);
+  void RegisterRequest(uint32_t correlation_id, commands::CommandPtr command);
+
+  /**
+   * Unregisters request to HMI or Mobile side
+   * @param correlation_id unique id of request
+   */
+  void UnregisterRequest(uint32_t correlation_id);
 
   /**
    * Sends message to HMI (Applink)
@@ -121,7 +127,7 @@ class VRModule
   void OnReceived(const vr_mobile_api::ServiceMessage& message);
   void EmitEvent(const vr_hmi_api::ServiceMessage& message);
   void EmitEvent(const vr_mobile_api::ServiceMessage& message);
-  void RunCommand(commands::CommandPtr command);
+  void RunCommand(commands::Command* command);
 
   functional_modules::PluginInfo plugin_info_;
 

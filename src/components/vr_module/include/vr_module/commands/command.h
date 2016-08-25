@@ -40,11 +40,6 @@ namespace commands {
 
 class Command {
  public:
-  explicit Command(int32_t id = 0)
-      : id_(id),
-        is_request_(id != 0) {
-  }
-
   virtual ~Command() {
   }
 
@@ -58,18 +53,6 @@ class Command {
    * Command on timeout reaction
    */
   virtual void OnTimeout() = 0;
-
-  int32_t id() const {
-    return id_;
-  }
-
-  bool is_request() const {
-    return is_request_;
-  }
-
- private:
-  const int32_t id_;
-  const bool is_request_;
 };
 
 typedef utils::SharedPtr<commands::Command> CommandPtr;
