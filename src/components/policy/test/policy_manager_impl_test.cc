@@ -574,6 +574,104 @@ TEST_F(PolicyManagerImplTest, LoadPT_SetInvalidUpdatePT_PTIsNotLoaded) {
   EXPECT_FALSE(manager->LoadPT("file_pt_update.json", msg));
 }
 
+// [GENIVI] Policies: "device" and "pre_DataConsent" sections
+// must be present in PT
+TEST_F(PolicyManagerImplTest,
+       CRQ26921_LoadPT_SetInvalidUpdatePT_PTIsNotLoaded) {
+  // Arrange
+  const std::string load_table(
+      "{"
+      "\"policy_table\": {"
+      "\"module_config\": {"
+      "\"preloaded_pt\": true,"
+      "\"exchange_after_x_ignition_cycles\": 10,"
+      "\"exchange_after_x_kilometers\": 100,"
+      "\"exchange_after_x_days\": 5,"
+      "\"timeout_after_x_seconds\": 500,"
+      "\"seconds_between_retries\": [10, 20, 30],"
+      "\"endpoints\": {"
+      "\"0x00\": {"
+      "\"default\": [\"http://ford.com/cloud/default\"]"
+      "}"
+      "},"
+      "\"notifications_per_minute_by_priority\": {"
+      "\"emergency\": 1,"
+      "\"navigation\": 2,"
+      "\"VOICECOMM\": 3,"
+      "\"communication\": 4,"
+      "\"normal\": 5,"
+      "\"none\": 6"
+      "},"
+      "\"vehicle_make\" : \"MakeT\","
+      "\"vehicle_model\" : \"ModelT\","
+      "\"vehicle_year\": \"2014\""
+      "},"
+      "\"app_policies\": {"
+      "\"default\": {"
+      "\"memory_kb\": 50,"
+      "\"heart_beat_timeout_ms\": 100,"
+      "\"groups\": [\"default\"],"
+      "\"keep_context\": true,"
+      "\"steal_focus\": true,"
+      "\"priority\": \"EMERGENCY\","
+      "\"default_hmi\": \"FULL\","
+      "\"certificate\": \"sign\""
+      "},   "
+      // skip pre_DataConsent
+      // skip device
+      // this should make table invalid
+      "\"1234\": {"
+      "\"memory_kb\": 50,"
+      "\"heart_beat_timeout_ms\": 100,"
+      "\"groups\": [\"default\"],"
+      "\"keep_context\": true,"
+      "\"steal_focus\": true,"
+      "\"priority\": \"EMERGENCY\","
+      "\"default_hmi\": \"FULL\","
+      "\"certificate\": \"sign\""
+      "}"
+      "},"
+      "\"consumer_friendly_messages\": {"
+      "\"version\": \"1.2\""
+      "},"
+      "\"functional_groupings\": {"
+      "\"default\": {"
+      "\"rpcs\": {"
+      "\"Update\": {"
+      "\"hmi_levels\": [\"FULL\"],"
+      "\"parameters\" : [\"speed\"]"
+      "}"
+      "}"
+      "}"
+      "}"
+      "}"
+      "}");
+  utils::json::JsonValue table(utils::json::ValueType::OBJECT_VALUE);
+  utils::json::JsonValue::ParseResult result =
+      utils::json::JsonValue::Parse(load_table);
+  table = result.first;
+
+  policy_table::Table update(table);
+  update.SetPolicyTableType(rpc::policy_table_interface_base::PT_UPDATE);
+
+  // Assert update is invalid
+  ASSERT_FALSE(IsValid(update));
+
+  // Act
+  const std::string json = table.ToJson(true);
+  ::policy::BinaryMessage msg(json.begin(), json.end());
+
+  // Assert
+  EXPECT_CALL(*cache_manager, GenerateSnapshot()).Times(0);
+  EXPECT_CALL(*cache_manager, ApplyUpdate(_)).Times(0);
+  EXPECT_CALL(listener, GetAppName(_)).Times(0);
+  EXPECT_CALL(listener, OnUpdateStatusChanged(_)).Times(1);
+  EXPECT_CALL(*cache_manager, SaveUpdateRequired(false)).Times(0);
+  EXPECT_CALL(*cache_manager, TimeoutResponse()).Times(0);
+  EXPECT_CALL(*cache_manager, SecondsBetweenRetries(_)).Times(0);
+  EXPECT_FALSE(manager->LoadPT("file_pt_update.json", msg));
+}
+
 TEST_F(PolicyManagerImplTest2,
        KmsChanged_SetExceededKms_ExpectCorrectSchedule) {
   // Arrange
