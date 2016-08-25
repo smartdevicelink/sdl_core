@@ -34,7 +34,7 @@ script:
   - mkdir build && cd build && cmake ../ -DBUILD_TESTS=ON -DENABLE_GCOV=ON && make install
   - sudo ldconfig
   - make test
-  - bash ../tools/infrastructure/show_disabled.sh 
+  - bash ../tools/infrastructure/show_disabled.sh
   - bash -ex ../tools/infrastructure/collect_coverage.sh ./
 env:
   global:
@@ -61,5 +61,4 @@ notifications:
     - RMalynovskyi@luxoft.com
     - MGhiumiusliu@luxoft.com
     - AGaliuzov@luxoft.com
-    - ANosach@luxoft.com
 

@@ -126,7 +126,7 @@ TEST_F(RequestInfoTest, AddRemoveHMIRequests) {
 }
 
 TEST_F(RequestInfoTest, AddHMIRequests_RemoveAllRequests) {
-  std::vector<utils::SharedPtr<RequestInfoForTesting>> requests;
+  std::vector<utils::SharedPtr<RequestInfoForTesting> > requests;
 
   // Add hmi requests
   for (uint32_t i = 0; i < kCountOfRequestsForTest; ++i) {
@@ -141,7 +141,7 @@ TEST_F(RequestInfoTest, AddHMIRequests_RemoveAllRequests) {
   EXPECT_EQ(kCountOfRequestsForTest, request_info_set_.Size());
 
   // Delete every request
-  std::vector<utils::SharedPtr<RequestInfoForTesting>>::iterator req_it =
+  std::vector<utils::SharedPtr<RequestInfoForTesting> >::iterator req_it =
       requests.begin();
 
   for (; req_it != requests.end(); ++req_it) {
@@ -164,7 +164,7 @@ TEST_F(RequestInfoTest, CheckRequestsMaxCount) {
   const uint32_t kHmiLevelCount = 1000u;
 
   // Count of added requests is less than max possible
-  std::vector<utils::SharedPtr<RequestInfoForTesting>> requests;
+  std::vector<utils::SharedPtr<RequestInfoForTesting> > requests;
   for (uint32_t i = 0; i < kHmiLevelCount - 1; ++i) {
     utils::SharedPtr<RequestInfoForTesting> request =
         CreateTestInfo(kMobileConnectionKey1,
@@ -214,7 +214,7 @@ TEST_F(RequestInfoTest, CheckMaxCountOfRequest) {
   const uint32_t kHmiLevelCount = 1000u;
 
   // Count of added requests is less than max possible
-  std::vector<utils::SharedPtr<RequestInfoForTesting>> requests;
+  std::vector<utils::SharedPtr<RequestInfoForTesting> > requests;
   for (uint32_t i = 0; i < kHmiLevelCount - 1; ++i) {
     utils::SharedPtr<RequestInfoForTesting> request =
         CreateTestInfo(kMobileConnectionKey1,
@@ -271,7 +271,7 @@ TEST_F(RequestInfoTest, AddMobileRequests_RemoveMobileRequests) {
 }
 
 TEST_F(RequestInfoTest, AddMobileRequests_RemoveMobileRequestsByConnectionKey) {
-  std::vector<utils::SharedPtr<RequestInfoForTesting>> requests;
+  std::vector<utils::SharedPtr<RequestInfoForTesting> > requests;
   const uint32_t kCountOfMobileequest1 = 200u;
   const uint32_t kCountOfMobileequest2 = 100u;
   for (uint32_t i = 0; i < kCountOfMobileequest1; ++i) {
@@ -326,14 +326,14 @@ TEST_F(RequestInfoTest, RequestInfoSetFront) {
 }
 
 TEST_F(RequestInfoTest, RequestInfoSetFind) {
-  std::vector<std::pair<uint32_t, uint32_t>> appid_connection_id;
+  std::vector<std::pair<uint32_t, uint32_t> > appid_connection_id;
   for (uint32_t i = 0; i < kCountOfRequestsForTest; ++i) {
     appid_connection_id.push_back(
         std::pair<uint32_t, uint32_t>(i, kCountOfRequestsForTest - i));
   }
-  std::vector<std::pair<uint32_t, uint32_t>>::iterator req_it =
+  std::vector<std::pair<uint32_t, uint32_t> >::iterator req_it =
       appid_connection_id.begin();
-  const std::vector<std::pair<uint32_t, uint32_t>>::iterator end =
+  const std::vector<std::pair<uint32_t, uint32_t> >::iterator end =
       appid_connection_id.end();
 
   for (; req_it != end; ++req_it) {
