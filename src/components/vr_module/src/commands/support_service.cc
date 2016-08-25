@@ -73,20 +73,15 @@ void SupportService::OnTimeout() {
 void SupportService::on_event(
     const event_engine::Event<vr_hmi_api::ServiceMessage, vr_hmi_api::RPCName>& event) {
   LOG4CXX_AUTO_TRACE(logger_);
-  const vr_hmi_api::ServiceMessage message = event.event_message();
-  if (!message.has_params()) {
-    LOG4CXX_WARN(logger_, "Message does not contain params");
-    return;
-  }
+  const vr_hmi_api::ServiceMessage& message = event.event_message();
   vr_hmi_api::SupportServiceResponse response;
-  bool ret = response.ParseFromString(message.params());
-  if (ret) {
+  if (message.has_params() && response.ParseFromString(message.params())) {
     bool supported = response.result() == vr_hmi_api::SUCCESS;
     module_->set_supported(supported);
-    module_->UnregisterRequest(message.correlation_id());
   } else {
-    LOG4CXX_WARN(logger_, "Could not parse params");
+    LOG4CXX_ERROR(logger_, "Could not get result from message");
   }
+  module_->UnregisterRequest(message.correlation_id());
 }
 
 }  // namespace commands

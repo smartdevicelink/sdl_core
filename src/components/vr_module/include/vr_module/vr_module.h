@@ -112,14 +112,14 @@ class VRModule
   }
 
  private:
+  static const functional_modules::ModuleID kModuleID = 405;
+
   /**
    * @brief Subscribes plugin to mobie rpc messages
    */
   void SubscribeToRpcMessages();
-
- private:
-  static const functional_modules::ModuleID kModuleID = 405;
   void CheckSupport();
+
   /**
    * Handles received message from Mobile application
    * @param message is GPB message according with protocol
