@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
@@ -30,67 +30,28 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_REQUEST_CONTROLLER_H_
-#define SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_REQUEST_CONTROLLER_H_
+#ifndef SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_FACTORY_H_
+#define SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_FACTORY_H_
 
-#include <map>
-
-#include "vr_module/commands/command.h"
-#include "vr_module/vr_module_timer.h"
+#include "vr_module/commands/factory_interface.h"
 
 namespace vr_module {
-namespace request_controller {
 
-typedef uint32_t  correlation_id;
+class VRModule;
 
-/**
- * @brief RequestController class is used to manage requests lifetime.
- */
-class RequestController : public functional_modules::TimerObserver<TrackableMessage> {
+namespace commands {
+
+class Factory : public FactoryInterface {
  public:
-  /**
-   * @brief Class constructor
-   *
-   */
-  RequestController();
-
-  /**
-   * @brief Class destructor
-   *
-   */
-  virtual ~RequestController();
-
-  /**
-   * @brief Adds pointer to request.
-   * @param correlation_id request correlation id
-   * @param command pointer to request created in mobile factory
-   */
-  void AddRequest(const uint32_t& correlation_id,
-                  commands::CommandPtr request);
-
-  /**
-   * @brief Removes request
-   * @param corellation_id request correlation id
-   */
-  void DeleteRequest(const uint32_t& correlation_id);
-
-  void OnTimeoutTriggered(const TrackableMessage& expired);
-
-  /**
-   * @brief Update request timer from cur time
-   * Use it if you want reset timet for some reason
-   * @param corellation_id request correlation id
-   */
-  void ResetTimer(const uint32_t& correlation_id);
+  explicit Factory(VRModule* module);
+  virtual Command* Create(const vr_hmi_api::ServiceMessage& message) const;
+  virtual Command* Create(const vr_mobile_api::ServiceMessage& message) const;
 
  private:
-  typedef std::map<correlation_id, commands::CommandPtr> RequestList;
-  RequestList request_list_;
-  functional_modules::ModuleTimer<TrackableMessage> timer_;
-  DISALLOW_COPY_AND_ASSIGN(RequestController);
+  VRModule* module_;
 };
 
-}  // namespace request_controller
+}  // namespace commands
 }  // namespace vr_module
 
-#endif  // SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_REQUEST_CONTROLLER_H_
+#endif  // SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_FACTORY_H_

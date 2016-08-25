@@ -36,6 +36,8 @@
 #include "functional_module/generic_module.h"
 #include "json/value.h"
 #include "utils/macro.h"
+#include "vr_module/commands/factory_interface.h"
+#include "vr_module/request_controller.h"
 #include "vr_module/vr_proxy.h"
 #include "vr_module/vr_proxy_listener.h"
 
@@ -82,19 +84,58 @@ class VRModule
    */
   virtual void OnReceived(const vr_hmi_api::ServiceMessage& message);
 
+  /**
+   * Registers request to HMI or Mobile side
+   * @param correlation_id unique id of request
+   */
+  void RegisterRequest(uint32_t correlation_id, commands::CommandPtr command);
+
+  /**
+   * Unregisters request to HMI or Mobile side
+   * @param correlation_id unique id of request
+   */
+  void UnregisterRequest(uint32_t correlation_id);
+
+  /**
+   * Sends message to HMI (Applink)
+   * @param message is GPB message according with protocol
+   * @return true if message was sent successful
+   */
+  bool SendToHmi(const vr_hmi_api::ServiceMessage& message);
+
+  bool supported() const {
+    return supported_;
+  }
+
+  void set_supported(bool value) {
+    supported_ = value;
+  }
+
  private:
+  static const functional_modules::ModuleID kModuleID = 405;
 
   /**
    * @brief Subscribes plugin to mobie rpc messages
    */
   void SubscribeToRpcMessages();
+  void CheckSupport();
 
- private:
-  static const functional_modules::ModuleID kModuleID = 405;
+  /**
+   * Handles received message from Mobile application
+   * @param message is GPB message according with protocol
+   */
+  void OnReceived(const vr_mobile_api::ServiceMessage& message);
+  void EmitEvent(const vr_hmi_api::ServiceMessage& message);
+  void EmitEvent(const vr_mobile_api::ServiceMessage& message);
+  void RunCommand(commands::Command* command);
+
   functional_modules::PluginInfo plugin_info_;
 
   static uint32_t next_correlation_id_;
   VRProxy proxy_;
+  const commands::FactoryInterface& factory_;
+  request_controller::RequestController request_controller_;
+  bool supported_;
 
   DISALLOW_COPY_AND_ASSIGN(VRModule);
 };

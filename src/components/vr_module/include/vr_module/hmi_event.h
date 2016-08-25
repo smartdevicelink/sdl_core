@@ -30,22 +30,18 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_VR_MODULE_EVENT_H_
-#define SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_VR_MODULE_EVENT_H_
+#ifndef SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_HMI_EVENT_H_
+#define SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_HMI_EVENT_H_
 
 #include <string>
 
-#include "application_manager/message.h"  // TODO(VS): Will be deleted when MessagePtr will be replaced with gpb generated class
-
+#include "utils/macro.h"
 #include "vr_module/event_engine/event.h"
 #include "vr_module/interface/hmi.pb.h"
 
-#include "functional_module/function_ids.h"
-
 namespace vr_module {
 
-class VRModuleEvent :
-    public event_engine::Event<vr_hmi_api::ServiceMessage,
+class HmiEvent : public event_engine::Event<vr_hmi_api::ServiceMessage,
     vr_hmi_api::RPCName> {
  public:
   /**
@@ -53,12 +49,12 @@ class VRModuleEvent :
    *
    * @param message GPB
    */
-  explicit VRModuleEvent(const vr_hmi_api::ServiceMessage& message);
+  explicit HmiEvent(const vr_hmi_api::ServiceMessage& message);
 
   /**
    * @brief Destructor
    */
-  virtual ~VRModuleEvent();
+  virtual ~HmiEvent();
 
   /*
    * @brief Retrieves event message request ID
@@ -76,9 +72,9 @@ class VRModuleEvent :
   virtual event_engine::MessageType event_message_type() const;
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(VRModuleEvent);
+  DISALLOW_COPY_AND_ASSIGN(HmiEvent);
 };
 
 }  // namespace vr_module
 
-#endif  // SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_VR_MODULE_EVENT_H_
+#endif  // SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_HMI_EVENT_H_

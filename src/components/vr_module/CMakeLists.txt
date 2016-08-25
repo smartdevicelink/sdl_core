@@ -38,8 +38,11 @@ set (SOURCES
     src/vr_module.cc
     src/vr_proxy.cc
     src/socket_channel.cc
-    # src/request_controller.cc
-    src/vr_module_event.cc
+    src/request_controller.cc
+    src/hmi_event.cc
+    src/mobile_event.cc
+    src/commands/factory.cc
+    src/commands/support_service.cc
 )
 
 set (LIBRARIES

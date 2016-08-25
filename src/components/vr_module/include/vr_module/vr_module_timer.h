@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
@@ -30,67 +30,42 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_REQUEST_CONTROLLER_H_
-#define SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_REQUEST_CONTROLLER_H_
+#ifndef SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_VR_MODULE_TIMER_H_
+#define SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_VR_MODULE_TIMER_H_
 
-#include <map>
-
-#include "vr_module/commands/command.h"
-#include "vr_module/vr_module_timer.h"
+#include "functional_module/timer/module_timer.h"
 
 namespace vr_module {
-namespace request_controller {
 
-typedef uint32_t  correlation_id;
-
-/**
- * @brief RequestController class is used to manage requests lifetime.
- */
-class RequestController : public functional_modules::TimerObserver<TrackableMessage> {
+class TrackableMessage : public functional_modules::Trackable {
  public:
-  /**
-   * @brief Class constructor
-   *
-   */
-  RequestController();
+  TrackableMessage(uint32_t app_id, uint32_t correlation_id)
+    : custom_interval_(0), app_id_(app_id), correlation_id_(correlation_id) {
+  }
 
-  /**
-   * @brief Class destructor
-   *
-   */
-  virtual ~RequestController();
+  functional_modules::TimeUnit custom_interval() const {
+    return custom_interval_;
+  }
 
-  /**
-   * @brief Adds pointer to request.
-   * @param correlation_id request correlation id
-   * @param command pointer to request created in mobile factory
-   */
-  void AddRequest(const uint32_t& correlation_id,
-                  commands::CommandPtr request);
+  uint32_t app_id() const {
+    return app_id_;
+  }
 
-  /**
-   * @brief Removes request
-   * @param corellation_id request correlation id
-   */
-  void DeleteRequest(const uint32_t& correlation_id);
+  uint32_t correlation_id() const {
+    return correlation_id_;
+  }
 
-  void OnTimeoutTriggered(const TrackableMessage& expired);
-
-  /**
-   * @brief Update request timer from cur time
-   * Use it if you want reset timet for some reason
-   * @param corellation_id request correlation id
-   */
-  void ResetTimer(const uint32_t& correlation_id);
+  bool operator==(const TrackableMessage& other) const {
+    return (other.app_id_ == app_id_ &&
+            other.correlation_id_ == correlation_id_);
+  }
 
  private:
-  typedef std::map<correlation_id, commands::CommandPtr> RequestList;
-  RequestList request_list_;
-  functional_modules::ModuleTimer<TrackableMessage> timer_;
-  DISALLOW_COPY_AND_ASSIGN(RequestController);
+  functional_modules::TimeUnit custom_interval_;
+  uint32_t app_id_;
+  uint32_t correlation_id_;
 };
 
-}  // namespace request_controller
 }  // namespace vr_module
 
-#endif  // SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_REQUEST_CONTROLLER_H_
+#endif  // SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_VR_MODULE_TIMER_H_
