@@ -89,6 +89,7 @@ void UpdateStatusManager::OnValidUpdateReceived() {
   update_status_thread_delegate_->updateTimeOut(0); // Stop Timer
   set_exchange_pending(false);
   set_exchange_in_progress(false);
+  set_update_required(false);
 }
 
 void UpdateStatusManager::OnWrongUpdateReceived() {
