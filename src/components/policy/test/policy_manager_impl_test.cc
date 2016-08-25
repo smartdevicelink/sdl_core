@@ -31,6 +31,7 @@
  */
 
 #include <vector>
+#include <fstream>
 
 #include "gtest/gtest.h"
 #include "mock_policy_listener.h"
@@ -38,6 +39,8 @@
 #include "mock_cache_manager.h"
 #include "mock_update_status_manager.h"
 #include "policy/policy_manager_impl.h"
+#include "json/reader.h"
+#include "utils/date_time.h"
 
 using ::testing::_;
 using ::testing::Return;
@@ -65,11 +68,11 @@ namespace components {
 namespace policy {
 
 class PolicyManagerImplTest : public ::testing::Test {
-protected:
-  PolicyManagerImpl *manager;
-  MockCacheManagerInterface *cache_manager;
+ protected:
+  PolicyManagerImpl* manager;
+  MockCacheManagerInterface* cache_manager;
   MockUpdateStatusManager update_manager;
-  MockPolicyListener *listener;
+  MockPolicyListener* listener;
 
   void SetUp() {
     manager = new PolicyManagerImpl();
@@ -86,7 +89,44 @@ protected:
     delete listener;
   }
 
-  ::testing::AssertionResult IsValid(const policy_table::Table &table) {
+  ::testing::AssertionResult IsValid(const policy_table::Table& table) {
+    if (table.is_valid()) {
+      return ::testing::AssertionSuccess();
+    } else {
+      ::rpc::ValidationReport report(" - table");
+      table.ReportErrors(&report);
+      return ::testing::AssertionFailure() << ::rpc::PrettyFormat(report);
+    }
+  }
+};
+
+class PolicyManagerImplTest2 : public ::testing::Test {
+ protected:
+  PolicyManagerImpl* manager;
+  MockCacheManagerInterface* cache_manager;
+  MockUpdateStatusManager update_manager;
+  MockPolicyListener* listener;
+
+  void CreateLocalPT(const std::string& filename) {
+    // what to do here ?
+  }
+
+  void SetUp() {
+    manager = new PolicyManagerImpl();
+
+    cache_manager = new MockCacheManagerInterface();
+    manager->set_cache_manager(cache_manager);
+
+    listener = new MockPolicyListener();
+    manager->set_listener(listener);
+  }
+
+  void TearDown() {
+    delete manager;
+    delete listener;
+  }
+
+  ::testing::AssertionResult IsValid(const policy_table::Table& table) {
     if (table.is_valid()) {
       return ::testing::AssertionSuccess();
     } else {
@@ -99,16 +139,25 @@ protected:
 
 TEST_F(
     PolicyManagerImplTest,
-    RefreshRetrySequence_SetSecondsBetweenRetries_ExpectRetryTimeoutSequenceWithSameSeconds) {
+    RefreshRetrySequence_SetSecondsBetweenRetries_ExpectRetryTimeoutSequenceAccording_APPLINK_18244) {
+  // time for_the_ (N)retry =
+  // time_ for_ the_(N-1)retry + <"seconds_between_retries">[N-1] + timeout
+  // where N>=1 and retries are started to be enumerated from "0"
 
   // arrange
+  const int timeout = 60;
+  const int sec_between_retry_1 = 50;
+  const int sec_between_retry_2 = 100;
+  const int sec_between_retry_3 = 200;
+  int next_retry = timeout;
+
   std::vector<int> seconds;
-  seconds.push_back(50);
-  seconds.push_back(100);
-  seconds.push_back(200);
+  seconds.push_back(sec_between_retry_1);
+  seconds.push_back(sec_between_retry_2);
+  seconds.push_back(sec_between_retry_3);
 
   // assert
-  EXPECT_CALL(*cache_manager, TimeoutResponse()).WillOnce(Return(60));
+  EXPECT_CALL(*cache_manager, TimeoutResponse()).WillOnce(Return(timeout));
   EXPECT_CALL(*cache_manager, SecondsBetweenRetries(_))
       .WillOnce(DoAll(SetArgReferee<0>(seconds), Return(true)));
 
@@ -116,14 +165,16 @@ TEST_F(
   manager->RefreshRetrySequence();
 
   // assert
-  EXPECT_EQ(50, manager->NextRetryTimeout());
-  EXPECT_EQ(100, manager->NextRetryTimeout());
-  EXPECT_EQ(200, manager->NextRetryTimeout());
+  next_retry += sec_between_retry_1;
+  EXPECT_EQ(next_retry, manager->NextRetryTimeout());
+  next_retry += sec_between_retry_2;
+  EXPECT_EQ(next_retry, manager->NextRetryTimeout());
+  next_retry += sec_between_retry_3;
+  EXPECT_EQ(next_retry, manager->NextRetryTimeout());
   EXPECT_EQ(0, manager->NextRetryTimeout());
 }
 
 TEST_F(PolicyManagerImplTest, DISABLED_GetUpdateUrl) {
-
   EXPECT_CALL(*cache_manager, GetServiceUrls("7", _));
   EXPECT_CALL(*cache_manager, GetServiceUrls("4", _));
 
@@ -143,6 +194,7 @@ TEST_F(PolicyManagerImplTest, ResetPT) {
       .WillOnce(Return(false));
   EXPECT_CALL(*cache_manager, TimeoutResponse());
   EXPECT_CALL(*cache_manager, SecondsBetweenRetries(_));
+  EXPECT_CALL(*cache_manager, ResetCalculatedPermissions()).Times(AtLeast(1));
 
   EXPECT_TRUE(manager->ResetPT("filename"));
   EXPECT_FALSE(manager->ResetPT("filename"));
@@ -150,7 +202,6 @@ TEST_F(PolicyManagerImplTest, ResetPT) {
 
 TEST_F(PolicyManagerImplTest,
        CheckPermissions_SetHmiLevelFullForAlert_ExpectAllowedPermissions) {
-
   // arrange
   ::policy::CheckPermissionResult expected;
   expected.hmi_level_permitted = ::policy::kRpcAllowed;
@@ -176,18 +227,17 @@ TEST_F(PolicyManagerImplTest,
 }
 
 TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
-
   // arrange
   Json::Value table(Json::objectValue);
   table["policy_table"] = Json::Value(Json::objectValue);
 
-  Json::Value &policy_table = table["policy_table"];
+  Json::Value& policy_table = table["policy_table"];
   policy_table["module_config"] = Json::Value(Json::objectValue);
   policy_table["functional_groupings"] = Json::Value(Json::objectValue);
   policy_table["consumer_friendly_messages"] = Json::Value(Json::objectValue);
   policy_table["app_policies"] = Json::Value(Json::objectValue);
 
-  Json::Value &module_config = policy_table["module_config"];
+  Json::Value& module_config = policy_table["module_config"];
   module_config["preloaded_pt"] = Json::Value(true);
   module_config["exchange_after_x_ignition_cycles"] = Json::Value(10);
   module_config["exchange_after_x_kilometers"] = Json::Value(100);
@@ -220,9 +270,9 @@ TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
   module_config["vehicle_model"] = Json::Value("ModelT");
   module_config["vehicle_year"] = Json::Value("2014");
 
-  Json::Value &functional_groupings = policy_table["functional_groupings"];
+  Json::Value& functional_groupings = policy_table["functional_groupings"];
   functional_groupings["default"] = Json::Value(Json::objectValue);
-  Json::Value &default_group = functional_groupings["default"];
+  Json::Value& default_group = functional_groupings["default"];
   default_group["rpcs"] = Json::Value(Json::objectValue);
   default_group["rpcs"]["Update"] = Json::Value(Json::objectValue);
   default_group["rpcs"]["Update"]["hmi_levels"] = Json::Value(Json::arrayValue);
@@ -230,11 +280,11 @@ TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
   default_group["rpcs"]["Update"]["parameters"] = Json::Value(Json::arrayValue);
   default_group["rpcs"]["Update"]["parameters"][0] = Json::Value("speed");
 
-  Json::Value &consumer_friendly_messages =
+  Json::Value& consumer_friendly_messages =
       policy_table["consumer_friendly_messages"];
   consumer_friendly_messages["version"] = Json::Value("1.2");
 
-  Json::Value &app_policies = policy_table["app_policies"];
+  Json::Value& app_policies = policy_table["app_policies"];
   app_policies["default"] = Json::Value(Json::objectValue);
   app_policies["default"]["memory_kb"] = Json::Value(50);
   app_policies["default"]["heart_beat_timeout_ms"] = Json::Value(100);
@@ -255,6 +305,17 @@ TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
   app_policies["1234"]["keep_context"] = Json::Value(true);
   app_policies["1234"]["steal_focus"] = Json::Value(true);
   app_policies["1234"]["certificate"] = Json::Value("sign");
+
+  app_policies["device"] = Json::Value(Json::objectValue);
+  app_policies["device"]["priority"] = Json::Value("NONE");
+  app_policies["device"]["groups"] = Json::Value(Json::arrayValue);
+  app_policies["device"]["groups"][0] = Json::Value("DataConsent-2");
+
+  app_policies["pre_DataConsent"] = Json::Value(Json::objectValue);
+  app_policies["pre_DataConsent"]["priority"] = Json::Value("NONE");
+  app_policies["pre_DataConsent"]["groups"] = Json::Value(Json::arrayValue);
+  app_policies["pre_DataConsent"]["groups"][0] =
+      Json::Value("BaseBeforeDataConsent");
 
   policy_table::Table update(&table);
   update.SetPolicyTableType(rpc::policy_table_interface_base::PT_UPDATE);
@@ -277,57 +338,66 @@ TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
   EXPECT_CALL(*cache_manager, SaveUpdateRequired(false));
   EXPECT_CALL(*cache_manager, TimeoutResponse());
   EXPECT_CALL(*cache_manager, SecondsBetweenRetries(_));
+  EXPECT_CALL(*cache_manager, GetHMIAppTypeAfterUpdate(_));
 
-  TEST_F(PolicyManagerImplTest2, NextRetryTimeout_ExpectTimeoutsFromPT) {
-    // Arrange
-    std::ifstream ifile("sdl_preloaded_pt.json");
-    Json::Reader reader;
-    Json::Value root(Json::objectValue);
-    if (ifile.is_open() && reader.parse(ifile, root, true)) {
-      Json::Value seconds_between_retries = Json::Value(Json::arrayValue);
-      seconds_between_retries =
-          root["policy_table"]["module_config"]["seconds_between_retries"];
-      uint32_t size = seconds_between_retries.size();
-      CreateLocalPT("sdl_preloaded_pt.json");
+  EXPECT_TRUE(manager->LoadPT("valid_sdl_pt_update.json", msg));
+}
 
-      uint32_t waiting_timeout = 0u;
+TEST_F(PolicyManagerImplTest2, DISABLED_NextRetryTimeout_ExpectTimeoutsFromPT) {
+  // Arrange
+  std::ifstream ifile("sdl_preloaded_pt.json");
+  Json::Reader reader;
+  Json::Value root(Json::objectValue);
 
-      for (uint32_t retry_number = 0u; retry_number < size; ++retry_number) {
-        waiting_timeout += seconds_between_retries[retry_number].asInt();
-        waiting_timeout += manager->TimeoutExchange();
+  if (ifile.is_open() && reader.parse(ifile, root, true)) {
+    Json::Value seconds_between_retries = Json::Value(Json::arrayValue);
+    seconds_between_retries =
+        root["policy_table"]["module_config"]["seconds_between_retries"];
+    uint32_t size = seconds_between_retries.size();
 
-        // it's in miliseconds
-        EXPECT_EQ(waiting_timeout * date_time::DateTime::MILLISECONDS_IN_SECOND,
-                  manager->NextRetryTimeout());
-      }
+    CreateLocalPT("sdl_preloaded_pt.json");
+
+    uint32_t waiting_timeout = 0u;
+
+    for (uint32_t retry_number = 0u; retry_number < size; ++retry_number) {
+      waiting_timeout += seconds_between_retries[retry_number].asInt();
+      waiting_timeout += manager->TimeoutExchange();
+
+      // it's in milliseconds
+      EXPECT_EQ(waiting_timeout * date_time::DateTime::MILLISECONDS_IN_SECOND,
+                manager->NextRetryTimeout());
     }
-  }
-
-  TEST_F(PolicyManagerImplTest,
-         RequestPTUpdate_SetPT_GeneratedSnapshotAndPTUpdate) {
-
-    // arrange
-    ::utils::SharedPtr<::policy_table::Table> p_table =
-        new ::policy_table::Table();
-
-    // assert
-    EXPECT_CALL(*cache_manager, GenerateSnapshot()).WillOnce(Return(p_table));
-
-    // act
-    manager->RequestPTUpdate();
-  }
-
-  TEST_F(PolicyManagerImplTest, DISABLED_AddApplication) {
-    // TODO(AOleynik): Implementation of method should be changed to avoid
-    // using of snapshot
-    // manager->AddApplication("12345678");
-  }
-
-  TEST_F(PolicyManagerImplTest, DISABLED_GetPolicyTableStatus) {
-    // TODO(AOleynik): Test is not finished, to be continued
-    // manager->GetPolicyTableStatus();
+    ifile.close();
+  } else {
+    FAIL();
   }
 }
+
+TEST_F(PolicyManagerImplTest,
+       RequestPTUpdate_SetPT_GeneratedSnapshotAndPTUpdate) {
+  // arrange
+  ::utils::SharedPtr<::policy_table::Table> p_table =
+      new ::policy_table::Table();
+
+  // assert
+  EXPECT_CALL(*cache_manager, GenerateSnapshot()).WillOnce(Return(p_table));
+  EXPECT_CALL(*listener, OnSnapshotCreated(_));
+
+  // act
+  manager->RequestPTUpdate();
+}
+
+TEST_F(PolicyManagerImplTest, DISABLED_AddApplication) {
+  // TODO(AOleynik): Implementation of method should be changed to avoid
+  // using of snapshot
+  // manager->AddApplication("12345678");
+}
+
+TEST_F(PolicyManagerImplTest, DISABLED_GetPolicyTableStatus) {
+  // TODO(AOleynik): Test is not finished, to be continued
+  // manager->GetPolicyTableStatus();
+}
+}
 // namespace policy
-} // namespace components
-} // namespace test
+}  // namespace components
+}  // namespace test
