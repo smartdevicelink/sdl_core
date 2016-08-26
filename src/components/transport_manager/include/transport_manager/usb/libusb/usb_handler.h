@@ -72,10 +72,11 @@ class UsbHandler {
   friend void UsbTransferSequenceCallback(libusb_transfer* transfer);
 
  private:
-  class UsbHandlerDelegate: public threads::ThreadDelegate {
+  class UsbHandlerDelegate : public threads::ThreadDelegate {
    public:
     explicit UsbHandlerDelegate(UsbHandler* handler);
     void threadMain() OVERRIDE;
+
    private:
     UsbHandler* handler_;
   };
@@ -97,10 +98,14 @@ class UsbHandler {
   libusb_hotplug_callback_handle left_callback_handle_;
 
   friend void* UsbHandlerThread(void* data);
-  friend int ArrivedCallback(libusb_context* context, libusb_device* device,
-                             libusb_hotplug_event event, void* data);
-  friend int LeftCallback(libusb_context* context, libusb_device* device,
-                          libusb_hotplug_event event, void* data);
+  friend int ArrivedCallback(libusb_context* context,
+                             libusb_device* device,
+                             libusb_hotplug_event event,
+                             void* data);
+  friend int LeftCallback(libusb_context* context,
+                          libusb_device* device,
+                          libusb_hotplug_event event,
+                          void* data);
 };
 
 }  // namespace transport_adapter

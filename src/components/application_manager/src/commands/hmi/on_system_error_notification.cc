@@ -31,7 +31,7 @@
  */
 
 #include "application_manager/commands/hmi/on_system_error_notification.h"
-#include "application_manager/policies/policy_handler.h"
+#include "application_manager/application_manager.h"
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {
@@ -39,23 +39,20 @@ namespace application_manager {
 namespace commands {
 
 OnSystemErrorNotification::OnSystemErrorNotification(
-    const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : NotificationFromHMI(message, application_manager) {}
 
-OnSystemErrorNotification::~OnSystemErrorNotification() {
-}
+OnSystemErrorNotification::~OnSystemErrorNotification() {}
 
 void OnSystemErrorNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  int code = (*message_)[strings::msg_params][hmi_notification::error]
-      .asInt();
+  const int code =
+      (*message_)[strings::msg_params][hmi_notification::error].asInt();
 
-  policy::PolicyHandler::instance()->OnSystemError(code);
+  application_manager_.GetPolicyHandler().OnSystemError(code);
 }
 
 }  // namespace commands
 
 }  // namespace application_manager
-

@@ -47,8 +47,8 @@ class ReceiverThreadDelegate : public threads::ThreadDelegate {
  public:
   ReceiverThreadDelegate(mqd_t mqueue_descriptor,
                          HMIMessageHandler* hmi_message_handler)
-      : mqueue_descriptor_(mqueue_descriptor),
-        hmi_message_handler_(hmi_message_handler) {}
+      : mqueue_descriptor_(mqueue_descriptor)
+      , hmi_message_handler_(hmi_message_handler) {}
 
  private:
   virtual void threadMain() {
@@ -75,31 +75,33 @@ class ReceiverThreadDelegate : public threads::ThreadDelegate {
 };
 
 MqueueAdapter::MqueueAdapter(HMIMessageHandler* hmi_message_handler)
-    : HMIMessageAdapter(hmi_message_handler),
-      sdl_to_hmi_mqueue_(-1),
-      hmi_to_sdl_mqueue_(-1),
-      receiver_thread_(NULL) {
+    : HMIMessageAdapterImpl(hmi_message_handler)
+    , sdl_to_hmi_mqueue_(-1)
+    , hmi_to_sdl_mqueue_(-1)
+    , receiver_thread_(NULL) {
   mq_attr mq_attributes;
   mq_attributes.mq_maxmsg = kMqueueSize;
   mq_attributes.mq_msgsize = kMqueueMessageSize;
   sdl_to_hmi_mqueue_ =
       mq_open(kSdlToHmiQueue, O_CREAT | O_RDWR, S_IRWXU, &mq_attributes);
   if (-1 == sdl_to_hmi_mqueue_) {
-    LOG4CXX_ERROR(logger_, "Could not open message queue "
-                              << kSdlToHmiQueue << ", error " << errno);
+    LOG4CXX_ERROR(logger_,
+                  "Could not open message queue " << kSdlToHmiQueue
+                                                  << ", error " << errno);
     return;
   }
   hmi_to_sdl_mqueue_ =
       mq_open(kHmiToSdlQueue, O_CREAT | O_RDWR, S_IRWXU, &mq_attributes);
   if (-1 == hmi_to_sdl_mqueue_) {
-    LOG4CXX_ERROR(logger_, "Could not open message queue "
-                              << kHmiToSdlQueue << ", error " << errno);
+    LOG4CXX_ERROR(logger_,
+                  "Could not open message queue " << kHmiToSdlQueue
+                                                  << ", error " << errno);
     return;
   }
-  receiver_thread_delegate_ = new ReceiverThreadDelegate(hmi_to_sdl_mqueue_,
-                                                        hmi_message_handler);
-  receiver_thread_ = threads::CreateThread("MqueueAdapter",
-                                           receiver_thread_delegate_);
+  receiver_thread_delegate_ =
+      new ReceiverThreadDelegate(hmi_to_sdl_mqueue_, hmi_message_handler);
+  receiver_thread_ =
+      threads::CreateThread("MqueueAdapter", receiver_thread_delegate_);
   receiver_thread_->start();
 }
 
@@ -107,8 +109,10 @@ MqueueAdapter::~MqueueAdapter() {
   receiver_thread_->join();
   delete receiver_thread_delegate_;
   threads::DeleteThread(receiver_thread_);
-  if (-1 != hmi_to_sdl_mqueue_) mq_close(hmi_to_sdl_mqueue_);
-  if (-1 != sdl_to_hmi_mqueue_) mq_close(sdl_to_hmi_mqueue_);
+  if (-1 != hmi_to_sdl_mqueue_)
+    mq_close(hmi_to_sdl_mqueue_);
+  if (-1 != sdl_to_hmi_mqueue_)
+    mq_close(sdl_to_hmi_mqueue_);
   mq_unlink(kHmiToSdlQueue);
   mq_unlink(kSdlToHmiQueue);
 }

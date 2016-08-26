@@ -39,9 +39,9 @@
 
 // A predicate-formatter for asserting that intergen generated
 // object is valid
-template<typename T>
+template <typename T>
 ::testing::AssertionResult AssertRpcObjValid(const char* obj_expr,
-                                               const T& obj) {
+                                             const T& obj) {
   if (obj.is_valid())
     return ::testing::AssertionSuccess();
 
@@ -49,8 +49,8 @@ template<typename T>
   obj.ReportErrors(&report);
 
   return ::testing::AssertionFailure()
-      << obj_expr << " failed validation. Violations are:\n"
-      << rpc::PrettyFormat(report);
+         << obj_expr << " failed validation. Violations are:\n"
+         << rpc::PrettyFormat(report);
 }
 
 #define ASSERT_RPCTYPE_VALID(object) \

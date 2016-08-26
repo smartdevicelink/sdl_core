@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_VI_IS_READY_RESPONSE_H_
 
 #include "application_manager/commands/hmi/response_from_hmi.h"
+#include "application_manager/application_manager.h"
 
 namespace application_manager {
 
@@ -49,7 +50,8 @@ class VIIsReadyResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit VIIsReadyResponse(const MessageSharedPtr& message);
+  VIIsReadyResponse(const MessageSharedPtr& message,
+                    ApplicationManager& application_manager);
 
   /**
    * @brief VIIsReadyResponse class destructor

@@ -54,19 +54,22 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 bool BluetoothDevice::GetRfcommChannel(const ApplicationHandle app_handle,
                                        uint8_t* channel_out) {
-  LOG4CXX_TRACE(logger_, "enter. app_handle: " << app_handle << ", channel_out: " <<
-                channel_out);
+  LOG4CXX_TRACE(logger_,
+                "enter. app_handle: " << app_handle
+                                      << ", channel_out: " << channel_out);
   if (app_handle < 0 || app_handle > std::numeric_limits<uint8_t>::max()) {
     LOG4CXX_TRACE(logger_,
-                  "exit with FALSE. Condition: app_handle < 0 || app_handle > numeric_limits::max()");
+                  "exit with FALSE. Condition: app_handle < 0 || app_handle > "
+                  "numeric_limits::max()");
     return false;
   }
   const uint8_t channel = static_cast<uint8_t>(app_handle);
-  RfcommChannelVector::const_iterator it = std::find(rfcomm_channels_.begin(),
-      rfcomm_channels_.end(),
-      channel);
+  RfcommChannelVector::const_iterator it =
+      std::find(rfcomm_channels_.begin(), rfcomm_channels_.end(), channel);
   if (it == rfcomm_channels_.end()) {
-    LOG4CXX_TRACE(logger_, "exit with FALSE. Condition: channel not found in RfcommChannelVector");
+    LOG4CXX_TRACE(
+        logger_,
+        "exit with FALSE. Condition: channel not found in RfcommChannelVector");
     return false;
   }
   *channel_out = channel;
@@ -82,31 +85,31 @@ std::string BluetoothDevice::GetUniqueDeviceId(const bdaddr_t& device_address) {
   return std::string("BT-") + device_address_string;
 }
 
-BluetoothDevice::BluetoothDevice(const bdaddr_t& device_address, const char* device_name,
+BluetoothDevice::BluetoothDevice(const bdaddr_t& device_address,
+                                 const char* device_name,
                                  const RfcommChannelVector& rfcomm_channels)
-  : Device(device_name, GetUniqueDeviceId(device_address)),
-    address_(device_address),
-    rfcomm_channels_(rfcomm_channels) {
-}
+    : Device(device_name, GetUniqueDeviceId(device_address))
+    , address_(device_address)
+    , rfcomm_channels_(rfcomm_channels) {}
 
 bool BluetoothDevice::IsSameAs(const Device* other) const {
   LOG4CXX_TRACE(logger_, "enter. device: " << other);
   bool result = false;
 
   const BluetoothDevice* other_bluetooth_device =
-    dynamic_cast<const BluetoothDevice*>(other);
+      dynamic_cast<const BluetoothDevice*>(other);
 
   if (0 != other_bluetooth_device) {
-    if (0
-        == memcmp(&address_, &other_bluetooth_device->address_,
-                  sizeof(bdaddr_t))) {
+    if (0 == memcmp(&address_,
+                    &other_bluetooth_device->address_,
+                    sizeof(bdaddr_t))) {
       result = true;
     }
   }
   if (result) {
-      LOG4CXX_TRACE(logger_, "exit with TRUE");
+    LOG4CXX_TRACE(logger_, "exit with TRUE");
   } else {
-      LOG4CXX_TRACE(logger_, "exit with FALSE");
+    LOG4CXX_TRACE(logger_, "exit with FALSE");
   }
   return result;
 }

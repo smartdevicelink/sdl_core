@@ -49,7 +49,8 @@ class UIPerformAudioPassThruRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UIPerformAudioPassThruRequest(const MessageSharedPtr& message);
+  UIPerformAudioPassThruRequest(const MessageSharedPtr& message,
+                                ApplicationManager& application_manager);
 
   /**
    * @brief UIPerformAudioPassThruRequest class destructor

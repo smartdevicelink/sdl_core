@@ -51,7 +51,8 @@ class DeleteCommandRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit DeleteCommandRequest(const MessageSharedPtr& message);
+  DeleteCommandRequest(const MessageSharedPtr& message,
+                       ApplicationManager& application_manager);
 
   /**
    * @brief DeleteCommandRequest class destructor
@@ -71,7 +72,6 @@ class DeleteCommandRequest : public CommandRequestImpl {
   void on_event(const event_engine::Event& event);
 
  private:
-
   DISALLOW_COPY_AND_ASSIGN(DeleteCommandRequest);
 
   /*

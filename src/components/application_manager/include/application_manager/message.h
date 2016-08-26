@@ -53,7 +53,7 @@ enum MessageType {
   kRequest = 0,
   kResponse = 1,
   kNotification = 2,
-  kErrorResponse = 3 // Error Response HMI ONLY
+  kErrorResponse = 3  // Error Response HMI ONLY
 };
 
 // Map PrcType to corresponding MessageType
@@ -103,12 +103,14 @@ class Message {
   void set_data_size(size_t data_size);
   void set_payload_size(size_t payload_size);
 
-  protocol_handler::MessagePriority Priority() const { return priority_; }
+  protocol_handler::MessagePriority Priority() const {
+    return priority_;
+  }
 
  private:
-  int32_t function_id_;  // @remark protocol V2.
+  int32_t function_id_;     // @remark protocol V2.
   int32_t correlation_id_;  // @remark protocol V2.
-  MessageType type_;  // @remark protocol V2.
+  MessageType type_;        // @remark protocol V2.
 
   // Pre-calculated message priority, higher priority messages are
   // Processed first

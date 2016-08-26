@@ -37,11 +37,10 @@ namespace application_manager {
 namespace commands {
 
 NaviShowConstantTBTRequest::NaviShowConstantTBTRequest(
-    const MessageSharedPtr& message) : RequestToHMI(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : RequestToHMI(message, application_manager) {}
 
-NaviShowConstantTBTRequest::~NaviShowConstantTBTRequest() {
-}
+NaviShowConstantTBTRequest::~NaviShowConstantTBTRequest() {}
 
 void NaviShowConstantTBTRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -52,4 +51,3 @@ void NaviShowConstantTBTRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

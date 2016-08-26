@@ -1,4 +1,4 @@
-# Copyright (c) 2015, Ford Motor Company
+# Copyright (c) 2016, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,16 +28,19 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-if(BUILD_TESTS)
+if (BUILD_TESTS)
 
-include_directories(
+include_directories (
+  include
+  ${COMPONENTS_DIR}/resumption/include
   ${GMOCK_INCLUDE_DIRECTORY}
   ${COMPONENTS_DIR}/protocol_handler/include
   ${COMPONENTS_DIR}/protocol_handler/test/include
   ${COMPONENTS_DIR}/include/protocol
+  ${JSONCPP_INCLUDE_DIRECTORY}
 )
 
-set(LIBRARIES
+set (LIBRARIES
   gmock
   ProtocolHandler
   connectionHandler
@@ -46,14 +49,15 @@ set(LIBRARIES
   ProtocolLibrary
 )
 
-set(SOURCES
+set (SOURCES
   incoming_data_handler_test.cc
   protocol_header_validator_test.cc
-  #protocol_handler_tm_test.cc
+  protocol_handler_tm_test.cc
   protocol_packet_test.cc
   protocol_payload_test.cc
+  multiframe_builder_test.cc
 )
 
-create_test("protocol_handler_test" "${SOURCES}" "${LIBRARIES}")
+create_test ("protocol_handler_test" "${SOURCES}" "${LIBRARIES}")
 
-endif()
+endif ()

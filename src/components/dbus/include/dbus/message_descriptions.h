@@ -38,12 +38,13 @@
 
 namespace ford_message_descriptions {
 
-enum ParameterType {Integer, Boolean, Float, String, Struct, Enum, Array};
+enum ParameterType { Integer, Boolean, Float, String, Struct, Enum, Array };
 
 struct ParameterDescription {
   const char* name;
   const ParameterType type;
-  const bool obligatory; // TODO (dchmerev@luxoft.com): rename to 'mandatory' as in HMI API description
+  const bool obligatory;  // TODO (dchmerev@luxoft.com): rename to 'mandatory'
+                          // as in HMI API description
 };
 
 struct ArrayDescription {
@@ -70,4 +71,3 @@ extern const MessageDescription* message_descriptions[];
 }  // namespace ford_message_descriptions
 
 #endif  // SRC_COMPONENTS_DBUS_INCLUDE_DBUS_MESSAGE_DESCRIPTIONS_H_
-

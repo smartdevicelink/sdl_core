@@ -35,14 +35,14 @@
 #ifndef SMARTDEVICELINK_COMPONENTS_FORMATTERS_INCLUDE_FORMATTERS_GENERIC_JSON_FORMATTER_H_
 #define SMARTDEVICELINK_COMPONENTS_FORMATTERS_INCLUDE_FORMATTERS_GENERIC_JSON_FORMATTER_H_
 
-#include "CFormatterJsonBase.hpp"
+#include "CFormatterJsonBase.h"
 
 namespace NsSmartDeviceLink {
 namespace NsJSONHandler {
 namespace Formatters {
 
-class GenericJsonFormatter: public CFormatterJsonBase {
-public:
+class GenericJsonFormatter : public CFormatterJsonBase {
+ public:
   /**
    * @brief Creates a JSON string from a SmartObject.
    *
@@ -64,8 +64,8 @@ public:
                          NsSmartObjects::SmartObject& out);
 };
 
-} // namespace Formatters
-} // namespace NsJSONHandler
-} // namespace NsSmartDeviceLink
+}  // namespace Formatters
+}  // namespace NsJSONHandler
+}  // namespace NsSmartDeviceLink
 
-#endif // SMARTDEVICELINK_COMPONENTS_FORMATTERS_INCLUDE_FORMATTERS_GENERIC_JSON_FORMATTER_H_
+#endif  // SMARTDEVICELINK_COMPONENTS_FORMATTERS_INCLUDE_FORMATTERS_GENERIC_JSON_FORMATTER_H_

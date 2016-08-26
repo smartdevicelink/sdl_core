@@ -51,24 +51,21 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 TcpSocketConnection::TcpSocketConnection(const DeviceUID& device_uid,
                                          const ApplicationHandle& app_handle,
                                          TransportAdapterController* controller)
-    : ThreadedSocketConnection(device_uid, app_handle, controller) {
-}
+    : ThreadedSocketConnection(device_uid, app_handle, controller) {}
 
-TcpSocketConnection::~TcpSocketConnection() {
-}
+TcpSocketConnection::~TcpSocketConnection() {}
 
 bool TcpSocketConnection::Establish(ConnectError** error) {
   return true;
 }
 
 TcpServerOiginatedSocketConnection::TcpServerOiginatedSocketConnection(
-    const DeviceUID& device_uid, const ApplicationHandle& app_handle,
+    const DeviceUID& device_uid,
+    const ApplicationHandle& app_handle,
     TransportAdapterController* controller)
-    : ThreadedSocketConnection(device_uid, app_handle, controller) {
-}
+    : ThreadedSocketConnection(device_uid, app_handle, controller) {}
 
-TcpServerOiginatedSocketConnection::~TcpServerOiginatedSocketConnection() {
-}
+TcpServerOiginatedSocketConnection::~TcpServerOiginatedSocketConnection() {}
 
 bool TcpServerOiginatedSocketConnection::Establish(ConnectError** error) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -84,9 +81,9 @@ bool TcpServerOiginatedSocketConnection::Establish(ConnectError** error) {
 
   const int port = tcp_device->GetApplicationPort(application_handle());
   if (-1 == port) {
-    LOG4CXX_ERROR(
-        logger_,
-        "Application port for " << application_handle() << " not found");
+    LOG4CXX_ERROR(logger_,
+                  "Application port for " << application_handle()
+                                          << " not found");
     *error = new ConnectError();
     return false;
   }
@@ -98,17 +95,17 @@ bool TcpServerOiginatedSocketConnection::Establish(ConnectError** error) {
     return false;
   }
 
-  struct sockaddr_in addr = { 0 };
+  struct sockaddr_in addr = {0};
   addr.sin_family = AF_INET;
   addr.sin_addr.s_addr = tcp_device->in_addr();
   addr.sin_port = htons(port);
 
   LOG4CXX_DEBUG(logger_,
-               "Connecting " << inet_ntoa(addr.sin_addr) << ":" << port);
-  if (::connect(socket, (struct sockaddr*) &addr, sizeof(addr)) < 0) {
-    LOG4CXX_ERROR(
-        logger_,
-        "Failed to connect for application " << application_handle() << ", error " << errno);
+                "Connecting " << inet_ntoa(addr.sin_addr) << ":" << port);
+  if (::connect(socket, (struct sockaddr*)&addr, sizeof(addr)) < 0) {
+    LOG4CXX_ERROR(logger_,
+                  "Failed to connect for application " << application_handle()
+                                                       << ", error " << errno);
     *error = new ConnectError();
     ::close(socket);
     return false;

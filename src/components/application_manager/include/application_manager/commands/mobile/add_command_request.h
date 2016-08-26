@@ -52,7 +52,8 @@ class AddCommandRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit AddCommandRequest(const MessageSharedPtr& message);
+  AddCommandRequest(const MessageSharedPtr& message,
+                    ApplicationManager& application_manager);
 
   /**
    * @brief AddCommandRequest class destructor
@@ -72,7 +73,6 @@ class AddCommandRequest : public CommandRequestImpl {
   void on_event(const event_engine::Event& event);
 
  private:
-
   /*
    * @brief Check if command name doesn't exist in application
    * Please see SDLAQ-CRS-407 for more information

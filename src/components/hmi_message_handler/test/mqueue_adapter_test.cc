@@ -51,8 +51,8 @@ class MockHandler : public HMIMessageHandler {
   MOCK_METHOD1(SendMessageToHMI, void(MessageSharedPointer message));
 };
 
-//TODO{ALeshin}: APPLINK-10846
-//TEST(MqueueAdapter, Send) {
+// TODO{ALeshin}: APPLINK-10846
+// TEST(MqueueAdapter, Send) {
 //  MockHandler handler;
 //  HMIMessageAdapter* adapter = new MqueueAdapter(&handler);
 
@@ -71,8 +71,8 @@ class MockHandler : public HMIMessageHandler {
 //  delete adapter;
 //}
 
-//TODO{ALeshin}: APPLINK-10846
-//TEST(MqueueAdapter, Receive) {
+// TODO{ALeshin}: APPLINK-10846
+// TEST(MqueueAdapter, Receive) {
 //  MockHandler handler;
 //  HMIMessageAdapter* adapter = new MqueueAdapter(&handler);
 

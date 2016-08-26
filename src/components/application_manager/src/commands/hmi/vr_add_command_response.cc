@@ -31,25 +31,25 @@
  */
 #include "application_manager/commands/hmi/vr_add_command_response.h"
 #include "application_manager/event_engine/event.h"
+
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
 namespace commands {
 
-VRAddCommandResponse::VRAddCommandResponse(const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+VRAddCommandResponse::VRAddCommandResponse(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {}
 
-VRAddCommandResponse::~VRAddCommandResponse() {
-}
+VRAddCommandResponse::~VRAddCommandResponse() {}
 
 void VRAddCommandResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   event_engine::Event event(hmi_apis::FunctionID::VR_AddCommand);
   event.set_smart_object(*message_);
-  event.raise();
+  event.raise(application_manager_.event_dispatcher());
 }
 
 }  // namespace commands

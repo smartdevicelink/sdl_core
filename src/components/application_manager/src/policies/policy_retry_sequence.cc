@@ -42,8 +42,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "PolicyHandler")
 
 RetrySequence::RetrySequence(PolicyHandler* const policy_handler)
     // TODO (Risk copy of PolicyHandler Pointer)
-    : policy_handler_(policy_handler) {
-}
+    : policy_handler_(policy_handler) {}
 
 void RetrySequence::threadMain() {
   StartNextRetry();
@@ -54,8 +53,7 @@ void RetrySequence::StartNextRetry() {
   DCHECK(policy_handler_);
   // TODO(Ezamakhov): inverstigate StartNextRetry on unload policy lib
 
-  BinaryMessageSptr pt_snapshot = policy_handler_
-      ->RequestPTUpdate();
+  BinaryMessageSptr pt_snapshot = policy_handler_->RequestPTUpdate();
   if (pt_snapshot) {
     policy_handler_->SendMessageToSDK(*pt_snapshot);
 
@@ -77,4 +75,3 @@ void RetrySequence::StartNextRetry() {
 }
 
 }  // namespace policy
-

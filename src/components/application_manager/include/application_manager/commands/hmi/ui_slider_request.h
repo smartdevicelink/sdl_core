@@ -49,7 +49,8 @@ class UISliderRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UISliderRequest(const MessageSharedPtr& message);
+  UISliderRequest(const MessageSharedPtr& message,
+                  ApplicationManager& application_manager);
 
   /**
    * @brief UISliderRequest class destructor

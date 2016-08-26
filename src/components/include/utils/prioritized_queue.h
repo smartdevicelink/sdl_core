@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,12 +30,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_PRIORITIZED_QUEUE_H_
-#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_PRIORITIZED_QUEUE_H_
+#ifndef SRC_COMPONENTS_INCLUDE_UTILS_PRIORITIZED_QUEUE_H_
+#define SRC_COMPONENTS_INCLUDE_UTILS_PRIORITIZED_QUEUE_H_
 
 #include <queue>
 #include <map>
-#include <iostream>
+#include <algorithm>
 
 #include "utils/macro.h"
 
@@ -45,15 +45,13 @@ namespace utils {
  * Template queue class that gives out messages respecting their priority
  * Message class must have size_t PriorityOrder() method implemented
  */
-template < typename M >
+template <typename M>
 class PrioritizedQueue {
  public:
   typedef M value_type;
   // std::map guarantees it's contents is sorted by key
   typedef std::map<size_t, std::queue<value_type> > QueuesMap;
-  PrioritizedQueue()
-    : total_size_(0) {
-  }
+  PrioritizedQueue() : total_size_(0) {}
   // All api mimics usual std queue interface
   void push(const value_type& message) {
     size_t message_priority = message.PriorityOrder();
@@ -65,6 +63,10 @@ class PrioritizedQueue {
   }
   bool empty() const {
     return queues_.empty();
+  }
+  void swap(PrioritizedQueue<M>& x) {
+    std::swap(queues_, x.queues_);
+    std::swap(total_size_, x.total_size_);
   }
   value_type front() {
     DCHECK(!queues_.empty() && !queues_.rbegin()->second.empty());
@@ -79,11 +81,12 @@ class PrioritizedQueue {
       queues_.erase(last);
     }
   }
+
  private:
   QueuesMap queues_;
   size_t total_size_;
 };
 
-}
+}  // namespace utils
 
-#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_
+#endif  // SRC_COMPONENTS_INCLUDE_UTILS_PRIORITIZED_QUEUE_H_

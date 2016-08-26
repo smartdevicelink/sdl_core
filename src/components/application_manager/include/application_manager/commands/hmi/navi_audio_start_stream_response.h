@@ -48,7 +48,8 @@ class AudioStartStreamResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit AudioStartStreamResponse(const MessageSharedPtr& message);
+  AudioStartStreamResponse(const MessageSharedPtr& message,
+                           ApplicationManager& application_manager);
 
   /**
    * @brief AudioStartStreamResponse class destructor

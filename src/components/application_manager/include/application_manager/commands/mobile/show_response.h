@@ -45,7 +45,8 @@ class ShowResponse : public CommandResponseImpl {
   /**
    * \brief ShowResponse class constructor
    **/
-  explicit ShowResponse(const MessageSharedPtr& message);
+  ShowResponse(const MessageSharedPtr& message,
+               ApplicationManager& application_manager);
 
   /**
    * \brief ShowResponse class destructor
