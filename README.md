@@ -86,7 +86,7 @@ environment variable
 
 ##### Steps for Windows platform
 
-* Go to directory with cloned repository
+* Go to directory with cloned repository and then enter in subfolder tools\ms
 * Run setup_VS2013_x64.cmd to generate solution for Visual Studio 2013.
 **Note:** In case Visual Studio has been installed to non-default location -- modify path in .cmd file.
 **Note:** Double click on file or run from windows command prompt. DO NOT run in "git bash".
