@@ -57,7 +57,8 @@ VRModule::VRModule()
     : GenericModule(kModuleID),
       proxy_(this),
       factory_(commands::Factory(this)),
-      supported_(false) {
+      supported_(false),
+      default_service_(0) {
   plugin_info_.name = "VRModulePlugin";
   plugin_info_.version = 1;
   SubscribeToRpcMessages();
@@ -217,6 +218,16 @@ void VRModule::RegisterRequest(uint32_t correlation_id,
 void VRModule::UnregisterRequest(uint32_t correlation_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   request_controller_.DeleteRequest(correlation_id);
+}
+
+void VRModule::SetDefaultService(int32_t app_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  default_service_ = app_id;
+}
+
+void VRModule::ResetDefaultService() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  default_service_ = 0;
 }
 
 }  //  namespace vr_module

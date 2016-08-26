@@ -30,44 +30,31 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "vr_module/commands/factory.h"
+#ifndef SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_ON_DEFAULT_SERVICE_CHOSEN_H_
+#define SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_ON_DEFAULT_SERVICE_CHOSEN_H_
 
-#include "utils/logger.h"
-
-#include "vr_module/commands/on_default_service_chosen.h"
-#include "vr_module/commands/support_service.h"
+#include "vr_module/commands/command.h"
 #include "vr_module/interface/hmi.pb.h"
-#include "vr_module/interface/mobile.pb.h"
 
 namespace vr_module {
+
+class VRModule;
+
 namespace commands {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "VRModule")
+class OnDefaultServiceChosen : public Command {
+ public:
+  OnDefaultServiceChosen(const vr_hmi_api::ServiceMessage& message,
+                         VRModule* module);
+  virtual bool Execute();
+  virtual void OnTimeout();
 
-Factory::Factory(VRModule* module)
-    : module_(module) {
-}
-
-Command* Factory::Create(const vr_hmi_api::ServiceMessage& message) const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  switch (message.rpc()) {
-    case vr_hmi_api::SUPPORT_SERVICE:
-      return new SupportService(message, module_);
-    case vr_hmi_api::ON_DEFAULT_CHOSEN:
-      return new OnDefaultServiceChosen(message, module_);
-    case vr_hmi_api::ACTIVATE:
-    case vr_hmi_api::PROCESS_DATA:
-    case vr_hmi_api::ON_REGISTER:
-    case vr_hmi_api::ON_DEACTIVATED:
-    default: return 0;
-  }
-  return 0;
-}
-
-Command* Factory::Create(const vr_mobile_api::ServiceMessage& message) const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  return 0;
-}
+ private:
+  VRModule* module_;
+  vr_hmi_api::ServiceMessage message_;
+};
 
 }  // namespace commands
 }  // namespace vr_module
+
+#endif  // SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_ON_DEFAULT_SERVICE_CHOSEN_H_

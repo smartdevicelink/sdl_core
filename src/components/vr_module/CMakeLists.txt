@@ -43,6 +43,7 @@ set (SOURCES
     src/mobile_event.cc
     src/commands/factory.cc
     src/commands/support_service.cc
+    src/commands/on_default_service_chosen.cc
 )
 
 set (LIBRARIES
