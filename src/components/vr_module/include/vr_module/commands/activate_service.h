@@ -49,9 +49,9 @@ class ActivateService : public Command, public event_engine::EventObserver<
  public:
   ActivateService(const vr_hmi_api::ServiceMessage& message, VRModule* module);
   ~ActivateService();
-  bool Execute();
-  void OnTimeout();
-  void on_event(
+  virtual bool Execute();
+  virtual void OnTimeout();
+  virtual void on_event(
       const event_engine::Event<vr_mobile_api::ServiceMessage,
           vr_mobile_api::RPCName>& event);
 

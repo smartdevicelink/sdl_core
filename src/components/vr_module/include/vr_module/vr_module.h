@@ -154,6 +154,7 @@ class VRModule
   const commands::FactoryInterface& factory_;
   request_controller::RequestController request_controller_;
   bool supported_;
+  int32_t active_service_;
 
   DISALLOW_COPY_AND_ASSIGN(VRModule);
 };
