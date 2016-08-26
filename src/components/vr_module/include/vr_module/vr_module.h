@@ -103,6 +103,12 @@ class VRModule
    */
   bool SendToHmi(const vr_hmi_api::ServiceMessage& message);
 
+  /**
+   * Registers service
+   * @param app_id unique application ID
+   */
+  void RegisterService(int32_t app_id);
+
   bool supported() const {
     return supported_;
   }
