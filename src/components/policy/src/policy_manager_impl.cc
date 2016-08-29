@@ -1004,7 +1004,6 @@ void PolicyManagerImpl::RetrySequence() {
   uint32_t timeout = NextRetryTimeout();
 
   if (!timeout && timer_retry_sequence_.is_running()) {
-    timer_retry_sequence_.Stop();
     return;
   }
 
