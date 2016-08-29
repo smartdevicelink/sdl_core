@@ -48,9 +48,9 @@ class SupportService : public Command, public event_engine::EventObserver<
  public:
   SupportService(const vr_hmi_api::ServiceMessage& message, VRModule* module);
   ~SupportService();
-  bool Execute();
-  void OnTimeout();
-  void on_event(
+  virtual bool Execute();
+  virtual void OnTimeout();
+  virtual void on_event(
       const event_engine::Event<vr_hmi_api::ServiceMessage, vr_hmi_api::RPCName>& event);
 
  private:

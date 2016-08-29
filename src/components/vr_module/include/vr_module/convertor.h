@@ -30,50 +30,27 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "vr_module/commands/factory.h"
+#ifndef SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_CONVERTOR_H_
+#define SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_CONVERTOR_H_
 
-#include "utils/logger.h"
-
-#include "vr_module/commands/activate_service.h"
-#include "vr_module/commands/on_default_service_chosen.h"
-#include "vr_module/commands/on_register_service.h"
-#include "vr_module/commands/on_service_deactivated.h"
-#include "vr_module/commands/support_service.h"
 #include "vr_module/interface/hmi.pb.h"
 #include "vr_module/interface/mobile.pb.h"
 
 namespace vr_module {
-namespace commands {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "VRModule")
+/**
+ * Converts Mobile result code into HMI result code
+ * @param value of Mobile result code
+ * @return HMI result code
+ */
+vr_hmi_api::ResultCode Convertor(vr_mobile_api::ResultCode value);
 
-Factory::Factory(VRModule* module)
-    : module_(module) {
-}
-
-Command* Factory::Create(const vr_hmi_api::ServiceMessage& message) const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  switch (message.rpc()) {
-    case vr_hmi_api::SUPPORT_SERVICE:
-      return new SupportService(message, module_);
-    case vr_hmi_api::ON_REGISTER:
-      return new OnRegisterService(message, module_);    
-    case vr_hmi_api::ON_DEFAULT_CHOSEN:
-      return new OnDefaultServiceChosen(message, module_);
-    case vr_hmi_api::ON_DEACTIVATED:
-      return new OnServiceDeactivated(module_);
-    case vr_hmi_api::ACTIVATE:
-      return new ActivateService(message, module_);
-    case vr_hmi_api::PROCESS_DATA:
-    default: return 0;
-  }
-  return 0;
-}
-
-Command* Factory::Create(const vr_mobile_api::ServiceMessage& message) const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  return 0;
-}
-
-}  // namespace commands
+/**
+ * Converts HMI result code into HMI result code
+ * @param value of Mobile result code
+ * @return Mobile result code
+ */
+vr_mobile_api::ResultCode Convertor(vr_hmi_api::ResultCode value);
 }  // namespace vr_module
+
+#endif  // SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_CONVERTOR_H_
