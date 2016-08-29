@@ -30,35 +30,27 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_SUPPORT_SERVICE_H_
-#define SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_SUPPORT_SERVICE_H_
+#ifndef SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_CONVERTOR_H_
+#define SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_CONVERTOR_H_
 
-#include "vr_module/commands/command.h"
-#include "vr_module/event_engine/event_dispatcher.h"
 #include "vr_module/interface/hmi.pb.h"
+#include "vr_module/interface/mobile.pb.h"
 
 namespace vr_module {
 
-class VRModule;
+/**
+ * Converts Mobile result code into HMI result code
+ * @param value of Mobile result code
+ * @return HMI result code
+ */
+vr_hmi_api::ResultCode Convertor(vr_mobile_api::ResultCode value);
 
-namespace commands {
-
-class SupportService : public Command, public event_engine::EventObserver<
-    vr_hmi_api::ServiceMessage, vr_hmi_api::RPCName> {
- public:
-  SupportService(const vr_hmi_api::ServiceMessage& message, VRModule* module);
-  ~SupportService();
-  virtual bool Execute();
-  virtual void OnTimeout();
-  virtual void on_event(
-      const event_engine::Event<vr_hmi_api::ServiceMessage, vr_hmi_api::RPCName>& event);
-
- private:
-  VRModule* module_;
-  vr_hmi_api::ServiceMessage message_;
-};
-
-}  // namespace commands
+/**
+ * Converts HMI result code into HMI result code
+ * @param value of Mobile result code
+ * @return Mobile result code
+ */
+vr_mobile_api::ResultCode Convertor(vr_hmi_api::ResultCode value);
 }  // namespace vr_module
 
-#endif  // SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_SUPPORT_SERVICE_H_
+#endif  // SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_CONVERTOR_H_

@@ -30,12 +30,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_SUPPORT_SERVICE_H_
-#define SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_SUPPORT_SERVICE_H_
+#ifndef SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_ACTIVATE_SERVICE_H_
+#define SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_ACTIVATE_SERVICE_H_
 
 #include "vr_module/commands/command.h"
 #include "vr_module/event_engine/event_dispatcher.h"
 #include "vr_module/interface/hmi.pb.h"
+#include "vr_module/interface/mobile.pb.h"
 
 namespace vr_module {
 
@@ -43,22 +44,24 @@ class VRModule;
 
 namespace commands {
 
-class SupportService : public Command, public event_engine::EventObserver<
-    vr_hmi_api::ServiceMessage, vr_hmi_api::RPCName> {
+class ActivateService : public Command, public event_engine::EventObserver<
+    vr_mobile_api::ServiceMessage, vr_mobile_api::RPCName> {
  public:
-  SupportService(const vr_hmi_api::ServiceMessage& message, VRModule* module);
-  ~SupportService();
+  ActivateService(const vr_hmi_api::ServiceMessage& message, VRModule* module);
+  ~ActivateService();
   virtual bool Execute();
   virtual void OnTimeout();
   virtual void on_event(
-      const event_engine::Event<vr_hmi_api::ServiceMessage, vr_hmi_api::RPCName>& event);
+      const event_engine::Event<vr_mobile_api::ServiceMessage,
+          vr_mobile_api::RPCName>& event);
 
  private:
   VRModule* module_;
   vr_hmi_api::ServiceMessage message_;
+  vr_mobile_api::ServiceMessage request_;
 };
 
 }  // namespace commands
 }  // namespace vr_module
 
-#endif  // SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_SUPPORT_SERVICE_H_
+#endif  // SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_ACTIVATE_SERVICE_H_

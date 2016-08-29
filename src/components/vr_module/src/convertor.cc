@@ -30,35 +30,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_SUPPORT_SERVICE_H_
-#define SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_SUPPORT_SERVICE_H_
-
-#include "vr_module/commands/command.h"
-#include "vr_module/event_engine/event_dispatcher.h"
-#include "vr_module/interface/hmi.pb.h"
+#include "vr_module/convertor.h"
 
 namespace vr_module {
 
-class VRModule;
+inline vr_hmi_api::ResultCode Convertor(vr_mobile_api::ResultCode value) {
+  switch (value) {
+    case vr_mobile_api::SUCCESS:
+      return vr_hmi_api::SUCCESS;
+    case vr_mobile_api::INVALID_DATA:
+      return vr_hmi_api::INVALID_DATA;
+    case vr_mobile_api::GENERIC_ERROR:
+      return vr_hmi_api::GENERIC_ERROR;
+    case vr_mobile_api::REJECTED:
+      return vr_hmi_api::REJECTED;
+    case vr_mobile_api::WARNINNG:
+      return vr_hmi_api::WARNINGS;
+    default:
+      return vr_hmi_api::GENERIC_ERROR;
+  }
+}
 
-namespace commands {
+inline vr_mobile_api::ResultCode Convertor(vr_hmi_api::ResultCode value) {
+  switch (value) {
+    case vr_hmi_api::SUCCESS:
+      return vr_mobile_api::SUCCESS;
+    case vr_hmi_api::INVALID_DATA:
+      return vr_mobile_api::INVALID_DATA;
+    case vr_hmi_api::GENERIC_ERROR:
+      return vr_mobile_api::GENERIC_ERROR;
+    case vr_hmi_api::WARNINGS:
+      return vr_mobile_api::WARNINNG;
+    case vr_hmi_api::REJECTED:
+      return vr_mobile_api::REJECTED;
+    case vr_hmi_api::UNSUPPORTED_RESOURCE:
+    default:
+      return vr_mobile_api::GENERIC_ERROR;
+  }
+}
 
-class SupportService : public Command, public event_engine::EventObserver<
-    vr_hmi_api::ServiceMessage, vr_hmi_api::RPCName> {
- public:
-  SupportService(const vr_hmi_api::ServiceMessage& message, VRModule* module);
-  ~SupportService();
-  virtual bool Execute();
-  virtual void OnTimeout();
-  virtual void on_event(
-      const event_engine::Event<vr_hmi_api::ServiceMessage, vr_hmi_api::RPCName>& event);
-
- private:
-  VRModule* module_;
-  vr_hmi_api::ServiceMessage message_;
-};
-
-}  // namespace commands
 }  // namespace vr_module
-
-#endif  // SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_SUPPORT_SERVICE_H_

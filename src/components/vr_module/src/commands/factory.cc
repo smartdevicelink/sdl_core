@@ -34,6 +34,7 @@
 
 #include "utils/logger.h"
 
+#include "vr_module/commands/activate_service.h"
 #include "vr_module/commands/support_service.h"
 #include "vr_module/interface/hmi.pb.h"
 #include "vr_module/interface/mobile.pb.h"
@@ -53,6 +54,7 @@ Command* Factory::Create(const vr_hmi_api::ServiceMessage& message) const {
     case vr_hmi_api::SUPPORT_SERVICE:
       return new SupportService(message, module_);
     case vr_hmi_api::ACTIVATE:
+      return new ActivateService(message, module_);
     case vr_hmi_api::PROCESS_DATA:
     case vr_hmi_api::ON_REGISTER:
     case vr_hmi_api::ON_DEFAULT_CHOSEN:
