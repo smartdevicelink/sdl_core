@@ -57,7 +57,9 @@ VRModule::VRModule()
     : GenericModule(kModuleID),
       proxy_(this),
       factory_(commands::Factory(this)),
-      supported_(false) {
+      supported_(false),
+      active_service_(0),
+      default_service_(0) {
   plugin_info_.name = "VRModulePlugin";
   plugin_info_.version = 1;
   SubscribeToRpcMessages();
@@ -106,6 +108,12 @@ void VRModule::EmitEvent(const vr_mobile_api::ServiceMessage& message) {
   MobileEvent event(message);
   EventDispatcher<vr_mobile_api::ServiceMessage,
       vr_mobile_api::RPCName>::instance()->raise_event(event);
+}
+
+bool VRModule::SendToMobile(const vr_mobile_api::ServiceMessage& message) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  // TODO(KKolodiy): should be implemented
+  return false;
 }
 
 void VRModule::RunCommand(commands::Command* command) {
@@ -217,6 +225,44 @@ void VRModule::RegisterRequest(uint32_t correlation_id,
 void VRModule::UnregisterRequest(uint32_t correlation_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   request_controller_.DeleteRequest(correlation_id);
+}
+
+void VRModule::ActivateService(int32_t app_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  active_service_ = app_id;
+}
+
+void VRModule::DeactivateService() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  active_service_ = 0;
+}
+
+void VRModule::SetDefaultService(int32_t app_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  default_service_ = app_id;
+}
+
+void VRModule::ResetDefaultService() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  default_service_ = 0;
+}
+
+void VRModule::RegisterService(int32_t app_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  vr_hmi_api::ServiceMessage message;
+  message.set_rpc(vr_hmi_api::ON_REGISTER);
+  vr_hmi_api::OnRegisterServiceNotification notification;
+  notification.set_appid(app_id);
+  bool is_default = app_id == default_service_;
+  if (is_default) {
+    notification.set_default_(is_default);
+  }
+  std::string params;
+  if (notification.SerializeToString(&params)) {
+    message.set_params(params);
+  }
+  commands::Command* command = factory_.Create(message);
+  RunCommand(command);
 }
 
 }  //  namespace vr_module

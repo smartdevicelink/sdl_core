@@ -63,8 +63,8 @@ message ActivateServiceResponse{
 // Must be sent by SDL to HU-subsystem on service registering
 message OnRegisterServiceNotification{
   // defines if the service has been previously stored as default on SDL
-  required bool default = 1;
-  optional int32 appID = 2;
+  optional bool default = 1;
+  required int32 appID = 2;
 }
 
 // sent from HU-subsystem -> SDL
