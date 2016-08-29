@@ -30,47 +30,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "vr_module/commands/factory.h"
+#include "vr_module/commands/on_default_service_chosen.h"
 
 #include "utils/logger.h"
-
-#include "vr_module/commands/activate_service.h"
-#include "vr_module/commands/on_default_service_chosen.h"
-#include "vr_module/commands/on_service_deactivated.h"
-#include "vr_module/commands/support_service.h"
-#include "vr_module/interface/hmi.pb.h"
-#include "vr_module/interface/mobile.pb.h"
+#include "vr_module/vr_module.h"
 
 namespace vr_module {
 namespace commands {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "VRModule")
 
-Factory::Factory(VRModule* module)
-    : module_(module) {
+OnDefaultServiceChosen::OnDefaultServiceChosen(
+    const vr_hmi_api::ServiceMessage& message, VRModule* module)
+    : module_(module),
+      message_(message) {
 }
 
-Command* Factory::Create(const vr_hmi_api::ServiceMessage& message) const {
+bool OnDefaultServiceChosen::Execute() {
   LOG4CXX_AUTO_TRACE(logger_);
-  switch (message.rpc()) {
-    case vr_hmi_api::SUPPORT_SERVICE:
-      return new SupportService(message, module_);
-    case vr_hmi_api::ON_DEFAULT_CHOSEN:
-      return new OnDefaultServiceChosen(message, module_);
-    case vr_hmi_api::ON_DEACTIVATED:
-      return new OnServiceDeactivated(module_);
-    case vr_hmi_api::ACTIVATE:
-      return new ActivateService(message, module_);
-    case vr_hmi_api::PROCESS_DATA:
-    case vr_hmi_api::ON_REGISTER:
-    default: return 0;
+  vr_hmi_api::OnDefaultServiceChosenNotification notification;
+  if (message_.has_params()
+      && notification.ParseFromString(message_.params())) {
+    if (notification.has_appid()) {
+      int32_t app_id = notification.appid();
+      module_->SetDefaultService(app_id);
+    } else {
+      module_->ResetDefaultService();
+    }
+  } else {
+    LOG4CXX_ERROR(logger_, "Could not get result from message");
   }
-  return 0;
+  delete this;
+  return true;
 }
 
-Command* Factory::Create(const vr_mobile_api::ServiceMessage& message) const {
+void OnDefaultServiceChosen::OnTimeout() {
   LOG4CXX_AUTO_TRACE(logger_);
-  return 0;
+  // no logic
 }
 
 }  // namespace commands

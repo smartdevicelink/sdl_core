@@ -108,6 +108,17 @@ class VRModule
   void UnregisterRequest(uint32_t correlation_id);
 
   /**
+   * Sets default service
+   * @param app_id unique application ID
+   */
+  void SetDefaultService(int32_t app_id);
+
+  /**
+   * Resets default service
+   */
+  void ResetDefaultService();
+
+  /**
    * Sends message to HMI (Applink)
    * @param message is GPB message according with protocol
    * @return true if message was sent successful
@@ -155,6 +166,7 @@ class VRModule
   request_controller::RequestController request_controller_;
   bool supported_;
   int32_t active_service_;
+  int32_t default_service_;
 
   DISALLOW_COPY_AND_ASSIGN(VRModule);
 };
