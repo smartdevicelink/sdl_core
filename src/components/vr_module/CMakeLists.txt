@@ -45,6 +45,7 @@ set (SOURCES
     src/commands/factory.cc
     src/commands/support_service.cc
     src/commands/activate_service.cc
+    src/commands/on_service_deactivated.cc
 )
 
 set (LIBRARIES

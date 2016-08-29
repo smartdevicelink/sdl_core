@@ -30,45 +30,36 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "vr_module/commands/factory.h"
+#include "vr_module/commands/on_service_deactivated.h"
 
 #include "utils/logger.h"
-
-#include "vr_module/commands/activate_service.h"
-#include "vr_module/commands/on_service_deactivated.h"
-#include "vr_module/commands/support_service.h"
-#include "vr_module/interface/hmi.pb.h"
 #include "vr_module/interface/mobile.pb.h"
+#include "vr_module/vr_module.h"
 
 namespace vr_module {
 namespace commands {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "VRModule")
 
-Factory::Factory(VRModule* module)
+OnServiceDeactivated::OnServiceDeactivated(VRModule* module)
     : module_(module) {
 }
 
-Command* Factory::Create(const vr_hmi_api::ServiceMessage& message) const {
+bool OnServiceDeactivated::Execute() {
   LOG4CXX_AUTO_TRACE(logger_);
-  switch (message.rpc()) {
-    case vr_hmi_api::SUPPORT_SERVICE:
-      return new SupportService(message, module_);
-    case vr_hmi_api::ON_DEACTIVATED:
-      return new OnServiceDeactivated(module_);
-    case vr_hmi_api::ACTIVATE:
-      return new ActivateService(message, module_);
-    case vr_hmi_api::PROCESS_DATA:
-    case vr_hmi_api::ON_REGISTER:
-    case vr_hmi_api::ON_DEFAULT_CHOSEN:
-    default: return 0;
-  }
-  return 0;
+  vr_mobile_api::ServiceMessage notification;
+  notification.set_rpc(vr_mobile_api::ON_DEACTIVATED);
+  notification.set_rpc_type(vr_mobile_api::NOTIFICATION);
+  notification.set_correlation_id(module_->GetNextCorrelationID());
+  module_->SendToMobile(notification);
+  module_->DeactivateService();
+  delete this;
+  return true;
 }
 
-Command* Factory::Create(const vr_mobile_api::ServiceMessage& message) const {
+void OnServiceDeactivated::OnTimeout() {
   LOG4CXX_AUTO_TRACE(logger_);
-  return 0;
+  // no logic
 }
 
 }  // namespace commands
