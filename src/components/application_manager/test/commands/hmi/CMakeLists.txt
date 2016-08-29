@@ -39,12 +39,8 @@ include_directories(
 set (SOURCES
   ${AM_SOURCE_DIR}/src/smart_object_keys.cc
   ${AM_SOURCE_DIR}/test/mock_message_helper.cc
-  ${COMMANDS_TEST_SOURCE_DIR}/mobile/delete_command_request_test.cc
-  ${COMMANDS_TEST_SOURCE_DIR}/mobile/add_command_request_test.cc
-  ${COMMANDS_TEST_SOURCE_DIR}/mobile/perform_interaction_test.cc
-  ${COMMANDS_TEST_SOURCE_DIR}/mobile/change_registration_test.cc
-  ${COMMANDS_TEST_SOURCE_DIR}/mobile/create_interaction_choice_set_test.cc
-  ${COMMANDS_TEST_SOURCE_DIR}/mobile/register_app_interface_request_test.cc
+  ${COMMANDS_TEST_SOURCE_DIR}/hmi/vi_is_ready_response_test.cc
+  ${COMMANDS_TEST_SOURCE_DIR}/hmi/vr_is_ready_response_test.cc
 )
 
 set(LIBRARIES
@@ -58,4 +54,4 @@ set(LIBRARIES
   SmartObjects
 )
 
-create_test("mobile_commands_test" "${SOURCES}" "${LIBRARIES}" )
+create_test("hmi_commands_test" "${SOURCES}" "${LIBRARIES}" )

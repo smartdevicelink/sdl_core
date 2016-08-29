@@ -60,3 +60,4 @@ set(LIBRARIES
 create_test("commands_test" "${SOURCES}" "${LIBRARIES}" )
 
 add_subdirectory(mobile)
+add_subdirectory(hmi)
