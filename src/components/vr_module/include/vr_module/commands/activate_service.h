@@ -30,44 +30,38 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "vr_module/commands/on_default_service_chosen.h"
+#ifndef SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_ACTIVATE_SERVICE_H_
+#define SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_ACTIVATE_SERVICE_H_
 
-#include "utils/logger.h"
-#include "vr_module/vr_module.h"
+#include "vr_module/commands/command.h"
+#include "vr_module/event_engine/event_dispatcher.h"
+#include "vr_module/interface/hmi.pb.h"
+#include "vr_module/interface/mobile.pb.h"
 
 namespace vr_module {
+
+class VRModule;
+
 namespace commands {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "VRModule")
+class ActivateService : public Command, public event_engine::EventObserver<
+    vr_mobile_api::ServiceMessage, vr_mobile_api::RPCName> {
+ public:
+  ActivateService(const vr_hmi_api::ServiceMessage& message, VRModule* module);
+  ~ActivateService();
+  virtual bool Execute();
+  virtual void OnTimeout();
+  virtual void on_event(
+      const event_engine::Event<vr_mobile_api::ServiceMessage,
+          vr_mobile_api::RPCName>& event);
 
-OnDefaultServiceChosen::OnDefaultServiceChosen(
-    const vr_hmi_api::ServiceMessage& message, VRModule* module)
-    : module_(module),
-      message_(message) {
-}
-
-bool OnDefaultServiceChosen::Execute() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  vr_hmi_api::OnDefaultServiceChosenNotification notification;
-  if (message_.has_params()
-      && notification.ParseFromString(message_.params())) {
-    if (notification.has_appid()) {
-      int32_t app_id = notification.appid();
-      module_->SetDefaultService(app_id);
-    } else {
-      module_->ResetDefaultService();
-    }
-  } else {
-    LOG4CXX_ERROR(logger_, "Could not get result from message");
-  }
-  delete this;
-  return true;
-}
-
-void OnDefaultServiceChosen::OnTimeout() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  // no logic
-}
+ private:
+  VRModule* module_;
+  vr_hmi_api::ServiceMessage message_;
+  vr_mobile_api::ServiceMessage request_;
+};
 
 }  // namespace commands
 }  // namespace vr_module
+
+#endif  // SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_ACTIVATE_SERVICE_H_

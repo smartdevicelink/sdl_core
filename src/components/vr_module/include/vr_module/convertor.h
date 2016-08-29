@@ -30,44 +30,27 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "vr_module/commands/on_default_service_chosen.h"
+#ifndef SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_CONVERTOR_H_
+#define SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_CONVERTOR_H_
 
-#include "utils/logger.h"
-#include "vr_module/vr_module.h"
+#include "vr_module/interface/hmi.pb.h"
+#include "vr_module/interface/mobile.pb.h"
 
 namespace vr_module {
-namespace commands {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "VRModule")
+/**
+ * Converts Mobile result code into HMI result code
+ * @param value of Mobile result code
+ * @return HMI result code
+ */
+vr_hmi_api::ResultCode Convertor(vr_mobile_api::ResultCode value);
 
-OnDefaultServiceChosen::OnDefaultServiceChosen(
-    const vr_hmi_api::ServiceMessage& message, VRModule* module)
-    : module_(module),
-      message_(message) {
-}
-
-bool OnDefaultServiceChosen::Execute() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  vr_hmi_api::OnDefaultServiceChosenNotification notification;
-  if (message_.has_params()
-      && notification.ParseFromString(message_.params())) {
-    if (notification.has_appid()) {
-      int32_t app_id = notification.appid();
-      module_->SetDefaultService(app_id);
-    } else {
-      module_->ResetDefaultService();
-    }
-  } else {
-    LOG4CXX_ERROR(logger_, "Could not get result from message");
-  }
-  delete this;
-  return true;
-}
-
-void OnDefaultServiceChosen::OnTimeout() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  // no logic
-}
-
-}  // namespace commands
+/**
+ * Converts HMI result code into HMI result code
+ * @param value of Mobile result code
+ * @return Mobile result code
+ */
+vr_mobile_api::ResultCode Convertor(vr_hmi_api::ResultCode value);
 }  // namespace vr_module
+
+#endif  // SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_CONVERTOR_H_

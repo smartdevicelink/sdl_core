@@ -30,44 +30,28 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "vr_module/commands/on_default_service_chosen.h"
+#ifndef SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_ON_SERVICE_DEACTIVATED_H_
+#define SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_ON_SERVICE_DEACTIVATED_H_
 
-#include "utils/logger.h"
-#include "vr_module/vr_module.h"
+#include "vr_module/commands/command.h"
 
 namespace vr_module {
+
+class VRModule;
+
 namespace commands {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "VRModule")
+class OnServiceDeactivated : public Command {
+ public:
+  explicit OnServiceDeactivated(VRModule* module);
+  virtual bool Execute();
+  virtual void OnTimeout();
 
-OnDefaultServiceChosen::OnDefaultServiceChosen(
-    const vr_hmi_api::ServiceMessage& message, VRModule* module)
-    : module_(module),
-      message_(message) {
-}
-
-bool OnDefaultServiceChosen::Execute() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  vr_hmi_api::OnDefaultServiceChosenNotification notification;
-  if (message_.has_params()
-      && notification.ParseFromString(message_.params())) {
-    if (notification.has_appid()) {
-      int32_t app_id = notification.appid();
-      module_->SetDefaultService(app_id);
-    } else {
-      module_->ResetDefaultService();
-    }
-  } else {
-    LOG4CXX_ERROR(logger_, "Could not get result from message");
-  }
-  delete this;
-  return true;
-}
-
-void OnDefaultServiceChosen::OnTimeout() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  // no logic
-}
+ private:
+  VRModule* module_;
+};
 
 }  // namespace commands
 }  // namespace vr_module
+
+#endif  // SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_ON_SERVICE_DEACTIVATED_H_

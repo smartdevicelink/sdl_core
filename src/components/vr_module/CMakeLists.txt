@@ -41,9 +41,12 @@ set (SOURCES
     src/request_controller.cc
     src/hmi_event.cc
     src/mobile_event.cc
+    src/convertor.cc
     src/commands/factory.cc
     src/commands/support_service.cc
+    src/commands/activate_service.cc
     src/commands/on_default_service_chosen.cc
+    src/commands/on_service_deactivated.cc
 )
 
 set (LIBRARIES

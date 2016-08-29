@@ -30,9 +30,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "vr_module/commands/on_default_service_chosen.h"
+#include "vr_module/commands/on_service_deactivated.h"
 
 #include "utils/logger.h"
+#include "vr_module/interface/mobile.pb.h"
 #include "vr_module/vr_module.h"
 
 namespace vr_module {
@@ -40,31 +41,23 @@ namespace commands {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "VRModule")
 
-OnDefaultServiceChosen::OnDefaultServiceChosen(
-    const vr_hmi_api::ServiceMessage& message, VRModule* module)
-    : module_(module),
-      message_(message) {
+OnServiceDeactivated::OnServiceDeactivated(VRModule* module)
+    : module_(module) {
 }
 
-bool OnDefaultServiceChosen::Execute() {
+bool OnServiceDeactivated::Execute() {
   LOG4CXX_AUTO_TRACE(logger_);
-  vr_hmi_api::OnDefaultServiceChosenNotification notification;
-  if (message_.has_params()
-      && notification.ParseFromString(message_.params())) {
-    if (notification.has_appid()) {
-      int32_t app_id = notification.appid();
-      module_->SetDefaultService(app_id);
-    } else {
-      module_->ResetDefaultService();
-    }
-  } else {
-    LOG4CXX_ERROR(logger_, "Could not get result from message");
-  }
+  vr_mobile_api::ServiceMessage notification;
+  notification.set_rpc(vr_mobile_api::ON_DEACTIVATED);
+  notification.set_rpc_type(vr_mobile_api::NOTIFICATION);
+  notification.set_correlation_id(module_->GetNextCorrelationID());
+  module_->SendToMobile(notification);
+  module_->DeactivateService();
   delete this;
   return true;
 }
 
-void OnDefaultServiceChosen::OnTimeout() {
+void OnServiceDeactivated::OnTimeout() {
   LOG4CXX_AUTO_TRACE(logger_);
   // no logic
 }

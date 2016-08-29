@@ -85,6 +85,17 @@ class VRModule
   virtual void OnReceived(const vr_hmi_api::ServiceMessage& message);
 
   /**
+   * Marks the application to use as service
+   * @param app_id unique application ID
+   */
+  void ActivateService(int32_t app_id);
+
+  /**
+   * Resets using the current application as service
+   */
+  void DeactivateService();
+
+  /**
    * Registers request to HMI or Mobile side
    * @param correlation_id unique id of request
    */
@@ -113,6 +124,13 @@ class VRModule
    * @return true if message was sent successful
    */
   bool SendToHmi(const vr_hmi_api::ServiceMessage& message);
+
+  /**
+   * Sends message to Mobile side
+   * @param message is GPB message according with protocol
+   * @return true if message was sent successful
+   */
+  bool SendToMobile(const vr_mobile_api::ServiceMessage& message);
 
   bool supported() const {
     return supported_;
@@ -147,6 +165,7 @@ class VRModule
   const commands::FactoryInterface& factory_;
   request_controller::RequestController request_controller_;
   bool supported_;
+  int32_t active_service_;
   int32_t default_service_;
 
   DISALLOW_COPY_AND_ASSIGN(VRModule);
