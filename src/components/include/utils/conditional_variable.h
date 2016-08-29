@@ -98,6 +98,16 @@ class ConditionalVariable {
  private:
   impl::PlatformConditionalVariable cond_var_;
 
+#ifndef NDEBUG
+  /**
+  * @brief Variable for debugging purposes that shows
+  * how much threads are waiting for condition variable currently.
+  * Allows detection of destroying condition variable
+  * while some threads are still waiting for it.
+  */
+  uint32_t waiting_threads_count_;
+#endif
+
  private:
   DISALLOW_COPY_AND_ASSIGN(ConditionalVariable);
 };

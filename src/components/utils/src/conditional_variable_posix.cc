@@ -48,7 +48,11 @@ namespace sync_primitives {
 
 SDL_CREATE_LOGGER("Utils")
 
-ConditionalVariable::ConditionalVariable() {
+ConditionalVariable::ConditionalVariable()
+#ifndef NDEBUG
+    : waiting_threads_count_(0)
+#endif
+{
   pthread_condattr_t attrs;
   int initialized = pthread_condattr_init(&attrs);
   if (initialized != 0)
@@ -69,6 +73,9 @@ ConditionalVariable::ConditionalVariable() {
 }
 
 ConditionalVariable::~ConditionalVariable() {
+#ifndef NDEBUG
+  DCHECK(0 == waiting_threads_count_);
+#endif
   pthread_cond_destroy(&cond_var_);
 }
 
@@ -90,10 +97,14 @@ bool ConditionalVariable::Wait(Lock& lock) {
 // Actual Qt version (5.5) cannot support waiting on recursive mutex.
 #ifndef NDEBUG
   DCHECK(!lock.is_mutex_recursive_);
+  ++waiting_threads_count_;
 #endif
   lock.AssertTakenAndMarkFree();
   int wait_status = pthread_cond_wait(&cond_var_, &lock.mutex_);
   lock.AssertFreeAndMarkTaken();
+#ifndef NDEBUG
+  --waiting_threads_count_;
+#endif
   if (wait_status != 0) {
     SDL_ERROR("Failed to wait for conditional variable");
     return false;
@@ -121,11 +132,15 @@ ConditionalVariable::WaitStatus ConditionalVariable::WaitFor(
 // Actual Qt version (5.5) cannot support waiting on recursive mutex.
 #ifndef NDEBUG
   DCHECK(!lock.is_mutex_recursive_);
+  ++waiting_threads_count_;
 #endif
   lock.AssertTakenAndMarkFree();
   int timedwait_status =
       pthread_cond_timedwait(&cond_var_, &lock.mutex_, &wait_interval);
   lock.AssertFreeAndMarkTaken();
+#ifndef NDEBUG
+  --waiting_threads_count_;
+#endif
   WaitStatus wait_status = kNoTimeout;
   switch (timedwait_status) {
     case 0: {
