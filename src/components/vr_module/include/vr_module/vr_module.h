@@ -45,9 +45,8 @@ namespace vr_module {
 
 typedef Json::Value MessageFromMobile;
 
-class VRModule
-    : public functional_modules::GenericModule,
-      public VRProxyListener {
+class VRModule : public functional_modules::GenericModule,
+    public VRProxyListener {
  public:
   VRModule();
   ~VRModule();
@@ -61,12 +60,13 @@ class VRModule
    * @return processing result
    */
   virtual functional_modules::ProcessResult ProcessMessage(
-    application_manager::MessagePtr msg);
+      application_manager::MessagePtr msg);
   virtual void RemoveAppExtension(uint32_t app_id);
   virtual void OnDeviceRemoved(const connection_handler::DeviceHandle& device);
   virtual void RemoveAppExtensions();
   virtual bool IsAppForPlugin(application_manager::ApplicationSharedPtr app);
-  virtual void OnAppHMILevelChanged(application_manager::ApplicationSharedPtr app,
+  virtual void OnAppHMILevelChanged(
+      application_manager::ApplicationSharedPtr app,
       mobile_apis::HMILevel::eType old_level);
 
   /**
@@ -99,7 +99,8 @@ class VRModule
    * Registers request to HMI or Mobile side
    * @param correlation_id unique id of request
    */
-  void RegisterRequest(uint32_t correlation_id, commands::CommandPtr command);
+  void RegisterRequest(uint32_t correlation_id,
+                       commands::TimedCommandPtr command);
 
   /**
    * Unregisters request to HMI or Mobile side
@@ -162,7 +163,7 @@ class VRModule
   void OnReceived(const vr_mobile_api::ServiceMessage& message);
   void EmitEvent(const vr_hmi_api::ServiceMessage& message);
   void EmitEvent(const vr_mobile_api::ServiceMessage& message);
-  void RunCommand(commands::Command* command);
+  void RunCommand(commands::CommandPtr command);
 
   functional_modules::PluginInfo plugin_info_;
 

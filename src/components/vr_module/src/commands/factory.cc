@@ -34,10 +34,12 @@
 
 #include "utils/logger.h"
 
+#include "vr_module/commands/async_command.h"
 #include "vr_module/commands/activate_service.h"
 #include "vr_module/commands/on_default_service_chosen.h"
 #include "vr_module/commands/on_register_service.h"
 #include "vr_module/commands/on_service_deactivated.h"
+#include "vr_module/commands/process_data.h"
 #include "vr_module/commands/support_service.h"
 #include "vr_module/interface/hmi.pb.h"
 #include "vr_module/interface/mobile.pb.h"
@@ -51,28 +53,30 @@ Factory::Factory(VRModule* module)
     : module_(module) {
 }
 
-Command* Factory::Create(const vr_hmi_api::ServiceMessage& message) const {
+CommandPtr Factory::Create(const vr_hmi_api::ServiceMessage& message) const {
   LOG4CXX_AUTO_TRACE(logger_);
   switch (message.rpc()) {
     case vr_hmi_api::SUPPORT_SERVICE:
-      return new SupportService(message, module_);
+      return CommandPtr(new AsyncCommand(new SupportService(message, module_)));
     case vr_hmi_api::ON_REGISTER:
-      return new OnRegisterService(message, module_);    
+      return CommandPtr(new OnRegisterService(message, module_));
     case vr_hmi_api::ON_DEFAULT_CHOSEN:
-      return new OnDefaultServiceChosen(message, module_);
+      return CommandPtr(new OnDefaultServiceChosen(message, module_));
     case vr_hmi_api::ON_DEACTIVATED:
-      return new OnServiceDeactivated(module_);
+      return CommandPtr(new OnServiceDeactivated(module_));
     case vr_hmi_api::ACTIVATE:
-      return new ActivateService(message, module_);
+      return CommandPtr(new AsyncCommand(new ActivateService(message, module_)));
     case vr_hmi_api::PROCESS_DATA:
-    default: return 0;
+      return CommandPtr(new AsyncCommand(new ProcessData(message, module_)));
+    default:
+      return CommandPtr();
   }
-  return 0;
+  return CommandPtr();
 }
 
-Command* Factory::Create(const vr_mobile_api::ServiceMessage& message) const {
+CommandPtr Factory::Create(const vr_mobile_api::ServiceMessage& message) const {
   LOG4CXX_AUTO_TRACE(logger_);
-  return 0;
+  return CommandPtr();
 }
 
 }  // namespace commands

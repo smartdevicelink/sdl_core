@@ -72,7 +72,7 @@ VRModule::~VRModule() {
 void VRModule::CheckSupport() {
   vr_hmi_api::ServiceMessage message;
   message.set_rpc(vr_hmi_api::SUPPORT_SERVICE);
-  commands::Command* command = factory_.Create(message);
+  commands::CommandPtr command = factory_.Create(message);
   RunCommand(command);
 }
 
@@ -81,7 +81,7 @@ void VRModule::OnReceived(const vr_hmi_api::ServiceMessage& message) {
   if (message.rpc_type() == vr_hmi_api::RESPONSE) {
     EmitEvent(message);
   } else {
-    commands::Command* command = factory_.Create(message);
+    commands::CommandPtr command = factory_.Create(message);
     RunCommand(command);
   }
 }
@@ -91,7 +91,7 @@ void VRModule::OnReceived(const vr_mobile_api::ServiceMessage& message) {
   if (message.rpc_type() == vr_mobile_api::RESPONSE) {
     EmitEvent(message);
   } else {
-    commands::Command* command = factory_.Create(message);
+    commands::CommandPtr command = factory_.Create(message);
     RunCommand(command);
   }
 }
@@ -116,7 +116,7 @@ bool VRModule::SendToMobile(const vr_mobile_api::ServiceMessage& message) {
   return false;
 }
 
-void VRModule::RunCommand(commands::Command* command) {
+void VRModule::RunCommand(commands::CommandPtr command) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (command) {
     command->Execute();
@@ -217,7 +217,7 @@ void VRModule::OnAppHMILevelChanged(application_manager::ApplicationSharedPtr ap
 }
 
 void VRModule::RegisterRequest(uint32_t correlation_id,
-                               commands::CommandPtr command) {
+                               commands::TimedCommandPtr command) {
   LOG4CXX_AUTO_TRACE(logger_);
   request_controller_.AddRequest(correlation_id, command);
 }
@@ -261,7 +261,7 @@ void VRModule::RegisterService(int32_t app_id) {
   if (notification.SerializeToString(&params)) {
     message.set_params(params);
   }
-  commands::Command* command = factory_.Create(message);
+  commands::CommandPtr command = factory_.Create(message);
   RunCommand(command);
 }
 

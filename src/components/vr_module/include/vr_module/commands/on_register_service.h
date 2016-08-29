@@ -47,7 +47,6 @@ class OnRegisterService : public Command {
   OnRegisterService(const vr_hmi_api::ServiceMessage& message,
                     VRModule* module);
   virtual bool Execute();
-  virtual void OnTimeout();
 
  private:
   VRModule* module_;

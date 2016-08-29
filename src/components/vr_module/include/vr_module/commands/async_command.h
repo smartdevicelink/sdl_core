@@ -30,28 +30,33 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "vr_module/commands/on_register_service.h"
+#ifndef SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_ASYNC_COMMAND_H_
+#define SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_ASYNC_COMMAND_H_
 
-#include "utils/logger.h"
-#include "vr_module/vr_module.h"
+#include "vr_module/commands/command.h"
 
 namespace vr_module {
 namespace commands {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "VRModule")
+class AsyncCommand : public Command {
+ public:
+  explicit AsyncCommand(Command* command)
+      : command_(command) {
+  }
 
-OnRegisterService::OnRegisterService(const vr_hmi_api::ServiceMessage& message,
-                                     VRModule* module)
-    : module_(module),
-      message_(message) {
-  message_.set_rpc_type(vr_hmi_api::NOTIFICATION);
-  message_.set_correlation_id(module_->GetNextCorrelationID());
-}
+  /**
+   * Executes command
+   * @return true if command was started successful
+   */
+  virtual bool Execute() {
+    return command_->Execute();
+  }
 
-bool OnRegisterService::Execute() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  return module_->SendToHmi(message_);
-}
+ private:
+  Command* command_;
+};
 
 }  // namespace commands
 }  // namespace vr_module
+
+#endif  // SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_ASYNC_COMMAND_H_

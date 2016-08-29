@@ -60,13 +60,7 @@ bool OnDefaultServiceChosen::Execute() {
   } else {
     LOG4CXX_ERROR(logger_, "Could not get result from message");
   }
-  delete this;
   return true;
-}
-
-void OnDefaultServiceChosen::OnTimeout() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  // no logic
 }
 
 }  // namespace commands

@@ -33,6 +33,8 @@
 #ifndef SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_FACTORY_INTERFACE_H_
 #define SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_FACTORY_INTERFACE_H_
 
+#include "vr_module/commands/command.h"
+
 namespace vr_hmi_api {
 class ServiceMessage;
 }  // namespace vr_hmi_api
@@ -44,8 +46,6 @@ class ServiceMessage;
 namespace vr_module {
 namespace commands {
 
-class Command;
-
 class FactoryInterface {
  public:
   virtual ~FactoryInterface() {
@@ -56,14 +56,15 @@ class FactoryInterface {
    * @param message GPB HMI message
    * @return command
    */
-  virtual Command* Create(const vr_hmi_api::ServiceMessage& message) const = 0;
+  virtual CommandPtr Create(
+      const vr_hmi_api::ServiceMessage& message) const = 0;
 
   /**
    * Creates command from GPB Mobile message
    * @param message GPB Mobile message
    * @return command
    */
-  virtual Command* Create(
+  virtual CommandPtr Create(
       const vr_mobile_api::ServiceMessage& message) const = 0;
 };
 

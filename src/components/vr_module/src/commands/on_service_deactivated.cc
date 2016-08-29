@@ -51,15 +51,8 @@ bool OnServiceDeactivated::Execute() {
   notification.set_rpc(vr_mobile_api::ON_DEACTIVATED);
   notification.set_rpc_type(vr_mobile_api::NOTIFICATION);
   notification.set_correlation_id(module_->GetNextCorrelationID());
-  module_->SendToMobile(notification);
   module_->DeactivateService();
-  delete this;
-  return true;
-}
-
-void OnServiceDeactivated::OnTimeout() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  // no logic
+  return module_->SendToMobile(notification);
 }
 
 }  // namespace commands

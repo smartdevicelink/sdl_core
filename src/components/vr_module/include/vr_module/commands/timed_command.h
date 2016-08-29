@@ -30,28 +30,28 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "vr_module/commands/on_register_service.h"
+#ifndef SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_TIMED_COMMAND_H_
+#define SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_TIMED_COMMAND_H_
 
-#include "utils/logger.h"
-#include "vr_module/vr_module.h"
+#include "vr_module/commands/command.h"
 
 namespace vr_module {
 namespace commands {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "VRModule")
+class TimedCommand : public Command {
+ public:
+  virtual ~TimedCommand() {
+  }
 
-OnRegisterService::OnRegisterService(const vr_hmi_api::ServiceMessage& message,
-                                     VRModule* module)
-    : module_(module),
-      message_(message) {
-  message_.set_rpc_type(vr_hmi_api::NOTIFICATION);
-  message_.set_correlation_id(module_->GetNextCorrelationID());
-}
+  /**
+   * Command on timeout reaction
+   */
+  virtual void OnTimeout() = 0;
+};
 
-bool OnRegisterService::Execute() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  return module_->SendToHmi(message_);
-}
+typedef utils::SharedPtr<commands::TimedCommand> TimedCommandPtr;
 
 }  // namespace commands
 }  // namespace vr_module
+
+#endif  // SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_TIMED_COMMAND_H_
