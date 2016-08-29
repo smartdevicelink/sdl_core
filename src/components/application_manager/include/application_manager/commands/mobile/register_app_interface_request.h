@@ -87,8 +87,7 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
 
  private:
   smart_objects::SmartObjectSPtr GetLockScreenIconUrlNotification(
-        const uint32_t connection_key,
-        ApplicationSharedPtr app);
+      const uint32_t connection_key, ApplicationSharedPtr app);
 
   /**
    * @brief Sends OnAppRegistered notification to HMI

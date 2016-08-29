@@ -288,7 +288,7 @@ Thread::~Thread() {
   join();
   // in some platforms pthread_join behaviour is undefined when thread is
   // not created(pthread_create) and call pthread_join.
-  if(handle_) {
+  if (handle_) {
     pthread_join(handle_, NULL);
   }
 }

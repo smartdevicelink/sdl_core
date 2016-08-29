@@ -77,18 +77,17 @@ mobile_apis::AppHMIType::eType StringToAppHMIType(const std::string& str) {
 }
 
 std::string AppHMITypeToString(mobile_apis::AppHMIType::eType type) {
-  const std::map<mobile_apis::AppHMIType::eType, std::string> app_hmi_type_map = {
-    {mobile_apis::AppHMIType::DEFAULT, "DEFAULT"},
-    {mobile_apis::AppHMIType::COMMUNICATION, "COMMUNICATION"},
-    {mobile_apis::AppHMIType::MEDIA, "MEDIA"},
-    {mobile_apis::AppHMIType::MESSAGING, "MESSAGING"},
-    {mobile_apis::AppHMIType::NAVIGATION, "NAVIGATION"},
-    {mobile_apis::AppHMIType::INFORMATION, "INFORMATION"},
-    {mobile_apis::AppHMIType::SOCIAL, "SOCIAL"},
-    {mobile_apis::AppHMIType::BACKGROUND_PROCESS, "BACKGROUND_PROCESS"},
-    {mobile_apis::AppHMIType::TESTING, "TESTING"},
-    {mobile_apis::AppHMIType::SYSTEM, "SYSTEM"}
-  };
+  const std::map<mobile_apis::AppHMIType::eType, std::string> app_hmi_type_map =
+      {{mobile_apis::AppHMIType::DEFAULT, "DEFAULT"},
+       {mobile_apis::AppHMIType::COMMUNICATION, "COMMUNICATION"},
+       {mobile_apis::AppHMIType::MEDIA, "MEDIA"},
+       {mobile_apis::AppHMIType::MESSAGING, "MESSAGING"},
+       {mobile_apis::AppHMIType::NAVIGATION, "NAVIGATION"},
+       {mobile_apis::AppHMIType::INFORMATION, "INFORMATION"},
+       {mobile_apis::AppHMIType::SOCIAL, "SOCIAL"},
+       {mobile_apis::AppHMIType::BACKGROUND_PROCESS, "BACKGROUND_PROCESS"},
+       {mobile_apis::AppHMIType::TESTING, "TESTING"},
+       {mobile_apis::AppHMIType::SYSTEM, "SYSTEM"}};
 
   std::map<mobile_apis::AppHMIType::eType, std::string>::const_iterator iter =
       app_hmi_type_map.find(type);
@@ -120,11 +119,11 @@ struct CheckMissedTypes {
     std::string app_type_str = AppHMITypeToString(
         static_cast<mobile_apis::AppHMIType::eType>(value.asInt()));
     if (!app_type_str.empty()) {
-    policy::StringArray::const_iterator it = policy_app_types_.begin();
-    policy::StringArray::const_iterator it_end = policy_app_types_.end();
-    for (; it != it_end; ++it) {
-      if (app_type_str == *it) {
-        return true;
+      policy::StringArray::const_iterator it = policy_app_types_.begin();
+      policy::StringArray::const_iterator it_end = policy_app_types_.end();
+      for (; it != it_end; ++it) {
+        if (app_type_str == *it) {
+          return true;
         }
       }
     }
@@ -336,13 +335,14 @@ void RegisterAppInterfaceRequest::Run() {
   GetPolicyHandler().SetDeviceInfo(device_mac, device_info);
 
   SendRegisterAppInterfaceResponseToMobile();
-  smart_objects::SmartObjectSPtr so = GetLockScreenIconUrlNotification(connection_key(), application);
+  smart_objects::SmartObjectSPtr so =
+      GetLockScreenIconUrlNotification(connection_key(), application);
   application_manager_.ManageMobileCommand(so, commands::Command::ORIGIN_SDL);
 }
 
-smart_objects::SmartObjectSPtr RegisterAppInterfaceRequest::GetLockScreenIconUrlNotification(
-    const uint32_t connection_key,
-    ApplicationSharedPtr app) {
+smart_objects::SmartObjectSPtr
+RegisterAppInterfaceRequest::GetLockScreenIconUrlNotification(
+    const uint32_t connection_key, ApplicationSharedPtr app) {
   DCHECK_OR_RETURN(app.get(), smart_objects::SmartObjectSPtr());
   smart_objects::SmartObjectSPtr message =
       utils::MakeShared<smart_objects::SmartObject>(
