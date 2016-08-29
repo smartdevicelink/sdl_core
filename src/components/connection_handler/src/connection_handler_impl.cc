@@ -722,6 +722,7 @@ void ConnectionHandlerImpl::CloseConnection(
   ConnectionList::iterator connection_list_itr =
       connection_list_.find(connection_uid);
   if (connection_list_.end() != connection_list_itr) {
+    delete connection_list_itr->second;
     connection_list_.erase(connection_list_itr);
   }
 }
