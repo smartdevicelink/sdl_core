@@ -247,4 +247,22 @@ void VRModule::ResetDefaultService() {
   default_service_ = 0;
 }
 
+void VRModule::RegisterService(int32_t app_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  vr_hmi_api::ServiceMessage message;
+  message.set_rpc(vr_hmi_api::ON_REGISTER);
+  vr_hmi_api::OnRegisterServiceNotification notification;
+  notification.set_appid(app_id);
+  bool is_default = app_id == default_service_;
+  if (is_default) {
+    notification.set_default_(is_default);
+  }
+  std::string params;
+  if (notification.SerializeToString(&params)) {
+    message.set_params(params);
+  }
+  commands::Command* command = factory_.Create(message);
+  RunCommand(command);
+}
+
 }  //  namespace vr_module
