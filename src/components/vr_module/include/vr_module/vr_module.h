@@ -38,6 +38,7 @@
 #include "utils/macro.h"
 #include "vr_module/commands/factory_interface.h"
 #include "vr_module/request_controller.h"
+#include "vr_module/service_module.h"
 #include "vr_module/vr_proxy.h"
 #include "vr_module/vr_proxy_listener.h"
 
@@ -46,7 +47,7 @@ namespace vr_module {
 typedef Json::Value MessageFromMobile;
 
 class VRModule : public functional_modules::GenericModule,
-    public VRProxyListener {
+    public VRProxyListener, public ServiceModule {
  public:
   VRModule();
   ~VRModule();
@@ -69,13 +70,9 @@ class VRModule : public functional_modules::GenericModule,
       application_manager::ApplicationSharedPtr app,
       mobile_apis::HMILevel::eType old_level);
 
-  /**
-   * @brief Returns unique correlation ID for request to mobile
-   *
-   * @return Unique correlation ID
-   */
-  static uint32_t GetNextCorrelationID() {
-    return next_correlation_id_++;
+  virtual int32_t GetNextCorrelationID() {
+    static int32_t next_correlation_id = 1;
+    return next_correlation_id++;
   }
 
   virtual void OnReady();
@@ -86,54 +83,15 @@ class VRModule : public functional_modules::GenericModule,
    */
   virtual void OnReceived(const vr_hmi_api::ServiceMessage& message);
 
-  /**
-   * Marks the application to use as service
-   * @param app_id unique application ID
-   */
-  void ActivateService(int32_t app_id);
-
-  /**
-   * Resets using the current application as service
-   */
-  void DeactivateService();
-
-  /**
-   * Registers request to HMI or Mobile side
-   * @param correlation_id unique id of request
-   */
-  void RegisterRequest(uint32_t correlation_id,
-                       commands::TimedCommandPtr command);
-
-  /**
-   * Unregisters request to HMI or Mobile side
-   * @param correlation_id unique id of request
-   */
-  void UnregisterRequest(uint32_t correlation_id);
-
-  /**
-   * Sets default service
-   * @param app_id unique application ID
-   */
-  void SetDefaultService(int32_t app_id);
-
-  /**
-   * Resets default service
-   */
-  void ResetDefaultService();
-
-  /**
-   * Sends message to HMI (Applink)
-   * @param message is GPB message according with protocol
-   * @return true if message was sent successful
-   */
-  bool SendToHmi(const vr_hmi_api::ServiceMessage& message);
-
-  /**
-   * Sends message to Mobile side
-   * @param message is GPB message according with protocol
-   * @return true if message was sent successful
-   */
-  bool SendToMobile(const vr_mobile_api::ServiceMessage& message);
+  virtual void ActivateService(int32_t app_id);
+  virtual void DeactivateService();
+  virtual void SetDefaultService(int32_t app_id);
+  virtual void ResetDefaultService();
+  virtual void RegisterRequest(int32_t correlation_id,
+                               commands::TimedCommand* command);
+  virtual void UnregisterRequest(int32_t correlation_id);
+  virtual bool SendToHmi(const vr_hmi_api::ServiceMessage& message);
+  virtual bool SendToMobile(const vr_mobile_api::ServiceMessage& message);
 
   /**
    * Registers service
@@ -141,12 +99,16 @@ class VRModule : public functional_modules::GenericModule,
    */
   void RegisterService(int32_t app_id);
 
-  bool supported() const {
+  virtual bool IsSupported() const {
     return supported_;
   }
 
-  void set_supported(bool value) {
-    supported_ = value;
+  virtual void EnableSupport() {
+    supported_ = true;
+  }
+
+  virtual void DisableSupport() {
+    supported_ = false;
   }
 
  private:
@@ -169,7 +131,6 @@ class VRModule : public functional_modules::GenericModule,
 
   functional_modules::PluginInfo plugin_info_;
 
-  static uint32_t next_correlation_id_;
   VRProxy proxy_;
   const commands::FactoryInterface& factory_;
   request_controller::RequestController request_controller_;

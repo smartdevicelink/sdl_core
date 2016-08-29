@@ -38,18 +38,18 @@
 
 namespace vr_module {
 
-class VRModule;
+class ServiceModule;
 
 namespace commands {
 
 class OnDefaultServiceChosen : public Command {
  public:
   OnDefaultServiceChosen(const vr_hmi_api::ServiceMessage& message,
-                         VRModule* module);
+                         ServiceModule* module);
   virtual bool Execute();
 
  private:
-  VRModule* module_;
+  ServiceModule* module_;
   vr_hmi_api::ServiceMessage message_;
 };
 

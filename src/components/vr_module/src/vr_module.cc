@@ -51,8 +51,6 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "VRModule")
 
 PLUGIN_FACTORY(VRModule)
 
-uint32_t VRModule::next_correlation_id_ = 1;
-
 VRModule::VRModule()
     : GenericModule(kModuleID),
       proxy_(this),
@@ -219,13 +217,13 @@ void VRModule::OnAppHMILevelChanged(application_manager::ApplicationSharedPtr ap
   // TODO(VSemenyuk): here should be implemented the corresponding logic
 }
 
-void VRModule::RegisterRequest(uint32_t correlation_id,
-                               commands::TimedCommandPtr command) {
+void VRModule::RegisterRequest(int32_t correlation_id,
+                               commands::TimedCommand* command) {
   LOG4CXX_AUTO_TRACE(logger_);
   request_controller_.AddRequest(correlation_id, command);
 }
 
-void VRModule::UnregisterRequest(uint32_t correlation_id) {
+void VRModule::UnregisterRequest(int32_t correlation_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   request_controller_.DeleteRequest(correlation_id);
 }

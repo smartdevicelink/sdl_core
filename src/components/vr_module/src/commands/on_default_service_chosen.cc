@@ -33,7 +33,7 @@
 #include "vr_module/commands/on_default_service_chosen.h"
 
 #include "utils/logger.h"
-#include "vr_module/vr_module.h"
+#include "vr_module/service_module.h"
 
 namespace vr_module {
 namespace commands {
@@ -41,7 +41,7 @@ namespace commands {
 CREATE_LOGGERPTR_GLOBAL(logger_, "VRModule")
 
 OnDefaultServiceChosen::OnDefaultServiceChosen(
-    const vr_hmi_api::ServiceMessage& message, VRModule* module)
+    const vr_hmi_api::ServiceMessage& message, ServiceModule* module)
     : module_(module),
       message_(message) {
 }

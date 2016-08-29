@@ -40,14 +40,15 @@
 
 namespace vr_module {
 
-class VRModule;
+class ServiceModule;
 
 namespace commands {
 
 class ActivateService : public TimedCommand, public event_engine::EventObserver<
     vr_mobile_api::ServiceMessage, vr_mobile_api::RPCName> {
  public:
-  ActivateService(const vr_hmi_api::ServiceMessage& message, VRModule* module);
+  ActivateService(const vr_hmi_api::ServiceMessage& message,
+                  ServiceModule* module);
   ~ActivateService();
   virtual bool Execute();
   virtual void OnTimeout();
@@ -56,7 +57,7 @@ class ActivateService : public TimedCommand, public event_engine::EventObserver<
           vr_mobile_api::RPCName>& event);
 
  private:
-  VRModule* module_;
+  ServiceModule* module_;
   vr_hmi_api::ServiceMessage message_;
   vr_mobile_api::ServiceMessage request_;
 };

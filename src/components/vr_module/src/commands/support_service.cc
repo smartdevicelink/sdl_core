@@ -35,7 +35,7 @@
 #include "utils/logger.h"
 #include "vr_module/event_engine/event_dispatcher.h"
 #include "vr_module/hmi_event.h"
-#include "vr_module/vr_module.h"
+#include "vr_module/service_module.h"
 
 namespace vr_module {
 namespace commands {
@@ -45,7 +45,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "VRModule")
 using event_engine::EventDispatcher;
 
 SupportService::SupportService(const vr_hmi_api::ServiceMessage& message,
-                               VRModule* module)
+                               ServiceModule* module)
     : module_(module),
       message_(message) {
   message_.set_rpc_type(vr_hmi_api::REQUEST);
@@ -67,7 +67,7 @@ bool SupportService::Execute() {
 
 void SupportService::OnTimeout() {
   LOG4CXX_AUTO_TRACE(logger_);
-  module_->set_supported(false);
+  module_->DisableSupport();
 }
 
 void SupportService::on_event(
@@ -77,7 +77,11 @@ void SupportService::on_event(
   vr_hmi_api::SupportServiceResponse response;
   if (message.has_params() && response.ParseFromString(message.params())) {
     bool supported = response.result() == vr_hmi_api::SUCCESS;
-    module_->set_supported(supported);
+    if (supported) {
+      module_->EnableSupport();
+    } else {
+      module_->DisableSupport();
+    }
   } else {
     LOG4CXX_ERROR(logger_, "Could not get result from message");
   }

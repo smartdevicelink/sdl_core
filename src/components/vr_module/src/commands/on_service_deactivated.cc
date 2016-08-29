@@ -34,14 +34,14 @@
 
 #include "utils/logger.h"
 #include "vr_module/interface/mobile.pb.h"
-#include "vr_module/vr_module.h"
+#include "vr_module/service_module.h"
 
 namespace vr_module {
 namespace commands {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "VRModule")
 
-OnServiceDeactivated::OnServiceDeactivated(VRModule* module)
+OnServiceDeactivated::OnServiceDeactivated(ServiceModule* module)
     : module_(module) {
 }
 

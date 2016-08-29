@@ -40,14 +40,14 @@
 
 namespace vr_module {
 
-class VRModule;
+class ServiceModule;
 
 namespace commands {
 
 class ProcessData : public TimedCommand, public event_engine::EventObserver<
     vr_mobile_api::ServiceMessage, vr_mobile_api::RPCName> {
  public:
-  ProcessData(const vr_hmi_api::ServiceMessage& message, VRModule* module);
+  ProcessData(const vr_hmi_api::ServiceMessage& message, ServiceModule* module);
   ~ProcessData();
   virtual bool Execute();
   virtual void OnTimeout();
@@ -56,7 +56,7 @@ class ProcessData : public TimedCommand, public event_engine::EventObserver<
           vr_mobile_api::RPCName>& event);
 
  private:
-  VRModule* module_;
+  ServiceModule* module_;
   vr_hmi_api::ServiceMessage message_;
   vr_mobile_api::ServiceMessage request_;
 };

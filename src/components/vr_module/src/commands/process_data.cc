@@ -36,7 +36,7 @@
 #include "vr_module/convertor.h"
 #include "vr_module/event_engine/event_dispatcher.h"
 #include "vr_module/mobile_event.h"
-#include "vr_module/vr_module.h"
+#include "vr_module/service_module.h"
 
 namespace vr_module {
 namespace commands {
@@ -46,7 +46,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "VRModule")
 using event_engine::EventDispatcher;
 
 ProcessData::ProcessData(const vr_hmi_api::ServiceMessage& message,
-                         VRModule* module)
+                         ServiceModule* module)
     : module_(module),
       message_(message) {
   request_.set_rpc(vr_mobile_api::PROCESS_DATA);
