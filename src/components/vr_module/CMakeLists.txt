@@ -48,6 +48,7 @@ set (SOURCES
     src/commands/on_default_service_chosen.cc
     src/commands/on_service_deactivated.cc
     src/commands/on_register_service.cc
+    src/commands/process_data.cc
 )
 
 set (LIBRARIES
