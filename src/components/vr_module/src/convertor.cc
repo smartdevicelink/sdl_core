@@ -30,46 +30,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "vr_module/commands/factory.h"
-
-#include "utils/logger.h"
-
-#include "vr_module/commands/activate_service.h"
-#include "vr_module/commands/on_service_deactivated.h"
-#include "vr_module/commands/support_service.h"
-#include "vr_module/interface/hmi.pb.h"
-#include "vr_module/interface/mobile.pb.h"
+#include "vr_module/convertor.h"
 
 namespace vr_module {
-namespace commands {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "VRModule")
-
-Factory::Factory(VRModule* module)
-    : module_(module) {
-}
-
-Command* Factory::Create(const vr_hmi_api::ServiceMessage& message) const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  switch (message.rpc()) {
-    case vr_hmi_api::SUPPORT_SERVICE:
-      return new SupportService(message, module_);
-    case vr_hmi_api::ON_DEACTIVATED:
-      return new OnServiceDeactivated(module_);
-    case vr_hmi_api::ACTIVATE:
-      return new ActivateService(message, module_);
-    case vr_hmi_api::PROCESS_DATA:
-    case vr_hmi_api::ON_REGISTER:
-    case vr_hmi_api::ON_DEFAULT_CHOSEN:
-    default: return 0;
+inline vr_hmi_api::ResultCode Convertor(vr_mobile_api::ResultCode value) {
+  switch (value) {
+    case vr_mobile_api::SUCCESS:
+      return vr_hmi_api::SUCCESS;
+    case vr_mobile_api::INVALID_DATA:
+      return vr_hmi_api::INVALID_DATA;
+    case vr_mobile_api::GENERIC_ERROR:
+      return vr_hmi_api::GENERIC_ERROR;
+    case vr_mobile_api::REJECTED:
+      return vr_hmi_api::REJECTED;
+    case vr_mobile_api::WARNINNG:
+      return vr_hmi_api::WARNINGS;
+    default:
+      return vr_hmi_api::GENERIC_ERROR;
   }
-  return 0;
 }
 
-Command* Factory::Create(const vr_mobile_api::ServiceMessage& message) const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  return 0;
+inline vr_mobile_api::ResultCode Convertor(vr_hmi_api::ResultCode value) {
+  switch (value) {
+    case vr_hmi_api::SUCCESS:
+      return vr_mobile_api::SUCCESS;
+    case vr_hmi_api::INVALID_DATA:
+      return vr_mobile_api::INVALID_DATA;
+    case vr_hmi_api::GENERIC_ERROR:
+      return vr_mobile_api::GENERIC_ERROR;
+    case vr_hmi_api::WARNINGS:
+      return vr_mobile_api::WARNINNG;
+    case vr_hmi_api::REJECTED:
+      return vr_mobile_api::REJECTED;
+    case vr_hmi_api::UNSUPPORTED_RESOURCE:
+    default:
+      return vr_mobile_api::GENERIC_ERROR;
+  }
 }
 
-}  // namespace commands
 }  // namespace vr_module
