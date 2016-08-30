@@ -36,12 +36,11 @@ namespace application_manager {
 
 namespace commands {
 
-UIGetLanguageRequest::UIGetLanguageRequest(const MessageSharedPtr& message)
-    : RequestToHMI(message) {
-}
+UIGetLanguageRequest::UIGetLanguageRequest(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : RequestToHMI(message, application_manager) {}
 
-UIGetLanguageRequest::~UIGetLanguageRequest() {
-}
+UIGetLanguageRequest::~UIGetLanguageRequest() {}
 
 void UIGetLanguageRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -52,4 +51,3 @@ void UIGetLanguageRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

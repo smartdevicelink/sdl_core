@@ -49,7 +49,8 @@ class UIShowResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UIShowResponse(const MessageSharedPtr& message);
+  UIShowResponse(const MessageSharedPtr& message,
+                 ApplicationManager& application_manager);
 
   /**
    * @brief UIShowResponse class destructor

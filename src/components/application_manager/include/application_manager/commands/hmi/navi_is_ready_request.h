@@ -49,7 +49,8 @@ class NaviIsReadyRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit NaviIsReadyRequest(const MessageSharedPtr& message);
+  NaviIsReadyRequest(const MessageSharedPtr& message,
+                     ApplicationManager& application_manager);
 
   /**
    * @brief NaviIsReadyRequest class destructor

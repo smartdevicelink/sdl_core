@@ -80,8 +80,8 @@ add_subdirectory(./config_profile)
 # --- AudioManager
 add_subdirectory(./media_manager)
 
-if (TIME_TESTER)
-    add_subdirectory(./time_tester)
+if (TELEMETRY_MONITOR)
+    add_subdirectory(./telemetry_monitor)
 endif()
 
 

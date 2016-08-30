@@ -55,7 +55,8 @@ class OnButtonPressNotification : public CommandNotificationImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnButtonPressNotification(const MessageSharedPtr& message);
+  OnButtonPressNotification(const MessageSharedPtr& message,
+                            ApplicationManager& application_manager);
 
   /**
    * @brief OnButtonEventCommand class destructor

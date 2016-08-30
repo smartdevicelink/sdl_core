@@ -34,30 +34,27 @@
 #include "application_manager/commands/mobile/put_file_response.h"
 #include "utils/file_system.h"
 #include "application_manager/application_impl.h"
-#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
 namespace commands {
 
-PutFileResponse::PutFileResponse(const MessageSharedPtr& message)
-    : CommandResponseImpl(message) {
-}
+PutFileResponse::PutFileResponse(const MessageSharedPtr& message,
+                                 ApplicationManager& application_manager)
+    : CommandResponseImpl(message, application_manager) {}
 
-PutFileResponse::~PutFileResponse() {
-}
+PutFileResponse::~PutFileResponse() {}
 
 void PutFileResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  uint32_t app_id = (*message_)[strings::params][strings::connection_key]
-      .asUInt();
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
+  uint32_t app_id =
+      (*message_)[strings::params][strings::connection_key].asUInt();
+  ApplicationSharedPtr app = application_manager_.application(app_id);
   if (!app) {
     LOG4CXX_ERROR(logger_, "Application not registered");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
-
 
   SendResponse((*message_)[strings::msg_params][strings::success].asBool());
 }

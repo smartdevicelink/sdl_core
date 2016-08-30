@@ -35,33 +35,33 @@
 std::basic_ostream<char>& operator<<(std::basic_ostream<char>& os,
                                      const QVariant& value) {
   switch (value.type()) {
-  case QVariant::Map: {
-    os << "{ ";
-    QVariantMap structure = value.toMap();
-    QMapIterator<QString, QVariant> i(structure);
-    while (i.hasNext()) {
-      i.next();
-      os << i.key() << ":" << i.value();
-      if (i.hasNext()) {
-        os << ", ";
+    case QVariant::Map: {
+      os << "{ ";
+      QVariantMap structure = value.toMap();
+      QMapIterator<QString, QVariant> i(structure);
+      while (i.hasNext()) {
+        i.next();
+        os << i.key() << ":" << i.value();
+        if (i.hasNext()) {
+          os << ", ";
+        }
       }
-    }
-    os << " }";
-  } break;
-  case QVariant::List: {
-    os << "[ ";
-    QVariantList array = value.toList();
-    QListIterator<QVariant> i(array);
-    while (i.hasNext()) {
-      os << i.next();
-      if (i.hasNext()) {
-        os << ", ";
+      os << " }";
+    } break;
+    case QVariant::List: {
+      os << "[ ";
+      QVariantList array = value.toList();
+      QListIterator<QVariant> i(array);
+      while (i.hasNext()) {
+        os << i.next();
+        if (i.hasNext()) {
+          os << ", ";
+        }
       }
-    }
-    os << " ]";
-  } break;
-  default:
-    os << value.toString().toLatin1().data();
+      os << " ]";
+    } break;
+    default:
+      os << value.toString().toLatin1().data();
   }
 
   return os;

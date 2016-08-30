@@ -68,10 +68,10 @@ class SingleThreadSimpleValidator {
   // of classes being checked for absence of concurrent access
   void AssertRunningOnCreationThread() const;
   PlatformThreadHandle creation_thread_id() const;
+
  private:
   const PlatformThreadHandle creation_thread_id_;
 };
-
 
 /*
  * This is bit more sophisticated debug helper which allows
@@ -97,10 +97,11 @@ class SingleThreadValidator {
   // of classes being checked for absence of unintended concurrent
   // access
   void AssertRunningOnValidThread() const;
+
  private:
   mutable PlatformThreadHandle owning_thread_id_;
 };
 
-} // namespace threads
+}  // namespace threads
 
-#endif // SRC_COMPONENTS_UTILS_INCLUDE_THREADS_THREAD_VALIDATOR_H_
+#endif  // SRC_COMPONENTS_UTILS_INCLUDE_THREADS_THREAD_VALIDATOR_H_

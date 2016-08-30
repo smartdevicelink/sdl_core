@@ -51,7 +51,8 @@ class DeleteInteractionChoiceSetResponse : public CommandResponseImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit DeleteInteractionChoiceSetResponse(const MessageSharedPtr& message);
+  DeleteInteractionChoiceSetResponse(const MessageSharedPtr& message,
+                                     ApplicationManager& application_manager);
 
   /**
    * @brief DeleteInteractionChoiceSetResponse class destructor

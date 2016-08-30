@@ -49,7 +49,8 @@ class ButtonGetCapabilitiesResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit ButtonGetCapabilitiesResponse(const MessageSharedPtr& message);
+  ButtonGetCapabilitiesResponse(const MessageSharedPtr& message,
+                                ApplicationManager& application_manager);
 
   /**
    * @brief ButtonGetCapabilitiesResponse class destructor

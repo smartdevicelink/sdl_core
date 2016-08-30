@@ -32,7 +32,7 @@
  */
 
 #include "application_manager/commands/mobile/alert_response.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
@@ -41,17 +41,16 @@ namespace application_manager {
 
 namespace commands {
 
-AlertResponse::AlertResponse(const MessageSharedPtr& message)
-    : CommandResponseImpl(message) {
-}
+AlertResponse::AlertResponse(const MessageSharedPtr& message,
+                             ApplicationManager& application_manager)
+    : CommandResponseImpl(message, application_manager) {}
 
-AlertResponse::~AlertResponse() {
-}
+AlertResponse::~AlertResponse() {}
 
 void AlertResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
+  application_manager_.SendMessageToMobile(message_);
 }
 
 }  // namespace commands

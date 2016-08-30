@@ -31,21 +31,19 @@
  */
 
 #include "application_manager/commands/hmi/request_to_hmi.h"
-#include "application_manager/application_manager_impl.h"
-#include "config_profile/profile.h"
 
 namespace application_manager {
 
 namespace commands {
 
-RequestToHMI::RequestToHMI(const MessageSharedPtr& message)
-    : CommandImpl(message) {
+RequestToHMI::RequestToHMI(const MessageSharedPtr& message,
+                           ApplicationManager& application_manager)
+    : CommandImpl(message, application_manager) {
   // Replace Mobile connection id with HMI app id
-  ApplicationManagerImpl::instance()->ReplaceMobileByHMIAppId(*(message.get()));
+  ReplaceMobileByHMIAppId(*(message.get()));
 }
 
-RequestToHMI::~RequestToHMI() {
-}
+RequestToHMI::~RequestToHMI() {}
 
 bool RequestToHMI::Init() {
   return true;
@@ -55,14 +53,13 @@ bool RequestToHMI::CleanUp() {
   return true;
 }
 
-void RequestToHMI::Run() {
-}
+void RequestToHMI::Run() {}
 
 void RequestToHMI::SendRequest() {
   (*message_)[strings::params][strings::protocol_type] = hmi_protocol_type_;
   (*message_)[strings::params][strings::protocol_version] = protocol_version_;
 
-  ApplicationManagerImpl::instance()->SendMessageToHMI(message_);
+  application_manager_.SendMessageToHMI(message_);
 }
 
 }  // namespace commands

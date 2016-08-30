@@ -49,7 +49,8 @@ class UIChangeRegistrationRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UIChangeRegistrationRequest(const MessageSharedPtr& message);
+  UIChangeRegistrationRequest(const MessageSharedPtr& message,
+                              ApplicationManager& application_manager);
 
   /**
    * @brief UIChangeRegistrationRequest class destructor

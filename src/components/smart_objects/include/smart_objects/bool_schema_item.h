@@ -50,13 +50,14 @@ class CBoolSchemaItem : public CDefaultSchemaItem<bool> {
    * @return Shared pointer to a new schema item.
    **/
   static utils::SharedPtr<CBoolSchemaItem> create(
-    const TSchemaItemParameter<bool>& DefaultValue =
-      TSchemaItemParameter<bool>());
+      const TSchemaItemParameter<bool>& DefaultValue =
+          TSchemaItemParameter<bool>());
 
  private:
   explicit CBoolSchemaItem(const TSchemaItemParameter<bool>& DefaultValue);
   SmartType getSmartType() const OVERRIDE;
   bool getDefaultValue() const OVERRIDE;
+
  private:
   DISALLOW_COPY_AND_ASSIGN(CBoolSchemaItem);
 };

@@ -43,26 +43,27 @@ namespace commands {
  * @brief SDLGetListOfPermissionsResponse command class
  **/
 class SDLGetListOfPermissionsResponse : public ResponseToHMI {
-  public:
-    /**
-     * @brief SDLGetListOfPermissionsResponse class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit SDLGetListOfPermissionsResponse(const MessageSharedPtr& message);
+ public:
+  /**
+   * @brief SDLGetListOfPermissionsResponse class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  SDLGetListOfPermissionsResponse(const MessageSharedPtr& message,
+                                  ApplicationManager& application_manager);
 
-    /**
-     * @brief SDLGetListOfPermissionsResponse class destructor
-     **/
-    virtual ~SDLGetListOfPermissionsResponse();
+  /**
+   * @brief SDLGetListOfPermissionsResponse class destructor
+   **/
+  virtual ~SDLGetListOfPermissionsResponse();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(SDLGetListOfPermissionsResponse);
+ private:
+  DISALLOW_COPY_AND_ASSIGN(SDLGetListOfPermissionsResponse);
 };
 
 }  // namespace commands

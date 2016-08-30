@@ -45,7 +45,7 @@ namespace NsSmartObjects {
 /**
  * @brief Default schema item.
  **/
-template<typename Type>
+template <typename Type>
 class CDefaultSchemaItem : public ISchemaItem {
  public:
   typedef TSchemaItemParameter<Type> ParameterType;
@@ -93,17 +93,17 @@ class CDefaultSchemaItem : public ISchemaItem {
   DISALLOW_COPY_AND_ASSIGN(CDefaultSchemaItem<Type>);
 };
 
-template<typename Type>
+template <typename Type>
 CDefaultSchemaItem<Type>::CDefaultSchemaItem(const ParameterType& DefaultValue)
-  : mDefaultValue(DefaultValue) {
-}
+    : mDefaultValue(DefaultValue) {}
 
-template<typename Type>
+template <typename Type>
 Errors::eType CDefaultSchemaItem<Type>::validate(const SmartObject& Object) {
-  return (getSmartType() == Object.getType()) ? Errors::OK : Errors::INVALID_VALUE;
+  return (getSmartType() == Object.getType()) ? Errors::OK
+                                              : Errors::INVALID_VALUE;
 }
 
-template<typename Type>
+template <typename Type>
 bool CDefaultSchemaItem<Type>::setDefaultValue(SmartObject& Object) {
   Type value;
   if (mDefaultValue.getValue(value)) {
@@ -113,9 +113,9 @@ bool CDefaultSchemaItem<Type>::setDefaultValue(SmartObject& Object) {
   return false;
 }
 
-template<typename Type>
+template <typename Type>
 void CDefaultSchemaItem<Type>::BuildObjectBySchema(
-  const SmartObject& pattern_object, SmartObject& result_object) {
+    const SmartObject& pattern_object, SmartObject& result_object) {
   if (getSmartType() == pattern_object.getType()) {
     result_object = pattern_object;
   } else {

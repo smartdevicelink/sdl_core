@@ -37,10 +37,10 @@
 
 namespace policy {
 class PTExchangeHandler {
-  public:
-    virtual ~PTExchangeHandler() {};
-    virtual void Start() = 0;
-    virtual void Stop() = 0;
+ public:
+  virtual ~PTExchangeHandler(){};
+  virtual void Start() = 0;
+  virtual void Stop() = 0;
 };
 }  //  namespace policy
 

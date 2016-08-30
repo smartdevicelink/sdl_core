@@ -34,15 +34,13 @@
 namespace utils {
 
 BitStream::BitStream(uint8_t* bytes, size_t bytes_count)
-    : bytes_(bytes),
-      bytes_count_(bytes_count),
-      byte_offset_(0),
-      bit_offset_(0),
-      bad_(false) {
-}
+    : bytes_(bytes)
+    , bytes_count_(bytes_count)
+    , byte_offset_(0)
+    , bit_offset_(0)
+    , bad_(false) {}
 
-BitStream::~BitStream() {
-}
+BitStream::~BitStream() {}
 
 size_t BitStream::FullBytesLeft() {
   size_t left = bytes_count_ - byte_offset_;
@@ -104,7 +102,7 @@ void Extract(BitStream* bs, std::string* str, size_t length) {
       bs->MarkBad();
       return;
     }
-    str->resize(length+1);
+    str->resize(length + 1);
     void* stringdata = &(*str)[0];
     bs->ExtractBytes(stringdata, length);
     str->resize(length);
@@ -129,4 +127,3 @@ void Extract(BitStream* bs, std::vector<uint8_t>* data, size_t length) {
 }
 
 }  // namespace utils
-

@@ -46,14 +46,9 @@ class UsbControlOutTransfer;
 
 class UsbControlTransfer {
  public:
-  enum TransferDirection {
-    IN,
-    OUT
-  };
+  enum TransferDirection { IN, OUT };
 
-  enum RequestType {
-    VENDOR
-  };
+  enum RequestType { VENDOR };
 
   virtual ~UsbControlTransfer() {}
   virtual TransferDirection Direction() const = 0;
@@ -67,21 +62,27 @@ class UsbControlTransfer {
 class UsbControlInTransfer : public UsbControlTransfer {
  public:
   virtual ~UsbControlInTransfer() {}
-  virtual TransferDirection Direction() const { return IN; }
+  virtual TransferDirection Direction() const {
+    return IN;
+  }
   virtual bool OnCompleted(unsigned char* data) const = 0;
 };
 
 class UsbControlOutTransfer : public UsbControlTransfer {
  public:
   virtual ~UsbControlOutTransfer() {}
-  virtual TransferDirection Direction() const { return OUT; }
+  virtual TransferDirection Direction() const {
+    return OUT;
+  }
   virtual const char* Data() const = 0;
 };
 
 class UsbControlTransferSequence {
  public:
   typedef std::list<UsbControlTransfer*> Transfers;
-  const Transfers& transfers() const { return transfers_; }
+  const Transfers& transfers() const {
+    return transfers_;
+  }
 
   virtual ~UsbControlTransferSequence() {
     for (Transfers::iterator it = transfers_.begin(); it != transfers_.end();

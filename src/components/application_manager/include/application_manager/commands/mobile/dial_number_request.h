@@ -48,7 +48,8 @@ class DialNumberRequest : public CommandRequestImpl {
   /**
    * \brief DialNumberRequest class constructor
    **/
-  explicit DialNumberRequest(const MessageSharedPtr& message);
+  DialNumberRequest(const MessageSharedPtr& message,
+                    ApplicationManager& application_manager);
 
   /**
    * \brief DialNumberRequest class destructor
@@ -58,11 +59,11 @@ class DialNumberRequest : public CommandRequestImpl {
   /**
     * @brief Initialize request params
    **/
-   bool Init() OVERRIDE;
+  bool Init() OVERRIDE;
 
   /**
-   * @brief Execute command
-   **/
+    * @brief Execute command
+    **/
   void Run() OVERRIDE;
 
   /**
@@ -73,13 +74,12 @@ class DialNumberRequest : public CommandRequestImpl {
   void on_event(const event_engine::Event& event);
 
  private:
-
   /**
    * @brief Removes from number param all characters
    * except the + character and digits.
    *
    */
-  void StripNumberParam(std::string &number);
+  void StripNumberParam(std::string& number);
 
   DISALLOW_COPY_AND_ASSIGN(DialNumberRequest);
 };

@@ -37,12 +37,10 @@ namespace application_manager {
 namespace commands {
 
 VIGetVehicleDataRequest::VIGetVehicleDataRequest(
-    const MessageSharedPtr& message)
-    : RequestToHMI(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : RequestToHMI(message, application_manager) {}
 
-VIGetVehicleDataRequest::~VIGetVehicleDataRequest() {
-}
+VIGetVehicleDataRequest::~VIGetVehicleDataRequest() {}
 
 void VIGetVehicleDataRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -53,4 +51,3 @@ void VIGetVehicleDataRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

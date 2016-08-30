@@ -38,15 +38,20 @@
 
 namespace logger {
 
-bool push_log(
-        log4cxx::LoggerPtr logger,
-        log4cxx::LevelPtr level,
-        const std::string& entry,
-        log4cxx_time_t timeStamp,
-        const log4cxx::spi::LocationInfo& location,
-        const log4cxx::LogString& threadName
-        );
+bool push_log(log4cxx::LoggerPtr logger,
+              log4cxx::LevelPtr level,
+              const std::string& entry,
+              log4cxx_time_t timeStamp,
+              const log4cxx::spi::LocationInfo& location,
+              const log4cxx::LogString& threadName);
 
+void flush_logger();
+
+bool logs_enabled();
+void set_logs_enabled(bool state);
+
+void create_log_message_loop_thread();
+void delete_log_message_loop_thread();
 }  // namespace logger
 
 #endif  // SRC_COMPONENTS_INCLUDE_UTILS_PUSH_LOG_H_

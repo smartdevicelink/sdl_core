@@ -31,26 +31,23 @@
  */
 
 #include "application_manager/commands/hmi/on_ignition_cycle_over_notification.h"
-#include "application_manager/policies/policy_handler.h"
+#include "application_manager/application_manager.h"
 
 namespace application_manager {
 
 namespace commands {
 
 OnIgnitionCycleOverNotification::OnIgnitionCycleOverNotification(
-    const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : NotificationFromHMI(message, application_manager) {}
 
-OnIgnitionCycleOverNotification::~OnIgnitionCycleOverNotification() {
-}
+OnIgnitionCycleOverNotification::~OnIgnitionCycleOverNotification() {}
 
 void OnIgnitionCycleOverNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  policy::PolicyHandler::instance()->OnIgnitionCycleOver();
+  application_manager_.GetPolicyHandler().OnIgnitionCycleOver();
 }
 
 }  // namespace commands
 
 }  // namespace application_manager
-

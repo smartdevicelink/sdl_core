@@ -50,7 +50,8 @@ class UIEndAudioPassThruRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UIEndAudioPassThruRequest(const MessageSharedPtr& message);
+  UIEndAudioPassThruRequest(const MessageSharedPtr& message,
+                            ApplicationManager& application_manager);
 
   /**
    * @brief UIEndAudioPassThruRequest class destructor

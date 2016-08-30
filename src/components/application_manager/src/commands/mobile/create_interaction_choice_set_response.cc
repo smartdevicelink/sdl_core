@@ -32,7 +32,7 @@
  */
 
 #include "application_manager/commands/mobile/create_interaction_choice_set_response.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"
 
@@ -41,12 +41,10 @@ namespace application_manager {
 namespace commands {
 
 CreateInteractionChoiceSetResponse::CreateInteractionChoiceSetResponse(
-    const MessageSharedPtr& message)
-    : CommandResponseImpl(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandResponseImpl(message, application_manager) {}
 
-CreateInteractionChoiceSetResponse::~CreateInteractionChoiceSetResponse() {
-}
+CreateInteractionChoiceSetResponse::~CreateInteractionChoiceSetResponse() {}
 
 void CreateInteractionChoiceSetResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

@@ -51,7 +51,8 @@ class AddSubMenuResponse : public CommandResponseImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit AddSubMenuResponse(const MessageSharedPtr& message);
+  AddSubMenuResponse(const MessageSharedPtr& message,
+                     ApplicationManager& application_manager);
 
   /**
    * @brief AddSubMenuResponse class destructor

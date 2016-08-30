@@ -39,12 +39,11 @@ namespace application_manager {
 namespace commands {
 
 OnAppInterfaceUnregisteredNotification::OnAppInterfaceUnregisteredNotification(
-    const MessageSharedPtr& message)
-    : CommandNotificationImpl(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandNotificationImpl(message, application_manager) {}
 
-OnAppInterfaceUnregisteredNotification::~OnAppInterfaceUnregisteredNotification() {
-}
+OnAppInterfaceUnregisteredNotification::
+    ~OnAppInterfaceUnregisteredNotification() {}
 
 void OnAppInterfaceUnregisteredNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

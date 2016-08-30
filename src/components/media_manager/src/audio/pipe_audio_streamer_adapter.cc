@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2014-2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,22 +31,14 @@
  */
 
 #include "media_manager/audio/pipe_audio_streamer_adapter.h"
-#include "config_profile/profile.h"
-#include "utils/logger.h"
 
 namespace media_manager {
 
-CREATE_LOGGERPTR_GLOBAL(logger, "PipeAudioStreamerAdapter")
+PipeAudioStreamerAdapter::PipeAudioStreamerAdapter(
+    const std::string& named_audio_pipe_path,
+    const std::string& app_storage_folder)
+    : PipeStreamerAdapter(named_audio_pipe_path, app_storage_folder) {}
 
-PipeAudioStreamerAdapter::PipeAudioStreamerAdapter() {
-  LOG4CXX_AUTO_TRACE(logger);
-  named_pipe_path_ = profile::Profile::instance()->named_audio_pipe_path();
-
-  Init();
-}
-
-PipeAudioStreamerAdapter::~PipeAudioStreamerAdapter() {
-  LOG4CXX_INFO(logger, "PipeAudioStreamerAdapter::~PipeAudioStreamerAdapter");
-}
+PipeAudioStreamerAdapter::~PipeAudioStreamerAdapter() {}
 
 }  // namespace media_manager

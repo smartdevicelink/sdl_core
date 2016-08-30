@@ -52,7 +52,8 @@ class AlertRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit AlertRequest(const MessageSharedPtr& message);
+  AlertRequest(const MessageSharedPtr& message,
+               ApplicationManager& application_manager);
 
   /**
    * @brief AlertRequest class destructor
@@ -71,7 +72,8 @@ class AlertRequest : public CommandRequestImpl {
 
   /*
    * @brief Will caled by request controller, when default will be expired.
-   * If Alert request has soft buttons, timeout response should not be sent to mobile
+   * If Alert request has soft buttons, timeout response should not be sent to
+   * mobile
    */
   virtual void onTimeOut();
 
@@ -83,7 +85,6 @@ class AlertRequest : public CommandRequestImpl {
   void on_event(const event_engine::Event& event);
 
  protected:
-
  private:
   /*
    * @brief Checks if request parameters are valid
@@ -102,15 +103,16 @@ class AlertRequest : public CommandRequestImpl {
    * @brief Sends TTS Speak request
    *
    * @param app_id Id of application requested this RPC
-   */
-  void SendSpeakRequest(int32_t app_id);
-
-  /*
-   * @brief Sends Basic communication playtone notification
    *
-   * @param app_id Id of application requested this RPC
+   * @param tts_chunks_exists if tts chunks exists in
+   * message contains true, otherwise contains false
+   *
+   * @param length_tts_chunks contains length of array
+   * tts chunks.
    */
-  void SendPlayToneNotification(int32_t app_id);
+  void SendSpeakRequest(int32_t app_id,
+                        bool tts_chunks_exists,
+                        size_t length_tts_chunks);
 
   /*
    * @brief Tells if there are sent requests without responses
@@ -124,14 +126,14 @@ class AlertRequest : public CommandRequestImpl {
    */
   bool CheckStringsOfAlertRequest();
 
-  bool                        awaiting_ui_alert_response_;
-  bool                        awaiting_tts_speak_response_;
-  bool                        awaiting_tts_stop_speaking_response_;
-  bool                        response_success_;
-  bool                        flag_other_component_sent_;
-  mobile_apis::Result::eType  response_result_;
-  smart_objects::SmartObject  response_params_;
-  mobile_apis::Result::eType  tts_speak_response_;
+  bool awaiting_ui_alert_response_;
+  bool awaiting_tts_speak_response_;
+  bool awaiting_tts_stop_speaking_response_;
+  bool is_alert_succeeded_;
+  bool is_ui_alert_sent_;
+  mobile_apis::Result::eType alert_result_;
+  smart_objects::SmartObject alert_response_params_;
+  mobile_apis::Result::eType tts_speak_result_;
 
   DISALLOW_COPY_AND_ASSIGN(AlertRequest);
 };

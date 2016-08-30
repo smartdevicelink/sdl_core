@@ -41,7 +41,6 @@
 
 namespace file_system {
 
-
 /**
  * @brief Get available disc space.
  *
@@ -147,6 +146,13 @@ void Close(std::ofstream* file_stream);
 std::string CurrentWorkingDirectory();
 
 /**
+ * @brief Allows to obtaine absolute path for certain path.
+ * @param path the file name for which absolute path have to be calculated.
+ * @return absolute path for certain path.
+ */
+std::string GetAbsolutePath(const std::string& path);
+
+/**
   * @brief Removes file
   *
   * @param name path to file
@@ -158,7 +164,8 @@ bool DeleteFile(const std::string& name);
  * @brief Removes directory.
  *
  * @param name path to directory.
- * @param is_recursively true if you need delete directory recursively, otherwise false.
+ * @param is_recursively true if you need delete directory recursively,
+ *otherwise false.
  * @return returns true if the directory is successfully deleted.
  */
 bool RemoveDirectory(const std::string& directory_name,
@@ -213,8 +220,7 @@ bool WriteBinaryFile(const std::string& name,
   * @param result read data
   * @return returns true if the operation is successfully.
   */
-bool ReadBinaryFile(const std::string& name,
-                    std::vector<uint8_t>& result);
+bool ReadBinaryFile(const std::string& name, std::vector<uint8_t>& result);
 
 bool ReadFile(const std::string& name, std::string& result);
 
@@ -248,8 +254,7 @@ uint64_t GetFileModificationTime(const std::string& path);
   * @param dst Destination file path
   * @return if result success return true
 */
-bool CopyFile(const std::string& src,
-              const std::string& dst);
+bool CopyFile(const std::string& src, const std::string& dst);
 
 /**
   * @brief Move file from source to destination
@@ -258,8 +263,8 @@ bool CopyFile(const std::string& src,
   * @param dst Destination file path
   * @return if result success return true
 */
-bool MoveFile(const std::string& src,
-              const std::string& dst);
+bool MoveFile(const std::string& src, const std::string& dst);
+
 void remove_directory_content(const std::string& directory_name);
 
 }  // namespace file_system
