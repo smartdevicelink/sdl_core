@@ -45,7 +45,12 @@ class VRProxyListener {
   }
 
   /**
-   * Handles receiving GPB message from IVDCM
+   * Handles event about that listener is ready to work
+   */
+  virtual void OnReady() = 0;
+
+  /**
+   * Handles receiving GPB message from HMI(Applink)
    * @param message GPB message according with hmi.proto file
    */
   virtual void OnReceived(const vr_hmi_api::ServiceMessage& message) = 0;

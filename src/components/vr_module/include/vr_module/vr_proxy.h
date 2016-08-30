@@ -68,6 +68,7 @@ class VRProxy : public threads::MessageLoopThread<MessageQueue>::Handler {
   inline void StartChannel();
   void Receive();
   void Handle(vr_hmi_api::ServiceMessage message);
+  void OnEstablished();
   void OnReceived(const vr_hmi_api::ServiceMessage& message);
   std::string SizeToString(int32_t value);
   int32_t SizeFromString(const std::string& value);

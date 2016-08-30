@@ -78,6 +78,8 @@ class VRModule
     return next_correlation_id_++;
   }
 
+  virtual void OnReady();
+
   /**
    * Handles received message from HMI (Applink)
    * @param message is GPB message according with protocol
