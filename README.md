@@ -64,7 +64,8 @@ environment variable
 
 ##### Steps for Windows platform
 * Download [sqlite3 sources](https://www.sqlite.org/2015/sqlite-amalgamation-3090200.zip) and extract them. Create new environment variable `SDL_SQLITE_DIR` and assign path where sqlite sources were extracted to this variable.
-* Download [sqlite3 binaries](https://www.sqlite.org/2015/sqlite-dll-win64-x64-3090200.zip). Extract them and add this folder to `PATH`.
+* Download [sqlite3 binaries](https://www.sqlite.org/2015/sqlite-dll-win64-x64-3090200.zip). Extract them to the same folder as sources and add this folder to the `PATH` environment variable.
+**Note:** It is important that both sources and binaries are in one and the same directory. The name of directory is not important. It is important the folder name is associated with `SDL_SQLITE_DIR`.
 * Install [Windows SDK 7.1](https://www.microsoft.com/en-us/download/details.aspx?id=8442)
 * Install [Visual Studio 2013](https://www.microsoft.com/en-us/download/confirmation.aspx?id=44914)
 
@@ -86,11 +87,13 @@ environment variable
 
 ##### Steps for Windows platform
 
-* Go to directory with cloned repository
-* Run setup_VS2013_x64.cmd to generate solution for Visual Studio 2013.
+* Go to the directory with the cloned repository.
+* Run setup_VS2013_x64.cmd to generate solution for Visual Studio 2013. It is located in tools\ms.
 **Note:** In case Visual Studio has been installed to non-default location -- modify path in .cmd file.
 **Note:** Double click on file or run from windows command prompt. DO NOT run in "git bash".
-* After script execution finish, go to build directory which is located one directory upper and open smartDeviceLinkCore.sln file using Visual Studio 2013
+* After script execution finish:
+  * Add path to the openssl executable to the PATH environment variable. By default in build\openssl_win_x64\bin.
+  * Go to the build directory which is in cloned repository folder and open smartDeviceLinkCore.sln file using Visual Studio 2013
 * Set smartDeviceLinkCore project as a startup in order to be able to run or debug it from Visual Studio
 * Run smartDeviceLinkCore project build
 * Run INSTALL project build to install SDL
