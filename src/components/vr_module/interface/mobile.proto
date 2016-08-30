@@ -14,6 +14,7 @@ enum ResultCode{
     GENERIC_ERROR = 2;
     REJECTED = 3;
     WARNINNG = 4;
+    TIMEOUT = 5;
 }
 
 enum RPCName{

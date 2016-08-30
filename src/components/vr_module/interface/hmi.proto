@@ -15,6 +15,7 @@ enum ResultCode{
   UNSUPPORTED_RESOURCE = 3;
   WARNINGS = 4;
   REJECTED = 5;
+  TIMEOUT = 6;
 }
 
 enum RPCName{

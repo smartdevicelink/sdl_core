@@ -77,7 +77,13 @@ bool ActivateService::Execute() {
 
 void ActivateService::OnTimeout() {
   LOG4CXX_AUTO_TRACE(logger_);
-  // TODO(KKolodiy): add timeout processing
+  message_.set_rpc_type(vr_hmi_api::RESPONSE);
+  vr_hmi_api::ActivateServiceResponse hmi_response;
+  hmi_response.set_result(vr_hmi_api::TIMEOUT);
+  std::string params;
+  hmi_response.SerializeToString(&params);
+  message_.set_params(params);
+  module_->SendToHmi(message_);
 }
 
 void ActivateService::on_event(
