@@ -35,7 +35,7 @@
 
 #include <map>
 
-#include "vr_module/commands/command.h"
+#include "vr_module/commands/timed_command.h"
 #include "vr_module/vr_module_timer.h"
 
 namespace vr_module {
@@ -66,7 +66,7 @@ class RequestController : public functional_modules::TimerObserver<TrackableMess
    * @param command pointer to request created in mobile factory
    */
   void AddRequest(const uint32_t& correlation_id,
-                  commands::CommandPtr request);
+                  commands::TimedCommandPtr request);
 
   /**
    * @brief Removes request
@@ -84,7 +84,7 @@ class RequestController : public functional_modules::TimerObserver<TrackableMess
   void ResetTimer(const uint32_t& correlation_id);
 
  private:
-  typedef std::map<correlation_id, commands::CommandPtr> RequestList;
+  typedef std::map<correlation_id, commands::TimedCommandPtr> RequestList;
   RequestList request_list_;
   functional_modules::ModuleTimer<TrackableMessage> timer_;
   DISALLOW_COPY_AND_ASSIGN(RequestController);

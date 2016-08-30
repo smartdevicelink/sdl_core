@@ -58,7 +58,7 @@ RequestController::~RequestController() {
 }
 
 void RequestController::AddRequest(const uint32_t& correlation_id,
-                                   commands::CommandPtr request) {
+                                   commands::TimedCommandPtr request) {
   // TODO(VS) Research and fix be problem with overlap correlation ids from two
   // different apllications(on two different mobile devices)
   request_list_[correlation_id] = request;

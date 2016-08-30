@@ -48,11 +48,6 @@ class Command {
    * @return true if command was started successful
    */
   virtual bool Execute() = 0;
-
-  /**
-   * Command on timeout reaction
-   */
-  virtual void OnTimeout() = 0;
 };
 
 typedef utils::SharedPtr<commands::Command> CommandPtr;

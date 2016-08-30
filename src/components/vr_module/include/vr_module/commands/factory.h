@@ -44,8 +44,8 @@ namespace commands {
 class Factory : public FactoryInterface {
  public:
   explicit Factory(VRModule* module);
-  virtual Command* Create(const vr_hmi_api::ServiceMessage& message) const;
-  virtual Command* Create(const vr_mobile_api::ServiceMessage& message) const;
+  virtual CommandPtr Create(const vr_hmi_api::ServiceMessage& message) const;
+  virtual CommandPtr Create(const vr_mobile_api::ServiceMessage& message) const;
 
  private:
   VRModule* module_;

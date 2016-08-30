@@ -33,7 +33,7 @@
 #ifndef SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_ACTIVATE_SERVICE_H_
 #define SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_ACTIVATE_SERVICE_H_
 
-#include "vr_module/commands/command.h"
+#include "vr_module/commands/timed_command.h"
 #include "vr_module/event_engine/event_dispatcher.h"
 #include "vr_module/interface/hmi.pb.h"
 #include "vr_module/interface/mobile.pb.h"
@@ -44,7 +44,7 @@ class VRModule;
 
 namespace commands {
 
-class ActivateService : public Command, public event_engine::EventObserver<
+class ActivateService : public TimedCommand, public event_engine::EventObserver<
     vr_mobile_api::ServiceMessage, vr_mobile_api::RPCName> {
  public:
   ActivateService(const vr_hmi_api::ServiceMessage& message, VRModule* module);

@@ -45,7 +45,6 @@ class OnServiceDeactivated : public Command {
  public:
   explicit OnServiceDeactivated(VRModule* module);
   virtual bool Execute();
-  virtual void OnTimeout();
 
  private:
   VRModule* module_;
