@@ -134,15 +134,18 @@ class AddCommandRequest : public CommandRequestImpl {
 
   inline bool BothSend() const;
 
+  const std::string GenerateMobileResponseInfo();
   bool send_ui_;
   bool send_vr_;
 
   bool is_ui_received_;
   bool is_vr_received_;
 
+  std::string ui_info_;
+  std::string vr_info_;
+
   hmi_apis::Common_Result::eType ui_result_;
   hmi_apis::Common_Result::eType vr_result_;
-  std::string info_;
 };
 
 }  // namespace commands

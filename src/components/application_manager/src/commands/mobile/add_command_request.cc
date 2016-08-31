@@ -315,12 +315,9 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
       is_ui_received_ = true;
       ui_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
-
+      ui_info_ = message[strings::msg_params][strings::info].asString();
       if (hmi_apis::Common_Result::SUCCESS != ui_result_) {
         (*message_)[strings::msg_params].erase(strings::menu_params);
-      }
-      if (message[strings::msg_params].keyExists(strings::info)) {
-        info_ += message[strings::msg_params][strings::info].asString();
       }
       break;
     }
@@ -330,12 +327,9 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
       MessageHelper::PrintSmartObject(message);
       vr_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
-
+      vr_info_ = message[strings::msg_params][strings::info].asString();
       if (hmi_apis::Common_Result::SUCCESS != vr_result_) {
         (*message_)[strings::msg_params].erase(strings::vr_commands);
-      }
-      if (message[strings::msg_params].keyExists(strings::info)) {
-        info_ += message[strings::msg_params][strings::info].asString();
       }
       break;
     }
@@ -478,9 +472,10 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
     RemoveCommand();
   }
 
+  const std::string info = GenerateMobileResponseInfo();
   SendResponse(result,
                result_code,
-               info_.empty() ? NULL : info_.c_str(),
+               info.empty() ? NULL : info.c_str(),
                &(message[strings::msg_params]));
 
   if (result) {
@@ -531,7 +526,31 @@ bool AddCommandRequest::IsWhiteSpaceExist() {
 }
 
 bool AddCommandRequest::BothSend() const {
-  return send_vr_ && send_ui_;
+    return send_vr_ && send_ui_;
+}
+
+std::string MergeInfos(const std::string& first, const std::string& second) {
+  if (!first.empty() && second.empty()) {
+    return first;
+  }
+  if (first.empty() && !second.empty()) {
+    return second;
+  }
+  if (!first.empty() && !second.empty()) {
+    return first + ", " + second;
+  }
+  return std::string();
+}
+
+const std::__cxx11::string AddCommandRequest::GenerateMobileResponseInfo() {
+    if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == vr_result_) {
+        return MergeInfos(vr_info_, ui_info_);
+    }
+
+    if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == ui_result_) {
+        return MergeInfos(ui_info_, vr_info_);
+    }
+    return MergeInfos(ui_info_, vr_info_);
 }
 
 void AddCommandRequest::RemoveCommand() {
