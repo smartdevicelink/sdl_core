@@ -529,17 +529,17 @@ bool AddCommandRequest::BothSend() const {
     return send_vr_ && send_ui_;
 }
 
+/**
+ * @brief MergeInfos merge 2 infos in one string
+ * @param first first info string
+ * @param second - second info string
+ * @return if first is empty return second
+ *         if second is empty return first
+ *         if both are empty return empty string
+ *         if both are not empty return empty first +", " + second
+ */
 std::string MergeInfos(const std::string& first, const std::string& second) {
-  if (!first.empty() && second.empty()) {
-    return first;
-  }
-  if (first.empty() && !second.empty()) {
-    return second;
-  }
-  if (!first.empty() && !second.empty()) {
-    return first + ", " + second;
-  }
-  return std::string();
+  return first + ((!first.empty() && !second.empty()) ? ", " : "") + second;
 }
 
 const std::string AddCommandRequest::GenerateMobileResponseInfo() {
