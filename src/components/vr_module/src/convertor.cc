@@ -47,7 +47,7 @@ inline vr_hmi_api::ResultCode Convertor(vr_mobile_api::ResultCode value) {
     case vr_mobile_api::WARNINNG:
       return vr_hmi_api::WARNINGS;
     case vr_mobile_api::TIMEOUT:
-          return vr_hmi_api::TIMEOUT;
+      return vr_hmi_api::TIMEOUT;
     default:
       return vr_hmi_api::GENERIC_ERROR;
   }
@@ -66,7 +66,7 @@ inline vr_mobile_api::ResultCode Convertor(vr_hmi_api::ResultCode value) {
     case vr_hmi_api::REJECTED:
       return vr_mobile_api::REJECTED;
     case vr_hmi_api::TIMEOUT:
-          return vr_mobile_api::TIMEOUT;
+      return vr_mobile_api::TIMEOUT;
     case vr_hmi_api::UNSUPPORTED_RESOURCE:
     default:
       return vr_mobile_api::GENERIC_ERROR;
