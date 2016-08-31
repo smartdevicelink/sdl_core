@@ -851,7 +851,8 @@ TEST_F(HMICommandsNotificationsTest,
 
 TEST_F(HMICommandsNotificationsTest,
        OnDeviceStateChangedNotificationDeviceStateUnpaired) {
-  std::string device_id = "device_id";
+  // Random MAC adress for test. It must contain 12 symbols.
+  const std::string device_id = "AA15F2204D6B";
   MessageSharedPtr message = CreateMessage();
   (*message)[am::strings::msg_params]["deviceState"] =
       hmi_apis::Common_DeviceState::UNPAIRED;
@@ -867,40 +868,40 @@ TEST_F(HMICommandsNotificationsTest,
 
 TEST_F(HMICommandsNotificationsTest,
        OnDeviceStateChangedNotificationDeviceStateEmptyDeviceId) {
-  const std::string kEmptyDeviceId = "";
+  const std::string empty_device_id = "";
   MessageSharedPtr message = CreateMessage();
   (*message)[am::strings::msg_params]["deviceState"] =
       hmi_apis::Common_DeviceState::UNPAIRED;
-  (*message)[am::strings::msg_params]["deviceInternalId"] = kEmptyDeviceId;
+  (*message)[am::strings::msg_params]["deviceInternalId"] = empty_device_id;
 
   utils::SharedPtr<Command> command =
       CreateCommand<OnDeviceStateChangedNotification>(message);
 
-  std::string device_id = "device_id";
+  std::string device_id = "default_id";
   EXPECT_CALL(app_mngr_, GetPolicyHandler());
   EXPECT_CALL(policy_interface_, RemoveDevice(_)).WillOnce(GetArg(&device_id));
   command->Run();
-  EXPECT_EQ(kEmptyDeviceId, device_id);
+  EXPECT_EQ(empty_device_id, device_id);
 }
 
 TEST_F(HMICommandsNotificationsTest,
        OnDeviceStateChangedNotificationDeviceStateDeviceIdFromId) {
-  const std::string kEmptyDeviceId = "";
-  const std::string kId = "id_string";
+  const std::string empty_device_id = "";
+  const std::string id = "id_string";
   MessageSharedPtr message = CreateMessage();
   (*message)[am::strings::msg_params]["deviceState"] =
       hmi_apis::Common_DeviceState::UNPAIRED;
-  (*message)[am::strings::msg_params]["deviceInternalId"] = kEmptyDeviceId;
-  (*message)[am::strings::msg_params]["deviceId"]["id"] = kId;
+  (*message)[am::strings::msg_params]["deviceInternalId"] = empty_device_id;
+  (*message)[am::strings::msg_params]["deviceId"]["id"] = id;
 
   utils::SharedPtr<Command> command =
       CreateCommand<OnDeviceStateChangedNotification>(message);
 
-  std::string device_id = "device_id";
+  std::string device_id = "default_id";
   EXPECT_CALL(app_mngr_, GetPolicyHandler());
   EXPECT_CALL(policy_interface_, RemoveDevice(_)).WillOnce(GetArg(&device_id));
   command->Run();
-  EXPECT_EQ(kId, device_id);
+  EXPECT_EQ(id, device_id);
 }
 
 //~policy_handler
