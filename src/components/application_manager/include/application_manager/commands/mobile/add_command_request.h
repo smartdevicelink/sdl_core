@@ -134,6 +134,11 @@ class AddCommandRequest : public CommandRequestImpl {
 
   inline bool BothSend() const;
 
+  /**
+   * @brief GenerateMobileResponseInfo generated info for mobile response
+   * depends from UI and VR responses
+   * @return info for mobile response
+   */
   const std::string GenerateMobileResponseInfo();
   bool send_ui_;
   bool send_vr_;
