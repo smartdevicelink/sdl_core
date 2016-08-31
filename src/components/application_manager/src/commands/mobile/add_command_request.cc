@@ -542,7 +542,7 @@ std::string MergeInfos(const std::string& first, const std::string& second) {
   return std::string();
 }
 
-const std::__cxx11::string AddCommandRequest::GenerateMobileResponseInfo() {
+const std::string AddCommandRequest::GenerateMobileResponseInfo() {
     if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == vr_result_) {
         return MergeInfos(vr_info_, ui_info_);
     }
