@@ -65,12 +65,45 @@ class VRProxy : public threads::MessageLoopThread<MessageQueue>::Handler {
   bool Send(const vr_hmi_api::ServiceMessage& message);
 
  private:
+  /**
+   * Starts channel to connect to HMI(Applink)
+   */
   inline void StartChannel();
+
+  /**
+   * Routine to receive messages from HMI(Applink)
+   */
   void Receive();
+
+  /**
+   * Handles message from queue from HMI(Applink)
+   * @param message received message
+   */
   void Handle(vr_hmi_api::ServiceMessage message);
+
+  /**
+   * Handles that channel to HMI is established successfully.
+   */
   void OnEstablished();
+
+  /**
+   * Handles receiving message from channel
+   * @param message received message
+   */
   void OnReceived(const vr_hmi_api::ServiceMessage& message);
+
+  /**
+   * Converts size of message to string
+   * @param value integer presentaiont of size
+   * @return string presentation of size
+   */
   std::string SizeToString(int32_t value);
+
+  /**
+   * Converts string to size of message
+   * @param value string presentaiont of size
+   * @return integer presentaiont of size
+   */
   int32_t SizeFromString(const std::string& value);
   VRProxyListener *listener_;
   threads::MessageLoopThread<MessageQueue> incoming_;
