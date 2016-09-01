@@ -324,7 +324,6 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
     case hmi_apis::FunctionID::VR_AddCommand: {
       LOG4CXX_INFO(logger_, "Received VR_AddCommand event");
       is_vr_received_ = true;
-      MessageHelper::PrintSmartObject(message);
       vr_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
       vr_info_ = message[strings::msg_params][strings::info].asString();
@@ -531,15 +530,15 @@ bool AddCommandRequest::BothSend() const {
 
 /**
  * @brief MergeInfos merge 2 infos in one string
- * @param first first info string
- * @param second - second info string
- * @return if first is empty return second
- *         if second is empty return first
+ * @param lval - info string that should be first in result info
+ * @param rval - info string that should be second in result info
+ * @return if lval is empty return rval
+ *         if rval is empty return lval
  *         if both are empty return empty string
- *         if both are not empty return empty first +", " + second
+ *         if both are not empty return empty lval +", " + rval
  */
-std::string MergeInfos(const std::string& first, const std::string& second) {
-  return first + ((!first.empty() && !second.empty()) ? ", " : "") + second;
+std::string MergeInfos(const std::string& lval, const std::string& rval) {
+  return lval + ((!lval.empty() && !rval.empty()) ? ", " : "") + rval;
 }
 
 const std::string AddCommandRequest::GenerateMobileResponseInfo() {
@@ -550,6 +549,9 @@ const std::string AddCommandRequest::GenerateMobileResponseInfo() {
   // Other way order is doesn't matter
   if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == vr_result_) {
     return MergeInfos(vr_info_, ui_info_);
+  }
+  if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == ui_result_) {
+    return MergeInfos(ui_info_, vr_info_);
   }
   return MergeInfos(ui_info_, vr_info_);
 }
