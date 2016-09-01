@@ -526,7 +526,7 @@ bool AddCommandRequest::IsWhiteSpaceExist() {
 }
 
 bool AddCommandRequest::BothSend() const {
-    return send_vr_ && send_ui_;
+  return send_vr_ && send_ui_;
 }
 
 /**
@@ -543,14 +543,14 @@ std::string MergeInfos(const std::string& first, const std::string& second) {
 }
 
 const std::string AddCommandRequest::GenerateMobileResponseInfo() {
-    if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == vr_result_) {
-        return MergeInfos(vr_info_, ui_info_);
-    }
+  if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == vr_result_) {
+    return MergeInfos(vr_info_, ui_info_);
+  }
 
-    if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == ui_result_) {
-        return MergeInfos(ui_info_, vr_info_);
-    }
+  if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == ui_result_) {
     return MergeInfos(ui_info_, vr_info_);
+  }
+  return MergeInfos(ui_info_, vr_info_);
 }
 
 void AddCommandRequest::RemoveCommand() {
