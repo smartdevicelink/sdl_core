@@ -67,7 +67,7 @@ bool SupportService::Execute() {
 
 void SupportService::OnTimeout() {
   LOG4CXX_AUTO_TRACE(logger_);
-  // TODO(KKolodiy): add timeout processing
+  module_->set_supported(false);
 }
 
 void SupportService::on_event(
