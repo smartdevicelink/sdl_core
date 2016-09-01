@@ -543,12 +543,13 @@ std::string MergeInfos(const std::string& first, const std::string& second) {
 }
 
 const std::string AddCommandRequest::GenerateMobileResponseInfo() {
+  // In case if vr_result_ is UNSUPPORTED_RESOURCE vr_info should be on the
+  // first place
+  // In case if ui_result_ is UNSUPPORTED_RESOURCE ui_info should be on the
+  // first place
+  // Other way order is doesn't matter
   if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == vr_result_) {
     return MergeInfos(vr_info_, ui_info_);
-  }
-
-  if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == ui_result_) {
-    return MergeInfos(ui_info_, vr_info_);
   }
   return MergeInfos(ui_info_, vr_info_);
 }
