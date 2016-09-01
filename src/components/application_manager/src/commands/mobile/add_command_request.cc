@@ -315,27 +315,20 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
       is_ui_received_ = true;
       ui_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
-
+      ui_info_ = message[strings::msg_params][strings::info].asString();
       if (hmi_apis::Common_Result::SUCCESS != ui_result_) {
         (*message_)[strings::msg_params].erase(strings::menu_params);
-      }
-      if (message[strings::msg_params].keyExists(strings::info)) {
-        info_ += message[strings::msg_params][strings::info].asString();
       }
       break;
     }
     case hmi_apis::FunctionID::VR_AddCommand: {
       LOG4CXX_INFO(logger_, "Received VR_AddCommand event");
       is_vr_received_ = true;
-      MessageHelper::PrintSmartObject(message);
       vr_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
-
+      vr_info_ = message[strings::msg_params][strings::info].asString();
       if (hmi_apis::Common_Result::SUCCESS != vr_result_) {
         (*message_)[strings::msg_params].erase(strings::vr_commands);
-      }
-      if (message[strings::msg_params].keyExists(strings::info)) {
-        info_ += message[strings::msg_params][strings::info].asString();
       }
       break;
     }
@@ -478,9 +471,10 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
     RemoveCommand();
   }
 
+  const std::string info = GenerateMobileResponseInfo();
   SendResponse(result,
                result_code,
-               info_.empty() ? NULL : info_.c_str(),
+               info.empty() ? NULL : info.c_str(),
                &(message[strings::msg_params]));
 
   if (result) {
@@ -532,6 +526,34 @@ bool AddCommandRequest::IsWhiteSpaceExist() {
 
 bool AddCommandRequest::BothSend() const {
   return send_vr_ && send_ui_;
+}
+
+/**
+ * @brief MergeInfos merge 2 infos in one string
+ * @param lval - info string that should be first in result info
+ * @param rval - info string that should be second in result info
+ * @return if lval is empty return rval
+ *         if rval is empty return lval
+ *         if both are empty return empty string
+ *         if both are not empty return empty lval +", " + rval
+ */
+std::string MergeInfos(const std::string& lval, const std::string& rval) {
+  return lval + ((!lval.empty() && !rval.empty()) ? ", " : "") + rval;
+}
+
+const std::string AddCommandRequest::GenerateMobileResponseInfo() {
+  // In case if vr_result_ is UNSUPPORTED_RESOURCE vr_info should be on the
+  // first place
+  // In case if ui_result_ is UNSUPPORTED_RESOURCE ui_info should be on the
+  // first place
+  // Other way order is doesn't matter
+  if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == vr_result_) {
+    return MergeInfos(vr_info_, ui_info_);
+  }
+  if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == ui_result_) {
+    return MergeInfos(ui_info_, vr_info_);
+  }
+  return MergeInfos(ui_info_, vr_info_);
 }
 
 void AddCommandRequest::RemoveCommand() {
