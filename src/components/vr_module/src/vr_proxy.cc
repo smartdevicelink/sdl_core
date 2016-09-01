@@ -57,6 +57,7 @@ class Receiver : public threads::ThreadDelegate {
       LOG4CXX_ERROR(logger_, "Could not start channel");
       return;
     }
+    parent_->OnEstablished();
     while (!stop_) {
       parent_->Receive();
     }
@@ -174,6 +175,10 @@ void VRProxy::Receive() {
   } else {
     LOG4CXX_WARN(logger_, "Could not read size of message");
   }
+}
+
+void VRProxy::OnEstablished() {
+  listener_->OnReady();
 }
 
 }  // namespace vr_module

@@ -63,7 +63,6 @@ VRModule::VRModule()
   plugin_info_.name = "VRModulePlugin";
   plugin_info_.version = 1;
   SubscribeToRpcMessages();
-  CheckSupport();
 }
 
 VRModule::~VRModule() {
@@ -74,6 +73,10 @@ void VRModule::CheckSupport() {
   message.set_rpc(vr_hmi_api::SUPPORT_SERVICE);
   commands::CommandPtr command = factory_.Create(message);
   RunCommand(command);
+}
+
+void VRModule::OnReady() {
+  CheckSupport();
 }
 
 void VRModule::OnReceived(const vr_hmi_api::ServiceMessage& message) {
