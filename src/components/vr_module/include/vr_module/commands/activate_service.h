@@ -57,6 +57,7 @@ class ActivateService : public TimedCommand, public event_engine::EventObserver<
           vr_mobile_api::RPCName>& event);
 
  private:
+  bool SendResponse(vr_hmi_api::ResultCode code);
   ServiceModule* module_;
   vr_hmi_api::ServiceMessage message_;
   vr_mobile_api::ServiceMessage request_;

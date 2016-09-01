@@ -12,6 +12,7 @@ set (SOURCES
   src/vr_library_test.cc
   src/vr_proxy_test.cc
   src/support_service_test.cc
+  src/activate_service_test.cc
 )
 
 set (LIBRARIES

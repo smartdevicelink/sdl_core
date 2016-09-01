@@ -58,8 +58,9 @@ class SupportServiceTest : public ::testing::Test {
 TEST_F(SupportServiceTest, Execute) {
   MockServiceModule service;
 
-  EXPECT_CALL(service, GetNextCorrelationID()).Times(1).WillOnce(Return(1));
-  EXPECT_CALL(service, RegisterRequest(1, _)).Times(1);
+  const int32_t kId = 1;
+  EXPECT_CALL(service, GetNextCorrelationID()).Times(1).WillOnce(Return(kId));
+  EXPECT_CALL(service, RegisterRequest(kId, _)).Times(1);
   vr_hmi_api::ServiceMessage input;
   input.set_rpc(vr_hmi_api::SUPPORT_SERVICE);
   SupportService cmd(input, &service);
@@ -67,10 +68,10 @@ TEST_F(SupportServiceTest, Execute) {
   vr_hmi_api::ServiceMessage expected;
   expected.set_rpc(vr_hmi_api::SUPPORT_SERVICE);
   expected.set_rpc_type(vr_hmi_api::REQUEST);
-  expected.set_correlation_id(1);
+  expected.set_correlation_id(kId);
   EXPECT_CALL(service, SendToHmi(ServiceMessageEq(expected))).Times(1).WillOnce(
       Return(true));
-  EXPECT_EQ(true, cmd.Execute());
+  EXPECT_TRUE(cmd.Execute());
 }
 
 TEST_F(SupportServiceTest, OnEventSuccess) {
@@ -121,6 +122,28 @@ TEST_F(SupportServiceTest, OnEventUnsupport) {
   HmiEvent event(response);
 
   EXPECT_CALL(service, DisableSupport()).Times(1);
+  EXPECT_CALL(service, UnregisterRequest(kId)).Times(1);
+  cmd.on_event(event);
+}
+
+TEST_F(SupportServiceTest, OnEventNoParams) {
+  MockServiceModule service;
+
+  const int32_t kId = 1;
+  EXPECT_CALL(service, GetNextCorrelationID()).Times(1).WillOnce(Return(kId));
+  EXPECT_CALL(service, RegisterRequest(kId, _)).Times(1);
+  vr_hmi_api::ServiceMessage input;
+  input.set_rpc(vr_hmi_api::SUPPORT_SERVICE);
+  SupportService cmd(input, &service);
+
+  vr_hmi_api::ServiceMessage response;
+  response.set_rpc(vr_hmi_api::SUPPORT_SERVICE);
+  response.set_rpc_type(vr_hmi_api::RESPONSE);
+  response.set_correlation_id(kId);
+  HmiEvent event(response);
+
+  EXPECT_CALL(service, EnableSupport()).Times(0);
+  EXPECT_CALL(service, DisableSupport()).Times(0);
   EXPECT_CALL(service, UnregisterRequest(kId)).Times(1);
   cmd.on_event(event);
 }
