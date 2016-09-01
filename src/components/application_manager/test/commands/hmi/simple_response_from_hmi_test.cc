@@ -50,7 +50,7 @@
 #include "hmi/tts_set_global_properties_response.h"
 #include "hmi/tts_speak_response.h"
 #include "hmi/tts_stop_speaking_response.h"
-#include "hmi/ui_add_command_response.h"
+#include "hmi/tts_change_registration_response.h"
 #include "hmi/ui_add_command_response.h"
 #include "hmi/ui_add_submenu_response.h"
 #include "hmi/ui_alert_response.h"
@@ -154,7 +154,9 @@ typedef Types<
                 hmi_apis::FunctionID::VR_ChangeRegistration>,
     CommandData<commands::VRDeleteCommandResponse,
                 hmi_apis::FunctionID::VR_DeleteCommand>,
-    CommandData<commands::UISliderResponse, hmi_apis::FunctionID::UI_Slider> >
+    CommandData<commands::UISliderResponse, hmi_apis::FunctionID::UI_Slider>,
+    CommandData<commands::TTSChangeRegistratioResponse,
+                hmi_apis::FunctionID::TTS_ChangeRegistration> >
     ResponseCommandsList;
 
 TYPED_TEST_CASE(ResponseFromHMICommandsTest, ResponseCommandsList);
