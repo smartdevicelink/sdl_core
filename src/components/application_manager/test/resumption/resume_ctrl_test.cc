@@ -797,10 +797,10 @@ TEST_F(ResumeCtrlTest, OnAppRegistrationStart) {
 }
 
 TEST_F(ResumeCtrlTest, OnAppRegistrationEnd) {
-  const uint32_t kTimeout = 10u;
+  const uint32_t timeout = 1000u;
   EXPECT_CALL(mock_application_manager_settings_,
               app_resumption_save_persistent_data_timeout())
-      .WillOnce(ReturnRef(kTimeout));
+      .WillOnce(ReturnRef(timeout));
   res_ctrl->OnAppRegistrationEnd();
 }
 
@@ -889,10 +889,10 @@ TEST_F(ResumeCtrlTest, OnSuspend_EmptyApplicationlist) {
 }
 
 TEST_F(ResumeCtrlTest, OnAwake) {
-  const uint32_t kTimeout = 10u;
+  const uint32_t timeout = 1000u;
   EXPECT_CALL(mock_application_manager_settings_,
               app_resumption_save_persistent_data_timeout())
-      .WillOnce(ReturnRef(kTimeout));
+      .WillOnce(ReturnRef(timeout));
   EXPECT_CALL(*mock_storage, OnAwake());
   res_ctrl->OnAwake();
 }
