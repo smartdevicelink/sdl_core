@@ -30,37 +30,66 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "gtest/gtest.h"
+#include "gmock/gmock.h"
+#include "mock_service_module.h"
 #include "vr_module/commands/on_default_service_chosen.h"
+#include "vr_module/interface/hmi.pb.h"
+#include "vr_module/interface/mobile.pb.h"
 
-#include "utils/logger.h"
-#include "vr_module/service_module.h"
+using ::testing::_;
+using ::testing::Return;
 
 namespace vr_module {
 namespace commands {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "VRModule")
+class OnDefaultServiceChosenTest : public ::testing::Test {
+ protected:
+};
 
-OnDefaultServiceChosen::OnDefaultServiceChosen(
-    const vr_hmi_api::ServiceMessage& message, ServiceModule* module)
-    : module_(module),
-      message_(message) {
+TEST_F(OnDefaultServiceChosenTest, Execute) {
+  MockServiceModule service;
+
+  vr_hmi_api::ServiceMessage input;
+  input.set_rpc(vr_hmi_api::ON_DEFAULT_CHOSEN);
+  vr_hmi_api::OnDefaultServiceChosenNotification notification;
+  notification.set_appid(1);
+  std::string params;
+  notification.SerializeToString(&params);
+  input.set_params(params);
+  OnDefaultServiceChosen cmd(input, &service);
+
+  EXPECT_CALL(service, ResetDefaultService()).Times(0);
+  EXPECT_CALL(service, SetDefaultService(1)).Times(1);
+  EXPECT_TRUE(cmd.Execute());
 }
 
-bool OnDefaultServiceChosen::Execute() {
-  LOG4CXX_AUTO_TRACE(logger_);
+TEST_F(OnDefaultServiceChosenTest, ExecuteReset) {
+  MockServiceModule service;
+
+  vr_hmi_api::ServiceMessage input;
+  input.set_rpc(vr_hmi_api::ON_DEFAULT_CHOSEN);
   vr_hmi_api::OnDefaultServiceChosenNotification notification;
-  if (message_.has_params()
-      && notification.ParseFromString(message_.params())) {
-    if (notification.has_appid()) {
-      int32_t app_id = notification.appid();
-      module_->SetDefaultService(app_id);
-    } else {
-      module_->ResetDefaultService();
-    }
-  } else {
-    LOG4CXX_ERROR(logger_, "Could not get application ID from message");
-  }
-  return true;
+  std::string params;
+  notification.SerializeToString(&params);
+  input.set_params(params);
+  OnDefaultServiceChosen cmd(input, &service);
+
+  EXPECT_CALL(service, SetDefaultService(_)).Times(0);
+  EXPECT_CALL(service, ResetDefaultService()).Times(1);
+  EXPECT_TRUE(cmd.Execute());
+}
+
+TEST_F(OnDefaultServiceChosenTest, ExecuteNoParams) {
+  MockServiceModule service;
+
+  vr_hmi_api::ServiceMessage input;
+  input.set_rpc(vr_hmi_api::ON_DEFAULT_CHOSEN);
+  OnDefaultServiceChosen cmd(input, &service);
+
+  EXPECT_CALL(service, ResetDefaultService()).Times(0);
+  EXPECT_CALL(service, ResetDefaultService()).Times(0);
+  EXPECT_TRUE(cmd.Execute());
 }
 
 }  // namespace commands

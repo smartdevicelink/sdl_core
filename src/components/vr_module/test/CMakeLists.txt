@@ -16,6 +16,7 @@ set (SOURCES
   src/process_data_test.cc
   src/on_register_service_test.cc
   src/on_service_deactivated_test.cc
+  src/on_default_service_chosen_test.cc
 )
 
 set (LIBRARIES
