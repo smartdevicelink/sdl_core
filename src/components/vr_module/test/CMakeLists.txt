@@ -14,6 +14,7 @@ set (SOURCES
   src/support_service_test.cc
   src/activate_service_test.cc
   src/process_data_test.cc
+  src/on_register_service_test.cc
 )
 
 set (LIBRARIES

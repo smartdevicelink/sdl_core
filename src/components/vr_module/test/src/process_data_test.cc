@@ -44,7 +44,7 @@ using ::testing::Return;
 namespace vr_module {
 namespace commands {
 
-MATCHER_P(ServiceMessageEq, expected, ""){
+MATCHER_P(ServiceMessageEq, expected, "") {
   return arg.rpc() == expected.rpc()
       && arg.rpc_type() == expected.rpc_type()
       && arg.correlation_id() == expected.correlation_id()
