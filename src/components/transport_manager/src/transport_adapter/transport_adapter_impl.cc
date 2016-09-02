@@ -751,21 +751,20 @@ void TransportAdapterImpl::ConnectFailed(const DeviceUID& device_handle,
 void TransportAdapterImpl::RemoveFinalizedConnection(
     const DeviceUID& device_handle, const ApplicationHandle& app_handle) {
   const DeviceUID device_uid = device_handle;
-  const ApplicationHandle app_uid = app_handle;
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoWriteLock lock(connections_lock_);
   ConnectionMap::iterator it_conn =
       connections_.find(std::make_pair(device_uid, app_handle));
   if (it_conn == connections_.end()) {
     LOG4CXX_WARN(logger_,
-                 "Device_id: " << &device_uid << ", app_handle: " << &app_uid
+                 "Device_id: " << &device_uid << ", app_handle: " << &app_handle
                                << " connection not found");
     return;
   }
   const ConnectionInfo& info = it_conn->second;
   if (info.state != ConnectionInfo::FINALISING) {
     LOG4CXX_WARN(logger_,
-                 "Device_id: " << &device_uid << ", app_handle: " << &app_uid
+                 "Device_id: " << &device_uid << ", app_handle: " << &app_handle
                                << " connection not finalized");
     return;
   }
