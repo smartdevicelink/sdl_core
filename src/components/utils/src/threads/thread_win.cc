@@ -131,7 +131,11 @@ Thread::Thread(const char* name, ThreadDelegate* delegate)
     , handle_(NULL)
     , thread_options_()
     , thread_command_(kThreadCommandNone)
-    , thread_state_(kThreadStateNone) {}
+    , thread_state_(kThreadStateNone) {
+#ifdef THREAD_COUNT
+  ThreadCounter::Increment();
+#endif  // THREAD_COUNT
+}
 
 bool Thread::start() {
   return start(thread_options_);
@@ -257,6 +261,9 @@ Thread::~Thread() {
     }
     CloseHandle(handle_);
   }
+#ifdef THREAD_COUNT
+  ThreadCounter::Decrement();
+#endif  // THREAD_COUNT
 }
 
 Thread* CreateThread(const char* name, ThreadDelegate* delegate) {

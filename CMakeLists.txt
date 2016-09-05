@@ -64,6 +64,7 @@ option(ENABLE_SANITIZE "Sanitize tool" OFF)
 option(ENABLE_SECURITY "Security Ford protocol protection" ON)
 option(ENABLE_HMI_PTU_DECRYPTION "Policy table update parsed by hmi" ON)
 option(ENABLE_EXTENDED_POLICY "Turns extended flow which requires embedded system interaction" ON)
+option(ENABLE_THREAD_COUNT "Turn on correct threads shutdown checks" OFF)
 
 # Platform - specific build flags
 if(${OS} STREQUAL "posix")
@@ -163,6 +164,11 @@ endif()
 if(ENABLE_EXTENDED_POLICY)
   add_definitions(-DEXTENDED_POLICY)
   message(STATUS "Extended policy enabled")
+endif()
+
+if(ENABLE_THREAD_COUNT)
+  add_definitions(-DTHREAD_COUNT)
+  message(STATUS "Thread counting enabled")
 endif()
 
 if(EXTENDED_MEDIA_MODE)
