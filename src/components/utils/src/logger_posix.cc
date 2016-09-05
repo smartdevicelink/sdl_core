@@ -100,6 +100,12 @@ bool logger::Logger::Impl::InitLogger(const bool logs_enabled,
   return false;
 }
 
+namespace {
+void RemoveLocalAppenders(log4cxx::LoggerPtr logger) {
+  logger->removeAllAppenders();
+}
+}
+
 void logger::Logger::Impl::DeinitLogger() {
   SDL_CREATE_LOGGER("Logger");
   SDL_DEBUG("Logger deinitialization");
@@ -108,6 +114,14 @@ void logger::Logger::Impl::DeinitLogger() {
   set_log_level(LogLevel::LL_TRACE);
   delete message_loop_thread_;
   message_loop_thread_ = NULL;
+
+  // 3rd-party logger deinitialization
+  log4cxx::LoggerPtr rootLogger = log4cxx::Logger::getRootLogger();
+  log4cxx::spi::LoggerRepositoryPtr repository =
+      rootLogger->getLoggerRepository();
+  log4cxx::LoggerList loggers = repository->getCurrentLoggers();
+  std::for_each(loggers.begin(), loggers.end(), RemoveLocalAppenders);
+  rootLogger->removeAllAppenders();
 }
 
 void logger::Logger::Impl::FlushLogger() {
