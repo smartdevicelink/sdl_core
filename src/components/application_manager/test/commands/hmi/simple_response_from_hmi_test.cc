@@ -85,6 +85,7 @@
 #include "hmi/vr_add_command_response.h"
 #include "hmi/vr_change_registration_response.h"
 #include "hmi/vr_delete_command_response.h"
+#include "hmi/vr_perform_interaction_response.h"
 
 namespace test {
 namespace components {
@@ -202,7 +203,9 @@ typedef Types<
     CommandData<commands::UISetGlobalPropertiesResponse,
                 hmi_apis::FunctionID::UI_SetGlobalProperties>,
     CommandData<commands::UISetGlobalPropertiesResponse,
-                hmi_apis::FunctionID::UI_SetGlobalProperties> >
+                hmi_apis::FunctionID::UI_SetGlobalProperties>,
+    CommandData<commands::VRPerformInteractionResponse,
+                hmi_apis::FunctionID::VR_PerformInteraction> >
     ResponseCommandsList;
 
 TYPED_TEST_CASE(ResponseFromHMICommandsTest, ResponseCommandsList);

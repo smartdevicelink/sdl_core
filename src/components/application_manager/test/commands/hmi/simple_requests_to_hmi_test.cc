@@ -95,6 +95,11 @@
 #include "hmi/vr_add_command_request.h"
 #include "hmi/vr_change_registration_request.h"
 #include "hmi/vr_delete_command_request.h"
+#include "hmi/vr_get_capabilities_request.h"
+#include "hmi/vr_get_supported_languages_request.h"
+#include "hmi/vr_get_language_request.h"
+#include "hmi/vr_is_ready_request.h"
+#include "hmi/vr_perform_interaction_request.h"
 
 namespace test {
 namespace components {
@@ -137,6 +142,9 @@ class RequestToHMICommandsTest
  public:
   typedef Command CommandType;
 };
+
+template <class Command>
+class RequestToHMICommandsTest2 : public RequestToHMICommandsTest<Command> {};
 
 typedef Types<commands::VIIsReadyRequest,
               commands::VIGetVehicleTypeRequest,
@@ -187,13 +195,30 @@ typedef Types<commands::VIIsReadyRequest,
               commands::NaviGetWayPointsRequest,
               commands::NaviIsReadyRequest,
               commands::UIScrollableMessageRequest,
-              commands::UISetAppIconRequest,
-              commands::UiSetDisplayLayoutRequest,
               commands::UISetGlobalPropertiesRequest> RequestCommandsList;
 
+typedef Types<commands::VRGetCapabilitiesRequest,
+              commands::UISetAppIconRequest,
+              commands::UiSetDisplayLayoutRequest,
+              commands::VRGetSupportedLanguagesRequest,
+              commands::VRGetLanguageRequest,
+              commands::VRPerformInteractionRequest,
+              commands::VRIsReadyRequest> RequestCommandsList2;
+
 TYPED_TEST_CASE(RequestToHMICommandsTest, RequestCommandsList);
+TYPED_TEST_CASE(RequestToHMICommandsTest2, RequestCommandsList2);
 
 TYPED_TEST(RequestToHMICommandsTest, Run_SendMessageToHMI_SUCCESS) {
+  typedef typename TestFixture::CommandType CommandType;
+
+  SharedPtr<CommandType> command = this->template CreateCommand<CommandType>();
+
+  EXPECT_CALL(this->app_mngr_, SendMessageToHMI(NotNull()));
+
+  command->Run();
+}
+
+TYPED_TEST(RequestToHMICommandsTest2, Run_SendMessageToHMI_SUCCESS) {
   typedef typename TestFixture::CommandType CommandType;
 
   SharedPtr<CommandType> command = this->template CreateCommand<CommandType>();
