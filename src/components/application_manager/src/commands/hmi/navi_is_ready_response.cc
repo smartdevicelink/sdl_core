@@ -43,22 +43,9 @@ NaviIsReadyResponse::~NaviIsReadyResponse() {}
 
 void NaviIsReadyResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  smart_objects::SmartObject& object = *message_;
-
-  bool is_available = false;
-  if (object[strings::msg_params].keyExists(strings::available)) {
-    is_available = object[strings::msg_params][strings::available].asBool();
-    const HmiInterfaces::InterfaceState interface_state =
-        is_available ? HmiInterfaces::STATE_AVAILABLE
-                     : HmiInterfaces::STATE_NOT_AVAILABLE;
-    HmiInterfaces& hmi_interfaces = application_manager_.hmi_interfaces();
-    hmi_interfaces.SetInterfaceState(HmiInterfaces::HMI_INTERFACE_Navigation,
-                                     interface_state);
-  }
-
-  HMICapabilities& hmi_capabilities = application_manager_.hmi_capabilities();
-
-  hmi_capabilities.set_is_navi_cooperating(is_available);
+  event_engine::Event event(hmi_apis::FunctionID::Navigation_IsReady);
+  event.set_smart_object(*message_);
+  event.raise(application_manager_.event_dispatcher());
 }
 
 }  // namespace commands

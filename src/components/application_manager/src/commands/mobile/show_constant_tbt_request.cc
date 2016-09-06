@@ -178,22 +178,26 @@ void ShowConstantTBTRequest::Run() {
 
 void ShowConstantTBTRequest::on_event(const event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
+  using namespace hmi_apis;
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
     case hmi_apis::FunctionID::Navigation_ShowConstantTBT: {
       LOG4CXX_INFO(logger_, "Received Navigation_ShowConstantTBT event");
-
-      mobile_apis::Result::eType result_code =
-          GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
-              message[strings::params][hmi_response::code].asInt()));
-      bool result = mobile_apis::Result::SUCCESS == result_code;
-      result =
-          result || (mobile_apis::Result::UNSUPPORTED_RESOURCE == result_code &&
-                     (HmiInterfaces::STATE_AVAILABLE ==
-                      application_manager_.hmi_interfaces().GetInterfaceState(
-                          HmiInterfaces::HMI_INTERFACE_Navigation)));
-      SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
+      const Common_Result::eType result_code =
+          static_cast<Common_Result::eType>(
+              message[strings::params][hmi_response::code].asInt());
+      std::string response_info;
+      GetInfo(HmiInterfaces::HMI_INTERFACE_Navigation,
+              result_code,
+              message,
+              response_info);
+      const bool result = PrepareResultForMobileResponse(
+          result_code, HmiInterfaces::HMI_INTERFACE_Navigation);
+      SendResponse(result,
+                   MessageHelper::HMIToMobileResult(result_code),
+                   response_info.empty() ? NULL : response_info.c_str(),
+                   &(message[strings::msg_params]));
       break;
     }
     default: {

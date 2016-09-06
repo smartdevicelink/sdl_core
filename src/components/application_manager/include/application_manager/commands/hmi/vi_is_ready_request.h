@@ -56,7 +56,7 @@ class VIIsReadyRequest : public RequestToHMI,
   /**
    * @brief VIIsReadyRequest class destructor
    **/
-  ~VIIsReadyRequest() OVERRIDE;
+  virtual ~VIIsReadyRequest();
 
   /**
    * @brief Execute command

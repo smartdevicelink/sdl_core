@@ -56,7 +56,7 @@ class TTSIsReadyRequest : public RequestToHMI,
   /**
    * @brief TTSIsReadyRequest class destructor
    **/
-  ~TTSIsReadyRequest() OVERRIDE;
+  virtual ~TTSIsReadyRequest();
 
   /**
    * @brief Execute command

@@ -651,7 +651,6 @@ bool CommandRequestImpl::PrepareResultForMobileResponse(
     hmi_apis::Common_Result::eType result_code,
     HmiInterfaces::InterfaceID interface) const {
   using namespace helpers;
-
   if (Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
           result_code,
           hmi_apis::Common_Result::SUCCESS,

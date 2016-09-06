@@ -56,7 +56,7 @@ class UIIsReadyRequest : public RequestToHMI,
   /**
    * @brief UIIsReadyRequest class destructor
    **/
-  ~UIIsReadyRequest() OVERRIDE;
+  virtual ~UIIsReadyRequest();
 
   /**
    * @brief Execute command

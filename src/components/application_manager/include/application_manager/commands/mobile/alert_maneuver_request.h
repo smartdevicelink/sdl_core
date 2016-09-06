@@ -74,11 +74,11 @@ class AlertManeuverRequest : public CommandRequestImpl {
   virtual void on_event(const event_engine::Event& event);
 
  private:
-
   /**
    * @brief Prepare parameters for  sending to mobile application
    * @param result_code contains result code for sending to mobile application
-   * @param return_info contains result result info for sending to mobil application
+   * @param return_info contains resulting info for sending to mobile
+   * application
    * @return result for sending to mobile application.
    */
   bool PrepareResponseParameters(mobile_apis::Result::eType& result_code,

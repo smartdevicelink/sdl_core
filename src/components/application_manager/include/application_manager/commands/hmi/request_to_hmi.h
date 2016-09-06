@@ -48,6 +48,7 @@ namespace commands {
  */
 bool CheckAvailabilityHMIInterfaces(ApplicationManager& application_manager,
                                     HmiInterfaces::InterfaceID interface);
+
 /**
  * @brief Change interface state
  * @param application_manager contains ApplicationManager instance

@@ -213,7 +213,6 @@ bool AlertManeuverRequest::PrepareResponseParameters(
     return_info = std::string("Unsupported phoneme type sent in a prompt");
     return result;
   }
-
   result_code =
       PrepareResultCodeForResponse(navigation_alert_info, tts_alert_info);
   return_info = MergeInfos(info_navi_, info_tts_);

@@ -223,6 +223,7 @@ class CommandRequestImpl : public CommandImpl,
    */
   bool PrepareResultForMobileResponse(ResponseInfo& out_first,
                                       ResponseInfo& out_second) const;
+
   /**
    * @brief If message from HMI contains returns this info
    * or process result code from HMI and checks state of interface
