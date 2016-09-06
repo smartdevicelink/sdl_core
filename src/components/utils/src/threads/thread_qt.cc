@@ -126,6 +126,9 @@ Thread::Thread(const char* name, ThreadDelegate* delegate, QObject* parent)
     , thread_command_(kThreadCommandNone)
     , thread_state_(kThreadStateNone) {
   qRegisterMetaType<QThread*>("QThread*");
+#ifdef THREAD_COUNT
+  ThreadCounter::Increment();
+#endif  // THREAD_COUNT
 }
 
 bool Thread::start() {
@@ -244,6 +247,9 @@ Thread::~Thread() {
       future_.waitForFinished();
     }
   }
+#ifdef THREAD_COUNT
+  ThreadCounter::Decrement();
+#endif  // THREAD_COUNT
 }
 
 Thread* CreateThread(const char* name, ThreadDelegate* delegate) {
