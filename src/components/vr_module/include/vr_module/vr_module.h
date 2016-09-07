@@ -45,11 +45,13 @@
 namespace vr_module {
 
 typedef Json::Value MessageFromMobile;
+class Channel;
 
 class VRModule : public functional_modules::GenericModule,
     public VRProxyListener, public ServiceModule {
  public:
   VRModule();
+  explicit VRModule(Channel *channel);
   ~VRModule();
   virtual functional_modules::PluginInfo GetPluginInfo() const;
   virtual functional_modules::ProcessResult ProcessHMIMessage(

@@ -63,6 +63,18 @@ VRModule::VRModule()
   SubscribeToRpcMessages();
 }
 
+VRModule::VRModule(Channel* channel)
+    : GenericModule(kModuleID),
+      proxy_(this, channel),
+      factory_(commands::Factory(this)),
+      supported_(false),
+      active_service_(0),
+      default_service_(0) {
+  plugin_info_.name = "VRModulePlugin";
+  plugin_info_.version = 1;
+  SubscribeToRpcMessages();
+}
+
 VRModule::~VRModule() {
 }
 
