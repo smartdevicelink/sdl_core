@@ -34,7 +34,7 @@
 
 namespace vr_module {
 
-inline vr_hmi_api::ResultCode Convertor(vr_mobile_api::ResultCode value) {
+vr_hmi_api::ResultCode Convertor(vr_mobile_api::ResultCode value) {
   switch (value) {
     case vr_mobile_api::SUCCESS:
       return vr_hmi_api::SUCCESS;
@@ -53,7 +53,7 @@ inline vr_hmi_api::ResultCode Convertor(vr_mobile_api::ResultCode value) {
   }
 }
 
-inline vr_mobile_api::ResultCode Convertor(vr_hmi_api::ResultCode value) {
+vr_mobile_api::ResultCode Convertor(vr_hmi_api::ResultCode value) {
   switch (value) {
     case vr_hmi_api::SUCCESS:
       return vr_mobile_api::SUCCESS;

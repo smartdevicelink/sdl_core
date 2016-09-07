@@ -36,11 +36,7 @@
 #include "mock_vr_proxy_listener.h"
 #include "mock_channel.h"
 
-using ::testing::_;
-using ::testing::NiceMock;
-using ::testing::StrictMock;
 using ::testing::Return;
-using ::testing::ReturnRef;
 
 namespace vr_module {
 

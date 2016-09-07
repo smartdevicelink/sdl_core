@@ -36,7 +36,7 @@
 #include "vr_module/convertor.h"
 #include "vr_module/event_engine/event_dispatcher.h"
 #include "vr_module/mobile_event.h"
-#include "vr_module/vr_module.h"
+#include "vr_module/service_module.h"
 
 namespace vr_module {
 namespace commands {
@@ -46,7 +46,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "VRModule")
 using event_engine::EventDispatcher;
 
 ActivateService::ActivateService(const vr_hmi_api::ServiceMessage& message,
-                                 VRModule* module)
+                                 ServiceModule* module)
     : module_(module),
       message_(message) {
   request_.set_rpc(vr_mobile_api::ACTIVATE);
@@ -71,19 +71,16 @@ bool ActivateService::Execute() {
     return module_->SendToMobile(request_);
   } else {
     LOG4CXX_ERROR(logger_, "Could not get app_id from message");
+    SendResponse(vr_hmi_api::INVALID_DATA);
+    module_->UnregisterRequest(request_.correlation_id());
   }
   return false;
 }
 
 void ActivateService::OnTimeout() {
   LOG4CXX_AUTO_TRACE(logger_);
-  message_.set_rpc_type(vr_hmi_api::RESPONSE);
-  vr_hmi_api::ActivateServiceResponse hmi_response;
-  hmi_response.set_result(vr_hmi_api::TIMEOUT);
-  std::string params;
-  hmi_response.SerializeToString(&params);
-  message_.set_params(params);
-  module_->SendToHmi(message_);
+  module_->DeactivateService();
+  SendResponse(vr_hmi_api::TIMEOUT);
 }
 
 void ActivateService::on_event(
@@ -98,17 +95,23 @@ void ActivateService::on_event(
     if (!activated) {
       module_->DeactivateService();
     }
-    message_.set_rpc_type(vr_hmi_api::RESPONSE);
-    vr_hmi_api::ActivateServiceResponse hmi_response;
-    hmi_response.set_result(Convertor(mobile_response.result()));
-    std::string params;
-    hmi_response.SerializeToString(&params);
-    message_.set_params(params);
-    module_->SendToHmi(message_);
+    SendResponse(Convertor(mobile_response.result()));
   } else {
     LOG4CXX_ERROR(logger_, "Could not get result from message");
+    module_->DeactivateService();
+    SendResponse(vr_hmi_api::GENERIC_ERROR);
   }
   module_->UnregisterRequest(request_.correlation_id());
+}
+
+bool ActivateService::SendResponse(vr_hmi_api::ResultCode code) {
+  message_.set_rpc_type(vr_hmi_api::RESPONSE);
+  vr_hmi_api::ActivateServiceResponse response;
+  response.set_result(code);
+  std::string params;
+  response.SerializeToString(&params);
+  message_.set_params(params);
+  return module_->SendToHmi(message_);
 }
 
 }  // namespace commands

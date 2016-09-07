@@ -36,7 +36,7 @@
 #include "vr_module/convertor.h"
 #include "vr_module/event_engine/event_dispatcher.h"
 #include "vr_module/mobile_event.h"
-#include "vr_module/vr_module.h"
+#include "vr_module/service_module.h"
 
 namespace vr_module {
 namespace commands {
@@ -46,7 +46,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "VRModule")
 using event_engine::EventDispatcher;
 
 ProcessData::ProcessData(const vr_hmi_api::ServiceMessage& message,
-                         VRModule* module)
+                         ServiceModule* module)
     : module_(module),
       message_(message) {
   request_.set_rpc(vr_mobile_api::PROCESS_DATA);
@@ -74,19 +74,15 @@ bool ProcessData::Execute() {
     return module_->SendToMobile(request_);
   } else {
     LOG4CXX_ERROR(logger_, "Could not get raw data from message");
+    SendResponse(vr_hmi_api::INVALID_DATA);
+    module_->UnregisterRequest(request_.correlation_id());
   }
   return false;
 }
 
 void ProcessData::OnTimeout() {
   LOG4CXX_AUTO_TRACE(logger_);
-  message_.set_rpc_type(vr_hmi_api::RESPONSE);
-  vr_hmi_api::ProcessDataResponse hmi_response;
-  hmi_response.set_result(vr_hmi_api::TIMEOUT);
-  std::string params;
-  hmi_response.SerializeToString(&params);
-  message_.set_params(params);
-  module_->SendToHmi(message_);
+  SendResponse(vr_hmi_api::TIMEOUT);
 }
 
 void ProcessData::on_event(
@@ -97,23 +93,36 @@ void ProcessData::on_event(
   vr_mobile_api::ProcessDataResponse mobile_response;
   if (message.has_params()
       && mobile_response.ParseFromString(message.params())) {
-    message_.set_rpc_type(vr_hmi_api::RESPONSE);
-    vr_hmi_api::ProcessDataResponse hmi_response;
-    std::string params;
-    hmi_response.set_result(Convertor(mobile_response.result()));
-    if (mobile_response.has_text()) {
-      hmi_response.set_text(mobile_response.text());
-    }
-    if (mobile_response.has_info()) {
-      hmi_response.set_info(mobile_response.info());
-    }
-    hmi_response.SerializeToString(&params);
-    message_.set_params(params);
-    module_->SendToHmi(message_);
+    vr_hmi_api::ResultCode code = Convertor(mobile_response.result());
+    const std::string* text =
+        mobile_response.has_text() ? &mobile_response.text() : NULL;
+    const std::string* info =
+        mobile_response.has_info() ? &mobile_response.info() : NULL;
+    SendResponse(code, text, info);
   } else {
     LOG4CXX_ERROR(logger_, "Could not get raw data from message");
+    SendResponse(vr_hmi_api::GENERIC_ERROR);
   }
   module_->UnregisterRequest(request_.correlation_id());
+}
+
+bool ProcessData::SendResponse(vr_hmi_api::ResultCode code,
+                               const std::string* text,
+                               const std::string* info) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  message_.set_rpc_type(vr_hmi_api::RESPONSE);
+  vr_hmi_api::ProcessDataResponse response;
+  std::string params;
+  response.set_result(code);
+  if (text) {
+    response.set_text(*text);
+  }
+  if (info) {
+    response.set_info(*info);
+  }
+  response.SerializeToString(&params);
+  message_.set_params(params);
+  return module_->SendToHmi(message_);
 }
 
 }  // namespace commands

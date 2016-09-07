@@ -49,7 +49,7 @@ namespace commands {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "VRModule")
 
-Factory::Factory(VRModule* module)
+Factory::Factory(ServiceModule* module)
     : module_(module) {
 }
 

@@ -37,18 +37,18 @@
 
 namespace vr_module {
 
-class VRModule;
+class ServiceModule;
 
 namespace commands {
 
 class Factory : public FactoryInterface {
  public:
-  explicit Factory(VRModule* module);
+  explicit Factory(ServiceModule* module);
   virtual CommandPtr Create(const vr_hmi_api::ServiceMessage& message) const;
   virtual CommandPtr Create(const vr_mobile_api::ServiceMessage& message) const;
 
  private:
-  VRModule* module_;
+  ServiceModule* module_;
 };
 
 }  // namespace commands

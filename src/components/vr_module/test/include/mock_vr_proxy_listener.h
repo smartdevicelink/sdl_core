@@ -40,6 +40,8 @@ namespace vr_module {
 
 class MockVRProxyListener : public VRProxyListener {
  public:
+  MOCK_METHOD0(OnReady,
+      void());
   MOCK_METHOD1(OnReceived,
       void(const vr_hmi_api::ServiceMessage& message));
 };

@@ -37,17 +37,17 @@
 
 namespace vr_module {
 
-class VRModule;
+class ServiceModule;
 
 namespace commands {
 
 class OnServiceDeactivated : public Command {
  public:
-  explicit OnServiceDeactivated(VRModule* module);
+  explicit OnServiceDeactivated(ServiceModule* module);
   virtual bool Execute();
 
  private:
-  VRModule* module_;
+  ServiceModule* module_;
 };
 
 }  // namespace commands

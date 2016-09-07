@@ -11,6 +11,12 @@ include_directories (
 set (SOURCES
   src/vr_library_test.cc
   src/vr_proxy_test.cc
+  src/support_service_test.cc
+  src/activate_service_test.cc
+  src/process_data_test.cc
+  src/on_register_service_test.cc
+  src/on_service_deactivated_test.cc
+  src/on_default_service_chosen_test.cc
 )
 
 set (LIBRARIES

@@ -30,36 +30,45 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_SUPPORT_SERVICE_H_
-#define SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_SUPPORT_SERVICE_H_
-
-#include "vr_module/commands/timed_command.h"
-#include "vr_module/event_engine/event_dispatcher.h"
+#include "gtest/gtest.h"
+#include "gmock/gmock.h"
+#include "mock_service_module.h"
+#include "vr_module/commands/on_service_deactivated.h"
 #include "vr_module/interface/hmi.pb.h"
+#include "vr_module/interface/mobile.pb.h"
+
+using ::testing::Return;
 
 namespace vr_module {
-
-class ServiceModule;
-
 namespace commands {
 
-class SupportService : public TimedCommand, public event_engine::EventObserver<
-    vr_hmi_api::ServiceMessage, vr_hmi_api::RPCName> {
- public:
-  SupportService(const vr_hmi_api::ServiceMessage& message,
-                 ServiceModule* module);
-  ~SupportService();
-  virtual bool Execute();
-  virtual void OnTimeout();
-  virtual void on_event(
-      const event_engine::Event<vr_hmi_api::ServiceMessage, vr_hmi_api::RPCName>& event);
+MATCHER_P(ServiceMessageEq, expected, "") {
+  return arg.rpc() == expected.rpc()
+      && arg.rpc_type() == expected.rpc_type()
+      && arg.correlation_id() == expected.correlation_id()
+      && arg.params() == expected.params();
+}
 
- private:
-  ServiceModule* module_;
-  vr_hmi_api::ServiceMessage message_;
+class OnServiceDeactivatedTest : public ::testing::Test {
+ protected:
 };
+
+TEST_F(OnServiceDeactivatedTest, Execute) {
+  MockServiceModule service;
+
+  const int32_t kMobileId = 1;
+  OnServiceDeactivated cmd(&service);
+  vr_mobile_api::ServiceMessage expected;
+  expected.set_rpc(vr_mobile_api::ON_DEACTIVATED);
+  expected.set_rpc_type(vr_mobile_api::NOTIFICATION);
+  expected.set_correlation_id(kMobileId);
+  EXPECT_CALL(service, SendToMobile(ServiceMessageEq(expected))).Times(1)
+      .WillOnce(Return(true));
+  EXPECT_CALL(service, GetNextCorrelationID()).Times(1).WillOnce(
+      Return(kMobileId));
+  EXPECT_CALL(service, DeactivateService()).Times(1);
+  EXPECT_TRUE(cmd.Execute());
+}
 
 }  // namespace commands
 }  // namespace vr_module
-
-#endif  // SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_SUPPORT_SERVICE_H_

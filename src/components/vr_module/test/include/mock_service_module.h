@@ -30,36 +30,41 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_SUPPORT_SERVICE_H_
-#define SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_SUPPORT_SERVICE_H_
+#ifndef SRC_COMPONENTS_VR_MODULE_TEST_INCLUDE_MOCK_SERVICE_MODULE_H_
+#define SRC_COMPONENTS_VR_MODULE_TEST_INCLUDE_MOCK_SERVICE_MODULE_H_
 
-#include "vr_module/commands/timed_command.h"
-#include "vr_module/event_engine/event_dispatcher.h"
-#include "vr_module/interface/hmi.pb.h"
+#include "vr_module/service_module.h"
 
 namespace vr_module {
 
-class ServiceModule;
-
-namespace commands {
-
-class SupportService : public TimedCommand, public event_engine::EventObserver<
-    vr_hmi_api::ServiceMessage, vr_hmi_api::RPCName> {
+class MockServiceModule : public ServiceModule {
  public:
-  SupportService(const vr_hmi_api::ServiceMessage& message,
-                 ServiceModule* module);
-  ~SupportService();
-  virtual bool Execute();
-  virtual void OnTimeout();
-  virtual void on_event(
-      const event_engine::Event<vr_hmi_api::ServiceMessage, vr_hmi_api::RPCName>& event);
-
- private:
-  ServiceModule* module_;
-  vr_hmi_api::ServiceMessage message_;
+  MOCK_METHOD0(GetNextCorrelationID,
+      int32_t());
+  MOCK_METHOD2(RegisterRequest,
+      void(int32_t correlation_id, commands::TimedCommand* command));
+  MOCK_METHOD1(UnregisterRequest,
+      void(int32_t correlation_id));
+  MOCK_METHOD1(SendToHmi,
+      bool(const vr_hmi_api::ServiceMessage& message));
+  MOCK_METHOD1(SendToMobile,
+      bool(const vr_mobile_api::ServiceMessage& message));
+  MOCK_METHOD1(ActivateService,
+      void(int32_t app_id));
+  MOCK_METHOD0(DeactivateService,
+      void());
+  MOCK_METHOD1(SetDefaultService,
+      void(int32_t app_id));
+  MOCK_METHOD0(ResetDefaultService,
+      void());
+  MOCK_CONST_METHOD0(IsSupported,
+      bool());
+  MOCK_METHOD0(EnableSupport,
+      void());
+  MOCK_METHOD0(DisableSupport,
+      void());
 };
 
-}  // namespace commands
 }  // namespace vr_module
 
-#endif  // SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_SUPPORT_SERVICE_H_
+#endif  // SRC_COMPONENTS_VR_MODULE_TEST_INCLUDE_MOCK_SERVICE_MODULE_H_

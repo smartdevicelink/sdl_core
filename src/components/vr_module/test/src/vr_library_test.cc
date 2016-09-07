@@ -31,6 +31,7 @@
  */
 
 #include <dlfcn.h>
+
 #include "gtest/gtest.h"
 #include "vr_module/vr_module.h"
 
