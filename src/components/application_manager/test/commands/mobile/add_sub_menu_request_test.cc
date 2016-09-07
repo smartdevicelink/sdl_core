@@ -75,7 +75,7 @@ TEST_F(AddSubMenuRequestTest, OnEvent_UnknownEvent_UNSUCCESS) {
   Event event(hmi_apis::FunctionID::INVALID_ENUM);
   AddSubMenuPtr command(CreateCommand<AddSubMenuRequest>());
 
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(mock_app_manager_, ManageMobileCommand(_, _)).Times(0);
 
   command->on_event(event);
 }
@@ -96,7 +96,8 @@ TEST_F(AddSubMenuRequestTest, OnEvent_SUCCESS) {
   AddSubMenuPtr command(CreateCommand<AddSubMenuRequest>(command_msg));
 
   MockAppPtr app(CreateMockApp());
-  EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app));
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillOnce(Return(app));
 
   MessageSharedPtr result_msg(
       CatchMobileCommandResult(CallOnEvent(*command, event)));
@@ -110,7 +111,7 @@ TEST_F(AddSubMenuRequestTest, OnEvent_SUCCESS) {
 TEST_F(AddSubMenuRequestTest, Run_ApplicationIsNotRegistered_UNSUCCESS) {
   AddSubMenuPtr command(CreateCommand<AddSubMenuRequest>());
 
-  EXPECT_CALL(app_mngr_, application(_))
+  EXPECT_CALL(mock_app_manager_, application(_))
       .WillOnce(Return(ApplicationSharedPtr()));
 
   MessageSharedPtr result_msg(CatchMobileCommandResult(CallRun(*command)));
@@ -131,7 +132,8 @@ TEST_F(AddSubMenuRequestTest, Run_InvalidSubMenuId_UNSUCCESS) {
 
   MockAppPtr app(CreateMockApp());
   MessageSharedPtr dummy_sub_menu(CreateMessage(smart_objects::SmartType_Null));
-  EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app));
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillOnce(Return(app));
   EXPECT_CALL(*app, FindSubMenu(kMenuId))
       .WillOnce(Return(dummy_sub_menu.get()));
 
@@ -153,7 +155,8 @@ TEST_F(AddSubMenuRequestTest, Run_DuplicatedSubMenuName_UNSUCCESS) {
 
   MockAppPtr app(CreateMockApp());
 
-  EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app));
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillOnce(Return(app));
   EXPECT_CALL(*app, FindSubMenu(kMenuId))
       .WillOnce(Return(static_cast<SmartObject*>(NULL)));
   EXPECT_CALL(*app, IsSubMenuNameAlreadyExist(_)).WillOnce(Return(true));
@@ -177,7 +180,8 @@ TEST_F(AddSubMenuRequestTest, Run_NotValidSubMenuName_UNSUCCESS) {
   AddSubMenuPtr command(CreateCommand<AddSubMenuRequest>(command_msg));
 
   MockAppPtr app(CreateMockApp());
-  EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app));
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillOnce(Return(app));
   EXPECT_CALL(*app, FindSubMenu(kMenuId))
       .WillOnce(Return(static_cast<SmartObject*>(NULL)));
 
@@ -202,7 +206,8 @@ TEST_F(AddSubMenuRequestTest, Run_SUCCESS) {
   AddSubMenuPtr command(CreateCommand<AddSubMenuRequest>(command_msg));
 
   MockAppPtr app(CreateMockApp());
-  EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app));
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillOnce(Return(app));
   EXPECT_CALL(*app, FindSubMenu(kMenuId))
       .WillOnce(Return(static_cast<SmartObject*>(NULL)));
 

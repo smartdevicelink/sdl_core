@@ -79,11 +79,11 @@ TEST_F(DiagnosticMessageRequestTest, Run_ApplicationIsNotRegistered_UNSUCCESS) {
   DiagnosticMessageRequestPtr command(
       CreateCommand<DiagnosticMessageRequest>(command_msg));
 
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
       .WillOnce(Return(ApplicationSharedPtr()));
 
   EXPECT_CALL(
-      app_mngr_,
+      mock_app_manager_,
       ManageMobileCommand(
           MobileResultCodeIs(mobile_result::APPLICATION_NOT_REGISTERED), _));
 
@@ -101,17 +101,18 @@ TEST_F(DiagnosticMessageRequestTest, Run_NotSupportedDiagnosticMode_UNSUCCESS) {
       CreateCommand<DiagnosticMessageRequest>(command_msg));
 
   MockAppPtr app(CreateMockApp());
-  EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app));
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillOnce(Return(app));
 
-  EXPECT_CALL(app_mngr_, get_settings())
-      .WillOnce(ReturnRef(app_mngr_settings_));
+  EXPECT_CALL(mock_app_manager_, get_settings())
+      .WillOnce(ReturnRef(mock_app_manager_settings_));
 
   const std::vector<uint32_t> empty_supported_diag_modes;
-  EXPECT_CALL(app_mngr_settings_, supported_diag_modes())
+  EXPECT_CALL(mock_app_manager_settings_, supported_diag_modes())
       .WillOnce(ReturnRef(empty_supported_diag_modes));
 
   EXPECT_CALL(
-      app_mngr_,
+      mock_app_manager_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::REJECTED), _));
 
   command->Run();
@@ -128,18 +129,19 @@ TEST_F(DiagnosticMessageRequestTest, Run_SUCCESS) {
       CreateCommand<DiagnosticMessageRequest>(command_msg));
 
   MockAppPtr app(CreateMockApp());
-  EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app));
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillOnce(Return(app));
 
-  EXPECT_CALL(app_mngr_, get_settings())
-      .WillOnce(ReturnRef(app_mngr_settings_));
+  EXPECT_CALL(mock_app_manager_, get_settings())
+      .WillOnce(ReturnRef(mock_app_manager_settings_));
 
   std::vector<uint32_t> supported_diag_modes;
   supported_diag_modes.push_back(kDiagnosticMode);
 
-  EXPECT_CALL(app_mngr_settings_, supported_diag_modes())
+  EXPECT_CALL(mock_app_manager_settings_, supported_diag_modes())
       .WillOnce(ReturnRef(supported_diag_modes));
 
-  EXPECT_CALL(app_mngr_,
+  EXPECT_CALL(mock_app_manager_,
               ManageHMICommand(HMIResultCodeIs(
                   hmi_apis::FunctionID::VehicleInfo_DiagnosticMessage)));
 
@@ -152,7 +154,7 @@ TEST_F(DiagnosticMessageRequestTest, OnEvent_UNSUCCESS) {
   DiagnosticMessageRequestPtr command(
       CreateCommand<DiagnosticMessageRequest>());
 
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(mock_app_manager_, ManageMobileCommand(_, _)).Times(0);
 
   command->on_event(event);
 }
@@ -170,7 +172,7 @@ TEST_F(DiagnosticMessageRequestTest, OnEvent_SUCCESS) {
       CreateCommand<DiagnosticMessageRequest>());
 
   EXPECT_CALL(
-      app_mngr_,
+      mock_app_manager_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::SUCCESS), _));
 
   command->on_event(event);

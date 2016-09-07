@@ -79,15 +79,16 @@ TEST_F(OnHMIStatusNotificationFromMobileTest,
       CreateCommand<OnHMIStatusNotificationFromMobile>(msg);
 
   MockAppPtr mock_app = CreateMockApp();
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
       .WillOnce(Return(mock_app));
   EXPECT_CALL(*mock_app, set_foreground(true));
 
   EXPECT_CALL(*mock_app, device()).WillOnce(Return(kHandle));
-  EXPECT_CALL(app_mngr_, IsAppsQueriedFrom(kHandle)).WillOnce(Return(true));
+  EXPECT_CALL(mock_app_manager_, IsAppsQueriedFrom(kHandle))
+      .WillOnce(Return(true));
 
   DataAccessor<ApplicationSet> accessor(app_set_, lock_);
-  EXPECT_CALL(app_mngr_, applications()).WillOnce(Return(accessor));
+  EXPECT_CALL(mock_app_manager_, applications()).WillOnce(Return(accessor));
 
   EXPECT_CALL(*mock_app, protocol_version())
       .WillRepeatedly(Return(ProtocolVersion::kV4));
@@ -106,14 +107,14 @@ TEST_F(OnHMIStatusNotificationFromMobileTest, Run_InvalidApp_NoNotification) {
       CreateCommand<OnHMIStatusNotificationFromMobile>(msg);
 
   MockAppPtr mock_app = CreateMockApp();
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
       .WillOnce(Return(MockAppPtr()));
   EXPECT_CALL(*mock_app, set_foreground(true)).Times(0);
 
   EXPECT_CALL(*mock_app, device()).Times(0);
-  EXPECT_CALL(app_mngr_, IsAppsQueriedFrom(kHandle)).Times(0);
+  EXPECT_CALL(mock_app_manager_, IsAppsQueriedFrom(kHandle)).Times(0);
 
-  EXPECT_CALL(app_mngr_, applications()).Times(0);
+  EXPECT_CALL(mock_app_manager_, applications()).Times(0);
 
   EXPECT_CALL(*mock_app, protocol_version()).Times(0);
   EXPECT_CALL(*mock_app, is_foreground()).Times(0);
@@ -132,15 +133,16 @@ TEST_F(OnHMIStatusNotificationFromMobileTest,
       CreateCommand<OnHMIStatusNotificationFromMobile>(msg);
 
   MockAppPtr mock_app = CreateMockApp();
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
       .WillOnce(Return(mock_app));
   EXPECT_CALL(*mock_app, set_foreground(false));
 
   EXPECT_CALL(*mock_app, device()).WillOnce(Return(kHandle));
-  EXPECT_CALL(app_mngr_, IsAppsQueriedFrom(kHandle)).WillOnce(Return(true));
+  EXPECT_CALL(mock_app_manager_, IsAppsQueriedFrom(kHandle))
+      .WillOnce(Return(true));
 
   DataAccessor<ApplicationSet> accessor(app_set_, lock_);
-  EXPECT_CALL(app_mngr_, applications()).WillOnce(Return(accessor));
+  EXPECT_CALL(mock_app_manager_, applications()).WillOnce(Return(accessor));
 
   EXPECT_CALL(*mock_app, protocol_version())
       .WillRepeatedly(Return(ProtocolVersion::kV4));
@@ -160,15 +162,16 @@ TEST_F(OnHMIStatusNotificationFromMobileTest,
       CreateCommand<OnHMIStatusNotificationFromMobile>(msg);
 
   MockAppPtr mock_app = CreateMockApp();
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
       .WillOnce(Return(mock_app));
   EXPECT_CALL(*mock_app, set_foreground(false));
 
   EXPECT_CALL(*mock_app, device()).WillOnce(Return(kHandle));
-  EXPECT_CALL(app_mngr_, IsAppsQueriedFrom(kHandle)).WillOnce(Return(true));
+  EXPECT_CALL(mock_app_manager_, IsAppsQueriedFrom(kHandle))
+      .WillOnce(Return(true));
 
   DataAccessor<ApplicationSet> accessor(app_set_, lock_);
-  EXPECT_CALL(app_mngr_, applications()).Times(0);
+  EXPECT_CALL(mock_app_manager_, applications()).Times(0);
 
   EXPECT_CALL(*mock_app, protocol_version())
       .WillOnce(Return(ProtocolVersion::kV3));
@@ -188,14 +191,15 @@ TEST_F(OnHMIStatusNotificationFromMobileTest,
       CreateCommand<OnHMIStatusNotificationFromMobile>(msg);
 
   MockAppPtr mock_app = CreateMockApp();
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
       .WillOnce(Return(mock_app));
   EXPECT_CALL(*mock_app, set_foreground(true));
 
   EXPECT_CALL(*mock_app, device()).WillOnce(Return(kHandle));
-  EXPECT_CALL(app_mngr_, IsAppsQueriedFrom(kHandle)).WillOnce(Return(false));
+  EXPECT_CALL(mock_app_manager_, IsAppsQueriedFrom(kHandle))
+      .WillOnce(Return(false));
 
-  EXPECT_CALL(app_mngr_, applications()).Times(0);
+  EXPECT_CALL(mock_app_manager_, applications()).Times(0);
 
   EXPECT_CALL(*mock_app, protocol_version())
       .WillOnce(Return(ProtocolVersion::kV3));
@@ -215,17 +219,18 @@ TEST_F(OnHMIStatusNotificationFromMobileTest,
       CreateCommand<OnHMIStatusNotificationFromMobile>(msg);
 
   MockAppPtr mock_app = CreateMockApp();
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
       .WillOnce(Return(mock_app));
   EXPECT_CALL(*mock_app, set_foreground(true));
 
   EXPECT_CALL(*mock_app, device()).WillOnce(Return(kHandle));
-  EXPECT_CALL(app_mngr_, IsAppsQueriedFrom(kHandle)).WillOnce(Return(false));
+  EXPECT_CALL(mock_app_manager_, IsAppsQueriedFrom(kHandle))
+      .WillOnce(Return(false));
 
   EXPECT_CALL(*mock_app, protocol_version())
       .WillOnce(Return(ProtocolVersion::kV4));
 
-  EXPECT_CALL(app_mngr_, applications()).Times(0);
+  EXPECT_CALL(mock_app_manager_, applications()).Times(0);
 
   EXPECT_CALL(*mock_app, is_foreground()).WillOnce(Return(true));
 
@@ -249,22 +254,23 @@ TEST_F(OnHMIStatusNotificationFromMobileTest,
       CreateCommand<OnHMIStatusNotificationFromMobile>(msg);
 
   MockAppPtr mock_app = CreateMockApp();
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
       .WillOnce(Return(mock_app));
   EXPECT_CALL(*mock_app, set_foreground(true));
 
   EXPECT_CALL(*mock_app, device()).WillOnce(Return(kHandle));
-  EXPECT_CALL(app_mngr_, IsAppsQueriedFrom(kHandle)).WillOnce(Return(true));
+  EXPECT_CALL(mock_app_manager_, IsAppsQueriedFrom(kHandle))
+      .WillOnce(Return(true));
 
   DataAccessor<ApplicationSet> accessor(app_set_, lock_);
-  EXPECT_CALL(app_mngr_, applications()).WillOnce(Return(accessor));
+  EXPECT_CALL(mock_app_manager_, applications()).WillOnce(Return(accessor));
 
   EXPECT_CALL(*mock_app, protocol_version())
       .WillRepeatedly(Return(ProtocolVersion::kV4));
   EXPECT_CALL(*mock_app, is_foreground()).WillRepeatedly(Return(false));
 
-  EXPECT_CALL(app_mngr_, MarkAppsGreyOut(kHandle, false));
-  EXPECT_CALL(app_mngr_, SendUpdateAppList());
+  EXPECT_CALL(mock_app_manager_, MarkAppsGreyOut(kHandle, false));
+  EXPECT_CALL(mock_app_manager_, SendUpdateAppList());
 
   command->Run();
 

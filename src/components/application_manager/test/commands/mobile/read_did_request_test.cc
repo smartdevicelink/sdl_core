@@ -69,7 +69,7 @@ TEST_F(ReadDIDRequestTest, OnEvent_WrongEventId_UNSUCCESS) {
   Event event(Event::EventID::INVALID_ENUM);
   SharedPtr<ReadDIDRequest> command(CreateCommand<ReadDIDRequest>());
 
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(mock_app_manager_, ManageMobileCommand(_, _)).Times(0);
   command->on_event(event);
 }
 
@@ -96,7 +96,7 @@ TEST_F(ReadDIDRequestTest, OnEvent_SUCCESS) {
 TEST_F(ReadDIDRequestTest, Run_AppNotRegistered_UNSUCCESS) {
   SharedPtr<ReadDIDRequest> command(CreateCommand<ReadDIDRequest>());
 
-  ON_CALL(app_mngr_, application(_))
+  ON_CALL(mock_app_manager_, application(_))
       .WillByDefault(Return(SharedPtr<am::Application>()));
 
   MessageSharedPtr result_msg(CatchMobileCommandResult(CallRun(*command)));
@@ -110,7 +110,7 @@ TEST_F(ReadDIDRequestTest, Run_CommandLimitsExceeded_UNSUCCESS) {
   SharedPtr<ReadDIDRequest> command(CreateCommand<ReadDIDRequest>());
 
   MockAppPtr app(CreateMockApp());
-  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
+  ON_CALL(mock_app_manager_, application(_)).WillByDefault(Return(app));
 
   ON_CALL(*app, AreCommandLimitsExceeded(_, _)).WillByDefault(Return(true));
 
@@ -125,7 +125,7 @@ TEST_F(ReadDIDRequestTest, Run_EmptyDidLocation_UNSUCCESS) {
   MockAppPtr app(CreateMockApp());
   SharedPtr<ReadDIDRequest> command(CreateCommand<ReadDIDRequest>());
 
-  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
+  ON_CALL(mock_app_manager_, application(_)).WillByDefault(Return(app));
 
   ON_CALL(*app, AreCommandLimitsExceeded(_, _)).WillByDefault(Return(false));
 
@@ -142,7 +142,7 @@ TEST_F(ReadDIDRequestTest, Run_SUCCESS) {
   (*msg)[am::strings::msg_params][am::strings::did_location]["SomeData"] = 0;
   SharedPtr<ReadDIDRequest> command(CreateCommand<ReadDIDRequest>(msg));
 
-  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
+  ON_CALL(mock_app_manager_, application(_)).WillByDefault(Return(app));
 
   ON_CALL(*app, AreCommandLimitsExceeded(_, _)).WillByDefault(Return(false));
 

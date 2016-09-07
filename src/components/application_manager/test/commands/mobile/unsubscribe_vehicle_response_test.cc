@@ -70,7 +70,7 @@ TEST_F(UnsubscribeVehicleResponseTest,
   ::utils::SharedPtr<commands::UnsubscribeVehicleDataResponse> command =
       CreateCommand<commands::UnsubscribeVehicleDataResponse>(command_msg);
   EXPECT_CALL(
-      app_mngr_,
+      mock_app_manager_,
       SendMessageToMobile(ResultCodeIs(mobile_apis::Result::INVALID_ENUM), _));
   command->Run();
 }
@@ -83,7 +83,7 @@ TEST_F(UnsubscribeVehicleResponseTest,
   ::utils::SharedPtr<commands::UnsubscribeVehicleDataResponse> command =
       CreateCommand<commands::UnsubscribeVehicleDataResponse>(command_msg);
   EXPECT_CALL(
-      app_mngr_,
+      mock_app_manager_,
       SendMessageToMobile(ResultCodeIs(mobile_apis::Result::SUCCESS), _));
   command->Run();
 }
@@ -99,7 +99,8 @@ TEST_F(UnsubscribeVehicleResponseTest,
       result_type;
   ::utils::SharedPtr<commands::UnsubscribeVehicleDataResponse> command =
       CreateCommand<commands::UnsubscribeVehicleDataResponse>(command_msg);
-  EXPECT_CALL(app_mngr_, SendMessageToMobile(ResultCodeIs(result_type), _));
+  EXPECT_CALL(mock_app_manager_,
+              SendMessageToMobile(ResultCodeIs(result_type), _));
   command->Run();
 }
 

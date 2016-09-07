@@ -73,12 +73,12 @@ TEST_F(UIGetLanguageResponseTest, Run_LanguageSet_SUCCESS) {
       CreateCommand<UIGetLanguageResponse>(msg));
 
   MockHMICapabilities mock_hmi_capabilities;
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
+  EXPECT_CALL(mock_app_manager_, hmi_capabilities())
       .WillOnce(ReturnRef(mock_hmi_capabilities));
   EXPECT_CALL(mock_hmi_capabilities, set_active_ui_language(kLanguage));
 
   MockEventDispatcher mock_event_dispatcher;
-  EXPECT_CALL(app_mngr_, event_dispatcher())
+  EXPECT_CALL(mock_app_manager_, event_dispatcher())
       .WillOnce(ReturnRef(mock_event_dispatcher));
   EXPECT_CALL(mock_event_dispatcher, raise_event(_));
 
@@ -92,13 +92,13 @@ TEST_F(UIGetLanguageResponseTest, Run_LanguageNotSet_SUCCESS) {
       CreateCommand<UIGetLanguageResponse>(msg));
 
   MockHMICapabilities mock_hmi_capabilities;
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
+  EXPECT_CALL(mock_app_manager_, hmi_capabilities())
       .WillOnce(ReturnRef(mock_hmi_capabilities));
   EXPECT_CALL(mock_hmi_capabilities,
               set_active_ui_language(Common_Language::INVALID_ENUM));
 
   MockEventDispatcher mock_event_dispatcher;
-  EXPECT_CALL(app_mngr_, event_dispatcher())
+  EXPECT_CALL(mock_app_manager_, event_dispatcher())
       .WillOnce(ReturnRef(mock_event_dispatcher));
   EXPECT_CALL(mock_event_dispatcher, raise_event(_));
 

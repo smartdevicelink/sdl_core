@@ -133,7 +133,7 @@ TEST_F(AddCommandRequestTest, GetRunMethods_SUCCESS) {
       CreateCommand<AddCommandRequest>(msg);
 
   MockAppPtr mock_app = CreateMockApp();
-  ON_CALL(app_mngr_, application(kConnectionKey))
+  ON_CALL(mock_app_manager_, application(kConnectionKey))
       .WillByDefault(Return(mock_app));
 
   MockMessageHelper* mock_message_helper =
@@ -153,7 +153,7 @@ TEST_F(AddCommandRequestTest, GetRunMethods_SUCCESS) {
 
   MessageSharedPtr ui_command_result;
   {
-    EXPECT_CALL(app_mngr_, ManageHMICommand(_))
+    EXPECT_CALL(mock_app_manager_, ManageHMICommand(_))
         .WillOnce(DoAll(SaveArg<0>(&ui_command_result), Return(true)));
   }
 
@@ -173,7 +173,7 @@ TEST_F(AddCommandRequestTest, OnEvent_UI_SUCCESS) {
       hmi_apis::Common_Result::SUCCESS;
 
   MockAppPtr mock_app = CreateMockApp();
-  ON_CALL(app_mngr_, application(kConnectionKey))
+  ON_CALL(mock_app_manager_, application(kConnectionKey))
       .WillByDefault(Return(mock_app));
   ON_CALL(*mock_app, app_id()).WillByDefault(Return(1));
 
@@ -198,7 +198,7 @@ TEST_F(AddCommandRequestTest, OnEvent_UI_SUCCESS) {
 
   MessageSharedPtr ui_command_result;
   {
-    EXPECT_CALL(app_mngr_, ManageHMICommand(_))
+    EXPECT_CALL(mock_app_manager_, ManageHMICommand(_))
         .WillOnce(DoAll(SaveArg<0>(&ui_command_result), Return(true)));
   }
 
@@ -206,7 +206,7 @@ TEST_F(AddCommandRequestTest, OnEvent_UI_SUCCESS) {
 
   ASSERT_TRUE(ui_command_result);
 
-  ON_CALL(app_mngr_, application(kConnectionKey))
+  ON_CALL(mock_app_manager_, application(kConnectionKey))
       .WillByDefault(Return(mock_app));
   ON_CALL(*mock_app, app_id()).WillByDefault(Return(1));
 
@@ -226,7 +226,7 @@ TEST_F(AddCommandRequestTest, OnEvent_VR_SUCCESS) {
       CreateCommand<AddCommandRequest>(msg_vr);
 
   MockAppPtr mock_app = CreateMockApp();
-  ON_CALL(app_mngr_, application(kConnectionKey))
+  ON_CALL(mock_app_manager_, application(kConnectionKey))
       .WillByDefault(Return(mock_app));
   ON_CALL(*mock_app, app_id()).WillByDefault(Return(1));
 
@@ -259,7 +259,7 @@ TEST_F(AddCommandRequestTest, OnEvent_VR_SUCCESS) {
 
   MessageSharedPtr vr_command_result;
   {
-    EXPECT_CALL(app_mngr_, ManageHMICommand(_))
+    EXPECT_CALL(mock_app_manager_, ManageHMICommand(_))
         .WillOnce(DoAll(SaveArg<0>(&vr_command_result), Return(true)));
   }
 
@@ -305,7 +305,7 @@ TEST_F(AddCommandRequestTest, OnEvent_BothSend_SUCCESS) {
   event_vr.set_smart_object(*msg1);
 
   MockAppPtr mock_app = CreateMockApp();
-  ON_CALL(app_mngr_, application(kConnectionKey))
+  ON_CALL(mock_app_manager_, application(kConnectionKey))
       .WillByDefault(Return(mock_app));
   ON_CALL(*mock_app, app_id()).WillByDefault(Return(1));
 
@@ -323,9 +323,9 @@ TEST_F(AddCommandRequestTest, OnEvent_UnknownEvent_UNSUCCESS) {
       CreateCommand<AddCommandRequest>(msg);
 
   MockAppPtr mock_app = CreateMockApp();
-  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app));
+  ON_CALL(mock_app_manager_, application(_)).WillByDefault(Return(mock_app));
 
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(mock_app_manager_, ManageMobileCommand(_, _)).Times(0);
 
   request->on_event(event);
 }

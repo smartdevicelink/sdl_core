@@ -148,10 +148,10 @@ TEST_F(OnSystemRequestNotificationTest, DISABLED_Run_ProprietaryType_SUCCESS) {
       CreateCommand<OnSystemRequestNotification>(msg);
 
   MockAppPtr mock_app = CreateMockApp();
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
       .WillOnce(Return(mock_app));
   MockPolicyHandlerInterface mock_policy_handler;
-  EXPECT_CALL(app_mngr_, GetPolicyHandler())
+  EXPECT_CALL(mock_app_manager_, GetPolicyHandler())
       .WillRepeatedly(ReturnRef(mock_policy_handler));
   std::string policy_app_id;
   EXPECT_CALL(*mock_app, policy_app_id()).WillOnce(Return(policy_app_id));
@@ -159,14 +159,14 @@ TEST_F(OnSystemRequestNotificationTest, DISABLED_Run_ProprietaryType_SUCCESS) {
       .WillOnce(Return(true));
 
 #ifdef EXTENDED_POLICY
-  EXPECT_CALL(app_mngr_, GetPolicyHandler())
+  EXPECT_CALL(mock_app_manager_, GetPolicyHandler())
       .Times(2)
       .WillRepeatedly(ReturnRef(mock_policy_handler));
   EXPECT_CALL(mock_policy_handler, TimeoutExchange()).WillOnce(Return(5u));
 #endif  // EXTENDED_POLICY
 
   EXPECT_CALL(message_helper_, PrintSmartObject(_)).WillOnce(Return(false));
-  EXPECT_CALL(app_mngr_, SendMessageToMobile(msg, _));
+  EXPECT_CALL(mock_app_manager_, SendMessageToMobile(msg, _));
 
   command->Run();
 
@@ -194,10 +194,10 @@ TEST_F(OnSystemRequestNotificationTest, Run_HTTPType_SUCCESS) {
       CreateCommand<OnSystemRequestNotification>(msg);
 
   MockAppPtr mock_app = CreateMockApp();
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
       .WillOnce(Return(mock_app));
   MockPolicyHandlerInterface mock_policy_handler;
-  EXPECT_CALL(app_mngr_, GetPolicyHandler())
+  EXPECT_CALL(mock_app_manager_, GetPolicyHandler())
       .WillOnce(ReturnRef(mock_policy_handler));
   std::string policy_app_id;
   EXPECT_CALL(*mock_app, policy_app_id()).WillOnce(Return(policy_app_id));
@@ -205,7 +205,7 @@ TEST_F(OnSystemRequestNotificationTest, Run_HTTPType_SUCCESS) {
       .WillOnce(Return(true));
 
   EXPECT_CALL(message_helper_, PrintSmartObject(_)).WillOnce(Return(false));
-  EXPECT_CALL(app_mngr_, SendMessageToMobile(msg, _));
+  EXPECT_CALL(mock_app_manager_, SendMessageToMobile(msg, _));
 
   command->Run();
 
@@ -230,15 +230,15 @@ TEST_F(OnSystemRequestNotificationTest, Run_InvalidApp_NoNotification) {
       CreateCommand<OnSystemRequestNotification>(msg);
 
   MockAppPtr mock_app = CreateMockApp();
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
       .WillOnce(Return(MockAppPtr()));
-  EXPECT_CALL(app_mngr_, GetPolicyHandler()).Times(0);
+  EXPECT_CALL(mock_app_manager_, GetPolicyHandler()).Times(0);
   EXPECT_CALL(*mock_app, policy_app_id()).Times(0);
   MockPolicyHandlerInterface mock_policy_handler;
   EXPECT_CALL(mock_policy_handler, IsRequestTypeAllowed(_, _)).Times(0);
 
   EXPECT_CALL(message_helper_, PrintSmartObject(_)).Times(0);
-  EXPECT_CALL(app_mngr_, SendMessageToMobile(msg, _)).Times(0);
+  EXPECT_CALL(mock_app_manager_, SendMessageToMobile(msg, _)).Times(0);
 
   command->Run();
 }
@@ -254,10 +254,10 @@ TEST_F(OnSystemRequestNotificationTest, Run_RequestNotAllowed_NoNotification) {
       CreateCommand<OnSystemRequestNotification>(msg);
 
   MockAppPtr mock_app = CreateMockApp();
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
       .WillOnce(Return(mock_app));
   MockPolicyHandlerInterface mock_policy_handler;
-  EXPECT_CALL(app_mngr_, GetPolicyHandler())
+  EXPECT_CALL(mock_app_manager_, GetPolicyHandler())
       .WillOnce(ReturnRef(mock_policy_handler));
   std::string policy_app_id;
   EXPECT_CALL(*mock_app, policy_app_id()).WillOnce(Return(policy_app_id));
@@ -265,7 +265,7 @@ TEST_F(OnSystemRequestNotificationTest, Run_RequestNotAllowed_NoNotification) {
       .WillOnce(Return(false));
 
   EXPECT_CALL(message_helper_, PrintSmartObject(_)).Times(0);
-  EXPECT_CALL(app_mngr_, SendMessageToMobile(msg, _)).Times(0);
+  EXPECT_CALL(mock_app_manager_, SendMessageToMobile(msg, _)).Times(0);
   ;
 
   command->Run();

@@ -72,7 +72,7 @@ class DeleteCommandRequestTest
 TEST_F(DeleteCommandRequestTest, Run_ApplicationIsNotRegistered_UNSUCCESS) {
   DeleteCommandPtr command(CreateCommand<DeleteCommandRequest>());
 
-  EXPECT_CALL(app_mngr_, application(_))
+  EXPECT_CALL(mock_app_manager_, application(_))
       .WillOnce(Return(ApplicationSharedPtr()));
 
   MessageSharedPtr result_msg(CatchMobileCommandResult(CallRun(*command)));
@@ -95,7 +95,8 @@ TEST_F(DeleteCommandRequestTest, Run_InvalidCommandId_UNSUCCESS) {
   DeleteCommandPtr command(CreateCommand<DeleteCommandRequest>(command_msg));
 
   MockAppPtr app = CreateMockApp();
-  EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app));
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillOnce(Return(app));
   EXPECT_CALL(*app, FindCommand(kCommandId))
       .WillOnce(Return(static_cast<SmartObject*>(NULL)));
 
@@ -119,7 +120,8 @@ TEST_F(DeleteCommandRequestTest, Run_SUCCESS) {
   DeleteCommandPtr command(CreateCommand<DeleteCommandRequest>(command_msg));
 
   MockAppPtr app = CreateMockApp();
-  EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app));
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillOnce(Return(app));
 
   MessageSharedPtr test_msg(CreateMessage(smart_objects::SmartType_Map));
   (*test_msg)[am::strings::menu_params] = 0;
@@ -131,9 +133,9 @@ TEST_F(DeleteCommandRequestTest, Run_SUCCESS) {
   MessageSharedPtr vr_command_result;
   {
     ::testing::InSequence sequence;
-    EXPECT_CALL(app_mngr_, ManageHMICommand(_))
+    EXPECT_CALL(mock_app_manager_, ManageHMICommand(_))
         .WillOnce(DoAll(SaveArg<0>(&menu_params_result), Return(true)));
-    EXPECT_CALL(app_mngr_, ManageHMICommand(_))
+    EXPECT_CALL(mock_app_manager_, ManageHMICommand(_))
         .WillOnce(DoAll(SaveArg<0>(&vr_command_result), Return(true)));
   }
 
@@ -160,7 +162,7 @@ TEST_F(DeleteCommandRequestTest, OnEvent_UnknownEvent_UNSUCCESS) {
 
   DeleteCommandPtr command(CreateCommand<DeleteCommandRequest>());
 
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(mock_app_manager_, ManageMobileCommand(_, _)).Times(0);
 
   command->on_event(event);
 }
@@ -174,7 +176,7 @@ TEST_F(DeleteCommandRequestTest, OnEvent_UiDeleteCommand_SUCCESS) {
   DeleteCommandPtr command(CreateCommand<DeleteCommandRequest>(command_msg));
 
   MockAppPtr app = CreateMockApp();
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
       .WillRepeatedly(Return(app));
 
   MessageSharedPtr test_msg(CreateMessage(smart_objects::SmartType_Map));
@@ -217,7 +219,7 @@ TEST_F(DeleteCommandRequestTest, OnEvent_VrDeleteCommand_SUCCESS) {
   DeleteCommandPtr command(CreateCommand<DeleteCommandRequest>(command_msg));
 
   MockAppPtr app = CreateMockApp();
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
       .WillRepeatedly(Return(app));
 
   MessageSharedPtr test_msg(CreateMessage(smart_objects::SmartType_Map));

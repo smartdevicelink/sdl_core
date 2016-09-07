@@ -84,7 +84,7 @@ TYPED_TEST_CASE(MobileNotificationCommandsTest, NotificationCommandsList);
 TYPED_TEST(MobileNotificationCommandsTest, Run_SendMessageToMobile_SUCCESS) {
   ::utils::SharedPtr<typename TestFixture::CommandType> command =
       this->template CreateCommand<typename TestFixture::CommandType>();
-  EXPECT_CALL(this->app_mngr_,
+  EXPECT_CALL(this->mock_app_manager_,
               SendMessageToMobile(CheckNotificationMessage(), _));
   command->Run();
 }

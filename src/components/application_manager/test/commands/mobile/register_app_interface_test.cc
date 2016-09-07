@@ -39,7 +39,7 @@
 
 #include "application_manager/commands/commands_test.h"
 #include "application_manager/commands/command_request_test.h"
-#include "application_manager/mock_policy_handler_interface.h"
+#include "application_manager/policies/mock_policy_handler_interface.h"
 #include "connection_handler/mock_connection_handler.h"
 
 #include "mobile/register_app_interface_response.h"

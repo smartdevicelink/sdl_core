@@ -131,7 +131,7 @@ class CommandRequestImplTest
     app_set = (!app_set ? ::utils::MakeShared<ApplicationSet>() : app_set);
     MockAppPtr app(CreateMockApp());
     app_set->insert(app);
-    EXPECT_CALL(app_mngr_, applications())
+    EXPECT_CALL(mock_app_manager_, applications())
         .WillOnce(
             Return(DataAccessor<ApplicationSet>(*app_set, app_set_lock_)));
     return app;
@@ -151,7 +151,7 @@ TEST_F(CommandRequestImplTest, OnTimeOut_StateCompleted_UNSUCCESS) {
   // First -- on `onTimeOut` method call
   // Second -- on destruction;
   EXPECT_CALL(event_dispatcher_, remove_observer(_)).Times(2);
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(mock_app_manager_, ManageMobileCommand(_, _)).Times(0);
 
   // If `command` already done, then state should change to `kCompleted`.
   command->set_current_state(RequestState::kCompleted);
@@ -173,7 +173,7 @@ TEST_F(CommandRequestImplTest, OnTimeOut_StateAwaitingHMIResponse_SUCCESS) {
   EXPECT_CALL(*mock_message_helper_, CreateNegativeResponse(_, _, _, _))
       .WillOnce(Return(dummy_msg));
   EXPECT_CALL(
-      app_mngr_,
+      mock_app_manager_,
       ManageMobileCommand(dummy_msg, Command::CommandOrigin::ORIGIN_SDL));
 
   command->onTimeOut();
@@ -251,7 +251,7 @@ TEST_F(CommandRequestImplTest, CreateHMINotification_SUCCESS) {
 
   MessageSharedPtr result;
 
-  EXPECT_CALL(app_mngr_, ManageHMICommand(_))
+  EXPECT_CALL(mock_app_manager_, ManageHMICommand(_))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
   command->CreateHMINotification(kInvalidFunctionId, *msg_params);
@@ -264,10 +264,10 @@ TEST_F(CommandRequestImplTest, CreateHMINotification_SUCCESS) {
 TEST_F(CommandRequestImplTest, SendHMIRequest_NoUseEvent_SUCCESS) {
   CommandPtr command = CreateCommand<UCommandRequestImpl>();
 
-  EXPECT_CALL(app_mngr_, GetNextHMICorrelationID())
+  EXPECT_CALL(mock_app_manager_, GetNextHMICorrelationID())
       .WillOnce(Return(kCorrelationId));
   // Return `true` prevents call of `SendResponse` method;
-  EXPECT_CALL(app_mngr_, ManageHMICommand(_)).WillOnce(Return(true));
+  EXPECT_CALL(mock_app_manager_, ManageHMICommand(_)).WillOnce(Return(true));
 
   EXPECT_EQ(kCorrelationId,
             command->SendHMIRequest(kInvalidFunctionId, NULL, false));
@@ -276,10 +276,10 @@ TEST_F(CommandRequestImplTest, SendHMIRequest_NoUseEvent_SUCCESS) {
 TEST_F(CommandRequestImplTest, SendHMIRequest_UseEvent_SUCCESS) {
   CommandPtr command = CreateCommand<UCommandRequestImpl>();
 
-  EXPECT_CALL(app_mngr_, GetNextHMICorrelationID())
+  EXPECT_CALL(mock_app_manager_, GetNextHMICorrelationID())
       .WillOnce(Return(kCorrelationId));
   // Return `true` prevents call of `SendResponse` method;
-  EXPECT_CALL(app_mngr_, ManageHMICommand(_)).WillOnce(Return(true));
+  EXPECT_CALL(mock_app_manager_, ManageHMICommand(_)).WillOnce(Return(true));
 
   EXPECT_CALL(event_dispatcher_, add_observer(_, _, _));
 
@@ -328,7 +328,7 @@ TEST_F(CommandRequestImplTest,
 
   CommandPtr command = CreateCommand<UCommandRequestImpl>(msg);
 
-  EXPECT_CALL(app_mngr_, applications()).Times(0);
+  EXPECT_CALL(mock_app_manager_, applications()).Times(0);
   EXPECT_TRUE(command->CheckPermissions());
 }
 
@@ -359,7 +359,7 @@ TEST_F(CommandRequestImplTest, CheckAllowedParameters_NoMsgParamsMap_SUCCESS) {
   EXPECT_CALL(*app, hmi_level())
       .WillOnce(Return(mobile_apis::HMILevel::HMI_NONE));
 
-  EXPECT_CALL(app_mngr_, CheckPolicyPermissions(_, _, _, _, _))
+  EXPECT_CALL(mock_app_manager_, CheckPolicyPermissions(_, _, _, _, _))
       .WillOnce(Return(kMobResultSuccess));
 
   EXPECT_TRUE(command->CheckPermissions());
@@ -380,14 +380,14 @@ TEST_F(CommandRequestImplTest,
   EXPECT_CALL(*app, hmi_level())
       .WillOnce(Return(mobile_apis::HMILevel::HMI_NONE));
 
-  EXPECT_CALL(app_mngr_, CheckPolicyPermissions(_, _, _, _, _))
+  EXPECT_CALL(mock_app_manager_, CheckPolicyPermissions(_, _, _, _, _))
       .WillOnce(Return(mobile_apis::Result::INVALID_ENUM));
 
   MessageSharedPtr dummy_msg;
   EXPECT_CALL(*mock_message_helper_,
               CreateBlockedByPoliciesResponse(_, _, _, _))
       .WillOnce(Return(dummy_msg));
-  EXPECT_CALL(app_mngr_, SendMessageToMobile(_, _));
+  EXPECT_CALL(mock_app_manager_, SendMessageToMobile(_, _));
   EXPECT_FALSE(command->CheckPermissions());
 }
 
@@ -410,7 +410,7 @@ TEST_F(CommandRequestImplTest, CheckAllowedParameters_MsgParamsMap_SUCCESS) {
       .WillOnce(Return(mobile_apis::HMILevel::HMI_NONE));
 
   RPCParams params;
-  EXPECT_CALL(app_mngr_, CheckPolicyPermissions(_, _, _, _, _))
+  EXPECT_CALL(mock_app_manager_, CheckPolicyPermissions(_, _, _, _, _))
       .WillOnce(DoAll(GetArg3(&params), Return(kMobResultSuccess)));
 
   EXPECT_TRUE(command->CheckPermissions());
@@ -443,7 +443,7 @@ TEST_F(CommandRequestImplTest, SendResponse_TimedOut_UNSUCCESS) {
 
   command->set_current_state(RequestState::kTimedOut);
 
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(mock_app_manager_, ManageMobileCommand(_, _)).Times(0);
 
   // Args do not affect on anything in this case;
   command->SendResponse(true, kMobResultSuccess, NULL, NULL);
@@ -458,7 +458,7 @@ TEST_F(CommandRequestImplTest, SendResponse_SUCCESS) {
   EXPECT_TRUE(smart_objects::SmartType_Null == (*msg).getType());
 
   MessageSharedPtr result;
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _))
+  EXPECT_CALL(mock_app_manager_, ManageMobileCommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
   // Args do not affect on anything in this case;
@@ -488,7 +488,7 @@ TEST_F(CommandRequestImplTest,
       kDisallowedParam1);
 
   MessageSharedPtr result;
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _))
+  EXPECT_CALL(mock_app_manager_, ManageMobileCommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
   command->SendResponse(true, kMobResultSuccess, NULL, NULL);

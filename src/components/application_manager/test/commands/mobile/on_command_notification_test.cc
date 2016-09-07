@@ -67,10 +67,10 @@ class OnCommandNotificationTest
 TEST_F(OnCommandNotificationTest, Run_AppNotRegistered_UNSUCCESS) {
   CommandPtr command(CreateCommand<OnCommandNotification>());
 
-  EXPECT_CALL(app_mngr_, application(_))
+  EXPECT_CALL(mock_app_manager_, application(_))
       .WillOnce(Return(ApplicationSharedPtr()));
 
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(mock_app_manager_, ManageMobileCommand(_, _)).Times(0);
 
   command->Run();
 }
@@ -83,12 +83,13 @@ TEST_F(OnCommandNotificationTest, Run_NoAppsForTheCommand_UNSUCCESS) {
   CommandPtr command(CreateCommand<OnCommandNotification>(command_msg));
 
   MockAppPtr mock_app(CreateMockApp());
-  EXPECT_CALL(app_mngr_, application(kAppId)).WillOnce(Return(mock_app));
+  EXPECT_CALL(mock_app_manager_, application(kAppId))
+      .WillOnce(Return(mock_app));
 
   EXPECT_CALL(*mock_app, FindCommand(kCommandId))
       .WillOnce(Return(static_cast<SmartObject*>(NULL)));
 
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(mock_app_manager_, ManageMobileCommand(_, _)).Times(0);
 
   command->Run();
 }
@@ -118,13 +119,15 @@ TEST_F(OnCommandNotificationTest, Run_SUCCESS) {
   CommandPtr command(CreateCommand<OnCommandNotification>(command_msg));
 
   MockAppPtr mock_app(CreateMockApp());
-  EXPECT_CALL(app_mngr_, application(kAppId)).WillOnce(Return(mock_app));
+  EXPECT_CALL(mock_app_manager_, application(kAppId))
+      .WillOnce(Return(mock_app));
 
   MessageSharedPtr dummy_msg(CreateMessage());
   EXPECT_CALL(*mock_app, FindCommand(kCommandId))
       .WillOnce(Return(dummy_msg.get()));
 
-  EXPECT_CALL(app_mngr_, SendMessageToMobile(CheckNotificationMessage(), _));
+  EXPECT_CALL(mock_app_manager_,
+              SendMessageToMobile(CheckNotificationMessage(), _));
 
   command->Run();
 }

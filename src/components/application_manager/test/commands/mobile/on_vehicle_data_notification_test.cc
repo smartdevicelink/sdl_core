@@ -125,7 +125,7 @@ TEST_F(OnVehicleDataNotificationTest,
   std::vector<ApplicationSharedPtr> applications;
   applications.push_back(mock_app);
 
-  EXPECT_CALL(app_mngr_,
+  EXPECT_CALL(mock_app_manager_,
               IviInfoUpdated(am::VehicleDataType::FUELLEVEL, kFuelLevel))
       .WillOnce(Return(applications));
 
@@ -133,7 +133,7 @@ TEST_F(OnVehicleDataNotificationTest,
   ::utils::custom_string::CustomString dummy_name("test_app");
   ON_CALL(*mock_app, name()).WillByDefault(ReturnRef(dummy_name));
 
-  EXPECT_CALL(app_mngr_,
+  EXPECT_CALL(mock_app_manager_,
               SendMessageToMobile(
                   CheckMessageData(am::strings::fuel_level, kFuelLevel), _));
 

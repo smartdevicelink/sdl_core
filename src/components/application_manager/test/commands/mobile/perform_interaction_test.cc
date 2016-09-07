@@ -680,7 +680,8 @@ TEST_F(PerformInteractionRequestTest,
 
   event.set_smart_object(*message_);
 
-  EXPECT_CALL(*mock_application_sptr_, DeletePerformInteractionChoiceSet(_)).Times(2);
+  EXPECT_CALL(*mock_application_sptr_, DeletePerformInteractionChoiceSet(_))
+      .Times(2);
 
   MessageSharedPtr result_msg = CatchMobileCommandResult(caller);
 

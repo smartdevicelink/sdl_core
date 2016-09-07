@@ -76,7 +76,7 @@ typedef SubscribeButtonRequestTest::MockHMICapabilities MockHMICapabilities;
 TEST_F(SubscribeButtonRequestTest, Run_AppNotRegistered_UNSUCCESS) {
   CommandPtr command(CreateCommand<SubscribeButtonRequest>());
 
-  ON_CALL(app_mngr_, application(_))
+  ON_CALL(mock_app_manager_, application(_))
       .WillByDefault(Return(SharedPtr<am::Application>()));
 
   MessageSharedPtr result_msg(CatchMobileCommandResult(CallRun(*command)));
@@ -93,7 +93,7 @@ TEST_F(SubscribeButtonRequestTest, Run_SubscriptionNotAllowed_UNSUCCESS) {
   CommandPtr command(CreateCommand<SubscribeButtonRequest>(msg));
 
   MockAppPtr app(CreateMockApp());
-  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
+  ON_CALL(mock_app_manager_, application(_)).WillByDefault(Return(app));
   ON_CALL(*app, is_media_application()).WillByDefault(Return(false));
 
   MessageSharedPtr result_msg(CatchMobileCommandResult(CallRun(*command)));
@@ -107,10 +107,10 @@ TEST_F(SubscribeButtonRequestTest, Run_UiIsNotSupported_UNSUCCESS) {
   CommandPtr command(CreateCommand<SubscribeButtonRequest>());
 
   MockAppPtr app(CreateMockApp());
-  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
+  ON_CALL(mock_app_manager_, application(_)).WillByDefault(Return(app));
 
   MockHMICapabilities hmi_capabilities;
-  ON_CALL(app_mngr_, hmi_capabilities())
+  ON_CALL(mock_app_manager_, hmi_capabilities())
       .WillByDefault(ReturnRef(hmi_capabilities));
   ON_CALL(hmi_capabilities, is_ui_cooperating()).WillByDefault(Return(false));
 
@@ -130,11 +130,11 @@ TEST_F(SubscribeButtonRequestTest, Run_IsSubscribedToButton_UNSUCCESS) {
   CommandPtr command(CreateCommand<SubscribeButtonRequest>(msg));
 
   MockAppPtr app(CreateMockApp());
-  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
+  ON_CALL(mock_app_manager_, application(_)).WillByDefault(Return(app));
   ON_CALL(*app, is_media_application()).WillByDefault(Return(true));
 
   MockHMICapabilities hmi_capabilities;
-  ON_CALL(app_mngr_, hmi_capabilities())
+  ON_CALL(mock_app_manager_, hmi_capabilities())
       .WillByDefault(ReturnRef(hmi_capabilities));
   ON_CALL(hmi_capabilities, is_ui_cooperating()).WillByDefault(Return(true));
 
@@ -162,11 +162,11 @@ TEST_F(SubscribeButtonRequestTest, Run_SUCCESS) {
   CommandPtr command(CreateCommand<SubscribeButtonRequest>(msg));
 
   MockAppPtr app(CreateMockApp());
-  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
+  ON_CALL(mock_app_manager_, application(_)).WillByDefault(Return(app));
   ON_CALL(*app, is_media_application()).WillByDefault(Return(true));
 
   MockHMICapabilities hmi_capabilities;
-  ON_CALL(app_mngr_, hmi_capabilities())
+  ON_CALL(mock_app_manager_, hmi_capabilities())
       .WillByDefault(ReturnRef(hmi_capabilities));
   ON_CALL(hmi_capabilities, is_ui_cooperating()).WillByDefault(Return(true));
 
@@ -179,7 +179,7 @@ TEST_F(SubscribeButtonRequestTest, Run_SUCCESS) {
   ON_CALL(*app, IsSubscribedToButton(_)).WillByDefault(Return(false));
 
   MessageSharedPtr hmi_result_msg;
-  EXPECT_CALL(app_mngr_, ManageHMICommand(_))
+  EXPECT_CALL(mock_app_manager_, ManageHMICommand(_))
       .WillOnce(DoAll(SaveArg<0>(&hmi_result_msg), Return(true)));
 
   MessageSharedPtr mobile_result_msg(

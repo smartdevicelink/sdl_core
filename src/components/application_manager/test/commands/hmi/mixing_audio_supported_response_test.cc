@@ -86,7 +86,7 @@ TEST_F(MixingAudioSupportedResponseTest, RUN_SUCCESS) {
       CreateCommand<MixingAudioSupportedResponse>(command_msg));
   MockHMICapabilities mock_hmi_capabilities;
 
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
+  EXPECT_CALL(mock_app_manager_, hmi_capabilities())
       .WillOnce(ReturnRef(mock_hmi_capabilities));
 
   const bool hmiResponse =

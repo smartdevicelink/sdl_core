@@ -112,7 +112,7 @@ class CommandsTest : public ::testing::Test {
                                    MessageSharedPtr& msg) {
     InitCommand(timeout);
     return ::utils::MakeShared<Command>((msg ? msg : msg = CreateMessage()),
-                                        app_mngr_);
+                                        mock_app_manager_);
   }
 
   template <class Command>
@@ -124,19 +124,19 @@ class CommandsTest : public ::testing::Test {
   SharedPtr<Command> CreateCommand(const uint32_t timeout = kDefaultTimeout_) {
     InitCommand(timeout);
     MessageSharedPtr msg = CreateMessage();
-    return ::utils::MakeShared<Command>(msg, app_mngr_);
+    return ::utils::MakeShared<Command>(msg, mock_app_manager_);
   }
 
   enum { kDefaultTimeout_ = 100 };
 
-  MockAppManager app_mngr_;
-  MockAppManagerSettings app_mngr_settings_;
+  MockAppManager mock_app_manager_;
+  MockAppManagerSettings mock_app_manager_settings_;
 
  protected:
   virtual void InitCommand(const uint32_t& timeout) {
-    ON_CALL(app_mngr_, get_settings())
-        .WillByDefault(ReturnRef(app_mngr_settings_));
-    ON_CALL(app_mngr_settings_, default_timeout())
+    ON_CALL(mock_app_manager_, get_settings())
+        .WillByDefault(ReturnRef(mock_app_manager_settings_));
+    ON_CALL(mock_app_manager_settings_, default_timeout())
         .WillByDefault(ReturnRef(timeout));
   }
 

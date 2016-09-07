@@ -51,7 +51,7 @@
 #include "application_manager/mock_message_helper.h"
 #include "application_manager/event_engine/event.h"
 #include "application_manager/mock_hmi_capabilities.h"
-#include "application_manager/mock_policy_handler_interface.h"
+#include "application_manager/policies/mock_policy_handler_interface.h"
 #include "application_manager/mock_application_manager_settings.h"
 
 #include "interfaces/MOBILE_API.h"
@@ -143,20 +143,6 @@ TEST_F(DeleteFileRequestTest, Run_HMILevelNone_UNSUCCESS) {
       ManageMobileCommand(CheckMessageResultCode(mobile_apis::Result::REJECTED),
                           am::commands::Command::CommandOrigin::ORIGIN_SDL));
 
-  command_->Run();
-}
-
-TEST_F(DeleteFileRequestTest, Run_InvalidFileName_UNSUCCESS) {
-  (*message_)[am::strings::msg_params][am::strings::sync_file_name] =
-      "invalid_file_name/";
-
-  EXPECT_CALL(mock_app_manager_, application(_)).WillOnce(Return(app_));
-  EXPECT_CALL(*app_, hmi_level())
-      .WillOnce(Return(am::mobile_api::HMILevel::HMI_FULL));
-  EXPECT_CALL(
-      mock_app_manager_,
-      ManageMobileCommand(CheckMessageResultCode(mobile_apis::Result::REJECTED),
-                          am::commands::Command::CommandOrigin::ORIGIN_SDL));
   command_->Run();
 }
 

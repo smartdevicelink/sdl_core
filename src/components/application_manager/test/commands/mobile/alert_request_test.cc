@@ -85,7 +85,7 @@ TEST_F(AlertRequestTest, OnTimeOut_UNSUCCESS) {
   CommandPtr command(CreateCommand<AlertRequest>(msg));
 
   command->onTimeOut();
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(mock_app_manager_, ManageMobileCommand(_, _)).Times(0);
 }
 
 TEST_F(AlertRequestTest, OnTimeOut_SUCCESS) {
@@ -106,7 +106,7 @@ TEST_F(AlertRequestTest, OnTimeOut_SUCCESS) {
 TEST_F(AlertRequestTest, Run_ApplicationIsNotRegistered_UNSUCCESS) {
   CommandPtr command(CreateCommand<AlertRequest>());
 
-  ON_CALL(app_mngr_, application(_))
+  ON_CALL(mock_app_manager_, application(_))
       .WillByDefault(Return(ApplicationSharedPtr()));
 
   MessageSharedPtr result_msg(CatchMobileCommandResult(CallRun(*command)));
@@ -120,7 +120,7 @@ TEST_F(AlertRequestTest, Run_AlertFrequencyIsTooHigh_UNSUCCESS) {
   CommandPtr command(CreateCommand<AlertRequest>());
 
   MockAppPtr app(CreateMockApp());
-  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
+  ON_CALL(mock_app_manager_, application(_)).WillByDefault(Return(app));
 
   ON_CALL(*app, hmi_level())
       .WillByDefault(Return(mobile_apis::HMILevel::HMI_BACKGROUND));
@@ -140,12 +140,12 @@ TEST_F(AlertRequestTest, Run_FailToProcessSoftButtons_UNSUCCESS) {
   CommandPtr command(CreateCommand<AlertRequest>());
 
   MockAppPtr app(CreateMockApp());
-  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
+  ON_CALL(mock_app_manager_, application(_)).WillByDefault(Return(app));
   ON_CALL(*app, hmi_level())
       .WillByDefault(Return(mobile_apis::HMILevel::HMI_BACKGROUND));
   ON_CALL(*app, AreCommandLimitsExceeded(_, _)).WillByDefault(Return(false));
 
-  ON_CALL(app_mngr_, GetPolicyHandler())
+  ON_CALL(mock_app_manager_, GetPolicyHandler())
       .WillByDefault(
           ReturnRef(*static_cast<policy::PolicyHandlerInterface*>(NULL)));
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
@@ -162,12 +162,12 @@ TEST_F(AlertRequestTest, Run_MandatoryParametersAreMissed_UNSUCCESS) {
   CommandPtr command(CreateCommand<AlertRequest>());
 
   MockAppPtr app(CreateMockApp());
-  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
+  ON_CALL(mock_app_manager_, application(_)).WillByDefault(Return(app));
   ON_CALL(*app, hmi_level())
       .WillByDefault(Return(mobile_apis::HMILevel::HMI_BACKGROUND));
   ON_CALL(*app, AreCommandLimitsExceeded(_, _)).WillByDefault(Return(false));
 
-  ON_CALL(app_mngr_, GetPolicyHandler())
+  ON_CALL(mock_app_manager_, GetPolicyHandler())
       .WillByDefault(
           ReturnRef(*static_cast<policy::PolicyHandlerInterface*>(NULL)));
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
@@ -190,7 +190,7 @@ TEST_F(AlertRequestTest, Run_MandatoryParametersAreInvalid_UNSUCCESS) {
   CommandPtr command(CreateCommand<AlertRequest>(msg));
 
   MockAppPtr app(CreateMockApp());
-  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
+  ON_CALL(mock_app_manager_, application(_)).WillByDefault(Return(app));
   ON_CALL(*app, hmi_level())
       .WillByDefault(Return(mobile_apis::HMILevel::HMI_BACKGROUND));
   ON_CALL(*app, AreCommandLimitsExceeded(_, _)).WillByDefault(Return(false));
@@ -212,19 +212,19 @@ TEST_F(AlertRequestTest, Run_SUCCESS) {
   CommandPtr command(CreateCommand<AlertRequest>(msg));
 
   MockAppPtr app(CreateMockApp());
-  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
+  ON_CALL(mock_app_manager_, application(_)).WillByDefault(Return(app));
   ON_CALL(*app, hmi_level())
       .WillByDefault(Return(mobile_apis::HMILevel::HMI_BACKGROUND));
   ON_CALL(*app, AreCommandLimitsExceeded(_, _)).WillByDefault(Return(false));
 
-  ON_CALL(app_mngr_, GetPolicyHandler())
+  ON_CALL(mock_app_manager_, GetPolicyHandler())
       .WillByDefault(
           ReturnRef(*static_cast<policy::PolicyHandlerInterface*>(NULL)));
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
               ProcessSoftButtons(_, _, _, _))
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
 
-  EXPECT_CALL(this->app_mngr_, ManageHMICommand(_))
+  EXPECT_CALL(this->mock_app_manager_, ManageHMICommand(_))
       .Times(AtLeast(1))
       .WillRepeatedly(Return(true));
 

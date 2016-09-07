@@ -47,7 +47,7 @@
 #include "application_manager/mock_message_helper.h"
 #include "application_manager/event_engine/event.h"
 #include "application_manager/mock_hmi_capabilities.h"
-#include "application_manager/mock_policy_handler_interface.h"
+#include "application_manager/policies/mock_policy_handler_interface.h"
 
 static application_manager::MockMessageHelper* message_helper_mock_;
 
@@ -190,7 +190,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
   (*message_)[am::strings::msg_params][am::strings::choice_set][1]
              [am::strings::vr_commands][0] = kVrCommands1;
   (*message_)[am::strings::msg_params][am::strings::choice_set][1]
-             [am::strings::vr_commands][1] = kVrCommands2;
+             [am::strings::vr_commands][1] = " kVrCommands2\t";
 
   EXPECT_CALL(mock_app_manager_, application(_)).WillOnce(Return(app_));
 
@@ -201,34 +201,6 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
   EXPECT_CALL(*app_, FindChoiceSet(kChoiceSetId))
       .WillOnce(Return(choice_set_id));
 
-  EXPECT_CALL(mock_app_manager_, GenerateGrammarID()).Times(0);
-  command_->Run();
-}
-
-TEST_F(CreateInteractionChoiceSetRequestTest,
-       Run_CheckChoiceSet_InvalidAmountVrCommands_UNSUCCESS) {
-  (*message_)[am::strings::msg_params][am::strings::choice_set][0]
-             [am::strings::menu_name] = kMenuName;
-  (*message_)[am::strings::msg_params][am::strings::choice_set][0]
-             [am::strings::image][am::strings::value] = kImage;
-  (*message_)[am::strings::msg_params][am::strings::choice_set][0]
-             [am::strings::choice_id] = kChoiceId1;
-  (*message_)[am::strings::msg_params][am::strings::choice_set][0]
-             [am::strings::secondary_image][am::strings::value] = kSecondImage;
-
-  FillMessageFieldsItem2(message_);
-  (*message_)[am::strings::msg_params][am::strings::choice_set][1]
-             [am::strings::vr_commands][0] = kVrCommands1;
-  (*message_)[am::strings::msg_params][am::strings::choice_set][1]
-             [am::strings::vr_commands][1] = kVrCommands2;
-
-  EXPECT_CALL(mock_app_manager_, application(_)).WillOnce(Return(app_));
-  EXPECT_CALL(*message_helper_mock_, VerifyImage(_, _, _))
-      .WillRepeatedly(Return(mobile_apis::Result::SUCCESS));
-
-  smart_objects::SmartObject* choice_set_id = NULL;
-  EXPECT_CALL(*app_, FindChoiceSet(kChoiceSetId))
-      .WillOnce(Return(choice_set_id));
   EXPECT_CALL(mock_app_manager_, GenerateGrammarID()).Times(0);
   command_->Run();
 }
@@ -373,7 +345,6 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
       .WillOnce(Return(choice_set_id));
 
   EXPECT_CALL(*app_, AddChoiceSet(kChoiceSetId, _));
-  EXPECT_CALL(*app_, UpdateHash());
   command_->Run();
 }
 

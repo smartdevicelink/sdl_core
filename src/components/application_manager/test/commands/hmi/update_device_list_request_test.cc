@@ -93,20 +93,20 @@ class UpdateDeviceListRequestTest
 TEST_F(UpdateDeviceListRequestTest, RUN_LaunchHMIReturnsFalse) {
   MessageSharedPtr command_msg = CreateCommandMsg();
 
-  EXPECT_CALL(app_mngr_, event_dispatcher())
+  EXPECT_CALL(mock_app_manager_, event_dispatcher())
       .WillOnce(ReturnRef(mock_event_dispatcher_));
   EXPECT_CALL(mock_event_dispatcher_, remove_observer(_));
 
   UpdateDeviceListRequestPtr command(
       CreateCommand<UpdateDeviceListRequest>(command_msg));
 
-  EXPECT_CALL(app_mngr_, get_settings()).WillOnce(ReturnRef(settings_));
+  EXPECT_CALL(mock_app_manager_, get_settings()).WillOnce(ReturnRef(settings_));
 
   EXPECT_CALL(settings_, launch_hmi()).WillOnce(Return(false));
 
-  EXPECT_CALL(app_mngr_, IsHMICooperating()).Times(0);
+  EXPECT_CALL(mock_app_manager_, IsHMICooperating()).Times(0);
 
-  EXPECT_CALL(app_mngr_, SendMessageToHMI(command_msg));
+  EXPECT_CALL(mock_app_manager_, SendMessageToHMI(command_msg));
 
   command->Run();
 
@@ -119,20 +119,20 @@ TEST_F(UpdateDeviceListRequestTest, RUN_LaunchHMIReturnsFalse) {
 TEST_F(UpdateDeviceListRequestTest, RUN_HMICooperatingReturnsTrue_SUCCESSS) {
   MessageSharedPtr command_msg = CreateCommandMsg();
 
-  EXPECT_CALL(app_mngr_, event_dispatcher())
+  EXPECT_CALL(mock_app_manager_, event_dispatcher())
       .WillOnce(ReturnRef(mock_event_dispatcher_));
   EXPECT_CALL(mock_event_dispatcher_, remove_observer(_));
 
   UpdateDeviceListRequestPtr command(
       CreateCommand<UpdateDeviceListRequest>(command_msg));
 
-  EXPECT_CALL(app_mngr_, get_settings()).WillOnce(ReturnRef(settings_));
+  EXPECT_CALL(mock_app_manager_, get_settings()).WillOnce(ReturnRef(settings_));
 
   EXPECT_CALL(settings_, launch_hmi()).WillOnce(Return(true));
 
-  EXPECT_CALL(app_mngr_, IsHMICooperating()).WillOnce(Return(true));
+  EXPECT_CALL(mock_app_manager_, IsHMICooperating()).WillOnce(Return(true));
 
-  EXPECT_CALL(app_mngr_, SendMessageToHMI(command_msg));
+  EXPECT_CALL(mock_app_manager_, SendMessageToHMI(command_msg));
 
   command->Run();
 
@@ -145,7 +145,7 @@ TEST_F(UpdateDeviceListRequestTest, RUN_HMICooperatingReturnsTrue_SUCCESSS) {
 TEST_F(UpdateDeviceListRequestTest, OnEvent_WrongEventId_UNSUCCESS) {
   Event event(Event::EventID::INVALID_ENUM);
 
-  EXPECT_CALL(app_mngr_, event_dispatcher())
+  EXPECT_CALL(mock_app_manager_, event_dispatcher())
       .WillOnce(ReturnRef(mock_event_dispatcher_));
   EXPECT_CALL(mock_event_dispatcher_, remove_observer(_));
 
@@ -157,7 +157,7 @@ TEST_F(UpdateDeviceListRequestTest, OnEvent_WrongEventId_UNSUCCESS) {
 TEST_F(UpdateDeviceListRequestTest, OnEvent_SUCCESS) {
   Event event(Event::EventID::BasicCommunication_OnReady);
 
-  EXPECT_CALL(app_mngr_, event_dispatcher())
+  EXPECT_CALL(mock_app_manager_, event_dispatcher())
       .WillOnce(ReturnRef(mock_event_dispatcher_));
   EXPECT_CALL(mock_event_dispatcher_, remove_observer(_, _));
 

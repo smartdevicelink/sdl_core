@@ -35,6 +35,7 @@
 
 #include "gtest/gtest.h"
 #include "application_manager/commands/command_request_test.h"
+#include "application_manager/mock_application.h"
 
 #include "mobile/get_way_points_request.h"
 
@@ -69,8 +70,11 @@ class GetWayPointsRequestTest
     command_sptr_ =
         CreateCommand<application_manager::commands::GetWayPointsRequest>(
             CommandsTest::kDefaultTimeout_, message_);
+    mock_app_ = CreateMockApp();
+    ON_CALL(mock_app_manager_, application(_)).WillByDefault(Return(mock_app_));
   }
 
+  MockAppPtr mock_app_;
   MessageSharedPtr message_;
   utils::SharedPtr<commands::GetWayPointsRequest> command_sptr_;
 };
@@ -140,42 +144,6 @@ TEST_F(GetWayPointsRequestTest,
           (*result_message)[strings::msg_params][strings::result_code].asInt());
 
   EXPECT_EQ(mobile_api::Result::SUCCESS, kResult);
-}
-
-TEST_F(GetWayPointsRequestTest, OnEvent_ResetTimeoutEvent_UpdateTimeout) {
-  event_engine::Event event(hmi_apis::FunctionID::UI_OnResetTimeout);
-
-  (*message_)[strings::params][strings::connection_key] = kConnectionKey;
-  (*message_)[strings::params][strings::correlation_id] = kCorrelationId;
-  (*message_)[strings::msg_params][strings::app_id] = kAppId;
-  (*message_)[strings::msg_params][strings::method_name] = kMethodName;
-
-  event.set_smart_object(*message_);
-
-  EXPECT_CALL(mock_app_manager_,
-              updateRequestTimeout(kConnectionKey, kCorrelationId, _));
-
-  CallOnEvent caller(*command_sptr_, event);
-  caller();
-}
-
-TEST_F(GetWayPointsRequestTest,
-       OnEvent_ResetTimeoutEventAndIncerrectConnectionKey_NotUpdateTimeout) {
-  event_engine::Event event(hmi_apis::FunctionID::UI_OnResetTimeout);
-
-  const uint32_t kConnectionKey = 1u;
-
-  (*message_)[strings::params][strings::connection_key] = kConnectionKey;
-  (*message_)[strings::params][strings::correlation_id] = kCorrelationId;
-  (*message_)[strings::msg_params][strings::app_id] = kAppId;
-  (*message_)[strings::msg_params][strings::method_name] = kMethodName;
-
-  event.set_smart_object(*message_);
-
-  EXPECT_CALL(mock_app_manager_, updateRequestTimeout(_, _, _)).Times(0);
-
-  CallOnEvent caller(*command_sptr_, event);
-  caller();
 }
 
 TEST_F(GetWayPointsRequestTest, OnEvent_DefaultCase) {

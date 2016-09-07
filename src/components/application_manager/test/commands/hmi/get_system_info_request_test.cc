@@ -75,9 +75,9 @@ TEST_F(GetSystemInfoRequestTest, RUN_SendRequest_SUCCESS) {
 
   const uint32_t kAppId = command->application_id();
 
-  EXPECT_CALL(app_mngr_, set_application_id(kCorrelationId, kAppId));
+  EXPECT_CALL(mock_app_manager_, set_application_id(kCorrelationId, kAppId));
 
-  EXPECT_CALL(app_mngr_, SendMessageToHMI(command_msg));
+  EXPECT_CALL(mock_app_manager_, SendMessageToHMI(command_msg));
 
   command->Run();
 
