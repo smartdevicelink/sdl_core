@@ -47,6 +47,9 @@
 #include "hmi/tts_speak_request.h"
 #include "hmi/tts_stop_speaking_request.h"
 #include "hmi/tts_get_supported_languages_request.h"
+#include "hmi/tts_change_registration_request.h"
+#include "hmi/tts_get_capabilities_request.h"
+#include "hmi/tts_get_language_request.h"
 #include "hmi/close_popup_request.h"
 #include "hmi/ui_add_command_request.h"
 #include "hmi/ui_add_submenu_request.h"
@@ -147,7 +150,10 @@ typedef Types<commands::VIIsReadyRequest,
               commands::VRAddCommandRequest,
               commands::VRChangeRegistrationRequest,
               commands::VRDeleteCommandRequest,
-              commands::UISliderRequest> RequestCommandsList;
+              commands::UISliderRequest,
+              commands::TTSChangeRegistrationRequest,
+              commands::TTSGetCapabilitiesRequest,
+              commands::TTSGetLanguageRequest> RequestCommandsList;
 
 TYPED_TEST_CASE(RequestToHMICommandsTest, RequestCommandsList);
 
