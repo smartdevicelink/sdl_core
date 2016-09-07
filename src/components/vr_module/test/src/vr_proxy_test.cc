@@ -36,6 +36,7 @@
 #include "mock_vr_proxy_listener.h"
 #include "mock_channel.h"
 
+using ::testing::_;
 using ::testing::Return;
 
 namespace vr_module {
@@ -44,34 +45,41 @@ class VRProxyTest : public ::testing::Test {
  protected:
 };
 
+TEST_F(VRProxyTest, StartStop) {
+  MockVRProxyListener listener;
+  MockChannel *channel = new MockChannel();
+  EXPECT_CALL(*channel, Start()).Times(1).WillOnce(Return(true));
+  EXPECT_CALL(listener, OnReady()).Times(1);
+  EXPECT_CALL(*channel, Receive(_, _)).WillRepeatedly(Return(false));
+  EXPECT_CALL(*channel, Stop()).Times(1).WillOnce(Return(true));
+  VRProxy proxy(&listener, channel);
+  sleep(1);
+}
+
 TEST_F(VRProxyTest, SizeToString) {
-  MockVRProxyListener *listener = new MockVRProxyListener();
+  MockVRProxyListener listener;
   MockChannel *channel = new MockChannel();
   EXPECT_CALL(*channel, Start()).Times(1).WillOnce(Return(false));
   EXPECT_CALL(*channel, Stop()).Times(1).WillOnce(Return(false));
-  VRProxy proxy(listener, channel);
+  VRProxy proxy(&listener, channel);
 
   unsigned char value[] = { 123, 0, 0, 0 };
-  std::string expected(value, value + 4);
-  std::string output = proxy.SizeToString(123);
+  std::string input(value, value + 4);
 
-  EXPECT_EQ(expected.size(), output.size());
-  EXPECT_EQ(expected, output);
+  EXPECT_EQ(int32_t(123), proxy.SizeFromString(input));
 
   unsigned char value2[] = { 0xBD, 0x3, 0, 0 };
-  std::string expected2(value2, value2 + 4);
-  std::string output2 = proxy.SizeToString(957);
+  std::string input2(value2, value2 + 4);
 
-  EXPECT_EQ(expected2.size(), output2.size());
-  EXPECT_EQ(expected2, output2);
+  EXPECT_EQ(int32_t(957), proxy.SizeFromString(input2));
 }
 
 TEST_F(VRProxyTest, SizeFromString) {
-  MockVRProxyListener *listener = new MockVRProxyListener();
+  MockVRProxyListener listener;
   MockChannel *channel = new MockChannel();
   EXPECT_CALL(*channel, Start()).Times(1).WillOnce(Return(false));
   EXPECT_CALL(*channel, Stop()).Times(1).WillOnce(Return(false));
-  VRProxy proxy(listener, channel);
+  VRProxy proxy(&listener, channel);
 
   unsigned char value[] = { 123, 0, 0, 0 };
   std::string input(value, value + 4);
