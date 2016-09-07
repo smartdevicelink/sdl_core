@@ -136,14 +136,14 @@ TEST_F(RequestToHMITest, SendRequest_SUCCESS) {
   command->SendRequest();
 }
 
-template <class Command>
+template <typename Command>
 class RequestToHMICommandsTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {
  public:
   typedef Command CommandType;
 };
 
-template <class Command>
+template <typename Command>
 class RequestToHMICommandsTest2 : public RequestToHMICommandsTest<Command> {};
 
 typedef Types<commands::VIIsReadyRequest,
