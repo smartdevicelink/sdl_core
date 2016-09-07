@@ -45,6 +45,10 @@ SocketChannel::SocketChannel()
     : socket_(0) {
 }
 
+SocketChannel::SocketChannel(net::ConnectedSocket *socket)
+    : socket_(socket) {
+}
+
 SocketChannel::~SocketChannel() {
   if (socket_) {
     socket_->close();
@@ -56,8 +60,10 @@ bool SocketChannel::Start() {
   LOG4CXX_AUTO_TRACE(logger_);
   std::string address = "127.0.0.1";
   UInt32 port = 5431;
-  socket_ = net::ConnectedSocketImpl::ConnectToHost(address.c_str(), port);
-  return false;
+  if (!socket_) {
+    socket_ = net::ConnectedSocketImpl::ConnectToHost(address.c_str(), port);
+  }
+  return true;
 }
 
 bool SocketChannel::Stop() {
