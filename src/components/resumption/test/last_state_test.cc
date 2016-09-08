@@ -31,24 +31,32 @@
  */
 
 #include <string>
+
 #include "gtest/gtest.h"
 #include "resumption/last_state.h"
 #include "utils/file_system.h"
+#include "utils/shared_ptr.h"
+#include "utils/make_shared.h"
+#include <json/writer.h>
+#include <json/reader.h>
 
 namespace test {
 namespace components {
 namespace resumption_test {
 
-using namespace ::resumption;
+using ::utils::SharedPtr;
+using ::utils::MakeShared;
 
+namespace {
 const std::string kAppStorageFolder = "app_storage_folder";
-const std::string kAppInfoStorageFile = "app_info_storage";
+const std::string kAppInfoStorageFile = "app_info_storage.dat";
+const std::string kJsonStr = "{\"firstName\":\"name\"}";
+}  // namespace
+
 class LastStateTest : public ::testing::Test {
  protected:
   LastStateTest()
-      : empty_dictionary_("null\n")
-      , app_info_dat_file_("app_info.dat")
-      , last_state_(kAppStorageFolder, kAppInfoStorageFile) {}
+      : empty_dictionary_("null\n"), app_info_dat_file_(kAppInfoStorageFile) {}
 
   static void SetUpTestCase() {
     file_system::DeleteFile(kAppInfoStorageFile);
@@ -56,6 +64,12 @@ class LastStateTest : public ::testing::Test {
   }
   void SetUp() OVERRIDE {
     ASSERT_TRUE(file_system::CreateFile(app_info_dat_file_));
+
+    const std::vector<uint8_t> char_vector_pdata(kJsonStr.begin(),
+                                                 kJsonStr.end());
+    ASSERT_TRUE(file_system::Write(kAppInfoStorageFile, char_vector_pdata));
+    last_state_ = utils::MakeShared<resumption::LastState>(kAppStorageFolder,
+                                                           kAppInfoStorageFile);
   }
 
   void TearDown() OVERRIDE {
@@ -64,55 +78,81 @@ class LastStateTest : public ::testing::Test {
   const std::string empty_dictionary_;
   const std::string app_info_dat_file_;
 
-  resumption::LastState last_state_;
+  ::utils::SharedPtr<resumption::LastState> last_state_;
+
+  void CompactJson(std::string& str) {
+    Json::Value root;
+    Json::Reader reader;
+    reader.parse(str, root);
+    Json::FastWriter writer;
+    str = writer.write(root);
+    if ('\n' == *(str.end() - 1)) {
+      str.erase(str.end() - 1);
+    }
+  }
 };
 
 TEST_F(LastStateTest, Basic) {
-  utils::json::JsonValue& dictionary = last_state_.dictionary();
-  EXPECT_EQ("null\n", dictionary.ToJson(true));
+  utils::json::JsonValue& dictionary = last_state_->dictionary();
+  std::string str = dictionary.ToJson(true);
+  CompactJson(str);
+  EXPECT_EQ(kJsonStr, str);
 }
 
 TEST_F(LastStateTest, SetGetData) {
   {
-    utils::json::JsonValue& dictionary = last_state_.dictionary();
+    const std::string null_string = "null";
+    utils::json::JsonValue& dictionary = last_state_->dictionary();
     utils::json::JsonValue bluetooth_info =
         dictionary["TransportManager"]["BluetoothAdapter"];
-    EXPECT_EQ("null\n", bluetooth_info.ToJson(true));
+    std::string str = bluetooth_info.ToJson(true);
+    CompactJson(str);
+    EXPECT_EQ(null_string, str);
 
     utils::json::JsonValue tcp_adapter_info =
         dictionary["TransportManager"]["TcpAdapter"]["devices"];
-    EXPECT_EQ("null\n", tcp_adapter_info.ToJson(true));
+    str = tcp_adapter_info.ToJson(true);
+    CompactJson(str);
+    EXPECT_EQ(null_string, str);
 
     utils::json::JsonValue resumption_time =
         dictionary["resumption"]["last_ign_off_time"];
-    EXPECT_EQ("null\n", resumption_time.ToJson(true));
+    str = resumption_time.ToJson(true);
+    CompactJson(str);
+    EXPECT_EQ(null_string, str);
 
     utils::json::JsonValue resumption_list =
         dictionary["resumption"]["resume_app_list"];
-    EXPECT_EQ("null\n", resumption_list.ToJson(true));
+    str = resumption_list.ToJson(true);
+    CompactJson(str);
+    EXPECT_EQ(null_string, str);
 
     utils::json::JsonValue test_value;
     test_value["name"] = "test_device";
 
-    utils::json::JsonValue& save_dictionary = last_state_.dictionary();
+    utils::json::JsonValue& save_dictionary = last_state_->dictionary();
     save_dictionary["TransportManager"]["TcpAdapter"]["devices"] = test_value;
     save_dictionary["TransportManager"]["BluetoothAdapter"]["devices"] =
         "bluetooth_device";
-    last_state_.SetDictionary(save_dictionary);
-    last_state_.SaveToFileSystem();
+    last_state_->SetDictionary(save_dictionary);
+    last_state_->SaveToFileSystem();
   }
 
-  utils::json::JsonValue dictionary = last_state_.dictionary();
+  utils::json::JsonValue dictionary = last_state_->dictionary();
 
   utils::json::JsonValue bluetooth_info =
       dictionary["TransportManager"]["BluetoothAdapter"];
   utils::json::JsonValue tcp_adapter_info =
       dictionary["TransportManager"]["TcpAdapter"];
-  EXPECT_EQ("{\n   \"devices\" : \"bluetooth_device\"\n}\n",
-            bluetooth_info.ToJson(true));
-  EXPECT_EQ(
-      "{\n   \"devices\" : {\n      \"name\" : \"test_device\"\n   }\n}\n",
-      tcp_adapter_info.ToJson(true));
+  std::string str = bluetooth_info.ToJson(true);
+  CompactJson(str);
+  const std::string bluetooth_device_str = "{\"devices\":\"bluetooth_device\"}";
+  EXPECT_EQ(bluetooth_device_str, str);
+  str = tcp_adapter_info.ToJson(true);
+  CompactJson(str);
+  const std::string test_device_str =
+      "{\"devices\":{\"name\":\"test_device\"}}";
+  EXPECT_EQ(test_device_str, str);
 }
 
 }  // namespace resumption_test
