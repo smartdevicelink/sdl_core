@@ -32,6 +32,8 @@
 
 #include "vr_module/socket_channel.h"
 
+#include <string.h>
+
 #include "functional_module/settings.h"
 #include "net/connected_socket_impl.h"
 #include "utils/logger.h"
@@ -52,7 +54,8 @@ SocketChannel::SocketChannel()
 }
 
 SocketChannel::SocketChannel(net::ConnectedSocket *socket)
-    : socket_(socket) {
+    : socket_(socket),
+      port_(0) {
 }
 
 SocketChannel::~SocketChannel() {
@@ -113,6 +116,11 @@ bool SocketChannel::Receive(size_t size, std::string* buffer) {
 
   size_t received = 0;
   UInt8* data_bytes = new UInt8[size];
+
+  utils::ScopeGuard ppsdata_guard = utils::MakeGuard(
+      utils::ArrayDeleter<UInt8*>, data_bytes);
+  UNUSED(ppsdata_guard);
+
   while (size > received) {
     ssize_t rev_size = socket_->recv(data_bytes, to_recv, 0);
     if (rev_size <= 0) {
