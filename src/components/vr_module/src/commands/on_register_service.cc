@@ -50,7 +50,21 @@ OnRegisterService::OnRegisterService(const vr_hmi_api::ServiceMessage& message,
 
 bool OnRegisterService::Execute() {
   LOG4CXX_AUTO_TRACE(logger_);
-  return module_->SendToHmi(message_);
+  vr_hmi_api::OnRegisterServiceNotification notification;
+  bool ret = notification.ParseFromString(message_.params());
+  if (ret && module_->IsDefaultService(notification.appid())) {
+    notification.set_default_(true);
+    std::string params;
+    if (notification.SerializeToString(&params)) {
+      message_.set_params(params);
+      return module_->SendToHmi(message_);
+    } else {
+      LOG4CXX_ERROR(logger_, "Could not serialize message");
+    }
+  } else {
+    LOG4CXX_ERROR(logger_, "Could not get application id from message");
+  }
+  return false;
 }
 
 }  // namespace commands
