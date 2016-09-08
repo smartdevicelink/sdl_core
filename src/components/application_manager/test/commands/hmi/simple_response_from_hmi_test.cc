@@ -38,6 +38,22 @@
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/commands/commands_test.h"
 #include "application_manager/commands/command.h"
+#include "hmi/activate_app_response.h"
+#include "hmi/basic_communication_system_response.h"
+#include "hmi/navi_alert_maneuver_response.h"
+#include "hmi/navi_audio_start_stream_response.h"
+#include "hmi/navi_get_way_points_response.h"
+#include "hmi/navi_send_location_response.h"
+#include "hmi/navi_show_constant_tbt_response.h"
+#include "hmi/navi_start_stream_response.h"
+#include "hmi/navi_subscribe_way_points_response.h"
+#include "hmi/navi_unsubscribe_way_points_response.h"
+#include "hmi/navi_update_turn_list_response.h"
+#include "hmi/tts_change_registration_response.h"
+#include "hmi/ui_set_app_icon_response.h"
+#include "hmi/ui_set_display_layout_response.h"
+#include "hmi/ui_set_global_properties_response.h"
+#include "hmi/ui_scrollable_message_response.h"
 #include "application_manager/mock_event_dispatcher.h"
 #include "application_manager/mock_hmi_capabilities.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
@@ -69,6 +85,7 @@
 #include "hmi/vr_add_command_response.h"
 #include "hmi/vr_change_registration_response.h"
 #include "hmi/vr_delete_command_response.h"
+#include "hmi/vr_perform_interaction_response.h"
 
 namespace test {
 namespace components {
@@ -156,7 +173,39 @@ typedef Types<
                 hmi_apis::FunctionID::VR_DeleteCommand>,
     CommandData<commands::UISliderResponse, hmi_apis::FunctionID::UI_Slider>,
     CommandData<commands::TTSChangeRegistratioResponse,
-                hmi_apis::FunctionID::TTS_ChangeRegistration> >
+                hmi_apis::FunctionID::TTS_ChangeRegistration>,
+    CommandData<commands::ActivateAppResponse,
+                hmi_apis::FunctionID::BasicCommunication_ActivateApp>,
+    CommandData<commands::BasicCommunicationSystemResponse,
+                hmi_apis::FunctionID::BasicCommunication_SystemRequest>,
+    CommandData<commands::NaviAlertManeuverResponse,
+                hmi_apis::FunctionID::Navigation_AlertManeuver>,
+    CommandData<commands::AudioStartStreamResponse,
+                hmi_apis::FunctionID::Navigation_StartAudioStream>,
+    CommandData<commands::NaviGetWayPointsResponse,
+                hmi_apis::FunctionID::Navigation_GetWayPoints>,
+    CommandData<commands::NaviSendLocationResponse,
+                hmi_apis::FunctionID::Navigation_SendLocation>,
+    CommandData<commands::NaviShowConstantTBTResponse,
+                hmi_apis::FunctionID::Navigation_ShowConstantTBT>,
+    CommandData<commands::NaviStartStreamResponse,
+                hmi_apis::FunctionID::Navigation_StartStream>,
+    CommandData<commands::NaviSubscribeWayPointsResponse,
+                hmi_apis::FunctionID::Navigation_SubscribeWayPoints>,
+    CommandData<commands::NaviUnsubscribeWayPointsResponse,
+                hmi_apis::FunctionID::Navigation_UnsubscribeWayPoints>,
+    CommandData<commands::NaviUpdateTurnListResponse,
+                hmi_apis::FunctionID::Navigation_UpdateTurnList>,
+    CommandData<commands::UISetAppIconResponse,
+                hmi_apis::FunctionID::UI_SetAppIcon>,
+    CommandData<commands::UiSetDisplayLayoutResponse,
+                hmi_apis::FunctionID::UI_SetDisplayLayout>,
+    CommandData<commands::UISetGlobalPropertiesResponse,
+                hmi_apis::FunctionID::UI_SetGlobalProperties>,
+    CommandData<commands::UISetGlobalPropertiesResponse,
+                hmi_apis::FunctionID::UI_SetGlobalProperties>,
+    CommandData<commands::VRPerformInteractionResponse,
+                hmi_apis::FunctionID::VR_PerformInteraction> >
     ResponseCommandsList;
 
 TYPED_TEST_CASE(ResponseFromHMICommandsTest, ResponseCommandsList);
