@@ -63,7 +63,7 @@ bool SocketChannel::Start() {
   if (!socket_) {
     socket_ = net::ConnectedSocketImpl::ConnectToHost(address.c_str(), port);
   }
-  return true;
+  return socket_ != NULL;
 }
 
 bool SocketChannel::Stop() {
@@ -96,7 +96,8 @@ bool SocketChannel::Send(const std::string& data) {
     if ((data_sent + kChunkSize) > total_size) {
       size_to_send = total_size - data_sent;
     }
-  } LOG4CXX_INFO(logger_, "Sent " << data_sent);
+  }
+  LOG4CXX_INFO(logger_, "Sent " << data_sent);
   return true;
 }
 

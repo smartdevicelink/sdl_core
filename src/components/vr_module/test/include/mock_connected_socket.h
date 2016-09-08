@@ -30,42 +30,37 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_VR_MODULE_TEST_INCLUDE_MOCK_SERVICE_MODULE_H_
-#define SRC_COMPONENTS_VR_MODULE_TEST_INCLUDE_MOCK_SERVICE_MODULE_H_
+#ifndef SRC_COMPONENTS_VR_MODULE_TEST_INCLUDE_MOCK_CONNECTED_SOCKET_H_
+#define SRC_COMPONENTS_VR_MODULE_TEST_INCLUDE_MOCK_CONNECTED_SOCKET_H_
 
 #include "gmock/gmock.h"
-#include "vr_module/service_module.h"
+#include "net/connected_socket.h"
 
-namespace vr_module {
+namespace net {
 
-class MockServiceModule : public ServiceModule {
+class MockConnectedSocket : public ConnectedSocket {
  public:
-  MOCK_METHOD0(GetNextCorrelationID,
-      int32_t());
-  MOCK_METHOD2(RegisterRequest,
-      void(int32_t correlation_id, commands::TimedCommand* command));
-  MOCK_METHOD1(UnregisterRequest,
-      void(int32_t correlation_id));
-  MOCK_METHOD1(SendToHmi,
-      bool(const vr_hmi_api::ServiceMessage& message));
-  MOCK_METHOD1(SendToMobile,
-      bool(const vr_mobile_api::ServiceMessage& message));
-  MOCK_METHOD1(ActivateService,
-      void(int32_t app_id));
-  MOCK_METHOD0(DeactivateService,
+  MockConnectedSocket() : ConnectedSocket(NET_AF_INET, "127.0.0.1", 8080) {}
+  MOCK_METHOD4(set_opt,
+      bool(Int32 level, Int32 optname, const void* optval, socklen_t optlen));
+  MOCK_METHOD0(close,
       void());
-  MOCK_METHOD1(SetDefaultService,
-      void(int32_t app_id));
-  MOCK_METHOD0(ResetDefaultService,
+  MOCK_METHOD0(shutdown,
       void());
-  MOCK_CONST_METHOD0(IsSupported,
+  MOCK_METHOD1(set_blocking_mode,
+      void(bool is_blocking));
+  MOCK_METHOD3(send,
+      ssize_t(const UInt8* buffer, size_t size, Int32 flags));
+  MOCK_METHOD2(send,
+      ssize_t(Int32 file_fd, Int32 flags));
+  MOCK_METHOD3(recv,
+      ssize_t(UInt8* buffer, size_t size, Int32 flags));
+  MOCK_METHOD2(recv,
+      ssize_t(struct msghdr* msg, Int32 flags));
+  MOCK_METHOD0(connect,
       bool());
-  MOCK_METHOD0(EnableSupport,
-      void());
-  MOCK_METHOD0(DisableSupport,
-      void());
 };
 
-}  // namespace vr_module
+}  // namespace net
 
-#endif  // SRC_COMPONENTS_VR_MODULE_TEST_INCLUDE_MOCK_SERVICE_MODULE_H_
+#endif  // SRC_COMPONENTS_VR_MODULE_TEST_INCLUDE_MOCK_CONNECTED_SOCKET_H_
