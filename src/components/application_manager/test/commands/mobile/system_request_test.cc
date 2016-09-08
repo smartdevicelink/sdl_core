@@ -45,6 +45,7 @@
 #include "interfaces/MOBILE_API.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
 #include "smart_objects/smart_object.h"
+#include "utils/file_system.h"
 
 namespace test {
 namespace components {
@@ -181,8 +182,7 @@ TEST_F(SystemRequestTest, Run_FileWithBinaryDataSaveUnsuccessful_GenericError) {
 
   EXPECT_CALL(app_mngr_settings_, system_files_path())
       .WillRepeatedly(ReturnRef(kBinaryFolder));
-  EXPECT_CALL(app_mngr_,
-              SaveBinary(binary_data, kBinaryFolder, file_name_, 0))
+  EXPECT_CALL(app_mngr_, SaveBinary(binary_data, kBinaryFolder, file_name_, 0))
       .WillOnce(Return(mobile_result::INVALID_DATA));
 
   EXPECT_CALL(
@@ -215,9 +215,10 @@ TEST_F(SystemRequestTest,
   am::AppFile ap_file;
   ON_CALL(*app_, folder_name()).WillByDefault(Return(kStorageFolder2));
   ap_file.is_download_complete = false;
-  EXPECT_CALL(
-      *app_, GetFile(kStorageFolder + "/" + kStorageFolder2 + "/" + file_name_))
-      .WillRepeatedly(Return(&ap_file));
+  EXPECT_CALL(*app_,
+              GetFile(kStorageFolder + file_system::GetPathDelimiter() +
+                      kStorageFolder2 + file_system::GetPathDelimiter() +
+                      file_name_)).WillRepeatedly(Return(&ap_file));
   EXPECT_CALL(app_mngr_,
               ManageMobileCommand(
                   MobileResponseIs(mobile_result::REJECTED, info_, false), _));
@@ -246,8 +247,10 @@ TEST_F(
       .WillRepeatedly(ReturnRef(kStorageFolder));
   ON_CALL(*app_, folder_name()).WillByDefault(Return("app_storage"));
   am::AppFile ap_file;
-  EXPECT_CALL(*app_, GetFile(kStorageFolder + "/app_storage/0IVSU"))
-      .WillRepeatedly(Return(&ap_file));
+  EXPECT_CALL(*app_,
+              GetFile(kStorageFolder + file_system::GetPathDelimiter() +
+                      "app_storage" + file_system::GetPathDelimiter() +
+                      "0IVSU")).WillRepeatedly(Return(&ap_file));
   EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
 
   EXPECT_CALL(app_mngr_,
