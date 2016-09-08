@@ -80,11 +80,7 @@ class PerformInteractionRequest : public CommandRequestImpl {
   virtual void on_event(const event_engine::Event& event) OVERRIDE;
 
 #if BUILD_TESTS
-  enum CheckMethod {
-    kCheckVrSynonyms = 0,
-    kCheckMenuNames,
-    kCheckVrHelpItem
-  };
+  enum CheckMethod { kCheckVrSynonyms = 0, kCheckMenuNames, kCheckVrHelpItem };
 
   /**
    * @brief Method for easier check methods in unit tests.

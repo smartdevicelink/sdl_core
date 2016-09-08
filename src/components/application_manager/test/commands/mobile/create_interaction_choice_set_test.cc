@@ -49,8 +49,6 @@
 #include "application_manager/mock_hmi_capabilities.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
 
-static application_manager::MockMessageHelper* message_helper_mock_;
-
 namespace test {
 namespace components {
 namespace commands_test {
@@ -90,6 +88,8 @@ const std::string kSecondImage = "second_image";
 const std::string kVrCommands1 = "vr_commands_1";
 const std::string kVrCommands2 = "vr_commands_2";
 const std::string kMenuName = "menu_name";
+
+static application_manager::MockMessageHelper* message_helper_mock_;
 }  // namespace
 
 class CreateInteractionChoiceSetRequestTest
@@ -472,43 +472,13 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
 
 TEST_F(CreateInteractionChoiceSetRequestTest,
        OnTimeOut_InvalidErrorFromHMI_UNSUCCESS) {
-  Event event(hmi_apis::FunctionID::VR_AddCommand);
-
-  (*message_)[am::strings::params][am::strings::correlation_id] =
-      kCorrelationId;
-  (*message_)[am::strings::params][am::hmi_response::code] =
-      hmi_apis::Common_Result::eType::SUCCESS;
-
-  FillMessageFieldsItem1(message_);
-  (*message_)[am::strings::msg_params][am::strings::interaction_choice_set_id] =
-      kChoiceSetId;
-
-  ON_CALL(mock_app_manager_, application(_)).WillByDefault(Return(app_));
-
-  EXPECT_CALL(*message_helper_mock_, VerifyImage(_, _, _))
-      .WillRepeatedly(Return(mobile_apis::Result::SUCCESS));
-
-  smart_objects::SmartObject* choice_set_id = NULL;
-  EXPECT_CALL(*app_, FindChoiceSet(kChoiceSetId))
-      .WillOnce(Return(choice_set_id));
-
-  EXPECT_CALL(mock_app_manager_, GenerateGrammarID())
-      .WillOnce(Return(kGrammarId));
-  EXPECT_CALL(*app_, AddChoiceSet(kChoiceSetId, _));
-  ON_CALL(mock_app_manager_, GetNextHMICorrelationID())
-      .WillByDefault(Return(kCorrelationId));
-  command_->Run();
-
-  FillMessageFieldsItem2(message_);
-  EXPECT_CALL(mock_app_manager_, updateRequestTimeout(_, _, _)).Times(0);
-  EXPECT_CALL(mock_app_manager_, TerminateRequest(_, _));
-  event.set_smart_object(*message_);
-  command_->on_event(event);
-
   EXPECT_CALL(mock_app_manager_, application(_)).WillOnce(Return(app_));
+
   EXPECT_CALL(mock_app_manager_,
-              ManageMobileCommand(_, am::commands::Command::ORIGIN_SDL))
-      .Times(2);
+              ManageMobileCommand(
+                  MobileResultCodeIs(mobile_apis::Result::GENERIC_ERROR),
+                  am::commands::Command::ORIGIN_SDL));
+
   EXPECT_CALL(mock_app_manager_, TerminateRequest(_, _));
   command_->onTimeOut();
 }

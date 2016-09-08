@@ -55,6 +55,10 @@ using namespace application_manager;
 using ::testing::Return;
 using ::testing::_;
 
+namespace {
+const int32_t kConnectionKey = 1;
+}
+
 class PutFileResponceTest : public CommandsTest<CommandsTestMocks::kIsNice> {
  public:
   void SetUp() OVERRIDE {
@@ -63,8 +67,7 @@ class PutFileResponceTest : public CommandsTest<CommandsTestMocks::kIsNice> {
         ::smart_objects::SmartObject(::smart_objects::SmartType_Map);
 
     command_sptr_ =
-        CreateCommand<application_manager::commands::PutFileResponse>(
-            CommandsTest::kDefaultTimeout_, message_);
+        CreateCommand<application_manager::commands::PutFileResponse>(message_);
   }
 
   MessageSharedPtr message_;
@@ -72,7 +75,6 @@ class PutFileResponceTest : public CommandsTest<CommandsTestMocks::kIsNice> {
 };
 
 TEST_F(PutFileResponceTest, Run_InvalidApp_ApplicationNotRegisteredResponce) {
-  const int32_t kConnectionKey = 1;
   ::smart_objects::SmartObject& message_ref = *message_;
 
   message_ref[strings::params][strings::connection_key] = kConnectionKey;
@@ -84,12 +86,11 @@ TEST_F(PutFileResponceTest, Run_InvalidApp_ApplicationNotRegisteredResponce) {
       mock_app_manager_,
       SendMessageToMobile(
           MobileResultCodeIs(mobile_api::Result::APPLICATION_NOT_REGISTERED),
-          _)).Times(1);
+          _));
   command_sptr_->Run();
 }
 
 TEST_F(PutFileResponceTest, Run_ApplicationRegistered_Success) {
-  const int32_t kConnectionKey = 1;
   ::smart_objects::SmartObject& message_ref = *message_;
 
   message_ref[strings::params][strings::connection_key] = kConnectionKey;
@@ -102,8 +103,7 @@ TEST_F(PutFileResponceTest, Run_ApplicationRegistered_Success) {
       .WillOnce(Return(application_sptr));
   EXPECT_CALL(
       mock_app_manager_,
-      SendMessageToMobile(MobileResultCodeIs(mobile_apis::Result::SUCCESS), _))
-      .Times(1);
+      SendMessageToMobile(MobileResultCodeIs(mobile_apis::Result::SUCCESS), _));
   command_sptr_->Run();
 }
 

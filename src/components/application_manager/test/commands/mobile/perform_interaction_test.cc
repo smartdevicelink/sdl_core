@@ -70,8 +70,8 @@ class PerformInteractionRequestTest
       : message_(utils::MakeShared<SmartObject>(::smart_objects::SmartType_Map))
       , kMsgParams_((*message_)[strings::msg_params]) {}
   void SetUp() OVERRIDE {
-    command_sptr_ = CreateCommand<commands::PerformInteractionRequest>(
-        CommandsTest::kDefaultTimeout_, message_);
+    command_sptr_ =
+        CreateCommand<commands::PerformInteractionRequest>(message_);
 
     mock_application_sptr_ = CreateMockApp();
     ON_CALL(mock_app_manager_, application(_))
@@ -714,22 +714,22 @@ TEST_F(PerformInteractionRequestTest,
 
 TEST_F(
     PerformInteractionRequestTest,
-    OnEvent_VRResponcVRPIcodeGenericError_TerminatePIAndGenericErrorResponce) {
+    OnEvent_VRResponceRPIcodeGenericError_TerminatePIAndGenericErrorResponce) {
   TestVRResponceResultCode(mobile_apis::Result::GENERIC_ERROR);
 }
 
 TEST_F(PerformInteractionRequestTest,
-       OnEvent_VRResponcVRPIcodeAbortedVrOnly_TerminatePIAndAbortedResponce) {
+       OnEvent_VRResponceRPIcodeAbortedVrOnly_TerminatePIAndAbortedResponce) {
   TestVRResponceResultCode(mobile_apis::Result::ABORTED);
 }
 
 TEST_F(PerformInteractionRequestTest,
-       OnEvent_VRResponcVRPIcodeTimeout_TerminatePIAndTimeoutResponce) {
+       OnEvent_VRResponceRPIcodeTimeout_TerminatePIAndTimeoutResponce) {
   TestVRResponceResultCode(mobile_apis::Result::TIMED_OUT);
 }
 
 TEST_F(PerformInteractionRequestTest,
-       OnEvent_VRResponcVRPIcodeTimeOut_ResetTimeout) {
+       OnEvent_VRResponceRPIcodeTimeOut_ResetTimeout) {
   event_engine::Event event(hmi_apis::FunctionID::VR_PerformInteraction);
   CallOnEvent caller(*command_sptr_, event);
 
@@ -745,23 +745,23 @@ TEST_F(PerformInteractionRequestTest,
 }
 
 TEST_F(PerformInteractionRequestTest,
-       OnEvent_VRResponcVRPIcodeRejected_TerminatePIAndRejectedResponce) {
+       OnEvent_VRResponceRPIcodeRejected_TerminatePIAndRejectedResponce) {
   TestVRResponceResultCode(mobile_apis::Result::REJECTED);
 }
 
 TEST_F(
     PerformInteractionRequestTest,
-    OnEvent_VRResponcVRPIcodeUnsupportedRequest_TerminatePIAndWarningsResponce) {
+    OnEvent_VRResponceRPIcodeUnsupportedRequest_TerminatePIAndWarningsResponce) {
   TestVRResponceResultCode(mobile_apis::Result::UNSUPPORTED_REQUEST);
 }
 
 TEST_F(PerformInteractionRequestTest,
-       OnEvent_VRResponcVRPIcodeWarnings_TerminatePIAndWarningsResponce) {
+       OnEvent_VRResponceRPIcodeWarnings_TerminatePIAndWarningsResponce) {
   TestVRResponceResultCode(mobile_apis::Result::WARNINGS);
 }
 
 TEST_F(PerformInteractionRequestTest,
-       OnEvent_VRResponcVRPIcodeSuccessManualOnly_Return) {
+       OnEvent_VRResponceRPIcodeSuccessManualOnly_Return) {
   event_engine::Event event(hmi_apis::FunctionID::VR_PerformInteraction);
   CallOnEvent caller(*command_sptr_, event);
 
@@ -780,7 +780,7 @@ TEST_F(PerformInteractionRequestTest,
 }
 
 TEST_F(PerformInteractionRequestTest,
-       OnEvent_VRResponcVRPIWrongChoiset_ResponceGenericError) {
+       OnEvent_VRResponceRPIWrongChoiset_ResponceGenericError) {
   event_engine::Event event(hmi_apis::FunctionID::VR_PerformInteraction);
   CallOnEvent caller(*command_sptr_, event);
 
@@ -823,7 +823,7 @@ TEST_F(PerformInteractionRequestTest,
 }
 
 TEST_F(PerformInteractionRequestTest,
-       OnEvent_VRResponcVRPICorrectChoiSet_ResponceSuccess) {
+       OnEvent_VRResponceRPICorrectChoiSet_ResponceSuccess) {
   event_engine::Event event(hmi_apis::FunctionID::VR_PerformInteraction);
   CallOnEvent caller(*command_sptr_, event);
 

@@ -84,7 +84,7 @@ class SDLGetUserFriendlyMessageRequestTest
   void InitCommand(const uint32_t& timeout) OVERRIDE {
     CommandRequestTest<CommandsTestMocks::kIsNice>::InitCommand(timeout);
     ON_CALL((*mock_app_), app_id()).WillByDefault(Return(kAppID));
-    EXPECT_CALL(app_mngr_, application_by_hmi_app(kAppID))
+    EXPECT_CALL(mock_app_manager_, application_by_hmi_app(kAppID))
         .WillOnce(Return(mock_app_));
   }
   MockAppPtr mock_app_;
@@ -109,7 +109,7 @@ TEST_F(SDLGetUserFriendlyMessageRequestTest, Run_LanguageSet_SUCCESS) {
 
   EXPECT_CALL(mock_message_helper_, CommonLanguageToString(kLanguage))
       .WillOnce(Return(kLanguageEn));
-  EXPECT_CALL(app_mngr_, GetPolicyHandler())
+  EXPECT_CALL(mock_app_manager_, GetPolicyHandler())
       .WillOnce(ReturnRef(mock_policy_handler_));
   std::vector<std::string> msg_codes;
   msg_codes.push_back(kLanguageDe);
@@ -134,13 +134,13 @@ TEST_F(SDLGetUserFriendlyMessageRequestTest, Run_LanguageNotSet_SUCCESS) {
       CreateCommand<SDLGetUserFriendlyMessageRequest>(msg));
 
   MockHMICapabilities mock_hmi_capabilities;
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
+  EXPECT_CALL(mock_app_manager_, hmi_capabilities())
       .WillOnce(ReturnRef(mock_hmi_capabilities));
   EXPECT_CALL(mock_hmi_capabilities, active_ui_language())
       .WillOnce(Return(kLanguage));
   EXPECT_CALL(mock_message_helper_, CommonLanguageToString(kLanguage))
       .WillOnce(Return(kLanguageEn));
-  EXPECT_CALL(app_mngr_, GetPolicyHandler())
+  EXPECT_CALL(mock_app_manager_, GetPolicyHandler())
       .WillOnce(ReturnRef(mock_policy_handler_));
   std::vector<std::string> msg_codes;
   msg_codes.push_back(kLanguageDe);
@@ -160,7 +160,7 @@ TEST_F(SDLGetUserFriendlyMessageRequestTest, Run_NoMsgCodes_Canceled) {
       CreateCommand<SDLGetUserFriendlyMessageRequest>(msg));
 
   EXPECT_CALL(mock_message_helper_, CommonLanguageToString(_)).Times(0);
-  EXPECT_CALL(app_mngr_, GetPolicyHandler()).Times(0);
+  EXPECT_CALL(mock_app_manager_, GetPolicyHandler()).Times(0);
   EXPECT_CALL(mock_policy_handler_, OnGetUserFriendlyMessage(_, _, _)).Times(0);
 
   command->Run();

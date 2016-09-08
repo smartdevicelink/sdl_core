@@ -767,6 +767,8 @@ void PerformInteractionRequest::DisablePerformInteraction() {
 
 bool PerformInteractionRequest::IsFieldHaveWhiteSpaces(
     const std::string& field_name) {
+  SDL_AUTO_TRACE();
+
   if (!(*message_)[strings::msg_params].keyExists(field_name)) {
     return false;
   }

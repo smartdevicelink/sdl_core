@@ -69,7 +69,7 @@ class GetWayPointsRequestTest
 
     command_sptr_ =
         CreateCommand<application_manager::commands::GetWayPointsRequest>(
-            CommandsTest::kDefaultTimeout_, message_);
+            message_);
     mock_app_ = CreateMockApp();
     ON_CALL(mock_app_manager_, application(_)).WillByDefault(Return(mock_app_));
   }
@@ -81,8 +81,6 @@ class GetWayPointsRequestTest
 
 TEST_F(GetWayPointsRequestTest,
        Run_InvalidApp_ApplicationNotRegisteredResponce) {
-  const int32_t kConnectionKey = 1;
-
   (*message_)[strings::params][strings::connection_key] = kConnectionKey;
 
   utils::SharedPtr<Application> null_application_sptr;
@@ -93,11 +91,11 @@ TEST_F(GetWayPointsRequestTest,
 
   MessageSharedPtr result_message = CatchMobileCommandResult(caller);
 
-  const mobile_api::Result::eType kResult =
+  const mobile_api::Result::eType result =
       static_cast<mobile_api::Result::eType>(
           (*result_message)[strings::msg_params][strings::result_code].asInt());
 
-  EXPECT_EQ(mobile_api::Result::APPLICATION_NOT_REGISTERED, kResult);
+  EXPECT_EQ(mobile_api::Result::APPLICATION_NOT_REGISTERED, result);
 }
 
 TEST_F(GetWayPointsRequestTest, Run_ApplicationRegistered_Success) {
@@ -116,11 +114,11 @@ TEST_F(GetWayPointsRequestTest, Run_ApplicationRegistered_Success) {
 
   MessageSharedPtr result_message = CatchHMICommandResult(caller);
 
-  const hmi_apis::FunctionID::eType kResultFunctionId =
+  const hmi_apis::FunctionID::eType result_function_id =
       static_cast<hmi_apis::FunctionID::eType>(
           (*result_message)[strings::params][strings::function_id].asInt());
 
-  EXPECT_EQ(hmi_apis::FunctionID::Navigation_GetWayPoints, kResultFunctionId);
+  EXPECT_EQ(hmi_apis::FunctionID::Navigation_GetWayPoints, result_function_id);
   EXPECT_EQ(
       kCorrelationId,
       (*result_message)[strings::params][strings::correlation_id].asUInt());
@@ -139,11 +137,11 @@ TEST_F(GetWayPointsRequestTest,
 
   MessageSharedPtr result_message = CatchMobileCommandResult(caller);
 
-  const mobile_api::Result::eType kResult =
+  const mobile_api::Result::eType result =
       static_cast<mobile_api::Result::eType>(
           (*result_message)[strings::msg_params][strings::result_code].asInt());
 
-  EXPECT_EQ(mobile_api::Result::SUCCESS, kResult);
+  EXPECT_EQ(mobile_api::Result::SUCCESS, result);
 }
 
 TEST_F(GetWayPointsRequestTest, OnEvent_DefaultCase) {

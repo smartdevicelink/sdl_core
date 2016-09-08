@@ -62,11 +62,10 @@ class PerformAudioPassThruRequestTest
  public:
   PerformAudioPassThruRequestTest()
       : message_(utils::MakeShared<SmartObject>(::smart_objects::SmartType_Map))
-      , kMsgParams_((*message_)[strings::msg_params]) {}
+      , msg_params_((*message_)[strings::msg_params]) {}
   void SetUp() OVERRIDE {
     command_sptr_ = CreateCommand<
-        application_manager::commands::PerformAudioPassThruRequest>(
-        CommandsTest::kDefaultTimeout_, message_);
+        application_manager::commands::PerformAudioPassThruRequest>(message_);
 
     application_sptr_ = CreateMockApp();
     ON_CALL(mock_app_manager_, application(_))
@@ -76,9 +75,9 @@ class PerformAudioPassThruRequestTest
  protected:
   void TestWrongSyntaxInField(const std::string& field) {
     if (field == strings::initial_prompt) {
-      kMsgParams_[field][0][strings::text] = "prompt\\n";
+      msg_params_[field][0][strings::text] = "prompt\\n";
     } else {
-      kMsgParams_[field] = "prompt\\n";
+      msg_params_[field] = "prompt\\n";
     }
 
     EXPECT_CALL(*application_sptr_, hmi_level())
@@ -96,7 +95,7 @@ class PerformAudioPassThruRequestTest
   }
 
   MessageSharedPtr message_;
-  ::smart_objects::SmartObject& kMsgParams_;
+  ::smart_objects::SmartObject& msg_params_;
   utils::SharedPtr<commands::PerformAudioPassThruRequest> command_sptr_;
   MockAppPtr application_sptr_;
 };

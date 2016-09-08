@@ -55,6 +55,10 @@ using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::_;
 
+namespace {
+const std::string kPolicyAppId = "id";
+}
+
 class RegisterAppInterfaceResponceTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {
  public:
@@ -63,8 +67,7 @@ class RegisterAppInterfaceResponceTest
     (*message_)[strings::msg_params] =
         ::smart_objects::SmartObject(::smart_objects::SmartType_Map);
     command_sptr_ = CreateCommand<
-        application_manager::commands::RegisterAppInterfaceResponse>(
-        CommandsTest::kDefaultTimeout_, message_);
+        application_manager::commands::RegisterAppInterfaceResponse>(message_);
   }
 
   MessageSharedPtr message_;
@@ -82,14 +85,14 @@ TEST_F(RegisterAppInterfaceResponceTest,
               SendMessageToMobile(
                   MobileResultCodeIs(
                       mobile_apis::Result::APPLICATION_REGISTERED_ALREADY),
-                  false)).Times(1);
+                  false));
 
   EXPECT_CALL(mock_app_manager_, application(_)).Times(0);
   command_sptr_->Run();
 }
 
 TEST_F(RegisterAppInterfaceResponceTest, Run_WrongConnectionKey_Unsuccess) {
-  EXPECT_CALL(mock_app_manager_, SendMessageToMobile(_, _)).Times(1);
+  EXPECT_CALL(mock_app_manager_, SendMessageToMobile(_, _));
 
   ApplicationSharedPtr null_application;
   EXPECT_CALL(mock_app_manager_, application(_))
@@ -101,8 +104,7 @@ TEST_F(RegisterAppInterfaceResponceTest, Run_WrongConnectionKey_Unsuccess) {
 
 TEST_F(RegisterAppInterfaceResponceTest,
        Run_PolicyEnabled_SetHeartbeatTimeout) {
-  const std::string kPolicyAppId = "id";
-  EXPECT_CALL(mock_app_manager_, SendMessageToMobile(_, _)).Times(1);
+  EXPECT_CALL(mock_app_manager_, SendMessageToMobile(_, _));
 
   utils::SharedPtr<NiceMock<MockApplication> > mock_application =
       utils::MakeShared<NiceMock<MockApplication> >();
@@ -120,7 +122,7 @@ TEST_F(RegisterAppInterfaceResponceTest,
   connection_handler_test::MockConnectionHandler mock_connection_handler;
   EXPECT_CALL(mock_app_manager_, connection_handler())
       .WillOnce(ReturnRef(mock_connection_handler));
-  EXPECT_CALL(mock_connection_handler, SetHeartBeatTimeout(_, _)).Times(1);
+  EXPECT_CALL(mock_connection_handler, SetHeartBeatTimeout(_, _));
 
   EXPECT_CALL(mock_app_manager_, OnApplicationRegistered(_));
   EXPECT_CALL(mock_policy_handler_, OnAppRegisteredOnMobile(kPolicyAppId));
@@ -130,8 +132,7 @@ TEST_F(RegisterAppInterfaceResponceTest,
 
 TEST_F(RegisterAppInterfaceResponceTest,
        Run_PolicyDisabled_DontSetHeartbeatTimeout) {
-  const std::string kPolicyAppId = "id";
-  EXPECT_CALL(mock_app_manager_, SendMessageToMobile(_, _)).Times(1);
+  EXPECT_CALL(mock_app_manager_, SendMessageToMobile(_, _));
 
   utils::SharedPtr<NiceMock<MockApplication> > mock_application =
       utils::MakeShared<NiceMock<MockApplication> >();

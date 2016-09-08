@@ -73,6 +73,8 @@ typedef NiceMock<
     ::test::components::application_manager_test::MockHMICapabilities>
     MockHMICapabilities;
 
+typedef std::vector<hmi_apis::FunctionID::eType> FunctionIdsArray;
+
 ACTION_TEMPLATE(SetArgPointer,
                 HAS_1_TEMPLATE_PARAMS(int, k),
                 AND_1_VALUE_PARAMS(vec)) {
@@ -110,6 +112,12 @@ class ChangeRegistrationRequestTest
     app_ = CreateMockApp();
   }
 
+  void FillEventArray(FunctionIdsArray& out_codes_array) {
+    out_codes_array.push_back(hmi_apis::FunctionID::UI_ChangeRegistration);
+    out_codes_array.push_back(hmi_apis::FunctionID::VR_ChangeRegistration);
+    out_codes_array.push_back(hmi_apis::FunctionID::TTS_ChangeRegistration);
+  }
+
   ChangeRegistrationRequestPtr command_;
   MessageSharedPtr message_;
   MockAppPtr app_;
@@ -131,10 +139,8 @@ TEST_F(ChangeRegistrationRequestTest, OnEvent_UnknownEvent_UNSUCCESS) {
 }
 
 TEST_F(ChangeRegistrationRequestTest, OnEvent_InvalidApp_UNSUCCESS) {
-  std::vector<hmi_apis::FunctionID::eType> function_id_vector;
-  function_id_vector.push_back(hmi_apis::FunctionID::UI_ChangeRegistration);
-  function_id_vector.push_back(hmi_apis::FunctionID::VR_ChangeRegistration);
-  function_id_vector.push_back(hmi_apis::FunctionID::TTS_ChangeRegistration);
+  FunctionIdsArray function_id_vector;
+  FillEventArray(function_id_vector);
 
   (*message_)[am::strings::params][am::strings::connection_key] =
       kConnectionKey;
@@ -142,10 +148,12 @@ TEST_F(ChangeRegistrationRequestTest, OnEvent_InvalidApp_UNSUCCESS) {
   MockAppPtr invalid_app;
   std::vector<hmi_apis::FunctionID::eType>::iterator it =
       function_id_vector.begin();
+
+  MessageSharedPtr event_message(CreateMessage());
+  (*event_message)[am::strings::params][am::hmi_response::code] = 1;
+  (*event_message)[am::strings::msg_params] = 0;
+
   for (; it != function_id_vector.end(); ++it) {
-    MessageSharedPtr event_message(CreateMessage());
-    (*event_message)[am::strings::params][am::hmi_response::code] = 1;
-    (*event_message)[am::strings::msg_params] = 0;
     Event event(*it);
     event.set_smart_object(*event_message);
     EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
@@ -155,21 +163,21 @@ TEST_F(ChangeRegistrationRequestTest, OnEvent_InvalidApp_UNSUCCESS) {
 }
 
 TEST_F(ChangeRegistrationRequestTest, OnEvent_ValidApp_SUCCESS) {
-  std::vector<hmi_apis::FunctionID::eType> function_id_vector;
-  function_id_vector.push_back(hmi_apis::FunctionID::UI_ChangeRegistration);
-  function_id_vector.push_back(hmi_apis::FunctionID::VR_ChangeRegistration);
-  function_id_vector.push_back(hmi_apis::FunctionID::TTS_ChangeRegistration);
+  FunctionIdsArray function_id_vector;
+  FillEventArray(function_id_vector);
 
   (*message_)[am::strings::params][am::strings::connection_key] =
       kConnectionKey;
 
   std::vector<hmi_apis::FunctionID::eType>::iterator it =
       function_id_vector.begin();
+
+  MessageSharedPtr event_message(CreateMessage());
+  (*event_message)[am::strings::params][am::hmi_response::code] =
+      hmi_apis::Common_Result::SUCCESS;
+  (*event_message)[am::strings::msg_params] = 0;
+
   for (; it != function_id_vector.end(); ++it) {
-    MessageSharedPtr event_message(CreateMessage());
-    (*event_message)[am::strings::params][am::hmi_response::code] =
-        hmi_apis::Common_Result::SUCCESS;
-    (*event_message)[am::strings::msg_params] = 0;
     Event event(*it);
     event.set_smart_object(*event_message);
     EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
