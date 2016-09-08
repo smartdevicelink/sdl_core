@@ -136,6 +136,8 @@ utils::json::ValueType::Type GetType(const QVariant& value) {
       return ValueType::UINT_VALUE;
     } else if (type == QVariant::Int) {
       return ValueType::INT_VALUE;
+    } else if (type == QVariant::LongLong) {
+      return ValueType::INT_VALUE;
     } else if (type == QVariant::Double) {
       // Handling of the numeric types is tricky since Qt stores
       // all json number values as double during parsing
