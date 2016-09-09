@@ -178,13 +178,13 @@ class MobileCommandsTest : public components::commands_test::CommandRequestTest<
   typedef Command CommandType;
 
   void InitCommand(const uint32_t& timeout) OVERRIDE {
-    EXPECT_CALL(app_mngr_settings_, default_timeout())
+    EXPECT_CALL(mock_app_manager_settings_, default_timeout())
         .WillOnce(ReturnRef(timeout));
-    ON_CALL(app_mngr_, event_dispatcher())
+    ON_CALL(mock_app_manager_, event_dispatcher())
         .WillByDefault(ReturnRef(event_dispatcher_));
-    ON_CALL(app_mngr_, get_settings())
-        .WillByDefault(ReturnRef(app_mngr_settings_));
-    ON_CALL(app_mngr_settings_, app_icons_folder())
+    ON_CALL(mock_app_manager_, get_settings())
+        .WillByDefault(ReturnRef(mock_app_manager_settings_));
+    ON_CALL(mock_app_manager_settings_, app_icons_folder())
         .WillByDefault(ReturnRef(kEmptyString_));
   }
 };

@@ -83,7 +83,7 @@ TEST_F(VRIsReadyResponseTest, RUN_SUCCESS) {
 
   VRIsReadyResponsePtr command(CreateCommand<VRIsReadyResponse>(command_msg));
 
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
+  EXPECT_CALL(mock_app_manager_, hmi_capabilities())
       .WillOnce(ReturnRef(mock_hmi_capabilities_));
 
   EXPECT_CALL(mock_hmi_capabilities_, set_is_vr_cooperating(kIsAvailable));
@@ -102,7 +102,7 @@ TEST_F(VRIsReadyResponseTest, RUN_NoKeyAvailable) {
 
   VRIsReadyResponsePtr command(CreateCommand<VRIsReadyResponse>(command_msg));
 
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
+  EXPECT_CALL(mock_app_manager_, hmi_capabilities())
       .WillOnce(ReturnRef(mock_hmi_capabilities_));
 
   EXPECT_CALL(mock_hmi_capabilities_, set_is_vr_cooperating(kIsNotAvailable));

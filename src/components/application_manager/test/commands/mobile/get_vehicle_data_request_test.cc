@@ -91,11 +91,11 @@ class UnwrappedGetVehicleDataRequest : public GetVehicleDataRequest {
 TEST_F(GetVehicleDataRequestTest, Run_ApplicationIsNotRegistered_UNSUCCESS) {
   GetVehicleDataRequestPtr command(CreateCommand<GetVehicleDataRequest>());
 
-  EXPECT_CALL(app_mngr_, application(_))
+  EXPECT_CALL(mock_app_manager_, application(_))
       .WillOnce(Return(ApplicationSharedPtr()));
 
   EXPECT_CALL(
-      app_mngr_,
+      mock_app_manager_,
       ManageMobileCommand(
           MobileResultCodeIs(mobile_result::APPLICATION_NOT_REGISTERED), _));
 
@@ -114,7 +114,8 @@ TEST_F(GetVehicleDataRequestTest, Run_TooHighFrequency_UNSUCCESS) {
       CreateCommand<GetVehicleDataRequest>(command_msg));
 
   MockAppPtr app(CreateMockApp());
-  EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app));
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillOnce(Return(app));
 
   EXPECT_CALL(
       *app,
@@ -122,7 +123,7 @@ TEST_F(GetVehicleDataRequestTest, Run_TooHighFrequency_UNSUCCESS) {
       .WillOnce(Return(true));
 
   EXPECT_CALL(
-      app_mngr_,
+      mock_app_manager_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::REJECTED), _));
 
   command->Run();
@@ -141,10 +142,11 @@ TEST_F(GetVehicleDataRequestTest, Run_EmptyMsgParams_UNSUCCESS) {
       .WillOnce(ReturnRef(kEmptyVehicleData));
 
   MockAppPtr app(CreateMockApp());
-  EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app));
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillOnce(Return(app));
 
   EXPECT_CALL(
-      app_mngr_,
+      mock_app_manager_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::INVALID_DATA), _));
 
   command->Run();
@@ -168,10 +170,11 @@ TEST_F(GetVehicleDataRequestTest,
   disallowed_params.push_back("test_param");
 
   MockAppPtr app(CreateMockApp());
-  EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app));
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillOnce(Return(app));
 
   EXPECT_CALL(
-      app_mngr_,
+      mock_app_manager_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::DISALLOWED), _));
 
   command->Run();
@@ -195,9 +198,10 @@ TEST_F(GetVehicleDataRequestTest, Run_SUCCESS) {
       .WillOnce(ReturnRef(vehicle_data));
 
   MockAppPtr app(CreateMockApp());
-  EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app));
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillOnce(Return(app));
 
-  EXPECT_CALL(app_mngr_,
+  EXPECT_CALL(mock_app_manager_,
               ManageHMICommand(HMIResultCodeIs(
                   hmi_apis::FunctionID::VehicleInfo_GetVehicleData)));
 
@@ -214,7 +218,7 @@ TEST_F(GetVehicleDataRequestTest, OnEvent_UnknownEvent_UNSUCCESS) {
 
   Event event(hmi_apis::FunctionID::INVALID_ENUM);
 
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(mock_app_manager_, ManageMobileCommand(_, _)).Times(0);
 
   command->on_event(event);
 }
@@ -237,7 +241,7 @@ TEST_F(GetVehicleDataRequestTest, OnEvent_DataNotAvailable_SUCCESS) {
   event.set_smart_object(*event_msg);
 
   EXPECT_CALL(
-      app_mngr_,
+      mock_app_manager_,
       ManageMobileCommand(
           MobileResultCodeIs(mobile_result::VEHICLE_DATA_NOT_AVAILABLE), _));
 

@@ -74,7 +74,7 @@ TYPED_TEST(ResponseToHMICommandsTest, Run_SendMessageToHMI_SUCCESS) {
 
   SharedPtr<CommandType> command = this->template CreateCommand<CommandType>();
 
-  EXPECT_CALL(this->app_mngr_, SendMessageToHMI(NotNull()));
+  EXPECT_CALL(this->mock_app_manager_, SendMessageToHMI(NotNull()));
 
   command->Run();
 }

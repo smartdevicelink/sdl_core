@@ -95,7 +95,7 @@ TEST_F(UIGetCapabilitiesResponseTest, RUN_SetDisplay_SUCCESSS) {
   ResponseFromHMIPtr command(
       CreateCommand<UIGetCapabilitiesResponse>(command_msg));
 
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
+  EXPECT_CALL(mock_app_manager_, hmi_capabilities())
       .WillOnce(ReturnRef(mock_hmi_capabilities_));
 
   smart_objects::SmartObject display_capabilities_so =
@@ -117,7 +117,7 @@ TEST_F(UIGetCapabilitiesResponseTest, SetSoftButton_SUCCESS) {
   ResponseFromHMIPtr command(
       CreateCommand<UIGetCapabilitiesResponse>(command_msg));
 
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
+  EXPECT_CALL(mock_app_manager_, hmi_capabilities())
       .WillOnce(ReturnRef(mock_hmi_capabilities_));
 
   smart_objects::SmartObject soft_button_capabilities_so = (*command_msg)
@@ -139,7 +139,7 @@ TEST_F(UIGetCapabilitiesResponseTest, SetHmiZone_SUCCESS) {
   ResponseFromHMIPtr command(
       CreateCommand<UIGetCapabilitiesResponse>(command_msg));
 
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
+  EXPECT_CALL(mock_app_manager_, hmi_capabilities())
       .WillOnce(ReturnRef(mock_hmi_capabilities_));
 
   smart_objects::SmartObject hmi_zone_capabilities_so =
@@ -159,7 +159,7 @@ TEST_F(UIGetCapabilitiesResponseTest, SetAudioPassThru_SUCCESS) {
   ResponseFromHMIPtr command(
       CreateCommand<UIGetCapabilitiesResponse>(command_msg));
 
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
+  EXPECT_CALL(mock_app_manager_, hmi_capabilities())
       .WillOnce(ReturnRef(mock_hmi_capabilities_));
 
   smart_objects::SmartObject audio_pass_thru_capabilities_so = (*command_msg)
@@ -181,7 +181,7 @@ TEST_F(UIGetCapabilitiesResponseTest, SetNavigation_SUCCESS) {
   ResponseFromHMIPtr command(
       CreateCommand<UIGetCapabilitiesResponse>(command_msg));
 
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
+  EXPECT_CALL(mock_app_manager_, hmi_capabilities())
       .WillOnce(ReturnRef(mock_hmi_capabilities_));
 
   smart_objects::SmartObject hmi_capabilities_so =
@@ -203,7 +203,7 @@ TEST_F(UIGetCapabilitiesResponseTest, SetPhoneCall_SUCCESS) {
   ResponseFromHMIPtr command(
       CreateCommand<UIGetCapabilitiesResponse>(command_msg));
 
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
+  EXPECT_CALL(mock_app_manager_, hmi_capabilities())
       .WillOnce(ReturnRef(mock_hmi_capabilities_));
 
   smart_objects::SmartObject hmi_capabilities_so =

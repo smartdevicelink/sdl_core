@@ -65,7 +65,7 @@ class ListFilesRequestTest
 TEST_F(ListFilesRequestTest, Run_AppNotRegistered_UNSUCCESS) {
   SharedPtr<ListFilesRequest> command(CreateCommand<ListFilesRequest>());
 
-  ON_CALL(app_mngr_, application(_))
+  ON_CALL(mock_app_manager_, application(_))
       .WillByDefault(Return(SharedPtr<am::Application>()));
 
   MessageSharedPtr result_msg(CatchMobileCommandResult(CallRun(*command)));
@@ -79,16 +79,16 @@ TEST_F(ListFilesRequestTest, Run_TooManyHmiNone_UNSUCCESS) {
   MockAppPtr app(CreateMockApp());
   SharedPtr<ListFilesRequest> command(CreateCommand<ListFilesRequest>());
 
-  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
+  ON_CALL(mock_app_manager_, application(_)).WillByDefault(Return(app));
   ON_CALL(*app, hmi_level())
       .WillByDefault(Return(mobile_apis::HMILevel::HMI_NONE));
 
   const uint32_t kListFilesInNoneAllowed = 1u;
   const uint32_t kListFilesInNoneCount = 2u;
 
-  EXPECT_CALL(app_mngr_, get_settings())
-      .WillOnce(ReturnRef(app_mngr_settings_));
-  ON_CALL(app_mngr_settings_, list_files_in_none())
+  EXPECT_CALL(mock_app_manager_, get_settings())
+      .WillOnce(ReturnRef(mock_app_manager_settings_));
+  ON_CALL(mock_app_manager_settings_, list_files_in_none())
       .WillByDefault(ReturnRef(kListFilesInNoneAllowed));
   ON_CALL(*app, list_files_in_none_count())
       .WillByDefault(Return(kListFilesInNoneCount));
@@ -104,7 +104,7 @@ TEST_F(ListFilesRequestTest, Run_SUCCESS) {
   MockAppPtr app(CreateMockApp());
   SharedPtr<ListFilesRequest> command(CreateCommand<ListFilesRequest>());
 
-  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
+  ON_CALL(mock_app_manager_, application(_)).WillByDefault(Return(app));
   ON_CALL(*app, hmi_level())
       .WillByDefault(Return(mobile_apis::HMILevel::HMI_FULL));
 

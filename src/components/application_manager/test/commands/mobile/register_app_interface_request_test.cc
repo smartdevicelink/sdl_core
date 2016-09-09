@@ -122,27 +122,27 @@ class RegisterAppInterfaceRequestTest
   }
 
   void InitGetters() {
-    ON_CALL(app_mngr_, GetPolicyHandler())
+    ON_CALL(mock_app_manager_, GetPolicyHandler())
         .WillByDefault(ReturnRef(mock_policy_handler_));
-    ON_CALL(app_mngr_, resume_controller())
+    ON_CALL(mock_app_manager_, resume_controller())
         .WillByDefault(ReturnRef(mock_resume_crt_));
-    ON_CALL(app_mngr_, connection_handler())
+    ON_CALL(mock_app_manager_, connection_handler())
         .WillByDefault(ReturnRef(mock_connection_handler_));
     ON_CALL(mock_connection_handler_, get_session_observer())
         .WillByDefault(ReturnRef(mock_session_observer_));
-    ON_CALL(app_mngr_, hmi_capabilities())
+    ON_CALL(mock_app_manager_, hmi_capabilities())
         .WillByDefault(ReturnRef(mock_hmi_capabilities_));
-    ON_CALL(app_mngr_settings_, sdl_version())
+    ON_CALL(mock_app_manager_settings_, sdl_version())
         .WillByDefault(ReturnRef(kDummyString));
     ON_CALL(mock_hmi_capabilities_, ccpu_version())
         .WillByDefault(ReturnRef(kDummyString));
-    ON_CALL(app_mngr_settings_, supported_diag_modes())
+    ON_CALL(mock_app_manager_settings_, supported_diag_modes())
         .WillByDefault(ReturnRef(kDummyDiagModes));
     ON_CALL(mock_policy_handler_, GetAppRequestTypes(_))
         .WillByDefault(Return(std::vector<std::string>()));
     ON_CALL(mock_policy_handler_, GetUserConsentForDevice(_))
         .WillByDefault(Return(policy::DeviceConsent::kDeviceAllowed));
-    ON_CALL(app_mngr_, GetDeviceTransportType(_))
+    ON_CALL(mock_app_manager_, GetDeviceTransportType(_))
         .WillByDefault(Return(hmi_apis::Common_TransportType::WIFI));
   }
 
@@ -182,30 +182,31 @@ TEST_F(RegisterAppInterfaceRequestTest, Run_MinimalData_SUCCESS) {
   InitLanguage();
   InitBasicMessage();
 
-  ON_CALL(app_mngr_, IsHMICooperating()).WillByDefault(Return(true));
+  ON_CALL(mock_app_manager_, IsHMICooperating()).WillByDefault(Return(true));
 
   MockAppPtr mock_app = CreateBasicMockedApp();
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
       .WillOnce(Return(ApplicationSharedPtr()))
       .WillRepeatedly(Return(mock_app));
 
-  ON_CALL(app_mngr_, applications())
+  ON_CALL(mock_app_manager_, applications())
       .WillByDefault(Return(DataAccessor<am::ApplicationSet>(app_set_, lock_)));
   ON_CALL(mock_policy_handler_, PolicyEnabled()).WillByDefault(Return(true));
   ON_CALL(mock_policy_handler_, GetInitialAppData(kAppId, _, _))
       .WillByDefault(Return(true));
 
-  EXPECT_CALL(app_mngr_, RegisterApplication(msg_)).WillOnce(Return(mock_app));
-  EXPECT_CALL(app_mngr_,
+  EXPECT_CALL(mock_app_manager_, RegisterApplication(msg_))
+      .WillOnce(Return(mock_app));
+  EXPECT_CALL(mock_app_manager_,
               ManageHMICommand(HMIResultCodeIs(
                   hmi_apis::FunctionID::BasicCommunication_OnAppRegistered)))
       .WillOnce(Return(true));
-  EXPECT_CALL(app_mngr_,
+  EXPECT_CALL(mock_app_manager_,
               ManageHMICommand(HMIResultCodeIs(
                   hmi_apis::FunctionID::Buttons_OnButtonSubscription)))
       .WillOnce(Return(true));
   EXPECT_CALL(
-      app_mngr_,
+      mock_app_manager_,
       ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS), _));
   EXPECT_CALL(mock_message_helper_,
               SendChangeRegistrationRequestToHMI(testing::Eq(mock_app), _));
@@ -228,30 +229,31 @@ TEST_F(RegisterAppInterfaceRequestTest, DISABLED_Run_AppHmiTypes_SUCCESS) {
 
   (*msg_)[am::strings::msg_params][am::strings::app_hmi_type][0] = app_hmi_type;
 
-  ON_CALL(app_mngr_, IsHMICooperating()).WillByDefault(Return(true));
+  ON_CALL(mock_app_manager_, IsHMICooperating()).WillByDefault(Return(true));
 
   MockAppPtr mock_app = CreateBasicMockedApp();
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
       .WillOnce(Return(ApplicationSharedPtr()))
       .WillRepeatedly(Return(mock_app));
 
-  ON_CALL(app_mngr_, applications())
+  ON_CALL(mock_app_manager_, applications())
       .WillByDefault(Return(DataAccessor<am::ApplicationSet>(app_set_, lock_)));
   ON_CALL(mock_policy_handler_, PolicyEnabled()).WillByDefault(Return(true));
   ON_CALL(mock_policy_handler_, GetInitialAppData(kAppId, _, _))
       .WillByDefault(DoAll(SetHmiType(app_hmi_type_str), Return(true)));
 
-  EXPECT_CALL(app_mngr_, RegisterApplication(msg_)).WillOnce(Return(mock_app));
-  EXPECT_CALL(app_mngr_,
+  EXPECT_CALL(mock_app_manager_, RegisterApplication(msg_))
+      .WillOnce(Return(mock_app));
+  EXPECT_CALL(mock_app_manager_,
               ManageHMICommand(HMIResultCodeIs(
                   hmi_apis::FunctionID::BasicCommunication_OnAppRegistered)))
       .WillOnce(Return(true));
-  EXPECT_CALL(app_mngr_,
+  EXPECT_CALL(mock_app_manager_,
               ManageHMICommand(HMIResultCodeIs(
                   hmi_apis::FunctionID::Buttons_OnButtonSubscription)))
       .WillOnce(Return(true));
   EXPECT_CALL(
-      app_mngr_,
+      mock_app_manager_,
       ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS), _));
   EXPECT_CALL(mock_message_helper_,
               SendChangeRegistrationRequestToHMI(testing::Eq(mock_app), _));

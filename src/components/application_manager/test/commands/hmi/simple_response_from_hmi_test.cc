@@ -112,7 +112,7 @@ class ResponseFromHMICommandsTest
   MockEventDispatcher event_dispatcher_;
 
   ResponseFromHMICommandsTest() {
-    ON_CALL(app_mngr_, event_dispatcher())
+    ON_CALL(mock_app_manager_, event_dispatcher())
         .WillByDefault(ReturnRef(event_dispatcher_));
   }
 };
@@ -244,7 +244,7 @@ TEST_F(OtherResponseFromHMICommandsTest, VIGetVehicleTypeResponse_Run_SUCCESS) {
       CreateCommand<commands::VIGetVehicleTypeResponse>(command_msg));
 
   application_manager_test::MockHMICapabilities hmi_capabilities;
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
+  EXPECT_CALL(mock_app_manager_, hmi_capabilities())
       .WillOnce(ReturnRef(hmi_capabilities));
 
   EXPECT_CALL(hmi_capabilities,
@@ -261,13 +261,13 @@ TEST_F(OtherResponseFromHMICommandsTest, VIIsReadyResponse_Run_SUCCESS) {
       CreateCommand<commands::VIIsReadyResponse>(command_msg));
 
   application_manager_test::MockHMICapabilities hmi_capabilities;
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
+  EXPECT_CALL(mock_app_manager_, hmi_capabilities())
       .WillOnce(ReturnRef(hmi_capabilities));
 
   EXPECT_CALL(hmi_capabilities, set_is_ivi_cooperating(Eq(true)));
 
   policy_test::MockPolicyHandlerInterface policy_handler;
-  EXPECT_CALL(app_mngr_, GetPolicyHandler())
+  EXPECT_CALL(mock_app_manager_, GetPolicyHandler())
       .WillOnce(ReturnRef(policy_handler));
 
   EXPECT_CALL(policy_handler, OnVIIsReady());

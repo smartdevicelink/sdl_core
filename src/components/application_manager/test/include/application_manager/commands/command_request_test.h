@@ -94,7 +94,7 @@ class CommandRequestTest : public CommandsTest<kIsNice> {
   MessageSharedPtr CatchMobileCommandResult(CallableT delegate,
                                             bool call_return = true) {
     MessageSharedPtr result_msg;
-    EXPECT_CALL(this->app_mngr_, ManageMobileCommand(_, _))
+    EXPECT_CALL(this->mock_app_manager_, ManageMobileCommand(_, _))
         .WillOnce(DoAll(SaveArg<0>(&result_msg), Return(call_return)));
     delegate();
     return result_msg;
@@ -104,7 +104,7 @@ class CommandRequestTest : public CommandsTest<kIsNice> {
   MessageSharedPtr CatchHMICommandResult(CallableT delegate,
                                          bool call_return = true) {
     MessageSharedPtr result_msg;
-    EXPECT_CALL(this->app_mngr_, ManageHMICommand(_))
+    EXPECT_CALL(this->mock_app_manager_, ManageHMICommand(_))
         .WillOnce(DoAll(SaveArg<0>(&result_msg), Return(call_return)));
     delegate();
     return result_msg;
@@ -117,32 +117,10 @@ class CommandRequestTest : public CommandsTest<kIsNice> {
 
   virtual void InitCommand(const uint32_t& default_timeout) OVERRIDE {
     CommandsTest<kIsNice>::InitCommand(default_timeout);
-    ON_CALL(CommandsTest<kIsNice>::app_mngr_, event_dispatcher())
+    ON_CALL(CommandsTest<kIsNice>::mock_app_manager_, event_dispatcher())
         .WillByDefault(ReturnRef(event_dispatcher_));
   }
 };
-
-MATCHER_P(MobileResultCodeIs, result_code, "") {
-  return result_code ==
-         static_cast<mobile_apis::Result::eType>(
-             (*arg)[am::strings::msg_params][am::strings::result_code].asInt());
-}
-
-MATCHER_P(HMIResultCodeIs, result_code, "") {
-  return result_code ==
-         static_cast<hmi_apis::FunctionID::eType>(
-             (*arg)[am::strings::params][am::strings::function_id].asInt());
-}
-
-MATCHER_P3(MobileResponseIs, result_code, result_info, result_success, "") {
-  mobile_apis::Result::eType code = static_cast<mobile_apis::Result::eType>(
-      (*arg)[am::strings::msg_params][am::strings::result_code].asInt());
-  std::string info =
-      (*arg)[am::strings::msg_params][am::strings::info].asString();
-  bool success = (*arg)[am::strings::msg_params][am::strings::success].asBool();
-  return result_code == code && result_info == info &&
-         result_success == success;
-}
 
 }  // namespace commands_test
 }  // namespace components

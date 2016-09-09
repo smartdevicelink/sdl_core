@@ -75,14 +75,14 @@ TEST_F(OnTouchEventNotificationTest, Run_AppIsNotFullscreen_UNSUCCESS) {
   std::vector<ApplicationSharedPtr> applications_with_navi;
   applications_with_navi.push_back(mock_app);
 
-  EXPECT_CALL(app_mngr_, applications_with_navi())
+  EXPECT_CALL(mock_app_manager_, applications_with_navi())
       .WillOnce(Return(applications_with_navi));
 
   EXPECT_CALL(*mock_app, IsFullscreen()).WillOnce(Return(false));
 
   EXPECT_CALL(*mock_app, app_id()).Times(0);
 
-  EXPECT_CALL(app_mngr_, SendMessageToMobile(_, _)).Times(0);
+  EXPECT_CALL(mock_app_manager_, SendMessageToMobile(_, _)).Times(0);
 
   command_->Run();
 }
@@ -117,14 +117,14 @@ TEST_F(OnTouchEventNotificationTest, Run_NotEmptyListOfAppsWithNavi_SUCCESS) {
   std::vector<ApplicationSharedPtr> applications_with_navi;
   applications_with_navi.push_back(mock_app);
 
-  EXPECT_CALL(app_mngr_, applications_with_navi())
+  EXPECT_CALL(mock_app_manager_, applications_with_navi())
       .WillOnce(Return(applications_with_navi));
 
   EXPECT_CALL(*mock_app, IsFullscreen()).WillOnce(Return(true));
 
   EXPECT_CALL(*mock_app, app_id()).WillOnce(Return(kAppId));
 
-  EXPECT_CALL(app_mngr_, SendMessageToMobile(CheckMessageData(), _));
+  EXPECT_CALL(mock_app_manager_, SendMessageToMobile(CheckMessageData(), _));
 
   command_->Run();
 }

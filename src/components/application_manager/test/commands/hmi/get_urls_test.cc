@@ -90,7 +90,7 @@ class GetUrlsTest : public CommandsTest<CommandsTestMocks::kIsNice> {
   ApplicationSharedPtr app;
 
   virtual void SetUp() OVERRIDE {
-    ON_CALL(app_mngr_, GetPolicyHandler())
+    ON_CALL(mock_app_manager_, GetPolicyHandler())
         .WillByDefault(ReturnRef(policy_handler_));
     mock_policy_manager_ =
         utils::MakeShared<policy_manager_test::MockPolicyManager>();
@@ -107,12 +107,12 @@ TEST_F(GetUrlsTest, RUN_SUCCESS) {
   (*command_msg)[am::strings::msg_params][am::hmi_request::service] =
       kInitialService;
 
-  ON_CALL(app_mngr_, event_dispatcher())
+  ON_CALL(mock_app_manager_, event_dispatcher())
       .WillByDefault(ReturnRef(mock_event_dispatcher_));
 
   RequestFromHMIPtr command(CreateCommand<GetUrls>(command_msg));
 
-  EXPECT_CALL(app_mngr_, GetPolicyHandler()).Times(2);
+  EXPECT_CALL(mock_app_manager_, GetPolicyHandler()).Times(2);
 
   EXPECT_CALL(policy_handler_, GetServiceUrls(kInitialService, _));
 
@@ -129,16 +129,17 @@ TEST_F(GetUrlsTest, RUN_PolicyNotEnabled_UNSUCCESS) {
   (*command_msg)[am::strings::msg_params][am::hmi_request::service] =
       kInitialService;
 
-  ON_CALL(app_mngr_, event_dispatcher())
+  ON_CALL(mock_app_manager_, event_dispatcher())
       .WillByDefault(ReturnRef(mock_event_dispatcher_));
 
   RequestFromHMIPtr command(CreateCommand<GetUrls>(command_msg));
 
-  EXPECT_CALL(app_mngr_, GetPolicyHandler());
+  EXPECT_CALL(mock_app_manager_, GetPolicyHandler());
 
   EXPECT_CALL(policy_handler_, PolicyEnabled()).WillOnce(Return(false));
 
-  EXPECT_CALL(app_mngr_, ManageHMICommand(command_msg)).WillOnce(Return(true));
+  EXPECT_CALL(mock_app_manager_, ManageHMICommand(command_msg))
+      .WillOnce(Return(true));
 
   command->Run();
 
@@ -156,18 +157,19 @@ TEST_F(GetUrlsTest, RUN_EmptyEndpoints_UNSUCCESS) {
   (*command_msg)[am::strings::msg_params][am::hmi_request::service] =
       kInitialService;
 
-  ON_CALL(app_mngr_, event_dispatcher())
+  ON_CALL(mock_app_manager_, event_dispatcher())
       .WillByDefault(ReturnRef(mock_event_dispatcher_));
 
   RequestFromHMIPtr command(CreateCommand<GetUrls>(command_msg));
 
-  EXPECT_CALL(app_mngr_, GetPolicyHandler()).Times(2);
+  EXPECT_CALL(mock_app_manager_, GetPolicyHandler()).Times(2);
 
   EXPECT_CALL(policy_handler_, GetServiceUrls(kInitialService, _));
 
   EXPECT_CALL(policy_handler_, PolicyEnabled()).WillOnce(Return(true));
 
-  EXPECT_CALL(app_mngr_, ManageHMICommand(command_msg)).WillOnce(Return(true));
+  EXPECT_CALL(mock_app_manager_, ManageHMICommand(command_msg))
+      .WillOnce(Return(true));
 
   command->Run();
 
@@ -187,12 +189,12 @@ TEST_F(GetUrlsTest, ProcessPolicyServiceURLs_SUCCESS) {
   (*command_msg)[am::strings::msg_params][am::hmi_request::service] =
       kPolicyService;
 
-  ON_CALL(app_mngr_, event_dispatcher())
+  ON_CALL(mock_app_manager_, event_dispatcher())
       .WillByDefault(ReturnRef(mock_event_dispatcher_));
 
   RequestFromHMIPtr command(CreateCommand<GetUrls>(command_msg));
 
-  EXPECT_CALL(app_mngr_, GetPolicyHandler()).Times(3);
+  EXPECT_CALL(mock_app_manager_, GetPolicyHandler()).Times(3);
   EXPECT_CALL(policy_handler_, PolicyEnabled()).WillOnce(Return(true));
 
   EndpointUrls endpoints_;
@@ -208,10 +210,10 @@ TEST_F(GetUrlsTest, ProcessPolicyServiceURLs_SUCCESS) {
   EXPECT_CALL(policy_handler_, GetAppIdForSending())
       .WillOnce(Return(kAppIdForSending));
 
-  EXPECT_CALL(app_mngr_, application(kAppIdForSending))
+  EXPECT_CALL(mock_app_manager_, application(kAppIdForSending))
       .WillOnce(Return(mock_app));
   EXPECT_CALL(*mock_app, app_id()).WillOnce(Return(kAppIdForSending));
-  EXPECT_CALL(app_mngr_, ManageHMICommand(command_msg))
+  EXPECT_CALL(mock_app_manager_, ManageHMICommand(command_msg))
       .WillRepeatedly(Return(true));
 
   command->Run();
@@ -245,12 +247,12 @@ TEST_F(GetUrlsTest, ProcessServiceURLs_SUCCESS) {
   (*command_msg)[am::strings::msg_params][am::hmi_response::urls][0]
                 [am::hmi_response::policy_app_id].asString() = "1";
 
-  ON_CALL(app_mngr_, event_dispatcher())
+  ON_CALL(mock_app_manager_, event_dispatcher())
       .WillByDefault(ReturnRef(mock_event_dispatcher_));
 
   RequestFromHMIPtr command(CreateCommand<GetUrls>(command_msg));
 
-  EXPECT_CALL(app_mngr_, GetPolicyHandler()).Times(2);
+  EXPECT_CALL(mock_app_manager_, GetPolicyHandler()).Times(2);
   EXPECT_CALL(policy_handler_, PolicyEnabled()).WillOnce(Return(true));
 
   EndpointUrls endpoints_;
@@ -287,12 +289,12 @@ TEST_F(GetUrlsTest, ProcessServiceURLs_PolicyDefaultId_SUCCESS) {
   (*command_msg)[am::strings::msg_params][am::hmi_response::urls][0]
                 [am::hmi_response::policy_app_id].asString() = kDefaultId;
 
-  ON_CALL(app_mngr_, event_dispatcher())
+  ON_CALL(mock_app_manager_, event_dispatcher())
       .WillByDefault(ReturnRef(mock_event_dispatcher_));
 
   RequestFromHMIPtr command(CreateCommand<GetUrls>(command_msg));
 
-  EXPECT_CALL(app_mngr_, GetPolicyHandler()).Times(2);
+  EXPECT_CALL(mock_app_manager_, GetPolicyHandler()).Times(2);
   EXPECT_CALL(policy_handler_, PolicyEnabled()).WillOnce(Return(true));
 
   EndpointUrls endpoints_;

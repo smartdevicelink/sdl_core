@@ -93,7 +93,7 @@ TEST_F(VRGetCapabilitiesResponseTest, RUN_SUCCESSS) {
   VRGetCapabilitiesResponsePtr command(
       CreateCommand<VRGetCapabilitiesResponse>(command_msg));
 
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
+  EXPECT_CALL(mock_app_manager_, hmi_capabilities())
       .WillOnce(ReturnRef(mock_hmi_capabilities_));
 
   smart_objects::SmartObject vr_capabilities_so =

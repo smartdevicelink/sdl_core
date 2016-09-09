@@ -68,11 +68,11 @@ class GetDTCsRequestTest
 TEST_F(GetDTCsRequestTest, Run_ApplicationIsNotRegistered_UNSUCCESS) {
   GetDTCsRequestPtr command(CreateCommand<GetDTCsRequest>());
 
-  EXPECT_CALL(app_mngr_, application(_))
+  EXPECT_CALL(mock_app_manager_, application(_))
       .WillOnce(Return(ApplicationSharedPtr()));
 
   EXPECT_CALL(
-      app_mngr_,
+      mock_app_manager_,
       ManageMobileCommand(
           MobileResultCodeIs(mobile_result::APPLICATION_NOT_REGISTERED), _));
 
@@ -89,9 +89,10 @@ TEST_F(GetDTCsRequestTest, Run_SUCCESS) {
   GetDTCsRequestPtr command(CreateCommand<GetDTCsRequest>(command_msg));
 
   MockAppPtr app(CreateMockApp());
-  EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app));
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillOnce(Return(app));
 
-  EXPECT_CALL(app_mngr_,
+  EXPECT_CALL(mock_app_manager_,
               ManageHMICommand(
                   HMIResultCodeIs(hmi_apis::FunctionID::VehicleInfo_GetDTCs)));
 
@@ -103,7 +104,7 @@ TEST_F(GetDTCsRequestTest, OnEvent_UnknownEvent_UNSUCCESS) {
 
   Event event(hmi_apis::FunctionID::INVALID_ENUM);
 
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(mock_app_manager_, ManageMobileCommand(_, _)).Times(0);
 
   command->on_event(event);
 }
@@ -120,7 +121,7 @@ TEST_F(GetDTCsRequestTest, OnEvent_SUCCESS) {
   event.set_smart_object(*event_msg);
 
   EXPECT_CALL(
-      app_mngr_,
+      mock_app_manager_,
       ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS), _));
 
   command->on_event(event);

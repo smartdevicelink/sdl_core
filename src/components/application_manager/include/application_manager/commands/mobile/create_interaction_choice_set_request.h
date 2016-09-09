@@ -71,7 +71,6 @@ class CreateInteractionChoiceSetRequest : public CommandRequestImpl {
    **/
   void Run() OVERRIDE;
 
- private:
   /**
    * @brief Interface method that is called whenever new event received
    *
@@ -84,6 +83,8 @@ class CreateInteractionChoiceSetRequest : public CommandRequestImpl {
    * has exceed it's limit
    */
   void onTimeOut() OVERRIDE;
+
+ private:
   /**
    * @brief DeleteChoices allows to walk through the sent commands collection
    * in order to sent appropriate DeleteCommand request.

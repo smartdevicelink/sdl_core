@@ -100,10 +100,10 @@ TEST_F(OnWayPointChangeNotificationTest,
   std::set<int32_t> apps_subscribed_for_way_points;
   apps_subscribed_for_way_points.insert(kAppId);
 
-  EXPECT_CALL(app_mngr_, GetAppsSubscribedForWayPoints())
+  EXPECT_CALL(mock_app_manager_, GetAppsSubscribedForWayPoints())
       .WillOnce(Return(apps_subscribed_for_way_points));
 
-  EXPECT_CALL(app_mngr_, SendMessageToMobile(CheckMessageData(), _));
+  EXPECT_CALL(mock_app_manager_, SendMessageToMobile(CheckMessageData(), _));
 
   command_->Run();
 }

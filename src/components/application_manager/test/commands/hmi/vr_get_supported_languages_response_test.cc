@@ -91,7 +91,7 @@ TEST_F(VRGetSupportedLanguagesResponseTest, RUN_SUCCESS) {
   VRGetSupportedLanguagesResponsePtr command(
       CreateCommand<VRGetSupportedLanguagesResponse>(command_msg));
 
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
+  EXPECT_CALL(mock_app_manager_, hmi_capabilities())
       .WillOnce(ReturnRef(mock_hmi_capabilities_));
 
   EXPECT_CALL(mock_hmi_capabilities_,

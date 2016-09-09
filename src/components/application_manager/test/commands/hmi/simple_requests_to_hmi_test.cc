@@ -131,7 +131,7 @@ TEST_F(RequestToHMITest, SendRequest_SUCCESS) {
   SharedPtr<commands::RequestToHMI> command(
       CreateCommand<commands::RequestToHMI>());
 
-  EXPECT_CALL(app_mngr_, SendMessageToHMI(NotNull()));
+  EXPECT_CALL(mock_app_manager_, SendMessageToHMI(NotNull()));
 
   command->SendRequest();
 }
@@ -213,7 +213,7 @@ TYPED_TEST(RequestToHMICommandsTest, Run_SendMessageToHMI_SUCCESS) {
 
   SharedPtr<CommandType> command = this->template CreateCommand<CommandType>();
 
-  EXPECT_CALL(this->app_mngr_, SendMessageToHMI(NotNull()));
+  EXPECT_CALL(this->mock_app_manager_, SendMessageToHMI(NotNull()));
 
   command->Run();
 }
@@ -223,7 +223,7 @@ TYPED_TEST(RequestToHMICommandsTest2, Run_SendMessageToHMI_SUCCESS) {
 
   SharedPtr<CommandType> command = this->template CreateCommand<CommandType>();
 
-  EXPECT_CALL(this->app_mngr_, SendMessageToHMI(NotNull()));
+  EXPECT_CALL(this->mock_app_manager_, SendMessageToHMI(NotNull()));
 
   command->Run();
 }

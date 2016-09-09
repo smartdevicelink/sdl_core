@@ -120,7 +120,7 @@ TYPED_TEST_CASE(MobileResponseCommandsTest, ResponseCommandsList);
 TYPED_TEST(MobileResponseCommandsTest, Run_SendResponseToMobile_SUCCESS) {
   ::utils::SharedPtr<typename TestFixture::CommandType> command =
       this->template CreateCommand<typename TestFixture::CommandType>();
-  EXPECT_CALL(this->app_mngr_, SendMessageToMobile(NotNull(), _));
+  EXPECT_CALL(this->mock_app_manager_, SendMessageToMobile(NotNull(), _));
   command->Run();
 }
 

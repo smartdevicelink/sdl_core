@@ -147,7 +147,7 @@ TEST_F(CommandImplTest, ReplaceMobileByHMIAppId_NoAppIdInMessage_UNSUCCESS) {
   MessageSharedPtr msg;
   UCommandImplPtr command = CreateCommand<UCommandImpl>(msg);
 
-  EXPECT_CALL(app_mngr_, application(_)).Times(0);
+  EXPECT_CALL(mock_app_manager_, application(_)).Times(0);
 
   command->ReplaceMobileByHMIAppId(*msg);
 }
@@ -160,7 +160,7 @@ TEST_F(CommandImplTest, ReplaceMobileByHMIAppId_SUCCESS) {
 
   MockAppPtr app = CreateMockApp();
 
-  EXPECT_CALL(app_mngr_, application(kAppId1_)).WillOnce(Return(app));
+  EXPECT_CALL(mock_app_manager_, application(kAppId1_)).WillOnce(Return(app));
   ON_CALL(*app, hmi_app_id()).WillByDefault(Return(kAppId2_));
 
   command->ReplaceMobileByHMIAppId(*msg);
@@ -174,7 +174,7 @@ TEST_F(CommandImplTest, ReplaceMobileByHMIAppId_Array_SUCCESS) {
 
   MockAppPtr app = CreateMockApp();
 
-  EXPECT_CALL(app_mngr_, application(_))
+  EXPECT_CALL(mock_app_manager_, application(_))
       .Times(kDefaultMsgCount_)
       .WillRepeatedly(Return(app));
   ON_CALL(*app, hmi_app_id()).WillByDefault(Return(kAppId2_));
@@ -195,7 +195,7 @@ TEST_F(CommandImplTest, ReplaceMobileByHMIAppId_Map_SUCCESS) {
 
   MockAppPtr app = CreateMockApp();
 
-  EXPECT_CALL(app_mngr_, application(_))
+  EXPECT_CALL(mock_app_manager_, application(_))
       .Times(kDefaultMsgCount_)
       .WillRepeatedly(Return(app));
   ON_CALL(*app, hmi_app_id()).WillByDefault(Return(kAppId2_));
@@ -213,7 +213,7 @@ TEST_F(CommandImplTest, ReplaceHMIByMobileAppId_NoHMIAppIdInMessage_UNSUCCESS) {
   MessageSharedPtr msg;
   UCommandImplPtr command = CreateCommand<UCommandImpl>(msg);
 
-  EXPECT_CALL(app_mngr_, application_by_hmi_app(_)).Times(0);
+  EXPECT_CALL(mock_app_manager_, application_by_hmi_app(_)).Times(0);
 
   command->ReplaceHMIByMobileAppId(*msg);
 }
@@ -226,7 +226,7 @@ TEST_F(CommandImplTest, ReplaceHMIByMobileAppId_SUCCESS) {
 
   MockAppPtr app = CreateMockApp();
 
-  EXPECT_CALL(app_mngr_, application_by_hmi_app(kAppId1_))
+  EXPECT_CALL(mock_app_manager_, application_by_hmi_app(kAppId1_))
       .WillOnce(Return(app));
   ON_CALL(*app, app_id()).WillByDefault(Return(kAppId2_));
 
@@ -241,7 +241,7 @@ TEST_F(CommandImplTest, ReplaceHMIByMobileAppId_Array_SUCCESS) {
   UCommandImplPtr command = CreateCommand<UCommandImpl>(msg);
   MockAppPtr app = CreateMockApp();
 
-  EXPECT_CALL(app_mngr_, application_by_hmi_app(_))
+  EXPECT_CALL(mock_app_manager_, application_by_hmi_app(_))
       .Times(kDefaultMsgCount_)
       .WillRepeatedly(Return(app));
   ON_CALL(*app, app_id()).WillByDefault(Return(kAppId2_));
@@ -262,7 +262,7 @@ TEST_F(CommandImplTest, ReplaceHMIByMobileAppId_Map_SUCCESS) {
   UCommandImplPtr command = CreateCommand<UCommandImpl>(msg);
   MockAppPtr app = CreateMockApp();
 
-  EXPECT_CALL(app_mngr_, application_by_hmi_app(_))
+  EXPECT_CALL(mock_app_manager_, application_by_hmi_app(_))
       .Times(kDefaultMsgCount_)
       .WillRepeatedly(Return(app));
   ON_CALL(*app, app_id()).WillByDefault(Return(kAppId2_));

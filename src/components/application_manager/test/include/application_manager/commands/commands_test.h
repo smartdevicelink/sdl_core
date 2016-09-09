@@ -48,6 +48,8 @@ namespace test {
 namespace components {
 namespace commands_test {
 
+namespace am = ::application_manager;
+
 using ::testing::ReturnRef;
 using ::testing::NiceMock;
 
@@ -110,7 +112,7 @@ class CommandsTest : public ::testing::Test {
                                    MessageSharedPtr& msg) {
     InitCommand(timeout);
     return ::utils::MakeShared<Command>((msg ? msg : msg = CreateMessage()),
-                                        app_mngr_);
+                                        mock_app_manager_);
   }
 
   template <class Command>
@@ -122,24 +124,48 @@ class CommandsTest : public ::testing::Test {
   SharedPtr<Command> CreateCommand(const uint32_t timeout = kDefaultTimeout_) {
     InitCommand(timeout);
     MessageSharedPtr msg = CreateMessage();
-    return ::utils::MakeShared<Command>(msg, app_mngr_);
+    return ::utils::MakeShared<Command>(msg, mock_app_manager_);
   }
 
   enum { kDefaultTimeout_ = 100 };
 
-  MockAppManager app_mngr_;
-  MockAppManagerSettings app_mngr_settings_;
+  MockAppManager mock_app_manager_;
+  MockAppManagerSettings mock_app_manager_settings_;
 
  protected:
   virtual void InitCommand(const uint32_t& timeout) {
-    ON_CALL(app_mngr_, get_settings())
-        .WillByDefault(ReturnRef(app_mngr_settings_));
-    ON_CALL(app_mngr_settings_, default_timeout())
+    ON_CALL(mock_app_manager_, get_settings())
+        .WillByDefault(ReturnRef(mock_app_manager_settings_));
+    ON_CALL(mock_app_manager_settings_, default_timeout())
         .WillByDefault(ReturnRef(timeout));
   }
 
   CommandsTest() {}
 };
+
+MATCHER_P(MobileResultCodeIs, result_code, "") {
+  return result_code ==
+         static_cast<mobile_apis::Result::eType>(
+             (*arg)[application_manager::strings::msg_params]
+                   [application_manager::strings::result_code].asInt());
+}
+
+MATCHER_P(HMIResultCodeIs, result_code, "") {
+  return result_code ==
+         static_cast<hmi_apis::FunctionID::eType>(
+             (*arg)[application_manager::strings::params]
+                   [application_manager::strings::function_id].asInt());
+}
+
+MATCHER_P3(MobileResponseIs, result_code, result_info, result_success, "") {
+  mobile_apis::Result::eType code = static_cast<mobile_apis::Result::eType>(
+      (*arg)[am::strings::msg_params][am::strings::result_code].asInt());
+  std::string info =
+      (*arg)[am::strings::msg_params][am::strings::info].asString();
+  bool success = (*arg)[am::strings::msg_params][am::strings::success].asBool();
+  return result_code == code && result_info == info &&
+         result_success == success;
+}
 
 }  // namespace commands_test
 }  // namespace components

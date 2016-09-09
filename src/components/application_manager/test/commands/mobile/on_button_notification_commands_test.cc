@@ -131,7 +131,7 @@ TYPED_TEST(OnButtonNotificationCommandsTest,
   SharedPtr<Notification> command(
       this->template CreateCommand<Notification>(notification_msg));
 
-  EXPECT_CALL(this->app_mngr_, SendMessageToMobile(_, _)).Times(0);
+  EXPECT_CALL(this->mock_app_manager_, SendMessageToMobile(_, _)).Times(0);
 
   command->Run();
 }
@@ -150,7 +150,7 @@ TYPED_TEST(OnButtonNotificationCommandsTest,
   SharedPtr<Notification> command(
       this->template CreateCommand<Notification>(notification_msg));
 
-  EXPECT_CALL(this->app_mngr_, SendMessageToMobile(_, _)).Times(0);
+  EXPECT_CALL(this->mock_app_manager_, SendMessageToMobile(_, _)).Times(0);
 
   command->Run();
 }
@@ -171,10 +171,10 @@ TYPED_TEST(OnButtonNotificationCommandsTest,
   SharedPtr<Notification> command(
       this->template CreateCommand<Notification>(notification_msg));
 
-  EXPECT_CALL(this->app_mngr_, application(kAppId))
+  EXPECT_CALL(this->mock_app_manager_, application(kAppId))
       .WillOnce(Return(ApplicationSharedPtr()));
 
-  EXPECT_CALL(this->app_mngr_, SendMessageToMobile(_, _)).Times(0);
+  EXPECT_CALL(this->mock_app_manager_, SendMessageToMobile(_, _)).Times(0);
 
   command->Run();
 }
@@ -196,12 +196,13 @@ TYPED_TEST(OnButtonNotificationCommandsTest,
       this->template CreateCommand<Notification>(notification_msg));
 
   typename TestFixture::MockAppPtr mock_app = this->CreateMockApp();
-  EXPECT_CALL(this->app_mngr_, application(kAppId)).WillOnce(Return(mock_app));
+  EXPECT_CALL(this->mock_app_manager_, application(kAppId))
+      .WillOnce(Return(mock_app));
 
   EXPECT_CALL(*mock_app, IsSubscribedToSoftButton(kCustomButtonId))
       .WillOnce(Return(false));
 
-  EXPECT_CALL(this->app_mngr_, SendMessageToMobile(_, _)).Times(0);
+  EXPECT_CALL(this->mock_app_manager_, SendMessageToMobile(_, _)).Times(0);
 
   command->Run();
 }
@@ -222,12 +223,13 @@ TYPED_TEST(OnButtonNotificationCommandsTest, Run_CustomButton_SUCCESS) {
       this->template CreateCommand<Notification>(notification_msg));
 
   typename TestFixture::MockAppPtr mock_app = this->CreateMockApp();
-  EXPECT_CALL(this->app_mngr_, application(kAppId)).WillOnce(Return(mock_app));
+  EXPECT_CALL(this->mock_app_manager_, application(kAppId))
+      .WillOnce(Return(mock_app));
 
   EXPECT_CALL(*mock_app, IsSubscribedToSoftButton(kCustomButtonId))
       .WillOnce(Return(true));
 
-  EXPECT_CALL(this->app_mngr_,
+  EXPECT_CALL(this->mock_app_manager_,
               SendMessageToMobile(
                   CheckNotificationMessage(TestFixture::kFunctionId), _));
 
@@ -247,10 +249,10 @@ TYPED_TEST(OnButtonNotificationCommandsTest, Run_NoSubscribedApps_UNSUCCESS) {
       this->template CreateCommand<Notification>(notification_msg));
 
   const std::vector<ApplicationSharedPtr> empty_subscribed_apps_list;
-  EXPECT_CALL(this->app_mngr_, applications_by_button(kButtonName))
+  EXPECT_CALL(this->mock_app_manager_, applications_by_button(kButtonName))
       .WillOnce(Return(empty_subscribed_apps_list));
 
-  EXPECT_CALL(this->app_mngr_, SendMessageToMobile(_, _)).Times(0);
+  EXPECT_CALL(this->mock_app_manager_, SendMessageToMobile(_, _)).Times(0);
 
   command->Run();
 }
@@ -274,10 +276,10 @@ TYPED_TEST(OnButtonNotificationCommandsTest, Run_InvalidHmiLevel_UNSUCCESS) {
   EXPECT_CALL(*mock_app, hmi_level())
       .WillRepeatedly(Return(mobile_apis::HMILevel::HMI_NONE));
 
-  EXPECT_CALL(this->app_mngr_, applications_by_button(kButtonName))
+  EXPECT_CALL(this->mock_app_manager_, applications_by_button(kButtonName))
       .WillOnce(Return(subscribed_apps_list));
 
-  EXPECT_CALL(this->app_mngr_, SendMessageToMobile(_, _)).Times(0);
+  EXPECT_CALL(this->mock_app_manager_, SendMessageToMobile(_, _)).Times(0);
 
   command->Run();
 }
@@ -302,10 +304,10 @@ TYPED_TEST(OnButtonNotificationCommandsTest,
   EXPECT_CALL(*mock_app, hmi_level())
       .WillRepeatedly(Return(mobile_apis::HMILevel::HMI_LIMITED));
 
-  EXPECT_CALL(this->app_mngr_, applications_by_button(kButtonName))
+  EXPECT_CALL(this->mock_app_manager_, applications_by_button(kButtonName))
       .WillOnce(Return(subscribed_apps_list));
 
-  EXPECT_CALL(this->app_mngr_, SendMessageToMobile(_, _)).Times(0);
+  EXPECT_CALL(this->mock_app_manager_, SendMessageToMobile(_, _)).Times(0);
 
   command->Run();
 }
@@ -329,10 +331,10 @@ TYPED_TEST(OnButtonNotificationCommandsTest, Run_SUCCESS) {
   EXPECT_CALL(*mock_app, hmi_level())
       .WillRepeatedly(Return(mobile_apis::HMILevel::HMI_FULL));
 
-  EXPECT_CALL(this->app_mngr_, applications_by_button(kButtonName))
+  EXPECT_CALL(this->mock_app_manager_, applications_by_button(kButtonName))
       .WillOnce(Return(subscribed_apps_list));
 
-  EXPECT_CALL(this->app_mngr_,
+  EXPECT_CALL(this->mock_app_manager_,
               SendMessageToMobile(
                   CheckNotificationMessage(TestFixture::kFunctionId), _));
 

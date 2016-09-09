@@ -34,11 +34,11 @@ class UnsubscribeButtonRequestTest
 TEST_F(UnsubscribeButtonRequestTest, Run_AppNotRegistered_UNSUCCESS) {
   CommandPtr command(CreateCommand<UnsubscribeButtonRequest>());
 
-  EXPECT_CALL(app_mngr_, application(_))
+  EXPECT_CALL(mock_app_manager_, application(_))
       .WillOnce(Return(ApplicationSharedPtr()));
 
   EXPECT_CALL(
-      app_mngr_,
+      mock_app_manager_,
       ManageMobileCommand(
           MobileResultCodeIs(mobile_result::APPLICATION_NOT_REGISTERED), _));
 
@@ -55,14 +55,14 @@ TEST_F(UnsubscribeButtonRequestTest,
   CommandPtr command(CreateCommand<UnsubscribeButtonRequest>(command_msg));
 
   MockAppPtr mock_app(CreateMockApp());
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
       .WillOnce(Return(mock_app));
 
   EXPECT_CALL(*mock_app, UnsubscribeFromButton(kButtonId))
       .WillOnce(Return(false));
 
   EXPECT_CALL(
-      app_mngr_,
+      mock_app_manager_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::IGNORED), _));
 
   command->Run();
@@ -79,17 +79,17 @@ TEST_F(UnsubscribeButtonRequestTest, Run_SUCCESS) {
   CommandPtr command(CreateCommand<UnsubscribeButtonRequest>(command_msg));
 
   MockAppPtr mock_app(CreateMockApp());
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
       .WillOnce(Return(mock_app));
 
   EXPECT_CALL(*mock_app, UnsubscribeFromButton(kButtonId))
       .WillOnce(Return(true));
 
-  EXPECT_CALL(app_mngr_,
+  EXPECT_CALL(mock_app_manager_,
               ManageHMICommand(HMIResultCodeIs(
                   hmi_apis::FunctionID::Buttons_OnButtonSubscription)));
   EXPECT_CALL(
-      app_mngr_,
+      mock_app_manager_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::SUCCESS), _));
 
   EXPECT_CALL(*mock_app, UpdateHash());

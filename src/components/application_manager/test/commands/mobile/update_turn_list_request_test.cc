@@ -96,11 +96,11 @@ class UpdateTurnListRequestTest
 };
 
 TEST_F(UpdateTurnListRequestTest, Run_ApplicationIsNotRegistered_UNSUCCESS) {
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
       .WillOnce(Return(ApplicationSharedPtr()));
 
   EXPECT_CALL(
-      app_mngr_,
+      mock_app_manager_,
       ManageMobileCommand(
           MobileResultCodeIs(mobile_result::APPLICATION_NOT_REGISTERED), _));
 
@@ -112,11 +112,11 @@ TEST_F(UpdateTurnListRequestTest, Run_InvalidNavigationText_UNSUCCESS) {
                  [am::strings::navigation_text] = "invalid_navigation_text\t\n";
 
   MockAppPtr mock_app(CreateMockApp());
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
       .WillOnce(Return(mock_app));
 
   EXPECT_CALL(
-      app_mngr_,
+      mock_app_manager_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::INVALID_DATA), _));
 
   command_->Run();
@@ -130,11 +130,11 @@ TEST_F(UpdateTurnListRequestTest, Run_InvalidTurnIcon_UNSUCCESS) {
                      "invalid_turn_icon\t\n";
 
   MockAppPtr mock_app(CreateMockApp());
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
       .WillOnce(Return(mock_app));
 
   EXPECT_CALL(
-      app_mngr_,
+      mock_app_manager_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::INVALID_DATA), _));
 
   command_->Run();
@@ -149,10 +149,10 @@ TEST_F(UpdateTurnListRequestTest,
                      "valid_turn_icon";
 
   MockAppPtr mock_app(CreateMockApp());
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
       .WillOnce(Return(mock_app));
 
-  EXPECT_CALL(app_mngr_, GetPolicyHandler())
+  EXPECT_CALL(mock_app_manager_, GetPolicyHandler())
       .WillOnce(ReturnRef(mock_policy_handler_));
 
   const mobile_result::eType kExpectedResult = mobile_result::INVALID_ENUM;
@@ -160,10 +160,10 @@ TEST_F(UpdateTurnListRequestTest,
               ProcessSoftButtons((*command_msg_)[am::strings::msg_params],
                                  Eq(mock_app),
                                  Ref(mock_policy_handler_),
-                                 Ref(app_mngr_)))
+                                 Ref(mock_app_manager_)))
       .WillOnce(Return(kExpectedResult));
 
-  EXPECT_CALL(app_mngr_,
+  EXPECT_CALL(mock_app_manager_,
               ManageMobileCommand(MobileResultCodeIs(kExpectedResult), _));
 
   command_->Run();
@@ -171,21 +171,21 @@ TEST_F(UpdateTurnListRequestTest,
 
 TEST_F(UpdateTurnListRequestTest, Run_NoTurnList_UNSUCCESS) {
   MockAppPtr mock_app(CreateMockApp());
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
       .WillOnce(Return(mock_app));
 
-  EXPECT_CALL(app_mngr_, GetPolicyHandler())
+  EXPECT_CALL(mock_app_manager_, GetPolicyHandler())
       .WillOnce(ReturnRef(mock_policy_handler_));
 
   EXPECT_CALL(mock_message_helper_,
               ProcessSoftButtons((*command_msg_)[am::strings::msg_params],
                                  Eq(mock_app),
                                  Ref(mock_policy_handler_),
-                                 Ref(app_mngr_)))
+                                 Ref(mock_app_manager_)))
       .WillOnce(Return(mobile_result::SUCCESS));
 
   EXPECT_CALL(
-      app_mngr_,
+      mock_app_manager_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::INVALID_DATA), _));
 
   command_->Run();
@@ -202,17 +202,17 @@ TEST_F(UpdateTurnListRequestTest, Run_ValidTurnList_SUCCESS) {
   (*command_msg_)[am::strings::msg_params][am::strings::soft_buttons] = 0;
 
   MockAppPtr mock_app(CreateMockApp());
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
       .WillOnce(Return(mock_app));
 
-  EXPECT_CALL(app_mngr_, GetPolicyHandler())
+  EXPECT_CALL(mock_app_manager_, GetPolicyHandler())
       .WillOnce(ReturnRef(mock_policy_handler_));
 
   EXPECT_CALL(mock_message_helper_,
               ProcessSoftButtons((*command_msg_)[am::strings::msg_params],
                                  Eq(mock_app),
                                  Ref(mock_policy_handler_),
-                                 Ref(app_mngr_)))
+                                 Ref(mock_app_manager_)))
       .WillOnce(Return(mobile_result::SUCCESS));
 
   EXPECT_CALL(
@@ -221,7 +221,7 @@ TEST_F(UpdateTurnListRequestTest, Run_ValidTurnList_SUCCESS) {
           (*command_msg_)[am::strings::msg_params][am::strings::turn_list][0]
                          [am::strings::turn_icon],
           Eq(mock_app),
-          Ref(app_mngr_))).WillOnce(Return(mobile_result::SUCCESS));
+          Ref(mock_app_manager_))).WillOnce(Return(mobile_result::SUCCESS));
 
   EXPECT_CALL(mock_message_helper_,
               SubscribeApplicationToSoftButton(_, _, kFunctionId));
@@ -257,7 +257,7 @@ TEST_F(UpdateTurnListRequestTest, Run_ValidTurnList_SUCCESS) {
 TEST_F(UpdateTurnListRequestTest, OnEvent_UnknownEvent_UNSUCCESS) {
   Event event(hmi_apis::FunctionID::INVALID_ENUM);
 
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(mock_app_manager_, ManageMobileCommand(_, _)).Times(0);
 
   command_->on_event(event);
 }
@@ -272,13 +272,13 @@ TEST_F(UpdateTurnListRequestTest, OnEvent_UnsupportedResource_SUCCESS) {
   event.set_smart_object(*event_msg);
 
   MockHMICapabilities mock_hmi_capabilities;
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
+  EXPECT_CALL(mock_app_manager_, hmi_capabilities())
       .WillOnce(ReturnRef(mock_hmi_capabilities));
 
   EXPECT_CALL(mock_hmi_capabilities, is_ui_cooperating())
       .WillOnce(Return(true));
 
-  EXPECT_CALL(app_mngr_,
+  EXPECT_CALL(mock_app_manager_,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_result::UNSUPPORTED_RESOURCE), _));
 
@@ -296,13 +296,13 @@ TEST_F(UpdateTurnListRequestTest,
   event.set_smart_object(*event_msg);
 
   MockHMICapabilities mock_hmi_capabilities;
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
+  EXPECT_CALL(mock_app_manager_, hmi_capabilities())
       .WillOnce(ReturnRef(mock_hmi_capabilities));
 
   EXPECT_CALL(mock_hmi_capabilities, is_ui_cooperating()).Times(0);
 
   EXPECT_CALL(
-      app_mngr_,
+      mock_app_manager_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::SUCCESS), _));
 
   command_->on_event(event);

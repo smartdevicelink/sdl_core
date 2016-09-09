@@ -73,7 +73,7 @@ TEST_F(GetUrlResponseTest, RUN_SendRequest_SUCCESS) {
 
   ResponseToHMIPtr command(CreateCommand<GetUrlsResponse>(command_msg));
 
-  EXPECT_CALL(app_mngr_, SendMessageToHMI(command_msg));
+  EXPECT_CALL(mock_app_manager_, SendMessageToHMI(command_msg));
 
   command->Run();
 

@@ -68,7 +68,7 @@ class AlertManeuverRequestTest
 
 TEST_F(AlertManeuverRequestTest, Run_RequiredFieldsDoesNotExist_UNSUCCESS) {
   CommandPtr command(CreateCommand<AlertManeuverRequest>());
-  EXPECT_CALL(app_mngr_, application(_)).Times(0);
+  EXPECT_CALL(mock_app_manager_, application(_)).Times(0);
   MessageSharedPtr result_msg(CatchMobileCommandResult(CallRun(*command)));
   EXPECT_EQ(mobile_apis::Result::INVALID_DATA,
             static_cast<mobile_apis::Result::eType>(
@@ -83,7 +83,7 @@ TEST_F(AlertManeuverRequestTest, Run_ApplicationIsNotRegistered_UNSUCCESS) {
 
   CommandPtr command(CreateCommand<AlertManeuverRequest>(msg));
 
-  ON_CALL(app_mngr_, application(_))
+  ON_CALL(mock_app_manager_, application(_))
       .WillByDefault(Return(ApplicationSharedPtr()));
 
   MessageSharedPtr result_msg(CatchMobileCommandResult(CallRun(*command)));
@@ -100,9 +100,9 @@ TEST_F(AlertManeuverRequestTest, Run_ProcessingResult_UNSUCCESS) {
   CommandPtr command(CreateCommand<AlertManeuverRequest>(msg));
 
   MockAppPtr app(CreateMockApp());
-  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
+  ON_CALL(mock_app_manager_, application(_)).WillByDefault(Return(app));
 
-  ON_CALL(app_mngr_, GetPolicyHandler())
+  ON_CALL(mock_app_manager_, GetPolicyHandler())
       .WillByDefault(
           ReturnRef(*static_cast<policy::PolicyHandlerInterface*>(NULL)));
 
@@ -135,7 +135,7 @@ TEST_F(AlertManeuverRequestTest, Run_IsWhiteSpaceExist_UNSUCCESS) {
   CommandPtr command(CreateCommand<AlertManeuverRequest>(msg));
 
   MockAppPtr app(CreateMockApp());
-  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
+  ON_CALL(mock_app_manager_, application(_)).WillByDefault(Return(app));
 
   MessageSharedPtr result_msg(CatchMobileCommandResult(CallRun(*command)));
   EXPECT_EQ(mobile_apis::Result::INVALID_DATA,
@@ -151,9 +151,9 @@ TEST_F(AlertManeuverRequestTest, Run_ProcessingResult_SUCCESS) {
   CommandPtr command(CreateCommand<AlertManeuverRequest>(msg));
 
   MockAppPtr app(CreateMockApp());
-  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
+  ON_CALL(mock_app_manager_, application(_)).WillByDefault(Return(app));
 
-  ON_CALL(app_mngr_, GetPolicyHandler())
+  ON_CALL(mock_app_manager_, GetPolicyHandler())
       .WillByDefault(
           ReturnRef(*static_cast<policy::PolicyHandlerInterface*>(NULL)));
 

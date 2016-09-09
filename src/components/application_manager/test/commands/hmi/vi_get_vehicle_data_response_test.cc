@@ -90,12 +90,12 @@ TEST_F(VIGetVehicleDataResponseTest, RUN_SUCCESS) {
   event.set_smart_object(*command_msg);
 
   policy_test::MockPolicyHandlerInterface policy_handler;
-  EXPECT_CALL(app_mngr_, GetPolicyHandler())
+  EXPECT_CALL(mock_app_manager_, GetPolicyHandler())
       .WillOnce(ReturnRef(policy_handler));
   EXPECT_CALL(policy_handler, OnVehicleDataUpdated(*command_msg));
 
   MockEventDispatcher mock_event_dispatcher;
-  EXPECT_CALL(app_mngr_, event_dispatcher())
+  EXPECT_CALL(mock_app_manager_, event_dispatcher())
       .WillOnce(ReturnRef(mock_event_dispatcher));
   EXPECT_CALL(mock_event_dispatcher, raise_event(_));
 
@@ -141,7 +141,7 @@ TEST_F(VIGetVehicleDataResponseTest, ErrorResponse_SUCCESS) {
   event.set_smart_object(result);
 
   MockEventDispatcher mock_event_dispatcher;
-  EXPECT_CALL(app_mngr_, event_dispatcher())
+  EXPECT_CALL(mock_app_manager_, event_dispatcher())
       .WillOnce(ReturnRef(mock_event_dispatcher));
   EXPECT_CALL(mock_event_dispatcher, raise_event(_));
 

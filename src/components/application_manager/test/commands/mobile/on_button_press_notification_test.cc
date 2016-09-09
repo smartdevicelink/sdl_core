@@ -88,12 +88,12 @@ class OnButtonPressNotificationTest
     subscribedApps.push_back(subscribed);
 
     if (is_app_id_valid) {
-      EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(mock_app));
+      EXPECT_CALL(mock_app_manager_, application(_)).WillOnce(Return(mock_app));
     } else {
-      EXPECT_CALL(app_mngr_, application(_))
+      EXPECT_CALL(mock_app_manager_, application(_))
           .WillOnce(Return(ApplicationSharedPtr()));
     }
-    EXPECT_CALL(app_mngr_, applications_by_button(_))
+    EXPECT_CALL(mock_app_manager_, applications_by_button(_))
         .WillOnce(Return(subscribedApps));
     EXPECT_CALL(*subscribed, hmi_level()).WillRepeatedly(Return(app_hmi_level));
     EXPECT_CALL(*subscribed, app_id()).WillRepeatedly(Return(app_id1));
@@ -103,7 +103,7 @@ class OnButtonPressNotificationTest
     }
 
     if (is_send_message_expected) {
-      EXPECT_CALL(app_mngr_, SendMessageToMobile(_, _));
+      EXPECT_CALL(mock_app_manager_, SendMessageToMobile(_, _));
     }
 
     command_->Run();
