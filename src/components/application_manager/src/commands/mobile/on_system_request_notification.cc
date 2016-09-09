@@ -149,7 +149,7 @@ void OnSystemRequestNotification::AddHeader(BinaryMessage& message) const {
       ","
       "\"InstanceFollowRedirects\": false,"
       "\"charset\": \"utf-8\","
-      "\"Content_-Length\": " +
+      "\"Content-Length\": " +
       std::string(size_str) +
       "},"
       "\"body\": \"" +
