@@ -32,6 +32,7 @@
 
 #include "vr_module/socket_channel.h"
 
+#include "functional_module/settings.h"
 #include "net/connected_socket_impl.h"
 #include "utils/logger.h"
 #include "utils/macro.h"
@@ -42,7 +43,12 @@ namespace vr_module {
 CREATE_LOGGERPTR_GLOBAL(logger_, "VRModule")
 
 SocketChannel::SocketChannel()
-    : socket_(0) {
+    : socket_(0),
+      address_("127.0.0.1"),
+      port_(5431) {
+  functional_modules::Settings settings;
+  settings.ReadParameter("Voice recognition module", "address", &address_);
+  settings.ReadParameter("Voice recognition module", "port", &port_);
 }
 
 SocketChannel::~SocketChannel() {
@@ -54,9 +60,7 @@ SocketChannel::~SocketChannel() {
 
 bool SocketChannel::Start() {
   LOG4CXX_AUTO_TRACE(logger_);
-  std::string address = "127.0.0.1";
-  UInt32 port = 5431;
-  socket_ = net::ConnectedSocketImpl::ConnectToHost(address.c_str(), port);
+  socket_ = net::ConnectedSocketImpl::ConnectToHost(address_.c_str(), port_);
   return false;
 }
 
