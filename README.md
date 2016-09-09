@@ -48,7 +48,7 @@ Once SDL Core is compiled and installed you can start it from the executable in 
 
 ```
 %cd bin/
-%./smartDeviceLinkCore
+%LD_LIBRARY_PATH=. ./smartDeviceLinkCore
 ```
 
 ## Start WEB HMI
