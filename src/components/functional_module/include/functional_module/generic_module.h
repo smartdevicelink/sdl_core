@@ -39,6 +39,7 @@
 #include "functional_module/function_ids.h"
 #include "utils/shared_ptr.h"
 #include "application_manager/service.h"
+#include "protocol/raw_message.h"
 
 namespace functional_modules {
 
@@ -57,6 +58,13 @@ enum ServiceState {
   HMI_ADAPTER_INITIALIZED
 };
 
+enum ServiceType {
+  RPC = 0,
+  VR,
+  NAVI,
+  CONNECTION_MANAGER
+};
+
 typedef std::string HMIFunctionID;
 
 struct PluginInfo {
@@ -64,6 +72,7 @@ struct PluginInfo {
   int version;
   std::deque<MobileFunctionID> mobile_function_list;
   std::deque<HMIFunctionID> hmi_function_list;
+  ServiceType service_type;
 };
 
 class GenericModule {
@@ -74,7 +83,7 @@ class GenericModule {
   ModuleID GetModuleID() const {
     return kModuleId_;
   }
-  virtual PluginInfo GetPluginInfo() const = 0;
+  virtual const PluginInfo& GetPluginInfo() const = 0;
 
   virtual void set_service(application_manager::ServicePtr service);
 
@@ -88,6 +97,26 @@ class GenericModule {
   virtual ProcessResult ProcessHMIMessage(
     application_manager::MessagePtr msg) = 0;
   virtual void OnServiceStateChanged(ServiceState state);
+
+  /**
+   * @brief Function for processing remote services messages
+   * @param message Message with supporting params received
+   * @return processing result
+   */
+  virtual void ProcessMessageFromRemoteMobileService(
+      const protocol_handler::RawMessagePtr message);
+
+  /**
+   * @brief Function for processing remote service starting
+   * @param connection_key Key of started session.
+   */
+  virtual void OnServiceStartedCallback(const uint32_t& connection_key);
+
+  /**
+   * @brief Function for processing remote service stoping
+   * @param connection_key Key of started session.
+   */
+  virtual void OnServiceEndedCallback(const uint32_t& connection_key);
 
   /**
     * @brief Adds pointer to observer of module to be notified about

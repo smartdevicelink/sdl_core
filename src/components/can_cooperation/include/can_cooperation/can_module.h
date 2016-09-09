@@ -57,7 +57,7 @@ class CANModule : public functional_modules::GenericModule,
   public threads::MessageLoopThread <std::queue<MessageFromCAN >>::Handler,
   public threads::MessageLoopThread <std::queue<MessageFromMobile >>::Handler {
  public:
-  functional_modules::PluginInfo GetPluginInfo() const;
+  const functional_modules::PluginInfo& GetPluginInfo() const;
   virtual functional_modules::ProcessResult ProcessMessage(
     application_manager::MessagePtr msg);
   virtual functional_modules::ProcessResult ProcessHMIMessage(

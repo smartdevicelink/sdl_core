@@ -33,10 +33,13 @@
 #include "vr_module/vr_module.h"
 
 #include "utils/logger.h"
+#include "utils/scope_guard.h"
 #include "vr_module/commands/factory.h"
 #include "vr_module/event_engine/event_dispatcher.h"
 #include "vr_module/hmi_event.h"
 #include "vr_module/mobile_event.h"
+//#include "protocol/common.h"
+#include "functional_module/plugin_manager.h"
 
 namespace vr_module {
 
@@ -57,9 +60,11 @@ VRModule::VRModule()
       factory_(commands::Factory(this)),
       supported_(false),
       active_service_(0),
-      default_service_(0) {
+      default_service_(0),
+      messages_from_mobile_service_("IncomingFromMobileRemoteService", this) {
   plugin_info_.name = "VRModulePlugin";
   plugin_info_.version = 1;
+  plugin_info_.service_type = functional_modules::ServiceType::VR;
   SubscribeToRpcMessages();
 }
 
@@ -111,10 +116,34 @@ void VRModule::EmitEvent(const vr_mobile_api::ServiceMessage& message) {
       vr_mobile_api::RPCName>::instance()->raise_event(event);
 }
 
-bool VRModule::SendToMobile(const vr_mobile_api::ServiceMessage& message) {
+bool VRModule::SendToMobile(
+    const vr_mobile_api::ServiceMessage& message) const {
   LOG4CXX_AUTO_TRACE(logger_);
-  // TODO(KKolodiy): should be implemented
-  return false;
+
+  uint32_t size = message.ByteSize();
+
+  uint8_t* data = new uint8_t[size];
+
+  utils::ScopeGuard data_guard = utils::MakeGuard(
+      utils::ArrayDeleter<uint8_t*>, data);
+  UNUSED(data_guard)
+
+  if (!message.SerializeToArray(data, size)) {
+    return false;
+  }
+
+  protocol_handler::RawMessagePtr messageToMobile =
+      new protocol_handler::RawMessage(active_service_,
+                                       protocol_handler::PROTOCOL_VERSION_2,
+                                       data, size,
+                                       protocol_handler::ServiceType::kVr);
+
+  // TODO(VS): GenericModule may contain pointer to PluginManager(can be fixed if
+  //           PluginManager will be redesigned from singleton)
+  functional_modules::PluginManager::instance()
+      ->SendMessageToRemoteMobileService(messageToMobile);
+
+  return true;
 }
 
 void VRModule::RunCommand(commands::CommandPtr command) {
@@ -133,7 +162,7 @@ void VRModule::SubscribeToRpcMessages() {
   // TODO(VSemenyuk): Subscribe to rpc messages here
 }
 
-PluginInfo VRModule::GetPluginInfo() const {
+const PluginInfo& VRModule::GetPluginInfo() const {
   LOG4CXX_AUTO_TRACE(logger_);
   return plugin_info_;
 }
@@ -264,6 +293,45 @@ void VRModule::RegisterService(int32_t app_id) {
   }
   commands::CommandPtr command = factory_.Create(message);
   RunCommand(command);
+}
+
+void VRModule::Handle(protocol_handler::RawMessagePtr message) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  vr_mobile_api::ServiceMessage service_message;
+  if (service_message.ParseFromArray(
+      message->data(), message->payload_size())) {
+    OnReceived(service_message);
+  } else {
+    LOG4CXX_ERROR(logger_,
+                  "Wrong message received from remote mobile service.");
+    // TODO(VS): INVALID_DATA response must be sent
+  }
+}
+
+void VRModule::ProcessMessageFromRemoteMobileService(
+    const protocol_handler::RawMessagePtr message) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  messages_from_mobile_service_.PostMessage(message);
+}
+
+void VRModule::OnServiceStartedCallback(const uint32_t& connection_key) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  RegisterService(connection_key);
+}
+
+void VRModule::OnServiceEndedCallback(const uint32_t& connection_key) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if ((static_cast<int32_t>(connection_key)) == active_service_) {
+    DeactivateService();
+  }
+
+  if ((static_cast<int32_t>(connection_key)) == default_service_) {
+    ResetDefaultService();
+  }
+
+  // TODO(VSemenyuk): here should be implemented reaction on service stopping(need to notify HMI)
 }
 
 }  //  namespace vr_module

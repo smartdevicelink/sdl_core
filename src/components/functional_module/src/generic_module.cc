@@ -62,4 +62,17 @@ application_manager::ServicePtr GenericModule::service() {
   return service_;
 }
 
+void GenericModule::ProcessMessageFromRemoteMobileService(
+    const protocol_handler::RawMessagePtr message) {
+  DCHECK(false); // must be processed only in plugins for remote services
+}
+
+void GenericModule::OnServiceStartedCallback(const uint32_t& connection_key) {
+  DCHECK(false); // must be processed only in plugins for remote services
+}
+
+void GenericModule::OnServiceEndedCallback(const uint32_t& connection_key) {
+  DCHECK(false); // must be processed only in plugins for remote services
+}
+
 }  //  namespace functional_modules

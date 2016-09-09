@@ -62,15 +62,22 @@ const uint8_t SERVICE_TYPE_NAVI = 0x0B;
 const uint8_t SERVICE_TYPE_BULK = 0x0F;
 
 /**
-  * \brief Enum describing possible types of sessions: RPC for API messages,
-    Navi for video streaming, bulk for PutFile.
-  */
+ *\brief Constant: VR data type of session
+ */
+const uint8_t SERVICE_TYPE_VR = 0x10;
+
+/**
+ * \brief Enum describing possible types of sessions: RPC for API messages,
+   Navi for video streaming, bulk for PutFile.
+ */
+
 enum ServiceType {
   kControl =   SERVICE_TYPE_CONTROL,
   kRpc =       SERVICE_TYPE_RPC,
   kAudio =     SERVICE_TYPE_AUDIO,
   kMobileNav = SERVICE_TYPE_NAVI,
   kBulk =      SERVICE_TYPE_BULK,
+  kVr =        SERVICE_TYPE_VR,
   kInvalidServiceType
 };
 

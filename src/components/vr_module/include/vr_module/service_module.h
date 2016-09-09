@@ -81,7 +81,8 @@ class ServiceModule {
    * @param message is GPB message according with protocol
    * @return true if message was sent successful
    */
-  virtual bool SendToMobile(const vr_mobile_api::ServiceMessage& message) = 0;
+  virtual bool SendToMobile(
+      const vr_mobile_api::ServiceMessage& message) const = 0;
 
   /**
    * Marks the application to use as service

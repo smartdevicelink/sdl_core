@@ -36,22 +36,28 @@
 #include "functional_module/generic_module.h"
 #include "json/value.h"
 #include "utils/macro.h"
+#include "utils/threads/message_loop_thread.h"
 #include "vr_module/commands/factory_interface.h"
 #include "vr_module/request_controller.h"
 #include "vr_module/service_module.h"
 #include "vr_module/vr_proxy.h"
 #include "vr_module/vr_proxy_listener.h"
+#include "protocol/raw_message.h"
+
 
 namespace vr_module {
+
+typedef std::queue<protocol_handler::RawMessagePtr> ServiceMessageQueue;
 
 typedef Json::Value MessageFromMobile;
 
 class VRModule : public functional_modules::GenericModule,
-    public VRProxyListener, public ServiceModule {
+    public VRProxyListener, public ServiceModule,
+    public threads::MessageLoopThread<ServiceMessageQueue>::Handler {
  public:
   VRModule();
   ~VRModule();
-  virtual functional_modules::PluginInfo GetPluginInfo() const;
+  virtual const functional_modules::PluginInfo& GetPluginInfo() const;
   virtual functional_modules::ProcessResult ProcessHMIMessage(
       application_manager::MessagePtr msg);
 
@@ -91,13 +97,7 @@ class VRModule : public functional_modules::GenericModule,
                                commands::TimedCommand* command);
   virtual void UnregisterRequest(int32_t correlation_id);
   virtual bool SendToHmi(const vr_hmi_api::ServiceMessage& message);
-  virtual bool SendToMobile(const vr_mobile_api::ServiceMessage& message);
-
-  /**
-   * Registers service
-   * @param app_id unique application ID
-   */
-  void RegisterService(int32_t app_id);
+  virtual bool SendToMobile(const vr_mobile_api::ServiceMessage& message) const;
 
   virtual bool IsSupported() const {
     return supported_;
@@ -115,6 +115,12 @@ class VRModule : public functional_modules::GenericModule,
   static const functional_modules::ModuleID kModuleID = 405;
 
   /**
+   * Registers service
+   * @param app_id unique application ID
+   */
+  void RegisterService(int32_t app_id);
+
+  /**
    * @brief Subscribes plugin to mobie rpc messages
    */
   void SubscribeToRpcMessages();
@@ -129,6 +135,32 @@ class VRModule : public functional_modules::GenericModule,
   void EmitEvent(const vr_mobile_api::ServiceMessage& message);
   void RunCommand(commands::CommandPtr command);
 
+  /**
+   * Handles messages from queue from mobile remote service
+   * @param message received message
+   */
+  void Handle(protocol_handler::RawMessagePtr message);
+
+  /**
+   * @brief Function for processing remote services messages
+   * @param message Message with supporting params received
+   * @return processing result
+   */
+  virtual void ProcessMessageFromRemoteMobileService(
+      const protocol_handler::RawMessagePtr message);
+
+  /**
+   * @brief Function for processing remote service starting
+   * @param connection_key Key of started session.
+   */
+  virtual void OnServiceStartedCallback(const uint32_t& connection_key);
+
+  /**
+   * @brief Function for processing remote service stoping
+   * @param connection_key Key of started session.
+   */
+  virtual void OnServiceEndedCallback(const uint32_t& connection_key);
+
   functional_modules::PluginInfo plugin_info_;
 
   VRProxy proxy_;
@@ -137,6 +169,7 @@ class VRModule : public functional_modules::GenericModule,
   bool supported_;
   int32_t active_service_;
   int32_t default_service_;
+  threads::MessageLoopThread<ServiceMessageQueue> messages_from_mobile_service_;
 
   DISALLOW_COPY_AND_ASSIGN(VRModule);
 };
