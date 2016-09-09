@@ -95,6 +95,37 @@ TEST_F(ProcessDataTest, ExecuteNoParams) {
 
   const int32_t kHmiId = 1;
   const int32_t kMobileId = 2;
+  EXPECT_CALL(service, GetNextCorrelationID()).Times(1).WillOnce(
+      Return(kMobileId));
+  EXPECT_CALL(service, RegisterRequest(kMobileId, _)).Times(1);
+  vr_hmi_api::ServiceMessage input;
+  input.set_rpc(vr_hmi_api::PROCESS_DATA);
+  input.set_rpc_type(vr_hmi_api::REQUEST);
+  input.set_correlation_id(kHmiId);
+  ProcessData cmd(input, &service);
+
+  vr_hmi_api::ServiceMessage expected;
+  expected.set_rpc(vr_hmi_api::PROCESS_DATA);
+  expected.set_rpc_type(vr_hmi_api::RESPONSE);
+  expected.set_correlation_id(kHmiId);
+  vr_hmi_api::ProcessDataResponse hmi_response;
+  hmi_response.set_result(vr_hmi_api::INVALID_DATA);
+  std::string hmi_params;
+  hmi_response.SerializeToString(&hmi_params);
+  expected.set_params(hmi_params);
+  EXPECT_CALL(service, HasActivatedService()).Times(1).WillOnce(Return(true));
+  EXPECT_CALL(service, SendToHmi(ServiceMessageEq(expected))).Times(1)
+      .WillOnce(Return(true));
+  EXPECT_CALL(service, SendToMobile(_)).Times(0);
+  EXPECT_CALL(service, UnregisterRequest(kMobileId)).Times(1);
+  EXPECT_FALSE(cmd.Execute());
+}
+
+TEST_F(ProcessDataTest, ExecuteNoService) {
+  MockServiceModule service;
+
+  const int32_t kHmiId = 1;
+  const int32_t kMobileId = 2;
   const std::string kRaw = "0123456789";
   EXPECT_CALL(service, GetNextCorrelationID()).Times(1).WillOnce(
       Return(kMobileId));
@@ -120,37 +151,6 @@ TEST_F(ProcessDataTest, ExecuteNoParams) {
   hmi_response.SerializeToString(&hmi_params);
   expected.set_params(hmi_params);
   EXPECT_CALL(service, HasActivatedService()).Times(1).WillOnce(Return(false));
-  EXPECT_CALL(service, SendToHmi(ServiceMessageEq(expected))).Times(1)
-      .WillOnce(Return(true));
-  EXPECT_CALL(service, SendToMobile(_)).Times(0);
-  EXPECT_CALL(service, UnregisterRequest(kMobileId)).Times(1);
-  EXPECT_FALSE(cmd.Execute());
-}
-
-TEST_F(ProcessDataTest, ExecuteNoService) {
-  MockServiceModule service;
-
-  const int32_t kHmiId = 1;
-  const int32_t kMobileId = 2;
-  EXPECT_CALL(service, GetNextCorrelationID()).Times(1).WillOnce(
-      Return(kMobileId));
-  EXPECT_CALL(service, RegisterRequest(kMobileId, _)).Times(1);
-  vr_hmi_api::ServiceMessage input;
-  input.set_rpc(vr_hmi_api::PROCESS_DATA);
-  input.set_rpc_type(vr_hmi_api::REQUEST);
-  input.set_correlation_id(kHmiId);
-  ProcessData cmd(input, &service);
-
-  vr_hmi_api::ServiceMessage expected;
-  expected.set_rpc(vr_hmi_api::PROCESS_DATA);
-  expected.set_rpc_type(vr_hmi_api::RESPONSE);
-  expected.set_correlation_id(kHmiId);
-  vr_hmi_api::ProcessDataResponse hmi_response;
-  hmi_response.set_result(vr_hmi_api::INVALID_DATA);
-  std::string hmi_params;
-  hmi_response.SerializeToString(&hmi_params);
-  expected.set_params(hmi_params);
-  EXPECT_CALL(service, HasActivatedService()).Times(1).WillOnce(Return(true));
   EXPECT_CALL(service, SendToHmi(ServiceMessageEq(expected))).Times(1)
       .WillOnce(Return(true));
   EXPECT_CALL(service, SendToMobile(_)).Times(0);
