@@ -53,6 +53,18 @@
 #include "mobile/unsubscribe_button_response.h"
 #include "mobile/unsubscribe_way_points_response.h"
 #include "mobile/update_turn_list_response.h"
+#include "mobile/slider_response.h"
+#include "mobile/speak_response.h"
+#include "mobile/subscribe_vehicle_data_response.h"
+#include "mobile/subscribe_way_points_response.h"
+#include "mobile/system_response.h"
+#include "mobile/get_way_points_response.h"
+#include "mobile/perform_interaction_response.h"
+#include "mobile/perform_audio_pass_thru_response.h"
+#include "mobile/set_global_properties_response.h"
+#include "mobile/set_media_clock_timer_response.h"
+#include "mobile/show_constant_tbt_response.h"
+#include "mobile/show_response.h"
 
 namespace test {
 namespace components {
@@ -89,7 +101,20 @@ typedef Types<commands::ListFilesResponse,
               commands::UnregisterAppInterfaceResponse,
               commands::UnsubscribeWayPointsResponse,
               commands::UpdateTurnListResponse,
-              commands::UnsubscribeButtonResponse> ResponseCommandsList;
+              commands::UnsubscribeButtonResponse,
+              commands::SliderResponse,
+              commands::SpeakResponse,
+              commands::SubscribeVehicleDataResponse,
+              commands::SubscribeWayPointsResponse,
+              commands::SystemResponse,
+              commands::GetWayPointsResponse,
+              commands::PerformInteractionResponse,
+              commands::PerformAudioPassThruResponse,
+              commands::SetGlobalPropertiesResponse,
+              commands::SetMediaClockTimerResponse,
+              commands::ShowConstantTBTResponse,
+              commands::ShowResponse,
+              commands::SystemResponse> ResponseCommandsList;
 TYPED_TEST_CASE(MobileResponseCommandsTest, ResponseCommandsList);
 
 TYPED_TEST(MobileResponseCommandsTest, Run_SendResponseToMobile_SUCCESS) {
