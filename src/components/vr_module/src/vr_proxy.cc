@@ -153,7 +153,7 @@ bool VRProxy::Send(const vr_hmi_api::ServiceMessage& message) {
     LOG4CXX_ERROR(logger_, "Connection to HMI(Applink) is not established");
     return false;
   }
-  return channel_->Send(data);
+  return channel_->Send(buffer);
 }
 
 void VRProxy::Receive() {

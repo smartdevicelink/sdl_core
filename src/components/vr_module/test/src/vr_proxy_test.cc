@@ -37,7 +37,17 @@
 #include "mock_channel.h"
 
 using ::testing::_;
+using ::testing::DoAll;
 using ::testing::Return;
+using ::testing::SetArgPointee;
+
+MATCHER_P(ServiceMessageEq, expected, "") {
+  return arg.rpc() == expected.rpc()
+      && arg.rpc_type() == expected.rpc_type()
+      && arg.correlation_id() == expected.correlation_id()
+      && (arg.has_params() == expected.has_params()
+          || arg.params() == expected.params());
+}
 
 namespace vr_module {
 
@@ -53,6 +63,45 @@ TEST_F(VRProxyTest, StartStop) {
   EXPECT_CALL(*channel, Receive(_, _)).WillRepeatedly(Return(false));
   EXPECT_CALL(*channel, Stop()).Times(1).WillOnce(Return(true));
   VRProxy proxy(&listener, channel);
+  sleep(1);
+}
+
+TEST_F(VRProxyTest, Send) {
+  MockVRProxyListener listener;
+  MockChannel *channel = new MockChannel();
+  EXPECT_CALL(*channel, Start()).Times(1).WillOnce(Return(false));
+  VRProxy proxy(&listener, channel);
+
+  unsigned char value[] = { 0x6, 0, 0, 0, 0x8, 0, 0x10, 0x2, 0x18, 0x1 };
+  std::string expected(value, value + 10);
+  vr_hmi_api::ServiceMessage message;
+  message.set_rpc(vr_hmi_api::ON_REGISTER);
+  message.set_rpc_type(vr_hmi_api::NOTIFICATION);
+  message.set_correlation_id(1);
+  EXPECT_CALL(*channel, Send(expected)).Times(1).WillOnce(Return(true));
+  EXPECT_TRUE(proxy.Send(message));
+}
+
+TEST_F(VRProxyTest, Receive) {
+  MockVRProxyListener listener;
+  MockChannel *channel = new MockChannel();
+  EXPECT_CALL(*channel, Start()).Times(1).WillOnce(Return(false));
+  VRProxy proxy(&listener, channel);
+
+  unsigned char size[] = { 0x6, 0, 0, 0 };
+  std::string in_size(size, size + 4);
+  unsigned char data[] = { 0x8, 0, 0x10, 0x2, 0x18, 0x1 };
+  std::string input(data, data + 6);
+  vr_hmi_api::ServiceMessage message;
+  message.set_rpc(vr_hmi_api::ON_REGISTER);
+  message.set_rpc_type(vr_hmi_api::NOTIFICATION);
+  message.set_correlation_id(1);
+  EXPECT_CALL(*channel, Receive(4, _)).Times(1).WillOnce(
+      DoAll(SetArgPointee<1>(in_size), Return(true)));
+  EXPECT_CALL(*channel, Receive(6, _)).Times(1).WillOnce(
+        DoAll(SetArgPointee<1>(input), Return(true)));
+  EXPECT_CALL(listener, OnReceived(_)).Times(1);
+  proxy.Receive();
   sleep(1);
 }
 

@@ -48,6 +48,7 @@ SET(RPATH_DIRECTORIES
   /usr/local/lib
   /usr/local
   ${CMAKE_BINARY_DIR}/src/components/utils
+  ${GPB_LIBS_DIRECTORY}
 )
 
 SET(CMAKE_INSTALL_RPATH "${RPATH_DIRECTORIES}")
