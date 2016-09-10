@@ -41,9 +41,15 @@ set(PATHS
   ${CMAKE_CURRENT_SOURCE_DIR}/include
   ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
+
+set(LIBRARIES
+  utils
+)
+
 collect_sources(SOURCES "${PATHS}")
 
 add_library(resumption ${SOURCES} )
+target_link_libraries(resumption ${LIBRARIES})
 
 if(BUILD_TESTS)
   add_subdirectory(test)

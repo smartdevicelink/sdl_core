@@ -54,8 +54,10 @@ set(PATHS
 set(EXCLUDE_PATHS)
 
 set(LIBRARIES
+  MOBILE_API
   protocol
   application_manager
+  utils
 )
 
 if(EXTENDED_MEDIA_MODE)

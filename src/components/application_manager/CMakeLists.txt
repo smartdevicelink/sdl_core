@@ -107,6 +107,7 @@ set(LIBRARIES
   formatters
   dbms
   ${SQLITE3_LIBRARIES}
+  utils
 )
 
 get_os(OS)
