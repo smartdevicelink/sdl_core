@@ -81,7 +81,8 @@ class ServiceModule {
    * @param message is GPB message according with protocol
    * @return true if message was sent successful
    */
-  virtual bool SendToMobile(const vr_mobile_api::ServiceMessage& message) = 0;
+  virtual bool SendToMobile(
+      const vr_mobile_api::ServiceMessage& message) const = 0;
 
   /**
    * Marks the application to use as service
@@ -95,6 +96,12 @@ class ServiceModule {
   virtual void DeactivateService() = 0;
 
   /**
+   * Checks if one of the services is activated
+   * @return true if one of the services is activated
+   */
+  virtual bool HasActivatedService() const = 0;
+
+  /**
    * Sets default service
    * @param app_id unique application ID
    */
@@ -104,6 +111,13 @@ class ServiceModule {
    * Resets default service
    */
   virtual void ResetDefaultService() = 0;
+
+  /**
+   * Checks if service is default
+   * @param app_id unique applicationID
+   * @return true if service is default
+   */
+  virtual bool IsDefaultService(int32_t app_id) const = 0;
 
   /**
    * Checks service is supported

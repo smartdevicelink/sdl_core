@@ -223,6 +223,10 @@ bool LifeCycle::StartComponents() {
   plugin_manager_->SetServiceHandler(core_service_);
   plugin_manager_->LoadPlugins(profile::Profile::instance()->plugins_folder());
 
+  protocol_handler_->set_remote_service_message_observer(plugin_manager_);
+  connection_handler_->set_remote_services_observer(plugin_manager_);
+  plugin_manager_->set_protocol_handler(protocol_handler_);
+
   if (!InitMessageSystem()) {
     LOG4CXX_INFO(logger_, "InitMessageBroker failed");
     return false;

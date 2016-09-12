@@ -72,6 +72,7 @@ CANModule::CANModule()
   can_connection_->set_observer(this);
   plugin_info_.name = "ReverseSDLPlugin";
   plugin_info_.version = 1;
+  plugin_info_.service_type = functional_modules::ServiceType::RPC;
   SubscribeOnFunctions();
 }
 
@@ -118,7 +119,7 @@ CANModule::~CANModule() {
   RemoveAppExtensions();
 }
 
-functional_modules::PluginInfo CANModule::GetPluginInfo() const {
+const functional_modules::PluginInfo& CANModule::GetPluginInfo() const {
   return plugin_info_;
 }
 

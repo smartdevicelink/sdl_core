@@ -38,12 +38,20 @@
 #include "functional_module/generic_module.h"
 #include "application_manager/service.h"
 #include "application_manager/message.h"
+#include "protocol_handler/remote_services_message_observer.h"
+#include "connection_handler/remote_services_observer.h"
 #include "utils/singleton.h"
+
+namespace protocol_handler {
+  class ProtocolHandler;
+}  // namespace protocol_handler
 
 namespace functional_modules {
 
 class PluginManager : public utils::Singleton<PluginManager>,
-  public ModuleObserver {
+  public ModuleObserver,
+  public protocol_handler::RemoteServicesMessageObserver,
+  public connection_handler::RemoteServicesObserver{
  public:
   typedef std::map<ModuleID, ModulePtr> Modules;
   int LoadPlugins(const std::string& plugin_path);
@@ -105,14 +113,55 @@ class PluginManager : public utils::Singleton<PluginManager>,
    */
   void OnDeviceRemoved(const connection_handler::DeviceHandle& device);
 
+  /**
+   * @brief RemoteServiceMessageObserver interface realization
+   */
+  virtual bool OnMessageReceived(
+      const protocol_handler::RawMessagePtr message) const;
+
+  /**
+   * @brief RemoteServicesObserver interface realization
+   */
+  virtual bool OnServiceStartedCallback(
+      const uint32_t& connection_key,
+      const protocol_handler::ServiceType& type) const;
+
+  /**
+   * @brief RemoteServicesObserver interface realization
+   */
+  virtual void OnServiceEndedCallback(
+      const uint32_t& connection_key,
+      const protocol_handler::ServiceType& type) const ;
+
+  /**
+   * @brief Sends message to app remote service
+   * @param message that will be sent through ProtcolHandler
+   */
+  virtual void SendMessageToRemoteMobileService(
+       const protocol_handler::RawMessagePtr message) const ;
+
+  /**
+   * @brief Sets pointer to ProtocolHandler
+   * @param protocol_handler - pointer that will be used for sending message to
+   *                           mobile through remote service
+   */
+  void set_protocol_handler(
+      protocol_handler::ProtocolHandler* protocol_handler);
+
  private:
   PluginManager();
   ~PluginManager();
+
+  ModulePtr FindPluginForSpecifiedService(
+      const protocol_handler::ServiceType& type) const;
+
   Modules plugins_;
   std::map<ModuleID, void*> dlls_;
   std::map<MobileFunctionID, ModulePtr> mobile_subscribers_;
   std::map<HMIFunctionID, ModulePtr> hmi_subscribers_;
+  std::map<ServiceType, ModulePtr> remote_services_subscribers_;
   application_manager::ServicePtr service_;
+  protocol_handler::ProtocolHandler* protocol_handler_;
 
   friend class PluginManagerTest;
   FRIEND_BASE_SINGLETON_CLASS(PluginManager);

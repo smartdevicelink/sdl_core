@@ -62,6 +62,12 @@ ProcessData::~ProcessData() {
 
 bool ProcessData::Execute() {
   LOG4CXX_AUTO_TRACE(logger_);
+  if (!module_->HasActivatedService()) {
+    LOG4CXX_ERROR(logger_, "No active service");
+    SendResponse(vr_hmi_api::REJECTED);
+    module_->UnregisterRequest(request_.correlation_id());
+    return false;
+  }
   vr_hmi_api::ProcessDataRequest params;
   if (message_.has_params() && params.ParseFromString(message_.params())) {
     vr_mobile_api::ProcessDataRequest mobile_request;

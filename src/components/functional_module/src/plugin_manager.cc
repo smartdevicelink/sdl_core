@@ -37,6 +37,7 @@
 #include "utils/file_system.h"
 #include "utils/logger.h"
 #include "json/json.h"
+#include "protocol_handler/protocol_handler.h"
 
 namespace functional_modules {
 
@@ -45,9 +46,12 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "PluginManager")
 typedef std::map<ModuleID, ModulePtr>::iterator PluginsIterator;
 typedef std::map<MobileFunctionID, ModulePtr>::iterator PluginFunctionsIterator;
 typedef std::map<HMIFunctionID, ModulePtr>::iterator PluginHMIFunctionsIterator;
+typedef std::map<ServiceType, ModulePtr>::const_iterator
+    PluginRemoteServicePluginIterator;
 
 PluginManager::PluginManager()
-  : service_() {
+  : service_(),
+    protocol_handler_(0) {
   LOG4CXX_DEBUG(logger_, "Creating plugin mgr");
 }
 
@@ -55,6 +59,7 @@ PluginManager::~PluginManager() {
   // TODO(PV): unsubscribe plugins from functions
   mobile_subscribers_.clear();
   hmi_subscribers_.clear();
+  remote_services_subscribers_.clear();
   UnloadPlugins();
 }
 
@@ -117,6 +122,12 @@ int PluginManager::LoadPlugins(const std::string& plugin_path) {
       }
       module->set_service(service_);
       module->AddObserver(this);
+
+      if (ServiceType::VR == module->GetPluginInfo().service_type) {
+        remote_services_subscribers_.insert(
+            std::pair<ServiceType, ModulePtr>(
+                module->GetPluginInfo().service_type, module));
+      }
     }
   }
   return plugins_.size();
@@ -352,6 +363,77 @@ void PluginManager::OnDeviceRemoved(
     const connection_handler::DeviceHandle& device) {
   LOG4CXX_AUTO_TRACE(logger_);
   std::for_each(plugins_.begin(), plugins_.end(), HandleDeviceRemoved(device));
+}
+
+ModulePtr PluginManager::FindPluginForSpecifiedService(
+    const protocol_handler::ServiceType& type) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  PluginRemoteServicePluginIterator it = remote_services_subscribers_.end();
+
+  if (type == protocol_handler::ServiceType::kVr) {
+    it = remote_services_subscribers_.find(ServiceType::VR);
+  }
+
+  if (remote_services_subscribers_.end() != it) {
+    return it->second;
+  } else {
+    return 0;
+  }
+}
+
+bool PluginManager::OnMessageReceived(
+    const protocol_handler::RawMessagePtr message) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  ModulePtr ptr = FindPluginForSpecifiedService(message->service_type());
+
+  if (ptr) {
+    ptr->ProcessMessageFromRemoteMobileService(message);
+    return true;
+  }
+
+  return false;
+}
+
+bool PluginManager::OnServiceStartedCallback(
+    const uint32_t& connection_key,
+    const protocol_handler::ServiceType& type) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  ModulePtr ptr = FindPluginForSpecifiedService(type);
+
+  if (ptr) {
+    ptr->OnServiceStartedCallback(connection_key);
+    return true;
+  }
+
+  return false;
+}
+
+void PluginManager::OnServiceEndedCallback(
+    const uint32_t& connection_key,
+    const protocol_handler::ServiceType& type) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  ModulePtr ptr = FindPluginForSpecifiedService(type);
+
+  if (ptr) {
+    ptr->OnServiceEndedCallback(connection_key);
+  }
+}
+
+void PluginManager::SendMessageToRemoteMobileService(
+    const protocol_handler::RawMessagePtr message) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (protocol_handler_) {
+    protocol_handler_->SendMessageToMobileApp(message, false);
+  }
+}
+
+void PluginManager::set_protocol_handler(
+  protocol_handler::ProtocolHandler* protocol_handler) {
+  protocol_handler_ = protocol_handler;
 }
 
 }  //  namespace functional_modules

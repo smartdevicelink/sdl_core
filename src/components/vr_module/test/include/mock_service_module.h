@@ -54,10 +54,14 @@ class MockServiceModule : public ServiceModule {
       void(int32_t app_id));
   MOCK_METHOD0(DeactivateService,
       void());
+  MOCK_CONST_METHOD0(HasActivatedService,
+      bool());
   MOCK_METHOD1(SetDefaultService,
       void(int32_t app_id));
   MOCK_METHOD0(ResetDefaultService,
       void());
+  MOCK_CONST_METHOD1(IsDefaultService,
+      bool(int32_t app_id));
   MOCK_CONST_METHOD0(IsSupported,
       bool());
   MOCK_METHOD0(EnableSupport,

@@ -46,6 +46,7 @@
 #include "connection_handler/connection.h"
 #include "connection_handler/devices_discovery_starter.h"
 #include "connection_handler/connection_handler.h"
+#include "connection_handler/remote_services_observer.h"
 #include "utils/logger.h"
 #include "utils/macro.h"
 #include "utils/lock.h"
@@ -82,6 +83,13 @@ class ConnectionHandlerImpl : public ConnectionHandler,
    */
   virtual void set_connection_handler_observer(
     ConnectionHandlerObserver *observer);
+
+  /**
+   * Sets pointer for processing mobile remote services
+   * @param observer Pointer to observer
+   */
+  virtual void set_remote_services_observer(
+      RemoteServicesObserver* observer);
 
   /**
     * \brief Sets pointer to TransportManager.
@@ -424,6 +432,8 @@ class ConnectionHandlerImpl : public ConnectionHandler,
    * \brief Pointer to observer
    */
   ConnectionHandlerObserver *connection_handler_observer_;
+
+  RemoteServicesObserver* remote_services_observer_;
 
   /**
    * \brief Pointer to TransportManager

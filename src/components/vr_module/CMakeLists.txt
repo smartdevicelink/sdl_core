@@ -28,6 +28,8 @@ include_directories (
   ../functional_module/include/
   ../application_manager/include
   ../connection_handler/include/
+  ../protocol/include/
+  ../protocol_handler/include/
   ${LOG4CXX_INCLUDE_DIRECTORY}
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${CMAKE_BINARY_DIR}/src/components/
