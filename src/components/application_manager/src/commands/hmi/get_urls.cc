@@ -93,6 +93,7 @@ void GetUrls::ProcessPolicyServiceURLs(const policy::EndpointUrls& endpoints) {
 
   if (!app_id_to_send_to) {
     SDL_ERROR("There are no available applications for processing.");
+    application_manager_.ManageHMICommand(message_);
     return;
   }
 
