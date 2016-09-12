@@ -238,6 +238,11 @@ void VRModule::DeactivateService() {
   active_service_ = 0;
 }
 
+bool VRModule::HasActivatedService() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return active_service_ != 0;
+}
+
 void VRModule::SetDefaultService(int32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   default_service_ = app_id;
@@ -248,16 +253,17 @@ void VRModule::ResetDefaultService() {
   default_service_ = 0;
 }
 
+bool VRModule::IsDefaultService(int32_t app_id) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return default_service_ == app_id;
+}
+
 void VRModule::RegisterService(int32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   vr_hmi_api::ServiceMessage message;
   message.set_rpc(vr_hmi_api::ON_REGISTER);
   vr_hmi_api::OnRegisterServiceNotification notification;
   notification.set_appid(app_id);
-  bool is_default = app_id == default_service_;
-  if (is_default) {
-    notification.set_default_(is_default);
-  }
   std::string params;
   if (notification.SerializeToString(&params)) {
     message.set_params(params);

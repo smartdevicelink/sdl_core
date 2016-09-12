@@ -57,12 +57,10 @@ TEST_F(OnRegisterServiceTest, Execute) {
   MockServiceModule service;
 
   const int32_t kId = 1;
-  EXPECT_CALL(service, GetNextCorrelationID()).Times(1).WillOnce(
-      Return(kId));
+  EXPECT_CALL(service, GetNextCorrelationID()).Times(1).WillOnce(Return(kId));
   vr_hmi_api::ServiceMessage input;
   input.set_rpc(vr_hmi_api::ON_REGISTER);
   vr_hmi_api::OnRegisterServiceNotification notification;
-  notification.set_default_(true);
   notification.set_appid(3);
   std::string params;
   notification.SerializeToString(&params);
@@ -79,8 +77,9 @@ TEST_F(OnRegisterServiceTest, Execute) {
   std::string hmi_params;
   hmi_notification.SerializeToString(&hmi_params);
   expected.set_params(hmi_params);
-  EXPECT_CALL(service, SendToHmi(ServiceMessageEq(expected))).Times(1)
-      .WillOnce(Return(true));
+  EXPECT_CALL(service, IsDefaultService(3)).Times(1).WillOnce(Return(true));
+  EXPECT_CALL(service, SendToHmi(ServiceMessageEq(expected))).Times(1).WillOnce(
+      Return(true));
   EXPECT_TRUE(cmd.Execute());
 }
 

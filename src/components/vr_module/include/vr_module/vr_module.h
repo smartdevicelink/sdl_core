@@ -85,8 +85,10 @@ class VRModule : public functional_modules::GenericModule,
 
   virtual void ActivateService(int32_t app_id);
   virtual void DeactivateService();
+  virtual bool HasActivatedService() const;
   virtual void SetDefaultService(int32_t app_id);
   virtual void ResetDefaultService();
+  virtual bool IsDefaultService(int32_t app_id) const;
   virtual void RegisterRequest(int32_t correlation_id,
                                commands::TimedCommand* command);
   virtual void UnregisterRequest(int32_t correlation_id);
