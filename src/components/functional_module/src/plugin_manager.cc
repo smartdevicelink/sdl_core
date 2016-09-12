@@ -389,6 +389,7 @@ bool PluginManager::OnMessageReceived(
 
   if (ptr) {
     ptr->ProcessMessageFromRemoteMobileService(message);
+    return true;
   }
 
   return false;

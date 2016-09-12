@@ -327,10 +327,6 @@ void VRModule::OnServiceEndedCallback(const uint32_t& connection_key) {
     DeactivateService();
   }
 
-  if ((static_cast<int32_t>(connection_key)) == default_service_) {
-    ResetDefaultService();
-  }
-
   // TODO(VSemenyuk): here should be implemented reaction on service stopping(need to notify HMI)
 }
 
