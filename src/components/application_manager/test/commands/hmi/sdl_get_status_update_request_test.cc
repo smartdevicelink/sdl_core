@@ -30,55 +30,51 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <stdint.h>
+
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
-#include "smart_objects/smart_object.h"
-#include "application_manager/smart_object_keys.h"
-#include "application_manager/commands/commands_test.h"
-#include "application_manager/commands/command.h"
-#include "application_manager/commands/hmi/sdl_activate_app_response.h"
-#include "application_manager/commands/hmi/sdl_get_list_of_permissions_response.h"
-#include "application_manager/commands/hmi/sdl_get_status_update_response.h"
-#include "application_manager/commands/hmi/sdl_get_user_friendly_message_response.h"
+#include "application_manager/commands/hmi/sdl_get_status_update_request.h"
+#include "application_manager/mock_application.h"
+#include "application_manager/policies/mock_policy_handler_interface.h"
+#include "commands/command_request_test.h"
 
 namespace test {
 namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
 
-using ::testing::_;
-using ::testing::Types;
-using ::testing::NotNull;
-using ::utils::SharedPtr;
+using application_manager::commands::MessageSharedPtr;
+using application_manager::commands::SDLGetStatusUpdateRequest;
+using test::components::policy_test::MockPolicyHandlerInterface;
+using testing::Return;
+using testing::ReturnRef;
 
-namespace commands = ::application_manager::commands;
-using commands::MessageSharedPtr;
+namespace {
+const uint32_t kCorrelationID = 1u;
+}  // namespace
 
-template <class Command>
-class ResponseToHMICommandsTest
-    : public CommandsTest<CommandsTestMocks::kIsNice> {
- public:
-  typedef Command CommandType;
-};
+namespace strings = ::application_manager::strings;
+namespace hmi_response = ::application_manager::hmi_response;
 
-typedef Types<commands::SDLActivateAppResponse,
-              commands::SDLGetListOfPermissionsResponse,
-              commands::SDLGetStatusUpdateResponse,
-              commands::SDLGetUserFriendlyMessageResponse> ResponseCommandsList;
+class SDLGetStatusUpdateRequestTest
+    : public CommandRequestTest<CommandsTestMocks::kIsNice> {};
 
-TYPED_TEST_CASE(ResponseToHMICommandsTest, ResponseCommandsList);
+TEST_F(SDLGetStatusUpdateRequestTest, Run_SUCCESS) {
+  MessageSharedPtr msg = CreateMessage();
+  (*msg)[strings::params][strings::correlation_id] = kCorrelationID;
 
-TYPED_TEST(ResponseToHMICommandsTest, Run_SendMessageToHMI_SUCCESS) {
-  typedef typename TestFixture::CommandType CommandType;
+  SharedPtr<SDLGetStatusUpdateRequest> command(
+      CreateCommand<SDLGetStatusUpdateRequest>(msg));
 
-  SharedPtr<CommandType> command = this->template CreateCommand<CommandType>();
-
-  EXPECT_CALL(this->mock_app_manager_, SendMessageToHMI(NotNull()));
+  MockPolicyHandlerInterface mock_policy_handler;
+  EXPECT_CALL(mock_app_manager_, GetPolicyHandler())
+      .WillOnce(ReturnRef(mock_policy_handler));
+  EXPECT_CALL(mock_policy_handler, OnGetStatusUpdate(kCorrelationID));
 
   command->Run();
 }
 
-}  // hmi_commands_test
+}  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components
 }  // namespace test

@@ -727,23 +727,23 @@ class MessageHelperTest : public ::testing::Test {
       const std::string& video_server_type,
       const std::string& server_path,
       const uint16_t port = 0) {
-    MockApplicationManagerSettings mock_app_mngr_settings;
+    MockApplicationManagerSettings mock_mock_app_manager_settings;
     EXPECT_CALL(mock_application_manager_, GetNextHMICorrelationID())
         .WillOnce(Return(kCorrelationId));
     EXPECT_CALL(mock_application_manager_, get_settings())
-        .WillRepeatedly(ReturnRef(mock_app_mngr_settings));
-    EXPECT_CALL(mock_app_mngr_settings, video_server_type())
+        .WillRepeatedly(ReturnRef(mock_mock_app_manager_settings));
+    EXPECT_CALL(mock_mock_app_manager_settings, video_server_type())
         .WillRepeatedly(ReturnRef(video_server_type));
     if (video_server_type == "socket") {
-      EXPECT_CALL(mock_app_mngr_settings, server_address())
+      EXPECT_CALL(mock_mock_app_manager_settings, server_address())
           .WillOnce(ReturnRef(server_path));
-      EXPECT_CALL(mock_app_mngr_settings, video_streaming_port())
+      EXPECT_CALL(mock_mock_app_manager_settings, video_streaming_port())
           .WillOnce(Return(port));
     } else if (video_server_type == "pipe") {
-      EXPECT_CALL(mock_app_mngr_settings, named_video_pipe_path())
+      EXPECT_CALL(mock_mock_app_manager_settings, named_video_pipe_path())
           .WillOnce(ReturnRef(server_path));
     } else {
-      EXPECT_CALL(mock_app_mngr_settings, video_stream_file())
+      EXPECT_CALL(mock_mock_app_manager_settings, video_stream_file())
           .WillOnce(ReturnRef(server_path));
     }
     smart_objects::SmartObjectSPtr result;
@@ -1371,13 +1371,13 @@ TEST_F(MessageHelperTest, VerifyImage_CurrentFilePath_SUCCESS) {
   EXPECT_TRUE(file_system::CreateFile(kRelativeFilePath));
   MockApplicationSharedPtr app_shared_mock =
       utils::MakeShared<MockApplication>();
-  MockApplicationManagerSettings app_mngr_settings;
+  MockApplicationManagerSettings mock_app_manager_settings;
   smart_objects::SmartObject image;
   image[strings::image_type] = mobile_apis::ImageType::DYNAMIC;
   image[strings::value] = kRelativeFilePath;
   EXPECT_CALL(mock_application_manager_, get_settings())
-      .WillOnce(ReturnRef(app_mngr_settings));
-  EXPECT_CALL(app_mngr_settings, app_storage_folder())
+      .WillOnce(ReturnRef(mock_app_manager_settings));
+  EXPECT_CALL(mock_app_manager_settings, app_storage_folder())
       .WillOnce(ReturnRef(kAppStorageFolder));
   mobile_apis::Result::eType result = MessageHelper::VerifyImage(
       image, app_shared_mock, mock_application_manager_);
@@ -1391,13 +1391,13 @@ TEST_F(MessageHelperTest, VerifyImage_AbsoluteFolderPath_InvalidData) {
   EXPECT_TRUE(file_system::CreateFile(kFile));
   MockApplicationSharedPtr app_shared_mock =
       utils::MakeShared<MockApplication>();
-  MockApplicationManagerSettings app_mngr_settings;
+  MockApplicationManagerSettings mock_app_manager_settings;
   smart_objects::SmartObject image;
   image[strings::image_type] = mobile_apis::ImageType::DYNAMIC;
   image[strings::value] = kFile;
   EXPECT_CALL(mock_application_manager_, get_settings())
-      .WillOnce(ReturnRef(app_mngr_settings));
-  EXPECT_CALL(app_mngr_settings, app_storage_folder())
+      .WillOnce(ReturnRef(mock_app_manager_settings));
+  EXPECT_CALL(mock_app_manager_settings, app_storage_folder())
       .WillOnce(ReturnRef(kFolder));
   mobile_apis::Result::eType result = MessageHelper::VerifyImage(
       image, app_shared_mock, mock_application_manager_);
@@ -1410,13 +1410,13 @@ TEST_F(MessageHelperTest, VerifyImage_EmptyFolder_InvalidData) {
   const std::string kEmptyFolder = "";
   MockApplicationSharedPtr app_shared_mock =
       utils::MakeShared<MockApplication>();
-  MockApplicationManagerSettings app_mngr_settings;
+  MockApplicationManagerSettings mock_app_manager_settings;
   smart_objects::SmartObject image;
   image[strings::image_type] = mobile_apis::ImageType::DYNAMIC;
   image[strings::value] = kFile;
   EXPECT_CALL(mock_application_manager_, get_settings())
-      .WillOnce(ReturnRef(app_mngr_settings));
-  EXPECT_CALL(app_mngr_settings, app_storage_folder())
+      .WillOnce(ReturnRef(mock_app_manager_settings));
+  EXPECT_CALL(mock_app_manager_settings, app_storage_folder())
       .WillOnce(ReturnRef(kEmptyFolder));
   mobile_apis::Result::eType result = MessageHelper::VerifyImage(
       image, app_shared_mock, mock_application_manager_);
@@ -2615,17 +2615,17 @@ TEST_F(MessageHelperTest,
 }
 
 TEST_F(MessageHelperTest, SendAudioStartStream_SUCCESS) {
-  MockApplicationManagerSettings app_mngr_settings;
+  MockApplicationManagerSettings mock_app_manager_settings;
 
   ON_CALL(mock_application_manager_, get_settings())
-      .WillByDefault(ReturnRef(app_mngr_settings));
+      .WillByDefault(ReturnRef(mock_app_manager_settings));
 
   const std::string kAudioServerType("test_audio_server_type");
-  ON_CALL(app_mngr_settings, audio_server_type())
+  ON_CALL(mock_app_manager_settings, audio_server_type())
       .WillByDefault(ReturnRef(kAudioServerType));
 
   const std::string kAudioStreamFile("test_audio_stream_file");
-  ON_CALL(app_mngr_settings, audio_stream_file())
+  ON_CALL(mock_app_manager_settings, audio_stream_file())
       .WillByDefault(ReturnRef(kAudioStreamFile));
 
   smart_objects::SmartObjectSPtr result;

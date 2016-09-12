@@ -100,6 +100,16 @@
 #include "hmi/vr_get_language_request.h"
 #include "hmi/vr_is_ready_request.h"
 #include "hmi/vr_perform_interaction_request.h"
+#include "hmi/allow_all_apps_request.h"
+#include "hmi/basic_communication_system_request.h"
+#include "hmi/button_get_capabilities_request.h"
+#include "hmi/allow_app_request.h"
+#include "hmi/navi_send_location_request.h"
+#include "hmi/navi_unsubscribe_way_points_request.h"
+#include "hmi/navi_update_turn_list_request.h"
+#include "hmi/navi_show_constant_tbt_request.h"
+#include "hmi/navi_stop_stream_request.h"
+#include "hmi/navi_subscribe_way_points_request.h"
 
 namespace test {
 namespace components {
@@ -187,17 +197,19 @@ typedef Types<commands::VIIsReadyRequest,
               commands::BasicCommunicationSystemRequest,
               commands::ButtonGetCapabilitiesRequest,
               commands::NaviSendLocationRequest,
+              commands::NaviUnSubscribeWayPointsRequest,
+              commands::NaviUpdateTurnListRequest,
               commands::NaviShowConstantTBTRequest,
               commands::NaviStopStreamRequest,
               commands::NaviSubscribeWayPointsRequest,
               commands::NaviAlertManeuverRequest,
               commands::AudioStopStreamRequest,
               commands::NaviGetWayPointsRequest,
-              commands::NaviIsReadyRequest,
-              commands::UIScrollableMessageRequest,
               commands::UISetGlobalPropertiesRequest> RequestCommandsList;
 
-typedef Types<commands::VRGetCapabilitiesRequest,
+typedef Types<commands::NaviIsReadyRequest,
+              commands::UIScrollableMessageRequest,
+              commands::VRGetCapabilitiesRequest,
               commands::UISetAppIconRequest,
               commands::UiSetDisplayLayoutRequest,
               commands::VRGetSupportedLanguagesRequest,

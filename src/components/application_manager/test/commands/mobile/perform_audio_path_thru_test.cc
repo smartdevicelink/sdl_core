@@ -148,10 +148,10 @@ TEST_F(PerformAudioPassThruRequestTest,
   EXPECT_CALL(*application_sptr_, hmi_level())
       .WillOnce(Return(mobile_api::HMILevel::HMI_FULL));
 
-  kMsgParams_[strings::initial_prompt][0][strings::text] = kCorrectPrompt;
-  kMsgParams_[strings::initial_prompt][0][strings::type] = kCorrectType;
-  kMsgParams_[strings::audio_pass_display_text1] = kCorrectDisplayText1;
-  kMsgParams_[strings::audio_pass_display_text2] = kCorrectDisplayText2;
+  msg_params_[strings::initial_prompt][0][strings::text] = kCorrectPrompt;
+  msg_params_[strings::initial_prompt][0][strings::type] = kCorrectType;
+  msg_params_[strings::audio_pass_display_text1] = kCorrectDisplayText1;
+  msg_params_[strings::audio_pass_display_text2] = kCorrectDisplayText2;
 
   MessageSharedPtr speak_reqeust_result_msg;
   MessageSharedPtr perform_result_msg;
@@ -197,12 +197,12 @@ TEST_F(PerformAudioPassThruRequestTest,
   EXPECT_CALL(*application_sptr_, hmi_level())
       .WillOnce(Return(mobile_api::HMILevel::HMI_FULL));
 
-  kMsgParams_[strings::initial_prompt][0][strings::text] = kCorrectPrompt;
-  kMsgParams_[strings::initial_prompt][0][strings::type] = kCorrectType;
+  msg_params_[strings::initial_prompt][0][strings::text] = kCorrectPrompt;
+  msg_params_[strings::initial_prompt][0][strings::type] = kCorrectType;
 
   const bool kMuted = false;
 
-  kMsgParams_[strings::mute_audio] = kMuted;
+  msg_params_[strings::mute_audio] = kMuted;
 
   MessageSharedPtr speak_reqeust_result_msg;
   MessageSharedPtr perform_result_msg;
@@ -356,7 +356,7 @@ TEST_F(PerformAudioPassThruRequestTest, Init_CorrectTimeout) {
   const uint32_t kDefaultTimeout = command_sptr_->default_timeout();
   const uint32_t kMaxDuration = 10000u;
 
-  kMsgParams_[strings::max_duration] = kMaxDuration;
+  msg_params_[strings::max_duration] = kMaxDuration;
 
   command_sptr_->Init();
 
@@ -385,8 +385,8 @@ TEST_F(PerformAudioPassThruRequestTest,
   EXPECT_CALL(*application_sptr_, hmi_level())
       .WillOnce(Return(mobile_api::HMILevel::HMI_FULL));
 
-  kMsgParams_[strings::initial_prompt][0][strings::text] = kCorrectPrompt;
-  kMsgParams_[strings::initial_prompt][0][strings::type] = kCorrectType;
+  msg_params_[strings::initial_prompt][0][strings::text] = kCorrectPrompt;
+  msg_params_[strings::initial_prompt][0][strings::type] = kCorrectType;
 
   // For setting is_active_tts_speak -> true
   EXPECT_CALL(mock_app_manager_, ManageHMICommand(_))
@@ -405,7 +405,6 @@ TEST_F(PerformAudioPassThruRequestTest,
       .WillOnce(Return(true));
   command_sptr_->onTimeOut();
 }
-
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

@@ -82,7 +82,7 @@ class SystemRequestTest
   void SetUp() OVERRIDE {
     ON_CALL(*app_, app_id()).WillByDefault(Return(kAppId));
     ON_CALL(*app_, policy_app_id()).WillByDefault(Return(kPolicyAppId));
-    ON_CALL(app_mngr_, GetPolicyHandler())
+    ON_CALL(mock_app_manager_, GetPolicyHandler())
         .WillByDefault(ReturnRef(policy_handler_mock));
   }
 
@@ -96,11 +96,11 @@ class SystemRequestTest
 TEST_F(SystemRequestTest, Run_ApplicationIsNotRegistered) {
   CommandPtr command(CreateCommand<SystemRequest>(msg_));
 
-  ON_CALL(app_mngr_, application(_))
+  ON_CALL(mock_app_manager_, application(_))
       .WillByDefault(Return(ApplicationSharedPtr()));
 
   EXPECT_CALL(
-      app_mngr_,
+      mock_app_manager_,
       ManageMobileCommand(
           MobileResultCodeIs(mobile_result::APPLICATION_NOT_REGISTERED), _));
 
@@ -111,10 +111,10 @@ TEST_F(SystemRequestTest, Run_TypeQueryAps_UnsupportedResourse) {
   (*msg_)[am::strings::msg_params][am::strings::request_type] =
       mobile_apis::RequestType::QUERY_APPS;
   CommandPtr command(CreateCommand<SystemRequest>(msg_));
-  ON_CALL(app_mngr_, application(kKey)).WillByDefault(Return(app_));
+  ON_CALL(mock_app_manager_, application(kKey)).WillByDefault(Return(app_));
 
   EXPECT_CALL(
-      app_mngr_,
+      mock_app_manager_,
       ManageMobileCommand(
           MobileResponseIs(mobile_result::UNSUPPORTED_RESOURCE, info_, false),
           _));
@@ -127,16 +127,16 @@ TEST_F(SystemRequestTest, Run_TypeDisallowed_DisallowedResult) {
       mobile_apis::RequestType::CLIMATE;
   (*msg_)[am::strings::msg_params][am::strings::request_type] = request_type;
   CommandPtr command(CreateCommand<SystemRequest>(msg_));
-  ON_CALL(app_mngr_, application(kKey)).WillByDefault(Return(app_));
+  ON_CALL(mock_app_manager_, application(kKey)).WillByDefault(Return(app_));
 
-  EXPECT_CALL(app_mngr_, GetPolicyHandler())
+  EXPECT_CALL(mock_app_manager_, GetPolicyHandler())
       .WillOnce(ReturnRef(policy_handler_mock));
 
   EXPECT_CALL(policy_handler_mock,
               IsRequestTypeAllowed(kPolicyAppId, request_type))
       .WillOnce(Return(false));
   EXPECT_CALL(
-      app_mngr_,
+      mock_app_manager_,
       ManageMobileCommand(
           MobileResponseIs(mobile_result::DISALLOWED, info_, false), _));
 
@@ -149,14 +149,14 @@ TEST_F(SystemRequestTest, Run_FileNameContainSlash_InvalidData) {
   (*msg_)[am::strings::msg_params][am::strings::request_type] = request_type;
   (*msg_)[am::strings::msg_params][am::strings::file_name] = "file_name/";
   CommandPtr command(CreateCommand<SystemRequest>(msg_));
-  ON_CALL(app_mngr_, application(kKey)).WillByDefault(Return(app_));
+  ON_CALL(mock_app_manager_, application(kKey)).WillByDefault(Return(app_));
 
   EXPECT_CALL(policy_handler_mock,
               IsRequestTypeAllowed(kPolicyAppId, request_type))
       .WillOnce(Return(true));
   info_ = "Sync file name contains forbidden symbols.";
   EXPECT_CALL(
-      app_mngr_,
+      mock_app_manager_,
       ManageMobileCommand(
           MobileResponseIs(mobile_result::INVALID_DATA, info_, false), _));
 
@@ -174,19 +174,20 @@ TEST_F(SystemRequestTest, Run_FileWithBinaryDataSaveUnsuccessful_GenericError) {
   (*msg_)[am::strings::msg_params][am::strings::file_name] = file_name_;
   (*msg_)[am::strings::params][am::strings::binary_data] = binary_data;
   CommandPtr command(CreateCommand<SystemRequest>(msg_));
-  ON_CALL(app_mngr_, application(kKey)).WillByDefault(Return(app_));
+  ON_CALL(mock_app_manager_, application(kKey)).WillByDefault(Return(app_));
 
   EXPECT_CALL(policy_handler_mock,
               IsRequestTypeAllowed(kPolicyAppId, request_type))
       .WillOnce(Return(true));
 
-  EXPECT_CALL(app_mngr_settings_, system_files_path())
+  EXPECT_CALL(mock_app_manager_settings_, system_files_path())
       .WillRepeatedly(ReturnRef(kBinaryFolder));
-  EXPECT_CALL(app_mngr_, SaveBinary(binary_data, kBinaryFolder, file_name_, 0))
+  EXPECT_CALL(mock_app_manager_,
+              SaveBinary(binary_data, kBinaryFolder, file_name_, 0))
       .WillOnce(Return(mobile_result::INVALID_DATA));
 
   EXPECT_CALL(
-      app_mngr_,
+      mock_app_manager_,
       ManageMobileCommand(
           MobileResponseIs(mobile_result::GENERIC_ERROR, info_, false), _));
 
@@ -200,17 +201,17 @@ TEST_F(SystemRequestTest,
   (*msg_)[am::strings::msg_params][am::strings::request_type] = request_type;
   (*msg_)[am::strings::msg_params][am::strings::file_name] = file_name_;
   CommandPtr command(CreateCommand<SystemRequest>(msg_));
-  ON_CALL(app_mngr_, application(kKey)).WillByDefault(Return(app_));
+  ON_CALL(mock_app_manager_, application(kKey)).WillByDefault(Return(app_));
 
   EXPECT_CALL(policy_handler_mock,
               IsRequestTypeAllowed(kPolicyAppId, request_type))
       .WillOnce(Return(true));
 
-  EXPECT_CALL(app_mngr_settings_, system_files_path())
+  EXPECT_CALL(mock_app_manager_settings_, system_files_path())
       .WillRepeatedly(ReturnRef(kBinaryFolder));
-  EXPECT_CALL(app_mngr_, SaveBinary(_, _, _, _)).Times(0);
+  EXPECT_CALL(mock_app_manager_, SaveBinary(_, _, _, _)).Times(0);
 
-  EXPECT_CALL(app_mngr_settings_, app_storage_folder())
+  EXPECT_CALL(mock_app_manager_settings_, app_storage_folder())
       .WillRepeatedly(ReturnRef(kStorageFolder));
   am::AppFile ap_file;
   ON_CALL(*app_, folder_name()).WillByDefault(Return(kStorageFolder2));
@@ -219,7 +220,7 @@ TEST_F(SystemRequestTest,
               GetFile(kStorageFolder + file_system::GetPathDelimiter() +
                       kStorageFolder2 + file_system::GetPathDelimiter() +
                       file_name_)).WillRepeatedly(Return(&ap_file));
-  EXPECT_CALL(app_mngr_,
+  EXPECT_CALL(mock_app_manager_,
               ManageMobileCommand(
                   MobileResponseIs(mobile_result::REJECTED, info_, false), _));
 
@@ -233,17 +234,17 @@ TEST_F(
   (*msg_)[am::strings::msg_params][am::strings::request_type] = request_type;
   (*msg_)[am::strings::msg_params][am::strings::file_name] = "IVSU";
   CommandPtr command(CreateCommand<SystemRequest>(msg_));
-  ON_CALL(app_mngr_, application(kKey)).WillByDefault(Return(app_));
+  ON_CALL(mock_app_manager_, application(kKey)).WillByDefault(Return(app_));
 
   EXPECT_CALL(policy_handler_mock,
               IsRequestTypeAllowed(kPolicyAppId, request_type))
       .WillOnce(Return(true));
 
-  EXPECT_CALL(app_mngr_settings_, system_files_path())
+  EXPECT_CALL(mock_app_manager_settings_, system_files_path())
       .WillRepeatedly(ReturnRef(kBinaryFolder));
-  EXPECT_CALL(app_mngr_, SaveBinary(_, _, _, _)).Times(0);
+  EXPECT_CALL(mock_app_manager_, SaveBinary(_, _, _, _)).Times(0);
 
-  EXPECT_CALL(app_mngr_settings_, app_storage_folder())
+  EXPECT_CALL(mock_app_manager_settings_, app_storage_folder())
       .WillRepeatedly(ReturnRef(kStorageFolder));
   ON_CALL(*app_, folder_name()).WillByDefault(Return("app_storage"));
   am::AppFile ap_file;
@@ -251,9 +252,9 @@ TEST_F(
               GetFile(kStorageFolder + file_system::GetPathDelimiter() +
                       "app_storage" + file_system::GetPathDelimiter() +
                       "0IVSU")).WillRepeatedly(Return(&ap_file));
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(mock_app_manager_, ManageMobileCommand(_, _)).Times(0);
 
-  EXPECT_CALL(app_mngr_,
+  EXPECT_CALL(mock_app_manager_,
               ManageHMICommand(HMIResultCodeIs(
                   hmi_apis::FunctionID::BasicCommunication_SystemRequest)))
       .WillOnce(Return(true));
@@ -275,9 +276,9 @@ TEST_F(SystemRequestTest, OnEvent_SuccessResult_SuccessfulCommand) {
   event.set_smart_object(*event_msg);
 
   CommandPtr command(CreateCommand<SystemRequest>(msg_));
-  ON_CALL(app_mngr_, application(kKey)).WillByDefault(Return(app_));
+  ON_CALL(mock_app_manager_, application(kKey)).WillByDefault(Return(app_));
 
-  EXPECT_CALL(app_mngr_,
+  EXPECT_CALL(mock_app_manager_,
               ManageMobileCommand(
                   MobileResponseIs(mobile_result::SUCCESS, info_, true), _));
   command->on_event(event);
@@ -297,9 +298,9 @@ TEST_F(SystemRequestTest, OnEvent_WarningResult_SuccessfulCommand) {
   event.set_smart_object(*event_msg);
 
   CommandPtr command(CreateCommand<SystemRequest>(msg_));
-  ON_CALL(app_mngr_, application(kKey)).WillByDefault(Return(app_));
+  ON_CALL(mock_app_manager_, application(kKey)).WillByDefault(Return(app_));
 
-  EXPECT_CALL(app_mngr_,
+  EXPECT_CALL(mock_app_manager_,
               ManageMobileCommand(
                   MobileResponseIs(mobile_result::WARNINGS, info_, true), _));
   command->on_event(event);
@@ -320,11 +321,11 @@ TEST_F(SystemRequestTest, OnEvent_UnsuccesfulResult_SendUnsuccessfulCommand) {
   event.set_smart_object(*event_msg);
 
   CommandPtr command(CreateCommand<SystemRequest>(msg_));
-  ON_CALL(app_mngr_, application(kKey)).WillByDefault(Return(app_));
+  ON_CALL(mock_app_manager_, application(kKey)).WillByDefault(Return(app_));
 
   // Result is false
   EXPECT_CALL(
-      app_mngr_,
+      mock_app_manager_,
       ManageMobileCommand(
           MobileResponseIs(mobile_result::GENERIC_ERROR, info_, false), _));
   command->on_event(event);

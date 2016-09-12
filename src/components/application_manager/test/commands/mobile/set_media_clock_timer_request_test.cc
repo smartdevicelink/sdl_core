@@ -73,11 +73,11 @@ class SetMediaClockRequestTest
   }
 
   void ExpectationsSetupHelper(bool is_media) {
-    EXPECT_CALL(app_mngr_, application(kConnectionKey))
+    EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
         .WillOnce(Return(mock_app_));
     EXPECT_CALL(*mock_app_, is_media_application()).WillOnce(Return(is_media));
     EXPECT_CALL(*mock_app_, app_id()).Times(0);
-    EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _));
+    EXPECT_CALL(mock_app_manager_, ManageMobileCommand(_, _));
   }
 
   MockAppPtr mock_app_;
@@ -95,7 +95,7 @@ TEST_F(SetMediaClockRequestTest, Run_UpdateCountUp_SUCCESS) {
   SharedPtr<SetMediaClockRequest> command(
       CreateCommand<SetMediaClockRequest>(msg));
 
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
   EXPECT_CALL(*mock_app_, is_media_application()).WillOnce(Return(true));
   EXPECT_CALL(*mock_app_, app_id()).WillOnce(Return(kAppID));
@@ -115,7 +115,7 @@ TEST_F(SetMediaClockRequestTest, Run_UpdateCountDown_SUCCESS) {
   SharedPtr<SetMediaClockRequest> command(
       CreateCommand<SetMediaClockRequest>(msg));
 
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
   EXPECT_CALL(*mock_app_, is_media_application()).WillOnce(Return(true));
   EXPECT_CALL(*mock_app_, app_id()).WillOnce(Return(kAppID));
@@ -152,11 +152,11 @@ TEST_F(SetMediaClockRequestTest, Run_UpdateCountDownWrongTime_Canceled) {
   SharedPtr<SetMediaClockRequest> command(
       CreateCommand<SetMediaClockRequest>(msg));
 
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
   EXPECT_CALL(*mock_app_, is_media_application()).WillOnce(Return(true));
   EXPECT_CALL(*mock_app_, app_id()).Times(0);
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _));
+  EXPECT_CALL(mock_app_manager_, ManageMobileCommand(_, _));
 
   command->Run();
 }
@@ -201,11 +201,11 @@ TEST_F(SetMediaClockRequestTest, Run_InvalidApp_Canceled) {
   SharedPtr<SetMediaClockRequest> command(
       CreateCommand<SetMediaClockRequest>(msg));
 
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
       .WillOnce(Return(MockAppPtr()));
   EXPECT_CALL(*mock_app_, is_media_application()).Times(0);
   EXPECT_CALL(*mock_app_, app_id()).Times(0);
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _));
+  EXPECT_CALL(mock_app_manager_, ManageMobileCommand(_, _));
 
   command->Run();
 }
@@ -218,7 +218,7 @@ TEST_F(SetMediaClockRequestTest, OnEvent_Success) {
   SharedPtr<SetMediaClockRequest> command(
       CreateCommand<SetMediaClockRequest>(msg));
 
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _));
+  EXPECT_CALL(mock_app_manager_, ManageMobileCommand(_, _));
 
   Event event(hmi_apis::FunctionID::UI_SetMediaClockTimer);
   event.set_smart_object(*msg);
@@ -232,7 +232,7 @@ TEST_F(SetMediaClockRequestTest, OnEvent_Canceled) {
   SharedPtr<SetMediaClockRequest> command(
       CreateCommand<SetMediaClockRequest>(msg));
 
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(mock_app_manager_, ManageMobileCommand(_, _)).Times(0);
 
   Event event(hmi_apis::FunctionID::UI_Slider);
   event.set_smart_object(*msg);

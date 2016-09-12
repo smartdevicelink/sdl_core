@@ -66,9 +66,9 @@ class HMICapabilitiesTest : public ::testing::Test {
       : last_state_("app_storage_folder", "app_info_data")
       , kFileName("hmi_capabilities.json") {}
   virtual void SetUp() OVERRIDE {
-    EXPECT_CALL(app_mngr_, event_dispatcher())
+    EXPECT_CALL(mock_app_manager_, event_dispatcher())
         .WillOnce(ReturnRef(mock_event_dispatcher));
-    EXPECT_CALL(app_mngr_, get_settings())
+    EXPECT_CALL(mock_app_manager_, get_settings())
         .WillRepeatedly(ReturnRef(mock_application_manager_settings_));
     EXPECT_CALL(mock_application_manager_settings_,
                 hmi_capabilities_file_name()).WillOnce(ReturnRef(kFileName));
@@ -77,7 +77,7 @@ class HMICapabilitiesTest : public ::testing::Test {
     EXPECT_CALL(mock_application_manager_settings_, launch_hmi())
         .WillOnce(Return(false));
     hmi_capabilities_test =
-        utils::MakeShared<HMICapabilitiesForTesting>(app_mngr_);
+        utils::MakeShared<HMICapabilitiesForTesting>(mock_app_manager_);
     hmi_capabilities_test->Init(&last_state_);
   }
 
@@ -91,7 +91,7 @@ class HMICapabilitiesTest : public ::testing::Test {
   }
 
   void SetCooperating();
-  MockApplicationManager app_mngr_;
+  MockApplicationManager mock_app_manager_;
   event_engine_test::MockEventDispatcher mock_event_dispatcher;
   resumption::LastState last_state_;
   MockApplicationManagerSettings mock_application_manager_settings_;
@@ -413,7 +413,8 @@ void HMICapabilitiesTest::SetCooperating() {
   smart_objects::SmartObjectSPtr test_so;
   EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
               CreateModuleInfoSO(_, _)).WillRepeatedly(Return(test_so));
-  EXPECT_CALL(app_mngr_, ManageHMICommand(_)).WillRepeatedly(Return(true));
+  EXPECT_CALL(mock_app_manager_, ManageHMICommand(_))
+      .WillRepeatedly(Return(true));
 }
 
 TEST_F(HMICapabilitiesTest, SetVRCooperating) {
@@ -424,19 +425,19 @@ TEST_F(HMICapabilitiesTest, SetVRCooperating) {
   EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
               CreateModuleInfoSO(hmi_apis::FunctionID::VR_GetLanguage, _))
       .WillOnce(Return(language));
-  EXPECT_CALL(app_mngr_, ManageHMICommand(language));
+  EXPECT_CALL(mock_app_manager_, ManageHMICommand(language));
 
   smart_objects::SmartObjectSPtr support_language;
   EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
               CreateModuleInfoSO(hmi_apis::FunctionID::VR_GetSupportedLanguages,
                                  _)).WillOnce(Return(support_language));
-  EXPECT_CALL(app_mngr_, ManageHMICommand(support_language));
+  EXPECT_CALL(mock_app_manager_, ManageHMICommand(support_language));
 
   smart_objects::SmartObjectSPtr capabilities;
   EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
               CreateModuleInfoSO(hmi_apis::FunctionID::VR_GetCapabilities, _))
       .WillOnce(Return(capabilities));
-  EXPECT_CALL(app_mngr_, ManageHMICommand(capabilities));
+  EXPECT_CALL(mock_app_manager_, ManageHMICommand(capabilities));
 
   hmi_capabilities_test->set_is_vr_cooperating(true);
 }
@@ -448,20 +449,20 @@ TEST_F(HMICapabilitiesTest, SetTTSCooperating) {
   EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
               CreateModuleInfoSO(hmi_apis::FunctionID::TTS_GetLanguage, _))
       .WillOnce(Return(language));
-  EXPECT_CALL(app_mngr_, ManageHMICommand(language));
+  EXPECT_CALL(mock_app_manager_, ManageHMICommand(language));
 
   smart_objects::SmartObjectSPtr support_language;
   EXPECT_CALL(
       *(MockMessageHelper::message_helper_mock()),
       CreateModuleInfoSO(hmi_apis::FunctionID::TTS_GetSupportedLanguages, _))
       .WillOnce(Return(support_language));
-  EXPECT_CALL(app_mngr_, ManageHMICommand(support_language));
+  EXPECT_CALL(mock_app_manager_, ManageHMICommand(support_language));
 
   smart_objects::SmartObjectSPtr capabilities;
   EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
               CreateModuleInfoSO(hmi_apis::FunctionID::TTS_GetCapabilities, _))
       .WillOnce(Return(capabilities));
-  EXPECT_CALL(app_mngr_, ManageHMICommand(capabilities));
+  EXPECT_CALL(mock_app_manager_, ManageHMICommand(capabilities));
 
   hmi_capabilities_test->set_is_tts_cooperating(true);
 }
@@ -473,19 +474,19 @@ TEST_F(HMICapabilitiesTest, SetUICooperating) {
   EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
               CreateModuleInfoSO(hmi_apis::FunctionID::UI_GetLanguage, _))
       .WillOnce(Return(language));
-  EXPECT_CALL(app_mngr_, ManageHMICommand(language));
+  EXPECT_CALL(mock_app_manager_, ManageHMICommand(language));
 
   smart_objects::SmartObjectSPtr support_language;
   EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
               CreateModuleInfoSO(hmi_apis::FunctionID::UI_GetSupportedLanguages,
                                  _)).WillOnce(Return(support_language));
-  EXPECT_CALL(app_mngr_, ManageHMICommand(support_language));
+  EXPECT_CALL(mock_app_manager_, ManageHMICommand(support_language));
 
   smart_objects::SmartObjectSPtr capabilities;
   EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
               CreateModuleInfoSO(hmi_apis::FunctionID::UI_GetCapabilities, _))
       .WillOnce(Return(capabilities));
-  EXPECT_CALL(app_mngr_, ManageHMICommand(capabilities));
+  EXPECT_CALL(mock_app_manager_, ManageHMICommand(capabilities));
 
   hmi_capabilities_test->set_is_ui_cooperating(true);
 }
@@ -496,7 +497,7 @@ TEST_F(HMICapabilitiesTest, SetIviCooperating) {
       *(MockMessageHelper::message_helper_mock()),
       CreateModuleInfoSO(hmi_apis::FunctionID::VehicleInfo_GetVehicleType, _))
       .WillOnce(Return(ivi_type));
-  EXPECT_CALL(app_mngr_, ManageHMICommand(ivi_type));
+  EXPECT_CALL(mock_app_manager_, ManageHMICommand(ivi_type));
 
   hmi_capabilities_test->set_is_ivi_cooperating(true);
 }
