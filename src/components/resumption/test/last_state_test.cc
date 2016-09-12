@@ -31,14 +31,14 @@
  */
 
 #include <string>
+#include <cctype>
+#include <algorithm>
 
 #include "gtest/gtest.h"
 #include "resumption/last_state.h"
 #include "utils/file_system.h"
 #include "utils/shared_ptr.h"
 #include "utils/make_shared.h"
-#include <json/writer.h>
-#include <json/reader.h>
 
 namespace test {
 namespace components {
@@ -81,22 +81,18 @@ class LastStateTest : public ::testing::Test {
   ::utils::SharedPtr<resumption::LastState> last_state_;
 
   void CompactJson(std::string& str) {
-    Json::Value root;
-    Json::Reader reader;
-    reader.parse(str, root);
-    Json::FastWriter writer;
-    str = writer.write(root);
-    if ('\n' == *(str.end() - 1)) {
-      str.erase(str.end() - 1);
+    str.erase(remove_if(str.begin(), str.end(), isspace), str.end());
+    if (str.empty()) {
+      str = "null";
     }
   }
 };
 
 TEST_F(LastStateTest, Basic) {
   utils::json::JsonValue& dictionary = last_state_->dictionary();
-  std::string str = dictionary.ToJson(true);
-  CompactJson(str);
-  EXPECT_EQ(kJsonStr, str);
+  std::string json_str_from_dictionary = dictionary.ToJson(true);
+  CompactJson(json_str_from_dictionary);
+  EXPECT_EQ(kJsonStr, json_str_from_dictionary);
 }
 
 TEST_F(LastStateTest, SetGetData) {
@@ -105,27 +101,27 @@ TEST_F(LastStateTest, SetGetData) {
     utils::json::JsonValue& dictionary = last_state_->dictionary();
     utils::json::JsonValue bluetooth_info =
         dictionary["TransportManager"]["BluetoothAdapter"];
-    std::string str = bluetooth_info.ToJson(true);
-    CompactJson(str);
-    EXPECT_EQ(null_string, str);
+    std::string json_str_from_dictionary = bluetooth_info.ToJson(true);
+    CompactJson(json_str_from_dictionary);
+    EXPECT_EQ(null_string, json_str_from_dictionary);
 
     utils::json::JsonValue tcp_adapter_info =
         dictionary["TransportManager"]["TcpAdapter"]["devices"];
-    str = tcp_adapter_info.ToJson(true);
-    CompactJson(str);
-    EXPECT_EQ(null_string, str);
+    json_str_from_dictionary = tcp_adapter_info.ToJson(true);
+    CompactJson(json_str_from_dictionary);
+    EXPECT_EQ(null_string, json_str_from_dictionary);
 
     utils::json::JsonValue resumption_time =
         dictionary["resumption"]["last_ign_off_time"];
-    str = resumption_time.ToJson(true);
-    CompactJson(str);
-    EXPECT_EQ(null_string, str);
+    json_str_from_dictionary = resumption_time.ToJson(true);
+    CompactJson(json_str_from_dictionary);
+    EXPECT_EQ(null_string, json_str_from_dictionary);
 
     utils::json::JsonValue resumption_list =
         dictionary["resumption"]["resume_app_list"];
-    str = resumption_list.ToJson(true);
-    CompactJson(str);
-    EXPECT_EQ(null_string, str);
+    json_str_from_dictionary = resumption_list.ToJson(true);
+    CompactJson(json_str_from_dictionary);
+    EXPECT_EQ(null_string, json_str_from_dictionary);
 
     utils::json::JsonValue test_value;
     test_value["name"] = "test_device";
@@ -144,15 +140,15 @@ TEST_F(LastStateTest, SetGetData) {
       dictionary["TransportManager"]["BluetoothAdapter"];
   utils::json::JsonValue tcp_adapter_info =
       dictionary["TransportManager"]["TcpAdapter"];
-  std::string str = bluetooth_info.ToJson(true);
-  CompactJson(str);
+  std::string json_str_from_dictionary = bluetooth_info.ToJson(true);
+  CompactJson(json_str_from_dictionary);
   const std::string bluetooth_device_str = "{\"devices\":\"bluetooth_device\"}";
-  EXPECT_EQ(bluetooth_device_str, str);
-  str = tcp_adapter_info.ToJson(true);
-  CompactJson(str);
+  EXPECT_EQ(bluetooth_device_str, json_str_from_dictionary);
+  json_str_from_dictionary = tcp_adapter_info.ToJson(true);
+  CompactJson(json_str_from_dictionary);
   const std::string test_device_str =
       "{\"devices\":{\"name\":\"test_device\"}}";
-  EXPECT_EQ(test_device_str, str);
+  EXPECT_EQ(test_device_str, json_str_from_dictionary);
 }
 
 }  // namespace resumption_test
