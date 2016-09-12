@@ -51,6 +51,10 @@ SocketChannel::SocketChannel()
   settings.ReadParameter("Voice recognition module", "port", &port_);
 }
 
+SocketChannel::SocketChannel(net::ConnectedSocket *socket)
+    : socket_(socket) {
+}
+
 SocketChannel::~SocketChannel() {
   if (socket_) {
     socket_->close();
@@ -60,8 +64,10 @@ SocketChannel::~SocketChannel() {
 
 bool SocketChannel::Start() {
   LOG4CXX_AUTO_TRACE(logger_);
-  socket_ = net::ConnectedSocketImpl::ConnectToHost(address_.c_str(), port_);
-  return false;
+  if (!socket_) {
+    socket_ = net::ConnectedSocketImpl::ConnectToHost(address_.c_str(), port_);
+  }
+  return socket_ != NULL;
 }
 
 bool SocketChannel::Stop() {
@@ -94,7 +100,8 @@ bool SocketChannel::Send(const std::string& data) {
     if ((data_sent + kChunkSize) > total_size) {
       size_to_send = total_size - data_sent;
     }
-  } LOG4CXX_INFO(logger_, "Sent " << data_sent);
+  }
+  LOG4CXX_INFO(logger_, "Sent " << data_sent);
   return true;
 }
 

@@ -112,6 +112,7 @@ class VRProxy : public threads::MessageLoopThread<MessageQueue>::Handler {
   friend class Receiver;
   FRIEND_TEST(VRProxyTest, SizeToString);
   FRIEND_TEST(VRProxyTest, SizeFromString);
+  FRIEND_TEST(VRProxyTest, Receive);
 };
 
 }  // namespace vr_module

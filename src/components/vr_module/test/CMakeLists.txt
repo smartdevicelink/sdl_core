@@ -17,6 +17,7 @@ set (SOURCES
   src/on_register_service_test.cc
   src/on_service_deactivated_test.cc
   src/on_default_service_chosen_test.cc
+  src/socket_channel_test.cc
 )
 
 set (LIBRARIES
@@ -47,6 +48,7 @@ SET(RPATH_DIRECTORIES
   /usr/local/lib
   /usr/local
   ${CMAKE_BINARY_DIR}/src/components/utils
+  ${GPB_LIBS_DIRECTORY}
 )
 
 SET(CMAKE_INSTALL_RPATH "${RPATH_DIRECTORIES}")

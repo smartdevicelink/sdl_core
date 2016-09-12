@@ -47,6 +47,7 @@ namespace vr_module {
 class SocketChannel : public Channel {
  public:
   SocketChannel();
+  explicit SocketChannel(net::ConnectedSocket *socket);
   ~SocketChannel();
   virtual bool Start();
   virtual bool Stop();
