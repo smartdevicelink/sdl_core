@@ -48,6 +48,7 @@
 #include "protocol_handler/session_observer.h"
 #include "protocol_handler/protocol_observer.h"
 #include "protocol_handler/incoming_data_handler.h"
+#include "protocol_handler/remote_services_message_observer.h"
 #include "transport_manager/common.h"
 #include "transport_manager/transport_manager.h"
 #include "transport_manager/transport_manager_listener_empty.h"
@@ -289,6 +290,14 @@ class ProtocolHandlerImpl
                           uint8_t protocol_version,
                           uint8_t service_type);
 
+
+  /**
+   * Sets pointer for processing remote services messages
+   * @param observer Pointer to observer
+   */
+  void set_remote_service_message_observer(
+      RemoteServicesMessageObserver* observer);
+
  private:
   void SendEndServicePrivate(int32_t connection_id, uint8_t session_id,
                              uint8_t service_type);
@@ -484,6 +493,9 @@ class ProtocolHandlerImpl
    *\brief (Connection Handler)
    */
   SessionObserver *session_observer_;
+
+
+  RemoteServicesMessageObserver* remote_service_message_observer_;
 
   /**
    *\brief Pointer on instance of Transport layer handler for message exchange.
