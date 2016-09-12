@@ -2298,22 +2298,21 @@ mobile_apis::Result::eType MessageHelper::VerifyImage(
         app_mngr.get_settings().app_storage_folder();
     if (!app_storage_folder.empty()) {
       // TODO(nvaganov@luxoft.com): APPLINK-11293
-      if (!file_system::IsRelativePath(app_storage_folder)) {  // absolute path
-        full_file_path = app_storage_folder + path_delimeter;
-      } else {  // relative path
-        full_file_path = file_system::CurrentWorkingDirectory() +
-                         path_delimeter + app_storage_folder + path_delimeter;
+      if (file_system::IsRelativePath(app_storage_folder)) {  // relative path
+        full_file_path = file_system::ConcatPath(
+            file_system::CurrentWorkingDirectory(), app_storage_folder);
+      } else {  // absolute path
+        full_file_path = app_storage_folder;
       }
     } else {  // empty app storage folder
-      full_file_path = file_system::CurrentWorkingDirectory() + path_delimeter;
+      full_file_path = file_system::CurrentWorkingDirectory();
     }
 
     const std::string app_folder_name = app->folder_name();
     if (!app_folder_name.empty()) {
-      full_file_path += app_folder_name;
-      full_file_path += path_delimeter;
+      full_file_path = file_system::ConcatPath(full_file_path, app_folder_name);
     }
-    full_file_path += file_name;
+    full_file_path = file_system::ConcatPath(full_file_path, file_name);
   }
 
   if (!file_system::FileExists(full_file_path)) {
