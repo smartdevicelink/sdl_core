@@ -137,10 +137,10 @@ void AlertManeuverRequest::on_event(const event_engine::Event& event) {
   SDL_AUTO_TRACE();
   using namespace helpers;
   const smart_objects::SmartObject& message = event.smart_object();
-  bool is_tts_ok;
-  bool is_no_navi_error;
-  hmi_apis::Common_Result::eType tts_result;
-  hmi_apis::Common_Result::eType navi_result;
+  bool is_tts_ok = false;
+  bool is_no_navi_error = false;
+  hmi_apis::Common_Result::eType tts_result =  hmi_apis::Common_Result::INVALID_ENUM;
+  hmi_apis::Common_Result::eType navi_result =  hmi_apis::Common_Result::INVALID_ENUM;
   hmi_apis::FunctionID::eType event_id = event.id();
   switch (event_id) {
     case hmi_apis::FunctionID::Navigation_AlertManeuver: {
