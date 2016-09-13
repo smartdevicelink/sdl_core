@@ -92,9 +92,11 @@ void Lock::Release() {
 }
 
 bool Lock::Try() {
+#ifndef NDEBUG
   if ((lock_taken_ > 0) && !is_mutex_recursive_) {
     return false;
   }
+#endif
   if (0 != pthread_mutex_trylock(&mutex_)) {
     return false;
   }
