@@ -274,13 +274,14 @@ bool CryptoManagerImpl::set_certificate(const std::string& cert_data) {
     SDL_WARN("Empty certificate");
     return false;
   }
+  const size_t cert_data_len = cert_data.length();
 
   BIO* bio = BIO_new(BIO_f_base64());
-  BIO* bmem = BIO_new_mem_buf((char*)cert_data.c_str(), cert_data.length());
+  BIO* bmem = BIO_new_mem_buf((char*)cert_data.c_str(), cert_data_len);
   bmem = BIO_push(bio, bmem);
 
-  char* buf = new char[cert_data.length()];
-  int len = BIO_read(bmem, buf, cert_data.length());
+  char* buf = new char[cert_data_len];
+  const int len = BIO_read(bmem, buf, cert_data_len);
 
   BIO* bio_cert = BIO_new(BIO_s_mem());
   if (NULL == bio_cert) {

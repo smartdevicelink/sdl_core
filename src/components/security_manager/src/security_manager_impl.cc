@@ -31,12 +31,16 @@
  */
 
 #include "security_manager/security_manager_impl.h"
-#include "security_manager/crypto_manager_impl.h"
-#include "protocol_handler/protocol_packet.h"
+
+#include <string.h>
+
 #include "utils/logger.h"
 #include "utils/byte_order.h"
 #include "utils/json_utils.h"
 #include "utils/convert_utils.h"
+
+#include "security_manager/crypto_manager_impl.h"
+#include "protocol_handler/protocol_packet.h"
 
 namespace security_manager {
 
