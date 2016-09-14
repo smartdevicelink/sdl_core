@@ -211,6 +211,10 @@ std::string SSLTest::server_certificate_data_base64_;
 class SSLTestParam : public testing::TestWithParam<ProtocolAndCipher> {
  protected:
   virtual void SetUp() OVERRIDE {
+    crypto_manager = NULL;
+    client_manager = NULL;
+    server_ctx = NULL;
+    client_ctx = NULL;
     std::ifstream certificate_file("server/spt_credential.p12");
     ASSERT_TRUE(certificate_file.is_open())
         << "Could not open certificate data file";
@@ -248,7 +252,10 @@ class SSLTestParam : public testing::TestWithParam<ProtocolAndCipher> {
     EXPECT_TRUE(client_manager_initialization);
 
     server_ctx = crypto_manager->CreateSSLContext();
+    ASSERT_TRUE(server_ctx) << " Server SSL Contect is not created";
+
     client_ctx = client_manager->CreateSSLContext();
+    ASSERT_TRUE(client_ctx) << " Client SSL Contect is not created";
 
     security_manager::SSLContext::HandshakeContext ctx;
     ctx.make_context(custom_str::CustomString("SPT"),
