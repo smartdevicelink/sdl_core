@@ -377,7 +377,7 @@ ModulePtr PluginManager::FindPluginForSpecifiedService(
   if (remote_services_subscribers_.end() != it) {
     return it->second;
   } else {
-    return 0;
+    return ModulePtr();
   }
 }
 
