@@ -58,6 +58,16 @@ class VRProxy : public threads::MessageLoopThread<MessageQueue>::Handler {
   ~VRProxy();
 
   /**
+   * Starts channel to connect to HMI(Applink)
+   */
+  void Start();
+
+  /**
+   * Stops channel to HMI(Applink)
+   */
+  void Stop();
+
+  /**
    * Sends message to HMI(Applink)
    * @param message to send
    * @return true if success
@@ -66,9 +76,9 @@ class VRProxy : public threads::MessageLoopThread<MessageQueue>::Handler {
 
  private:
   /**
-   * Starts channel to connect to HMI(Applink)
+   * Create thread to receive data from HMI(Applink)
    */
-  inline void StartChannel();
+  inline void CreateThread();
 
   /**
    * Routine to receive messages from HMI(Applink)

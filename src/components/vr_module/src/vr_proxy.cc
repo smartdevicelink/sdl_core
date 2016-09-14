@@ -79,7 +79,7 @@ VRProxy::VRProxy(VRProxyListener *listener)
       channel_(0),
       channel_thread_(0) {
   channel_ = new SocketChannel();
-  StartChannel();
+  CreateThread();
 }
 
 VRProxy::VRProxy(VRProxyListener* listener, Channel* channel)
@@ -87,14 +87,23 @@ VRProxy::VRProxy(VRProxyListener* listener, Channel* channel)
       incoming_("VrIncoming", this),
       channel_(channel),
       channel_thread_(0) {
-  StartChannel();
+  CreateThread();
 }
 
-void VRProxy::StartChannel() {
+void VRProxy::CreateThread() {
   LOG4CXX_AUTO_TRACE(logger_);
   channel_thread_ = threads::CreateThread("ChannelReceiver",
                                           new Receiver(this));
+}
+
+void VRProxy::Start() {
+  LOG4CXX_AUTO_TRACE(logger_);
   channel_thread_->start();
+}
+
+void VRProxy::Stop() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  channel_thread_->stop();
 }
 
 VRProxy::~VRProxy() {

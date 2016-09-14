@@ -350,4 +350,12 @@ void VRModule::OnServiceEndedCallback(const uint32_t& connection_key) {
   // TODO(VSemenyuk): here should be implemented reaction on service stopping(need to notify HMI)
 }
 
+void VRModule::Start() {
+  proxy_.Start();
+}
+
+void VRModule::Stop() {
+  proxy_.Stop();
+}
+
 }  //  namespace vr_module

@@ -85,6 +85,16 @@ class GenericModule {
   }
   virtual const PluginInfo& GetPluginInfo() const = 0;
 
+  /**
+   * Starts routines of the plugin
+   */
+  virtual void Start();
+
+  /**
+   * Stops routines of the plugin
+   */
+  virtual void Stop();
+
   virtual void set_service(application_manager::ServicePtr service);
 
   /**
