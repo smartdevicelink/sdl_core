@@ -46,7 +46,9 @@ set(PATHS
 collect_sources(SOURCES "${PATHS}")
 
 set(LIBRARIES
+  HMI_API
   dbus-1
+  utils
   ${DBUS_LIBRARIES}
 )
 

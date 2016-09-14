@@ -52,6 +52,7 @@ set(LIBRARIES
   protocol
   encryption
   ${OPENSSL_LIBRARIES}
+  utils
 )
 
 collect_sources(SOURCES "${PATHS}")

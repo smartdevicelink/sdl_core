@@ -51,6 +51,7 @@ set(PATHS
 collect_sources(SOURCES "${PATHS}")
 
 set(LIBRARIES
+  utils
   protocol
   protocol_handler
   jsoncpp
