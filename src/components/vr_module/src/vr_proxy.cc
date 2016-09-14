@@ -158,9 +158,10 @@ bool VRProxy::Send(const vr_hmi_api::ServiceMessage& message) {
 
 void VRProxy::Receive() {
   LOG4CXX_AUTO_TRACE(logger_);
-  std::string data;
-  if (channel_->Receive(kHeaderSize, &data)) {
-    int size = SizeFromString(data);
+  std::string header;
+  if (channel_->Receive(kHeaderSize, &header)) {
+    int size = SizeFromString(header);
+    std::string data;
     if (channel_->Receive(size, &data)) {
       vr_hmi_api::ServiceMessage message;
       bool parsed = message.ParseFromString(data);
