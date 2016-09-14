@@ -96,9 +96,9 @@ void VRProxy::CreateThread() {
                                           new Receiver(this));
 }
 
-void VRProxy::Start() {
+bool VRProxy::Start() {
   LOG4CXX_AUTO_TRACE(logger_);
-  channel_thread_->start();
+  return channel_thread_->start();
 }
 
 void VRProxy::Stop() {

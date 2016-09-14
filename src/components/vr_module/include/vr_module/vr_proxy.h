@@ -60,7 +60,7 @@ class VRProxy : public threads::MessageLoopThread<MessageQueue>::Handler {
   /**
    * Starts channel to connect to HMI(Applink)
    */
-  void Start();
+  bool Start();
 
   /**
    * Stops channel to HMI(Applink)
