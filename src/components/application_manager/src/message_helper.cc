@@ -2290,26 +2290,29 @@ mobile_apis::Result::eType MessageHelper::VerifyImage(
   }
 
   std::string full_file_path;
-  if (file_name.size() > 0 && file_name[0] == '/') {
+  const std::string path_delimeter = file_system::GetPathDelimiter();
+  if (file_name.size() > 0 && !file_system::IsRelativePath(file_name)) {
     full_file_path = file_name;
   } else {
     const std::string& app_storage_folder =
         app_mngr.get_settings().app_storage_folder();
     if (!app_storage_folder.empty()) {
       // TODO(nvaganov@luxoft.com): APPLINK-11293
-      if (app_storage_folder[0] == '/') {  // absolute path
-        full_file_path = app_storage_folder + "/";
-      } else {  // relative path
-        full_file_path = file_system::CurrentWorkingDirectory() + "/" +
-                         app_storage_folder + "/";
+      if (file_system::IsRelativePath(app_storage_folder)) {  // relative path
+        full_file_path = file_system::ConcatPath(
+            file_system::CurrentWorkingDirectory(), app_storage_folder);
+      } else {  // absolute path
+        full_file_path = app_storage_folder;
       }
     } else {  // empty app storage folder
-      full_file_path = file_system::CurrentWorkingDirectory() + "/";
+      full_file_path = file_system::CurrentWorkingDirectory();
     }
 
-    full_file_path += app->folder_name();
-    full_file_path += "/";
-    full_file_path += file_name;
+    const std::string app_folder_name = app->folder_name();
+    if (!app_folder_name.empty()) {
+      full_file_path = file_system::ConcatPath(full_file_path, app_folder_name);
+    }
+    full_file_path = file_system::ConcatPath(full_file_path, file_name);
   }
 
   if (!file_system::FileExists(full_file_path)) {

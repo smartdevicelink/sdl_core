@@ -34,7 +34,6 @@
 #include <vector>
 #include <set>
 #include <algorithm>
-#include <iostream>
 
 #include "gmock/gmock.h"
 #include "application_manager/message_helper.h"
@@ -61,6 +60,15 @@ namespace application_manager_test {
 namespace {
 const uint32_t kCorrelationId = 1;
 const uint32_t kAppId = 123;
+#ifdef OS_WINDOWS
+const std::string kFullFilePath = "C:\\file.txt";
+const std::string kRelativeFilePath = "file.txt";
+const std::string kAppStorageFolder = "";
+#else
+const std::string kFullFilePath = "/file.txt";
+const std::string kRelativeFilePath = "./file.txt";
+const std::string kAppStorageFolder = "./";
+#endif
 }  // namespace
 
 namespace HmiLanguage = hmi_apis::Common_Language;
@@ -1341,43 +1349,40 @@ TEST_F(MessageHelperTest,
       utils::MakeShared<MockApplication>();
   smart_objects::SmartObject image;
   image[strings::image_type] = mobile_apis::ImageType::DYNAMIC;
-  image[strings::value] = "/file.dat";
+  image[strings::value] = kFullFilePath;
   mobile_apis::Result::eType result = MessageHelper::VerifyImage(
       image, app_shared_mock, mock_application_manager_);
   EXPECT_EQ(mobile_apis::Result::INVALID_DATA, result);
 }
 
 TEST_F(MessageHelperTest, VerifyImage_FullFilePathFileExists_InvalidData) {
-  const std::string kFile = "/file.txt";
-  EXPECT_FALSE(file_system::CreateFile(kFile));
+  EXPECT_FALSE(file_system::CreateFile(kFullFilePath));
   MockApplicationSharedPtr app_shared_mock =
       utils::MakeShared<MockApplication>();
   smart_objects::SmartObject image;
   image[strings::image_type] = mobile_apis::ImageType::DYNAMIC;
-  image[strings::value] = kFile;
+  image[strings::value] = kFullFilePath;
   mobile_apis::Result::eType result = MessageHelper::VerifyImage(
       image, app_shared_mock, mock_application_manager_);
   EXPECT_EQ(mobile_apis::Result::INVALID_DATA, result);
 }
 
 TEST_F(MessageHelperTest, VerifyImage_CurrentFilePath_SUCCESS) {
-  const std::string kFile = "./file.txt";
-  const std::string kFolder = "./";
-  EXPECT_TRUE(file_system::CreateFile(kFile));
+  EXPECT_TRUE(file_system::CreateFile(kRelativeFilePath));
   MockApplicationSharedPtr app_shared_mock =
       utils::MakeShared<MockApplication>();
   MockApplicationManagerSettings app_mngr_settings;
   smart_objects::SmartObject image;
   image[strings::image_type] = mobile_apis::ImageType::DYNAMIC;
-  image[strings::value] = kFile;
+  image[strings::value] = kRelativeFilePath;
   EXPECT_CALL(mock_application_manager_, get_settings())
       .WillOnce(ReturnRef(app_mngr_settings));
   EXPECT_CALL(app_mngr_settings, app_storage_folder())
-      .WillOnce(ReturnRef(kFolder));
+      .WillOnce(ReturnRef(kAppStorageFolder));
   mobile_apis::Result::eType result = MessageHelper::VerifyImage(
       image, app_shared_mock, mock_application_manager_);
   EXPECT_EQ(mobile_apis::Result::SUCCESS, result);
-  EXPECT_TRUE(file_system::DeleteFile(kFile));
+  EXPECT_TRUE(file_system::DeleteFile(kRelativeFilePath));
 }
 
 TEST_F(MessageHelperTest, VerifyImage_AbsoluteFolderPath_InvalidData) {
