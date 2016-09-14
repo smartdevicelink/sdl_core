@@ -381,7 +381,7 @@ INSTANTIATE_TEST_CASE_P(
                                         kFordCipher)));
 
 // TODO(OHerasym) : ReleaseSSLContext fails
-TEST_F(SSLTest, DISABLED_OnTSL2Protocol_BrokenHandshake) {
+TEST_F(SSLTest, OnTSL2Protocol_BrokenHandshake) {
   ASSERT_EQ(security_manager::SSLContext::Handshake_Result_Success,
             client_ctx->StartHandshake(&kClientBuf, &client_buf_len));
   ASSERT_FALSE(NULL == kClientBuf);
@@ -400,7 +400,7 @@ TEST_F(SSLTest, DISABLED_OnTSL2Protocol_BrokenHandshake) {
 // TODO {AKozoriz} : Unexpected uncomplited init of SSL component.
 // In this and next tests.
 // Must be fixed after merge to develop.
-TEST_F(SSLTest, DISABLED_OnTSL2Protocol_Positive) {
+TEST_F(SSLTest, OnTSL2Protocol_Positive) {
   ASSERT_EQ(client_ctx->StartHandshake(&kClientBuf, &client_buf_len),
             security_manager::SSLContext::Handshake_Result_Success);
   ASSERT_FALSE(NULL == kClientBuf);
@@ -459,7 +459,7 @@ TEST_F(SSLTest, DISABLED_OnTSL2Protocol_Positive) {
   ASSERT_EQ(input_string, output_str);
 }
 
-TEST_F(SSLTest, DISABLED_OnTSL2Protocol_EcncryptionFail) {
+TEST_F(SSLTest, OnTSL2Protocol_EcncryptionFail) {
   ASSERT_EQ(security_manager::SSLContext::Handshake_Result_Success,
             client_ctx->StartHandshake(&kClientBuf, &client_buf_len));
 
