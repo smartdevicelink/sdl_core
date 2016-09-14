@@ -160,6 +160,16 @@ bool CryptoManagerImpl::Init() {
     free_ctx(&context_);
   }
   context_ = SSL_CTX_new(method);
+  if (!context_) {
+    const unsigned long error = ERR_get_error();
+    UNUSED(error);
+    SDL_ERROR("Could not create \""
+              << (is_server ? "server" : "client") << "\" SSL method \"'"
+              << get_settings().security_manager_protocol_name()
+              << "\"', err 0x" << std::hex << error << " \""
+              << ERR_reason_error_string(error) << '"');
+    return false;
+  }
 
   utils::ScopeGuard guard = utils::MakeGuard(free_ctx, &context_);
 
