@@ -57,7 +57,7 @@ PLUGIN_FACTORY(VRModule)
 VRModule::VRModule()
     : GenericModule(kModuleID),
       proxy_(this),
-      factory_(commands::Factory(this)),
+      factory_(new commands::Factory(this)),
       supported_(false),
       active_service_(0),
       default_service_(0),
@@ -71,7 +71,7 @@ VRModule::VRModule()
 VRModule::VRModule(Channel* channel)
     : GenericModule(kModuleID),
       proxy_(this, channel),
-      factory_(commands::Factory(this)),
+      factory_(new commands::Factory(this)),
       supported_(false),
       active_service_(0),
       default_service_(0),
@@ -88,7 +88,7 @@ VRModule::~VRModule() {
 void VRModule::CheckSupport() {
   vr_hmi_api::ServiceMessage message;
   message.set_rpc(vr_hmi_api::SUPPORT_SERVICE);
-  commands::CommandPtr command = factory_.Create(message);
+  commands::CommandPtr command = factory_->Create(message);
   RunCommand(command);
 }
 
@@ -101,7 +101,7 @@ void VRModule::OnReceived(const vr_hmi_api::ServiceMessage& message) {
   if (message.rpc_type() == vr_hmi_api::RESPONSE) {
     EmitEvent(message);
   } else {
-    commands::CommandPtr command = factory_.Create(message);
+    commands::CommandPtr command = factory_->Create(message);
     RunCommand(command);
   }
 }
@@ -111,7 +111,7 @@ void VRModule::OnReceived(const vr_mobile_api::ServiceMessage& message) {
   if (message.rpc_type() == vr_mobile_api::RESPONSE) {
     EmitEvent(message);
   } else {
-    commands::CommandPtr command = factory_.Create(message);
+    commands::CommandPtr command = factory_->Create(message);
     RunCommand(command);
   }
 }
@@ -311,7 +311,7 @@ void VRModule::RegisterService(int32_t app_id) {
   if (notification.SerializeToString(&params)) {
     message.set_params(params);
   }
-  commands::CommandPtr command = factory_.Create(message);
+  commands::CommandPtr command = factory_->Create(message);
   RunCommand(command);
 }
 
