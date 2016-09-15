@@ -48,7 +48,7 @@ class MockServiceModule : public ServiceModule {
       void(int32_t correlation_id));
   MOCK_METHOD1(SendToHmi,
       bool(const vr_hmi_api::ServiceMessage& message));
-  MOCK_METHOD1(SendToMobile,
+  MOCK_CONST_METHOD1(SendToMobile,
       bool(const vr_mobile_api::ServiceMessage& message));
   MOCK_METHOD1(ActivateService,
       void(int32_t app_id));

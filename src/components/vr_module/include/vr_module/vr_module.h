@@ -168,7 +168,7 @@ class VRModule : public functional_modules::GenericModule,
   functional_modules::PluginInfo plugin_info_;
 
   VRProxy proxy_;
-  const commands::FactoryInterface& factory_;
+  const commands::FactoryInterface* factory_;
   request_controller::RequestController request_controller_;
   bool supported_;
   int32_t active_service_;
