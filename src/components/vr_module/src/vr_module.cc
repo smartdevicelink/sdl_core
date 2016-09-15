@@ -57,11 +57,11 @@ PLUGIN_FACTORY(VRModule)
 VRModule::VRModule()
     : GenericModule(kModuleID),
       proxy_(this),
-      factory_(new commands::Factory(this)),
       supported_(false),
       active_service_(0),
       default_service_(0),
       messages_from_mobile_service_("IncomingFromMobileRemoteService", this) {
+  factory_ = new commands::Factory(this);
   plugin_info_.name = "VRModulePlugin";
   plugin_info_.version = 1;
   plugin_info_.service_type = functional_modules::ServiceType::VR;
@@ -71,11 +71,11 @@ VRModule::VRModule()
 VRModule::VRModule(Channel* channel)
     : GenericModule(kModuleID),
       proxy_(this, channel),
-      factory_(new commands::Factory(this)),
       supported_(false),
       active_service_(0),
       default_service_(0),
       messages_from_mobile_service_("IncomingFromMobileRemoteService", this) {
+  factory_ = new commands::Factory(this);
   plugin_info_.name = "VRModulePlugin";
   plugin_info_.version = 1;
   plugin_info_.service_type = functional_modules::ServiceType::VR;
@@ -83,6 +83,7 @@ VRModule::VRModule(Channel* channel)
 }
 
 VRModule::~VRModule() {
+  delete factory_;
 }
 
 void VRModule::CheckSupport() {
