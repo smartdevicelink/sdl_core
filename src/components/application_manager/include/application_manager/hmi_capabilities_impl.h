@@ -70,13 +70,6 @@ class HMICapabilitiesImpl : public HMICapabilities {
    */
   virtual ~HMICapabilitiesImpl();
 
-  /**
-   * @brief Checks if all HMI capabilities received
-   *
-   * @return TRUE if all information received, otherwise FALSE
-   */
-  bool is_hmi_capabilities_initialized() const OVERRIDE;
-
   /*
    * @brief Checks is image type(Static/Dynamic) requested by
    * Mobile Device is supported on current HMI.
@@ -430,6 +423,12 @@ class HMICapabilitiesImpl : public HMICapabilities {
    */
   HMILanguageHandler& get_hmi_language_handler() OVERRIDE;
 
+  /**
+   * @brief Trigger waiting for response
+   * @param request Request object
+   */
+  void set_handle_response_for(const smart_objects::SmartObject& request) OVERRIDE;
+
  protected:
   /*
    * @brief Loads capabilities from local file in case SDL was launched
@@ -469,13 +468,6 @@ class HMICapabilitiesImpl : public HMICapabilities {
   bool is_ui_cooperating_;
   bool is_navi_cooperating_;
   bool is_ivi_cooperating_;
-
-  // to check if IsReady response for corresponding interface received
-  bool is_vr_ready_response_recieved_;
-  bool is_tts_ready_response_recieved_;
-  bool is_ui_ready_response_recieved_;
-  bool is_navi_ready_response_recieved_;
-  bool is_ivi_ready_response_recieved_;
 
   bool attenuated_supported_;
   hmi_apis::Common_Language::eType ui_language_;

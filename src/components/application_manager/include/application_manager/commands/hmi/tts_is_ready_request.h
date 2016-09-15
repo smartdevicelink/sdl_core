@@ -42,7 +42,8 @@ namespace commands {
 /**
  * @brief TTSIsReadyRequest command class
  **/
-class TTSIsReadyRequest : public RequestToHMI {
+class TTSIsReadyRequest : public RequestToHMI,
+                          public event_engine::EventObserver{
  public:
   /**
    * @brief TTSIsReadyRequest class constructor
@@ -61,6 +62,21 @@ class TTSIsReadyRequest : public RequestToHMI {
    * @brief Execute command
    **/
   virtual void Run();
+
+  /**
+   * @brief On event callback
+   **/
+  virtual void on_event(const event_engine::Event& event);
+
+  /**
+   * @brief onTimeOut from requrst Controller
+   */
+  virtual void onTimeOut();
+
+  /**
+   * @brief Send request to HMI for fetching of cappabilities
+   */
+  void SendMessageToHMI();
 
  private:
   DISALLOW_COPY_AND_ASSIGN(TTSIsReadyRequest);

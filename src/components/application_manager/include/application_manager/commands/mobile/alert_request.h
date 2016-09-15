@@ -34,6 +34,8 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ALERT_REQUEST_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ALERT_REQUEST_H_
 
+#include <string>
+
 #include "application_manager/commands/command_request_impl.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/macro.h"
@@ -126,14 +128,25 @@ class AlertRequest : public CommandRequestImpl {
    */
   bool CheckStringsOfAlertRequest();
 
+  /*
+   * @brief Prepare result code and result for sending to mobile application
+   * @param result_code contains result code for sending to mobile application
+   * @param info contains info for mobile app.
+   * @return result for sending to mobile application.
+   */
+  bool PrepareResponseParameters(mobile_apis::Result::eType& result_code,
+                                 std::string& info);
+
   bool awaiting_ui_alert_response_;
   bool awaiting_tts_speak_response_;
   bool awaiting_tts_stop_speaking_response_;
   bool is_alert_succeeded_;
   bool is_ui_alert_sent_;
-  mobile_apis::Result::eType alert_result_;
+  hmi_apis::Common_Result::eType alert_result_;
   smart_objects::SmartObject alert_response_params_;
-  mobile_apis::Result::eType tts_speak_result_;
+  hmi_apis::Common_Result::eType tts_speak_result_;
+  std::string ui_response_info_;
+  std::string tts_response_info_;
 
   DISALLOW_COPY_AND_ASSIGN(AlertRequest);
 };

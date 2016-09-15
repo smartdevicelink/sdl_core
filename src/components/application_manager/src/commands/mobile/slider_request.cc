@@ -133,7 +133,8 @@ void SliderRequest::on_event(const event_engine::Event& event) {
 
   LOG4CXX_DEBUG(logger_, "Received UI_Slider event");
 
-  const Common_Result::eType response_code = static_cast<Common_Result::eType>(
+  const  Common_Result::eType response_code =
+          static_cast<Common_Result::eType>(
       message[strings::params][hmi_response::code].asInt());
 
   SmartObject response_msg_params = message[strings::msg_params];
@@ -154,13 +155,15 @@ void SliderRequest::on_event(const event_engine::Event& event) {
       response_msg_params[strings::slider_position] = 0;
     }
   }
+  std::string response_info;
+  GetInfo(HmiInterfaces::HMI_INTERFACE_UI, response_code, response_info, message);
+  const bool is_response_success =
+          PrepareResultForMobileResponse(response_code, HmiInterfaces::HMI_INTERFACE_UI);
 
-  const bool is_response_success = Compare<Common_Result::eType, EQ, ONE>(
-      response_code, Common_Result::SUCCESS, Common_Result::WARNINGS);
 
   SendResponse(is_response_success,
                MessageHelper::HMIToMobileResult(response_code),
-               0,
+               response_info.empty()?NULL:response_info.c_str(),
                &response_msg_params);
 }
 

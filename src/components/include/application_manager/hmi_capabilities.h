@@ -68,13 +68,6 @@ class HMICapabilities {
      */
   virtual HMILanguageHandler& get_hmi_language_handler() = 0;
 
-  /**
-   * @brief Checks if all HMI capabilities received
-   *
-   * @return TRUE if all information received, otherwise FALSE
-   */
-  virtual bool is_hmi_capabilities_initialized() const = 0;
-
   /*
    * @brief Checks is image type(Static/Dynamic) requested by
    * Mobile Device is supported on current HMI.
@@ -423,6 +416,13 @@ class HMICapabilities {
   virtual bool phone_call_supported() const = 0;
 
   virtual void Init(resumption::LastState* last_state) = 0;
+
+  /**
+   * @brief Trigger waiting for response
+   * @param request Request object
+   */
+  virtual void set_handle_response_for(
+      const smart_objects::SmartObject& request) = 0;
 
  protected:
   /*

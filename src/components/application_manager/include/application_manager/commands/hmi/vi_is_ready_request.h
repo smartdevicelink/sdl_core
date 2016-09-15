@@ -42,7 +42,8 @@ namespace commands {
 /**
  * @brief VIIsReadyRequest command class
  **/
-class VIIsReadyRequest : public RequestToHMI {
+class VIIsReadyRequest : public RequestToHMI,
+                         public event_engine::EventObserver{
  public:
   /**
    * @brief VIIsReadyRequest class constructor
@@ -62,7 +63,22 @@ class VIIsReadyRequest : public RequestToHMI {
    **/
   virtual void Run();
 
- private:
+  /**
+   * @brief On event callback
+   **/
+  virtual void on_event(const event_engine::Event& event);
+
+  /**
+   * @brief onTimeOut from requrst Controller
+   */
+  virtual void onTimeOut();
+
+  /**
+   * @brief Send request to HMI for fetching of cappabilities
+   */
+  void SendMessageToHMI();
+
+private:
   DISALLOW_COPY_AND_ASSIGN(VIIsReadyRequest);
 };
 

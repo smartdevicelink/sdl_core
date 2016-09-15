@@ -578,7 +578,7 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
 
   // By default app subscribed to CUSTOM_BUTTON
   SendSubscribeCustomButtonNotification();
-  SendChangeRagistrationOnHMI(application);
+  SendChangeRegistrationOnHMI(application);
 }
 
 void RegisterAppInterfaceRequest::SendChangeRegistration(
@@ -602,7 +602,7 @@ void RegisterAppInterfaceRequest::SendChangeRegistration(
   }
 }
 
-void RegisterAppInterfaceRequest::SendChangeRagistrationOnHMI(
+void RegisterAppInterfaceRequest::SendChangeRegistrationOnHMI(
     ApplicationConstSharedPtr app) {
   using namespace hmi_apis::FunctionID;
   DCHECK_OR_RETURN_VOID(app);

@@ -315,7 +315,8 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
       is_ui_received_ = true;
       ui_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
-      ui_info_ = message[strings::msg_params][strings::info].asString();
+      GetInfo(HmiInterfaces::HMI_INTERFACE_UI, ui_result_,
+              ui_info_, message);
       if (hmi_apis::Common_Result::SUCCESS != ui_result_) {
         (*message_)[strings::msg_params].erase(strings::menu_params);
       }
@@ -326,7 +327,8 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
       is_vr_received_ = true;
       vr_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
-      vr_info_ = message[strings::msg_params][strings::info].asString();
+      GetInfo(HmiInterfaces::HMI_INTERFACE_VR, vr_result_,
+              vr_info_, message);
       if (hmi_apis::Common_Result::SUCCESS != vr_result_) {
         (*message_)[strings::msg_params].erase(strings::vr_commands);
       }
@@ -360,6 +362,10 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
           ui_result_,
           hmi_apis::Common_Result::INVALID_ENUM,
           hmi_apis::Common_Result::UNSUPPORTED_RESOURCE);
+  const bool is_vr_unsupported = vr_result_ ==
+          hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
+  const bool is_ui_unsupported = ui_result_ ==
+          hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
 
   const bool is_no_ui_error = Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
       ui_result_,
@@ -382,6 +388,7 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
   bool result = (is_no_ui_error && is_no_vr_error) ||
                 (is_no_ui_error && is_vr_invalid_unsupported) ||
                 (is_no_vr_error && is_ui_invalid_unsupported);
+
   LOG4CXX_DEBUG(logger_,
                 "calculated result " << ui_result_ << " " << is_no_ui_error
                                      << " " << is_no_vr_error);
@@ -457,7 +464,17 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
     LOG4CXX_DEBUG(logger_, "Result " << result);
   }
 
-  if (!BothSend() && is_vr_or_ui_unsupported) {
+  HmiInterfaces::InterfaceState ui_interface_state =
+      application_manager_.hmi_interfaces().GetInterfaceState(
+          HmiInterfaces::HMI_INTERFACE_UI);
+  HmiInterfaces::InterfaceState vr_interface_state =
+      application_manager_.hmi_interfaces().GetInterfaceState(
+          HmiInterfaces::HMI_INTERFACE_VR);
+
+  if (!BothSend() && ((is_vr_unsupported && HmiInterfaces::STATE_NOT_AVAILABLE ==
+                       vr_interface_state) ||
+                      (is_ui_unsupported && HmiInterfaces::STATE_NOT_AVAILABLE ==
+                                             ui_interface_state))) {
     LOG4CXX_DEBUG(logger_, "!BothSend() && is_vr_or_ui_unsupported");
     result = false;
   }
@@ -526,19 +543,6 @@ bool AddCommandRequest::IsWhiteSpaceExist() {
 
 bool AddCommandRequest::BothSend() const {
   return send_vr_ && send_ui_;
-}
-
-/**
- * @brief MergeInfos merge 2 infos in one string
- * @param lval - info string that should be first in result info
- * @param rval - info string that should be second in result info
- * @return if lval is empty return rval
- *         if rval is empty return lval
- *         if both are empty return empty string
- *         if both are not empty return empty lval +", " + rval
- */
-std::string MergeInfos(const std::string& lval, const std::string& rval) {
-  return lval + ((!lval.empty() && !rval.empty()) ? ", " : "") + rval;
 }
 
 const std::string AddCommandRequest::GenerateMobileResponseInfo() {

@@ -44,7 +44,11 @@ ClosePopupRequest::~ClosePopupRequest() {}
 
 void ClosePopupRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-
+  if(!CheckAvailabilityHMIInterfaces(application_manager_,
+                                     HmiInterfaces::HMI_INTERFACE_UI)) {
+      LOG4CXX_INFO(logger_, "HmiInterfaces::HMI_INTERFACE_UI isn't available");
+      return;
+  }
   SendRequest();
 }
 

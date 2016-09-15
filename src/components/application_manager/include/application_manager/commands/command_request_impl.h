@@ -47,7 +47,38 @@ class SmartObject;
 namespace application_manager {
 namespace commands {
 
+struct response_info{
+  hmi_apis::Common_Result::eType result_code;
+  HmiInterfaces::InterfaceID interface;
+  HmiInterfaces::InterfaceState interface_state;
+  bool is_ok;
+  bool is_unsupported_resource;
+  bool is_invalid_enum;
+};
+
 namespace NsSmart = NsSmartDeviceLink::NsSmartObjects;
+
+/**
+ * @brief MergeInfos merge 2 infos in one string
+ * @param first - info string that should be first in result info
+ * @param second - info string that should be second in result info
+ * @return if first is empty return second
+ *         if second is empty return first
+ *         if both are empty return empty string
+ *         if both are not empty return empty first +", " + second
+ */
+std::string MergeInfos(const std::string& first, const std::string& second);
+
+/**
+ * @brief MergeInfos merge 3 infos in one string
+ * @param first - info string that should be first in result info
+ * @param second - info string that should be second in result info
+ * @param third - info string that should be second in result info
+ * @return resulting string contain merge all incoming parameters
+ */
+std::string MergeInfos(const std::string& first,
+                       const std::string& second,
+                       const std::string& third);
 
 class CommandRequestImpl : public CommandImpl,
                            public event_engine::EventObserver {
@@ -153,7 +184,56 @@ class CommandRequestImpl : public CommandImpl,
    */
   bool HasDisallowedParams() const;
 
- protected:
+  /**
+   * @brief Checks result code from HMI for single RPC
+   * and returns parameter for sending to mobile app.
+   * @param result_code contains result code from HMI response
+   * @param interface contains interface for which HMI sent response
+   * @return true if result code complies successful result cods
+   * otherwise returns false.
+   */
+  bool PrepareResultForMobileResponse(hmi_apis::Common_Result::eType result_code,
+                                 HmiInterfaces::InterfaceID interface) const;
+
+  /**
+   * @brief Checks result code from HMI for splitted RPC
+   * and returns parameter for sending to mobile app.
+   * @param first contains result_code from HMI response and
+   * interface that returns response
+   * @param second contains result_code from HMI response and
+   * interface that returns response
+   * @return true if result code complies successful result code
+   * otherwise returns false
+   */
+  bool PrepareResultForMobileResponse(response_info& first,
+                                      response_info& second) const;
+  /**
+   * @brief If message from HMI contains returns this info
+   * or process result code from HMI and checks state of interface
+   * and create info.
+   * @param interface contains interface for which HMI sent response
+   * @param result_code contains result code from HMI
+   * @param info contain info for sending to application
+   * @param response_from_hmi contains response from HMI
+   */
+  void GetInfo(HmiInterfaces::InterfaceID interface,
+                   hmi_apis::Common_Result::eType result_code,
+                  std::string& info,
+                  const smart_objects::SmartObject& response_from_hmi);
+
+  /**
+   * @brief Prepare result code for sending to mobile application
+   * @param first contains result_code from HMI response and
+   * interface that returns response
+   * @param second contains result_code from HMI response and
+   * interface that returns response.
+   * @return resulting code for sending to mobile application.
+   */
+  mobile_apis::Result::eType PrepareResultCodeForResponse(
+      const response_info& first,
+      const response_info& second);
+
+protected:
   /**
    * @brief Returns policy parameters permissions
    * @return Parameters permissions struct reference

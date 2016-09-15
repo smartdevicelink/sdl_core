@@ -43,8 +43,7 @@ namespace components {
 namespace application_manager_test {
 
 class MockHMICapabilities : public ::application_manager::HMICapabilities {
- public:
-  MOCK_CONST_METHOD0(is_hmi_capabilities_initialized, bool());
+ public:  
   MOCK_CONST_METHOD1(VerifyImageType, bool(const int32_t image_type));
 
   MOCK_CONST_METHOD0(is_vr_cooperating, bool());
@@ -161,6 +160,8 @@ class MockHMICapabilities : public ::application_manager::HMICapabilities {
   MOCK_METHOD1(set_ccpu_version, void(const std::string& ccpu_version));
   MOCK_METHOD0(get_hmi_language_handler,
                application_manager::HMILanguageHandler&());
+  MOCK_METHOD1(set_handle_response_for, void (
+                 const smart_objects::SmartObject& request));
 
  protected:
   MOCK_CONST_METHOD2(check_existing_json_member,
