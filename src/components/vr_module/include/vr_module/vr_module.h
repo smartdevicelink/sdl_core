@@ -60,6 +60,8 @@ class VRModule : public functional_modules::GenericModule,
   explicit VRModule(Channel *channel);
   ~VRModule();
   virtual const functional_modules::PluginInfo& GetPluginInfo() const;
+  virtual void Start();
+  virtual void Stop();
   virtual functional_modules::ProcessResult ProcessHMIMessage(
       application_manager::MessagePtr msg);
 

@@ -30,6 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <pthread.h>
+
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 #include "vr_module/vr_proxy.h"
@@ -37,6 +39,7 @@
 #include "mock_channel.h"
 
 using ::testing::_;
+using ::testing::AtLeast;
 using ::testing::DoAll;
 using ::testing::Return;
 using ::testing::SetArgPointee;
@@ -47,6 +50,10 @@ MATCHER_P(ServiceMessageEq, expected, "") {
       && arg.correlation_id() == expected.correlation_id()
       && (arg.has_params() == expected.has_params()
           || arg.params() == expected.params());
+}
+
+ACTION_P(Unlock, mutex) {
+  pthread_mutex_unlock(mutex);
 }
 
 namespace vr_module {
@@ -60,16 +67,20 @@ TEST_F(VRProxyTest, StartStop) {
   MockChannel *channel = new MockChannel();
   EXPECT_CALL(*channel, Start()).Times(1).WillOnce(Return(true));
   EXPECT_CALL(listener, OnReady()).Times(1);
-  EXPECT_CALL(*channel, Receive(_, _)).WillRepeatedly(Return(false));
-  EXPECT_CALL(*channel, Stop()).Times(1).WillOnce(Return(true));
+  pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+  EXPECT_CALL(*channel, Receive(_, _)).WillRepeatedly(
+      DoAll(Unlock(&mutex), Return(false)));
+  EXPECT_CALL(*channel, Stop()).Times(AtLeast(1)).WillRepeatedly(Return(true));
   VRProxy proxy(&listener, channel);
-  sleep(1);
+  pthread_mutex_lock(&mutex);
+  EXPECT_TRUE(proxy.Start());
+  pthread_mutex_lock(&mutex);
+  proxy.Stop();
 }
 
 TEST_F(VRProxyTest, Send) {
   MockVRProxyListener listener;
   MockChannel *channel = new MockChannel();
-  EXPECT_CALL(*channel, Start()).Times(1).WillOnce(Return(false));
   VRProxy proxy(&listener, channel);
 
   unsigned char value[] = { 0x6, 0, 0, 0, 0x8, 0, 0x10, 0x2, 0x18, 0x1 };
@@ -85,7 +96,6 @@ TEST_F(VRProxyTest, Send) {
 TEST_F(VRProxyTest, Receive) {
   MockVRProxyListener listener;
   MockChannel *channel = new MockChannel();
-  EXPECT_CALL(*channel, Start()).Times(1).WillOnce(Return(false));
   VRProxy proxy(&listener, channel);
 
   unsigned char size[] = { 0x6, 0, 0, 0 };
@@ -99,17 +109,18 @@ TEST_F(VRProxyTest, Receive) {
   EXPECT_CALL(*channel, Receive(4, _)).Times(1).WillOnce(
       DoAll(SetArgPointee<1>(in_size), Return(true)));
   EXPECT_CALL(*channel, Receive(6, _)).Times(1).WillOnce(
-        DoAll(SetArgPointee<1>(input), Return(true)));
-  EXPECT_CALL(listener, OnReceived(_)).Times(1);
+      DoAll(SetArgPointee<1>(input), Return(true)));
+  pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+  EXPECT_CALL(listener, OnReceived(ServiceMessageEq(message))).Times(1).WillOnce(
+      Unlock(&mutex));
+  pthread_mutex_lock(&mutex);
   proxy.Receive();
-  sleep(1);
+  pthread_mutex_lock(&mutex);
 }
 
 TEST_F(VRProxyTest, SizeToString) {
   MockVRProxyListener listener;
   MockChannel *channel = new MockChannel();
-  EXPECT_CALL(*channel, Start()).Times(1).WillOnce(Return(false));
-  EXPECT_CALL(*channel, Stop()).Times(1).WillOnce(Return(false));
   VRProxy proxy(&listener, channel);
 
   unsigned char value[] = { 123, 0, 0, 0 };
@@ -126,8 +137,6 @@ TEST_F(VRProxyTest, SizeToString) {
 TEST_F(VRProxyTest, SizeFromString) {
   MockVRProxyListener listener;
   MockChannel *channel = new MockChannel();
-  EXPECT_CALL(*channel, Start()).Times(1).WillOnce(Return(false));
-  EXPECT_CALL(*channel, Stop()).Times(1).WillOnce(Return(false));
   VRProxy proxy(&listener, channel);
 
   unsigned char value[] = { 123, 0, 0, 0 };
