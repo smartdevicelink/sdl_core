@@ -28,8 +28,20 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 FORMATER=clang-format-3.6
+INSTALL_CMD="sudo apt-get install -f $FORMATER"
 
-command -v $FORMATER >/dev/null 2>&1 || { echo >&2 "$FORMATER is not installed. Use following: sudo apt-get install -f $FORMATER"; exit 1; }
+if [ "$1" = "--help" ]
+then
+    echo ""
+    echo "Script checks c++ code style in all .h .cc and .cpp files"
+    echo "Uses $FORMATER as base tool. Install it with : $INSTALL_CMD"
+    echo "Usage: `basename $0` [option]"
+    echo "      --fix   Fix files format indirectly"
+    echo "      --help  Display this information"
+    exit 0
+fi
+
+command -v $FORMATER >/dev/null 2>&1 || { echo >&2 "$FORMATER is not installed. Use following: $INSTALL_CMD"; exit 1; }
 
 FILE_NAMES=$(find src -name \*.h -print -o -name \*.cpp -print  -o -name \*.cc -print | grep -v 3rd_party)
 
