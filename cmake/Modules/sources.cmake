@@ -28,32 +28,24 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-include_directories(
-  ${GMOCK_INCLUDE_DIRECTORY}
-  ${COMPONENTS_DIR}/application_manager/include/application_manager/
-  ${COMPONENTS_DIR}/application_manager/include/application_manager/commands/
-  ${COMPONENTS_DIR}/application_manager/test/include/
-  ${COMPONENTS_DIR}/application_manager/test/include/application_manager/commands/
-)
-
-file(GLOB SOURCES
-  ${AM_SOURCE_DIR}/src/smart_object_keys.cc
-  ${AM_SOURCE_DIR}/test/mock_message_helper.cc
-  ${COMMANDS_TEST_SOURCE_DIR}/hmi/*
-  ${COMMANDS_TEST_SOURCE_DIR}/hmi/vi_is_ready_request_test.cc
-  ${COMMANDS_TEST_SOURCE_DIR}/hmi/vr_is_ready_request_test.cc 
-  ${COMMANDS_TEST_SOURCE_DIR}/hmi/ui_is_ready_request_test.cc
+function(create_cotired_test NAME SOURCES LIBS)
+  add_executable(
+    ${NAME}
+    EXCLUDE_FROM_ALL
+    ${CMAKE_SOURCE_DIR}/src/components/test_main.cc
+    ${SOURCES}
   )
-
-set(LIBRARIES
-  gmock
-  jsoncpp
-  Utils
-  ApplicationManager
-  connectionHandler
-  HMI_API
-  MOBILE_API
-  SmartObjects
-)
-
-create_test("hmi_commands_test" "${SOURCES}" "${LIBRARIES}" )
+  if(${USE_COTIRE})
+    include(cotire)
+    cotire(${NAME})
+    set(NAME "${NAME}_unity")
+  endif()
+  target_link_libraries(${NAME} ${LIBS})
+  set_target_properties(
+    ${NAME}
+    PROPERTIES
+    EXCLUDE_FROM_ALL 0
+  )
+  add_test(NAME ${NAME}
+  COMMAND ${NAME} --gtest_output=xml:${CMAKE_BINARY_DIR}/test_results/)
+endfunction()
