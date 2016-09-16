@@ -141,3 +141,26 @@ function(create_test NAME SOURCES LIBS)
   add_test(NAME ${NAME}
   COMMAND ${NAME} --gtest_output=xml:${CMAKE_BINARY_DIR}/test_results/)
 endfunction()
+
+function(create_cotired_test NAME SOURCES LIBS)
+  add_executable(
+    ${NAME}
+    EXCLUDE_FROM_ALL
+    ${CMAKE_SOURCE_DIR}/src/components/test_main.cc
+    ${SOURCES}
+  )
+  # TODO: Fix problems with Cotire on Windows and Qt APPLINK-28060
+  if(${FAST_BUILD} AND (${OS} STREQUAL "posix"))
+    include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/cotire.cmake)
+    cotire(${NAME})
+    set(NAME "${NAME}_unity")
+  endif()
+  target_link_libraries(${NAME} ${LIBS})
+  set_target_properties(
+    ${NAME}
+    PROPERTIES
+    EXCLUDE_FROM_ALL 0
+  )
+  add_test(NAME ${NAME}
+  COMMAND ${NAME} --gtest_output=xml:${CMAKE_BINARY_DIR}/test_results/)
+endfunction()

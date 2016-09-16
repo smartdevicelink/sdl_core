@@ -65,6 +65,7 @@ option(ENABLE_SECURITY "Security Ford protocol protection" ON)
 option(ENABLE_HMI_PTU_DECRYPTION "Policy table update parsed by hmi" ON)
 option(ENABLE_EXTENDED_POLICY "Turns extended flow which requires embedded system interaction" ON)
 option(ENABLE_THREAD_COUNT "Turn on correct threads shutdown checks" OFF)
+option(FAST_BUILD "Turn on fast build" ON)
 
 # Platform - specific build flags
 if(${OS} STREQUAL "posix")
