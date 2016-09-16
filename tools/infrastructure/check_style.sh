@@ -27,15 +27,19 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+FORMATER=clang-format-3.6
+
+command -v $FORMATER >/dev/null 2>&1 || { echo >&2 "$FORMATER is not installed. Use following: sudo apt-get install -f $FORMATER"; exit 1; }
+
 FILE_NAMES=$(find src -name \*.h -print -o -name \*.cpp -print  -o -name \*.cc -print | grep -v 3rd_party)
 
 
 check_style() {
-	clang-format-3.6 -style=file $1 | diff $1 -
+	$FORMATER -style=file $1 | diff $1 -
 }
 
 fix_style() {
-	clang-format-3.6 -style=file -i $1
+	$FORMATER -style=file -i $1
 }
 
 if [ "$1" = "--fix" ]
