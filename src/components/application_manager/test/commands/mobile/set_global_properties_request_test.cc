@@ -59,7 +59,7 @@ using utils::custom_string::CustomString;
 using smart_objects::SmartObject;
 using testing::_;
 using testing::Return;
-/*
+
 namespace strings = application_manager::strings;
 namespace hmi_request = application_manager::hmi_request;
 namespace hmi_response = application_manager::hmi_response;
@@ -190,7 +190,7 @@ TEST_F(SetGlobalPropertiesRequestTest, Run_VRWithMenuAndKeyboard_SUCCESS) {
   EXPECT_CALL(mock_message_helper_, VerifyImageVrHelpItems(vr_help_array, _, _))
       .WillOnce((Return(mobile_apis::Result::SUCCESS)));
   EXPECT_CALL(mock_app_manager_,
-RemoveAppFromTTSGlobalPropertiesList(kConnectionKey));
+              RemoveAppFromTTSGlobalPropertiesList(kConnectionKey));
   EXPECT_CALL(*mock_app_, set_vr_help_title(vr_help_title));
   EXPECT_CALL(*mock_app_, set_vr_help(vr_help_array));
   EXPECT_CALL(*mock_app_, vr_help_title()).WillOnce(Return(&vr_help_title));
@@ -219,8 +219,8 @@ TEST_F(SetGlobalPropertiesRequestTest, Run_VRBrokenMenuIcon_Canceled) {
   EXPECT_CALL(mock_message_helper_, VerifyImage(menu_icon, _, _))
       .WillOnce((Return(mobile_apis::Result::ABORTED)));
   EXPECT_CALL(mock_message_helper_, VerifyImageVrHelpItems(_, _, _)).Times(0);
-  EXPECT_CALL(mock_app_manager_,
-RemoveAppFromTTSGlobalPropertiesList(_)).Times(0);
+  EXPECT_CALL(mock_app_manager_, RemoveAppFromTTSGlobalPropertiesList(_))
+      .Times(0);
   EmptyExpectationsSetupHelper();
 
   SharedPtr<SetGlobalPropertiesRequest> command(
@@ -242,8 +242,8 @@ TEST_F(SetGlobalPropertiesRequestTest, Run_VRBrokenVRHelp_Canceled) {
       .WillOnce((Return(mobile_apis::Result::SUCCESS)));
   EXPECT_CALL(mock_message_helper_, VerifyImageVrHelpItems(vr_help_array, _, _))
       .WillOnce((Return(mobile_apis::Result::ABORTED)));
-  EXPECT_CALL(mock_app_manager_,
-RemoveAppFromTTSGlobalPropertiesList(_)).Times(0);
+  EXPECT_CALL(mock_app_manager_, RemoveAppFromTTSGlobalPropertiesList(_))
+      .Times(0);
   EmptyExpectationsSetupHelper();
 
   SharedPtr<SetGlobalPropertiesRequest> command(
@@ -267,8 +267,8 @@ TEST_F(SetGlobalPropertiesRequestTest, Run_VRIncorrectSyntax_Canceled) {
       .WillOnce((Return(mobile_apis::Result::SUCCESS)));
   EXPECT_CALL(mock_message_helper_, VerifyImageVrHelpItems(vr_help_array, _, _))
       .WillOnce((Return(mobile_apis::Result::SUCCESS)));
-  EXPECT_CALL(mock_app_manager_,
-RemoveAppFromTTSGlobalPropertiesList(_)).Times(0);
+  EXPECT_CALL(mock_app_manager_, RemoveAppFromTTSGlobalPropertiesList(_))
+      .Times(0);
   EmptyExpectationsSetupHelper();
 
   SharedPtr<SetGlobalPropertiesRequest> command(
@@ -290,7 +290,7 @@ TEST_F(SetGlobalPropertiesRequestTest, Run_VRMissingTitle_Canceled) {
   EXPECT_CALL(mock_message_helper_, VerifyImageVrHelpItems(vr_help_array, _, _))
       .WillOnce((Return(mobile_apis::Result::SUCCESS)));
   EXPECT_CALL(mock_app_manager_,
-RemoveAppFromTTSGlobalPropertiesList(kConnectionKey));
+              RemoveAppFromTTSGlobalPropertiesList(kConnectionKey));
   EmptyExpectationsSetupHelper();
 
   SharedPtr<SetGlobalPropertiesRequest> command(
@@ -308,7 +308,7 @@ TEST_F(SetGlobalPropertiesRequestTest, Run_VRMissingArray_Canceled) {
       .WillOnce(Return(mock_app_));
   EXPECT_CALL(mock_message_helper_, VerifyImageVrHelpItems(_, _, _)).Times(0);
   EXPECT_CALL(mock_app_manager_,
-RemoveAppFromTTSGlobalPropertiesList(kConnectionKey));
+              RemoveAppFromTTSGlobalPropertiesList(kConnectionKey));
   EmptyExpectationsSetupHelper();
 
   SharedPtr<SetGlobalPropertiesRequest> command(
@@ -330,7 +330,7 @@ TEST_F(SetGlobalPropertiesRequestTest, Run_VRWrongOrder_Canceled) {
   EXPECT_CALL(mock_message_helper_, VerifyImageVrHelpItems(vr_help_array, _, _))
       .WillOnce((Return(mobile_apis::Result::SUCCESS)));
   EXPECT_CALL(mock_app_manager_,
-RemoveAppFromTTSGlobalPropertiesList(kConnectionKey));
+              RemoveAppFromTTSGlobalPropertiesList(kConnectionKey));
   EmptyExpectationsSetupHelper();
 
   SharedPtr<SetGlobalPropertiesRequest> command(
@@ -351,7 +351,7 @@ TEST_F(SetGlobalPropertiesRequestTest, Run_NoVR_SUCCESS) {
       .WillOnce(Return(mock_app_));
   EXPECT_CALL(mock_message_helper_, VerifyImageVrHelpItems(_, _, _)).Times(0);
   EXPECT_CALL(mock_app_manager_,
-RemoveAppFromTTSGlobalPropertiesList(kConnectionKey));
+              RemoveAppFromTTSGlobalPropertiesList(kConnectionKey));
   SmartObject vr_help_title("Menu_Title");
   EXPECT_CALL(*mock_app_, vr_help_title()).WillOnce(Return(&vr_help_title));
   EXPECT_CALL(*mock_app_, set_menu_title(menu_title));
@@ -375,18 +375,22 @@ TEST_F(SetGlobalPropertiesRequestTest, Run_NoVRNoDataNoDefault_Canceled) {
       .WillOnce(Return(mock_app_));
   EXPECT_CALL(mock_message_helper_, VerifyImageVrHelpItems(_, _, _)).Times(0);
   EXPECT_CALL(mock_app_manager_,
-RemoveAppFromTTSGlobalPropertiesList(kConnectionKey));
+              RemoveAppFromTTSGlobalPropertiesList(kConnectionKey));
   SmartObject vr_help_title(smart_objects::SmartType_Null);
-  EXPECT_CALL(*mock_app_, vr_help_title()).WillOnce(Return(&vr_help_title));
+  EXPECT_CALL(*mock_app_, vr_help_title())
+      .WillOnce(Return(&vr_help_title))
+      .WillOnce(Return(&vr_help_title));
 
   CommandsMap commands_map;
   DataAccessor<CommandsMap> accessor(commands_map, lock_);
   EXPECT_CALL(*mock_app_, commands_map()).WillOnce(Return(accessor));
-  EXPECT_CALL(*mock_app_, vr_synonyms()).WillOnce(Return(&vr_help_title));
+  const CustomString name("name");
+  EXPECT_CALL(*mock_app_, name()).WillOnce(ReturnRef(name));
+  EXPECT_CALL(*mock_app_, set_vr_help_title(SmartObject(name)));
   EXPECT_CALL(*mock_app_, set_menu_title(_)).Times(0);
   EXPECT_CALL(*mock_app_, set_menu_icon(_)).Times(0);
-  EXPECT_CALL(*mock_app_, set_keyboard_props(_)).Times(0);
-  EXPECT_CALL(*mock_app_, app_id()).Times(0);
+  EXPECT_CALL(*mock_app_, set_keyboard_props(_));
+  EXPECT_CALL(*mock_app_, app_id());
 
   SharedPtr<SetGlobalPropertiesRequest> command(
       CreateCommand<SetGlobalPropertiesRequest>(msg));
@@ -404,7 +408,7 @@ TEST_F(SetGlobalPropertiesRequestTest, Run_NoVRNoDataDefaultCreated_SUCCESS) {
       .WillOnce(Return(mock_app_));
   EXPECT_CALL(mock_message_helper_, VerifyImageVrHelpItems(_, _, _)).Times(0);
   EXPECT_CALL(mock_app_manager_,
-RemoveAppFromTTSGlobalPropertiesList(kConnectionKey));
+              RemoveAppFromTTSGlobalPropertiesList(kConnectionKey));
   SmartObject vr_help_title(smart_objects::SmartType_Null);
   EXPECT_CALL(*mock_app_, vr_help_title())
       .Times(2)
@@ -443,7 +447,7 @@ TEST_F(SetGlobalPropertiesRequestTest, Run_NoVRNoDataFromSynonyms_SUCCESS) {
       .WillOnce(Return(mock_app_));
   EXPECT_CALL(mock_message_helper_, VerifyImageVrHelpItems(_, _, _)).Times(0);
   EXPECT_CALL(mock_app_manager_,
-RemoveAppFromTTSGlobalPropertiesList(kConnectionKey));
+              RemoveAppFromTTSGlobalPropertiesList(kConnectionKey));
   SmartObject vr_help_title(smart_objects::SmartType_Null);
   EXPECT_CALL(*mock_app_, vr_help_title())
       .Times(2)
@@ -458,12 +462,9 @@ RemoveAppFromTTSGlobalPropertiesList(kConnectionKey));
   vr_help_array[0][strings::position] = kPosition;
   SmartObject vr_synonyms(smart_objects::SmartType_Array);
   vr_synonyms[0] = vr_help_array;
-  EXPECT_CALL(*mock_app_, vr_synonyms()).WillOnce(Return(&vr_synonyms));
-  EXPECT_CALL(*mock_app_, set_vr_help(vr_help_array));
   const CustomString name("name");
   EXPECT_CALL(*mock_app_, name()).WillOnce(ReturnRef(name));
   EXPECT_CALL(*mock_app_, set_vr_help_title(SmartObject(name)));
-  EXPECT_CALL(*mock_app_, vr_help()).WillOnce(Return(&vr_help_array));
   EXPECT_CALL(*mock_app_, set_menu_title(_)).Times(0);
   EXPECT_CALL(*mock_app_, set_menu_icon(_)).Times(0);
   EXPECT_CALL(*mock_app_, set_keyboard_props(keyboard_properties));
@@ -488,7 +489,7 @@ TEST_F(SetGlobalPropertiesRequestTest, Run_TTSHelpAndTimeout_SUCCESS) {
       .WillOnce(Return(mock_app_));
   EXPECT_CALL(mock_message_helper_, VerifyImageVrHelpItems(_, _, _)).Times(0);
   EXPECT_CALL(mock_app_manager_,
-RemoveAppFromTTSGlobalPropertiesList(kConnectionKey));
+              RemoveAppFromTTSGlobalPropertiesList(kConnectionKey));
   SmartObject vr_help_title("title");
   EXPECT_CALL(*mock_app_, vr_help_title()).WillOnce(Return(&vr_help_title));
   EXPECT_CALL(*mock_app_, set_help_prompt(help_prompt));
@@ -513,7 +514,7 @@ TEST_F(SetGlobalPropertiesRequestTest, Run_TTSOnlyHelp_SUCCESS) {
       .WillOnce(Return(mock_app_));
   EXPECT_CALL(mock_message_helper_, VerifyImageVrHelpItems(_, _, _)).Times(0);
   EXPECT_CALL(mock_app_manager_,
-RemoveAppFromTTSGlobalPropertiesList(kConnectionKey));
+              RemoveAppFromTTSGlobalPropertiesList(kConnectionKey));
   SmartObject vr_help_title("title");
   EXPECT_CALL(*mock_app_, vr_help_title()).WillOnce(Return(&vr_help_title));
   EXPECT_CALL(*mock_app_, set_help_prompt(help_prompt));
@@ -538,7 +539,7 @@ TEST_F(SetGlobalPropertiesRequestTest, Run_TTSOnlyTimeout_SUCCESS) {
       .WillOnce(Return(mock_app_));
   EXPECT_CALL(mock_message_helper_, VerifyImageVrHelpItems(_, _, _)).Times(0);
   EXPECT_CALL(mock_app_manager_,
-RemoveAppFromTTSGlobalPropertiesList(kConnectionKey));
+              RemoveAppFromTTSGlobalPropertiesList(kConnectionKey));
   SmartObject vr_help_title("title");
   EXPECT_CALL(*mock_app_, vr_help_title()).WillOnce(Return(&vr_help_title));
   EXPECT_CALL(*mock_app_, set_help_prompt(_)).Times(0);
@@ -562,8 +563,8 @@ TEST_F(SetGlobalPropertiesRequestTest, Run_TTSIncorrectSyntax_Canceled) {
   EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
   EXPECT_CALL(mock_message_helper_, VerifyImageVrHelpItems(_, _, _)).Times(0);
-  EXPECT_CALL(mock_app_manager_,
-RemoveAppFromTTSGlobalPropertiesList(_)).Times(0);
+  EXPECT_CALL(mock_app_manager_, RemoveAppFromTTSGlobalPropertiesList(_))
+      .Times(0);
   SmartObject vr_help_title("title");
   EmptyExpectationsSetupHelper();
 
@@ -579,8 +580,8 @@ TEST_F(SetGlobalPropertiesRequestTest, Run_NoData_Canceled) {
   EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
   EXPECT_CALL(mock_message_helper_, VerifyImageVrHelpItems(_, _, _)).Times(0);
-  EXPECT_CALL(mock_app_manager_,
-RemoveAppFromTTSGlobalPropertiesList(_)).Times(0);
+  EXPECT_CALL(mock_app_manager_, RemoveAppFromTTSGlobalPropertiesList(_))
+      .Times(0);
   EmptyExpectationsSetupHelper();
 
   SharedPtr<SetGlobalPropertiesRequest> command(
@@ -596,8 +597,8 @@ TEST_F(SetGlobalPropertiesRequestTest, Run_InvalidApp_Canceled) {
   EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
       .WillOnce(Return(MockAppPtr()));
   EXPECT_CALL(mock_message_helper_, VerifyImageVrHelpItems(_, _, _)).Times(0);
-  EXPECT_CALL(mock_app_manager_,
-RemoveAppFromTTSGlobalPropertiesList(_)).Times(0);
+  EXPECT_CALL(mock_app_manager_, RemoveAppFromTTSGlobalPropertiesList(_))
+      .Times(0);
   EmptyExpectationsSetupHelper();
 
   SharedPtr<SetGlobalPropertiesRequest> command(
@@ -734,7 +735,7 @@ TEST_F(SetGlobalPropertiesRequestTest,
   event.set_smart_object(*msg);
 
   command->on_event(event);
-}*/
+}
 
 }  // namespace mobile_commands_test
 }  // namespace commands_test
