@@ -37,6 +37,7 @@
 #include "vr_module/interface/hmi.pb.h"
 #include "vr_module/interface/mobile.pb.h"
 
+using ::testing::_;
 using ::testing::Return;
 
 namespace vr_module {
@@ -81,6 +82,50 @@ TEST_F(OnRegisterServiceTest, Execute) {
   EXPECT_CALL(service, SendToHmi(ServiceMessageEq(expected))).Times(1).WillOnce(
       Return(true));
   EXPECT_TRUE(cmd.Execute());
+}
+
+TEST_F(OnRegisterServiceTest, ExecuteNoDefault) {
+  MockServiceModule service;
+
+  const int32_t kId = 1;
+  EXPECT_CALL(service, GetNextCorrelationID()).Times(1).WillOnce(Return(kId));
+  vr_hmi_api::ServiceMessage input;
+  input.set_rpc(vr_hmi_api::ON_REGISTER);
+  vr_hmi_api::OnRegisterServiceNotification notification;
+  notification.set_appid(3);
+  std::string params;
+  notification.SerializeToString(&params);
+  input.set_params(params);
+  OnRegisterService cmd(input, &service);
+
+  vr_hmi_api::ServiceMessage expected;
+  expected.set_rpc(vr_hmi_api::ON_REGISTER);
+  expected.set_rpc_type(vr_hmi_api::NOTIFICATION);
+  expected.set_correlation_id(kId);
+  vr_hmi_api::OnRegisterServiceNotification hmi_notification;
+  hmi_notification.set_default_(false);
+  hmi_notification.set_appid(3);
+  std::string hmi_params;
+  hmi_notification.SerializeToString(&hmi_params);
+  expected.set_params(hmi_params);
+  EXPECT_CALL(service, IsDefaultService(3)).Times(1).WillOnce(Return(false));
+  EXPECT_CALL(service, SendToHmi(ServiceMessageEq(expected))).Times(1).WillOnce(
+      Return(true));
+  EXPECT_TRUE(cmd.Execute());
+}
+
+TEST_F(OnRegisterServiceTest, ExecuteNoParams) {
+  MockServiceModule service;
+
+  const int32_t kId = 1;
+  EXPECT_CALL(service, GetNextCorrelationID()).Times(1).WillOnce(Return(kId));
+  vr_hmi_api::ServiceMessage input;
+  input.set_rpc(vr_hmi_api::ON_REGISTER);
+  OnRegisterService cmd(input, &service);
+
+  EXPECT_CALL(service, IsDefaultService(_)).Times(0);
+  EXPECT_CALL(service, SendToHmi(_)).Times(0);
+  EXPECT_FALSE(cmd.Execute());
 }
 
 }  // namespace commands
