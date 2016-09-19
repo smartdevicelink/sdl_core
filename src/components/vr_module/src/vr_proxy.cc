@@ -32,6 +32,8 @@
 
 #include "vr_module/vr_proxy.h"
 
+#include <arpa/inet.h>
+
 #include "utils/logger.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
@@ -124,28 +126,24 @@ void VRProxy::Handle(vr_hmi_api::ServiceMessage message) {
   listener_->OnReceived(message);
 }
 
-std::string VRProxy::SizeToString(int32_t value) {
+std::string VRProxy::SizeToString(uint32_t value) {
   LOG4CXX_AUTO_TRACE(logger_);
-  unsigned char result[kHeaderSize] = { 0 };
-  result[0] = (value & 0x000000ff);
-  result[1] = (value & 0x0000ff00) >> 8;
-  result[2] = (value & 0x00ff0000) >> 16;
-  result[3] = (value & 0xff000000) >> 24;
+  uint32_t net_value = htonl(value);
+  unsigned char* result = reinterpret_cast<unsigned char*>(&net_value);
   std::string size(result, result + kHeaderSize);
   DCHECK(size.size() == kHeaderSize)
   return size;
 }
 
-int32_t VRProxy::SizeFromString(const std::string& value) {
+uint32_t VRProxy::SizeFromString(const std::string& value) {
   if (value.size() != kHeaderSize) {
     LOG4CXX_WARN(logger_, "Incorrect length of header");
     return 0;
   }
-  unsigned char result[kHeaderSize] = { 0 };
+  unsigned char result[kHeaderSize] = { 0, 0, 0, 0 };
   memcpy(result, value.c_str(), kHeaderSize);
-  int32_t size = int32_t(result[0]) + int32_t(result[1] << 8)
-      + int32_t(result[2] << 16) + int32_t(result[3] << 24);
-  return size;
+  uint32_t* net_value = reinterpret_cast<uint32_t*>(result);
+  return ntohl(*net_value);
 }
 
 bool VRProxy::Send(const vr_hmi_api::ServiceMessage& message) {
