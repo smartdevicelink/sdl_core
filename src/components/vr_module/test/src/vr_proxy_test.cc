@@ -83,7 +83,7 @@ TEST_F(VRProxyTest, Send) {
   MockChannel *channel = new MockChannel();
   VRProxy proxy(&listener, channel);
 
-  unsigned char value[] = { 0x6, 0, 0, 0, 0x8, 0, 0x10, 0x2, 0x18, 0x1 };
+  unsigned char value[] = { 0, 0, 0, 0x6, 0x8, 0, 0x10, 0x2, 0x18, 0x1 };
   std::string expected(value, value + 10);
   vr_hmi_api::ServiceMessage message;
   message.set_rpc(vr_hmi_api::ON_REGISTER);
@@ -98,7 +98,7 @@ TEST_F(VRProxyTest, Receive) {
   MockChannel *channel = new MockChannel();
   VRProxy proxy(&listener, channel);
 
-  unsigned char size[] = { 0x6, 0, 0, 0 };
+  unsigned char size[] = { 0, 0, 0, 0x6 };
   std::string in_size(size, size + 4);
   unsigned char data[] = { 0x8, 0, 0x10, 0x2, 0x18, 0x1 };
   std::string input(data, data + 6);
@@ -123,15 +123,15 @@ TEST_F(VRProxyTest, SizeToString) {
   MockChannel *channel = new MockChannel();
   VRProxy proxy(&listener, channel);
 
-  unsigned char value[] = { 123, 0, 0, 0 };
+  unsigned char value[] = { 0, 0, 0, 123 };
   std::string input(value, value + 4);
 
-  EXPECT_EQ(int32_t(123), proxy.SizeFromString(input));
+  EXPECT_EQ(input, proxy.SizeToString(123));
 
-  unsigned char value2[] = { 0xBD, 0x3, 0, 0 };
+  unsigned char value2[] = { 0, 0, 0x3, 0xBD };
   std::string input2(value2, value2 + 4);
 
-  EXPECT_EQ(int32_t(957), proxy.SizeFromString(input2));
+  EXPECT_EQ(input2, proxy.SizeToString(957));
 }
 
 TEST_F(VRProxyTest, SizeFromString) {
@@ -139,15 +139,15 @@ TEST_F(VRProxyTest, SizeFromString) {
   MockChannel *channel = new MockChannel();
   VRProxy proxy(&listener, channel);
 
-  unsigned char value[] = { 123, 0, 0, 0 };
+  unsigned char value[] = { 0, 0, 0, 123 };
   std::string input(value, value + 4);
 
-  EXPECT_EQ(int32_t(123), proxy.SizeFromString(input));
+  EXPECT_EQ(uint32_t(123), proxy.SizeFromString(input));
 
-  unsigned char value2[] = { 0xBD, 0x3, 0, 0 };
+  unsigned char value2[] = { 0, 0, 0x3, 0xBD };
   std::string input2(value2, value2 + 4);
 
-  EXPECT_EQ(int32_t(957), proxy.SizeFromString(input2));
+  EXPECT_EQ(uint32_t(957), proxy.SizeFromString(input2));
 }
 
 }  // namespace vr_module

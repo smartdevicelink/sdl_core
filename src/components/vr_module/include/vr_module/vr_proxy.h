@@ -107,14 +107,14 @@ class VRProxy : public threads::MessageLoopThread<MessageQueue>::Handler {
    * @param value integer presentaiont of size
    * @return string presentation of size
    */
-  std::string SizeToString(int32_t value);
+  std::string SizeToString(uint32_t value);
 
   /**
    * Converts string to size of message
    * @param value string presentaiont of size
    * @return integer presentaiont of size
    */
-  int32_t SizeFromString(const std::string& value);
+  uint32_t SizeFromString(const std::string& value);
   VRProxyListener *listener_;
   threads::MessageLoopThread<MessageQueue> incoming_;
   Channel *channel_;
