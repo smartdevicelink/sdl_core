@@ -59,11 +59,7 @@ TEST_F(ActivateServiceTest, Execute) {
   MockServiceModule service;
 
   const int32_t kHmiId = 1;
-  const int32_t kMobileId = 2;
   const int32_t kAppId = 3;
-  EXPECT_CALL(service, GetNextCorrelationID()).Times(1).WillOnce(
-      Return(kMobileId));
-  EXPECT_CALL(service, RegisterRequest(kMobileId, _)).Times(1);
   vr_hmi_api::ServiceMessage input;
   input.set_rpc(vr_hmi_api::ACTIVATE);
   input.set_rpc_type(vr_hmi_api::REQUEST);
@@ -75,13 +71,18 @@ TEST_F(ActivateServiceTest, Execute) {
   input.set_params(params);
   ActivateService cmd(input, &service);
 
-  vr_mobile_api::ServiceMessage expected;
-  expected.set_rpc(vr_mobile_api::ACTIVATE);
-  expected.set_rpc_type(vr_mobile_api::REQUEST);
-  expected.set_correlation_id(kMobileId);
-  EXPECT_CALL(service, SendToMobile(ServiceMessageEq(expected))).Times(1)
-      .WillOnce(Return(true));
+  vr_hmi_api::ServiceMessage expected;
+  expected.set_rpc(vr_hmi_api::ACTIVATE);
+  expected.set_rpc_type(vr_hmi_api::RESPONSE);
+  expected.set_correlation_id(kHmiId);
+  vr_hmi_api::ActivateServiceResponse hmi_response;
+  hmi_response.set_result(vr_hmi_api::SUCCESS);
+  std::string hmi_params;
+  hmi_response.SerializeToString(&hmi_params);
+  expected.set_params(hmi_params);
   EXPECT_CALL(service, ActivateService(kAppId)).Times(1);
+  EXPECT_CALL(service, SendToHmi(ServiceMessageEq(expected))).Times(1)
+      .WillOnce(Return(true));
   EXPECT_TRUE(cmd.Execute());
 }
 
@@ -89,10 +90,6 @@ TEST_F(ActivateServiceTest, ExecuteNoParams) {
   MockServiceModule service;
 
   const int32_t kHmiId = 1;
-  const int32_t kMobileId = 2;
-  EXPECT_CALL(service, GetNextCorrelationID()).Times(1).WillOnce(
-      Return(kMobileId));
-  EXPECT_CALL(service, RegisterRequest(kMobileId, _)).Times(1);
   vr_hmi_api::ServiceMessage input;
   input.set_rpc(vr_hmi_api::ACTIVATE);
   input.set_rpc_type(vr_hmi_api::REQUEST);
@@ -110,159 +107,8 @@ TEST_F(ActivateServiceTest, ExecuteNoParams) {
   expected.set_params(hmi_params);
   EXPECT_CALL(service, SendToHmi(ServiceMessageEq(expected))).Times(1)
       .WillOnce(Return(true));
-  EXPECT_CALL(service, SendToMobile(_)).Times(0);
   EXPECT_CALL(service, ActivateService(_)).Times(0);
-  EXPECT_CALL(service, UnregisterRequest(kMobileId)).Times(1);
-  EXPECT_FALSE(cmd.Execute());
-}
-
-TEST_F(ActivateServiceTest, OnEventSuccess) {
-  MockServiceModule service;
-
-  const int32_t kHmiId = 1;
-  const int32_t kMobileId = 2;
-  EXPECT_CALL(service, GetNextCorrelationID()).Times(1).WillOnce(
-      Return(kMobileId));
-  EXPECT_CALL(service, RegisterRequest(kMobileId, _)).Times(1);
-  vr_hmi_api::ServiceMessage input;
-  input.set_rpc(vr_hmi_api::ACTIVATE);
-  input.set_rpc_type(vr_hmi_api::REQUEST);
-  input.set_correlation_id(kHmiId);
-  ActivateService cmd(input, &service);
-
-  vr_mobile_api::ServiceMessage response;
-  response.set_rpc(vr_mobile_api::ACTIVATE);
-  response.set_rpc_type(vr_mobile_api::RESPONSE);
-  response.set_correlation_id(kHmiId);
-  vr_mobile_api::ActivateServiceResponse mobile_response;
-  mobile_response.set_result(vr_mobile_api::SUCCESS);
-  std::string params;
-  mobile_response.SerializeToString(&params);
-  response.set_params(params);
-  MobileEvent event(response);
-
-  vr_hmi_api::ServiceMessage expected;
-  expected.set_rpc(vr_hmi_api::ACTIVATE);
-  expected.set_rpc_type(vr_hmi_api::RESPONSE);
-  expected.set_correlation_id(kHmiId);
-  vr_hmi_api::ActivateServiceResponse hmi_response;
-  hmi_response.set_result(vr_hmi_api::SUCCESS);
-  std::string hmi_params;
-  hmi_response.SerializeToString(&hmi_params);
-  expected.set_params(hmi_params);
-  EXPECT_CALL(service, SendToHmi(ServiceMessageEq(expected))).Times(1).WillOnce(
-      Return(true));
-  EXPECT_CALL(service, ActivateService(_)).Times(0);
-  EXPECT_CALL(service, DeactivateService()).Times(0);
-  EXPECT_CALL(service, UnregisterRequest(kMobileId)).Times(1);
-  cmd.on_event(event);
-}
-
-TEST_F(ActivateServiceTest, OnEventRejected) {
-  MockServiceModule service;
-
-  const int32_t kHmiId = 1;
-  const int32_t kMobileId = 2;
-  EXPECT_CALL(service, GetNextCorrelationID()).Times(1).WillOnce(
-      Return(kMobileId));
-  EXPECT_CALL(service, RegisterRequest(kMobileId, _)).Times(1);
-  vr_hmi_api::ServiceMessage input;
-  input.set_rpc(vr_hmi_api::ACTIVATE);
-  input.set_rpc_type(vr_hmi_api::REQUEST);
-  input.set_correlation_id(kHmiId);
-  ActivateService cmd(input, &service);
-
-  vr_mobile_api::ServiceMessage response;
-  response.set_rpc(vr_mobile_api::ACTIVATE);
-  response.set_rpc_type(vr_mobile_api::RESPONSE);
-  response.set_correlation_id(kHmiId);
-  vr_mobile_api::ActivateServiceResponse mobile_response;
-  mobile_response.set_result(vr_mobile_api::REJECTED);
-  std::string params;
-  mobile_response.SerializeToString(&params);
-  response.set_params(params);
-  MobileEvent event(response);
-
-  vr_hmi_api::ServiceMessage expected;
-  expected.set_rpc(vr_hmi_api::ACTIVATE);
-  expected.set_rpc_type(vr_hmi_api::RESPONSE);
-  expected.set_correlation_id(kHmiId);
-  vr_hmi_api::ActivateServiceResponse hmi_response;
-  hmi_response.set_result(vr_hmi_api::REJECTED);
-  std::string hmi_params;
-  hmi_response.SerializeToString(&hmi_params);
-  expected.set_params(hmi_params);
-  EXPECT_CALL(service, SendToHmi(ServiceMessageEq(expected))).Times(1).WillOnce(
-      Return(true));
-  EXPECT_CALL(service, ActivateService(_)).Times(0);
-  EXPECT_CALL(service, DeactivateService()).Times(1);
-  EXPECT_CALL(service, UnregisterRequest(kMobileId)).Times(1);
-  cmd.on_event(event);
-}
-
-TEST_F(ActivateServiceTest, OnEventNoParams) {
-  MockServiceModule service;
-
-  const int32_t kHmiId = 1;
-  const int32_t kMobileId = 2;
-  EXPECT_CALL(service, GetNextCorrelationID()).Times(1).WillOnce(
-      Return(kMobileId));
-  EXPECT_CALL(service, RegisterRequest(kMobileId, _)).Times(1);
-  vr_hmi_api::ServiceMessage input;
-  input.set_rpc(vr_hmi_api::ACTIVATE);
-  input.set_rpc_type(vr_hmi_api::REQUEST);
-  input.set_correlation_id(kHmiId);
-  ActivateService cmd(input, &service);
-
-  vr_mobile_api::ServiceMessage response;
-  response.set_rpc(vr_mobile_api::ACTIVATE);
-  response.set_rpc_type(vr_mobile_api::RESPONSE);
-  response.set_correlation_id(kHmiId);
-  MobileEvent event(response);
-
-  vr_hmi_api::ServiceMessage expected;
-  expected.set_rpc(vr_hmi_api::ACTIVATE);
-  expected.set_rpc_type(vr_hmi_api::RESPONSE);
-  expected.set_correlation_id(kHmiId);
-  vr_hmi_api::ActivateServiceResponse hmi_response;
-  hmi_response.set_result(vr_hmi_api::GENERIC_ERROR);
-  std::string params;
-  hmi_response.SerializeToString(&params);
-  expected.set_params(params);
-  EXPECT_CALL(service, SendToHmi(ServiceMessageEq(expected))).Times(1).WillOnce(
-      Return(true));
-  EXPECT_CALL(service, ActivateService(_)).Times(0);
-  EXPECT_CALL(service, DeactivateService()).Times(1);
-  EXPECT_CALL(service, UnregisterRequest(kMobileId)).Times(1);
-  cmd.on_event(event);
-}
-
-TEST_F(ActivateServiceTest, OnTimeout) {
-  MockServiceModule service;
-
-  const int32_t kHmiId = 1;
-  const int32_t kMobileId = 2;
-  EXPECT_CALL(service, GetNextCorrelationID()).Times(1).WillOnce(
-      Return(kMobileId));
-  EXPECT_CALL(service, RegisterRequest(kMobileId, _)).Times(1);
-  vr_hmi_api::ServiceMessage input;
-  input.set_rpc(vr_hmi_api::ACTIVATE);
-  input.set_correlation_id(kHmiId);
-  ActivateService cmd(input, &service);
-
-  vr_hmi_api::ServiceMessage expected;
-  expected.set_rpc(vr_hmi_api::ACTIVATE);
-  expected.set_rpc_type(vr_hmi_api::RESPONSE);
-  expected.set_correlation_id(kHmiId);
-  vr_hmi_api::ActivateServiceResponse response;
-  response.set_result(vr_hmi_api::TIMEOUT);
-  std::string params;
-  response.SerializeToString(&params);
-  expected.set_params(params);
-  EXPECT_CALL(service, SendToHmi(ServiceMessageEq(expected))).Times(1).WillOnce(
-      Return(true));
-  EXPECT_CALL(service, DeactivateService()).Times(1);
-  cmd.OnTimeout();
+  EXPECT_TRUE(cmd.Execute());
 }
 
 }  // namespace commands
