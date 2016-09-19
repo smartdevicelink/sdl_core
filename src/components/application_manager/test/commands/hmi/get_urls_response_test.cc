@@ -48,6 +48,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
+namespace get_urls_response {
 
 using ::testing::_;
 using ::testing::Return;
@@ -83,7 +84,8 @@ TEST_F(GetUrlResponseTest, RUN_SendRequest_SUCCESS) {
             CommandImpl::protocol_version_);
 }
 
-}  // hmi_commands_test
+}  // namespace get_urls_response
+}  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components
 }  // namespace test

@@ -42,6 +42,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
+namespace vr_get_language_response {
 
 using utils::SharedPtr;
 using application_manager::commands::VRGetLanguageResponse;
@@ -105,6 +106,7 @@ TEST_F(VRGetLanguageResponseTest, Run_LanguageNotSet_SUCCESS) {
   command->Run();
 }
 
+}  // namespace vr_get_language_response
 }  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components

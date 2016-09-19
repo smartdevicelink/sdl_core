@@ -44,6 +44,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace show_constant_tbt_request {
 
 using application_manager::commands::MessageSharedPtr;
 using application_manager::commands::ShowConstantTBTRequest;
@@ -498,6 +499,7 @@ TEST_F(ShowConstantTBTRequestTest, OnEvent_WrongFunctionID_SUCCESS) {
   command->on_event(event);
 }
 
+}  // namespace show_constant_tbt_request
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

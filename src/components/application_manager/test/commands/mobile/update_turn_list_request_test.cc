@@ -53,6 +53,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace update_turn_list_request {
 
 namespace am = ::application_manager;
 namespace mobile_result = mobile_apis::Result;
@@ -308,6 +309,7 @@ TEST_F(UpdateTurnListRequestTest,
   command_->on_event(event);
 }
 
+}  // namespace update_turn_list_request
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

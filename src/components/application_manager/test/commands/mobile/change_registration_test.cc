@@ -55,6 +55,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace change_registration {
 
 using ::testing::_;
 using ::testing::Return;
@@ -629,6 +630,7 @@ TEST_F(ChangeRegistrationResponseTest, Run_SUCCESS) {
   command->Run();
 }
 
+}  // namespace change_registration
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

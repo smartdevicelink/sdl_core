@@ -54,6 +54,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
+namespace get_urls {
 
 using namespace hmi_apis;
 using namespace policy;
@@ -314,7 +315,8 @@ TEST_F(GetUrlsTest, ProcessServiceURLs_PolicyDefaultId_SUCCESS) {
           .keyExists(am::hmi_response::policy_app_id));
 }
 
-}  // hmi_commands_test
+}  // namespace get_urls
+}  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components
 }  // namespace test

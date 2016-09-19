@@ -45,6 +45,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
+namespace sdl_activate_app_response {
 
 using ::utils::SharedPtr;
 namespace am = ::application_manager;
@@ -80,6 +81,7 @@ TEST_F(SDLActivateAppResponseTest, RUN_SendRequest_SUCCESS) {
             CommandImpl::protocol_version_);
 }
 
+}  // namespace sdl_activate_app_response
 }  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components

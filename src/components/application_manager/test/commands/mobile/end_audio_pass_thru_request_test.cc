@@ -50,6 +50,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace end_audio_pass_thru_request {
 
 using ::testing::_;
 using ::testing::Return;
@@ -112,6 +113,7 @@ TEST_F(EndAudioPassThruRequestTest, OnEvent_SUCCESS) {
   command->on_event(event);
 }
 
+}  // namespace end_audio_pass_thru_request
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

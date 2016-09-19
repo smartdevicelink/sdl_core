@@ -55,6 +55,8 @@
 namespace test {
 namespace components {
 namespace commands_test {
+namespace mobile_commands_test {
+namespace add_command_request {
 
 namespace am = application_manager;
 using am::commands::CommandImpl;
@@ -329,6 +331,9 @@ TEST_F(AddCommandRequestTest, OnEvent_UnknownEvent_UNSUCCESS) {
 
   request->on_event(event);
 }
+
+}  // namespace add_command_request
+}  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components
 }  // namespace tests

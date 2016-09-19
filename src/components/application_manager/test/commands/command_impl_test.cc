@@ -47,6 +47,7 @@
 namespace test {
 namespace components {
 namespace commands_test {
+namespace command_impl {
 
 using ::testing::Return;
 using ::testing::AtLeast;
@@ -276,6 +277,7 @@ TEST_F(CommandImplTest, ReplaceHMIByMobileAppId_Map_SUCCESS) {
   }
 }
 
+}  // namespace command_impl
 }  // namespace commands_test
 }  // namespace components
 }  // namespace test

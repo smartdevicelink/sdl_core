@@ -47,6 +47,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
+namespace get_system_info_request {
 
 using ::utils::SharedPtr;
 namespace am = ::application_manager;
@@ -92,7 +93,8 @@ TEST_F(GetSystemInfoRequestTest, RUN_SendRequest_SUCCESS) {
             CommandImpl::protocol_version_);
 }
 
-}  // hmi_commands_test
+}  // namespace get_system_info_request
+}  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components
 }  // namespace test

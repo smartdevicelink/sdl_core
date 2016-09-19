@@ -50,6 +50,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
+namespace tts_is_ready_response {
 
 using ::testing::_;
 using ::testing::Return;
@@ -121,7 +122,8 @@ TEST_F(TTSIsReadyResponseTest, RUN_NoKeyAvailable) {
       (*command_msg)[strings::msg_params].keyExists(strings::available));
 }
 
-}  // hmi_commands_test
+}  // namespace tts_is_ready_response
+}  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components
 }  // namespace test

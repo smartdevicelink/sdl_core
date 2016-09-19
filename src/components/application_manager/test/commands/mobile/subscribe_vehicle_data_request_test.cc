@@ -49,6 +49,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace subscribe_vehicle_data_request {
 
 using application_manager::commands::SubscribeVehicleDataRequest;
 using ::testing::DefaultValue;
@@ -389,6 +390,7 @@ TEST_F(SubscribeVehicleDataRequestTest, OnEvent_AppAlreadySubscribed_Ignored) {
   command->on_event(event);
 }
 
+}  // namespace subscribe_vehicle_data_request
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

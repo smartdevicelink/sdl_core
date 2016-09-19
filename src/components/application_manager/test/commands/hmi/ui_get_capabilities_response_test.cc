@@ -47,6 +47,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
+namespace ui_get_capabilities_response {
 
 using ::utils::SharedPtr;
 using ::testing::NiceMock;
@@ -215,7 +216,8 @@ TEST_F(UIGetCapabilitiesResponseTest, SetPhoneCall_SUCCESS) {
   command->Run();
 }
 
-}  // hmi_commands_test
+}  // namespace ui_get_capabilities_response
+}  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components
 }  // namespace test

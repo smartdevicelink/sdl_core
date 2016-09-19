@@ -46,6 +46,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
+namespace update_sdl_request {
 
 using ::utils::SharedPtr;
 using ::testing::ReturnRef;
@@ -83,6 +84,7 @@ TEST_F(UpdateSDLRequestTest, RUN_SUCCESS) {
             (*command_msg)[strings::params][strings::correlation_id].asUInt());
 }
 
+}  // namespace update_sdl_request
 }  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components

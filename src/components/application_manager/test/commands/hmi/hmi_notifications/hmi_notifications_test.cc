@@ -138,6 +138,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
+namespace hmi_notifications_test {
 
 using ::testing::_;
 using ::testing::Test;
@@ -1955,6 +1956,7 @@ TEST_F(HMICommandsNotificationsTest, OnDriverDistractionNotificationValidApp) {
             (*message)[am::strings::params][am::strings::message_type].asInt());
 }
 
+}  // namespace hmi_notifications_test
 }  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components

@@ -51,6 +51,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace dial_number_request {
 
 using ::testing::_;
 using ::testing::Return;
@@ -184,6 +185,7 @@ TEST_F(DialNumberRequestTest, OnEvent_SUCCESS) {
   command->on_event(event);
 }
 
+}  // namespace dial_number_request
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

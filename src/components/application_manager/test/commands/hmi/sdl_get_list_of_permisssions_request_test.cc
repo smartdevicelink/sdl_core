@@ -42,6 +42,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
+namespace sdl_get_list_of_permissions_request {
 
 using application_manager::commands::MessageSharedPtr;
 using application_manager::commands::SDLGetListOfPermissionsRequest;
@@ -108,6 +109,7 @@ TEST_F(SDLGetListOfPermissionsRequestTest, Run_KeyDoesntExist_SUCCESS) {
   command->Run();
 }
 
+}  // namespace sdl_get_list_of_permissions_request
 }  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components

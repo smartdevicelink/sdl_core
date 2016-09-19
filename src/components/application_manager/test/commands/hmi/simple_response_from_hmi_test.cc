@@ -99,6 +99,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
+namespace simple_response_from_hmi_test {
 
 using ::testing::_;
 using ::testing::ReturnRef;
@@ -283,7 +284,8 @@ TEST_F(OtherResponseFromHMICommandsTest, VIIsReadyResponse_Run_SUCCESS) {
   command->Run();
 }
 
-}  // hmi_commands_test
+}  // namespace simple_response_from_hmi_test
+}  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components
 }  // namespace test

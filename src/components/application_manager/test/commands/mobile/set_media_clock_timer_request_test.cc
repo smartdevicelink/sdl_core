@@ -40,6 +40,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace set_media_clock_timer_request {
 
 using application_manager::commands::MessageSharedPtr;
 using application_manager::commands::SetMediaClockRequest;
@@ -240,6 +241,7 @@ TEST_F(SetMediaClockRequestTest, OnEvent_Canceled) {
   command->on_event(event);
 }
 
+}  // namespace set_media_clock_timer_request
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

@@ -50,6 +50,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
+namespace tts_get_supported_languages_response {
 
 using ::testing::_;
 using ::testing::Return;
@@ -125,7 +126,9 @@ TEST_F(TTSGetSupportedLanguageResponseTest, RUN_UNSUCCESS) {
   EXPECT_FALSE((*command_msg)[am::strings::msg_params].keyExists(
       am::hmi_response::languages));
 }
-}  // hmi_commands_test
+
+}  // namespace tts_get_supported_languages_response
+}  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components
 }  // namespace test

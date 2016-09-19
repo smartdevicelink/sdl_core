@@ -50,6 +50,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace on_button_notification {
 
 namespace am = ::application_manager;
 namespace commands = am::commands;
@@ -341,6 +342,7 @@ TYPED_TEST(OnButtonNotificationCommandsTest, Run_SUCCESS) {
   command->Run();
 }
 
+}  // namespace on_button_notification {
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

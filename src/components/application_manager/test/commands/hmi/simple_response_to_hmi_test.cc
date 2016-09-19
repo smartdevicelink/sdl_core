@@ -45,6 +45,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
+namespace simple_response_to_hmi_test {
 
 using ::testing::_;
 using ::testing::Types;
@@ -78,7 +79,8 @@ TYPED_TEST(ResponseToHMICommandsTest, Run_SendMessageToHMI_SUCCESS) {
   command->Run();
 }
 
-}  // hmi_commands_test
+}  // namespace simple_response_to_hmi_test
+}  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components
 }  // namespace test

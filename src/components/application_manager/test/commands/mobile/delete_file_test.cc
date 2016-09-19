@@ -62,6 +62,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace delete_file {
 
 using ::testing::_;
 using ::testing::Test;
@@ -232,6 +233,7 @@ TEST_F(DeleteFileResponseTest, Run_ValidApp_SUCCESS) {
   command->Run();
 }
 
+}  // namespace delete_file
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

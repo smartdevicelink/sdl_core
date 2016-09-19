@@ -115,6 +115,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
+namespace simple_requests_to_hmi_test {
 
 using ::testing::_;
 using ::testing::Types;
@@ -240,6 +241,7 @@ TYPED_TEST(RequestToHMICommandsTest2, Run_SendMessageToHMI_SUCCESS) {
   command->Run();
 }
 
+}  // namespace simple_requests_to_hmi_test
 }  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components

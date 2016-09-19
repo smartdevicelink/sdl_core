@@ -55,6 +55,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace reset_global_properties {
 
 using ::testing::_;
 using ::testing::Return;
@@ -318,6 +319,7 @@ TEST_F(ResetGlobalPropertiesResponseTest, Run_SendMessage_SUCCESS) {
   command->Run();
 }
 
+}  // namespace reset_global_properties
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

@@ -41,6 +41,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
+namespace button_get_capabilities_response {
 
 using application_manager::commands::MessageSharedPtr;
 using application_manager::commands::ButtonGetCapabilitiesResponse;
@@ -108,6 +109,7 @@ TEST_F(ButtonGetCapabilitiesResponseTest, Run_CodeAborted_SUCCESS) {
   command->Run();
 }
 
+}  // namespace button_get_capabilities_response
 }  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components

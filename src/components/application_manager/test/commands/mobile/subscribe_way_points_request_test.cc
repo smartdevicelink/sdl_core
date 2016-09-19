@@ -49,6 +49,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace subscribe_way_points_request {
 
 using application_manager::commands::SubscribeWayPointsRequest;
 using ::testing::DefaultValue;
@@ -207,6 +208,7 @@ TEST_F(SubscribeWayPointsRequestTest, OnEvent_UnsuccessResult_NotSubscribeApp) {
   command->on_event(event);
 }
 
+}  // namespace subscribe_way_points_request
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

@@ -44,6 +44,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
+namespace add_statistics_info_notification {
 
 namespace am = ::application_manager;
 namespace strings = ::application_manager::strings;
@@ -83,6 +84,7 @@ TEST_F(AddStatisticsInfoNotificationTest, Run_SUCCESS) {
   command->Run();
 }
 
+}  // namespace add_statistics_info_notification
 }  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components

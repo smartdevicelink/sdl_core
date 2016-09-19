@@ -41,6 +41,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
+namespace tts_get_capabilities_response {
 
 using application_manager::commands::MessageSharedPtr;
 using application_manager::commands::TTSGetCapabilitiesResponse;
@@ -128,6 +129,7 @@ TEST_F(TTSGetCapabilitiesResponseTest, Run_Nothing_SUCCESS) {
   command->Run();
 }
 
+}  // namespace tts_get_capabilities_response
 }  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components

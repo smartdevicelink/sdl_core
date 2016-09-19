@@ -49,6 +49,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace on_button_press_notification {
 
 namespace am = ::application_manager;
 namespace commands = am::commands;
@@ -152,6 +153,7 @@ TEST_F(OnButtonPressNotificationTest,
   CheckExpectations(kAppIdValid, HMILevel::HMI_NONE, kAppId1, kAppId1);
 }
 
+}  // namespace on_button_press_notification
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

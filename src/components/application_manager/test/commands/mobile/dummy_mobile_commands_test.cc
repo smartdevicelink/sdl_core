@@ -153,6 +153,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace dummy_mobile_commands_test {
 
 namespace commands = ::application_manager::commands;
 
@@ -340,6 +341,7 @@ TYPED_TEST(MobileCommandsTestThird, CtorAndDtorCall) {
   UNUSED(command);
 }
 
+}  // namespace dummy_mobile_commands_test
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

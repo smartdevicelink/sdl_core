@@ -48,6 +48,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace set_global_properties_request {
 
 using application_manager::commands::MessageSharedPtr;
 using application_manager::commands::SetGlobalPropertiesRequest;
@@ -737,6 +738,7 @@ TEST_F(SetGlobalPropertiesRequestTest,
   command->on_event(event);
 }
 
+}  // namespace set_global_properties_request
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components
