@@ -118,7 +118,6 @@ TEST_F(SubscribeWayPointsRequestTest, Run_SomeAppSubscribedBefore_Success) {
   EXPECT_CALL(mock_app_manager_, IsAnyAppSubscribedForWayPoints())
       .WillOnce(Return(true));
   EXPECT_CALL(mock_app_manager_, SubscribeAppForWayPoints(kAppId));
-  EXPECT_CALL(*app_, UpdateHash());
 
   EXPECT_CALL(mock_app_manager_,
               ManageMobileCommand(
@@ -173,8 +172,6 @@ TEST_F(SubscribeWayPointsRequestTest, OnEvent_SuccessResult_SubscribeApp) {
 
   EXPECT_CALL(mock_app_manager_, SubscribeAppForWayPoints(kAppId));
 
-  EXPECT_CALL(*app_, UpdateHash());
-
   EXPECT_CALL(mock_app_manager_,
               ManageMobileCommand(
                   MobileResponseIs(mobile_result::SUCCESS, info_, true), _));
@@ -198,8 +195,6 @@ TEST_F(SubscribeWayPointsRequestTest, OnEvent_UnsuccessResult_NotSubscribeApp) {
   ON_CALL(mock_app_manager_, application(kKey)).WillByDefault(Return(app_));
 
   EXPECT_CALL(mock_app_manager_, SubscribeAppForWayPoints(kAppId)).Times(0);
-
-  EXPECT_CALL(*app_, UpdateHash()).Times(0);
 
   EXPECT_CALL(
       mock_app_manager_,
