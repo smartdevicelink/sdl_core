@@ -51,9 +51,8 @@ OnRegisterService::OnRegisterService(const vr_hmi_api::ServiceMessage& message,
 bool OnRegisterService::Execute() {
   LOG4CXX_AUTO_TRACE(logger_);
   vr_hmi_api::OnRegisterServiceNotification notification;
-  bool ret = notification.ParseFromString(message_.params());
-  if (ret && module_->IsDefaultService(notification.appid())) {
-    notification.set_default_(true);
+  if (notification.ParseFromString(message_.params())) {
+    notification.set_default_(module_->IsDefaultService(notification.appid()));
     std::string params;
     if (notification.SerializeToString(&params)) {
       message_.set_params(params);
