@@ -98,11 +98,11 @@ TEST_F(ResetGlobalPropertiesRequestTest, Run_InvalidApp_UNSUCCESS) {
   (*message_)[am::strings::params][am::strings::connection_key] =
       kConnectionKey;
   MockAppPtr invalid_app;
-  EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(invalid_app));
+  EXPECT_CALL(mock_app_manager_, application(_)).WillOnce(Return(invalid_app));
 
   MessageSharedPtr command_result;
   EXPECT_CALL(
-      app_mngr_,
+      mock_app_manager_,
       ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
       .WillOnce(DoAll(SaveArg<0>(&command_result), Return(true)));
 
@@ -133,18 +133,20 @@ TEST_F(ResetGlobalPropertiesRequestTest, Run_SUCCESS) {
   (*message_)[am::strings::params][am::strings::connection_key] =
       kConnectionKey;
 
-  EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app_));
-  EXPECT_CALL(app_mngr_, RemoveAppFromTTSGlobalPropertiesList(kConnectionKey));
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillOnce(Return(app_));
+  EXPECT_CALL(mock_app_manager_,
+              RemoveAppFromTTSGlobalPropertiesList(kConnectionKey));
   smart_objects::SmartObject so_prompt =
       smart_objects::SmartObject(smart_objects::SmartType_Array);
   EXPECT_CALL(*app_, set_help_prompt(so_prompt));
 
-  EXPECT_CALL(app_mngr_, get_settings())
-      .WillOnce(ReturnRef(app_mngr_settings_));
+  EXPECT_CALL(mock_app_manager_, get_settings())
+      .WillOnce(ReturnRef(mock_app_manager_settings_));
 
   std::vector<std::string> time_out_prompt;
   time_out_prompt.push_back("time_out");
-  EXPECT_CALL(app_mngr_settings_, time_out_promt())
+  EXPECT_CALL(mock_app_manager_settings_, time_out_promt())
       .WillOnce(ReturnRef(time_out_prompt));
 
   smart_objects::SmartObject timeout_prompt =
@@ -183,11 +185,11 @@ TEST_F(ResetGlobalPropertiesRequestTest, Run_SUCCESS) {
   EXPECT_CALL(*app_, help_prompt()).WillOnce(Return(so_help_prompt.get()));
   EXPECT_CALL(*app_, timeout_prompt()).WillOnce(Return(so_help_prompt.get()));
 
-  EXPECT_CALL(app_mngr_,
+  EXPECT_CALL(mock_app_manager_,
               ManageHMICommand(HMIResultCodeIs(
                   hmi_apis::FunctionID::UI_SetGlobalProperties)))
       .WillOnce(Return(true));
-  EXPECT_CALL(app_mngr_,
+  EXPECT_CALL(mock_app_manager_,
               ManageHMICommand(HMIResultCodeIs(
                   hmi_apis::FunctionID::TTS_SetGlobalProperties)))
       .WillOnce(Return(true));
@@ -200,8 +202,9 @@ TEST_F(ResetGlobalPropertiesRequestTest, OnEvent_InvalidEventId_UNSUCCESS) {
       kConnectionKey;
   Event event(hmi_apis::FunctionID::INVALID_ENUM);
 
-  EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app_));
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillOnce(Return(app_));
+  EXPECT_CALL(mock_app_manager_, ManageMobileCommand(_, _)).Times(0);
   command_->on_event(event);
 }
 
@@ -218,7 +221,8 @@ TEST_F(ResetGlobalPropertiesRequestTest,
   (*message_)[am::strings::msg_params][am::strings::properties][0] =
       mobile_apis::GlobalProperty::VRHELPTITLE;
 
-  ON_CALL(app_mngr_, application(kConnectionKey)).WillByDefault(Return(app_));
+  ON_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillByDefault(Return(app_));
 
   EXPECT_CALL(*app_, reset_vr_help_title());
   EXPECT_CALL(*app_, reset_vr_help());
@@ -231,14 +235,14 @@ TEST_F(ResetGlobalPropertiesRequestTest,
   EXPECT_CALL((*am::MockMessageHelper::message_helper_mock()),
               CreateAppVrHelp(_)).WillOnce(Return(vr_help));
 
-  ON_CALL(app_mngr_, GetNextHMICorrelationID())
+  ON_CALL(mock_app_manager_, GetNextHMICorrelationID())
       .WillByDefault(Return(kCorrelationId));
 
   command_->Run();
 
   event.set_smart_object(*message_);
 
-  EXPECT_CALL(app_mngr_,
+  EXPECT_CALL(mock_app_manager_,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_apis::Result::eType::SUCCESS),
                   am::commands::Command::ORIGIN_SDL));
@@ -260,7 +264,8 @@ TEST_F(ResetGlobalPropertiesRequestTest,
   (*message_)[am::strings::msg_params][am::strings::properties][0] =
       mobile_apis::GlobalProperty::VRHELPTITLE;
 
-  ON_CALL(app_mngr_, application(kConnectionKey)).WillByDefault(Return(app_));
+  ON_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillByDefault(Return(app_));
 
   EXPECT_CALL(*app_, reset_vr_help_title());
   EXPECT_CALL(*app_, reset_vr_help());
@@ -273,7 +278,7 @@ TEST_F(ResetGlobalPropertiesRequestTest,
   EXPECT_CALL((*am::MockMessageHelper::message_helper_mock()),
               CreateAppVrHelp(_)).WillOnce(Return(vr_help));
 
-  ON_CALL(app_mngr_, GetNextHMICorrelationID())
+  ON_CALL(mock_app_manager_, GetNextHMICorrelationID())
       .WillByDefault(Return(kCorrelationId));
 
   command_->Run();
@@ -281,7 +286,7 @@ TEST_F(ResetGlobalPropertiesRequestTest,
   event.set_smart_object(*message_);
 
   EXPECT_CALL(
-      app_mngr_,
+      mock_app_manager_,
       ManageMobileCommand(
           MobileResultCodeIs(mobile_apis::Result::eType::UNSUPPORTED_RESOURCE),
           am::commands::Command::ORIGIN_SDL));
@@ -294,10 +299,11 @@ TEST_F(ResetGlobalPropertiesRequestTest, OnEvent_PendingRequest_UNSUCCESS) {
   Event event(hmi_apis::FunctionID::UI_SetGlobalProperties);
   (*message_)[am::strings::params][am::strings::connection_key] =
       kConnectionKey;
-  EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app_));
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillOnce(Return(app_));
   event.set_smart_object(*message_);
 
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(mock_app_manager_, ManageMobileCommand(_, _)).Times(0);
   EXPECT_CALL(*app_, UpdateHash()).Times(0);
 
   command_->on_event(event);
@@ -308,7 +314,7 @@ TEST_F(ResetGlobalPropertiesResponseTest, Run_SendMessage_SUCCESS) {
   ResetGlobalPropertiesResponsePtr command(
       CreateCommand<ResetGlobalPropertiesResponse>(message));
 
-  EXPECT_CALL(app_mngr_, SendMessageToMobile(message, _));
+  EXPECT_CALL(mock_app_manager_, SendMessageToMobile(message, _));
   command->Run();
 }
 

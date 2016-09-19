@@ -31,15 +31,12 @@
  */
 
 #include "gtest/gtest.h"
+#include "application_manager/commands/hmi/activate_app_request.h"
 #include "utils/shared_ptr.h"
 #include "smart_objects/smart_object.h"
-#include "application_manager/smart_object_keys.h"
-#include "application_manager/commands/commands_test.h"
-#include "application_manager/commands/command.h"
-#include "application_manager/commands/hmi/sdl_activate_app_response.h"
-#include "application_manager/commands/hmi/sdl_get_list_of_permissions_response.h"
-#include "application_manager/commands/hmi/sdl_get_status_update_response.h"
-#include "application_manager/commands/hmi/sdl_get_user_friendly_message_response.h"
+#include "application_manager/mock_application.h"
+#include "application_manager/commands/command_impl.h"
+#include "commands/commands_test.h"
 
 namespace test {
 namespace components {
@@ -47,38 +44,56 @@ namespace commands_test {
 namespace hmi_commands_test {
 
 using ::testing::_;
-using ::testing::Types;
-using ::testing::NotNull;
-using ::utils::SharedPtr;
+namespace am = ::application_manager;
+namespace strings = ::application_manager::strings;
+using am::commands::MessageSharedPtr;
+using am::commands::ActivateAppRequest;
+using am::commands::CommandImpl;
 
-namespace commands = ::application_manager::commands;
-using commands::MessageSharedPtr;
+typedef ::utils::SharedPtr<ActivateAppRequest> ActivateAppRequestPtr;
 
-template <class Command>
-class ResponseToHMICommandsTest
-    : public CommandsTest<CommandsTestMocks::kIsNice> {
+namespace {
+const uint32_t kAppId = 1u;
+const uint32_t kCorrelationId = 2u;
+}  // namespace
+
+class ActivateAppRequestTest : public CommandsTest<CommandsTestMocks::kIsNice> {
  public:
-  typedef Command CommandType;
+  MessageSharedPtr CreateMsgParams() {
+    MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
+    smart_objects::SmartObject msg_params =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+    msg_params[strings::app_id] = kAppId;
+    msg_params[strings::correlation_id] = kCorrelationId;
+    (*msg)[strings::msg_params] = msg_params;
+    (*msg)[strings::params][strings::app_id] = kAppId;
+    (*msg)[strings::params][strings::correlation_id] = kCorrelationId;
+    (*msg)[strings::app_id] = kAppId;
+    return msg;
+  }
 };
 
-typedef Types<commands::SDLActivateAppResponse,
-              commands::SDLGetListOfPermissionsResponse,
-              commands::SDLGetStatusUpdateResponse,
-              commands::SDLGetUserFriendlyMessageResponse> ResponseCommandsList;
+TEST_F(ActivateAppRequestTest, Run_SUCCESS) {
+  MessageSharedPtr msg = CreateMsgParams();
 
-TYPED_TEST_CASE(ResponseToHMICommandsTest, ResponseCommandsList);
+  MockAppPtr mock_app = CreateMockApp();
+  EXPECT_CALL(mock_app_manager_, application(kAppId))
+      .WillOnce(Return(mock_app));
 
-TYPED_TEST(ResponseToHMICommandsTest, Run_SendMessageToHMI_SUCCESS) {
-  typedef typename TestFixture::CommandType CommandType;
+  ActivateAppRequestPtr command(CreateCommand<ActivateAppRequest>(msg));
 
-  SharedPtr<CommandType> command = this->template CreateCommand<CommandType>();
-
-  EXPECT_CALL(this->mock_app_manager_, SendMessageToHMI(NotNull()));
+  EXPECT_CALL(mock_app_manager_, set_application_id(kCorrelationId, kAppId));
+  EXPECT_CALL(mock_app_manager_, SendMessageToHMI(msg));
 
   command->Run();
+
+  EXPECT_EQ(CommandImpl::hmi_protocol_type_,
+            (*msg)[strings::params][strings::protocol_type].asInt());
+  EXPECT_EQ(CommandImpl::protocol_version_,
+            (*msg)[strings::params][strings::protocol_version].asInt());
 }
 
-}  // hmi_commands_test
+}  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components
 }  // namespace test

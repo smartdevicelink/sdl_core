@@ -31,54 +31,45 @@
  */
 
 #include "gtest/gtest.h"
+#include "application_manager/commands/hmi/allow_all_apps_response.h"
 #include "utils/shared_ptr.h"
 #include "smart_objects/smart_object.h"
-#include "application_manager/smart_object_keys.h"
-#include "application_manager/commands/commands_test.h"
-#include "application_manager/commands/command.h"
-#include "application_manager/commands/hmi/sdl_activate_app_response.h"
-#include "application_manager/commands/hmi/sdl_get_list_of_permissions_response.h"
-#include "application_manager/commands/hmi/sdl_get_status_update_response.h"
-#include "application_manager/commands/hmi/sdl_get_user_friendly_message_response.h"
+#include "application_manager/mock_application.h"
+#include "application_manager/commands/command_impl.h"
+#include "commands/commands_test.h"
 
 namespace test {
 namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
 
-using ::testing::_;
-using ::testing::Types;
-using ::testing::NotNull;
-using ::utils::SharedPtr;
+using application_manager::commands::MessageSharedPtr;
+using application_manager::commands::AllowAllAppsResponse;
 
-namespace commands = ::application_manager::commands;
-using commands::MessageSharedPtr;
+namespace strings = ::application_manager::strings;
+namespace hmi_response = ::application_manager::hmi_response;
 
-template <class Command>
-class ResponseToHMICommandsTest
-    : public CommandsTest<CommandsTestMocks::kIsNice> {
- public:
-  typedef Command CommandType;
-};
+typedef ::utils::SharedPtr<AllowAllAppsResponse> ResponsePtr;
 
-typedef Types<commands::SDLActivateAppResponse,
-              commands::SDLGetListOfPermissionsResponse,
-              commands::SDLGetStatusUpdateResponse,
-              commands::SDLGetUserFriendlyMessageResponse> ResponseCommandsList;
+namespace {
+const bool kResponseIsAllowed = true;
+}  //
 
-TYPED_TEST_CASE(ResponseToHMICommandsTest, ResponseCommandsList);
+class AllowAllAppsResponseTest
+    : public CommandsTest<CommandsTestMocks::kIsNice> {};
 
-TYPED_TEST(ResponseToHMICommandsTest, Run_SendMessageToHMI_SUCCESS) {
-  typedef typename TestFixture::CommandType CommandType;
+TEST_F(AllowAllAppsResponseTest, Run_SUCCESS) {
+  MessageSharedPtr msg = CreateMessage();
+  (*msg)[strings::msg_params][hmi_response::allowed] = kResponseIsAllowed;
 
-  SharedPtr<CommandType> command = this->template CreateCommand<CommandType>();
+  ResponsePtr command(CreateCommand<AllowAllAppsResponse>(msg));
 
-  EXPECT_CALL(this->mock_app_manager_, SendMessageToHMI(NotNull()));
+  EXPECT_CALL(mock_app_manager_, SetAllAppsAllowed(kResponseIsAllowed));
 
   command->Run();
 }
 
-}  // hmi_commands_test
+}  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components
 }  // namespace test

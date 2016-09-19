@@ -79,9 +79,9 @@ class ShowConstantTBTRequestTest
   }
 
   void GeneralExpectationsSetupHelper(SmartObject& msg_params) {
-    EXPECT_CALL(app_mngr_, application(kConnectionKey))
+    EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
         .WillOnce(Return(mock_app_));
-    EXPECT_CALL(app_mngr_, GetPolicyHandler())
+    EXPECT_CALL(mock_app_manager_, GetPolicyHandler())
         .WillOnce(ReturnRef(mock_policy_handler_));
     EXPECT_CALL(mock_message_helper_, ProcessSoftButtons(msg_params, _, _, _))
         .WillOnce(Return(mobile_apis::Result::SUCCESS));
@@ -144,9 +144,9 @@ TEST_F(ShowConstantTBTRequestTest, Run_TurnIcon_Canceled) {
   SharedPtr<ShowConstantTBTRequest> command(
       CreateCommand<ShowConstantTBTRequest>(msg));
 
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
-  EXPECT_CALL(app_mngr_, GetPolicyHandler())
+  EXPECT_CALL(mock_app_manager_, GetPolicyHandler())
       .WillOnce(ReturnRef(mock_policy_handler_));
   EXPECT_CALL(mock_message_helper_, ProcessSoftButtons(msg_params, _, _, _))
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
@@ -154,7 +154,7 @@ TEST_F(ShowConstantTBTRequestTest, Run_TurnIcon_Canceled) {
       .WillOnce(Return(mobile_apis::Result::REJECTED));
   EXPECT_CALL(*mock_app_, app_id()).Times(0);
   EXPECT_CALL(*mock_app_, set_tbt_show_command(_)).Times(0);
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _));
+  EXPECT_CALL(mock_app_manager_, ManageMobileCommand(_, _));
 
   command->Run();
 }
@@ -193,9 +193,9 @@ TEST_F(ShowConstantTBTRequestTest, Run_NextTurnIcon_Canceled) {
   SharedPtr<ShowConstantTBTRequest> command(
       CreateCommand<ShowConstantTBTRequest>(msg));
 
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
-  EXPECT_CALL(app_mngr_, GetPolicyHandler())
+  EXPECT_CALL(mock_app_manager_, GetPolicyHandler())
       .WillOnce(ReturnRef(mock_policy_handler_));
   EXPECT_CALL(mock_message_helper_, ProcessSoftButtons(msg_params, _, _, _))
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
@@ -203,7 +203,7 @@ TEST_F(ShowConstantTBTRequestTest, Run_NextTurnIcon_Canceled) {
       .WillOnce(Return(mobile_apis::Result::REJECTED));
   EXPECT_CALL(*mock_app_, app_id()).Times(0);
   EXPECT_CALL(*mock_app_, set_tbt_show_command(_)).Times(0);
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _));
+  EXPECT_CALL(mock_app_manager_, ManageMobileCommand(_, _));
 
   command->Run();
 }
@@ -331,10 +331,10 @@ TEST_F(ShowConstantTBTRequestTest, Run_InvalidApp_Canceled) {
   SharedPtr<ShowConstantTBTRequest> command(
       CreateCommand<ShowConstantTBTRequest>(msg));
 
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
       .WillOnce(Return(MockAppPtr()));
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _));
-  EXPECT_CALL(app_mngr_, GetPolicyHandler()).Times(0);
+  EXPECT_CALL(mock_app_manager_, ManageMobileCommand(_, _));
+  EXPECT_CALL(mock_app_manager_, GetPolicyHandler()).Times(0);
   EXPECT_CALL(mock_message_helper_, ProcessSoftButtons(_, _, _, _)).Times(0);
   EXPECT_CALL(*mock_app_, app_id()).Times(0);
 
@@ -349,10 +349,10 @@ TEST_F(ShowConstantTBTRequestTest, Run_EmptyMsgParams_Canceled) {
   SharedPtr<ShowConstantTBTRequest> command(
       CreateCommand<ShowConstantTBTRequest>(msg));
 
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _));
-  EXPECT_CALL(app_mngr_, GetPolicyHandler()).Times(0);
+  EXPECT_CALL(mock_app_manager_, ManageMobileCommand(_, _));
+  EXPECT_CALL(mock_app_manager_, GetPolicyHandler()).Times(0);
   EXPECT_CALL(mock_message_helper_, ProcessSoftButtons(_, _, _, _)).Times(0);
   EXPECT_CALL(*mock_app_, app_id()).Times(0);
 
@@ -368,10 +368,10 @@ TEST_F(ShowConstantTBTRequestTest, Run_WrongSyntax_Canceled) {
   SharedPtr<ShowConstantTBTRequest> command(
       CreateCommand<ShowConstantTBTRequest>(msg));
 
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _));
-  EXPECT_CALL(app_mngr_, GetPolicyHandler()).Times(0);
+  EXPECT_CALL(mock_app_manager_, ManageMobileCommand(_, _));
+  EXPECT_CALL(mock_app_manager_, GetPolicyHandler()).Times(0);
   EXPECT_CALL(mock_message_helper_, ProcessSoftButtons(_, _, _, _)).Times(0);
   EXPECT_CALL(*mock_app_, app_id()).Times(0);
 
@@ -387,13 +387,13 @@ TEST_F(ShowConstantTBTRequestTest, Run_UnsuccessfulProcessing_Canceled) {
   SharedPtr<ShowConstantTBTRequest> command(
       CreateCommand<ShowConstantTBTRequest>(msg));
 
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
-  EXPECT_CALL(app_mngr_, GetPolicyHandler())
+  EXPECT_CALL(mock_app_manager_, GetPolicyHandler())
       .WillOnce(ReturnRef(mock_policy_handler_));
   EXPECT_CALL(mock_message_helper_, ProcessSoftButtons(_, _, _, _))
       .WillOnce(Return(mobile_apis::Result::ABORTED));
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _));
+  EXPECT_CALL(mock_app_manager_, ManageMobileCommand(_, _));
   EXPECT_CALL(*mock_app_, app_id()).Times(0);
 
   EXPECT_CALL(*mock_app_, set_tbt_show_command(_)).Times(0);
@@ -410,9 +410,9 @@ TEST_F(ShowConstantTBTRequestTest, OnEvent_SuccessResultCode_SUCCESS) {
   SharedPtr<ShowConstantTBTRequest> command(
       CreateCommand<ShowConstantTBTRequest>(msg));
 
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
+  EXPECT_CALL(mock_app_manager_, hmi_capabilities())
       .WillOnce(ReturnRef(mock_hmi_capabilities_));
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _));
+  EXPECT_CALL(mock_app_manager_, ManageMobileCommand(_, _));
 
   Event event(hmi_apis::FunctionID::Navigation_ShowConstantTBT);
   event.set_smart_object(*msg);
@@ -429,11 +429,11 @@ TEST_F(ShowConstantTBTRequestTest, OnEvent_UnsupportedRCAndUICoop_SUCCESS) {
   SharedPtr<ShowConstantTBTRequest> command(
       CreateCommand<ShowConstantTBTRequest>(msg));
 
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
+  EXPECT_CALL(mock_app_manager_, hmi_capabilities())
       .WillOnce(ReturnRef(mock_hmi_capabilities_));
   EXPECT_CALL(mock_hmi_capabilities_, is_ui_cooperating())
       .WillOnce(Return(true));
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _));
+  EXPECT_CALL(mock_app_manager_, ManageMobileCommand(_, _));
 
   Event event(hmi_apis::FunctionID::Navigation_ShowConstantTBT);
   event.set_smart_object(*msg);
@@ -450,11 +450,11 @@ TEST_F(ShowConstantTBTRequestTest, OnEvent_UnsupportedRCAndUINotCoop_SUCCESS) {
   SharedPtr<ShowConstantTBTRequest> command(
       CreateCommand<ShowConstantTBTRequest>(msg));
 
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
+  EXPECT_CALL(mock_app_manager_, hmi_capabilities())
       .WillOnce(ReturnRef(mock_hmi_capabilities_));
   EXPECT_CALL(mock_hmi_capabilities_, is_ui_cooperating())
       .WillOnce(Return(false));
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _));
+  EXPECT_CALL(mock_app_manager_, ManageMobileCommand(_, _));
 
   Event event(hmi_apis::FunctionID::Navigation_ShowConstantTBT);
   event.set_smart_object(*msg);
@@ -471,10 +471,10 @@ TEST_F(ShowConstantTBTRequestTest, OnEvent_AbortedResponseCode_SUCCESS) {
   SharedPtr<ShowConstantTBTRequest> command(
       CreateCommand<ShowConstantTBTRequest>(msg));
 
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
+  EXPECT_CALL(mock_app_manager_, hmi_capabilities())
       .WillOnce(ReturnRef(mock_hmi_capabilities_));
   EXPECT_CALL(mock_hmi_capabilities_, is_ui_cooperating()).Times(0);
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _));
+  EXPECT_CALL(mock_app_manager_, ManageMobileCommand(_, _));
 
   Event event(hmi_apis::FunctionID::Navigation_ShowConstantTBT);
   event.set_smart_object(*msg);
@@ -488,9 +488,9 @@ TEST_F(ShowConstantTBTRequestTest, OnEvent_WrongFunctionID_SUCCESS) {
   SharedPtr<ShowConstantTBTRequest> command(
       CreateCommand<ShowConstantTBTRequest>(msg));
 
-  EXPECT_CALL(app_mngr_, hmi_capabilities()).Times(0);
+  EXPECT_CALL(mock_app_manager_, hmi_capabilities()).Times(0);
   EXPECT_CALL(mock_hmi_capabilities_, is_ui_cooperating()).Times(0);
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(mock_app_manager_, ManageMobileCommand(_, _)).Times(0);
 
   Event event(hmi_apis::FunctionID::UI_SetGlobalProperties);
   event.set_smart_object(*msg);

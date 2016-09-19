@@ -31,54 +31,59 @@
  */
 
 #include "gtest/gtest.h"
+#include "application_manager/commands/hmi/add_statistics_info_notification.h"
 #include "utils/shared_ptr.h"
 #include "smart_objects/smart_object.h"
+#include "application_manager/mock_application.h"
 #include "application_manager/smart_object_keys.h"
-#include "application_manager/commands/commands_test.h"
-#include "application_manager/commands/command.h"
-#include "application_manager/commands/hmi/sdl_activate_app_response.h"
-#include "application_manager/commands/hmi/sdl_get_list_of_permissions_response.h"
-#include "application_manager/commands/hmi/sdl_get_status_update_response.h"
-#include "application_manager/commands/hmi/sdl_get_user_friendly_message_response.h"
+#include "commands/commands_test.h"
+#include "application_manager/policies/policy_handler.h"
+#include "application_manager/policies/mock_policy_handler_interface.h"
 
 namespace test {
 namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
 
+namespace am = ::application_manager;
+namespace strings = ::application_manager::strings;
+namespace hmi_notification = ::application_manager::hmi_notification;
+using am::commands::MessageSharedPtr;
+using am::commands::AddStatisticsInfoNotification;
+using am::commands::CommandImpl;
+using policy::PolicyHandler;
+using policy_test::MockPolicyHandlerInterface;
 using ::testing::_;
-using ::testing::Types;
-using ::testing::NotNull;
-using ::utils::SharedPtr;
+using ::testing::Return;
+using ::testing::ReturnRef;
 
-namespace commands = ::application_manager::commands;
-using commands::MessageSharedPtr;
+typedef ::utils::SharedPtr<AddStatisticsInfoNotification> NotificationPtr;
 
-template <class Command>
-class ResponseToHMICommandsTest
+namespace {
+const uint32_t kStatisticType = 1u;
+}  // namespace
+
+class AddStatisticsInfoNotificationTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {
- public:
-  typedef Command CommandType;
+ protected:
+  MockPolicyHandlerInterface policy_handler_;
 };
 
-typedef Types<commands::SDLActivateAppResponse,
-              commands::SDLGetListOfPermissionsResponse,
-              commands::SDLGetStatusUpdateResponse,
-              commands::SDLGetUserFriendlyMessageResponse> ResponseCommandsList;
+TEST_F(AddStatisticsInfoNotificationTest, Run_SUCCESS) {
+  MessageSharedPtr msg = CreateMessage();
+  (*msg)[am::strings::msg_params][am::hmi_notification::statistic_type] =
+      kStatisticType;
 
-TYPED_TEST_CASE(ResponseToHMICommandsTest, ResponseCommandsList);
+  NotificationPtr command(CreateCommand<AddStatisticsInfoNotification>(msg));
 
-TYPED_TEST(ResponseToHMICommandsTest, Run_SendMessageToHMI_SUCCESS) {
-  typedef typename TestFixture::CommandType CommandType;
-
-  SharedPtr<CommandType> command = this->template CreateCommand<CommandType>();
-
-  EXPECT_CALL(this->mock_app_manager_, SendMessageToHMI(NotNull()));
+  EXPECT_CALL(mock_app_manager_, GetPolicyHandler())
+      .WillOnce(ReturnRef(policy_handler_));
+  EXPECT_CALL(policy_handler_, AddStatisticsInfo(kStatisticType));
 
   command->Run();
 }
 
-}  // hmi_commands_test
+}  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components
 }  // namespace test

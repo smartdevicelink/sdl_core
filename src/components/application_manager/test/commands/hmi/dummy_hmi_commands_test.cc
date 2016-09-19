@@ -45,7 +45,6 @@
 #include "application_manager/commands/hmi/navi_audio_start_stream_response.h"
 #include "application_manager/commands/hmi/navi_audio_stop_stream_request.h"
 #include "application_manager/commands/hmi/navi_audio_stop_stream_response.h"
-
 #include "application_manager/commands/hmi/update_device_list_request.h"
 #include "application_manager/commands/hmi/update_device_list_response.h"
 #include "application_manager/commands/hmi/on_update_device_list.h"

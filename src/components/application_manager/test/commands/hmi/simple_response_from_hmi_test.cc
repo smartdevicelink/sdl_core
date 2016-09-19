@@ -86,6 +86,14 @@
 #include "hmi/vr_change_registration_response.h"
 #include "hmi/vr_delete_command_response.h"
 #include "hmi/vr_perform_interaction_response.h"
+#include "hmi/activate_app_response.h"
+#include "hmi/basic_communication_system_response.h"
+#include "hmi/navi_unsubscribe_way_points_response.h"
+#include "hmi/navi_update_turn_list_response.h"
+#include "hmi/navi_send_location_response.h"
+#include "hmi/navi_show_constant_tbt_response.h"
+#include "hmi/navi_start_stream_response.h"
+#include "hmi/navi_subscribe_way_points_response.h"
 
 namespace test {
 namespace components {

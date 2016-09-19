@@ -78,11 +78,11 @@ class SpeakRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
 TEST_F(SpeakRequestTest, Run_ApplicationIsNotRegistered) {
   CommandPtr command(CreateCommand<SpeakRequest>(msg_));
 
-  ON_CALL(app_mngr_, application(_))
+  ON_CALL(mock_app_manager_, application(_))
       .WillByDefault(Return(ApplicationSharedPtr()));
 
   EXPECT_CALL(
-      app_mngr_,
+      mock_app_manager_,
       ManageMobileCommand(
           MobileResultCodeIs(mobile_result::APPLICATION_NOT_REGISTERED), _));
 
@@ -94,10 +94,10 @@ TEST_F(SpeakRequestTest, Run_MsgWithWhiteSpace_InvalidData) {
          [am::strings::text] = " ";
   CommandPtr command(CreateCommand<SpeakRequest>(msg_));
 
-  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app_));
+  ON_CALL(mock_app_manager_, application(_)).WillByDefault(Return(app_));
 
   EXPECT_CALL(
-      app_mngr_,
+      mock_app_manager_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::INVALID_DATA), _));
 
   command->Run();
@@ -108,10 +108,10 @@ TEST_F(SpeakRequestTest, Run_MsgWithIncorrectChar1_InvalidData) {
          [am::strings::text] = "sd\\t";
   CommandPtr command(CreateCommand<SpeakRequest>(msg_));
 
-  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app_));
+  ON_CALL(mock_app_manager_, application(_)).WillByDefault(Return(app_));
 
   EXPECT_CALL(
-      app_mngr_,
+      mock_app_manager_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::INVALID_DATA), _));
 
   command->Run();
@@ -122,10 +122,10 @@ TEST_F(SpeakRequestTest, Run_MsgWithIncorrectChar2_InvalidData) {
          [am::strings::text] = "sd\\n";
   CommandPtr command(CreateCommand<SpeakRequest>(msg_));
 
-  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app_));
+  ON_CALL(mock_app_manager_, application(_)).WillByDefault(Return(app_));
 
   EXPECT_CALL(
-      app_mngr_,
+      mock_app_manager_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::INVALID_DATA), _));
 
   command->Run();
@@ -136,10 +136,10 @@ TEST_F(SpeakRequestTest, Run_MsgWithIncorrectChar3_InvalidData) {
          [am::strings::text] = "sd\tdf";
   CommandPtr command(CreateCommand<SpeakRequest>(msg_));
 
-  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app_));
+  ON_CALL(mock_app_manager_, application(_)).WillByDefault(Return(app_));
 
   EXPECT_CALL(
-      app_mngr_,
+      mock_app_manager_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::INVALID_DATA), _));
 
   command->Run();
@@ -150,10 +150,10 @@ TEST_F(SpeakRequestTest, Run_MsgWithIncorrectChar4_InvalidData) {
          [am::strings::text] = "sd\n rer";
   CommandPtr command(CreateCommand<SpeakRequest>(msg_));
 
-  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app_));
+  ON_CALL(mock_app_manager_, application(_)).WillByDefault(Return(app_));
 
   EXPECT_CALL(
-      app_mngr_,
+      mock_app_manager_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::INVALID_DATA), _));
 
   command->Run();
@@ -164,10 +164,10 @@ TEST_F(SpeakRequestTest, Run_MsgWithIncorrectCharInfirstPlace_InvalidData) {
          [am::strings::text] = "\n";
   CommandPtr command(CreateCommand<SpeakRequest>(msg_));
 
-  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app_));
+  ON_CALL(mock_app_manager_, application(_)).WillByDefault(Return(app_));
 
   EXPECT_CALL(
-      app_mngr_,
+      mock_app_manager_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::INVALID_DATA), _));
 
   command->Run();
@@ -178,11 +178,11 @@ TEST_F(SpeakRequestTest, Run_MsgWithEmptyString_Success) {
          [am::strings::text] = "";
   CommandPtr command(CreateCommand<SpeakRequest>(msg_));
 
-  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app_));
+  ON_CALL(mock_app_manager_, application(_)).WillByDefault(Return(app_));
   ON_CALL(*app_, app_id()).WillByDefault(Return(kAppId));
 
   EXPECT_CALL(
-      app_mngr_,
+      mock_app_manager_,
       ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::TTS_Speak)));
 
   command->Run();
@@ -193,11 +193,11 @@ TEST_F(SpeakRequestTest, Run_MsgCorrect_Success) {
          [am::strings::text] = "asda";
   CommandPtr command(CreateCommand<SpeakRequest>(msg_));
 
-  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app_));
+  ON_CALL(mock_app_manager_, application(_)).WillByDefault(Return(app_));
   ON_CALL(*app_, app_id()).WillByDefault(Return(kAppId));
 
   EXPECT_CALL(
-      app_mngr_,
+      mock_app_manager_,
       ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::TTS_Speak)));
 
   command->Run();
@@ -207,7 +207,7 @@ TEST_F(SpeakRequestTest, OnEvent_WrongEventId_UNSUCCESS) {
   Event event(Event::EventID::INVALID_ENUM);
   CommandPtr command(CreateCommand<SpeakRequest>());
 
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(mock_app_manager_, ManageMobileCommand(_, _)).Times(0);
   command->on_event(event);
 }
 
@@ -223,13 +223,13 @@ TEST_F(SpeakRequestTest, OnEvent_TTS_Speak_SUCCESS) {
   event.set_smart_object(*event_msg);
   CommandPtr command(CreateCommand<SpeakRequest>(msg_));
 
-  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app_));
+  ON_CALL(mock_app_manager_, application(_)).WillByDefault(Return(app_));
 
   EXPECT_CALL((*am::MockMessageHelper::message_helper_mock()),
               HMIToMobileResult(hmi_result))
       .WillOnce(Return(am::mobile_api::Result::SUCCESS));
   EXPECT_CALL(
-      app_mngr_,
+      mock_app_manager_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::SUCCESS), _));
   command->on_event(event);
 }
@@ -244,13 +244,13 @@ TEST_F(SpeakRequestTest, OnEvent_TTS_SpeakWithWarning_WarningWithSuccess) {
   event.set_smart_object(*event_msg);
   CommandPtr command(CreateCommand<SpeakRequest>());
 
-  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app_));
+  ON_CALL(mock_app_manager_, application(_)).WillByDefault(Return(app_));
 
   const std::string info = "Unsupported phoneme type sent in a prompt";
   EXPECT_CALL((*am::MockMessageHelper::message_helper_mock()),
               HMIToMobileResult(hmi_result))
       .WillOnce(Return(am::mobile_api::Result::WARNINGS));
-  EXPECT_CALL(app_mngr_,
+  EXPECT_CALL(mock_app_manager_,
               ManageMobileCommand(
                   MobileResponseIs(mobile_result::WARNINGS, info, true), _));
   command->on_event(event);
@@ -268,13 +268,13 @@ TEST_F(SpeakRequestTest,
   event.set_smart_object(*event_msg);
   CommandPtr command(CreateCommand<SpeakRequest>());
 
-  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app_));
+  ON_CALL(mock_app_manager_, application(_)).WillByDefault(Return(app_));
 
   const std::string info = "Unsupported phoneme type sent in a prompt";
   EXPECT_CALL((*am::MockMessageHelper::message_helper_mock()),
               HMIToMobileResult(hmi_result))
       .WillOnce(Return(am::mobile_api::Result::UNSUPPORTED_RESOURCE));
-  EXPECT_CALL(app_mngr_,
+  EXPECT_CALL(mock_app_manager_,
               ManageMobileCommand(
                   MobileResponseIs(mobile_result::WARNINGS, info, false), _));
   command->on_event(event);
@@ -286,7 +286,7 @@ TEST_F(SpeakRequestTest, OnEvent_TTS_OnResetTimeout_UpdateTimeout) {
   (*msg_)[am::strings::params][am::strings::correlation_id] = kAppId;
   CommandPtr command(CreateCommand<SpeakRequest>(msg_));
 
-  EXPECT_CALL(app_mngr_, updateRequestTimeout(kKey, kAppId, _));
+  EXPECT_CALL(mock_app_manager_, updateRequestTimeout(kKey, kAppId, _));
 
   command->on_event(event);
 }

@@ -30,55 +30,57 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <stdint.h>
+#include <string>
+
 #include "gtest/gtest.h"
 #include "utils/shared_ptr.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
-#include "application_manager/commands/commands_test.h"
-#include "application_manager/commands/command.h"
+#include "commands/commands_test.h"
+#include "application_manager/application.h"
 #include "application_manager/commands/hmi/sdl_activate_app_response.h"
-#include "application_manager/commands/hmi/sdl_get_list_of_permissions_response.h"
-#include "application_manager/commands/hmi/sdl_get_status_update_response.h"
-#include "application_manager/commands/hmi/sdl_get_user_friendly_message_response.h"
 
 namespace test {
 namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
 
-using ::testing::_;
-using ::testing::Types;
-using ::testing::NotNull;
 using ::utils::SharedPtr;
+namespace am = ::application_manager;
+namespace strings = ::application_manager::strings;
+using am::commands::SDLActivateAppResponse;
+using am::commands::CommandImpl;
 
-namespace commands = ::application_manager::commands;
-using commands::MessageSharedPtr;
+typedef SharedPtr<SDLActivateAppResponse> SDLActivateAppResponsePtr;
 
-template <class Command>
-class ResponseToHMICommandsTest
-    : public CommandsTest<CommandsTestMocks::kIsNice> {
- public:
-  typedef Command CommandType;
-};
+namespace {
+const uint32_t kConnectionKey = 2u;
+const std::string kStrNumber = "123";
+}  // namespace
 
-typedef Types<commands::SDLActivateAppResponse,
-              commands::SDLGetListOfPermissionsResponse,
-              commands::SDLGetStatusUpdateResponse,
-              commands::SDLGetUserFriendlyMessageResponse> ResponseCommandsList;
+class SDLActivateAppResponseTest
+    : public CommandsTest<CommandsTestMocks::kIsNice> {};
 
-TYPED_TEST_CASE(ResponseToHMICommandsTest, ResponseCommandsList);
+TEST_F(SDLActivateAppResponseTest, RUN_SendRequest_SUCCESS) {
+  MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*command_msg)[strings::msg_params][strings::number] = kStrNumber;
+  (*command_msg)[strings::params][strings::connection_key] = kConnectionKey;
 
-TYPED_TEST(ResponseToHMICommandsTest, Run_SendMessageToHMI_SUCCESS) {
-  typedef typename TestFixture::CommandType CommandType;
+  SDLActivateAppResponsePtr command(
+      CreateCommand<SDLActivateAppResponse>(command_msg));
 
-  SharedPtr<CommandType> command = this->template CreateCommand<CommandType>();
-
-  EXPECT_CALL(this->mock_app_manager_, SendMessageToHMI(NotNull()));
+  EXPECT_CALL(mock_app_manager_, SendMessageToHMI(command_msg));
 
   command->Run();
+
+  EXPECT_EQ((*command_msg)[strings::params][strings::protocol_type].asInt(),
+            CommandImpl::hmi_protocol_type_);
+  EXPECT_EQ((*command_msg)[strings::params][strings::protocol_version].asInt(),
+            CommandImpl::protocol_version_);
 }
 
-}  // hmi_commands_test
+}  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components
 }  // namespace test
