@@ -63,8 +63,7 @@ class CObjectSchemaItem : public ISchemaItem {
      * @param IsMandatory true if member is mandatory, false
      *                    otherwise. Defaults to true.
      **/
-    SMember(const ISchemaItemPtr SchemaItem,
-            const bool IsMandatory = true);
+    SMember(const ISchemaItemPtr SchemaItem, const bool IsMandatory = true);
     /**
      * @brief Member schema item.
      **/
@@ -96,7 +95,8 @@ class CObjectSchemaItem : public ISchemaItem {
    * @param RemoveFakeParameters contains true if need to remove fake parameters
    * from smart object otherwise contains false.
    **/
-  void applySchema(SmartObject& Object, const bool RemoveFakeParameters) OVERRIDE;
+  void applySchema(SmartObject& Object,
+                   const bool RemoveFakeParameters) OVERRIDE;
   /**
    * @brief Unapply schema.
    * @param Object Object to unapply schema.
@@ -131,7 +131,8 @@ class CObjectSchemaItem : public ISchemaItem {
   void RemoveFakeParams(SmartObject& Object);
 
   /**
-   * @brief Map of member name to SMember structure describing the object member.
+   * @brief Map of member name to SMember structure describing the object
+   *member.
    **/
   const Members mMembers;
   DISALLOW_COPY_AND_ASSIGN(CObjectSchemaItem);

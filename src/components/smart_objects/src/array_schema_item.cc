@@ -57,7 +57,7 @@ Errors::eType CArraySchemaItem::validate(const SmartObject& Object) {
 
   for (size_t i = 0u; i < array_len; ++i) {
     const Errors::eType result =
-      mElementSchemaItem->validate(Object.getElement(i));
+        mElementSchemaItem->validate(Object.getElement(i));
     if (Errors::OK != result) {
       return result;
     }
@@ -82,8 +82,8 @@ void CArraySchemaItem::unapplySchema(SmartObject& Object) {
   }
 }
 
-void CArraySchemaItem::BuildObjectBySchema(
-    const SmartObject& pattern_object, SmartObject& result_object) {
+void CArraySchemaItem::BuildObjectBySchema(const SmartObject& pattern_object,
+                                           SmartObject& result_object) {
   if (SmartType_Array == pattern_object.getType()) {
     const size_t array_len = pattern_object.length();
     if (array_len > 0) {
@@ -101,10 +101,9 @@ void CArraySchemaItem::BuildObjectBySchema(
 CArraySchemaItem::CArraySchemaItem(const ISchemaItemPtr ElementSchemaItem,
                                    const TSchemaItemParameter<size_t>& MinSize,
                                    const TSchemaItemParameter<size_t>& MaxSize)
-  : mElementSchemaItem(ElementSchemaItem),
-    mMinSize(MinSize),
-    mMaxSize(MaxSize) {
-}
+    : mElementSchemaItem(ElementSchemaItem)
+    , mMinSize(MinSize)
+    , mMaxSize(MaxSize) {}
 
 }  // namespace NsSmartObjects
 }  // namespace NsSmartDeviceLink

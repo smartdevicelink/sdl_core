@@ -6,22 +6,29 @@ env:
    - secure: "YrUVgA4/Vs4YPINdq1hwc5Mv2SZEtq/XY/+Wg0hC6lpicRBLSiQEgsqmxZc0/OFIbxzTYSE080X8SA6DXp+A0MEVu94zYr9lS/jJ5cDi/2Cl8QV+S/q0nlvr8aJEmCjOFDQTvWMp32ajBIo9HKsN9WrfK6nHuGhBBkZHPjCiVSE="
 language: cpp
 dist: trusty
-before_install:
-  - sudo apt-get install -y libavahi-client-dev libssl-dev libbluetooth3 libbluetooth-dev bluez-tools libudev-dev
-  - sudo add-apt-repository ppa:kalakris/cmake -y
-  - sudo apt-get install -y cmake
-  - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
-  - sudo apt-get -qq install g++-4.8
-  - sudo rm /usr/bin/gcc
-  - sudo ln -s /usr/bin/gcc-4.8 /usr/bin/gcc
-  - sudo rm /usr/bin/g++
-  - sudo ln -s /usr/bin/g++-4.8 /usr/bin/g++
+sudo: required
+only:
+  - master
+  - develop
+  - \/feature\/.+
+  - \/fix\/.+
+  - \/hotfix\/.+
+  - \/release\/.+
+
 addons:
   apt:
     sources:
-    - travis-ci/sqlite3
+    - ubuntu-toolchain-r-test
     packages:
-    - sqlite3
+    - gcc-4.9
+    - g++-4.9
+    - libssl-dev
+    - libbluetooth3
+    - libbluetooth-dev
+    - libudev-dev
+    - cmake
+    - html2text
+    - clang-format-3.6
   coverity_scan:
     project:
       name: "smartdevicelink/sdl_core"
@@ -30,5 +37,42 @@ addons:
     build_command_prepend: "mkdir build && cd build && cmake ../"
     build_command:   "make install"
     branch_pattern: coverity
-script: 
-  - echo "Build Complete"
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get -q -y install libavahi-client-dev bluez-tools sqlite3 libsqlite3-dev automake1.11
+  - wget http://archive.ubuntu.com/ubuntu/pool/main/l/lcov/lcov_1.11-3_all.deb
+  - sudo dpkg -i lcov_1.11-3_all.deb
+script:
+  - sudo ln -sf /usr/bin/gcov-4.9 /usr/bin/gcov
+  - bash -e tools/infrastructure/check_style.sh
+  - mkdir build && cd build && cmake ../ -DBUILD_TESTS=ON -DENABLE_GCOV=ON && make install
+  - sudo ldconfig
+  - make test
+  - bash -ex ../tools/infrastructure/collect_coverage.sh ./
+env:
+  global:
+  - LC_CTYPE=en_US.UTF-8
+  - CTEST_OUTPUT_ON_FAILURE=TRUE
+  - CMAKE_CXX_COMPILER=g++-4.9
+  - CMAKE_C_COMPILER=gcc-4.9
+  - LD_LIBRARY_PATH=.
+after_success:
+  - pwd ; bash <(curl -s https://codecov.io/bash) -f ./coverage/coverage.info || echo "Codecov did not collect coverage reports"
+deploy:
+  provider: releases
+  api-key: "uw8e4USTAS6c9LFhRMYOvw"
+  file:
+    - "coverage_report.tar.gz"
+  skip_cleanup: true
+  on:
+    tags: true
+notifications:
+  email:
+    - AKutsan@luxoft.com
+    - AByzhynar@luxoft.com
+    - NSnitsar@luxoft.com
+    - RMalynovskyi@luxoft.com
+    - MGhiumiusliu@luxoft.com
+    - AGaliuzov@luxoft.com
+    - ANosach@luxoft.com
+

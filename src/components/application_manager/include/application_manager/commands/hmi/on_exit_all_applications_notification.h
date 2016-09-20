@@ -49,7 +49,8 @@ class OnExitAllApplicationsNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnExitAllApplicationsNotification(const MessageSharedPtr& message);
+  OnExitAllApplicationsNotification(const MessageSharedPtr& message,
+                                    ApplicationManager& application_manager);
 
   /**
    * @brief OnExitAllApplicationsNotification class destructor
@@ -62,7 +63,6 @@ class OnExitAllApplicationsNotification : public NotificationFromHMI {
   virtual void Run();
 
  private:
-
   /**
    * @brief Notify's HMI that SDL stored all data required for resumption
    **/

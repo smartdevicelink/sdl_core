@@ -32,7 +32,7 @@
 #ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_BITSTREAM_H_
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_BITSTREAM_H_
 
-#include "stdint.h"
+#include <stdint.h>
 
 #include <climits>
 #include <cstring>
@@ -57,12 +57,21 @@ class BitStream {
   // Mark stream as badly-formed.
   // Should be called by Extract* family of procedures if they decide
   // that stream is invalid
-  void MarkBad()  { bad_ = true;  }
+  void MarkBad() {
+    bad_ = true;
+  }
   // Predicates to check whether there were errors while parsing
   // Stream is good when it is created
-  bool IsGood()   { return !bad_; }
-  bool IsBad()    { return bad_;  }
-  operator bool() { return IsGood(); }
+  bool IsGood() {
+    return !bad_;
+  }
+  bool IsBad() {
+    return bad_;
+  }
+  operator bool() {
+    return IsGood();
+  }
+
  private:
   // These two functions are used for internal stream checks only
   // Stream parser procedures must not define their logic depending on
@@ -78,13 +87,13 @@ class BitStream {
 
   // Extract single value, amount of bits read from stream depends on T size
   // If there is not enough data in the stream, stream is marked bad
-  template<typename T>
+  template <typename T>
   void Extract(T& val);
 
   // Read single value, amount of bits read from stream is signaled by |bits|
   // parameter. T must be wide enough to hold this amount of bits.
   // If there is not enough data in the stream, stream is marked bad
-  template<typename T>
+  template <typename T>
   void ExtractBits(T& val, size_t bits);
 
   // Extract |length| bytes from the stream. Stream read position
@@ -94,10 +103,11 @@ class BitStream {
 
  private:
   const uint8_t* bytes_;
-  const size_t   bytes_count_;
+  const size_t bytes_count_;
   size_t byte_offset_;
   size_t bit_offset_;
   bool bad_;
+
  private:
   friend void Extract(BitStream*, uint8_t*);
   friend void Extract(BitStream*, uint8_t*, size_t);
@@ -105,7 +115,6 @@ class BitStream {
   friend void Extract(BitStream*, uint32_t*, size_t);
   friend void Extract(BitStream*, std::string*, size_t);
   friend void Extract(BitStream*, std::vector<uint8_t>*, size_t);
-
 };
 
 // Extract single byte from stream
@@ -133,16 +142,15 @@ void Extract(BitStream* bs, std::string* str, size_t length);
 // vector |data|. If stream is too short it is marked bad.
 void Extract(BitStream* bs, std::vector<uint8_t>* data, size_t length);
 
-
 // Template member definitions
-template<typename T>
+template <typename T>
 void BitStream::Extract(T& val) {
   // Slow but simple implementation
   // It's a space for bit stream reading optimization
   ExtractBits(val, sizeof(val) * CHAR_BIT);
 }
 
-template<typename T>
+template <typename T>
 void BitStream::ExtractBits(T& val, size_t bits) {
   DCHECK(sizeof(val) * CHAR_BIT >= bits);
   if (IsGood()) {
@@ -164,7 +172,6 @@ void BitStream::ExtractBits(T& val, size_t bits) {
   }
 }
 
-} // namespace utils
+}  // namespace utils
 
-
-#endif // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_BITSTREAM_H_
+#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_BITSTREAM_H_

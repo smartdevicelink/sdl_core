@@ -55,7 +55,8 @@ TEST(ConnectionDevice, CompareDevicesWithDifferentMacAddresses) {
   std::string hash_mac_address = test_device.mac_address();
 
   std::string test_next_mac_address = "test_address_";
-  Device next_test_device(device_handle, device_name, test_next_mac_address, connection_type);
+  Device next_test_device(
+      device_handle, device_name, test_next_mac_address, connection_type);
   EXPECT_NE(test_next_mac_address, next_test_device.mac_address());
   std::string hash_next_mac_address = next_test_device.mac_address();
 
@@ -77,4 +78,3 @@ TEST(ConnectionDevice, MacAddressHash) {
 }  // namespace connection_handle
 }  // namespace components
 }  // namespace test
-

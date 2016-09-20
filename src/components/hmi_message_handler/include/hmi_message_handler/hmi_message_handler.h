@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,6 +35,7 @@
 
 #include "hmi_message_handler/hmi_message_sender.h"
 #include "hmi_message_handler/hmi_message_observer.h"
+#include "hmi_message_handler/hmi_message_handler_settings.h"
 
 namespace hmi_message_handler {
 
@@ -49,6 +50,12 @@ class HMIMessageHandler : public HMIMessageObserver, public HMIMessageSender {
   virtual ~HMIMessageHandler() {}
   virtual void AddHMIMessageAdapter(HMIMessageAdapter* adapter) = 0;
   virtual void RemoveHMIMessageAdapter(HMIMessageAdapter* adapter) = 0;
+
+  /**
+   * \brief Hmi message handler settings getter
+   * \return pointer to hmi message handler settings class
+   */
+  virtual const HMIMessageHandlerSettings& get_settings() const = 0;
 };
 
 }  // namespace hmi_message_handler

@@ -41,18 +41,17 @@ namespace commands {
 namespace hmi {
 
 OnUIResetTimeoutNotification::OnUIResetTimeoutNotification(
-    const MessageSharedPtr& message) : NotificationFromHMI(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : NotificationFromHMI(message, application_manager) {}
 
-OnUIResetTimeoutNotification::~OnUIResetTimeoutNotification() {
-}
+OnUIResetTimeoutNotification::~OnUIResetTimeoutNotification() {}
 
 void OnUIResetTimeoutNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   event_engine::Event event(hmi_apis::FunctionID::UI_OnResetTimeout);
   event.set_smart_object(*message_);
-  event.raise();
+  event.raise(application_manager_.event_dispatcher());
 }
 
 }  // namespace hmi
@@ -60,4 +59,3 @@ void OnUIResetTimeoutNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

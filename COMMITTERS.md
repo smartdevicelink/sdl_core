@@ -18,6 +18,11 @@ set in the form of a pull request.
 
 **develop branch** - [The branch](https://github.com/LuxoftSDL/sdl_core/tree/develop) where bug fixes against the latest release or release candidate are merged.
 
+## Pre-commit hook installation
+* Go to tools/infrastructure/
+* Run install-hooks.py
+* or : Just run "python tools/infrastructure/install-hooks.py"
+
 ##Pull request checklist
 * Add Unit tests.
 * All tests pass (see Run all tests section).

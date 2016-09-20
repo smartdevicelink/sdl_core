@@ -49,7 +49,8 @@ class VRAddCommandRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit VRAddCommandRequest(const MessageSharedPtr& message);
+  VRAddCommandRequest(const MessageSharedPtr& message,
+                      ApplicationManager& application_manager);
 
   /**
    * @brief VRAddCommandRequest class destructor

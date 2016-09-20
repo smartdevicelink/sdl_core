@@ -35,7 +35,8 @@ namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
 namespace Errors {
 /**
- * @brief Enumeration that provides information about SmartObject validation errors
+ * @brief Enumeration that provides information about SmartObject validation
+ *errors
  **/
 enum eType {
   /**

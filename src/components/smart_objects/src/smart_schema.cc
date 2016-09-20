@@ -35,13 +35,10 @@
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
 
-CSmartSchema::CSmartSchema()
-    : mSchemaItem(CAlwaysTrueSchemaItem::create()) {
-}
+CSmartSchema::CSmartSchema() : mSchemaItem(CAlwaysTrueSchemaItem::create()) {}
 
 CSmartSchema::CSmartSchema(const ISchemaItemPtr SchemaItem)
-    : mSchemaItem(SchemaItem) {
-}
+    : mSchemaItem(SchemaItem) {}
 
 Errors::eType CSmartSchema::validate(const SmartObject& object) const {
   return mSchemaItem->validate(object);
@@ -51,7 +48,8 @@ void CSmartSchema::setSchemaItem(const ISchemaItemPtr schemaItem) {
   mSchemaItem = schemaItem;
 }
 
-void CSmartSchema::applySchema(SmartObject& Object, const bool RemoveFakeParameters) {
+void CSmartSchema::applySchema(SmartObject& Object,
+                               const bool RemoveFakeParameters) {
   mSchemaItem->applySchema(Object, RemoveFakeParameters);
 }
 

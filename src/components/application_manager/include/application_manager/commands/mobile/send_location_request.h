@@ -34,6 +34,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_SEND_LOCATION_REQUEST_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_SEND_LOCATION_REQUEST_H_
 
+#include <list>
 #include "application_manager/commands/command_request_impl.h"
 
 namespace application_manager {
@@ -48,7 +49,8 @@ class SendLocationRequest : public CommandRequestImpl {
   /**
    * @brief SendLocationRquest class constructor
    */
-  explicit SendLocationRequest(const MessageSharedPtr& message);
+  SendLocationRequest(const MessageSharedPtr& message,
+                      ApplicationManager& application_manager);
 
   /**
    * @brief SendLocationRquest class destructor
@@ -67,8 +69,13 @@ class SendLocationRequest : public CommandRequestImpl {
    */
   virtual void on_event(const event_engine::Event& event);
 
-
  private:
+  /**
+ * @brief CheckFieldsCompatibility checks if fields are compatible with each
+ * other.
+ * @return true if compatible, otherwise return false
+ */
+  bool CheckFieldsCompatibility();
 
   /**
    * @brief Checks sendlocation params(locationName, locationDescription, ...).
@@ -77,7 +84,8 @@ class SendLocationRequest : public CommandRequestImpl {
    */
   bool IsWhiteSpaceExist();
 
-  bool CheckHMICapabilities(std::list<hmi_apis::Common_TextFieldName::eType>& fields_names);
+  bool CheckHMICapabilities(
+      std::vector<hmi_apis::Common_TextFieldName::eType>& fields_names);
   DISALLOW_COPY_AND_ASSIGN(SendLocationRequest);
 };
 

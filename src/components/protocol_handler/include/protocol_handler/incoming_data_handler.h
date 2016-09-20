@@ -32,7 +32,6 @@
 #ifndef SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_INCOMING_DATA_HANDLER_H_
 #define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_INCOMING_DATA_HANDLER_H_
 
-#include <list>
 #include <map>
 #include <vector>
 #include "utils/macro.h"
@@ -43,7 +42,8 @@ namespace protocol_handler {
 
 /**
  * \class IncomingDataHandler
- * \brief Class for contecat TM messages to ford frames and validate ford header data
+ * \brief Class for contecat TM messages to ford frames and validate ford header
+ * data
  * IncomingDataHandler methods are reentrant and not thread-safe
  */
 class IncomingDataHandler {
@@ -53,7 +53,8 @@ class IncomingDataHandler {
    * @brief Setting additional validator for checking malformed packets
    * \param validator pointer
    */
-  void set_validator(const ProtocolPacket::ProtocolHeaderValidator *const validator);
+  void set_validator(
+      const ProtocolPacket::ProtocolHeaderValidator* const validator);
   /**
    * @brief Concatenate TM messages to ford frames and validate ford header data
    * \param TM messages for converting to frames
@@ -65,25 +66,23 @@ class IncomingDataHandler {
    *   - RESULT_FAIL - packet serialization or validation error occurs
    * \return list of complete, correct packets
    */
-  std::list<ProtocolFramePtr> ProcessData(const RawMessage &tm_message,
-                                          RESULT_CODE *result,
-                                          size_t *malformed_occurrence);
+  ProtocolFramePtrList ProcessData(const RawMessage& tm_message,
+                                   RESULT_CODE* result,
+                                   size_t* malformed_occurrence);
   /**
    * @brief Add connection for data handling and verification
    */
-  void AddConnection(
-    const transport_manager::ConnectionUID connection_id);
+  void AddConnection(const transport_manager::ConnectionUID connection_id);
   /**
    * @brief Remove connection and all unhandled data
    */
-  void RemoveConnection(
-    const transport_manager::ConnectionUID connection_id);
+  void RemoveConnection(const transport_manager::ConnectionUID connection_id);
 
  private:
   /**
    * @brief Returns size of frame to be formed from raw bytes.
    */
-  static uint32_t GetPacketSize(const ProtocolPacket::ProtocolHeader &header);
+  static uint32_t GetPacketSize(const ProtocolPacket::ProtocolHeader& header);
   /**
    * @brief Try to create frame from incoming data
    * \param incommung_data raw stream
@@ -95,16 +94,17 @@ class IncomingDataHandler {
    *   - RESULT_OK - one or more frames successfully created
    *   - RESULT_FAIL - packet serialization or validation error occurs
    */
-  RESULT_CODE CreateFrame(std::vector<uint8_t> &incoming_data,
-                          std::list<ProtocolFramePtr> &out_frames,
-                          size_t &malformed_occurrence,
+  RESULT_CODE CreateFrame(std::vector<uint8_t>& incoming_data,
+                          ProtocolFramePtrList& out_frames,
+                          size_t& malformed_occurrence,
                           const transport_manager::ConnectionUID connection_id);
 
   typedef std::map<transport_manager::ConnectionUID, std::vector<uint8_t> >
-  ConnectionsDataMap;
+      ConnectionsDataMap;
   ConnectionsDataMap connections_data_;
   ProtocolPacket::ProtocolHeader header_;
-  const  ProtocolPacket::ProtocolHeaderValidator *validator_;
+  const ProtocolPacket::ProtocolHeaderValidator* validator_;
+  bool last_portion_of_data_was_malformed_;
   DISALLOW_COPY_AND_ASSIGN(IncomingDataHandler);
 };
 }  // namespace protocol_handler

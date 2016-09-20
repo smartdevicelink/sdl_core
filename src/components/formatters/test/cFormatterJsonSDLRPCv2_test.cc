@@ -31,8 +31,8 @@
  */
 
 #include "gtest/gtest.h"
-#include "create_smartSchema.h"
-#include "formatters/CFormatterJsonSDLRPCv2.hpp"
+#include "formatters/create_smartSchema.h"
+#include "formatters/CFormatterJsonSDLRPCv2.h"
 
 namespace test {
 namespace components {
@@ -75,7 +75,8 @@ TEST(CFormatterJsonSDLRPCv2Test, SmObjWithRequestWithoutMsgNotValid_ToString) {
   EXPECT_EQ(expectOutputJsonString, jsonString);
 }
 
-TEST(CFormatterJsonSDLRPCv2Test, SmObjWithRequestWithEmptyMsgWithTestSchemaToString) {
+TEST(CFormatterJsonSDLRPCv2Test,
+     SmObjWithRequestWithEmptyMsgWithTestSchemaToString) {
   SmartObject srcObj;
   CSmartSchema schema = initObjectSchema();
   srcObj.setSchema(schema);
@@ -100,7 +101,8 @@ TEST(CFormatterJsonSDLRPCv2Test, SmObjWithRequestWithEmptyMsgWithTestSchemaToStr
   EXPECT_EQ(expectOutputJsonString, jsonString);
 }
 
-TEST(CFormatterJsonSDLRPCv2Test, SmObjWithRequestWithNonemptyMsgWithTestSchemaToString) {
+TEST(CFormatterJsonSDLRPCv2Test,
+     SmObjWithRequestWithNonemptyMsgWithTestSchemaToString) {
   SmartObject srcObj;
   CSmartSchema schema = initObjectSchema();
   srcObj.setSchema(schema);
@@ -216,7 +218,8 @@ TEST(CFormatterJsonSDLRPCv2Test, SmObjWithResponseToString) {
   EXPECT_EQ(expectOutputJsonString, jsonString);
 }
 
-TEST(CFormatterJsonSDLRPCv2Test, SmObjWithResponseWithoutSchemaWithoutParamsToString) {
+TEST(CFormatterJsonSDLRPCv2Test,
+     SmObjWithResponseWithoutSchemaWithoutParamsToString) {
   SmartObject srcObj;
   srcObj[S_PARAMS][S_MESSAGE_TYPE] = MessageTypeTest::response;
   std::string jsonString;
@@ -252,9 +255,11 @@ TEST(CFormatterJsonSDLRPCv2Test, StringRequestWithoutCorIdToSmObj) {
   obj.setSchema(schema);
 
   bool result = CFormatterJsonSDLRPCv2::fromString<FunctionIDTest::eType,
-      MessageTypeTest::eType>(inputJsonString, obj,
-                              FunctionIDTest::RegisterAppInterface,
-                              MessageTypeTest::request);
+                                                   MessageTypeTest::eType>(
+      inputJsonString,
+      obj,
+      FunctionIDTest::RegisterAppInterface,
+      MessageTypeTest::request);
 
   EXPECT_EQ(true, result);
   EXPECT_EQ(Errors::eType::MISSING_MANDATORY_PARAMETER, obj.validate());
@@ -294,9 +299,12 @@ TEST(CFormatterJsonSDLRPCv2Test, StringRequestWithCorIdToSmObj) {
   obj.setSchema(schema);
   int32_t corId = 10;
   bool result = CFormatterJsonSDLRPCv2::fromString<FunctionIDTest::eType,
-      MessageTypeTest::eType>(inputJsonString, obj,
-                              FunctionIDTest::RegisterAppInterface,
-                              MessageTypeTest::request, corId);
+                                                   MessageTypeTest::eType>(
+      inputJsonString,
+      obj,
+      FunctionIDTest::RegisterAppInterface,
+      MessageTypeTest::request,
+      corId);
 
   EXPECT_EQ(true, result);
   EXPECT_EQ(Errors::eType::OK, obj.validate());
@@ -328,9 +336,12 @@ TEST(CFormatterJsonSDLRPCv2Test, StringResponceWithCorIdToSmartObject) {
   obj.setSchema(schema);
   int32_t corId = 10;
   bool result = CFormatterJsonSDLRPCv2::fromString<FunctionIDTest::eType,
-      MessageTypeTest::eType>(inputJsonString, obj,
-                              FunctionIDTest::RegisterAppInterface,
-                              MessageTypeTest::response, corId);
+                                                   MessageTypeTest::eType>(
+      inputJsonString,
+      obj,
+      FunctionIDTest::RegisterAppInterface,
+      MessageTypeTest::response,
+      corId);
   EXPECT_EQ(true, result);
 
   EXPECT_EQ(obj[S_PARAMS][S_MESSAGE_TYPE], MessageTypeTest::response);
@@ -354,9 +365,12 @@ TEST(CFormatterJsonSDLRPCv2Test, StringNotificationToSmartObject) {
   obj.setSchema(schema);
   int32_t corId = 10;
   bool result = CFormatterJsonSDLRPCv2::fromString<FunctionIDTest::eType,
-      MessageTypeTest::eType>(inputJsonString, obj,
-                              FunctionIDTest::SetGlobalProperties,
-                              MessageTypeTest::notification, corId);
+                                                   MessageTypeTest::eType>(
+      inputJsonString,
+      obj,
+      FunctionIDTest::SetGlobalProperties,
+      MessageTypeTest::notification,
+      corId);
   EXPECT_EQ(true, result);
   EXPECT_EQ(Errors::eType::OK, obj.validate());
   EXPECT_EQ(obj[S_PARAMS][S_MESSAGE_TYPE], MessageTypeTest::notification);

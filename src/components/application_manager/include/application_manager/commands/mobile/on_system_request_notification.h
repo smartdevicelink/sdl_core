@@ -53,7 +53,8 @@ class OnSystemRequestNotification : public CommandNotificationImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnSystemRequestNotification(const MessageSharedPtr& message);
+  OnSystemRequestNotification(const MessageSharedPtr& message,
+                              ApplicationManager& application_manager);
 
   /**
    * @brief OnSystemRequestNotification class destructor
@@ -72,7 +73,7 @@ class OnSystemRequestNotification : public CommandNotificationImpl {
    * @param message Message
    */
   void AddHeader(BinaryMessage& message) const;
-  void ParsePTString(std::string& pt_string) const;
+  size_t ParsePTString(std::string& pt_string) const;
 #endif
 
   DISALLOW_COPY_AND_ASSIGN(OnSystemRequestNotification);

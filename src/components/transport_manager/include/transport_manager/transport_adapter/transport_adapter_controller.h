@@ -42,8 +42,7 @@ namespace transport_adapter {
 
 class TransportAdapterController {
  public:
-  virtual ~TransportAdapterController() {
-  }
+  virtual ~TransportAdapterController() {}
 
   /**
    * @brief Add device to the container(map), if container doesn't hold it yet.
@@ -55,7 +54,8 @@ class TransportAdapterController {
   virtual DeviceSptr AddDevice(DeviceSptr device) = 0;
 
   /**
-   * @brief Search for device in container of devices, if it is not there - adds it.
+   * @brief Search for device in container of devices, if it is not there - adds
+   *it.
    *
    * @param devices Container(vector) of smart pointers to devices.
    */
@@ -100,7 +100,8 @@ class TransportAdapterController {
                                  const ApplicationHandle& app_handle) = 0;
 
   /**
-   * @brief Make state of specified connection - ESTABLISHED and launch OnConnectDone event in device adapter listener.
+   * @brief Make state of specified connection - ESTABLISHED and launch
+   *OnConnectDone event in device adapter listener.
    *
    * @param devcie_handle Device unique identifier.
    * @param app_handle Handle of application.
@@ -109,7 +110,8 @@ class TransportAdapterController {
                            const ApplicationHandle& app_handle) = 0;
 
   /**
-   * @brief Delete connection from the container of connections and launch OnConnectFailed event in the device adapter listener.
+   * @brief Delete connection from the container of connections and launch
+   *OnConnectFailed event in the device adapter listener.
    *
    * @param device_handle Device unique identifier.
    * @param app_handle Handle of application.
@@ -119,7 +121,7 @@ class TransportAdapterController {
                              const ConnectError& error) = 0;
 
   /**
-   * @brief Make state of specified connection - FINILIZING.
+   * @brief Make state of specified connection - FINALISING.
    *
    * @param device_handle Device unique identifier.
    * @param app_handle Handle of application.
@@ -128,7 +130,8 @@ class TransportAdapterController {
                                   const ApplicationHandle& app_handle) = 0;
 
   /**
-   * @brief Set specified connection state to FINALISING and launch OnUnexpectedDisconnect event in the device adapter listener.
+   * @brief Set specified connection state to FINALISING and launch
+   *OnUnexpectedDisconnect event in the device adapter listener.
    *
    * @param device_handle Device unique identifier.
    * @param app_handle Handle of application.
@@ -147,7 +150,8 @@ class TransportAdapterController {
                                   const DisconnectDeviceError& error) = 0;
 
   /**
-   * @brief Delete specified connection from the container(map) of connections and launch event in the device adapter listener.
+   * @brief Delete specified connection from the container(map) of connections
+   *and launch event in the device adapter listener.
    *
    * @param device_handle Device unique identifier.
    * @param app_handle Handle of application.
@@ -155,13 +159,13 @@ class TransportAdapterController {
   virtual void DisconnectDone(const DeviceUID& device_handle,
                               const ApplicationHandle& app_handle) = 0;
 
-   /**
-   * @brief Launch OnDataReceiveDone event in the device adapter listener.
-   *
-   * @param device_handle Device unique identifier.
-   * @param app_handle Handle of application.
-   * @param message Smart pointer to the raw message.
-   */
+  /**
+  * @brief Launch OnDataReceiveDone event in the device adapter listener.
+  *
+  * @param device_handle Device unique identifier.
+  * @param app_handle Handle of application.
+  * @param message Smart pointer to the raw message.
+  */
   virtual void DataReceiveDone(const DeviceUID& device_handle,
                                const ApplicationHandle& app_handle,
                                ::protocol_handler::RawMessagePtr message) = 0;
@@ -198,7 +202,8 @@ class TransportAdapterController {
    */
   virtual void DataSendFailed(const DeviceUID& device_handle,
                               const ApplicationHandle& app_handle,
-                              ::protocol_handler::RawMessagePtr message, const DataSendError&) = 0;
+                              ::protocol_handler::RawMessagePtr message,
+                              const DataSendError&) = 0;
 };
 
 }  // namespace transport_adapter

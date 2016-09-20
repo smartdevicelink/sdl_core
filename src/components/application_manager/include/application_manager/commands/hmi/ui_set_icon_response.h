@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,7 +49,7 @@ class UISetIconResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UISetIconResponse(const MessageSharedPtr& message);
+  UISetIconResponse(const MessageSharedPtr& message);
 
   /**
    * @brief UISetIconResponse class destructor

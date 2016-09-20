@@ -35,14 +35,17 @@ include_directories(
   ${COMPONENTS_DIR}/protocol_handler/test/include
   ${COMPONENTS_DIR}/transport_manager/test/include
   ${COMPONENTS_DIR}/security_manager/include
-  include
+  ${COMPONENTS_DIR}/resumption/include
+  ${JSONCPP_INCLUDE_DIRECTORY}
 )
 
 set(SOURCES
-  #${COMPONENTS_DIR}/security_manager/test/crypto_manager_impl_test.cc
-  #${COMPONENTS_DIR}/security_manager/test/security_manager_test.cc
-  #${COMPONENTS_DIR}/security_manager/test/security_query_test.cc
+  ${COMPONENTS_DIR}/security_manager/test/crypto_manager_impl_test.cc
+  ${COMPONENTS_DIR}/security_manager/test/security_manager_test.cc
+  ${COMPONENTS_DIR}/security_manager/test/security_query_test.cc
   ${COMPONENTS_DIR}/security_manager/test/security_query_matcher.cc
+  ${COMPONENTS_DIR}/security_manager/test/ssl_context_test.cc
+  ${COMPONENTS_DIR}/security_manager/test/ssl_certificate_handshake_test.cc
  )
 
 set(LIBRARIES
@@ -55,12 +58,17 @@ set(CERT_LIST
   ${CMAKE_SOURCE_DIR}/mykey.pem   
 )
 
+add_custom_target(generate_certificates
+  COMMAND ${CMAKE_SOURCE_DIR}/tools/Utils/generate_test_certificates.py
+          -d=${CMAKE_CURRENT_BINARY_DIR} -s
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+)
+
 foreach( file_i ${CERT_LIST})
   file(COPY ${file_i} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 endforeach( file_i )
 
-add_library (test_security_manager ${SOURCES})
-target_link_libraries (test_security_manager ${LIBRARIES} )
 create_test (security_manager_test "${SOURCES}" "${LIBRARIES}")
+add_dependencies(security_manager_test generate_certificates)
 
 endif ()

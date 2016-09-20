@@ -42,20 +42,18 @@ namespace test {
 namespace components {
 namespace dbus {
 
-class DBusAdapterTest : public ::testing::Test {
-};
+class DBusAdapterTest : public ::testing::Test {};
 
 TEST_F(DBusAdapterTest, Initialization) {
   const std::string kSdlServiceName = "test.ford.sdl.core";
   const std::string kSdlObjectPath = "/";
   const std::string kHmiServiceName = "test.ford.sdl.hmi";
   const std::string kHmiObjectPath = "/";
-  ::dbus::DBusAdapter adapter(kSdlServiceName, kSdlObjectPath,
-                            kHmiServiceName, kHmiObjectPath);
+  ::dbus::DBusAdapter adapter(
+      kSdlServiceName, kSdlObjectPath, kHmiServiceName, kHmiObjectPath);
   EXPECT_TRUE(adapter.Init());
 }
 
 }  // namespace dbus
 }  // namespace components
 }  // namespace test
-

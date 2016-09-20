@@ -36,7 +36,7 @@
 #include <memory>
 #include <mqueue.h>
 #include "utils/threads/thread.h"
-#include "hmi_message_handler/hmi_message_adapter.h"
+#include "hmi_message_handler/hmi_message_adapter_impl.h"
 
 namespace hmi_message_handler {
 
@@ -45,7 +45,7 @@ class ReceiverThreadDelegate;
 /**
  * \brief HMI message adapter for mqueue
  */
-class MqueueAdapter : public HMIMessageAdapter {
+class MqueueAdapter : public HMIMessageAdapterImpl {
  public:
   MqueueAdapter(HMIMessageHandler* hmi_message_handler);
   virtual ~MqueueAdapter();

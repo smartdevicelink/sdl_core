@@ -49,7 +49,8 @@ class UIIsReadyResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UIIsReadyResponse(const MessageSharedPtr& message);
+  UIIsReadyResponse(const MessageSharedPtr& message,
+                    ApplicationManager& application_manager);
 
   /**
    * @brief UIIsReadyResponse class destructor

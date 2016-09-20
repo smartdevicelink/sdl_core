@@ -36,195 +36,89 @@
 #include <unistd.h>
 #include "utils/logger.h"
 #include "utils/file_system.h"
-#include "config_profile/profile.h"
 #include "media_manager/pipe_streamer_adapter.h"
 
 namespace media_manager {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "PipeStreamerAdapter")
 
-PipeStreamerAdapter::PipeStreamerAdapter()
-  : is_ready_(false),
-    thread_(threads::CreateThread("PipeStreamer", new Streamer(this))),
-    messages_() {
-  LOG4CXX_AUTO_TRACE(logger_);
-}
+PipeStreamerAdapter::PipeStreamerAdapter(const std::string& named_pipe_path,
+                                         const std::string& app_storage_folder)
+    : StreamerAdapter(
+          new PipeStreamer(this, named_pipe_path, app_storage_folder)) {}
 
-PipeStreamerAdapter::~PipeStreamerAdapter() {
-  LOG4CXX_AUTO_TRACE(logger_);
+PipeStreamerAdapter::~PipeStreamerAdapter() {}
 
-  if ((0 != current_application_ ) && (is_ready_)) {
-    StopActivity(current_application_);
-  }
-
-  thread_->join();
-  delete thread_->delegate();
-  threads::DeleteThread(thread_);
-}
-
-void PipeStreamerAdapter::SendData(
-  int32_t application_key,
-  const ::protocol_handler::RawMessagePtr message) {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  if (application_key != current_application_) {
-    LOG4CXX_WARN(logger_, "Wrong application " << application_key);
+PipeStreamerAdapter::PipeStreamer::PipeStreamer(
+    PipeStreamerAdapter* const adapter,
+    const std::string& named_pipe_path,
+    const std::string& app_storage_folder)
+    : Streamer(adapter)
+    , named_pipe_path_(named_pipe_path)
+    , app_storage_folder_(app_storage_folder)
+    , pipe_fd_(0) {
+  if (!file_system::CreateDirectoryRecursively(app_storage_folder_)) {
+    LOG4CXX_ERROR(logger_,
+                  "Cannot create app storage folder " << app_storage_folder_);
     return;
   }
-
-  if (is_ready_) {
-    messages_.push(message);
+  if ((mkfifo(named_pipe_path_.c_str(), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH) <
+       0) &&
+      (errno != EEXIST)) {
+    LOG4CXX_ERROR(logger_, "Cannot create pipe " << named_pipe_path_);
+  } else {
+    LOG4CXX_INFO(logger_,
+                 "Pipe " << named_pipe_path_ << " was successfully created");
+  }
+}
+PipeStreamerAdapter::PipeStreamer::~PipeStreamer() {
+  if (0 == unlink(named_pipe_path_.c_str())) {
+    LOG4CXX_INFO(logger_, "Pipe " << named_pipe_path_ << " was removed");
+  } else {
+    LOG4CXX_ERROR(logger_, "Error removing pipe " << named_pipe_path_);
   }
 }
 
-void PipeStreamerAdapter::StartActivity(int32_t application_key) {
+bool PipeStreamerAdapter::PipeStreamer::Connect() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  if (application_key == current_application_) {
-    LOG4CXX_WARN(logger_, "Already started activity for " << application_key);
-    return;
-  }
-
-  current_application_ = application_key;
-  is_ready_ = true;
-
-  for (std::set<MediaListenerPtr>::iterator it = media_listeners_.begin();
-       media_listeners_.end() != it;
-       ++it) {
-    (*it)->OnActivityStarted(application_key);
-  }
-
-  LOG4CXX_DEBUG(logger_, "Pipe was opened for writing " << named_pipe_path_);
-}
-
-void PipeStreamerAdapter::StopActivity(int32_t application_key) {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  if (application_key != current_application_) {
-    LOG4CXX_WARN(logger_, "Not performing activity for " << application_key);
-    return;
-  }
-
-  is_ready_ = false;
-  current_application_ = 0;
-
-  messages_.Reset();
-
-  for (std::set<MediaListenerPtr>::iterator it = media_listeners_.begin();
-       media_listeners_.end() != it;
-       ++it) {
-    (*it)->OnActivityEnded(application_key);
-  }
-}
-
-bool PipeStreamerAdapter::is_app_performing_activity( int32_t application_key) {
-  return (application_key == current_application_);
-}
-
-void PipeStreamerAdapter::Init() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  if (thread_->is_running()) {
-    thread_->stop();
-    thread_->join();
-  }
-  LOG4CXX_DEBUG(logger_, "Start sending thread");
-  const size_t kStackSize = 16384;
-  thread_->start(threads::ThreadOptions(kStackSize));
-}
-
-PipeStreamerAdapter::Streamer::Streamer(
-  PipeStreamerAdapter* server)
-  : server_(server),
-    pipe_fd_(0),
-    stop_flag_(false) {
-}
-
-PipeStreamerAdapter::Streamer::~Streamer() {
-  server_ = NULL;
-}
-
-void PipeStreamerAdapter::Streamer::threadMain() {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  open();
-
-  while (!stop_flag_) {
-    while (!server_->messages_.empty()) {
-      ::protocol_handler::RawMessagePtr msg = server_->messages_.pop();
-      if (!msg) {
-        LOG4CXX_ERROR(logger_, "Null pointer message");
-        continue;
-      }
-
-      ssize_t ret = write(pipe_fd_, msg.get()->data(),
-                          msg.get()->data_size());
-
-      if (ret == -1) {
-        LOG4CXX_ERROR(logger_, "Failed writing data to pipe "
-                      << server_->named_pipe_path_);
-
-        std::set<MediaListenerPtr>::iterator it =
-            server_->media_listeners_.begin();
-        for (;server_->media_listeners_.end() != it; ++it) {
-          (*it)->OnErrorReceived(server_->current_application_, -1);
-        }
-      } else if (static_cast<uint32_t>(ret) != msg.get()->data_size()) {
-        LOG4CXX_WARN(logger_, "Couldn't write all the data to pipe "
-                     << server_->named_pipe_path_);
-      }
-
-      static int32_t messsages_for_session = 0;
-      ++messsages_for_session;
-
-      LOG4CXX_DEBUG(logger_, "Handling map streaming message. This is "
-                   << messsages_for_session << " the message for "
-                   << server_->current_application_);
-      std::set<MediaListenerPtr>::iterator it =
-          server_->media_listeners_.begin();
-      for (; server_->media_listeners_.end() != it; ++it) {
-        (*it)->OnDataReceived(server_->current_application_,
-                              messsages_for_session);
-      }
-    }
-    server_->messages_.wait();
-  }
-  close();
-}
-
-void PipeStreamerAdapter::Streamer::exitThreadMain() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  stop_flag_ = true;
-  server_->messages_.Shutdown();
-}
-
-void PipeStreamerAdapter::Streamer::open() {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  DCHECK(file_system::CreateDirectoryRecursively(
-      profile::Profile::instance()->app_storage_folder()));
-
-  if ((mkfifo(server_->named_pipe_path_.c_str(),
-              S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH) < 0)
-      && (errno != EEXIST)) {
-    LOG4CXX_ERROR(logger_, "Cannot create pipe " << server_->named_pipe_path_);
-    return;
-  }
-
-  pipe_fd_ = ::open(server_->named_pipe_path_.c_str(), O_RDWR, 0);
+  pipe_fd_ = open(named_pipe_path_.c_str(), O_RDWR, 0);
   if (-1 == pipe_fd_) {
-    LOG4CXX_ERROR(logger_, "Cannot open pipe for writing "
-                  << server_->named_pipe_path_);
-    return;
+    LOG4CXX_ERROR(logger_, "Cannot open pipe for writing " << named_pipe_path_);
+    return false;
   }
 
-  LOG4CXX_DEBUG(logger_, "Pipe " << server_->named_pipe_path_
-                << " was successfully created");
+  LOG4CXX_INFO(logger_,
+               "Pipe " << named_pipe_path_
+                       << " was successfuly opened for writing");
+  return true;
 }
 
-void PipeStreamerAdapter::Streamer::close() {
+void PipeStreamerAdapter::PipeStreamer::Disconnect() {
   LOG4CXX_AUTO_TRACE(logger_);
-  ::close(pipe_fd_);
-  unlink(server_->named_pipe_path_.c_str());
+  if (0 == close(pipe_fd_)) {
+    LOG4CXX_INFO(logger_, "Pipe " << named_pipe_path_ << " was closed");
+  } else {
+    LOG4CXX_ERROR(logger_, "Error closing pipe " << named_pipe_path_);
+  }
+}
+
+bool PipeStreamerAdapter::PipeStreamer::Send(
+    protocol_handler::RawMessagePtr msg) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  ssize_t ret = write(pipe_fd_, msg->data(), msg->data_size());
+  if (-1 == ret) {
+    LOG4CXX_ERROR(logger_, "Failed writing data to pipe " << named_pipe_path_);
+    return false;
+  }
+
+  if (static_cast<uint32_t>(ret) != msg->data_size()) {
+    LOG4CXX_WARN(logger_,
+                 "Couldn't write all the data to pipe " << named_pipe_path_);
+  }
+
+  LOG4CXX_INFO(logger_, "Streamer::sent " << msg->data_size());
+  return true;
 }
 
 }  // namespace media_manager

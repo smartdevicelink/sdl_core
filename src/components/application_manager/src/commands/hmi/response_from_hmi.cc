@@ -31,27 +31,27 @@
  */
 
 #include "application_manager/commands/hmi/response_from_hmi.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "smart_objects/smart_object.h"
 
 namespace application_manager {
 
 namespace commands {
 
-ResponseFromHMI::ResponseFromHMI(const MessageSharedPtr& message)
-    : CommandImpl(message) {
-  //If it is error response, shift info
+ResponseFromHMI::ResponseFromHMI(const MessageSharedPtr& message,
+                                 ApplicationManager& application_manager)
+    : CommandImpl(message, application_manager) {
+  // If it is error response, shift info
   if ((*message)[strings::params].keyExists(hmi_response::message)) {
     (*message)[strings::msg_params][strings::info] =
         (*message)[strings::params][hmi_response::message];
   }
 
   // Replace HMI app id with Mobile connection id
-  ApplicationManagerImpl::instance()->ReplaceHMIByMobileAppId(*(message.get()));
+  ReplaceHMIByMobileAppId(*(message.get()));
 }
 
-ResponseFromHMI::~ResponseFromHMI() {
-}
+ResponseFromHMI::~ResponseFromHMI() {}
 
 bool ResponseFromHMI::Init() {
   return true;
@@ -61,19 +61,18 @@ bool ResponseFromHMI::CleanUp() {
   return true;
 }
 
-void ResponseFromHMI::Run() {
-}
+void ResponseFromHMI::Run() {}
 
-void ResponseFromHMI::SendResponseToMobile(const MessageSharedPtr& message) {
+void ResponseFromHMI::SendResponseToMobile(
+    const MessageSharedPtr& message, ApplicationManager& application_manager) {
   (*message)[strings::params][strings::message_type] = MessageType::kResponse;
 
-  ApplicationManagerImpl::instance()->ManageMobileCommand(message);
+  application_manager_.ManageMobileCommand(message, ORIGIN_SDL);
 }
 
 void ResponseFromHMI::CreateHMIRequest(
     const hmi_apis::FunctionID::eType& function_id,
     const smart_objects::SmartObject& msg_params) const {
-
   smart_objects::SmartObjectSPtr result = new smart_objects::SmartObject;
 
   if (!result) {
@@ -82,8 +81,8 @@ void ResponseFromHMI::CreateHMIRequest(
   }
 
   // get hmi correlation id for chaining further request from this object
-  const uint32_t hmi_correlation_id_ = ApplicationManagerImpl::instance()
-      ->GetNextHMICorrelationID();
+  const uint32_t hmi_correlation_id_ =
+      application_manager_.GetNextHMICorrelationID();
 
   NsSmartDeviceLink::NsSmartObjects::SmartObject& request = *result;
   request[strings::params][strings::message_type] = MessageType::kRequest;
@@ -96,7 +95,7 @@ void ResponseFromHMI::CreateHMIRequest(
 
   request[strings::msg_params] = msg_params;
 
-  if (!ApplicationManagerImpl::instance()->ManageHMICommand(result)) {
+  if (!application_manager_.ManageHMICommand(result)) {
     LOG4CXX_ERROR(logger_, "Unable to send request");
     return;
   }

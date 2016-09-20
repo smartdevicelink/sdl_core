@@ -49,7 +49,8 @@ class UpdateAppListRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UpdateAppListRequest(const MessageSharedPtr& message);
+  UpdateAppListRequest(const MessageSharedPtr& message,
+                       ApplicationManager& application_manager);
 
   /**
    * @brief UpdateAppListRequest class destructor
@@ -70,4 +71,3 @@ class UpdateAppListRequest : public RequestToHMI {
 }  // namespace application_manager
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_UPDATE_APP_LIST_REQUEST_H_
-

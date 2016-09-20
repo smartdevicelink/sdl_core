@@ -36,7 +36,6 @@
 
 #include "application_manager/commands/command_response_impl.h"
 
-
 namespace application_manager {
 
 namespace commands {
@@ -51,7 +50,8 @@ class SystemResponse : public CommandResponseImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit SystemResponse(const MessageSharedPtr& message);
+  SystemResponse(const MessageSharedPtr& message,
+                 ApplicationManager& application_manager);
 
   /**
    * @brief SystemResponse class destructor

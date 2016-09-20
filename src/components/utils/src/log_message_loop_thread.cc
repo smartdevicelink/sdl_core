@@ -43,13 +43,12 @@ void LogMessageHandler::Handle(const LogMessage message) {
                             message.threadName);
 }
 
-LogMessageLoopThread::LogMessageLoopThread() :
-  LogMessageLoopThreadTemplate("Logger", new LogMessageHandler()) {
-}
+LogMessageLoopThread::LogMessageLoopThread()
+    : LogMessageLoopThreadTemplate("Logger", new LogMessageHandler()) {}
 
 LogMessageLoopThread::~LogMessageLoopThread() {
-// we'll have to drop messages
-// while deleting logger thread
+  // we'll have to drop messages
+  // while deleting logger thread
   logger_status = DeletingLoggerThread;
 }
 

@@ -31,6 +31,7 @@
  */
 #include "application_manager/commands/hmi/navi_alert_maneuver_response.h"
 #include "application_manager/event_engine/event.h"
+
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {
@@ -38,18 +39,17 @@ namespace application_manager {
 namespace commands {
 
 NaviAlertManeuverResponse::NaviAlertManeuverResponse(
-    const MessageSharedPtr& message) : ResponseFromHMI(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {}
 
-NaviAlertManeuverResponse::~NaviAlertManeuverResponse() {
-}
+NaviAlertManeuverResponse::~NaviAlertManeuverResponse() {}
 
 void NaviAlertManeuverResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   event_engine::Event event(hmi_apis::FunctionID::Navigation_AlertManeuver);
   event.set_smart_object(*message_);
-  event.raise();
+  event.raise(application_manager_.event_dispatcher());
 }
 
 }  // namespace commands
