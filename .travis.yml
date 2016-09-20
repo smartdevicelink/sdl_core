@@ -1,9 +1,3 @@
-env:
-  global:
-   # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
-   #   via the "travis encrypt" command using the project repo's public key
-   - LD_LIBRARY_PATH=.
-   - secure: "YrUVgA4/Vs4YPINdq1hwc5Mv2SZEtq/XY/+Wg0hC6lpicRBLSiQEgsqmxZc0/OFIbxzTYSE080X8SA6DXp+A0MEVu94zYr9lS/jJ5cDi/2Cl8QV+S/q0nlvr8aJEmCjOFDQTvWMp32ajBIo9HKsN9WrfK6nHuGhBBkZHPjCiVSE="
 language: cpp
 dist: trusty
 sudo: required
@@ -57,6 +51,9 @@ env:
   - CMAKE_CXX_COMPILER=g++-4.9
   - CMAKE_C_COMPILER=gcc-4.9
   - LD_LIBRARY_PATH=.
+  # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
+  #   via the "travis encrypt" command using the project repo's public key
+  - secure: "gGRieQzK0ExcuQRaMs/8mbXK4gitDSBs9RFV/iIqVUeKv+1ZyA4UP4tGAFXeY8Kl0sbRtld7t03Wx1/u0JI1bON2XMn/wCj0Hr8kbwt3eJr1bpG8dVr0tqDpfYVsBjX/nMxwNNBillvBpyXRoZf8z7ukZJAyRMMVG5tHqUVJM4k="
 after_success:
   - pwd ; bash <(curl -s https://codecov.io/bash) -f ./coverage/coverage.info || echo "Codecov did not collect coverage reports"
 deploy:
