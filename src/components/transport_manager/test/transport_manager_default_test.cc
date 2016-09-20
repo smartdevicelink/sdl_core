@@ -61,8 +61,7 @@ TEST(TestTransportManagerDefault, Init_LastStateNotUsed) {
   transport_manager.Stop();
 }
 
-// TODO(VlAntonov) APPLINK-27939
-TEST(TestTransportManagerDefault, DISABLED_Init_LastStateUsed) {
+TEST(TestTransportManagerDefault, Init_LastStateUsed) {
   MockTransportManagerSettings transport_manager_settings;
   transport_manager::TransportManagerDefault transport_manager(
       transport_manager_settings);
