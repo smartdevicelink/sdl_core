@@ -137,9 +137,11 @@ log4cxx_time_t time_now();
 
 #define CREATE_LOGGERPTR_LOCAL(logger_var, logger_name)
 
-#define INIT_LOGGER(file_name)
+#define INIT_LOGGER(file_name, logs_enabled)
 
-#define DEINIT_LOGGER(file_name)
+#define DEINIT_LOGGER()
+
+#define FLUSH_LOGGER()
 
 #define LOG4CXX_IS_TRACE_ENABLED(logger) false
 
