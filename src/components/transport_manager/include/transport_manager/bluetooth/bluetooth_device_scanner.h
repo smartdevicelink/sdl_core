@@ -53,6 +53,7 @@
 #include "utils/conditional_variable.h"
 #include "utils/lock.h"
 #include "utils/threads/thread_delegate.h"
+#include "utils/atomic_object.h"
 
 class Thread;
 
@@ -118,6 +119,7 @@ class BluetoothDeviceScanner : public DeviceScanner {
    public:
     explicit BluetoothDeviceScannerDelegate(BluetoothDeviceScanner* scanner);
     void threadMain() OVERRIDE;
+    void exitThreadMain() OVERRIDE;
 
    private:
     BluetoothDeviceScanner* scanner_;
@@ -196,9 +198,9 @@ class BluetoothDeviceScanner : public DeviceScanner {
 #endif
   TransportAdapterController* controller_;
   threads::Thread* thread_;
-  bool shutdown_requested_;
+  sync_primitives::atomic_bool shutdown_requested_;
   bool ready_;
-  bool device_scan_requested_;
+  volatile bool device_scan_requested_;
   sync_primitives::Lock device_scan_requested_lock_;
   sync_primitives::ConditionalVariable device_scan_requested_cv_;
 

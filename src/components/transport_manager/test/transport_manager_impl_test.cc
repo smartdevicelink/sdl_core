@@ -70,6 +70,7 @@ class TransportManagerImplTest : public ::testing::Test {
  protected:
   TransportManagerImplTest()
       : tm_(settings)
+      , mock_adapter_(NULL)
       , device_handle_(1)
       , mac_address_("MA:CA:DR:ES:S")
       , dev_info_(device_handle_, mac_address_, "TestDeviceName", "BTMAC") {}
@@ -507,6 +508,7 @@ TEST_F(TransportManagerImplTest, SendMessageToDevice) {
   EXPECT_CALL(mock_metric_observer_, StartRawMsg(test_message_.get()));
 #endif  // TELEMETRY_MONITOR
   EXPECT_EQ(E_SUCCESS, tm_.SendMessageToDevice(test_message_));
+
   testing::Mock::AsyncVerifyAndClearExpectations(kAsyncExpectationsTimeout);
 }
 
@@ -640,7 +642,8 @@ TEST_F(TransportManagerImplTest, UpdateDeviceList_AddNewDevice) {
 
 struct DeviceInfoComparator {
   const transport_manager::DeviceInfo& val_;
-  DeviceInfoComparator(const transport_manager::DeviceInfo& val) : val_(val) {}
+  explicit DeviceInfoComparator(const transport_manager::DeviceInfo& val)
+      : val_(val) {}
 
   bool operator()(const transport_manager::DeviceInfo& val) const {
     return val_.name() == val.name() &&
@@ -689,6 +692,7 @@ TEST_F(TransportManagerImplTest, ReceiveEventFromDevice_OnSearchDeviceDone) {
   EXPECT_CALL(*tm_listener_, OnScanDevicesFinished());
 
   tm_.ReceiveEventFromDevice(test_event);
+
   testing::Mock::AsyncVerifyAndClearExpectations(kAsyncExpectationsTimeout);
 }
 
@@ -707,6 +711,7 @@ TEST_F(TransportManagerImplTest, ReceiveEventFromDevice_OnSearchDeviceFail) {
   EXPECT_CALL(*tm_listener_, OnScanDevicesFailed(_));
 
   tm_.ReceiveEventFromDevice(test_event);
+
   testing::Mock::AsyncVerifyAndClearExpectations(kAsyncExpectationsTimeout);
 }
 
@@ -741,6 +746,7 @@ TEST_F(TransportManagerImplTest, ReceiveEventFromDevice_DeviceListUpdated) {
 
   tm_.ReceiveEventFromDevice(test_event);
   device_list_.pop_back();
+
   testing::Mock::AsyncVerifyAndClearExpectations(kAsyncExpectationsTimeout);
 }
 

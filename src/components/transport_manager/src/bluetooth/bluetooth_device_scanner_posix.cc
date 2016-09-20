@@ -81,19 +81,18 @@ int FindPairedDevs(std::vector<bdaddr_t>* result) {
     SDL_TRACE("exit -1. Condition: !pipe");
     return -1;
   }
-  char* buffer = new char[1028];
+  const int buffer_size = 1028;
+  std::vector<char> buffer(buffer_size);
   size_t counter = 0;
-  while (fgets(buffer, 1028, pipe) != NULL) {
+  while (fgets(&buffer[0], buffer_size, pipe) != NULL) {
     if (0 < counter++) {  //  skip first line
-      char* bt_address = SplitToAddr(buffer);
+      char* bt_address = SplitToAddr(&buffer[0]);
       if (bt_address) {
         bdaddr_t address;
         str2ba(bt_address, &address);
         result->push_back(address);
       }
     }
-    delete[] buffer;
-    buffer = new char[1028];
   }
   pclose(pipe);
   SDL_TRACE("exit with 0");
@@ -132,7 +131,7 @@ BluetoothDeviceScanner::BluetoothDeviceScanner(
                                                    0xA8};
   sdp_uuid128_create(&smart_device_link_service_uuid_,
                      smart_device_link_service_uuid_data);
-  thread_ = threads::CreateThread("BT Device Scaner",
+  thread_ = threads::CreateThread("BT Device Scanner",
                                   new BluetoothDeviceScannerDelegate(this));
 }
 
@@ -194,13 +193,14 @@ void BluetoothDeviceScanner::DoInquiry() {
   SDL_INFO("Starting hci_inquiry on device " << device_id);
   const uint8_t inquiry_time = 8u;  // Time unit is 1.28 seconds
   const size_t max_devices = 256u;
-  inquiry_info* inquiry_info_list = new inquiry_info[max_devices];
+  std::vector<inquiry_info> inquiry_info_list(max_devices);
+  inquiry_info* inquiry_info_list_ptr = &inquiry_info_list[0];
 
   const int number_of_devices = hci_inquiry(device_id,
                                             inquiry_time,
                                             max_devices,
                                             0,
-                                            &inquiry_info_list,
+                                            &inquiry_info_list_ptr,
                                             IREQ_CACHE_FLUSH);
 
   if (number_of_devices >= 0) {
@@ -217,7 +217,6 @@ void BluetoothDeviceScanner::DoInquiry() {
   controller_->FindNewApplicationsRequest();
 
   close(device_handle);
-  delete[] inquiry_info_list;
 
   if (number_of_devices < 0) {
     SDL_DEBUG("number_of_devices < 0");
@@ -495,6 +494,12 @@ void BluetoothDeviceScanner::BluetoothDeviceScannerDelegate::threadMain() {
   SDL_AUTO_TRACE();
   DCHECK(scanner_);
   scanner_->Thread();
+}
+
+void BluetoothDeviceScanner::BluetoothDeviceScannerDelegate::exitThreadMain() {
+  scanner_->shutdown_requested_ = true;
+  sync_primitives::AutoLock auto_lock(scanner_->device_scan_requested_lock_);
+  scanner_->device_scan_requested_cv_.NotifyOne();
 }
 
 }  // namespace transport_adapter

@@ -47,6 +47,7 @@ void ThreadDelegate::exitThreadMain() {
     if (thread_->IsCurrentThread()) {
       ExitThread(kThreadCancelledExitCode);
     } else {
+      DCHECK(!"Thread termination by force should be avoided!")
       TerminateThread(thread_->thread_handle(), kThreadCancelledExitCode);
     }
   }

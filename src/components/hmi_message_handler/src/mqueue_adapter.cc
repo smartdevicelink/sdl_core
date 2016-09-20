@@ -33,6 +33,7 @@
 #include "hmi_message_handler/mqueue_adapter.h"
 #include "hmi_message_handler/hmi_message_handler.h"
 #include "utils/logger.h"
+#include "utils/atomic_object.h"
 
 namespace hmi_message_handler {
 
@@ -48,14 +49,22 @@ class ReceiverThreadDelegate : public threads::ThreadDelegate {
   ReceiverThreadDelegate(mqd_t mqueue_descriptor,
                          HMIMessageHandler* hmi_message_handler)
       : mqueue_descriptor_(mqueue_descriptor)
-      , hmi_message_handler_(hmi_message_handler) {}
+      , hmi_message_handler_(hmi_message_handler)
+      , shutdown_requested_(false) {}
 
  private:
-  virtual void threadMain() {
-    while (true) {
+  void threadMain() OVERRIDE {
+    while (!shutdown_requested_) {
       static char buffer[kMqueueMessageSize];
-      const ssize_t size =
-          mq_receive(mqueue_descriptor_, buffer, kMqueueMessageSize, NULL);
+
+      struct timespec current_time;
+      clock_gettime(CLOCK_REALTIME, &current_time);
+
+      const time_t wait_time_sec = 1;
+      current_time.tv_sec += wait_time_sec;
+
+      const ssize_t size = mq_timedreceive(
+          mqueue_descriptor_, buffer, kMqueueMessageSize, NULL, &current_time);
       if (-1 == size) {
         SDL_ERROR("Message queue receive failed, error " << errno);
         continue;
@@ -70,8 +79,13 @@ class ReceiverThreadDelegate : public threads::ThreadDelegate {
     }
   }
 
+  void exitThreadMain() OVERRIDE {
+    shutdown_requested_ = true;
+  }
+
   const mqd_t mqueue_descriptor_;
   HMIMessageHandler* hmi_message_handler_;
+  sync_primitives::atomic_bool shutdown_requested_;
 };
 
 MqueueAdapter::MqueueAdapter(HMIMessageHandler* hmi_message_handler)
