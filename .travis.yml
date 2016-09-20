@@ -29,7 +29,7 @@ addons:
       name: "smartdevicelink/sdl_core"
       description: "Build submitted via Travis CI"
     notification_email: jack@livio.io
-    build_command_prepend: "mkdir build && cd build && cmake ../"
+    build_command_prepend: "mkdir build && cd build && cmake ../ -DBUILD_TESTS=ON -DENABLE_GCOV=ON"
     build_command:   "make install"
     branch_pattern: coverity
 before_install:
@@ -40,8 +40,8 @@ before_install:
 script:
   - sudo ln -sf /usr/bin/gcov-4.9 /usr/bin/gcov
   - bash -e tools/infrastructure/check_style.sh
-  - mkdir build && cd build && cmake ../ -DBUILD_TESTS=ON -DENABLE_GCOV=ON && make install
   - sudo ldconfig
+  - cd build
   - make test
   - bash -ex ../tools/infrastructure/collect_coverage.sh ./
 env:
@@ -52,7 +52,7 @@ env:
   - CMAKE_C_COMPILER=gcc-4.9
   - LD_LIBRARY_PATH=.
   # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
-  #   via the "travis encrypt" command using the project repo's public key
+  # via the "travis encrypt" command using the project repo's public key
   - secure: "gGRieQzK0ExcuQRaMs/8mbXK4gitDSBs9RFV/iIqVUeKv+1ZyA4UP4tGAFXeY8Kl0sbRtld7t03Wx1/u0JI1bON2XMn/wCj0Hr8kbwt3eJr1bpG8dVr0tqDpfYVsBjX/nMxwNNBillvBpyXRoZf8z7ukZJAyRMMVG5tHqUVJM4k="
 after_success:
   - pwd ; bash <(curl -s https://codecov.io/bash) -f ./coverage/coverage.info || echo "Codecov did not collect coverage reports"
