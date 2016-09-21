@@ -1,3 +1,4 @@
+
 language: cpp
 dist: trusty
 sudo: required
@@ -24,6 +25,7 @@ addons:
     - html2text
     - clang-format-3.6
 before_install:
+  - cmake
   - sudo apt-get -qq update
   - sudo apt-get -q -y install libavahi-client-dev bluez-tools sqlite3 libsqlite3-dev automake1.11
   - wget http://archive.ubuntu.com/ubuntu/pool/main/l/lcov/lcov_1.11-3_all.deb
