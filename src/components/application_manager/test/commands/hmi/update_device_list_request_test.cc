@@ -52,6 +52,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
+namespace update_device_list_request {
 
 using ::utils::SharedPtr;
 using testing::_;
@@ -165,6 +166,8 @@ TEST_F(UpdateDeviceListRequestTest, OnEvent_SUCCESS) {
 
   command->on_event(event);
 }
+
+}  // namespace update_device_list_request
 }  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components

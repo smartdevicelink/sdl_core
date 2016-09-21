@@ -46,6 +46,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
+namespace vr_get_capabilities_response {
 
 using ::utils::SharedPtr;
 using ::testing::NiceMock;
@@ -104,6 +105,7 @@ TEST_F(VRGetCapabilitiesResponseTest, RUN_SUCCESSS) {
   command->Run();
 }
 
+}  // namespace vr_get_capabilities_response
 }  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components

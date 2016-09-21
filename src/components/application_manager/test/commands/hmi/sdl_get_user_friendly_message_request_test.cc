@@ -48,6 +48,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
+namespace sdl_get_user_friendly_message_request {
 
 using application_manager::commands::MessageSharedPtr;
 using application_manager::commands::SDLGetUserFriendlyMessageRequest;
@@ -166,6 +167,7 @@ TEST_F(SDLGetUserFriendlyMessageRequestTest, Run_NoMsgCodes_Canceled) {
   command->Run();
 }
 
+}  // namespace sdl_get_user_friendly_message_request
 }  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components

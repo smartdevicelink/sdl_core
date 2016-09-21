@@ -48,6 +48,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
+namespace vr_get_supported_languages_response {
 
 using ::testing::Return;
 using ::utils::SharedPtr;
@@ -119,6 +120,8 @@ TEST_F(VRGetSupportedLanguagesResponseTest, RUN_UNSUCCESS) {
   EXPECT_FALSE((*command_msg)[am::strings::msg_params].keyExists(
       am::hmi_response::languages));
 }
+
+}  // namespace vr_get_supported_languages_response
 }  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components

@@ -42,6 +42,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
+namespace sdl_get_status_update_request {
 
 using application_manager::commands::MessageSharedPtr;
 using application_manager::commands::SDLGetStatusUpdateRequest;
@@ -74,6 +75,7 @@ TEST_F(SDLGetStatusUpdateRequestTest, Run_SUCCESS) {
   command->Run();
 }
 
+}  // namespace sdl_get_status_update_request
 }  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components

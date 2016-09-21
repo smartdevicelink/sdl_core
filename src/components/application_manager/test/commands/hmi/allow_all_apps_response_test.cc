@@ -42,6 +42,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
+namespace allow_all_apps_response {
 
 using application_manager::commands::MessageSharedPtr;
 using application_manager::commands::AllowAllAppsResponse;
@@ -69,6 +70,7 @@ TEST_F(AllowAllAppsResponseTest, Run_SUCCESS) {
   command->Run();
 }
 
+}  // namespace allow_all_apps_response
 }  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components

@@ -53,6 +53,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace create_interaction_choice_set {
 
 using ::testing::_;
 using ::testing::Return;
@@ -547,6 +548,7 @@ TEST_F(CreateInteractionChoiceSetResponseTest, Run_SuccessTrue_SUCCESS) {
   command->Run();
 }
 
+}  // namespace create_interaction_choice_set
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

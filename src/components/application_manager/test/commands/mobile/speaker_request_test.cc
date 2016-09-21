@@ -49,6 +49,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace speak_request {
 
 using application_manager::commands::SpeakRequest;
 using ::testing::DefaultValue;
@@ -291,6 +292,7 @@ TEST_F(SpeakRequestTest, OnEvent_TTS_OnResetTimeout_UpdateTimeout) {
   command->on_event(event);
 }
 
+}  // namespace speak_request
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

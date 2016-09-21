@@ -44,6 +44,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
+namespace ui_is_ready_response {
 
 using ::testing::Return;
 using ::utils::SharedPtr;
@@ -113,7 +114,8 @@ TEST_F(UIIsReadyResponseTest, RUN_NoKeyAvailable) {
       (*command_msg)[strings::msg_params].keyExists(strings::available));
 }
 
-}  // hmi_commands_test
+}  // namespace ui_is_ready_response
+}  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components
 }  // namespace test

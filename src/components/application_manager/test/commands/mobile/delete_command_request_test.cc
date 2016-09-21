@@ -50,6 +50,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace delete_command_request {
 
 using ::testing::_;
 using ::testing::Return;
@@ -252,6 +253,7 @@ TEST_F(DeleteCommandRequestTest, OnEvent_VrDeleteCommand_SUCCESS) {
   EXPECT_EQ(mobile_apis::Result::WARNINGS, kReceivedResult);
 }
 
+}  // namespace delete_command_request
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

@@ -51,6 +51,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
+namespace mixing_audio_supported_response {
 
 using ::testing::Return;
 using ::testing::ReturnRef;
@@ -98,7 +99,8 @@ TEST_F(MixingAudioSupportedResponseTest, RUN_SUCCESS) {
   command->Run();
 }
 
-}  // hmi_commands_test
+}  // namespace mixing_audio_supported_response
+}  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components
 }  // namespace test

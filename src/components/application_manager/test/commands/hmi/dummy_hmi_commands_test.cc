@@ -275,6 +275,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
+namespace dummy_hmi_commands_test {
 
 namespace commands = ::application_manager::commands;
 
@@ -610,7 +611,8 @@ TYPED_TEST(HMICommandsTestFifth, CtorAndDtorCall) {
   UNUSED(command);
 }
 
-}  // namespace hmie_commands_test
+}  // namespace dummy_hmi_commands_test
+}  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components
 }  // namespace test

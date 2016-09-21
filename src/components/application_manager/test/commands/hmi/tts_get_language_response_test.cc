@@ -42,6 +42,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
+namespace tts_get_language_response {
 
 using utils::SharedPtr;
 using application_manager::commands::TTSGetLanguageResponse;
@@ -101,7 +102,8 @@ TEST_F(TTSGetLanguageResponseTest, Run_LanguageNotSet_SUCCESS) {
   command->Run();
 }
 
-}  // hmi_commands_test
+}  // namespace tts_get_language_response
+}  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components
 }  // namespace test

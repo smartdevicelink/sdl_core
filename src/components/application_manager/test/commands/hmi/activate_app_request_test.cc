@@ -42,6 +42,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
+namespace activate_app_request {
 
 using ::testing::_;
 namespace am = ::application_manager;
@@ -93,6 +94,7 @@ TEST_F(ActivateAppRequestTest, Run_SUCCESS) {
             (*msg)[strings::params][strings::protocol_version].asInt());
 }
 
+}  // namespace activate_app_request
 }  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components

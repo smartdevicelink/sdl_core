@@ -46,6 +46,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
+namespace close_popup_response {
 
 using ::utils::SharedPtr;
 namespace am = ::application_manager;
@@ -64,7 +65,9 @@ TEST_F(ClosePopupResponseTest, RUN_SUCCESS) {
 
   command->Run();
 }
-}  // hmi_commands_test
+
+}  // namespace close_popup_response
+}  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components
 }  // namespace test

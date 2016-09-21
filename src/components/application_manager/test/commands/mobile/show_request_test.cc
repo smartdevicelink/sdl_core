@@ -44,6 +44,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace show_request {
 
 using application_manager::commands::MessageSharedPtr;
 using application_manager::commands::ShowRequest;
@@ -699,6 +700,7 @@ TEST_F(ShowRequestTest, OnEvent_WrongFunctionID_Canceled) {
   command->on_event(event);
 }
 
+}  // namespace show_request
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

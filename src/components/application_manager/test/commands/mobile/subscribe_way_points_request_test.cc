@@ -49,6 +49,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace subscribe_way_points_request {
 
 using application_manager::commands::SubscribeWayPointsRequest;
 using ::testing::DefaultValue;
@@ -117,7 +118,6 @@ TEST_F(SubscribeWayPointsRequestTest, Run_SomeAppSubscribedBefore_Success) {
   EXPECT_CALL(mock_app_manager_, IsAnyAppSubscribedForWayPoints())
       .WillOnce(Return(true));
   EXPECT_CALL(mock_app_manager_, SubscribeAppForWayPoints(kAppId));
-  EXPECT_CALL(*app_, UpdateHash());
 
   EXPECT_CALL(mock_app_manager_,
               ManageMobileCommand(
@@ -172,8 +172,6 @@ TEST_F(SubscribeWayPointsRequestTest, OnEvent_SuccessResult_SubscribeApp) {
 
   EXPECT_CALL(mock_app_manager_, SubscribeAppForWayPoints(kAppId));
 
-  EXPECT_CALL(*app_, UpdateHash());
-
   EXPECT_CALL(mock_app_manager_,
               ManageMobileCommand(
                   MobileResponseIs(mobile_result::SUCCESS, info_, true), _));
@@ -198,8 +196,6 @@ TEST_F(SubscribeWayPointsRequestTest, OnEvent_UnsuccessResult_NotSubscribeApp) {
 
   EXPECT_CALL(mock_app_manager_, SubscribeAppForWayPoints(kAppId)).Times(0);
 
-  EXPECT_CALL(*app_, UpdateHash()).Times(0);
-
   EXPECT_CALL(
       mock_app_manager_,
       ManageMobileCommand(
@@ -207,6 +203,7 @@ TEST_F(SubscribeWayPointsRequestTest, OnEvent_UnsuccessResult_NotSubscribeApp) {
   command->on_event(event);
 }
 
+}  // namespace subscribe_way_points_request
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

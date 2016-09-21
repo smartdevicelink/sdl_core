@@ -51,7 +51,8 @@
 namespace test {
 namespace components {
 namespace commands_test {
-namespace mobile_commands_test {
+namespace hmi_commands_test {
+namespace vi_get_vehicle_data_response {
 
 using ::testing::_;
 using ::testing::Return;
@@ -147,7 +148,9 @@ TEST_F(VIGetVehicleDataResponseTest, ErrorResponse_SUCCESS) {
 
   command->Run();
 }
-}  // namespace mobile_commands_test
+
+}  // namespace vi_get_vehicle_data_response
+}  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components
 }  // namespace test

@@ -50,6 +50,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace delete_sub_menu {
 
 using ::testing::_;
 using ::testing::Mock;
@@ -225,6 +226,7 @@ TEST_F(DeleteSubMenuResponseTest, Run_SUCCESS) {
   command->Run();
 }
 
+}  // namespace delete_sub_menu
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

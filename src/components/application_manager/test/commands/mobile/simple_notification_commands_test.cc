@@ -49,6 +49,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace simple_notification_commands_test {
 
 namespace am = ::application_manager;
 namespace commands = am::commands;
@@ -89,6 +90,7 @@ TYPED_TEST(MobileNotificationCommandsTest, Run_SendMessageToMobile_SUCCESS) {
   command->Run();
 }
 
+}  // namespace simple_notification_commands_test
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

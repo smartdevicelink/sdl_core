@@ -46,6 +46,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
+namespace mixing_audio_supported_request {
 
 using ::testing::_;
 using ::testing::Return;
@@ -84,7 +85,8 @@ TEST_F(MixingAudioSupportedRequestTest, RUN_SendRequest_SUCCESS) {
             CommandImpl::protocol_version_);
 }
 
-}  // hmi_commands_test
+}  // namespace mixing_audio_supported_request
+}  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components
 }  // namespace test

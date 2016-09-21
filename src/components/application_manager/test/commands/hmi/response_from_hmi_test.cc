@@ -45,6 +45,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
+namespace response_from_hmi {
 
 using ::testing::_;
 using ::testing::Return;
@@ -115,7 +116,8 @@ TEST_F(ResponseFromHMITest, CreateHMIRequest_SUCCESS) {
   EXPECT_EQ(kPostedFunctionId, kReceivedFunctionId);
 }
 
-}  // hmi_commands_test
+}  // namespace response_from_hmi
+}  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components
 }  // namespace test

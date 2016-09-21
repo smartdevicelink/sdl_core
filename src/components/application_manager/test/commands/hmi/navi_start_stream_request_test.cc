@@ -54,6 +54,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
+namespace navi_start_stream_request {
 
 namespace am = ::application_manager;
 namespace mobile_result = mobile_apis::Result;
@@ -332,6 +333,7 @@ TEST_F(NaviStartStreamRequestTest,
   command->onTimeOut();
 }
 
+}  // namespace navi_start_stream_request
 }  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components

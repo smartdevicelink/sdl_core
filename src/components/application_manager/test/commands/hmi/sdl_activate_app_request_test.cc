@@ -45,6 +45,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
+namespace sdl_activate_app_request {
 
 namespace am = ::application_manager;
 namespace strings = am::strings;
@@ -277,6 +278,7 @@ TEST_F(SDLActivateAppRequestTest, FirstAppNotRegistered_SUCCESS) {
   command->Run();
 }
 
+}  // namespace sdl_activate_app_request
 }  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components

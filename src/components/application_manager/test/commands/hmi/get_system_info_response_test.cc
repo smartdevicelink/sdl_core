@@ -50,6 +50,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
+namespace get_system_info_response {
 
 using ::testing::Return;
 using ::utils::SharedPtr;
@@ -150,7 +151,9 @@ TEST_F(GetSystemInfoResponseTest, GetSystemInfo_UNSUCCESS) {
 
   command->Run();
 }
-}  // hmi_commands_test
+
+}  // namespace get_system_info_response
+}  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components
 }  // namespace test

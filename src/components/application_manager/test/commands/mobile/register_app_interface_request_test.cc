@@ -59,6 +59,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace register_app_interface_request {
 
 using ::testing::_;
 using ::testing::Return;
@@ -260,6 +261,7 @@ TEST_F(RegisterAppInterfaceRequestTest, DISABLED_Run_AppHmiTypes_SUCCESS) {
   command_->Run();
 }
 
+}  // namespace register_app_interface_request
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

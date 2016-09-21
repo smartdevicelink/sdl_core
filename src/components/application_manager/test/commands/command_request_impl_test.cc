@@ -53,6 +53,7 @@
 namespace test {
 namespace components {
 namespace commands_test {
+namespace command_request_impl {
 
 namespace am = application_manager;
 namespace strings = am::strings;
@@ -499,6 +500,7 @@ TEST_F(CommandRequestImplTest,
   EXPECT_NE("", (*result)[strings::msg_params][strings::info].asString());
 }
 
+}  // namespace command_request_impl
 }  // namespace commands_test
 }  // namespace components
 }  // namespace test

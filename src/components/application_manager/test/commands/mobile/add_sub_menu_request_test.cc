@@ -52,6 +52,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace add_sub_menu_request {
 
 using ::testing::_;
 using ::testing::Return;
@@ -218,6 +219,7 @@ TEST_F(AddSubMenuRequestTest, Run_SUCCESS) {
   EXPECT_EQ(hmi_apis::FunctionID::UI_AddSubMenu, kReceivedResult);
 }
 
+}  // namespace add_sub_menu_request
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

@@ -52,6 +52,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace alert_request {
 
 using ::testing::_;
 using ::testing::Return;
@@ -231,6 +232,7 @@ TEST_F(AlertRequestTest, Run_SUCCESS) {
   command->Run();
 }
 
+}  // namespace alert_request
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

@@ -50,6 +50,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace subscribe_button_request {
 
 using ::testing::_;
 using ::testing::Return;
@@ -196,6 +197,7 @@ TEST_F(SubscribeButtonRequestTest, Run_SUCCESS) {
                                     [am::strings::result_code].asInt()));
 }
 
+}  // namespace subscribe_button_request
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components
