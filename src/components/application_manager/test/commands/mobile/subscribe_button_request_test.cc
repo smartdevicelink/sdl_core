@@ -43,6 +43,7 @@
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_hmi_capabilities.h"
 #include "mobile/subscribe_button_request.h"
+#include "mobile/subscribe_button_response.h"
 #include "interfaces/MOBILE_API.h"
 #include "application_manager/smart_object_keys.h"
 
@@ -59,9 +60,16 @@ using ::testing::DoAll;
 using ::testing::SaveArg;
 namespace am = ::application_manager;
 using am::commands::SubscribeButtonRequest;
+using am::commands::SubscribeButtonResponse;
 using am::commands::MessageSharedPtr;
 
 typedef SharedPtr<SubscribeButtonRequest> CommandPtr;
+typedef SharedPtr<SubscribeButtonResponse> ResponsePtr;
+
+MATCHER_P(CheckMessageSuccess, success, "") {
+  return success ==
+         (*arg)[am::strings::msg_params][am::strings::success].asBool();
+}
 
 class SubscribeButtonRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
@@ -71,6 +79,9 @@ class SubscribeButtonRequestTest
                  application_manager_test::MockHMICapabilities>::Result
       MockHMICapabilities;
 };
+
+class SubscribeButtonResponsetTest
+    : public CommandsTest<CommandsTestMocks::kIsNice> {};
 
 typedef SubscribeButtonRequestTest::MockHMICapabilities MockHMICapabilities;
 
@@ -195,6 +206,25 @@ TEST_F(SubscribeButtonRequestTest, Run_SUCCESS) {
             static_cast<mobile_apis::Result::eType>(
                 (*mobile_result_msg)[am::strings::msg_params]
                                     [am::strings::result_code].asInt()));
+}
+
+TEST_F(SubscribeButtonResponsetTest, ResponseFalse_UNSUCCESS) {
+  MessageSharedPtr msg(CreateMessage());
+  (*msg)[am::strings::msg_params][am::strings::success] = false;
+  ResponsePtr command(CreateCommand<SubscribeButtonResponse>(msg));
+
+  EXPECT_CALL(mock_app_manager_,
+              SendMessageToMobile(CheckMessageSuccess(false), false));
+  command->Run();
+}
+
+TEST_F(SubscribeButtonResponsetTest, ResponseTrue_SUCCESS) {
+  MessageSharedPtr msg(CreateMessage());
+  ResponsePtr command(CreateCommand<SubscribeButtonResponse>(msg));
+
+  EXPECT_CALL(mock_app_manager_,
+              SendMessageToMobile(CheckMessageSuccess(true), false));
+  command->Run();
 }
 
 }  // namespace subscribe_button_request

@@ -42,10 +42,12 @@
 #include "hmi/basic_communication_system_response.h"
 #include "hmi/navi_alert_maneuver_response.h"
 #include "hmi/navi_audio_start_stream_response.h"
+#include "hmi/navi_audio_stop_stream_response.h"
 #include "hmi/navi_get_way_points_response.h"
 #include "hmi/navi_send_location_response.h"
 #include "hmi/navi_show_constant_tbt_response.h"
 #include "hmi/navi_start_stream_response.h"
+#include "hmi/navi_stop_stream_response.h"
 #include "hmi/navi_subscribe_way_points_response.h"
 #include "hmi/navi_unsubscribe_way_points_response.h"
 #include "hmi/navi_update_turn_list_response.h"
@@ -94,6 +96,11 @@
 #include "hmi/navi_show_constant_tbt_response.h"
 #include "hmi/navi_start_stream_response.h"
 #include "hmi/navi_subscribe_way_points_response.h"
+#include "hmi/on_find_applications.h"
+#include "hmi/on_update_device_list.h"
+#include "hmi/sdl_policy_update_response.h"
+#include "hmi/update_app_list_response.h"
+#include "hmi/update_device_list_response.h"
 
 namespace test {
 namespace components {
@@ -124,6 +131,13 @@ class ResponseFromHMICommandsTest
     ON_CALL(mock_app_manager_, event_dispatcher())
         .WillByDefault(ReturnRef(event_dispatcher_));
   }
+};
+
+template <class Command>
+class EmptyResponseFromHMICommandsTest
+    : public CommandsTest<CommandsTestMocks::kIsNice> {
+ public:
+  typedef Command CommandType;
 };
 
 template <class Command, hmi_apis::FunctionID::eType kExpectedEventId>
@@ -217,7 +231,17 @@ typedef Types<
                 hmi_apis::FunctionID::VR_PerformInteraction> >
     ResponseCommandsList;
 
+typedef Types<commands::AudioStopStreamResponse,
+              commands::NaviStopStreamResponse,
+              commands::OnFindApplications,
+              commands::OnUpdateDeviceList,
+              commands::SDLPolicyUpdateResponse,
+              commands::UpdateAppListResponse,
+              commands::UpdateDeviceListResponse> EmptyResponseCommandsList;
+
 TYPED_TEST_CASE(ResponseFromHMICommandsTest, ResponseCommandsList);
+
+TYPED_TEST_CASE(EmptyResponseFromHMICommandsTest, EmptyResponseCommandsList);
 
 MATCHER_P(EventIdIsEqualTo, function_id, "") {
   return static_cast<hmi_apis::FunctionID::eType>(function_id) == arg.id();
@@ -231,6 +255,14 @@ TYPED_TEST(ResponseFromHMICommandsTest, Run_SendMessageToHMI_SUCCESS) {
 
   EXPECT_CALL(this->event_dispatcher_,
               raise_event(EventIdIsEqualTo(CommandData::kEventId)));
+
+  command->Run();
+}
+
+TYPED_TEST(EmptyResponseFromHMICommandsTest, Run_SUCCESS) {
+  typedef typename TestFixture::CommandType CommandType;
+
+  SharedPtr<CommandType> command = this->template CreateCommand<CommandType>();
 
   command->Run();
 }
