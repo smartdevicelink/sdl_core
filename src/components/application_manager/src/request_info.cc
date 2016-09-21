@@ -76,7 +76,7 @@ MobileRequestInfo::MobileRequestInfo(RequestPtr request,
 RequestInfo::RequestInfo(RequestPtr request,
                          const RequestInfo::RequestType requst_type,
                          const TimevalStruct& start_time,
-                         const uint64_t timeout_msec) 
+                         const uint64_t timeout_msec)
     : request_(request)
     , start_time_(start_time)
     , timeout_msec_(timeout_msec)

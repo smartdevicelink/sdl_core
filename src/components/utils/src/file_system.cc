@@ -98,8 +98,8 @@ size_t file_system::DirectorySize(const std::string& path) {
         size += DirectorySize(full_element_path);
       } else {
         if (0 != stat(full_element_path.c_str(), &file_info)) {
-          LOG4CXX_WARN_WITH_ERRNO(logger_, "Could not get file info: "
-                                  << full_element_path);
+          LOG4CXX_WARN_WITH_ERRNO(
+              logger_, "Could not get file info: " << full_element_path);
         } else {
           size += file_info.st_size;
         }
@@ -271,8 +271,8 @@ void file_system::remove_directory_content(const std::string& directory_name) {
         rmdir(full_element_path.c_str());
       } else {
         if (0 != remove(full_element_path.c_str())) {
-          LOG4CXX_WARN_WITH_ERRNO(logger_, "Unable to remove file: "
-                                  << full_element_path);
+          LOG4CXX_WARN_WITH_ERRNO(
+              logger_, "Unable to remove file: " << full_element_path);
         }
       }
     }

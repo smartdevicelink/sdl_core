@@ -315,7 +315,8 @@ Profile::Profile()
     , max_cmd_id_(kDefaultMaxCmdId)
     , default_timeout_(kDefaultTimeout)
     , app_resuming_timeout_(kDefaultAppResumingTimeout)
-    , app_resumption_save_persistent_data_timeout_(kDefaultAppSavePersistentDataTimeout)
+    , app_resumption_save_persistent_data_timeout_(
+          kDefaultAppSavePersistentDataTimeout)
     , app_dir_quota_(kDefaultDirQuota)
     , app_hmi_level_none_time_scale_max_requests_(
           kDefaultAppHmiLevelNoneTimeScaleMaxRequests)

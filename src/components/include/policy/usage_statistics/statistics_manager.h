@@ -38,11 +38,11 @@
 
 namespace usage_statistics {
 
-enum GlobalCounterId { 
-  GLOBAL_COUNTER_NONE, 
-  IAP_BUFFER_FULL, 
-  SYNC_OUT_OF_MEMORY, 
-  SYNC_REBOOTS 
+enum GlobalCounterId {
+  GLOBAL_COUNTER_NONE,
+  IAP_BUFFER_FULL,
+  SYNC_OUT_OF_MEMORY,
+  SYNC_REBOOTS
 };
 
 enum AppInfoId { APP_INFO_NONE, LANGUAGE_GUI, LANGUAGE_VUI };

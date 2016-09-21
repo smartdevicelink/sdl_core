@@ -271,8 +271,8 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
               message[strings::params][hmi_response::code].asInt());
       bool result = false;
       if (mobile_apis::Result::SUCCESS == result_code ||
-          (mobile_apis::Result::VEHICLE_DATA_NOT_AVAILABLE == result_code
-                    && message[strings::msg_params].length() > 1)) {
+          (mobile_apis::Result::VEHICLE_DATA_NOT_AVAILABLE == result_code &&
+           message[strings::msg_params].length() > 1)) {
         result = true;
       }
       const char* info = NULL;

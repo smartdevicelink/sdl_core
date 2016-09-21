@@ -67,8 +67,7 @@ Message::Message(protocol_handler::MessagePriority priority)
     , version_(kUnknownProtocol) {}
 
 Message::Message(const Message& message)
-    : priority_(message.priority_),
-      binary_data_(NULL) {
+    : priority_(message.priority_), binary_data_(NULL) {
   *this = message;
 }
 

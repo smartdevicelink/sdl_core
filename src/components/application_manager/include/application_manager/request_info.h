@@ -53,7 +53,7 @@ namespace request_controller {
  *
  */
 typedef utils::SharedPtr<commands::Command> RequestPtr;
-  
+
 struct RequestInfo {
   enum RequestType { RequestNone, MobileRequest, HMIRequest };
 
