@@ -110,6 +110,8 @@
 #include "hmi/navi_show_constant_tbt_request.h"
 #include "hmi/navi_stop_stream_request.h"
 #include "hmi/navi_subscribe_way_points_request.h"
+#include "hmi/sdl_policy_update.h"
+#include "hmi/ui_set_icon_request.h"
 
 namespace test {
 namespace components {
@@ -216,7 +218,10 @@ typedef Types<commands::NaviIsReadyRequest,
               commands::VRGetSupportedLanguagesRequest,
               commands::VRGetLanguageRequest,
               commands::VRPerformInteractionRequest,
-              commands::VRIsReadyRequest> RequestCommandsList2;
+              commands::VRIsReadyRequest,
+              commands::AllowAppRequest,
+              commands::SDLPolicyUpdate,
+              commands::UISetIconRequest> RequestCommandsList2;
 
 TYPED_TEST_CASE(RequestToHMICommandsTest, RequestCommandsList);
 TYPED_TEST_CASE(RequestToHMICommandsTest2, RequestCommandsList2);

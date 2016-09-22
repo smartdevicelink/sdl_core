@@ -65,6 +65,10 @@
 #include "mobile/set_media_clock_timer_response.h"
 #include "mobile/show_constant_tbt_response.h"
 #include "mobile/show_response.h"
+#include "mobile/add_command_response.h"
+#include "mobile/send_location_response.h"
+#include "mobile/set_app_icon_response.h"
+#include "mobile/set_display_layout_response.h"
 
 namespace test {
 namespace components {
@@ -115,7 +119,12 @@ typedef Types<commands::ListFilesResponse,
               commands::SetMediaClockTimerResponse,
               commands::ShowConstantTBTResponse,
               commands::ShowResponse,
-              commands::SystemResponse> ResponseCommandsList;
+              commands::SystemResponse,
+              commands::AddCommandResponse,
+              commands::SendLocationResponse,
+              commands::SetAppIconResponse,
+              commands::SetDisplayLayoutResponse> ResponseCommandsList;
+
 TYPED_TEST_CASE(MobileResponseCommandsTest, ResponseCommandsList);
 
 TYPED_TEST(MobileResponseCommandsTest, Run_SendResponseToMobile_SUCCESS) {

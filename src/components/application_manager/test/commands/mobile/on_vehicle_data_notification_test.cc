@@ -118,16 +118,18 @@ TEST_F(OnVehicleDataNotificationTest,
   EXPECT_CALL(mock_message_helper_, vehicle_data())
       .WillOnce(ReturnRef(test_vehicle_data));
 
-  const int kFuelLevel = 100;
+  const uint32_t fuel_level = 100u;
   (*command_msg_)[am::strings::msg_params][am::strings::fuel_level] =
-      kFuelLevel;
+      fuel_level;
 
   MockAppPtr mock_app(CreateMockApp());
   std::vector<ApplicationSharedPtr> applications;
+  // Added mock_app twice for passing all code in command
+  applications.push_back(mock_app);
   applications.push_back(mock_app);
 
   EXPECT_CALL(mock_app_manager_,
-              IviInfoUpdated(am::VehicleDataType::FUELLEVEL, kFuelLevel))
+              IviInfoUpdated(am::VehicleDataType::FUELLEVEL, fuel_level))
       .WillOnce(Return(applications));
 
   EXPECT_CALL(*mock_app, app_id()).WillRepeatedly(Return(kAppId));
@@ -136,7 +138,7 @@ TEST_F(OnVehicleDataNotificationTest,
 
   EXPECT_CALL(mock_app_manager_,
               SendMessageToMobile(
-                  CheckMessageData(am::strings::fuel_level, kFuelLevel), _));
+                  CheckMessageData(am::strings::fuel_level, fuel_level), _));
 
   command_->Run();
 }
