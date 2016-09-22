@@ -108,22 +108,6 @@ TEST_F(SystemRequestTest, Run_ApplicationIsNotRegistered) {
   command->Run();
 }
 
-// TODO(LevchenkoS): Fix broken test case APPLINK-28059
-TEST_F(SystemRequestTest, DISABLED_Run_TypeQueryAps_UnsupportedResourse) {
-  (*msg_)[am::strings::msg_params][am::strings::request_type] =
-      mobile_apis::RequestType::QUERY_APPS;
-  CommandPtr command(CreateCommand<SystemRequest>(msg_));
-  ON_CALL(mock_app_manager_, application(kKey)).WillByDefault(Return(app_));
-
-  EXPECT_CALL(
-      mock_app_manager_,
-      ManageMobileCommand(
-          MobileResponseIs(mobile_result::UNSUPPORTED_RESOURCE, info_, false),
-          _));
-
-  command->Run();
-}
-
 TEST_F(SystemRequestTest, Run_TypeDisallowed_DisallowedResult) {
   mobile_apis::RequestType::eType request_type =
       mobile_apis::RequestType::CLIMATE;
@@ -141,27 +125,6 @@ TEST_F(SystemRequestTest, Run_TypeDisallowed_DisallowedResult) {
       mock_app_manager_,
       ManageMobileCommand(
           MobileResponseIs(mobile_result::DISALLOWED, info_, false), _));
-
-  command->Run();
-}
-
-// TODO(LevchenkoS): Fix broken test case APPLINK-28059
-TEST_F(SystemRequestTest, DISABLED_Run_FileNameContainSlash_InvalidData) {
-  mobile_apis::RequestType::eType request_type =
-      mobile_apis::RequestType::CLIMATE;
-  (*msg_)[am::strings::msg_params][am::strings::request_type] = request_type;
-  (*msg_)[am::strings::msg_params][am::strings::file_name] = "file_name/";
-  CommandPtr command(CreateCommand<SystemRequest>(msg_));
-  ON_CALL(mock_app_manager_, application(kKey)).WillByDefault(Return(app_));
-
-  EXPECT_CALL(policy_handler_mock,
-              IsRequestTypeAllowed(kPolicyAppId, request_type))
-      .WillOnce(Return(true));
-  info_ = "Sync file name contains forbidden symbols.";
-  EXPECT_CALL(
-      mock_app_manager_,
-      ManageMobileCommand(
-          MobileResponseIs(mobile_result::INVALID_DATA, info_, false), _));
 
   command->Run();
 }
