@@ -33,6 +33,9 @@
 #include "vr_module/commands/activate_service.h"
 
 #include "utils/logger.h"
+#include "vr_module/convertor.h"
+#include "vr_module/event_engine/event_dispatcher.h"
+#include "vr_module/mobile_event.h"
 #include "vr_module/service_module.h"
 
 namespace vr_module {
@@ -40,13 +43,21 @@ namespace commands {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "VRModule")
 
+using event_engine::EventDispatcher;
+
 ActivateService::ActivateService(const vr_hmi_api::ServiceMessage& message,
                                  ServiceModule* module)
     : module_(module),
       message_(message) {
+  request_.set_rpc(vr_mobile_api::ACTIVATE);
+  request_.set_rpc_type(vr_mobile_api::REQUEST);
+  request_.set_correlation_id(module_->GetNextCorrelationID());
+  module_->RegisterRequest(request_.correlation_id(), this);
 }
 
 ActivateService::~ActivateService() {
+  EventDispatcher<vr_mobile_api::ServiceMessage, vr_mobile_api::RPCName>::instance()
+      ->remove_observer(this);
 }
 
 bool ActivateService::Execute() {
@@ -55,11 +66,42 @@ bool ActivateService::Execute() {
   if (message_.has_params() && params.ParseFromString(message_.params())) {
     int32_t app_id = params.appid();
     module_->ActivateService(app_id);
-    return SendResponse(vr_hmi_api::SUCCESS);
+    EventDispatcher<vr_mobile_api::ServiceMessage, vr_mobile_api::RPCName>::instance()
+        ->add_observer(request_.rpc(), request_.correlation_id(), this);
+    return module_->SendToMobile(request_);
   } else {
     LOG4CXX_ERROR(logger_, "Could not get app_id from message");
-    return SendResponse(vr_hmi_api::INVALID_DATA);
+    SendResponse(vr_hmi_api::INVALID_DATA);
+    module_->UnregisterRequest(request_.correlation_id());
   }
+  return false;
+}
+
+void ActivateService::OnTimeout() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  module_->DeactivateService();
+  SendResponse(vr_hmi_api::TIMEOUT);
+}
+
+void ActivateService::on_event(
+    const event_engine::Event<vr_mobile_api::ServiceMessage,
+        vr_mobile_api::RPCName>& event) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  const vr_mobile_api::ServiceMessage& message = event.event_message();
+  vr_mobile_api::ActivateServiceResponse mobile_response;
+  if (message.has_params()
+      && mobile_response.ParseFromString(message.params())) {
+    bool activated = mobile_response.result() == vr_mobile_api::SUCCESS;
+    if (!activated) {
+      module_->DeactivateService();
+    }
+    SendResponse(Convertor(mobile_response.result()));
+  } else {
+    LOG4CXX_ERROR(logger_, "Could not get result from message");
+    module_->DeactivateService();
+    SendResponse(vr_hmi_api::GENERIC_ERROR);
+  }
+  module_->UnregisterRequest(request_.correlation_id());
 }
 
 bool ActivateService::SendResponse(vr_hmi_api::ResultCode code) {
