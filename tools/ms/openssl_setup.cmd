@@ -2,6 +2,8 @@
 setlocal EnableDelayedExpansion
 
 if [%1]==[] goto usage
+set SDL_OPENSSL_DIR="C:\OpenSSL"
+if exist %SDL_OPENSSL_DIR% goto msg
 
 set BUILD_TYPE=%1
 set LIBS_DIR="%SDL_ROOT_DIR%\src\3rd_party-static"
@@ -49,5 +51,6 @@ goto end
 
 :usage
 @echo "Usage: <script> [x86|x64]"
-
+:msg
+@echo "OpenSSL already exist"
 :end

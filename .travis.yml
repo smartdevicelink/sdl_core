@@ -1,4 +1,6 @@
+
 language: cpp
+cache: ccache 
 dist: trusty
 sudo: required
 only:
@@ -31,7 +33,7 @@ before_install:
 script:
   - sudo ln -sf /usr/bin/gcov-4.9 /usr/bin/gcov
   - bash -e tools/infrastructure/check_style.sh
-  - mkdir build && cd build && cmake ../ -DBUILD_TESTS=ON -DENABLE_GCOV=ON && make install
+  - mkdir build && cd build && cmake ../ -DBUILD_TESTS=ON -DENABLE_GCOV=ON && make install 
   - sudo ldconfig
   - make test
   - bash ../tools/infrastructure/show_disabled.sh
