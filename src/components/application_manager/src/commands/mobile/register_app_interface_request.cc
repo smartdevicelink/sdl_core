@@ -590,9 +590,9 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
                                             application->mac_address());
   }
 
+  SendResponse(true, result_code, add_info.c_str(), &response_params);
   SendOnAppRegisteredNotificationToHMI(
       *(application.get()), resumption, need_restore_vr);
-  SendResponse(true, result_code, add_info.c_str(), &response_params);
 
   // Check if application exists, because application might be unregestered
   // during sending reponse to mobile.
