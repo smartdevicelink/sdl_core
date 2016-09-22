@@ -146,7 +146,7 @@ class ApplicationManagerImplTest : public ::testing::Test {
   NiceMock<hmi_message_handler_test::MockHMIMessageHandler>
       mock_hmi_mess_handler;
   NiceMock<MockApplicationManagerSettings> mock_application_manager_settings_;
-  std::auto_ptr<am::ApplicationManagerImpl> app_manager_impl_;
+  std::unique_ptr<am::ApplicationManagerImpl> app_manager_impl_;
 };
 
 struct AppIdExtractor {

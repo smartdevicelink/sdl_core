@@ -1417,7 +1417,7 @@ class ApplicationManagerImpl
   // Thread that pumps messages audio pass thru to mobile.
   impl::AudioPassThruQueue audio_pass_thru_messages_;
 
-  std::auto_ptr<HMICapabilities> hmi_capabilities_;
+  std::unique_ptr<HMICapabilities> hmi_capabilities_;
   // The reason of HU shutdown
   mobile_api::AppInterfaceUnregisteredReason::eType unregister_reason_;
 
@@ -1426,7 +1426,7 @@ class ApplicationManagerImpl
    * about persistent application data on disk, and save session ID for resuming
    * application in case INGITION_OFF or MASTER_RESSET
    */
-  std::auto_ptr<resumption::ResumeCtrl> resume_ctrl_;
+  std::unique_ptr<resumption::ResumeCtrl> resume_ctrl_;
 
   NaviServiceStatusMap navi_service_status_;
   std::deque<uint32_t> navi_app_to_stop_;
