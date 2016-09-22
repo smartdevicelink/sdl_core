@@ -2,12 +2,13 @@
 setlocal EnableDelayedExpansion
 
 if [%1]==[] goto usage
-
+set BUILD_TYPE=%1
+if exist "%SDL_LIBUSB_DIR%\libusbx_win_%BUILD_TYPE%" goto msg
 set BUILD_TYPE=%1
 set LIBS_DIR="%SDL_ROOT_DIR%\src\3rd_party-static"
 set LIBUSBX_SRC_DIR_NAME=libusbx-1.0.17
 set LIBUSBX_SRC_DIR=%LIBS_DIR%\%LIBUSBX_SRC_DIR_NAME%
-set LIBUSBX_BUILD_DIR=%SDL_BUILD_DIR%\libusbx_win_%BUILD_TYPE%
+set LIBUSBX_BUILD_DIR=%SDL_LIBUSB_DIR%\libusbx_win_%BUILD_TYPE%
 
 if not exist %LIBUSBX_SRC_DIR% (
   pushd %LIBS_DIR%
@@ -36,10 +37,11 @@ if not exist %LIBUSBX_BUILD_DIR% (
 
   xcopy %LIBUSBX_SRC_DIR%\libusb %LIBUSBX_BUILD_DIR%\libusb /E /I /H /R /Y
 )
-
+setx SDL_LIBUSB_DIR %LIBUSB_BUILD_DIR%
 goto end
 
 :usage
 @echo "Usage: <script> [x86|x64]"
-
+:msg
+@echo "LibUSB already exists"
 :end
