@@ -119,8 +119,9 @@ class GenericModule {
   /**
    * @brief Function for processing remote service starting
    * @param connection_key Key of started session.
+   * @return processing result
    */
-  virtual void OnServiceStartedCallback(const uint32_t& connection_key);
+  virtual bool OnServiceStartedCallback(const uint32_t& connection_key);
 
   /**
    * @brief Function for processing remote service stoping

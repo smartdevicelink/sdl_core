@@ -406,8 +406,7 @@ bool PluginManager::OnServiceStartedCallback(
   ModulePtr ptr = FindPluginForSpecifiedService(type);
 
   if (ptr) {
-    ptr->OnServiceStartedCallback(connection_key);
-    return true;
+    return ptr->OnServiceStartedCallback(connection_key);
   }
 
   return false;

@@ -336,9 +336,16 @@ void VRModule::ProcessMessageFromRemoteMobileService(
   messages_from_mobile_service_.PostMessage(message);
 }
 
-void VRModule::OnServiceStartedCallback(const uint32_t& connection_key) {
+bool VRModule::OnServiceStartedCallback(const uint32_t& connection_key) {
   LOG4CXX_AUTO_TRACE(logger_);
+
+  if (!IsSupported()) {
+    return false;
+  }
+
   RegisterService(connection_key);
+
+  return true;
 }
 
 void VRModule::OnServiceEndedCallback(const uint32_t& connection_key) {
