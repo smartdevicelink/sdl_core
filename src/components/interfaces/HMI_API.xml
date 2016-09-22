@@ -243,10 +243,10 @@
   </enum>
 
   <struct name="Coordinate">
-    <param name="latitudeDegrees" minvalue="-90" maxvalue="90" type="Double" mandatory="true">
+    <param name="latitudeDegrees" minvalue="-90" maxvalue="90" type="Float" mandatory="true">
       <description>Latitude of the location.</description>
     </param>
-    <param name="longitudeDegrees" minvalue="-180" maxvalue="180" type="Double" mandatory="true">
+    <param name="longitudeDegrees" minvalue="-180" maxvalue="180" type="Float" mandatory="true">
       <description>Longitude of the location.</description>
     </param>
   </struct>
@@ -1679,9 +1679,9 @@
 <!--IVI part-->
 <struct name="GPSData">
   <description>Struct with the GPS data.</description>
-  <param name="longitudeDegrees" type="Double" minvalue="-180" maxvalue="180" mandatory="false">
+  <param name="longitudeDegrees" type="Float" minvalue="-180" maxvalue="180" mandatory="false">
   </param>
-  <param name="latitudeDegrees" type="Double" minvalue="-90" maxvalue="90" mandatory="false">
+  <param name="latitudeDegrees" type="Float" minvalue="-90" maxvalue="90" mandatory="false">
   </param>
   <param name="utcYear" type="Integer" minvalue="2010" maxvalue="2100" mandatory="false">
     <description>The current UTC year.</description>
