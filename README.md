@@ -58,7 +58,7 @@ A quick guide to installing, configuring, and running an instance of the SDL Cor
 Note: it will ask you about adding to the `PATH` environment variable. Press `Yes`.
 * Download and install [python](https://www.python.org/ftp/python/2.7.10/python-2.7.10.msi) and add it to the `PATH`
 environment variable
-* Download and install [perl](http://www.activestate.com/activeperl/downloads/thank-you?dl=http://downloads.activestate.com/ActivePerl/releases/5.20.2.2002/ActivePerl-5.20.2.2002-MSWin32-x86-64int-299195.msi). Add it to `PATH`
+* Download and install [perl](http://www.activestate.com/activeperl/downloads?_ga=1.2858806.789162934.1474621646). Add it to `PATH`
 * Download and install [git](https://git-scm.com/download/win)
 * Download and install [GStreamer SDK](http://docs.gstreamer.com/display/GstSDK/Installing+on+Windows). You will need both Runtime and Development files. Add path to **bin** folder to `PATH`. Create new environment variable `SDL_GSTREAMER_DIR` with path to SDK (e.g. `D:\gstreamer-sdk\0.10\x86_64`).
 
