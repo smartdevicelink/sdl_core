@@ -41,16 +41,14 @@ A quick guide to installing, configuring, and running an instance of the SDL Cor
 ```
 %make
 %make install
-%cp bin/mykey.pem src/appMain
-%cp bin/mycert.pem src/appMain
 ```
 
 ## Start SDL Core
 Once SDL Core is compiled and installed you can start it from the executable in the bin folder
 
 ```
-%cd src/appMain
-%./smartDeviceLinkCore
+%cd bin/
+%LD_LIBRARY_PATH=. ./smartDeviceLinkCore
 ```
 
 ## Start WEB HMI
