@@ -3,10 +3,12 @@
 
 #include "gtest/gtest.h"
 #include "utils/shared_ptr.h"
+#include "commands/commands_test.h"
 #include "commands/command_request_test.h"
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_message_helper.h"
 #include "mobile/unsubscribe_button_request.h"
+#include "mobile/unsubscribe_button_response.h"
 
 namespace test {
 namespace components {
@@ -20,9 +22,16 @@ namespace mobile_result = mobile_apis::Result;
 using ::testing::_;
 
 using am::commands::UnsubscribeButtonRequest;
+using am::commands::UnsubscribeButtonResponse;
 using am::commands::MessageSharedPtr;
 
 typedef ::utils::SharedPtr<UnsubscribeButtonRequest> CommandPtr;
+typedef ::utils::SharedPtr<UnsubscribeButtonResponse> ResponsePtr;
+
+MATCHER_P(CheckMessageSuccess, success, "") {
+  return success ==
+         (*arg)[am::strings::msg_params][am::strings::success].asBool();
+}
 
 namespace {
 const uint32_t kConnectionKey = 1u;
@@ -31,6 +40,9 @@ const mobile_apis::ButtonName::eType kButtonId = mobile_apis::ButtonName::OK;
 
 class UnsubscribeButtonRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {};
+
+class UnsubscribeButtonResponseTest
+    : public CommandsTest<CommandsTestMocks::kIsNice> {};
 
 TEST_F(UnsubscribeButtonRequestTest, Run_AppNotRegistered_UNSUCCESS) {
   CommandPtr command(CreateCommand<UnsubscribeButtonRequest>());
@@ -95,6 +107,25 @@ TEST_F(UnsubscribeButtonRequestTest, Run_SUCCESS) {
 
   EXPECT_CALL(*mock_app, UpdateHash());
 
+  command->Run();
+}
+
+TEST_F(UnsubscribeButtonResponseTest, ResponseFalse_UNSUCCESS) {
+  MessageSharedPtr msg(CreateMessage());
+  (*msg)[am::strings::msg_params][am::strings::success] = false;
+  ResponsePtr command(CreateCommand<UnsubscribeButtonResponse>(msg));
+
+  EXPECT_CALL(mock_app_manager_,
+              SendMessageToMobile(CheckMessageSuccess(false), false));
+  command->Run();
+}
+
+TEST_F(UnsubscribeButtonResponseTest, ResponseTrue_SUCCESS) {
+  MessageSharedPtr msg(CreateMessage());
+  ResponsePtr command(CreateCommand<UnsubscribeButtonResponse>(msg));
+
+  EXPECT_CALL(mock_app_manager_,
+              SendMessageToMobile(CheckMessageSuccess(true), false));
   command->Run();
 }
 
