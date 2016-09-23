@@ -373,6 +373,21 @@ bool operator ==(const VRModule::MobileService& a,
   return a.app_id == b.app_id && a.device_id == b.device_id;
 }
 
+void VRModule::UnregisterService(int32_t app_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  services_.erase(app_id);
+  vr_hmi_api::ServiceMessage message;
+  message.set_rpc(vr_hmi_api::ON_UNREGISTER);
+  vr_hmi_api::OnUnregisterServiceNotification notification;
+  notification.set_appid(app_id);
+  std::string params;
+  if (notification.SerializeToString(&params)) {
+    message.set_params(params);
+  }
+  commands::CommandPtr command = factory_->Create(message);
+  RunCommand(command);
+}
+
 void VRModule::OnServiceEndedCallback(const uint32_t& connection_key) {
   LOG4CXX_AUTO_TRACE(logger_);
 
@@ -380,7 +395,7 @@ void VRModule::OnServiceEndedCallback(const uint32_t& connection_key) {
     DeactivateService();
   }
 
-  // TODO(VSemenyuk): here should be implemented reaction on service stopping(need to notify HMI)
+  UnregisterService(connection_key);
 }
 
 void VRModule::Start() {
