@@ -118,13 +118,19 @@ class VRModule : public functional_modules::GenericModule,
   }
 
  private:
+  struct MobileService {
+    std::string app_id;
+    std::string device_id;
+  };
+
   static const functional_modules::ModuleID kModuleID = 405;
 
   /**
    * Registers service
    * @param app_id unique application ID
+   * @param device_id unique device ID
    */
-  void RegisterService(int32_t app_id);
+  void RegisterService(int32_t app_id, const std::string& device_id);
 
   /**
    * @brief Subscribes plugin to mobie rpc messages
@@ -158,9 +164,11 @@ class VRModule : public functional_modules::GenericModule,
   /**
    * @brief Function for processing remote service starting
    * @param connection_key Key of started session.
+   * @param device_mac_address unique identificator of device
    * @return processing result
    */
-  virtual bool OnServiceStartedCallback(const uint32_t& connection_key);
+  virtual bool OnServiceStartedCallback(const uint32_t& connection_key,
+                                        const std::string& device_mac_address);
 
   /**
    * @brief Function for processing remote service stoping
@@ -175,11 +183,18 @@ class VRModule : public functional_modules::GenericModule,
   request_controller::RequestController request_controller_;
   bool supported_;
   int32_t active_service_;
-  int32_t default_service_;
+  MobileService default_service_;
   threads::MessageLoopThread<ServiceMessageQueue> messages_from_mobile_service_;
+  std::map<uint32_t, MobileService> services_;
 
   DISALLOW_COPY_AND_ASSIGN(VRModule);
+
+  friend bool operator==(const VRModule::MobileService& a,
+      const VRModule::MobileService& b);
 };
+
+bool operator==(const VRModule::MobileService& a,
+    const VRModule::MobileService& b);
 
 EXPORT_FUNCTION(VRModule)
 

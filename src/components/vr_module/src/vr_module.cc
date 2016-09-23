@@ -59,7 +59,7 @@ VRModule::VRModule()
       proxy_(this),
       supported_(false),
       active_service_(0),
-      default_service_(0),
+      default_service_(),
       messages_from_mobile_service_("IncomingFromMobileRemoteService", this) {
   factory_ = new commands::Factory(this);
   plugin_info_.name = "VRModulePlugin";
@@ -73,7 +73,7 @@ VRModule::VRModule(Channel* channel)
       proxy_(this, channel),
       supported_(false),
       active_service_(0),
-      default_service_(0),
+      default_service_(),
       messages_from_mobile_service_("IncomingFromMobileRemoteService", this) {
   factory_ = new commands::Factory(this);
   plugin_info_.name = "VRModulePlugin";
@@ -289,21 +289,40 @@ bool VRModule::HasActivatedService() const {
 
 void VRModule::SetDefaultService(int32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
-  default_service_ = app_id;
+  bool is_exist = services_.find(app_id) != services_.end();
+  if (is_exist) {
+    LOG4CXX_DEBUG(logger_, "app_id: " << app_id);
+    default_service_ = services_[app_id];
+  } else {
+    LOG4CXX_WARN(logger_, "Service " << app_id << " is not exist");
+  }
 }
 
 void VRModule::ResetDefaultService() {
   LOG4CXX_AUTO_TRACE(logger_);
-  default_service_ = 0;
+  default_service_ = MobileService();
 }
 
 bool VRModule::IsDefaultService(int32_t app_id) const {
   LOG4CXX_AUTO_TRACE(logger_);
-  return default_service_ == app_id;
+  std::map<uint32_t, MobileService>::const_iterator i = services_.find(app_id);
+  bool is_exist = (i != services_.end());
+  if (is_exist) {
+    LOG4CXX_DEBUG(logger_, "app_id: " << app_id);
+    return default_service_ == i->second;
+  } else {
+    LOG4CXX_WARN(logger_, "Service " << app_id << " is not exist");
+    return false;
+  }
 }
 
-void VRModule::RegisterService(int32_t app_id) {
+void VRModule::RegisterService(int32_t app_id, const std::string& device_id) {
   LOG4CXX_AUTO_TRACE(logger_);
+  application_manager::ApplicationSharedPtr app =
+      service()->GetApplication(app_id);
+  std::string mobile_app_id = app->mobile_app_id();
+  services_[app_id] = { mobile_app_id, device_id };
+
   vr_hmi_api::ServiceMessage message;
   message.set_rpc(vr_hmi_api::ON_REGISTER);
   vr_hmi_api::OnRegisterServiceNotification notification;
@@ -336,16 +355,22 @@ void VRModule::ProcessMessageFromRemoteMobileService(
   messages_from_mobile_service_.PostMessage(message);
 }
 
-bool VRModule::OnServiceStartedCallback(const uint32_t& connection_key) {
+bool VRModule::OnServiceStartedCallback(const uint32_t& connection_key,
+                                        const std::string& device_mac_address) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (!IsSupported()) {
     return false;
   }
 
-  RegisterService(connection_key);
+  RegisterService(connection_key, device_mac_address);
 
   return true;
+}
+
+bool operator ==(const VRModule::MobileService& a,
+    const VRModule::MobileService& b) {
+  return a.app_id == b.app_id && a.device_id == b.device_id;
 }
 
 void VRModule::OnServiceEndedCallback(const uint32_t& connection_key) {

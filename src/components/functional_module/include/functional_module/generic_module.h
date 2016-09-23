@@ -119,9 +119,11 @@ class GenericModule {
   /**
    * @brief Function for processing remote service starting
    * @param connection_key Key of started session.
+   * @param device_mac_address unique identificator of device
    * @return processing result
    */
-  virtual bool OnServiceStartedCallback(const uint32_t& connection_key);
+  virtual bool OnServiceStartedCallback(const uint32_t& connection_key,
+                                        const std::string& device_mac_address);
 
   /**
    * @brief Function for processing remote service stoping

@@ -124,7 +124,8 @@ class PluginManager : public utils::Singleton<PluginManager>,
    */
   virtual bool OnServiceStartedCallback(
       const uint32_t& connection_key,
-      const protocol_handler::ServiceType& type) const;
+      const protocol_handler::ServiceType& type,
+      const std::string& device_mac_address) const;
 
   /**
    * @brief RemoteServicesObserver interface realization

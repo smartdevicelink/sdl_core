@@ -33,6 +33,8 @@
 #ifndef SRC_COMPONENTS_CONNECTION_HANDLER_INCLUDE_CONNECTION_HANDLER_REMOTE_SERVICES_OBSERVER_H_
 #define SRC_COMPONENTS_CONNECTION_HANDLER_INCLUDE_CONNECTION_HANDLER_REMOTE_SERVICES_OBSERVER_H_
 
+#include <string>
+
 #include "protocol/service_type.h"
 
 namespace connection_handler {
@@ -46,11 +48,13 @@ class RemoteServicesObserver {
    * @brief Function for processing remote service starting
    * @param connection_key Key of started session.
    * @param type Established service type
+   * @param device_mac_address unique identificator of device
    * @return processing result
    */
   virtual bool OnServiceStartedCallback(
       const uint32_t& connection_key,
-      const protocol_handler::ServiceType& type) const = 0;
+      const protocol_handler::ServiceType& type,
+      const std::string& device_mac_address) const = 0;
 
   /**
    * @brief Function for processing remote service stoping
