@@ -350,8 +350,11 @@ uint32_t ConnectionHandlerImpl::OnSessionStartedCallback(
     const uint32_t session_key = KeyFromPair(connection_handle, new_session_id);
 
     if (remote_services_observer_) {
+      std::string device_mac_address = "";
+      GetDataOnDeviceID(connection->connection_device_handle(), NULL, NULL,
+                        &device_mac_address);
       if (remote_services_observer_->OnServiceStartedCallback(
-          session_key, service_type)) {
+          session_key, service_type, device_mac_address)) {
         LOG4CXX_INFO(logger_, "Remote service for RevSdl plugin started.");
         return new_session_id;
       }
