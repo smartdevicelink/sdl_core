@@ -25,6 +25,7 @@ enum RPCName{
   PROCESS_DATA = 3;
   ON_DEFAULT_CHOSEN = 4;
   SUPPORT_SERVICE = 5;
+  ON_UNREGISTER = 6;
 }
 
 //----------------SDL <=> HU- valid for SDL-RC Services approach only----------
@@ -94,4 +95,9 @@ message SupportServiceRequest{
 // may be recognized/substituted by HU-subsystem
 message SupportServiceResponse{
   required ResultCode result = 1;
+}
+
+// Must be sent by SDL to HU-subsystem on service unregistering
+message OnUnregisterServiceNotification{
+  required int32 appID = 1;
 }

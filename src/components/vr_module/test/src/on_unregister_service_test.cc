@@ -30,56 +30,56 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "vr_module/commands/factory.h"
-
-#include "utils/logger.h"
-
-#include "vr_module/commands/async_command.h"
-#include "vr_module/commands/activate_service.h"
-#include "vr_module/commands/on_default_service_chosen.h"
-#include "vr_module/commands/on_register_service.h"
-#include "vr_module/commands/on_service_deactivated.h"
+#include "gtest/gtest.h"
+#include "gmock/gmock.h"
+#include "mock_service_module.h"
 #include "vr_module/commands/on_unregister_service.h"
-#include "vr_module/commands/process_data.h"
-#include "vr_module/commands/support_service.h"
 #include "vr_module/interface/hmi.pb.h"
 #include "vr_module/interface/mobile.pb.h"
+
+using ::testing::_;
+using ::testing::Return;
 
 namespace vr_module {
 namespace commands {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "VRModule")
-
-Factory::Factory(ServiceModule* module)
-    : module_(module) {
+MATCHER_P(ServiceMessageEq, expected, "") {
+  return arg.rpc() == expected.rpc()
+      && arg.rpc_type() == expected.rpc_type()
+      && arg.correlation_id() == expected.correlation_id()
+      && arg.params() == expected.params();
 }
 
-CommandPtr Factory::Create(const vr_hmi_api::ServiceMessage& message) const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  switch (message.rpc()) {
-    case vr_hmi_api::SUPPORT_SERVICE:
-      return CommandPtr(new AsyncCommand(new SupportService(message, module_)));
-    case vr_hmi_api::ON_REGISTER:
-      return CommandPtr(new OnRegisterService(message, module_));
-    case vr_hmi_api::ON_DEFAULT_CHOSEN:
-      return CommandPtr(new OnDefaultServiceChosen(message, module_));
-    case vr_hmi_api::ON_DEACTIVATED:
-      return CommandPtr(new OnServiceDeactivated(module_));
-    case vr_hmi_api::ACTIVATE:
-      return CommandPtr(new AsyncCommand(new ActivateService(message, module_)));
-    case vr_hmi_api::PROCESS_DATA:
-      return CommandPtr(new AsyncCommand(new ProcessData(message, module_)));
-    case vr_hmi_api::ON_UNREGISTER:
-      return CommandPtr(new OnUnregisterService(message, module_));
-    default:
-      return CommandPtr();
-  }
-  return CommandPtr();
-}
+class OnUnregisterServiceTest : public ::testing::Test {
+ protected:
+};
 
-CommandPtr Factory::Create(const vr_mobile_api::ServiceMessage& message) const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  return CommandPtr();
+TEST_F(OnUnregisterServiceTest, Execute) {
+  MockServiceModule service;
+
+  const int32_t kId = 1;
+  EXPECT_CALL(service, GetNextCorrelationID()).Times(1).WillOnce(Return(kId));
+  vr_hmi_api::ServiceMessage input;
+  input.set_rpc(vr_hmi_api::ON_UNREGISTER);
+  vr_hmi_api::OnUnregisterServiceNotification notification;
+  notification.set_appid(3);
+  std::string params;
+  notification.SerializeToString(&params);
+  input.set_params(params);
+  OnUnregisterService cmd(input, &service);
+
+  vr_hmi_api::ServiceMessage expected;
+  expected.set_rpc(vr_hmi_api::ON_UNREGISTER);
+  expected.set_rpc_type(vr_hmi_api::NOTIFICATION);
+  expected.set_correlation_id(kId);
+  vr_hmi_api::OnUnregisterServiceNotification hmi_notification;
+  hmi_notification.set_appid(3);
+  std::string hmi_params;
+  hmi_notification.SerializeToString(&hmi_params);
+  expected.set_params(hmi_params);
+  EXPECT_CALL(service, SendToHmi(ServiceMessageEq(expected))).Times(1).WillOnce(
+      Return(true));
+  EXPECT_TRUE(cmd.Execute());
 }
 
 }  // namespace commands

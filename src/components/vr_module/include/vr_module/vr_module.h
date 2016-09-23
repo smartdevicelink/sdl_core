@@ -133,6 +133,12 @@ class VRModule : public functional_modules::GenericModule,
   void RegisterService(int32_t app_id, const std::string& device_id);
 
   /**
+   * Unregisters service
+   * @param app_id unique application ID
+   */
+  void UnregisterService(int32_t app_id);
+
+  /**
    * @brief Subscribes plugin to mobie rpc messages
    */
   void SubscribeToRpcMessages();
