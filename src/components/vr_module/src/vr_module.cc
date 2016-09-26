@@ -316,12 +316,17 @@ bool VRModule::IsDefaultService(int32_t app_id) const {
   }
 }
 
-void VRModule::RegisterService(int32_t app_id, const std::string& device_id) {
+bool VRModule::RegisterService(int32_t app_id, const std::string& device_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   application_manager::ApplicationSharedPtr app =
       service()->GetApplication(app_id);
-  std::string mobile_app_id = app->mobile_app_id();
-  services_[app_id] = { mobile_app_id, device_id };
+  if (app) {
+    std::string mobile_app_id = app->mobile_app_id();
+    services_[app_id] = { mobile_app_id, device_id };
+  } else {
+    LOG4CXX_ERROR(logger_, "Could not find application " << app_id);
+    return false;
+  }
 
   vr_hmi_api::ServiceMessage message;
   message.set_rpc(vr_hmi_api::ON_REGISTER);
@@ -333,6 +338,7 @@ void VRModule::RegisterService(int32_t app_id, const std::string& device_id) {
   }
   commands::CommandPtr command = factory_->Create(message);
   RunCommand(command);
+  return true;
 }
 
 void VRModule::Handle(protocol_handler::RawMessagePtr message) {
@@ -363,9 +369,7 @@ bool VRModule::OnServiceStartedCallback(const uint32_t& connection_key,
     return false;
   }
 
-  RegisterService(connection_key, device_mac_address);
-
-  return true;
+  return RegisterService(connection_key, device_mac_address);
 }
 
 bool operator ==(const VRModule::MobileService& a,
