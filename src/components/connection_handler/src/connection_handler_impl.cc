@@ -828,6 +828,10 @@ void ConnectionHandlerImpl::CloseSession(ConnectionHandle connection_handle,
       for (;service_list_itr != service_list.end(); ++service_list_itr) {
         const protocol_handler::ServiceType service_type =
             service_list_itr->service_type;
+        if (remote_services_observer_) {
+          remote_services_observer_->OnServiceEndedCallback(session_key,
+                                                            service_type);
+        }
         connection_handler_observer_->OnServiceEndedCallback(session_key,
                                                              service_type);
       }
@@ -958,6 +962,10 @@ void ConnectionHandlerImpl::OnConnectionEnded(
       const ServiceList &service_list = session_it->second.service_list;
       for (ServiceList::const_iterator service_it = service_list.begin(), end =
            service_list.end(); service_it != end; ++service_it) {
+        if (remote_services_observer_) {
+          remote_services_observer_->OnServiceEndedCallback(
+              session_key, service_it->service_type);
+        }
         connection_handler_observer_->OnServiceEndedCallback(
               session_key, service_it->service_type);
       }
