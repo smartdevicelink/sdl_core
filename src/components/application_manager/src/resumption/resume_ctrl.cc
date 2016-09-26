@@ -658,7 +658,6 @@ bool ResumeCtrl::CheckAppRestrictions(
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN(saved_app.keyExists(strings::hmi_level), false);
 
-  const bool is_media_app = application->is_media_application();
   const HMILevel::eType hmi_level =
       static_cast<HMILevel::eType>(saved_app[strings::hmi_level].asInt());
   const bool result = Compare<HMILevel::eType, EQ, ONE>(
@@ -666,8 +665,9 @@ bool ResumeCtrl::CheckAppRestrictions(
                           ? true
                           : false;
   LOG4CXX_DEBUG(logger_,
-                "is_media_app " << is_media_app << "; hmi_level " << hmi_level
-                                << " result " << result);
+                "is_media_app " << application->is_media_application()
+                                << "; hmi_level " << hmi_level << " result "
+                                << result);
   return result;
 }
 
