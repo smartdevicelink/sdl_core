@@ -129,8 +129,9 @@ class VRModule : public functional_modules::GenericModule,
    * Registers service
    * @param app_id unique application ID
    * @param device_id unique device ID
+   * @return true if service was registered on SDL side
    */
-  void RegisterService(int32_t app_id, const std::string& device_id);
+  bool RegisterService(int32_t app_id, const std::string& device_id);
 
   /**
    * Unregisters service
