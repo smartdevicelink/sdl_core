@@ -53,6 +53,13 @@ using am::commands::CommandImpl;
 
 typedef ::utils::SharedPtr<ActivateAppRequest> ActivateAppRequestPtr;
 
+MATCHER_P(CheckMessage, level, "") {
+  return level ==
+         static_cast<mobile_apis::HMILevel::eType>(
+             (*arg)[strings::msg_params][strings::activate_app_hmi_level]
+                 .asInt());
+}
+
 namespace {
 const uint32_t kAppId = 1u;
 const uint32_t kCorrelationId = 2u;
@@ -80,18 +87,28 @@ TEST_F(ActivateAppRequestTest, Run_SUCCESS) {
   MockAppPtr mock_app = CreateMockApp();
   EXPECT_CALL(mock_app_manager_, application(kAppId))
       .WillOnce(Return(mock_app));
-
+#ifdef ENABLE_LOG
+  (*msg)[strings::msg_params][strings::activate_app_hmi_level] =
+      mobile_apis::HMILevel::HMI_FULL;
+#endif
   ActivateAppRequestPtr command(CreateCommand<ActivateAppRequest>(msg));
 
   EXPECT_CALL(mock_app_manager_, set_application_id(kCorrelationId, kAppId));
-  EXPECT_CALL(mock_app_manager_, SendMessageToHMI(msg));
-
+#ifdef ENABLE_LOG
+  EXPECT_CALL(mock_app_manager_,
+              SendMessageToHMI(CheckMessage(mobile_apis::HMILevel::HMI_FULL)));
+#else
+  EXPECT_CALL(mock_app_manager_,
+              SendMessageToHMI(msg)));
+#endif
   command->Run();
 
+#ifndef ENABLE_LOG
   EXPECT_EQ(CommandImpl::hmi_protocol_type_,
             (*msg)[strings::params][strings::protocol_type].asInt());
   EXPECT_EQ(CommandImpl::protocol_version_,
             (*msg)[strings::params][strings::protocol_version].asInt());
+#endif
 }
 
 }  // namespace activate_app_request
