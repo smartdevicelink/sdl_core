@@ -1761,6 +1761,38 @@ bool ApplicationManagerImpl::Stop() {
   return true;
 }
 
+namespace {
+/**
+ * @brief Checks if message has to be sent to mobile or not
+ * @param output - message to check
+ * @returns true if message type is response
+ * otherwise false
+ */
+bool HandleWrongMessageType(smart_objects::SmartObject& output) {
+  SDL_AUTO_TRACE();
+  switch (output[strings::params][strings::message_type].asInt()) {
+    case application_manager::MessageType::kNotification: {
+      SDL_ERROR("Ignore wrong HMI notification");
+      return false;
+    }
+    case application_manager::MessageType::kRequest: {
+      SDL_ERROR("Ignore wrong HMI request");
+      return false;
+    }
+    default: {
+      // Req-t APPLINK-15509
+      output.erase(strings::msg_params);
+      output[strings::params][hmi_response::code] =
+          hmi_apis::Common_Result::GENERIC_ERROR;
+      output[strings::msg_params][strings::info] =
+          std::string("Invalid message received from vehicle");
+      SDL_ERROR("Received invalid data on HMI response");
+    }
+  }
+  return true;
+}
+}
+
 bool ApplicationManagerImpl::ConvertMessageToSO(
     const Message& message, smart_objects::SmartObject& output) {
   SDL_AUTO_TRACE();
@@ -1833,25 +1865,8 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
         return false;
       }
       if (output.validate() != smart_objects::Errors::OK) {
-        SDL_ERROR("Incorrect parameter from HMI");
-
-        if (application_manager::MessageType::kNotification ==
-            output[strings::params][strings::message_type].asInt()) {
-          SDL_ERROR("Ignore wrong HMI notification");
-          return false;
-        }
-
-        if (application_manager::MessageType::kRequest ==
-            output[strings::params][strings::message_type].asInt()) {
-          SDL_ERROR("Ignore wrong HMI request");
-          return false;
-        }
-
-        output.erase(strings::msg_params);
-        output[strings::params][hmi_response::code] =
-            hmi_apis::Common_Result::INVALID_DATA;
-        output[strings::msg_params][strings::info] =
-            std::string("Received invalid data on HMI response");
+        SDL_ERROR("Incorrect parameter from HMI.");
+        return HandleWrongMessageType(output);
       }
       break;
     }
