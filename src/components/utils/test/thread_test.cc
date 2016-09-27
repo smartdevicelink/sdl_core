@@ -252,22 +252,6 @@ TEST_F(
   EXPECT_TRUE(delegate_->check_value());
 }
 
-// TODO (AN): Test should be reworked because we cannot use
-// "test_lock_" and "cond_var_" global variables in detached thread
-TEST_F(
-    ThreadOptionsTest,
-    StartThreadWithZeroStackAndDetached_ExpectMinimumStackAndDetachedThreadStarted) {
-  AutoLock test_lock(test_mutex_thread_start);
-  // Start thread with default options (Stack size = 0 & thread is detached)
-  thread_->start(threads::ThreadOptions(0, false));
-  // Check thread is detached
-  EXPECT_FALSE(thread_->is_joinable());
-  // Check thread stack size is 0
-  EXPECT_EQ(Thread::kMinStackSize, thread_->stack_size());
-  cond_var_thread_start.WaitFor(test_lock, kWaitTime);
-  EXPECT_TRUE(delegate_->check_value());
-}
-
 TEST_F(ThreadOptionsTest, StartThread_ExpectThreadStarted) {
   AutoLock test_lock(test_mutex_thread_start);
   // Start created thread
