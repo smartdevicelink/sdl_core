@@ -5,12 +5,9 @@ namespace application_manager {
 
 namespace commands {
 
-namespace {
 using NsSmartDeviceLink::NsSmartObjects::SmartType_Map;
 using NsSmartDeviceLink::NsSmartObjects::SmartType_String;
 using NsSmartDeviceLink::NsSmartObjects::SmartType_Array;
-typedef std::set<std::string>::const_iterator ConstSetIter;
-}
 
 GetWayPointsRequest::GetWayPointsRequest(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
@@ -42,7 +39,7 @@ void GetWayPointsRequest::Run() {
 bool GetWayPointsRequest::CheckResponseSyntax(
     const smart_objects::SmartObject& obj) {
   const char* str = obj.asCharArray();
-  const bool is_str_empty = str && !str[0];
+  const bool is_str_empty = obj.empty();
   return is_str_empty || CheckSyntax(str);
 }
 
@@ -77,7 +74,7 @@ bool GetWayPointsRequest::ValidateResponseFromHMI(
     }
     case SmartType_Map: {
       const std::set<std::string> keys = obj.enumerate();
-      for (ConstSetIter key = keys.begin(); key != keys.end(); key++) {
+      for (ConstSetIter key = keys.begin(); key != keys.end(); ++key) {
         if (!ValidateSmartMapResponse(obj, key)) {
           return false;
         }
@@ -94,13 +91,6 @@ bool GetWayPointsRequest::ValidateResponseFromHMI(
   return true;
 }
 
-void GetWayPointsRequest::onTimeOut() {
-  SDL_AUTO_TRACE();
-  SendResponse(false,
-               mobile_apis::Result::GENERIC_ERROR,
-               "Invalid response from system");
-}
-
 void GetWayPointsRequest::on_event(const event_engine::Event& event) {
   SDL_AUTO_TRACE();
   smart_objects::SmartObject message = event.smart_object();
@@ -109,29 +99,24 @@ void GetWayPointsRequest::on_event(const event_engine::Event& event) {
       SDL_INFO("Received Navigation_GetWayPoints event");
       const bool all_checks_passed = ValidateResponseFromHMI(
           message[strings::msg_params][strings::way_points]);
-      const char* response_info =
-          message[strings::params][hmi_response::message].asCharArray();
+      const std::string response_info(
+          message[strings::params][hmi_response::message].asCharArray());
       mobile_apis::Result::eType result_code =
           GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
-              message[strings::params][hmi_response::code].asUInt()));
+              message[strings::params][hmi_response::code].asInt()));
       const bool result = mobile_apis::Result::SUCCESS == result_code;
 
-      if(!result) {
-        SendResponse(false,
-                     result_code,
-                     "Invalid response from system");
+      if (!result) {
+        SendResponse(false, result_code, "Invalid response from system");
         return;
       }
-      if (!CheckSyntax(response_info)) {
-        response_info = NULL;
-      }
 
+      const char* info =
+          CheckSyntax(response_info) ? response_info.c_str() : NULL;
       message[strings::msg_params].erase(strings::info);
       if (all_checks_passed) {
-        SendResponse(result,
-                     result_code,
-                     response_info,
-                     &(message[strings::msg_params]));
+        SendResponse(
+            result, result_code, info, &(message[strings::msg_params]));
       } else {
         SendResponse(false,
                      mobile_apis::Result::GENERIC_ERROR,

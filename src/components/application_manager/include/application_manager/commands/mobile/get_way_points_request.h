@@ -44,6 +44,7 @@ namespace commands {
  **/
 class GetWayPointsRequest : public CommandRequestImpl {
  public:
+  typedef std::set<std::string>::const_iterator ConstSetIter;
   /**
    * \brief GetWayPointsRequest class constructor
    **/
@@ -66,11 +67,6 @@ class GetWayPointsRequest : public CommandRequestImpl {
    */
   virtual void on_event(const event_engine::Event& event) OVERRIDE;
 
-  /**
-   * @brief Will caled by request controller, when default will be expired.
-   */
-  void onTimeOut() OVERRIDE;
-
  private:
   /**
    * @brief Validate response from HMI
@@ -90,7 +86,7 @@ class GetWayPointsRequest : public CommandRequestImpl {
    * @param message from HMI to check
    */
   bool ValidateSmartMapResponse(const smart_objects::SmartObject& obj,
-                                std::set<std::string>::const_iterator key);
+                                ConstSetIter key);
   DISALLOW_COPY_AND_ASSIGN(GetWayPointsRequest);
 };
 

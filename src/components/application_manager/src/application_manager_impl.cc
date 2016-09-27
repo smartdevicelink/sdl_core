@@ -1785,7 +1785,7 @@ bool HandleWrongMessageType(smart_objects::SmartObject& output) {
       output[strings::params][hmi_response::code] =
           hmi_apis::Common_Result::GENERIC_ERROR;
       output[strings::msg_params][strings::info] =
-          std::string("Invalid message received from vehicle");
+          "Invalid message received from vehicle";
       SDL_ERROR("Received invalid data on HMI response");
     }
   }

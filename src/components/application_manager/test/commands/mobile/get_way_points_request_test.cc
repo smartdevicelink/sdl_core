@@ -82,13 +82,14 @@ class GetWayPointsRequestTest
 
   MockAppPtr mock_app_;
   MessageSharedPtr message_;
-  utils::SharedPtr<application_manager::commands::GetWayPointsRequest> command_sptr_;
+  utils::SharedPtr<application_manager::commands::GetWayPointsRequest>
+      command_sptr_;
 };
 
-class GetWayPointsRequestTest2
+class GetWayPointsRequestOnEventTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
-  GetWayPointsRequestTest2() : app_(CreateMockApp()) {}
+  GetWayPointsRequestOnEventTest() : app_(CreateMockApp()) {}
 
   void CheckOnEventResponse(const std::string& wayPointsParam,
                             const MobileResult ResultCode,
@@ -124,7 +125,8 @@ class GetWayPointsRequestTest2
 
 TEST_F(GetWayPointsRequestTest,
        Run_InvalidApp_ApplicationNotRegisteredResponce) {
-  (*message_)[am::strings::params][am::strings::connection_key] = kConnectionKey;
+  (*message_)[am::strings::params][am::strings::connection_key] =
+      kConnectionKey;
 
   utils::SharedPtr<am::Application> null_application_sptr;
   EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
@@ -136,13 +138,15 @@ TEST_F(GetWayPointsRequestTest,
 
   const mobile_apis::Result::eType result =
       static_cast<mobile_apis::Result::eType>(
-          (*result_message)[am::strings::msg_params][am::strings::result_code].asInt());
+          (*result_message)[am::strings::msg_params][am::strings::result_code]
+              .asInt());
 
   EXPECT_EQ(mobile_apis::Result::APPLICATION_NOT_REGISTERED, result);
 }
 
 TEST_F(GetWayPointsRequestTest, Run_ApplicationRegistered_Success) {
-  (*message_)[am::strings::params][am::strings::connection_key] = kConnectionKey;
+  (*message_)[am::strings::params][am::strings::connection_key] =
+      kConnectionKey;
 
   MockAppPtr application_sptr = CreateMockApp();
 
@@ -159,12 +163,13 @@ TEST_F(GetWayPointsRequestTest, Run_ApplicationRegistered_Success) {
 
   const hmi_apis::FunctionID::eType result_function_id =
       static_cast<hmi_apis::FunctionID::eType>(
-          (*result_message)[am::strings::params][am::strings::function_id].asInt());
+          (*result_message)[am::strings::params][am::strings::function_id]
+              .asInt());
 
   EXPECT_EQ(hmi_apis::FunctionID::Navigation_GetWayPoints, result_function_id);
-  EXPECT_EQ(
-      kCorrelationId,
-      (*result_message)[am::strings::params][am::strings::correlation_id].asUInt());
+  EXPECT_EQ(kCorrelationId,
+            (*result_message)[am::strings::params][am::strings::correlation_id]
+                .asUInt());
 }
 
 TEST_F(GetWayPointsRequestTest,
@@ -182,7 +187,8 @@ TEST_F(GetWayPointsRequestTest,
 
   const mobile_apis::Result::eType result =
       static_cast<mobile_apis::Result::eType>(
-          (*result_message)[am::strings::msg_params][am::strings::result_code].asInt());
+          (*result_message)[am::strings::msg_params][am::strings::result_code]
+              .asInt());
 
   EXPECT_EQ(mobile_apis::Result::SUCCESS, result);
 }
@@ -199,7 +205,7 @@ TEST_F(GetWayPointsRequestTest, OnEvent_DefaultCase) {
   caller();
 }
 
-TEST_F(GetWayPointsRequestTest2, OnEvent_WrongEventId_UNSUCCESS) {
+TEST_F(GetWayPointsRequestOnEventTest, OnEvent_WrongEventId_UNSUCCESS) {
   Event event(Event::EventID::INVALID_ENUM);
   CommandPtr command(CreateCommand<GetWayPointsRequest>());
 
@@ -207,31 +213,31 @@ TEST_F(GetWayPointsRequestTest2, OnEvent_WrongEventId_UNSUCCESS) {
   command->on_event(event);
 }
 
-TEST_F(GetWayPointsRequestTest2, OnEvent_Expect_SUCCESS_Case1) {
+TEST_F(GetWayPointsRequestOnEventTest, OnEvent_Expect_SUCCESS_Case1) {
   CheckOnEventResponse("0", SUCCESS, true);
 }
 
-TEST_F(GetWayPointsRequestTest2, OnEvent_Expect_SUCCESS_Case2) {
+TEST_F(GetWayPointsRequestOnEventTest, OnEvent_Expect_SUCCESS_Case2) {
   CheckOnEventResponse("", SUCCESS, true);
 }
 
-TEST_F(GetWayPointsRequestTest2, OnEvent_Expect_SUCCESS_Case3) {
+TEST_F(GetWayPointsRequestOnEventTest, OnEvent_Expect_SUCCESS_Case3) {
   CheckOnEventResponse("test", SUCCESS, true);
 }
 
-TEST_F(GetWayPointsRequestTest2, OnEvent_Expect_GENERIC_ERROR_Case1) {
+TEST_F(GetWayPointsRequestOnEventTest, OnEvent_Expect_GENERIC_ERROR_Case1) {
   CheckOnEventResponse("    ", GENERIC_ERROR, false);
 }
 
-TEST_F(GetWayPointsRequestTest2, OnEvent_Expect_GENERIC_ERROR_Case2) {
+TEST_F(GetWayPointsRequestOnEventTest, OnEvent_Expect_GENERIC_ERROR_Case2) {
   CheckOnEventResponse("test\t", GENERIC_ERROR, false);
 }
 
-TEST_F(GetWayPointsRequestTest2, OnEvent_Expect_GENERIC_ERROR_Case3) {
+TEST_F(GetWayPointsRequestOnEventTest, OnEvent_Expect_GENERIC_ERROR_Case3) {
   CheckOnEventResponse("test\n", GENERIC_ERROR, false);
 }
 
-TEST_F(GetWayPointsRequestTest2, OnEvent_Expect_GENERIC_ERROR_Case4) {
+TEST_F(GetWayPointsRequestOnEventTest, OnEvent_Expect_GENERIC_ERROR_Case4) {
   CheckOnEventResponse("test\t\n", GENERIC_ERROR, false);
 }
 
