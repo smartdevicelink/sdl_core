@@ -54,7 +54,8 @@ namespace {
 const std::string kCaPath = "";
 const uint8_t* kServerBuf;
 const uint8_t* kClientBuf;
-const std::string kAllCiphers = "ALL";
+const std::string kAllCiphers = SSL_TXT_ALL;
+const std::string kNullCiphers = SSL_TXT_NULL;
 size_t server_buf_len;
 size_t client_buf_len;
 #ifdef __QNXNTO__
@@ -89,15 +90,26 @@ struct ProtocolAndCipher {
 class SSLTest : public testing::Test {
  protected:
   static void SetUpTestCase() {
-    std::ifstream certificate_file("server/spt_credential_unsigned.p12");
+    std::ifstream certificate_file("server/spt_credential_unsigned.p12.enc");
+    ASSERT_TRUE(certificate_file.is_open())
+        << "Could not open certificate data file";
     std::stringstream certificate;
-    if (certificate_file.is_open()) {
-      certificate << certificate_file.rdbuf();
-    }
+    certificate << certificate_file.rdbuf();
     certificate_file.close();
-    certificate_data_base64_ = certificate.str();
-    ASSERT_FALSE(certificate_data_base64_.empty())
-        << "Certificate data file is empty";
+    server_certificate_data_base64_ = certificate.str();
+    ASSERT_FALSE(server_certificate_data_base64_.empty())
+        << "Server certificate data file is empty";
+
+    certificate.clear();
+
+    certificate_file.open("client/client_credential_unsigned.p12.enc");
+    ASSERT_TRUE(certificate_file.is_open())
+        << "Could not open certificate data file";
+    certificate << certificate_file.rdbuf();
+    certificate_file.close();
+    client_certificate_data_base64_ = certificate.str();
+    ASSERT_FALSE(client_certificate_data_base64_.empty())
+        << "Client certificate data file is empty";
   }
 
   virtual void SetUp() OVERRIDE {
@@ -113,13 +125,13 @@ class SSLTest : public testing::Test {
                 security_manager_protocol_name())
         .WillOnce(Return(security_manager::TLSv1_2));
     EXPECT_CALL(*mock_crypto_manager_settings_, certificate_data())
-        .WillOnce(ReturnRef(certificate_data_base64_));
+        .WillOnce(ReturnRef(server_certificate_data_base64_));
     EXPECT_CALL(*mock_crypto_manager_settings_, ciphers_list())
-        .WillRepeatedly(ReturnRef(kAllCiphers));
+        .WillRepeatedly(ReturnRef(kNullCiphers));
     EXPECT_CALL(*mock_crypto_manager_settings_, ca_cert_path())
         .WillRepeatedly(ReturnRef(kCaPath));
     EXPECT_CALL(*mock_crypto_manager_settings_, verify_peer())
-        .WillOnce(Return(false));
+        .WillRepeatedly(Return(false));
     const bool crypto_manager_initialization = crypto_manager_->Init();
     EXPECT_TRUE(crypto_manager_initialization);
 
@@ -135,14 +147,13 @@ class SSLTest : public testing::Test {
                 security_manager_protocol_name())
         .WillOnce(Return(security_manager::TLSv1_2));
     EXPECT_CALL(*mock_client_manager_settings_, certificate_data())
-        .WillOnce(ReturnRef(certificate_data_base64_));
+        .WillOnce(ReturnRef(client_certificate_data_base64_));
     EXPECT_CALL(*mock_client_manager_settings_, ciphers_list())
-        .WillRepeatedly(ReturnRef(kAllCiphers));
+        .WillRepeatedly(ReturnRef(kNullCiphers));
     EXPECT_CALL(*mock_client_manager_settings_, ca_cert_path())
-        .Times(2)
         .WillRepeatedly(ReturnRef(kCaPath));
     EXPECT_CALL(*mock_client_manager_settings_, verify_peer())
-        .WillOnce(Return(false));
+        .WillRepeatedly(Return(false));
     const bool client_manager_initialization = client_manager_->Init();
     EXPECT_TRUE(client_manager_initialization);
 
@@ -190,14 +201,20 @@ class SSLTest : public testing::Test {
   security_manager::SSLContext* server_ctx;
   security_manager::SSLContext* client_ctx;
 
-  static std::string certificate_data_base64_;
+  static std::string client_certificate_data_base64_;
+  static std::string server_certificate_data_base64_;
 };
-std::string SSLTest::certificate_data_base64_;
+std::string SSLTest::client_certificate_data_base64_;
+std::string SSLTest::server_certificate_data_base64_;
 
 // StartHandshake() fails when client and server protocols are not TLSv1_2
 class SSLTestParam : public testing::TestWithParam<ProtocolAndCipher> {
  protected:
   virtual void SetUp() OVERRIDE {
+    crypto_manager = NULL;
+    client_manager = NULL;
+    server_ctx = NULL;
+    client_ctx = NULL;
     std::ifstream certificate_file("server/spt_credential.p12");
     ASSERT_TRUE(certificate_file.is_open())
         << "Could not open certificate data file";
@@ -235,7 +252,10 @@ class SSLTestParam : public testing::TestWithParam<ProtocolAndCipher> {
     EXPECT_TRUE(client_manager_initialization);
 
     server_ctx = crypto_manager->CreateSSLContext();
+    ASSERT_TRUE(server_ctx) << " Server SSL Contect is not created";
+
     client_ctx = client_manager->CreateSSLContext();
+    ASSERT_TRUE(client_ctx) << " Client SSL Contect is not created";
 
     security_manager::SSLContext::HandshakeContext ctx;
     ctx.make_context(custom_str::CustomString("SPT"),
@@ -361,7 +381,7 @@ INSTANTIATE_TEST_CASE_P(
                                         kFordCipher)));
 
 // TODO(OHerasym) : ReleaseSSLContext fails
-TEST_F(SSLTest, DISABLED_OnTSL2Protocol_BrokenHandshake) {
+TEST_F(SSLTest, OnTSL2Protocol_BrokenHandshake) {
   ASSERT_EQ(security_manager::SSLContext::Handshake_Result_Success,
             client_ctx->StartHandshake(&kClientBuf, &client_buf_len));
   ASSERT_FALSE(NULL == kClientBuf);
@@ -380,12 +400,12 @@ TEST_F(SSLTest, DISABLED_OnTSL2Protocol_BrokenHandshake) {
 // TODO {AKozoriz} : Unexpected uncomplited init of SSL component.
 // In this and next tests.
 // Must be fixed after merge to develop.
-TEST_F(SSLTest, DISABLED_OnTSL2Protocol_Positive) {
+TEST_F(SSLTest, OnTSL2Protocol_Positive) {
   ASSERT_EQ(client_ctx->StartHandshake(&kClientBuf, &client_buf_len),
             security_manager::SSLContext::Handshake_Result_Success);
   ASSERT_FALSE(NULL == kClientBuf);
   ASSERT_LT(0u, client_buf_len);
-  EXPECT_TRUE(server_ctx->IsInitCompleted());
+  EXPECT_FALSE(server_ctx->IsInitCompleted());
 
   while (true) {
     const security_manager::SSLContext::HandshakeResult server_result =
@@ -416,9 +436,11 @@ TEST_F(SSLTest, DISABLED_OnTSL2Protocol_Positive) {
   EXPECT_TRUE(server_ctx->IsInitCompleted());
 
   // Encrypt text on client side
-  const uint8_t* text = reinterpret_cast<const uint8_t*>("abra");
+  const std::string input_string =
+      std::string("abrakadabra") + std::string(1024, 'Z');
+  const uint8_t* text = reinterpret_cast<const uint8_t*>(input_string.c_str());
   const uint8_t* encrypted_text = 0;
-  size_t text_len = 4;
+  size_t text_len = input_string.size();
   size_t encrypted_text_len;
   EXPECT_TRUE(client_ctx->Encrypt(
       text, text_len, &encrypted_text, &encrypted_text_len));
@@ -432,10 +454,12 @@ TEST_F(SSLTest, DISABLED_OnTSL2Protocol_Positive) {
   ASSERT_NE(reinterpret_cast<void*>(NULL), text);
   ASSERT_LT(0u, text_len);
 
-  ASSERT_EQ(strncmp(reinterpret_cast<const char*>(text), "abra", 4), 0);
+  const std::string output_str =
+      std::string(reinterpret_cast<const char*>(text), text_len);
+  ASSERT_EQ(input_string, output_str);
 }
 
-TEST_F(SSLTest, DISABLED_OnTSL2Protocol_EcncryptionFail) {
+TEST_F(SSLTest, OnTSL2Protocol_EcncryptionFail) {
   ASSERT_EQ(security_manager::SSLContext::Handshake_Result_Success,
             client_ctx->StartHandshake(&kClientBuf, &client_buf_len));
 

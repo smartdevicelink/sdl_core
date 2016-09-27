@@ -160,6 +160,16 @@ bool CryptoManagerImpl::Init() {
     free_ctx(&context_);
   }
   context_ = SSL_CTX_new(method);
+  if (!context_) {
+    const unsigned long error = ERR_get_error();
+    UNUSED(error);
+    SDL_ERROR("Could not create \""
+              << (is_server ? "server" : "client") << "\" SSL method \"'"
+              << get_settings().security_manager_protocol_name()
+              << "\"', err 0x" << std::hex << error << " \""
+              << ERR_reason_error_string(error) << '"');
+    return false;
+  }
 
   utils::ScopeGuard guard = utils::MakeGuard(free_ctx, &context_);
 
@@ -274,13 +284,14 @@ bool CryptoManagerImpl::set_certificate(const std::string& cert_data) {
     SDL_WARN("Empty certificate");
     return false;
   }
+  const size_t cert_data_len = cert_data.length();
 
   BIO* bio = BIO_new(BIO_f_base64());
-  BIO* bmem = BIO_new_mem_buf((char*)cert_data.c_str(), cert_data.length());
+  BIO* bmem = BIO_new_mem_buf((char*)cert_data.c_str(), cert_data_len);
   bmem = BIO_push(bio, bmem);
 
-  char* buf = new char[cert_data.length()];
-  int len = BIO_read(bmem, buf, cert_data.length());
+  char* buf = new char[cert_data_len];
+  const int len = BIO_read(bmem, buf, cert_data_len);
 
   BIO* bio_cert = BIO_new(BIO_s_mem());
   if (NULL == bio_cert) {

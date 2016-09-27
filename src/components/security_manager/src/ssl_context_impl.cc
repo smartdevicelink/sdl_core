@@ -327,8 +327,8 @@ SSLContext::HandshakeResult CryptoManagerImpl::SSLContextImpl::DoHandshakeStep(
     const uint8_t** const out_data,
     size_t* out_data_size) {
   SDL_AUTO_TRACE();
-  DCHECK(out_data);
-  DCHECK(out_data_size);
+  DCHECK_OR_RETURN(out_data, Handshake_Result_Fail);
+  DCHECK_OR_RETURN(out_data_size, Handshake_Result_Fail);
   *out_data = NULL;
   *out_data_size = 0;
 
