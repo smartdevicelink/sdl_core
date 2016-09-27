@@ -43,8 +43,15 @@ set(PATHS
   ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
+set(LIBRARIES
+  protocol_handler
+  utils
+  smart_object
+)
+
 collect_sources(SOURCES "${PATHS}")
 add_library(formatters ${SOURCES})
+target_link_libraries(formatters ${LIBRARIES})
 
 if(BUILD_TESTS)
   add_subdirectory(test)

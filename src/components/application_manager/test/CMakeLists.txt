@@ -149,6 +149,7 @@ set(LIBRARIES
 )
 
 add_library(mock_message_helper_library ${MOCK_MESSAGE_HELPER_SOURCE})
+target_link_libraries(mock_message_helper_library ${LIBRARIES})
 
 create_test(application_manager_test "${APPLICATION_MANAGER_SOURCES}" "${LIBRARIES}")
 create_test(am_event_engine_test "${AM_EVENT_ENGINE_SOURCES}" "${LIBRARIES}")
