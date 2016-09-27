@@ -62,7 +62,7 @@ typedef SharedPtr<SubscribeVehicleDataRequest> CommandPtr;
 
 namespace {
 const uint32_t kAppId = 10u;
-const uint32_t kKey = 5u;
+const uint32_t kConnectionKey = 5u;
 const std::string kKeyName = "key_name";
 }
 
@@ -117,6 +117,17 @@ MATCHER_P6(CheckResponseWithKeyParams,
          key_result_code == key_code;
 }
 
+class TestSubscribeVehicleDataRequest : public SubscribeVehicleDataRequest {
+ public:
+  TestSubscribeVehicleDataRequest(const MessageSharedPtr& message,
+                                  am::ApplicationManager& application_manager)
+      : SubscribeVehicleDataRequest(message, application_manager) {}
+
+  am::CommandParametersPermissions& removed_parameters_permissions() {
+    return removed_parameters_permissions_;
+  }
+};
+
 TEST_F(SubscribeVehicleDataRequestTest, Run_ApplicationIsNotRegistered) {
   CommandPtr command(CreateCommand<SubscribeVehicleDataRequest>(msg_));
 
@@ -132,10 +143,11 @@ TEST_F(SubscribeVehicleDataRequestTest, Run_ApplicationIsNotRegistered) {
 }
 
 TEST_F(SubscribeVehicleDataRequestTest, Run_NoDataInRequest_InvalidData) {
-  (*msg_)[am::strings::params][am::strings::connection_key] = kKey;
+  (*msg_)[am::strings::params][am::strings::connection_key] = kConnectionKey;
   CommandPtr command(CreateCommand<SubscribeVehicleDataRequest>(msg_));
   const std::string info = "No data in the request";
-  ON_CALL(mock_app_manager_, application(kKey)).WillByDefault(Return(app_));
+  ON_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillByDefault(Return(app_));
   EXPECT_CALL(
       mock_app_manager_,
       ManageMobileCommand(
@@ -145,11 +157,12 @@ TEST_F(SubscribeVehicleDataRequestTest, Run_NoDataInRequest_InvalidData) {
 }
 
 TEST_F(SubscribeVehicleDataRequestTest, Run_DataAlreadySubscribed_IGNORED) {
-  (*msg_)[am::strings::params][am::strings::connection_key] = kKey;
+  (*msg_)[am::strings::params][am::strings::connection_key] = kConnectionKey;
   (*msg_)[am::strings::msg_params][kKeyName] = true;
   CommandPtr command(CreateCommand<SubscribeVehicleDataRequest>(msg_));
 
-  ON_CALL(mock_app_manager_, application(kKey)).WillByDefault(Return(app_));
+  ON_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillByDefault(Return(app_));
   // Data is subscribed
   EXPECT_CALL(*app_, IsSubscribedToIVI(data_type)).WillOnce(Return(true));
 
@@ -163,11 +176,12 @@ TEST_F(SubscribeVehicleDataRequestTest, Run_DataAlreadySubscribed_IGNORED) {
 
 TEST_F(SubscribeVehicleDataRequestTest,
        Run_DataSubscribedByAnotherApp_Success) {
-  (*msg_)[am::strings::params][am::strings::connection_key] = kKey;
+  (*msg_)[am::strings::params][am::strings::connection_key] = kConnectionKey;
   (*msg_)[am::strings::msg_params][kKeyName] = true;
   CommandPtr command(CreateCommand<SubscribeVehicleDataRequest>(msg_));
 
-  ON_CALL(mock_app_manager_, application(kKey)).WillByDefault(Return(app_));
+  ON_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillByDefault(Return(app_));
   // Data is not subscribed
   EXPECT_CALL(*app_, IsSubscribedToIVI(data_type)).WillOnce(Return(false));
 
@@ -191,11 +205,12 @@ TEST_F(SubscribeVehicleDataRequestTest,
 
 TEST_F(SubscribeVehicleDataRequestTest,
        Run_DataSubscribedByAnotherAppKeyCannotBeSubscribed_IGNORED) {
-  (*msg_)[am::strings::params][am::strings::connection_key] = kKey;
+  (*msg_)[am::strings::params][am::strings::connection_key] = kConnectionKey;
   (*msg_)[am::strings::msg_params][kKeyName] = true;
   CommandPtr command(CreateCommand<SubscribeVehicleDataRequest>(msg_));
 
-  ON_CALL(mock_app_manager_, application(kKey)).WillByDefault(Return(app_));
+  ON_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillByDefault(Return(app_));
   // Data is not subscribed
   EXPECT_CALL(*app_, IsSubscribedToIVI(data_type)).WillOnce(Return(false));
 
@@ -220,11 +235,12 @@ TEST_F(SubscribeVehicleDataRequestTest,
 
 TEST_F(SubscribeVehicleDataRequestTest,
        Run_DataNotSubscribedByAnotherApp_Success) {
-  (*msg_)[am::strings::params][am::strings::connection_key] = kKey;
+  (*msg_)[am::strings::params][am::strings::connection_key] = kConnectionKey;
   (*msg_)[am::strings::msg_params][kKeyName] = true;
   CommandPtr command(CreateCommand<SubscribeVehicleDataRequest>(msg_));
 
-  ON_CALL(mock_app_manager_, application(kKey)).WillByDefault(Return(app_));
+  ON_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillByDefault(Return(app_));
   // Data is not subscribed
   EXPECT_CALL(*app_, IsSubscribedToIVI(data_type)).WillOnce(Return(false));
 
@@ -252,11 +268,12 @@ TEST_F(SubscribeVehicleDataRequestTest,
 
 TEST_F(SubscribeVehicleDataRequestTest,
        Run_DataNotSubscribedByAnotherAppRequestNotSending_OutOfMemory) {
-  (*msg_)[am::strings::params][am::strings::connection_key] = kKey;
+  (*msg_)[am::strings::params][am::strings::connection_key] = kConnectionKey;
   (*msg_)[am::strings::msg_params][kKeyName] = true;
   CommandPtr command(CreateCommand<SubscribeVehicleDataRequest>(msg_));
 
-  ON_CALL(mock_app_manager_, application(kKey)).WillByDefault(Return(app_));
+  ON_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillByDefault(Return(app_));
   // Data is not subscribed
   EXPECT_CALL(*app_, IsSubscribedToIVI(data_type)).WillOnce(Return(false));
 
@@ -302,10 +319,11 @@ TEST_F(SubscribeVehicleDataRequestTest,
       hmi_apis::Common_VehicleDataResultCode::VDRC_SUCCESS;
   event.set_smart_object(*event_msg);
 
-  (*msg_)[am::strings::params][am::strings::connection_key] = kKey;
+  (*msg_)[am::strings::params][am::strings::connection_key] = kConnectionKey;
   CommandPtr command(CreateCommand<SubscribeVehicleDataRequest>(msg_));
 
-  ON_CALL(mock_app_manager_, application(kKey)).WillByDefault(Return(app_));
+  ON_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillByDefault(Return(app_));
 
   EXPECT_CALL(*application_manager::MockMessageHelper::message_helper_mock(),
               HMIToMobileResult(hmi_code)).WillOnce(Return(mobile_code));
@@ -330,10 +348,11 @@ TEST_F(SubscribeVehicleDataRequestTest,
       hmi_apis::Common_VehicleDataResultCode::VDRC_IGNORED;
   event.set_smart_object(*event_msg);
 
-  (*msg_)[am::strings::params][am::strings::connection_key] = kKey;
+  (*msg_)[am::strings::params][am::strings::connection_key] = kConnectionKey;
   CommandPtr command(CreateCommand<SubscribeVehicleDataRequest>(msg_));
 
-  ON_CALL(mock_app_manager_, application(kKey)).WillByDefault(Return(app_));
+  ON_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillByDefault(Return(app_));
   // Expect unsibscribe from unsuccessful subscription
   EXPECT_CALL(*app_, UnsubscribeFromIVI(data_type));
   EXPECT_CALL(*application_manager::MockMessageHelper::message_helper_mock(),
@@ -348,11 +367,12 @@ TEST_F(SubscribeVehicleDataRequestTest,
 }
 
 TEST_F(SubscribeVehicleDataRequestTest, OnEvent_AppAlreadySubscribed_Ignored) {
-  (*msg_)[am::strings::params][am::strings::connection_key] = kKey;
+  (*msg_)[am::strings::params][am::strings::connection_key] = kConnectionKey;
   (*msg_)[am::strings::msg_params][kKeyName] = true;
   CommandPtr command(CreateCommand<SubscribeVehicleDataRequest>(msg_));
 
-  ON_CALL(mock_app_manager_, application(kKey)).WillByDefault(Return(app_));
+  ON_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillByDefault(Return(app_));
   // Data is subscribed
   EXPECT_CALL(*app_, IsSubscribedToIVI(data_type)).WillOnce(Return(true));
 
@@ -388,6 +408,84 @@ TEST_F(SubscribeVehicleDataRequestTest, OnEvent_AppAlreadySubscribed_Ignored) {
           _));
   EXPECT_CALL(*app_, UpdateHash());
   command->on_event(event);
+}
+
+TEST_F(SubscribeVehicleDataRequestTest,
+       OnEvent_OtherAppIsSubscribedToIVI_SUCCESS) {
+  (*msg_)[am::strings::params][am::strings::connection_key] = kConnectionKey;
+  (*msg_)[am::strings::msg_params][kKeyName] = true;
+  CommandPtr command(CreateCommand<SubscribeVehicleDataRequest>(msg_));
+
+  ON_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillByDefault(Return(app_));
+  // Data is subscribed
+  EXPECT_CALL(*app_, IsSubscribedToIVI(data_type)).WillOnce(Return(false));
+
+  MockAppPtr other_app(CreateMockApp());
+  am::ApplicationSet app_set;
+  app_set.insert(other_app);
+  EXPECT_CALL(mock_app_manager_, applications())
+      .WillOnce(
+          Return(DataAccessor<am::ApplicationSet>(app_set, app_set_lock_)));
+  EXPECT_CALL(*other_app, IsSubscribedToIVI(data_type)).WillOnce(Return(true));
+
+  EXPECT_CALL(*app_, SubscribeToIVI(data_type)).WillOnce(Return(true));
+  EXPECT_CALL(
+      mock_app_manager_,
+      ManageMobileCommand(MobileResultCodeIs(mobile_result::SUCCESS), _));
+
+  command->Run();
+
+  Event event(Event::EventID::VehicleInfo_SubscribeVehicleData);
+  MessageSharedPtr event_msg(CreateMessage(smart_objects::SmartType_Map));
+  const hmi_apis::Common_Result::eType hmi_result_code =
+      hmi_apis::Common_Result::SUCCESS;
+  const mobile_apis::Result::eType mobile_result_code =
+      mobile_apis::Result::SUCCESS;
+  (*event_msg)[am::strings::params][am::hmi_response::code] = hmi_result_code;
+  (*event_msg)[am::strings::msg_params][kKeyName][am::strings::result_code] =
+      hmi_apis::Common_VehicleDataResultCode::VDRC_SUCCESS;
+  event.set_smart_object(*event_msg);
+
+  EXPECT_CALL(*application_manager::MockMessageHelper::message_helper_mock(),
+              HMIToMobileResult(hmi_result_code))
+      .WillOnce(Return(mobile_result_code));
+  const std::string info = "";
+  EXPECT_CALL(
+      mock_app_manager_,
+      ManageMobileCommand(CheckResponseWithKeyParams(
+                              mobile_result_code,
+                              info,
+                              true,
+                              kKeyName,
+                              data_type,
+                              mobile_apis::VehicleDataResultCode::VDRC_SUCCESS),
+                          _));
+  EXPECT_CALL(*app_, UpdateHash());
+  command->on_event(event);
+}
+
+TEST_F(SubscribeVehicleDataRequestTest, Run_HasDisallowedParams_DISALLOWED) {
+  (*msg_)[am::strings::params][am::strings::connection_key] = kConnectionKey;
+  (*msg_)[am::strings::msg_params][kKeyName] = false;
+  SharedPtr<TestSubscribeVehicleDataRequest> command(
+      CreateCommand<TestSubscribeVehicleDataRequest>(msg_));
+
+  ON_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillByDefault(Return(app_));
+
+  am::CommandParametersPermissions& removed_parameters_permissions =
+      command->removed_parameters_permissions();
+
+  // If command have 0 items to subscribe
+  // and disallowed parameters, it will send `DISALLOWED`
+  removed_parameters_permissions.disallowed_params.push_back(
+      "disallowed_param");
+  EXPECT_CALL(
+      mock_app_manager_,
+      ManageMobileCommand(MobileResultCodeIs(mobile_result::DISALLOWED), _));
+
+  command->Run();
 }
 
 }  // namespace subscribe_vehicle_data_request
