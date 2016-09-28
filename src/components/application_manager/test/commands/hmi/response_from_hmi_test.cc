@@ -116,6 +116,21 @@ TEST_F(ResponseFromHMITest, CreateHMIRequest_SUCCESS) {
   EXPECT_EQ(kPostedFunctionId, kReceivedFunctionId);
 }
 
+TEST_F(ResponseFromHMITest, CreateHMIRequest_CantManageCommand_Covering) {
+  ResponseFromHMIPtr command(CreateCommand<ResponseFromHMI>());
+
+  MessageSharedPtr result_msg;
+  ON_CALL(mock_app_manager_, GetNextHMICorrelationID())
+      .WillByDefault(Return(1u));
+  EXPECT_CALL(mock_app_manager_, ManageHMICommand(_))
+      .WillOnce(DoAll(SaveArg<0>(&result_msg), Return(false)));
+
+  const hmi_apis::FunctionID::eType kPostedFunctionId =
+      hmi_apis::FunctionID::INVALID_ENUM;
+  MessageSharedPtr dummy_msg_params = CreateMessage();
+  command->CreateHMIRequest(kPostedFunctionId, *dummy_msg_params);
+}
+
 }  // namespace response_from_hmi
 }  // namespace hmi_commands_test
 }  // namespace commands_test

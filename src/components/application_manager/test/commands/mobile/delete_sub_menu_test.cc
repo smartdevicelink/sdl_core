@@ -226,6 +226,49 @@ TEST_F(DeleteSubMenuResponseTest, Run_SUCCESS) {
   command->Run();
 }
 
+TEST_F(DeleteSubMenuRequestTest,
+       DeleteSubmenu_CommandhaventVrCommadsAndMenuParams_DontSendHMIRequest) {
+  Event event(hmi_apis::FunctionID::UI_DeleteSubMenu);
+  (*message_)[am::strings::msg_params][am::strings::menu_id] = kMenuId;
+  (*message_)[am::strings::params][am::strings::connection_key] =
+      kConnectionKey;
+  (*message_)[am::strings::params][am::hmi_response::code] =
+      am::mobile_api::Result::SUCCESS;
+  event.set_smart_object(*message_);
+
+  commands_map_.insert(
+      std::make_pair(0, &((*message_)[am::strings::msg_params])));
+
+  EXPECT_CALL(mock_app_manager_, application(_)).WillOnce(Return(app_));
+  EXPECT_CALL(mock_app_manager_, ManageHMICommand(_)).Times(0);
+  EXPECT_CALL(*app_, commands_map()).Times(2).WillRepeatedly(Return(accessor_));
+  EXPECT_CALL(*app_, RemoveCommand(_)).Times(0);
+
+  command_->on_event(event);
+}
+
+TEST_F(DeleteSubMenuRequestTest,
+       DeleteSubmenu_NotAChildOfMenupartam_DontSendHMIRequest) {
+  Event event(hmi_apis::FunctionID::UI_DeleteSubMenu);
+  (*message_)[am::strings::msg_params][am::strings::menu_id] = kMenuId;
+  (*message_)[am::strings::msg_params][am::strings::menu_params]
+             [am::hmi_request::parent_id] = kMenuId + 1;
+  (*message_)[am::strings::params][am::strings::connection_key] =
+      kConnectionKey;
+  (*message_)[am::strings::params][am::hmi_response::code] =
+      am::mobile_api::Result::SUCCESS;
+  event.set_smart_object(*message_);
+
+  commands_map_.insert(
+      std::make_pair(0, &((*message_)[am::strings::msg_params])));
+
+  EXPECT_CALL(mock_app_manager_, application(_)).WillOnce(Return(app_));
+  EXPECT_CALL(mock_app_manager_, ManageHMICommand(_)).Times(0);
+  EXPECT_CALL(*app_, commands_map()).Times(2).WillRepeatedly(Return(accessor_));
+  EXPECT_CALL(*app_, RemoveCommand(_)).Times(0);
+
+  command_->on_event(event);
+}
 }  // namespace delete_sub_menu
 }  // namespace mobile_commands_test
 }  // namespace commands_test
