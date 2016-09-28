@@ -38,6 +38,7 @@
 #include "utils/shared_ptr.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
+#include "application_manager/mock_message_helper.h"
 #include "application_manager/commands/commands_test.h"
 #include "application_manager/commands/command_impl.h"
 #include "utils/helpers.h"
@@ -52,7 +53,9 @@ namespace am = ::application_manager;
 
 using ::testing::_;
 using ::testing::Return;
+using ::testing::Mock;
 
+using am::MockMessageHelper;
 using am::commands::MessageSharedPtr;
 using am::commands::mobile::OnTouchEventNotification;
 
@@ -66,9 +69,18 @@ class OnTouchEventNotificationTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {
  public:
   OnTouchEventNotificationTest()
-      : command_(CreateCommand<OnTouchEventNotification>()) {}
+      : command_(CreateCommand<OnTouchEventNotification>())
+      , message_helper_(*MockMessageHelper::message_helper_mock()) {
+    Mock::VerifyAndClearExpectations(&message_helper_);
+  }
 
+  ~OnTouchEventNotificationTest() {
+    Mock::VerifyAndClearExpectations(&message_helper_);
+  }
+
+ protected:
   NotificationPtr command_;
+  MockMessageHelper& message_helper_;
 };
 
 TEST_F(OnTouchEventNotificationTest, Run_AppIsNotFullscreen_UNSUCCESS) {
@@ -126,6 +138,8 @@ TEST_F(OnTouchEventNotificationTest, Run_NotEmptyListOfAppsWithNavi_SUCCESS) {
   EXPECT_CALL(*mock_app, app_id()).WillOnce(Return(kAppId));
 
   EXPECT_CALL(mock_app_manager_, SendMessageToMobile(CheckMessageData(), _));
+
+  EXPECT_CALL(message_helper_, PrintSmartObject(_)).WillOnce(Return(false));
 
   command_->Run();
 }

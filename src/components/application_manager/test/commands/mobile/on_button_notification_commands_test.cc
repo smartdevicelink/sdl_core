@@ -40,6 +40,7 @@
 
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_application.h"
+#include "application_manager/mock_message_helper.h"
 
 #include "command_impl.h"
 #include "commands/commands_test.h"
@@ -58,8 +59,10 @@ namespace commands = am::commands;
 using ::testing::_;
 using ::testing::Types;
 using ::testing::Return;
+using ::testing::Mock;
 
 using ::utils::SharedPtr;
+using am::MockMessageHelper;
 using am::commands::MessageSharedPtr;
 
 namespace {
@@ -78,7 +81,20 @@ struct NotificationData {
 template <class NotificationDataT>
 class OnButtonNotificationCommandsTest
     : public CommandsTest<CommandsTestMocks::kIsNice>,
-      public NotificationDataT {};
+      public NotificationDataT {
+ public:
+  OnButtonNotificationCommandsTest()
+      : message_helper_(*MockMessageHelper::message_helper_mock()) {
+    Mock::VerifyAndClearExpectations(&message_helper_);
+  }
+
+  ~OnButtonNotificationCommandsTest() {
+    Mock::VerifyAndClearExpectations(&message_helper_);
+  }
+
+ protected:
+  MockMessageHelper& message_helper_;
+};
 
 typedef Types<NotificationData<commands::mobile::OnButtonEventNotification,
                                mobile_apis::FunctionID::OnButtonEventID>,
@@ -234,6 +250,9 @@ TYPED_TEST(OnButtonNotificationCommandsTest, Run_CustomButton_SUCCESS) {
               SendMessageToMobile(
                   CheckNotificationMessage(TestFixture::kFunctionId), _));
 
+  EXPECT_CALL(this->message_helper_, PrintSmartObject(_))
+      .WillOnce(Return(false));
+
   command->Run();
 }
 
@@ -338,6 +357,9 @@ TYPED_TEST(OnButtonNotificationCommandsTest, Run_SUCCESS) {
   EXPECT_CALL(this->mock_app_manager_,
               SendMessageToMobile(
                   CheckNotificationMessage(TestFixture::kFunctionId), _));
+
+  EXPECT_CALL(this->message_helper_, PrintSmartObject(_))
+      .WillOnce(Return(false));
 
   command->Run();
 }

@@ -49,6 +49,7 @@ namespace unsubscribe_vehicle_data_request {
 namespace am = ::application_manager;
 namespace mobile_result = mobile_apis::Result;
 
+using ::testing::Mock;
 using ::testing::_;
 
 using am::commands::UnsubscribeVehicleDataRequest;
@@ -64,6 +65,12 @@ const am::VehicleDataType kVehicleType = am::VehicleDataType::SPEED;
 
 class UnsubscribeVehicleRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
+ public:
+  ~UnsubscribeVehicleRequestTest() {
+    // Fix DataAccessor release and WinQt crash
+    Mock::VerifyAndClearExpectations(&mock_app_manager_);
+  }
+
  protected:
   void UnsubscribeSuccessfully();
   sync_primitives::Lock app_set_lock_;

@@ -63,6 +63,7 @@ using ::testing::_;
 using ::testing::Return;
 using ::testing::SaveArg;
 using ::testing::DoAll;
+using ::testing::Mock;
 
 using ::utils::SharedPtr;
 using am::commands::MessageSharedPtr;
@@ -123,8 +124,12 @@ class CommandRequestImplTest
 
   CommandRequestImplTest() {
     mock_message_helper_ = am::MockMessageHelper::message_helper_mock();
+    Mock::VerifyAndClearExpectations(mock_message_helper_);
   }
   ~CommandRequestImplTest() {
+    // Fix DataAccessor release and WinQt crash
+    Mock::VerifyAndClearExpectations(&mock_app_manager_);
+    Mock::VerifyAndClearExpectations(mock_message_helper_);
     mock_message_helper_ = NULL;
   }
 

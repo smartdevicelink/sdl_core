@@ -53,6 +53,7 @@ namespace subscribe_vehicle_data_request {
 
 using application_manager::commands::SubscribeVehicleDataRequest;
 using ::testing::DefaultValue;
+using ::testing::Mock;
 using application_manager::MockMessageHelper;
 
 namespace mobile_result = mobile_apis::Result;
@@ -68,19 +69,22 @@ const std::string kKeyName = "key_name";
 
 class SubscribeVehicleDataRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
- protected:
+ public:
   SubscribeVehicleDataRequestTest() : app_(CreateMockApp()) {
     msg_ = CreateMessage(smart_objects::SmartType_Map);
     data_type = am::VehicleDataType::SPEED;
     vehicle_data.insert(
         std::pair<std::string, am::VehicleDataType>(kKeyName, data_type));
-  }
-
-  void SetUp() OVERRIDE {
     EXPECT_CALL(*application_manager::MockMessageHelper::message_helper_mock(),
                 vehicle_data()).WillRepeatedly(ReturnRef(vehicle_data));
   }
 
+  ~SubscribeVehicleDataRequestTest() {
+    // Fix DataAccessor release and WinQt crash
+    Mock::VerifyAndClearExpectations(&mock_app_manager_);
+  }
+
+ protected:
   void AlreadySubscribedByThisApp();
   MockAppPtr app_;
   MessageSharedPtr msg_;
