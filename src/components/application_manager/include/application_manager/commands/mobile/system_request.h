@@ -80,6 +80,18 @@ class SystemRequest : public CommandRequestImpl {
    */
   virtual void on_event(const event_engine::Event& event) OVERRIDE;
 
+#ifdef BUILD_TESTS
+  /**
+   * @brief To avoid override of existing file,
+   * command append index as a suffix to
+   * the file name and increment it, each time
+   * when command saves a file.
+   **/
+  static uint32_t file_index() {
+    return index;
+  }
+#endif  // BUILD_TESTS
+
  private:
   /**
    * @brief Validates data coming within QueryApps response
