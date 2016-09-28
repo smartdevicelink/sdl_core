@@ -35,6 +35,8 @@
 #include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"
 
+#include "utils/make_shared.h"
+
 namespace application_manager {
 
 namespace commands {
@@ -123,18 +125,8 @@ void OnButtonEventNotification::Run() {
 }
 
 void OnButtonEventNotification::SendButtonEvent(ApplicationConstSharedPtr app) {
-  if (!app) {
-    SDL_ERROR("OnButtonEvent NULL pointer");
-    return;
-  }
-
   smart_objects::SmartObjectSPtr on_btn_event =
-      new smart_objects::SmartObject();
-
-  if (!on_btn_event) {
-    SDL_ERROR("OnButtonEvent NULL pointer");
-    return;
-  }
+      utils::MakeShared<smart_objects::SmartObject>();
 
   (*on_btn_event)[strings::params][strings::connection_key] = app->app_id();
 
