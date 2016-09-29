@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,6 +38,8 @@ namespace components {
 namespace formatters {
 
 void CompactJson(std::string& str);
+
+void removeSubstrs(std::string& s);
 
 }  // namespace formatters
 }  // namespace components
