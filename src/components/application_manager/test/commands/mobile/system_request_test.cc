@@ -31,6 +31,8 @@
  */
 
 #include <string>
+#include <sstream>
+
 #include "gtest/gtest.h"
 #include "mobile/system_request.h"
 #include "utils/shared_ptr.h"
@@ -40,7 +42,6 @@
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/smart_object_keys.h"
-#include "mock_message_helper.h"
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
@@ -55,7 +56,6 @@ namespace system_request {
 
 using application_manager::commands::SystemRequest;
 using ::testing::DefaultValue;
-using application_manager::MockMessageHelper;
 
 namespace mobile_result = mobile_apis::Result;
 namespace am = application_manager;
@@ -233,9 +233,10 @@ TEST_F(SystemRequestTest,
 TEST_F(
     SystemRequestTest,
     Run_FileInFileSystemWithoutBinaryDataNotHTTPTypeNotSystemFile_SendRequestToHMI) {
+  const std::string file_name = "IVSU";
   mobile_apis::RequestType::eType request_type = mobile_apis::RequestType::HTTP;
   (*msg_)[am::strings::msg_params][am::strings::request_type] = request_type;
-  (*msg_)[am::strings::msg_params][am::strings::file_name] = "IVSU";
+  (*msg_)[am::strings::msg_params][am::strings::file_name] = file_name;
   CommandPtr command(CreateCommand<SystemRequest>(msg_));
   ON_CALL(mock_app_manager_, application(kKey)).WillByDefault(Return(app_));
 
@@ -251,10 +252,20 @@ TEST_F(
       .WillRepeatedly(ReturnRef(kStorageFolder));
   ON_CALL(*app_, folder_name()).WillByDefault(Return("app_storage"));
   am::AppFile ap_file;
-  EXPECT_CALL(*app_,
-              GetFile(kStorageFolder + file_system::GetPathDelimiter() +
-                      "app_storage" + file_system::GetPathDelimiter() +
-                      "0IVSU")).WillRepeatedly(Return(&ap_file));
+
+  // To avoid override of existing file,
+  // command append index as a suffix to
+  // the file name and increment it, each time
+  // when command saves a file.
+  std::ostringstream final_file_name;
+  final_file_name << SystemRequest::file_index() << file_name;
+
+  const std::string app_full_file_path = file_system::ConcatPath(
+      kStorageFolder, "app_storage", final_file_name.str());
+
+  EXPECT_CALL(*app_, GetFile(app_full_file_path))
+      .WillRepeatedly(Return(&ap_file));
+
   EXPECT_CALL(mock_app_manager_, ManageMobileCommand(_, _)).Times(0);
 
   EXPECT_CALL(mock_app_manager_,
