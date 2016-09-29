@@ -67,13 +67,17 @@ const uint32_t kKey = 5u;
 
 class SpeakRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
-  SpeakRequestTest() : app_(CreateMockApp()) {
-    msg_ = CreateMessage(smart_objects::SmartType_Map);
+  SpeakRequestTest()
+      : app_(CreateMockApp())
+      , msg_(CreateMessage(smart_objects::SmartType_Map))
+      , mock_message_helper_(*am::MockMessageHelper::message_helper_mock()) {
+    testing::Mock::VerifyAndClearExpectations(&mock_message_helper_);
   }
 
  protected:
   MockAppPtr app_;
   MessageSharedPtr msg_;
+  am::MockMessageHelper& mock_message_helper_;
 };
 
 TEST_F(SpeakRequestTest, Run_ApplicationIsNotRegistered) {
@@ -226,8 +230,7 @@ TEST_F(SpeakRequestTest, OnEvent_TTS_Speak_SUCCESS) {
 
   ON_CALL(mock_app_manager_, application(_)).WillByDefault(Return(app_));
 
-  EXPECT_CALL((*am::MockMessageHelper::message_helper_mock()),
-              HMIToMobileResult(hmi_result))
+  EXPECT_CALL(mock_message_helper_, HMIToMobileResult(hmi_result))
       .WillOnce(Return(am::mobile_api::Result::SUCCESS));
   EXPECT_CALL(
       mock_app_manager_,
@@ -248,8 +251,7 @@ TEST_F(SpeakRequestTest, OnEvent_TTS_SpeakWithWarning_WarningWithSuccess) {
   ON_CALL(mock_app_manager_, application(_)).WillByDefault(Return(app_));
 
   const std::string info = "Unsupported phoneme type sent in a prompt";
-  EXPECT_CALL((*am::MockMessageHelper::message_helper_mock()),
-              HMIToMobileResult(hmi_result))
+  EXPECT_CALL(mock_message_helper_, HMIToMobileResult(hmi_result))
       .WillOnce(Return(am::mobile_api::Result::WARNINGS));
   EXPECT_CALL(mock_app_manager_,
               ManageMobileCommand(
@@ -272,8 +274,7 @@ TEST_F(SpeakRequestTest,
   ON_CALL(mock_app_manager_, application(_)).WillByDefault(Return(app_));
 
   const std::string info = "Unsupported phoneme type sent in a prompt";
-  EXPECT_CALL((*am::MockMessageHelper::message_helper_mock()),
-              HMIToMobileResult(hmi_result))
+  EXPECT_CALL(mock_message_helper_, HMIToMobileResult(hmi_result))
       .WillOnce(Return(am::mobile_api::Result::UNSUPPORTED_RESOURCE));
   EXPECT_CALL(mock_app_manager_,
               ManageMobileCommand(

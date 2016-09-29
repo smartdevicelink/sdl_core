@@ -134,8 +134,7 @@ void SpeakRequest::ProcessTTSSpeakResponse(
 
   if (is_result_ok) {
     result_code = mobile_apis::Result::WARNINGS;
-    return_info =
-        std::string("Unsupported phoneme type sent in a prompt").c_str();
+    return_info = "Unsupported phoneme type sent in a prompt";
   }
 
   SendResponse(
