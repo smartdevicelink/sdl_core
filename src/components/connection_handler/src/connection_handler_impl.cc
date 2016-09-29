@@ -350,8 +350,11 @@ uint32_t ConnectionHandlerImpl::OnSessionStartedCallback(
     const uint32_t session_key = KeyFromPair(connection_handle, new_session_id);
 
     if (remote_services_observer_) {
+      std::string device_mac_address = "";
+      GetDataOnDeviceID(connection->connection_device_handle(), NULL, NULL,
+                        &device_mac_address);
       if (remote_services_observer_->OnServiceStartedCallback(
-          session_key, service_type)) {
+          session_key, service_type, device_mac_address)) {
         LOG4CXX_INFO(logger_, "Remote service for RevSdl plugin started.");
         return new_session_id;
       }
@@ -825,6 +828,10 @@ void ConnectionHandlerImpl::CloseSession(ConnectionHandle connection_handle,
       for (;service_list_itr != service_list.end(); ++service_list_itr) {
         const protocol_handler::ServiceType service_type =
             service_list_itr->service_type;
+        if (remote_services_observer_) {
+          remote_services_observer_->OnServiceEndedCallback(session_key,
+                                                            service_type);
+        }
         connection_handler_observer_->OnServiceEndedCallback(session_key,
                                                              service_type);
       }
@@ -955,6 +962,10 @@ void ConnectionHandlerImpl::OnConnectionEnded(
       const ServiceList &service_list = session_it->second.service_list;
       for (ServiceList::const_iterator service_it = service_list.begin(), end =
            service_list.end(); service_it != end; ++service_it) {
+        if (remote_services_observer_) {
+          remote_services_observer_->OnServiceEndedCallback(
+              session_key, service_it->service_type);
+        }
         connection_handler_observer_->OnServiceEndedCallback(
               session_key, service_it->service_type);
       }

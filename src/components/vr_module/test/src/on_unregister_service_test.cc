@@ -30,40 +30,57 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_ACTIVATE_SERVICE_H_
-#define SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_ACTIVATE_SERVICE_H_
-
-#include "vr_module/commands/timed_command.h"
-#include "vr_module/event_engine/event_dispatcher.h"
+#include "gtest/gtest.h"
+#include "gmock/gmock.h"
+#include "mock_service_module.h"
+#include "vr_module/commands/on_unregister_service.h"
 #include "vr_module/interface/hmi.pb.h"
 #include "vr_module/interface/mobile.pb.h"
 
+using ::testing::_;
+using ::testing::Return;
+
 namespace vr_module {
-
-class ServiceModule;
-
 namespace commands {
 
-class ActivateService : public TimedCommand, public event_engine::EventObserver<
-    vr_mobile_api::ServiceMessage, vr_mobile_api::RPCName> {
- public:
-  ActivateService(const vr_hmi_api::ServiceMessage& message,
-                  ServiceModule* module);
-  ~ActivateService();
-  virtual bool Execute();
-  virtual void OnTimeout();
-  virtual void on_event(
-      const event_engine::Event<vr_mobile_api::ServiceMessage,
-          vr_mobile_api::RPCName>& event);
+MATCHER_P(ServiceMessageEq, expected, "") {
+  return arg.rpc() == expected.rpc()
+      && arg.rpc_type() == expected.rpc_type()
+      && arg.correlation_id() == expected.correlation_id()
+      && arg.params() == expected.params();
+}
 
- private:
-  bool SendResponse(vr_hmi_api::ResultCode code);
-  ServiceModule* module_;
-  vr_hmi_api::ServiceMessage message_;
-  vr_mobile_api::ServiceMessage request_;
+class OnUnregisterServiceTest : public ::testing::Test {
+ protected:
 };
+
+TEST_F(OnUnregisterServiceTest, Execute) {
+  MockServiceModule service;
+
+  const int32_t kId = 1;
+  EXPECT_CALL(service, GetNextCorrelationID()).Times(1).WillOnce(Return(kId));
+  vr_hmi_api::ServiceMessage input;
+  input.set_rpc(vr_hmi_api::ON_UNREGISTER);
+  vr_hmi_api::OnUnregisterServiceNotification notification;
+  notification.set_appid(3);
+  std::string params;
+  notification.SerializeToString(&params);
+  input.set_params(params);
+  OnUnregisterService cmd(input, &service);
+
+  vr_hmi_api::ServiceMessage expected;
+  expected.set_rpc(vr_hmi_api::ON_UNREGISTER);
+  expected.set_rpc_type(vr_hmi_api::NOTIFICATION);
+  expected.set_correlation_id(kId);
+  vr_hmi_api::OnUnregisterServiceNotification hmi_notification;
+  hmi_notification.set_appid(3);
+  std::string hmi_params;
+  hmi_notification.SerializeToString(&hmi_params);
+  expected.set_params(hmi_params);
+  EXPECT_CALL(service, SendToHmi(ServiceMessageEq(expected))).Times(1).WillOnce(
+      Return(true));
+  EXPECT_TRUE(cmd.Execute());
+}
 
 }  // namespace commands
 }  // namespace vr_module
-
-#endif  // SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_ACTIVATE_SERVICE_H_

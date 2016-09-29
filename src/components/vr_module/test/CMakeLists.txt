@@ -17,6 +17,7 @@ set (SOURCES
   src/on_register_service_test.cc
   src/on_service_deactivated_test.cc
   src/on_default_service_chosen_test.cc
+  src/on_unregister_service_test.cc
   src/socket_channel_test.cc
 )
 

@@ -30,40 +30,28 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_ACTIVATE_SERVICE_H_
-#define SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_ACTIVATE_SERVICE_H_
+#include "vr_module/commands/on_unregister_service.h"
 
-#include "vr_module/commands/timed_command.h"
-#include "vr_module/event_engine/event_dispatcher.h"
-#include "vr_module/interface/hmi.pb.h"
-#include "vr_module/interface/mobile.pb.h"
+#include "utils/logger.h"
+#include "vr_module/service_module.h"
 
 namespace vr_module {
-
-class ServiceModule;
-
 namespace commands {
 
-class ActivateService : public TimedCommand, public event_engine::EventObserver<
-    vr_mobile_api::ServiceMessage, vr_mobile_api::RPCName> {
- public:
-  ActivateService(const vr_hmi_api::ServiceMessage& message,
-                  ServiceModule* module);
-  ~ActivateService();
-  virtual bool Execute();
-  virtual void OnTimeout();
-  virtual void on_event(
-      const event_engine::Event<vr_mobile_api::ServiceMessage,
-          vr_mobile_api::RPCName>& event);
+CREATE_LOGGERPTR_GLOBAL(logger_, "VRModule")
 
- private:
-  bool SendResponse(vr_hmi_api::ResultCode code);
-  ServiceModule* module_;
-  vr_hmi_api::ServiceMessage message_;
-  vr_mobile_api::ServiceMessage request_;
-};
+OnUnregisterService::OnUnregisterService(const vr_hmi_api::ServiceMessage& message,
+                                         ServiceModule* module)
+    : module_(module),
+      message_(message) {
+  message_.set_rpc_type(vr_hmi_api::NOTIFICATION);
+  message_.set_correlation_id(module_->GetNextCorrelationID());
+}
+
+bool OnUnregisterService::Execute() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return module_->SendToHmi(message_);
+}
 
 }  // namespace commands
 }  // namespace vr_module
-
-#endif  // SRC_COMPONENTS_VR_MODULE_INCLUDE_VR_MODULE_COMMANDS_ACTIVATE_SERVICE_H_

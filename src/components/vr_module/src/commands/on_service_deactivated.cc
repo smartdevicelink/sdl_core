@@ -51,8 +51,9 @@ bool OnServiceDeactivated::Execute() {
   notification.set_rpc(vr_mobile_api::ON_DEACTIVATED);
   notification.set_rpc_type(vr_mobile_api::NOTIFICATION);
   notification.set_correlation_id(module_->GetNextCorrelationID());
+  bool ret = module_->SendToMobile(notification);
   module_->DeactivateService();
-  return module_->SendToMobile(notification);
+  return ret;
 }
 
 }  // namespace commands

@@ -39,6 +39,7 @@
 #include "vr_module/commands/on_default_service_chosen.h"
 #include "vr_module/commands/on_register_service.h"
 #include "vr_module/commands/on_service_deactivated.h"
+#include "vr_module/commands/on_unregister_service.h"
 #include "vr_module/commands/process_data.h"
 #include "vr_module/commands/support_service.h"
 #include "vr_module/interface/hmi.pb.h"
@@ -68,6 +69,8 @@ CommandPtr Factory::Create(const vr_hmi_api::ServiceMessage& message) const {
       return CommandPtr(new AsyncCommand(new ActivateService(message, module_)));
     case vr_hmi_api::PROCESS_DATA:
       return CommandPtr(new AsyncCommand(new ProcessData(message, module_)));
+    case vr_hmi_api::ON_UNREGISTER:
+      return CommandPtr(new OnUnregisterService(message, module_));
     default:
       return CommandPtr();
   }
