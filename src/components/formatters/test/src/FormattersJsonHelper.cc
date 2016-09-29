@@ -52,18 +52,19 @@ void CompactJson(std::string& str) {
 }
 
 void removeSubstrs(std::string& s) {
-	std::vector<std::string> v;
-	v.push_back("\"");
-	v.push_back("{");
-	v.push_back("}");
-	v.push_back("null");
+  std::vector<std::string> v;
+  v.push_back("\"");
+  v.push_back("{");
+  v.push_back("}");
+  v.push_back("null");
 
-	for (std::vector<std::string>::const_iterator str = v.cbegin(); str != v.cend(); ++str) {
-		for (std::string::size_type i = s.find(*str);
-			i != std::string::npos;
-			i = s.find(*str))
-			s.erase(i, (*str).length());
-	}
+  for (std::vector<std::string>::const_iterator str = v.cbegin();
+       str != v.cend();
+       ++str) {
+    for (std::string::size_type i = s.find(*str); i != std::string::npos;
+         i = s.find(*str))
+      s.erase(i, (*str).length());
+  }
 }
 
 }  // namespace formatters

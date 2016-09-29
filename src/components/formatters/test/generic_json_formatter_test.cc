@@ -83,7 +83,8 @@ TEST(GenericJsonFormatter, ToString) {
   formatters::GenericJsonFormatter::ToString(obj, result);
   CompactJson(result);
   ASSERT_STREQ(
-      "{\"intField\":100500,\"stringField\":\"s\",\"subobject\":{\"arrayField\":[0,\"c\",[\"10.0\"]],\"boolField\":false}}",
+      "{\"intField\":100500,\"stringField\":\"s\",\"subobject\":{"
+      "\"arrayField\":[0,\"c\",[\"10.0\"]],\"boolField\":false}}",
       result.c_str());
 }
 

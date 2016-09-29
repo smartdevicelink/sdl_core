@@ -76,11 +76,11 @@ const char* const kTestJsonArrayString =
 const std::size_t kTestJsonArraySize = 2;
 
 utils::json::JsonValueRef GetItem(const utils::json::JsonValueRef object,
-	const std::string& member) {
-	if (object.IsObject() && object.HasMember(member)) {
-		return object[member];
-	}
-	return utils::json::JsonValueRef();
+                                  const std::string& member) {
+  if (object.IsObject() && object.HasMember(member)) {
+    return object[member];
+  }
+  return utils::json::JsonValueRef();
 }
 
 void SetStringValue(utils::json::JsonValueRef json_value,
@@ -111,7 +111,8 @@ TEST(TestJsonValue, DefaultIsNull) {
 TEST(TestJsonValue, IsNull) {
   using namespace utils::json;
 
-  JsonValue::ParseResult parse_result = JsonValue::Parse(kTestJsonObjectWithNull);
+  JsonValue::ParseResult parse_result =
+      JsonValue::Parse(kTestJsonObjectWithNull);
   ASSERT_TRUE(parse_result.second);
 
   const JsonValue& root_json = parse_result.first;
@@ -129,7 +130,8 @@ TEST(TestJsonValue, IsNull) {
 TEST(TestJsonVaue, SubObjectIsNull) {
   using namespace utils::json;
 
-  JsonValue::ParseResult parse_result = JsonValue::Parse(kTestJsonObjectWithNull);
+  JsonValue::ParseResult parse_result =
+      JsonValue::Parse(kTestJsonObjectWithNull);
   ASSERT_TRUE(parse_result.second);
 
   const JsonValue& root_json = parse_result.first;
@@ -137,7 +139,7 @@ TEST(TestJsonVaue, SubObjectIsNull) {
 
   ASSERT_TRUE(json_obj.IsObject());
   for (utils::json::JsonValue::const_iterator i = json_obj.begin(),
-                                                  end = json_obj.end();
+                                              end = json_obj.end();
        i != end;
        ++i) {
     ASSERT_EQ("NullMember", i.key().AsString());
@@ -406,8 +408,9 @@ TEST(TestJsonVaue, ObjectUpdateElementByKey) {
   ASSERT_EQ(123, pos_int_value.AsInt());
 
   const JsonValue& const_root_json = parse_result.first;
+  const bool result = false;
   ASSERT_EQ(kNewStringValue, const_root_json["StrVal"].AsString());
-  ASSERT_EQ(false, const_root_json["BoolVal"].AsBool());
+  ASSERT_EQ(result, const_root_json["BoolVal"].AsBool());
   ASSERT_EQ(-123, const_root_json["NegIntVal"].AsInt());
   ASSERT_EQ(123, const_root_json["PosIntVal"].AsInt());
 }
@@ -431,7 +434,7 @@ TEST(TestJsonVaue, ObjectIterator) {
   JsonValue::Members members = root_json.GetMemberNames();
   ASSERT_EQ(kTestJsonObjectSize, root_json.Size());
   ASSERT_EQ(kTestJsonObjectSize, members.size());
-  int index = 0;
+  std::size_t index = 0;
   for (JsonValue::iterator itr = root_json.begin(), end = root_json.end();
        itr != end;
        ++itr) {
@@ -469,7 +472,7 @@ TEST(TestJsonVaue, ObjectIteratorByRef) {
   JsonValue::Members members = root_json_ref.GetMemberNames();
   ASSERT_EQ(kTestJsonObjectSize, root_json_ref.Size());
   ASSERT_EQ(kTestJsonObjectSize, members.size());
-  int index = 0;
+  std::size_t index = 0;
   for (JsonValue::iterator itr = root_json_ref.begin(),
                            end = root_json_ref.end();
        itr != end;
@@ -508,7 +511,7 @@ TEST(TestJsonVaue, ObjectIteratorKey) {
   JsonValue::Members members = root_json.GetMemberNames();
   ASSERT_EQ(kTestJsonObjectSize, root_json.Size());
   ASSERT_EQ(kTestJsonObjectSize, members.size());
-  int index = 0;
+  std::size_t index = 0;
   for (JsonValue::iterator itr = root_json.begin(), end = root_json.end();
        itr != end;
        ++itr) {
@@ -529,7 +532,7 @@ TEST(TestJsonVaue, ObjectConstIteratorKey) {
   JsonValue::Members members = root_json.GetMemberNames();
   ASSERT_EQ(kTestJsonObjectSize, root_json.Size());
   ASSERT_EQ(kTestJsonObjectSize, members.size());
-  int index = 0;
+  std::size_t index = 0;
   for (JsonValue::const_iterator itr = root_json.begin(), end = root_json.end();
        itr != end;
        ++itr) {
@@ -549,7 +552,7 @@ TEST(TestJsonVaue, ArrayIterator) {
   JsonValue& root_json = parse_result.first;
   ASSERT_EQ(ValueType::ARRAY_VALUE, root_json.Type());
   ASSERT_EQ(kTestJsonArraySize, root_json.Size());
-  int index = 0;
+  std::size_t index = 0;
   for (JsonValue::iterator itr = root_json.begin(), end = root_json.end();
        itr != end;
        ++itr) {
@@ -574,7 +577,7 @@ TEST(TestJsonVaue, ArrayConstIterator) {
   const JsonValue& root_json = parse_result.first;
   ASSERT_EQ(ValueType::ARRAY_VALUE, root_json.Type());
   ASSERT_EQ(kTestJsonArraySize, root_json.Size());
-  int index = 0;
+  std::size_t index = 0;
   for (JsonValue::const_iterator itr = root_json.begin(), end = root_json.end();
        itr != end;
        ++itr) {
@@ -649,7 +652,7 @@ TEST(TestJsonVaue, SubArrayIterator) {
   ASSERT_EQ(kTestJsonObjectSize, root_json.Size());
   JsonValueRef sub_array = root_json["ArrVal"];
   ASSERT_TRUE(sub_array.IsArray());
-  ASSERT_EQ(15, sub_array.Size());
+  ASSERT_EQ(15u, sub_array.Size());
   uint32_t expected_value = 3;
   for (JsonValue::iterator itr = sub_array.begin(), end = sub_array.end();
        itr != end;
@@ -668,7 +671,7 @@ TEST(TestJsonVaue, SubArrayConstIterator) {
   ASSERT_EQ(kTestJsonObjectSize, root_json.Size());
   const JsonValueRef& sub_array = root_json["ArrVal"];
   ASSERT_TRUE(sub_array.IsArray());
-  ASSERT_EQ(15, sub_array.Size());
+  ASSERT_EQ(15u, sub_array.Size());
   uint32_t expected_value = 3;
   for (JsonValue::const_iterator itr = sub_array.begin(), end = sub_array.end();
        itr != end;
@@ -689,14 +692,14 @@ TEST(TestJsonVaue, EmptyObjectIterator) {
   ASSERT_EQ(ValueType::OBJECT_VALUE, obj_val.Type());
   ASSERT_GT(obj_val.Size(), 0u);
   obj_val.Clear();
-  ASSERT_EQ(0, obj_val.Size());
+  ASSERT_EQ(0u, obj_val.Size());
   uint32_t index = 0;
   for (JsonValue::iterator itr = obj_val.begin(), end = obj_val.end();
        itr != end;
        ++itr) {
     index++;
   }
-  ASSERT_EQ(0, index);
+  ASSERT_EQ(0u, index);
 }
 
 TEST(TestJsonVaue, EmptyConstObjectIterator) {
@@ -710,7 +713,7 @@ TEST(TestJsonVaue, EmptyConstObjectIterator) {
   root_json["ObjVal"].Clear();
   const JsonValueRef const_obj_val = root_json["ObjVal"];
   ASSERT_EQ(ValueType::OBJECT_VALUE, const_obj_val.Type());
-  ASSERT_EQ(0, const_obj_val.Size());
+  ASSERT_EQ(0u, const_obj_val.Size());
   uint32_t index = 0;
   for (JsonValue::const_iterator itr = const_obj_val.begin(),
                                  end = const_obj_val.end();
@@ -718,7 +721,7 @@ TEST(TestJsonVaue, EmptyConstObjectIterator) {
        ++itr) {
     index++;
   }
-  ASSERT_EQ(0, index);
+  ASSERT_EQ(0u, index);
 }
 
 TEST(TestJsonVaue, EmptyArrayIterator) {
@@ -733,14 +736,14 @@ TEST(TestJsonVaue, EmptyArrayIterator) {
   ASSERT_EQ(ValueType::ARRAY_VALUE, arr_val.Type());
   ASSERT_GT(arr_val.Size(), 0u);
   arr_val.Clear();
-  ASSERT_EQ(0, arr_val.Size());
+  ASSERT_EQ(0u, arr_val.Size());
   uint32_t index = 0;
   for (JsonValue::iterator itr = arr_val.begin(), end = arr_val.end();
        itr != end;
        ++itr) {
     index++;
   }
-  ASSERT_EQ(0, index);
+  ASSERT_EQ(0u, index);
 }
 
 TEST(TestJsonVaue, EmptyConstArrayIterator) {
@@ -754,7 +757,7 @@ TEST(TestJsonVaue, EmptyConstArrayIterator) {
   root_json["ArrVal"].Clear();
   const JsonValueRef const_arr_val = root_json["ArrVal"];
   ASSERT_EQ(ValueType::ARRAY_VALUE, const_arr_val.Type());
-  ASSERT_EQ(0, const_arr_val.Size());
+  ASSERT_EQ(0u, const_arr_val.Size());
   uint32_t index = 0;
   for (JsonValue::const_iterator itr = const_arr_val.begin(),
                                  end = const_arr_val.end();
@@ -762,7 +765,7 @@ TEST(TestJsonVaue, EmptyConstArrayIterator) {
        ++itr) {
     index++;
   }
-  ASSERT_EQ(0, index);
+  ASSERT_EQ(0u, index);
 }
 
 TEST(TestJsonVaue, ObjectConstIterator) {
@@ -774,7 +777,7 @@ TEST(TestJsonVaue, ObjectConstIterator) {
   JsonValue::Members members = root_json.GetMemberNames();
   ASSERT_EQ(kTestJsonObjectSize, root_json.Size());
   ASSERT_EQ(kTestJsonObjectSize, members.size());
-  int index = 0;
+  std::size_t index = 0;
   for (JsonValue::const_iterator itr = root_json.begin(), end = root_json.end();
        itr != end;
        ++itr) {
@@ -856,12 +859,12 @@ TEST(TestJsonVaue, ObjectIsEmptyAndClear) {
 
   JsonValue& root_json = parse_result.first;
 
-  ASSERT_EQ(ValueType::OBJECT_VALUE, root_json.Type());
+  ASSERT_EQ(ValueType::OBJECT_VALUE, static_cast<uint32_t>(root_json.Type()));
   ASSERT_FALSE(root_json.IsEmpty());
   ASSERT_EQ(kTestJsonObjectSize, root_json.Size());
   root_json.Clear();
   ASSERT_TRUE(root_json.IsEmpty());
-  ASSERT_EQ(0, root_json.Size());
+  ASSERT_EQ(0u, root_json.Size());
 }
 
 TEST(TestJsonVaue, ArrayIsEmptyAndClear) {
@@ -871,13 +874,13 @@ TEST(TestJsonVaue, ArrayIsEmptyAndClear) {
 
   JsonValue& root_json = parse_result.first;
 
-  ASSERT_EQ(ValueType::ARRAY_VALUE, root_json.Type());
+  ASSERT_EQ(ValueType::ARRAY_VALUE, static_cast<uint32_t>(root_json.Type()));
 
   ASSERT_FALSE(root_json.IsEmpty());
   ASSERT_EQ(kTestJsonArraySize, root_json.Size());
   root_json.Clear();
   ASSERT_TRUE(root_json.IsEmpty());
-  ASSERT_EQ(0, root_json.Size());
+  ASSERT_EQ(0u, root_json.Size());
 }
 
 TEST(TestJsonVaue, CreateObjectWithString) {
@@ -943,97 +946,97 @@ TEST(TestJsonVaue, NonValidRef) {
 #if defined(QT_PORT)
 
 namespace {
-	inline QVariant Parse(const std::string& json) {
-		QJsonParseError parsing_error;
-		QJsonDocument json_document =
-			QJsonDocument::fromJson(json.c_str(), &parsing_error);
-		if (parsing_error.error != QJsonParseError::NoError) {
-			return QVariant();
-		}
+inline QVariant Parse(const std::string& json) {
+  QJsonParseError parsing_error;
+  QJsonDocument json_document =
+      QJsonDocument::fromJson(json.c_str(), &parsing_error);
+  if (parsing_error.error != QJsonParseError::NoError) {
+    return QVariant();
+  }
 
-		return json_document.toVariant();
-	}
+  return json_document.toVariant();
+}
 
-	template <typename T>
-	T& GetValueRef(QVariant& variant) {
-		// If the variant stores a T, return it.
-		if (variant.userType() == qMetaTypeId<T>()) {
-			return *reinterpret_cast<T*>(variant.data());
-		}
+template <typename T>
+T& GetValueRef(QVariant& variant) {
+  // If the variant stores a T, return it.
+  if (variant.userType() == qMetaTypeId<T>()) {
+    return *reinterpret_cast<T*>(variant.data());
+  }
 
-		// Some value to return, if the variant does not store a T.
-		static T defaultValue;
-		return defaultValue;
-	}
+  // Some value to return, if the variant does not store a T.
+  static T defaultValue;
+  return defaultValue;
+}
 
-	template <typename T>
-	const T& GetValueRef(const QVariant& variant) {
-		// If the variant stores a T, return it.
-		if (variant.userType() == qMetaTypeId<T>()) {
-			return *reinterpret_cast<const T*>(variant.constData());
-		}
+template <typename T>
+const T& GetValueRef(const QVariant& variant) {
+  // If the variant stores a T, return it.
+  if (variant.userType() == qMetaTypeId<T>()) {
+    return *reinterpret_cast<const T*>(variant.constData());
+  }
 
-		// Some value to return, if the variant does not store a T.
-		static T defaultValue;
-		// Return the default value. Or add an assertion here. Or throw
-		// an exception etc.
-		return defaultValue;
-	}
+  // Some value to return, if the variant does not store a T.
+  static T defaultValue;
+  // Return the default value. Or add an assertion here. Or throw
+  // an exception etc.
+  return defaultValue;
+}
 
-	inline std::string ToJsonString(const QVariant& json) {
-		QJsonDocument json_document;
+inline std::string ToJsonString(const QVariant& json) {
+  QJsonDocument json_document;
 
-		if (json.canConvert<QVariantMap>()) {
-			QJsonObject json_object =
-				QJsonObject::fromVariantMap(GetValueRef<QVariantMap>(json));
-			json_document.setObject(json_object);
-			return json_document.toJson().toStdString();
-		} else if (json.canConvert<QVariantList>()) {
-			QJsonArray json_array =
-				QJsonArray::fromVariantList(GetValueRef<QVariantList>(json));
-			json_document.setArray(json_array);
-			return json_document.toJson().toStdString();
-		}
-		return std::string();
-	}
+  if (json.canConvert<QVariantMap>()) {
+    QJsonObject json_object =
+        QJsonObject::fromVariantMap(GetValueRef<QVariantMap>(json));
+    json_document.setObject(json_object);
+    return json_document.toJson().toStdString();
+  } else if (json.canConvert<QVariantList>()) {
+    QJsonArray json_array =
+        QJsonArray::fromVariantList(GetValueRef<QVariantList>(json));
+    json_document.setArray(json_array);
+    return json_document.toJson().toStdString();
+  }
+  return std::string();
+}
 
-    std::pair<double, bool> GetIntegralPart(double value) {
-      double integral_part = 0.;
-      double fractional_part = std::modf(value, &integral_part);
-      if (fractional_part <= std::numeric_limits<double>::epsilon()) {
-        return std::make_pair(integral_part, true);
-      }
-      return std::make_pair(integral_part, false);
-    }
+std::pair<double, bool> GetIntegralPart(double value) {
+  double integral_part = 0.;
+  double fractional_part = std::modf(value, &integral_part);
+  if (fractional_part <= std::numeric_limits<double>::epsilon()) {
+    return std::make_pair(integral_part, true);
+  }
+  return std::make_pair(integral_part, false);
+}
 
-    bool IsInt(double value) {
-      std::pair<double, bool> int_part_result = GetIntegralPart(value);
-      if (!int_part_result.second) {
-        return false;
-      }
-      if (int_part_result.first < 0) {
-        return true;
-      }
-      if (int_part_result.first <= std::numeric_limits<Int>::max()) {
-        return true;
-      }
-      return false;
-    }
+bool IsInt(double value) {
+  std::pair<double, bool> int_part_result = GetIntegralPart(value);
+  if (!int_part_result.second) {
+    return false;
+  }
+  if (int_part_result.first < 0) {
+    return true;
+  }
+  if (int_part_result.first <= std::numeric_limits<Int>::max()) {
+    return true;
+  }
+  return false;
+}
 
-    bool IsUInt(double value) {
-      std::pair<double, bool> int_part_result = GetIntegralPart(value);
-      if (!int_part_result.second) {
-        return false;
-      }
-      if (int_part_result.first < 0) {
-        return false;
-      }
-      if (int_part_result.first <= std::numeric_limits<UInt>::max()) {
-        return true;
-      }
-      return false;
-    }
-} // namespace
+bool IsUInt(double value) {
+  std::pair<double, bool> int_part_result = GetIntegralPart(value);
+  if (!int_part_result.second) {
+    return false;
+  }
+  if (int_part_result.first < 0) {
+    return false;
+  }
+  if (int_part_result.first <= std::numeric_limits<UInt>::max()) {
+    return true;
+  }
+  return false;
+}
+}  // namespace
 
 TEST(TestQJsonArray, ReadWriteArray) {
   using namespace utils::json;
