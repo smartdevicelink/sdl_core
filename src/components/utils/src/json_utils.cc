@@ -169,13 +169,44 @@ utils::json::JsonValue::JsonValue(const std::string& value) : storage_(value) {}
 utils::json::JsonValue::JsonValue(ValueType::Type type)
     : storage_(CreateStorage(type)) {}
 
+
+namespace {
+	bool DocumentCheck(const std::string& str) {
+		switch (str[0])
+		{
+		case 't':
+		case 'T':
+		case 'f':
+		case 'F':
+		case 'n':
+		case 'N':
+		case '0':
+		case '1':
+		case '2':
+		case '3':
+		case '4':
+		case '5':
+		case '6':
+		case '7':
+		case '8':
+		case '9':
+		case '/':
+		case '\"':
+			return false;
+		default:
+			return true;
+		}
+	}
+} // namespace
+
+
 utils::json::JsonValue::ParseResult utils::json::JsonValue::Parse(
     const std::string& document) {
   Storage storage;
   Json::Reader reader;
   bool is_parsed = reader.parse(document, storage, false);
-  if (!is_parsed) {
-    return std::make_pair(JsonValue(ValueType::NULL_VALUE), false);
+  if (!DocumentCheck(document) || !is_parsed) {
+	  return std::make_pair(JsonValue(ValueType::NULL_VALUE), false);
   }
   return std::make_pair(JsonValue(storage), true);
 }
