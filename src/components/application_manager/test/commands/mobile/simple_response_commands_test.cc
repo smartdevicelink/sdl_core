@@ -34,6 +34,7 @@
 #include <string>
 
 #include "gtest/gtest.h"
+#include "utils/helpers.h"
 #include "utils/shared_ptr.h"
 #include "commands/commands_test.h"
 #include "application_manager/mock_application_manager.h"
@@ -69,6 +70,7 @@
 #include "mobile/send_location_response.h"
 #include "mobile/set_app_icon_response.h"
 #include "mobile/set_display_layout_response.h"
+#include "mobile/generic_response.h"
 
 namespace test {
 namespace components {
@@ -77,6 +79,7 @@ namespace mobile_commands_test {
 namespace simple_response_commands_test {
 
 namespace commands = ::application_manager::commands;
+namespace am = ::application_manager;
 
 using ::testing::_;
 using ::testing::NotNull;
@@ -131,6 +134,40 @@ TYPED_TEST(MobileResponseCommandsTest, Run_SendResponseToMobile_SUCCESS) {
   ::utils::SharedPtr<typename TestFixture::CommandType> command =
       this->template CreateCommand<typename TestFixture::CommandType>();
   EXPECT_CALL(this->mock_app_manager_, SendMessageToMobile(NotNull(), _));
+  command->Run();
+}
+
+class GenericResponseFromHMICommandsTest
+    : public CommandsTest<CommandsTestMocks::kIsNice> {};
+
+MATCHER_P2(CheckMessageParams, success, result, "") {
+  const bool is_msg_type_correct =
+      (am::MessageType::kResponse) ==
+      static_cast<uint32_t>(
+          (*arg)[am::strings::params][am::strings::message_type].asInt());
+  const bool is_success_correct =
+      success == (*arg)[am::strings::msg_params][am::strings::success].asBool();
+  const bool is_result_code_correct =
+      result ==
+      static_cast<uint32_t>(
+          (*arg)[am::strings::msg_params][am::strings::result_code].asInt());
+
+  using namespace helpers;
+  return Compare<bool, EQ, ALL>(
+      true, is_msg_type_correct, is_success_correct, is_result_code_correct);
+}
+
+TEST_F(GenericResponseFromHMICommandsTest, Run_SUCCESS) {
+  MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
+
+  SharedPtr<commands::GenericResponse> command(
+      CreateCommand<commands::GenericResponse>(command_msg));
+
+  EXPECT_CALL(
+      mock_app_manager_,
+      SendMessageToMobile(
+          CheckMessageParams(false, mobile_apis::Result::INVALID_DATA), false));
+
   command->Run();
 }
 

@@ -228,7 +228,9 @@ typedef Types<
     CommandData<commands::UISetGlobalPropertiesResponse,
                 hmi_apis::FunctionID::UI_SetGlobalProperties>,
     CommandData<commands::VRPerformInteractionResponse,
-                hmi_apis::FunctionID::VR_PerformInteraction> >
+                hmi_apis::FunctionID::VR_PerformInteraction>,
+    CommandData<commands::UIScrollableMessageResponse,
+                hmi_apis::FunctionID::UI_ScrollableMessage> >
     ResponseCommandsList;
 
 typedef Types<commands::AudioStopStreamResponse,
