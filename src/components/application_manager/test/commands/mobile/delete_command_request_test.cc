@@ -42,6 +42,7 @@
 #include "application_manager/application.h"
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_application.h"
+#include "application_manager/mock_message_helper.h"
 #include "application_manager/event_engine/event.h"
 #include "mobile/delete_command_request.h"
 #include "interfaces/MOBILE_API.h"
@@ -53,6 +54,7 @@ namespace mobile_commands_test {
 namespace delete_command_request {
 
 using ::testing::_;
+using ::testing::Mock;
 using ::testing::Return;
 using ::testing::ReturnRef;
 namespace am = ::application_manager;
@@ -251,6 +253,207 @@ TEST_F(DeleteCommandRequestTest, OnEvent_VrDeleteCommand_SUCCESS) {
           (*result_msg)[am::strings::msg_params][am::strings::result_code]
               .asInt());
   EXPECT_EQ(mobile_apis::Result::WARNINGS, kReceivedResult);
+}
+
+TEST_F(DeleteCommandRequestTest, OnEvent_InvalidApp_UNSUCCESS) {
+  MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*command_msg)[am::strings::msg_params][am::strings::cmd_id] = kCommandId;
+  (*command_msg)[am::strings::params][am::strings::connection_key] =
+      kConnectionKey;
+
+  DeleteCommandPtr command(CreateCommand<DeleteCommandRequest>(command_msg));
+
+  MockAppPtr app = CreateMockApp();
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillOnce(Return(app));
+
+  MessageSharedPtr test_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*test_msg)[am::strings::menu_params] = 0;
+
+  EXPECT_CALL(*app, FindCommand(kCommandId)).WillOnce(Return(test_msg.get()));
+
+  command->Run();
+
+  MockAppPtr invalid_app;
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillOnce(Return(invalid_app));
+
+  MessageSharedPtr event_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*event_msg)[am::strings::params][am::hmi_response::code] =
+      hmi_apis::Common_Result::WARNINGS;
+  Event event(hmi_apis::FunctionID::UI_DeleteCommand);
+  event.set_smart_object(*event_msg);
+
+  EXPECT_CALL(mock_app_manager_, ManageMobileCommand(_, _)).Times(0);
+
+  command->on_event(event);
+}
+
+TEST_F(DeleteCommandRequestTest, OnEvent_InvalidCommand_UNSUCCESS) {
+  MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*command_msg)[am::strings::msg_params][am::strings::cmd_id] = kCommandId;
+  (*command_msg)[am::strings::params][am::strings::connection_key] =
+      kConnectionKey;
+
+  DeleteCommandPtr command(CreateCommand<DeleteCommandRequest>(command_msg));
+
+  MockAppPtr app = CreateMockApp();
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillRepeatedly(Return(app));
+
+  MessageSharedPtr test_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*test_msg)[am::strings::menu_params] = 0;
+
+  EXPECT_CALL(*app, FindCommand(kCommandId)).WillOnce(Return(test_msg.get()));
+
+  command->Run();
+
+  smart_objects::SmartObject* invalid_test_msg = NULL;
+  EXPECT_CALL(*app, FindCommand(kCommandId)).WillOnce(Return(invalid_test_msg));
+
+  MessageSharedPtr event_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*event_msg)[am::strings::params][am::hmi_response::code] =
+      hmi_apis::Common_Result::WARNINGS;
+  Event event(hmi_apis::FunctionID::UI_DeleteCommand);
+  event.set_smart_object(*event_msg);
+
+  EXPECT_CALL(*app, RemoveCommand(_)).Times(0);
+
+  command->on_event(event);
+}
+
+TEST_F(DeleteCommandRequestTest, OnEvent_PendingRequest_UNSUCCESS) {
+  MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*command_msg)[am::strings::msg_params][am::strings::cmd_id] = kCommandId;
+  (*command_msg)[am::strings::params][am::strings::connection_key] =
+      kConnectionKey;
+
+  DeleteCommandPtr command(CreateCommand<DeleteCommandRequest>(command_msg));
+
+  MockAppPtr app = CreateMockApp();
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillOnce(Return(app));
+
+  MessageSharedPtr test_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*test_msg)[am::strings::vr_commands] = 0;
+
+  EXPECT_CALL(*app, FindCommand(kCommandId))
+      .WillRepeatedly(Return(test_msg.get()));
+
+  command->Run();
+
+  MessageSharedPtr event_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*event_msg)[am::strings::params][am::hmi_response::code] =
+      hmi_apis::Common_Result::REJECTED;
+  Event event(hmi_apis::FunctionID::UI_DeleteCommand);
+  event.set_smart_object(*event_msg);
+
+  EXPECT_CALL(mock_app_manager_, application(_)).Times(0);
+  command->on_event(event);
+}
+
+TEST_F(DeleteCommandRequestTest, OnEvent_UiResultRejected_UNSUCCESS) {
+  MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*command_msg)[am::strings::msg_params][am::strings::cmd_id] = kCommandId;
+  (*command_msg)[am::strings::params][am::strings::connection_key] =
+      kConnectionKey;
+
+  DeleteCommandPtr command(CreateCommand<DeleteCommandRequest>(command_msg));
+
+  MockAppPtr app = CreateMockApp();
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillOnce(Return(app));
+
+  MessageSharedPtr test_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*test_msg)[am::strings::menu_params] = 0;
+
+  EXPECT_CALL(*app, FindCommand(kCommandId))
+      .WillRepeatedly(Return(test_msg.get()));
+
+  command->Run();
+
+  am::MockMessageHelper& mock_message_helper =
+      *am::MockMessageHelper::message_helper_mock();
+
+  MessageSharedPtr event_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*event_msg)[am::strings::params][am::hmi_response::code] =
+      hmi_apis::Common_Result::REJECTED;
+  Event event(hmi_apis::FunctionID::UI_DeleteCommand);
+  event.set_smart_object(*event_msg);
+
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillOnce(Return(app));
+
+  EXPECT_CALL(*app, RemoveCommand(kCommandId)).Times(0);
+
+  EXPECT_CALL(mock_message_helper, HMIToMobileResult(_))
+      .WillOnce(Return(mobile_apis::Result::REJECTED));
+
+  EXPECT_CALL(*app, UpdateHash()).Times(0);
+
+  MessageSharedPtr result_msg(
+      CatchMobileCommandResult(CallOnEvent(*command, event)));
+
+  ASSERT_TRUE(result_msg);
+
+  const mobile_apis::Result::eType kReceivedResult =
+      static_cast<mobile_apis::Result::eType>(
+          (*result_msg)[am::strings::msg_params][am::strings::result_code]
+              .asInt());
+  EXPECT_EQ(mobile_apis::Result::REJECTED, kReceivedResult);
+  Mock::VerifyAndClearExpectations(&mock_message_helper);
+}
+
+TEST_F(DeleteCommandRequestTest, OnEvent_VrResultRejected_UNSUCCESS) {
+  MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*command_msg)[am::strings::msg_params][am::strings::cmd_id] = kCommandId;
+  (*command_msg)[am::strings::params][am::strings::connection_key] =
+      kConnectionKey;
+
+  DeleteCommandPtr command(CreateCommand<DeleteCommandRequest>(command_msg));
+
+  MockAppPtr app = CreateMockApp();
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillOnce(Return(app));
+
+  MessageSharedPtr test_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*test_msg)[am::strings::vr_commands] = 0;
+
+  EXPECT_CALL(*app, FindCommand(kCommandId))
+      .WillRepeatedly(Return(test_msg.get()));
+
+  command->Run();
+
+  am::MockMessageHelper& mock_message_helper =
+      *am::MockMessageHelper::message_helper_mock();
+
+  MessageSharedPtr event_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*event_msg)[am::strings::params][am::hmi_response::code] =
+      hmi_apis::Common_Result::REJECTED;
+  Event event(hmi_apis::FunctionID::VR_DeleteCommand);
+  event.set_smart_object(*event_msg);
+
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillOnce(Return(app));
+
+  EXPECT_CALL(*app, RemoveCommand(kCommandId)).Times(0);
+
+  EXPECT_CALL(mock_message_helper, HMIToMobileResult(_))
+      .WillOnce(Return(mobile_apis::Result::REJECTED));
+
+  EXPECT_CALL(*app, UpdateHash()).Times(0);
+
+  MessageSharedPtr result_msg(
+      CatchMobileCommandResult(CallOnEvent(*command, event)));
+
+  ASSERT_TRUE(result_msg);
+
+  const mobile_apis::Result::eType kReceivedResult =
+      static_cast<mobile_apis::Result::eType>(
+          (*result_msg)[am::strings::msg_params][am::strings::result_code]
+              .asInt());
+  EXPECT_EQ(mobile_apis::Result::REJECTED, kReceivedResult);
+  Mock::VerifyAndClearExpectations(&mock_message_helper);
 }
 
 }  // namespace delete_command_request

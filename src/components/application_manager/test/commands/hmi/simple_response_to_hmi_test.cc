@@ -40,6 +40,7 @@
 #include "application_manager/commands/hmi/sdl_get_list_of_permissions_response.h"
 #include "application_manager/commands/hmi/sdl_get_status_update_response.h"
 #include "application_manager/commands/hmi/sdl_get_user_friendly_message_response.h"
+#include "application_manager/commands/hmi/response_to_hmi.h"
 
 namespace test {
 namespace components {
@@ -75,6 +76,26 @@ TYPED_TEST(ResponseToHMICommandsTest, Run_SendMessageToHMI_SUCCESS) {
   SharedPtr<CommandType> command = this->template CreateCommand<CommandType>();
 
   EXPECT_CALL(this->mock_app_manager_, SendMessageToHMI(NotNull()));
+
+  command->Run();
+}
+
+class ResponseToHMITest : public CommandsTest<CommandsTestMocks::kIsNice> {};
+
+TEST_F(ResponseToHMITest, BasicMethodsOverloads_SUCCESS) {
+  SharedPtr<commands::ResponseToHMI> command(
+      CreateCommand<commands::ResponseToHMI>());
+
+  // Current implementation always return `true`
+  EXPECT_TRUE(command->Init());
+  EXPECT_TRUE(command->CleanUp());
+}
+
+TEST_F(ResponseToHMITest, Run_SUCCESS) {
+  SharedPtr<commands::ResponseToHMI> command(
+      CreateCommand<commands::ResponseToHMI>());
+
+  EXPECT_CALL(mock_app_manager_, SendMessageToHMI(NotNull()));
 
   command->Run();
 }
