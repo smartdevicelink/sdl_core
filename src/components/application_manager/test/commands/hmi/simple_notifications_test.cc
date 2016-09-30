@@ -54,8 +54,8 @@ class SimpleNotificationsTest
   typedef Command CommandType;
 };
 
-typedef Types<commands::CommandNotificationImpl,
-              commands::NotificationToHMI> CommandsList;
+typedef Types<commands::CommandNotificationImpl, commands::NotificationToHMI>
+    CommandsList;
 
 TYPED_TEST_CASE(SimpleNotificationsTest, CommandsList);
 

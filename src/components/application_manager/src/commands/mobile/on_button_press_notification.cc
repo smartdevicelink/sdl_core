@@ -125,6 +125,11 @@ void OnButtonPressNotification::Run() {
 }
 
 void OnButtonPressNotification::SendButtonPress(ApplicationConstSharedPtr app) {
+  if (!app) {
+    SDL_ERROR("OnButtonPress NULL pointer");
+    return;
+  }
+
   smart_objects::SmartObjectSPtr on_btn_press =
       utils::MakeShared<smart_objects::SmartObject>();
 

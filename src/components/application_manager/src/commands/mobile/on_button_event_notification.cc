@@ -125,6 +125,11 @@ void OnButtonEventNotification::Run() {
 }
 
 void OnButtonEventNotification::SendButtonEvent(ApplicationConstSharedPtr app) {
+  if (!app) {
+    SDL_ERROR("OnButtonEvent NULL pointer");
+    return;
+  }
+
   smart_objects::SmartObjectSPtr on_btn_event =
       utils::MakeShared<smart_objects::SmartObject>();
 
