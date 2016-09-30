@@ -32,7 +32,6 @@ include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
 include_directories(
   ${COMPONENTS_DIR}/formatters/include
-  ${COMPONENTS_DIR}/protocol_handler/include
   ${COMPONENTS_DIR}/utils/include
   ${COMPONENTS_DIR}/smart_objects/include
   ${JSONCPP_INCLUDE_DIRECTORY}
@@ -44,7 +43,6 @@ set(PATHS
 )
 
 set(LIBRARIES
-  protocol_handler
   utils
   smart_object
 )

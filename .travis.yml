@@ -31,7 +31,8 @@ before_install:
 script:
   - sudo ln -sf /usr/bin/gcov-4.9 /usr/bin/gcov
   - bash -e tools/infrastructure/check_style.sh
-  - mkdir build && cd build && cmake ../ -DBUILD_TESTS=ON -DENABLE_GCOV=ON && echo nproc is $("nproc") && make install -j$("nproc")
+  - echo Number of processing units available $("nproc")
+  - mkdir build && cd build && cmake ../ -DBUILD_TESTS=ON -DENABLE_GCOV=ON && make install -j$("nproc")
   - sudo ldconfig
   - make test
   - bash ../tools/infrastructure/show_disabled.sh
