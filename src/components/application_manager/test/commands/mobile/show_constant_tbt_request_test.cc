@@ -160,6 +160,27 @@ TEST_F(ShowConstantTBTRequestTest, Run_TurnIcon_Canceled) {
   command->Run();
 }
 
+TEST_F(ShowConstantTBTRequestTest, Run_TurnIcon_WrongSyntax) {
+  MessageSharedPtr msg = CreateMsgParams();
+  SmartObject turn_icon(smart_objects::SmartType_Map);
+  turn_icon[strings::value] = "Wrong Syntax\\n";
+  (*msg)[strings::msg_params][strings::turn_icon] = turn_icon;
+
+  SharedPtr<ShowConstantTBTRequest> command(
+      CreateCommand<ShowConstantTBTRequest>(msg));
+
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillOnce(Return(mock_app_));
+  EXPECT_CALL(mock_app_manager_, ManageMobileCommand(_, _));
+  EXPECT_CALL(mock_app_manager_, GetPolicyHandler()).Times(0);
+  EXPECT_CALL(mock_message_helper_, ProcessSoftButtons(_, _, _, _)).Times(0);
+  EXPECT_CALL(*mock_app_, app_id()).Times(0);
+
+  EXPECT_CALL(*mock_app_, set_tbt_show_command(_)).Times(0);
+
+  command->Run();
+}
+
 TEST_F(ShowConstantTBTRequestTest, Run_NextTurnIcon_SUCCESS) {
   MessageSharedPtr msg = CreateMsgParams();
   SmartObject msg_params(smart_objects::SmartType_Map);
@@ -209,6 +230,27 @@ TEST_F(ShowConstantTBTRequestTest, Run_NextTurnIcon_Canceled) {
   command->Run();
 }
 
+TEST_F(ShowConstantTBTRequestTest, Run_NextTurnIcon_WrongSyntax) {
+  MessageSharedPtr msg = CreateMsgParams();
+  SmartObject next_turn_icon(smart_objects::SmartType_Map);
+  next_turn_icon[strings::value] = "Wrong Syntax\\n";
+  (*msg)[strings::msg_params][strings::next_turn_icon] = next_turn_icon;
+
+  SharedPtr<ShowConstantTBTRequest> command(
+      CreateCommand<ShowConstantTBTRequest>(msg));
+
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillOnce(Return(mock_app_));
+  EXPECT_CALL(mock_app_manager_, ManageMobileCommand(_, _));
+  EXPECT_CALL(mock_app_manager_, GetPolicyHandler()).Times(0);
+  EXPECT_CALL(mock_message_helper_, ProcessSoftButtons(_, _, _, _)).Times(0);
+  EXPECT_CALL(*mock_app_, app_id()).Times(0);
+
+  EXPECT_CALL(*mock_app_, set_tbt_show_command(_)).Times(0);
+
+  command->Run();
+}
+
 TEST_F(ShowConstantTBTRequestTest, Run_NavigationText1_SUCCESS) {
   MessageSharedPtr msg = CreateMsgParams();
   SmartObject msg_params(smart_objects::SmartType_Map);
@@ -224,6 +266,25 @@ TEST_F(ShowConstantTBTRequestTest, Run_NavigationText1_SUCCESS) {
   MsgParamsSetupHelper(msg_params,
                        strings::navigation_text_1,
                        hmi_apis::Common_TextFieldName::navigationText1);
+
+  command->Run();
+}
+
+TEST_F(ShowConstantTBTRequestTest, Run_NavigationText1_WrongSyntax) {
+  MessageSharedPtr msg = CreateMsgParams();
+  (*msg)[strings::msg_params][strings::navigation_text_1] = "Wrong Syntax\\n";
+
+  SharedPtr<ShowConstantTBTRequest> command(
+      CreateCommand<ShowConstantTBTRequest>(msg));
+
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillOnce(Return(mock_app_));
+  EXPECT_CALL(mock_app_manager_, ManageMobileCommand(_, _));
+  EXPECT_CALL(mock_app_manager_, GetPolicyHandler()).Times(0);
+  EXPECT_CALL(mock_message_helper_, ProcessSoftButtons(_, _, _, _)).Times(0);
+  EXPECT_CALL(*mock_app_, app_id()).Times(0);
+
+  EXPECT_CALL(*mock_app_, set_tbt_show_command(_)).Times(0);
 
   command->Run();
 }
@@ -247,6 +308,25 @@ TEST_F(ShowConstantTBTRequestTest, Run_NavigationText2_SUCCESS) {
   command->Run();
 }
 
+TEST_F(ShowConstantTBTRequestTest, Run_NavigationText2_WrongSyntax) {
+  MessageSharedPtr msg = CreateMsgParams();
+  (*msg)[strings::msg_params][strings::navigation_text_2] = "Wrong Syntax\\n";
+
+  SharedPtr<ShowConstantTBTRequest> command(
+      CreateCommand<ShowConstantTBTRequest>(msg));
+
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillOnce(Return(mock_app_));
+  EXPECT_CALL(mock_app_manager_, ManageMobileCommand(_, _));
+  EXPECT_CALL(mock_app_manager_, GetPolicyHandler()).Times(0);
+  EXPECT_CALL(mock_message_helper_, ProcessSoftButtons(_, _, _, _)).Times(0);
+  EXPECT_CALL(*mock_app_, app_id()).Times(0);
+
+  EXPECT_CALL(*mock_app_, set_tbt_show_command(_)).Times(0);
+
+  command->Run();
+}
+
 TEST_F(ShowConstantTBTRequestTest, Run_ETA_SUCCESS) {
   MessageSharedPtr msg = CreateMsgParams();
   SmartObject msg_params(smart_objects::SmartType_Map);
@@ -261,6 +341,25 @@ TEST_F(ShowConstantTBTRequestTest, Run_ETA_SUCCESS) {
 
   MsgParamsSetupHelper(
       msg_params, strings::eta, hmi_apis::Common_TextFieldName::ETA);
+
+  command->Run();
+}
+
+TEST_F(ShowConstantTBTRequestTest, Run_ETA_WrongSyntax) {
+  MessageSharedPtr msg = CreateMsgParams();
+  (*msg)[strings::msg_params][strings::eta] = "Wrong Syntax\\n";
+
+  SharedPtr<ShowConstantTBTRequest> command(
+      CreateCommand<ShowConstantTBTRequest>(msg));
+
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillOnce(Return(mock_app_));
+  EXPECT_CALL(mock_app_manager_, ManageMobileCommand(_, _));
+  EXPECT_CALL(mock_app_manager_, GetPolicyHandler()).Times(0);
+  EXPECT_CALL(mock_message_helper_, ProcessSoftButtons(_, _, _, _)).Times(0);
+  EXPECT_CALL(*mock_app_, app_id()).Times(0);
+
+  EXPECT_CALL(*mock_app_, set_tbt_show_command(_)).Times(0);
 
   command->Run();
 }
@@ -284,6 +383,25 @@ TEST_F(ShowConstantTBTRequestTest, Run_TotalDistance_SUCCESS) {
   command->Run();
 }
 
+TEST_F(ShowConstantTBTRequestTest, Run_TotalDistance_WrongSyntax) {
+  MessageSharedPtr msg = CreateMsgParams();
+  (*msg)[strings::msg_params][strings::total_distance] = "Wrong Syntax\\n";
+
+  SharedPtr<ShowConstantTBTRequest> command(
+      CreateCommand<ShowConstantTBTRequest>(msg));
+
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillOnce(Return(mock_app_));
+  EXPECT_CALL(mock_app_manager_, ManageMobileCommand(_, _));
+  EXPECT_CALL(mock_app_manager_, GetPolicyHandler()).Times(0);
+  EXPECT_CALL(mock_message_helper_, ProcessSoftButtons(_, _, _, _)).Times(0);
+  EXPECT_CALL(*mock_app_, app_id()).Times(0);
+
+  EXPECT_CALL(*mock_app_, set_tbt_show_command(_)).Times(0);
+
+  command->Run();
+}
+
 TEST_F(ShowConstantTBTRequestTest, Run_TimeToDistanation_SUCCESS) {
   MessageSharedPtr msg = CreateMsgParams();
   SmartObject msg_params(smart_objects::SmartType_Map);
@@ -299,6 +417,25 @@ TEST_F(ShowConstantTBTRequestTest, Run_TimeToDistanation_SUCCESS) {
   MsgParamsSetupHelper(msg_params,
                        strings::time_to_destination,
                        hmi_apis::Common_TextFieldName::timeToDestination);
+
+  command->Run();
+}
+
+TEST_F(ShowConstantTBTRequestTest, Run_TimeToDistanation_WrongSyntax) {
+  MessageSharedPtr msg = CreateMsgParams();
+  (*msg)[strings::msg_params][strings::time_to_destination] = "Wrong Syntax\\n";
+
+  SharedPtr<ShowConstantTBTRequest> command(
+      CreateCommand<ShowConstantTBTRequest>(msg));
+
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillOnce(Return(mock_app_));
+  EXPECT_CALL(mock_app_manager_, ManageMobileCommand(_, _));
+  EXPECT_CALL(mock_app_manager_, GetPolicyHandler()).Times(0);
+  EXPECT_CALL(mock_message_helper_, ProcessSoftButtons(_, _, _, _)).Times(0);
+  EXPECT_CALL(*mock_app_, app_id()).Times(0);
+
+  EXPECT_CALL(*mock_app_, set_tbt_show_command(_)).Times(0);
 
   command->Run();
 }
@@ -346,25 +483,6 @@ TEST_F(ShowConstantTBTRequestTest, Run_InvalidApp_Canceled) {
 
 TEST_F(ShowConstantTBTRequestTest, Run_EmptyMsgParams_Canceled) {
   MessageSharedPtr msg = CreateMsgParams();
-
-  SharedPtr<ShowConstantTBTRequest> command(
-      CreateCommand<ShowConstantTBTRequest>(msg));
-
-  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
-      .WillOnce(Return(mock_app_));
-  EXPECT_CALL(mock_app_manager_, ManageMobileCommand(_, _));
-  EXPECT_CALL(mock_app_manager_, GetPolicyHandler()).Times(0);
-  EXPECT_CALL(mock_message_helper_, ProcessSoftButtons(_, _, _, _)).Times(0);
-  EXPECT_CALL(*mock_app_, app_id()).Times(0);
-
-  EXPECT_CALL(*mock_app_, set_tbt_show_command(_)).Times(0);
-
-  command->Run();
-}
-
-TEST_F(ShowConstantTBTRequestTest, Run_WrongSyntax_Canceled) {
-  MessageSharedPtr msg = CreateMsgParams();
-  (*msg)[strings::msg_params][strings::navigation_text_1] = "Wrong Syntax\\n";
 
   SharedPtr<ShowConstantTBTRequest> command(
       CreateCommand<ShowConstantTBTRequest>(msg));
