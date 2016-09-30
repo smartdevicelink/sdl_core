@@ -32,7 +32,6 @@ include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
 include_directories(
   ${COMPONENTS_DIR}/formatters/include
-  ${COMPONENTS_DIR}/protocol_handler/include
   ${COMPONENTS_DIR}/utils/include
   ${COMPONENTS_DIR}/smart_objects/include
   ${JSONCPP_INCLUDE_DIRECTORY}
@@ -43,8 +42,14 @@ set(PATHS
   ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
+set(LIBRARIES
+  utils
+  smart_object
+)
+
 collect_sources(SOURCES "${PATHS}")
 add_library(formatters ${SOURCES})
+target_link_libraries(formatters ${LIBRARIES})
 
 if(BUILD_TESTS)
   add_subdirectory(test)

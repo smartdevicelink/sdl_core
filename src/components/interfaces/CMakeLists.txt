@@ -64,3 +64,8 @@ if(HMI_DBUS_API)
 
   add_library(HMI_API ${CMAKE_CURRENT_BINARY_DIR}/HMI_API_schema.cc)
 endif()
+
+target_link_libraries(v4_protocol_v1_2_no_extra utils)
+target_link_libraries(MOBILE_API utils)
+target_link_libraries(HMI_API utils)
+

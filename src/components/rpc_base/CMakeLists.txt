@@ -44,6 +44,7 @@ collect_sources(SOURCES "${PATHS}")
 
 set(LIBRARIES
   jsoncpp
+  utils
 )
 
 add_library(rpc_base ${SOURCES})
