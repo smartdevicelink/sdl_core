@@ -49,6 +49,7 @@ namespace {
 const size_t kThreadStackSize = 32768u;
 const std::string kThreadName("Test thread");
 const uint32_t kWaitTime = 1000u;
+const bool kIsJoinable = true;
 
 sync_primitives::ConditionalVariable cond_var_thread_start;
 sync_primitives::ConditionalVariable cond_var_thread_exit;
@@ -89,11 +90,15 @@ void WaitForThreadStart(Delegate delegate) {
 class InfiniteMainTestDelegate : public threads::ThreadDelegate {
  public:
   InfiniteMainTestDelegate()
-      : notified_(false), notify_running_(false), check_value_(false) {}
+      : notified_(false)
+      , notify_running_(false)
+      , times_started_counter_(0)
+      , check_value_(false) {}
 
   void threadMain() OVERRIDE {
     {
       AutoLock test_lock(test_mutex_thread_start);
+      times_started_counter_++;
       check_value_ = true;
       notify_running_ = true;
       cond_var_thread_start.Broadcast();
@@ -129,6 +134,7 @@ class InfiniteMainTestDelegate : public threads::ThreadDelegate {
 
   volatile bool notified_;
   volatile bool notify_running_;
+  int times_started_counter_;
 
  private:
   bool check_value_;
@@ -294,6 +300,101 @@ TEST_F(ThreadOptionsTest, StartOneThreadTwice_ExpectTheSameThreadStartedTwice) {
   EXPECT_EQ(thread1_id, thread2_id);
   cond_var_thread_start.WaitFor(test_lock, kWaitTime);
   EXPECT_TRUE(delegate_->check_value());
+}
+
+
+TEST(ThreadExecutionFlowTest, Start_Success) {
+  // Create a delegate with infinite threadMain
+  InfiniteMainTestDelegate* delegate = new InfiniteMainTestDelegate();
+  Thread* thread = CreateThread(kThreadName.c_str(), delegate);
+  EXPECT_TRUE(thread->start(threads::ThreadOptions()));
+  EXPECT_TRUE(thread->is_joinable());
+
+  // Wait for the thread to notify it has started execution
+  WaitForThreadStart(delegate);
+  EXPECT_TRUE(thread->is_running());
+
+  // Wait for the execution
+  thread->join(Thread::JoinOptionStop::kForceStop);
+  EXPECT_FALSE(thread->is_running());
+
+  delete delegate;
+  DeleteThread(thread);
+}
+
+TEST(ThreadExecutionFlowTest, StartWithCustomOptions_Success) {
+  // Create a delegate with infinite threadMain
+  InfiniteMainTestDelegate* delegate = new InfiniteMainTestDelegate();
+  Thread* thread = CreateThread(kThreadName.c_str(), delegate);
+
+  // Start thread with custom options (custom stack size & thread is joinable)
+  EXPECT_TRUE(
+      thread->start(threads::ThreadOptions(kThreadStackSize, kIsJoinable)));
+  EXPECT_TRUE(thread->is_joinable());
+
+  // Check if custom options are passed and received as expected
+  EXPECT_EQ(kThreadStackSize, thread->stack_size());
+  EXPECT_EQ(kThreadName, thread->name());
+  EXPECT_EQ(thread->is_joinable(), kIsJoinable);
+
+  // Wait for the thread to notify it has started execution
+  WaitForThreadStart(delegate);
+  EXPECT_TRUE(thread->is_running());
+
+  // Wait for the execution
+  thread->join(Thread::JoinOptionStop::kForceStop);
+  EXPECT_FALSE(thread->is_running());
+
+  delete delegate;
+  DeleteThread(thread);
+}
+
+TEST(ThreadExecutionFlowTest, StartTwice_Success) {
+  // Create a delegate with infinite threadMain
+  InfiniteMainTestDelegate* delegate = new InfiniteMainTestDelegate();
+  Thread* thread = CreateThread(kThreadName.c_str(), delegate);
+  EXPECT_TRUE(thread->start(threads::ThreadOptions()));
+  EXPECT_TRUE(thread->is_joinable());
+
+  // Wait for the thread to notify it has started execution
+  WaitForThreadStart(delegate);
+  EXPECT_TRUE(thread->is_running());
+
+  EXPECT_TRUE(thread->start());
+  // Check thread has not restarted
+  EXPECT_EQ(delegate->times_started_counter_, 1);
+
+  // Wait for the thread to notify it is running
+  WaitForThreadStart(delegate);
+  EXPECT_TRUE(thread->is_running());
+
+  // Make the thread stop and wait for it
+  delegate->SignalWakeUp();
+  thread->join(Thread::JoinOptionStop::kNoStop);
+  EXPECT_FALSE(thread->is_running());
+
+  delete delegate;
+  DeleteThread(thread);
+}
+
+TEST(ThreadExecutionFlowTest, StartStop_Success) {
+  // Create a delegate with infinite threadMain
+  InfiniteMainTestDelegate* delegate = new InfiniteMainTestDelegate();
+  Thread* thread = CreateThread(kThreadName.c_str(), delegate);
+  EXPECT_TRUE(thread->start(threads::ThreadOptions()));
+  EXPECT_TRUE(thread->is_joinable());
+
+  // Wait for the thread to notify it has started execution
+  WaitForThreadStart(delegate);
+  EXPECT_TRUE(thread->is_running());
+
+  // Signal the thread to stop and wait for the execution
+  thread->stop();
+  thread->join(Thread::JoinOptionStop::kNoStop);
+  EXPECT_FALSE(thread->is_running());
+
+  delete delegate;
+  DeleteThread(thread);
 }
 
 TEST(ThreadExecutionFlowTest, StartAndJoinForce_Success) {
