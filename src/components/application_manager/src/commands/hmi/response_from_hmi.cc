@@ -32,6 +32,7 @@
 
 #include "application_manager/commands/hmi/response_from_hmi.h"
 #include "smart_objects/smart_object.h"
+#include "utils/make_shared.h"
 
 namespace application_manager {
 
@@ -72,12 +73,8 @@ void ResponseFromHMI::SendResponseToMobile(
 void ResponseFromHMI::CreateHMIRequest(
     const hmi_apis::FunctionID::eType& function_id,
     const smart_objects::SmartObject& msg_params) const {
-  smart_objects::SmartObjectSPtr result = new smart_objects::SmartObject;
-
-  if (!result) {
-    SDL_ERROR("Memory allocation failed.");
-    return;
-  }
+  smart_objects::SmartObjectSPtr result =
+      utils::MakeShared<smart_objects::SmartObject>();
 
   // get hmi correlation id for chaining further request from this object
   const uint32_t hmi_correlation_id_ =

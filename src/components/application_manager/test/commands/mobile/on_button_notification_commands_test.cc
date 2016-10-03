@@ -342,6 +342,31 @@ TYPED_TEST(OnButtonNotificationCommandsTest, Run_SUCCESS) {
   command->Run();
 }
 
+TYPED_TEST(OnButtonNotificationCommandsTest,
+           Run_InvalidAppInSubscribed_UNSUCCESS) {
+  typedef typename TestFixture::Notification Notification;
+
+  MessageSharedPtr notification_msg(
+      this->CreateMessage(smart_objects::SmartType_Map));
+
+  (*notification_msg)[am::strings::msg_params][am::hmi_response::button_name] =
+      kButtonName;
+
+  SharedPtr<Notification> command(
+      this->template CreateCommand<Notification>(notification_msg));
+
+  typename TestFixture::MockAppPtr mock_app;
+  std::vector<ApplicationSharedPtr> subscribed_apps_list;
+  subscribed_apps_list.push_back(mock_app);
+
+  EXPECT_CALL(this->mock_app_manager_, applications_by_button(kButtonName))
+      .WillOnce(Return(subscribed_apps_list));
+
+  EXPECT_CALL(this->mock_app_manager_, SendMessageToMobile(_, _)).Times(0);
+
+  command->Run();
+}
+
 }  // namespace on_button_notification {
 }  // namespace mobile_commands_test
 }  // namespace commands_test
