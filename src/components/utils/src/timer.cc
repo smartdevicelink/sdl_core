@@ -60,11 +60,10 @@ timer::Timer::Timer(const std::string& name, TimerTask* task)
 timer::Timer::~Timer() {
   SDL_AUTO_TRACE();
   sync_primitives::AutoLock auto_lock(state_lock_);
-  StopThread();
   StopDelegate();
+  StopThread();
   single_shot_ = true;
 
-  thread_->set_delegate(NULL);
   delegate_.reset();
   DeleteThread(thread_);
   DCHECK(task_);
