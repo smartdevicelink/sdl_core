@@ -4,6 +4,8 @@ include_directories (
   ${CMAKE_SOURCE_DIR}/src/components/functional_module/include/
   ${CMAKE_SOURCE_DIR}/src/components/vr_module/include/
   ${CMAKE_SOURCE_DIR}/src/components/include/
+  ${CMAKE_SOURCE_DIR}/src/components/smart_objects/include
+  ${CMAKE_SOURCE_DIR}/src/components/policy/src/policy/usage_statistics/include
   ${JSONCPP_INCLUDE_DIRECTORY}
   include
 )
@@ -19,6 +21,7 @@ set (SOURCES
   src/on_default_service_chosen_test.cc
   src/on_unregister_service_test.cc
   src/socket_channel_test.cc
+  src/integration_test.cc
 )
 
 set (LIBRARIES
@@ -27,6 +30,7 @@ set (LIBRARIES
   gmock_main
   vrmoduleplugin
   gcov
+  pthread
 )
 
 if (ENABLE_TEST_COV_COUNT)
