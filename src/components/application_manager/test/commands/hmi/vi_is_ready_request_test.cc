@@ -106,7 +106,6 @@ class VIIsReadyRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNic
           CreateModuleInfoSO(hmi_apis::FunctionID::VehicleInfo_GetVehicleType, _))
           .WillOnce(Return(ivi_type));
     EXPECT_CALL(app_mngr_, ManageHMICommand(ivi_type));
-
   }
 
   void PrepareEvent(bool is_message_contain_param,
