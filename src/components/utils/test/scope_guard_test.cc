@@ -44,7 +44,7 @@ using ::utils::MakeGuard;
 using ::utils::MakeObjGuard;
 using ::testing::Mock;
 
-class TestObject {
+class ScopeGuardTestObject {
  public:
   MOCK_METHOD0(function_to_call, void());
   MOCK_METHOD1(function_to_call_with_param, void(void*));
@@ -69,22 +69,23 @@ TEST(ScopeGuardTest, CallFreeFunctionWithParam) {
 }
 
 TEST(ScopeGuardTest, CallObjectFunction) {
-  TestObject obj;
+  ScopeGuardTestObject obj;
   Mock::AllowLeak(&obj);  // Google tests bug
   EXPECT_CALL(obj, function_to_call()).Times(1);
   {
-    ScopeGuard guard = MakeObjGuard(obj, &TestObject::function_to_call);
+    ScopeGuard guard =
+        MakeObjGuard(obj, &ScopeGuardTestObject::function_to_call);
     UNUSED(guard);
   }
 }
 
 TEST(ScopeGuardTest, CallObjectFunctionWithParam) {
-  TestObject obj;
+  ScopeGuardTestObject obj;
   Mock::AllowLeak(&obj);  // Google tests bug
   EXPECT_CALL(obj, function_to_call_with_param(&obj)).Times(1);
   {
-    ScopeGuard guard =
-        MakeObjGuard(obj, &TestObject::function_to_call_with_param, &obj);
+    ScopeGuard guard = MakeObjGuard(
+        obj, &ScopeGuardTestObject::function_to_call_with_param, &obj);
     UNUSED(guard);
   }
 }
@@ -100,20 +101,21 @@ TEST(ScopeGuardTest, DismissCallFreeFunctionWithParam) {
 }
 
 TEST(ScopeGuardTest, DismissCallObjectFunction) {
-  TestObject obj;
+  ScopeGuardTestObject obj;
   EXPECT_CALL(obj, function_to_call()).Times(0);
   {
-    ScopeGuard guard = MakeObjGuard(obj, &TestObject::function_to_call);
+    ScopeGuard guard =
+        MakeObjGuard(obj, &ScopeGuardTestObject::function_to_call);
     guard.Dismiss();
   }
 }
 
 TEST(ScopeGuardTest, DismissCallObjectFunctionWithParam) {
-  TestObject obj;
+  ScopeGuardTestObject obj;
   EXPECT_CALL(obj, function_to_call_with_param(&obj)).Times(0);
   {
-    ScopeGuard guard =
-        MakeObjGuard(obj, &TestObject::function_to_call_with_param, &obj);
+    ScopeGuard guard = MakeObjGuard(
+        obj, &ScopeGuardTestObject::function_to_call_with_param, &obj);
     guard.Dismiss();
   }
 }
