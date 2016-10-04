@@ -72,27 +72,18 @@ void OnButtonPressNotification::Run() {
     }
 
     // custom_button_id is mandatory for CUSTOM_BUTTON notification
-<<<<<<< HEAD
-    if (false == (*message_)[strings::msg_params].keyExists(
-        hmi_response::custom_button_id)) {
-      LOG4CXX_ERROR_EXT(logger_,
-=======
     if (false ==
         (*message_)[strings::msg_params].keyExists(
             hmi_response::custom_button_id)) {
       LOG4CXX_ERROR(logger_,
->>>>>>> upstream/master
                     "CUSTOM_BUTTON OnButtonPress without custom_button_id.");
       return;
     }
 
-<<<<<<< HEAD
-    if (false == app.valid()) {
-      LOG4CXX_ERROR_EXT(logger_, "Application doesn't exist.");
-=======
+
     if (!app) {
       LOG4CXX_ERROR(logger_, "Application doesn't exist.");
->>>>>>> upstream/master
+
       return;
     }
 
