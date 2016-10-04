@@ -55,6 +55,7 @@ using am::commands::SDLActivateAppRequest;
 using am::ApplicationSet;
 using testing::Return;
 using testing::ReturnRef;
+using testing::Mock;
 using am::MockMessageHelper;
 using policy_test::MockPolicyHandlerInterface;
 
@@ -69,7 +70,15 @@ class SDLActivateAppRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  protected:
   SDLActivateAppRequestTest()
-      : message_helper_mock_(am::MockMessageHelper::message_helper_mock()) {}
+      : message_helper_mock_(am::MockMessageHelper::message_helper_mock()) {
+    Mock::VerifyAndClearExpectations(message_helper_mock_);
+  }
+
+  ~SDLActivateAppRequestTest() {
+    // Fix DataAccessor release and WinQt crash
+    Mock::VerifyAndClearExpectations(&mock_app_manager_);
+    Mock::VerifyAndClearExpectations(message_helper_mock_);
+  }
 
   void InitCommand(const uint32_t& timeout) OVERRIDE {
     MockAppPtr mock_app = CreateMockApp();

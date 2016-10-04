@@ -146,13 +146,13 @@ class GenericResponseFromHMICommandsTest
 MATCHER_P2(CheckMessageParams, success, result, "") {
   const bool is_msg_type_correct =
       (am::MessageType::kResponse) ==
-      static_cast<uint32_t>(
+      static_cast<int32_t>(
           (*arg)[am::strings::params][am::strings::message_type].asInt());
   const bool is_success_correct =
       success == (*arg)[am::strings::msg_params][am::strings::success].asBool();
   const bool is_result_code_correct =
       result ==
-      static_cast<uint32_t>(
+      static_cast<int32_t>(
           (*arg)[am::strings::msg_params][am::strings::result_code].asInt());
 
   using namespace helpers;

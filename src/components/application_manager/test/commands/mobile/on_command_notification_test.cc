@@ -36,6 +36,7 @@
 #include "gtest/gtest.h"
 #include "utils/shared_ptr.h"
 #include "smart_objects/smart_object.h"
+#include "application_manager/mock_message_helper.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/commands/commands_test.h"
 #include "application_manager/commands/command_impl.h"
@@ -51,7 +52,9 @@ namespace am = ::application_manager;
 
 using ::testing::_;
 using ::testing::Return;
+using ::testing::Mock;
 
+using am::MockMessageHelper;
 using am::commands::MessageSharedPtr;
 using am::commands::OnCommandNotification;
 
@@ -63,7 +66,30 @@ const uint32_t kCommandId = 5u;
 }  // namespace
 
 class OnCommandNotificationTest
-    : public CommandsTest<CommandsTestMocks::kNotNice> {};
+    : public CommandsTest<CommandsTestMocks::kNotNice> {
+ public:
+  OnCommandNotificationTest()
+      : message_helper_(*MockMessageHelper::message_helper_mock()) {
+    const uint32_t timeout = kDefaultTimeout_;
+    ON_CALL(mock_app_manager_, get_settings())
+        .WillByDefault(ReturnRef(mock_application_manager_settings_));
+    ON_CALL(mock_app_manager_settings_, default_timeout())
+        .WillByDefault(ReturnRef(timeout));
+
+    Mock::VerifyAndClearExpectations(&message_helper_);
+
+    EXPECT_CALL(mock_app_manager_settings_, default_timeout());
+    EXPECT_CALL(mock_app_manager_, get_settings());
+  }
+
+  ~OnCommandNotificationTest() {
+    Mock::VerifyAndClearExpectations(&message_helper_);
+  }
+
+ protected:
+  MockApplicationManagerSettings mock_application_manager_settings_;
+  MockMessageHelper& message_helper_;
+};
 
 TEST_F(OnCommandNotificationTest, Run_AppNotRegistered_UNSUCCESS) {
   CommandPtr command(CreateCommand<OnCommandNotification>());
@@ -122,6 +148,8 @@ TEST_F(OnCommandNotificationTest, Run_SUCCESS) {
   MockAppPtr mock_app(CreateMockApp());
   EXPECT_CALL(mock_app_manager_, application(kAppId))
       .WillOnce(Return(mock_app));
+  EXPECT_CALL(*mock_app, app_id()).WillOnce(Return(0u));
+  EXPECT_CALL(message_helper_, PrintSmartObject(_)).WillOnce(Return(false));
 
   MessageSharedPtr dummy_msg(CreateMessage());
   EXPECT_CALL(*mock_app, FindCommand(kCommandId))

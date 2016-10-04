@@ -54,6 +54,7 @@ using namespace application_manager;
 using ::testing::Return;
 using ::testing::ReturnNull;
 using ::testing::ReturnPointee;
+using ::testing::Mock;
 using ::testing::_;
 
 namespace {
@@ -70,6 +71,12 @@ class PerformInteractionRequestTest
   PerformInteractionRequestTest()
       : message_(utils::MakeShared<SmartObject>(::smart_objects::SmartType_Map))
       , kMsgParams_((*message_)[strings::msg_params]) {}
+
+  ~PerformInteractionRequestTest() {
+    // Fix DataAccessor release and WinQt crash
+    Mock::VerifyAndClearExpectations(mock_application_sptr_.get());
+  }
+
   void SetUp() OVERRIDE {
     command_sptr_ =
         CreateCommand<commands::PerformInteractionRequest>(message_);

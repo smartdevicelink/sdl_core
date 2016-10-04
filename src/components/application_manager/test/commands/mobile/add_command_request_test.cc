@@ -67,6 +67,7 @@ using am::MockMessageHelper;
 using ::testing::_;
 using ::utils::SharedPtr;
 using ::testing::Return;
+using ::testing::Mock;
 using am::commands::AddCommandRequest;
 using ::test::components::application_manager_test::MockApplication;
 using usage_statistics_test::MockStatisticsManager;
@@ -87,8 +88,16 @@ const uint32_t kConnectionKey = 2u;
 
 class AddCommandRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
- public:
-  sync_primitives::Lock lock_;
+ protected:
+  AddCommandRequestTest() {
+    mock_app_ = CreateMockApp();
+  }
+
+  ~AddCommandRequestTest() {
+    // Fix DataAccessor release and WinQt crash
+    Mock::VerifyAndClearExpectations(mock_app_.get());
+  }
+
   MessageSharedPtr CreateFullParamsUISO() {
     MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
     (*msg)[strings::params][strings::connection_key] = kConnectionKey;
@@ -125,6 +134,9 @@ class AddCommandRequestTest
 
     return msg;
   }
+
+  sync_primitives::Lock lock_;
+  MockAppPtr mock_app_;
 };
 
 TEST_F(AddCommandRequestTest, GetRunMethods_SUCCESS) {
@@ -134,9 +146,8 @@ TEST_F(AddCommandRequestTest, GetRunMethods_SUCCESS) {
   utils::SharedPtr<AddCommandRequest> req =
       CreateCommand<AddCommandRequest>(msg);
 
-  MockAppPtr mock_app = CreateMockApp();
   ON_CALL(mock_app_manager_, application(kConnectionKey))
-      .WillByDefault(Return(mock_app));
+      .WillByDefault(Return(mock_app_));
 
   MockMessageHelper* mock_message_helper =
       MockMessageHelper::message_helper_mock();
@@ -144,13 +155,13 @@ TEST_F(AddCommandRequestTest, GetRunMethods_SUCCESS) {
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
 
   smart_objects::SmartObject* ptr = NULL;
-  EXPECT_CALL(*mock_app, FindCommand(kCmdId)).WillOnce(Return(ptr));
+  EXPECT_CALL(*mock_app_, FindCommand(kCmdId)).WillOnce(Return(ptr));
   EXPECT_EQ(NULL, ptr);
-  EXPECT_CALL(*mock_app, AddCommand(kCmdId, (*msg)[strings::msg_params]));
+  EXPECT_CALL(*mock_app_, AddCommand(kCmdId, (*msg)[strings::msg_params]));
 
   am::CommandsMap commands_map;
-  ON_CALL(*mock_app, commands_map())
-      .WillByDefault(Return(
+  EXPECT_CALL(*mock_app_, commands_map())
+      .WillRepeatedly(Return(
           DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
 
   MessageSharedPtr ui_command_result;
@@ -174,10 +185,9 @@ TEST_F(AddCommandRequestTest, OnEvent_UI_SUCCESS) {
   (*msg_ui)[strings::params][hmi_response::code] =
       hmi_apis::Common_Result::SUCCESS;
 
-  MockAppPtr mock_app = CreateMockApp();
   ON_CALL(mock_app_manager_, application(kConnectionKey))
-      .WillByDefault(Return(mock_app));
-  ON_CALL(*mock_app, app_id()).WillByDefault(Return(1));
+      .WillByDefault(Return(mock_app_));
+  ON_CALL(*mock_app_, app_id()).WillByDefault(Return(1));
 
   MockMessageHelper* mock_message_helper =
       MockMessageHelper::message_helper_mock();
@@ -185,14 +195,14 @@ TEST_F(AddCommandRequestTest, OnEvent_UI_SUCCESS) {
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
 
   smart_objects::SmartObject* ptr = NULL;
-  ON_CALL(*mock_app, FindCommand(kCmdId)).WillByDefault(Return(ptr));
+  ON_CALL(*mock_app_, FindCommand(kCmdId)).WillByDefault(Return(ptr));
   EXPECT_EQ(NULL, ptr);
 
-  EXPECT_CALL(*mock_app, AddCommand(kCmdId, (*msg_ui)[strings::msg_params]));
+  EXPECT_CALL(*mock_app_, AddCommand(kCmdId, (*msg_ui)[strings::msg_params]));
 
   am::CommandsMap commands_map;
-  ON_CALL(*mock_app, commands_map())
-      .WillByDefault(
+  EXPECT_CALL(*mock_app_, commands_map())
+      .WillRepeatedly(
           Return(DataAccessor<am::CommandsMap>(commands_map, lock_)));
 
   am::event_engine::Event event(hmi_apis::FunctionID::UI_AddCommand);
@@ -209,14 +219,14 @@ TEST_F(AddCommandRequestTest, OnEvent_UI_SUCCESS) {
   ASSERT_TRUE(ui_command_result);
 
   ON_CALL(mock_app_manager_, application(kConnectionKey))
-      .WillByDefault(Return(mock_app));
-  ON_CALL(*mock_app, app_id()).WillByDefault(Return(1));
+      .WillByDefault(Return(mock_app_));
+  ON_CALL(*mock_app_, app_id()).WillByDefault(Return(1));
 
   EXPECT_CALL(*mock_message_helper,
               HMIToMobileResult(hmi_apis::Common_Result::SUCCESS))
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
 
-  EXPECT_CALL(*mock_app, UpdateHash());
+  EXPECT_CALL(*mock_app_, UpdateHash());
 
   req_ui->on_event(event);
 }
@@ -227,10 +237,9 @@ TEST_F(AddCommandRequestTest, OnEvent_VR_SUCCESS) {
   utils::SharedPtr<AddCommandRequest> req_vr =
       CreateCommand<AddCommandRequest>(msg_vr);
 
-  MockAppPtr mock_app = CreateMockApp();
   ON_CALL(mock_app_manager_, application(kConnectionKey))
-      .WillByDefault(Return(mock_app));
-  ON_CALL(*mock_app, app_id()).WillByDefault(Return(1));
+      .WillByDefault(Return(mock_app_));
+  ON_CALL(*mock_app_, app_id()).WillByDefault(Return(1));
 
   MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
   (*msg)[strings::params][hmi_response::code] =
@@ -241,7 +250,7 @@ TEST_F(AddCommandRequestTest, OnEvent_VR_SUCCESS) {
   event.set_smart_object(*msg);
 
   smart_objects::SmartObject* ptr = NULL;
-  ON_CALL(*mock_app, FindCommand(kCmdId)).WillByDefault(Return(ptr));
+  ON_CALL(*mock_app_, FindCommand(kCmdId)).WillByDefault(Return(ptr));
   EXPECT_EQ(NULL, ptr);
 
   MockMessageHelper* mock_message_helper =
@@ -250,14 +259,14 @@ TEST_F(AddCommandRequestTest, OnEvent_VR_SUCCESS) {
               HMIToMobileResult(hmi_apis::Common_Result::SUCCESS))
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
 
-  EXPECT_CALL(*mock_app, AddCommand(kCmdId, (*msg_vr)[strings::msg_params]));
+  EXPECT_CALL(*mock_app_, AddCommand(kCmdId, (*msg_vr)[strings::msg_params]));
 
   am::CommandsMap commands_map;
-  ON_CALL(*mock_app, commands_map())
-      .WillByDefault(
+  EXPECT_CALL(*mock_app_, commands_map())
+      .WillRepeatedly(
           Return(DataAccessor<am::CommandsMap>(commands_map, lock_)));
 
-  EXPECT_CALL(*mock_app, UpdateHash());
+  EXPECT_CALL(*mock_app_, UpdateHash());
 
   MessageSharedPtr vr_command_result;
   {
@@ -306,12 +315,11 @@ TEST_F(AddCommandRequestTest, OnEvent_BothSend_SUCCESS) {
   am::event_engine::Event event_vr(hmi_apis::FunctionID::VR_AddCommand);
   event_vr.set_smart_object(*msg1);
 
-  MockAppPtr mock_app = CreateMockApp();
   ON_CALL(mock_app_manager_, application(kConnectionKey))
-      .WillByDefault(Return(mock_app));
-  ON_CALL(*mock_app, app_id()).WillByDefault(Return(1));
+      .WillByDefault(Return(mock_app_));
+  ON_CALL(*mock_app_, app_id()).WillByDefault(Return(1));
 
-  EXPECT_CALL(*mock_app, RemoveCommand(kCommandId)).Times(0);
+  EXPECT_CALL(*mock_app_, RemoveCommand(kCommandId)).Times(0);
 
   req_ui->Run();
   req_ui->on_event(event_ui);
@@ -324,8 +332,7 @@ TEST_F(AddCommandRequestTest, OnEvent_UnknownEvent_UNSUCCESS) {
   utils::SharedPtr<AddCommandRequest> request =
       CreateCommand<AddCommandRequest>(msg);
 
-  MockAppPtr mock_app = CreateMockApp();
-  ON_CALL(mock_app_manager_, application(_)).WillByDefault(Return(mock_app));
+  ON_CALL(mock_app_manager_, application(_)).WillByDefault(Return(mock_app_));
 
   EXPECT_CALL(mock_app_manager_, ManageMobileCommand(_, _)).Times(0);
 

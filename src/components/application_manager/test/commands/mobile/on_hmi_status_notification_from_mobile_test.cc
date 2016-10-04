@@ -61,6 +61,12 @@ using testing::_;
 class OnHMIStatusNotificationFromMobileTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {
  public:
+  ~OnHMIStatusNotificationFromMobileTest() {
+    // Fix DataAccessor release and WinQt crash
+    Mock::VerifyAndClearExpectations(&mock_app_manager_);
+  }
+
+ protected:
   MessageSharedPtr CreateMsgParams(
       const mobile_apis::HMILevel::eType kHMIState) {
     MessageSharedPtr msg = CreateMessage();

@@ -57,6 +57,7 @@ namespace am = ::application_manager;
 using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
+using ::testing::Mock;
 
 using am::commands::MessageSharedPtr;
 using am::commands::OnVehicleDataNotification;
@@ -73,8 +74,15 @@ class OnVehicleDataNotificationTest
   OnVehicleDataNotificationTest()
       : mock_message_helper_(*am::MockMessageHelper::message_helper_mock())
       , command_msg_(CreateMessage(smart_objects::SmartType_Map))
-      , command_(CreateCommand<OnVehicleDataNotification>(command_msg_)) {}
+      , command_(CreateCommand<OnVehicleDataNotification>(command_msg_)) {
+    Mock::VerifyAndClearExpectations(&mock_message_helper_);
+  }
 
+  ~OnVehicleDataNotificationTest() {
+    Mock::VerifyAndClearExpectations(&mock_message_helper_);
+  }
+
+ protected:
   am::MockMessageHelper& mock_message_helper_;
   MessageSharedPtr command_msg_;
   NotificationPtr command_;
@@ -139,6 +147,9 @@ TEST_F(OnVehicleDataNotificationTest,
   EXPECT_CALL(mock_app_manager_,
               SendMessageToMobile(
                   CheckMessageData(am::strings::fuel_level, fuel_level), _));
+
+  EXPECT_CALL(mock_message_helper_, PrintSmartObject(_))
+      .WillOnce(Return(false));
 
   command_->Run();
 }

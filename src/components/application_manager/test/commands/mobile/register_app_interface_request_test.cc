@@ -65,6 +65,7 @@ using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::DoAll;
+using ::testing::Mock;
 
 namespace am = ::application_manager;
 
@@ -91,7 +92,16 @@ class RegisterAppInterfaceRequestTest
       : msg_(CreateMessage())
       , command_(CreateCommand<RegisterAppInterfaceRequest>(msg_))
       , app_name_("test_app_name_")
-      , mock_message_helper_(*am::MockMessageHelper::message_helper_mock()) {}
+      , data_accessor_(app_set_, lock_)
+      , mock_message_helper_(*am::MockMessageHelper::message_helper_mock()) {
+    Mock::VerifyAndClearExpectations(&mock_message_helper_);
+  }
+
+  ~RegisterAppInterfaceRequestTest() {
+    // Fix DataAccessor release and WinQt crash
+    Mock::VerifyAndClearExpectations(&mock_app_manager_);
+    Mock::VerifyAndClearExpectations(&mock_message_helper_);
+  }
 
   void InitBasicMessage() {
     (*msg_)[am::strings::params][am::strings::connection_key] = kConnectionKey;
@@ -153,6 +163,7 @@ class RegisterAppInterfaceRequestTest
   const utils::custom_string::CustomString app_name_;
   sync_primitives::Lock lock_;
   am::ApplicationSet app_set_;
+  DataAccessor<am::ApplicationSet> data_accessor_;
 
   typedef IsNiceMock<policy_test::MockPolicyHandlerInterface,
                      kMocksAreNice>::Result MockPolicyHandlerInterface;
@@ -190,8 +201,8 @@ TEST_F(RegisterAppInterfaceRequestTest, Run_MinimalData_SUCCESS) {
       .WillOnce(Return(ApplicationSharedPtr()))
       .WillRepeatedly(Return(mock_app));
 
-  ON_CALL(mock_app_manager_, applications())
-      .WillByDefault(Return(DataAccessor<am::ApplicationSet>(app_set_, lock_)));
+  EXPECT_CALL(mock_app_manager_, applications())
+      .WillRepeatedly(Return(data_accessor_));
   ON_CALL(mock_policy_handler_, PolicyEnabled()).WillByDefault(Return(true));
   ON_CALL(mock_policy_handler_, GetInitialAppData(kAppId, _, _))
       .WillByDefault(Return(true));
@@ -237,8 +248,8 @@ TEST_F(RegisterAppInterfaceRequestTest, DISABLED_Run_AppHmiTypes_SUCCESS) {
       .WillOnce(Return(ApplicationSharedPtr()))
       .WillRepeatedly(Return(mock_app));
 
-  ON_CALL(mock_app_manager_, applications())
-      .WillByDefault(Return(DataAccessor<am::ApplicationSet>(app_set_, lock_)));
+  EXPECT_CALL(mock_app_manager_, applications())
+      .WillRepeatedly(Return(data_accessor_));
   ON_CALL(mock_policy_handler_, PolicyEnabled()).WillByDefault(Return(true));
   ON_CALL(mock_policy_handler_, GetInitialAppData(kAppId, _, _))
       .WillByDefault(DoAll(SetHmiType(app_hmi_type_str), Return(true)));

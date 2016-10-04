@@ -87,6 +87,11 @@ class DeleteInteractionChoiceSetRequestTest
   DeleteInteractionChoiceSetRequestTest()
       : accessor_(choice_set_map_, performinteraction_choice_set_lock_) {}
 
+  ~DeleteInteractionChoiceSetRequestTest() {
+    // Fix DataAccessor release and WinQt crash
+    Mock::VerifyAndClearExpectations(&mock_app_manager_);
+  }
+
   am::PerformChoiceSetMap choice_set_map_;
   mutable sync_primitives::Lock performinteraction_choice_set_lock_;
   DataAccessor<am::PerformChoiceSetMap> accessor_;
@@ -97,6 +102,7 @@ class DeleteInteractionChoiceSetRequestTest
     command_ = CreateCommand<DeleteInteractionChoiceSetRequest>(message_);
     app_ = CreateMockApp();
   }
+
   DeleteInteractionChoiceSetRequestPtr command_;
   MessageSharedPtr message_;
   MockAppPtr app_;

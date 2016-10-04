@@ -60,6 +60,7 @@ namespace change_registration {
 using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
+using ::testing::Mock;
 
 namespace am = ::application_manager;
 
@@ -96,6 +97,11 @@ class ChangeRegistrationRequestTest
  public:
   ChangeRegistrationRequestTest()
       : applications_(application_set_, applications_lock_) {}
+
+  ~ChangeRegistrationRequestTest() {
+    // Fix DataAccessor release and WinQt crash
+    Mock::VerifyAndClearExpectations(&mock_app_manager_);
+  }
 
   void CreateDefaultMessage(MessageSharedPtr message) {
     (*message)[am::strings::msg_params][am::strings::app_name] = kAppName1;
