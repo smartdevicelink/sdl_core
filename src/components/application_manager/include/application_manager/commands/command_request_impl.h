@@ -48,6 +48,21 @@ namespace application_manager {
 namespace commands {
 
 struct ResponseInfo {
+  ResponseInfo()
+      : result_code(hmi_apis::Common_Result::INVALID_ENUM)
+      , interface(HmiInterfaces::HMI_INTERFACE_INVALID_ENUM)
+      , interface_state(HmiInterfaces::STATE_NOT_RESPONSE)
+      , is_ok(false)
+      , is_unsupported_resource(false)
+      , is_invalid_enum(false) {}
+  ResponseInfo(hmi_apis::Common_Result::eType result,
+               HmiInterfaces::InterfaceID interface)
+      : result_code(result)
+      , interface(interface)
+      , interface_state(HmiInterfaces::STATE_NOT_RESPONSE)
+      , is_ok(false)
+      , is_unsupported_resource(false)
+      , is_invalid_enum(false) {}
   hmi_apis::Common_Result::eType result_code;
   HmiInterfaces::InterfaceID interface;
   HmiInterfaces::InterfaceState interface_state;
@@ -206,21 +221,21 @@ class CommandRequestImpl : public CommandImpl,
    * @return true if result code complies successful result code
    * otherwise returns false
    */
-  bool PrepareResultForMobileResponse(ResponseInfo& first,
-                                      ResponseInfo& second) const;
+  bool PrepareResultForMobileResponse(ResponseInfo& out_first,
+                                      ResponseInfo& out_second) const;
   /**
    * @brief If message from HMI contains returns this info
    * or process result code from HMI and checks state of interface
    * and create info.
    * @param interface contains interface for which HMI sent response
    * @param result_code contains result code from HMI
-   * @param info contain info for sending to application
    * @param response_from_hmi contains response from HMI
+   * @param out_info contain info for sending to application
    */
   void GetInfo(HmiInterfaces::InterfaceID interface,
                hmi_apis::Common_Result::eType result_code,
-               std::string& info,
-               const smart_objects::SmartObject& response_from_hmi);
+               const smart_objects::SmartObject& response_from_hmi,
+               std::string& out_info);
 
   /**
    * @brief Prepare result code for sending to mobile application

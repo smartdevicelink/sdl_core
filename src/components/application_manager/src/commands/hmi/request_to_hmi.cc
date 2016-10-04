@@ -46,17 +46,17 @@ bool CheckAvailabilityHMIInterfaces(ApplicationManager& application_manager,
 bool ChangeInterfaceState(ApplicationManager& application_manager,
                           const smart_objects::SmartObject& response_from_hmi,
                           HmiInterfaces::InterfaceID interface) {
-  bool is_available = false;
   if (response_from_hmi[strings::msg_params].keyExists(strings::available)) {
-    is_available =
+    const bool is_available =
         response_from_hmi[strings::msg_params][strings::available].asBool();
     const HmiInterfaces::InterfaceState interface_state =
         is_available ? HmiInterfaces::STATE_AVAILABLE
                      : HmiInterfaces::STATE_NOT_AVAILABLE;
     application_manager.hmi_interfaces().SetInterfaceState(interface,
                                                            interface_state);
+    return is_available;
   }
-  return is_available;
+  return false;
 }
 
 RequestToHMI::RequestToHMI(const MessageSharedPtr& message,

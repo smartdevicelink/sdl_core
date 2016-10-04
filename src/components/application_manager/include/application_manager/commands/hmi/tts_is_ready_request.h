@@ -56,22 +56,22 @@ class TTSIsReadyRequest : public RequestToHMI,
   /**
    * @brief TTSIsReadyRequest class destructor
    **/
-  virtual ~TTSIsReadyRequest();
+  ~TTSIsReadyRequest() OVERRIDE;
 
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
   /**
    * @brief On event callback
    **/
-  virtual void on_event(const event_engine::Event& event);
+  void on_event(const event_engine::Event& event) OVERRIDE;
 
   /**
    * @brief onTimeOut from requrst Controller
    */
-  virtual void onTimeOut();
+  void onTimeOut() OVERRIDE;
 
   /**
    * @brief Send request to HMI for fetching of cappabilities

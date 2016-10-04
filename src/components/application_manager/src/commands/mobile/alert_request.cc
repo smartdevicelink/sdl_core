@@ -167,8 +167,8 @@ void AlertRequest::on_event(const event_engine::Event& event) {
       alert_response_params_ = message[strings::msg_params];
       GetInfo(HmiInterfaces::HMI_INTERFACE_UI,
               alert_result_,
-              ui_response_info_,
-              message);
+              message,
+              ui_response_info_);
       break;
     }
     case hmi_apis::FunctionID::TTS_Speak: {
@@ -180,8 +180,8 @@ void AlertRequest::on_event(const event_engine::Event& event) {
           message[strings::params][hmi_response::code].asInt());
       GetInfo(HmiInterfaces::HMI_INTERFACE_TTS,
               tts_speak_result_,
-              tts_response_info_,
-              message);
+              message,
+              tts_response_info_);
       break;
     }
     case hmi_apis::FunctionID::TTS_StopSpeaking: {
@@ -211,18 +211,9 @@ void AlertRequest::on_event(const event_engine::Event& event) {
 
 bool AlertRequest::PrepareResponseParameters(
     mobile_apis::Result::eType& result_code, std::string& info) {
-  ResponseInfo ui_alert_info{alert_result_,
-                             HmiInterfaces::HMI_INTERFACE_UI,
-                             HmiInterfaces::STATE_NOT_RESPONSE,
-                             false,
-                             false,
-                             false};
-  ResponseInfo tts_alert_info{tts_speak_result_,
-                              HmiInterfaces::HMI_INTERFACE_TTS,
-                              HmiInterfaces::STATE_NOT_RESPONSE,
-                              false,
-                              false,
-                              false};
+  ResponseInfo ui_alert_info(alert_result_, HmiInterfaces::HMI_INTERFACE_UI);
+  ResponseInfo tts_alert_info(tts_speak_result_,
+                              HmiInterfaces::HMI_INTERFACE_TTS);
 
   bool result = PrepareResultForMobileResponse(ui_alert_info, tts_alert_info);
 

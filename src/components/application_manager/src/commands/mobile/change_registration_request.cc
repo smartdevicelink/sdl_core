@@ -174,8 +174,8 @@ void ChangeRegistrationRequest::on_event(const event_engine::Event& event) {
           message[strings::params][hmi_response::code].asInt());
       GetInfo(HmiInterfaces::HMI_INTERFACE_UI,
               ui_result_,
-              ui_response_info_,
-              message);
+              message,
+              ui_response_info_);
       break;
     }
     case hmi_apis::FunctionID::VR_ChangeRegistration: {
@@ -185,8 +185,8 @@ void ChangeRegistrationRequest::on_event(const event_engine::Event& event) {
           message[strings::params][hmi_response::code].asInt());
       GetInfo(HmiInterfaces::HMI_INTERFACE_VR,
               vr_result_,
-              vr_response_info_,
-              message);
+              message,
+              vr_response_info_);
       break;
     }
     case hmi_apis::FunctionID::TTS_ChangeRegistration: {
@@ -196,8 +196,8 @@ void ChangeRegistrationRequest::on_event(const event_engine::Event& event) {
           message[strings::params][hmi_response::code].asInt());
       GetInfo(HmiInterfaces::HMI_INTERFACE_TTS,
               tts_result_,
-              tts_response_info_,
-              message);
+              message,
+              tts_response_info_);
       break;
     }
     default: {

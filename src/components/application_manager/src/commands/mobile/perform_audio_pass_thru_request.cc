@@ -123,7 +123,7 @@ void PerformAudioPassThruRequest::on_event(const event_engine::Event& event) {
 
       result_ui_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asUInt());
-      GetInfo(HmiInterfaces::HMI_INTERFACE_UI, result_ui_, ui_info_, message);
+      GetInfo(HmiInterfaces::HMI_INTERFACE_UI, result_ui_, message, ui_info_);
 
       // in case perform audio is started by other request skip stopping
       if (hmi_apis::Common_Result::REJECTED == result_ui_) {
@@ -143,8 +143,8 @@ void PerformAudioPassThruRequest::on_event(const event_engine::Event& event) {
           message[strings::params][hmi_response::code].asUInt());
       GetInfo(HmiInterfaces::HMI_INTERFACE_TTS,
               result_tts_speak_,
-              tts_info_,
-              message);
+              message,
+              tts_info_);
       awaiting_tts_speak_response_ = false;
       const bool is_tts_speak_success_unsuported =
           Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
@@ -196,20 +196,10 @@ bool PerformAudioPassThruRequest::PrepareResponseParameters(
     mobile_apis::Result::eType& result_code, std::string& info) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ResponseInfo ui_perform_info{result_ui_,
-                               HmiInterfaces::HMI_INTERFACE_UI,
-                               HmiInterfaces::STATE_NOT_RESPONSE,
-                               false,
-                               false,
-                               false};
-  ResponseInfo tts_perform_info{result_tts_speak_,
-                                HmiInterfaces::HMI_INTERFACE_TTS,
-                                HmiInterfaces::STATE_NOT_RESPONSE,
-                                false,
-                                false,
-                                false};
-
-  bool result =
+  ResponseInfo ui_perform_info(result_ui_, HmiInterfaces::HMI_INTERFACE_UI);
+  ResponseInfo tts_perform_info(result_tts_speak_,
+                                HmiInterfaces::HMI_INTERFACE_TTS);
+  const bool result =
       PrepareResultForMobileResponse(ui_perform_info, tts_perform_info);
 
   if (ui_perform_info.is_ok && tts_perform_info.is_unsupported_resource &&

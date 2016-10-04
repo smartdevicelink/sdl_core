@@ -234,8 +234,8 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
           message[strings::params][hmi_response::code].asInt());
       GetInfo(HmiInterfaces::HMI_INTERFACE_UI,
               ui_result_,
-              ui_response_info_,
-              message);
+              message,
+              ui_response_info_);
       break;
     }
     case hmi_apis::FunctionID::TTS_SetGlobalProperties: {
@@ -245,8 +245,8 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
           message[strings::params][hmi_response::code].asInt());
       GetInfo(HmiInterfaces::HMI_INTERFACE_TTS,
               tts_result_,
-              tts_response_info_,
-              message);
+              message,
+              tts_response_info_);
       break;
     }
     default: {
@@ -287,20 +287,11 @@ bool SetGlobalPropertiesRequest::PrepareResponseParameters(
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace helpers;
 
-  ResponseInfo ui_properties_info{ui_result_,
-                                  HmiInterfaces::HMI_INTERFACE_UI,
-                                  HmiInterfaces::STATE_NOT_RESPONSE,
-                                  false,
-                                  false,
-                                  false};
-  ResponseInfo tts_properties_info{tts_result_,
-                                   HmiInterfaces::HMI_INTERFACE_TTS,
-                                   HmiInterfaces::STATE_NOT_RESPONSE,
-                                   false,
-                                   false,
-                                   false};
+  ResponseInfo ui_properties_info(ui_result_, HmiInterfaces::HMI_INTERFACE_UI);
 
-  bool result =
+  ResponseInfo tts_properties_info(tts_result_,
+                                   HmiInterfaces::HMI_INTERFACE_TTS);
+  const bool result =
       PrepareResultForMobileResponse(ui_properties_info, tts_properties_info);
   if (result &&
       (HmiInterfaces::STATE_AVAILABLE == tts_properties_info.interface_state) &&

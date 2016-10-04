@@ -231,7 +231,7 @@ void PerformInteractionRequest::on_event(const event_engine::Event& event) {
       ui_result_code_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asUInt());
       GetInfo(
-          HmiInterfaces::HMI_INTERFACE_UI, ui_result_code_, ui_info_, message);
+          HmiInterfaces::HMI_INTERFACE_UI, ui_result_code_, message, ui_info_);
       if (ProcessUIResponse(event.smart_object(), msg_param)) {
         return;
       }
@@ -244,7 +244,7 @@ void PerformInteractionRequest::on_event(const event_engine::Event& event) {
       vr_result_code_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asUInt());
       GetInfo(
-          HmiInterfaces::HMI_INTERFACE_VR, vr_result_code_, vr_info_, message);
+          HmiInterfaces::HMI_INTERFACE_VR, vr_result_code_, message, vr_info_);
       if (ProcessVRResponse(event.smart_object(), msg_param)) {
         return;
       }
@@ -937,19 +937,10 @@ void PerformInteractionRequest::SendBothModeResponse(
   LOG4CXX_AUTO_TRACE(logger_);
   mobile_apis::Result::eType perform_interaction_result_code =
       mobile_apis::Result::INVALID_ENUM;
-  ResponseInfo ui_perform_info{ui_result_code_,
-                               HmiInterfaces::HMI_INTERFACE_UI,
-                               HmiInterfaces::STATE_NOT_RESPONSE,
-                               false,
-                               false,
-                               false};
-  ResponseInfo vr_perform_info{vr_result_code_,
-                               HmiInterfaces::HMI_INTERFACE_VR,
-                               HmiInterfaces::STATE_NOT_RESPONSE,
-                               false,
-                               false,
-                               false};
-
+  ResponseInfo ui_perform_info(ui_result_code_,
+                               HmiInterfaces::HMI_INTERFACE_UI);
+  ResponseInfo vr_perform_info(vr_result_code_,
+                               HmiInterfaces::HMI_INTERFACE_VR);
   const bool result =
       PrepareResultForMobileResponse(ui_perform_info, vr_perform_info);
   perform_interaction_result_code =

@@ -235,8 +235,8 @@ void ShowRequest::on_event(const event_engine::Event& event) {
           result_code, HmiInterfaces::HMI_INTERFACE_UI);
       GetInfo(HmiInterfaces::InterfaceID::HMI_INTERFACE_UI,
               result_code,
-              response_info,
-              message);
+              message,
+              response_info);
       if (hmi_apis::Common_Result::WARNINGS == result_code &&
           message[strings::params].keyExists(hmi_response::message)) {
         response_info =

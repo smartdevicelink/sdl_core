@@ -76,7 +76,7 @@ void SetDisplayLayoutRequest::on_event(const event_engine::Event& event) {
       const bool response_success = PrepareResultForMobileResponse(
           result_code, HmiInterfaces::HMI_INTERFACE_UI);
       std::string info;
-      GetInfo(HmiInterfaces::HMI_INTERFACE_UI, result_code, info, message);
+      GetInfo(HmiInterfaces::HMI_INTERFACE_UI, result_code, message, info);
       smart_objects::SmartObject msg_params = message[strings::msg_params];
       if (response_success) {
         HMICapabilities& hmi_capabilities =
