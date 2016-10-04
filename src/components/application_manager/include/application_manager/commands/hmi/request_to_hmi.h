@@ -60,7 +60,6 @@ bool ChangeInterfaceState(ApplicationManager& application_manager,
                           const smart_objects::SmartObject& response_from_hmi,
                           HmiInterfaces::InterfaceID interface);
 
-
 class RequestToHMI : public CommandImpl {
  public:
   RequestToHMI(const MessageSharedPtr& message,

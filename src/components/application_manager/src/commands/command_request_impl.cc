@@ -49,45 +49,48 @@ std::string MergeInfos(const std::string& first, const std::string& second) {
 std::string MergeInfos(const std::string& first,
                        const std::string& second,
                        const std::string& third) {
-  std::string result  = MergeInfos(first, second);
+  std::string result = MergeInfos(first, second);
   return MergeInfos(result, third);
 }
 
-const std::string CreateInfoForUnsupportedResult(HmiInterfaces::InterfaceID interface) {
-    switch (interface) {
-    case(HmiInterfaces::InterfaceID::HMI_INTERFACE_VR):{
-        return "VR is not supported by system";
-    } case(HmiInterfaces::InterfaceID::HMI_INTERFACE_TTS): {
-        return "TTS is not supported by system";
-    } case(HmiInterfaces::InterfaceID::HMI_INTERFACE_UI): {
-        return "UI is not supported by system";
-    } case(HmiInterfaces::InterfaceID::HMI_INTERFACE_Navigation): {
-        return "Navi is not supported by system";
+const std::string CreateInfoForUnsupportedResult(
+    HmiInterfaces::InterfaceID interface) {
+  switch (interface) {
+    case (HmiInterfaces::InterfaceID::HMI_INTERFACE_VR): {
+      return "VR is not supported by system";
+    }
+    case (HmiInterfaces::InterfaceID::HMI_INTERFACE_TTS): {
+      return "TTS is not supported by system";
+    }
+    case (HmiInterfaces::InterfaceID::HMI_INTERFACE_UI): {
+      return "UI is not supported by system";
+    }
+    case (HmiInterfaces::InterfaceID::HMI_INTERFACE_Navigation): {
+      return "Navi is not supported by system";
     }
     default:
-    return "";
-    }
+      return "";
+  }
 }
 
-bool CheckResultCode(const ResponseInfo& first,
-                     const ResponseInfo& second) {
-    if (first.is_ok && second.is_unsupported_resource) {
-        return true;
-    }
-    if (first.is_invalid_enum && second.is_unsupported_resource &&
-            HmiInterfaces::STATE_NOT_AVAILABLE != second.interface_state) {
-        return true;
-    }
-    return false;
+bool CheckResultCode(const ResponseInfo& first, const ResponseInfo& second) {
+  if (first.is_ok && second.is_unsupported_resource) {
+    return true;
+  }
+  if (first.is_invalid_enum && second.is_unsupported_resource &&
+      HmiInterfaces::STATE_NOT_AVAILABLE != second.interface_state) {
+    return true;
+  }
+  return false;
 }
 
 bool IsResultCodeUnsupported(const ResponseInfo& first,
                              const ResponseInfo& second) {
-    return ((first.is_ok || first.is_invalid_enum) &&
-             second.is_unsupported_resource) ||
-            ((second.is_ok || second.is_invalid_enum) &&
-             first.is_unsupported_resource) ||
-           (first.is_unsupported_resource && second.is_unsupported_resource);
+  return ((first.is_ok || first.is_invalid_enum) &&
+          second.is_unsupported_resource) ||
+         ((second.is_ok || second.is_invalid_enum) &&
+          first.is_unsupported_resource) ||
+         (first.is_unsupported_resource && second.is_unsupported_resource);
 }
 
 struct DisallowedParamsInserter {
@@ -114,8 +117,6 @@ struct DisallowedParamsInserter {
   smart_objects::SmartObject& response_;
   mobile_apis::VehicleDataResultCode::eType code_;
 };
-
-
 
 CommandRequestImpl::CommandRequestImpl(const MessageSharedPtr& message,
                                        ApplicationManager& application_manager)
@@ -641,118 +642,115 @@ bool CommandRequestImpl::HasDisallowedParams() const {
 }
 
 bool CommandRequestImpl::PrepareResultForMobileResponse(
-        hmi_apis::Common_Result::eType result_code,
-        HmiInterfaces::InterfaceID interface) const {
-    using namespace helpers;
-    bool result = Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
-        result_code,
-        hmi_apis::Common_Result::SUCCESS,
-        hmi_apis::Common_Result::WARNINGS,
-        hmi_apis::Common_Result::WRONG_LANGUAGE,
-        hmi_apis::Common_Result::RETRY,
-        hmi_apis::Common_Result::SAVED);
-    const HmiInterfaces::InterfaceState state =
-        application_manager_.hmi_interfaces().GetInterfaceState(interface);
+    hmi_apis::Common_Result::eType result_code,
+    HmiInterfaces::InterfaceID interface) const {
+  using namespace helpers;
+  bool result = Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
+      result_code,
+      hmi_apis::Common_Result::SUCCESS,
+      hmi_apis::Common_Result::WARNINGS,
+      hmi_apis::Common_Result::WRONG_LANGUAGE,
+      hmi_apis::Common_Result::RETRY,
+      hmi_apis::Common_Result::SAVED);
+  const HmiInterfaces::InterfaceState state =
+      application_manager_.hmi_interfaces().GetInterfaceState(interface);
 
-    result  = result || (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == result_code &&
-                         HmiInterfaces::STATE_NOT_AVAILABLE != state);
-    return result;
+  result =
+      result || (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == result_code &&
+                 HmiInterfaces::STATE_NOT_AVAILABLE != state);
+  return result;
 }
 
 bool CommandRequestImpl::PrepareResultForMobileResponse(
-        ResponseInfo& first,
-        ResponseInfo& second) const {
-    using namespace helpers;
+    ResponseInfo& first, ResponseInfo& second) const {
+  using namespace helpers;
 
-    first.is_ok = Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
-        first.result_code,
-        hmi_apis::Common_Result::SUCCESS,
-        hmi_apis::Common_Result::WARNINGS,
-        hmi_apis::Common_Result::WRONG_LANGUAGE,
-        hmi_apis::Common_Result::RETRY,
-        hmi_apis::Common_Result::SAVED);
+  first.is_ok = Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
+      first.result_code,
+      hmi_apis::Common_Result::SUCCESS,
+      hmi_apis::Common_Result::WARNINGS,
+      hmi_apis::Common_Result::WRONG_LANGUAGE,
+      hmi_apis::Common_Result::RETRY,
+      hmi_apis::Common_Result::SAVED);
 
-    second.is_ok = Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
-        second.result_code,
-        hmi_apis::Common_Result::SUCCESS,
-        hmi_apis::Common_Result::WARNINGS,
-        hmi_apis::Common_Result::WRONG_LANGUAGE,
-        hmi_apis::Common_Result::RETRY,
-        hmi_apis::Common_Result::SAVED);
+  second.is_ok = Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
+      second.result_code,
+      hmi_apis::Common_Result::SUCCESS,
+      hmi_apis::Common_Result::WARNINGS,
+      hmi_apis::Common_Result::WRONG_LANGUAGE,
+      hmi_apis::Common_Result::RETRY,
+      hmi_apis::Common_Result::SAVED);
 
-    first.is_invalid_enum =
-        hmi_apis::Common_Result::INVALID_ENUM == first.result_code;
+  first.is_invalid_enum =
+      hmi_apis::Common_Result::INVALID_ENUM == first.result_code;
 
-    second.is_invalid_enum =
-        hmi_apis::Common_Result::INVALID_ENUM == second.result_code;
+  second.is_invalid_enum =
+      hmi_apis::Common_Result::INVALID_ENUM == second.result_code;
 
-    first.is_unsupported_resource =
-        hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == first.result_code;
+  first.is_unsupported_resource =
+      hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == first.result_code;
 
-    second.is_unsupported_resource =
-        hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == second.result_code;
+  second.is_unsupported_resource =
+      hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == second.result_code;
 
-    first.interface_state = application_manager_.hmi_interfaces().GetInterfaceState(
-            first.interface);
-    second.interface_state = application_manager_.hmi_interfaces().GetInterfaceState(
-            second.interface);
+  first.interface_state =
+      application_manager_.hmi_interfaces().GetInterfaceState(first.interface);
+  second.interface_state =
+      application_manager_.hmi_interfaces().GetInterfaceState(second.interface);
 
-    bool result = (first.is_ok && second.is_ok) ||
-                  (second.is_invalid_enum && first.is_ok) ||
-                  (first. is_invalid_enum && second.is_ok);
-    result = result || CheckResultCode(first, second);
-    result = result || CheckResultCode(second, first);
-    return result;
+  bool result = (first.is_ok && second.is_ok) ||
+                (second.is_invalid_enum && first.is_ok) ||
+                (first.is_invalid_enum && second.is_ok);
+  result = result || CheckResultCode(first, second);
+  result = result || CheckResultCode(second, first);
+  return result;
 }
 
-void CommandRequestImpl::GetInfo(HmiInterfaces::InterfaceID interface,
-                hmi_apis::Common_Result::eType result_code,
-                std::string& info,
-                const smart_objects::SmartObject& response_from_hmi) {
-    if (response_from_hmi[strings::msg_params].keyExists(strings::info)) {
-        info =
-        response_from_hmi[strings::msg_params][strings::info].asString();
-    } else {
-        HmiInterfaces::InterfaceState interface_state =
-                application_manager_.hmi_interfaces().GetInterfaceState(interface);
-        if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == result_code &&
-            HmiInterfaces::InterfaceState::STATE_NOT_RESPONSE == interface_state) {
-            info = CreateInfoForUnsupportedResult(interface);
-        }
+void CommandRequestImpl::GetInfo(
+    HmiInterfaces::InterfaceID interface,
+    hmi_apis::Common_Result::eType result_code,
+    std::string& info,
+    const smart_objects::SmartObject& response_from_hmi) {
+  if (response_from_hmi[strings::msg_params].keyExists(strings::info)) {
+    info = response_from_hmi[strings::msg_params][strings::info].asString();
+  } else {
+    HmiInterfaces::InterfaceState interface_state =
+        application_manager_.hmi_interfaces().GetInterfaceState(interface);
+    if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == result_code &&
+        HmiInterfaces::InterfaceState::STATE_NOT_RESPONSE == interface_state) {
+      info = CreateInfoForUnsupportedResult(interface);
     }
-
- }
+  }
+}
 
 mobile_apis::Result::eType CommandRequestImpl::PrepareResultCodeForResponse(
-    const ResponseInfo& first,
-    const ResponseInfo& second) {
-    mobile_apis::Result::eType result_code = mobile_apis::Result::INVALID_ENUM;
-    if (IsResultCodeUnsupported(first, second)) {
-      result_code = mobile_apis::Result::UNSUPPORTED_RESOURCE;
-    } else {
-        //If response contains erroneous result code SDL need return erroneus result code.
-        hmi_apis::Common_Result::eType first_result =
-                hmi_apis::Common_Result::INVALID_ENUM;
-        hmi_apis::Common_Result::eType second_result =
-                hmi_apis::Common_Result::INVALID_ENUM;
-        if(!first.is_unsupported_resource) {
-            first_result = first.result_code;
-        }
-        if (!second.is_unsupported_resource) {
-            second_result  = second.result_code;
-        }
-        result_code = MessageHelper::HMIToMobileResult(
-                    std::max(first_result, second_result));
+    const ResponseInfo& first, const ResponseInfo& second) {
+  mobile_apis::Result::eType result_code = mobile_apis::Result::INVALID_ENUM;
+  if (IsResultCodeUnsupported(first, second)) {
+    result_code = mobile_apis::Result::UNSUPPORTED_RESOURCE;
+  } else {
+    // If response contains erroneous result code SDL need return erroneus
+    // result code.
+    hmi_apis::Common_Result::eType first_result =
+        hmi_apis::Common_Result::INVALID_ENUM;
+    hmi_apis::Common_Result::eType second_result =
+        hmi_apis::Common_Result::INVALID_ENUM;
+    if (!first.is_unsupported_resource) {
+      first_result = first.result_code;
     }
-    return result_code;
+    if (!second.is_unsupported_resource) {
+      second_result = second.result_code;
+    }
+    result_code =
+        MessageHelper::HMIToMobileResult(std::max(first_result, second_result));
+  }
+  return result_code;
 }
 
 const CommandParametersPermissions& CommandRequestImpl::parameters_permissions()
     const {
   return parameters_permissions_;
 }
-
-
 
 }  // namespace commands
 

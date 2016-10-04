@@ -71,10 +71,10 @@ void SetDisplayLayoutRequest::on_event(const event_engine::Event& event) {
     case hmi_apis::FunctionID::UI_SetDisplayLayout: {
       LOG4CXX_INFO(logger_, "Received UI_SetDisplayLayout event");
       hmi_apis::Common_Result::eType result_code =
-              static_cast<hmi_apis::Common_Result::eType>(
+          static_cast<hmi_apis::Common_Result::eType>(
               message[strings::params][hmi_response::code].asInt());
-      const bool response_success = PrepareResultForMobileResponse(result_code,
-                                                              HmiInterfaces::HMI_INTERFACE_UI);
+      const bool response_success = PrepareResultForMobileResponse(
+          result_code, HmiInterfaces::HMI_INTERFACE_UI);
       std::string info;
       GetInfo(HmiInterfaces::HMI_INTERFACE_UI, result_code, info, message);
       smart_objects::SmartObject msg_params = message[strings::msg_params];
@@ -96,7 +96,7 @@ void SetDisplayLayoutRequest::on_event(const event_engine::Event& event) {
       }
       SendResponse(response_success,
                    MessageHelper::HMIToMobileResult(result_code),
-                   info.empty()?NULL:info.c_str(),
+                   info.empty() ? NULL : info.c_str(),
                    &msg_params);
       break;
     }

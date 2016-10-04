@@ -92,17 +92,16 @@ class ChangeRegistrationRequestTest
     (*msg)[strings::params][strings::connection_key] = kConnectionKey;
     smart_objects::SmartObject msg_params =
         smart_objects::SmartObject(smart_objects::SmartType_Map);
-    msg_params[strings::hmi_display_language] =
-        mobile_apis::Language::EN_US;
-    msg_params[strings::language] =
-        mobile_apis::Language::EN_US;
+    msg_params[strings::hmi_display_language] = mobile_apis::Language::EN_US;
+    msg_params[strings::language] = mobile_apis::Language::EN_US;
     (*msg)[strings::msg_params] = msg_params;
     return msg;
   }
   void PrepareExpectationBeforeRun() {
     ON_CALL(app_mngr_, hmi_capabilities())
         .WillByDefault(ReturnRef(hmi_capabilities_));
-    smart_objects::SmartObject supported_languages(smart_objects::SmartType_Array);
+    smart_objects::SmartObject supported_languages(
+        smart_objects::SmartType_Array);
     supported_languages[0] = static_cast<int32_t>(mobile_apis::Language::EN_US);
     EXPECT_CALL(hmi_capabilities_, ui_supported_languages())
         .WillOnce(Return(&supported_languages));
@@ -112,34 +111,36 @@ class ChangeRegistrationRequestTest
         .WillOnce(Return(&supported_languages));
 
     EXPECT_CALL(app_mngr_, hmi_interfaces())
-          .WillRepeatedly(ReturnRef(hmi_interfaces_));
-    EXPECT_CALL(hmi_interfaces_, GetInterfaceFromFunction(
-                  hmi_apis::FunctionID::UI_ChangeRegistration))
+        .WillRepeatedly(ReturnRef(hmi_interfaces_));
+    EXPECT_CALL(
+        hmi_interfaces_,
+        GetInterfaceFromFunction(hmi_apis::FunctionID::UI_ChangeRegistration))
         .WillOnce(Return(am::HmiInterfaces::HMI_INTERFACE_UI));
-    EXPECT_CALL(hmi_interfaces_, GetInterfaceState(
-                  am::HmiInterfaces::HMI_INTERFACE_UI))
+    EXPECT_CALL(hmi_interfaces_,
+                GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
         .WillOnce(Return(am::HmiInterfaces::STATE_AVAILABLE));
 
-    EXPECT_CALL(hmi_interfaces_, GetInterfaceFromFunction(
-                  hmi_apis::FunctionID::VR_ChangeRegistration))
+    EXPECT_CALL(
+        hmi_interfaces_,
+        GetInterfaceFromFunction(hmi_apis::FunctionID::VR_ChangeRegistration))
         .WillOnce(Return(am::HmiInterfaces::HMI_INTERFACE_VR));
-    EXPECT_CALL(hmi_interfaces_, GetInterfaceState(
-                  am::HmiInterfaces::HMI_INTERFACE_VR))
+    EXPECT_CALL(hmi_interfaces_,
+                GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_VR))
         .WillOnce(Return(am::HmiInterfaces::STATE_AVAILABLE));
 
-    EXPECT_CALL(hmi_interfaces_, GetInterfaceFromFunction(
-                  hmi_apis::FunctionID::TTS_ChangeRegistration))
+    EXPECT_CALL(
+        hmi_interfaces_,
+        GetInterfaceFromFunction(hmi_apis::FunctionID::TTS_ChangeRegistration))
         .WillOnce(Return(am::HmiInterfaces::HMI_INTERFACE_TTS));
-    EXPECT_CALL(hmi_interfaces_, GetInterfaceState(
-                  am::HmiInterfaces::HMI_INTERFACE_TTS))
+    EXPECT_CALL(hmi_interfaces_,
+                GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_TTS))
         .WillOnce(Return(am::HmiInterfaces::STATE_AVAILABLE));
   }
 
   void CreateResponseFromHMI(MessageSharedPtr msg,
                              hmi_apis::Common_Result::eType result,
                              const std::string& info) {
-    (*msg)[strings::params][hmi_response::code] =
-        static_cast<int32_t>(result);
+    (*msg)[strings::params][hmi_response::code] = static_cast<int32_t>(result);
     (*msg)[strings::msg_params][strings::info] = info;
   }
 
@@ -149,7 +150,6 @@ class ChangeRegistrationRequestTest
       MockHMICapabilities;
   MockHMICapabilities hmi_capabilities_;
   MockHmiInterfaces hmi_interfaces_;
-
 };
 
 typedef ChangeRegistrationRequestTest::MockHMICapabilities MockHMICapabilities;
@@ -180,25 +180,27 @@ TEST_F(ChangeRegistrationRequestTest, OnEvent_VR_UNSUPPORTED_RESOURCE) {
   MessageSharedPtr vr_response = CreateMessage(smart_objects::SmartType_Map);
   MessageSharedPtr tts_response = CreateMessage(smart_objects::SmartType_Map);
   CreateResponseFromHMI(
-        ui_response, hmi_apis::Common_Result::WARNINGS,"ui_info");
+      ui_response, hmi_apis::Common_Result::WARNINGS, "ui_info");
+  CreateResponseFromHMI(vr_response,
+                        hmi_apis::Common_Result::UNSUPPORTED_RESOURCE,
+                        "unsupported_resource");
   CreateResponseFromHMI(
-        vr_response, hmi_apis::Common_Result::UNSUPPORTED_RESOURCE, "unsupported_resource");
-  CreateResponseFromHMI(
-        tts_response, hmi_apis::Common_Result::SUCCESS, "tts_info");
+      tts_response, hmi_apis::Common_Result::SUCCESS, "tts_info");
 
   am::event_engine::Event event_ui(hmi_apis::FunctionID::UI_ChangeRegistration);
   event_ui.set_smart_object(*ui_response);
   am::event_engine::Event event_vr(hmi_apis::FunctionID::VR_ChangeRegistration);
   event_vr.set_smart_object(*vr_response);
-  am::event_engine::Event event_tts(hmi_apis::FunctionID::TTS_ChangeRegistration);
+  am::event_engine::Event event_tts(
+      hmi_apis::FunctionID::TTS_ChangeRegistration);
   event_tts.set_smart_object(*tts_response);
 
   MessageSharedPtr response_to_mobile;
 
   EXPECT_CALL(
-        app_mngr_,
-        ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
-        .WillOnce(DoAll(SaveArg<0>(&response_to_mobile), Return(true)));
+      app_mngr_,
+      ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
+      .WillOnce(DoAll(SaveArg<0>(&response_to_mobile), Return(true)));
 
   command->on_event(event_ui);
   command->on_event(event_vr);

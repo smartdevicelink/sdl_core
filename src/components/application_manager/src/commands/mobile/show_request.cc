@@ -229,13 +229,13 @@ void ShowRequest::on_event(const event_engine::Event& event) {
       LOG4CXX_DEBUG(logger_, "Received UI_Show event.");
       std::string response_info;
       hmi_apis::Common_Result::eType result_code =
-              static_cast<hmi_apis::Common_Result::eType>(
+          static_cast<hmi_apis::Common_Result::eType>(
               message[strings::params][hmi_response::code].asInt());
-      const bool result = PrepareResultForMobileResponse(result_code,
-                                                    HmiInterfaces::HMI_INTERFACE_UI);
+      const bool result = PrepareResultForMobileResponse(
+          result_code, HmiInterfaces::HMI_INTERFACE_UI);
       GetInfo(HmiInterfaces::InterfaceID::HMI_INTERFACE_UI,
-                 result_code,
-                 response_info,
+              result_code,
+              response_info,
               message);
       if (hmi_apis::Common_Result::WARNINGS == result_code &&
           message[strings::params].keyExists(hmi_response::message)) {

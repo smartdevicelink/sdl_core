@@ -104,12 +104,13 @@ void AddSubMenuRequest::on_event(const event_engine::Event& event) {
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_AddSubMenu: {
       hmi_apis::Common_Result::eType result_code =
-              static_cast<hmi_apis::Common_Result::eType>(
-                      message[strings::params][hmi_response::code].asInt());
+          static_cast<hmi_apis::Common_Result::eType>(
+              message[strings::params][hmi_response::code].asInt());
       std::string response_info;
-      GetInfo(HmiInterfaces::HMI_INTERFACE_UI, result_code, response_info, message);
-      const bool result = PrepareResultForMobileResponse(result_code,
-                                                    HmiInterfaces::HMI_INTERFACE_UI);
+      GetInfo(
+          HmiInterfaces::HMI_INTERFACE_UI, result_code, response_info, message);
+      const bool result = PrepareResultForMobileResponse(
+          result_code, HmiInterfaces::HMI_INTERFACE_UI);
 
       ApplicationSharedPtr application =
           application_manager_.application(connection_key());
@@ -126,7 +127,7 @@ void AddSubMenuRequest::on_event(const event_engine::Event& event) {
       }
       SendResponse(result,
                    MessageHelper::HMIToMobileResult(result_code),
-                   response_info.empty()? NULL:response_info.c_str(),
+                   response_info.empty() ? NULL : response_info.c_str(),
                    &(message[strings::msg_params]));
       if (result) {
         application->UpdateHash();

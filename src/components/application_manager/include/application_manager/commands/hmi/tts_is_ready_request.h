@@ -43,7 +43,7 @@ namespace commands {
  * @brief TTSIsReadyRequest command class
  **/
 class TTSIsReadyRequest : public RequestToHMI,
-                          public event_engine::EventObserver{
+                          public event_engine::EventObserver {
  public:
   /**
    * @brief TTSIsReadyRequest class constructor

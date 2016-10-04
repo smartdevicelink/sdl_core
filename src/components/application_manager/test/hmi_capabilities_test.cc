@@ -388,8 +388,8 @@ TEST_F(HMICapabilitiesTest, SetUICooperating) {
 }
 
 TEST_F(HMICapabilitiesTest, SetIviCooperating) {
- hmi_capabilities_test->set_is_ivi_cooperating(true);
- EXPECT_EQ(true, hmi_capabilities_test->is_ivi_cooperating());
+  hmi_capabilities_test->set_is_ivi_cooperating(true);
+  EXPECT_EQ(true, hmi_capabilities_test->is_ivi_cooperating());
 }
 
 }  // namespace application_manager_test

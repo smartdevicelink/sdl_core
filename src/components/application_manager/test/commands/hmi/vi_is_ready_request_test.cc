@@ -61,10 +61,10 @@ using am::event_engine::Event;
 
 typedef SharedPtr<VIIsReadyRequest> VIIsReadyRequestPtr;
 
-class VIIsReadyRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
-  public:
-  VIIsReadyRequestTest()
-       :command_(CreateCommand<VIIsReadyRequest>()) {}
+class VIIsReadyRequestTest
+    : public CommandRequestTest<CommandsTestMocks::kIsNice> {
+ public:
+  VIIsReadyRequestTest() : command_(CreateCommand<VIIsReadyRequest>()) {}
 
   void SetUpExpectations(bool is_vi_cooperating_available,
                          bool is_send_message_to_hmi,
@@ -77,13 +77,13 @@ class VIIsReadyRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNic
 
     if (is_message_contain_param) {
       EXPECT_CALL(app_mngr_, hmi_interfaces())
-            .WillRepeatedly(ReturnRef(mock_hmi_interfaces_));
+          .WillRepeatedly(ReturnRef(mock_hmi_interfaces_));
       EXPECT_CALL(mock_hmi_interfaces_,
-                    SetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_VehicleInfo,
-                                      state));
+                  SetInterfaceState(
+                      am::HmiInterfaces::HMI_INTERFACE_VehicleInfo, state));
     } else {
       EXPECT_CALL(app_mngr_, hmi_interfaces())
-            .WillOnce(ReturnRef(mock_hmi_interfaces_));
+          .WillOnce(ReturnRef(mock_hmi_interfaces_));
       EXPECT_CALL(mock_hmi_interfaces_, SetInterfaceState(_, _)).Times(0);
     }
     EXPECT_CALL(app_mngr_, GetPolicyHandler())
@@ -91,8 +91,8 @@ class VIIsReadyRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNic
     EXPECT_CALL(mock_policy_handler_interface_, OnVIIsReady());
 
     EXPECT_CALL(mock_hmi_interfaces_,
-               GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_VehicleInfo))
-               .WillOnce(Return(state));
+                GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_VehicleInfo))
+        .WillOnce(Return(state));
 
     if (is_send_message_to_hmi) {
       ExpectSendMessagesToHMI();
@@ -102,17 +102,17 @@ class VIIsReadyRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNic
   void ExpectSendMessagesToHMI() {
     smart_objects::SmartObjectSPtr ivi_type;
     EXPECT_CALL(
-          *(MockMessageHelper::message_helper_mock()),
-          CreateModuleInfoSO(hmi_apis::FunctionID::VehicleInfo_GetVehicleType, _))
-          .WillOnce(Return(ivi_type));
+        *(MockMessageHelper::message_helper_mock()),
+        CreateModuleInfoSO(hmi_apis::FunctionID::VehicleInfo_GetVehicleType, _))
+        .WillOnce(Return(ivi_type));
     EXPECT_CALL(app_mngr_, ManageHMICommand(ivi_type));
   }
 
   void PrepareEvent(bool is_message_contain_param,
-                   Event& event,
-                   bool is_vi_cooperating_available = false) {
+                    Event& event,
+                    bool is_vi_cooperating_available = false) {
     MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
-    if(is_message_contain_param) {
+    if (is_message_contain_param) {
       (*msg)[am::strings::msg_params][am::strings::available] =
           is_vi_cooperating_available;
     }
@@ -125,8 +125,7 @@ class VIIsReadyRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNic
   policy_test::MockPolicyHandlerInterface mock_policy_handler_interface_;
 };
 
-TEST_F(VIIsReadyRequestTest,
-       Run_NoKeyAvailableInMessage_HmiInterfacesIgnored) {
+TEST_F(VIIsReadyRequestTest, Run_NoKeyAvailableInMessage_HmiInterfacesIgnored) {
   const bool is_vi_cooperating_available = false;
   const bool is_send_message_to_hmi = true;
   const bool is_message_contain_param = false;

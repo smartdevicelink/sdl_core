@@ -43,7 +43,7 @@ namespace commands {
  * @brief VIIsReadyRequest command class
  **/
 class VIIsReadyRequest : public RequestToHMI,
-                         public event_engine::EventObserver{
+                         public event_engine::EventObserver {
  public:
   /**
    * @brief VIIsReadyRequest class constructor
@@ -78,7 +78,7 @@ class VIIsReadyRequest : public RequestToHMI,
    */
   void SendMessageToHMI();
 
-private:
+ private:
   DISALLOW_COPY_AND_ASSIGN(VIIsReadyRequest);
 };
 

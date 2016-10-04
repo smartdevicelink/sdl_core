@@ -46,18 +46,18 @@ bool CheckAvailabilityHMIInterfaces(ApplicationManager& application_manager,
 bool ChangeInterfaceState(ApplicationManager& application_manager,
                           const smart_objects::SmartObject& response_from_hmi,
                           HmiInterfaces::InterfaceID interface) {
- bool is_available = false;
- if (response_from_hmi[strings::msg_params].keyExists(strings::available)) {
-   is_available = response_from_hmi[strings::msg_params][strings::available].asBool();
-   const HmiInterfaces::InterfaceState interface_state =
-       is_available ? HmiInterfaces::STATE_AVAILABLE
-                    : HmiInterfaces::STATE_NOT_AVAILABLE;
-   application_manager.hmi_interfaces().SetInterfaceState(
-         interface, interface_state);
- }
- return is_available;
+  bool is_available = false;
+  if (response_from_hmi[strings::msg_params].keyExists(strings::available)) {
+    is_available =
+        response_from_hmi[strings::msg_params][strings::available].asBool();
+    const HmiInterfaces::InterfaceState interface_state =
+        is_available ? HmiInterfaces::STATE_AVAILABLE
+                     : HmiInterfaces::STATE_NOT_AVAILABLE;
+    application_manager.hmi_interfaces().SetInterfaceState(interface,
+                                                           interface_state);
+  }
+  return is_available;
 }
-
 
 RequestToHMI::RequestToHMI(const MessageSharedPtr& message,
                            ApplicationManager& application_manager)
@@ -79,10 +79,9 @@ bool RequestToHMI::CleanUp() {
 void RequestToHMI::Run() {}
 
 void RequestToHMI::SendRequest() {
-    (*message_)[strings::params][strings::protocol_type] = hmi_protocol_type_;
-    (*message_)[strings::params][strings::protocol_version] = protocol_version_;
-    application_manager_.SendMessageToHMI(message_);
-
+  (*message_)[strings::params][strings::protocol_type] = hmi_protocol_type_;
+  (*message_)[strings::params][strings::protocol_version] = protocol_version_;
+  application_manager_.SendMessageToHMI(message_);
 }
 
 }  // namespace commands

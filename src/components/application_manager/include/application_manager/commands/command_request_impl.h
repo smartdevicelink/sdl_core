@@ -47,7 +47,7 @@ class SmartObject;
 namespace application_manager {
 namespace commands {
 
-struct ResponseInfo{
+struct ResponseInfo {
   hmi_apis::Common_Result::eType result_code;
   HmiInterfaces::InterfaceID interface;
   HmiInterfaces::InterfaceState interface_state;
@@ -192,8 +192,9 @@ class CommandRequestImpl : public CommandImpl,
    * @return true if result code complies successful result cods
    * otherwise returns false.
    */
-  bool PrepareResultForMobileResponse(hmi_apis::Common_Result::eType result_code,
-                                 HmiInterfaces::InterfaceID interface) const;
+  bool PrepareResultForMobileResponse(
+      hmi_apis::Common_Result::eType result_code,
+      HmiInterfaces::InterfaceID interface) const;
 
   /**
    * @brief Checks result code from HMI for splitted RPC
@@ -217,9 +218,9 @@ class CommandRequestImpl : public CommandImpl,
    * @param response_from_hmi contains response from HMI
    */
   void GetInfo(HmiInterfaces::InterfaceID interface,
-                   hmi_apis::Common_Result::eType result_code,
-                  std::string& info,
-                  const smart_objects::SmartObject& response_from_hmi);
+               hmi_apis::Common_Result::eType result_code,
+               std::string& info,
+               const smart_objects::SmartObject& response_from_hmi);
 
   /**
    * @brief Prepare result code for sending to mobile application
@@ -230,10 +231,9 @@ class CommandRequestImpl : public CommandImpl,
    * @return resulting code for sending to mobile application.
    */
   mobile_apis::Result::eType PrepareResultCodeForResponse(
-      const ResponseInfo& first,
-      const ResponseInfo& second);
+      const ResponseInfo& first, const ResponseInfo& second);
 
-protected:
+ protected:
   /**
    * @brief Returns policy parameters permissions
    * @return Parameters permissions struct reference

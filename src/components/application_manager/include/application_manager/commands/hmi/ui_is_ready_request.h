@@ -43,7 +43,7 @@ namespace commands {
  * @brief UIIsReadyRequest command class
  **/
 class UIIsReadyRequest : public RequestToHMI,
-                         public event_engine::EventObserver{
+                         public event_engine::EventObserver {
  public:
   /**
    * @brief UIIsReadyRequest class constructor

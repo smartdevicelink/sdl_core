@@ -427,7 +427,8 @@ class HMICapabilitiesImpl : public HMICapabilities {
    * @brief Trigger waiting for response
    * @param request Request object
    */
-  void set_handle_response_for(const smart_objects::SmartObject& request) OVERRIDE;
+  void set_handle_response_for(
+      const smart_objects::SmartObject& request) OVERRIDE;
 
  protected:
   /*

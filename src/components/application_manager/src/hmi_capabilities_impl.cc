@@ -1074,8 +1074,8 @@ HMILanguageHandler& HMICapabilitiesImpl::get_hmi_language_handler() {
 }
 
 void HMICapabilitiesImpl::set_handle_response_for(
-        const smart_objects::SmartObject& request) {
-    hmi_language_handler_.set_handle_response_for(request);
+    const smart_objects::SmartObject& request) {
+  hmi_language_handler_.set_handle_response_for(request);
 }
 
 }  //  namespace application_manager

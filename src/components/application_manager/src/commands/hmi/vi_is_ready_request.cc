@@ -40,7 +40,7 @@ namespace commands {
 VIIsReadyRequest::VIIsReadyRequest(const MessageSharedPtr& message,
                                    ApplicationManager& application_manager)
     : RequestToHMI(message, application_manager)
-    , EventObserver(application_manager.event_dispatcher()){}
+    , EventObserver(application_manager.event_dispatcher()) {}
 
 VIIsReadyRequest::~VIIsReadyRequest() {}
 
@@ -58,22 +58,26 @@ void VIIsReadyRequest::on_event(const event_engine::Event& event) {
     case hmi_apis::FunctionID::VehicleInfo_IsReady: {
       LOG4CXX_DEBUG(logger_, "VehicleInfo_IsReady event");
       unsubscribe_from_event(hmi_apis::FunctionID::VehicleInfo_IsReady);
-      const bool is_available = ChangeInterfaceState(
-                    application_manager_, message,
-                    HmiInterfaces::HMI_INTERFACE_VehicleInfo);
+      const bool is_available =
+          ChangeInterfaceState(application_manager_,
+                               message,
+                               HmiInterfaces::HMI_INTERFACE_VehicleInfo);
 
-      HMICapabilities& hmi_capabilities = application_manager_.hmi_capabilities();
+      HMICapabilities& hmi_capabilities =
+          application_manager_.hmi_capabilities();
       hmi_capabilities.set_is_ivi_cooperating(is_available);
       application_manager_.GetPolicyHandler().OnVIIsReady();
-      if(!CheckAvailabilityHMIInterfaces(application_manager_,
-                                         HmiInterfaces::HMI_INTERFACE_VehicleInfo)) {
-          LOG4CXX_INFO(logger_, "HmiInterfaces::HMI_INTERFACE_VehicleInfo isn't available");
-          return;
+      if (!CheckAvailabilityHMIInterfaces(
+              application_manager_, HmiInterfaces::HMI_INTERFACE_VehicleInfo)) {
+        LOG4CXX_INFO(
+            logger_,
+            "HmiInterfaces::HMI_INTERFACE_VehicleInfo isn't available");
+        return;
       }
       SendMessageToHMI();
 
       break;
-  }
+    }
     default: {
       LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
       return;
@@ -82,15 +86,16 @@ void VIIsReadyRequest::on_event(const event_engine::Event& event) {
 }
 
 void VIIsReadyRequest::onTimeOut() {
-    // Note(dtrunov): According to new requirment APPLINK-27956
-    SendMessageToHMI();
+  // Note(dtrunov): According to new requirment APPLINK-27956
+  SendMessageToHMI();
 }
 
 void VIIsReadyRequest::SendMessageToHMI() {
-    utils::SharedPtr<smart_objects::SmartObject> get_type(
-          MessageHelper::CreateModuleInfoSO(
-              hmi_apis::FunctionID::VehicleInfo_GetVehicleType, application_manager_));
-      application_manager_.ManageHMICommand(get_type);
+  utils::SharedPtr<smart_objects::SmartObject> get_type(
+      MessageHelper::CreateModuleInfoSO(
+          hmi_apis::FunctionID::VehicleInfo_GetVehicleType,
+          application_manager_));
+  application_manager_.ManageHMICommand(get_type);
 }
 
 }  // namespace commands

@@ -165,8 +165,10 @@ void AlertRequest::on_event(const event_engine::Event& event) {
 
       // Mobile Alert request is successful when UI_Alert is successful
       alert_response_params_ = message[strings::msg_params];
-      GetInfo(HmiInterfaces::HMI_INTERFACE_UI, alert_result_,
-              ui_response_info_, message);
+      GetInfo(HmiInterfaces::HMI_INTERFACE_UI,
+              alert_result_,
+              ui_response_info_,
+              message);
       break;
     }
     case hmi_apis::FunctionID::TTS_Speak: {
@@ -176,8 +178,10 @@ void AlertRequest::on_event(const event_engine::Event& event) {
       awaiting_tts_speak_response_ = false;
       tts_speak_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
-      GetInfo(HmiInterfaces::HMI_INTERFACE_TTS, tts_speak_result_,
-              tts_response_info_, message);
+      GetInfo(HmiInterfaces::HMI_INTERFACE_TTS,
+              tts_speak_result_,
+              tts_response_info_,
+              message);
       break;
     }
     case hmi_apis::FunctionID::TTS_StopSpeaking: {
@@ -205,14 +209,20 @@ void AlertRequest::on_event(const event_engine::Event& event) {
                &alert_response_params_);
 }
 
-bool AlertRequest::PrepareResponseParameters(mobile_apis::Result::eType& result_code,
-                                             std::string& info) {
-  ResponseInfo ui_alert_info{alert_result_, HmiInterfaces::HMI_INTERFACE_UI,
-                                  HmiInterfaces::STATE_NOT_RESPONSE,
-                                  false, false, false};
-  ResponseInfo tts_alert_info{tts_speak_result_, HmiInterfaces::HMI_INTERFACE_TTS,
-                                  HmiInterfaces::STATE_NOT_RESPONSE,
-                                  false, false, false};
+bool AlertRequest::PrepareResponseParameters(
+    mobile_apis::Result::eType& result_code, std::string& info) {
+  ResponseInfo ui_alert_info{alert_result_,
+                             HmiInterfaces::HMI_INTERFACE_UI,
+                             HmiInterfaces::STATE_NOT_RESPONSE,
+                             false,
+                             false,
+                             false};
+  ResponseInfo tts_alert_info{tts_speak_result_,
+                              HmiInterfaces::HMI_INTERFACE_TTS,
+                              HmiInterfaces::STATE_NOT_RESPONSE,
+                              false,
+                              false,
+                              false};
 
   bool result = PrepareResultForMobileResponse(ui_alert_info, tts_alert_info);
 
@@ -222,7 +232,7 @@ bool AlertRequest::PrepareResponseParameters(mobile_apis::Result::eType& result_
    */
   if (result && ui_alert_info.is_ok && tts_alert_info.is_unsupported_resource &&
       HmiInterfaces::STATE_NOT_AVAILABLE != tts_alert_info.interface_state) {
-      result = false;
+    result = false;
   }
   result_code = mobile_apis::Result::WARNINGS;
   if ((ui_alert_info.is_ok || ui_alert_info.is_invalid_enum) &&

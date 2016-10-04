@@ -172,7 +172,9 @@ void ChangeRegistrationRequest::on_event(const event_engine::Event& event) {
       pending_requests_.Remove(event_id);
       ui_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
-      GetInfo(HmiInterfaces::HMI_INTERFACE_UI, ui_result_, ui_response_info_,
+      GetInfo(HmiInterfaces::HMI_INTERFACE_UI,
+              ui_result_,
+              ui_response_info_,
               message);
       break;
     }
@@ -181,7 +183,9 @@ void ChangeRegistrationRequest::on_event(const event_engine::Event& event) {
       pending_requests_.Remove(event_id);
       vr_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
-      GetInfo(HmiInterfaces::HMI_INTERFACE_VR, vr_result_, vr_response_info_,
+      GetInfo(HmiInterfaces::HMI_INTERFACE_VR,
+              vr_result_,
+              vr_response_info_,
               message);
       break;
     }
@@ -190,7 +194,9 @@ void ChangeRegistrationRequest::on_event(const event_engine::Event& event) {
       pending_requests_.Remove(event_id);
       tts_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
-      GetInfo(HmiInterfaces::HMI_INTERFACE_TTS, tts_result_, tts_response_info_,
+      GetInfo(HmiInterfaces::HMI_INTERFACE_TTS,
+              tts_result_,
+              tts_response_info_,
               message);
       break;
     }
@@ -239,8 +245,7 @@ void ChangeRegistrationRequest::on_event(const event_engine::Event& event) {
 }
 
 bool ChangeRegistrationRequest::PrepareResponseParameters(
-    mobile_apis::Result::eType& result_code,
-        std::string& response_info) {
+    mobile_apis::Result::eType& result_code, std::string& response_info) {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace helpers;
   const bool is_tts_succeeded_unsupported =
@@ -261,8 +266,7 @@ bool ChangeRegistrationRequest::PrepareResponseParameters(
           hmi_apis::Common_Result::WRONG_LANGUAGE,
           hmi_apis::Common_Result::RETRY,
           hmi_apis::Common_Result::SAVED,
-          hmi_apis::Common_Result::UNSUPPORTED_RESOURCE
-          );
+          hmi_apis::Common_Result::UNSUPPORTED_RESOURCE);
 
   const bool is_vr_succeeded_unsupported =
       Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
@@ -272,8 +276,7 @@ bool ChangeRegistrationRequest::PrepareResponseParameters(
           hmi_apis::Common_Result::WRONG_LANGUAGE,
           hmi_apis::Common_Result::RETRY,
           hmi_apis::Common_Result::SAVED,
-          hmi_apis::Common_Result::UNSUPPORTED_RESOURCE
-              );
+          hmi_apis::Common_Result::UNSUPPORTED_RESOURCE);
 
   const bool is_tts_ui_vr_unsupported =
       Compare<hmi_apis::Common_Result::eType, EQ, ALL>(
@@ -295,27 +298,28 @@ bool ChangeRegistrationRequest::PrepareResponseParameters(
   if ((result && is_tts_or_ui_or_vr_unsupported) || is_tts_ui_vr_unsupported) {
     result_code = mobile_apis::Result::UNSUPPORTED_RESOURCE;
   } else {
-      //If response contains erroneous result code SDL need return erroneus result code.
-      hmi_apis::Common_Result::eType ui_result =
-              hmi_apis::Common_Result::INVALID_ENUM;
-      hmi_apis::Common_Result::eType vr_result =
-              hmi_apis::Common_Result::INVALID_ENUM;
-      hmi_apis::Common_Result::eType tts_result =
-              hmi_apis::Common_Result::INVALID_ENUM;
-      if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE != ui_result_) {
-          ui_result = ui_result_;
-      }
-      if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE != vr_result_) {
-          vr_result = vr_result_;
-      }
-      if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE != tts_result_) {
-          tts_result = tts_result_;
-      }
-      result_code = MessageHelper::HMIToMobileResult(
-      std::max(std::max(ui_result, vr_result), tts_result));
+    // If response contains erroneous result code SDL need return erroneus
+    // result code.
+    hmi_apis::Common_Result::eType ui_result =
+        hmi_apis::Common_Result::INVALID_ENUM;
+    hmi_apis::Common_Result::eType vr_result =
+        hmi_apis::Common_Result::INVALID_ENUM;
+    hmi_apis::Common_Result::eType tts_result =
+        hmi_apis::Common_Result::INVALID_ENUM;
+    if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE != ui_result_) {
+      ui_result = ui_result_;
+    }
+    if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE != vr_result_) {
+      vr_result = vr_result_;
+    }
+    if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE != tts_result_) {
+      tts_result = tts_result_;
+    }
+    result_code = MessageHelper::HMIToMobileResult(
+        std::max(std::max(ui_result, vr_result), tts_result));
   }
-  response_info = MergeInfos(ui_response_info_, vr_response_info_,
-                             tts_response_info_);
+  response_info =
+      MergeInfos(ui_response_info_, vr_response_info_, tts_response_info_);
   return result;
 }
 

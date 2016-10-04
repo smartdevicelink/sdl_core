@@ -59,10 +59,10 @@ using am::event_engine::Event;
 
 typedef SharedPtr<VRIsReadyRequest> VRIsReadyRequestPtr;
 
-class VRIsReadyRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
+class VRIsReadyRequestTest
+    : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
-  VRIsReadyRequestTest()
-      : command_(CreateCommand<VRIsReadyRequest>()) {}
+  VRIsReadyRequestTest() : command_(CreateCommand<VRIsReadyRequest>()) {}
 
   void SetUpExpectations(bool is_vr_cooperating_available,
                          bool is_send_message_to_hmi,
@@ -82,18 +82,18 @@ class VRIsReadyRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNic
 
     if (is_message_contain_param) {
       EXPECT_CALL(app_mngr_, hmi_interfaces())
-            .WillRepeatedly(ReturnRef(mock_hmi_interfaces_));
-      EXPECT_CALL(mock_hmi_interfaces_,
-                    SetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_VR,
-                                      state));
+          .WillRepeatedly(ReturnRef(mock_hmi_interfaces_));
+      EXPECT_CALL(
+          mock_hmi_interfaces_,
+          SetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_VR, state));
     } else {
       EXPECT_CALL(app_mngr_, hmi_interfaces())
-            .WillOnce(ReturnRef(mock_hmi_interfaces_));
+          .WillOnce(ReturnRef(mock_hmi_interfaces_));
       EXPECT_CALL(mock_hmi_interfaces_, SetInterfaceState(_, _)).Times(0);
     }
     EXPECT_CALL(mock_hmi_interfaces_,
-               GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_VR))
-               .WillOnce(Return(state));
+                GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_VR))
+        .WillOnce(Return(state));
   }
 
   void ExpectSendMessagesToHMI(bool is_send_message_by_timeout) {
@@ -103,33 +103,34 @@ class VRIsReadyRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNic
     }
 
     smart_objects::SmartObjectSPtr language(
-          new smart_objects::SmartObject(smart_objects::SmartType_Map));
-      EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
-                  CreateModuleInfoSO(hmi_apis::FunctionID::VR_GetLanguage, _))
-          .WillOnce(Return(language));
-      EXPECT_CALL(mock_hmi_capabilities_, set_handle_response_for(*language));
-      EXPECT_CALL(app_mngr_, ManageHMICommand(language));
+        new smart_objects::SmartObject(smart_objects::SmartType_Map));
+    EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
+                CreateModuleInfoSO(hmi_apis::FunctionID::VR_GetLanguage, _))
+        .WillOnce(Return(language));
+    EXPECT_CALL(mock_hmi_capabilities_, set_handle_response_for(*language));
+    EXPECT_CALL(app_mngr_, ManageHMICommand(language));
 
-      smart_objects::SmartObjectSPtr support_language(
-            new smart_objects::SmartObject(smart_objects::SmartType_Map));
-      EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
-                  CreateModuleInfoSO(hmi_apis::FunctionID::VR_GetSupportedLanguages,
-                                     _)).WillOnce(Return(support_language));
-      EXPECT_CALL(app_mngr_, ManageHMICommand(support_language));
+    smart_objects::SmartObjectSPtr support_language(
+        new smart_objects::SmartObject(smart_objects::SmartType_Map));
+    EXPECT_CALL(
+        *(MockMessageHelper::message_helper_mock()),
+        CreateModuleInfoSO(hmi_apis::FunctionID::VR_GetSupportedLanguages, _))
+        .WillOnce(Return(support_language));
+    EXPECT_CALL(app_mngr_, ManageHMICommand(support_language));
 
-      smart_objects::SmartObjectSPtr capabilities(
-            new smart_objects::SmartObject(smart_objects::SmartType_Map));
-      EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
-                  CreateModuleInfoSO(hmi_apis::FunctionID::VR_GetCapabilities, _))
-          .WillOnce(Return(capabilities));
-      EXPECT_CALL(app_mngr_, ManageHMICommand(capabilities));
+    smart_objects::SmartObjectSPtr capabilities(
+        new smart_objects::SmartObject(smart_objects::SmartType_Map));
+    EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
+                CreateModuleInfoSO(hmi_apis::FunctionID::VR_GetCapabilities, _))
+        .WillOnce(Return(capabilities));
+    EXPECT_CALL(app_mngr_, ManageHMICommand(capabilities));
   }
 
   void PrepareEvent(bool is_message_contain_param,
-                   Event& event,
-                   bool is_vr_cooperating_available = false) {
+                    Event& event,
+                    bool is_vr_cooperating_available = false) {
     MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
-    if(is_message_contain_param) {
+    if (is_message_contain_param) {
       (*msg)[am::strings::msg_params][am::strings::available] =
           is_vr_cooperating_available;
     }
@@ -141,8 +142,7 @@ class VRIsReadyRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNic
   application_manager_test::MockHMICapabilities mock_hmi_capabilities_;
 };
 
-TEST_F(VRIsReadyRequestTest,
-       Run_NoKeyAvailableInMessage_HmiInterfacesIgnored) {
+TEST_F(VRIsReadyRequestTest, Run_NoKeyAvailableInMessage_HmiInterfacesIgnored) {
   const bool is_vr_cooperating_available = false;
   const bool is_send_message_to_hmi = true;
   const bool is_message_contain_param = false;
@@ -156,16 +156,16 @@ TEST_F(VRIsReadyRequestTest,
 }
 
 TEST_F(VRIsReadyRequestTest, Run_KeyAvailableEqualToFalse_StateNotAvailable) {
-const bool is_vr_cooperating_available = false;
-const bool is_send_message_to_hmi = false;
-const bool is_message_contain_param = true;
-Event event(hmi_apis::FunctionID::VR_IsReady);
-PrepareEvent(is_message_contain_param, event);
-SetUpExpectations(is_vr_cooperating_available,
-                  is_send_message_to_hmi,
-                  is_message_contain_param,
-                  am::HmiInterfaces::STATE_NOT_AVAILABLE);
-command_->on_event(event);
+  const bool is_vr_cooperating_available = false;
+  const bool is_send_message_to_hmi = false;
+  const bool is_message_contain_param = true;
+  Event event(hmi_apis::FunctionID::VR_IsReady);
+  PrepareEvent(is_message_contain_param, event);
+  SetUpExpectations(is_vr_cooperating_available,
+                    is_send_message_to_hmi,
+                    is_message_contain_param,
+                    am::HmiInterfaces::STATE_NOT_AVAILABLE);
+  command_->on_event(event);
 }
 
 TEST_F(VRIsReadyRequestTest, Run_KeyAvailableEqualToTrue_StateAvailable) {

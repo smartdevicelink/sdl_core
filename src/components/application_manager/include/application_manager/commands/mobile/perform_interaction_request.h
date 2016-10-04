@@ -104,9 +104,8 @@ class PerformInteractionRequest : public CommandRequestImpl {
    * @return true if send response to mobile application otherwise
    * return false.
    */
-  bool ProcessUIResponse(
-      const smart_objects::SmartObject& message,
-      smart_objects::SmartObject& msg_params);
+  bool ProcessUIResponse(const smart_objects::SmartObject& message,
+                         smart_objects::SmartObject& msg_params);
 
   /*
    * @brief Sends UI PerformInteraction request to HMI

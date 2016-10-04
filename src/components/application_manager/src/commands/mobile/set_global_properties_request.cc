@@ -232,7 +232,8 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
       is_ui_received_ = true;
       ui_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
-      GetInfo(HmiInterfaces::HMI_INTERFACE_UI, ui_result_,
+      GetInfo(HmiInterfaces::HMI_INTERFACE_UI,
+              ui_result_,
               ui_response_info_,
               message);
       break;
@@ -243,7 +244,9 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
       tts_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
       GetInfo(HmiInterfaces::HMI_INTERFACE_TTS,
-              tts_result_, tts_response_info_, message);
+              tts_result_,
+              tts_response_info_,
+              message);
       break;
     }
     default: {
@@ -284,22 +287,31 @@ bool SetGlobalPropertiesRequest::PrepareResponseParameters(
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace helpers;
 
-  ResponseInfo ui_properties_info{ui_result_, HmiInterfaces::HMI_INTERFACE_UI,
+  ResponseInfo ui_properties_info{ui_result_,
+                                  HmiInterfaces::HMI_INTERFACE_UI,
                                   HmiInterfaces::STATE_NOT_RESPONSE,
-                                  false, false, false};
-  ResponseInfo tts_properties_info{tts_result_, HmiInterfaces::HMI_INTERFACE_TTS,
-                                  HmiInterfaces::STATE_NOT_RESPONSE,
-                                  false, false, false};
+                                  false,
+                                  false,
+                                  false};
+  ResponseInfo tts_properties_info{tts_result_,
+                                   HmiInterfaces::HMI_INTERFACE_TTS,
+                                   HmiInterfaces::STATE_NOT_RESPONSE,
+                                   false,
+                                   false,
+                                   false};
 
-  bool result = PrepareResultForMobileResponse(ui_properties_info, tts_properties_info);
-  if (result && (HmiInterfaces::STATE_AVAILABLE == tts_properties_info.interface_state) &&
+  bool result =
+      PrepareResultForMobileResponse(ui_properties_info, tts_properties_info);
+  if (result &&
+      (HmiInterfaces::STATE_AVAILABLE == tts_properties_info.interface_state) &&
       (tts_properties_info.is_unsupported_resource)) {
     result_code = mobile_apis::Result::WARNINGS;
     tts_response_info_ = "Unsupported phoneme type sent in a prompt";
     info = MergeInfos(tts_response_info_, ui_response_info_);
     return result;
   }
-  result_code = PrepareResultCodeForResponse(ui_properties_info, tts_properties_info);
+  result_code =
+      PrepareResultCodeForResponse(ui_properties_info, tts_properties_info);
   info = MergeInfos(tts_response_info_, ui_response_info_);
   return result;
 }

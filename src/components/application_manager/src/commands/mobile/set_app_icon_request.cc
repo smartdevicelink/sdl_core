@@ -235,13 +235,13 @@ void SetAppIconRequest::on_event(const event_engine::Event& event) {
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_SetAppIcon: {
       hmi_apis::Common_Result::eType result_code =
-              static_cast<hmi_apis::Common_Result::eType>(
-                      message[strings::params][hmi_response::code].asInt());
-      const bool result = PrepareResultForMobileResponse(result_code,
-                                                    HmiInterfaces::HMI_INTERFACE_UI);
+          static_cast<hmi_apis::Common_Result::eType>(
+              message[strings::params][hmi_response::code].asInt());
+      const bool result = PrepareResultForMobileResponse(
+          result_code, HmiInterfaces::HMI_INTERFACE_UI);
       std::string response_info;
-      GetInfo(HmiInterfaces::HMI_INTERFACE_UI, result_code, response_info,
-              message);
+      GetInfo(
+          HmiInterfaces::HMI_INTERFACE_UI, result_code, response_info, message);
       if (result) {
         ApplicationSharedPtr app =
             application_manager_.application(connection_key());
@@ -262,7 +262,7 @@ void SetAppIconRequest::on_event(const event_engine::Event& event) {
 
       SendResponse(result,
                    MessageHelper::HMIToMobileResult(result_code),
-                   response_info.empty()?NULL:response_info.c_str(),
+                   response_info.empty() ? NULL : response_info.c_str(),
                    &(message[strings::msg_params]));
       break;
     }

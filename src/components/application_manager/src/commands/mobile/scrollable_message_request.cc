@@ -128,18 +128,18 @@ void ScrollableMessageRequest::on_event(const event_engine::Event& event) {
       LOG4CXX_INFO(logger_, "Received UI_ScrollableMessage event");
 
       hmi_apis::Common_Result::eType result_code =
-              static_cast<hmi_apis::Common_Result::eType>(
+          static_cast<hmi_apis::Common_Result::eType>(
               message[strings::params][hmi_response::code].asInt());
       std::string response_info;
-      GetInfo(HmiInterfaces::HMI_INTERFACE_UI, result_code, response_info,
-              message);
+      GetInfo(
+          HmiInterfaces::HMI_INTERFACE_UI, result_code, response_info, message);
 
-      const bool result = PrepareResultForMobileResponse(result_code,
-                                              HmiInterfaces::HMI_INTERFACE_UI);
+      const bool result = PrepareResultForMobileResponse(
+          result_code, HmiInterfaces::HMI_INTERFACE_UI);
 
       SendResponse(result,
                    MessageHelper::HMIToMobileResult(result_code),
-                   response_info.empty()?NULL:response_info.c_str(),
+                   response_info.empty() ? NULL : response_info.c_str(),
                    &(message[strings::msg_params]));
       break;
     }

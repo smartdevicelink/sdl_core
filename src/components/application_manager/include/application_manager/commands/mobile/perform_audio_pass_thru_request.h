@@ -86,7 +86,8 @@ class PerformAudioPassThruRequest : public CommandRequestImpl {
 
  private:
   /**
-   * @brief Prepare result code, result and info for sending to mobile application
+   * @brief Prepare result code, result and info for sending to mobile
+   * application
    * @param result_code contains result code for sending to mobile application
    * @return result for sending to mobile application.
    */

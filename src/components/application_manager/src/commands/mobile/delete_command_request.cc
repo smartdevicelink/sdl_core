@@ -104,7 +104,7 @@ void DeleteCommandRequest::Run() {
     is_vr_send_ = true;
   }
   if (is_ui_send_) {
-      SendHMIRequest(hmi_apis::FunctionID::UI_DeleteCommand, &msg_params, true);
+    SendHMIRequest(hmi_apis::FunctionID::UI_DeleteCommand, &msg_params, true);
   }
   if (is_vr_send_) {
     // VR params
@@ -115,35 +115,41 @@ void DeleteCommandRequest::Run() {
 }
 
 bool DeleteCommandRequest::PrepareResponseParameters(
-        mobile_apis::Result::eType& result_code,
-                               std::string& info) {
-    using namespace helpers;
-    ResponseInfo ui_delete_info{ui_result_, HmiInterfaces::HMI_INTERFACE_UI,
-                                    HmiInterfaces::STATE_NOT_RESPONSE,
-                                    false, false, false};
-    ResponseInfo vr_delete_info{vr_result_, HmiInterfaces::HMI_INTERFACE_VR,
-                                    HmiInterfaces::STATE_NOT_RESPONSE,
-                                    false, false, false};
-    const bool result = PrepareResultForMobileResponse(ui_delete_info, vr_delete_info);
+    mobile_apis::Result::eType& result_code, std::string& info) {
+  using namespace helpers;
+  ResponseInfo ui_delete_info{ui_result_,
+                              HmiInterfaces::HMI_INTERFACE_UI,
+                              HmiInterfaces::STATE_NOT_RESPONSE,
+                              false,
+                              false,
+                              false};
+  ResponseInfo vr_delete_info{vr_result_,
+                              HmiInterfaces::HMI_INTERFACE_VR,
+                              HmiInterfaces::STATE_NOT_RESPONSE,
+                              false,
+                              false,
+                              false};
+  const bool result =
+      PrepareResultForMobileResponse(ui_delete_info, vr_delete_info);
 
-    const bool is_vr_or_ui_warning =
-        Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
-            hmi_apis::Common_Result::WARNINGS, ui_result_, vr_result_);
-    info = MergeInfos(ui_info_, vr_info_);
-    if (!result && hmi_apis::Common_Result::REJECTED == ui_result_
-            && (!vr_delete_info.is_invalid_enum)) {
-      result_code = MessageHelper::HMIToMobileResult(vr_result_);
-      return result;
-    }
-    if (is_vr_or_ui_warning && !ui_delete_info.is_unsupported_resource &&
-            !vr_delete_info.is_unsupported_resource) {
-        LOG4CXX_DEBUG(logger_, "VR or UI result is warning");
-        result_code = mobile_apis::Result::WARNINGS;
-        return result;
-    }
-    result_code = PrepareResultCodeForResponse(ui_delete_info, vr_delete_info);
-    LOG4CXX_DEBUG(logger_, "Result is " << (result ? "true" : "false"));
+  const bool is_vr_or_ui_warning =
+      Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
+          hmi_apis::Common_Result::WARNINGS, ui_result_, vr_result_);
+  info = MergeInfos(ui_info_, vr_info_);
+  if (!result && hmi_apis::Common_Result::REJECTED == ui_result_ &&
+      (!vr_delete_info.is_invalid_enum)) {
+    result_code = MessageHelper::HMIToMobileResult(vr_result_);
     return result;
+  }
+  if (is_vr_or_ui_warning && !ui_delete_info.is_unsupported_resource &&
+      !vr_delete_info.is_unsupported_resource) {
+    LOG4CXX_DEBUG(logger_, "VR or UI result is warning");
+    result_code = mobile_apis::Result::WARNINGS;
+    return result;
+  }
+  result_code = PrepareResultCodeForResponse(ui_delete_info, vr_delete_info);
+  LOG4CXX_DEBUG(logger_, "Result is " << (result ? "true" : "false"));
+  return result;
 }
 
 void DeleteCommandRequest::on_event(const event_engine::Event& event) {
@@ -154,7 +160,7 @@ void DeleteCommandRequest::on_event(const event_engine::Event& event) {
     case hmi_apis::FunctionID::UI_DeleteCommand: {
       is_ui_received_ = true;
       ui_result_ = static_cast<hmi_apis::Common_Result::eType>(
-                  message[strings::params][hmi_response::code].asInt());
+          message[strings::params][hmi_response::code].asInt());
       LOG4CXX_DEBUG(logger_,
                     "Received UI_DeleteCommand event with result "
                         << MessageHelper::HMIResultToString(ui_result_));
@@ -164,7 +170,7 @@ void DeleteCommandRequest::on_event(const event_engine::Event& event) {
     case hmi_apis::FunctionID::VR_DeleteCommand: {
       is_vr_received_ = true;
       vr_result_ = static_cast<hmi_apis::Common_Result::eType>(
-                  message[strings::params][hmi_response::code].asInt());
+          message[strings::params][hmi_response::code].asInt());
       LOG4CXX_DEBUG(logger_,
                     "Received VR_DeleteCommand event with result "
                         << MessageHelper::HMIResultToString(vr_result_));

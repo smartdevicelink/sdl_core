@@ -56,12 +56,14 @@ void EndAudioPassThruRequest::on_event(const event_engine::Event& event) {
 
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_EndAudioPassThru: {
-      hmi_apis::Common_Result::eType result_code = static_cast<hmi_apis::Common_Result::eType>(
+      hmi_apis::Common_Result::eType result_code =
+          static_cast<hmi_apis::Common_Result::eType>(
               message[strings::params][hmi_response::code].asUInt());
       std::string response_info;
-      GetInfo(HmiInterfaces::HMI_INTERFACE_UI, result_code, response_info, message);
-      const bool result = PrepareResultForMobileResponse(result_code,
-                                                    HmiInterfaces::HMI_INTERFACE_UI);
+      GetInfo(
+          HmiInterfaces::HMI_INTERFACE_UI, result_code, response_info, message);
+      const bool result = PrepareResultForMobileResponse(
+          result_code, HmiInterfaces::HMI_INTERFACE_UI);
       if (result) {
         bool ended_successfully = application_manager_.EndAudioPassThrough();
         if (ended_successfully) {
@@ -69,8 +71,9 @@ void EndAudioPassThruRequest::on_event(const event_engine::Event& event) {
         }
       }
 
-      SendResponse(result, MessageHelper::HMIToMobileResult(result_code),
-                   response_info.empty()?NULL:response_info.c_str(),
+      SendResponse(result,
+                   MessageHelper::HMIToMobileResult(result_code),
+                   response_info.empty() ? NULL : response_info.c_str(),
                    &(message[strings::msg_params]));
       break;
     }

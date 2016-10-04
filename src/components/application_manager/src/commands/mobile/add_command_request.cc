@@ -315,8 +315,7 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
       is_ui_received_ = true;
       ui_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
-      GetInfo(HmiInterfaces::HMI_INTERFACE_UI, ui_result_,
-              ui_info_, message);
+      GetInfo(HmiInterfaces::HMI_INTERFACE_UI, ui_result_, ui_info_, message);
       if (hmi_apis::Common_Result::SUCCESS != ui_result_) {
         (*message_)[strings::msg_params].erase(strings::menu_params);
       }
@@ -327,8 +326,7 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
       is_vr_received_ = true;
       vr_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
-      GetInfo(HmiInterfaces::HMI_INTERFACE_VR, vr_result_,
-              vr_info_, message);
+      GetInfo(HmiInterfaces::HMI_INTERFACE_VR, vr_result_, vr_info_, message);
       if (hmi_apis::Common_Result::SUCCESS != vr_result_) {
         (*message_)[strings::msg_params].erase(strings::vr_commands);
       }
@@ -362,10 +360,10 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
           ui_result_,
           hmi_apis::Common_Result::INVALID_ENUM,
           hmi_apis::Common_Result::UNSUPPORTED_RESOURCE);
-  const bool is_vr_unsupported = vr_result_ ==
-          hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
-  const bool is_ui_unsupported = ui_result_ ==
-          hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
+  const bool is_vr_unsupported =
+      vr_result_ == hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
+  const bool is_ui_unsupported =
+      ui_result_ == hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
 
   const bool is_no_ui_error = Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
       ui_result_,
@@ -471,10 +469,11 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
       application_manager_.hmi_interfaces().GetInterfaceState(
           HmiInterfaces::HMI_INTERFACE_VR);
 
-  if (!BothSend() && ((is_vr_unsupported && HmiInterfaces::STATE_NOT_AVAILABLE ==
-                       vr_interface_state) ||
-                      (is_ui_unsupported && HmiInterfaces::STATE_NOT_AVAILABLE ==
-                                             ui_interface_state))) {
+  if (!BothSend() &&
+      ((is_vr_unsupported &&
+        HmiInterfaces::STATE_NOT_AVAILABLE == vr_interface_state) ||
+       (is_ui_unsupported &&
+        HmiInterfaces::STATE_NOT_AVAILABLE == ui_interface_state))) {
     LOG4CXX_DEBUG(logger_, "!BothSend() && is_vr_or_ui_unsupported");
     result = false;
   }
