@@ -73,6 +73,7 @@
 #include "mobile/generic_response.h"
 #include "mobile/set_app_icon_response.h"
 #include "mobile/set_icon_response.h"
+#include "mobile/scrollable_message_response.h"
 
 namespace test {
 namespace components {
@@ -171,6 +172,23 @@ TEST_F(GenericResponseFromHMICommandsTest, Run_SUCCESS) {
       SendMessageToMobile(
           CheckMessageParams(false, mobile_apis::Result::INVALID_DATA), false));
 
+  command->Run();
+}
+
+class ScrollableMessageResponseTest
+    : public CommandsTest<CommandsTestMocks::kIsNice> {};
+
+TEST_F(ScrollableMessageResponseTest, Run_SUCCESS) {
+  MessageSharedPtr message = CreateMessage();
+  (*message)[am::strings::msg_params][am::strings::result_code] =
+      mobile_apis::Result::SUCCESS;
+
+  MockAppPtr app(CreateMockApp());
+
+  SharedPtr<am::commands::ScrollableMessageResponse> command(
+      CreateCommand<am::commands::ScrollableMessageResponse>(message));
+  EXPECT_CALL(mock_app_manager_, application(_)).WillOnce(Return(app));
+  EXPECT_CALL(*app, UnsubscribeFromSoftButtons(_));
   command->Run();
 }
 
