@@ -58,7 +58,7 @@ void VIIsReadyRequest::on_event(const event_engine::Event& event) {
     case hmi_apis::FunctionID::VehicleInfo_IsReady: {
       LOG4CXX_DEBUG(logger_, "VehicleInfo_IsReady event");
       unsubscribe_from_event(hmi_apis::FunctionID::VehicleInfo_IsReady);
-      bool is_available = ChangeInterfaceState(
+      const bool is_available = ChangeInterfaceState(
                     application_manager_, message,
                     HmiInterfaces::HMI_INTERFACE_VehicleInfo);
 
@@ -82,7 +82,7 @@ void VIIsReadyRequest::on_event(const event_engine::Event& event) {
 }
 
 void VIIsReadyRequest::onTimeOut() {
-    //According wiht new requirment APPLINK-27958
+    // Note(dtrunov): According to new requirment APPLINK-27956
     SendMessageToHMI();
 }
 
@@ -92,7 +92,6 @@ void VIIsReadyRequest::SendMessageToHMI() {
               hmi_apis::FunctionID::VehicleInfo_GetVehicleType, application_manager_));
       application_manager_.ManageHMICommand(get_type);
 }
-
 
 }  // namespace commands
 

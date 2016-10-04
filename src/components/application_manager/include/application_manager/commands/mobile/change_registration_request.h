@@ -138,7 +138,7 @@ class ChangeRegistrationRequest : public CommandRequestImpl {
    * @return result for sending to mobile application.
    */
   bool PrepareResponseParameters(mobile_apis::Result::eType& result_code,
-                                 std::string& response_info);
+                                 std::string& ResponseInfo);
 
   /**
     * @brief Predicate for using with CheckCoincidence method to compare with VR

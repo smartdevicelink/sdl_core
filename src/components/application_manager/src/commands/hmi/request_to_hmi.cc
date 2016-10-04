@@ -40,7 +40,7 @@ bool CheckAvailabilityHMIInterfaces(ApplicationManager& application_manager,
                                     HmiInterfaces::InterfaceID interface) {
   const HmiInterfaces::InterfaceState state =
       application_manager.hmi_interfaces().GetInterfaceState(interface);
-  return HmiInterfaces::STATE_NOT_AVAILABLE != state ? true : false;
+  return HmiInterfaces::STATE_NOT_AVAILABLE != state;
 }
 
 bool ChangeInterfaceState(ApplicationManager& application_manager,

@@ -134,7 +134,7 @@ void ScrollableMessageRequest::on_event(const event_engine::Event& event) {
       GetInfo(HmiInterfaces::HMI_INTERFACE_UI, result_code, response_info,
               message);
 
-      bool result = PrepareResultForMobileResponse(result_code,
+      const bool result = PrepareResultForMobileResponse(result_code,
                                               HmiInterfaces::HMI_INTERFACE_UI);
 
       SendResponse(result,

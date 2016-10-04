@@ -47,7 +47,7 @@ class SmartObject;
 namespace application_manager {
 namespace commands {
 
-struct response_info{
+struct ResponseInfo{
   hmi_apis::Common_Result::eType result_code;
   HmiInterfaces::InterfaceID interface;
   HmiInterfaces::InterfaceState interface_state;
@@ -205,8 +205,8 @@ class CommandRequestImpl : public CommandImpl,
    * @return true if result code complies successful result code
    * otherwise returns false
    */
-  bool PrepareResultForMobileResponse(response_info& first,
-                                      response_info& second) const;
+  bool PrepareResultForMobileResponse(ResponseInfo& first,
+                                      ResponseInfo& second) const;
   /**
    * @brief If message from HMI contains returns this info
    * or process result code from HMI and checks state of interface
@@ -230,8 +230,8 @@ class CommandRequestImpl : public CommandImpl,
    * @return resulting code for sending to mobile application.
    */
   mobile_apis::Result::eType PrepareResultCodeForResponse(
-      const response_info& first,
-      const response_info& second);
+      const ResponseInfo& first,
+      const ResponseInfo& second);
 
 protected:
   /**

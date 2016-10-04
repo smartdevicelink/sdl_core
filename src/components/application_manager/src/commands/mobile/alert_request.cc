@@ -207,17 +207,17 @@ void AlertRequest::on_event(const event_engine::Event& event) {
 
 bool AlertRequest::PrepareResponseParameters(mobile_apis::Result::eType& result_code,
                                              std::string& info) {
-  response_info ui_alert_info{alert_result_, HmiInterfaces::HMI_INTERFACE_UI,
+  ResponseInfo ui_alert_info{alert_result_, HmiInterfaces::HMI_INTERFACE_UI,
                                   HmiInterfaces::STATE_NOT_RESPONSE,
                                   false, false, false};
-  response_info tts_alert_info{tts_speak_result_, HmiInterfaces::HMI_INTERFACE_TTS,
+  ResponseInfo tts_alert_info{tts_speak_result_, HmiInterfaces::HMI_INTERFACE_TTS,
                                   HmiInterfaces::STATE_NOT_RESPONSE,
                                   false, false, false};
 
   bool result = PrepareResultForMobileResponse(ui_alert_info, tts_alert_info);
 
   /* result=false if UI interface is ok and TTS interface = UNSUPPORTED_RESOURCE
-   * and sdl receive TTS.IsReady=true or SDL doesn't resive responce for
+   * and sdl receive TTS.IsReady=true or SDL doesn't receive responce for
    * TTS.IsReady.
    */
   if (result && ui_alert_info.is_ok && tts_alert_info.is_unsupported_resource &&

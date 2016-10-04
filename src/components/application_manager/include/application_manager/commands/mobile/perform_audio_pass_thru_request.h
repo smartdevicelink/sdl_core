@@ -130,7 +130,7 @@ class PerformAudioPassThruRequest : public CommandRequestImpl {
   /*
    * @brief Tells if there are sent requests without responses
    */
-  bool HasHmiResponsesToWait();
+  bool IsWaitingHMIResponse();
 
   /* flag display state of speak and ui perform audio
   during perform audio pass thru*/

@@ -258,7 +258,7 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
   }
   mobile_apis::Result::eType result_code = mobile_apis::Result::INVALID_ENUM;
   std::string response_info;
-  bool result = PrepareResponseParameters(result_code, response_info);
+  const bool result = PrepareResponseParameters(result_code, response_info);
 
   // TODO{ALeshin} APPLINK-15858. connection_key removed during SendResponse
   ApplicationSharedPtr application =
@@ -284,10 +284,10 @@ bool SetGlobalPropertiesRequest::PrepareResponseParameters(
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace helpers;
 
-  response_info ui_properties_info{ui_result_, HmiInterfaces::HMI_INTERFACE_UI,
+  ResponseInfo ui_properties_info{ui_result_, HmiInterfaces::HMI_INTERFACE_UI,
                                   HmiInterfaces::STATE_NOT_RESPONSE,
                                   false, false, false};
-  response_info tts_properties_info{tts_result_, HmiInterfaces::HMI_INTERFACE_TTS,
+  ResponseInfo tts_properties_info{tts_result_, HmiInterfaces::HMI_INTERFACE_TTS,
                                   HmiInterfaces::STATE_NOT_RESPONSE,
                                   false, false, false};
 

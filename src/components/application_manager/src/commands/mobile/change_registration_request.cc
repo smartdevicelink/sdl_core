@@ -295,7 +295,7 @@ bool ChangeRegistrationRequest::PrepareResponseParameters(
   if ((result && is_tts_or_ui_or_vr_unsupported) || is_tts_ui_vr_unsupported) {
     result_code = mobile_apis::Result::UNSUPPORTED_RESOURCE;
   } else {
-      //If esponse contains erroneous result code SDL need return erroneus result code.
+      //If response contains erroneous result code SDL need return erroneus result code.
       hmi_apis::Common_Result::eType ui_result =
               hmi_apis::Common_Result::INVALID_ENUM;
       hmi_apis::Common_Result::eType vr_result =

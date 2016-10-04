@@ -58,7 +58,7 @@ void UIIsReadyRequest::on_event(const event_engine::Event& event) {
     case hmi_apis::FunctionID::UI_IsReady: {
       LOG4CXX_DEBUG(logger_, "Received UI_IsReady event");
       unsubscribe_from_event(hmi_apis::FunctionID::UI_IsReady);
-      bool is_available = ChangeInterfaceState(
+      const bool is_available = ChangeInterfaceState(
                       application_manager_, message,
                       HmiInterfaces::HMI_INTERFACE_UI);
       HMICapabilities& hmi_capabilities = application_manager_.hmi_capabilities();
@@ -79,7 +79,7 @@ void UIIsReadyRequest::on_event(const event_engine::Event& event) {
 }
 
 void UIIsReadyRequest::onTimeOut() {
-    //According wiht new requirment APPLINK-27957
+    // Note(dtrunov): According to new requirment APPLINK-27956
     SendMessageToHMI();
 }
 

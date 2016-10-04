@@ -174,7 +174,7 @@ void PerformAudioPassThruRequest::on_event(const event_engine::Event& event) {
       return;
     }
   }
-  if (HasHmiResponsesToWait()) {
+  if (IsWaitingHMIResponse()) {
       return;
   }
 
@@ -193,10 +193,10 @@ bool PerformAudioPassThruRequest::PrepareResponseParameters(
     mobile_apis::Result::eType& result_code, std::string& info) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  response_info ui_perform_info{result_ui_, HmiInterfaces::HMI_INTERFACE_UI,
+  ResponseInfo ui_perform_info{result_ui_, HmiInterfaces::HMI_INTERFACE_UI,
                                   HmiInterfaces::STATE_NOT_RESPONSE,
                                   false, false, false};
-  response_info tts_perform_info{result_tts_speak_, HmiInterfaces::HMI_INTERFACE_TTS,
+  ResponseInfo tts_perform_info{result_tts_speak_, HmiInterfaces::HMI_INTERFACE_TTS,
                                   HmiInterfaces::STATE_NOT_RESPONSE,
                                   false, false, false};
 
@@ -365,7 +365,7 @@ void PerformAudioPassThruRequest::FinishTTSSpeak() {
   SendHMIRequest(hmi_apis::FunctionID::TTS_StopSpeaking, NULL);
 }
 
-bool PerformAudioPassThruRequest::HasHmiResponsesToWait() {
+bool PerformAudioPassThruRequest::IsWaitingHMIResponse() {
   LOG4CXX_AUTO_TRACE(logger_);
   return awaiting_tts_speak_response_ || awaiting_ui_response_;
 }

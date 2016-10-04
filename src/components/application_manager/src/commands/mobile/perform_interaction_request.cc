@@ -939,10 +939,10 @@ void PerformInteractionRequest::SendBothModeResponse(
   LOG4CXX_AUTO_TRACE(logger_);
   mobile_apis::Result::eType perform_interaction_result_code =
           mobile_apis::Result::INVALID_ENUM;
-  response_info ui_perform_info{ui_result_code_, HmiInterfaces::HMI_INTERFACE_UI,
+  ResponseInfo ui_perform_info{ui_result_code_, HmiInterfaces::HMI_INTERFACE_UI,
                                   HmiInterfaces::STATE_NOT_RESPONSE,
                                   false, false, false};
-  response_info vr_perform_info{vr_result_code_, HmiInterfaces::HMI_INTERFACE_VR,
+  ResponseInfo vr_perform_info{vr_result_code_, HmiInterfaces::HMI_INTERFACE_VR,
                                   HmiInterfaces::STATE_NOT_RESPONSE,
                                   false, false, false};
 
