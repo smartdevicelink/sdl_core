@@ -97,11 +97,11 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
                               const uint32_t app_id);
 
   /**
-   * @brief SendChangeRagistrationOnHMI send required SendChangeRagistration
+   * @brief SendChangeRegistrationOnHMI send required SendChangeRegistration
    * HMI
    * @param app application to change registration
    */
-  void SendChangeRagistrationOnHMI(ApplicationConstSharedPtr app);
+  void SendChangeRegistrationOnHMI(ApplicationConstSharedPtr app);
 
   /**
    * @brief Sends OnAppRegistered notification to HMI

@@ -33,6 +33,7 @@
 
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_PERFORM_INTERACTION_REQUEST_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_PERFORM_INTERACTION_REQUEST_H_
+#include <string>
 
 #include "application_manager/commands/command_request_impl.h"
 #include "application_manager/application.h"
@@ -87,25 +88,24 @@ class PerformInteractionRequest : public CommandRequestImpl {
   virtual void onTimeOut();
 
  private:
-  /*
+  /**
    * @brief Function will be called when VR_OnCommand event
    * comes
-   *
    * @param message which should send to mobile side
-   *
+   * @return true if send response to mobile application otherwise
+   * return false.
    */
-  void ProcessVRResponse(const smart_objects::SmartObject& message,
+  bool ProcessVRResponse(const smart_objects::SmartObject& message,
                          smart_objects::SmartObject& msg_params);
 
-  /*
+  /**
    * @brief Sends PerformInteraction response to mobile side
-   *
    * @param message which should send to mobile side
-   *
+   * @return true if send response to mobile application otherwise
+   * return false.
    */
-  void ProcessPerformInteractionResponse(
-      const smart_objects::SmartObject& message,
-      smart_objects::SmartObject& msg_params);
+  bool ProcessUIResponse(const smart_objects::SmartObject& message,
+                         smart_objects::SmartObject& msg_params);
 
   /*
    * @brief Sends UI PerformInteraction request to HMI
@@ -218,12 +218,6 @@ class PerformInteractionRequest : public CommandRequestImpl {
   const bool HasHMIResponsesToWait() const;
 
   /**
-   * @brief Check VR response result code, in case GENERIC_ERROR, REJECTED,
-   * send resultCode FALSE, in case WARNINGS send resultCode TRUE
-   */
-  void CheckResponseResultCode();
-
-  /**
    * @brief Check UI & VR result codes, send response to mobile
    * @param msg_param Message params to send
    */
@@ -232,12 +226,12 @@ class PerformInteractionRequest : public CommandRequestImpl {
   mobile_apis::InteractionMode::eType interaction_mode_;
   bool ui_response_recived_;
   bool vr_response_recived_;
-  bool ui_result_;
-  bool vr_result_;
   bool app_pi_was_active_before_;
   static uint32_t pi_requests_count_;
-  mobile_apis::Result::eType vr_resultCode_;
-  mobile_apis::Result::eType ui_resultCode_;
+  hmi_apis::Common_Result::eType vr_result_code_;
+  hmi_apis::Common_Result::eType ui_result_code_;
+  std::string ui_info_;
+  std::string vr_info_;
 
   DISALLOW_COPY_AND_ASSIGN(PerformInteractionRequest);
 };

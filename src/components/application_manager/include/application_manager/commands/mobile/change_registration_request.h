@@ -106,15 +106,6 @@ class ChangeRegistrationRequest : public CommandRequestImpl {
    */
   bool IsPendingResponseExist();
 
-  /*
-   * @brief Checks result codes
-   *
-   * @return true if all of result codes is success
-   */
-  bool AllHmiResponsesSuccess(const hmi_apis::Common_Result::eType ui,
-                              const hmi_apis::Common_Result::eType vr,
-                              const hmi_apis::Common_Result::eType tts);
-
   /**
    * @brief Checks change_registration params(ttsName, appname,
    * ngnMediaScreenAppName, vrSynonyms) on invalid characters.
@@ -141,11 +132,20 @@ class ChangeRegistrationRequest : public CommandRequestImpl {
   bool IsNicknameAllowed(const custom_str::CustomString& app_name) const;
 
   /**
-   * @brief Predicate for using with CheckCoincidence method to compare with VR
-   * synonym SO
-   *
-   * @return TRUE if there is coincidence of VR, otherwise FALSE
+   * @brief Prepare result code and result for sending to mobile application
+   * @param result_code contains result code for sending to mobile application
+   * @param response_info contains info for sending to mobile application
+   * @return result for sending to mobile application.
    */
+  bool PrepareResponseParameters(mobile_apis::Result::eType& result_code,
+                                 std::string& ResponseInfo);
+
+  /**
+    * @brief Predicate for using with CheckCoincidence method to compare with VR
+    * synonym SO
+    *
+    * @return TRUE if there is coincidence of VR, otherwise FALSE
+    */
   struct CoincidencePredicateVR {
     CoincidencePredicateVR(const custom_str::CustomString& newItem)
         : newItem_(newItem){};
@@ -163,6 +163,9 @@ class ChangeRegistrationRequest : public CommandRequestImpl {
   hmi_apis::Common_Result::eType ui_result_;
   hmi_apis::Common_Result::eType vr_result_;
   hmi_apis::Common_Result::eType tts_result_;
+  std::string ui_response_info_;
+  std::string vr_response_info_;
+  std::string tts_response_info_;
 
   DISALLOW_COPY_AND_ASSIGN(ChangeRegistrationRequest);
 };

@@ -353,52 +353,6 @@ TEST_F(HMICapabilitiesTest, LoadCapabilitiesFromFile) {
   EXPECT_EQ("SE", vehicle_type_so["trim"].asString());
 }
 
-TEST_F(HMICapabilitiesTest,
-       HmiCapabilitiesInitialized_UiVrTtsIviNotCooperating) {
-  // Precondition
-  hmi_capabilities_test->set_is_vr_cooperating(false);
-  hmi_capabilities_test->set_is_tts_cooperating(false);
-
-  hmi_capabilities_test->set_is_ui_cooperating(false);
-  hmi_capabilities_test->set_is_navi_cooperating(false);
-  hmi_capabilities_test->set_is_ivi_cooperating(false);
-  EXPECT_TRUE(hmi_capabilities_test->is_hmi_capabilities_initialized());
-}
-
-TEST_F(HMICapabilitiesTest, HmiCapabilitiesInitialized) {
-  // Precondition
-  SetCooperating();
-  smart_objects::SmartObjectSPtr language(
-      new smart_objects::SmartObject(smart_objects::SmartType_Map));
-
-  EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
-              CreateModuleInfoSO(_, _)).WillRepeatedly(Return(language));
-
-  hmi_capabilities_test->set_is_vr_cooperating(true);
-  smart_objects::SmartObject supported_languages;
-  supported_languages[0] = "EN_US";
-  hmi_capabilities_test->set_vr_supported_languages(supported_languages);
-  hmi_capabilities_test->set_tts_supported_languages(supported_languages);
-  hmi_capabilities_test->set_ui_supported_languages(supported_languages);
-  hmi_capabilities_test->set_vehicle_type(supported_languages);
-
-  hmi_capabilities_test->set_is_tts_cooperating(true);
-  hmi_capabilities_test->set_is_ui_cooperating(true);
-  hmi_capabilities_test->set_is_navi_cooperating(true);
-  hmi_capabilities_test->set_is_ivi_cooperating(true);
-
-  hmi_capabilities_test->set_active_vr_language(
-      hmi_apis::Common_Language::EN_US);
-  SetCooperating();
-  hmi_capabilities_test->set_active_tts_language(
-      hmi_apis::Common_Language::EN_US);
-  SetCooperating();
-  hmi_capabilities_test->set_active_ui_language(
-      hmi_apis::Common_Language::EN_US);
-
-  EXPECT_TRUE(hmi_capabilities_test->is_hmi_capabilities_initialized());
-}
-
 TEST_F(HMICapabilitiesTest, VerifyImageType) {
   const int32_t image_type = 1;
   smart_objects::SmartObject sm_obj;
@@ -419,88 +373,23 @@ void HMICapabilitiesTest::SetCooperating() {
 }
 
 TEST_F(HMICapabilitiesTest, SetVRCooperating) {
-  // Without sequence it is impossible to check correct call of ManageHMICommand
-  InSequence dummy;
-  smart_objects::SmartObjectSPtr language(
-      new smart_objects::SmartObject(smart_objects::SmartType_Map));
-  EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
-              CreateModuleInfoSO(hmi_apis::FunctionID::VR_GetLanguage, _))
-      .WillOnce(Return(language));
-  EXPECT_CALL(app_mngr_, ManageHMICommand(language));
-
-  smart_objects::SmartObjectSPtr support_language;
-  EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
-              CreateModuleInfoSO(hmi_apis::FunctionID::VR_GetSupportedLanguages,
-                                 _)).WillOnce(Return(support_language));
-  EXPECT_CALL(app_mngr_, ManageHMICommand(support_language));
-
-  smart_objects::SmartObjectSPtr capabilities;
-  EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
-              CreateModuleInfoSO(hmi_apis::FunctionID::VR_GetCapabilities, _))
-      .WillOnce(Return(capabilities));
-  EXPECT_CALL(app_mngr_, ManageHMICommand(capabilities));
-
   hmi_capabilities_test->set_is_vr_cooperating(true);
+  EXPECT_EQ(true, hmi_capabilities_test->is_vr_cooperating());
 }
 
 TEST_F(HMICapabilitiesTest, SetTTSCooperating) {
-  smart_objects::SmartObjectSPtr language(
-      new smart_objects::SmartObject(smart_objects::SmartType_Map));
-  InSequence dummy;
-  EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
-              CreateModuleInfoSO(hmi_apis::FunctionID::TTS_GetLanguage, _))
-      .WillOnce(Return(language));
-  EXPECT_CALL(app_mngr_, ManageHMICommand(language));
-
-  smart_objects::SmartObjectSPtr support_language;
-  EXPECT_CALL(
-      *(MockMessageHelper::message_helper_mock()),
-      CreateModuleInfoSO(hmi_apis::FunctionID::TTS_GetSupportedLanguages, _))
-      .WillOnce(Return(support_language));
-  EXPECT_CALL(app_mngr_, ManageHMICommand(support_language));
-
-  smart_objects::SmartObjectSPtr capabilities;
-  EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
-              CreateModuleInfoSO(hmi_apis::FunctionID::TTS_GetCapabilities, _))
-      .WillOnce(Return(capabilities));
-  EXPECT_CALL(app_mngr_, ManageHMICommand(capabilities));
-
   hmi_capabilities_test->set_is_tts_cooperating(true);
+  EXPECT_EQ(true, hmi_capabilities_test->is_tts_cooperating());
 }
 
 TEST_F(HMICapabilitiesTest, SetUICooperating) {
-  InSequence dummy;
-  smart_objects::SmartObjectSPtr language(
-      new smart_objects::SmartObject(smart_objects::SmartType_Map));
-  EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
-              CreateModuleInfoSO(hmi_apis::FunctionID::UI_GetLanguage, _))
-      .WillOnce(Return(language));
-  EXPECT_CALL(app_mngr_, ManageHMICommand(language));
-
-  smart_objects::SmartObjectSPtr support_language;
-  EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
-              CreateModuleInfoSO(hmi_apis::FunctionID::UI_GetSupportedLanguages,
-                                 _)).WillOnce(Return(support_language));
-  EXPECT_CALL(app_mngr_, ManageHMICommand(support_language));
-
-  smart_objects::SmartObjectSPtr capabilities;
-  EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
-              CreateModuleInfoSO(hmi_apis::FunctionID::UI_GetCapabilities, _))
-      .WillOnce(Return(capabilities));
-  EXPECT_CALL(app_mngr_, ManageHMICommand(capabilities));
-
   hmi_capabilities_test->set_is_ui_cooperating(true);
+  EXPECT_EQ(true, hmi_capabilities_test->is_ui_cooperating());
 }
 
 TEST_F(HMICapabilitiesTest, SetIviCooperating) {
-  smart_objects::SmartObjectSPtr ivi_type;
-  EXPECT_CALL(
-      *(MockMessageHelper::message_helper_mock()),
-      CreateModuleInfoSO(hmi_apis::FunctionID::VehicleInfo_GetVehicleType, _))
-      .WillOnce(Return(ivi_type));
-  EXPECT_CALL(app_mngr_, ManageHMICommand(ivi_type));
-
   hmi_capabilities_test->set_is_ivi_cooperating(true);
+  EXPECT_EQ(true, hmi_capabilities_test->is_ivi_cooperating());
 }
 
 }  // namespace application_manager_test

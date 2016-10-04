@@ -120,7 +120,7 @@ generate_function_to_interface_convert_map() {
   convert_map[VR_GetSupportedLanguages] = HmiInterfaces::HMI_INTERFACE_VR;
   convert_map[VR_GetLanguage] = HmiInterfaces::HMI_INTERFACE_VR;
   convert_map[VR_GetCapabilities] = HmiInterfaces::HMI_INTERFACE_VR;
-  convert_map[TTS_GetCapabilities] = HmiInterfaces::HMI_INTERFACE_VR;
+  convert_map[TTS_GetCapabilities] = HmiInterfaces::HMI_INTERFACE_TTS;
   convert_map[TTS_Started] = HmiInterfaces::HMI_INTERFACE_TTS;
   convert_map[TTS_Stopped] = HmiInterfaces::HMI_INTERFACE_TTS;
   convert_map[TTS_IsReady] = HmiInterfaces::HMI_INTERFACE_TTS;

@@ -50,6 +50,7 @@
 #include "application_manager/mock_message_helper.h"
 #include "application_manager/mock_hmi_capabilities.h"
 #include "application_manager/event_engine/event.h"
+#include "application_manager/mock_hmi_interface.h"
 
 namespace test {
 namespace components {
@@ -61,6 +62,7 @@ using am::ApplicationManager;
 using am::commands::MessageSharedPtr;
 using am::ApplicationSharedPtr;
 using am::MockMessageHelper;
+using am::MockHmiInterfaces;
 using ::testing::_;
 using ::utils::SharedPtr;
 using ::testing::Return;
@@ -85,62 +87,81 @@ class ChangeRegistrationRequestTest
   sync_primitives::Lock app_set_lock_;
   sync_primitives::Lock lock_;
 
-  MessageSharedPtr CreateFullParamsVRSO() {
+  MessageSharedPtr CreateMsgFromMobile() {
     MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
     (*msg)[strings::params][strings::connection_key] = kConnectionKey;
     smart_objects::SmartObject msg_params =
         smart_objects::SmartObject(smart_objects::SmartType_Map);
-    msg_params[strings::cmd_id] = kCmdId;
-    msg_params[strings::vr_commands] =
-        smart_objects::SmartObject(smart_objects::SmartType_Array);
-    msg_params[strings::vr_commands][0] = "lamer";
-    msg_params[strings::type] = 34;
-    msg_params[strings::grammar_id] = 12;
-    msg_params[strings::app_id] = kAppId;
+    msg_params[strings::hmi_display_language] = mobile_apis::Language::EN_US;
+    msg_params[strings::language] = mobile_apis::Language::EN_US;
     (*msg)[strings::msg_params] = msg_params;
-
     return msg;
   }
+  void PrepareExpectationBeforeRun() {
+    ON_CALL(app_mngr_, hmi_capabilities())
+        .WillByDefault(ReturnRef(hmi_capabilities_));
+    smart_objects::SmartObject supported_languages(
+        smart_objects::SmartType_Array);
+    supported_languages[0] = static_cast<int32_t>(mobile_apis::Language::EN_US);
+    EXPECT_CALL(hmi_capabilities_, ui_supported_languages())
+        .WillOnce(Return(&supported_languages));
+    EXPECT_CALL(hmi_capabilities_, vr_supported_languages())
+        .WillOnce(Return(&supported_languages));
+    EXPECT_CALL(hmi_capabilities_, tts_supported_languages())
+        .WillOnce(Return(&supported_languages));
+
+    EXPECT_CALL(app_mngr_, hmi_interfaces())
+        .WillRepeatedly(ReturnRef(hmi_interfaces_));
+    EXPECT_CALL(
+        hmi_interfaces_,
+        GetInterfaceFromFunction(hmi_apis::FunctionID::UI_ChangeRegistration))
+        .WillOnce(Return(am::HmiInterfaces::HMI_INTERFACE_UI));
+    EXPECT_CALL(hmi_interfaces_,
+                GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
+        .WillOnce(Return(am::HmiInterfaces::STATE_AVAILABLE));
+
+    EXPECT_CALL(
+        hmi_interfaces_,
+        GetInterfaceFromFunction(hmi_apis::FunctionID::VR_ChangeRegistration))
+        .WillOnce(Return(am::HmiInterfaces::HMI_INTERFACE_VR));
+    EXPECT_CALL(hmi_interfaces_,
+                GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_VR))
+        .WillOnce(Return(am::HmiInterfaces::STATE_AVAILABLE));
+
+    EXPECT_CALL(
+        hmi_interfaces_,
+        GetInterfaceFromFunction(hmi_apis::FunctionID::TTS_ChangeRegistration))
+        .WillOnce(Return(am::HmiInterfaces::HMI_INTERFACE_TTS));
+    EXPECT_CALL(hmi_interfaces_,
+                GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_TTS))
+        .WillOnce(Return(am::HmiInterfaces::STATE_AVAILABLE));
+  }
+
+  void CreateResponseFromHMI(MessageSharedPtr msg,
+                             hmi_apis::Common_Result::eType result,
+                             const std::string& info) {
+    (*msg)[strings::params][hmi_response::code] = static_cast<int32_t>(result);
+    (*msg)[strings::msg_params][strings::info] = info;
+  }
+
   typedef TypeIf<kMocksAreNice,
                  NiceMock<application_manager_test::MockHMICapabilities>,
                  application_manager_test::MockHMICapabilities>::Result
       MockHMICapabilities;
+  MockHMICapabilities hmi_capabilities_;
+  MockHmiInterfaces hmi_interfaces_;
 };
 
 typedef ChangeRegistrationRequestTest::MockHMICapabilities MockHMICapabilities;
 
 TEST_F(ChangeRegistrationRequestTest, OnEvent_VR_UNSUPPORTED_RESOURCE) {
-  MessageSharedPtr msg_vr = CreateFullParamsVRSO();
+  MessageSharedPtr msg_from_mobile = CreateMsgFromMobile();
 
-  utils::SharedPtr<ChangeRegistrationRequest> req_vr =
-      CreateCommand<ChangeRegistrationRequest>(msg_vr);
-
+  utils::SharedPtr<ChangeRegistrationRequest> command =
+      CreateCommand<ChangeRegistrationRequest>(msg_from_mobile);
   MockAppPtr mock_app = CreateMockApp();
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app));
   ON_CALL(*mock_app, app_id()).WillByDefault(Return(1));
-
-  MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
-  (*msg)[strings::params][hmi_response::code] =
-      hmi_apis::Common_Result::WARNINGS;
-  (*msg)[strings::params][strings::info] = "info";
-  (*msg)[strings::msg_params][strings::cmd_id] = kCommandId;
-
-  am::event_engine::Event event(hmi_apis::FunctionID::VR_ChangeRegistration);
-  event.set_smart_object(*msg);
-
-  smart_objects::SmartObject* ptr = NULL;
-  ON_CALL(*mock_app, FindCommand(kCmdId)).WillByDefault(Return(ptr));
-  EXPECT_EQ(NULL, ptr);
-
-  am::CommandsMap commands_map;
-  ON_CALL(*mock_app, commands_map())
-      .WillByDefault(
-          Return(DataAccessor<am::CommandsMap>(commands_map, lock_)));
-
-  MockHMICapabilities hmi_capabilities;
-  ON_CALL(app_mngr_, hmi_capabilities())
-      .WillByDefault(ReturnRef(hmi_capabilities));
-
   am::ApplicationSet application_set;
   const utils::custom_string::CustomString name("name");
   MockAppPtr app = CreateMockApp();
@@ -152,32 +173,45 @@ TEST_F(ChangeRegistrationRequestTest, OnEvent_VR_UNSUPPORTED_RESOURCE) {
 
   EXPECT_CALL(app_mngr_, applications()).WillOnce(Return(accessor));
   EXPECT_CALL(*app, name()).WillOnce(ReturnRef(name));
+  PrepareExpectationBeforeRun();
+  command->Run();
+
+  MessageSharedPtr ui_response = CreateMessage(smart_objects::SmartType_Map);
+  MessageSharedPtr vr_response = CreateMessage(smart_objects::SmartType_Map);
+  MessageSharedPtr tts_response = CreateMessage(smart_objects::SmartType_Map);
+  CreateResponseFromHMI(
+      ui_response, hmi_apis::Common_Result::WARNINGS, "ui_info");
+  CreateResponseFromHMI(vr_response,
+                        hmi_apis::Common_Result::UNSUPPORTED_RESOURCE,
+                        "unsupported_resource");
+  CreateResponseFromHMI(
+      tts_response, hmi_apis::Common_Result::SUCCESS, "tts_info");
+
+  am::event_engine::Event event_ui(hmi_apis::FunctionID::UI_ChangeRegistration);
+  event_ui.set_smart_object(*ui_response);
+  am::event_engine::Event event_vr(hmi_apis::FunctionID::VR_ChangeRegistration);
+  event_vr.set_smart_object(*vr_response);
+  am::event_engine::Event event_tts(
+      hmi_apis::FunctionID::TTS_ChangeRegistration);
+  event_tts.set_smart_object(*tts_response);
+
+  MessageSharedPtr response_to_mobile;
+
   EXPECT_CALL(
       app_mngr_,
       ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
-      .WillOnce(Return(true));
+      .WillOnce(DoAll(SaveArg<0>(&response_to_mobile), Return(true)));
 
-  req_vr->Run();
-
-  MessageSharedPtr vr_command_result;
-  EXPECT_CALL(
-      app_mngr_,
-      ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
-      .WillOnce(DoAll(SaveArg<0>(&vr_command_result), Return(true)));
-
-  req_vr->on_event(event);
+  command->on_event(event_ui);
+  command->on_event(event_vr);
+  command->on_event(event_tts);
 
   EXPECT_EQ(
-      (*vr_command_result)[strings::msg_params][strings::success].asBool(),
-      false);
+      (*response_to_mobile)[strings::msg_params][strings::success].asBool(),
+      true);
   EXPECT_EQ(
-      (*vr_command_result)[strings::msg_params][strings::result_code].asInt(),
-      static_cast<int32_t>(hmi_apis::Common_Result::WARNINGS));
-  if ((*vr_command_result)[strings::msg_params].keyExists(strings::info)) {
-    EXPECT_EQ(
-        (*vr_command_result)[strings::msg_params][strings::info].asString(),
-        (*msg)[strings::msg_params][strings::info].asString());
-  }
+      (*response_to_mobile)[strings::msg_params][strings::result_code].asInt(),
+      static_cast<int32_t>(mobile_apis::Result::UNSUPPORTED_RESOURCE));
 }
 
 }  // namespace commands_test

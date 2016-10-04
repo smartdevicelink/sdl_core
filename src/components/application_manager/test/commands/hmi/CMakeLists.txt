@@ -39,9 +39,9 @@ include_directories(
 set (SOURCES
   ${AM_SOURCE_DIR}/src/smart_object_keys.cc
   ${AM_SOURCE_DIR}/test/mock_message_helper.cc
-  ${COMMANDS_TEST_SOURCE_DIR}/hmi/vi_is_ready_response_test.cc
-  ${COMMANDS_TEST_SOURCE_DIR}/hmi/vr_is_ready_response_test.cc
-)
+  ${COMMANDS_TEST_SOURCE_DIR}/hmi/vi_is_ready_request_test.cc
+  ${COMMANDS_TEST_SOURCE_DIR}/hmi/vr_is_ready_request_test.cc
+  )
 
 set(LIBRARIES
   gmock
