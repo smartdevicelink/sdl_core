@@ -51,7 +51,8 @@ class OnHMIStatusNotification : public CommandNotificationImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnHMIStatusNotification(const MessageSharedPtr& message);
+  OnHMIStatusNotification(const MessageSharedPtr& message,
+                          ApplicationManager& application_manager);
 
   /**
    * @brief OnHMIStatusNotification class destructor
@@ -63,7 +64,7 @@ class OnHMIStatusNotification : public CommandNotificationImpl {
    **/
   virtual void Run();
 
-private:
+ private:
   DISALLOW_COPY_AND_ASSIGN(OnHMIStatusNotification);
 };
 

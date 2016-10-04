@@ -50,24 +50,16 @@
 
 namespace transport_manager {
 
-class TMMetricObserver;
+class TMTelemetryObserver;
 
 namespace transport_adapter {
 
 class TransportAdapterListener;
 
 // TODO(EZamakhov): cahnge to DeviceUID
-//typedef std::string DeviceType;
+// typedef std::string DeviceType;
 
-enum DeviceType {
-  AOA,
-  PASA_AOA,
-  BLUETOOTH,
-  PASA_BLUETOOTH,
-  MME,
-  TCP,
-  UNKNOWN
-};
+enum DeviceType { AOA, PASA_AOA, BLUETOOTH, PASA_BLUETOOTH, MME, TCP, UNKNOWN };
 
 typedef std::map<DeviceType, std::string> DeviceTypes;
 
@@ -87,14 +79,7 @@ class TransportAdapter {
   /**
    * @enum Available types of errors.
    */
-  enum Error {
-    OK,
-    FAIL,
-    NOT_SUPPORTED,
-    ALREADY_EXISTS,
-    BAD_STATE,
-    BAD_PARAM
-  };
+  enum Error { OK, FAIL, NOT_SUPPORTED, ALREADY_EXISTS, BAD_STATE, BAD_PARAM };
 
  public:
   /**
@@ -211,6 +196,15 @@ class TransportAdapter {
   virtual Error StopClientListening() = 0;
 
   /**
+   * @brief Remove marked as FINALISING connection from accounting.
+   *
+   * @param device_handle Device unique identifier.
+   * @param app_handle Handle of application.
+   */
+  virtual void RemoveFinalizedConnection(
+      const DeviceUID& device_handle, const ApplicationHandle& app_handle) = 0;
+
+  /**
    * @brief Disconnect from specified session.
    *
    * @param device_handle Handle of device to Disconnect from.
@@ -260,8 +254,8 @@ class TransportAdapter {
    *
    * @return Container(vector) that holds application unique identifiers.
    */
-  virtual ApplicationList GetApplicationList(const DeviceUID& device_handle)
-      const = 0;
+  virtual ApplicationList GetApplicationList(
+      const DeviceUID& device_handle) const = 0;
 
   /**
    * @brief Return name of device.
@@ -272,14 +266,14 @@ class TransportAdapter {
    */
   virtual std::string DeviceName(const DeviceUID& device_id) const = 0;
 
-#ifdef TIME_TESTER
+#ifdef TELEMETRY_MONITOR
   /**
    * @brief Return Time metric observer
    *
    * @param return pointer to Time metric observer
    */
-  virtual TMMetricObserver* GetTimeMetricObserver() = 0;
-#endif  // TIME_TESTER
+  virtual TMTelemetryObserver* GetTelemetryObserver() = 0;
+#endif  // TELEMETRY_MONITOR
 };
 }  // namespace transport_adapter
 }  // namespace transport_manager

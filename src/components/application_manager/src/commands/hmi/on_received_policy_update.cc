@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,30 +32,36 @@
 
 #include <string>
 #include "application_manager/commands/hmi/on_received_policy_update.h"
-#include "application_manager/policies/policy_handler.h"
+#include "application_manager/application_manager.h"
 #include "utils/file_system.h"
 
 namespace application_manager {
 
 namespace commands {
 
-OnReceivedPolicyUpdate::OnReceivedPolicyUpdate(const MessageSharedPtr& message)
-  : NotificationFromHMI(message) {
-}
+OnReceivedPolicyUpdate::OnReceivedPolicyUpdate(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : NotificationFromHMI(message, application_manager) {}
 
-OnReceivedPolicyUpdate::~OnReceivedPolicyUpdate() {
-}
+OnReceivedPolicyUpdate::~OnReceivedPolicyUpdate() {}
 
 void OnReceivedPolicyUpdate::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
+#ifdef EXTENDED_POLICY
   const std::string& file_path =
-    (*message_)[strings::msg_params][hmi_notification::policyfile].asString();
+      (*message_)[strings::msg_params][hmi_notification::policyfile].asString();
   policy::BinaryMessage file_content;
   if (!file_system::ReadBinaryFile(file_path, file_content)) {
     LOG4CXX_ERROR(logger_, "Failed to read Update file.");
     return;
   }
-  policy::PolicyHandler::instance()->ReceiveMessageFromSDK(file_path, file_content);
+  application_manager_.GetPolicyHandler().ReceiveMessageFromSDK(file_path,
+                                                                file_content);
+#else
+  LOG4CXX_WARN(logger_,
+               "This RPC is part of extended policy flow."
+               "Please re-build with extended policy mode enabled.");
+#endif
 }
 
 }  // namespace commands

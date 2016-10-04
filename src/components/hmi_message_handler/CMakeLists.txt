@@ -35,7 +35,6 @@ include_directories (
     ${COMPONENTS_DIR}/utils/include/
     ${COMPONENTS_DIR}/smart_objects/include/
     ${COMPONENTS_DIR}/formatters/include/
-    ${COMPONENTS_DIR}/config_profile/include/
     ${COMPONENTS_DIR}/media_manager/include/
     ${COMPONENTS_DIR}/protocol_handler/include
     ${JSONCPP_INCLUDE_DIRECTORY}
@@ -55,7 +54,7 @@ ENDIF ()
 set (SOURCES
     ${COMPONENTS_DIR}/hmi_message_handler/src/hmi_message_handler_impl.cc
     ${COMPONENTS_DIR}/hmi_message_handler/src/messagebroker_adapter.cc
-    ${COMPONENTS_DIR}/hmi_message_handler/src/hmi_message_adapter.cc
+    ${COMPONENTS_DIR}/hmi_message_handler/src/hmi_message_adapter_impl.cc
     ${COMPONENTS_DIR}/hmi_message_handler/src/mqueue_adapter.cc
     ${DBUS_SOURCE}
 )
@@ -76,6 +75,6 @@ endif()
 # Tests temporary are inactivated. For details please check
 # Readme.txt in test directory of hmi_message_handler 
 
-#if(BUILD_TESTS)
-#  add_subdirectory(test)
-#endif()
+if(BUILD_TESTS)
+  add_subdirectory(test)
+endif()

@@ -38,18 +38,16 @@ namespace application_manager {
 namespace commands {
 
 UIPerformInteractionResponse::UIPerformInteractionResponse(
-    const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {}
 
-UIPerformInteractionResponse::~UIPerformInteractionResponse() {
-}
+UIPerformInteractionResponse::~UIPerformInteractionResponse() {}
 
 void UIPerformInteractionResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   event_engine::Event event(hmi_apis::FunctionID::UI_PerformInteraction);
   event.set_smart_object(*message_);
-  event.raise();
+  event.raise(application_manager_.event_dispatcher());
 }
 
 }  // namespace commands

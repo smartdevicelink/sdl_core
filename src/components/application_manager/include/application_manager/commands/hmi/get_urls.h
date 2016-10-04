@@ -34,34 +34,64 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_URLS_H_
 
 #include "application_manager/commands/hmi/request_from_hmi.h"
+#include "policy/policy_types.h"
 
 namespace application_manager {
 namespace commands {
-
+namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 /**
  * @brief GetUrls command class
  **/
 class GetUrls : public RequestFromHMI {
-  public:
-    /**
-     * @brief GetUrls class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit GetUrls(const MessageSharedPtr& message);
+ public:
+  /**
+   * @brief GetUrls class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  GetUrls(const MessageSharedPtr& message,
+          ApplicationManager& application_manager);
 
-    /**
-     * @brief GetUrls class destructor
-     **/
-    virtual ~GetUrls();
+  /**
+   * @brief GetUrls class destructor
+   **/
+  virtual ~GetUrls();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+  /**
+   * @brief Execute command
+   **/
+  void Run() OVERRIDE;
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(GetUrls);
+ private:
+#ifdef EXTENDED_POLICY
+  /**
+   * @brief Processes URLs collecting for policy service
+   * @param endpoints Endpoints section of policy table
+   */
+  void ProcessPolicyServiceURLs(const policy::EndpointUrls& endpoints);
+#endif
+
+  /**
+   * @brief Process URLs collecting for service
+   * @param endpoints Endpoints section of policy table
+   */
+  void ProcessServiceURLs(const policy::EndpointUrls& endpoints);
+
+  /**
+   * @brief Sends response to HMI
+   * @param result Result code
+   */
+  void SendResponseToHMI(hmi_apis::Common_Result::eType result);
+
+  /**
+   * @brief fills structure for sending to HMI with default urls
+   * @param urls structure for filling
+   * @param endpoints Endpoints section of policy table
+   */
+  void FillSODefaultUrls(smart_objects::SmartObject& urls,
+                         const policy::EndpointUrls& endpoints);
+
+  DISALLOW_COPY_AND_ASSIGN(GetUrls);
 };
 
 }  // namespace commands

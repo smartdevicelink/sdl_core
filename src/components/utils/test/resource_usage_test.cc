@@ -60,25 +60,24 @@ TEST_F(ResourceUsagePrivateTest, GetMemInfoTest) {
 }
 
 TEST_F(ResourceUsagePrivateTest, GetStatPathTest_FileExists) {
-  //arrange
+  // arrange
   std::string filename = res.GetStatPath();
-  //assert
+  // assert
   EXPECT_TRUE(file_system::FileExists(filename));
 }
 
 TEST_F(ResourceUsagePrivateTest, GetStatPathTest_ReadFile) {
-  //arrange
+  // arrange
   std::string filename = res.GetStatPath();
   std::string output;
-  //assert
+  // assert
   EXPECT_TRUE(file_system::ReadFile(filename, output));
-
 }
 TEST_F(ResourceUsagePrivateTest, GetProcPathTest) {
-  ///arrange
+  /// arrange
   std::string fd = res.GetProcPath();
   std::string filename = res.GetStatPath();
-  //assert
+  // assert
   EXPECT_EQ(filename, fd + "/stat");
 }
 }
@@ -88,7 +87,8 @@ namespace components {
 namespace utils_test {
 
 TEST(ResourceUsageTest, SuccesfulGrabResources) {
-  ::utils::ResourseUsage* resources = ::utils::Resources::getCurrentResourseUsage();
+  ::utils::ResourseUsage* resources =
+      ::utils::Resources::getCurrentResourseUsage();
   EXPECT_TRUE(resources != NULL);
   delete resources;
 }

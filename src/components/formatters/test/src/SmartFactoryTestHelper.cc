@@ -30,27 +30,38 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "SmartFactoryTestHelper.h"
+#include "formatters/SmartFactoryTestHelper.h"
 
 using namespace test::components::formatters;
 
-template<>
-const EnumConversionHelper<TestType::eType>::EnumToCStringMap EnumConversionHelper<
-    test::components::formatters::TestType::eType>::enum_to_cstring_map_ =
-    EnumConversionHelper<test::components::formatters::TestType::eType>::InitEnumToCStringMap();
+template <>
+const EnumConversionHelper<TestType::eType>::EnumToCStringMap
+    EnumConversionHelper<
+        test::components::formatters::TestType::eType>::enum_to_cstring_map_ =
+        EnumConversionHelper<test::components::formatters::TestType::eType>::
+            InitEnumToCStringMap();
 
-template<>
-const EnumConversionHelper<TestType::eType>::CStringToEnumMap EnumConversionHelper<
-    test::components::formatters::TestType::eType>::cstring_to_enum_map_ =
-    EnumConversionHelper<test::components::formatters::TestType::eType>::InitCStringToEnumMap();
+template <>
+const EnumConversionHelper<TestType::eType>::CStringToEnumMap
+    EnumConversionHelper<
+        test::components::formatters::TestType::eType>::cstring_to_enum_map_ =
+        EnumConversionHelper<test::components::formatters::TestType::eType>::
+            InitCStringToEnumMap();
 
-template<>
+template <>
 const char* const EnumConversionHelper<TestType::eType>::cstring_values_[] = {
-    "APPLICATION_NOT_REGISTERED", "SUCCESS", "TOO_MANY_PENDING_REQUESTS",
-    "REJECTED", "INVALID_DATA", "OUT_OF_MEMORY", "ABORTED", "USER_DISALLOWED",
-    "GENERIC_ERROR", "DISALLOWED" };
+    "APPLICATION_NOT_REGISTERED",
+    "SUCCESS",
+    "TOO_MANY_PENDING_REQUESTS",
+    "REJECTED",
+    "INVALID_DATA",
+    "OUT_OF_MEMORY",
+    "ABORTED",
+    "USER_DISALLOWED",
+    "GENERIC_ERROR",
+    "DISALLOWED"};
 
-template<>
+template <>
 const TestType::eType EnumConversionHelper<TestType::eType>::enum_values_[] = {
     test::components::formatters::TestType::APPLICATION_NOT_REGISTERED,
     test::components::formatters::TestType::SUCCESS,
@@ -61,51 +72,64 @@ const TestType::eType EnumConversionHelper<TestType::eType>::enum_values_[] = {
     test::components::formatters::TestType::ABORTED,
     test::components::formatters::TestType::USER_DISALLOWED,
     test::components::formatters::TestType::GENERIC_ERROR,
-    test::components::formatters::TestType::DISALLOWED };
+    test::components::formatters::TestType::DISALLOWED};
 
-template<>
-const EnumConversionHelper<FunctionIdTest::eType>::EnumToCStringMap EnumConversionHelper<
-    test::components::formatters::FunctionIdTest::eType>::enum_to_cstring_map_ =
-    EnumConversionHelper<test::components::formatters::FunctionIdTest::eType>::InitEnumToCStringMap();
+template <>
+const EnumConversionHelper<FunctionIdTest::eType>::EnumToCStringMap
+    EnumConversionHelper<test::components::formatters::FunctionIdTest::eType>::
+        enum_to_cstring_map_ = EnumConversionHelper<
+            test::components::formatters::FunctionIdTest::eType>::
+            InitEnumToCStringMap();
 
-template<>
-const EnumConversionHelper<FunctionIdTest::eType>::CStringToEnumMap EnumConversionHelper<
-    test::components::formatters::FunctionIdTest::eType>::cstring_to_enum_map_ =
-    EnumConversionHelper<test::components::formatters::FunctionIdTest::eType>::InitCStringToEnumMap();
+template <>
+const EnumConversionHelper<FunctionIdTest::eType>::CStringToEnumMap
+    EnumConversionHelper<test::components::formatters::FunctionIdTest::eType>::
+        cstring_to_enum_map_ = EnumConversionHelper<
+            test::components::formatters::FunctionIdTest::eType>::
+            InitCStringToEnumMap();
 
-template<>
-const char* const EnumConversionHelper<FunctionIdTest::eType>::cstring_values_[] =
-    { "Function1", "Function2", "Function3" };
+template <>
+const char* const
+    EnumConversionHelper<FunctionIdTest::eType>::cstring_values_[] = {
+        "Function1", "Function2", "Function3"};
 
-template<>
-const FunctionIdTest::eType EnumConversionHelper<FunctionIdTest::eType>::enum_values_[] =
-    { test::components::formatters::FunctionIdTest::Function1,
+template <>
+const FunctionIdTest::eType
+    EnumConversionHelper<FunctionIdTest::eType>::enum_values_[] = {
+        test::components::formatters::FunctionIdTest::Function1,
         test::components::formatters::FunctionIdTest::Function2,
-        test::components::formatters::FunctionIdTest::Function3 };
+        test::components::formatters::FunctionIdTest::Function3};
 
-template<>
-const EnumConversionHelper<MessageTypeTest::eType>::EnumToCStringMap EnumConversionHelper<
-    test::components::formatters::MessageTypeTest::eType>::enum_to_cstring_map_ =
-    EnumConversionHelper<test::components::formatters::MessageTypeTest::eType>::InitEnumToCStringMap();
+template <>
+const EnumConversionHelper<MessageTypeTest::eType>::EnumToCStringMap
+    EnumConversionHelper<test::components::formatters::MessageTypeTest::eType>::
+        enum_to_cstring_map_ = EnumConversionHelper<
+            test::components::formatters::MessageTypeTest::eType>::
+            InitEnumToCStringMap();
 
-template<>
-const EnumConversionHelper<MessageTypeTest::eType>::CStringToEnumMap EnumConversionHelper<
-    test::components::formatters::MessageTypeTest::eType>::cstring_to_enum_map_ =
-    EnumConversionHelper<test::components::formatters::MessageTypeTest::eType>::InitCStringToEnumMap();
+template <>
+const EnumConversionHelper<MessageTypeTest::eType>::CStringToEnumMap
+    EnumConversionHelper<test::components::formatters::MessageTypeTest::eType>::
+        cstring_to_enum_map_ = EnumConversionHelper<
+            test::components::formatters::MessageTypeTest::eType>::
+            InitCStringToEnumMap();
 
-template<>
-const char* const EnumConversionHelper<MessageTypeTest::eType>::cstring_values_[] =
-    { "request", "response", "notification" };
+template <>
+const char* const
+    EnumConversionHelper<MessageTypeTest::eType>::cstring_values_[] = {
+        "request", "response", "notification"};
 
-template<>
-const MessageTypeTest::eType EnumConversionHelper<MessageTypeTest::eType>::enum_values_[] =
-    { test::components::formatters::MessageTypeTest::request,
+template <>
+const MessageTypeTest::eType
+    EnumConversionHelper<MessageTypeTest::eType>::enum_values_[] = {
+        test::components::formatters::MessageTypeTest::request,
         test::components::formatters::MessageTypeTest::response,
-        test::components::formatters::MessageTypeTest::notification };
+        test::components::formatters::MessageTypeTest::notification};
 
 CSmartFactoryTest::CSmartFactoryTest()
-    : CSmartFactory<FunctionIdTest::eType, MessageTypeTest::eType,
-        StructIdentifiersTest::eType>() {
+    : CSmartFactory<FunctionIdTest::eType,
+                    MessageTypeTest::eType,
+                    StructIdentifiersTest::eType>() {
   TStructsSchemaItems struct_schema_items;
   InitStructSchemes(struct_schema_items);
   std::set<FunctionIdTest::eType> function_id_items;
@@ -118,51 +142,49 @@ CSmartFactoryTest::CSmartFactoryTest()
   message_type_items.insert(MessageTypeTest::response);
   message_type_items.insert(MessageTypeTest::notification);
   message_type_items.insert(MessageTypeTest::error_response);
-  InitFunctionSchemes(struct_schema_items, function_id_items,
-                      message_type_items);
+  InitFunctionSchemes(
+      struct_schema_items, function_id_items, message_type_items);
 }
 
 void CSmartFactoryTest::InitStructSchemes(
-    TStructsSchemaItems &struct_schema_items) {
+    TStructsSchemaItems& struct_schema_items) {
   utils::SharedPtr<ISchemaItem> struct_schema_item_Common_1 =
       InitStructSchemaItem_Common_1(struct_schema_items);
-  struct_schema_items.insert(
-      std::make_pair(StructIdentifiersTest::Common_1,
-                     struct_schema_item_Common_1));
+  struct_schema_items.insert(std::make_pair(StructIdentifiersTest::Common_1,
+                                            struct_schema_item_Common_1));
   structs_schemes_.insert(
       std::make_pair(StructIdentifiersTest::Common_1,
                      CSmartSchema(struct_schema_item_Common_1)));
 
   utils::SharedPtr<ISchemaItem> struct_schema_item_Common_2 =
       InitStructSchemaItem_Common_2();
-  struct_schema_items.insert(
-      std::make_pair(StructIdentifiersTest::Common_2,
-                     struct_schema_item_Common_2));
+  struct_schema_items.insert(std::make_pair(StructIdentifiersTest::Common_2,
+                                            struct_schema_item_Common_2));
   structs_schemes_.insert(
       std::make_pair(StructIdentifiersTest::Common_2,
                      CSmartSchema(struct_schema_item_Common_2)));
 }
 
 void CSmartFactoryTest::InitFunctionSchemes(
-    const TStructsSchemaItems &struct_schema_items,
-    const std::set<FunctionIdTest::eType> &function_id_items,
-    const std::set<MessageTypeTest::eType> &message_type_items) {
+    const TStructsSchemaItems& struct_schema_items,
+    const std::set<FunctionIdTest::eType>& function_id_items,
+    const std::set<MessageTypeTest::eType>& message_type_items) {
   CObjectSchemaItem::Members params_members;
   params_members[S_FUNCTION_ID] = CObjectSchemaItem::SMember(
       TEnumSchemaItem<FunctionIdTest::eType>::create(function_id_items), true);
   params_members[S_MESSAGE_TYPE] = CObjectSchemaItem::SMember(
       TEnumSchemaItem<MessageTypeTest::eType>::create(message_type_items),
       true);
-  params_members[S_PROTOCOL_VERSION] = CObjectSchemaItem::SMember(
-      TNumberSchemaItem<int>::create(), true);
-  params_members[S_PROTOCOL_TYPE] = CObjectSchemaItem::SMember(
-      TNumberSchemaItem<int>::create(), true);
-  params_members[S_CORRELATION_ID] = CObjectSchemaItem::SMember(
-      TNumberSchemaItem<int>::create(), true);
-  params_members[kCode] = CObjectSchemaItem::SMember(
-      TNumberSchemaItem<int>::create(), true);
-  params_members[kMessage] = CObjectSchemaItem::SMember(
-      CStringSchemaItem::create(), true);
+  params_members[S_PROTOCOL_VERSION] =
+      CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+  params_members[S_PROTOCOL_TYPE] =
+      CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+  params_members[S_CORRELATION_ID] =
+      CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+  params_members[kCode] =
+      CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+  params_members[kMessage] =
+      CObjectSchemaItem::SMember(CStringSchemaItem::create(), true);
 
   CObjectSchemaItem::Members root_members_map;
   root_members_map[NsSmartDeviceLink::NsJSONHandler::strings::S_PARAMS] =
@@ -172,68 +194,52 @@ void CSmartFactoryTest::InitFunctionSchemes(
   CSmartSchema error_response_schema(
       CObjectSchemaItem::create(root_members_map));
 
-  functions_schemes_.insert(
-      std::make_pair(
-          SmartSchemaKey<FunctionIdTest::eType, MessageTypeTest::eType>(
-              FunctionIdTest::Function1, MessageTypeTest::error_response),
-          error_response_schema));
-  functions_schemes_.insert(
-      std::make_pair(
-          SmartSchemaKey<FunctionIdTest::eType, MessageTypeTest::eType>(
-              FunctionIdTest::Function1, MessageTypeTest::request),
-          InitFunction_Function1_request(function_id_items,
-                                         message_type_items)));
-  functions_schemes_.insert(
-      std::make_pair(
-          SmartSchemaKey<FunctionIdTest::eType, MessageTypeTest::eType>(
-              FunctionIdTest::Function1, MessageTypeTest::response),
-          InitFunction_Function1_response(struct_schema_items,
-                                          function_id_items,
-                                          message_type_items)));
+  functions_schemes_.insert(std::make_pair(
+      SmartSchemaKey<FunctionIdTest::eType, MessageTypeTest::eType>(
+          FunctionIdTest::Function1, MessageTypeTest::error_response),
+      error_response_schema));
+  functions_schemes_.insert(std::make_pair(
+      SmartSchemaKey<FunctionIdTest::eType, MessageTypeTest::eType>(
+          FunctionIdTest::Function1, MessageTypeTest::request),
+      InitFunction_Function1_request(function_id_items, message_type_items)));
+  functions_schemes_.insert(std::make_pair(
+      SmartSchemaKey<FunctionIdTest::eType, MessageTypeTest::eType>(
+          FunctionIdTest::Function1, MessageTypeTest::response),
+      InitFunction_Function1_response(
+          struct_schema_items, function_id_items, message_type_items)));
 
-  functions_schemes_.insert(
-      std::make_pair(
-          SmartSchemaKey<FunctionIdTest::eType, MessageTypeTest::eType>(
-              FunctionIdTest::Function2, MessageTypeTest::error_response),
-          error_response_schema));
-  functions_schemes_.insert(
-      std::make_pair(
-          SmartSchemaKey<FunctionIdTest::eType, MessageTypeTest::eType>(
-              FunctionIdTest::Function2, MessageTypeTest::request),
-          InitFunction_Function2_request(function_id_items,
-                                         message_type_items)));
-  functions_schemes_.insert(
-      std::make_pair(
-          SmartSchemaKey<FunctionIdTest::eType, MessageTypeTest::eType>(
-              FunctionIdTest::Function2, MessageTypeTest::response),
-          InitFunction_Function2_response(struct_schema_items,
-                                          function_id_items,
-                                          message_type_items)));
+  functions_schemes_.insert(std::make_pair(
+      SmartSchemaKey<FunctionIdTest::eType, MessageTypeTest::eType>(
+          FunctionIdTest::Function2, MessageTypeTest::error_response),
+      error_response_schema));
+  functions_schemes_.insert(std::make_pair(
+      SmartSchemaKey<FunctionIdTest::eType, MessageTypeTest::eType>(
+          FunctionIdTest::Function2, MessageTypeTest::request),
+      InitFunction_Function2_request(function_id_items, message_type_items)));
+  functions_schemes_.insert(std::make_pair(
+      SmartSchemaKey<FunctionIdTest::eType, MessageTypeTest::eType>(
+          FunctionIdTest::Function2, MessageTypeTest::response),
+      InitFunction_Function2_response(
+          struct_schema_items, function_id_items, message_type_items)));
 
-  functions_schemes_.insert(
-      std::make_pair(
-          SmartSchemaKey<FunctionIdTest::eType, MessageTypeTest::eType>(
-              FunctionIdTest::Function3, MessageTypeTest::error_response),
-          error_response_schema));
-  functions_schemes_.insert(
-      std::make_pair(
-          SmartSchemaKey<FunctionIdTest::eType, MessageTypeTest::eType>(
-              FunctionIdTest::Function3, MessageTypeTest::request),
-          InitFunction_Function3_request(function_id_items,
-                                         message_type_items)));
-  functions_schemes_.insert(
-      std::make_pair(
-          SmartSchemaKey<FunctionIdTest::eType, MessageTypeTest::eType>(
-              FunctionIdTest::Function3, MessageTypeTest::response),
-          InitFunction_Function3_response(struct_schema_items,
-                                          function_id_items,
-                                          message_type_items)));
+  functions_schemes_.insert(std::make_pair(
+      SmartSchemaKey<FunctionIdTest::eType, MessageTypeTest::eType>(
+          FunctionIdTest::Function3, MessageTypeTest::error_response),
+      error_response_schema));
+  functions_schemes_.insert(std::make_pair(
+      SmartSchemaKey<FunctionIdTest::eType, MessageTypeTest::eType>(
+          FunctionIdTest::Function3, MessageTypeTest::request),
+      InitFunction_Function3_request(function_id_items, message_type_items)));
+  functions_schemes_.insert(std::make_pair(
+      SmartSchemaKey<FunctionIdTest::eType, MessageTypeTest::eType>(
+          FunctionIdTest::Function3, MessageTypeTest::response),
+      InitFunction_Function3_response(
+          struct_schema_items, function_id_items, message_type_items)));
 }
 
 CSmartSchema CSmartFactoryTest::InitFunction_Function1_request(
-    const std::set<FunctionIdTest::eType> &function_id_items,
-    const std::set<MessageTypeTest::eType> &message_type_items) {
-
+    const std::set<FunctionIdTest::eType>& function_id_items,
+    const std::set<MessageTypeTest::eType>& message_type_items) {
   CObjectSchemaItem::Members schema_members;
   CObjectSchemaItem::Members params_members;
 
@@ -242,12 +248,12 @@ CSmartSchema CSmartFactoryTest::InitFunction_Function1_request(
   params_members[S_MESSAGE_TYPE] = CObjectSchemaItem::SMember(
       TEnumSchemaItem<MessageTypeTest::eType>::create(message_type_items),
       true);
-  params_members[S_PROTOCOL_VERSION] = CObjectSchemaItem::SMember(
-      TNumberSchemaItem<int>::create(), true);
-  params_members[S_PROTOCOL_TYPE] = CObjectSchemaItem::SMember(
-      TNumberSchemaItem<int>::create(), true);
-  params_members[S_CORRELATION_ID] = CObjectSchemaItem::SMember(
-      TNumberSchemaItem<int>::create(), true);
+  params_members[S_PROTOCOL_VERSION] =
+      CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+  params_members[S_PROTOCOL_TYPE] =
+      CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+  params_members[S_CORRELATION_ID] =
+      CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
 
   CObjectSchemaItem::Members root_members_map;
   root_members_map[S_MSG_PARAMS] = CObjectSchemaItem::SMember(
@@ -259,17 +265,17 @@ CSmartSchema CSmartFactoryTest::InitFunction_Function1_request(
 }
 
 CSmartSchema CSmartFactoryTest::InitFunction_Function1_response(
-    const TStructsSchemaItems &struct_schema_items,
-    const std::set<FunctionIdTest::eType> &function_id_items,
-    const std::set<MessageTypeTest::eType> &message_type_items) {
+    const TStructsSchemaItems& struct_schema_items,
+    const std::set<FunctionIdTest::eType>& function_id_items,
+    const std::set<MessageTypeTest::eType>& message_type_items) {
   // Function parameter available.
-  utils::SharedPtr<ISchemaItem> available_SchemaItem = CBoolSchemaItem::create(
-      TSchemaItemParameter<bool>());
+  utils::SharedPtr<ISchemaItem> available_SchemaItem =
+      CBoolSchemaItem::create(TSchemaItemParameter<bool>());
 
   CObjectSchemaItem::Members schema_members;
 
-  schema_members["available"] = CObjectSchemaItem::SMember(available_SchemaItem,
-                                                           true);
+  schema_members["available"] =
+      CObjectSchemaItem::SMember(available_SchemaItem, true);
 
   CObjectSchemaItem::Members params_members;
   params_members[S_FUNCTION_ID] = CObjectSchemaItem::SMember(
@@ -277,14 +283,14 @@ CSmartSchema CSmartFactoryTest::InitFunction_Function1_response(
   params_members[S_MESSAGE_TYPE] = CObjectSchemaItem::SMember(
       TEnumSchemaItem<MessageTypeTest::eType>::create(message_type_items),
       true);
-  params_members[S_PROTOCOL_VERSION] = CObjectSchemaItem::SMember(
-      TNumberSchemaItem<int>::create(), true);
-  params_members[S_PROTOCOL_TYPE] = CObjectSchemaItem::SMember(
-      TNumberSchemaItem<int>::create(), true);
-  params_members[S_CORRELATION_ID] = CObjectSchemaItem::SMember(
-      TNumberSchemaItem<int>::create(), true);
-  params_members[kCode] = CObjectSchemaItem::SMember(
-      TNumberSchemaItem<int>::create(), true);
+  params_members[S_PROTOCOL_VERSION] =
+      CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+  params_members[S_PROTOCOL_TYPE] =
+      CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+  params_members[S_CORRELATION_ID] =
+      CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+  params_members[kCode] =
+      CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
 
   CObjectSchemaItem::Members root_members_map;
   root_members_map[S_MSG_PARAMS] = CObjectSchemaItem::SMember(
@@ -296,8 +302,8 @@ CSmartSchema CSmartFactoryTest::InitFunction_Function1_response(
 }
 
 CSmartSchema CSmartFactoryTest::InitFunction_Function2_request(
-    const std::set<FunctionIdTest::eType> &function_id_items,
-    const std::set<MessageTypeTest::eType> &message_type_items) {
+    const std::set<FunctionIdTest::eType>& function_id_items,
+    const std::set<MessageTypeTest::eType>& message_type_items) {
   CObjectSchemaItem::Members schema_members;
 
   CObjectSchemaItem::Members params_members;
@@ -306,12 +312,12 @@ CSmartSchema CSmartFactoryTest::InitFunction_Function2_request(
   params_members[S_MESSAGE_TYPE] = CObjectSchemaItem::SMember(
       TEnumSchemaItem<MessageTypeTest::eType>::create(message_type_items),
       true);
-  params_members[S_PROTOCOL_VERSION] = CObjectSchemaItem::SMember(
-      TNumberSchemaItem<int>::create(), true);
-  params_members[S_PROTOCOL_TYPE] = CObjectSchemaItem::SMember(
-      TNumberSchemaItem<int>::create(), true);
-  params_members[S_CORRELATION_ID] = CObjectSchemaItem::SMember(
-      TNumberSchemaItem<int>::create(), true);
+  params_members[S_PROTOCOL_VERSION] =
+      CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+  params_members[S_PROTOCOL_TYPE] =
+      CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+  params_members[S_CORRELATION_ID] =
+      CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
 
   CObjectSchemaItem::Members root_members_map;
   root_members_map[S_MSG_PARAMS] = CObjectSchemaItem::SMember(
@@ -323,17 +329,17 @@ CSmartSchema CSmartFactoryTest::InitFunction_Function2_request(
 }
 
 CSmartSchema CSmartFactoryTest::InitFunction_Function2_response(
-    const TStructsSchemaItems &struct_schema_items,
-    const std::set<FunctionIdTest::eType> &function_id_items,
-    const std::set<MessageTypeTest::eType> &message_type_items) {
+    const TStructsSchemaItems& struct_schema_items,
+    const std::set<FunctionIdTest::eType>& function_id_items,
+    const std::set<MessageTypeTest::eType>& message_type_items) {
   // Function parameter available.
-  utils::SharedPtr<ISchemaItem> available_SchemaItem = CBoolSchemaItem::create(
-      TSchemaItemParameter<bool>());
+  utils::SharedPtr<ISchemaItem> available_SchemaItem =
+      CBoolSchemaItem::create(TSchemaItemParameter<bool>());
 
   CObjectSchemaItem::Members schema_members;
 
-  schema_members["available"] = CObjectSchemaItem::SMember(available_SchemaItem,
-                                                           true);
+  schema_members["available"] =
+      CObjectSchemaItem::SMember(available_SchemaItem, true);
 
   CObjectSchemaItem::Members params_members;
   params_members[S_FUNCTION_ID] = CObjectSchemaItem::SMember(
@@ -341,14 +347,14 @@ CSmartSchema CSmartFactoryTest::InitFunction_Function2_response(
   params_members[S_MESSAGE_TYPE] = CObjectSchemaItem::SMember(
       TEnumSchemaItem<MessageTypeTest::eType>::create(message_type_items),
       true);
-  params_members[S_PROTOCOL_VERSION] = CObjectSchemaItem::SMember(
-      TNumberSchemaItem<int>::create(), true);
-  params_members[S_PROTOCOL_TYPE] = CObjectSchemaItem::SMember(
-      TNumberSchemaItem<int>::create(), true);
-  params_members[S_CORRELATION_ID] = CObjectSchemaItem::SMember(
-      TNumberSchemaItem<int>::create(), true);
-  params_members[kCode] = CObjectSchemaItem::SMember(
-      TNumberSchemaItem<int>::create(), true);
+  params_members[S_PROTOCOL_VERSION] =
+      CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+  params_members[S_PROTOCOL_TYPE] =
+      CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+  params_members[S_CORRELATION_ID] =
+      CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+  params_members[kCode] =
+      CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
 
   CObjectSchemaItem::Members root_members_map;
   root_members_map[S_MSG_PARAMS] = CObjectSchemaItem::SMember(
@@ -360,8 +366,8 @@ CSmartSchema CSmartFactoryTest::InitFunction_Function2_response(
 }
 
 CSmartSchema CSmartFactoryTest::InitFunction_Function3_request(
-    const std::set<FunctionIdTest::eType> &function_id_items,
-    const std::set<MessageTypeTest::eType> &message_type_items) {
+    const std::set<FunctionIdTest::eType>& function_id_items,
+    const std::set<MessageTypeTest::eType>& message_type_items) {
   CObjectSchemaItem::Members schema_members;
 
   CObjectSchemaItem::Members params_members;
@@ -370,12 +376,12 @@ CSmartSchema CSmartFactoryTest::InitFunction_Function3_request(
   params_members[S_MESSAGE_TYPE] = CObjectSchemaItem::SMember(
       TEnumSchemaItem<MessageTypeTest::eType>::create(message_type_items),
       true);
-  params_members[S_PROTOCOL_VERSION] = CObjectSchemaItem::SMember(
-      TNumberSchemaItem<int>::create(), true);
-  params_members[S_PROTOCOL_TYPE] = CObjectSchemaItem::SMember(
-      TNumberSchemaItem<int>::create(), true);
-  params_members[S_CORRELATION_ID] = CObjectSchemaItem::SMember(
-      TNumberSchemaItem<int>::create(), true);
+  params_members[S_PROTOCOL_VERSION] =
+      CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+  params_members[S_PROTOCOL_TYPE] =
+      CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+  params_members[S_CORRELATION_ID] =
+      CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
 
   CObjectSchemaItem::Members root_members_map;
   root_members_map[S_MSG_PARAMS] = CObjectSchemaItem::SMember(
@@ -387,19 +393,19 @@ CSmartSchema CSmartFactoryTest::InitFunction_Function3_request(
 }
 
 CSmartSchema CSmartFactoryTest::InitFunction_Function3_response(
-    const TStructsSchemaItems &struct_schema_items,
-    const std::set<FunctionIdTest::eType> &function_id_items,
-    const std::set<MessageTypeTest::eType> &message_type_items) {
+    const TStructsSchemaItems& struct_schema_items,
+    const std::set<FunctionIdTest::eType>& function_id_items,
+    const std::set<MessageTypeTest::eType>& message_type_items) {
   // Function parameter available.
   //
   // Must be true if VR is present and ready to communicate with SDL.
-  utils::SharedPtr<ISchemaItem> available_SchemaItem = CBoolSchemaItem::create(
-      TSchemaItemParameter<bool>());
+  utils::SharedPtr<ISchemaItem> available_SchemaItem =
+      CBoolSchemaItem::create(TSchemaItemParameter<bool>());
 
   CObjectSchemaItem::Members schema_members;
 
-  schema_members["available"] = CObjectSchemaItem::SMember(available_SchemaItem,
-                                                           true);
+  schema_members["available"] =
+      CObjectSchemaItem::SMember(available_SchemaItem, true);
 
   CObjectSchemaItem::Members params_members;
   params_members[S_FUNCTION_ID] = CObjectSchemaItem::SMember(
@@ -407,14 +413,14 @@ CSmartSchema CSmartFactoryTest::InitFunction_Function3_response(
   params_members[S_MESSAGE_TYPE] = CObjectSchemaItem::SMember(
       TEnumSchemaItem<MessageTypeTest::eType>::create(message_type_items),
       true);
-  params_members[S_PROTOCOL_VERSION] = CObjectSchemaItem::SMember(
-      TNumberSchemaItem<int>::create(), true);
-  params_members[S_PROTOCOL_TYPE] = CObjectSchemaItem::SMember(
-      TNumberSchemaItem<int>::create(), true);
-  params_members[S_CORRELATION_ID] = CObjectSchemaItem::SMember(
-      TNumberSchemaItem<int>::create(), true);
-  params_members[kCode] = CObjectSchemaItem::SMember(
-      TNumberSchemaItem<int>::create(), true);
+  params_members[S_PROTOCOL_VERSION] =
+      CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+  params_members[S_PROTOCOL_TYPE] =
+      CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+  params_members[S_CORRELATION_ID] =
+      CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+  params_members[kCode] =
+      CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
 
   CObjectSchemaItem::Members root_members_map;
   root_members_map[S_MSG_PARAMS] = CObjectSchemaItem::SMember(
@@ -426,13 +432,14 @@ CSmartSchema CSmartFactoryTest::InitFunction_Function3_response(
 }
 
 utils::SharedPtr<ISchemaItem> CSmartFactoryTest::InitStructSchemaItem_Common_1(
-    TStructsSchemaItems &struct_schema_items) {
+    TStructsSchemaItems& struct_schema_items) {
   // Struct member text.
   //
   // Text to display
-  utils::SharedPtr<ISchemaItem> text_SchemaItem = CStringSchemaItem::create(
-      TSchemaItemParameter<size_t>(1), TSchemaItemParameter<size_t>(500),
-      TSchemaItemParameter<std::string>());
+  utils::SharedPtr<ISchemaItem> text_SchemaItem =
+      CStringSchemaItem::create(TSchemaItemParameter<size_t>(1),
+                                TSchemaItemParameter<size_t>(500),
+                                TSchemaItemParameter<std::string>());
 
   // Struct member image.
   //
@@ -454,8 +461,8 @@ utils::SharedPtr<ISchemaItem> CSmartFactoryTest::InitStructSchemaItem_Common_1(
   CObjectSchemaItem::Members schema_members;
 
   schema_members["text"] = CObjectSchemaItem::SMember(text_SchemaItem, true);
-  schema_members["position"] = CObjectSchemaItem::SMember(position_SchemaItem,
-                                                          true);
+  schema_members["position"] =
+      CObjectSchemaItem::SMember(position_SchemaItem, true);
 
   CObjectSchemaItem::Members root_members_map;
   root_members_map[""] = CObjectSchemaItem::SMember(
@@ -465,13 +472,15 @@ utils::SharedPtr<ISchemaItem> CSmartFactoryTest::InitStructSchemaItem_Common_1(
   return CObjectSchemaItem::create(schema_members);
 }
 
-utils::SharedPtr<ISchemaItem> CSmartFactoryTest::InitStructSchemaItem_Common_2() {
+utils::SharedPtr<ISchemaItem>
+CSmartFactoryTest::InitStructSchemaItem_Common_2() {
   // Struct member text.
   //
   // Text to display
-  utils::SharedPtr<ISchemaItem> text_SchemaItem = CStringSchemaItem::create(
-      TSchemaItemParameter<size_t>(1), TSchemaItemParameter<size_t>(500),
-      TSchemaItemParameter<std::string>());
+  utils::SharedPtr<ISchemaItem> text_SchemaItem =
+      CStringSchemaItem::create(TSchemaItemParameter<size_t>(1),
+                                TSchemaItemParameter<size_t>(500),
+                                TSchemaItemParameter<std::string>());
   // Struct member position.
   //
   // Position to display item
@@ -482,20 +491,20 @@ utils::SharedPtr<ISchemaItem> CSmartFactoryTest::InitStructSchemaItem_Common_2()
 
   CObjectSchemaItem::Members schema_members;
   schema_members["text"] = CObjectSchemaItem::SMember(text_SchemaItem, true);
-  schema_members["position"] = CObjectSchemaItem::SMember(position_SchemaItem,
-                                                          true);
+  schema_members["position"] =
+      CObjectSchemaItem::SMember(position_SchemaItem, true);
 
   return CObjectSchemaItem::create(schema_members);
 }
 
-utils::SharedPtr<ISchemaItem> CSmartFactoryTest::ProvideObjectSchemaItemForStruct(
-    TStructsSchemaItems &struct_schema_items,
+utils::SharedPtr<ISchemaItem>
+CSmartFactoryTest::ProvideObjectSchemaItemForStruct(
+    TStructsSchemaItems& struct_schema_items,
     const StructIdentifiersTest::eType struct_id) {
-  const TStructsSchemaItems::const_iterator it = struct_schema_items.find(
-      struct_id);
+  const TStructsSchemaItems::const_iterator it =
+      struct_schema_items.find(struct_id);
   if (it != struct_schema_items.end()) {
     return it->second;
   }
   return NsSmartDeviceLink::NsSmartObjects::CAlwaysFalseSchemaItem::create();
 }
-

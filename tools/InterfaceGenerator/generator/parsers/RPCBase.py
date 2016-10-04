@@ -568,7 +568,8 @@ class Parser(object):
                 default_value = self._get_bool_from_string(default_value);
             param_type = Model.Boolean(default_value=default_value)
         elif type_name == "Integer" or \
-                type_name == "Float":
+                type_name == "Float" or \
+                type_name == "Double" :
             min_value = self._extract_optional_number_attrib(
                 attrib, "minvalue", int if type_name == "Integer" else float)
             max_value = self._extract_optional_number_attrib(

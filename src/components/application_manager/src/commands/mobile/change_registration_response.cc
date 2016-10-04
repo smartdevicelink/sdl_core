@@ -32,24 +32,21 @@
  */
 
 #include "application_manager/commands/mobile/change_registration_response.h"
-#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
 namespace commands {
 
 ChangeRegistrationResponse::ChangeRegistrationResponse(
-    const MessageSharedPtr& message)
-    : CommandResponseImpl(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandResponseImpl(message, application_manager) {}
 
-ChangeRegistrationResponse::~ChangeRegistrationResponse() {
-}
+ChangeRegistrationResponse::~ChangeRegistrationResponse() {}
 
 void ChangeRegistrationResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
+  application_manager_.SendMessageToMobile(message_);
 }
 
 }  // namespace commands

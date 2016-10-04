@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,58 +35,80 @@
 
 #include <string>
 #include <map>
-#include "utils/singleton.h"
 #include "protocol_handler/protocol_observer.h"
 #include "protocol_handler/protocol_handler.h"
 #include "media_manager/media_manager.h"
 #include "media_manager/media_adapter_impl.h"
 #include "media_manager/media_adapter_listener.h"
 
+namespace application_manager {
+class ApplicationManager;
+}
+
+namespace connection_handler {
+class ConnectionHandlerImpl;
+}
+
 namespace media_manager {
 
 class MediaManagerImpl : public MediaManager,
-  public protocol_handler::ProtocolObserver,
-  public utils::Singleton<MediaManagerImpl> {
-  public:
-    virtual ~MediaManagerImpl();
+                         public protocol_handler::ProtocolObserver {
+ public:
+  MediaManagerImpl(application_manager::ApplicationManager& application_manager,
+                   const MediaManagerSettings& settings);
+  virtual ~MediaManagerImpl();
 
-    virtual void PlayA2DPSource(int32_t application_key);
-    virtual void StopA2DPSource(int32_t application_key);
+  virtual void PlayA2DPSource(int32_t application_key);
+  virtual void StopA2DPSource(int32_t application_key);
 
-    virtual void StartMicrophoneRecording(int32_t application_key,
-                                          const std::string& outputFileName,
-                                          int32_t duration);
-    virtual void StopMicrophoneRecording(int32_t application_key);
+  virtual void StartMicrophoneRecording(int32_t application_key,
+                                        const std::string& outputFileName,
+                                        int32_t duration);
+  virtual void StopMicrophoneRecording(int32_t application_key);
 
-    virtual void StartStreaming(
-        int32_t application_key, protocol_handler::ServiceType service_type);
-    virtual void StopStreaming(
-        int32_t application_key, protocol_handler::ServiceType service_type);
+  virtual void StartStreaming(int32_t application_key,
+                              protocol_handler::ServiceType service_type);
+  virtual void StopStreaming(int32_t application_key,
+                             protocol_handler::ServiceType service_type);
 
-    virtual void SetProtocolHandler(
+  virtual void SetProtocolHandler(
       protocol_handler::ProtocolHandler* protocol_handler);
-    virtual void OnMessageReceived(
+  virtual void OnMessageReceived(
       const ::protocol_handler::RawMessagePtr message);
-    virtual void OnMobileMessageSent(
+  virtual void OnMobileMessageSent(
       const ::protocol_handler::RawMessagePtr message);
-    virtual void FramesProcessed(int32_t application_key, int32_t frame_number);
+  virtual void FramesProcessed(int32_t application_key, int32_t frame_number);
 
-  protected:
-    MediaManagerImpl();
-    virtual void Init();
+  virtual const MediaManagerSettings& settings() const OVERRIDE;
 
-    protocol_handler::ProtocolHandler* protocol_handler_;
-    MediaAdapter*                      a2dp_player_;
+#ifdef BUILD_TESTS
+  void set_mock_a2dp_player(MediaAdapter* media_adapter);
+  void set_mock_mic_listener(MediaListenerPtr media_listener);
+  void set_mock_mic_recorder(MediaAdapterImpl* media_adapter);
+  void set_mock_streamer(protocol_handler::ServiceType stype,
+                         MediaAdapterImpl* mock_stream);
+  void set_mock_streamer_listener(protocol_handler::ServiceType stype,
+                                  MediaAdapterListener* mock_stream);
+#endif  // BUILD_TESTS
 
-    MediaAdapterImpl*                  from_mic_recorder_;
-    MediaListenerPtr                   from_mic_listener_;
+ protected:
+  virtual void Init();
 
-    std::map<protocol_handler::ServiceType, MediaAdapterImplPtr> streamer_;
-    std::map<protocol_handler::ServiceType, MediaListenerPtr>    streamer_listener_;
+  const MediaManagerSettings& settings_;
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(MediaManagerImpl);
-    FRIEND_BASE_SINGLETON_CLASS(MediaManagerImpl);
+  protocol_handler::ProtocolHandler* protocol_handler_;
+  MediaAdapter* a2dp_player_;
+
+  MediaAdapterImpl* from_mic_recorder_;
+  MediaListenerPtr from_mic_listener_;
+
+  std::map<protocol_handler::ServiceType, MediaAdapterImplPtr> streamer_;
+  std::map<protocol_handler::ServiceType, MediaListenerPtr> streamer_listener_;
+
+  application_manager::ApplicationManager& application_manager_;
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(MediaManagerImpl);
 };
 
 }  //  namespace media_manager

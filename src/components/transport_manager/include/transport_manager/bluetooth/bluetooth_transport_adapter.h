@@ -49,14 +49,15 @@ class BluetoothTransportAdapter : public TransportAdapterImpl {
   /**
    * @brief Constructor.
    */
-  BluetoothTransportAdapter();
+  BluetoothTransportAdapter(resumption::LastState& last_state,
+                            const TransportManagerSettings& settings);
 
   /**
    * @brief Destructor.
    */
   virtual ~BluetoothTransportAdapter();
- protected:
 
+ protected:
   /**
    * @brief Return type of device.
    */

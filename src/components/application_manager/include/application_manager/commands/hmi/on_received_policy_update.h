@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,26 +40,27 @@ namespace application_manager {
 namespace commands {
 
 class OnReceivedPolicyUpdate : public NotificationFromHMI {
-  public:
-    /**
-       * @brief OnReceivedPolicyUpdate class constructor
-       *
-       * @param message Incoming SmartObject message
-       **/
-    explicit OnReceivedPolicyUpdate(const MessageSharedPtr& message);
-
-    /**
-     * @brief OnReceivedPolicyUpdate class destructor
+ public:
+  /**
+     * @brief OnReceivedPolicyUpdate class constructor
+     *
+     * @param message Incoming SmartObject message
      **/
-    virtual ~OnReceivedPolicyUpdate();
+  OnReceivedPolicyUpdate(const MessageSharedPtr& message,
+                         ApplicationManager& application_manager);
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+  /**
+   * @brief OnReceivedPolicyUpdate class destructor
+   **/
+  ~OnReceivedPolicyUpdate() OVERRIDE;
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(OnReceivedPolicyUpdate);
+  /**
+   * @brief Execute command
+   **/
+  void Run() OVERRIDE;
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(OnReceivedPolicyUpdate);
 };
 
 }  // namespace commands

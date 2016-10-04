@@ -37,11 +37,10 @@ namespace application_manager {
 namespace commands {
 
 NaviUpdateTurnListRequest::NaviUpdateTurnListRequest(
-    const MessageSharedPtr& message) : RequestToHMI(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : RequestToHMI(message, application_manager) {}
 
-NaviUpdateTurnListRequest::~NaviUpdateTurnListRequest() {
-}
+NaviUpdateTurnListRequest::~NaviUpdateTurnListRequest() {}
 
 void NaviUpdateTurnListRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -52,4 +51,3 @@ void NaviUpdateTurnListRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

@@ -36,12 +36,11 @@ namespace application_manager {
 
 namespace commands {
 
-UpdateAppListResponse::UpdateAppListResponse(const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+UpdateAppListResponse::UpdateAppListResponse(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {}
 
-UpdateAppListResponse::~UpdateAppListResponse() {
-}
+UpdateAppListResponse::~UpdateAppListResponse() {}
 
 void UpdateAppListResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -52,5 +51,3 @@ void UpdateAppListResponse::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-
-

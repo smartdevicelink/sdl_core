@@ -32,7 +32,7 @@
  */
 
 #include "application_manager/commands/mobile/get_dtcs_request.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
 #include "interfaces/HMI_API.h"
 
@@ -40,17 +40,16 @@ namespace application_manager {
 
 namespace commands {
 
-GetDTCsRequest::GetDTCsRequest(const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {
-}
+GetDTCsRequest::GetDTCsRequest(const MessageSharedPtr& message,
+                               ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager) {}
 
-GetDTCsRequest::~GetDTCsRequest() {
-}
+GetDTCsRequest::~GetDTCsRequest() {}
 
 void GetDTCsRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
+  ApplicationSharedPtr app = application_manager_.application(
       (*message_)[strings::params][strings::connection_key].asUInt());
 
   if (!app) {
@@ -59,8 +58,8 @@ void GetDTCsRequest::Run() {
     return;
   }
 
-  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-      smart_objects::SmartType_Map);
+  smart_objects::SmartObject msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
 
   msg_params[strings::ecu_name] =
       (*message_)[strings::msg_params][strings::ecu_name];

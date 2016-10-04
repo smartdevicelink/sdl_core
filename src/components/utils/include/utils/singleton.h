@@ -43,15 +43,13 @@ namespace deleters {
 
 class DummyDeleter {
  public:
-  void grab(void* pointer) {
-  }
+  void grab(void* pointer) {}
 };
 
-template<typename T>
+template <typename T>
 class Deleter {
  public:
-  Deleter() : pointer_(0) {
-  }
+  Deleter() : pointer_(0) {}
   ~Deleter() {
     if (pointer_) {
       delete pointer_;
@@ -60,69 +58,68 @@ class Deleter {
   void grab(T* pointer) {
     pointer_ = pointer;
   }
+
  private:
   T* pointer_;
 };
 
 }  // namespace deleters
 
-template<typename T, class Deleter = deleters::DummyDeleter>
+template <typename T, class Deleter = deleters::DummyDeleter>
 class Singleton {
-/**
- * @brief Singleton template
- * Singleton classes must derive from this template specialized with class itself:
- *
- * class MySingleton : public Singleton<MySingleton> {...};
- *
- * All such classes must declare instance() method as friend
- * by adding FRIEND_BASE_SINGLETON_CLASS macro from macro.h to class definition:
- *
- * FRIEND_BASE_SINGLETON_CLASS(MySingleton);
- *
- * Instance of this class (if created) can be deleted by Deleter destructor
- * which is called after main() (or from exit())
- * This requires T destructor to be accessible for Deleter (e.g. public)
- * Deleter template parameter can be specified with any class
- * with public default constructor, destructor and method
- * void grab(T*);
- * However, default Deleter specification does nothing
- *
- * Also instance can be deleted explicitly by calling destroy() method
- *
- * Both instance() and destroy() methods are thread safe
- * but not thread safety between simultaneous calls
- * of instance() and destroy() is cared about
- */
+  /**
+   * @brief Singleton template
+   * Singleton classes must derive from this template specialized with class
+   *itself:
+   *
+   * class MySingleton : public Singleton<MySingleton> {...};
+   *
+   * All such classes must declare instance() method as friend
+   * by adding FRIEND_BASE_SINGLETON_CLASS macro from macro.h to class
+   *definition:
+   *
+   * FRIEND_BASE_SINGLETON_CLASS(MySingleton);
+   *
+   * Instance of this class (if created) can be deleted by Deleter destructor
+   * which is called after main() (or from exit())
+   * This requires T destructor to be accessible for Deleter (e.g. public)
+   * Deleter template parameter can be specified with any class
+   * with public default constructor, destructor and method
+   * void grab(T*);
+   * However, default Deleter specification does nothing
+   *
+   * Also instance can be deleted explicitly by calling destroy() method
+   *
+   * Both instance() and destroy() methods are thread safe
+   * but not thread safety between simultaneous calls
+   * of instance() and destroy() is cared about
+   */
  public:
-/**
- * @brief Returns the singleton of class
- */
+  /**
+   * @brief Returns the singleton of class
+   */
   static T* instance();
-/**
- * @brief Destroys the singleton (if it had been created)
- */
+  /**
+   * @brief Destroys the singleton (if it had been created)
+   */
   static void destroy();
-/**
- * @brief Checks whether the singleton exists
- */
+  /**
+   * @brief Checks whether the singleton exists
+   */
   static bool exists();
 
  private:
-
   static T** instance_pointer();
   static Deleter* deleter();
 
   static sync_primitives::Lock lock_;
 };
 
-
-template<typename T, class Deleter>
+template <typename T, class Deleter>
 sync_primitives::Lock Singleton<T, Deleter>::lock_;
 
-
-template<typename T, class Deleter>
+template <typename T, class Deleter>
 T* Singleton<T, Deleter>::instance() {
-
   T* local_instance;
   atomic_pointer_assign(local_instance, *instance_pointer());
   memory_barrier();
@@ -142,9 +139,8 @@ T* Singleton<T, Deleter>::instance() {
   return local_instance;
 }
 
-template<typename T, class Deleter>
+template <typename T, class Deleter>
 void Singleton<T, Deleter>::destroy() {
-
   T* local_instance;
   atomic_pointer_assign(local_instance, *instance_pointer());
   memory_barrier();
@@ -162,18 +158,18 @@ void Singleton<T, Deleter>::destroy() {
   }
 }
 
-template<typename T, class Deleter>
+template <typename T, class Deleter>
 bool Singleton<T, Deleter>::exists() {
   return *instance_pointer() != 0;
 }
 
-template<typename T, class Deleter>
+template <typename T, class Deleter>
 T** Singleton<T, Deleter>::instance_pointer() {
   static T* instance = 0;
   return &instance;
 }
 
-template<typename T, class Deleter>
+template <typename T, class Deleter>
 Deleter* Singleton<T, Deleter>::deleter() {
   static Deleter deleter;
   return &deleter;

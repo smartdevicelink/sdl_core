@@ -47,6 +47,7 @@ set(LIBRARIES
     Utils    
     Resumption  
     jsoncpp
+    ConfigProfile
 )
 
 set(SOURCES

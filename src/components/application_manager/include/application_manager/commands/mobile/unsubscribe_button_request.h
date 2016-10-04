@@ -51,7 +51,8 @@ class UnsubscribeButtonRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UnsubscribeButtonRequest(const MessageSharedPtr& message);
+  UnsubscribeButtonRequest(const MessageSharedPtr& message,
+                           ApplicationManager& application_manager);
 
   /**
    * @brief UnsubscribeButtonRequest class destructor

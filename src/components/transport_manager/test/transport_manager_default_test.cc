@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,15 +32,44 @@
 #include "gtest/gtest.h"
 #include "transport_manager/transport_manager.h"
 #include "transport_manager/transport_manager_default.h"
+#include "resumption/last_state.h"
+#include "transport_manager/mock_transport_manager_settings.h"
+#include "resumption/last_state.h"
 
 namespace test {
-namespace test_transport_manager_instance {
-TEST(TestTransportManagerDefault, CreateOnlyInstance) {
-  transport_manager::TransportManager* instance =
-      transport_manager::TransportManagerDefault::instance();
-  ASSERT_EQ(instance, transport_manager::TransportManagerDefault::instance());
-  transport_manager::TransportManagerDefault::destroy();
+namespace components {
+namespace transport_manager_test {
+
+using ::testing::Return;
+
+TEST(TestTransportManagerDefault, Init_LastStateNotUsed) {
+  MockTransportManagerSettings transport_manager_settings;
+  transport_manager::TransportManagerDefault transport_manager(
+      transport_manager_settings);
+  resumption::LastState last_state("app_storage_folder", "app_info_storage2");
+
+  EXPECT_CALL(transport_manager_settings, use_last_state())
+      .WillRepeatedly(Return(false));
+  EXPECT_CALL(transport_manager_settings, transport_manager_tcp_adapter_port())
+      .WillRepeatedly(Return(1u));
+  transport_manager.Init(last_state);
 }
 
+TEST(TestTransportManagerDefault, Init_LastStateUsed) {
+  MockTransportManagerSettings transport_manager_settings;
+  transport_manager::TransportManagerDefault transport_manager(
+      transport_manager_settings);
+  resumption::LastState last_state("app_storage_folder", "app_info_storage2");
+
+  EXPECT_CALL(transport_manager_settings, use_last_state())
+      .WillRepeatedly(Return(true));
+  EXPECT_CALL(transport_manager_settings, transport_manager_tcp_adapter_port())
+      .WillRepeatedly(Return(1u));
+
+  transport_manager.Init(last_state);
+  transport_manager.Stop();
+}
+
+}  // namespace transport_manager_test
+}  // namespace components
 }  // namespace test
-}  // namespace test_transport_manager_instance

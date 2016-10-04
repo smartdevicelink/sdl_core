@@ -48,18 +48,18 @@
 #include <QtDBus/QDBusConnection>
 
 #if QT_4
-#  include <QtDeclarative/QDeclarativeContext>
-#  include <QtDeclarative/QDeclarativeListReference>
-#  include <QtDeclarative/QDeclarativeEngine>
+#include <QtDeclarative/QDeclarativeContext>
+#include <QtDeclarative/QDeclarativeListReference>
+#include <QtDeclarative/QDeclarativeEngine>
 #elif QT_5
-#  include <QtQml/QQmlContext>
-#  include <QtQml/QQmlListReference>
-#  include <QtQml/QQmlEngine>
+#include <QtQml/QQmlContext>
+#include <QtQml/QQmlListReference>
+#include <QtQml/QQmlEngine>
 #endif  // QT_VERSION
-log4cxx::LoggerPtr logger_ = log4cxx::LoggerPtr(
-                              log4cxx::Logger::getLogger("DBusPlugin"));
+log4cxx::LoggerPtr logger_ =
+    log4cxx::LoggerPtr(log4cxx::Logger::getLogger("DBusPlugin"));
 
-void DbusPlugin::registerTypes(const char *uri) {
+void DbusPlugin::registerTypes(const char* uri) {
   log4cxx::PropertyConfigurator::configure("log4cxx.properties");
 
   // @uri sdl.core.api
@@ -87,9 +87,9 @@ void DbusPlugin::registerTypes(const char *uri) {
   HmiProxy::api_adaptors_.SetDBusController(dbusController_);
 }
 
-void DbusPlugin::initializeEngine(Engine *engine, const char *uri) {
-    engine->rootContext()->setContextProperty("DBus", dbusController_);
-    engine->rootContext()->setContextProperty("RequestToSDL", requestToSDL_);
+void DbusPlugin::initializeEngine(Engine* engine, const char* uri) {
+  engine->rootContext()->setContextProperty("DBus", dbusController_);
+  engine->rootContext()->setContextProperty("RequestToSDL", requestToSDL_);
 }
 
 #if QT_4

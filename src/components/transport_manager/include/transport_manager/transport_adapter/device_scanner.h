@@ -76,8 +76,7 @@ class DeviceScanner {
   /**
    * @brief Destructor.
    */
-  virtual ~DeviceScanner() {
-  }
+  virtual ~DeviceScanner() {}
 };
 
 }  // namespace transport_adapter

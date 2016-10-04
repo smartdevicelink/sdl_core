@@ -51,7 +51,8 @@ class DiagnosticMessageResponse : public CommandResponseImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit DiagnosticMessageResponse(const MessageSharedPtr& message);
+  DiagnosticMessageResponse(const MessageSharedPtr& message,
+                            ApplicationManager& application_manager);
 
   /**
    * @brief DiagnosticMessageResponse class destructor

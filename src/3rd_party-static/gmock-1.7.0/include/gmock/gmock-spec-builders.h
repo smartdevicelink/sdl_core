@@ -60,6 +60,10 @@
 #ifndef GMOCK_INCLUDE_GMOCK_GMOCK_SPEC_BUILDERS_H_
 #define GMOCK_INCLUDE_GMOCK_GMOCK_SPEC_BUILDERS_H_
 
+#if defined(OS_POSIX)
+#include <sys/time.h>
+#endif
+
 #include <map>
 #include <set>
 #include <sstream>
@@ -120,6 +124,16 @@ GTEST_API_ GTEST_DECLARE_STATIC_MUTEX_(g_gmock_mutex);
 // Untyped base class for ActionResultHolder<R>.
 class UntypedActionResultHolderBase;
 
+// Expectation results enum
+enum ExpectationResult {
+  // Some expectations are not satisfied
+  NotSatisfied,
+  // All expectations are satisfied
+  Satisfied,
+  // Some expectations are over satisfied
+  OverSaturated
+};
+
 // Abstract base class of FunctionMockerBase.  This is the
 // type-agnostic part of the function mocker interface.  Its pure
 // virtual methods are implemented by FunctionMockerBase.
@@ -132,6 +146,12 @@ class GTEST_API_ UntypedFunctionMockerBase {
   // satisfied.  Reports one or more Google Test non-fatal failures
   // and returns false if not.
   bool VerifyAndClearExpectationsLocked()
+      GTEST_EXCLUSIVE_LOCK_REQUIRED_(g_gmock_mutex);
+
+  // Verifies that all expectations on this mock function have been
+  // satisfied. Does not report failures.
+  // Returns ExpectationResult value.
+  ExpectationResult VerifyExpectationsLocked()
       GTEST_EXCLUSIVE_LOCK_REQUIRED_(g_gmock_mutex);
 
   // Clears the ON_CALL()s set on this mock function.
@@ -207,6 +227,11 @@ class GTEST_API_ UntypedFunctionMockerBase {
   const char* Name() const
       GTEST_LOCK_EXCLUDED_(g_gmock_mutex);
 
+  // Returns the time of this mock registering.  Must be called after
+  // RegisterOwner() has been called.
+  timeval RegisteredTime() const
+      GTEST_LOCK_EXCLUDED_(g_gmock_mutex);
+
   // Returns the result of invoking this mock function with the given
   // arguments.  This function can be safely called from multiple
   // threads concurrently.  The caller is responsible for deleting the
@@ -233,6 +258,10 @@ class GTEST_API_ UntypedFunctionMockerBase {
   // Name of the function being mocked.  Only valid after this mock
   // method has been called.
   const char* name_;  // Protected by g_gmock_mutex.
+
+  // Time of the function registering.
+  // Only valid after RegisterOwner() has been called.
+  timeval registered_time_;  // Protected by g_gmock_mutex.
 
   // All default action specs for this function mocker.
   UntypedOnCallSpecs untyped_on_call_specs_;
@@ -389,6 +418,12 @@ class GTEST_API_ Mock {
   static bool VerifyAndClear(void* mock_obj)
       GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex);
 
+  // Asynchronously verifies all expectations of all registered mock objects
+  // and clears there default actions and expectations.  Returns true if the
+  // verification was successful.
+  static bool AsyncVerifyAndClearExpectations(int timeout)
+      GTEST_EXCLUSIVE_LOCK_REQUIRED_(internal::g_gmock_mutex);
+
  private:
   friend class internal::UntypedFunctionMockerBase;
 
@@ -436,6 +471,12 @@ class GTEST_API_ Mock {
   // satisfied.  Reports one or more Google Test non-fatal failures
   // and returns false if not.
   static bool VerifyAndClearExpectationsLocked(void* mock_obj)
+      GTEST_EXCLUSIVE_LOCK_REQUIRED_(internal::g_gmock_mutex);
+
+  // Asynchronously verifies that all expectations of all registered
+  // mock objects have been satisfied.  Reports one or more Google
+  // Test non-fatal failures and returns false if not.
+  static bool AsyncVerifyAndClearExpectationsLocked(int timeout_msec)
       GTEST_EXCLUSIVE_LOCK_REQUIRED_(internal::g_gmock_mutex);
 
   // Clears all ON_CALL()s set on the given mock object.

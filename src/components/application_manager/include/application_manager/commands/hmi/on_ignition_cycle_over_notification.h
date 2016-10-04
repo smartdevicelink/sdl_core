@@ -50,7 +50,8 @@ class OnIgnitionCycleOverNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnIgnitionCycleOverNotification(const MessageSharedPtr& message);
+  OnIgnitionCycleOverNotification(const MessageSharedPtr& message,
+                                  ApplicationManager& application_manager);
 
   /**
    * @brief OnIgnitionCycleOverNotification class destructor
@@ -63,7 +64,6 @@ class OnIgnitionCycleOverNotification : public NotificationFromHMI {
   virtual void Run();
 
  private:
-
   DISALLOW_COPY_AND_ASSIGN(OnIgnitionCycleOverNotification);
 };
 

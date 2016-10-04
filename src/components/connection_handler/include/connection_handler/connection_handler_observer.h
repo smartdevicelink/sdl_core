@@ -38,6 +38,10 @@
 #include "connection_handler/connection_handler.h"
 #include "protocol/service_type.h"
 
+#ifdef ENABLE_SECURITY
+#include "security_manager/ssl_context.h"
+#endif  // ENABLE_SECURITY
+
 /**
  * \namespace connection_handler
  * \brief SmartDeviceLink connection_handler namespace.
@@ -49,7 +53,7 @@ namespace connection_handler {
  * \brief ConnectionHandlerObserver class
  */
 class ConnectionHandlerObserver {
-  public:
+ public:
   /**
    * \brief Available devices list updated.
    *
@@ -59,7 +63,7 @@ class ConnectionHandlerObserver {
    * \param DeviceList New list of available devices.
    **/
   virtual void OnDeviceListUpdated(
-      const connection_handler::DeviceMap &device_list) = 0;
+      const connection_handler::DeviceMap& device_list) = 0;
 
   /**
    * @brief Reaction to "Find new applications" request
@@ -74,19 +78,20 @@ class ConnectionHandlerObserver {
    * \param DeviceHandle Handle of removed device.
    **/
   virtual void RemoveDevice(
-      const connection_handler::DeviceHandle &device_handle) = 0;
+      const connection_handler::DeviceHandle& device_handle) = 0;
 
   /**
    * \brief Callback function used by connection_handler
    * when Mobile Application initiates start of new service.
-   * \param deviceHandle Device identifier within which session has to be started.
+   * \param deviceHandle Device identifier within which session has to be
+   * started.
    * \param sessionKey Key of started session.
    * \param type Established service type
    */
   virtual bool OnServiceStartedCallback(
-      const connection_handler::DeviceHandle &device_handle,
-      const int32_t &session_key,
-      const protocol_handler::ServiceType &type) = 0;
+      const connection_handler::DeviceHandle& device_handle,
+      const int32_t& session_key,
+      const protocol_handler::ServiceType& type) = 0;
 
   /**
    * \brief Callback function used by connection_handler
@@ -100,12 +105,15 @@ class ConnectionHandlerObserver {
       const protocol_handler::ServiceType& type,
       const connection_handler::CloseSessionReason& close_reason) = 0;
 
+#ifdef ENABLE_SECURITY
+  virtual security_manager::SSLContext::HandshakeContext GetHandshakeContext(
+      uint32_t key) const = 0;
+#endif  // ENABLE_SECURITY
  protected:
   /**
    * \brief Destructor
    */
-  virtual ~ConnectionHandlerObserver() {
-  }
+  virtual ~ConnectionHandlerObserver() {}
 };
 }  // namespace connection_handler
 
