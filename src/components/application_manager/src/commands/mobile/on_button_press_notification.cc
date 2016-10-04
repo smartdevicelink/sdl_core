@@ -59,10 +59,6 @@ void OnButtonPressNotification::Run() {
   const ApplicationSharedPtr app = application_manager_.application(
       (*message_)[strings::msg_params][strings::app_id].asUInt());
 
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
-     (*message_)[strings::msg_params][strings::app_id].asUInt());
-
-
   // CUSTOM_BUTTON notification
   if (static_cast<uint32_t>(mobile_apis::ButtonName::CUSTOM_BUTTON) == btn_id) {
     // app_id is mandatory for CUSTOM_BUTTON notification
@@ -80,10 +76,8 @@ void OnButtonPressNotification::Run() {
       return;
     }
 
-
     if (!app) {
       LOG4CXX_ERROR(logger_, "Application doesn't exist.");
-
       return;
     }
 
@@ -126,7 +120,6 @@ void OnButtonPressNotification::Run() {
     if (is_app_id_exists || subscribed_app->IsFullscreen()) {
       SendButtonPress(subscribed_app);
     }
-
   }
 }
 
