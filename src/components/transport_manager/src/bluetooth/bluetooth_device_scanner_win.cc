@@ -222,12 +222,13 @@ void BluetoothDeviceScanner::CheckSDLServiceOnDevices(
     }
 
     const BLUETOOTH_DEVICE_INFO bd_address = bd_addresses[i];
-    char deviceName[256];
+    const size_t device_name_size = 256u;
+    char device_name[device_name_size];
     char servInfo[NI_MAXSERV];
     DWORD hci_read_remote_name_ret =
         getnameinfo((struct sockaddr*)device_handle,
                     sizeof(struct sockaddr),
-                    deviceName,
+                    device_name,
                     NI_MAXHOST,
                     servInfo,
                     NI_MAXSERV,
@@ -235,19 +236,19 @@ void BluetoothDeviceScanner::CheckSDLServiceOnDevices(
 
     if (hci_read_remote_name_ret != 0) {
       SDL_ERROR_WITH_ERRNO("hci_read_remote_name failed");
-      strncpy(deviceName,
-              BluetoothDevice::GetUniqueDeviceId(bd_address).c_str(),
-              sizeof(deviceName) / sizeof(deviceName[0]));
+      const std::string unique_device_id =
+          BluetoothDevice::GetUniqueDeviceId(bd_address);
+      strncpy(device_name, unique_device_id.c_str(), device_name_size);
     }
 
     Device* bluetooth_device = new BluetoothDevice(
-        bd_address, deviceName, sdl_rfcomm_channels[i], sock_addr_bth_server_);
+        bd_address, device_name, sdl_rfcomm_channels[i], sock_addr_bth_server_);
 
     if (bluetooth_device) {
       SDL_INFO("Bluetooth device created successfully");
       discovered_devices->push_back(bluetooth_device);
     } else {
-      SDL_WARN("Can't create bluetooth device " << deviceName);
+      SDL_WARN("Can't create bluetooth device " << device_name);
     }
   }
 }

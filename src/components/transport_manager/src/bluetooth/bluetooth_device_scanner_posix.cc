@@ -240,28 +240,23 @@ void BluetoothDeviceScanner::CheckSDLServiceOnDevices(
     }
 
     const bdaddr_t& bd_address = bd_addresses[i];
-    char deviceName[256];
-    int hci_read_remote_name_ret =
-        hci_read_remote_name(device_handle,
-                             &bd_address,
-                             sizeof(deviceName) / sizeof(deviceName[0]),
-                             deviceName,
-                             0);
+    std::string device_name;
+    device_name.resize(256u, '\0');
+    int hci_read_remote_name_ret = hci_read_remote_name(
+        device_handle, &bd_address, device_name.capacity(), &device_name[0], 0);
 
     if (hci_read_remote_name_ret != 0) {
       SDL_ERROR_WITH_ERRNO("hci_read_remote_name failed");
-      strncpy(deviceName,
-              BluetoothDevice::GetUniqueDeviceId(bd_address).c_str(),
-              sizeof(deviceName) / sizeof(deviceName[0]));
+      device_name = BluetoothDevice::GetUniqueDeviceId(bd_address);
     }
 
-    Device* bluetooth_device =
-        new BluetoothDevice(bd_address, deviceName, sdl_rfcomm_channels[i]);
+    Device* bluetooth_device = new BluetoothDevice(
+        bd_address, &device_name[0], sdl_rfcomm_channels[i]);
     if (bluetooth_device) {
       SDL_INFO("Bluetooth device created successfully");
       discovered_devices->push_back(bluetooth_device);
     } else {
-      SDL_WARN("Can't create bluetooth device " << deviceName);
+      SDL_WARN("Can't create bluetooth device " << device_name);
     }
   }
   SDL_TRACE("exit");
@@ -384,7 +379,7 @@ bool BluetoothDeviceScanner::DiscoverSmartDeviceLinkRFCOMMChannels(
 
     SDL_INFO("SmartDeviceLink service was discovered on device "
              << BluetoothDevice::GetUniqueDeviceId(device_address)
-             << " at channel(s): " << rfcomm_channels_string.str().c_str());
+             << " at channel(s): " << rfcomm_channels_string.str());
   } else {
     SDL_INFO("SmartDeviceLink service was not discovered on device "
              << BluetoothDevice::GetUniqueDeviceId(device_address));

@@ -33,6 +33,7 @@
 #include <cstdint>
 #include <cstddef>
 #include <QtNetwork>
+#include <QString>
 
 #include "utils/winhdr.h"
 #include "utils/pipe.h"
@@ -154,8 +155,8 @@ bool utils::Pipe::Impl::Write(const uint8_t* buffer,
 ////////////////////////////////////////////////////////////////////////////////
 
 utils::Pipe::Pipe(const std::string& name) {
-  impl_->name_ = (kPlatformPipePrefix +
-                  file_system::RetrieveFileNameFromPath(name)).c_str();
+  impl_->name_ = QString::fromStdString(
+      kPlatformPipePrefix + file_system::RetrieveFileNameFromPath(name));
 }
 
 bool utils::Pipe::Open() {

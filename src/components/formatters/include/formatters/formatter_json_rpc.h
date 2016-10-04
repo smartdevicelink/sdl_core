@@ -481,8 +481,9 @@ int32_t FormatterJsonRpc::ParseFunctionId(
   } else {
     FunctionId function_id;
 
+    const std::string method_value_str = method_value.AsString();
     if (!NsSmartObjects::EnumConversionHelper<FunctionId>::CStringToEnum(
-            method_value.AsString().c_str(), &function_id)) {
+            method_value_str.c_str(), &function_id)) {
       result |= kUnknownMethod;
     } else {
       namespace strings = NsSmartDeviceLink::NsJSONHandler::strings;

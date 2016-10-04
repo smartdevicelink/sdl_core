@@ -56,7 +56,8 @@ class SQLQueryTest : public ::testing::Test {
   SQLDatabaseImpl db_;
 
   static void SetUpTestCase() {
-    sqlite3_open((kDatabaseName_ + ".sqlite").c_str(), &conn_);
+    const std::string database_name = kDatabaseName_ + ".sqlite";
+    sqlite3_open(database_name.c_str(), &conn_);
     sqlite3_exec(conn_,
                  "CREATE TABLE testTable (integerValue INTEGER,"
                  " doubleValue REAL, stringValue TEXT)",
@@ -67,7 +68,8 @@ class SQLQueryTest : public ::testing::Test {
 
   static void TearDownTestCase() {
     sqlite3_close(conn_);
-    remove((kDatabaseName_ + ".sqlite").c_str());
+    const std::string database_name = kDatabaseName_ + ".sqlite";
+    remove(database_name.c_str());
   }
 
   void SetUp() {

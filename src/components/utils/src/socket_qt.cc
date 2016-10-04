@@ -324,9 +324,8 @@ void utils::TcpSocketConnection::Impl::Wait() {
 }
 
 void utils::TcpSocketConnection::Impl::OnErrorSlot() {
-  SDL_DEBUG("Socket error code:#["
-            << tcp_socket_->error() << "]. "
-            << tcp_socket_->errorString().toStdString().c_str());
+  SDL_DEBUG("Socket error code:#[" << tcp_socket_->error() << "]. "
+                                   << tcp_socket_->errorString().toStdString());
   if (tcp_socket_->error() != QAbstractSocket::RemoteHostClosedError) {
     OnError(tcp_socket_->error());
   }
