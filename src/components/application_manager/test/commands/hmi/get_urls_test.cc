@@ -98,12 +98,34 @@ class GetUrlsTest : public CommandsTest<CommandsTestMocks::kIsNice> {
         utils::MakeShared<policy_manager_test::MockPolicyManager>();
     ASSERT_TRUE(mock_policy_manager_);
   }
+
+  MessageSharedPtr CreateCommandMsg() {
+    MessageSharedPtr command_msg(
+        CreateMessage(NsSmartDeviceLink::NsSmartObjects::SmartType_Map));
+    (*command_msg)[am::strings::params][am::strings::connection_key] =
+        kConnectionKey;
+    (*command_msg)[am::strings::msg_params][am::hmi_request::service] =
+        kPolicyService;
+
+    return command_msg;
+  }
+
+  RequestFromHMIPtr PrepareRunFlowAndCreateCommandRequestFromHMI(
+      MessageSharedPtr command_msg) {
+    ON_CALL(mock_app_manager_, event_dispatcher())
+        .WillByDefault(ReturnRef(mock_event_dispatcher_));
+
+    RequestFromHMIPtr command(CreateCommand<GetUrls>(command_msg));
+
+    EXPECT_CALL(mock_app_manager_, GetPolicyHandler()).Times(3);
+    EXPECT_CALL(policy_handler_, PolicyEnabled()).WillOnce(Return(true));
+    return command;
+  }
 };
 
 TEST_F(GetUrlsTest, RUN_SUCCESS) {
   MessageSharedPtr command_msg(
       CreateMessage(NsSmartDeviceLink::NsSmartObjects::SmartType_Map));
-  (*command_msg)[am::strings::msg_params][am::strings::number] = "123";
   (*command_msg)[am::strings::params][am::strings::connection_key] =
       kConnectionKey;
   (*command_msg)[am::strings::msg_params][am::hmi_request::service] =
@@ -125,7 +147,6 @@ TEST_F(GetUrlsTest, RUN_SUCCESS) {
 TEST_F(GetUrlsTest, RUN_PolicyNotEnabled_UNSUCCESS) {
   MessageSharedPtr command_msg(
       CreateMessage(NsSmartDeviceLink::NsSmartObjects::SmartType_Map));
-  (*command_msg)[am::strings::msg_params][am::strings::number] = "123";
   (*command_msg)[am::strings::params][am::strings::connection_key] =
       kConnectionKey;
   (*command_msg)[am::strings::msg_params][am::hmi_request::service] =
@@ -153,7 +174,6 @@ TEST_F(GetUrlsTest, RUN_PolicyNotEnabled_UNSUCCESS) {
 TEST_F(GetUrlsTest, RUN_EmptyEndpoints_UNSUCCESS) {
   MessageSharedPtr command_msg(
       CreateMessage(NsSmartDeviceLink::NsSmartObjects::SmartType_Map));
-  (*command_msg)[am::strings::msg_params][am::strings::number] = "123";
   (*command_msg)[am::strings::params][am::strings::connection_key] =
       kConnectionKey;
   (*command_msg)[am::strings::msg_params][am::hmi_request::service] =
@@ -183,21 +203,9 @@ TEST_F(GetUrlsTest, RUN_EmptyEndpoints_UNSUCCESS) {
 
 #ifdef EXTENDED_POLICY
 TEST_F(GetUrlsTest, ProcessPolicyServiceURLs_SUCCESS) {
-  MessageSharedPtr command_msg(
-      CreateMessage(NsSmartDeviceLink::NsSmartObjects::SmartType_Map));
-  (*command_msg)[am::strings::msg_params][am::strings::number] = "123";
-  (*command_msg)[am::strings::params][am::strings::connection_key] =
-      kConnectionKey;
-  (*command_msg)[am::strings::msg_params][am::hmi_request::service] =
-      kPolicyService;
-
-  ON_CALL(mock_app_manager_, event_dispatcher())
-      .WillByDefault(ReturnRef(mock_event_dispatcher_));
-
-  RequestFromHMIPtr command(CreateCommand<GetUrls>(command_msg));
-
-  EXPECT_CALL(mock_app_manager_, GetPolicyHandler()).Times(3);
-  EXPECT_CALL(policy_handler_, PolicyEnabled()).WillOnce(Return(true));
+  MessageSharedPtr command_msg = CreateCommandMsg();
+  RequestFromHMIPtr command =
+      PrepareRunFlowAndCreateCommandRequestFromHMI(command_msg);
 
   EndpointUrls endpoints_;
   EndpointData data(kDefaultUrl);
@@ -236,21 +244,9 @@ TEST_F(GetUrlsTest, ProcessPolicyServiceURLs_SUCCESS) {
                           [strings::url].asString());
 }
 TEST_F(GetUrlsTest, ProcessPolicyServiceURLs_IncorrectIdForSending_UNSUCCESS) {
-  MessageSharedPtr command_msg(
-      CreateMessage(NsSmartDeviceLink::NsSmartObjects::SmartType_Map));
-  (*command_msg)[am::strings::msg_params][am::strings::number] = "123";
-  (*command_msg)[am::strings::params][am::strings::connection_key] =
-      kConnectionKey;
-  (*command_msg)[am::strings::msg_params][am::hmi_request::service] =
-      kPolicyService;
-
-  ON_CALL(mock_app_manager_, event_dispatcher())
-      .WillByDefault(ReturnRef(mock_event_dispatcher_));
-
-  RequestFromHMIPtr command(CreateCommand<GetUrls>(command_msg));
-
-  EXPECT_CALL(mock_app_manager_, GetPolicyHandler()).Times(3);
-  EXPECT_CALL(policy_handler_, PolicyEnabled()).WillOnce(Return(true));
+  MessageSharedPtr command_msg = CreateCommandMsg();
+  RequestFromHMIPtr command =
+      PrepareRunFlowAndCreateCommandRequestFromHMI(command_msg);
 
   EndpointUrls endpoints_;
   EndpointData data(kDefaultUrl);
@@ -271,21 +267,9 @@ TEST_F(GetUrlsTest, ProcessPolicyServiceURLs_IncorrectIdForSending_UNSUCCESS) {
   command->Run();
 }
 TEST_F(GetUrlsTest, ProcessPolicyServiceURLs_ApplicationIsNotValid_UNSUCCESS) {
-  MessageSharedPtr command_msg(
-      CreateMessage(NsSmartDeviceLink::NsSmartObjects::SmartType_Map));
-  (*command_msg)[am::strings::msg_params][am::strings::number] = "123";
-  (*command_msg)[am::strings::params][am::strings::connection_key] =
-      kConnectionKey;
-  (*command_msg)[am::strings::msg_params][am::hmi_request::service] =
-      kPolicyService;
-
-  ON_CALL(mock_app_manager_, event_dispatcher())
-      .WillByDefault(ReturnRef(mock_event_dispatcher_));
-
-  RequestFromHMIPtr command(CreateCommand<GetUrls>(command_msg));
-
-  EXPECT_CALL(mock_app_manager_, GetPolicyHandler()).Times(3);
-  EXPECT_CALL(policy_handler_, PolicyEnabled()).WillOnce(Return(true));
+  MessageSharedPtr command_msg = CreateCommandMsg();
+  RequestFromHMIPtr command =
+      PrepareRunFlowAndCreateCommandRequestFromHMI(command_msg);
 
   EndpointUrls endpoints_;
   EndpointData data(kDefaultUrl);
@@ -314,21 +298,9 @@ TEST_F(GetUrlsTest, ProcessPolicyServiceURLs_ApplicationIsNotValid_UNSUCCESS) {
             Common_Result::DATA_NOT_AVAILABLE);
 }
 TEST_F(GetUrlsTest, ProcessPolicyServiceURLs_FoundURLForApplication_SUCCESS) {
-  MessageSharedPtr command_msg(
-      CreateMessage(NsSmartDeviceLink::NsSmartObjects::SmartType_Map));
-  (*command_msg)[am::strings::msg_params][am::strings::number] = "123";
-  (*command_msg)[am::strings::params][am::strings::connection_key] =
-      kConnectionKey;
-  (*command_msg)[am::strings::msg_params][am::hmi_request::service] =
-      kPolicyService;
-
-  ON_CALL(mock_app_manager_, event_dispatcher())
-      .WillByDefault(ReturnRef(mock_event_dispatcher_));
-
-  RequestFromHMIPtr command(CreateCommand<GetUrls>(command_msg));
-
-  EXPECT_CALL(mock_app_manager_, GetPolicyHandler()).Times(3);
-  EXPECT_CALL(policy_handler_, PolicyEnabled()).WillOnce(Return(true));
+  MessageSharedPtr command_msg = CreateCommandMsg();
+  RequestFromHMIPtr command =
+      PrepareRunFlowAndCreateCommandRequestFromHMI(command_msg);
 
   EndpointUrls endpoints_;
   EndpointData data(kDefaultUrl);
@@ -369,7 +341,6 @@ TEST_F(GetUrlsTest, ProcessPolicyServiceURLs_FoundURLForApplication_SUCCESS) {
 TEST_F(GetUrlsTest, ProcessServiceURLs_SUCCESS) {
   MessageSharedPtr command_msg(
       CreateMessage(NsSmartDeviceLink::NsSmartObjects::SmartType_Map));
-  (*command_msg)[am::strings::msg_params][am::strings::number] = "123";
   (*command_msg)[am::strings::params][am::strings::connection_key] =
       kConnectionKey;
   (*command_msg)[am::strings::msg_params][am::hmi_request::service] =
@@ -411,7 +382,6 @@ TEST_F(GetUrlsTest, ProcessServiceURLs_SUCCESS) {
 TEST_F(GetUrlsTest, ProcessServiceURLs_PolicyDefaultId_SUCCESS) {
   MessageSharedPtr command_msg(
       CreateMessage(NsSmartDeviceLink::NsSmartObjects::SmartType_Map));
-  (*command_msg)[am::strings::msg_params][am::strings::number] = "123";
   (*command_msg)[am::strings::params][am::strings::connection_key] =
       kConnectionKey;
   (*command_msg)[am::strings::msg_params][am::hmi_request::service] =

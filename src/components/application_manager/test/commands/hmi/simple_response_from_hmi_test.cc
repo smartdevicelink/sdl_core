@@ -96,7 +96,6 @@
 #include "hmi/navi_show_constant_tbt_response.h"
 #include "hmi/navi_start_stream_response.h"
 #include "hmi/navi_subscribe_way_points_response.h"
-#include "hmi/navi_is_ready_response.h"
 #include "hmi/on_find_applications.h"
 #include "hmi/on_update_device_list.h"
 #include "hmi/sdl_policy_update_response.h"
@@ -111,7 +110,6 @@ namespace simple_response_from_hmi_test {
 
 using ::testing::_;
 using ::testing::ReturnRef;
-using ::testing::Return;
 using ::testing::Types;
 using ::testing::Eq;
 
@@ -316,32 +314,6 @@ TEST_F(OtherResponseFromHMICommandsTest, VIIsReadyResponse_Run_SUCCESS) {
       .WillOnce(ReturnRef(policy_handler));
 
   EXPECT_CALL(policy_handler, OnVIIsReady());
-
-  command->Run();
-}
-
-TEST(NaviIsReadyResponseTest, NaviIsReadyResponse_Run_SUCCESS) {
-  application_manager_test::MockApplicationManager mock_app_manager;
-  application_manager_test::MockHMICapabilities mock_hmi_capabilities;
-  application_manager_test::MockApplicationManagerSettings mock_settings;
-
-  MessageSharedPtr command_msg(utils::MakeShared<smart_objects::SmartObject>(
-      smart_objects::SmartType_Map));
-
-  (*command_msg)[am::strings::msg_params][am::strings::available] = true;
-  uint32_t timeout = 1u;
-
-  EXPECT_CALL(mock_app_manager, get_settings())
-      .WillOnce(ReturnRef(mock_settings));
-  EXPECT_CALL(mock_settings, default_timeout()).WillOnce(ReturnRef(timeout));
-
-  SharedPtr<commands::NaviIsReadyResponse> command(
-      ::utils::MakeShared<commands::NaviIsReadyResponse>(command_msg,
-                                                         mock_app_manager));
-
-  EXPECT_CALL(mock_app_manager, hmi_capabilities())
-      .WillOnce(ReturnRef(mock_hmi_capabilities));
-  EXPECT_CALL(mock_hmi_capabilities, set_is_navi_cooperating(Eq(true)));
 
   command->Run();
 }

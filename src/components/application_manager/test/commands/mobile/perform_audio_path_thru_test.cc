@@ -195,7 +195,7 @@ TEST_F(PerformAudioPassThruRequestTest,
   // now we recieve on_event:
 
   application_manager_test::MockApplicationManagerSettings mock_settings;
-  uint32_t default_timeout_msec = 1u;
+  uint32_t default_timeout_msec = CommandsTest::kDefaultTimeout_;
   event_engine::Event event(hmi_apis::FunctionID::UI_PerformAudioPassThru);
   (*message_)[strings::params][hmi_response::code] =
       mobile_apis::Result::eType::GENERIC_ERROR;
