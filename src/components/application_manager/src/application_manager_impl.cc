@@ -1404,7 +1404,6 @@ void ApplicationManagerImpl::SendMessageToMobile(
                                  << ") not allowed by policy");
       return;
     }
-
   }
 
   if (message_to_send->binary_data()) {
