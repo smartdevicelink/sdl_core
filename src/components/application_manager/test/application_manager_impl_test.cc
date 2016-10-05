@@ -112,7 +112,7 @@ class ApplicationManagerImplTest : public ::testing::Test {
     app_manager_impl_->resume_controller().set_resumption_storage(
         mock_storage_);
     app_manager_impl_->set_connection_handler(&mock_connection_handler_);
-    app_manager_impl_->set_hmi_message_handler(&mock_hmi_mess_handler_);
+    app_manager_impl_->set_hmi_message_handler(&mock_hmi_msg_handler_);
   }
 
   void CreateAppManager() {
@@ -144,7 +144,7 @@ class ApplicationManagerImplTest : public ::testing::Test {
   NiceMock<con_test::MockConnectionHandler> mock_connection_handler_;
   NiceMock<protocol_handler_test::MockSessionObserver> mock_session_observer_;
   NiceMock<hmi_message_handler_test::MockHMIMessageHandler>
-      mock_hmi_mess_handler_;
+      mock_hmi_msg_handler_;
   NiceMock<MockApplicationManagerSettings> mock_application_manager_settings_;
   std::auto_ptr<am::ApplicationManagerImpl> app_manager_impl_;
 };
@@ -186,7 +186,7 @@ TEST_F(ApplicationManagerImplTest,
   smart_objects::SmartObject sm_object(SmartType_Map);
   sm_object[am::json::response][0] = app_data;
 
-  EXPECT_CALL(mock_hmi_mess_handler_, SendMessageToHMI(Truly(AppIdExtractor())))
+  EXPECT_CALL(mock_hmi_msg_handler_, SendMessageToHMI(Truly(AppIdExtractor())))
       .Times(AtLeast(1u));
 
   app_manager_impl_->ProcessQueryApp(sm_object, connection_key);
@@ -215,7 +215,7 @@ TEST_F(ApplicationManagerImplTest,
   smart_objects::SmartObject sm_object(SmartType_Map);
   sm_object[am::json::response][0] = app_data;
 
-  EXPECT_CALL(mock_hmi_mess_handler_, SendMessageToHMI(Truly(AppIdExtractor())))
+  EXPECT_CALL(mock_hmi_msg_handler_, SendMessageToHMI(Truly(AppIdExtractor())))
       .Times(AtLeast(1u));
 
   app_manager_impl_->ProcessQueryApp(sm_object, connection_key);
