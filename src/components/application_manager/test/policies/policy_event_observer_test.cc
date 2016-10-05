@@ -46,7 +46,7 @@ namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 using application_manager::event_engine::Event;
 using namespace policy;
 
-using testing::_;
+using ::testing::_;
 using ::testing::Return;
 
 class PolicyEventObserverTest : public ::testing::Test {
@@ -69,6 +69,7 @@ class PolicyEventObserverTest : public ::testing::Test {
   }
 
   void TearDown() OVERRIDE {
+    EXPECT_CALL(mock_event_dispatcher_, remove_observer(_));
     delete policy_event_observer_;
     DeleteEvent();
   }
@@ -110,6 +111,7 @@ TEST_F(PolicyEventObserverTest, OnEvent_EventInvalid_ExpectNoProcessingEvent) {
 TEST_F(PolicyEventObserverTest,
        OnEvent_EventInvalidCommonResult_ExpectNoProcessingEvent) {
   // Arrange
+  EXPECT_CALL(mock_event_dispatcher_, remove_observer(_, _));
   CreateEvent(Event::EventID::VehicleInfo_GetVehicleData);
   CookSmartObject(
       hmi_apis::Common_Result::INVALID_DATA, field_name, field_value);
@@ -120,6 +122,7 @@ TEST_F(PolicyEventObserverTest,
 TEST_F(PolicyEventObserverTest,
        OnEvent_EventGetVehicleData_ExpectProcessOdometerEvent) {
   // Arrange
+  EXPECT_CALL(mock_event_dispatcher_, remove_observer(_, _));
   CreateEvent(Event::EventID::VehicleInfo_GetVehicleData);
   CookSmartObject(hmi_apis::Common_Result::SUCCESS, field_name, field_value);
   // Check
@@ -129,6 +132,7 @@ TEST_F(PolicyEventObserverTest,
 TEST_F(PolicyEventObserverTest,
        OnEvent_EventBasicCommunication_OnReady_ExpectOnSystemReady) {
   // Arrange
+  EXPECT_CALL(mock_event_dispatcher_, remove_observer(_, _));
   CreateEvent(Event::EventID::BasicCommunication_OnReady);
   CookSmartObject(hmi_apis::Common_Result::SUCCESS, field_name, field_value);
   // Check
