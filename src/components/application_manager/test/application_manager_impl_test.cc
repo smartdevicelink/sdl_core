@@ -199,7 +199,6 @@ TEST_F(ApplicationManagerImplTest,
     }
   }
 
-  EXPECT_CALL(mock_hmi_mess_handler_, SendMessageToHMI(_)).Times(AtLeast(0));
   EXPECT_TRUE(app_manager_impl_->FindAppToRegister(hmi_app_id_).valid());
 }
 
@@ -229,7 +228,6 @@ TEST_F(ApplicationManagerImplTest,
     }
   }
 
-  EXPECT_CALL(mock_hmi_mess_handler_, SendMessageToHMI(_)).Times(AtLeast(0));
   hmi_app_id_ += 100;  // change hmi_id
   EXPECT_FALSE(app_manager_impl_->FindAppToRegister(hmi_app_id_).valid());
 }
