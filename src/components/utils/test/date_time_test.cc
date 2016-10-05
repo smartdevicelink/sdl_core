@@ -33,6 +33,7 @@
 #include "gtest/gtest.h"
 #include "utils/date_time.h"
 #include "utils/threads/thread.h"
+#include "utils/convert_utils.h"
 
 namespace test {
 namespace components {
@@ -97,8 +98,9 @@ TEST(DateTimeTest, GetuSecsmSecs) {
   time.tv_sec = 5;
   time.tv_usec = 6;
 
-  int64_t expect_value = date_time::DateTime::getuSecs(time) /
-                         date_time::kMicrosecondsInMillisecond;
+  int64_t expect_value =
+      utils::Int64DivisionRoundUp(date_time::DateTime::getuSecs(time),
+                                  date_time::kMicrosecondsInMillisecond);
 
   // assert
   ASSERT_EQ(expect_value, date_time::DateTime::getmSecs(time));
@@ -108,7 +110,7 @@ TEST(DateTimeTest, CalculateTimeSpan) {
   // arrange
   const TimevalStruct time = date_time::DateTime::getCurrentTime();
 
-  const uint32_t sleep_time_mSec = 10;
+  const int64_t sleep_time_mSec = 100;
   threads::sleep(sleep_time_mSec);
 
   // assert

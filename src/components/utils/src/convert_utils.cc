@@ -70,3 +70,9 @@ uint64_t utils::ConvertLongLongUIntToUInt64(
 
   return static_cast<uint64_t>(value);
 }
+
+int64_t utils::Int64DivisionRoundUp(const int64_t numerator,
+                                    const uint64_t denominator) {
+  return numerator / denominator +
+         (((numerator < 0) ^ (denominator > 0)) && (numerator % denominator));
+}

@@ -33,6 +33,7 @@
 #include <stdint.h>
 
 #include "utils/date_time.h"
+#include "utils/convert_utils.h"
 
 namespace date_time {
 
@@ -54,7 +55,7 @@ int64_t date_time::DateTime::getSecs(const TimevalStruct& time) {
 int64_t DateTime::getmSecs(const TimevalStruct& time) {
   const TimevalStruct times = ConvertionUsecs(time);
   return static_cast<int64_t>(times.tv_sec) * kMillisecondsInSecond +
-         times.tv_usec / kMicrosecondsInMillisecond;
+         utils::Int64DivisionRoundUp(times.tv_usec, kMicrosecondsInMillisecond);
 }
 
 int64_t DateTime::getuSecs(const TimevalStruct& time) {
