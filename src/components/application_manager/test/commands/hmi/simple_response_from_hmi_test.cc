@@ -101,6 +101,7 @@
 #include "hmi/sdl_policy_update_response.h"
 #include "hmi/update_app_list_response.h"
 #include "hmi/update_device_list_response.h"
+#include "hmi/notification_from_hmi.h"
 
 namespace test {
 namespace components {
@@ -109,6 +110,7 @@ namespace hmi_commands_test {
 namespace simple_response_from_hmi_test {
 
 using ::testing::_;
+using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::Types;
 using ::testing::Eq;
@@ -316,6 +318,57 @@ TEST_F(OtherResponseFromHMICommandsTest, VIIsReadyResponse_Run_SUCCESS) {
   EXPECT_CALL(policy_handler, OnVIIsReady());
 
   command->Run();
+}
+
+MATCHER_P(CheckMsgType, msg_type, "") {
+  return msg_type ==
+         static_cast<int32_t>(
+             (*arg)[am::strings::params][am::strings::message_type].asInt());
+}
+
+class NotificationFromHMITest
+    : public CommandsTest<CommandsTestMocks::kIsNice> {};
+
+TEST_F(NotificationFromHMITest, BasicMethodsOverloads_SUCCESS) {
+  SharedPtr<commands::NotificationFromHMI> command(
+      CreateCommand<commands::NotificationFromHMI>());
+  // Current implementation always return `true`
+  EXPECT_TRUE(command->Init());
+  EXPECT_TRUE(command->CleanUp());
+  EXPECT_NO_THROW(command->Run());
+}
+
+TEST_F(NotificationFromHMITest, SendNotificationToMobile_SUCCESS) {
+  MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*command_msg)[am::strings::params][am::strings::message_type] =
+      static_cast<int32_t>(am::MessageType::kNotification);
+
+  SharedPtr<commands::NotificationFromHMI> command(
+      CreateCommand<commands::NotificationFromHMI>());
+
+  EXPECT_CALL(
+      mock_app_manager_,
+      ManageMobileCommand(CheckMsgType(am::MessageType::kNotification),
+                          am::commands::Command::CommandOrigin::ORIGIN_SDL));
+
+  command->SendNotificationToMobile(command_msg);
+}
+
+TEST_F(NotificationFromHMITest, CreateHMIRequest_UNSUCCESS) {
+  MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*command_msg)[am::strings::msg_params] = 0;
+  SharedPtr<commands::NotificationFromHMI> command(
+      CreateCommand<commands::NotificationFromHMI>(command_msg));
+
+  const uint32_t correlation_id = 1u;
+  EXPECT_CALL(mock_app_manager_, GetNextHMICorrelationID())
+      .WillOnce(Return(correlation_id));
+  EXPECT_CALL(mock_app_manager_,
+              ManageHMICommand(CheckMsgType(am::MessageType::kRequest)))
+      .WillOnce(Return(false));
+
+  command->CreateHMIRequest(hmi_apis::FunctionID::INVALID_ENUM,
+                            (*command_msg)[am::strings::msg_params]);
 }
 
 }  // namespace simple_response_from_hmi_test

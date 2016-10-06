@@ -34,12 +34,15 @@
 
 #include "gtest/gtest.h"
 #include "utils/lock.h"
+#include "utils/helpers.h"
 #include "application_manager/commands/hmi/sdl_activate_app_request.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
 #include "commands/command_request_test.h"
 #include "application_manager/mock_message_helper.h"
+#include "application_manager/event_engine/event.h"
+#include "application_manager/mock_event_dispatcher.h"
 
 namespace test {
 namespace components {
@@ -53,11 +56,13 @@ namespace hmi_response = am::hmi_response;
 using am::commands::MessageSharedPtr;
 using am::commands::SDLActivateAppRequest;
 using am::ApplicationSet;
+using testing::Mock;
 using testing::Return;
 using testing::ReturnRef;
 using testing::Mock;
 using am::MockMessageHelper;
 using policy_test::MockPolicyHandlerInterface;
+using am::event_engine::Event;
 
 namespace {
 const uint32_t kCorrelationID = 1u;
@@ -65,6 +70,33 @@ const uint32_t kAppID = 2u;
 const uint32_t kAppIDFirst = 1u;
 const connection_handler::DeviceHandle kHandle = 2u;
 }  // namespace
+
+MATCHER_P2(CheckMsgParams, result, corr_id, "") {
+  const bool is_func_id_valid =
+      hmi_apis::FunctionID::SDL_ActivateApp ==
+      static_cast<int32_t>(
+          (*arg)[am::strings::params][am::strings::function_id].asInt());
+
+  const bool is_result_code_valid =
+      hmi_apis::Common_Result::APPLICATION_NOT_REGISTERED ==
+      static_cast<int32_t>(
+          (*arg)[am::strings::msg_params][am::strings::result_code].asInt());
+
+  const bool is_result_valid =
+      result == (*arg)[am::strings::msg_params][am::strings::success].asBool();
+
+  const bool is_corr_id_valid =
+      corr_id ==
+      static_cast<int32_t>(
+          (*arg)[am::strings::params][am::strings::correlation_id].asInt());
+
+  using namespace helpers;
+  return Compare<bool, EQ, ALL>(true,
+                                is_func_id_valid,
+                                is_result_code_valid,
+                                is_result_valid,
+                                is_corr_id_valid);
+}
 
 class SDLActivateAppRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
@@ -84,8 +116,12 @@ class SDLActivateAppRequestTest
     MockAppPtr mock_app = CreateMockApp();
     CommandRequestTest<CommandsTestMocks::kIsNice>::InitCommand(timeout);
     ON_CALL((*mock_app), app_id()).WillByDefault(Return(kAppID));
-    EXPECT_CALL(mock_app_manager_, application_by_hmi_app(kAppID))
-        .WillOnce(Return(mock_app));
+    ON_CALL(mock_app_manager_, application_by_hmi_app(kAppID))
+        .WillByDefault(Return(mock_app));
+  }
+  void SetCorrelationAndAppID(MessageSharedPtr msg) {
+    (*msg)[am::strings::params][strings::correlation_id] = kCorrelationID;
+    (*msg)[am::strings::msg_params][strings::app_id] = kAppID;
   }
 
   ApplicationSet app_list_;
@@ -96,8 +132,7 @@ class SDLActivateAppRequestTest
 
 TEST_F(SDLActivateAppRequestTest, FindAppToRegister_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
-  (*msg)[am::strings::params][strings::correlation_id] = kCorrelationID;
-  (*msg)[am::strings::msg_params][strings::app_id] = kAppID;
+  SetCorrelationAndAppID(msg);
 
   SharedPtr<SDLActivateAppRequest> command(
       CreateCommand<SDLActivateAppRequest>(msg));
@@ -127,8 +162,7 @@ TEST_F(SDLActivateAppRequestTest, FindAppToRegister_SUCCESS) {
 
 TEST_F(SDLActivateAppRequestTest, AppIdNotFound_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
-  (*msg)[am::strings::params][strings::correlation_id] = kCorrelationID;
-  (*msg)[am::strings::msg_params][strings::app_id] = kAppID;
+  SetCorrelationAndAppID(msg);
 
   SharedPtr<SDLActivateAppRequest> command(
       CreateCommand<SDLActivateAppRequest>(msg));
@@ -143,8 +177,7 @@ TEST_F(SDLActivateAppRequestTest, AppIdNotFound_SUCCESS) {
 
 TEST_F(SDLActivateAppRequestTest, DevicesAppsEmpty_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
-  (*msg)[am::strings::params][strings::correlation_id] = kCorrelationID;
-  (*msg)[am::strings::msg_params][strings::app_id] = kAppID;
+  SetCorrelationAndAppID(msg);
 
   SharedPtr<SDLActivateAppRequest> command(
       CreateCommand<SDLActivateAppRequest>(msg));
@@ -162,8 +195,7 @@ TEST_F(SDLActivateAppRequestTest, DevicesAppsEmpty_SUCCESS) {
 
 TEST_F(SDLActivateAppRequestTest, FirstAppActive_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
-  (*msg)[am::strings::params][strings::correlation_id] = kCorrelationID;
-  (*msg)[am::strings::msg_params][strings::app_id] = kAppID;
+  SetCorrelationAndAppID(msg);
 
   SharedPtr<SDLActivateAppRequest> command(
       CreateCommand<SDLActivateAppRequest>(msg));
@@ -195,8 +227,7 @@ TEST_F(SDLActivateAppRequestTest, FirstAppActive_SUCCESS) {
 
 TEST_F(SDLActivateAppRequestTest, FirstAppNotActive_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
-  (*msg)[am::strings::params][strings::correlation_id] = kCorrelationID;
-  (*msg)[am::strings::msg_params][strings::app_id] = kAppID;
+  SetCorrelationAndAppID(msg);
 
   SharedPtr<SDLActivateAppRequest> command(
       CreateCommand<SDLActivateAppRequest>(msg));
@@ -226,10 +257,47 @@ TEST_F(SDLActivateAppRequestTest, FirstAppNotActive_SUCCESS) {
   command->Run();
 }
 
+TEST_F(SDLActivateAppRequestTest, FirstAppIsForeground_SUCCESS) {
+  Mock::VerifyAndClearExpectations(&message_helper_mock_);
+  MessageSharedPtr msg = CreateMessage();
+  SetCorrelationAndAppID(msg);
+
+  SharedPtr<SDLActivateAppRequest> command(
+      CreateCommand<SDLActivateAppRequest>(msg));
+
+  MockAppPtr mock_app(CreateMockApp());
+
+  const std::string schema("schema");
+  mock_app->SetShemaUrl(schema);
+  const std::string package_name("package_name");
+  mock_app->SetPackageName(package_name);
+
+  ON_CALL(mock_app_manager_, application(kAppID))
+      .WillByDefault(Return(mock_app));
+
+  EXPECT_CALL(*mock_app, device()).WillOnce(Return(kHandle));
+
+  MockAppPtr mock_app_first(CreateMockApp());
+  ON_CALL(*mock_app_first, device()).WillByDefault(Return(kHandle));
+  ON_CALL(*mock_app_first, is_foreground()).WillByDefault(Return(false));
+
+  app_list_.insert(mock_app_first);
+  DataAccessor<ApplicationSet> accessor(app_list_, lock_);
+  EXPECT_CALL(mock_app_manager_, applications()).WillOnce(Return(accessor));
+
+  EXPECT_CALL(*mock_app, IsRegistered()).WillOnce(Return(true));
+  EXPECT_CALL(*mock_app_first, device()).WillOnce(Return(kHandle));
+  EXPECT_CALL(*mock_app_first, is_foreground()).WillOnce(Return(true));
+
+  EXPECT_CALL(*message_helper_mock_, SendLaunchApp(_, schema, package_name, _));
+
+  command->Run();
+  Mock::VerifyAndClearExpectations(&message_helper_mock_);
+}
+
 TEST_F(SDLActivateAppRequestTest, FirstAppNotRegisteredAndEmpty_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
-  (*msg)[am::strings::params][strings::correlation_id] = kCorrelationID;
-  (*msg)[am::strings::msg_params][strings::app_id] = kAppID;
+  SetCorrelationAndAppID(msg);
 
   SharedPtr<SDLActivateAppRequest> command(
       CreateCommand<SDLActivateAppRequest>(msg));
@@ -257,8 +325,7 @@ TEST_F(SDLActivateAppRequestTest, FirstAppNotRegisteredAndEmpty_SUCCESS) {
 
 TEST_F(SDLActivateAppRequestTest, FirstAppNotRegistered_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
-  (*msg)[am::strings::params][strings::correlation_id] = kCorrelationID;
-  (*msg)[am::strings::msg_params][strings::app_id] = kAppID;
+  SetCorrelationAndAppID(msg);
 
   SharedPtr<SDLActivateAppRequest> command(
       CreateCommand<SDLActivateAppRequest>(msg));
@@ -285,6 +352,77 @@ TEST_F(SDLActivateAppRequestTest, FirstAppNotRegistered_SUCCESS) {
   EXPECT_CALL(*message_helper_mock_, SendLaunchApp(_, _, _, _));
 
   command->Run();
+}
+
+TEST_F(SDLActivateAppRequestTest, OnTimeout_SUCCESS) {
+  MessageSharedPtr msg = CreateMessage();
+  SetCorrelationAndAppID(msg);
+
+  SharedPtr<SDLActivateAppRequest> command(
+      CreateCommand<SDLActivateAppRequest>(msg));
+
+  EXPECT_CALL(mock_app_manager_,
+              ManageHMICommand(CheckMsgParams(false, kCorrelationID)))
+      .WillOnce(Return(true));
+
+  command->onTimeOut();
+}
+
+TEST_F(SDLActivateAppRequestTest, OnEvent_InvalidEventId_UNSUCCESS) {
+  MessageSharedPtr event_msg = CreateMessage();
+  (*event_msg)[am::strings::params][strings::correlation_id] = kCorrelationID;
+
+  SharedPtr<SDLActivateAppRequest> command(
+      CreateCommand<SDLActivateAppRequest>());
+
+  Event event(hmi_apis::FunctionID::INVALID_ENUM);
+  event.set_smart_object(*event_msg);
+  EXPECT_CALL(mock_app_manager_, application_by_hmi_app(_)).Times(0);
+
+  command->on_event(event);
+}
+
+TEST_F(SDLActivateAppRequestTest, OnEvent_InvalidAppId_UNSUCCESS) {
+  MessageSharedPtr event_msg = CreateMessage();
+  (*event_msg)[strings::msg_params][strings::application][strings::app_id] =
+      kAppID;
+
+  SharedPtr<SDLActivateAppRequest> command(
+      CreateCommand<SDLActivateAppRequest>());
+
+  Event event(hmi_apis::FunctionID::BasicCommunication_OnAppRegistered);
+  event.set_smart_object(*event_msg);
+
+  MockAppPtr invalid_mock_app;
+  EXPECT_CALL(mock_app_manager_, application_by_hmi_app(kAppID))
+      .WillOnce(Return(invalid_mock_app));
+  EXPECT_CALL(mock_app_manager_, GetPolicyHandler()).Times(0);
+
+  command->on_event(event);
+}
+
+TEST_F(SDLActivateAppRequestTest, OnEvent_SUCCESS) {
+  MessageSharedPtr msg = CreateMessage();
+  (*msg)[strings::params][strings::correlation_id] = kCorrelationID;
+  SharedPtr<SDLActivateAppRequest> command(
+      CreateCommand<SDLActivateAppRequest>(msg));
+
+  MessageSharedPtr event_msg = CreateMessage();
+  (*event_msg)[strings::msg_params][strings::application][strings::app_id] =
+      kAppID;
+
+  Event event(hmi_apis::FunctionID::BasicCommunication_OnAppRegistered);
+  event.set_smart_object(*event_msg);
+
+  MockAppPtr mock_app(CreateMockApp());
+  EXPECT_CALL(mock_app_manager_, application_by_hmi_app(kAppID))
+      .WillOnce(Return(mock_app));
+  EXPECT_CALL(*mock_app, app_id()).WillOnce(Return(kAppID));
+  EXPECT_CALL(mock_app_manager_, GetPolicyHandler())
+      .WillOnce(ReturnRef(policy_handler_));
+  EXPECT_CALL(policy_handler_, OnActivateApp(kAppID, kCorrelationID));
+
+  command->on_event(event);
 }
 
 }  // namespace sdl_activate_app_request
