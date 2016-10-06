@@ -61,6 +61,17 @@ unsigned long long int ConvertUInt64ToLongLongUInt(const uint64_t value);
 uint64_t ConvertLongLongUIntToUInt64(const unsigned long long int value);
 
 /**
+ * Return integer division round up
+ *
+ * C++ dividing example: 5 / 2 = 2
+ *
+ * Example:
+ * Int64DivisionRoundUp(5, 2) returns 3
+ */
+int64_t Int64DivisionRoundUp(const int64_t numerator,
+                             const uint64_t denominator);
+
+/**
  * Convert one number value to another type value
  */
 template <typename InputType, typename OutputType>
