@@ -267,6 +267,7 @@ void PerformInteractionRequest::onTimeOut() {
 
   switch (interaction_mode_) {
     case mobile_apis::InteractionMode::BOTH: {
+      LOG4CXX_DEBUG(logger_, "Interaction Mode: BOTH");
       if (true == vr_response_recived_) {
         unsubscribe_from_event(hmi_apis::FunctionID::UI_PerformInteraction);
         DisablePerformInteraction();
@@ -278,11 +279,14 @@ void PerformInteractionRequest::onTimeOut() {
       break;
     }
     case mobile_apis::InteractionMode::VR_ONLY: {
-      application_manager_.updateRequestTimeout(
-          connection_key(), correlation_id(), default_timeout());
+      LOG4CXX_DEBUG(logger_, "Interaction Mode: VR_ONLY");
+      unsubscribe_from_event(hmi_apis::FunctionID::UI_PerformInteraction);
+      DisablePerformInteraction();
+      CommandRequestImpl::onTimeOut();
       break;
     }
     case mobile_apis::InteractionMode::MANUAL_ONLY: {
+      LOG4CXX_DEBUG(logger_, "InteractionMode: MANUAL_ONLY");
       unsubscribe_from_event(hmi_apis::FunctionID::UI_PerformInteraction);
       DisablePerformInteraction();
       CommandRequestImpl::onTimeOut();
@@ -419,17 +423,6 @@ bool PerformInteractionRequest::ProcessUIResponse(
         msg_params.erase(strings::manual_text_entry);
       }
     }
-  }
-
-  const SmartObject* response_params = msg_params.empty() ? NULL : &msg_params;
-  if (mobile_apis::InteractionMode::BOTH != interaction_mode_ &&
-      HmiInterfaces::STATE_NOT_AVAILABLE != ui_interface_state) {
-    DisablePerformInteraction();
-    SendResponse(result,
-                 MessageHelper::HMIToMobileResult(ui_result_code_),
-                 ui_info_.empty() ? NULL : ui_info_.c_str(),
-                 response_params);
-    return true;
   }
   return false;
 }
