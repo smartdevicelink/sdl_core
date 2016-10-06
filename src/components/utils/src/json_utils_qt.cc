@@ -322,8 +322,8 @@ utils::json::JsonValue::JsonValue(ValueType::Type type)
 utils::json::JsonValue::ParseResult utils::json::JsonValue::Parse(
     const std::string& document) {
   QJsonParseError parsing_error;
-  QJsonDocument json_document =
-      QJsonDocument::fromJson(document.c_str(), &parsing_error);
+  QJsonDocument json_document = QJsonDocument::fromJson(
+      QByteArray::fromStdString(document), &parsing_error);
   if (parsing_error.error != QJsonParseError::NoError) {
     return std::make_pair(JsonValue(ValueType::NULL_VALUE), false);
   }
@@ -396,6 +396,17 @@ bool utils::json::JsonValue::IsEmpty() const {
   return false;
 }
 
+namespace {
+std::string StorageCheck(const utils::json::JsonValue::Storage& storage) {
+  if (storage.type() == QVariant::Type::Double) {
+    return QString::number(storage.toDouble(), 'f', 2).toStdString() + "\n";
+  } else if (storage.type() == QVariant::Type::String) {
+    return storage.toString().toStdString() + "\n";
+  }
+  return storage.toByteArray().toStdString() + "\n";
+}
+}
+
 std::string utils::json::JsonValue::ToJson(const bool styled) const {
   const QJsonDocument::JsonFormat format =
       styled ? QJsonDocument::Indented : QJsonDocument::Compact;
@@ -408,7 +419,7 @@ std::string utils::json::JsonValue::ToJson(const bool styled) const {
         .toJson(format)
         .toStdString();
   }
-  return std::string();
+  return StorageCheck(storage_);
 }
 
 void utils::json::JsonValue::Clear() {

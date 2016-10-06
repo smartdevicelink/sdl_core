@@ -32,6 +32,7 @@
 
 #include "gtest/gtest.h"
 #include "formatters/generic_json_formatter.h"
+#include "FormattersJsonHelper.h"
 
 namespace test {
 namespace components {
@@ -41,11 +42,13 @@ TEST(GenericJsonFormatter, ToString) {
   namespace smartobj = NsSmartDeviceLink::NsSmartObjects;
   namespace formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
 
-  smartobj::SmartObject obj;
+  smartobj::SmartObject obj(smartobj::SmartType::SmartType_Map);
   std::string result;
 
   formatters::GenericJsonFormatter::ToString(obj, result);
-  ASSERT_STREQ("null\n", result.c_str());
+  CompactJson(result);
+  removeSubstrs(result);
+  ASSERT_STREQ("", result.c_str());
 
   obj = true;
   formatters::GenericJsonFormatter::ToString(obj, result);
@@ -61,34 +64,27 @@ TEST(GenericJsonFormatter, ToString) {
 
   obj = 'c';
   formatters::GenericJsonFormatter::ToString(obj, result);
-  ASSERT_STREQ("\"c\"\n", result.c_str());
+  removeSubstrs(result);
+  ASSERT_STREQ("c\n", result.c_str());
 
   obj[0] = 1;
   obj[1] = true;
   obj[2] = "string";
   formatters::GenericJsonFormatter::ToString(obj, result);
-  ASSERT_STREQ("[ 1, true, \"string\" ]\n", result.c_str());
+  CompactJson(result);
+  ASSERT_STREQ("[1,true,\"string\"]", result.c_str());
 
   obj["intField"] = 100500;
   obj["stringField"] = "s";
   obj["subobject"]["boolField"] = false;
   obj["subobject"]["arrayField"][0] = 0;
   obj["subobject"]["arrayField"][1] = 'c';
-  obj["subobject"]["arrayField"][2][0] = 10.0;
+  obj["subobject"]["arrayField"][2][0] = "10.0";
   formatters::GenericJsonFormatter::ToString(obj, result);
+  CompactJson(result);
   ASSERT_STREQ(
-      "{\n"
-      "   \"intField\" : 100500,\n"
-      "   \"stringField\" : \"s\",\n"
-      "   \"subobject\" : {\n"
-      "      \"arrayField\" : [\n"
-      "         0,\n"
-      "         \"c\",\n"
-      "         [ 10.0 ]\n"
-      "      ],\n"
-      "      \"boolField\" : false\n"
-      "   }\n"
-      "}\n",
+      "{\"intField\":100500,\"stringField\":\"s\",\"subobject\":{"
+      "\"arrayField\":[0,\"c\",[\"10.0\"]],\"boolField\":false}}",
       result.c_str());
 }
 
@@ -102,25 +98,12 @@ TEST(GenericJsonFormatter, FromString) {
   ASSERT_FALSE(formatters::GenericJsonFormatter::FromString("\"str", result));
   ASSERT_FALSE(formatters::GenericJsonFormatter::FromString("[10", result));
   ASSERT_FALSE(formatters::GenericJsonFormatter::FromString("{10}", result));
+  ASSERT_FALSE(formatters::GenericJsonFormatter::FromString("null", result));
+  ASSERT_FALSE(formatters::GenericJsonFormatter::FromString("true", result));
+  ASSERT_FALSE(formatters::GenericJsonFormatter::FromString("1", result));
+  ASSERT_FALSE(formatters::GenericJsonFormatter::FromString("0.5", result));
 
-  ASSERT_TRUE(formatters::GenericJsonFormatter::FromString("null", result));
-  ASSERT_EQ(smartobj::SmartType_Null, result.getType());
-
-  ASSERT_TRUE(formatters::GenericJsonFormatter::FromString("true", result));
-  ASSERT_EQ(smartobj::SmartType_Boolean, result.getType());
-  ASSERT_EQ(true, result.asBool());
-
-  ASSERT_TRUE(formatters::GenericJsonFormatter::FromString("1", result));
-  ASSERT_EQ(smartobj::SmartType_Integer, result.getType());
-  ASSERT_EQ(1, result.asInt());
-
-  ASSERT_TRUE(formatters::GenericJsonFormatter::FromString("0.5", result));
-  ASSERT_EQ(smartobj::SmartType_Double, result.getType());
-  ASSERT_DOUBLE_EQ(0.5, result.asDouble());
-
-  ASSERT_TRUE(formatters::GenericJsonFormatter::FromString("\"str\"", result));
-  ASSERT_EQ(smartobj::SmartType_String, result.getType());
-  ASSERT_STREQ("str", result.asString().c_str());
+  ASSERT_FALSE(formatters::GenericJsonFormatter::FromString("\"str\"", result));
 
   ASSERT_TRUE(
       formatters::GenericJsonFormatter::FromString("[true, null, 10]", result));

@@ -49,8 +49,9 @@ TEST(CFormatterJsonSDLRPCv2Test, EmptySmartObjectToString) {
 
   EXPECT_TRUE(result);
 
-  std::string expectOutputJsonString = "\"\"";
+  std::string expectOutputJsonString = "";
   CompactJson(jsonString);
+  removeSubstrs(jsonString);
   EXPECT_EQ(expectOutputJsonString, jsonString);
 }
 
@@ -71,8 +72,9 @@ TEST(CFormatterJsonSDLRPCv2Test, SmObjWithRequestWithoutMsgNotValid_ToString) {
   bool result = CFormatterJsonSDLRPCv2::toString(srcObj, jsonString);
   EXPECT_TRUE(result);
 
-  std::string expectOutputJsonString = "\"\"";
+  std::string expectOutputJsonString = "";
   CompactJson(jsonString);
+  removeSubstrs(jsonString);
   EXPECT_EQ(expectOutputJsonString, jsonString);
 }
 
@@ -228,8 +230,9 @@ TEST(CFormatterJsonSDLRPCv2Test,
 
   EXPECT_TRUE(result);
 
-  std::string expectOutputJsonString = "\"\"";
+  std::string expectOutputJsonString = "";
   CompactJson(jsonString);
+  removeSubstrs(jsonString);
   EXPECT_EQ(expectOutputJsonString, jsonString);
 }
 
