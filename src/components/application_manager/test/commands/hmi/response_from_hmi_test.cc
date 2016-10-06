@@ -81,11 +81,11 @@ TEST_F(ResponseFromHMITest, SendResponseToMobile_SUCCESS) {
 
   command->SendResponseToMobile(msg, mock_app_manager_);
 
-  const application_manager::MessageType kReceivedMessageType =
+  const application_manager::MessageType received_message_tipe =
       static_cast<application_manager::MessageType>(
           (*msg)[am::strings::params][am::strings::message_type].asInt());
 
-  EXPECT_EQ(application_manager::MessageType::kResponse, kReceivedMessageType);
+  EXPECT_EQ(application_manager::MessageType::kResponse, received_message_tipe);
 }
 
 TEST_F(ResponseFromHMITest, CreateHMIRequest_SUCCESS) {
@@ -95,25 +95,40 @@ TEST_F(ResponseFromHMITest, CreateHMIRequest_SUCCESS) {
   EXPECT_CALL(mock_app_manager_, ManageHMICommand(_))
       .WillOnce(DoAll(SaveArg<0>(&result_msg), Return(true)));
 
-  const hmi_apis::FunctionID::eType kPostedFunctionId =
+  const hmi_apis::FunctionID::eType posted_function_id =
       hmi_apis::FunctionID::INVALID_ENUM;
   MessageSharedPtr dummy_msg_params = CreateMessage();
-  command->CreateHMIRequest(kPostedFunctionId, *dummy_msg_params);
+  command->CreateHMIRequest(posted_function_id, *dummy_msg_params);
 
   ASSERT_TRUE(result_msg);
 
-  const application_manager::MessageType kReceivedMessageType =
+  const application_manager::MessageType received_message_tipe =
       static_cast<application_manager::MessageType>(
           (*result_msg)[am::strings::params][am::strings::message_type]
               .asInt());
 
-  EXPECT_EQ(am::MessageType::kRequest, kReceivedMessageType);
+  EXPECT_EQ(am::MessageType::kRequest, received_message_tipe);
 
-  const hmi_apis::FunctionID::eType kReceivedFunctionId =
+  const hmi_apis::FunctionID::eType received_function_id =
       static_cast<hmi_apis::FunctionID::eType>(
           (*result_msg)[am::strings::params][am::strings::function_id].asInt());
 
-  EXPECT_EQ(kPostedFunctionId, kReceivedFunctionId);
+  EXPECT_EQ(posted_function_id, received_function_id);
+}
+
+TEST_F(ResponseFromHMITest, CreateHMIRequest_CantManageCommand_Covering) {
+  ResponseFromHMIPtr command(CreateCommand<ResponseFromHMI>());
+
+  MessageSharedPtr result_msg;
+  ON_CALL(mock_app_manager_, GetNextHMICorrelationID())
+      .WillByDefault(Return(1u));
+  EXPECT_CALL(mock_app_manager_, ManageHMICommand(_))
+      .WillOnce(DoAll(SaveArg<0>(&result_msg), Return(false)));
+
+  const hmi_apis::FunctionID::eType posted_function_id =
+      hmi_apis::FunctionID::INVALID_ENUM;
+  MessageSharedPtr dummy_msg_params = CreateMessage();
+  command->CreateHMIRequest(posted_function_id, *dummy_msg_params);
 }
 
 }  // namespace response_from_hmi

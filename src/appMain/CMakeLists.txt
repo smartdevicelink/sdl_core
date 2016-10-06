@@ -97,8 +97,10 @@ endif()
 
 add_executable(${PROJECT} ${SOURCES})
 target_link_libraries(${PROJECT} ${LIBRARIES})
-
 add_dependencies(${PROJECT} Policy)
+if(LOG4CXX_LOGGER)
+  add_dependencies(${PROJECT} install-3rd_party_logger)
+endif()
 
 # Replace commit in ini file
 set(GITCOMMIT "")

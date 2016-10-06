@@ -530,7 +530,11 @@ std::string file_system::GetPathDelimiter() {
 
 std::string file_system::ConcatPath(const std::string& utf8_path1,
                                     const std::string& utf8_path2) {
-  return utf8_path1 + GetPathDelimiter() + utf8_path2;
+  if (utf8_path1.empty() || utf8_path2.empty()) {
+    return utf8_path1 + utf8_path2;
+  } else {
+    return utf8_path1 + GetPathDelimiter() + utf8_path2;
+  }
 }
 
 std::string file_system::ConcatPath(const std::string& utf8_path1,

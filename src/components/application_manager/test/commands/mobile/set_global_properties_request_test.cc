@@ -60,6 +60,7 @@ using utils::custom_string::CustomString;
 using smart_objects::SmartObject;
 using testing::_;
 using testing::Return;
+using testing::Mock;
 
 namespace strings = application_manager::strings;
 namespace hmi_request = application_manager::hmi_request;
@@ -77,6 +78,17 @@ class SetGlobalPropertiesRequestTest
  public:
   SetGlobalPropertiesRequestTest()
       : mock_message_helper_(*MockMessageHelper::message_helper_mock()) {
+    Mock::VerifyAndClearExpectations(&mock_message_helper_);
+  }
+
+  ~SetGlobalPropertiesRequestTest() {
+    // Fix DataAccessor release and WinQt crash
+    Mock::VerifyAndClearExpectations(mock_app_.get());
+    Mock::VerifyAndClearExpectations(&mock_message_helper_);
+  }
+
+ protected:
+  void SetUp() OVERRIDE {
     mock_app_ = CreateMockApp();
   }
 

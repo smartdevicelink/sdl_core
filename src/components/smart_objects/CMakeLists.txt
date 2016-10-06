@@ -42,6 +42,7 @@ set(PATHS
 collect_sources(SOURCES "${PATHS}")
 
 add_library(smart_object ${SOURCES})
+target_link_libraries(smart_object utils)
 
 if(BUILD_TESTS)
   add_subdirectory(test)

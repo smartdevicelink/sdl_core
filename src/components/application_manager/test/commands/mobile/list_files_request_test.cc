@@ -32,6 +32,7 @@
 
 #include <stdint.h>
 #include <string>
+#include <utility>
 
 #include "gtest/gtest.h"
 #include "utils/shared_ptr.h"
@@ -61,7 +62,32 @@ using am::commands::ListFilesRequest;
 using am::commands::MessageSharedPtr;
 
 class ListFilesRequestTest
-    : public CommandRequestTest<CommandsTestMocks::kIsNice> {};
+    : public CommandRequestTest<CommandsTestMocks::kIsNice> {
+ protected:
+  void SetUp() OVERRIDE {
+    app_ = CreateMockApp();
+  }
+  void SetExpectCallsForRunSuccess() {
+    const std::string file_name("file_name");
+    files_map_.insert(
+        std::pair<std::string, am::AppFile>(file_name, app_file_));
+
+    ON_CALL(mock_app_manager_, application(_)).WillByDefault(Return(app_));
+    ON_CALL(*app_, hmi_level())
+        .WillByDefault(Return(mobile_apis::HMILevel::HMI_FULL));
+
+    ON_CALL(*app_, increment_list_files_in_none_count())
+        .WillByDefault(Return());
+
+    ON_CALL(*app_, GetAvailableDiskSpace()).WillByDefault(Return(0));
+    ON_CALL(*app_, getAppFiles()).WillByDefault(ReturnRef(files_map_));
+    EXPECT_CALL(mock_app_manager_, get_settings())
+        .WillOnce(ReturnRef(mock_app_manager_settings_));
+  }
+  MockAppPtr app_;
+  am::AppFile app_file_;
+  am::AppFilesMap files_map_;
+};
 
 TEST_F(ListFilesRequestTest, Run_AppNotRegistered_UNSUCCESS) {
   SharedPtr<ListFilesRequest> command(CreateCommand<ListFilesRequest>());
@@ -77,11 +103,10 @@ TEST_F(ListFilesRequestTest, Run_AppNotRegistered_UNSUCCESS) {
 }
 
 TEST_F(ListFilesRequestTest, Run_TooManyHmiNone_UNSUCCESS) {
-  MockAppPtr app(CreateMockApp());
   SharedPtr<ListFilesRequest> command(CreateCommand<ListFilesRequest>());
 
-  ON_CALL(mock_app_manager_, application(_)).WillByDefault(Return(app));
-  ON_CALL(*app, hmi_level())
+  ON_CALL(mock_app_manager_, application(_)).WillByDefault(Return(app_));
+  ON_CALL(*app_, hmi_level())
       .WillByDefault(Return(mobile_apis::HMILevel::HMI_NONE));
 
   const uint32_t kListFilesInNoneAllowed = 1u;
@@ -91,7 +116,7 @@ TEST_F(ListFilesRequestTest, Run_TooManyHmiNone_UNSUCCESS) {
       .WillOnce(ReturnRef(mock_app_manager_settings_));
   ON_CALL(mock_app_manager_settings_, list_files_in_none())
       .WillByDefault(ReturnRef(kListFilesInNoneAllowed));
-  ON_CALL(*app, list_files_in_none_count())
+  ON_CALL(*app_, list_files_in_none_count())
       .WillByDefault(Return(kListFilesInNoneCount));
 
   MessageSharedPtr result_msg(CatchMobileCommandResult(CallRun(*command)));
@@ -102,20 +127,28 @@ TEST_F(ListFilesRequestTest, Run_TooManyHmiNone_UNSUCCESS) {
 }
 
 TEST_F(ListFilesRequestTest, Run_SUCCESS) {
-  MockAppPtr app(CreateMockApp());
   SharedPtr<ListFilesRequest> command(CreateCommand<ListFilesRequest>());
 
-  ON_CALL(mock_app_manager_, application(_)).WillByDefault(Return(app));
-  ON_CALL(*app, hmi_level())
-      .WillByDefault(Return(mobile_apis::HMILevel::HMI_FULL));
+  SetExpectCallsForRunSuccess();
 
-  ON_CALL(*app, increment_list_files_in_none_count()).WillByDefault(Return());
+  const uint32_t files_response_cnt = 1;
+  EXPECT_CALL(mock_app_manager_settings_, list_files_response_size())
+      .WillOnce(ReturnRef(files_response_cnt));
+  MessageSharedPtr result_msg(CatchMobileCommandResult(CallRun(*command)));
+  EXPECT_EQ(mobile_apis::Result::SUCCESS,
+            static_cast<mobile_apis::Result::eType>(
+                (*result_msg)[am::strings::msg_params][am::strings::result_code]
+                    .asInt()));
+}
 
-  ON_CALL(*app, GetAvailableDiskSpace()).WillByDefault(Return(0));
+TEST_F(ListFilesRequestTest, Run_EmptyListFiles_SUCCESS) {
+  SharedPtr<ListFilesRequest> command(CreateCommand<ListFilesRequest>());
 
-  am::AppFilesMap files_map;
-  ON_CALL(*app, getAppFiles()).WillByDefault(ReturnRef(files_map));
+  SetExpectCallsForRunSuccess();
 
+  const uint32_t files_response_cnt = 0;
+  EXPECT_CALL(mock_app_manager_settings_, list_files_response_size())
+      .WillOnce(ReturnRef(files_response_cnt));
   MessageSharedPtr result_msg(CatchMobileCommandResult(CallRun(*command)));
   EXPECT_EQ(mobile_apis::Result::SUCCESS,
             static_cast<mobile_apis::Result::eType>(

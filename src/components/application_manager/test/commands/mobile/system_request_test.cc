@@ -30,7 +30,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <stdint.h>
+#include <vector>
 #include <string>
+#include <sstream>
+
 #include "gtest/gtest.h"
 #include "mobile/system_request.h"
 #include "utils/shared_ptr.h"
@@ -40,7 +44,6 @@
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/smart_object_keys.h"
-#include "mock_message_helper.h"
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
@@ -55,7 +58,6 @@ namespace system_request {
 
 using application_manager::commands::SystemRequest;
 using ::testing::DefaultValue;
-using application_manager::MockMessageHelper;
 
 namespace mobile_result = mobile_apis::Result;
 namespace am = application_manager;
@@ -65,10 +67,12 @@ typedef SharedPtr<SystemRequest> CommandPtr;
 namespace {
 const uint32_t kAppId = 10u;
 const std::string kPolicyAppId = "12345";
-const uint32_t kKey = 5u;
+const uint32_t kConnectionKey = 5u;
 const std::string kBinaryFolder = "test_binary_folder";
 const std::string kStorageFolder = "test_storage_folder";
 const std::string kStorageFolder2 = "test_storage_folder2";
+const mobile_apis::RequestType::eType kRequestType =
+    mobile_apis::RequestType::CLIMATE;
 }
 
 class SystemRequestTest
@@ -77,7 +81,7 @@ class SystemRequestTest
   SystemRequestTest()
       : app_(CreateMockApp()), info_(""), file_name_("file_name") {
     msg_ = CreateMessage(smart_objects::SmartType_Map);
-    (*msg_)[am::strings::params][am::strings::connection_key] = kKey;
+    (*msg_)[am::strings::params][am::strings::connection_key] = kConnectionKey;
   }
 
   void SetUp() OVERRIDE {
@@ -108,34 +112,14 @@ TEST_F(SystemRequestTest, Run_ApplicationIsNotRegistered) {
   command->Run();
 }
 
-// TODO(LevchenkoS): Fix broken test case APPLINK-28059
-TEST_F(SystemRequestTest, DISABLED_Run_TypeQueryAps_UnsupportedResourse) {
-  (*msg_)[am::strings::msg_params][am::strings::request_type] =
-      mobile_apis::RequestType::QUERY_APPS;
-  CommandPtr command(CreateCommand<SystemRequest>(msg_));
-  ON_CALL(mock_app_manager_, application(kKey)).WillByDefault(Return(app_));
-
-  EXPECT_CALL(
-      mock_app_manager_,
-      ManageMobileCommand(
-          MobileResponseIs(mobile_result::UNSUPPORTED_RESOURCE, info_, false),
-          _));
-
-  command->Run();
-}
-
 TEST_F(SystemRequestTest, Run_TypeDisallowed_DisallowedResult) {
-  mobile_apis::RequestType::eType request_type =
-      mobile_apis::RequestType::CLIMATE;
-  (*msg_)[am::strings::msg_params][am::strings::request_type] = request_type;
+  (*msg_)[am::strings::msg_params][am::strings::request_type] = kRequestType;
   CommandPtr command(CreateCommand<SystemRequest>(msg_));
-  ON_CALL(mock_app_manager_, application(kKey)).WillByDefault(Return(app_));
-
-  EXPECT_CALL(mock_app_manager_, GetPolicyHandler())
-      .WillOnce(ReturnRef(policy_handler_mock));
+  ON_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillByDefault(Return(app_));
 
   EXPECT_CALL(policy_handler_mock,
-              IsRequestTypeAllowed(kPolicyAppId, request_type))
+              IsRequestTypeAllowed(kPolicyAppId, kRequestType))
       .WillOnce(Return(false));
   EXPECT_CALL(
       mock_app_manager_,
@@ -145,42 +129,20 @@ TEST_F(SystemRequestTest, Run_TypeDisallowed_DisallowedResult) {
   command->Run();
 }
 
-// TODO(LevchenkoS): Fix broken test case APPLINK-28059
-TEST_F(SystemRequestTest, DISABLED_Run_FileNameContainSlash_InvalidData) {
-  mobile_apis::RequestType::eType request_type =
-      mobile_apis::RequestType::CLIMATE;
-  (*msg_)[am::strings::msg_params][am::strings::request_type] = request_type;
-  (*msg_)[am::strings::msg_params][am::strings::file_name] = "file_name/";
-  CommandPtr command(CreateCommand<SystemRequest>(msg_));
-  ON_CALL(mock_app_manager_, application(kKey)).WillByDefault(Return(app_));
-
-  EXPECT_CALL(policy_handler_mock,
-              IsRequestTypeAllowed(kPolicyAppId, request_type))
-      .WillOnce(Return(true));
-  info_ = "Sync file name contains forbidden symbols.";
-  EXPECT_CALL(
-      mock_app_manager_,
-      ManageMobileCommand(
-          MobileResponseIs(mobile_result::INVALID_DATA, info_, false), _));
-
-  command->Run();
-}
-
 TEST_F(SystemRequestTest, Run_FileWithBinaryDataSaveUnsuccessful_GenericError) {
-  mobile_apis::RequestType::eType request_type =
-      mobile_apis::RequestType::CLIMATE;
   std::vector<uint8_t> binary_data;
   binary_data.push_back(0x1);
   binary_data.push_back(0x2);
   binary_data.push_back(0x4);
-  (*msg_)[am::strings::msg_params][am::strings::request_type] = request_type;
+  (*msg_)[am::strings::msg_params][am::strings::request_type] = kRequestType;
   (*msg_)[am::strings::msg_params][am::strings::file_name] = file_name_;
   (*msg_)[am::strings::params][am::strings::binary_data] = binary_data;
   CommandPtr command(CreateCommand<SystemRequest>(msg_));
-  ON_CALL(mock_app_manager_, application(kKey)).WillByDefault(Return(app_));
+  ON_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillByDefault(Return(app_));
 
   EXPECT_CALL(policy_handler_mock,
-              IsRequestTypeAllowed(kPolicyAppId, request_type))
+              IsRequestTypeAllowed(kPolicyAppId, kRequestType))
       .WillOnce(Return(true));
 
   EXPECT_CALL(mock_app_manager_settings_, system_files_path())
@@ -199,15 +161,14 @@ TEST_F(SystemRequestTest, Run_FileWithBinaryDataSaveUnsuccessful_GenericError) {
 
 TEST_F(SystemRequestTest,
        Run_FileWithoutBinaryDataNotHTTPTypeNotSystemFile_Rejected) {
-  mobile_apis::RequestType::eType request_type =
-      mobile_apis::RequestType::CLIMATE;
-  (*msg_)[am::strings::msg_params][am::strings::request_type] = request_type;
+  (*msg_)[am::strings::msg_params][am::strings::request_type] = kRequestType;
   (*msg_)[am::strings::msg_params][am::strings::file_name] = file_name_;
   CommandPtr command(CreateCommand<SystemRequest>(msg_));
-  ON_CALL(mock_app_manager_, application(kKey)).WillByDefault(Return(app_));
+  ON_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillByDefault(Return(app_));
 
   EXPECT_CALL(policy_handler_mock,
-              IsRequestTypeAllowed(kPolicyAppId, request_type))
+              IsRequestTypeAllowed(kPolicyAppId, kRequestType))
       .WillOnce(Return(true));
 
   EXPECT_CALL(mock_app_manager_settings_, system_files_path())
@@ -233,11 +194,13 @@ TEST_F(SystemRequestTest,
 TEST_F(
     SystemRequestTest,
     Run_FileInFileSystemWithoutBinaryDataNotHTTPTypeNotSystemFile_SendRequestToHMI) {
+  const std::string file_name = "IVSU";
   mobile_apis::RequestType::eType request_type = mobile_apis::RequestType::HTTP;
   (*msg_)[am::strings::msg_params][am::strings::request_type] = request_type;
-  (*msg_)[am::strings::msg_params][am::strings::file_name] = "IVSU";
+  (*msg_)[am::strings::msg_params][am::strings::file_name] = file_name;
   CommandPtr command(CreateCommand<SystemRequest>(msg_));
-  ON_CALL(mock_app_manager_, application(kKey)).WillByDefault(Return(app_));
+  ON_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillByDefault(Return(app_));
 
   EXPECT_CALL(policy_handler_mock,
               IsRequestTypeAllowed(kPolicyAppId, request_type))
@@ -251,10 +214,20 @@ TEST_F(
       .WillRepeatedly(ReturnRef(kStorageFolder));
   ON_CALL(*app_, folder_name()).WillByDefault(Return("app_storage"));
   am::AppFile ap_file;
-  EXPECT_CALL(*app_,
-              GetFile(kStorageFolder + file_system::GetPathDelimiter() +
-                      "app_storage" + file_system::GetPathDelimiter() +
-                      "0IVSU")).WillRepeatedly(Return(&ap_file));
+
+  // To avoid override of existing file,
+  // command append index as a suffix to
+  // the file name and increment it, each time
+  // when command saves a file.
+  std::ostringstream final_file_name;
+  final_file_name << SystemRequest::file_index() << file_name;
+
+  const std::string app_full_file_path = file_system::ConcatPath(
+      kStorageFolder, "app_storage", final_file_name.str());
+
+  EXPECT_CALL(*app_, GetFile(app_full_file_path))
+      .WillRepeatedly(Return(&ap_file));
+
   EXPECT_CALL(mock_app_manager_, ManageMobileCommand(_, _)).Times(0);
 
   EXPECT_CALL(mock_app_manager_,
@@ -279,7 +252,8 @@ TEST_F(SystemRequestTest, OnEvent_SuccessResult_SuccessfulCommand) {
   event.set_smart_object(*event_msg);
 
   CommandPtr command(CreateCommand<SystemRequest>(msg_));
-  ON_CALL(mock_app_manager_, application(kKey)).WillByDefault(Return(app_));
+  ON_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillByDefault(Return(app_));
 
   EXPECT_CALL(mock_app_manager_,
               ManageMobileCommand(
@@ -301,7 +275,8 @@ TEST_F(SystemRequestTest, OnEvent_WarningResult_SuccessfulCommand) {
   event.set_smart_object(*event_msg);
 
   CommandPtr command(CreateCommand<SystemRequest>(msg_));
-  ON_CALL(mock_app_manager_, application(kKey)).WillByDefault(Return(app_));
+  ON_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillByDefault(Return(app_));
 
   EXPECT_CALL(mock_app_manager_,
               ManageMobileCommand(
@@ -324,7 +299,8 @@ TEST_F(SystemRequestTest, OnEvent_UnsuccesfulResult_SendUnsuccessfulCommand) {
   event.set_smart_object(*event_msg);
 
   CommandPtr command(CreateCommand<SystemRequest>(msg_));
-  ON_CALL(mock_app_manager_, application(kKey)).WillByDefault(Return(app_));
+  ON_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillByDefault(Return(app_));
 
   // Result is false
   EXPECT_CALL(
@@ -332,6 +308,74 @@ TEST_F(SystemRequestTest, OnEvent_UnsuccesfulResult_SendUnsuccessfulCommand) {
       ManageMobileCommand(
           MobileResponseIs(mobile_result::GENERIC_ERROR, info_, false), _));
   command->on_event(event);
+}
+
+TEST_F(SystemRequestTest, Run_InvalidQueryAppData_GENERIC_ERROR) {
+  const mobile_apis::RequestType::eType request_type =
+      mobile_apis::RequestType::QUERY_APPS;
+  (*msg_)[am::strings::msg_params][am::strings::file_name] = file_name_;
+  (*msg_)[am::strings::msg_params][am::strings::request_type] = request_type;
+
+  // json_data was not contain required parameter, `json::response`
+  const std::string json_data("{\"invalid_json_data\":{}}");
+  const std::vector<uint8_t> binary_data(json_data.begin(), json_data.end());
+  (*msg_)[am::strings::params][am::strings::binary_data] = binary_data;
+  CommandPtr command(CreateCommand<SystemRequest>(msg_));
+
+  ON_CALL(policy_handler_mock, IsRequestTypeAllowed(kPolicyAppId, request_type))
+      .WillByDefault(Return(true));
+  ON_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillByDefault(Return(app_));
+  ON_CALL(mock_app_manager_settings_, system_files_path())
+      .WillByDefault(ReturnRef(kBinaryFolder));
+  ON_CALL(mock_app_manager_settings_, app_storage_folder())
+      .WillByDefault(ReturnRef(kStorageFolder));
+
+  ON_CALL(mock_app_manager_, SaveBinary(_, kBinaryFolder, file_name_, 0))
+      .WillByDefault(Return(mobile_result::SUCCESS));
+
+  EXPECT_CALL(
+      mock_app_manager_,
+      ManageMobileCommand(MobileResultCodeIs(mobile_result::GENERIC_ERROR), _));
+
+  command->Run();
+}
+
+TEST_F(SystemRequestTest, Run_ValidQueryAppData_SUCCESS) {
+  const mobile_apis::RequestType::eType request_type =
+      mobile_apis::RequestType::QUERY_APPS;
+  (*msg_)[am::strings::msg_params][am::strings::file_name] = file_name_;
+  (*msg_)[am::strings::msg_params][am::strings::request_type] = request_type;
+
+  std::ostringstream json_data_stream;
+  json_data_stream << "{\"" << am::json::response << "\":{}}";
+
+  // json_data should contain `json::response` parameter, to be valid
+  const std::string json_data(json_data_stream.str());
+  const std::vector<uint8_t> binary_data(json_data.begin(), json_data.end());
+
+  (*msg_)[am::strings::params][am::strings::binary_data] = binary_data;
+  CommandPtr command(CreateCommand<SystemRequest>(msg_));
+
+  ON_CALL(policy_handler_mock, IsRequestTypeAllowed(kPolicyAppId, request_type))
+      .WillByDefault(Return(true));
+  ON_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillByDefault(Return(app_));
+  ON_CALL(mock_app_manager_settings_, system_files_path())
+      .WillByDefault(ReturnRef(kBinaryFolder));
+  ON_CALL(mock_app_manager_settings_, app_storage_folder())
+      .WillByDefault(ReturnRef(kStorageFolder));
+
+  ON_CALL(mock_app_manager_, SaveBinary(_, kBinaryFolder, file_name_, 0))
+      .WillByDefault(Return(mobile_result::SUCCESS));
+
+  EXPECT_CALL(mock_app_manager_, ProcessQueryApp(_, kConnectionKey));
+
+  EXPECT_CALL(
+      mock_app_manager_,
+      ManageMobileCommand(MobileResultCodeIs(mobile_result::SUCCESS), _));
+
+  command->Run();
 }
 
 }  // namespace system_request

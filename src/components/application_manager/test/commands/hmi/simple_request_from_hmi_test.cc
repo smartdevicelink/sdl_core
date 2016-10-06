@@ -36,71 +36,63 @@
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/commands/commands_test.h"
 #include "application_manager/commands/command.h"
-#include "application_manager/commands/hmi/sdl_activate_app_response.h"
-#include "application_manager/commands/hmi/sdl_get_list_of_permissions_response.h"
-#include "application_manager/commands/hmi/sdl_get_status_update_response.h"
-#include "application_manager/commands/hmi/sdl_get_user_friendly_message_response.h"
-#include "application_manager/commands/hmi/response_to_hmi.h"
+#include "application_manager/event_engine/event.h"
+#include "application_manager/mock_event_dispatcher.h"
+#include "hmi/request_from_hmi.h"
 
 namespace test {
 namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
-namespace simple_response_to_hmi_test {
+namespace simple_requests_from_hmi_test {
 
 using ::testing::_;
 using ::testing::Types;
 using ::testing::NotNull;
-using ::utils::SharedPtr;
+using ::testing::NiceMock;
 
+using ::utils::SharedPtr;
 namespace commands = ::application_manager::commands;
 using commands::MessageSharedPtr;
+using ::application_manager::event_engine::EventObserver;
+using ::test::components::event_engine_test::MockEventDispatcher;
 
-template <class Command>
-class ResponseToHMICommandsTest
-    : public CommandsTest<CommandsTestMocks::kIsNice> {
- public:
-  typedef Command CommandType;
+class RequestFromHMITest : public CommandsTest<CommandsTestMocks::kIsNice> {
+ protected:
+  void SetUp() OVERRIDE {
+    EXPECT_CALL(mock_app_manager_, event_dispatcher())
+        .WillOnce(ReturnRef(mock_event_dispatcher_));
+  }
+  NiceMock<event_engine_test::MockEventDispatcher> mock_event_dispatcher_;
 };
 
-typedef Types<commands::SDLActivateAppResponse,
-              commands::SDLGetListOfPermissionsResponse,
-              commands::SDLGetStatusUpdateResponse,
-              commands::SDLGetUserFriendlyMessageResponse> ResponseCommandsList;
-
-TYPED_TEST_CASE(ResponseToHMICommandsTest, ResponseCommandsList);
-
-TYPED_TEST(ResponseToHMICommandsTest, Run_SendMessageToHMI_SUCCESS) {
-  typedef typename TestFixture::CommandType CommandType;
-
-  SharedPtr<CommandType> command = this->template CreateCommand<CommandType>();
-
-  EXPECT_CALL(this->mock_app_manager_, SendMessageToHMI(NotNull()));
-
-  command->Run();
-}
-
-class ResponseToHMITest : public CommandsTest<CommandsTestMocks::kIsNice> {};
-
-TEST_F(ResponseToHMITest, BasicMethodsOverloads_SUCCESS) {
-  SharedPtr<commands::ResponseToHMI> command(
-      CreateCommand<commands::ResponseToHMI>());
-
+TEST_F(RequestFromHMITest, BasicMethodsOverloads_SUCCESS) {
+  SharedPtr<commands::RequestFromHMI> command(
+      CreateCommand<commands::RequestFromHMI>());
+  application_manager::event_engine::Event event(
+      hmi_apis::FunctionID::BasicCommunication_ActivateApp);
   // Current implementation always return `true`
   EXPECT_TRUE(command->Init());
   EXPECT_TRUE(command->CleanUp());
+  EXPECT_NO_THROW(command->Run());
+  EXPECT_NO_THROW(command->on_event(event));
 }
 
-TEST_F(ResponseToHMITest, Run_SUCCESS) {
-  SharedPtr<commands::ResponseToHMI> command(
-      CreateCommand<commands::ResponseToHMI>());
+TEST_F(RequestFromHMITest, SendResponse_SUCCESS) {
+  SharedPtr<commands::RequestFromHMI> command(
+      CreateCommand<commands::RequestFromHMI>());
 
-  EXPECT_CALL(mock_app_manager_, SendMessageToHMI(NotNull()));
+  const bool success = false;
+  const uint32_t correlation_id = 1u;
+  EXPECT_CALL(mock_app_manager_, ManageHMICommand(NotNull()));
 
-  command->Run();
+  command->SendResponse(success,
+                        correlation_id,
+                        hmi_apis::FunctionID::BasicCommunication_ActivateApp,
+                        hmi_apis::Common_Result::SUCCESS);
 }
 
-}  // namespace simple_response_to_hmi_test
+}  // namespace simple_requests_to_hmi_test
 }  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components

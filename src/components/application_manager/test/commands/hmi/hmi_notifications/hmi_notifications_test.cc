@@ -219,7 +219,17 @@ class HMICommandsNotificationsTest
           CommandsTestMocks::kIsNice> {
  public:
   HMICommandsNotificationsTest()
-      : applications_(application_set_, applications_lock_) {}
+      : applications_(application_set_, applications_lock_), app_ptr_(NULL) {
+    message_helper_mock_ =
+        application_manager::MockMessageHelper::message_helper_mock();
+    Mock::VerifyAndClearExpectations(message_helper_mock_);
+  }
+
+  ~HMICommandsNotificationsTest() {
+    // Fix DataAccessor release and WinQt crash
+    Mock::VerifyAndClearExpectations(&mock_app_manager_);
+    Mock::VerifyAndClearExpectations(message_helper_mock_);
+  }
   typedef Command CommandType;
 
  protected:
@@ -235,11 +245,6 @@ class HMICommandsNotificationsTest
 
   am::ApplicationSharedPtr app_;
   NiceMock<MockApplication>* app_ptr_;
-
-  void SetUp() OVERRIDE {
-    message_helper_mock_ =
-        application_manager::MockMessageHelper::message_helper_mock();
-  }
 
   void InitCommand(const uint32_t& default_timeout) OVERRIDE {
     app_ = ConfigureApp(&app_ptr_, kAppId_, NOT_MEDIA, NOT_NAVI, NOT_VC);

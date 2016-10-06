@@ -149,7 +149,7 @@ uint32_t SDLActivateAppRequest::app_id() const {
 
 uint32_t SDLActivateAppRequest::hmi_app_id(
     const smart_objects::SmartObject& so) const {
-  if (so.keyExists(strings::params)) {
+  if (so.keyExists(strings::msg_params)) {
     if (so[strings::msg_params].keyExists(strings::application)) {
       if (so[strings::msg_params][strings::application].keyExists(
               strings::app_id)) {

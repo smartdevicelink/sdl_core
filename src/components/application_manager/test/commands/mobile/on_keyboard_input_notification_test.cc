@@ -62,7 +62,15 @@ class OnKeyBoardInputNotificationTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {
  public:
   OnKeyBoardInputNotificationTest()
-      : message_helper_(*MockMessageHelper::message_helper_mock()) {}
+      : message_helper_(*MockMessageHelper::message_helper_mock()) {
+    Mock::VerifyAndClearExpectations(&message_helper_);
+  }
+
+  ~OnKeyBoardInputNotificationTest() {
+    // Fix DataAccessor release and WinQt crash
+    Mock::VerifyAndClearExpectations(&mock_app_manager_);
+    Mock::VerifyAndClearExpectations(&message_helper_);
+  }
 
   void SetSendNotificationExpectations(MessageSharedPtr msg) {
     EXPECT_CALL(message_helper_, PrintSmartObject(_)).WillOnce(Return(false));
@@ -76,14 +84,6 @@ class OnKeyBoardInputNotificationTest
               (*msg)[strings::params][strings::protocol_type].asInt());
     ASSERT_EQ(CommandImpl::protocol_version_,
               (*msg)[strings::params][strings::protocol_version].asInt());
-  }
-
-  void SetUp() OVERRIDE {
-    Mock::VerifyAndClearExpectations(&message_helper_);
-  }
-
-  void TearDown() OVERRIDE {
-    Mock::VerifyAndClearExpectations(&message_helper_);
   }
 
   MockAppPtr InitAppSetDataAccessor(SharedPtr<ApplicationSet>& app_set) {

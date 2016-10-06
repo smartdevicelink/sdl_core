@@ -40,6 +40,7 @@
 #include "smart_objects/smart_object.h"
 #include "commands/commands_test.h"
 #include "commands/command_request_test.h"
+#include "application_manager/commands/command.h"
 #include "application_manager/application.h"
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_application.h"
@@ -61,6 +62,7 @@ namespace mobile_result = mobile_apis::Result;
 using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
+using ::testing::Mock;
 using ::testing::Ref;
 using ::testing::Eq;
 
@@ -253,6 +255,85 @@ TEST_F(UpdateTurnListRequestTest, Run_ValidTurnList_SUCCESS) {
       (*result_msg)[am::strings::msg_params][am::strings::turn_list][0]
                    [am::hmi_request::navi_text][am::hmi_request::field_text]
                        .asString());
+}
+
+TEST_F(UpdateTurnListRequestTest, Run_VerifyImageInvalidData_UNSUCCESS) {
+  Mock::VerifyAndClearExpectations(&mock_message_helper_);
+  const std::string navigation_text = "valid_navigation_text";
+  (*command_msg_)[am::strings::msg_params][am::strings::turn_list][0]
+                 [am::strings::navigation_text] = navigation_text;
+  (*command_msg_)[am::strings::msg_params][am::strings::turn_list][0]
+                 [am::strings::turn_icon][am::strings::value] =
+                     "valid_turn_icon";
+  (*command_msg_)[am::strings::msg_params][am::strings::soft_buttons] = 0;
+
+  MockAppPtr mock_app(CreateMockApp());
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillOnce(Return(mock_app));
+
+  EXPECT_CALL(mock_app_manager_, GetPolicyHandler())
+      .WillOnce(ReturnRef(mock_policy_handler_));
+
+  EXPECT_CALL(mock_message_helper_,
+              ProcessSoftButtons((*command_msg_)[am::strings::msg_params],
+                                 Eq(mock_app),
+                                 Ref(mock_policy_handler_),
+                                 Ref(mock_app_manager_)))
+      .WillOnce(Return(mobile_result::SUCCESS));
+
+  EXPECT_CALL(
+      mock_message_helper_,
+      VerifyImage(
+          (*command_msg_)[am::strings::msg_params][am::strings::turn_list][0]
+                         [am::strings::turn_icon],
+          Eq(mock_app),
+          Ref(mock_app_manager_)))
+      .WillOnce(Return(mobile_result::INVALID_ENUM));
+
+  EXPECT_CALL(
+      mock_app_manager_,
+      ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL));
+
+  EXPECT_CALL(mock_message_helper_, SubscribeApplicationToSoftButton(_, _, _))
+      .Times(0);
+
+  command_->Run();
+  Mock::VerifyAndClearExpectations(&mock_message_helper_);
+}
+
+TEST_F(UpdateTurnListRequestTest, Run_InvalidTurnList_UNSUCCESS) {
+  Mock::VerifyAndClearExpectations(&mock_message_helper_);
+  MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*command_msg)[am::strings::msg_params][am::strings::turn_list][0] = 0;
+  (*command_msg)[am::strings::msg_params][am::strings::soft_buttons] = 0;
+  (*command_msg)[am::strings::params][am::strings::connection_key] =
+      kConnectionKey;
+  (*command_msg)[am::strings::params][am::strings::function_id] = kFunctionId;
+
+  ::utils::SharedPtr<UpdateTurnListRequest> command(
+      CreateCommand<UpdateTurnListRequest>(command_msg));
+
+  MockAppPtr mock_app(CreateMockApp());
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillOnce(Return(mock_app));
+
+  EXPECT_CALL(mock_app_manager_, GetPolicyHandler())
+      .WillOnce(ReturnRef(mock_policy_handler_));
+
+  EXPECT_CALL(mock_message_helper_,
+              ProcessSoftButtons((*command_msg)[am::strings::msg_params],
+                                 Eq(mock_app),
+                                 Ref(mock_policy_handler_),
+                                 Ref(mock_app_manager_)))
+      .WillOnce(Return(mobile_result::SUCCESS));
+
+  EXPECT_CALL(mock_message_helper_, VerifyImage(_, _, _)).Times(0);
+
+  EXPECT_CALL(mock_message_helper_,
+              SubscribeApplicationToSoftButton(_, _, kFunctionId)).Times(0);
+
+  command->Run();
+  Mock::VerifyAndClearExpectations(&mock_message_helper_);
 }
 
 TEST_F(UpdateTurnListRequestTest, OnEvent_UnknownEvent_UNSUCCESS) {

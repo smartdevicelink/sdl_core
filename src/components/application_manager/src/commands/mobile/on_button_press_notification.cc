@@ -35,6 +35,8 @@
 #include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"
 
+#include "utils/make_shared.h"
+
 namespace application_manager {
 
 namespace commands {
@@ -129,12 +131,7 @@ void OnButtonPressNotification::SendButtonPress(ApplicationConstSharedPtr app) {
   }
 
   smart_objects::SmartObjectSPtr on_btn_press =
-      new smart_objects::SmartObject();
-
-  if (!on_btn_press) {
-    SDL_ERROR("OnButtonPress NULL pointer");
-    return;
-  }
+      utils::MakeShared<smart_objects::SmartObject>();
 
   (*on_btn_press)[strings::params][strings::connection_key] = app->app_id();
 

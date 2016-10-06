@@ -1,13 +1,12 @@
 @echo off
 setlocal EnableDelayedExpansion
-
 if [%1]==[] goto usage
-
 set BUILD_TYPE=%1
+if exist "%SDL_OPENSSL_DIR%\openssl_win_%BUILD_TYPE%"  goto msg
 set LIBS_DIR="%SDL_ROOT_DIR%\src\3rd_party-static"
 set OPENSSL_SRC_DIR_NAME=openssl-1.0.2
 set OPENSSL_SRC_DIR=%LIBS_DIR%\%OPENSSL_SRC_DIR_NAME%
-set OPENSSL_BUILD_DIR=%SDL_BUILD_DIR%\openssl_win_%BUILD_TYPE%
+set OPENSSL_BUILD_DIR=%SDL_OPENSSL_DIR%\openssl_win_%BUILD_TYPE%
 
 if not exist %OPENSSL_SRC_DIR% (
   pushd %LIBS_DIR%
@@ -44,10 +43,11 @@ rem The following commit is stable
   nmake -f ms\nt.mak install
   popd
 )
-
+setx SDL_OPENSSL_DIR %OPENSSL_BUILD_DIR%
 goto end
 
 :usage
 @echo "Usage: <script> [x86|x64]"
-
+:msg
+@echo "OpenSSL already exists"
 :end

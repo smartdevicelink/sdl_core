@@ -265,7 +265,7 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
                 (is_ui_invalid_unsupported && is_tts_succeeded);
 
   mobile_apis::Result::eType result_code = mobile_apis::Result::INVALID_ENUM;
-  const char* return_info = NULL;
+  std::string return_info;
 
   const bool is_ui_or_tts_warning =
       Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
@@ -274,8 +274,7 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
   if (result && (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == tts_result_ ||
                  is_ui_or_tts_warning)) {
     result_code = mobile_apis::Result::WARNINGS;
-    return_info =
-        std::string("Unsupported phoneme type sent in a prompt").c_str();
+    return_info = "Unsupported phoneme type sent in a prompt";
   } else {
     result_code =
         MessageHelper::HMIToMobileResult(std::max(ui_result_, tts_result_));
@@ -285,8 +284,10 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
   ApplicationSharedPtr application =
       application_manager_.application(connection_key());
 
-  SendResponse(
-      result, result_code, return_info, &(message[strings::msg_params]));
+  SendResponse(result,
+               result_code,
+               return_info.empty() ? NULL : return_info.c_str(),
+               &(message[strings::msg_params]));
 
   if (!application) {
     SDL_DEBUG("NULL pointer.");

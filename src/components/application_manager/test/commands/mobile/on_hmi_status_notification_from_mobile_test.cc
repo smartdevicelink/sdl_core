@@ -61,6 +61,12 @@ using testing::_;
 class OnHMIStatusNotificationFromMobileTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {
  public:
+  ~OnHMIStatusNotificationFromMobileTest() {
+    // Fix DataAccessor release and WinQt crash
+    Mock::VerifyAndClearExpectations(&mock_app_manager_);
+  }
+
+ protected:
   MessageSharedPtr CreateMsgParams(
       const mobile_apis::HMILevel::eType kHMIState) {
     MessageSharedPtr msg = CreateMessage();
@@ -248,7 +254,7 @@ TEST_F(OnHMIStatusNotificationFromMobileTest,
 }
 
 TEST_F(OnHMIStatusNotificationFromMobileTest,
-       Run_AnotherForegroundSDLApp_SUCCESS) {
+       Run_NotAnotherForegroundSDLApp_SendUpdateAppList) {
   MessageSharedPtr msg = CreateMsgParams(mobile_apis::HMILevel::HMI_FULL);
 
   SharedPtr<OnHMIStatusNotificationFromMobile> command =
@@ -272,6 +278,44 @@ TEST_F(OnHMIStatusNotificationFromMobileTest,
 
   EXPECT_CALL(mock_app_manager_, MarkAppsGreyOut(kHandle, false));
   EXPECT_CALL(mock_app_manager_, SendUpdateAppList());
+
+  command->Run();
+
+  ASSERT_EQ(application_manager::MessageType::kNotification,
+            (*msg)[strings::params][strings::message_type].asInt());
+}
+
+TEST_F(OnHMIStatusNotificationFromMobileTest,
+       Run_AnotherForegroundSDLApp_DontSendUpdateAppList) {
+  MessageSharedPtr msg = CreateMsgParams(mobile_apis::HMILevel::HMI_FULL);
+
+  SharedPtr<OnHMIStatusNotificationFromMobile> command =
+      CreateCommand<OnHMIStatusNotificationFromMobile>(msg);
+
+  MockAppPtr mock_app = CreateMockApp();
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillOnce(Return(mock_app));
+  EXPECT_CALL(*mock_app, set_foreground(true));
+
+  EXPECT_CALL(*mock_app, device()).WillOnce(Return(kHandle));
+  EXPECT_CALL(mock_app_manager_, IsAppsQueriedFrom(kHandle))
+      .WillOnce(Return(true));
+
+  EXPECT_CALL(*mock_app, protocol_version())
+      .WillOnce(Return(ProtocolVersion::kV4));
+
+  MockAppPtr mock_another_app_sptr = CreateMockApp();
+  app_set_.insert(mock_another_app_sptr);
+  DataAccessor<ApplicationSet> accessor(app_set_, lock_);
+  EXPECT_CALL(mock_app_manager_, applications()).WillOnce(Return(accessor));
+
+  EXPECT_CALL(*mock_another_app_sptr, app_id()).WillOnce(Return(2u));
+  EXPECT_CALL(*mock_another_app_sptr, protocol_version())
+      .WillOnce(Return(ProtocolVersion::kV4));
+  EXPECT_CALL(*mock_another_app_sptr, is_foreground()).WillOnce(Return(true));
+
+  EXPECT_CALL(mock_app_manager_, MarkAppsGreyOut(kHandle, false)).Times(0);
+  EXPECT_CALL(mock_app_manager_, SendUpdateAppList()).Times(0);
 
   command->Run();
 

@@ -38,6 +38,7 @@
 #include "utils/shared_ptr.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
+#include "application_manager/mock_message_helper.h"
 #include "application_manager/commands/commands_test.h"
 #include "application_manager/commands/command_impl.h"
 #include "utils/helpers.h"
@@ -52,7 +53,9 @@ namespace am = ::application_manager;
 
 using ::testing::_;
 using ::testing::Return;
+using ::testing::Mock;
 
+using am::MockMessageHelper;
 using am::commands::MessageSharedPtr;
 using am::commands::OnWayPointChangeNotification;
 
@@ -66,9 +69,18 @@ class OnWayPointChangeNotificationTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {
  public:
   OnWayPointChangeNotificationTest()
-      : command_(CreateCommand<OnWayPointChangeNotification>()) {}
+      : command_(CreateCommand<OnWayPointChangeNotification>())
+      , message_helper_(*MockMessageHelper::message_helper_mock()) {
+    Mock::VerifyAndClearExpectations(&message_helper_);
+  }
 
+  ~OnWayPointChangeNotificationTest() {
+    Mock::VerifyAndClearExpectations(&message_helper_);
+  }
+
+ protected:
   NotificationPtr command_;
+  MockMessageHelper& message_helper_;
 };
 
 MATCHER(CheckMessageData, "") {
@@ -105,6 +117,8 @@ TEST_F(OnWayPointChangeNotificationTest,
       .WillOnce(Return(apps_subscribed_for_way_points));
 
   EXPECT_CALL(mock_app_manager_, SendMessageToMobile(CheckMessageData(), _));
+
+  EXPECT_CALL(message_helper_, PrintSmartObject(_)).WillOnce(Return(false));
 
   command_->Run();
 }

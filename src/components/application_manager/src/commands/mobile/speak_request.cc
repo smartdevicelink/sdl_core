@@ -125,7 +125,7 @@ void SpeakRequest::ProcessTTSSpeakResponse(
   (*message_)[strings::params][strings::function_id] =
       mobile_apis::FunctionID::SpeakID;
 
-  const char* return_info = NULL;
+  std::string return_info;
 
   const bool is_result_ok = Compare<mobile_api::Result::eType, EQ, ONE>(
       result_code,
@@ -134,17 +134,17 @@ void SpeakRequest::ProcessTTSSpeakResponse(
 
   if (is_result_ok) {
     result_code = mobile_apis::Result::WARNINGS;
-    return_info =
-        std::string("Unsupported phoneme type sent in a prompt").c_str();
+    return_info = "Unsupported phoneme type sent in a prompt";
   }
 
-  SendResponse(
-      result, result_code, return_info, &(message[strings::msg_params]));
+  SendResponse(result,
+               result_code,
+               return_info.empty() ? NULL : return_info.c_str(),
+               &(message[strings::msg_params]));
 }
 
 bool SpeakRequest::IsWhiteSpaceExist() {
   SDL_AUTO_TRACE();
-  const char* str = NULL;
 
   if ((*message_)[strings::msg_params].keyExists(strings::tts_chunks)) {
     const smart_objects::SmartArray* tc_array =
@@ -154,7 +154,7 @@ bool SpeakRequest::IsWhiteSpaceExist() {
     smart_objects::SmartArray::const_iterator it_tc_end = tc_array->end();
 
     for (; it_tc != it_tc_end; ++it_tc) {
-      str = (*it_tc)[strings::text].asCharArray();
+      const char* str = (*it_tc)[strings::text].asCharArray();
       if (strlen(str) && !CheckSyntax(str)) {
         SDL_ERROR("Invalid tts_chunks syntax check failed");
         return true;

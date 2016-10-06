@@ -75,12 +75,15 @@ class OnSystemRequestNotificationTest
 
   void SetUp() OVERRIDE {
     Mock::VerifyAndClearExpectations(&message_helper_);
+    ON_CALL(mock_app_manager_, GetPolicyHandler())
+        .WillByDefault(ReturnRef(mock_policy_handler_));
   }
 
   void TearDown() OVERRIDE {
     Mock::VerifyAndClearExpectations(&message_helper_);
   }
   MockMessageHelper& message_helper_;
+  MockPolicyHandlerInterface mock_policy_handler_;
 };
 
 #ifdef EXTENDED_POLICY
@@ -122,7 +125,7 @@ bool CheckHeader(MessageSharedPtr msg) {
   required_members.insert("ContentType");
   required_members.insert("ConnectTimeout");
   required_members.insert("DoOutput");
-  required_members.insert("Content-Length");
+  required_members.insert("Content_Length");
   required_members.insert("DoInput");
   required_members.insert("UseCaches");
   required_members.insert("RequestMethod");
@@ -138,7 +141,7 @@ bool CheckHeader(MessageSharedPtr msg) {
 
 // TODO(SLevchenko): Enable test after fixes from PR #642 merged in current
 // branch. APPLINK-27274
-TEST_F(OnSystemRequestNotificationTest, DISABLED_Run_ProprietaryType_SUCCESS) {
+TEST_F(OnSystemRequestNotificationTest, Run_ProprietaryType_SUCCESS) {
   const RequestType::eType kRequestType = RequestType::PROPRIETARY;
 
   MessageSharedPtr msg = CreateMessage();
@@ -151,19 +154,53 @@ TEST_F(OnSystemRequestNotificationTest, DISABLED_Run_ProprietaryType_SUCCESS) {
   MockAppPtr mock_app = CreateMockApp();
   EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
       .WillOnce(Return(mock_app));
-  MockPolicyHandlerInterface mock_policy_handler;
-  EXPECT_CALL(mock_app_manager_, GetPolicyHandler())
-      .WillRepeatedly(ReturnRef(mock_policy_handler));
   std::string policy_app_id;
   EXPECT_CALL(*mock_app, policy_app_id()).WillOnce(Return(policy_app_id));
-  EXPECT_CALL(mock_policy_handler, IsRequestTypeAllowed(_, _))
+  EXPECT_CALL(mock_policy_handler_, IsRequestTypeAllowed(_, _))
       .WillOnce(Return(true));
 
 #ifdef EXTENDED_POLICY
-  EXPECT_CALL(mock_app_manager_, GetPolicyHandler())
-      .Times(2)
-      .WillRepeatedly(ReturnRef(mock_policy_handler));
-  EXPECT_CALL(mock_policy_handler, TimeoutExchange()).WillOnce(Return(5u));
+  EXPECT_CALL(mock_policy_handler_, TimeoutExchange()).WillOnce(Return(5u));
+#endif  // EXTENDED_POLICY
+
+  EXPECT_CALL(message_helper_, PrintSmartObject(_)).WillOnce(Return(false));
+  EXPECT_CALL(mock_app_manager_, SendMessageToMobile(msg, _));
+
+  command->Run();
+
+  EXPECT_EQ(FileType::JSON,
+            (*msg)[strings::msg_params][strings::file_type].asInt());
+  EXPECT_EQ(application_manager::MessageType::kNotification,
+            (*msg)[strings::params][strings::message_type].asInt());
+  EXPECT_EQ(CommandImpl::mobile_protocol_type_,
+            (*msg)[strings::params][strings::protocol_type].asInt());
+  EXPECT_EQ(CommandImpl::protocol_version_,
+            (*msg)[strings::params][strings::protocol_version].asInt());
+#ifdef EXTENDED_POLICY
+  EXPECT_TRUE(CheckHeader(msg));
+#endif  // EXTENDED_POLICY
+}
+
+TEST_F(OnSystemRequestNotificationTest, Run_EmptyMessage_UNSUCCESS) {
+  const RequestType::eType kRequestType = RequestType::PROPRIETARY;
+
+  MessageSharedPtr msg = CreateMessage();
+  (*msg)[strings::params][strings::connection_key] = kConnectionKey;
+  (*msg)[strings::msg_params][strings::request_type] = kRequestType;
+
+  SharedPtr<OnSystemRequestNotification> command =
+      CreateCommand<OnSystemRequestNotification>(msg);
+
+  MockAppPtr mock_app = CreateMockApp();
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillOnce(Return(mock_app));
+  std::string policy_app_id;
+  EXPECT_CALL(*mock_app, policy_app_id()).WillOnce(Return(policy_app_id));
+  EXPECT_CALL(mock_policy_handler_, IsRequestTypeAllowed(_, _))
+      .WillOnce(Return(true));
+
+#ifdef EXTENDED_POLICY
+  EXPECT_CALL(mock_policy_handler_, TimeoutExchange()).WillOnce(Return(NULL));
 #endif  // EXTENDED_POLICY
 
   EXPECT_CALL(message_helper_, PrintSmartObject(_)).WillOnce(Return(false));
@@ -197,12 +234,9 @@ TEST_F(OnSystemRequestNotificationTest, Run_HTTPType_SUCCESS) {
   MockAppPtr mock_app = CreateMockApp();
   EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
       .WillOnce(Return(mock_app));
-  MockPolicyHandlerInterface mock_policy_handler;
-  EXPECT_CALL(mock_app_manager_, GetPolicyHandler())
-      .WillOnce(ReturnRef(mock_policy_handler));
   std::string policy_app_id;
   EXPECT_CALL(*mock_app, policy_app_id()).WillOnce(Return(policy_app_id));
-  EXPECT_CALL(mock_policy_handler, IsRequestTypeAllowed(_, _))
+  EXPECT_CALL(mock_policy_handler_, IsRequestTypeAllowed(_, _))
       .WillOnce(Return(true));
 
   EXPECT_CALL(message_helper_, PrintSmartObject(_)).WillOnce(Return(false));
@@ -235,8 +269,7 @@ TEST_F(OnSystemRequestNotificationTest, Run_InvalidApp_NoNotification) {
       .WillOnce(Return(MockAppPtr()));
   EXPECT_CALL(mock_app_manager_, GetPolicyHandler()).Times(0);
   EXPECT_CALL(*mock_app, policy_app_id()).Times(0);
-  MockPolicyHandlerInterface mock_policy_handler;
-  EXPECT_CALL(mock_policy_handler, IsRequestTypeAllowed(_, _)).Times(0);
+  EXPECT_CALL(mock_policy_handler_, IsRequestTypeAllowed(_, _)).Times(0);
 
   EXPECT_CALL(message_helper_, PrintSmartObject(_)).Times(0);
   EXPECT_CALL(mock_app_manager_, SendMessageToMobile(msg, _)).Times(0);
@@ -257,12 +290,9 @@ TEST_F(OnSystemRequestNotificationTest, Run_RequestNotAllowed_NoNotification) {
   MockAppPtr mock_app = CreateMockApp();
   EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
       .WillOnce(Return(mock_app));
-  MockPolicyHandlerInterface mock_policy_handler;
-  EXPECT_CALL(mock_app_manager_, GetPolicyHandler())
-      .WillOnce(ReturnRef(mock_policy_handler));
   std::string policy_app_id;
   EXPECT_CALL(*mock_app, policy_app_id()).WillOnce(Return(policy_app_id));
-  EXPECT_CALL(mock_policy_handler, IsRequestTypeAllowed(_, _))
+  EXPECT_CALL(mock_policy_handler_, IsRequestTypeAllowed(_, _))
       .WillOnce(Return(false));
 
   EXPECT_CALL(message_helper_, PrintSmartObject(_)).Times(0);

@@ -5,6 +5,10 @@ namespace application_manager {
 
 namespace commands {
 
+using NsSmartDeviceLink::NsSmartObjects::SmartType_Map;
+using NsSmartDeviceLink::NsSmartObjects::SmartType_String;
+using NsSmartDeviceLink::NsSmartObjects::SmartType_Array;
+
 GetWayPointsRequest::GetWayPointsRequest(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
     : CommandRequestImpl(message, application_manager) {}
@@ -32,18 +36,92 @@ void GetWayPointsRequest::Run() {
                  true);
 }
 
+bool GetWayPointsRequest::CheckResponseSyntax(
+    const smart_objects::SmartObject& obj) {
+  const char* str = obj.asCharArray();
+  const bool is_str_empty = obj.empty();
+  return is_str_empty || CheckSyntax(str);
+}
+
+bool GetWayPointsRequest::ValidateSmartMapResponse(
+    const smart_objects::SmartObject& obj, ConstSetIter key) {
+  const smart_objects::SmartObject& value = obj[*key];
+  switch (value.getType()) {
+    case SmartType_Array:
+    case SmartType_Map: {
+      return ValidateResponseFromHMI(value);
+    }
+    case SmartType_String: {
+      return CheckResponseSyntax(value);
+    }
+    default:
+      // Catch SmartType_Integer or SmartType_Double
+      break;
+  }
+  return true;
+}
+
+bool GetWayPointsRequest::ValidateResponseFromHMI(
+    const smart_objects::SmartObject& obj) {
+  switch (obj.getType()) {
+    case SmartType_Array: {
+      for (uint32_t i = 0; i < obj.length(); ++i) {
+        if (!ValidateResponseFromHMI(obj[i])) {
+          return false;
+        }
+      }
+      break;
+    }
+    case SmartType_Map: {
+      const std::set<std::string> keys = obj.enumerate();
+      for (ConstSetIter key = keys.begin(); key != keys.end(); ++key) {
+        if (!ValidateSmartMapResponse(obj, key)) {
+          return false;
+        }
+      }
+      break;
+    }
+    case SmartType_String: {
+      return CheckResponseSyntax(obj);
+    }
+    default:
+      // Catch SmartType_Integer or SmartType_Double
+      break;
+  }
+  return true;
+}
+
 void GetWayPointsRequest::on_event(const event_engine::Event& event) {
   SDL_AUTO_TRACE();
-  ApplicationSharedPtr app = application_manager_.application(connection_key());
-  const smart_objects::SmartObject& message = event.smart_object();
+  smart_objects::SmartObject message = event.smart_object();
   switch (event.id()) {
     case hmi_apis::FunctionID::Navigation_GetWayPoints: {
       SDL_INFO("Received Navigation_GetWayPoints event");
+      const bool all_checks_passed = ValidateResponseFromHMI(
+          message[strings::msg_params][strings::way_points]);
+      const std::string response_info(
+          message[strings::params][hmi_response::message].asCharArray());
       mobile_apis::Result::eType result_code =
           GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
-              message[strings::params][hmi_response::code].asUInt()));
-      bool result = mobile_apis::Result::SUCCESS == result_code;
-      SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
+              message[strings::params][hmi_response::code].asInt()));
+      const bool result = mobile_apis::Result::SUCCESS == result_code;
+
+      if (!result) {
+        SendResponse(false, result_code, "Invalid response from system");
+        return;
+      }
+
+      const char* info =
+          CheckSyntax(response_info) ? response_info.c_str() : NULL;
+      message[strings::msg_params].erase(strings::info);
+      if (all_checks_passed) {
+        SendResponse(
+            result, result_code, info, &(message[strings::msg_params]));
+      } else {
+        SendResponse(false,
+                     mobile_apis::Result::GENERIC_ERROR,
+                     "Invalid response from system");
+      }
       break;
     }
     default: {

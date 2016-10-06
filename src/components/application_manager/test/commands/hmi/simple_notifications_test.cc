@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,70 +30,48 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <vector>
-#include <map>
 #include "gtest/gtest.h"
-#include "utils/stl_utils.h"
+
+#include "commands/commands_test.h"
+
+#include "hmi/notification_to_hmi.h"
+#include "application_manager/commands/command_notification_impl.h"
 
 namespace test {
 namespace components {
-namespace utils_test {
+namespace commands_test {
+namespace hmi_commands_test {
+namespace simple_notifications_test {
 
-using ::utils::StlCollectionDeleter;
-using ::utils::StlMapDeleter;
+using namespace application_manager;
 
-class STLTestObject {
+using ::testing::Types;
+
+template <typename Command>
+class SimpleNotificationsTest
+    : public CommandsTest<CommandsTestMocks::kIsNice> {
  public:
-  ~STLTestObject() {}
+  typedef Command CommandType;
 };
 
-typedef std::map<int, STLTestObject*> TestMap;
-typedef std::vector<STLTestObject*> TestVector;
+typedef Types<commands::CommandNotificationImpl, commands::NotificationToHMI>
+    CommandsList;
 
-TEST(StlDeleter, DestructMapWithOneElement) {
-  TestMap test_map;
-  test_map[1] = new STLTestObject();
+TYPED_TEST_CASE(SimpleNotificationsTest, CommandsList);
 
-  EXPECT_EQ(1u, test_map.size());
-  { StlMapDeleter<TestMap> test_list_deleter_(&test_map); }
-  EXPECT_EQ(1u, test_map.size());
-  EXPECT_EQ(NULL, test_map[1]);
+TYPED_TEST(SimpleNotificationsTest, Run_SendMessageToHMI_SUCCESS) {
+  typedef typename TestFixture::CommandType CommandType;
+
+  SharedPtr<CommandType> command = this->template CreateCommand<CommandType>();
+
+  // Current implementation always return `true`
+  EXPECT_TRUE(command->Init());
+  EXPECT_NO_THROW(command->Run());
+  EXPECT_TRUE(command->CleanUp());
 }
 
-TEST(StlDeleter, DestructMapWithSeveralElements) {
-  TestMap test_map;
-  test_map[1] = new STLTestObject();
-  test_map[2] = new STLTestObject();
-
-  EXPECT_EQ(2u, test_map.size());
-  { StlMapDeleter<TestMap> test_list_deleter_(&test_map); }
-  EXPECT_EQ(2u, test_map.size());
-  EXPECT_EQ(NULL, test_map[1]);
-  EXPECT_EQ(NULL, test_map[2]);
-}
-
-TEST(StlDeleter, DestructVectorWithOneElement) {
-  TestVector test_vector;
-  test_vector.push_back(new STLTestObject());
-
-  EXPECT_EQ(1u, test_vector.size());
-  { StlCollectionDeleter<TestVector> test_list_deleter_(&test_vector); }
-  EXPECT_EQ(1u, test_vector.size());
-  EXPECT_EQ(NULL, test_vector[0]);
-}
-
-TEST(StlDeleter, DestructVectorWithSeveralElements) {
-  TestVector test_vector;
-  test_vector.push_back(new STLTestObject());
-  test_vector.push_back(new STLTestObject());
-
-  EXPECT_EQ(2u, test_vector.size());
-  { StlCollectionDeleter<TestVector> test_list_deleter_(&test_vector); }
-  EXPECT_EQ(2u, test_vector.size());
-  EXPECT_EQ(NULL, test_vector[0]);
-  EXPECT_EQ(NULL, test_vector[1]);
-}
-
-}  // namespace utils_test
+}  // namespace simple_notifications_test
+}  // namespace hmi_commands_test
+}  // namespace commands_test
 }  // namespace components
 }  // namespace test
