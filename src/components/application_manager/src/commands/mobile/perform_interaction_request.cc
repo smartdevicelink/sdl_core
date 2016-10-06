@@ -57,8 +57,8 @@ PerformInteractionRequest::PerformInteractionRequest(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
     : CommandRequestImpl(message, application_manager)
     , interaction_mode_(mobile_apis::InteractionMode::INVALID_ENUM)
-    , ui_response_recived_(false)
-    , vr_response_recived_(false)
+    , ui_response_received_(false)
+    , vr_response_received_(false)
     , app_pi_was_active_before_(false)
     , vr_result_code_(hmi_apis::Common_Result::INVALID_ENUM)
     , ui_result_code_(hmi_apis::Common_Result::INVALID_ENUM) {
@@ -226,20 +226,18 @@ void PerformInteractionRequest::on_event(const event_engine::Event& event) {
     }
     case hmi_apis::FunctionID::UI_PerformInteraction: {
       LOG4CXX_DEBUG(logger_, "Received UI_PerformInteraction event");
-      ui_response_recived_ = true;
+      ui_response_received_ = true;
       unsubscribe_from_event(hmi_apis::FunctionID::UI_PerformInteraction);
       ui_result_code_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asUInt());
       GetInfo(
           HmiInterfaces::HMI_INTERFACE_UI, ui_result_code_, message, ui_info_);
-      if (ProcessUIResponse(event.smart_object(), msg_param)) {
-        return;
-      }
+      ProcessUIResponse(event.smart_object(), msg_param);
       break;
     }
     case hmi_apis::FunctionID::VR_PerformInteraction: {
       LOG4CXX_DEBUG(logger_, "Received VR_PerformInteraction");
-      vr_response_recived_ = true;
+      vr_response_received_ = true;
       unsubscribe_from_event(hmi_apis::FunctionID::VR_PerformInteraction);
       vr_result_code_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asUInt());
@@ -267,7 +265,8 @@ void PerformInteractionRequest::onTimeOut() {
 
   switch (interaction_mode_) {
     case mobile_apis::InteractionMode::BOTH: {
-      if (true == vr_response_recived_) {
+      LOG4CXX_DEBUG(logger_, "Interaction Mode: BOTH");
+      if (true == vr_response_received_) {
         unsubscribe_from_event(hmi_apis::FunctionID::UI_PerformInteraction);
         DisablePerformInteraction();
         CommandRequestImpl::onTimeOut();
@@ -278,11 +277,14 @@ void PerformInteractionRequest::onTimeOut() {
       break;
     }
     case mobile_apis::InteractionMode::VR_ONLY: {
-      application_manager_.updateRequestTimeout(
-          connection_key(), correlation_id(), default_timeout());
+      LOG4CXX_DEBUG(logger_, "Interaction Mode: VR_ONLY");
+      unsubscribe_from_event(hmi_apis::FunctionID::UI_PerformInteraction);
+      DisablePerformInteraction();
+      CommandRequestImpl::onTimeOut();
       break;
     }
     case mobile_apis::InteractionMode::MANUAL_ONLY: {
+      LOG4CXX_DEBUG(logger_, "InteractionMode: MANUAL_ONLY");
       unsubscribe_from_event(hmi_apis::FunctionID::UI_PerformInteraction);
       DisablePerformInteraction();
       CommandRequestImpl::onTimeOut();
@@ -355,7 +357,7 @@ bool PerformInteractionRequest::ProcessVRResponse(
   return false;
 }
 
-bool PerformInteractionRequest::ProcessUIResponse(
+void PerformInteractionRequest::ProcessUIResponse(
     const smart_objects::SmartObject& message,
     smart_objects::SmartObject& msg_params) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -365,7 +367,7 @@ bool PerformInteractionRequest::ProcessUIResponse(
   ApplicationSharedPtr app = application_manager_.application(connection_key());
   if (!app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
-    return false;
+    return;
   }
 
   HmiInterfaces::InterfaceState ui_interface_state =
@@ -420,18 +422,6 @@ bool PerformInteractionRequest::ProcessUIResponse(
       }
     }
   }
-
-  const SmartObject* response_params = msg_params.empty() ? NULL : &msg_params;
-  if (mobile_apis::InteractionMode::BOTH != interaction_mode_ &&
-      HmiInterfaces::STATE_NOT_AVAILABLE != ui_interface_state) {
-    DisablePerformInteraction();
-    SendResponse(result,
-                 MessageHelper::HMIToMobileResult(ui_result_code_),
-                 ui_info_.empty() ? NULL : ui_info_.c_str(),
-                 response_params);
-    return true;
-  }
-  return false;
 }
 
 void PerformInteractionRequest::SendUIPerformInteractionRequest(
@@ -929,7 +919,7 @@ bool PerformInteractionRequest::CheckChoiceIDFromRequest(
 
 const bool PerformInteractionRequest::HasHMIResponsesToWait() const {
   LOG4CXX_AUTO_TRACE(logger_);
-  return !ui_response_recived_ || !vr_response_recived_;
+  return !ui_response_received_ || !vr_response_received_;
 }
 
 void PerformInteractionRequest::SendBothModeResponse(

@@ -101,10 +101,8 @@ class PerformInteractionRequest : public CommandRequestImpl {
   /**
    * @brief Sends PerformInteraction response to mobile side
    * @param message which should send to mobile side
-   * @return true if send response to mobile application otherwise
-   * return false.
    */
-  bool ProcessUIResponse(const smart_objects::SmartObject& message,
+  void ProcessUIResponse(const smart_objects::SmartObject& message,
                          smart_objects::SmartObject& msg_params);
 
   /*
@@ -224,8 +222,8 @@ class PerformInteractionRequest : public CommandRequestImpl {
   void SendBothModeResponse(const smart_objects::SmartObject& msg_param);
 
   mobile_apis::InteractionMode::eType interaction_mode_;
-  bool ui_response_recived_;
-  bool vr_response_recived_;
+  bool ui_response_received_;
+  bool vr_response_received_;
   bool app_pi_was_active_before_;
   static uint32_t pi_requests_count_;
   hmi_apis::Common_Result::eType vr_result_code_;
