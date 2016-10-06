@@ -112,6 +112,7 @@
 #include "hmi/navi_subscribe_way_points_request.h"
 #include "hmi/sdl_policy_update.h"
 #include "hmi/ui_set_icon_request.h"
+#include "hmi/dial_number_request.h"
 
 namespace test {
 namespace components {
@@ -221,7 +222,8 @@ typedef Types<commands::NaviIsReadyRequest,
               commands::VRIsReadyRequest,
               commands::AllowAppRequest,
               commands::SDLPolicyUpdate,
-              commands::UISetIconRequest> RequestCommandsList2;
+              commands::UISetIconRequest,
+              commands::hmi::DialNumberRequest> RequestCommandsList2;
 
 TYPED_TEST_CASE(RequestToHMICommandsTest, RequestCommandsList);
 TYPED_TEST_CASE(RequestToHMICommandsTest2, RequestCommandsList2);

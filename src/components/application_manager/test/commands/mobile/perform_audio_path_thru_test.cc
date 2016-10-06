@@ -145,6 +145,76 @@ TEST_F(PerformAudioPassThruRequestTest,
 }
 
 TEST_F(PerformAudioPassThruRequestTest,
+       Run_InitPromptCorrect_TTSSpeakIsAbsent) {
+  EXPECT_CALL(*application_sptr_, hmi_level())
+      .WillOnce(Return(mobile_api::HMILevel::HMI_FULL));
+
+  msg_params_[strings::initial_prompt][0][strings::text] = kCorrectPrompt;
+  msg_params_[strings::initial_prompt][0][strings::type] = kCorrectType;
+  msg_params_[strings::audio_pass_display_text1] = kCorrectDisplayText1;
+  msg_params_[strings::audio_pass_display_text2] = kCorrectDisplayText2;
+
+  MessageSharedPtr speak_reqeust_result_msg;
+  MessageSharedPtr perform_result_msg;
+  {
+    InSequence dummy;
+    // Send speak request sending
+    EXPECT_CALL(mock_app_manager_, ManageHMICommand(_))
+        .WillOnce(DoAll(SaveArg<0>(&speak_reqeust_result_msg), Return(true)));
+
+    // Perform audio path thru request sending
+    EXPECT_CALL(mock_app_manager_, ManageHMICommand(_))
+        .WillOnce(DoAll(SaveArg<0>(&perform_result_msg), Return(true)));
+  }
+  CallRun run_caller(*command_sptr_);
+  run_caller();
+
+  const ::smart_objects::SmartObject& kSpeakMsgParams_ =
+      (*speak_reqeust_result_msg)[strings::msg_params];
+  const ::smart_objects::SmartObject& kPerformMsgParams =
+      (*perform_result_msg)[strings::msg_params];
+
+  const std::string& kResultInitialPrompt =
+      kSpeakMsgParams_[hmi_request::tts_chunks][0][strings::text].asString();
+  const std::string& kResultPromptType =
+      kSpeakMsgParams_[hmi_request::tts_chunks][0][strings::type].asString();
+  const std::string& kResultDisplayText1 =
+      kPerformMsgParams[hmi_request::audio_pass_display_texts][0]
+                       [hmi_request::field_text].asString();
+  const std::string& kResultDisplayText2 =
+      kPerformMsgParams[hmi_request::audio_pass_display_texts][1]
+                       [hmi_request::field_text].asString();
+
+  EXPECT_EQ(kCorrectPrompt, kResultInitialPrompt);
+  EXPECT_EQ(kCorrectType, kResultPromptType);
+  EXPECT_EQ(kCorrectDisplayText1, kResultDisplayText1);
+  EXPECT_EQ(kCorrectDisplayText2, kResultDisplayText2);
+
+  EXPECT_EQ(true, kPerformMsgParams[strings::mute_audio].asBool());
+
+  // now we recieve on_event:
+
+  application_manager_test::MockApplicationManagerSettings mock_settings;
+  uint32_t default_timeout_msec = CommandsTest::kDefaultTimeout_;
+  event_engine::Event event(hmi_apis::FunctionID::UI_PerformAudioPassThru);
+  (*message_)[strings::params][hmi_response::code] =
+      mobile_apis::Result::eType::GENERIC_ERROR;
+  event.set_smart_object(*message_);
+  CallOnEvent on_event_caller(*command_sptr_, event);
+
+  EXPECT_CALL(
+      mock_app_manager_,
+      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::TTS_StopSpeaking)))
+      .WillOnce(Return(true));
+  EXPECT_CALL(mock_app_manager_, get_settings())
+      .WillOnce(ReturnRef(mock_settings));
+  EXPECT_CALL(mock_settings, default_timeout())
+      .WillOnce(ReturnRef(default_timeout_msec));
+
+  CatchMobileCommandResult(on_event_caller);
+}
+
+TEST_F(PerformAudioPassThruRequestTest,
        Run_InitPromptCorrect_SpeakAndPerformAPTRequestsSendMuteTrue) {
   EXPECT_CALL(*application_sptr_, hmi_level())
       .WillOnce(Return(mobile_api::HMILevel::HMI_FULL));
@@ -333,9 +403,18 @@ TEST_F(PerformAudioPassThruRequestTest,
       (*perform_event_result)[strings::msg_params][strings::info].asString());
 }
 
+TEST_F(PerformAudioPassThruRequestTest, OnEvent_TTSSpeak_UpdateTimeout) {
+  event_engine::Event event(hmi_apis::FunctionID::TTS_Speak);
+
+  EXPECT_CALL(mock_app_manager_, updateRequestTimeout(_, _, _));
+
+  CallOnEvent caller(*command_sptr_, event);
+  caller();
+}
+
 TEST_F(PerformAudioPassThruRequestTest,
        OnEvent_TTSOnResetTimeout_UpdateTimeout) {
-  event_engine::Event event(hmi_apis::FunctionID::TTS_Speak);
+  event_engine::Event event(hmi_apis::FunctionID::TTS_OnResetTimeout);
 
   EXPECT_CALL(mock_app_manager_, updateRequestTimeout(_, _, _));
 
