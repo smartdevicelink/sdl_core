@@ -95,7 +95,7 @@ MATCHER_P(CheckMessageResultCode, result_code, "") {
 }
 
 namespace {
-const uint32_t kConnectionKey = 2u;
+const uint32_t kConnectionKey = 1u;
 const uint32_t kCorrelationId = 10u;
 const int32_t kMenuId = 5;
 }  // namespace
@@ -106,11 +106,11 @@ class DeleteFileRequestTest
   void SetUp() OVERRIDE {
     message_ = CreateMessage();
     command_ = CreateCommand<DeleteFileRequest>(message_);
-    app_ = CreateMockApp();
+    mock_app_ = CreateMockApp();
   }
   DeleteFileRequestPtr command_;
   MessageSharedPtr message_;
-  MockAppPtr app_;
+  MockAppPtr mock_app_;
 };
 
 class DeleteFileResponseTest : public CommandsTest<CommandsTestMocks::kIsNice> {
@@ -128,16 +128,20 @@ TEST_F(DeleteFileRequestTest, Run_InvalidApp_UNSUCCESS) {
 }
 
 TEST_F(DeleteFileRequestTest, Run_HMILevelNone_UNSUCCESS) {
-  EXPECT_CALL(mock_app_manager_, application(_)).WillOnce(Return(app_));
-  EXPECT_CALL(*app_, hmi_level())
+  (*message_)[am::strings::params][am::strings::connection_key] =
+      kConnectionKey;
+
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillOnce(Return(mock_app_));
+  EXPECT_CALL(*mock_app_, hmi_level())
       .WillOnce(Return(am::mobile_api::HMILevel::HMI_NONE));
 
   EXPECT_CALL(mock_app_manager_, get_settings())
       .WillOnce(ReturnRef(mock_app_manager_settings_));
-  const uint32_t kNum = 0;
+  const uint32_t num = 0;
   EXPECT_CALL(mock_app_manager_settings_, delete_file_in_none())
-      .WillOnce(ReturnRef(kNum));
-  EXPECT_CALL(*app_, delete_file_in_none_count()).WillOnce(Return(1));
+      .WillOnce(ReturnRef(num));
+  EXPECT_CALL(*mock_app_, delete_file_in_none_count()).WillOnce(Return(1));
 
   EXPECT_CALL(
       mock_app_manager_,
@@ -148,12 +152,15 @@ TEST_F(DeleteFileRequestTest, Run_HMILevelNone_UNSUCCESS) {
 }
 
 TEST_F(DeleteFileRequestTest, Run_ValidFileName_SUCCESS) {
-  const std::string kFileName = "test_file.txt";
-  EXPECT_TRUE(file_system::CreateFile(kFileName));
-  (*message_)[am::strings::msg_params][am::strings::sync_file_name] = kFileName;
+  const std::string file_name = "test_file.txt";
+  EXPECT_TRUE(file_system::CreateFile(file_name));
+  (*message_)[am::strings::msg_params][am::strings::sync_file_name] = file_name;
+  (*message_)[am::strings::params][am::strings::connection_key] =
+      kConnectionKey;
 
-  EXPECT_CALL(mock_app_manager_, application(_)).WillOnce(Return(app_));
-  EXPECT_CALL(*app_, hmi_level())
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillOnce(Return(mock_app_));
+  EXPECT_CALL(*mock_app_, hmi_level())
       .WillOnce(Return(am::mobile_api::HMILevel::HMI_FULL));
 
   EXPECT_CALL(mock_app_manager_, get_settings())
@@ -162,13 +169,13 @@ TEST_F(DeleteFileRequestTest, Run_ValidFileName_SUCCESS) {
   EXPECT_CALL(mock_app_manager_settings_, app_storage_folder())
       .WillOnce(ReturnRef(kFullFilePath));
 
-  am::AppFile kFile;
-  kFile.file_name = kFileName;
-  kFile.file_type = mobile_apis::FileType::BINARY;
+  am::AppFile file;
+  file.file_name = file_name;
+  file.file_type = mobile_apis::FileType::BINARY;
 
-  EXPECT_CALL(*app_, GetFile(_)).WillOnce(Return(&kFile));
-  EXPECT_CALL(*app_, DeleteFile(_));
-  EXPECT_CALL(*app_, increment_delete_file_in_none_count());
+  EXPECT_CALL(*mock_app_, GetFile(_)).WillOnce(Return(&file));
+  EXPECT_CALL(*mock_app_, DeleteFile(_));
+  EXPECT_CALL(*mock_app_, increment_delete_file_in_none_count());
   EXPECT_CALL(
       mock_app_manager_,
       ManageMobileCommand(CheckMessageResultCode(mobile_apis::Result::SUCCESS),
@@ -178,11 +185,14 @@ TEST_F(DeleteFileRequestTest, Run_ValidFileName_SUCCESS) {
 }
 
 TEST_F(DeleteFileRequestTest, Run_InvalidFile_UNSUCCESS) {
-  const std::string kFileName = "test_file.txt";
-  (*message_)[am::strings::msg_params][am::strings::sync_file_name] = kFileName;
+  const std::string file_name = "test_file.txt";
+  (*message_)[am::strings::msg_params][am::strings::sync_file_name] = file_name;
+  (*message_)[am::strings::params][am::strings::connection_key] =
+      kConnectionKey;
 
-  EXPECT_CALL(mock_app_manager_, application(_)).WillOnce(Return(app_));
-  EXPECT_CALL(*app_, hmi_level())
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillOnce(Return(mock_app_));
+  EXPECT_CALL(*mock_app_, hmi_level())
       .WillOnce(Return(am::mobile_api::HMILevel::HMI_FULL));
 
   EXPECT_CALL(mock_app_manager_, get_settings())

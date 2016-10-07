@@ -123,6 +123,28 @@ TEST_F(AddSubMenuRequestTest, Run_ApplicationIsNotRegistered_UNSUCCESS) {
   EXPECT_EQ(mobile_apis::Result::APPLICATION_NOT_REGISTERED, kReceivedResult);
 }
 
+TEST_F(AddSubMenuRequestTest, OnEvent_ApplicationIsNotRegistered_UNSUCCESS) {
+  Event event(hmi_apis::FunctionID::UI_AddSubMenu);
+  MessageSharedPtr event_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*event_msg)[am::strings::params][am::hmi_response::code] =
+      mobile_apis::Result::SUCCESS;
+  (*event_msg)[am::strings::msg_params] = 0;
+
+  event.set_smart_object(*event_msg);
+
+  MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*command_msg)[am::strings::params][am::strings::connection_key] =
+      kConnectionKey;
+
+  AddSubMenuPtr command(CreateCommand<AddSubMenuRequest>(command_msg));
+
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillOnce(Return(ApplicationSharedPtr()));
+  EXPECT_CALL(mock_app_manager_, ManageMobileCommand(_, _)).Times(0);
+
+  command->on_event(event);
+}
+
 TEST_F(AddSubMenuRequestTest, Run_InvalidSubMenuId_UNSUCCESS) {
   MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
   (*command_msg)[am::strings::msg_params][am::strings::menu_id] = kMenuId;

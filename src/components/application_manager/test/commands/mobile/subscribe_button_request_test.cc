@@ -63,6 +63,10 @@ using am::commands::SubscribeButtonRequest;
 using am::commands::SubscribeButtonResponse;
 using am::commands::MessageSharedPtr;
 
+namespace {
+const uint32_t kConnectionKey = 1u;
+}
+
 typedef SharedPtr<SubscribeButtonRequest> CommandPtr;
 typedef SharedPtr<SubscribeButtonResponse> ResponsePtr;
 
@@ -78,10 +82,36 @@ class SubscribeButtonRequestTest
                  NiceMock<application_manager_test::MockHMICapabilities>,
                  application_manager_test::MockHMICapabilities>::Result
       MockHMICapabilities;
+  void SetUp() OVERRIDE {
+    command_msg = CreateMessage(smart_objects::SmartType_Map);
+    (*command_msg)[am::strings::params][am::strings::connection_key] =
+        kConnectionKey;
+    mock_app_ = CreateMockApp();
+
+    ON_CALL(mock_app_manager_, application(kConnectionKey))
+        .WillByDefault(Return(mock_app_));
+  }
+
+  MessageSharedPtr command_msg;
+  MockAppPtr mock_app_;
 };
 
 class SubscribeButtonResponsetTest
-    : public CommandsTest<CommandsTestMocks::kIsNice> {};
+    : public CommandsTest<CommandsTestMocks::kIsNice> {
+ protected:
+  void SetUp() OVERRIDE {
+    command_msg = CreateMessage(smart_objects::SmartType_Map);
+    (*command_msg)[am::strings::params][am::strings::connection_key] =
+        kConnectionKey;
+    mock_app_ = CreateMockApp();
+
+    ON_CALL(mock_app_manager_, application(kConnectionKey))
+        .WillByDefault(Return(mock_app_));
+  }
+
+  MessageSharedPtr command_msg;
+  MockAppPtr mock_app_;
+};
 
 typedef SubscribeButtonRequestTest::MockHMICapabilities MockHMICapabilities;
 
@@ -99,14 +129,12 @@ TEST_F(SubscribeButtonRequestTest, Run_AppNotRegistered_UNSUCCESS) {
 }
 
 TEST_F(SubscribeButtonRequestTest, Run_SubscriptionNotAllowed_UNSUCCESS) {
-  MessageSharedPtr msg(CreateMessage());
-  (*msg)[am::strings::msg_params][am::strings::button_name] =
+  (*command_msg)[am::strings::msg_params][am::strings::button_name] =
       mobile_apis::ButtonName::SEEKLEFT;
-  CommandPtr command(CreateCommand<SubscribeButtonRequest>(msg));
 
-  MockAppPtr app(CreateMockApp());
-  ON_CALL(mock_app_manager_, application(_)).WillByDefault(Return(app));
-  ON_CALL(*app, is_media_application()).WillByDefault(Return(false));
+  CommandPtr command(CreateCommand<SubscribeButtonRequest>(command_msg));
+
+  ON_CALL(*mock_app_, is_media_application()).WillByDefault(Return(false));
 
   MessageSharedPtr result_msg(CatchMobileCommandResult(CallRun(*command)));
   EXPECT_EQ(mobile_apis::Result::REJECTED,
@@ -116,10 +144,7 @@ TEST_F(SubscribeButtonRequestTest, Run_SubscriptionNotAllowed_UNSUCCESS) {
 }
 
 TEST_F(SubscribeButtonRequestTest, Run_UiIsNotSupported_UNSUCCESS) {
-  CommandPtr command(CreateCommand<SubscribeButtonRequest>());
-
-  MockAppPtr app(CreateMockApp());
-  ON_CALL(mock_app_manager_, application(_)).WillByDefault(Return(app));
+  CommandPtr command(CreateCommand<SubscribeButtonRequest>(command_msg));
 
   MockHMICapabilities hmi_capabilities;
   ON_CALL(mock_app_manager_, hmi_capabilities())
@@ -133,17 +158,35 @@ TEST_F(SubscribeButtonRequestTest, Run_UiIsNotSupported_UNSUCCESS) {
                     .asInt()));
 }
 
+TEST_F(SubscribeButtonRequestTest, Run_UiIsSupported_UNSUCCESS) {
+  MockHMICapabilities hmi_capabilities;
+  ON_CALL(mock_app_manager_, hmi_capabilities())
+      .WillByDefault(ReturnRef(hmi_capabilities));
+  ON_CALL(hmi_capabilities, is_ui_cooperating()).WillByDefault(Return(true));
+
+  ON_CALL(hmi_capabilities, button_capabilities())
+      .WillByDefault(Return(static_cast<const SmartObject*>(NULL)));
+
+  CommandPtr command(CreateCommand<SubscribeButtonRequest>(command_msg));
+
+  MessageSharedPtr result_msg(CatchMobileCommandResult(CallRun(*command)));
+
+  EXPECT_EQ(mobile_apis::Result::UNSUPPORTED_RESOURCE,
+            static_cast<mobile_apis::Result::eType>(
+                (*result_msg)[am::strings::msg_params][am::strings::result_code]
+                    .asInt()));
+}
+
 TEST_F(SubscribeButtonRequestTest, Run_IsSubscribedToButton_UNSUCCESS) {
   const mobile_apis::ButtonName::eType kButtonName =
       mobile_apis::ButtonName::SEEKLEFT;
 
-  MessageSharedPtr msg(CreateMessage());
-  (*msg)[am::strings::msg_params][am::strings::button_name] = kButtonName;
-  CommandPtr command(CreateCommand<SubscribeButtonRequest>(msg));
+  (*command_msg)[am::strings::msg_params][am::strings::button_name] =
+      kButtonName;
 
-  MockAppPtr app(CreateMockApp());
-  ON_CALL(mock_app_manager_, application(_)).WillByDefault(Return(app));
-  ON_CALL(*app, is_media_application()).WillByDefault(Return(true));
+  CommandPtr command(CreateCommand<SubscribeButtonRequest>(command_msg));
+
+  ON_CALL(*mock_app_, is_media_application()).WillByDefault(Return(true));
 
   MockHMICapabilities hmi_capabilities;
   ON_CALL(mock_app_manager_, hmi_capabilities())
@@ -156,7 +199,7 @@ TEST_F(SubscribeButtonRequestTest, Run_IsSubscribedToButton_UNSUCCESS) {
   ON_CALL(hmi_capabilities, button_capabilities())
       .WillByDefault(Return(button_caps_ptr.get()));
 
-  ON_CALL(*app, IsSubscribedToButton(_)).WillByDefault(Return(true));
+  ON_CALL(*mock_app_, IsSubscribedToButton(_)).WillByDefault(Return(true));
 
   MessageSharedPtr result_msg(CatchMobileCommandResult(CallRun(*command)));
   EXPECT_EQ(mobile_apis::Result::IGNORED,
@@ -168,14 +211,11 @@ TEST_F(SubscribeButtonRequestTest, Run_IsSubscribedToButton_UNSUCCESS) {
 TEST_F(SubscribeButtonRequestTest, Run_SUCCESS) {
   const mobile_apis::ButtonName::eType kButtonName =
       mobile_apis::ButtonName::SEEKLEFT;
+  (*command_msg)[am::strings::msg_params][am::strings::button_name] =
+      kButtonName;
+  CommandPtr command(CreateCommand<SubscribeButtonRequest>(command_msg));
 
-  MessageSharedPtr msg(CreateMessage());
-  (*msg)[am::strings::msg_params][am::strings::button_name] = kButtonName;
-  CommandPtr command(CreateCommand<SubscribeButtonRequest>(msg));
-
-  MockAppPtr app(CreateMockApp());
-  ON_CALL(mock_app_manager_, application(_)).WillByDefault(Return(app));
-  ON_CALL(*app, is_media_application()).WillByDefault(Return(true));
+  ON_CALL(*mock_app_, is_media_application()).WillByDefault(Return(true));
 
   MockHMICapabilities hmi_capabilities;
   ON_CALL(mock_app_manager_, hmi_capabilities())
@@ -188,7 +228,7 @@ TEST_F(SubscribeButtonRequestTest, Run_SUCCESS) {
   ON_CALL(hmi_capabilities, button_capabilities())
       .WillByDefault(Return(button_caps_ptr.get()));
 
-  ON_CALL(*app, IsSubscribedToButton(_)).WillByDefault(Return(false));
+  ON_CALL(*mock_app_, IsSubscribedToButton(_)).WillByDefault(Return(false));
 
   MessageSharedPtr hmi_result_msg;
   EXPECT_CALL(mock_app_manager_, ManageHMICommand(_))
@@ -209,9 +249,8 @@ TEST_F(SubscribeButtonRequestTest, Run_SUCCESS) {
 }
 
 TEST_F(SubscribeButtonResponsetTest, ResponseFalse_UNSUCCESS) {
-  MessageSharedPtr msg(CreateMessage());
-  (*msg)[am::strings::msg_params][am::strings::success] = false;
-  ResponsePtr command(CreateCommand<SubscribeButtonResponse>(msg));
+  (*command_msg)[am::strings::msg_params][am::strings::success] = false;
+  ResponsePtr command(CreateCommand<SubscribeButtonResponse>(command_msg));
 
   EXPECT_CALL(mock_app_manager_,
               SendMessageToMobile(CheckMessageSuccess(false), false));
@@ -219,8 +258,7 @@ TEST_F(SubscribeButtonResponsetTest, ResponseFalse_UNSUCCESS) {
 }
 
 TEST_F(SubscribeButtonResponsetTest, ResponseTrue_SUCCESS) {
-  MessageSharedPtr msg(CreateMessage());
-  ResponsePtr command(CreateCommand<SubscribeButtonResponse>(msg));
+  ResponsePtr command(CreateCommand<SubscribeButtonResponse>(command_msg));
 
   EXPECT_CALL(mock_app_manager_,
               SendMessageToMobile(CheckMessageSuccess(true), false));

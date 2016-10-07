@@ -31,8 +31,9 @@
  */
 
 #include <set>
+#include "utils/make_shared.h"
 #include "application_manager/commands/hmi/on_driver_distraction_notification.h"
-
+#include "smart_objects/smart_object.h"
 #include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
@@ -58,12 +59,8 @@ void OnDriverDistractionNotification::Run() {
   application_manager_.set_driver_distraction(state);
 
   smart_objects::SmartObjectSPtr on_driver_distraction =
-      new smart_objects::SmartObject();
-
-  if (!on_driver_distraction) {
-    SDL_ERROR("NULL pointer");
-    return;
-  }
+      utils::MakeShared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Map);
 
   (*on_driver_distraction)[strings::params][strings::function_id] =
       mobile_api::FunctionID::OnDriverDistractionID;

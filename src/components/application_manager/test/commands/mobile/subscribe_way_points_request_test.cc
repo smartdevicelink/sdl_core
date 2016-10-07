@@ -62,7 +62,7 @@ typedef SharedPtr<SubscribeWayPointsRequest> CommandPtr;
 
 namespace {
 const uint32_t kAppId = 10u;
-const uint32_t kKey = 5u;
+const uint32_t kConnectionKey = 5u;
 }
 
 class SubscribeWayPointsRequestTest
@@ -70,7 +70,7 @@ class SubscribeWayPointsRequestTest
  protected:
   SubscribeWayPointsRequestTest() : app_(CreateMockApp()), info_("") {
     msg_ = CreateMessage(smart_objects::SmartType_Map);
-    (*msg_)[am::strings::params][am::strings::connection_key] = kKey;
+    (*msg_)[am::strings::params][am::strings::connection_key] = kConnectionKey;
   }
 
   void SetUp() OVERRIDE {
@@ -98,7 +98,8 @@ TEST_F(SubscribeWayPointsRequestTest, Run_ApplicationIsNotRegistered) {
 
 TEST_F(SubscribeWayPointsRequestTest, Run_WayPointsSubscribedBefore_Ignored) {
   CommandPtr command(CreateCommand<SubscribeWayPointsRequest>(msg_));
-  ON_CALL(mock_app_manager_, application(kKey)).WillByDefault(Return(app_));
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillOnce(Return(app_));
 
   EXPECT_CALL(mock_app_manager_, IsAppSubscribedForWayPoints(kAppId))
       .WillOnce(Return(true));
@@ -111,7 +112,8 @@ TEST_F(SubscribeWayPointsRequestTest, Run_WayPointsSubscribedBefore_Ignored) {
 
 TEST_F(SubscribeWayPointsRequestTest, Run_SomeAppSubscribedBefore_Success) {
   CommandPtr command(CreateCommand<SubscribeWayPointsRequest>(msg_));
-  ON_CALL(mock_app_manager_, application(kKey)).WillByDefault(Return(app_));
+  ON_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillByDefault(Return(app_));
 
   EXPECT_CALL(mock_app_manager_, IsAppSubscribedForWayPoints(kAppId))
       .WillOnce(Return(false));
@@ -129,7 +131,8 @@ TEST_F(SubscribeWayPointsRequestTest, Run_SomeAppSubscribedBefore_Success) {
 TEST_F(SubscribeWayPointsRequestTest,
        Run_AnyAppSubscribedBefore_SuccessSubscribe) {
   CommandPtr command(CreateCommand<SubscribeWayPointsRequest>(msg_));
-  ON_CALL(mock_app_manager_, application(kKey)).WillByDefault(Return(app_));
+  ON_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillByDefault(Return(app_));
 
   EXPECT_CALL(mock_app_manager_, IsAppSubscribedForWayPoints(kAppId))
       .WillOnce(Return(false));
@@ -168,7 +171,8 @@ TEST_F(SubscribeWayPointsRequestTest, OnEvent_SuccessResult_SubscribeApp) {
   event.set_smart_object(*event_msg);
 
   CommandPtr command(CreateCommand<SubscribeWayPointsRequest>(msg_));
-  ON_CALL(mock_app_manager_, application(kKey)).WillByDefault(Return(app_));
+  ON_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillByDefault(Return(app_));
 
   EXPECT_CALL(mock_app_manager_, SubscribeAppForWayPoints(kAppId));
 
@@ -192,14 +196,33 @@ TEST_F(SubscribeWayPointsRequestTest, OnEvent_UnsuccessResult_NotSubscribeApp) {
   event.set_smart_object(*event_msg);
 
   CommandPtr command(CreateCommand<SubscribeWayPointsRequest>(msg_));
-  ON_CALL(mock_app_manager_, application(kKey)).WillByDefault(Return(app_));
+  ON_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillByDefault(Return(app_));
 
   EXPECT_CALL(mock_app_manager_, SubscribeAppForWayPoints(kAppId)).Times(0);
+
+  EXPECT_CALL(*app_, UpdateHash()).Times(0);
 
   EXPECT_CALL(
       mock_app_manager_,
       ManageMobileCommand(
           MobileResponseIs(mobile_result::GENERIC_ERROR, info_, false), _));
+  command->on_event(event);
+}
+
+TEST_F(SubscribeWayPointsRequestTest, OnEvent_UnknownEvent_UNSUCCESS) {
+  MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*command_msg)[am::strings::params][am::strings::connection_key] =
+      kConnectionKey;
+
+  CommandPtr command(CreateCommand<SubscribeWayPointsRequest>(command_msg));
+  ON_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillByDefault(Return(app_));
+
+  Event event(hmi_apis::FunctionID::INVALID_ENUM);
+
+  EXPECT_CALL(mock_app_manager_, ManageMobileCommand(_, _)).Times(0);
+
   command->on_event(event);
 }
 

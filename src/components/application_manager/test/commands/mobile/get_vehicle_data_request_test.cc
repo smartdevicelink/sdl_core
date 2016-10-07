@@ -237,6 +237,8 @@ TEST_F(GetVehicleDataRequestTest, OnEvent_DataNotAvailable_SUCCESS) {
       mobile_result::VEHICLE_DATA_NOT_AVAILABLE;
   (*event_msg)[am::strings::params][am::strings::error_msg] = "test_error";
   (*event_msg)[am::strings::msg_params][am::hmi_response::method] = 0;
+  (*event_msg)[am::strings::msg_params][am::strings::tts_chunks][0]
+              [am::strings::text] = "text";
 
   Event event(hmi_apis::FunctionID::VehicleInfo_GetVehicleData);
   event.set_smart_object(*event_msg);

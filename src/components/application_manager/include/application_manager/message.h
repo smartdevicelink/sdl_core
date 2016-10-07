@@ -41,6 +41,8 @@
 #include "protocol/rpc_type.h"
 #include "smart_objects/smart_object.h"
 
+namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
+
 namespace application_manager {
 
 typedef std::vector<uint8_t> BinaryData;
