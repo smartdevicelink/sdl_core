@@ -325,27 +325,28 @@ void SubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
     }
   }
 #else
+
   hmi_apis::Common_Result::eType hmi_result =
       static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
-
-  const bool is_result_no_error =
-      Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
+  std::string response_info;
+  GetInfo(HmiInterfaces::InterfaceID::HMI_INTERFACE_VehicleInfo,
           hmi_result,
-          hmi_apis::Common_Result::SUCCESS,
-          hmi_apis::Common_Result::WARNINGS);
+          message,
+          response_info);
+  const bool result = PrepareResultForMobileResponse(
+      hmi_result, HmiInterfaces::HMI_INTERFACE_VehicleInfo);
 
   bool is_succeeded =
-      is_result_no_error || !vi_already_subscribed_by_another_apps_.empty();
+      result || !vi_already_subscribed_by_another_apps_.empty();
 
   mobile_apis::Result::eType result_code =
       MessageHelper::HMIToMobileResult(hmi_result);
 
-  const char* return_info = NULL;
   if (is_succeeded) {
     if (!vi_already_subscribed_by_this_app_.empty()) {
       result_code = mobile_apis::Result::IGNORED;
-      return_info = "Already subscribed on some provided VehicleData.";
+      response_info = "Already subscribed on some provided VehicleData.";
     }
   }
 
@@ -358,7 +359,10 @@ void SubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
   }
 
   SendResponse(
-      is_succeeded, result_code, return_info, &(message[strings::msg_params]));
+      is_succeeded,
+      result_code,
+      response_info.empty()?NULL:response_info.c_str(),
+      &(message[strings::msg_params]));
 
   if (is_succeeded) {
     app->UpdateHash();

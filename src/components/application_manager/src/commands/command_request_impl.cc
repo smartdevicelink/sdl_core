@@ -68,7 +68,10 @@ const std::string CreateInfoForUnsupportedResult(
     case (HmiInterfaces::InterfaceID::HMI_INTERFACE_Navigation): {
       return "Navi is not supported by system";
     }
-    default:
+    case (HmiInterfaces::InterfaceID::HMI_INTERFACE_VehicleInfo): {
+      return "VehicleInfo is not supported by system";
+    }
+  default:
 #ifdef ENABLE_LOG
       CREATE_LOGGERPTR_LOCAL(logger, "Commands");
       LOG4CXX_WARN(logger,
