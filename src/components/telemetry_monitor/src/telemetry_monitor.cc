@@ -202,7 +202,7 @@ void Streamer::Start() {
   if (-1 == bind(server_socket_fd_,
                  reinterpret_cast<struct sockaddr*>(&serv_addr_),
                  sizeof(serv_addr_))) {
-    SDL_ERROR("Unable to bind server " << kserver_->ip().c_str() << ':'
+    SDL_ERROR("Unable to bind server " << kserver_->ip() << ':'
                                        << kserver_->port());
     return;
   }

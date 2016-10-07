@@ -219,7 +219,7 @@ TEST_F(ChangeRegistrationRequestTest,
   std::map<const std::string, const std::string>::iterator it = params.begin();
   for (; it != params.end(); ++it) {
     MessageSharedPtr message(CreateMessage());
-    (*message)[am::strings::msg_params][(it->first).c_str()] = it->second;
+    (*message)[am::strings::msg_params][it->first] = it->second;
     ChangeRegistrationRequestPtr command(
         CreateCommand<ChangeRegistrationRequest>(message));
 

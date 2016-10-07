@@ -45,7 +45,8 @@ SQLDatabaseImpl::SQLDatabaseImpl() : database_path_() {}
 
 SQLDatabaseImpl::SQLDatabaseImpl(const std::string& database_path,
                                  const std::string& connection_name)
-    : database_path_((database_path + kDatabaseExtension.toStdString()).c_str())
+    : database_path_(QString::fromStdString(database_path +
+                                            kDatabaseExtension.toStdString()))
     , connection_name_(connection_name.c_str()) {
   db_ = QSqlDatabase::addDatabase("QSQLITE", connection_name_);
 }

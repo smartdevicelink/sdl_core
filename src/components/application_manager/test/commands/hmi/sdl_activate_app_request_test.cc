@@ -87,8 +87,7 @@ MATCHER_P2(CheckMsgParams, result, corr_id, "") {
 
   const bool is_corr_id_valid =
       corr_id ==
-      static_cast<int32_t>(
-          (*arg)[am::strings::params][am::strings::correlation_id].asInt());
+      (*arg)[am::strings::params][am::strings::correlation_id].asUInt();
 
   using namespace helpers;
   return Compare<bool, EQ, ALL>(true,

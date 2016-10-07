@@ -91,17 +91,18 @@ void LogMessageHandler::Handle(const LogMessage message) {
   // will be the same for all messages. So the question is next, how to inject
   // correct thread id
   // to the qlogger.
-  (qlogger.*log_func)(
-      "%s [%s][%d][%s] %s:%d %s: %s",
-      type_str.c_str(),
-      message.time_.toString("yyyy:MM:dd hh:mm:ss.zzz").toStdString().c_str(),
-      message.thread_id_,
-      message.logger_.c_str(),
-      file_system::RetrieveFileNameFromPath(message.location_.file_name_)
-          .c_str(),
-      message.location_.line_number_,
-      message.location_.function_name_,
-      message.entry_.c_str());
+  const std::string time =
+      message.time_.toString("yyyy:MM:dd hh:mm:ss.zzz").toStdString();
+  (qlogger.*log_func)("%s [%s][%d][%s] %s:%d %s: %s",
+                      type_str.c_str(),
+                      time.c_str(),
+                      message.thread_id_,
+                      message.logger_.c_str(),
+                      file_system::RetrieveFileNameFromPath(
+                          message.location_.file_name_).c_str(),
+                      message.location_.line_number_,
+                      message.location_.function_name_,
+                      message.entry_.c_str());
 }
 
 }  // namespace logger

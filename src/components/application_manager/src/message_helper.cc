@@ -2500,7 +2500,7 @@ bool MessageHelper::PrintSmartObject(const smart_objects::SmartObject& object) {
         ++tab;
 
         SDL_INFO(tab_buffer << (*key) << ": ");
-        if (!PrintSmartObject(object[(*key).c_str()])) {
+        if (!PrintSmartObject(object[*key])) {
           return false;
         }
       }

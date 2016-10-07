@@ -64,7 +64,7 @@ std::wstring ConvertUTF8ToWString(const std::string& utf8_str) {
     return std::wstring();
   }
   QString extended_utf8_str =
-      QString::fromUtf8(utils::ReplaceString(utf8_str, "/", "\\").c_str());
+      QString::fromStdString(utils::ReplaceString(utf8_str, "/", "\\"));
   if (!file_system::IsRelativePath(utf8_str)) {
     extended_utf8_str = kPlatformPathPrefix + extended_utf8_str;
   }

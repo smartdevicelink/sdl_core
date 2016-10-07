@@ -522,7 +522,8 @@ DevicesDiscoveryStarter& ConnectionHandlerImpl::get_device_discovery_starter() {
 struct CompareMAC {
   explicit CompareMAC(const std::string& mac) : mac_(mac) {}
   bool operator()(const DeviceMap::value_type& device) {
-    return strcasecmp(device.second.mac_address().c_str(), mac_.c_str()) == 0;
+    std::string mac_address = device.second.mac_address();
+    return strcasecmp(mac_address.c_str(), mac_.c_str()) == 0;
   }
 
  private:

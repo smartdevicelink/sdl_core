@@ -117,8 +117,8 @@ file_system::FileSizeType file_system::GetAvailableDiskSpace(
   DWORD sectors_per_cluster;
   DWORD bytes_per_sector;
   DWORD number_of_free_clusters;
-
-  const BOOL res = GetDiskFreeSpaceW(ConvertUTF8ToWString(utf8_path).c_str(),
+  const std::wstring wstr_path = ConvertUTF8ToWString(utf8_path);
+  const BOOL res = GetDiskFreeSpaceW(wstr_path.c_str(),
                                      &sectors_per_cluster,
                                      &bytes_per_sector,
                                      &number_of_free_clusters,
@@ -131,7 +131,8 @@ file_system::FileSizeType file_system::GetAvailableDiskSpace(
 
 file_system::FileSizeType file_system::FileSize(const std::string& utf8_path) {
   WIN32_FIND_DATAW ffd;
-  HANDLE find = FindFirstFileW(ConvertUTF8ToWString(utf8_path).c_str(), &ffd);
+  const std::wstring wstr_path = ConvertUTF8ToWString(utf8_path);
+  HANDLE find = FindFirstFileW(wstr_path.c_str(), &ffd);
   if (INVALID_HANDLE_VALUE == find) {
     return 0u;
   }
@@ -151,8 +152,8 @@ file_system::FileSizeType file_system::DirectorySize(
 
   const std::string find_string = ConcatPath(utf8_path, "*");
   WIN32_FIND_DATAW ffd;
-
-  HANDLE find = FindFirstFileW(ConvertUTF8ToWString(find_string).c_str(), &ffd);
+  const std::wstring wstr_path = ConvertUTF8ToWString(utf8_path);
+  HANDLE find = FindFirstFileW(wstr_path.c_str(), &ffd);
   if (INVALID_HANDLE_VALUE == find) {
     return size;
   }
@@ -174,8 +175,8 @@ file_system::FileSizeType file_system::DirectorySize(
 }
 
 bool file_system::CreateDirectory(const std::string& utf8_path) {
-  return DirectoryExists(utf8_path) ||
-         0 == _wmkdir(ConvertUTF8ToWString(utf8_path).c_str());
+  const std::wstring wstr_path = ConvertUTF8ToWString(utf8_path);
+  return DirectoryExists(utf8_path) || 0 == _wmkdir(wstr_path.c_str());
 }
 
 bool file_system::CreateDirectoryRecursively(const std::string& utf8_path) {
@@ -192,15 +193,15 @@ bool file_system::CreateDirectoryRecursively(const std::string& utf8_path) {
 }
 
 bool file_system::DirectoryExists(const std::string& utf8_path) {
-  const DWORD attrib =
-      GetFileAttributesW(ConvertUTF8ToWString(utf8_path).c_str());
+  const std::wstring wstr_path = ConvertUTF8ToWString(utf8_path);
+  const DWORD attrib = GetFileAttributesW(wstr_path.c_str());
   return (attrib != INVALID_FILE_ATTRIBUTES &&
           (attrib & FILE_ATTRIBUTE_DIRECTORY));
 }
 
 bool file_system::FileExists(const std::string& utf8_path) {
-  const DWORD attrib =
-      GetFileAttributesW(ConvertUTF8ToWString(utf8_path).c_str());
+  const std::wstring wstr_path = ConvertUTF8ToWString(utf8_path);
+  const DWORD attrib = GetFileAttributesW(wstr_path.c_str());
   return (attrib != INVALID_FILE_ATTRIBUTES &&
           !(attrib & FILE_ATTRIBUTE_DIRECTORY));
 }
@@ -257,7 +258,8 @@ std::string file_system::CurrentWorkingDirectory() {
 
 bool file_system::DeleteFile(const std::string& utf8_path) {
   if (FileExists(utf8_path) && IsWritingAllowed(utf8_path)) {
-    return 0 == _wremove(ConvertUTF8ToWString(utf8_path).c_str());
+    const std::wstring wstr_path = ConvertUTF8ToWString(utf8_path);
+    return 0 == _wremove(wstr_path.c_str());
   }
   return false;
 }
@@ -269,8 +271,8 @@ void file_system::RemoveDirectoryContent(const std::string& utf8_path) {
 
   const std::string find_string = ConcatPath(utf8_path, "*");
   WIN32_FIND_DATAW ffd;
-
-  HANDLE find = FindFirstFileW(ConvertUTF8ToWString(find_string).c_str(), &ffd);
+  const std::wstring wstr_path = ConvertUTF8ToWString(utf8_path);
+  HANDLE find = FindFirstFileW(wstr_path.c_str(), &ffd);
   if (INVALID_HANDLE_VALUE == find) {
     return;
   }
@@ -296,7 +298,8 @@ bool file_system::RemoveDirectory(const std::string& utf8_path,
     if (is_recursively) {
       RemoveDirectoryContent(utf8_path);
     }
-    return 0 == _wrmdir(ConvertUTF8ToWString(utf8_path).c_str());
+    const std::wstring wstr_path = ConvertUTF8ToWString(utf8_path);
+    return 0 == _wrmdir(wstr_path.c_str());
   }
   return false;
 }
@@ -306,7 +309,9 @@ bool file_system::IsAccessible(const std::string& utf8_path,
   BOOL result = FALSE;
 
   DWORD length = 0;
-  if (0 == GetFileSecurityW(ConvertUTF8ToWString(utf8_path).c_str(),
+
+  const std::wstring wstr_path = ConvertUTF8ToWString(utf8_path);
+  if (0 == GetFileSecurityW(wstr_path.c_str(),
                             OWNER_SECURITY_INFORMATION |
                                 GROUP_SECURITY_INFORMATION |
                                 DACL_SECURITY_INFORMATION,
@@ -316,7 +321,7 @@ bool file_system::IsAccessible(const std::string& utf8_path,
       ERROR_INSUFFICIENT_BUFFER == GetLastError()) {
     uint8_t* security_descriptor = new uint8_t[length];
     if (0 != GetFileSecurityW(
-                 ConvertUTF8ToWString(utf8_path).c_str(),
+                 wstr_path.c_str(),
                  OWNER_SECURITY_INFORMATION | GROUP_SECURITY_INFORMATION |
                      DACL_SECURITY_INFORMATION,
                  static_cast<PSECURITY_DESCRIPTOR>(security_descriptor),
@@ -374,10 +379,11 @@ std::vector<std::string> file_system::ListFiles(const std::string& utf8_path) {
     return list_files;
   }
 
-  const std::string find_string = ConcatPath(utf8_path, "*");
+  const std::wstring find_string =
+      ConvertUTF8ToWString(ConcatPath(utf8_path, "*"));
   WIN32_FIND_DATAW ffd;
 
-  HANDLE find = FindFirstFileW(ConvertUTF8ToWString(find_string).c_str(), &ffd);
+  HANDLE find = FindFirstFileW(find_string.c_str(), &ffd);
   if (INVALID_HANDLE_VALUE == find) {
     return list_files;
   }
@@ -474,7 +480,8 @@ bool file_system::CreateFile(const std::string& utf8_path) {
 
 uint64_t file_system::GetFileModificationTime(const std::string& utf8_path) {
   WIN32_FIND_DATAW ffd;
-  HANDLE find = FindFirstFileW(ConvertUTF8ToWString(utf8_path).c_str(), &ffd);
+  const std::wstring wstr_path = ConvertUTF8ToWString(utf8_path);
+  HANDLE find = FindFirstFileW(wstr_path.c_str(), &ffd);
   if (INVALID_HANDLE_VALUE == find) {
     return 0;
   }

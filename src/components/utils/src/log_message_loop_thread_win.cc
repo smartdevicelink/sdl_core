@@ -88,11 +88,12 @@ void LogMessageHandler::Handle(const LogMessage message) {
         << utils::ReplaceString(message.entry_, "%", "%%");
 
   // dump log string to console
-  printf(entry.str().c_str());
+  const std::string entry_str = entry.str();
+  printf(entry_str.c_str());
   printf("\n");
   // dump log string to file
   if (message.output_file_) {
-    fprintf(message.output_file_, entry.str().c_str());
+    fprintf(message.output_file_, entry_str.c_str());
     fprintf(message.output_file_, "\n");
     fflush(message.output_file_);
   }

@@ -41,7 +41,8 @@ class GeneratedCodeTest : public ::testing::Test {
  public:
   static void SetUpTestCase() {
     sqlite3* conn;
-    sqlite3_open((kDatabaseName + ".sqlite").c_str(), &conn);
+    const std::string database_name = kDatabaseName + ".sqlite";
+    sqlite3_open(database_name.c_str(), &conn);
     sqlite3_exec(conn, kEndpointsCreation.c_str(), NULL, NULL, NULL);
     sqlite3_exec(conn, kEndpointsContent.c_str(), NULL, NULL, NULL);
     sqlite3_exec(conn, kAppPoliciesCreation.c_str(), NULL, NULL, NULL);
@@ -50,7 +51,8 @@ class GeneratedCodeTest : public ::testing::Test {
   }
 
   static void TearDownTestCase() {
-    remove((kDatabaseName + ".sqlite").c_str());
+    const std::string database_name = kDatabaseName + ".sqlite";
+    remove(database_name.c_str());
   }
 
   static const std::string kDatabaseName;

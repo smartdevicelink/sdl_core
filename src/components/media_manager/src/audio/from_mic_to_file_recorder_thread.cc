@@ -118,20 +118,22 @@ media_manager::FromMicToFileRecorderThread::Impl::Impl(
   argc_ = 5;
   argv_ = new gchar* [argc_];
 
-  std::stringstream stringStream;
-  stringStream << duration / 1000;
-  std::string durationString = stringStream.str();
+  std::stringstream string_stream;
+  string_stream << duration / 1000;
+  const std::string duration_string = string_stream.str();
+  const std::string audio_manager = "AudioManager";
+
   argv_[0] = new gchar[14];
   argv_[1] = new gchar[3];
   argv_[2] = new gchar[outputFileName.length() + 1];
   argv_[3] = new gchar[3];
-  argv_[4] = new gchar[durationString.length() + 1];
+  argv_[4] = new gchar[duration_string.length() + 1];
 
-  argv_[0] = const_cast<gchar*>(std::string("AudioManager").c_str());
+  argv_[0] = const_cast<gchar*>(audio_manager.c_str());
   argv_[1] = const_cast<gchar*>(oKey_.c_str());
   argv_[2] = const_cast<gchar*>(outputFileName.c_str());
   argv_[3] = const_cast<gchar*>(tKey_.c_str());
-  argv_[4] = const_cast<gchar*>(durationString.c_str());
+  argv_[4] = const_cast<gchar*>(duration_string.c_str());
 }
 
 media_manager::FromMicToFileRecorderThread::Impl::~Impl() {}
