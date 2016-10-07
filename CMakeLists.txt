@@ -202,6 +202,10 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/src/components/include
 )
 
+include_directories(
+  $ENV{THIRD_PARTY_INSTALL_PREFIX}/include
+)
+
 if(BUILD_TESTS)
   enable_testing()
   add_definitions(-DBUILD_TESTS)
