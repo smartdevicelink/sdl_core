@@ -126,6 +126,12 @@ Thread::Thread(const char* name, ThreadDelegate* delegate, QObject* parent)
     , thread_command_(kThreadCommandNone)
     , thread_state_(kThreadStateNone) {
   qRegisterMetaType<QThread*>("QThread*");
+  // The number of the threads was set to the number
+  // of threads used in SDL according to ListOfThreads.
+  // See APPLINK-27148 for details.
+  // This is done in order to prevent the blocking
+  // of thread at start due to insufficient pool size.
+  QThreadPool::globalInstance()->setMaxThreadCount(45);
 #ifdef THREAD_COUNT
   ThreadCounter::Increment();
 #endif  // THREAD_COUNT
