@@ -43,7 +43,6 @@ namespace protocol_handler {
 class SessionObserver;
 }
 
-
 namespace connection_handler {
 class ConnectionHandlerImpl;
 }
