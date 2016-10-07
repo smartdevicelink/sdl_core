@@ -382,6 +382,7 @@
     <description> 5 inch GEN1.1 display </description>
     </element>
     <element name="GEN3_8_INCH"/>
+    <element name="SDL_GENERIC" />
   </enum>
 
 <enum name="ImageType">
