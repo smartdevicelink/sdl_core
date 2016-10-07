@@ -42,6 +42,8 @@ namespace application_manager {
 
 namespace commands {
 
+namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
+
 class ResponseFromHMI : public CommandImpl {
  public:
   ResponseFromHMI(const MessageSharedPtr& message,

@@ -62,7 +62,7 @@ typedef SharedPtr<SpeakRequest> CommandPtr;
 
 namespace {
 const uint32_t kAppId = 10u;
-const uint32_t kKey = 5u;
+const uint32_t kConnectionKey = 5u;
 }
 
 class SpeakRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
@@ -223,7 +223,8 @@ TEST_F(SpeakRequestTest, OnEvent_TTS_Speak_SUCCESS) {
   (*event_msg)[am::strings::msg_params][am::strings::tts_chunks][0]
               [am::strings::text] = "1234";
   (*event_msg)[am::strings::params][am::hmi_response::code] = hmi_result;
-  (*event_msg)[am::strings::params][am::strings::connection_key] = kKey;
+  (*event_msg)[am::strings::params][am::strings::connection_key] =
+      kConnectionKey;
 
   event.set_smart_object(*event_msg);
   CommandPtr command(CreateCommand<SpeakRequest>(msg_));
@@ -284,11 +285,33 @@ TEST_F(SpeakRequestTest,
 
 TEST_F(SpeakRequestTest, OnEvent_TTS_OnResetTimeout_UpdateTimeout) {
   Event event(Event::EventID::TTS_OnResetTimeout);
-  (*msg_)[am::strings::params][am::strings::connection_key] = kKey;
+  (*msg_)[am::strings::params][am::strings::connection_key] = kConnectionKey;
   (*msg_)[am::strings::params][am::strings::correlation_id] = kAppId;
   CommandPtr command(CreateCommand<SpeakRequest>(msg_));
 
-  EXPECT_CALL(mock_app_manager_, updateRequestTimeout(kKey, kAppId, _));
+  EXPECT_CALL(mock_app_manager_,
+              updateRequestTimeout(kConnectionKey, kAppId, _));
+
+  command->on_event(event);
+}
+
+TEST_F(SpeakRequestTest, OnEvent_ApplicationIsNotRegistered_UNSUCCESS) {
+  const hmi_apis::Common_Result::eType hmi_result =
+      hmi_apis::Common_Result::SUCCESS;
+
+  Event event(Event::EventID::TTS_Speak);
+  MessageSharedPtr event_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*event_msg)[am::strings::msg_params][am::strings::tts_chunks][0]
+              [am::strings::text] = "text";
+  (*event_msg)[am::strings::params][am::hmi_response::code] = hmi_result;
+  (*event_msg)[am::strings::params][am::strings::connection_key] =
+      kConnectionKey;
+
+  event.set_smart_object(*event_msg);
+  CommandPtr command(CreateCommand<SpeakRequest>(msg_));
+
+  EXPECT_CALL(mock_app_manager_, application(_))
+      .WillOnce(Return(ApplicationSharedPtr()));
 
   command->on_event(event);
 }

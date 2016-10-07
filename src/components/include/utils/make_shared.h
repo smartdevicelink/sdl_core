@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_INCLUDE_UTILS_MAKE_SHARED_H_
 
 #include <new>
+#include <stddef.h>
 /**
  * @brief The functions set below allows to create shared pointer in a safe way.
  * There are up to 5 parameters could be passed as the constructor parameters.
