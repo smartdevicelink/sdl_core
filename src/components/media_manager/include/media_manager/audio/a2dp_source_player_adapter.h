@@ -37,9 +37,14 @@
 #include "protocol/common.h"
 #include "media_manager/media_adapter_impl.h"
 #include "utils/threads/thread_delegate.h"
+#include "connection_handler/connection_handler_impl.h"
 
 namespace protocol_handler {
 class SessionObserver;
+}
+
+namespace connection_handler {
+class ConnectionHandlerImpl;
 }
 
 namespace threads {
@@ -70,6 +75,7 @@ class A2DPSourcePlayerAdapter : public MediaAdapterImpl {
   typedef std::map<int32_t, Pair> SourcesMap;
   SourcesMap sources_;
   protocol_handler::SessionObserver& session_observer_;
+  connection_handler::ConnectionHandlerImpl* connection_handler_;
   DISALLOW_COPY_AND_ASSIGN(A2DPSourcePlayerAdapter);
 };
 
