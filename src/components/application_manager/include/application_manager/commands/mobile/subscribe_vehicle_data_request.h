@@ -130,7 +130,7 @@ class SubscribeVehicleDataRequest : public CommandRequestImpl {
                             mobile_apis::Result::eType& out_result_code,
                             smart_objects::SmartObject& out_response_params,
                             smart_objects::SmartObject& out_request_params,
-                            bool& result);
+                            bool& out_result);
 
   /**
    * @brief VI parameters which had been already subscribed by another apps

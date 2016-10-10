@@ -341,11 +341,11 @@ void SubscribeVehicleDataRequest::CheckVISubscribtions(
     mobile_apis::Result::eType& out_result_code,
     smart_objects::SmartObject& out_response_params,
     smart_objects::SmartObject& out_request_params,
-    bool& result) {
+    bool& out_result) {
   // counter for items to subscribe
-  int32_t items_to_subscribe = 0;
+  VehicleInfoSubscriptions::size_type items_to_subscribe = 0;
   // counter for subscribed items by application
-  int32_t subscribed_items = 0;
+  uint32_t subscribed_items = 0;
 
   const VehicleData& vehicle_data = MessageHelper::vehicle_data();
   VehicleData::const_iterator it = vehicle_data.begin();
@@ -360,7 +360,8 @@ void SubscribeVehicleDataRequest::CheckVISubscribtions(
   for (; vehicle_data.end() != it; ++it) {
     const std::string& key_name = it->first;
     if ((*message_)[strings::msg_params].keyExists(key_name)) {
-      bool is_key_enabled = (*message_)[strings::msg_params][key_name].asBool();
+      const bool is_key_enabled =
+          (*message_)[strings::msg_params][key_name].asBool();
       if (is_key_enabled) {
         ++items_to_subscribe;
       }
@@ -419,7 +420,7 @@ void SubscribeVehicleDataRequest::CheckVISubscribtions(
   }
 
   const bool is_everything_already_subscribed =
-      static_cast<uint32_t>(items_to_subscribe) ==
+      items_to_subscribe ==
       vi_already_subscribed_by_another_apps_.size() +
           vi_already_subscribed_by_this_app_.size();
 
@@ -430,23 +431,23 @@ void SubscribeVehicleDataRequest::CheckVISubscribtions(
       out_result_code = mobile_apis::Result::INVALID_DATA;
       out_info = "No data in the request";
     }
-    result = false;
+    out_result = false;
   }
 
   if (0 == subscribed_items && !is_interface_not_available) {
     out_result_code = mobile_apis::Result::IGNORED;
     out_info = "Already subscribed on provided VehicleData.";
-    result = false;
+    out_result = false;
   }
 
   if (is_everything_already_subscribed) {
     out_result_code = vi_already_subscribed_by_this_app_.size()
                           ? mobile_apis::Result::IGNORED
                           : mobile_apis::Result::SUCCESS;
-    if (vi_already_subscribed_by_this_app_.size()) {
+    if (!(vi_already_subscribed_by_this_app_.empty())) {
       out_info = "Already subscribed on some provided VehicleData.";
     }
-    result = true;
+    out_result = true;
   }
 }
 
