@@ -276,8 +276,9 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
               result_code,
               message,
               response_info);
-      result = result || ((hmi_apis::Common_Result::DATA_NOT_AVAILABLE ==
-      result_code) && (message[strings::msg_params].length() > 1));
+      result = result ||
+               ((hmi_apis::Common_Result::DATA_NOT_AVAILABLE == result_code) &&
+                (message[strings::msg_params].length() > 1));
 
       if (true ==
           message[strings::msg_params].keyExists(hmi_response::method)) {
@@ -288,7 +289,7 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
       }
       SendResponse(result,
                    MessageHelper::HMIToMobileResult(result_code),
-                   response_info.empty()?NULL:response_info.c_str(),
+                   response_info.empty() ? NULL : response_info.c_str(),
                    &(message[strings::msg_params]));
       break;
     }

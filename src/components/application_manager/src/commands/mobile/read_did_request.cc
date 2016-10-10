@@ -110,7 +110,7 @@ void ReadDIDRequest::on_event(const event_engine::Event& event) {
 
       SendResponse(result,
                    MessageHelper::HMIToMobileResult(result_code),
-                   response_info.empty()?NULL:response_info.c_str(),
+                   response_info.empty() ? NULL : response_info.c_str(),
                    &(message[strings::msg_params]));
       break;
     }

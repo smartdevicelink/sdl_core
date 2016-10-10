@@ -337,8 +337,7 @@ void SubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
   const bool result = PrepareResultForMobileResponse(
       hmi_result, HmiInterfaces::HMI_INTERFACE_VehicleInfo);
 
-  bool is_succeeded =
-      result || !vi_already_subscribed_by_another_apps_.empty();
+  bool is_succeeded = result || !vi_already_subscribed_by_another_apps_.empty();
 
   mobile_apis::Result::eType result_code =
       MessageHelper::HMIToMobileResult(hmi_result);
@@ -358,11 +357,10 @@ void SubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
         const_cast<smart_objects::SmartObject&>(message[strings::msg_params]));
   }
 
-  SendResponse(
-      is_succeeded,
-      result_code,
-      response_info.empty()?NULL:response_info.c_str(),
-      &(message[strings::msg_params]));
+  SendResponse(is_succeeded,
+               result_code,
+               response_info.empty() ? NULL : response_info.c_str(),
+               &(message[strings::msg_params]));
 
   if (is_succeeded) {
     app->UpdateHash();

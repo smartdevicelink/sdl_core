@@ -71,7 +71,7 @@ const std::string CreateInfoForUnsupportedResult(
     case (HmiInterfaces::InterfaceID::HMI_INTERFACE_VehicleInfo): {
       return "VehicleInfo is not supported by system";
     }
-  default:
+    default:
 #ifdef ENABLE_LOG
       CREATE_LOGGERPTR_LOCAL(logger, "Commands");
       LOG4CXX_WARN(logger,
