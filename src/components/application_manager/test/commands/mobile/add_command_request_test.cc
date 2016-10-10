@@ -102,6 +102,26 @@ class AddCommandRequestTest
 
     return msg;
   }
+
+  MessageSharedPtr CreateFullParamsUISO() {
+    MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
+    (*msg)[am::strings::params][am::strings::connection_key] = kConnectionKey;
+    smart_objects::SmartObject menu_params =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+    menu_params[am::strings::position] = 10;
+    menu_params[am::strings::menu_name] = "LG";
+
+    smart_objects::SmartObject msg_params =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+    msg_params[am::strings::cmd_id] = kCmdId;
+    msg_params[am::strings::menu_params] = menu_params;
+    msg_params[am::strings::app_id] = kAppId;
+    msg_params[am::strings::cmd_icon] = 1;
+    msg_params[am::strings::cmd_icon][am::strings::value] = "10";
+    (*msg)[am::strings::msg_params] = msg_params;
+
+    return msg;
+  }
 };
 
 TEST_F(AddCommandRequestTest, OnTimeout_GENERIC_ERROR) {
@@ -226,6 +246,97 @@ TEST_F(AddCommandRequestTest, OnEvent_VR_UNSUPPORTED_RESOURCE) {
     EXPECT_EQ(
         (*vr_command_result)[strings::msg_params][strings::info].asString(),
         (*msg)[strings::msg_params][strings::info].asString());
+  }
+}
+
+TEST_F(AddCommandRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
+  MessageSharedPtr msg_vr = CreateFullParamsUISO();
+  (*msg_vr)[am::strings::msg_params][am::strings::vr_commands][0] =
+      "vr_command";
+
+  utils::SharedPtr<AddCommandRequest> req_vr =
+      CreateCommand<AddCommandRequest>(msg_vr);
+
+  MockAppPtr mock_app = CreateMockApp();
+  ON_CALL(app_mngr_, application(kConnectionKey))
+      .WillByDefault(Return(mock_app));
+  ON_CALL(*mock_app, app_id()).WillByDefault(Return(1));
+  ON_CALL(*mock_app, FindSubMenu(_)).WillByDefault(Return(&(*msg_vr)));
+  MockHmiInterfaces hmi_interfaces;
+  ON_CALL(app_mngr_, hmi_interfaces()).WillByDefault(ReturnRef(hmi_interfaces));
+  ON_CALL(hmi_interfaces, GetInterfaceFromFunction(_))
+      .WillByDefault(
+          Return(am::HmiInterfaces::HMI_INTERFACE_BasicCommunication));
+  ON_CALL(hmi_interfaces, GetInterfaceState(_))
+      .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
+
+  MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
+  (*msg)[am::strings::params][am::hmi_response::code] =
+      hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
+  (*msg)[am::strings::msg_params][am::strings::cmd_id] = kCommandId;
+
+  Event event(hmi_apis::FunctionID::UI_AddCommand);
+  event.set_smart_object(*msg);
+
+  smart_objects::SmartObject* ptr = NULL;
+  ON_CALL(*mock_app, FindCommand(kCmdId)).WillByDefault(Return(ptr));
+  EXPECT_EQ(NULL, ptr);
+
+  MockMessageHelper* mock_message_helper =
+      MockMessageHelper::message_helper_mock();
+  ON_CALL(*mock_message_helper, HMIToMobileResult(_))
+      .WillByDefault(Return(mobile_apis::Result::SUCCESS));
+
+  ON_CALL(*mock_message_helper, VerifyImage(_, _, _))
+      .WillByDefault(Return(mobile_apis::Result::SUCCESS));
+  EXPECT_CALL(*mock_app,
+              AddCommand(kCmdId, (*msg_vr)[am::strings::msg_params]));
+
+  am::CommandsMap commands_map;
+  ON_CALL(*mock_app, commands_map())
+      .WillByDefault(
+          Return(DataAccessor<am::CommandsMap>(commands_map, lock_)));
+
+  EXPECT_CALL(
+      app_mngr_,
+      ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
+      .WillOnce(Return(true))
+      .WillOnce(Return(true));
+
+  EXPECT_CALL(*mock_app, UpdateHash());
+
+  MessageSharedPtr msg_ui(CreateMessage(smart_objects::SmartType_Map));
+  (*msg_ui)[am::strings::params][am::hmi_response::code] =
+      hmi_apis::Common_Result::SUCCESS;
+  (*msg_ui)[am::strings::params][am::strings::info] = "info";
+
+  Event event_vr(hmi_apis::FunctionID::VR_AddCommand);
+  event_vr.set_smart_object(*msg_vr);
+
+  req_vr->Run();
+  req_vr->on_event(event_vr);
+
+  MessageSharedPtr ui_command_result;
+  EXPECT_CALL(
+      app_mngr_,
+      ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
+      .WillOnce(DoAll(SaveArg<0>(&ui_command_result), Return(true)));
+
+  req_vr->on_event(event);
+
+  EXPECT_EQ((*ui_command_result)[am::strings::msg_params][am::strings::success]
+                .asBool(),
+            true);
+  EXPECT_EQ(
+      (*ui_command_result)[am::strings::msg_params][am::strings::result_code]
+          .asInt(),
+      static_cast<int32_t>(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE));
+  if ((*ui_command_result)[am::strings::msg_params].keyExists(
+          am::strings::info)) {
+    EXPECT_FALSE(
+        (*ui_command_result)[am::strings::msg_params][am::strings::info]
+            .asString()
+            .empty());
   }
 }
 

@@ -193,6 +193,70 @@ TEST_F(PerformInteractionRequestTest, OnEvent_VR_UNSUPPORTED_RESOURCE) {
       (*response_msg_vr)[strings::msg_params][strings::info].asString());
 }
 
+TEST_F(PerformInteractionRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
+  MessageSharedPtr msg_from_mobile =
+      CreateMessage(smart_objects::SmartType_Map);
+  (*msg_from_mobile)[strings::params][strings::connection_key] = kConnectionKey;
+  (*msg_from_mobile)[strings::msg_params][strings::interaction_mode] =
+      mobile_apis::InteractionMode::VR_ONLY;
+  utils::SharedPtr<PerformInteractionRequest> command =
+      CreateCommand<PerformInteractionRequest>(msg_from_mobile);
+  command->Init();
+
+  MockAppPtr mock_app;
+  EXPECT_CALL(app_mngr_, application(_)).WillRepeatedly(Return(mock_app));
+
+  MockHmiInterfaces hmi_interfaces;
+  EXPECT_CALL(app_mngr_, hmi_interfaces())
+      .WillRepeatedly(ReturnRef(hmi_interfaces));
+
+  MessageSharedPtr response_msg_vr =
+      CreateMessage(smart_objects::SmartType_Map);
+  (*response_msg_vr)[strings::params][hmi_response::code] =
+      hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
+  (*response_msg_vr)[strings::params][strings::info] =
+      "VR is not supported by system";
+  (*response_msg_vr)[strings::msg_params][strings::cmd_id] = kCommandId;
+
+  am::event_engine::Event event_vr(hmi_apis::FunctionID::VR_PerformInteraction);
+  event_vr.set_smart_object(*response_msg_vr);
+
+  MessageSharedPtr response_msg_ui =
+      CreateMessage(smart_objects::SmartType_Map);
+  (*response_msg_ui)[strings::params][hmi_response::code] =
+      hmi_apis::Common_Result::SUCCESS;
+
+  am::event_engine::Event event_ui(hmi_apis::FunctionID::UI_PerformInteraction);
+  event_ui.set_smart_object(*response_msg_ui);
+
+  EXPECT_CALL(hmi_interfaces,
+              GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
+      .WillRepeatedly(Return(am::HmiInterfaces::STATE_AVAILABLE));
+  EXPECT_CALL(hmi_interfaces,
+              GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_VR))
+      .WillRepeatedly(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
+
+  MessageSharedPtr response_to_mobile;
+
+  EXPECT_CALL(
+      app_mngr_,
+      ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
+      .WillOnce(DoAll(SaveArg<0>(&response_to_mobile), Return(true)));
+
+  command->on_event(event_ui);
+  command->on_event(event_vr);
+
+  EXPECT_EQ(
+      (*response_to_mobile)[strings::msg_params][strings::success].asBool(),
+      true);
+  EXPECT_EQ(
+      (*response_to_mobile)[strings::msg_params][strings::result_code].asInt(),
+      static_cast<int32_t>(mobile_apis::Result::UNSUPPORTED_RESOURCE));
+  EXPECT_EQ(
+      (*response_to_mobile)[strings::msg_params][strings::info].asString(),
+      (*response_msg_vr)[strings::msg_params][strings::info].asString());
+}
+
 }  // namespace commands_test
 }  // namespace components
 }  // namespace tests

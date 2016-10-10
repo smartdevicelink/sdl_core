@@ -34,7 +34,7 @@
 #include <string>
 #include <set>
 
-#include "application_manager/commands/mobile/alert_request.h"
+#include "application_manager/commands/mobile/perform_audio_pass_thru_request.h"
 
 #include "gtest/gtest.h"
 #include "application_manager/commands/command_request_test.h"
@@ -49,13 +49,14 @@ namespace components {
 namespace commands_test {
 
 namespace am = application_manager;
-using am::commands::AlertRequest;
+using am::commands::PerformAudioPassThruRequest;
 using am::commands::CommandImpl;
 using am::commands::MessageSharedPtr;
 using am::MockMessageHelper;
 using am::MockHmiInterfaces;
 using ::utils::SharedPtr;
 using ::testing::_;
+using ::testing::Mock;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
@@ -66,8 +67,12 @@ const uint32_t kCmdId = 1u;
 const uint32_t kConnectionKey = 2u;
 }  // namespace
 
-class AlertRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
+class PerformAudioPassThruRequestTest
+    : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
+  PerformAudioPassThruRequestTest()
+      : mock_message_helper_(*MockMessageHelper::message_helper_mock()) {}
+  MockMessageHelper& mock_message_helper_;
   sync_primitives::Lock lock_;
 
   MessageSharedPtr CreateFullParamsUISO() {
@@ -91,20 +96,22 @@ class AlertRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
   }
 };
 
-TEST_F(AlertRequestTest, OnTimeout_GENERIC_ERROR) {
-  MessageSharedPtr msg_vr = CreateMessage(smart_objects::SmartType_Map);
-  (*msg_vr)[am::strings::msg_params][am::strings::result_code] =
+TEST_F(PerformAudioPassThruRequestTest, OnTimeout_GENERIC_ERROR) {
+  MessageSharedPtr msg_ui = CreateMessage(smart_objects::SmartType_Map);
+  (*msg_ui)[am::strings::msg_params][am::strings::result_code] =
       am::mobile_api::Result::GENERIC_ERROR;
-  (*msg_vr)[am::strings::msg_params][am::strings::success] = false;
+  (*msg_ui)[am::strings::msg_params][am::strings::success] = false;
 
-  utils::SharedPtr<AlertRequest> req_vr = CreateCommand<AlertRequest>();
+  utils::SharedPtr<PerformAudioPassThruRequest> command =
+      CreateCommand<PerformAudioPassThruRequest>();
 
-  MockMessageHelper* mock_message_helper =
-      MockMessageHelper::message_helper_mock();
+  EXPECT_CALL(app_mngr_, EndAudioPassThrough()).WillOnce(Return(true));
+  EXPECT_CALL(app_mngr_, StopAudioPassThru(_));
+
   EXPECT_CALL(
-      *mock_message_helper,
+      mock_message_helper_,
       CreateNegativeResponse(_, _, _, am::mobile_api::Result::GENERIC_ERROR))
-      .WillOnce(Return(msg_vr));
+      .WillOnce(Return(msg_ui));
 
   MessageSharedPtr vr_command_result;
   EXPECT_CALL(
@@ -112,7 +119,7 @@ TEST_F(AlertRequestTest, OnTimeout_GENERIC_ERROR) {
       ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
       .WillOnce(DoAll(SaveArg<0>(&vr_command_result), Return(true)));
 
-  req_vr->onTimeOut();
+  command->onTimeOut();
   EXPECT_EQ((*vr_command_result)[am::strings::msg_params][am::strings::success]
                 .asBool(),
             false);
@@ -120,61 +127,61 @@ TEST_F(AlertRequestTest, OnTimeout_GENERIC_ERROR) {
       (*vr_command_result)[am::strings::msg_params][am::strings::result_code]
           .asInt(),
       static_cast<int32_t>(am::mobile_api::Result::GENERIC_ERROR));
+  Mock::VerifyAndClearExpectations(&mock_message_helper_);
 }
 
-TEST_F(AlertRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
-  MessageSharedPtr msg_vr = CreateFullParamsUISO();
-  (*msg_vr)[am::strings::msg_params][am::strings::menu_params]
-           [am::hmi_request::parent_id] = 10u;
-  (*msg_vr)[am::strings::msg_params][am::strings::menu_params]
-           [am::strings::menu_name] = "menu_name";
+TEST_F(PerformAudioPassThruRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
+  MessageSharedPtr msg_ui = CreateFullParamsUISO();
+  (*msg_ui)[am::strings::params][am::strings::connection_key] = kConnectionKey;
 
-  utils::SharedPtr<AlertRequest> req_vr = CreateCommand<AlertRequest>(msg_vr);
+  utils::SharedPtr<PerformAudioPassThruRequest> command =
+      CreateCommand<PerformAudioPassThruRequest>(msg_ui);
 
   MockAppPtr mock_app = CreateMockApp();
   ON_CALL(app_mngr_, application(kConnectionKey))
       .WillByDefault(Return(mock_app));
-  ON_CALL(*mock_app, app_id()).WillByDefault(Return(kConnectionKey));
-  MockHmiInterfaces hmi_interfaces;
-  ON_CALL(app_mngr_, hmi_interfaces()).WillByDefault(ReturnRef(hmi_interfaces));
-  ON_CALL(hmi_interfaces, GetInterfaceFromFunction(_))
-      .WillByDefault(
-          Return(am::HmiInterfaces::HMI_INTERFACE_BasicCommunication));
-  ON_CALL(hmi_interfaces, GetInterfaceState(_))
-      .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
+  ON_CALL(*mock_app, app_id()).WillByDefault(Return(1));
+
+  ON_CALL(app_mngr_, application(kConnectionKey))
+      .WillByDefault(Return(mock_app));
 
   MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
   (*msg)[am::strings::params][am::hmi_response::code] =
       hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
   (*msg)[am::strings::msg_params][am::strings::cmd_id] = kCommandId;
 
-  Event event(hmi_apis::FunctionID::UI_Alert);
+  Event event(hmi_apis::FunctionID::UI_PerformAudioPassThru);
   event.set_smart_object(*msg);
 
-  MockMessageHelper* mock_message_helper =
-      MockMessageHelper::message_helper_mock();
-  ON_CALL(*mock_message_helper, HMIToMobileResult(_))
-      .WillByDefault(Return(mobile_apis::Result::SUCCESS));
+  MockHmiInterfaces hmi_interfaces;
+  ON_CALL(app_mngr_, hmi_interfaces()).WillByDefault(ReturnRef(hmi_interfaces));
+  ON_CALL(hmi_interfaces,
+          GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
+      .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
+  ON_CALL(hmi_interfaces,
+          GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_TTS))
+      .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
 
-  MessageSharedPtr vr_command_result;
+  MessageSharedPtr ui_command_result;
+  EXPECT_CALL(app_mngr_, EndAudioPassThrough()).WillOnce(Return(false));
   EXPECT_CALL(
       app_mngr_,
       ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
-      .WillOnce(DoAll(SaveArg<0>(&vr_command_result), Return(true)));
+      .WillOnce(DoAll(SaveArg<0>(&ui_command_result), Return(true)));
 
-  req_vr->on_event(event);
+  command->on_event(event);
 
-  EXPECT_EQ((*vr_command_result)[am::strings::msg_params][am::strings::success]
+  EXPECT_EQ((*ui_command_result)[am::strings::msg_params][am::strings::success]
                 .asBool(),
             true);
   EXPECT_EQ(
-      (*vr_command_result)[am::strings::msg_params][am::strings::result_code]
+      (*ui_command_result)[am::strings::msg_params][am::strings::result_code]
           .asInt(),
       static_cast<int32_t>(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE));
-  if ((*vr_command_result)[am::strings::msg_params].keyExists(
+  if ((*ui_command_result)[am::strings::msg_params].keyExists(
           am::strings::info)) {
     EXPECT_FALSE(
-        (*vr_command_result)[am::strings::msg_params][am::strings::info]
+        (*ui_command_result)[am::strings::msg_params][am::strings::info]
             .asString()
             .empty());
   }

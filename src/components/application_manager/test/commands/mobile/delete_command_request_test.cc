@@ -73,6 +73,26 @@ const uint32_t kConnectionKey = 2u;
 class DeleteCommandRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
+  MessageSharedPtr CreateFullParamsUISO() {
+    MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
+    (*msg)[am::strings::params][am::strings::connection_key] = kConnectionKey;
+    smart_objects::SmartObject menu_params =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+    menu_params[am::strings::position] = 10;
+    menu_params[am::strings::menu_name] = "LG";
+
+    smart_objects::SmartObject msg_params =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+    msg_params[am::strings::cmd_id] = kCmdId;
+    msg_params[am::strings::menu_params] = menu_params;
+    msg_params[am::strings::app_id] = kAppId;
+    msg_params[am::strings::cmd_icon] = 1;
+    msg_params[am::strings::cmd_icon][am::strings::value] = "10";
+    (*msg)[am::strings::msg_params] = msg_params;
+
+    return msg;
+  }
+
   MessageSharedPtr CreateFullParamsVRSO() {
     MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
     (*msg)[am::strings::params][am::strings::connection_key] = kConnectionKey;
@@ -150,6 +170,71 @@ TEST_F(DeleteCommandRequestTest, OnEvent_VrDeleteCommand_UNSUPPORTED_RESOURCE) {
     EXPECT_EQ(
         (*event_msg)[am::strings::params][am::strings::info].asString(),
         (*result_msg)[am::strings::msg_params][am::strings::info].asString());
+  }
+}
+
+TEST_F(DeleteCommandRequestTest, OnEvent_UIDeleteCommand_UNSUPPORTED_RESOURCE) {
+  MessageSharedPtr command_msg = CreateFullParamsUISO();
+  (*command_msg)[am::strings::msg_params][am::strings::cmd_id] = kCommandId;
+  (*command_msg)[am::strings::params][am::strings::connection_key] =
+      kConnectionKey;
+
+  DeleteCommandPtr command(CreateCommand<DeleteCommandRequest>(command_msg));
+
+  MockAppPtr app = CreateMockApp();
+  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
+
+  MessageSharedPtr test_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*test_msg)[am::strings::vr_commands] = 0;
+  (*test_msg)[am::strings::menu_params] = 0;
+
+  MockHmiInterfaces hmi_interfaces;
+  ON_CALL(app_mngr_, hmi_interfaces()).WillByDefault(ReturnRef(hmi_interfaces));
+  ON_CALL(hmi_interfaces, GetInterfaceFromFunction(_))
+      .WillByDefault(
+          Return(am::HmiInterfaces::HMI_INTERFACE_BasicCommunication));
+  ON_CALL(hmi_interfaces, GetInterfaceState(_))
+      .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
+  ON_CALL(*app, FindCommand(kCommandId)).WillByDefault(Return(test_msg.get()));
+  ON_CALL(*app, app_id()).WillByDefault(Return(kConnectionKey));
+  ON_CALL(*app, get_grammar_id()).WillByDefault(Return(kConnectionKey));
+
+  MessageSharedPtr msg(CreateMessage(smart_objects::SmartType_Map));
+  (*msg)[am::strings::params][am::hmi_response::code] =
+      hmi_apis::Common_Result::SUCCESS;
+  Event event_vr(hmi_apis::FunctionID::VR_DeleteCommand);
+  event_vr.set_smart_object(*msg);
+
+  command->Run();
+  command->on_event(event_vr);
+
+  MessageSharedPtr event_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*event_msg)[am::strings::params][am::hmi_response::code] =
+      hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
+  (*event_msg)[am::strings::params][am::strings::info] = "info";
+  Event event_ui(hmi_apis::FunctionID::UI_DeleteCommand);
+  event_ui.set_smart_object(*event_msg);
+
+  EXPECT_CALL(*app, RemoveCommand(kCommandId));
+
+  EXPECT_CALL(*app, UpdateHash());
+
+  MessageSharedPtr result_msg(
+      CatchMobileCommandResult(CallOnEvent(*command, event_ui)));
+
+  ASSERT_TRUE(result_msg);
+
+  EXPECT_EQ(
+      (*result_msg)[am::strings::msg_params][am::strings::success].asBool(),
+      true);
+  EXPECT_EQ(
+      hmi_apis::Common_Result::UNSUPPORTED_RESOURCE,
+      (*result_msg)[am::strings::msg_params][am::strings::result_code].asInt());
+
+  if ((*result_msg)[am::strings::msg_params].keyExists(am::strings::info)) {
+    EXPECT_FALSE((*event_msg)[am::strings::params][am::strings::info]
+                     .asString()
+                     .empty());
   }
 }
 
