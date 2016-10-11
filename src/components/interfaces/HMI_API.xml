@@ -3238,7 +3238,7 @@
   </function>
 </interface>
 
-<interface name="Navigation" version="1.4" date="2016-07-4">
+<interface name="Navigation" version="1.5" date="2016-10-11">
 
   <function name="IsReady" messagetype="request">
     <description>Method is invoked at system startup. Response must provide the information about presence of UI Navigation module and its readiness to cooperate with SDL.</description>
@@ -3413,9 +3413,6 @@
     </param>
   </function>
   <function name="GetWayPoints" messagetype="response">
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of the application.</description>
-    </param>
     <param name="wayPoints" type="Common.LocationDetails" mandatory="false" array="true" minsize="1" maxsize="10">
       <description>See LocationDetails</description>
     </param>
