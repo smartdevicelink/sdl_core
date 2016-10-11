@@ -1,5 +1,5 @@
 ﻿/*
- Copyright (c) 2014, Ford Motor Company
+ Copyright (c) 2016, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -83,6 +83,23 @@ namespace NsSmart = NsSmartDeviceLink::NsSmartObjects;
  *         if both are not empty return empty first +", " + second
  */
 std::string MergeInfos(const std::string& first, const std::string& second);
+
+/**
+ * @brief MergeInfos merge 2 infos into one string with info
+ * @param first_info -contains result_code from HMI response and
+ * interface that returns response
+ * @param first_str - info string that should be first in result info
+ * @param second_info -contains result_code from HMI response and
+ * interface that returns response
+ * @param second_str - info string that should be second in result info
+ * @return if first_info is not available and second_str not empty return second
+ *         if second_info is not available and first_str not empty return first
+ *         other cases return result MergeInfos for 2 params
+ */
+std::string MergeInfos(const ResponseInfo& first_info,
+                       const std::string& first_str,
+                       const ResponseInfo& second_info,
+                       const std::string& second_str);
 
 /**
  * @brief MergeInfos merge 3 infos in one string
@@ -223,6 +240,7 @@ class CommandRequestImpl : public CommandImpl,
    */
   bool PrepareResultForMobileResponse(ResponseInfo& out_first,
                                       ResponseInfo& out_second) const;
+
   /**
    * @brief If message from HMI contains returns this info
    * or process result code from HMI and checks state of interface

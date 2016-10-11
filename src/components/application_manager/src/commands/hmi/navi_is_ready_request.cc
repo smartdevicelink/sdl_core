@@ -38,14 +38,40 @@ namespace commands {
 
 NaviIsReadyRequest::NaviIsReadyRequest(const MessageSharedPtr& message,
                                        ApplicationManager& application_manager)
-    : RequestToHMI(message, application_manager) {}
+    : RequestToHMI(message, application_manager)
+    , EventObserver(application_manager.event_dispatcher()) {}
 
 NaviIsReadyRequest::~NaviIsReadyRequest() {}
 
 void NaviIsReadyRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-
+  subscribe_on_event(hmi_apis::FunctionID::Navigation_IsReady,
+                     correlation_id());
   SendRequest();
+}
+
+void NaviIsReadyRequest::on_event(const event_engine::Event& event) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  const smart_objects::SmartObject& message = event.smart_object();
+  switch (event.id()) {
+    case hmi_apis::FunctionID::Navigation_IsReady: {
+      LOG4CXX_DEBUG(logger_, "Received Navigation_IsReady event");
+      unsubscribe_from_event(hmi_apis::FunctionID::Navigation_IsReady);
+      const bool is_available =
+          ChangeInterfaceState(application_manager_,
+                               message,
+                               HmiInterfaces::HMI_INTERFACE_Navigation);
+
+      HMICapabilities& hmi_capabilities =
+          application_manager_.hmi_capabilities();
+      hmi_capabilities.set_is_navi_cooperating(is_available);
+      break;
+    }
+    default: {
+      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+      return;
+    }
+  }
 }
 
 }  // namespace commands

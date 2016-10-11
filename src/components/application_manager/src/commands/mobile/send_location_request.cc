@@ -31,11 +31,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 #include <algorithm>
-
 #include "application_manager/commands/mobile/send_location_request.h"
-
 #include "application_manager/message_helper.h"
-#include "utils/helpers.h"
 #include "utils/custom_string.h"
 
 namespace application_manager {
@@ -136,21 +133,23 @@ void SendLocationRequest::Run() {
 
 void SendLocationRequest::on_event(const event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
-  namespace Result = mobile_apis::Result;
-  using namespace helpers;
+  using namespace hmi_apis;
   const smart_objects::SmartObject& message = event.smart_object();
   if (hmi_apis::FunctionID::Navigation_SendLocation == event.id()) {
     LOG4CXX_INFO(logger_, "Received Navigation_SendLocation event");
-    mobile_apis::Result::eType result_code =
-        GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
-            message[strings::params][hmi_response::code].asUInt()));
-    const bool result =
-        Compare<Result::eType, EQ, ONE>(result_code,
-                                        Result::SAVED,
-                                        Result::SUCCESS,
-                                        Result::WARNINGS,
-                                        Result::UNSUPPORTED_RESOURCE);
-    SendResponse(result, result_code, NULL, &(message[strings::params]));
+    const Common_Result::eType result_code = static_cast<Common_Result::eType>(
+        message[strings::params][hmi_response::code].asInt());
+    std::string response_info;
+    GetInfo(HmiInterfaces::HMI_INTERFACE_Navigation,
+            result_code,
+            message,
+            response_info);
+    const bool result = PrepareResultForMobileResponse(
+        result_code, HmiInterfaces::HMI_INTERFACE_Navigation);
+    SendResponse(result,
+                 MessageHelper::HMIToMobileResult(result_code),
+                 response_info.empty() ? NULL : response_info.c_str(),
+                 &(message[strings::params]));
     return;
   }
   LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());

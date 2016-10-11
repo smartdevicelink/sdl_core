@@ -179,7 +179,6 @@ void AlertManeuverRequest::on_event(const event_engine::Event& event) {
   std::string return_info;
   mobile_apis::Result::eType result_code;
   const bool result = PrepareResponseParameters(result_code, return_info);
-
   bool must_be_empty_info = false;
   if (return_info.find("\n") != std::string::npos ||
       return_info.find("\t") != std::string::npos) {
@@ -201,7 +200,7 @@ bool AlertManeuverRequest::PrepareResponseParameters(
       HmiInterfaces::HMI_INTERFACE_Navigation);
 
   application_manager::commands::ResponseInfo tts_alert_info(
-      tts_speak_result_code_, HmiInterfaces::HMI_INTERFACE_Navigation);
+      tts_speak_result_code_, HmiInterfaces::HMI_INTERFACE_TTS);
   const bool result =
       PrepareResultForMobileResponse(navigation_alert_info, tts_alert_info);
 
@@ -214,10 +213,10 @@ bool AlertManeuverRequest::PrepareResponseParameters(
     return_info = std::string("Unsupported phoneme type sent in a prompt");
     return result;
   }
-
   result_code =
       PrepareResultCodeForResponse(navigation_alert_info, tts_alert_info);
-  return_info = MergeInfos(info_navi_, info_tts_);
+  return_info =
+      MergeInfos(navigation_alert_info, info_navi_, tts_alert_info, info_tts_);
   return result;
 }
 

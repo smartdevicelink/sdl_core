@@ -58,6 +58,11 @@ NaviStartStreamRequest::~NaviStartStreamRequest() {}
 
 void NaviStartStreamRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
+  if (!CheckAvailabilityHMIInterfaces(
+          application_manager_, HmiInterfaces::HMI_INTERFACE_Navigation)) {
+    LOG4CXX_INFO(logger_, "Interface Navi is not supported by system");
+    return;
+  }
 
   SetAllowedToTerminate(false);
   subscribe_on_event(hmi_apis::FunctionID::Navigation_StartStream,
