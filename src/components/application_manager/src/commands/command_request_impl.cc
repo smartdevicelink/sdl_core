@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2013, Ford Motor Company
+ Copyright (c) 2016, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,25 @@
 namespace application_manager {
 
 namespace commands {
+
+std::string MergeInfos(const ResponseInfo& first_info,
+                       const std::string& first_str,
+                       const ResponseInfo& second_info,
+                       const std::string& second_str) {
+  if ((first_info.interface_state == HmiInterfaces::STATE_NOT_AVAILABLE) &&
+      (second_info.interface_state != HmiInterfaces::STATE_NOT_AVAILABLE) &&
+      !second_str.empty()) {
+    return second_str;
+  }
+
+  if ((second_info.interface_state == HmiInterfaces::STATE_NOT_AVAILABLE) &&
+      (first_info.interface_state != HmiInterfaces::STATE_NOT_AVAILABLE) &&
+      !first_str.empty()) {
+    return first_str;
+  }
+
+  return MergeInfos(first_str, second_str);
+}
 
 std::string MergeInfos(const std::string& first, const std::string& second) {
   return first + ((!first.empty() && !second.empty()) ? ", " : "") + second;

@@ -200,7 +200,7 @@ bool AlertManeuverRequest::PrepareResponseParameters(
       HmiInterfaces::HMI_INTERFACE_Navigation);
 
   application_manager::commands::ResponseInfo tts_alert_info(
-      tts_speak_result_code_, HmiInterfaces::HMI_INTERFACE_Navigation);
+      tts_speak_result_code_, HmiInterfaces::HMI_INTERFACE_TTS);
   const bool result =
       PrepareResultForMobileResponse(navigation_alert_info, tts_alert_info);
 
@@ -215,7 +215,8 @@ bool AlertManeuverRequest::PrepareResponseParameters(
   }
   result_code =
       PrepareResultCodeForResponse(navigation_alert_info, tts_alert_info);
-  return_info = MergeInfos(info_navi_, info_tts_);
+  return_info =
+      MergeInfos(navigation_alert_info, info_navi_, tts_alert_info, info_tts_);
   return result;
 }
 
