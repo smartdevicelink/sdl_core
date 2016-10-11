@@ -35,11 +35,10 @@
 
 #include <string>
 #include <map>
+#include "smart_objects/smart_object.h"
 #include "dbus/dbus_adapter.h"
 
 namespace dbus {
-
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 class DBusMessageController : public DBusAdapter {
  public:

@@ -36,6 +36,7 @@
 #include <string>
 #include <vector>
 #include "gmock/gmock.h"
+#include "smart_objects/smart_object.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_manager_settings.h"
@@ -49,7 +50,6 @@
 namespace test {
 namespace components {
 namespace application_manager_test {
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 class MockApplicationManager : public application_manager::ApplicationManager {
  public:

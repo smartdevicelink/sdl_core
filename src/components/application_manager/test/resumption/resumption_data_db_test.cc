@@ -40,6 +40,7 @@
 #include "utils/sqlite_wrapper/sql_query.h"
 #include "utils/make_shared.h"
 #include "utils/file_system.h"
+#include "smart_objects/smart_object.h"
 #include "application_manager/resumption_data_test.h"
 #include "application_manager/test_resumption_data_db.h"
 
@@ -68,7 +69,6 @@ using application_manager_test::MockApplication;
 using ::test::components::utils::dbms::MockSQLDatabase;
 
 namespace am = application_manager;
-namespace smart_objects = ::NsSmartDeviceLink::NsSmartObjects;
 using namespace file_system;
 
 using namespace resumption;
@@ -1262,7 +1262,7 @@ TEST_F(ResumptionDataDBTest, DropAppResumptionData) {
 
   EXPECT_TRUE(res_db()->DropAppDataResumption(kMacAddress_, policy_app_id_));
 
-  am::smart_objects::SmartObject app;
+  ::smart_objects::SmartObject app;
   EXPECT_TRUE(res_db()->GetSavedApplication(policy_app_id_, kMacAddress_, app));
 
   EXPECT_TRUE(app.keyExists(am::strings::application_commands) &&

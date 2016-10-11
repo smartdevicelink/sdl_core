@@ -35,6 +35,7 @@
 
 #include <string.h>
 
+#include "smart_objects/smart_object.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/policies/policy_handler.h"
@@ -43,8 +44,6 @@
 namespace application_manager {
 
 namespace commands {
-
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 AlertRequest::AlertRequest(const MessageSharedPtr& message,
                            ApplicationManager& application_manager)

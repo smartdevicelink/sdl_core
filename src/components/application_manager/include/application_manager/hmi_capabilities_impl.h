@@ -33,6 +33,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMI_CAPABILITIES_IMPL_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMI_CAPABILITIES_IMPL_H_
 
+#include "smart_objects/smart_object.h"
 #include "application_manager/hmi_capabilities.h"
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
@@ -41,17 +42,9 @@
 #include "utils/json_utils.h"
 #include "application_manager/hmi_language_handler.h"
 
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
-class SmartObject;
-}  // namespace NsSmartObjects
-}  // namespace NsSmartDeviceLink
-
 namespace resumption {
 class LastState;
 }  // namespace resumption
-
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 namespace application_manager {
 class ApplicationManager;

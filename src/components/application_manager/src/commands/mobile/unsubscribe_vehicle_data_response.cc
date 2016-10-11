@@ -31,6 +31,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "smart_objects/smart_object.h"
 #include "application_manager/commands/mobile/unsubscribe_vehicle_data_response.h"
 
 namespace application_manager {
@@ -44,9 +45,6 @@ UnsubscribeVehicleDataResponse::~UnsubscribeVehicleDataResponse() {}
 
 void UnsubscribeVehicleDataResponse::Run() {
   SDL_AUTO_TRACE();
-
-  namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
-
   // check if response false
   if (true == (*message_)[strings::msg_params].keyExists(strings::success)) {
     if ((*message_)[strings::msg_params][strings::success].asBool() == false) {

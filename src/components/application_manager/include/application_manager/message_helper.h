@@ -40,6 +40,7 @@
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 #include "utils/macro.h"
+#include "smart_objects/smart_object.h"
 #include "connection_handler/device.h"
 #include "application_manager/application.h"
 #include "application_manager/vehicle_info_data.h"
@@ -47,19 +48,12 @@
 #include "protocol_handler/session_observer.h"
 #include "application_manager/policies/policy_handler_interface.h"
 
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
-class SmartObject;
-}
-}
-
 namespace policy {
 class PolicyHandlerInterface;
 }
 
 namespace application_manager {
 namespace mobile_api = mobile_apis;
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 /*
  * @brief Typedef for VehicleData

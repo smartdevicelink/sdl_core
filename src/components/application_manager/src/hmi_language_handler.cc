@@ -30,6 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include "smart_objects/smart_object.h"
 #include "application_manager/hmi_language_handler.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/message_helper.h"
@@ -152,7 +153,7 @@ void HMILanguageHandler::on_event(const event_engine::Event& event) {
 }
 
 void HMILanguageHandler::set_handle_response_for(
-    const event_engine::smart_objects::SmartObject& request) {
+    const smart_objects::SmartObject& request) {
   SDL_AUTO_TRACE();
   using namespace helpers;
   if (!request.keyExists(strings::params)) {
