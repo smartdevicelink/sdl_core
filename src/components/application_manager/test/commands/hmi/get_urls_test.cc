@@ -81,237 +81,251 @@ const std::string kInitialService = "0x0";
 const std::string kPolicyService = "7";
 const std::string kDefaultUrl = "URL is not found";
 const std::string kDefaultId = "default";
+const std::string kPolicyAppId = "policy_app_id";
 }  // namespace
 
-class GetUrlsTest : public CommandsTest<CommandsTestMocks::kIsNice> {
+class GetUrlsTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
-  policy_test::MockPolicyHandlerInterface policy_handler_;
-  utils::SharedPtr<policy_manager_test::MockPolicyManager> mock_policy_manager_;
-  NiceMock<event_engine_test::MockEventDispatcher> mock_event_dispatcher_;
-  ApplicationSharedPtr app;
+  policy_test::MockPolicyHandlerInterface mock_policy_handler_;
+  MessageSharedPtr command_msg_;
+  RequestFromHMIPtr request_command_;
 
-  virtual void SetUp() OVERRIDE {
+  GetUrlsTest() {
+    command_msg_ =
+        CreateMessage(NsSmartDeviceLink::NsSmartObjects::SmartType_Map);
+    (*command_msg_)[am::strings::params][am::strings::connection_key] =
+        kConnectionKey;
+    (*command_msg_)[am::strings::msg_params][am::hmi_request::service] =
+        kInitialService;
+
+    request_command_ = CreateCommand<GetUrls>(command_msg_);
+
     ON_CALL(mock_app_manager_, GetPolicyHandler())
-        .WillByDefault(ReturnRef(policy_handler_));
-    mock_policy_manager_ =
-        utils::MakeShared<policy_manager_test::MockPolicyManager>();
-    ASSERT_TRUE(mock_policy_manager_);
+        .WillByDefault(ReturnRef(mock_policy_handler_));
   }
 };
 
 TEST_F(GetUrlsTest, RUN_SUCCESS) {
-  MessageSharedPtr command_msg(
-      CreateMessage(NsSmartDeviceLink::NsSmartObjects::SmartType_Map));
-  (*command_msg)[am::strings::msg_params][am::strings::number] = "123";
-  (*command_msg)[am::strings::params][am::strings::connection_key] =
-      kConnectionKey;
-  (*command_msg)[am::strings::msg_params][am::hmi_request::service] =
-      kInitialService;
+  EXPECT_CALL(mock_policy_handler_, GetServiceUrls(kInitialService, _));
+  EXPECT_CALL(mock_policy_handler_, PolicyEnabled()).WillOnce(Return(true));
 
-  ON_CALL(mock_app_manager_, event_dispatcher())
-      .WillByDefault(ReturnRef(mock_event_dispatcher_));
-
-  RequestFromHMIPtr command(CreateCommand<GetUrls>(command_msg));
-
-  EXPECT_CALL(mock_app_manager_, GetPolicyHandler()).Times(2);
-
-  EXPECT_CALL(policy_handler_, GetServiceUrls(kInitialService, _));
-
-  EXPECT_CALL(policy_handler_, PolicyEnabled()).WillOnce(Return(true));
-
-  command->Run();
+  request_command_->Run();
 }
+
 TEST_F(GetUrlsTest, RUN_PolicyNotEnabled_UNSUCCESS) {
-  MessageSharedPtr command_msg(
-      CreateMessage(NsSmartDeviceLink::NsSmartObjects::SmartType_Map));
-  (*command_msg)[am::strings::msg_params][am::strings::number] = "123";
-  (*command_msg)[am::strings::params][am::strings::connection_key] =
-      kConnectionKey;
-  (*command_msg)[am::strings::msg_params][am::hmi_request::service] =
-      kInitialService;
-
-  ON_CALL(mock_app_manager_, event_dispatcher())
-      .WillByDefault(ReturnRef(mock_event_dispatcher_));
-
-  RequestFromHMIPtr command(CreateCommand<GetUrls>(command_msg));
-
-  EXPECT_CALL(mock_app_manager_, GetPolicyHandler());
-
-  EXPECT_CALL(policy_handler_, PolicyEnabled()).WillOnce(Return(false));
-
-  EXPECT_CALL(mock_app_manager_, ManageHMICommand(command_msg))
+  EXPECT_CALL(mock_policy_handler_, PolicyEnabled()).WillOnce(Return(false));
+  EXPECT_CALL(mock_app_manager_, ManageHMICommand(command_msg_))
       .WillOnce(Return(true));
 
-  command->Run();
+  request_command_->Run();
 
-  EXPECT_EQ((*command_msg)[strings::params][strings::message_type].asInt(),
-            am::MessageType::kResponse);
-  EXPECT_EQ((*command_msg)[strings::params][am::hmi_response::code].asInt(),
-            Common_Result::DATA_NOT_AVAILABLE);
+  EXPECT_EQ(am::MessageType::kResponse,
+            (*command_msg_)[strings::params][strings::message_type].asInt());
+  EXPECT_EQ(Common_Result::DATA_NOT_AVAILABLE,
+            (*command_msg_)[strings::params][am::hmi_response::code].asInt());
 }
+
 TEST_F(GetUrlsTest, RUN_EmptyEndpoints_UNSUCCESS) {
-  MessageSharedPtr command_msg(
-      CreateMessage(NsSmartDeviceLink::NsSmartObjects::SmartType_Map));
-  (*command_msg)[am::strings::msg_params][am::strings::number] = "123";
-  (*command_msg)[am::strings::params][am::strings::connection_key] =
-      kConnectionKey;
-  (*command_msg)[am::strings::msg_params][am::hmi_request::service] =
-      kInitialService;
-
-  ON_CALL(mock_app_manager_, event_dispatcher())
-      .WillByDefault(ReturnRef(mock_event_dispatcher_));
-
-  RequestFromHMIPtr command(CreateCommand<GetUrls>(command_msg));
-
-  EXPECT_CALL(mock_app_manager_, GetPolicyHandler()).Times(2);
-
-  EXPECT_CALL(policy_handler_, GetServiceUrls(kInitialService, _));
-
-  EXPECT_CALL(policy_handler_, PolicyEnabled()).WillOnce(Return(true));
-
-  EXPECT_CALL(mock_app_manager_, ManageHMICommand(command_msg))
+  EXPECT_CALL(mock_policy_handler_, GetServiceUrls(kInitialService, _));
+  EXPECT_CALL(mock_policy_handler_, PolicyEnabled()).WillOnce(Return(true));
+  EXPECT_CALL(mock_app_manager_, ManageHMICommand(command_msg_))
       .WillOnce(Return(true));
 
-  command->Run();
+  request_command_->Run();
 
-  EXPECT_EQ((*command_msg)[strings::params][strings::message_type].asInt(),
-            am::MessageType::kResponse);
-  EXPECT_EQ((*command_msg)[strings::params][am::hmi_response::code].asInt(),
-            Common_Result::DATA_NOT_AVAILABLE);
+  EXPECT_EQ(am::MessageType::kResponse,
+            (*command_msg_)[strings::params][strings::message_type].asInt());
+  EXPECT_EQ(Common_Result::DATA_NOT_AVAILABLE,
+            (*command_msg_)[strings::params][am::hmi_response::code].asInt());
 }
 
 #ifdef EXTENDED_POLICY
 TEST_F(GetUrlsTest, ProcessPolicyServiceURLs_SUCCESS) {
-  MessageSharedPtr command_msg(
-      CreateMessage(NsSmartDeviceLink::NsSmartObjects::SmartType_Map));
-  (*command_msg)[am::strings::msg_params][am::strings::number] = "123";
-  (*command_msg)[am::strings::params][am::strings::connection_key] =
-      kConnectionKey;
-  (*command_msg)[am::strings::msg_params][am::hmi_request::service] =
+  (*command_msg_)[am::strings::msg_params][am::hmi_request::service] =
       kPolicyService;
 
-  ON_CALL(mock_app_manager_, event_dispatcher())
-      .WillByDefault(ReturnRef(mock_event_dispatcher_));
-
-  RequestFromHMIPtr command(CreateCommand<GetUrls>(command_msg));
-
-  EXPECT_CALL(mock_app_manager_, GetPolicyHandler()).Times(3);
-  EXPECT_CALL(policy_handler_, PolicyEnabled()).WillOnce(Return(true));
+  EXPECT_CALL(mock_policy_handler_, PolicyEnabled()).WillOnce(Return(true));
 
   EndpointUrls endpoints_;
   EndpointData data(kDefaultUrl);
   endpoints_.push_back(data);
 
-  ON_CALL(policy_handler_, GetServiceUrls(kPolicyService, _))
+  ON_CALL(mock_policy_handler_, GetServiceUrls(kPolicyService, _))
       .WillByDefault(SetArgReferee<1>(endpoints_));
-  EXPECT_CALL(policy_handler_, GetServiceUrls(kPolicyService, _));
 
   MockAppPtr mock_app = CreateMockApp();
 
-  EXPECT_CALL(policy_handler_, GetAppIdForSending())
+  EXPECT_CALL(mock_policy_handler_, GetAppIdForSending())
       .WillOnce(Return(kAppIdForSending));
 
   EXPECT_CALL(mock_app_manager_, application(kAppIdForSending))
       .WillOnce(Return(mock_app));
   EXPECT_CALL(*mock_app, app_id()).WillOnce(Return(kAppIdForSending));
-  EXPECT_CALL(mock_app_manager_, ManageHMICommand(command_msg))
-      .WillRepeatedly(Return(true));
+  EXPECT_CALL(mock_app_manager_, ManageHMICommand(command_msg_))
+      .WillOnce(Return(true));
 
-  command->Run();
+  request_command_->Run();
 
-  EXPECT_FALSE((*command_msg)[am::strings::msg_params].keyExists(
+  EXPECT_FALSE((*command_msg_)[am::strings::msg_params].keyExists(
       am::hmi_request::service));
 
-  EXPECT_EQ((*command_msg)[strings::params][strings::message_type].asInt(),
-            am::MessageType::kResponse);
-  EXPECT_EQ((*command_msg)[strings::params][am::hmi_response::code].asInt(),
-            Common_Result::SUCCESS);
+  EXPECT_EQ(am::MessageType::kResponse,
+            (*command_msg_)[strings::params][strings::message_type].asInt());
+  EXPECT_EQ(Common_Result::SUCCESS,
+            (*command_msg_)[strings::params][am::hmi_response::code].asInt());
 
   EXPECT_EQ(kAppIdForSending,
-            (*command_msg)[am::strings::msg_params][am::hmi_response::urls][0]
-                          [strings::app_id].asInt());
+            (*command_msg_)[am::strings::msg_params][am::hmi_response::urls][0]
+                           [strings::app_id].asInt());
   EXPECT_EQ(kDefaultUrl,
-            (*command_msg)[am::strings::msg_params][am::hmi_response::urls][0]
-                          [strings::url].asString());
+            (*command_msg_)[am::strings::msg_params][am::hmi_response::urls][0]
+                           [strings::url].asString());
+}
+
+TEST_F(GetUrlsTest, ProcessPolicyServiceURLs_IncorrectIdForSending_UNSUCCESS) {
+  (*command_msg_)[am::strings::msg_params][am::hmi_request::service] =
+      kPolicyService;
+
+  EXPECT_CALL(mock_policy_handler_, PolicyEnabled()).WillOnce(Return(true));
+
+  EndpointUrls endpoints_;
+  EndpointData data(kDefaultUrl);
+  endpoints_.push_back(data);
+
+  ON_CALL(mock_policy_handler_, GetServiceUrls(kPolicyService, _))
+      .WillByDefault(SetArgReferee<1>(endpoints_));
+
+  EXPECT_CALL(mock_policy_handler_, GetAppIdForSending())
+      .WillOnce(Return(kInvalidAppId_));
+
+  EXPECT_CALL(mock_app_manager_, ManageHMICommand(command_msg_))
+      .WillOnce(Return(true));
+
+  EXPECT_CALL(mock_app_manager_, application(kInvalidAppId_)).Times(0);
+
+  request_command_->Run();
+}
+
+TEST_F(GetUrlsTest, ProcessPolicyServiceURLs_ApplicationIsNotValid_UNSUCCESS) {
+  (*command_msg_)[am::strings::msg_params][am::hmi_request::service] =
+      kPolicyService;
+
+  EXPECT_CALL(mock_policy_handler_, PolicyEnabled()).WillOnce(Return(true));
+
+  EndpointUrls endpoints_;
+  EndpointData data(kDefaultUrl);
+  endpoints_.push_back(data);
+
+  ON_CALL(mock_policy_handler_, GetServiceUrls(kPolicyService, _))
+      .WillByDefault(SetArgReferee<1>(endpoints_));
+
+  MockAppPtr invalid_mock_app;
+
+  EXPECT_CALL(mock_policy_handler_, GetAppIdForSending())
+      .WillOnce(Return(kAppIdForSending));
+
+  EXPECT_CALL(mock_app_manager_, application(kAppIdForSending))
+      .WillOnce(Return(invalid_mock_app));
+
+  EXPECT_CALL(mock_app_manager_, ManageHMICommand(command_msg_))
+      .WillOnce(Return(true));
+
+  request_command_->Run();
+
+  EXPECT_EQ(am::MessageType::kResponse,
+            (*command_msg_)[strings::params][strings::message_type].asInt());
+  EXPECT_EQ(Common_Result::DATA_NOT_AVAILABLE,
+            (*command_msg_)[strings::params][am::hmi_response::code].asInt());
+}
+
+TEST_F(GetUrlsTest, ProcessPolicyServiceURLs_FoundURLForApplication_SUCCESS) {
+  (*command_msg_)[am::strings::msg_params][am::hmi_request::service] =
+      kPolicyService;
+
+  EXPECT_CALL(mock_policy_handler_, PolicyEnabled()).WillOnce(Return(true));
+
+  EndpointUrls endpoints_;
+  EndpointData data(kDefaultUrl);
+  data.app_id = kPolicyAppId;
+  endpoints_.push_back(data);
+
+  ON_CALL(mock_policy_handler_, GetServiceUrls(kPolicyService, _))
+      .WillByDefault(SetArgReferee<1>(endpoints_));
+
+  MockAppPtr mock_app = CreateMockApp();
+
+  EXPECT_CALL(mock_policy_handler_, GetAppIdForSending())
+      .WillOnce(Return(kAppIdForSending));
+
+  EXPECT_CALL(mock_app_manager_, application(kAppIdForSending))
+      .WillOnce(Return(mock_app));
+
+  EXPECT_CALL(*mock_app, policy_app_id()).WillOnce(Return(kPolicyAppId));
+
+  EXPECT_CALL(mock_app_manager_, ManageHMICommand(command_msg_))
+      .WillOnce(Return(true));
+
+  request_command_->Run();
+
+  EXPECT_FALSE((*command_msg_)[am::strings::msg_params].keyExists(
+      am::hmi_request::service));
+
+  EXPECT_EQ(am::MessageType::kResponse,
+            (*command_msg_)[strings::params][strings::message_type].asInt());
+  EXPECT_EQ(Common_Result::SUCCESS,
+            (*command_msg_)[strings::params][am::hmi_response::code].asInt());
 }
 #endif
+
 TEST_F(GetUrlsTest, ProcessServiceURLs_SUCCESS) {
-  MessageSharedPtr command_msg(
-      CreateMessage(NsSmartDeviceLink::NsSmartObjects::SmartType_Map));
-  (*command_msg)[am::strings::msg_params][am::strings::number] = "123";
-  (*command_msg)[am::strings::params][am::strings::connection_key] =
-      kConnectionKey;
-  (*command_msg)[am::strings::msg_params][am::hmi_request::service] =
-      kInitialService;
-  (*command_msg)[am::strings::msg_params][am::hmi_response::urls][0] =
+  (*command_msg_)[am::strings::msg_params][am::hmi_response::urls][0] =
       kDefaultUrl;
-  (*command_msg)[am::strings::msg_params][am::hmi_response::urls][0]
-                [am::hmi_response::policy_app_id].asString() = "1";
+  (*command_msg_)[am::strings::msg_params][am::hmi_response::urls][0]
+                 [am::hmi_response::policy_app_id] = "1";
 
-  ON_CALL(mock_app_manager_, event_dispatcher())
-      .WillByDefault(ReturnRef(mock_event_dispatcher_));
-
-  RequestFromHMIPtr command(CreateCommand<GetUrls>(command_msg));
-
-  EXPECT_CALL(mock_app_manager_, GetPolicyHandler()).Times(2);
-  EXPECT_CALL(policy_handler_, PolicyEnabled()).WillOnce(Return(true));
+  EXPECT_CALL(mock_policy_handler_, PolicyEnabled()).WillOnce(Return(true));
 
   EndpointUrls endpoints_;
   EndpointData data(kDefaultUrl);
   data.app_id = "1";
   endpoints_.push_back(data);
 
-  ON_CALL(policy_handler_, GetServiceUrls(kInitialService, _))
+  ON_CALL(mock_policy_handler_, GetServiceUrls(kInitialService, _))
       .WillByDefault(SetArgReferee<1>(endpoints_));
-  EXPECT_CALL(policy_handler_, GetServiceUrls(kInitialService, _));
 
-  command->Run();
+  request_command_->Run();
 
-  EXPECT_FALSE((*command_msg)[am::strings::msg_params].keyExists(
+  EXPECT_FALSE((*command_msg_)[am::strings::msg_params].keyExists(
       am::hmi_request::service));
-  EXPECT_EQ((*command_msg)[am::strings::msg_params][am::hmi_response::urls][0]
-                          [am::strings::url].asString(),
-            kDefaultUrl);
-
-  EXPECT_EQ((*command_msg)[am::strings::msg_params][am::hmi_response::urls][0]
-                          [am::hmi_response::policy_app_id].asString(),
-            endpoints_[0].app_id);
+  EXPECT_EQ(kDefaultUrl,
+            (*command_msg_)[am::strings::msg_params][am::hmi_response::urls][0]
+                           [am::strings::url].asString());
+  EXPECT_EQ(endpoints_[0].app_id,
+            (*command_msg_)[am::strings::msg_params][am::hmi_response::urls][0]
+                           [am::hmi_response::policy_app_id].asString());
 }
+
 TEST_F(GetUrlsTest, ProcessServiceURLs_PolicyDefaultId_SUCCESS) {
-  MessageSharedPtr command_msg(
-      CreateMessage(NsSmartDeviceLink::NsSmartObjects::SmartType_Map));
-  (*command_msg)[am::strings::msg_params][am::strings::number] = "123";
-  (*command_msg)[am::strings::params][am::strings::connection_key] =
-      kConnectionKey;
-  (*command_msg)[am::strings::msg_params][am::hmi_request::service] =
-      kInitialService;
-  (*command_msg)[am::strings::msg_params][am::hmi_response::urls][0] =
+  (*command_msg_)[am::strings::msg_params][am::hmi_response::urls][0] =
       kDefaultUrl;
-  (*command_msg)[am::strings::msg_params][am::hmi_response::urls][0]
-                [am::hmi_response::policy_app_id].asString() = kDefaultId;
+  (*command_msg_)[am::strings::msg_params][am::hmi_response::urls][0]
+                 [am::hmi_response::policy_app_id] = kDefaultId;
 
-  ON_CALL(mock_app_manager_, event_dispatcher())
-      .WillByDefault(ReturnRef(mock_event_dispatcher_));
-
-  RequestFromHMIPtr command(CreateCommand<GetUrls>(command_msg));
-
-  EXPECT_CALL(mock_app_manager_, GetPolicyHandler()).Times(2);
-  EXPECT_CALL(policy_handler_, PolicyEnabled()).WillOnce(Return(true));
+  EXPECT_CALL(mock_policy_handler_, PolicyEnabled()).WillOnce(Return(true));
 
   EndpointUrls endpoints_;
   EndpointData data(kDefaultUrl);
   endpoints_.push_back(data);
 
-  ON_CALL(policy_handler_, GetServiceUrls(kInitialService, _))
+  ON_CALL(mock_policy_handler_, GetServiceUrls(kInitialService, _))
       .WillByDefault(SetArgReferee<1>(endpoints_));
-  EXPECT_CALL(policy_handler_, GetServiceUrls(kInitialService, _));
 
-  command->Run();
+  request_command_->Run();
 
-  EXPECT_FALSE((*command_msg)[am::strings::msg_params].keyExists(
+  EXPECT_FALSE((*command_msg_)[am::strings::msg_params].keyExists(
       am::hmi_request::service));
   EXPECT_FALSE(
-      (*command_msg)[am::strings::msg_params][am::hmi_response::urls][0]
+      (*command_msg_)[am::strings::msg_params][am::hmi_response::urls][0]
           .keyExists(am::hmi_response::policy_app_id));
 }
 
