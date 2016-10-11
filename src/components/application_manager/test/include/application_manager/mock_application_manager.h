@@ -174,7 +174,9 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD0(StartDevicesDiscovery, void());
   MOCK_METHOD1(StopAudioPassThru, void(int32_t application_key));
   MOCK_METHOD2(TerminateRequest,
-               void(uint32_t connection_key, uint32_t corr_id));
+               void(uint32_t connection_key,
+                    uint32_t corr_id,
+                    int32_t function_id));
   MOCK_METHOD4(UnregisterApplication,
                void(const uint32_t&, mobile_apis::Result::eType, bool, bool));
   MOCK_METHOD3(updateRequestTimeout,

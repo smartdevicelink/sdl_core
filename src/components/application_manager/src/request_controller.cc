@@ -227,37 +227,45 @@ void RequestController::removeNotification(
   LOG4CXX_DEBUG(logger_, "Cant find notification");
 }
 
-void RequestController::terminateRequest(const uint32_t& correlation_id,
-                                         const uint32_t& connection_key,
+void RequestController::terminateRequest(const uint32_t correlation_id,
+                                         const uint32_t connection_key,
+                                         const int32_t function_id,
                                          bool force_terminate) {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_,
                 "correlation_id = "
                     << correlation_id << " connection_key = " << connection_key
+                    << " function_id = " << function_id
                     << " force_terminate = " << force_terminate);
   RequestInfoPtr request =
       waiting_for_response_.Find(connection_key, correlation_id);
-  if (request) {
-    if (force_terminate || request->request()->AllowedToTerminate()) {
-      waiting_for_response_.RemoveRequest(request);
-    } else {
-      LOG4CXX_WARN(logger_, "Request was not terminated");
-    }
-    UpdateTimer();
-  } else {
-    LOG4CXX_WARN(logger_, "Request not found in waiting_for_response_");
+  if (!request) {
+    LOG4CXX_WARN(logger_, "Request not found in waiting_for_response");
+    return;
   }
+  if (request->request()->function_id() != function_id) {
+    LOG4CXX_ERROR(logger_, "Request and response funciton_id's does not match");
+    return;
+  }
+  if (force_terminate || request->request()->AllowedToTerminate()) {
+    waiting_for_response_.RemoveRequest(request);
+  } else {
+    LOG4CXX_WARN(logger_, "Request was not terminated");
+  }
+  UpdateTimer();
 }
 
-void RequestController::OnMobileResponse(const uint32_t& mobile_correlation_id,
-                                         const uint32_t& connection_key) {
+void RequestController::OnMobileResponse(const uint32_t mobile_correlation_id,
+                                         const uint32_t connection_key,
+                                         const int32_t function_id) {
   LOG4CXX_AUTO_TRACE(logger_);
-  terminateRequest(mobile_correlation_id, connection_key);
+  terminateRequest(mobile_correlation_id, connection_key, function_id);
 }
 
-void RequestController::OnHMIResponse(const uint32_t& correlation_id) {
+void RequestController::OnHMIResponse(const uint32_t correlation_id,
+                                      const int32_t function_id) {
   LOG4CXX_AUTO_TRACE(logger_);
-  terminateRequest(correlation_id, RequestInfo::HmiConnectoinKey);
+  terminateRequest(correlation_id, RequestInfo::HmiConnectoinKey, function_id);
 }
 
 void RequestController::terminateWaitingForExecutionAppRequests(

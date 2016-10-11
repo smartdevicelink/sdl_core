@@ -413,7 +413,9 @@ class ApplicationManager {
    * @param connection_key - application id of request
    * @param corr_id correlation id of request
    */
-  virtual void TerminateRequest(uint32_t connection_key, uint32_t corr_id) = 0;
+  virtual void TerminateRequest(uint32_t connection_key,
+                                uint32_t corr_id,
+                                const int32_t function_id) = 0;
 
   /*
    * @brief Closes application by id

@@ -370,7 +370,8 @@ void CreateInteractionChoiceSetRequest::onTimeOut() {
   // according to SDLAQ-CRS-2976
   sync_primitives::AutoLock timeout_lock_(is_timed_out_lock_);
   is_timed_out_ = true;
-  application_manager_.TerminateRequest(connection_key(), correlation_id());
+  application_manager_.TerminateRequest(
+      connection_key(), correlation_id(), function_id());
 }
 
 void CreateInteractionChoiceSetRequest::DeleteChoices() {
@@ -420,7 +421,8 @@ void CreateInteractionChoiceSetRequest::OnAllHMIResponsesReceived() {
     DeleteChoices();
   }
 
-  application_manager_.TerminateRequest(connection_key(), correlation_id());
+  application_manager_.TerminateRequest(
+      connection_key(), correlation_id(), function_id());
 }
 
 }  // namespace commands

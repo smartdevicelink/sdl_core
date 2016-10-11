@@ -1388,7 +1388,8 @@ void ApplicationManagerImpl::SendMessageToMobile(
   if (msg_to_mobile[strings::params].keyExists(strings::correlation_id)) {
     request_ctrl_.OnMobileResponse(
         msg_to_mobile[strings::params][strings::correlation_id].asInt(),
-        msg_to_mobile[strings::params][strings::connection_key].asInt());
+        msg_to_mobile[strings::params][strings::connection_key].asInt(),
+        msg_to_mobile[strings::params][strings::function_id].asInt());
   } else if (app) {
     mobile_apis::FunctionID::eType function_id =
         static_cast<mobile_apis::FunctionID::eType>(
@@ -1438,9 +1439,10 @@ void ApplicationManagerImpl::SendMessageToMobile(
       impl::MessageToMobile(message_to_send, final_message));
 }
 
-void ApplicationManagerImpl::TerminateRequest(uint32_t connection_key,
-                                              uint32_t corr_id) {
-  request_ctrl_.terminateRequest(corr_id, connection_key, true);
+void ApplicationManagerImpl::TerminateRequest(const uint32_t connection_key,
+                                              const uint32_t corr_id,
+                                              const int32_t function_id) {
+  request_ctrl_.terminateRequest(corr_id, connection_key, function_id, true);
 }
 
 bool ApplicationManagerImpl::ManageMobileCommand(
@@ -1694,7 +1696,9 @@ bool ApplicationManagerImpl::ManageHMICommand(
     if (kResponse == message_type) {
       const uint32_t correlation_id =
           (*(message.get()))[strings::params][strings::correlation_id].asInt();
-      request_ctrl_.OnHMIResponse(correlation_id);
+      const int32_t function_id =
+          (*(message.get()))[strings::params][strings::function_id].asInt();
+      request_ctrl_.OnHMIResponse(correlation_id, function_id);
     }
     return true;
   }
