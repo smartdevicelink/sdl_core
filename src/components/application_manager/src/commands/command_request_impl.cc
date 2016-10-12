@@ -102,11 +102,8 @@ const std::string CreateInfoForUnsupportedResult(
 }
 
 bool CheckResultCode(const ResponseInfo& first, const ResponseInfo& second) {
-  if (first.is_ok && second.is_unsupported_resource) {
-    return true;
-  }
-  if (first.is_invalid_enum && second.is_unsupported_resource &&
-      HmiInterfaces::STATE_NOT_AVAILABLE != second.interface_state) {
+  if (first.is_ok && second.is_unsupported_resource &&
+      second.interface_state == HmiInterfaces::STATE_NOT_AVAILABLE) {
     return true;
   }
   return false;
