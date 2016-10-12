@@ -1442,7 +1442,7 @@ void ApplicationManagerImpl::SendMessageToMobile(
 void ApplicationManagerImpl::TerminateRequest(const uint32_t connection_key,
                                               const uint32_t corr_id,
                                               const int32_t function_id) {
-  request_ctrl_.terminateRequest(corr_id, connection_key, function_id, true);
+  request_ctrl_.TerminateRequest(corr_id, connection_key, function_id, true);
 }
 
 bool ApplicationManagerImpl::ManageMobileCommand(
