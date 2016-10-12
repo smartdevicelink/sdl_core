@@ -236,10 +236,7 @@ void SubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
       static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
   std::string response_info;
-  GetInfo(HmiInterfaces::InterfaceID::HMI_INTERFACE_VehicleInfo,
-          hmi_result,
-          message,
-          response_info);
+  GetInfo(message, response_info);
   const bool result = PrepareResultForMobileResponse(
       hmi_result, HmiInterfaces::HMI_INTERFACE_VehicleInfo);
 

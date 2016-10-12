@@ -165,10 +165,7 @@ void AlertRequest::on_event(const event_engine::Event& event) {
 
       // Mobile Alert request is successful when UI_Alert is successful
       alert_response_params_ = message[strings::msg_params];
-      GetInfo(HmiInterfaces::HMI_INTERFACE_UI,
-              alert_result_,
-              message,
-              ui_response_info_);
+      GetInfo(message, ui_response_info_);
       break;
     }
     case hmi_apis::FunctionID::TTS_Speak: {
@@ -178,10 +175,7 @@ void AlertRequest::on_event(const event_engine::Event& event) {
       awaiting_tts_speak_response_ = false;
       tts_speak_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
-      GetInfo(HmiInterfaces::HMI_INTERFACE_TTS,
-              tts_speak_result_,
-              message,
-              tts_response_info_);
+      GetInfo(message, tts_response_info_);
       break;
     }
     case hmi_apis::FunctionID::TTS_StopSpeaking: {

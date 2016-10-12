@@ -232,10 +232,7 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
       is_ui_received_ = true;
       ui_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
-      GetInfo(HmiInterfaces::HMI_INTERFACE_UI,
-              ui_result_,
-              message,
-              ui_response_info_);
+      GetInfo(message, ui_response_info_);
       break;
     }
     case hmi_apis::FunctionID::TTS_SetGlobalProperties: {
@@ -243,10 +240,7 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
       is_tts_received_ = true;
       tts_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
-      GetInfo(HmiInterfaces::HMI_INTERFACE_TTS,
-              tts_result_,
-              message,
-              tts_response_info_);
+      GetInfo(message, tts_response_info_);
       break;
     }
     default: {
@@ -303,7 +297,11 @@ bool SetGlobalPropertiesRequest::PrepareResponseParameters(
   }
   result_code =
       PrepareResultCodeForResponse(ui_properties_info, tts_properties_info);
-  info = MergeInfos(tts_response_info_, ui_response_info_);
+
+  info = MergeInfos(tts_properties_info,
+                    tts_response_info_,
+                    ui_properties_info,
+                    ui_response_info_);
   return result;
 }
 

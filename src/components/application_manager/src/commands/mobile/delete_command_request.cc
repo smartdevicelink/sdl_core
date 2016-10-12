@@ -149,7 +149,7 @@ void DeleteCommandRequest::on_event(const event_engine::Event& event) {
       LOG4CXX_DEBUG(logger_,
                     "Received UI_DeleteCommand event with result "
                         << MessageHelper::HMIResultToString(ui_result_));
-      GetInfo(HmiInterfaces::HMI_INTERFACE_UI, ui_result_, message, ui_info_);
+      GetInfo(message, ui_info_);
       break;
     }
     case hmi_apis::FunctionID::VR_DeleteCommand: {
@@ -159,7 +159,7 @@ void DeleteCommandRequest::on_event(const event_engine::Event& event) {
       LOG4CXX_DEBUG(logger_,
                     "Received VR_DeleteCommand event with result "
                         << MessageHelper::HMIResultToString(vr_result_));
-      GetInfo(HmiInterfaces::HMI_INTERFACE_VR, vr_result_, message, vr_info_);
+      GetInfo(message, vr_info_);
       break;
     }
     default: {

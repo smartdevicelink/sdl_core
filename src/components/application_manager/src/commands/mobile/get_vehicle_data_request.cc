@@ -272,10 +272,7 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
       bool result = PrepareResultForMobileResponse(
           result_code, HmiInterfaces::HMI_INTERFACE_VehicleInfo);
       std::string response_info;
-      GetInfo(HmiInterfaces::InterfaceID::HMI_INTERFACE_VehicleInfo,
-              result_code,
-              message,
-              response_info);
+      GetInfo(message, response_info);
       result = result ||
                ((hmi_apis::Common_Result::DATA_NOT_AVAILABLE == result_code) &&
                 (message[strings::msg_params].length() > 1));

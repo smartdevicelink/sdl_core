@@ -123,7 +123,7 @@ void PerformAudioPassThruRequest::on_event(const event_engine::Event& event) {
 
       result_ui_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asUInt());
-      GetInfo(HmiInterfaces::HMI_INTERFACE_UI, result_ui_, message, ui_info_);
+      GetInfo(message, ui_info_);
 
       // in case perform audio is started by other request skip stopping
       if (hmi_apis::Common_Result::REJECTED == result_ui_) {
@@ -141,10 +141,7 @@ void PerformAudioPassThruRequest::on_event(const event_engine::Event& event) {
       LOG4CXX_INFO(logger_, "Received TTS_Speak event");
       result_tts_speak_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asUInt());
-      GetInfo(HmiInterfaces::HMI_INTERFACE_TTS,
-              result_tts_speak_,
-              message,
-              tts_info_);
+      GetInfo(message, tts_info_);
       awaiting_tts_speak_response_ = false;
       const bool is_tts_speak_success_unsuported =
           Compare<hmi_apis::Common_Result::eType, EQ, ONE>(

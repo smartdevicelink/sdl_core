@@ -230,8 +230,7 @@ void PerformInteractionRequest::on_event(const event_engine::Event& event) {
       unsubscribe_from_event(hmi_apis::FunctionID::UI_PerformInteraction);
       ui_result_code_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asUInt());
-      GetInfo(
-          HmiInterfaces::HMI_INTERFACE_UI, ui_result_code_, message, ui_info_);
+      GetInfo(message, ui_info_);
       ProcessUIResponse(event.smart_object(), msg_param);
       break;
     }
@@ -241,8 +240,7 @@ void PerformInteractionRequest::on_event(const event_engine::Event& event) {
       unsubscribe_from_event(hmi_apis::FunctionID::VR_PerformInteraction);
       vr_result_code_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asUInt());
-      GetInfo(
-          HmiInterfaces::HMI_INTERFACE_VR, vr_result_code_, message, vr_info_);
+      GetInfo(message, vr_info_);
       if (ProcessVRResponse(event.smart_object(), msg_param)) {
         return;
       }

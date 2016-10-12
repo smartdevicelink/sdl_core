@@ -140,10 +140,7 @@ void SendLocationRequest::on_event(const event_engine::Event& event) {
     const Common_Result::eType result_code = static_cast<Common_Result::eType>(
         message[strings::params][hmi_response::code].asInt());
     std::string response_info;
-    GetInfo(HmiInterfaces::HMI_INTERFACE_Navigation,
-            result_code,
-            message,
-            response_info);
+    GetInfo(message, response_info);
     const bool result = PrepareResultForMobileResponse(
         result_code, HmiInterfaces::HMI_INTERFACE_Navigation);
     SendResponse(result,

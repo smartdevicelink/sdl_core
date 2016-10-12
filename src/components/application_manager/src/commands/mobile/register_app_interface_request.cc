@@ -334,6 +334,18 @@ void FillVIRelatedFields(smart_objects::SmartObject& response_params,
   }
 }
 
+void FillTTSRelatedFields(smart_objects::SmartObject& response_params,
+                          const HMICapabilities& hmi_capabilities) {
+  if (hmi_capabilities.speech_capabilities()) {
+    response_params[strings::speech_capabilities] =
+        *hmi_capabilities.speech_capabilities();
+  }
+  if (hmi_capabilities.prerecorded_speech()) {
+    response_params[strings::prerecorded_speech] =
+        *(hmi_capabilities.prerecorded_speech());
+  }
+}
+
 void FillUIRelatedFields(smart_objects::SmartObject& response_params,
                          const HMICapabilities& hmi_capabilities) {
   response_params[strings::hmi_display_language] =
@@ -502,9 +514,11 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
           *hmi_capabilities.hmi_zone_capabilities();
     }
   }
-  if (hmi_capabilities.speech_capabilities()) {
-    response_params[strings::speech_capabilities] =
-        *hmi_capabilities.speech_capabilities();
+
+  if (HmiInterfaces::STATE_NOT_AVAILABLE !=
+      application_manager_.hmi_interfaces().GetInterfaceState(
+          HmiInterfaces::HMI_INTERFACE_TTS)) {
+    FillTTSRelatedFields(response_params, hmi_capabilities);
   }
 
   if (hmi_capabilities.pcm_stream_capabilities()) {
@@ -516,11 +530,6 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
       application_manager_.hmi_interfaces().GetInterfaceState(
           HmiInterfaces::HMI_INTERFACE_VehicleInfo)) {
     FillVIRelatedFields(response_params, hmi_capabilities);
-  }
-
-  if (hmi_capabilities.prerecorded_speech()) {
-    response_params[strings::prerecorded_speech] =
-        *(hmi_capabilities.prerecorded_speech());
   }
 
   const std::vector<uint32_t>& diag_modes =
