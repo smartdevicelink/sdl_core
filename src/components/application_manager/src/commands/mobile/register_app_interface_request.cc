@@ -312,6 +312,11 @@ void RegisterAppInterfaceRequest::Run() {
   SendRegisterAppInterfaceResponseToMobile();
 }
 
+void FillTTSRelatedFields(smart_objects::SmartObject& response_params,
+                         const HMICapabilities& hmi_capabilities) {
+  response_params[strings::language] = hmi_capabilities.active_tts_language();
+}
+
 void FillVRRelatedFields(smart_objects::SmartObject& response_params,
                          const HMICapabilities& hmi_capabilities) {
   response_params[strings::language] = hmi_capabilities.active_vr_language();
@@ -454,6 +459,12 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
             << hmi_capabilities.active_ui_language());
 
     result_code = mobile_apis::Result::WRONG_LANGUAGE;
+  }
+
+  if (HmiInterfaces::STATE_NOT_AVAILABLE !=
+      application_manager_.hmi_interfaces().GetInterfaceState(
+          HmiInterfaces::HMI_INTERFACE_TTS)) {
+    FillTTSRelatedFields(response_params, hmi_capabilities);
   }
 
   if (HmiInterfaces::STATE_NOT_AVAILABLE !=
