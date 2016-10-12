@@ -250,7 +250,7 @@ MATCHER_P(CheckHMIInterfacesRealtedData, expected_data, "") {
 }
 
 TEST_F(RegisterAppInterfaceRequestTest,
-       DISABLE_Run_HmiInterfacesStateAvailable_SUCCESS) {
+       Run_HmiInterfacesStateAvailable_SUCCESS) {
   InitBasicMessage();
 
   MockAppPtr mock_app = CreateBasicMockedApp();

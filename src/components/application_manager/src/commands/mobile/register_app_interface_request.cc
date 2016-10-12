@@ -313,7 +313,7 @@ void RegisterAppInterfaceRequest::Run() {
 }
 
 void FillTTSRelatedFields(smart_objects::SmartObject& response_params,
-                          const HMICapabilities& hmi_capabilities) {
+                         const HMICapabilities& hmi_capabilities) {
   response_params[strings::language] = hmi_capabilities.active_tts_language();
 }
 

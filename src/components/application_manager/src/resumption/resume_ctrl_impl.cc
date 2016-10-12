@@ -349,12 +349,9 @@ void ResumeCtrlImpl::StartAppHmiStateResumption(
   DCHECK_OR_RETURN_VOID(application);
   smart_objects::SmartObject saved_app;
   const std::string& device_mac = application->mac_address();
-  const bool result = resumption_storage_->GetSavedApplication(
+  bool result = resumption_storage_->GetSavedApplication(
       application->policy_app_id(), device_mac, saved_app);
-  if (!result) {
-    LOG4CXX_ERROR(logger_, "Application was not saved");
-    return;
-  }
+  DCHECK_OR_RETURN_VOID(result);
   const uint32_t ign_off_count = saved_app[strings::ign_off_count].asUInt();
   bool restore_data_allowed = false;
   restore_data_allowed =

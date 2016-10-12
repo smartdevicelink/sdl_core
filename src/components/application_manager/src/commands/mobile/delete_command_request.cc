@@ -126,6 +126,11 @@ bool DeleteCommandRequest::PrepareResponseParameters(
       Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
           hmi_apis::Common_Result::WARNINGS, ui_result_, vr_result_);
   info = MergeInfos(ui_info_, vr_info_);
+  if (!result && hmi_apis::Common_Result::REJECTED == ui_result_ &&
+      (!vr_delete_info.is_invalid_enum)) {
+    result_code = MessageHelper::HMIToMobileResult(vr_result_);
+    return result;
+  }
   if (is_vr_or_ui_warning && !ui_delete_info.is_unsupported_resource &&
       !vr_delete_info.is_unsupported_resource) {
     LOG4CXX_DEBUG(logger_, "VR or UI result is warning");
