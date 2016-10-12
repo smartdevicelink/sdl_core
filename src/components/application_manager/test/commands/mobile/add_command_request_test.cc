@@ -161,7 +161,7 @@ TEST_F(AddCommandRequestTest, OnTimeout_GENERIC_ERROR) {
       static_cast<int32_t>(am::mobile_api::Result::GENERIC_ERROR));
 }
 
-TEST_F(AddCommandRequestTest, OnEvent_VR_UNSUPPORTED_RESOURCE) {
+TEST_F(AddCommandRequestTest, OnEvent_VR_AddCommand_UNSUPPORTED_RESOURCE) {
   MessageSharedPtr msg_vr = CreateFullParamsVRSO();
   (*msg_vr)[strings::msg_params][strings::menu_params]
            [am::hmi_request::parent_id] = 10u;
@@ -249,7 +249,7 @@ TEST_F(AddCommandRequestTest, OnEvent_VR_UNSUPPORTED_RESOURCE) {
   }
 }
 
-TEST_F(AddCommandRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
+TEST_F(AddCommandRequestTest, OnEvent_UI_AddCommand_UNSUPPORTED_RESOURCE) {
   MessageSharedPtr msg_vr = CreateFullParamsUISO();
   (*msg_vr)[am::strings::msg_params][am::strings::vr_commands][0] =
       "vr_command";
@@ -260,7 +260,7 @@ TEST_F(AddCommandRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
   MockAppPtr mock_app = CreateMockApp();
   ON_CALL(app_mngr_, application(kConnectionKey))
       .WillByDefault(Return(mock_app));
-  ON_CALL(*mock_app, app_id()).WillByDefault(Return(1));
+  ON_CALL(*mock_app, app_id()).WillByDefault(Return(kAppId));
   ON_CALL(*mock_app, FindSubMenu(_)).WillByDefault(Return(&(*msg_vr)));
   MockHmiInterfaces hmi_interfaces;
   ON_CALL(app_mngr_, hmi_interfaces()).WillByDefault(ReturnRef(hmi_interfaces));
