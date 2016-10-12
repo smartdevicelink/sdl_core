@@ -114,8 +114,6 @@ void MediaManagerImpl::Init() {
 
 #if defined(EXTENDED_MEDIA_MODE)
   LOG4CXX_INFO(logger_, "Called Init with default configuration.");
-  a2dp_player_ =
-      new A2DPSourcePlayerAdapter(protocol_handler_->get_session_observer());
   from_mic_recorder_ = new FromMicRecorderAdapter();
 #endif
 
@@ -157,6 +155,14 @@ void MediaManagerImpl::Init() {
 
 void MediaManagerImpl::PlayA2DPSource(int32_t application_key) {
   LOG4CXX_AUTO_TRACE(logger_);
+
+#if defined(EXTENDED_MEDIA_MODE)
+  if (!a2dp_player_ && protocol_handler_) {
+    a2dp_player_ =
+        new A2DPSourcePlayerAdapter(protocol_handler_->get_session_observer());
+  }
+#endif
+
   if (a2dp_player_) {
     a2dp_player_->StartActivity(application_key);
   }
