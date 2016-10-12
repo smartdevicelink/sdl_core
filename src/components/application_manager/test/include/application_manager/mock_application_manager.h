@@ -173,7 +173,7 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                     int32_t audio_type));
   MOCK_METHOD0(StartDevicesDiscovery, void());
   MOCK_METHOD1(StopAudioPassThru, void(int32_t application_key));
-  MOCK_METHOD2(TerminateRequest,
+  MOCK_METHOD3(TerminateRequest,
                void(const uint32_t connection_key,
                     const uint32_t corr_id,
                     const int32_t function_id));

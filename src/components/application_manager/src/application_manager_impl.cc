@@ -1387,8 +1387,8 @@ void ApplicationManagerImpl::SendMessageToMobile(
   // checked against policy permissions
   if (msg_to_mobile[strings::params].keyExists(strings::correlation_id)) {
     request_ctrl_.OnMobileResponse(
-        msg_to_mobile[strings::params][strings::correlation_id].asInt(),
-        msg_to_mobile[strings::params][strings::connection_key].asInt(),
+        msg_to_mobile[strings::params][strings::correlation_id].asUInt(),
+        msg_to_mobile[strings::params][strings::connection_key].asUInt(),
         msg_to_mobile[strings::params][strings::function_id].asInt());
   } else if (app) {
     mobile_apis::FunctionID::eType function_id =
@@ -1695,7 +1695,7 @@ bool ApplicationManagerImpl::ManageHMICommand(
     command->Run();
     if (kResponse == message_type) {
       const uint32_t correlation_id =
-          (*(message.get()))[strings::params][strings::correlation_id].asInt();
+          (*(message.get()))[strings::params][strings::correlation_id].asUInt();
       const int32_t function_id =
           (*(message.get()))[strings::params][strings::function_id].asInt();
       request_ctrl_.OnHMIResponse(correlation_id, function_id);
