@@ -737,18 +737,12 @@ bool CommandRequestImpl::PrepareResultForMobileResponse(
 }
 
 void CommandRequestImpl::GetInfo(
-    HmiInterfaces::InterfaceID interface,
-    hmi_apis::Common_Result::eType result_code,
     const smart_objects::SmartObject& response_from_hmi,
     std::string& out_info) {
   if (response_from_hmi[strings::msg_params].keyExists(strings::info)) {
-    out_info = response_from_hmi[strings::msg_params][strings::info].asString();
-  } else {
-    HmiInterfaces::InterfaceState interface_state =
-        application_manager_.hmi_interfaces().GetInterfaceState(interface);
-    if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == result_code &&
-        HmiInterfaces::InterfaceState::STATE_NOT_RESPONSE == interface_state) {
-      out_info = CreateInfoForUnsupportedResult(interface);
+    if (!response_from_hmi[strings::msg_params][strings::info].empty()) {
+      out_info =
+          response_from_hmi[strings::msg_params][strings::info].asString();
     }
   }
 }

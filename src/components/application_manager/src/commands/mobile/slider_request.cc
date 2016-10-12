@@ -155,8 +155,7 @@ void SliderRequest::on_event(const event_engine::Event& event) {
     }
   }
   std::string response_info;
-  GetInfo(
-      HmiInterfaces::HMI_INTERFACE_UI, response_code, message, response_info);
+  GetInfo(message, response_info);
   const bool is_response_success = PrepareResultForMobileResponse(
       response_code, HmiInterfaces::HMI_INTERFACE_UI);
 

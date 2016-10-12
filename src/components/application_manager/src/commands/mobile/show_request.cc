@@ -233,10 +233,7 @@ void ShowRequest::on_event(const event_engine::Event& event) {
               message[strings::params][hmi_response::code].asInt());
       const bool result = PrepareResultForMobileResponse(
           result_code, HmiInterfaces::HMI_INTERFACE_UI);
-      GetInfo(HmiInterfaces::InterfaceID::HMI_INTERFACE_UI,
-              result_code,
-              message,
-              response_info);
+      GetInfo(message, response_info);
       if (hmi_apis::Common_Result::WARNINGS == result_code &&
           message[strings::params].keyExists(hmi_response::message)) {
         response_info =

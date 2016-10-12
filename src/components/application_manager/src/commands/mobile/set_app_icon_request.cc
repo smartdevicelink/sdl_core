@@ -240,8 +240,7 @@ void SetAppIconRequest::on_event(const event_engine::Event& event) {
       const bool result = PrepareResultForMobileResponse(
           result_code, HmiInterfaces::HMI_INTERFACE_UI);
       std::string response_info;
-      GetInfo(
-          HmiInterfaces::HMI_INTERFACE_UI, result_code, message, response_info);
+      GetInfo(message, response_info);
       if (result) {
         ApplicationSharedPtr app =
             application_manager_.application(connection_key());

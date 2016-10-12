@@ -100,10 +100,7 @@ void DiagnosticMessageRequest::on_event(const event_engine::Event& event) {
       const bool result = PrepareResultForMobileResponse(
           result_code, HmiInterfaces::HMI_INTERFACE_VehicleInfo);
       std::string response_info;
-      GetInfo(HmiInterfaces::InterfaceID::HMI_INTERFACE_VehicleInfo,
-              result_code,
-              message,
-              response_info);
+      GetInfo(message, response_info);
       SendResponse(result,
                    MessageHelper::HMIToMobileResult(result_code),
                    response_info.empty() ? NULL : response_info.c_str(),

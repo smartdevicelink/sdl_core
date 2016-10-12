@@ -250,9 +250,7 @@ class CommandRequestImpl : public CommandImpl,
    * @param response_from_hmi contains response from HMI
    * @param out_info contain info for sending to application
    */
-  void GetInfo(HmiInterfaces::InterfaceID interface,
-               hmi_apis::Common_Result::eType result_code,
-               const smart_objects::SmartObject& response_from_hmi,
+  void GetInfo(const smart_objects::SmartObject& response_from_hmi,
                std::string& out_info);
 
   /**

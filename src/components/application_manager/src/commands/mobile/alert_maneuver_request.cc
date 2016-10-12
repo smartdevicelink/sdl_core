@@ -138,10 +138,7 @@ void AlertManeuverRequest::on_event(const event_engine::Event& event) {
       navi_alert_maneuver_result_code_ =
           static_cast<hmi_apis::Common_Result::eType>(
               message[strings::params][hmi_response::code].asInt());
-      GetInfo(HmiInterfaces::HMI_INTERFACE_Navigation,
-              navi_alert_maneuver_result_code_,
-              message,
-              info_navi_);
+      GetInfo(message, info_navi_);
       break;
     }
     case hmi_apis::FunctionID::TTS_Speak: {
@@ -149,10 +146,7 @@ void AlertManeuverRequest::on_event(const event_engine::Event& event) {
       pending_requests_.Remove(event_id);
       tts_speak_result_code_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
-      GetInfo(HmiInterfaces::HMI_INTERFACE_TTS,
-              tts_speak_result_code_,
-              message,
-              info_tts_);
+      GetInfo(message, info_tts_);
       break;
     }
     case hmi_apis::FunctionID::TTS_OnResetTimeout: {
