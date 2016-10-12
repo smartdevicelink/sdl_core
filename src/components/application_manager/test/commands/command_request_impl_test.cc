@@ -234,6 +234,9 @@ TEST_F(CommandRequestImplTest, GetMobileResultCode_SUCCESS) {
   EXPECT_EQ(
       mobile_apis::Result::GENERIC_ERROR,
       command->GetMobileResultCode(hmi_apis::Common_Result::TRUNCATED_DATA));
+
+  EXPECT_EQ(mobile_apis::Result::SAVED,
+            command->GetMobileResultCode(hmi_apis::Common_Result::SAVED));
 }
 
 TEST_F(CommandRequestImplTest, BasicMethodsOverloads_SUCCESS) {
@@ -381,8 +384,8 @@ TEST_F(CommandRequestImplTest,
 
   SharedPtr<ApplicationSet> app_set;
   MockAppPtr app(InitAppSetDataAccessor(app_set));
-  EXPECT_CALL(*app, app_id()).Times(2).WillRepeatedly(Return(kConnectionKey));
-  EXPECT_CALL(*app, policy_app_id()).WillOnce(Return(kPolicyAppId));
+  ON_CALL(*app, app_id()).WillByDefault(Return(kConnectionKey));
+  ON_CALL(*app, policy_app_id()).WillByDefault(Return(kPolicyAppId));
   EXPECT_CALL(*app, hmi_level())
       .WillOnce(Return(mobile_apis::HMILevel::HMI_NONE));
 
@@ -395,6 +398,37 @@ TEST_F(CommandRequestImplTest,
       .WillOnce(Return(dummy_msg));
   EXPECT_CALL(mock_app_manager_, SendMessageToMobile(_, _));
   EXPECT_FALSE(command->CheckPermissions());
+}
+
+TEST_F(CommandRequestImplTest,
+       CheckAllowedParameters_RemoveDisallowedParameters_SUCCESS) {
+  MessageSharedPtr msg = CreateMessage();
+  (*msg)[strings::params][strings::connection_key] = kConnectionKey;
+  (*msg)[strings::msg_params] = 0u;
+
+  CommandPtr command = CreateCommand<UCommandRequestImpl>(msg);
+
+  command->parameters_permissions().allowed_params.push_back(kAllowedParam);
+
+  SharedPtr<ApplicationSet> app_set;
+  MockAppPtr app(InitAppSetDataAccessor(app_set));
+  ON_CALL(*app, app_id()).WillByDefault(Return(kConnectionKey));
+  ON_CALL(*app, policy_app_id()).WillByDefault(Return(kPolicyAppId));
+  EXPECT_CALL(*app, hmi_level())
+      .WillOnce(Return(mobile_apis::HMILevel::HMI_NONE));
+
+  EXPECT_CALL(mock_app_manager_, CheckPolicyPermissions(_, _, _, _, _))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
+
+  EXPECT_CALL(*mock_message_helper_,
+              CreateBlockedByPoliciesResponse(_, _, _, _)).Times(0);
+  EXPECT_CALL(mock_app_manager_, SendMessageToMobile(_, _)).Times(0);
+
+  am::VehicleData vehicle_data;
+  vehicle_data.insert(std::make_pair(std::string("vehicle_data"), am::GPS));
+  EXPECT_CALL(*mock_message_helper_, vehicle_data())
+      .WillOnce(ReturnRef(vehicle_data));
+  EXPECT_TRUE(command->CheckPermissions());
 }
 
 ACTION_P(GetArg3, output) {
@@ -410,8 +444,8 @@ TEST_F(CommandRequestImplTest, CheckAllowedParameters_MsgParamsMap_SUCCESS) {
 
   SharedPtr<ApplicationSet> app_set;
   MockAppPtr app(InitAppSetDataAccessor(app_set));
-  EXPECT_CALL(*app, app_id()).WillOnce(Return(kConnectionKey));
-  EXPECT_CALL(*app, policy_app_id()).WillOnce(Return(kPolicyAppId));
+  ON_CALL(*app, app_id()).WillByDefault(Return(kConnectionKey));
+  ON_CALL(*app, policy_app_id()).WillByDefault(Return(kPolicyAppId));
   EXPECT_CALL(*app, hmi_level())
       .WillOnce(Return(mobile_apis::HMILevel::HMI_NONE));
 
@@ -477,27 +511,24 @@ TEST_F(CommandRequestImplTest, SendResponse_SUCCESS) {
 
 TEST_F(CommandRequestImplTest,
        SendResponse_AddDisallowedParametersToInfo_SUCCESS) {
-  am::VehicleData vehicle_data;
-  vehicle_data.insert(am::VehicleData::value_type(kDisallowedParam1,
-                                                  am::VehicleDataType::MYKEY));
-
-  EXPECT_CALL(*mock_message_helper_, vehicle_data())
-      .WillOnce(ReturnRef(vehicle_data));
-
   MessageSharedPtr msg = CreateMessage();
   (*msg)[strings::params][strings::function_id] =
-      mobile_apis::FunctionID::SubscribeVehicleDataID;
+      mobile_apis::FunctionID::GetVehicleDataID;
+  (*msg)[strings::params][strings::correlation_id] = kCorrelationId;
+  (*msg)[strings::params][strings::connection_key] = kConnectionKey;
 
   CommandPtr command = CreateCommand<UCommandRequestImpl>(msg);
 
   command->removed_parameters_permissions().disallowed_params.push_back(
       kDisallowedParam1);
+  command->removed_parameters_permissions().undefined_params.push_back(
+      kUndefinedParam);
 
   MessageSharedPtr result;
   EXPECT_CALL(mock_app_manager_, ManageMobileCommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
-  command->SendResponse(true, kMobResultSuccess, NULL, NULL);
+  command->SendResponse(true, kMobResultSuccess, "info", NULL);
 
   EXPECT_EQ(RequestState::kCompleted, command->current_state());
 

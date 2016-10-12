@@ -89,8 +89,6 @@ const std::string kSecondImage = "second_image";
 const std::string kVrCommands1 = "vr_commands_1";
 const std::string kVrCommands2 = "vr_commands_2";
 const std::string kMenuName = "menu_name";
-
-static application_manager::MockMessageHelper* message_helper_mock_;
 }  // namespace
 
 class CreateInteractionChoiceSetRequestTest
@@ -102,6 +100,7 @@ class CreateInteractionChoiceSetRequestTest
     command_ = CreateCommand<CreateInteractionChoiceSetRequest>(message_);
     app_ = CreateMockApp();
   }
+  am::MockMessageHelper* message_helper_mock_;
   CreateInteractionChoiceSetRequestPtr command_;
   MessageSharedPtr message_;
   MockAppPtr app_;
@@ -524,6 +523,95 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
   command_->onTimeOut();
 }
 
+TEST_F(CreateInteractionChoiceSetRequestTest, OnTimeOut_InvalidApp_UNSUCCESS) {
+  (*message_)[am::strings::params][am::strings::correlation_id] =
+      kCorrelationId;
+  (*message_)[am::strings::params][am::strings::connection_key] =
+      kConnectionKey;
+  (*message_)[am::strings::params][am::hmi_response::code] =
+      hmi_apis::Common_Result::eType::INVALID_ENUM;
+
+  FillMessageFieldsItem1(message_);
+  (*message_)[am::strings::msg_params][am::strings::interaction_choice_set_id] =
+      kChoiceSetId;
+
+  EXPECT_CALL(mock_app_manager_, application(_)).WillRepeatedly(Return(app_));
+
+  EXPECT_CALL(*message_helper_mock_, VerifyImage(_, _, _))
+      .WillRepeatedly(Return(mobile_apis::Result::SUCCESS));
+
+  smart_objects::SmartObject* choice_set_id = NULL;
+  EXPECT_CALL(*app_, FindChoiceSet(kChoiceSetId))
+      .WillOnce(Return(choice_set_id));
+
+  EXPECT_CALL(mock_app_manager_, GenerateGrammarID())
+      .WillOnce(Return(kGrammarId));
+  EXPECT_CALL(*app_, AddChoiceSet(kChoiceSetId, _));
+  ON_CALL(mock_app_manager_, GetNextHMICorrelationID())
+      .WillByDefault(Return(kCorrelationId));
+  command_->Run();
+
+  FillMessageFieldsItem2(message_);
+  EXPECT_CALL(mock_app_manager_, updateRequestTimeout(_, _, _)).Times(0);
+  EXPECT_CALL(mock_app_manager_, TerminateRequest(_, _)).Times(2);
+  Event event(hmi_apis::FunctionID::VR_AddCommand);
+  event.set_smart_object(*message_);
+  command_->on_event(event);
+
+  MockAppPtr invalid_app;
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillOnce(Return(invalid_app));
+  EXPECT_CALL(*app_, RemoveChoiceSet(_)).Times(0);
+  command_->onTimeOut();
+}
+
+TEST_F(CreateInteractionChoiceSetRequestTest,
+       OnTimeOut_SuccessfulResponseReceived_UNSUCCESS) {
+  (*message_)[am::strings::params][am::strings::correlation_id] =
+      kCorrelationId;
+  (*message_)[am::strings::params][am::strings::connection_key] =
+      kConnectionKey;
+  (*message_)[am::strings::params][am::hmi_response::code] =
+      hmi_apis::Common_Result::eType::SUCCESS;
+
+  FillMessageFieldsItem1(message_);
+  (*message_)[am::strings::msg_params][am::strings::interaction_choice_set_id] =
+      kChoiceSetId;
+
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillOnce(Return(app_));
+
+  EXPECT_CALL(*message_helper_mock_, VerifyImage(_, _, _))
+      .WillRepeatedly(Return(mobile_apis::Result::SUCCESS));
+
+  smart_objects::SmartObject* choice_set_id = NULL;
+  EXPECT_CALL(*app_, FindChoiceSet(kChoiceSetId))
+      .WillOnce(Return(choice_set_id));
+
+  EXPECT_CALL(mock_app_manager_, GenerateGrammarID())
+      .WillOnce(Return(kGrammarId));
+  EXPECT_CALL(*app_, AddChoiceSet(kChoiceSetId, _));
+  ON_CALL(mock_app_manager_, GetNextHMICorrelationID())
+      .WillByDefault(Return(kCorrelationId));
+  command_->Run();
+
+  FillMessageFieldsItem2(message_);
+  EXPECT_CALL(mock_app_manager_, updateRequestTimeout(_, _, _)).Times(0);
+  EXPECT_CALL(mock_app_manager_, TerminateRequest(_, _));
+  Event event(hmi_apis::FunctionID::VR_AddCommand);
+  event.set_smart_object(*message_);
+
+  MockAppPtr invalid_app;
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillOnce(Return(invalid_app));
+  command_->on_event(event);
+
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillOnce(Return(app_));
+  EXPECT_CALL(*app_, RemoveChoiceSet(_));
+  command_->onTimeOut();
+}
+
 TEST_F(CreateInteractionChoiceSetResponseTest, Run_SuccessFalse_UNSUCCESS) {
   MessageSharedPtr message(CreateMessage());
   (*message)[am::strings::msg_params][am::strings::success] = false;
@@ -546,6 +634,47 @@ TEST_F(CreateInteractionChoiceSetResponseTest, Run_SuccessTrue_SUCCESS) {
 
   EXPECT_CALL(mock_app_manager_, SendMessageToMobile(message, false));
   command->Run();
+}
+
+TEST_F(CreateInteractionChoiceSetRequestTest, Run_ErrorFromHmiFalse_UNSUCCESS) {
+  Event event(hmi_apis::FunctionID::VR_AddCommand);
+
+  (*message_)[am::strings::params][am::strings::correlation_id] =
+      kCorrelationId;
+  (*message_)[am::strings::params][am::hmi_response::code] =
+      hmi_apis::Common_Result::GENERIC_ERROR;
+
+  FillMessageFieldsItem1(message_);
+
+  (*message_)[am::strings::msg_params][am::strings::interaction_choice_set_id] =
+      kChoiceSetId;
+  ON_CALL(mock_app_manager_, application(_)).WillByDefault(Return(app_));
+
+  EXPECT_CALL(*message_helper_mock_, VerifyImage(_, _, _))
+      .WillRepeatedly(Return(mobile_apis::Result::GENERIC_ERROR));
+
+  smart_objects::SmartObject* choice_set_id = NULL;
+  EXPECT_CALL(*app_, FindChoiceSet(kChoiceSetId))
+      .WillRepeatedly(Return(choice_set_id));
+
+  EXPECT_CALL(mock_app_manager_, GenerateGrammarID())
+      .WillRepeatedly(Return(kGrammarId));
+  EXPECT_CALL(*app_, AddChoiceSet(kChoiceSetId, _)).Times(2);
+  ON_CALL(mock_app_manager_, GetNextHMICorrelationID())
+      .WillByDefault(Return(kCorrelationId));
+  command_->Run();
+
+  FillMessageFieldsItem2(message_);
+
+  EXPECT_CALL(mock_app_manager_,
+              ManageMobileCommand(
+                  MobileResultCodeIs(mobile_apis::Result::GENERIC_ERROR),
+                  am::commands::Command::ORIGIN_SDL));
+  EXPECT_CALL(mock_app_manager_, updateRequestTimeout(_, _, _)).Times(0);
+  EXPECT_CALL(mock_app_manager_, TerminateRequest(_, _));
+  event.set_smart_object(*message_);
+  command_->on_event(event);
+  command_->Run();
 }
 
 }  // namespace create_interaction_choice_set
