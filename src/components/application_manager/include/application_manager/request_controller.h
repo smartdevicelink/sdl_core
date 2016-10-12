@@ -139,11 +139,13 @@ class RequestController {
   *
   * @param correlation_id Active request correlation ID,
   * @param connection_key Active request connection key (0 for HMI requersts)
+  * @param function_id Active request  function id
   * @param force_terminate if true, request controller will terminate
   * even if not allowed by request
   */
-  void terminateRequest(const uint32_t& correlation_id,
-                        const uint32_t& connection_key,
+  void TerminateRequest(const uint32_t correlation_id,
+                        const uint32_t connection_key,
+                        const int32_t function_id,
                         bool force_terminate = false);
 
   /**
@@ -152,8 +154,9 @@ class RequestController {
   * @param mobile_correlation_id Active mobile request correlation ID
   *
   */
-  void OnMobileResponse(const uint32_t& mobile_correlation_id,
-                        const uint32_t& connection_key);
+  void OnMobileResponse(const uint32_t mobile_correlation_id,
+                        const uint32_t connection_key,
+                        const int32_t function_id);
 
   /**
   * @brief Removes request from queue
@@ -161,7 +164,7 @@ class RequestController {
   * @param mobile_correlation_id Active mobile request correlation ID
   *
   */
-  void OnHMIResponse(const uint32_t& correlation_id);
+  void OnHMIResponse(const uint32_t correlation_id, const int32_t function_id);
 
   /**
   * @ Add notification to collection

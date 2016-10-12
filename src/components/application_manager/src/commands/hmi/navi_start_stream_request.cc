@@ -129,7 +129,8 @@ void NaviStartStreamRequest::on_event(const event_engine::Event& event) {
 void NaviStartStreamRequest::onTimeOut() {
   RetryStartSession();
 
-  application_manager_.TerminateRequest(connection_key(), correlation_id());
+  application_manager_.TerminateRequest(
+      connection_key(), correlation_id(), function_id());
 }
 
 void NaviStartStreamRequest::RetryStartSession() {

@@ -403,7 +403,8 @@ void UnsubscribeVehicleDataRequest::UpdateHash() const {
                   "Application with connection_key = " << connection_key()
                                                        << " doesn't exist.");
   }
-  application_manager_.TerminateRequest(connection_key(), correlation_id());
+  application_manager_.TerminateRequest(
+      connection_key(), correlation_id(), function_id());
 }
 
 }  // namespace commands
