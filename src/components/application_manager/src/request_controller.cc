@@ -227,7 +227,7 @@ void RequestController::removeNotification(
   LOG4CXX_DEBUG(logger_, "Cant find notification");
 }
 
-void RequestController::terminateRequest(const uint32_t correlation_id,
+void RequestController::TerminateRequest(const uint32_t correlation_id,
                                          const uint32_t connection_key,
                                          const int32_t function_id,
                                          bool force_terminate) {
@@ -240,11 +240,11 @@ void RequestController::terminateRequest(const uint32_t correlation_id,
   RequestInfoPtr request =
       waiting_for_response_.Find(connection_key, correlation_id);
   if (!request) {
-    LOG4CXX_WARN(logger_, "Request not found in waiting_for_response");
+    LOG4CXX_WARN(logger_, "Request was not found in waiting_for_response");
     return;
   }
   if (request->request()->function_id() != function_id) {
-    LOG4CXX_ERROR(logger_, "Request and response funciton_id's does not match");
+    LOG4CXX_ERROR(logger_, "Request and response function_id's don't match");
     return;
   }
   if (force_terminate || request->request()->AllowedToTerminate()) {
@@ -259,13 +259,13 @@ void RequestController::OnMobileResponse(const uint32_t mobile_correlation_id,
                                          const uint32_t connection_key,
                                          const int32_t function_id) {
   LOG4CXX_AUTO_TRACE(logger_);
-  terminateRequest(mobile_correlation_id, connection_key, function_id);
+  TerminateRequest(mobile_correlation_id, connection_key, function_id);
 }
 
 void RequestController::OnHMIResponse(const uint32_t correlation_id,
                                       const int32_t function_id) {
   LOG4CXX_AUTO_TRACE(logger_);
-  terminateRequest(correlation_id, RequestInfo::HmiConnectoinKey, function_id);
+  TerminateRequest(correlation_id, RequestInfo::HmiConnectoinKey, function_id);
 }
 
 void RequestController::terminateWaitingForExecutionAppRequests(
