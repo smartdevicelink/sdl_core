@@ -935,7 +935,8 @@ void PerformInteractionRequest::SendBothModeResponse(
       PrepareResultCodeForResponse(ui_perform_info, vr_perform_info);
   const smart_objects::SmartObject* response_params =
       msg_param.empty() ? NULL : &msg_param;
-  std::string info = MergeInfos(ui_info_, vr_info_);
+  std::string info =
+      MergeInfos(ui_perform_info, ui_info_, vr_perform_info, vr_info_);
   DisablePerformInteraction();
   SendResponse(result,
                perform_interaction_result_code,
