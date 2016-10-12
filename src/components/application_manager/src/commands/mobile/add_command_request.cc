@@ -553,10 +553,10 @@ const std::string AddCommandRequest::GenerateMobileResponseInfo() {
 
   HmiInterfaces& hmi_interfaces = application_manager_.hmi_interfaces();
   HmiInterfaces::InterfaceState ui_interface_state =
-  hmi_interfaces.GetInterfaceState(HmiInterfaces::HMI_INTERFACE_UI);
+      hmi_interfaces.GetInterfaceState(HmiInterfaces::HMI_INTERFACE_UI);
 
   HmiInterfaces::InterfaceState vr_interface_state =
-  hmi_interfaces.GetInterfaceState(HmiInterfaces::HMI_INTERFACE_VR);
+      hmi_interfaces.GetInterfaceState(HmiInterfaces::HMI_INTERFACE_VR);
 
   if ((ui_interface_state == HmiInterfaces::STATE_NOT_AVAILABLE) &&
       (vr_interface_state != HmiInterfaces::STATE_NOT_AVAILABLE) &&
