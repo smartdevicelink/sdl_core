@@ -646,7 +646,8 @@ TEST_F(SetGlobalPropertiesRequestTest, Run_TTSIncorrectSyntax_Canceled) {
 TEST_F(SetGlobalPropertiesRequestTest, Run_InvalidHelpPromptText_INVALID_DATA) {
   MessageSharedPtr msg = CreateMsgParams();
   SmartObject help_prompt(smart_objects::SmartType_Array);
-  help_prompt[0][strings::text] = "help_prompt\\n";
+  help_prompt[0][strings::text] =
+      "invalid help prompt text with empty line in the end\\n";
   (*msg)[strings::msg_params][strings::help_prompt] = help_prompt;
 
   ExpectVerifyImageVrHelpUnsuccess();
@@ -663,7 +664,8 @@ TEST_F(SetGlobalPropertiesRequestTest, Run_InvalidHelpPromptText_INVALID_DATA) {
 TEST_F(SetGlobalPropertiesRequestTest, Run_InvalidVrHelpText_INVALID_DATA) {
   MessageSharedPtr msg = CreateMsgParams();
   SmartObject vr_help(smart_objects::SmartType_Array);
-  vr_help[0][strings::text] = "vr_help\\n";
+  vr_help[0][strings::text] =
+      "invalid vr_help text with empty line in the end\\n";
   (*msg)[strings::msg_params][strings::vr_help] = vr_help;
 
   ExpectVerifyImageVrHelpSuccess(vr_help);
@@ -681,7 +683,8 @@ TEST_F(SetGlobalPropertiesRequestTest, Run_InvalidImageValue_INVALID_DATA) {
   MessageSharedPtr msg = CreateMsgParams();
   SmartObject vr_help(smart_objects::SmartType_Array);
   vr_help[0][strings::text] = "vr_help";
-  vr_help[0][strings::image][strings::value] = "value\\n";
+  vr_help[0][strings::image][strings::value] =
+      "invalid value text with empty line in the end\\n";
   (*msg)[strings::msg_params][strings::vr_help] = vr_help;
 
   ExpectVerifyImageVrHelpSuccess(vr_help);
@@ -698,7 +701,8 @@ TEST_F(SetGlobalPropertiesRequestTest, Run_InvalidImageValue_INVALID_DATA) {
 TEST_F(SetGlobalPropertiesRequestTest, Run_InvalidMenuIcon_INVALID_DATA) {
   MessageSharedPtr msg = CreateMsgParams();
   SmartObject menu_icon(smart_objects::SmartType_Array);
-  menu_icon[strings::value] = "meun_icon\\n";
+  menu_icon[strings::value] =
+      "invalid menu icon text with empty line in the end\\n";
   (*msg)[strings::msg_params][strings::menu_icon] = menu_icon;
 
   ExpectVerifyImageSuccess(menu_icon);
@@ -715,7 +719,7 @@ TEST_F(SetGlobalPropertiesRequestTest, Run_InvalidMenuIcon_INVALID_DATA) {
 TEST_F(SetGlobalPropertiesRequestTest, Run_InvalidMenuTitle_INVALID_DATA) {
   MessageSharedPtr msg = CreateMsgParams();
   SmartObject menu_title(smart_objects::SmartType_Array);
-  menu_title = "menu_title\\n";
+  menu_title = "invalid menu title text with empty line in the end\\n";
   (*msg)[strings::msg_params][strings::menu_title] = menu_title;
 
   ExpectVerifyImageVrHelpUnsuccess();
@@ -733,7 +737,8 @@ TEST_F(SetGlobalPropertiesRequestTest,
        Run_InvalidLimitedCharacterList_INVALID_DATA) {
   MessageSharedPtr msg = CreateMsgParams();
   SmartObject limited_character_list(smart_objects::SmartType_Array);
-  limited_character_list[0] = "limited_character_list\\n";
+  limited_character_list[0] =
+      "invalid limited character list text with empty line in the end\\n";
   (*msg)[strings::msg_params][strings::keyboard_properties]
         [strings::limited_character_list] = limited_character_list;
 
@@ -752,7 +757,8 @@ TEST_F(SetGlobalPropertiesRequestTest,
        Run_InvalidAutoCompleteText_INVALID_DATA) {
   MessageSharedPtr msg = CreateMsgParams();
   SmartObject auto_complete_text(smart_objects::SmartType_Array);
-  auto_complete_text = "auto_complete_text\\n";
+  auto_complete_text =
+      "invalid auto completetext with empty line in the end\\n";
   (*msg)[strings::msg_params][strings::keyboard_properties]
         [strings::auto_complete_text] = auto_complete_text;
 

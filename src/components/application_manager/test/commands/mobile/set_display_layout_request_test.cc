@@ -87,10 +87,10 @@ TEST_F(SetDisplayLayoutRequestTest, Run_InvalidApp_UNSUCCESS) {
   EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
       .WillOnce(Return(invalid_mock_app));
 
-  EXPECT_CALL(
-      mock_app_manager_,
-      ManageMobileCommand(
-          MobileResultCodeIs(mobile_result::APPLICATION_NOT_REGISTERED), _));
+  EXPECT_CALL(mock_app_manager_,
+              ManageMobileCommand(
+                  MobileResultCodeIs(mobile_result::APPLICATION_NOT_REGISTERED),
+                  am::commands::Command::CommandOrigin::ORIGIN_SDL));
 
   command->Run();
 }
@@ -148,7 +148,8 @@ TEST_F(SetDisplayLayoutRequestTest, OnEvent_SUCCESS) {
 
   EXPECT_CALL(
       mock_app_manager_,
-      ManageMobileCommand(MobileResultCodeIs(mobile_result::SUCCESS), _));
+      ManageMobileCommand(MobileResultCodeIs(mobile_result::SUCCESS),
+                          am::commands::Command::CommandOrigin::ORIGIN_SDL));
 
   command->on_event(event);
 }

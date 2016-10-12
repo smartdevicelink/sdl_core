@@ -78,8 +78,8 @@ class SetIconRequestTest
         .WillByDefault(ReturnRef(mock_app_manager_settings_));
   }
   void TearDown() OVERRIDE {
-    if (file_system::FileExists("./" + kFileName)) {
-      EXPECT_TRUE(file_system::DeleteFile("./" + kFileName));
+    if (file_system::FileExists(kFileName)) {
+      EXPECT_TRUE(file_system::DeleteFile(kFileName));
     }
   }
 };
@@ -92,10 +92,10 @@ TEST_F(SetIconRequestTest, Run_InvalidApp_UNSUCCESS) {
   EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
       .WillOnce(Return(invalid_mock_app));
 
-  EXPECT_CALL(
-      mock_app_manager_,
-      ManageMobileCommand(
-          MobileResultCodeIs(mobile_result::APPLICATION_NOT_REGISTERED), _));
+  EXPECT_CALL(mock_app_manager_,
+              ManageMobileCommand(
+                  MobileResultCodeIs(mobile_result::APPLICATION_NOT_REGISTERED),
+                  am::commands::Command::CommandOrigin::ORIGIN_SDL));
 
   command->Run();
 }
