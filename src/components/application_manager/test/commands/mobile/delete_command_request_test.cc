@@ -134,10 +134,6 @@ TEST_F(DeleteCommandRequestTest, OnEvent_VrDeleteCommand_UNSUPPORTED_RESOURCE) {
   Event event_vr(hmi_apis::FunctionID::VR_DeleteCommand);
   event_vr.set_smart_object(*event_msg);
 
-  EXPECT_CALL(*app, RemoveCommand(kCommandId));
-
-  EXPECT_CALL(*app, UpdateHash());
-
   MessageSharedPtr result_msg(
       CatchMobileCommandResult(CallOnEvent(*command, event_vr)));
 
@@ -145,7 +141,7 @@ TEST_F(DeleteCommandRequestTest, OnEvent_VrDeleteCommand_UNSUPPORTED_RESOURCE) {
 
   EXPECT_EQ(
       (*result_msg)[am::strings::msg_params][am::strings::success].asBool(),
-      true);
+      false);
   EXPECT_EQ(
       hmi_apis::Common_Result::UNSUPPORTED_RESOURCE,
       (*result_msg)[am::strings::msg_params][am::strings::result_code].asInt());
