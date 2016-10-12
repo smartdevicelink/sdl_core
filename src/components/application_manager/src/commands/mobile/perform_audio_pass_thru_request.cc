@@ -203,11 +203,13 @@ bool PerformAudioPassThruRequest::PrepareResponseParameters(
       HmiInterfaces::STATE_AVAILABLE == tts_perform_info.interface_state) {
     result_code = mobile_apis::Result::WARNINGS;
     tts_info_ = "Unsupported phoneme type sent in a prompt";
-    info = MergeInfos(ui_info_, tts_info_);
+    info = MergeInfos(ui_perform_info, ui_info_,
+                      tts_perform_info, tts_info_);
     return result;
   }
   result_code = PrepareResultCodeForResponse(ui_perform_info, tts_perform_info);
-  info = MergeInfos(ui_info_, tts_info_);
+  info = MergeInfos(ui_perform_info, ui_info_,
+                    tts_perform_info, tts_info_);
   return result;
 }
 

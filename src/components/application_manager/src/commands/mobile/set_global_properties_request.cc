@@ -292,12 +292,12 @@ bool SetGlobalPropertiesRequest::PrepareResponseParameters(
       (tts_properties_info.is_unsupported_resource)) {
     result_code = mobile_apis::Result::WARNINGS;
     tts_response_info_ = "Unsupported phoneme type sent in a prompt";
-    info = MergeInfos(tts_response_info_, ui_response_info_);
+    info = MergeInfos(tts_properties_info, tts_response_info_,
+                      ui_properties_info, ui_response_info_);
     return result;
   }
   result_code =
       PrepareResultCodeForResponse(ui_properties_info, tts_properties_info);
-
   info = MergeInfos(tts_properties_info,
                     tts_response_info_,
                     ui_properties_info,

@@ -224,11 +224,13 @@ bool AlertRequest::PrepareResponseParameters(
       tts_alert_info.is_unsupported_resource &&
       HmiInterfaces::STATE_AVAILABLE == tts_alert_info.interface_state) {
     tts_response_info_ = "Unsupported phoneme type sent in a prompt";
-    info = MergeInfos(ui_response_info_, tts_response_info_);
+    info = MergeInfos(ui_alert_info, ui_response_info_,
+                      tts_alert_info, tts_response_info_);
     return result;
   }
   result_code = PrepareResultCodeForResponse(ui_alert_info, tts_alert_info);
-  info = MergeInfos(ui_response_info_, tts_response_info_);
+  info = MergeInfos(ui_alert_info, ui_response_info_,
+                    tts_alert_info, tts_response_info_);
   return result;
 }
 

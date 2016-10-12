@@ -551,7 +551,7 @@ const std::string AddCommandRequest::GenerateMobileResponseInfo() {
   // first place
   // Other way order is doesn't matter
 
-  HmiInterfaces hmi_interfaces = application_manager_.hmi_interfaces();
+  HmiInterfaces& hmi_interfaces = application_manager_.hmi_interfaces();
   HmiInterfaces::InterfaceState ui_interface_state =
   hmi_interfaces.GetInterfaceState(HmiInterfaces::HMI_INTERFACE_UI);
 
