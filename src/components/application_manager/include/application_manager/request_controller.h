@@ -139,6 +139,7 @@ class RequestController {
   *
   * @param correlation_id Active request correlation ID,
   * @param connection_key Active request connection key (0 for HMI requersts)
+  * @param function_id Active request  function id
   * @param force_terminate if true, request controller will terminate
   * even if not allowed by request
   */

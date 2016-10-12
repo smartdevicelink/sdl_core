@@ -711,6 +711,7 @@ class ApplicationManagerImpl
    * @brief TerminateRequest forces termination of request
    * @param connection_key - application id of request
    * @param corr_id correlation id of request
+   * @param function_id function id of request
    */
   void TerminateRequest(const uint32_t connection_key,
                         const uint32_t corr_id,
