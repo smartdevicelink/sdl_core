@@ -550,12 +550,26 @@ const std::string AddCommandRequest::GenerateMobileResponseInfo() {
   // In case if ui_result_ is UNSUPPORTED_RESOURCE ui_info should be on the
   // first place
   // Other way order is doesn't matter
-  if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == vr_result_) {
-    return MergeInfos(vr_info_, ui_info_);
+
+  HmiInterfaces hmi_interfaces = application_manager_.hmi_interfaces();
+  HmiInterfaces::InterfaceState ui_interface_state =
+  hmi_interfaces.GetInterfaceState(HmiInterfaces::HMI_INTERFACE_UI);
+
+  HmiInterfaces::InterfaceState vr_interface_state =
+  hmi_interfaces.GetInterfaceState(HmiInterfaces::HMI_INTERFACE_VR);
+
+  if ((ui_interface_state == HmiInterfaces::STATE_NOT_AVAILABLE) &&
+      (vr_interface_state != HmiInterfaces::STATE_NOT_AVAILABLE) &&
+      !vr_info_.empty()) {
+    return vr_info_;
   }
-  if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == ui_result_) {
-    return MergeInfos(ui_info_, vr_info_);
+
+  if ((vr_interface_state == HmiInterfaces::STATE_NOT_AVAILABLE) &&
+      (ui_interface_state != HmiInterfaces::STATE_NOT_AVAILABLE) &&
+      !ui_info_.empty()) {
+    return ui_info_;
   }
+
   return MergeInfos(ui_info_, vr_info_);
 }
 
