@@ -195,6 +195,12 @@ TEST_F(ChangeRegistrationRequestTest, OnEvent_VR_UNSUPPORTED_RESOURCE) {
       hmi_apis::FunctionID::TTS_ChangeRegistration);
   event_tts.set_smart_object(*tts_response);
 
+  MockHmiInterfaces hmi_interfaces;
+  EXPECT_CALL(app_mngr_, hmi_interfaces())
+      .WillRepeatedly(ReturnRef(hmi_interfaces));
+  EXPECT_CALL(hmi_interfaces, GetInterfaceState(_))
+      .WillRepeatedly(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
+
   MessageSharedPtr response_to_mobile;
 
   EXPECT_CALL(
@@ -208,7 +214,7 @@ TEST_F(ChangeRegistrationRequestTest, OnEvent_VR_UNSUPPORTED_RESOURCE) {
 
   EXPECT_EQ(
       (*response_to_mobile)[strings::msg_params][strings::success].asBool(),
-      true);
+      false);
   EXPECT_EQ(
       (*response_to_mobile)[strings::msg_params][strings::result_code].asInt(),
       static_cast<int32_t>(mobile_apis::Result::UNSUPPORTED_RESOURCE));

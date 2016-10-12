@@ -241,6 +241,15 @@ void CheckInfo(std::string& str) {
     str.clear();
   }
 }
+
+bool CheckResultCode(const ResponseInfo& first, const ResponseInfo& second) {
+  if (first.is_ok && second.is_unsupported_resource &&
+      second.interface_state == HmiInterfaces::STATE_NOT_AVAILABLE) {
+    return true;
+  }
+  return false;
+}
+
 }  // namespace
 
 bool ChangeRegistrationRequest::PrepareResponseParameters(
@@ -288,8 +297,19 @@ bool ChangeRegistrationRequest::PrepareResponseParameters(
   const HmiInterfaces::InterfaceState tts_state =
       hmi_interfaces.GetInterfaceState(
           HmiInterfaces::InterfaceID::HMI_INTERFACE_TTS);
-  const bool tts_state_is_generated =
-      tts_state == HmiInterfaces::STATE_NOT_AVAILABLE;
+  const HmiInterfaces::InterfaceState vr_state =
+      hmi_interfaces.GetInterfaceState(
+          HmiInterfaces::InterfaceID::HMI_INTERFACE_VR);
+  const HmiInterfaces::InterfaceState ui_state =
+      hmi_interfaces.GetInterfaceState(
+          HmiInterfaces::InterfaceID::HMI_INTERFACE_UI);
+
+  ResponseInfo ui_properties_info(ui_result_, HmiInterfaces::HMI_INTERFACE_UI);
+
+  ResponseInfo tts_properties_info(tts_result_,
+                                   HmiInterfaces::HMI_INTERFACE_TTS);
+
+  ResponseInfo vr_properties_info(ui_result_, HmiInterfaces::HMI_INTERFACE_VR);
 
   bool result = ((!is_tts_ui_vr_unsupported) && is_tts_succeeded_unsupported &&
                  is_ui_succeeded_unsupported && is_vr_succeeded_unsupported);
@@ -303,7 +323,8 @@ bool ChangeRegistrationRequest::PrepareResponseParameters(
 
   if ((result && is_tts_or_ui_or_vr_unsupported)) {
     result_code = mobile_apis::Result::UNSUPPORTED_RESOURCE;
-    result = tts_state_is_generated & !is_tts_or_ui_or_vr_unsupported;
+    result = CheckResultCode(ui_properties_info, tts_properties_info) ||
+             CheckResultCode(tts_properties_info, vr_properties_info);
   } else {
     // If response contains erroneous result code SDL need return erroneus
     // result code.
@@ -326,9 +347,26 @@ bool ChangeRegistrationRequest::PrepareResponseParameters(
         std::max(std::max(ui_result, vr_result), tts_result));
   }
 
-  CheckInfo(ui_response_info_);
-  CheckInfo(vr_response_info_);
-  CheckInfo(tts_response_info_);
+  const bool is_tts_state_available =
+      tts_state == HmiInterfaces::STATE_AVAILABLE;
+  const bool is_vr_state_available = vr_state == HmiInterfaces::STATE_AVAILABLE;
+  const bool is_ui_state_available = ui_state == HmiInterfaces::STATE_AVAILABLE;
+
+  const bool is_tts_hmi_info =
+      is_tts_state_available && !tts_response_info_.empty();
+  const bool is_vr_hmi_info =
+      is_vr_state_available && !vr_response_info_.empty();
+  const bool is_ui_hmi_info =
+      is_ui_state_available && !ui_response_info_.empty();
+
+  if (is_tts_hmi_info || is_vr_hmi_info || is_ui_hmi_info) {
+    if (!is_tts_hmi_info)
+      CheckInfo(tts_response_info_);
+    if (!is_vr_hmi_info)
+      CheckInfo(ui_response_info_);
+    if (!is_ui_hmi_info)
+      CheckInfo(vr_response_info_);
+  }
 
   response_info =
       MergeInfos(ui_response_info_, vr_response_info_, tts_response_info_);
