@@ -312,11 +312,6 @@ void RegisterAppInterfaceRequest::Run() {
   SendRegisterAppInterfaceResponseToMobile();
 }
 
-void FillTTSRelatedFields(smart_objects::SmartObject& response_params,
-                          const HMICapabilities& hmi_capabilities) {
-  response_params[strings::language] = hmi_capabilities.active_tts_language();
-}
-
 void FillVRRelatedFields(smart_objects::SmartObject& response_params,
                          const HMICapabilities& hmi_capabilities) {
   response_params[strings::language] = hmi_capabilities.active_vr_language();
@@ -336,6 +331,7 @@ void FillVIRelatedFields(smart_objects::SmartObject& response_params,
 
 void FillTTSRelatedFields(smart_objects::SmartObject& response_params,
                           const HMICapabilities& hmi_capabilities) {
+  response_params[strings::language] = hmi_capabilities.active_tts_language();
   if (hmi_capabilities.speech_capabilities()) {
     response_params[strings::speech_capabilities] =
         *hmi_capabilities.speech_capabilities();
