@@ -45,6 +45,7 @@ cmake_policy(POP)
 if (EXTENDED_MEDIA_MODE)
 set(default_media_inc
 ${GSTREAMER_gst_INCLUDE_DIR}
+${GSTREAMER_gstconfig_INCLUDE_DIR}
 )
 else(EXTENDED_MEDIA_MODE)
 set(default_media_inc
