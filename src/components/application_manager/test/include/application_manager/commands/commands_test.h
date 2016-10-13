@@ -74,6 +74,8 @@ template <class MockT, bool kIsNice>
 struct IsNiceMock : public TypeIf<kIsNice, ::testing::NiceMock<MockT>, MockT> {
 };
 
+#define MOCK(Type) typename IsNiceMock<Type, kMocksAreNice>::Result
+
 // If `kIsNice` is `true` then all used mock types
 // will be wrapped by a `NiceMock`
 

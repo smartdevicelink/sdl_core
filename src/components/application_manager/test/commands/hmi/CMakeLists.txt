@@ -36,12 +36,11 @@ include_directories(
   ${COMPONENTS_DIR}/application_manager/test/include/application_manager/commands/
 )
 
-set (SOURCES
+file(GLOB SOURCES
   ${AM_SOURCE_DIR}/src/smart_object_keys.cc
   ${AM_SOURCE_DIR}/test/mock_message_helper.cc
-  ${COMMANDS_TEST_SOURCE_DIR}/hmi/vi_is_ready_request_test.cc
-  ${COMMANDS_TEST_SOURCE_DIR}/hmi/vr_is_ready_request_test.cc
-  )
+  ${COMMANDS_TEST_SOURCE_DIR}/hmi/*
+)
 
 set(LIBRARIES
   gmock
