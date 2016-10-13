@@ -47,6 +47,7 @@
 namespace test {
 namespace components {
 namespace commands_test {
+namespace perform_audio_pass_thru_request {
 
 namespace am = application_manager;
 using am::commands::PerformAudioPassThruRequest;
@@ -71,9 +72,8 @@ class PerformAudioPassThruRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
   PerformAudioPassThruRequestTest()
-      : mock_message_helper_(*MockMessageHelper::message_helper_mock()) {}
-  MockMessageHelper& mock_message_helper_;
-  sync_primitives::Lock lock_;
+      : mock_message_helper_(*MockMessageHelper::message_helper_mock())
+      , mock_app_(CreateMockApp()) {}
 
   MessageSharedPtr CreateFullParamsUISO() {
     MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
@@ -94,6 +94,34 @@ class PerformAudioPassThruRequestTest
 
     return msg;
   }
+
+  void SetUp() OVERRIDE {
+    ON_CALL(app_mngr_, application(kConnectionKey))
+        .WillByDefault(Return(mock_app_));
+    ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kConnectionKey));
+    ON_CALL(app_mngr_, hmi_interfaces())
+        .WillByDefault(ReturnRef(hmi_interfaces_));
+  }
+
+  void TearDown() OVERRIDE {
+    Mock::VerifyAndClearExpectations(&mock_message_helper_);
+  }
+
+  void ResultCommandExpectations(MessageSharedPtr msg,
+                                 const std::string& info) {
+    EXPECT_EQ((*msg)[am::strings::msg_params][am::strings::success].asBool(),
+              true);
+    EXPECT_EQ(
+        (*msg)[am::strings::msg_params][am::strings::result_code].asInt(),
+        static_cast<int32_t>(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE));
+    EXPECT_EQ((*msg)[am::strings::msg_params][am::strings::info].asString(),
+              info);
+  }
+
+  sync_primitives::Lock lock_;
+  NiceMock<MockHmiInterfaces> hmi_interfaces_;
+  MockMessageHelper& mock_message_helper_;
+  MockAppPtr mock_app_;
 };
 
 TEST_F(PerformAudioPassThruRequestTest, OnTimeout_GENERIC_ERROR) {
@@ -130,20 +158,13 @@ TEST_F(PerformAudioPassThruRequestTest, OnTimeout_GENERIC_ERROR) {
   Mock::VerifyAndClearExpectations(&mock_message_helper_);
 }
 
-TEST_F(PerformAudioPassThruRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
+TEST_F(PerformAudioPassThruRequestTest,
+       OnEvent_UIHmiSendUnsupportedResource_UNSUPPORTED_RESOURCE) {
   MessageSharedPtr msg_ui = CreateFullParamsUISO();
   (*msg_ui)[am::strings::params][am::strings::connection_key] = kConnectionKey;
 
   utils::SharedPtr<PerformAudioPassThruRequest> command =
       CreateCommand<PerformAudioPassThruRequest>(msg_ui);
-
-  MockAppPtr mock_app = CreateMockApp();
-  ON_CALL(app_mngr_, application(kConnectionKey))
-      .WillByDefault(Return(mock_app));
-  ON_CALL(*mock_app, app_id()).WillByDefault(Return(1));
-
-  ON_CALL(app_mngr_, application(kConnectionKey))
-      .WillByDefault(Return(mock_app));
 
   MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
   (*msg)[am::strings::params][am::hmi_response::code] =
@@ -153,12 +174,10 @@ TEST_F(PerformAudioPassThruRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
   Event event(hmi_apis::FunctionID::UI_PerformAudioPassThru);
   event.set_smart_object(*msg);
 
-  MockHmiInterfaces hmi_interfaces;
-  ON_CALL(app_mngr_, hmi_interfaces()).WillByDefault(ReturnRef(hmi_interfaces));
-  ON_CALL(hmi_interfaces,
+  ON_CALL(hmi_interfaces_,
           GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
-      .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
-  ON_CALL(hmi_interfaces,
+      .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_RESPONSE));
+  ON_CALL(hmi_interfaces_,
           GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_TTS))
       .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
 
@@ -171,22 +190,10 @@ TEST_F(PerformAudioPassThruRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
 
   command->on_event(event);
 
-  EXPECT_EQ((*ui_command_result)[am::strings::msg_params][am::strings::success]
-                .asBool(),
-            true);
-  EXPECT_EQ(
-      (*ui_command_result)[am::strings::msg_params][am::strings::result_code]
-          .asInt(),
-      static_cast<int32_t>(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE));
-  if ((*ui_command_result)[am::strings::msg_params].keyExists(
-          am::strings::info)) {
-    EXPECT_FALSE(
-        (*ui_command_result)[am::strings::msg_params][am::strings::info]
-            .asString()
-            .empty());
-  }
+  ResultCommandExpectations(ui_command_result, "UI is not supported by system");
 }
 
+}  // namespace perform_audio_pass_thru_request
 }  // namespace commands_test
 }  // namespace components
 }  // namespace tests

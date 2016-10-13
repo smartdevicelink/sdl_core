@@ -48,6 +48,7 @@
 namespace test {
 namespace components {
 namespace commands_test {
+namespace set_display_layout_request {
 
 namespace am = application_manager;
 using am::commands::SetDisplayLayoutRequest;
@@ -71,9 +72,8 @@ class SetDisplayLayoutRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
   SetDisplayLayoutRequestTest()
-      : mock_message_helper_(*MockMessageHelper::message_helper_mock()) {}
-  MockMessageHelper& mock_message_helper_;
-  sync_primitives::Lock lock_;
+      : mock_message_helper_(*MockMessageHelper::message_helper_mock())
+      , mock_app_(CreateMockApp()) {}
 
   MessageSharedPtr CreateFullParamsUISO() {
     MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
@@ -94,15 +94,44 @@ class SetDisplayLayoutRequestTest
 
     return msg;
   }
+
+  void SetUp() OVERRIDE {
+    ON_CALL(app_mngr_, application(kConnectionKey))
+        .WillByDefault(Return(mock_app_));
+    ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kConnectionKey));
+    ON_CALL(app_mngr_, hmi_interfaces())
+        .WillByDefault(ReturnRef(hmi_interfaces_));
+  }
+
+  void TearDown() OVERRIDE {
+    Mock::VerifyAndClearExpectations(&mock_message_helper_);
+  }
   typedef TypeIf<kMocksAreNice,
                  NiceMock<application_manager_test::MockHMICapabilities>,
                  application_manager_test::MockHMICapabilities>::Result
       MockHMICapabilities;
+
+  void ResultCommandExpectations(MessageSharedPtr msg,
+                                 const std::string& info) {
+    EXPECT_EQ((*msg)[am::strings::msg_params][am::strings::success].asBool(),
+              true);
+    EXPECT_EQ(
+        (*msg)[am::strings::msg_params][am::strings::result_code].asInt(),
+        static_cast<int32_t>(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE));
+    EXPECT_EQ((*msg)[am::strings::msg_params][am::strings::info].asString(),
+              info);
+  }
+
+  sync_primitives::Lock lock_;
+  NiceMock<MockHmiInterfaces> hmi_interfaces_;
+  MockMessageHelper& mock_message_helper_;
+  MockAppPtr mock_app_;
 };
 
 typedef SetDisplayLayoutRequestTest::MockHMICapabilities MockHMICapabilities;
 
-TEST_F(SetDisplayLayoutRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
+TEST_F(SetDisplayLayoutRequestTest,
+       OnEvent_UIHmiUnsupportedResource_UNSUPPORTED_RESOURCE) {
   MessageSharedPtr msg_ui = CreateFullParamsUISO();
   (*msg_ui)[am::strings::params][am::strings::connection_key] = kConnectionKey;
 
@@ -118,16 +147,15 @@ TEST_F(SetDisplayLayoutRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
   MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
   (*msg)[am::strings::params][am::hmi_response::code] =
       hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
-  (*msg)[am::strings::msg_params][am::strings::info] = "info1";
+  (*msg)[am::strings::msg_params][am::strings::app_id] = kConnectionKey;
 
   Event event(hmi_apis::FunctionID::UI_SetDisplayLayout);
   event.set_smart_object(*msg);
 
-  MockHmiInterfaces hmi_interfaces;
-  ON_CALL(app_mngr_, hmi_interfaces()).WillByDefault(ReturnRef(hmi_interfaces));
-  EXPECT_CALL(hmi_interfaces,
+  EXPECT_CALL(hmi_interfaces_,
               GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
-      .WillOnce(Return(am::HmiInterfaces::STATE_AVAILABLE));
+      .WillOnce(Return(am::HmiInterfaces::STATE_NOT_RESPONSE))
+      .WillOnce(Return(am::HmiInterfaces::STATE_NOT_RESPONSE));
 
   MockHMICapabilities hmi_capabilities;
   EXPECT_CALL(app_mngr_, hmi_capabilities())
@@ -144,23 +172,10 @@ TEST_F(SetDisplayLayoutRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
 
   command->on_event(event);
 
-  EXPECT_EQ((*ui_command_result)[am::strings::msg_params][am::strings::success]
-                .asBool(),
-            true);
-  EXPECT_EQ(
-      (*ui_command_result)[am::strings::msg_params][am::strings::result_code]
-          .asInt(),
-      static_cast<int32_t>(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE));
-  if ((*ui_command_result)[am::strings::msg_params].keyExists(
-          am::strings::info)) {
-    EXPECT_FALSE(
-        (*ui_command_result)[am::strings::msg_params][am::strings::info]
-            .asString()
-            .empty());
-  }
-  Mock::VerifyAndClearExpectations(&mock_message_helper_);
+  ResultCommandExpectations(ui_command_result, "UI is not supported by system");
 }
 
+}  // namespace set_display_layout_request
 }  // namespace commands_test
 }  // namespace components
 }  // namespace tests

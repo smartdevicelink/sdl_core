@@ -47,6 +47,7 @@
 namespace test {
 namespace components {
 namespace commands_test {
+namespace set_global_properties_request {
 
 namespace am = application_manager;
 using am::commands::SetGlobalPropertiesRequest;
@@ -56,6 +57,7 @@ using am::MockMessageHelper;
 using am::MockHmiInterfaces;
 using ::utils::SharedPtr;
 using ::testing::_;
+using ::testing::Mock;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
@@ -69,7 +71,9 @@ const uint32_t kConnectionKey = 2u;
 class SetGlobalPropertiesRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
-  sync_primitives::Lock lock_;
+  SetGlobalPropertiesRequestTest()
+      : mock_message_helper_(*MockMessageHelper::message_helper_mock())
+      , mock_app_(CreateMockApp()) {}
 
   MessageSharedPtr CreateFullParamsUISO() {
     MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
@@ -94,38 +98,73 @@ class SetGlobalPropertiesRequestTest
 
     return msg;
   }
+
+  void SetUp() OVERRIDE {
+    ON_CALL(app_mngr_, application(kConnectionKey))
+        .WillByDefault(Return(mock_app_));
+    ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kConnectionKey));
+    ON_CALL(app_mngr_, hmi_interfaces())
+        .WillByDefault(ReturnRef(hmi_interfaces_));
+  }
+
+  void TearDown() OVERRIDE {
+    Mock::VerifyAndClearExpectations(&mock_message_helper_);
+  }
+
+  void ResultCommandExpectations(MessageSharedPtr msg,
+                                 const std::string& info) {
+    EXPECT_EQ((*msg)[am::strings::msg_params][am::strings::success].asBool(),
+              true);
+    EXPECT_EQ(
+        (*msg)[am::strings::msg_params][am::strings::result_code].asInt(),
+        static_cast<int32_t>(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE));
+    EXPECT_EQ((*msg)[am::strings::msg_params][am::strings::info].asString(),
+              info);
+  }
+
+  void ExpectationsHmiInterface_Run() {
+    EXPECT_CALL(
+        hmi_interfaces_,
+        GetInterfaceFromFunction(hmi_apis::FunctionID::UI_SetGlobalProperties))
+        .WillOnce(Return(am::HmiInterfaces::HMI_INTERFACE_UI));
+    EXPECT_CALL(
+        hmi_interfaces_,
+        GetInterfaceFromFunction(hmi_apis::FunctionID::TTS_SetGlobalProperties))
+        .WillOnce(Return(am::HmiInterfaces::HMI_INTERFACE_TTS));
+    ON_CALL(hmi_interfaces_,
+            GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
+        .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_RESPONSE));
+    ON_CALL(hmi_interfaces_,
+            GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_TTS))
+        .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_RESPONSE));
+  }
+  sync_primitives::Lock lock_;
+  NiceMock<MockHmiInterfaces> hmi_interfaces_;
+  MockMessageHelper& mock_message_helper_;
+  MockAppPtr mock_app_;
 };
 
-TEST_F(SetGlobalPropertiesRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
+TEST_F(SetGlobalPropertiesRequestTest,
+       OnEvent_UIHmiSendSuccess_UNSUPPORTED_RESOURCE) {
   MessageSharedPtr msg_vr = CreateFullParamsUISO();
   (*msg_vr)[am::strings::msg_params][am::strings::vr_commands][0] =
       "vr_command";
 
-  utils::SharedPtr<SetGlobalPropertiesRequest> req_vr =
+  utils::SharedPtr<SetGlobalPropertiesRequest> command =
       CreateCommand<SetGlobalPropertiesRequest>(msg_vr);
 
-  MockAppPtr mock_app = CreateMockApp();
-  EXPECT_CALL(app_mngr_, RemoveAppFromTTSGlobalPropertiesList(_));
-  ON_CALL(app_mngr_, application(kConnectionKey))
-      .WillByDefault(Return(mock_app));
-  ON_CALL(*mock_app, app_id()).WillByDefault(Return(kConnectionKey));
+  EXPECT_CALL(app_mngr_, RemoveAppFromTTSGlobalPropertiesList(kConnectionKey));
   const smart_objects::SmartObject* vr_help_title =
       &((*msg_vr)[am::strings::msg_params][am::strings::vr_help_title]);
   const smart_objects::SmartObject* vr_help =
       &((*msg_vr)[am::strings::msg_params][am::strings::vr_help]);
   const smart_objects::SmartObject* vr_help_prompt =
       &((*msg_vr)[am::strings::msg_params][am::strings::help_prompt]);
-  ON_CALL(*mock_app, vr_help_title()).WillByDefault(Return(vr_help_title));
-  ON_CALL(*mock_app, vr_help()).WillByDefault(Return(vr_help));
-  ON_CALL(*mock_app, help_prompt()).WillByDefault(Return(vr_help_prompt));
+  ON_CALL(*mock_app_, vr_help_title()).WillByDefault(Return(vr_help_title));
+  ON_CALL(*mock_app_, vr_help()).WillByDefault(Return(vr_help));
+  ON_CALL(*mock_app_, help_prompt()).WillByDefault(Return(vr_help_prompt));
 
-  MockHmiInterfaces hmi_interfaces;
-  ON_CALL(app_mngr_, hmi_interfaces()).WillByDefault(ReturnRef(hmi_interfaces));
-  ON_CALL(hmi_interfaces, GetInterfaceFromFunction(_))
-      .WillByDefault(
-          Return(am::HmiInterfaces::HMI_INTERFACE_BasicCommunication));
-  ON_CALL(hmi_interfaces, GetInterfaceState(_))
-      .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
+  ExpectationsHmiInterface_Run();
 
   MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
   (*msg)[am::strings::params][am::hmi_response::code] =
@@ -135,14 +174,12 @@ TEST_F(SetGlobalPropertiesRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
   Event event(hmi_apis::FunctionID::UI_SetGlobalProperties);
   event.set_smart_object(*msg);
 
-  MockMessageHelper* mock_message_helper =
-      MockMessageHelper::message_helper_mock();
-  ON_CALL(*mock_message_helper, VerifyImageVrHelpItems(_, _, _))
+  ON_CALL(mock_message_helper_,
+          VerifyImageVrHelpItems(
+              (*msg_vr)[am::strings::msg_params][am::strings::vr_help], _, _))
       .WillByDefault(Return(mobile_apis::Result::SUCCESS));
-  ON_CALL(*mock_message_helper, HMIToMobileResult(_))
-      .WillByDefault(Return(mobile_apis::Result::UNSUPPORTED_RESOURCE));
 
-  ON_CALL(*mock_message_helper, VerifyImage(_, _, _))
+  ON_CALL(mock_message_helper_, VerifyImage(_, _, _))
       .WillByDefault(Return(mobile_apis::Result::SUCCESS));
 
   EXPECT_CALL(
@@ -151,17 +188,15 @@ TEST_F(SetGlobalPropertiesRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
       .WillOnce(Return(true))
       .WillOnce(Return(true));
 
-  EXPECT_CALL(*mock_app, UpdateHash());
+  EXPECT_CALL(*mock_app_, UpdateHash());
 
-  MessageSharedPtr msg_ui(CreateMessage(smart_objects::SmartType_Map));
-  (*msg_ui)[am::strings::params][am::hmi_response::code] =
+  (*msg_vr)[am::strings::params][am::hmi_response::code] =
       hmi_apis::Common_Result::SUCCESS;
-
   Event event_vr(hmi_apis::FunctionID::TTS_SetGlobalProperties);
   event_vr.set_smart_object(*msg_vr);
 
-  req_vr->Run();
-  req_vr->on_event(event_vr);
+  command->Run();
+  command->on_event(event_vr);
 
   MessageSharedPtr ui_command_result;
   EXPECT_CALL(
@@ -169,24 +204,12 @@ TEST_F(SetGlobalPropertiesRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
       ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
       .WillOnce(DoAll(SaveArg<0>(&ui_command_result), Return(true)));
 
-  req_vr->on_event(event);
+  command->on_event(event);
 
-  EXPECT_EQ((*ui_command_result)[am::strings::msg_params][am::strings::success]
-                .asBool(),
-            true);
-  EXPECT_EQ(
-      (*ui_command_result)[am::strings::msg_params][am::strings::result_code]
-          .asInt(),
-      static_cast<int32_t>(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE));
-  if ((*ui_command_result)[am::strings::msg_params].keyExists(
-          am::strings::info)) {
-    EXPECT_FALSE(
-        (*ui_command_result)[am::strings::msg_params][am::strings::info]
-            .asString()
-            .empty());
-  }
+  ResultCommandExpectations(ui_command_result, "UI is not supported by system");
 }
 
+}  // namespace set_global_properties_request
 }  // namespace commands_test
 }  // namespace components
 }  // namespace tests

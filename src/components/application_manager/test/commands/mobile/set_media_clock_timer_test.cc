@@ -47,6 +47,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace set_media_clock_timer_request {
 
 namespace am = ::application_manager;
 using am::commands::SetMediaClockRequest;
@@ -69,11 +70,39 @@ class SetMediaClockRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
   SetMediaClockRequestTest()
-      : mock_message_helper_(*MockMessageHelper::message_helper_mock()) {}
+      : mock_message_helper_(*MockMessageHelper::message_helper_mock())
+      , mock_app_(CreateMockApp()) {}
+
+  void SetUp() OVERRIDE {
+    ON_CALL(app_mngr_, application(kConnectionKey))
+        .WillByDefault(Return(mock_app_));
+    ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kConnectionKey));
+    ON_CALL(app_mngr_, hmi_interfaces())
+        .WillByDefault(ReturnRef(hmi_interfaces_));
+  }
+
+  void TearDown() OVERRIDE {
+    Mock::VerifyAndClearExpectations(&mock_message_helper_);
+  }
+
+  void ResultCommandExpectations(MessageSharedPtr msg,
+                                 const std::string& info) {
+    EXPECT_EQ((*msg)[am::strings::msg_params][am::strings::success].asBool(),
+              true);
+    EXPECT_EQ(
+        (*msg)[am::strings::msg_params][am::strings::result_code].asInt(),
+        static_cast<int32_t>(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE));
+    EXPECT_EQ((*msg)[am::strings::msg_params][am::strings::info].asString(),
+              info);
+  }
+
+  NiceMock<MockHmiInterfaces> hmi_interfaces_;
   MockMessageHelper& mock_message_helper_;
+  MockAppPtr mock_app_;
 };
 
-TEST_F(SetMediaClockRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
+TEST_F(SetMediaClockRequestTest,
+       OnEvent_UIHmiSendUnsupportedResource_UNSUPPORTED_RESOURCE) {
   MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
   (*msg)[am::strings::params][am::strings::connection_key] = kConnectionKey;
 
@@ -83,16 +112,14 @@ TEST_F(SetMediaClockRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
   MessageSharedPtr ev_msg = CreateMessage(smart_objects::SmartType_Map);
   (*ev_msg)[am::strings::params][am::hmi_response::code] =
       hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
-  (*ev_msg)[am::strings::msg_params][am::strings::info] = "info";
+  (*ev_msg)[am::strings::msg_params][am::strings::app_id] = kConnectionKey;
 
   Event event(hmi_apis::FunctionID::UI_SetMediaClockTimer);
   event.set_smart_object(*ev_msg);
 
-  MockHmiInterfaces hmi_interfaces;
-  ON_CALL(app_mngr_, hmi_interfaces()).WillByDefault(ReturnRef(hmi_interfaces));
-  EXPECT_CALL(hmi_interfaces,
+  EXPECT_CALL(hmi_interfaces_,
               GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
-      .WillOnce(Return(am::HmiInterfaces::STATE_AVAILABLE));
+      .WillRepeatedly(Return(am::HmiInterfaces::STATE_NOT_RESPONSE));
 
   EXPECT_CALL(mock_message_helper_,
               HMIToMobileResult(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE))
@@ -106,23 +133,10 @@ TEST_F(SetMediaClockRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
 
   command->on_event(event);
 
-  EXPECT_EQ((*ui_command_result)[am::strings::msg_params][am::strings::success]
-                .asBool(),
-            true);
-  EXPECT_EQ(
-      (*ui_command_result)[am::strings::msg_params][am::strings::result_code]
-          .asInt(),
-      static_cast<int32_t>(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE));
-  if ((*ui_command_result)[am::strings::msg_params].keyExists(
-          am::strings::info)) {
-    EXPECT_FALSE(
-        (*ui_command_result)[am::strings::msg_params][am::strings::info]
-            .asString()
-            .empty());
-  }
-  Mock::VerifyAndClearExpectations(&mock_message_helper_);
+  ResultCommandExpectations(ui_command_result, "UI is not supported by system");
 }
 
+}  // namespace set_media_clock_timer_request
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components
