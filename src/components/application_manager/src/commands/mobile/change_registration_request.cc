@@ -314,8 +314,10 @@ bool ChangeRegistrationRequest::PrepareResponseParameters(
 
   if ((result && is_tts_or_ui_or_vr_unsupported)) {
     result_code = mobile_apis::Result::UNSUPPORTED_RESOURCE;
-    result = PrepareResultForMobileResponse(ui_properties_info, tts_properties_info) &&
-             PrepareResultForMobileResponse(tts_properties_info, vr_properties_info);
+    result =
+        PrepareResultForMobileResponse(ui_properties_info,
+                                       tts_properties_info) &&
+        PrepareResultForMobileResponse(tts_properties_info, vr_properties_info);
   } else {
     // If response contains erroneous result code SDL need return erroneus
     // result code.
