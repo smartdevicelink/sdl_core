@@ -584,6 +584,7 @@
     <element name="MFD4" />
     <element name="MFD5" />
     <element name="GEN3_8-INCH" internal_name="GEN3_8_INCH" />
+    <element name="SDL_GENERIC" />
   </enum>
 
   <enum name="TextFieldName">

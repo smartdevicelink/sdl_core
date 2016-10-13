@@ -196,7 +196,8 @@ const std::map<std::string, hmi_apis::Common_DisplayType::eType>
         {"MFD3", hmi_apis::Common_DisplayType::MFD3},
         {"MFD4", hmi_apis::Common_DisplayType::MFD4},
         {"MFD5", hmi_apis::Common_DisplayType::MFD5},
-        {"GEN3_8_INCH", hmi_apis::Common_DisplayType::GEN3_8_INCH}};
+        {"GEN3_8_INCH", hmi_apis::Common_DisplayType::GEN3_8_INCH},
+        {"SDL_GENERIC", hmi_apis::Common_DisplayType::SDL_GENERIC}};
 
 const std::map<std::string, hmi_apis::Common_CharacterSet::eType>
     character_set_enum = {{"TYPE2SET", hmi_apis::Common_CharacterSet::TYPE2SET},
