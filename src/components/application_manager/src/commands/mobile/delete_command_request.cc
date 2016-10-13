@@ -125,7 +125,7 @@ bool DeleteCommandRequest::PrepareResponseParameters(
   const bool is_vr_or_ui_warning =
       Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
           hmi_apis::Common_Result::WARNINGS, ui_result_, vr_result_);
-  info = MergeInfos(ui_info_, vr_info_);
+  info = MergeInfos(ui_delete_info, ui_info_, vr_delete_info, vr_info_);
   if (is_vr_or_ui_warning && !ui_delete_info.is_unsupported_resource &&
       !vr_delete_info.is_unsupported_resource) {
     LOG4CXX_DEBUG(logger_, "VR or UI result is warning");
