@@ -99,7 +99,8 @@ TEST_F(SetGlobalPropertiesRequestTest, OnEvent_SUCCESS_Expect_MessageNotSend) {
   command->on_event(event);
 }
 
-TEST_F(SetGlobalPropertiesRequestTest, OnEvent_UNSUPPORTED_RESOURCE_Expect_false) {
+TEST_F(SetGlobalPropertiesRequestTest,
+       OnEvent_UNSUPPORTED_RESOURCE_Expect_false) {
   MessageSharedPtr response = CreateMessage(smart_objects::SmartType_Map);
   (*response)[am::strings::params][am::hmi_response::code] =
       hmi_apis::Common_Result::SUCCESS;
