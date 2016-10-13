@@ -140,7 +140,9 @@ class ChangeRegistrationRequestTest
   void CheckExpectations(const hmi_apis::Common_Result::eType hmi_response,
                          const mobile_apis::Result::eType mobile_response,
                          const am::HmiInterfaces::InterfaceState state,
-                         const bool success) {
+                         const bool success,
+                         const hmi_apis::Common_Result::eType ui_hmi_response = hmi_apis::Common_Result::WARNINGS,
+                         const hmi_apis::Common_Result::eType vr_hmi_response = hmi_apis::Common_Result::UNSUPPORTED_RESOURCE) {
     MessageSharedPtr msg_from_mobile = CreateMsgFromMobile();
 
     utils::SharedPtr<ChangeRegistrationRequest> command =
@@ -166,9 +168,9 @@ class ChangeRegistrationRequestTest
     MessageSharedPtr vr_response = CreateMessage(smart_objects::SmartType_Map);
     MessageSharedPtr tts_response = CreateMessage(smart_objects::SmartType_Map);
     CreateResponseFromHMI(
-        ui_response, hmi_apis::Common_Result::WARNINGS, "ui_info");
+        ui_response, ui_hmi_response, "ui_info");
     CreateResponseFromHMI(vr_response,
-                          hmi_apis::Common_Result::UNSUPPORTED_RESOURCE,
+                          vr_hmi_response,
                           "unsupported_resource");
 
     (*tts_response)[strings::params][hmi_response::code] = hmi_response;
@@ -176,8 +178,8 @@ class ChangeRegistrationRequestTest
 
     MockHmiInterfaces hmi_interfaces;
     EXPECT_CALL(app_mngr_, hmi_interfaces())
-        .WillOnce(ReturnRef(hmi_interfaces));
-    EXPECT_CALL(hmi_interfaces, GetInterfaceState(_)).WillOnce(Return(state));
+        .WillRepeatedly(ReturnRef(hmi_interfaces));
+    EXPECT_CALL(hmi_interfaces, GetInterfaceState(_)).WillRepeatedly(Return(state));
 
     am::event_engine::Event event_ui(
         hmi_apis::FunctionID::UI_ChangeRegistration);
@@ -291,25 +293,53 @@ TEST_F(ChangeRegistrationRequestTest, OnEvent_VR_UNSUPPORTED_RESOURCE) {
       static_cast<int32_t>(mobile_apis::Result::UNSUPPORTED_RESOURCE));
 }
 
-TEST_F(ChangeRegistrationRequestTest, OnEvent_TTS_UNSUPPORTED_RESOURCE_Case1) {
+TEST_F(ChangeRegistrationRequestTest, OnEvent_TTS_UNSUPPORTED_RESOURCE_STATE_NOT_AVAILABLE_Expect_true) {
   CheckExpectations(hmi_apis::Common_Result::SUCCESS,
                     mobile_apis::Result::UNSUPPORTED_RESOURCE,
                     am::HmiInterfaces::STATE_NOT_AVAILABLE,
                     true);
 }
 
-TEST_F(ChangeRegistrationRequestTest, OnEvent_TTS_UNSUPPORTED_RESOURCE_Case2) {
+TEST_F(ChangeRegistrationRequestTest, OnEvent_TTS_UNSUPPORTED_RESOURCE_STATE_NOT_RESPONSE_Expect_false) {
   CheckExpectations(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE,
                     mobile_apis::Result::UNSUPPORTED_RESOURCE,
                     am::HmiInterfaces::STATE_NOT_RESPONSE,
-                    true);
+                    false);
 }
 
-TEST_F(ChangeRegistrationRequestTest, OnEvent_TTS_UNSUPPORTED_RESOURCE_Case3) {
+TEST_F(ChangeRegistrationRequestTest, OnEvent_TTS_UNSUPPORTED_RESOURCE_STATE_AVAILABLE_Expect_false) {
   CheckExpectations(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE,
                     mobile_apis::Result::UNSUPPORTED_RESOURCE,
                     am::HmiInterfaces::STATE_AVAILABLE,
-                    true);
+                    false);
+}
+
+TEST_F(ChangeRegistrationRequestTest, OnEvent_TTS_UNSUPPORTED_RESOURCE_SUCCESS_STATE_AVAILABLE_Expect_false) {
+  CheckExpectations(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE,
+                    mobile_apis::Result::UNSUPPORTED_RESOURCE,
+                    am::HmiInterfaces::STATE_AVAILABLE,
+                    false, hmi_apis::Common_Result::SUCCESS, hmi_apis::Common_Result::SUCCESS);
+}
+
+TEST_F(ChangeRegistrationRequestTest, OnEvent_TTS_SUCCESS_STATE_AVAILABLE_Expect_false) {
+  CheckExpectations(hmi_apis::Common_Result::SUCCESS,
+                    mobile_apis::Result::SUCCESS,
+                    am::HmiInterfaces::STATE_AVAILABLE,
+                    true, hmi_apis::Common_Result::SUCCESS, hmi_apis::Common_Result::SUCCESS);
+}
+
+TEST_F(ChangeRegistrationRequestTest, OnEvent_TTS_WRONG_LANGUAGE_STATE_AVAILABLE_Expect_true) {
+  CheckExpectations(hmi_apis::Common_Result::WRONG_LANGUAGE,
+                    mobile_apis::Result::SUCCESS,
+                    am::HmiInterfaces::STATE_AVAILABLE,
+                    true, hmi_apis::Common_Result::SUCCESS, hmi_apis::Common_Result::SUCCESS);
+}
+
+TEST_F(ChangeRegistrationRequestTest, OnEvent_TTS_INVALID_DATA_STATE_AVAILABLE_Expect_false) {
+  CheckExpectations(hmi_apis::Common_Result::INVALID_DATA,
+                    mobile_apis::Result::SUCCESS,
+                    am::HmiInterfaces::STATE_AVAILABLE,
+                    false, hmi_apis::Common_Result::SUCCESS, hmi_apis::Common_Result::SUCCESS);
 }
 
 }  // namespace commands_test

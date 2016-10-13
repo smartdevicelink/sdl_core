@@ -160,21 +160,21 @@ TEST_F(SpeakRequestTest, OnEvent_SUCCESS_Expect_true) {
       static_cast<int32_t>(mobile_apis::Result::SUCCESS));
 }
 
-TEST_F(SpeakRequestTest, OnEvent_UNSUPPORTED_RESOURCE_Case1) {
+TEST_F(SpeakRequestTest, OnEvent_UNSUPPORTED_RESOURCE_STATE_AVAILABLE_Expect_true) {
   CheckExpectations(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE,
                     mobile_apis::Result::UNSUPPORTED_RESOURCE,
                     am::HmiInterfaces::STATE_AVAILABLE,
                     true);
 }
 
-TEST_F(SpeakRequestTest, OnEvent_UNSUPPORTED_RESOURCE_Case2) {
+TEST_F(SpeakRequestTest, OnEvent_UNSUPPORTED_RESOURCE_STATE_NOT_AVAILABLE_Expect_false) {
   CheckExpectations(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE,
                     mobile_apis::Result::UNSUPPORTED_RESOURCE,
                     am::HmiInterfaces::STATE_NOT_AVAILABLE,
                     false);
 }
 
-TEST_F(SpeakRequestTest, OnEvent_UNSUPPORTED_RESOURCE_Case3) {
+TEST_F(SpeakRequestTest, OnEvent_UNSUPPORTED_RESOURCE_STATE_NOT_RESPONSE_Expect_true) {
   CheckExpectations(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE,
                     mobile_apis::Result::UNSUPPORTED_RESOURCE,
                     am::HmiInterfaces::STATE_NOT_RESPONSE,

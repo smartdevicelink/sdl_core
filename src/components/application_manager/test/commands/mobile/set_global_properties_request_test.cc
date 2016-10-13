@@ -77,7 +77,7 @@ class SetGlobalPropertiesRequestTest
  public:
 };
 
-TEST_F(SetGlobalPropertiesRequestTest, Test1) {
+TEST_F(SetGlobalPropertiesRequestTest, OnEvent_SUCCESS_Expect_MessageNotSend) {
   MessageSharedPtr response = CreateMessage(smart_objects::SmartType_Map);
   (*response)[am::strings::params][am::hmi_response::code] =
       hmi_apis::Common_Result::SUCCESS;
@@ -99,7 +99,7 @@ TEST_F(SetGlobalPropertiesRequestTest, Test1) {
   command->on_event(event);
 }
 
-TEST_F(SetGlobalPropertiesRequestTest, Test2) {
+TEST_F(SetGlobalPropertiesRequestTest, OnEvent_UNSUPPORTED_RESOURCE_Expect_false) {
   MessageSharedPtr response = CreateMessage(smart_objects::SmartType_Map);
   (*response)[am::strings::params][am::hmi_response::code] =
       hmi_apis::Common_Result::SUCCESS;
