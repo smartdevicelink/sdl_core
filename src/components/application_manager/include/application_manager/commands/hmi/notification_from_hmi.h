@@ -33,20 +33,13 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NOTIFICATION_FROM_HMI_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NOTIFICATION_FROM_HMI_H_
 
+#include "smart_objects/smart_object.h"
 #include "application_manager/commands/command_impl.h"
 #include "interfaces/HMI_API.h"
-
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
-class CSmartObject;
-}
-}
 
 namespace application_manager {
 
 namespace commands {
-
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 class NotificationFromHMI : public CommandImpl {
  public:

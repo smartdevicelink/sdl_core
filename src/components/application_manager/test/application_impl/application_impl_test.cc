@@ -56,7 +56,6 @@ namespace application_manager_test {
 using namespace application_manager;
 
 using namespace mobile_apis;
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 namespace custom_str = utils::custom_string;
 
 using ::testing::_;

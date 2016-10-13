@@ -41,6 +41,7 @@
 #include <algorithm>
 #include <memory>
 
+#include "smart_objects/smart_object.h"
 #include "application_manager/hmi_command_factory.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/hmi_capabilities.h"
@@ -88,13 +89,6 @@
 #include "utils/lock.h"
 #include "utils/data_accessor.h"
 #include "utils/timer.h"
-
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
-class SmartObject;
-}
-}
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 namespace threads {
 class Thread;

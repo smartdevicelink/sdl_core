@@ -33,6 +33,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_MESSAGE_HELPER_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_MESSAGE_HELPER_H_
 #include "gmock/gmock.h"
+#include "smart_objects/smart_object.h"
 #include "application_manager/application.h"
 #include "application_manager/message_helper.h"
 #include "interfaces/HMI_API.h"
@@ -42,7 +43,6 @@
 
 namespace application_manager {
 
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 class MockMessageHelper {
  public:
   MOCK_METHOD1(GetHashUpdateNotification,

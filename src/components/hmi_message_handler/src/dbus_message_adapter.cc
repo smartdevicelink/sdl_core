@@ -30,12 +30,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "hmi_message_handler/dbus_message_adapter.h"
 #include <sstream>
+#include "smart_objects/smart_object.h"
+#include "hmi_message_handler/dbus_message_adapter.h"
 #include "utils/logger.h"
 #include "formatters/CSmartFactory.h"
 
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 namespace sos = NsSmartDeviceLink::NsJSONHandler::strings;
 
 namespace hmi_message_handler {

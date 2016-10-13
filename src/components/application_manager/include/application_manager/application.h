@@ -39,6 +39,7 @@
 #include <list>
 #include "utils/shared_ptr.h"
 #include "utils/data_accessor.h"
+#include "smart_objects/smart_object.h"
 #include "interfaces/MOBILE_API.h"
 #include "connection_handler/device.h"
 #include "application_manager/message.h"
@@ -51,18 +52,10 @@
 #elif defined(OS_WINDOWS)
 #define strcasecmp _stricmp
 #endif
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
-
-class SmartObject;
-}
-}
 
 namespace application_manager {
 
 namespace mobile_api = mobile_apis;
-
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 namespace custom_str = utils::custom_string;
 

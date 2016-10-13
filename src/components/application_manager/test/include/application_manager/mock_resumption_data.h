@@ -33,6 +33,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_RESUMPTION_DATA_H_
 #include <string>
 #include "gmock/gmock.h"
+#include "smart_objects/smart_object.h"
 #include "application_manager/resumption/resumption_data.h"
 #include "application_manager/application.h"
 #include "application_manager/mock_application_manager_settings.h"
@@ -43,7 +44,6 @@ namespace components {
 namespace resumption_test {
 
 namespace app_mngr = application_manager;
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 class MockResumptionData : public ::resumption::ResumptionData {
  public:

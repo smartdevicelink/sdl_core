@@ -84,8 +84,7 @@ class HMILanguageHandler : public event_engine::EventObserver {
    * @brief Trigger waiting for response
    * @param request Request object
    */
-  void set_handle_response_for(
-      const event_engine::smart_objects::SmartObject& request);
+  void set_handle_response_for(const smart_objects::SmartObject& request);
 
   /**
    * @brief Sets default languages from HMI capabilities

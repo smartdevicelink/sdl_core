@@ -621,7 +621,7 @@ TEST_F(HMICommandsNotificationsTest,
   std::vector<uint8_t> data(tmp, tmp + 4);
   EXPECT_TRUE(file_system::WriteBinaryFile(kFile, data));
 
-  MessageSharedPtr message = CreateMessage(am::smart_objects::SmartType_String);
+  MessageSharedPtr message = CreateMessage(smart_objects::SmartType_String);
   (*message)[am::strings::msg_params][am::hmi_notification::policyfile] = kFile;
   utils::SharedPtr<Command> command =
       CreateCommand<OnReceivedPolicyUpdate>(message);
@@ -634,7 +634,7 @@ TEST_F(HMICommandsNotificationsTest,
 
 TEST_F(HMICommandsNotificationsTest,
        OnReceivePolicyUpdateNotification_UNSUCCESS) {
-  MessageSharedPtr message = CreateMessage(am::smart_objects::SmartType_String);
+  MessageSharedPtr message = CreateMessage(smart_objects::SmartType_String);
   utils::SharedPtr<Command> command =
       CreateCommand<OnReceivedPolicyUpdate>(message);
 
@@ -645,14 +645,13 @@ TEST_F(HMICommandsNotificationsTest,
 
 TEST_F(HMICommandsNotificationsTest,
        OnAppPermissionConsentNotificationPolicyHandlerNoAppId) {
-  MessageSharedPtr message = CreateMessage(am::smart_objects::SmartType_Map);
+  MessageSharedPtr message = CreateMessage(smart_objects::SmartType_Map);
   (*message)[am::strings::msg_params][am::strings::consented_functions] =
-      am::smart_objects::SmartObject(am::smart_objects::SmartType_Array);
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
   SmartObject& applications =
       (*message)[am::strings::msg_params][am::strings::consented_functions];
 
-  am::smart_objects::SmartObject hmi_application_temp(
-      am::smart_objects::SmartType_Map);
+  smart_objects::SmartObject hmi_application_temp(smart_objects::SmartType_Map);
   applications[0] = hmi_application_temp;
 
   utils::SharedPtr<Command> command =
@@ -668,13 +667,13 @@ TEST_F(HMICommandsNotificationsTest,
 
 TEST_F(HMICommandsNotificationsTest,
        OnAppPermissionConsentNotificationPolicyHandlerWithAppId) {
-  MessageSharedPtr message = CreateMessage(am::smart_objects::SmartType_Map);
+  MessageSharedPtr message = CreateMessage(smart_objects::SmartType_Map);
   (*message)[am::strings::msg_params][am::strings::app_id] = kAppId_;
   (*message)[am::strings::msg_params][am::strings::consented_functions] =
-      am::smart_objects::SmartObject(am::smart_objects::SmartType_Array);
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
 
-  am::smart_objects::SmartObjectSPtr consented_function =
-      utils::MakeShared<am::smart_objects::SmartObject>();
+  smart_objects::SmartObjectSPtr consented_function =
+      utils::MakeShared<smart_objects::SmartObject>();
   (*message)[am::strings::msg_params][am::strings::consented_functions][0] =
       *consented_function;
 
@@ -698,15 +697,15 @@ TEST_F(HMICommandsNotificationsTest,
 
 TEST_F(HMICommandsNotificationsTest,
        OnAppPermissionConsentNotificationPolicyHandlerAppIdAllowTrue) {
-  MessageSharedPtr message = CreateMessage(am::smart_objects::SmartType_Map);
+  MessageSharedPtr message = CreateMessage(smart_objects::SmartType_Map);
   (*message)[am::strings::msg_params][am::strings::consented_functions] =
-      am::smart_objects::SmartObject(am::smart_objects::SmartType_Array);
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
   (*message)[am::strings::msg_params][am::strings::app_id] = kAppId_;
   (*message)[am::strings::msg_params][am::strings::consent_source] =
       "test_content_source";
 
-  am::smart_objects::SmartObjectSPtr consented_function =
-      utils::MakeShared<am::smart_objects::SmartObject>();
+  smart_objects::SmartObjectSPtr consented_function =
+      utils::MakeShared<smart_objects::SmartObject>();
   (*consented_function)[am::strings::allowed] = true;
   (*consented_function)[am::strings::id] = 999;
   (*consented_function)[am::strings::name] = "test_group_alias";
@@ -737,15 +736,15 @@ TEST_F(HMICommandsNotificationsTest,
 
 TEST_F(HMICommandsNotificationsTest,
        OnAppPermissionConsentNotificationPolicyHandlerAppIdAllowFalse) {
-  MessageSharedPtr message = CreateMessage(am::smart_objects::SmartType_Map);
+  MessageSharedPtr message = CreateMessage(smart_objects::SmartType_Map);
   (*message)[am::strings::msg_params][am::strings::consented_functions] =
-      am::smart_objects::SmartObject(am::smart_objects::SmartType_Array);
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
   (*message)[am::strings::msg_params][am::strings::app_id] = kAppId_;
   (*message)[am::strings::msg_params][am::strings::consent_source] =
       "test_content_source";
 
-  am::smart_objects::SmartObjectSPtr consented_function =
-      utils::MakeShared<am::smart_objects::SmartObject>();
+  smart_objects::SmartObjectSPtr consented_function =
+      utils::MakeShared<smart_objects::SmartObject>();
   (*consented_function)[am::strings::allowed] = false;
   (*consented_function)[am::strings::id] = 999;
   (*consented_function)[am::strings::name] = "test_group_alias";
@@ -987,7 +986,7 @@ TEST_F(HMICommandsNotificationsTest,
       CreateCommand<OnExitAllApplicationsNotification>(message);
 
   MessageSharedPtr ethalon_message =
-      CreateMessage(am::smart_objects::SmartType_Map);
+      CreateMessage(smart_objects::SmartType_Map);
   (*ethalon_message)[am::strings::params][am::strings::function_id] =
       hmi_apis::FunctionID::BasicCommunication_OnSDLPersistenceComplete;
   (*ethalon_message)[am::strings::params][am::strings::message_type] =
@@ -1034,8 +1033,8 @@ TEST_F(HMICommandsNotificationsTest,
        OnExitApplicationNotificationManageMobileCommand) {
   MessageSharedPtr message = CreateMessage();
   (*message)[am::strings::msg_params][am::strings::app_id] = kAppId_;
-  am::smart_objects::SmartObjectSPtr notification =
-      utils::MakeShared<am::smart_objects::SmartObject>();
+  smart_objects::SmartObjectSPtr notification =
+      utils::MakeShared<smart_objects::SmartObject>();
   (*notification)[am::strings::params][am::strings::function_id] =
       static_cast<int32_t>(
           mobile_apis::FunctionID::OnAppInterfaceUnregisteredID);
@@ -1128,8 +1127,8 @@ TEST_F(HMICommandsNotificationsTest,
   utils::SharedPtr<Command> command =
       CreateCommand<OnExitApplicationNotification>(message);
 
-  am::smart_objects::SmartObjectSPtr notification =
-      utils::MakeShared<am::smart_objects::SmartObject>();
+  smart_objects::SmartObjectSPtr notification =
+      utils::MakeShared<smart_objects::SmartObject>();
   (*notification)[am::strings::params][am::strings::function_id] =
       static_cast<int32_t>(
           mobile_apis::FunctionID::OnAppInterfaceUnregisteredID);
@@ -1170,8 +1169,8 @@ TEST_F(HMICommandsNotificationsTest,
   utils::SharedPtr<Command> command =
       CreateCommand<OnExitApplicationNotification>(message);
 
-  am::smart_objects::SmartObjectSPtr notification =
-      utils::MakeShared<am::smart_objects::SmartObject>();
+  smart_objects::SmartObjectSPtr notification =
+      utils::MakeShared<smart_objects::SmartObject>();
   (*notification)[am::strings::params][am::strings::function_id] =
       static_cast<int32_t>(
           mobile_apis::FunctionID::OnAppInterfaceUnregisteredID);
@@ -1430,8 +1429,8 @@ TEST_F(HMICommandsNotificationsTest,
       CreateCommand<OnVRLanguageChangeNotification>(message);
 
   application_set_.insert(app_);
-  am::smart_objects::SmartObjectSPtr notification =
-      utils::MakeShared<am::smart_objects::SmartObject>();
+  smart_objects::SmartObjectSPtr notification =
+      utils::MakeShared<smart_objects::SmartObject>();
   (*notification)[am::strings::params][am::strings::function_id] =
       static_cast<int32_t>(mobile_apis::FunctionID::OnLanguageChangeID);
   (*notification)[am::strings::params][am::strings::message_type] =
@@ -1740,8 +1739,8 @@ TEST_F(HMICommandsNotificationsTest,
       CreateCommand<OnTTSLanguageChangeNotification>(message);
 
   application_set_.insert(app_);
-  am::smart_objects::SmartObjectSPtr notification =
-      utils::MakeShared<am::smart_objects::SmartObject>();
+  smart_objects::SmartObjectSPtr notification =
+      utils::MakeShared<smart_objects::SmartObject>();
   (*notification)[am::strings::params][am::strings::function_id] =
       static_cast<int32_t>(mobile_apis::FunctionID::OnLanguageChangeID);
   (*notification)[am::strings::params][am::strings::message_type] =
@@ -1852,8 +1851,8 @@ TEST_F(HMICommandsNotificationsTest,
       CreateCommand<OnUILanguageChangeNotification>(message);
 
   application_set_.insert(app_);
-  am::smart_objects::SmartObjectSPtr notification =
-      utils::MakeShared<am::smart_objects::SmartObject>();
+  smart_objects::SmartObjectSPtr notification =
+      utils::MakeShared<smart_objects::SmartObject>();
   (*notification)[am::strings::params][am::strings::function_id] =
       static_cast<int32_t>(mobile_apis::FunctionID::OnLanguageChangeID);
   (*notification)[am::strings::params][am::strings::message_type] =

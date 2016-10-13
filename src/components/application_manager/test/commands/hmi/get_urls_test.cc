@@ -62,7 +62,6 @@ using ::utils::SharedPtr;
 using ::testing::NiceMock;
 using ::testing::SetArgReferee;
 using ::test::components::application_manager_test::MockApplication;
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 namespace am = ::application_manager;
 namespace strings = ::application_manager::strings;
 using am::commands::RequestFromHMI;

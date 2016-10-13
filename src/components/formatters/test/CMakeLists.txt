@@ -41,9 +41,9 @@ set(LIBRARIES
   gmock 
   HMI_API
   MOBILE_API
+  jsoncpp
   smart_object
   formatters
-  jsoncpp
 )
 
 collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}")
