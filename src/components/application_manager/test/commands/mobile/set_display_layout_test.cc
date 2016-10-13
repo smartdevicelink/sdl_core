@@ -114,7 +114,7 @@ class SetDisplayLayoutRequestTest
   void ResultCommandExpectations(MessageSharedPtr msg,
                                  const std::string& info) {
     EXPECT_EQ((*msg)[am::strings::msg_params][am::strings::success].asBool(),
-              true);
+              false);
     EXPECT_EQ(
         (*msg)[am::strings::msg_params][am::strings::result_code].asInt(),
         static_cast<int32_t>(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE));
@@ -148,22 +148,19 @@ TEST_F(SetDisplayLayoutRequestTest,
   (*msg)[am::strings::params][am::hmi_response::code] =
       hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
   (*msg)[am::strings::msg_params][am::strings::app_id] = kConnectionKey;
+  (*msg)[am::strings::msg_params][am::strings::info] =
+      "UI is not supported by system";
 
   Event event(hmi_apis::FunctionID::UI_SetDisplayLayout);
   event.set_smart_object(*msg);
 
-  EXPECT_CALL(hmi_interfaces_,
-              GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
-      .WillOnce(Return(am::HmiInterfaces::STATE_NOT_RESPONSE))
-      .WillOnce(Return(am::HmiInterfaces::STATE_NOT_RESPONSE));
+  ON_CALL(hmi_interfaces_,
+          GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
+      .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
 
-  MockHMICapabilities hmi_capabilities;
-  EXPECT_CALL(app_mngr_, hmi_capabilities())
-      .WillOnce(ReturnRef(hmi_capabilities));
-
-  EXPECT_CALL(mock_message_helper_,
-              HMIToMobileResult(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE))
-      .WillOnce(Return(mobile_apis::Result::UNSUPPORTED_RESOURCE));
+  ON_CALL(mock_message_helper_,
+          HMIToMobileResult(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE))
+      .WillByDefault(Return(mobile_apis::Result::UNSUPPORTED_RESOURCE));
   MessageSharedPtr ui_command_result;
   EXPECT_CALL(
       app_mngr_,

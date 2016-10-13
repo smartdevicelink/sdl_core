@@ -150,6 +150,9 @@ class ChangeRegistrationRequestTest
                              hmi_apis::Common_Result::UNSUPPORTED_RESOURCE) {
     MessageSharedPtr msg_from_mobile = CreateMsgFromMobile();
 
+    ON_CALL(mock_message_helper_, HMIToMobileResult(_))
+        .WillByDefault(Return(mobile_response));
+
     utils::SharedPtr<ChangeRegistrationRequest> command =
         CreateCommand<ChangeRegistrationRequest>(msg_from_mobile);
     MockAppPtr mock_app = CreateMockApp();
@@ -216,7 +219,8 @@ class ChangeRegistrationRequestTest
   void CreateResponseFromHMI(MessageSharedPtr msg,
                              hmi_apis::Common_Result::eType result,
                              const std::string& info) {
-    (*msg)[strings::params][hmi_response::code] = static_cast<int32_t>(result);    
+    (*msg)[strings::params][hmi_response::code] = static_cast<int32_t>(result);
+    (*msg)[strings::msg_params][strings::info] = info;
   }
 
   MessageSharedPtr CreateFullParamsUISO() {
@@ -305,7 +309,6 @@ TEST_F(ChangeRegistrationRequestTest,
   EXPECT_CALL(app_mngr_, applications()).WillOnce(Return(accessor));
   EXPECT_CALL(*app, name()).WillOnce(ReturnRef(name));
 
-  PrepareExpectationBeforeRun();
   smart_objects::SmartObjectSPtr supported_languages(
       CreateMessage(smart_objects::SmartType_Array));
   (*supported_languages)[0] =
@@ -313,26 +316,24 @@ TEST_F(ChangeRegistrationRequestTest,
 
   ExpectationsHmiCapabilities(supported_languages);
 
-  EXPECT_CALL(
-      hmi_interfaces_,
-      GetInterfaceFromFunction(hmi_apis::FunctionID::UI_ChangeRegistration))
-      .WillOnce(Return(am::HmiInterfaces::HMI_INTERFACE_UI));
+  ON_CALL(hmi_interfaces_,
+          GetInterfaceFromFunction(hmi_apis::FunctionID::UI_ChangeRegistration))
+      .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_UI));
   ON_CALL(hmi_interfaces_,
           GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
       .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
 
-  EXPECT_CALL(
-      hmi_interfaces_,
-      GetInterfaceFromFunction(hmi_apis::FunctionID::VR_ChangeRegistration))
-      .WillOnce(Return(am::HmiInterfaces::HMI_INTERFACE_VR));
+  ON_CALL(hmi_interfaces_,
+          GetInterfaceFromFunction(hmi_apis::FunctionID::VR_ChangeRegistration))
+      .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_VR));
   ON_CALL(hmi_interfaces_,
           GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_VR))
       .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_RESPONSE));
 
-  EXPECT_CALL(
+  ON_CALL(
       hmi_interfaces_,
       GetInterfaceFromFunction(hmi_apis::FunctionID::TTS_ChangeRegistration))
-      .WillOnce(Return(am::HmiInterfaces::HMI_INTERFACE_TTS));
+      .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_TTS));
   ON_CALL(hmi_interfaces_,
           GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_TTS))
       .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
@@ -345,7 +346,7 @@ TEST_F(ChangeRegistrationRequestTest,
       ui_response, hmi_apis::Common_Result::WARNINGS, "ui_info");
   CreateResponseFromHMI(vr_response,
                         hmi_apis::Common_Result::UNSUPPORTED_RESOURCE,
-                        "unsupported_resource");
+                        "VR is not supported by system");
   CreateResponseFromHMI(
       tts_response, hmi_apis::Common_Result::SUCCESS, "tts_info");
   (*ui_response)[am::strings::msg_params][am::strings::app_id] = kConnectionKey;
@@ -378,11 +379,10 @@ TEST_F(ChangeRegistrationRequestTest,
   command->on_event(event_vr);
 
   ResultCommandExpectations(response_to_mobile,
-                            "VR is not supported by system");
+                            "ui_info, VR is not supported by system, tts_info");
 }
 
 TEST_F(ChangeRegistrationRequestTest,
-<<<<<<< HEAD
        OnEvent_TTS_UNSUPPORTED_RESOURCE_STATE_NOT_AVAILABLE_Expect_true) {
   CheckExpectations(hmi_apis::Common_Result::SUCCESS,
                     mobile_apis::Result::UNSUPPORTED_RESOURCE,
@@ -472,29 +472,27 @@ TEST_F(ChangeRegistrationRequestTest,
 
   ExpectationsHmiCapabilities(supported_languages);
 
-  EXPECT_CALL(
-      hmi_interfaces_,
-      GetInterfaceFromFunction(hmi_apis::FunctionID::UI_ChangeRegistration))
-      .WillOnce(Return(am::HmiInterfaces::HMI_INTERFACE_UI));
+  ON_CALL(hmi_interfaces_,
+          GetInterfaceFromFunction(hmi_apis::FunctionID::UI_ChangeRegistration))
+      .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_UI));
   ON_CALL(hmi_interfaces_,
           GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
-      .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_RESPONSE));
+      .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
 
-  EXPECT_CALL(
-      hmi_interfaces_,
-      GetInterfaceFromFunction(hmi_apis::FunctionID::VR_ChangeRegistration))
-      .WillOnce(Return(am::HmiInterfaces::HMI_INTERFACE_VR));
+  ON_CALL(hmi_interfaces_,
+          GetInterfaceFromFunction(hmi_apis::FunctionID::VR_ChangeRegistration))
+      .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_VR));
   ON_CALL(hmi_interfaces_,
           GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_VR))
-      .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
+      .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
 
-  EXPECT_CALL(
+  ON_CALL(
       hmi_interfaces_,
       GetInterfaceFromFunction(hmi_apis::FunctionID::TTS_ChangeRegistration))
-      .WillOnce(Return(am::HmiInterfaces::HMI_INTERFACE_TTS));
+      .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_TTS));
   ON_CALL(hmi_interfaces_,
           GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_TTS))
-      .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
+      .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
 
   command->Run();
 
@@ -532,7 +530,7 @@ TEST_F(ChangeRegistrationRequestTest,
   command->on_event(event_ui);
 
   ResultCommandExpectations(response_to_mobile,
-                            "UI is not supported by system");
+                            "unsupported_resource, vr_info, tts_info");
 }
 
 }  // namespace change_registration_request

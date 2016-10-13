@@ -113,6 +113,8 @@ TEST_F(SetMediaClockRequestTest,
   (*ev_msg)[am::strings::params][am::hmi_response::code] =
       hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
   (*ev_msg)[am::strings::msg_params][am::strings::app_id] = kConnectionKey;
+  (*ev_msg)[am::strings::msg_params][am::strings::info] =
+      "UI is not supported by system";
 
   Event event(hmi_apis::FunctionID::UI_SetMediaClockTimer);
   event.set_smart_object(*ev_msg);

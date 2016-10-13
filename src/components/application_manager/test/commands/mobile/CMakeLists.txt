@@ -46,7 +46,6 @@ set (SOURCES
   ${COMMANDS_TEST_SOURCE_DIR}/mobile/create_interaction_choice_set_test.cc
   ${COMMANDS_TEST_SOURCE_DIR}/mobile/register_app_interface_request_test.cc
   ${COMMANDS_TEST_SOURCE_DIR}/mobile/speak_request_test.cc
-  ${COMMANDS_TEST_SOURCE_DIR}/mobile/set_global_properties_request_test.cc
   ${COMMANDS_TEST_SOURCE_DIR}/mobile/alert_maneuver_request_test.cc
   ${COMMANDS_TEST_SOURCE_DIR}/mobile/show_test.cc
   ${COMMANDS_TEST_SOURCE_DIR}/mobile/alert_request_test.cc

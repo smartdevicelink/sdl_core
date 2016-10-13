@@ -116,7 +116,7 @@ class AlertRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
     ON_CALL(hmi_interfaces_,
             GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
         .WillByDefault(
-            Return(am::HmiInterfaces::InterfaceState::STATE_NOT_RESPONSE));
+            Return(am::HmiInterfaces::InterfaceState::STATE_NOT_AVAILABLE));
 
     ON_CALL(hmi_interfaces_,
             GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_TTS))
@@ -177,140 +177,22 @@ TEST_F(AlertRequestTest, OnEvent_UI_HmiSendSuccess_UNSUPPORTED_RESOURCE) {
   (*msg)[am::strings::params][am::hmi_response::code] =
       hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
   (*msg)[am::strings::msg_params][am::strings::cmd_id] = kCommandId;
-
-  Event event(hmi_apis::FunctionID::UI_Alert);
-  event.set_smart_object(*msg);
+  (*msg)[am::strings::msg_params][am::strings::info] =
+      "UI is not supported by system";
 
   ON_CALL(mock_message_helper_, HMIToMobileResult(_))
       .WillByDefault(Return(mobile_apis::Result::SUCCESS));
 
-  MessageSharedPtr ui_command_result;
-  EXPECT_CALL(
-      app_mngr_,
-      ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
-      .WillOnce(DoAll(SaveArg<0>(&ui_command_result), Return(true)));
+  MessageSharedPtr msg_tts = CreateMessage();
+  (*msg_tts)[am::strings::params][am::hmi_response::code] =
+      hmi_apis::Common_Result::SUCCESS;
+  Event event_vr(hmi_apis::FunctionID::TTS_Speak);
+  event_vr.set_smart_object(*msg_tts);
 
-  command->on_event(event);
-
-  ResultCommandExpectations(ui_command_result, "UI is not supported by system");
-}
-
-TEST_F(AlertRequestTest, OnEvent_UI_HmiSendWarnings_UNSUPPORTED_RESOURCE) {
-  MessageSharedPtr command_msg = CreateFullParamsUISO();
-  (*command_msg)[am::strings::msg_params][am::strings::menu_params]
-                [am::hmi_request::parent_id] = 10u;
-  (*command_msg)[am::strings::msg_params][am::strings::menu_params]
-                [am::strings::menu_name] = "menu_name";
-
-  utils::SharedPtr<AlertRequest> command =
-      CreateCommand<AlertRequest>(command_msg);
-
-  MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
-  (*msg)[am::strings::params][am::hmi_response::code] =
-      hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
-  (*msg)[am::strings::msg_params][am::strings::cmd_id] = kCommandId;
+  command->on_event(event_vr);
 
   Event event(hmi_apis::FunctionID::UI_Alert);
   event.set_smart_object(*msg);
-
-  ON_CALL(mock_message_helper_, HMIToMobileResult(_))
-      .WillByDefault(Return(mobile_apis::Result::WARNINGS));
-
-  MessageSharedPtr ui_command_result;
-  EXPECT_CALL(
-      app_mngr_,
-      ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
-      .WillOnce(DoAll(SaveArg<0>(&ui_command_result), Return(true)));
-
-  command->on_event(event);
-
-  ResultCommandExpectations(ui_command_result, "UI is not supported by system");
-}
-
-TEST_F(AlertRequestTest, OnEvent_UI_HmiSendWrongLanguage_UNSUPPORTED_RESOURCE) {
-  MessageSharedPtr command_msg = CreateFullParamsUISO();
-  (*command_msg)[am::strings::msg_params][am::strings::menu_params]
-                [am::hmi_request::parent_id] = 10u;
-  (*command_msg)[am::strings::msg_params][am::strings::menu_params]
-                [am::strings::menu_name] = "menu_name";
-
-  utils::SharedPtr<AlertRequest> command =
-      CreateCommand<AlertRequest>(command_msg);
-
-  MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
-  (*msg)[am::strings::params][am::hmi_response::code] =
-      hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
-  (*msg)[am::strings::msg_params][am::strings::cmd_id] = kCommandId;
-
-  Event event(hmi_apis::FunctionID::UI_Alert);
-  event.set_smart_object(*msg);
-
-  ON_CALL(mock_message_helper_, HMIToMobileResult(_))
-      .WillByDefault(Return(mobile_apis::Result::WRONG_LANGUAGE));
-
-  MessageSharedPtr ui_command_result;
-  EXPECT_CALL(
-      app_mngr_,
-      ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
-      .WillOnce(DoAll(SaveArg<0>(&ui_command_result), Return(true)));
-
-  command->on_event(event);
-
-  ResultCommandExpectations(ui_command_result, "UI is not supported by system");
-}
-
-TEST_F(AlertRequestTest, OnEvent_UI_HmiSendRetry_UNSUPPORTED_RESOURCE) {
-  MessageSharedPtr command_msg = CreateFullParamsUISO();
-  (*command_msg)[am::strings::msg_params][am::strings::menu_params]
-                [am::hmi_request::parent_id] = 10u;
-  (*command_msg)[am::strings::msg_params][am::strings::menu_params]
-                [am::strings::menu_name] = "menu_name";
-
-  utils::SharedPtr<AlertRequest> command =
-      CreateCommand<AlertRequest>(command_msg);
-
-  MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
-  (*msg)[am::strings::params][am::hmi_response::code] =
-      hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
-  (*msg)[am::strings::msg_params][am::strings::cmd_id] = kCommandId;
-
-  Event event(hmi_apis::FunctionID::UI_Alert);
-  event.set_smart_object(*msg);
-
-  ON_CALL(mock_message_helper_, HMIToMobileResult(_))
-      .WillByDefault(Return(mobile_apis::Result::RETRY));
-
-  MessageSharedPtr ui_command_result;
-  EXPECT_CALL(
-      app_mngr_,
-      ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
-      .WillOnce(DoAll(SaveArg<0>(&ui_command_result), Return(true)));
-
-  command->on_event(event);
-
-  ResultCommandExpectations(ui_command_result, "UI is not supported by system");
-}
-
-TEST_F(AlertRequestTest, OnEvent_UI_HmiSendSaved_UNSUPPORTED_RESOURCE) {
-  MessageSharedPtr command_msg = CreateFullParamsUISO();
-  (*command_msg)[am::strings::msg_params][am::strings::menu_params]
-                [am::hmi_request::parent_id] = 10u;
-  (*command_msg)[am::strings::msg_params][am::strings::menu_params]
-                [am::strings::menu_name] = "menu_name";
-
-  utils::SharedPtr<AlertRequest> command =
-      CreateCommand<AlertRequest>(command_msg);
-
-  MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
-  (*msg)[am::strings::params][am::hmi_response::code] =
-      hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
-  (*msg)[am::strings::msg_params][am::strings::cmd_id] = kCommandId;
-
-  Event event(hmi_apis::FunctionID::UI_Alert);
-  event.set_smart_object(*msg);
-
-  ON_CALL(mock_message_helper_, HMIToMobileResult(_))
-      .WillByDefault(Return(mobile_apis::Result::SAVED));
 
   MessageSharedPtr ui_command_result;
   EXPECT_CALL(

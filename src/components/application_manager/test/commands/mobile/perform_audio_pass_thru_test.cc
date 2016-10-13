@@ -170,16 +170,27 @@ TEST_F(PerformAudioPassThruRequestTest,
   (*msg)[am::strings::params][am::hmi_response::code] =
       hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
   (*msg)[am::strings::msg_params][am::strings::cmd_id] = kCommandId;
+  (*msg)[am::strings::msg_params][am::strings::info] =
+      "UI is not supported by system";
 
   Event event(hmi_apis::FunctionID::UI_PerformAudioPassThru);
   event.set_smart_object(*msg);
 
   ON_CALL(hmi_interfaces_,
           GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
-      .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_RESPONSE));
+      .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
   ON_CALL(hmi_interfaces_,
           GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_TTS))
       .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
+
+  MessageSharedPtr response_msg_tts =
+      CreateMessage(smart_objects::SmartType_Map);
+  (*response_msg_tts)[am::strings::params][am::hmi_response::code] =
+      hmi_apis::Common_Result::SUCCESS;
+  (*response_msg_tts)[am::strings::msg_params][am::strings::cmd_id] = kCmdId;
+  am::event_engine::Event event_tts(hmi_apis::FunctionID::TTS_Speak);
+  event_tts.set_smart_object(*response_msg_tts);
+  command->on_event(event_tts);
 
   MessageSharedPtr ui_command_result;
   EXPECT_CALL(app_mngr_, EndAudioPassThrough()).WillOnce(Return(false));

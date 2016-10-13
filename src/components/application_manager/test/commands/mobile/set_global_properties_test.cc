@@ -133,10 +133,10 @@ class SetGlobalPropertiesRequestTest
         .WillOnce(Return(am::HmiInterfaces::HMI_INTERFACE_TTS));
     ON_CALL(hmi_interfaces_,
             GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
-        .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_RESPONSE));
+        .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
     ON_CALL(hmi_interfaces_,
             GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_TTS))
-        .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_RESPONSE));
+        .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
   }
   sync_primitives::Lock lock_;
   NiceMock<MockHmiInterfaces> hmi_interfaces_;
@@ -170,6 +170,8 @@ TEST_F(SetGlobalPropertiesRequestTest,
   (*msg)[am::strings::params][am::hmi_response::code] =
       hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
   (*msg)[am::strings::msg_params][am::strings::cmd_id] = kCommandId;
+  (*msg)[am::strings::msg_params][am::strings::info] =
+      "UI is not supported by system";
 
   Event event(hmi_apis::FunctionID::UI_SetGlobalProperties);
   event.set_smart_object(*msg);
@@ -181,12 +183,6 @@ TEST_F(SetGlobalPropertiesRequestTest,
 
   ON_CALL(mock_message_helper_, VerifyImage(_, _, _))
       .WillByDefault(Return(mobile_apis::Result::SUCCESS));
-
-  EXPECT_CALL(
-      app_mngr_,
-      ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
-      .WillOnce(Return(true))
-      .WillOnce(Return(true));
 
   EXPECT_CALL(*mock_app_, UpdateHash());
 
@@ -207,6 +203,75 @@ TEST_F(SetGlobalPropertiesRequestTest,
   command->on_event(event);
 
   ResultCommandExpectations(ui_command_result, "UI is not supported by system");
+}
+
+TEST_F(SetGlobalPropertiesRequestTest, OnEvent_SUCCESS_Expect_MessageNotSend) {
+  MessageSharedPtr response = CreateMessage(smart_objects::SmartType_Map);
+  (*response)[am::strings::params][am::hmi_response::code] =
+      hmi_apis::Common_Result::SUCCESS;
+  (*response)[am::strings::msg_params][am::strings::info] = "test";
+
+  am::event_engine::Event event(hmi_apis::FunctionID::TTS_SetGlobalProperties);
+  event.set_smart_object(*response);
+
+  utils::SharedPtr<SetGlobalPropertiesRequest> command =
+      CreateCommand<SetGlobalPropertiesRequest>(response);
+
+  MockAppPtr mock_app(CreateMockApp());
+  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app));
+
+  EXPECT_CALL(
+      app_mngr_,
+      ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
+      .Times(0);
+  command->on_event(event);
+}
+
+TEST_F(SetGlobalPropertiesRequestTest,
+       OnEvent_UNSUPPORTED_RESOURCE_Expect_false) {
+  MessageSharedPtr response = CreateMessage(smart_objects::SmartType_Map);
+  (*response)[am::strings::params][am::hmi_response::code] =
+      hmi_apis::Common_Result::SUCCESS;
+  (*response)[am::strings::msg_params][am::strings::info] = "qwe";
+
+  am::event_engine::Event event_tts(
+      hmi_apis::FunctionID::TTS_SetGlobalProperties);
+  event_tts.set_smart_object(*response);
+  am::event_engine::Event event_ui(
+      hmi_apis::FunctionID::UI_SetGlobalProperties);
+  event_tts.set_smart_object(*response);
+  utils::SharedPtr<SetGlobalPropertiesRequest> command =
+      CreateCommand<SetGlobalPropertiesRequest>(response);
+
+  MockAppPtr mock_app(CreateMockApp());
+  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app));
+
+  ON_CALL(mock_message_helper_, HMIToMobileResult(_))
+      .WillByDefault(Return(mobile_apis::Result::UNSUPPORTED_RESOURCE));
+
+  MockHmiInterfaces hmi_interfaces;
+  EXPECT_CALL(app_mngr_, hmi_interfaces())
+      .WillRepeatedly(ReturnRef(hmi_interfaces));
+  EXPECT_CALL(hmi_interfaces, GetInterfaceState(_))
+      .WillRepeatedly(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
+
+  MessageSharedPtr response_to_mobile;
+  EXPECT_CALL(
+      app_mngr_,
+      ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
+      .WillOnce(DoAll(SaveArg<0>(&response_to_mobile), Return(true)));
+
+  command->Run();
+  command->on_event(event_ui);
+  command->on_event(event_tts);
+
+  EXPECT_EQ((*response_to_mobile)[am::strings::msg_params][am::strings::success]
+                .asBool(),
+            false);
+  EXPECT_EQ(
+      (*response_to_mobile)[am::strings::msg_params][am::strings::result_code]
+          .asInt(),
+      static_cast<int32_t>(mobile_apis::Result::INVALID_DATA));
 }
 
 }  // namespace set_global_properties_request

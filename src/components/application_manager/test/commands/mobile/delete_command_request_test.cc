@@ -144,7 +144,7 @@ class DeleteCommandRequestTest
 };
 
 TEST_F(DeleteCommandRequestTest,
-       OnEvent_VrHmiSendSuccess_UNSUPPORTED_RESOURCE) {
+       OnEvent_VrHmiSendUnsupportedResource_UNSUPPORTED_RESOURCE) {
   MessageSharedPtr command_msg = CreateFullParamsVRSO();
   (*command_msg)[am::strings::msg_params][am::strings::cmd_id] = kCommandId;
   (*command_msg)[am::strings::params][am::strings::connection_key] =
@@ -160,8 +160,12 @@ TEST_F(DeleteCommandRequestTest,
 
   ON_CALL(hmi_interfaces_, GetInterfaceFromFunction(_))
       .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_VR));
-  ON_CALL(hmi_interfaces_, GetInterfaceState(_))
-      .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_RESPONSE));
+  ON_CALL(hmi_interfaces_,
+          GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
+      .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
+  ON_CALL(hmi_interfaces_,
+          GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_VR))
+      .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
   ON_CALL(*mock_app_, FindCommand(kCommandId))
       .WillByDefault(Return(test_msg.get()));
   ON_CALL(*mock_app_, get_grammar_id()).WillByDefault(Return(kConnectionKey));
@@ -178,6 +182,8 @@ TEST_F(DeleteCommandRequestTest,
   MessageSharedPtr event_msg(CreateMessage(smart_objects::SmartType_Map));
   (*event_msg)[am::strings::params][am::hmi_response::code] =
       hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
+  (*event_msg)[am::strings::msg_params][am::strings::info] =
+      "VR is not supported by system";
   Event event_vr(hmi_apis::FunctionID::VR_DeleteCommand);
   event_vr.set_smart_object(*event_msg);
 
@@ -197,7 +203,7 @@ TEST_F(DeleteCommandRequestTest,
 }
 
 TEST_F(DeleteCommandRequestTest,
-       OnEvent_UIHmiSendSuccess_UNSUPPORTED_RESOURCE) {
+       OnEvent_UIHmiSendUnsupportedResource_UNSUPPORTED_RESOURCE) {
   MessageSharedPtr command_msg = CreateFullParamsUISO();
   (*command_msg)[am::strings::msg_params][am::strings::cmd_id] = kCommandId;
   (*command_msg)[am::strings::params][am::strings::connection_key] =
@@ -214,8 +220,12 @@ TEST_F(DeleteCommandRequestTest,
 
   ON_CALL(hmi_interfaces_, GetInterfaceFromFunction(_))
       .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_UI));
-  ON_CALL(hmi_interfaces_, GetInterfaceState(_))
-      .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_RESPONSE));
+  ON_CALL(hmi_interfaces_,
+          GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
+      .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
+  ON_CALL(hmi_interfaces_,
+          GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_VR))
+      .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
   ON_CALL(*app, FindCommand(kCommandId)).WillByDefault(Return(test_msg.get()));
   ON_CALL(*app, get_grammar_id()).WillByDefault(Return(kConnectionKey));
 
@@ -231,200 +241,8 @@ TEST_F(DeleteCommandRequestTest,
   MessageSharedPtr event_msg(CreateMessage(smart_objects::SmartType_Map));
   (*event_msg)[am::strings::params][am::hmi_response::code] =
       hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
-  Event event_ui(hmi_apis::FunctionID::UI_DeleteCommand);
-  event_ui.set_smart_object(*event_msg);
-
-  EXPECT_CALL(*app, RemoveCommand(kCommandId));
-
-  EXPECT_CALL(*app, UpdateHash());
-
-  MessageSharedPtr result_msg(
-      CatchMobileCommandResult(CallOnEvent(*command, event_ui)));
-
-  ASSERT_TRUE(result_msg);
-
-  ResultCommandExpectations(result_msg, "UI is not supported by system");
-}
-
-TEST_F(DeleteCommandRequestTest,
-       OnEvent_UIHmiSendWarning_UNSUPPORTED_RESOURCE) {
-  MessageSharedPtr command_msg = CreateFullParamsUISO();
-  (*command_msg)[am::strings::msg_params][am::strings::cmd_id] = kCommandId;
-  (*command_msg)[am::strings::params][am::strings::connection_key] =
-      kConnectionKey;
-
-  DeleteCommandPtr command(CreateCommand<DeleteCommandRequest>(command_msg));
-
-  MockAppPtr app = CreateMockApp();
-  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
-
-  MessageSharedPtr test_msg(CreateMessage(smart_objects::SmartType_Map));
-  (*test_msg)[am::strings::vr_commands] = 0;
-  (*test_msg)[am::strings::menu_params] = 0;
-
-  ON_CALL(hmi_interfaces_, GetInterfaceFromFunction(_))
-      .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_UI));
-  ON_CALL(hmi_interfaces_, GetInterfaceState(_))
-      .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_RESPONSE));
-  ON_CALL(*app, FindCommand(kCommandId)).WillByDefault(Return(test_msg.get()));
-  ON_CALL(*app, get_grammar_id()).WillByDefault(Return(kConnectionKey));
-
-  MessageSharedPtr msg(CreateMessage(smart_objects::SmartType_Map));
-  (*msg)[am::strings::params][am::hmi_response::code] =
-      hmi_apis::Common_Result::WARNINGS;
-  Event event_vr(hmi_apis::FunctionID::VR_DeleteCommand);
-  event_vr.set_smart_object(*msg);
-
-  command->Run();
-  command->on_event(event_vr);
-
-  MessageSharedPtr event_msg(CreateMessage(smart_objects::SmartType_Map));
-  (*event_msg)[am::strings::params][am::hmi_response::code] =
-      hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
-  Event event_ui(hmi_apis::FunctionID::UI_DeleteCommand);
-  event_ui.set_smart_object(*event_msg);
-
-  EXPECT_CALL(*app, RemoveCommand(kCommandId));
-
-  EXPECT_CALL(*app, UpdateHash());
-
-  MessageSharedPtr result_msg(
-      CatchMobileCommandResult(CallOnEvent(*command, event_ui)));
-
-  ASSERT_TRUE(result_msg);
-
-  ResultCommandExpectations(result_msg, "UI is not supported by system");
-}
-
-TEST_F(DeleteCommandRequestTest,
-       OnEvent_UIHmiSendWronglanguage_UNSUPPORTED_RESOURCE) {
-  MessageSharedPtr command_msg = CreateFullParamsUISO();
-  (*command_msg)[am::strings::msg_params][am::strings::cmd_id] = kCommandId;
-  (*command_msg)[am::strings::params][am::strings::connection_key] =
-      kConnectionKey;
-
-  DeleteCommandPtr command(CreateCommand<DeleteCommandRequest>(command_msg));
-
-  MockAppPtr app = CreateMockApp();
-  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
-
-  MessageSharedPtr test_msg(CreateMessage(smart_objects::SmartType_Map));
-  (*test_msg)[am::strings::vr_commands] = 0;
-  (*test_msg)[am::strings::menu_params] = 0;
-
-  ON_CALL(hmi_interfaces_, GetInterfaceFromFunction(_))
-      .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_UI));
-  ON_CALL(hmi_interfaces_, GetInterfaceState(_))
-      .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_RESPONSE));
-  ON_CALL(*app, FindCommand(kCommandId)).WillByDefault(Return(test_msg.get()));
-  ON_CALL(*app, get_grammar_id()).WillByDefault(Return(kConnectionKey));
-
-  MessageSharedPtr msg(CreateMessage(smart_objects::SmartType_Map));
-  (*msg)[am::strings::params][am::hmi_response::code] =
-      hmi_apis::Common_Result::WRONG_LANGUAGE;
-  Event event_vr(hmi_apis::FunctionID::VR_DeleteCommand);
-  event_vr.set_smart_object(*msg);
-
-  command->Run();
-  command->on_event(event_vr);
-
-  MessageSharedPtr event_msg(CreateMessage(smart_objects::SmartType_Map));
-  (*event_msg)[am::strings::params][am::hmi_response::code] =
-      hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
-  Event event_ui(hmi_apis::FunctionID::UI_DeleteCommand);
-  event_ui.set_smart_object(*event_msg);
-
-  MessageSharedPtr result_msg(
-      CatchMobileCommandResult(CallOnEvent(*command, event_ui)));
-
-  ASSERT_TRUE(result_msg);
-
-  ResultCommandExpectations(result_msg, "UI is not supported by system");
-}
-
-TEST_F(DeleteCommandRequestTest, OnEvent_UIHmiSendRetry_UNSUPPORTED_RESOURCE) {
-  MessageSharedPtr command_msg = CreateFullParamsUISO();
-  (*command_msg)[am::strings::msg_params][am::strings::cmd_id] = kCommandId;
-  (*command_msg)[am::strings::params][am::strings::connection_key] =
-      kConnectionKey;
-
-  DeleteCommandPtr command(CreateCommand<DeleteCommandRequest>(command_msg));
-
-  MockAppPtr app = CreateMockApp();
-  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
-
-  MessageSharedPtr test_msg(CreateMessage(smart_objects::SmartType_Map));
-  (*test_msg)[am::strings::vr_commands] = 0;
-  (*test_msg)[am::strings::menu_params] = 0;
-
-  ON_CALL(hmi_interfaces_, GetInterfaceFromFunction(_))
-      .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_UI));
-  ON_CALL(hmi_interfaces_, GetInterfaceState(_))
-      .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_RESPONSE));
-  ON_CALL(*app, FindCommand(kCommandId)).WillByDefault(Return(test_msg.get()));
-  ON_CALL(*app, get_grammar_id()).WillByDefault(Return(kConnectionKey));
-
-  MessageSharedPtr msg(CreateMessage(smart_objects::SmartType_Map));
-  (*msg)[am::strings::params][am::hmi_response::code] =
-      hmi_apis::Common_Result::RETRY;
-  Event event_vr(hmi_apis::FunctionID::VR_DeleteCommand);
-  event_vr.set_smart_object(*msg);
-
-  command->Run();
-  command->on_event(event_vr);
-
-  MessageSharedPtr event_msg(CreateMessage(smart_objects::SmartType_Map));
-  (*event_msg)[am::strings::params][am::hmi_response::code] =
-      hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
-  Event event_ui(hmi_apis::FunctionID::UI_DeleteCommand);
-  event_ui.set_smart_object(*event_msg);
-
-  EXPECT_CALL(*app, RemoveCommand(kCommandId));
-
-  EXPECT_CALL(*app, UpdateHash());
-
-  MessageSharedPtr result_msg(
-      CatchMobileCommandResult(CallOnEvent(*command, event_ui)));
-
-  ASSERT_TRUE(result_msg);
-
-  ResultCommandExpectations(result_msg, "UI is not supported by system");
-}
-
-TEST_F(DeleteCommandRequestTest, OnEvent_UIHmiSendSaved_UNSUPPORTED_RESOURCE) {
-  MessageSharedPtr command_msg = CreateFullParamsUISO();
-  (*command_msg)[am::strings::msg_params][am::strings::cmd_id] = kCommandId;
-  (*command_msg)[am::strings::params][am::strings::connection_key] =
-      kConnectionKey;
-
-  DeleteCommandPtr command(CreateCommand<DeleteCommandRequest>(command_msg));
-
-  MockAppPtr app = CreateMockApp();
-  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
-
-  MessageSharedPtr test_msg(CreateMessage(smart_objects::SmartType_Map));
-  (*test_msg)[am::strings::vr_commands] = 0;
-  (*test_msg)[am::strings::menu_params] = 0;
-
-  ON_CALL(hmi_interfaces_, GetInterfaceFromFunction(_))
-      .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_UI));
-  ON_CALL(hmi_interfaces_, GetInterfaceState(_))
-      .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_RESPONSE));
-  ON_CALL(*app, FindCommand(kCommandId)).WillByDefault(Return(test_msg.get()));
-  ON_CALL(*app, get_grammar_id()).WillByDefault(Return(kConnectionKey));
-
-  MessageSharedPtr msg(CreateMessage(smart_objects::SmartType_Map));
-  (*msg)[am::strings::params][am::hmi_response::code] =
-      hmi_apis::Common_Result::SAVED;
-  Event event_vr(hmi_apis::FunctionID::VR_DeleteCommand);
-  event_vr.set_smart_object(*msg);
-
-  command->Run();
-  command->on_event(event_vr);
-
-  MessageSharedPtr event_msg(CreateMessage(smart_objects::SmartType_Map));
-  (*event_msg)[am::strings::params][am::hmi_response::code] =
-      hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
+  (*event_msg)[am::strings::msg_params][am::strings::info] =
+      "UI is not supported by system";
   Event event_ui(hmi_apis::FunctionID::UI_DeleteCommand);
   event_ui.set_smart_object(*event_msg);
 
