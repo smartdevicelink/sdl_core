@@ -214,7 +214,7 @@ TEST_F(ChangeRegistrationRequestTest, OnEvent_VR_UNSUPPORTED_RESOURCE) {
 
   EXPECT_EQ(
       (*response_to_mobile)[strings::msg_params][strings::success].asBool(),
-      false);
+      true);
   EXPECT_EQ(
       (*response_to_mobile)[strings::msg_params][strings::result_code].asInt(),
       static_cast<int32_t>(mobile_apis::Result::UNSUPPORTED_RESOURCE));
