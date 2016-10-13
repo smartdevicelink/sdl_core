@@ -116,11 +116,14 @@ class RegisterAppInterfaceRequestTest
 
   void InitLanguage(
       hmi_apis::Common_Language::eType ui_language = kHmiLanguage,
-      hmi_apis::Common_Language::eType vr_language = kHmiLanguage) {
+      hmi_apis::Common_Language::eType vr_language = kHmiLanguage,
+      hmi_apis::Common_Language::eType tts_language = kHmiLanguage) {
     ON_CALL(mock_hmi_capabilities_, active_vr_language())
         .WillByDefault(Return(vr_language));
     ON_CALL(mock_hmi_capabilities_, active_ui_language())
         .WillByDefault(Return(ui_language));
+    ON_CALL(mock_hmi_capabilities_, active_tts_language())
+        .WillByDefault(Return(tts_language));
   }
 
   void InitGetters() {
@@ -250,7 +253,7 @@ MATCHER_P(CheckHMIInterfacesRealtedData, expected_data, "") {
 }
 
 TEST_F(RegisterAppInterfaceRequestTest,
-       DISABLE_Run_HmiInterfacesStateAvailable_SUCCESS) {
+       Run_HmiInterfacesStateAvailable_SUCCESS) {
   InitBasicMessage();
 
   MockAppPtr mock_app = CreateBasicMockedApp();
