@@ -48,6 +48,7 @@
 #include "interfaces/MOBILE_API.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
+#include "application_manager/mock_hmi_interface.h"
 
 namespace test {
 namespace components {
@@ -61,11 +62,59 @@ namespace am = ::application_manager;
 using am::commands::AlertManeuverRequest;
 using am::commands::MessageSharedPtr;
 using am::event_engine::Event;
+using am::MockHmiInterfaces;
+using am::MockMessageHelper;
 
 typedef SharedPtr<AlertManeuverRequest> CommandPtr;
 
 class AlertManeuverRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
+ public:
+  void CheckExpectations(const hmi_apis::Common_Result::eType hmi_response,
+                         const mobile_apis::Result::eType mobile_response,
+                         const am::HmiInterfaces::InterfaceState state,
+                         const bool success) {
+    MessageSharedPtr response = CreateMessage(smart_objects::SmartType_Map);
+    (*response)[am::strings::params][am::hmi_response::code] = hmi_response;
+    (*response)[am::strings::msg_params][am::strings::info] = "test";
+
+    am::event_engine::Event event(hmi_apis::FunctionID::TTS_Speak);
+    event.set_smart_object(*response);
+
+    utils::SharedPtr<AlertManeuverRequest> command =
+        CreateCommand<AlertManeuverRequest>(response);
+
+    MockAppPtr mock_app(CreateMockApp());
+    ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app));
+
+    MockMessageHelper* mock_message_helper =
+        MockMessageHelper::message_helper_mock();
+    EXPECT_CALL(*mock_message_helper, HMIToMobileResult(_))
+        .WillOnce(Return(mobile_apis::Result::UNSUPPORTED_RESOURCE));
+
+    MockHmiInterfaces hmi_interfaces;
+    EXPECT_CALL(app_mngr_, hmi_interfaces())
+        .WillRepeatedly(ReturnRef(hmi_interfaces));
+    EXPECT_CALL(hmi_interfaces, GetInterfaceState(_))
+        .WillRepeatedly(Return(state));
+
+    MessageSharedPtr response_to_mobile;
+    EXPECT_CALL(app_mngr_,
+                ManageMobileCommand(
+                    _, am::commands::Command::CommandOrigin::ORIGIN_SDL))
+        .WillOnce(DoAll(SaveArg<0>(&response_to_mobile), Return(true)));
+    command->on_event(event);
+
+    EXPECT_EQ(
+        (*response_to_mobile)[am::strings::msg_params][am::strings::success]
+            .asBool(),
+        success);
+    EXPECT_EQ(
+        (*response_to_mobile)[am::strings::msg_params][am::strings::result_code]
+            .asInt(),
+        static_cast<int32_t>(mobile_response));
+  }
+
  protected:
   NiceMock<policy_test::MockPolicyHandlerInterface> policy_interface_;
 };
@@ -163,6 +212,15 @@ TEST_F(AlertManeuverRequestTest, Run_ProcessingResult_SUCCESS) {
               ProcessSoftButtons(_, _, _, _))
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
 
+  MockHmiInterfaces hmi_interfaces;
+  EXPECT_CALL(app_mngr_, hmi_interfaces())
+      .WillRepeatedly(ReturnRef(hmi_interfaces));
+  EXPECT_CALL(hmi_interfaces, GetInterfaceFromFunction(_))
+      .WillRepeatedly(
+          Return(am::HmiInterfaces::InterfaceID::HMI_INTERFACE_TTS));
+  EXPECT_CALL(hmi_interfaces, GetInterfaceState(_))
+      .WillRepeatedly(Return(am::HmiInterfaces::STATE_AVAILABLE));
+
   EXPECT_CALL(*(am::MockMessageHelper::message_helper_mock()),
               SubscribeApplicationToSoftButton(_, _, _));
 
@@ -183,6 +241,34 @@ TEST_F(AlertManeuverRequestTest, OnEvent_ReceivedUnknownEvent_UNSUCCESS) {
             static_cast<mobile_apis::Result::eType>(
                 (*result_msg)[am::strings::msg_params][am::strings::result_code]
                     .asInt()));
+}
+
+TEST_F(AlertManeuverRequestTest, OnEvent_UNSUPPORTED_RESOURCE_Case1) {
+  CheckExpectations(hmi_apis::Common_Result::SUCCESS,
+                    mobile_apis::Result::UNSUPPORTED_RESOURCE,
+                    am::HmiInterfaces::STATE_AVAILABLE,
+                    true);
+}
+
+TEST_F(AlertManeuverRequestTest, OnEvent_UNSUPPORTED_RESOURCE_Case2) {
+  CheckExpectations(hmi_apis::Common_Result::SUCCESS,
+                    mobile_apis::Result::UNSUPPORTED_RESOURCE,
+                    am::HmiInterfaces::STATE_NOT_AVAILABLE,
+                    true);
+}
+
+TEST_F(AlertManeuverRequestTest, OnEvent_UNSUPPORTED_RESOURCE_Case3) {
+  CheckExpectations(hmi_apis::Common_Result::SUCCESS,
+                    mobile_apis::Result::UNSUPPORTED_RESOURCE,
+                    am::HmiInterfaces::STATE_NOT_RESPONSE,
+                    true);
+}
+
+TEST_F(AlertManeuverRequestTest, OnEvent_UNSUPPORTED_RESOURCE_Case4) {
+  CheckExpectations(hmi_apis::Common_Result::GENERIC_ERROR,
+                    mobile_apis::Result::UNSUPPORTED_RESOURCE,
+                    am::HmiInterfaces::STATE_NOT_RESPONSE,
+                    false);
 }
 
 }  // namespace mobile_commands_test
