@@ -33,10 +33,9 @@
 #include <stdint.h>
 #include <string>
 
-#include "application_manager/commands/mobile/add_sub_menu_request.h"
+#include "application_manager/commands/mobile/set_media_clock_timer_request.h"
 
 #include "gtest/gtest.h"
-#include "application_manager/commands/commands_test.h"
 #include "application_manager/commands/command_request_test.h"
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_application.h"
@@ -48,9 +47,10 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace set_media_clock_timer_request {
 
 namespace am = ::application_manager;
-using am::commands::AddSubMenuRequest;
+using am::commands::SetMediaClockRequest;
 using am::commands::MessageSharedPtr;
 using am::event_engine::Event;
 using am::MockHmiInterfaces;
@@ -58,50 +58,70 @@ using am::MockMessageHelper;
 using ::testing::_;
 using ::testing::Mock;
 using ::testing::Return;
+using ::testing::ReturnRef;
 
-typedef SharedPtr<AddSubMenuRequest> AddSubMenuPtr;
+typedef SharedPtr<SetMediaClockRequest> SetMediaClockRequestPtr;
 
 namespace {
 const uint32_t kConnectionKey = 2u;
 }  // namespace
 
-class AddSubMenuRequestTest
+class SetMediaClockRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
-  AddSubMenuRequestTest()
-      : mock_message_helper_(*MockMessageHelper::message_helper_mock()) {}
+  SetMediaClockRequestTest()
+      : mock_message_helper_(*MockMessageHelper::message_helper_mock())
+      , mock_app_(CreateMockApp()) {}
+
+  void SetUp() OVERRIDE {
+    ON_CALL(app_mngr_, application(kConnectionKey))
+        .WillByDefault(Return(mock_app_));
+    ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kConnectionKey));
+    ON_CALL(app_mngr_, hmi_interfaces())
+        .WillByDefault(ReturnRef(hmi_interfaces_));
+  }
+
+  void TearDown() OVERRIDE {
+    Mock::VerifyAndClearExpectations(&mock_message_helper_);
+  }
+
+  void ResultCommandExpectations(MessageSharedPtr msg,
+                                 const std::string& info) {
+    EXPECT_EQ((*msg)[am::strings::msg_params][am::strings::success].asBool(),
+              true);
+    EXPECT_EQ(
+        (*msg)[am::strings::msg_params][am::strings::result_code].asInt(),
+        static_cast<int32_t>(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE));
+    EXPECT_EQ((*msg)[am::strings::msg_params][am::strings::info].asString(),
+              info);
+  }
+
+  NiceMock<MockHmiInterfaces> hmi_interfaces_;
   MockMessageHelper& mock_message_helper_;
+  MockAppPtr mock_app_;
 };
 
-TEST_F(AddSubMenuRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
-  const uint32_t menu_id = 10u;
+TEST_F(SetMediaClockRequestTest,
+       OnEvent_UIHmiSendUnsupportedResource_UNSUPPORTED_RESOURCE) {
   MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
   (*msg)[am::strings::params][am::strings::connection_key] = kConnectionKey;
-  (*msg)[am::strings::msg_params][am::strings::menu_id] = menu_id;
 
-  utils::SharedPtr<AddSubMenuRequest> command =
-      CreateCommand<AddSubMenuRequest>(msg);
-
-  MockAppPtr mock_app = CreateMockApp();
-  ON_CALL(app_mngr_, application(kConnectionKey))
-      .WillByDefault(Return(mock_app));
-  ON_CALL(*mock_app, app_id()).WillByDefault(Return(kConnectionKey));
-  EXPECT_CALL(*mock_app, AddSubMenu(menu_id, _));
-  EXPECT_CALL(*mock_app, UpdateHash());
+  utils::SharedPtr<SetMediaClockRequest> command =
+      CreateCommand<SetMediaClockRequest>(msg);
 
   MessageSharedPtr ev_msg = CreateMessage(smart_objects::SmartType_Map);
   (*ev_msg)[am::strings::params][am::hmi_response::code] =
       hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
-  (*ev_msg)[am::strings::msg_params][am::strings::info] = "info";
+  (*ev_msg)[am::strings::msg_params][am::strings::app_id] = kConnectionKey;
+  (*ev_msg)[am::strings::msg_params][am::strings::info] =
+      "UI is not supported by system";
 
-  Event event(hmi_apis::FunctionID::UI_AddSubMenu);
+  Event event(hmi_apis::FunctionID::UI_SetMediaClockTimer);
   event.set_smart_object(*ev_msg);
 
-  MockHmiInterfaces hmi_interfaces;
-  ON_CALL(app_mngr_, hmi_interfaces()).WillByDefault(ReturnRef(hmi_interfaces));
-  EXPECT_CALL(hmi_interfaces,
+  EXPECT_CALL(hmi_interfaces_,
               GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
-      .WillOnce(Return(am::HmiInterfaces::STATE_AVAILABLE));
+      .WillRepeatedly(Return(am::HmiInterfaces::STATE_NOT_RESPONSE));
 
   EXPECT_CALL(mock_message_helper_,
               HMIToMobileResult(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE))
@@ -115,23 +135,10 @@ TEST_F(AddSubMenuRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
 
   command->on_event(event);
 
-  EXPECT_EQ((*ui_command_result)[am::strings::msg_params][am::strings::success]
-                .asBool(),
-            true);
-  EXPECT_EQ(
-      (*ui_command_result)[am::strings::msg_params][am::strings::result_code]
-          .asInt(),
-      static_cast<int32_t>(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE));
-  if ((*ui_command_result)[am::strings::msg_params].keyExists(
-          am::strings::info)) {
-    EXPECT_FALSE(
-        (*ui_command_result)[am::strings::msg_params][am::strings::info]
-            .asString()
-            .empty());
-  }
-  Mock::VerifyAndClearExpectations(&mock_message_helper_);
+  ResultCommandExpectations(ui_command_result, "UI is not supported by system");
 }
 
+}  // namespace set_media_clock_timer_request
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

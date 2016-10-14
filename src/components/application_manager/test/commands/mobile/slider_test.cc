@@ -32,74 +32,99 @@
 
 #include <stdint.h>
 #include <string>
-#include <vector>
+#include <set>
 
-#include "application_manager/commands/mobile/end_audio_pass_thru_request.h"
+#include "application_manager/commands/mobile/slider_request.h"
 
 #include "gtest/gtest.h"
-#include "application_manager/smart_object_keys.h"
-#include "application_manager/test/include/application_manager/commands/commands_test.h"
-#include "application_manager/test/include/application_manager/commands/command_request_test.h"
+#include "application_manager/commands/command_request_test.h"
+#include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager.h"
-#include "application_manager/event_engine/event.h"
 #include "application_manager/mock_message_helper.h"
+#include "application_manager/event_engine/event.h"
 #include "application_manager/mock_hmi_interface.h"
 
 namespace test {
 namespace components {
 namespace commands_test {
-namespace mobile_commands_test {
 
-namespace am = ::application_manager;
+namespace am = application_manager;
+using am::commands::SliderRequest;
+using am::commands::CommandImpl;
+using am::commands::MessageSharedPtr;
+using am::MockMessageHelper;
+using am::MockHmiInterfaces;
+using ::utils::SharedPtr;
 using ::testing::_;
 using ::testing::Mock;
 using ::testing::Return;
 using ::testing::ReturnRef;
-using am::commands::MessageSharedPtr;
-using am::commands::EndAudioPassThruRequest;
-using am::event_engine::Event;
-using am::MockHmiInterfaces;
-using am::MockMessageHelper;
 
-typedef SharedPtr<EndAudioPassThruRequest> EndAudioPassThruRequestPtr;
+namespace {
+const int32_t kCommandId = 1;
+const uint32_t kAppId = 1u;
+const uint32_t kCmdId = 1u;
+const uint32_t kConnectionKey = 2u;
+}  // namespace
 
-class EndAudioPassThruRequestTest
+class SliderRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
-  EndAudioPassThruRequestTest()
+  SliderRequestTest()
       : mock_message_helper_(*MockMessageHelper::message_helper_mock()) {}
   MockMessageHelper& mock_message_helper_;
+  sync_primitives::Lock lock_;
+
+  MessageSharedPtr CreateFullParamsUISO() {
+    MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
+    (*msg)[am::strings::params][am::strings::connection_key] = kConnectionKey;
+    smart_objects::SmartObject menu_params =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+    menu_params[am::strings::position] = 10;
+    menu_params[am::strings::menu_name] = "LG";
+
+    smart_objects::SmartObject msg_params =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+    msg_params[am::strings::cmd_id] = kCmdId;
+    msg_params[am::strings::menu_params] = menu_params;
+    msg_params[am::strings::app_id] = kAppId;
+    msg_params[am::strings::cmd_icon] = 1;
+    msg_params[am::strings::cmd_icon][am::strings::value] = "10";
+    (*msg)[am::strings::msg_params] = msg_params;
+
+    return msg;
+  }
 };
 
-TEST_F(EndAudioPassThruRequestTest, OnEvent_UI_UNSUPPORTED_RESOUCRE) {
-  const uint32_t kConnectionKey = 2u;
+TEST_F(SliderRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
+  MessageSharedPtr msg_ui = CreateFullParamsUISO();
+  (*msg_ui)[am::strings::params][am::strings::connection_key] = kConnectionKey;
 
-  MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
-  (*command_msg)[am::strings::params][am::strings::connection_key] =
-      kConnectionKey;
+  utils::SharedPtr<SliderRequest> command =
+      CreateCommand<SliderRequest>(msg_ui);
 
-  EndAudioPassThruRequestPtr command(
-      CreateCommand<EndAudioPassThruRequest>(command_msg));
+  MockAppPtr mock_app = CreateMockApp();
+  ON_CALL(app_mngr_, application(kConnectionKey))
+      .WillByDefault(Return(mock_app));
 
-  MessageSharedPtr event_msg(CreateMessage(smart_objects::SmartType_Map));
-  (*event_msg)[am::strings::msg_params] = 0;
-  (*event_msg)[am::strings::params][am::hmi_response::code] =
-      mobile_apis::Result::UNSUPPORTED_RESOURCE;
-
-  Event event(hmi_apis::FunctionID::UI_EndAudioPassThru);
-  event.set_smart_object(*event_msg);
-
+  ON_CALL(*mock_app, app_id()).WillByDefault(Return(kConnectionKey));
   MockHmiInterfaces hmi_interfaces;
   ON_CALL(app_mngr_, hmi_interfaces()).WillByDefault(ReturnRef(hmi_interfaces));
-  ON_CALL(hmi_interfaces,
-          GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
-      .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
+  EXPECT_CALL(hmi_interfaces,
+              GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
+      .WillOnce(Return(am::HmiInterfaces::STATE_AVAILABLE));
+
+  MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
+  (*msg)[am::strings::params][am::hmi_response::code] =
+      hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
+  (*msg)[am::strings::msg_params][am::strings::info] = "info";
+
+  Event event(hmi_apis::FunctionID::UI_Slider);
+  event.set_smart_object(*msg);
 
   EXPECT_CALL(mock_message_helper_,
               HMIToMobileResult(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE))
       .WillOnce(Return(mobile_apis::Result::UNSUPPORTED_RESOURCE));
-
-  EXPECT_CALL(app_mngr_, EndAudioPassThrough()).WillOnce(Return(false));
 
   MessageSharedPtr ui_command_result;
   EXPECT_CALL(
@@ -126,7 +151,6 @@ TEST_F(EndAudioPassThruRequestTest, OnEvent_UI_UNSUPPORTED_RESOUCRE) {
   Mock::VerifyAndClearExpectations(&mock_message_helper_);
 }
 
-}  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components
-}  // namespace test
+}  // namespace tests

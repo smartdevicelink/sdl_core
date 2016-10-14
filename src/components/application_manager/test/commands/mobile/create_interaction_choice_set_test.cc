@@ -53,6 +53,7 @@
 namespace test {
 namespace components {
 namespace commands_test {
+namespace create_interaction_choice_set_request {
 
 namespace am = application_manager;
 using am::commands::CommandImpl;
@@ -62,6 +63,7 @@ using am::ApplicationSharedPtr;
 using am::MockMessageHelper;
 using am::MockHmiInterfaces;
 using ::testing::_;
+using ::testing::Mock;
 using ::utils::SharedPtr;
 using ::testing::Return;
 using ::testing::ReturnRef;
@@ -203,6 +205,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest, OnEvent_VR_UNSUPPORTED_RESOURCE) {
   }
 }
 
+}  // namespace create_interaction_choice_set_request
 }  // namespace commands_test
 }  // namespace components
 }  // namespace tests
