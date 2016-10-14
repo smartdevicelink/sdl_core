@@ -724,15 +724,19 @@ void SmartObject::cleanup_data() {
   switch (m_type) {
     case SmartType_String:
       delete m_data.str_value;
+      m_data.str_value = NULL;
       break;
     case SmartType_Map:
       delete m_data.map_value;
+      m_data.map_value = NULL;
       break;
     case SmartType_Array:
       delete m_data.array_value;
+      m_data.array_value = NULL;
       break;
     case SmartType_Binary:
       delete m_data.binary_value;
+      m_data.array_value = NULL;
       break;
     default:
       break;

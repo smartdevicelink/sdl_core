@@ -282,6 +282,13 @@ class RequestController {
    */
   timer::Timer timer_;
 
+  /*
+   * Timer for lock
+   */
+  volatile bool timer_stop_flag_;
+  sync_primitives::Lock timer_lock;
+  sync_primitives::ConditionalVariable timer_condition_;
+
   bool is_low_voltage_;
   const RequestControlerSettings& settings_;
   DISALLOW_COPY_AND_ASSIGN(RequestController);
