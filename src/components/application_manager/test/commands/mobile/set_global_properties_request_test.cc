@@ -59,6 +59,7 @@ using utils::SharedPtr;
 using utils::custom_string::CustomString;
 using smart_objects::SmartObject;
 using testing::_;
+using testing::Mock;
 using testing::Return;
 using testing::Mock;
 
@@ -167,6 +168,43 @@ class SetGlobalPropertiesRequestTest
     EXPECT_CALL(*mock_app_, set_menu_icon(_)).Times(0);
     EXPECT_CALL(*mock_app_, set_keyboard_props(_)).Times(0);
     EXPECT_CALL(*mock_app_, app_id()).Times(0);
+  }
+
+  void ExpectInvalidData() {
+    EXPECT_CALL(mock_app_manager_,
+                ManageMobileCommand(
+                    MobileResultCodeIs(mobile_apis::Result::INVALID_DATA),
+                    am::commands::Command::ORIGIN_SDL));
+  }
+
+  void ExpectVerifyImageVrHelpSuccess(SmartObject& smart_obj) {
+    EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
+        .WillOnce(Return(mock_app_));
+    EXPECT_CALL(mock_message_helper_, VerifyImageVrHelpItems(smart_obj, _, _))
+        .WillOnce(Return(mobile_apis::Result::SUCCESS));
+    EXPECT_CALL(mock_app_manager_, RemoveAppFromTTSGlobalPropertiesList(_))
+        .Times(0);
+  }
+
+  void ExpectVerifyImageVrHelpUnsuccess() {
+    EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
+        .WillOnce(Return(mock_app_));
+    EXPECT_CALL(mock_message_helper_, VerifyImageVrHelpItems(_, _, _)).Times(0);
+    EXPECT_CALL(mock_app_manager_, RemoveAppFromTTSGlobalPropertiesList(_))
+        .Times(0);
+  }
+
+  void ExpectVerifyImageSuccess(SmartObject& smart_obj) {
+    EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
+        .WillOnce(Return(mock_app_));
+    EXPECT_CALL(mock_message_helper_, VerifyImage(smart_obj, _, _))
+        .WillOnce(Return(mobile_apis::Result::SUCCESS));
+    EXPECT_CALL(mock_app_manager_, RemoveAppFromTTSGlobalPropertiesList(_))
+        .Times(0);
+  }
+
+  void TearDown() OVERRIDE {
+    Mock::VerifyAndClearExpectations(&mock_message_helper_);
   }
 
   MockAppPtr mock_app_;
@@ -378,6 +416,39 @@ TEST_F(SetGlobalPropertiesRequestTest, Run_NoVR_SUCCESS) {
   command->Run();
 }
 
+TEST_F(SetGlobalPropertiesRequestTest, Run_VRCouldNotGenerate_INVALID_DATA) {
+  MessageSharedPtr msg = CreateMsgParams();
+  SmartObject keyboard_properties(smart_objects::SmartType_Map);
+  (*msg)[strings::msg_params][hmi_request::keyboard_properties] =
+      keyboard_properties;
+  SmartObject menu_title("Menu_Title");
+  (*msg)[strings::msg_params][hmi_request::menu_title] = menu_title;
+
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillOnce(Return(mock_app_));
+  EXPECT_CALL(mock_message_helper_, VerifyImageVrHelpItems(_, _, _)).Times(0);
+  EXPECT_CALL(mock_app_manager_,
+              RemoveAppFromTTSGlobalPropertiesList(kConnectionKey));
+  SmartObject* vr_help_title = NULL;
+  CommandsMap commands_map;
+  SmartObject empty_msg(smart_objects::SmartType_Map);
+  commands_map.insert(std::pair<uint32_t, SmartObject*>(1u, &empty_msg));
+  DataAccessor<CommandsMap> accessor(commands_map, lock_);
+  EXPECT_CALL(*mock_app_, commands_map()).WillOnce(Return(accessor));
+  EXPECT_CALL(*mock_app_, vr_help_title()).WillOnce(Return(vr_help_title));
+  EXPECT_CALL(*mock_app_, set_menu_title(_)).Times(0);
+
+  SharedPtr<SetGlobalPropertiesRequest> command(
+      CreateCommand<SetGlobalPropertiesRequest>(msg));
+
+  EXPECT_CALL(
+      mock_app_manager_,
+      ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::INVALID_DATA),
+                          am::commands::Command::ORIGIN_SDL));
+
+  command->Run();
+}
+
 TEST_F(SetGlobalPropertiesRequestTest, Run_NoVRNoDataNoDefault_Canceled) {
   MessageSharedPtr msg = CreateMsgParams();
   SmartObject keyboard_properties(smart_objects::SmartType_Map);
@@ -576,9 +647,6 @@ TEST_F(SetGlobalPropertiesRequestTest, Run_TTSIncorrectSyntax_Canceled) {
   EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
   EXPECT_CALL(mock_message_helper_, VerifyImageVrHelpItems(_, _, _)).Times(0);
-  EXPECT_CALL(mock_app_manager_, RemoveAppFromTTSGlobalPropertiesList(_))
-      .Times(0);
-  SmartObject vr_help_title("title");
   EmptyExpectationsSetupHelper();
 
   SharedPtr<SetGlobalPropertiesRequest> command(
@@ -587,14 +655,140 @@ TEST_F(SetGlobalPropertiesRequestTest, Run_TTSIncorrectSyntax_Canceled) {
   command->Run();
 }
 
+TEST_F(SetGlobalPropertiesRequestTest, Run_InvalidHelpPromptText_INVALID_DATA) {
+  MessageSharedPtr msg = CreateMsgParams();
+  SmartObject help_prompt(smart_objects::SmartType_Array);
+  help_prompt[0][strings::text] =
+      "invalid help prompt text with empty line in the end\\n";
+  (*msg)[strings::msg_params][strings::help_prompt] = help_prompt;
+
+  ExpectVerifyImageVrHelpUnsuccess();
+  EmptyExpectationsSetupHelper();
+
+  SharedPtr<SetGlobalPropertiesRequest> command(
+      CreateCommand<SetGlobalPropertiesRequest>(msg));
+
+  ExpectInvalidData();
+
+  command->Run();
+}
+
+TEST_F(SetGlobalPropertiesRequestTest, Run_InvalidVrHelpText_INVALID_DATA) {
+  MessageSharedPtr msg = CreateMsgParams();
+  SmartObject vr_help(smart_objects::SmartType_Array);
+  vr_help[0][strings::text] =
+      "invalid vr_help text with empty line in the end\\n";
+  (*msg)[strings::msg_params][strings::vr_help] = vr_help;
+
+  ExpectVerifyImageVrHelpSuccess(vr_help);
+  EmptyExpectationsSetupHelper();
+
+  SharedPtr<SetGlobalPropertiesRequest> command(
+      CreateCommand<SetGlobalPropertiesRequest>(msg));
+
+  ExpectInvalidData();
+
+  command->Run();
+}
+
+TEST_F(SetGlobalPropertiesRequestTest, Run_InvalidImageValue_INVALID_DATA) {
+  MessageSharedPtr msg = CreateMsgParams();
+  SmartObject vr_help(smart_objects::SmartType_Array);
+  vr_help[0][strings::text] = "vr_help";
+  vr_help[0][strings::image][strings::value] =
+      "invalid value text with empty line in the end\\n";
+  (*msg)[strings::msg_params][strings::vr_help] = vr_help;
+
+  ExpectVerifyImageVrHelpSuccess(vr_help);
+  EmptyExpectationsSetupHelper();
+
+  SharedPtr<SetGlobalPropertiesRequest> command(
+      CreateCommand<SetGlobalPropertiesRequest>(msg));
+
+  ExpectInvalidData();
+
+  command->Run();
+}
+
+TEST_F(SetGlobalPropertiesRequestTest, Run_InvalidMenuIcon_INVALID_DATA) {
+  MessageSharedPtr msg = CreateMsgParams();
+  SmartObject menu_icon(smart_objects::SmartType_Array);
+  menu_icon[strings::value] =
+      "invalid menu icon text with empty line in the end\\n";
+  (*msg)[strings::msg_params][strings::menu_icon] = menu_icon;
+
+  ExpectVerifyImageSuccess(menu_icon);
+  EmptyExpectationsSetupHelper();
+
+  SharedPtr<SetGlobalPropertiesRequest> command(
+      CreateCommand<SetGlobalPropertiesRequest>(msg));
+
+  ExpectInvalidData();
+
+  command->Run();
+}
+
+TEST_F(SetGlobalPropertiesRequestTest, Run_InvalidMenuTitle_INVALID_DATA) {
+  MessageSharedPtr msg = CreateMsgParams();
+  SmartObject menu_title(smart_objects::SmartType_Array);
+  menu_title = "invalid menu title text with empty line in the end\\n";
+  (*msg)[strings::msg_params][strings::menu_title] = menu_title;
+
+  ExpectVerifyImageVrHelpUnsuccess();
+  EmptyExpectationsSetupHelper();
+
+  SharedPtr<SetGlobalPropertiesRequest> command(
+      CreateCommand<SetGlobalPropertiesRequest>(msg));
+
+  ExpectInvalidData();
+
+  command->Run();
+}
+
+TEST_F(SetGlobalPropertiesRequestTest,
+       Run_InvalidLimitedCharacterList_INVALID_DATA) {
+  MessageSharedPtr msg = CreateMsgParams();
+  SmartObject limited_character_list(smart_objects::SmartType_Array);
+  limited_character_list[0] =
+      "invalid limited character list text with empty line in the end\\n";
+  (*msg)[strings::msg_params][strings::keyboard_properties]
+        [strings::limited_character_list] = limited_character_list;
+
+  ExpectVerifyImageVrHelpUnsuccess();
+  EmptyExpectationsSetupHelper();
+
+  SharedPtr<SetGlobalPropertiesRequest> command(
+      CreateCommand<SetGlobalPropertiesRequest>(msg));
+
+  ExpectInvalidData();
+
+  command->Run();
+}
+
+TEST_F(SetGlobalPropertiesRequestTest,
+       Run_InvalidAutoCompleteText_INVALID_DATA) {
+  MessageSharedPtr msg = CreateMsgParams();
+  SmartObject auto_complete_text(smart_objects::SmartType_Array);
+  auto_complete_text =
+      "invalid auto completetext with empty line in the end\\n";
+  (*msg)[strings::msg_params][strings::keyboard_properties]
+        [strings::auto_complete_text] = auto_complete_text;
+
+  ExpectVerifyImageVrHelpUnsuccess();
+  EmptyExpectationsSetupHelper();
+
+  SharedPtr<SetGlobalPropertiesRequest> command(
+      CreateCommand<SetGlobalPropertiesRequest>(msg));
+
+  ExpectInvalidData();
+
+  command->Run();
+}
+
 TEST_F(SetGlobalPropertiesRequestTest, Run_NoData_Canceled) {
   MessageSharedPtr msg = CreateMsgParams();
 
-  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
-      .WillOnce(Return(mock_app_));
-  EXPECT_CALL(mock_message_helper_, VerifyImageVrHelpItems(_, _, _)).Times(0);
-  EXPECT_CALL(mock_app_manager_, RemoveAppFromTTSGlobalPropertiesList(_))
-      .Times(0);
+  ExpectVerifyImageVrHelpUnsuccess();
   EmptyExpectationsSetupHelper();
 
   SharedPtr<SetGlobalPropertiesRequest> command(
@@ -607,17 +801,31 @@ TEST_F(SetGlobalPropertiesRequestTest, Run_InvalidApp_Canceled) {
   MessageSharedPtr msg = CreateMessage();
   (*msg)[strings::params][strings::connection_key] = kConnectionKey;
 
-  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
-      .WillOnce(Return(MockAppPtr()));
-  EXPECT_CALL(mock_message_helper_, VerifyImageVrHelpItems(_, _, _)).Times(0);
-  EXPECT_CALL(mock_app_manager_, RemoveAppFromTTSGlobalPropertiesList(_))
-      .Times(0);
+  ExpectVerifyImageVrHelpUnsuccess();
+
   EmptyExpectationsSetupHelper();
 
   SharedPtr<SetGlobalPropertiesRequest> command(
       CreateCommand<SetGlobalPropertiesRequest>(msg));
 
   command->Run();
+}
+
+TEST_F(SetGlobalPropertiesRequestTest, OnEvent_PendingRequest_UNSUCCESS) {
+  MessageSharedPtr msg = CreateMsgParams();
+  hmi_apis::Common_Result::eType response_code =
+      hmi_apis::Common_Result::SUCCESS;
+  (*msg)[strings::params][hmi_response::code] = response_code;
+
+  SharedPtr<SetGlobalPropertiesRequest> command(
+      CreateCommand<SetGlobalPropertiesRequest>(msg));
+
+  EXPECT_CALL(mock_message_helper_, HMIToMobileResult(_)).Times(0);
+
+  Event event(hmi_apis::FunctionID::UI_SetGlobalProperties);
+  event.set_smart_object(*msg);
+
+  command->on_event(event);
 }
 
 TEST_F(SetGlobalPropertiesRequestTest, OnEvent_UIAndSuccessResultCode_SUCCESS) {
