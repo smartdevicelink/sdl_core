@@ -208,6 +208,7 @@ endif()
 
 if (BUILD_USB_SUPPORT)
   add_definitions(-DUSB_SUPPORT)
+  find_package(UDev REQUIRED)
   message(STATUS "USB support is enabled")
 endif()
 
@@ -618,6 +619,7 @@ add_custom_target(install-3rd_party
   WORKING_DIRECTORY ${3RD_PARTY_BINARY_DIRECTORY}
 )
 
+find_package(OpenSSL REQUIRED)
 if(ENABLE_LOG)
   include_directories ( ${LOG4CXX_INCLUDE_DIRECTORY} )
 endif()

@@ -86,6 +86,9 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
   void SendRegisterAppInterfaceResponseToMobile();
 
  private:
+  smart_objects::SmartObjectSPtr GetLockScreenIconUrlNotification(
+      const uint32_t connection_key, ApplicationSharedPtr app);
+
   /**
    * @brief SendChangeRegistration send ChangeRegistration on HMI
    * @param function_id interface specific ChangeRegistration

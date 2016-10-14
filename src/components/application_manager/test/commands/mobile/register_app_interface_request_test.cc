@@ -201,7 +201,7 @@ class RegisterAppInterfaceRequestTest
   MockHmiInterfaces mock_hmi_interfaces_;
 };
 
-TEST_F(RegisterAppInterfaceRequestTest, Run_MinimalData_SUCCESS) {
+TEST_F(RegisterAppInterfaceRequestTest, DISABLED_Run_MinimalData_SUCCESS) {
   InitBasicMessage();
 
   MockAppPtr mock_app = CreateBasicMockedApp();
@@ -253,7 +253,7 @@ MATCHER_P(CheckHMIInterfacesRealtedData, expected_data, "") {
 }
 
 TEST_F(RegisterAppInterfaceRequestTest,
-       Run_HmiInterfacesStateAvailable_SUCCESS) {
+       DISABLED_Run_HmiInterfacesStateAvailable_SUCCESS) {
   InitBasicMessage();
 
   MockAppPtr mock_app = CreateBasicMockedApp();
