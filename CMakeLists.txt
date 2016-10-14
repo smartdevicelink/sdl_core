@@ -66,6 +66,8 @@ option(ENABLE_HMI_PTU_DECRYPTION "Policy table update parsed by hmi" ON)
 option(ENABLE_EXTENDED_POLICY "Turns extended flow which requires embedded system interaction" ON)
 option(ENABLE_THREAD_COUNT "Turn on correct threads shutdown checks" OFF)
 option(FAST_BUILD "Turn on fast build" ON)
+option(USE_CCACHE "Turn on ccache usage" ON)
+option(USE_DISTCC "Turn on distributed build_usage" ON)
 
 # Platform - specific build flags
 if(${OS} STREQUAL "posix")
@@ -171,6 +173,37 @@ if(ENABLE_THREAD_COUNT)
   add_definitions(-DTHREAD_COUNT)
   message(STATUS "Thread counting enabled")
 endif()
+
+if (USE_CCACHE)
+# Configure CCache if available
+  find_program(CCACHE_FOUND ccache)
+  if(CCACHE_FOUND)
+    get_property(RULE_LAUNCH_COMPILE GLOBAL PROPERTY RULE_LAUNCH_COMPILE)
+    set(RULE_LAUNCH_COMPILE "${RULE_LAUNCH_COMPILE} ccache")
+    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ${RULE_LAUNCH_COMPILE})
+
+    get_property(RULE_LAUNCH_LINK GLOBAL PROPERTY RULE_LAUNCH_LINK)
+    set(RULE_LAUNCH_LINK "${RULE_LAUNCH_LINK} ccache")
+    set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ${RULE_LAUNCH_LINK})
+
+    message(INFO " Used CCache for compilation.")
+  else(CCACHE_FOUND)
+    message(WARNING " CCache was not found.")
+  endif(CCACHE_FOUND)
+endif(USE_CCACHE)
+
+if (USE_DISTCC)
+# Configure distributed compilation if available
+  find_program(DISTCC_FOUND distcc)
+  if(DISTCC_FOUND)
+    get_property(RULE_LAUNCH_COMPILE GLOBAL PROPERTY RULE_LAUNCH_COMPILE)
+    set(RULE_LAUNCH_COMPILE "${RULE_LAUNCH_COMPILE} distcc")
+    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ${RULE_LAUNCH_COMPILE})
+    message(INFO " Used distributed build.")
+  else(CCACHE_FOUND)
+    message(WARNING " distcc was not found. Distributed compilation is impossible.")
+  endif(DISTCC_FOUND)
+endif(USE_DISTCC)
 
 if(EXTENDED_MEDIA_MODE)
   add_definitions(-DEXTENDED_MEDIA_MODE)
