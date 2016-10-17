@@ -2291,10 +2291,10 @@
   </enum>
 
   <struct name="Coordinate">
-    <param name="latitudeDegrees" minvalue="-90" maxvalue="90" type="Double" mandatory="true">
+    <param name="latitudeDegrees" minvalue="-90" maxvalue="90" type="Float" mandatory="true">
       <description>Latitude of the location.</description>
     </param>
-    <param name="longitudeDegrees" minvalue="-180" maxvalue="180" type="Double" mandatory="true">
+    <param name="longitudeDegrees" minvalue="-180" maxvalue="180" type="Float" mandatory="true">
       <description>Longitude of the location.</description>
     </param>
   </struct>
@@ -4790,9 +4790,9 @@
   </function>
 
   <function name="SendLocation" functionID="SendLocationID" messagetype="request">
-     <param name="longitudeDegrees" type="Double" minvalue="-180" maxvalue="180" mandatory="false">
+     <param name="longitudeDegrees" type="Float" minvalue="-180" maxvalue="180" mandatory="false">
     </param>
-     <param name="latitudeDegrees" type="Double" minvalue="-90" maxvalue="90" mandatory="false">
+     <param name="latitudeDegrees" type="Float" minvalue="-90" maxvalue="90" mandatory="false">
     </param>
     <param name="locationName" type="String" maxlength="500" mandatory="false">
       <description>
