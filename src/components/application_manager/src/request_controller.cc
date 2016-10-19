@@ -381,40 +381,40 @@ void RequestController::onTimer() {
     RequestInfoPtr probably_expired =
         waiting_for_response_.FrontWithNotNullTimeout();
     if (!probably_expired) {
-	  sync_primitives::AutoLock auto_lock(timer_lock);
-	  timer_condition_.Wait(auto_lock);
-	  continue;
-	}
-	if (!probably_expired->isExpired()) {
+      sync_primitives::AutoLock auto_lock(timer_lock);
+      timer_condition_.Wait(auto_lock);
+      continue;
+    }
+    if (!probably_expired->isExpired()) {
       LOG4CXX_DEBUG(logger_,
-				    "Timeout for "
-               	        << (RequestInfo::HMIRequest ==
-							        probably_expired->requst_type()
+                    "Timeout for "
+                        << (RequestInfo::HMIRequest ==
+                                    probably_expired->requst_type()
                                 ? "HMI"
                                 : "Mobile")
                         << " request id: " << probably_expired->requestId()
                         << " connection_key: " << probably_expired->app_id()
                         << " NOT expired");
-	  sync_primitives::AutoLock auto_lock(timer_lock);
-	  const TimevalStruct current_time = date_time::DateTime::getCurrentTime();
-	  const TimevalStruct end_time = probably_expired->end_time();
-	  if (current_time < end_time) {
-	    const uint32_t msecs = static_cast<uint32_t>(
-			date_time::DateTime::getmSecs(end_time - current_time));
-		LOG4CXX_DEBUG(logger_, "Sleep for " << msecs << " millisecs");
-		timer_condition_.WaitFor(auto_lock, msecs);
-	  }
-	  continue;
-	}
+      sync_primitives::AutoLock auto_lock(timer_lock);
+      const TimevalStruct current_time = date_time::DateTime::getCurrentTime();
+      const TimevalStruct end_time = probably_expired->end_time();
+      if (current_time < end_time) {
+        const uint32_t msecs = static_cast<uint32_t>(
+            date_time::DateTime::getmSecs(end_time - current_time));
+        LOG4CXX_DEBUG(logger_, "Sleep for " << msecs << " millisecs");
+        timer_condition_.WaitFor(auto_lock, msecs);
+      }
+      continue;
+    }
     LOG4CXX_INFO(logger_,
-				 "Timeout for "
-             		 << (RequestInfo::HMIRequest ==
-							    probably_expired->requst_type()
+                 "Timeout for "
+                     << (RequestInfo::HMIRequest ==
+                                 probably_expired->requst_type()
                              ? "HMI"
-                     		 : "Mobile")
-             		 << " request id: " << probably_expired->requestId()
-             		 << " connection_key: " << probably_expired->app_id()
-             		 << " is expired");
+                             : "Mobile")
+                     << " request id: " << probably_expired->requestId()
+                     << " connection_key: " << probably_expired->app_id()
+                     << " is expired");
     const uint32_t experied_request_id = probably_expired->requestId();
     const uint32_t experied_app_id = probably_expired->app_id();
 
