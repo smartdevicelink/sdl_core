@@ -1130,6 +1130,8 @@ void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string) {
   }
   SendMessageToSDK(pt_string, urls.front().url.front());
 #endif
+  // reset update required false
+  OnUpdateRequestSentToMobile();
 }
 
 bool PolicyHandler::GetPriority(const std::string& policy_app_id,
