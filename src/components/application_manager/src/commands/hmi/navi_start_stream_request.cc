@@ -63,21 +63,19 @@ void NaviStartStreamRequest::Run() {
     LOG4CXX_INFO(logger_, "Interface Navi is not supported by system");
     return;
   }
-
-  SetAllowedToTerminate(false);
-  subscribe_on_event(hmi_apis::FunctionID::Navigation_StartStream,
-                     correlation_id());
-
   ApplicationSharedPtr app =
       application_manager_.application_by_hmi_app(application_id());
-  if (app) {
-    app->set_video_streaming_allowed(true);
-    SendRequest();
-  } else {
+  if (!app) {
     LOG4CXX_ERROR(logger_,
                   "Applcation with hmi_app_id " << application_id()
                                                 << "does not exist");
+    return;
   }
+  SetAllowedToTerminate(false);
+  subscribe_on_event(hmi_apis::FunctionID::Navigation_StartStream,
+                     correlation_id());
+  app->set_video_streaming_allowed(true);
+  SendRequest();
 }
 
 void NaviStartStreamRequest::on_event(const event_engine::Event& event) {
