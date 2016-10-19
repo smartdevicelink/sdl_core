@@ -147,38 +147,6 @@ mobile_apis::Result::eType CreateInteractionChoiceSetRequest::CheckChoiceSet(
   return mobile_apis::Result::SUCCESS;
 }
 
-bool CreateInteractionChoiceSetRequest::compareSynonyms(
-    const NsSmartDeviceLink::NsSmartObjects::SmartObject& choice1,
-    const NsSmartDeviceLink::NsSmartObjects::SmartObject& choice2) {
-  smart_objects::SmartArray* vr_cmds_1 =
-      choice1[strings::vr_commands].asArray();
-  DCHECK(vr_cmds_1 != NULL);
-  smart_objects::SmartArray* vr_cmds_2 =
-      choice2[strings::vr_commands].asArray();
-  DCHECK(vr_cmds_2 != NULL);
-
-  smart_objects::SmartArray::iterator it;
-  it = std::find_first_of(vr_cmds_1->begin(),
-                          vr_cmds_1->end(),
-                          vr_cmds_2->begin(),
-                          vr_cmds_2->end(),
-                          CreateInteractionChoiceSetRequest::compareStr);
-
-  if (it != vr_cmds_1->end()) {
-    SDL_INFO("Incoming choice set has duplicated VR synonyms "
-             << it->asString());
-    return true;
-  }
-
-  return false;
-}
-
-bool CreateInteractionChoiceSetRequest::compareStr(
-    const NsSmartDeviceLink::NsSmartObjects::SmartObject& str1,
-    const NsSmartDeviceLink::NsSmartObjects::SmartObject& str2) {
-  return 0 == strcasecmp(str1.asCharArray(), str2.asCharArray());
-}
-
 bool CreateInteractionChoiceSetRequest::IsWhiteSpaceExist(
     const smart_objects::SmartObject& choice_set) {
   SDL_AUTO_TRACE();
