@@ -57,7 +57,7 @@ RequestController::RequestController(const RequestControlerSettings& settings)
     , settings_(settings) {
   LOG4CXX_AUTO_TRACE(logger_);
   InitializeThreadpool();
-  timer_.Start(0, timer::kSingleShot);
+  timer_.Start(0, true);
 }
 
 RequestController::~RequestController() {
