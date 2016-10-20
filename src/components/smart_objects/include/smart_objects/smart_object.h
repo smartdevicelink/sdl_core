@@ -36,6 +36,7 @@
 #include <set>
 #include <string>
 #include <vector>
+#include <iostream>
 #include <map>
 
 #include "smart_objects/smart_schema.h"
@@ -163,7 +164,7 @@ class SmartObject FINAL {
    * @param pointer
    **/
   template <typename UnknownType>
-  SmartObject(const UnknownType&);
+  explicit SmartObject(const UnknownType&);
 
   /**
    * @brief Constructor for creating object of given primitive type.
@@ -449,6 +450,18 @@ class SmartObject FINAL {
    * @return std::string
    **/
   std::string asString() const;
+
+  /**
+   * @brief Writes smart object to stream
+   *
+   * @param out_stream reference to a stream
+   * in which smart_object will be recorded
+   * @param smart_object object which will be
+   * written to the out_stream
+   * @return reference to out_stream
+   **/
+  friend std::iostream& operator<<(std::iostream& out_stream,
+                                   const SmartObject& smart_object);
 
   /**
    * @brief Returns char array from SmartObject data if exist. Otherwise returns
@@ -841,14 +854,6 @@ class SmartObject FINAL {
   inline void set_value_cstr(const char* NewValue);
 
   /**
-   * @brief Converts object to string type
-   *
-   * @return int32_t Converted value or invalid_string_value if conversion not
-   *possible
-   **/
-  inline std::string convert_string() const;
-
-  /**
    * @brief Converts object to CustomString type
    *
    * @return CustomString Converted value or
@@ -1014,6 +1019,7 @@ static SmartObject invalid_object_value(SmartType_Invalid);
  * @brief Value that is used as invalid value for object type
  **/
 static const SmartBinary invalid_binary_value;
+
 }  // namespace NsSmartObjects
 }  // namespace NsSmartDeviceLink
 

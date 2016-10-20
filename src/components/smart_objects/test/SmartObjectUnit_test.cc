@@ -304,7 +304,7 @@ TEST(FromBool, TypeConversion) {
 
   obj = true;
 
-  ASSERT_EQ(invalid_string_value, obj.asString());
+  ASSERT_EQ("true", obj.asString());
   ASSERT_TRUE(obj.asBool());
   ASSERT_EQ(1, obj.asInt());
   ASSERT_EQ(invalid_char_value, obj.asChar());
@@ -315,7 +315,7 @@ TEST(FromBool, TypeConversion) {
 
   obj = false;
 
-  ASSERT_EQ(invalid_string_value, obj.asString());
+  ASSERT_EQ("false", obj.asString());
   ASSERT_FALSE(obj.asBool());
   ASSERT_EQ(0, obj.asBool());
   ASSERT_EQ(invalid_char_value, obj.asChar());
@@ -413,7 +413,7 @@ TEST(FromMap, TypeConversion) {
 
   obj["key1"] = 123;
 
-  ASSERT_EQ(invalid_string_value, obj.asString());
+  ASSERT_EQ("{\"key1\": 123}", obj.asString());
   ASSERT_EQ(invalid_int_value, obj.asInt());
   ASSERT_EQ(invalid_char_value, obj.asChar());
   ASSERT_EQ(invalid_double_value, obj.asDouble());
@@ -428,7 +428,7 @@ TEST(FromArray, TypeConversion) {
   obj[0] = 'A';
   obj[1] = -123;
 
-  ASSERT_EQ(invalid_string_value, obj.asString());
+  ASSERT_EQ("[A, -123]", obj.asString());
   ASSERT_EQ(invalid_int_value, obj.asInt());
   ASSERT_EQ(invalid_char_value, obj.asChar());
   ASSERT_EQ(invalid_double_value, obj.asDouble());
