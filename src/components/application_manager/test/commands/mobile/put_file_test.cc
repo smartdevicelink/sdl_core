@@ -32,18 +32,23 @@
 
 #include <stdint.h>
 #include <string>
+#include <vector>
 
 #include "gtest/gtest.h"
 
-#include "application_manager/commands/commands_test.h"
+#include "commands/commands_test.h"
+#include "commands/command_request_test.h"
 
 #include "mobile/put_file_response.h"
 #include "mobile/put_file_request.h"
 
 #include "utils/make_shared.h"
+#include "utils/file_system.h"
 #include "smart_objects/smart_object.h"
-
+#include "interfaces/MOBILE_API.h"
+#include "application_manager/application.h"
 #include "application_manager/mock_application.h"
+#include "application_manager/policies/mock_policy_handler_interface.h"
 
 namespace test {
 namespace components {
@@ -51,42 +56,99 @@ namespace commands_test {
 namespace mobile_commands_test {
 namespace put_file {
 
-using namespace application_manager;
-
-using ::testing::Return;
 using ::testing::_;
+using ::testing::Return;
+using ::testing::ReturnRef;
+using ::testing::AtLeast;
+
+namespace am = ::application_manager;
+
+using am::commands::PutFileRequest;
+using am::commands::PutFileResponse;
+using am::commands::MessageSharedPtr;
+using policy_test::MockPolicyHandlerInterface;
+
+typedef SharedPtr<PutFileRequest> PutFileRequestPtr;
+typedef SharedPtr<PutFileResponse> PutFileResponsePtr;
 
 namespace {
-const int32_t kConnectionKey = 1;
+const uint32_t kConnectionKey = 1u;
+const std::string kFileName = "sync_file_name.txt";
+const int64_t kOffset = 10u;
+const int64_t kZeroOffset = 0u;
+const std::string kStorageFolder = "./storage";
+const std::string kAppFolder = "app_folder";
 }
+
+class PutFileRequestTest
+    : public CommandRequestTest<CommandsTestMocks::kIsNice> {
+ public:
+  PutFileRequestTest()
+      : msg_(CreateMessage(::smart_objects::SmartType_Map))
+      , mock_app_(CreateMockApp()) {}
+
+  void SetUp() OVERRIDE {
+    binary_data_.push_back(1u);
+
+    (*msg_)[am::strings::params][am::strings::connection_key] = kConnectionKey;
+    (*msg_)[am::strings::msg_params][am::strings::sync_file_name] = kFileName;
+    (*msg_)[am::strings::msg_params][am::strings::persistent_file] = true;
+    (*msg_)[am::strings::msg_params][am::strings::file_type] =
+        mobile_apis::FileType::JSON;
+    (*msg_)[am::strings::params][am::strings::binary_data] = binary_data_;
+
+    ON_CALL(mock_app_manager_, application(kConnectionKey))
+        .WillByDefault(Return(mock_app_));
+    ON_CALL(mock_app_manager_, GetPolicyHandler())
+        .WillByDefault(ReturnRef(mock_policy_handler_));
+    ON_CALL(*mock_app_, hmi_level())
+        .WillByDefault(Return(mobile_apis::HMILevel::HMI_FULL));
+  }
+
+  void ExpectReceiveMessageFromSDK() {
+    EXPECT_CALL(mock_policy_handler_,
+                ReceiveMessageFromSDK(kFileName, binary_data_))
+        .WillOnce(Return(mobile_apis::HMILevel::HMI_FULL));
+  }
+  void ExpectManageMobileCommandWithResultCode(
+      const mobile_apis::Result::eType code) {
+    EXPECT_CALL(
+        mock_app_manager_,
+        ManageMobileCommand(MobileResultCodeIs(code),
+                            am::commands::Command::CommandOrigin::ORIGIN_SDL));
+  }
+
+  MessageSharedPtr msg_;
+  MockAppPtr mock_app_;
+  MockPolicyHandlerInterface mock_policy_handler_;
+  std::vector<uint8_t> binary_data_;
+};
 
 class PutFileResponceTest : public CommandsTest<CommandsTestMocks::kIsNice> {
  public:
-  void SetUp() OVERRIDE {
-    message_ = utils::MakeShared<SmartObject>(::smart_objects::SmartType_Map);
-    (*message_)[strings::msg_params] =
-        ::smart_objects::SmartObject(::smart_objects::SmartType_Map);
+  PutFileResponceTest() : message_(CreateMessage()) {}
 
-    command_sptr_ =
-        CreateCommand<application_manager::commands::PutFileResponse>(message_);
+  void SetUp() OVERRIDE {
+    command_sptr_ = CreateCommand<PutFileResponse>(message_);
   }
 
   MessageSharedPtr message_;
-  utils::SharedPtr<commands::PutFileResponse> command_sptr_;
+  SharedPtr<PutFileResponse> command_sptr_;
 };
 
 TEST_F(PutFileResponceTest, Run_InvalidApp_ApplicationNotRegisteredResponce) {
   ::smart_objects::SmartObject& message_ref = *message_;
 
-  message_ref[strings::params][strings::connection_key] = kConnectionKey;
+  message_ref[am::strings::params][am::strings::connection_key] =
+      kConnectionKey;
 
-  utils::SharedPtr<Application> null_application_sptr;
+  utils::SharedPtr<am::Application> null_application_sptr;
   EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
       .WillOnce(Return(null_application_sptr));
   EXPECT_CALL(
       mock_app_manager_,
       SendMessageToMobile(
-          MobileResultCodeIs(mobile_api::Result::APPLICATION_NOT_REGISTERED),
+          MobileResultCodeIs(mobile_apis::Result::APPLICATION_NOT_REGISTERED),
           _));
   command_sptr_->Run();
 }
@@ -94,10 +156,11 @@ TEST_F(PutFileResponceTest, Run_InvalidApp_ApplicationNotRegisteredResponce) {
 TEST_F(PutFileResponceTest, Run_ApplicationRegistered_Success) {
   ::smart_objects::SmartObject& message_ref = *message_;
 
-  message_ref[strings::params][strings::connection_key] = kConnectionKey;
-  message_ref[strings::msg_params][strings::success] = true;
+  message_ref[am::strings::params][am::strings::connection_key] =
+      kConnectionKey;
+  message_ref[am::strings::msg_params][am::strings::success] = true;
 
-  utils::SharedPtr<Application> application_sptr =
+  utils::SharedPtr<am::Application> application_sptr =
       utils::MakeShared<MockApplication>();
 
   EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
@@ -106,6 +169,181 @@ TEST_F(PutFileResponceTest, Run_ApplicationRegistered_Success) {
       mock_app_manager_,
       SendMessageToMobile(MobileResultCodeIs(mobile_apis::Result::SUCCESS), _));
   command_sptr_->Run();
+}
+
+TEST_F(PutFileRequestTest, Run_ApplicationIsNotRegistered_UNSUCCESS) {
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillOnce(Return(ApplicationSharedPtr()));
+  ExpectManageMobileCommandWithResultCode(
+      mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+
+  PutFileRequestPtr command(CreateCommand<PutFileRequest>(msg_));
+  command->Run();
+}
+
+TEST_F(PutFileRequestTest, Run_HmiLevelNone_UNSUCCESS) {
+  EXPECT_CALL(*mock_app_, hmi_level())
+      .WillOnce(Return(mobile_apis::HMILevel::HMI_NONE));
+
+  const uint32_t settings_put_file_in_none = 1u;
+  const uint32_t app_put_file_in_none_count = 2u;
+  EXPECT_CALL(mock_app_manager_settings_, put_file_in_none())
+      .WillOnce(ReturnRef(settings_put_file_in_none));
+  EXPECT_CALL(*mock_app_, put_file_in_none_count())
+      .WillOnce(Return(app_put_file_in_none_count));
+  ExpectManageMobileCommandWithResultCode(mobile_apis::Result::REJECTED);
+
+  PutFileRequestPtr command(CreateCommand<PutFileRequest>(msg_));
+  command->Run();
+}
+
+TEST_F(PutFileRequestTest, Run_BinaryDataDoesNotExists_UNSUCCESS) {
+  (*msg_)[am::strings::params].erase(am::strings::binary_data);
+  ExpectManageMobileCommandWithResultCode(mobile_apis::Result::INVALID_DATA);
+
+  PutFileRequestPtr command(CreateCommand<PutFileRequest>(msg_));
+  command->Run();
+}
+
+TEST_F(PutFileRequestTest, Run_SyncFileNameDoesNotExists_UNSUCCESS) {
+  (*msg_)[am::strings::msg_params].erase(am::strings::sync_file_name);
+
+  ExpectManageMobileCommandWithResultCode(mobile_apis::Result::INVALID_DATA);
+
+  PutFileRequestPtr command(CreateCommand<PutFileRequest>(msg_));
+  command->Run();
+}
+
+TEST_F(PutFileRequestTest, Run_FileTypeDoesNotExists_UNSUCCESS) {
+  (*msg_)[am::strings::msg_params].erase(am::strings::file_type);
+
+  ExpectManageMobileCommandWithResultCode(mobile_apis::Result::INVALID_DATA);
+
+  PutFileRequestPtr command(CreateCommand<PutFileRequest>(msg_));
+  command->Run();
+}
+
+TEST_F(PutFileRequestTest, Run_BinaryDataGreaterThanAvaliableSpace_UNSUCCESS) {
+  (*msg_)[am::strings::msg_params][am::strings::offset] = kOffset;
+  (*msg_)[am::strings::msg_params][am::strings::system_file] = false;
+
+  ExpectReceiveMessageFromSDK();
+  EXPECT_CALL(mock_app_manager_settings_, app_storage_folder())
+      .WillOnce(ReturnRef(kStorageFolder));
+  EXPECT_CALL(*mock_app_, folder_name()).WillOnce(Return(kAppFolder));
+
+  const uint32_t avaliable_space = 0u;
+  EXPECT_CALL(*mock_app_, GetAvailableDiskSpace())
+      .WillOnce(Return(avaliable_space));
+  ExpectManageMobileCommandWithResultCode(mobile_apis::Result::OUT_OF_MEMORY);
+
+  PutFileRequestPtr command(CreateCommand<PutFileRequest>(msg_));
+  command->Run();
+}
+
+TEST_F(PutFileRequestTest, Run_IvalidCreationDirectory_UNSUCCESS) {
+  (*msg_)[am::strings::msg_params][am::strings::offset] = kOffset;
+  (*msg_)[am::strings::msg_params][am::strings::system_file] = true;
+
+  ExpectReceiveMessageFromSDK();
+
+  const std::string storage_folder = "/storage";
+  EXPECT_CALL(mock_app_manager_settings_, system_files_path())
+      .WillOnce(ReturnRef(storage_folder));
+  ExpectManageMobileCommandWithResultCode(mobile_apis::Result::GENERIC_ERROR);
+
+  PutFileRequestPtr command(CreateCommand<PutFileRequest>(msg_));
+  command->Run();
+}
+
+TEST_F(PutFileRequestTest, Run_IvalidUpdateFile_UNSUCCESS) {
+  (*msg_)[am::strings::msg_params][am::strings::offset] = kZeroOffset;
+  (*msg_)[am::strings::msg_params][am::strings::system_file] = false;
+
+  ExpectReceiveMessageFromSDK();
+  EXPECT_CALL(mock_app_manager_settings_, app_storage_folder())
+      .WillOnce(ReturnRef(kStorageFolder));
+  EXPECT_CALL(*mock_app_, folder_name()).WillOnce(Return(kAppFolder));
+
+  const uint32_t avaliable_space = 2u;
+  EXPECT_CALL(*mock_app_, GetAvailableDiskSpace())
+      .WillOnce(Return(avaliable_space))
+      .WillOnce(Return(avaliable_space));
+
+  const std::string file_path =
+      file_system::ConcatPath(kStorageFolder, kAppFolder);
+  EXPECT_CALL(mock_app_manager_,
+              SaveBinary(binary_data_, file_path, kFileName, kZeroOffset))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
+  EXPECT_CALL(*mock_app_, AddFile(_)).WillOnce(Return(false));
+  EXPECT_CALL(*mock_app_, UpdateFile(_)).WillOnce(Return(false));
+
+  ExpectManageMobileCommandWithResultCode(mobile_apis::Result::INVALID_DATA);
+
+  PutFileRequestPtr command(CreateCommand<PutFileRequest>(msg_));
+  command->Run();
+}
+
+TEST_F(PutFileRequestTest, Run_AddFile_SUCCESS) {
+  (*msg_)[am::strings::msg_params][am::strings::offset] = kZeroOffset;
+  (*msg_)[am::strings::msg_params][am::strings::system_file] = false;
+
+  ExpectReceiveMessageFromSDK();
+  EXPECT_CALL(mock_app_manager_settings_, app_storage_folder())
+      .WillOnce(ReturnRef(kStorageFolder));
+  EXPECT_CALL(*mock_app_, folder_name()).WillOnce(Return(kAppFolder));
+
+  const uint32_t avaliable_space = 2u;
+  EXPECT_CALL(*mock_app_, GetAvailableDiskSpace())
+      .WillOnce(Return(avaliable_space))
+      .WillOnce(Return(avaliable_space));
+
+  const std::string file_path =
+      file_system::ConcatPath(kStorageFolder, kAppFolder);
+  EXPECT_CALL(mock_app_manager_,
+              SaveBinary(binary_data_, file_path, kFileName, kZeroOffset))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
+  EXPECT_CALL(*mock_app_, AddFile(_)).WillOnce(Return(true));
+  ExpectManageMobileCommandWithResultCode(mobile_apis::Result::SUCCESS);
+
+  PutFileRequestPtr command(CreateCommand<PutFileRequest>(msg_));
+  command->Run();
+}
+
+TEST_F(PutFileRequestTest, Run_SendOnPutFileNotification_SUCCESS) {
+  (*msg_)[am::strings::msg_params][am::strings::offset] = kZeroOffset;
+  (*msg_)[am::strings::msg_params][am::strings::system_file] = true;
+
+  ExpectReceiveMessageFromSDK();
+  EXPECT_CALL(mock_app_manager_settings_, system_files_path())
+      .WillOnce(ReturnRef(kStorageFolder));
+  EXPECT_CALL(mock_app_manager_,
+              SaveBinary(binary_data_, kStorageFolder, kFileName, kZeroOffset))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
+  EXPECT_CALL(mock_app_manager_,
+              ManageHMICommand(HMIResultCodeIs(
+                  hmi_apis::FunctionID::BasicCommunication_OnPutFile)))
+      .WillOnce(Return(true));
+  ExpectManageMobileCommandWithResultCode(mobile_apis::Result::SUCCESS);
+
+  PutFileRequestPtr command(CreateCommand<PutFileRequest>(msg_));
+  command->Run();
+}
+
+TEST_F(PutFileRequestTest, Run_InvalidPutFile_UNSUCCESS) {
+  (*msg_)[am::strings::msg_params][am::strings::offset] = kZeroOffset;
+  (*msg_)[am::strings::msg_params][am::strings::system_file] = true;
+
+  ExpectReceiveMessageFromSDK();
+  EXPECT_CALL(mock_app_manager_settings_, system_files_path())
+      .WillOnce(ReturnRef(kStorageFolder));
+  EXPECT_CALL(mock_app_manager_,
+              SaveBinary(binary_data_, kStorageFolder, kFileName, kZeroOffset))
+      .WillOnce(Return(mobile_apis::Result::INVALID_DATA));
+  ExpectManageMobileCommandWithResultCode(mobile_apis::Result::INVALID_DATA);
+
+  PutFileRequestPtr command(CreateCommand<PutFileRequest>(msg_));
+  command->Run();
 }
 
 }  // namespace put_file
