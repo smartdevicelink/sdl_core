@@ -53,6 +53,7 @@
 #include "application_manager/mock_resume_ctrl.h"
 #include "application_manager/mock_hmi_interface.h"
 #include "utils/custom_string.h"
+#include "utils/helpers.h"
 #include "utils/lock.h"
 
 namespace test {
@@ -80,6 +81,7 @@ const mobile_apis::Language::eType kMobileLanguage =
 const std::string kMacAddress = "test_mac_address";
 const std::string kAppId = "test_app_id";
 const std::string kDummyString = "test_string";
+const std::string kDummyLockScreenIconUrl = "test_folder/icon";
 const std::vector<uint32_t> kDummyDiagModes;
 }  // namespace
 
@@ -148,6 +150,8 @@ class RegisterAppInterfaceRequestTest
         .WillByDefault(Return(std::vector<std::string>()));
     ON_CALL(mock_policy_handler_, GetUserConsentForDevice(_))
         .WillByDefault(Return(policy::DeviceConsent::kDeviceAllowed));
+    ON_CALL(mock_policy_handler_, GetLockScreenIconUrl())
+        .WillByDefault(Return(kDummyLockScreenIconUrl));
     ON_CALL(app_mngr_, GetDeviceTransportType(_))
         .WillByDefault(Return(hmi_apis::Common_TransportType::WIFI));
     ON_CALL(app_mngr_, hmi_interfaces())
@@ -201,7 +205,41 @@ class RegisterAppInterfaceRequestTest
   MockHmiInterfaces mock_hmi_interfaces_;
 };
 
-TEST_F(RegisterAppInterfaceRequestTest, DISABLED_Run_MinimalData_SUCCESS) {
+MATCHER_P2(CheckLockScreenIconUrlNotification, connection_key, url, "") {
+  const bool is_request_type_correct =
+      mobile_apis::RequestType::LOCK_SCREEN_ICON_URL ==
+      (*arg)[am::strings::msg_params][am::strings::request_type].asInt();
+  const bool is_function_id_correct =
+      mobile_apis::FunctionID::OnSystemRequestID ==
+      (*arg)[am::strings::params][am::strings::function_id].asInt();
+  const bool is_mobile_protocol_type_correct =
+      am::commands::CommandImpl::mobile_protocol_type_ ==
+      (*arg)[am::strings::params][am::strings::protocol_type].asInt();
+  const bool is_protocol_version_correct =
+      am::commands::CommandImpl::protocol_version_ ==
+      (*arg)[am::strings::params][am::strings::protocol_version].asInt();
+  const bool is_message_type_correct =
+      mobile_apis::messageType::notification ==
+      (*arg)[am::strings::params][am::strings::message_type].asInt();
+  const bool is_connection_key_correct =
+      connection_key ==
+      (*arg)[am::strings::params][am::strings::connection_key].asUInt();
+  const bool is_url_correct =
+      url == (*arg)[am::strings::msg_params][am::strings::url].asString();
+
+  using namespace helpers;
+  return Compare<bool, EQ, ALL>(true,
+                                is_request_type_correct,
+                                is_function_id_correct,
+                                is_mobile_protocol_type_correct,
+                                is_protocol_version_correct) &&
+         Compare<bool, EQ, ALL>(true,
+                                is_message_type_correct,
+                                is_connection_key_correct,
+                                is_url_correct);
+}
+
+TEST_F(RegisterAppInterfaceRequestTest, Run_MinimalData_SUCCESS) {
   InitBasicMessage();
 
   MockAppPtr mock_app = CreateBasicMockedApp();
@@ -227,6 +265,10 @@ TEST_F(RegisterAppInterfaceRequestTest, DISABLED_Run_MinimalData_SUCCESS) {
   EXPECT_CALL(
       app_mngr_,
       ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS), _));
+  EXPECT_CALL(app_mngr_,
+              ManageMobileCommand(CheckLockScreenIconUrlNotification(
+                                      kConnectionKey, kDummyLockScreenIconUrl),
+                                  _));
   command_->Run();
 }
 
@@ -253,7 +295,7 @@ MATCHER_P(CheckHMIInterfacesRealtedData, expected_data, "") {
 }
 
 TEST_F(RegisterAppInterfaceRequestTest,
-       DISABLED_Run_HmiInterfacesStateAvailable_SUCCESS) {
+       Run_HmiInterfacesStateAvailable_SUCCESS) {
   InitBasicMessage();
 
   MockAppPtr mock_app = CreateBasicMockedApp();
@@ -326,7 +368,10 @@ TEST_F(RegisterAppInterfaceRequestTest,
   EXPECT_CALL(
       app_mngr_,
       ManageMobileCommand(CheckHMIInterfacesRealtedData(expected_message), _));
-
+  EXPECT_CALL(app_mngr_,
+              ManageMobileCommand(CheckLockScreenIconUrlNotification(
+                                      kConnectionKey, kDummyLockScreenIconUrl),
+                                  _));
   command_->Run();
 }
 
