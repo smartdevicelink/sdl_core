@@ -51,7 +51,7 @@ RequestController::RequestController(const RequestControlerSettings& settings)
     , pool_size_(settings.thread_pool_size())
     , timer_("AM RequestCtrlTimer",
              new timer::TimerTaskImpl<RequestController>(
-                 this, &RequestController::onTimer))
+                 this, &RequestController::TimeoutThread))
     , timer_stop_flag_(false)
     , is_low_voltage_(false)
     , settings_(settings) {
@@ -207,7 +207,7 @@ RequestController::TResult RequestController::addHMIRequest(
   LOG4CXX_DEBUG(logger_,
                 "Waiting for response count:" << waiting_for_response_.Size());
 
-  UpdateTimer();
+  NotifyTimer();
   return RequestController::SUCCESS;
 }
 
@@ -248,7 +248,7 @@ void RequestController::terminateRequest(const uint32_t& correlation_id,
     } else {
       LOG4CXX_WARN(logger_, "Request was not terminated");
     }
-    UpdateTimer();
+    NotifyTimer();
   } else {
     LOG4CXX_WARN(logger_, "Request not found in waiting_for_response_");
   }
@@ -304,7 +304,7 @@ void RequestController::terminateAppRequests(const uint32_t& app_id) {
 
   terminateWaitingForExecutionAppRequests(app_id);
   terminateWaitingForResponseAppRequests(app_id);
-  UpdateTimer();
+  NotifyTimer();
 }
 
 void RequestController::terminateAllHMIRequests() {
@@ -319,7 +319,7 @@ void RequestController::terminateAllMobileRequests() {
   AutoLock waiting_execution_auto_lock(mobile_request_list_lock_);
   mobile_request_list_.clear();
   LOG4CXX_DEBUG(logger_, "Mobile Requests waiting for execution cleared");
-  UpdateTimer();
+  NotifyTimer();
 }
 
 void RequestController::updateRequestTimeout(const uint32_t& app_id,
@@ -341,7 +341,7 @@ void RequestController::updateRequestTimeout(const uint32_t& app_id,
     waiting_for_response_.RemoveRequest(request_info);
     request_info->updateTimeOut(new_timeout);
     waiting_for_response_.Add(request_info);
-    UpdateTimer();
+    NotifyTimer();
     LOG4CXX_INFO(logger_,
                  "Timeout updated for "
                      << " app_id: " << app_id << " correlation_id: "
@@ -372,7 +372,7 @@ bool RequestController::IsLowVoltage() {
   return is_low_voltage_;
 }
 
-void RequestController::onTimer() {
+void RequestController::TimeoutThread() {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(
       logger_,
@@ -433,7 +433,6 @@ void RequestController::onTimer() {
       }
     }
   }
-  UpdateTimer();
   LOG4CXX_DEBUG(
       logger_,
       "EXIT Waiting for response count : " << waiting_for_response_.Size());
@@ -484,7 +483,7 @@ void RequestController::Worker::threadMain() {
     LOG4CXX_DEBUG(logger_, "timeout_in_mseconds " << timeout_in_mseconds);
 
     if (0 != timeout_in_mseconds) {
-      request_controller_->UpdateTimer();
+      request_controller_->NotifyTimer();
     } else {
       LOG4CXX_DEBUG(logger_,
                     "Default timeout was set to 0. "
@@ -512,7 +511,7 @@ void RequestController::Worker::exitThreadMain() {
   // FIXME (dchmerev@luxoft.com): There is no waiting
 }
 
-void RequestController::UpdateTimer() {
+void RequestController::NotifyTimer() {
   LOG4CXX_AUTO_TRACE(logger_);
   timer_condition_.NotifyOne();
 }
