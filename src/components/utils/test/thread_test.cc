@@ -54,11 +54,16 @@ const std::string kThreadName("THREAD");
 
 class ThreadTestDelegate : public threads::ThreadDelegate {
  public:
-  ThreadTestDelegate() : thread_stopped_(false), thread_started_(false) {}
+  ThreadTestDelegate()
+      : thread_stopped_(false), thread_started_(false), starts_counter_(0) {}
+
+  //Milliseconds expected to be enough for execution
+  static const uint32_t kMilliSecondsToWait = 10000u;
 
   void threadMain() OVERRIDE {
     {
       AutoLock test_lock(test_mutex_);
+      ++starts_counter_;
       thread_started_ = true;
       cond_var_.Broadcast();
     }
@@ -73,15 +78,20 @@ class ThreadTestDelegate : public threads::ThreadDelegate {
 
   void WaitForThreadStart() {
     AutoLock test_lock(test_mutex_);
-    while (!thread_started_) {
-      cond_var_.Wait(test_lock);
-    }
+     while (!thread_started_) {
+     ASSERT_FALSE(cond_var_.WaitFor(test_lock, kMilliSecondsToWait) == ConditionalVariable::kTimeout);
+     }
   }
+
 
   bool is_thread_started() const {
     return thread_started_;
   }
 
+  // Thread is not supposed to start twice
+  bool is_thread_restarted() const {
+    return starts_counter_ == 1;
+  }
   void exitThreadMain() OVERRIDE {
     AutoLock test_lock(test_mutex_);
     thread_stopped_ = true;
@@ -97,6 +107,7 @@ class ThreadTestDelegate : public threads::ThreadDelegate {
  private:
   volatile bool thread_stopped_;
   volatile bool thread_started_;
+  uint32_t starts_counter_;
   sync_primitives::ConditionalVariable cond_var_;
   sync_primitives::Lock test_mutex_;
 };
@@ -255,6 +266,62 @@ TEST_F(ThreadTest, StartJoinStart_Success) {
   // Make the thread stop and wait for it
   thread_->join(Thread::JoinOptionStop::kForceStop);
   EXPECT_FALSE(thread_->is_running());
+}
+
+TEST_F(ThreadTest, Start_Success) {
+  // Default ThreadOptions means it is joinable
+  ASSERT_TRUE(thread_->start(threads::ThreadOptions()));
+
+  // Wait for the threadMain to signal that it has started
+  delegate_->WaitForThreadStart();
+  EXPECT_TRUE(delegate_->is_thread_started());
+  CheckThreadHasCompleted();
+}
+
+TEST_F(ThreadTest, StartTwice_Success) {
+  ASSERT_TRUE(thread_->start(threads::ThreadOptions()));
+
+  // Wait for the thread to notify it has started execution
+  delegate_->WaitForThreadStart();
+  EXPECT_TRUE(thread_->is_running());
+
+  // Try to start the same thread second time
+  EXPECT_TRUE(thread_->start());
+
+  // Check thread has not restarted
+  EXPECT_TRUE(delegate_->is_thread_restarted());
+
+  // Make the thread stop and wait for it
+  thread_->join(Thread::JoinOptionStop::kForceStop);
+  EXPECT_FALSE(thread_->is_running());
+}
+
+TEST_F(ThreadTest, StartStop_Success) {
+  ASSERT_TRUE(thread_->start(threads::ThreadOptions()));
+
+  // Wait for the thread to notify it has started execution
+  delegate_->WaitForThreadStart();
+  EXPECT_TRUE(thread_->is_running());
+
+  // Signal the thread to stop and wait for the execution
+  thread_->stop();
+  thread_->join(Thread::JoinOptionStop::kNoStop);
+  EXPECT_FALSE(thread_->is_running());
+}
+
+TEST_F(ThreadTest, StartWithCustomOptions_Success) {
+  bool is_joinable = true;
+
+  // Start thread with custom options (custom stack size & thread is joinable)
+  ASSERT_TRUE(
+      thread_->start(threads::ThreadOptions(kThreadStackSize, is_joinable)));
+
+  // Check thread was created with correct parameters
+  EXPECT_EQ(kThreadName, thread_->name());
+  EXPECT_EQ(kThreadStackSize, thread_->stack_size());
+  EXPECT_EQ(thread_->is_joinable(), is_joinable);
+
+  CheckThreadHasCompleted();
 }
 
 }  // namespace utils
