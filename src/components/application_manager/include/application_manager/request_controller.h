@@ -213,15 +213,14 @@ class RequestController {
 
  protected:
   /**
-  * @brief Timer Callback
+  * @brief Timer callback which handles all request timeouts
   */
-  void onTimer();
+  void TimeoutThread();
 
   /**
-  * @brief Update timout for next OnTimer
-  * Not thread safe
+  * @brief Signal timer condition variable
   */
-  void UpdateTimer();
+  void NotifyTimer();
 
   void terminateWaitingForExecutionAppRequests(const uint32_t& app_id);
   void terminateWaitingForResponseAppRequests(const uint32_t& app_id);
@@ -280,6 +279,13 @@ class RequestController {
    * timer for checking requests timeout
    */
   timer::Timer timer_;
+
+  /*
+   * Timer for lock
+   */
+  bool timer_stop_flag_;
+  sync_primitives::Lock timer_lock;
+  sync_primitives::ConditionalVariable timer_condition_;
 
   bool is_low_voltage_;
   const RequestControlerSettings& settings_;
