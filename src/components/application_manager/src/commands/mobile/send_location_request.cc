@@ -159,7 +159,6 @@ void SendLocationRequest::on_event(const event_engine::Event& event) {
 bool SendLocationRequest::CheckFieldsCompatibility() {
   const smart_objects::SmartObject& msg_params =
       (*message_)[strings::msg_params];
-  MessageHelper::PrintSmartObject(msg_params);
   const bool longitude_degrees_exist =
       msg_params.keyExists(strings::longitude_degrees);
   const bool latitude_degrees_exist =

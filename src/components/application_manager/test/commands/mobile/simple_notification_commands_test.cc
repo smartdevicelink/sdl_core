@@ -105,8 +105,7 @@ TYPED_TEST(MobileNotificationCommandsTest, Run_SendMessageToMobile_SUCCESS) {
       this->template CreateCommand<typename TestFixture::CommandType>();
   EXPECT_CALL(this->mock_app_manager_,
               SendMessageToMobile(CheckNotificationMessage(), _));
-  EXPECT_CALL(this->message_helper_, PrintSmartObject(_))
-      .WillOnce(Return(false));
+
   command->Run();
 }
 

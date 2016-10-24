@@ -76,7 +76,6 @@ class OnHMIStatusNotificationTest
 
   void SetSendNotificationExpectations(MessageSharedPtr& msg) {
     Mock::VerifyAndClearExpectations(&message_helper_);
-    EXPECT_CALL(message_helper_, PrintSmartObject(_)).WillOnce(Return(false));
     EXPECT_CALL(mock_app_manager_, SendMessageToMobile(msg, _));
   }
 

@@ -1041,7 +1041,6 @@ uint32_t ApplicationManagerImpl::GenerateNewHMIAppID() {
 
 void ApplicationManagerImpl::ReplaceMobileByHMIAppId(
     smart_objects::SmartObject& message) {
-  MessageHelper::PrintSmartObject(message);
   if (message.keyExists(strings::app_id)) {
     ApplicationSharedPtr application_ptr =
         application(message[strings::app_id].asUInt());
@@ -1452,9 +1451,6 @@ bool ApplicationManagerImpl::ManageMobileCommand(
     SDL_WARN("Low Voltage is active");
     return false;
   }
-#ifdef DEBUG
-  MessageHelper::PrintSmartObject(*message);
-#endif
 
   SDL_DEBUG("Trying to create message in mobile factory.");
   utils::SharedPtr<commands::Command> command(
@@ -1661,8 +1657,6 @@ bool ApplicationManagerImpl::ManageHMICommand(
     SDL_WARN("Low Voltage is active");
     return false;
   }
-
-  MessageHelper::PrintSmartObject(*message);
 
   CommandSharedPtr command = HMICommandFactory::CreateCommand(message, *this);
   if (!command) {

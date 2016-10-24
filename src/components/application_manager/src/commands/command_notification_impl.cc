@@ -61,7 +61,6 @@ void CommandNotificationImpl::SendNotification() {
       static_cast<int32_t>(application_manager::MessageType::kNotification);
 
   SDL_INFO("SendNotification");
-  MessageHelper::PrintSmartObject(*message_);
 
   application_manager_.SendMessageToMobile(message_);
 }

@@ -250,9 +250,6 @@ TYPED_TEST(OnButtonNotificationCommandsTest, Run_CustomButton_SUCCESS) {
               SendMessageToMobile(
                   CheckNotificationMessage(TestFixture::kFunctionId), _));
 
-  EXPECT_CALL(this->message_helper_, PrintSmartObject(_))
-      .WillOnce(Return(false));
-
   command->Run();
 }
 
@@ -357,9 +354,6 @@ TYPED_TEST(OnButtonNotificationCommandsTest, Run_SUCCESS) {
   EXPECT_CALL(this->mock_app_manager_,
               SendMessageToMobile(
                   CheckNotificationMessage(TestFixture::kFunctionId), _));
-
-  EXPECT_CALL(this->message_helper_, PrintSmartObject(_))
-      .WillOnce(Return(false));
 
   command->Run();
 }
