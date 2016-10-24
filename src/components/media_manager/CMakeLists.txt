@@ -37,6 +37,7 @@ pkg_check_modules(GLIB2 REQUIRED glib-2.0)
 add_definitions(${GLIB2_CFLAGS})
 set(default_includes
     ${GSTREAMER_gst_INCLUDE_DIR}
+    ${GSTREAMER_gstconfig_INCLUDE_DIR}
     ${GLIB_glib_2_INCLUDE_DIR}
 )
 set(default_sources
@@ -63,6 +64,8 @@ set(LIBRARIES
     glib-2.0
 )
 else(EXTENDED_MEDIA_MODE)
+set(default_includes
+)
 
 set(default_sources
     ${COMPONENTS_DIR}/media_manager/src/audio/socket_audio_streamer_adapter.cc
@@ -96,6 +99,7 @@ include_directories (
     ${JSONCPP_INCLUDE_DIRECTORY}
     ${CMAKE_BINARY_DIR}/src/components/
     ${COMPONENTS_DIR}/policy/include/
+    ${default_includes}
     ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
