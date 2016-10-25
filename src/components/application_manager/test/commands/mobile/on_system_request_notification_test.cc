@@ -163,7 +163,6 @@ TEST_F(OnSystemRequestNotificationTest, Run_ProprietaryType_SUCCESS) {
   EXPECT_CALL(mock_policy_handler_, TimeoutExchange()).WillOnce(Return(5u));
 #endif  // EXTENDED_POLICY
 
-  EXPECT_CALL(message_helper_, PrintSmartObject(_)).WillOnce(Return(false));
   EXPECT_CALL(mock_app_manager_, SendMessageToMobile(msg, _));
 
   command->Run();
@@ -203,7 +202,6 @@ TEST_F(OnSystemRequestNotificationTest, Run_EmptyMessage_UNSUCCESS) {
   EXPECT_CALL(mock_policy_handler_, TimeoutExchange()).WillOnce(Return(NULL));
 #endif  // EXTENDED_POLICY
 
-  EXPECT_CALL(message_helper_, PrintSmartObject(_)).WillOnce(Return(false));
   EXPECT_CALL(mock_app_manager_, SendMessageToMobile(msg, _));
 
   command->Run();
@@ -239,7 +237,6 @@ TEST_F(OnSystemRequestNotificationTest, Run_HTTPType_SUCCESS) {
   EXPECT_CALL(mock_policy_handler_, IsRequestTypeAllowed(_, _))
       .WillOnce(Return(true));
 
-  EXPECT_CALL(message_helper_, PrintSmartObject(_)).WillOnce(Return(false));
   EXPECT_CALL(mock_app_manager_, SendMessageToMobile(msg, _));
 
   command->Run();
@@ -271,7 +268,6 @@ TEST_F(OnSystemRequestNotificationTest, Run_InvalidApp_NoNotification) {
   EXPECT_CALL(*mock_app, policy_app_id()).Times(0);
   EXPECT_CALL(mock_policy_handler_, IsRequestTypeAllowed(_, _)).Times(0);
 
-  EXPECT_CALL(message_helper_, PrintSmartObject(_)).Times(0);
   EXPECT_CALL(mock_app_manager_, SendMessageToMobile(msg, _)).Times(0);
 
   command->Run();
@@ -295,9 +291,7 @@ TEST_F(OnSystemRequestNotificationTest, Run_RequestNotAllowed_NoNotification) {
   EXPECT_CALL(mock_policy_handler_, IsRequestTypeAllowed(_, _))
       .WillOnce(Return(false));
 
-  EXPECT_CALL(message_helper_, PrintSmartObject(_)).Times(0);
   EXPECT_CALL(mock_app_manager_, SendMessageToMobile(msg, _)).Times(0);
-  ;
 
   command->Run();
 }

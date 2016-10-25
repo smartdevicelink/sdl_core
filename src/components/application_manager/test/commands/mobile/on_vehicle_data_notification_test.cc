@@ -148,9 +148,6 @@ TEST_F(OnVehicleDataNotificationTest,
               SendMessageToMobile(
                   CheckMessageData(am::strings::fuel_level, fuel_level), _));
 
-  EXPECT_CALL(mock_message_helper_, PrintSmartObject(_))
-      .WillOnce(Return(false));
-
   command_->Run();
 }
 

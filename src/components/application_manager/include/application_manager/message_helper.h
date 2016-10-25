@@ -576,8 +576,6 @@ class MessageHelper {
       ApplicationSharedPtr app,
       const int32_t function_id);
 
-  static bool PrintSmartObject(const smart_objects::SmartObject& object);
-
   template <typename From, typename To>
   static To ConvertEnumAPINoCheck(const From& input) {
     return static_cast<To>(input);

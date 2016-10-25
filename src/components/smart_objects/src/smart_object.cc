@@ -37,7 +37,7 @@
 #include <limits>
 #include <stdlib.h>
 #include <algorithm>
-#include <sstream>
+#include <iostream>
 #include <iomanip>
 #include <iterator>
 #include <limits>
@@ -440,7 +440,9 @@ SmartObject::SmartObject(const custom_str::CustomString& InitialValue)
 }
 
 std::string SmartObject::asString() const {
-  return convert_string();
+  std::stringstream stream;
+  stream << *this;
+  return stream.str();
 }
 
 custom_str::CustomString SmartObject::asCustomString() const {
@@ -481,23 +483,61 @@ void SmartObject::set_value_string(const custom_str::CustomString& NewValue) {
   m_data.str_value = new custom_str::CustomString(NewValue);
 }
 
-std::string SmartObject::convert_string() const {
-  switch (m_type) {
-    case SmartType_String:
-      return (m_data.str_value)->AsMBString();
+std::iostream& operator<<(std::iostream& out_stream,
+                          const SmartObject& smart_object) {
+  switch (smart_object.m_type) {
     case SmartType_Integer: {
-      std::stringstream stream;
-      stream << m_data.int_value;
-      return stream.str();
-    }
-    case SmartType_Character:
-      return std::string(1, m_data.char_value);
-    case SmartType_Double:
-      return convert_double_to_string(m_data.double_value);
-    default:
-      break;
+      out_stream << smart_object.asInt();
+    } break;
+    case SmartType_UInteger: {
+      out_stream << smart_object.asUInt();
+    } break;
+    case SmartType_Character: {
+      out_stream << smart_object.asChar();
+    } break;
+    case SmartType_Double: {
+      out_stream << SmartObject::convert_double_to_string(
+          smart_object.m_data.double_value);
+    } break;
+    case SmartType_String: {
+      out_stream << smart_object.m_data.str_value->AsMBString();
+    } break;
+    case SmartType_Boolean: {
+      out_stream << std::boolalpha << smart_object.asBool();
+    } break;
+    case SmartType_Array: {
+      out_stream << "[";
+      bool is_first = true;
+      for (size_t i = 0; i < smart_object.length(); ++i) {
+        if (!is_first) {
+          out_stream << ", ";
+        }
+        out_stream << smart_object[i];
+        is_first = false;
+      }
+      out_stream << "]";
+    } break;
+    case SmartType_Map: {
+      typedef std::set<std::string> KeySet;
+      out_stream << "{";
+      const KeySet keys = smart_object.enumerate();
+      bool is_first = true;
+      for (KeySet::const_iterator key = keys.begin(); key != keys.end();
+           ++key) {
+        if (!is_first) {
+          out_stream << ", ";
+        }
+        out_stream << "\"" << *key << "\": ";
+        out_stream << smart_object[*key];
+        is_first = false;
+      }
+      out_stream << "}";
+    } break;
+    default: {
+      out_stream << NsSmartDeviceLink::NsSmartObjects::invalid_cstr_value;
+    } break;
   }
-  return NsSmartDeviceLink::NsSmartObjects::invalid_cstr_value;
+  return out_stream;
 }
 
 custom_str::CustomString SmartObject::convert_custom_string() const {
@@ -505,7 +545,7 @@ custom_str::CustomString SmartObject::convert_custom_string() const {
     case SmartType_String:
       return *(m_data.str_value);
     default:
-      return custom_str::CustomString(convert_string());
+      return custom_str::CustomString(asString());
   }
 }
 

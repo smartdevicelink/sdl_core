@@ -149,7 +149,6 @@ TEST_F(OnCommandNotificationTest, Run_SUCCESS) {
   EXPECT_CALL(mock_app_manager_, application(kAppId))
       .WillOnce(Return(mock_app));
   EXPECT_CALL(*mock_app, app_id()).WillOnce(Return(0u));
-  EXPECT_CALL(message_helper_, PrintSmartObject(_)).WillOnce(Return(false));
 
   MessageSharedPtr dummy_msg(CreateMessage());
   EXPECT_CALL(*mock_app, FindCommand(kCommandId))

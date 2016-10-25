@@ -293,7 +293,6 @@ void MessageHelper::SendHashUpdateNotification(const uint32_t app_id,
     return;
   }
   smart_objects::SmartObjectSPtr so = CreateHashUpdateNotification(app_id);
-  PrintSmartObject(*so);
   if (!app_mngr.ManageMobileCommand(so, commands::Command::ORIGIN_SDL)) {
     SDL_ERROR("Failed to send HashUpdate notification.");
     return;
@@ -1888,10 +1887,6 @@ void MessageHelper::SendSystemRequestNotification(
 
   content[strings::params][strings::connection_key] = connection_key;
 
-#ifdef DEBUG
-  PrintSmartObject(content);
-#endif
-
   DCHECK(app_mngr.ManageMobileCommand(
       utils::MakeShared<smart_objects::SmartObject>(content),
       commands::Command::ORIGIN_SDL));
@@ -2464,75 +2459,6 @@ void MessageHelper::SubscribeApplicationToSoftButton(
     softbuttons_id.insert(soft_buttons[i][strings::soft_button_id].asUInt());
   }
   app->SubscribeToSoftButtons(function_id, softbuttons_id);
-}
-
-bool MessageHelper::PrintSmartObject(const smart_objects::SmartObject& object) {
-#ifdef ENABLE_LOG
-  static uint32_t tab = 0;
-  std::string tab_buffer;
-
-  if (tab == 0) {
-    SDL_INFO("-------------------------------------------------------------");
-  }
-
-  for (uint32_t i = 0; i < tab; ++i) {
-    tab_buffer += "\t";
-  }
-
-  switch (object.getType()) {
-    case NsSmartDeviceLink::NsSmartObjects::SmartType_Array: {
-      for (size_t i = 0; i < object.length(); i++) {
-        ++tab;
-
-        SDL_INFO(tab_buffer << i << ": ");
-        if (!PrintSmartObject(object.getElement(i))) {
-          return false;
-        }
-      }
-      break;
-    }
-    case NsSmartDeviceLink::NsSmartObjects::SmartType_Map: {
-      std::set<std::string> keys = object.enumerate();
-
-      for (std::set<std::string>::const_iterator key = keys.begin();
-           key != keys.end();
-           key++) {
-        ++tab;
-
-        SDL_INFO(tab_buffer << (*key) << ": ");
-        if (!PrintSmartObject(object[*key])) {
-          return false;
-        }
-      }
-      break;
-    }
-    case NsSmartDeviceLink::NsSmartObjects::SmartType_Boolean:
-      SDL_INFO(std::boolalpha << object.asBool());
-      break;
-    case NsSmartDeviceLink::NsSmartObjects::SmartType_Double: {
-      SDL_INFO(object.asDouble());
-      break;
-    }
-    case NsSmartDeviceLink::NsSmartObjects::SmartType_Integer:
-      break;
-    case NsSmartDeviceLink::NsSmartObjects::SmartType_String:
-      SDL_INFO(object.asString());
-      break;
-    case NsSmartDeviceLink::NsSmartObjects::SmartType_Character:
-      SDL_INFO(object.asChar());
-      break;
-    default:
-      SDL_INFO("PrintSmartObject - default case\n");
-      break;
-  }
-
-  if (0 != tab) {
-    --tab;
-  } else {
-    SDL_INFO("-------------------------------------------------------------");
-  }
-#endif
-  return true;
 }
 
 }  //  namespace application_manager

@@ -443,10 +443,6 @@ void MessageHelper::SendTTSGlobalProperties(ApplicationSharedPtr app,
       app, default_help_prompt, app_man);
 }
 
-bool MessageHelper::PrintSmartObject(const smart_objects::SmartObject& object) {
-  return MockMessageHelper::message_helper_mock()->PrintSmartObject(object);
-}
-
 void MessageHelper::SendSetAppIcon(const uint32_t app_id,
                                    const std::string& icon_path,
                                    ApplicationManager& application_manager) {

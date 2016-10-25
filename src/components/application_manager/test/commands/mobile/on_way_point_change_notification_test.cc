@@ -118,8 +118,6 @@ TEST_F(OnWayPointChangeNotificationTest,
 
   EXPECT_CALL(mock_app_manager_, SendMessageToMobile(CheckMessageData(), _));
 
-  EXPECT_CALL(message_helper_, PrintSmartObject(_)).WillOnce(Return(false));
-
   command_->Run();
 }
 
