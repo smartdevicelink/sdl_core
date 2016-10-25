@@ -185,11 +185,6 @@ void ResetGlobalPropertiesRequest::Run() {
 
 bool ResetGlobalPropertiesRequest::ResetHelpPromt(
     application_manager::ApplicationSharedPtr app) {
-  if (!app) {
-    SDL_ERROR("Null pointer");
-    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
-    return false;
-  }
   smart_objects::SmartObject so_help_prompt =
       smart_objects::SmartObject(smart_objects::SmartType_Array);
   app->set_help_prompt(so_help_prompt);
@@ -198,12 +193,6 @@ bool ResetGlobalPropertiesRequest::ResetHelpPromt(
 
 bool ResetGlobalPropertiesRequest::ResetTimeoutPromt(
     application_manager::ApplicationSharedPtr const app) {
-  if (!app) {
-    SDL_ERROR("Null pointer");
-    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
-    return false;
-  }
-
   const std::vector<std::string>& time_out_promt =
       application_manager_.get_settings().time_out_promt();
 
@@ -225,11 +214,6 @@ bool ResetGlobalPropertiesRequest::ResetTimeoutPromt(
 
 bool ResetGlobalPropertiesRequest::ResetVrHelpTitleItems(
     application_manager::ApplicationSharedPtr const app) {
-  if (!app) {
-    SDL_ERROR("Null pointer");
-    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
-    return false;
-  }
   app->reset_vr_help_title();
   app->reset_vr_help();
 

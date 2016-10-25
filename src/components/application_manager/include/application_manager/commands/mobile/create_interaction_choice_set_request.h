@@ -132,7 +132,8 @@ class CreateInteractionChoiceSetRequest : public CommandRequestImpl {
   sync_primitives::Lock is_timed_out_lock_;
 
   sync_primitives::Lock vr_commands_lock_;
-  /*
+
+  /**
    * @brief Sends VR AddCommand request to HMI
    *
    * @param app_id Application ID
@@ -140,89 +141,13 @@ class CreateInteractionChoiceSetRequest : public CommandRequestImpl {
    */
   void SendVRAddCommandRequests(ApplicationSharedPtr const app);
 
-  /*
+  /**
    * @brief Checks incoming choiseSet params.
    * @param app Registred mobile application
    *
    * @return Mobile result code
    */
   mobile_apis::Result::eType CheckChoiceSet(ApplicationConstSharedPtr app);
-
-  /*
-* @brief Predicate for using with CheckChoiceSet method to compare choice ID
-*param
-  *
-  * return TRUE if there is coincidence of choice ID, otherwise FALSE
-  */
-  struct CoincidencePredicateChoiceID {
-    CoincidencePredicateChoiceID(const uint32_t newItem) : newItem_(newItem) {}
-
-    bool operator()(smart_objects::SmartObject obj) {
-      return obj[strings::choice_id].asUInt() == newItem_;
-    }
-
-    const uint32_t newItem_;
-  };
-
-  /*
-* @brief Predicate for using with CheckChoiceSet method to compare menu name
-*param
-  *
-  * return TRUE if there is coincidence of menu name, otherwise FALSE
-  */
-  struct CoincidencePredicateMenuName {
-    CoincidencePredicateMenuName(const std::string& newItem)
-        : newItem_(newItem){};
-
-    bool operator()(smart_objects::SmartObject obj) {
-      return obj[strings::menu_name].asString() == newItem_;
-    }
-
-    const std::string& newItem_;
-  };
-
-  /*
-* @brief Predicate for using with CheckChoiceSet method to compare VR commands
-*param
-  *
-  * return TRUE if there is coincidence of VR commands, otherwise FALSE
-  */
-  struct CoincidencePredicateVRCommands {
-    CoincidencePredicateVRCommands(const smart_objects::SmartObject& newItem)
-        : newItem_(newItem) {}
-
-    bool operator()(smart_objects::SmartObject obj) {
-      return compareStr(obj, newItem_);
-    }
-
-    const smart_objects::SmartObject& newItem_;
-  };
-
-  /*
-   * @brief Checks if incoming choice set doesn't has similar VR synonyms.
-   *
-   * @param choice1  Choice to compare
-   * @param choice2  Choice to compare
-   *
-   * return Return TRUE if there are similar VR synonyms in choice set,
-   * otherwise FALSE
-  */
-  bool compareSynonyms(
-      const NsSmartDeviceLink::NsSmartObjects::SmartObject& choice1,
-      const NsSmartDeviceLink::NsSmartObjects::SmartObject& choice2);
-
-  /*
-   * @brief Checks VR synonyms ignoring differences in case.
-   *
-   * @param str1 VR synonym to compare
-   * @param str2 VR synonym to compare
-   *
-   * return Return TRUE if there are similar VR synonyms in choice set,
-   * otherwise FALSE
-  */
-  static bool compareStr(
-      const NsSmartDeviceLink::NsSmartObjects::SmartObject& str1,
-      const NsSmartDeviceLink::NsSmartObjects::SmartObject& str2);
 
   /**
    * @brief Checks choice set params(menuName, tertiaryText, ...)
