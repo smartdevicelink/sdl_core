@@ -131,6 +131,11 @@ class SQLDatabase {
   sync_primitives::Lock conn_lock_;
 
   /**
+   * The file path of database
+   */
+  std::string path_;
+
+  /**
    * The filename of database
    */
   std::string databasename_;
