@@ -117,6 +117,15 @@ bool Compare(T what, T to, T to1, T to2, T to3, T to4) {
       Compare<T, CompareType, CmpStrategy>(what, to4));
 }
 
+template <typename T,
+          bool (*CompareType)(T, T),
+          bool (*CmpStrategy)(bool, bool)>
+bool Compare(T what, T to, T to1, T to2, T to3, T to4, T to5) {
+  return CmpStrategy(
+      Compare<T, CompareType, CmpStrategy>(what, to, to1, to2, to3),
+      Compare<T, CompareType, CmpStrategy>(what, to4, to5));
+}
+
 template <typename Container>
 bool in_range(const Container& container,
               const typename Container::value_type& value) {

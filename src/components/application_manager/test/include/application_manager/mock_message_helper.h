@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_TEST_MOCK_MESSAGE_HELPER_H_
 #include "gmock/gmock.h"
 #include "application_manager/application.h"
+#include "application_manager/message_helper.h"
 #include "interfaces/HMI_API.h"
 #include "policy/policy_types.h"
 #include "application_manager/policies/policy_handler_interface.h"
@@ -151,9 +152,13 @@ class MockMessageHelper {
                smart_objects::SmartObjectList(ApplicationSharedPtr app));
   MOCK_METHOD3(VerifyImageFiles,
                mobile_apis::Result::eType(smart_objects::SmartObject& message,
-
                                           ApplicationConstSharedPtr app,
                                           ApplicationManager& app_mngr));
+  MOCK_METHOD3(VerifyImage,
+               mobile_apis::Result::eType(smart_objects::SmartObject& message,
+                                          ApplicationConstSharedPtr app,
+                                          ApplicationManager& app_mngr));
+
   MOCK_METHOD6(GetBCActivateAppRequestToHMI,
                smart_objects::SmartObjectSPtr(
                    ApplicationConstSharedPtr app,
@@ -166,6 +171,75 @@ class MockMessageHelper {
                NsSmartDeviceLink::NsSmartObjects::SmartObjectSPtr(
                    int32_t connection_key,
                    mobile_apis::AppInterfaceUnregisteredReason::eType reason));
+  MOCK_METHOD4(ProcessSoftButtons,
+               mobile_apis::Result::eType(
+                   smart_objects::SmartObject& message_params,
+                   ApplicationConstSharedPtr app,
+                   const policy::PolicyHandlerInterface& policy_handler,
+                   ApplicationManager& app_mngr));
+  MOCK_METHOD3(SubscribeApplicationToSoftButton,
+               void(smart_objects::SmartObject& message_params,
+                    ApplicationSharedPtr app,
+                    int32_t function_id));
+  MOCK_METHOD4(CreateNegativeResponse,
+               smart_objects::SmartObjectSPtr(uint32_t connection_key,
+                                              int32_t function_id,
+                                              const uint32_t correlation_id,
+                                              int32_t result_code));
+  MOCK_METHOD4(
+      CreateBlockedByPoliciesResponse,
+      smart_objects::SmartObjectSPtr(mobile_apis::FunctionID::eType function_id,
+                                     mobile_apis::Result::eType result,
+                                     const uint32_t correlation_id,
+                                     uint32_t connection_key));
+  MOCK_METHOD0(vehicle_data, const VehicleData&());
+  MOCK_METHOD1(SendStopAudioPathThru, bool(ApplicationManager& app_mngr));
+  MOCK_METHOD1(StringifiedFunctionID,
+               std::string(const mobile_apis::FunctionID::eType function_id));
+  MOCK_METHOD2(SendUIChangeRegistrationRequestToHMI,
+               void(ApplicationConstSharedPtr app,
+                    ApplicationManager& app_mngr));
+  MOCK_METHOD5(CreateHMIApplicationStruct,
+               bool(ApplicationConstSharedPtr app,
+                    const protocol_handler::SessionObserver& session_observer,
+                    const policy::PolicyHandlerInterface& policy_handler,
+                    smart_objects::SmartObject* output,
+                    ApplicationManager& app_mngr));
+  MOCK_METHOD3(SendOnAppUnregNotificationToHMI,
+               void(ApplicationConstSharedPtr app,
+                    const bool is_unexpected_disconnect,
+                    ApplicationManager& app_mngr));
+  MOCK_METHOD4(SendLaunchApp,
+               void(const uint32_t connection_key,
+                    const std::string& urlSchema,
+                    const std::string& packageName,
+                    ApplicationManager& app_man));
+  MOCK_METHOD1(SendUnsubscribedWayPoints, bool(ApplicationManager& app_mngr));
+
+  MOCK_METHOD2(SendQueryApps,
+               void(const uint32_t connection_key,
+                    ApplicationManager& app_man));
+  MOCK_METHOD1(CreateAppVrHelp,
+               smart_objects::SmartObjectSPtr(ApplicationConstSharedPtr app));
+  MOCK_METHOD3(VerifyImageVrHelpItems,
+               mobile_apis::Result::eType(smart_objects::SmartObject& message,
+                                          ApplicationConstSharedPtr app,
+                                          ApplicationManager& app_mngr));
+
+  MOCK_METHOD1(GetPriorityCode, const uint32_t(const std::string& priority));
+
+  MOCK_METHOD1(PrintSmartObject,
+               bool(const smart_objects::SmartObject& object));
+  MOCK_METHOD3(SendTTSGlobalProperties,
+               void(ApplicationSharedPtr app,
+                    const bool default_help_prompt,
+                    ApplicationManager& app_man));
+  MOCK_METHOD3(SendSetAppIcon,
+               void(const uint32_t app_id,
+                    const std::string& icon_path,
+                    ApplicationManager& application_manager));
+  MOCK_METHOD1(StringifiedHMILevel,
+               std::string(const mobile_apis::HMILevel::eType hmi_level));
 
   static MockMessageHelper* message_helper_mock();
 };

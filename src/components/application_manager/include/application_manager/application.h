@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -109,6 +109,8 @@ class InitialApplicationData {
   virtual const smart_objects::SmartObject* app_types() const = 0;
   virtual const smart_objects::SmartObject* vr_synonyms() const = 0;
   virtual const std::string& mac_address() const = 0;
+  virtual const std::string& bundle_id() const = 0;
+  virtual void set_bundle_id(const std::string& bundle_id) = 0;
   virtual std::string policy_app_id() const = 0;
   virtual const smart_objects::SmartObject* tts_name() const = 0;
   virtual const smart_objects::SmartObject* ngn_media_screen_name() const = 0;
@@ -578,8 +580,8 @@ class Application : public virtual InitialApplicationData,
    * @param source Limits source, e.g. policy table, config file etc.
    * @return true, if - excedeed, otherwise - false
    */
-  virtual bool IsCommandLimitsExceeded(mobile_apis::FunctionID::eType cmd_id,
-                                       TLimitSource source) = 0;
+  virtual bool AreCommandLimitsExceeded(mobile_apis::FunctionID::eType cmd_id,
+                                        TLimitSource source) = 0;
 
   /**
    * Returns object for recording statistics

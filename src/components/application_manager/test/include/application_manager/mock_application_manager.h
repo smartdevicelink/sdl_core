@@ -47,6 +47,9 @@
 #include "application_manager/state_controller.h"
 #include "resumption/last_state.h"
 #include "interfaces/MOBILE_API.h"
+#include "application_manager/app_launch/app_launch_ctrl.h"
+#include "application_manager/event_engine/event_dispatcher.h"
+#include "application_manager/state_controller.h"
 
 namespace test {
 namespace components {
@@ -170,8 +173,10 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                     int32_t audio_type));
   MOCK_METHOD0(StartDevicesDiscovery, void());
   MOCK_METHOD1(StopAudioPassThru, void(int32_t application_key));
-  MOCK_METHOD2(TerminateRequest,
-               void(uint32_t connection_key, uint32_t corr_id));
+  MOCK_METHOD3(TerminateRequest,
+               void(const uint32_t connection_key,
+                    const uint32_t corr_id,
+                    const int32_t function_id));
   MOCK_METHOD4(UnregisterApplication,
                void(const uint32_t&, mobile_apis::Result::eType, bool, bool));
   MOCK_METHOD3(updateRequestTimeout,
@@ -197,6 +202,8 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                      bool(uint32_t connection_key,
                           const std::string& policy_app_id));
   MOCK_METHOD0(resume_controller, resumption::ResumeCtrl&());
+  MOCK_METHOD0(hmi_interfaces, application_manager::HmiInterfaces&());
+  MOCK_METHOD0(app_launch_ctrl, app_launch::AppLaunchCtrl&());
   MOCK_METHOD1(
       GetDeviceTransportType,
       hmi_apis::Common_TransportType::eType(const std::string& transport_type));

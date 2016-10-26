@@ -33,6 +33,7 @@
 
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ADD_COMMAND_REQUEST_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ADD_COMMAND_REQUEST_H_
+#include <string>
 
 #include "application_manager/application.h"
 #include "application_manager/commands/command_request_impl.h"
@@ -72,6 +73,12 @@ class AddCommandRequest : public CommandRequestImpl {
    */
   void on_event(const event_engine::Event& event);
 
+  /**
+   * @brief Function is called by RequestController when request execution time
+   * has exceed it's limit
+   */
+  virtual void onTimeOut();
+
  private:
   /*
    * @brief Check if command name doesn't exist in application
@@ -103,12 +110,6 @@ class AddCommandRequest : public CommandRequestImpl {
   bool CheckCommandParentId(ApplicationConstSharedPtr app);
 
   /**
-   * @brief Function is called by RequestController when request execution time
-   * has exceed it's limit
-   */
-  virtual void onTimeOut();
-
-  /**
    * @brief Removes command from list when HMI sends negative response or
    * HMI does not answer on addCommand request.
    */
@@ -133,11 +134,20 @@ class AddCommandRequest : public CommandRequestImpl {
 
   inline bool BothSend() const;
 
+  /**
+   * @brief GenerateMobileResponseInfo generated info for mobile response
+   * depends from UI and VR responses
+   * @return info for mobile response
+   */
+  const std::string GenerateMobileResponseInfo();
   bool send_ui_;
   bool send_vr_;
 
   bool is_ui_received_;
   bool is_vr_received_;
+
+  std::string ui_info_;
+  std::string vr_info_;
 
   hmi_apis::Common_Result::eType ui_result_;
   hmi_apis::Common_Result::eType vr_result_;

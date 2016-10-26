@@ -113,6 +113,26 @@ class SubscribeVehicleDataRequest : public CommandRequestImpl {
       const smart_objects::SmartObject& msg_params) const;
 
   /**
+   * @brief Checks if current application and other applications
+   * were subscribed to VI, prepare data that need to send to mobile app
+   * or HMI.
+   * @param app contains application
+   * @param out_info contains resulting info for sending to mobile app
+   * @param out_result_code contains result code for sending to mobile app
+   * @param out_response_params contains parameters that SDL sends to
+   * mobile application
+   * @param out_request_params contains parameters that SDL sends to
+   * HMI
+   * @param result contains result that SDL sends to mobile app.
+   */
+  void CheckVISubscribtions(ApplicationSharedPtr app,
+                            std::string& out_info,
+                            mobile_apis::Result::eType& out_result_code,
+                            smart_objects::SmartObject& out_response_params,
+                            smart_objects::SmartObject& out_request_params,
+                            bool& out_result);
+
+  /**
    * @brief VI parameters which had been already subscribed by another apps
    * befor particular app subscribed for these parameters
    */

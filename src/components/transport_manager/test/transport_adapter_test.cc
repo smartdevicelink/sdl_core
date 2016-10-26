@@ -54,6 +54,7 @@ namespace components {
 namespace transport_manager_test {
 
 using ::testing::Return;
+using ::testing::ReturnRef;
 using ::testing::_;
 using ::testing::NiceMock;
 using namespace ::transport_manager;
@@ -737,6 +738,39 @@ TEST_F(TransportAdapterTest, FindEstablishedConnection) {
   EXPECT_EQ(mock_connection, conn);
 
   EXPECT_CALL(*serverMock, Terminate());
+}
+
+TEST_F(TransportAdapterTest, RunAppOnDevice_NoDeviseWithAskedId_UNSUCCESS) {
+  const std::string bundle_id = "test_bundle_id";
+
+  MockTransportAdapterImpl transport_adapter(
+      NULL, NULL, NULL, last_state_, transport_manager_settings);
+
+  utils::SharedPtr<MockDevice> mock_device =
+      utils::MakeShared<MockDevice>("test_device_name", "test_device_uid0");
+
+  transport_adapter.AddDevice(mock_device);
+
+  EXPECT_CALL(*mock_device, LaunchApp(bundle_id)).Times(0);
+
+  transport_adapter.RunAppOnDevice("test_device_uid1", bundle_id);
+}
+
+TEST_F(TransportAdapterTest, RunAppOnDevice_DeviseWithAskedIdWasFound_SUCCESS) {
+  const std::string bundle_id = "test_bundle_id";
+  const std::string device_uid = "test_device_uid";
+
+  MockTransportAdapterImpl transport_adapter(
+      NULL, NULL, NULL, last_state_, transport_manager_settings);
+
+  utils::SharedPtr<MockDevice> mock_device =
+      utils::MakeShared<MockDevice>("test_device_name", device_uid);
+
+  transport_adapter.AddDevice(mock_device);
+
+  EXPECT_CALL(*mock_device, LaunchApp(bundle_id));
+
+  transport_adapter.RunAppOnDevice(device_uid, bundle_id);
 }
 
 }  // namespace transport_manager_test

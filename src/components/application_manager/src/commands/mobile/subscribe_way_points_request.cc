@@ -1,5 +1,6 @@
 #include "application_manager/application_manager.h"
 #include "application_manager/commands/mobile/subscribe_way_points_request.h"
+#include "application_manager/message_helper.h"
 
 namespace application_manager {
 
@@ -47,14 +48,20 @@ void SubscribeWayPointsRequest::on_event(const event_engine::Event& event) {
   switch (event.id()) {
     case hmi_apis::FunctionID::Navigation_SubscribeWayPoints: {
       LOG4CXX_INFO(logger_, "Received Navigation_SubscribeWayPoints event");
-      mobile_apis::Result::eType result_code =
-          GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
-              message[strings::params][hmi_response::code].asUInt()));
-      bool result = mobile_apis::Result::SUCCESS == result_code;
+      const hmi_apis::Common_Result::eType result_code =
+          static_cast<hmi_apis::Common_Result::eType>(
+              message[strings::params][hmi_response::code].asInt());
+      std::string response_info;
+      GetInfo(message, response_info);
+      const bool result = PrepareResultForMobileResponse(
+          result_code, HmiInterfaces::HMI_INTERFACE_Navigation);
       if (result) {
         application_manager_.SubscribeAppForWayPoints(app->app_id());
       }
-      SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
+      SendResponse(result,
+                   MessageHelper::HMIToMobileResult(result_code),
+                   response_info.empty() ? NULL : response_info.c_str(),
+                   &(message[strings::msg_params]));
       if (result) {
         app->UpdateHash();
       }

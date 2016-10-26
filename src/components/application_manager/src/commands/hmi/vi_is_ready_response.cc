@@ -43,17 +43,9 @@ VIIsReadyResponse::~VIIsReadyResponse() {}
 
 void VIIsReadyResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  smart_objects::SmartObject& object = *message_;
-
-  bool is_available = false;
-  if (object[strings::msg_params].keyExists(strings::available)) {
-    is_available = object[strings::msg_params][strings::available].asBool();
-  }
-
-  HMICapabilities& hmi_capabilities = application_manager_.hmi_capabilities();
-  hmi_capabilities.set_is_ivi_cooperating(is_available);
-
-  application_manager_.GetPolicyHandler().OnVIIsReady();
+  event_engine::Event event(hmi_apis::FunctionID::VehicleInfo_IsReady);
+  event.set_smart_object(*message_);
+  event.raise(application_manager_.event_dispatcher());
 }
 
 }  // namespace commands

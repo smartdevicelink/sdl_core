@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_VR_IS_READY_REQUEST_H_
 
 #include "application_manager/commands/hmi/request_to_hmi.h"
+#include "application_manager/message_helper.h"
 
 namespace application_manager {
 
@@ -42,7 +43,8 @@ namespace commands {
 /**
  * @brief VRIsReadyRequest command class
  **/
-class VRIsReadyRequest : public RequestToHMI {
+class VRIsReadyRequest : public RequestToHMI,
+                         public event_engine::EventObserver {
  public:
   /**
    * @brief VRIsReadyRequest class constructor
@@ -60,7 +62,22 @@ class VRIsReadyRequest : public RequestToHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
+
+  /**
+   * @brief On event callback
+   **/
+  void on_event(const event_engine::Event& event) OVERRIDE;
+
+  /**
+   * @brief onTimeOut from requrst Controller
+   */
+  void onTimeOut() OVERRIDE;
+
+  /**
+   * @brief Send request to HMI for fetching of cappabilities
+   */
+  void SendMessageToHMI();
 
  private:
   DISALLOW_COPY_AND_ASSIGN(VRIsReadyRequest);

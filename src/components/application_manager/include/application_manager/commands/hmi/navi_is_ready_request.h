@@ -42,7 +42,8 @@ namespace commands {
 /**
  * @brief NaviIsReadyRequest command class
  **/
-class NaviIsReadyRequest : public RequestToHMI {
+class NaviIsReadyRequest : public RequestToHMI,
+                           public event_engine::EventObserver {
  public:
   /**
    * @brief NaviIsReadyRequest class constructor
@@ -60,7 +61,12 @@ class NaviIsReadyRequest : public RequestToHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
+
+  /**
+   * @brief On event callback
+   **/
+  void on_event(const event_engine::Event& event) OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(NaviIsReadyRequest);

@@ -48,6 +48,7 @@ class MockDevice : public ::transport_manager::transport_adapter::Device {
       : Device(name, unique_device_id) {}
   MOCK_CONST_METHOD1(IsSameAs, bool(const Device* other_device));
   MOCK_CONST_METHOD0(GetApplicationList, std::vector<int>());
+  MOCK_CONST_METHOD1(LaunchApp, void(const std::string& bundle_id));
   MOCK_METHOD0(Stop, void());
 };
 

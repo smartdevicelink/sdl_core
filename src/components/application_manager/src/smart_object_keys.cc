@@ -18,6 +18,12 @@ const char* msg_params = "msg_params";
 const char* method_name = "methodName";
 const char* info = "info";
 const char* app_id = "appID";
+const char* bundle_id = "appBundleID";
+const char* app_info = "appInfo";
+const char* app_launch = "app_launch";
+const char* app_launch_list = "app_launch_list";
+const char* app_launch_last_session = "app_launch_last_session";
+const char* policy_app_id = "policyAppID";
 const char* hmi_app_id = "hmiAppID";
 const char* device_id = "deviceID";
 const char* subscribed_for_way_points = "subscribed_for_way_points";
@@ -401,5 +407,3 @@ const char* event_name = "eventName";
 }  // namespace hmi_notification
 
 }  // namespace application_manager
-
-#

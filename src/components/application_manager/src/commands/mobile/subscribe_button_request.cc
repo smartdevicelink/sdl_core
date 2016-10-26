@@ -58,7 +58,7 @@ void SubscribeButtonRequest::Run() {
 
   const mobile_apis::ButtonName::eType btn_id =
       static_cast<mobile_apis::ButtonName::eType>(
-          (*message_)[str::msg_params][str::button_name].asUInt());
+          (*message_)[str::msg_params][str::button_name].asInt());
 
   if (!IsSubscriptionAllowed(app, btn_id)) {
     LOG4CXX_ERROR(logger_,
@@ -101,7 +101,6 @@ bool SubscribeButtonRequest::IsSubscriptionAllowed(
        (mobile_apis::ButtonName::TUNEDOWN == btn_id))) {
     return false;
   }
-
   return true;
 }
 

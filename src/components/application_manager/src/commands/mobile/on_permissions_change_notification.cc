@@ -48,9 +48,6 @@ OnPermissionsChangeNotification::~OnPermissionsChangeNotification() {}
 void OnPermissionsChangeNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  (*message_)[strings::params][strings::message_type] =
-      static_cast<int32_t>(application_manager::MessageType::kNotification);
-
   SendNotification();
 }
 

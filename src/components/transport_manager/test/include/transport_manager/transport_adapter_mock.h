@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_TRANSPORT_ADAPTER_MOCK_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_TRANSPORT_ADAPTER_MOCK_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_MOCK_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_MOCK_H_
 
 #include "gmock/gmock.h"
 #include "transport_manager/transport_adapter/transport_adapter.h"
@@ -66,6 +66,7 @@ class MockTransportAdapter
   MOCK_METHOD1(ConnectDevice,
                ::transport_manager::transport_adapter::TransportAdapter::Error(
                    const ::transport_manager::DeviceUID& device_handle));
+  MOCK_METHOD2(RunAppOnDevice, void(const std::string&, const std::string&));
   MOCK_CONST_METHOD0(IsClientOriginatedConnectSupported, bool());
   MOCK_METHOD0(
       StartClientListening,
@@ -105,4 +106,4 @@ class MockTransportAdapter
 }  // namespace components
 }  // namespace test
 
-#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_TRANSPORT_ADAPTER_MOCK_H_
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_MOCK_H_

@@ -65,6 +65,13 @@ class DeleteSubMenuRequest : public CommandRequestImpl {
    **/
   virtual void Run();
 
+  /**
+   * @brief Interface method that is called whenever new event received
+   *
+   * @param event The received event
+   */
+  void on_event(const event_engine::Event& event);
+
  private:
   /*
    * @brief Deletes VR commands from SDL for corresponding submenu ID
@@ -83,13 +90,6 @@ class DeleteSubMenuRequest : public CommandRequestImpl {
    * @return TRUE on success, otherwise FALSE
    */
   void DeleteSubMenuUICommands(ApplicationSharedPtr const app);
-
-  /**
-   * @brief Interface method that is called whenever new event received
-   *
-   * @param event The received event
-   */
-  void on_event(const event_engine::Event& event);
 
   DISALLOW_COPY_AND_ASSIGN(DeleteSubMenuRequest);
 };

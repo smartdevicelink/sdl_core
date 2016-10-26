@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -139,6 +139,8 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   const std::string& app_icon_path() const;
   connection_handler::DeviceHandle device() const;
   const std::string& mac_address() const OVERRIDE;
+  const std::string& bundle_id() const OVERRIDE;
+  void set_bundle_id(const std::string& bundle_id) OVERRIDE;
   void set_tts_properties_in_none(bool active);
   bool tts_properties_in_none();
   void set_tts_properties_in_full(bool active);
@@ -199,8 +201,8 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
 
   UsageStatistics& usage_report();
 
-  bool IsCommandLimitsExceeded(mobile_apis::FunctionID::eType cmd_id,
-                               TLimitSource source);
+  bool AreCommandLimitsExceeded(mobile_apis::FunctionID::eType cmd_id,
+                                TLimitSource source);
   virtual void SubscribeToSoftButtons(int32_t cmd_id,
                                       const SoftButtonID& softbuttons_id);
   virtual bool IsSubscribedToSoftButton(const uint32_t softbutton_id);
@@ -357,7 +359,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   std::string app_icon_path_;
   connection_handler::DeviceHandle device_;
   const std::string mac_address_;
-
+  std::string bundle_id_;
   AppFilesMap app_files_;
   std::set<mobile_apis::ButtonName::eType> subscribed_buttons_;
   VehicleInfoSubscriptions subscribed_vehicle_info_;

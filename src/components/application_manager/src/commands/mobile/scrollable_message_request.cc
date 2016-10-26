@@ -115,7 +115,6 @@ void ScrollableMessageRequest::Run() {
 
 void ScrollableMessageRequest::on_event(const event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
-  using namespace helpers;
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
@@ -128,24 +127,19 @@ void ScrollableMessageRequest::on_event(const event_engine::Event& event) {
     case hmi_apis::FunctionID::UI_ScrollableMessage: {
       LOG4CXX_INFO(logger_, "Received UI_ScrollableMessage event");
 
-      mobile_apis::Result::eType result_code =
-          static_cast<mobile_apis::Result::eType>(
+      hmi_apis::Common_Result::eType result_code =
+          static_cast<hmi_apis::Common_Result::eType>(
               message[strings::params][hmi_response::code].asInt());
+      std::string response_info;
+      GetInfo(message, response_info);
 
-      HMICapabilities& hmi_capabilities =
-          application_manager_.hmi_capabilities();
+      const bool result = PrepareResultForMobileResponse(
+          result_code, HmiInterfaces::HMI_INTERFACE_UI);
 
-      bool result = Compare<mobile_api::Result::eType, EQ, ONE>(
-          result_code,
-          mobile_api::Result::SUCCESS,
-          mobile_api::Result::WARNINGS);
-
-      if (mobile_apis::Result::UNSUPPORTED_RESOURCE == result_code &&
-          hmi_capabilities.is_ui_cooperating()) {
-        result = true;
-      }
-
-      SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
+      SendResponse(result,
+                   MessageHelper::HMIToMobileResult(result_code),
+                   response_info.empty() ? NULL : response_info.c_str(),
+                   &(message[strings::msg_params]));
       break;
     }
     default: {

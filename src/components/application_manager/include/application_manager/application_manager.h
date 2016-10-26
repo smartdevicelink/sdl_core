@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,11 +47,15 @@
 #include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/application_manager_settings.h"
 #include "application_manager/state_controller.h"
+#include "application_manager/hmi_interfaces.h"
 
 namespace resumption {
 class LastState;
 }
 
+namespace app_launch {
+class AppLaunchCtrl;
+}  // namespace app_launch
 namespace media_manager {
 class MediaManager;
 }
@@ -408,8 +412,11 @@ class ApplicationManager {
    * @brief TerminateRequest forces termination of request
    * @param connection_key - application id of request
    * @param corr_id correlation id of request
+   * @param function_id function id of request
    */
-  virtual void TerminateRequest(uint32_t connection_key, uint32_t corr_id) = 0;
+  virtual void TerminateRequest(const uint32_t connection_key,
+                                const uint32_t corr_id,
+                                const int32_t function_id) = 0;
 
   /*
    * @brief Closes application by id
@@ -490,6 +497,16 @@ class ApplicationManager {
       uint32_t connection_key, const std::string& policy_app_id) const = 0;
 
   virtual resumption::ResumeCtrl& resume_controller() = 0;
+
+  /**
+  * @brief hmi_interfaces getter for hmi_interfaces component, that handle
+  * hmi_instrfaces state
+  * @return reference to hmi_interfaces component
+  */
+  virtual HmiInterfaces& hmi_interfaces() = 0;
+
+  virtual app_launch::AppLaunchCtrl& app_launch_ctrl() = 0;
+
   /*
    * @brief Converts connection string transport type representation
    * to HMI Common_TransportType

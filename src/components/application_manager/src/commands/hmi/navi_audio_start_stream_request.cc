@@ -58,21 +58,24 @@ AudioStartStreamRequest::~AudioStartStreamRequest() {}
 
 void AudioStartStreamRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-
-  SetAllowedToTerminate(false);
-  subscribe_on_event(hmi_apis::FunctionID::Navigation_StartAudioStream,
-                     correlation_id());
-
+  if (!CheckAvailabilityHMIInterfaces(
+          application_manager_, HmiInterfaces::HMI_INTERFACE_Navigation)) {
+    LOG4CXX_INFO(logger_, "Interface Navi is not supported by system");
+    return;
+  }
   ApplicationSharedPtr app =
       application_manager_.application_by_hmi_app(application_id());
-  if (app) {
-    app->set_audio_streaming_allowed(true);
-    SendRequest();
-  } else {
+  if (!app) {
     LOG4CXX_ERROR(logger_,
                   "Applcation with hmi_app_id " << application_id()
                                                 << " does not exist");
+    return;
   }
+  SetAllowedToTerminate(false);
+  subscribe_on_event(hmi_apis::FunctionID::Navigation_StartAudioStream,
+                     correlation_id());
+  app->set_audio_streaming_allowed(true);
+  SendRequest();
 }
 
 void AudioStartStreamRequest::on_event(const event_engine::Event& event) {
@@ -124,7 +127,8 @@ void AudioStartStreamRequest::on_event(const event_engine::Event& event) {
 void AudioStartStreamRequest::onTimeOut() {
   RetryStartSession();
 
-  application_manager_.TerminateRequest(connection_key(), correlation_id());
+  application_manager_.TerminateRequest(
+      connection_key(), correlation_id(), function_id());
 }
 
 void AudioStartStreamRequest::RetryStartSession() {

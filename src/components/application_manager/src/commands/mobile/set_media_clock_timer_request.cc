@@ -33,6 +33,7 @@
 
 #include "application_manager/commands/mobile/set_media_clock_timer_request.h"
 
+#include "application_manager/message_helper.h"
 #include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
@@ -84,13 +85,18 @@ void SetMediaClockRequest::on_event(const event_engine::Event& event) {
 
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_SetMediaClockTimer: {
-      mobile_apis::Result::eType result_code =
-          static_cast<mobile_apis::Result::eType>(
+      hmi_apis::Common_Result::eType result_code =
+          static_cast<hmi_apis::Common_Result::eType>(
               message[strings::params][hmi_response::code].asInt());
+      const bool result = PrepareResultForMobileResponse(
+          result_code, HmiInterfaces::HMI_INTERFACE_UI);
+      std::string response_info;
+      GetInfo(message, response_info);
 
-      bool result = mobile_apis::Result::SUCCESS == result_code;
-
-      SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
+      SendResponse(result,
+                   MessageHelper::HMIToMobileResult(result_code),
+                   response_info.empty() ? NULL : response_info.c_str(),
+                   &(message[strings::msg_params]));
       break;
     }
     default: {

@@ -30,18 +30,22 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <stdint.h>
+#include <string>
+#include <vector>
+
 #include "gtest/gtest.h"
 #include "utils/shared_ptr.h"
 #include "smart_objects/smart_object.h"
-#include "commands/commands_test.h"
-#include "commands/command_request_test.h"
+#include "application_manager/smart_object_keys.h"
+#include "application_manager/test/include/application_manager/commands/commands_test.h"
+#include "application_manager/test/include/application_manager/commands/command_request_test.h"
 #include "application_manager/application.h"
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_application.h"
-#include "application_manager/mock_hmi_capabilities.h"
-#include "mobile/unsubscribe_way_points_request.h"
+#include "application_manager/event_engine/event.h"
+#include "application_manager/commands/mobile/get_dtcs_request.h"
 #include "interfaces/MOBILE_API.h"
-#include "application_manager/smart_object_keys.h"
 
 namespace test {
 namespace components {
@@ -50,45 +54,74 @@ namespace mobile_commands_test {
 
 using ::testing::_;
 using ::testing::Return;
-using ::testing::ReturnRef;
-using ::testing::DoAll;
-using ::testing::SaveArg;
-using ::testing::InSequence;
 namespace am = ::application_manager;
-using am::commands::UnSubscribeWayPointsRequest;
 using am::commands::MessageSharedPtr;
+using am::commands::GetDTCsRequest;
+using am::event_engine::Event;
+namespace mobile_result = mobile_apis::Result;
 
-typedef SharedPtr<UnSubscribeWayPointsRequest> CommandPtr;
+typedef SharedPtr<GetDTCsRequest> GetDTCsRequestPtr;
 
-class UnsubscribeWayPointsRequestTest
-    : public CommandRequestTest<CommandsTestMocks::kIsNice> {
- public:
-  typedef TypeIf<kMocksIsNice,
-                 NiceMock<application_manager_test::MockHMICapabilities>,
-                 application_manager_test::MockHMICapabilities>::Result
-      MockHMICapabilities;
-};
+class GetDTCsRequestTest
+    : public CommandRequestTest<CommandsTestMocks::kIsNice> {};
 
-TEST_F(UnsubscribeWayPointsRequestTest, OnEvent_SUCCESS) {
-  CommandPtr command(CreateCommand<UnSubscribeWayPointsRequest>());
+TEST_F(GetDTCsRequestTest, Run_ApplicationIsNotRegistered_UNSUCCESS) {
+  GetDTCsRequestPtr command(CreateCommand<GetDTCsRequest>());
+
+  EXPECT_CALL(app_mngr_, application(_))
+      .WillOnce(Return(ApplicationSharedPtr()));
+
+  EXPECT_CALL(
+      app_mngr_,
+      ManageMobileCommand(
+          MobileResultCodeIs(mobile_result::APPLICATION_NOT_REGISTERED), _));
+
+  command->Run();
+}
+
+TEST_F(GetDTCsRequestTest, Run_SUCCESS) {
+  const uint32_t kConnectionKey = 2u;
+  MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*command_msg)[am::strings::msg_params][am::strings::dtc_mask] = 0;
+  (*command_msg)[am::strings::params][am::strings::connection_key] =
+      kConnectionKey;
+
+  GetDTCsRequestPtr command(CreateCommand<GetDTCsRequest>(command_msg));
+
   MockAppPtr app(CreateMockApp());
-  Event event(hmi_apis::FunctionID::Navigation_UnsubscribeWayPoints);
+  EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app));
+
+  EXPECT_CALL(app_mngr_,
+              ManageHMICommand(
+                  HMIResultCodeIs(hmi_apis::FunctionID::VehicleInfo_GetDTCs)));
+
+  command->Run();
+}
+
+TEST_F(GetDTCsRequestTest, OnEvent_UnknownEvent_UNSUCCESS) {
+  GetDTCsRequestPtr command(CreateCommand<GetDTCsRequest>());
+
+  Event event(hmi_apis::FunctionID::INVALID_ENUM);
+
+  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
+
+  command->on_event(event);
+}
+
+TEST_F(GetDTCsRequestTest, OnEvent_SUCCESS) {
+  GetDTCsRequestPtr command(CreateCommand<GetDTCsRequest>());
 
   MessageSharedPtr event_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*event_msg)[am::strings::msg_params] = 0;
   (*event_msg)[am::strings::params][am::hmi_response::code] =
       mobile_apis::Result::SUCCESS;
-  (*event_msg)[am::strings::msg_params] = 0;
 
+  Event event(hmi_apis::FunctionID::VehicleInfo_GetDTCs);
   event.set_smart_object(*event_msg);
 
-  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
-
-  {
-    InSequence dummy;
-    EXPECT_CALL(app_mngr_, UnsubscribeAppFromWayPoints(_));
-    EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _));
-    EXPECT_CALL(*app, UpdateHash());
-  }
+  EXPECT_CALL(
+      app_mngr_,
+      ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS), _));
 
   command->on_event(event);
 }

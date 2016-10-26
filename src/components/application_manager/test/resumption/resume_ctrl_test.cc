@@ -30,10 +30,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/resumption/resume_ctrl.h"
 #include <string>
 #include <algorithm>
+
 #include "gtest/gtest.h"
+#include "application_manager/resumption/resume_ctrl_impl.h"
 #include "application_manager/usage_statistics.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_resumption_data.h"
@@ -85,7 +86,7 @@ class ResumeCtrlTest : public ::testing::Test {
         ::utils::MakeShared<NiceMock<resumption_test::MockResumptionData>>(
             app_mngr_);
     app_mock = utils::MakeShared<NiceMock<MockApplication>>();
-    res_ctrl = utils::MakeShared<ResumeCtrl>(app_mngr_);
+    res_ctrl = utils::MakeShared<ResumeCtrlImpl>(app_mngr_);
     res_ctrl->set_resumption_storage(mock_storage);
 
     ON_CALL(app_mngr_, state_controller())
@@ -782,6 +783,30 @@ TEST_F(ResumeCtrlTest, CheckApplicationkHash_) {
   EXPECT_CALL(*mock_storage, GetSavedApplication(kTestPolicyAppId_, _, _))
       .WillRepeatedly(DoAll(SetArgReferee<2>(saved_app), Return(true)));
   EXPECT_TRUE(res_ctrl->CheckApplicationHash(app_mock, kHash_));
+}
+
+TEST_F(ResumeCtrlTest, GetSavedAppHmiLevel_NoAskedApp_INVALID_ENUM) {
+  const std::string app_id = "test_app_id";
+  const std::string device_id = "test_device_id";
+  EXPECT_CALL(*mock_storage, GetSavedApplication(app_id, device_id, _))
+      .WillOnce(Return(false));
+  EXPECT_EQ(mobile_apis::HMILevel::INVALID_ENUM,
+            res_ctrl->GetSavedAppHmiLevel(app_id, device_id));
+}
+
+ACTION_P(SetHmiLevel, hmi_level) {
+  arg2[am::strings::hmi_level] = hmi_level;
+}
+
+TEST_F(ResumeCtrlTest, GetSavedAppHmiLevel_AskedAppFound_INVALID_ENUM) {
+  const std::string app_id = "test_app_id";
+  const std::string device_id = "test_device_id";
+  const mobile_apis::HMILevel::eType hmi_level =
+      mobile_apis::HMILevel::HMI_FULL;
+
+  EXPECT_CALL(*mock_storage, GetSavedApplication(app_id, device_id, _))
+      .WillOnce(DoAll(SetHmiLevel(hmi_level), Return(true)));
+  EXPECT_EQ(hmi_level, res_ctrl->GetSavedAppHmiLevel(app_id, device_id));
 }
 
 }  // namespace resumption_test
