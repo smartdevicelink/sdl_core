@@ -54,7 +54,6 @@ bool SQLDatabase::Open() {
   if (conn_)
     return true;
   error_ = sqlite3_open(get_path().c_str(), &conn_);
-  printf("OPEN SQLDATABASE: %i\n", error_);
   return error_ == SQLITE_OK;
 }
 
