@@ -320,6 +320,10 @@ InitResult SQLPTRepresentation::Init(const PolicySettings* settings) {
 #ifdef BUILD_TESTS
   open_counter_ = 0;
 #endif  // BUILD_TESTS
+  std::string path = get_settings().app_storage_folder();
+  if (!path.empty()) {
+    db_->set_path(path + "/");
+  }
   if (!db_->Open()) {
     LOG4CXX_ERROR(logger_, "Failed opening database.");
     LOG4CXX_INFO(logger_, "Starting opening retries.");

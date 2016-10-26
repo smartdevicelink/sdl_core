@@ -76,21 +76,20 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
   static DBMS* dbms;
   static SQLPTRepresentation* reps;
   static const std::string kDatabaseName;
+  static const std::string kAppStorageFolder;
   // Gtest can show message that this object doesn't destroyed
   static std::auto_ptr<policy_handler_test::MockPolicySettings>
       policy_settings_;
 
   static void SetUpTestCase() {
-    const std::string kAppStorageFolder = "storage1";
-    file_system::RemoveDirectory(kAppStorageFolder);
-    file_system::DeleteFile("policy.sqlite");
+    file_system::DeleteFile(kAppStorageFolder + "/policy.sqlite");
     reps = new SQLPTRepresentation;
-    dbms = new DBMS(kDatabaseName);
     policy_settings_ = std::auto_ptr<policy_handler_test::MockPolicySettings>(
         new policy_handler_test::MockPolicySettings());
     ON_CALL(*policy_settings_, app_storage_folder())
         .WillByDefault(ReturnRef(kAppStorageFolder));
     EXPECT_EQ(::policy::SUCCESS, reps->Init(policy_settings_.get()));
+    dbms = new DBMS(kAppStorageFolder + "/" + kDatabaseName);
     EXPECT_TRUE(dbms->Open());
   }
 
@@ -104,6 +103,7 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
     reps->RemoveDB();
     delete reps;
     dbms->Close();
+    file_system::RemoveDirectory(kAppStorageFolder);
     policy_settings_.reset();
   }
 
@@ -351,6 +351,7 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
 DBMS* SQLPTRepresentationTest::dbms = 0;
 SQLPTRepresentation* SQLPTRepresentationTest::reps = 0;
 const std::string SQLPTRepresentationTest::kDatabaseName = "policy.sqlite";
+const std::string SQLPTRepresentationTest::kAppStorageFolder = "storage1";
 std::auto_ptr<policy_handler_test::MockPolicySettings>
     SQLPTRepresentationTest::policy_settings_;
 
@@ -383,6 +384,25 @@ class SQLPTRepresentationTest2 : public ::testing::Test {
   const std::string kAppStorageFolder;
   const uint16_t kOpenAttemptTimeoutMs;
   const uint16_t kAttemptsToOpenPolicyDB;
+};
+
+class SQLPTRepresentationTest3 : public ::testing::Test {
+ protected:
+  SQLPTRepresentationTest3() : kAppStorageFolder("storage") {}
+
+  void SetUp() OVERRIDE {
+    file_system::CreateDirectory(kAppStorageFolder);
+    reps = new SQLPTRepresentation;
+  }
+
+  void TearDown() OVERRIDE {
+    file_system::RemoveDirectory(kAppStorageFolder, true);
+    delete reps;
+  }
+
+  SQLPTRepresentation* reps;
+  NiceMock<policy_handler_test::MockPolicySettings> policy_settings_;
+  const std::string kAppStorageFolder;
 };
 
 // {AKozoriz} : Unknown behavior (must try 8 times, tried 2 and opened)
@@ -991,49 +1011,38 @@ TEST_F(SQLPTRepresentationTest,
   EXPECT_EQ("EMERGENCY", priority);
 }
 
-namespace {
-const std::string kAppStorageFolder = "storage";
-}
-
-TEST(SQLPTRepresentationTest3, Init_InitNewDataBase_ExpectResultSuccess) {
+TEST_F(SQLPTRepresentationTest3, Init_InitNewDataBase_ExpectResultSuccess) {
   // Arrange
-  NiceMock<policy_handler_test::MockPolicySettings> policy_settings_;
-  SQLPTRepresentation* reps;
-  reps = new SQLPTRepresentation;
-  // Checks
   ON_CALL(policy_settings_, app_storage_folder())
       .WillByDefault(ReturnRef(kAppStorageFolder));
+  // Checks
   EXPECT_EQ(::policy::SUCCESS, reps->Init(&policy_settings_));
   EXPECT_EQ(::policy::EXISTS, reps->Init(&policy_settings_));
   reps->RemoveDB();
-  delete reps;
 }
 
-TEST(SQLPTRepresentationTest3,
-     Init_TryInitNotExistingDataBase_ExpectResultFail) {
+TEST_F(SQLPTRepresentationTest3,
+       Init_TryInitNotExistingDataBase_ExpectResultFail) {
+  const std::string kEmptyDirectory = "";
   // Arrange
-  NiceMock<policy_handler_test::MockPolicySettings> policy_settings_;
   ON_CALL(policy_settings_, app_storage_folder())
-      .WillByDefault(ReturnRef(kAppStorageFolder));
-  SQLPTRepresentation reps;
-  (reps.db())->set_path("/home/");
+      .WillByDefault(ReturnRef(kEmptyDirectory));
+  (reps->db())->set_path("/home/");
   // Check
-  EXPECT_EQ(::policy::FAIL, reps.Init(&policy_settings_));
+  EXPECT_EQ(::policy::FAIL, reps->Init(&policy_settings_));
 }
 
-TEST(SQLPTRepresentationTest3,
-     Close_InitNewDataBaseThenClose_ExpectResultSuccess) {
+TEST_F(SQLPTRepresentationTest3,
+       Close_InitNewDataBaseThenClose_ExpectResultSuccess) {
   // Arrange
-  NiceMock<policy_handler_test::MockPolicySettings> policy_settings_;
   ON_CALL(policy_settings_, app_storage_folder())
       .WillByDefault(ReturnRef(kAppStorageFolder));
-  SQLPTRepresentation reps;
-  EXPECT_EQ(::policy::SUCCESS, reps.Init(&policy_settings_));
-  EXPECT_TRUE(reps.Close());
+  EXPECT_EQ(::policy::SUCCESS, reps->Init(&policy_settings_));
+  EXPECT_TRUE(reps->Close());
   utils::dbms::SQLError error(utils::dbms::Error::OK);
   // Checks
-  EXPECT_EQ(error.number(), (reps.db()->LastError().number()));
-  reps.RemoveDB();
+  EXPECT_EQ(error.number(), (reps->db()->LastError().number()));
+  reps->RemoveDB();
 }
 
 TEST_F(SQLPTRepresentationTest,
@@ -1476,10 +1485,10 @@ TEST_F(SQLPTRepresentationTest,
   EXPECT_EQ(0, dbms->FetchOneInt(query_select));
 }
 
-TEST(SQLPTRepresentationTest3, RemoveDB_RemoveDB_ExpectFileDeleted) {
+TEST_F(SQLPTRepresentationTest3, RemoveDB_RemoveDB_ExpectFileDeleted) {
   // Arrange
-  policy_handler_test::MockPolicySettings policy_settings_;
-  SQLPTRepresentation* reps = new SQLPTRepresentation;
+  ON_CALL(policy_settings_, app_storage_folder())
+      .WillByDefault(ReturnRef(kAppStorageFolder));
   EXPECT_EQ(::policy::SUCCESS, reps->Init(&policy_settings_));
   EXPECT_EQ(::policy::EXISTS, reps->Init(&policy_settings_));
   std::string path = (reps->db())->get_path();
@@ -1487,7 +1496,6 @@ TEST(SQLPTRepresentationTest3, RemoveDB_RemoveDB_ExpectFileDeleted) {
   reps->RemoveDB();
   // Check
   EXPECT_FALSE(file_system::FileExists(path));
-  delete reps;
 }
 
 // TODO {AKozoriz} : Snapshot must have module meta section, but test
