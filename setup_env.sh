@@ -6,7 +6,6 @@ fi
 cp /etc/apt/sources.list /etc/apt/sources.list.backup
 
 . /etc/lsb-release
-echo $DISTRIB_RELEASE
 
 packages=(
 libssl-dev
@@ -34,25 +33,37 @@ libgtest-dev
 )
 
 if [ $DISTRIB_RELEASE!="14.04" ]; then
+   #add-apt-repository -y ppa:smspillaz/cmake-2.8.12
    sed -i -e '$a\deb http://ppa.launchpad.net/smspillaz/cmake-2.8.12/ubuntu wily main' /etc/apt/sources.list
 fi
-
 
 apt-get update
 apt-get install -y ${packages[@]}
 
+#if cmake not installed it will be installed. If any version of cmake installed except 2.8.12 it will be removed before installation.
 if ! dpkg -s cmake | grep "Version" | grep 2.8.12; then
-	apt-get remove cmake
+	apt-get remove cmake cmake-data
 	echo "INSTALLING CMAKE"
 	CMAKE_CORRECT_VERSION="$(apt-cache show cmake | grep Version | grep '2.8.12' | awk '{print $2}')"
 	apt-get install -y --force-yes cmake=$CMAKE_CORRECT_VERSION cmake-data=$CMAKE_CORRECT_VERSION
 fi
-
 
 . ./tools/Utils/update_gcc.sh
 . ./tools/Utils/install_distcc.sh
 
 python ./tools/infrastructure/install_hooks.py
 
+if [ "$1" == "-h" ]; then
+    echo "Argument -c allows to install git global name and email."
+    echo "Example setup_env.sh -c username usermail"
+fi
+
+if [ "$#" -eq 3 ]; then
+    if [ "$1" == "-c" ]; then
+	echo "Setting up git globals"
+	git config --global user.name $2
+	git config --global user.email $3
+    fi
+fi
+
 cp /etc/apt/sources.list.backup /etc/apt/sources.list
-rm -f /etc/apt/sources.list.backup
