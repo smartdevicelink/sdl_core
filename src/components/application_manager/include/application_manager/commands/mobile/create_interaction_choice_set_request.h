@@ -143,11 +143,10 @@ class CreateInteractionChoiceSetRequest : public CommandRequestImpl {
 
   /**
    * @brief Checks incoming choiseSet params.
-   * @param app Registred mobile application
    *
    * @return Mobile result code
    */
-  mobile_apis::Result::eType CheckChoiceSet(ApplicationConstSharedPtr app);
+  mobile_apis::Result::eType CheckChoiceSet();
 
   /**
    * @brief Checks choice set params(menuName, tertiaryText, ...)
