@@ -3,6 +3,12 @@ if [[ $EUID -ne 0 ]]; then
    exit 1
 fi
 
+if [ "$1" == "-h" ]; then
+    echo "Argument -c allows to install git global name and email."
+    echo "Example setup_env.sh -c username usermail"
+    exit 0
+fi
+
 cp /etc/apt/sources.list /etc/apt/sources.list.backup
 
 . /etc/lsb-release
@@ -30,10 +36,10 @@ bluez-tools
 chromium-browser
 libgl1-mesa-dev
 libgtest-dev
+binutils
 )
 
 if [ $DISTRIB_RELEASE!="14.04" ]; then
-   #add-apt-repository -y ppa:smspillaz/cmake-2.8.12
    sed -i -e '$a\deb http://ppa.launchpad.net/smspillaz/cmake-2.8.12/ubuntu wily main' /etc/apt/sources.list
 fi
 
@@ -52,11 +58,6 @@ fi
 . ./tools/Utils/install_distcc.sh
 
 python ./tools/infrastructure/install_hooks.py
-
-if [ "$1" == "-h" ]; then
-    echo "Argument -c allows to install git global name and email."
-    echo "Example setup_env.sh -c username usermail"
-fi
 
 if [ "$#" -eq 3 ]; then
     if [ "$1" == "-c" ]; then
