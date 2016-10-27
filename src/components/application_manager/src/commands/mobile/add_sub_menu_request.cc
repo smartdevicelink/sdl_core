@@ -35,6 +35,7 @@
 
 #include "application_manager/application.h"
 #include "utils/helpers.h"
+#include "utils/file_system.h"
 
 namespace application_manager {
 
@@ -93,6 +94,16 @@ void AddSubMenuRequest::Run() {
       (*message_)[strings::msg_params][strings::menu_name];
   msg_params[strings::app_id] = app->app_id();
 
+  if (((*message_)[strings::msg_params].keyExists(strings::sub_menu_icon)) &&
+      CheckSubMenuIcon()) {
+    msg_params[strings::sub_menu_icon] = (*message_)[strings::sub_menu_icon];
+    msg_params[strings::sub_menu_icon][strings::value] =
+        (*message_)[strings::msg_params][strings::sub_menu_icon][strings::value]
+            .asString();
+    msg_params[strings::sub_menu_icon][strings::image_type] = (*message_)
+        [strings::msg_params][strings::sub_menu_icon][strings::image_type];
+  }
+
   SendHMIRequest(hmi_apis::FunctionID::UI_AddSubMenu, &msg_params, true);
 }
 
@@ -120,12 +131,17 @@ void AddSubMenuRequest::on_event(const event_engine::Event& event) {
         return;
       }
 
+      const char* info = NULL;
       if (result) {
         application->AddSubMenu(
             (*message_)[strings::msg_params][strings::menu_id].asInt(),
             (*message_)[strings::msg_params]);
+        if (!CheckMenuIconExistedInStorage()) {
+          info = "Reference image(s) not found";
+        }
       }
-      SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
+
+      SendResponse(result, result_code, info, &(message[strings::msg_params]));
       if (result) {
         application->UpdateHash();
       }
@@ -145,6 +161,38 @@ bool AddSubMenuRequest::CheckSubMenuName() {
   str = (*message_)[strings::msg_params][strings::menu_name].asCharArray();
   if (!CheckSyntax(str)) {
     SDL_INFO("Invalid subMenu name.");
+    return false;
+  }
+  return true;
+}
+
+bool AddSubMenuRequest::CheckSubMenuIcon() {
+  if (!(*message_)[strings::msg_params].keyExists(strings::sub_menu_icon)) {
+    return false;
+  }
+  std::string str =
+      (*message_)[strings::msg_params][strings::sub_menu_icon][strings::value]
+          .asString();
+  if (!CheckSyntax(str) || std::string::npos != str.find(" ")) {
+    SDL_ERROR("Invalid menu icon syntax check failed.");
+    return false;
+  }
+
+  return true;
+}
+bool AddSubMenuRequest::CheckMenuIconExistedInStorage() {
+  if (!(*message_)[strings::msg_params].keyExists(strings::sub_menu_icon)) {
+    return true;
+  }
+  std::string full_file_path =
+      application_manager_.get_settings().app_storage_folder() + "/";
+
+  full_file_path += file_system::GetPathDelimiter();
+  full_file_path +=
+      (*message_)[strings::msg_params][strings::sub_menu_icon][strings::value]
+          .asString();
+
+  if (!file_system::FileExists(full_file_path)) {
     return false;
   }
   return true;
