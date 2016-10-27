@@ -31,7 +31,6 @@ bluez-tools
 chromium-browser
 libgl1-mesa-dev
 libgtest-dev
-aclocal-1.14
 )
 
 if [ $DISTRIB_RELEASE!="14.04" ]; then
