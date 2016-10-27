@@ -41,10 +41,38 @@
 #include "application_manager/message_helper.h"
 #include "utils/gen_hash.h"
 #include "utils/helpers.h"
+#include "utils/stl_utils.h"
 
 namespace application_manager {
 
 namespace commands {
+
+class UniqueParamChecker {
+ public:
+  UniqueParamChecker(const char* const name) : name_(name) {}
+
+  mobile_apis::Result::eType operator()(const std::string& param) {
+    if (!utils::InsertIntoSet(Djb2HashFromString(param), hash_set_)) {
+      error_msg_ = "Choise with " + name_ + " " + param + " already exists";
+      return mobile_apis::Result::DUPLICATE_NAME;
+    }
+    if (!CommandRequestImpl::CheckSyntax(param)) {
+      error_msg_ = "Invalid syntax of " + name_ + " value. Syntax check failed";
+      return mobile_apis::Result::INVALID_DATA;
+    }
+
+    return mobile_apis::Result::SUCCESS;
+  }
+
+  const std::string error_msg() const {
+    return error_msg_;
+  }
+
+ private:
+  std::string error_msg_;
+  std::set<int32_t> hash_set_;
+  const std::string name_;
+};
 
 CreateInteractionChoiceSetRequest::CreateInteractionChoiceSetRequest(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
@@ -108,23 +136,25 @@ void CreateInteractionChoiceSetRequest::Run() {
     return;
   }
 
-  Result::eType result = CheckChoiceSet(app);
+  Result::eType result = CheckChoiceSet();
   if (Result::SUCCESS != result) {
     SendResponse(false, result);
     return;
   }
   uint32_t grammar_id = application_manager_.GenerateGrammarID();
   (*message_)[strings::msg_params][strings::grammar_id] = grammar_id;
-  app->AddChoiceSet(choice_set_id_, (*message_)[strings::msg_params]);
   SendVRAddCommandRequests(app);
+  app->AddChoiceSet(choice_set_id_, (*message_)[strings::msg_params]);
 }
 
-mobile_apis::Result::eType CreateInteractionChoiceSetRequest::CheckChoiceSet(
-    ApplicationConstSharedPtr app) {
-  using namespace smart_objects;
+mobile_apis::Result::eType CreateInteractionChoiceSetRequest::CheckChoiceSet() {
+  using smart_objects::SmartObject;
+  using smart_objects::SmartArray;
   LOG4CXX_AUTO_TRACE(logger_);
 
   std::set<uint32_t> choice_id_set;
+  UniqueParamChecker choice_menu_name_checker(strings::menu_name);
+  UniqueParamChecker choice_vr_command_checker(strings::vr_commands);
 
   const SmartArray* choice_set =
       (*message_)[strings::msg_params][strings::choice_set].asArray();
@@ -132,18 +162,37 @@ mobile_apis::Result::eType CreateInteractionChoiceSetRequest::CheckChoiceSet(
   SmartArray::const_iterator choice_set_it = choice_set->begin();
 
   for (; choice_set->end() != choice_set_it; ++choice_set_it) {
-    std::pair<std::set<uint32_t>::iterator, bool> ins_res =
-        choice_id_set.insert((*choice_set_it)[strings::choice_id].asInt());
-    if (!ins_res.second) {
+    const uint32_t choice_id = (*choice_set_it)[strings::choice_id].asUInt();
+    if (!utils::InsertIntoSet(choice_id, choice_id_set)) {
       LOG4CXX_ERROR(logger_,
-                    "Choise with ID "
-                        << (*choice_set_it)[strings::choice_id].asInt()
-                        << " already exists");
+                    "Choise with ID " << choice_id << " already exists");
       return mobile_apis::Result::INVALID_ID;
     }
 
+    mobile_apis::Result::eType result_code = mobile_apis::Result::SUCCESS;
+
+    const std::string choice_menu_name =
+        (*choice_set_it)[strings::menu_name].asString();
+    result_code = choice_menu_name_checker(choice_menu_name);
+    if (mobile_apis::Result::SUCCESS != result_code) {
+      LOG4CXX_ERROR(logger_, choice_menu_name_checker.error_msg());
+      return result_code;
+    }
+
+    const SmartObject& vr_commands_array =
+        (*choice_set_it)[strings::vr_commands];
+
+    for (size_t i = 0; i < vr_commands_array.length(); ++i) {
+      const std::string choice_vr_command = vr_commands_array[i].asString();
+      result_code = choice_vr_command_checker(choice_vr_command);
+      if (mobile_apis::Result::SUCCESS != result_code) {
+        LOG4CXX_ERROR(logger_, choice_vr_command_checker.error_msg());
+        return result_code;
+      }
+    }
+
     if (IsWhiteSpaceExist(*choice_set_it)) {
-      LOG4CXX_ERROR(logger_, "Incoming choice set has contains \t\n \\t \\n");
+      LOG4CXX_ERROR(logger_, "Incoming choice set has contains \\t\\n \\t \\n");
       return mobile_apis::Result::INVALID_DATA;
     }
   }
@@ -184,76 +233,98 @@ bool CreateInteractionChoiceSetRequest::compareStr(
 }
 
 bool CreateInteractionChoiceSetRequest::IsWhiteSpaceExist(
-    const smart_objects::SmartObject& choice_set) {
+    const smart_objects::SmartObject& choice) {
   LOG4CXX_AUTO_TRACE(logger_);
   const char* str = NULL;
 
-  str = choice_set[strings::menu_name].asCharArray();
-  if (!CheckSyntax(str)) {
-    LOG4CXX_ERROR(logger_, "Invalid menu_name syntax check failed");
-    return true;
-  }
-
-  if (choice_set.keyExists(strings::secondary_text)) {
-    str = choice_set[strings::secondary_text].asCharArray();
+  if (choice.keyExists(strings::secondary_text)) {
+    str = choice[strings::secondary_text].asCharArray();
     if (!CheckSyntax(str)) {
-      LOG4CXX_ERROR(logger_, "Invalid secondary_text syntax check failed");
+      LOG4CXX_ERROR(
+          logger_,
+          "Invalid syntax of secondary_text value. Syntax check failed");
       return true;
     }
   }
 
-  if (choice_set.keyExists(strings::tertiary_text)) {
-    str = choice_set[strings::tertiary_text].asCharArray();
+  if (choice.keyExists(strings::tertiary_text)) {
+    str = choice[strings::tertiary_text].asCharArray();
     if (!CheckSyntax(str)) {
-      LOG4CXX_ERROR(logger_, "Invalid tertiary_text syntax check failed");
+      LOG4CXX_ERROR(
+          logger_,
+          "Invalid syntax of tertiary_text value. Syntax check failed");
       return true;
     }
   }
 
-  if (choice_set.keyExists(strings::vr_commands)) {
-    const size_t len = choice_set[strings::vr_commands].length();
-
-    for (size_t i = 0; i < len; ++i) {
-      str = choice_set[strings::vr_commands][i].asCharArray();
-      if (!CheckSyntax(str)) {
-        LOG4CXX_ERROR(logger_, "Invalid vr_commands syntax check failed");
-        return true;
-      }
-    }
-  }
-
-  if (choice_set.keyExists(strings::image)) {
-    str = choice_set[strings::image][strings::value].asCharArray();
-    if (!CheckSyntax(str)) {
-      LOG4CXX_ERROR(logger_, "Invalid image value syntax check failed");
-      return true;
-    }
-  }
-
-  if (choice_set.keyExists(strings::secondary_image)) {
-    str = choice_set[strings::secondary_image][strings::value].asCharArray();
+  if (choice.keyExists(strings::image)) {
+    str = choice[strings::image][strings::value].asCharArray();
     if (!CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_,
-                    "Invalid secondary_image value. "
-                    "Syntax check failed");
+                    "Invalid syntax of image value. Syntax check failed");
+      return true;
+    }
+  }
+
+  if (choice.keyExists(strings::secondary_image)) {
+    str = choice[strings::secondary_image][strings::value].asCharArray();
+    if (!CheckSyntax(str)) {
+      LOG4CXX_ERROR(
+          logger_,
+          "Invalid syntax of secondary_image value. Syntax check failed");
       return true;
     }
   }
   return false;
 }
 
+bool InsertVrCommands(const smart_objects::SmartObject& vr_commands,
+                      std::set<int32_t>& vr_commands_hash) {
+  using smart_objects::SmartArray;
+  const smart_objects::SmartArray* vr_commands_array = vr_commands.asArray();
+
+  SmartArray::const_iterator vr_it = vr_commands_array->begin();
+  const SmartArray::const_iterator vr_end = vr_commands_array->end();
+
+  bool result = true;
+  for (; vr_end != vr_it; ++vr_it) {
+    const std::string vr_command = (*vr_it).asString();
+    result = utils::InsertIntoSet(utils::Djb2HashFromString(vr_command),
+                                  vr_commands_hash) &&
+             result;
+  }
+  return result;
+}
+
+std::set<int32_t> CollectVRCommands(
+    DataAccessor<application_manager::ChoiceSetMap> data_accessor) {
+  using namespace application_manager;
+  std::set<int32_t> vr_commands_set;
+  const ChoiceSetMap& choice_set_map = data_accessor.GetData();
+
+  ChoiceSetMap::const_iterator choice_set_it = choice_set_map.begin();
+  const ChoiceSetMap::const_iterator choice_set_end = choice_set_map.end();
+  for (; choice_set_it != choice_set_end; ++choice_set_it) {
+    InsertVrCommands((*choice_set_it->second)[strings::vr_commands],
+                     vr_commands_set);
+  }
+  return vr_commands_set;
+}
+
 void CreateInteractionChoiceSetRequest::SendVRAddCommandRequests(
     application_manager::ApplicationSharedPtr const app) {
+  using smart_objects::SmartObject;
   LOG4CXX_AUTO_TRACE(logger_);
 
-  smart_objects::SmartObject& choice_set = (*message_)[strings::msg_params];
-  smart_objects::SmartObject msg_params =
-      smart_objects::SmartObject(smart_objects::SmartType_Map);
+  SmartObject& choice_set = (*message_)[strings::msg_params];
+  SmartObject msg_params = SmartObject(smart_objects::SmartType_Map);
   msg_params[strings::type] = hmi_apis::Common_VRCommandType::Choice;
   msg_params[strings::app_id] = app->app_id();
   msg_params[strings::grammar_id] = choice_set[strings::grammar_id];
   const uint32_t choice_count = choice_set[strings::choice_set].length();
   SetAllowedToTerminate(false);
+
+  std::set<int32_t> vr_commands_hash(CollectVRCommands(app->choice_set_map()));
 
   expected_chs_count_ = choice_count;
   size_t chs_num = 0;
@@ -267,12 +338,33 @@ void CreateInteractionChoiceSetRequest::SendVRAddCommandRequests(
       }
     }
 
-    msg_params[strings::cmd_id] =
-        choice_set[strings::choice_set][chs_num][strings::choice_id];
-    msg_params[strings::vr_commands] =
-        smart_objects::SmartObject(smart_objects::SmartType_Array);
-    msg_params[strings::vr_commands] =
-        choice_set[strings::choice_set][chs_num][strings::vr_commands];
+    const SmartObject& choice = choice_set[strings::choice_set][chs_num];
+
+    if (!choice[strings::vr_commands].asArray() ||
+        choice[strings::vr_commands].empty()) {
+      --expected_chs_count_;
+      LOG4CXX_DEBUG(logger_,
+                    "Choice with cmd_id "
+                        << choice[strings::cmd_id].asString()
+                        << "was skipped because it have no vr_commands");
+      continue;
+    }
+
+    if (!InsertVrCommands(choice[strings::vr_commands], vr_commands_hash)) {
+      --expected_chs_count_;
+      LOG4CXX_DEBUG(
+          logger_,
+          "Choice with cmd_id "
+              << choice[strings::cmd_id].asString()
+              << "was skipped because some of vr_commands were already sent to "
+                 "HMI. vr_commands: "
+              << choice[strings::vr_commands].asString());
+
+      continue;
+    }
+
+    msg_params[strings::cmd_id] = choice[strings::choice_id];
+    msg_params[strings::vr_commands] = choice[strings::vr_commands];
 
     sync_primitives::AutoLock commands_lock(vr_commands_lock_);
     const uint32_t vr_cmd_id = msg_params[strings::cmd_id].asUInt();
@@ -285,7 +377,6 @@ void CreateInteractionChoiceSetRequest::SendVRAddCommandRequests(
                   "VR_command sent corr_id " << vr_corr_id << " cmd_id "
                                              << vr_corr_id);
   }
-  expected_chs_count_ = chs_num;
   LOG4CXX_DEBUG(logger_, "expected_chs_count_ = " << expected_chs_count_);
 }
 
