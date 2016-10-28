@@ -2373,62 +2373,59 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
     return mobile_apis::Result::SUCCESS;
   }
 
-  SmartObject& request_soft_buttons = message_params[strings::soft_buttons];
+  SmartObject& soft_buttons = message_params[strings::soft_buttons];
 
   // Check whether soft buttons request is well-formed
-  if (!ValidateSoftButtons(request_soft_buttons)) {
+  if (!ValidateSoftButtons(soft_buttons)) {
     return Result::INVALID_DATA;
   }
 
-  SmartObject soft_buttons(SmartType_Array);
+  SmartObject soft_buttons_array(SmartType_Array);
 
   uint32_t j = 0;
-  size_t size = request_soft_buttons.length();
+  size_t size = soft_buttons.length();
   for (uint32_t i = 0; i < size; ++i) {
-    const int system_action =
-        request_soft_buttons[i][strings::system_action].asInt();
-
+    SmartObject& soft_button = soft_buttons[i];
+    const int system_action = soft_button[strings::system_action].asInt();
     if (!CheckWithPolicy(static_cast<SystemAction::eType>(system_action),
                          app->policy_app_id(),
                          policy_handler)) {
       return Result::DISALLOWED;
     }
 
-    switch (request_soft_buttons[i][strings::type].asInt()) {
-      case SoftButtonType::SBT_IMAGE: {
-        // Any text value for type "IMAGE" should be ignored.
-        if (request_soft_buttons[i].keyExists(strings::text)) {
-          request_soft_buttons[i].erase(strings::text);
-        }
+    bool is_image_valid = false;
+    bool is_image_exists = soft_button.keyExists(strings::image);
 
-        if ((!request_soft_buttons[i].keyExists(strings::image) ||
-             (Result::SUCCESS !=
-              VerifyImage(
-                  request_soft_buttons[i][strings::image], app, app_mngr)))) {
+    bool is_text_valid = false;
+    bool is_text_exists = soft_button.keyExists(strings::text);
+
+    if (is_image_exists) {
+      is_image_valid = Result::SUCCESS ==
+                       VerifyImage(soft_button[strings::image], app, app_mngr);
+    }
+
+    if (is_text_exists) {
+      is_text_valid = !soft_button[strings::text].empty() &&
+                      VerifySoftButtonString(soft_buttons.asString());
+    }
+    mobile_apis::SoftButtonType::eType button_type =
+        static_cast<mobile_apis::SoftButtonType::eType>(
+            soft_button[strings::type].asInt());
+    switch (button_type) {
+      case SoftButtonType::SBT_IMAGE: {
+        if (!is_image_valid || (is_text_exists && !is_text_valid)) {
           return Result::INVALID_DATA;
         }
         break;
       }
       case SoftButtonType::SBT_TEXT: {
-        if ((!request_soft_buttons[i].keyExists(strings::text)) ||
-            (!VerifySoftButtonString(
-                 request_soft_buttons[i][strings::text].asString()))) {
+        if (!is_text_valid || (is_image_exists && !is_image_valid)) {
           return Result::INVALID_DATA;
         }
         break;
       }
       case SoftButtonType::SBT_BOTH: {
-        if ((!request_soft_buttons[i].keyExists(strings::text)) ||
-            ((request_soft_buttons[i][strings::text].length()) &&
-             (!VerifySoftButtonString(
-                  request_soft_buttons[i][strings::text].asString())))) {
-          return Result::INVALID_DATA;
-        }
-
-        if ((!request_soft_buttons[i].keyExists(strings::image) ||
-             (Result::SUCCESS !=
-              VerifyImage(
-                  request_soft_buttons[i][strings::image], app, app_mngr)))) {
+        if (!is_text_valid || !is_image_valid) {
           return Result::INVALID_DATA;
         }
         break;
@@ -2436,12 +2433,12 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
       default: { continue; }
     }
 
-    soft_buttons[j++] = request_soft_buttons[i];
+    soft_buttons_array[j++] = soft_button;
   }
 
-  request_soft_buttons = soft_buttons;
+  soft_buttons = soft_buttons_array;
 
-  if (0 == request_soft_buttons.length()) {
+  if (0 == soft_buttons.length()) {
     message_params.erase(strings::soft_buttons);
   }
   return Result::SUCCESS;
