@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 if [[ $EUID -ne 0 ]]; then
    echo "This script must be run as root" 1>&2
    exit 1
@@ -37,6 +39,8 @@ chromium-browser
 libgl1-mesa-dev
 libgtest-dev
 binutils
+cmake-curses-gui
+gitk
 )
 
 if [ $DISTRIB_RELEASE!="14.04" ]; then
@@ -48,10 +52,10 @@ apt-get install -y ${packages[@]}
 
 #if cmake not installed it will be installed. If any version of cmake installed except 2.8.12 it will be removed before installation.
 if ! dpkg -s cmake | grep "Version" | grep 2.8.12; then
-	apt-get remove cmake cmake-data
+	apt-get remove -y cmake cmake-data cmake-curses-gui
 	echo "INSTALLING CMAKE"
 	CMAKE_CORRECT_VERSION="$(apt-cache show cmake | grep Version | grep '2.8.12' | awk '{print $2}')"
-	apt-get install -y --force-yes cmake=$CMAKE_CORRECT_VERSION cmake-data=$CMAKE_CORRECT_VERSION
+	apt-get install -y --force-yes cmake=$CMAKE_CORRECT_VERSION cmake-data=$CMAKE_CORRECT_VERSION cmake-curses-gui=$CMAKE_CORRECT_VERSION
 fi
 
 . ./tools/Utils/update_gcc.sh
