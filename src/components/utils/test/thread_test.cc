@@ -57,7 +57,7 @@ class ThreadTestDelegate : public threads::ThreadDelegate {
   ThreadTestDelegate()
       : thread_stopped_(false), thread_started_(false), starts_counter_(0) {}
 
-  //Milliseconds expected to be enough for execution
+  // Milliseconds expected to be enough for execution
   static const uint32_t kMilliSecondsToWait = 10000u;
 
   void threadMain() OVERRIDE {
@@ -78,11 +78,11 @@ class ThreadTestDelegate : public threads::ThreadDelegate {
 
   void WaitForThreadStart() {
     AutoLock test_lock(test_mutex_);
-     while (!thread_started_) {
-     ASSERT_FALSE(cond_var_.WaitFor(test_lock, kMilliSecondsToWait) == ConditionalVariable::kTimeout);
-     }
+    while (!thread_started_) {
+      ASSERT_FALSE(cond_var_.WaitFor(test_lock, kMilliSecondsToWait) ==
+                   ConditionalVariable::kTimeout);
+    }
   }
-
 
   bool is_thread_started() const {
     return thread_started_;

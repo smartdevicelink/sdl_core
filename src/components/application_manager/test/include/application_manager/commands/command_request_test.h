@@ -43,6 +43,7 @@
 #include "application_manager/commands/command_request_impl.h"
 #include "application_manager/mock_event_dispatcher.h"
 #include "application_manager/event_engine/event.h"
+#include "application_manager/mock_message_helper.h"
 
 namespace test {
 namespace components {
@@ -52,6 +53,7 @@ using ::testing::_;
 using ::testing::Return;
 using ::testing::SaveArg;
 using ::testing::DoAll;
+using ::testing::Mock;
 using ::testing::NiceMock;
 using ::test::components::event_engine_test::MockEventDispatcher;
 namespace am = ::application_manager;
@@ -113,8 +115,12 @@ class CommandRequestTest : public CommandsTest<kIsNice> {
   MockEventDisp event_dispatcher_;
 
  protected:
-  CommandRequestTest() : CommandsTest<kIsNice>() {}
-
+  CommandRequestTest()
+      : CommandsTest<kIsNice>()
+      , mock_message_helper_(*am::MockMessageHelper::message_helper_mock()) {
+    Mock::VerifyAndClearExpectations(&mock_message_helper_);
+  }
+  am::MockMessageHelper& mock_message_helper_;
   virtual void InitCommand(const uint32_t& default_timeout) OVERRIDE {
     CommandsTest<kIsNice>::InitCommand(default_timeout);
     ON_CALL(CommandsTest<kIsNice>::mock_app_manager_, event_dispatcher())
