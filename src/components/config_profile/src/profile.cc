@@ -199,7 +199,6 @@ const char* kUseDBForResumptionKey = "UseDBForResumption";
 const char* kAttemptsToOpenResumptionDBKey = "AttemptsToOpenResumptionDB";
 const char* kOpenAttemptTimeoutMsResumptionDBKey =
     "OpenAttemptTimeoutMsResumptionDB";
-
 const char* kAppLaunchWaitTimeKey = "AppLaunchWaitTime";
 const char* kAppLaunchMaxRetryAttemptKey = "AppLaunchMaxRetryAttempt";
 const char* kAppLaunchRetryWaitTimeKey = "AppLaunchRetryWaitTime";
@@ -207,6 +206,8 @@ const char* kRemoveBundleIDattemptsKey = "RemoveBundleIDattempts";
 const char* kMaxNumberOfiOSDeviceKey = "MaxNumberOfiOSDevice";
 const char* kWaitTimeBetweenAppsKey = "WaitTimeBetweenApps";
 const char* kEnableAppLaunchIOSKey = "EnableAppLaunchIOS";
+const char* kMenuTitleKey = "MenuTitle";
+const char* kMenuIconKey = "MenuIcon";
 #ifdef WEB_HMI
 const char* kDefaultLinkToWebHMI = "HMI/index.html";
 #endif  // WEB_HMI
@@ -230,6 +231,8 @@ const char* kDefaultHubProtocolMask = "com.smartdevicelink.prot";
 const char* kDefaultPoolProtocolMask = "com.smartdevicelink.prot";
 const char* kDefaultIAPSystemConfig = "/fs/mp/etc/mm/ipod.cfg";
 const char* kDefaultIAP2SystemConfig = "/fs/mp/etc/mm/iap2.cfg";
+const char* kDefaultMenuTitle = "MENU";
+const char* kDefaultMenuIcon = "";
 
 #ifdef ENABLE_SECURITY
 const char* kDefaultSecurityProtocol = "TLSv1.2";
@@ -387,6 +390,8 @@ Profile::Profile()
     , max_number_of_ios_device_(kDefaultMaxNumberOfiOSDevice)
     , wait_time_between_apps_(kDefaultWaitTimeBetweenApps)
     , enable_app_launch_ios_(kDefaultEnableAppLaunchIOS)
+    , menu_title_(kDefaultMenuTitle)
+    , menu_icon_(kDefaultMenuIcon)
     , error_occured_(false)
     , error_description_() {
   // SDL version
@@ -871,6 +876,14 @@ const uint16_t Profile::app_launch_wait_time() const {
 
 const bool Profile::enable_app_launch_ios() const {
   return enable_app_launch_ios_;
+}
+
+const std::string& Profile::menu_title() const {
+  return menu_title_;
+}
+
+const std::string& Profile::menu_icon() const {
+  return menu_icon_;
 }
 
 const uint16_t Profile::max_number_of_ios_device() const {
@@ -1829,6 +1842,20 @@ void Profile::UpdateValues() {
 
   LOG_UPDATED_BOOL_VALUE(
       enable_app_launch_ios_, kEnableAppLaunchIOSKey, kAppLaunchSection);
+
+  // Menu title
+  ReadStringValue(&menu_title_,
+                  kDefaultMenuTitle,
+                  kApplicationManagerSection,
+                  kMenuTitleKey);
+
+  LOG_UPDATED_VALUE(menu_title_, kMenuTitleKey, kApplicationManagerSection);
+
+  // Menu icon
+  ReadStringValue(
+      &menu_icon_, kDefaultMenuIcon, kApplicationManagerSection, kMenuIconKey);
+
+  LOG_UPDATED_VALUE(menu_icon_, kMenuIconKey, kApplicationManagerSection);
 }
 
 bool Profile::ReadValue(bool* value,

@@ -632,6 +632,16 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   const bool enable_app_launch_ios() const OVERRIDE;
 
   /**
+   * @brief Returns menu title
+   */
+  const std::string& menu_title() const OVERRIDE;
+
+  /**
+   * @brief Returns path to menu icon
+   */
+  const std::string& menu_icon() const OVERRIDE;
+
+  /*
    * @brief Updates all related values from ini file
    */
   void UpdateValues();
@@ -887,6 +897,8 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   uint16_t max_number_of_ios_device_;
   uint16_t wait_time_between_apps_;
   bool enable_app_launch_ios_;
+  std::string menu_title_;
+  std::string menu_icon_;
   bool error_occured_;
   std::string error_description_;
 
