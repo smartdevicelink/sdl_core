@@ -193,6 +193,8 @@ const char* kUseDBForResumptionKey = "UseDBForResumption";
 const char* kAttemptsToOpenResumptionDBKey = "AttemptsToOpenResumptionDB";
 const char* kOpenAttemptTimeoutMsResumptionDBKey =
     "OpenAttemptTimeoutMsResumptionDB";
+const char* kMenuTitleKey = "MenuTitle";
+const char* kMenuIconKey = "MenuIcon";
 
 #ifdef WEB_HMI
 const char* kDefaultLinkToWebHMI = "HMI/index.html";
@@ -216,6 +218,8 @@ const char* kDefaultHubProtocolMask = "com.smartdevicelink.prot";
 const char* kDefaultPoolProtocolMask = "com.smartdevicelink.prot";
 const char* kDefaultIAPSystemConfig = "/fs/mp/etc/mm/ipod.cfg";
 const char* kDefaultIAP2SystemConfig = "/fs/mp/etc/mm/iap2.cfg";
+const char* kDefaultMenuTitle = "MENU";
+const char* kDefaultMenuIcon = "";
 
 #ifdef ENABLE_SECURITY
 const char* kDefaultSecurityProtocol = "TLSv1.2";
@@ -357,7 +361,9 @@ Profile::Profile()
     , use_db_for_resumption_(false)
     , attempts_to_open_resumption_db_(kDefaultAttemptsToOpenResumptionDB)
     , open_attempt_timeout_ms_resumption_db_(
-          kDefaultOpenAttemptTimeoutMsResumptionDB) {
+          kDefaultOpenAttemptTimeoutMsResumptionDB)
+    , menu_title_(kDefaultMenuTitle)
+    , menu_icon_(kDefaultMenuIcon) {
 }
 
 Profile::~Profile() {}
@@ -818,6 +824,14 @@ uint16_t Profile::attempts_to_open_resumption_db() const {
 
 uint16_t Profile::open_attempt_timeout_ms_resumption_db() const {
   return open_attempt_timeout_ms_resumption_db_;
+}
+
+const std::string& Profile::menu_title() const {
+  return menu_title_;
+}
+
+const std::string& Profile::menu_icon() const {
+  return menu_icon_;
 }
 
 void Profile::UpdateValues() {
@@ -1680,6 +1694,20 @@ void Profile::UpdateValues() {
   LOG_UPDATED_VALUE(open_attempt_timeout_ms_resumption_db_,
                     kOpenAttemptTimeoutMsResumptionDBKey,
                     kResumptionSection);
+
+  // Menu title
+  ReadStringValue(&menu_title_,
+                  kDefaultMenuTitle,
+                  kApplicationManagerSection,
+                  kMenuTitleKey);
+
+  LOG_UPDATED_VALUE(menu_title_, kMenuTitleKey, kApplicationManagerSection);
+
+  // Menu icon
+  ReadStringValue(
+      &menu_icon_, kDefaultMenuIcon, kApplicationManagerSection, kMenuIconKey);
+
+  LOG_UPDATED_VALUE(menu_icon_, kMenuIconKey, kApplicationManagerSection);
 }
 
 bool Profile::ReadValue(bool* value,

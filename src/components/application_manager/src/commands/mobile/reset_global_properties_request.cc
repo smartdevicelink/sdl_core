@@ -76,7 +76,7 @@ void ResetGlobalPropertiesRequest::Run() {
   bool helpt_promt = false;
   bool timeout_prompt = false;
   bool vr_help_title_items = false;
-  bool menu_name = false;
+  bool menu_title = false;
   bool menu_icon = false;
   bool is_key_board_properties = false;
   int number_of_reset_vr = 0;
@@ -98,7 +98,7 @@ void ResetGlobalPropertiesRequest::Run() {
       ++number_of_reset_vr;
       vr_help_title_items = ResetVrHelpTitleItems(app);
     } else if (mobile_apis::GlobalProperty::MENUNAME == global_property) {
-      menu_name = true;
+      menu_title = true;
     } else if (mobile_apis::GlobalProperty::MENUICON == global_property) {
       menu_icon = true;
     } else if (mobile_apis::GlobalProperty::KEYBOARDPROPERTIES ==
@@ -107,7 +107,7 @@ void ResetGlobalPropertiesRequest::Run() {
     }
   }
 
-  if (vr_help_title_items || menu_name || menu_icon ||
+  if (vr_help_title_items || menu_title || menu_icon ||
       is_key_board_properties) {
     is_ui_send_ = true;
   }
@@ -118,7 +118,7 @@ void ResetGlobalPropertiesRequest::Run() {
 
   app->set_reset_global_properties_active(true);
 
-  if (vr_help_title_items || menu_name || menu_icon ||
+  if (vr_help_title_items || menu_title || menu_icon ||
       is_key_board_properties) {
     smart_objects::SmartObject msg_params =
         smart_objects::SmartObject(smart_objects::SmartType_Map);
@@ -131,13 +131,18 @@ void ResetGlobalPropertiesRequest::Run() {
       }
       msg_params = *vr_help;
     }
-    if (menu_name) {
-      msg_params[hmi_request::menu_title] = "";
+    if (menu_title) {
+      msg_params[hmi_request::menu_title] =
+          application_manager_.get_settings().menu_title();
       app->set_menu_title(msg_params[hmi_request::menu_title]);
     }
-    // TODO(DT): clarify the sending parameter menuIcon
-    // if (menu_icon) {
-    //}
+    if (menu_icon) {
+      smart_objects::SmartObject so_menu_icon(smart_objects::SmartType_Map);
+      so_menu_icon[strings::value] =
+          application_manager_.get_settings().menu_icon();
+      msg_params[hmi_request::menu_icon] = so_menu_icon;
+      app->set_menu_icon(msg_params[hmi_request::menu_icon]);
+    }
     if (is_key_board_properties) {
       smart_objects::SmartObject key_board_properties =
           smart_objects::SmartObject(smart_objects::SmartType_Map);
