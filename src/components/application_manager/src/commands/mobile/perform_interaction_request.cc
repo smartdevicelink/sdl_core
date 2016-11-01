@@ -42,6 +42,7 @@
 #include "utils/helpers.h"
 #include "utils/custom_string.h"
 #include "utils/gen_hash.h"
+#include "utils/stl_utils.h"
 
 namespace application_manager {
 
@@ -87,13 +88,6 @@ bool PerformInteractionRequest::Init() {
   return true;
 }
 
-template <typename T>
-bool InsertData(std::set<T>& out_set, const T& data) {
-  typedef std::pair<typename std::set<T>::iterator, bool> InsertResult;
-  InsertResult ins_res = out_set.insert(data);
-  return ins_res.second;
-}
-
 class CheckMenuNames {
  public:
   CheckMenuNames()
@@ -102,7 +96,8 @@ class CheckMenuNames {
 
   bool operator()(const smart_objects::SmartObject& choice) {
     const std::string& menu_name = choice[strings::menu_name].asString();
-    return InsertData(hash_set_, utils::Djb2HashFromString(menu_name));
+    return utils::InsertIntoSet(utils::Djb2HashFromString(menu_name),
+                                hash_set_);
   }
 
   const mobile_apis::Result::eType result_code_;
@@ -124,7 +119,8 @@ class CheckVRSynonyms {
     for (size_t vr_command_i = 0; vr_command_i < vr_commands.length();
          ++vr_command_i) {
       const std::string& vr_command = vr_commands[vr_command_i].asString();
-      if (!InsertData(hash_set_, utils::Djb2HashFromString(vr_command))) {
+      if (!utils::InsertIntoSet(utils::Djb2HashFromString(vr_command),
+                                hash_set_)) {
         return false;
       }
     }

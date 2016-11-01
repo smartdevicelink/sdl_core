@@ -39,6 +39,7 @@
 #include "application_manager/message_helper.h"
 #include "utils/gen_hash.h"
 #include "utils/helpers.h"
+#include "utils/stl_utils.h"
 
 namespace application_manager {
 
@@ -117,19 +118,12 @@ void CreateInteractionChoiceSetRequest::Run() {
   app->AddChoiceSet(choice_set_id_, (*message_)[strings::msg_params]);
 }
 
-template <typename T>
-bool InsertData(std::set<T>& out_set, const T& data) {
-  typedef std::pair<typename std::set<T>::iterator, bool> InsertResult;
-  InsertResult ins_res = out_set.insert(data);
-  return ins_res.second;
-}
-
 class UniqueParamChecker {
  public:
   UniqueParamChecker(const char* const name) : name_(name) {}
 
   mobile_apis::Result::eType operator()(const std::string& param) {
-    if (!InsertData(hash_set_, utils::Djb2HashFromString(param))) {
+    if (!utils::InsertIntoSet(Djb2HashFromString(param), hash_set_)) {
       error_msg_ = "Choise with " + name_ + " " + param + " already exists";
       return mobile_apis::Result::DUPLICATE_NAME;
     }
@@ -167,7 +161,7 @@ mobile_apis::Result::eType CreateInteractionChoiceSetRequest::CheckChoiceSet() {
 
   for (; choice_set->end() != choice_set_it; ++choice_set_it) {
     const uint32_t choice_id = (*choice_set_it)[strings::choice_id].asUInt();
-    if (!InsertData(choice_id_set, choice_id)) {
+    if (!utils::InsertIntoSet(choice_id, choice_id_set)) {
       SDL_ERROR("Choise with ID " << choice_id << " already exists");
       return mobile_apis::Result::INVALID_ID;
     }
@@ -251,8 +245,9 @@ bool InsertVrCommand(std::set<int32_t>& vr_commands_hash,
   bool result = true;
   for (; vr_commands_array->end() != vr_it; ++vr_it) {
     const std::string vr_command = (*vr_it).asString();
-    result = result && InsertData(vr_commands_hash,
-                                  utils::Djb2HashFromString(vr_command));
+    result = utils::InsertIntoSet(utils::Djb2HashFromString(vr_command),
+                                  vr_commands_hash) &&
+             result;
   }
   return result;
 }
