@@ -422,12 +422,6 @@
                 "upDownAvailable"    :true
             },
             {
-                "name":"PLAY_PAUSE", 
-                "shortPressAvailable":true,
-                "longPressAvailable" :true,
-                "upDownAvailable"    :true
-            },
-            {
                 "name":"SEEKLEFT",
                 "shortPressAvailable":true,
                 "longPressAvailable" :true,
