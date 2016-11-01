@@ -802,6 +802,39 @@ class MessageHelperTest : public ::testing::Test {
     obj.state = state;
   }
 
+  void CheckMessageParams(mobile_apis::SoftButtonType::eType button_type) {
+    smart_objects::SmartObject soft_button;
+    soft_button[strings::system_action] =
+        mobile_apis::SystemAction::INVALID_ENUM;
+    soft_button[strings::type] = button_type;
+
+    smart_objects::SmartObject message_params;
+    smart_objects::SmartObject& msg_param =
+        message_params[strings::soft_buttons][0];
+    msg_param = soft_button;
+
+    const std::string button_text = "soft_button.text";
+    msg_param[strings::text] = button_text;
+
+    smart_objects::SmartObject button_image;
+    button_image[strings::image_type] = mobile_apis::ImageType::STATIC;
+    button_image[strings::value] = kRelativeFilePath;
+    msg_param[strings::image] = button_image;
+
+    MockApplicationSharedPtr app_shared_ptr =
+        utils::MakeShared<MockApplication>();
+    policy_test::MockPolicyHandlerInterface policy_handler;
+    application_manager_test::MockApplicationManager mock_application_manager;
+
+    EXPECT_CALL(policy_handler, PolicyEnabled()).WillOnce(Return(true));
+    EXPECT_CALL(policy_handler, CheckSystemAction(_, _)).WillOnce(Return(true));
+    EXPECT_EQ(mobile_apis::Result::SUCCESS,
+              MessageHelper::ProcessSoftButtons(message_params,
+                                                app_shared_ptr,
+                                                policy_handler,
+                                                mock_application_manager));
+  }
+
  protected:
   application_manager_test::MockApplicationManager mock_application_manager_;
   StringArray language_strings_;
@@ -1056,6 +1089,21 @@ TEST_F(MessageHelperTest,
                                                 policy_handler,
                                                 mock_application_manager));
   }
+}
+
+TEST_F(MessageHelperTest,
+       ProcessSoftButtons_TextAndImageExists_SBTImage_SUCCESS) {
+  CheckMessageParams(mobile_apis::SoftButtonType::SBT_IMAGE);
+}
+
+TEST_F(MessageHelperTest,
+       ProcessSoftButtons_TextAndImageExists_SBTText_SUCCESS) {
+  CheckMessageParams(mobile_apis::SoftButtonType::SBT_TEXT);
+}
+
+TEST_F(MessageHelperTest,
+       ProcessSoftButtons_TextAndImageExists_SBTBoth_SUCCESS) {
+  CheckMessageParams(mobile_apis::SoftButtonType::SBT_BOTH);
 }
 
 TEST_F(MessageHelperTest, ProcessSoftButtons_Text_InvalidData) {
