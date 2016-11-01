@@ -88,9 +88,9 @@ bool PerformInteractionRequest::Init() {
   return true;
 }
 
-class CheckMenuNames {
+class MenuNamesChecker {
  public:
-  CheckMenuNames()
+  MenuNamesChecker()
       : result_code_(mobile_apis::Result::DUPLICATE_NAME)
       , error_msg_("Choice set has duplicated menu name") {}
 
@@ -107,11 +107,11 @@ class CheckMenuNames {
   std::set<int32_t> hash_set_;
 };
 
-class CheckVRSynonyms {
+class VRSynonymsChecker {
  public:
-  CheckVRSynonyms()
+  VRSynonymsChecker()
       : result_code_(mobile_apis::Result::DUPLICATE_NAME)
-      , error_msg_("Choice set has duplicated VR synonym") {}
+      , error_msg_("Choice set has duplicated VR synonyms") {}
 
   bool operator()(const smart_objects::SmartObject& choice) {
     const smart_objects::SmartObject& vr_commands =
@@ -221,8 +221,8 @@ void PerformInteractionRequest::Run() {
   switch (interaction_mode_) {
     case mobile_apis::InteractionMode::BOTH: {
       SDL_DEBUG("Interaction Mode: BOTH");
-      if (!CheckChoiceSet(app, CheckVRSynonyms()) ||
-          !CheckChoiceSet(app, CheckMenuNames()) ||
+      if (!ProcessChoiceSet(app, VRSynonymsChecker()) ||
+          !ProcessChoiceSet(app, MenuNamesChecker()) ||
           !CheckVrHelpItemPositions(app)) {
         return;
       }
@@ -230,8 +230,8 @@ void PerformInteractionRequest::Run() {
     }
     case mobile_apis::InteractionMode::MANUAL_ONLY: {
       SDL_DEBUG("Interaction Mode: MANUAL_ONLY");
-      if (!CheckChoiceSet(app, CheckVRSynonyms()) ||
-          !CheckChoiceSet(app, CheckMenuNames()) ||
+      if (!ProcessChoiceSet(app, VRSynonymsChecker()) ||
+          !ProcessChoiceSet(app, MenuNamesChecker()) ||
           !CheckVrHelpItemPositions(app)) {
         return;
       }
@@ -239,7 +239,7 @@ void PerformInteractionRequest::Run() {
     }
     case mobile_apis::InteractionMode::VR_ONLY: {
       SDL_DEBUG("Interaction Mode: VR_ONLY");
-      if (!CheckChoiceSet(app, CheckVRSynonyms()) ||
+      if (!ProcessChoiceSet(app, VRSynonymsChecker()) ||
           !CheckVrHelpItemPositions(app)) {
         return;
       }
@@ -883,10 +883,10 @@ bool PerformInteractionRequest::CallCheckMethod(CheckMethod method) {
   ApplicationSharedPtr app = application_manager_.application(connection_key());
   switch (method) {
     case CheckMethod::kCheckVrSynonyms: {
-      return CheckChoiceSet(app, CheckVRSynonyms());
+      return ProcessChoiceSet(app, VRSynonymsChecker());
     }
     case CheckMethod::kCheckMenuNames: {
-      return CheckChoiceSet(app, CheckMenuNames());
+      return ProcessChoiceSet(app, MenuNamesChecker());
     }
     case CheckMethod::kCheckVrHelpItem: {
       return CheckVrHelpItemPositions(app);

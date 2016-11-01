@@ -464,7 +464,7 @@ TEST_F(PerformInteractionRequestTest,
 TEST_F(PerformInteractionRequestTest,
        CheckVrHelpItem_CorrectPositions_Success) {
   kMsgParams_[strings::vr_help][0][strings::position] = kChoiceSetId0;
-  kMsgParams_[strings::vr_help][1][strings::position] = kChoiceSetId0 + 1;
+  kMsgParams_[strings::vr_help][1][strings::position] = kChoiceSetId1;
 
   EXPECT_CALL(mock_app_manager_, ManageMobileCommand(_, _)).Times(0);
 
