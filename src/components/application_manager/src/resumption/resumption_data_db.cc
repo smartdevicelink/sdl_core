@@ -79,6 +79,14 @@ ResumptionDataDB::ResumptionDataDB(
   }
 }
 
+#ifdef BUILD_TESTS
+ResumptionDataDB::ResumptionDataDB(
+    utils::dbms::SQLDatabase* db,
+    const application_manager::ApplicationManagerSettings&
+        application_manager_settings)
+    : ResumptionData(application_manager_settings), db_(db) {}
+#endif  // BUILD_TESTS
+
 ResumptionDataDB::~ResumptionDataDB() {
   db_->Close();
   delete db_;

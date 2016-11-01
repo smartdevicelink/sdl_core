@@ -44,6 +44,8 @@ namespace test {
 namespace components {
 namespace resumption_test {
 
+using ::testing::ReturnRef;
+
 class TestResumptionDataDB : public ResumptionDataDB {
  public:
   utils::dbms::SQLDatabase* get_db_handle() {
@@ -53,7 +55,11 @@ class TestResumptionDataDB : public ResumptionDataDB {
   application_manager_test::MockApplicationManagerSettings
       mock_application_manager_settings_;
   TestResumptionDataDB(DbStorage db_storage)
-      : ResumptionDataDB(db_storage, mock_application_manager_settings_) {}
+      : ResumptionDataDB(db_storage, mock_application_manager_settings_) {
+    //      const std::string storage_folder = "./";
+    //      ON_CALL(mock_application_manager_settings_, app_storage_folder()).
+    //              WillByDefault(ReturnRef(storage_folder));
+  }
 };
 
 }  // namespace resumption_test

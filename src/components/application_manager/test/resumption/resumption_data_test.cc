@@ -129,9 +129,22 @@ void ResumptionDataTest::CheckSubmenues(sm::SmartObject& res_list) {
     std::string name =
         (*test_submenu_map[i + 10])[am::strings::menu_name].asString();
     int position = (*test_submenu_map[i + 10])[am::strings::position].asInt();
+    std::string icon_name =
+        (*test_submenu_map[i +
+                           10])[am::strings::sub_menu_icon][am::strings::value]
+            .asString();
+    int icon_type =
+        (*test_submenu_map[i + 10])[am::strings::sub_menu_icon]
+                                   [am::strings::image_type].asInt();
     EXPECT_EQ(position, res_list[i][am::strings::position].asInt());
     EXPECT_EQ(test_id, res_list[i][am::strings::menu_id].asUInt());
     EXPECT_EQ(name, res_list[i][am::strings::menu_name].asString());
+    EXPECT_EQ(
+        icon_name,
+        res_list[i][am::strings::sub_menu_icon][am::strings::value].asString());
+    EXPECT_EQ(icon_type,
+              res_list[i][am::strings::sub_menu_icon][am::strings::image_type]
+                  .asInt());
   }
 }
 
@@ -465,6 +478,9 @@ void ResumptionDataTest::SetSubmenues() {
     sm_comm[am::strings::menu_id] = i;
     sm_comm[am::strings::position] = i;
     sm_comm[am::strings::menu_name] = "SubMenu" + std::string(numb);
+    sm_comm[am::strings::sub_menu_icon][am::strings::value] =
+        "submenuicon" + std::string(numb);
+    sm_comm[am::strings::sub_menu_icon][am::strings::type] = ImageType::STATIC;
     test_submenu_map[i] = new sm::SmartObject(sm_comm);
   }
 }

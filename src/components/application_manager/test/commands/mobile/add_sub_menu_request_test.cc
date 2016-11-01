@@ -109,6 +109,51 @@ TEST_F(AddSubMenuRequestTest, OnEvent_SUCCESS) {
   EXPECT_EQ(mobile_apis::Result::SUCCESS, kReceivedResult);
 }
 
+TEST_F(AddSubMenuRequestTest,
+       OnEvent_SubMenuWithIcon_NotExistsInFolder_ExpectInfo) {
+  // message will be send on hmi with icon that not exists in folder
+
+  MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*command_msg)[am::strings::msg_params][am::strings::menu_id] = kMenuId;
+  (*command_msg)[am::strings::params][am::strings::connection_key] =
+      kConnectionKey;
+  (*command_msg)[am::strings::msg_params][am::strings::sub_menu_icon]
+                [am::strings::value] = "icon.png";
+
+  Event event(hmi_apis::FunctionID::UI_AddSubMenu);
+  MessageSharedPtr event_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*event_msg)[am::strings::params][am::hmi_response::code] =
+      mobile_apis::Result::WARNINGS;
+  (*event_msg)[am::strings::msg_params] = 0;
+
+  event.set_smart_object(*event_msg);
+
+  AddSubMenuPtr command(CreateCommand<AddSubMenuRequest>(command_msg));
+
+  MockAppPtr app(CreateMockApp());
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillOnce(Return(app));
+
+  EXPECT_CALL(mock_app_manager_, get_settings())
+      .WillOnce(ReturnRef(mock_app_manager_settings_));
+
+  const std::string file_storage = "test_storage";
+  EXPECT_CALL(mock_app_manager_settings_, app_storage_folder())
+      .WillOnce(ReturnRef(file_storage));
+
+  MessageSharedPtr result_msg(
+      CatchMobileCommandResult(CallOnEvent(*command, event)));
+  const mobile_apis::Result::eType kReceivedResult =
+      static_cast<mobile_apis::Result::eType>(
+          (*result_msg)[am::strings::msg_params][am::strings::result_code]
+              .asInt());
+
+  EXPECT_EQ(mobile_apis::Result::WARNINGS, kReceivedResult);
+  const std::string received_info =
+      (*result_msg)[am::strings::msg_params][am::strings::info].asString();
+  EXPECT_EQ("Reference image(s) not found", received_info);
+}
+
 TEST_F(AddSubMenuRequestTest, Run_ApplicationIsNotRegistered_UNSUCCESS) {
   AddSubMenuPtr command(CreateCommand<AddSubMenuRequest>());
 
@@ -217,6 +262,123 @@ TEST_F(AddSubMenuRequestTest, Run_SUCCESS) {
       static_cast<hmi_apis::FunctionID::eType>(
           (*result_msg)[am::strings::params][am::strings::function_id].asInt());
   EXPECT_EQ(hmi_apis::FunctionID::UI_AddSubMenu, kReceivedResult);
+}
+
+TEST_F(AddSubMenuRequestTest, Run_MenuIconCorrectName_SUCCESS) {
+  MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*command_msg)[am::strings::msg_params][am::strings::menu_id] = kMenuId;
+  (*command_msg)[am::strings::params][am::strings::connection_key] =
+      kConnectionKey;
+  (*command_msg)[am::strings::msg_params][am::strings::menu_name] =
+      "valid_sub_menu_name";
+  (*command_msg)[am::strings::msg_params][am::strings::position] =
+      "test_position";
+  (*command_msg)[am::strings::msg_params][am::strings::sub_menu_icon]
+                [am::strings::value] = "icon.png";
+  (*command_msg)[am::strings::msg_params][am::strings::sub_menu_icon]
+                [am::strings::type] = "DYNAMIC";
+
+  AddSubMenuPtr command(CreateCommand<AddSubMenuRequest>(command_msg));
+
+  MockAppPtr app(CreateMockApp());
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillOnce(Return(app));
+  EXPECT_CALL(*app, FindSubMenu(kMenuId))
+      .WillOnce(Return(static_cast<SmartObject*>(NULL)));
+
+  MessageSharedPtr result_msg(CatchHMICommandResult(CallRun(*command)));
+  const hmi_apis::FunctionID::eType kReceivedResult =
+      static_cast<hmi_apis::FunctionID::eType>(
+          (*result_msg)[am::strings::params][am::strings::function_id].asInt());
+  EXPECT_EQ(hmi_apis::FunctionID::UI_AddSubMenu, kReceivedResult);
+
+  EXPECT_EQ("icon.png",
+            (*result_msg)[am::strings::msg_params][am::strings::sub_menu_icon]
+                         [am::strings::value].asString());
+}
+
+TEST_F(AddSubMenuRequestTest, Run_MenuIconNewLineChar_SendWithoutIcon) {
+  MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*command_msg)[am::strings::msg_params][am::strings::menu_id] = kMenuId;
+  (*command_msg)[am::strings::params][am::strings::connection_key] =
+      kConnectionKey;
+  (*command_msg)[am::strings::msg_params][am::strings::menu_name] =
+      "valid_sub_menu_name";
+  (*command_msg)[am::strings::msg_params][am::strings::sub_menu_icon]
+                [am::strings::value] = "ico\nn.png";
+
+  AddSubMenuPtr command(CreateCommand<AddSubMenuRequest>(command_msg));
+
+  MockAppPtr app(CreateMockApp());
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillOnce(Return(app));
+  EXPECT_CALL(*app, FindSubMenu(kMenuId))
+      .WillOnce(Return(static_cast<SmartObject*>(NULL)));
+
+  MessageSharedPtr result_msg(CatchHMICommandResult(CallRun(*command)));
+  const hmi_apis::FunctionID::eType kReceivedResult =
+      static_cast<hmi_apis::FunctionID::eType>(
+          (*result_msg)[am::strings::params][am::strings::function_id].asInt());
+  EXPECT_EQ(hmi_apis::FunctionID::UI_AddSubMenu, kReceivedResult);
+
+  EXPECT_FALSE((*result_msg)[am::strings::msg_params].keyExists(
+      am::strings::sub_menu_icon));
+}
+
+TEST_F(AddSubMenuRequestTest, Run_MenuIconTabChar_SendWithoutIcon) {
+  MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*command_msg)[am::strings::msg_params][am::strings::menu_id] = kMenuId;
+  (*command_msg)[am::strings::params][am::strings::connection_key] =
+      kConnectionKey;
+  (*command_msg)[am::strings::msg_params][am::strings::menu_name] =
+      "valid_sub_menu_name";
+  (*command_msg)[am::strings::msg_params][am::strings::sub_menu_icon]
+                [am::strings::value] = "ico\tn.png";
+
+  AddSubMenuPtr command(CreateCommand<AddSubMenuRequest>(command_msg));
+
+  MockAppPtr app(CreateMockApp());
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillOnce(Return(app));
+  EXPECT_CALL(*app, FindSubMenu(kMenuId))
+      .WillOnce(Return(static_cast<SmartObject*>(NULL)));
+
+  MessageSharedPtr result_msg(CatchHMICommandResult(CallRun(*command)));
+  const hmi_apis::FunctionID::eType kReceivedResult =
+      static_cast<hmi_apis::FunctionID::eType>(
+          (*result_msg)[am::strings::params][am::strings::function_id].asInt());
+  EXPECT_EQ(hmi_apis::FunctionID::UI_AddSubMenu, kReceivedResult);
+
+  EXPECT_FALSE((*result_msg)[am::strings::msg_params].keyExists(
+      am::strings::sub_menu_icon));
+}
+
+TEST_F(AddSubMenuRequestTest, Run_MenuIconWhiteSpace_SendWithoutIcon) {
+  MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*command_msg)[am::strings::msg_params][am::strings::menu_id] = kMenuId;
+  (*command_msg)[am::strings::params][am::strings::connection_key] =
+      kConnectionKey;
+  (*command_msg)[am::strings::msg_params][am::strings::menu_name] =
+      "valid_sub_menu_name";
+  (*command_msg)[am::strings::msg_params][am::strings::sub_menu_icon]
+                [am::strings::value] = "ico n.png";
+
+  AddSubMenuPtr command(CreateCommand<AddSubMenuRequest>(command_msg));
+
+  MockAppPtr app(CreateMockApp());
+  EXPECT_CALL(mock_app_manager_, application(kConnectionKey))
+      .WillOnce(Return(app));
+  EXPECT_CALL(*app, FindSubMenu(kMenuId))
+      .WillOnce(Return(static_cast<SmartObject*>(NULL)));
+
+  MessageSharedPtr result_msg(CatchHMICommandResult(CallRun(*command)));
+  const hmi_apis::FunctionID::eType kReceivedResult =
+      static_cast<hmi_apis::FunctionID::eType>(
+          (*result_msg)[am::strings::params][am::strings::function_id].asInt());
+  EXPECT_EQ(hmi_apis::FunctionID::UI_AddSubMenu, kReceivedResult);
+
+  EXPECT_FALSE((*result_msg)[am::strings::msg_params].keyExists(
+      am::strings::sub_menu_icon));
 }
 
 }  // namespace add_sub_menu_request
