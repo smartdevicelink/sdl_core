@@ -60,15 +60,8 @@ using ::testing::_;
 namespace {
 const std::string kNotValidText = "wrong prompt\n";
 const std::string kValidText = "correct prompt";
-const std::string kVrCommand0 = "vr_command_0";
-const std::string kVrCommand1 = "vr_command_1";
 const uint32_t kCorrelationId = 666u;
-const uint32_t kChoiceId0 = 1;
-const uint32_t kChoiceId1 = 2;
-const uint32_t kChoiceSetId0 = 1;
-const uint32_t kChoiceSetId1 = 2;
-const uint32_t kGrammarId = 10u;
-
+const int32_t kSomeNumber = 1;
 const int32_t kSomeAnotherNumber = 666;
 }
 
@@ -108,10 +101,10 @@ class PerformInteractionRequestTest
   }
 
   void TestPromptFieldValidation(const std::string& field) {
-    kMsgParams_[strings::interaction_choice_set_id_list][0] = kChoiceSetId0;
+    kMsgParams_[strings::interaction_choice_set_id_list][0] = kSomeNumber;
 
     ::smart_objects::SmartObject choise_sets;
-    choise_sets[strings::choice_set][0][strings::choice_id] = kChoiceId0;
+    choise_sets[strings::choice_set][0][strings::choice_id] = kSomeNumber;
     EXPECT_CALL(*mock_application_sptr_, FindChoiceSet(_))
         .WillOnce(Return(&choise_sets));
 
@@ -234,18 +227,18 @@ TEST_F(PerformInteractionRequestTest,
 }
 
 TEST_F(PerformInteractionRequestTest, Run_FoundInvalidChouiseSet_InvalidId) {
-  kMsgParams_[strings::interaction_choice_set_id_list][0] = kChoiceSetId0;
+  kMsgParams_[strings::interaction_choice_set_id_list][0] = kSomeNumber;
   EXPECT_CALL(*mock_application_sptr_, FindChoiceSet(_)).WillOnce(ReturnNull());
 
   ExpectMobileResult(mobile_api::Result::INVALID_ID);
 }
 
 TEST_F(PerformInteractionRequestTest, Run_TwoSameChoisesetIds_InvalidId) {
-  kMsgParams_[strings::interaction_choice_set_id_list][0] = kChoiceSetId0;
+  kMsgParams_[strings::interaction_choice_set_id_list][0] = kSomeNumber;
 
   ::smart_objects::SmartObject choise_sets;
-  choise_sets[strings::choice_set][0][strings::choice_id] = kChoiceId0;
-  choise_sets[strings::choice_set][1][strings::choice_id] = kChoiceId0;
+  choise_sets[strings::choice_set][0][strings::choice_id] = kSomeNumber;
+  choise_sets[strings::choice_set][1][strings::choice_id] = kSomeNumber;
 
   EXPECT_CALL(*mock_application_sptr_, FindChoiceSet(_))
       .WillOnce(Return(&choise_sets));
@@ -254,10 +247,10 @@ TEST_F(PerformInteractionRequestTest, Run_TwoSameChoisesetIds_InvalidId) {
 }
 
 TEST_F(PerformInteractionRequestTest, Run_InvalidImageVrHelpItems_InvalidData) {
-  kMsgParams_[strings::interaction_choice_set_id_list][0] = kChoiceSetId0;
+  kMsgParams_[strings::interaction_choice_set_id_list][0] = kSomeNumber;
 
   ::smart_objects::SmartObject choise_sets;
-  choise_sets[strings::choice_set][0][strings::choice_id] = kChoiceId0;
+  choise_sets[strings::choice_set][0][strings::choice_id] = kSomeNumber;
   EXPECT_CALL(*mock_application_sptr_, FindChoiceSet(_))
       .WillOnce(Return(&choise_sets));
 
@@ -271,10 +264,10 @@ TEST_F(PerformInteractionRequestTest, Run_InvalidImageVrHelpItems_InvalidData) {
 
 TEST_F(PerformInteractionRequestTest,
        Run_WhiteSpaceExistsInInitialText_InvalidData) {
-  kMsgParams_[strings::interaction_choice_set_id_list][0] = kChoiceSetId0;
+  kMsgParams_[strings::interaction_choice_set_id_list][0] = kSomeNumber;
 
   ::smart_objects::SmartObject choise_sets;
-  choise_sets[strings::choice_set][0][strings::choice_id] = kChoiceId0;
+  choise_sets[strings::choice_set][0][strings::choice_id] = kSomeNumber;
   EXPECT_CALL(*mock_application_sptr_, FindChoiceSet(_))
       .WillOnce(Return(&choise_sets));
 
@@ -300,10 +293,10 @@ TEST_F(PerformInteractionRequestTest,
 
 TEST_F(PerformInteractionRequestTest,
        Run_WhiteSpaceExistsInVrHelpText_InvalidData) {
-  kMsgParams_[strings::interaction_choice_set_id_list][0] = kChoiceSetId0;
+  kMsgParams_[strings::interaction_choice_set_id_list][0] = kSomeNumber;
 
   ::smart_objects::SmartObject choise_sets;
-  choise_sets[strings::choice_set][0][strings::choice_id] = kChoiceId0;
+  choise_sets[strings::choice_set][0][strings::choice_id] = kSomeNumber;
   EXPECT_CALL(*mock_application_sptr_, FindChoiceSet(_))
       .WillOnce(Return(&choise_sets));
 
@@ -319,10 +312,10 @@ TEST_F(PerformInteractionRequestTest,
 
 TEST_F(PerformInteractionRequestTest,
        Run_WhiteSpaceExistsInVrHelpImageValue_InvalidData) {
-  kMsgParams_[strings::interaction_choice_set_id_list][0] = kChoiceSetId0;
+  kMsgParams_[strings::interaction_choice_set_id_list][0] = kSomeNumber;
 
   ::smart_objects::SmartObject choise_sets;
-  choise_sets[strings::choice_set][0][strings::choice_id] = kChoiceId0;
+  choise_sets[strings::choice_set][0][strings::choice_id] = kSomeNumber;
   EXPECT_CALL(*mock_application_sptr_, FindChoiceSet(_))
       .WillOnce(Return(&choise_sets));
 
@@ -356,12 +349,12 @@ TEST_F(PerformInteractionRequestTest,
 
 TEST_F(PerformInteractionRequestTest,
        ChecVrSynonyms_TwoSameVrCommands_DuplicateName) {
-  kMsgParams_[strings::interaction_choice_set_id_list][0] = kChoiceSetId0;
-  kMsgParams_[strings::interaction_choice_set_id_list][1] = kChoiceSetId0;
+  kMsgParams_[strings::interaction_choice_set_id_list][0] = kSomeNumber;
+  kMsgParams_[strings::interaction_choice_set_id_list][1] = kSomeNumber;
   ::smart_objects::SmartObject choise_sets;
-  choise_sets[strings::grammar_id] = kGrammarId;
-  choise_sets[strings::choice_set][0][strings::vr_commands][0] = kVrCommand0;
-  choise_sets[strings::choice_set][0][strings::vr_commands][1] = kVrCommand1;
+  choise_sets[strings::grammar_id] = kSomeNumber;
+  choise_sets[strings::choice_set][0][strings::vr_commands][0] = kSomeNumber;
+  choise_sets[strings::choice_set][0][strings::vr_commands][1] = kSomeNumber;
 
   EXPECT_CALL(*mock_application_sptr_, FindChoiceSet(_))
       .WillRepeatedly(Return(&choise_sets));
@@ -378,9 +371,14 @@ TEST_F(PerformInteractionRequestTest,
 
 TEST_F(PerformInteractionRequestTest,
        CheckMenuNames_InvalidListOfNames_InvalidId) {
-  kMsgParams_[strings::interaction_choice_set_id_list][0] = kChoiceSetId0;
+  kMsgParams_[strings::interaction_choice_set_id_list][0] = kSomeNumber;
+  kMsgParams_[strings::interaction_choice_set_id_list][1] = kSomeNumber;
 
-  EXPECT_CALL(*mock_application_sptr_, FindChoiceSet(kChoiceSetId0))
+  EXPECT_CALL(
+      *mock_application_sptr_,
+      FindChoiceSet(
+          kMsgParams_[strings::interaction_choice_set_id_list][0].asInt()))
+      .Times(3)
       .WillRepeatedly(ReturnNull());
   EXPECT_CALL(mock_app_manager_,
               ManageMobileCommand(
@@ -394,18 +392,24 @@ TEST_F(PerformInteractionRequestTest,
 
 TEST_F(PerformInteractionRequestTest,
        CheckMenuNames_TwoSameNames_DuplicateName) {
-  kMsgParams_[strings::interaction_choice_set_id_list][0] = kChoiceSetId0;
-  kMsgParams_[strings::interaction_choice_set_id_list][1] = kChoiceSetId1;
+  kMsgParams_[strings::interaction_choice_set_id_list][0] = kSomeNumber;
+  kMsgParams_[strings::interaction_choice_set_id_list][1] = kSomeNumber;
 
-  ::smart_objects::SmartObject choise_set_0;
   ::smart_objects::SmartObject choise_set_1;
-  choise_set_0[strings::choice_set][0][strings::menu_name] = "MenuName";
+  ::smart_objects::SmartObject choise_set_2;
   choise_set_1[strings::choice_set][0][strings::menu_name] = "MenuName";
+  choise_set_2[strings::choice_set][0][strings::menu_name] = "MenuName";
 
-  EXPECT_CALL(*mock_application_sptr_, FindChoiceSet(kChoiceSetId0))
-      .WillOnce(Return(&choise_set_0));
-  EXPECT_CALL(*mock_application_sptr_, FindChoiceSet(kChoiceSetId1))
-      .WillOnce(Return(&choise_set_1));
+  EXPECT_CALL(
+      *mock_application_sptr_,
+      FindChoiceSet(
+          kMsgParams_[strings::interaction_choice_set_id_list][0].asInt()))
+      .Times(3)
+      .WillOnce(Return(&choise_set_1))
+      // Second call will be scipped in method cycles
+      .WillOnce(ReturnNull())
+      // Third call value will be compared to value from first call
+      .WillOnce(Return(&choise_set_2));
 
   EXPECT_CALL(mock_app_manager_,
               ManageMobileCommand(
@@ -418,18 +422,27 @@ TEST_F(PerformInteractionRequestTest,
 }
 
 TEST_F(PerformInteractionRequestTest, CheckMenuNames_AllRight_Success) {
-  kMsgParams_[strings::interaction_choice_set_id_list][0] = kChoiceSetId0;
-  kMsgParams_[strings::interaction_choice_set_id_list][1] = kChoiceSetId1;
+  kMsgParams_[strings::interaction_choice_set_id_list][0] = kSomeNumber;
+  kMsgParams_[strings::interaction_choice_set_id_list][1] = kSomeNumber;
 
-  ::smart_objects::SmartObject choise_set_0;
   ::smart_objects::SmartObject choise_set_1;
-  choise_set_0[strings::choice_set][0][strings::menu_name] = "MenuName";
-  choise_set_1[strings::choice_set][0][strings::menu_name] = "AnotherMenuName";
+  ::smart_objects::SmartObject choise_set_2;
+  choise_set_1[strings::choice_set][0][strings::menu_name] = "MenuName";
+  choise_set_2[strings::choice_set][0][strings::menu_name] = "AnotherMenuName";
 
-  EXPECT_CALL(*mock_application_sptr_, FindChoiceSet(kChoiceSetId0))
-      .WillOnce(Return(&choise_set_0));
-  EXPECT_CALL(*mock_application_sptr_, FindChoiceSet(kChoiceSetId1))
-      .WillOnce(Return(&choise_set_1));
+  EXPECT_CALL(*mock_application_sptr_, FindChoiceSet(_))
+      .Times(6)
+      .WillOnce(Return(&choise_set_1))
+      // Second call will be scipped in method cycles
+      .WillOnce(ReturnNull())
+      // Third call value will be compared to value from first call
+      .WillOnce(Return(&choise_set_2))
+      // First cycle second iteration
+      .WillOnce(Return(&choise_set_2))
+      // Second cycle first iteration
+      .WillOnce(Return(&choise_set_1))
+      // Second cycle second iteration will be skipped
+      .WillOnce(ReturnNull());
 
   EXPECT_CALL(mock_app_manager_, ManageMobileCommand(_, _)).Times(0);
 
@@ -448,7 +461,7 @@ TEST_F(PerformInteractionRequestTest, CheckVrHelpItem_VrHelpNotExists_Success) {
 
 TEST_F(PerformInteractionRequestTest,
        CheckVrHelpItem_IncorrectPosition_Rejected) {
-  kMsgParams_[strings::vr_help][0][strings::position] = kChoiceSetId0;
+  kMsgParams_[strings::vr_help][0][strings::position] = kSomeNumber;
   kMsgParams_[strings::vr_help][1][strings::position] = kSomeAnotherNumber;
 
   EXPECT_CALL(mock_app_manager_,
@@ -463,8 +476,8 @@ TEST_F(PerformInteractionRequestTest,
 
 TEST_F(PerformInteractionRequestTest,
        CheckVrHelpItem_CorrectPositions_Success) {
-  kMsgParams_[strings::vr_help][0][strings::position] = kChoiceSetId0;
-  kMsgParams_[strings::vr_help][1][strings::position] = kChoiceSetId1;
+  kMsgParams_[strings::vr_help][0][strings::position] = kSomeNumber;
+  kMsgParams_[strings::vr_help][1][strings::position] = kSomeNumber + 1;
 
   EXPECT_CALL(mock_app_manager_, ManageMobileCommand(_, _)).Times(0);
 
@@ -476,13 +489,13 @@ TEST_F(PerformInteractionRequestTest,
 
 TEST_F(PerformInteractionRequestTest,
        Run_InvalidInteractionMode_StopProcessing) {
-  kMsgParams_[strings::interaction_choice_set_id_list][0] = kChoiceSetId0;
+  kMsgParams_[strings::interaction_choice_set_id_list][0] = kSomeNumber;
   kMsgParams_[strings::interaction_mode] =
       mobile_api::InteractionMode::INVALID_ENUM;
   kMsgParams_[strings::initial_text] = kValidText;
 
   ::smart_objects::SmartObject choise_sets;
-  choise_sets[strings::choice_set][0][strings::choice_id] = kChoiceSetId0;
+  choise_sets[strings::choice_set][0][strings::choice_id] = kSomeNumber;
 
   EXPECT_CALL(*mock_application_sptr_, FindChoiceSet(_))
       .WillOnce(Return(&choise_sets));
@@ -501,9 +514,9 @@ TEST_F(PerformInteractionRequestTest, Run_AllRight_SendVRAndUIRequests) {
   kMsgParams_[strings::help_prompt][0][strings::text] = "Prompt";
 
   ::smart_objects::SmartObject choise_sets;
-  choise_sets[strings::grammar_id] = kGrammarId;
-  choise_sets[strings::choice_set][0][strings::choice_id] = kChoiceId0;
-  choise_sets[strings::choice_set][0][strings::vr_commands][0] = kVrCommand0;
+  choise_sets[strings::grammar_id] = kSomeNumber;
+  choise_sets[strings::choice_set][0][strings::choice_id] = kSomeNumber;
+  choise_sets[strings::choice_set][0][strings::vr_commands][0] = kSomeNumber;
 
   EXPECT_CALL(*mock_application_sptr_, FindChoiceSet(_))
       .WillRepeatedly(Return(&choise_sets));
@@ -595,7 +608,7 @@ TEST_F(PerformInteractionRequestTest,
   ::smart_objects::SmartObject message;
   message[strings::params][hmi_response::code] =
       hmi_apis::Common_Result::SUCCESS;
-  message[strings::msg_params][strings::choice_id] = kChoiceId0;
+  message[strings::msg_params][strings::choice_id] = kSomeNumber;
 
   event.set_smart_object(message);
 
@@ -779,7 +792,7 @@ TEST_F(PerformInteractionRequestTest,
   event_engine::Event event(hmi_apis::FunctionID::VR_PerformInteraction);
   CallOnEvent caller(*command_sptr_, event);
 
-  (*message_)[strings::msg_params][strings::choice_id] = kChoiceId0;
+  (*message_)[strings::msg_params][strings::choice_id] = kSomeNumber;
   (*message_)[strings::params][hmi_response::code] =
       mobile_apis::Result::SUCCESS;
 
@@ -826,12 +839,12 @@ TEST_F(PerformInteractionRequestTest,
       mobile_api::Result::SUCCESS;
 
   (*message_)[strings::params][strings::correlation_id] = kCorrelationId;
-  (*message_)[strings::msg_params][strings::choice_id] = kChoiceId0;
+  (*message_)[strings::msg_params][strings::choice_id] = kSomeNumber;
 
   event.set_smart_object(*message_);
 
   ::smart_objects::SmartObject choise_set;
-  choise_set[strings::choice_set][0][strings::choice_id] = kChoiceId0;
+  choise_set[strings::choice_set][0][strings::choice_id] = kSomeNumber;
 
   PerformChoice perform_choise_map;
   perform_choise_map[kCorrelationId] = &choise_set;
@@ -865,8 +878,8 @@ TEST_F(PerformInteractionRequestTest,
           (*mobile_result_msg)[strings::msg_params][strings::result_code]
               .asInt());
 
-  const uint32_t kResultChoiseId =
-      (*mobile_result_msg)[strings::msg_params][strings::choice_id].asUInt();
+  const int32_t kResultChoiseId =
+      (*mobile_result_msg)[strings::msg_params][strings::choice_id].asInt();
   const mobile_api::TriggerSource::eType ts_result =
       static_cast<mobile_api::TriggerSource::eType>(
           (*mobile_result_msg)[strings::msg_params][strings::trigger_source]
@@ -875,7 +888,7 @@ TEST_F(PerformInteractionRequestTest,
   EXPECT_EQ(hmi_apis::FunctionID::UI_ClosePopUp, kHmiResult);
 
   EXPECT_EQ(mobile_api::TriggerSource::TS_VR, ts_result);
-  EXPECT_EQ(kChoiceId0, kResultChoiseId);
+  EXPECT_EQ(kSomeNumber, kResultChoiseId);
   EXPECT_EQ(mobile_apis::Result::SUCCESS, kMobileResult);
 }
 
