@@ -200,10 +200,12 @@ TEST_F(ProfileTest, UpdateBoolValues) {
 TEST_F(ProfileTest, UpdateStringValue) {
   // Default values
   std::string recording_file_name = "record.wav";
+  std::string server_address = "127.0.0.1";
+  std::string app_resource_folder = "";
   std::string tts_delimiter_ = "";
   std::string vr_help_title_ = "";
-  std::string app_resource_folder = "";
-  std::string server_address = "127.0.0.1";
+  std::string menu_title = "";
+  std::string menu_icon;
 
   EXPECT_EQ(recording_file_name, profile_.recording_file_name());
   EXPECT_EQ(server_address, profile_.server_address());
@@ -218,7 +220,9 @@ TEST_F(ProfileTest, UpdateStringValue) {
   EXPECT_EQ(tts_delimiter_, profile_.tts_delimiter());
   vr_help_title_ = "Available Vr Commands List";
   EXPECT_EQ(vr_help_title_, profile_.vr_help_title());
-  EXPECT_EQ(server_address, profile_.server_address());
+  menu_title = "MENU";
+  EXPECT_EQ(menu_title, profile_.menu_title());
+  EXPECT_EQ(menu_icon, profile_.menu_icon());
 
   // Update config file
   profile_.UpdateValues();
@@ -227,6 +231,8 @@ TEST_F(ProfileTest, UpdateStringValue) {
   EXPECT_EQ(tts_delimiter_, profile_.tts_delimiter());
   EXPECT_EQ(vr_help_title_, profile_.vr_help_title());
   EXPECT_EQ(server_address, profile_.server_address());
+  EXPECT_EQ(menu_title, profile_.menu_title());
+  EXPECT_EQ(menu_icon, profile_.menu_icon());
 }
 
 TEST_F(ProfileTest, UpdateInt_ValueAppearsInFileTwice) {
