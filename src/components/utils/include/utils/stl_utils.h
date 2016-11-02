@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,6 +32,7 @@
 #ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_STL_UTILS_H_
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_STL_UTILS_H_
 
+#include <set>
 #include "utils/macro.h"
 
 namespace utils {
@@ -81,6 +82,13 @@ class StlMapDeleter {
  private:
   Collection* collection_;
 };
+
+template <typename T>
+bool InsertIntoSet(const T& data, std::set<T>& out_set) {
+  typedef std::pair<typename std::set<T>::iterator, bool> InsertResult;
+  InsertResult ins_res = out_set.insert(data);
+  return ins_res.second;
+}
 
 }  // namespace utils
 

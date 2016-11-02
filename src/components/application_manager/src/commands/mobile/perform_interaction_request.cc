@@ -42,6 +42,7 @@
 #include "utils/helpers.h"
 #include "utils/custom_string.h"
 #include "utils/gen_hash.h"
+#include "utils/stl_utils.h"
 
 namespace application_manager {
 
@@ -86,6 +87,62 @@ bool PerformInteractionRequest::Init() {
   }
   return true;
 }
+
+/**
+ * @brief The MenuNamesChecker class helps
+ * to check, whether incoming menu name
+ * is unique compared to previous ones, or not.
+ */
+class MenuNamesChecker {
+ public:
+  MenuNamesChecker()
+      : result_code_(mobile_apis::Result::DUPLICATE_NAME)
+      , error_msg_("Choice set has duplicated menu name") {}
+
+  bool operator()(const smart_objects::SmartObject& choice) {
+    const std::string& menu_name = choice[strings::menu_name].asString();
+    return utils::InsertIntoSet(utils::Djb2HashFromString(menu_name),
+                                hash_set_);
+  }
+
+  const mobile_apis::Result::eType result_code_;
+  const char* const error_msg_;
+
+ private:
+  std::set<int32_t> hash_set_;
+};
+
+/**
+ * @brief The VRSynonymsChecker class helps
+ * to check, whether incoming vr synonyms
+ * is unique compared to previous ones, or not.
+ */
+class VRSynonymsChecker {
+ public:
+  VRSynonymsChecker()
+      : result_code_(mobile_apis::Result::DUPLICATE_NAME)
+      , error_msg_("Choice set has duplicated VR synonyms") {}
+
+  bool operator()(const smart_objects::SmartObject& choice) {
+    const smart_objects::SmartObject& vr_commands =
+        choice[strings::vr_commands];
+    for (size_t vr_command_i = 0; vr_command_i < vr_commands.length();
+         ++vr_command_i) {
+      const std::string& vr_command = vr_commands[vr_command_i].asString();
+      if (!utils::InsertIntoSet(utils::Djb2HashFromString(vr_command),
+                                hash_set_)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  const mobile_apis::Result::eType result_code_;
+  const char* const error_msg_;
+
+ private:
+  std::set<int32_t> hash_set_;
+};
 
 void PerformInteractionRequest::Run() {
   SDL_AUTO_TRACE();
@@ -174,7 +231,8 @@ void PerformInteractionRequest::Run() {
   switch (interaction_mode_) {
     case mobile_apis::InteractionMode::BOTH: {
       SDL_DEBUG("Interaction Mode: BOTH");
-      if (!CheckChoiceSetVRSynonyms(app) || !CheckChoiceSetMenuNames(app) ||
+      if (!ProcessChoiceSet(app, VRSynonymsChecker()) ||
+          !ProcessChoiceSet(app, MenuNamesChecker()) ||
           !CheckVrHelpItemPositions(app)) {
         return;
       }
@@ -182,7 +240,8 @@ void PerformInteractionRequest::Run() {
     }
     case mobile_apis::InteractionMode::MANUAL_ONLY: {
       SDL_DEBUG("Interaction Mode: MANUAL_ONLY");
-      if (!CheckChoiceSetVRSynonyms(app) || !CheckChoiceSetMenuNames(app) ||
+      if (!ProcessChoiceSet(app, VRSynonymsChecker()) ||
+          !ProcessChoiceSet(app, MenuNamesChecker()) ||
           !CheckVrHelpItemPositions(app)) {
         return;
       }
@@ -190,7 +249,8 @@ void PerformInteractionRequest::Run() {
     }
     case mobile_apis::InteractionMode::VR_ONLY: {
       SDL_DEBUG("Interaction Mode: VR_ONLY");
-      if (!CheckChoiceSetVRSynonyms(app) || !CheckVrHelpItemPositions(app)) {
+      if (!ProcessChoiceSet(app, VRSynonymsChecker()) ||
+          !CheckVrHelpItemPositions(app)) {
         return;
       }
       break;
@@ -605,120 +665,6 @@ void PerformInteractionRequest::SendVRPerformInteractionRequest(
       hmi_apis::FunctionID::VR_PerformInteraction, &msg_params, true);
 }
 
-bool PerformInteractionRequest::CheckChoiceSetMenuNames(
-    application_manager::ApplicationSharedPtr const app) {
-  SDL_AUTO_TRACE();
-
-  smart_objects::SmartObject& choice_list =
-      (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];
-
-  for (size_t i = 0; i < choice_list.length(); ++i) {
-    // choice_set contains SmartObject msg_params
-    smart_objects::SmartObject* i_choice_set =
-        app->FindChoiceSet(choice_list[i].asInt());
-
-    for (size_t j = 0; j < choice_list.length(); ++j) {
-      smart_objects::SmartObject* j_choice_set =
-          app->FindChoiceSet(choice_list[j].asInt());
-
-      if (i == j) {
-        // skip check the same element
-        continue;
-      }
-
-      if (!i_choice_set || !j_choice_set) {
-        SDL_ERROR("Invalid ID");
-        SendResponse(false, mobile_apis::Result::INVALID_ID);
-        return false;
-      }
-
-      size_t ii = 0;
-      size_t jj = 0;
-      for (; ii < (*i_choice_set)[strings::choice_set].length(); ++ii) {
-        for (; jj < (*j_choice_set)[strings::choice_set].length(); ++jj) {
-          const std::string& ii_menu_name =
-              (*i_choice_set)[strings::choice_set][ii][strings::menu_name]
-                  .asString();
-          const std::string& jj_menu_name =
-              (*j_choice_set)[strings::choice_set][jj][strings::menu_name]
-                  .asString();
-
-          if (ii_menu_name == jj_menu_name) {
-            SDL_ERROR("Choice set has duplicated menu name");
-            SendResponse(false,
-                         mobile_apis::Result::DUPLICATE_NAME,
-                         "Choice set has duplicated menu name");
-            return false;
-          }
-        }
-      }
-    }
-  }
-
-  return true;
-}
-
-bool PerformInteractionRequest::CheckChoiceSetVRSynonyms(
-    application_manager::ApplicationSharedPtr const app) {
-  SDL_AUTO_TRACE();
-
-  smart_objects::SmartObject& choice_list =
-      (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];
-
-  for (size_t i = 0; i < choice_list.length(); ++i) {
-    // choice_set contains SmartObject msg_params
-    smart_objects::SmartObject* i_choice_set =
-        app->FindChoiceSet(choice_list[i].asInt());
-
-    for (size_t j = 0; j < choice_list.length(); ++j) {
-      smart_objects::SmartObject* j_choice_set =
-          app->FindChoiceSet(choice_list[j].asInt());
-
-      if (i == j) {
-        // skip check the same element
-        continue;
-      }
-
-      if ((!i_choice_set) || (!j_choice_set)) {
-        SDL_ERROR("Invalid ID");
-        SendResponse(false, mobile_apis::Result::INVALID_ID);
-        return false;
-      }
-
-      size_t ii = 0;
-      size_t jj = 0;
-      for (; ii < (*i_choice_set)[strings::choice_set].length(); ++ii) {
-        for (; jj < (*j_choice_set)[strings::choice_set].length(); ++jj) {
-          // choice_set pointer contains SmartObject msg_params
-          smart_objects::SmartObject& ii_vr_commands =
-              (*i_choice_set)[strings::choice_set][ii][strings::vr_commands];
-
-          smart_objects::SmartObject& jj_vr_commands =
-              (*j_choice_set)[strings::choice_set][jj][strings::vr_commands];
-
-          for (size_t iii = 0; iii < ii_vr_commands.length(); ++iii) {
-            for (size_t jjj = 0; jjj < jj_vr_commands.length(); ++jjj) {
-              const custom_str::CustomString& vr_cmd_i =
-                  ii_vr_commands[iii].asCustomString();
-              const custom_str::CustomString& vr_cmd_j =
-                  jj_vr_commands[jjj].asCustomString();
-              if (vr_cmd_i.CompareIgnoreCase(vr_cmd_j)) {
-                SDL_ERROR("Choice set has duplicated VR synonym");
-                SendResponse(false,
-                             mobile_apis::Result::DUPLICATE_NAME,
-                             "Choice set has duplicated VR synonym");
-                return false;
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-
-  return true;
-}
-
 bool PerformInteractionRequest::CheckVrHelpItemPositions(
     application_manager::ApplicationSharedPtr const app) {
   SDL_AUTO_TRACE();
@@ -947,10 +893,10 @@ bool PerformInteractionRequest::CallCheckMethod(CheckMethod method) {
   ApplicationSharedPtr app = application_manager_.application(connection_key());
   switch (method) {
     case CheckMethod::kCheckVrSynonyms: {
-      return CheckChoiceSetVRSynonyms(app);
+      return ProcessChoiceSet(app, VRSynonymsChecker());
     }
     case CheckMethod::kCheckMenuNames: {
-      return CheckChoiceSetMenuNames(app);
+      return ProcessChoiceSet(app, MenuNamesChecker());
     }
     case CheckMethod::kCheckVrHelpItem: {
       return CheckVrHelpItemPositions(app);

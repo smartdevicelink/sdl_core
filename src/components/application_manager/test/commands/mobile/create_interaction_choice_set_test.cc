@@ -48,6 +48,7 @@
 #include "application_manager/event_engine/event.h"
 #include "application_manager/mock_hmi_capabilities.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
+#include "utils/lock.h"
 
 namespace test {
 namespace components {
@@ -82,13 +83,15 @@ const uint32_t kCorrelationId = 10u;
 const uint32_t kGrammarId = 10u;
 const int32_t kMenuId = 5;
 const uint32_t kChoiceSetId = 1u;
-const uint32_t kChoiceId1 = 2u;
-const uint32_t kChoiceId2 = 3u;
+const uint32_t kChoiceId0 = 2u;
+const uint32_t kChoiceId1 = 3u;
 const std::string kImage = "image";
 const std::string kSecondImage = "second_image";
-const std::string kVrCommands1 = "vr_commands_1";
-const std::string kVrCommands2 = "vr_commands_2";
-const std::string kMenuName = "menu_name";
+const std::string kVrCommand0 = "vr_command_0";
+const std::string kVrCommand1 = "vr_command_1";
+const std::string kMenuName0 = "menu_name_0";
+const std::string kMenuName1 = "menu_name_1";
+
 }  // namespace
 
 class CreateInteractionChoiceSetRequestTest
@@ -99,31 +102,37 @@ class CreateInteractionChoiceSetRequestTest
     message_ = CreateMessage();
     command_ = CreateCommand<CreateInteractionChoiceSetRequest>(message_);
     app_ = CreateMockApp();
+    ON_CALL(*app_, choice_set_map())
+        .WillByDefault(Return(
+            DataAccessor<am::ChoiceSetMap>(dummy_choice_set_map_, lock_)));
   }
+
   am::MockMessageHelper* message_helper_mock_;
   CreateInteractionChoiceSetRequestPtr command_;
   MessageSharedPtr message_;
   MockAppPtr app_;
+  am::ChoiceSetMap dummy_choice_set_map_;
+  sync_primitives::Lock lock_;
 
   void FillMessageFieldsItem1(MessageSharedPtr message) {
     (*message)[am::strings::msg_params][am::strings::choice_set][0]
-              [am::strings::menu_name] = kMenuName;
+              [am::strings::menu_name] = kMenuName0;
     (*message)[am::strings::msg_params][am::strings::choice_set][0]
               [am::strings::image][am::strings::value] = kImage;
     (*message)[am::strings::msg_params][am::strings::choice_set][0]
-              [am::strings::choice_id] = kChoiceId1;
+              [am::strings::choice_id] = kChoiceId0;
     (*message)[am::strings::msg_params][am::strings::choice_set][0]
-              [am::strings::vr_commands][0] = kVrCommands1;
+              [am::strings::vr_commands][0] = kVrCommand0;
     (*message)[am::strings::msg_params][am::strings::choice_set][0]
               [am::strings::secondary_image][am::strings::value] = kSecondImage;
   }
   void FillMessageFieldsItem2(MessageSharedPtr message) {
     (*message)[am::strings::msg_params][am::strings::choice_set][1]
-              [am::strings::choice_id] = kChoiceId2;
+              [am::strings::choice_id] = kChoiceId1;
     (*message)[am::strings::msg_params][am::strings::choice_set][1]
-              [am::strings::menu_name] = kMenuName;
+              [am::strings::menu_name] = kMenuName1;
     (*message)[am::strings::msg_params][am::strings::choice_set][1]
-              [am::strings::vr_commands][0] = kVrCommands2;
+              [am::strings::vr_commands][0] = kVrCommand1;
     (*message)[am::strings::msg_params]
               [am::strings::interaction_choice_set_id] = kChoiceSetId;
   }
@@ -178,19 +187,19 @@ TEST_F(CreateInteractionChoiceSetRequestTest, Run_FindChoiceSetFail_UNSUCCESS) {
 TEST_F(CreateInteractionChoiceSetRequestTest,
        Run_CheckChoiceSet_InvalidChoiceId_UNSUCCESS) {
   (*message_)[am::strings::msg_params][am::strings::choice_set][0]
-             [am::strings::menu_name] = kMenuName;
+             [am::strings::menu_name] = kMenuName0;
   (*message_)[am::strings::msg_params][am::strings::choice_set][0]
              [am::strings::image][am::strings::value] = kImage;
   (*message_)[am::strings::msg_params][am::strings::choice_set][0]
-             [am::strings::choice_id] = kChoiceId1;
+             [am::strings::choice_id] = kChoiceId0;
   (*message_)[am::strings::msg_params][am::strings::choice_set][0]
              [am::strings::secondary_image][am::strings::value] = kSecondImage;
 
   FillMessageFieldsItem2(message_);
   (*message_)[am::strings::msg_params][am::strings::choice_set][1]
-             [am::strings::vr_commands][0] = kVrCommands1;
+             [am::strings::vr_commands][0] = kVrCommand0;
   (*message_)[am::strings::msg_params][am::strings::choice_set][1]
-             [am::strings::vr_commands][1] = " kVrCommands2\t";
+             [am::strings::vr_commands][1] = " kVrCommand1\t";
 
   EXPECT_CALL(mock_app_manager_, application(_)).WillOnce(Return(app_));
 
@@ -216,7 +225,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
   (*message_)[am::strings::msg_params][am::strings::choice_set][0]
              [am::strings::image][am::strings::value] = "image\t";
   (*message_)[am::strings::msg_params][am::strings::choice_set][0]
-             [am::strings::choice_id] = kChoiceId1;
+             [am::strings::choice_id] = kChoiceId0;
   (*message_)[am::strings::msg_params][am::strings::choice_set][0]
              [am::strings::secondary_image][am::strings::value] =
                  "second_image\t";
@@ -245,7 +254,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
   if ((*message_)[am::strings::msg_params][am::strings::choice_set][0]
           .keyExists(am::strings::secondary_text)) {
     (*message_)[am::strings::msg_params][am::strings::choice_set][0]
-               [am::strings::menu_name] = kMenuName;
+               [am::strings::menu_name] = kMenuName0;
     CreateInteractionChoiceSetRequestPtr command(
         CreateCommand<CreateInteractionChoiceSetRequest>(message_));
 
@@ -320,18 +329,18 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
 TEST_F(CreateInteractionChoiceSetRequestTest,
        Run_EmptyAmountVrCommands_SUCCESS) {
   (*message_)[am::strings::msg_params][am::strings::choice_set][0]
-             [am::strings::menu_name] = kMenuName;
+             [am::strings::menu_name] = kMenuName0;
   (*message_)[am::strings::msg_params][am::strings::choice_set][0]
              [am::strings::image][am::strings::value] = kImage;
   (*message_)[am::strings::msg_params][am::strings::choice_set][0]
-             [am::strings::choice_id] = kChoiceId1;
+             [am::strings::choice_id] = kChoiceId0;
   (*message_)[am::strings::msg_params][am::strings::choice_set][0]
              [am::strings::secondary_image][am::strings::value] = kSecondImage;
 
   (*message_)[am::strings::msg_params][am::strings::choice_set][1]
-             [am::strings::choice_id] = kChoiceId2;
+             [am::strings::choice_id] = kChoiceId1;
   (*message_)[am::strings::msg_params][am::strings::choice_set][1]
-             [am::strings::menu_name] = kMenuName;
+             [am::strings::menu_name] = kMenuName1;
   (*message_)[am::strings::msg_params][am::strings::interaction_choice_set_id] =
       kChoiceSetId;
 

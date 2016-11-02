@@ -34,6 +34,8 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_PERFORM_INTERACTION_REQUEST_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_PERFORM_INTERACTION_REQUEST_H_
 
+#include <algorithm>
+
 #include "application_manager/commands/command_request_impl.h"
 #include "application_manager/application.h"
 #include "utils/macro.h"
@@ -143,26 +145,18 @@ class PerformInteractionRequest : public CommandRequestImpl {
   void SendUIShowVRHelpRequest(ApplicationSharedPtr const app);
 
   /*
-   * @brief Checks if incoming choice set doesn't has similar menu names.
+   * @brief Checks incoming choice set by checker.
    *
-   * @param app_id Application ID
+   * @param app shared pointer to Application
+   * @param checker a functor which checks choises;
    *
-   * return Return TRUE if there are no similar menu names in choice set,
+   * return Return TRUE if checker returned TRUE
+   * for each choice in a choice set form the list,
    * otherwise FALSE
    */
-  bool CheckChoiceSetMenuNames(
-      application_manager::ApplicationSharedPtr const app);
-
-  /*
-   * @brief Checks if incoming choice set doesn't has similar VR synonyms.
-   *
-   * @param app_id Application ID
-   *
-   * return Return TRUE if there are no similar VR synonyms in choice set,
-   * otherwise FALSE
-   */
-  bool CheckChoiceSetVRSynonyms(
-      application_manager::ApplicationSharedPtr const app);
+  template <typename FunctorT>
+  bool ProcessChoiceSet(const application_manager::ApplicationSharedPtr app,
+                        FunctorT checker);
 
   /*
    * @brief Checks if request with non-sequential positions of vrHelpItems
@@ -260,6 +254,41 @@ class PerformInteractionRequest : public CommandRequestImpl {
 
   DISALLOW_COPY_AND_ASSIGN(PerformInteractionRequest);
 };
+
+template <typename FunctorT>
+bool PerformInteractionRequest::ProcessChoiceSet(
+    const application_manager::ApplicationSharedPtr app, FunctorT checker) {
+  SDL_AUTO_TRACE();
+  using smart_objects::SmartObject;
+  using smart_objects::SmartArray;
+  SmartObject& choice_set_list =
+      (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];
+
+  for (size_t choice_set_i = 0; choice_set_i < choice_set_list.length();
+       ++choice_set_i) {
+    const SmartObject* const choice_set_ptr =
+        app->FindChoiceSet(choice_set_list[choice_set_i].asInt());
+    if (!choice_set_ptr) {
+      SDL_ERROR("Invalid choice set ID");
+      SendResponse(false, mobile_apis::Result::INVALID_ID);
+      return false;
+    }
+
+    const SmartArray* choice_set =
+        (*choice_set_ptr)[strings::choice_set].asArray();
+
+    DCHECK_OR_RETURN(choice_set, false);
+
+    const SmartArray::const_iterator it =
+        std::find_if_not(choice_set->begin(), choice_set->end(), checker);
+    if (it != choice_set->end()) {
+      SDL_ERROR(checker.error_msg_);
+      SendResponse(false, checker.result_code_, checker.error_msg_);
+      return false;
+    }
+  }
+  return true;
+}
 
 }  // namespace commands
 }  // namespace application_manager
