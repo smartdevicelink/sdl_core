@@ -88,6 +88,11 @@ bool PerformInteractionRequest::Init() {
   return true;
 }
 
+/**
+ * @brief The MenuNamesChecker class helps
+ * to check, whether incoming menu name
+ * is unique compared to previous ones, or not.
+ */
 class MenuNamesChecker {
  public:
   MenuNamesChecker()
@@ -107,6 +112,11 @@ class MenuNamesChecker {
   std::set<int32_t> hash_set_;
 };
 
+/**
+ * @brief The VRSynonymsChecker class helps
+ * to check, whether incoming vr synonyms
+ * is unique compared to previous ones, or not.
+ */
 class VRSynonymsChecker {
  public:
   VRSynonymsChecker()
