@@ -76,8 +76,6 @@ class MobileOnDriverDistractionNotificationTest
 
   void SetSendNotificationExpectations(MessageSharedPtr& msg) {
     Mock::VerifyAndClearExpectations(&mock_message_helper_);
-    EXPECT_CALL(mock_message_helper_, PrintSmartObject(_))
-        .WillOnce(Return(false));
     EXPECT_CALL(mock_app_manager_, SendMessageToMobile(msg, _));
   }
 
