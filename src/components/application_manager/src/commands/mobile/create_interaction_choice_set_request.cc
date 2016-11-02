@@ -47,6 +47,12 @@ namespace application_manager {
 
 namespace commands {
 
+/**
+ * @brief The UniqueParamChecker class
+ * helps to check, whether incoming string
+ * is unique compared to previous ones, or not.
+ * Also checks syntax correctness.
+ */
 class UniqueParamChecker {
  public:
   UniqueParamChecker(const char* const name) : name_(name) {}
