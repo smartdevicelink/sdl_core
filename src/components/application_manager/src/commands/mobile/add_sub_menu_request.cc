@@ -94,14 +94,12 @@ void AddSubMenuRequest::Run() {
       (*message_)[strings::msg_params][strings::menu_name];
   msg_params[strings::app_id] = app->app_id();
 
+  SDL_DEBUG("MENU ICON before check icon ");
+  SDL_DEBUG((*message_).asString());
   if (((*message_)[strings::msg_params].keyExists(strings::sub_menu_icon)) &&
       CheckSubMenuIcon()) {
-    msg_params[strings::sub_menu_icon] = (*message_)[strings::sub_menu_icon];
-    msg_params[strings::sub_menu_icon][strings::value] =
-        (*message_)[strings::msg_params][strings::sub_menu_icon][strings::value]
-            .asString();
-    msg_params[strings::sub_menu_icon][strings::image_type] = (*message_)
-        [strings::msg_params][strings::sub_menu_icon][strings::image_type];
+    msg_params[strings::sub_menu_icon] =
+        (*message_)[strings::msg_params][strings::sub_menu_icon];
   }
 
   SendHMIRequest(hmi_apis::FunctionID::UI_AddSubMenu, &msg_params, true);
