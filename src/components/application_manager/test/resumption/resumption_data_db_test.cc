@@ -591,7 +591,7 @@ class ResumptionDBTest_WithMockStorage : public ::testing::Test {
     EXPECT_CALL(*mock_app, hmi_app_id()).WillOnce(Return(1u));
     EXPECT_CALL(*mock_app, IsAudioApplication()).WillOnce(Return(true));
     EXPECT_CALL(mock_am_, IsAppSubscribedForWayPoints(_))
-        .WillOnce(Return(false));
+        .WillRepeatedly(Return(false));
   }
 
   void PrepareApplicationSO(smart_objects::SmartObject& app_data) {
@@ -806,7 +806,7 @@ TEST_F(ResumptionDBTest_WithMockStorage, UpdateDBVersion_Positive) {
 }
 
 TEST_F(ResumptionDBTest_WithMockStorage,
-       DISABLED_SaveApplication_AppNotChanged_AppExist) {
+       SaveApplication_AppNotChanged_AppExist) {
   InitRealDB();
   MockApplication* app_ptr = new MockApplication();
   application_manager::ApplicationSharedPtr app_sptr(app_ptr);
@@ -831,7 +831,7 @@ TEST_F(ResumptionDBTest_WithMockStorage,
 }
 
 TEST_F(ResumptionDBTest_WithMockStorage,
-       DISABLED_SaveApplication_AppNotChanged_AppExist_DBProblem) {
+       SaveApplication_AppNotChanged_AppExist_DBProblem) {
   InitRealDB();
   MockApplication* app_ptr = new MockApplication();
   application_manager::ApplicationSharedPtr app_sptr(app_ptr);
@@ -846,6 +846,8 @@ TEST_F(ResumptionDBTest_WithMockStorage,
   EXPECT_CALL(*app_ptr, is_application_data_changed())
       .WillRepeatedly(Return(false));
   EXPECT_CALL(*app_ptr, hmi_level()).WillRepeatedly(Return(HMILevel::HMI_FULL));
+  EXPECT_CALL(*app_ptr, IsAppSubscribedForWayPoints(_))
+      .WillRepeatedly(Return(true));
   EXPECT_CALL(*mock_database_, conn())
       .WillOnce(Return(real_db_.conn()))
       .WillOnce(Return(real_db_.conn()))

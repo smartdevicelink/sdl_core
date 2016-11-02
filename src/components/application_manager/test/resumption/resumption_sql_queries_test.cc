@@ -114,6 +114,7 @@ class ResumptionSqlQueriesTest : public ::testing::Test {
   static const int ign_off_count2;
   static const int timeStamp;
   static const int timeStamp2;
+  static const int image_key;
 
   static void SetUpTestCase() {
     db_ = new SQLDatabaseImpl();
@@ -357,6 +358,7 @@ const int ResumptionSqlQueriesTest::ign_off_count = 3;
 const int ResumptionSqlQueriesTest::ign_off_count2 = 4;
 const int ResumptionSqlQueriesTest::timeStamp = 2015;
 const int ResumptionSqlQueriesTest::timeStamp2 = 2016;
+const int ResumptionSqlQueriesTest::image_key = 4;
 
 void ResumptionSqlQueriesTest::CheckDeleteQuery(
     const string& count_query,
@@ -1371,7 +1373,8 @@ TEST_F(ResumptionSqlQueriesTest, kDeleteSubMenu_ExpectDataDeleted) {
                              key,
                              true).LastInsertId();
   int64_t submenu_key =
-      FillSubMenuTable(temp_query, 1, "tst_menuName", 2, 4).LastInsertId();
+      FillSubMenuTable(temp_query, 1, "tst_menuName", 2, image_key)
+          .LastInsertId();
 
   FillApplicationSubMenuArrayTable(temp_query, key, submenu_key);
   // Check
@@ -1383,7 +1386,7 @@ TEST_F(ResumptionSqlQueriesTest, kDeleteSubMenu_ExpectDataDeleted) {
 }
 
 TEST_F(ResumptionSqlQueriesTest,
-       DISABLED_kDeleteApplicationSubMenuArray_ExpectDataDeleted) {
+       kDeleteApplicationSubMenuArray_ExpectDataDeleted) {
   // Arrange
   SQLQuery temp_query(db());
   int64_t key = FillImageTable(temp_query, 1, test_image).LastInsertId();
@@ -1404,7 +1407,8 @@ TEST_F(ResumptionSqlQueriesTest,
                              key,
                              true).LastInsertId();
   int64_t submenu_key =
-      FillSubMenuTable(temp_query, 1, "tst_menuName", 2, key).LastInsertId();
+      FillSubMenuTable(temp_query, 1, "tst_menuName", 2, image_key)
+          .LastInsertId();
 
   FillApplicationSubMenuArrayTable(temp_query, key, submenu_key);
   // Check
@@ -2172,7 +2176,7 @@ TEST_F(ResumptionSqlQueriesTest,
 TEST_F(ResumptionSqlQueriesTest, kInsertToSubMenu_ExpectDataInserted) {
   // Arrange
   SQLQuery temp_query(db());
-  FillSubMenuTable(temp_query, 1, "tst_menu", 3, 4);
+  FillSubMenuTable(temp_query, 1, "tst_menu", 3, image_key);
   // Checks
   const std::string select_count_subMenu = "SELECT COUNT(*) FROM subMenu;";
   CheckSelectQuery(select_count_subMenu, 1, 0);
