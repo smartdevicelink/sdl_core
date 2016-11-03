@@ -218,7 +218,7 @@ class Timer {
 
   mutable sync_primitives::Lock state_lock_;
 
-  mutable std::auto_ptr<TimerDelegate> delegate_;
+  mutable std::unique_ptr<TimerDelegate> delegate_;
   threads::Thread* thread_;
 
   /**

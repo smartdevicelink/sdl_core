@@ -64,24 +64,14 @@ file_system::FileSizeType file_system::FileSize(const std::string& utf8_path) {
 file_system::FileSizeType file_system::DirectorySize(
     const std::string& utf8_path) {
   FileSizeType size = 0u;
-  int32_t return_code = 0;
   DIR* directory = NULL;
 
-#ifndef __QNXNTO__
-  struct dirent dir_element_;
-  struct dirent* dir_element = &dir_element_;
-#else
-  char* direntbuffer = new char[offsetof(struct dirent, d_name) +
-                                pathconf(utf8_path.c_str(), _PC_NAME_MAX) + 1];
-  struct dirent* dir_element = new (direntbuffer) dirent;
-#endif
   struct dirent* result = NULL;
   struct stat file_info = {0};
   directory = opendir(utf8_path.c_str());
   if (NULL != directory) {
-    return_code = readdir_r(directory, dir_element, &result);
-    for (; NULL != result && 0 == return_code;
-         return_code = readdir_r(directory, dir_element, &result)) {
+    result = readdir(directory);
+    for (; NULL != result; result = readdir(directory)) {
       if ((kCurrentDirectoryEntry == result->d_name) ||
           (kParentDirectoryEntry == result->d_name)) {
         continue;
@@ -96,9 +86,6 @@ file_system::FileSizeType file_system::DirectorySize(
     }
   }
   closedir(directory);
-#ifdef __QNXNTO__
-  delete[] direntbuffer;
-#endif
   return size;
 }
 
@@ -201,25 +188,15 @@ bool file_system::DeleteFile(const std::string& utf8_path) {
 }
 
 void file_system::RemoveDirectoryContent(const std::string& utf8_path) {
-  int32_t return_code = 0;
   DIR* directory = NULL;
-#ifndef __QNXNTO__
-  struct dirent dir_element_;
-  struct dirent* dir_element = &dir_element_;
-#else
-  char* direntbuffer = new char[offsetof(struct dirent, d_name) +
-                                pathconf(utf8_path.c_str(), _PC_NAME_MAX) + 1];
-  struct dirent* dir_element = new (direntbuffer) dirent;
-#endif
   struct dirent* result = NULL;
 
   directory = opendir(utf8_path.c_str());
 
   if (NULL != directory) {
-    return_code = readdir_r(directory, dir_element, &result);
+    result = readdir(directory);
 
-    for (; NULL != result && 0 == return_code;
-         return_code = readdir_r(directory, dir_element, &result)) {
+    for (; NULL != result; result = readdir(directory)) {
       if ((kCurrentDirectoryEntry == result->d_name) ||
           (kParentDirectoryEntry == result->d_name)) {
         continue;
@@ -236,9 +213,6 @@ void file_system::RemoveDirectoryContent(const std::string& utf8_path) {
   }
 
   closedir(directory);
-#ifdef __QNXNTO__
-  delete[] direntbuffer;
-#endif
 }
 
 bool file_system::RemoveDirectory(const std::string& utf8_path,
@@ -272,24 +246,14 @@ std::vector<std::string> file_system::ListFiles(const std::string& utf8_path) {
     return listFiles;
   }
 
-  int32_t return_code = 0;
   DIR* directory = NULL;
-#ifndef __QNXNTO__
-  struct dirent dir_element_;
-  struct dirent* dir_element = &dir_element_;
-#else
-  char* direntbuffer = new char[offsetof(struct dirent, d_name) +
-                                pathconf(utf8_path.c_str(), _PC_NAME_MAX) + 1];
-  struct dirent* dir_element = new (direntbuffer) dirent;
-#endif
   struct dirent* result = NULL;
 
   directory = opendir(utf8_path.c_str());
   if (NULL != directory) {
-    return_code = readdir_r(directory, dir_element, &result);
+    result = readdir(directory);
 
-    for (; NULL != result && 0 == return_code;
-         return_code = readdir_r(directory, dir_element, &result)) {
+    for (; NULL != result; result = readdir(directory)) {
       if (0 == strcmp(result->d_name, "..") ||
           0 == strcmp(result->d_name, ".")) {
         continue;
@@ -300,10 +264,6 @@ std::vector<std::string> file_system::ListFiles(const std::string& utf8_path) {
 
     closedir(directory);
   }
-
-#ifdef __QNXNTO__
-  delete[] direntbuffer;
-#endif
 
   return listFiles;
 }

@@ -88,7 +88,7 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
   static SQLPTRepresentation* reps;
   static const std::string kDatabaseName;
   // Gtest can show message that this object doesn't destroyed
-  static std::auto_ptr<policy_handler_test::MockPolicySettings>
+  static std::unique_ptr<policy_handler_test::MockPolicySettings>
       policy_settings_;
 
   static void SetUpTestCase() {
@@ -98,7 +98,7 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
     reps = new SQLPTRepresentation(
         kStorageFolder, kAttemptsToOpenPolicyDb, kOpenAttemptTimeoutMs);
     dbms = new DBMS(kDatabaseName);
-    policy_settings_ = std::auto_ptr<policy_handler_test::MockPolicySettings>(
+    policy_settings_ = std::unique_ptr<policy_handler_test::MockPolicySettings>(
         new policy_handler_test::MockPolicySettings());
     ON_CALL(*policy_settings_, app_storage_folder())
         .WillByDefault(ReturnRef(kAppStorageFolder));
@@ -358,7 +358,7 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
 DBMS* SQLPTRepresentationTest::dbms = 0;
 SQLPTRepresentation* SQLPTRepresentationTest::reps = 0;
 const std::string SQLPTRepresentationTest::kDatabaseName = "policy.sqlite";
-std::auto_ptr<policy_handler_test::MockPolicySettings>
+std::unique_ptr<policy_handler_test::MockPolicySettings>
     SQLPTRepresentationTest::policy_settings_;
 
 class SQLPTRepresentationTest2 : public ::testing::Test {
