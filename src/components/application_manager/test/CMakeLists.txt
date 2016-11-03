@@ -68,10 +68,8 @@ set(REQUEST_CONTROLLER_SOURCES
 set(RESUMPTION_PATHS
   ${CMAKE_CURRENT_SOURCE_DIR}/resumption
 )
-# Temporary exclude some resumption tests from build due to compile errors APPLINK-26346
+
 set(RESUMPTION_EXCLUDE
-#  resumption_data_json_test.cc
-#  resumption_data_db_test.cc
 )
 
 get_sdk(SDK)

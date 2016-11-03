@@ -474,19 +474,20 @@ void ResumptionDataTest::SetCommands() {
 }
 
 void ResumptionDataTest::SetSubmenues() {
-  sm::SmartObject sm_comm;
+  sm::SmartObject so_submenu;
   for (size_t i = kSubmenuStartId_; i < kCountOfSubmenues_ + kSubmenuStartId_;
        ++i) {
     char numb[12];
     snprintf(numb, 12, "%lu", i);
     std::string numb_id(numb);
-    sm_comm[am::strings::menu_id] = i;
-    sm_comm[am::strings::position] = i;
-    sm_comm[am::strings::menu_name] = "SubMenu" + numb_id;
-    sm_comm[am::strings::sub_menu_icon][am::strings::value] =
+    so_submenu[am::strings::menu_id] = i;
+    so_submenu[am::strings::position] = i;
+    so_submenu[am::strings::menu_name] = "SubMenu" + numb_id;
+    so_submenu[am::strings::sub_menu_icon][am::strings::value] =
         "submenuicon" + numb_id;
-    sm_comm[am::strings::sub_menu_icon][am::strings::type] = ImageType::STATIC;
-    test_submenu_map[i] = new sm::SmartObject(sm_comm);
+    so_submenu[am::strings::sub_menu_icon][am::strings::type] =
+        ImageType::STATIC;
+    test_submenu_map[i] = new sm::SmartObject(so_submenu);
   }
 }
 

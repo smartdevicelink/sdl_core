@@ -370,15 +370,17 @@ void ResumptionDataDBTest::CheckSubmenuData() {
   BindId(select_submenu);
   int i = 10;
   while (select_submenu.Next()) {
-    uint32_t test_id = (*test_submenu_map[i])[am::strings::menu_id].asUInt();
-    std::string name =
+    const uint32_t test_id =
+        (*test_submenu_map[i])[am::strings::menu_id].asUInt();
+    const std::string name =
         (*test_submenu_map[i])[am::strings::menu_name].asString();
-    int position = (*test_submenu_map[i])[am::strings::position].asInt();
-    std::string image_value =
+    const int position = (*test_submenu_map[i])[am::strings::position].asInt();
+    const std::string image_value =
         (*test_submenu_map[i])[am::strings::sub_menu_icon][am::strings::value]
             .asString();
-    int image_type = (*test_submenu_map[i])[am::strings::sub_menu_icon]
-                                           [am::strings::image_type].asInt();
+    const int image_type =
+        (*test_submenu_map[i])[am::strings::sub_menu_icon]
+                              [am::strings::image_type].asInt();
     EXPECT_EQ(test_id, select_submenu.GetUInteger(0));
     EXPECT_EQ(name, select_submenu.GetString(1));
     EXPECT_EQ(position, select_submenu.GetInteger(2));

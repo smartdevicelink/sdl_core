@@ -236,7 +236,7 @@ class ResumptionSqlQueriesTest : public ::testing::Test {
                              const int menuID,
                              const string& menuName,
                              const int position,
-                             const int64_t idimage);
+                             const int64_t image_id);
 
   SQLQuery& FillApplicationSubMenuArrayTable(SQLQuery& query,
                                              const int app_key,
@@ -718,12 +718,12 @@ SQLQuery& ResumptionSqlQueriesTest::FillSubMenuTable(SQLQuery& query,
                                                      const int menuID,
                                                      const string& menuName,
                                                      const int position,
-                                                     const int64_t idimage) {
+                                                     const int64_t image_id) {
   EXPECT_TRUE(query.Prepare(kInsertToSubMenu));
   query.Bind(0, menuID);
   query.Bind(1, menuName);
   query.Bind(2, position);
-  query.Bind(3, idimage);
+  query.Bind(3, image_id);
   EXPECT_TRUE(query.Exec());
   return query;
 }
@@ -2644,7 +2644,7 @@ TEST_F(ResumptionSqlQueriesTest, kSelectSubMenu_ExpectDataCorrect) {
                                          device_id,
                                          9,
                                          true).LastInsertId();
-  int64_t key1 = FillImageTable(temp_query, 1, test_image).LastInsertId();
+  const int64_t key1 = FillImageTable(temp_query, 1, test_image).LastInsertId();
   int64_t submenu_key =
       FillSubMenuTable(temp_query, 1, "menu_name", 1, key1).LastInsertId();
 
