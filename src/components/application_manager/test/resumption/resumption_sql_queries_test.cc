@@ -114,6 +114,7 @@ class ResumptionSqlQueriesTest : public ::testing::Test {
   static const int ign_off_count2;
   static const int timeStamp;
   static const int timeStamp2;
+  static const int image_key;
 
   static void SetUpTestCase() {
     db_ = new SQLDatabaseImpl();
@@ -234,7 +235,8 @@ class ResumptionSqlQueriesTest : public ::testing::Test {
   SQLQuery& FillSubMenuTable(SQLQuery& query,
                              const int menuID,
                              const string& menuName,
-                             const int position);
+                             const int position,
+                             const int64_t image_id);
 
   SQLQuery& FillApplicationSubMenuArrayTable(SQLQuery& query,
                                              const int app_key,
@@ -356,6 +358,7 @@ const int ResumptionSqlQueriesTest::ign_off_count = 3;
 const int ResumptionSqlQueriesTest::ign_off_count2 = 4;
 const int ResumptionSqlQueriesTest::timeStamp = 2015;
 const int ResumptionSqlQueriesTest::timeStamp2 = 2016;
+const int ResumptionSqlQueriesTest::image_key = 4;
 
 void ResumptionSqlQueriesTest::CheckDeleteQuery(
     const string& count_query,
@@ -714,11 +717,13 @@ SQLQuery& ResumptionSqlQueriesTest::FillFileTable(SQLQuery& query,
 SQLQuery& ResumptionSqlQueriesTest::FillSubMenuTable(SQLQuery& query,
                                                      const int menuID,
                                                      const string& menuName,
-                                                     const int position) {
+                                                     const int position,
+                                                     const int64_t image_id) {
   EXPECT_TRUE(query.Prepare(kInsertToSubMenu));
   query.Bind(0, menuID);
   query.Bind(1, menuName);
   query.Bind(2, position);
+  query.Bind(3, image_id);
   EXPECT_TRUE(query.Exec());
   return query;
 }
@@ -1368,7 +1373,8 @@ TEST_F(ResumptionSqlQueriesTest, kDeleteSubMenu_ExpectDataDeleted) {
                              key,
                              true).LastInsertId();
   int64_t submenu_key =
-      FillSubMenuTable(temp_query, 1, "tst_menuName", 2).LastInsertId();
+      FillSubMenuTable(temp_query, 1, "tst_menuName", 2, image_key)
+          .LastInsertId();
 
   FillApplicationSubMenuArrayTable(temp_query, key, submenu_key);
   // Check
@@ -1400,9 +1406,9 @@ TEST_F(ResumptionSqlQueriesTest,
                              device_id,
                              key,
                              true).LastInsertId();
-
   int64_t submenu_key =
-      FillSubMenuTable(temp_query, 1, "tst_menuName", 2).LastInsertId();
+      FillSubMenuTable(temp_query, 1, "tst_menuName", 2, image_key)
+          .LastInsertId();
 
   FillApplicationSubMenuArrayTable(temp_query, key, submenu_key);
   // Check
@@ -2170,7 +2176,7 @@ TEST_F(ResumptionSqlQueriesTest,
 TEST_F(ResumptionSqlQueriesTest, kInsertToSubMenu_ExpectDataInserted) {
   // Arrange
   SQLQuery temp_query(db());
-  FillSubMenuTable(temp_query, 1, "tst_menu", 3);
+  FillSubMenuTable(temp_query, 1, "tst_menu", 3, image_key);
   // Checks
   const std::string select_count_subMenu = "SELECT COUNT(*) FROM subMenu;";
   CheckSelectQuery(select_count_subMenu, 1, 0);
@@ -2180,6 +2186,9 @@ TEST_F(ResumptionSqlQueriesTest, kInsertToSubMenu_ExpectDataInserted) {
   CheckSelectQuery(select_menuName, "tst_menu", 0);
   const std::string select_position = "SELECT position FROM subMenu;";
   CheckSelectQuery(select_position, 3, 0);
+
+  const std::string select_idkey = "SELECT idimage FROM subMenu;";
+  CheckSelectQuery(select_idkey, 4, 0);
 }
 
 TEST_F(ResumptionSqlQueriesTest,
@@ -2608,8 +2617,10 @@ TEST_F(ResumptionSqlQueriesTest, kSelectCountSubMenu_ExpectDataCorrect) {
                                          device_id,
                                          9,
                                          true).LastInsertId();
+
+  int64_t key1 = FillImageTable(temp_query, 1, test_image).LastInsertId();
   int64_t submenu_key =
-      FillSubMenuTable(temp_query, 1, "menu_name", 1).LastInsertId();
+      FillSubMenuTable(temp_query, 1, "menu_name", 1, key1).LastInsertId();
   FillApplicationSubMenuArrayTable(temp_query, app_key, submenu_key);
   ValToPosPair p1(0, app_id1);
   ValToPosPair p2(1, device_id);
@@ -2633,9 +2644,9 @@ TEST_F(ResumptionSqlQueriesTest, kSelectSubMenu_ExpectDataCorrect) {
                                          device_id,
                                          9,
                                          true).LastInsertId();
+  const int64_t key1 = FillImageTable(temp_query, 1, test_image).LastInsertId();
   int64_t submenu_key =
-
-      FillSubMenuTable(temp_query, 1, "menu_name", 1).LastInsertId();
+      FillSubMenuTable(temp_query, 1, "menu_name", 1, key1).LastInsertId();
 
   FillApplicationSubMenuArrayTable(temp_query, app_key, submenu_key);
   ValToPosPair p1(0, app_id1);

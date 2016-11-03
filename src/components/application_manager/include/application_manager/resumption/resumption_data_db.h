@@ -76,6 +76,13 @@ class ResumptionDataDB : public ResumptionData {
                    const application_manager::ApplicationManagerSettings&
                        application_manager_settings);
 
+#ifdef BUILD_TESTS
+  ResumptionDataDB(utils::dbms::SQLDatabase* db_storage,
+                   const application_manager::ApplicationManagerSettings&
+                       application_manager_settings);
+
+#endif  // BUILD_TESTS
+
   /**
    * @brief allows to destroy ResumptionDataDB object
    */
