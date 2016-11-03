@@ -77,6 +77,9 @@ typedef SharedPtr<ResetGlobalPropertiesResponse>
 namespace {
 const uint32_t kConnectionKey = 2u;
 const uint32_t kCorrelationId = 10u;
+const std::string kTimeOutDefaultValue = "time_out";
+const std::string kMenuTitleDefaultValue = "MENU";
+const std::string kMenuIconDefaultValue = "icon_path";
 }  // namespace
 
 class ResetGlobalPropertiesRequestTest
@@ -185,6 +188,9 @@ TEST_F(ResetGlobalPropertiesRequestTest, Run_InvalidVrHelp_UNSUCCESS) {
 }
 
 TEST_F(ResetGlobalPropertiesRequestTest, Run_SUCCESS) {
+  EXPECT_CALL(mock_app_manager_,
+              RemoveAppFromTTSGlobalPropertiesList(kConnectionKey));
+
   (*msg_)[am::strings::msg_params][am::strings::properties][0] =
       mobile_apis::GlobalProperty::HELPPROMPT;
   (*msg_)[am::strings::msg_params][am::strings::properties][1] =
@@ -198,59 +204,82 @@ TEST_F(ResetGlobalPropertiesRequestTest, Run_SUCCESS) {
   (*msg_)[am::strings::msg_params][am::strings::properties][5] =
       mobile_apis::GlobalProperty::KEYBOARDPROPERTIES;
 
-  EXPECT_CALL(mock_app_manager_,
-              RemoveAppFromTTSGlobalPropertiesList(kConnectionKey));
-  smart_objects::SmartObject so_prompt =
-      smart_objects::SmartObject(smart_objects::SmartType_Array);
-  EXPECT_CALL(*mock_app_, set_help_prompt(so_prompt));
+  EXPECT_CALL(*mock_app_, set_reset_global_properties_active(true));
 
-  std::vector<std::string> time_out_prompt;
-  time_out_prompt.push_back("time_out");
-  EXPECT_CALL(mock_app_manager_settings_, time_out_promt())
-      .WillOnce(ReturnRef(time_out_prompt));
-
-  smart_objects::SmartObject timeout_prompt =
+  smart_objects::SmartObject ui_msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
-  timeout_prompt[am::strings::text] = time_out_prompt[0];
-  timeout_prompt[am::strings::type] =
+
+  // mobile_apis::GlobalProperty::HELPPROMPT:
+  const smart_objects::SmartObjectSPtr so_help_prompt =
+      ::utils::MakeShared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Map);
+  EXPECT_CALL(*mock_app_, help_prompt()).WillOnce(Return(so_help_prompt.get()));
+
+  // mobile_apis::GlobalProperty::TIMEOUTPROMPT:
+  std::vector<std::string> time_out_prompt_default_vector;
+  time_out_prompt_default_vector.push_back(kTimeOutDefaultValue);
+  EXPECT_CALL(mock_app_manager_settings_, time_out_promt())
+      .WillOnce(ReturnRef(time_out_prompt_default_vector));
+
+  smart_objects::SmartObject time_out_prompt_map =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+  time_out_prompt_map[am::strings::text] = time_out_prompt_default_vector[0];
+  time_out_prompt_map[am::strings::type] =
       hmi_apis::Common_SpeechCapabilities::SC_TEXT;
 
-  smart_objects::SmartObject so_time_out_prompt =
+  smart_objects::SmartObject time_out_prompt_array =
       smart_objects::SmartObject(smart_objects::SmartType_Array);
+  time_out_prompt_array[0] = time_out_prompt_map;
+  EXPECT_CALL(*mock_app_, set_timeout_prompt(time_out_prompt_array));
 
-  so_time_out_prompt[0] = timeout_prompt;
+  const smart_objects::SmartObjectSPtr so_time_out_prompt =
+      ::utils::MakeShared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Map);
+  EXPECT_CALL(*mock_app_, timeout_prompt())
+      .WillOnce(Return(so_time_out_prompt.get()));
 
-  EXPECT_CALL(*mock_app_, set_timeout_prompt(so_time_out_prompt));
-
+  // mobile_apis::GlobalProperty::VRHELPTITLE:
   EXPECT_CALL(*mock_app_, reset_vr_help_title());
   EXPECT_CALL(*mock_app_, reset_vr_help());
 
-  EXPECT_CALL(*mock_app_, set_reset_global_properties_active(true));
-
-  smart_objects::SmartObjectSPtr vr_help =
+  const smart_objects::SmartObjectSPtr vr_help =
       ::utils::MakeShared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
   EXPECT_CALL(*mock_message_helper_, CreateAppVrHelp(_))
       .WillOnce(Return(vr_help));
 
-  smart_objects::SmartObject msg_params =
-      smart_objects::SmartObject(smart_objects::SmartType_Map);
-  msg_params[am::hmi_request::menu_title] = "";
-
+  // mobile_apis::GlobalProperty::MENUNAME:
+  EXPECT_CALL(mock_app_manager_settings_, menu_title())
+      .WillOnce(ReturnRef(kMenuTitleDefaultValue));
+  ui_msg_params[am::hmi_request::menu_title] = kMenuTitleDefaultValue;
   EXPECT_CALL(*mock_app_,
-              set_menu_title(msg_params[am::hmi_request::menu_title]));
+              set_menu_title(ui_msg_params[am::hmi_request::menu_title]));
 
-  const smart_objects::SmartObjectSPtr so_help_prompt =
-      ::utils::MakeShared<smart_objects::SmartObject>(
-          smart_objects::SmartType_Map);
-  EXPECT_CALL(*mock_app_, help_prompt()).WillOnce(Return(so_help_prompt.get()));
-  EXPECT_CALL(*mock_app_, timeout_prompt())
-      .WillOnce(Return(so_help_prompt.get()));
+  // mobile_apis::GlobalProperty::MENUICON:
+  smart_objects::SmartObject so_menu_icon =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+  EXPECT_CALL(mock_app_manager_settings_, menu_icon())
+      .WillOnce(ReturnRef(kMenuIconDefaultValue));
+  so_menu_icon[am::strings::value] = kMenuIconDefaultValue;
+  ui_msg_params[am::hmi_request::menu_icon] = so_menu_icon;
+  EXPECT_CALL(*mock_app_,
+              set_menu_icon(ui_msg_params[am::hmi_request::menu_icon]));
+
+  // mobile_apis::GlobalProperty::KEYBOARDPROPERTIES:
+  smart_objects::SmartObject key_board_properties =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+  key_board_properties[am::strings::language] =
+      static_cast<int32_t>(hmi_apis::Common_Language::EN_US);
+  key_board_properties[am::hmi_request::keyboard_layout] =
+      static_cast<int32_t>(hmi_apis::Common_KeyboardLayout::QWERTY);
+  key_board_properties[am::hmi_request::auto_complete_text] = "";
+  ui_msg_params[am::hmi_request::keyboard_properties] = key_board_properties;
 
   EXPECT_CALL(mock_app_manager_,
               ManageHMICommand(HMIResultCodeIs(
                   hmi_apis::FunctionID::UI_SetGlobalProperties)))
       .WillOnce(Return(true));
+
   EXPECT_CALL(mock_app_manager_,
               ManageHMICommand(HMIResultCodeIs(
                   hmi_apis::FunctionID::TTS_SetGlobalProperties)))
@@ -308,7 +337,7 @@ TEST_F(ResetGlobalPropertiesRequestTest,
   (*msg_)[am::strings::msg_params][am::strings::properties][0] =
       mobile_apis::GlobalProperty::TIMEOUTPROMPT;
   (*msg_)[am::strings::msg_params][am::strings::properties][1] =
-      mobile_apis::GlobalProperty::MENUICON;
+      mobile_apis::GlobalProperty::MENUNAME;
 
   std::vector<std::string> time_out_prompt;
   time_out_prompt.push_back("time_out");
@@ -325,10 +354,20 @@ TEST_F(ResetGlobalPropertiesRequestTest,
 
   EXPECT_CALL(*mock_app_, set_reset_global_properties_active(true));
 
+  smart_objects::SmartObject ui_msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  EXPECT_CALL(mock_app_manager_settings_, menu_title())
+      .WillOnce(ReturnRef(kMenuTitleDefaultValue));
+  ui_msg_params[am::hmi_request::menu_title] = kMenuTitleDefaultValue;
+  EXPECT_CALL(*mock_app_,
+              set_menu_title(ui_msg_params[am::hmi_request::menu_title]));
+
   MessageSharedPtr ui_msg = CreateMessage();
   (*ui_msg)[am::strings::params][am::strings::correlation_id] = kCorrelationId;
   (*ui_msg)[am::strings::params][am::hmi_response::code] =
       hmi_apis::Common_Result::eType::SUCCESS;
+  (*ui_msg)[am::strings::msg_params] = ui_msg_params;
 
   Event ui_event(hmi_apis::FunctionID::UI_SetGlobalProperties);
   ui_event.set_smart_object(*ui_msg);

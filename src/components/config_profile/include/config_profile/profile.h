@@ -581,6 +581,16 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
    */
   uint16_t open_attempt_timeout_ms_resumption_db() const OVERRIDE;
 
+  /**
+   * @brief Returns menu title
+   */
+  const std::string& menu_title() const;
+
+  /**
+   * @brief Returns path to menu icon
+   */
+  const std::string& menu_icon() const;
+
   /*
    * @brief Updates all related values from ini file
    */
@@ -796,6 +806,8 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   bool use_db_for_resumption_;
   uint16_t attempts_to_open_resumption_db_;
   uint16_t open_attempt_timeout_ms_resumption_db_;
+  std::string menu_title_;
+  std::string menu_icon_;
 
   DISALLOW_COPY_AND_ASSIGN(Profile);
 };
