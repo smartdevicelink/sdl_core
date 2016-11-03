@@ -35,6 +35,7 @@
 #include "gtest/gtest.h"
 #include "application_manager/commands/hmi/tts_get_capabilities_response.h"
 #include "application_manager/mock_hmi_capabilities.h"
+#include "smart_objects/smart_object.h"
 #include "commands/commands_test.h"
 
 namespace test {
@@ -45,7 +46,6 @@ namespace tts_get_capabilities_response {
 
 using application_manager::commands::MessageSharedPtr;
 using application_manager::commands::TTSGetCapabilitiesResponse;
-using smart_objects::SmartObject;
 using test::components::application_manager_test::MockHMICapabilities;
 using utils::SharedPtr;
 using testing::_;

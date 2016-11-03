@@ -53,6 +53,7 @@ namespace am = ::application_manager;
 namespace strings = ::application_manager::strings;
 namespace hmi_response = am::hmi_response;
 using am::commands::VRIsReadyResponse;
+using namespace strings;
 
 typedef SharedPtr<VRIsReadyResponse> VRIsReadyResponsePtr;
 typedef NiceMock<
@@ -73,14 +74,13 @@ class VRIsReadyResponseTest : public CommandsTest<CommandsTestMocks::kIsNice> {
 };
 
 TEST_F(VRIsReadyResponseTest, RUN_SUCCESS) {
+  using namespace strings;
   MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
-  (*command_msg)[strings::msg_params][strings::number] = kStringNum;
-  (*command_msg)[strings::params][strings::connection_key] = kConnectionKey;
-  (*command_msg)[strings::params][hmi_response::code] =
-      hmi_apis::Common_Result::SUCCESS;
-  (*command_msg)[strings::msg_params][hmi_response::capabilities] =
-      (capabilities_);
-  (*command_msg)[strings::msg_params][strings::available] = kIsAvailable;
+  (*command_msg)[msg_params][number] = kStringNum;
+  (*command_msg)[params][connection_key] = kConnectionKey;
+  (*command_msg)[params][hmi_response::code] = hmi_apis::Common_Result::SUCCESS;
+  (*command_msg)[msg_params][hmi_response::capabilities] = (capabilities_);
+  (*command_msg)[msg_params][available] = kIsAvailable;
 
   VRIsReadyResponsePtr command(CreateCommand<VRIsReadyResponse>(command_msg));
 
@@ -93,13 +93,12 @@ TEST_F(VRIsReadyResponseTest, RUN_SUCCESS) {
 }
 
 TEST_F(VRIsReadyResponseTest, RUN_NoKeyAvailable) {
+  using namespace strings;
   MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
-  (*command_msg)[strings::msg_params][strings::number] = kStringNum;
-  (*command_msg)[strings::params][strings::connection_key] = kConnectionKey;
-  (*command_msg)[strings::params][hmi_response::code] =
-      hmi_apis::Common_Result::SUCCESS;
-  (*command_msg)[strings::msg_params][hmi_response::capabilities] =
-      (capabilities_);
+  (*command_msg)[msg_params][number] = kStringNum;
+  (*command_msg)[params][connection_key] = kConnectionKey;
+  (*command_msg)[params][hmi_response::code] = hmi_apis::Common_Result::SUCCESS;
+  (*command_msg)[msg_params][hmi_response::capabilities] = (capabilities_);
 
   VRIsReadyResponsePtr command(CreateCommand<VRIsReadyResponse>(command_msg));
 
@@ -110,8 +109,7 @@ TEST_F(VRIsReadyResponseTest, RUN_NoKeyAvailable) {
 
   command->Run();
 
-  EXPECT_FALSE(
-      (*command_msg)[strings::msg_params].keyExists(strings::available));
+  EXPECT_FALSE((*command_msg)[msg_params].keyExists(available));
 }
 
 }  // namespace vr_is_ready_response

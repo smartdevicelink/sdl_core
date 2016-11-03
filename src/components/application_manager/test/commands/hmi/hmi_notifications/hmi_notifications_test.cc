@@ -1898,14 +1898,14 @@ TEST_F(HMICommandsNotificationsTest,
 }
 
 TEST_F(HMICommandsNotificationsTest, OnDriverDistractionNotificationEmptyData) {
-  const hmi_apis::Common_DriverDistractionState::eType kState =
+  const hmi_apis::Common_DriverDistractionState::eType state =
       hmi_apis::Common_DriverDistractionState::DD_ON;
   MessageSharedPtr message = CreateMessage();
-  (*message)[am::strings::msg_params][am::hmi_notification::state] = kState;
+  (*message)[am::strings::msg_params][am::hmi_notification::state] = state;
   utils::SharedPtr<Command> command =
       CreateCommand<hmi::OnDriverDistractionNotification>(message);
 
-  EXPECT_CALL(mock_app_manager_, set_driver_distraction(kState));
+  EXPECT_CALL(mock_app_manager_, set_driver_distraction(state));
   EXPECT_CALL(mock_app_manager_, applications())
       .WillOnce(Return(applications_));
 
@@ -1916,10 +1916,10 @@ TEST_F(HMICommandsNotificationsTest, OnDriverDistractionNotificationEmptyData) {
 
 TEST_F(HMICommandsNotificationsTest,
        OnDriverDistractionNotificationInvalidApp) {
-  const hmi_apis::Common_DriverDistractionState::eType kState =
+  const hmi_apis::Common_DriverDistractionState::eType state =
       hmi_apis::Common_DriverDistractionState::DD_ON;
   MessageSharedPtr message = CreateMessage();
-  (*message)[am::strings::msg_params][am::hmi_notification::state] = kState;
+  (*message)[am::strings::msg_params][am::hmi_notification::state] = state;
   utils::SharedPtr<Command> command =
       CreateCommand<hmi::OnDriverDistractionNotification>(message);
 
@@ -1934,10 +1934,10 @@ TEST_F(HMICommandsNotificationsTest,
 }
 
 TEST_F(HMICommandsNotificationsTest, OnDriverDistractionNotificationValidApp) {
-  const hmi_apis::Common_DriverDistractionState::eType kState =
+  const hmi_apis::Common_DriverDistractionState::eType state =
       hmi_apis::Common_DriverDistractionState::DD_ON;
   MessageSharedPtr message = CreateMessage();
-  (*message)[am::strings::msg_params][am::mobile_notification::state] = kState;
+  (*message)[am::strings::msg_params][am::mobile_notification::state] = state;
   utils::SharedPtr<Command> command =
       CreateCommand<hmi::OnDriverDistractionNotification>(message);
 
