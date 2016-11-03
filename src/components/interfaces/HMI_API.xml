@@ -2856,7 +2856,7 @@
     </param>
     <param name="subMenuIcon" type="Common.Image" mandatory="false">
     <description>
-      If ommited on supported displays, no (or the default if applicable) icon shall be displayed.
+      If omited on supported displays, no (or the default if applicable) icon shall be displayed.
     </description>
     </param>
   </function>

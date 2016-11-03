@@ -168,7 +168,7 @@ bool AddSubMenuRequest::CheckSubMenuIcon() {
   if (!(*message_)[strings::msg_params].keyExists(strings::sub_menu_icon)) {
     return false;
   }
-  std::string str =
+  const std::string str =
       (*message_)[strings::msg_params][strings::sub_menu_icon][strings::value]
           .asString();
   if (!CheckSyntax(str) || std::string::npos != str.find(" ")) {
@@ -178,6 +178,7 @@ bool AddSubMenuRequest::CheckSubMenuIcon() {
 
   return true;
 }
+
 bool AddSubMenuRequest::CheckMenuIconExistedInStorage() {
   if (!(*message_)[strings::msg_params].keyExists(strings::sub_menu_icon)) {
     return true;
