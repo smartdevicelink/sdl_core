@@ -346,7 +346,7 @@ void ResumptionDataDBTest::CheckCharacters(int64_t global_properties_key) {
 }
 
 void ResumptionDataDBTest::CheckSubmenuData() {
-  utils::dbms::SQLQuery select_submenu(test_db());
+  ::utils::dbms::SQLQuery select_submenu(test_db());
 
   EXPECT_TRUE(select_submenu.Prepare(kSelectCountSubMenu));
   BindId(select_submenu);
@@ -357,13 +357,23 @@ void ResumptionDataDBTest::CheckSubmenuData() {
   BindId(select_submenu);
   int i = 10;
   while (select_submenu.Next()) {
-    uint32_t test_id = (*test_submenu_map[i])[am::strings::menu_id].asUInt();
-    std::string name =
+    const uint32_t test_id =
+        (*test_submenu_map[i])[am::strings::menu_id].asUInt();
+    const std::string name =
         (*test_submenu_map[i])[am::strings::menu_name].asString();
-    int position = (*test_submenu_map[i])[am::strings::position].asInt();
+
+    const int position = (*test_submenu_map[i])[am::strings::position].asInt();
+    const std::string image_value =
+        (*test_submenu_map[i])[am::strings::sub_menu_icon][am::strings::value]
+            .asString();
+    const int image_type =
+        (*test_submenu_map[i])[am::strings::sub_menu_icon]
+                              [am::strings::image_type].asInt();
     EXPECT_EQ(test_id, select_submenu.GetUInteger(0));
     EXPECT_EQ(name, select_submenu.GetString(1));
     EXPECT_EQ(position, select_submenu.GetInteger(2));
+    EXPECT_EQ(image_value, select_submenu.GetString(3));
+    EXPECT_EQ(image_type, select_submenu.GetInteger(4));
     i++;
   }
 }
