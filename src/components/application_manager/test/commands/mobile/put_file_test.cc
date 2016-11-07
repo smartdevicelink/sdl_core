@@ -63,7 +63,7 @@ const int32_t kConnectionKey = 1;
 class PutFilesRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {};
 
-class PutFileResponceTest : public CommandsTest<CommandsTestMocks::kIsNice> {
+class PutFileResponseTest : public CommandsTest<CommandsTestMocks::kIsNice> {
  public:
   void SetUp() OVERRIDE {
     message_ = utils::MakeShared<SmartObject>(::smart_objects::SmartType_Map);
@@ -78,7 +78,7 @@ class PutFileResponceTest : public CommandsTest<CommandsTestMocks::kIsNice> {
   utils::SharedPtr<commands::PutFileResponse> command_sptr_;
 };
 
-TEST_F(PutFileResponceTest, Run_InvalidApp_ApplicationNotRegisteredResponce) {
+TEST_F(PutFileResponseTest, Run_InvalidApp_ApplicationNotRegisteredResponce) {
   ::smart_objects::SmartObject& message_ref = *message_;
 
   message_ref[strings::params][strings::connection_key] = kConnectionKey;
@@ -94,7 +94,7 @@ TEST_F(PutFileResponceTest, Run_InvalidApp_ApplicationNotRegisteredResponce) {
   command_sptr_->Run();
 }
 
-TEST_F(PutFileResponceTest, Run_ApplicationRegistered_Success) {
+TEST_F(PutFileResponseTest, Run_ApplicationRegistered_Success) {
   ::smart_objects::SmartObject& message_ref = *message_;
 
   message_ref[strings::params][strings::connection_key] = kConnectionKey;
