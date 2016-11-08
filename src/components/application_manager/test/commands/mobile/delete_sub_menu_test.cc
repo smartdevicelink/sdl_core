@@ -47,6 +47,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace delete_sub_menu_request {
 
 using ::testing::_;
 using ::testing::Mock;
@@ -139,6 +140,7 @@ TEST_F(DeleteSubMenuRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
   Mock::VerifyAndClearExpectations(&mock_message_helper_);
 }
 
+}  // namespace delete_sub_menu_request
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

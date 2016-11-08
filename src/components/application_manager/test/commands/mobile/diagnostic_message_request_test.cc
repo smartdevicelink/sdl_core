@@ -51,6 +51,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace diagnostic_message_request {
 
 using ::testing::_;
 using ::testing::Return;
@@ -176,6 +177,7 @@ TEST_F(DiagnosticMessageRequestTest, OnEvent_SUCCESS) {
   command->on_event(event);
 }
 
+}  // namespace diagnostic_message_request
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

@@ -53,6 +53,7 @@
 namespace test {
 namespace components {
 namespace commands_test {
+namespace mobile_commands_test {
 namespace create_interaction_choice_set_request {
 
 namespace am = application_manager;
@@ -206,6 +207,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest, OnEvent_VR_UNSUPPORTED_RESOURCE) {
 }
 
 }  // namespace create_interaction_choice_set_request
+}  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components
 }  // namespace tests

@@ -49,6 +49,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
+namespace ui_is_ready_request {
 
 namespace am = ::application_manager;
 
@@ -203,7 +204,8 @@ TEST_F(UIIsReadyRequestTest, OnTimeout_SUCCESS) {
   command_->onTimeOut();
 }
 
-}  // namespace mobile_commands_test
+}  // namespace ui_is_ready_request
+}  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components
 }  // namespace test

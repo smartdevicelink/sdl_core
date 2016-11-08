@@ -55,6 +55,7 @@
 namespace test {
 namespace components {
 namespace commands_test {
+namespace mobile_commands_test {
 namespace change_registration_request {
 
 namespace am = application_manager;
@@ -534,6 +535,7 @@ TEST_F(ChangeRegistrationRequestTest,
 }
 
 }  // namespace change_registration_request
+}  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components
 }  // namespace tests

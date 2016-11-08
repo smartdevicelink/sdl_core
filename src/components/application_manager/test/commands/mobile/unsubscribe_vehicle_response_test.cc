@@ -42,6 +42,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace unsubscribe_vehicle_data_response {
 
 namespace commands = ::application_manager::commands;
 
@@ -103,6 +104,7 @@ TEST_F(UnsubscribeVehicleResponseTest,
   command->Run();
 }
 
+}  // namespace unsubscribe_vehicle_data_response
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

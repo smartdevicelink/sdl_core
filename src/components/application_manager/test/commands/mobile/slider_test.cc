@@ -47,6 +47,8 @@
 namespace test {
 namespace components {
 namespace commands_test {
+namespace mobile_commands_test {
+namespace slider_request {
 
 namespace am = application_manager;
 using am::commands::SliderRequest;
@@ -151,6 +153,8 @@ TEST_F(SliderRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
   Mock::VerifyAndClearExpectations(&mock_message_helper_);
 }
 
+}  // namespace slider_request
+}  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components
 }  // namespace tests
