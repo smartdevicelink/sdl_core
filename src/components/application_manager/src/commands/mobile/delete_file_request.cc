@@ -93,7 +93,6 @@ void DeleteFileRequest::Run() {
       SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
     }
   } else {
-    // APPLINK-29148
     SendResponse(false, mobile_apis::Result::REJECTED);
   }
 }
