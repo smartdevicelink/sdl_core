@@ -40,12 +40,11 @@
 
 #include "application_manager/policies/policy_handler.h"
 #include "utils/helpers.h"
+#include "smart_objects/smart_object.h"
 
 namespace application_manager {
 
 namespace commands {
-
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 AlertRequest::AlertRequest(const MessageSharedPtr& message,
                            ApplicationManager& application_manager)

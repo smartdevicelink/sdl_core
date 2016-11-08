@@ -59,7 +59,6 @@ using ::testing::AtLeast;
 using ::testing::Invoke;
 using ::testing::InSequence;
 
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 using namespace application_manager;
 
 class HMICapabilitiesTest : public ::testing::Test {

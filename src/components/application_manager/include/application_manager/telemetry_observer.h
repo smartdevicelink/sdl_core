@@ -39,7 +39,6 @@
 #include "utils/shared_ptr.h"
 #include "utils/date_time.h"
 
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 namespace application_manager {
 
 class AMTelemetryObserver {

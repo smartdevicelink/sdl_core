@@ -43,7 +43,6 @@ namespace components {
 namespace application_manager_test {
 
 namespace custom_str = utils::custom_string;
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 class MockApplication : public ::application_manager::Application {
  public:
   MockApplication() {}

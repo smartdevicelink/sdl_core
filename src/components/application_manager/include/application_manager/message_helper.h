@@ -46,12 +46,7 @@
 #include "policy/policy_types.h"
 #include "protocol_handler/session_observer.h"
 #include "application_manager/policies/policy_handler_interface.h"
-
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
-class SmartObject;
-}
-}
+#include "smart_objects/smart_object.h"
 
 namespace policy {
 class PolicyHandlerInterface;
@@ -59,7 +54,6 @@ class PolicyHandlerInterface;
 
 namespace application_manager {
 namespace mobile_api = mobile_apis;
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 /*
  * @brief Typedef for VehicleData
