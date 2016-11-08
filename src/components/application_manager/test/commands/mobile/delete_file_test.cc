@@ -107,9 +107,6 @@ class DeleteFileRequestTest
   MockAppPtr mock_app_;
 };
 
-class DeleteFileResponseTest : public CommandsTest<CommandsTestMocks::kIsNice> {
-};
-
 TEST_F(DeleteFileRequestTest, Run_InvalidApp_UNSUCCESS) {
   MockAppPtr invalid_app;
   EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(invalid_app));
@@ -140,91 +137,6 @@ TEST_F(DeleteFileRequestTest, Run_HMILevelNone_UNSUCCESS) {
                           am::commands::Command::CommandOrigin::ORIGIN_SDL));
 
   command_->Run();
-}
-
-TEST_F(DeleteFileRequestTest, Run_ValidFileName_SUCCESS) {
-  const std::string file_name = "test_file.txt";
-  EXPECT_TRUE(file_system::CreateFile(file_name));
-  (*message_)[am::strings::msg_params][am::strings::sync_file_name] = file_name;
-
-  EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(mock_app_));
-  EXPECT_CALL(*mock_app_, hmi_level())
-      .WillOnce(Return(am::mobile_api::HMILevel::HMI_FULL));
-
-  EXPECT_CALL(app_mngr_, get_settings())
-      .WillOnce(ReturnRef(app_mngr_settings_));
-  const std::string full_file_path = file_system::CurrentWorkingDirectory();
-  EXPECT_CALL(app_mngr_settings_, app_storage_folder())
-      .WillOnce(ReturnRef(full_file_path));
-
-  am::AppFile file;
-  file.file_name = file_name;
-  file.file_type = mobile_apis::FileType::BINARY;
-
-  EXPECT_CALL(*mock_app_, GetFile(_)).WillOnce(Return(&file));
-  EXPECT_CALL(*mock_app_, DeleteFile(_));
-  EXPECT_CALL(*mock_app_, increment_delete_file_in_none_count());
-  EXPECT_CALL(
-      app_mngr_,
-      ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS),
-                          am::commands::Command::CommandOrigin::ORIGIN_SDL));
-
-  command_->Run();
-}
-
-TEST_F(DeleteFileRequestTest, Run_InvalidFile_UNSUCCESS) {
-  const std::string file_name = "test_file.txt";
-  (*message_)[am::strings::msg_params][am::strings::sync_file_name] = file_name;
-
-  EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(mock_app_));
-  EXPECT_CALL(*mock_app_, hmi_level())
-      .WillOnce(Return(am::mobile_api::HMILevel::HMI_FULL));
-
-  EXPECT_CALL(app_mngr_, get_settings())
-      .WillOnce(ReturnRef(app_mngr_settings_));
-  const std::string full_file_path = file_system::CurrentWorkingDirectory();
-  EXPECT_CALL(app_mngr_settings_, app_storage_folder())
-      .WillOnce(ReturnRef(full_file_path));
-  EXPECT_CALL(
-      app_mngr_,
-      ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::REJECTED),
-                          am::commands::Command::CommandOrigin::ORIGIN_SDL));
-  command_->Run();
-}
-
-TEST_F(DeleteFileResponseTest, Run_InvalidApp_UNSUCCESS) {
-  MessageSharedPtr message = CreateMessage();
-  (*message)[am::strings::params][am::strings::connection_key] = kConnectionKey;
-  MockAppPtr invalid_app;
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
-      .WillOnce(Return(invalid_app));
-  EXPECT_CALL(
-      app_mngr_,
-      SendMessageToMobile(
-          MobileResultCodeIs(mobile_apis::Result::APPLICATION_NOT_REGISTERED),
-          false));
-
-  DeleteFileResponsePtr command = CreateCommand<DeleteFileResponse>(message);
-  command->Run();
-}
-
-TEST_F(DeleteFileResponseTest, Run_ValidApp_SUCCESS) {
-  MessageSharedPtr message = CreateMessage();
-  (*message)[am::strings::params][am::strings::connection_key] = kConnectionKey;
-  (*message)[am::strings::msg_params][am::strings::success] = true;
-
-  MockAppPtr app(CreateMockApp());
-  EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app));
-  const uint32_t available_disk_space = 10u;
-  EXPECT_CALL(*app, GetAvailableDiskSpace())
-      .WillOnce(Return(available_disk_space));
-
-  EXPECT_CALL(
-      app_mngr_,
-      SendMessageToMobile(MobileResultCodeIs(mobile_apis::Result::SUCCESS), _));
-
-  DeleteFileResponsePtr command = CreateCommand<DeleteFileResponse>(message);
-  command->Run();
 }
 
 }  // namespace delete_file
