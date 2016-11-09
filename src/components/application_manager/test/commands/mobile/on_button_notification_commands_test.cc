@@ -83,7 +83,7 @@ class OnButtonNotificationCommandsTest
 typedef Types<NotificationData<commands::mobile::OnButtonEventNotification,
                                mobile_apis::FunctionID::OnButtonEventID>,
               NotificationData<commands::mobile::OnButtonPressNotification,
-                               mobile_apis::FunctionID::OnButtonPressID>>
+                               mobile_apis::FunctionID::OnButtonPressID> >
     OnButtonNotificationCommandsList;
 
 MATCHER_P(CheckNotificationMessage, function_id, "") {
