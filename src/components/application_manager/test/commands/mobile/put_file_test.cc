@@ -56,60 +56,8 @@ using namespace application_manager;
 using ::testing::Return;
 using ::testing::_;
 
-namespace {
-const int32_t kConnectionKey = 1;
-}
-
 class PutFilesRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {};
-
-class PutFileResponseTest : public CommandsTest<CommandsTestMocks::kIsNice> {
- public:
-  void SetUp() OVERRIDE {
-    message_ = utils::MakeShared<SmartObject>(::smart_objects::SmartType_Map);
-    (*message_)[strings::msg_params] =
-        ::smart_objects::SmartObject(::smart_objects::SmartType_Map);
-
-    command_sptr_ =
-        CreateCommand<application_manager::commands::PutFileResponse>(message_);
-  }
-
-  MessageSharedPtr message_;
-  utils::SharedPtr<commands::PutFileResponse> command_sptr_;
-};
-
-TEST_F(PutFileResponseTest, Run_InvalidApp_ApplicationNotRegisteredResponce) {
-  ::smart_objects::SmartObject& message_ref = *message_;
-
-  message_ref[strings::params][strings::connection_key] = kConnectionKey;
-
-  utils::SharedPtr<Application> null_application_sptr;
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
-      .WillOnce(Return(null_application_sptr));
-  EXPECT_CALL(
-      app_mngr_,
-      SendMessageToMobile(
-          MobileResultCodeIs(mobile_api::Result::APPLICATION_NOT_REGISTERED),
-          _));
-  command_sptr_->Run();
-}
-
-TEST_F(PutFileResponseTest, Run_ApplicationRegistered_Success) {
-  ::smart_objects::SmartObject& message_ref = *message_;
-
-  message_ref[strings::params][strings::connection_key] = kConnectionKey;
-  message_ref[strings::msg_params][strings::success] = true;
-
-  utils::SharedPtr<Application> application_sptr =
-      utils::MakeShared<MockApplication>();
-
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
-      .WillOnce(Return(application_sptr));
-  EXPECT_CALL(
-      app_mngr_,
-      SendMessageToMobile(MobileResultCodeIs(mobile_apis::Result::SUCCESS), _));
-  command_sptr_->Run();
-}
 
 TEST_F(PutFilesRequestTest, Run_TooManyHmiNone_UNSUCCESS) {
   MockAppPtr app(CreateMockApp());
@@ -120,15 +68,15 @@ TEST_F(PutFilesRequestTest, Run_TooManyHmiNone_UNSUCCESS) {
   ON_CALL(*app, hmi_level())
       .WillByDefault(Return(mobile_apis::HMILevel::HMI_NONE));
 
-  const uint32_t kPutFilesInNoneAllowed = 1u;
-  const uint32_t kPutFilesInNoneCount = 2u;
+  const uint32_t put_files_in_none_allowed = 1u;
+  const uint32_t put_files_in_none_count = 2u;
 
-  EXPECT_CALL(app_mngr_, get_settings())
-      .WillOnce(ReturnRef(app_mngr_settings_));
+  ON_CALL(app_mngr_, get_settings())
+      .WillByDefault(ReturnRef(app_mngr_settings_));
   ON_CALL(app_mngr_settings_, put_file_in_none())
-      .WillByDefault(ReturnRef(kPutFilesInNoneAllowed));
+      .WillByDefault(ReturnRef(put_files_in_none_allowed));
   ON_CALL(*app, put_file_in_none_count())
-      .WillByDefault(Return(kPutFilesInNoneCount));
+      .WillByDefault(Return(put_files_in_none_count));
 
   MessageSharedPtr result_msg(CatchMobileCommandResult(CallRun(*command)));
   EXPECT_EQ(mobile_apis::Result::REJECTED,

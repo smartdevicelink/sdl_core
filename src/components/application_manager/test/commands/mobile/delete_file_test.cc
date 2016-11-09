@@ -107,17 +107,6 @@ class DeleteFileRequestTest
   MockAppPtr mock_app_;
 };
 
-TEST_F(DeleteFileRequestTest, Run_InvalidApp_UNSUCCESS) {
-  MockAppPtr invalid_app;
-  EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(invalid_app));
-  EXPECT_CALL(
-      app_mngr_,
-      ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL));
-  EXPECT_CALL(app_mngr_, get_settings()).Times(0);
-
-  command_->Run();
-}
-
 TEST_F(DeleteFileRequestTest, Run_HMILevelNone_UNSUCCESS) {
   EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(mock_app_));
   EXPECT_CALL(*mock_app_, hmi_level())
@@ -135,6 +124,26 @@ TEST_F(DeleteFileRequestTest, Run_HMILevelNone_UNSUCCESS) {
       ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::REJECTED),
                           am::commands::Command::CommandOrigin::ORIGIN_SDL));
 
+  command_->Run();
+}
+
+TEST_F(DeleteFileRequestTest, Run_InvalidFile_UNSUCCESS) {
+  const std::string kFileName = "test_file.txt";
+  (*message_)[am::strings::msg_params][am::strings::sync_file_name] = kFileName;
+
+  EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(mock_app_));
+  EXPECT_CALL(*mock_app_, hmi_level())
+      .WillOnce(Return(am::mobile_api::HMILevel::HMI_FULL));
+
+  EXPECT_CALL(app_mngr_, get_settings())
+      .WillOnce(ReturnRef(app_mngr_settings_));
+  const std::string kFullFilePath = file_system::CurrentWorkingDirectory();
+  EXPECT_CALL(app_mngr_settings_, app_storage_folder())
+      .WillOnce(ReturnRef(kFullFilePath));
+  EXPECT_CALL(
+      app_mngr_,
+      ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::REJECTED),
+                          am::commands::Command::CommandOrigin::ORIGIN_SDL));
   command_->Run();
 }
 
