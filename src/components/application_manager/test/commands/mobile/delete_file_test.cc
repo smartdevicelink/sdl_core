@@ -128,8 +128,8 @@ TEST_F(DeleteFileRequestTest, Run_HMILevelNone_UNSUCCESS) {
 }
 
 TEST_F(DeleteFileRequestTest, Run_InvalidFile_UNSUCCESS) {
-  const std::string kFileName = "test_file.txt";
-  (*message_)[am::strings::msg_params][am::strings::sync_file_name] = kFileName;
+  const std::string file_name = "test_file.txt";
+  (*message_)[am::strings::msg_params][am::strings::sync_file_name] = file_name;
 
   EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(mock_app_));
   EXPECT_CALL(*mock_app_, hmi_level())
