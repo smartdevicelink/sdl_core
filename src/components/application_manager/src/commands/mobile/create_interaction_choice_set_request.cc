@@ -47,6 +47,17 @@ namespace application_manager {
 
 namespace commands {
 
+typedef std::set<int32_t> Djb2HashSet;
+
+bool InsertIntoDjb2HashSet(const std::string& data, Djb2HashSet& out_set) {
+  return utils::InsertIntoSet(Djb2HashFromString(data), out_set);
+}
+
+const Djb2HashSet::iterator FindDataInDjb2HashSet(const std::string& data,
+                                                  const Djb2HashSet& set) {
+  return set.find(Djb2HashFromString(data));
+}
+
 /**
  * @brief The UniqueParamChecker class
  * helps to check, whether incoming string
@@ -58,8 +69,8 @@ class UniqueParamChecker {
   UniqueParamChecker(const char* const name) : name_(name) {}
 
   mobile_apis::Result::eType operator()(const std::string& param) {
-    if (!utils::InsertIntoSet(Djb2HashFromString(param), hash_set_)) {
-      error_msg_ = "Choise with " + name_ + " " + param + " already exists";
+    if (!InsertIntoDjb2HashSet(param, hash_set_)) {
+      error_msg_ = "Choice with " + name_ + " " + param + " already exists";
       return mobile_apis::Result::DUPLICATE_NAME;
     }
     if (!CommandRequestImpl::CheckSyntax(param)) {
@@ -76,7 +87,7 @@ class UniqueParamChecker {
 
  private:
   std::string error_msg_;
-  std::set<int32_t> hash_set_;
+  Djb2HashSet hash_set_;
   const std::string name_;
 };
 
@@ -171,7 +182,7 @@ mobile_apis::Result::eType CreateInteractionChoiceSetRequest::CheckChoiceSet() {
     const uint32_t choice_id = (*choice_set_it)[strings::choice_id].asUInt();
     if (!utils::InsertIntoSet(choice_id, choice_id_set)) {
       LOG4CXX_ERROR(logger_,
-                    "Choise with ID " << choice_id << " already exists");
+                    "Choice with ID " << choice_id << " already exists");
       return mobile_apis::Result::INVALID_ID;
     }
 
@@ -284,28 +295,52 @@ bool CreateInteractionChoiceSetRequest::IsWhiteSpaceExist(
   return false;
 }
 
-bool InsertVrCommands(const smart_objects::SmartObject& vr_commands,
-                      std::set<int32_t>& vr_commands_hash) {
+void InsertVrCommands(const smart_objects::SmartObject& vr_commands,
+                      Djb2HashSet& out_vr_commands_hash) {
   using smart_objects::SmartArray;
-  const smart_objects::SmartArray* vr_commands_array = vr_commands.asArray();
 
+  const smart_objects::SmartArray* vr_commands_array = vr_commands.asArray();
+  if (!vr_commands_array) {
+    return;
+  }
   SmartArray::const_iterator vr_it = vr_commands_array->begin();
   const SmartArray::const_iterator vr_end = vr_commands_array->end();
 
-  bool result = true;
   for (; vr_end != vr_it; ++vr_it) {
     const std::string vr_command = (*vr_it).asString();
-    result = utils::InsertIntoSet(utils::Djb2HashFromString(vr_command),
-                                  vr_commands_hash) &&
-             result;
+    InsertIntoDjb2HashSet(vr_command, out_vr_commands_hash);
   }
-  return result;
 }
 
-std::set<int32_t> CollectVRCommands(
+bool CheckVrCommands(const smart_objects::SmartArray& vr_commands_array,
+                     Djb2HashSet& out_vr_commands_hash) {
+  using smart_objects::SmartArray;
+
+  SmartArray::const_iterator vr_it = vr_commands_array.begin();
+  const SmartArray::const_iterator vr_end = vr_commands_array.end();
+
+  for (; vr_end != vr_it; ++vr_it) {
+    std::string vr_command = (*vr_it).asString();
+    if (!InsertIntoDjb2HashSet(vr_command, out_vr_commands_hash)) {
+      // If current VR command already have been added in a set,
+      // all of successfully added VR commands, before this one,
+      // from this VR commands list, should be removed from set.
+      const SmartArray::const_iterator vr_begin = vr_commands_array.begin();
+      for (; vr_begin != vr_it; --vr_it) {
+        vr_command = (*vr_it).asString();
+        out_vr_commands_hash.erase(
+            FindDataInDjb2HashSet(vr_command, out_vr_commands_hash));
+      }
+      return false;
+    }
+  }
+  return true;
+}
+
+Djb2HashSet CollectVRCommands(
     DataAccessor<application_manager::ChoiceSetMap> data_accessor) {
   using namespace application_manager;
-  std::set<int32_t> vr_commands_set;
+  Djb2HashSet vr_commands_set;
   const ChoiceSetMap& choice_set_map = data_accessor.GetData();
 
   ChoiceSetMap::const_iterator choice_set_it = choice_set_map.begin();
@@ -320,6 +355,8 @@ std::set<int32_t> CollectVRCommands(
 void CreateInteractionChoiceSetRequest::SendVRAddCommandRequests(
     application_manager::ApplicationSharedPtr const app) {
   using smart_objects::SmartObject;
+  using smart_objects::SmartArray;
+
   LOG4CXX_AUTO_TRACE(logger_);
 
   SmartObject& choice_set = (*message_)[strings::msg_params];
@@ -330,7 +367,7 @@ void CreateInteractionChoiceSetRequest::SendVRAddCommandRequests(
   const uint32_t choice_count = choice_set[strings::choice_set].length();
   SetAllowedToTerminate(false);
 
-  std::set<int32_t> vr_commands_hash(CollectVRCommands(app->choice_set_map()));
+  Djb2HashSet vr_commands_hash(CollectVRCommands(app->choice_set_map()));
 
   expected_chs_count_ = choice_count;
   size_t chs_num = 0;
@@ -345,9 +382,10 @@ void CreateInteractionChoiceSetRequest::SendVRAddCommandRequests(
     }
 
     const SmartObject& choice = choice_set[strings::choice_set][chs_num];
+    const SmartArray* vr_commands_array =
+        choice[strings::vr_commands].asArray();
 
-    if (!choice[strings::vr_commands].asArray() ||
-        choice[strings::vr_commands].empty()) {
+    if (!vr_commands_array || vr_commands_array->empty()) {
       --expected_chs_count_;
       LOG4CXX_DEBUG(logger_,
                     "Choice with cmd_id "
@@ -356,7 +394,7 @@ void CreateInteractionChoiceSetRequest::SendVRAddCommandRequests(
       continue;
     }
 
-    if (!InsertVrCommands(choice[strings::vr_commands], vr_commands_hash)) {
+    if (!CheckVrCommands(*vr_commands_array, vr_commands_hash)) {
       --expected_chs_count_;
       LOG4CXX_DEBUG(
           logger_,
