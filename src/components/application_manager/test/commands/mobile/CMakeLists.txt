@@ -51,6 +51,7 @@ set (SOURCES
   ${COMMANDS_TEST_SOURCE_DIR}/mobile/alert_request_test.cc
   ${COMMANDS_TEST_SOURCE_DIR}/mobile/add_sub_menu_request_test.cc
   ${COMMANDS_TEST_SOURCE_DIR}/mobile/delete_sub_menu_test.cc
+  ${COMMANDS_TEST_SOURCE_DIR}/mobile/delete_file_test.cc
   ${COMMANDS_TEST_SOURCE_DIR}/mobile/set_media_clock_timer_test.cc
   ${COMMANDS_TEST_SOURCE_DIR}/mobile/set_global_properties_test.cc
   ${COMMANDS_TEST_SOURCE_DIR}/mobile/set_app_icon_test.cc
@@ -59,6 +60,9 @@ set (SOURCES
   ${COMMANDS_TEST_SOURCE_DIR}/mobile/scrollable_message_test.cc
   ${COMMANDS_TEST_SOURCE_DIR}/mobile/perform_audio_pass_thru_test.cc
   ${COMMANDS_TEST_SOURCE_DIR}/mobile/end_audio_pass_thru_request_test.cc
+  ${COMMANDS_TEST_SOURCE_DIR}/mobile/list_files_request_test.cc
+  ${COMMANDS_TEST_SOURCE_DIR}/mobile/put_file_test.cc
+  ${COMMANDS_TEST_SOURCE_DIR}/mobile/subscribe_button_request_test.cc
 )
 
 set(LIBRARIES
