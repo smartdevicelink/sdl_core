@@ -128,7 +128,6 @@ TEST_F(DeleteFileRequestTest, Run_HMILevelNone_UNSUCCESS) {
   const uint32_t num = 0;
   EXPECT_CALL(app_mngr_settings_, delete_file_in_none())
       .WillOnce(ReturnRef(num));
-  // Do not trying delete file twice
   EXPECT_CALL(*mock_app_, delete_file_in_none_count()).WillOnce(Return(1));
 
   EXPECT_CALL(
