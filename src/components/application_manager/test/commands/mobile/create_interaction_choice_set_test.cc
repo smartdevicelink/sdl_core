@@ -106,6 +106,7 @@ class CreateInteractionChoiceSetRequestTest
       , message_(CreateMessage())
       , command_(CreateCommand<CreateInteractionChoiceSetRequest>(message_))
       , mock_app_(CreateMockApp()) {
+    (*message_)[strings::params][strings::connection_key] = kConnectionKey;
     ON_CALL(*mock_app_, choice_set_map())
         .WillByDefault(Return(
             DataAccessor<am::ChoiceSetMap>(dummy_choice_set_map_, lock_)));
@@ -123,24 +124,22 @@ class CreateInteractionChoiceSetRequestTest
   }
 
   void FillMessageFieldsItem1(MessageSharedPtr message) {
-    (*message)[am::strings::msg_params][am::strings::choice_set][0]
-              [am::strings::menu_name] = kMenuName0;
-    (*message)[am::strings::msg_params][am::strings::choice_set][0]
-              [am::strings::image][am::strings::value] = kImage;
-    (*message)[am::strings::msg_params][am::strings::choice_set][0]
-              [am::strings::choice_id] = kChoiceId0;
-    (*message)[am::strings::msg_params][am::strings::choice_set][0]
-              [am::strings::vr_commands][0] = kVrCommand0;
-    (*message)[am::strings::msg_params][am::strings::choice_set][0]
-              [am::strings::secondary_image][am::strings::value] = kSecondImage;
+    SmartObject& choice_set =
+        (*message)[am::strings::msg_params][am::strings::choice_set];
+    choice_set[0][am::strings::menu_name] = kMenuName0;
+    choice_set[0][am::strings::image][am::strings::value] = kImage;
+    choice_set[0][am::strings::choice_id] = kChoiceId0;
+    choice_set[0][am::strings::vr_commands][0] = kVrCommand0;
+    choice_set[0][am::strings::secondary_image][am::strings::value] =
+        kSecondImage;
   }
   void FillMessageFieldsItem2(MessageSharedPtr message) {
-    (*message)[am::strings::msg_params][am::strings::choice_set][1]
-              [am::strings::choice_id] = kChoiceId1;
-    (*message)[am::strings::msg_params][am::strings::choice_set][1]
-              [am::strings::menu_name] = kMenuName1;
-    (*message)[am::strings::msg_params][am::strings::choice_set][1]
-              [am::strings::vr_commands][0] = kVrCommand1;
+    SmartObject& choice_set =
+        (*message)[am::strings::msg_params][am::strings::choice_set];
+
+    choice_set[1][am::strings::choice_id] = kChoiceId1;
+    choice_set[1][am::strings::menu_name] = kMenuName1;
+    choice_set[1][am::strings::vr_commands][0] = kVrCommand1;
     (*message)[am::strings::msg_params]
               [am::strings::interaction_choice_set_id] = kChoiceSetId;
   }
@@ -173,16 +172,18 @@ class CreateInteractionChoiceSetRequestTest
 
 TEST_F(CreateInteractionChoiceSetRequestTest, OnTimeout_GENERIC_ERROR) {
   MessageSharedPtr msg_vr = CreateMessage(smart_objects::SmartType_Map);
+  (*msg_vr)[strings::params][strings::connection_key] = kConnectionKey;
   (*msg_vr)[strings::msg_params][strings::result_code] =
       am::mobile_api::Result::GENERIC_ERROR;
   (*msg_vr)[strings::msg_params][strings::success] = false;
 
   utils::SharedPtr<CreateInteractionChoiceSetRequest> req_vr =
-      CreateCommand<CreateInteractionChoiceSetRequest>();
+      CreateCommand<CreateInteractionChoiceSetRequest>(msg_vr);
 
-  EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(mock_app_));
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillOnce(Return(mock_app_));
   ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kConnectionKey));
-  ON_CALL(*mock_app_, get_grammar_id()).WillByDefault(Return(kConnectionKey));
+  ON_CALL(*mock_app_, get_grammar_id()).WillByDefault(Return(kGrammarId));
   ON_CALL(*mock_app_, RemoveCommand(_)).WillByDefault(Return());
 
   MessageSharedPtr vr_command_result;
@@ -268,12 +269,13 @@ TEST_F(CreateInteractionChoiceSetRequestTest, Run_InvalidApp_UNSUCCESS) {
 }
 
 TEST_F(CreateInteractionChoiceSetRequestTest, Run_VerifyImageFail_UNSUCCESS) {
-  (*message_)[am::strings::msg_params][am::strings::choice_set][0]
-             [am::strings::image] = kImage;
-  (*message_)[am::strings::msg_params][am::strings::choice_set][0]
-             [am::strings::secondary_image] = kSecondImage;
+  SmartObject& choice_set =
+      (*message_)[am::strings::msg_params][am::strings::choice_set];
+  choice_set[0][am::strings::image] = kImage;
+  choice_set[0][am::strings::secondary_image] = kSecondImage;
 
-  EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(mock_app_));
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillOnce(Return(mock_app_));
   EXPECT_CALL(*mock_message_helper_, VerifyImage(_, _, _))
       .WillRepeatedly(Return(mobile_apis::Result::INVALID_DATA));
   EXPECT_CALL(app_mngr_, GenerateGrammarID()).Times(0);
@@ -282,14 +284,16 @@ TEST_F(CreateInteractionChoiceSetRequestTest, Run_VerifyImageFail_UNSUCCESS) {
 }
 
 TEST_F(CreateInteractionChoiceSetRequestTest, Run_FindChoiceSetFail_UNSUCCESS) {
-  (*message_)[am::strings::msg_params][am::strings::choice_set][0]
-             [am::strings::image] = kImage;
-  (*message_)[am::strings::msg_params][am::strings::choice_set][0]
-             [am::strings::secondary_image] = kSecondImage;
+  SmartObject& choice_set =
+      (*message_)[am::strings::msg_params][am::strings::choice_set];
+
+  choice_set[0][am::strings::image] = kImage;
+  choice_set[0][am::strings::secondary_image] = kSecondImage;
   (*message_)[am::strings::msg_params][am::strings::interaction_choice_set_id] =
       kChoiceSetId;
 
-  EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(mock_app_));
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillOnce(Return(mock_app_));
   EXPECT_CALL(*mock_message_helper_, VerifyImage(_, _, _))
       .WillRepeatedly(Return(mobile_apis::Result::SUCCESS));
 
@@ -304,22 +308,21 @@ TEST_F(CreateInteractionChoiceSetRequestTest, Run_FindChoiceSetFail_UNSUCCESS) {
 
 TEST_F(CreateInteractionChoiceSetRequestTest,
        Run_CheckChoiceSet_InvalidChoiceId_UNSUCCESS) {
-  (*message_)[am::strings::msg_params][am::strings::choice_set][0]
-             [am::strings::menu_name] = kMenuName0;
-  (*message_)[am::strings::msg_params][am::strings::choice_set][0]
-             [am::strings::image][am::strings::value] = kImage;
-  (*message_)[am::strings::msg_params][am::strings::choice_set][0]
-             [am::strings::choice_id] = kChoiceId0;
-  (*message_)[am::strings::msg_params][am::strings::choice_set][0]
-             [am::strings::secondary_image][am::strings::value] = kSecondImage;
+  SmartObject& choice_set =
+      (*message_)[am::strings::msg_params][am::strings::choice_set];
+
+  choice_set[0][am::strings::menu_name] = kMenuName0;
+  choice_set[0][am::strings::image][am::strings::value] = kImage;
+  choice_set[0][am::strings::choice_id] = kChoiceId0;
+  choice_set[0][am::strings::secondary_image][am::strings::value] =
+      kSecondImage;
 
   FillMessageFieldsItem2(message_);
-  (*message_)[am::strings::msg_params][am::strings::choice_set][1]
-             [am::strings::vr_commands][0] = kVrCommand0;
-  (*message_)[am::strings::msg_params][am::strings::choice_set][1]
-             [am::strings::vr_commands][1] = " kVrCommand1\t";
+  choice_set[1][am::strings::vr_commands][0] = kVrCommand0;
+  choice_set[1][am::strings::vr_commands][1] = " kVrCommand1\t";
 
-  EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(mock_app_));
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillOnce(Return(mock_app_));
 
   EXPECT_CALL(*mock_message_helper_, VerifyImage(_, _, _))
       .WillRepeatedly(Return(mobile_apis::Result::SUCCESS));
@@ -334,21 +337,17 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
 
 TEST_F(CreateInteractionChoiceSetRequestTest,
        Run_IsWhiteSpaceVRCommandsExist_InvalidMenuName_UNSUCCESS) {
-  (*message_)[am::strings::msg_params][am::strings::choice_set][0]
-             [am::strings::menu_name] = "menu_name\t";
-  (*message_)[am::strings::msg_params][am::strings::choice_set][0]
-             [am::strings::secondary_text] = "secondary_text\t";
-  (*message_)[am::strings::msg_params][am::strings::choice_set][0]
-             [am::strings::tertiary_text] = "tertiary_text\t";
-  (*message_)[am::strings::msg_params][am::strings::choice_set][0]
-             [am::strings::image][am::strings::value] = "image\t";
-  (*message_)[am::strings::msg_params][am::strings::choice_set][0]
-             [am::strings::choice_id] = kChoiceId0;
-  (*message_)[am::strings::msg_params][am::strings::choice_set][0]
-             [am::strings::secondary_image][am::strings::value] =
-                 "second_image\t";
-  (*message_)[am::strings::msg_params][am::strings::choice_set][0]
-             [am::strings::vr_commands][0] = "vr_commands_1\t";
+  SmartObject& choice_set =
+      (*message_)[am::strings::msg_params][am::strings::choice_set];
+
+  choice_set[0][am::strings::menu_name] = "menu_name\t";
+  choice_set[0][am::strings::secondary_text] = "secondary_text\t";
+  choice_set[0][am::strings::tertiary_text] = "tertiary_text\t";
+  choice_set[0][am::strings::image][am::strings::value] = "image\t";
+  choice_set[0][am::strings::choice_id] = kChoiceId0;
+  choice_set[0][am::strings::secondary_image][am::strings::value] =
+      "second_image\t";
+  choice_set[0][am::strings::vr_commands][0] = "vr_commands_1\t";
 
   (*message_)[am::strings::msg_params][am::strings::interaction_choice_set_id] =
       kChoiceSetId;
@@ -361,58 +360,47 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
   EXPECT_CALL(*mock_message_helper_, VerifyImage(_, _, _))
       .WillRepeatedly(Return(mobile_apis::Result::SUCCESS));
 
-  if ((*message_)[am::strings::msg_params][am::strings::choice_set][0]
-          .keyExists(am::strings::menu_name)) {
+  if (choice_set[0].keyExists(am::strings::menu_name)) {
     CreateInteractionChoiceSetRequestPtr command(
         CreateCommand<CreateInteractionChoiceSetRequest>(message_));
 
     EXPECT_CALL(app_mngr_, GenerateGrammarID()).Times(0);
     command->Run();
   }
-  if ((*message_)[am::strings::msg_params][am::strings::choice_set][0]
-          .keyExists(am::strings::secondary_text)) {
-    (*message_)[am::strings::msg_params][am::strings::choice_set][0]
-               [am::strings::menu_name] = kMenuName0;
+  if (choice_set[0].keyExists(am::strings::secondary_text)) {
+    choice_set[0][am::strings::menu_name] = kMenuName0;
     CreateInteractionChoiceSetRequestPtr command(
         CreateCommand<CreateInteractionChoiceSetRequest>(message_));
 
     EXPECT_CALL(app_mngr_, GenerateGrammarID()).Times(0);
     command->Run();
   }
-  if ((*message_)[am::strings::msg_params][am::strings::choice_set][0]
-          .keyExists(am::strings::tertiary_text)) {
-    (*message_)[am::strings::msg_params][am::strings::choice_set][0]
-               [am::strings::secondary_text] = "secondary_text";
+  if (choice_set[0].keyExists(am::strings::tertiary_text)) {
+    choice_set[0][am::strings::secondary_text] = "secondary_text";
     CreateInteractionChoiceSetRequestPtr command(
         CreateCommand<CreateInteractionChoiceSetRequest>(message_));
 
     EXPECT_CALL(app_mngr_, GenerateGrammarID()).Times(0);
     command->Run();
   }
-  if ((*message_)[am::strings::msg_params][am::strings::choice_set][0]
-          .keyExists(am::strings::vr_commands)) {
-    (*message_)[am::strings::msg_params][am::strings::choice_set][0]
-               [am::strings::tertiary_text] = "tertiary_text";
+  if (choice_set[0].keyExists(am::strings::vr_commands)) {
+    choice_set[0][am::strings::tertiary_text] = "tertiary_text";
     CreateInteractionChoiceSetRequestPtr command(
         CreateCommand<CreateInteractionChoiceSetRequest>(message_));
 
     EXPECT_CALL(app_mngr_, GenerateGrammarID()).Times(0);
     command->Run();
   }
-  if ((*message_)[am::strings::msg_params][am::strings::choice_set][0]
-          .keyExists(am::strings::image)) {
-    (*message_)[am::strings::msg_params][am::strings::choice_set][0]
-               [am::strings::vr_commands][0] = "vr_commands";
+  if (choice_set[0].keyExists(am::strings::image)) {
+    choice_set[0][am::strings::vr_commands][0] = "vr_commands";
     CreateInteractionChoiceSetRequestPtr command(
         CreateCommand<CreateInteractionChoiceSetRequest>(message_));
 
     EXPECT_CALL(app_mngr_, GenerateGrammarID()).Times(0);
     command->Run();
   }
-  if ((*message_)[am::strings::msg_params][am::strings::choice_set][0]
-          .keyExists(am::strings::secondary_image)) {
-    (*message_)[am::strings::msg_params][am::strings::choice_set][0]
-               [am::strings::image][am::strings::value] = kImage;
+  if (choice_set[0].keyExists(am::strings::secondary_image)) {
+    choice_set[0][am::strings::image][am::strings::value] = kImage;
     CreateInteractionChoiceSetRequestPtr command(
         CreateCommand<CreateInteractionChoiceSetRequest>(message_));
 
@@ -425,7 +413,8 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
        Run_ValidAmountVrCommands_SUCCESS) {
   FillMessageFieldsItem1(message_);
   FillMessageFieldsItem2(message_);
-  EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(mock_app_));
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillOnce(Return(mock_app_));
 
   EXPECT_CALL(*mock_message_helper_, VerifyImage(_, _, _))
       .WillRepeatedly(Return(mobile_apis::Result::SUCCESS));
@@ -445,23 +434,22 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
 
 TEST_F(CreateInteractionChoiceSetRequestTest,
        Run_EmptyAmountVrCommands_SUCCESS) {
-  (*message_)[am::strings::msg_params][am::strings::choice_set][0]
-             [am::strings::menu_name] = kMenuName0;
-  (*message_)[am::strings::msg_params][am::strings::choice_set][0]
-             [am::strings::image][am::strings::value] = kImage;
-  (*message_)[am::strings::msg_params][am::strings::choice_set][0]
-             [am::strings::choice_id] = kChoiceId0;
-  (*message_)[am::strings::msg_params][am::strings::choice_set][0]
-             [am::strings::secondary_image][am::strings::value] = kSecondImage;
+  SmartObject& choice_set =
+      (*message_)[am::strings::msg_params][am::strings::choice_set];
 
-  (*message_)[am::strings::msg_params][am::strings::choice_set][1]
-             [am::strings::choice_id] = kChoiceId1;
-  (*message_)[am::strings::msg_params][am::strings::choice_set][1]
-             [am::strings::menu_name] = kMenuName1;
+  choice_set[0][am::strings::menu_name] = kMenuName0;
+  choice_set[0][am::strings::image][am::strings::value] = kImage;
+  choice_set[0][am::strings::choice_id] = kChoiceId0;
+  choice_set[0][am::strings::secondary_image][am::strings::value] =
+      kSecondImage;
+
+  choice_set[1][am::strings::choice_id] = kChoiceId1;
+  choice_set[1][am::strings::menu_name] = kMenuName1;
   (*message_)[am::strings::msg_params][am::strings::interaction_choice_set_id] =
       kChoiceSetId;
 
-  EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(mock_app_));
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillOnce(Return(mock_app_));
 
   EXPECT_CALL(*mock_message_helper_, VerifyImage(_, _, _))
       .WillRepeatedly(Return(mobile_apis::Result::SUCCESS));
@@ -493,7 +481,8 @@ TEST_F(CreateInteractionChoiceSetRequestTest, OnEvent_ValidVrNoError_SUCCESS) {
   FillMessageFieldsItem1(message_);
   FillMessageFieldsItem2(message_);
 
-  EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(mock_app_));
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillOnce(Return(mock_app_));
 
   EXPECT_CALL(*mock_message_helper_, VerifyImage(_, _, _))
       .WillRepeatedly(Return(mobile_apis::Result::SUCCESS));
@@ -526,7 +515,8 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
 
   FillMessageFieldsItem1(message_);
   FillMessageFieldsItem2(message_);
-  EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(mock_app_));
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillOnce(Return(mock_app_));
 
   EXPECT_CALL(*mock_message_helper_, VerifyImage(_, _, _))
       .WillRepeatedly(Return(mobile_apis::Result::SUCCESS));
@@ -585,7 +575,8 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
 
 TEST_F(CreateInteractionChoiceSetRequestTest,
        OnTimeOut_InvalidErrorFromHMI_UNSUCCESS) {
-  EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(mock_app_));
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillOnce(Return(mock_app_));
 
   EXPECT_CALL(app_mngr_,
               ManageMobileCommand(
