@@ -74,7 +74,19 @@ class SetDisplayLayoutRequestTest
  public:
   SetDisplayLayoutRequestTest()
       : mock_message_helper_(*MockMessageHelper::message_helper_mock())
-      , mock_app_(CreateMockApp()) {}
+      , mock_app_(CreateMockApp()) {
+    Mock::VerifyAndClearExpectations(&mock_message_helper_);
+
+    ON_CALL(app_mngr_, application(kConnectionKey))
+        .WillByDefault(Return(mock_app_));
+    ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kConnectionKey));
+    ON_CALL(app_mngr_, hmi_interfaces())
+        .WillByDefault(ReturnRef(hmi_interfaces_));
+  }
+
+  ~SetDisplayLayoutRequestTest() {
+    Mock::VerifyAndClearExpectations(&mock_message_helper_);
+  }
 
   MessageSharedPtr CreateFullParamsUISO() {
     MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
@@ -94,18 +106,6 @@ class SetDisplayLayoutRequestTest
     (*msg)[am::strings::msg_params] = msg_params;
 
     return msg;
-  }
-
-  void SetUp() OVERRIDE {
-    ON_CALL(app_mngr_, application(kConnectionKey))
-        .WillByDefault(Return(mock_app_));
-    ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kConnectionKey));
-    ON_CALL(app_mngr_, hmi_interfaces())
-        .WillByDefault(ReturnRef(hmi_interfaces_));
-  }
-
-  void TearDown() OVERRIDE {
-    Mock::VerifyAndClearExpectations(&mock_message_helper_);
   }
   typedef TypeIf<kMocksAreNice,
                  NiceMock<application_manager_test::MockHMICapabilities>,
