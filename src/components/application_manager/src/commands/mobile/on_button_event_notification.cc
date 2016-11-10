@@ -56,8 +56,7 @@ void OnButtonEventNotification::Run() {
 
   const bool is_app_id_exists =
       (*message_)[strings::msg_params].keyExists(strings::app_id);
-  const ApplicationSharedPtr app = application_manager_.application(
-      (*message_)[strings::msg_params][strings::app_id].asUInt());
+  ApplicationSharedPtr app;
 
   // CUSTOM_BUTTON notification
   if (static_cast<uint32_t>(mobile_apis::ButtonName::CUSTOM_BUTTON) == btn_id) {
@@ -66,6 +65,9 @@ void OnButtonEventNotification::Run() {
       LOG4CXX_ERROR(logger_, "CUSTOM_BUTTON OnButtonEvent without app_id.");
       return;
     }
+
+    app = application_manager_.application(
+        (*message_)[strings::msg_params][strings::app_id].asUInt());
 
     // custom_button_id is mandatory for CUSTOM_BUTTON notification
     if (false ==
