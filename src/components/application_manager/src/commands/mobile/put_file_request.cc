@@ -108,8 +108,20 @@ void PutFileRequest::Run() {
                  &response_params);
     return;
   }
+
   sync_file_name_ =
       (*message_)[strings::msg_params][strings::sync_file_name].asString();
+
+  const std::size_t backslash_index = sync_file_name_.find('\\');
+  if (backslash_index != std::string::npos) {
+    LOG4CXX_ERROR(logger_, "File name contains backslash");
+    SendResponse(false,
+                 mobile_apis::Result::INVALID_DATA,
+                 "File name contains backslash",
+                 &response_params);
+    return;
+  }
+
   file_type_ = static_cast<mobile_apis::FileType::eType>(
       (*message_)[strings::msg_params][strings::file_type].asInt());
   const std::vector<uint8_t> binary_data =
@@ -175,6 +187,7 @@ void PutFileRequest::Run() {
                  &response_params);
     return;
   }
+
   const std::string full_path = file_path + "/" + sync_file_name_;
   UNUSED(full_path);
   LOG4CXX_DEBUG(logger_,
