@@ -891,26 +891,6 @@ void PerformInteractionRequest::SendBothModeResponse(
                response_params);
 }
 
-#if BUILD_TESTS
-bool PerformInteractionRequest::CallCheckMethod(CheckMethod method) {
-  ApplicationSharedPtr app = application_manager_.application(connection_key());
-  switch (method) {
-    case CheckMethod::kCheckVrSynonyms: {
-      return ProcessChoiceSet(app, VRSynonymsChecker());
-    }
-    case CheckMethod::kCheckMenuNames: {
-      return ProcessChoiceSet(app, MenuNamesChecker());
-    }
-    case CheckMethod::kCheckVrHelpItem: {
-      return CheckVrHelpItemPositions(app);
-    }
-    default:
-      break;
-  }
-  return false;
-}
-#endif
-
 }  // namespace commands
 
 }  // namespace application_manager

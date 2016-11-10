@@ -146,15 +146,15 @@ class PerformInteractionRequest : public CommandRequestImpl {
    * @brief Checks incoming choice set by checker.
    *
    * @param app shared pointer to Application
-   * @param checker a functor which checks choises;
+   * @param checker a functor which checks choices;
    *
    * return Return TRUE if checker returned TRUE
    * for each choice in a choice set form the list,
    * otherwise FALSE
    */
-  template <typename FunctorT>
+  template <typename CheckerT>
   bool ProcessChoiceSet(const application_manager::ApplicationSharedPtr app,
-                        FunctorT checker);
+                        CheckerT checker);
 
   /*
    * @brief Checks if request with non-sequential positions of vrHelpItems
@@ -238,19 +238,19 @@ class PerformInteractionRequest : public CommandRequestImpl {
   DISALLOW_COPY_AND_ASSIGN(PerformInteractionRequest);
 };
 
-template <typename FunctorT>
+template <typename CheckerT>
 bool PerformInteractionRequest::ProcessChoiceSet(
-    const application_manager::ApplicationSharedPtr app, FunctorT checker) {
+    const application_manager::ApplicationSharedPtr app, CheckerT checker) {
   LOG4CXX_AUTO_TRACE(logger_);
   using smart_objects::SmartObject;
   using smart_objects::SmartArray;
-  SmartObject& choice_set_list =
+  SmartObject& choice_set_id_list =
       (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];
 
-  for (size_t choice_set_i = 0; choice_set_i < choice_set_list.length();
+  for (size_t choice_set_i = 0; choice_set_i < choice_set_id_list.length();
        ++choice_set_i) {
     const SmartObject* const choice_set_ptr =
-        app->FindChoiceSet(choice_set_list[choice_set_i].asInt());
+        app->FindChoiceSet(choice_set_id_list[choice_set_i].asInt());
     if (!choice_set_ptr) {
       LOG4CXX_ERROR(logger_, "Invalid choice set ID");
       SendResponse(false, mobile_apis::Result::INVALID_ID);
