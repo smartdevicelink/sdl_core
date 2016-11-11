@@ -51,6 +51,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace read_did_request {
 
 using ::testing::_;
 using ::testing::DoAll;
@@ -153,6 +154,7 @@ TEST_F(ReadDIDRequestTest, Run_SUCCESS) {
                     .asInt()));
 }
 
+}  // namespace read_did_request
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

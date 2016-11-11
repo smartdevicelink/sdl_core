@@ -36,6 +36,7 @@
 #include "application_manager/hmi_capabilities.h"
 #include "utils/helpers.h"
 #include "resumption/last_state.h"
+#include "smart_objects/smart_object.h"
 
 static const std::string LanguagesKey = "Languages";
 static const std::string UIKey = "UI";
@@ -150,7 +151,7 @@ void HMILanguageHandler::on_event(const event_engine::Event& event) {
 }
 
 void HMILanguageHandler::set_handle_response_for(
-    const event_engine::smart_objects::SmartObject& request) {
+    const smart_objects::SmartObject& request) {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace helpers;
   if (!request.keyExists(strings::params)) {

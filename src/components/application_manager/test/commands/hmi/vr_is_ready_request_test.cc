@@ -48,6 +48,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
+namespace vr_is_ready_request {
 
 using ::testing::_;
 using ::testing::ReturnRef;
@@ -187,7 +188,8 @@ TEST_F(VRIsReadyRequestTest, Run_HMIDoestRespond_SendMessageToHMIByTimeout) {
   command_->onTimeOut();
 }
 
-}  // namespace mobile_commands_test
+}  // namespace vr_is_ready_request
+}  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components
 }  // namespace test

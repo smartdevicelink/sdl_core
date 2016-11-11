@@ -47,6 +47,7 @@
 namespace test {
 namespace components {
 namespace commands_test {
+namespace mobile_commands_test {
 namespace perform_audio_pass_thru_request {
 
 namespace am = application_manager;
@@ -205,6 +206,7 @@ TEST_F(PerformAudioPassThruRequestTest,
 }
 
 }  // namespace perform_audio_pass_thru_request
+}  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components
 }  // namespace tests

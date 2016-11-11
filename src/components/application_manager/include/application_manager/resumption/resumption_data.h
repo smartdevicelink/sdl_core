@@ -43,7 +43,6 @@ class ApplicationManagerSettings;
 
 namespace resumption {
 
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 namespace app_mngr = application_manager;
 
 /**

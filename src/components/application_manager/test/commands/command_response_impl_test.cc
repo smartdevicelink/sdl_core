@@ -45,6 +45,7 @@
 namespace test {
 namespace components {
 namespace commands_test {
+namespace command_response_impl {
 
 namespace strings = ::application_manager::strings;
 namespace hmi_response = ::application_manager::hmi_response;
@@ -179,6 +180,7 @@ TEST_F(CommandResponseImplTest,
             (*msg)[strings::msg_params][strings::result_code].asInt());
 }
 
+}  // namespace command_response_impl
 }  // namespace commands_test
 }  // namespace components
 }  // namespace test

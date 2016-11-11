@@ -40,8 +40,6 @@
 
 namespace hmi_message_handler {
 
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
-
 /**
  * \brief adapter for DBus
  */

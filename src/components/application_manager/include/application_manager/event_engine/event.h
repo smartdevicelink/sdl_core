@@ -43,8 +43,6 @@ namespace event_engine {
 
 class EventDispatcher;
 
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
-
 class Event {
  public:
   // Typedef for possible Event ID's from mobile_apis functionID enum

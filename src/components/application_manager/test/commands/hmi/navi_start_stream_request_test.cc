@@ -47,6 +47,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
+namespace navi_start_stream_request {
 
 using ::testing::_;
 using ::testing::ReturnRef;
@@ -115,6 +116,7 @@ TEST_F(NaviStartStreamRequestTest, Run_HmiInterfaceAvailable_SentRequest) {
   command_->Run();
 }
 
+}  // namespace navi_start_stream_request
 }  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components

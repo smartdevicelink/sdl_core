@@ -50,6 +50,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace unsubscribe_way_points_request {
 
 namespace am = ::application_manager;
 namespace mobile_result = mobile_apis::Result;
@@ -163,6 +164,7 @@ TEST_F(UnSubscribeWayPointsRequestTest,
   command_->on_event(event);
 }
 
+}  // namespace unsubscribe_way_points_request
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components
