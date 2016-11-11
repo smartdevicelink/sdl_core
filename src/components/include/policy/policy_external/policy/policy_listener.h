@@ -174,6 +174,14 @@ class PolicyListener {
                                  const std::string& hmi_level,
                                  const std::string& device_rank) = 0;
 #endif  // SDL_REMOTE_CONTROL
+
+    virtual KnownConsentsIds GetRegisteredApps() const = 0;
+  /**
+ * @brief Collects currently registered applications ids linked to their
+ * device id
+ * @return Collection of device_id-to-app_id links
+ */
+  virtual ApplicationsLinks GetRegisteredLinks() const = 0;
 };
 }  //  namespace policy
 #endif  // SRC_COMPONENTS_INCLUDE_POLICY_POLICY_LISTENER_H_

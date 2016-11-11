@@ -38,6 +38,7 @@
 #include <vector>
 #include <map>
 #include <set>
+#include <utility>
 #include "utils/shared_ptr.h"
 #include "utils/helpers.h"
 namespace policy {
@@ -384,6 +385,8 @@ struct RetrySequenceURL {
  * from the Endpoints vector
  */
 typedef std::pair<uint32_t, uint32_t> AppIdURL;
+
+enum EntityStatus { kStatusOn, kStatusOff };
 
 /**
  * @brief The ExternalConsentStatusItem struct represents external user consent

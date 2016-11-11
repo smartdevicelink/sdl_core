@@ -36,6 +36,9 @@
 #include <functional>
 #include <ctime>
 #include <cmath>
+#include <utility>
+#include <string>
+#include <vector>
 
 #include "utils/file_system.h"
 #include "json/reader.h"
@@ -52,6 +55,144 @@
 #include "policy/sql_pt_ext_representation.h"
 
 namespace policy_table = rpc::policy_table_interface_base;
+
+namespace {
+
+/**
+ * @brief Looks for CCS entity in the list of entities
+ * @param entities CCS entities list
+ * @param entity Entity to look for
+ * @return True if found in the list, otherwise - false
+ */
+bool IsEntityExists(const policy_table::DisallowedByCCSEntities& entities,
+                    const policy_table::CCS_Entity& entity) {
+  const policy_table::DisallowedByCCSEntities::const_iterator it_entity =
+      std::find(entities.begin(), entities.end(), entity);
+
+  return entities.end() != it_entity;
+}
+
+/**
+ * @brief Looks for CCS entity in disallowed_by_ccs_entities_on/off sections
+ * of each functional group
+ */
+struct GroupByEntityFinder
+    : public std::unary_function<
+          void,
+          const policy_table::FunctionalGroupings::value_type&> {
+  GroupByEntityFinder(const policy::CCSStatusItem& ccs_item,
+                      policy::GroupsByCCSStatus& out_groups_by_ccs)
+      : ccs_item_(ccs_item), out_groups_by_ccs_(out_groups_by_ccs) {}
+
+  void operator()(
+      const policy_table::FunctionalGroupings::value_type& group) const {
+    if (!group.second.user_consent_prompt.is_initialized()) {
+      return;
+    }
+
+    policy_table::CCS_Entity entity(ccs_item_.entity_type_,
+                                    ccs_item_.entity_id_);
+    const std::string group_name = group.first;
+
+    if (IsEntityExists(*group.second.disallowed_by_ccs_entities_on, entity)) {
+      const bool disallowed_by_ccs_entities_on_marker = true;
+      out_groups_by_ccs_[ccs_item_].push_back(
+          std::make_pair(group_name, disallowed_by_ccs_entities_on_marker));
+    }
+
+    if (IsEntityExists(*group.second.disallowed_by_ccs_entities_off, entity)) {
+      const bool disallowed_by_ccs_entities_off_marker = false;
+      out_groups_by_ccs_[ccs_item_].push_back(
+          std::make_pair(group_name, disallowed_by_ccs_entities_off_marker));
+    }
+  }
+
+ private:
+  const policy::CCSStatusItem& ccs_item_;
+  policy::GroupsByCCSStatus& out_groups_by_ccs_;
+};
+
+/**
+ * @brief Maps CCS status item to the list of functional groups names specifying
+ * container where item is found. If item is not found it won't be added.
+ */
+struct GroupByCCSItemFinder
+    : public std::unary_function<void, const policy::CCSStatus::value_type&> {
+  GroupByCCSItemFinder(const policy_table::FunctionalGroupings& groups,
+                       policy::GroupsByCCSStatus& out_groups_by_ccs)
+      : groups_(groups), out_groups_by_css_(out_groups_by_ccs) {}
+
+  void operator()(const policy::CCSStatus::value_type& ccs_item) const {
+    GroupByEntityFinder group_finder(ccs_item, out_groups_by_css_);
+    std::for_each(groups_.begin(), groups_.end(), group_finder);
+  }
+
+ private:
+  const policy_table::FunctionalGroupings& groups_;
+  policy::GroupsByCCSStatus& out_groups_by_css_;
+};
+
+/**
+ * @brief Template for getting 'first' of std::pair to use with standard
+ * algorithm below
+ */
+template <typename T1, typename T2>
+const T1& pair_first(const std::pair<T1, T2>& item) {
+  return item.first;
+}
+
+/**
+ * @brief Collects known links device-to-application form
+ * device_data/user_consent_records is any record is present
+ */
+struct LinkCollector
+    : public std::unary_function<void,
+                                 const policy_table::DeviceData::value_type&> {
+  typedef std::vector<policy_table::UserConsentRecords::key_type>
+      ApplicationsIds;
+
+  LinkCollector(policy::ApplicationsLinks& links) : links_(links) {}
+
+  void operator()(const policy_table::DeviceData::value_type& value) {
+    using namespace policy_table;
+
+    device_id_ = value.first;
+
+    ApplicationsIds applications_ids;
+    std::transform(value.second.user_consent_records->begin(),
+                   value.second.user_consent_records->end(),
+                   std::back_inserter(applications_ids),
+                   &pair_first<UserConsentRecords::key_type,
+                               UserConsentRecords::mapped_type>);
+
+    std::for_each(applications_ids.begin(),
+                  applications_ids.end(),
+                  std::bind1st(std::mem_fun(&LinkCollector::FillLinks), this));
+  }
+
+ private:
+  void FillLinks(const ApplicationsIds::value_type app_id) const {
+    links_.insert(std::make_pair(device_id_, app_id));
+  }
+
+  std::string device_id_;
+  policy::ApplicationsLinks& links_;
+};
+
+/**
+ * @brief Returns group consent record constructed from input group permissions
+ */
+struct CCSConsentGroupAppender
+    : public std::unary_function<policy_table::ConsentGroups,
+                                 const policy::FunctionalGroupPermission&> {
+  policy_table::ConsentGroups::value_type operator()(
+      const policy::FunctionalGroupPermission& value) const {
+    return std::make_pair(value.group_name,
+                          rpc::Boolean(value.state == policy::kGroupAllowed));
+  }
+};
+
+}  // namespace
 
 namespace policy {
 
@@ -2171,7 +2312,7 @@ void CacheManager::SetDecryptedCertificate(const std::string& certificate) {
   Backup();
 }
 
-bool CacheManager::SaveExternalConsentStatus(
+bool CacheManager::SetExternalConsentStatus(
     const ExternalConsentStatus& status) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock auto_lock(cache_lock_);

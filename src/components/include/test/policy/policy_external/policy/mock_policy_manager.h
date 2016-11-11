@@ -239,7 +239,7 @@ class MockPolicyManager : public PolicyManager {
   MOCK_CONST_METHOD2(RetrySequenceUrl,
                      AppIdURL(const struct RetrySequenceURL&,
                               const EndpointUrls& urls));
-  MOCK_METHOD1(SaveExternalConsentStatus, bool(const ExternalConsentStatus&));
+  MOCK_METHOD1(SetExternalConsentStatus, bool(const ExternalConsentStatus&));
   MOCK_METHOD0(GetExternalConsentStatus, ExternalConsentStatus());
 };
 }  // namespace policy_manager_test

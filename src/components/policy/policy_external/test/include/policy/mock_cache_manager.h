@@ -237,6 +237,14 @@ class MockCacheManagerInterface : public ::policy::CacheManagerInterface {
   MOCK_METHOD1(GetHMITypes,
                const policy_table::AppHMITypes*(const std::string& app_id));
   MOCK_METHOD1(GetGroups, const policy_table::Strings&(const PTString& app_id));
+
+  MOCK_METHOD1(SetCCSStatus, bool(const CCSStatus&));
+
+  MOCK_METHOD0(GetCCSStatus, CCSStatus());
+  MOCK_METHOD1(GetGroupsWithSameEntities, GroupsByCCSStatus(const CCSStatus&));
+  MOCK_METHOD0(GetKnownLinksFromPT, ApplicationsLinks());
+  MOCK_METHOD1(SetCCSConsentsForApp, void(const PermissionConsent&));
+  MOCK_METHOD1(UpdateUserConsentsWithCCS, void(const CCSStatus&));
 };
 
 }  // namespace policy_test

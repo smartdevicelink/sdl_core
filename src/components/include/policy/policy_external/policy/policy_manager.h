@@ -665,7 +665,7 @@ class PolicyManager : public usage_statistics::StatisticsManager {
    * @param status external consent status
    * @return true if succeeded, otherwise - false
    */
-  virtual bool SaveExternalConsentStatus(
+  virtual bool SetExternalConsentStatus(
       const ExternalConsentStatus& status) = 0;
 
   /**

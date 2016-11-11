@@ -1824,7 +1824,7 @@ bool SQLPTExtRepresentation::SetVINValue(const std::string& value) {
   return result;
 }
 
-bool SQLPTExtRepresentation::SaveExternalConsentStatus(
+bool SQLPTExtRepresentation::SetExternalConsentStatus(
     const ExternalConsentStatus& status) const {
   LOG4CXX_AUTO_TRACE(logger_);
   utils::dbms::SQLQuery query(db());

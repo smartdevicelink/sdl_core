@@ -127,6 +127,32 @@ struct GroupsAppender
   int32_t index_;
 };
 
+struct GroupsAppender
+    : std::unary_function<void, const PermissionsList::value_type&> {
+  GroupsAppender(smart_objects::SmartObject& groups)
+      : groups_(groups), index_(0) {}
+
+  void operator()(const PermissionsList::value_type& item) {
+    using namespace smart_objects;
+    using namespace policy;
+    groups_[index_] = SmartObject(SmartType_Map);
+
+    SmartObject& group = groups_[index_];
+    group[strings::name] = item.group_alias;
+    group[strings::id] = item.group_id;
+    GroupConsent permission_state = item.state;
+    // If state undefined, 'allowed' parameter should be absent
+    if (kGroupUndefined != permission_state) {
+      group["allowed"] = kGroupAllowed == permission_state;
+    }
+    ++index_;
+  }
+
+ private:
+  smart_objects::SmartObject& groups_;
+  int32_t index_;
+};
+
 #ifdef EXTERNAL_PROPRIETARY_MODE
 struct ExternalConsentStatusAppender
     : std::unary_function<void,
@@ -156,7 +182,7 @@ struct ExternalConsentStatusAppender
 };
 #endif  // EXTERNAL_PROPRIETARY_MODE
 
-}  // namespace
+} // namespace
 
 std::pair<std::string, VehicleDataType> kVehicleDataInitializer[] = {
     std::make_pair(strings::gps, VehicleDataType::GPS),
