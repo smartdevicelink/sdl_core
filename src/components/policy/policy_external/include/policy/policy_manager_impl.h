@@ -211,21 +211,40 @@ class PolicyManagerImpl : public PolicyManager {
   AppIdURL RetrySequenceUrl(const struct RetrySequenceURL& rs,
                             const EndpointUrls& urls) const OVERRIDE;
 
+  bool SetExternalConsentStatus(const ExternalConsentStatus& status) OVERRIDE;
+  ExternalConsentStatus GetExternalConsentStatus() OVERRIDE;
+
  protected:
   virtual utils::SharedPtr<policy_table::Table> Parse(
       const BinaryMessage& pt_content);
 
  private:
   void CheckTriggers();
-  /*
-   * @brief Checks policy table update along with current data for any changes
-   * in assigned functional group list of application
-   *
-   * @param Policy table update struct
+
+  /**
+   * @brief Compares current applications policies to the updated one and
+   * returns apporopriate result codes per application, which that are being
+   * processed by sending notification to applications registered and to the
+   * system
+   * @param update Shared pointer to policy table udpate
+   * @param snapshot Shared pointer to current copy of policy table
+   * @return Collection per-application results
    */
-  void CheckPermissionsChanges(
+  CheckAppPolicyResults CheckPermissionsChanges(
       const utils::SharedPtr<policy_table::Table> update,
       const utils::SharedPtr<policy_table::Table> snapshot);
+
+  /**
+   * @brief Processes results from policy table update analysis done by
+   * CheckPermissionsChanges() by sending OnPermissionChange and
+   * OnAppPermissionChanged notifications
+   * @param results Collection of per-application results
+   * @param app_policies Reference to updated application policies section as
+   * a data source for generating notifications data
+   */
+  void ProcessAppPolicyCheckResults(
+      const CheckAppPolicyResults& results,
+      const policy_table::ApplicationPolicies& app_policies);
 
   /**
    * @brief Fill structure to be sent with OnPermissionsChanged notification
@@ -394,8 +413,82 @@ class PolicyManagerImpl : public PolicyManager {
       GroupsNames& out_allowed_groups,
       GroupsNames& out_disallowed_groups) const;
 
-  bool SetExternalConsentStatus(const ExternalConsentStatus& status) OVERRIDE;
-  ExternalConsentStatus GetExternalConsentStatus() OVERRIDE;
+  /**
+   * @brief Notify application about its permissions changes by preparing and
+   * sending OnPermissionsChanged notification
+   * @param policy_app_id Application id to send notification to
+   * @param app_group_permissons Current permissions for groups assigned to
+   * application
+   */
+  void NotifyPermissionsChanges(
+      const std::string& policy_app_id,
+      const std::vector<FunctionalGroupPermission>& app_group_permissions);
+
+  /**
+   * @brief Processes updated CCS status received via OnAppPermissionConsent
+   * notification by updating user consents and CCS consents for registered and
+   * known before by policy table (must have any user consent records)
+   * @param groups_by_status Collection of CCS entities with their statuses
+   */
+  void ProcessCCSStatusUpdate(const GroupsByCCSStatus& groups_by_status);
+
+  /**
+   * @brief Processes CCS status for application registered afterward, so its
+   * user consents (if any) and CCS consents (if any) will be updated
+   * appropiately to current CCS status stored by policy table
+   * @param application_id Application id
+   */
+  void ProcessCCSStatusForApp(const std::string& application_id);
+  /**
+   * @brief Directly updates user consent and CCS consents (if any) for
+   * application if it has assigned any of group from allowed or disallowed
+   * lists
+   * @param device_id Device id which is linked to application id
+   * @param application_id Application id
+   * @param allowed_groups List of group names allowed by current CCS status
+   * @param disallowed_groups List of group names disallwed by current CCS
+   * status
+   */
+  void UpdateAppConsentWithCCS(const std::string& device_id,
+                               const std::string& application_id,
+                               const GroupsNames& allowed_groups,
+                               const GroupsNames& disallowed_groups);
+
+  typedef policy_table::ApplicationPolicies::value_type AppPoliciesValueType;
+
+  /**
+   * @brief Notifies system by sending OnAppPermissionChanged notification
+   * @param app_policy Reference to application policy
+   */
+  void NotifySystem(const AppPoliciesValueType& app_policy) const;
+
+  /**
+   * @brief Sends OnPermissionChange notification to application if its
+   * currently registered
+   * @param app_policy Reference to application policy
+   */
+  void SendPermissionsToApp(const AppPoliciesValueType& app_policy);
+
+  /**
+   * @brief Gets groups names from collection of groups permissions
+   * @param app_group_permissions Collection of groups permissions
+   * @return Collection of group names
+   */
+  policy_table::Strings GetGroupsNames(
+      const std::vector<FunctionalGroupPermission>& app_group_permissions)
+      const;
+
+  /**
+   * @brief Calculates consents for groups based on mapped CCS entities statuses
+   * and groups containers where entities have been found
+   * @param groups_by_ccs CCS entities mapped to functional groups names and
+   * their containters where this entity has been found
+   * @param out_allowed_groups List of groups allowed by CCS status
+   * @param out_disallowed_groups List of groups disallowed by CCS status
+   */
+  void CalculateGroupsConsentFromCCS(const GroupsByCCSStatus& groups_by_ccs,
+                                     GroupsNames& out_allowed_groups,
+                                     GroupsNames& out_disallowed_groups) const;
 
   PolicyListener* listener_;
 
@@ -403,7 +496,14 @@ class PolicyManagerImpl : public PolicyManager {
   CacheManagerInterfaceSPtr cache_;
   sync_primitives::Lock apps_registration_lock_;
   sync_primitives::Lock app_permissions_diff_lock_;
-  std::map<std::string, AppPermissions> app_permissions_diff_;
+
+  /**
+   * @brief Collection of parameters to be reported to the system with
+   * SDL.ActivateApp response or OnAppPermissionsChanged notification
+   * Being set during policy table update processing
+   */
+  typedef std::map<std::string, AppPermissions> PendingPermissions;
+  PendingPermissions app_permissions_diff_;
 
   /**
    * Timeout to wait response with UpdatePT

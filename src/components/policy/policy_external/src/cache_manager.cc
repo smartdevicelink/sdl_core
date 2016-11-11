@@ -36,6 +36,9 @@
 #include <functional>
 #include <ctime>
 #include <cmath>
+#include <utility>
+#include <string>
+#include <vector>
 
 #include "utils/file_system.h"
 #include "json/reader.h"

@@ -83,8 +83,14 @@ class MockPolicyListener : public ::policy::PolicyListener {
   MOCK_METHOD1(OnCertificateUpdated, void(const std::string&));
   MOCK_CONST_METHOD2(SendOnAppPermissionsChanged,
                      void(const policy::AppPermissions&, const std::string&));
-  MOCK_CONST_METHOD1(GetRegisteredLinks,
-                     void(std::map<std::string, std::string>&));
+  MOCK_METHOD1(GetDevicesIds,
+               std::vector<std::string>(const std::string& policy_app_id));
+  MOCK_METHOD3(OnUpdateHMILevel,
+               void(const std::string& device_id,
+                    const std::string& policy_app_id,
+                    const std::string& hmi_level));
+  MOCK_CONST_METHOD0(GetRegisteredApps, policy::KnownConsentsIds());
+  MOCK_CONST_METHOD0(GetRegisteredLinks, policy::ApplicationsLinks());
 };
 
 }  // namespace policy_test

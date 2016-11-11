@@ -1399,7 +1399,238 @@ TEST_F(SQLPTExtRepresentationTest,
       "1, 64, 10) ";
   ASSERT_TRUE(query_wrapper_->Exec(query_insert_app));
   // Check
-  EXPECT_TRUE(reps->IsPredataPolicy("12345"));
+  EXPECT_TRUE(reps_->IsPredataPolicy("12345"));
+}
+
+TEST_F(SQLPTExtRepresentationTest, SaveUserConsentRecords_ExpectedSaved) {
+  using namespace policy_table;
+  using namespace rpc;
+
+  const std::string device_id = "test_device_id";
+  const std::string app_id = "test_app_id";
+  const std::string ccs_group = "CCSGroup";
+  const std::string consent_group = "ConsentGroup";
+  const std::string time_stamp = "2016-08-29T17:12:07Z";
+  const Input input = Input::I_GUI;
+
+  Table original_table;
+  UserConsentRecords& user_consent_records =
+      *(*original_table.policy_table.device_data)[device_id]
+           .user_consent_records;
+
+  UserConsentRecords::mapped_type& app_records = user_consent_records[app_id];
+
+  app_records.ccs_consent_groups->insert(
+      std::make_pair(ccs_group, Boolean(true)));
+
+  app_records.consent_groups->insert(
+      std::make_pair(consent_group, Boolean(true)));
+
+  *app_records.input = input;
+  *app_records.time_stamp = time_stamp;
+
+  // Act
+  EXPECT_TRUE(reps_->Save(original_table));
+  utils::SharedPtr<Table> loaded_table = reps_->GenerateSnapshot();
+
+  // GetData/GetKeyData methods do internal existence check - no need to do it
+  // separately. In case of data is missing expectations will be violated.
+  DeviceData device_data = GetData<Table, DeviceData>(*loaded_table);
+
+  policy_table::DeviceParams device_parameters =
+      GetKeyData<DeviceData, policy_table::DeviceParams>(device_data,
+                                                         device_id);
+
+  ConsentRecords consents = GetKeyData<UserConsentRecords, ConsentRecords>(
+      *device_parameters.user_consent_records, app_id);
+
+  EXPECT_TRUE(
+      (IsKeyExist<ConsentGroups>(*consents.consent_groups, consent_group)));
+  EXPECT_TRUE(
+      (IsKeyExist<ConsentGroups>(*consents.ccs_consent_groups, ccs_group)));
+  EXPECT_EQ((String<1, 255>(time_stamp)), *consents.time_stamp);
+  EXPECT_EQ(input, *consents.input);
+}
+
+TEST_F(SQLPTExtRepresentationTest, SaveFunctionalGroupings_ExpectedSaved) {
+  using namespace policy_table;
+  using namespace rpc;
+
+  const std::string group_name = "GroupName";
+  const std::string another_group_name = "AnotherGroup";
+  const std::string rpc_name = "RpcName";
+  const std::string user_consent_prompt = "TestConsentPrompt";
+  const std::string another_user_consent_prompt = "AnotherTestConsentPrompt";
+  CCS_Entity off_entity_1(0, 0);
+  CCS_Entity off_entity_2(0, 1);
+  CCS_Entity on_entity_1(1, 0);
+  CCS_Entity on_entity_2(1, 1);
+
+  const HmiLevel test_level_1 = HL_FULL;
+  const HmiLevel test_level_2 = HL_LIMITED;
+  const policy_table::Parameter test_parameter_1 = P_GPS;
+  const policy_table::Parameter test_parameter_2 = P_SPEED;
+
+  Rpcs rpcs;
+
+  rpcs.disallowed_by_ccs_entities_off->push_back(off_entity_1);
+  rpcs.disallowed_by_ccs_entities_off->push_back(off_entity_2);
+
+  rpcs.disallowed_by_ccs_entities_on->push_back(on_entity_1);
+  rpcs.disallowed_by_ccs_entities_on->push_back(on_entity_2);
+
+  *rpcs.user_consent_prompt = user_consent_prompt;
+
+  RpcParameters parameters;
+  parameters.hmi_levels.push_back(test_level_1);
+  parameters.hmi_levels.push_back(test_level_2);
+  parameters.parameters->push_back(test_parameter_1);
+  parameters.parameters->push_back(test_parameter_2);
+  rpcs.rpcs.insert(std::make_pair(rpc_name, parameters));
+
+  Table original_table;
+  FunctionalGroupings& groupings =
+      original_table.policy_table.functional_groupings;
+  groupings.insert(std::make_pair(group_name, rpcs));
+
+  CCS_Entity off_entity_3(3, 4);
+  CCS_Entity on_entity_3(5, 6);
+
+  Rpcs another_rpcs;
+
+  another_rpcs.disallowed_by_ccs_entities_off->push_back(off_entity_3);
+  another_rpcs.disallowed_by_ccs_entities_on->push_back(on_entity_3);
+  *another_rpcs.user_consent_prompt = another_user_consent_prompt;
+
+  const HmiLevel test_level_3 = HL_BACKGROUND;
+  const policy_table::Parameter test_parameter_3 = P_BELTSTATUS;
+
+  RpcParameters another_parameters;
+  another_parameters.hmi_levels.push_back(test_level_3);
+  another_parameters.parameters->push_back(test_parameter_3);
+  another_rpcs.rpcs.insert(std::make_pair(rpc_name, another_parameters));
+
+  groupings.insert(std::make_pair(another_group_name, another_rpcs));
+
+  // Act
+  EXPECT_TRUE(reps_->Save(original_table));
+  utils::SharedPtr<Table> loaded_table = reps_->GenerateSnapshot();
+
+  FunctionalGroupings loaded_groupings =
+      GetData<Table, FunctionalGroupings>(*loaded_table);
+
+  Rpcs loaded_rpcs =
+      GetKeyData<FunctionalGroupings, Rpcs>(loaded_groupings, group_name);
+
+  EXPECT_TRUE((IsKeyExist<DisallowedByCCSEntities>(
+      *loaded_rpcs.disallowed_by_ccs_entities_off, off_entity_1)));
+  EXPECT_TRUE((IsKeyExist<DisallowedByCCSEntities>(
+      *loaded_rpcs.disallowed_by_ccs_entities_off, off_entity_2)));
+
+  EXPECT_TRUE((IsKeyExist<DisallowedByCCSEntities>(
+      *loaded_rpcs.disallowed_by_ccs_entities_on, on_entity_1)));
+  EXPECT_TRUE((IsKeyExist<DisallowedByCCSEntities>(
+      *loaded_rpcs.disallowed_by_ccs_entities_on, on_entity_2)));
+
+  RpcParameters loaded_parameters =
+      GetKeyData<Rpc, RpcParameters>(loaded_rpcs.rpcs, rpc_name);
+
+  EXPECT_TRUE(
+      (IsKeyExist<HmiLevels>(loaded_parameters.hmi_levels, test_level_1)));
+  EXPECT_TRUE(
+      (IsKeyExist<HmiLevels>(loaded_parameters.hmi_levels, test_level_2)));
+
+  EXPECT_TRUE((
+      IsKeyExist<Parameters>(*loaded_parameters.parameters, test_parameter_1)));
+  EXPECT_TRUE((
+      IsKeyExist<Parameters>(*loaded_parameters.parameters, test_parameter_2)));
+
+  Rpcs another_loaded_rpcs = GetKeyData<FunctionalGroupings, Rpcs>(
+      loaded_groupings, another_group_name);
+
+  EXPECT_TRUE((IsKeyExist<DisallowedByCCSEntities>(
+      *another_loaded_rpcs.disallowed_by_ccs_entities_off, off_entity_3)));
+
+  EXPECT_TRUE((IsKeyExist<DisallowedByCCSEntities>(
+      *another_loaded_rpcs.disallowed_by_ccs_entities_on, on_entity_3)));
+
+  RpcParameters another_loaded_parameters =
+      GetKeyData<Rpc, RpcParameters>(another_loaded_rpcs.rpcs, rpc_name);
+
+  EXPECT_TRUE((IsKeyExist<HmiLevels>(another_loaded_parameters.hmi_levels,
+                                     test_level_3)));
+
+  EXPECT_TRUE((IsKeyExist<Parameters>(*another_loaded_parameters.parameters,
+                                      test_parameter_3)));
+}
+
+TEST_F(SQLPTExtRepresentationTest, JsonContentsCCS_ExpectParsed) {
+  using namespace policy_table;
+  using namespace rpc;
+
+  const std::string group_name = "GroupName";
+  const int32_t entity_on_type = 1;
+  const int32_t entity_on_id = 2;
+  const int32_t entity_off_type = 3;
+  const int32_t entity_off_id = 4;
+
+  Json::Value json_table(Json::objectValue);
+  json_table["policy_table"] = Json::Value(Json::objectValue);
+
+  Json::Value& policy_table = json_table["policy_table"];
+  policy_table["functional_groupings"] = Json::Value(Json::objectValue);
+
+  Json::Value& functional_groupings = policy_table["functional_groupings"];
+  functional_groupings[group_name] = Json::Value(Json::objectValue);
+  functional_groupings[group_name]["rpcs"];
+
+  Json::Value entity_on = Json::Value(Json::objectValue);
+  entity_on["entityType"] = entity_on_type;
+  entity_on["entityID"] = entity_on_id;
+
+  functional_groupings[group_name]["disallowed_by_ccs_entities_on"][0] =
+      entity_on;
+
+  Json::Value entity_off = Json::Value(Json::objectValue);
+  entity_off["entityType"] = entity_off_type;
+  entity_off["entityID"] = entity_off_id;
+  functional_groupings[group_name]["disallowed_by_ccs_entities_off"][0] =
+      entity_off;
+
+  policy_table::Table parsed_table(&json_table);
+
+  FunctionalGroupings loaded_groupings =
+      GetData<Table, FunctionalGroupings>(parsed_table);
+
+  Rpcs loaded_rpcs =
+      GetKeyData<FunctionalGroupings, Rpcs>(loaded_groupings, group_name);
+
+  CCS_Entity off_entity_1(entity_off_type, entity_off_id);
+  CCS_Entity on_entity_1(entity_on_type, entity_on_id);
+
+  EXPECT_TRUE((IsKeyExist<DisallowedByCCSEntities>(
+      *loaded_rpcs.disallowed_by_ccs_entities_off, off_entity_1)));
+
+  EXPECT_TRUE((IsKeyExist<DisallowedByCCSEntities>(
+      *loaded_rpcs.disallowed_by_ccs_entities_on, on_entity_1)));
+}
+
+TEST_F(SQLPTExtRepresentationTest, SaveCCSStatus_ExpectSaved) {
+  CCSStatusItem item_1(0, 0, kStatusOn);
+  CCSStatusItem item_2(1, 1, kStatusOff);
+  CCSStatus in_status;
+  in_status.insert(item_1);
+  in_status.insert(item_2);
+
+  EXPECT_TRUE(reps_->SaveCCSStatus(in_status));
+
+  CCSStatus out_status = reps_->GetCCSStatus();
+  EXPECT_TRUE(in_status.size() == out_status.size());
+
+  EXPECT_TRUE(out_status.end() !=
+              find(out_status.begin(), out_status.end(), item_1));
+  EXPECT_TRUE(out_status.end() !=
+              find(out_status.begin(), out_status.end(), item_2));
 }
 
 }  // namespace policy_test

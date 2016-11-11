@@ -259,19 +259,19 @@ TEST_F(PolicyManagerImplTest2,
 TEST_F(
     PolicyManagerImplTest2,
     AddValidRequestTypeToPT_GetNewAppWithSpecificPoliciesViaPTU_ExpectRTAdded) {
-  const std::string section_name = application_id_;
+  const std::string& app_id = application_id_;
 
   // Arrange
   CreateLocalPT(preloadet_pt_filename_);
   // Add app
-  policy_manager_->AddApplication(section_name);
+  policy_manager_->AddApplication(app_id, hmi_types_);
   // Check app gets RequestTypes from pre_DataConsent of app_policies
   // section
-  pt_request_types_ = policy_manager_->GetAppRequestTypes(section_name);
+  pt_request_types_ = policy_manager_->GetAppRequestTypes(app_id);
 
   // Only single item as in pre_DataConsent in preloaded PT
   EXPECT_EQ(1u, pt_request_types_.size());
-  EXPECT_CALL(listener_, OnPendingPermissionChange(section_name)).Times(1);
+  EXPECT_CALL(listener_, OnPendingPermissionChange(app_id)).Times(1);
 
   // PTU has RequestTypes as [] - means 'all allowed'
   Json::Value root = GetPTU("json/PTU2.json");
@@ -284,18 +284,18 @@ TEST_F(
 
   // Get App Request Types from PTU
   ptu_request_types_ =
-      root["policy_table"]["app_policies"][section_name]["RequestType"];
+      root["policy_table"]["app_policies"][app_id]["RequestType"];
   ptu_request_types_size_ = ptu_request_types_.size();
 
   pt_request_types_.clear();
   // Get RequestTypes from <app_id> section of app policies after PT update
-  pt_request_types_ = policy_manager_->GetAppRequestTypes(section_name);
+  pt_request_types_ = policy_manager_->GetAppRequestTypes(app_id);
 
   // Check sizes of Request types of PT and PTU
   ASSERT_EQ(ptu_request_types_size_, pt_request_types_.size());
 
   ::policy::AppPermissions permissions =
-      policy_manager_->GetAppPermissionsChanges(section_name);
+      policy_manager_->GetAppPermissionsChanges(app_id);
   EXPECT_TRUE(permissions.requestTypeChanged);
 
   ::policy::StringArray result;

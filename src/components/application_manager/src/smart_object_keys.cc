@@ -277,6 +277,22 @@ const char* is_suscribed = "isSubscribed";
 const char* message_data = "messageData";
 
 const char* delivery_mode = "deliveryMode";
+
+const char* audio_streaming_indicator = "audioStreamingIndicator";
+
+const char* const keyboard_properties_supported = "keyboardPropertiesSupported";
+const char* const language_supported = "languageSupported";
+const char* const keyboard_layout_supported = "keyboardLayoutSupported";
+const char* const keypress_mode_supported = "keypressModeSupported";
+const char* const limited_characters_list_supported =
+    "limitedCharactersListSupported";
+const char* const auto_complete_text_supported = "autoCompleteTextSupported";
+const char* const entity_type = "entityType";
+const char* const entity_id = "entityID";
+const char* const status = "status";
+const char* const ccs_status = "ccsStatus";
+const char* const consented_functions = "consentedFunctions";
+const char* const source = "source";
 }  // namespace strings
 
 namespace json {

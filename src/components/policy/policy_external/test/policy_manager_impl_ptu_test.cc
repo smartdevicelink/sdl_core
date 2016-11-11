@@ -85,6 +85,7 @@ TEST_F(PolicyManagerImplTest,
 
 TEST_F(PolicyManagerImplTest2, GetNotificationsNumberAfterPTUpdate) {
   // Arrange
+  CreateLocalPT(preloaded_pt_filename_);
 
   Json::Value table = createPTforLoad();
   policy_manager_->ForcePTExchange();
@@ -125,7 +126,12 @@ TEST_F(PolicyManagerImplTest2, GetNotificationsNumberAfterPTUpdate) {
 
 TEST_F(PolicyManagerImplTest2, IsAppRevoked_SetRevokedAppID_ExpectAppRevoked) {
   // Arrange
-  std::ifstream ifile(kValidSdlPtUpdateJson);
+  CreateLocalPT(preloaded_pt_filename_);
+
+  AppHmiTypes types;
+  policy_manager_->AddApplication(app_id_1_, types);
+
+  std::ifstream ifile(preloaded_pt_filename_);
   Json::Reader reader;
   std::string json;
   Json::Value root(Json::objectValue);
@@ -138,41 +144,38 @@ TEST_F(PolicyManagerImplTest2, IsAppRevoked_SetRevokedAppID_ExpectAppRevoked) {
   ::policy::BinaryMessage msg(json.begin(), json.end());
   ASSERT_TRUE(policy_manager_->LoadPT(kFilePtUpdateJson, msg));
   EXPECT_FALSE(policy_manager_->GetCache()->IsPTPreloaded());
+  CheckRpcPermissions(
+      app_id_1_, "UnregisterAppInterface", ::policy::kRpcDisallowed);
   EXPECT_TRUE(policy_manager_->IsApplicationRevoked(app_id_1_));
 }
 
-TEST_F(
-    PolicyManagerImplTest2,
-    IsAppRevoked_ReregisterRevokedApp_OnHmiNotificationIsSentWithProperValues) {
+// Related to manual test APPLINK-18792
+TEST_F(PolicyManagerImplTest2, AppRevokedOne_AppRegistered) {
   // Arrange
-  CreateLocalPT(preloadet_pt_filename_);
+  CreateLocalPT(preloaded_pt_filename_);
+  EmulatePTAppRevoked(kPtu2Json);
 
-  manager_->AddApplication(app_id_1_);
+  EXPECT_FALSE(policy_manager_->GetCache()->IsPTPreloaded());
+  ASSERT_TRUE(
+      (policy_manager_->GetCache())->AddDevice(device_id_2_, "Bluetooth"));
+  policy_manager_->AddApplication(application_id_, hmi_types_);
+  // Registration is allowed
+  CheckRpcPermissions("RegisterAppInterface", ::policy::kRpcAllowed);
+}
 
-  // Check RPC is allowed and OnHMIStatus is sent
-  CheckRpcPermissions("OnHMIStatus", ::policy::kRpcAllowed);
+// Related to manual test APPLINK-18794
+TEST_F(PolicyManagerImplTest2, AppRevokedOne_AppRegistered_HMIDefault) {
+  // Arrange
+  CreateLocalPT(preloaded_pt_filename_);
+  EmulatePTAppRevoked(kPtu2Json);
 
-  std::ifstream ifile(kValidSdlPtUpdateJson);
-  Json::Reader reader;
-  std::string json;
-  Json::Value root(Json::objectValue);
-  if (ifile.is_open() && reader.parse(ifile, root, true)) {
-    root["policy_table"]["app_policies"][app_id_1_] = Json::nullValue;
-    json = root.toStyledString();
-  }
-  ifile.close();
+  EXPECT_FALSE(policy_manager_->GetCache()->IsPTPreloaded());
+  policy_manager_->AddApplication(application_id_, hmi_types_);
 
-  ::policy::BinaryMessage msg(json.begin(), json.end());
-  ASSERT_TRUE(manager_->LoadPT(kFilePtUpdateJson, msg));
-  EXPECT_TRUE(manager_->IsApplicationRevoked(app_id_1_));
-
-  // Re-register application
-  manager_->AddApplication(app_id_1_);
-  EXPECT_NE(typeid(utils::CallNothing),
-            typeid(manager_->AddApplication(app_id_1_)));
-
-  // Check RPC is disallowed and OnHMIStatus is sent
-  CheckRpcPermissions("OnHMIStatus", ::policy::kRpcDisallowed);
+  std::string default_hmi;
+  // Default HMI level is NONE
+  EXPECT_TRUE(policy_manager_->GetDefaultHmi(application_id_, &default_hmi));
+  EXPECT_EQ("NONE", default_hmi);
 }
 
 TEST_F(PolicyManagerImplTest2,
@@ -544,6 +547,34 @@ TEST_F(PolicyManagerImplTest2,
   EXPECT_TRUE(output.list_of_allowed_params.empty());
   EXPECT_TRUE(output.list_of_disallowed_params.empty());
   EXPECT_TRUE(output.list_of_undefined_params.empty());
+}
+
+TEST_F(PolicyManagerImplTest2, GetUpdateUrl) {
+  // Arrange
+  CreateLocalPT(preloaded_pt_filename_);
+  GetPTU(preloaded_pt_filename_);
+  // Check expectations
+  const std::string update_url(
+      "http://policies.telematics.ford.com/api/policies");
+  EXPECT_EQ(update_url, policy_manager_->GetUpdateUrl(7));
+  EXPECT_EQ("", policy_manager_->GetUpdateUrl(4));
+}
+
+// Related to manual test APPLINK-18789
+TEST_F(PolicyManagerImplTest2, GetCorrectStatus_PTUSuccessful) {
+  // Precondition
+  CreateLocalPT(preloaded_pt_filename_);
+  // Check
+  EXPECT_EQ("UP_TO_DATE", policy_manager_->GetPolicyTableStatus());
+
+  // Adding changes PT status
+  policy_manager_->AddApplication(application_id_, hmi_types_);
+  EXPECT_EQ("UPDATE_NEEDED", policy_manager_->GetPolicyTableStatus());
+  // Before load PT we should send notification about start updating
+  policy_manager_->OnUpdateStarted();
+  // Update
+  GetPTU(kPtu3Json);
+  EXPECT_EQ("UP_TO_DATE", policy_manager_->GetPolicyTableStatus());
 }
 
 TEST_F(PolicyManagerImplTest2,
@@ -1587,14 +1618,16 @@ TEST_F(
   policy_table::RequestTypes correct_types;
   correct_types.push_back(policy_table::RequestType::RT_HTTP);
 
-  // Load RequestType with invalid values
-  RefreshPT(preloadet_pt_filename_, kJsonFiles[13]);
+  ON_CALL(listener_, OnCurrentDeviceIdUpdateRequired(_))
+      .WillByDefault(Return(device_id));
+
+  utils::SharedPtr<Table> pt = (policy_manager_->GetCache())->GetPT();
 
   // Get Request Types for "<pre_DataConsent>"
   policy_table::RequestTypes received_types =
       GetRequestTypesForApplication(policy::kPreDataConsentId);
 
-  CompareRequestTypesContainers(correct_types, received_types);
+  const DeviceData& device_data = *pt->policy_table.device_data;
 }
 
 TEST_F(PolicyManagerImplTest_RequestTypes,
@@ -1602,13 +1635,25 @@ TEST_F(PolicyManagerImplTest_RequestTypes,
   // Load RequestType with empty values
   RefreshPT(preloadet_pt_filename_, kJsonFiles[14]);
 
-  // Get Request Types for "<pre_DataConsent>"
-  policy_table::RequestTypes received_types =
-      GetRequestTypesForApplication(policy::kPreDataConsentId);
+  EXPECT_EQ(1u, device_data.size());
 
-  // Expect
-  const size_t received_size = received_types.size();
-  EXPECT_EQ(0u, received_size);
+  const DeviceData::const_iterator dev_data_iter = device_data.find(device_id);
+  EXPECT_TRUE(device_data.end() != dev_data_iter);
+
+  UserConsentRecords::const_iterator it_device_consent =
+      dev_data_iter->second.user_consent_records->find(device);
+
+  EXPECT_TRUE(dev_data_iter->second.user_consent_records->end() !=
+              it_device_consent);
+
+  const ConsentRecords& parameters = it_device_consent->second;
+  const Json::Value time_stamp = (parameters.time_stamp).ToJsonValue();
+  EXPECT_EQ(device, it_device_consent->first);
+
+  const bool time_stamp_result = CheckPolicyTimeStamp(time_stamp.asString());
+
+  EXPECT_TRUE(time_stamp_result);
+  EXPECT_EQ(DeviceConsent::kDeviceAllowed, device_consent);
 }
 
 TEST_F(

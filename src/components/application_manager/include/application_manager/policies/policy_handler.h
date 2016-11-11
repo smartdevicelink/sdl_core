@@ -199,8 +199,19 @@ class PolicyHandler : public PolicyHandlerInterface,
    * should be applied to all applications
    * @param permissions User-changed group permissions consent
    */
+
+  /**
+   * @brief Processes permissions changes received from system via
+   * OnAppPermissionConsent notification
+   * @param connection_key Connection key of application, 0 if no key has been
+   * provided by notification
+   * @param permissions Structure containing group permissions changes
+   * @param ccs_status Structure containig customer connectivity settings
+   * changes
+   */
   void OnAppPermissionConsent(const uint32_t connection_key,
-                              const PermissionConsent& permissions) OVERRIDE;
+                              const PermissionConsent& permissions,
+                              const CCSStatus& ccs_status) FINAL;
 
   /**
    * @brief Get appropriate message parameters and send them with response
@@ -242,6 +253,13 @@ class PolicyHandler : public PolicyHandlerInterface,
    */
   std::string OnCurrentDeviceIdUpdateRequired(
       const std::string& policy_app_id) OVERRIDE;
+
+  /**
+ * @brief Collects currently registered applications ids linked to their
+ * device id
+ * @return Collection of device_id-to-app_id links
+ */
+  ApplicationsLinks GetRegisteredLinks() const FINAL;
 
   /**
    * @brief Set parameters from OnSystemInfoChanged to policy table
@@ -460,14 +478,19 @@ class PolicyHandler : public PolicyHandlerInterface,
   bool CheckStealFocus(const std::string& policy_app_id) const;
 
   /**
-   * @brief OnAppPermissionConsentInternal reacts on permission changing
-   *
-   * @param connection_key connection key
-   *
-   * @param permissions new permissions.
+   * @brief Processes data received via OnAppPermissionChanged notification
+   * from. Being started asyncronously from AppPermissionDelegate class.
+   * Sets updated permissions and CCS for registered applications and
+   * applications which already have appropriate group assigned which related to
+   * devices already known by policy
+   * @param connection_key Connection key of application, 0 if no key has been
+   * provided within notification
+   * @param ccs_status Customer connectivity settings changes to process
+   * @param permissions Permissions changes to process
    */
   void OnAppPermissionConsentInternal(const uint32_t connection_key,
-                                      PermissionConsent& permissions) OVERRIDE;
+                                      const CCSStatus& ccs_status,
+                                      PermissionConsent& out_permissions) FINAL;
 
   /**
    * @brief Sets days after epoch on successful policy update
@@ -545,6 +568,32 @@ class PolicyHandler : public PolicyHandlerInterface,
   void GetRegisteredLinks(std::map<std::string, std::string>& out_links) const;
 
   static const std::string kLibrary;
+
+  /**
+   * @brief Collects permissions for all currently registered applications on
+   * all devices
+   * @return consolidated permissions list or empty list if no
+   * applications/devices currently present
+   */
+  std::vector<FunctionalGroupPermission> CollectRegisteredAppsPermissions();
+
+  /**
+   * @brief Collects permissions for application with certain connection key
+   * @param connection_key Connection key of application to look for
+   * @return list of application permissions or empty list if no such
+   * application found
+   */
+  std::vector<FunctionalGroupPermission> CollectAppPermissions(
+      const uint32_t connection_key);
+
+  /**
+ * @brief Collects currently registered applications ids linked to their
+ * device id
+ * @param out_links Collection of device_id-to-app_id links
+ */
+  void GetRegisteredLinks(ApplicationsLinks& out_links) const;
+
+ private:
   mutable sync_primitives::RWLock policy_manager_lock_;
   utils::SharedPtr<PolicyManager> policy_manager_;
   void* dl_handle_;
@@ -564,10 +613,11 @@ class PolicyHandler : public PolicyHandlerInterface,
   mutable sync_primitives::Lock listeners_lock_;
 
   /**
-   * @brief Application-to-device map is used for getting/setting user consents
-   * for all apps
+   * @brief Application-to-device links are used for collecting their current
+   * consents to provide for HMI request and process response with possible
+   * changes done by user
    */
-  std::map<std::string, std::string> app_to_device_link_;
+  ApplicationsLinks app_to_device_link_;
 
   // Lock for app to device list
   sync_primitives::Lock app_to_device_link_lock_;

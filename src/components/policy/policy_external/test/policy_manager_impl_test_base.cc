@@ -39,6 +39,7 @@
 
 #include "utils/file_system.h"
 #include "utils/make_shared.h"
+#include "utils/gen_hash.h"
 #include "json/reader.h"
 
 #include "policy/mock_pt_ext_representation.h"
@@ -50,6 +51,7 @@ namespace policy_test {
 using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::ContainerEq;
+using ::testing::_;
 
 // Help functions
 char GenRandomChar(char range_from, char range_to) {
@@ -199,8 +201,16 @@ PolicyManagerImplTest::PolicyManagerImplTest()
 void PolicyManagerImplTest::SetUp() {
   policy_manager_ = new PolicyManagerImpl();
   cache_manager_ = new MockCacheManagerInterface();
-  policy_manager_->set_cache_manager(cache_manager_);
-  policy_manager_->set_listener(&listener_);
+  manager_->set_cache_manager(cache_manager_);
+  manager_->set_listener(&listener_);
+
+  ON_CALL(*cache_manager_, GetCCSStatus()).WillByDefault(Return(CCSStatus()));
+  ON_CALL(*cache_manager_, GetGroupsWithSameEntities(_))
+      .WillByDefault(Return(GroupsByCCSStatus()));
+  ON_CALL(*cache_manager_, GetKnownLinksFromPT())
+      .WillByDefault(Return(ApplicationsLinks()));
+  ON_CALL(listener_, GetRegisteredLinks())
+      .WillByDefault(Return(policy::ApplicationsLinks()));
 }
 
 void PolicyManagerImplTest::TearDown() {
@@ -235,6 +245,9 @@ PolicyManagerImplTest2::PolicyManagerImplTest2()
     , ptu_request_types_(Json::arrayValue) {}
 
 void PolicyManagerImplTest2::SetUp() {
+  ON_CALL(listener_, GetRegisteredLinks())
+      .WillByDefault(Return(policy::ApplicationsLinks()));
+
   file_system::CreateDirectory(app_storage_folder_);
 
   policy_manager_ = new PolicyManagerImpl(in_memory_);
@@ -586,6 +599,9 @@ PolicyManagerImplTest_RequestTypes::PolicyManagerImplTest_RequestTypes()
     , preloadet_pt_filename_(kSdlPreloadedPtJson) {}
 
 void PolicyManagerImplTest_RequestTypes::SetUp() {
+  ON_CALL(listener_, GetRegisteredLinks())
+      .WillByDefault(Return(policy::ApplicationsLinks()));
+
   file_system::CreateDirectory(app_storage_folder_);
   const bool in_memory = true;
   policy_manager_impl_sptr_ = utils::MakeShared<PolicyManagerImpl>(in_memory);
@@ -703,6 +719,157 @@ void PolicyManagerImplTest_RequestTypes::CompareRequestTypesContainers(
 
 void PolicyManagerImplTest_RequestTypes::TearDown() {
   file_system::RemoveDirectory(app_storage_folder_, true);
+}
+
+void PolicyManagerImplTest_CCS::
+    PreconditionCCSPreparePTWithAppGroupsAndConsents() {
+  using namespace policy_table;
+  using namespace rpc;
+
+  CreateLocalPT(preloaded_pt_filename_);
+  Table t = PreparePTWithGroupsHavingCCS();
+
+  ApplicationParams app_params;
+  app_params.groups.push_back(group_name_1_);
+  app_params.groups.push_back(group_name_2_);
+
+  t.policy_table.app_policies_section.apps.insert(
+      std::make_pair(app_id_1_, app_params));
+
+  EXPECT_TRUE(policy_manager_->GetCache()->ApplyUpdate(t));
+
+  // User allows first group and disallows second group. Third is kept
+  // untouched.
+  PermissionConsent permissions;
+  permissions.device_id = device_id_1_;
+  permissions.policy_app_id = app_id_1_;
+
+  FunctionalGroupPermission group_permissions_1;
+  group_permissions_1.group_name = group_name_1_;
+  group_permissions_1.group_alias = group_name_1_;
+  group_permissions_1.group_id = utils::Djb2HashFromString(group_name_1_);
+  group_permissions_1.state = kGroupAllowed;
+
+  FunctionalGroupPermission group_permissions_2;
+  group_permissions_2.group_name = group_name_2_;
+  group_permissions_2.group_alias = group_name_2_;
+  group_permissions_2.group_id = utils::Djb2HashFromString(group_name_2_);
+  group_permissions_2.state = kGroupDisallowed;
+
+  permissions.group_permissions.push_back(group_permissions_1);
+  permissions.group_permissions.push_back(group_permissions_2);
+
+  policy_manager_->SetUserConsentForApp(permissions);
+}
+
+void PolicyManagerImplTest_CCS::PreconditionCCSPreparePTWithAppPolicy() {
+  using namespace policy_table;
+  using namespace rpc;
+
+  // PT has 3 functional groups with some entities in
+  // disallowed_by_ccs_entities_on/off. Groups consents can be changed.
+  CreateLocalPT(preloaded_pt_filename_);
+  Table t = PreparePTWithGroupsHavingCCS();
+
+  ApplicationParams app_params;
+  app_params.groups.push_back(group_name_1_);
+  app_params.groups.push_back(group_name_2_);
+
+  t.policy_table.app_policies_section.apps.insert(
+      std::make_pair(app_id_1_, app_params));
+
+  EXPECT_TRUE(policy_manager_->GetCache()->ApplyUpdate(t));
+}
+
+rpc::policy_table_interface_base::Table
+PolicyManagerImplTest_CCS::PreparePTWithGroupsHavingCCS() {
+  using namespace policy_table;
+  using namespace rpc;
+
+  // PT has 3 functional groups with some entities in
+  // disallowed_by_ccs_entities_on/off. Groups consents can be changed.
+
+  CCS_Entity entity_1(type_1_, id_1_);
+  CCS_Entity entity_2(type_2_, id_2_);
+  CCS_Entity entity_3(type_3_, id_3_);
+
+  Rpcs rpcs_1;
+  rpcs_1.disallowed_by_ccs_entities_on->push_back(entity_1);
+  *rpcs_1.user_consent_prompt = group_name_1_;
+  rpcs_1.rpcs.set_to_null();
+
+  Rpcs rpcs_2;
+  rpcs_2.disallowed_by_ccs_entities_off->push_back(entity_2);
+  *rpcs_2.user_consent_prompt = group_name_2_;
+  rpcs_2.rpcs.set_to_null();
+
+  Rpcs rpcs_3;
+  rpcs_3.disallowed_by_ccs_entities_on->push_back(entity_3);
+  *rpcs_3.user_consent_prompt = group_name_3_;
+  rpcs_3.rpcs.set_to_null();
+
+  Table t;
+  t.policy_table.functional_groupings.insert(
+      std::make_pair(group_name_1_, rpcs_1));
+  t.policy_table.functional_groupings.insert(
+      std::make_pair(group_name_2_, rpcs_2));
+  t.policy_table.functional_groupings.insert(
+      std::make_pair(group_name_3_, rpcs_3));
+
+  return t;
+}
+
+std::string PolicyManagerImplTest_CCS::PreparePTUWithNewGroup(
+    const uint32_t type, const uint32_t id, const std::string& group_name) {
+  using namespace policy_table;
+  using namespace rpc;
+
+  std::ifstream ifile(preloaded_pt_filename_);
+  Json::Reader reader;
+  std::string json;
+  Json::Value root(Json::objectValue);
+  if (ifile.is_open() && reader.parse(ifile, root, true)) {
+    Table t = PreparePTWithGroupsHavingCCS();
+
+    CCS_Entity entity_4(type, id);
+
+    Rpcs rpcs_4;
+    rpcs_4.disallowed_by_ccs_entities_on->push_back(entity_4);
+    *rpcs_4.user_consent_prompt = group_name;
+    rpcs_4.rpcs.set_to_null();
+
+    t.policy_table.functional_groupings.insert(
+        std::make_pair(group_name, rpcs_4));
+
+    ApplicationParams app_params;
+    app_params.groups.push_back(group_name_1_);
+    app_params.groups.push_back(group_name_2_);
+    app_params.groups.push_back(group_name);
+    app_params.keep_context = Boolean(true);
+    app_params.steal_focus = Boolean(true);
+    app_params.default_hmi = HL_FULL;
+    app_params.priority = P_EMERGENCY;
+
+    t.policy_table.app_policies_section.apps.insert(
+        std::make_pair(app_id_1_, app_params));
+
+    const Json::Value overriden_table = t.ToJsonValue();
+
+    const std::string policy_table_key = "policy_table";
+    const std::string functional_groupings_key = "functional_groupings";
+    const std::string app_policies_key = "app_policies";
+
+    root[policy_table_key][functional_groupings_key] =
+        overriden_table[policy_table_key][functional_groupings_key];
+
+    root[policy_table_key][app_policies_key][app_id_1_] =
+        overriden_table[policy_table_key][app_policies_key][app_id_1_];
+
+    json = root.toStyledString();
+  }
+  ifile.close();
+
+  return json;
 }
 
 }  // namespace policy_test

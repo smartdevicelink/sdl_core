@@ -46,7 +46,8 @@ AppPermissionDelegate::AppPermissionDelegate(
 
 void AppPermissionDelegate::threadMain() {
   LOG4CXX_AUTO_TRACE(logger_);
-  policy_handler_.OnAppPermissionConsentInternal(connection_key_, permissions_);
+  policy_handler_.OnAppPermissionConsentInternal(
+      connection_key_, ccs_status_, permissions_);
 }
 
 void AppPermissionDelegate::exitThreadMain() {

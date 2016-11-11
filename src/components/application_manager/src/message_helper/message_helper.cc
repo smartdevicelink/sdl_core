@@ -96,8 +96,91 @@ bool ValidateSoftButtons(smart_objects::SmartObject& soft_buttons) {
     }
   }
   return true;
-}  // namespace
 }
+
+struct GroupsAppender
+    : std::unary_function<void, const PermissionsList::value_type&> {
+  GroupsAppender(smart_objects::SmartObject& groups)
+      : groups_(groups), index_(0) {}
+
+  void operator()(const PermissionsList::value_type& item) {
+    using namespace smart_objects;
+    using namespace policy;
+    groups_[index_] = SmartObject(SmartType_Map);
+
+    SmartObject& group = groups_[index_];
+    group[strings::name] = item.group_alias;
+    group[strings::id] = item.group_id;
+    GroupConsent permission_state = item.state;
+    // If state undefined, 'allowed' parameter should be absent
+    if (kGroupUndefined != permission_state) {
+      group["allowed"] = kGroupAllowed == permission_state;
+    }
+    ++index_;
+  }
+
+ private:
+  smart_objects::SmartObject& groups_;
+  int32_t index_;
+};
+
+struct GroupsAppender
+    : std::unary_function<void, const PermissionsList::value_type&> {
+  GroupsAppender(smart_objects::SmartObject& groups)
+      : groups_(groups), index_(0) {}
+
+  void operator()(const PermissionsList::value_type& item) {
+    using namespace smart_objects;
+    using namespace policy;
+    groups_[index_] = SmartObject(SmartType_Map);
+
+    SmartObject& group = groups_[index_];
+    group[strings::name] = item.group_alias;
+    group[strings::id] = item.group_id;
+    GroupConsent permission_state = item.state;
+    // If state undefined, 'allowed' parameter should be absent
+    if (kGroupUndefined != permission_state) {
+      group["allowed"] = kGroupAllowed == permission_state;
+    }
+    ++index_;
+  }
+
+ private:
+  smart_objects::SmartObject& groups_;
+  int32_t index_;
+};
+
+#ifdef EXTERNAL_PROPRIETARY_MODE
+struct ExternalConsentStatusAppender
+    : std::unary_function<void,
+                          const policy::ExternalConsentStatus::value_type&> {
+  ExternalConsentStatusAppender(smart_objects::SmartObject& status)
+      : status_(status), index_(0) {}
+
+  void operator()(const policy::ExternalConsentStatus::value_type& item) {
+    using namespace smart_objects;
+    using namespace policy;
+    using namespace hmi_apis;
+    status_[index_] = SmartObject(SmartType_Map);
+
+    SmartObject& external_consent_status = status_[index_];
+    external_consent_status["entityType"] = item.entity_type;
+    external_consent_status["entityID"] = item.entity_id;
+    external_consent_status["status"] =
+        0 == strcasecmp("ON", item.entity_status.c_str())
+            ? static_cast<int32_t>(Common_EntityStatus::ON)
+            : static_cast<int32_t>(Common_EntityStatus::OFF);
+    ++index_;
+  }
+
+ private:
+  smart_objects::SmartObject& status_;
+  int32_t index_;
+};
+#endif  // EXTERNAL_PROPRIETARY_MODE
+
+} // namespace
+
 std::pair<std::string, VehicleDataType> kVehicleDataInitializer[] = {
     std::make_pair(strings::gps, VehicleDataType::GPS),
     std::make_pair(strings::speed, VehicleDataType::SPEED),

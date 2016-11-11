@@ -35,6 +35,7 @@
 #include <algorithm>
 #include <vector>
 #include <functional>
+#include <utility>
 #include "application_manager/smart_object_keys.h"
 
 #include "application_manager/policies/delegates/app_permission_delegate.h"
@@ -204,13 +205,16 @@ struct SDLAllowedNotification {
   StateController& state_controller_;
 };
 
-struct LinkAppToDevice {
-  explicit LinkAppToDevice(
-      std::map<std::string, std::string>& app_to_device_link,
-      const ApplicationManager& application_manager)
-      : app_to_device_link_(app_to_device_link)
-      , application_manager_(application_manager) {
-    app_to_device_link_.clear();
+/**
+ * @brief Gets from system list of currently registered applications and
+ * create collection of links device-to-application
+ */
+struct LinksCollector {
+  LinksCollector(const ApplicationManager& application_manager,
+                 ApplicationsLinks& out_app_to_device_link)
+      : application_manager_(application_manager)
+      , out_app_to_device_link_(out_app_to_device_link) {
+    out_app_to_device_link_.clear();
   }
 
   void operator()(const ApplicationSharedPtr& app) {
@@ -229,12 +233,13 @@ struct LinkAppToDevice {
                    "Couldn't find device, which hosts application " << app_id);
       return;
     }
-    app_to_device_link_[app_id] = device_params.device_mac_address;
+    out_app_to_device_link_.insert(
+        std::make_pair(device_params.device_mac_address, app_id));
   }
 
  private:
-  std::map<std::string, std::string>& app_to_device_link_;
   const ApplicationManager& application_manager_;
+  ApplicationsLinks& out_app_to_device_link_;
 };
 
 /**
@@ -548,68 +553,67 @@ void PolicyHandler::SetDeviceInfo(const std::string& device_id,
 }
 
 void PolicyHandler::OnAppPermissionConsentInternal(
-    const uint32_t connection_key, PermissionConsent& permissions) {
+    const uint32_t connection_key,
+    const CCSStatus& ccs_status,
+    PermissionConsent& out_permissions) {
   LOG4CXX_AUTO_TRACE(logger_);
   POLICY_LIB_CHECK_VOID();
+
   if (connection_key) {
     ApplicationSharedPtr app = application_manager_.application(connection_key);
 
     if (app.valid()) {
-      permissions.policy_app_id = app->policy_app_id();
+      out_permissions.policy_app_id = app->policy_app_id();
       DeviceParams device_params = GetDeviceParams(
           app->device(),
           application_manager_.connection_handler().get_session_observer());
 
-      permissions.device_id = device_params.device_mac_address;
+      out_permissions.device_id = device_params.device_mac_address;
     }
 
-    if (!permissions.policy_app_id.empty()) {
-      policy_manager_->SetUserConsentForApp(permissions);
+    if (!out_permissions.policy_app_id.empty()) {
+      policy_manager_->SetUserConsentForApp(out_permissions);
     }
+  } else if (!app_to_device_link_.empty()) {
+    sync_primitives::AutoLock lock(app_to_device_link_lock_);
+    ApplicationsLinks::const_iterator it = app_to_device_link_.begin();
+    for (; app_to_device_link_.end() != it; ++it) {
+      ApplicationSharedPtr app =
+          application_manager_.application_by_policy_id(it->second);
 
-    return;
-  }
+      // If list of apps sent to HMI for user consents is not the same as
+      // current,
+      // permissions should be set only for coincident to registered apps
+      if (!app.valid()) {
+        LOG4CXX_WARN(logger_,
+                     "Invalid pointer to application was passed."
+                     "Permissions setting skipped.");
+        continue;
+      }
 
-  LinkAppsToDevice();
+      DeviceParams device_params = GetDeviceParams(
+          app->device(),
+          application_manager_.connection_handler().get_session_observer());
 
-  if (!app_to_device_link_.size()) {
+      if (device_params.device_mac_address != it->first) {
+        LOG4CXX_WARN(logger_,
+                     "Device_id of application is changed."
+                     "Permissions setting skipped.");
+        continue;
+      }
+
+      out_permissions.policy_app_id = it->second;
+      out_permissions.device_id = it->first;
+      policy_manager_->SetUserConsentForApp(out_permissions);
+    }
+  } else {
     LOG4CXX_WARN(logger_,
                  "There are no applications previously stored for "
                  "setting common permissions.");
-    return;
   }
 
-  std::map<std::string, std::string>::const_iterator it =
-      app_to_device_link_.begin();
-  std::map<std::string, std::string>::const_iterator it_end =
-      app_to_device_link_.end();
-  for (; it != it_end; ++it) {
-    ApplicationSharedPtr app =
-        application_manager_.application_by_policy_id(it->first);
-
-    // If list of apps sent to HMI for user consents is not the same as current,
-    // permissions should be set only for coincident to registered apps
-    if (!app.valid()) {
-      LOG4CXX_WARN(logger_,
-                   "Invalid pointer to application was passed."
-                   "Permissions setting skipped.");
-      continue;
-    }
-
-    DeviceParams device_params = GetDeviceParams(
-        app->device(),
-        application_manager_.connection_handler().get_session_observer());
-
-    if (device_params.device_mac_address != it->second) {
-      LOG4CXX_WARN(logger_,
-                   "Device_id of application is changed."
-                   "Permissions setting skipped.");
-      continue;
-    }
-
-    permissions.policy_app_id = it->first;
-    permissions.device_id = it->second;
-    policy_manager_->SetUserConsentForApp(permissions);
+  if (!policy_manager_->SetCCSStatus(ccs_status)) {
+    LOG4CXX_WARN(logger_, "CCS status has not been set!");
   }
 }
 
@@ -651,8 +655,7 @@ void PolicyHandler::OnGetUserFriendlyMessage(
       result, correlation_id, application_manager_);
 }
 
-void PolicyHandler::GetRegisteredLinks(
-    std::map<std::string, std::string>& out_links) const {
+void PolicyHandler::GetRegisteredLinks(ApplicationsLinks& out_links) const {
   DataAccessor<ApplicationSet> accessor = application_manager_.applications();
   ApplicationSetConstIt it_app = accessor.GetData().begin();
   ApplicationSetConstIt it_app_end = accessor.GetData().end();
@@ -661,30 +664,23 @@ void PolicyHandler::GetRegisteredLinks(
   std::for_each(it_app, it_app_end, linker);
 }
 
-void PolicyHandler::OnGetListOfPermissions(const uint32_t connection_key,
-                                           const uint32_t correlation_id) {
+std::vector<policy::FunctionalGroupPermission>
+PolicyHandler::CollectRegisteredAppsPermissions() {
   LOG4CXX_AUTO_TRACE(logger_);
   POLICY_LIB_CHECK_VOID();
   // If no specific app was passed, get permissions for all currently registered
   // applications
-  if (!connection_key) {
-    LinkAppsToDevice();
-    PermissionsConsolidator consolidator;
-    std::vector<policy::FunctionalGroupPermission> group_permissions;
-    std::map<std::string, std::string>::const_iterator it =
-        app_to_device_link_.begin();
-    for (; it != app_to_device_link_.end(); ++it) {
-      policy_manager_->GetUserConsentForApp(
-          it->second, it->first, group_permissions);
-      consolidator.Consolidate(group_permissions);
-    }
+  sync_primitives::AutoLock lock(app_to_device_link_lock_);
 
-    MessageHelper::SendGetListOfPermissionsResponse(
-        consolidator.GetConsolidatedPermissions(),
-        correlation_id,
-        application_manager_);
+  GetRegisteredLinks(app_to_device_link_);
 
-    return;
+  PermissionsConsolidator consolidator;
+  std::vector<policy::FunctionalGroupPermission> group_permissions;
+  ApplicationsLinks::const_iterator it = app_to_device_link_.begin();
+  for (; it != app_to_device_link_.end(); ++it) {
+    policy_manager_->GetUserConsentForApp(
+        it->first, it->second, group_permissions);
+    consolidator.Consolidate(group_permissions);
   }
 
   // Single app only
@@ -823,6 +819,12 @@ std::string PolicyHandler::OnCurrentDeviceIdUpdateRequired(
       application_manager_.connection_handler().get_session_observer());
 
   return device_params.device_mac_address;
+}
+
+ApplicationsLinks PolicyHandler::GetRegisteredLinks() const {
+  ApplicationsLinks links;
+  GetRegisteredLinks(links);
+  return links;
 }
 
 void PolicyHandler::OnSystemInfoChanged(const std::string& language) {

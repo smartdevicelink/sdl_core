@@ -216,9 +216,10 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
                     policy::EndpointUrls& end_points));
 
  private:
-  MOCK_METHOD2(OnAppPermissionConsentInternal,
-               void(const uint32_t connection_key,
-                    policy::PermissionConsent& permissions));
+  MOCK_METHOD3(OnAppPermissionConsentInternal,
+               void(const uint32_t,
+                    const policy::CCSStatus&,
+                    policy::PermissionConsent&));
 };
 
 }  // namespace policy_test

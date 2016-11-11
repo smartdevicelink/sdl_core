@@ -178,11 +178,13 @@ class PolicyHandlerInterface {
                              const DeviceInfo& device_info) = 0;
 
   /**
-   * @brief Store user-changed permissions consent to DB
-   * @param connection_key Connection key of application or 0, if permissions
-   * should be applied to all applications
-   * @param permissions User-changed group permissions consent
-   */
+ * @brief Processes data from OnAppPermissionConsent notification with
+ * permissions changes and CCS status changes done by user
+ * @param connection_key Connection key of application, 0 if no key has been
+ * provided
+ * @param permissions Groups permissions changes
+ * @param ccs_status Customer connectivity settings status changes
+ */
   virtual void OnAppPermissionConsent(const uint32_t connection_key,
                                       const PermissionConsent& permissions) = 0;
 
@@ -399,8 +401,21 @@ class PolicyHandlerInterface {
   virtual const std::string RemoteAppsUrl() const = 0;
 
  private:
+  /**
+   * @brief Processes data received via OnAppPermissionChanged notification
+   * from. Being started asyncronously from AppPermissionDelegate class.
+   * Sets updated permissions and CCS for registered applications and
+   * applications which already have appropriate group assigned which related to
+   * devices already known by policy
+   * @param connection_key Connection key of application, 0 if no key has been
+   * provided within notification
+   * @param ccs_status Customer connectivity settings changes to process
+   * @param permissions Permissions changes to process
+   */
   virtual void OnAppPermissionConsentInternal(
-      const uint32_t connection_key, PermissionConsent& permissions) = 0;
+      const uint32_t connection_key,
+      const CCSStatus& ccs_status,
+      PermissionConsent& out_permissions) = 0;
 
   friend class AppPermissionDelegate;
 };

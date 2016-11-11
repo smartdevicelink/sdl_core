@@ -2094,6 +2094,9 @@ bool ExternalConsentEntity::operator==(const ExternalConsentEntity& rhs) const {
 }
 
 bool ExternalConsentEntity::is_valid() const {
+  if (!is_initialized()) {
+    return false;
+  }
   if (!entity_type.is_valid()) {
     return false;
   }
