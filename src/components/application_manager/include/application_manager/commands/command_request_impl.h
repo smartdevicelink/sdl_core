@@ -158,7 +158,8 @@ class CommandRequestImpl : public CommandImpl,
    * @param allow_empty_string if true methods allow empty sting
    * @return true if success otherwise return false
    */
-  bool CheckSyntax(const std::string& str, bool allow_empty_line = false);
+  static bool CheckSyntax(const std::string& str,
+                          bool allow_empty_line = false);
 
   /*
    * @brief Sends HMI request
