@@ -40,10 +40,10 @@ if (BUILD_TESTS)
     ${COMPONENTS_DIR}/utils/include/
     ${COMPONENTS_DIR}/resumption/include/
     ${COMPONENTS_DIR}/utils/include/
-    ${COMPONENTS_DIR}/policy/include/
+    ${POLICY_PATH}/include/
     ${COMPONENTS_DIR}/media_manager/include/
     ${COMPONENTS_DIR}/security_manager/include/
-    ${COMPONENTS_DIR}/policy/test/include/
+    ${POLICY_PATH}/policy/test/include/
     ${COMPONENTS_DIR}/application_manager/test/include/
     )
 
@@ -148,7 +148,7 @@ endif()
 add_custom_command(
 OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/libPolicy.so
                      COMMAND ${CMAKE_COMMAND} -E
-                     copy  ${COMPONENTS_DIR}/policy/libPolicy.so ${CMAKE_CURRENT_BINARY_DIR})
+                     copy  ${POLICY_PATH}/libPolicy.so ${CMAKE_CURRENT_BINARY_DIR})
   set(CMAKE_EXE_LINKER_FLAGS
     "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath=${CMAKE_CURRENT_BINARY_DIR}")
   create_test("application_manager_test" "${testSources}" "${testLibraries}" )

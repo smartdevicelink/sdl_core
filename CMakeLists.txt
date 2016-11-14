@@ -48,7 +48,11 @@ option(ENABLE_GCOV "gcov code coverage feature" OFF)
 option(ENABLE_SANITIZE "Sanitize tool" OFF)
 option(ENABLE_SECURITY "Security Ford protocol protection" ON)
 option(ENABLE_HMI_PTU_DECRYPTION "Policy table update parsed by hmi" ON)
-option(ENABLE_EXTENDED_POLICY "Turns extended flow which requires embedded system interaction" ON)
+
+set (EXTENDED_POLICY "${EXTENDED_POLICY}" CACHE STRING "Policy mode (PROPRIETARY, HTTP or EXTENDED_PROPRIETARY)")
+if(EXTENDED_POLICY STREQUAL "")
+  set(EXTENDED_POLICY "PROPRIETARY")
+endif()
 
 set(OS_TYPE_OPTION 	"$ENV{OS_TYPE}")
 set(DEBUG_OPTION 	"$ENV{DEBUG}")
@@ -231,9 +235,27 @@ if (TELEMETRY_MONITOR)
     add_definitions(-DTELEMETRY_MONITOR)
 endif()
 
-if (ENABLE_EXTENDED_POLICY)
-    add_definitions(-DEXTENDED_POLICY)
+if (${EXTENDED_POLICY} STREQUAL "EXTENDED_PROPRIETARY")
+    add_definitions(-DEXTENDED_PROPRIETARY)
+    set(POLICY_PATH ${COMPONENTS_DIR}/policy/policy_premium/)
+    set(POLICY_GLOBAL_INCLUDE_PATH ${COMPONENTS_DIR}/include/policy/policy_premium/)
+    set(POLICY_MOCK_INCLUDE_PATH ${COMPONENTS_DIR}/include/test/policy/policy_premium/)
+    message("DEFINED  EXTENDED_PROPRIETARY")
+else()
+   if (${EXTENDED_POLICY} STREQUAL "PROPRIETARY")
+     add_definitions(-DEXTENDED_POLICY)
+     message("DEFINED EXTENDED_POLICY")
+   else()
+     message("DEFAULT PROPRIETARY")
+   endif()
+   set(POLICY_PATH ${COMPONENTS_DIR}/policy/policy_regular/)
+   set(POLICY_GLOBAL_INCLUDE_PATH ${COMPONENTS_DIR}/include/policy/policy_regular/)
+   set(POLICY_MOCK_INCLUDE_PATH ${COMPONENTS_DIR}/include/test/policy/policy_regular/)
 endif()
+
+
+
+#include_directories()
 
 # TODO(AK): check current OS here
 add_definitions(-DOS_POSIX)

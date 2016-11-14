@@ -1,0 +1,15 @@
+/*! \page components_transportmanager_internal_design_trasport_manager Trasport Manager Implementation
+
+Actually Transport Manager component is implemented as classical manager component. It manages connections and abstract devices and provides unified information for the clients.
+
+Connection-related information encapsulated in structure NsSmartDeviceLink::NsTransportManager::CTransportManager::SConnectionInfo. Transport Manager manages these structures to store information about every active connection.
+
+Frame processing encapsulated in structure NsSmartDeviceLink::NsTransportManager::CTransportManager::SFrameDataForConnection. Transport Manager manages these structures to store information related to data for specific connection.
+
+Callback information between transport manager threads passed in form of special structures:
+NsSmartDeviceLink::NsTransportManager::CTransportManager::SDeviceListenerCallback.
+NsSmartDeviceLink::NsTransportManager::CTransportManager::SDataListenerCallback.
+
+Client calls to TM guarded by separate mutex. This allows use component from different threads without any risk.
+
+*/

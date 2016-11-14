@@ -49,8 +49,10 @@ include_directories (
   ${COMPONENTS_DIR}/app_launch/include/
   ${COMPONENTS_DIR}/rpc_base/include/
   ${COMPONENTS_DIR}/interfaces
+  ${POLICY_PATH}/include/
+  ${POLICY_GLOBAL_INCLUDE_PATH}/
   ${CMAKE_BINARY_DIR}/src/components/
-  ${COMPONENTS_DIR}/policy/include/
+  ${POLICY_INCLUDE_PATH}/
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${ENCRYPTION_INCLUDE_DIRECTORY}
   ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
@@ -86,7 +88,7 @@ ${AM_SOURCE_DIR}/src/policies/delegates/statistics_delegate.cc
 )
 
   include_directories(
-    ${COMPONENTS_DIR}/policy/src/policy/policy_table/table_struct
+    ${POLICY_PATH}/src/policy/policy_table/table_struct
   )
 file (GLOB EVENT_ENGINE
   ${AM_SOURCE_DIR}/src/event_engine/*
