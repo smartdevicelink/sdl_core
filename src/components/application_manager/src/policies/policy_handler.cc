@@ -404,7 +404,6 @@ uint32_t PolicyHandler::GetAppIdForSending() const {
       }
     }
   }
-  LOG4CXX_INFO(logger_, "No app to send");
   return 0;
 }
 
@@ -603,13 +602,13 @@ void PolicyHandler::OnGetListOfPermissions(const uint32_t connection_key,
     sync_primitives::AutoLock lock(app_to_device_link_lock_);
     LinkAppToDevice linker(app_to_device_link_, application_manager_);
     {
-      const ApplicationSet& accessor =
-          application_manager_.applications().GetData();
-      ApplicationSetConstIt it_app = accessor.begin();
-      ApplicationSetConstIt it_app_end = accessor.end();
+    const ApplicationSet& accessor =
+        application_manager_.applications().GetData();
+    ApplicationSetConstIt it_app = accessor.begin();
+    ApplicationSetConstIt it_app_end = accessor.end();
 
-      // Add all currently registered applications
-      std::for_each(it_app, it_app_end, linker);
+    // Add all currently registered applications
+    std::for_each(it_app, it_app_end, linker);
     }
 
     PermissionsConsolidator consolidator;
@@ -732,7 +731,7 @@ void PolicyHandler::OnVehicleDataUpdated(
     const smart_objects::SmartObject& message) {
   POLICY_LIB_CHECK_VOID();
 #ifdef EXTENDED_PROPRIETARY
-  if (!message.keyExists(strings::msg_params)) {
+    if (!message.keyExists(strings::msg_params)) {
     LOG4CXX_ERROR(logger_,
                   "Message does not contains mandatory section "
                       << strings::msg_params);
@@ -743,9 +742,8 @@ void PolicyHandler::OnVehicleDataUpdated(
         message[strings::msg_params][strings::vin].asString());
   }
 #else
-  LOG4CXX_DEBUG(logger_,
-                "This functionality is not available for not premium policy");
-#endif
+  LOG4CXX_DEBUG(logger_, "This functionality is not available for not premium policy");
+  #endif
 }
 
 void PolicyHandler::OnPendingPermissionChange(
@@ -1256,17 +1254,15 @@ void PolicyHandler::OnSnapshotCreated(
   }
 }
 #else  // EXTENDED_PROPRIETARY
-
 void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string) {
   LOG4CXX_AUTO_TRACE(logger_);
   POLICY_LIB_CHECK_VOID();
-#if EXTENDED_POLICY
+#ifdef EXTENDED_POLICY
   std::string policy_snapshot_full_path;
   if (!SaveSnapshot(pt_string, policy_snapshot_full_path)) {
     LOG4CXX_ERROR(logger_, "Snapshot processing skipped.");
     return;
   }
-  LOG4CXX_ERROR(logger_, "PROPriatery policy");
   MessageHelper::SendPolicyUpdate(policy_snapshot_full_path,
                                   policy_manager_->TimeoutExchange(),
                                   policy_manager_->RetrySequenceDelaysSeconds(),
