@@ -116,8 +116,14 @@ void OnButtonPressNotification::Run() {
                        << "in FULL or LIMITED hmi level");
       continue;
     }
-    // if "app_id" absent send notification only in HMI_FULL mode
-    if (is_app_id_exists || subscribed_app->IsFullscreen()) {
+    // if "appID" is present, send it to named app only if its FULL or
+    // LIMITED
+    if (app.valid()) {
+      if (app->app_id() == subscribed_app->app_id()) {
+        SendButtonPress(subscribed_app);
+      }
+    } else if (subscribed_app->IsFullscreen()) {
+      // if No "appID" - send it FULL apps only.
       SendButtonPress(subscribed_app);
     }
   }
