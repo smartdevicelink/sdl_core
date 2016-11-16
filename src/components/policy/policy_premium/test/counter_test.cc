@@ -29,7 +29,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "gtest/gtest.h"
-#include "policy/policy_premium/usage_statistics/mock_statistics_manager.h"
+#include "policy/usage_statistics/mock_statistics_manager.h"
 #include "policy/usage_statistics/counter.h"
 
 using ::testing::StrictMock;
