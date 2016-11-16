@@ -1405,14 +1405,32 @@ TEST_F(PolicyHandlerTest, OnDeviceConsentChanged_PredatePolicyNotAllowed) {
 
   policy_handler_.OnDeviceConsentChanged(kPolicyAppId_, is_allowed);
 }
+#ifdef EXTENDED_PROPRIETARY
+TEST_F(PolicyHandlerTest, OnCertificateUpdated) {
+  const std::string app_storage = "storage";
+  file_system::CreateFile("storage/certificate");
+  EXPECT_CALL(policy_settings_, app_storage_folder())
+      .WillOnce(ReturnRef(app_storage));
 
+  std::string cert_data = "data";
+
+  const std::string full_file_name =
+      file_system::GetAbsolutePath(app_storage) + "/certificate";
+  EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
+              SendDecryptCertificateToHMI(full_file_name, _));
+  policy_handler_.OnCertificateUpdated(cert_data);
+}
+#else
 TEST_F(PolicyHandlerTest, OnCertificateUpdated) {
   application_manager_test::MockPolicyHandlerObserver policy_handler_observer;
   policy_handler_.add_listener(&policy_handler_observer);
   std::string cert_data = "data";
+  EnablePolicy();
+
   EXPECT_CALL(policy_handler_observer, OnCertificateUpdated(cert_data));
   policy_handler_.OnCertificateUpdated(cert_data);
 }
+#endif
 
 TEST_F(PolicyHandlerTest, GetAppIdForSending_WithoutApps) {
   // Arrange
