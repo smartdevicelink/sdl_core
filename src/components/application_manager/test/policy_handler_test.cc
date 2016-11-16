@@ -1248,10 +1248,12 @@ TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlAdded) {
   const int timeout_exchange = 10;
 
 // TODO(AKutsan): Policy move issues
-//  EXPECT_CALL(*mock_policy_manager_, GetUpdateUrls(_, _))
-//      .WillRepeatedly(SetArgReferee<1>(test_data));
+  EXPECT_CALL(*mock_policy_manager_, GetUpdateUrls(_, _))
+      .WillRepeatedly(SetArgReferee<1>(test_data));
 #endif  // EXTENDED_PROPRIETARY
 
+  EXPECT_CALL(*mock_policy_manager_, GetUpdateUrls("0x07", _))
+      .WillRepeatedly(SetArgReferee<1>(test_data));
   EXPECT_CALL(app_manager_, connection_handler())
       .WillOnce(ReturnRef(conn_handler));
   EXPECT_CALL(conn_handler, get_session_observer())
@@ -1266,6 +1268,8 @@ TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlAdded) {
   EXPECT_CALL(app_manager_, application(kAppId_))
       .WillRepeatedly(Return(mock_app_));
   EXPECT_CALL(*mock_app_, policy_app_id()).WillOnce(Return(kPolicyAppId_));
+
+
 #endif  // EXTENDED_POLICY
 
 #ifdef EXTENDED_PROPRIETARY
