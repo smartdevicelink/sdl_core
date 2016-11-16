@@ -40,7 +40,7 @@ include_directories (
   ${COMPONENTS_DIR}/include/utils
 )
 
-set(full_xml_name "${CMAKE_CURRENT_SOURCE_DIR}/MOBILE_API.xml")
+set(full_xml_name "${CMAKE_SOURCE_DIR}/src/components/interfaces/MOBILE_API.xml")
 
 add_custom_target( generate_version
                    COMMAND ${INTEFRACE_GENERATOR_CMD} ${full_xml_name} "mobile_apis"
@@ -58,7 +58,7 @@ set(testSources
   generated_msg_version_test.cc
 )
 
-file(COPY MOBILE_API.xml DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ${full_xml_name} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 create_test("generator_test" "${testSources}" "${testLibraries}")
 add_dependencies("generator_test" generate_version)
 
