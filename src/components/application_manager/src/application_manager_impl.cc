@@ -1404,7 +1404,7 @@ void ApplicationManagerImpl::SendMessageToMobile(
       for (; iter != iter_end; ++iter) {
         if (true == iter->second.asBool()) {
           LOG4CXX_INFO(logger_, "Request's param: " << iter->first);
-          params.push_back(iter->first);
+          params.insert(iter->first);
         }
       }
     }
@@ -2787,11 +2787,8 @@ mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
                                              << stringified_hmi_level << " rpc "
                                              << stringified_functionID);
   policy::CheckPermissionResult result;
-  GetPolicyHandler().CheckPermissions(policy_app_id,
-                                      stringified_hmi_level,
-                                      stringified_functionID,
-                                      rpc_params,
-                                      result);
+  policy::PTString x1, x2, x3;
+  GetPolicyHandler().CheckPermissions(x1, x2, x3, rpc_params, result);
 
   if (NULL != params_permissions) {
     params_permissions->allowed_params = result.list_of_allowed_params;

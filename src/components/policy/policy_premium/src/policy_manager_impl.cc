@@ -178,6 +178,10 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
   return true;
 }
 
+std::string PolicyManagerImpl::GetLockScreenIconUrl() const {
+  return cache_->GetLockScreenIconUrl();
+}
+
 void PolicyManagerImpl::CheckPermissionsChanges(
     const utils::SharedPtr<policy_table::Table> pt_update,
     const utils::SharedPtr<policy_table::Table> snapshot) {
@@ -202,31 +206,15 @@ void PolicyManagerImpl::PrepareNotificationData(
   std::for_each(group_names.begin(), group_names.end(), processor);
 }
 
-std::string PolicyManagerImpl::GetUpdateUrl(int service_type) const {
+void PolicyManagerImpl::GetUpdateUrls(const std::string& service_type,
+                                      EndpointUrls& out_end_points) {
   LOG4CXX_AUTO_TRACE(logger_);
-  EndpointUrls urls;
-  cache_->GetUpdateUrls(service_type, urls);
-
-  std::string url;
-  if (!urls.empty()) {
-    static uint32_t index = 0;
-
-    if (!urls.empty() && index >= urls.size()) {
-      index = 0;
-    }
-    url = urls[index].url.empty() ? "" : urls[index].url[0];
-
-    ++index;
-  } else {
-    LOG4CXX_ERROR(logger_, "The endpoint entry is empty");
-  }
-  return url;
+  cache_->GetUpdateUrls(service_type, out_end_points);
 }
-
-void PolicyManagerImpl::GetUpdateUrls(int service_type,
-                                      EndpointUrls& end_points) {
+void PolicyManagerImpl::GetUpdateUrls(const uint32_t service_type,
+                                      EndpointUrls& out_end_points) {
   LOG4CXX_AUTO_TRACE(logger_);
-  cache_->GetUpdateUrls(service_type, end_points);
+  cache_->GetUpdateUrls(service_type, out_end_points);
 }
 
 void PolicyManagerImpl::RequestPTUpdate() {

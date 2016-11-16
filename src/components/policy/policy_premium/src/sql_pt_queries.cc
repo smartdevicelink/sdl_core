@@ -454,6 +454,9 @@ const std::string kCheckDBIntegrity = "PRAGMA integrity_check";
 
 const std::string kCheckPgNumber = "PRAGMA page_count";
 
+const std::string kSelectLockScreenIcon =
+    "SELECT `url` FROM `endpoint` WHERE `service` = ? AND `application_id` = ?";
+
 const std::string kSelectRpc =
     "SELECT DISTINCT `rpc`.`parameter` FROM `rpc` "
     "  JOIN `app_group` AS `g` ON (`g`.`functional_group_id` = "

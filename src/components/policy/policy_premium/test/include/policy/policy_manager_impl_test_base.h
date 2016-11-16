@@ -29,8 +29,8 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef SRC_COMPONENTS_POLICY_TEST_INCLUDE_POLICY_POLICY_MANAGER_IMPL_TEST_BASE_H_
-#define SRC_COMPONENTS_POLICY_TEST_INCLUDE_POLICY_POLICY_MANAGER_IMPL_TEST_BASE_H_
+#ifndef SRC_COMPONENTS_POLICY_POLICY_PREMIUM_TEST_INCLUDE_POLICY_POLICY_MANAGER_IMPL_TEST_BASE_H_
+#define SRC_COMPONENTS_POLICY_POLICY_PREMIUM_TEST_INCLUDE_POLICY_POLICY_MANAGER_IMPL_TEST_BASE_H_
 
 #include <string>
 #include <vector>
@@ -41,8 +41,8 @@
 
 #include "policy/mock_cache_manager.h"
 #include "policy/mock_update_status_manager.h"
-#include "policy/mock_policy_listener.h"
-#include "policy/mock_policy_settings.h"
+#include "policy/policy_premium/mock_policy_listener.h"
+#include "policy/policy_premium/mock_policy_settings.h"
 
 namespace test {
 namespace components {
@@ -242,4 +242,4 @@ class PolicyManagerImplTest_RequestTypes : public ::testing::Test {
 }  // namespace components
 }  // namespace test
 
-#endif  // SRC_COMPONENTS_POLICY_TEST_INCLUDE_POLICY_POLICY_MANAGER_IMPL_TEST_BASE_H_
+#endif  // SRC_COMPONENTS_POLICY_POLICY_PREMIUM_TEST_INCLUDE_POLICY_POLICY_MANAGER_IMPL_TEST_BASE_H_

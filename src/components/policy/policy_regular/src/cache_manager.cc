@@ -455,7 +455,7 @@ void CacheManager::CheckPermissions(const PTString& app_id,
               rpc_param.parameters->end();
 
           for (; params_iter != params_iter_end; ++params_iter) {
-            result.list_of_allowed_params.push_back(
+            result.list_of_allowed_params.insert(
                 policy_table::EnumToJsonString(*params_iter));
           }
         }
@@ -653,19 +653,24 @@ std::vector<UserFriendlyMessage> CacheManager::GetUserFriendlyMsg(
   return result;
 }
 
-void CacheManager::GetServiceUrls(const std::string& service_type,
-                                  EndpointUrls& end_points) {
+void CacheManager::GetUpdateUrls(const uint32_t service_type,
+                                 EndpointUrls& out_end_points) {
+  std::stringstream service_type_stream;
+  service_type_stream << (service_type <= 9 ? "0x0" : "0x") << service_type;
+
+  const std::string service_type_str = service_type_stream.str();
+  GetUpdateUrls(service_type_str, out_end_points);
+}
+
+void CacheManager::GetUpdateUrls(const std::string& service_type,
+                                 EndpointUrls& out_end_points) {
   LOG4CXX_AUTO_TRACE(logger_);
   CACHE_MANAGER_CHECK_VOID();
-  std::string search_value;
-  if (!IsNumberService(service_type, search_value)) {
-    search_value = service_type;
-  }
 
-  LOG4CXX_DEBUG(logger_, "Search service value is: " << search_value);
+  LOG4CXX_DEBUG(logger_, "Search service value is: " << service_type);
 
   policy_table::ServiceEndpoints::const_iterator iter =
-      pt_->policy_table.module_config.endpoints.find(search_value);
+      pt_->policy_table.module_config.endpoints.find(service_type);
 
   if (pt_->policy_table.module_config.endpoints.end() != iter) {
     policy_table::URLList::const_iterator url_list_iter =
@@ -679,7 +684,7 @@ void CacheManager::GetServiceUrls(const std::string& service_type,
                 (*url_list_iter).second.end(),
                 std::back_inserter(data.url));
 
-      end_points.push_back(data);
+      out_end_points.push_back(data);
     }
   }
 }
@@ -921,29 +926,6 @@ bool CacheManager::IsPermissionsCalculated(const std::string& device_id,
     return true;
   }
   return false;
-}
-
-bool policy::CacheManager::IsNumberService(const std::string& input,
-                                           std::string& output) const {
-  const char* input_value = input.c_str();
-  char* endptr;
-  const int base = 10;
-  errno = 0;
-  uint32_t service_value = strtoul(input_value, &endptr, base);
-  bool is_real_zero_value =
-      (!service_value && endptr != input_value && *endptr == '\0');
-  if (!is_real_zero_value && (!service_value || errno == ERANGE)) {
-    return false;
-  }
-
-  output = input;
-  if (service_value <= 9) {
-    output.insert(0, "0x0", 3);
-  } else {
-    output.insert(0, "0x", 2);
-  }
-
-  return true;
 }
 
 utils::SharedPtr<policy_table::Table> CacheManager::GenerateSnapshot() {

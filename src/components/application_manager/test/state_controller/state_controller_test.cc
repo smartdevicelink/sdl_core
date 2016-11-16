@@ -47,7 +47,7 @@
 #include "application_manager/event_engine/event.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/mock_message_helper.h"
-#include "policy/mock_policy_settings.h"
+#include "mock_policy_settings.h"
 #include "protocol_handler/mock_session_observer.h"
 #include "connection_handler/mock_connection_handler.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"

@@ -99,7 +99,7 @@ TEST_F(OnSystemRequestNotificationTest, Run_ProprietaryType_SUCCESS) {
   EXPECT_CALL(mock_policy_handler, IsRequestTypeAllowed(_, _))
       .WillOnce(Return(true));
 
-#ifdef EXTENDED_POLICY
+#ifndef EXTENDED_POLICY
   EXPECT_CALL(app_mngr_, GetPolicyHandler())
       .Times(2)
       .WillRepeatedly(ReturnRef(mock_policy_handler));

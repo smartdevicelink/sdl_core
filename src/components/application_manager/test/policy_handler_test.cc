@@ -465,15 +465,15 @@ TEST_F(PolicyHandlerTest, GetInitialAppData) {
   policy_handler_.GetInitialAppData(kPolicyAppId_, nicknames, app_hmi_types);
 }
 
-TEST_F(PolicyHandlerTest, GetServiceUrls) {
+TEST_F(PolicyHandlerTest, GetUpdateUrls) {
   // Arrange
   EnablePolicyAndPolicyManagerMock();
   EndpointUrls endpoints;
   const std::string service_type_ = "0x0";
   // Check expectations
-  EXPECT_CALL(*mock_policy_manager_, GetServiceUrls(service_type_, _));
+  EXPECT_CALL(*mock_policy_manager_, GetUpdateUrls(service_type_, _));
   // Act
-  policy_handler_.GetServiceUrls(service_type_, endpoints);
+  policy_handler_.GetUpdateUrls(service_type_, endpoints);
 }
 
 TEST_F(PolicyHandlerTest, ResetRetrySequence) {
@@ -1218,14 +1218,19 @@ TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlNotAdded) {
   EnablePolicyAndPolicyManagerMock();
   BinaryMessage msg;
   EndpointUrls test_data;
-#ifdef EXTENDED_POLICY
+#if !defined(EXTENDED_POLICY) && !defined(EXTENDED_PROPRIETARY)
   ExtendedPolicyExpectations();
-#else
-  EXPECT_CALL(*mock_policy_manager_, GetServiceUrls(_, _))
-      .WillRepeatedly(SetArgReferee<1>(test_data));
-#endif  // EXTENDED_POLICY
-
+#endif
+#ifdef EXTENDED_PROPRIETARY
+  std::vector<int> retry_delay_seconds;
+  const int timeout_exchange = 10;
+  // TODO(AKutsan): Policy move issues
+  //  EXPECT_CALL(*mock_policy_manager_, GetUpdateUrls(_, _))
+  //      .WillRepeatedly(SetArgReferee<1>(test_data));
+  policy_handler_.OnSnapshotCreated(msg, retry_delay_seconds, timeout_exchange);
+#else  // EXTENDED_POLICY
   policy_handler_.OnSnapshotCreated(msg);
+#endif
 }
 
 TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlAdded) {
@@ -1235,11 +1240,19 @@ TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlAdded) {
   EndpointData data("some_data");
   test_data.push_back(data);
 
-#ifdef EXTENDED_POLICY
+#if !defined(EXTENDED_POLICY) && !defined(EXTENDED_PROPRIETARY)
   ExtendedPolicyExpectations();
-#else
-  EXPECT_CALL(*mock_policy_manager_, GetServiceUrls(_, _))
-      .WillRepeatedly(SetArgReferee<1>(test_data));
+#else  // EXTENDED_POLICY
+
+#ifdef EXTENDED_PROPRIETARY
+  std::vector<int> retry_delay_seconds;
+  const int timeout_exchange = 10;
+
+// TODO(AKutsan): Policy move issues
+//  EXPECT_CALL(*mock_policy_manager_, GetUpdateUrls(_, _))
+//      .WillRepeatedly(SetArgReferee<1>(test_data));
+#endif  // EXTENDED_PROPRIETARY
+
   EXPECT_CALL(app_manager_, connection_handler())
       .WillOnce(ReturnRef(conn_handler));
   EXPECT_CALL(conn_handler, get_session_observer())
@@ -1256,7 +1269,11 @@ TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlAdded) {
   EXPECT_CALL(*mock_app_, policy_app_id()).WillOnce(Return(kPolicyAppId_));
 #endif  // EXTENDED_POLICY
 
+#ifdef EXTENDED_PROPRIETARY
+  policy_handler_.OnSnapshotCreated(msg, retry_delay_seconds, timeout_exchange);
+#else   // EXTENDED_PROPRIETARY
   policy_handler_.OnSnapshotCreated(msg);
+#endif  // EXTENDED_PROPRIETARY
 }
 
 TEST_F(PolicyHandlerTest,

@@ -75,7 +75,7 @@ typedef utils::SharedPtr<BinaryMessage> BinaryMessageSptr;
 typedef std::string HMILevel;
 typedef std::string Parameter;
 typedef std::string RpcName;
-typedef std::vector<std::string> RPCParams;
+typedef std::set<std::string> RPCParams;
 
 typedef std::map<std::string, std::set<policy::HMILevel> > HMIPermissions;
 typedef std::map<std::string, std::set<policy::Parameter> >
@@ -109,9 +109,9 @@ struct CheckPermissionResult {
   CheckPermissionResult() : hmi_level_permitted(kRpcDisallowed) {}
 
   PermitResult hmi_level_permitted;
-  std::vector<PTString> list_of_allowed_params;
-  std::vector<PTString> list_of_disallowed_params;
-  std::vector<PTString> list_of_undefined_params;
+  RPCParams list_of_allowed_params;
+  RPCParams list_of_disallowed_params;
+  RPCParams list_of_undefined_params;
 };
 
 /**

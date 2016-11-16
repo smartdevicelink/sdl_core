@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_POLICY_INCLUDE_POLICY_CACHE_MANAGER_INTERFACE_H_
-#define SRC_COMPONENTS_POLICY_INCLUDE_POLICY_CACHE_MANAGER_INTERFACE_H_
+#ifndef SRC_COMPONENTS_POLICY_POLICY_PREMIUM_INCLUDE_POLICY_CACHE_MANAGER_INTERFACE_H_
+#define SRC_COMPONENTS_POLICY_POLICY_PREMIUM_INCLUDE_POLICY_CACHE_MANAGER_INTERFACE_H_
 
 #include <string>
 #include <vector>
@@ -151,7 +151,19 @@ class CacheManagerInterface {
    * @param service_type If URLs for specific service are preset,
    * return them otherwise default URLs.
    */
-  virtual void GetUpdateUrls(int service_type, EndpointUrls& end_points) = 0;
+  virtual void GetUpdateUrls(const std::string& service_type,
+                             EndpointUrls& out_end_points) = 0;
+
+  virtual void GetUpdateUrls(const uint32_t service_type,
+                             EndpointUrls& out_end_points) = 0;
+
+  /**
+   * @brief GetLockScreenIcon allows to obtain lock screen icon url;
+   *
+   * @return url which point to the resourse where lock screen icon could be
+   *obtained.
+   */
+  virtual std::string GetLockScreenIconUrl() const = 0;
 
   /**
    * @brief Get allowed number of notifications
@@ -701,4 +713,4 @@ typedef utils::SharedPtr<CacheManagerInterface> CacheManagerInterfaceSPtr;
 
 }  // namespace policy
 
-#endif  // SRC_COMPONENTS_POLICY_INCLUDE_POLICY_CACHE_MANAGER_INTERFACE_H_
+#endif  // SRC_COMPONENTS_POLICY_POLICY_PREMIUM_INCLUDE_POLICY_CACHE_MANAGER_INTERFACE_H_

@@ -129,6 +129,8 @@ file (GLOB MOBILE_COMMANDS_SOURCES
   ${COMMANDS_SOURCE_DIR}/hmi/activate_app_response.cc
   ${COMMANDS_SOURCE_DIR}/hmi/get_system_info_request.cc
   ${COMMANDS_SOURCE_DIR}/hmi/get_system_info_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/decrypt_certificate_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/decrypt_certificate_response.cc
   ${COMMANDS_SOURCE_DIR}/hmi/sdl_get_list_of_permissions_request.cc
   ${COMMANDS_SOURCE_DIR}/hmi/sdl_get_list_of_permissions_response.cc
   ${COMMANDS_SOURCE_DIR}/hmi/sdl_get_user_friendly_message_request.cc

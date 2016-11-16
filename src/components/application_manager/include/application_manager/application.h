@@ -218,9 +218,16 @@ class DynamicApplicationData {
   virtual void set_video_stream_retry_number(
       const uint32_t& video_stream_retry_number) = 0;
 
-  /*
-   * @brief Adds a command to the in application menu
+  /**
+   * @brief Checks if application is media, voice communication or navigation
+   * @return true if application is media, voice communication or navigation,
+   * false otherwise
    */
+  virtual bool is_audio() const = 0;
+
+  /*
+ * @brief Adds a command to the in application menu
+ */
   virtual void AddCommand(uint32_t cmd_id,
                           const smart_objects::SmartObject& command) = 0;
 

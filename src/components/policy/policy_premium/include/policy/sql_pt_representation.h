@@ -30,8 +30,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_POLICY_INCLUDE_POLICY_SQL_PT_REPRESENTATION_H_
-#define SRC_COMPONENTS_POLICY_INCLUDE_POLICY_SQL_PT_REPRESENTATION_H_
+#ifndef SRC_COMPONENTS_POLICY_POLICY_PREMIUM_INCLUDE_POLICY_SQL_PT_REPRESENTATION_H_
+#define SRC_COMPONENTS_POLICY_POLICY_PREMIUM_INCLUDE_POLICY_SQL_PT_REPRESENTATION_H_
 
 #include <string>
 #include <vector>
@@ -153,6 +153,7 @@ class SQLPTRepresentation : public virtual PTRepresentation {
                        const policy_table::RequestTypes& types);
 
  public:
+  virtual std::string GetLockScreenIconUrl() const;
   bool UpdateRequired() const;
   void SaveUpdateRequired(bool value);
 
@@ -200,4 +201,4 @@ class SQLPTRepresentation : public virtual PTRepresentation {
 };
 }  //  namespace policy
 
-#endif  // SRC_COMPONENTS_POLICY_INCLUDE_POLICY_SQL_PT_REPRESENTATION_H_
+#endif  // SRC_COMPONENTS_POLICY_POLICY_PREMIUM_INCLUDE_POLICY_SQL_PT_REPRESENTATION_H_

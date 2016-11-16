@@ -240,7 +240,7 @@ if (${EXTENDED_POLICY} STREQUAL "EXTENDED_PROPRIETARY")
     set(POLICY_PATH ${COMPONENTS_DIR}/policy/policy_premium/)
     set(POLICY_GLOBAL_INCLUDE_PATH ${COMPONENTS_DIR}/include/policy/policy_premium/)
     set(POLICY_MOCK_INCLUDE_PATH ${COMPONENTS_DIR}/include/test/policy/policy_premium/)
-    message("DEFINED  EXTENDED_PROPRIETARY")
+    message("DEFINED EXTENDED_PROPRIETARY")
 else()
    if (${EXTENDED_POLICY} STREQUAL "PROPRIETARY")
      add_definitions(-DEXTENDED_POLICY)
@@ -401,13 +401,20 @@ if (HMIADAPTER STREQUAL "mqueue")
 endif()
 
 # --- Directory with SDL interfaces, global types and ProtocolLib component
-include_directories(
-  ${COMPONENTS_DIR}/include
-  ${COMPONENTS_DIR}/protocol/include
 if (BUILD_TESTS)
-  ${COMPONENTS_DIR}/include/test
-endif ()
-)
+  include_directories(
+    ${COMPONENTS_DIR}/include
+    ${COMPONENTS_DIR}/protocol/include
+    ${COMPONENTS_DIR}/include/test
+  )
+else(BUILD_TESTS)
+  include_directories(
+    ${COMPONENTS_DIR}/include
+    ${COMPONENTS_DIR}/protocol/include
+  )
+endif(BUILD_TESTS)
+
+
 
 # --- 3rd party libs
 INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/src/3rd_party/set_3rd_party_paths.cmake)

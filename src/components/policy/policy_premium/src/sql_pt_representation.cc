@@ -37,6 +37,7 @@
 #include <unistd.h>
 
 #include "utils/logger.h"
+#include "utils/sqlite_wrapper/sql_database.h"
 #include "utils/file_system.h"
 #include "utils/gen_hash.h"
 #include "policy/sql_pt_representation.h"
@@ -70,19 +71,19 @@ const char* kDatabaseName = "policy";
 }  // namespace
 
 SQLPTRepresentation::SQLPTRepresentation()
-    : db_(new utils::dbms::SQLDatabaseImpl(kDatabaseName)) {
+    : db_(new utils::dbms::SQLDatabase(kDatabaseName)) {
   is_in_memory = false;
 }
 
 SQLPTRepresentation::SQLPTRepresentation(bool in_memory) {
   is_in_memory = in_memory;
 #ifdef __QNX__
-  db_ = new utils::dbms::SQLDatabaseImpl(kDatabaseName);
+  db_ = new utils::dbms::SQLDatabase(kDatabaseName);
 #else   // __QNX__
   if (in_memory) {
-    db_ = new utils::dbms::SQLDatabaseImpl();
+    db_ = new utils::dbms::SQLDatabase();
   } else {
-    db_ = new utils::dbms::SQLDatabaseImpl(kDatabaseName);
+    db_ = new utils::dbms::SQLDatabase(kDatabaseName);
   }
 #endif  // __QNX__
 }
@@ -90,6 +91,28 @@ SQLPTRepresentation::SQLPTRepresentation(bool in_memory) {
 SQLPTRepresentation::~SQLPTRepresentation() {
   db_->Close();
   delete db_;
+}
+
+std::string SQLPTRepresentation::GetLockScreenIconUrl() const {
+  utils::dbms::SQLQuery query(db());
+  std::string ret;
+  if (query.Prepare(sql_pt::kSelectLockScreenIcon)) {
+    query.Bind(0, std::string("lock_screen_icon_url"));
+    query.Bind(1, std::string("default"));
+
+    if (!query.Exec()) {
+      LOG4CXX_WARN(logger_, "Incorrect select from notifications by priority.");
+      return ret;
+    }
+
+    if (!query.IsNull(0)) {
+      ret = query.GetString(0);
+    }
+
+  } else {
+    LOG4CXX_WARN(logger_, "Invalid select endpoints statement.");
+  }
+  return ret;
 }
 
 void SQLPTRepresentation::CheckPermissions(const PTString& app_id,
@@ -1650,8 +1673,7 @@ const int32_t SQLPTRepresentation::GetDBVersion() const {
 
 utils::dbms::SQLDatabase* SQLPTRepresentation::db() const {
 #ifdef __QNX__
-  utils::dbms::SQLDatabase* db =
-      new utils::dbms::SQLDatabaseImpl(kDatabaseName);
+  utils::dbms::SQLDatabase* db = new utils::dbms::SQLDatabase(kDatabaseName);
   db->Open();
   return db;
 #else

@@ -30,7 +30,7 @@
 
 include_directories(
   include
-  ${GOOGLETEST_INCLUDE_DIRECTORY}
+  ${GMOCK_INCLUDE_DIRECTORY}
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${POLICY_PATH}/include
   ${COMPONENTS_DIR}/rpc_base/include
@@ -40,7 +40,7 @@ include_directories(
 )
 
 set(testLibraries
-  googletest
+  gmock
   Utils
   Policy
   UsageStatistics

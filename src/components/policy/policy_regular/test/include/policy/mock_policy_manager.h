@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_INCLUDE_TEST_POLICY_MOCK_POLICY_MANAGER_H_
-#define SRC_COMPONENTS_INCLUDE_TEST_POLICY_MOCK_POLICY_MANAGER_H_
+#ifndef SRC_COMPONENTS_POLICY_POLICY_REGULAR_TEST_INCLUDE_MOCK_POLICY_MANAGER_H_
+#define SRC_COMPONENTS_POLICY_POLICY_REGULAR_TEST_INCLUDE_MOCK_POLICY_MANAGER_H_
 
 #include <string>
 #include <vector>
@@ -46,11 +46,9 @@
 
 namespace policy_table = ::rpc::policy_table_interface_base;
 
-using namespace policy;
+namespace policy_manager {
 
-namespace test {
-namespace components {
-namespace policy_manager_test {
+using namespace policy;
 
 class MockPolicyManager : public PolicyManager {
  public:
@@ -61,9 +59,12 @@ class MockPolicyManager : public PolicyManager {
   MOCK_METHOD2(LoadPT,
                bool(const std::string& file, const BinaryMessage& pt_content));
   MOCK_METHOD1(ResetPT, bool(const std::string& file_name));
-  MOCK_CONST_METHOD1(GetUpdateUrl, std::string(int service_type));
-  MOCK_METHOD2(GetUpdateUrls, void(int service_type, EndpointUrls& end_points));
-  MOCK_METHOD0(RequestPTUpdate, void());
+  MOCK_METHOD2(GetUpdateUrls,
+               void(const uint32_t service_type, EndpointUrls& out_end_points));
+  MOCK_METHOD2(GetUpdateUrls,
+               void(const std::string& service_type,
+                    EndpointUrls& out_end_points));
+  MOCK_METHOD0(RequestPTUpdate, bool());
   MOCK_METHOD5(CheckPermissions,
                void(const PTString& app_id,
                     const PTString& hmi_level,
@@ -89,9 +90,9 @@ class MockPolicyManager : public PolicyManager {
            const std::string& policy_app_id,
            std::vector<policy::FunctionalGroupPermission>& permissions));
   MOCK_METHOD2(SetUserConsentForDevice,
-               void(const std::string& device_id, const bool is_allowed));
+               void(const std::string& device_id, bool is_allowed));
   MOCK_METHOD2(ReactOnUserDevConsentForApp,
-               bool(const std::string& app_id, bool is_device_allowed));
+               bool(const std::string app_id, bool is_device_allowed));
   MOCK_METHOD2(PTUpdatedAt, void(policy::Counters counter, int value));
 
   MOCK_METHOD3(GetInitialAppData,
@@ -155,9 +156,7 @@ class MockPolicyManager : public PolicyManager {
       GetAppRequestTypes,
       const std::vector<std::string>(const std::string policy_app_id));
   MOCK_CONST_METHOD0(GetVehicleInfo, const policy::VehicleInfo());
-  MOCK_CONST_METHOD0(GetMetaInfo, const policy::MetaInfo());
   MOCK_CONST_METHOD0(RetrieveCertificate, std::string());
-  MOCK_CONST_METHOD0(HasCertificate, bool());
   MOCK_METHOD1(SetDecryptedCertificate, void(const std::string&));
   MOCK_METHOD0(ExceededIgnitionCycles, bool());
   MOCK_METHOD0(ExceededDays, bool());
@@ -177,8 +176,7 @@ class MockPolicyManager : public PolicyManager {
   MOCK_CONST_METHOD0(get_settings, const PolicySettings&());
   MOCK_METHOD1(set_settings, void(const PolicySettings* get_settings));
 };
-}  // namespace policy_manager_test
-}  // namespace components
-}  // namespace test
 
-#endif  // SRC_COMPONENTS_INCLUDE_TEST_POLICY_MOCK_POLICY_MANAGER_H_
+}  // namespace policy_manager
+
+#endif  // SRC_COMPONENTS_POLICY_POLICY_REGULAR_TEST_INCLUDE_MOCK_POLICY_MANAGER_H_

@@ -1,5 +1,5 @@
-﻿/*
- * Copyright (c) 2014, Ford Motor Company
+/*
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,29 +29,45 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef SRC_COMPONENTS_POLICY_TEST_POLICY_INCLUDE_MOCK_UPDATE_STATUS_MANAGER_H_
-#define SRC_COMPONENTS_POLICY_TEST_POLICY_INCLUDE_MOCK_UPDATE_STATUS_MANAGER_H_
 
-#include "gmock/gmock.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_DECRYPT_CERTIFICATE_RESPONSE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_DECRYPT_CERTIFICATE_RESPONSE_H_
 
-#include "policy/update_status_manager.h"
+#include "application_manager/commands/hmi/response_from_hmi.h"
 
-namespace policy {
+namespace application_manager {
 
-class MockUpdateStatusManager : public UpdateStatusManager {
+namespace commands {
+
+/**
+ * @brief DecryptCertificateResponse command class
+ **/
+class DecryptCertificateResponse : public ResponseFromHMI {
  public:
-  MOCK_METHOD1(set_listener, void(PolicyListener* listener));
-  MOCK_METHOD1(OnUpdateSentOut, void(uint32_t update_timeout));
-  MOCK_METHOD0(OnUpdateTimeoutOccurs, void());
-  MOCK_METHOD0(OnValidUpdateReceived, void());
-  MOCK_METHOD0(OnWrongUpdateReceived, void());
-  MOCK_METHOD1(OnResetDefaultPT, void(bool is_update_required));
-  MOCK_METHOD0(OnResetRetrySequence, void());
-  MOCK_METHOD0(OnNewApplicationAdded, void());
-  MOCK_METHOD1(OnPolicyInit, void(bool is_update_required));
-  MOCK_METHOD0(GetUpdateStatus, PolicyTableStatus());
+  /**
+   * @brief DecryptCertificateResponse class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  DecryptCertificateResponse(const MessageSharedPtr& message,
+                             ApplicationManager& application_manager);
+
+  /**
+   * @brief DecryptCertificateResponse class destructor
+   **/
+  virtual ~DecryptCertificateResponse();
+
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(DecryptCertificateResponse);
 };
 
-}  // namespace policy
+}  // namespace commands
 
-#endif  // SRC_COMPONENTS_POLICY_TEST_POLICY_INCLUDE_MOCK_UPDATE_STATUS_MANAGER_H_
+}  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_DECRYPT_CERTIFICATE_RESPONSE_H_

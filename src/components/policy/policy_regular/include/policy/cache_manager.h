@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_POLICY_INCLUDE_CACHE_MANAGER_H_
-#define SRC_COMPONENTS_POLICY_INCLUDE_CACHE_MANAGER_H_
+#ifndef SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_CACHE_MANAGER_H_
+#define SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_CACHE_MANAGER_H_
 
 #include <map>
 
@@ -156,9 +156,11 @@ class CacheManager : public CacheManagerInterface {
    * @param service_type If URLs for specific service are preset,
    * return them otherwise default URLs.
    */
-  virtual void GetServiceUrls(const std::string& service_type,
-                              EndpointUrls& end_points);
+  virtual void GetUpdateUrls(const std::string& service_type,
+                             EndpointUrls& out_end_points);
 
+  virtual void GetUpdateUrls(const uint32_t service_type,
+                             EndpointUrls& out_end_points);
   /**
    * @brief GetLockScreenIcon allows to obtain lock screen icon url;
    *
@@ -714,16 +716,6 @@ class CacheManager : public CacheManagerInterface {
                                policy::Permissions& permission);
 
  private:
-  /**
-   * @brief Checks, if input string is known service represented by number, than
-   * converts input string to service number
-   * @param input Input string
-   * @param output Output service
-   * @return true, if successfully converted, otherwise - false
-   */
-  bool IsNumberService(const std::string& input, std::string& output) const;
-
- private:
   utils::SharedPtr<policy_table::Table> pt_;
   utils::SharedPtr<policy_table::Table> snapshot_;
   utils::SharedPtr<PTRepresentation> backup_;
@@ -765,4 +757,4 @@ class CacheManager : public CacheManagerInterface {
   const PolicySettings* settings_;
 };
 }  // namespace policy
-#endif  // SRC_COMPONENTS_POLICY_INCLUDE_CACHE_MANAGER_H_
+#endif  // SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_CACHE_MANAGER_H_

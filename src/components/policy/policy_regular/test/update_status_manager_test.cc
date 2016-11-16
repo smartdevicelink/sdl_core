@@ -31,7 +31,7 @@
  */
 
 #include "gtest/gtest.h"
-#include "mock_policy_listener.h"
+#include "policy/mock_policy_listener.h"
 #include "policy/policy_manager_impl.h"
 #include "policy/update_status_manager.h"
 

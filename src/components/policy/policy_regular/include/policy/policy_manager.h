@@ -30,8 +30,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_POLICY_INCLUDE_POLICY_POLICY_MANAGER_H_
-#define SRC_COMPONENTS_POLICY_INCLUDE_POLICY_POLICY_MANAGER_H_
+#ifndef SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_POLICY_MANAGER_H_
+#define SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_POLICY_MANAGER_H_
 
 #include <vector>
 #include <cstdint>
@@ -88,8 +88,10 @@ class PolicyManager : public usage_statistics::StatisticsManager {
    * @param service_type Service specifies user of URL
    * @return vector of urls
    */
-  virtual void GetServiceUrls(const std::string& service_type,
-                              EndpointUrls& end_points) = 0;
+  virtual void GetUpdateUrls(const std::string& service_type,
+                             EndpointUrls& out_end_points) = 0;
+  virtual void GetUpdateUrls(const uint32_t service_type,
+                             EndpointUrls& out_end_points) = 0;
 
   /**
    * @brief PTU is needed, for this PTS has to be formed and sent.
@@ -478,4 +480,4 @@ class PolicyManager : public usage_statistics::StatisticsManager {
 extern "C" policy::PolicyManager* CreateManager();
 extern "C" void DeleteManager(policy::PolicyManager*);
 
-#endif  // SRC_COMPONENTS_POLICY_INCLUDE_POLICY_POLICY_MANAGER_H_
+#endif  // SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_POLICY_MANAGER_H_

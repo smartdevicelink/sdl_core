@@ -29,8 +29,8 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef SRC_COMPONENTS_POLICY_TEST_POLICY_INCLUDE_MOCK_CACHE_MANAGER_H_
-#define SRC_COMPONENTS_POLICY_TEST_POLICY_INCLUDE_MOCK_CACHE_MANAGER_H_
+#ifndef SRC_COMPONENTS_POLICY_POLICY_REGULAR_TEST_INCLUDE_MOCK_CACHE_MANAGER_H_
+#define SRC_COMPONENTS_POLICY_POLICY_REGULAR_TEST_INCLUDE_MOCK_CACHE_MANAGER_H_
 
 #include <string>
 #include <vector>
@@ -66,15 +66,17 @@ class MockCacheManagerInterface : public CacheManagerInterface {
                std::vector<UserFriendlyMessage>(
                    const std::vector<std::string>& msg_codes,
                    const std::string& language));
-  MOCK_METHOD2(GetUpdateUrls, void(int service_type, EndpointUrls& end_points));
   MOCK_METHOD1(
       GetNotificationsNumber,
       policy_table::NumberOfNotificationsType(const std::string& priority));
   MOCK_CONST_METHOD2(GetPriority,
                      bool(const std::string& policy_app_id,
                           std::string& priority));
-  MOCK_METHOD2(GetServiceUrls,
-               void(const std::string& service_type, EndpointUrls& end_points));
+  MOCK_METHOD2(GetUpdateUrls,
+               void(const std::string& service_type,
+                    EndpointUrls& out_end_points));
+  MOCK_METHOD2(GetUpdateUrls,
+               void(const uint32_t service_type, EndpointUrls& out_end_points));
   MOCK_CONST_METHOD0(GetLockScreenIconUrl, std::string());
   MOCK_METHOD2(Init,
                bool(const std::string& file_name,
@@ -204,4 +206,4 @@ class MockCacheManagerInterface : public CacheManagerInterface {
 
 }  // namespace policy
 
-#endif  // SRC_COMPONENTS_POLICY_TEST_POLICY_INCLUDE_MOCK_CACHE_MANAGER_H_
+#endif  // SRC_COMPONENTS_POLICY_POLICY_REGULAR_TEST_INCLUDE_MOCK_CACHE_MANAGER_H_

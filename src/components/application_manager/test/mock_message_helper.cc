@@ -68,6 +68,12 @@ void MessageHelper::SendOnDataStreaming(protocol_handler::ServiceType service,
       service, available, app_mngr);
 }
 
+void MessageHelper::SendDecryptCertificateToHMI(const std::string& file_name,
+                                                ApplicationManager& app_mngr) {
+  MockMessageHelper::message_helper_mock()->SendDecryptCertificateToHMI(
+      file_name, app_mngr);
+}
+
 smart_objects::SmartObjectSPtr GetHashUpdateNotification(
     const uint32_t app_id) {
   return MockMessageHelper::message_helper_mock()->GetHashUpdateNotification(

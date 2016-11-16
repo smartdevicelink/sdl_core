@@ -30,8 +30,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_POLICY_INCLUDE_POLICY_PT_REPRESENTATION_H_
-#define SRC_COMPONENTS_POLICY_INCLUDE_POLICY_PT_REPRESENTATION_H_
+#ifndef SRC_COMPONENTS_POLICY_POLICY_PREMIUM_INCLUDE_POLICY_PT_REPRESENTATION_H_
+#define SRC_COMPONENTS_POLICY_POLICY_PREMIUM_INCLUDE_POLICY_PT_REPRESENTATION_H_
 
 #include <vector>
 #include <string>
@@ -69,6 +69,14 @@ class PTRepresentation {
    * from preloaded pt file.
    */
   virtual bool IsPTPreloaded() = 0;
+
+  /**
+   * @brief GetLockScreenIcon allows to obtain lock screen icon url;
+   *
+   * @return url which point to the resourse where lock screen icon could be
+   *obtained.
+   */
+  virtual std::string GetLockScreenIconUrl() const = 0;
 
   /**
    * @brief Re-creates schema in DB, drops all data
@@ -317,4 +325,4 @@ class PTRepresentation {
 
 }  //  namespace policy
 
-#endif  // SRC_COMPONENTS_POLICY_INCLUDE_POLICY_PT_REPRESENTATION_H_
+#endif  // SRC_COMPONENTS_POLICY_POLICY_PREMIUM_INCLUDE_POLICY_PT_REPRESENTATION_H_

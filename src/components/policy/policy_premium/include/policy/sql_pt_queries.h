@@ -30,8 +30,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_POLICY_INCLUDE_POLICY_SQL_PT_QUERIES_H_
-#define SRC_COMPONENTS_POLICY_INCLUDE_POLICY_SQL_PT_QUERIES_H_
+#ifndef SRC_COMPONENTS_POLICY_POLICY_PREMIUM_INCLUDE_POLICY_SQL_PT_QUERIES_H_
+#define SRC_COMPONENTS_POLICY_POLICY_PREMIUM_INCLUDE_POLICY_SQL_PT_QUERIES_H_
 
 #include <string>
 
@@ -49,6 +49,7 @@ extern const std::string kSelectPreloaded;
 extern const std::string kIsFirstRun;
 extern const std::string kSetNotFirstRun;
 extern const std::string kSelectEndpoint;
+extern const std::string kSelectLockScreenIcon;
 extern const std::string kSelectModuleConfig;
 extern const std::string kSelectEndpoints;
 extern const std::string kSelectNotificationsPerMin;
@@ -117,4 +118,4 @@ extern const std::string kUpdateDBVersion;
 }  // namespace sql_pt
 }  // namespace policy
 
-#endif  // SRC_COMPONENTS_POLICY_INCLUDE_POLICY_SQL_PT_QUERIES_H_
+#endif  // SRC_COMPONENTS_POLICY_POLICY_PREMIUM_INCLUDE_POLICY_SQL_PT_QUERIES_H_

@@ -103,6 +103,13 @@ class MessageHelper {
    */
   static void SendOnLanguageChangeToMobile(uint32_t connection_key);
 
+  /**
+    * @brief Sends DecryptCertificate request to HMI
+    * @param file_name path to file containing encrypted certificate
+    */
+  static void SendDecryptCertificateToHMI(const std::string& file_name,
+                                          ApplicationManager& app_mngr);
+
   /*
    * @brief Retrieve vehicle data map for param name in mobile request
    * to VehicleDataType

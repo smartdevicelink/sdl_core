@@ -30,8 +30,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_POLICY_INCLUDE_POLICY_POLICY_MANAGER_IMPL_H_
-#define SRC_COMPONENTS_POLICY_INCLUDE_POLICY_POLICY_MANAGER_IMPL_H_
+#ifndef SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_POLICY_MANAGER_IMPL_H_
+#define SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_POLICY_MANAGER_IMPL_H_
 
 #include <string>
 #include <list>
@@ -65,8 +65,10 @@ class PolicyManagerImpl : public PolicyManager {
   virtual bool LoadPT(const std::string& file, const BinaryMessage& pt_content);
   virtual bool ResetPT(const std::string& file_name);
 
-  virtual void GetServiceUrls(const std::string& service_type,
-                              EndpointUrls& end_points);
+  virtual void GetUpdateUrls(const uint32_t service_type,
+                             EndpointUrls& out_end_points);
+  virtual void GetUpdateUrls(const std::string& service_type,
+                             EndpointUrls& out_end_points);
 
   virtual std::string GetLockScreenIconUrl() const;
   virtual bool RequestPTUpdate();
@@ -349,4 +351,4 @@ class PolicyManagerImpl : public PolicyManager {
 
 }  // namespace policy
 
-#endif  // SRC_COMPONENTS_POLICY_INCLUDE_POLICY_POLICY_MANAGER_IMPL_H_
+#endif  // SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_POLICY_MANAGER_IMPL_H_

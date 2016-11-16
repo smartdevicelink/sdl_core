@@ -510,15 +510,6 @@ TEST_F(PolicyManagerImplTest2,
   EXPECT_TRUE(output.list_of_undefined_params.empty());
 }
 
-TEST_F(PolicyManagerImplTest2, GetUpdateUrl) {
-  // Arrange
-  GetPTU(preloadet_pt_filename_);
-  // Check expectations
-  EXPECT_EQ("http://policies.telematics.ford.com/api/policies",
-            manager_->GetUpdateUrl(7));
-  EXPECT_EQ("", manager_->GetUpdateUrl(4));
-}
-
 TEST_F(PolicyManagerImplTest2,
        CheckPermissions_NoParamsInPT_AddAppWithAllParams_CheckRpcsInDiffLvls) {
   // File does not have parameters, so they all are permitted

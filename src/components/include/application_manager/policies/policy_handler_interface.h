@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -69,6 +69,14 @@ class PolicyHandlerInterface {
   virtual void OnPermissionsUpdated(const std::string& policy_app_id,
                                     const Permissions& permissions) = 0;
 
+#ifdef EXTENDED_PROPRIETARY
+  virtual void OnSnapshotCreated(const BinaryMessage& pt_string,
+                                 const std::vector<int>& retry_delay_seconds,
+                                 int timeout_exchange) = 0;
+#else   // EXTENDED_PROPRIETARY
+  virtual void OnSnapshotCreated(const BinaryMessage& pt_string) = 0;
+#endif  // EXTENDED_PROPRIETARY
+
   virtual bool GetPriority(const std::string& policy_app_id,
                            std::string* priority) const = 0;
   virtual void CheckPermissions(const PTString& app_id,
@@ -76,7 +84,6 @@ class PolicyHandlerInterface {
                                 const PTString& rpc,
                                 const RPCParams& rpc_params,
                                 CheckPermissionResult& result) = 0;
-
   virtual uint32_t GetNotificationsNumber(
       const std::string& priority) const = 0;
   virtual DeviceConsent GetUserConsentForDevice(
@@ -86,8 +93,10 @@ class PolicyHandlerInterface {
   virtual bool GetInitialAppData(const std::string& application_id,
                                  StringArray* nicknames = NULL,
                                  StringArray* app_hmi_types = NULL) = 0;
-  virtual void GetServiceUrls(const std::string& service_type,
-                              EndpointUrls& end_points) = 0;
+  virtual void GetUpdateUrls(const std::string& service_type,
+                             EndpointUrls& out_end_points) = 0;
+  virtual void GetUpdateUrls(const uint32_t service_type,
+                             EndpointUrls& out_end_points) = 0;
   virtual std::string GetLockScreenIconUrl() const = 0;
   virtual void ResetRetrySequence() = 0;
   virtual uint32_t NextRetryTimeout() = 0;
@@ -135,7 +144,7 @@ class PolicyHandlerInterface {
    * @param User consent from response
    */
   virtual void OnAllowSDLFunctionalityNotification(
-      bool is_allowed, const std::string& device_id) = 0;
+      bool is_allowed, const std::string& device_mac) = 0;
 
   /**
    * @brief Increment counter for ignition cycles
@@ -281,7 +290,9 @@ class PolicyHandlerInterface {
       std::map<std::string, StringArray> app_hmi_types) = 0;
 
   virtual void OnCertificateUpdated(const std::string& certificate_data) = 0;
-
+#ifdef EXTENDED_PROPRIETARY
+  virtual void OnCertificateDecrypted(bool is_succeeded) = 0;
+#endif  // EXTENDED_PROPRIETARY
   virtual bool CanUpdate() = 0;
 
   virtual void OnDeviceConsentChanged(const std::string& device_id,
@@ -360,7 +371,13 @@ class PolicyHandlerInterface {
    * @return Structure with vehicle information
    */
   virtual const VehicleInfo GetVehicleInfo() const = 0;
-
+#ifdef EXTENDED_PROPRIETARY
+  /**
+   * @brief Gets meta information
+   * @return meta information
+   */
+  virtual const policy::MetaInfo GetMetaInfo() const = 0;
+#endif  // EXTENDED_PROPRIETARY
   virtual void Increment(usage_statistics::GlobalCounterId type) = 0;
   virtual void Increment(const std::string& app_id,
                          usage_statistics::AppCounterId type) = 0;

@@ -99,7 +99,7 @@ void SQLPTRepresentation::CheckPermissions(const PTString& app_id,
   while (ret) {
     if (!query.IsNull(0)) {
       parameter = query.GetString(0);
-      result.list_of_allowed_params.push_back(parameter);
+      result.list_of_allowed_params.insert(parameter);
     }
     ret = query.Next();
   }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,7 @@
 #include "policy/usage_statistics/statistics_manager.h"
 
 #include "rpc_base/rpc_base.h"
+#include "policy/policy_table/types.h"
 #include "policy/policy_manager.h"
 
 namespace policy_table = ::rpc::policy_table_interface_base;
@@ -60,9 +61,12 @@ class MockPolicyManager : public PolicyManager {
   MOCK_METHOD2(LoadPT,
                bool(const std::string& file, const BinaryMessage& pt_content));
   MOCK_METHOD1(ResetPT, bool(const std::string& file_name));
-  MOCK_CONST_METHOD1(GetUpdateUrl, std::string(int service_type));
-  MOCK_METHOD2(GetUpdateUrls, void(int service_type, EndpointUrls& end_points));
-  MOCK_METHOD0(RequestPTUpdate, bool());
+  MOCK_METHOD2(GetUpdateUrls,
+               void(const uint32_t service_type, EndpointUrls& out_end_points));
+  MOCK_METHOD2(GetUpdateUrls,
+               void(const std::string& service_type,
+                    EndpointUrls& out_end_points));
+  MOCK_METHOD0(RequestPTUpdate, void());
   MOCK_METHOD5(CheckPermissions,
                void(const PTString& app_id,
                     const PTString& hmi_level,
@@ -75,7 +79,7 @@ class MockPolicyManager : public PolicyManager {
   MOCK_METHOD0(IncrementIgnitionCycles, void());
   MOCK_METHOD0(ForcePTExchange, std::string());
   MOCK_METHOD0(ResetRetrySequence, void());
-  MOCK_METHOD0(NextRetryTimeout, uint32_t());
+  MOCK_METHOD0(NextRetryTimeout, int());
   MOCK_METHOD0(TimeoutExchange, int());
   MOCK_METHOD0(RetrySequenceDelaysSeconds, const std::vector<int>());
   MOCK_METHOD0(OnExceededTimeout, void());
@@ -90,7 +94,7 @@ class MockPolicyManager : public PolicyManager {
   MOCK_METHOD2(SetUserConsentForDevice,
                void(const std::string& device_id, const bool is_allowed));
   MOCK_METHOD2(ReactOnUserDevConsentForApp,
-               bool(const std::string app_id, bool is_device_allowed));
+               bool(const std::string& app_id, bool is_device_allowed));
   MOCK_METHOD2(PTUpdatedAt, void(policy::Counters counter, int value));
 
   MOCK_METHOD3(GetInitialAppData,
@@ -156,6 +160,7 @@ class MockPolicyManager : public PolicyManager {
   MOCK_CONST_METHOD0(GetVehicleInfo, const policy::VehicleInfo());
   MOCK_CONST_METHOD0(GetMetaInfo, const policy::MetaInfo());
   MOCK_CONST_METHOD0(RetrieveCertificate, std::string());
+  MOCK_CONST_METHOD0(HasCertificate, bool());
   MOCK_METHOD1(SetDecryptedCertificate, void(const std::string&));
   MOCK_METHOD0(ExceededIgnitionCycles, bool());
   MOCK_METHOD0(ExceededDays, bool());
@@ -174,9 +179,6 @@ class MockPolicyManager : public PolicyManager {
                     int32_t timespan_seconds));
   MOCK_CONST_METHOD0(get_settings, const PolicySettings&());
   MOCK_METHOD1(set_settings, void(const PolicySettings* get_settings));
-  MOCK_CONST_METHOD0(GetLockScreenIconUrl, std::string());
-  MOCK_METHOD2(GetServiceUrls,
-               void(const std::string& service_type, EndpointUrls& end_points));
 };
 }  // namespace policy_manager_test
 }  // namespace components

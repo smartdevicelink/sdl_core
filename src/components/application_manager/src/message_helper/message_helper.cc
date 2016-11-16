@@ -251,6 +251,25 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateHashUpdateNotification(
   return message;
 }
 
+void MessageHelper::SendDecryptCertificateToHMI(const std::string& file_name,
+                                                ApplicationManager& app_mngr) {
+  using namespace smart_objects;
+  SmartObjectSPtr message =
+      CreateRequestObject(app_mngr.GetNextHMICorrelationID());
+  DCHECK(message);
+
+  SmartObject& object = *message;
+  object[strings::params][strings::function_id] =
+      hmi_apis::FunctionID::BasicCommunication_DecryptCertificate;
+
+  SmartObject msg_params = SmartObject(SmartType_Map);
+
+  msg_params[hmi_request::file_name] = file_name;
+  object[strings::msg_params] = msg_params;
+
+  app_mngr.ManageHMICommand(message);
+}
+
 void MessageHelper::SendHashUpdateNotification(const uint32_t app_id,
                                                ApplicationManager& app_mngr) {
   LOG4CXX_AUTO_TRACE(logger_);

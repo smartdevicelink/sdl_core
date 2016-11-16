@@ -56,7 +56,7 @@ UpdateStatusManager::~UpdateStatusManager() {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK(update_status_thread_delegate_);
   DCHECK(thread_);
-  thread_->join(threads::Thread::kForceStop);
+  thread_->join();
   delete update_status_thread_delegate_;
   threads::DeleteThread(thread_);
 }

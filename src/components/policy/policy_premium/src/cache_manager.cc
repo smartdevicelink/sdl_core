@@ -101,7 +101,7 @@ CacheManager::CacheManager(bool in_memory)
 CacheManager::~CacheManager() {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(backuper_locker_);
-  backup_thread_->join(threads::Thread::kForceStop);
+  backup_thread_->join();
   delete backup_thread_->delegate();
   threads::DeleteThread(backup_thread_);
 }
@@ -1144,23 +1144,24 @@ std::vector<UserFriendlyMessage> CacheManager::GetUserFriendlyMsg(
   return result;
 }
 
-void CacheManager::GetUpdateUrls(int service_type, EndpointUrls& end_points) {
+void CacheManager::GetUpdateUrls(const uint32_t service_type,
+                                 EndpointUrls& out_end_points) {
+  std::stringstream service_type_stream;
+  service_type_stream << (service_type <= 9 ? "0x0" : "0x") << service_type;
+
+  const std::string service_type_str = service_type_stream.str();
+  GetUpdateUrls(service_type_str, out_end_points);
+}
+
+void CacheManager::GetUpdateUrls(const std::string& service_type,
+                                 EndpointUrls& out_end_points) {
   LOG4CXX_AUTO_TRACE(logger_);
-
   CACHE_MANAGER_CHECK_VOID();
-  char buff[32];
-  sprintf(buff, "%x", service_type);
 
-  std::string serv_type(buff);
-  // TODO: remove this workaround
-  if (service_type <= 0x9) {
-    serv_type.insert(0, "0x0", 3);
-  } else {
-    serv_type.insert(0, "0x", 2);
-  }
+  LOG4CXX_DEBUG(logger_, "Search service value is: " << service_type);
 
   policy_table::ServiceEndpoints::const_iterator iter =
-      pt_->policy_table.module_config.endpoints.find(serv_type);
+      pt_->policy_table.module_config.endpoints.find(service_type);
 
   if (pt_->policy_table.module_config.endpoints.end() != iter) {
     policy_table::URLList::const_iterator url_list_iter =
@@ -1174,9 +1175,16 @@ void CacheManager::GetUpdateUrls(int service_type, EndpointUrls& end_points) {
                 (*url_list_iter).second.end(),
                 std::back_inserter(data.url));
 
-      end_points.push_back(data);
+      out_end_points.push_back(data);
     }
   }
+}
+
+std::string CacheManager::GetLockScreenIconUrl() const {
+  if (backup_) {
+    return backup_->GetLockScreenIconUrl();
+  }
+  return std::string("");
 }
 
 rpc::policy_table_interface_base::NumberOfNotificationsType

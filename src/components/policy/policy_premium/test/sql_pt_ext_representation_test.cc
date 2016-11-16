@@ -43,7 +43,7 @@
 #include "sqlite_wrapper/sql_query.h"
 #include "rpc_base/rpc_base.h"
 #include "policy/policy_table/types.h"
-#include "mock_policy_settings.h"
+#include "policy/mock_policy_settings.h"
 #include "utils/shared_ptr.h"
 #include "utils/make_shared.h"
 
