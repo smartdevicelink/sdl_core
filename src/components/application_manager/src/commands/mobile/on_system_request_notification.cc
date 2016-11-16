@@ -84,7 +84,7 @@ void OnSystemRequestNotification::Run() {
    Also in Genivi SDL we don't save the PT to file - we put it directly in
    binary_data */
 
-#if !defined(EXTENDED_POLICY) && !defined(EXTENDED_PROPRIETARY)
+#ifdef EXTENDED_POLICY
     const std::string filename =
         (*message_)[strings::msg_params][strings::file_name].asString();
 
@@ -92,7 +92,7 @@ void OnSystemRequestNotification::Run() {
     file_system::ReadBinaryFile(filename, binary_data);
     AddHeader(binary_data);
     (*message_)[strings::params][strings::binary_data] = binary_data;
-#endif  // !EXTENDED_POLICY && !EXTENDED_PROPRIETARY
+#endif //EXTENDED_POLICY
     (*message_)[strings::msg_params][strings::file_type] = FileType::JSON;
   } else if (RequestType::HTTP == request_type) {
     (*message_)[strings::msg_params][strings::file_type] = FileType::BINARY;
@@ -101,7 +101,7 @@ void OnSystemRequestNotification::Run() {
   SendNotification();
 }
 
-#if !defined(EXTENDED_POLICY) && !defined(EXTENDED_PROPRIETARY)
+#ifdef EXTENDED_POLICY
 void OnSystemRequestNotification::AddHeader(BinaryMessage& message) const {
   LOG4CXX_AUTO_TRACE(logger_);
   const int timeout = application_manager_.GetPolicyHandler().TimeoutExchange();
@@ -184,7 +184,7 @@ size_t OnSystemRequestNotification::ParsePTString(
   pt_string = result;
   return result_length;
 }
-#endif  // !EXTENDED_POLICY && !EXTENDED_PROPRIETARY
+#endif  //EXTENDED_POLICY
 
 }  // namespace mobile
 

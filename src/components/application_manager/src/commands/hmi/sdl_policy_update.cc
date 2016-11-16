@@ -44,7 +44,7 @@ SDLPolicyUpdate::~SDLPolicyUpdate() {}
 
 void SDLPolicyUpdate::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-#ifndef EXTENDED_POLICY
+#if defined(EXTENDED_POLICY) || defined(EXTENDED_PROPRIETARY)
   SendRequest();
 #else
   LOG4CXX_WARN(logger_,

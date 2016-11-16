@@ -1218,9 +1218,6 @@ TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlNotAdded) {
   EnablePolicyAndPolicyManagerMock();
   BinaryMessage msg;
   EndpointUrls test_data;
-#if !defined(EXTENDED_POLICY) && !defined(EXTENDED_PROPRIETARY)
-  ExtendedPolicyExpectations();
-#endif
 #ifdef EXTENDED_PROPRIETARY
   std::vector<int> retry_delay_seconds;
   const int timeout_exchange = 10;
@@ -1228,9 +1225,12 @@ TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlNotAdded) {
   //  EXPECT_CALL(*mock_policy_manager_, GetUpdateUrls(_, _))
   //      .WillRepeatedly(SetArgReferee<1>(test_data));
   policy_handler_.OnSnapshotCreated(msg, retry_delay_seconds, timeout_exchange);
-#else  // EXTENDED_POLICY
+#else // EXTENDED_PROPRIETARY
+#ifdef EXTENDED_POLICY
+  ExtendedPolicyExpectations();
+#endif // EXTENDED_POLICY
   policy_handler_.OnSnapshotCreated(msg);
-#endif
+#endif // EXTENDED_PROPRIETARY
 }
 
 TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlAdded) {
@@ -1240,10 +1240,9 @@ TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlAdded) {
   EndpointData data("some_data");
   test_data.push_back(data);
 
-#if !defined(EXTENDED_POLICY) && !defined(EXTENDED_PROPRIETARY)
+#ifdef EXTENDED_POLICY
   ExtendedPolicyExpectations();
 #else  // EXTENDED_POLICY
-
 #ifdef EXTENDED_PROPRIETARY
   std::vector<int> retry_delay_seconds;
   const int timeout_exchange = 10;
