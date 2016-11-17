@@ -83,6 +83,23 @@ SDLActivateAppRequest::SDLActivateAppRequest(
     : RequestFromHMI(message, application_manager) {}
 
 SDLActivateAppRequest::~SDLActivateAppRequest() {}
+
+
+uint32_t SDLActivateAppRequest::app_id() const {
+  using namespace strings;
+  if (!(*message_).keyExists(msg_params)) {
+    LOG4CXX_DEBUG(logger_, msg_params << " section is absent in the message.");
+    return 0;
+  }
+  if (!(*message_)[msg_params].keyExists(strings::app_id)) {
+    LOG4CXX_DEBUG(logger_,
+                  strings::app_id << " section is absent in the message.");
+    return 0;
+  }
+  return (*message_)[msg_params][strings::app_id].asUInt();
+}
+
+
 #ifdef EXTENDED_PROPRIETARY
 void SDLActivateAppRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -101,20 +118,6 @@ void SDLActivateAppRequest::Run() {
     application_manager_.GetPolicyHandler().OnActivateApp(application_id,
                                                           correlation_id());
   }
-}
-
-uint32_t SDLActivateAppRequest::app_id() const {
-  using namespace strings;
-  if (!(*message_).keyExists(msg_params)) {
-    LOG4CXX_DEBUG(logger_, msg_params << " section is absent in the message.");
-    return 0;
-  }
-  if (!(*message_)[msg_params].keyExists(strings::app_id)) {
-    LOG4CXX_DEBUG(logger_,
-                  strings::app_id << " section is absent in the message.");
-    return 0;
-  }
-  return (*message_)[msg_params][strings::app_id].asUInt();
 }
 
 #else  // EXTENDED_PROPRIETARY
