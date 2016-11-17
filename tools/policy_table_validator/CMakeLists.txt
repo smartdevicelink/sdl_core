@@ -8,10 +8,10 @@ include_directories(
 
 if (${EXTENDED_POLICY} STREQUAL "EXTENDED_PROPRIETARY")
   include_directories(${CMAKE_SOURCE_DIR}/src/components/policy/policy_premium/include/)
-  message("DEFINED  EXTENDED_PROPRIETARY")
+  message(STATUS "DEFINED  EXTENDED_PROPRIETARY")
 else()
   include_directories(${CMAKE_SOURCE_DIR}/src/components/policy/policy_regular/include/)
-  message("DEFAULT PARAMETER")
+  message(STATUS "DEFAULT PARAMETER")
 endif()
 
 link_directories (
