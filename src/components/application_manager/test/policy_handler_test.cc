@@ -226,9 +226,9 @@ TEST_F(PolicyHandlerTest,
 #ifdef EXTENDED_PROPRIETARY
 TEST_F(PolicyHandlerTest, ResetPolicyTable_PTNotInitialised_PTNotReset) {
   // Arrange
-  EXPECT_CALL(mock_app_manager_, event_dispatcher());
+  EXPECT_CALL(app_manager_, event_dispatcher());
   EnablePolicy();
-  EXPECT_TRUE(policy_handler_.Start());
+  EXPECT_TRUE(policy_handler_.LoadPolicyLibrary());
   // Check
   EXPECT_FALSE(policy_handler_.ResetPolicyTable());
 }
