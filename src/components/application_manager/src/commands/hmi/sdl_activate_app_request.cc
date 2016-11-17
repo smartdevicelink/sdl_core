@@ -84,7 +84,6 @@ SDLActivateAppRequest::SDLActivateAppRequest(
 
 SDLActivateAppRequest::~SDLActivateAppRequest() {}
 
-
 uint32_t SDLActivateAppRequest::app_id() const {
   using namespace strings;
   if (!(*message_).keyExists(msg_params)) {
@@ -98,7 +97,6 @@ uint32_t SDLActivateAppRequest::app_id() const {
   }
   return (*message_)[msg_params][strings::app_id].asUInt();
 }
-
 
 #ifdef EXTENDED_PROPRIETARY
 void SDLActivateAppRequest::Run() {
@@ -229,7 +227,6 @@ void SDLActivateAppRequest::on_event(const event_engine::Event& event) {
   application_manager_.GetPolicyHandler().OnActivateApp(app->app_id(),
                                                         correlation_id());
 }
-
 
 uint32_t SDLActivateAppRequest::hmi_app_id(
     const smart_objects::SmartObject& so) const {

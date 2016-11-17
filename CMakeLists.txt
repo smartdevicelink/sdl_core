@@ -240,22 +240,18 @@ if (${EXTENDED_POLICY} STREQUAL "EXTENDED_PROPRIETARY")
     set(POLICY_PATH ${COMPONENTS_DIR}/policy/policy_premium/)
     set(POLICY_GLOBAL_INCLUDE_PATH ${COMPONENTS_DIR}/include/policy/policy_premium/)
     set(POLICY_MOCK_INCLUDE_PATH ${COMPONENTS_DIR}/include/test/policy/policy_premium/)
-    message("DEFINED EXTENDED_PROPRIETARY")
+    message(STATUS "DEFINED EXTENDED_PROPRIETARY")
 else()
    if (${EXTENDED_POLICY} STREQUAL "PROPRIETARY")
      add_definitions(-DEXTENDED_POLICY)
-     message("DEFINED EXTENDED_POLICY")
+     message(STATUS "DEFINED EXTENDED_POLICY")
    else()
-     message("DEFAULT PROPRIETARY")
+     message(STATUS "DEFAULT PROPRIETARY")
    endif()
    set(POLICY_PATH ${COMPONENTS_DIR}/policy/policy_regular/)
    set(POLICY_GLOBAL_INCLUDE_PATH ${COMPONENTS_DIR}/include/policy/policy_regular/)
    set(POLICY_MOCK_INCLUDE_PATH ${COMPONENTS_DIR}/include/test/policy/policy_regular/)
 endif()
-
-
-
-#include_directories()
 
 # TODO(AK): check current OS here
 add_definitions(-DOS_POSIX)

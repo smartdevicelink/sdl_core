@@ -78,7 +78,6 @@ class RequestFromHMI : public CommandImpl, public event_engine::EventObserver {
                          hmi_apis::FunctionID::eType function_id,
                          hmi_apis::Common_Result::eType result_code);
 
-
   void FillCommonParametersOfSO(smart_objects::SmartObject* message,
                                 uint32_t correlation_id,
                                 hmi_apis::FunctionID::eType function_id);

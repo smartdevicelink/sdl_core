@@ -57,6 +57,7 @@
 #include "policy/usage_statistics/statistics_manager.h"
 #include "interfaces/MOBILE_API.h"
 #include "policy/mock_policy_settings.h"
+#include "utils/make_shared.h"
 #include "application_manager/mock_application.h"
 #include "policy/usage_statistics/mock_statistics_manager.h"
 #include "protocol_handler/mock_session_observer.h"
@@ -81,7 +82,6 @@ using ::testing::SetArgReferee;
 using ::testing::SetArgPointee;
 using ::testing::DoAll;
 using ::testing::SetArgReferee;
-using usage_statistics_test::MockStatisticsManager;
 
 class PolicyHandlerTest : public ::testing::Test {
  public:
@@ -175,6 +175,7 @@ class PolicyHandlerTest : public ::testing::Test {
 
   void ExtendedPolicyExpectations() {
     const std::vector<int> retry_sequence_delay_seconds;
+
     EXPECT_CALL(policy_settings_, policies_snapshot_file_name())
         .WillOnce(ReturnRef(kSnapshotFile_));
     EXPECT_CALL(policy_settings_, system_files_path())
@@ -183,7 +184,7 @@ class PolicyHandlerTest : public ::testing::Test {
     EXPECT_CALL(*mock_policy_manager_, TimeoutExchange()).WillOnce(Return(1));
     EXPECT_CALL(*mock_policy_manager_, RetrySequenceDelaysSeconds())
         .WillOnce(Return(retry_sequence_delay_seconds));
-#endif // EXTENDED_POLICY
+#endif  // EXTENDED_POLICY
     EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
                 SendPolicyUpdate(_, _, _, _));
   }
@@ -227,7 +228,7 @@ TEST_F(PolicyHandlerTest, ResetPolicyTable_PTNotInitialised_PTNotReset) {
   EnablePolicy();
   EXPECT_TRUE(policy_handler_.LoadPolicyLibrary());
   // Check
-  EXPECT_TRUE(policy_handler_.ResetPolicyTable());
+  EXPECT_FALSE(policy_handler_.ResetPolicyTable());
 }
 
 TEST_F(PolicyHandlerTest,
@@ -613,7 +614,35 @@ void PolicyHandlerTest::TestActivateApp(const uint32_t connection_key,
   AppPermissions permissions(kPolicyAppId_);
   permissions.appPermissionsConsentNeeded = true;
 
-  // Check expectations
+// Check expectations
+#ifdef EXTENDED_PROPRIETARY
+  const connection_handler::DeviceHandle device_handle = 0u;
+  EXPECT_CALL(app_manager_, connection_handler())
+      .WillRepeatedly(ReturnRef(conn_handler));
+  EXPECT_CALL(conn_handler, get_session_observer())
+      .WillOnce(ReturnRef(mock_session_observer));
+  utils::SharedPtr<usage_statistics_test::MockStatisticsManager>
+      mock_statistics_manager =
+          utils::MakeShared<usage_statistics_test::MockStatisticsManager>();
+  UsageStatistics usage_stats(
+      "0",
+      utils::SharedPtr<usage_statistics::StatisticsManager>(
+          mock_statistics_manager));
+  EXPECT_CALL(*application1, usage_report()).WillOnce(ReturnRef(usage_stats));
+  EXPECT_CALL(*mock_policy_manager_, GetUserConsentForDevice(_))
+      .WillOnce(Return(DeviceConsent::kDeviceHasNoConsent));
+  EXPECT_CALL(app_manager_, state_controller())
+      .WillRepeatedly(ReturnRef(mock_state_controller));
+  EXPECT_CALL(*mock_statistics_manager, Increment(_, _))
+      .WillRepeatedly(Return());
+  EXPECT_CALL(*application1, device()).WillRepeatedly(Return(device_handle));
+  EXPECT_CALL(*application1, is_audio()).WillRepeatedly(Return(false));
+  EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
+              SendOnAppPermissionsChangedNotification(kAppId_, _, _));
+  EXPECT_CALL(mock_session_observer,
+              GetDataOnDeviceID(device_handle, _, _, _, _));
+#endif  // EXTENDED_PROPRIETARY
+
   EXPECT_CALL(*application1, policy_app_id()).WillOnce(Return(kPolicyAppId_));
   EXPECT_CALL(*mock_policy_manager_, GetAppPermissionsChanges(_))
       .WillOnce(Return(permissions));
@@ -622,15 +651,6 @@ void PolicyHandlerTest::TestActivateApp(const uint32_t connection_key,
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
               SendSDLActivateAppResponse(_, _, _));
   ON_CALL(*application1, app_id()).WillByDefault(Return(kAppId_));
-
-#ifdef EXTENDED_PROPRIETARY
-  SharedPtr<MockStatisticsManager> mock_statistics_manger =
-          MakeShared<MockStatisticsManager>();
-  UsageStatistics usage_statistics(kPolicyAppId_,mock_statistics_manger);
-  ON_CALL(*application1, usage_report()).WillByDefault(ReturnRef(usage_statistics));
-  ON_CALL(*mock_policy_manager_, GetUserConsentForDevice(_)).WillByDefault(Return(DeviceConsent::kDeviceAllowed));
-#endif
-
   // Act
   policy_handler_.OnActivateApp(connection_key, correlation_id);
 }
@@ -1231,17 +1251,17 @@ TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlNotAdded) {
   EndpointUrls test_data;
 #if defined(EXTENDED_POLICY) || defined(EXTENDED_PROPRIETARY)
   ExtendedPolicyExpectations();
-#endif // EXTENDED_POLICY || EXTENDED_PROPRIETARY
+#endif  // EXTENDED_POLICY || EXTENDED_PROPRIETARY
 #ifdef EXTENDED_PROPRIETARY
   std::vector<int> retry_delay_seconds;
   const int timeout_exchange = 10;
   // TODO(AKutsan): Policy move issues
-    EXPECT_CALL(*mock_policy_manager_, GetUpdateUrls("0x07", _))
-        .WillRepeatedly(SetArgReferee<1>(test_data));
+  EXPECT_CALL(*mock_policy_manager_, GetUpdateUrls("0x07", _))
+      .WillRepeatedly(SetArgReferee<1>(test_data));
   policy_handler_.OnSnapshotCreated(msg, retry_delay_seconds, timeout_exchange);
-#else // EXTENDED_PROPRIETARY
+#else   // EXTENDED_PROPRIETARY
   policy_handler_.OnSnapshotCreated(msg);
-#endif // EXTENDED_PROPRIETARY
+#endif  // EXTENDED_PROPRIETARY
 }
 
 TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlAdded) {
@@ -1253,7 +1273,7 @@ TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlAdded) {
 
 #if defined(EXTENDED_POLICY) || defined(EXTENDED_PROPRIETARY)
   ExtendedPolicyExpectations();
-#endif // EXTENDED_POLICY || EXTENDED_PROPRIETARY
+#endif  // EXTENDED_POLICY || EXTENDED_PROPRIETARY
 
 #ifndef EXTENDED_PROPRIETARY
   EXPECT_CALL(*mock_policy_manager_, GetUpdateUrls("0x07", _))
@@ -1269,7 +1289,7 @@ TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlAdded) {
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
               SendPolicySnapshotNotification(_, _, _, _));
   EXPECT_CALL(*mock_app_, policy_app_id()).WillOnce(Return(kPolicyAppId_));
-#endif // EXTENDED_PROPRIETARY
+#endif  // EXTENDED_PROPRIETARY
   EXPECT_CALL(app_manager_, application(kAppId_))
       .WillRepeatedly(Return(mock_app_));
 #ifdef EXTENDED_PROPRIETARY

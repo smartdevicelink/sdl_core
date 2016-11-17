@@ -56,8 +56,7 @@ class PolicyEventObserver
  private:
   sync_primitives::Lock policy_handler_lock_;
   PolicyHandlerInterface* policy_handler_;
-  void ProcessOdometerEvent(
-      const smart_objects::SmartObject& message);
+  void ProcessOdometerEvent(const smart_objects::SmartObject& message);
 };
 
 }  //  namespace policy

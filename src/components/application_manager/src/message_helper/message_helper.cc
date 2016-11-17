@@ -1577,12 +1577,10 @@ void MessageHelper::SendGetUserFriendlyMessageResponse(
       obj[textBody] = it->text_body;
     }
 #endif  // EXTENDED_PROPRIETARY
-
   }
 
   app_mngr.ManageHMICommand(message);
 }
-
 
 void MessageHelper::SendGetListOfPermissionsResponse(
     const std::vector<policy::FunctionalGroupPermission>& permissions,
