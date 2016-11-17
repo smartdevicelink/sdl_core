@@ -67,14 +67,14 @@ class OnSystemRequestNotification : public CommandNotificationImpl {
   void Run() OVERRIDE;
 
  private:
-#if !defined(EXTENDED_POLICY) && !defined(EXTENDED_PROPRIETARY)
+#ifdef EXTENDED_POLICY
   /**
    * @brief Adds HTTP header to message
    * @param message Message
    */
   void AddHeader(BinaryMessage& message) const;
   size_t ParsePTString(std::string& pt_string) const;
-#endif  // EXTENDED_POLICY && !EXTENDED_PROPRIETARY
+#endif  //EXTENDED_POLICY
 
   DISALLOW_COPY_AND_ASSIGN(OnSystemRequestNotification);
 };

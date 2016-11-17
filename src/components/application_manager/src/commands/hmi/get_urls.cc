@@ -67,14 +67,14 @@ void GetUrls::Run() {
     return;
   }
 
-#if !defined(EXTENDED_POLICY) && !defined(EXTENDED_PROPRIETARY)
+#ifdef EXTENDED_POLICY
   const uint32_t policy_service = 7;
 
   if (policy_service == service_to_check) {
     ProcessPolicyServiceURLs(endpoints);
     return;
   }
-#endif  // !EXTENDED_POLICY && !EXTENDED_PROPRIETARY
+#endif  //EXTENDED_POLICY
 
   ProcessServiceURLs(endpoints);
 }
@@ -123,7 +123,7 @@ void GetUrls::SendResponseToHMI(hmi_apis::Common_Result::eType result) {
   application_manager_.ManageHMICommand(message_);
 }
 
-#if !defined(EXTENDED_POLICY) && !defined(EXTENDED_PROPRIETARY)
+#ifdef EXTENDED_POLICY
 struct PolicyAppIdComparator {
   PolicyAppIdComparator(const std::string& policy_app_id)
       : policy_app_id_(policy_app_id) {}
@@ -219,7 +219,7 @@ void GetUrls::ProcessPolicyServiceURLs(const policy::EndpointUrls& endpoints) {
   SendResponseToHMI(Common_Result::SUCCESS);
   return;
 }
-#endif  // !EXTENDED_POLICY && !EXTENDED_PROPRIETARY
+#endif  //EXTENDED_POLICY
 
 }  // namespace commands
 }  // namespace application_manager

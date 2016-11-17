@@ -1259,7 +1259,7 @@ void PolicyHandler::OnSnapshotCreated(
 void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string) {
   LOG4CXX_AUTO_TRACE(logger_);
   POLICY_LIB_CHECK_VOID();
-#ifndef EXTENDED_POLICY
+#if defined(EXTENDED_POLICY) || defined(EXTENDED_PROPRIETARY)
   std::string policy_snapshot_full_path;
   if (!SaveSnapshot(pt_string, policy_snapshot_full_path)) {
     LOG4CXX_ERROR(logger_, "Snapshot processing skipped.");
@@ -1269,7 +1269,7 @@ void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string) {
                                   policy_manager_->TimeoutExchange(),
                                   policy_manager_->RetrySequenceDelaysSeconds(),
                                   application_manager_);
-#else   // EXTENDED_POLICY
+#else  // EXTENDED_POLICY || EXTENDED_PROPRIETARY
   EndpointUrls urls;
   policy_manager_->GetUpdateUrls("0x07", urls);
 

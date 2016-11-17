@@ -41,8 +41,8 @@
 
 #include "policy/mock_cache_manager.h"
 #include "policy/mock_update_status_manager.h"
-#include "policy/policy_premium/mock_policy_listener.h"
-#include "policy/policy_premium/mock_policy_settings.h"
+#include "policy/mock_policy_listener.h"
+#include "policy/mock_policy_settings.h"
 
 namespace test {
 namespace components {

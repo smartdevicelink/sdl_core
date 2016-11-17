@@ -47,7 +47,7 @@ OnReceivedPolicyUpdate::~OnReceivedPolicyUpdate() {}
 
 void OnReceivedPolicyUpdate::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-#ifndef EXTENDED_POLICY
+#if defined(EXTENDED_POLICY) || defined(EXTENDED_PROPRIETARY)
   const std::string& file_path =
       (*message_)[strings::msg_params][hmi_notification::policyfile].asString();
   policy::BinaryMessage file_content;

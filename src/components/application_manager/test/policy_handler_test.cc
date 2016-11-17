@@ -1218,19 +1218,19 @@ TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlNotAdded) {
   EnablePolicyAndPolicyManagerMock();
   BinaryMessage msg;
   EndpointUrls test_data;
-#if !defined(EXTENDED_POLICY) && !defined(EXTENDED_PROPRIETARY)
-  ExtendedPolicyExpectations();
-#endif
 #ifdef EXTENDED_PROPRIETARY
   std::vector<int> retry_delay_seconds;
   const int timeout_exchange = 10;
   // TODO(AKutsan): Policy move issues
-  //  EXPECT_CALL(*mock_policy_manager_, GetUpdateUrls(_, _))
-  //      .WillRepeatedly(SetArgReferee<1>(test_data));
+    EXPECT_CALL(*mock_policy_manager_, GetUpdateUrls("0x07", _))
+        .WillRepeatedly(SetArgReferee<1>(test_data));
   policy_handler_.OnSnapshotCreated(msg, retry_delay_seconds, timeout_exchange);
-#else  // EXTENDED_POLICY
+#else // EXTENDED_PROPRIETARY
+#ifdef EXTENDED_POLICY
+  ExtendedPolicyExpectations();
+#endif // EXTENDED_POLICY
   policy_handler_.OnSnapshotCreated(msg);
-#endif
+#endif // EXTENDED_PROPRIETARY
 }
 
 TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlAdded) {
@@ -1240,19 +1240,20 @@ TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlAdded) {
   EndpointData data("some_data");
   test_data.push_back(data);
 
-#if !defined(EXTENDED_POLICY) && !defined(EXTENDED_PROPRIETARY)
+#ifdef EXTENDED_POLICY
   ExtendedPolicyExpectations();
 #else  // EXTENDED_POLICY
-
 #ifdef EXTENDED_PROPRIETARY
   std::vector<int> retry_delay_seconds;
   const int timeout_exchange = 10;
 
 // TODO(AKutsan): Policy move issues
-//  EXPECT_CALL(*mock_policy_manager_, GetUpdateUrls(_, _))
-//      .WillRepeatedly(SetArgReferee<1>(test_data));
+  EXPECT_CALL(*mock_policy_manager_, GetUpdateUrls("0x07", _))
+      .WillRepeatedly(SetArgReferee<1>(test_data));
 #endif  // EXTENDED_PROPRIETARY
 
+  EXPECT_CALL(*mock_policy_manager_, GetUpdateUrls("0x07", _))
+      .WillRepeatedly(SetArgReferee<1>(test_data));
   EXPECT_CALL(app_manager_, connection_handler())
       .WillOnce(ReturnRef(conn_handler));
   EXPECT_CALL(conn_handler, get_session_observer())
@@ -1267,6 +1268,8 @@ TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlAdded) {
   EXPECT_CALL(app_manager_, application(kAppId_))
       .WillRepeatedly(Return(mock_app_));
   EXPECT_CALL(*mock_app_, policy_app_id()).WillOnce(Return(kPolicyAppId_));
+
+
 #endif  // EXTENDED_POLICY
 
 #ifdef EXTENDED_PROPRIETARY
@@ -1402,14 +1405,32 @@ TEST_F(PolicyHandlerTest, OnDeviceConsentChanged_PredatePolicyNotAllowed) {
 
   policy_handler_.OnDeviceConsentChanged(kPolicyAppId_, is_allowed);
 }
+#ifdef EXTENDED_PROPRIETARY
+TEST_F(PolicyHandlerTest, OnCertificateUpdated) {
+  const std::string app_storage = "storage";
+  file_system::CreateFile("storage/certificate");
+  EXPECT_CALL(policy_settings_, app_storage_folder())
+      .WillOnce(ReturnRef(app_storage));
 
+  std::string cert_data = "data";
+
+  const std::string full_file_name =
+      file_system::GetAbsolutePath(app_storage) + "/certificate";
+  EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
+              SendDecryptCertificateToHMI(full_file_name, _));
+  policy_handler_.OnCertificateUpdated(cert_data);
+}
+#else
 TEST_F(PolicyHandlerTest, OnCertificateUpdated) {
   application_manager_test::MockPolicyHandlerObserver policy_handler_observer;
   policy_handler_.add_listener(&policy_handler_observer);
   std::string cert_data = "data";
+  EnablePolicy();
+
   EXPECT_CALL(policy_handler_observer, OnCertificateUpdated(cert_data));
   policy_handler_.OnCertificateUpdated(cert_data);
 }
+#endif
 
 TEST_F(PolicyHandlerTest, GetAppIdForSending_WithoutApps) {
   // Arrange
