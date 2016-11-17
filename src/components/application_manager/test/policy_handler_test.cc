@@ -66,6 +66,10 @@
 #include "application_manager/mock_event_dispatcher.h"
 #include "application_manager/mock_state_controller.h"
 
+#ifdef EXTENDED_PROPRIETARY
+#include "policy/usage_statistics/mock_statistics_manager.h"
+#endif  // EXTENDED_PROPRIETARY
+
 namespace test {
 namespace components {
 namespace policy_handler_test {
@@ -611,7 +615,22 @@ void PolicyHandlerTest::TestActivateApp(const uint32_t connection_key,
   AppPermissions permissions(kPolicyAppId_);
   permissions.appPermissionsConsentNeeded = true;
 
-  // Check expectations
+// Check expectations
+#ifdef EXTENDED_PROPRIETARY
+  utils::SharedPtr<usage_statistics_test::MockStatisticsManager>
+      mock_statistics_manager =
+          utils::MakeShared<usage_statistics_test::MockStatisticsManager>();
+  UsageStatistics usage_stats(
+      "0",
+      utils::SharedPtr<usage_statistics::StatisticsManager>(
+          mock_statistics_manager));
+  EXPECT_CALL(*application1, usage_report()).WillOnce(ReturnRef(usage_stats));
+  EXPECT_CALL(*mock_policy_manager_, GetUserConsentForDevice(_))
+      .WillOnce(Return(DeviceConsent::kDeviceHasNoConsent));
+  EXPECT_CALL(app_manager_, state_controller())
+      .WillRepeatedly(ReturnRef(mock_state_controller));
+#endif  // EXTENDED_PROPRIETARY
+
   EXPECT_CALL(*application1, policy_app_id()).WillOnce(Return(kPolicyAppId_));
   EXPECT_CALL(*mock_policy_manager_, GetAppPermissionsChanges(_))
       .WillOnce(Return(permissions));
@@ -620,6 +639,7 @@ void PolicyHandlerTest::TestActivateApp(const uint32_t connection_key,
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
               SendSDLActivateAppResponse(_, _, _));
   ON_CALL(*application1, app_id()).WillByDefault(Return(kAppId_));
+
   // Act
   policy_handler_.OnActivateApp(connection_key, correlation_id);
 }
@@ -1222,15 +1242,15 @@ TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlNotAdded) {
   std::vector<int> retry_delay_seconds;
   const int timeout_exchange = 10;
   // TODO(AKutsan): Policy move issues
-    EXPECT_CALL(*mock_policy_manager_, GetUpdateUrls("0x07", _))
-        .WillRepeatedly(SetArgReferee<1>(test_data));
+  EXPECT_CALL(*mock_policy_manager_, GetUpdateUrls("0x07", _))
+      .WillRepeatedly(SetArgReferee<1>(test_data));
   policy_handler_.OnSnapshotCreated(msg, retry_delay_seconds, timeout_exchange);
-#else // EXTENDED_PROPRIETARY
+#else  // EXTENDED_PROPRIETARY
 #ifdef EXTENDED_POLICY
   ExtendedPolicyExpectations();
-#endif // EXTENDED_POLICY
+#endif  // EXTENDED_POLICY
   policy_handler_.OnSnapshotCreated(msg);
-#endif // EXTENDED_PROPRIETARY
+#endif  // EXTENDED_PROPRIETARY
 }
 
 TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlAdded) {
@@ -1247,7 +1267,7 @@ TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlAdded) {
   std::vector<int> retry_delay_seconds;
   const int timeout_exchange = 10;
 
-// TODO(AKutsan): Policy move issues
+  // TODO(AKutsan): Policy move issues
   EXPECT_CALL(*mock_policy_manager_, GetUpdateUrls("0x07", _))
       .WillRepeatedly(SetArgReferee<1>(test_data));
 #endif  // EXTENDED_PROPRIETARY
@@ -1268,7 +1288,6 @@ TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlAdded) {
   EXPECT_CALL(app_manager_, application(kAppId_))
       .WillRepeatedly(Return(mock_app_));
   EXPECT_CALL(*mock_app_, policy_app_id()).WillOnce(Return(kPolicyAppId_));
-
 
 #endif  // EXTENDED_POLICY
 

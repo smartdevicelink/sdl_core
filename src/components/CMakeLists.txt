@@ -62,10 +62,10 @@ endif()
 # Policy
 if (${EXTENDED_POLICY} STREQUAL "EXTENDED_PROPRIETARY")
   add_subdirectory(./policy/policy_premium/)
-  message("INCLUDE policy_premium")
+  message(STATUS "INCLUDE policy_premium")
 else()
   add_subdirectory(./policy/policy_regular/)
-  message("INCLUDE policy_regular")
+  message(STATUS "INCLUDE policy_regular")
 endif()
 
 
