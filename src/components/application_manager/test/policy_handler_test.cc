@@ -226,7 +226,7 @@ TEST_F(PolicyHandlerTest, ResetPolicyTable_PTNotInitialised_PTNotReset) {
   EnablePolicy();
   EXPECT_TRUE(policy_handler_.LoadPolicyLibrary());
   // Check
-  EXPECT_TRUE(policy_handler_.ResetPolicyTable());
+  EXPECT_FALSE(policy_handler_.ResetPolicyTable());
 }
 
 TEST_F(PolicyHandlerTest,
