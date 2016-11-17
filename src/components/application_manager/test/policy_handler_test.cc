@@ -66,10 +66,6 @@
 #include "application_manager/mock_event_dispatcher.h"
 #include "application_manager/mock_state_controller.h"
 
-#ifdef EXTENDED_PROPRIETARY
-#include "policy/usage_statistics/mock_statistics_manager.h"
-#endif  // EXTENDED_PROPRIETARY
-
 namespace test {
 namespace components {
 namespace policy_handler_test {
