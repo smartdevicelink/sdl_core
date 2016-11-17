@@ -57,6 +57,7 @@
 #include "policy/usage_statistics/statistics_manager.h"
 #include "interfaces/MOBILE_API.h"
 #include "policy/mock_policy_settings.h"
+#include "utils/make_shared.h"
 #include "application_manager/mock_application.h"
 #include "policy/usage_statistics/mock_statistics_manager.h"
 #include "protocol_handler/mock_session_observer.h"
@@ -613,6 +614,11 @@ void PolicyHandlerTest::TestActivateApp(const uint32_t connection_key,
 
 // Check expectations
 #ifdef EXTENDED_PROPRIETARY
+  const connection_handler::DeviceHandle device_handle = 0u;
+  EXPECT_CALL(app_manager_, connection_handler())
+      .WillRepeatedly(ReturnRef(conn_handler));
+  EXPECT_CALL(conn_handler, get_session_observer())
+      .WillOnce(ReturnRef(mock_session_observer));
   utils::SharedPtr<usage_statistics_test::MockStatisticsManager>
       mock_statistics_manager =
           utils::MakeShared<usage_statistics_test::MockStatisticsManager>();
@@ -625,6 +631,14 @@ void PolicyHandlerTest::TestActivateApp(const uint32_t connection_key,
       .WillOnce(Return(DeviceConsent::kDeviceHasNoConsent));
   EXPECT_CALL(app_manager_, state_controller())
       .WillRepeatedly(ReturnRef(mock_state_controller));
+  EXPECT_CALL(*mock_statistics_manager, Increment(_, _))
+      .WillRepeatedly(Return());
+  EXPECT_CALL(*application1, device()).WillRepeatedly(Return(device_handle));
+  EXPECT_CALL(*application1, is_audio()).WillRepeatedly(Return(false));
+  EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
+              SendOnAppPermissionsChangedNotification(kAppId_, _, _));
+  EXPECT_CALL(mock_session_observer,
+              GetDataOnDeviceID(device_handle, _, _, _, _));
 #endif  // EXTENDED_PROPRIETARY
 
   EXPECT_CALL(*application1, policy_app_id()).WillOnce(Return(kPolicyAppId_));
