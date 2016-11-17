@@ -81,6 +81,7 @@ using ::testing::SetArgReferee;
 using ::testing::SetArgPointee;
 using ::testing::DoAll;
 using ::testing::SetArgReferee;
+using usage_statistics_test::MockStatisticsManager;
 
 class PolicyHandlerTest : public ::testing::Test {
  public:
@@ -620,6 +621,15 @@ void PolicyHandlerTest::TestActivateApp(const uint32_t connection_key,
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
               SendSDLActivateAppResponse(_, _, _));
   ON_CALL(*application1, app_id()).WillByDefault(Return(kAppId_));
+
+#ifdef EXTENDED_PROPRIETARY
+  SharedPtr<MockStatisticsManager> mock_statistics_manger =
+          MakeShared<MockStatisticsManager>();
+  UsageStatistics usage_statistics(kPolicyAppId_,mock_statistics_manger);
+  ON_CALL(*application1, usage_report()).WillByDefault(ReturnRef(usage_statistics));
+  ON_CALL(*mock_policy_manager_, GetUserConsentForDevice(_)).WillByDefault(Return(DeviceConsent::kDeviceAllowed));
+#endif
+
   // Act
   policy_handler_.OnActivateApp(connection_key, correlation_id);
 }
