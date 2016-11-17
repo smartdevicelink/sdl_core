@@ -1222,8 +1222,8 @@ TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlNotAdded) {
   std::vector<int> retry_delay_seconds;
   const int timeout_exchange = 10;
   // TODO(AKutsan): Policy move issues
-  //  EXPECT_CALL(*mock_policy_manager_, GetUpdateUrls(_, _))
-  //      .WillRepeatedly(SetArgReferee<1>(test_data));
+    EXPECT_CALL(*mock_policy_manager_, GetUpdateUrls("0x07", _))
+        .WillRepeatedly(SetArgReferee<1>(test_data));
   policy_handler_.OnSnapshotCreated(msg, retry_delay_seconds, timeout_exchange);
 #else // EXTENDED_PROPRIETARY
 #ifdef EXTENDED_POLICY
@@ -1248,7 +1248,7 @@ TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlAdded) {
   const int timeout_exchange = 10;
 
 // TODO(AKutsan): Policy move issues
-  EXPECT_CALL(*mock_policy_manager_, GetUpdateUrls(_, _))
+  EXPECT_CALL(*mock_policy_manager_, GetUpdateUrls("0x07", _))
       .WillRepeatedly(SetArgReferee<1>(test_data));
 #endif  // EXTENDED_PROPRIETARY
 
