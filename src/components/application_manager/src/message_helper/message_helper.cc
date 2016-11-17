@@ -1470,12 +1470,12 @@ void MessageHelper::SendSDLActivateAppResponse(
         GetPriorityCode(permissions.priority);
   }
 
+  app_mngr.ManageHMICommand(message);
+
   // If application is revoked it should not be activated
   if (permissions.appRevoked || !permissions.isSDLAllowed) {
     return;
   }
-
-  app_mngr.ManageHMICommand(message);
 }
 
 void MessageHelper::SendOnSDLConsentNeeded(
@@ -1515,15 +1515,16 @@ void MessageHelper::SendPolicyUpdate(const std::string& file_path,
   }
   app_mngr.ManageHMICommand(message);
 }
-
 void MessageHelper::SendGetUserFriendlyMessageResponse(
     const std::vector<policy::UserFriendlyMessage>& msg,
-    uint32_t correlation_id,
+    const uint32_t correlation_id,
     ApplicationManager& app_mngr) {
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObjectSPtr message =
-      utils::MakeShared<smart_objects::SmartObject>(
-          smart_objects::SmartType_Map);
+      new smart_objects::SmartObject(smart_objects::SmartType_Map);
+  if (!message) {
+    return;
+  }
 
   (*message)[strings::params][strings::function_id] =
       hmi_apis::FunctionID::SDL_GetUserFriendlyMessage;
@@ -1544,6 +1545,11 @@ void MessageHelper::SendGetUserFriendlyMessageResponse(
   smart_objects::SmartObject& user_friendly_messages =
       (*message)[strings::msg_params][messages];
 
+  const std::string tts = "ttsString";
+  const std::string label = "label";
+  const std::string line1 = "line1";
+  const std::string line2 = "line2";
+  const std::string textBody = "textBody";
   const std::string message_code = "messageCode";
 
   std::vector<policy::UserFriendlyMessage>::const_iterator it = msg.begin();
@@ -1554,10 +1560,27 @@ void MessageHelper::SendGetUserFriendlyMessageResponse(
 
     smart_objects::SmartObject& obj = user_friendly_messages[index];
     obj[message_code] = it->message_code;
+
+    if (!it->tts.empty()) {
+      obj[tts] = it->tts;
+    }
+    if (!it->label.empty()) {
+      obj[label] = it->label;
+    }
+    if (!it->line1.empty()) {
+      obj[line1] = it->line1;
+    }
+    if (!it->line2.empty()) {
+      obj[line2] = it->line2;
+    }
+    if (!it->text_body.empty()) {
+      obj[textBody] = it->text_body;
+    }
   }
 
   app_mngr.ManageHMICommand(message);
 }
+
 
 void MessageHelper::SendGetListOfPermissionsResponse(
     const std::vector<policy::FunctionalGroupPermission>& permissions,

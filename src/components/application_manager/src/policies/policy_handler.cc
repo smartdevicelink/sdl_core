@@ -300,8 +300,6 @@ bool PolicyHandler::PolicyEnabled() const {
   return get_settings().enable_policy();
 }
 
-#ifdef EXTENDED_PROPRIETARY
-#else  // EXTENDED_PROPRIETARY
 bool PolicyHandler::LoadPolicyLibrary() {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoWriteLock lock(policy_manager_lock_);
@@ -349,7 +347,6 @@ bool PolicyHandler::CreateManager() {
 const PolicySettings& PolicyHandler::get_settings() const {
   return settings_;
 }
-#endif  // EXTENDED_PROPRIETARY
 
 bool PolicyHandler::InitPolicyTable() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -407,6 +404,7 @@ uint32_t PolicyHandler::GetAppIdForSending() const {
       }
     }
   }
+  LOG4CXX_INFO(logger_, "No app to send");
   return 0;
 }
 
