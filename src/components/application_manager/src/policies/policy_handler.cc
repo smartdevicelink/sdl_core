@@ -296,6 +296,10 @@ PolicyHandler::PolicyHandler(const PolicySettings& settings,
 
 PolicyHandler::~PolicyHandler() {}
 
+bool PolicyHandler::PolicyEnabled() const {
+  return get_settings().enable_policy();
+}
+
 bool PolicyHandler::LoadPolicyLibrary() {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoWriteLock lock(policy_manager_lock_);
@@ -321,10 +325,6 @@ bool PolicyHandler::LoadPolicyLibrary() {
   }
 
   return policy_manager_.valid();
-}
-
-bool PolicyHandler::PolicyEnabled() const {
-  return get_settings().enable_policy();
 }
 
 bool PolicyHandler::CreateManager() {
@@ -1255,11 +1255,10 @@ void PolicyHandler::OnSnapshotCreated(
   }
 }
 #else  // EXTENDED_PROPRIETARY
-
 void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string) {
   LOG4CXX_AUTO_TRACE(logger_);
   POLICY_LIB_CHECK_VOID();
-#if defined(EXTENDED_POLICY) || defined(EXTENDED_PROPRIETARY)
+#ifdef EXTENDED_POLICY
   std::string policy_snapshot_full_path;
   if (!SaveSnapshot(pt_string, policy_snapshot_full_path)) {
     LOG4CXX_ERROR(logger_, "Snapshot processing skipped.");
@@ -1269,7 +1268,8 @@ void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string) {
                                   policy_manager_->TimeoutExchange(),
                                   policy_manager_->RetrySequenceDelaysSeconds(),
                                   application_manager_);
-#else  // EXTENDED_POLICY || EXTENDED_PROPRIETARY
+#else   // EXTENDED_POLICY
+  LOG4CXX_ERROR(logger_, "HTTP policy");
   EndpointUrls urls;
   policy_manager_->GetUpdateUrls("0x07", urls);
 

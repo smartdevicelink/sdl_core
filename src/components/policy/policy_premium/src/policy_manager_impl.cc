@@ -269,9 +269,11 @@ void PolicyManagerImpl::StartPTExchange() {
                  "is in progress.");
     return;
   }
-
+  LOG4CXX_INFO(logger_, "Policy want to  call RequestPTUpdate");
   if (listener_ && listener_->CanUpdate()) {
+    LOG4CXX_INFO(logger_, "Listener CanUpdate");
     if (update_status_manager_.IsUpdateRequired()) {
+      LOG4CXX_INFO(logger_, "IsUpdateRequired");
       RequestPTUpdate();
     }
   }

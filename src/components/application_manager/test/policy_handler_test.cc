@@ -180,9 +180,11 @@ class PolicyHandlerTest : public ::testing::Test {
         .WillOnce(ReturnRef(kSnapshotFile_));
     EXPECT_CALL(policy_settings_, system_files_path())
         .WillOnce(ReturnRef(kSnapshotStorage_));
+#ifdef EXTENDED_POLICY
     EXPECT_CALL(*mock_policy_manager_, TimeoutExchange()).WillOnce(Return(1));
     EXPECT_CALL(*mock_policy_manager_, RetrySequenceDelaysSeconds())
         .WillOnce(Return(retry_sequence_delay_seconds));
+#endif  // EXTENDED_POLICY
     EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
                 SendPolicyUpdate(_, _, _, _));
   }
@@ -649,7 +651,6 @@ void PolicyHandlerTest::TestActivateApp(const uint32_t connection_key,
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
               SendSDLActivateAppResponse(_, _, _));
   ON_CALL(*application1, app_id()).WillByDefault(Return(kAppId_));
-
   // Act
   policy_handler_.OnActivateApp(connection_key, correlation_id);
 }
@@ -1248,6 +1249,9 @@ TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlNotAdded) {
   EnablePolicyAndPolicyManagerMock();
   BinaryMessage msg;
   EndpointUrls test_data;
+#if defined(EXTENDED_POLICY) || defined(EXTENDED_PROPRIETARY)
+  ExtendedPolicyExpectations();
+#endif  // EXTENDED_POLICY || EXTENDED_PROPRIETARY
 #ifdef EXTENDED_PROPRIETARY
   std::vector<int> retry_delay_seconds;
   const int timeout_exchange = 10;
@@ -1255,10 +1259,7 @@ TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlNotAdded) {
   EXPECT_CALL(*mock_policy_manager_, GetUpdateUrls("0x07", _))
       .WillRepeatedly(SetArgReferee<1>(test_data));
   policy_handler_.OnSnapshotCreated(msg, retry_delay_seconds, timeout_exchange);
-#else  // EXTENDED_PROPRIETARY
-#ifdef EXTENDED_POLICY
-  ExtendedPolicyExpectations();
-#endif  // EXTENDED_POLICY
+#else   // EXTENDED_PROPRIETARY
   policy_handler_.OnSnapshotCreated(msg);
 #endif  // EXTENDED_PROPRIETARY
 }
@@ -1270,38 +1271,30 @@ TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlAdded) {
   EndpointData data("some_data");
   test_data.push_back(data);
 
-#ifdef EXTENDED_POLICY
+#if defined(EXTENDED_POLICY) || defined(EXTENDED_PROPRIETARY)
   ExtendedPolicyExpectations();
-#else  // EXTENDED_POLICY
-#ifdef EXTENDED_PROPRIETARY
-  std::vector<int> retry_delay_seconds;
-  const int timeout_exchange = 10;
+#endif  // EXTENDED_POLICY || EXTENDED_PROPRIETARY
 
-  // TODO(AKutsan): Policy move issues
+#ifndef EXTENDED_PROPRIETARY
   EXPECT_CALL(*mock_policy_manager_, GetUpdateUrls("0x07", _))
       .WillRepeatedly(SetArgReferee<1>(test_data));
-#endif  // EXTENDED_PROPRIETARY
 
-  EXPECT_CALL(*mock_policy_manager_, GetUpdateUrls("0x07", _))
-      .WillRepeatedly(SetArgReferee<1>(test_data));
   EXPECT_CALL(app_manager_, connection_handler())
       .WillOnce(ReturnRef(conn_handler));
   EXPECT_CALL(conn_handler, get_session_observer())
       .WillOnce(ReturnRef(mock_session_observer));
   EXPECT_CALL(*mock_app_, device()).WillOnce(Return(0));
   EXPECT_CALL(app_manager_, applications()).WillOnce(Return(app_set));
+  GetAppIDForSending();
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
               SendPolicySnapshotNotification(_, _, _, _));
-  // Check expectations for get app id
-  GetAppIDForSending();
-  // Expectations
+  EXPECT_CALL(*mock_app_, policy_app_id()).WillOnce(Return(kPolicyAppId_));
+#endif  // EXTENDED_PROPRIETARY
   EXPECT_CALL(app_manager_, application(kAppId_))
       .WillRepeatedly(Return(mock_app_));
-  EXPECT_CALL(*mock_app_, policy_app_id()).WillOnce(Return(kPolicyAppId_));
-
-#endif  // EXTENDED_POLICY
-
 #ifdef EXTENDED_PROPRIETARY
+  std::vector<int> retry_delay_seconds;
+  const int timeout_exchange = 10;
   policy_handler_.OnSnapshotCreated(msg, retry_delay_seconds, timeout_exchange);
 #else   // EXTENDED_PROPRIETARY
   policy_handler_.OnSnapshotCreated(msg);
