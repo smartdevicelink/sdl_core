@@ -1,5 +1,0 @@
-/*! \page info Project information
-
-Here will be general information about project
-
-*/
