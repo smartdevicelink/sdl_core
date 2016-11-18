@@ -92,7 +92,7 @@ void OnSystemRequestNotification::Run() {
     file_system::ReadBinaryFile(filename, binary_data);
     AddHeader(binary_data);
     (*message_)[strings::params][strings::binary_data] = binary_data;
-#endif
+#endif //EXTENDED_POLICY
     (*message_)[strings::msg_params][strings::file_type] = FileType::JSON;
   } else if (RequestType::HTTP == request_type) {
     (*message_)[strings::msg_params][strings::file_type] = FileType::BINARY;
@@ -184,7 +184,7 @@ size_t OnSystemRequestNotification::ParsePTString(
   pt_string = result;
   return result_length;
 }
-#endif
+#endif  //EXTENDED_POLICY
 
 }  // namespace mobile
 
