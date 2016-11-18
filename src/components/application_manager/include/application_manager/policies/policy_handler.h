@@ -30,8 +30,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_POLICY_HANDLER_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_POLICY_HANDLER_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_POLICIES_POLICY_HANDLER_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_POLICIES_POLICY_HANDLER_H_
 
 #include <string>
 #include <map>
@@ -92,8 +92,13 @@ class PolicyHandler : public PolicyHandlerInterface,
   virtual void OnPermissionsUpdated(const std::string& policy_app_id,
                                     const Permissions& permissions) OVERRIDE;
 
-  virtual void OnSnapshotCreated(const BinaryMessage& pt_string) OVERRIDE;
-
+#ifdef EXTENDED_PROPRIETARY
+  void OnSnapshotCreated(const BinaryMessage& pt_string,
+                         const std::vector<int>& retry_delay_seconds,
+                         int timeout_exchange) OVERRIDE;
+#else   // EXTENDED_PROPRIETARY
+  void OnSnapshotCreated(const BinaryMessage& pt_string) OVERRIDE;
+#endif  // EXTENDED_PROPRIETARY
   virtual bool GetPriority(const std::string& policy_app_id,
                            std::string* priority) const OVERRIDE;
   void CheckPermissions(const PTString& app_id,
@@ -110,8 +115,10 @@ class PolicyHandler : public PolicyHandlerInterface,
   bool GetInitialAppData(const std::string& application_id,
                          StringArray* nicknames = NULL,
                          StringArray* app_hmi_types = NULL) OVERRIDE;
-  void GetServiceUrls(const std::string& service_type,
-                      EndpointUrls& end_points) OVERRIDE;
+  void GetUpdateUrls(const std::string& service_type,
+                     EndpointUrls& out_end_points) OVERRIDE;
+  void GetUpdateUrls(const uint32_t service_type,
+                     EndpointUrls& out_end_points) OVERRIDE;
   virtual std::string GetLockScreenIconUrl() const OVERRIDE;
   void ResetRetrySequence() OVERRIDE;
   uint32_t NextRetryTimeout() OVERRIDE;
@@ -154,7 +161,7 @@ class PolicyHandler : public PolicyHandlerInterface,
    * @param User consent from response
    */
   void OnAllowSDLFunctionalityNotification(
-      bool is_allowed, const std::string& device_id) OVERRIDE;
+      bool is_allowed, const std::string& device_mac) OVERRIDE;
 
   /**
    * @brief Increment counter for ignition cycles
@@ -300,7 +307,9 @@ class PolicyHandler : public PolicyHandlerInterface,
 
   virtual void OnCertificateUpdated(
       const std::string& certificate_data) OVERRIDE;
-
+#ifdef EXTENDED_PROPRIETARY
+  void OnCertificateDecrypted(bool is_succeeded) OVERRIDE;
+#endif  // EXTENDED_PROPRIETARY
   virtual bool CanUpdate() OVERRIDE;
 
   virtual void OnDeviceConsentChanged(const std::string& device_id,
@@ -357,6 +366,15 @@ class PolicyHandler : public PolicyHandlerInterface,
   void OnAppsSearchCompleted() OVERRIDE;
 
   /**
+   * @brief OnAppRegisteredOnMobile allows to handle event when application were
+   * succesfully registered on mobile device.
+   * It will send OnAppPermissionSend notification and will try to start PTU.
+   *
+   * @param application_id registered application.
+   */
+  void OnAppRegisteredOnMobile(const std::string& application_id) OVERRIDE;
+
+  /**
    * @brief Checks if certain request type is allowed for application
    * @param policy_app_id Unique applicaion id
    * @param type Request type
@@ -380,14 +398,13 @@ class PolicyHandler : public PolicyHandlerInterface,
    */
   const VehicleInfo GetVehicleInfo() const OVERRIDE;
 
+#ifdef EXTENDED_PROPRIETARY
   /**
-   * @brief OnAppRegisteredOnMobile allows to handle event when application were
-   * succesfully registered on mobile device.
-   * It will send OnAppPermissionSend notification and will try to start PTU.
-   *
-   * @param application_id registered application.
+   * @brief Gets meta information
+   * @return meta information
    */
-  void OnAppRegisteredOnMobile(const std::string& application_id) OVERRIDE;
+  const policy::MetaInfo GetMetaInfo() const OVERRIDE;
+#endif  // EXTENDED_PROPRIETARY
 
   // TODO(AKutsan) REMOVE THIS UGLY HOTFIX
   virtual void Increment(usage_statistics::GlobalCounterId type) OVERRIDE;
@@ -466,22 +483,22 @@ class PolicyHandler : public PolicyHandlerInterface,
       policy_handler_->AsyncRun(new StatisticsDelegate(*policy_handler_, type));
     }
 
-    void Increment(const std::string& app_id,
-                   usage_statistics::AppCounterId type) {
+    virtual void Increment(const std::string& app_id,
+                           usage_statistics::AppCounterId type) {
       policy_handler_->AsyncRun(
           new StatisticsDelegate(*policy_handler_, app_id, type));
     }
 
-    void Set(const std::string& app_id,
-             usage_statistics::AppInfoId type,
-             const std::string& value) {
+    virtual void Set(const std::string& app_id,
+                     usage_statistics::AppInfoId type,
+                     const std::string& value) {
       policy_handler_->AsyncRun(
           new StatisticsDelegate(*policy_handler_, app_id, type, value));
     }
 
-    void Add(const std::string& app_id,
-             usage_statistics::AppStopwatchId type,
-             int32_t timespan_seconds) {
+    virtual void Add(const std::string& app_id,
+                     usage_statistics::AppStopwatchId type,
+                     int32_t timespan_seconds) {
       policy_handler_->AsyncRun(new StatisticsDelegate(
           *policy_handler_, app_id, type, timespan_seconds));
     }
@@ -489,7 +506,9 @@ class PolicyHandler : public PolicyHandlerInterface,
    private:
     PolicyHandler* policy_handler_;
   };
-
+#ifdef EXTENDED_PROPRIETARY
+  void OnEmptyCertificateArrived() const;
+#endif  // EXTENDED_PROPRIETARY
   bool SaveSnapshot(const BinaryMessage& pt_string, std::string& snap_path);
   static const std::string kLibrary;
   mutable sync_primitives::RWLock policy_manager_lock_;
@@ -508,7 +527,7 @@ class PolicyHandler : public PolicyHandlerInterface,
 
   typedef std::list<PolicyHandlerObserver*> HandlersCollection;
   HandlersCollection listeners_;
-  sync_primitives::Lock listeners_lock_;
+  mutable sync_primitives::Lock listeners_lock_;
 
   /**
    * @brief Application-to-device map is used for getting/setting user consents
