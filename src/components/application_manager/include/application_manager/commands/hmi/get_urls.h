@@ -69,7 +69,7 @@ class GetUrls : public RequestFromHMI {
    * @param endpoints Endpoints section of policy table
    */
   void ProcessPolicyServiceURLs(const policy::EndpointUrls& endpoints);
-#endif  //EXTENDED_POLICY
+#endif  // EXTENDED_POLICY
 
   /**
    * @brief Process URLs collecting for service
