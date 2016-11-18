@@ -300,7 +300,7 @@ class Array : public std::vector<T>, public CompositeType {
   Json::Value ToJsonValue() const;
   void ToDbusWriter(dbus::MessageWriter* writer) const;
 
-  bool is_valid() const;
+  virtual bool is_valid() const;
   bool is_initialized() const;
   void ReportErrors(ValidationReport* report) const;
   virtual void SetPolicyTableType(
