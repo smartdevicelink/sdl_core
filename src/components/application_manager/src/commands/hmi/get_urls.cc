@@ -74,7 +74,7 @@ void GetUrls::Run() {
     ProcessPolicyServiceURLs(endpoints);
     return;
   }
-#endif  //EXTENDED_POLICY
+#endif  // EXTENDED_POLICY
 
   ProcessServiceURLs(endpoints);
 }
@@ -219,7 +219,7 @@ void GetUrls::ProcessPolicyServiceURLs(const policy::EndpointUrls& endpoints) {
   SendResponseToHMI(Common_Result::SUCCESS);
   return;
 }
-#endif  //EXTENDED_POLICY
+#endif  // EXTENDED_POLICY
 
 }  // namespace commands
 }  // namespace application_manager

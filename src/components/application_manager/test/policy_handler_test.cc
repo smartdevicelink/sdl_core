@@ -1309,13 +1309,14 @@ TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlAdded) {
 
   ExtendedPolicyExpectations();
 
-  EXPECT_CALL(*MockMessageHelper::message_helper_mock(), SendPolicySnapshotNotification(_, _, _, _));
+  EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
+              SendPolicySnapshotNotification(_, _, _, _));
   EXPECT_CALL(app_manager_, application(kAppId_))
       .WillRepeatedly(Return(mock_app_));
 
   policy_handler_.OnSnapshotCreated(msg, retry_delay_seconds, timeout_exchange);
 }
-#else //EXTENDED_PROPRIETARY
+#else  // EXTENDED_PROPRIETARY
 TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlAdded) {
   EnablePolicyAndPolicyManagerMock();
   BinaryMessage msg;
@@ -1346,7 +1347,7 @@ TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlAdded) {
 
   policy_handler_.OnSnapshotCreated(msg);
 }
-#endif // EXTENDED_PROPRIETARY
+#endif  // EXTENDED_PROPRIETARY
 
 TEST_F(PolicyHandlerTest,
        OnAllowSDLFunctionalityNotification_Allowed_WithoutDevId_AppActivated) {
