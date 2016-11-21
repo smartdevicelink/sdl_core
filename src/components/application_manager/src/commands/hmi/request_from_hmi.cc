@@ -77,9 +77,9 @@ void RequestFromHMI::SendResponse(
 }
 
 void RequestFromHMI::SendErrorResponse(
-    uint32_t correlation_id,
-    hmi_apis::FunctionID::eType function_id,
-    hmi_apis::Common_Result::eType result_code) {
+    const uint32_t correlation_id,
+    const hmi_apis::FunctionID::eType function_id,
+    const hmi_apis::Common_Result::eType result_code) {
   smart_objects::SmartObject* message =
       new smart_objects::SmartObject(smart_objects::SmartType_Map);
   FillCommonParametersOfSO(message, correlation_id, function_id);
