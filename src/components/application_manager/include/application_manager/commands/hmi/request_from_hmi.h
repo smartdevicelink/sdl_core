@@ -69,7 +69,7 @@ class RequestFromHMI : public CommandImpl, public event_engine::EventObserver {
    * @param function_id the function id for which response will be sent
    * @param result_code the result code.
    */
-  void SendErrorResponse(uint32_t correlation_id,
+  void SendErrorResponse(const uint32_t correlation_id,
                          hmi_apis::FunctionID::eType function_id,
                          hmi_apis::Common_Result::eType result_code);
 
