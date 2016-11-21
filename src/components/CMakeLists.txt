@@ -65,7 +65,7 @@ if (${EXTENDED_POLICY} STREQUAL "EXTENDED_PROPRIETARY")
   message(STATUS "Use premium policy")
 else()
   add_subdirectory(./policy/policy_regular/)
-  message(STATUS "Use promium policy")
+  message(STATUS "Use regular policy")
 endif()
 
 # --- Validated types
