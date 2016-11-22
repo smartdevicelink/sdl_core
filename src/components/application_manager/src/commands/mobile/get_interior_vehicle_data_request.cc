@@ -43,20 +43,15 @@ namespace application_manager {
 
 namespace commands {
 
-
 GetInteriorVehicleDataRequest::GetInteriorVehicleDataRequest(
     const MessageSharedPtr& message)
- : CommandRequestImpl(message)
-{
+    : CommandRequestImpl(message) {
   subscribe_on_event(hmi_apis::FunctionID::UI_OnResetTimeout);
 }
 
-GetInteriorVehicleDataRequest::~GetInteriorVehicleDataRequest()
-{
-}
+GetInteriorVehicleDataRequest::~GetInteriorVehicleDataRequest() {}
 
-bool GetInteriorVehicleDataRequest::Init()
-{
+bool GetInteriorVehicleDataRequest::Init() {
   /* Timeout in milliseconds.
      If omitted a standard value of 10000 milliseconds is used.*/
   if ((*message_)[strings::msg_params].keyExists(strings::timeout)) {
@@ -70,12 +65,11 @@ bool GetInteriorVehicleDataRequest::Init()
   return true;
 }
 
-void GetInteriorVehicleDataRequest::Run()
-{
+void GetInteriorVehicleDataRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationSharedPtr app = application_manager::ApplicationManagerImpl::instance()
-      ->application((*message_)[strings::params][strings::connection_key].asUInt());
+  ApplicationSharedPtr app = application_manager_.application(
+      (*message_)[strings::params][strings::connection_key].asUInt());
 
   if (!app) {
     LOG4CXX_ERROR(logger_, "Application is not registered");
@@ -83,38 +77,35 @@ void GetInteriorVehicleDataRequest::Run()
     return;
   }
 
-  if((*message_)[strings::msg_params].keyExists("subscribe")){
-    if((*message_)[strings::msg_params]["subscribe"].asBool()){
+  if ((*message_)[strings::msg_params].keyExists("subscribe")) {
+    if ((*message_)[strings::msg_params]["subscribe"].asBool()) {
+      smart_objects::SmartObject module =
+          smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-      smart_objects::SmartObject module = smart_objects::SmartObject(
-        smart_objects::SmartType_Map);
-      
       module = (*message_)[strings::msg_params]["moduleDescription"];
-      if(!(app->IsSubscribedToInteriorVehicleData(module)))
+      if (!(app->IsSubscribedToInteriorVehicleData(module)))
         app->SubscribeToInteriorVehicleData(module);
-    }
-    else if(!(*message_)[strings::msg_params]["subscribe"].asBool()){
+    } else if (!(*message_)[strings::msg_params]["subscribe"].asBool()) {
+      smart_objects::SmartObject module =
+          smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-      smart_objects::SmartObject module = smart_objects::SmartObject(
-        smart_objects::SmartType_Map);
-      
       module = (*message_)[strings::msg_params]["moduleDescription"];
-      if((app->IsSubscribedToInteriorVehicleData(module)))
+      if ((app->IsSubscribedToInteriorVehicleData(module)))
         app->UnsubscribeFromInteriorVehicleData(module);
     }
   }
 
-  //Construct msg_params to be sent to HMI
+  // Construct msg_params to be sent to HMI
 
-  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-      smart_objects::SmartType_Map);
+  smart_objects::SmartObject msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
 
   msg_params = (*message_)[strings::msg_params];
   msg_params[strings::app_id] = app->app_id();
 
-  SendHMIRequest(hmi_apis::FunctionID::RC_GetInteriorVehicleData, &msg_params, true);
+  SendHMIRequest(
+      hmi_apis::FunctionID::RC_GetInteriorVehicleData, &msg_params, true);
 }
-
 
 void GetInteriorVehicleDataRequest::on_event(const event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -123,31 +114,30 @@ void GetInteriorVehicleDataRequest::on_event(const event_engine::Event& event) {
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_OnResetTimeout: {
       LOG4CXX_INFO(logger_, "Received UI_OnResetTimeout event");
-      ApplicationManagerImpl::instance()->updateRequestTimeout(connection_key(),
-          correlation_id(),
-          default_timeout());
+      application_manager_.updateRequestTimeout(
+          connection_key(), correlation_id(), default_timeout());
       break;
     }
     case hmi_apis::FunctionID::RC_GetInteriorVehicleData: {
       LOG4CXX_INFO(logger_, "Received RC_GetInteriorVehicleData event");
 
       mobile_apis::Result::eType result_code =
-          static_cast<mobile_apis::Result::eType>
-          (message[strings::params][hmi_response::code].asInt());
+          static_cast<mobile_apis::Result::eType>(
+              message[strings::params][hmi_response::code].asInt());
       HMICapabilities& hmi_capabilities =
-          ApplicationManagerImpl::instance()->hmi_capabilities();
+          application_manager_.hmi_capabilities();
       bool result = false;
       if (mobile_apis::Result::SUCCESS == result_code) {
         result = true;
       } else if ((mobile_apis::Result::UNSUPPORTED_RESOURCE == result_code) &&
-          hmi_capabilities.is_ui_cooperating()) {
+                 hmi_capabilities.is_ui_cooperating()) {
         result = true;
       }
       SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
       break;
     }
     default: {
-      LOG4CXX_ERROR(logger_,"Received unknown event" << event.id());
+      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
       break;
     }
   }

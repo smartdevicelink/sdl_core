@@ -1,6 +1,6 @@
 /*
 
- Copyright (c) 2013, Ford Motor Company
+ Copyright (c) 2016, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -78,7 +78,8 @@ void RegisterAppInterfaceResponse::Run() {
 
   SetHeartBeatTimeout(connection_key(), application->policy_app_id());
 
-  // Default HMI level should be set before any permissions validation, since it
+  // Default HMI level should be set before any permissions validation, since
+  // it
   // relies on HMI level.
   application_manager_.OnApplicationRegistered(application);
 

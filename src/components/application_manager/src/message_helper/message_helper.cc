@@ -368,6 +368,17 @@ mobile_apis::HMILevel::eType MessageHelper::StringToHMILevel(
   return mobile_apis::HMILevel::INVALID_ENUM;
 }
 
+mobile_apis::DeviceRank::eType MessageHelper::StringToDeviceRank(
+    const std::string& device_rank) {
+  using namespace NsSmartDeviceLink::NsSmartObjects;
+  mobile_apis::DeviceRank::eType value;
+  if (EnumConversionHelper<mobile_apis::DeviceRank::eType>::StringToEnum(
+          device_rank, &value)) {
+    return value;
+  }
+  return mobile_apis::DeviceRank::INVALID_ENUM;
+}
+
 std::string MessageHelper::StringifiedHMILevel(
     mobile_apis::HMILevel::eType hmi_level) {
   using namespace NsSmartDeviceLink::NsSmartObjects;

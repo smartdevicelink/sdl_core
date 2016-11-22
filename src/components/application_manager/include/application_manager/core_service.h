@@ -54,7 +54,7 @@ class CoreService : public Service {
   /**
    * @brief CoreService class destructor
    */
-  CoreService();
+  explicit CoreService(ApplicationManager& application_manager);
 
   /**
    * @brief CoreService class destructor
@@ -242,6 +242,9 @@ class CoreService : public Service {
                    const std::vector<std::string>& allowed_params);
   bool IsAllowed(const std::string& name,
                  const std::vector<std::string>& allowed_params);
+
+  ApplicationManager application_manager_;
+
   DISALLOW_COPY_AND_ASSIGN(CoreService);
 };
 

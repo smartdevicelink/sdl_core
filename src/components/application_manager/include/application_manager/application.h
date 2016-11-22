@@ -46,6 +46,7 @@
 #include "application_manager/application_state.h"
 #include "protocol_handler/protocol_handler.h"
 #include "smart_objects/smart_object.h"
+#include "application_manager/app_extension.h"
 
 namespace application_manager {
 
@@ -777,6 +778,7 @@ class Application : public virtual InitialApplicationData,
 
 typedef utils::SharedPtr<Application> ApplicationSharedPtr;
 typedef utils::SharedPtr<const Application> ApplicationConstSharedPtr;
+typedef uint32_t ApplicationId;
 
 }  // namespace application_manager
 

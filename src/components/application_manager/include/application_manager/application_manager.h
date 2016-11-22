@@ -48,6 +48,7 @@
 #include "application_manager/application_manager_settings.h"
 #include "application_manager/state_controller.h"
 #include "application_manager/hmi_interfaces.h"
+#include "functional_module/plugin_manager.h"
 
 namespace resumption {
 class LastState;
@@ -299,6 +300,8 @@ class ApplicationManager {
   virtual connection_handler::ConnectionHandler& connection_handler() const = 0;
   virtual protocol_handler::ProtocolHandler& protocol_handler() const = 0;
   virtual policy::PolicyHandlerInterface& GetPolicyHandler() = 0;
+
+  virtual functional_modules::PluginManager& GetPluginManager() = 0;
 
   virtual uint32_t GetNextHMICorrelationID() = 0;
   virtual uint32_t GenerateNewHMIAppID() = 0;

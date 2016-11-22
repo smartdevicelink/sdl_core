@@ -39,7 +39,10 @@
 #include "utils/shared_ptr.h"
 #include "protocol/message_priority.h"
 #include "protocol/rpc_type.h"
+#ifdef HMI_DBUS_API
 #include "smart_objects/smart_object.h"
+
+namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 namespace application_manager {
 
@@ -75,6 +78,7 @@ class Message {
   ~Message();
 
   //! --------------------------------------------------------------------------
+  std::string function_name() const;
   int32_t function_id() const;
   int32_t correlation_id() const;
   int32_t connection_key() const;
@@ -87,9 +91,12 @@ class Message {
   bool has_binary_data() const;
   size_t data_size() const;
   size_t payload_size() const;
+#ifdef HMI_DBUS_API
   const smart_objects::SmartObject& smart_object() const;
+#endif
 
   //! --------------------------------------------------------------------------
+  void set_function_name(const std::string& name);
   void set_function_id(int32_t id);
   void set_correlation_id(int32_t id);
   void set_connection_key(int32_t key);
@@ -97,7 +104,9 @@ class Message {
   void set_binary_data(BinaryData* data);
   void set_json_message(const std::string& json_message);
   void set_protocol_version(ProtocolVersion version);
+#ifdef HMI_DBUS_API
   void set_smart_object(const smart_objects::SmartObject& object);
+#endif
   void set_data_size(size_t data_size);
   void set_payload_size(size_t payload_size);
 
@@ -107,6 +116,8 @@ class Message {
 
  private:
   int32_t function_id_;     // @remark protocol V2.
+  std::string function_name_; // string
+  int32_t function_id_;  // @remark protocol V2.
   int32_t correlation_id_;  // @remark protocol V2.
   MessageType type_;        // @remark protocol V2.
 
@@ -116,7 +127,9 @@ class Message {
 
   int32_t connection_key_;
   std::string json_message_;
+#ifdef HMI_DBUS_API
   smart_objects::SmartObject smart_object_;
+#endif
 
   // TODO(akandul): replace with shared_ptr
   BinaryData* binary_data_;
@@ -124,6 +137,8 @@ class Message {
   size_t payload_size_;
   ProtocolVersion version_;
 };
+typedef utils::SharedPtr<application_manager::Message> MobileMessage;
+typedef utils::SharedPtr<application_manager::Message> MessagePtr;
 }  // namespace application_manager
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_MESSAGE_H_

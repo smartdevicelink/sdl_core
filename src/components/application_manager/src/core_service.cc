@@ -44,17 +44,17 @@ namespace application_manager {
 namespace {
 struct AppExtensionPredicate {
   AppExtensionUID uid;
-      bool operator() (const ApplicationSharedPtr app) {
-        return app? app->QueryInterface(uid).valid() : false;
-      }
+  bool operator()(const ApplicationSharedPtr app) {
+    return app ? app->QueryInterface(uid).valid() : false;
+  }
 };
 }
 
-CoreService::CoreService() {
+CoreService::CoreService(ApplicationManager application_manager) {
+  application_manager_ = application_manager;
 }
 
-CoreService::~CoreService() {
-}
+CoreService::~CoreService() {}
 
 mobile_apis::Result::eType CoreService::CheckPolicyPermissions(MessagePtr msg) {
   ApplicationSharedPtr app = GetApplication(msg->connection_key());
@@ -64,8 +64,9 @@ mobile_apis::Result::eType CoreService::CheckPolicyPermissions(MessagePtr msg) {
 
   const RPCParams rpc_params;
   CommandParametersPermissions params;
-  const mobile_apis::Result::eType ret = ApplicationManagerImpl::instance()
-      ->CheckPolicyPermissions(app, msg->function_name(), rpc_params, &params);
+  const mobile_apis::Result::eType ret =
+      application_manager_.CheckPolicyPermissions(
+          app, msg->function_name(), rpc_params, &params);
 
   if (ret != mobile_apis::Result::eType::SUCCESS) {
     return ret;
@@ -88,10 +89,10 @@ TypeAccess CoreService::CheckAccess(const ApplicationId& app_id,
 #ifdef SDL_REMOTE_CONTROL
   ApplicationSharedPtr app = GetApplication(app_id);
   if (app) {
-    std::string device_handle = MessageHelper::GetDeviceMacAddressForHandle(
-        app->device());
-    return policy::PolicyHandler::instance()->CheckAccess(device_handle,
-        app->mobile_app_id(), zone, module, rpc, params);
+    std::string device_handle =
+        MessageHelper::GetDeviceMacAddressForHandle(app->device());
+    return application_manager_.GetPolicyHandler().CheckAccess(
+        device_handle, app->mobile_app_id(), zone, module, rpc, params);
   }
 #endif  // SDL_REMOTE_CONTROL
   return kNone;
@@ -102,8 +103,8 @@ bool CoreService::CheckModule(const ApplicationId& app_id,
 #ifdef SDL_REMOTE_CONTROL
   ApplicationSharedPtr app = GetApplication(app_id);
   if (app) {
-    return policy::PolicyHandler::instance()->CheckModule(app->mobile_app_id(),
-                                                          module);
+    return application_manager_.GetPolicyHandler().CheckModule(
+        app->mobile_app_id(), module);
   }
 #endif  // SDL_REMOTE_CONTROL
   return false;
@@ -116,10 +117,10 @@ void CoreService::SetAccess(const ApplicationId& app_id,
 #ifdef SDL_REMOTE_CONTROL
   ApplicationSharedPtr app = GetApplication(app_id);
   if (app) {
-    std::string device_handle = MessageHelper::GetDeviceMacAddressForHandle(
-        app->device());
-    policy::PolicyHandler::instance()->SetAccess(device_handle,
-        app->mobile_app_id(), zone, module, allowed);
+    std::string device_handle =
+        MessageHelper::GetDeviceMacAddressForHandle(app->device());
+    application_manager_.GetPolicyHandler().SetAccess(
+        device_handle, app->mobile_app_id(), zone, module, allowed);
   }
 #endif  // SDL_REMOTE_CONTROL
 }
@@ -128,9 +129,10 @@ void CoreService::ResetAccess(const ApplicationId& app_id) {
 #ifdef SDL_REMOTE_CONTROL
   ApplicationSharedPtr app = GetApplication(app_id);
   if (app) {
-    std::string device_handle = MessageHelper::GetDeviceMacAddressForHandle(
-        app->device());
-    policy::PolicyHandler::instance()->ResetAccess(device_handle, app->mobile_app_id());
+    std::string device_handle =
+        MessageHelper::GetDeviceMacAddressForHandle(app->device());
+    application_manager_.GetPolicyHandler().ResetAccess(device_handle,
+                                                        app->mobile_app_id());
   }
 #endif  // SDL_REMOTE_CONTROL
 }
@@ -138,27 +140,27 @@ void CoreService::ResetAccess(const ApplicationId& app_id) {
 void CoreService::ResetAccess(const SeatLocation& zone,
                               const std::string& module) {
 #ifdef SDL_REMOTE_CONTROL
-  policy::PolicyHandler::instance()->ResetAccess(zone, module);
+  application_manager_.GetPolicyHandler().ResetAccess(zone, module);
 #endif  // SDL_REMOTE_CONTROL
 }
 
 void CoreService::SetPrimaryDevice(const uint32_t dev_id) {
 #ifdef SDL_REMOTE_CONTROL
-  std::string device_handle = MessageHelper::GetDeviceMacAddressForHandle(
-    dev_id);
-  policy::PolicyHandler::instance()->SetPrimaryDevice(device_handle);
+  std::string device_handle =
+      MessageHelper::GetDeviceMacAddressForHandle(dev_id);
+  application_manager_.GetPolicyHandler().SetPrimaryDevice(device_handle);
 #endif  // SDL_REMOTE_CONTROL
 }
 
 void CoreService::ResetPrimaryDevice() {
 #ifdef SDL_REMOTE_CONTROL
-  policy::PolicyHandler::instance()->ResetPrimaryDevice();
+  application_manager_.GetPolicyHandler().ResetPrimaryDevice();
 #endif  // SDL_REMOTE_CONTROL
 }
 
 uint32_t CoreService::PrimaryDevice() const {
 #ifdef SDL_REMOTE_CONTROL
-  return policy::PolicyHandler::instance()->PrimaryDevice();
+  return application_manager_.GetPolicyHandler().PrimaryDevice();
 #endif  // SDL_REMOTE_CONTROL
   return 0;
 }
@@ -166,56 +168,58 @@ uint32_t CoreService::PrimaryDevice() const {
 void CoreService::SetDeviceZone(const uint32_t dev_id,
                                 const SeatLocation& zone) {
 #ifdef SDL_REMOTE_CONTROL
-  std::string device_handle = MessageHelper::GetDeviceMacAddressForHandle(
-      dev_id);
-  policy::PolicyHandler::instance()->SetDeviceZone(device_handle, zone);
+  std::string device_handle =
+      MessageHelper::GetDeviceMacAddressForHandle(dev_id);
+  application_manager_.GetPolicyHandler().SetDeviceZone(device_handle, zone);
 #endif  // SDL_REMOTE_CONTROL
 }
 
 const SeatLocationPtr CoreService::GetDeviceZone(const uint32_t dev_id) const {
 #ifdef SDL_REMOTE_CONTROL
-  std::string device_handle = MessageHelper::GetDeviceMacAddressForHandle(
-      dev_id);
-  return policy::PolicyHandler::instance()->GetDeviceZone(device_handle);
+  std::string device_handle =
+      MessageHelper::GetDeviceMacAddressForHandle(dev_id);
+  return application_manager_.GetPolicyHandler().GetDeviceZone(device_handle);
 #endif  // SDL_REMOTE_CONTROL
   return SeatLocationPtr();
 }
 
 void CoreService::SetRemoteControl(bool enabled) {
 #ifdef SDL_REMOTE_CONTROL
-  policy::PolicyHandler::instance()->SetRemoteControl(enabled);
+  application_manager_.GetPolicyHandler().SetRemoteControl(enabled);
 #endif  // SDL_REMOTE_CONTROL
 }
 
 bool CoreService::IsRemoteControlAllowed() const {
 #ifdef SDL_REMOTE_CONTROL
-  return policy::PolicyHandler::instance()->GetRemoteControl();
+  return application_manager_.GetPolicyHandler().GetRemoteControl();
 #endif  // SDL_REMOTE_CONTROL
   return false;
 }
 
 bool CoreService::IsRemoteControlApplication(ApplicationSharedPtr app) const {
 #ifdef SDL_REMOTE_CONTROL
-  return policy::PolicyHandler::instance()->CheckHMIType(
-      app->mobile_app_id(), mobile_apis::AppHMIType::eType::REMOTE_CONTROL, app->app_types());
+  return application_manager_.GetPolicyHandler().CheckHMIType(
+      app->mobile_app_id(),
+      mobile_apis::AppHMIType::eType::REMOTE_CONTROL,
+      app->app_types());
 #endif  // SDL_REMOTE_CONTROL
   return false;
 }
 
 ApplicationSharedPtr CoreService::GetApplication(ApplicationId app_id) {
-  return ApplicationManagerImpl::instance()->application(app_id);
+  return application_manager_.application(app_id);
 }
 
 void CoreService::SendMessageToHMI(const MessagePtr& message) {
-  ApplicationManagerImpl::instance()->PostMessageToHMIQueque(message);
+  application_manager_.PostMessageToHMIQueque(message);
 }
 
 void CoreService::SendMessageToMobile(const MessagePtr& message) {
-  ApplicationManagerImpl::instance()->PostMessageToMobileQueque(message);
+  application_manager_.PostMessageToMobileQueque(message);
 }
 
 uint32_t CoreService::GetNextCorrelationID() {
-  return ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
+  return application_manager_.GetNextHMICorrelationID();
 }
 
 std::vector<ApplicationSharedPtr> CoreService::GetApplications(
@@ -229,23 +233,22 @@ std::vector<ApplicationSharedPtr> CoreService::GetApplications(
 void CoreService::SubscribeToHMINotification(
     const std::string& hmi_notification) {
   if (!hmi_notification.empty()) {
-    ApplicationManagerImpl::instance()->SubscribeToHMINotification(
-        hmi_notification);
+    application_manager_.SubscribeToHMINotification(hmi_notification);
   }
 }
 
 void CoreService::ChangeNotifyHMILevel(ApplicationSharedPtr app,
-      mobile_apis::HMILevel::eType level) {
-  ApplicationManagerImpl::instance()->ChangeAppsHMILevel(app->app_id(),
-                                                           level);
+                                       mobile_apis::HMILevel::eType level) {
+  application_manager_.ChangeAppsHMILevel(app->app_id(), level);
   MessageHelper::SendHMIStatusNotification(*app);
 }
 
 void CoreService::NotifyHMIAboutHMILevel(ApplicationSharedPtr app,
-      mobile_apis::HMILevel::eType level) {
+                                         mobile_apis::HMILevel::eType level) {
   if (app->hmi_level() != mobile_apis::HMILevel::eType::HMI_FULL) {
     MessageHelper::SendActivateAppToHMI(
-        app->app_id(), static_cast<hmi_apis::Common_HMILevel::eType>(level),
+        app->app_id(),
+        static_cast<hmi_apis::Common_HMILevel::eType>(level),
         true);
   }
 }
@@ -278,15 +281,15 @@ bool CoreService::CheckParams(const Json::Value& object,
 
 bool CoreService::IsAllowed(const std::string& name,
                             const std::vector<std::string>& allowed_params) {
-  return std::find(allowed_params.begin(), allowed_params.end(), name)
-      != allowed_params.end();
+  return std::find(allowed_params.begin(), allowed_params.end(), name) !=
+         allowed_params.end();
 }
 
 bool CoreService::GetModuleTypes(const std::string& policy_app_id,
                                  std::vector<std::string>* modules) const {
 #ifdef SDL_REMOTE_CONTROL
-  return policy::PolicyHandler::instance()->GetModuleTypes(policy_app_id,
-                                                           modules);
+  return application_manager_.GetPolicyHandler().GetModuleTypes(policy_app_id,
+                                                                modules);
 #endif  // SDL_REMOTE_CONTROL
   return false;
 }

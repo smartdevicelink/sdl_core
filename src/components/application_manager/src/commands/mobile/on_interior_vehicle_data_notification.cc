@@ -43,68 +43,75 @@ namespace mobile {
 
 OnInteriorVehicleDataNotification::OnInteriorVehicleDataNotification(
     const MessageSharedPtr& message)
-    : CommandNotificationImpl(message) {
-}
+    : CommandNotificationImpl(message) {}
 
-OnInteriorVehicleDataNotification::~OnInteriorVehicleDataNotification() {
-}
+OnInteriorVehicleDataNotification::~OnInteriorVehicleDataNotification() {}
 
 void OnInteriorVehicleDataNotification::Run() {
-  	LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_AUTO_TRACE(logger_);
 
-  	smart_objects::SmartObject moduleDescription = smart_objects::SmartObject(
-      smart_objects::SmartType_Map);
-  	smart_objects::SmartObject moduleZone = smart_objects::SmartObject(
-      smart_objects::SmartType_Map);
-  	smart_objects::SmartObject moduleType = smart_objects::SmartObject(
-      smart_objects::SmartType_Map);
+  smart_objects::SmartObject moduleDescription =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+  smart_objects::SmartObject moduleZone =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+  smart_objects::SmartObject moduleType =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-  	moduleZone = (*message_)[strings::msg_params]["moduleData"]["moduleZone"];
+  moduleZone = (*message_)[strings::msg_params]["moduleData"]["moduleZone"];
 
-  	moduleType = (*message_)[strings::msg_params]["moduleData"]["moduleType"];
+  moduleType = (*message_)[strings::msg_params]["moduleData"]["moduleType"];
 
-  	moduleDescription["moduleZone"] = moduleZone;
-  	moduleDescription["moduleType"] = moduleType;
+  moduleDescription["moduleZone"] = moduleZone;
+  moduleDescription["moduleType"] = moduleType;
 
-  	const std::vector<ApplicationSharedPtr>& subscribedApps =
-  		ApplicationManagerImpl::instance()->applications_by_interior_vehicle_data(moduleDescription);
+  const std::vector<ApplicationSharedPtr>& subscribedApps =
+      application_manager_.applications_by_interior_vehicle_data(
+          moduleDescription);
 
-  	std::vector<ApplicationSharedPtr>::const_iterator it = subscribedApps.begin();
-  	for(;subscribedApps.end() != it; ++it){
-  		ApplicationSharedPtr subscribed_app = *it;
-  		if(!subscribed_app){
-  	      	LOG4CXX_WARN_EXT(logger_, "Null pointer to subscribed app.");
-      		continue;		
-  		}
+  std::vector<ApplicationSharedPtr>::const_iterator it = subscribedApps.begin();
+  for (; subscribedApps.end() != it; ++it) {
+    ApplicationSharedPtr subscribed_app = *it;
+    if (!subscribed_app) {
+      LOG4CXX_WARN_EXT(logger_, "Null pointer to subscribed app.");
+      continue;
+    }
 
-		  smart_objects::SmartObjectSPtr on_interior_vehicle_data_notification = new smart_objects::SmartObject();
+    smart_objects::SmartObjectSPtr on_interior_vehicle_data_notification =
+        new smart_objects::SmartObject();
 
-		  if (!on_interior_vehicle_data_notification) {
-		    LOG4CXX_ERROR_EXT(logger_, "OnButtonPress NULL pointer");
-		    return;
-		  }
-		
-		  (*on_interior_vehicle_data_notification)[strings::params][strings::connection_key] = subscribed_app->app_id();
+    if (!on_interior_vehicle_data_notification) {
+      LOG4CXX_ERROR_EXT(logger_, "OnButtonPress NULL pointer");
+      return;
+    }
 
-		  (*on_interior_vehicle_data_notification)[strings::params][strings::function_id] =
-		      static_cast<int32_t>(mobile_apis::FunctionID::eType::OnInteriorVehicleDataID);
+    (*on_interior_vehicle_data_notification)
+        [strings::params][strings::connection_key] = subscribed_app->app_id();
 
-		  (*on_interior_vehicle_data_notification)[strings::msg_params]["moduleData"] =
-		      (*message_)[strings::msg_params]["moduleData"];
+    (*on_interior_vehicle_data_notification)
+        [strings::params][strings::function_id] = static_cast<int32_t>(
+            mobile_apis::FunctionID::eType::OnInteriorVehicleDataID);
 
-		  message_ = on_interior_vehicle_data_notification;
-		  //(*message_)[strings::params][strings::connection_key] = subscribed_app->app_id();
-		  SendNotification();
-  	}
+    (*on_interior_vehicle_data_notification)
+        [strings::msg_params]["moduleData"] =
+            (*message_)[strings::msg_params]["moduleData"];
+
+    message_ = on_interior_vehicle_data_notification;
+    //(*message_)[strings::params][strings::connection_key] =
+    //subscribed_app->app_id();
+    SendNotification();
+  }
 }
 
-/*void OnInteriorVehicleDataNotification::SendNotificationHelper(ApplicationConstSharedPtr app){
- 
+/*void
+OnInteriorVehicleDataNotification::SendNotificationHelper(ApplicationConstSharedPtr
+app){
+
  if(!app){
- 	LOG4CXX_ERROR_EXT(logger_, "OnButtonPress NULL pointer");
+  LOG4CXX_ERROR_EXT(logger_, "OnButtonPress NULL pointer");
     return;
  }
-  smart_objects::SmartObjectSPtr on_interior_vehicle_data_notification = new smart_objects::SmartObject();
+  smart_objects::SmartObjectSPtr on_interior_vehicle_data_notification = new
+smart_objects::SmartObject();
 
   if (!on_interior_vehicle_data_notification) {
     LOG4CXX_ERROR_EXT(logger_, "OnButtonPress NULL pointer");
@@ -112,14 +119,18 @@ void OnInteriorVehicleDataNotification::Run() {
   }
 
 
-  (*on_interior_vehicle_data_notification)[strings::params][strings::connection_key] = app->app_id();
+  (*on_interior_vehicle_data_notification)[strings::params][strings::connection_key]
+= app->app_id();
 
-  (*on_interior_vehicle_data_notification)[strings::params][strings::function_id] =
+  (*on_interior_vehicle_data_notification)[strings::params][strings::function_id]
+=
       static_cast<int32_t>(mobile_apis::FunctionID::eType::OnInteriorVehicleDataID);
 
-  (*on_interior_vehicle_data_notification)[strings::msg_params][strings::moduleDescription] =
+  (*on_interior_vehicle_data_notification)[strings::msg_params][strings::moduleDescription]
+=
       (*message_)[strings::msg_params][hmi_response::button_name];
-  (*on_interior_vehicle_data_notification)[strings::msg_params][strings::button_press_mode] =
+  (*on_interior_vehicle_data_notification)[strings::msg_params][strings::button_press_mode]
+=
       (*message_)[strings::msg_params][hmi_response::button_mode];
 
 

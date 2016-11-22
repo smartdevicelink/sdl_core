@@ -1,6 +1,6 @@
 /*
 
- Copyright (c) 2013, Ford Motor Company
+ Copyright (c) 2016, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -185,6 +185,10 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
   void SendSubscribeCustomButtonNotification();
 
  private:
+#ifdef SDL_REMOTE_CONTROL
+  bool IsRemoteControl(const std::string& mobile_app_id) const;
+  bool IsDriverDevice() const;
+#endif  // SDL_REMOTE_CONTROL
   std::string response_info_;
   mobile_apis::Result::eType result_checking_app_hmi_type_;
 

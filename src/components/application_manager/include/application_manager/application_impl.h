@@ -36,6 +36,7 @@
 #include <map>
 #include <set>
 #include <vector>
+#include <list>
 #include <utility>
 #include <list>
 #include <stdint.h>
@@ -47,6 +48,7 @@
 #include "protocol_handler/protocol_handler.h"
 
 #include "connection_handler/device.h"
+#include "utils/timer_thread.h"
 #include "utils/lock.h"
 #include "utils/atomic_object.h"
 #include "utils/custom_string.h"
@@ -90,6 +92,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
    * @brief change supporting COMMUNICATION NAVIGATION
    */
   virtual void ChangeSupportingAppHMIType();
+  bool IsAudible() const;
 
   inline bool is_navi() const {
     return is_navi_;
@@ -148,9 +151,14 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   void set_version(const Version& ver);
   void set_name(const custom_str::CustomString& name);
   void set_is_media_application(bool is_media);
+  void set_hmi_level(const mobile_api::HMILevel::eType& hmi_level);
   void increment_put_file_in_none_count();
   void increment_delete_file_in_none_count();
   void increment_list_files_in_none_count();
+  void set_system_context(
+      const mobile_api::SystemContext::eType& system_context);
+  void set_audio_streaming_state(
+      const mobile_api::AudioStreamingState::eType& state);
   bool set_app_icon_path(const std::string& path);
   void set_app_allowed(const bool allowed);
   void set_device(connection_handler::DeviceHandle device);
@@ -180,6 +188,14 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   DataAccessor<VehicleInfoSubscriptions> SubscribedIVI() const OVERRIDE;
   inline bool IsRegistered() const OVERRIDE;
 
+  bool SubscribeToInteriorVehicleData(smart_objects::SmartObject module);
+  bool IsSubscribedToInteriorVehicleData(smart_objects::SmartObject module);
+  bool UnsubscribeFromInteriorVehicleData(smart_objects::SmartObject module);
+
+  virtual const std::set<mobile_apis::ButtonName::eType>& SubscribedButtons() const;
+  virtual const  std::set<uint32_t>& SubscribesIVI() const;
+
+  virtual const std::string& curHash() const;
   /**
    * @brief ResetDataInNone reset data counters in NONE
    */
@@ -304,6 +320,32 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
    */
   void CleanupFiles();
 
+  /**
+   * @brief Return pointer to extension by uid
+   * @param uid uid of extension
+   * @return Pointer to extension, if extension was initialized, otherwise NULL
+   */
+  AppExtensionPtr QueryInterface(AppExtensionUID uid);
+
+  /**
+   * @brief Add extension to application
+   * @param extension pointer to extension
+   * @return true if success, false if extension already initialized
+   */
+  bool AddExtension(AppExtensionPtr extention);
+
+  /**
+   * @brief Remove extension from application
+   * @param uid uid of extension
+   * @return true if success, false if extension is not present
+   */
+  bool RemoveExtension(AppExtensionUID uid);
+
+  /**
+   * @brief Removes all extensions
+   */
+  void RemoveExtensions();
+
  private:
   /**
    * @brief Callback for video streaming suspend timer.
@@ -398,6 +440,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   sync_primitives::Lock button_lock_;
   std::string folder_name_;
   ApplicationManager& application_manager_;
+
   DISALLOW_COPY_AND_ASSIGN(ApplicationImpl);
 };
 

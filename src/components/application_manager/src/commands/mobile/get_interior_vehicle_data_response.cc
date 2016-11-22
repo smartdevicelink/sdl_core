@@ -48,7 +48,7 @@ GetInteriorVehicleDataResponse::~GetInteriorVehicleDataResponse() {
 void GetInteriorVehicleDataResponse::Run() {
   LOG4CXX_INFO(logger_, "ButtonPressResponse::Run");
   
-  ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
+  application_manager_.SendMessageToMobile(message_);
 }
 
 }  // namespace commands

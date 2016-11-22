@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2015, Ford Motor Company
+ Copyright (c) 2016, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -54,6 +54,7 @@ class PolicyHandlerInterface;
 
 namespace application_manager {
 namespace mobile_api = mobile_apis;
+namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 /*
  * @brief Typedef for VehicleData

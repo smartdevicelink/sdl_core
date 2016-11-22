@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,6 +37,7 @@
 #include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
+#include "application_manager/policies/policy_handler.h"
 
 namespace application_manager {
 
@@ -107,6 +108,21 @@ void OnExitApplicationNotification::Run() {
   } else {
     LOG4CXX_ERROR(logger_, "Unable to find appication " << app_id);
   }
+
+#ifdef SDL_REMOTE_CONTROL
+  std::string device_handle =
+      MessageHelper::GetDeviceMacAddressForHandle(app_impl->device());
+  application_manager_.GetPolicyHandler().ResetAccess(
+      device_handle, app_impl->mobile_app_id());
+#endif  // SDL_REMOTE_CONTROL
+
+  application_manager_.->ChangeAppsHMILevel(app_impl->app_id(),
+                                            mobile_apis::HMILevel::HMI_NONE);
+
+  app_impl->set_audio_streaming_state(
+      mobile_apis::AudioStreamingState::NOT_AUDIBLE);
+  app_impl->set_system_context(mobile_api::SystemContext::SYSCTXT_MAIN);
+  MessageHelper::SendHMIStatusNotification(*app_impl);
 }
 
 }  // namespace commands
