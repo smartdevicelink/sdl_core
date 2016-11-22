@@ -133,6 +133,15 @@
 #include "application_manager/commands/mobile/send_location_response.h"
 #include "application_manager/commands/mobile/dial_number_request.h"
 #include "application_manager/commands/mobile/dial_number_response.h"
+#include "application_manager/commands/mobile/button_press_request.h"
+#include "application_manager/commands/mobile/button_press_response.h"
+#include "application_manager/commands/mobile/get_interior_vehicle_data_capabilities_request.h"
+#include "application_manager/commands/mobile/get_interior_vehicle_data_capabilities_response.h"
+#include "application_manager/commands/mobile/get_interior_vehicle_data_request.h"
+#include "application_manager/commands/mobile/get_interior_vehicle_data_response.h"
+#include "application_manager/commands/mobile/set_interior_vehicle_data_request.h"
+#include "application_manager/commands/mobile/set_interior_vehicle_data_response.h"
+#include "application_manager/commands/mobile/on_interior_vehicle_data_notification.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/make_shared.h"
 
@@ -602,6 +611,46 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
         command.reset(
             new commands::DialNumberRequest(message, application_manager));
       }
+      break;
+    }
+    case mobile_apis::FunctionID::ButtonPressID: {
+      if ((*message)[strings::params][strings::message_type]
+          == static_cast<int>(application_manager::MessageType::kResponse)) {
+        return new commands::ButtonPressResponse(message);
+      } else {
+        return new commands::ButtonPressRequest(message);
+      }
+      break;
+    }
+    case mobile_apis::FunctionID::GetInteriorVehicleDataCapabilitiesID: {
+      if ((*message)[strings::params][strings::message_type]
+          == static_cast<int>(application_manager::MessageType::kResponse)) {
+        return new commands::GetInteriorVehicleDataCapabilitiesResponse(message);
+      } else {
+        return new commands::GetInteriorVehicleDataCapabilitiesRequest(message);
+      }
+      break;
+    }
+    case mobile_apis::FunctionID::GetInteriorVehicleDataID: {
+      if ((*message)[strings::params][strings::message_type]
+          == static_cast<int>(application_manager::MessageType::kResponse)) {
+        return new commands::GetInteriorVehicleDataResponse(message);
+      } else {
+        return new commands::GetInteriorVehicleDataRequest(message);
+      }
+      break;
+    }
+    case mobile_apis::FunctionID::SetInteriorVehicleDataID: {
+      if ((*message)[strings::params][strings::message_type]
+          == static_cast<int>(application_manager::MessageType::kResponse)) {
+        return new commands::SetInteriorVehicleDataResponse(message);
+      } else {
+        return new commands::SetInteriorVehicleDataRequest(message);
+      }
+      break;
+    }
+    case mobile_apis::FunctionID::OnInteriorVehicleDataID: {
+      return new commands::mobile::OnInteriorVehicleDataNotification(message);
       break;
     }
     case mobile_apis::FunctionID::OnButtonEventID: {

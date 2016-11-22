@@ -53,7 +53,9 @@
 #include "utils/date_time.h"
 #include "utils/make_shared.h"
 #include "utils/gen_hash.h"
-
+#ifdef SDL_REMOTE_CONTROL
+#  include "mock_access_remote.h"
+#endif  // SDL_REMOTE_CONTROL
 using ::testing::ReturnRef;
 using ::testing::DoAll;
 using ::testing::SetArgReferee;
@@ -73,8 +75,6 @@ using ::policy::PolicyTable;
 
 namespace policy_table = rpc::policy_table_interface_base;
 
-namespace test {
-namespace components {
 namespace policy {
 
 namespace custom_str = utils::custom_string;
@@ -142,14 +142,25 @@ class PolicyManagerImplTest : public ::testing::Test {
  protected:
   PolicyManagerImpl* manager;
   MockCacheManagerInterface* cache_manager;
-  NiceMock<MockPolicyListener> listener;
-  const std::string device_id;
+  MockUpdateStatusManager update_manager;
+  MockPolicyListener* listener;
+#ifdef SDL_REMOTE_CONTROL
+  MockAccessRemote* access_remote;
+#endif  // SDL_REMOTE_CONTROL
 
   void SetUp() OVERRIDE {
     manager = new PolicyManagerImpl();
     manager->set_listener(&listener);
     cache_manager = new MockCacheManagerInterface();
     manager->set_cache_manager(cache_manager);
+
+#ifdef SDL_REMOTE_CONTROL
+    access_remote = new MockAccessRemote();
+    manager->access_remote_ = access_remote;
+#endif  // SDL_REMOTE_CONTROL
+
+    listener = new MockPolicyListener();
+    manager->set_listener(listener);
   }
 
   void TearDown() OVERRIDE {
@@ -165,6 +176,15 @@ class PolicyManagerImplTest : public ::testing::Test {
       return ::testing::AssertionFailure() << ::rpc::PrettyFormat(report);
     }
   }
+
+#ifdef SDL_REMOTE_CONTROL
+ public:
+  bool CheckPTURemoteCtrlChange(
+      const utils::SharedPtr<policy_table::Table> pt_update,
+      const utils::SharedPtr<policy_table::Table> snapshot) {
+    return manager->CheckPTURemoteCtrlChange(pt_update, snapshot);
+  }
+#endif  // SDL_REMOTE_CONTROL
 };
 
 class PolicyManagerImplTest2 : public ::testing::Test {
@@ -506,10 +526,12 @@ TEST_F(PolicyManagerImplTest2, IsAppRevoked_SetRevokedAppID_ExpectAppRevoked) {
   }
   ifile.close();
 
-  ::policy::BinaryMessage msg(json.begin(), json.end());
-  ASSERT_TRUE(manager->LoadPT("file_pt_update.json", msg));
-  EXPECT_TRUE(manager->IsApplicationRevoked(app_id1));
-}
+TEST_F(PolicyManagerImplTest, ResetPT) {
+  EXPECT_CALL(*cache_manager, ResetPT("filename")).WillOnce(Return(true))
+      .WillOnce(Return(false));
+  EXPECT_CALL(*cache_manager, ResetCalculatedPermissions()).Times(2);
+  EXPECT_CALL(*cache_manager, TimeoutResponse());
+  EXPECT_CALL(*cache_manager, SecondsBetweenRetries(_));
 
 TEST_F(PolicyManagerImplTest2,
        CheckPermissions_SetRevokedAppID_ExpectRPCDisallowed) {
@@ -621,17 +643,25 @@ TEST_F(PolicyManagerImplTest2,
   }
   ifile.close();
 
-  ::policy::BinaryMessage msg(json.begin(), json.end());
-  // Load Json to cache
-  EXPECT_TRUE(manager->LoadPT("file_pt_update.json", msg));
+  policy_table::Strings groups;
+  groups.push_back("Group-1");
 
-  policy_table::RpcParameters rpc_parameters;
-  rpc_parameters.hmi_levels.push_back(policy_table::HL_FULL);
+  //assert
+  EXPECT_CALL(*cache_manager, IsApplicationRepresented("12345678")).
+      WillOnce(Return(true));
+#ifdef SDL_REMOTE_CONTROL
+  Subject who = { "dev1", "12345678" };
+  EXPECT_CALL(*access_remote, GetGroups(who)).WillOnce(ReturnRef(groups));
+#else  // SDL_REMOTE_CONTROL
+  EXPECT_CALL(*cache_manager, GetGroups("12345678")).
+      WillOnce(ReturnRef(groups));
+#endif  // SDL_REMOTE_CONTROL
 
   policy_table::Rpc rpc;
   rpc["Alert"] = rpc_parameters;
   ::policy::RPCParams input_params;
   ::policy::CheckPermissionResult output;
+  manager->CheckPermissions("dev1", "12345678", "FULL", "Alert", input_params, output);
 
   (manager->GetCache())->AddDevice(dev_id1, "Bluetooth");
   (manager->GetCache())
@@ -664,19 +694,15 @@ TEST_F(PolicyManagerImplTest, IncrementAppCounter) {
   manager->Increment("12345", usage_statistics::USER_SELECTIONS);
 }
 
-TEST_F(PolicyManagerImplTest, SetAppInfo) {
-  // Assert
-  EXPECT_CALL(*cache_manager,
-              Set("12345", usage_statistics::LANGUAGE_GUI, "de-de"));
-  manager->Set("12345", usage_statistics::LANGUAGE_GUI, "de-de");
-}
+  //arrange
+  Json::Value table(Json::objectValue);
+  table["policy_table"] = Json::Value(Json::objectValue);
 
-TEST_F(PolicyManagerImplTest, AddAppStopwatch) {
-  // Assert
-  EXPECT_CALL(*cache_manager,
-              Add("12345", usage_statistics::SECONDS_HMI_FULL, 30));
-  manager->Add("12345", usage_statistics::SECONDS_HMI_FULL, 30);
-}
+  Json::Value& policy_table = table["policy_table"];
+  policy_table["module_config"] = Json::Value(Json::objectValue);
+  policy_table["functional_groupings"] = Json::Value(Json::objectValue);
+  policy_table["consumer_friendly_messages"] = Json::Value(Json::objectValue);
+  policy_table["app_policies"] = Json::Value(Json::objectValue);
 
 TEST_F(PolicyManagerImplTest, ResetPT) {
   EXPECT_CALL(*cache_manager, ResetPT("filename"))
@@ -705,9 +731,15 @@ TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
   const std::string json = table.toStyledString();
   ::policy::BinaryMessage msg(json.begin(), json.end());
 
-  utils::SharedPtr<policy_table::Table> snapshot =
-      utils::MakeShared<policy_table::Table>(update.policy_table);
-  // Assert
+  utils::SharedPtr<policy_table::Table> snapshot = new policy_table::Table(
+      update.policy_table);
+
+  //assert
+  std::map<std::string, StringArray> hmi_types;
+  hmi_types["1234"] = StringArray();
+  EXPECT_CALL(*cache_manager, GetHMIAppTypeAfterUpdate(_)).
+      WillOnce(SetArgReferee<0>(hmi_types));
+  EXPECT_CALL(*listener, OnUpdateHMIAppType(hmi_types));
   EXPECT_CALL(*cache_manager, GenerateSnapshot()).WillOnce(Return(snapshot));
   EXPECT_CALL(*cache_manager, ApplyUpdate(_)).WillOnce(Return(true));
   EXPECT_CALL(listener, GetAppName("1234"))
@@ -716,6 +748,9 @@ TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
   EXPECT_CALL(*cache_manager, SaveUpdateRequired(false));
   EXPECT_CALL(*cache_manager, TimeoutResponse());
   EXPECT_CALL(*cache_manager, SecondsBetweenRetries(_));
+#ifdef SDL_REMOTE_CONTROL
+  EXPECT_CALL(*access_remote, Init());
+#endif  // SDL_REMOTE_CONTROL
 
   EXPECT_TRUE(manager->LoadPT("file_pt_update.json", msg));
 }
@@ -727,8 +762,9 @@ TEST_F(PolicyManagerImplTest, LoadPT_SetInvalidUpdatePT_PTIsNotLoaded) {
   policy_table::Table update(&table);
   update.SetPolicyTableType(rpc::policy_table_interface_base::PT_UPDATE);
 
-  // Assert update is invalid
-  ASSERT_FALSE(IsValid(update));
+  //assert
+  EXPECT_CALL(*listener, OnSnapshotCreated(_, _, _));
+  EXPECT_CALL(*cache_manager, GenerateSnapshot()).WillOnce(Return(p_table));
 
   // Act
   std::string json = table.toStyledString();

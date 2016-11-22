@@ -1,3 +1,4 @@
 build/
 *.user
 src/appMain/sdl_preloaded_pt.json
+*.pyc

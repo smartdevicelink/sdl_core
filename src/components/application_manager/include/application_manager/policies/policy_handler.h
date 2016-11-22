@@ -68,6 +68,8 @@ typedef std::vector<uint32_t> AppIds;
 typedef std::vector<uint32_t> DeviceHandles;
 namespace custom_str = utils::custom_string;
 
+class PolicyManager;
+
 class PolicyHandler : public PolicyHandlerInterface,
                       public PolicyListener,
                       public threads::AsyncRunner {
@@ -105,6 +107,137 @@ class PolicyHandler : public PolicyHandlerInterface,
   uint32_t GetNotificationsNumber(const std::string& priority) const OVERRIDE;
   virtual DeviceConsent GetUserConsentForDevice(
       const std::string& device_id) const OVERRIDE;
+#ifdef SDL_REMOTE_CONTROL
+  /**
+   * Checks access to equipment of vehicle for application by RPC
+   * @param device_id unique identifier of device
+   * @param app_id policy id application
+   * @param zone interior zone
+   * @param module type
+   * @param rpc name of rpc
+   * @param params parameters list
+   */
+  application_manager::TypeAccess CheckAccess(
+      const PTString& device_id, const PTString& app_id,
+      const application_manager::SeatLocation& zone,
+      const PTString& module, const std::string& rpc,
+      const std::vector<PTString>& params);
+
+  /**
+   * Checks access to module for application
+   * @param app_id policy id application
+   * @param module
+   * @return true if module is allowed for application
+   */
+  bool CheckModule(const PTString& app_id, const PTString& module);
+
+  /**
+   * Sets access to equipment of vehicle for application by RPC
+   * @param device_id unique identifier of device
+   * @param app_id policy id application
+   * @param zone interior zone
+   * @param module type
+   * @param allowed true if access is allowed
+   */
+  void SetAccess(const PTString& device_id, const PTString& app_id,
+                 const application_manager::SeatLocation& zone,
+                 const PTString& module,
+                 bool allowed);
+
+  /**
+   * Resets access application to all resources
+   * @param device_id unique identifier of device
+   * @param app_id policy id application
+   */
+  void ResetAccess(const PTString& device_id, const PTString& app_id);
+
+  /**
+   * Resets access by group name for all applications
+   * @param zone interior zone
+   * @param module type
+   */
+  void ResetAccess(const application_manager::SeatLocation& zone,
+                   const std::string& module);
+
+  /**
+   * Sets device as primary device
+   * @param dev_id ID device
+   */
+  void SetPrimaryDevice(const PTString& dev_id);
+
+  /**
+   * Resets driver's device
+   */
+  void ResetPrimaryDevice();
+
+  /*
+   * Return id of primary device
+   */
+  uint32_t PrimaryDevice() const;
+
+  /**
+   * Sets device zone
+   * @param device_id unique identifier of device
+   * @param zone device zone
+   */
+  void SetDeviceZone(const std::string& device_id,
+                     const application_manager::SeatLocation& zone);
+
+  /**
+   * Gets device zone
+   * @param dev_id ID device
+   * @return device zone is unknown otherwise 0
+   */
+  const application_manager::SeatLocationPtr GetDeviceZone(
+      const std::string& device_id) const;
+
+  /**
+   * Sets mode of remote control (on/off)
+   * @param enabled true if remote control is turned on
+   */
+  void SetRemoteControl(bool enabled);
+
+  /*
+   * @brief If remote control is enabled
+   * by User and by Policy
+   */
+  bool GetRemoteControl() const;
+
+  /*
+   * @brief Notifies passengers' apps about change
+   * @param new_consent New value of remote permission
+   */
+  void OnRemoteAllowedChanged(bool new_consent);
+
+  /*
+   * @brief Notifies Remote apps about change in permissions
+   * @param device_id Device on which app is running
+   * @param application_id ID of app whose permissions are changed
+   */
+  void OnRemoteAppPermissionsChanged(const std::string& device_id,
+      const std::string& application_id);
+
+  virtual void OnUpdateHMIStatus(const std::string& device_id,
+                                 const std::string& policy_app_id,
+                                 const std::string& hmi_level);
+
+  virtual void OnUpdateHMIStatus(const std::string& device_id,
+                                 const std::string& policy_app_id,
+                                 const std::string& hmi_level,
+                                 const std::string& device_rank);
+
+  /**
+   * Gets all allowed module types
+   * @param app_id unique identifier of application
+   * @param list of allowed module types
+   * @return true if application has allowed modules
+   */
+  bool GetModuleTypes(const std::string& policy_app_id,
+                      std::vector<std::string>* modules) const;
+#endif  // SDL_REMOTE_CONTROL
+
+  uint32_t GetNotificationsNumber(const std::string& priority);
+  DeviceConsent GetUserConsentForDevice(const std::string& device_id);
   bool GetDefaultHmi(const std::string& policy_app_id,
                      std::string* default_hmi) const OVERRIDE;
   bool GetInitialAppData(const std::string& application_id,
@@ -231,9 +364,17 @@ class PolicyHandler : public PolicyHandlerInterface,
    * @brief Update currently used device id in policies manager for given
    * application
    * @param policy_app_id Application id
+   * @deprecated see std::vector<std::string> GetDevicesIds(const std::string&)
    */
   std::string OnCurrentDeviceIdUpdateRequired(
       const std::string& policy_app_id) OVERRIDE;
+
+  /**
+   * Gets devices ids by policy application id
+   * @param policy_app_id
+   * @return list devices ids
+   */
+  std::vector<std::string> GetDevicesIds(const std::string policy_app_id);
 
   /**
    * @brief Set parameters from OnSystemInfoChanged to policy table
@@ -297,6 +438,9 @@ class PolicyHandler : public PolicyHandlerInterface,
 
   virtual void OnUpdateHMIAppType(
       std::map<std::string, StringArray> app_hmi_types) OVERRIDE;
+  virtual void OnUpdateHMILevel(const std::string& device_id,
+                                const std::string& policy_app_id,
+                                const std::string& hmi_level);
 
   virtual void OnCertificateUpdated(
       const std::string& certificate_data) OVERRIDE;
@@ -317,9 +461,22 @@ class PolicyHandler : public PolicyHandlerInterface,
   /**
    * @brief Allows to add new or update existed application during
    * registration process
+   * @param device_id unique identifier of device
    * @param application_id The policy aplication id.
+   * @param app_types list of hmi types
    */
   void AddApplication(const std::string& application_id) OVERRIDE;
+
+  /**
+   * Checks if application has HMI type
+   * @param application_id ID application
+   * @param hmi HMI type to check
+   * @param app_types additional list of HMI type to search in it
+   * @return true if hmi is contained in policy or app_types
+   */
+  bool CheckHMIType(const std::string& application_id,
+                    mobile_apis::AppHMIType::eType hmi,
+                    const smart_objects::SmartObject* app_types);
 
   /**
    * Checks whether application is revoked
@@ -384,7 +541,7 @@ class PolicyHandler : public PolicyHandlerInterface,
    * @brief OnAppRegisteredOnMobile allows to handle event when application were
    * succesfully registered on mobile device.
    * It will send OnAppPermissionSend notification and will try to start PTU.
-   *
+   * @param device_handle unique indetifier of device
    * @param application_id registered application.
    */
   void OnAppRegisteredOnMobile(const std::string& application_id) OVERRIDE;
@@ -448,6 +605,43 @@ class PolicyHandler : public PolicyHandlerInterface,
    */
   void OnAppPermissionConsentInternal(const uint32_t connection_key,
                                       PermissionConsent& permissions) OVERRIDE;
+
+  void UpdateHMILevel(application_manager::ApplicationSharedPtr app,
+                      mobile_apis::HMILevel::eType level);
+
+private:
+  class StatisticManagerImpl: public usage_statistics::StatisticsManager {
+      //TODO(AKutsan) REMOVE THIS UGLY HOTFIX
+        virtual void Increment(usage_statistics::GlobalCounterId type) {
+
+        PolicyHandler::instance()->AsyncRun(new StatisticsDelegate(type));
+      }
+
+        virtual void Increment(const std::string& app_id,
+                               usage_statistics::AppCounterId type) {
+
+        PolicyHandler::instance()->AsyncRun(new StatisticsDelegate(app_id,
+                                                                   type));
+      }
+
+        virtual void Set(const std::string& app_id,
+                         usage_statistics::AppInfoId type,
+                         const std::string& value) {
+
+        PolicyHandler::instance()->AsyncRun(new StatisticsDelegate(app_id,
+                                                                   type,
+                                                                   value));
+      }
+
+        virtual void Add(const std::string& app_id,
+                         usage_statistics::AppStopwatchId type,
+                         int32_t timespan_seconds) {
+
+        PolicyHandler::instance()->AsyncRun(new StatisticsDelegate(
+                                              app_id, type, timespan_seconds));
+      }
+  };
+  //TODO(AKutsan) REMOVE THIS UGLY HOTFIX
 
   /**
    * @brief Sets days after epoch on successful policy update

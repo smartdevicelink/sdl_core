@@ -43,6 +43,25 @@ namespace hmi_message_handler {
  * SDL with HMI has to implement this interface.
  */
 class HMIMessageAdapter : public HMIMessageSender {
+ public:
+  /**
+   * \brief Constructor
+   * \param handler Pointer to implementation of HMIMessageHandler abstract class
+   * to notify it about receiving message or error on sending message.
+   */
+  explicit HMIMessageAdapter(HMIMessageHandler* handler);
+
+  /**
+   * \brief Destructor
+   */
+  virtual ~HMIMessageAdapter();
+  /**
+   * @brief Subscribes to notification from HMI
+   * @param hmi_notification string with notification name
+   */
+  virtual void SubscribeToHMINotification(
+      const std::string& hmi_notification) = 0;
+
  protected:
   /**
    * \brief Interface for subscriptions.

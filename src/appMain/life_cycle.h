@@ -47,13 +47,18 @@
 #include "hmi_message_handler/mqueue_adapter.h"
 #endif  // MQUEUE_HMIADAPTER
 #include "application_manager/application_manager_impl.h"
+#include "application_manager/core_service.h"
 #include "connection_handler/connection_handler_impl.h"
 #include "protocol_handler/protocol_handler_impl.h"
 #include "transport_manager/transport_manager.h"
 #include "transport_manager/transport_manager_default.h"
 #include "media_manager/media_manager_impl.h"
+#include "functional_module/plugin_manager.h"
 #ifdef TELEMETRY_MONITOR
 #include "telemetry_monitor/telemetry_monitor.h"
+#endif
+#ifdef TIME_TESTER
+#include "time_tester/time_manager.h"
 #endif
 
 //#if ( defined (MESSAGEBROKER_HMIADAPTER) || defined(PASA_HMI)  )
@@ -93,6 +98,7 @@ class LifeCycle {
   protocol_handler::ProtocolHandlerImpl* protocol_handler_;
   connection_handler::ConnectionHandlerImpl* connection_handler_;
   application_manager::ApplicationManagerImpl* app_manager_;
+    functional_modules::PluginManager* plugin_manager_;
 #ifdef ENABLE_SECURITY
   security_manager::CryptoManager* crypto_manager_;
   security_manager::SecurityManager* security_manager_;

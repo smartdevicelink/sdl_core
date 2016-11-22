@@ -64,6 +64,14 @@ add_library("TelemetryMonitor" ${SOURCES})
 target_link_libraries("TelemetryMonitor" ${LIBRARIES})
 add_dependencies("TelemetryMonitor" HMI_API MOBILE_API)
 
+set (LIBRARIES
+  HMI_API
+)
+
+add_library("TimeTester" ${SOURCES})
+target_link_libraries("TimeTester" ${LIBRARIES})
+add_dependencies("TimeTester" HMI_API MOBILE_API)
+
 if(BUILD_TESTS)
   add_subdirectory(test)
 endif()

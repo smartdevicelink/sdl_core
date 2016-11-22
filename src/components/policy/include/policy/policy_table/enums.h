@@ -71,6 +71,7 @@ enum AppHMIType {
   AHT_BACKGROUND_PROCESS,
   AHT_TESTING,
   AHT_SYSTEM,
+  AHT_REMOTE_CONTROL,
 };
 bool IsValidEnum(AppHMIType val);
 const char* EnumToJsonString(AppHMIType val);
@@ -99,9 +100,21 @@ enum RequestType {
   RT_FOTA
 };
 
-bool IsValidEnum(RequestType val);
-const char* EnumToJsonString(RequestType val);
-bool EnumFromJsonString(const std::string& literal, RequestType* result);
+enum Input {
+  I_GUI,
+  I_VUI,
+};
+bool IsValidEnum(Input val);
+const char* EnumToJsonString(Input val);
+bool EnumFromJsonString(const std::string& literal, Input* result);
+
+enum ModuleType {
+  MT_CLIMATE,
+  MT_RADIO,
+};
+bool IsValidEnum(ModuleType val);
+const char* EnumToJsonString(ModuleType val);
+bool EnumFromJsonString(const std::string& literal, ModuleType* result);
 
 extern const std::string kDefaultApp;
 extern const std::string kPreDataConsentApp;

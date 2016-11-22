@@ -184,6 +184,24 @@ bool LifeCycle::StartComponents() {
   // start transport manager
   transport_manager_->Visibility(true);
 
+  components_started_ = true;
+
+  core_service_ = new application_manager::CoreService();
+
+  plugin_manager_ = functional_modules::PluginManager::instance();
+  plugin_manager_->SetServiceHandler(core_service_);
+  plugin_manager_->LoadPlugins(profile::Profile::instance()->plugins_folder());
+
+  if (!InitMessageSystem()) {
+    LOG4CXX_INFO(logger_, "InitMessageBroker failed");
+    return false;
+  }
+
+  LOG4CXX_INFO(logger_, "InitMessageBroker successful");
+
+  plugin_manager_->OnServiceStateChanged(
+    functional_modules::ServiceState::HMI_ADAPTER_INITIALIZED);
+
   return true;
 }
 
@@ -334,6 +352,12 @@ void LifeCycle::Run() {
 
 void LifeCycle::StopComponents() {
   LOG4CXX_AUTO_TRACE(logger_);
+  if (!components_started_) {
+    LOG4CXX_ERROR(logger_, "Components wasn't started");
+    return;
+  }
+
+  functional_modules::PluginManager::destroy();
 
   DCHECK_OR_RETURN_VOID(hmi_handler_);
   hmi_handler_->set_message_observer(NULL);
