@@ -368,6 +368,7 @@ mobile_apis::HMILevel::eType MessageHelper::StringToHMILevel(
   return mobile_apis::HMILevel::INVALID_ENUM;
 }
 
+#ifdef SDL_REMOTE_CONTROL
 mobile_apis::DeviceRank::eType MessageHelper::StringToDeviceRank(
     const std::string& device_rank) {
   using namespace NsSmartDeviceLink::NsSmartObjects;
@@ -378,6 +379,7 @@ mobile_apis::DeviceRank::eType MessageHelper::StringToDeviceRank(
   }
   return mobile_apis::DeviceRank::INVALID_ENUM;
 }
+#endif
 
 std::string MessageHelper::StringifiedHMILevel(
     mobile_apis::HMILevel::eType hmi_level) {

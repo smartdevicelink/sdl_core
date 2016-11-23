@@ -64,11 +64,12 @@ class ApplicationManager;
 }
 
 namespace policy {
+
+namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
+
 typedef std::vector<uint32_t> AppIds;
 typedef std::vector<uint32_t> DeviceHandles;
 namespace custom_str = utils::custom_string;
-
-class PolicyManager;
 
 class PolicyHandler : public PolicyHandlerInterface,
                       public PolicyListener,
@@ -479,7 +480,7 @@ class PolicyHandler : public PolicyHandlerInterface,
    */
   bool CheckHMIType(const std::string& application_id,
                     mobile_apis::AppHMIType::eType hmi,
-                    const smart_objects::SmartObject* app_types);
+                    const smart_objects::SmartObjectSPtr app_types);
 
   /**
    * Checks whether application is revoked
@@ -611,34 +612,6 @@ class PolicyHandler : public PolicyHandlerInterface,
 
   void UpdateHMILevel(application_manager::ApplicationSharedPtr app,
                       mobile_apis::HMILevel::eType level);
-
- private:
-  class StatisticManagerImpl : public usage_statistics::StatisticsManager {
-    // TODO(AKutsan) REMOVE THIS UGLY HOTFIX
-    virtual void Increment(usage_statistics::GlobalCounterId type) {
-      PolicyHandler::instance()->AsyncRun(new StatisticsDelegate(type));
-    }
-
-    virtual void Increment(const std::string& app_id,
-                           usage_statistics::AppCounterId type) {
-      PolicyHandler::instance()->AsyncRun(new StatisticsDelegate(app_id, type));
-    }
-
-    virtual void Set(const std::string& app_id,
-                     usage_statistics::AppInfoId type,
-                     const std::string& value) {
-      PolicyHandler::instance()->AsyncRun(
-          new StatisticsDelegate(app_id, type, value));
-    }
-
-    virtual void Add(const std::string& app_id,
-                     usage_statistics::AppStopwatchId type,
-                     int32_t timespan_seconds) {
-      PolicyHandler::instance()->AsyncRun(
-          new StatisticsDelegate(app_id, type, timespan_seconds));
-    }
-  };
-  // TODO(AKutsan) REMOVE THIS UGLY HOTFIX
 
   /**
    * @brief Sets days after epoch on successful policy update

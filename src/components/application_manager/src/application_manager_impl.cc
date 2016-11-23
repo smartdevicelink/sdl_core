@@ -36,6 +36,7 @@
 #include <string>
 #include <fstream>
 #include <utility>
+#include <time.h>
 
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/mobile_command_factory.h"
@@ -67,9 +68,11 @@
 #include "media_manager/media_manager.h"
 #include "policy/usage_statistics/counter.h"
 #include "utils/custom_string.h"
+
+#ifdef SDL_REMOTE_CONTROL
 #include "usage_statistics/counter.h"
+#endif
 #include "functional_module/plugin_manager.h"
-#include <time.h>
 
 namespace {
 int get_rand_from_range(uint32_t from = 0, int to = RAND_MAX) {
@@ -224,6 +227,17 @@ ApplicationSharedPtr ApplicationManagerImpl::application(
   DataAccessor<ApplicationSet> accessor = applications();
   return FindApp(accessor, finder);
 }
+#ifdef SDL_REMOTE_CONTROL
+ApplicationSharedPtr ApplicationManagerImpl::application(
+    const std::string& device_id, const std::string& policy_app_id) const {
+  connection_handler::DeviceHandle device_handle;
+  connection_handler().GetDeviceID(device_id, &device_handle);
+  ApplicationSharedPtr app = ApplicationListAccessor().Find(
+      IsApplication(device_handle, policy_app_id));
+  LOG4CXX_DEBUG(logger_,
+                " policy_app_id << " << policy_app_id << "Found = " << app);
+  return app;
+}
 
 struct TakeDeviceHandle {
   std::string operator()(ApplicationSharedPtr& app) {
@@ -243,6 +257,7 @@ std::vector<std::string> ApplicationManagerImpl::devices(
                  TakeDeviceHandle());
   return devices;
 }
+#endif
 
 ApplicationSharedPtr ApplicationManagerImpl::application_by_hmi_app(
     uint32_t hmi_app_id) const {
@@ -256,21 +271,6 @@ ApplicationSharedPtr ApplicationManagerImpl::application_by_policy_id(
   PolicyAppIdPredicate finder(policy_app_id);
   DataAccessor<ApplicationSet> accessor = applications();
   return FindApp(accessor, finder);
-}
-
-bool ActiveAppPredicate(const ApplicationSharedPtr app) {
-  return app ? app->IsFullscreen() : false;
-}
-
-ApplicationSharedPtr ApplicationManagerImpl::application(
-    const std::string& device_id, const std::string& policy_app_id) const {
-  connection_handler::DeviceHandle device_handle;
-  connection_handler()->GetDeviceID(device_id, &device_handle);
-  ApplicationSharedPtr app = ApplicationListAccessor().Find(
-      IsApplication(device_handle, policy_app_id));
-  LOG4CXX_DEBUG(logger_,
-                " policy_app_id << " << policy_app_id << "Found = " << app);
-  return app;
 }
 
 bool ActiveAppPredicate(const ApplicationSharedPtr app) {
@@ -343,6 +343,7 @@ struct SubscribedToIVIPredicate {
   }
 };
 
+#ifdef SDL_REMOTE_CONTROL
 std::vector<ApplicationSharedPtr>
 ApplicationManagerImpl::applications_by_interior_vehicle_data(
     smart_objects::SmartObject moduleDescription) {
@@ -352,7 +353,7 @@ ApplicationManagerImpl::applications_by_interior_vehicle_data(
   LOG4CXX_DEBUG(logger_, " Found count: " << apps.size());
   return apps;
 }
-
+#endif
 std::vector<ApplicationSharedPtr> ApplicationManagerImpl::IviInfoUpdated(
     VehicleDataType vehicle_info, int value) {
   // Notify Policy Manager if available about info it's interested in,
@@ -1028,6 +1029,7 @@ void ApplicationManagerImpl::RemoveDevice(
   LOG4CXX_DEBUG(logger_, "device_handle " << device_handle);
 }
 
+#ifdef SDL_REMOTE_CONTROL
 bool ApplicationManagerImpl::IsAudioStreamingAllowed(
     uint32_t application_key) const {
   ApplicationSharedPtr app = application(application_key);
@@ -1056,6 +1058,7 @@ bool ApplicationManagerImpl::IsVideoStreamingAllowed(
   LOG4CXX_DEBUG(logger_, "HMILevel: " << app->hmi_level());
   return Compare<eType, EQ, ONE>(app->hmi_level(), HMI_FULL, HMI_LIMITED);
 }
+#endif
 
 mobile_apis::HMILevel::eType ApplicationManagerImpl::GetDefaultHmiLevel(
     ApplicationConstSharedPtr application) const {
@@ -1458,9 +1461,6 @@ void ApplicationManagerImpl::SendMessageToMobile(
   }
 
   smart_objects::SmartObject& msg_to_mobile = *message;
-  mobile_apis::FunctionID::eType function_id =
-      static_cast<mobile_apis::FunctionID::eType>(
-          (*message)[strings::params][strings::function_id].asUInt());
 
   // If correlation_id is not present, it is from-HMI message which should be
   // checked against policy permissions
@@ -2747,12 +2747,13 @@ void ApplicationManagerImpl::Handle(const impl::MessageFromMobile message) {
     LOG4CXX_INFO(logger_, "Application manager is stopping");
     return;
   }
-
+#ifdef SDL_REMOTE_CONTROL
   if (plugin_manager_.IsMessageForPlugin(message)) {
     LOG4CXX_INFO(logger_, "Message will be processed by plugin.");
     plugin_manager_.ProcessMessage(message);
     return;
   }
+#endif
   ProcessMessageFromMobile(message);
 }
 
@@ -2780,8 +2781,9 @@ void ApplicationManagerImpl::Handle(const impl::MessageToMobile message) {
       close_session = true;
     }
   }
-
+#ifdef SDL_REMOTE_CONTROL
   protocol_handler_->SendMessageToMobileApp(rawMessage, is_final);
+#endif
   LOG4CXX_INFO(logger_, "Message for mobile given away");
 
   if (close_session) {
@@ -2797,7 +2799,7 @@ void ApplicationManagerImpl::Handle(const impl::MessageFromHmi message) {
     LOG4CXX_ERROR(logger_, "Null-pointer message received.");
     return;
   }
-
+#ifdef SDL_REMOTE_CONTROL
   if (plugin_manager_.IsHMIMessageForPlugin(message)) {
     LOG4CXX_INFO(logger_, "Message will be processed by plugin.");
     functional_modules::ProcessResult result =
@@ -2807,6 +2809,7 @@ void ApplicationManagerImpl::Handle(const impl::MessageFromHmi message) {
       return;
     }
   }
+#endif
   ProcessMessageFromHMI(message);
 }
 
@@ -2861,8 +2864,9 @@ void ApplicationManagerImpl::Handle(const impl::AudioData message) {
 }
 
 mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
-    const ApplicationSharedPtr app,
-    const std::string& function_id,
+    const std::string& policy_app_id,
+    mobile_apis::HMILevel::eType hmi_level,
+    mobile_apis::FunctionID::eType function_id,
     const RPCParams& rpc_params,
     CommandParametersPermissions* params_permissions) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -2951,7 +2955,6 @@ void ApplicationManagerImpl::SubscribeToHMINotification(
     const std::string& hmi_notification) {
   hmi_handler_->SubscribeToHMINotification(hmi_notification);
 }
-}
 
 bool ApplicationManagerImpl::IsLowVoltage() {
   LOG4CXX_TRACE(logger_, "result: " << is_low_voltage_);
@@ -2969,6 +2972,7 @@ std::string ApplicationManagerImpl::GetHashedAppID(
   return mobile_app_id + device_name;
 }
 
+#ifdef SDL_REMOTE_CONTROL
 uint32_t ApplicationManagerImpl::GetDeviceHandle(uint32_t connection_key) {
   using namespace connection_handler;
   uint32_t device_handle = 0;
@@ -2976,6 +2980,7 @@ uint32_t ApplicationManagerImpl::GetDeviceHandle(uint32_t connection_key) {
       connection_key, 0, NULL, &device_handle);
   return device_handle;
 }
+#endif
 
 bool ApplicationManagerImpl::HMILevelAllowsStreaming(
     uint32_t app_id, protocol_handler::ServiceType service_type) const {
@@ -3459,7 +3464,7 @@ void ApplicationManagerImpl::RemoveAppFromTTSGlobalPropertiesList(
   }
   tts_global_properties_app_list_lock_.Release();
 }
-
+#ifdef SDL_REMOTE_CONTROL
 void ApplicationManagerImpl::CreatePhoneCallAppList() {
   LOG4CXX_AUTO_TRACE(logger_);
 
@@ -3490,6 +3495,7 @@ void ApplicationManagerImpl::CreatePhoneCallAppList() {
     }
   }
 }
+
 
 void ApplicationManagerImpl::ResetPhoneCallAppList() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -3530,6 +3536,7 @@ void ApplicationManagerImpl::ChangeAppsHMILevel(
     LOG4CXX_WARN(logger_, "Redudant changing HMI level : " << level);
   }
 }
+#endif
 
 void ApplicationManagerImpl::MakeAppNotAudible(uint32_t app_id) {
   using namespace mobile_apis;
@@ -3789,5 +3796,20 @@ const std::set<int32_t> ApplicationManagerImpl::GetAppsSubscribedForWayPoints()
   sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);
   return subscribed_way_points_apps_list_;
 }
+
+#ifdef SDL_REMOTE_CONTROL
+std::vector<std::string> ApplicationManagerImpl::devices(
+    const std::string& policy_app_id) const {
+  MobileAppIdPredicate matcher(policy_app_id);
+  std::vector<ApplicationSharedPtr> apps =
+      ApplicationListAccessor().FindAll(matcher);
+  std::vector<std::string> devices;
+  std::transform(apps.begin(),
+                 apps.end(),
+                 std::back_inserter(devices),
+                 TakeDeviceHandle());
+  return devices;
+}
+#endif
 
 }  // namespace application_manager

@@ -48,11 +48,14 @@
 #include "protocol_handler/protocol_handler.h"
 
 #include "connection_handler/device.h"
-#include "utils/timer_thread.h"
 #include "utils/lock.h"
 #include "utils/atomic_object.h"
 #include "utils/custom_string.h"
 #include "utils/timer.h"
+
+#ifdef SDL_REMOTE_CONTROL
+#include "utils/timer_thread.h"
+#endif
 
 namespace usage_statistics {
 
@@ -192,11 +195,8 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   bool IsSubscribedToInteriorVehicleData(smart_objects::SmartObject module);
   bool UnsubscribeFromInteriorVehicleData(smart_objects::SmartObject module);
 
-  virtual const std::set<mobile_apis::ButtonName::eType>& SubscribedButtons()
-      const;
   virtual const std::set<uint32_t>& SubscribesIVI() const;
 
-  virtual const std::string& curHash() const;
   /**
    * @brief ResetDataInNone reset data counters in NONE
    */
@@ -304,6 +304,13 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   void set_video_stream_retry_number(const uint32_t& video_stream_retry_number);
 
   /**
+   * @brief Return pointer to extension by uid
+   * @param uid uid of extension
+   * @return Pointer to extension, if extension was initialized, otherwise NULL
+   */
+  AppExtensionPtr QueryInterface(AppExtensionUID uid) OVERRIDE;
+
+  /**
    * @brief Load persistent files from application folder.
    */
   void LoadPersistentFiles() OVERRIDE;
@@ -320,13 +327,6 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
    * @brief Clean up application folder. Persistent files will stay
    */
   void CleanupFiles();
-
-  /**
-   * @brief Return pointer to extension by uid
-   * @param uid uid of extension
-   * @return Pointer to extension, if extension was initialized, otherwise NULL
-   */
-  AppExtensionPtr QueryInterface(AppExtensionUID uid);
 
   /**
    * @brief Add extension to application

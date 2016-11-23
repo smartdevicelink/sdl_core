@@ -75,8 +75,10 @@ mobile_apis::AppHMIType::eType StringToAppHMIType(const std::string& str) {
     return mobile_apis::AppHMIType::TESTING;
   } else if ("SYSTEM" == str) {
     return mobile_apis::AppHMIType::SYSTEM;
+#ifdef SDL_REMOTE_CONTROL
   } else if ("REMOTE_CONTROL" == str) {
     return mobile_apis::AppHMIType::REMOTE_CONTROL;
+#endif
   } else {
     return mobile_apis::AppHMIType::INVALID_ENUM;
   }
@@ -155,6 +157,7 @@ struct IsSameNickname {
   const custom_str::CustomString& app_id_;
 };
 
+#ifdef SDL_REMOTE_CONTROL
 /**
  * @brief Predicate for using with CheckCoincidence method to compare with VR
  *synonym SO
@@ -163,18 +166,17 @@ struct IsSameNickname {
  */
 struct CoincidencePredicateVR {
   explicit CoincidencePredicateVR(const std::string& newItem)
-      : newItem_(newItem){};
+      : newItem_(newItem) {}
 
   bool operator()(smart_objects::SmartObject obj) {
     const std::string vr_synonym = obj.asString();
     return !(strcasecmp(vr_synonym.c_str(), newItem_.c_str()));
-  };
+  }
 
   const std::string& newItem_;
 };
+#endif
 }  // namespace
-
-CREATE_LOGGERPTR_GLOBAL(logger_, "Commands")
 
 namespace application_manager {
 
@@ -219,7 +221,8 @@ struct IsSameAppId : public IsSameApp {
     if (AreBothRemoteControl(other) && !IsSameDeviceType(other)) {
       return false;
     }
-    return strcasecmp(app_id_.c_str(), other->mobile_app_id().c_str()) == 0;
+    // return strcasecmp(app_id_.c_str(), other->mobile_app_id().c_str()) == 0;
+    return strcasecmp(app_id_.c_str(), other->policy_app_id().c_str()) == 0;
   }
 
  private:
@@ -241,6 +244,7 @@ struct IsSameAppName : public IsSameApp {
     }
     bool same = strcasecmp(name_.c_str(), other->name().c_str()) == 0;
     if (same) {
+      LOG4CXX_AUTO_TRACE(logger_);
       LOG4CXX_ERROR(logger_, "Application name is known already.");
       return true;
     }
@@ -251,6 +255,8 @@ struct IsSameAppName : public IsSameApp {
       if (std::find_if(other_vr_synonyms->begin(),
                        other_vr_synonyms->end(),
                        matcher_) != other_vr_synonyms->end()) {
+        LOG4CXX_AUTO_TRACE(logger_);
+
         LOG4CXX_ERROR(logger_, "Application name is known already.");
         return true;
       }
@@ -259,6 +265,8 @@ struct IsSameAppName : public IsSameApp {
     if (vr_synonyms_) {
       if (std::find_if(vr_synonyms_->begin(), vr_synonyms_->end(), matcher_) !=
           vr_synonyms_->end()) {
+        LOG4CXX_AUTO_TRACE(logger_);
+
         LOG4CXX_ERROR(logger_, "vr_synonyms duplicated with app_name .");
         return true;
       }
@@ -271,11 +279,11 @@ struct IsSameAppName : public IsSameApp {
   CoincidencePredicateVR matcher_;
   const smart_objects::SmartArray* vr_synonyms_;
 };
-#else   // SDL_REMOTE_CONTROL
+//#else   // SDL_REMOTE_CONTROL
 struct IsSameAppId {
   explicit IsSameAppId(const std::string& app_id) : app_id_(app_id) {}
   bool operator()(ApplicationSharedPtr other) const {
-    return strcasecmp(app_id_.c_str(), other->mobile_app_id().c_str()) == 0;
+    return strcasecmp(app_id_.c_str(), other->policy_app_id().c_str()) == 0;
   }
 
  private:
@@ -288,6 +296,7 @@ struct IsSameAppName {
   bool operator()(ApplicationSharedPtr other) const {
     bool same = strcasecmp(name_.c_str(), other->name().c_str()) == 0;
     if (same) {
+      LOG4CXX_AUTO_TRACE(logger_);
       LOG4CXX_ERROR(logger_, "Application name is known already.");
       return true;
     }
@@ -298,6 +307,8 @@ struct IsSameAppName {
       if (std::find_if(other_vr_synonyms->begin(),
                        other_vr_synonyms->end(),
                        matcher_) != other_vr_synonyms->end()) {
+        LOG4CXX_AUTO_TRACE(logger_);
+
         LOG4CXX_ERROR(logger_, "Application name is known already.");
         return true;
       }
@@ -306,6 +317,8 @@ struct IsSameAppName {
     if (vr_synonyms_) {
       if (std::find_if(vr_synonyms_->begin(), vr_synonyms_->end(), matcher_) !=
           vr_synonyms_->end()) {
+        LOG4CXX_AUTO_TRACE(logger_);
+
         LOG4CXX_ERROR(logger_, "vr_synonyms duplicated with app_name .");
         return true;
       }
@@ -1005,25 +1018,34 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckCoincidence() {
 
   }  // application for end
 
-  const std::string app_name = msg_params[strings::app_name].asString();
+#ifdef SDL_REMOTE_CONTROL
+
   const smart_objects::SmartArray* vr_synonyms = 0;
   if (msg_params.keyExists(strings::vr_synonyms)) {
     vr_synonyms = msg_params[strings::vr_synonyms].asArray();
   }
 
-#ifdef SDL_REMOTE_CONTROL
   const std::string mobile_app_id =
       (*message_)[strings::msg_params][strings::app_id].asString();
-  IsSameAppName matcher(app_name,
+  IsSameAppName matcher(app_name.AsMBString(),
                         vr_synonyms,
                         IsRemoteControl(mobile_app_id),
                         IsDriverDevice(),
                         application_manager_);
-#else   // SDL_REMOTE_CONTROL
-  IsSameAppName matcher(app_name, vr_synonyms);
+  //(TODO) OKozlov clarify
+//#else   // SDL_REMOTE_CONTROL
+  IsSameAppName matcher(app_name.AsMBString(), vr_synonyms);
 #endif  // SDL_REMOTE_CONTROL
 
+  #ifdef SDL_REMOTE_CONTROL
+  bool duplicate =
+      std::find_if(accessor.begin(), accessor.end(), matcher) != accessor.end();
+  return duplicate ? mobile_apis::Result::DUPLICATE_NAME
+                   : mobile_apis::Result::SUCCESS;
+#else
   return mobile_apis::Result::SUCCESS;
+#endif
+
 }  // method end
 
 mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckWithPolicyData() {
@@ -1150,30 +1172,32 @@ bool RegisterAppInterfaceRequest::IsApplicationWithSameAppIdRegistered() {
   const ApplicationSet& applications =
       application_manager_.applications().GetData();
 
-  ApplicationSetConstIt it = applications.begin();
-  ApplicationSetConstIt it_end = applications.end();
+ApplicationSetConstIt it = applications.begin();
+ApplicationSetConstIt it_end = applications.end();
 
-  for (; it != it_end; ++it) {
-    if (mobile_app_id.CompareIgnoreCase((*it)->policy_app_id().c_str())) {
-      return true;
-    }
+for (; it != it_end; ++it) {
+  if (mobile_app_id.CompareIgnoreCase((*it)->policy_app_id().c_str())) {
+    return true;
   }
+}
 
 #ifdef SDL_REMOTE_CONTROL
-  IsSameAppId matcher(mobile_app_id,
+  IsSameAppId matcher(mobile_app_id.AsMBString(),
                       IsRemoteControl(mobile_app_id),
                       IsDriverDevice(),
                       application_manager_);
-#else   // SDL_REMOTE_CONTROL
-  IsSameAppId matcher(mobile_app_id);
+//(TODO) OKozlov clarify
+  //#else   // SDL_REMOTE_CONTROL
+  IsSameAppId matcher(mobile_app_id.AsMBString());
 #endif  // SDL_REMOTE_CONTROL
 
-  ApplicationManagerImpl::ApplicationListAccessor accessor;
-  const ApplicationManagerImpl::ApplictionSet applications =
-      accessor.applications();
-
+  #ifdef SDL_REMOTE_CONTROL
   return std::find_if(applications.begin(), applications.end(), matcher) !=
          applications.end();
+#else
+  return false;
+#endif
+
 }
 #ifdef SDL_REMOTE_CONTROL
 bool RegisterAppInterfaceRequest::IsRemoteControl(

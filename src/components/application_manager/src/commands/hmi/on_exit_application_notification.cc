@@ -116,13 +116,14 @@ void OnExitApplicationNotification::Run() {
       device_handle, app_impl->mobile_app_id());
 #endif  // SDL_REMOTE_CONTROL
 
-  application_manager_.->ChangeAppsHMILevel(app_impl->app_id(),
+  application_manager_.ChangeAppsHMILevel(app_impl->app_id(),
                                             mobile_apis::HMILevel::HMI_NONE);
 
   app_impl->set_audio_streaming_state(
       mobile_apis::AudioStreamingState::NOT_AUDIBLE);
   app_impl->set_system_context(mobile_api::SystemContext::SYSCTXT_MAIN);
-  MessageHelper::SendHMIStatusNotification(*app_impl);
+  //MessageHelper::SendHMIStatusNotification(*app_impl);
+  application_manager_.SendHMIStatusNotification(app_impl);
 }
 
 }  // namespace commands

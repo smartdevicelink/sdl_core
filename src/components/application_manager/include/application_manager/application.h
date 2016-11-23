@@ -523,6 +523,10 @@ class Application : public virtual InitialApplicationData,
   virtual void increment_put_file_in_none_count() = 0;
   virtual void increment_delete_file_in_none_count() = 0;
   virtual void increment_list_files_in_none_count() = 0;
+  virtual void set_system_context(
+      const mobile_api::SystemContext::eType& system_context) = 0;
+  virtual void set_audio_streaming_state(
+      const mobile_api::AudioStreamingState::eType& state) = 0;
   virtual bool set_app_icon_path(const std::string& file_name) = 0;
   virtual void set_app_allowed(const bool allowed) = 0;
   virtual void set_device(connection_handler::DeviceHandle device) = 0;
@@ -562,9 +566,18 @@ class Application : public virtual InitialApplicationData,
   virtual bool UnsubscribeFromIVI(uint32_t vehicle_info_type) = 0;
 
   /**
+   * @brief Return pointer to extension by uid
+   * @param uid uid of extension
+   * @return Pointer to extension, if extension was initialized, otherwise NULL
+   */
+  virtual AppExtensionPtr QueryInterface(AppExtensionUID uid) = 0;
+
+  /**
    * @brief ResetDataInNone reset data counters in NONE
    */
   virtual void ResetDataInNone() = 0;
+
+  virtual void RemoveExtensions() = 0;
 
   /**
    * @brief Check, if limits for command number per time is exceeded

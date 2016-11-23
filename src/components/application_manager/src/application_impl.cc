@@ -193,10 +193,12 @@ void ApplicationImpl::ChangeSupportingAppHMIType() {
   }
 }
 
+#ifdef SDL_REMOTE_CONTROL
 bool ApplicationImpl::IsAudible() const {
   return mobile_api::HMILevel::HMI_FULL == hmi_level_ ||
          mobile_api::HMILevel::HMI_LIMITED == hmi_level_;
 }
+#endif
 
 void ApplicationImpl::set_is_navi(bool allow) {
   is_navi_ = allow;
@@ -559,6 +561,7 @@ void ApplicationImpl::increment_list_files_in_none_count() {
   ++list_files_in_none_count_;
 }
 
+#ifdef SDL_REMOTE_CONTROL
 void ApplicationImpl::set_system_context(
     const mobile_api::SystemContext::eType& system_context) {
   system_context_ = system_context;
@@ -575,6 +578,7 @@ void ApplicationImpl::set_audio_streaming_state(
   }
   audio_streaming_state_ = state;
 }
+#endif
 
 bool ApplicationImpl::set_app_icon_path(const std::string& path) {
   if (app_files_.find(path) != app_files_.end()) {
@@ -701,6 +705,20 @@ bool ApplicationImpl::UnsubscribeFromButton(
   return subscribed_buttons_.erase(btn_name);
 }
 
+#ifdef SDL_REMOTE_CONTROL
+AppExtensionPtr ApplicationImpl::QueryInterface(AppExtensionUID uid) {
+  std::list<AppExtensionPtr>::const_iterator it =
+      extensions_.begin();
+  for (;it != extensions_.end(); ++it) {
+    if ((*it)->uid() == uid) {
+      return (*it);
+    }
+  }
+
+  return AppExtensionPtr();
+}
+#endif
+
 bool ApplicationImpl::SubscribeToIVI(uint32_t vehicle_info_type) {
   sync_primitives::AutoLock lock(vi_lock_);
   return subscribed_vehicle_info_.insert(vehicle_info_type).second;
@@ -718,6 +736,7 @@ bool ApplicationImpl::UnsubscribeFromIVI(uint32_t vehicle_info_type) {
   return subscribed_vehicle_info_.erase(vehicle_info_type);
 }
 
+#ifdef SDL_REMOTE_CONTROL
 bool ApplicationImpl::SubscribeToInteriorVehicleData(
     smart_objects::SmartObject module) {
   // size_t old_size = subscribed_interior_vehicle_data_.size();
@@ -747,6 +766,7 @@ bool ApplicationImpl::UnsubscribeFromInteriorVehicleData(
   subscribed_interior_vehicle_data_.remove(module);
   return true;
 }
+#endif
 
 UsageStatistics& ApplicationImpl::usage_report() {
   return usage_report_;
@@ -1021,6 +1041,7 @@ void ApplicationImpl::UnsubscribeFromSoftButtons(int32_t cmd_id) {
   }
 }
 
+#ifdef SDL_REMOTE_CONTROL
 AppExtensionPtr ApplicationImpl::QueryInterface(AppExtensionUID uid) {
   std::list<AppExtensionPtr>::const_iterator it = extensions_.begin();
   for (; it != extensions_.end(); ++it) {
@@ -1055,5 +1076,6 @@ bool ApplicationImpl::RemoveExtension(AppExtensionUID uid) {
 void ApplicationImpl::RemoveExtensions() {
   application_manager_.GetPluginManager().RemoveAppExtension(app_id_);
 }
+#endif
 
 }  // namespace application_manager

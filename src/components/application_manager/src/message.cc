@@ -40,6 +40,7 @@ bool BinaryDataPredicate(uint8_t i, uint8_t j) {
 
 namespace application_manager {
 
+
 MessageType MessageTypeFromRpcType(protocol_handler::RpcType rpc_type) {
   switch (rpc_type) {
     case protocol_handler::kRpcTypeRequest:
