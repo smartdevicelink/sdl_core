@@ -68,7 +68,7 @@ void GetUrls::Run() {
   }
 
 #ifdef EXTENDED_POLICY
-  const uint32_t policy_service = 7;
+  const uint32_t policy_service = 7u;
 
   if (policy_service == service_to_check) {
     ProcessPolicyServiceURLs(endpoints);
