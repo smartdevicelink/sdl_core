@@ -39,15 +39,13 @@ namespace application_manager {
 namespace commands {
 
 ButtonPressResponse::ButtonPressResponse(const MessageSharedPtr& message)
-    : CommandResponseImpl(message) {
-}
+    : CommandResponseImpl(message) {}
 
-ButtonPressResponse::~ButtonPressResponse() {
-}
+ButtonPressResponse::~ButtonPressResponse() {}
 
 void ButtonPressResponse::Run() {
   LOG4CXX_INFO(logger_, "ButtonPressResponse::Run");
-  
+
   application_manager_.SendMessageToMobile(message_);
 }
 

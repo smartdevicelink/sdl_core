@@ -39,8 +39,7 @@ namespace functional_modules {
 
 class MockModuleObserver : public ModuleObserver {
  public:
-  MOCK_METHOD2(OnError,
-               void(Errors error, ModuleID module_id));
+  MOCK_METHOD2(OnError, void(Errors error, ModuleID module_id));
   int ObserverMethod() {
     return 13;
   }

@@ -30,8 +30,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef  SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_EVENT_ENGINE_EVENT_DISPATCHER_H_
-#define  SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_EVENT_ENGINE_EVENT_DISPATCHER_H_
+#ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_EVENT_ENGINE_EVENT_DISPATCHER_H_
+#define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_EVENT_ENGINE_EVENT_DISPATCHER_H_
 
 #include <list>
 #include <map>
@@ -46,11 +46,10 @@
 
 namespace event_engine {
 
-template<typename EventMessage, typename EventID>
-class EventDispatcher :
-    public utils::Singleton<EventDispatcher<EventMessage, EventID>> {
+template <typename EventMessage, typename EventID>
+class EventDispatcher
+    : public utils::Singleton<EventDispatcher<EventMessage, EventID> > {
  public:
-
   /*
    * @brief Delivers the event to all subscribers
    *
@@ -75,8 +74,9 @@ class EventDispatcher :
    * @param event_id    The event ID to unsubscribe from
    * @param observer    The observer to be unsubscribed
    */
-  void remove_observer(const EventID& event_id,
-                    const EventObserver<EventMessage, EventID>* const observer);
+  void remove_observer(
+      const EventID& event_id,
+      const EventObserver<EventMessage, EventID>* const observer);
 
   /*
    * @brief Unsubscribes the observer from all events
@@ -87,9 +87,7 @@ class EventDispatcher :
       const EventObserver<EventMessage, EventID>* const observer);
 
  protected:
-
  private:
-
   /*
    * @brief Default constructor
    */
@@ -106,27 +104,22 @@ class EventDispatcher :
 
   // Data types section
   typedef std::list<EventObserver<EventMessage, EventID>*> ObserverList;
-  typedef std::map<int32_t, ObserverList>      ObserversMap;
-  typedef std::map<EventID, ObserversMap>      EventObserverMap;
+  typedef std::map<int32_t, ObserverList> ObserversMap;
+  typedef std::map<EventID, ObserversMap> EventObserverMap;
 
   // Members section
-  sync_primitives::Lock                               state_lock_;
-  EventObserverMap                                    observers_;
+  sync_primitives::Lock state_lock_;
+  EventObserverMap observers_;
 };
 
-
-template<typename EventMessage, typename EventID>
+template <typename EventMessage, typename EventID>
 EventDispatcher<EventMessage, EventID>::EventDispatcher()
-    : observers_() {
-}
+    : observers_() {}
 
+template <typename EventMessage, typename EventID>
+EventDispatcher<EventMessage, EventID>::~EventDispatcher() {}
 
-template<typename EventMessage, typename EventID>
-EventDispatcher<EventMessage, EventID>::~EventDispatcher() {
-}
-
-
-template<typename EventMessage, typename EventID>
+template <typename EventMessage, typename EventID>
 void EventDispatcher<EventMessage, EventID>::raise_event(
     const Event<EventMessage, EventID>& event) {
   // create local list
@@ -134,52 +127,45 @@ void EventDispatcher<EventMessage, EventID>::raise_event(
   {
     sync_primitives::AutoLock auto_lock(state_lock_);
     // check if event is notification
-    if (hmi_apis::messageType::notification ==
-        event.event_message_type()) {
-
-      //ObserversMap iterator
+    if (hmi_apis::messageType::notification == event.event_message_type()) {
+      // ObserversMap iterator
       typename ObserversMap::iterator it = observers_[event.id()].begin();
       for (; observers_[event.id()].end() != it; ++it) {
         list = it->second;
       }
     }
 
-    if ((hmi_apis::messageType::response  ==
-        event.event_message_type())
-        || (hmi_apis::messageType::error_response ==
-            event.event_message_type())) {
+    if ((hmi_apis::messageType::response == event.event_message_type()) ||
+        (hmi_apis::messageType::error_response == event.event_message_type())) {
       list = observers_[event.id()][event.event_message_correlation_id()];
     }
   }
 
   // Call observers
-  typename ObserverList::iterator observers =  list.begin();
+  typename ObserverList::iterator observers = list.begin();
   for (; list.end() != observers; ++observers) {
-      (*observers)->on_event(event);
+    (*observers)->on_event(event);
   }
 }
 
-
-template<typename EventMessage, typename EventID>
+template <typename EventMessage, typename EventID>
 void EventDispatcher<EventMessage, EventID>::add_observer(
-                   const EventID& event_id,
-                   int32_t hmi_correlation_id,
-                   EventObserver<EventMessage, EventID>* const observer) {
+    const EventID& event_id,
+    int32_t hmi_correlation_id,
+    EventObserver<EventMessage, EventID>* const observer) {
   sync_primitives::AutoLock auto_lock(state_lock_);
   observers_[event_id][hmi_correlation_id].push_back(observer);
 }
 
-
-template<typename EventMessage, typename EventID>
+template <typename EventMessage, typename EventID>
 void EventDispatcher<EventMessage, EventID>::remove_observer(
-                   const EventID& event_id,
-                   const EventObserver<EventMessage, EventID>* const observer) {
+    const EventID& event_id,
+    const EventObserver<EventMessage, EventID>* const observer) {
   sync_primitives::AutoLock auto_lock(state_lock_);
-  typename ObserversMap::iterator it =  observers_[event_id].begin();
+  typename ObserversMap::iterator it = observers_[event_id].begin();
   for (; observers_[event_id].end() != it; ++it) {
-
-    //ObserverList iterator
-    typename ObserverList::iterator observer_it =  it->second.begin();
+    // ObserverList iterator
+    typename ObserverList::iterator observer_it = it->second.begin();
     while (it->second.end() != observer_it) {
       if (observer->id() == (*observer_it)->id()) {
         observer_it = it->second.erase(observer_it);
@@ -190,19 +176,16 @@ void EventDispatcher<EventMessage, EventID>::remove_observer(
   }
 }
 
-
-template<typename EventMessage, typename EventID>
+template <typename EventMessage, typename EventID>
 void EventDispatcher<EventMessage, EventID>::remove_observer(
-                  const EventObserver<EventMessage, EventID>* const observer) {
+    const EventObserver<EventMessage, EventID>* const observer) {
   sync_primitives::AutoLock auto_lock(state_lock_);
   typename EventObserverMap::iterator event_map = observers_.begin();
   for (; observers_.end() != event_map; ++event_map) {
-
-    typename ObserversMap::iterator it =  event_map->second.begin();
+    typename ObserversMap::iterator it = event_map->second.begin();
     for (; event_map->second.end() != it; ++it) {
-
-      //ObserverList iterator
-      typename ObserverList::iterator observer_it =  it->second.begin();
+      // ObserverList iterator
+      typename ObserverList::iterator observer_it = it->second.begin();
       while (it->second.end() != observer_it) {
         if (observer->id() == (*observer_it)->id()) {
           observer_it = it->second.erase(observer_it);
@@ -213,7 +196,6 @@ void EventDispatcher<EventMessage, EventID>::remove_observer(
     }
   }
 }
-
 }
 
 #endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_EVENT_ENGINE_EVENT_DISPATCHER_H_

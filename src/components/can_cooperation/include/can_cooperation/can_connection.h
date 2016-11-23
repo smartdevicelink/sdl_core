@@ -46,12 +46,7 @@ typedef Json::Value CANMessage;
 /**
  * @brief Enum describing possible CAN<->RSDL connection states
  */
-enum ConnectionState {
-  NONE = -1,
-  OPENED,
-  CLOSED,
-  INVALID
-};
+enum ConnectionState { NONE = -1, OPENED, CLOSED, INVALID };
 
 /**
   * @class CANConnectionObserver
@@ -70,8 +65,10 @@ class CANConnectionObserver {
   * @class
   * @brief Abstract class defining methods for communication between
   * CAN-integration software and RSDL.
-  * Class implementing CANConnection has to have subscriber (see @CANConnectionObserver).
-  * Class implementing CANConnection has to define SendMessage and ReadMessage methods.
+  * Class implementing CANConnection has to have subscriber (see
+ * @CANConnectionObserver).
+  * Class implementing CANConnection has to define SendMessage and ReadMessage
+ * methods.
   */
 class CANConnection {
  public:
@@ -92,7 +89,8 @@ class CANConnection {
   /**
     * @brief Sets observer of events occuring during communication
     * between RSDL and CAN-integration software
-    * @param observer Pointer to implementation of CANConnectionObserver interface
+    * @param observer Pointer to implementation of CANConnectionObserver
+   * interface
     */
   virtual void set_observer(CANConnectionObserver* observer) {
     DCHECK(observer);
@@ -100,11 +98,12 @@ class CANConnection {
       observer_ = observer;
     }
   }
+
  protected:
   /**
    * \brief Class constructor
    */
-  CANConnection(): observer_(NULL) {}
+  CANConnection() : observer_(NULL) {}
   /**
     * @brief Implementation of pure virtual function ReadMessage should
     * receive message from CAN-integration software and forward it to RSDL

@@ -38,16 +38,15 @@ namespace application_manager {
 
 namespace commands {
 
-GetInteriorVehicleDataResponse::GetInteriorVehicleDataResponse(const MessageSharedPtr& message)
-    : CommandResponseImpl(message) {
-}
+GetInteriorVehicleDataResponse::GetInteriorVehicleDataResponse(
+    const MessageSharedPtr& message)
+    : CommandResponseImpl(message) {}
 
-GetInteriorVehicleDataResponse::~GetInteriorVehicleDataResponse() {
-}
+GetInteriorVehicleDataResponse::~GetInteriorVehicleDataResponse() {}
 
 void GetInteriorVehicleDataResponse::Run() {
   LOG4CXX_INFO(logger_, "ButtonPressResponse::Run");
-  
+
   application_manager_.SendMessageToMobile(message_);
 }
 

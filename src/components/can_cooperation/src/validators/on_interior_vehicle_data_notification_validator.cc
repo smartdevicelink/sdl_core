@@ -43,8 +43,8 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "OnInteriorVehicleDataNotificationValidator")
 using namespace message_params;
 using namespace json_keys;
 
-OnInteriorVehicleDataNotificationValidator::OnInteriorVehicleDataNotificationValidator() {
-}
+OnInteriorVehicleDataNotificationValidator::
+    OnInteriorVehicleDataNotificationValidator() {}
 
 ValidationResult OnInteriorVehicleDataNotificationValidator::Validate(
     std::string& json_string) {
@@ -57,14 +57,14 @@ ValidationResult OnInteriorVehicleDataNotificationValidator::Validate(
   ValidationResult result;
 
   if (IsMember(json, kModuleData)) {
-    result = ModuleDataValidator::instance()->
-        Validate(json[kModuleData], outgoing_json[kModuleData]);
+    result = ModuleDataValidator::instance()->Validate(
+        json[kModuleData], outgoing_json[kModuleData]);
   } else {
     result = ValidationResult::INVALID_DATA;
-    LOG4CXX_ERROR(logger_, "Mandatory param " <<kModuleData <<" missing!" );
+    LOG4CXX_ERROR(logger_, "Mandatory param " << kModuleData << " missing!");
   }
 
-  if  (ValidationResult::SUCCESS == result) {
+  if (ValidationResult::SUCCESS == result) {
     json_string = MessageHelper::ValueToString(outgoing_json);
   }
 
@@ -74,4 +74,3 @@ ValidationResult OnInteriorVehicleDataNotificationValidator::Validate(
 }  // namespace valdiators
 
 }  // namespace can_cooperation
-

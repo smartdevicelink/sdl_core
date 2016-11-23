@@ -42,7 +42,8 @@ namespace can_cooperation {
 /*
  * @brief VehicleCapabilities class stores capabilities from file
  * specified in smartDeviceLink.ini as InteriorVDCapabilitiesFile
- * or from default location ./plugins/Remote_Control/InteriorVehicleDataCapabilities.json.
+ * or from default location
+ * ./plugins/Remote_Control/InteriorVehicleDataCapabilities.json.
  */
 class VehicleCapabilities {
  public:

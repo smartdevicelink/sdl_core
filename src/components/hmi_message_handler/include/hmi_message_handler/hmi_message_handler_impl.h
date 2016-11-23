@@ -99,8 +99,7 @@ class HMIMessageHandlerImpl : public HMIMessageHandler,
    * @brief Subscribes to notification from HMI
    * @param hmi_notification string with notification name
    */
-  virtual void SubscribeToHMINotification(
-      const std::string& hmi_notification);
+  virtual void SubscribeToHMINotification(const std::string& hmi_notification);
 
   virtual const HMIMessageHandlerSettings& get_settings() const OVERRIDE;
 

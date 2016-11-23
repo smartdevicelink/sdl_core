@@ -200,7 +200,7 @@ bool LifeCycle::StartComponents() {
   LOG4CXX_INFO(logger_, "InitMessageBroker successful");
 
   plugin_manager_->OnServiceStateChanged(
-    functional_modules::ServiceState::HMI_ADAPTER_INITIALIZED);
+      functional_modules::ServiceState::HMI_ADAPTER_INITIALIZED);
 
   return true;
 }

@@ -43,7 +43,7 @@
 namespace functional_modules {
 
 class PluginManager : public utils::Singleton<PluginManager>,
-  public ModuleObserver {
+                      public ModuleObserver {
  public:
   typedef std::map<ModuleID, ModulePtr> Modules;
   int LoadPlugins(const std::string& plugin_path);
@@ -88,7 +88,7 @@ class PluginManager : public utils::Singleton<PluginManager>,
    * @param old_level Old HMILevel of app
    */
   void OnAppHMILevelChanged(application_manager::ApplicationSharedPtr app,
-    mobile_apis::HMILevel::eType old_level);
+                            mobile_apis::HMILevel::eType old_level);
 
   /**
    * @brief Checks if plugin hasn't put restrictions on app's HMI Level
@@ -97,7 +97,7 @@ class PluginManager : public utils::Singleton<PluginManager>,
    * @return false if any of the plugins returns false.
    */
   bool CanAppChangeHMILevel(application_manager::ApplicationSharedPtr app,
-    mobile_apis::HMILevel::eType new_level);
+                            mobile_apis::HMILevel::eType new_level);
 
   /**
    * Handles removing (disconnecting) device

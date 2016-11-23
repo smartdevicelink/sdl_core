@@ -96,7 +96,7 @@ ClimateControlDataValidator::ClimateControlDataValidator() {
   dual_mode_enable_[ValidationParams::MANDATORY] = 0;
 
   validation_scope_map_[kFanSpeed] = &fan_speed_;
-  validation_scope_map_[kCurrentTemp] =  &current_temp_;
+  validation_scope_map_[kCurrentTemp] = &current_temp_;
   validation_scope_map_[kTemperatureUnit] = &temperature_unit_;
   validation_scope_map_[kACEnable] = &ac_enable_;
   validation_scope_map_[kCirculateAirEnable] = &circulate_air_enable_;
@@ -104,11 +104,10 @@ ClimateControlDataValidator::ClimateControlDataValidator() {
   validation_scope_map_[kAutoModeEnable] = &auto_mode_enable_;
   validation_scope_map_[kDefrostZone] = &defrost_zone_;
   validation_scope_map_[kDualModeEnable] = &dual_mode_enable_;
-
 }
 
-ValidationResult ClimateControlDataValidator::Validate(const Json::Value& json,
-                                                 Json::Value& outgoing_json) {
+ValidationResult ClimateControlDataValidator::Validate(
+    const Json::Value& json, Json::Value& outgoing_json) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (!json.isObject()) {
@@ -134,4 +133,3 @@ void ClimateControlDataValidator::RemoveReadOnlyParams(Json::Value& json) {
 }  // namespace valdiators
 
 }  // namespace can_cooperation
-

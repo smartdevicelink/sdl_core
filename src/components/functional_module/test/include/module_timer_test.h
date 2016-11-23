@@ -6,8 +6,7 @@ namespace functional_modules {
 class TestTrackable : public Trackable {
  public:
   explicit TestTrackable(TimeUnit interval = 0)
-    : Trackable()
-    , custom_interval_(interval) {}
+      : Trackable(), custom_interval_(interval) {}
 
   virtual TimeUnit custom_interval() const {
     return custom_interval_;
@@ -16,14 +15,14 @@ class TestTrackable : public Trackable {
   bool operator==(const TestTrackable& other) const {
     return custom_interval_ == other.custom_interval_;
   }
+
  private:
   TimeUnit custom_interval_;
 };
 
 class ModuleTimerTest {
  public:
-  ModuleTimerTest(ModuleTimer<TestTrackable>& timer)
-    : timer_(timer) {}
+  ModuleTimerTest(ModuleTimer<TestTrackable>& timer) : timer_(timer) {}
 
   TimeUnit period() const {
     return timer_.period_;
@@ -38,8 +37,8 @@ class ModuleTimerTest {
   }
 
   TestTrackable trackable(const TestTrackable& track) const {
-    return *std::find(timer_.trackables_.begin(),
-                      timer_.trackables_.end(), track);
+    return *std::find(
+               timer_.trackables_.begin(), timer_.trackables_.end(), track);
   }
 
   TimeUnit current_time() const {

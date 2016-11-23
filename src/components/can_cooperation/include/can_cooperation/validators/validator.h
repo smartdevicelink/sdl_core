@@ -42,11 +42,7 @@ namespace can_cooperation {
 
 namespace validators {
 
-enum ValidationResult {
-  SUCCESS,
-  INVALID_DATA
-};
-
+enum ValidationResult { SUCCESS, INVALID_DATA };
 
 // TOD(VS): Use this enum as key for ValidationScope map
 enum ValidationParams {
@@ -62,17 +58,10 @@ enum ValidationParams {
   ENUM_TYPE
 };
 
-
-enum ValueType {
-  INT,
-  STRING,
-  DOUBLE,
-  BOOL,
-  ENUM
-};
+enum ValueType { INT, STRING, DOUBLE, BOOL, ENUM };
 
 enum EnumType {
-  //TRIGGER_SOURCE,
+  // TRIGGER_SOURCE,
   BUTTON_NAME,
   MODULE_TYPE,
   RADIO_BAND,
@@ -82,7 +71,8 @@ enum EnumType {
   BUTTON_PRESS_MODE
 };
 
-//validation_scope map with data that will be used for validation(minlength. maxlength, etc.)
+// validation_scope map with data that will be used for validation(minlength.
+// maxlength, etc.)
 typedef std::map<ValidationParams, int> ValidationScope;
 
 typedef std::map<std::string, ValidationScope*> ValidationScopeMap;
@@ -97,7 +87,8 @@ class Validator {
  protected:
   /**
   * @brief Validate simple values(integers, strings, boolean), cut fake params,
-  *        If invalid param will be found, validation stops, error will be returned as result,
+  *        If invalid param will be found, validation stops, error will be
+  *returned as result,
   *        and outgoing_json should not be used.
   *
   * @param json incoming json with request-response params
@@ -106,10 +97,10 @@ class Validator {
   *
   * @return validation result
   */
- ValidationResult ValidateSimpleValues(const Json::Value& json,
-                                       Json::Value& outgoing_json);
+  ValidationResult ValidateSimpleValues(const Json::Value& json,
+                                        Json::Value& outgoing_json);
 
- ValidationScopeMap validation_scope_map_;
+  ValidationScopeMap validation_scope_map_;
 
  private:
   /**
@@ -117,8 +108,10 @@ class Validator {
    *
    * @param value_name name of param in json, that will be verified
    * @param json incoming json with request-response params
-   * @param outgoing_json outgoing json where is param will be copied after verification
-   * @param validation_scope map with data that will be used for validation(minlength, maxlength, etc.)
+   * @param outgoing_json outgoing json where is param will be copied after
+   *verification
+   * @param validation_scope map with data that will be used for
+   *validation(minlength, maxlength, etc.)
    *
    * @return validation result
    */
@@ -131,7 +124,8 @@ class Validator {
    * @brief Validate value
    *
    * @param json incoming json with request-response params
-   * @param validation_scope map with data that will be used for validation(minlength, maxlength, etc.)
+   * @param validation_scope map with data that will be used for
+   *validation(minlength, maxlength, etc.)
    *
    * @return validation result
    */
@@ -141,7 +135,8 @@ class Validator {
    * @brief Validate string value
    *
    * @param value string to verify
-   * @param validation_scope map with data that will be used for validation(minlength, maxlength)
+   * @param validation_scope map with data that will be used for
+   *validation(minlength, maxlength)
    *
    * @return validation result
    */
@@ -149,7 +144,8 @@ class Validator {
                                        ValidationScope& validation_scope);
 
   /**
-   * @brief Validate string with enum value that comes in request/response/notification
+   * @brief Validate string with enum value that comes in
+   *request/response/notification
    *
    * @param value value to verify
    * @param validation_scope map with data that will be used for validation
@@ -163,7 +159,8 @@ class Validator {
    * @brief Validate int value
    *
    * @param value int value to verify
-   * @param validation_scope map with data that will be used for validation(minvalue, maxvalue)
+   * @param validation_scope map with data that will be used for
+   *validation(minvalue, maxvalue)
    *
    * @return validation result
    */
@@ -174,13 +171,13 @@ class Validator {
    * @brief Validate double value
    *
    * @param value double value to verify
-   * @param validation_scope map with data that will be used for validation(minvalue, maxvalue, etc.)
+   * @param validation_scope map with data that will be used for
+   *validation(minvalue, maxvalue, etc.)
    *
    * @return validation result
    */
   ValidationResult ValidateDoubleValue(double value,
                                        ValidationScope& validation_scope);
-
 };
 
 }  // namespace validators

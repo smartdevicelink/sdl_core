@@ -42,8 +42,8 @@ namespace validators {
 using namespace message_params;
 using namespace json_keys;
 
-ValidationResult TuneRadioRequestValidator::Validate(const Json::Value& json,
-                                                   Json::Value& outgoing_json) {
+ValidationResult TuneRadioRequestValidator::Validate(
+    const Json::Value& json, Json::Value& outgoing_json) {
   if (json.isMember(kRadioStation)) {
     return RadioStationValidator::instance()->Validate(
         json[kRadioStation], outgoing_json[kRadioStation]);
@@ -55,4 +55,3 @@ ValidationResult TuneRadioRequestValidator::Validate(const Json::Value& json,
 }  // namespace valdiators
 
 }  // namespace can_cooperation
-

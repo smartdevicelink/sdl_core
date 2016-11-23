@@ -39,48 +39,46 @@ namespace validators {
 
 using namespace message_params;
 
-
 AddressValidator::AddressValidator() {
-/*  // name="state"
-  state_[kType] = ValueType::STRING; // TODO(VS): Research Min-Max Length
-  state_[kMinLength] = 0;
-  state_[kMaxLength] = 100;
-  state_[kArray] = 0;
-  state_[kMandatory] = 0;
+  /*  // name="state"
+    state_[kType] = ValueType::STRING; // TODO(VS): Research Min-Max Length
+    state_[kMinLength] = 0;
+    state_[kMaxLength] = 100;
+    state_[kArray] = 0;
+    state_[kMandatory] = 0;
 
-  // name="zipcode"
-  zip_code_[kType] = ValueType::STRING; // TODO(VS): Research Min-Max Length
-  zip_code_[kMinLength] = 0;
-  zip_code_[kMaxLength] = 100;
-  zip_code_[kArray] = 0;
-  zip_code_[kMandatory] = 0;
+    // name="zipcode"
+    zip_code_[kType] = ValueType::STRING; // TODO(VS): Research Min-Max Length
+    zip_code_[kMinLength] = 0;
+    zip_code_[kMaxLength] = 100;
+    zip_code_[kArray] = 0;
+    zip_code_[kMandatory] = 0;
 
-  // name="city"
-  city_[kType] = ValueType::STRING; // TODO(VS): Research Min-Max Length
-  city_[kMinLength] = 0;
-  city_[kMaxLength] = 100;
-  city_[kArray] = 0;
-  city_[kMandatory] = 0;
+    // name="city"
+    city_[kType] = ValueType::STRING; // TODO(VS): Research Min-Max Length
+    city_[kMinLength] = 0;
+    city_[kMaxLength] = 100;
+    city_[kArray] = 0;
+    city_[kMandatory] = 0;
 
-  // name="street"
-  street_[kType] = ValueType::STRING; // TODO(VS): Research Min-Max Length
-  street_[kMinLength] = 0;
-  street_[kMaxLength] = 100;
-  street_[kArray] = 0;
-  street_[kMandatory] = 0;
+    // name="street"
+    street_[kType] = ValueType::STRING; // TODO(VS): Research Min-Max Length
+    street_[kMinLength] = 0;
+    street_[kMaxLength] = 100;
+    street_[kArray] = 0;
+    street_[kMandatory] = 0;
 
-  validation_scope_map_[kState] = &state_;
-  validation_scope_map_[kZipCode] =  &zip_code_;
-  validation_scope_map_[kCity] = &city_;
-  validation_scope_map_[kStreet] = &street_;*/
+    validation_scope_map_[kState] = &state_;
+    validation_scope_map_[kZipCode] =  &zip_code_;
+    validation_scope_map_[kCity] = &city_;
+    validation_scope_map_[kStreet] = &street_;*/
 }
 
 ValidationResult AddressValidator::Validate(const Json::Value& json,
-                                                 Json::Value& outgoing_json) {
+                                            Json::Value& outgoing_json) {
   return ValidateSimpleValues(json, outgoing_json);
 }
 
 }  // namespace valdiators
 
 }  // namespace can_cooperation
-

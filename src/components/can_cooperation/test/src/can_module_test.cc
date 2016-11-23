@@ -59,10 +59,11 @@ using ::testing::ReturnRef;
 namespace can_cooperation {
 
 class CanModuleTest : public ::testing::Test {
-public:
+ public:
   void static HandleMessage(application_manager::MessagePtr msg) {
     module->HandleMessage(msg);
   }
+
  protected:
   static CANModule* module;
   static MockService* mock_service;
@@ -83,8 +84,8 @@ public:
 
   static void TearDownTestCase() {
     std::vector<application_manager::ApplicationSharedPtr> apps;
-    EXPECT_CALL(*mock_service, GetApplications(module->GetModuleID())).
-        WillRepeatedly(Return(apps));
+    EXPECT_CALL(*mock_service, GetApplications(module->GetModuleID()))
+        .WillRepeatedly(Return(apps));
     CANModule::destroy();
   }
 };
@@ -102,8 +103,8 @@ TEST_F(CanModuleTest, Create) {
 
 TEST_F(CanModuleTest, ProcessMessageWrongMessage) {
   application_manager::MessagePtr message = new application_manager::Message(
-    protocol_handler::MessagePriority::FromServiceType(
-      protocol_handler::ServiceType::kRpc));
+      protocol_handler::MessagePriority::FromServiceType(
+          protocol_handler::ServiceType::kRpc));
   message->set_function_id(-1);
   EXPECT_CALL(*mock_service, SendMessageToMobile(_)).Times(0);
   EXPECT_EQ(ProcessResult::CANNOT_PROCESS, module->ProcessMessage(message));
@@ -111,12 +112,13 @@ TEST_F(CanModuleTest, ProcessMessageWrongMessage) {
 
 TEST_F(CanModuleTest, ProcessMessageEmptyAppsList) {
   application_manager::MessagePtr message = new application_manager::Message(
-    protocol_handler::MessagePriority::FromServiceType(
-      protocol_handler::ServiceType::kRpc));
+      protocol_handler::MessagePriority::FromServiceType(
+          protocol_handler::ServiceType::kRpc));
   message->set_function_id(MobileFunctionID::ON_INTERIOR_VEHICLE_DATA);
   message->set_function_name("OnInteriorVehicleData");
 
-  std::string json = "{\"jsonrpc\": \"2.0\", \"method\": \"RC.OnInteriorVehicleData\",\
+  std::string json =
+      "{\"jsonrpc\": \"2.0\", \"method\": \"RC.OnInteriorVehicleData\",\
                         \"params\": {\"moduleData\": {\"moduleType\": \"CLIMATE\",\
                         \"moduleZone\":  {\"col\": 0,\"row\": 0,\"level\": 0,\"colspan\": 2,\
                         \"rowspan\": 2, \"levelspan\": 1}, \"climateControlData\": {\"fanSpeed\": 100} }}}";
@@ -124,19 +126,20 @@ TEST_F(CanModuleTest, ProcessMessageEmptyAppsList) {
 
   std::vector<application_manager::ApplicationSharedPtr> apps;
 
-  EXPECT_CALL(*mock_service, GetApplications(module->GetModuleID())
-    ).WillOnce(Return(apps));
+  EXPECT_CALL(*mock_service, GetApplications(module->GetModuleID()))
+      .WillOnce(Return(apps));
   EXPECT_CALL(*mock_service, SendMessageToMobile(_)).Times(0);
   EXPECT_EQ(ProcessResult::PROCESSED, module->ProcessMessage(message));
 }
 
 TEST_F(CanModuleTest, ProcessMessagePass) {
   application_manager::MessagePtr message = new application_manager::Message(
-    protocol_handler::MessagePriority::FromServiceType(
-      protocol_handler::ServiceType::kRpc));
+      protocol_handler::MessagePriority::FromServiceType(
+          protocol_handler::ServiceType::kRpc));
   message->set_function_id(MobileFunctionID::ON_INTERIOR_VEHICLE_DATA);
 
-  std::string json = "{\"jsonrpc\": \"2.0\", \"method\": \"RC.OnInteriorVehicleData\",\
+  std::string json =
+      "{\"jsonrpc\": \"2.0\", \"method\": \"RC.OnInteriorVehicleData\",\
                         \"params\": {\"moduleData\": {\"moduleType\": \"CLIMATE\",\
                         \"moduleZone\":  {\"col\": 0,\"row\": 0,\"level\": 0,\"colspan\": 2,\
                         \"rowspan\": 2, \"levelspan\": 1}, \"climateControlData\": {\"fanSpeed\": 100} }}}";
@@ -147,11 +150,11 @@ TEST_F(CanModuleTest, ProcessMessagePass) {
 
   moduleDescription[message_params::kModuleType] =
       json_value[json_keys::kParams][message_params::kModuleData]
-                                     [message_params::kModuleType];
+                [message_params::kModuleType];
 
   moduleDescription[message_params::kModuleZone] =
       json_value[json_keys::kParams][message_params::kModuleData]
-                                     [message_params::kModuleZone];
+                [message_params::kModuleZone];
 
   std::vector<application_manager::ApplicationSharedPtr> apps;
   NiceMock<MockApplication>* app = new NiceMock<MockApplication>();
@@ -159,14 +162,16 @@ TEST_F(CanModuleTest, ProcessMessagePass) {
   apps.push_back(app_ptr);
   CANAppExtension* ext = new CANAppExtension(module->GetModuleID());
   ext->SubscribeToInteriorVehicleData(moduleDescription);
-  EXPECT_CALL(*app, QueryInterface(module->GetModuleID())).
-      WillRepeatedly(Return(ext));
+  EXPECT_CALL(*app, QueryInterface(module->GetModuleID()))
+      .WillRepeatedly(Return(ext));
   EXPECT_CALL(*app, app_id()).WillRepeatedly(Return(1));
-  EXPECT_CALL(*mock_service, GetApplications(module->GetModuleID())
-    ).WillRepeatedly(Return(apps));
-  EXPECT_CALL(*mock_service, GetApplication(1)).Times(1)
+  EXPECT_CALL(*mock_service, GetApplications(module->GetModuleID()))
+      .WillRepeatedly(Return(apps));
+  EXPECT_CALL(*mock_service, GetApplication(1))
+      .Times(1)
       .WillOnce(Return(app_ptr));
-  EXPECT_CALL(*mock_service, CheckPolicyPermissions(_)).Times(1)
+  EXPECT_CALL(*mock_service, CheckPolicyPermissions(_))
+      .Times(1)
       .WillOnce(Return(mobile_apis::Result::eType::SUCCESS));
   EXPECT_CALL(*mock_service, CheckModule(1, "CLIMATE")).WillOnce(Return(true));
   EXPECT_CALL(*mock_service, SendMessageToMobile(_)).Times(1);
@@ -180,8 +185,9 @@ TEST_F(CanModuleTest, RemoveAppExtensionPassWay) {
 
   EXPECT_CALL(*app, app_id()).WillOnce(Return(1));
   EXPECT_CALL(*mock_service, ResetAccess(1));
-  EXPECT_CALL(*mock_service, GetApplication(1)).Times(1).WillOnce(
-    Return(valid_app));
+  EXPECT_CALL(*mock_service, GetApplication(1))
+      .Times(1)
+      .WillOnce(Return(valid_app));
   EXPECT_CALL(*app, RemoveExtension(module->GetModuleID())).Times(1);
 
   module->RemoveAppExtension(1);
@@ -191,16 +197,17 @@ TEST_F(CanModuleTest, RemoveAppExtensionIfAppNoExist) {
   application_manager::ApplicationSharedPtr invalid_app;
 
   EXPECT_CALL(*mock_service, ResetAccess(_)).Times(0);
-  EXPECT_CALL(*mock_service, GetApplication(_)).Times(1).WillOnce(
-    Return(invalid_app));
+  EXPECT_CALL(*mock_service, GetApplication(_))
+      .Times(1)
+      .WillOnce(Return(invalid_app));
 
   module->RemoveAppExtension(1);
 }
 
 TEST_F(CanModuleTest, SendResponseToMobile) {
   application_manager::MessagePtr message = new application_manager::Message(
-    protocol_handler::MessagePriority::FromServiceType(
-      protocol_handler::ServiceType::kRpc));
+      protocol_handler::MessagePriority::FromServiceType(
+          protocol_handler::ServiceType::kRpc));
 
   EXPECT_CALL(*mock_service, SendMessageToMobile(message)).Times(1);
 
@@ -212,15 +219,17 @@ TEST_F(CanModuleTest, IsAppForPluginSuccess) {
   application_manager::ApplicationSharedPtr app_ptr(app);
   application_manager::AppExtensionPtr ext;
   CANAppExtension* valid_ext = new CANAppExtension(module->GetModuleID());
-  EXPECT_CALL(*app, QueryInterface(module->GetModuleID())).
-      WillOnce(Return(ext)).WillRepeatedly(Return(valid_ext));
+  EXPECT_CALL(*app, QueryInterface(module->GetModuleID()))
+      .WillOnce(Return(ext))
+      .WillRepeatedly(Return(valid_ext));
   EXPECT_CALL(*app, AddExtension(_)).WillOnce(Return(true));
   mobile_apis::HMILevel::eType hmi = mobile_apis::HMILevel::eType::HMI_FULL;
   EXPECT_CALL(*app, hmi_level()).WillRepeatedly(ReturnRef(hmi));
   EXPECT_CALL(*app, device()).WillOnce(Return(1));
   EXPECT_CALL(*mock_service, NotifyHMIAboutHMILevel(app_ptr, _)).Times(1);
   EXPECT_CALL(*mock_service, PrimaryDevice()).Times(1);
-  EXPECT_CALL(*mock_service, IsRemoteControlApplication(app_ptr)).Times(1)
+  EXPECT_CALL(*mock_service, IsRemoteControlApplication(app_ptr))
+      .Times(1)
       .WillOnce(Return(true));
   ASSERT_TRUE(module->IsAppForPlugin(app_ptr));
 }
@@ -229,8 +238,8 @@ TEST_F(CanModuleTest, IsAppForPluginNotNew) {
   MockApplication* app = new MockApplication();
   application_manager::ApplicationSharedPtr app_ptr(app);
   CANAppExtension* ext = new CANAppExtension(module->GetModuleID());
-  EXPECT_CALL(*app, QueryInterface(module->GetModuleID())).
-      WillOnce(Return(ext));
+  EXPECT_CALL(*app, QueryInterface(module->GetModuleID()))
+      .WillOnce(Return(ext));
   EXPECT_CALL(*mock_service, NotifyHMIAboutHMILevel(app_ptr, _)).Times(0);
   ASSERT_TRUE(module->IsAppForPlugin(app_ptr));
 }
@@ -239,9 +248,10 @@ TEST_F(CanModuleTest, IsAppForPluginFail) {
   MockApplication* app = new MockApplication();
   application_manager::ApplicationSharedPtr app_ptr(app);
   application_manager::AppExtensionPtr ext;
-  EXPECT_CALL(*app, QueryInterface(module->GetModuleID())).
-      WillOnce(Return(ext));
-  EXPECT_CALL(*mock_service, IsRemoteControlApplication(app_ptr)).Times(1)
+  EXPECT_CALL(*app, QueryInterface(module->GetModuleID()))
+      .WillOnce(Return(ext));
+  EXPECT_CALL(*mock_service, IsRemoteControlApplication(app_ptr))
+      .Times(1)
       .WillOnce(Return(false));
   ASSERT_FALSE(module->IsAppForPlugin(app_ptr));
 }
@@ -253,8 +263,9 @@ TEST_F(CanModuleTest, OnAppHMILevelChanged) {
   ON_CALL(*app, name()).WillByDefault(ReturnRef(name));
   mobile_apis::HMILevel::eType hmi = mobile_apis::HMILevel::eType::HMI_NONE;
   EXPECT_CALL(*app, hmi_level()).Times(2).WillRepeatedly(ReturnRef(hmi));
-  EXPECT_CALL(*mock_service, NotifyHMIAboutHMILevel(
-      app_ptr, mobile_apis::HMILevel::eType::HMI_NONE));
+  EXPECT_CALL(
+      *mock_service,
+      NotifyHMIAboutHMILevel(app_ptr, mobile_apis::HMILevel::eType::HMI_NONE));
   module->OnAppHMILevelChanged(app_ptr, mobile_apis::HMILevel::eType::HMI_FULL);
 }
 
@@ -263,15 +274,18 @@ TEST_F(CanModuleTest, SetDriverDeviceOnRegister) {
   application_manager::ApplicationSharedPtr app_ptr(app);
   application_manager::AppExtensionPtr invalid_ext;
   CANAppExtension* ext = new CANAppExtension(module->GetModuleID());
-  EXPECT_CALL(*app, QueryInterface(module->GetModuleID())).Times(2).
-      WillOnce(Return(invalid_ext)).WillRepeatedly(Return(ext));
+  EXPECT_CALL(*app, QueryInterface(module->GetModuleID()))
+      .Times(2)
+      .WillOnce(Return(invalid_ext))
+      .WillRepeatedly(Return(ext));
   EXPECT_CALL(*app, AddExtension(_)).WillOnce(Return(true));
   EXPECT_CALL(*app, device()).WillOnce(Return(12));
   mobile_apis::HMILevel::eType hmi = mobile_apis::HMILevel::eType::HMI_NONE;
-    EXPECT_CALL(*app, hmi_level()).Times(1).WillRepeatedly(ReturnRef(hmi));
+  EXPECT_CALL(*app, hmi_level()).Times(1).WillRepeatedly(ReturnRef(hmi));
   EXPECT_CALL(*mock_service, NotifyHMIAboutHMILevel(app_ptr, _)).Times(1);
   EXPECT_CALL(*mock_service, PrimaryDevice()).Times(1).WillOnce(Return(12));
-  EXPECT_CALL(*mock_service, IsRemoteControlApplication(app_ptr)).Times(1)
+  EXPECT_CALL(*mock_service, IsRemoteControlApplication(app_ptr))
+      .Times(1)
       .WillOnce(Return(true));
 
   ASSERT_TRUE(module->IsAppForPlugin(app_ptr));
@@ -283,15 +297,18 @@ TEST_F(CanModuleTest, SetDriverDeviceOnRegisterFail) {
   application_manager::ApplicationSharedPtr app_ptr(app);
   application_manager::AppExtensionPtr invalid_ext;
   CANAppExtension* ext = new CANAppExtension(module->GetModuleID());
-  EXPECT_CALL(*app, QueryInterface(module->GetModuleID())).Times(2).
-      WillOnce(Return(invalid_ext)).WillRepeatedly(Return(ext));
+  EXPECT_CALL(*app, QueryInterface(module->GetModuleID()))
+      .Times(2)
+      .WillOnce(Return(invalid_ext))
+      .WillRepeatedly(Return(ext));
   EXPECT_CALL(*app, AddExtension(_)).WillOnce(Return(true));
   mobile_apis::HMILevel::eType hmi = mobile_apis::HMILevel::eType::HMI_FULL;
   EXPECT_CALL(*app, hmi_level()).WillRepeatedly(ReturnRef(hmi));
   EXPECT_CALL(*app, device()).WillOnce(Return(12));
   EXPECT_CALL(*mock_service, NotifyHMIAboutHMILevel(app_ptr, _)).Times(1);
   EXPECT_CALL(*mock_service, PrimaryDevice()).Times(1).WillOnce(Return(3));
-  EXPECT_CALL(*mock_service, IsRemoteControlApplication(app_ptr)).Times(1)
+  EXPECT_CALL(*mock_service, IsRemoteControlApplication(app_ptr))
+      .Times(1)
       .WillOnce(Return(true));
 
   ASSERT_TRUE(module->IsAppForPlugin(app_ptr));
@@ -300,23 +317,27 @@ TEST_F(CanModuleTest, SetDriverDeviceOnRegisterFail) {
 
 TEST_F(CanModuleTest, ChangeDriverDevice) {
   Json::Value value(Json::ValueType::objectValue);
-  value[json_keys::kMethod] = functional_modules::hmi_api::on_device_rank_changed;
+  value[json_keys::kMethod] =
+      functional_modules::hmi_api::on_device_rank_changed;
   value[json_keys::kParams] = Json::Value(Json::ValueType::objectValue);
-  value[json_keys::kParams][message_params::kDevice] = Json::Value(Json::ValueType::objectValue);
+  value[json_keys::kParams][message_params::kDevice] =
+      Json::Value(Json::ValueType::objectValue);
   value[json_keys::kParams][message_params::kDevice][json_keys::kId] = 1;
-  value[json_keys::kParams][message_params::kDevice][message_params::kName] = "1";
+  value[json_keys::kParams][message_params::kDevice][message_params::kName] =
+      "1";
   value[json_keys::kParams][message_params::kRank] = "DRIVER";
   Json::FastWriter writer;
   std::string json_str = writer.write(value);
 
   application_manager::MessagePtr message = new application_manager::Message(
-    protocol_handler::MessagePriority::FromServiceType(
-      protocol_handler::ServiceType::kRpc));
-  message->set_function_name(functional_modules::hmi_api::on_device_rank_changed);
+      protocol_handler::MessagePriority::FromServiceType(
+          protocol_handler::ServiceType::kRpc));
+  message->set_function_name(
+      functional_modules::hmi_api::on_device_rank_changed);
   message->set_json_message(json_str);
 
   NiceMock<MockApplication>* app = new NiceMock<MockApplication>();
-    application_manager::ApplicationSharedPtr app_ptr(app);
+  application_manager::ApplicationSharedPtr app_ptr(app);
   std::vector<application_manager::ApplicationSharedPtr> apps;
   apps.push_back(app_ptr);
   CANAppExtension* ext = new CANAppExtension(module->GetModuleID());
@@ -324,10 +345,10 @@ TEST_F(CanModuleTest, ChangeDriverDevice) {
   mobile_apis::HMILevel::eType hmi = mobile_apis::HMILevel::eType::HMI_FULL;
   EXPECT_CALL(*app, hmi_level()).WillRepeatedly(ReturnRef(hmi));
   EXPECT_CALL(*app, device()).WillRepeatedly(Return(1));
-  EXPECT_CALL(*app, QueryInterface(module->GetModuleID())).
-      WillRepeatedly(Return(ext));
-  EXPECT_CALL(*mock_service, GetApplications(module->GetModuleID())).
-      WillOnce(Return(apps));
+  EXPECT_CALL(*app, QueryInterface(module->GetModuleID()))
+      .WillRepeatedly(Return(ext));
+  EXPECT_CALL(*mock_service, GetApplications(module->GetModuleID()))
+      .WillOnce(Return(apps));
   EXPECT_CALL(*mock_service, SetPrimaryDevice(1)).Times(1);
   EXPECT_CALL(*mock_service, ResetPrimaryDevice()).Times(0);
 
@@ -337,19 +358,23 @@ TEST_F(CanModuleTest, ChangeDriverDevice) {
 
 TEST_F(CanModuleTest, ChangeDriverDeviceOnOther) {
   Json::Value value(Json::ValueType::objectValue);
-  value[json_keys::kMethod] = functional_modules::hmi_api::on_device_rank_changed;
+  value[json_keys::kMethod] =
+      functional_modules::hmi_api::on_device_rank_changed;
   value[json_keys::kParams] = Json::Value(Json::ValueType::objectValue);
-  value[json_keys::kParams][message_params::kDevice] = Json::Value(Json::ValueType::objectValue);
+  value[json_keys::kParams][message_params::kDevice] =
+      Json::Value(Json::ValueType::objectValue);
   value[json_keys::kParams][message_params::kDevice][json_keys::kId] = 1;
-  value[json_keys::kParams][message_params::kDevice][message_params::kName] = "1";
+  value[json_keys::kParams][message_params::kDevice][message_params::kName] =
+      "1";
   value[json_keys::kParams][message_params::kRank] = "DRIVER";
   Json::FastWriter writer;
   std::string json_str = writer.write(value);
 
   application_manager::MessagePtr message = new application_manager::Message(
-    protocol_handler::MessagePriority::FromServiceType(
-      protocol_handler::ServiceType::kRpc));
-  message->set_function_name(functional_modules::hmi_api::on_device_rank_changed);
+      protocol_handler::MessagePriority::FromServiceType(
+          protocol_handler::ServiceType::kRpc));
+  message->set_function_name(
+      functional_modules::hmi_api::on_device_rank_changed);
   message->set_message_type(application_manager::MessageType::kNotification);
   message->set_json_message(json_str);
 
@@ -369,10 +394,10 @@ TEST_F(CanModuleTest, ChangeDriverDeviceOnOther) {
 
   EXPECT_CALL(*app_1, device()).WillOnce(Return(1));
   EXPECT_CALL(*app_2, device()).WillOnce(Return(2));
-  EXPECT_CALL(*app_1, QueryInterface(module->GetModuleID())).
-      WillOnce(Return(ext_1));
-  EXPECT_CALL(*mock_service, GetApplications(module->GetModuleID())).
-      WillRepeatedly(Return(apps));
+  EXPECT_CALL(*app_1, QueryInterface(module->GetModuleID()))
+      .WillOnce(Return(ext_1));
+  EXPECT_CALL(*mock_service, GetApplications(module->GetModuleID()))
+      .WillRepeatedly(Return(apps));
   EXPECT_CALL(*mock_service, SetPrimaryDevice(1)).Times(1);
   EXPECT_CALL(*mock_service, ResetPrimaryDevice()).Times(0);
 
@@ -383,19 +408,23 @@ TEST_F(CanModuleTest, ChangeDriverDeviceOnOther) {
 
 TEST_F(CanModuleTest, ChangeDriverDeviceToPassenger) {
   Json::Value value(Json::ValueType::objectValue);
-  value[json_keys::kMethod] = functional_modules::hmi_api::on_device_rank_changed;
+  value[json_keys::kMethod] =
+      functional_modules::hmi_api::on_device_rank_changed;
   value[json_keys::kParams] = Json::Value(Json::ValueType::objectValue);
-  value[json_keys::kParams][message_params::kDevice] = Json::Value(Json::ValueType::objectValue);
+  value[json_keys::kParams][message_params::kDevice] =
+      Json::Value(Json::ValueType::objectValue);
   value[json_keys::kParams][message_params::kDevice][json_keys::kId] = 1;
-  value[json_keys::kParams][message_params::kDevice][message_params::kName] = "1";
+  value[json_keys::kParams][message_params::kDevice][message_params::kName] =
+      "1";
   value[json_keys::kParams][message_params::kRank] = "PASSENGER";
   Json::FastWriter writer;
   std::string json_str = writer.write(value);
 
   application_manager::MessagePtr message = new application_manager::Message(
-    protocol_handler::MessagePriority::FromServiceType(
-      protocol_handler::ServiceType::kRpc));
-  message->set_function_name(functional_modules::hmi_api::on_device_rank_changed);
+      protocol_handler::MessagePriority::FromServiceType(
+          protocol_handler::ServiceType::kRpc));
+  message->set_function_name(
+      functional_modules::hmi_api::on_device_rank_changed);
   message->set_message_type(application_manager::MessageType::kNotification);
   message->set_json_message(json_str);
 
@@ -410,10 +439,10 @@ TEST_F(CanModuleTest, ChangeDriverDeviceToPassenger) {
   mobile_apis::HMILevel::eType hmi = mobile_apis::HMILevel::eType::HMI_FULL;
   EXPECT_CALL(*app, hmi_level()).WillRepeatedly(ReturnRef(hmi));
   EXPECT_CALL(*app, device()).WillOnce(Return(1));
-  EXPECT_CALL(*app, QueryInterface(module->GetModuleID())).
-      WillRepeatedly(Return(ext));
-  EXPECT_CALL(*mock_service, GetApplications(module->GetModuleID())).
-      WillRepeatedly(Return(apps));
+  EXPECT_CALL(*app, QueryInterface(module->GetModuleID()))
+      .WillRepeatedly(Return(ext));
+  EXPECT_CALL(*mock_service, GetApplications(module->GetModuleID()))
+      .WillRepeatedly(Return(apps));
   EXPECT_CALL(*mock_service, PrimaryDevice()).Times(1).WillOnce(Return(1));
   EXPECT_CALL(*mock_service, ResetPrimaryDevice()).Times(1);
 
@@ -423,19 +452,23 @@ TEST_F(CanModuleTest, ChangeDriverDeviceToPassenger) {
 
 TEST_F(CanModuleTest, ChangePassengerDeviceToPassenger) {
   Json::Value value(Json::ValueType::objectValue);
-  value[json_keys::kMethod] = functional_modules::hmi_api::on_device_rank_changed;
+  value[json_keys::kMethod] =
+      functional_modules::hmi_api::on_device_rank_changed;
   value[json_keys::kParams] = Json::Value(Json::ValueType::objectValue);
-  value[json_keys::kParams][message_params::kDevice] = Json::Value(Json::ValueType::objectValue);
+  value[json_keys::kParams][message_params::kDevice] =
+      Json::Value(Json::ValueType::objectValue);
   value[json_keys::kParams][message_params::kDevice][json_keys::kId] = 1;
-  value[json_keys::kParams][message_params::kDevice][message_params::kName] = "1";
+  value[json_keys::kParams][message_params::kDevice][message_params::kName] =
+      "1";
   value[json_keys::kParams][message_params::kRank] = "PASSENGER";
   Json::FastWriter writer;
   std::string json_str = writer.write(value);
 
   application_manager::MessagePtr message = new application_manager::Message(
-    protocol_handler::MessagePriority::FromServiceType(
-      protocol_handler::ServiceType::kRpc));
-  message->set_function_name(functional_modules::hmi_api::on_device_rank_changed);
+      protocol_handler::MessagePriority::FromServiceType(
+          protocol_handler::ServiceType::kRpc));
+  message->set_function_name(
+      functional_modules::hmi_api::on_device_rank_changed);
   message->set_message_type(application_manager::MessageType::kNotification);
   message->set_json_message(json_str);
 
@@ -448,10 +481,10 @@ TEST_F(CanModuleTest, ChangePassengerDeviceToPassenger) {
   EXPECT_FALSE(ext->is_on_driver_device());
 
   EXPECT_CALL(*app, device()).WillOnce(Return(1));
-  EXPECT_CALL(*app, QueryInterface(module->GetModuleID())).
-      WillRepeatedly(Return(ext));
-  EXPECT_CALL(*mock_service, GetApplications(module->GetModuleID())).
-      WillRepeatedly(Return(apps));
+  EXPECT_CALL(*app, QueryInterface(module->GetModuleID()))
+      .WillRepeatedly(Return(ext));
+  EXPECT_CALL(*mock_service, GetApplications(module->GetModuleID()))
+      .WillRepeatedly(Return(apps));
   EXPECT_CALL(*mock_service, PrimaryDevice()).Times(1).WillOnce(Return(2));
   EXPECT_CALL(*mock_service, ResetPrimaryDevice()).Times(0);
 
@@ -460,11 +493,16 @@ TEST_F(CanModuleTest, ChangePassengerDeviceToPassenger) {
 }
 
 TEST_F(CanModuleTest, DeactivateApp) {
-  std::string reasons[] = {"AUDIO", "PHONECALL", "NAVIGATIONMAP", "PHONEMENU", "SYNCSETTINGS", "GENERAL"};
+  std::string reasons[] = {"AUDIO",
+                           "PHONECALL",
+                           "NAVIGATIONMAP",
+                           "PHONEMENU",
+                           "SYNCSETTINGS",
+                           "GENERAL"};
 
   application_manager::MessagePtr message = new application_manager::Message(
-    protocol_handler::MessagePriority::FromServiceType(
-      protocol_handler::ServiceType::kRpc));
+      protocol_handler::MessagePriority::FromServiceType(
+          protocol_handler::ServiceType::kRpc));
   message->set_function_name(functional_modules::hmi_api::on_app_deactivated);
   message->set_message_type(application_manager::MessageType::kNotification);
 
@@ -481,14 +519,13 @@ TEST_F(CanModuleTest, DeactivateApp) {
 
   EXPECT_CALL(*app, hmi_app_id()).WillRepeatedly(Return(11));
   EXPECT_CALL(*app, IsFullscreen()).WillRepeatedly(Return(true));
-  EXPECT_CALL(*mock_service, GetApplications(module->GetModuleID())).
-      WillRepeatedly(Return(apps));
+  EXPECT_CALL(*mock_service, GetApplications(module->GetModuleID()))
+      .WillRepeatedly(Return(apps));
   EXPECT_CALL(*mock_service,
-              ChangeNotifyHMILevel(_,
-                                   mobile_apis::HMILevel::eType::HMI_LIMITED)).
-                                       Times(6);
+              ChangeNotifyHMILevel(
+                  _, mobile_apis::HMILevel::eType::HMI_LIMITED)).Times(6);
 
-  for (size_t i = 0; i < 6; ++ i) {
+  for (size_t i = 0; i < 6; ++i) {
     Json::Value value(Json::ValueType::objectValue);
     value[json_keys::kMethod] = functional_modules::hmi_api::on_app_deactivated;
     value[json_keys::kParams] = Json::Value(Json::ValueType::objectValue);
@@ -511,13 +548,17 @@ TEST_F(CanModuleTest, CanAppChangeHMILevelPrimary) {
   CANAppExtension* ext = new CANAppExtension(module->GetModuleID());
   ext->set_is_on_driver_device(true);
 
-  EXPECT_CALL(*app, QueryInterface(module->GetModuleID())).
-      WillRepeatedly(Return(ext));
+  EXPECT_CALL(*app, QueryInterface(module->GetModuleID()))
+      .WillRepeatedly(Return(ext));
 
-  ASSERT_TRUE(module->CanAppChangeHMILevel(app_ptr, mobile_apis::HMILevel::eType::HMI_FULL));
-  ASSERT_TRUE(module->CanAppChangeHMILevel(app_ptr, mobile_apis::HMILevel::eType::HMI_LIMITED));
-  ASSERT_TRUE(module->CanAppChangeHMILevel(app_ptr, mobile_apis::HMILevel::eType::HMI_BACKGROUND));
-  ASSERT_TRUE(module->CanAppChangeHMILevel(app_ptr, mobile_apis::HMILevel::eType::HMI_NONE));
+  ASSERT_TRUE(module->CanAppChangeHMILevel(
+      app_ptr, mobile_apis::HMILevel::eType::HMI_FULL));
+  ASSERT_TRUE(module->CanAppChangeHMILevel(
+      app_ptr, mobile_apis::HMILevel::eType::HMI_LIMITED));
+  ASSERT_TRUE(module->CanAppChangeHMILevel(
+      app_ptr, mobile_apis::HMILevel::eType::HMI_BACKGROUND));
+  ASSERT_TRUE(module->CanAppChangeHMILevel(
+      app_ptr, mobile_apis::HMILevel::eType::HMI_NONE));
 }
 
 TEST_F(CanModuleTest, CanAppChangeHMILevelPassenger) {
@@ -529,13 +570,17 @@ TEST_F(CanModuleTest, CanAppChangeHMILevelPassenger) {
   CANAppExtension* ext = new CANAppExtension(module->GetModuleID());
   ext->set_is_on_driver_device(false);
 
-  EXPECT_CALL(*app, QueryInterface(module->GetModuleID())).
-      WillRepeatedly(Return(ext));
+  EXPECT_CALL(*app, QueryInterface(module->GetModuleID()))
+      .WillRepeatedly(Return(ext));
 
-  ASSERT_FALSE(module->CanAppChangeHMILevel(app_ptr, mobile_apis::HMILevel::eType::HMI_FULL));
-  ASSERT_FALSE(module->CanAppChangeHMILevel(app_ptr, mobile_apis::HMILevel::eType::HMI_LIMITED));
-  ASSERT_TRUE(module->CanAppChangeHMILevel(app_ptr, mobile_apis::HMILevel::eType::HMI_BACKGROUND));
-  ASSERT_TRUE(module->CanAppChangeHMILevel(app_ptr, mobile_apis::HMILevel::eType::HMI_NONE));
+  ASSERT_FALSE(module->CanAppChangeHMILevel(
+      app_ptr, mobile_apis::HMILevel::eType::HMI_FULL));
+  ASSERT_FALSE(module->CanAppChangeHMILevel(
+      app_ptr, mobile_apis::HMILevel::eType::HMI_LIMITED));
+  ASSERT_TRUE(module->CanAppChangeHMILevel(
+      app_ptr, mobile_apis::HMILevel::eType::HMI_BACKGROUND));
+  ASSERT_TRUE(module->CanAppChangeHMILevel(
+      app_ptr, mobile_apis::HMILevel::eType::HMI_NONE));
 }
 
 }  // namespace can_cooperation

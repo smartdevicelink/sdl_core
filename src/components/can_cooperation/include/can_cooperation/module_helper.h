@@ -44,15 +44,14 @@ namespace can_cooperation {
  **/
 class ModuleHelper {
  public:
-
   /*
    * @brief Checks if deactivated app was of R-SDL type
    * and process correspondingly. Otherwise returns
    * CANNOT_PROCESS.
    * @param value Json notification from HMI
    */
-   static functional_modules::ProcessResult ProcessOnAppDeactivation(
-    const Json::Value& value);
+  static functional_modules::ProcessResult ProcessOnAppDeactivation(
+      const Json::Value& value);
 
   /*
    * @brief Check if activated/other apps are of R-SDL type;
@@ -61,21 +60,22 @@ class ModuleHelper {
    * @param value Json request from HMI
    */
   static functional_modules::ProcessResult ProcessSDLActivateApp(
-    const Json::Value& value);
+      const Json::Value& value);
 
   static void ProccessDeviceRankChanged(const uint32_t device_handle,
-                            const std::string& rank);
+                                        const std::string& rank);
 
-  static void ProccessOnReverseAppsDisallowed ();
+  static void ProccessOnReverseAppsDisallowed();
 
  private:
   DISALLOW_COPY_AND_ASSIGN(ModuleHelper);
 
   ModuleHelper();
 
-  static application_manager::MessagePtr ResponseToHMI(unsigned int id,
-                                     hmi_apis::Common_Result::eType result_code,
-                                     const std::string& method_name);
+  static application_manager::MessagePtr ResponseToHMI(
+      unsigned int id,
+      hmi_apis::Common_Result::eType result_code,
+      const std::string& method_name);
 };
 
 }  //  namespace can_cooperation

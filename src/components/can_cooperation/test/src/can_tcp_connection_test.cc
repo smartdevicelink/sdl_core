@@ -51,6 +51,7 @@ class TCPServer {
   void Stop();
   bool Send(const std::string& message);
   bool Receive(std::string* message);
+
  private:
   static void* Listen(void* self_object);
   std::string address_;
@@ -62,12 +63,12 @@ class TCPServer {
 };
 
 TCPServer::TCPServer(const std::string& address, int port)
-  : address_(address),
-    port_(port),
-    socket_(-1),
-    client_socket_(-1),
-    thread_(0),
-    mutex_(PTHREAD_MUTEX_INITIALIZER) {
+    : address_(address)
+    , port_(port)
+    , socket_(-1)
+    , client_socket_(-1)
+    , thread_(0)
+    , mutex_(PTHREAD_MUTEX_INITIALIZER) {
   socket_ = socket(AF_INET, SOCK_STREAM, 0);
   struct sockaddr_in server_addr;
   memset(&server_addr, 0, sizeof(server_addr));
@@ -75,8 +76,8 @@ TCPServer::TCPServer(const std::string& address, int port)
   server_addr.sin_addr.s_addr = inet_addr(address_.c_str());
   server_addr.sin_port = htons(port_);
 
-  if (-1 == bind(socket_, (struct sockaddr*)&server_addr,
-                 sizeof(server_addr))) {
+  if (-1 ==
+      bind(socket_, (struct sockaddr*)&server_addr, sizeof(server_addr))) {
     printf("Failed to bind\n");
   }
 }
@@ -90,16 +91,16 @@ void* TCPServer::Listen(void* self_object) {
   pthread_mutex_unlock(&self->mutex_);
   if (-1 == listen(self->socket_, 1)) {
     printf("failed to listen\n");
-    return (void*) - 1;
+    return (void*)-1;
   }
   struct sockaddr_in client_addr;
   socklen_t client_addr_size = sizeof(client_addr);
-  self->client_socket_ = accept(self->socket_, (struct sockaddr*) &client_addr,
-                                &client_addr_size);
+  self->client_socket_ =
+      accept(self->socket_, (struct sockaddr*)&client_addr, &client_addr_size);
   if (-1 == self->client_socket_) {
     printf("Failed to accept\n");
     close(self->socket_);
-    return (void*) - 1;
+    return (void*)-1;
   }
   return NULL;
 }
@@ -143,11 +144,11 @@ bool TCPServer::Receive(std::string* message) {
 
 class TcpConnectionTest {
  public:
-  TcpConnectionTest(CANTCPConnection& conn)
-    : conn_(conn) {}
+  TcpConnectionTest(CANTCPConnection& conn) : conn_(conn) {}
   ConnectionState state() const {
     return conn_.current_state_;
   }
+
  private:
   CANTCPConnection& conn_;
 };

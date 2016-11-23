@@ -43,10 +43,10 @@ namespace validators {
 /**
  * @brief ButtonPressRequestValidator class
  */
-class ButtonPressRequestValidator : public Validator,
-                  public utils::Singleton<ButtonPressRequestValidator> {
+class ButtonPressRequestValidator
+    : public Validator,
+      public utils::Singleton<ButtonPressRequestValidator> {
  public:
-
   /**
    * @brief Validate json with message params
    *

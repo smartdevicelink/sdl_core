@@ -43,14 +43,15 @@ namespace validators {
 /**
  * @brief AddressValidator class
  */
-class AddressValidator : public Validator, public utils::Singleton<AddressValidator> {
+class AddressValidator : public Validator,
+                         public utils::Singleton<AddressValidator> {
  public:
-
   /**
    * @brief Validate json with message params
    *
    * @param json incoming json
-   * @param outgoing_json outgoing json where is param will be copied after verification
+   * @param outgoing_json outgoing json where is param will be copied after
+   *verification
    *
    * @return validation result
    */
@@ -61,12 +62,12 @@ class AddressValidator : public Validator, public utils::Singleton<AddressValida
   DISALLOW_COPY_AND_ASSIGN(AddressValidator);
   FRIEND_BASE_SINGLETON_CLASS(AddressValidator);
   AddressValidator();
-  ~AddressValidator() {};
+  ~AddressValidator(){};
 
-/*  std::map<std::string, int> state_;
-  std::map<std::string, int> zip_code_;
-  std::map<std::string, int> city_;
-  std::map<std::string, int> street_;*/
+  /*  std::map<std::string, int> state_;
+    std::map<std::string, int> zip_code_;
+    std::map<std::string, int> city_;
+    std::map<std::string, int> street_;*/
 };
 
 }  // namespace valdiators

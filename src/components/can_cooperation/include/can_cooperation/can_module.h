@@ -46,21 +46,23 @@ class CANAppExtension;
 typedef utils::SharedPtr<CANAppExtension> CANAppExtensionPtr;
 
 struct MessageFromCAN : public Json::Value {
-  explicit MessageFromCAN(const Json::Value& other): Json::Value(other) {}
+  explicit MessageFromCAN(const Json::Value& other) : Json::Value(other) {}
 };
 typedef Json::Value MessageFromMobile;
 
-class CANModule : public functional_modules::GenericModule,
-  public utils::Singleton<CANModule>,
-  public CANConnectionObserver,
-  public threads::MessageLoopThread <std::queue<MessageFromCAN >>::Handler,
-  public threads::MessageLoopThread <std::queue<MessageFromMobile >>::Handler {
+class CANModule
+    : public functional_modules::GenericModule,
+      public utils::Singleton<CANModule>,
+      public CANConnectionObserver,
+      public threads::MessageLoopThread<std::queue<MessageFromCAN> >::Handler,
+      public threads::MessageLoopThread<
+          std::queue<MessageFromMobile> >::Handler {
  public:
   functional_modules::PluginInfo GetPluginInfo() const;
   virtual functional_modules::ProcessResult ProcessMessage(
-    application_manager::MessagePtr msg);
+      application_manager::MessagePtr msg);
   virtual functional_modules::ProcessResult ProcessHMIMessage(
-    application_manager::MessagePtr msg);
+      application_manager::MessagePtr msg);
   void OnCANMessageReceived(const CANMessage& message);
   void OnCANConnectionError(ConnectionState state, const std::string& info);
   void Handle(const MessageFromMobile message);
@@ -107,8 +109,7 @@ class CANModule : public functional_modules::GenericModule,
    * @param msg Registration message
    * @param app Application basis already create by Core
    */
-  bool IsAppForPlugin(
-      application_manager::ApplicationSharedPtr app);
+  bool IsAppForPlugin(application_manager::ApplicationSharedPtr app);
 
   /**
    * @brief Notify about change of HMILevel of plugin's app
@@ -116,7 +117,7 @@ class CANModule : public functional_modules::GenericModule,
    * @param old_level Old HMILevel of app
    */
   void OnAppHMILevelChanged(application_manager::ApplicationSharedPtr app,
-    mobile_apis::HMILevel::eType old_level);
+                            mobile_apis::HMILevel::eType old_level);
 
   /**
    * @brief Checks if plugin hasn't put restrictions on app's HMI Level
@@ -124,8 +125,8 @@ class CANModule : public functional_modules::GenericModule,
    * @param new_level HMILevel which is about to be set to app
    */
   virtual bool CanAppChangeHMILevel(
-    application_manager::ApplicationSharedPtr app,
-    mobile_apis::HMILevel::eType new_level);
+      application_manager::ApplicationSharedPtr app,
+      mobile_apis::HMILevel::eType new_level);
 
   /**
    * Handles removing (disconnecting) device
@@ -135,14 +136,14 @@ class CANModule : public functional_modules::GenericModule,
 
   void SendHmiStatusNotification(application_manager::ApplicationSharedPtr app);
 
-  void UnsubscribeAppForAllZones(uint32_t hmi_app_id,
-                                 CANAppExtensionPtr app);
+  void UnsubscribeAppForAllZones(uint32_t hmi_app_id, CANAppExtensionPtr app);
 
  protected:
   /**
    * @brief Remove extension for all applications
    */
   virtual void RemoveAppExtensions();
+
  private:
   CANModule();
   ~CANModule();
@@ -150,20 +151,20 @@ class CANModule : public functional_modules::GenericModule,
   void SubscribeOnFunctions();
   void NotifyMobiles(application_manager::MessagePtr msg);
 
-  void UnsubscribeAppsFromAllInteriorZones(uint32_t  device_id);
+  void UnsubscribeAppsFromAllInteriorZones(uint32_t device_id);
 
   functional_modules::ProcessResult HandleMessage(
-    application_manager::MessagePtr msg);
-  inline bool DoNeedUnsubscribe(
-      uint32_t device_id, const application_manager::SeatLocation& zone);
+      application_manager::MessagePtr msg);
+  inline bool DoNeedUnsubscribe(uint32_t device_id,
+                                const application_manager::SeatLocation& zone);
   inline application_manager::SeatLocation GetInteriorZone(
       const Json::Value& device_location) const;
   // TODO(VS): must be uid
   static const functional_modules::ModuleID kCANModuleID = 153;
   CANConnectionSPtr can_connection_;
   functional_modules::PluginInfo plugin_info_;
-  threads::MessageLoopThread<std::queue<MessageFromCAN>> from_can_;
-  threads::MessageLoopThread<std::queue<MessageFromMobile>> from_mobile_;
+  threads::MessageLoopThread<std::queue<MessageFromCAN> > from_can_;
+  threads::MessageLoopThread<std::queue<MessageFromMobile> > from_mobile_;
   bool is_scan_started_;
   request_controller::RequestController request_controller_;
 

@@ -43,14 +43,16 @@ namespace validators {
 /**
  * @brief ModuleDescriptionValidator class
  */
-class ModuleDescriptionValidator : public Validator, public utils::Singleton<ModuleDescriptionValidator> {
+class ModuleDescriptionValidator
+    : public Validator,
+      public utils::Singleton<ModuleDescriptionValidator> {
  public:
-
   /**
    * @brief Validate json with message params
    *
    * @param json incoming json
-   * @param outgoing_json outgoing json where is param will be copied after verification
+   * @param outgoing_json outgoing json where is param will be copied after
+   *verification
    *
    * @return validation result
    */

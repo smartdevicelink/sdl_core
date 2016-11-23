@@ -43,12 +43,12 @@ using message_params::kInteriorVehicleDataCapabilities;
 using message_params::kModuleZone;
 
 VehicleCapabilities::VehicleCapabilities()
-  : kDefaultPath_("./plugins/Remote_Control/InteriorVehicleDataCapabilities.json") {
+    : kDefaultPath_(
+          "./plugins/Remote_Control/InteriorVehicleDataCapabilities.json") {
   std::string path_to_file;
   functional_modules::Settings settings;
-  if (!settings.ReadParameter("Remote Control",
-      "InteriorVDCapabilitiesFile",
-      &path_to_file)) {
+  if (!settings.ReadParameter(
+          "Remote Control", "InteriorVDCapabilitiesFile", &path_to_file)) {
     path_to_file = kDefaultPath_;
   }
   LOG4CXX_DEBUG(logger_, "Reading capabilities from " << path_to_file);
@@ -77,8 +77,9 @@ Json::Value VehicleCapabilities::capabilities(const Json::Value& zone) const {
   if (capabilities_.type() == Json::ValueType::objectValue) {
     Json::Value result(Json::ValueType::arrayValue);
     for (Json::Value::iterator it =
-           capabilities_[kInteriorVehicleDataCapabilities].begin();
-         capabilities_[kInteriorVehicleDataCapabilities].end() != it; ++it) {
+             capabilities_[kInteriorVehicleDataCapabilities].begin();
+         capabilities_[kInteriorVehicleDataCapabilities].end() != it;
+         ++it) {
       if ((*it)[kModuleZone] == zone) {
         result.append(*it);
       }

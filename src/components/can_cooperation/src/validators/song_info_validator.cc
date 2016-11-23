@@ -39,56 +39,56 @@ namespace validators {
 
 using namespace message_params;
 
-
 SongInfoValidator::SongInfoValidator() {
-/*  // name="name"
-  name_[kType] = ValueType::STRING; // TODO(VS): Research Min-Max Length
-  name_[kMinLength] = 0;
-  name_[kMaxLength] = 100;
-  name_[kArray] = 0;
-  name_[kMandatory] = 0;
+  /*  // name="name"
+    name_[kType] = ValueType::STRING; // TODO(VS): Research Min-Max Length
+    name_[kMinLength] = 0;
+    name_[kMaxLength] = 100;
+    name_[kArray] = 0;
+    name_[kMandatory] = 0;
 
-  // name="artist"
-  artist_[kType] = ValueType::STRING; // TODO(VS): Research Min-Max Length
-  artist_[kMinLength] = 0;
-  artist_[kMaxLength] = 100;
-  artist_[kArray] = 0;
-  artist_[kMandatory] = 0;
+    // name="artist"
+    artist_[kType] = ValueType::STRING; // TODO(VS): Research Min-Max Length
+    artist_[kMinLength] = 0;
+    artist_[kMaxLength] = 100;
+    artist_[kArray] = 0;
+    artist_[kMandatory] = 0;
 
-  // name="genre"
-  genre_[kType] = ValueType::STRING; // TODO(VS): Research Min-Max Length
-  genre_[kMinLength] = 0;
-  genre_[kMaxLength] = 100;
-  genre_[kArray] = 0;
-  genre_[kMandatory] = 0;
+    // name="genre"
+    genre_[kType] = ValueType::STRING; // TODO(VS): Research Min-Max Length
+    genre_[kMinLength] = 0;
+    genre_[kMaxLength] = 100;
+    genre_[kArray] = 0;
+    genre_[kMandatory] = 0;
 
-  // name="album"
-  album_[kType] = ValueType::STRING; // TODO(VS): Research Min-Max Length
-  album_[kMinLength] = 0;
-  album_[kMaxLength] = 100;
-  album_[kArray] = 0;
-  album_[kMandatory] = 0;
+    // name="album"
+    album_[kType] = ValueType::STRING; // TODO(VS): Research Min-Max Length
+    album_[kMinLength] = 0;
+    album_[kMaxLength] = 100;
+    album_[kArray] = 0;
+    album_[kMandatory] = 0;
 
-  // name="year"
-  year_[kType] = ValueType::INT;
-  year_[kMinValue] = 1000;
-  year_[kMaxLength] = 3000;
-  year_[kArray] = 0;
-  year_[kMandatory] = 0;
+    // name="year"
+    year_[kType] = ValueType::INT;
+    year_[kMinValue] = 1000;
+    year_[kMaxLength] = 3000;
+    year_[kArray] = 0;
+    year_[kMandatory] = 0;
 
-  // name="duration"
-  duration_[kType] = ValueType::INT; // TODO(VS): Research Min-Max Value(Maybe it must be not integer at all)
-  duration_[kMinValue] = 1;
-  duration_[kMaxLength] = 100;
-  duration_[kArray] = 0;
-  duration_[kMandatory] = 0;
+    // name="duration"
+    duration_[kType] = ValueType::INT; // TODO(VS): Research Min-Max Value(Maybe
+    it must be not integer at all)
+    duration_[kMinValue] = 1;
+    duration_[kMaxLength] = 100;
+    duration_[kArray] = 0;
+    duration_[kMandatory] = 0;
 
-  validation_scope_map_[kName] = &name_;
-  validation_scope_map_[kArtist] =  &artist_;
-  validation_scope_map_[kGenre] = &genre_;
-  validation_scope_map_[kAlbum] = &album_;
-  validation_scope_map_[kSongYear] = &year_;
-  validation_scope_map_[kDuration] = &duration_;*/
+    validation_scope_map_[kName] = &name_;
+    validation_scope_map_[kArtist] =  &artist_;
+    validation_scope_map_[kGenre] = &genre_;
+    validation_scope_map_[kAlbum] = &album_;
+    validation_scope_map_[kSongYear] = &year_;
+    validation_scope_map_[kDuration] = &duration_;*/
 }
 
 ValidationResult SongInfoValidator::Validate(const Json::Value& json,
@@ -99,4 +99,3 @@ ValidationResult SongInfoValidator::Validate(const Json::Value& json,
 }  // namespace valdiators
 
 }  // namespace can_cooperation
-

@@ -48,12 +48,12 @@ using namespace message_params;
 using namespace json_keys;
 
 OnRadioDetailsNotificationValidator::OnRadioDetailsNotificationValidator() {
-/*  trigger_source_[kType] = ValueType::ENUM;
-  trigger_source_[kEnumType] = EnumType::TRIGGER_SOURCE;
-  trigger_source_[kArray] = 0;
-  trigger_source_[kMandatory] = 1;
+  /*  trigger_source_[kType] = ValueType::ENUM;
+    trigger_source_[kEnumType] = EnumType::TRIGGER_SOURCE;
+    trigger_source_[kArray] = 0;
+    trigger_source_[kMandatory] = 1;
 
-  validation_scope_map_[kTriggerSource] = &trigger_source_;*/
+    validation_scope_map_[kTriggerSource] = &trigger_source_;*/
 }
 
 ValidationResult OnRadioDetailsNotificationValidator::Validate(
@@ -76,8 +76,8 @@ ValidationResult OnRadioDetailsNotificationValidator::Validate(
   }
 
   if (json.isMember(kSongInfo)) {
-    result = SongInfoValidator::instance()->Validate(
-        json[kSongInfo], outgoing_json[kSongInfo]);
+    result = SongInfoValidator::instance()->Validate(json[kSongInfo],
+                                                     outgoing_json[kSongInfo]);
   }
 
   if (result != ValidationResult::SUCCESS) {
@@ -85,8 +85,8 @@ ValidationResult OnRadioDetailsNotificationValidator::Validate(
   }
 
   if (json.isMember(kEvent)) {
-    result = EventDetailsValidator::instance()->Validate(
-        json[kEvent], outgoing_json[kEvent]);
+    result = EventDetailsValidator::instance()->Validate(json[kEvent],
+                                                         outgoing_json[kEvent]);
   }
 
   if (result != ValidationResult::SUCCESS) {
@@ -112,8 +112,8 @@ ValidationResult OnRadioDetailsNotificationValidator::Validate(
   }
 
   if (json.isMember(kLocation)) {
-    result = LocationValidator::instance()->Validate(
-        json[kLocation], outgoing_json[kLocation]);
+    result = LocationValidator::instance()->Validate(json[kLocation],
+                                                     outgoing_json[kLocation]);
   }
 
   if (result != ValidationResult::SUCCESS) {
@@ -122,7 +122,7 @@ ValidationResult OnRadioDetailsNotificationValidator::Validate(
 
   result = ValidateSimpleValues(json, outgoing_json);
 
-  if  (ValidationResult::SUCCESS == result) {
+  if (ValidationResult::SUCCESS == result) {
     json_string = MessageHelper::ValueToString(outgoing_json);
   }
 
@@ -132,4 +132,3 @@ ValidationResult OnRadioDetailsNotificationValidator::Validate(
 }  // namespace valdiators
 
 }  // namespace can_cooperation
-

@@ -38,7 +38,8 @@ namespace functional_modules {
 
 class DriverGenericModuleTest : public GenericModule {
  public:
-  explicit DriverGenericModuleTest(ModuleID module_id) : GenericModule(module_id) {}
+  explicit DriverGenericModuleTest(ModuleID module_id)
+      : GenericModule(module_id) {}
   virtual ~DriverGenericModuleTest() {}
   virtual PluginInfo GetPluginInfo() const {
     PluginInfo info;
@@ -55,12 +56,12 @@ class DriverGenericModuleTest : public GenericModule {
   }
   virtual void RemoveAppExtension(uint32_t app_id) {}
   virtual void RemoveAppExtensions() {}
-  bool IsAppForPlugin(
-      application_manager::ApplicationSharedPtr app) {return true;}
+  bool IsAppForPlugin(application_manager::ApplicationSharedPtr app) {
+    return true;
+  }
 
-  void OnAppHMILevelChanged(
-    application_manager::ApplicationSharedPtr,
-    mobile_apis::HMILevel::eType) {}
+  void OnAppHMILevelChanged(application_manager::ApplicationSharedPtr,
+                            mobile_apis::HMILevel::eType) {}
 
   const Observers& observers() {
     return observers_;

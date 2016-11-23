@@ -49,28 +49,28 @@ using namespace message_params;
 CREATE_LOGGERPTR_GLOBAL(logger_, "GetInteriorVehicleDataRequest")
 
 GetInteriorVehicleDataRequest::GetInteriorVehicleDataRequest(
-  const application_manager::MessagePtr& message)
-  : BaseCommandRequest(message) {
-}
+    const application_manager::MessagePtr& message)
+    : BaseCommandRequest(message) {}
 
 void GetInteriorVehicleDataRequest::Execute() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  SendRequest(
-      functional_modules::hmi_api::get_interior_vehicle_data,
-      MessageHelper::StringToValue(message_->json_message()), true);
+  SendRequest(functional_modules::hmi_api::get_interior_vehicle_data,
+              MessageHelper::StringToValue(message_->json_message()),
+              true);
 }
 
 void GetInteriorVehicleDataRequest::OnEvent(
-    const event_engine::Event<application_manager::MessagePtr,
-    std::string>& event) {
+    const event_engine::Event<application_manager::MessagePtr, std::string>&
+        event) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (functional_modules::hmi_api::get_interior_vehicle_data == event.id()) {
     std::string result_code;
     std::string info;
 
-    Json::Value value  = MessageHelper::StringToValue(event.event_message()->json_message());
+    Json::Value value =
+        MessageHelper::StringToValue(event.event_message()->json_message());
 
     bool success = ParseResultCode(value, result_code, info);
 
@@ -96,7 +96,6 @@ void GetInteriorVehicleDataRequest::OnEvent(
   }
 }
 
-
 void GetInteriorVehicleDataRequest::ProccessSubscription() {
   LOG4CXX_AUTO_TRACE(logger_);
 
@@ -105,11 +104,11 @@ void GetInteriorVehicleDataRequest::ProccessSubscription() {
   Json::Reader reader;
   reader.parse(message_->json_message(), params);
 
-  if (IsMember(params, kSubscribe)){
+  if (IsMember(params, kSubscribe)) {
     bool subscribe = params[kSubscribe].asBool();
 
     if (!response_params_.isMember(kIsSubscribed)) {
-      if (subscribe){
+      if (subscribe) {
         response_params_[kIsSubscribed] = false;
       } else {
         response_params_[kIsSubscribed] = true;
@@ -122,7 +121,8 @@ void GetInteriorVehicleDataRequest::ProccessSubscription() {
       if (subscribe && isSubscribed) {
         extension->SubscribeToInteriorVehicleData(params[kModuleDescription]);
       } else if ((!subscribe) && (!isSubscribed)) {
-        extension->UnsubscribeFromInteriorVehicleData(params[kModuleDescription]);
+        extension->UnsubscribeFromInteriorVehicleData(
+            params[kModuleDescription]);
       }
     }
   } else {
@@ -141,14 +141,13 @@ bool GetInteriorVehicleDataRequest::Validate() {
   Json::Value outgoing_json;
 
   if (validators::ValidationResult::SUCCESS !=
-    validators::GetInteriorVehicleDataRequestValidator::instance()->
-                                                Validate(json, outgoing_json)) {
-    LOG4CXX_INFO(logger_,
-                 "GetInteriorVehicleDataRequest validation failed!");
-    SendResponse(false, result_codes::kInvalidData,
-                 "Mobile request validation failed!");
+      validators::GetInteriorVehicleDataRequestValidator::instance()->Validate(
+          json, outgoing_json)) {
+    LOG4CXX_INFO(logger_, "GetInteriorVehicleDataRequest validation failed!");
+    SendResponse(
+        false, result_codes::kInvalidData, "Mobile request validation failed!");
     return false;
-  }  else {
+  } else {
     message_->set_json_message(MessageHelper::ValueToString(outgoing_json));
   }
 
@@ -158,22 +157,24 @@ bool GetInteriorVehicleDataRequest::Validate() {
 std::string GetInteriorVehicleDataRequest::ModuleType(
     const Json::Value& message) {
   return message.get(message_params::kModuleDescription,
-                     Json::Value(Json::objectValue)).get(
-      message_params::kModuleType, Json::Value("")).asString();
+                     Json::Value(Json::objectValue))
+      .get(message_params::kModuleType, Json::Value(""))
+      .asString();
 }
 
 Json::Value GetInteriorVehicleDataRequest::GetInteriorZone(
-  const Json::Value& message) {
+    const Json::Value& message) {
   return message.get(message_params::kModuleDescription,
-                                 Json::Value(Json::objectValue)).get(
-      message_params::kModuleZone, Json::Value(Json::objectValue));
+                     Json::Value(Json::objectValue))
+      .get(message_params::kModuleZone, Json::Value(Json::objectValue));
 }
 
 SeatLocation GetInteriorVehicleDataRequest::InteriorZone(
     const Json::Value& message) {
-  Json::Value zone = message.get(message_params::kModuleDescription,
-                                 Json::Value(Json::objectValue)).get(
-      message_params::kModuleZone, Json::Value(Json::objectValue));
+  Json::Value zone =
+      message.get(message_params::kModuleDescription,
+                  Json::Value(Json::objectValue))
+          .get(message_params::kModuleZone, Json::Value(Json::objectValue));
   return CreateInteriorZone(zone);
 }
 

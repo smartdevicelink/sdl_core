@@ -39,32 +39,30 @@ namespace validators {
 
 using namespace message_params;
 
-
 WebActivityValidator::WebActivityValidator() {
-/*  // name="url"
-  url_[kType] = ValueType::STRING; // TODO(VS): Research Min-Max Length
-  url_[kMinLength] = 0;
-  url_[kMaxLength] = 100;
-  url_[kArray] = 0;
-  url_[kMandatory] = 1;
+  /*  // name="url"
+    url_[kType] = ValueType::STRING; // TODO(VS): Research Min-Max Length
+    url_[kMinLength] = 0;
+    url_[kMaxLength] = 100;
+    url_[kArray] = 0;
+    url_[kMandatory] = 1;
 
-  // name="actionCode"
-  action_code_[kType] = ValueType::INT; // TODO(VS): Research Min-Max Value
-  action_code_[kMinValue] = 0;
-  action_code_[kMaxValue] = 100;
-  action_code_[kArray] = 0;
-  action_code_[kMandatory] = 0;
+    // name="actionCode"
+    action_code_[kType] = ValueType::INT; // TODO(VS): Research Min-Max Value
+    action_code_[kMinValue] = 0;
+    action_code_[kMaxValue] = 100;
+    action_code_[kArray] = 0;
+    action_code_[kMandatory] = 0;
 
-  validation_scope_map_[kURL] = &url_;
-  validation_scope_map_[kActionCode] =  &action_code_;*/
+    validation_scope_map_[kURL] = &url_;
+    validation_scope_map_[kActionCode] =  &action_code_;*/
 }
 
 ValidationResult WebActivityValidator::Validate(const Json::Value& json,
-                                                 Json::Value& outgoing_json) {
+                                                Json::Value& outgoing_json) {
   return ValidateSimpleValues(json, outgoing_json);
 }
 
 }  // namespace valdiators
 
 }  // namespace can_cooperation
-

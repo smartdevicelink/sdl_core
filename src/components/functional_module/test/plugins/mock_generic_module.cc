@@ -7,8 +7,7 @@ using functional_modules::PluginInfo;
 using ::testing::_;
 using ::testing::Return;
 
-MockGenericModule::MockGenericModule()
-    : GenericModule(19) {
+MockGenericModule::MockGenericModule() : GenericModule(19) {
   PluginInfo info;
   info.name = "MockGenericModule";
   info.version = 1;

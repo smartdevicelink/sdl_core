@@ -44,8 +44,8 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "CANRequestController")
 RequestController::RequestController() {
   functional_modules::TimeUnit timeout_seconds = 100;
   functional_modules::Settings settings;
-  settings.ReadParameter("Remote Control", "timeout_period_seconds",
-                         &timeout_seconds);
+  settings.ReadParameter(
+      "Remote Control", "timeout_period_seconds", &timeout_seconds);
   timer_.set_period(timeout_seconds);
   LOG4CXX_DEBUG(logger_, "Timeout is set to " << timeout_seconds);
   timer_.AddObserver(this);
@@ -74,7 +74,7 @@ void RequestController::DeleteRequest(const uint32_t& mobile_correlation_id) {
 
 void RequestController::OnTimeoutTriggered(const TrackableMessage& expired) {
   std::map<correlation_id, MobileRequestPtr>::iterator it =
-    mobile_request_list_.find(expired.correlation_id());
+      mobile_request_list_.find(expired.correlation_id());
   if (mobile_request_list_.end() == it) {
     // no corresponding request found, error.
     return;

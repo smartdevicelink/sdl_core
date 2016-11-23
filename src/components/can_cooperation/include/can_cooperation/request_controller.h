@@ -42,14 +42,14 @@ namespace can_cooperation {
 namespace request_controller {
 
 typedef utils::SharedPtr<commands::Command> MobileRequestPtr;
-typedef uint32_t  correlation_id;
+typedef uint32_t correlation_id;
 
 /**
  * @brief RequestController class is used to manage mobile requests lifetime.
  */
-class RequestController : public functional_modules::TimerObserver<TrackableMessage> {
+class RequestController
+    : public functional_modules::TimerObserver<TrackableMessage> {
  public:
-
   /**
   * @brief Class constructor
   *

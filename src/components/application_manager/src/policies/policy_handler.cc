@@ -442,7 +442,8 @@ void PolicyHandler::OnDeviceConsentChanged(const std::string& device_id,
 
       policy_manager_->ReactOnUserDevConsentForApp(policy_app_id, is_allowed);
 
-      policy_manager_->SendNotificationOnPermissionsUpdated(device_id, policy_app_id);
+      policy_manager_->SendNotificationOnPermissionsUpdated(device_id,
+                                                            policy_app_id);
     }
   }
 }
@@ -482,20 +483,23 @@ void PolicyHandler::GetAvailableApps(std::queue<std::string>& apps) {
 }
 
 struct SmartObjectToInt {
-  int operator ()(const smart_objects::SmartObject& item) const {
+  int operator()(const smart_objects::SmartObject& item) const {
     return item.asInt();
   }
 };
 
-void PolicyHandler::AddApplication(const std::string& device_id,
-                                   const std::string& application_id,
-                                   const smart_objects::SmartObject* app_types) {
+void PolicyHandler::AddApplication(
+    const std::string& device_id,
+    const std::string& application_id,
+    const smart_objects::SmartObject* app_types) {
   POLICY_LIB_CHECK_VOID();
   std::vector<int> hmi_types;
   if (app_types && app_types->asArray()) {
     smart_objects::SmartArray* hmi_list = app_types->asArray();
-    std::transform(hmi_list->begin(), hmi_list->end(),
-                   std::back_inserter(hmi_types), SmartObjectToInt());
+    std::transform(hmi_list->begin(),
+                   hmi_list->end(),
+                   std::back_inserter(hmi_types),
+                   SmartObjectToInt());
   }
   policy_manager_->AddApplication(device_id, application_id, hmi_types);
 }
@@ -511,10 +515,13 @@ bool PolicyHandler::CheckHMIType(const std::string& application_id,
   std::vector<int> additional_hmi_types;
   if (app_types && app_types->asArray()) {
     smart_objects::SmartArray* hmi_list = app_types->asArray();
-    std::transform(hmi_list->begin(), hmi_list->end(),
-                   std::back_inserter(additional_hmi_types), SmartObjectToInt());
+    std::transform(hmi_list->begin(),
+                   hmi_list->end(),
+                   std::back_inserter(additional_hmi_types),
+                   SmartObjectToInt());
   }
-  const std::vector<int>& hmi_types = ret ? policy_hmi_types : additional_hmi_types;
+  const std::vector<int>& hmi_types =
+      ret ? policy_hmi_types : additional_hmi_types;
   return std::find(hmi_types.begin(), hmi_types.end(), hmi) != hmi_types.end();
 }
 
@@ -875,7 +882,7 @@ bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string,
       app_id = app->app_id();
     }
 #else
-      return false;
+    return false;
 #endif
   } else {
     app_id = last_used_app_ids_.back();
@@ -884,8 +891,10 @@ bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string,
   }
 
   if (!app) {
-    LOG4CXX_WARN(logger_, "There is no registered application with "
-                 "connection key '" << app_id << "'");
+    LOG4CXX_WARN(logger_,
+                 "There is no registered application with "
+                 "connection key '"
+                     << app_id << "'");
     return false;
   }
 
@@ -1352,18 +1361,20 @@ void PolicyHandler::OnUpdateHMILevel(const std::string& device_id,
                                      const std::string& policy_app_id,
                                      const std::string& hmi_level) {
   LOG4CXX_AUTO_TRACE(logger_);
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
-      device_id, policy_app_id);
+  ApplicationSharedPtr app =
+      ApplicationManagerImpl::instance()->application(device_id, policy_app_id);
   if (!app) {
-    LOG4CXX_WARN(
-        logger_,
-        "Could not find application: " << device_id << " - " << policy_app_id);
+    LOG4CXX_WARN(logger_,
+                 "Could not find application: " << device_id << " - "
+                                                << policy_app_id);
     return;
   }
-  mobile_apis::HMILevel::eType level = MessageHelper::StringToHMILevel(hmi_level);
+  mobile_apis::HMILevel::eType level =
+      MessageHelper::StringToHMILevel(hmi_level);
   if (mobile_apis::HMILevel::INVALID_ENUM == level) {
-    LOG4CXX_WARN(logger_, "Couldn't convert default hmi level "
-                 << hmi_level << " to enum.");
+    LOG4CXX_WARN(logger_,
+                 "Couldn't convert default hmi level " << hmi_level
+                                                       << " to enum.");
     return;
   }
   UpdateHMILevel(app, level);
@@ -1459,7 +1470,8 @@ void PolicyHandler::OnAppsSearchCompleted() {
   policy_manager_->OnAppsSearchCompleted();
 }
 
-void PolicyHandler::OnAppRegisteredOnMobile(connection_handler::DeviceHandle device_handle,
+void PolicyHandler::OnAppRegisteredOnMobile(
+    connection_handler::DeviceHandle device_handle,
     const std::string& application_id) {
   POLICY_LIB_CHECK_VOID();
   std::string mac = MessageHelper::GetDeviceMacAddressForHandle(device_handle);
@@ -1534,11 +1546,11 @@ void PolicyHandler::UpdateHMILevel(ApplicationSharedPtr app,
     // If default is FULL, send request to HMI. Notification to mobile will be
     // sent on response receiving.
     if (mobile_apis::HMILevel::HMI_FULL == level) {
-        MessageHelper::SendActivateAppToHMI(app->app_id());
+      MessageHelper::SendActivateAppToHMI(app->app_id());
     } else {
-      LOG4CXX_INFO(logger_, "Changing hmi level of application "
-                             << app->app_id()
-                             << " to default hmi level " << level);
+      LOG4CXX_INFO(logger_,
+                   "Changing hmi level of application "
+                       << app->app_id() << " to default hmi level " << level);
       // Set application hmi level
       ApplicationManagerImpl::instance()->ChangeAppsHMILevel(app->app_id(),
                                                              level);
@@ -1550,8 +1562,7 @@ void PolicyHandler::UpdateHMILevel(ApplicationSharedPtr app,
 
 #ifdef SDL_REMOTE_CONTROL
 namespace {
-application_manager::TypeAccess ConvertTypeAccess(
-    policy::TypeAccess access) {
+application_manager::TypeAccess ConvertTypeAccess(policy::TypeAccess access) {
   application_manager::TypeAccess converted;
   switch (access) {
     case policy::TypeAccess::kAllowed:
@@ -1571,15 +1582,16 @@ application_manager::TypeAccess ConvertTypeAccess(
 }  // namespace
 
 application_manager::TypeAccess PolicyHandler::CheckAccess(
-    const PTString& device_id, const PTString& app_id,
+    const PTString& device_id,
+    const PTString& app_id,
     const application_manager::SeatLocation& zone,
-    const PTString& module, const std::string& rpc,
+    const PTString& module,
+    const std::string& rpc,
     const std::vector<PTString>& params) {
   POLICY_LIB_CHECK(application_manager::TypeAccess::kNone);
   policy::SeatLocation policy_zone = {zone.col, zone.row, zone.level};
-  policy::TypeAccess access = policy_manager_->CheckAccess(device_id,
-                                                           app_id, policy_zone,
-                                                           module, rpc, params);
+  policy::TypeAccess access = policy_manager_->CheckAccess(
+      device_id, app_id, policy_zone, module, rpc, params);
   return ConvertTypeAccess(access);
 }
 
@@ -1608,7 +1620,7 @@ void PolicyHandler::ResetAccess(const PTString& device_id,
 void PolicyHandler::ResetAccess(const application_manager::SeatLocation& zone,
                                 const std::string& module) {
   POLICY_LIB_CHECK_VOID();
-  policy::SeatLocation policy_zone  = {zone.col, zone.row, zone.level};
+  policy::SeatLocation policy_zone = {zone.col, zone.row, zone.level};
   policy_manager_->ResetAccess(policy_zone, module);
 }
 
@@ -1622,31 +1634,32 @@ void PolicyHandler::SetPrimaryDevice(const PTString& dev_id) {
   policy_manager_->SetPrimaryDevice(dev_id);
 
   connection_handler::DeviceHandle old_device_handle;
-    ApplicationManagerImpl::instance()->connection_handler()
-        ->GetDeviceID(old_dev_id, &old_device_handle);
+  ApplicationManagerImpl::instance()->connection_handler()->GetDeviceID(
+      old_dev_id, &old_device_handle);
 
   connection_handler::DeviceHandle device_handle;
-  ApplicationManagerImpl::instance()->connection_handler()
-      ->GetDeviceID(dev_id, &device_handle);
+  ApplicationManagerImpl::instance()->connection_handler()->GetDeviceID(
+      dev_id, &device_handle);
 
-  LOG4CXX_DEBUG(
-      logger_,
-      "Old: " << old_dev_id << "(" << old_device_handle << ")" <<
-      "New: " << dev_id << "(" << device_handle << ")");
+  LOG4CXX_DEBUG(logger_,
+                "Old: " << old_dev_id << "(" << old_device_handle << ")"
+                        << "New: " << dev_id << "(" << device_handle << ")");
   std::map<connection_handler::DeviceHandle, PTString> devices;
   devices[device_handle] = dev_id;
   devices[old_device_handle] = old_dev_id;
   ApplicationManagerImpl::ApplicationListAccessor accessor;
   for (ApplicationManagerImpl::ApplictionSetConstIt i = accessor.begin();
-      i != accessor.end(); ++i) {
+       i != accessor.end();
+       ++i) {
     const ApplicationSharedPtr app = *i;
     LOG4CXX_DEBUG(logger_,
                   "Item: " << app->device() << " - " << app->mobile_app_id());
     if (devices.find(app->device()) != devices.end()) {
-      LOG4CXX_DEBUG(
-          logger_,
-          "Send notify " << app->device() << " - " << app->mobile_app_id());
-      policy_manager_->OnChangedPrimaryDevice(devices[app->device()], app->mobile_app_id());
+      LOG4CXX_DEBUG(logger_,
+                    "Send notify " << app->device() << " - "
+                                   << app->mobile_app_id());
+      policy_manager_->OnChangedPrimaryDevice(devices[app->device()],
+                                              app->mobile_app_id());
     }
   }
 }
@@ -1657,23 +1670,23 @@ void PolicyHandler::ResetPrimaryDevice() {
   policy_manager_->ResetPrimaryDevice();
 
   connection_handler::DeviceHandle old_device_handle;
-  ApplicationManagerImpl::instance()->connection_handler()
-      ->GetDeviceID(old_dev_id, &old_device_handle);
+  ApplicationManagerImpl::instance()->connection_handler()->GetDeviceID(
+      old_dev_id, &old_device_handle);
 
-  LOG4CXX_DEBUG(
-        logger_,
-        "Old: " << old_dev_id << "(" << old_device_handle << ")");
+  LOG4CXX_DEBUG(logger_,
+                "Old: " << old_dev_id << "(" << old_device_handle << ")");
 
   ApplicationManagerImpl::ApplicationListAccessor accessor;
   for (ApplicationManagerImpl::ApplictionSetConstIt i = accessor.begin();
-      i != accessor.end(); ++i) {
+       i != accessor.end();
+       ++i) {
     const ApplicationSharedPtr app = *i;
     LOG4CXX_DEBUG(logger_,
                   "Item: " << app->device() << " - " << app->mobile_app_id());
     if (app->device() == old_device_handle) {
-      LOG4CXX_DEBUG(
-          logger_,
-          "Send notify " << app->device() << " - " << app->mobile_app_id());
+      LOG4CXX_DEBUG(logger_,
+                    "Send notify " << app->device() << " - "
+                                   << app->mobile_app_id());
       policy_manager_->OnChangedPrimaryDevice(old_dev_id, app->mobile_app_id());
     }
   }
@@ -1683,35 +1696,41 @@ uint32_t PolicyHandler::PrimaryDevice() const {
   POLICY_LIB_CHECK(0);
   PTString device_id = policy_manager_->PrimaryDevice();
   connection_handler::DeviceHandle device_handle;
-  if (ApplicationManagerImpl::instance()->connection_handler()
-        ->GetDeviceID(device_id, &device_handle)) {
+  if (ApplicationManagerImpl::instance()->connection_handler()->GetDeviceID(
+          device_id, &device_handle)) {
     return device_handle;
   } else {
     return 0;
   }
 }
 
-void PolicyHandler::SetDeviceZone(const std::string& device_id,
-                                  const application_manager::SeatLocation& zone) {
+void PolicyHandler::SetDeviceZone(
+    const std::string& device_id,
+    const application_manager::SeatLocation& zone) {
   POLICY_LIB_CHECK_VOID();
-  policy::SeatLocation policy_zone = { zone.col, zone.row, zone.level,
-      zone.colspan, zone.rowspan, zone.levelspan };
+  policy::SeatLocation policy_zone = {zone.col,
+                                      zone.row,
+                                      zone.level,
+                                      zone.colspan,
+                                      zone.rowspan,
+                                      zone.levelspan};
   policy_manager_->SetDeviceZone(device_id, policy_zone);
 
   connection_handler::DeviceHandle device_handle;
-  ApplicationManagerImpl::instance()->connection_handler()
-      ->GetDeviceID(device_id, &device_handle);
+  ApplicationManagerImpl::instance()->connection_handler()->GetDeviceID(
+      device_id, &device_handle);
 
   ApplicationManagerImpl::ApplicationListAccessor accessor;
   for (ApplicationManagerImpl::ApplictionSetConstIt i = accessor.begin();
-      i != accessor.end(); ++i) {
+       i != accessor.end();
+       ++i) {
     const ApplicationSharedPtr app = *i;
     LOG4CXX_DEBUG(logger_,
                   "Item: " << app->device() << " - " << app->mobile_app_id());
     if (app->device() == device_handle) {
-      LOG4CXX_DEBUG(
-          logger_,
-          "Send notify " << app->device() << " - " << app->mobile_app_id());
+      LOG4CXX_DEBUG(logger_,
+                    "Send notify " << app->device() << " - "
+                                   << app->mobile_app_id());
       policy_manager_->OnChangedDeviceZone(device_id, app->mobile_app_id());
     }
   }
@@ -1753,22 +1772,24 @@ void PolicyHandler::OnRemoteAllowedChanged(bool /*new_consent*/) {
 
   ApplicationManagerImpl::ApplicationListAccessor accessor;
   for (ApplicationManagerImpl::ApplictionSetConstIt i = accessor.begin();
-      i != accessor.end(); ++i) {
+       i != accessor.end();
+       ++i) {
     const ApplicationSharedPtr app = *i;
     LOG4CXX_DEBUG(logger_,
                   "Item: " << app->device() << " - " << app->mobile_app_id());
     if (app->device() != device_handle) {
-      LOG4CXX_DEBUG(
-          logger_,
-          "Send notify " << app->device() << " - " << app->mobile_app_id());
-      std::string mac = MessageHelper::GetDeviceMacAddressForHandle(app->device());
+      LOG4CXX_DEBUG(logger_,
+                    "Send notify " << app->device() << " - "
+                                   << app->mobile_app_id());
+      std::string mac =
+          MessageHelper::GetDeviceMacAddressForHandle(app->device());
       policy_manager_->OnChangedRemoteControl(mac, app->mobile_app_id());
     }
   }
 }
 
-void PolicyHandler::OnRemoteAppPermissionsChanged(const std::string& device_id,
-      const std::string& application_id) {
+void PolicyHandler::OnRemoteAppPermissionsChanged(
+    const std::string& device_id, const std::string& application_id) {
   POLICY_LIB_CHECK_VOID();
   policy_manager_->SendAppPermissionsChanged(device_id, application_id);
 }
@@ -1777,27 +1798,28 @@ void PolicyHandler::OnUpdateHMIStatus(const std::string& device_id,
                                       const std::string& policy_app_id,
                                       const std::string& hmi_level) {
   LOG4CXX_AUTO_TRACE(logger_);
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
-      device_id, policy_app_id);
+  ApplicationSharedPtr app =
+      ApplicationManagerImpl::instance()->application(device_id, policy_app_id);
   if (!app) {
-    LOG4CXX_WARN(
-        logger_,
-        "Could not find application: " << device_id << " - " << policy_app_id);
+    LOG4CXX_WARN(logger_,
+                 "Could not find application: " << device_id << " - "
+                                                << policy_app_id);
     return;
   }
-  mobile_apis::HMILevel::eType level = MessageHelper::StringToHMILevel(hmi_level);
+  mobile_apis::HMILevel::eType level =
+      MessageHelper::StringToHMILevel(hmi_level);
   if (mobile_apis::HMILevel::INVALID_ENUM == level) {
-    LOG4CXX_WARN(logger_, "Couldn't convert default hmi level "
-                 << hmi_level << " to enum.");
+    LOG4CXX_WARN(logger_,
+                 "Couldn't convert default hmi level " << hmi_level
+                                                       << " to enum.");
     return;
   }
 
-  LOG4CXX_INFO(logger_, "Changing hmi level of application "
-                         << app->app_id()
-                         << " to default hmi level " << level);
+  LOG4CXX_INFO(logger_,
+               "Changing hmi level of application "
+                   << app->app_id() << " to default hmi level " << level);
   // Set application hmi level
-  ApplicationManagerImpl::instance()->ChangeAppsHMILevel(app->app_id(),
-                                                         level);
+  ApplicationManagerImpl::instance()->ChangeAppsHMILevel(app->app_id(), level);
   MessageHelper::SendHMIStatusNotification(*app);
 }
 
@@ -1806,38 +1828,40 @@ void PolicyHandler::OnUpdateHMIStatus(const std::string& device_id,
                                       const std::string& hmi_level,
                                       const std::string& device_rank) {
   LOG4CXX_AUTO_TRACE(logger_);
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
-      device_id, policy_app_id);
+  ApplicationSharedPtr app =
+      ApplicationManagerImpl::instance()->application(device_id, policy_app_id);
   if (!app) {
-    LOG4CXX_WARN(
-        logger_,
-        "Could not find application: " << device_id << " - " << policy_app_id);
+    LOG4CXX_WARN(logger_,
+                 "Could not find application: " << device_id << " - "
+                                                << policy_app_id);
     return;
   }
-  mobile_apis::HMILevel::eType level = MessageHelper::StringToHMILevel(hmi_level);
+  mobile_apis::HMILevel::eType level =
+      MessageHelper::StringToHMILevel(hmi_level);
   if (mobile_apis::HMILevel::INVALID_ENUM == level) {
-    LOG4CXX_WARN(logger_, "Couldn't convert default hmi level "
-                 << hmi_level << " to enum.");
+    LOG4CXX_WARN(logger_,
+                 "Couldn't convert default hmi level " << hmi_level
+                                                       << " to enum.");
     return;
   }
-  mobile_apis::DeviceRank::eType rank = MessageHelper::StringToDeviceRank(device_rank);
+  mobile_apis::DeviceRank::eType rank =
+      MessageHelper::StringToDeviceRank(device_rank);
   if (rank == mobile_apis::DeviceRank::INVALID_ENUM) {
-    LOG4CXX_WARN(logger_, "Couldn't convert device rank "
-                 << device_rank << " to enum.");
+    LOG4CXX_WARN(logger_,
+                 "Couldn't convert device rank " << device_rank << " to enum.");
     return;
   }
 
   if (rank == mobile_apis::DeviceRank::DRIVER) {
-      MessageHelper::SendHMIStatusNotification(*app, rank);
-      LOG4CXX_DEBUG(logger_, "Device rank: " << rank);
-      return;
+    MessageHelper::SendHMIStatusNotification(*app, rank);
+    LOG4CXX_DEBUG(logger_, "Device rank: " << rank);
+    return;
   }
-  LOG4CXX_INFO(logger_, "Changing hmi level of application "
-                         << app->app_id()
-                         << " to default hmi level " << level);
+  LOG4CXX_INFO(logger_,
+               "Changing hmi level of application "
+                   << app->app_id() << " to default hmi level " << level);
   // Set application hmi level
-  ApplicationManagerImpl::instance()->ChangeAppsHMILevel(app->app_id(),
-                                                         level);
+  ApplicationManagerImpl::instance()->ChangeAppsHMILevel(app->app_id(), level);
   MessageHelper::SendHMIStatusNotification(*app, rank);
 }
 

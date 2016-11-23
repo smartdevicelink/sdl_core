@@ -44,13 +44,13 @@ class PolicyHelper {
   static void ChangeDeviceRank(const uint32_t device_handle,
                                const std::string& rank);
   static void SetIsAppOnPrimaryDevice(
-    application_manager::ApplicationSharedPtr app);
+      application_manager::ApplicationSharedPtr app);
 
  private:
   static void MarkApplications(const uint32_t device_handle);
   static void MarkAppOnPrimaryDevice(
-    application_manager::ApplicationSharedPtr app,
-    const uint32_t device_handle);
+      application_manager::ApplicationSharedPtr app,
+      const uint32_t device_handle);
 };
 
 }  //  namespace can_cooperation

@@ -97,7 +97,7 @@ RdsDataValidator::RdsDataValidator() {
   validation_scope_map_[kPS] = &ps_;
   validation_scope_map_[kRT] = &rt_;
   validation_scope_map_[kCT] = &ct_;
-  validation_scope_map_[kPI] =  &pi_;
+  validation_scope_map_[kPI] = &pi_;
   validation_scope_map_[kPTY] = &pty_;
   validation_scope_map_[kTA] = &ta_;
   validation_scope_map_[kTP] = &tp_;
@@ -105,7 +105,7 @@ RdsDataValidator::RdsDataValidator() {
 }
 
 ValidationResult RdsDataValidator::Validate(const Json::Value& json,
-                                                 Json::Value& outgoing_json) {
+                                            Json::Value& outgoing_json) {
   LOG4CXX_AUTO_TRACE(logger_);
   return ValidateSimpleValues(json, outgoing_json);
 }
@@ -113,4 +113,3 @@ ValidationResult RdsDataValidator::Validate(const Json::Value& json,
 }  // namespace valdiators
 
 }  // namespace can_cooperation
-

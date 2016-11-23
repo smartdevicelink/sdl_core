@@ -97,7 +97,7 @@ void OnInteriorVehicleDataNotification::Run() {
 
     message_ = on_interior_vehicle_data_notification;
     //(*message_)[strings::params][strings::connection_key] =
-    //subscribed_app->app_id();
+    // subscribed_app->app_id();
     SendNotification();
   }
 }

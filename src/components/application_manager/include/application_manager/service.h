@@ -41,12 +41,7 @@
 
 namespace application_manager {
 
-enum TypeAccess {
-  kNone,
-  kDisallowed,
-  kAllowed,
-  kManual
-};
+enum TypeAccess { kNone, kDisallowed, kAllowed, kManual };
 
 struct SeatLocation {
   int col, row, level;
@@ -66,8 +61,7 @@ typedef std::string PluginFunctionID;
  */
 class Service {
  public:
-  virtual ~Service() {
-  }
+  virtual ~Service() {}
 
   /**
    * @brief Checks message permissions and cuts parameters according
@@ -202,7 +196,7 @@ class Service {
    * @return List with shared pointers to applications
    */
   virtual std::vector<ApplicationSharedPtr> GetApplications(
-    AppExtensionUID uid) = 0;
+      AppExtensionUID uid) = 0;
 
   /**
    * @brief Subscribes to notification from HMI
@@ -217,7 +211,7 @@ class Service {
    * @param level New HMI level of app
    */
   virtual void ChangeNotifyHMILevel(ApplicationSharedPtr app,
-      mobile_apis::HMILevel::eType level) = 0;
+                                    mobile_apis::HMILevel::eType level) = 0;
 
   /**
    * @brief Notify HMI about app changing HMI Level
@@ -226,7 +220,7 @@ class Service {
    * @param level New HMI level of app
    */
   virtual void NotifyHMIAboutHMILevel(ApplicationSharedPtr app,
-      mobile_apis::HMILevel::eType level) = 0;
+                                      mobile_apis::HMILevel::eType level) = 0;
 
   /**
    * Checks if application has remote control functions
@@ -248,6 +242,5 @@ class Service {
 typedef utils::SharedPtr<Service> ServicePtr;
 
 }  // namespace application_manager
-
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_SERVICE_H_

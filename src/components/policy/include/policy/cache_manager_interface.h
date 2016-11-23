@@ -316,7 +316,8 @@ class CacheManagerInterface {
    * @param app_id ID application
    * @return list of HMI types
    */
-  virtual const policy_table::AppHMITypes* GetHMITypes(const std::string &app_id) = 0;
+  virtual const policy_table::AppHMITypes* GetHMITypes(
+      const std::string& app_id) = 0;
 
   /**
    * @brief Reset user consent for device data and applications permissions
@@ -614,12 +615,12 @@ class CacheManagerInterface {
       const std::string& policy_app_id,
       std::vector<std::string>& request_types) const = 0;
 
-/**
-   * Gets groups list
-   * @param app_id ID application
-   * @return list of groups
-   */
-  virtual const policy_table::Strings& GetGroups(const PTString &app_id) = 0;
+  /**
+     * Gets groups list
+     * @param app_id ID application
+     * @return list of groups
+     */
+  virtual const policy_table::Strings& GetGroups(const PTString& app_id) = 0;
 
   /**
    * @brief GetCertificate allows to obtain certificate in order to

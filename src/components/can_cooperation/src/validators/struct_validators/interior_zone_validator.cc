@@ -84,9 +84,8 @@ InteriorZoneValidator::InteriorZoneValidator() {
   levelspan_[ValidationParams::ARRAY] = 0;
   levelspan_[ValidationParams::MANDATORY] = 1;
 
-
   validation_scope_map_[kCol] = &col_;
-  validation_scope_map_[kRow] =  &row_;
+  validation_scope_map_[kRow] = &row_;
   validation_scope_map_[kLevel] = &level_;
   validation_scope_map_[kColspan] = &colspan_;
   validation_scope_map_[kRowspan] = &rowspan_;
@@ -102,4 +101,3 @@ ValidationResult InteriorZoneValidator::Validate(const Json::Value& json,
 }  // namespace valdiators
 
 }  // namespace can_cooperation
-

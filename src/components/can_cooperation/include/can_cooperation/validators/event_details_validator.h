@@ -43,14 +43,15 @@ namespace validators {
 /**
  * @brief EventDetailsValidator class
  */
-class EventDetailsValidator : public Validator, public utils::Singleton<EventDetailsValidator> {
+class EventDetailsValidator : public Validator,
+                              public utils::Singleton<EventDetailsValidator> {
  public:
-
   /**
    * @brief Validate json with message params
    *
    * @param json incoming json
-   * @param outgoing_json outgoing json where is param will be copied after verification
+   * @param outgoing_json outgoing json where is param will be copied after
+   *verification
    *
    * @return validation result
    */
@@ -61,11 +62,11 @@ class EventDetailsValidator : public Validator, public utils::Singleton<EventDet
   DISALLOW_COPY_AND_ASSIGN(EventDetailsValidator);
   FRIEND_BASE_SINGLETON_CLASS(EventDetailsValidator);
   EventDetailsValidator();
-  ~EventDetailsValidator() {};
+  ~EventDetailsValidator(){};
 
-/*  std::map<std::string, int> event_name_;
-  std::map<std::string, int> phone_number_;
-  std::map<std::string, int> price_;*/
+  /*  std::map<std::string, int> event_name_;
+    std::map<std::string, int> phone_number_;
+    std::map<std::string, int> price_;*/
 };
 
 }  // namespace valdiators

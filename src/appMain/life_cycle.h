@@ -98,7 +98,7 @@ class LifeCycle {
   protocol_handler::ProtocolHandlerImpl* protocol_handler_;
   connection_handler::ConnectionHandlerImpl* connection_handler_;
   application_manager::ApplicationManagerImpl* app_manager_;
-    functional_modules::PluginManager* plugin_manager_;
+  functional_modules::PluginManager* plugin_manager_;
 #ifdef ENABLE_SECURITY
   security_manager::CryptoManager* crypto_manager_;
   security_manager::SecurityManager* security_manager_;

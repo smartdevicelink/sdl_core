@@ -41,13 +41,10 @@ namespace commands {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "TuneDownRequest")
 
-TuneDownRequest::TuneDownRequest(
-  const application_manager::MessagePtr& message)
-  : BaseCommandRequest(message) {
-}
+TuneDownRequest::TuneDownRequest(const application_manager::MessagePtr& message)
+    : BaseCommandRequest(message) {}
 
-TuneDownRequest::~TuneDownRequest() {
-}
+TuneDownRequest::~TuneDownRequest() {}
 
 void TuneDownRequest::Execute() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -56,8 +53,8 @@ void TuneDownRequest::Execute() {
 }
 
 void TuneDownRequest::OnEvent(
-    const event_engine::Event<application_manager::MessagePtr,
-    std::string>& event) {
+    const event_engine::Event<application_manager::MessagePtr, std::string>&
+        event) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (functional_modules::can_api::tune_down == event.id()) {

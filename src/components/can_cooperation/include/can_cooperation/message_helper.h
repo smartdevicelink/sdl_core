@@ -48,14 +48,14 @@ namespace can_cooperation {
  **/
 class MessageHelper {
  public:
-
   /**
    * @brief Returns unique correlation ID for next CAN request
    *
    * @return Unique correlation ID
    */
   static uint32_t GetNextCANCorrelationID();
-  static const std::string GetMobileAPIName(functional_modules::MobileFunctionID func_id);
+  static const std::string GetMobileAPIName(
+      functional_modules::MobileFunctionID func_id);
 
   /**
    * @brief Convert Json::Value to std::string
@@ -95,7 +95,8 @@ class MessageHelper {
   MessageHelper();
 
   static uint32_t next_correlation_id_;
-  static const std::map<functional_modules::MobileFunctionID, std::string> kMobileAPINames;
+  static const std::map<functional_modules::MobileFunctionID, std::string>
+      kMobileAPINames;
 };
 
 /**

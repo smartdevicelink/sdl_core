@@ -104,7 +104,7 @@ RadioControlDataValidator::RadioControlDataValidator() {
   state_[ValidationParams::MANDATORY] = 0;
 
   validation_scope_map_[kFrequencyInteger] = &frequency_integer_;
-  validation_scope_map_[kFrequencyFraction] =  &frequency_fraction_;
+  validation_scope_map_[kFrequencyFraction] = &frequency_fraction_;
   validation_scope_map_[kBand] = &band_;
   validation_scope_map_[kAvailableHDs] = &available_hds_;
   validation_scope_map_[kHdChannel] = &hd_channel_;
@@ -114,8 +114,8 @@ RadioControlDataValidator::RadioControlDataValidator() {
   validation_scope_map_[kState] = &state_;
 }
 
-ValidationResult RadioControlDataValidator::Validate(const Json::Value& json,
-                                                 Json::Value& outgoing_json) {
+ValidationResult RadioControlDataValidator::Validate(
+    const Json::Value& json, Json::Value& outgoing_json) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (!json.isObject()) {
@@ -150,8 +150,8 @@ void RadioControlDataValidator::RemoveReadOnlyParams(Json::Value& json) {
   RemoveReadOnlyParam(json, kRadioEnable);
 }
 
-void RadioControlDataValidator::RemoveReadOnlyParam(
-    Json::Value& json, const char* param_name) {
+void RadioControlDataValidator::RemoveReadOnlyParam(Json::Value& json,
+                                                    const char* param_name) {
   if (json.isMember(param_name)) {
     json.removeMember(param_name);
   }
@@ -160,4 +160,3 @@ void RadioControlDataValidator::RemoveReadOnlyParam(
 }  // namespace valdiators
 
 }  // namespace can_cooperation
-

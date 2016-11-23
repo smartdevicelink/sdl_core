@@ -49,7 +49,8 @@ class OnPresetChangedNotification : public BaseCommandNotification {
    *
    * @param message Message with notification
    **/
-  explicit OnPresetChangedNotification(const application_manager::MessagePtr& message);
+  explicit OnPresetChangedNotification(
+      const application_manager::MessagePtr& message);
 
   /**
    * @brief Execute command

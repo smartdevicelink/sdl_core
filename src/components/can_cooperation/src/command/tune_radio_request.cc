@@ -43,16 +43,13 @@ namespace commands {
 CREATE_LOGGERPTR_GLOBAL(logger_, "TuneRadioRequest")
 
 TuneRadioRequest::TuneRadioRequest(
-  const application_manager::MessagePtr& message)
-  : BaseCommandRequest(message) {
-}
+    const application_manager::MessagePtr& message)
+    : BaseCommandRequest(message) {}
 
-TuneRadioRequest::~TuneRadioRequest() {
-}
+TuneRadioRequest::~TuneRadioRequest() {}
 
 void TuneRadioRequest::Execute() {
   LOG4CXX_AUTO_TRACE(logger_);
-
 
   /*
   Json::Value json;
@@ -78,8 +75,8 @@ void TuneRadioRequest::Execute() {
 }
 
 void TuneRadioRequest::OnEvent(
-    const event_engine::Event<application_manager::MessagePtr,
-    std::string>& event) {
+    const event_engine::Event<application_manager::MessagePtr, std::string>&
+        event) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (functional_modules::can_api::tune_radion == event.id()) {

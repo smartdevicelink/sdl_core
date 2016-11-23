@@ -113,12 +113,11 @@
     return;                                                                   \
   }
 
-#define EXPORT_FUNCTION(TypeName) \
-  extern "C" TypeName* Create();
+#define EXPORT_FUNCTION(TypeName) extern "C" TypeName* Create();
 
 #define EXPORT_FUNCTION_IMPL(TypeName) \
-  extern "C" TypeName* Create() { \
-    return TypeName::instance(); \
+  extern "C" TypeName* Create() {      \
+    return TypeName::instance();       \
   }
 
 #define NOTREACHED() DCHECK(!"Unreachable code")
@@ -140,8 +139,8 @@
 #define ARRAYSIZE(arr) sizeof(arr) / sizeof(*arr)
 
 #ifdef BUILD_TESTS
-#define FRIEND_TEST(test_case_name, test_name)\
-friend class test_case_name##_##test_name##_Test
+#define FRIEND_TEST(test_case_name, test_name) \
+  friend class test_case_name##_##test_name##_Test
 #else  // BUILD_TESTS
 #define FRIEND_TEST(test_case_name, test_name)
 #endif  // BUILD_TESTS

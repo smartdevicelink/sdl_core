@@ -46,7 +46,8 @@ class HMIMessageAdapter : public HMIMessageSender {
  public:
   /**
    * \brief Constructor
-   * \param handler Pointer to implementation of HMIMessageHandler abstract class
+   * \param handler Pointer to implementation of HMIMessageHandler abstract
+   * class
    * to notify it about receiving message or error on sending message.
    */
   explicit HMIMessageAdapter(HMIMessageHandler* handler);

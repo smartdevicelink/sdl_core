@@ -50,7 +50,8 @@ class GetInteriorVehicleDataCapabiliesRequest : public BaseCommandRequest {
    *
    * @param message Message from mobile
    **/
-  explicit GetInteriorVehicleDataCapabiliesRequest(const application_manager::MessagePtr& message);
+  explicit GetInteriorVehicleDataCapabiliesRequest(
+      const application_manager::MessagePtr& message);
 
   /**
    * @brief Execute command
@@ -68,7 +69,7 @@ class GetInteriorVehicleDataCapabiliesRequest : public BaseCommandRequest {
    * @param event The received event
    */
   void OnEvent(const event_engine::Event<application_manager::MessagePtr,
-                std::string>& event);
+                                         std::string>& event);
 
   /**
    * @brief GetInteriorVehicleDataCapabiliesRequest class destructor
@@ -76,7 +77,8 @@ class GetInteriorVehicleDataCapabiliesRequest : public BaseCommandRequest {
   virtual ~GetInteriorVehicleDataCapabiliesRequest();
 
  protected:
-  virtual application_manager::TypeAccess CheckAccess(const Json::Value& message);
+  virtual application_manager::TypeAccess CheckAccess(
+      const Json::Value& message);
   virtual std::string ModuleType(const Json::Value& message);
   virtual SeatLocation InteriorZone(const Json::Value& message);
   virtual Json::Value GetInteriorZone(const Json::Value& message);
@@ -89,7 +91,8 @@ class GetInteriorVehicleDataCapabiliesRequest : public BaseCommandRequest {
                           const Json::Value& modules);
   inline bool IsDriverDevice();
   application_manager::TypeAccess GetModuleTypes();
-  application_manager::TypeAccess ProcessRequestedModuleTypes(const Json::Value& modules);
+  application_manager::TypeAccess ProcessRequestedModuleTypes(
+      const Json::Value& modules);
   Json::Value allowed_modules_;
 };
 

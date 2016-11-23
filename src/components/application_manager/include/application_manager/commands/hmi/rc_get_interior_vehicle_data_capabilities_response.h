@@ -41,8 +41,8 @@ namespace commands {
 
 class RCGetInteriorVehicleDataCapabilitiesResponse : public ResponseFromHMI {
  public:
-
-  explicit RCGetInteriorVehicleDataCapabilitiesResponse(const MessageSharedPtr& message);
+  explicit RCGetInteriorVehicleDataCapabilitiesResponse(
+      const MessageSharedPtr& message);
 
   virtual ~RCGetInteriorVehicleDataCapabilitiesResponse();
 

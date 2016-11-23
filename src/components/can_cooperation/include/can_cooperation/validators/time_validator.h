@@ -45,12 +45,12 @@ namespace validators {
  */
 class TimeValidator : public Validator, public utils::Singleton<TimeValidator> {
  public:
-
   /**
    * @brief Validate json with message params
    *
    * @param json incoming json
-   * @param outgoing_json outgoing json where is param will be copied after verification
+   * @param outgoing_json outgoing json where is param will be copied after
+   *verification
    *
    * @return validation result
    */
@@ -61,15 +61,15 @@ class TimeValidator : public Validator, public utils::Singleton<TimeValidator> {
   DISALLOW_COPY_AND_ASSIGN(TimeValidator);
   FRIEND_BASE_SINGLETON_CLASS(TimeValidator);
   TimeValidator();
-  ~TimeValidator() {};
+  ~TimeValidator(){};
 
-/*  std::map<std::string, int> hours_;
-  std::map<std::string, int> minutes_;
-  std::map<std::string, int> seconds_;
-  std::map<std::string, int> year_;
-  std::map<std::string, int> month_;
-  std::map<std::string, int> day_;
-  std::map<std::string, int> tzd_;*/
+  /*  std::map<std::string, int> hours_;
+    std::map<std::string, int> minutes_;
+    std::map<std::string, int> seconds_;
+    std::map<std::string, int> year_;
+    std::map<std::string, int> month_;
+    std::map<std::string, int> day_;
+    std::map<std::string, int> tzd_;*/
 };
 
 }  // namespace valdiators

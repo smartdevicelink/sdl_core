@@ -43,19 +43,17 @@ namespace commands {
 CREATE_LOGGERPTR_GLOBAL(logger_, "StartScanRequest")
 
 StartScanRequest::StartScanRequest(
-  const application_manager::MessagePtr& message)
-  : BaseCommandRequest(message) {
-}
+    const application_manager::MessagePtr& message)
+    : BaseCommandRequest(message) {}
 
-StartScanRequest::~StartScanRequest() {
-}
+StartScanRequest::~StartScanRequest() {}
 
 void StartScanRequest::Execute() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (CANModule::instance()->IsScanStarted()) {
     LOG4CXX_ERROR(logger_, "Scan already started!");
-    SendResponse(false, result_codes::kRejected,  "");
+    SendResponse(false, result_codes::kRejected, "");
     return;
   }
 
@@ -63,8 +61,8 @@ void StartScanRequest::Execute() {
 }
 
 void StartScanRequest::OnEvent(
-    const event_engine::Event<application_manager::MessagePtr,
-    std::string>& event) {
+    const event_engine::Event<application_manager::MessagePtr, std::string>&
+        event) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (functional_modules::can_api::start_scan == event.id()) {

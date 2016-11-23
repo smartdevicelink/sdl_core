@@ -63,7 +63,7 @@ class TuneUpRequest : public BaseCommandRequest {
    * @param event The received event
    */
   void OnEvent(const event_engine::Event<application_manager::MessagePtr,
-                std::string>& event);
+                                         std::string>& event);
 
   /**
    * @brief TuneUpRequest class destructor

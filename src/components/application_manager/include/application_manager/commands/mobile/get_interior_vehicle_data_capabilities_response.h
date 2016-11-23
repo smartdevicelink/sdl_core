@@ -42,8 +42,8 @@ namespace commands {
 
 class GetInteriorVehicleDataCapabilitiesResponse : public CommandResponseImpl {
  public:
-
-  explicit GetInteriorVehicleDataCapabilitiesResponse(const MessageSharedPtr& message);
+  explicit GetInteriorVehicleDataCapabilitiesResponse(
+      const MessageSharedPtr& message);
 
   virtual ~GetInteriorVehicleDataCapabilitiesResponse();
 

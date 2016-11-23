@@ -43,14 +43,15 @@ namespace validators {
 /**
  * @brief InteriorZoneValidator class
  */
-class InteriorZoneValidator : public Validator, public utils::Singleton<InteriorZoneValidator> {
+class InteriorZoneValidator : public Validator,
+                              public utils::Singleton<InteriorZoneValidator> {
  public:
-
   /**
    * @brief Validate json with message params
    *
    * @param json incoming json
-   * @param outgoing_json outgoing json where is param will be copied after verification
+   * @param outgoing_json outgoing json where is param will be copied after
+   *verification
    *
    * @return validation result
    */

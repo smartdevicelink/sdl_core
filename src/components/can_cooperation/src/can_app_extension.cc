@@ -34,11 +34,10 @@
 
 namespace can_cooperation {
 CANAppExtension::CANAppExtension(application_manager::AppExtensionUID uid)
-  : AppExtension(uid) ,
-    is_control_given_(false),
-    seat_(),
-    is_on_driver_device_(false) {
-}
+    : AppExtension(uid)
+    , is_control_given_(false)
+    , seat_()
+    , is_on_driver_device_(false) {}
 
 bool CANAppExtension::IsControlGiven() const {
   return is_control_given_;
@@ -60,8 +59,8 @@ void CANAppExtension::UnsubscribeFromInteriorVehicleData(
 
 bool CANAppExtension::IsSubscibedToInteriorVehicleData(
     const Json::Value& moduleDescription) {
-  std::set<Json::Value>::iterator it = subscribed_interior_vehicle_data_.find(
-      moduleDescription);
+  std::set<Json::Value>::iterator it =
+      subscribed_interior_vehicle_data_.find(moduleDescription);
 
   return (it != subscribed_interior_vehicle_data_.end());
 }

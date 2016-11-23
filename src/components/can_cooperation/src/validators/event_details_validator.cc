@@ -41,32 +41,32 @@ namespace validators {
 
 using namespace message_params;
 
-
 EventDetailsValidator::EventDetailsValidator() {
-/*  // name="eventName"
-  event_name_[kType] = ValueType::STRING; // TODO(VS): Research Min-Max Length
-  event_name_[kMinLength] = 0;
-  event_name_[kMaxLength] = 100;
-  event_name_[kArray] = 0;
-  event_name_[kMandatory] = 1;
+  /*  // name="eventName"
+    event_name_[kType] = ValueType::STRING; // TODO(VS): Research Min-Max Length
+    event_name_[kMinLength] = 0;
+    event_name_[kMaxLength] = 100;
+    event_name_[kArray] = 0;
+    event_name_[kMandatory] = 1;
 
-  // name="phoneNumber"
-  phone_number_[kType] = ValueType::STRING; // TODO(VS): Research Min-Max Length
-  phone_number_[kMinLength] = 0;
-  phone_number_[kMaxLength] = 100;
-  phone_number_[kArray] = 0;
-  phone_number_[kMandatory] = 0;
+    // name="phoneNumber"
+    phone_number_[kType] = ValueType::STRING; // TODO(VS): Research Min-Max
+    Length
+    phone_number_[kMinLength] = 0;
+    phone_number_[kMaxLength] = 100;
+    phone_number_[kArray] = 0;
+    phone_number_[kMandatory] = 0;
 
-  // name="price"
-  price_[kType] = ValueType::DOUBLE; // TODO(VS): Research Min-Max Value
-  price_[kMinValue] = 0.01;
-  price_[kMaxValue] = 1000000;
-  price_[kArray] = 0;
-  price_[kMandatory] = 0;
+    // name="price"
+    price_[kType] = ValueType::DOUBLE; // TODO(VS): Research Min-Max Value
+    price_[kMinValue] = 0.01;
+    price_[kMaxValue] = 1000000;
+    price_[kArray] = 0;
+    price_[kMandatory] = 0;
 
-  validation_scope_map_[kEventName] = &event_name_;
-  validation_scope_map_[kPhoneNumber] =  &phone_number_;
-  validation_scope_map_[kPrice] = &price_;*/
+    validation_scope_map_[kEventName] = &event_name_;
+    validation_scope_map_[kPhoneNumber] =  &phone_number_;
+    validation_scope_map_[kPrice] = &price_;*/
 }
 
 ValidationResult EventDetailsValidator::Validate(const Json::Value& json,
@@ -78,13 +78,13 @@ ValidationResult EventDetailsValidator::Validate(const Json::Value& json,
   }
 
   if (json.isMember(kEventTime)) {
-     result = TimeValidator::instance()->Validate(json[kEventTime],
-                                                  outgoing_json[kEventTime]);
-   }
+    result = TimeValidator::instance()->Validate(json[kEventTime],
+                                                 outgoing_json[kEventTime]);
+  }
 
-   if (result != ValidationResult::SUCCESS) {
-     return result;
-   }
+  if (result != ValidationResult::SUCCESS) {
+    return result;
+  }
 
   if (json.isMember(kLocation)) {
     result = LocationValidator::instance()->Validate(json[kLocation],
@@ -97,4 +97,3 @@ ValidationResult EventDetailsValidator::Validate(const Json::Value& json,
 }  // namespace valdiators
 
 }  // namespace can_cooperation
-

@@ -43,10 +43,10 @@ namespace validators {
 /**
  * @brief SetInteriorVehicleDataRequestValidator class
  */
-class SetInteriorVehicleDataRequestValidator : public Validator,
-   public utils::Singleton<SetInteriorVehicleDataRequestValidator> {
+class SetInteriorVehicleDataRequestValidator
+    : public Validator,
+      public utils::Singleton<SetInteriorVehicleDataRequestValidator> {
  public:
-
   /**
    * @brief Validate json with message params
    *

@@ -36,7 +36,6 @@
 #include "application_manager/commands/hmi/notification_from_hmi.h"
 #include "application_manager/application_manager_impl.h"
 
-
 namespace application_manager {
 
 namespace commands {

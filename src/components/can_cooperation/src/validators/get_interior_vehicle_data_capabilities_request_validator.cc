@@ -39,12 +39,13 @@ namespace can_cooperation {
 
 namespace validators {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "GetInteriorVehicleDataCapabilitiesRequestValidator")
+CREATE_LOGGERPTR_GLOBAL(logger_,
+                        "GetInteriorVehicleDataCapabilitiesRequestValidator")
 
 using namespace message_params;
 
 GetInteriorVehicleDataCapabilitiesRequestValidator::
-GetInteriorVehicleDataCapabilitiesRequestValidator() {
+    GetInteriorVehicleDataCapabilitiesRequestValidator() {
   // name="moduleType"
   module_type_[ValidationParams::TYPE] = ValueType::ENUM;
   module_type_[ValidationParams::ENUM_TYPE] = EnumType::MODULE_TYPE;
@@ -57,8 +58,7 @@ GetInteriorVehicleDataCapabilitiesRequestValidator() {
 };
 
 ValidationResult GetInteriorVehicleDataCapabilitiesRequestValidator::Validate(
-                                                   const Json::Value& json,
-                                                   Json::Value& outgoing_json) {
+    const Json::Value& json, Json::Value& outgoing_json) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   ValidationResult result = ValidateSimpleValues(json, outgoing_json);
@@ -69,7 +69,7 @@ ValidationResult GetInteriorVehicleDataCapabilitiesRequestValidator::Validate(
 
   if (IsMember(json, kZone)) {
     result = InteriorZoneValidator::instance()->Validate(json[kZone],
-                                                    outgoing_json[kZone]);
+                                                         outgoing_json[kZone]);
   }
 
   return result;
@@ -78,4 +78,3 @@ ValidationResult GetInteriorVehicleDataCapabilitiesRequestValidator::Validate(
 }  // namespace valdiators
 
 }  // namespace can_cooperation
-

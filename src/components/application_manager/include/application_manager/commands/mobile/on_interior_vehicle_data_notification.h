@@ -68,7 +68,6 @@ class OnInteriorVehicleDataNotification : public CommandNotificationImpl {
   virtual void Run();
 
  private:
-
   void SendNotificationHelper(ApplicationConstSharedPtr app);
 
   DISALLOW_COPY_AND_ASSIGN(OnInteriorVehicleDataNotification);

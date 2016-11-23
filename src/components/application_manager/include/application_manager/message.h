@@ -115,11 +115,11 @@ class Message {
   }
 
  private:
-  int32_t function_id_;     // @remark protocol V2.
-  std::string function_name_; // string
-  int32_t function_id_;  // @remark protocol V2.
-  int32_t correlation_id_;  // @remark protocol V2.
-  MessageType type_;        // @remark protocol V2.
+  int32_t function_id_;        // @remark protocol V2.
+  std::string function_name_;  // string
+  int32_t function_id_;        // @remark protocol V2.
+  int32_t correlation_id_;     // @remark protocol V2.
+  MessageType type_;           // @remark protocol V2.
 
   // Pre-calculated message priority, higher priority messages are
   // Processed first

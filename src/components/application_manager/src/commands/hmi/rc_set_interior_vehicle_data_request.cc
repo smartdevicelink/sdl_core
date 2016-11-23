@@ -36,12 +36,11 @@ namespace application_manager {
 
 namespace commands {
 
-RCSetInteriorVehicleDataRequest::RCSetInteriorVehicleDataRequest(const MessageSharedPtr& message)
-    : RequestToHMI(message) {
-}
+RCSetInteriorVehicleDataRequest::RCSetInteriorVehicleDataRequest(
+    const MessageSharedPtr& message)
+    : RequestToHMI(message) {}
 
-RCSetInteriorVehicleDataRequest::~RCSetInteriorVehicleDataRequest() {
-}
+RCSetInteriorVehicleDataRequest::~RCSetInteriorVehicleDataRequest() {}
 
 void RCSetInteriorVehicleDataRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -52,4 +51,3 @@ void RCSetInteriorVehicleDataRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

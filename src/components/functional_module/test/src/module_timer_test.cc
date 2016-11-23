@@ -78,13 +78,11 @@ TEST(ModuleTimerTest, add_trackable) {
   TestTrackable track(3);
   timer.AddTrackable(track);
   ASSERT_EQ(2, test.trackables_size());
-  EXPECT_TRUE(
-    test.trackable(track).start_time() - test.current_time() < 1);
+  EXPECT_TRUE(test.trackable(track).start_time() - test.current_time() < 1);
   timer.AddTrackable(track);
   sleep(3);
-  EXPECT_TRUE(
-    test.current_time() - test.trackable(track).start_time() < 4 &&
-    test.current_time() - test.trackable(track).start_time() > 2);
+  EXPECT_TRUE(test.current_time() - test.trackable(track).start_time() < 4 &&
+              test.current_time() - test.trackable(track).start_time() > 2);
 }
 
 TEST(ModuleTimerTest, remove_trackable) {
@@ -122,4 +120,4 @@ TEST(ModuleTimerTest, notify) {
   EXPECT_EQ(1, test.trackables_size());
 }
 
-}   //  namespace functional_modules
+}  //  namespace functional_modules

@@ -46,8 +46,7 @@ typedef std::map<ModuleID, ModulePtr>::iterator PluginsIterator;
 typedef std::map<MobileFunctionID, ModulePtr>::iterator PluginFunctionsIterator;
 typedef std::map<HMIFunctionID, ModulePtr>::iterator PluginHMIFunctionsIterator;
 
-PluginManager::PluginManager()
-  : service_() {
+PluginManager::PluginManager() : service_() {
   LOG4CXX_DEBUG(logger_, "Creating plugin mgr");
 }
 
@@ -60,8 +59,7 @@ PluginManager::~PluginManager() {
 
 int PluginManager::LoadPlugins(const std::string& plugin_path) {
   LOG4CXX_INFO(logger_, "Loading plugins from " << plugin_path);
-  std::vector<std::string> plugin_files = file_system::ListFiles(
-      plugin_path);
+  std::vector<std::string> plugin_files = file_system::ListFiles(plugin_path);
   for (size_t i = 0; i < plugin_files.size(); ++i) {
     size_t pos = plugin_files[i].find_last_of(".");
     if (std::string::npos != pos) {
@@ -74,46 +72,49 @@ int PluginManager::LoadPlugins(const std::string& plugin_path) {
     std::string full_name = plugin_path + '/' + plugin_files[i];
     void* generic_plugin_dll = dlopen(full_name.c_str(), RTLD_LAZY);
     if (NULL == generic_plugin_dll) {
-      LOG4CXX_ERROR(logger_, "Failed to open dll " << plugin_files[i] << "\n"
-                    << dlerror());
+      LOG4CXX_ERROR(logger_,
+                    "Failed to open dll " << plugin_files[i] << "\n"
+                                          << dlerror());
       continue;
     }
     typedef GenericModule* (*Create)();
-    Create create_manager = reinterpret_cast<Create>(
-      dlsym(generic_plugin_dll, "Create"));
+    Create create_manager =
+        reinterpret_cast<Create>(dlsym(generic_plugin_dll, "Create"));
     char* error_string = dlerror();
     if (NULL != error_string) {
-      LOG4CXX_ERROR(logger_, "Failed to export dll's " << plugin_files[i]
-        << " symbols\n" << error_string);
+      LOG4CXX_ERROR(logger_,
+                    "Failed to export dll's " << plugin_files[i] << " symbols\n"
+                                              << error_string);
       dlclose(generic_plugin_dll);
       continue;
     }
     ModulePtr module = create_manager();
     if (!module) {
-      LOG4CXX_ERROR(logger_, "Failed to create plugin main class "
-        << plugin_files[i]);
+      LOG4CXX_ERROR(logger_,
+                    "Failed to create plugin main class " << plugin_files[i]);
       dlclose(generic_plugin_dll);
       continue;
     } else {
-      LOG4CXX_DEBUG(logger_, "Opened and working plugin from "
-                    << plugin_files[i] << " with id "
-                    << module->GetModuleID());
-      dlls_.insert(std::pair<ModuleID, void*>(
-                     module->GetModuleID(), generic_plugin_dll));
-      plugins_.insert(std::pair<ModuleID, ModulePtr>(
-                        module->GetModuleID(), module));
+      LOG4CXX_DEBUG(logger_,
+                    "Opened and working plugin from " << plugin_files[i]
+                                                      << " with id "
+                                                      << module->GetModuleID());
+      dlls_.insert(std::pair<ModuleID, void*>(module->GetModuleID(),
+                                              generic_plugin_dll));
+      plugins_.insert(
+          std::pair<ModuleID, ModulePtr>(module->GetModuleID(), module));
       std::deque<MobileFunctionID> subscribers =
-        module->GetPluginInfo().mobile_function_list;
+          module->GetPluginInfo().mobile_function_list;
       for (size_t i = 0; i < subscribers.size(); ++i) {
-        mobile_subscribers_.insert(std::pair<MobileFunctionID, ModulePtr>(
-          subscribers[i], module));
+        mobile_subscribers_.insert(
+            std::pair<MobileFunctionID, ModulePtr>(subscribers[i], module));
       }
 
       std::deque<HMIFunctionID> hmi_subscribers =
-        module->GetPluginInfo().hmi_function_list;
+          module->GetPluginInfo().hmi_function_list;
       for (size_t i = 0; i < hmi_subscribers.size(); ++i) {
         hmi_subscribers_.insert(
-          std::pair<HMIFunctionID, ModulePtr>(hmi_subscribers[i], module));
+            std::pair<HMIFunctionID, ModulePtr>(hmi_subscribers[i], module));
       }
       module->set_service(service_);
       module->AddObserver(this);
@@ -129,7 +130,8 @@ void PluginManager::UnloadPlugins() {
   plugins_.clear();
 
   for (std::map<ModuleID, void*>::iterator it = dlls_.begin();
-       dlls_.end() != it; ++it) {
+       dlls_.end() != it;
+       ++it) {
     dlclose(it->second);
   }
   dlls_.clear();
@@ -145,11 +147,10 @@ void PluginManager::ProcessMessage(application_manager::MessagePtr msg) {
     return;
   }
   if (application_manager::ProtocolVersion::kUnknownProtocol !=
-        msg->protocol_version()
-      && application_manager::ProtocolVersion::kHMI !=
-        msg->protocol_version()) {
+          msg->protocol_version() &&
+      application_manager::ProtocolVersion::kHMI != msg->protocol_version()) {
     PluginFunctionsIterator subscribed_plugin_itr = mobile_subscribers_.find(
-          static_cast<MobileFunctionID>(msg->function_id()));
+        static_cast<MobileFunctionID>(msg->function_id()));
     if (mobile_subscribers_.end() != subscribed_plugin_itr) {
       if (subscribed_plugin_itr->second->ProcessMessage(msg) !=
           ProcessResult::PROCESSED) {
@@ -159,7 +160,8 @@ void PluginManager::ProcessMessage(application_manager::MessagePtr msg) {
   }
 }
 
-ProcessResult PluginManager::ProcessHMIMessage(application_manager::MessagePtr msg) {
+ProcessResult PluginManager::ProcessHMIMessage(
+    application_manager::MessagePtr msg) {
   DCHECK(msg);
   if (!msg) {
     LOG4CXX_ERROR(logger_, "Null pointer message was received.");
@@ -179,8 +181,8 @@ ProcessResult PluginManager::ProcessHMIMessage(application_manager::MessagePtr m
     } else if (value.isMember("result") && value["result"].isMember("method")) {
       function_name = value["result"]["method"].asCString();
       // Error response from HMI
-    }  else if (value.isMember("error") && value["error"].isMember("data") &&
-                value["error"]["data"].isMember("method")) {
+    } else if (value.isMember("error") && value["error"].isMember("data") &&
+               value["error"]["data"].isMember("method")) {
       function_name = value["error"]["data"]["method"].asCString();
     } else {
       DCHECK(false);
@@ -189,7 +191,7 @@ ProcessResult PluginManager::ProcessHMIMessage(application_manager::MessagePtr m
   }
 
   PluginHMIFunctionsIterator subscribed_plugin_itr =
-    hmi_subscribers_.find(function_name);
+      hmi_subscribers_.find(function_name);
   if (hmi_subscribers_.end() != subscribed_plugin_itr) {
     return subscribed_plugin_itr->second->ProcessHMIMessage(msg);
   }
@@ -203,9 +205,8 @@ bool PluginManager::IsMessageForPlugin(application_manager::MessagePtr msg) {
     return false;
   }
   if (application_manager::ProtocolVersion::kUnknownProtocol !=
-      msg->protocol_version()
-      && application_manager::ProtocolVersion::kHMI !=
-      msg->protocol_version()) {
+          msg->protocol_version() &&
+      application_manager::ProtocolVersion::kHMI != msg->protocol_version()) {
     MobileFunctionID id = static_cast<MobileFunctionID>(msg->function_id());
     return (mobile_subscribers_.find(id) != mobile_subscribers_.end());
   } else {
@@ -234,10 +235,11 @@ bool PluginManager::IsHMIMessageForPlugin(application_manager::MessagePtr msg) {
       return (hmi_subscribers_.find(value["result"]["method"].asCString()) !=
               hmi_subscribers_.end());
       // Error response from HMI
-    }  else if (value.isMember("error") && value["error"].isMember("data") &&
-                value["error"]["data"].isMember("method")) {
-      return (hmi_subscribers_.find(value["error"]["data"]["method"].asCString()) !=
-              hmi_subscribers_.end());
+    } else if (value.isMember("error") && value["error"].isMember("data") &&
+               value["error"]["data"].isMember("method")) {
+      return (
+          hmi_subscribers_.find(value["error"]["data"]["method"].asCString()) !=
+          hmi_subscribers_.end());
     } else {
       DCHECK(false);
     }
@@ -247,8 +249,7 @@ bool PluginManager::IsHMIMessageForPlugin(application_manager::MessagePtr msg) {
 }
 
 void PluginManager::OnServiceStateChanged(ServiceState state) {
-  for (PluginsIterator it = plugins_.begin();
-       plugins_.end() != it; ++it) {
+  for (PluginsIterator it = plugins_.begin(); plugins_.end() != it; ++it) {
     it->second->OnServiceStateChanged(state);
   }
 }
@@ -266,10 +267,12 @@ void PluginManager::OnError(ModuleObserver::Errors error, ModuleID module_id) {
     case ModuleObserver::Errors::FS_FAILURE:
       error_string = "Plugin failed to run file system operation.";
       break;
-    default: break;
+    default:
+      break;
   }
-  LOG4CXX_ERROR(logger_, "Error " << error_string <<
-                " was received from module " << module_id);
+  LOG4CXX_ERROR(logger_,
+                "Error " << error_string << " was received from module "
+                         << module_id);
   // TODO(PV)
 }
 
@@ -280,7 +283,7 @@ void PluginManager::RemoveAppExtension(uint32_t app_id) {
 }
 
 bool PluginManager::IsAppForPlugins(
-  application_manager::ApplicationSharedPtr app) {
+    application_manager::ApplicationSharedPtr app) {
   DCHECK(app);
   if (!app) {
     return false;
@@ -308,9 +311,11 @@ void PluginManager::OnAppHMILevelChanged(
   }
   for (PluginsIterator it = plugins_.begin(); plugins_.end() != it; ++it) {
     if (it->second->IsAppForPlugin(app)) {
-      LOG4CXX_DEBUG(logger_, "Application " << app->name() << " of plugin "
-        << it->second->GetModuleID() << " has changed level from " << old_level
-        << " to " << app->hmi_level());
+      LOG4CXX_DEBUG(logger_,
+                    "Application " << app->name() << " of plugin "
+                                   << it->second->GetModuleID()
+                                   << " has changed level from " << old_level
+                                   << " to " << app->hmi_level());
       it->second->OnAppHMILevelChanged(app, old_level);
     }
   }
@@ -327,10 +332,11 @@ bool PluginManager::CanAppChangeHMILevel(
   for (PluginsIterator it = plugins_.begin(); plugins_.end() != it; ++it) {
     if (it->second->IsAppForPlugin(app)) {
       result = result && it->second->CanAppChangeHMILevel(app, new_level);
-      LOG4CXX_DEBUG(logger_, "Application " << app->name() << " of plugin "
-        << it->second->GetModuleID() << " is "
-        << (result ? "allowed": "not allowed") << " to change level to "
-        << new_level);
+      LOG4CXX_DEBUG(logger_,
+                    "Application " << app->name() << " of plugin "
+                                   << it->second->GetModuleID() << " is "
+                                   << (result ? "allowed" : "not allowed")
+                                   << " to change level to " << new_level);
     }
   }
   return result;
@@ -340,6 +346,7 @@ typedef std::map<ModuleID, ModulePtr>::value_type PluginsValueType;
 struct HandleDeviceRemoved {
  private:
   const connection_handler::DeviceHandle& device_;
+
  public:
   explicit HandleDeviceRemoved(const connection_handler::DeviceHandle& device)
       : device_(device) {}

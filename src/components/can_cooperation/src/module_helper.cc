@@ -42,9 +42,10 @@ namespace can_cooperation {
 using functional_modules::ProcessResult;
 using application_manager::AppExtensionPtr;
 
-application_manager::MessagePtr ModuleHelper::ResponseToHMI(unsigned int id,
-                              hmi_apis::Common_Result::eType result_code,
-                              const std::string& method_name) {
+application_manager::MessagePtr ModuleHelper::ResponseToHMI(
+    unsigned int id,
+    hmi_apis::Common_Result::eType result_code,
+    const std::string& method_name) {
   Json::Value msg;
   msg[json_keys::kId] = id;
   msg[json_keys::kJsonrpc] = "2.0";
@@ -56,34 +57,30 @@ application_manager::MessagePtr ModuleHelper::ResponseToHMI(unsigned int id,
   } else {
     msg[json_keys::kError] = Json::Value(Json::ValueType::objectValue);
     msg[json_keys::kError][json_keys::kCode] = result_code;
-    msg[json_keys::kError][json_keys::kData] = Json::Value(
-      Json::ValueType::objectValue);
+    msg[json_keys::kError][json_keys::kData] =
+        Json::Value(Json::ValueType::objectValue);
     msg[json_keys::kError][json_keys::kData][json_keys::kMethod] = method_name;
   }
 
-  application_manager::MessagePtr message(
-    new application_manager::Message(
+  application_manager::MessagePtr message(new application_manager::Message(
       protocol_handler::MessagePriority::kDefault));
-  message->set_protocol_version(
-    application_manager::ProtocolVersion::kHMI);
+  message->set_protocol_version(application_manager::ProtocolVersion::kHMI);
   message->set_correlation_id(msg[json_keys::kId].asInt());
   Json::FastWriter writer;
   std::string json_msg = writer.write(msg);
   message->set_json_message(json_msg);
-  message->set_message_type(
-    application_manager::MessageType::kResponse);
+  message->set_message_type(application_manager::MessageType::kResponse);
   return message;
 }
 
-ProcessResult ModuleHelper::ProcessOnAppDeactivation(
-  const Json::Value& value) {
-  if (IsMember(value, json_keys::kParams)
-      && IsMember(value[json_keys::kParams], message_params::kHMIAppID)) {
+ProcessResult ModuleHelper::ProcessOnAppDeactivation(const Json::Value& value) {
+  if (IsMember(value, json_keys::kParams) &&
+      IsMember(value[json_keys::kParams], message_params::kHMIAppID)) {
     uint32_t hmi_app_id =
-      value[json_keys::kParams][message_params::kHMIAppID].asUInt();
+        value[json_keys::kParams][message_params::kHMIAppID].asUInt();
     typedef std::vector<application_manager::ApplicationSharedPtr> AppList;
     AppList applications = CANModule::instance()->service()->GetApplications(
-                             CANModule::instance()->GetModuleID());
+        CANModule::instance()->GetModuleID());
     if (!applications.empty()) {
       application_manager::ApplicationSharedPtr current_app;
       application_manager::ApplicationSharedPtr active_app;
@@ -99,7 +96,7 @@ ProcessResult ModuleHelper::ProcessOnAppDeactivation(
 
       if (current_app && current_app == active_app) {
         CANModule::instance()->service()->ChangeNotifyHMILevel(
-          current_app, mobile_apis::HMILevel::eType::HMI_LIMITED);
+            current_app, mobile_apis::HMILevel::eType::HMI_LIMITED);
         return ProcessResult::PROCESSED;
       }
 
@@ -110,14 +107,14 @@ ProcessResult ModuleHelper::ProcessOnAppDeactivation(
 }
 
 functional_modules::ProcessResult ModuleHelper::ProcessSDLActivateApp(
-  const Json::Value& value) {
-  if (IsMember(value, json_keys::kParams)
-      && IsMember(value[json_keys::kParams], message_params::kHMIAppID)) {
+    const Json::Value& value) {
+  if (IsMember(value, json_keys::kParams) &&
+      IsMember(value[json_keys::kParams], message_params::kHMIAppID)) {
     uint32_t hmi_app_id =
-      value[json_keys::kParams][message_params::kHMIAppID].asUInt();
+        value[json_keys::kParams][message_params::kHMIAppID].asUInt();
     typedef std::vector<application_manager::ApplicationSharedPtr> AppList;
     AppList applications = CANModule::instance()->service()->GetApplications(
-                             CANModule::instance()->GetModuleID());
+        CANModule::instance()->GetModuleID());
     if (!applications.empty()) {
       application_manager::ApplicationSharedPtr new_app;
       application_manager::ApplicationSharedPtr active_app;
@@ -130,17 +127,17 @@ functional_modules::ProcessResult ModuleHelper::ProcessSDLActivateApp(
         if (applications[i]->hmi_app_id() == hmi_app_id) {
           new_app = applications[i];
           new_app_ext = AppExtensionPtr::static_pointer_cast<CANAppExtension>(
-            new_app->QueryInterface(CANModule::instance()->GetModuleID()));
+              new_app->QueryInterface(CANModule::instance()->GetModuleID()));
           DCHECK(new_app_ext);
           if (!new_app_ext) {
             return ProcessResult::CANNOT_PROCESS;
           }
           if (!new_app_ext->is_on_driver_device()) {
             // Do not change HMI Level of app on passenger's device
-            application_manager::MessagePtr msg = ResponseToHMI(
-              value[json_keys::kId].asUInt(),
-              hmi_apis::Common_Result::REJECTED,
-              functional_modules::hmi_api::sdl_activate_app);
+            application_manager::MessagePtr msg =
+                ResponseToHMI(value[json_keys::kId].asUInt(),
+                              hmi_apis::Common_Result::REJECTED,
+                              functional_modules::hmi_api::sdl_activate_app);
 
             CANModule::instance()->service()->SendMessageToHMI(msg);
 
@@ -148,15 +145,16 @@ functional_modules::ProcessResult ModuleHelper::ProcessSDLActivateApp(
           }
         } else {
           CANAppExtensionPtr app_ext =
-            AppExtensionPtr::static_pointer_cast<CANAppExtension>(
-              applications[i]->QueryInterface(
-                CANModule::instance()->GetModuleID()));
+              AppExtensionPtr::static_pointer_cast<CANAppExtension>(
+                  applications[i]->QueryInterface(
+                      CANModule::instance()->GetModuleID()));
           DCHECK(app_ext);
           if (!app_ext) {
             continue;
           }
-          if (applications[i]->hmi_level() == mobile_apis::HMILevel::HMI_LIMITED
-              && app_ext->is_on_driver_device()) {
+          if (applications[i]->hmi_level() ==
+                  mobile_apis::HMILevel::HMI_LIMITED &&
+              app_ext->is_on_driver_device()) {
             limited_apps.push_back(applications[i]);
           }
         }
@@ -168,7 +166,7 @@ functional_modules::ProcessResult ModuleHelper::ProcessSDLActivateApp(
       if (new_app_ext->is_on_driver_device()) {
         for (size_t i = 0; i < limited_apps.size(); ++i) {
           CANModule::instance()->service()->ChangeNotifyHMILevel(
-            limited_apps[i], mobile_apis::HMILevel::eType::HMI_BACKGROUND);
+              limited_apps[i], mobile_apis::HMILevel::eType::HMI_BACKGROUND);
         }
       }
       return ProcessResult::PARTIALLY_PROCESSED;
@@ -177,24 +175,26 @@ functional_modules::ProcessResult ModuleHelper::ProcessSDLActivateApp(
   return ProcessResult::CANNOT_PROCESS;
 }
 
-// (TODO)VS: Replace this functions for separate OnDeviceRankChanged notiifcation
+// (TODO)VS: Replace this functions for separate OnDeviceRankChanged
+// notiifcation
 void ModuleHelper::ProccessDeviceRankChanged(const uint32_t device_handle,
-                                           const std::string& rank) {
+                                             const std::string& rank) {
   std::vector<application_manager::ApplicationSharedPtr> applications =
-    CANModule::instance()->service()->GetApplications(
-        CANModule::instance()->GetModuleID());
+      CANModule::instance()->service()->GetApplications(
+          CANModule::instance()->GetModuleID());
 
   if (rank == "DRIVER") {
     bool is_rank_actually_changed = false;
 
     for (uint32_t i = 0; i < applications.size(); ++i) {
       if (applications[i]->device() == device_handle) {
-        application_manager::AppExtensionPtr app_extension = applications[i]->QueryInterface(
-            CANModule::instance()->GetModuleID());
+        application_manager::AppExtensionPtr app_extension =
+            applications[i]->QueryInterface(
+                CANModule::instance()->GetModuleID());
         if (app_extension) {
           CANAppExtensionPtr can_app_extension =
-              application_manager::AppExtensionPtr::static_pointer_cast<CANAppExtension>(
-                  app_extension);
+              application_manager::AppExtensionPtr::static_pointer_cast<
+                  CANAppExtension>(app_extension);
           if (!can_app_extension->is_on_driver_device()) {
             can_app_extension->set_is_on_driver_device(true);
             is_rank_actually_changed = true;
@@ -209,12 +209,13 @@ void ModuleHelper::ProccessDeviceRankChanged(const uint32_t device_handle,
     if (is_rank_actually_changed) {
       for (uint32_t i = 0; i < applications.size(); ++i) {
         if (applications[i]->device() != device_handle) {
-          application_manager::AppExtensionPtr app_extension = applications[i]->QueryInterface(
-              CANModule::instance()->GetModuleID());
+          application_manager::AppExtensionPtr app_extension =
+              applications[i]->QueryInterface(
+                  CANModule::instance()->GetModuleID());
           if (app_extension) {
             CANAppExtensionPtr can_app_extension =
-              application_manager::AppExtensionPtr::static_pointer_cast<CANAppExtension>(
-                  app_extension);
+                application_manager::AppExtensionPtr::static_pointer_cast<
+                    CANAppExtension>(app_extension);
             if (can_app_extension->is_on_driver_device()) {
               CANModule::instance()->UnsubscribeAppForAllZones(
                   applications[i]->hmi_app_id(), can_app_extension);
@@ -228,36 +229,38 @@ void ModuleHelper::ProccessDeviceRankChanged(const uint32_t device_handle,
   } else if (rank == "PASSENGER") {
     for (uint32_t i = 0; i < applications.size(); ++i) {
       if (applications[i]->device() == device_handle) {
-        application_manager::AppExtensionPtr app_extension = applications[i]->QueryInterface(
-            CANModule::instance()->GetModuleID());
+        application_manager::AppExtensionPtr app_extension =
+            applications[i]->QueryInterface(
+                CANModule::instance()->GetModuleID());
         if (app_extension) {
           CANAppExtensionPtr can_app_extension =
-               application_manager::AppExtensionPtr::static_pointer_cast<CANAppExtension>(
-                   app_extension);
-           if (can_app_extension->is_on_driver_device()) {
-             CANModule::instance()->UnsubscribeAppForAllZones(
-                 applications[i]->hmi_app_id(), can_app_extension);
-             can_app_extension->set_is_on_driver_device(false);
-           }
-         }
-       }
-     }
-   }
+              application_manager::AppExtensionPtr::static_pointer_cast<
+                  CANAppExtension>(app_extension);
+          if (can_app_extension->is_on_driver_device()) {
+            CANModule::instance()->UnsubscribeAppForAllZones(
+                applications[i]->hmi_app_id(), can_app_extension);
+            can_app_extension->set_is_on_driver_device(false);
+          }
+        }
+      }
+    }
+  }
 }
 
-// (TODO)VS: Replace this functions for separate OnReverseAppsDisallowed notiifcation
-void ModuleHelper::ProccessOnReverseAppsDisallowed () {
+// (TODO)VS: Replace this functions for separate OnReverseAppsDisallowed
+// notiifcation
+void ModuleHelper::ProccessOnReverseAppsDisallowed() {
   std::vector<application_manager::ApplicationSharedPtr> applications =
-    CANModule::instance()->service()->GetApplications(
-        CANModule::instance()->GetModuleID());
+      CANModule::instance()->service()->GetApplications(
+          CANModule::instance()->GetModuleID());
 
   for (uint32_t i = 0; i < applications.size(); ++i) {
-    application_manager::AppExtensionPtr app_extension = applications[i]->
-        QueryInterface(CANModule::instance()->GetModuleID());
+    application_manager::AppExtensionPtr app_extension =
+        applications[i]->QueryInterface(CANModule::instance()->GetModuleID());
     if (app_extension) {
       CANAppExtensionPtr can_app_extension =
-          application_manager::AppExtensionPtr::static_pointer_cast<CANAppExtension>(
-              app_extension);
+          application_manager::AppExtensionPtr::static_pointer_cast<
+              CANAppExtension>(app_extension);
       if (!can_app_extension->is_on_driver_device()) {
         CANModule::instance()->UnsubscribeAppForAllZones(
             applications[i]->hmi_app_id(), can_app_extension);

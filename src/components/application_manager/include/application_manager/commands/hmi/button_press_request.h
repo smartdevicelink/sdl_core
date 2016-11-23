@@ -44,7 +44,6 @@ namespace commands {
  **/
 class ButtonsButtonPressRequest : public RequestToHMI {
  public:
-
   explicit ButtonsButtonPressRequest(const MessageSharedPtr& message);
 
   virtual ~ButtonsButtonPressRequest();

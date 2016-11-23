@@ -50,8 +50,8 @@ class MobileCommandFactory {
    * @param  message Message shared pointer.
    * @return Pointer to created command object.
    **/
-   static commands::Command* CreateCommand(
-       const application_manager::MessagePtr& msg);
+  static commands::Command* CreateCommand(
+      const application_manager::MessagePtr& msg);
 
  private:
   MobileCommandFactory();

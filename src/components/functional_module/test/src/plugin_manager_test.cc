@@ -47,34 +47,30 @@ TEST_F(PluginManagerTest, ChangePluginsState) {
 }
 
 TEST_F(PluginManagerTest, IsMessageForPluginFail) {
-  Message* msg = new Message(
-      protocol_handler::MessagePriority::FromServiceType(
-          protocol_handler::ServiceType::kRpc));
+  Message* msg = new Message(protocol_handler::MessagePriority::FromServiceType(
+      protocol_handler::ServiceType::kRpc));
   msg->set_protocol_version(ProtocolVersion::kUnknownProtocol);
   EXPECT_FALSE(manager->IsMessageForPlugin(msg));
 }
 
 TEST_F(PluginManagerTest, IsMessageForPluginPass) {
-  Message* msg = new Message(
-      protocol_handler::MessagePriority::FromServiceType(
-          protocol_handler::ServiceType::kRpc));
+  Message* msg = new Message(protocol_handler::MessagePriority::FromServiceType(
+      protocol_handler::ServiceType::kRpc));
   msg->set_protocol_version(ProtocolVersion::kV3);
   msg->set_function_id(101);  // see MockGenericModule
   EXPECT_TRUE(manager->IsMessageForPlugin(msg));
 }
 
 TEST_F(PluginManagerTest, IsHMIMessageForPluginFail) {
-  Message* msg = new Message(
-      protocol_handler::MessagePriority::FromServiceType(
-          protocol_handler::ServiceType::kRpc));
+  Message* msg = new Message(protocol_handler::MessagePriority::FromServiceType(
+      protocol_handler::ServiceType::kRpc));
   msg->set_protocol_version(ProtocolVersion::kUnknownProtocol);
   EXPECT_FALSE(manager->IsHMIMessageForPlugin(msg));
 }
 
 TEST_F(PluginManagerTest, IsHMIMessageForPluginPass) {
-  Message* msg = new Message(
-      protocol_handler::MessagePriority::FromServiceType(
-          protocol_handler::ServiceType::kRpc));
+  Message* msg = new Message(protocol_handler::MessagePriority::FromServiceType(
+      protocol_handler::ServiceType::kRpc));
   msg->set_protocol_version(ProtocolVersion::kHMI);
   std::string json = "{\"method\": \"HMI-Func-1\"}";  // see MockGenericModule
   msg->set_json_message(json);
@@ -88,9 +84,8 @@ TEST_F(PluginManagerTest, RemoveAppExtension) {
 }
 
 TEST_F(PluginManagerTest, ProcessMessageFail) {
-  Message* msg = new Message(
-      protocol_handler::MessagePriority::FromServiceType(
-          protocol_handler::ServiceType::kRpc));
+  Message* msg = new Message(protocol_handler::MessagePriority::FromServiceType(
+      protocol_handler::ServiceType::kRpc));
   application_manager::MessagePtr message(msg);
   msg->set_protocol_version(ProtocolVersion::kUnknownProtocol);
   EXPECT_CALL(*module, ProcessMessage(message)).Times(0);
@@ -98,21 +93,20 @@ TEST_F(PluginManagerTest, ProcessMessageFail) {
 }
 
 TEST_F(PluginManagerTest, ProcessMessagePass) {
-  Message* msg = new Message(
-      protocol_handler::MessagePriority::FromServiceType(
-          protocol_handler::ServiceType::kRpc));
+  Message* msg = new Message(protocol_handler::MessagePriority::FromServiceType(
+      protocol_handler::ServiceType::kRpc));
   application_manager::MessagePtr message(msg);
   msg->set_protocol_version(ProtocolVersion::kV3);
   msg->set_function_id(101);  // see MockGenericModule
-  EXPECT_CALL(*module, ProcessMessage(message)).Times(1).WillOnce(
-      Return(ProcessResult::PROCESSED));
+  EXPECT_CALL(*module, ProcessMessage(message))
+      .Times(1)
+      .WillOnce(Return(ProcessResult::PROCESSED));
   manager->ProcessMessage(message);
 }
 
 TEST_F(PluginManagerTest, ProcessHMIMessageFail) {
-  Message* msg = new Message(
-      protocol_handler::MessagePriority::FromServiceType(
-          protocol_handler::ServiceType::kRpc));
+  Message* msg = new Message(protocol_handler::MessagePriority::FromServiceType(
+      protocol_handler::ServiceType::kRpc));
   application_manager::MessagePtr message(msg);
   message->set_protocol_version(ProtocolVersion::kUnknownProtocol);
   EXPECT_CALL(*module, ProcessHMIMessage(message)).Times(0);
@@ -120,20 +114,21 @@ TEST_F(PluginManagerTest, ProcessHMIMessageFail) {
 }
 
 TEST_F(PluginManagerTest, ProcessHMIMessagePass) {
-  Message* msg = new Message(
-      protocol_handler::MessagePriority::FromServiceType(
-          protocol_handler::ServiceType::kRpc));
+  Message* msg = new Message(protocol_handler::MessagePriority::FromServiceType(
+      protocol_handler::ServiceType::kRpc));
   application_manager::MessagePtr message(msg);
   message->set_protocol_version(ProtocolVersion::kHMI);
-  std::string json = "{\"method\": \"HMI-Func-1\"}"; // see MockGenericModule
+  std::string json = "{\"method\": \"HMI-Func-1\"}";  // see MockGenericModule
   message->set_json_message(json);
-  EXPECT_CALL(*module, ProcessHMIMessage(message)).Times(1).WillOnce(
-      Return(ProcessResult::PROCESSED));
+  EXPECT_CALL(*module, ProcessHMIMessage(message))
+      .Times(1)
+      .WillOnce(Return(ProcessResult::PROCESSED));
   manager->ProcessHMIMessage(message);
 }
 
 TEST_F(PluginManagerTest, IsAppForPlugins) {
-  application_manager::MockApplication* app = new application_manager::MockApplication();
+  application_manager::MockApplication* app =
+      new application_manager::MockApplication();
   application_manager::ApplicationSharedPtr app_ptr(app);
   EXPECT_CALL(*module, IsAppForPlugin(app_ptr)).Times(1);
   manager->IsAppForPlugins(app_ptr);
@@ -141,7 +136,7 @@ TEST_F(PluginManagerTest, IsAppForPlugins) {
 
 TEST_F(PluginManagerTest, OnAppHMILevelChanged) {
   NiceMock<application_manager::MockApplication>* app =
-    new NiceMock<application_manager::MockApplication>();
+      new NiceMock<application_manager::MockApplication>();
   application_manager::ApplicationSharedPtr app_ptr(app);
 
   std::string name("name");
@@ -149,62 +144,66 @@ TEST_F(PluginManagerTest, OnAppHMILevelChanged) {
   mobile_apis::HMILevel::eType level = mobile_apis::HMILevel::eType::HMI_NONE;
   ON_CALL(*app, hmi_level()).WillByDefault(ReturnRef(level));
 
-  Expectation is_for_plugin = EXPECT_CALL(*module, IsAppForPlugin(app_ptr))
-    .WillOnce(Return(true));
+  Expectation is_for_plugin =
+      EXPECT_CALL(*module, IsAppForPlugin(app_ptr)).WillOnce(Return(true));
   EXPECT_CALL(*module, OnAppHMILevelChanged(app_ptr, _))
-    .Times(1)
-    .After(is_for_plugin);
-  manager->OnAppHMILevelChanged(app_ptr, mobile_apis::HMILevel::eType::HMI_FULL);
+      .Times(1)
+      .After(is_for_plugin);
+  manager->OnAppHMILevelChanged(app_ptr,
+                                mobile_apis::HMILevel::eType::HMI_FULL);
 }
 
 TEST_F(PluginManagerTest, CanAppChangeHMILevel) {
   NiceMock<application_manager::MockApplication>* app =
-    new NiceMock<application_manager::MockApplication>();
+      new NiceMock<application_manager::MockApplication>();
   application_manager::ApplicationSharedPtr app_ptr(app);
 
   std::string name("name");
   ON_CALL(*app, name()).WillByDefault(ReturnRef(name));
 
-  Expectation is_for_plugin = EXPECT_CALL(*module, IsAppForPlugin(app_ptr))
-    .WillOnce(Return(true));
+  Expectation is_for_plugin =
+      EXPECT_CALL(*module, IsAppForPlugin(app_ptr)).WillOnce(Return(true));
   EXPECT_CALL(*module, CanAppChangeHMILevel(app_ptr, _))
-    .Times(1)
-    .After(is_for_plugin)
-    .WillOnce(Return(true));
-  ASSERT_TRUE(manager->CanAppChangeHMILevel(app_ptr, mobile_apis::HMILevel::eType::HMI_FULL));
+      .Times(1)
+      .After(is_for_plugin)
+      .WillOnce(Return(true));
+  ASSERT_TRUE(manager->CanAppChangeHMILevel(
+      app_ptr, mobile_apis::HMILevel::eType::HMI_FULL));
 }
 
 TEST_F(PluginManagerTest, CanAppChangeHMILevelNegative) {
   NiceMock<application_manager::MockApplication>* app =
-    new NiceMock<application_manager::MockApplication>();
+      new NiceMock<application_manager::MockApplication>();
   application_manager::ApplicationSharedPtr app_ptr(app);
 
   std::string name("name");
   ON_CALL(*app, name()).WillByDefault(ReturnRef(name));
 
-  Expectation is_for_plugin = EXPECT_CALL(*module, IsAppForPlugin(app_ptr))
-    .WillOnce(Return(true));
+  Expectation is_for_plugin =
+      EXPECT_CALL(*module, IsAppForPlugin(app_ptr)).WillOnce(Return(true));
   EXPECT_CALL(*module, CanAppChangeHMILevel(app_ptr, _))
-    .Times(1)
-    .After(is_for_plugin)
-    .WillOnce(Return(false));
-  ASSERT_FALSE(manager->CanAppChangeHMILevel(app_ptr, mobile_apis::HMILevel::eType::HMI_BACKGROUND));
+      .Times(1)
+      .After(is_for_plugin)
+      .WillOnce(Return(false));
+  ASSERT_FALSE(manager->CanAppChangeHMILevel(
+      app_ptr, mobile_apis::HMILevel::eType::HMI_BACKGROUND));
 }
 
 TEST_F(PluginManagerTest, CanAppChangeHMILevelNotForPlugin) {
   NiceMock<application_manager::MockApplication>* app =
-    new NiceMock<application_manager::MockApplication>();
+      new NiceMock<application_manager::MockApplication>();
   application_manager::ApplicationSharedPtr app_ptr(app);
 
   std::string name("name");
   ON_CALL(*app, name()).WillByDefault(ReturnRef(name));
 
-  Expectation is_for_plugin = EXPECT_CALL(*module, IsAppForPlugin(app_ptr))
-    .WillOnce(Return(false));
+  Expectation is_for_plugin =
+      EXPECT_CALL(*module, IsAppForPlugin(app_ptr)).WillOnce(Return(false));
   EXPECT_CALL(*module, CanAppChangeHMILevel(app_ptr, _))
-    .Times(0)
-    .After(is_for_plugin);
-  ASSERT_TRUE(manager->CanAppChangeHMILevel(app_ptr, mobile_apis::HMILevel::eType::HMI_BACKGROUND));
+      .Times(0)
+      .After(is_for_plugin);
+  ASSERT_TRUE(manager->CanAppChangeHMILevel(
+      app_ptr, mobile_apis::HMILevel::eType::HMI_BACKGROUND));
 }
 
 }  // namespace functional_modules

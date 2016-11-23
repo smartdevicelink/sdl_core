@@ -37,12 +37,12 @@ namespace policy {
 
 TEST(AccessRemoteImplTest, Allow) {
   AccessRemoteImpl access_remote;
-  Subject who = { "dev1", "12345" };
-  SeatLocation zone = { 0, 0, 0 };
-  Object what = { policy_table::MT_RADIO, zone };
+  Subject who = {"dev1", "12345"};
+  SeatLocation zone = {0, 0, 0};
+  Object what = {policy_table::MT_RADIO, zone};
   access_remote.Allow(who, what);
-  AccessRemoteImpl::AccessControlList::const_iterator i = access_remote.acl_
-      .find(what);
+  AccessRemoteImpl::AccessControlList::const_iterator i =
+      access_remote.acl_.find(what);
   ASSERT_NE(access_remote.acl_.end(), i);
   AccessRemoteImpl::AccessControlRow::const_iterator j = i->second.find(who);
   ASSERT_NE(i->second.end(), j);
@@ -52,10 +52,10 @@ TEST(AccessRemoteImplTest, Allow) {
 TEST(AccessRemoteImplTest, KeyMapTest) {
   // Testing operator < to use as key of map
   AccessRemoteImpl access_remote;
-  Subject who = { "dev1", "12345" };
-  SeatLocation zone = { 0, 0, 0 };
-  Object what1 = { policy_table::MT_RADIO, zone };
-  Object what2 = { policy_table::MT_CLIMATE, zone };
+  Subject who = {"dev1", "12345"};
+  SeatLocation zone = {0, 0, 0};
+  Object what1 = {policy_table::MT_RADIO, zone};
+  Object what2 = {policy_table::MT_CLIMATE, zone};
   access_remote.Allow(who, what1);
   access_remote.Allow(who, what2);
   ASSERT_EQ(2, access_remote.acl_.size());
@@ -63,12 +63,12 @@ TEST(AccessRemoteImplTest, KeyMapTest) {
 
 TEST(AccessRemoteImplTest, Deny) {
   AccessRemoteImpl access_remote;
-  Subject who = { "dev1", "12345" };
-  SeatLocation zone = { 0, 0, 0 };
-  Object what = { policy_table::MT_RADIO, zone };
+  Subject who = {"dev1", "12345"};
+  SeatLocation zone = {0, 0, 0};
+  Object what = {policy_table::MT_RADIO, zone};
   access_remote.Deny(who, what);
-  AccessRemoteImpl::AccessControlList::const_iterator i = access_remote.acl_
-      .find(what);
+  AccessRemoteImpl::AccessControlList::const_iterator i =
+      access_remote.acl_.find(what);
   ASSERT_NE(access_remote.acl_.end(), i);
   AccessRemoteImpl::AccessControlRow::const_iterator j = i->second.find(who);
   ASSERT_NE(i->second.end(), j);
@@ -77,9 +77,9 @@ TEST(AccessRemoteImplTest, Deny) {
 
 TEST(AccessRemoteImplTest, ChangeAccess) {
   AccessRemoteImpl access_remote;
-  Subject who = { "dev1", "12345" };
-  SeatLocation zone = { 0, 0, 0 };
-  Object what = { policy_table::MT_RADIO, zone };
+  Subject who = {"dev1", "12345"};
+  SeatLocation zone = {0, 0, 0};
+  Object what = {policy_table::MT_RADIO, zone};
   access_remote.Allow(who, what);
   ASSERT_EQ(TypeAccess::kAllowed, access_remote.acl_[what][who]);
   access_remote.Deny(who, what);
@@ -90,10 +90,10 @@ TEST(AccessRemoteImplTest, ChangeAccess) {
 
 TEST(AccessRemoteImplTest, ResetBySubject) {
   AccessRemoteImpl access_remote;
-  Subject who = { "dev1", "12345" };
-  SeatLocation zone = { 0, 0, 0 };
-  Object what1 = { policy_table::MT_RADIO, zone };
-  Object what2 = { policy_table::MT_CLIMATE, zone };
+  Subject who = {"dev1", "12345"};
+  SeatLocation zone = {0, 0, 0};
+  Object what1 = {policy_table::MT_RADIO, zone};
+  Object what2 = {policy_table::MT_CLIMATE, zone};
   access_remote.Allow(who, what1);
   access_remote.Deny(who, what2);
   ASSERT_EQ(2, access_remote.acl_.size());
@@ -108,10 +108,10 @@ TEST(AccessRemoteImplTest, ResetBySubject) {
 
 TEST(AccessRemoteImplTest, ResetByObject) {
   AccessRemoteImpl access_remote;
-  Subject who1 = { "dev1", "12345" };
-  Subject who2 = { "dev2", "123456" };
-  SeatLocation zone = { 0, 0, 0 };
-  Object what = { policy_table::MT_RADIO, zone };
+  Subject who1 = {"dev1", "12345"};
+  Subject who2 = {"dev2", "123456"};
+  SeatLocation zone = {0, 0, 0};
+  Object what = {policy_table::MT_RADIO, zone};
   access_remote.Allow(who1, what);
   access_remote.Deny(who2, what);
   ASSERT_EQ(1, access_remote.acl_.size());
@@ -123,9 +123,9 @@ TEST(AccessRemoteImplTest, ResetByObject) {
 
 TEST(AccessRemoteImplTest, CheckAllowed) {
   AccessRemoteImpl access_remote;
-  Subject who = { "dev1", "12345" };
-  SeatLocation zone = { 0, 0, 0 };
-  Object what = { policy_table::MT_RADIO, zone };
+  Subject who = {"dev1", "12345"};
+  SeatLocation zone = {0, 0, 0};
+  Object what = {policy_table::MT_RADIO, zone};
   access_remote.Allow(who, what);
 
   EXPECT_EQ(TypeAccess::kAllowed, access_remote.Check(who, what));
@@ -133,10 +133,10 @@ TEST(AccessRemoteImplTest, CheckAllowed) {
 
 TEST(AccessRemoteImplTest, CheckDisallowed) {
   AccessRemoteImpl access_remote;
-  Subject who = { "dev1", "12345" };
-  Subject who1 = { "dev1", "123456" };
-  SeatLocation zone = { 0, 0, 0 };
-  Object what = { policy_table::MT_RADIO, zone };
+  Subject who = {"dev1", "12345"};
+  Subject who1 = {"dev1", "123456"};
+  SeatLocation zone = {0, 0, 0};
+  Object what = {policy_table::MT_RADIO, zone};
 
   access_remote.Allow(who, what);
   EXPECT_EQ(TypeAccess::kManual, access_remote.Check(who1, what));
@@ -148,10 +148,10 @@ TEST(AccessRemoteImplTest, CheckDisallowed) {
 
 TEST(AccessRemoteImplTest, CheckManual) {
   AccessRemoteImpl access_remote;
-  Subject who = { "dev1", "12345" };
-  Subject who1 = { "dev1", "123456" };
-  SeatLocation zone = { 0, 0, 0 };
-  Object what = { policy_table::MT_RADIO, zone };
+  Subject who = {"dev1", "12345"};
+  Subject who1 = {"dev1", "123456"};
+  SeatLocation zone = {0, 0, 0};
+  Object what = {policy_table::MT_RADIO, zone};
 
   EXPECT_EQ(TypeAccess::kManual, access_remote.Check(who, what));
 
@@ -167,8 +167,8 @@ TEST(AccessRemoteImplTest, CheckModuleType) {
   EXPECT_FALSE(access_remote.CheckModuleType("1234", policy_table::MT_RADIO));
 
   // No modules
-  policy_table::ApplicationPolicies& apps = access_remote.cache_->pt_
-      ->policy_table.app_policies;
+  policy_table::ApplicationPolicies& apps =
+      access_remote.cache_->pt_->policy_table.app_policies;
   apps["1234"];
   EXPECT_FALSE(access_remote.CheckModuleType("1234", policy_table::MT_RADIO));
 
@@ -187,8 +187,8 @@ TEST(AccessRemoteImplTest, CheckModuleType) {
 TEST(AccessRemoteImplTest, EnableDisable) {
   AccessRemoteImpl access_remote;
   access_remote.cache_->pt_ = new policy_table::Table();
-  policy_table::ModuleConfig& config = access_remote.cache_->pt_->policy_table
-      .module_config;
+  policy_table::ModuleConfig& config =
+      access_remote.cache_->pt_->policy_table.module_config;
 
   // Country is enabled
   access_remote.enabled_ = true;
@@ -223,11 +223,10 @@ TEST(AccessRemoteImplTest, SetDefaultHmiTypes) {
   std::vector<int> hmi_expected;
   hmi_expected.push_back(2);
   hmi_expected.push_back(6);
-  Subject who = { "dev1", "1234" };
+  Subject who = {"dev1", "1234"};
   access_remote.SetDefaultHmiTypes(who, hmi_expected);
 
-  EXPECT_NE(access_remote.hmi_types_.end(),
-            access_remote.hmi_types_.find(who));
+  EXPECT_NE(access_remote.hmi_types_.end(), access_remote.hmi_types_.find(who));
   policy_table::AppHMITypes& hmi_output = access_remote.hmi_types_[who];
   EXPECT_EQ(2, hmi_output.size());
   EXPECT_EQ(policy_table::AHT_MEDIA, hmi_output[0]);
@@ -238,12 +237,12 @@ TEST(AccessRemoteImplTest, GetGroups) {
   AccessRemoteImpl access_remote;
   access_remote.primary_device_ = "dev1";
   access_remote.enabled_ = true;
-  Subject who = { "dev1", "1234" };
+  Subject who = {"dev1", "1234"};
   access_remote.hmi_types_[who].push_back(policy_table::AHT_REMOTE_CONTROL);
 
   access_remote.cache_->pt_ = new policy_table::Table();
-  policy_table::ApplicationPolicies& apps = access_remote.cache_->pt_
-      ->policy_table.app_policies;
+  policy_table::ApplicationPolicies& apps =
+      access_remote.cache_->pt_->policy_table.app_policies;
   apps["1234"].groups.push_back("group_default");
   apps["1234"].groups_nonPrimaryRC->push_back("group_non_primary");
   apps["1234"].groups_primaryRC->push_back("group_primary");
@@ -260,7 +259,7 @@ TEST(AccessRemoteImplTest, GetGroups) {
 
   // Non primary groups
   apps["1234"].set_to_string(policy::kDefaultId);
-  Subject who2 = { "dev2", "1234" };
+  Subject who2 = {"dev2", "1234"};
   access_remote.hmi_types_[who2].push_back(policy_table::AHT_REMOTE_CONTROL);
   const policy_table::Strings& groups3 = access_remote.GetGroups(who2);
   EXPECT_EQ(std::string("group_non_primary"), std::string(groups3[0]));
@@ -278,8 +277,8 @@ TEST(AccessRemoteImplTest, CheckParameters) {
   access_remote.cache_->pt_->policy_table.module_config.equipment
       ->mark_initialized();
 
-  policy_table::Zones& zones = access_remote.cache_->pt_->policy_table
-      .module_config.equipment->zones;
+  policy_table::Zones& zones =
+      access_remote.cache_->pt_->policy_table.module_config.equipment->zones;
 
   zones["Block A"].col = 0;
   zones["Block A"].row = 0;
@@ -300,28 +299,28 @@ TEST(AccessRemoteImplTest, CheckParameters) {
   zones["Block B"].driver_allow["RADIO"]["Rpc 5"].push_back("param 2");
 
   // No zone
-  SeatLocation no_zone = { 2, 2, 2 };
-  Object what_no = { policy_table::MT_RADIO, no_zone };
+  SeatLocation no_zone = {2, 2, 2};
+  Object what_no = {policy_table::MT_RADIO, no_zone};
   EXPECT_EQ(
       TypeAccess::kDisallowed,
       access_remote.CheckParameters(what_no, "Any rpc", RemoteControlParams()));
 
   // No module
-  SeatLocation block_a = { 0, 0, 0 };
-  Object what_a = { policy_table::ModuleType(-1), block_a };
+  SeatLocation block_a = {0, 0, 0};
+  Object what_a = {policy_table::ModuleType(-1), block_a};
   EXPECT_EQ(
       TypeAccess::kDisallowed,
       access_remote.CheckParameters(what_a, "Any rpc", RemoteControlParams()));
 
   // Driver allow, all RPCs are allowed
-  Object what_ca = { policy_table::MT_CLIMATE, block_a };
+  Object what_ca = {policy_table::MT_CLIMATE, block_a};
   EXPECT_EQ(
       TypeAccess::kManual,
       access_remote.CheckParameters(what_ca, "Any rpc", RemoteControlParams()));
 
   // Driver allow, no RPC
-  SeatLocation block_b = { 1, 1, 1 };
-  Object what_cb = { policy_table::MT_CLIMATE, block_b };
+  SeatLocation block_b = {1, 1, 1};
+  Object what_cb = {policy_table::MT_CLIMATE, block_b};
   EXPECT_EQ(
       TypeAccess::kDisallowed,
       access_remote.CheckParameters(what_cb, "No rpc", RemoteControlParams()));
@@ -365,7 +364,7 @@ TEST(AccessRemoteImplTest, CheckParameters) {
             access_remote.CheckParameters(what_cb, "Rpc 3", params_3));
 
   // Auto allow, Rpc 4, empty input parameters
-  Object what_rb = { policy_table::MT_RADIO, block_b };
+  Object what_rb = {policy_table::MT_RADIO, block_b};
   EXPECT_EQ(
       TypeAccess::kDisallowed,
       access_remote.CheckParameters(what_rb, "Rpc 4", RemoteControlParams()));
@@ -422,11 +421,10 @@ TEST(AccessRemoteImplTest, GetDeviceZone) {
   EXPECT_EQ(0, zone1);
 
   // Device has zone
-  SeatLocation expect = { 0, 1, 0 };
+  SeatLocation expect = {0, 1, 0};
   access_remote.seats_["dev_2"] = expect;
   const SeatLocation* zone2 = access_remote.GetDeviceZone("dev_2");
   EXPECT_EQ(expect, *zone2);
 }
 
 }  // namespace policy
-

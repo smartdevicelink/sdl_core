@@ -118,9 +118,11 @@ class PolicyHandler : public PolicyHandlerInterface,
    * @param params parameters list
    */
   application_manager::TypeAccess CheckAccess(
-      const PTString& device_id, const PTString& app_id,
+      const PTString& device_id,
+      const PTString& app_id,
       const application_manager::SeatLocation& zone,
-      const PTString& module, const std::string& rpc,
+      const PTString& module,
+      const std::string& rpc,
       const std::vector<PTString>& params);
 
   /**
@@ -139,7 +141,8 @@ class PolicyHandler : public PolicyHandlerInterface,
    * @param module type
    * @param allowed true if access is allowed
    */
-  void SetAccess(const PTString& device_id, const PTString& app_id,
+  void SetAccess(const PTString& device_id,
+                 const PTString& app_id,
                  const application_manager::SeatLocation& zone,
                  const PTString& module,
                  bool allowed);
@@ -215,7 +218,7 @@ class PolicyHandler : public PolicyHandlerInterface,
    * @param application_id ID of app whose permissions are changed
    */
   void OnRemoteAppPermissionsChanged(const std::string& device_id,
-      const std::string& application_id);
+                                     const std::string& application_id);
 
   virtual void OnUpdateHMIStatus(const std::string& device_id,
                                  const std::string& policy_app_id,
@@ -609,39 +612,33 @@ class PolicyHandler : public PolicyHandlerInterface,
   void UpdateHMILevel(application_manager::ApplicationSharedPtr app,
                       mobile_apis::HMILevel::eType level);
 
-private:
-  class StatisticManagerImpl: public usage_statistics::StatisticsManager {
-      //TODO(AKutsan) REMOVE THIS UGLY HOTFIX
-        virtual void Increment(usage_statistics::GlobalCounterId type) {
+ private:
+  class StatisticManagerImpl : public usage_statistics::StatisticsManager {
+    // TODO(AKutsan) REMOVE THIS UGLY HOTFIX
+    virtual void Increment(usage_statistics::GlobalCounterId type) {
+      PolicyHandler::instance()->AsyncRun(new StatisticsDelegate(type));
+    }
 
-        PolicyHandler::instance()->AsyncRun(new StatisticsDelegate(type));
-      }
+    virtual void Increment(const std::string& app_id,
+                           usage_statistics::AppCounterId type) {
+      PolicyHandler::instance()->AsyncRun(new StatisticsDelegate(app_id, type));
+    }
 
-        virtual void Increment(const std::string& app_id,
-                               usage_statistics::AppCounterId type) {
+    virtual void Set(const std::string& app_id,
+                     usage_statistics::AppInfoId type,
+                     const std::string& value) {
+      PolicyHandler::instance()->AsyncRun(
+          new StatisticsDelegate(app_id, type, value));
+    }
 
-        PolicyHandler::instance()->AsyncRun(new StatisticsDelegate(app_id,
-                                                                   type));
-      }
-
-        virtual void Set(const std::string& app_id,
-                         usage_statistics::AppInfoId type,
-                         const std::string& value) {
-
-        PolicyHandler::instance()->AsyncRun(new StatisticsDelegate(app_id,
-                                                                   type,
-                                                                   value));
-      }
-
-        virtual void Add(const std::string& app_id,
-                         usage_statistics::AppStopwatchId type,
-                         int32_t timespan_seconds) {
-
-        PolicyHandler::instance()->AsyncRun(new StatisticsDelegate(
-                                              app_id, type, timespan_seconds));
-      }
+    virtual void Add(const std::string& app_id,
+                     usage_statistics::AppStopwatchId type,
+                     int32_t timespan_seconds) {
+      PolicyHandler::instance()->AsyncRun(
+          new StatisticsDelegate(app_id, type, timespan_seconds));
+    }
   };
-  //TODO(AKutsan) REMOVE THIS UGLY HOTFIX
+  // TODO(AKutsan) REMOVE THIS UGLY HOTFIX
 
   /**
    * @brief Sets days after epoch on successful policy update

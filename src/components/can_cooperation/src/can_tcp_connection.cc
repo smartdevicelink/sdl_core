@@ -53,6 +53,7 @@ class TCPClientDelegate : public threads::ThreadDelegate {
   ~TCPClientDelegate();
   void threadMain();
   void exitThreadMain();
+
  private:
   CANTCPConnection* can_connection_;
   volatile bool stop_flag_;
@@ -61,12 +62,12 @@ class TCPClientDelegate : public threads::ThreadDelegate {
 };
 
 CANTCPConnection::CANTCPConnection()
-    : CANConnection(),
-      address_("127.0.0.1"),
-      port_(8092),
-      socket_(-1),
-      current_state_(NONE),
-      thread_(NULL) {
+    : CANConnection()
+    , address_("127.0.0.1")
+    , port_(8092)
+    , socket_(-1)
+    , current_state_(NONE)
+    , thread_(NULL) {
   socket_ = socket(AF_INET, SOCK_STREAM, 0);
   if (-1 == socket_) {
     current_state_ = INVALID;
@@ -76,11 +77,10 @@ CANTCPConnection::CANTCPConnection()
   settings.ReadParameter("Remote Control", "address", &address_);
   settings.ReadParameter("Remote Control", "port", &port_);
 
-  LOG4CXX_INFO(logger_, "Connecting to "
-               << address_ << " on port " << port_);
+  LOG4CXX_INFO(logger_, "Connecting to " << address_ << " on port " << port_);
   if (OpenConnection() == ConnectionState::OPENED) {
-    thread_ = threads::CreateThread("CANClientListener",
-                                  new TCPClientDelegate(this));
+    thread_ =
+        threads::CreateThread("CANClientListener", new TCPClientDelegate(this));
     const size_t kStackSize = 16384;
     thread_->start(threads::ThreadOptions(kStackSize));
   } else {
@@ -151,8 +151,9 @@ ConnectionState CANTCPConnection::OpenConnection() {
     server_addr.sin_family = AF_INET;
     server_addr.sin_addr.s_addr = inet_addr(address_.c_str());
     server_addr.sin_port = htons(port_);
-    if (-1 == connect(socket_, reinterpret_cast<sockaddr*>(&server_addr),
-      sizeof(server_addr))) {
+    if (-1 == connect(socket_,
+                      reinterpret_cast<sockaddr*>(&server_addr),
+                      sizeof(server_addr))) {
       current_state_ = INVALID;
     } else {
       current_state_ = OPENED;
@@ -185,8 +186,7 @@ ConnectionState CANTCPConnection::Flash() {
 
 //  -------------- ThreadDelegate --------------
 TCPClientDelegate::TCPClientDelegate(CANTCPConnection* can_connection)
-  : can_connection_(can_connection),
-    stop_flag_(false) {
+    : can_connection_(can_connection), stop_flag_(false) {
   DCHECK(can_connection);
 }
 
@@ -219,20 +219,20 @@ void TCPClientDelegate::threadMain() {
           break;
       }
       can_connection_->observer_->OnCANConnectionError(
-        can_connection_->current_state_, info);
+          can_connection_->current_state_, info);
     }
   }
   stop_flag_cond_.NotifyOne();
 }
 
 void TCPClientDelegate::exitThreadMain() {
-  if (stop_flag_) return;
+  if (stop_flag_)
+    return;
   sync_primitives::AutoLock run_lock(stop_flag_lock_);
   stop_flag_ = true;
   sync_primitives::ConditionalVariable::WaitStatus wait_status =
-  stop_flag_cond_.WaitFor(run_lock, 10000);
-  if (sync_primitives::ConditionalVariable::kTimeout ==
-        wait_status) {
+      stop_flag_cond_.WaitFor(run_lock, 10000);
+  if (sync_primitives::ConditionalVariable::kTimeout == wait_status) {
     threads::ThreadDelegate::exitThreadMain();
   }
 }

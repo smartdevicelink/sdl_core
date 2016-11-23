@@ -50,12 +50,11 @@ ModuleDescriptionValidator::ModuleDescriptionValidator() {
   module_type_[ValidationParams::ARRAY] = 0;
   module_type_[ValidationParams::MANDATORY] = 1;
 
-
   validation_scope_map_[kModuleType] = &module_type_;
 }
 
-ValidationResult ModuleDescriptionValidator::Validate(const Json::Value& json,
-                                                 Json::Value& outgoing_json) {
+ValidationResult ModuleDescriptionValidator::Validate(
+    const Json::Value& json, Json::Value& outgoing_json) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   ValidationResult result = ValidateSimpleValues(json, outgoing_json);
@@ -65,11 +64,11 @@ ValidationResult ModuleDescriptionValidator::Validate(const Json::Value& json,
   }
 
   if (IsMember(json, kModuleZone)) {
-    result = InteriorZoneValidator::instance()->Validate(json[kModuleZone],
-                                                    outgoing_json[kModuleZone]);
+    result = InteriorZoneValidator::instance()->Validate(
+        json[kModuleZone], outgoing_json[kModuleZone]);
   } else {
     result = ValidationResult::INVALID_DATA;
-    LOG4CXX_ERROR(logger_, "Mandatory param " <<kModuleZone <<" missing!" );
+    LOG4CXX_ERROR(logger_, "Mandatory param " << kModuleZone << " missing!");
   }
 
   return result;
@@ -78,4 +77,3 @@ ValidationResult ModuleDescriptionValidator::Validate(const Json::Value& json,
 }  // namespace valdiators
 
 }  // namespace can_cooperation
-

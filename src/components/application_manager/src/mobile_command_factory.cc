@@ -614,8 +614,8 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       break;
     }
     case mobile_apis::FunctionID::ButtonPressID: {
-      if ((*message)[strings::params][strings::message_type]
-          == static_cast<int>(application_manager::MessageType::kResponse)) {
+      if ((*message)[strings::params][strings::message_type] ==
+          static_cast<int>(application_manager::MessageType::kResponse)) {
         return new commands::ButtonPressResponse(message);
       } else {
         return new commands::ButtonPressRequest(message);
@@ -623,17 +623,18 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       break;
     }
     case mobile_apis::FunctionID::GetInteriorVehicleDataCapabilitiesID: {
-      if ((*message)[strings::params][strings::message_type]
-          == static_cast<int>(application_manager::MessageType::kResponse)) {
-        return new commands::GetInteriorVehicleDataCapabilitiesResponse(message);
+      if ((*message)[strings::params][strings::message_type] ==
+          static_cast<int>(application_manager::MessageType::kResponse)) {
+        return new commands::GetInteriorVehicleDataCapabilitiesResponse(
+            message);
       } else {
         return new commands::GetInteriorVehicleDataCapabilitiesRequest(message);
       }
       break;
     }
     case mobile_apis::FunctionID::GetInteriorVehicleDataID: {
-      if ((*message)[strings::params][strings::message_type]
-          == static_cast<int>(application_manager::MessageType::kResponse)) {
+      if ((*message)[strings::params][strings::message_type] ==
+          static_cast<int>(application_manager::MessageType::kResponse)) {
         return new commands::GetInteriorVehicleDataResponse(message);
       } else {
         return new commands::GetInteriorVehicleDataRequest(message);
@@ -641,8 +642,8 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       break;
     }
     case mobile_apis::FunctionID::SetInteriorVehicleDataID: {
-      if ((*message)[strings::params][strings::message_type]
-          == static_cast<int>(application_manager::MessageType::kResponse)) {
+      if ((*message)[strings::params][strings::message_type] ==
+          static_cast<int>(application_manager::MessageType::kResponse)) {
         return new commands::SetInteriorVehicleDataResponse(message);
       } else {
         return new commands::SetInteriorVehicleDataRequest(message);

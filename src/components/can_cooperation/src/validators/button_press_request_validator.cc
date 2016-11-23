@@ -62,14 +62,13 @@ ButtonPressRequestValidator::ButtonPressRequestValidator() {
   button_press_mode_[ValidationParams::ARRAY] = 0;
   button_press_mode_[ValidationParams::MANDATORY] = 1;
 
-
   validation_scope_map_[kModuleType] = &module_type_;
   validation_scope_map_[kButtonName] = &button_name_;
   validation_scope_map_[kButtonPressMode] = &button_press_mode_;
 };
 
-ValidationResult ButtonPressRequestValidator::Validate(const Json::Value& json,
-                                                   Json::Value& outgoing_json) {
+ValidationResult ButtonPressRequestValidator::Validate(
+    const Json::Value& json, Json::Value& outgoing_json) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   ValidationResult result = ValidateSimpleValues(json, outgoing_json);
@@ -83,7 +82,7 @@ ValidationResult ButtonPressRequestValidator::Validate(const Json::Value& json,
                                                          outgoing_json[kZone]);
   } else {
     result = ValidationResult::INVALID_DATA;
-    LOG4CXX_ERROR(logger_, "Mandatory param " <<kZone <<" missing!" );
+    LOG4CXX_ERROR(logger_, "Mandatory param " << kZone << " missing!");
   }
 
   if (result != ValidationResult::SUCCESS) {
@@ -91,32 +90,34 @@ ValidationResult ButtonPressRequestValidator::Validate(const Json::Value& json,
   }
 
   if ((json[kModuleType].asString() == enums_value::kRadio) &&
-      (json[kButtonName].asString() != enums_value::kVolumeUp)    &&
-      (json[kButtonName].asString() != enums_value::kVolumeDown)  &&
-      (json[kButtonName].asString() != enums_value::kEject)       &&
-      (json[kButtonName].asString() != enums_value::kSource)      &&
-      (json[kButtonName].asString() != enums_value::kShuffle)     &&
+      (json[kButtonName].asString() != enums_value::kVolumeUp) &&
+      (json[kButtonName].asString() != enums_value::kVolumeDown) &&
+      (json[kButtonName].asString() != enums_value::kEject) &&
+      (json[kButtonName].asString() != enums_value::kSource) &&
+      (json[kButtonName].asString() != enums_value::kShuffle) &&
       (json[kButtonName].asString() != enums_value::kRepeat)) {
     result = ValidationResult::INVALID_DATA;
     LOG4CXX_ERROR(logger_,
-         "Button " << json[kButtonName].asCString() <<" is not radio button!" );
+                  "Button " << json[kButtonName].asCString()
+                            << " is not radio button!");
 
   } else if ((json[kModuleType].asString() == enums_value::kClimate) &&
-             (json[kButtonName].asString() != enums_value::kACMax)       &&
-             (json[kButtonName].asString() != enums_value::kAC)          &&
+             (json[kButtonName].asString() != enums_value::kACMax) &&
+             (json[kButtonName].asString() != enums_value::kAC) &&
              (json[kButtonName].asString() != enums_value::kRecirculate) &&
-             (json[kButtonName].asString() != enums_value::kFanUp)       &&
-             (json[kButtonName].asString() != enums_value::kFanDown)     &&
-             (json[kButtonName].asString() != enums_value::kTempUp)      &&
-             (json[kButtonName].asString() != enums_value::kTempDown)    &&
-             (json[kButtonName].asString() != enums_value::kDefrostMax)  &&
-             (json[kButtonName].asString() != enums_value::kDefrost)     &&
+             (json[kButtonName].asString() != enums_value::kFanUp) &&
+             (json[kButtonName].asString() != enums_value::kFanDown) &&
+             (json[kButtonName].asString() != enums_value::kTempUp) &&
+             (json[kButtonName].asString() != enums_value::kTempDown) &&
+             (json[kButtonName].asString() != enums_value::kDefrostMax) &&
+             (json[kButtonName].asString() != enums_value::kDefrost) &&
              (json[kButtonName].asString() != enums_value::kDefrostRear) &&
-             (json[kButtonName].asString() != enums_value::kUpperVent)   &&
+             (json[kButtonName].asString() != enums_value::kUpperVent) &&
              (json[kButtonName].asString() != enums_value::kLowerVent)) {
     result = ValidationResult::INVALID_DATA;
     LOG4CXX_ERROR(logger_,
-       "Button " << json[kButtonName].asCString() <<" is not climate button!" );
+                  "Button " << json[kButtonName].asCString()
+                            << " is not climate button!");
   }
 
   return result;
@@ -125,4 +126,3 @@ ValidationResult ButtonPressRequestValidator::Validate(const Json::Value& json,
 }  // namespace valdiators
 
 }  // namespace can_cooperation
-

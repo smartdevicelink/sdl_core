@@ -53,14 +53,12 @@ using namespace message_params;
 CREATE_LOGGERPTR_GLOBAL(logger_, "GetInteriorVehicleDataCapabiliesRequest")
 
 GetInteriorVehicleDataCapabiliesRequest::
-GetInteriorVehicleDataCapabiliesRequest(
-  const application_manager::MessagePtr& message)
-  : BaseCommandRequest(message) {
-}
+    GetInteriorVehicleDataCapabiliesRequest(
+        const application_manager::MessagePtr& message)
+    : BaseCommandRequest(message) {}
 
 GetInteriorVehicleDataCapabiliesRequest::
-~GetInteriorVehicleDataCapabiliesRequest() {
-}
+    ~GetInteriorVehicleDataCapabiliesRequest() {}
 
 void GetInteriorVehicleDataCapabiliesRequest::Execute() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -73,7 +71,8 @@ void GetInteriorVehicleDataCapabiliesRequest::Execute() {
 
   SendRequest(
       functional_modules::hmi_api::get_interior_vehicle_data_capabilities,
-      params, true);
+      params,
+      true);
 }
 
 void GetInteriorVehicleDataCapabiliesRequest::UpdateModules(
@@ -97,8 +96,8 @@ void GetInteriorVehicleDataCapabiliesRequest::UpdateModules(
 }
 
 void GetInteriorVehicleDataCapabiliesRequest::OnEvent(
-    const event_engine::Event<application_manager::MessagePtr,
-    std::string>& event) {
+    const event_engine::Event<application_manager::MessagePtr, std::string>&
+        event) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (functional_modules::hmi_api::get_interior_vehicle_data_capabilities ==
@@ -112,8 +111,8 @@ void GetInteriorVehicleDataCapabiliesRequest::OnEvent(
 
     bool success = ParseResultCode(value, result_code, info);
 
-
-    // TOD(VS): Create GetInteriorVehicleDataCapabiliesResponseValidator. Replace this code there and correct it
+    // TOD(VS): Create GetInteriorVehicleDataCapabiliesResponseValidator.
+    // Replace this code there and correct it
     validators::ValidationResult validation_result = validators::SUCCESS;
 
     const int capabilities_min_size = 1;
@@ -124,13 +123,13 @@ void GetInteriorVehicleDataCapabiliesRequest::OnEvent(
         int capabilities_size =
             value[kResult][kInteriorVehicleDataCapabilities].size();
         if (value[kResult][kInteriorVehicleDataCapabilities].isArray() &&
-            (capabilities_size >= capabilities_min_size)               &&
+            (capabilities_size >= capabilities_min_size) &&
             (capabilities_size <= capabilities_max_size)) {
           for (int i = 0; i < capabilities_size; ++i) {
             validation_result =
-              validators::ModuleDescriptionValidator::instance()->Validate(
-                value[kResult][kInteriorVehicleDataCapabilities][i],
-                response_params_[kInteriorVehicleDataCapabilities][i]);
+                validators::ModuleDescriptionValidator::instance()->Validate(
+                    value[kResult][kInteriorVehicleDataCapabilities][i],
+                    response_params_[kInteriorVehicleDataCapabilities][i]);
           }
         } else {
           validation_result = validators::INVALID_DATA;
@@ -162,7 +161,8 @@ void GetInteriorVehicleDataCapabiliesRequest::OnEvent(
 }
 
 bool GetInteriorVehicleDataCapabiliesRequest::ReadCapabilitiesFromFile() {
-  LOG4CXX_INFO(logger_, "Failed to get correct response from HMI; \
+  LOG4CXX_INFO(logger_,
+               "Failed to get correct response from HMI; \
       trying to read from file");
   Json::Value request;
   Json::Reader reader;
@@ -184,8 +184,8 @@ bool GetInteriorVehicleDataCapabiliesRequest::ReadCapabilitiesFromFile() {
     LOG4CXX_ERROR(logger_, "Failed to read capabilities from file also");
     return false;
   }
-  LOG4CXX_DEBUG(logger_, "Read vehicle capabilities from file "
-      << zone_capabilities);
+  LOG4CXX_DEBUG(logger_,
+                "Read vehicle capabilities from file " << zone_capabilities);
   const Json::Value& modules =
       IsDriverDevice() ? allowed_modules_ : request[kModuleTypes];
   DCHECK(modules.isArray());
@@ -195,12 +195,13 @@ bool GetInteriorVehicleDataCapabiliesRequest::ReadCapabilitiesFromFile() {
 
 void GetInteriorVehicleDataCapabiliesRequest::CreateCapabilities(
     const Json::Value& capabilities, const Json::Value& modules) {
-  response_params_[kInteriorVehicleDataCapabilities] = Json::Value(
-    Json::ValueType::arrayValue);
+  response_params_[kInteriorVehicleDataCapabilities] =
+      Json::Value(Json::ValueType::arrayValue);
   for (Json::ValueConstIterator i = capabilities.begin();
-      i != capabilities.end(); ++i) {
-    for (Json::ValueConstIterator j = modules.begin();
-        j != modules.end(); ++j) {
+       i != capabilities.end();
+       ++i) {
+    for (Json::ValueConstIterator j = modules.begin(); j != modules.end();
+         ++j) {
       const Json::Value& row = *i;
       if (row[kModuleType] == *j) {
         response_params_[kInteriorVehicleDataCapabilities].append(row);
@@ -219,12 +220,12 @@ bool GetInteriorVehicleDataCapabiliesRequest::Validate() {
   Json::Value outgoing_json;
 
   if (validators::ValidationResult::SUCCESS !=
-    validators::GetInteriorVehicleDataCapabilitiesRequestValidator::instance()->
-                                                Validate(json, outgoing_json)) {
+      validators::GetInteriorVehicleDataCapabilitiesRequestValidator::instance()
+          ->Validate(json, outgoing_json)) {
     LOG4CXX_INFO(logger_,
                  "GetInteriorVehicleDataCapabiliesRequest validation failed!");
-    SendResponse(false, result_codes::kInvalidData,
-                 "Mobile request validation failed!");
+    SendResponse(
+        false, result_codes::kInvalidData, "Mobile request validation failed!");
     return false;
   } else {
     message_->set_json_message(MessageHelper::ValueToString(outgoing_json));
@@ -233,7 +234,8 @@ bool GetInteriorVehicleDataCapabiliesRequest::Validate() {
   return true;
 }
 
-application_manager::TypeAccess GetInteriorVehicleDataCapabiliesRequest::CheckAccess(
+application_manager::TypeAccess
+GetInteriorVehicleDataCapabiliesRequest::CheckAccess(
     const Json::Value& message) {
   if (IsDriverDevice()) {
     return CheckModuleTypes(message);
@@ -241,7 +243,8 @@ application_manager::TypeAccess GetInteriorVehicleDataCapabiliesRequest::CheckAc
   return BaseCommandRequest::CheckAccess(message);
 }
 
-application_manager::TypeAccess GetInteriorVehicleDataCapabiliesRequest::CheckModuleTypes(
+application_manager::TypeAccess
+GetInteriorVehicleDataCapabiliesRequest::CheckModuleTypes(
     const Json::Value& message) {
   if (IsMember(message, message_params::kModuleTypes)) {
     return ProcessRequestedModuleTypes(message[message_params::kModuleTypes]);
@@ -250,7 +253,8 @@ application_manager::TypeAccess GetInteriorVehicleDataCapabiliesRequest::CheckMo
   }
 }
 
-application_manager::TypeAccess GetInteriorVehicleDataCapabiliesRequest::ProcessRequestedModuleTypes(
+application_manager::TypeAccess
+GetInteriorVehicleDataCapabiliesRequest::ProcessRequestedModuleTypes(
     const Json::Value& modules) {
   DCHECK(!modules.empty());
   DCHECK(allowed_modules_.isNull());
@@ -263,13 +267,14 @@ application_manager::TypeAccess GetInteriorVehicleDataCapabiliesRequest::Process
   }
   allowed_modules_ = moduleTypes;
   DCHECK(allowed_modules_.isArray());
-  // Empty allowed modules list means requested modules didn't match with allowed by policy
-  return
-      allowed_modules_.empty() ?
-          application_manager::kDisallowed : application_manager::kAllowed;
+  // Empty allowed modules list means requested modules didn't match with
+  // allowed by policy
+  return allowed_modules_.empty() ? application_manager::kDisallowed
+                                  : application_manager::kAllowed;
 }
 
-application_manager::TypeAccess GetInteriorVehicleDataCapabiliesRequest::GetModuleTypes() {
+application_manager::TypeAccess
+GetInteriorVehicleDataCapabiliesRequest::GetModuleTypes() {
   DCHECK(allowed_modules_.isNull());
   typedef std::vector<std::string> ModuleTypes;
   ModuleTypes modules;
@@ -300,8 +305,8 @@ SeatLocation GetInteriorVehicleDataCapabiliesRequest::InteriorZone(
     const Json::Value& message) {
   // This is used only for passenger's devices
   DCHECK(!IsDriverDevice());
-  Json::Value zone = message.get(message_params::kZone,
-                                 Json::Value(Json::objectValue));
+  Json::Value zone =
+      message.get(message_params::kZone, Json::Value(Json::objectValue));
   if (zone.empty()) {
     // if SDL-RC has not received app's device location from the vehicle
     // we will use this message to send response "DISALLOWED"
@@ -314,8 +319,8 @@ std::string GetInteriorVehicleDataCapabiliesRequest::ModuleType(
     const Json::Value& message) {
   // This is used only for passenger's devices
   DCHECK(!IsDriverDevice());
-  Json::Value modules = message.get(message_params::kModuleTypes,
-                                    Json::Value(Json::arrayValue));
+  Json::Value modules =
+      message.get(message_params::kModuleTypes, Json::Value(Json::arrayValue));
   if (modules.size() == 1) {
     return modules.get(Json::ArrayIndex(0), Json::Value("")).asString();
   }

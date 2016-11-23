@@ -829,29 +829,32 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
-    case hmi_apis::FunctionID::RC_GetInteriorVehicleDataCapabilities:{
-    	if(is_response){
-    		command.reset(new commands::RCGetInteriorVehicleDataCapabilitiesResponse(message));	
-    	} else {
-    		command.reset(new commands::RCGetInteriorVehicleDataCapabilitiesRequest(message));
-    	}
-    	break;
+    case hmi_apis::FunctionID::RC_GetInteriorVehicleDataCapabilities: {
+      if (is_response) {
+        command.reset(
+            new commands::RCGetInteriorVehicleDataCapabilitiesResponse(
+                message));
+      } else {
+        command.reset(
+            new commands::RCGetInteriorVehicleDataCapabilitiesRequest(message));
+      }
+      break;
     }
-    case hmi_apis::FunctionID::RC_GetInteriorVehicleData:{
-    	if(is_response){
-    		command.reset(new commands::RCGetInteriorVehicleDataResponse(message));	
-    	} else {
-    		command.reset(new commands::RCGetInteriorVehicleDataRequest(message));
-    	}
-    	break;
+    case hmi_apis::FunctionID::RC_GetInteriorVehicleData: {
+      if (is_response) {
+        command.reset(new commands::RCGetInteriorVehicleDataResponse(message));
+      } else {
+        command.reset(new commands::RCGetInteriorVehicleDataRequest(message));
+      }
+      break;
     }
-    case hmi_apis::FunctionID::RC_SetInteriorVehicleData:{
-    	if(is_response){
-    		command.reset(new commands::RCSetInteriorVehicleDataResponse(message));	
-    	} else {
-    		command.reset(new commands::RCSetInteriorVehicleDataRequest(message));
-    	}
-    	break;
+    case hmi_apis::FunctionID::RC_SetInteriorVehicleData: {
+      if (is_response) {
+        command.reset(new commands::RCSetInteriorVehicleDataResponse(message));
+      } else {
+        command.reset(new commands::RCSetInteriorVehicleDataRequest(message));
+      }
+      break;
     }
 #ifdef HMI_DBUS_API
     case hmi_apis::FunctionID::VehicleInfo_GetGpsData: {
@@ -1395,8 +1398,9 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case hmi_apis::FunctionID::RC_OnInteriorVehicleData: {
-    	command.reset(new commands::hmi::OnInteriorVehicleDataNotification(message));	
-    	break;
+      command.reset(
+          new commands::hmi::OnInteriorVehicleDataNotification(message));
+      break;
     }
 #ifdef HMI_DBUS_API
     case hmi_apis::FunctionID::VehicleInfo_SubscribeGps: {

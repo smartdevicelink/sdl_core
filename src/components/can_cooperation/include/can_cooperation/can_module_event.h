@@ -41,10 +41,9 @@
 
 namespace can_cooperation {
 
-class CanModuleEvent :
-    public event_engine::Event<application_manager::MessagePtr, std::string> {
+class CanModuleEvent
+    : public event_engine::Event<application_manager::MessagePtr, std::string> {
  public:
-
   /*
    * @brief Constructor with parameters
    *
@@ -74,10 +73,9 @@ class CanModuleEvent :
    */
   virtual int32_t event_message_type() const;
 
-private:
+ private:
   DISALLOW_COPY_AND_ASSIGN(CanModuleEvent);
 };
-
 }
 
 #endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_CAN_MODULE_EVENT_H_

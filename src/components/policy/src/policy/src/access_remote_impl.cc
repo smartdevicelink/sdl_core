@@ -47,11 +47,10 @@ namespace policy {
 struct Erase {
  private:
   const Subject& who_;
+
  public:
-  explicit Erase(const Subject& who)
-      : who_(who) {
-  }
-  void operator() (AccessRemoteImpl::AccessControlList::value_type& row) const {
+  explicit Erase(const Subject& who) : who_(who) {}
+  void operator()(AccessRemoteImpl::AccessControlList::value_type& row) const {
     row.second.erase(who_);
   }
 };
@@ -59,25 +58,24 @@ struct Erase {
 struct IsTypeAccess {
  private:
   const TypeAccess& type_;
+
  public:
-  explicit IsTypeAccess(const TypeAccess& type)
-      : type_(type) {
-  }
-  bool operator() (
+  explicit IsTypeAccess(const TypeAccess& type) : type_(type) {}
+  bool operator()(
       const AccessRemoteImpl::AccessControlRow::value_type& item) const {
     return item.second == type_;
   }
 };
 
 struct ToHMIType {
-  policy_table::AppHMITypes::value_type operator() (int item) const {
+  policy_table::AppHMITypes::value_type operator()(int item) const {
     policy_table::AppHMIType type = static_cast<policy_table::AppHMIType>(item);
     if (!IsValidEnum(type)) {
       LOG4CXX_WARN(logger_, "HMI type isn't known " << item);
       type = policy_table::AHT_DEFAULT;
     }
     LOG4CXX_DEBUG(logger_,
-        "HMI type: " << item << " - " << EnumToJsonString(type));
+                  "HMI type: " << item << " - " << EnumToJsonString(type));
     return policy_table::AppHMITypes::value_type(type);
   }
 };
@@ -85,11 +83,10 @@ struct ToHMIType {
 struct IsZone {
  private:
   const SeatLocation& seat_;
+
  public:
-  explicit IsZone(const SeatLocation& seat)
-      : seat_(seat) {
-  }
-  bool operator() (const policy_table::Zones::value_type& item) const {
+  explicit IsZone(const SeatLocation& seat) : seat_(seat) {}
+  bool operator()(const policy_table::Zones::value_type& item) const {
     const policy_table::InteriorZone& zone = item.second;
     return seat_ == zone;
   }
@@ -98,57 +95,47 @@ struct IsZone {
 struct Contained {
  private:
   const policy_table::Strings& params_;
+
  public:
-  explicit Contained(const policy_table::Strings& params)
-      : params_(params) {
-  }
-  bool operator() (const RemoteControlParams::value_type& item) const {
-    return std::find_if(params_.begin(), params_.end(), CompareString(item))
-        != params_.end();
+  explicit Contained(const policy_table::Strings& params) : params_(params) {}
+  bool operator()(const RemoteControlParams::value_type& item) const {
+    return std::find_if(params_.begin(), params_.end(), CompareString(item)) !=
+           params_.end();
   }
   struct CompareString {
    private:
     const RemoteControlParams::value_type& value_;
+
    public:
     explicit CompareString(const RemoteControlParams::value_type& value)
-        : value_(value) {
-    }
-    bool operator() (const policy_table::Strings::value_type& item) const {
+        : value_(value) {}
+    bool operator()(const policy_table::Strings::value_type& item) const {
       return value_ == static_cast<std::string>(item);
     }
   };
 };
 
-
 struct ToModuleType {
-  std::string operator() (policy_table::ModuleTypes::value_type item) const {
+  std::string operator()(policy_table::ModuleTypes::value_type item) const {
     policy_table::ModuleType type = static_cast<policy_table::ModuleType>(item);
     return EnumToJsonString(type);
   }
 };
 
 AccessRemoteImpl::AccessRemoteImpl()
-    : cache_(new CacheManager()),
-      primary_device_(),
-      enabled_(true),
-      acl_() {
-}
+    : cache_(new CacheManager()), primary_device_(), enabled_(true), acl_() {}
 
 AccessRemoteImpl::AccessRemoteImpl(utils::SharedPtr<CacheManager> cache)
-    : cache_(cache),
-      primary_device_(),
-      enabled_(true),
-      acl_() {
-}
+    : cache_(cache), primary_device_(), enabled_(true), acl_() {}
 
 void AccessRemoteImpl::Init() {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK(cache_->pt_);
 
   policy_table::ModuleConfig& config = cache_->pt_->policy_table.module_config;
-  enabled_ = country_consent()
-      && (!config.user_consent_passengersRC.is_initialized()
-          || *config.user_consent_passengersRC);
+  enabled_ = country_consent() &&
+             (!config.user_consent_passengersRC.is_initialized() ||
+              *config.user_consent_passengersRC);
 }
 
 bool AccessRemoteImpl::IsPrimaryDevice(const PTString& dev_id) const {
@@ -166,10 +153,9 @@ TypeAccess AccessRemoteImpl::Check(const Subject& who,
     if (j != row.end()) {
       // who has permissions
       TypeAccess ret = j->second;
-      LOG4CXX_TRACE(
-          logger_,
-          "Subject " << who << " has permissions " << ret <<
-          " to object " << what);
+      LOG4CXX_TRACE(logger_,
+                    "Subject " << who << " has permissions " << ret
+                               << " to object " << what);
       return ret;
     }
   }
@@ -183,8 +169,8 @@ bool AccessRemoteImpl::CheckModuleType(const PTString& app_id,
     return false;
   }
 
-  const policy_table::ApplicationParams& app = cache_->pt_->policy_table
-      .app_policies[app_id];
+  const policy_table::ApplicationParams& app =
+      cache_->pt_->policy_table.app_policies[app_id];
   if (!app.moduleType.is_initialized()) {
     return false;
   }
@@ -198,14 +184,14 @@ bool AccessRemoteImpl::CheckModuleType(const PTString& app_id,
 }
 
 TypeAccess AccessRemoteImpl::CheckParameters(
-    const Object& what, const std::string& rpc,
+    const Object& what,
+    const std::string& rpc,
     const RemoteControlParams& params) const {
   LOG4CXX_AUTO_TRACE(logger_);
-  const policy_table::Zones& zones = cache_->pt_->policy_table.module_config
-      .equipment->zones;
-  policy_table::Zones::const_iterator i = std::find_if(zones.begin(),
-                                                       zones.end(),
-                                                       IsZone(what.zone));
+  const policy_table::Zones& zones =
+      cache_->pt_->policy_table.module_config.equipment->zones;
+  policy_table::Zones::const_iterator i =
+      std::find_if(zones.begin(), zones.end(), IsZone(what.zone));
   if (i == zones.end()) {
     LOG4CXX_DEBUG(logger_, what.zone << " wasn't found");
     return TypeAccess::kDisallowed;
@@ -223,10 +209,10 @@ TypeAccess AccessRemoteImpl::CheckParameters(
   return TypeAccess::kDisallowed;
 }
 
-bool AccessRemoteImpl::IsAllowed(
-    const policy_table::AccessModules& modules,
-    const std::string& module_name, const std::string& rpc_name,
-    RemoteControlParams* input) const {
+bool AccessRemoteImpl::IsAllowed(const policy_table::AccessModules& modules,
+                                 const std::string& module_name,
+                                 const std::string& rpc_name,
+                                 RemoteControlParams* input) const {
   LOG4CXX_AUTO_TRACE(logger_);
   policy_table::AccessModules::const_iterator i = modules.find(module_name);
   if (i == modules.end()) {
@@ -248,8 +234,7 @@ bool AccessRemoteImpl::IsAllowed(
 }
 
 bool AccessRemoteImpl::CompareParameters(
-    const policy_table::Strings& parameters,
-    RemoteControlParams* input) const {
+    const policy_table::Strings& parameters, RemoteControlParams* input) const {
   LOG4CXX_AUTO_TRACE(logger_);
   if (parameters.empty()) {
     return true;
@@ -317,8 +302,8 @@ void AccessRemoteImpl::set_enabled(bool value) {
 
 bool AccessRemoteImpl::country_consent() const {
   policy_table::ModuleConfig& config = cache_->pt_->policy_table.module_config;
-  return !config.country_consent_passengersRC.is_initialized()
-      || *config.country_consent_passengersRC;
+  return !config.country_consent_passengersRC.is_initialized() ||
+         *config.country_consent_passengersRC;
 }
 
 bool AccessRemoteImpl::IsEnabled() const {
@@ -330,12 +315,15 @@ void AccessRemoteImpl::SetDefaultHmiTypes(const Subject& who,
                                           const std::vector<int>& hmi_types) {
   LOG4CXX_AUTO_TRACE(logger_);
   HMIList::mapped_type types;
-  std::transform(hmi_types.begin(), hmi_types.end(), std::back_inserter(types),
+  std::transform(hmi_types.begin(),
+                 hmi_types.end(),
+                 std::back_inserter(types),
                  ToHMIType());
   hmi_types_[who] = types;
 }
 
-const policy_table::AppHMITypes& AccessRemoteImpl::HmiTypes(const Subject& who) {
+const policy_table::AppHMITypes& AccessRemoteImpl::HmiTypes(
+    const Subject& who) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (cache_->IsDefaultPolicy(who.app_id)) {
     return hmi_types_[who];
@@ -348,10 +336,11 @@ const policy_table::Strings& AccessRemoteImpl::GetGroups(const Subject& who) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (IsAppReverse(who)) {
     if (IsPrimaryDevice(who.dev_id)) {
-      return *cache_->pt_->policy_table.app_policies[who.app_id].groups_primaryRC;
+      return *cache_->pt_->policy_table.app_policies[who.app_id]
+                  .groups_primaryRC;
     } else if (IsEnabled()) {
-      return
-        *cache_->pt_->policy_table.app_policies[who.app_id].groups_nonPrimaryRC;
+      return *cache_->pt_->policy_table.app_policies[who.app_id]
+                  .groups_nonPrimaryRC;
     } else {
       return cache_->GetGroups(kPreConsentPassengersRC);
     }
@@ -361,39 +350,43 @@ const policy_table::Strings& AccessRemoteImpl::GetGroups(const Subject& who) {
 
 bool AccessRemoteImpl::IsAppReverse(const Subject& who) {
   const policy_table::AppHMITypes& hmi_types = HmiTypes(who);
-  return std::find(hmi_types.begin(), hmi_types.end(),
+  return std::find(hmi_types.begin(),
+                   hmi_types.end(),
                    policy_table::AHT_REMOTE_CONTROL) != hmi_types.end();
 }
 
-bool AccessRemoteImpl::GetPermissionsForApp(const std::string &device_id,
-                                            const std::string &app_id,
+bool AccessRemoteImpl::GetPermissionsForApp(const std::string& device_id,
+                                            const std::string& app_id,
                                             FunctionalIdType& group_types) {
   LOG4CXX_AUTO_TRACE(logger_);
   GetGroupsIds(device_id, app_id, group_types[kTypeGeneral]);
   GetGroupsIds(device_id, kDefaultId, group_types[kTypeDefault]);
-  GetGroupsIds(device_id, kPreDataConsentId,
-               group_types[kTypePreDataConsented]);
+  GetGroupsIds(
+      device_id, kPreDataConsentId, group_types[kTypePreDataConsented]);
   return true;
 }
 
-std::ostream& operator <<(std::ostream& output,
-                          const FunctionalGroupIDs& types) {
-  std::copy(types.begin(), types.end(),
-      std::ostream_iterator<FunctionalGroupIDs::value_type>(output, " "));
+std::ostream& operator<<(std::ostream& output,
+                         const FunctionalGroupIDs& types) {
+  std::copy(types.begin(),
+            types.end(),
+            std::ostream_iterator<FunctionalGroupIDs::value_type>(output, " "));
   return output;
 }
 
-extern std::ostream& operator <<(std::ostream& output,
-                                 const policy_table::Strings& groups);
+extern std::ostream& operator<<(std::ostream& output,
+                                const policy_table::Strings& groups);
 
-void AccessRemoteImpl::GetGroupsIds(const std::string &device_id,
-                                    const std::string &app_id,
+void AccessRemoteImpl::GetGroupsIds(const std::string& device_id,
+                                    const std::string& app_id,
                                     FunctionalGroupIDs& groups_ids) {
-  Subject who = { device_id, app_id };
+  Subject who = {device_id, app_id};
   const policy_table::Strings& groups = GetGroups(who);
   LOG4CXX_DEBUG(logger_, "Groups Names: " << groups);
   groups_ids.resize(groups.size());
-  std::transform(groups.begin(), groups.end(), groups_ids.begin(),
+  std::transform(groups.begin(),
+                 groups.end(),
+                 groups_ids.begin(),
                  &CacheManager::GenerateHash);
   LOG4CXX_DEBUG(logger_, "Groups Ids: " << groups_ids);
 }
@@ -415,7 +408,8 @@ void AccessRemoteImpl::SetDeviceZone(const std::string& device_id,
 bool AccessRemoteImpl::GetModuleTypes(const std::string& application_id,
                                       std::vector<std::string>* modules) {
   DCHECK(modules);
-  policy_table::ApplicationPolicies& apps = cache_->pt_->policy_table.app_policies;
+  policy_table::ApplicationPolicies& apps =
+      cache_->pt_->policy_table.app_policies;
   policy_table::ApplicationPolicies::iterator i = apps.find(application_id);
   if (i == apps.end()) {
     return false;
@@ -424,8 +418,10 @@ bool AccessRemoteImpl::GetModuleTypes(const std::string& application_id,
   if (!moduleTypes.is_initialized()) {
     return false;
   }
-  std::transform(moduleTypes->begin(), moduleTypes->end(),
-                 std::back_inserter(*modules), ToModuleType());
+  std::transform(moduleTypes->begin(),
+                 moduleTypes->end(),
+                 std::back_inserter(*modules),
+                 ToModuleType());
   return true;
 }
 

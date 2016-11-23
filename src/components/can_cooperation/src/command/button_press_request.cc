@@ -45,12 +45,10 @@ namespace commands {
 CREATE_LOGGERPTR_GLOBAL(logger_, "ButtonPressRequest")
 
 ButtonPressRequest::ButtonPressRequest(
-  const application_manager::MessagePtr& message)
-  : BaseCommandRequest(message) {
-}
+    const application_manager::MessagePtr& message)
+    : BaseCommandRequest(message) {}
 
-ButtonPressRequest::~ButtonPressRequest() {
-}
+ButtonPressRequest::~ButtonPressRequest() {}
 
 void ButtonPressRequest::Execute() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -64,8 +62,8 @@ void ButtonPressRequest::Execute() {
 }
 
 void ButtonPressRequest::OnEvent(
-    const event_engine::Event<application_manager::MessagePtr,
-    std::string>& event) {
+    const event_engine::Event<application_manager::MessagePtr, std::string>&
+        event) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (functional_modules::hmi_api::button_press == event.id()) {
@@ -98,8 +96,8 @@ bool ButtonPressRequest::Validate() {
       validators::ButtonPressRequestValidator::instance()->Validate(
           json, outgoing_json)) {
     LOG4CXX_INFO(logger_, "ButtonPressRequest validation failed!");
-    SendResponse(false, result_codes::kInvalidData,
-                 "Mobile request validation failed!");
+    SendResponse(
+        false, result_codes::kInvalidData, "Mobile request validation failed!");
     return false;
   } else {
     message_->set_json_message(MessageHelper::ValueToString(outgoing_json));
@@ -116,10 +114,9 @@ Json::Value ButtonPressRequest::GetInteriorZone(const Json::Value& message) {
   return message.get(message_params::kZone, Json::Value(Json::objectValue));
 }
 
-SeatLocation ButtonPressRequest::InteriorZone(
-    const Json::Value& message) {
-  Json::Value zone = message.get(message_params::kZone,
-                                 Json::Value(Json::objectValue));
+SeatLocation ButtonPressRequest::InteriorZone(const Json::Value& message) {
+  Json::Value zone =
+      message.get(message_params::kZone, Json::Value(Json::objectValue));
   return CreateInteriorZone(zone);
 }
 

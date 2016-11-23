@@ -40,15 +40,15 @@ namespace application_manager {
 typedef int AppExtensionUID;
 
 class AppExtension {
-  public:
-    explicit AppExtension(AppExtensionUID uid)
-      : kUid_(uid) {}
-    virtual ~AppExtension() {}
-    AppExtensionUID uid() const {
-      return kUid_;
-    }
-  private:
-    const AppExtensionUID kUid_;
+ public:
+  explicit AppExtension(AppExtensionUID uid) : kUid_(uid) {}
+  virtual ~AppExtension() {}
+  AppExtensionUID uid() const {
+    return kUid_;
+  }
+
+ private:
+  const AppExtensionUID kUid_;
 };
 
 typedef utils::SharedPtr<AppExtension> AppExtensionPtr;

@@ -42,10 +42,8 @@ namespace application_manager {
 
 namespace commands {
 
-
 class GetInteriorVehicleDataRequest : public CommandRequestImpl {
  public:
-
   explicit GetInteriorVehicleDataRequest(const MessageSharedPtr& message);
 
   virtual ~GetInteriorVehicleDataRequest();

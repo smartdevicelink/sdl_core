@@ -47,12 +47,12 @@ void PolicyHelper::ChangeDeviceRank(const uint32_t device_handle,
                                     const std::string& rank) {
   if (rank == "DRIVER") {
     CANModule::instance()->service()->SetPrimaryDevice(device_handle);
-    //MarkApplications(device_handle);
+    // MarkApplications(device_handle);
   } else if (rank == "PASSENGER") {
-      if (CANModule::instance()->service()->PrimaryDevice() == device_handle) {
-        CANModule::instance()->service()->ResetPrimaryDevice();
-        //MarkApplications(0);
-      }
+    if (CANModule::instance()->service()->PrimaryDevice() == device_handle) {
+      CANModule::instance()->service()->ResetPrimaryDevice();
+      // MarkApplications(0);
+    }
   } else {
     LOG4CXX_WARN(logger_, "Unknown device rank");
   }
@@ -61,17 +61,17 @@ void PolicyHelper::ChangeDeviceRank(const uint32_t device_handle,
 void PolicyHelper::SetIsAppOnPrimaryDevice(
     application_manager::ApplicationSharedPtr app) {
   MarkAppOnPrimaryDevice(app,
-    CANModule::instance()->service()->PrimaryDevice());
+                         CANModule::instance()->service()->PrimaryDevice());
 }
 
 void PolicyHelper::MarkAppOnPrimaryDevice(
     application_manager::ApplicationSharedPtr app,
     const uint32_t device_handle) {
   application_manager::AppExtensionUID module_id =
-    CANModule::instance()->GetModuleID();
+      CANModule::instance()->GetModuleID();
   CANAppExtensionPtr extension =
-    application_manager::AppExtensionPtr::static_pointer_cast<CANAppExtension>(
-      app->QueryInterface(module_id));
+      application_manager::AppExtensionPtr::static_pointer_cast<
+          CANAppExtension>(app->QueryInterface(module_id));
   DCHECK(extension);
   bool is_driver = (app->device() == device_handle);
   extension->set_is_on_driver_device(is_driver);
@@ -81,7 +81,7 @@ void PolicyHelper::MarkApplications(const uint32_t device_handle) {
   application_manager::AppExtensionUID module_id =
       CANModule::instance()->GetModuleID();
   std::vector<application_manager::ApplicationSharedPtr> applications =
-    CANModule::instance()->service()->GetApplications(module_id);
+      CANModule::instance()->service()->GetApplications(module_id);
 
   for (size_t i = 0; i < applications.size(); ++i) {
     MarkAppOnPrimaryDevice(applications[i], device_handle);

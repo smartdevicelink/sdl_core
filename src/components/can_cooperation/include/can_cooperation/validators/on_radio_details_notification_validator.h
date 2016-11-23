@@ -43,10 +43,10 @@ namespace validators {
 /**
  * @brief OnRadioDetailsNotificationValidator class
  */
-class OnRadioDetailsNotificationValidator : public Validator,
-                  public utils::Singleton<OnRadioDetailsNotificationValidator> {
+class OnRadioDetailsNotificationValidator
+    : public Validator,
+      public utils::Singleton<OnRadioDetailsNotificationValidator> {
  public:
-
   /**
    * @brief Validate json with message params
    *
@@ -60,9 +60,9 @@ class OnRadioDetailsNotificationValidator : public Validator,
   DISALLOW_COPY_AND_ASSIGN(OnRadioDetailsNotificationValidator);
   FRIEND_BASE_SINGLETON_CLASS(OnRadioDetailsNotificationValidator);
   OnRadioDetailsNotificationValidator();
-  ~OnRadioDetailsNotificationValidator() {};
+  ~OnRadioDetailsNotificationValidator(){};
 
-  //td::map<std::string, int> trigger_source_;
+  // td::map<std::string, int> trigger_source_;
 };
 
 }  // namespace valdiators

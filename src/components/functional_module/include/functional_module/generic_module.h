@@ -51,12 +51,7 @@ enum ProcessResult {
   FAILED
 };
 
-enum ServiceState {
-  IDLE = 0,
-  SUSPENDED,
-  LOWVOLTAGE,
-  HMI_ADAPTER_INITIALIZED
-};
+enum ServiceState { IDLE = 0, SUSPENDED, LOWVOLTAGE, HMI_ADAPTER_INITIALIZED };
 
 typedef std::string HMIFunctionID;
 
@@ -72,7 +67,7 @@ struct PluginInfo {
 
 class GenericModule {
  public:
-  typedef std::deque<ModuleObserver* > Observers;
+  typedef std::deque<ModuleObserver*> Observers;
 
   virtual ~GenericModule();
   ModuleID GetModuleID() const {
@@ -90,7 +85,7 @@ class GenericModule {
 
   virtual ProcessResult ProcessMessage(application_manager::MessagePtr msg) = 0;
   virtual ProcessResult ProcessHMIMessage(
-    application_manager::MessagePtr msg) = 0;
+      application_manager::MessagePtr msg) = 0;
   virtual void OnServiceStateChanged(ServiceState state);
 
   /**
@@ -99,7 +94,7 @@ class GenericModule {
     * Raw pointer is passed to avoid circular dependencies.
     * Module is not responsible for freeing observer's memory.
     */
-  void AddObserver(ModuleObserver* const  observer);
+  void AddObserver(ModuleObserver* const observer);
 
   /**
     * @brief Removes pointer to observer of module when it's no loger
@@ -129,8 +124,8 @@ class GenericModule {
    * @param old_level Old HMILevel of app
    */
   virtual void OnAppHMILevelChanged(
-    application_manager::ApplicationSharedPtr app,
-    mobile_apis::HMILevel::eType old_level) = 0;
+      application_manager::ApplicationSharedPtr app,
+      mobile_apis::HMILevel::eType old_level) = 0;
 
   /**
    * @brief Checks if plugin hasn't put restrictions on app's HMI Level
@@ -138,8 +133,10 @@ class GenericModule {
    * @param new_level HMILevel which is about to be set to app
    */
   virtual bool CanAppChangeHMILevel(
-    application_manager::ApplicationSharedPtr app,
-    mobile_apis::HMILevel::eType new_level)  { return true; }
+      application_manager::ApplicationSharedPtr app,
+      mobile_apis::HMILevel::eType new_level) {
+    return true;
+  }
 
   /**
    * Handles removing (disconnecting) device

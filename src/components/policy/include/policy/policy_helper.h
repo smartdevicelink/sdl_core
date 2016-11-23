@@ -249,11 +249,9 @@ bool UnwrapAppPolicies(policy_table::ApplicationPolicies& app_policies);
 struct ProccessAppGroups {
   ProccessAppGroups(const policy_table::ApplicationPolicies& apps,
                     PolicyManagerImpl* pm)
-    : new_apps_(apps),
-      pm_(pm),
-      default_(new_apps_.find(kDefaultId)) {
-  }
-  void operator() (const policy_table::ApplicationPolicies::value_type & app);
+      : new_apps_(apps), pm_(pm), default_(new_apps_.find(kDefaultId)) {}
+  void operator()(const policy_table::ApplicationPolicies::value_type& app);
+
  private:
   const policy_table::ApplicationPolicies& new_apps_;
   PolicyManagerImpl* pm_;
@@ -261,7 +259,6 @@ struct ProccessAppGroups {
 };
 
 #endif  // SDL_REMOTE_CONTROL
-
 }
 
 #endif  // SRC_COMPONENTS_POLICY_INCLUDE_POLICY_POLICY_HELPER_H_
