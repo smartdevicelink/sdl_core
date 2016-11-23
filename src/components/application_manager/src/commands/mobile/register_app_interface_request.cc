@@ -1043,7 +1043,6 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckCoincidence() {
   }  // application for end
 
 #ifdef SDL_REMOTE_CONTROL
-
   const smart_objects::SmartArray* vr_synonyms = 0;
   if (msg_params.keyExists(strings::vr_synonyms)) {
     vr_synonyms = msg_params[strings::vr_synonyms].asArray();
@@ -1062,6 +1061,17 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckCoincidence() {
 #endif  // SDL_REMOTE_CONTROL
 
 #ifdef SDL_REMOTE_CONTROL
+  // return mobile_apis::Result::SUCCESS;
+  bool duplicate =
+      std::find_if(accessor.begin(), accessor.end(), matcher) != accessor.end();
+  return duplicate ? mobile_apis::Result::DUPLICATE_NAME
+                   : mobile_apis::Result::SUCCESS;
+  //(TODO) OKozlov clarify
+  //#else   // SDL_REMOTE_CONTROL
+  IsSameAppName matcher(app_name.AsMBString(), vr_synonyms);
+#endif  // SDL_REMOTE_CONTROL
+
+#ifdef SDL_REMOTE_CONTROL
   bool duplicate =
       std::find_if(accessor.begin(), accessor.end(), matcher) != accessor.end();
   return duplicate ? mobile_apis::Result::DUPLICATE_NAME
@@ -1069,7 +1079,6 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckCoincidence() {
 #else
   return mobile_apis::Result::SUCCESS;
 #endif
-
 }  // method end
 
 mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckWithPolicyData() {
@@ -1212,6 +1221,12 @@ bool RegisterAppInterfaceRequest::IsApplicationWithSameAppIdRegistered() {
                       application_manager_);
 //(TODO) OKozlov clarify
 #else   // SDL_REMOTE_CONTROL
+  IsSameAppId matcher(mobile_app_id.AsMBString());
+#endif  // SDL_REMOTE_CONTROL
+
+#ifdef SDL_REMOTE_CONTROL
+  //(TODO) OKozlov clarify
+  //#else   // SDL_REMOTE_CONTROL
   IsSameAppId matcher(mobile_app_id.AsMBString());
 #endif  // SDL_REMOTE_CONTROL
 

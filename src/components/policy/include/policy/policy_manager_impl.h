@@ -198,6 +198,12 @@ class PolicyManagerImpl : public PolicyManager {
 
   virtual bool IsPredataPolicy(const std::string& policy_app_id);
 
+<<<<<<< HEAD
+=======
+  virtual bool GetHMITypes(const std::string& application_id,
+                           std::vector<int>* app_types) OVERRIDE;
+
+>>>>>>> Remove names duplication & fixes in
   void set_cache_manager(CacheManagerInterface* cache_manager);
 
   virtual void OnAppsSearchStarted();

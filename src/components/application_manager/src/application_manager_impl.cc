@@ -71,8 +71,8 @@
 
 #ifdef SDL_REMOTE_CONTROL
 #include "usage_statistics/counter.h"
-#endif
 #include "functional_module/plugin_manager.h"
+#endif
 
 namespace {
 int get_rand_from_range(uint32_t from = 0, int to = RAND_MAX) {
@@ -352,7 +352,9 @@ struct SubscribedToIVIPredicate {
 };
 
 #ifdef SDL_REMOTE_CONTROL
-AppSharedPtrs ApplicationManagerImpl::applications_by_interior_vehicle_data(
+
+std::vector<ApplicationSharedPtr>
+ApplicationManagerImpl::applications_by_interior_vehicle_data(
     smart_objects::SmartObject moduleDescription) {
   SubscribedToInteriorVehicleDataPredicate finder(moduleDescription);
   ApplicationListAccessor accessor;
@@ -361,7 +363,8 @@ AppSharedPtrs ApplicationManagerImpl::applications_by_interior_vehicle_data(
   return apps;
 }
 #endif
-AppSharedPtrs ApplicationManagerImpl::IviInfoUpdated(
+
+std::vector<ApplicationSharedPtr> ApplicationManagerImpl::IviInfoUpdated(
     VehicleDataType vehicle_info, int value) {
   // Notify Policy Manager if available about info it's interested in,
   // i.e. odometer etc

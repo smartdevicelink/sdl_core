@@ -451,13 +451,16 @@ void PolicyManagerImpl::SendNotificationOnPermissionsUpdated(
     listener()->OnPermissionsUpdated(application_id, notification_data);
     return;
   }
-#endif  // SDL_REMOTE_CONTROL
+#else   // SDL_REMOTE_CONTROL
   std::string default_hmi;
   GetDefaultHmi(application_id, &default_hmi);
   listener()->OnUpdateHMILevel(device_id, application_id, default_hmi);
 
   listener()->OnPermissionsUpdated(
       application_id, notification_data, default_hmi);
+#endif  // SDL_REMOTE_CONTROL
+  listener()->OnPermissionsUpdated(
+      device_id, application_id, notification_data);
 }
 
 bool PolicyManagerImpl::CleanupUnpairedDevices() {
