@@ -442,8 +442,7 @@ void PolicyHandler::OnDeviceConsentChanged(const std::string& device_id,
 
       policy_manager_->ReactOnUserDevConsentForApp(policy_app_id, is_allowed);
 
-      policy_manager_->SendNotificationOnPermissionsUpdated(device_id,
-                                                            policy_app_id);
+      policy_manager_->SendNotificationOnPermissionsUpdated(policy_app_id);
     }
   }
 }
@@ -488,25 +487,15 @@ struct SmartObjectToInt {
   }
 };
 
-void PolicyHandler::AddApplication(
-    const std::string& device_id,
-    const std::string& application_id,
-    const smart_objects::SmartObject* app_types) {
+void PolicyHandler::AddApplication(const std::string& application_id) {
   POLICY_LIB_CHECK_VOID();
-  std::vector<int> hmi_types;
-  if (app_types && app_types->asArray()) {
-    smart_objects::SmartArray* hmi_list = app_types->asArray();
-    std::transform(hmi_list->begin(),
-                   hmi_list->end(),
-                   std::back_inserter(hmi_types),
-                   SmartObjectToInt());
-  }
-  policy_manager_->AddApplication(device_id, application_id, hmi_types);
+  policy_manager_->AddApplication(application_id);
 }
 
-bool PolicyHandler::CheckHMIType(const std::string& application_id,
-                                 mobile_apis::AppHMIType::eType hmi,
-                                 const smart_objects::SmartObject* app_types) {
+bool PolicyHandler::CheckHMIType(
+    const std::string& application_id,
+    mobile_apis::AppHMIType::eType hmi,
+    const smart_objects::SmartObjectSPtr app_types) {
   LOG4CXX_AUTO_TRACE(logger_);
   POLICY_LIB_CHECK(false);
   std::vector<int> policy_hmi_types;
@@ -735,7 +724,7 @@ std::string PolicyHandler::OnCurrentDeviceIdUpdateRequired(
 
 std::vector<std::string> PolicyHandler::GetDevicesIds(
     const std::string policy_app_id) {
-  return ApplicationManagerImpl::instance()->devices(policy_app_id);
+  return application_manager_.devices(policy_app_id);
 }
 
 void PolicyHandler::OnSystemInfoChanged(const std::string& language) {
@@ -887,7 +876,7 @@ bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string,
   } else {
     app_id = last_used_app_ids_.back();
 
-    app = ApplicationManagerImpl::instance()->application(app_id);
+    app = application_manager_.application(app_id);
   }
 
   if (!app) {
@@ -1079,12 +1068,11 @@ void PolicyHandler::PTExchangeAtUserRequest(uint32_t correlation_id) {
       update_status, correlation_id, application_manager_);
 }
 
-void PolicyHandler::OnPermissionsUpdated(const std::string& device_id,
-                                         const std::string& policy_app_id,
+void PolicyHandler::OnPermissionsUpdated(const std::string& policy_app_id,
                                          const Permissions& permissions,
                                          const HMILevel& default_hmi) {
   LOG4CXX_AUTO_TRACE(logger_);
-  OnPermissionsUpdated(device_id, policy_app_id, permissions);
+  OnPermissionsUpdated(policy_app_id, permissions);
 
   ApplicationSharedPtr app =
       application_manager_.application_by_policy_id(policy_app_id);
@@ -1136,8 +1124,7 @@ void PolicyHandler::OnPermissionsUpdated(const std::string& device_id,
   }
 }
 
-void PolicyHandler::OnPermissionsUpdated(const std::string& device_id,
-                                         const std::string& policy_app_id,
+void PolicyHandler::OnPermissionsUpdated(const std::string& policy_app_id,
                                          const Permissions& permissions) {
   LOG4CXX_AUTO_TRACE(logger_);
   ApplicationSharedPtr app =
@@ -1356,13 +1343,13 @@ void PolicyHandler::OnUpdateHMIAppType(
     (*it)->OnUpdateHMIAppType(app_hmi_types);
   }
 }
-
+/*
 void PolicyHandler::OnUpdateHMILevel(const std::string& device_id,
                                      const std::string& policy_app_id,
                                      const std::string& hmi_level) {
   LOG4CXX_AUTO_TRACE(logger_);
   ApplicationSharedPtr app =
-      ApplicationManagerImpl::instance()->application(device_id, policy_app_id);
+      application_manager_.application(device_id, policy_app_id);
   if (!app) {
     LOG4CXX_WARN(logger_,
                  "Could not find application: " << device_id << " - "
@@ -1379,7 +1366,7 @@ void PolicyHandler::OnUpdateHMILevel(const std::string& device_id,
   }
   UpdateHMILevel(app, level);
 }
-
+*/
 void PolicyHandler::OnCertificateUpdated(const std::string& certificate_data) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(listeners_lock_);
@@ -1470,12 +1457,9 @@ void PolicyHandler::OnAppsSearchCompleted() {
   policy_manager_->OnAppsSearchCompleted();
 }
 
-void PolicyHandler::OnAppRegisteredOnMobile(
-    connection_handler::DeviceHandle device_handle,
-    const std::string& application_id) {
+void PolicyHandler::OnAppRegisteredOnMobile(const std::string& application_id) {
   POLICY_LIB_CHECK_VOID();
-  std::string mac = MessageHelper::GetDeviceMacAddressForHandle(device_handle);
-  policy_manager_->OnAppRegisteredOnMobile(mac, application_id);
+  policy_manager_->OnAppRegisteredOnMobile(application_id);
 }
 
 bool PolicyHandler::IsRequestTypeAllowed(
@@ -1539,6 +1523,7 @@ void PolicyHandler::Add(const std::string& app_id,
   policy_manager_->Add(app_id, type, timespan_seconds);
 }
 
+/*
 void PolicyHandler::UpdateHMILevel(ApplicationSharedPtr app,
                                    mobile_apis::HMILevel::eType level) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -1558,7 +1543,7 @@ void PolicyHandler::UpdateHMILevel(ApplicationSharedPtr app,
       MessageHelper::SendHMIStatusNotification(*app);
     }
   }
-}
+}*/
 
 #ifdef SDL_REMOTE_CONTROL
 namespace {

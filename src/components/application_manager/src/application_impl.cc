@@ -701,6 +701,18 @@ bool ApplicationImpl::UnsubscribeFromButton(
   return subscribed_buttons_.erase(btn_name);
 }
 
+AppExtensionPtr ApplicationImpl::QueryInterface(AppExtensionUID uid) {
+  std::list<AppExtensionPtr>::const_iterator it =
+      extensions_.begin();
+  for (;it != extensions_.end(); ++it) {
+    if ((*it)->uid() == uid) {
+      return (*it);
+    }
+  }
+
+  return AppExtensionPtr();
+}
+
 bool ApplicationImpl::SubscribeToIVI(uint32_t vehicle_info_type) {
   sync_primitives::AutoLock lock(vi_lock_);
   return subscribed_vehicle_info_.insert(vehicle_info_type).second;

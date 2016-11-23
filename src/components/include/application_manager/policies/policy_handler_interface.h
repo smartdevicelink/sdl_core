@@ -45,6 +45,7 @@
 #include "utils/custom_string.h"
 #include "policy/policy_settings.h"
 #include "smart_objects/smart_object.h"
+#include "application_manager/application.h"
 
 namespace policy {
 class PolicyHandlerInterface {

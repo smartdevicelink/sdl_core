@@ -100,6 +100,10 @@ enum RequestType {
   RT_FOTA
 };
 
+bool IsValidEnum(RequestType val);
+const char* EnumToJsonString(RequestType val);
+bool EnumFromJsonString(const std::string& literal, RequestType* result);
+
 enum Input {
   I_GUI,
   I_VUI,

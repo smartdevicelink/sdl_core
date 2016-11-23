@@ -36,6 +36,7 @@ set (AM_MOCK_DIR ${AM_TEST_DIR}/mock)
 include_directories (
   include/
   ${COMPONENTS_DIR}
+  ${COMPONENTS_DIR}/functional_module/include/
   ${COMPONENTS_DIR}/utils/include/
   ${COMPONENTS_DIR}/formatters/include/
   ${COMPONENTS_DIR}/protocol_handler/include/
@@ -51,8 +52,6 @@ include_directories (
   ${COMPONENTS_DIR}/interfaces
   ${CMAKE_BINARY_DIR}/src/components/
   ${COMPONENTS_DIR}/policy/include/
-  ${COMPONENTS_DIR}/include/
-  ${COMPONENTS_DIR}/functional_module/include/
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${ENCRYPTION_INCLUDE_DIRECTORY}
   ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
@@ -111,6 +110,28 @@ file (GLOB MOBILE_COMMANDS_SOURCES
   ${COMMANDS_SOURCE_DIR}/mobile/*
 )
 
+if (NOT REMOTE_CONTROL)
+    list(REMOVE_ITEM MOBILE_COMMANDS_SOURCES
+        ${COMMANDS_SOURCE_DIR}/mobile/set_interior_vehicle_data_request.cc)
+    list(REMOVE_ITEM MOBILE_COMMANDS_SOURCES
+        ${COMMANDS_SOURCE_DIR}/mobile/get_interior_vehicle_data_response.cc)
+    list(REMOVE_ITEM MOBILE_COMMANDS_SOURCES
+        ${COMMANDS_SOURCE_DIR}/mobile/get_interior_vehicle_data_capabilities_response.cc)
+    list(REMOVE_ITEM MOBILE_COMMANDS_SOURCES
+        ${COMMANDS_SOURCE_DIR}/mobile/on_interior_vehicle_data_notification.cc)
+    list(REMOVE_ITEM MOBILE_COMMANDS_SOURCES
+        ${COMMANDS_SOURCE_DIR}/mobile/button_press_request.cc)
+    list(REMOVE_ITEM MOBILE_COMMANDS_SOURCES
+        ${COMMANDS_SOURCE_DIR}/mobile/button_press_response.cc)
+    list(REMOVE_ITEM MOBILE_COMMANDS_SOURCES
+        ${COMMANDS_SOURCE_DIR}/mobile/get_interior_vehicle_data_capabilities_request.cc)
+    list(REMOVE_ITEM MOBILE_COMMANDS_SOURCES
+        ${COMMANDS_SOURCE_DIR}/mobile/get_interior_vehicle_data_request.cc)
+    list(REMOVE_ITEM MOBILE_COMMANDS_SOURCES
+        ${COMMANDS_SOURCE_DIR}/mobile/set_interior_vehicle_data_response.cc)
+    list(REMOVE_ITEM SOURCES
+        ${COMPONENTS_DIR}/application_manager/src/core_service.cc)
+endif()
 
   set (HMI_COMMANDS_SOURCES
   ${COMMANDS_SOURCE_DIR}/hmi/request_to_hmi.cc

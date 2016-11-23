@@ -225,6 +225,17 @@ ApplicationSharedPtr ApplicationManagerImpl::application(
   return FindApp(accessor, finder);
 }
 
+ApplicationSharedPtr ApplicationManagerImpl::application(
+    const std::string& device_id, const std::string& policy_app_id) const {
+  connection_handler::DeviceHandle device_handle;
+  connection_handler()->GetDeviceID(device_id, &device_handle);
+  ApplicationSharedPtr app = ApplicationListAccessor().Find(
+      IsApplication(device_handle, policy_app_id));
+  LOG4CXX_DEBUG(logger_,
+                " policy_app_id << " << policy_app_id << "Found = " << app);
+  return app;
+}
+
 struct TakeDeviceHandle {
   std::string operator()(ApplicationSharedPtr& app) {
     return MessageHelper::GetDeviceMacAddressForHandle(app->device());
@@ -1458,9 +1469,6 @@ void ApplicationManagerImpl::SendMessageToMobile(
   }
 
   smart_objects::SmartObject& msg_to_mobile = *message;
-  mobile_apis::FunctionID::eType function_id =
-      static_cast<mobile_apis::FunctionID::eType>(
-          (*message)[strings::params][strings::function_id].asUInt());
 
   // If correlation_id is not present, it is from-HMI message which should be
   // checked against policy permissions
@@ -2861,8 +2869,9 @@ void ApplicationManagerImpl::Handle(const impl::AudioData message) {
 }
 
 mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
-    const ApplicationSharedPtr app,
-    const std::string& function_id,
+    const std::string& policy_app_id,
+    mobile_apis::HMILevel::eType hmi_level,
+    mobile_apis::FunctionID::eType function_id,
     const RPCParams& rpc_params,
     CommandParametersPermissions* params_permissions) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -2950,7 +2959,6 @@ void ApplicationManagerImpl::PostMessageToHMIQueque(const MessagePtr& message) {
 void ApplicationManagerImpl::SubscribeToHMINotification(
     const std::string& hmi_notification) {
   hmi_handler_->SubscribeToHMINotification(hmi_notification);
-}
 }
 
 bool ApplicationManagerImpl::IsLowVoltage() {
@@ -3788,6 +3796,19 @@ const std::set<int32_t> ApplicationManagerImpl::GetAppsSubscribedForWayPoints()
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);
   return subscribed_way_points_apps_list_;
+}
+
+std::vector<std::string> ApplicationManagerImpl::devices(
+    const std::string& policy_app_id) const {
+  MobileAppIdPredicate matcher(policy_app_id);
+  std::vector<ApplicationSharedPtr> apps =
+      ApplicationListAccessor().FindAll(matcher);
+  std::vector<std::string> devices;
+  std::transform(apps.begin(),
+                 apps.end(),
+                 std::back_inserter(devices),
+                 TakeDeviceHandle());
+  return devices;
 }
 
 }  // namespace application_manager
