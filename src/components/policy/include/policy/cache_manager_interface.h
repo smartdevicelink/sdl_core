@@ -36,7 +36,7 @@
 #include <string>
 #include <vector>
 
-#include "types.h"
+#include "policy/policy_table/types.h"
 #include "policy/pt_representation.h"
 #include "utils/shared_ptr.h"
 #include "policy/usage_statistics/counter.h"

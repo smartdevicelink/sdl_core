@@ -74,10 +74,9 @@ PolicyManagerImpl::PolicyManagerImpl()
     , listener_(NULL)
     , cache_(new CacheManager)
 #ifdef SDL_REMOTE_CONTROL
-          access_remote_(new AccessRemoteImpl(
-              CacheManagerInterfaceSPtr::static_pointer_cast<CacheManager>(
-                  cache_)))
-    ,
+    , access_remote_(new AccessRemoteImpl(
+          CacheManagerInterfaceSPtr::static_pointer_cast<CacheManager>(cache_)))
+
 #endif  // SDL_REMOTE_CONTROL
     , retry_sequence_timeout_(kDefaultRetryTimeoutInSec)
     , retry_sequence_index_(0)
@@ -458,12 +457,16 @@ void PolicyManagerImpl::SendNotificationOnPermissionsUpdated(
     GetDefaultHmi(application_id, &default_hmi);
     listener()->OnUpdateHMILevel(device_id, application_id, default_hmi);
   }
-#else  // SDL_REMOTE_CONTROL
+#else   // SDL_REMOTE_CONTROL
   std::string default_hmi;
   default_hmi = "NONE";
 
   listener()->OnPermissionsUpdated(
       application_id, notification_data, default_hmi);
+#endif  // SDL_REMOTE_CONTROL
+  listener()->OnPermissionsUpdated(
+      device_id, application_id, notification_data);
+}
 }
 
 bool PolicyManagerImpl::CleanupUnpairedDevices() {
