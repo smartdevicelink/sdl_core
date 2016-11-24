@@ -1,4 +1,6 @@
 // This file is generated, do not edit
+#include <algorithm>
+
 #include "policy/policy_table/types.h"
 #include "rpc_base/rpc_base_json_inl.h"
 
@@ -179,6 +181,36 @@ Json::Value ApplicationParams::ToJsonValue() const {
       "heart_beat_timeout_ms", heart_beat_timeout_ms, &result__);
   impl::WriteJsonField("certificate", certificate, &result__);
   return result__;
+}
+
+bool ApplicationParams::ValidateModuleTypes() const {
+  // moduleType is optional so see Optional<T>::is_valid()
+  bool is_initialized = moduleType->is_initialized();
+  if (!is_initialized) {
+    // valid if not initialized
+    return true;
+  }
+  bool is_valid = moduleType->is_valid();
+  if (is_valid) {
+    return true;
+  }
+
+  struct IsInvalid {
+    bool operator()(Enum<ModuleType> item) const {
+      return !item.is_valid();
+    }
+  };
+  // cut invalid items
+  moduleType->erase(
+      std::remove_if(moduleType->begin(), moduleType->end(), IsInvalid()),
+      moduleType->end());
+  bool empty = moduleType->empty();
+  if (empty) {
+    // set non initialized value
+    ModuleTypes non_initialized;
+    moduleType = Optional<ModuleTypes>(non_initialized);
+  }
+  return true;
 }
 
 bool ApplicationParams::is_valid() const {
@@ -642,6 +674,48 @@ void ModuleConfig::SetPolicyTableType(PolicyTableType pt_type) {
   vehicle_make.SetPolicyTableType(pt_type);
   vehicle_model.SetPolicyTableType(pt_type);
   vehicle_year.SetPolicyTableType(pt_type);
+}
+
+// Equipment methods
+Equipment::Equipment() : CompositeType(kUninitialized) {}
+Equipment::~Equipment() {}
+Equipment::Equipment(const Json::Value* value__)
+    : CompositeType(InitHelper(value__, &Json::Value::isObject))
+    , zones(impl::ValueMember(value__, "zones")) {}
+Json::Value Equipment::ToJsonValue() const {
+  Json::Value result__(Json::objectValue);
+  impl::WriteJsonField("zones", zones, &result__);
+  return result__;
+}
+bool Equipment::is_valid() const {
+  if (!zones.is_valid()) {
+    return false;
+  }
+
+  return Validate();
+}
+bool Equipment::is_initialized() const {
+  return (initialization_state__ != kUninitialized) || (!struct_empty());
+}
+bool Equipment::struct_empty() const {
+  if (zones.is_initialized()) {
+    return false;
+  }
+
+  return true;
+}
+void Equipment::ReportErrors(rpc::ValidationReport* report__) const {
+  if (struct_empty()) {
+    rpc::CompositeType::ReportErrors(report__);
+  }
+  if (!zones.is_valid()) {
+    zones.ReportErrors(&report__->ReportSubobject("zones"));
+  }
+}
+
+void Equipment::SetPolicyTableType(PolicyTableType pt_type) {
+  CompositeType::SetPolicyTableType(pt_type);
+  zones.SetPolicyTableType(pt_type);
 }
 
 // MessageString methods

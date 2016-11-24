@@ -217,13 +217,13 @@ class CacheManager : public CacheManagerInterface {
    * Gets flag updateRequired
    * @return true if update is required
    */
-  bool UpdateRequired() const;
+  virtual bool UpdateRequired() const;
 
   /**
    * @brief Saves flag updateRequired
    * @param status update status if true then update required.
    */
-  void SaveUpdateRequired(bool status);
+  virtual void SaveUpdateRequired(bool status);
 
   /**
    * @brief GetInitialAppData Retrieves data from app_policies

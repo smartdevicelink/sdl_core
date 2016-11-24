@@ -50,6 +50,8 @@ namespace policy {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "Policy")
 
+namespace dbms = utils::dbms;
+
 namespace {
 template <typename T, typename K>
 void InsertUnique(K value, T* array) {
@@ -928,15 +930,15 @@ bool SQLPTRepresentation::SaveApplicationPoliciesSection(
     }
   }
   policy_table::ApplicationPolicies::const_iterator it_pre_consent_passengerRC =
-      apps.find(kPreConsentPassengersRC);
-  if (apps.end() != it_pre_consent_passengerRC) {
+      policies.apps.find(kPreConsentPassengersRC);
+  if (policies.apps.end() != it_pre_consent_passengerRC) {
     if (!SaveSpecificAppPolicy(*it_pre_consent_passengerRC)) {
       return false;
     }
   }
   policy_table::ApplicationPolicies::const_iterator it_device =
-      apps.find(kDeviceId);
-  if (apps.end() != it_device) {
+      policies.apps.find(kDeviceId);
+  if (policies.apps.end() != it_device) {
     if (!SaveSpecificAppPolicy(*it_device)) {
       return false;
     }

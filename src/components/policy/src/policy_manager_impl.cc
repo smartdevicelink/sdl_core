@@ -51,6 +51,7 @@
 #include "utils/timer_task_impl.h"
 
 #ifdef SDL_REMOTE_CONTROL
+#include "policy/access_remote.h"
 #include "policy/access_remote_impl.h"
 #endif  // SDL_REMOTE_CONTROL
 
@@ -373,16 +374,19 @@ const VehicleInfo PolicyManagerImpl::GetVehicleInfo() const {
   return cache_->GetVehicleInfo();
 }
 
-if (!cache_->IsApplicationRepresented(app_id)) {
-  LOG4CXX_WARN(logger_, "Application " << app_id << " isn't exist");
-  return;
-}
-
-void PolicyManagerImpl::CheckPermissions(const PTString& app_id,
+void PolicyManagerImpl::CheckPermissions(const PTString& device_id,
+                                         const PTString& app_id,
                                          const PTString& hmi_level,
                                          const PTString& rpc,
                                          const RPCParams& rpc_params,
                                          CheckPermissionResult& result) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (!cache_->IsApplicationRepresented(app_id)) {
+    LOG4CXX_WARN(logger_, "Application " << app_id << " isn't exist");
+    return;
+  }
+
   LOG4CXX_INFO(logger_,
                "CheckPermissions for " << app_id << " and rpc " << rpc
                                        << " for " << hmi_level << " level.");
@@ -429,14 +433,6 @@ void PolicyManagerImpl::SendNotificationOnPermissionsUpdated(
     app_groups.push_back((*it).group_name);
   }
 
-  PrepareNotificationData(
-      functional_groupings, app_groups, app_group_permissions, *data);
-}
-
-void PolicyManagerImpl::SendNotificationOnPermissionsUpdated(
-    const std::string& device_id, const std::string& application_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
-
   Permissions notification_data;
   PrepareNotificationData(functional_groupings,
                           app_groups,
@@ -452,21 +448,16 @@ void PolicyManagerImpl::SendNotificationOnPermissionsUpdated(
     const std::string rank =
         access_remote_->IsPrimaryDevice(who.dev_id) ? "DRIVER" : "PASSENGER";
     UpdateDeviceRank(who, rank);
-  } else {
-    std::string default_hmi;
-    GetDefaultHmi(application_id, &default_hmi);
-    listener()->OnUpdateHMILevel(device_id, application_id, default_hmi);
+    listener()->OnPermissionsUpdated(application_id, notification_data);
+    return;
   }
-#else   // SDL_REMOTE_CONTROL
+#endif  // SDL_REMOTE_CONTROL
   std::string default_hmi;
-  default_hmi = "NONE";
+  GetDefaultHmi(application_id, &default_hmi);
+  listener()->OnUpdateHMILevel(device_id, application_id, default_hmi);
 
   listener()->OnPermissionsUpdated(
       application_id, notification_data, default_hmi);
-#endif  // SDL_REMOTE_CONTROL
-  listener()->OnPermissionsUpdated(
-      device_id, application_id, notification_data);
-}
 }
 
 bool PolicyManagerImpl::CleanupUnpairedDevices() {
@@ -977,20 +968,25 @@ void PolicyManagerImpl::AddApplication(const std::string& application_id) {
   } else {
     PromoteExistedApplication(application_id, device_consent);
   }
+}
+
 #if SDL_REMOTE_CONTROL
+void PolicyManagerImpl::AddApplication(const std::string& application_id,
+                                       const std::vector<int>& hmi_types) {
+  LOG4CXX_INFO(logger_, "AddApplication");
+  const std::string device_id = GetCurrentDeviceId(application_id);
+  DeviceConsent device_consent = GetUserConsentForDevice(device_id);
+  sync_primitives::AutoLock lock(apps_registration_lock_);
+
+  if (IsNewApplication(application_id)) {
+    AddNewApplication(application_id, device_consent);
+    update_status_manager_.OnNewApplicationAdded();
+  } else {
+    PromoteExistedApplication(application_id, device_consent);
+  }
+
   Subject who = {device_id, application_id};
   access_remote_->SetDefaultHmiTypes(who, hmi_types);
-#endif  // SDL_REMOTE_CONTROL
-}
-
-void PolicyManagerImpl::RemoveAppConsentForGroup(
-    const std::string& app_id, const std::string& group_name) {
-  cache_->RemoveAppConsentForGroup(app_id, group_name);
-}
-
-bool PolicyManagerImpl::IsPredataPolicy(const std::string& policy_app_id) {
-  LOG4CXX_INFO(logger_, "IsPredataApp");
-  return cache_->IsPredataPolicy(policy_app_id);
 }
 
 struct HMITypeToInt {
@@ -1014,6 +1010,17 @@ bool PolicyManagerImpl::GetHMITypes(const std::string& application_id,
                    HMITypeToInt());
   }
   return hmi_types;
+}
+#endif  // SDL_REMOTE_CONTROL
+
+void PolicyManagerImpl::RemoveAppConsentForGroup(
+    const std::string& app_id, const std::string& group_name) {
+  cache_->RemoveAppConsentForGroup(app_id, group_name);
+}
+
+bool PolicyManagerImpl::IsPredataPolicy(const std::string& policy_app_id) {
+  LOG4CXX_INFO(logger_, "IsPredataApp");
+  return cache_->IsPredataPolicy(policy_app_id);
 }
 
 void PolicyManagerImpl::AddNewApplication(const std::string& application_id,
@@ -1328,12 +1335,35 @@ void PolicyManagerImpl::SendHMILevelChanged(const Subject& who) {
   }
 }
 
+void PolicyManagerImpl::GetPermissions(const std::string device_id,
+                                       const std::string application_id,
+                                       Permissions* data) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  DCHECK(data);
+  std::vector<FunctionalGroupPermission> app_group_permissions;
+  GetPermissionsForApp(device_id, application_id, app_group_permissions);
+
+  policy_table::FunctionalGroupings functional_groupings;
+  cache_->GetFunctionalGroupings(functional_groupings);
+
+  policy_table::Strings app_groups;
+  std::vector<FunctionalGroupPermission>::const_iterator it =
+      app_group_permissions.begin();
+  std::vector<FunctionalGroupPermission>::const_iterator it_end =
+      app_group_permissions.end();
+  for (; it != it_end; ++it) {
+    app_groups.push_back((*it).group_name);
+  }
+
+  PrepareNotificationData(
+      functional_groupings, app_groups, app_group_permissions, *data);
+}
+
 void PolicyManagerImpl::SendAppPermissionsChanged(
     const std::string& device_id, const std::string& application_id) {
   Permissions notification_data;
   GetPermissions(device_id, application_id, &notification_data);
-  listener()->OnPermissionsUpdated(
-      device_id, application_id, notification_data);
+  listener()->OnPermissionsUpdated(application_id, notification_data);
 }
 
 void PolicyManagerImpl::CheckPTUUpdatesChange(
@@ -1399,9 +1429,9 @@ void PolicyManagerImpl::CheckRemoteGroupsChange(
   LOG4CXX_AUTO_TRACE(logger_);
 
   policy_table::ApplicationPolicies& new_apps =
-      pt_update->policy_table.app_policies;
+      pt_update->policy_table.app_policies_section.apps;
   policy_table::ApplicationPolicies& old_apps =
-      snapshot->policy_table.app_policies;
+      snapshot->policy_table.app_policies_section.apps;
   std::for_each(
       old_apps.begin(), old_apps.end(), ProccessAppGroups(new_apps, this));
 }
