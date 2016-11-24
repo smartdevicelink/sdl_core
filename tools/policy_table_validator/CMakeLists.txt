@@ -7,7 +7,7 @@ include_directories(
 )
 
   message(STATUS "use ${EXTENDED_POLICY} poicy")
-if (${EXTENDED_POLICY} STREQUAL "EXTENDED_PROPRIETARY")
+if (${EXTENDED_POLICY} STREQUAL "EXTERNAL_PROPRIETARY")
   include_directories(${CMAKE_SOURCE_DIR}/src/components/policy/policy_premium/include/)
 else()
   include_directories(${CMAKE_SOURCE_DIR}/src/components/policy/policy_regular/include/)

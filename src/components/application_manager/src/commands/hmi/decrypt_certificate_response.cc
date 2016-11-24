@@ -32,7 +32,7 @@
 #include "application_manager/commands/hmi/decrypt_certificate_response.h"
 
 #include "application_manager/policies/policy_handler.h"
-#ifdef EXTENDED_PROPRIETARY
+#ifdef EXTERNAL_PROPRIETARY
 namespace application_manager {
 
 namespace commands {
@@ -56,4 +56,4 @@ void DecryptCertificateResponse::Run() {
 
 }  // namespace commands
 }  // namespace application_manager
-#endif  // EXTENDED_PROPRIETARY
+#endif  // EXTERNAL_PROPRIETARY

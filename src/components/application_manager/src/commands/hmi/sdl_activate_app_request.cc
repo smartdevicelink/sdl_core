@@ -98,7 +98,7 @@ uint32_t SDLActivateAppRequest::app_id() const {
   return (*message_)[msg_params][strings::app_id].asUInt();
 }
 
-#ifdef EXTENDED_PROPRIETARY
+#ifdef EXTERNAL_PROPRIETARY
 void SDLActivateAppRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace hmi_apis::FunctionID;
@@ -118,7 +118,7 @@ void SDLActivateAppRequest::Run() {
   }
 }
 
-#else  // EXTENDED_PROPRIETARY
+#else  // EXTERNAL_PROPRIETARY
 void SDLActivateAppRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace hmi_apis::FunctionID;
@@ -195,7 +195,7 @@ void SDLActivateAppRequest::Run() {
   subscribe_on_event(BasicCommunication_OnAppRegistered);
 }
 
-#endif  // EXTENDED_PROPRIETARY
+#endif  // EXTERNAL_PROPRIETARY
 void SDLActivateAppRequest::onTimeOut() {
   using namespace hmi_apis::FunctionID;
   using namespace hmi_apis::Common_Result;
