@@ -730,7 +730,7 @@ void PolicyHandler::OnVIIsReady() {
 void PolicyHandler::OnVehicleDataUpdated(
     const smart_objects::SmartObject& message) {
   POLICY_LIB_CHECK_VOID();
-#ifdef EXTENDED_PROPRIETARY
+#ifdef EXTERNAL_PROPRIETARY
   if (!message.keyExists(strings::msg_params)) {
     LOG4CXX_ERROR(logger_,
                   "Message does not contains mandatory section "
@@ -914,7 +914,7 @@ bool PolicyHandler::UnloadPolicyLibrary() {
   return ret;
 }
 
-#ifdef EXTENDED_PROPRIETARY
+#ifdef EXTERNAL_PROPRIETARY
 struct SDLAlowedNotification {
   SDLAlowedNotification(const connection_handler::DeviceHandle& device_id,
                         PolicyManager* policy_manager,
@@ -951,7 +951,7 @@ struct SDLAlowedNotification {
   PolicyManager* policy_manager_;
   StateController& state_controller_;
 };
-#endif  // EXTENDED_PROPRIETARY
+#endif  // EXTERNAL_PROPRIETARY
 
 void PolicyHandler::OnAllowSDLFunctionalityNotification(
     bool is_allowed, const std::string& device_mac) {
@@ -985,7 +985,7 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(
       LOG4CXX_WARN(logger_,
                    "Device hadle with mac " << device_mac << " wasn't found.");
     }
-#ifdef EXTENDED_PROPRIETARY
+#ifdef EXTERNAL_PROPRIETARY
     DataAccessor<ApplicationSet> accessor = application_manager_.applications();
     if (!is_allowed) {
       std::for_each(
@@ -1001,7 +1001,7 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(
                                 policy_manager_.get(),
                                 application_manager_.state_controller()));
     }
-#endif  // EXTENDED_PROPRIETARY
+#endif  // EXTERNAL_PROPRIETARY
   }
 
   // Case, when specific device was changed
@@ -1021,7 +1021,7 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(
 
     pending_device_handles_.erase(it);
   }
-#ifdef EXTENDED_PROPRIETARY
+#ifdef EXTERNAL_PROPRIETARY
   if (is_allowed && last_activated_app_id_) {
     ApplicationSharedPtr app =
         application_manager_.application(last_activated_app_id_);
@@ -1045,7 +1045,7 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(
       last_activated_app_id_ = 0;
     }
   }
-#endif  // EXTENDED_PROPRIETARY
+#endif  // EXTERNAL_PROPRIETARY
 }
 
 void PolicyHandler::OnIgnitionCycleOver() {
@@ -1075,7 +1075,7 @@ void PolicyHandler::OnActivateApp(uint32_t connection_key,
     }
   } else {
     permissions = policy_manager_->GetAppPermissionsChanges(policy_app_id);
-#ifdef EXTENDED_PROPRIETARY
+#ifdef EXTERNAL_PROPRIETARY
     UsageStatistics& usage = app->usage_report();
 
     usage.RecordAppUserSelection();
@@ -1110,9 +1110,9 @@ void PolicyHandler::OnActivateApp(uint32_t connection_key,
       MessageHelper::SendOnAppPermissionsChangedNotification(
           app->app_id(), permissions, application_manager_);
     }
-#else   // EXTENDED_PROPRIETARY
+#else   // EXTERNAL_PROPRIETARY
     permissions.isSDLAllowed = true;
-#endif  // EXTENDED_PROPRIETARY
+#endif  // EXTERNAL_PROPRIETARY
     policy_manager_->RemovePendingPermissionChanges(policy_app_id);
   }
   // If application is revoked it should not be activated
@@ -1241,7 +1241,7 @@ bool PolicyHandler::SaveSnapshot(const BinaryMessage& pt_string,
   return result;
 }
 
-#ifdef EXTENDED_PROPRIETARY
+#ifdef EXTERNAL_PROPRIETARY
 void PolicyHandler::OnSnapshotCreated(
     const BinaryMessage& pt_string,
     const std::vector<int>& retry_delay_seconds,
@@ -1254,7 +1254,7 @@ void PolicyHandler::OnSnapshotCreated(
                                     application_manager_);
   }
 }
-#else  // EXTENDED_PROPRIETARY
+#else  // EXTERNAL_PROPRIETARY
 void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string) {
   LOG4CXX_AUTO_TRACE(logger_);
   POLICY_LIB_CHECK_VOID();
@@ -1282,7 +1282,7 @@ void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string) {
   // reset update required false
   OnUpdateRequestSentToMobile();
 }
-#endif  // EXTENDED_PROPRIETARY
+#endif  // EXTERNAL_PROPRIETARY
 
 bool PolicyHandler::GetPriority(const std::string& policy_app_id,
                                 std::string* priority) const {
@@ -1448,7 +1448,7 @@ void PolicyHandler::OnUpdateHMIAppType(
     (*it)->OnUpdateHMIAppType(app_hmi_types);
   }
 }
-#ifdef EXTENDED_PROPRIETARY
+#ifdef EXTERNAL_PROPRIETARY
 
 void PolicyHandler::OnCertificateUpdated(const std::string& certificate_data) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -1525,7 +1525,7 @@ void PolicyHandler::OnCertificateDecrypted(bool is_succeeded) {
       std::bind2nd(std::mem_fun(&PolicyHandlerObserver::OnCertificateUpdated),
                    certificate_data));
 }
-#else   // EXTENDED_PROPRIETARY
+#else   // EXTERNAL_PROPRIETARY
 void PolicyHandler::OnCertificateUpdated(const std::string& certificate_data) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(listeners_lock_);
@@ -1535,7 +1535,7 @@ void PolicyHandler::OnCertificateUpdated(const std::string& certificate_data) {
     observer->OnCertificateUpdated(certificate_data);
   }
 }
-#endif  // EXTENDED_PROPRIETARY
+#endif  // EXTERNAL_PROPRIETARY
 
 bool PolicyHandler::CanUpdate() {
   return 0 != GetAppIdForSending();
@@ -1546,7 +1546,7 @@ void PolicyHandler::RemoveDevice(const std::string& device_id) {
   POLICY_LIB_CHECK_VOID();
 
   policy_manager_->MarkUnpairedDevice(device_id);
-#ifdef EXTENDED_PROPRIETARY
+#ifdef EXTERNAL_PROPRIETARY
   connection_handler::DeviceHandle device_uid;
   if (application_manager_.connection_handler().GetDeviceID(device_id,
                                                             &device_uid)) {
@@ -1556,7 +1556,7 @@ void PolicyHandler::RemoveDevice(const std::string& device_id) {
                   DeactivateApplication(
                       device_uid, application_manager_.state_controller()));
   }
-#endif  // EXTENDED_PROPRIETARY
+#endif  // EXTERNAL_PROPRIETARY
 }
 
 bool PolicyHandler::IsApplicationRevoked(const std::string& app_id) {
@@ -1669,12 +1669,12 @@ const VehicleInfo policy::PolicyHandler::GetVehicleInfo() const {
   return policy_manager_->GetVehicleInfo();
 }
 
-#ifdef EXTENDED_PROPRIETARY
+#ifdef EXTERNAL_PROPRIETARY
 const MetaInfo PolicyHandler::GetMetaInfo() const {
   POLICY_LIB_CHECK(MetaInfo());
   return policy_manager_->GetMetaInfo();
 }
-#endif  // EXTENDED_PROPRIETARY
+#endif  // EXTERNAL_PROPRIETARY
 
 void PolicyHandler::Increment(usage_statistics::GlobalCounterId type) {
   POLICY_LIB_CHECK();

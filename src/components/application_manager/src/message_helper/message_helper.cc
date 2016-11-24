@@ -1544,13 +1544,13 @@ void MessageHelper::SendGetUserFriendlyMessageResponse(
 
   smart_objects::SmartObject& user_friendly_messages =
       (*message)[strings::msg_params][messages];
-#ifdef EXTENDED_PROPRIETARY
+#ifdef EXTERNAL_PROPRIETARY
   const std::string tts = "ttsString";
   const std::string label = "label";
   const std::string line1 = "line1";
   const std::string line2 = "line2";
   const std::string textBody = "textBody";
-#endif  // EXTENDED_PROPRIETARY
+#endif  // EXTERNAL_PROPRIETARY
   const std::string message_code = "messageCode";
   std::vector<policy::UserFriendlyMessage>::const_iterator it = msg.begin();
   std::vector<policy::UserFriendlyMessage>::const_iterator it_end = msg.end();
@@ -1560,7 +1560,7 @@ void MessageHelper::SendGetUserFriendlyMessageResponse(
 
     smart_objects::SmartObject& obj = user_friendly_messages[index];
     obj[message_code] = it->message_code;
-#ifdef EXTENDED_PROPRIETARY
+#ifdef EXTERNAL_PROPRIETARY
     if (!it->tts.empty()) {
       obj[tts] = it->tts;
     }
@@ -1576,7 +1576,7 @@ void MessageHelper::SendGetUserFriendlyMessageResponse(
     if (!it->text_body.empty()) {
       obj[textBody] = it->text_body;
     }
-#endif  // EXTENDED_PROPRIETARY
+#endif  // EXTERNAL_PROPRIETARY
   }
 
   app_mngr.ManageHMICommand(message);
