@@ -141,6 +141,8 @@ class ApplicationManager {
   virtual DataAccessor<ApplicationSet> applications() const = 0;
 
   virtual ApplicationSharedPtr application(uint32_t app_id) const = 0;
+  virtual ApplicationSharedPtr application(
+      const std::string& device_id, const std::string& policy_app_id) const = 0;
   virtual ApplicationSharedPtr active_application() const = 0;
 
   /**
@@ -301,10 +303,10 @@ class ApplicationManager {
   virtual protocol_handler::ProtocolHandler& protocol_handler() const = 0;
   virtual policy::PolicyHandlerInterface& GetPolicyHandler() = 0;
 
-  virtual functional_modules::PluginManager& GetPluginManager() = 0;
-
   virtual uint32_t GetNextHMICorrelationID() = 0;
   virtual uint32_t GenerateNewHMIAppID() = 0;
+  virtual void ReplaceMobileByHMIAppId(smart_objects::SmartObject& message) = 0;
+  virtual void ReplaceHMIByMobileAppId(smart_objects::SmartObject& message) = 0;
 
   /**
    * @brief Ends opened navi services (audio/video) for application
@@ -593,6 +595,20 @@ class ApplicationManager {
   virtual const ApplicationManagerSettings& get_settings() const = 0;
 
   virtual event_engine::EventDispatcher& event_dispatcher() = 0;
+
+  virtual void ChangeAppsHMILevel(uint32_t app_id,
+                                  mobile_apis::HMILevel::eType level) = 0;
+  virtual uint32_t GetAvailableSpaceForApp(const std::string& folder_name) = 0;
+  virtual void OnTimerSendTTSGlobalProperties() = 0;
+  virtual void CreatePhoneCallAppList() = 0;
+  virtual void ResetPhoneCallAppList() = 0;
+  virtual void OnLowVoltage() = 0;
+  virtual void OnWakeUp() = 0;
+  virtual functional_modules::PluginManager& GetPluginManager() = 0;
+  virtual std::vector<std::string> devices(
+      const std::string& policy_app_id) const = 0;
+  virtual void PostMessageToHMIQueque(const MessagePtr& message) = 0;
+  virtual void PostMessageToMobileQueque(const MessagePtr& message) = 0;
 };
 
 }  // namespace application_manager

@@ -40,8 +40,8 @@
 #include "protocol/message_priority.h"
 #include "protocol/rpc_type.h"
 #include "smart_objects/smart_object.h"
-
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
+#endif
 
 namespace application_manager {
 
@@ -112,7 +112,6 @@ class Message {
  private:
   int32_t function_id_;        // @remark protocol V2.
   std::string function_name_;  // string
-  int32_t function_id_;        // @remark protocol V2.
   int32_t correlation_id_;     // @remark protocol V2.
   MessageType type_;           // @remark protocol V2.
 

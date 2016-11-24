@@ -420,11 +420,20 @@ class PolicyManager : public usage_statistics::StatisticsManager {
   virtual bool IsPredataPolicy(const std::string& policy_app_id) = 0;
 
   /**
-   * Returns heart beat timeout
-   * @param app_id application id
-   * @return if timeout was set then value in milliseconds greater zero
-   * otherwise heart beat for specific application isn't set
+   * Gets HMI types
+   * @param application_id ID application
+   * @param app_types list to save HMI types
+   * @return true if policy has specific policy for this application
    */
+  virtual bool GetHMITypes(const std::string& application_id,
+                           std::vector<int>* app_types) = 0;
+
+  /**
+ * Returns heart beat timeout
+ * @param app_id application id
+ * @return if timeout was set then value in milliseconds greater zero
+ * otherwise heart beat for specific application isn't set
+ */
   virtual uint32_t HeartBeatTimeout(const std::string& app_id) const = 0;
 
   /**
