@@ -312,7 +312,7 @@ void PluginManager::OnAppHMILevelChanged(
   for (PluginsIterator it = plugins_.begin(); plugins_.end() != it; ++it) {
     if (it->second->IsAppForPlugin(app)) {
       LOG4CXX_DEBUG(logger_,
-                    "Application " << app->name() << " of plugin "
+                    "Application " << app->name().AsMBString() << " of plugin "
                                    << it->second->GetModuleID()
                                    << " has changed level from " << old_level
                                    << " to " << app->hmi_level());
@@ -333,7 +333,7 @@ bool PluginManager::CanAppChangeHMILevel(
     if (it->second->IsAppForPlugin(app)) {
       result = result && it->second->CanAppChangeHMILevel(app, new_level);
       LOG4CXX_DEBUG(logger_,
-                    "Application " << app->name() << " of plugin "
+                    "Application " << app->name().AsMBString() << " of plugin "
                                    << it->second->GetModuleID() << " is "
                                    << (result ? "allowed" : "not allowed")
                                    << " to change level to " << new_level);
