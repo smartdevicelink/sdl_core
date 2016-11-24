@@ -33,6 +33,7 @@
 #ifndef SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_ADAPTER_H_
 #define SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_ADAPTER_H_
 
+#include "hmi_message_handler/hmi_message_handler.h"
 #include "hmi_message_handler/hmi_message_sender.h"
 
 namespace hmi_message_handler {
@@ -44,13 +45,6 @@ namespace hmi_message_handler {
  */
 class HMIMessageAdapter : public HMIMessageSender {
  public:
-  /**
-   * \brief Constructor
-   * \param handler Pointer to implementation of HMIMessageHandler abstract
-   * class
-   * to notify it about receiving message or error on sending message.
-   */
-  explicit HMIMessageAdapter(HMIMessageHandler* handler);
 
   /**
    * \brief Destructor
