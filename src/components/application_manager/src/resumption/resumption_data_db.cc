@@ -47,6 +47,7 @@ const std::string kDatabaseName = "resumption";
 }
 
 namespace resumption {
+namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 CREATE_LOGGERPTR_GLOBAL(logger_, "Resumption")
 
 ResumptionDataDB::ResumptionDataDB(

@@ -242,7 +242,7 @@ class CoreService : public Service {
   bool IsAllowed(const std::string& name,
                  const std::vector<std::string>& allowed_params);
 
-  ApplicationManager application_manager_;
+  ApplicationManager& application_manager_;
 
   DISALLOW_COPY_AND_ASSIGN(CoreService);
 };

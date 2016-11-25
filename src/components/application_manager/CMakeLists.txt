@@ -131,6 +131,8 @@ if (NOT REMOTE_CONTROL)
         ${COMMANDS_SOURCE_DIR}/mobile/set_interior_vehicle_data_response.cc)
     list(REMOVE_ITEM SOURCES
         ${COMPONENTS_DIR}/application_manager/src/core_service.cc)
+    list(REMOVE_ITEM SOURCES
+        ${COMPONENTS_DIR}/application_manager/src/resume_ctrl.cpp)
 endif()
 
   set (HMI_COMMANDS_SOURCES

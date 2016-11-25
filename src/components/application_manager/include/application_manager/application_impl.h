@@ -48,11 +48,14 @@
 #include "protocol_handler/protocol_handler.h"
 
 #include "connection_handler/device.h"
-#include "utils/timer_thread.h"
 #include "utils/lock.h"
 #include "utils/atomic_object.h"
 #include "utils/custom_string.h"
 #include "utils/timer.h"
+
+#ifdef SDL_REMOTE_CONTROL
+#include "utils/timer_thread.h"
+#endif
 
 namespace usage_statistics {
 

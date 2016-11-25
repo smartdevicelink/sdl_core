@@ -1066,9 +1066,11 @@ class ApplicationManagerImpl
     return policy_handler_;
   }
 
+#ifdef SDL_REMOTE_CONTROL
   virtual functional_modules::PluginManager& GetPluginManager() OVERRIDE {
     return plugin_manager_;
   }
+#endif
 
   /**
    * @brief Function Should be called when Low Voltage is occured
@@ -1500,7 +1502,9 @@ class ApplicationManagerImpl
   policy::PolicyHandler policy_handler_;
   protocol_handler::ProtocolHandler* protocol_handler_;
   request_controller::RequestController request_ctrl_;
+#ifdef SDL_REMOTE_CONTROL
   functional_modules::PluginManager plugin_manager_;
+#endif
 
   hmi_apis::HMI_API* hmi_so_factory_;
   mobile_apis::MOBILE_API* mobile_so_factory_;

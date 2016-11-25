@@ -155,6 +155,11 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   const uint16_t video_streaming_port() const OVERRIDE;
 
   /**
+     * @brief Returns port for audio streaming
+     */
+  const uint16_t audio_streaming_port() const;
+
+  /**
     * @brief Returns folder containing all plugins
     */
   const std::string& plugins_folder() const;

@@ -613,6 +613,7 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       }
       break;
     }
+#ifdef SDL_REMOTE_CONTROL
     case mobile_apis::FunctionID::ButtonPressID: {
       if ((*message)[strings::params][strings::message_type] ==
           static_cast<int>(application_manager::MessageType::kResponse)) {
@@ -654,6 +655,7 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       return new commands::mobile::OnInteriorVehicleDataNotification(message);
       break;
     }
+#endif
     case mobile_apis::FunctionID::OnButtonEventID: {
       command.reset(new commands::mobile::OnButtonEventNotification(
           message, application_manager));

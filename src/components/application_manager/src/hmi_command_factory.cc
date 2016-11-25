@@ -233,7 +233,6 @@
 #include "application_manager/commands/hmi/on_app_registered_notification.h"
 #include "application_manager/commands/hmi/on_app_unregistered_notification.h"
 #include "application_manager/commands/hmi/on_driver_distraction_notification.h"
-#include "application_manager/commands/hmi/on_play_tone_notification.h"
 #include "application_manager/commands/hmi/on_tts_started_notification.h"
 #include "application_manager/commands/hmi/on_tts_stopped_notification.h"
 #include "application_manager/commands/hmi/on_vr_started_notification.h"
@@ -283,6 +282,10 @@
 #include "application_manager/commands/hmi/on_tts_reset_timeout_notification.h"
 #include "application_manager/commands/hmi/dial_number_request.h"
 #include "application_manager/commands/hmi/dial_number_response.h"
+
+#ifdef SDL_REMOTE_CONTROL
+#include "application_manager/commands/hmi/on_play_tone_notification.h"
+#endif
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 namespace application_manager {
@@ -829,6 +832,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
+#ifdef SDL_REMOTE_CONTROL
     case hmi_apis::FunctionID::RC_GetInteriorVehicleDataCapabilities: {
       if (is_response) {
         command.reset(
@@ -856,6 +860,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
+#endif
 #ifdef HMI_DBUS_API
     case hmi_apis::FunctionID::VehicleInfo_GetGpsData: {
       if (is_response)
@@ -1254,7 +1259,8 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
-    case hmi_apis::FunctionID::Buttons_ButtonPress: {
+#ifdef SDL_REMOTE_CONTROL
+  case hmi_apis::FunctionID::Buttons_ButtonPress: {
       if (is_response) {
         command.reset(new commands::ButtonsButtonPressResponse(message));
       } else {
@@ -1262,6 +1268,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
+#endif
     case hmi_apis::FunctionID::SDL_OnAllowSDLFunctionality: {
       command.reset(new commands::OnAllowSDLFunctionalityNotification(
           message, application_manager));
@@ -1397,11 +1404,13 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
           message, application_manager));
       break;
     }
+#ifdef SDL_REMOTE_CONTROL
     case hmi_apis::FunctionID::RC_OnInteriorVehicleData: {
       command.reset(
           new commands::hmi::OnInteriorVehicleDataNotification(message));
       break;
     }
+#endif
 #ifdef HMI_DBUS_API
     case hmi_apis::FunctionID::VehicleInfo_SubscribeGps: {
       if (is_response)
