@@ -221,11 +221,19 @@ class PolicyHandlerInterface {
    */
   virtual void OnUpdateStatusChanged(const std::string& status) = 0;
 
+/*#ifdef SDL_REMOTE_CONTROL
+  virtual std::vector<std::string> GetDevicesIds(const std::string&) = 0;
+
+  virtual void OnUpdateHMILevel(const std::string& device_id,
+                                const std::string& policy_app_id,
+                                const std::string& hmi_level) = 0;
+#endif
+*/
   /**
-   * @brief Update currently used device id in policies manager for given
-   * application
-   * @param policy_app_id Application id
-   */
+ * @brief Update currently used device id in policies manager for given
+ * application
+ * @param policy_app_id Application id
+ */
   virtual std::string OnCurrentDeviceIdUpdateRequired(
       const std::string& policy_app_id) = 0;
 

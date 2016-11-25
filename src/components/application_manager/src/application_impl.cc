@@ -868,6 +868,12 @@ DataAccessor<VehicleInfoSubscriptions> ApplicationImpl::SubscribedIVI() const {
                                                 vi_lock_);
 }
 
+#ifdef SDL_REMOTE_CONTROL
+const std::set<uint32_t>& ApplicationImpl::SubscribesIVI() const {
+  return subscribed_vehicle_info_;
+}
+#endif
+
 const std::string& ApplicationImpl::curHash() const {
   return hash_val_;
 }

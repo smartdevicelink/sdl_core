@@ -233,9 +233,11 @@ class ApplicationManagerImpl
 
   DataAccessor<ApplicationSet> applications() const OVERRIDE;
   ApplicationSharedPtr application(uint32_t app_id) const OVERRIDE;
+#ifdef SDL_REMOTE_CONTROL
   ApplicationSharedPtr application(
       const std::string& device_id,
       const std::string& policy_app_id) const OVERRIDE;
+#endif
 
   ApplicationSharedPtr active_application() const OVERRIDE;
 
@@ -518,6 +520,7 @@ class ApplicationManagerImpl
     state_ctrl_.SetRegularState(app, new_state, SendActivateApp);
   }
 
+#ifdef SDL_REMOTE_CONTROL
   /**
    * @brief ChangeAppsHMILevel the function that will change application's
    * hmi level.
@@ -527,7 +530,6 @@ class ApplicationManagerImpl
    * @param level new hmi level for certain application.
    */
   void ChangeAppsHMILevel(uint32_t app_id, mobile_apis::HMILevel::eType level);
-
   /**
    * @brief MakeAppNotAudible allows to make certain application not audible.
    *
@@ -544,6 +546,7 @@ class ApplicationManagerImpl
    * @return true if operation was success, false otherwise.
    */
   bool MakeAppFullScreen(uint32_t app_id);
+#endif
 
   /**
    * @brief Checks, if given RPC is allowed at current HMI level for specific
@@ -576,12 +579,13 @@ class ApplicationManagerImpl
    * @param message Message to HMI
    */
   void PostMessageToHMIQueque(const MessagePtr& message) OVERRIDE;
-#endif
-  /*
+
+  /**
    * @brief Subscribes to notification from HMI
    * @param hmi_notification string with notification name
    */
   void SubscribeToHMINotification(const std::string& hmi_notification);
+#endif
 
   /**
    * @brief IsApplicationForbidden allows to distinguish if application is
@@ -733,11 +737,13 @@ class ApplicationManagerImpl
     }
     state_ctrl_.SetRegularState(app, state);
   }
+
+#ifdef SDL_REMOTE_CONTROL
   void Erase(ApplicationSharedPtr app_to_remove) {
     app_to_remove->RemoveExtensions();
     applications_.erase(app_to_remove);
   }
-
+#endif
   /**
    * @brief Checks, if particular state is active
    * @param state_id State
@@ -1052,6 +1058,7 @@ class ApplicationManagerImpl
    */
   void RemoveAppFromTTSGlobalPropertiesList(const uint32_t app_id) OVERRIDE;
 
+#ifdef SDL_REMOTE_CONTROL
   /**
    * @brief method adds application in FULL and LIMITED state
    * to on_phone_call_app_list_.
@@ -1065,7 +1072,7 @@ class ApplicationManagerImpl
    * Also OnHMIStateNotification with previous HMI state sent for these apps
    */
   void ResetPhoneCallAppList() OVERRIDE;
-
+#endif
   // TODO(AOleynik): Temporary added, to fix build. Should be reworked.
   connection_handler::ConnectionHandler& connection_handler() const OVERRIDE;
   protocol_handler::ProtocolHandler& protocol_handler() const OVERRIDE;

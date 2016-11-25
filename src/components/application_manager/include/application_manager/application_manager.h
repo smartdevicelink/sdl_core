@@ -143,8 +143,10 @@ class ApplicationManager {
   virtual DataAccessor<ApplicationSet> applications() const = 0;
 
   virtual ApplicationSharedPtr application(uint32_t app_id) const = 0;
+#ifdef SDL_REMOTE_CONTROL
   virtual ApplicationSharedPtr application(
       const std::string& device_id, const std::string& policy_app_id) const = 0;
+#endif
   virtual ApplicationSharedPtr active_application() const = 0;
 
   /**
@@ -605,12 +607,14 @@ class ApplicationManager {
 
   virtual event_engine::EventDispatcher& event_dispatcher() = 0;
 
-  virtual void ChangeAppsHMILevel(uint32_t app_id,
-                                  mobile_apis::HMILevel::eType level) = 0;
   virtual uint32_t GetAvailableSpaceForApp(const std::string& folder_name) = 0;
   virtual void OnTimerSendTTSGlobalProperties() = 0;
+#ifdef SDL_REMOTE_CONTROL
+  virtual void ChangeAppsHMILevel(uint32_t app_id,
+                                  mobile_apis::HMILevel::eType level) = 0;
   virtual void CreatePhoneCallAppList() = 0;
   virtual void ResetPhoneCallAppList() = 0;
+#endif
   virtual void OnLowVoltage() = 0;
   virtual void OnWakeUp() = 0;
 #ifdef SDL_REMOTE_CONTROL

@@ -62,8 +62,9 @@ typedef Map<Rpcs, 1, 255> FunctionalGroupings;
 typedef Map<DeviceParams, 0, 255> DeviceData;
 
 typedef Array<Enum<RequestType>, 0, 255> RequestTypes;
+#ifdef SDL_REMOTE_CONTROL
 typedef Map<InteriorZone, 2, 1000000> Zones;
-
+#endif
 typedef Map<Strings, 0, 255> RemoteRpcs;
 
 typedef Map<RemoteRpcs, 0, 255> AccessModules;
@@ -98,6 +99,7 @@ struct DevicePolicy : PolicyBase {
   explicit DevicePolicy(const Json::Value* value__);
 };
 
+#ifdef SDL_REMOTE_CONTROL
 struct InteriorZone : CompositeType {
  public:
   Integer<uint8_t, 0, 100> col;
@@ -136,6 +138,7 @@ struct InteriorZone : CompositeType {
                                  const RemoteRpcs& rpcs) const;
   inline bool ValidateParameters(ModuleType module, const Strings& rpcs) const;
 };
+#endif
 
 struct ApplicationParams : PolicyBase {
  public:
@@ -232,6 +235,7 @@ struct Rpcs : CompositeType {
   bool Validate() const;
 };
 
+#ifdef SDL_REMOTE_CONTROL
 struct Equipment : CompositeType {
  public:
   Zones zones;
@@ -251,6 +255,7 @@ struct Equipment : CompositeType {
   bool Validate() const;
   inline bool ValidateNameZone(const std::string& name) const;
 };
+#endif
 
 struct ModuleConfig : CompositeType {
  public:
@@ -270,8 +275,9 @@ struct ModuleConfig : CompositeType {
   Optional<String<0, 65535> > certificate;
   Optional<Boolean> user_consent_passengersRC;
   Optional<Boolean> country_consent_passengersRC;
+#ifdef SDL_REMOTE_CONTROL
   Optional<Equipment> equipment;
-
+#endif
  public:
   ModuleConfig();
   ModuleConfig(uint8_t exchange_after_x_ignition_cycles,

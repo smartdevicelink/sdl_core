@@ -184,6 +184,7 @@ bool LifeCycle::StartComponents() {
   // start transport manager
   transport_manager_->Visibility(true);
 
+#ifdef SDL_REMOTE_CONTROL
   components_started_ = true;
 
   core_service_ = new application_manager::CoreService();
@@ -201,7 +202,7 @@ bool LifeCycle::StartComponents() {
 
   plugin_manager_->OnServiceStateChanged(
       functional_modules::ServiceState::HMI_ADAPTER_INITIALIZED);
-
+#endif
   return true;
 }
 
@@ -352,13 +353,10 @@ void LifeCycle::Run() {
 
 void LifeCycle::StopComponents() {
   LOG4CXX_AUTO_TRACE(logger_);
-  if (!components_started_) {
-    LOG4CXX_ERROR(logger_, "Components wasn't started");
-    return;
-  }
 
+#ifdef SDL_REMOTE_CONTROL
   functional_modules::PluginManager::destroy();
-
+#endif
   DCHECK_OR_RETURN_VOID(hmi_handler_);
   hmi_handler_->set_message_observer(NULL);
 

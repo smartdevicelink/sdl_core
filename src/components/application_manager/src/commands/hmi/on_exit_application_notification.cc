@@ -114,7 +114,6 @@ void OnExitApplicationNotification::Run() {
       app_impl->device(), application_manager_);
   application_manager_.GetPolicyHandler().ResetAccess(
       device_handle, app_impl->mobile_app_id());
-#endif  // SDL_REMOTE_CONTROL
 
   application_manager_.ChangeAppsHMILevel(app_impl->app_id(),
                                           mobile_apis::HMILevel::HMI_NONE);
@@ -124,6 +123,8 @@ void OnExitApplicationNotification::Run() {
   app_impl->set_system_context(mobile_api::SystemContext::SYSCTXT_MAIN);
   // MessageHelper::SendHMIStatusNotification(*app_impl);
   application_manager_.SendHMIStatusNotification(app_impl);
+#endif  // SDL_REMOTE_CONTROL
+
 }
 
 }  // namespace commands

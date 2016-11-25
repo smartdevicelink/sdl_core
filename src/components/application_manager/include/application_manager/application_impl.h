@@ -159,10 +159,12 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   void increment_put_file_in_none_count();
   void increment_delete_file_in_none_count();
   void increment_list_files_in_none_count();
+#ifdef SDL_REMOTE_CONTROL
   void set_system_context(
       const mobile_api::SystemContext::eType& system_context);
   void set_audio_streaming_state(
       const mobile_api::AudioStreamingState::eType& state);
+#endif
   bool set_app_icon_path(const std::string& path);
   void set_app_allowed(const bool allowed);
   void set_device(connection_handler::DeviceHandle device);
@@ -196,8 +198,9 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   bool IsSubscribedToInteriorVehicleData(smart_objects::SmartObject module);
   bool UnsubscribeFromInteriorVehicleData(smart_objects::SmartObject module);
 
-  virtual const std::set<uint32_t>& SubscribesIVI() const;
-
+#ifdef SDL_REMOTE_CONTROL
+  virtual const std::set<uint32_t>& SubscribesIVI() const OVERRIDE;
+#endif
   /**
    * @brief ResetDataInNone reset data counters in NONE
    */
@@ -304,12 +307,14 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
 
   void set_video_stream_retry_number(const uint32_t& video_stream_retry_number);
 
+#ifdef SDL_REMOTE_CONTROL
   /**
    * @brief Return pointer to extension by uid
    * @param uid uid of extension
    * @return Pointer to extension, if extension was initialized, otherwise NULL
    */
   AppExtensionPtr QueryInterface(AppExtensionUID uid) OVERRIDE;
+#endif
 
   /**
    * @brief Load persistent files from application folder.
@@ -329,24 +334,26 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
    */
   void CleanupFiles();
 
+#ifdef SDL_REMOTE_CONTROL
   /**
    * @brief Add extension to application
    * @param extension pointer to extension
    * @return true if success, false if extension already initialized
    */
-  bool AddExtension(AppExtensionPtr extention);
+   bool AddExtension(AppExtensionPtr extention) OVERRIDE;
 
   /**
    * @brief Remove extension from application
    * @param uid uid of extension
    * @return true if success, false if extension is not present
    */
-  bool RemoveExtension(AppExtensionUID uid);
+  bool RemoveExtension(AppExtensionUID uid) OVERRIDE;
 
   /**
    * @brief Removes all extensions
    */
-  void RemoveExtensions();
+  void RemoveExtensions() OVERRIDE;
+#endif
 
  private:
   /**

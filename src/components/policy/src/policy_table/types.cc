@@ -676,6 +676,7 @@ void ModuleConfig::SetPolicyTableType(PolicyTableType pt_type) {
   vehicle_year.SetPolicyTableType(pt_type);
 }
 
+#ifdef SDL_REMOTE_CONTROL
 // Equipment methods
 Equipment::Equipment() : CompositeType(kUninitialized) {}
 Equipment::~Equipment() {}
@@ -718,6 +719,7 @@ void Equipment::SetPolicyTableType(PolicyTableType pt_type) {
   zones.SetPolicyTableType(pt_type);
 }
 
+#endif
 // MessageString methods
 MessageString::MessageString() : CompositeType(kUninitialized) {}
 MessageString::~MessageString() {}

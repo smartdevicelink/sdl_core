@@ -441,6 +441,8 @@ void PolicyManagerImpl::SendNotificationOnPermissionsUpdated(
   LOG4CXX_INFO(logger_,
                "Send notification for application_id:" << application_id);
 
+  std::string default_hmi;
+  default_hmi = "NONE";
 #ifdef SDL_REMOTE_CONTROL
   const Subject who = {device_id, application_id};
   if (access_remote_->IsAppReverse(who)) {
@@ -450,16 +452,17 @@ void PolicyManagerImpl::SendNotificationOnPermissionsUpdated(
     listener()->OnPermissionsUpdated(application_id, notification_data);
     return;
   }
-#else   // SDL_REMOTE_CONTROL
-  std::string default_hmi;
+  //(TODO) OKozlov clarify
+  //#else   // SDL_REMOTE_CONTROL
   GetDefaultHmi(application_id, &default_hmi);
   listener()->OnUpdateHMILevel(device_id, application_id, default_hmi);
 
   listener()->OnPermissionsUpdated(
       application_id, notification_data, default_hmi);
-#endif  // SDL_REMOTE_CONTROL  
+#endif  // SDL_REMOTE_CONTROL
+
   listener()->OnPermissionsUpdated(
-        application_id, notification_data, default_hmi);
+      application_id, notification_data, default_hmi);
 }
 
 bool PolicyManagerImpl::CleanupUnpairedDevices() {

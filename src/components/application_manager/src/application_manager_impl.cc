@@ -2961,12 +2961,12 @@ void ApplicationManagerImpl::PostMessageToMobileQueque(
 void ApplicationManagerImpl::PostMessageToHMIQueque(const MessagePtr& message) {
   messages_to_hmi_.PostMessage(impl::MessageToHmi(message));
 }
-#endif
 
 void ApplicationManagerImpl::SubscribeToHMINotification(
     const std::string& hmi_notification) {
   hmi_handler_->SubscribeToHMINotification(hmi_notification);
 }
+#endif
 
 bool ApplicationManagerImpl::IsLowVoltage() {
   LOG4CXX_TRACE(logger_, "result: " << is_low_voltage_);
@@ -3547,7 +3547,6 @@ void ApplicationManagerImpl::ChangeAppsHMILevel(
     LOG4CXX_WARN(logger_, "Redudant changing HMI level : " << level);
   }
 }
-#endif
 
 void ApplicationManagerImpl::MakeAppNotAudible(uint32_t app_id) {
   using namespace mobile_apis;
@@ -3580,6 +3579,7 @@ bool ApplicationManagerImpl::MakeAppFullScreen(uint32_t app_id) {
 
   return true;
 }
+#endif
 
 mobile_apis::AppHMIType::eType ApplicationManagerImpl::StringToAppHMIType(
     std::string str) {

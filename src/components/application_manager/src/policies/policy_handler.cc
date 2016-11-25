@@ -726,7 +726,7 @@ std::string PolicyHandler::OnCurrentDeviceIdUpdateRequired(
 
 #ifdef SDL_REMOTE_CONTROL
 std::vector<std::string> PolicyHandler::GetDevicesIds(
-    const std::string policy_app_id) {
+    const std::string& policy_app_id) {
   return application_manager_.devices(policy_app_id);
 }
 #endif
@@ -1349,7 +1349,8 @@ void PolicyHandler::OnUpdateHMIAppType(
     (*it)->OnUpdateHMIAppType(app_hmi_types);
   }
 }
-/*
+
+#ifdef SDL_REMOTE_CONTROL
 void PolicyHandler::OnUpdateHMILevel(const std::string& device_id,
                                      const std::string& policy_app_id,
                                      const std::string& hmi_level) {
@@ -1372,7 +1373,8 @@ void PolicyHandler::OnUpdateHMILevel(const std::string& device_id,
   }
   UpdateHMILevel(app, level);
 }
-*/
+#endif
+
 void PolicyHandler::OnCertificateUpdated(const std::string& certificate_data) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(listeners_lock_);

@@ -60,13 +60,15 @@ class PolicyListener {
    */
   virtual std::string OnCurrentDeviceIdUpdateRequired(
       const std::string& policy_app_id) = 0;
-  /**
-   * Gets devices ids by policy application id
-   * @param policy_app_id
-   * @return list devices ids
-   */
+/**
+ * Gets devices ids by policy application id
+ * @param policy_app_id
+ * @return list devices ids
+ */
+#ifdef SDL_REMOTE_CONTROL
   virtual std::vector<std::string> GetDevicesIds(
-      const std::string policy_app_id) = 0;
+      const std::string& policy_app_id) = 0;
+#endif
   virtual void OnSystemInfoUpdateRequired() = 0;
   virtual custom_str::CustomString GetAppName(
       const std::string& policy_app_id) = 0;
@@ -79,10 +81,11 @@ class PolicyListener {
    * @param policy_app_id unique identifier of application in policy
    * @param hmi_level default HMI level for this application
    */
+#ifdef SDL_REMOTE_CONTROL
   virtual void OnUpdateHMILevel(const std::string& device_id,
                                 const std::string& policy_app_id,
                                 const std::string& hmi_level) = 0;
-
+#endif
   /**
    * @brief CanUpdate allows to find active application
    * and check whether related device consented.
