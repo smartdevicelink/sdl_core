@@ -124,6 +124,15 @@ class MessageHelper {
       const std::string& hmi_result);
 
   /**
+   * @brief Converts string to device rank, if possible
+   * @param device_rank Stringified device rank
+   * @return Appropriate enum from device rank, or INVALID_ENUM, if conversion
+   * is not possible
+   */
+  static mobile_api::DeviceRank::eType StringToDeviceRank(
+      const std::string& device_ranki);
+
+  /**
    * @brief Converts mobile Result enum value to string
    * @param mobile_result mobile Result enum value
    * @return stringified value for enum if succedeed, otherwise - empty string

@@ -85,6 +85,7 @@ class Application;
 class StateControllerImpl;
 struct CommandParametersPermissions;
 typedef std::vector<std::string> RPCParams;
+typedef std::vector<ApplicationSharedPtr> AppSharedPtrs;
 
 struct ApplicationsAppIdSorter {
   bool operator()(const ApplicationSharedPtr lhs,
@@ -156,9 +157,12 @@ class ApplicationManager {
   virtual ApplicationSharedPtr application_by_policy_id(
       const std::string& policy_app_id) const = 0;
 
-  virtual std::vector<ApplicationSharedPtr> applications_by_button(
+  virtual AppSharedPtrs applications_by_button(
       uint32_t button) = 0;
-  virtual std::vector<ApplicationSharedPtr> applications_with_navi() = 0;
+  virtual AppSharedPtrs applications_with_navi() = 0;
+#ifdef SDL_REMOTE_CONTROL
+  virtual AppSharedPtrs applications_by_interior_vehicle_data(smart_objects::SmartObject moduleDescription) = 0;
+#endif //SDL_REMOTE_CONTROL
 
   /**
    * @brief Returns media application with LIMITED HMI Level if exists
@@ -339,7 +343,7 @@ class ApplicationManager {
    * @param vehicle_info Enum value of type of vehicle data
    * @param new value (for integer values currently) of vehicle data
    */
-  virtual std::vector<ApplicationSharedPtr> IviInfoUpdated(
+  virtual AppSharedPtrs IviInfoUpdated(
       VehicleDataType vehicle_info, int value) = 0;
 
   virtual ApplicationSharedPtr RegisterApplication(const utils::SharedPtr<

@@ -44,8 +44,8 @@ namespace application_manager {
 namespace commands {
 
 GetInteriorVehicleDataRequest::GetInteriorVehicleDataRequest(
-    const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager) {
   subscribe_on_event(hmi_apis::FunctionID::UI_OnResetTimeout);
 }
 

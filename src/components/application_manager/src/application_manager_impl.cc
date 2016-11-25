@@ -204,9 +204,9 @@ ApplicationSharedPtr FindApp(DataAccessor<ApplicationSet> accessor,
 }
 
 template <class UnaryPredicate>
-std::vector<ApplicationSharedPtr> FindAllApps(
+AppSharedPtrs FindAllApps(
     DataAccessor<ApplicationSet> accessor, UnaryPredicate finder) {
-  std::vector<ApplicationSharedPtr> result;
+  AppSharedPtrs result;
   ApplicationSetConstIt it = std::find_if(
       accessor.GetData().begin(), accessor.GetData().end(), finder);
   while (it != accessor.GetData().end()) {
@@ -259,7 +259,7 @@ struct TakeDeviceHandle {
 std::vector<std::string> ApplicationManagerImpl::devices(
     const std::string& policy_app_id) const {
   MobileAppIdPredicate matcher(policy_app_id);
-  std::vector<ApplicationSharedPtr> apps =
+  AppSharedPtrs apps =
       ApplicationListAccessor().FindAll(matcher);
   std::vector<std::string> devices;
   std::transform(apps.begin(),
@@ -332,12 +332,12 @@ bool NaviAppPredicate(const ApplicationSharedPtr app) {
   return app ? app->is_navi() : false;
 }
 
-std::vector<ApplicationSharedPtr>
+AppSharedPtrs
 ApplicationManagerImpl::applications_with_navi() {
   DataAccessor<ApplicationSet> accessor = applications();
   return FindAllApps(accessor, NaviAppPredicate);
 }
-std::vector<ApplicationSharedPtr>
+AppSharedPtrs
 ApplicationManagerImpl::applications_by_button(uint32_t button) {
   SubscribedToButtonPredicate finder(
       static_cast<mobile_apis::ButtonName::eType>(button));
@@ -355,17 +355,17 @@ struct SubscribedToIVIPredicate {
 };
 
 #ifdef SDL_REMOTE_CONTROL
-std::vector<ApplicationSharedPtr>
+AppSharedPtrs
 ApplicationManagerImpl::applications_by_interior_vehicle_data(
     smart_objects::SmartObject moduleDescription) {
   SubscribedToInteriorVehicleDataPredicate finder(moduleDescription);
   ApplicationListAccessor accessor;
-  std::vector<ApplicationSharedPtr> apps = accessor.FindAll(finder);
+  AppSharedPtrs apps = accessor.FindAll(finder);
   LOG4CXX_DEBUG(logger_, " Found count: " << apps.size());
   return apps;
 }
 #endif
-std::vector<ApplicationSharedPtr> ApplicationManagerImpl::IviInfoUpdated(
+AppSharedPtrs ApplicationManagerImpl::IviInfoUpdated(
     VehicleDataType vehicle_info, int value) {
   // Notify Policy Manager if available about info it's interested in,
   // i.e. odometer etc
@@ -3811,7 +3811,7 @@ const std::set<int32_t> ApplicationManagerImpl::GetAppsSubscribedForWayPoints()
 std::vector<std::string> ApplicationManagerImpl::devices(
     const std::string& policy_app_id) const {
   MobileAppIdPredicate matcher(policy_app_id);
-  std::vector<ApplicationSharedPtr> apps =
+  AppSharedPtrs apps =
       ApplicationListAccessor().FindAll(matcher);
   std::vector<std::string> devices;
   std::transform(apps.begin(),

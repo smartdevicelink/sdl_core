@@ -44,8 +44,8 @@ namespace commands {
 namespace hmi {
 
 OnInteriorVehicleDataNotification::OnInteriorVehicleDataNotification(
-    const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : NotificationFromHMI(message, application_manager) {}
 
 OnInteriorVehicleDataNotification::~OnInteriorVehicleDataNotification() {}
 

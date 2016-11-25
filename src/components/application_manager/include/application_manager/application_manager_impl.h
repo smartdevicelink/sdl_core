@@ -244,9 +244,12 @@ class ApplicationManagerImpl
   ApplicationSharedPtr application_by_policy_id(
       const std::string& policy_app_id) const OVERRIDE;
 
-  std::vector<ApplicationSharedPtr> applications_by_button(
+  AppSharedPtrs applications_by_button(
       uint32_t button) OVERRIDE;
-  std::vector<ApplicationSharedPtr> applications_with_navi() OVERRIDE;
+  AppSharedPtrs applications_with_navi() OVERRIDE;
+#ifdef SDL_REMOTE_CONTROL
+  AppSharedPtrs applications_by_interior_vehicle_data(smart_objects::SmartObject moduleDescription) OVERRIDE;
+#endif // SDL_REMOTE_CONTROL
 
   ApplicationSharedPtr get_limited_media_application() const OVERRIDE;
   ApplicationSharedPtr get_limited_navi_application() const OVERRIDE;
@@ -312,7 +315,7 @@ class ApplicationManagerImpl
    * @param vehicle_info Enum value of type of vehicle data
    * @param new value (for integer values currently) of vehicle data
    */
-  std::vector<ApplicationSharedPtr> IviInfoUpdated(VehicleDataType vehicle_info,
+  AppSharedPtrs IviInfoUpdated(VehicleDataType vehicle_info,
                                                    int value) OVERRIDE;
 
   void OnApplicationRegistered(ApplicationSharedPtr app) OVERRIDE;

@@ -42,8 +42,8 @@ namespace commands {
 namespace mobile {
 
 OnInteriorVehicleDataNotification::OnInteriorVehicleDataNotification(
-    const MessageSharedPtr& message)
-    : CommandNotificationImpl(message) {}
+    const MessageSharedPtr& message,  ApplicationManager& application_manager)
+    : CommandNotificationImpl(message, application_manager) {}
 
 OnInteriorVehicleDataNotification::~OnInteriorVehicleDataNotification() {}
 
@@ -72,7 +72,7 @@ void OnInteriorVehicleDataNotification::Run() {
   for (; subscribedApps.end() != it; ++it) {
     ApplicationSharedPtr subscribed_app = *it;
     if (!subscribed_app) {
-      LOG4CXX_WARN_EXT(logger_, "Null pointer to subscribed app.");
+      LOG4CXX_WARN(logger_, "Null pointer to subscribed app.");
       continue;
     }
 
@@ -80,7 +80,7 @@ void OnInteriorVehicleDataNotification::Run() {
         new smart_objects::SmartObject();
 
     if (!on_interior_vehicle_data_notification) {
-      LOG4CXX_ERROR_EXT(logger_, "OnButtonPress NULL pointer");
+      LOG4CXX_ERROR(logger_, "OnButtonPress NULL pointer");
       return;
     }
 
