@@ -724,10 +724,12 @@ std::string PolicyHandler::OnCurrentDeviceIdUpdateRequired(
   return device_params.device_mac_address;
 }
 
+#ifdef SDL_REMOTE_CONTROL
 std::vector<std::string> PolicyHandler::GetDevicesIds(
     const std::string policy_app_id) {
   return application_manager_.devices(policy_app_id);
 }
+#endif
 
 void PolicyHandler::OnSystemInfoChanged(const std::string& language) {
   LOG4CXX_AUTO_TRACE(logger_);

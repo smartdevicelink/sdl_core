@@ -562,6 +562,7 @@ class ApplicationManagerImpl
       const RPCParams& rpc_params,
       CommandParametersPermissions* params_permissions = NULL) OVERRIDE;
 
+#ifdef SDL_REMOTE_CONTROL
   /**
    * @brief  Places a message to the queue to be sent to mobile. Called from
    * plugins.
@@ -575,7 +576,7 @@ class ApplicationManagerImpl
    * @param message Message to HMI
    */
   void PostMessageToHMIQueque(const MessagePtr& message) OVERRIDE;
-
+#endif
   /*
    * @brief Subscribes to notification from HMI
    * @param hmi_notification string with notification name
@@ -1459,10 +1460,10 @@ class ApplicationManagerImpl
       const connection_handler::DeviceHandle handle);
 
   void ClearTTSGlobalPropertiesList();
-
+#ifdef SDL_REMOTE_CONTROL
   std::vector<std::string> devices(
       const std::string& policy_app_id) const OVERRIDE;
-
+#endif
  private:
   const ApplicationManagerSettings& settings_;
   /**

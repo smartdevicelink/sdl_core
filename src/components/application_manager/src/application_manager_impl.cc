@@ -2952,6 +2952,7 @@ void ApplicationManagerImpl::OnLowVoltage() {
   request_ctrl_.OnLowVoltage();
 }
 
+#ifdef SDL_REMOTE_CONTROL
 void ApplicationManagerImpl::PostMessageToMobileQueque(
     const MessagePtr& message) {
   messages_to_mobile_.PostMessage(impl::MessageToMobile(message, false));
@@ -2960,6 +2961,7 @@ void ApplicationManagerImpl::PostMessageToMobileQueque(
 void ApplicationManagerImpl::PostMessageToHMIQueque(const MessagePtr& message) {
   messages_to_hmi_.PostMessage(impl::MessageToHmi(message));
 }
+#endif
 
 void ApplicationManagerImpl::SubscribeToHMINotification(
     const std::string& hmi_notification) {

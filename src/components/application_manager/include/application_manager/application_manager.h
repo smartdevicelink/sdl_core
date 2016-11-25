@@ -48,8 +48,9 @@
 #include "application_manager/application_manager_settings.h"
 #include "application_manager/state_controller.h"
 #include "application_manager/hmi_interfaces.h"
+#ifdef SDL_REMOTE_CONTROL
 #include "functional_module/plugin_manager.h"
-
+#endif
 namespace resumption {
 class LastState;
 }
@@ -612,11 +613,13 @@ class ApplicationManager {
   virtual void ResetPhoneCallAppList() = 0;
   virtual void OnLowVoltage() = 0;
   virtual void OnWakeUp() = 0;
+#ifdef SDL_REMOTE_CONTROL
   virtual functional_modules::PluginManager& GetPluginManager() = 0;
   virtual std::vector<std::string> devices(
       const std::string& policy_app_id) const = 0;
   virtual void PostMessageToHMIQueque(const MessagePtr& message) = 0;
   virtual void PostMessageToMobileQueque(const MessagePtr& message) = 0;
+#endif
 };
 
 }  // namespace application_manager
