@@ -110,8 +110,8 @@ void OnExitApplicationNotification::Run() {
   }
 
 #ifdef SDL_REMOTE_CONTROL
-  std::string device_handle =
-      MessageHelper::GetDeviceMacAddressForHandle(app_impl->device(),application_manager_);
+  std::string device_handle = MessageHelper::GetDeviceMacAddressForHandle(
+      app_impl->device(), application_manager_);
   application_manager_.GetPolicyHandler().ResetAccess(
       device_handle, app_impl->mobile_app_id());
 #endif  // SDL_REMOTE_CONTROL

@@ -140,8 +140,8 @@ class MessageHelper {
   static std::string MobileResultToString(
       mobile_apis::Result::eType mobile_result);
 
-  static std::string GetDeviceMacAddressForHandle(
-          const uint32_t device_handle, ApplicationManager& app_mngr);
+  static std::string GetDeviceMacAddressForHandle(const uint32_t device_handle,
+                                                  ApplicationManager& app_mngr);
 
   /**
    * @brief Converts string to mobile Result enum value

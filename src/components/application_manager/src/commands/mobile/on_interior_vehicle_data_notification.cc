@@ -42,7 +42,7 @@ namespace commands {
 namespace mobile {
 
 OnInteriorVehicleDataNotification::OnInteriorVehicleDataNotification(
-    const MessageSharedPtr& message,  ApplicationManager& application_manager)
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
     : CommandNotificationImpl(message, application_manager) {}
 
 OnInteriorVehicleDataNotification::~OnInteriorVehicleDataNotification() {}
