@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
@@ -29,31 +29,33 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "application_manager/commands/hmi/decrypt_certificate_response.h"
+#ifndef SRC_COMPONENTS_POLICY_POLICY_EXTERNAL_TEST_INCLUDE_POLICY_MOCK_UPDATE_STATUS_MANAGER_H_
+#define SRC_COMPONENTS_POLICY_POLICY_EXTERNAL_TEST_INCLUDE_POLICY_MOCK_UPDATE_STATUS_MANAGER_H_
 
-#include "application_manager/policies/policy_handler.h"
-#ifdef EXTERNAL_PROPRIETARY
-namespace application_manager {
+#include "gmock/gmock.h"
 
-namespace commands {
+#include "policy/update_status_manager.h"
 
-DecryptCertificateResponse::DecryptCertificateResponse(
-    const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : ResponseFromHMI(message, application_manager) {}
+namespace test {
+namespace components {
+namespace policy_test {
 
-DecryptCertificateResponse::~DecryptCertificateResponse() {}
+class MockUpdateStatusManager : public ::policy::UpdateStatusManager {
+ public:
+  MOCK_METHOD1(set_listener, void(PolicyListener* listener));
+  MOCK_METHOD1(OnUpdateSentOut, void(uint32_t update_timeout));
+  MOCK_METHOD0(OnUpdateTimeoutOccurs, void());
+  MOCK_METHOD0(OnValidUpdateReceived, void());
+  MOCK_METHOD0(OnWrongUpdateReceived, void());
+  MOCK_METHOD1(OnResetDefaultPT, void(bool is_update_required));
+  MOCK_METHOD0(OnResetRetrySequence, void());
+  MOCK_METHOD0(OnNewApplicationAdded, void());
+  MOCK_METHOD1(OnPolicyInit, void(bool is_update_required));
+  MOCK_METHOD0(GetUpdateStatus, PolicyTableStatus());
+};
 
-void DecryptCertificateResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  const hmi_apis::Common_Result::eType code =
-      static_cast<hmi_apis::Common_Result::eType>(
-          (*message_)[strings::params][hmi_response::code].asInt());
+}  // namespace policy_test
+}  // namespace components
+}  // namespace test
 
-  const bool is_succeeded = hmi_apis::Common_Result::SUCCESS == code;
-
-  application_manager_.GetPolicyHandler().OnCertificateDecrypted(is_succeeded);
-}
-
-}  // namespace commands
-}  // namespace application_manager
-#endif  // EXTERNAL_PROPRIETARY
+#endif  // SRC_COMPONENTS_POLICY_POLICY_EXTERNAL_TEST_INCLUDE_POLICY_MOCK_UPDATE_STATUS_MANAGER_H_

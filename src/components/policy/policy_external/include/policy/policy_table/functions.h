@@ -29,31 +29,11 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "application_manager/commands/hmi/decrypt_certificate_response.h"
 
-#include "application_manager/policies/policy_handler.h"
-#ifdef EXTERNAL_PROPRIETARY
-namespace application_manager {
+#ifndef SRC_COMPONENTS_POLICY_POLICY_EXTERNAL_INCLUDE_POLICY_POLICY_TABLE_FUNCTIONS_H_
+#define SRC_COMPONENTS_POLICY_POLICY_EXTERNAL_INCLUDE_POLICY_POLICY_TABLE_FUNCTIONS_H_
 
-namespace commands {
+#include "policy/policy_table/enums.h"
+#include "policy/policy_table/types.h"
 
-DecryptCertificateResponse::DecryptCertificateResponse(
-    const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : ResponseFromHMI(message, application_manager) {}
-
-DecryptCertificateResponse::~DecryptCertificateResponse() {}
-
-void DecryptCertificateResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  const hmi_apis::Common_Result::eType code =
-      static_cast<hmi_apis::Common_Result::eType>(
-          (*message_)[strings::params][hmi_response::code].asInt());
-
-  const bool is_succeeded = hmi_apis::Common_Result::SUCCESS == code;
-
-  application_manager_.GetPolicyHandler().OnCertificateDecrypted(is_succeeded);
-}
-
-}  // namespace commands
-}  // namespace application_manager
-#endif  // EXTERNAL_PROPRIETARY
+#endif  // SRC_COMPONENTS_POLICY_POLICY_EXTERNAL_INCLUDE_POLICY_POLICY_TABLE_FUNCTIONS_H_

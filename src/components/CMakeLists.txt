@@ -60,8 +60,8 @@ if(ENABLE_SECURITY)
 endif()
 
 
-if (${EXTENDED_POLICY} STREQUAL "EXTENDED_PROPRIETARY")
-  add_subdirectory(./policy/policy_premium/)
+if (${EXTENDED_POLICY} STREQUAL "EXTERNAL_PROPRIETARY")
+  add_subdirectory(./policy/policy_external/)
   message(STATUS "Use premium policy")
 else()
   add_subdirectory(./policy/policy_regular/)
