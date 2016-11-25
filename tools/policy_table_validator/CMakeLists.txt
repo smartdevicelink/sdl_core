@@ -6,9 +6,9 @@ include_directories(
 	${JSONCPP_INCLUDE_DIRECTORY}
 )
 
-  message(STATUS "use ${EXTENDED_POLICY} poicy")
-if (${EXTENDED_POLICY} STREQUAL "EXTENDED_PROPRIETARY")
-  include_directories(${CMAKE_SOURCE_DIR}/src/components/policy/policy_premium/include/)
+message(STATUS "Using ${EXTENDED_POLICY} policy mode")
+if (${EXTENDED_POLICY} STREQUAL "EXTERNAL_PROPRIETARY")
+  include_directories(${CMAKE_SOURCE_DIR}/src/components/policy/policy_external/include/)
 else()
   include_directories(${CMAKE_SOURCE_DIR}/src/components/policy/policy_regular/include/)
 endif()
