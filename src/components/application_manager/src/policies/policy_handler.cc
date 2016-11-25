@@ -492,9 +492,11 @@ void PolicyHandler::AddApplication(const std::string& application_id) {
   policy_manager_->AddApplication(application_id);
 }
 
-bool PolicyHandler::CheckHMIType(const std::string& application_id,
-                                 mobile_apis::AppHMIType::eType hmi,
-                                 const smart_objects::SmartObject* app_types) {
+#ifdef SDL_REMOTE_CONTROL
+bool PolicyHandler::CheckHMIType(
+    const std::string& application_id,
+    mobile_apis::AppHMIType::eType hmi,
+    const smart_objects::SmartObjectSPtr app_types) {
   LOG4CXX_AUTO_TRACE(logger_);
   POLICY_LIB_CHECK(false);
   std::vector<int> policy_hmi_types;
@@ -512,6 +514,7 @@ bool PolicyHandler::CheckHMIType(const std::string& application_id,
       ret ? policy_hmi_types : additional_hmi_types;
   return std::find(hmi_types.begin(), hmi_types.end(), hmi) != hmi_types.end();
 }
+#endif
 
 void PolicyHandler::AddDevice(const std::string& device_id,
                               const std::string& connection_type) {

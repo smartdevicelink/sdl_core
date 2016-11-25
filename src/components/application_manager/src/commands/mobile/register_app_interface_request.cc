@@ -1058,14 +1058,6 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckCoincidence() {
 //(TODO) OKozlov clarify
 #else   // SDL_REMOTE_CONTROL
   matcher(app_name.AsMBString(), vr_synonyms);
-#endif  // SDL_REMOTE_CONTROL
-
-#ifdef SDL_REMOTE_CONTROL
-  // return mobile_apis::Result::SUCCESS;
-  bool duplicate =
-      std::find_if(accessor.begin(), accessor.end(), matcher) != accessor.end();
-  return duplicate ? mobile_apis::Result::DUPLICATE_NAME
-                   : mobile_apis::Result::SUCCESS;
   //(TODO) OKozlov clarify
   //#else   // SDL_REMOTE_CONTROL
   IsSameAppName matcher(app_name.AsMBString(), vr_synonyms);
@@ -1224,11 +1216,6 @@ bool RegisterAppInterfaceRequest::IsApplicationWithSameAppIdRegistered() {
   IsSameAppId matcher(mobile_app_id.AsMBString());
 #endif  // SDL_REMOTE_CONTROL
 
-#ifdef SDL_REMOTE_CONTROL
-  //(TODO) OKozlov clarify
-  //#else   // SDL_REMOTE_CONTROL
-  IsSameAppId matcher(mobile_app_id.AsMBString());
-#endif  // SDL_REMOTE_CONTROL
 
 #ifdef SDL_REMOTE_CONTROL
   return std::find_if(applications.begin(), applications.end(), matcher) !=

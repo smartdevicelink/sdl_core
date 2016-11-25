@@ -374,8 +374,7 @@ const VehicleInfo PolicyManagerImpl::GetVehicleInfo() const {
   return cache_->GetVehicleInfo();
 }
 
-void PolicyManagerImpl::CheckPermissions(const PTString& device_id,
-                                         const PTString& app_id,
+void PolicyManagerImpl::CheckPermissions(const PTString& app_id,
                                          const PTString& hmi_level,
                                          const PTString& rpc,
                                          const RPCParams& rpc_params,
@@ -458,9 +457,9 @@ void PolicyManagerImpl::SendNotificationOnPermissionsUpdated(
 
   listener()->OnPermissionsUpdated(
       application_id, notification_data, default_hmi);
-#endif  // SDL_REMOTE_CONTROL
+#endif  // SDL_REMOTE_CONTROL  
   listener()->OnPermissionsUpdated(
-      device_id, application_id, notification_data);
+        application_id, notification_data, default_hmi);
 }
 
 bool PolicyManagerImpl::CleanupUnpairedDevices() {
