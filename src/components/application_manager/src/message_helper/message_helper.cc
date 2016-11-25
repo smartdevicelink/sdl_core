@@ -220,6 +220,16 @@ hmi_apis::Common_Language::eType MessageHelper::CommonLanguageFromString(
   return hmi_apis::Common_Language::INVALID_ENUM;
 }
 
+std::string MessageHelper::GetDeviceMacAddressForHandle(
+  const uint32_t device_handle, ApplicationManager& app_mngr) {
+
+  std::string device_mac_address = "";
+  app_mngr.connection_handler().GetDataOnDeviceID(
+    device_handle, NULL, NULL, &device_mac_address);
+  LOG4CXX_DEBUG(logger_, "result : " << device_handle);
+  return device_mac_address;
+}
+
 smart_objects::SmartObjectSPtr MessageHelper::CreateRequestObject(
     const uint32_t correlation_id) {
   using namespace smart_objects;

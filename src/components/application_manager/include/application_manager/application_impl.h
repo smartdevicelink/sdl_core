@@ -53,10 +53,6 @@
 #include "utils/custom_string.h"
 #include "utils/timer.h"
 
-#ifdef SDL_REMOTE_CONTROL
-#include "utils/timer_thread.h"
-#endif
-
 namespace usage_statistics {
 
 class StatisticsManager;
