@@ -3,3 +3,4 @@
 #else
 #include "application_manager/policies/regular/delegates/statistics_delegate.h"
 #endif
+
