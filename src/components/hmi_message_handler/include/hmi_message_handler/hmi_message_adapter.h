@@ -45,7 +45,6 @@ namespace hmi_message_handler {
  */
 class HMIMessageAdapter : public HMIMessageSender {
  public:
-
   /**
    * \brief Destructor
    */

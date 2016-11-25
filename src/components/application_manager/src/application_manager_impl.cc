@@ -3507,7 +3507,6 @@ void ApplicationManagerImpl::CreatePhoneCallAppList() {
   }
 }
 
-
 void ApplicationManagerImpl::ResetPhoneCallAppList() {
   LOG4CXX_AUTO_TRACE(logger_);
 

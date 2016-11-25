@@ -707,9 +707,8 @@ bool ApplicationImpl::UnsubscribeFromButton(
 
 #ifdef SDL_REMOTE_CONTROL
 AppExtensionPtr ApplicationImpl::QueryInterface(AppExtensionUID uid) {
-  std::list<AppExtensionPtr>::const_iterator it =
-      extensions_.begin();
-  for (;it != extensions_.end(); ++it) {
+  std::list<AppExtensionPtr>::const_iterator it = extensions_.begin();
+  for (; it != extensions_.end(); ++it) {
     if ((*it)->uid() == uid) {
       return (*it);
     }
@@ -717,7 +716,7 @@ AppExtensionPtr ApplicationImpl::QueryInterface(AppExtensionUID uid) {
 
   return AppExtensionPtr();
 }
-#endif //SDL_REMOTE_CONTROL
+#endif  // SDL_REMOTE_CONTROL
 
 bool ApplicationImpl::SubscribeToIVI(uint32_t vehicle_info_type) {
   sync_primitives::AutoLock lock(vi_lock_);
@@ -766,7 +765,7 @@ bool ApplicationImpl::UnsubscribeFromInteriorVehicleData(
   subscribed_interior_vehicle_data_.remove(module);
   return true;
 }
-#endif //SDL_REMOTE_CONTROL
+#endif  // SDL_REMOTE_CONTROL
 
 UsageStatistics& ApplicationImpl::usage_report() {
   return usage_report_;
@@ -1076,6 +1075,6 @@ bool ApplicationImpl::RemoveExtension(AppExtensionUID uid) {
 void ApplicationImpl::RemoveExtensions() {
   application_manager_.GetPluginManager().RemoveAppExtension(app_id_);
 }
-#endif //SDL_REMOTE_CONTROL
+#endif  // SDL_REMOTE_CONTROL
 
 }  // namespace application_manager

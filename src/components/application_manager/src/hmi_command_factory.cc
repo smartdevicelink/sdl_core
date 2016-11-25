@@ -1260,7 +1260,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
 #ifdef SDL_REMOTE_CONTROL
-  case hmi_apis::FunctionID::Buttons_ButtonPress: {
+    case hmi_apis::FunctionID::Buttons_ButtonPress: {
       if (is_response) {
         command.reset(new commands::ButtonsButtonPressResponse(message));
       } else {

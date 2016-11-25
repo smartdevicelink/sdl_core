@@ -580,8 +580,6 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
 
   bool logs_enabled() const;
 
-  const uint16_t audio_streaming_port() const;
-
   /**
    * @brief Returns true if resumption ctrl uses db, returns false if
    * resumption ctrl uses JSON.
