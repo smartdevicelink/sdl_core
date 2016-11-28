@@ -673,8 +673,8 @@ void PolicyHandlerTest::TestActivateApp(const uint32_t connection_key,
 TEST_F(PolicyHandlerTest, OnActivateApp) {
   // Arrange
   EnablePolicyAndPolicyManagerMock();
-  const uint32_t connection_key = 1;
-  const uint32_t correlation_id = 2;
+  const uint32_t connection_key = 1u;
+  const uint32_t correlation_id = 2u;
   TestActivateApp(connection_key, correlation_id);
 }
 
@@ -1284,8 +1284,8 @@ TEST_F(PolicyHandlerTest,
   // Arrange
 
   EnablePolicyAndPolicyManagerMock();
-  const uint32_t connection_key = 1;
-  const uint32_t correlation_id = 2;
+  const uint32_t connection_key = 1u;
+  const uint32_t correlation_id = 2u;
   TestActivateApp(connection_key, correlation_id);
 
   const bool is_allowed = true;
@@ -1359,8 +1359,8 @@ TEST_F(PolicyHandlerTest,
   std::vector<std::string> device_macs;
   device_macs.push_back(kPolicyAppId_);
   EnablePolicyAndPolicyManagerMock();
-  const uint32_t connection_key = 1;
-  const uint32_t correlation_id = 2;
+  const uint32_t connection_key = 1u;
+  const uint32_t correlation_id = 2u;
   TestActivateApp(connection_key, correlation_id);
 
   // Device ID is not setted by us
