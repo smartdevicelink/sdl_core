@@ -1082,7 +1082,7 @@ void PolicyHandler::OnActivateApp(uint32_t connection_key,
 
     DeviceConsent consent = policy_manager_->GetUserConsentForDevice(
         permissions.deviceInfo.device_mac_address);
-    permissions.isSDLAllowed = kDeviceAllowed == consent ? true : false;
+    permissions.isSDLAllowed = kDeviceAllowed == consent;
 
     // According to the SDLAQ-CRS-2794, p.9
     // 'priority' should be ommited in case when device
