@@ -43,8 +43,8 @@ namespace application_manager {
 
 namespace commands {
 
-ButtonPressRequest::ButtonPressRequest(const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {
+ButtonPressRequest::ButtonPressRequest(const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager) {
   subscribe_on_event(hmi_apis::FunctionID::UI_OnResetTimeout);
 }
 

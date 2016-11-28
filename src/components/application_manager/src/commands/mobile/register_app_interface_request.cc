@@ -186,7 +186,7 @@ namespace commands {
 struct IsSameApp {
   IsSameApp(bool is_remote_control,
             bool is_driver,
-            const ApplicationManager& application_manager)
+            ApplicationManager& application_manager)
       : is_remote_control_(is_remote_control)
       , is_driver_(is_driver)
       , plugin_manager_(application_manager.GetPluginManager())
@@ -203,18 +203,22 @@ struct IsSameApp {
     return is_driver_ == other_is_driver;
   }
 
+#ifdef ENABLE_LOG
+  static log4cxx::LoggerPtr logger_;
+#endif  // ENABLE_LOG
+
  private:
   static const functional_modules::ModuleID kCANModuleID = 153;
   bool is_remote_control_;
   bool is_driver_;
   functional_modules::PluginManager& plugin_manager_;
-  policy::PolicyHandler& policy_handler_;
+  policy::PolicyHandlerInterface& policy_handler_;
 };
 struct IsSameAppId : public IsSameApp {
   IsSameAppId(const std::string& app_id,
               bool is_remote_control,
               bool is_driver,
-              const ApplicationManager& application_manager)
+              ApplicationManager& application_manager)
       : IsSameApp(is_remote_control, is_driver, application_manager)
       , app_id_(app_id) {}
   bool operator()(ApplicationSharedPtr other) const {
@@ -233,7 +237,7 @@ struct IsSameAppName : public IsSameApp {
                 const smart_objects::SmartArray* vr_synonyms,
                 bool is_remote_control,
                 bool is_driver,
-                const ApplicationManager& application_manager)
+                ApplicationManager& application_manager)
       : IsSameApp(is_remote_control, is_driver, application_manager)
       , name_(name)
       , matcher_(name_)
@@ -279,7 +283,7 @@ struct IsSameAppName : public IsSameApp {
   CoincidencePredicateVR matcher_;
   const smart_objects::SmartArray* vr_synonyms_;
 };
-//#else   // SDL_REMOTE_CONTROL
+#else   // SDL_REMOTE_CONTROL
 struct IsSameAppId {
   explicit IsSameAppId(const std::string& app_id) : app_id_(app_id) {}
   bool operator()(ApplicationSharedPtr other) const {
@@ -853,6 +857,25 @@ void RegisterAppInterfaceRequest::SendChangeRegistration(
   }
 }
 
+#ifdef SDL_REMOTE_CONTROL
+bool RegisterAppInterfaceRequest::IsRemoteControl(const std::string& mobile_app_id) const {
+  const smart_objects::SmartObject *hmi_types = 0;
+  if ((*message_)[strings::msg_params].keyExists(strings::app_hmi_type)) {
+    hmi_types = &(*message_)[strings::msg_params][strings::app_hmi_type];
+  }
+  return application_manager_.GetPolicyHandler().CheckHMIType(
+      mobile_app_id, mobile_apis::AppHMIType::eType::REMOTE_CONTROL, hmi_types);
+}
+
+bool RegisterAppInterfaceRequest::IsDriverDevice() const {
+  uint32_t connection_key =
+      (*message_)[strings::params][strings::connection_key].asInt();
+  uint32_t device_handle = application_manager_.GetDeviceHandle(connection_key);
+  return device_handle == application_manager_.GetPolicyHandler().PrimaryDevice();
+}
+#endif  // SDL_REMOTE_CONTROL
+
+
 void RegisterAppInterfaceRequest::SendChangeRegistrationOnHMI(
     ApplicationConstSharedPtr app) {
   using namespace hmi_apis::FunctionID;
@@ -1033,8 +1056,8 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckCoincidence() {
                         IsDriverDevice(),
                         application_manager_);
   //(TODO) OKozlov clarify
-  //#else   // SDL_REMOTE_CONTROL
-  IsSameAppName matcher(app_name.AsMBString(), vr_synonyms);
+#else   // SDL_REMOTE_CONTROL
+   matcher(app_name.AsMBString(), vr_synonyms);
 #endif  // SDL_REMOTE_CONTROL
 
 #ifdef SDL_REMOTE_CONTROL
@@ -1183,11 +1206,11 @@ bool RegisterAppInterfaceRequest::IsApplicationWithSameAppIdRegistered() {
 
 #ifdef SDL_REMOTE_CONTROL
   IsSameAppId matcher(mobile_app_id.AsMBString(),
-                      IsRemoteControl(mobile_app_id),
+                      IsRemoteControl(mobile_app_id.AsMBString()),
                       IsDriverDevice(),
                       application_manager_);
   //(TODO) OKozlov clarify
-  //#else   // SDL_REMOTE_CONTROL
+#else   // SDL_REMOTE_CONTROL
   IsSameAppId matcher(mobile_app_id.AsMBString());
 #endif  // SDL_REMOTE_CONTROL
 
@@ -1198,25 +1221,6 @@ bool RegisterAppInterfaceRequest::IsApplicationWithSameAppIdRegistered() {
   return false;
 #endif
 }
-#ifdef SDL_REMOTE_CONTROL
-bool RegisterAppInterfaceRequest::IsRemoteControl(
-    const std::string& mobile_app_id) const {
-  const smart_objects::SmartObject* hmi_types = 0;
-  if ((*message_)[strings::msg_params].keyExists(strings::app_hmi_type)) {
-    hmi_types = &(*message_)[strings::msg_params][strings::app_hmi_type];
-  }
-  return application_manager_.GetPolicyHandler().CheckHMIType(
-      mobile_app_id, mobile_apis::AppHMIType::eType::REMOTE_CONTROL, hmi_types);
-}
-
-bool RegisterAppInterfaceRequest::IsDriverDevice() const {
-  uint32_t connection_key =
-      (*message_)[strings::params][strings::connection_key].asInt();
-  uint32_t device_handle = application_manager_.GetDeviceHandle(connection_key);
-  return device_handle ==
-         application_manager_.GetPolicyHandler().PrimaryDevice();
-}
-#endif  // SDL_REMOTE_CONTROL
 
 bool RegisterAppInterfaceRequest::IsWhiteSpaceExist() {
   LOG4CXX_AUTO_TRACE(logger_);

@@ -44,7 +44,7 @@ namespace commands {
 
 class SetInteriorVehicleDataRequest : public CommandRequestImpl {
  public:
-  explicit SetInteriorVehicleDataRequest(const MessageSharedPtr& message);
+  explicit SetInteriorVehicleDataRequest(const MessageSharedPtr& message,ApplicationManager& application_manager);
 
   virtual ~SetInteriorVehicleDataRequest();
 

@@ -354,6 +354,10 @@ class ApplicationManager {
   virtual void MarkAppsGreyOut(const connection_handler::DeviceHandle handle,
                                bool is_greyed_out) = 0;
 
+#ifdef SDL_REMOTE_CONTROL
+  virtual uint32_t GetDeviceHandle(uint32_t connection_key) =0;
+#endif
+
   /**
    * @brief Returns pointer to application-to-be-registered (from QUERY_APP
    * list)

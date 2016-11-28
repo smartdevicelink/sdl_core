@@ -492,10 +492,9 @@ void PolicyHandler::AddApplication(const std::string& application_id) {
   policy_manager_->AddApplication(application_id);
 }
 
-bool PolicyHandler::CheckHMIType(
-    const std::string& application_id,
-    mobile_apis::AppHMIType::eType hmi,
-    const smart_objects::SmartObjectSPtr app_types) {
+bool PolicyHandler::CheckHMIType(const std::string& application_id,
+                                 mobile_apis::AppHMIType::eType hmi,
+                                 const smart_objects::SmartObject* app_types) {
   LOG4CXX_AUTO_TRACE(logger_);
   POLICY_LIB_CHECK(false);
   std::vector<int> policy_hmi_types;
@@ -504,13 +503,10 @@ bool PolicyHandler::CheckHMIType(
   std::vector<int> additional_hmi_types;
   if (app_types && app_types->asArray()) {
     smart_objects::SmartArray* hmi_list = app_types->asArray();
-    std::transform(hmi_list->begin(),
-                   hmi_list->end(),
-                   std::back_inserter(additional_hmi_types),
-                   SmartObjectToInt());
+    std::transform(hmi_list->begin(), hmi_list->end(),
+                   std::back_inserter(additional_hmi_types), SmartObjectToInt());
   }
-  const std::vector<int>& hmi_types =
-      ret ? policy_hmi_types : additional_hmi_types;
+  const std::vector<int>& hmi_types = ret ? policy_hmi_types : additional_hmi_types;
   return std::find(hmi_types.begin(), hmi_types.end(), hmi) != hmi_types.end();
 }
 
@@ -857,13 +853,7 @@ bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string,
   if (last_used_app_ids_.empty()) {
     LOG4CXX_WARN(logger_, "last_used_app_ids_ is empty");
 #ifdef SDL_REMOTE_CONTROL
-    app = ApplicationManagerImpl::instance()->active_application();
-    if (!app) {
-      ApplicationManagerImpl::ApplicationListAccessor accessor;
-      if (!accessor.Empty()) {
-        app = *(accessor.begin());
-      }
-    }
+    app = application_manager_.active_application();
     if (!app) {
       LOG4CXX_DEBUG(logger_, "No registered application was found.");
       return false;
@@ -1537,7 +1527,7 @@ void PolicyHandler::UpdateHMILevel(ApplicationSharedPtr app,
                    "Changing hmi level of application "
                        << app->app_id() << " to default hmi level " << level);
       // Set application hmi level
-      ApplicationManagerImpl::instance()->ChangeAppsHMILevel(app->app_id(),
+      application_manager_.ChangeAppsHMILevel(app->app_id(),
                                                              level);
       // If hmi Level is full, it will be seted after ActivateApp response
       MessageHelper::SendHMIStatusNotification(*app);
@@ -1619,11 +1609,11 @@ void PolicyHandler::SetPrimaryDevice(const PTString& dev_id) {
   policy_manager_->SetPrimaryDevice(dev_id);
 
   connection_handler::DeviceHandle old_device_handle;
-  ApplicationManagerImpl::instance()->connection_handler()->GetDeviceID(
+  application_manager_.connection_handler()->GetDeviceID(
       old_dev_id, &old_device_handle);
 
   connection_handler::DeviceHandle device_handle;
-  ApplicationManagerImpl::instance()->connection_handler()->GetDeviceID(
+  application_manager_.connection_handler()->GetDeviceID(
       dev_id, &device_handle);
 
   LOG4CXX_DEBUG(logger_,
@@ -1655,7 +1645,7 @@ void PolicyHandler::ResetPrimaryDevice() {
   policy_manager_->ResetPrimaryDevice();
 
   connection_handler::DeviceHandle old_device_handle;
-  ApplicationManagerImpl::instance()->connection_handler()->GetDeviceID(
+  application_manager_.connection_handler()->GetDeviceID(
       old_dev_id, &old_device_handle);
 
   LOG4CXX_DEBUG(logger_,
@@ -1681,7 +1671,7 @@ uint32_t PolicyHandler::PrimaryDevice() const {
   POLICY_LIB_CHECK(0);
   PTString device_id = policy_manager_->PrimaryDevice();
   connection_handler::DeviceHandle device_handle;
-  if (ApplicationManagerImpl::instance()->connection_handler()->GetDeviceID(
+  if (application_manager_.connection_handler()->GetDeviceID(
           device_id, &device_handle)) {
     return device_handle;
   } else {
@@ -1702,7 +1692,7 @@ void PolicyHandler::SetDeviceZone(
   policy_manager_->SetDeviceZone(device_id, policy_zone);
 
   connection_handler::DeviceHandle device_handle;
-  ApplicationManagerImpl::instance()->connection_handler()->GetDeviceID(
+  application_manager_.connection_handler()->GetDeviceID(
       device_id, &device_handle);
 
   ApplicationManagerImpl::ApplicationListAccessor accessor;
@@ -1784,7 +1774,7 @@ void PolicyHandler::OnUpdateHMIStatus(const std::string& device_id,
                                       const std::string& hmi_level) {
   LOG4CXX_AUTO_TRACE(logger_);
   ApplicationSharedPtr app =
-      ApplicationManagerImpl::instance()->application(device_id, policy_app_id);
+      application_manager_.application(device_id, policy_app_id);
   if (!app) {
     LOG4CXX_WARN(logger_,
                  "Could not find application: " << device_id << " - "
@@ -1804,7 +1794,7 @@ void PolicyHandler::OnUpdateHMIStatus(const std::string& device_id,
                "Changing hmi level of application "
                    << app->app_id() << " to default hmi level " << level);
   // Set application hmi level
-  ApplicationManagerImpl::instance()->ChangeAppsHMILevel(app->app_id(), level);
+  application_manager_.ChangeAppsHMILevel(app->app_id(), level);
   MessageHelper::SendHMIStatusNotification(*app);
 }
 
@@ -1814,7 +1804,7 @@ void PolicyHandler::OnUpdateHMIStatus(const std::string& device_id,
                                       const std::string& device_rank) {
   LOG4CXX_AUTO_TRACE(logger_);
   ApplicationSharedPtr app =
-      ApplicationManagerImpl::instance()->application(device_id, policy_app_id);
+      application_manager_.application(device_id, policy_app_id);
   if (!app) {
     LOG4CXX_WARN(logger_,
                  "Could not find application: " << device_id << " - "
@@ -1846,7 +1836,7 @@ void PolicyHandler::OnUpdateHMIStatus(const std::string& device_id,
                "Changing hmi level of application "
                    << app->app_id() << " to default hmi level " << level);
   // Set application hmi level
-  ApplicationManagerImpl::instance()->ChangeAppsHMILevel(app->app_id(), level);
+  application_manager_.ChangeAppsHMILevel(app->app_id(), level);
   MessageHelper::SendHMIStatusNotification(*app, rank);
 }
 

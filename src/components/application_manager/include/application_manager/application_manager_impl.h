@@ -296,6 +296,10 @@ class ApplicationManagerImpl
    */
   void UnsubscribeAppFromWayPoints(const uint32_t app_id) OVERRIDE;
 
+#ifdef SDL_REMOTE_CONTROL
+  uint32_t GetDeviceHandle(uint32_t connection_key) OVERRIDE;
+#endif // SDL_REMOTE_CONTROL
+
   /**
    * @brief Is Any Application is subscribed for way points
    * @return true if some app is subscribed otherwise false
