@@ -858,8 +858,9 @@ void RegisterAppInterfaceRequest::SendChangeRegistration(
 }
 
 #ifdef SDL_REMOTE_CONTROL
-bool RegisterAppInterfaceRequest::IsRemoteControl(const std::string& mobile_app_id) const {
-  const smart_objects::SmartObject *hmi_types = 0;
+bool RegisterAppInterfaceRequest::IsRemoteControl(
+    const std::string& mobile_app_id) const {
+  const smart_objects::SmartObject* hmi_types = 0;
   if ((*message_)[strings::msg_params].keyExists(strings::app_hmi_type)) {
     hmi_types = &(*message_)[strings::msg_params][strings::app_hmi_type];
   }
@@ -871,10 +872,10 @@ bool RegisterAppInterfaceRequest::IsDriverDevice() const {
   uint32_t connection_key =
       (*message_)[strings::params][strings::connection_key].asInt();
   uint32_t device_handle = application_manager_.GetDeviceHandle(connection_key);
-  return device_handle == application_manager_.GetPolicyHandler().PrimaryDevice();
+  return device_handle ==
+         application_manager_.GetPolicyHandler().PrimaryDevice();
 }
 #endif  // SDL_REMOTE_CONTROL
-
 
 void RegisterAppInterfaceRequest::SendChangeRegistrationOnHMI(
     ApplicationConstSharedPtr app) {
@@ -1055,9 +1056,9 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckCoincidence() {
                         IsRemoteControl(mobile_app_id),
                         IsDriverDevice(),
                         application_manager_);
-  //(TODO) OKozlov clarify
+//(TODO) OKozlov clarify
 #else   // SDL_REMOTE_CONTROL
-   matcher(app_name.AsMBString(), vr_synonyms);
+  matcher(app_name.AsMBString(), vr_synonyms);
 #endif  // SDL_REMOTE_CONTROL
 
 #ifdef SDL_REMOTE_CONTROL
@@ -1209,7 +1210,7 @@ bool RegisterAppInterfaceRequest::IsApplicationWithSameAppIdRegistered() {
                       IsRemoteControl(mobile_app_id.AsMBString()),
                       IsDriverDevice(),
                       application_manager_);
-  //(TODO) OKozlov clarify
+//(TODO) OKozlov clarify
 #else   // SDL_REMOTE_CONTROL
   IsSameAppId matcher(mobile_app_id.AsMBString());
 #endif  // SDL_REMOTE_CONTROL

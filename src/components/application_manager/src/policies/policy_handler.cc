@@ -503,10 +503,13 @@ bool PolicyHandler::CheckHMIType(const std::string& application_id,
   std::vector<int> additional_hmi_types;
   if (app_types && app_types->asArray()) {
     smart_objects::SmartArray* hmi_list = app_types->asArray();
-    std::transform(hmi_list->begin(), hmi_list->end(),
-                   std::back_inserter(additional_hmi_types), SmartObjectToInt());
+    std::transform(hmi_list->begin(),
+                   hmi_list->end(),
+                   std::back_inserter(additional_hmi_types),
+                   SmartObjectToInt());
   }
-  const std::vector<int>& hmi_types = ret ? policy_hmi_types : additional_hmi_types;
+  const std::vector<int>& hmi_types =
+      ret ? policy_hmi_types : additional_hmi_types;
   return std::find(hmi_types.begin(), hmi_types.end(), hmi) != hmi_types.end();
 }
 
@@ -1609,12 +1612,12 @@ void PolicyHandler::SetPrimaryDevice(const PTString& dev_id) {
   policy_manager_->SetPrimaryDevice(dev_id);
 
   connection_handler::DeviceHandle old_device_handle;
-  application_manager_.connection_handler()->GetDeviceID(
-      old_dev_id, &old_device_handle);
+  application_manager_.connection_handler()->GetDeviceID(old_dev_id,
+                                                         &old_device_handle);
 
   connection_handler::DeviceHandle device_handle;
-  application_manager_.connection_handler()->GetDeviceID(
-      dev_id, &device_handle);
+  application_manager_.connection_handler()->GetDeviceID(dev_id,
+                                                         &device_handle);
 
   LOG4CXX_DEBUG(logger_,
                 "Old: " << old_dev_id << "(" << old_device_handle << ")"
@@ -1645,8 +1648,8 @@ void PolicyHandler::ResetPrimaryDevice() {
   policy_manager_->ResetPrimaryDevice();
 
   connection_handler::DeviceHandle old_device_handle;
-  application_manager_.connection_handler()->GetDeviceID(
-      old_dev_id, &old_device_handle);
+  application_manager_.connection_handler()->GetDeviceID(old_dev_id,
+                                                         &old_device_handle);
 
   LOG4CXX_DEBUG(logger_,
                 "Old: " << old_dev_id << "(" << old_device_handle << ")");
@@ -1671,8 +1674,8 @@ uint32_t PolicyHandler::PrimaryDevice() const {
   POLICY_LIB_CHECK(0);
   PTString device_id = policy_manager_->PrimaryDevice();
   connection_handler::DeviceHandle device_handle;
-  if (application_manager_.connection_handler()->GetDeviceID(
-          device_id, &device_handle)) {
+  if (application_manager_.connection_handler()->GetDeviceID(device_id,
+                                                             &device_handle)) {
     return device_handle;
   } else {
     return 0;
@@ -1692,8 +1695,8 @@ void PolicyHandler::SetDeviceZone(
   policy_manager_->SetDeviceZone(device_id, policy_zone);
 
   connection_handler::DeviceHandle device_handle;
-  application_manager_.connection_handler()->GetDeviceID(
-      device_id, &device_handle);
+  application_manager_.connection_handler()->GetDeviceID(device_id,
+                                                         &device_handle);
 
   ApplicationManagerImpl::ApplicationListAccessor accessor;
   for (ApplicationManagerImpl::ApplictionSetConstIt i = accessor.begin();

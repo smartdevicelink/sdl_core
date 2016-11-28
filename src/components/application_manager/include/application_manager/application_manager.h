@@ -355,7 +355,7 @@ class ApplicationManager {
                                bool is_greyed_out) = 0;
 
 #ifdef SDL_REMOTE_CONTROL
-  virtual uint32_t GetDeviceHandle(uint32_t connection_key) =0;
+  virtual uint32_t GetDeviceHandle(uint32_t connection_key) = 0;
 #endif
 
   /**

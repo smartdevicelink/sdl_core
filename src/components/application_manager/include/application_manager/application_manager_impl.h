@@ -298,7 +298,7 @@ class ApplicationManagerImpl
 
 #ifdef SDL_REMOTE_CONTROL
   uint32_t GetDeviceHandle(uint32_t connection_key) OVERRIDE;
-#endif // SDL_REMOTE_CONTROL
+#endif  // SDL_REMOTE_CONTROL
 
   /**
    * @brief Is Any Application is subscribed for way points

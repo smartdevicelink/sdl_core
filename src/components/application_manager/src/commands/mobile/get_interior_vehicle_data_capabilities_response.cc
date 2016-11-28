@@ -39,7 +39,9 @@ namespace application_manager {
 namespace commands {
 
 GetInteriorVehicleDataCapabilitiesResponse::
-    GetInteriorVehicleDataCapabilitiesResponse(const MessageSharedPtr& message,ApplicationManager& application_manager)
+    GetInteriorVehicleDataCapabilitiesResponse(
+        const MessageSharedPtr& message,
+        ApplicationManager& application_manager)
     : CommandResponseImpl(message, application_manager) {}
 
 GetInteriorVehicleDataCapabilitiesResponse::

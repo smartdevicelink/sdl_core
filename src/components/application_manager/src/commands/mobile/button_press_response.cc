@@ -38,7 +38,8 @@ namespace application_manager {
 
 namespace commands {
 
-ButtonPressResponse::ButtonPressResponse(const MessageSharedPtr& message,ApplicationManager& application_manager)
+ButtonPressResponse::ButtonPressResponse(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
     : CommandResponseImpl(message, application_manager) {}
 
 ButtonPressResponse::~ButtonPressResponse() {}

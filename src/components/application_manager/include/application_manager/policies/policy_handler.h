@@ -478,9 +478,9 @@ class PolicyHandler : public PolicyHandlerInterface,
      * @param app_types additional list of HMI type to search in it
      * @return true if hmi is contained in policy or app_types
      */
-    bool CheckHMIType(const std::string& application_id,
-                      mobile_apis::AppHMIType::eType hmi,
-                      const smart_objects::SmartObject* app_types);
+  bool CheckHMIType(const std::string& application_id,
+                    mobile_apis::AppHMIType::eType hmi,
+                    const smart_objects::SmartObject* app_types);
 
   /**
    * Checks whether application is revoked

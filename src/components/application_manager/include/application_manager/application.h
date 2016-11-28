@@ -400,9 +400,12 @@ class Application : public virtual InitialApplicationData,
   virtual void UpdateHash() = 0;
 
 #ifdef SDL_REMOTE_CONTROL
-  virtual bool IsSubscribedToInteriorVehicleData(smart_objects::SmartObject module) = 0;
-  virtual bool SubscribeToInteriorVehicleData(smart_objects::SmartObject module) = 0;
-  virtual bool UnsubscribeFromInteriorVehicleData(smart_objects::SmartObject module) = 0;
+  virtual bool IsSubscribedToInteriorVehicleData(
+      smart_objects::SmartObject module) = 0;
+  virtual bool SubscribeToInteriorVehicleData(
+      smart_objects::SmartObject module) = 0;
+  virtual bool UnsubscribeFromInteriorVehicleData(
+      smart_objects::SmartObject module) = 0;
 #endif
 
   /**
