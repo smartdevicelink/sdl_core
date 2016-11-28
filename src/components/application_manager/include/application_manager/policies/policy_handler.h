@@ -407,13 +407,13 @@ class PolicyHandler : public PolicyHandlerInterface,
 #endif  // EXTERNAL_PROPRIETARY
 
   // TODO(AKutsan) REMOVE THIS UGLY HOTFIX
-  virtual void Increment(usage_statistics::GlobalCounterId type) OVERRIDE;
-  virtual void Increment(const std::string& app_id,
+  void Increment(usage_statistics::GlobalCounterId type) OVERRIDE;
+  void Increment(const std::string& app_id,
                          usage_statistics::AppCounterId type) OVERRIDE;
-  virtual void Set(const std::string& app_id,
+  void Set(const std::string& app_id,
                    usage_statistics::AppInfoId type,
                    const std::string& value) OVERRIDE;
-  virtual void Add(const std::string& app_id,
+  void Add(const std::string& app_id,
                    usage_statistics::AppStopwatchId type,
                    int32_t timespan_seconds) OVERRIDE;
 
@@ -479,26 +479,26 @@ class PolicyHandler : public PolicyHandlerInterface,
       DCHECK(policy_handler_);
     }
     // TODO(AKutsan) REMOVE THIS UGLY HOTFIX
-    virtual void Increment(usage_statistics::GlobalCounterId type) {
+    void Increment(usage_statistics::GlobalCounterId type) OVERRIDE {
       policy_handler_->AsyncRun(new StatisticsDelegate(*policy_handler_, type));
     }
 
-    virtual void Increment(const std::string& app_id,
-                           usage_statistics::AppCounterId type) {
+    void Increment(const std::string& app_id,
+                           usage_statistics::AppCounterId type) OVERRIDE {
       policy_handler_->AsyncRun(
           new StatisticsDelegate(*policy_handler_, app_id, type));
     }
 
-    virtual void Set(const std::string& app_id,
+    void Set(const std::string& app_id,
                      usage_statistics::AppInfoId type,
-                     const std::string& value) {
+                     const std::string& value) OVERRIDE {
       policy_handler_->AsyncRun(
           new StatisticsDelegate(*policy_handler_, app_id, type, value));
     }
 
-    virtual void Add(const std::string& app_id,
+    void Add(const std::string& app_id,
                      usage_statistics::AppStopwatchId type,
-                     int32_t timespan_seconds) {
+                     int32_t timespan_seconds) OVERRIDE {
       policy_handler_->AsyncRun(new StatisticsDelegate(
           *policy_handler_, app_id, type, timespan_seconds));
     }
