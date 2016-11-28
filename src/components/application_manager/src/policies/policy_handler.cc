@@ -1474,7 +1474,7 @@ void PolicyHandler::OnCertificateUpdated(const std::string& certificate_data) {
 
 void PolicyHandler::OnEmptyCertificateArrived() const {
   LOG4CXX_DEBUG(logger_, "Empty certificate arrived");
-  const std::string empty_certificate = "";
+  const std::string empty_certificate;
   sync_primitives::AutoLock lock(listeners_lock_);
   std::for_each(
       listeners_.begin(),
