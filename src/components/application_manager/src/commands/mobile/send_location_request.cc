@@ -64,7 +64,7 @@ void SendLocationRequest::Run() {
   if (msg_params.keyExists(strings::delivery_mode)) {
     const RPCParams& allowed_params = parameters_permissions().allowed_params;
 
-    if (helpers::in_range(RPCParams, strings::delivery_mode)) {
+    if (helpers::in_range(allowed_params, strings::delivery_mode)) {
       msg_params.erase(strings::delivery_mode);
     }
   }
