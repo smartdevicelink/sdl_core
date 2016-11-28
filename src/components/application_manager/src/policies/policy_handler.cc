@@ -1087,7 +1087,7 @@ void PolicyHandler::OnActivateApp(uint32_t connection_key,
     // According to the SDLAQ-CRS-2794, p.9
     // 'priority' should be ommited in case when device
     // is not allowed.
-    if (permissions.isSDLAllowed == false) {
+    if (!permissions.isSDLAllowed) {
       permissions.priority.clear();
       last_activated_app_id_ = connection_key;
     }
