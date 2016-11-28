@@ -226,6 +226,21 @@ ApplicationSharedPtr ApplicationManagerImpl::application(
   DataAccessor<ApplicationSet> accessor = applications();
   return FindApp(accessor, finder);
 }
+
+struct IsApplication {
+  IsApplication(connection_handler::DeviceHandle device_handle,
+                const std::string& policy_app_id)
+      : device_handle_(device_handle), policy_app_id_(policy_app_id) {}
+  bool operator()(const ApplicationSharedPtr app) const {
+    return app && app->device() == device_handle_ &&
+           app->mobile_app_id() == policy_app_id_;
+  }
+
+ private:
+  connection_handler::DeviceHandle device_handle_;
+  const std::string& policy_app_id_;
+};
+
 #ifdef SDL_REMOTE_CONTROL
 struct MobileAppIdPredicate {
   std::string policy_app_id_;
@@ -235,6 +250,20 @@ struct MobileAppIdPredicate {
     return app ? policy_app_id_ == app->mobile_app_id() : false;
   }
 };
+
+ApplicationSharedPtr ApplicationManagerImpl::application(
+    const std::string& device_id, const std::string& policy_app_id) const {
+  connection_handler::DeviceHandle device_handle;
+  connection_handler().GetDeviceID(device_id, &device_handle);
+
+  DataAccessor<ApplicationSet> accessor = applications();
+  ApplicationSharedPtr app =
+      FindApp(accessor, IsApplication(device_handle, policy_app_id));
+
+  LOG4CXX_DEBUG(logger_,
+                " policy_app_id << " << policy_app_id << "Found = " << app);
+  return app;
+}
 
 struct TakeDeviceHandle {
  public:
@@ -3462,7 +3491,7 @@ void ApplicationManagerImpl::RemoveAppFromTTSGlobalPropertiesList(
 void ApplicationManagerImpl::CreatePhoneCallAppList() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  DataAccessor<ApplicationSet> accessor(applications());
+  DataAccessor<ApplicationSet> accessor = applications();
 
   ApplicationManagerImpl::ApplictionSetIt it = accessor.GetData().begin();
   ApplicationManagerImpl::ApplictionSetIt itEnd = accessor.GetData().end();

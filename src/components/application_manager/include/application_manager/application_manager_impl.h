@@ -584,6 +584,16 @@ class ApplicationManagerImpl
    * @param hmi_notification string with notification name
    */
   void SubscribeToHMINotification(const std::string& hmi_notification) OVERRIDE;
+
+  /**
+   * @brief Checks HMI level and returns true if audio streaming is allowed
+   */
+  bool IsAudioStreamingAllowed(uint32_t connection_key) const OVERRIDE;
+
+  /**
+   * @brief Checks HMI level and returns true if video streaming is allowed
+   */
+  bool IsVideoStreamingAllowed(uint32_t connection_key) const OVERRIDE;
 #endif
 
   /**
@@ -1072,14 +1082,6 @@ class ApplicationManagerImpl
    */
   void ResetPhoneCallAppList() OVERRIDE;
 
-  /*
-   * @brief Checks HMI level and returns true if audio streaming is allowed
-   */
-  virtual bool IsAudioStreamingAllowed(uint32_t connection_key) const OVERRIDE;
-  /*
-   * @brief Checks HMI level and returns true if video streaming is allowed
-   */
-  virtual bool IsVideoStreamingAllowed(uint32_t connection_key) const OVERRIDE;
 #endif
   // TODO(AOleynik): Temporary added, to fix build. Should be reworked.
   connection_handler::ConnectionHandler& connection_handler() const OVERRIDE;
@@ -1527,7 +1529,20 @@ class ApplicationManagerImpl
   request_controller::RequestController request_ctrl_;
 
 #ifdef SDL_REMOTE_CONTROL
+  struct AppState {
+    AppState(const mobile_apis::HMILevel::eType& level,
+             const mobile_apis::AudioStreamingState::eType& streaming_state,
+             const mobile_apis::SystemContext::eType& context)
+    : hmi_level(level),
+      audio_streaming_state(streaming_state),
+      system_context(context) { }
+
+    mobile_apis::HMILevel::eType            hmi_level;
+    mobile_apis::AudioStreamingState::eType audio_streaming_state;
+    mobile_apis::SystemContext::eType       system_context;
+  };
   functional_modules::PluginManager plugin_manager_;
+<<<<<<< HEAD
 
   /**
    * @brief Map contains apps with HMI state before incoming call
@@ -1547,6 +1562,8 @@ class ApplicationManagerImpl
     mobile_apis::SystemContext::eType system_context;
   };
 
+=======
+>>>>>>> Fix conflicts in application_manager
   std::map<uint32_t, AppState> on_phone_call_app_list_;
 #endif
 
