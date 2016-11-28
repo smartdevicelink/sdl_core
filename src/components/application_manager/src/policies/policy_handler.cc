@@ -182,9 +182,7 @@ struct SDLAllowedNotification {
       , state_controller_(state_controller) {}
 
   void operator()(const ApplicationSharedPtr& app) {
-    if (!policy_manager_) {
-      return;
-    }
+    DCHECK_OR_RETURN_VOID(policy_manager_);
     if (device_id_ == app->device()) {
       std::string hmi_level;
       mobile_apis::HMILevel::eType default_mobile_hmi;
@@ -924,9 +922,7 @@ struct SDLAlowedNotification {
       , state_controller_(state_controller) {}
 
   void operator()(const ApplicationSharedPtr& app) {
-    if (!policy_manager_) {
-      return;
-    }
+    DCHECK_OR_RETURN_VOID(policy_manager_);
     if (device_id_ == app->device()) {
       std::string hmi_level;
       mobile_apis::HMILevel::eType default_mobile_hmi;
