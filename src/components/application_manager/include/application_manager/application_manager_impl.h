@@ -1072,6 +1072,15 @@ class ApplicationManagerImpl
    * Also OnHMIStateNotification with previous HMI state sent for these apps
    */
   void ResetPhoneCallAppList() OVERRIDE;
+
+  /*
+   * @brief Checks HMI level and returns true if audio streaming is allowed
+   */
+  virtual bool IsAudioStreamingAllowed(uint32_t connection_key) const OVERRIDE;
+  /*
+   * @brief Checks HMI level and returns true if video streaming is allowed
+   */
+  virtual bool IsVideoStreamingAllowed(uint32_t connection_key) const OVERRIDE;
 #endif
   // TODO(AOleynik): Temporary added, to fix build. Should be reworked.
   connection_handler::ConnectionHandler& connection_handler() const OVERRIDE;

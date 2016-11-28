@@ -1216,7 +1216,6 @@ bool RegisterAppInterfaceRequest::IsApplicationWithSameAppIdRegistered() {
   IsSameAppId matcher(mobile_app_id.AsMBString());
 #endif  // SDL_REMOTE_CONTROL
 
-
 #ifdef SDL_REMOTE_CONTROL
   return std::find_if(applications.begin(), applications.end(), matcher) !=
          applications.end();

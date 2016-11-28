@@ -70,7 +70,8 @@ using namespace timer;
 namespace mobile_api = mobile_apis;
 namespace custom_str = custom_string;
 
-class ApplicationImpl : public virtual InitialApplicationDataImpl,
+class ApplicationImpl : public virtual Application,
+                        public virtual InitialApplicationDataImpl,
                         public virtual DynamicApplicationDataImpl {
  public:
   ApplicationImpl(
@@ -340,7 +341,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
    * @param extension pointer to extension
    * @return true if success, false if extension already initialized
    */
-   bool AddExtension(AppExtensionPtr extention) OVERRIDE;
+  bool AddExtension(AppExtensionPtr extention) OVERRIDE;
 
   /**
    * @brief Remove extension from application

@@ -148,6 +148,14 @@ class ApplicationManager {
       const std::string& device_id, const std::string& policy_app_id) const = 0;
   virtual void SubscribeToHMINotification(
       const std::string& hmi_notification) = 0;
+  /*
+   * @brief Checks HMI level and returns true if audio streaming is allowed
+   */
+  virtual bool IsAudioStreamingAllowed(uint32_t connection_key) const = 0;
+  /*
+   * @brief Checks HMI level and returns true if video streaming is allowed
+   */
+  virtual bool IsVideoStreamingAllowed(uint32_t connection_key) const;
 #endif
   virtual ApplicationSharedPtr active_application() const = 0;
 

@@ -227,42 +227,31 @@ ApplicationSharedPtr ApplicationManagerImpl::application(
   return FindApp(accessor, finder);
 }
 #ifdef SDL_REMOTE_CONTROL
-ApplicationSharedPtr ApplicationManagerImpl::application(
-    const std::string& device_id, const std::string& policy_app_id) const {
-  connection_handler::DeviceHandle device_handle;
-  connection_handler().GetDeviceID(device_id, &device_handle);
-  ApplicationSharedPtr app = ApplicationListAccessor().Find(
-      IsApplication(device_handle, policy_app_id));
-  LOG4CXX_DEBUG(logger_,
-                " policy_app_id << " << policy_app_id << "Found = " << app);
-  return app;
-}
-
-ApplicationSharedPtr ApplicationManagerImpl::application(
-    const std::string& device_id, const std::string& policy_app_id) const {
-  connection_handler::DeviceHandle device_handle;
-  connection_handler()->GetDeviceID(device_id, &device_handle);
-  ApplicationSharedPtr app = ApplicationListAccessor().Find(
-      IsApplication(device_handle, policy_app_id));
-  LOG4CXX_DEBUG(logger_,
-                " policy_app_id << " << policy_app_id << "Found = " << app);
-  return app;
-}
+struct MobileAppIdPredicate {
+  std::string policy_app_id_;
+  MobileAppIdPredicate(const std::string& policy_app_id)
+      : policy_app_id_(policy_app_id) {}
+  bool operator()(const ApplicationSharedPtr app) const {
+    return app ? policy_app_id_ == app->mobile_app_id() : false;
+  }
+};
 
 struct TakeDeviceHandle {
-public:
-    TakeDeviceHandle(const ApplicationManager& app_mngr) : app_mngr_(app_mngr) {}
+ public:
+  TakeDeviceHandle(const ApplicationManager& app_mngr) : app_mngr_(app_mngr) {}
   std::string operator()(ApplicationSharedPtr& app) {
-    return MessageHelper::GetDeviceMacAddressForHandle(app->device(), app_mngr_);
+    return MessageHelper::GetDeviceMacAddressForHandle(app->device(),
+                                                       app_mngr_);
   }
-private:
-    const ApplicationManager& app_mngr_;
+
+ private:
+  const ApplicationManager& app_mngr_;
 };
 
 std::vector<std::string> ApplicationManagerImpl::devices(
     const std::string& policy_app_id) const {
   MobileAppIdPredicate matcher(policy_app_id);
-  AppSharedPtrs apps = ApplicationListAccessor().FindAll(matcher);
+  AppSharedPtrs apps = FindAllApps(applications(), matcher);
   std::vector<std::string> devices;
   std::transform(apps.begin(),
                  apps.end(),
@@ -356,12 +345,23 @@ struct SubscribedToIVIPredicate {
 
 #ifdef SDL_REMOTE_CONTROL
 
+struct SubscribedToInteriorVehicleDataPredicate {
+  smart_objects::SmartObject interior_module_data_ =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+  SubscribedToInteriorVehicleDataPredicate(
+      smart_objects::SmartObject interior_module_data)
+      : interior_module_data_(interior_module_data) {}
+  bool operator()(const ApplicationSharedPtr app) const {
+    return app ? app->IsSubscribedToInteriorVehicleData(interior_module_data_)
+               : false;
+  }
+};
+
 std::vector<ApplicationSharedPtr>
 ApplicationManagerImpl::applications_by_interior_vehicle_data(
     smart_objects::SmartObject moduleDescription) {
   SubscribedToInteriorVehicleDataPredicate finder(moduleDescription);
-  ApplicationListAccessor accessor;
-  AppSharedPtrs apps = accessor.FindAll(finder);
+  AppSharedPtrs apps = FindAllApps(applications(), finder);
   LOG4CXX_DEBUG(logger_, " Found count: " << apps.size());
   return apps;
 }
@@ -2898,11 +2898,12 @@ mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
                                              << stringified_hmi_level << " rpc "
                                              << stringified_functionID);
   policy::CheckPermissionResult result;
-  GetPolicyHandler().CheckPermissions(policy_app_id,
-                                      stringified_hmi_level,
-                                      stringified_functionID,
-                                      rpc_params,
-                                      result);
+  //TODO(LS): find out what how this thing should work
+  //  GetPolicyHandler().CheckPermissions(policy_app_id,
+  //                                      stringified_hmi_level,
+  //                                      stringified_functionID,
+  //                                      rpc_params,
+  //                                      result);
 
   if (NULL != params_permissions) {
     params_permissions->allowed_params = result.list_of_allowed_params;
@@ -3483,10 +3484,10 @@ void ApplicationManagerImpl::RemoveAppFromTTSGlobalPropertiesList(
 void ApplicationManagerImpl::CreatePhoneCallAppList() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationManagerImpl::ApplicationListAccessor accessor;
+  DataAccessor<ApplicationSet> accessor(applications());
 
-  ApplicationManagerImpl::ApplictionSetIt it = accessor.begin();
-  ApplicationManagerImpl::ApplictionSetIt itEnd = accessor.end();
+  ApplicationManagerImpl::ApplictionSetIt it = accessor.GetData().begin();
+  ApplicationManagerImpl::ApplictionSetIt itEnd = accessor.GetData().end();
 
   using namespace mobile_apis::HMILevel;
   using namespace helpers;
@@ -3815,7 +3816,7 @@ const std::set<int32_t> ApplicationManagerImpl::GetAppsSubscribedForWayPoints()
 std::vector<std::string> ApplicationManagerImpl::devices(
     const std::string& policy_app_id) const {
   MobileAppIdPredicate matcher(policy_app_id);
-  AppSharedPtrs apps = ApplicationListAccessor().FindAll(matcher);
+  AppSharedPtrs apps = FindAllApps(applications(), matcher);
   std::vector<std::string> devices;
   std::transform(apps.begin(),
                  apps.end(),

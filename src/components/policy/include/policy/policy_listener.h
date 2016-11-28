@@ -75,12 +75,12 @@ class PolicyListener {
   virtual void OnUpdateHMIAppType(
       std::map<std::string, StringArray> app_hmi_types) = 0;
 
-  /**
-   * Notifies about changing HMI level
-   * @param device_id unique identifier of device
-   * @param policy_app_id unique identifier of application in policy
-   * @param hmi_level default HMI level for this application
-   */
+/**
+ * Notifies about changing HMI level
+ * @param device_id unique identifier of device
+ * @param policy_app_id unique identifier of application in policy
+ * @param hmi_level default HMI level for this application
+ */
 #ifdef SDL_REMOTE_CONTROL
   virtual void OnUpdateHMILevel(const std::string& device_id,
                                 const std::string& policy_app_id,

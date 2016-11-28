@@ -124,7 +124,6 @@ void OnExitApplicationNotification::Run() {
   // MessageHelper::SendHMIStatusNotification(*app_impl);
   application_manager_.SendHMIStatusNotification(app_impl);
 #endif  // SDL_REMOTE_CONTROL
-
 }
 
 }  // namespace commands

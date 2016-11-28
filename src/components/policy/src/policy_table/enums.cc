@@ -572,16 +572,22 @@ bool EnumFromJsonString(const std::string& literal, RequestType* result) {
 #ifdef SDL_REMOTE_CONTROL
 bool IsValidEnum(ModuleType val) {
   switch (val) {
-    case MT_CLIMATE: return true;
-    case MT_RADIO: return true;
-    default: return false;
+    case MT_CLIMATE:
+      return true;
+    case MT_RADIO:
+      return true;
+    default:
+      return false;
   }
 }
 const char* EnumToJsonString(ModuleType val) {
   switch (val) {
-    case MT_CLIMATE: return "CLIMATE";
-    case MT_RADIO: return "RADIO";
-    default: return "";
+    case MT_CLIMATE:
+      return "CLIMATE";
+    case MT_RADIO:
+      return "RADIO";
+    default:
+      return "";
   }
 }
 

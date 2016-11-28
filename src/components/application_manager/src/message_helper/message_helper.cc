@@ -2548,7 +2548,8 @@ void MessageHelper::SendHMIStatusNotification(
         static_cast<int32_t>(rank);
   }
 
-  application_manager.ManageMobileCommand(notification);
+  application_manager.ManageMobileCommand(notification,
+                                          commands::Command::ORIGIN_SDL);
 }
 
 void MessageHelper::SendActivateAppToHMI(

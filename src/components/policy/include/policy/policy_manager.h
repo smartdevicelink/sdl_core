@@ -418,7 +418,6 @@ class PolicyManager : public usage_statistics::StatisticsManager {
    */
   virtual bool IsPredataPolicy(const std::string& policy_app_id) = 0;
 
-
   /**
  * Returns heart beat timeout
  * @param app_id application id
