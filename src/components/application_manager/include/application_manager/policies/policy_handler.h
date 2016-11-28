@@ -471,6 +471,7 @@ class PolicyHandler : public PolicyHandlerInterface,
    */
   void AddApplication(const std::string& application_id) OVERRIDE;
 
+#ifdef SDL_REMOTE_CONTROL
   /**
      * Checks if application has HMI type
      * @param application_id ID application
@@ -480,8 +481,8 @@ class PolicyHandler : public PolicyHandlerInterface,
      */
   bool CheckHMIType(const std::string& application_id,
                     mobile_apis::AppHMIType::eType hmi,
-                    const smart_objects::SmartObject* app_types);
-
+                    const smart_objects::SmartObjectSPtr app_types);
+#endif
   /**
    * Checks whether application is revoked
    * @param app_id id application

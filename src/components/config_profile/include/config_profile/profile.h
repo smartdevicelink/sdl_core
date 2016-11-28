@@ -154,6 +154,8 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
    */
   const uint16_t video_streaming_port() const OVERRIDE;
 
+  const uint16_t audio_streaming_port() const OVERRIDE;
+
   /**
     * @brief Returns folder containing all plugins
     */

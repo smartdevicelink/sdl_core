@@ -82,10 +82,10 @@ add_subdirectory(./media_manager)
 # --- Functional module
 add_subdirectory(./functional_module)
 
-if (REMOTE_CONTROL)
+if(REMOTE_CONTROL)
   # --- CAN Module
   add_subdirectory(./can_cooperation)
-endif ()
+endif()
 
 if (TELEMETRY_MONITOR)
     add_subdirectory(./telemetry_monitor)

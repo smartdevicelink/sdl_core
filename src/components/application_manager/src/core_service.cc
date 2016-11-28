@@ -93,8 +93,8 @@ TypeAccess CoreService::CheckAccess(const ApplicationId& app_id,
 #ifdef SDL_REMOTE_CONTROL
   ApplicationSharedPtr app = GetApplication(app_id);
   if (app) {
-    std::string device_handle =
-        MessageHelper::GetDeviceMacAddressForHandle(app->device());
+    std::string device_handle = MessageHelper::GetDeviceMacAddressForHandle(
+        app->device(), application_manager_);
     return application_manager_.GetPolicyHandler().CheckAccess(
         device_handle, app->mobile_app_id(), zone, module, rpc, params);
   }
@@ -121,8 +121,8 @@ void CoreService::SetAccess(const ApplicationId& app_id,
 #ifdef SDL_REMOTE_CONTROL
   ApplicationSharedPtr app = GetApplication(app_id);
   if (app) {
-    std::string device_handle =
-        MessageHelper::GetDeviceMacAddressForHandle(app->device());
+    std::string device_handle = MessageHelper::GetDeviceMacAddressForHandle(
+        app->device(), application_manager_);
     application_manager_.GetPolicyHandler().SetAccess(
         device_handle, app->mobile_app_id(), zone, module, allowed);
   }
@@ -133,8 +133,8 @@ void CoreService::ResetAccess(const ApplicationId& app_id) {
 #ifdef SDL_REMOTE_CONTROL
   ApplicationSharedPtr app = GetApplication(app_id);
   if (app) {
-    std::string device_handle =
-        MessageHelper::GetDeviceMacAddressForHandle(app->device());
+    std::string device_handle = MessageHelper::GetDeviceMacAddressForHandle(
+        app->device(), application_manager_);
     application_manager_.GetPolicyHandler().ResetAccess(device_handle,
                                                         app->mobile_app_id());
   }
@@ -151,7 +151,7 @@ void CoreService::ResetAccess(const SeatLocation& zone,
 void CoreService::SetPrimaryDevice(const uint32_t dev_id) {
 #ifdef SDL_REMOTE_CONTROL
   std::string device_handle =
-      MessageHelper::GetDeviceMacAddressForHandle(dev_id);
+      MessageHelper::GetDeviceMacAddressForHandle(dev_id, application_manager_);
   application_manager_.GetPolicyHandler().SetPrimaryDevice(device_handle);
 #endif  // SDL_REMOTE_CONTROL
 }
@@ -173,7 +173,7 @@ void CoreService::SetDeviceZone(const uint32_t dev_id,
                                 const SeatLocation& zone) {
 #ifdef SDL_REMOTE_CONTROL
   std::string device_handle =
-      MessageHelper::GetDeviceMacAddressForHandle(dev_id);
+      MessageHelper::GetDeviceMacAddressForHandle(dev_id, application_manager_);
   application_manager_.GetPolicyHandler().SetDeviceZone(device_handle, zone);
 #endif  // SDL_REMOTE_CONTROL
 }
@@ -181,7 +181,7 @@ void CoreService::SetDeviceZone(const uint32_t dev_id,
 const SeatLocationPtr CoreService::GetDeviceZone(const uint32_t dev_id) const {
 #ifdef SDL_REMOTE_CONTROL
   std::string device_handle =
-      MessageHelper::GetDeviceMacAddressForHandle(dev_id);
+      MessageHelper::GetDeviceMacAddressForHandle(dev_id, application_manager_);
   return application_manager_.GetPolicyHandler().GetDeviceZone(device_handle);
 #endif  // SDL_REMOTE_CONTROL
   return SeatLocationPtr();
@@ -228,10 +228,18 @@ uint32_t CoreService::GetNextCorrelationID() {
 
 std::vector<ApplicationSharedPtr> CoreService::GetApplications(
     AppExtensionUID uid) {
-  ApplicationManagerImpl::ApplicationListAccessor accessor;
+  ApplicationSet accessor;
   AppExtensionPredicate predicate;
   predicate.uid = uid;
-  return accessor.FindAll(predicate);
+
+  std::vector<ApplicationSharedPtr> result;
+  ApplicationSetConstIt it =
+      std::find_if(accessor.begin(), accessor.end(), predicate);
+  while (it != accessor.end()) {
+    result.push_back(*it);
+    it = std::find_if(++it, accessor.end(), predicate);
+  }
+  return result;
 }
 
 void CoreService::SubscribeToHMINotification(
@@ -244,7 +252,7 @@ void CoreService::SubscribeToHMINotification(
 void CoreService::ChangeNotifyHMILevel(ApplicationSharedPtr app,
                                        mobile_apis::HMILevel::eType level) {
   application_manager_.ChangeAppsHMILevel(app->app_id(), level);
-  MessageHelper::SendHMIStatusNotification(*app);
+  MessageHelper::SendHMIStatusNotification(*app, application_manager_);
 }
 
 void CoreService::NotifyHMIAboutHMILevel(ApplicationSharedPtr app,
@@ -252,6 +260,7 @@ void CoreService::NotifyHMIAboutHMILevel(ApplicationSharedPtr app,
   if (app->hmi_level() != mobile_apis::HMILevel::eType::HMI_FULL) {
     MessageHelper::SendActivateAppToHMI(
         app->app_id(),
+        application_manager_,
         static_cast<hmi_apis::Common_HMILevel::eType>(level),
         true);
   }

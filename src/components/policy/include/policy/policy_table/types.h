@@ -17,7 +17,9 @@ struct MessageLanguages;
 struct MessageString;
 struct RpcParameters;
 struct Rpcs;
+#ifdef SDL_REMOTE_CONTROL
 struct InteriorZone;
+#endif
 }  // namespace policy_table_interface_base
 }  // namespace rpc
 

@@ -140,8 +140,8 @@ class MessageHelper {
   static std::string MobileResultToString(
       mobile_apis::Result::eType mobile_result);
 
-  static std::string GetDeviceMacAddressForHandle(const uint32_t device_handle,
-                                                  ApplicationManager& app_mngr);
+  static std::string GetDeviceMacAddressForHandle(
+      const uint32_t device_handle, const ApplicationManager& app_mngr);
 
   /**
    * @brief Converts string to mobile Result enum value
@@ -683,6 +683,25 @@ class MessageHelper {
   GetOnAppInterfaceUnregisteredNotificationToMobile(
       int32_t connection_key,
       mobile_api::AppInterfaceUnregisteredReason::eType reason);
+
+  /**
+   * @brief Sends HMI status notification to mobile
+   *
+   * @param application_impl application with changed HMI status
+   * @param rank device rank
+   *
+   **/
+  static void SendHMIStatusNotification(
+      const Application& application_impl,
+      ApplicationManager& application_manager,
+      mobile_apis::DeviceRank::eType rank =
+          mobile_apis::DeviceRank::eType::INVALID_ENUM);
+
+  static void SendActivateAppToHMI(
+      uint32_t const app_id,
+      ApplicationManager& application_manager,
+      hmi_apis::Common_HMILevel::eType level = hmi_apis::Common_HMILevel::FULL,
+      bool send_policy_priority = true);
 
  private:
   /**

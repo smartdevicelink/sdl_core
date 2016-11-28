@@ -584,7 +584,7 @@ class ApplicationManagerImpl
    * @brief Subscribes to notification from HMI
    * @param hmi_notification string with notification name
    */
-  void SubscribeToHMINotification(const std::string& hmi_notification);
+  void SubscribeToHMINotification(const std::string& hmi_notification) OVERRIDE;
 #endif
 
   /**

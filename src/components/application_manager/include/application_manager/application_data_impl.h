@@ -51,6 +51,7 @@ class InitialApplicationDataImpl : public virtual Application {
   const smart_objects::SmartObject* app_types() const;
   const smart_objects::SmartObject* vr_synonyms() const;
   virtual std::string policy_app_id() const;
+  virtual std::string mobile_app_id() const;
   const smart_objects::SmartObject* tts_name() const;
   const smart_objects::SmartObject* ngn_media_screen_name() const;
   const mobile_api::Language::eType& language() const;

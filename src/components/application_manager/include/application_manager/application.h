@@ -587,7 +587,7 @@ class Application : public virtual InitialApplicationData,
   virtual bool AddExtension(AppExtensionPtr extention) = 0;
   virtual bool RemoveExtension(AppExtensionUID uid) = 0;
   virtual void RemoveExtensions() = 0;
-  virtual const std::set<uint32_t>& ApplicationImpl::SubscribesIVI() const = 0;
+  virtual const std::set<uint32_t>& SubscribesIVI() const = 0;
 #endif
   /**
    * @brief ResetDataInNone reset data counters in NONE

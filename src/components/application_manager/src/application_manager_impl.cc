@@ -66,11 +66,10 @@
 #include "interfaces/HMI_API_schema.h"
 #include "application_manager/application_impl.h"
 #include "media_manager/media_manager.h"
-#include "policy/usage_statistics/counter.h"
 #include "utils/custom_string.h"
 
 #ifdef SDL_REMOTE_CONTROL
-#include "usage_statistics/counter.h"
+#include "policy/usage_statistics/counter.h"
 #include "functional_module/plugin_manager.h"
 #endif
 
@@ -251,9 +250,13 @@ ApplicationSharedPtr ApplicationManagerImpl::application(
 }
 
 struct TakeDeviceHandle {
+public:
+    TakeDeviceHandle(const ApplicationManager& app_mngr) : app_mngr_(app_mngr) {}
   std::string operator()(ApplicationSharedPtr& app) {
-    return MessageHelper::GetDeviceMacAddressForHandle(app->device());
+    return MessageHelper::GetDeviceMacAddressForHandle(app->device(), app_mngr_);
   }
+private:
+    const ApplicationManager& app_mngr_;
 };
 
 std::vector<std::string> ApplicationManagerImpl::devices(
@@ -264,7 +267,7 @@ std::vector<std::string> ApplicationManagerImpl::devices(
   std::transform(apps.begin(),
                  apps.end(),
                  std::back_inserter(devices),
-                 TakeDeviceHandle());
+                 TakeDeviceHandle(*this));
   return devices;
 }
 #endif
@@ -3503,7 +3506,7 @@ void ApplicationManagerImpl::CreatePhoneCallAppList() {
       (*it)->set_audio_streaming_state(
           mobile_api::AudioStreamingState::NOT_AUDIBLE);
       (*it)->set_system_context(mobile_api::SystemContext::SYSCTXT_MAIN);
-      MessageHelper::SendHMIStatusNotification(*(*it));
+      MessageHelper::SendHMIStatusNotification(*(*it), *this);
     }
   }
 }

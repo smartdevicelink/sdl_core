@@ -1640,10 +1640,17 @@ void PolicyHandler::SetPrimaryDevice(const PTString& dev_id) {
   std::map<connection_handler::DeviceHandle, PTString> devices;
   devices[device_handle] = dev_id;
   devices[old_device_handle] = old_dev_id;
+<<<<<<< Updated upstream
   DataAccessor<ApplicationSet> accessor = application_manager_.applications();
   for (ApplicationSetConstIt i = accessor.GetData().begin();
        i != accessor.GetData().end();
        ++i) {
+=======
+
+  const ApplicationSet& accessor =
+      application_manager_.applications().GetData();
+  for (ApplicationSetConstIt i = accessor.begin(); i != accessor.end(); ++i) {
+>>>>>>> Stashed changes
     const ApplicationSharedPtr app = *i;
     LOG4CXX_DEBUG(logger_,
                   "Item: " << app->device() << " - " << app->mobile_app_id());
@@ -1669,10 +1676,17 @@ void PolicyHandler::ResetPrimaryDevice() {
   LOG4CXX_DEBUG(logger_,
                 "Old: " << old_dev_id << "(" << old_device_handle << ")");
 
+<<<<<<< Updated upstream
   DataAccessor<ApplicationSet> accessor = application_manager_.applications();
   for (ApplicationSetConstIt i = accessor.GetData().begin();
        i != accessor.GetData().end();
        ++i) {
+=======
+  const ApplicationSet& accessor =
+      application_manager_.applications().GetData();
+
+  for (ApplicationSetConstIt i = accessor.begin(); i != accessor.end(); ++i) {
+>>>>>>> Stashed changes
     const ApplicationSharedPtr app = *i;
     LOG4CXX_DEBUG(logger_,
                   "Item: " << app->device() << " - " << app->mobile_app_id());
@@ -1713,10 +1727,16 @@ void PolicyHandler::SetDeviceZone(
   application_manager_.connection_handler().GetDeviceID(device_id,
                                                         &device_handle);
 
+<<<<<<< Updated upstream
   DataAccessor<ApplicationSet> accessor = application_manager_.applications();
   for (ApplicationSetConstIt i = accessor.GetData().begin();
        i != accessor.GetData().end();
        ++i) {
+=======
+  const ApplicationSet& accessor =
+      application_manager_.applications().GetData();
+  for (ApplicationSetConstIt i = accessor.begin(); i != accessor.end(); ++i) {
+>>>>>>> Stashed changes
     const ApplicationSharedPtr app = *i;
     LOG4CXX_DEBUG(logger_,
                   "Item: " << app->device() << " - " << app->mobile_app_id());
@@ -1763,10 +1783,16 @@ void PolicyHandler::OnRemoteAllowedChanged(bool /*new_consent*/) {
   POLICY_LIB_CHECK_VOID();
   connection_handler::DeviceHandle device_handle = PrimaryDevice();
 
+<<<<<<< Updated upstream
   DataAccessor<ApplicationSet> accessor = application_manager_.applications();
   for (ApplicationSetConstIt i = accessor.GetData().begin();
        i != accessor.GetData().end();
        ++i) {
+=======
+  const ApplicationSet& accessor =
+      application_manager_.applications().GetData();
+  for (ApplicationSetConstIt i = accessor.begin(); i != accessor.end(); ++i) {
+>>>>>>> Stashed changes
     const ApplicationSharedPtr app = *i;
     LOG4CXX_DEBUG(logger_,
                   "Item: " << app->device() << " - " << app->mobile_app_id());
@@ -1813,8 +1839,7 @@ void PolicyHandler::OnUpdateHMIStatus(const std::string& device_id,
                    << app->app_id() << " to default hmi level " << level);
   // Set application hmi level
   application_manager_.ChangeAppsHMILevel(app->app_id(), level);
-  MessageHelper::SendHMIStatusNotification(
-      *app, mobile_apis::DeviceRank::eType::INVALID_ENUM, application_manager_);
+  MessageHelper::SendHMIStatusNotification(*app, application_manager_);
 }
 
 void PolicyHandler::OnUpdateHMIStatus(const std::string& device_id,
@@ -1847,7 +1872,11 @@ void PolicyHandler::OnUpdateHMIStatus(const std::string& device_id,
   }
 
   if (rank == mobile_apis::DeviceRank::DRIVER) {
+<<<<<<< Updated upstream
     MessageHelper::SendHMIStatusNotification(*app, rank, application_manager_);
+=======
+    MessageHelper::SendHMIStatusNotification(*app, application_manager_, rank);
+>>>>>>> Stashed changes
     LOG4CXX_DEBUG(logger_, "Device rank: " << rank);
     return;
   }
@@ -1856,7 +1885,11 @@ void PolicyHandler::OnUpdateHMIStatus(const std::string& device_id,
                    << app->app_id() << " to default hmi level " << level);
   // Set application hmi level
   application_manager_.ChangeAppsHMILevel(app->app_id(), level);
+<<<<<<< Updated upstream
   MessageHelper::SendHMIStatusNotification(*app, rank, application_manager_);
+=======
+  MessageHelper::SendHMIStatusNotification(*app, application_manager_, rank);
+>>>>>>> Stashed changes
 }
 
 bool PolicyHandler::GetModuleTypes(const std::string& policy_app_id,
