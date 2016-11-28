@@ -157,8 +157,8 @@ class PolicyHandler : public PolicyHandlerInterface,
 
   /**
    * @brief Process user consent on mobile data connection access
-   * @param Device id or empty string, if concern to all SDL functionality
-   * @param User consent from response
+   * @param is_allowed - user consent from response
+   * @param device_mac - mac adress of device
    */
   void OnAllowSDLFunctionalityNotification(
       bool is_allowed, const std::string& device_mac) OVERRIDE;
