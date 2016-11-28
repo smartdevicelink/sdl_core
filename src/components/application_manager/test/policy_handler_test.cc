@@ -1463,7 +1463,7 @@ TEST_F(PolicyHandlerTest, OnCertificateUpdated) {
   EXPECT_CALL(policy_settings_, app_storage_folder())
       .WillOnce(ReturnRef(app_storage));
 
-  std::string cert_data = "data";
+  const std::string cert_data = "data";
 
   const std::string full_file_name =
       file_system::GetAbsolutePath(app_storage) + "/certificate";
@@ -1475,7 +1475,7 @@ TEST_F(PolicyHandlerTest, OnCertificateUpdated) {
 TEST_F(PolicyHandlerTest, OnCertificateUpdated) {
   application_manager_test::MockPolicyHandlerObserver policy_handler_observer;
   policy_handler_.add_listener(&policy_handler_observer);
-  std::string cert_data = "data";
+  const std::string cert_data = "data";
   EnablePolicy();
 
   EXPECT_CALL(policy_handler_observer, OnCertificateUpdated(cert_data));
