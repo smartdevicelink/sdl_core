@@ -199,6 +199,17 @@ class MessageHelper {
       const uint32_t correlation_id,
       uint32_t connection_key);
 
+  /**
+   * @brief Sends HMI status notification to mobile
+   *
+   * @param application_impl application with changed HMI status
+   * @param rank device rank
+   *
+   **/
+  static void SendHMIStatusNotification(const Application& application_impl,
+                                        mobile_apis::DeviceRank::eType rank,
+                                        ApplicationManager& app_mngr);
+
   /*
    * @brief Prepare GetDeviceListResponse
    *

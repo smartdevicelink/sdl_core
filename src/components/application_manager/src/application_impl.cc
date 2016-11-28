@@ -195,8 +195,8 @@ void ApplicationImpl::ChangeSupportingAppHMIType() {
 
 #ifdef SDL_REMOTE_CONTROL
 bool ApplicationImpl::IsAudible() const {
-  return mobile_api::HMILevel::HMI_FULL == hmi_level_ ||
-         mobile_api::HMILevel::HMI_LIMITED == hmi_level_;
+  return mobile_api::HMILevel::HMI_FULL == hmi_level() ||
+         mobile_api::HMILevel::HMI_LIMITED == hmi_level();
 }
 #endif
 
@@ -320,7 +320,6 @@ const mobile_api::SystemContext::eType ApplicationImpl::system_context() const {
   using namespace mobile_apis;
   const HmiStatePtr hmi_state = CurrentHmiState();
   return hmi_state ? hmi_state->system_context() : SystemContext::INVALID_ENUM;
-  ;
 }
 
 const std::string& ApplicationImpl::app_icon_path() const {
@@ -564,7 +563,8 @@ void ApplicationImpl::increment_list_files_in_none_count() {
 #ifdef SDL_REMOTE_CONTROL
 void ApplicationImpl::set_system_context(
     const mobile_api::SystemContext::eType& system_context) {
-  system_context_ = system_context;
+  const HmiStatePtr hmi_state = CurrentHmiState();
+  hmi_state->set_system_context(system_context);
 }
 
 void ApplicationImpl::set_audio_streaming_state(
@@ -576,7 +576,7 @@ void ApplicationImpl::set_audio_streaming_state(
                  " for non-media application to different from NOT_AUDIBLE");
     return;
   }
-  audio_streaming_state_ = state;
+  CurrentHmiState()->set_audio_streaming_state(state);
 }
 #endif
 
@@ -704,19 +704,6 @@ bool ApplicationImpl::UnsubscribeFromButton(
   sync_primitives::AutoLock lock(button_lock_);
   return subscribed_buttons_.erase(btn_name);
 }
-
-#ifdef SDL_REMOTE_CONTROL
-AppExtensionPtr ApplicationImpl::QueryInterface(AppExtensionUID uid) {
-  std::list<AppExtensionPtr>::const_iterator it = extensions_.begin();
-  for (; it != extensions_.end(); ++it) {
-    if ((*it)->uid() == uid) {
-      return (*it);
-    }
-  }
-
-  return AppExtensionPtr();
-}
-#endif  // SDL_REMOTE_CONTROL
 
 bool ApplicationImpl::SubscribeToIVI(uint32_t vehicle_info_type) {
   sync_primitives::AutoLock lock(vi_lock_);

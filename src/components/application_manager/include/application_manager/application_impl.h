@@ -40,6 +40,7 @@
 #include <utility>
 #include <list>
 #include <stdint.h>
+#include <forward_list>
 
 #include "utils/date_time.h"
 #include "application_manager/application_data_impl.h"
@@ -413,6 +414,11 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   uint32_t audio_stream_suspend_timeout_;
   Timer video_stream_suspend_timer_;
   Timer audio_stream_suspend_timer_;
+
+  std::list<AppExtensionPtr> extensions_;
+
+  std::forward_list<smart_objects::SmartObject>
+      subscribed_interior_vehicle_data_;
 
   /**
    * @brief Defines number per time in seconds limits

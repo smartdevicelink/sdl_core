@@ -535,6 +535,44 @@ void MessageHelper::CreateGetVehicleDataRequest(
 #endif
 }
 
+void MessageHelper::SendHMIStatusNotification(
+    const Application& application_impl,
+    mobile_apis::DeviceRank::eType rank,
+    ApplicationManager& app_mngr) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  smart_objects::SmartObjectSPtr notification = new smart_objects::SmartObject;
+  if (!notification) {
+    LOG4CXX_ERROR(logger_, "Failed to create smart object");
+    return;
+  }
+  smart_objects::SmartObject& message = *notification;
+
+  message[strings::params][strings::function_id] =
+      static_cast<int32_t>(mobile_api::FunctionID::OnHMIStatusID);
+
+  message[strings::params][strings::message_type] =
+      static_cast<int32_t>(application_manager::MessageType::kNotification);
+
+  message[strings::params][strings::connection_key] =
+      static_cast<int32_t>(application_impl.app_id());
+
+  message[strings::msg_params][strings::hmi_level] =
+      static_cast<int32_t>(application_impl.hmi_level());
+
+  message[strings::msg_params][strings::audio_streaming_state] =
+      static_cast<int32_t>(application_impl.audio_streaming_state());
+
+  message[strings::msg_params][strings::system_context] =
+      static_cast<int32_t>(application_impl.system_context());
+
+  if (rank != mobile_apis::DeviceRank::eType::INVALID_ENUM) {
+    message[strings::msg_params][strings::device_rank] =
+        static_cast<int32_t>(rank);
+  }
+
+  app_mngr.ManageMobileCommand(notification, commands::Command::ORIGIN_SDL);
+}
+
 smart_objects::SmartObjectSPtr MessageHelper::CreateBlockedByPoliciesResponse(
     mobile_apis::FunctionID::eType function_id,
     mobile_apis::Result::eType result,

@@ -41,6 +41,7 @@
 #include <stdint.h>
 
 #include "policy/policy_manager.h"
+#include "application_manager/application.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/policies/policy_event_observer.h"
 #include "application_manager/policies/delegates/statistics_delegate.h"
@@ -99,11 +100,11 @@ class PolicyHandler : public PolicyHandlerInterface,
 
   virtual bool GetPriority(const std::string& policy_app_id,
                            std::string* priority) const OVERRIDE;
-  void CheckPermissions(const PTString& app_id,
-                        const PTString& hmi_level,
-                        const PTString& rpc,
-                        const RPCParams& rpc_params,
-                        CheckPermissionResult& result) OVERRIDE;
+  virtual void CheckPermissions(
+      const application_manager::ApplicationSharedPtr app,
+      const PTString& rpc,
+      const RPCParams& rpc_params,
+      CheckPermissionResult& result) OVERRIDE;
 
   uint32_t GetNotificationsNumber(const std::string& priority) const OVERRIDE;
   virtual DeviceConsent GetUserConsentForDevice(
