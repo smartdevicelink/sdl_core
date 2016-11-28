@@ -484,11 +484,11 @@ TEST_F(PolicyHandlerTest, GetUpdateUrls) {
   // Arrange
   EnablePolicyAndPolicyManagerMock();
   EndpointUrls endpoints;
-  const std::string service_type_ = "0x0";
+  const std::string service_type = "0x0";
   // Check expectations
-  EXPECT_CALL(*mock_policy_manager_, GetUpdateUrls(service_type_, _));
+  EXPECT_CALL(*mock_policy_manager_, GetUpdateUrls(service_type, _));
   // Act
-  policy_handler_.GetUpdateUrls(service_type_, endpoints);
+  policy_handler_.GetUpdateUrls(service_type, endpoints);
 }
 
 TEST_F(PolicyHandlerTest, ResetRetrySequence) {
