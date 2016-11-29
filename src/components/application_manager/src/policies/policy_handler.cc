@@ -741,7 +741,7 @@ void PolicyHandler::OnVehicleDataUpdated(
   }
 #else
   LOG4CXX_DEBUG(logger_,
-                "This functionality is not available for not premium policy");
+                "This functionality is not available for not external policy");
 #endif
 }
 
