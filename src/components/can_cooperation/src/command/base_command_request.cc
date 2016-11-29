@@ -36,6 +36,7 @@
 #include "can_cooperation/message_helper.h"
 #include "can_cooperation/can_module.h"
 #include "can_cooperation/can_module_constants.h"
+#include "application_manager/application_manager_impl.h"
 
 namespace can_cooperation {
 
@@ -47,12 +48,14 @@ using application_manager::SeatLocationPtr;
 
 using namespace json_keys;
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "CANCooperation")
-
 BaseCommandRequest::BaseCommandRequest(
-    const application_manager::MessagePtr& message)
-    : message_(message), auto_allowed_(false) {
-  service_ = CANModule::instance()->service();
+    const application_manager::MessagePtr& message,
+    application_manager::ApplicationManager& application_manager)
+    : application_manager::commands::CommandRequestImpl(message,
+                                                        application_manager)
+    , message_(message)
+    , auto_allowed_(false) {
+  service_ = application_manager_.can_module().service();
   app_ = service_->GetApplication(message_->connection_key());
   if (app_) {
     device_location_ = service_->GetDeviceZone(app_->device());
@@ -88,9 +91,9 @@ void BaseCommandRequest::SendResponse(bool success,
   std::string params = writer.write(msg_params);
   message_->set_json_message(params);
   if (0 == strcmp(result_code, result_codes::kTimedOut)) {
-    CANModule::instance()->SendTimeoutResponseToMobile(message_);
+    application_manager_.can_module().SendTimeoutResponseToMobile(message_);
   } else {
-    CANModule::instance()->SendResponseToMobile(message_);
+    application_manager_.can_module().SendResponseToMobile(message_);
   }
 }
 
@@ -132,7 +135,7 @@ void BaseCommandRequest::SendRequest(const char* function_id,
     LOG4CXX_DEBUG(logger_, "Request to HMI: " << json_msg);
     service_->SendMessageToHMI(message_to_send);
   } else {
-    CANModule::instance()->SendMessageToCan(msg);
+    application_manager_.can_module().SendMessageToCan(msg);
   }
 }
 
@@ -265,7 +268,7 @@ CANAppExtensionPtr BaseCommandRequest::GetAppExtension(
     return NULL;
   }
 
-  functional_modules::ModuleID id = CANModule::instance()->GetModuleID();
+  functional_modules::ModuleID id = application_manager_.can_module().GetModuleID();
 
   CANAppExtensionPtr can_app_extension;
   application_manager::AppExtensionPtr app_extension = app->QueryInterface(id);

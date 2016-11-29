@@ -33,7 +33,7 @@
 #ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_BASE_COMMAND_REQUEST_H_
 #define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_BASE_COMMAND_REQUEST_H_
 
-#include "can_cooperation/commands/command.h"
+#include "application_manager/commands/command_request_impl.h"
 #include "can_cooperation/event_engine/event_observer.h"
 #include "application_manager/message.h"
 #include "application_manager/service.h"
@@ -41,6 +41,8 @@
 #include "interfaces/HMI_API.h"
 #include "can_cooperation/can_app_extension.h"
 #include "json/json.h"
+#include "can_cooperation/include/can_cooperation/can_module.h"
+#include "application_manager/application_manager.h"
 
 using application_manager::SeatLocation;
 using application_manager::SeatLocationPtr;
@@ -53,7 +55,7 @@ namespace commands {
  * @brief Base command class for requests
  */
 class BaseCommandRequest
-    : public Command,
+    : public application_manager::commands::CommandRequestImpl,
       public event_engine::EventObserver<application_manager::MessagePtr,
                                          std::string> {
  public:
@@ -62,7 +64,9 @@ class BaseCommandRequest
    *
    * @param message Message from mobile
    **/
-  explicit BaseCommandRequest(const application_manager::MessagePtr& message);
+  BaseCommandRequest(
+      const application_manager::MessagePtr& message,
+      application_manager::ApplicationManager& application_manager);
 
   /**
    * @brief BaseCommandRequest class destructor

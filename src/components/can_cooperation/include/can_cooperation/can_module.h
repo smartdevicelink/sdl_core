@@ -36,16 +36,19 @@
 #include <queue>
 #include <string>
 
-#include "can_cooperation/can_module_interface.h"
+#include "can_cooperation/include/can_cooperation/can_module_interface.h"
 #include "functional_module/generic_module.h"
-#include "can_cooperation/can_connection.h"
-#include "can_cooperation/request_controller.h"
+#include "can_cooperation/include/can_cooperation/can_connection.h"
+#include "can_cooperation/include/can_cooperation/request_controller.h"
 #include "utils/threads/message_loop_thread.h"
 
 namespace can_cooperation {
 
 class CANModule : public CANModuleInterface {
  public:
+  CANModule();
+  ~CANModule();
+
   functional_modules::PluginInfo GetPluginInfo() const;
   virtual functional_modules::ProcessResult ProcessMessage(
       application_manager::MessagePtr msg);
@@ -126,8 +129,6 @@ class CANModule : public CANModuleInterface {
 
   void UnsubscribeAppForAllZones(uint32_t hmi_app_id, CANAppExtensionPtr app);
 
-  CANModule();
-  ~CANModule();
  protected:
   /**
    * @brief Remove extension for all applications
@@ -135,7 +136,6 @@ class CANModule : public CANModuleInterface {
   virtual void RemoveAppExtensions();
 
  private:
-
   void SubscribeOnFunctions();
   void NotifyMobiles(application_manager::MessagePtr msg);
 

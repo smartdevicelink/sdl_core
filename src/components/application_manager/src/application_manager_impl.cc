@@ -3590,6 +3590,11 @@ bool ApplicationManagerImpl::MakeAppFullScreen(uint32_t app_id) {
 
   return true;
 }
+
+can_cooperation::CANModule& ApplicationManagerImpl::can_module() {
+    return can_module_;
+}
+
 #endif
 
 mobile_apis::AppHMIType::eType ApplicationManagerImpl::StringToAppHMIType(
