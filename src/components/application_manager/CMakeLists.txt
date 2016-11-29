@@ -38,6 +38,7 @@ include_directories (
   ${COMPONENTS_DIR}
   ${COMPONENTS_DIR}/can_cooperation/include/
   ${COMPONENTS_DIR}/functional_module/include/
+  ${COMPONENTS_DIR}/can_cooperation/include/
   ${COMPONENTS_DIR}/utils/include/
   ${COMPONENTS_DIR}/formatters/include/
   ${COMPONENTS_DIR}/protocol_handler/include/
@@ -112,6 +113,10 @@ file (GLOB MOBILE_COMMANDS_SOURCES
 )
 
 if (NOT REMOTE_CONTROL)
+    include_directories (
+      include/
+      ${COMPONENTS_DIR}/can_cooperation/include/
+      )
     list(REMOVE_ITEM MOBILE_COMMANDS_SOURCES
         ${COMMANDS_SOURCE_DIR}/mobile/set_interior_vehicle_data_request.cc)
     list(REMOVE_ITEM MOBILE_COMMANDS_SOURCES

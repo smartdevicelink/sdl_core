@@ -129,7 +129,8 @@ ProcessResult CANModule::ProcessMessage(application_manager::MessagePtr msg) {
 
   LOG4CXX_DEBUG(logger_, "Mobile message: " << msg->json_message());
 
-  commands::Command* command = MobileCommandFactory::CreateCommand(msg);
+  request_controller::MobileRequestPtr command =
+      MobileCommandFactory::CreateCommand(msg);
   if (command) {
     request_controller_.AddRequest(msg->correlation_id(), command);
     command->Run();
@@ -396,11 +397,11 @@ void CANModule::SendHmiStatusNotification(
 
 void CANModule::NotifyMobiles(application_manager::MessagePtr message) {
   LOG4CXX_AUTO_TRACE(logger_);
-  commands::Command* command = MobileCommandFactory::CreateCommand(message);
+  request_controller::MobileRequestPtr command =
+      MobileCommandFactory::CreateCommand(message);
   if (command) {
     command->Run();
   }
-  delete command;
 }
 
 void CANModule::SendResponseToMobile(application_manager::MessagePtr msg) {

@@ -33,10 +33,11 @@
 #ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_REQUEST_CONTROLLER_H_
 #define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_REQUEST_CONTROLLER_H_
 
+#include <map>
+
 #include "application_manager/commands/command.h"
 #include "can_cooperation/can_module_timer.h"
 
-#include <map>
 
 namespace can_cooperation {
 namespace request_controller {
