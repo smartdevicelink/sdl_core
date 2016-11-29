@@ -2877,64 +2877,45 @@ void ApplicationManagerImpl::Handle(const impl::AudioData message) {
 }
 
 mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
-    const std::string& policy_app_id,
-    mobile_apis::HMILevel::eType hmi_level,
-    mobile_apis::FunctionID::eType function_id,
+    const ApplicationSharedPtr app,
+    const std::string& function_id,
     const RPCParams& rpc_params,
     CommandParametersPermissions* params_permissions) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "CheckPolicyPermissions");
   // TODO(AOleynik): Remove check of policy_enable, when this flag will be
   // unused in config file
-  if (!GetPolicyHandler().PolicyEnabled()) {
+  if (!policy::PolicyHandler::instance()->PolicyEnabled()) {
     return mobile_apis::Result::SUCCESS;
   }
 
-  const std::string stringified_functionID =
-      MessageHelper::StringifiedFunctionID(function_id);
-  const std::string stringified_hmi_level =
-      MessageHelper::StringifiedHMILevel(hmi_level);
-  LOG4CXX_DEBUG(logger_,
-                "Checking permissions for  " << policy_app_id << " in "
-                                             << stringified_hmi_level << " rpc "
-                                             << stringified_functionID);
+  DCHECK(app);
   policy::CheckPermissionResult result;
-  //TODO(LS): find out what how this thing should work
-  //  GetPolicyHandler().CheckPermissions(policy_app_id,
-  //                                      stringified_hmi_level,
-  //                                      stringified_functionID,
-  //                                      rpc_params,
-  //                                      result);
+  policy::PolicyHandler::instance()->CheckPermissions(app,
+                                                      function_id,
+                                                      rpc_params,
+                                                      result);
 
   if (NULL != params_permissions) {
-    params_permissions->allowed_params = result.list_of_allowed_params;
-    params_permissions->disallowed_params = result.list_of_disallowed_params;
-    params_permissions->undefined_params = result.list_of_undefined_params;
+      params_permissions->allowed_params = result.list_of_allowed_params;
+      params_permissions->disallowed_params = result.list_of_disallowed_params;
+      params_permissions->undefined_params = result.list_of_undefined_params;
   }
 
-  if (hmi_level == mobile_apis::HMILevel::HMI_NONE &&
-      function_id != mobile_apis::FunctionID::UnregisterAppInterfaceID) {
-    ApplicationSharedPtr app = application_by_policy_id(policy_app_id);
-    if (!app) {
-      LOG4CXX_ERROR(logger_, "No application for policy id " << policy_app_id);
-      return mobile_apis::Result::GENERIC_ERROR;
-    }
+  if (app->hmi_level() == mobile_apis::HMILevel::HMI_NONE
+      && function_id != MessageHelper::StringifiedFunctionID(
+          mobile_apis::FunctionID::UnregisterAppInterfaceID)) {
     if (result.hmi_level_permitted != policy::kRpcAllowed) {
       app->usage_report().RecordRpcSentInHMINone();
     }
   }
 
-  const std::string log_msg = "Application: " + policy_app_id + ", RPC: " +
-                              stringified_functionID + ", HMI status: " +
-                              stringified_hmi_level;
+  const std::string log_msg = "Application: "+ app->mobile_app_id() +
+                              ", RPC: " + function_id +
+                              ", HMI status: "+ MessageHelper::StringifiedHMILevel(app->hmi_level());
 
   if (result.hmi_level_permitted != policy::kRpcAllowed) {
-    LOG4CXX_WARN(logger_, "Request is blocked by policies. " << log_msg);
+    LOG4CXX_WARN(logger_, "Request is blocked by policies. " << log_msg );
 
-    ApplicationSharedPtr app = application_by_policy_id(policy_app_id);
-    if (!app) {
-      LOG4CXX_ERROR(logger_, "No application for policy id " << policy_app_id);
-      return mobile_apis::Result::GENERIC_ERROR;
-    }
     app->usage_report().RecordPolicyRejectedRpcCall();
 
     switch (result.hmi_level_permitted) {
@@ -2946,7 +2927,7 @@ mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
         return mobile_apis::Result::INVALID_ENUM;
     }
   }
-  LOG4CXX_DEBUG(logger_, "Request is allowed by policies. " << log_msg);
+  LOG4CXX_INFO(logger_, "Request is allowed by policies. "+log_msg);
   return mobile_api::Result::SUCCESS;
 }
 
