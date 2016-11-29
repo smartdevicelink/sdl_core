@@ -46,6 +46,7 @@ class CANAppExtension;
 typedef utils::SharedPtr<CANAppExtension> CANAppExtensionPtr;
 
 struct MessageFromCAN : public Json::Value {
+  explicit MessageFromCAN() {}
   explicit MessageFromCAN(const Json::Value& other) : Json::Value(other) {}
 };
 
