@@ -3,4 +3,3 @@
 #else
 #include "application_manager/policies/regular/delegates/app_permission_delegate.h"
 #endif
-
