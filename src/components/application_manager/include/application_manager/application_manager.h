@@ -50,6 +50,7 @@
 #include "application_manager/hmi_interfaces.h"
 #ifdef SDL_REMOTE_CONTROL
 #include "functional_module/plugin_manager.h"
+#include "can_cooperation/include/can_cooperation/can_module.h"
 #endif
 namespace resumption {
 class LastState;
@@ -147,7 +148,7 @@ class ApplicationManager {
   virtual ApplicationSharedPtr application(
       const std::string& device_id, const std::string& policy_app_id) const = 0;
   virtual void SubscribeToHMINotification(
-      const std::string& hmi_notification) = 0;  
+      const std::string& hmi_notification) = 0;
 #endif
   virtual ApplicationSharedPtr active_application() const = 0;
 
@@ -167,6 +168,7 @@ class ApplicationManager {
 #ifdef SDL_REMOTE_CONTROL
   virtual AppSharedPtrs applications_by_interior_vehicle_data(
       smart_objects::SmartObject moduleDescription) = 0;
+  virtual can_cooperation::CANModule& can_module() = 0;
 #endif  // SDL_REMOTE_CONTROL
 
   /**

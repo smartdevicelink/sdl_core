@@ -543,7 +543,6 @@ void CANModule::UnsubscribeAppsFromAllInteriorZones(uint32_t device_id) {
   std::vector<application_manager::ApplicationSharedPtr> applications =
       this->service()->GetApplications(
           this->GetModuleID());
-
   for (uint32_t i = 0; i < applications.size(); ++i) {
     if (applications[i]->device() == device_id) {
       application_manager::AppExtensionPtr app_extension =

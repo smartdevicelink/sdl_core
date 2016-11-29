@@ -33,15 +33,16 @@
 #ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_REQUEST_CONTROLLER_H_
 #define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_REQUEST_CONTROLLER_H_
 
-#include "can_cooperation/commands/command.h"
-#include "can_cooperation/can_module_timer.h"
+#include "application_manager/include/application_manager/commands/command.h"
+#include "can_cooperation/include/can_cooperation/can_module_timer.h"
 
 #include <map>
 
 namespace can_cooperation {
 namespace request_controller {
 
-typedef utils::SharedPtr<commands::Command> MobileRequestPtr;
+typedef utils::SharedPtr<application_manager::commands::Command>
+    MobileRequestPtr;
 typedef uint32_t correlation_id;
 
 /**
