@@ -74,11 +74,12 @@ class PolicyManagerImpl : public PolicyManager {
 
   virtual std::string GetLockScreenIconUrl() const;
   virtual bool RequestPTUpdate();
-  virtual void CheckPermissions(const PTString& app_id,
+  virtual void CheckPermissions(const PTString& device_id,
+                                const PTString& app_id,
                                 const PTString& hmi_level,
                                 const PTString& rpc,
                                 const RPCParams& rpc_params,
-                                CheckPermissionResult& result);
+                                CheckPermissionResult& result) OVERRIDE;
   virtual bool ResetUserConsent();
   virtual void KmsChanged(int kilometers);
   virtual void IncrementIgnitionCycles();

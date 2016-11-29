@@ -1209,7 +1209,7 @@ void PolicyHandler::CheckPermissions(const ApplicationSharedPtr app,
                                             << hmi_level << " on device "
                                             << device_id << " rpc " << rpc);
   policy_manager_->CheckPermissions(
-      app->mobile_app_id(), hmi_level, rpc, rpc_params, result);
+      app->mobile_app_id(), device_id, hmi_level, rpc, rpc_params, result);
 }
 
 uint32_t PolicyHandler::GetNotificationsNumber(
