@@ -268,7 +268,8 @@ CANAppExtensionPtr BaseCommandRequest::GetAppExtension(
     return NULL;
   }
 
-  functional_modules::ModuleID id = application_manager_.can_module().GetModuleID();
+  functional_modules::ModuleID id =
+      application_manager_.can_module().GetModuleID();
 
   CANAppExtensionPtr can_app_extension;
   application_manager::AppExtensionPtr app_extension = app->QueryInterface(id);

@@ -3593,7 +3593,7 @@ bool ApplicationManagerImpl::MakeAppFullScreen(uint32_t app_id) {
 }
 
 can_cooperation::CANModuleInterface& ApplicationManagerImpl::can_module() {
-    return *can_module_;
+  return *can_module_;
 }
 
 #endif

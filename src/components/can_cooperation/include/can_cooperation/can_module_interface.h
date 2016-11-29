@@ -59,15 +59,16 @@ class CANModuleInterface
       public threads::MessageLoopThread<
           std::queue<MessageFromMobile> >::Handler {
  public:
-  CANModuleInterface() : GenericModule(kCANModuleID){}
-  virtual ~CANModuleInterface(){}
+  CANModuleInterface() : GenericModule(kCANModuleID) {}
+  virtual ~CANModuleInterface() {}
   virtual functional_modules::PluginInfo GetPluginInfo() const = 0;
   virtual functional_modules::ProcessResult ProcessMessage(
       application_manager::MessagePtr msg) = 0;
   virtual functional_modules::ProcessResult ProcessHMIMessage(
       application_manager::MessagePtr msg) = 0;
   virtual void OnCANMessageReceived(const CANMessage& message) = 0;
-  virtual void OnCANConnectionError(ConnectionState state, const std::string& info) = 0;
+  virtual void OnCANConnectionError(ConnectionState state,
+                                    const std::string& info) = 0;
   virtual void Handle(const MessageFromMobile message) = 0;
   virtual void Handle(const MessageFromCAN message) = 0;
 
@@ -81,7 +82,8 @@ class CANModuleInterface
    * @brief Sends timeout response to mobile application
    * @param msg response mesage
    */
-  virtual void SendTimeoutResponseToMobile(application_manager::MessagePtr msg) = 0;
+  virtual void SendTimeoutResponseToMobile(
+      application_manager::MessagePtr msg) = 0;
 
   /**
    * @brief Post message to can to queue
@@ -112,15 +114,17 @@ class CANModuleInterface
    * @param msg Registration message
    * @param app Application basis already create by Core
    */
-  virtual bool IsAppForPlugin(application_manager::ApplicationSharedPtr app) = 0;
+  virtual bool IsAppForPlugin(
+      application_manager::ApplicationSharedPtr app) = 0;
 
   /**
    * @brief Notify about change of HMILevel of plugin's app
    * @param app App with new HMILevel
    * @param old_level Old HMILevel of app
    */
-  virtual void OnAppHMILevelChanged(application_manager::ApplicationSharedPtr app,
-                            mobile_apis::HMILevel::eType old_level) = 0;
+  virtual void OnAppHMILevelChanged(
+      application_manager::ApplicationSharedPtr app,
+      mobile_apis::HMILevel::eType old_level) = 0;
 
   /**
    * @brief Checks if plugin hasn't put restrictions on app's HMI Level
@@ -135,11 +139,14 @@ class CANModuleInterface
    * Handles removing (disconnecting) device
    * @param device removed
    */
-  virtual void OnDeviceRemoved(const connection_handler::DeviceHandle& device) = 0;
+  virtual void OnDeviceRemoved(
+      const connection_handler::DeviceHandle& device) = 0;
 
-  virtual void SendHmiStatusNotification(application_manager::ApplicationSharedPtr app) = 0;
+  virtual void SendHmiStatusNotification(
+      application_manager::ApplicationSharedPtr app) = 0;
 
-  virtual void UnsubscribeAppForAllZones(uint32_t hmi_app_id, CANAppExtensionPtr app) = 0;
+  virtual void UnsubscribeAppForAllZones(uint32_t hmi_app_id,
+                                         CANAppExtensionPtr app) = 0;
 
  protected:
   /**
