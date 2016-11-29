@@ -62,7 +62,7 @@ endif()
 
 if (${EXTENDED_POLICY} STREQUAL "EXTERNAL_PROPRIETARY")
   add_subdirectory(./policy/policy_external/)
-  message(STATUS "Use premium policy")
+  message(STATUS "Use external policy")
 else()
   add_subdirectory(./policy/policy_regular/)
   message(STATUS "Use regular policy")
