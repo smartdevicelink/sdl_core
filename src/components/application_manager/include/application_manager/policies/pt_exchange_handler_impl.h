@@ -3,4 +3,3 @@
 #else
 #include "application_manager/policies/regular/pt_exchange_handler_impl.h"
 #endif
-
