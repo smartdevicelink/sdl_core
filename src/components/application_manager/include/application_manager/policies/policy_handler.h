@@ -409,13 +409,13 @@ class PolicyHandler : public PolicyHandlerInterface,
   // TODO(AKutsan) REMOVE THIS UGLY HOTFIX
   void Increment(usage_statistics::GlobalCounterId type) OVERRIDE;
   void Increment(const std::string& app_id,
-                         usage_statistics::AppCounterId type) OVERRIDE;
+                 usage_statistics::AppCounterId type) OVERRIDE;
   void Set(const std::string& app_id,
-                   usage_statistics::AppInfoId type,
-                   const std::string& value) OVERRIDE;
+           usage_statistics::AppInfoId type,
+           const std::string& value) OVERRIDE;
   void Add(const std::string& app_id,
-                   usage_statistics::AppStopwatchId type,
-                   int32_t timespan_seconds) OVERRIDE;
+           usage_statistics::AppStopwatchId type,
+           int32_t timespan_seconds) OVERRIDE;
 
 #ifdef BUILD_TESTS
   void SetPolicyManager(utils::SharedPtr<PolicyManager> pm) {
@@ -484,21 +484,21 @@ class PolicyHandler : public PolicyHandlerInterface,
     }
 
     void Increment(const std::string& app_id,
-                           usage_statistics::AppCounterId type) OVERRIDE {
+                   usage_statistics::AppCounterId type) OVERRIDE {
       policy_handler_->AsyncRun(
           new StatisticsDelegate(*policy_handler_, app_id, type));
     }
 
     void Set(const std::string& app_id,
-                     usage_statistics::AppInfoId type,
-                     const std::string& value) OVERRIDE {
+             usage_statistics::AppInfoId type,
+             const std::string& value) OVERRIDE {
       policy_handler_->AsyncRun(
           new StatisticsDelegate(*policy_handler_, app_id, type, value));
     }
 
     void Add(const std::string& app_id,
-                     usage_statistics::AppStopwatchId type,
-                     int32_t timespan_seconds) OVERRIDE {
+             usage_statistics::AppStopwatchId type,
+             int32_t timespan_seconds) OVERRIDE {
       policy_handler_->AsyncRun(new StatisticsDelegate(
           *policy_handler_, app_id, type, timespan_seconds));
     }
