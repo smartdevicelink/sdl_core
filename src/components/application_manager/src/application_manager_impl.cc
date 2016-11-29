@@ -1500,11 +1500,12 @@ void ApplicationManagerImpl::SendMessageToMobile(
         }
       }
     }
+    const std::string string_functionID =
+        MessageHelper::StringifiedFunctionID(function_id);
     const mobile_apis::Result::eType check_result = CheckPolicyPermissions(
-        app->policy_app_id(), app->hmi_level(), function_id, params);
+        app, string_functionID, params);
     if (mobile_apis::Result::SUCCESS != check_result) {
-      const std::string string_functionID =
-          MessageHelper::StringifiedFunctionID(function_id);
+
       LOG4CXX_WARN(logger_,
                    "Function \"" << string_functionID << "\" (#" << function_id
                                  << ") not allowed by policy");
@@ -2884,16 +2885,16 @@ mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
   LOG4CXX_INFO(logger_, "CheckPolicyPermissions");
   // TODO(AOleynik): Remove check of policy_enable, when this flag will be
   // unused in config file
-  if (!policy::PolicyHandler::instance()->PolicyEnabled()) {
+  if (!policy_handler_.PolicyEnabled()) {
     return mobile_apis::Result::SUCCESS;
   }
 
   DCHECK(app);
   policy::CheckPermissionResult result;
-  policy::PolicyHandler::instance()->CheckPermissions(app,
-                                                      function_id,
-                                                      rpc_params,
-                                                      result);
+  policy_handler_.CheckPermissions(app,
+                                  function_id,
+                                  rpc_params,
+                                  result);
 
   if (NULL != params_permissions) {
       params_permissions->allowed_params = result.list_of_allowed_params;
