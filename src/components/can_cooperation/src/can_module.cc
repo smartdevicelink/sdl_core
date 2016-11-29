@@ -56,12 +56,10 @@ namespace hmi_api = functional_modules::hmi_api;
 
 using namespace json_keys;
 
-EXPORT_FUNCTION_IMPL(CANModule);
 CREATE_LOGGERPTR_GLOBAL(logger_, "CanModule")
 
 CANModule::CANModule()
-    : GenericModule(kCANModuleID)
-    , can_connection_(new CANTCPConnection)
+    : can_connection_(new CANTCPConnection)
     , from_can_("FromCan To Mobile", this)
     , from_mobile_("FromMobile To Can", this)
     , is_scan_started_(false) {
@@ -254,7 +252,7 @@ functional_modules::ProcessResult CANModule::HandleMessage(
               value[json_keys::kParams][message_params::kAllowed].isBool()) {
             if ((!value[json_keys::kParams][message_params::kAllowed]
                       .asBool()) &&
-                CANModule::instance()->service()->IsRemoteControlAllowed()) {
+                this->service()->IsRemoteControlAllowed()) {
               ModuleHelper::ProccessOnReverseAppsDisallowed();
             }
             PolicyHelper::OnRSDLFunctionalityAllowing(
@@ -471,7 +469,7 @@ void CANModule::OnAppHMILevelChanged(
     application_manager::ApplicationSharedPtr app,
     mobile_apis::HMILevel::eType) {
   LOG4CXX_DEBUG(logger_,
-                "RSDL application " << app->name()
+                "RSDL application " << app->name().AsMBString()
                                     << " has changed hmi level to "
                                     << app->hmi_level());
   service()->NotifyHMIAboutHMILevel(app, app->hmi_level());
@@ -543,13 +541,13 @@ void CANModule::UnsubscribeAppForAllZones(uint32_t hmi_app_id,
 
 void CANModule::UnsubscribeAppsFromAllInteriorZones(uint32_t device_id) {
   std::vector<application_manager::ApplicationSharedPtr> applications =
-      CANModule::instance()->service()->GetApplications(
-          CANModule::instance()->GetModuleID());
+      this->service()->GetApplications(
+          this->GetModuleID());
 
   for (uint32_t i = 0; i < applications.size(); ++i) {
     if (applications[i]->device() == device_id) {
       application_manager::AppExtensionPtr app_extension =
-          applications[i]->QueryInterface(CANModule::instance()->GetModuleID());
+          applications[i]->QueryInterface(this->GetModuleID());
       if (app_extension) {
         CANAppExtensionPtr can_app_extension =
             application_manager::AppExtensionPtr::static_pointer_cast<

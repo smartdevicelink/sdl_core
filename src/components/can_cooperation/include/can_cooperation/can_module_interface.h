@@ -58,6 +58,7 @@ class CANModuleInterface
       public threads::MessageLoopThread<
           std::queue<MessageFromMobile> >::Handler {
  public:
+  CANModuleInterface() : GenericModule(kCANModuleID){}
   virtual ~CANModuleInterface(){}
   virtual functional_modules::PluginInfo GetPluginInfo() const = 0;
   virtual functional_modules::ProcessResult ProcessMessage(
@@ -144,6 +145,9 @@ class CANModuleInterface
    * @brief Remove extension for all applications
    */
   virtual void RemoveAppExtensions() = 0;
+
+  // TODO(VS): must be uid
+  static const functional_modules::ModuleID kCANModuleID = 153;
 };
 
 }  // namespace can_cooperation

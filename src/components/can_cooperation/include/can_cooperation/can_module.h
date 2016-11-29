@@ -147,8 +147,6 @@ class CANModule : public CANModuleInterface {
                                 const application_manager::SeatLocation& zone);
   inline application_manager::SeatLocation GetInteriorZone(
       const Json::Value& device_location) const;
-  // TODO(VS): must be uid
-  static const functional_modules::ModuleID kCANModuleID = 153;
   CANConnectionSPtr can_connection_;
   functional_modules::PluginInfo plugin_info_;
   threads::MessageLoopThread<std::queue<MessageFromCAN> > from_can_;
