@@ -584,6 +584,16 @@ class ApplicationManagerImpl
    * @param hmi_notification string with notification name
    */
   void SubscribeToHMINotification(const std::string& hmi_notification) OVERRIDE;
+
+  /**
+   * @brief Checks HMI level and returns true if audio streaming is allowed
+   */
+  bool IsAudioStreamingAllowed(uint32_t connection_key) const OVERRIDE;
+
+  /**
+   * @brief Checks HMI level and returns true if video streaming is allowed
+   */
+  bool IsVideoStreamingAllowed(uint32_t connection_key) const OVERRIDE;
 #endif
 
   /**
@@ -1072,14 +1082,6 @@ class ApplicationManagerImpl
    */
   void ResetPhoneCallAppList() OVERRIDE;
 
-  /*
-   * @brief Checks HMI level and returns true if audio streaming is allowed
-   */
-  virtual bool IsAudioStreamingAllowed(uint32_t connection_key) const OVERRIDE;
-  /*
-   * @brief Checks HMI level and returns true if video streaming is allowed
-   */
-  virtual bool IsVideoStreamingAllowed(uint32_t connection_key) const OVERRIDE;
 #endif
   // TODO(AOleynik): Temporary added, to fix build. Should be reworked.
   connection_handler::ConnectionHandler& connection_handler() const OVERRIDE;
@@ -1546,7 +1548,6 @@ class ApplicationManagerImpl
     mobile_apis::AudioStreamingState::eType audio_streaming_state;
     mobile_apis::SystemContext::eType system_context;
   };
-
   std::map<uint32_t, AppState> on_phone_call_app_list_;
 #endif
 

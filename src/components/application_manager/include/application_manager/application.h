@@ -407,6 +407,7 @@ class Application : public virtual InitialApplicationData,
       smart_objects::SmartObject module) = 0;
   virtual bool UnsubscribeFromInteriorVehicleData(
       smart_objects::SmartObject module) = 0;
+  virtual void set_hmi_level(const mobile_api::HMILevel::eType& hmi_level) = 0;
 #endif
 
   /**

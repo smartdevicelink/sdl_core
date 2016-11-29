@@ -156,8 +156,6 @@ class ApplicationImpl : public virtual Application,
   void set_version(const Version& ver);
   void set_name(const custom_str::CustomString& name);
   void set_is_media_application(bool is_media);
-  virtual void set_hmi_level(
-      const mobile_api::HMILevel::eType& hmi_level) OVERRIDE;
   void increment_put_file_in_none_count();
   void increment_delete_file_in_none_count();
   void increment_list_files_in_none_count();
@@ -166,6 +164,8 @@ class ApplicationImpl : public virtual Application,
       const mobile_api::SystemContext::eType& system_context);
   void set_audio_streaming_state(
       const mobile_api::AudioStreamingState::eType& state);
+  virtual void set_hmi_level(
+      const mobile_api::HMILevel::eType& hmi_level) OVERRIDE;
 #endif
   bool set_app_icon_path(const std::string& path);
   void set_app_allowed(const bool allowed);
@@ -433,6 +433,9 @@ class ApplicationImpl : public virtual Application,
   std::forward_list<smart_objects::SmartObject>
       subscribed_interior_vehicle_data_;
 
+#ifdef SDL_REMOTE_CONTROL
+  mobile_api::HMILevel::eType hmi_level_;
+#endif
   /**
    * @brief Defines number per time in seconds limits
    */

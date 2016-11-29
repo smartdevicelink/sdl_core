@@ -200,23 +200,12 @@ class MessageHelper {
       uint32_t connection_key);
 
   /**
-   * @brief Sends HMI status notification to mobile
-   *
-   * @param application_impl application with changed HMI status
-   * @param rank device rank
-   *
-   **/
-  static void SendHMIStatusNotification(const Application& application_impl,
-                                        mobile_apis::DeviceRank::eType rank,
-                                        ApplicationManager& app_mngr);
-
-  /*
-   * @brief Prepare GetDeviceListResponse
-   *
-   *
-   * @param devices Devices list
-   *
-   */
+ * @brief Prepare GetDeviceListResponse
+ *
+ *
+ * @param devices Devices list
+ *
+ */
   static smart_objects::SmartObjectSPtr CreateDeviceListSO(
       const connection_handler::DeviceMap& devices,
       const policy::PolicyHandlerInterface& policy_handler,
