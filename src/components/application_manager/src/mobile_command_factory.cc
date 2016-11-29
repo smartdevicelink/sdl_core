@@ -617,9 +617,9 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
     case mobile_apis::FunctionID::ButtonPressID: {
       if ((*message)[strings::params][strings::message_type] ==
           static_cast<int>(application_manager::MessageType::kResponse)) {
-        return new commands::ButtonPressResponse(message);
+        return new commands::ButtonPressResponse(message,application_manager);
       } else {
-        return new commands::ButtonPressRequest(message);
+        return new commands::ButtonPressRequest(message,application_manager);
       }
       break;
     }
@@ -627,32 +627,32 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       if ((*message)[strings::params][strings::message_type] ==
           static_cast<int>(application_manager::MessageType::kResponse)) {
         return new commands::GetInteriorVehicleDataCapabilitiesResponse(
-            message);
+            message,application_manager);
       } else {
-        return new commands::GetInteriorVehicleDataCapabilitiesRequest(message);
+        return new commands::GetInteriorVehicleDataCapabilitiesRequest(message,application_manager);
       }
       break;
     }
     case mobile_apis::FunctionID::GetInteriorVehicleDataID: {
       if ((*message)[strings::params][strings::message_type] ==
           static_cast<int>(application_manager::MessageType::kResponse)) {
-        return new commands::GetInteriorVehicleDataResponse(message);
+        return new commands::GetInteriorVehicleDataResponse(message,application_manager);
       } else {
-        return new commands::GetInteriorVehicleDataRequest(message);
+        return new commands::GetInteriorVehicleDataRequest(message,application_manager);
       }
       break;
     }
     case mobile_apis::FunctionID::SetInteriorVehicleDataID: {
       if ((*message)[strings::params][strings::message_type] ==
           static_cast<int>(application_manager::MessageType::kResponse)) {
-        return new commands::SetInteriorVehicleDataResponse(message);
+        return new commands::SetInteriorVehicleDataResponse(message,application_manager);
       } else {
-        return new commands::SetInteriorVehicleDataRequest(message);
+        return new commands::SetInteriorVehicleDataRequest(message,application_manager);
       }
       break;
     }
     case mobile_apis::FunctionID::OnInteriorVehicleDataID: {
-      return new commands::mobile::OnInteriorVehicleDataNotification(message);
+      return new commands::mobile::OnInteriorVehicleDataNotification(message,application_manager);
       break;
     }
 #endif

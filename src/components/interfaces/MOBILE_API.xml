@@ -2395,10 +2395,10 @@
     <element name="GetWayPointsID" value="41" hexvalue="29" />
     <element name="SubscribeWayPointsID" value="42" hexvalue="2A"/>
     <element name="UnsubscribeWayPointsID" value="43" hexvalue="2B"/>
-    <element name="ButtonPressID" value="41" hexvalue="2C" />
-    <element name="GetInteriorVehicleDataCapabilitiesID" value="42" hexvalue="2D" />
-    <element name="GetInteriorVehicleDataID" value="43" hexvalue="2E" />
-    <element name="SetInteriorVehicleDataID" value="44" hexvalue="2F" />
+    <element name="ButtonPressID" value="44" hexvalue="2C" />
+    <element name="GetInteriorVehicleDataCapabilitiesID" value="45" hexvalue="2D" />
+    <element name="GetInteriorVehicleDataID" value="46" hexvalue="2E" />
+    <element name="SetInteriorVehicleDataID" value="47" hexvalue="2F" />
 
 <!--
         Base Notifications
@@ -2421,7 +2421,7 @@
     <element name="OnSystemRequestID" value="32781" hexvalue="800D" />
     <element name="OnHashChangeID" value="32782" hexvalue="800E" />
     <element name="OnWayPointChangeID" value="32783" hexvalue="800F" />
-    <element name="OnInteriorVehicleDataID" value="32783" hexvalue="8010" />
+    <element name="OnInteriorVehicleDataID" value="32784" hexvalue="8010" />
 
 <!--
         Ford Specific Request / Response RPCs

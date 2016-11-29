@@ -32,7 +32,7 @@
  */
 
 #include "application_manager/commands/mobile/get_interior_vehicle_data_response.h"
-#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_manager.h"
 
 namespace application_manager {
 

@@ -137,7 +137,7 @@ class ApplicationImpl : public virtual Application,
   bool is_media_application() const;
   bool is_foreground() const OVERRIDE;
   void set_foreground(const bool is_foreground) OVERRIDE;
-  const mobile_apis::HMILevel::eType hmi_level() const;
+  virtual const mobile_apis::HMILevel::eType hmi_level() const OVERRIDE;
   const uint32_t put_file_in_none_count() const;
   const uint32_t delete_file_in_none_count() const;
   const uint32_t list_files_in_none_count() const;
@@ -156,7 +156,7 @@ class ApplicationImpl : public virtual Application,
   void set_version(const Version& ver);
   void set_name(const custom_str::CustomString& name);
   void set_is_media_application(bool is_media);
-  void set_hmi_level(const mobile_api::HMILevel::eType& hmi_level);
+  virtual void set_hmi_level(const mobile_api::HMILevel::eType& hmi_level) OVERRIDE;
   void increment_put_file_in_none_count();
   void increment_delete_file_in_none_count();
   void increment_list_files_in_none_count();

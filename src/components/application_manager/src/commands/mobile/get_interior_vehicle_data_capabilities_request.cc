@@ -33,7 +33,7 @@
 
 #include <string.h>
 #include "application_manager/commands/mobile/get_interior_vehicle_data_capabilities_request.h"
-#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_manager.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"

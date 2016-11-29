@@ -3524,7 +3524,7 @@ void ApplicationManagerImpl::ResetPhoneCallAppList() {
 
       app->set_audio_streaming_state(it->second.audio_streaming_state);
       app->set_system_context(it->second.system_context);
-      MessageHelper::SendHMIStatusNotification(*app);
+      MessageHelper::SendHMIStatusNotification(*app, *this);
     }
   }
 
@@ -3811,19 +3811,5 @@ const std::set<int32_t> ApplicationManagerImpl::GetAppsSubscribedForWayPoints()
   sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);
   return subscribed_way_points_apps_list_;
 }
-
-#ifdef SDL_REMOTE_CONTROL
-std::vector<std::string> ApplicationManagerImpl::devices(
-    const std::string& policy_app_id) const {
-  MobileAppIdPredicate matcher(policy_app_id);
-  AppSharedPtrs apps = FindAllApps(applications(), matcher);
-  std::vector<std::string> devices;
-  std::transform(apps.begin(),
-                 apps.end(),
-                 std::back_inserter(devices),
-                 TakeDeviceHandle());
-  return devices;
-}
-#endif
 
 }  // namespace application_manager
