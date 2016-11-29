@@ -57,7 +57,7 @@ RequestController::~RequestController() {
   timer_.RemoveObserver(this);
 }
 
-void RequestController::AddRequest(const uint32_t& mobile_correlation_id,
+void RequestController::AddRequest(const uint32_t mobile_correlation_id,
                                    MobileRequestPtr request) {
   // TODO(VS) Research and fix be problem with overlap correlation ids from two
   // different apllications(on two different mobile devices)

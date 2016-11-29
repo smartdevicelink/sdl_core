@@ -121,11 +121,11 @@ int32_t Message::function_id() const {
   return function_id_;
 }
 
-int32_t Message::correlation_id() const {
+uint32_t Message::correlation_id() const {
   return correlation_id_;
 }
 
-int32_t Message::connection_key() const {
+uint32_t Message::connection_key() const {
   return connection_key_;
 }
 

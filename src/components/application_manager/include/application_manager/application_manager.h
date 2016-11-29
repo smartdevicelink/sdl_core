@@ -50,7 +50,7 @@
 #include "application_manager/hmi_interfaces.h"
 #ifdef SDL_REMOTE_CONTROL
 #include "functional_module/plugin_manager.h"
-#include "can_cooperation/include/can_cooperation/can_module.h"
+#include "can_cooperation/can_module.h"
 #endif
 namespace resumption {
 class LastState;
@@ -168,7 +168,7 @@ class ApplicationManager {
 #ifdef SDL_REMOTE_CONTROL
   virtual AppSharedPtrs applications_by_interior_vehicle_data(
       smart_objects::SmartObject moduleDescription) = 0;
-  virtual can_cooperation::CANModule& can_module() = 0;
+  virtual can_cooperation::CANModuleInterface& can_module() = 0;
 #endif  // SDL_REMOTE_CONTROL
 
   /**

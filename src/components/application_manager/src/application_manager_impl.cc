@@ -70,6 +70,7 @@
 
 #ifdef SDL_REMOTE_CONTROL
 #include "policy/usage_statistics/counter.h"
+#include "can_cooperation/can_module.h"
 #include "functional_module/plugin_manager.h"
 #endif
 
@@ -3591,8 +3592,8 @@ bool ApplicationManagerImpl::MakeAppFullScreen(uint32_t app_id) {
   return true;
 }
 
-can_cooperation::CANModule& ApplicationManagerImpl::can_module() {
-    return can_module_;
+can_cooperation::CANModuleInterface& ApplicationManagerImpl::can_module() {
+    return *can_module_;
 }
 
 #endif

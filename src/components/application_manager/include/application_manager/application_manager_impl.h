@@ -251,7 +251,7 @@ class ApplicationManagerImpl
 #ifdef SDL_REMOTE_CONTROL
   AppSharedPtrs applications_by_interior_vehicle_data(
       smart_objects::SmartObject moduleDescription) OVERRIDE;
-  can_cooperation::CANModule& can_module() OVERRIDE;
+  can_cooperation::CANModuleInterface& can_module() OVERRIDE;
 #endif  // SDL_REMOTE_CONTROL
 
   ApplicationSharedPtr get_limited_media_application() const OVERRIDE;
@@ -1531,7 +1531,7 @@ class ApplicationManagerImpl
 
 #ifdef SDL_REMOTE_CONTROL
   functional_modules::PluginManager plugin_manager_;
-  can_cooperation::CANModule can_module_;
+  std::auto_ptr<can_cooperation::CANModuleInterface> can_module_;
   /**
    * @brief Map contains apps with HMI state before incoming call
    * After incoming call ends previous HMI state must restore

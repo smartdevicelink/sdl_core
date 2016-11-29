@@ -77,8 +77,8 @@ class Message {
   //! --------------------------------------------------------------------------
   std::string function_name() const;
   int32_t function_id() const;
-  int32_t correlation_id() const;
-  int32_t connection_key() const;
+  uint32_t correlation_id() const;
+  uint32_t connection_key() const;
 
   MessageType type() const;
   ProtocolVersion protocol_version() const;

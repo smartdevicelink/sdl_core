@@ -36,8 +36,8 @@
 #include <queue>
 #include <string>
 #include "functional_module/generic_module.h"
-#include "can_cooperation/include/can_cooperation/can_connection.h"
-#include "can_cooperation/include/can_cooperation/request_controller.h"
+#include "can_cooperation/can_connection.h"
+#include "can_cooperation/request_controller.h"
 #include "utils/threads/message_loop_thread.h"
 
 namespace can_cooperation {

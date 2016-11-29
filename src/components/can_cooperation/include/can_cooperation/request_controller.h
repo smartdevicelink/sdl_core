@@ -33,8 +33,8 @@
 #ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_REQUEST_CONTROLLER_H_
 #define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_REQUEST_CONTROLLER_H_
 
-#include "application_manager/include/application_manager/commands/command.h"
-#include "can_cooperation/include/can_cooperation/can_module_timer.h"
+#include "application_manager/commands/command.h"
+#include "can_cooperation/can_module_timer.h"
 
 #include <map>
 
@@ -68,7 +68,7 @@ class RequestController
    * @param mobile_correlation_id mobile request correlation id
    * @param command pointer to request created in mobile factory
    */
-  void AddRequest(const uint32_t& mobile_correlation_id,
+  void AddRequest(const uint32_t mobile_correlation_id,
                   MobileRequestPtr request);
 
   /**
