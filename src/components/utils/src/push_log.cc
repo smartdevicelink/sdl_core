@@ -92,11 +92,13 @@ void delete_log_message_loop_thread() {
 }
 
 void flush_logger() {
-  logger::LoggerStatus old_status = logger::logger_status;
   // Stop pushing new messages to the log queue
-  logger::logger_status = logger::DeletingLoggerThread;
-  log_message_loop_thread->WaitDumpQueue();
-  logger::logger_status = old_status;
+  if (logger::logger_status != LoggerThreadNotCreated) {
+    logger::LoggerStatus old_status = logger::logger_status;
+    logger::logger_status = logger::DeletingLoggerThread;
+    log_message_loop_thread->WaitDumpQueue();
+    logger::logger_status = old_status;
+  }
 }
 
 }  // namespace logger
