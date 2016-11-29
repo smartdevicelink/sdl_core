@@ -558,11 +558,11 @@ class ApplicationManagerImpl
       * SubscribeVehicleData) defined in policy table
       * @return SUCCESS, if allowed, otherwise result code of check
       */
-     mobile_apis::Result::eType CheckPolicyPermissions(
-         const ApplicationSharedPtr app,
-         const std::string& function_id,
-         const RPCParams& rpc_params,
-         CommandParametersPermissions* params_permissions = NULL) OVERRIDE;
+  mobile_apis::Result::eType CheckPolicyPermissions(
+      const ApplicationSharedPtr app,
+      const std::string& function_id,
+      const RPCParams& rpc_params,
+      CommandParametersPermissions* params_permissions = NULL) OVERRIDE;
 
 #ifdef SDL_REMOTE_CONTROL
   /**
@@ -1538,13 +1538,13 @@ class ApplicationManagerImpl
     AppState(const mobile_apis::HMILevel::eType& level,
              const mobile_apis::AudioStreamingState::eType& streaming_state,
              const mobile_apis::SystemContext::eType& context)
-    : hmi_level(level),
-      audio_streaming_state(streaming_state),
-      system_context(context) { }
+        : hmi_level(level)
+        , audio_streaming_state(streaming_state)
+        , system_context(context) {}
 
-    mobile_apis::HMILevel::eType            hmi_level;
+    mobile_apis::HMILevel::eType hmi_level;
     mobile_apis::AudioStreamingState::eType audio_streaming_state;
-    mobile_apis::SystemContext::eType       system_context;
+    mobile_apis::SystemContext::eType system_context;
   };
 
   std::map<uint32_t, AppState> on_phone_call_app_list_;

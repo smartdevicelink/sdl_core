@@ -377,9 +377,9 @@ const VehicleInfo PolicyManagerImpl::GetVehicleInfo() const {
 void PolicyManagerImpl::CheckPermissions(const PTString& device_id,
                                          const PTString& app_id,
                                          const PTString& hmi_level,
-                                          const PTString& rpc,
-                                          const RPCParams& rpc_params,
-                                          CheckPermissionResult& result) {
+                                         const PTString& rpc,
+                                         const RPCParams& rpc_params,
+                                         CheckPermissionResult& result) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (!cache_->IsApplicationRepresented(app_id)) {
@@ -387,21 +387,19 @@ void PolicyManagerImpl::CheckPermissions(const PTString& device_id,
     return;
   }
 
-  LOG4CXX_INFO(
-    logger_,
-    "CheckPermissions for " << app_id << " and rpc " << rpc << " for "
-    << hmi_level << " level.");
+  LOG4CXX_INFO(logger_,
+               "CheckPermissions for " << app_id << " and rpc " << rpc
+                                       << " for " << hmi_level << " level.");
 
 #ifdef SDL_REMOTE_CONTROL
-  Subject who = { device_id, app_id };
+  Subject who = {device_id, app_id};
   const policy_table::Strings& groups = access_remote_->GetGroups(who);
-#else  // SDL_REMOTE_CONTROL
+#else   // SDL_REMOTE_CONTROL
   const policy_table::Strings& groups = cache_->GetGroups(app_id);
 #endif  // SDL_REMOTE_CONTROL
   LOG4CXX_DEBUG(logger_, "Groups: " << groups);
   cache_->CheckPermissions(groups, hmi_level, rpc, result);
 }
-
 
 bool PolicyManagerImpl::ResetUserConsent() {
   bool result = true;

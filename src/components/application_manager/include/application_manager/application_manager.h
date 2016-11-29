@@ -492,21 +492,21 @@ class ApplicationManager {
   virtual bool HMILevelAllowsStreaming(
       uint32_t app_id, protocol_handler::ServiceType service_type) const = 0;
 
-    /**
-        * @brief Checks, if given RPC is allowed at current HMI level for specific
-        * application in policy table
-        * @param app Application
-        * @param hmi_level Current HMI level of application
-        * @param function_id FunctionID of RPC
-        * @param params_permissions Permissions for RPC parameters (e.g.
-        * SubscribeVehicleData) defined in policy table
-        * @return SUCCESS, if allowed, otherwise result code of check
-        */
-     virtual  mobile_apis::Result::eType CheckPolicyPermissions(
-           const ApplicationSharedPtr app,
-           const std::string& function_id,
-           const RPCParams& rpc_params,
-           CommandParametersPermissions* params_permissions = NULL) = 0;
+  /**
+      * @brief Checks, if given RPC is allowed at current HMI level for specific
+      * application in policy table
+      * @param app Application
+      * @param hmi_level Current HMI level of application
+      * @param function_id FunctionID of RPC
+      * @param params_permissions Permissions for RPC parameters (e.g.
+      * SubscribeVehicleData) defined in policy table
+      * @return SUCCESS, if allowed, otherwise result code of check
+      */
+  virtual mobile_apis::Result::eType CheckPolicyPermissions(
+      const ApplicationSharedPtr app,
+      const std::string& function_id,
+      const RPCParams& rpc_params,
+      CommandParametersPermissions* params_permissions = NULL) = 0;
 
   /**
    * @brief IsApplicationForbidden allows to distinguish if application is

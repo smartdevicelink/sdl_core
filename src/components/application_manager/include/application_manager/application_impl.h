@@ -156,7 +156,8 @@ class ApplicationImpl : public virtual Application,
   void set_version(const Version& ver);
   void set_name(const custom_str::CustomString& name);
   void set_is_media_application(bool is_media);
-  virtual void set_hmi_level(const mobile_api::HMILevel::eType& hmi_level) OVERRIDE;
+  virtual void set_hmi_level(
+      const mobile_api::HMILevel::eType& hmi_level) OVERRIDE;
   void increment_put_file_in_none_count();
   void increment_delete_file_in_none_count();
   void increment_list_files_in_none_count();
