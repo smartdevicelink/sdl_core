@@ -82,12 +82,13 @@ using ::testing::SetArgReferee;
 using ::testing::SetArgPointee;
 using ::testing::DoAll;
 using ::testing::SetArgReferee;
+using ::testing::Mock;
 
 class PolicyHandlerTest : public ::testing::Test {
  public:
   PolicyHandlerTest()
       : policy_handler_(policy_settings_, app_manager_)
-      , mock_message_helper_(**MockMessageHelper::message_helper_mock())
+      , mock_message_helper_(*MockMessageHelper::message_helper_mock())
       , kPolicyAppId_("fake_app_id")
       , kMacAddr_("kMacAddr_ess")
       , kDeviceId_("fake_device_id")
