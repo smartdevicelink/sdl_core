@@ -1195,11 +1195,11 @@ bool PolicyHandler::GetPriority(const std::string& policy_app_id,
   return policy_manager_->GetPriority(policy_app_id, priority);
 }
 
-void PolicyHandler::CheckPermissions(const PTString& app_id,
-                                     const PTString& hmi_level,
-                                     const PTString& rpc,
-                                     const RPCParams& rpc_params,
-                                     CheckPermissionResult& result) {
+void PolicyHandler::CheckPermissions(
+    const application_manager::ApplicationSharedPtr app,
+    const PTString& rpc,
+    const RPCParams& rpc_params,
+    CheckPermissionResult& result) {
   POLICY_LIB_CHECK_VOID();
   const std::string hmi_level =
       MessageHelper::StringifiedHMILevel(app->hmi_level());

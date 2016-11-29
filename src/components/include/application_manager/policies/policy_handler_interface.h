@@ -72,11 +72,11 @@ class PolicyHandlerInterface {
 
   virtual bool GetPriority(const std::string& policy_app_id,
                            std::string* priority) const = 0;
-  virtual void CheckPermissions(const PTString& app_id,
-                                const PTString& hmi_level,
-                                const PTString& rpc,
-                                const RPCParams& rpc_params,
-                                CheckPermissionResult& result) = 0;
+  virtual void CheckPermissions(
+      const application_manager::ApplicationSharedPtr app,
+      const PTString& rpc,
+      const RPCParams& rpc_params,
+      CheckPermissionResult& result) = 0;
 
   virtual uint32_t GetNotificationsNumber(
       const std::string& priority) const = 0;
