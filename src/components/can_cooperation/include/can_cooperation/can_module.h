@@ -35,6 +35,8 @@
 
 #include <queue>
 #include <string>
+
+#include "can_cooperation/can_module_interface.h"
 #include "functional_module/generic_module.h"
 #include "can_cooperation/can_connection.h"
 #include "can_cooperation/request_controller.h"
@@ -42,21 +44,7 @@
 
 namespace can_cooperation {
 
-class CANAppExtension;
-typedef utils::SharedPtr<CANAppExtension> CANAppExtensionPtr;
-
-struct MessageFromCAN : public Json::Value {
-  explicit MessageFromCAN(const Json::Value& other) : Json::Value(other) {}
-};
-typedef Json::Value MessageFromMobile;
-
-class CANModule
-    : public functional_modules::GenericModule,
-      public utils::Singleton<CANModule>,
-      public CANConnectionObserver,
-      public threads::MessageLoopThread<std::queue<MessageFromCAN> >::Handler,
-      public threads::MessageLoopThread<
-          std::queue<MessageFromMobile> >::Handler {
+class CANModule : public CANModuleInterface {
  public:
   functional_modules::PluginInfo GetPluginInfo() const;
   virtual functional_modules::ProcessResult ProcessMessage(
@@ -138,6 +126,8 @@ class CANModule
 
   void UnsubscribeAppForAllZones(uint32_t hmi_app_id, CANAppExtensionPtr app);
 
+  CANModule();
+  ~CANModule();
  protected:
   /**
    * @brief Remove extension for all applications
@@ -145,8 +135,6 @@ class CANModule
   virtual void RemoveAppExtensions();
 
  private:
-  CANModule();
-  ~CANModule();
 
   void SubscribeOnFunctions();
   void NotifyMobiles(application_manager::MessagePtr msg);
@@ -168,12 +156,8 @@ class CANModule
   bool is_scan_started_;
   request_controller::RequestController request_controller_;
 
-  friend class CanModuleTest;
-  FRIEND_BASE_SINGLETON_CLASS(CANModule);
   DISALLOW_COPY_AND_ASSIGN(CANModule);
 };
-
-EXPORT_FUNCTION(CANModule)
 
 }  // namespace can_cooperation
 

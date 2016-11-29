@@ -22,13 +22,13 @@ if (CMAKE_BUILD_TYPE)
 endif()
 
 include_directories (
-  ./include/
-  ../include/
-  ../functional_module/include/
-  ../application_manager/include
-  ../connection_handler/include/
-  ../smart_objects/include/
-  ../utils/include/
+  ${COMPONENTS_DIR}/can_cooperation/include/
+  ${COMPONENTS_DIR}/include/
+  ${COMPONENTS_DIR}/functional_module/include/
+  ${COMPONENTS_DIR}/application_manager/include
+  ${COMPONENTS_DIR}/connection_handler/include/
+  ${COMPONENTS_DIR}/smart_objects/include/
+  ${COMPONENTS_DIR}/utils/include/
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${LOG4CXX_INCLUDE_DIRECTORY}
   ${CMAKE_BINARY_DIR}/src/components/
