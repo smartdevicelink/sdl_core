@@ -182,9 +182,7 @@ struct SDLAllowedNotification {
       , state_controller_(state_controller) {}
 
   void operator()(const ApplicationSharedPtr& app) {
-    if (!policy_manager_) {
-      return;
-    }
+    DCHECK_OR_RETURN_VOID(policy_manager_);
     if (device_id_ == app->device()) {
       std::string hmi_level;
       mobile_apis::HMILevel::eType default_mobile_hmi;
@@ -924,9 +922,7 @@ struct SDLAlowedNotification {
       , state_controller_(state_controller) {}
 
   void operator()(const ApplicationSharedPtr& app) {
-    if (!policy_manager_) {
-      return;
-    }
+    DCHECK_OR_RETURN_VOID(policy_manager_);
     if (device_id_ == app->device()) {
       std::string hmi_level;
       mobile_apis::HMILevel::eType default_mobile_hmi;
@@ -1086,12 +1082,12 @@ void PolicyHandler::OnActivateApp(uint32_t connection_key,
 
     DeviceConsent consent = policy_manager_->GetUserConsentForDevice(
         permissions.deviceInfo.device_mac_address);
-    permissions.isSDLAllowed = kDeviceAllowed == consent ? true : false;
+    permissions.isSDLAllowed = kDeviceAllowed == consent;
 
     // According to the SDLAQ-CRS-2794, p.9
     // 'priority' should be ommited in case when device
     // is not allowed.
-    if (permissions.isSDLAllowed == false) {
+    if (!permissions.isSDLAllowed) {
       permissions.priority.clear();
       last_activated_app_id_ = connection_key;
     }
@@ -1478,7 +1474,7 @@ void PolicyHandler::OnCertificateUpdated(const std::string& certificate_data) {
 
 void PolicyHandler::OnEmptyCertificateArrived() const {
   LOG4CXX_DEBUG(logger_, "Empty certificate arrived");
-  const std::string empty_certificate = "";
+  const std::string empty_certificate;
   sync_primitives::AutoLock lock(listeners_lock_);
   std::for_each(
       listeners_.begin(),
