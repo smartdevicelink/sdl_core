@@ -40,7 +40,6 @@
 #include "protocol/message_priority.h"
 #include "protocol/rpc_type.h"
 #include "smart_objects/smart_object.h"
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 namespace application_manager {
 
