@@ -61,7 +61,8 @@ utils::SharedPtr<commands::Command> MobileCommandFactory::CreateCommand(
     const application_manager::MessagePtr& msg) {
   switch (msg->function_id()) {
     case MobileFunctionID::GET_INTERIOR_VEHICLE_DATA_CAPABILITIES: {
-      return utils::MakeShared<commands::GetInteriorVehicleDataCapabiliesRequest>(msg);
+      return utils::MakeShared<
+          commands::GetInteriorVehicleDataCapabiliesRequest>(msg);
       break;
     }
     case MobileFunctionID::GET_INTERIOR_VEHICLE_DATA: {
@@ -77,7 +78,8 @@ utils::SharedPtr<commands::Command> MobileCommandFactory::CreateCommand(
       break;
     }
     case MobileFunctionID::ON_INTERIOR_VEHICLE_DATA: {
-      return utils::MakeShared<commands::OnInteriorVehicleDataNotification>(msg);
+      return utils::MakeShared<commands::OnInteriorVehicleDataNotification>(
+          msg);
       break;
     }
     /*  case MobileFunctionID::START_SCAN: {

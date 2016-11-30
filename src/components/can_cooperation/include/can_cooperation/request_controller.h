@@ -38,12 +38,10 @@
 #include "can_cooperation/commands/command.h"
 #include "can_cooperation/can_module_timer.h"
 
-
 namespace can_cooperation {
 namespace request_controller {
 
-typedef utils::SharedPtr<can_cooperation::commands::Command>
-    MobileRequestPtr;
+typedef utils::SharedPtr<can_cooperation::commands::Command> MobileRequestPtr;
 typedef uint32_t correlation_id;
 
 /**
