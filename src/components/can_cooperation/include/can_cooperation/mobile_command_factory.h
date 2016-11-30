@@ -35,6 +35,7 @@
 
 #include "utils/shared_ptr.h"
 #include "can_cooperation/commands/command.h"
+#include "can_cooperation/can_module.h"
 #include "application_manager/message.h"
 #include "utils/macro.h"
 
@@ -54,7 +55,6 @@ class MobileCommandFactory {
   static utils::SharedPtr<commands::Command> CreateCommand(
       const application_manager::MessagePtr& msg,
       CANModuleInterface& can_module);
-
  private:
   MobileCommandFactory();
   DISALLOW_COPY_AND_ASSIGN(MobileCommandFactory);

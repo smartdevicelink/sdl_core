@@ -50,9 +50,8 @@ class ButtonPressRequest : public BaseCommandRequest {
    *
    * @param message Message from mobile
    **/
-  explicit ButtonPressRequest(const application_manager::MessagePtr& message,
-                              CANModuleInterface& can_module);
-
+  ButtonPressRequest(const application_manager::MessagePtr& message,
+                     CANModuleInterface& can_module);
   /**
    * @brief Execute command
    */

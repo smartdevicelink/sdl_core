@@ -49,7 +49,7 @@ class OnInteriorVehicleDataNotification : public BaseCommandNotification {
    *
    * @param message Message with notification
    **/
-  explicit OnInteriorVehicleDataNotification(
+  OnInteriorVehicleDataNotification(
       const application_manager::MessagePtr& message,
       CANModuleInterface& can_module);
 

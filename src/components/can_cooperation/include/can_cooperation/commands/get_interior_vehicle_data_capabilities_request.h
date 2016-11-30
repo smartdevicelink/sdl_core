@@ -50,7 +50,7 @@ class GetInteriorVehicleDataCapabiliesRequest : public BaseCommandRequest {
    *
    * @param message Message from mobile
    **/
-  explicit GetInteriorVehicleDataCapabiliesRequest(
+  GetInteriorVehicleDataCapabiliesRequest(
       const application_manager::MessagePtr& message,
       CANModuleInterface& can_module);
 

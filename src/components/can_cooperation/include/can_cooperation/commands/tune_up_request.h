@@ -50,8 +50,8 @@ class TuneUpRequest : public BaseCommandRequest {
    *
    * @param message Message from mobile
    **/
-  explicit TuneUpRequest(const application_manager::MessagePtr& message,
-                         CANModuleInterface& can_module);
+  TuneUpRequest(const application_manager::MessagePtr& message,
+                CANModuleInterface& can_module);
 
   /**
    * @brief Execute command

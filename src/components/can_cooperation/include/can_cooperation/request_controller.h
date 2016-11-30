@@ -46,7 +46,7 @@ class Command;
 
 namespace request_controller {
 
-typedef utils::SharedPtr<can_cooperation::commands::Command> MobileRequestPtr;
+typedef utils::SharedPtr<commands::Command> MobileRequestPtr;
 typedef uint32_t correlation_id;
 
 /**

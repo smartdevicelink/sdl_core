@@ -50,9 +50,8 @@ class GetInteriorVehicleDataRequest : public BaseCommandRequest {
    *
    * @param message Message from mobile
    **/
-  explicit GetInteriorVehicleDataRequest(
-      const application_manager::MessagePtr& message,
-      CANModuleInterface& can_module);
+  GetInteriorVehicleDataRequest(const application_manager::MessagePtr& message,
+                                CANModuleInterface& can_module);
 
   /**
    * @brief Execute command

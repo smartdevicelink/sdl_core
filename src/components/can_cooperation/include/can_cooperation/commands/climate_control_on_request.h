@@ -50,9 +50,8 @@ class ClimateControlOnRequest : public BaseCommandRequest {
    *
    * @param message Message from mobile
    **/
-  explicit ClimateControlOnRequest(
-      const application_manager::MessagePtr& message,
-      CANModuleInterface& can_module);
+  ClimateControlOnRequest(const application_manager::MessagePtr& message,
+                          CANModuleInterface& can_module);
 
   /**
    * @brief Execute command
