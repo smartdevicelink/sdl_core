@@ -58,28 +58,31 @@ namespace can_cooperation {
 using functional_modules::MobileFunctionID;
 
 utils::SharedPtr<commands::Command> MobileCommandFactory::CreateCommand(
-    const application_manager::MessagePtr& msg) {
+    const application_manager::MessagePtr& msg,
+    CANModuleInterface& can_module) {
   switch (msg->function_id()) {
     case MobileFunctionID::GET_INTERIOR_VEHICLE_DATA_CAPABILITIES: {
       return utils::MakeShared<
-          commands::GetInteriorVehicleDataCapabiliesRequest>(msg);
+          commands::GetInteriorVehicleDataCapabiliesRequest>(msg, can_module);
       break;
     }
     case MobileFunctionID::GET_INTERIOR_VEHICLE_DATA: {
-      return utils::MakeShared<commands::GetInteriorVehicleDataRequest>(msg);
+      return utils::MakeShared<commands::GetInteriorVehicleDataRequest>(
+          msg, can_module);
       break;
     }
     case MobileFunctionID::SET_INTERIOR_VEHICLE_DATA: {
-      return utils::MakeShared<commands::SetInteriorVehicleDataRequest>(msg);
+      return utils::MakeShared<commands::SetInteriorVehicleDataRequest>(
+          msg, can_module);
       break;
     }
     case MobileFunctionID::BUTTON_PRESS: {
-      return utils::MakeShared<commands::ButtonPressRequest>(msg);
+      return utils::MakeShared<commands::ButtonPressRequest>(msg, can_module);
       break;
     }
     case MobileFunctionID::ON_INTERIOR_VEHICLE_DATA: {
       return utils::MakeShared<commands::OnInteriorVehicleDataNotification>(
-          msg);
+          msg, can_module);
       break;
     }
     /*  case MobileFunctionID::START_SCAN: {

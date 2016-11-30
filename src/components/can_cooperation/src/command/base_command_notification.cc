@@ -46,11 +46,8 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "CANCooperation")
 
 BaseCommandNotification::BaseCommandNotification(
     const application_manager::MessagePtr& message,
-    appliCANModuleInterface& can_module)
-    : Command(can_module)
-    , application_manager_(application_manager)
-    , service_(can_module_.service())
-    , message_(message) {
+    CANModuleInterface& can_module)
+    : Command(can_module), service_(can_module_.service()), message_(message) {
   Json::Value value;
   Json::Reader reader;
   reader.parse(message_->json_message(), value);
@@ -70,8 +67,7 @@ CANAppExtensionPtr BaseCommandNotification::GetAppExtension(
     return NULL;
   }
 
-  functional_modules::ModuleID id =
-      application_manager_.can_module().GetModuleID();
+  functional_modules::ModuleID id = can_module_.GetModuleID();
 
   CANAppExtensionPtr can_app_extension;
   application_manager::AppExtensionPtr app_extension = app->QueryInterface(id);
@@ -99,8 +95,7 @@ void BaseCommandNotification::Run() {
 void BaseCommandNotification::NotifyApplications() {
   LOG4CXX_AUTO_TRACE(logger_);
   typedef std::vector<application_manager::ApplicationSharedPtr> AppList;
-  AppList applications = service_->GetApplications(
-      application_manager_.can_module().GetModuleID());
+  AppList applications = service_->GetApplications(can_module_.GetModuleID());
   for (AppList::iterator i = applications.begin(); i != applications.end();
        ++i) {
     application_manager::MessagePtr message(

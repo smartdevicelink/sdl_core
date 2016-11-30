@@ -52,7 +52,8 @@ class MobileCommandFactory {
    * @return Pointer to created command object.
    **/
   static utils::SharedPtr<commands::Command> CreateCommand(
-      const application_manager::MessagePtr& msg);
+      const application_manager::MessagePtr& msg,
+      CANModuleInterface& can_module);
 
  private:
   MobileCommandFactory();

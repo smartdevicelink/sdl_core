@@ -39,6 +39,11 @@
 #include "can_cooperation/can_module_timer.h"
 
 namespace can_cooperation {
+
+namespace commands {
+class Command;
+}
+
 namespace request_controller {
 
 typedef utils::SharedPtr<can_cooperation::commands::Command> MobileRequestPtr;

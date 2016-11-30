@@ -82,7 +82,6 @@ class BaseCommandRequest
                                           std::string>& event);
 
  protected:
-  application_manager::ApplicationManager& application_manager_;
   application_manager::MessagePtr message_;
   Json::Value response_params_;
 
@@ -218,7 +217,6 @@ class BaseCommandRequest
   SeatLocationPtr device_location_;
   bool auto_allowed_;
   std::string disallowed_info_;
-  CANModuleInterface& can_module_;
 };
 
 }  // namespace commands
