@@ -41,8 +41,7 @@
 #include "interfaces/HMI_API.h"
 #include "can_cooperation/can_app_extension.h"
 #include "json/json.h"
-#include "can_cooperation/can_module.h"
-#include "application_manager/application_manager.h"
+#include "can_cooperation/can_module_interface.h"
 
 using application_manager::SeatLocation;
 using application_manager::SeatLocationPtr;
@@ -64,9 +63,8 @@ class BaseCommandRequest
    *
    * @param message Message from mobile
    **/
-  BaseCommandRequest(
-      const application_manager::MessagePtr& message,
-      application_manager::ApplicationManager& application_manager);
+  BaseCommandRequest(const application_manager::MessagePtr& message,
+                     CANModuleInterface& can_module);
 
   /**
    * @brief BaseCommandRequest class destructor
@@ -220,6 +218,7 @@ class BaseCommandRequest
   SeatLocationPtr device_location_;
   bool auto_allowed_;
   std::string disallowed_info_;
+  CANModuleInterface& can_module_;
 };
 
 }  // namespace commands

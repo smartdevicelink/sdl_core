@@ -52,11 +52,9 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "CANCooperation")
 
 BaseCommandRequest::BaseCommandRequest(
     const application_manager::MessagePtr& message,
-    application_manager::ApplicationManager& application_manager)
-    : application_manager_(application_manager)
-    , message_(message)
-    , auto_allowed_(false) {
-  service_ = application_manager_.can_module().service();
+    CANModuleInterface& can_module)
+    : Command(can_module), message_(message), auto_allowed_(false) {
+  service_ = can_module_.service();
   app_ = service_->GetApplication(message_->connection_key());
   if (app_) {
     device_location_ = service_->GetDeviceZone(app_->device());
@@ -92,9 +90,9 @@ void BaseCommandRequest::SendResponse(bool success,
   std::string params = writer.write(msg_params);
   message_->set_json_message(params);
   if (0 == strcmp(result_code, result_codes::kTimedOut)) {
-    application_manager_.can_module().SendTimeoutResponseToMobile(message_);
+    can_module_.SendTimeoutResponseToMobile(message_);
   } else {
-    application_manager_.can_module().SendResponseToMobile(message_);
+    can_module_.SendResponseToMobile(message_);
   }
 }
 
@@ -136,7 +134,7 @@ void BaseCommandRequest::SendRequest(const char* function_id,
     LOG4CXX_DEBUG(logger_, "Request to HMI: " << json_msg);
     service_->SendMessageToHMI(message_to_send);
   } else {
-    application_manager_.can_module().SendMessageToCan(msg);
+    can_module_.SendMessageToCan(msg);
   }
 }
 
@@ -269,8 +267,7 @@ CANAppExtensionPtr BaseCommandRequest::GetAppExtension(
     return NULL;
   }
 
-  functional_modules::ModuleID id =
-      application_manager_.can_module().GetModuleID();
+  functional_modules::ModuleID id = can_module_.GetModuleID();
 
   CANAppExtensionPtr can_app_extension;
   application_manager::AppExtensionPtr app_extension = app->QueryInterface(id);

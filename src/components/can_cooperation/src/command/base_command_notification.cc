@@ -46,9 +46,10 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "CANCooperation")
 
 BaseCommandNotification::BaseCommandNotification(
     const application_manager::MessagePtr& message,
-    application_manager::ApplicationManager& application_manager)
-    : application_manager_(application_manager)
-    , service_(application_manager.can_module().service())
+    appliCANModuleInterface& can_module)
+    : Command(can_module)
+    , application_manager_(application_manager)
+    , service_(can_module_.service())
     , message_(message) {
   Json::Value value;
   Json::Reader reader;

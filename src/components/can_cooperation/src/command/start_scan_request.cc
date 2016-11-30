@@ -51,7 +51,7 @@ StartScanRequest::~StartScanRequest() {}
 void StartScanRequest::Execute() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  if (CANModule::instance()->IsScanStarted()) {
+  if (can_module_.IsScanStarted()) {
     LOG4CXX_ERROR(logger_, "Scan already started!");
     SendResponse(false, result_codes::kRejected, "");
     return;
@@ -76,7 +76,7 @@ void StartScanRequest::OnEvent(
     bool success = ParseResultCode(value, result_code, info);
 
     if (success) {
-      CANModule::instance()->SetScanStarted(true);
+      can_module_.SetScanStarted(true);
     }
 
     SendResponse(success, result_code.c_str(), info);

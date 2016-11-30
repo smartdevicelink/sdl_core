@@ -69,13 +69,13 @@ void OnInteriorVehicleDataNotification::Execute() {
       json[message_params::kModuleData][message_params::kModuleZone];
 
   std::vector<application_manager::ApplicationSharedPtr> applications =
-      service_->GetApplications(CANModule::instance()->GetModuleID());
+      service_->GetApplications(can_module_.GetModuleID());
 
   for (size_t i = 0; i < applications.size(); ++i) {
     CANAppExtensionPtr extension =
         application_manager::AppExtensionPtr::static_pointer_cast<
-            CANAppExtension>(applications[i]->QueryInterface(
-            CANModule::instance()->GetModuleID()));
+            CANAppExtension>(
+            applications[i]->QueryInterface(can_module_.GetModuleID()));
     DCHECK(extension);
 
     if (extension->IsSubscibedToInteriorVehicleData(moduleDescription)) {

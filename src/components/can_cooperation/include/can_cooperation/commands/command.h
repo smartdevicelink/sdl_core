@@ -34,8 +34,11 @@
 #define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_COMMAND_H_
 
 #include "utils/shared_ptr.h"
+#include "can_cooperation/can_module_interface.h"
 
 namespace can_cooperation {
+
+class CANModuleInterface;
 
 namespace commands {
 
@@ -58,6 +61,11 @@ class Command {
    * \brief Command on timeout reaction
    */
   virtual void OnTimeout() = 0;
+
+ protected:
+  Command(CANModuleInterface& can_module) : can_module_(can_module) {}
+
+  CANModuleInterface& can_module_;
 };
 
 }  // namespace commands
