@@ -48,6 +48,8 @@ using application_manager::SeatLocationPtr;
 
 using namespace json_keys;
 
+CREATE_LOGGERPTR_GLOBAL(logger_, "CANCooperation")
+
 BaseCommandRequest::BaseCommandRequest(
     const application_manager::MessagePtr& message,
     application_manager::ApplicationManager& application_manager)
@@ -550,7 +552,7 @@ void BaseCommandRequest::CheckHMILevel(application_manager::TypeAccess access,
         if (app_->hmi_level() == mobile_apis::HMILevel::eType::HMI_NONE) {
           LOG4CXX_DEBUG(logger_,
                         "RSDL functionality for "
-                            << app_->name()
+                            << app_->name().c_str()
                             << " is auto allowed; setting BACKGROUND level.");
           service_->ChangeNotifyHMILevel(
               app_, mobile_apis::HMILevel::eType::HMI_BACKGROUND);
@@ -563,7 +565,8 @@ void BaseCommandRequest::CheckHMILevel(application_manager::TypeAccess access,
             app_->hmi_level() == mobile_apis::HMILevel::eType::HMI_BACKGROUND) {
           LOG4CXX_DEBUG(logger_,
                         "User consented RSDL functionality for "
-                            << app_->name() << "; setting LIMITED level.");
+                            << app_->name().c_str()
+                            << "; setting LIMITED level.");
           service_->ChangeNotifyHMILevel(
               app_, mobile_apis::HMILevel::eType::HMI_LIMITED);
         }
