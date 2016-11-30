@@ -257,7 +257,8 @@ functional_modules::ProcessResult CANModule::HandleMessage(
               ModuleHelper::ProccessOnReverseAppsDisallowed();
             }
             PolicyHelper::OnRSDLFunctionalityAllowing(
-                value[json_keys::kParams][message_params::kAllowed].asBool());
+                value[json_keys::kParams][message_params::kAllowed].asBool(),
+                *this);
           } else {
             LOG4CXX_ERROR(logger_,
                           "Invalid OnReverseAppsAllowing notification");
@@ -277,7 +278,7 @@ functional_modules::ProcessResult CANModule::HandleMessage(
             uint32_t device_id =
                 params[message_params::kDevice][json_keys::kId].asUInt();
             std::string rank = params[message_params::kRank].asString();
-            PolicyHelper::ChangeDeviceRank(device_id, rank);
+            PolicyHelper::ChangeDeviceRank(device_id, rank, *this);
             ModuleHelper::ProccessDeviceRankChanged(device_id, rank);
           } else {
             LOG4CXX_ERROR(logger_,
@@ -460,7 +461,7 @@ bool CANModule::IsAppForPlugin(application_manager::ApplicationSharedPtr app) {
     CANAppExtensionPtr can_app_extension = new CANAppExtension(GetModuleID());
     app->AddExtension(can_app_extension);
     service()->NotifyHMIAboutHMILevel(app, app->hmi_level());
-    PolicyHelper::SetIsAppOnPrimaryDevice(app);
+    PolicyHelper::SetIsAppOnPrimaryDevice(app, *this);
     return true;
   }
   return false;

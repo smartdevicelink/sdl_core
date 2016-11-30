@@ -50,7 +50,8 @@ class TuneDownRequest : public BaseCommandRequest {
    *
    * @param message Message from mobile
    **/
-  explicit TuneDownRequest(const application_manager::MessagePtr& message);
+  explicit TuneDownRequest(const application_manager::MessagePtr& message,
+                           CANModuleInterface& can_module);
 
   /**
    * @brief Execute command

@@ -51,7 +51,8 @@ class SetInteriorVehicleDataRequest : public BaseCommandRequest {
    * @param message Message from mobile
    **/
   explicit SetInteriorVehicleDataRequest(
-      const application_manager::MessagePtr& message);
+      const application_manager::MessagePtr& message,
+      CANModuleInterface& can_module);
 
   /**
    * @brief Execute command

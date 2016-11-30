@@ -47,8 +47,9 @@ namespace commands {
 CREATE_LOGGERPTR_GLOBAL(logger_, "OnInteriorVehicleDataNotification")
 
 OnInteriorVehicleDataNotification::OnInteriorVehicleDataNotification(
-    const application_manager::MessagePtr& message)
-    : BaseCommandNotification(message) {}
+    const application_manager::MessagePtr& message,
+    CANModuleInterface& can_module)
+    : BaseCommandNotification(message, can_module) {}
 
 OnInteriorVehicleDataNotification::~OnInteriorVehicleDataNotification() {}
 

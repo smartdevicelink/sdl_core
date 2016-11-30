@@ -50,8 +50,8 @@ class GetSeatControlRequest : public BaseCommandRequest {
    *
    * @param message Message from mobile
    **/
-  explicit GetSeatControlRequest(
-      const application_manager::MessagePtr& message);
+  explicit GetSeatControlRequest(const application_manager::MessagePtr& message,
+                                 CANModuleInterface& can_module);
 
   /**
    * @brief Execute command

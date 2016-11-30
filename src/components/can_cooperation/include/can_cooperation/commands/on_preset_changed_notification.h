@@ -50,7 +50,8 @@ class OnPresetChangedNotification : public BaseCommandNotification {
    * @param message Message with notification
    **/
   explicit OnPresetChangedNotification(
-      const application_manager::MessagePtr& message);
+      const application_manager::MessagePtr& message,
+      CANModuleInterface& can_module);
 
   /**
    * @brief Execute command

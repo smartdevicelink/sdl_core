@@ -50,7 +50,8 @@ class OnRadioDetailsNotification : public BaseCommandNotification {
    * @param message Message with notification
    **/
   explicit OnRadioDetailsNotification(
-      const application_manager::MessagePtr& message);
+      const application_manager::MessagePtr& message,
+      CANModuleInterface& can_module);
 
   /**
    * @brief Execute command

@@ -51,8 +51,9 @@ using namespace message_params;
 CREATE_LOGGERPTR_GLOBAL(logger_, "SetInteriorVehicleDataRequest")
 
 SetInteriorVehicleDataRequest::SetInteriorVehicleDataRequest(
-    const application_manager::MessagePtr& message)
-    : BaseCommandRequest(message) {}
+    const application_manager::MessagePtr& message,
+    CANModuleInterface& can_module)
+    : BaseCommandRequest(message, can_module) {}
 
 SetInteriorVehicleDataRequest::~SetInteriorVehicleDataRequest() {}
 

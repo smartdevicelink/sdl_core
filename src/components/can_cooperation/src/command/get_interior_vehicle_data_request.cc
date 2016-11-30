@@ -49,8 +49,9 @@ using namespace message_params;
 CREATE_LOGGERPTR_GLOBAL(logger_, "GetInteriorVehicleDataRequest")
 
 GetInteriorVehicleDataRequest::GetInteriorVehicleDataRequest(
-    const application_manager::MessagePtr& message)
-    : BaseCommandRequest(message) {}
+    const application_manager::MessagePtr& message,
+    CANModuleInterface& can_module)
+    : BaseCommandRequest(message, can_module) {}
 
 void GetInteriorVehicleDataRequest::Execute() {
   LOG4CXX_AUTO_TRACE(logger_);

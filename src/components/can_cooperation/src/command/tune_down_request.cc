@@ -41,8 +41,9 @@ namespace commands {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "TuneDownRequest")
 
-TuneDownRequest::TuneDownRequest(const application_manager::MessagePtr& message)
-    : BaseCommandRequest(message) {}
+TuneDownRequest::TuneDownRequest(const application_manager::MessagePtr& message,
+                                 CANModuleInterface& can_module)
+    : BaseCommandRequest(message, can_module) {}
 
 TuneDownRequest::~TuneDownRequest() {}
 

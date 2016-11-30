@@ -54,8 +54,9 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "GetInteriorVehicleDataCapabiliesRequest")
 
 GetInteriorVehicleDataCapabiliesRequest::
     GetInteriorVehicleDataCapabiliesRequest(
-        const application_manager::MessagePtr& message)
-    : BaseCommandRequest(message) {}
+        const application_manager::MessagePtr& message,
+        CANModuleInterface& can_module)
+    : BaseCommandRequest(message, can_module) {}
 
 GetInteriorVehicleDataCapabiliesRequest::
     ~GetInteriorVehicleDataCapabiliesRequest() {}

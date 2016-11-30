@@ -35,22 +35,28 @@
 
 #include <string>
 #include "application_manager/application.h"
+#include "can_cooperation/can_module_interface.h"
 
 namespace can_cooperation {
 
 class PolicyHelper {
  public:
-  static void OnRSDLFunctionalityAllowing(bool allowed);
+  static void OnRSDLFunctionalityAllowing(bool allowed,
+                                          CANModuleInterface& can_module);
   static void ChangeDeviceRank(const uint32_t device_handle,
-                               const std::string& rank);
+                               const std::string& rank,
+                               CANModuleInterface& can_module);
   static void SetIsAppOnPrimaryDevice(
-      application_manager::ApplicationSharedPtr app);
+      application_manager::ApplicationSharedPtr app,
+      CANModuleInterface& can_module);
 
  private:
-  static void MarkApplications(const uint32_t device_handle);
+  static void MarkApplications(const uint32_t device_handle,
+                               CANModuleInterface& can_module);
   static void MarkAppOnPrimaryDevice(
       application_manager::ApplicationSharedPtr app,
-      const uint32_t device_handle);
+      const uint32_t device_handle,
+      CANModuleInterface& can_module);
 };
 
 }  //  namespace can_cooperation

@@ -50,7 +50,8 @@ class StopScanRequest : public BaseCommandRequest {
    *
    * @param message Message from mobile
    **/
-  explicit StopScanRequest(const application_manager::MessagePtr& message);
+  explicit StopScanRequest(const application_manager::MessagePtr& message,
+                           CANModuleInterface& can_module);
 
   /**
    * @brief Execute command

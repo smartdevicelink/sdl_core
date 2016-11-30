@@ -42,8 +42,9 @@ namespace commands {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "StopScanRequest")
 
-StopScanRequest::StopScanRequest(const application_manager::MessagePtr& message)
-    : BaseCommandRequest(message) {}
+StopScanRequest::StopScanRequest(const application_manager::MessagePtr& message,
+                                 CANModuleInterface& can_module)
+    : BaseCommandRequest(message, can_module) {}
 
 StopScanRequest::~StopScanRequest() {}
 

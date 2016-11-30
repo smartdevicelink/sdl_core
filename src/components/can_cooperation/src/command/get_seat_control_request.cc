@@ -42,8 +42,9 @@ namespace commands {
 CREATE_LOGGERPTR_GLOBAL(logger_, "GetSeatControlRequest")
 
 GetSeatControlRequest::GetSeatControlRequest(
-    const application_manager::MessagePtr& message)
-    : BaseCommandRequest(message) {}
+    const application_manager::MessagePtr& message,
+    CANModuleInterface& can_module)
+    : BaseCommandRequest(message, can_module) {}
 
 GetSeatControlRequest::~GetSeatControlRequest() {}
 
