@@ -124,9 +124,10 @@ class PolicyHandlerInterface {
      * @param app_types additional list of HMI type to search in it
      * @return true if hmi is contained in policy or app_types
      */
-  bool CheckHMIType(const std::string& application_id,
+
+   virtual  bool CheckHMIType(const std::string& application_id,
                     mobile_apis::AppHMIType::eType hmi,
-                    const smart_objects::SmartObject* app_types);
+                    const smart_objects::SmartObject* app_types) = 0;
 
   /**
    * Lets client to notify PolicyHandler that more kilometers expired
@@ -408,13 +409,13 @@ class PolicyHandlerInterface {
    * @param rpc name of rpc
    * @param params parameters list
    */
-  application_manager::TypeAccess CheckAccess(
+  virtual application_manager::TypeAccess CheckAccess(
       const PTString& device_id,
       const PTString& app_id,
       const application_manager::SeatLocation& zone,
       const PTString& module,
       const std::string& rpc,
-      const std::vector<PTString>& params);
+      const std::vector<PTString>& params) = 0;
 
   /**
    * Checks access to module for application
@@ -422,7 +423,7 @@ class PolicyHandlerInterface {
    * @param module
    * @return true if module is allowed for application
    */
-  bool CheckModule(const PTString& app_id, const PTString& module);
+  virtual bool CheckModule(const PTString& app_id, const PTString& module) = 0;
 
   /**
    * Sets access to equipment of vehicle for application by RPC
@@ -432,93 +433,93 @@ class PolicyHandlerInterface {
    * @param module type
    * @param allowed true if access is allowed
    */
-  void SetAccess(const PTString& device_id,
+  virtual void SetAccess(const PTString& device_id,
                  const PTString& app_id,
                  const application_manager::SeatLocation& zone,
                  const PTString& module,
-                 bool allowed);
+                 bool allowed) = 0;
 
   /**
    * Resets access application to all resources
    * @param device_id unique identifier of device
    * @param app_id policy id application
    */
-  void ResetAccess(const PTString& device_id, const PTString& app_id);
+  virtual void ResetAccess(const PTString& device_id, const PTString& app_id) = 0;
 
   /**
    * Resets access by group name for all applications
    * @param zone interior zone
    * @param module type
    */
-  void ResetAccess(const application_manager::SeatLocation& zone,
-                   const std::string& module);
+  virtual void ResetAccess(const application_manager::SeatLocation& zone,
+                   const std::string& module) = 0;
 
   /**
    * Sets device as primary device
    * @param dev_id ID device
    */
-  void SetPrimaryDevice(const PTString& dev_id);
+   virtual void SetPrimaryDevice(const PTString& dev_id) = 0;
 
   /**
    * Resets driver's device
    */
-  void ResetPrimaryDevice();
+  virtual void ResetPrimaryDevice() = 0;
 
   /*
    * Return id of primary device
    */
-  uint32_t PrimaryDevice() const;
+  virtual uint32_t PrimaryDevice() const = 0;
 
   /**
    * Sets device zone
    * @param device_id unique identifier of device
    * @param zone device zone
    */
-  void SetDeviceZone(const std::string& device_id,
-                     const application_manager::SeatLocation& zone);
+  virtual void SetDeviceZone(const std::string& device_id,
+                     const application_manager::SeatLocation& zone) = 0;
 
   /**
    * Gets device zone
    * @param dev_id ID device
    * @return device zone is unknown otherwise 0
    */
-  const application_manager::SeatLocationPtr GetDeviceZone(
-      const std::string& device_id) const;
+  virtual const application_manager::SeatLocationPtr GetDeviceZone(
+      const std::string& device_id) const = 0;
 
   /**
    * Sets mode of remote control (on/off)
    * @param enabled true if remote control is turned on
    */
-  void SetRemoteControl(bool enabled);
+  virtual void SetRemoteControl(bool enabled) = 0;
 
   /*
    * @brief If remote control is enabled
    * by User and by Policy
    */
-  bool GetRemoteControl() const;
+  virtual bool GetRemoteControl() const = 0;
 
   /*
    * @brief Notifies passengers' apps about change
    * @param new_consent New value of remote permission
    */
-  void OnRemoteAllowedChanged(bool new_consent);
+  virtual void OnRemoteAllowedChanged(bool new_consent) = 0;
 
   /*
    * @brief Notifies Remote apps about change in permissions
    * @param device_id Device on which app is running
    * @param application_id ID of app whose permissions are changed
    */
-  void OnRemoteAppPermissionsChanged(const std::string& device_id,
-                                     const std::string& application_id);
+  virtual void OnRemoteAppPermissionsChanged(const std::string& device_id,
+                                     const std::string& application_id) = 0;
 
   virtual void OnUpdateHMIStatus(const std::string& device_id,
                                  const std::string& policy_app_id,
-                                 const std::string& hmi_level);
+                                 const std::string& hmi_level) = 0;
 
   virtual void OnUpdateHMIStatus(const std::string& device_id,
                                  const std::string& policy_app_id,
                                  const std::string& hmi_level,
-                                 const std::string& device_rank);
+                                 const std::string& device_rank) = 0;
 
   /**
    * Gets all allowed module types
@@ -526,8 +527,8 @@ class PolicyHandlerInterface {
    * @param list of allowed module types
    * @return true if application has allowed modules
    */
-  bool GetModuleTypes(const std::string& policy_app_id,
-                      std::vector<std::string>* modules) const;
+  virtual bool GetModuleTypes(const std::string& policy_app_id,
+                      std::vector<std::string>* modules) const = 0;
 #endif  // SDL_REMOTE_CONTROL
 
  private:

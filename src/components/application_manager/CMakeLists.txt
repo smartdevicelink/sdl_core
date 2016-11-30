@@ -89,7 +89,7 @@ ${AM_SOURCE_DIR}/src/policies/delegates/statistics_delegate.cc
 )
 
   include_directories(
-    ${COMPONENTS_DIR}/policy/src/policy/policy_table/table_struct
+    ${COMPONENTS_DIR}/policy/src/policy_table/
   )
 file (GLOB EVENT_ENGINE
   ${AM_SOURCE_DIR}/src/event_engine/*
@@ -392,6 +392,7 @@ SET (LIBRARIES
   dl
   formatters
   dbms  
+  Policy
 )
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
