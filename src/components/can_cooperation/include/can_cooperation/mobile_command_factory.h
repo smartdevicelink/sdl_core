@@ -55,6 +55,7 @@ class MobileCommandFactory {
   static utils::SharedPtr<commands::Command> CreateCommand(
       const application_manager::MessagePtr& msg,
       CANModuleInterface& can_module);
+
  private:
   MobileCommandFactory();
   DISALLOW_COPY_AND_ASSIGN(MobileCommandFactory);

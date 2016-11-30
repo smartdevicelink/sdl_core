@@ -117,6 +117,9 @@ ApplicationManagerImpl::ApplicationManagerImpl(
     , policy_handler_(policy_settings, *this)
     , protocol_handler_(NULL)
     , request_ctrl_(am_settings)
+#ifdef SDL_REMOTE_CONTROL
+    , can_module_(new can_cooperation::CANModule())
+#endif  // SDL_REMOTE_CONTROL
     , hmi_so_factory_(NULL)
     , mobile_so_factory_(NULL)
     , messages_from_mobile_("AM FromMobile", this)
