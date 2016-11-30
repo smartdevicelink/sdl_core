@@ -353,6 +353,87 @@ const std::string kInsertInitData =
     "INSERT OR IGNORE INTO `_internal_data` (`db_version_hash`) VALUES(0); "
     "";
 
+const std::string kDeleteAppGroupPrimary = "DELETE FROM `app_group_primary`";
+
+const std::string kDeleteAppGroupNonPrimary =
+    "DELETE FROM `app_group_non_primary`";
+
+const std::string kDeleteModuleTypes = "DELETE FROM `module_type`";
+
+const std::string kDeleteAllDevices = "DELETE FROM `device`;";
+
+const std::string kSelectAppGroupsPrimary =
+    "SELECT `f`.`name` FROM `app_group_primary` AS `a`"
+    "  LEFT JOIN `functional_group` AS `f` "
+    "    ON (`f`.`id` = `a`.`functional_group_id`)"
+    "  WHERE `a`.`application_id` = ?";
+
+const std::string kSelectAppGroupsNonPrimary =
+    "SELECT `f`.`name` FROM `app_group_non_primary` AS `a`"
+    "  LEFT JOIN `functional_group` AS `f` "
+    "    ON (`f`.`id` = `a`.`functional_group_id`)"
+    "  WHERE `a`.`application_id` = ?";
+
+const std::string kSelectRemoteControlDenied =
+    "SELECT `remote_control_denied` FROM `application` WHERE `id` = ? LIMIT 1";
+
+const std::string kInsertAppGroupPrimary =
+    "INSERT INTO `app_group_primary` (`application_id`, `functional_group_id`)"
+    "  SELECT ?, `id` FROM `functional_group` WHERE `name` = ? LIMIT 1";
+
+const std::string kInsertAppGroupNonPrimary =
+    "INSERT INTO `app_group_non_primary` (`application_id`, "
+    "`functional_group_id`)"
+    "  SELECT ?, `id` FROM `functional_group` WHERE `name` = ? LIMIT 1";
+
+const std::string kUpdateRemoteControlDenied =
+    "UPDATE `application` SET `remote_control_denied` = ? WHERE `id` = ?";
+
+const std::string kCountInteriorZones =
+    "SELECT COUNT(`id`) FROM `interior_zone`";
+
+const std::string kDeleteInteriorZones = "DELETE FROM `interior_zone`";
+
+const std::string kDeleteAccessModules = "DELETE FROM `access_module`";
+
+const std::string kDeleteRemoteRpc = "DELETE FROM `remote_rpc`";
+
+const std::string kInsertInteriorZone =
+    "INSERT INTO `interior_zone` (`name`, `col`, `row`, `level`) "
+    "  VALUES(?, ?, ?, ?)";
+
+const std::string kSelectInteriorZones =
+    "SELECT `id`, `name`, `col`, `row`, `level` FROM `interior_zone`";
+
+const std::string kInsertAccessModule =
+    "INSERT INTO `access_module` (`name`, `zone_id`, `user_consent_needed`) "
+    "  VALUES(?, ?, ?)";
+
+const std::string kDeleteAppGroupPrimaryByApplicationId =
+    "DELETE FROM `app_group_primary` WHERE `application_id` = ?";
+
+const std::string kDeleteAppGroupNonPrimaryByApplicationId =
+    "DELETE FROM `app_group_non_primary` WHERE `application_id` = ?";
+
+const std::string kSelectAccessModules =
+    "SELECT `id`, `name` FROM `access_module` "
+    "  WHERE `zone_id` = ? AND `user_consent_needed` = ?";
+
+const std::string kInsertRemoteRpc =
+    "INSERT INTO `remote_rpc` (`module_id`, `name`, `parameter`) "
+    "  VALUES(?, ?, ?)";
+
+const std::string kSelectRemoteRpcs =
+    "SELECT `name`, `parameter` FROM `remote_rpc` "
+    "  WHERE `module_id` = ?";
+
+const std::string kInsertModuleType =
+    "INSERT OR IGNORE INTO `module_type` (`application_id`, `name`) VALUES (?, "
+    "?)";
+
+const std::string kSelectModuleTypes =
+    "SELECT DISTINCT `name` FROM `module_type` WHERE `application_id` = ?";
+
 const std::string kDropSchema =
     "BEGIN; "
     "DROP INDEX IF EXISTS `message.fk_messages_languages1_idx`; "
