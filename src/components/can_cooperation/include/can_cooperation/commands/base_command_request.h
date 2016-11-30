@@ -33,7 +33,7 @@
 #ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_BASE_COMMAND_REQUEST_H_
 #define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_BASE_COMMAND_REQUEST_H_
 
-#include "application_manager/commands/command_request_impl.h"
+#include "can_cooperation/commands/command.h"
 #include "can_cooperation/event_engine/event_observer.h"
 #include "application_manager/message.h"
 #include "application_manager/service.h"
@@ -55,7 +55,7 @@ namespace commands {
  * @brief Base command class for requests
  */
 class BaseCommandRequest
-    : public application_manager::commands::CommandRequestImpl,
+    : public Command,
       public event_engine::EventObserver<application_manager::MessagePtr,
                                          std::string> {
  public:
@@ -84,6 +84,7 @@ class BaseCommandRequest
                                           std::string>& event);
 
  protected:
+  application_manager::ApplicationManager& application_manager_;
   application_manager::MessagePtr message_;
   Json::Value response_params_;
 

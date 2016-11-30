@@ -59,8 +59,9 @@ class BaseCommandNotification : public Command {
    *
    * @param message Message from mobile
    **/
-  explicit BaseCommandNotification(
-      const application_manager::MessagePtr& message);
+  BaseCommandNotification(
+      const application_manager::MessagePtr& message,
+      application_manager::ApplicationManager& application_manager);
 
   /**
    * @brief BaseCommandNotification class destructor
@@ -79,6 +80,7 @@ class BaseCommandNotification : public Command {
   application_manager::MessagePtr message() {
     return message_;
   }
+  application_manager::ApplicationManager& application_manager_;
   application_manager::ServicePtr service_;
 
   CANAppExtensionPtr GetAppExtension(

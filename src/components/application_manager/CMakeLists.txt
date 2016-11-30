@@ -43,7 +43,7 @@ include_directories (
   ${COMPONENTS_DIR}/formatters/include/
   ${COMPONENTS_DIR}/protocol_handler/include/
   ${COMPONENTS_DIR}/smart_objects/include/
-  ${COMPONENTS_DIR}/hmi_message_handler/include
+  ${COMPONENTS_DIR}/hmi_message_handler/include/
   ${COMPONENTS_DIR}/media_manager/include/
   ${COMPONENTS_DIR}/connection_handler/include/
   ${COMPONENTS_DIR}/config_profile/include/
