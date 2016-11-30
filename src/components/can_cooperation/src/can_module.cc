@@ -129,8 +129,8 @@ ProcessResult CANModule::ProcessMessage(application_manager::MessagePtr msg) {
 
   LOG4CXX_DEBUG(logger_, "Mobile message: " << msg->json_message());
 
-  request_controller::MobileRequestPtr command =
-      MobileCommandFactory::CreateCommand(msg);
+  request_controller::MobileRequestPtr command(
+      MobileCommandFactory::CreateCommand(msg));
   if (command) {
     request_controller_.AddRequest(msg->correlation_id(), command);
     command->Run();

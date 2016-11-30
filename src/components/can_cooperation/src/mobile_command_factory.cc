@@ -30,6 +30,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "utils/shared_ptr.h"
+#include "utils/make_shared.h"
 #include "can_cooperation/mobile_command_factory.h"
 #include "functional_module/function_ids.h"
 /*
@@ -55,63 +57,63 @@ namespace can_cooperation {
 
 using functional_modules::MobileFunctionID;
 
-commands::Command* MobileCommandFactory::CreateCommand(
+utils::SharedPtr<commands::Command> MobileCommandFactory::CreateCommand(
     const application_manager::MessagePtr& msg) {
   switch (msg->function_id()) {
     case MobileFunctionID::GET_INTERIOR_VEHICLE_DATA_CAPABILITIES: {
-      return new commands::GetInteriorVehicleDataCapabiliesRequest(msg);
+      return utils::MakeShared<commands::GetInteriorVehicleDataCapabiliesRequest>(msg);
       break;
     }
     case MobileFunctionID::GET_INTERIOR_VEHICLE_DATA: {
-      return new commands::GetInteriorVehicleDataRequest(msg);
+      return utils::MakeShared<commands::GetInteriorVehicleDataRequest>(msg);
       break;
     }
     case MobileFunctionID::SET_INTERIOR_VEHICLE_DATA: {
-      return new commands::SetInteriorVehicleDataRequest(msg);
+      return utils::MakeShared<commands::SetInteriorVehicleDataRequest>(msg);
       break;
     }
     case MobileFunctionID::BUTTON_PRESS: {
-      return new commands::ButtonPressRequest(msg);
+      return utils::MakeShared<commands::ButtonPressRequest>(msg);
       break;
     }
     case MobileFunctionID::ON_INTERIOR_VEHICLE_DATA: {
-      return new commands::OnInteriorVehicleDataNotification(msg);
+      return utils::MakeShared<commands::OnInteriorVehicleDataNotification>(msg);
       break;
     }
     /*  case MobileFunctionID::START_SCAN: {
-        return new commands::StartScanRequest(msg);
+        return utils::MakeShared<commands::StartScanRequest>(msg);
         break;
       }
       case MobileFunctionID::STOP_SCAN: {
-        return new commands::StopScanRequest(msg);
+        return utils::MakeShared< commands::StopScanRequest>(msg);
         break;
       }
       case MobileFunctionID::TUNE_RADIO: {
-        return new commands::TuneRadioRequest(msg);
+        return utils::MakeShared<Request>(msg);
         break;
       }
       case MobileFunctionID::TUNE_UP: {
-        return new commands::TuneUpRequest(msg);
+        return utils::MakeShared< commands::TuneUpRequest>(msg));
         break;
       }
       case MobileFunctionID::TUNE_DOWN: {
-        return new commands::TuneDownRequest(msg);
+        return utils::MakeShared (commands::TuneDownRequest(msg);
         break;
       }
       case MobileFunctionID::GET_SEAT_CONTROL: {
-        return new commands::GetSeatControlRequest(msg);
+        return utils::MakeShared< commands::GetSeatControlRequest>(msg);
         break;
       }
       case MobileFunctionID::CLIMATE_CONTROL_ON: {
-        return new commands::ClimateControlOnRequest(msg);
+        return utils::MakeShared<commands::ClimateControlOnRequest>(msg);
         break;
       }*/
     /* case MobileFunctionID::ON_RADIO_DETAILS: {
-       return new commands::OnRadioDetailsNotification(msg);
+       return utils::MakeShared< commands::OnRadioDetailsNotification>(msg);
        break;
      }
      case MobileFunctionID::ON_PRESETS_CHANGED: {
-       return new commands::OnPresetChangedNotification(msg);
+       return utils::MakeShared< commands::OnPresetChangedNotification>(msg);
        break;
      }*/
     default: { return NULL; }

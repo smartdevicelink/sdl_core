@@ -41,7 +41,7 @@
 #include "interfaces/HMI_API.h"
 #include "can_cooperation/can_app_extension.h"
 #include "json/json.h"
-#include "can_cooperation/include/can_cooperation/can_module.h"
+#include "can_cooperation/can_module.h"
 #include "application_manager/application_manager.h"
 
 using application_manager::SeatLocation;

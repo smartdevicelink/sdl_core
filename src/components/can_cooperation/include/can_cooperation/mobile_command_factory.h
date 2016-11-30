@@ -33,6 +33,7 @@
 #ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_MOBILE_COMMAND_FACTORY_H_
 #define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_MOBILE_COMMAND_FACTORY_H_
 
+#include "utils/shared_ptr.h"
 #include "can_cooperation/commands/command.h"
 #include "application_manager/message.h"
 #include "utils/macro.h"
@@ -50,7 +51,7 @@ class MobileCommandFactory {
    * @param  message Message shared pointer.
    * @return Pointer to created command object.
    **/
-  static commands::Command* CreateCommand(
+  static utils::SharedPtr<commands::Command> CreateCommand(
       const application_manager::MessagePtr& msg);
 
  private:
