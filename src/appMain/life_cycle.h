@@ -128,6 +128,7 @@ class LifeCycle {
 #endif  // MESSAGEBROKER_HMIADAPTER
 
   const profile::Profile& profile_;
+  bool components_started_;
   DISALLOW_COPY_AND_ASSIGN(LifeCycle);
 };
 }  //  namespace main_namespace

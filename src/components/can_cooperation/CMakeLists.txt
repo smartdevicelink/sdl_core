@@ -99,7 +99,6 @@ set (LIBRARIES
     ApplicationManager
     Utils
     ConfigProfile
-
 )
 
 add_library(${target} SHARED ${SOURCES})

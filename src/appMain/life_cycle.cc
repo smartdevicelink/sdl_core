@@ -96,7 +96,9 @@ LifeCycle::LifeCycle(const profile::Profile& profile)
     , mb_server_thread_(NULL)
     , mb_adapter_thread_(NULL)
 #endif  // MESSAGEBROKER_HMIADAPTER
-    , profile_(profile) {
+    , profile_(profile)
+    , components_started_(false)
+    {
 }
 
 bool LifeCycle::StartComponents() {
@@ -187,11 +189,12 @@ bool LifeCycle::StartComponents() {
 #ifdef SDL_REMOTE_CONTROL
   components_started_ = true;
 
-  core_service_ = new application_manager::CoreService();
 
-  plugin_manager_ = functional_modules::PluginManager::instance();
+  core_service_ = new application_manager::CoreService(*app_manager_);
+
+  plugin_manager_ = new functional_modules::PluginManager();
   plugin_manager_->SetServiceHandler(core_service_);
-  plugin_manager_->LoadPlugins(profile::Profile::instance()->plugins_folder());
+  plugin_manager_->LoadPlugins(profile_.plugins_folder());
 
   if (!InitMessageSystem()) {
     LOG4CXX_INFO(logger_, "InitMessageBroker failed");
@@ -423,6 +426,10 @@ void LifeCycle::StopComponents() {
   delete app_manager_;
   app_manager_ = NULL;
 
+#ifdef SDL_REMOTE_CONTROL
+  delete plugin_manager_;
+  delete core_service_;
+#endif
   LOG4CXX_INFO(logger_, "Destroying HMI Message Handler and MB adapter.");
 
 #ifdef DBUS_HMIADAPTER

@@ -391,7 +391,7 @@ SET (LIBRARIES
   UsageStatistics
   dl
   formatters
-  dbms
+  dbms  
 )
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
