@@ -97,8 +97,7 @@ LifeCycle::LifeCycle(const profile::Profile& profile)
     , mb_adapter_thread_(NULL)
 #endif  // MESSAGEBROKER_HMIADAPTER
     , profile_(profile)
-    , components_started_(false)
-    {
+    , components_started_(false) {
 }
 
 bool LifeCycle::StartComponents() {
@@ -188,7 +187,6 @@ bool LifeCycle::StartComponents() {
 
 #ifdef SDL_REMOTE_CONTROL
   components_started_ = true;
-
 
   core_service_ = new application_manager::CoreService(*app_manager_);
 

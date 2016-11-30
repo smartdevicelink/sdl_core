@@ -114,7 +114,7 @@ ApplicationManagerImpl::ApplicationManagerImpl(
     , media_manager_(NULL)
     , hmi_handler_(NULL)
     , connection_handler_(NULL)
-    , policy_handler_(policy_settings, *this)
+    , policy_handler_(new policy::PolicyHandler(policy_settings, *this))
     , protocol_handler_(NULL)
     , request_ctrl_(am_settings)
 #ifdef SDL_REMOTE_CONTROL
@@ -1112,10 +1112,10 @@ mobile_apis::HMILevel::eType ApplicationManagerImpl::GetDefaultHmiLevel(
   LOG4CXX_AUTO_TRACE(logger_);
   HMILevel::eType default_hmi = HMILevel::HMI_NONE;
 
-  if (policy_handler_.PolicyEnabled()) {
+  if (policy_handler_->PolicyEnabled()) {
     const std::string policy_app_id = application->policy_app_id();
     std::string default_hmi_string = "";
-    if (policy_handler_.GetDefaultHmi(policy_app_id, &default_hmi_string)) {
+    if (policy_handler_->GetDefaultHmi(policy_app_id, &default_hmi_string)) {
       if ("BACKGROUND" == default_hmi_string) {
         default_hmi = HMILevel::HMI_BACKGROUND;
       } else if ("FULL" == default_hmi_string) {
@@ -2917,13 +2917,13 @@ mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
   LOG4CXX_INFO(logger_, "CheckPolicyPermissions");
   // TODO(AOleynik): Remove check of policy_enable, when this flag will be
   // unused in config file
-  if (!policy_handler_.PolicyEnabled()) {
+  if (!policy_handler_->PolicyEnabled()) {
     return mobile_apis::Result::SUCCESS;
   }
 
   DCHECK(app);
   policy::CheckPermissionResult result;
-  policy_handler_.CheckPermissions(app, function_id, rpc_params, result);
+  policy_handler_->CheckPermissions(app, function_id, rpc_params, result);
 
   if (NULL != params_permissions) {
     params_permissions->allowed_params = result.list_of_allowed_params;
@@ -3326,7 +3326,7 @@ bool ApplicationManagerImpl::IsApplicationForbidden(
 
 policy::DeviceConsent ApplicationManagerImpl::GetUserConsentForDevice(
     const std::string& device_id) const {
-  return policy_handler_.GetUserConsentForDevice(device_id);
+  return policy_handler_->GetUserConsentForDevice(device_id);
 }
 
 void ApplicationManagerImpl::OnWakeUp() {

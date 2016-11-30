@@ -493,10 +493,9 @@ void PolicyHandler::AddApplication(const std::string& application_id) {
 }
 
 #ifdef SDL_REMOTE_CONTROL
-bool PolicyHandler::CheckHMIType(
-    const std::string& application_id,
-    mobile_apis::AppHMIType::eType hmi,
-    const smart_objects::SmartObjectSPtr app_types) {
+bool PolicyHandler::CheckHMIType(const std::string& application_id,
+                                 mobile_apis::AppHMIType::eType hmi,
+                                 const smart_objects::SmartObject* app_types) {
   LOG4CXX_AUTO_TRACE(logger_);
   POLICY_LIB_CHECK(false);
   std::vector<int> policy_hmi_types;

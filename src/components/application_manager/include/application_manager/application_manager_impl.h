@@ -64,7 +64,7 @@
 #include "connection_handler/connection_handler_observer.h"
 #include "connection_handler/device.h"
 #include "formatters/CSmartFactory.h"
-#include "policies/policy_handler.h"
+#include "application_manager/policies/policy_handler_interface.h"
 
 #include "interfaces/HMI_API.h"
 #include "interfaces/HMI_API_schema.h"
@@ -1089,7 +1089,7 @@ class ApplicationManagerImpl
   protocol_handler::ProtocolHandler& protocol_handler() const OVERRIDE;
 
   virtual policy::PolicyHandlerInterface& GetPolicyHandler() OVERRIDE {
-    return policy_handler_;
+    return *policy_handler_;
   }
 
 #ifdef SDL_REMOTE_CONTROL
@@ -1525,7 +1525,7 @@ class ApplicationManagerImpl
 
   hmi_message_handler::HMIMessageHandler* hmi_handler_;
   connection_handler::ConnectionHandler* connection_handler_;
-  policy::PolicyHandler policy_handler_;
+  std::auto_ptr<policy::PolicyHandlerInterface> policy_handler_;
   protocol_handler::ProtocolHandler* protocol_handler_;
   request_controller::RequestController request_ctrl_;
 
