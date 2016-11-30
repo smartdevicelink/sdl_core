@@ -51,8 +51,7 @@ using namespace json_keys;
 BaseCommandRequest::BaseCommandRequest(
     const application_manager::MessagePtr& message,
     application_manager::ApplicationManager& application_manager)
-    : application_manager::commands::CommandRequestImpl(message,
-                                                        application_manager)
+    : application_manager_(application_manager)
     , message_(message)
     , auto_allowed_(false) {
   service_ = application_manager_.can_module().service();

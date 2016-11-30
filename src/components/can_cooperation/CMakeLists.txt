@@ -27,6 +27,12 @@ include_directories (
   ${COMPONENTS_DIR}/functional_module/include/
   ${COMPONENTS_DIR}/application_manager/include
   ${COMPONENTS_DIR}/connection_handler/include/
+
+  ${COMPONENTS_DIR}/hmi_message_handler/include/
+  ${COMPONENTS_DIR}/formatters/include/
+  ${COMPONENTS_DIR}/policy/include/
+  ${COMPONENTS_DIR}/rpc_base/include/
+
   ${COMPONENTS_DIR}/smart_objects/include/
   ${COMPONENTS_DIR}/utils/include/
   ${JSONCPP_INCLUDE_DIRECTORY}
