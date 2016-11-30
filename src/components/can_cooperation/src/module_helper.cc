@@ -181,7 +181,7 @@ void ModuleHelper::ProccessDeviceRankChanged(const uint32_t device_handle,
                                              const std::string& rank,
                                              CANModuleInterface& can_module) {
   std::vector<application_manager::ApplicationSharedPtr> applications =
-      can_moduleservice()->GetApplications(can_module.GetModuleID());
+      can_module.service()->GetApplications(can_module.GetModuleID());
 
   if (rank == "DRIVER") {
     bool is_rank_actually_changed = false;

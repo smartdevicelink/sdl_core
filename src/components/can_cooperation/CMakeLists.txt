@@ -22,11 +22,11 @@ if (CMAKE_BUILD_TYPE)
 endif()
 
 include_directories (
-  ${COMPONENTS_DIR}/can_cooperation/include/
   ${COMPONENTS_DIR}/include/
-  ${COMPONENTS_DIR}/functional_module/include/
   ${COMPONENTS_DIR}/application_manager/include
+  ${COMPONENTS_DIR}/can_cooperation/include/
   ${COMPONENTS_DIR}/connection_handler/include/
+  ${COMPONENTS_DIR}/functional_module/include/
 
   ${COMPONENTS_DIR}/hmi_message_handler/include/
   ${COMPONENTS_DIR}/formatters/include/

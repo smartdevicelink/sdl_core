@@ -112,11 +112,7 @@ file (GLOB MOBILE_COMMANDS_SOURCES
   ${COMMANDS_SOURCE_DIR}/mobile/*
 )
 
-if (NOT REMOTE_CONTROL)
-    include_directories (
-      include/
-      ${COMPONENTS_DIR}/can_cooperation/include/
-      )
+if (NOT REMOTE_CONTROL)    
     list(REMOVE_ITEM MOBILE_COMMANDS_SOURCES
         ${COMMANDS_SOURCE_DIR}/mobile/set_interior_vehicle_data_request.cc)
     list(REMOVE_ITEM MOBILE_COMMANDS_SOURCES

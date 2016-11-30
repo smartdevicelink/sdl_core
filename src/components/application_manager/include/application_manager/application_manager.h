@@ -50,7 +50,7 @@
 #include "application_manager/hmi_interfaces.h"
 #ifdef SDL_REMOTE_CONTROL
 #include "functional_module/plugin_manager.h"
-#include "can_cooperation/can_module.h"
+#include "can_cooperation/can_module_interface.h"
 #endif
 namespace resumption {
 class LastState;

@@ -108,6 +108,10 @@ include_directories (
   ${COMPONENTS_DIR}/protocol_handler/include/
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${COMPONENTS_DIR}/application_manager/include
+
+  ${COMPONENTS_DIR}/can_cooperation/include
+  ${COMPONENTS_DIR}/rpc_base/include
+
   ${COMPONENTS_DIR}/formatters/include
   ${COMPONENTS_DIR}/transport_manager/include
   ${COMPONENTS_DIR}/security_manager/include
