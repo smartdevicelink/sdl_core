@@ -36,6 +36,7 @@
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"
+#include "utils/file_system.h"
 
 namespace application_manager {
 
@@ -90,6 +91,17 @@ void OnVehicleDataNotification::Run() {
       }
     }
   }
+
+  std::vector<uint8_t> binary_data;
+
+  LOG4CXX_DEBUG(logger_, "Reading Binary Data To Send");
+  if (!file_system::ReadBinaryFile("binary_vehicle_data", binary_data)) {
+    LOG4CXX_ERROR(logger_, "Unable to read file.");
+    return;
+  }
+
+  LOG4CXX_DEBUG(logger_, "Adding Binary Data to Vehicle Data Message");
+  (*message_)[strings::params][strings::binary_data] = smart_objects::SmartObject(binary_data);
 
   LOG4CXX_DEBUG(
       logger_,
