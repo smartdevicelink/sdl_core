@@ -254,7 +254,7 @@ functional_modules::ProcessResult CANModule::HandleMessage(
             if ((!value[json_keys::kParams][message_params::kAllowed]
                       .asBool()) &&
                 this->service()->IsRemoteControlAllowed()) {
-              ModuleHelper::ProccessOnReverseAppsDisallowed();
+              ModuleHelper::ProccessOnReverseAppsDisallowed(*this);
             }
             PolicyHelper::OnRSDLFunctionalityAllowing(
                 value[json_keys::kParams][message_params::kAllowed].asBool(),
@@ -279,7 +279,7 @@ functional_modules::ProcessResult CANModule::HandleMessage(
                 params[message_params::kDevice][json_keys::kId].asUInt();
             std::string rank = params[message_params::kRank].asString();
             PolicyHelper::ChangeDeviceRank(device_id, rank, *this);
-            ModuleHelper::ProccessDeviceRankChanged(device_id, rank);
+            ModuleHelper::ProccessDeviceRankChanged(device_id, rank, *this);
           } else {
             LOG4CXX_ERROR(logger_,
                           "Invalid RC.OnDeviceRankChanged notification");
@@ -288,7 +288,7 @@ functional_modules::ProcessResult CANModule::HandleMessage(
         return ProcessResult::PROCESSED;
       } else if (functional_modules::hmi_api::on_app_deactivated ==
                  function_name) {
-        return ModuleHelper::ProcessOnAppDeactivation(value);
+        return ModuleHelper::ProcessOnAppDeactivation(value, *this);
       } else if (function_name ==
                  functional_modules::hmi_api::on_device_location_changed) {
         if (value.isMember(json_keys::kParams)) {
@@ -330,7 +330,7 @@ functional_modules::ProcessResult CANModule::HandleMessage(
     case application_manager::MessageType::kRequest: {
       if (function_name == functional_modules::hmi_api::sdl_activate_app) {
         msg->set_protocol_version(application_manager::ProtocolVersion::kHMI);
-        return ModuleHelper::ProcessSDLActivateApp(value);
+        return ModuleHelper::ProcessSDLActivateApp(value, *this);
       }
       return ProcessResult::CANNOT_PROCESS;
     }

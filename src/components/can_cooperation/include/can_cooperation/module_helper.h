@@ -36,6 +36,7 @@
 #include "functional_module/generic_module.h"
 #include "json/json.h"
 #include "interfaces/HMI_API.h"
+#include "can_cooperation/can_module_interface.h"
 
 namespace can_cooperation {
 
@@ -51,7 +52,7 @@ class ModuleHelper {
    * @param value Json notification from HMI
    */
   static functional_modules::ProcessResult ProcessOnAppDeactivation(
-      const Json::Value& value);
+      const Json::Value& value, CANModuleInterface& can_module);
 
   /*
    * @brief Check if activated/other apps are of R-SDL type;
@@ -60,12 +61,13 @@ class ModuleHelper {
    * @param value Json request from HMI
    */
   static functional_modules::ProcessResult ProcessSDLActivateApp(
-      const Json::Value& value);
+      const Json::Value& value, CANModuleInterface& can_module);
 
   static void ProccessDeviceRankChanged(const uint32_t device_handle,
-                                        const std::string& rank);
+                                        const std::string& rank,
+                                        CANModuleInterface& can_module);
 
-  static void ProccessOnReverseAppsDisallowed();
+  static void ProccessOnReverseAppsDisallowed(CANModuleInterface& can_module);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(ModuleHelper);
