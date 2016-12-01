@@ -368,8 +368,10 @@ TEST_F(PolicyManagerImplTest2,
   message_code.push_back("SettingEnableUpdates");
   message_code.push_back("AppPermissions");
   const std::string language = "en-us";
+  const std::string active_hmi_language = language;
   std::vector< ::policy::UserFriendlyMessage> result =
-      manager_->GetUserFriendlyMessages(message_code, language);
+      manager_->GetUserFriendlyMessages(
+          message_code, language, active_hmi_language);
   uint32_t size = result.size();
   EXPECT_GT(size, 0u);
   std::vector< ::policy::UserFriendlyMessage>::iterator result_iter;
