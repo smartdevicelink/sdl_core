@@ -47,6 +47,12 @@
 namespace event_engine {
 
 template <typename EventMessage, typename EventID>
+class Event;
+
+template <typename EventMessage, typename EventID>
+class EventObserver;
+
+template <typename EventMessage, typename EventID>
 class EventDispatcher
     : public utils::Singleton<EventDispatcher<EventMessage, EventID> > {
  public:

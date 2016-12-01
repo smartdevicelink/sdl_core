@@ -42,7 +42,7 @@ namespace commands {
 class RCGetInteriorVehicleDataCapabilitiesRequest : public RequestToHMI {
  public:
   explicit RCGetInteriorVehicleDataCapabilitiesRequest(
-      const MessageSharedPtr& message);
+      const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   virtual ~RCGetInteriorVehicleDataCapabilitiesRequest();
 

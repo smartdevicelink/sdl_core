@@ -39,6 +39,9 @@
 namespace event_engine {
 
 template <typename EventMessage, typename EventID>
+class Event;
+
+template <typename EventMessage, typename EventID>
 class EventObserver {
  public:
   // Typedef for possible Observer ID's from mobile_apis functionID enum

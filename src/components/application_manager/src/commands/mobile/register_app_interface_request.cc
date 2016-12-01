@@ -202,11 +202,9 @@ struct IsSameApp {
     bool other_is_driver = other->device() == policy_handler_.PrimaryDevice();
     return is_driver_ == other_is_driver;
   }
-
 #ifdef ENABLE_LOG
   static log4cxx::LoggerPtr logger_;
 #endif  // ENABLE_LOG
-
  private:
   static const functional_modules::ModuleID kCANModuleID = 153;
   bool is_remote_control_;
@@ -214,6 +212,9 @@ struct IsSameApp {
   functional_modules::PluginManager& plugin_manager_;
   policy::PolicyHandlerInterface& policy_handler_;
 };
+
+CREATE_LOGGERPTR_LOCAL(IsSameApp::logger_, "Commands")
+
 struct IsSameAppId : public IsSameApp {
   IsSameAppId(const std::string& app_id,
               bool is_remote_control,
@@ -232,6 +233,7 @@ struct IsSameAppId : public IsSameApp {
  private:
   const std::string& app_id_;
 };
+
 struct IsSameAppName : public IsSameApp {
   IsSameAppName(const std::string& name,
                 const smart_objects::SmartArray* vr_synonyms,

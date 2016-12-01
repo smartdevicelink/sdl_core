@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_EVENT_ENGINE_CAN_COOPERATION_EVENT_H_
 
 #include <string>
+#include <can_cooperation/event_engine/event_dispatcher.h>
 
 namespace event_engine {
 
@@ -87,6 +88,8 @@ class Event {
    */
   virtual int32_t event_message_type() const = 0;
 
+  void raise();
+
  protected:
   EventMessage event_message_;
 
@@ -108,10 +111,11 @@ template <typename EventMessage, typename EventID>
 Event<EventMessage, EventID>::Event(EventMessage& message, const EventID& id)
     : event_message_(message), id_(id) {}
 
-/*template<typename EventMessage, typename EventID>
+template <typename EventMessage, typename EventID>
 void Event<EventMessage, EventID>::raise() {
   EventDispatcher<EventMessage, EventID>::instance()->raise_event(*this);
-}*/
 }
+
+}  // namespace event_engine
 
 #endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_EVENT_ENGINE_CAN_COOPERATION_EVENT_H_

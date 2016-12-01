@@ -382,6 +382,22 @@ if (${HMI_DBUS_API})
     set (HMI_COMMANDS_SOURCES ${HMI_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES_DBUS})
 endif (${HMI_DBUS_API})
 
+if (${REMOTE_CONTROL})
+    set (
+        HMI_COMMANDS_SOURCES
+        ${HMI_COMMANDS_SOURCES}
+        ${COMMANDS_SOURCE_DIR}/hmi/rc_get_interior_vehicle_data_capabilities_request.cc
+        ${COMMANDS_SOURCE_DIR}/hmi/rc_get_interior_vehicle_data_capabilities_response.cc
+        ${COMMANDS_SOURCE_DIR}/hmi/rc_get_interior_vehicle_data_request.cc
+        ${COMMANDS_SOURCE_DIR}/hmi/rc_get_interior_vehicle_data_response.cc
+        ${COMMANDS_SOURCE_DIR}/hmi/rc_set_interior_vehicle_data_request.cc
+        ${COMMANDS_SOURCE_DIR}/hmi/rc_set_interior_vehicle_data_response.cc
+        ${COMMANDS_SOURCE_DIR}/hmi/button_press_response.cc
+        ${COMMANDS_SOURCE_DIR}/hmi/button_press_request.cc
+        ${COMMANDS_SOURCE_DIR}/hmi/on_interior_vehicle_data_notification.cc
+    )
+endif (${REMOTE_CONTROL})
+
 SET (LIBRARIES
   HMI_API
   MOBILE_API
@@ -393,6 +409,7 @@ SET (LIBRARIES
   formatters
   dbms  
   Policy
+  CANCooperation
 )
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")

@@ -52,7 +52,8 @@ class OnInteriorVehicleDataNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnInteriorVehicleDataNotification(const MessageSharedPtr& message);
+  explicit OnInteriorVehicleDataNotification(
+      const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief OnInteriorVehicleDataNotification class destructor

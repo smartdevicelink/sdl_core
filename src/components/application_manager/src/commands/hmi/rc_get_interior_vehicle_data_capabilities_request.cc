@@ -37,8 +37,10 @@ namespace application_manager {
 namespace commands {
 
 RCGetInteriorVehicleDataCapabilitiesRequest::
-    RCGetInteriorVehicleDataCapabilitiesRequest(const MessageSharedPtr& message)
-    : RequestToHMI(message) {}
+    RCGetInteriorVehicleDataCapabilitiesRequest(
+        const MessageSharedPtr& message,
+        ApplicationManager& application_manager)
+    : RequestToHMI(message, application_manager) {}
 
 RCGetInteriorVehicleDataCapabilitiesRequest::
     ~RCGetInteriorVehicleDataCapabilitiesRequest() {}

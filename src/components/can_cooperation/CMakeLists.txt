@@ -96,7 +96,7 @@ set (SOURCES
 set (LIBRARIES
     jsoncpp
     FunctionalModule
-    ApplicationManager
+    #ApplicationManager
     Utils
     ConfigProfile
 )

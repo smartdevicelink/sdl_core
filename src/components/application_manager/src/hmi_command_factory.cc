@@ -837,26 +837,30 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       if (is_response) {
         command.reset(
             new commands::RCGetInteriorVehicleDataCapabilitiesResponse(
-                message));
+                message, application_manager));
       } else {
-        command.reset(
-            new commands::RCGetInteriorVehicleDataCapabilitiesRequest(message));
+        command.reset(new commands::RCGetInteriorVehicleDataCapabilitiesRequest(
+            message, application_manager));
       }
       break;
     }
     case hmi_apis::FunctionID::RC_GetInteriorVehicleData: {
       if (is_response) {
-        command.reset(new commands::RCGetInteriorVehicleDataResponse(message));
+        command.reset(new commands::RCGetInteriorVehicleDataResponse(
+            message, application_manager));
       } else {
-        command.reset(new commands::RCGetInteriorVehicleDataRequest(message));
+        command.reset(new commands::RCGetInteriorVehicleDataRequest(
+            message, application_manager));
       }
       break;
     }
     case hmi_apis::FunctionID::RC_SetInteriorVehicleData: {
       if (is_response) {
-        command.reset(new commands::RCSetInteriorVehicleDataResponse(message));
+        command.reset(new commands::RCSetInteriorVehicleDataResponse(
+            message, application_manager));
       } else {
-        command.reset(new commands::RCSetInteriorVehicleDataRequest(message));
+        command.reset(new commands::RCSetInteriorVehicleDataRequest(
+            message, application_manager));
       }
       break;
     }
@@ -1262,9 +1266,11 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
 #ifdef SDL_REMOTE_CONTROL
     case hmi_apis::FunctionID::Buttons_ButtonPress: {
       if (is_response) {
-        command.reset(new commands::ButtonsButtonPressResponse(message));
+        command.reset(new commands::ButtonsButtonPressResponse(
+            message, application_manager));
       } else {
-        command.reset(new commands::ButtonsButtonPressRequest(message));
+        command.reset(new commands::ButtonsButtonPressRequest(
+            message, application_manager));
       }
       break;
     }
@@ -1406,8 +1412,8 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     }
 #ifdef SDL_REMOTE_CONTROL
     case hmi_apis::FunctionID::RC_OnInteriorVehicleData: {
-      command.reset(
-          new commands::hmi::OnInteriorVehicleDataNotification(message));
+      command.reset(new commands::hmi::OnInteriorVehicleDataNotification(
+          message, application_manager));
       break;
     }
 #endif

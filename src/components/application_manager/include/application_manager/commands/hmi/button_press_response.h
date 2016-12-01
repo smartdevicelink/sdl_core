@@ -41,7 +41,8 @@ namespace commands {
 
 class ButtonsButtonPressResponse : public ResponseFromHMI {
  public:
-  explicit ButtonsButtonPressResponse(const MessageSharedPtr& message);
+  explicit ButtonsButtonPressResponse(const MessageSharedPtr& message,
+                                      ApplicationManager& application_manager);
 
   virtual ~ButtonsButtonPressResponse();
 
