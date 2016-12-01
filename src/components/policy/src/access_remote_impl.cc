@@ -170,7 +170,7 @@ bool AccessRemoteImpl::CheckModuleType(const PTString& app_id,
   }
 
   const policy_table::ApplicationParams& app =
-      cache_->pt_->policy_table.app_policies[app_id];
+      cache_->pt_->policy_table.app_policies_section.apps[app_id];
   if (!app.moduleType.is_initialized()) {
     return false;
   }
@@ -328,7 +328,8 @@ const policy_table::AppHMITypes& AccessRemoteImpl::HmiTypes(
   if (cache_->IsDefaultPolicy(who.app_id)) {
     return hmi_types_[who];
   } else {
-    return *cache_->pt_->policy_table.app_policies[who.app_id].AppHMIType;
+    return *cache_->pt_->policy_table.app_policies_section.apps[who.app_id]
+                .AppHMIType;
   }
 }
 
@@ -336,10 +337,10 @@ const policy_table::Strings& AccessRemoteImpl::GetGroups(const Subject& who) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (IsAppReverse(who)) {
     if (IsPrimaryDevice(who.dev_id)) {
-      return *cache_->pt_->policy_table.app_policies[who.app_id]
+      return *cache_->pt_->policy_table.app_policies_section.apps[who.app_id]
                   .groups_primaryRC;
     } else if (IsEnabled()) {
-      return *cache_->pt_->policy_table.app_policies[who.app_id]
+      return *cache_->pt_->policy_table.app_policies_section.apps[who.app_id]
                   .groups_nonPrimaryRC;
     } else {
       return cache_->GetGroups(kPreConsentPassengersRC);
@@ -409,7 +410,7 @@ bool AccessRemoteImpl::GetModuleTypes(const std::string& application_id,
                                       std::vector<std::string>* modules) {
   DCHECK(modules);
   policy_table::ApplicationPolicies& apps =
-      cache_->pt_->policy_table.app_policies;
+      cache_->pt_->policy_table.app_policies_section.apps;
   policy_table::ApplicationPolicies::iterator i = apps.find(application_id);
   if (i == apps.end()) {
     return false;

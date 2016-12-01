@@ -51,6 +51,7 @@ set(SOURCES
   ${COMPONENTS_DIR}/policy/src/sql_pt_queries.cc
   ${COMPONENTS_DIR}/policy/src/sql_pt_representation.cc
   ${COMPONENTS_DIR}/policy/src/update_status_manager.cc
+  ${COMPONENTS_DIR}/policy/src/access_remote_impl.cc
   ${COMPONENTS_DIR}/policy/src/cache_manager.cc
   ${COMPONENTS_DIR}/rpc_base/src/rpc_base/rpc_base.cc
 )
