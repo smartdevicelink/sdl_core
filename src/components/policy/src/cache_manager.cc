@@ -123,12 +123,6 @@ uint32_t CacheManager::HeartBeatTimeout(const std::string& app_id) const {
   return result;
 }
 
-bool CacheManager::CanAppStealFocus(const std::string& app_id) const {
-  CACHE_MANAGER_CHECK(false);
-  bool result = true;
-  return result;
-}
-
 const policy_table::AppHMITypes* CacheManager::GetHMITypes(
     const std::string& app_id) {
   const policy_table::ApplicationPolicies& apps =
@@ -138,6 +132,12 @@ const policy_table::AppHMITypes* CacheManager::GetHMITypes(
     return &(*i->second.AppHMIType);
   }
   return NULL;
+}
+
+bool CacheManager::CanAppStealFocus(const std::string& app_id) const {
+  CACHE_MANAGER_CHECK(false);
+  bool result = true;
+  return result;
 }
 
 bool CacheManager::GetDefaultHMI(const std::string& app_id,

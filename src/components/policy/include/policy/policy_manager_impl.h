@@ -308,9 +308,9 @@ class PolicyManagerImpl : public PolicyManager {
    * @param Unique app id
    * @param Current permissions for app
    */
-  void CheckPendingPermissionsChanges(
+  virtual void CheckPendingPermissionsChanges(
       const std::string& policy_app_id,
-      const std::vector<FunctionalGroupPermission>& current_permissions);
+      const std::vector<FunctionalGroupPermission>& current_permissions) OVERRIDE;
 
   virtual void StartPTExchange();
   virtual bool ExceededDays();

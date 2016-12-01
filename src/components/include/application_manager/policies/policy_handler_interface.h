@@ -117,18 +117,19 @@ class PolicyHandlerInterface {
   virtual bool CheckSystemAction(mobile_apis::SystemAction::eType system_action,
                                  const std::string& policy_app_id) const = 0;
 
-  /**
-     * Checks if application has HMI type
-     * @param application_id ID application
-     * @param hmi HMI type to check
-     * @param app_types additional list of HMI type to search in it
-     * @return true if hmi is contained in policy or app_types
-     */
+/**
+   * Checks if application has HMI type
+   * @param application_id ID application
+   * @param hmi HMI type to check
+   * @param app_types additional list of HMI type to search in it
+   * @return true if hmi is contained in policy or app_types
+   */
 
+#ifdef SDL_REMOTE_CONTROL
   virtual bool CheckHMIType(const std::string& application_id,
                             mobile_apis::AppHMIType::eType hmi,
                             const smart_objects::SmartObject* app_types) = 0;
-
+#endif
   /**
    * Lets client to notify PolicyHandler that more kilometers expired
    * @param kms New value of odometer
@@ -222,14 +223,6 @@ class PolicyHandlerInterface {
    */
   virtual void OnUpdateStatusChanged(const std::string& status) = 0;
 
-  /*#ifdef SDL_REMOTE_CONTROL
-    virtual std::vector<std::string> GetDevicesIds(const std::string&) = 0;
-
-    virtual void OnUpdateHMILevel(const std::string& device_id,
-                                  const std::string& policy_app_id,
-                                  const std::string& hmi_level) = 0;
-  #endif
-  */
   /**
  * @brief Update currently used device id in policies manager for given
  * application

@@ -223,7 +223,7 @@ hmi_apis::Common_Language::eType MessageHelper::CommonLanguageFromString(
 std::string MessageHelper::GetDeviceMacAddressForHandle(
     const uint32_t device_handle, const ApplicationManager& app_mngr) {
   std::string device_mac_address = "";
-  app_mngr.connection_handler().GetDataOnDeviceID(
+  app_mngr.connection_handler().get_session_observer().GetDataOnDeviceID(
       device_handle, NULL, NULL, &device_mac_address);
   LOG4CXX_DEBUG(logger_, "result : " << device_handle);
   return device_mac_address;
@@ -2540,14 +2540,14 @@ void MessageHelper::SendActivateAppToHMI(
     std::string priority;
     // TODO(KKolodiy): need remove method policy_manager
 
-    application_manager.GetPolicyHandler().GetPriority(app->mobile_app_id(),
+    application_manager.GetPolicyHandler().GetPriority(app->policy_app_id(),
                                                        &priority);
     // According SDLAQ-CRS-2794
     // SDL have to send ActivateApp without "proirity" parameter to HMI.
     // in case of unconsented device
     std::string mac_adress;
     connection_handler::DeviceHandle device_handle = app->device();
-    application_manager.connection_handler().GetDataOnDeviceID(
+    application_manager.connection_handler().get_session_observer().GetDataOnDeviceID(
         device_handle, NULL, NULL, &mac_adress, NULL);
 
     policy::DeviceConsent consent =

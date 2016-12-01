@@ -101,7 +101,7 @@ struct DevicePolicy : PolicyBase {
   explicit DevicePolicy(const Json::Value* value__);
 };
 
-#ifdef SDL_REMOTE_CONTROL
+//#ifdef SDL_REMOTE_CONTROL
 struct InteriorZone : CompositeType {
  public:
   Integer<uint8_t, 0, 100> col;
@@ -140,7 +140,7 @@ struct InteriorZone : CompositeType {
                                  const RemoteRpcs& rpcs) const;
   inline bool ValidateParameters(ModuleType module, const Strings& rpcs) const;
 };
-#endif
+//#endif
 
 struct ApplicationParams : PolicyBase {
  public:

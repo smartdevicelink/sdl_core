@@ -98,8 +98,6 @@ class InitialApplicationData {
  public:
   virtual ~InitialApplicationData() {}
 
-  virtual std::string mobile_app_id() const = 0;
-  virtual void set_mobile_app_id(const std::string& mobile_app_id) = 0;
   virtual const smart_objects::SmartObject* app_types() const = 0;
   virtual const smart_objects::SmartObject* vr_synonyms() const = 0;
   virtual const std::string& mac_address() const = 0;
@@ -119,7 +117,9 @@ class InitialApplicationData {
   virtual void set_language(const mobile_api::Language::eType& language) = 0;
   virtual void set_ui_language(
       const mobile_api::Language::eType& ui_language) = 0;
+#ifdef SDL_REMOTE_CONTROL
   virtual void set_hmi_level(const mobile_api::HMILevel::eType& hmi_level) = 0;
+#endif
 };
 
 /*

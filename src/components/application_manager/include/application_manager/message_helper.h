@@ -54,7 +54,6 @@ class PolicyHandlerInterface;
 
 namespace application_manager {
 namespace mobile_api = mobile_apis;
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 /*
  * @brief Typedef for VehicleData
@@ -142,7 +141,6 @@ class MessageHelper {
 
   static std::string GetDeviceMacAddressForHandle(
       const uint32_t device_handle, const ApplicationManager& app_mngr);
-
   /**
    * @brief Converts string to mobile Result enum value
    * @param mobile_result stringified value

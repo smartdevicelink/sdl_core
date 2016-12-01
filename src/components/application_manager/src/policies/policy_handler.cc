@@ -1205,11 +1205,11 @@ void PolicyHandler::CheckPermissions(
   const std::string device_id = MessageHelper::GetDeviceMacAddressForHandle(
       app->device(), application_manager_);
   LOG4CXX_INFO(logger_,
-               "Checking permissions for  " << app->mobile_app_id() << " in "
+               "Checking permissions for  " << app->policy_app_id() << " in "
                                             << hmi_level << " on device "
                                             << device_id << " rpc " << rpc);
   policy_manager_->CheckPermissions(
-      app->mobile_app_id(), device_id, hmi_level, rpc, rpc_params, result);
+      device_id, app->policy_app_id(), hmi_level, rpc, rpc_params, result);
 }
 
 uint32_t PolicyHandler::GetNotificationsNumber(
@@ -1531,6 +1531,7 @@ void PolicyHandler::Add(const std::string& app_id,
   policy_manager_->Add(app_id, type, timespan_seconds);
 }
 
+#ifdef SDL_REMOTE_CONTROL
 void PolicyHandler::UpdateHMILevel(ApplicationSharedPtr app,
                                    mobile_apis::HMILevel::eType level) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -1551,7 +1552,6 @@ void PolicyHandler::UpdateHMILevel(ApplicationSharedPtr app,
   }
 }
 
-#ifdef SDL_REMOTE_CONTROL
 namespace {
 application_manager::TypeAccess ConvertTypeAccess(policy::TypeAccess access) {
   application_manager::TypeAccess converted;
@@ -1644,13 +1644,13 @@ void PolicyHandler::SetPrimaryDevice(const PTString& dev_id) {
        ++i) {
     const ApplicationSharedPtr app = *i;
     LOG4CXX_DEBUG(logger_,
-                  "Item: " << app->device() << " - " << app->mobile_app_id());
+                  "Item: " << app->device() << " - " << app->policy_app_id());
     if (devices.find(app->device()) != devices.end()) {
       LOG4CXX_DEBUG(logger_,
                     "Send notify " << app->device() << " - "
-                                   << app->mobile_app_id());
+                                   << app->policy_app_id());
       policy_manager_->OnChangedPrimaryDevice(devices[app->device()],
-                                              app->mobile_app_id());
+                                              app->policy_app_id());
     }
   }
 }
@@ -1673,12 +1673,12 @@ void PolicyHandler::ResetPrimaryDevice() {
        ++i) {
     const ApplicationSharedPtr app = *i;
     LOG4CXX_DEBUG(logger_,
-                  "Item: " << app->device() << " - " << app->mobile_app_id());
+                  "Item: " << app->device() << " - " << app->policy_app_id());
     if (app->device() == old_device_handle) {
       LOG4CXX_DEBUG(logger_,
                     "Send notify " << app->device() << " - "
-                                   << app->mobile_app_id());
-      policy_manager_->OnChangedPrimaryDevice(old_dev_id, app->mobile_app_id());
+                                   << app->policy_app_id());
+      policy_manager_->OnChangedPrimaryDevice(old_dev_id, app->policy_app_id());
     }
   }
 }
@@ -1717,12 +1717,12 @@ void PolicyHandler::SetDeviceZone(
        ++i) {
     const ApplicationSharedPtr app = *i;
     LOG4CXX_DEBUG(logger_,
-                  "Item: " << app->device() << " - " << app->mobile_app_id());
+                  "Item: " << app->device() << " - " << app->policy_app_id());
     if (app->device() == device_handle) {
       LOG4CXX_DEBUG(logger_,
                     "Send notify " << app->device() << " - "
-                                   << app->mobile_app_id());
-      policy_manager_->OnChangedDeviceZone(device_id, app->mobile_app_id());
+                                   << app->policy_app_id());
+      policy_manager_->OnChangedDeviceZone(device_id, app->policy_app_id());
     }
   }
 }
@@ -1767,14 +1767,14 @@ void PolicyHandler::OnRemoteAllowedChanged(bool /*new_consent*/) {
        ++i) {
     const ApplicationSharedPtr app = *i;
     LOG4CXX_DEBUG(logger_,
-                  "Item: " << app->device() << " - " << app->mobile_app_id());
+                  "Item: " << app->device() << " - " << app->policy_app_id());
     if (app->device() != device_handle) {
       LOG4CXX_DEBUG(logger_,
                     "Send notify " << app->device() << " - "
-                                   << app->mobile_app_id());
+                                   << app->policy_app_id());
       std::string mac = MessageHelper::GetDeviceMacAddressForHandle(
           app->device(), application_manager_);
-      policy_manager_->OnChangedRemoteControl(mac, app->mobile_app_id());
+      policy_manager_->OnChangedRemoteControl(mac, app->policy_app_id());
     }
   }
 }

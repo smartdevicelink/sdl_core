@@ -279,7 +279,7 @@ GetInteriorVehicleDataCapabiliesRequest::GetModuleTypes() {
   DCHECK(allowed_modules_.isNull());
   typedef std::vector<std::string> ModuleTypes;
   ModuleTypes modules;
-  if (service()->GetModuleTypes(app()->mobile_app_id(), &modules)) {
+  if (service()->GetModuleTypes(app()->policy_app_id(), &modules)) {
     Json::Value moduleTypes(Json::arrayValue);
     for (ModuleTypes::iterator i = modules.begin(); i != modules.end(); ++i) {
       const std::string& name = *i;

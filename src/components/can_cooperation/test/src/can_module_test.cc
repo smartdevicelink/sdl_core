@@ -40,7 +40,6 @@
 #include "mock_service.h"
 #include "mock_can_connection.h"
 
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 using functional_modules::PluginInfo;
 using functional_modules::ProcessResult;

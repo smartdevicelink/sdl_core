@@ -240,6 +240,8 @@ class MockMessageHelper {
                     ApplicationManager& application_manager));
   MOCK_METHOD1(StringifiedHMILevel,
                std::string(const mobile_apis::HMILevel::eType hmi_level));
+  MOCK_METHOD2(GetDeviceMacAddressForHandle, std::string(
+      const uint32_t device_handle, const ApplicationManager& app_mngr));
 
   static MockMessageHelper* message_helper_mock();
 };

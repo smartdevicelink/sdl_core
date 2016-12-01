@@ -83,10 +83,6 @@ std::string InitialApplicationDataImpl::policy_app_id() const {
   return mobile_app_id_;
 }
 
-std::string InitialApplicationDataImpl::mobile_app_id() const {
-  return mobile_app_id_;
-}
-
 const smart_objects::SmartObject* InitialApplicationDataImpl::tts_name() const {
   return tts_name_;
 }

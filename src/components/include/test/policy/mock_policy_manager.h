@@ -63,8 +63,9 @@ class MockPolicyManager : public PolicyManager {
   MOCK_CONST_METHOD1(GetUpdateUrl, std::string(int service_type));
   MOCK_METHOD2(GetUpdateUrls, void(int service_type, EndpointUrls& end_points));
   MOCK_METHOD0(RequestPTUpdate, bool());
-  MOCK_METHOD5(CheckPermissions,
-               void(const PTString& app_id,
+  MOCK_METHOD6(CheckPermissions,
+               void(const PTString& device_id,
+                    const PTString& app_id,
                     const PTString& hmi_level,
                     const PTString& rpc,
                     const RPCParams& rpc_params,
@@ -177,6 +178,10 @@ class MockPolicyManager : public PolicyManager {
   MOCK_CONST_METHOD0(GetLockScreenIconUrl, std::string());
   MOCK_METHOD2(GetServiceUrls,
                void(const std::string& service_type, EndpointUrls& end_points));
+  MOCK_METHOD2(CheckPendingPermissionsChanges,
+               void(const std::string& policy_app_id,
+                    const std::vector<policy::FunctionalGroupPermission>&
+                        current_permissions));
 };
 }  // namespace policy_manager_test
 }  // namespace components

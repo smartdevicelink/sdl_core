@@ -237,7 +237,7 @@ struct IsApplication {
       : device_handle_(device_handle), policy_app_id_(policy_app_id) {}
   bool operator()(const ApplicationSharedPtr app) const {
     return app && app->device() == device_handle_ &&
-           app->mobile_app_id() == policy_app_id_;
+           app->policy_app_id() == policy_app_id_;
   }
 
  private:
@@ -251,7 +251,7 @@ struct MobileAppIdPredicate {
   MobileAppIdPredicate(const std::string& policy_app_id)
       : policy_app_id_(policy_app_id) {}
   bool operator()(const ApplicationSharedPtr app) const {
-    return app ? policy_app_id_ == app->mobile_app_id() : false;
+    return app ? policy_app_id_ == app->policy_app_id() : false;
   }
 };
 
@@ -2940,7 +2940,7 @@ mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
   }
 
   const std::string log_msg =
-      "Application: " + app->mobile_app_id() + ", RPC: " + function_id +
+      "Application: " + app->policy_app_id() + ", RPC: " + function_id +
       ", HMI status: " + MessageHelper::StringifiedHMILevel(app->hmi_level());
 
   if (result.hmi_level_permitted != policy::kRpcAllowed) {

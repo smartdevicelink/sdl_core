@@ -66,8 +66,6 @@ class ApplicationManager;
 
 namespace policy {
 
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
-
 typedef std::vector<uint32_t> AppIds;
 typedef std::vector<uint32_t> DeviceHandles;
 namespace custom_str = utils::custom_string;
@@ -241,8 +239,6 @@ class PolicyHandler : public PolicyHandlerInterface,
                       std::vector<std::string>* modules) const;
 #endif  // SDL_REMOTE_CONTROL
 
-  uint32_t GetNotificationsNumber(const std::string& priority);
-  DeviceConsent GetUserConsentForDevice(const std::string& device_id);
   bool GetDefaultHmi(const std::string& policy_app_id,
                      std::string* default_hmi) const OVERRIDE;
   bool GetInitialAppData(const std::string& application_id,
@@ -611,9 +607,10 @@ class PolicyHandler : public PolicyHandlerInterface,
   void OnAppPermissionConsentInternal(const uint32_t connection_key,
                                       PermissionConsent& permissions) OVERRIDE;
 
+#ifdef SDL_REMOTE_CONTROL
   void UpdateHMILevel(application_manager::ApplicationSharedPtr app,
-                      mobile_apis::HMILevel::eType level);
-
+                      mobile_apis::HMILevel::eType level) ;
+#endif
   /**
    * @brief Sets days after epoch on successful policy update
    */

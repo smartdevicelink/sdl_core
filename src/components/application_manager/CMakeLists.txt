@@ -409,7 +409,7 @@ SET (LIBRARIES
   formatters
   dbms  
   Policy
-  CANCooperation
+ #CANCooperation
 )
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")

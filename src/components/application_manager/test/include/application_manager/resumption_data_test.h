@@ -38,7 +38,7 @@
 #include "gtest/gtest.h"
 #include "application_manager/usage_statistics.h"
 #include "application_manager/mock_application.h"
-#include "application_manager/mock_application_manager.h"
+#include "application_manager/test/include/application_manager/mock_application_manager.h"
 #include "utils/data_accessor.h"
 #include "config_profile/profile.h"
 #include "application_manager/policies/policy_handler.h"
@@ -146,7 +146,7 @@ class ResumptionDataTest : public ::testing::Test {
   sync_primitives::Lock ivilock_;
   application_manager_test::MockApplicationManagerSettings
       mock_application_manager_settings_;
-  application_manager_test::MockApplicationManager mock_application_manager_;
+  application_manager_test:: MockApplicationManager mock_application_manager_;
 };
 
 }  // namespace resumption_test

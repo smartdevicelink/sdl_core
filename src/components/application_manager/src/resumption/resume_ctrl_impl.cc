@@ -51,7 +51,6 @@
 #include "utils/timer_task_impl.h"
 
 namespace resumption {
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 using namespace application_manager;
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "Resumption")

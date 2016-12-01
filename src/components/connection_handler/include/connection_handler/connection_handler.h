@@ -91,13 +91,13 @@ class ConnectionHandler {
    * \param connection_type Returned: type of connection (USB, BT, etc.)
    * \return int32_t -1 in case of error or 0 in case of success
    */
-  virtual int32_t GetDataOnDeviceID(
+  /*virtual int32_t GetDataOnDeviceID(
       connection_handler::DeviceHandle device_handle,
       std::string* device_name = NULL,
       std::list<uint32_t>* applications_list = NULL,
       std::string* mac_address = NULL,
       std::string* connection_type = NULL) const = 0;
-
+*/
   /**
    * @brief  Close the connection revoked by Policy
    * @param connection_key pair of connection and session id

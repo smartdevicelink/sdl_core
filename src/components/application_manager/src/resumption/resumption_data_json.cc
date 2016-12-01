@@ -41,7 +41,6 @@
 
 namespace resumption {
 
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 namespace Formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "Resumption")

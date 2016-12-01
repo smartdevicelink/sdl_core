@@ -49,14 +49,12 @@ namespace custom_str = utils::custom_string;
 
 class MockPolicyListener : public PolicyListener {
  public:
-  MOCK_METHOD4(OnPermissionsUpdated,
-               void(const std::string& device_id,
-                    const std::string& policy_app_id,
+  MOCK_METHOD3(OnPermissionsUpdated,
+               void(const std::string& policy_app_id,
                     const Permissions& permissions,
                     const policy::HMILevel& default_hmi));
-  MOCK_METHOD3(OnPermissionsUpdated,
-               void(const std::string& device_id,
-                    const std::string& policy_app_id,
+  MOCK_METHOD2(OnPermissionsUpdated,
+               void(const std::string& policy_app_id,
                     const Permissions& permissions));
   MOCK_METHOD1(OnPendingPermissionChange,
                void(const std::string& policy_app_id));
@@ -76,6 +74,12 @@ class MockPolicyListener : public PolicyListener {
   MOCK_METHOD1(OnCertificateUpdated, void(const std::string&));
   MOCK_CONST_METHOD2(SendOnAppPermissionsChanged,
                      void(const AppPermissions&, const std::string&));
+  MOCK_METHOD1(GetDevicesIds,
+               std::vector<std::string>(const std::string& policy_app_id));
+  MOCK_METHOD3(OnUpdateHMILevel,
+               void(const std::string& device_id,
+                    const std::string& policy_app_id,
+                    const std::string& hmi_level));
 };
 
 }  // namespace policy

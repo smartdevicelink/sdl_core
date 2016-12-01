@@ -450,4 +450,10 @@ std::string MessageHelper::StringifiedHMILevel(
       hmi_level);
 }
 
+std::string MessageHelper::GetDeviceMacAddressForHandle(
+    const uint32_t device_handle, const ApplicationManager& app_mngr) {
+  return MockMessageHelper::message_helper_mock()->GetDeviceMacAddressForHandle(
+      device_handle, app_mngr);
+}
+
 }  // namespace application_manager

@@ -93,7 +93,7 @@ TypeAccess CoreService::CheckAccess(const ApplicationId& app_id,
     std::string device_handle = MessageHelper::GetDeviceMacAddressForHandle(
         app->device(), application_manager_);
     return application_manager_.GetPolicyHandler().CheckAccess(
-        device_handle, app->mobile_app_id(), zone, module, rpc, params);
+        device_handle, app->policy_app_id(), zone, module, rpc, params);
   }
 #endif  // SDL_REMOTE_CONTROL
   return kNone;
@@ -105,7 +105,7 @@ bool CoreService::CheckModule(const ApplicationId& app_id,
   ApplicationSharedPtr app = GetApplication(app_id);
   if (app) {
     return application_manager_.GetPolicyHandler().CheckModule(
-        app->mobile_app_id(), module);
+        app->policy_app_id(), module);
   }
 #endif  // SDL_REMOTE_CONTROL
   return false;
@@ -121,7 +121,7 @@ void CoreService::SetAccess(const ApplicationId& app_id,
     std::string device_handle = MessageHelper::GetDeviceMacAddressForHandle(
         app->device(), application_manager_);
     application_manager_.GetPolicyHandler().SetAccess(
-        device_handle, app->mobile_app_id(), zone, module, allowed);
+        device_handle, app->policy_app_id(), zone, module, allowed);
   }
 #endif  // SDL_REMOTE_CONTROL
 }
@@ -133,7 +133,7 @@ void CoreService::ResetAccess(const ApplicationId& app_id) {
     std::string device_handle = MessageHelper::GetDeviceMacAddressForHandle(
         app->device(), application_manager_);
     application_manager_.GetPolicyHandler().ResetAccess(device_handle,
-                                                        app->mobile_app_id());
+                                                        app->policy_app_id());
   }
 #endif  // SDL_REMOTE_CONTROL
 }
@@ -200,7 +200,7 @@ bool CoreService::IsRemoteControlAllowed() const {
 bool CoreService::IsRemoteControlApplication(ApplicationSharedPtr app) const {
 #ifdef SDL_REMOTE_CONTROL
   return application_manager_.GetPolicyHandler().CheckHMIType(
-      app->mobile_app_id(),
+      app->policy_app_id(),
       mobile_apis::AppHMIType::eType::REMOTE_CONTROL,
       app->app_types());
 #endif  // SDL_REMOTE_CONTROL

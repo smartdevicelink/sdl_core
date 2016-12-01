@@ -131,7 +131,7 @@ class ApplicationImpl : public virtual Application,
   void set_hmi_application_id(uint32_t hmi_app_id);
   inline uint32_t hmi_app_id() const;
   inline uint32_t app_id() const;
-  const custom_str::CustomString& name() const;
+  const custom_str::CustomString& name() const OVERRIDE;
   void set_folder_name(const std::string& folder_name) OVERRIDE;
   const std::string folder_name() const;
   bool is_media_application() const;

@@ -157,7 +157,6 @@ struct IsSameNickname {
   const custom_str::CustomString& app_id_;
 };
 
-#ifdef SDL_REMOTE_CONTROL
 /**
  * @brief Predicate for using with CheckCoincidence method to compare with VR
  *synonym SO
@@ -175,12 +174,12 @@ struct CoincidencePredicateVR {
 
   const std::string& newItem_;
 };
-#endif
 }  // namespace
 
 namespace application_manager {
 
 namespace commands {
+CREATE_LOGGERPTR_LOCAL(logger_, "Commands")
 
 #ifdef SDL_REMOTE_CONTROL
 struct IsSameApp {
@@ -213,8 +212,6 @@ struct IsSameApp {
   policy::PolicyHandlerInterface& policy_handler_;
 };
 
-CREATE_LOGGERPTR_LOCAL(IsSameApp::logger_, "Commands")
-
 struct IsSameAppId : public IsSameApp {
   IsSameAppId(const std::string& app_id,
               bool is_remote_control,
@@ -226,7 +223,6 @@ struct IsSameAppId : public IsSameApp {
     if (AreBothRemoteControl(other) && !IsSameDeviceType(other)) {
       return false;
     }
-    // return strcasecmp(app_id_.c_str(), other->mobile_app_id().c_str()) == 0;
     return strcasecmp(app_id_.c_str(), other->policy_app_id().c_str()) == 0;
   }
 
@@ -1044,12 +1040,11 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckCoincidence() {
 
   }  // application for end
 
-#ifdef SDL_REMOTE_CONTROL
   const smart_objects::SmartArray* vr_synonyms = 0;
   if (msg_params.keyExists(strings::vr_synonyms)) {
     vr_synonyms = msg_params[strings::vr_synonyms].asArray();
   }
-
+#ifdef SDL_REMOTE_CONTROL
   const std::string mobile_app_id =
       (*message_)[strings::msg_params][strings::app_id].asString();
   IsSameAppName matcher(app_name.AsMBString(),
@@ -1058,10 +1053,7 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckCoincidence() {
                         IsDriverDevice(),
                         application_manager_);
 //(TODO) OKozlov clarify
-#else   // SDL_REMOTE_CONTROL
-  matcher(app_name.AsMBString(), vr_synonyms);
-  //(TODO) OKozlov clarify
-  //#else   // SDL_REMOTE_CONTROL
+#else   // SDL_REMOTE_CONTROL  
   IsSameAppName matcher(app_name.AsMBString(), vr_synonyms);
 #endif  // SDL_REMOTE_CONTROL
 
