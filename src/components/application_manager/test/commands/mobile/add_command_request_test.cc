@@ -670,6 +670,271 @@ TEST_F(AddCommandRequestTest,
   request_ptr->on_event(event_vr);
 }
 
+TEST_F(
+    AddCommandRequestTest,
+    OnEvent_UI_HmiResponseCodeIsGenericError_VR_HmiResponseCodeIsUnsupportedResourse_ExpectCommandRemoved) {
+  CreateBasicParamsVRRequest();
+  CreateBasicParamsUIRequest();
+  SmartObject& params = (*msg_)[strings::params];
+  params[hmi_response::code] = hmi_apis::Common_Result::GENERIC_ERROR;
+  SmartObject& image = (*msg_)[msg_params][cmd_icon];
+  EXPECT_CALL(mock_message_helper_, VerifyImage(image, _, _))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
+  am::CommandsMap commands_map;
+  EXPECT_CALL(*mock_app_, commands_map())
+      .WillRepeatedly(Return(
+          DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
+  {
+    InSequence dummy;
+    EXPECT_CALL(
+        app_mngr_,
+        ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
+        .WillOnce(Return(true));
+    EXPECT_CALL(
+        app_mngr_,
+        ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand)))
+        .WillOnce(Return(true));
+  }
+
+  EXPECT_CALL(mock_message_helper_,
+              HMIToMobileResult(hmi_apis::Common_Result::GENERIC_ERROR))
+      .WillRepeatedly(Return(mobile_apis::Result::GENERIC_ERROR));
+  EXPECT_CALL(*mock_app_, RemoveCommand(kCmdId));
+  utils::SharedPtr<AddCommandRequest> request_ptr =
+      CreateCommand<AddCommandRequest>(msg_);
+  request_ptr->Run();
+
+  Event event_ui(hmi_apis::FunctionID::UI_AddCommand);
+  event_ui.set_smart_object(*msg_);
+  request_ptr->on_event(event_ui);
+
+  Event event_vr(hmi_apis::FunctionID::VR_AddCommand);
+  MessageSharedPtr msg_vr = CreateMessage(SmartType_Map);
+  (*msg_vr)[strings::params][hmi_response::code] =
+      hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
+  (*msg_vr)[msg_params][cmd_id] = kCmdId;
+  event_vr.set_smart_object(*msg_vr);
+  request_ptr->on_event(event_vr);
+}
+
+TEST_F(
+    AddCommandRequestTest,
+    OnEvent_VR_HmiResponseCodeIsGenericError_UI_HmiResponseCodeIsUnsupportedResourse_ExpectCommandRemoved) {
+  CreateBasicParamsVRRequest();
+  CreateBasicParamsUIRequest();
+  SmartObject& params = (*msg_)[strings::params];
+  params[hmi_response::code] = hmi_apis::Common_Result::GENERIC_ERROR;
+  SmartObject& image = (*msg_)[msg_params][cmd_icon];
+  EXPECT_CALL(mock_message_helper_, VerifyImage(image, _, _))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
+  am::CommandsMap commands_map;
+  EXPECT_CALL(*mock_app_, commands_map())
+      .WillRepeatedly(Return(
+          DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
+  {
+    InSequence dummy;
+    EXPECT_CALL(
+        app_mngr_,
+        ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
+        .WillOnce(Return(true));
+    EXPECT_CALL(
+        app_mngr_,
+        ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand)))
+        .WillOnce(Return(true));
+  }
+
+  EXPECT_CALL(mock_message_helper_,
+              HMIToMobileResult(hmi_apis::Common_Result::GENERIC_ERROR))
+      .WillRepeatedly(Return(mobile_apis::Result::GENERIC_ERROR));
+  EXPECT_CALL(*mock_app_, RemoveCommand(kCmdId));
+  utils::SharedPtr<AddCommandRequest> request_ptr =
+      CreateCommand<AddCommandRequest>(msg_);
+  request_ptr->Run();
+
+  Event event_vr(hmi_apis::FunctionID::VR_AddCommand);
+  event_vr.set_smart_object(*msg_);
+  request_ptr->on_event(event_vr);
+
+  Event event_ui(hmi_apis::FunctionID::UI_AddCommand);
+  MessageSharedPtr msg_ui = CreateMessage(SmartType_Map);
+  (*msg_ui)[strings::params][hmi_response::code] =
+      hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
+  (*msg_ui)[msg_params][cmd_id] = kCmdId;
+  event_ui.set_smart_object(*msg_ui);
+  request_ptr->on_event(event_ui);
+}
+
+TEST_F(
+    AddCommandRequestTest,
+    OnEvent_UI_VR_HmiResponseCodeIsUnsupportedResourse_UI_NotAvailableInterfaceState_ExpectCommandRemoved) {
+  CreateBasicParamsVRRequest();
+  CreateBasicParamsUIRequest();
+  SmartObject& params = (*msg_)[strings::params];
+  params[hmi_response::code] = hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
+  SmartObject& image = (*msg_)[msg_params][cmd_icon];
+  EXPECT_CALL(mock_message_helper_, VerifyImage(image, _, _))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
+  am::CommandsMap commands_map;
+  EXPECT_CALL(*mock_app_, commands_map())
+      .WillRepeatedly(Return(
+          DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
+  {
+    InSequence dummy;
+    EXPECT_CALL(
+        app_mngr_,
+        ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
+        .WillOnce(Return(true));
+    EXPECT_CALL(
+        app_mngr_,
+        ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand)))
+        .WillOnce(Return(true));
+  }
+  utils::SharedPtr<AddCommandRequest> request_ptr =
+      CreateCommand<AddCommandRequest>(msg_);
+  request_ptr->Run();
+
+  EXPECT_CALL(mock_hmi_interfaces_,
+              GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
+      .WillRepeatedly(
+          Return(am::HmiInterfaces::InterfaceState::STATE_NOT_AVAILABLE));
+  EXPECT_CALL(mock_hmi_interfaces_,
+              GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_VR))
+      .WillRepeatedly(Return(am::HmiInterfaces::STATE_AVAILABLE));
+  EXPECT_CALL(
+      app_mngr_,
+      ManageMobileCommand(
+          MobileResultCodeIs(mobile_apis::Result::UNSUPPORTED_RESOURCE), _));
+  EXPECT_CALL(*mock_app_, RemoveCommand(kCmdId));
+  Event event_ui(hmi_apis::FunctionID::UI_AddCommand);
+  event_ui.set_smart_object(*msg_);
+  Event event_vr(hmi_apis::FunctionID::VR_AddCommand);
+  event_vr.set_smart_object(*msg_);
+  request_ptr->on_event(event_ui);
+  request_ptr->on_event(event_vr);
+}
+
+TEST_F(
+    AddCommandRequestTest,
+    OnEvent_UI_VR_HmiResponseCodeIsUnsupportedResourse_VR_NotAvailableInterfaceState_ExpectCommandRemoved) {
+  CreateBasicParamsVRRequest();
+  CreateBasicParamsUIRequest();
+  SmartObject& params = (*msg_)[strings::params];
+  params[hmi_response::code] = hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
+  SmartObject& image = (*msg_)[msg_params][cmd_icon];
+  EXPECT_CALL(mock_message_helper_, VerifyImage(image, _, _))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
+  am::CommandsMap commands_map;
+  EXPECT_CALL(*mock_app_, commands_map())
+      .WillRepeatedly(Return(
+          DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
+  {
+    InSequence dummy;
+    EXPECT_CALL(
+        app_mngr_,
+        ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
+        .WillOnce(Return(true));
+    EXPECT_CALL(
+        app_mngr_,
+        ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand)))
+        .WillOnce(Return(true));
+  }
+  utils::SharedPtr<AddCommandRequest> request_ptr =
+      CreateCommand<AddCommandRequest>(msg_);
+  request_ptr->Run();
+
+  EXPECT_CALL(mock_hmi_interfaces_,
+              GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
+      .WillRepeatedly(Return(am::HmiInterfaces::STATE_AVAILABLE));
+  EXPECT_CALL(mock_hmi_interfaces_,
+              GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_VR))
+      .WillRepeatedly(
+          Return(am::HmiInterfaces::InterfaceState::STATE_NOT_AVAILABLE));
+  EXPECT_CALL(
+      app_mngr_,
+      ManageMobileCommand(
+          MobileResultCodeIs(mobile_apis::Result::UNSUPPORTED_RESOURCE), _));
+  EXPECT_CALL(*mock_app_, RemoveCommand(kCmdId));
+  Event event_ui(hmi_apis::FunctionID::UI_AddCommand);
+  event_ui.set_smart_object(*msg_);
+  Event event_vr(hmi_apis::FunctionID::VR_AddCommand);
+  event_vr.set_smart_object(*msg_);
+  request_ptr->on_event(event_ui);
+  request_ptr->on_event(event_vr);
+}
+
+TEST_F(
+    AddCommandRequestTest,
+    OnEvent_UI_HmiResponseCodeIsUnsupportedResource_NotAvailableInterfaceState_ExpectCommandRemoved) {
+  CreateBasicParamsUIRequest();
+  SmartObject& params = (*msg_)[strings::params];
+  params[hmi_response::code] = hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
+  SmartObject& image = (*msg_)[msg_params][cmd_icon];
+  EXPECT_CALL(mock_message_helper_, VerifyImage(image, _, _))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
+  am::CommandsMap commands_map;
+  EXPECT_CALL(*mock_app_, commands_map())
+      .WillRepeatedly(Return(
+          DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
+  EXPECT_CALL(
+      app_mngr_,
+      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
+      .WillOnce(Return(true));
+  utils::SharedPtr<AddCommandRequest> request_ptr =
+      CreateCommand<AddCommandRequest>(msg_);
+  request_ptr->Run();
+  EXPECT_CALL(mock_hmi_interfaces_,
+              GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
+      .WillRepeatedly(
+          Return(am::HmiInterfaces::InterfaceState::STATE_NOT_AVAILABLE));
+  EXPECT_CALL(mock_hmi_interfaces_,
+              GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_VR))
+      .WillRepeatedly(
+          Return(am::HmiInterfaces::InterfaceState::STATE_NOT_AVAILABLE));
+  EXPECT_CALL(*mock_app_, RemoveCommand(kCmdId));
+  EXPECT_CALL(
+      app_mngr_,
+      ManageMobileCommand(
+          MobileResultCodeIs(mobile_apis::Result::UNSUPPORTED_RESOURCE), _));
+  Event event(hmi_apis::FunctionID::UI_AddCommand);
+  event.set_smart_object(*msg_);
+  request_ptr->on_event(event);
+}
+
+TEST_F(
+    AddCommandRequestTest,
+    OnEvent_VR_HmiResponseCodeIsUnsupportedResource_NotAvailableInterfaceState_ExpectCommandRemoved) {
+  CreateBasicParamsVRRequest();
+  SmartObject& params = (*msg_)[strings::params];
+  params[hmi_response::code] = hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
+  am::CommandsMap commands_map;
+  EXPECT_CALL(*mock_app_, commands_map())
+      .WillRepeatedly(Return(
+          DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
+  EXPECT_CALL(
+      app_mngr_,
+      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand)))
+      .WillOnce(Return(true));
+  utils::SharedPtr<AddCommandRequest> request_ptr =
+      CreateCommand<AddCommandRequest>(msg_);
+  request_ptr->Run();
+  EXPECT_CALL(mock_hmi_interfaces_,
+              GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
+      .WillRepeatedly(
+          Return(am::HmiInterfaces::InterfaceState::STATE_NOT_AVAILABLE));
+  EXPECT_CALL(mock_hmi_interfaces_,
+              GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_VR))
+      .WillRepeatedly(
+          Return(am::HmiInterfaces::InterfaceState::STATE_NOT_AVAILABLE));
+  EXPECT_CALL(*mock_app_, RemoveCommand(kCmdId));
+  EXPECT_CALL(
+      app_mngr_,
+      ManageMobileCommand(
+          MobileResultCodeIs(mobile_apis::Result::UNSUPPORTED_RESOURCE), _));
+  Event event(hmi_apis::FunctionID::VR_AddCommand);
+  event.set_smart_object(*msg_);
+  request_ptr->on_event(event);
+}
+
 TEST_F(AddCommandRequestTest,
        OnEvent_UI_EventWithNotSuccesResponseCode_ExpectVRCommandDelete) {
   CreateBasicParamsVRRequest();
