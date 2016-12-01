@@ -45,7 +45,7 @@ UpdateStatusManager::UpdateStatusManager()
     , update_scheduled_(false)
     , exchange_pending_(false)
     , apps_search_in_progress_(false)
-    , app_registered_from_non_consented_device_(false)
+    , app_registered_from_non_consented_device_(true)
     , last_update_status_(policy::StatusUnknown) {
   update_status_thread_delegate_ = new UpdateThreadDelegate(this);
   thread_ = threads::CreateThread("UpdateStatusThread",
