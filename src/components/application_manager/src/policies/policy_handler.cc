@@ -1531,7 +1531,6 @@ void PolicyHandler::Add(const std::string& app_id,
   policy_manager_->Add(app_id, type, timespan_seconds);
 }
 
-/*
 void PolicyHandler::UpdateHMILevel(ApplicationSharedPtr app,
                                    mobile_apis::HMILevel::eType level) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -1539,19 +1538,18 @@ void PolicyHandler::UpdateHMILevel(ApplicationSharedPtr app,
     // If default is FULL, send request to HMI. Notification to mobile will be
     // sent on response receiving.
     if (mobile_apis::HMILevel::HMI_FULL == level) {
-      MessageHelper::SendActivateAppToHMI(app->app_id());
+      MessageHelper::SendActivateAppToHMI(app->app_id(), application_manager_);
     } else {
       LOG4CXX_INFO(logger_,
                    "Changing hmi level of application "
                        << app->app_id() << " to default hmi level " << level);
       // Set application hmi level
-      application_manager_.ChangeAppsHMILevel(app->app_id(),
-                                                             level);
+      application_manager_.ChangeAppsHMILevel(app->app_id(), level);
       // If hmi Level is full, it will be seted after ActivateApp response
-      MessageHelper::SendHMIStatusNotification(*app);
+      MessageHelper::SendHMIStatusNotification(*app, application_manager_);
     }
   }
-}*/
+}
 
 #ifdef SDL_REMOTE_CONTROL
 namespace {
