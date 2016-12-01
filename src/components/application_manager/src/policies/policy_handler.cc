@@ -583,8 +583,18 @@ void PolicyHandler::OnGetUserFriendlyMessage(
     uint32_t correlation_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   POLICY_LIB_CHECK_VOID();
-  std::vector<UserFriendlyMessage> result =
+
+#ifdef EXTERNAL_PROPRIETARY
+  const std::string active_hmi_language =
+      application_manager::MessageHelper::CommonLanguageToString(
+          application_manager_.hmi_capabilities().active_ui_language());
+  const std::vector<UserFriendlyMessage> result =
+      policy_manager_->GetUserFriendlyMessages(
+          message_codes, language, active_hmi_language);
+#else
+  const std::vector<UserFriendlyMessage> result =
       policy_manager_->GetUserFriendlyMessages(message_codes, language);
+#endif  // EXTERNAL_PROPRIETARY
   // Send response to HMI with gathered data
   MessageHelper::SendGetUserFriendlyMessageResponse(
       result, correlation_id, application_manager_);

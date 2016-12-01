@@ -772,8 +772,11 @@ bool PolicyManagerImpl::GetPriority(const std::string& policy_app_id,
 }
 
 std::vector<UserFriendlyMessage> PolicyManagerImpl::GetUserFriendlyMessages(
-    const std::vector<std::string>& message_code, const std::string& language) {
-  return cache_->GetUserFriendlyMsg(message_code, language);
+    const std::vector<std::string>& message_code,
+    const std::string& language,
+    const std::string& active_hmi_language) {
+  return cache_->GetUserFriendlyMsg(
+      message_code, language, active_hmi_language);
 }
 
 void PolicyManagerImpl::GetUserConsentForApp(

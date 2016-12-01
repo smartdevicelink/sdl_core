@@ -82,6 +82,16 @@ struct LanguageFinder {
   const std::string& language_;
 };
 
+policy_table::MessageString FindLanguage(
+    const policy_table::MessageLanguages& msg_languages,
+    const std::string& lang) {
+  LanguageFinder finder(lang);
+  policy_table::Languages::const_iterator it = std::find_if(
+      msg_languages.languages.begin(), msg_languages.languages.end(), finder);
+  return (msg_languages.languages.end() == it) ? policy_table::MessageString()
+                                               : it->second;
+}
+
 CacheManager::CacheManager()
     : CacheManagerInterface()
     , pt_(new policy_table::Table)
@@ -1088,7 +1098,9 @@ const policy::VehicleInfo CacheManager::GetVehicleInfo() const {
 }
 
 std::vector<UserFriendlyMessage> CacheManager::GetUserFriendlyMsg(
-    const std::vector<std::string>& msg_codes, const std::string& language) {
+    const std::vector<std::string>& msg_codes,
+    const std::string& language,
+    const std::string& active_hmi_language) {
   LOG4CXX_AUTO_TRACE(logger_);
   std::vector<UserFriendlyMessage> result;
   CACHE_MANAGER_CHECK(result);
@@ -1099,36 +1111,34 @@ std::vector<UserFriendlyMessage> CacheManager::GetUserFriendlyMsg(
     policy_table::MessageLanguages msg_languages =
         (*pt_->policy_table.consumer_friendly_messages->messages)[*it];
 
-    policy_table::MessageString message_string;
-
     // If message has no records with required language, fallback language
     // should be used instead.
-    LanguageFinder finder(language);
-    policy_table::Languages::const_iterator it_language = std::find_if(
-        msg_languages.languages.begin(), msg_languages.languages.end(), finder);
+    policy_table::MessageString message_string =
+        FindLanguage(msg_languages, language);
 
-    if (msg_languages.languages.end() == it_language) {
+    if (!message_string.is_valid()) {
       LOG4CXX_WARN(logger_,
                    "Language "
                        << language
                        << " haven't been found for message code: " << *it);
+      policy_table::MessageString active_hmi_language_message_string =
+          FindLanguage(msg_languages, active_hmi_language);
+      if (!active_hmi_language_message_string.is_valid()) {
+        LOG4CXX_WARN(logger_,
+                     "Active hmi language "
+                         << active_hmi_language
+                         << " haven't been found for message code: " << *it);
 
-      LanguageFinder fallback_language_finder("en-us");
-
-      policy_table::Languages::const_iterator it_fallback_language =
-          std::find_if(msg_languages.languages.begin(),
-                       msg_languages.languages.end(),
-                       fallback_language_finder);
-
-      if (msg_languages.languages.end() == it_fallback_language) {
-        LOG4CXX_ERROR(logger_,
-                      "No fallback language found for message code: " << *it);
-        continue;
+        policy_table::MessageString fallback_message_string =
+            FindLanguage(msg_languages, "en-us");
+        if (!fallback_message_string.is_valid()) {
+          LOG4CXX_ERROR(logger_,
+                        "No fallback language found for message code: " << *it);
+          continue;
+        }
+        message_string = fallback_message_string;
       }
-
-      message_string = it_fallback_language->second;
-    } else {
-      message_string = it_language->second;
+      message_string = active_hmi_language_message_string;
     }
 
     UserFriendlyMessage msg;

@@ -145,11 +145,15 @@ class CacheManager : public CacheManagerInterface {
    * dependent on language and context.
    * @param msg_codes Context of message (Driver distraction, Grant permission
    * etc)
-   * @param language Language of the message
+   * @param language Requested language of the message
+   * @param active_hmi_language Last language has been received
+   * via UI.GetLanguage (used as first fallback language)
    * @return Array of appropriate messages parameters
    */
   std::vector<UserFriendlyMessage> GetUserFriendlyMsg(
-      const std::vector<std::string>& msg_codes, const std::string& language);
+      const std::vector<std::string>& msg_codes,
+      const std::string& language,
+      const std::string& active_hmi_language);
 
   /**
    * @brief GetLockScreenIcon allows to obtain lock screen icon url;

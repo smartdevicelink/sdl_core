@@ -281,7 +281,8 @@ class PolicyManager : public usage_statistics::StatisticsManager {
    */
   virtual std::vector<UserFriendlyMessage> GetUserFriendlyMessages(
       const std::vector<std::string>& message_code,
-      const std::string& language) = 0;
+      const std::string& language,
+      const std::string& active_hmi_language) = 0;
 
   /**
    * Checks if the application is revoked
