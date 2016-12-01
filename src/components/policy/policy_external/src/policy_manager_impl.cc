@@ -548,6 +548,9 @@ void PolicyManagerImpl::SetUserConsentForDevice(const std::string& device_id,
                  "Event listener is not initialized. "
                  "Can't call OnDeviceConsentChanged");
   }
+  if (is_allowed) {
+    update_status_manager_.OnDeviceConsented();
+  }
   StartPTExchange();
 }
 
@@ -1194,7 +1197,7 @@ void PolicyManagerImpl::AddApplication(const std::string& application_id) {
 
   if (IsNewApplication(application_id)) {
     AddNewApplication(application_id, device_consent);
-    update_status_manager_.OnNewApplicationAdded();
+    update_status_manager_.OnNewApplicationAdded(device_consent);
   } else {
     PromoteExistedApplication(application_id, device_consent);
   }

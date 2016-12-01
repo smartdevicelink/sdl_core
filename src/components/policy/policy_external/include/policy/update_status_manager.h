@@ -96,13 +96,19 @@ class UpdateStatusManager {
   /**
    * @brief Update status handler on new application registering
    */
-  void OnNewApplicationAdded();
+  void OnNewApplicationAdded(const DeviceConsent consent);
 
   /**
    * @brief Update status handler for policy initialization
    * @param is_update_required Update necessity flag
    */
   void OnPolicyInit(bool is_update_required);
+
+  /**
+   * @brief In case application from non-consented device has been registered
+   * before and and no updated happened then triggers status change
+   */
+  void OnDeviceConsented();
 
   /**
    * @brief IsUpdateRequired allows to distiguish if update is required
@@ -198,6 +204,7 @@ class UpdateStatusManager {
   bool update_scheduled_;
   bool exchange_pending_;
   bool apps_search_in_progress_;
+  bool app_registered_from_non_consented_device_;
   sync_primitives::Lock exchange_in_progress_lock_;
   sync_primitives::Lock update_required_lock_;
   sync_primitives::Lock exchange_pending_lock_;

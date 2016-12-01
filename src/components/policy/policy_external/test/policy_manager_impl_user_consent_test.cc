@@ -33,6 +33,7 @@
 #include "gtest/gtest.h"
 
 #include "policy/policy_manager_impl_test_base.h"
+#include "utils/date_time.h"
 
 namespace test {
 namespace components {
@@ -44,11 +45,44 @@ using ::testing::Return;
 // Tests that use device without Consent
 TEST_F(
     PolicyManagerImplTest2,
-    AddApplication_AddNewApplicationFromDeviceWithoutConsent_ExpectUpdateRequired) {
+    AddApplication_AddNewApplicationFromDeviceWithConsent_ExpectUpdateRequired) {
   // Arrange
   CreateLocalPT(preloadet_pt_filename_);
+
+  EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(app_id_1_))
+      .WillOnce(Return(device_id_1_));
+
+  manager_->SetUserConsentForDevice(device_id_1_, true);
+
   manager_->AddApplication(app_id_1_);
+
   EXPECT_EQ("UPDATE_NEEDED", manager_->GetPolicyTableStatus());
+}
+
+TEST_F(
+    PolicyManagerImplTest2,
+    AddApplication_AddNewApplicationFromDeviceWithoutConsent_ExpectUpToDate) {
+  // Arrange
+  CreateLocalPT(preloadet_pt_filename_);
+
+  // To set UP_TO_DATE before registration
+  GetPTU(kValidSdlPtUpdateJson);
+
+  TimevalStruct current_time = date_time::DateTime::getCurrentTime();
+  const int kSecondsInDay = 60 * 60 * 24;
+  int days_after_epoch = current_time.tv_sec / kSecondsInDay;
+
+  manager_->PTUpdatedAt(DAYS_AFTER_EPOCH, days_after_epoch);
+  manager_->PTUpdatedAt(KILOMETERS, 1000);
+
+  EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(app_id_1_))
+      .WillOnce(Return(device_id_1_));
+
+  manager_->SetUserConsentForDevice(device_id_1_, false);
+
+  manager_->AddApplication(app_id_1_);
+
+  EXPECT_EQ("UP_TO_DATE", manager_->GetPolicyTableStatus());
 }
 
 TEST_F(
