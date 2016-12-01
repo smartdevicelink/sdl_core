@@ -281,9 +281,11 @@ TransportAdapter::Error TransportAdapterImpl::DisconnectDevice(
        j != to_disconnect.end();
        ++j) {
     ConnectionInfo info = *j;
-    if (OK != info.connection->Disconnect()) {
-      error = FAIL;
-      LOG4CXX_ERROR(logger_, "Error on disconnect " << error);
+    if (info.connection) {
+      if (OK != info.connection->Disconnect()) {
+        error = FAIL;
+        LOG4CXX_ERROR(logger_, "Error on disconnect " << error);
+      }
     }
   }
 
