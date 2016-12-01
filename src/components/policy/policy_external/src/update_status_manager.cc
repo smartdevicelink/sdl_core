@@ -45,6 +45,7 @@ UpdateStatusManager::UpdateStatusManager()
     , update_scheduled_(false)
     , exchange_pending_(false)
     , apps_search_in_progress_(false)
+    , app_registered_from_non_consented_device_(false)
     , last_update_status_(policy::StatusUnknown) {
   update_status_thread_delegate_ = new UpdateThreadDelegate(this);
   thread_ = threads::CreateThread("UpdateStatusThread",
@@ -116,14 +117,26 @@ void UpdateStatusManager::OnResetRetrySequence() {
   set_update_required(true);
 }
 
-void UpdateStatusManager::OnNewApplicationAdded() {
+void UpdateStatusManager::OnNewApplicationAdded(const DeviceConsent consent) {
   LOG4CXX_AUTO_TRACE(logger_);
+  if (kDeviceAllowed != consent) {
+    app_registered_from_non_consented_device_ = true;
+    return;
+  }
+  app_registered_from_non_consented_device_ = false;
   set_update_required(true);
 }
 
 void UpdateStatusManager::OnPolicyInit(bool is_update_required) {
   LOG4CXX_AUTO_TRACE(logger_);
   update_required_ = is_update_required;
+}
+
+void UpdateStatusManager::OnDeviceConsented() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (app_registered_from_non_consented_device_) {
+    set_update_required(true);
+  }
 }
 
 PolicyTableStatus UpdateStatusManager::GetUpdateStatus() const {

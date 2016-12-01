@@ -150,7 +150,7 @@ TEST_F(UpdateStatusManagerTest,
   manager_->OnUpdateSentOut(k_timeout_);
   status_ = manager_->GetLastUpdateStatus();
   EXPECT_EQ(StatusUpdatePending, status_);
-  manager_->OnNewApplicationAdded();
+  manager_->OnNewApplicationAdded(kDeviceAllowed);
   status_ = manager_->GetLastUpdateStatus();
   // Checks
   EXPECT_EQ(StatusUpdatePending, status_);
