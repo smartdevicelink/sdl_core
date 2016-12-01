@@ -68,9 +68,9 @@ TEST_F(
   // To set UP_TO_DATE before registration
   GetPTU(kValidSdlPtUpdateJson);
 
-  TimevalStruct current_time = date_time::DateTime::getCurrentTime();
+  const TimevalStruct current_time = date_time::DateTime::getCurrentTime();
   const int kSecondsInDay = 60 * 60 * 24;
-  int days_after_epoch = current_time.tv_sec / kSecondsInDay;
+  const int days_after_epoch = current_time.tv_sec / kSecondsInDay;
 
   manager_->PTUpdatedAt(DAYS_AFTER_EPOCH, days_after_epoch);
   manager_->PTUpdatedAt(KILOMETERS, 1000);
