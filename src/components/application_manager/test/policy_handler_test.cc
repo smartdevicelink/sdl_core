@@ -416,12 +416,11 @@ TEST_F(PolicyHandlerTest, CheckPermissions) {
   CheckPermissionResult result;
   RPCParams kRpc_params;
   // Check expectations
-  EXPECT_CALL(
-      *mock_policy_manager_,
-      CheckPermissions(kDeviceId, kPolicyAppId_, kHmiLevel_, kRpc_, kRpc_params, _));
+  EXPECT_CALL(*mock_policy_manager_,
+              CheckPermissions(
+                  kDeviceId, kPolicyAppId_, kHmiLevel_, kRpc_, kRpc_params, _));
   // Act
-  policy_handler_.CheckPermissions(
-      mock_app_, kRpc_, kRpc_params, result);
+  policy_handler_.CheckPermissions(mock_app_, kRpc_, kRpc_params, result);
 }
 
 TEST_F(PolicyHandlerTest, GetNotificationsNumber) {

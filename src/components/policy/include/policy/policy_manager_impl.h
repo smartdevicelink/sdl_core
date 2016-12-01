@@ -310,7 +310,8 @@ class PolicyManagerImpl : public PolicyManager {
    */
   virtual void CheckPendingPermissionsChanges(
       const std::string& policy_app_id,
-      const std::vector<FunctionalGroupPermission>& current_permissions) OVERRIDE;
+      const std::vector<FunctionalGroupPermission>& current_permissions)
+      OVERRIDE;
 
   virtual void StartPTExchange();
   virtual bool ExceededDays();

@@ -196,7 +196,8 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                    const application_manager::ApplicationSharedPtr app,
                    const std::string& function_id,
                    const application_manager::RPCParams& rpc_params,
-                   application_manager::CommandParametersPermissions* params_permissions));
+                   application_manager::CommandParametersPermissions*
+                       params_permissions));
   MOCK_CONST_METHOD2(IsApplicationForbidden,
                      bool(uint32_t connection_key,
                           const std::string& policy_app_id));

@@ -2547,8 +2547,9 @@ void MessageHelper::SendActivateAppToHMI(
     // in case of unconsented device
     std::string mac_adress;
     connection_handler::DeviceHandle device_handle = app->device();
-    application_manager.connection_handler().get_session_observer().GetDataOnDeviceID(
-        device_handle, NULL, NULL, &mac_adress, NULL);
+    application_manager.connection_handler()
+        .get_session_observer()
+        .GetDataOnDeviceID(device_handle, NULL, NULL, &mac_adress, NULL);
 
     policy::DeviceConsent consent =
         application_manager.GetPolicyHandler().GetUserConsentForDevice(

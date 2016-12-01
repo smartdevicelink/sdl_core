@@ -1053,7 +1053,7 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckCoincidence() {
                         IsDriverDevice(),
                         application_manager_);
 //(TODO) OKozlov clarify
-#else   // SDL_REMOTE_CONTROL  
+#else   // SDL_REMOTE_CONTROL
   IsSameAppName matcher(app_name.AsMBString(), vr_synonyms);
 #endif  // SDL_REMOTE_CONTROL
 

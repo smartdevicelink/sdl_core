@@ -146,7 +146,7 @@ class ResumptionDataTest : public ::testing::Test {
   sync_primitives::Lock ivilock_;
   application_manager_test::MockApplicationManagerSettings
       mock_application_manager_settings_;
-  application_manager_test:: MockApplicationManager mock_application_manager_;
+  application_manager_test::MockApplicationManager mock_application_manager_;
 };
 
 }  // namespace resumption_test

@@ -609,7 +609,7 @@ class PolicyHandler : public PolicyHandlerInterface,
 
 #ifdef SDL_REMOTE_CONTROL
   void UpdateHMILevel(application_manager::ApplicationSharedPtr app,
-                      mobile_apis::HMILevel::eType level) ;
+                      mobile_apis::HMILevel::eType level);
 #endif
   /**
    * @brief Sets days after epoch on successful policy update
