@@ -54,6 +54,7 @@ using utils::SharedPtr;
 using testing::_;
 using testing::Return;
 using testing::ReturnRef;
+using ::testing::Mock;
 
 namespace strings = application_manager::strings;
 namespace hmi_response = application_manager::hmi_response;
@@ -97,6 +98,10 @@ class SendLocationRequestTest
     disp_cap_ = utils::MakeShared<SmartObject>(smart_objects::SmartType_Map);
     message_ = CreateMessage();
     command_ = CreateCommand<UnwrappedSendLocationRequest>(message_);
+  }
+
+  void TearDown() OVERRIDE {
+    Mock::VerifyAndClearExpectations(&mock_message_helper_);
   }
 
   void InitialSetup(MessageSharedPtr message_) {
@@ -173,8 +178,6 @@ TEST_F(SendLocationRequestTest, Run_DeliveryMode_Success) {
   msg_params[strings::delivery_mode] = SmartObject();
   (*message_)[strings::msg_params] = msg_params;
   msg_params.erase(strings::delivery_mode);
-  EXPECT_CALL(mock_message_helper_, PrintSmartObject(_))
-      .WillOnce(Return(false));
   FinishSetup();
   command_->Run();
 }
@@ -183,8 +186,6 @@ TEST_F(SendLocationRequestTest, Run_LocationNameIsAllowed_Success) {
   InitialSetup(message_);
   (*message_)[strings::msg_params][strings::location_name] = "Location_Name";
   HMICapabilitiesSetupWithArguments(Common_TextFieldName::locationName);
-  EXPECT_CALL(mock_message_helper_, PrintSmartObject(_))
-      .WillOnce(Return(false));
   FinishSetup();
   command_->Run();
 }
@@ -210,8 +211,6 @@ TEST_F(SendLocationRequestTest, Run_LocationDescriptionIsAllowed_Success) {
   (*message_)[strings::msg_params][strings::location_description] =
       kLocationDescription;
   HMICapabilitiesSetupWithArguments(Common_TextFieldName::locationDescription);
-  EXPECT_CALL(mock_message_helper_, PrintSmartObject(_))
-      .WillOnce(Return(false));
   FinishSetup();
   command_->Run();
 }
@@ -240,8 +239,6 @@ TEST_F(SendLocationRequestTest, Run_AddressLinesAreAllowed_Success) {
       SmartObject(smart_objects::SmartType_Array);
   (*message_)[strings::msg_params][strings::address_lines][0] = kAddressLine;
   HMICapabilitiesSetupWithArguments(Common_TextFieldName::addressLines);
-  EXPECT_CALL(mock_message_helper_, PrintSmartObject(_))
-      .WillOnce(Return(false));
   FinishSetup();
   command_->Run();
 }
@@ -271,8 +268,6 @@ TEST_F(SendLocationRequestTest, Run_PhoneNumberIsAllowed_Success) {
   InitialSetup(message_);
   (*message_)[strings::msg_params][strings::phone_number] = kPhoneNumber;
   HMICapabilitiesSetupWithArguments(Common_TextFieldName::phoneNumber);
-  EXPECT_CALL(mock_message_helper_, PrintSmartObject(_))
-      .WillOnce(Return(false));
   FinishSetup();
   command_->Run();
 }
@@ -302,8 +297,6 @@ TEST_F(SendLocationRequestTest, Run_AddressesContainWrongSyntax_Cancelled) {
       kCorrectAddress;
   (*message_)[strings::msg_params][strings::address]["Address 2"] =
       kAddressWithWrongSyntax;
-  EXPECT_CALL(mock_message_helper_, PrintSmartObject(_))
-      .WillOnce(Return(false));
   FinishSetupCancelled(mobile_apis::Result::INVALID_DATA);
   command_->Run();
 }
@@ -319,8 +312,6 @@ TEST_F(SendLocationRequestTest, Run_LocationImageValid_Success) {
       VerifyImage(
           (*message_)[strings::msg_params][strings::location_image], _, _))
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
-  EXPECT_CALL(mock_message_helper_, PrintSmartObject(_))
-      .WillOnce(Return(false));
   FinishSetup();
   command_->Run();
 }
@@ -336,8 +327,6 @@ TEST_F(SendLocationRequestTest, Run_LocationImageInvalid_Cancelled) {
       VerifyImage(
           (*message_)[strings::msg_params][strings::location_image], _, _))
       .WillOnce(Return(mobile_apis::Result::ABORTED));
-  EXPECT_CALL(mock_message_helper_, PrintSmartObject(_))
-      .WillOnce(Return(false));
   FinishSetupCancelled(mobile_apis::Result::ABORTED);
   command_->Run();
 }
@@ -400,8 +389,6 @@ TEST_F(SendLocationRequestTest, Run_MandatoryParamsDisallowed_InvalidData) {
   EXPECT_CALL(app_mngr_,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_apis::Result::INVALID_DATA), _));
-  EXPECT_CALL(mock_message_helper_, PrintSmartObject(_))
-      .WillOnce(Return(false));
   command_->Run();
 }
 

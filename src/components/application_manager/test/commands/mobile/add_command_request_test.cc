@@ -90,6 +90,7 @@ const uint32_t kConnectionKey = 2u;
 const std::string kMenuName = "LG";
 const uint32_t kFirstParentId = 10u;
 const uint32_t kSecondParentId = 1u;
+const std::string kErroredVRCommand = "l\namer";
 const std::string kFirstVrCommand = "lamer";
 const std::string kSecondVrCommand = "hacker";
 const uint32_t kFirstCommandId = 10u;
@@ -101,7 +102,7 @@ const int32_t kPosition = 10;
 
 class AddCommandRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
- protected:
+ public:
   AddCommandRequestTest()
       : msg_(CreateMessage())
       , default_app_name_("test_default_app_name_")
@@ -118,6 +119,7 @@ class AddCommandRequestTest
     Mock::VerifyAndClearExpectations(&mock_message_helper_);
   }
 
+ protected:
   void InitBasicMessage() {
     (*msg_)[params][connection_key] = kConnectionKey;
     (*msg_)[msg_params][app_id] = kAppId;
@@ -232,7 +234,6 @@ class AddCommandRequestTest
 
 TEST_F(AddCommandRequestTest, Run_AppNotExisted_EXPECT_AppNotRegistered) {
   CreateBasicParamsUIRequest();
-  Mock::VerifyAndClearExpectations(&app_mngr_);
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(ApplicationSharedPtr()));
   EXPECT_CALL(
@@ -273,7 +274,8 @@ TEST_F(AddCommandRequestTest, Run_MenuNameHasSyntaxError_EXPECT_INVALID_DATA) {
       .WillRepeatedly(Return(
           DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
   SmartObject parent = SmartObject(SmartType_Map);
-  EXPECT_CALL(*mock_app_, FindSubMenu(_)).WillOnce(Return(&parent));
+  EXPECT_CALL(*mock_app_, FindSubMenu(kFirstParentId))
+      .WillOnce(Return(&parent));
   EXPECT_CALL(app_mngr_,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_apis::Result::INVALID_DATA), _));
@@ -286,8 +288,7 @@ TEST_F(AddCommandRequestTest,
        Run_VRCommandsHaveSyntaxError_EXPECT_INVALID_DATA) {
   CreateBasicParamsVRRequest();
   SmartObject& msg_params = (*msg_)[strings::msg_params];
-  const std::string errored_vr_command = "l\namer";
-  msg_params[vr_commands][0] = errored_vr_command;
+  msg_params[vr_commands][0] = kErroredVRCommand;
   EXPECT_CALL(*mock_app_, FindCommand(kCmdId)).WillOnce(Return(so_ptr_.get()));
   am::CommandsMap commands_map;
   EXPECT_CALL(*mock_app_, commands_map())
@@ -382,7 +383,8 @@ TEST_F(AddCommandRequestTest,
   EXPECT_CALL(*mock_app_, commands_map())
       .WillRepeatedly(Return(
           DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
-  EXPECT_CALL(*mock_app_, FindSubMenu(_)).WillOnce(Return(so_ptr_.get()));
+  EXPECT_CALL(*mock_app_, FindSubMenu(kSecondParentId))
+      .WillOnce(Return(so_ptr_.get()));
   EXPECT_CALL(app_mngr_,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_apis::Result::INVALID_ID), _));
@@ -410,7 +412,8 @@ TEST_F(AddCommandRequestTest,
       .WillRepeatedly(Return(
           DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
   so_ptr_ = utils::MakeShared<SmartObject>(SmartType_Map);
-  EXPECT_CALL(*mock_app_, FindSubMenu(_)).WillOnce(Return(so_ptr_.get()));
+  EXPECT_CALL(*mock_app_, FindSubMenu(kSecondParentId))
+      .WillOnce(Return(so_ptr_.get()));
   EXPECT_CALL(app_mngr_,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_apis::Result::DUPLICATE_NAME), _));
@@ -452,7 +455,8 @@ TEST_F(AddCommandRequestTest,
       .WillRepeatedly(Return(
           DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
   so_ptr_ = utils::MakeShared<SmartObject>(SmartType_Map);
-  EXPECT_CALL(*mock_app_, FindSubMenu(_)).WillOnce(Return(so_ptr_.get()));
+  EXPECT_CALL(*mock_app_, FindSubMenu(kSecondParentId))
+      .WillOnce(Return(so_ptr_.get()));
   {
     InSequence dummy;
     EXPECT_CALL(
@@ -590,7 +594,6 @@ TEST_F(AddCommandRequestTest, OnEvent_UnknownEvent_UNSUCCESS) {
 
 TEST_F(AddCommandRequestTest, OnEvent_AppNotExisted_UNSUCCESS) {
   CreateBasicParamsUIRequest();
-  Mock::VerifyAndClearExpectations(&app_mngr_);
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(ApplicationSharedPtr()));
   Event event(hmi_apis::FunctionID::UI_AddCommand);
@@ -1040,7 +1043,6 @@ TEST_F(AddCommandRequestTest,
 TEST_F(AddCommandRequestTest,
        OnTimeOut_AppNotExisted_NoAppRemoveCommandCalled) {
   CreateBasicParamsUIRequest();
-  Mock::VerifyAndClearExpectations(&app_mngr_);
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(ApplicationSharedPtr()));
   EXPECT_CALL(*mock_app_, RemoveCommand(kCmdId)).Times(0);
@@ -1075,7 +1077,8 @@ TEST_F(AddCommandRequestTest, OnTimeOut_AppRemoveCommandCalled) {
       .WillRepeatedly(Return(
           DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
   so_ptr_ = utils::MakeShared<SmartObject>(SmartType_Map);
-  EXPECT_CALL(*mock_app_, FindSubMenu(_)).WillOnce(Return(so_ptr_.get()));
+  EXPECT_CALL(*mock_app_, FindSubMenu(kSecondParentId))
+      .WillOnce(Return(so_ptr_.get()));
   {
     InSequence dummy;
     EXPECT_CALL(
