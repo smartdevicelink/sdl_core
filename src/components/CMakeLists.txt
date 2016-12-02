@@ -79,12 +79,12 @@ add_subdirectory(./config_profile)
 
 # --- AudioManager
 add_subdirectory(./media_manager)
-# --- Functional module
-add_subdirectory(./functional_module)
 
 if(REMOTE_CONTROL)
   # --- CAN Module
   add_subdirectory(./can_cooperation)
+  # --- Functional module
+  add_subdirectory(./functional_module)
 endif()
 
 if (TELEMETRY_MONITOR)
