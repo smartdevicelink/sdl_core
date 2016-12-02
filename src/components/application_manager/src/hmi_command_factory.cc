@@ -287,8 +287,9 @@
 #include "application_manager/commands/hmi/on_play_tone_notification.h"
 #endif
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 namespace application_manager {
+
+CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager");
 
 CommandSharedPtr HMICommandFactory::CreateCommand(
     const commands::MessageSharedPtr& message,

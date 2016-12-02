@@ -433,6 +433,10 @@ class ApplicationImpl : public virtual Application,
   std::forward_list<smart_objects::SmartObject>
       subscribed_interior_vehicle_data_;
 
+#ifdef ENABLE_LOG
+  static log4cxx::LoggerPtr logger_;
+#endif  // ENABLE_LOG
+
 #ifdef SDL_REMOTE_CONTROL
   mobile_api::HMILevel::eType hmi_level_;
 #endif

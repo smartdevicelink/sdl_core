@@ -72,9 +72,9 @@ mobile_apis::FileType::eType StringToFileType(const char* str) {
 }
 }
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
-
 namespace application_manager {
+
+CREATE_LOGGERPTR_LOCAL(ApplicationImpl::logger_, "ApplicationManager");
 
 ApplicationImpl::ApplicationImpl(
     uint32_t application_id,

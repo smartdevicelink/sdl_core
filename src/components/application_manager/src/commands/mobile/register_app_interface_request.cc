@@ -212,6 +212,8 @@ struct IsSameApp {
   policy::PolicyHandlerInterface& policy_handler_;
 };
 
+CREATE_LOGGERPTR_LOCAL(IsSameApp::logger_, "ApplicationManager");
+
 struct IsSameAppId : public IsSameApp {
   IsSameAppId(const std::string& app_id,
               bool is_remote_control,

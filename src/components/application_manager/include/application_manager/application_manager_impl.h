@@ -186,7 +186,6 @@ typedef struct {
 typedef std::queue<AudioData> RawAudioDataQueue;
 typedef threads::MessageLoopThread<RawAudioDataQueue> AudioPassThruQueue;
 }
-CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 typedef std::vector<std::string> RPCParams;
 typedef utils::SharedPtr<timer::Timer> TimerSPtr;
 
@@ -1481,6 +1480,10 @@ class ApplicationManagerImpl
       const std::string& policy_app_id) const OVERRIDE;
 #endif
  private:
+#ifdef ENABLE_LOG
+  static log4cxx::LoggerPtr logger_;
+#endif  // ENABLE_LOG
+
   const ApplicationManagerSettings& settings_;
   /**
    * @brief List of applications

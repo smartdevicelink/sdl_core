@@ -409,8 +409,14 @@ SET (LIBRARIES
   formatters
   dbms  
   Policy
- #CANCooperation
 )
+
+if(REMOTE_CONTROL)
+    SET (LIBRARIES
+      ${LIBRARIES}
+      CANCooperation
+    )
+endif(REMOTE_CONTROL)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   list(APPEND LIBRARIES sqlite3)

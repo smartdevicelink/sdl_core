@@ -33,7 +33,7 @@
 
 #include "application_manager/commands/mobile/on_interior_vehicle_data_notification.h"
 #include "application_manager/application_manager.h"
-#include "application_manager/application_impl.h"
+#include "application_manager/application.h"
 #include "interfaces/MOBILE_API.h"
 namespace application_manager {
 

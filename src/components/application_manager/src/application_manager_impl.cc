@@ -82,7 +82,10 @@ int get_rand_from_range(uint32_t from = 0, int to = RAND_MAX) {
 
 namespace application_manager {
 
+CREATE_LOGGERPTR_LOCAL(ApplicationManagerImpl::logger_, "ApplicationManager");
+
 namespace {
+
 DeviceTypes devicesType = {
     std::make_pair(std::string("USB_AOA"),
                    hmi_apis::Common_TransportType::USB_AOA),
