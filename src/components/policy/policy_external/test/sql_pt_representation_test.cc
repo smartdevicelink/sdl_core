@@ -1095,10 +1095,10 @@ TEST(SQLPTRepresentationTest3,
      Init_TryInitNotExistingDataBase_ExpectResultFail) {
   // Arrange
   NiceMock<policy_handler_test::MockPolicySettings> policy_settings_;
+  const std::string not_existing_path = "/not/existing/path"
   ON_CALL(policy_settings_, app_storage_folder())
-      .WillByDefault(ReturnRef(kAppStorageFolder));
+      .WillByDefault(ReturnRef(not_existing_path));
   SQLPTRepresentation reps;
-  (reps.db())->set_path("/home/");
   // Check
   EXPECT_EQ(::policy::FAIL, reps.Init(&policy_settings_));
 }
