@@ -1023,11 +1023,10 @@ TEST_F(SQLPTRepresentationTest3, Init_InitNewDataBase_ExpectResultSuccess) {
 
 TEST_F(SQLPTRepresentationTest3,
        Init_TryInitNotExistingDataBase_ExpectResultFail) {
-  const std::string kEmptyDirectory = "";
+  const std::string not_existing_path = "/not/existing/path";
   // Arrange
   ON_CALL(policy_settings_, app_storage_folder())
-      .WillByDefault(ReturnRef(kEmptyDirectory));
-  (reps->db())->set_path("/home/");
+      .WillByDefault(ReturnRef(not_existing_path));
   // Check
   EXPECT_EQ(::policy::FAIL, reps->Init(&policy_settings_));
 }
