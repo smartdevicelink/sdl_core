@@ -198,6 +198,7 @@ ApplicationManagerImpl::~ApplicationManagerImpl() {
 template <class UnaryPredicate>
 ApplicationSharedPtr FindApp(DataAccessor<ApplicationSet> accessor,
                              UnaryPredicate finder) {
+  CREATE_LOGGERPTR_LOCAL(logger_, "ApplicationManager");
   ApplicationSet::iterator it = std::find_if(
       accessor.GetData().begin(), accessor.GetData().end(), finder);
   if (accessor.GetData().end() == it) {
