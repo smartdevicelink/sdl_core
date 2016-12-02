@@ -28,10 +28,10 @@ set (LIBRARIES
 )
 
 set(SOURCES
-  #./src/generic_module_test.cc
-  #./src/plugin_manager_test.cc
-  #./src/module_timer_test.cc
-  #./src/settings_test.cc
+  ./src/generic_module_test.cc
+  ./src/plugin_manager_test.cc
+  ./src/module_timer_test.cc
+  ./src/settings_test.cc
 )
 
 # use, i.e. don't skip the full RPATH for the build tree

@@ -175,7 +175,7 @@ class PolicyManagerImpl : public PolicyManager {
   void MarkUnpairedDevice(const std::string& device_id);
 
   virtual void AddApplication(const std::string& application_id);
-#if SDL_REMOTE_CONTROL
+#ifdef SDL_REMOTE_CONTROL
   virtual void AddApplication(const std::string& application_id,
                               const std::vector<int>& hmi_types);
 
@@ -187,6 +187,31 @@ class PolicyManagerImpl : public PolicyManager {
        */
   virtual bool GetHMITypes(const std::string& application_id,
                            std::vector<int>* app_types);
+  virtual void set_access_remote(utils::SharedPtr<AccessRemote> access_remote);
+  TypeAccess CheckDriverConsent(const Subject& who,
+                                const Object& what,
+                                const std::string& rpc,
+                                const RemoteControlParams& params);
+  void CheckPTUUpdatesChange(
+      const utils::SharedPtr<policy_table::Table> pt_update,
+      const utils::SharedPtr<policy_table::Table> snapshot);
+  bool CheckPTURemoteCtrlChange(
+      const utils::SharedPtr<policy_table::Table> pt_update,
+      const utils::SharedPtr<policy_table::Table> snapshot);
+
+  void CheckPTUZonesChange(
+      const utils::SharedPtr<policy_table::Table> pt_update,
+      const utils::SharedPtr<policy_table::Table> snapshot);
+
+  void CheckRemoteGroupsChange(
+      const utils::SharedPtr<policy_table::Table> pt_update,
+      const utils::SharedPtr<policy_table::Table> snapshot);
+
+  void SendHMILevelChanged(const Subject& who);
+  void UpdateDeviceRank(const Subject& who, const std::string& rank);
+
+  void OnPrimaryGroupsChanged(const std::string& application_id);
+  void OnNonPrimaryGroupsChanged(const std::string& application_id);
 #endif  // SDL_REMOTE_CONTROL
 
   virtual void RemoveAppConsentForGroup(const std::string& app_id,
@@ -355,43 +380,18 @@ class PolicyManagerImpl : public PolicyManager {
                                          const std::string& application_id);
   virtual bool GetModuleTypes(const std::string& policy_app_id,
                               std::vector<std::string>* modules) const;
-#endif  // SDL_REMOTE_CONTROL
+  #endif  // SDL_REMOTE_CONTROL
  private:
   PolicyListener* listener_;
 
   UpdateStatusManager update_status_manager_;
   CacheManagerInterfaceSPtr cache_;
+#ifdef SDL_REMOTE_CONTROL
+  utils::SharedPtr<AccessRemote> access_remote_;
+#endif
   sync_primitives::Lock apps_registration_lock_;
   sync_primitives::Lock app_permissions_diff_lock_;
   std::map<std::string, AppPermissions> app_permissions_diff_;
-
-#ifdef SDL_REMOTE_CONTROL
-  TypeAccess CheckDriverConsent(const Subject& who,
-                                const Object& what,
-                                const std::string& rpc,
-                                const RemoteControlParams& params);
-  void CheckPTUUpdatesChange(
-      const utils::SharedPtr<policy_table::Table> pt_update,
-      const utils::SharedPtr<policy_table::Table> snapshot);
-  bool CheckPTURemoteCtrlChange(
-      const utils::SharedPtr<policy_table::Table> pt_update,
-      const utils::SharedPtr<policy_table::Table> snapshot);
-
-  void CheckPTUZonesChange(
-      const utils::SharedPtr<policy_table::Table> pt_update,
-      const utils::SharedPtr<policy_table::Table> snapshot);
-
-  void CheckRemoteGroupsChange(
-      const utils::SharedPtr<policy_table::Table> pt_update,
-      const utils::SharedPtr<policy_table::Table> snapshot);
-  utils::SharedPtr<AccessRemote> access_remote_;
-
-  void SendHMILevelChanged(const Subject& who);
-  void UpdateDeviceRank(const Subject& who, const std::string& rank);
-
-  void OnPrimaryGroupsChanged(const std::string& application_id);
-  void OnNonPrimaryGroupsChanged(const std::string& application_id);
-#endif  // SDL_REMOTE_CONTROL
 
   /**
    * Timeout to wait response with UpdatePT

@@ -614,6 +614,9 @@ class PolicyManager : public usage_statistics::StatisticsManager {
    */
   virtual bool GetModuleTypes(const std::string& policy_app_id,
                               std::vector<std::string>* modules) const = 0;
+
+  virtual void set_access_remote(
+      utils::SharedPtr<AccessRemote> access_remote) = 0;
 #endif  // SDL_REMOTE_CONTROL
 
  protected:

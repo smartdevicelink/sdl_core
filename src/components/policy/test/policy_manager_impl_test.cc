@@ -54,7 +54,7 @@
 #include "utils/make_shared.h"
 #include "utils/gen_hash.h"
 #ifdef SDL_REMOTE_CONTROL
-#include "mock_access_remote.h"
+#include "policy/test/include/mock_access_remote.h"
 #endif  // SDL_REMOTE_CONTROL
 using ::testing::ReturnRef;
 using ::testing::DoAll;
@@ -148,7 +148,7 @@ class PolicyManagerImplTest : public ::testing::Test {
   MockPolicyListener* listener;
   const std::string device_id;
 #ifdef SDL_REMOTE_CONTROL
-  MockAccessRemote* access_remote;
+  utils::SharedPtr<access_remote_test::MockAccessRemote> access_remote;
 #endif  // SDL_REMOTE_CONTROL
 
   void SetUp() OVERRIDE {
@@ -158,8 +158,8 @@ class PolicyManagerImplTest : public ::testing::Test {
     manager->set_cache_manager(cache_manager);
 
 #ifdef SDL_REMOTE_CONTROL
-    access_remote = new MockAccessRemote();
-    manager->access_remote_ = access_remote;
+    access_remote = new access_remote_test::MockAccessRemote();
+    manager->set_access_remote(access_remote);
 #endif  // SDL_REMOTE_CONTROL
 
     listener = new MockPolicyListener();
@@ -169,9 +169,6 @@ class PolicyManagerImplTest : public ::testing::Test {
   void TearDown() OVERRIDE {
     delete manager;
     delete listener;
-#ifdef SDL_REMOTE_CONTROL
-    delete access_remote;
-#endif
   }
 
   ::testing::AssertionResult IsValid(const policy_table::Table& table) {

@@ -1478,6 +1478,11 @@ bool PolicyManagerImpl::GetModuleTypes(
     std::vector<std::string>* modules) const {
   return access_remote_->GetModuleTypes(application_id, modules);
 }
+
+void PolicyManagerImpl::set_access_remote(
+    utils::SharedPtr<AccessRemote> access_remote) {
+  access_remote_ = access_remote;
+}
 #endif  // SDL_REMOTE_CONTROL
 
 }  //  namespace policy

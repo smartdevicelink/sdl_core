@@ -168,7 +168,7 @@ TEST(AccessRemoteImplTest, CheckModuleType) {
 
   // No modules
   policy_table::ApplicationPolicies& apps =
-      access_remote.cache_->pt_->policy_table.app_policies;
+      access_remote.cache_->pt_->policy_table.app_policies_section.apps;
   apps["1234"];
   EXPECT_FALSE(access_remote.CheckModuleType("1234", policy_table::MT_RADIO));
 
@@ -242,7 +242,7 @@ TEST(AccessRemoteImplTest, GetGroups) {
 
   access_remote.cache_->pt_ = new policy_table::Table();
   policy_table::ApplicationPolicies& apps =
-      access_remote.cache_->pt_->policy_table.app_policies;
+      access_remote.cache_->pt_->policy_table.app_policies_section.apps;
   apps["1234"].groups.push_back("group_default");
   apps["1234"].groups_nonPrimaryRC->push_back("group_non_primary");
   apps["1234"].groups_primaryRC->push_back("group_primary");
