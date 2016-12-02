@@ -67,7 +67,7 @@ class MockAccessRemote : public policy::AccessRemote {
   MOCK_METHOD1(Reset, void(const policy::Object& what));
   MOCK_CONST_METHOD2(Check,
                      policy::TypeAccess(const policy::Subject& who,
-                                const policy::Object& what));
+                                        const policy::Object& what));
   MOCK_CONST_METHOD3(
       FindGroup,
       policy::PTString(const policy::Subject& who,
@@ -85,10 +85,11 @@ class MockAccessRemote : public policy::AccessRemote {
   MOCK_CONST_METHOD2(CheckModuleType,
                      bool(const policy::PTString& app_id,
                           policy_table::ModuleType module));
-  MOCK_CONST_METHOD3(CheckParameters,
-                     policy::TypeAccess(const policy::Object& what,
-                                const std::string& rpc,
-                                const policy::RemoteControlParams& params));
+  MOCK_CONST_METHOD3(
+      CheckParameters,
+      policy::TypeAccess(const policy::Object& what,
+                         const std::string& rpc,
+                         const policy::RemoteControlParams& params));
   MOCK_METHOD1(IsAppReverse, bool(const policy::Subject& who));
   MOCK_METHOD0(Reset, void());
   MOCK_CONST_METHOD1(GetDeviceZone,

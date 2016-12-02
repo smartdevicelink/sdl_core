@@ -562,6 +562,11 @@ class PolicyHandler : public PolicyHandlerInterface,
   void SetPolicyManager(utils::SharedPtr<PolicyManager> pm) {
     policy_manager_ = pm;
   }
+
+  AppIds& last_used_app_ids() {
+    return last_used_app_ids_;
+  }
+
 #endif  // BUILD_TESTS
 
 #ifdef ENABLE_SECURITY
