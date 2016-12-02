@@ -59,8 +59,6 @@ TransportAdapter::Error BluetoothConnectionFactory::CreateConnection(
                                       << ", app_handle: " << &app_handle);
   BluetoothSocketConnection* connection(
       new BluetoothSocketConnection(device_uid, app_handle, controller_));
-  controller_->ConnectionCreated(connection, device_uid, app_handle);
-
   TransportAdapter::Error error = connection->Start();
   if (TransportAdapter::OK != error) {
     LOG4CXX_ERROR(logger_, "connection::Start() failed");
