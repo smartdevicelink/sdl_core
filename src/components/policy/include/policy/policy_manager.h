@@ -360,7 +360,7 @@ class PolicyManager : public usage_statistics::StatisticsManager {
    * @param Application id assigned by Ford to the application
    */
   virtual void AddApplication(const std::string& application_id) = 0;
-#if SDL_REMOTE_CONTROL
+#ifdef SDL_REMOTE_CONTROL
   virtual void AddApplication(const std::string& application_id,
                               const std::vector<int>& hmi_types) = 0;
 

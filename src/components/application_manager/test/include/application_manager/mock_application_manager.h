@@ -257,11 +257,13 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD0(OnLowVoltage, void());
   MOCK_METHOD0(OnWakeUp, void());
 
+  MOCK_METHOD1(application,
+               application_manager::ApplicationSharedPtr(uint32_t app_id));
 #ifdef SDL_REMOTE_CONTROL
-  MOCK_METHOD2(application,
-               application_manager::ApplicationSharedPtr(
-                   const std::string& device_id,
-                   const std::string& policy_app_id));
+  MOCK_CONST_METHOD2(application,
+                     application_manager::ApplicationSharedPtr(
+                         const std::string& device_id,
+                         const std::string& policy_app_id));
   MOCK_METHOD1(SubscribeToHMINotification,
                void(const std::string& hmi_notification));
   MOCK_METHOD1(applications_by_interior_vehicle_data,
@@ -275,10 +277,15 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD0(CreatePhoneCallAppList, void());
   MOCK_METHOD0(ResetPhoneCallAppList, void());
   MOCK_METHOD0(GetPluginManager, functional_modules::PluginManager&());
-  MOCK_METHOD1(devices,
-               std::vector<std::string>(const std::string& policy_app_id));
-  MOCK_METHOD1(PostMessageToHMIQueque, void(const MessagePtr& message));
-  MOCK_METHOD1(PostMessageToMobileQueque, void(const MessagePtr& message));
+  MOCK_CONST_METHOD1(
+      devices, std::vector<std::string>(const std::string& policy_app_id));
+  MOCK_METHOD1(PostMessageToHMIQueque,
+               void(const application_manager::MessagePtr& message));
+  MOCK_METHOD1(PostMessageToMobileQueque,
+               void(const application_manager::MessagePtr& message));
+  MOCK_METHOD1(GetDeviceHandle, uint32_t(uint32_t connection_key));
+  MOCK_CONST_METHOD1(IsAudioStreamingAllowed, bool(uint32_t connection_key));
+  MOCK_CONST_METHOD1(IsVideoStreamingAllowed, bool(uint32_t connection_key));
 #endif
 };
 

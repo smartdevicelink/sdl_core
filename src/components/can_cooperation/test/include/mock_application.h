@@ -59,7 +59,8 @@ class MockApplication : public Application {
   MOCK_METHOD1(set_hmi_application_id, void(uint32_t hmi_app_id));
   MOCK_CONST_METHOD0(hmi_app_id, uint32_t());
   MOCK_CONST_METHOD0(app_id, uint32_t());
-  MOCK_CONST_METHOD0(name, const std::string&());
+  MOCK_CONST_METHOD0(name,
+                     const application_manager::custom_str::CustomString&());
   MOCK_CONST_METHOD0(folder_name, const std::string());
   MOCK_CONST_METHOD0(is_media_application, bool());
   MOCK_CONST_METHOD0(hmi_level, const mobile_api::HMILevel::eType&());

@@ -36,7 +36,7 @@
 #include "gmock/gmock.h"
 
 #include "application_manager/policies/policy_handler.h"
-#include "policy/mock_policy_manager.h"
+#include "policy/test/include/mock_cache_manager.h"
 #include "connection_handler/connection_handler_impl.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
@@ -57,7 +57,7 @@
 #include "policy/usage_statistics/statistics_manager.h"
 #include "interfaces/MOBILE_API.h"
 #include "policy/mock_policy_settings.h"
-#include "application_manager/mock_application.h"
+#include "application_manager/test/include/application_manager/mock_application.h"
 #include "policy/usage_statistics/mock_statistics_manager.h"
 #include "protocol_handler/mock_session_observer.h"
 #include "connection_handler/mock_connection_handler.h"
@@ -65,6 +65,7 @@
 #include "application_manager/policies/mock_policy_handler_observer.h"
 #include "application_manager/mock_event_dispatcher.h"
 #include "application_manager/mock_state_controller.h"
+#include "policy/test/include/mock_policy_manager.h"
 
 namespace test {
 namespace components {
@@ -108,7 +109,7 @@ class PolicyHandlerTest : public ::testing::Test {
   protocol_handler_test::MockSessionObserver mock_session_observer;
   application_manager_test::MockStateController mock_state_controller;
   PolicyHandler policy_handler_;
-  utils::SharedPtr<policy_manager_test::MockPolicyManager> mock_policy_manager_;
+  utils::SharedPtr<policy_manager::MockPolicyManager> mock_policy_manager_;
   application_manager_test::MockApplicationManager app_manager_;
   const std::string kPolicyAppId_;
   const std::string kMacAddr_;
@@ -134,7 +135,7 @@ class PolicyHandlerTest : public ::testing::Test {
     std::string path = file_system::CreateDirectory("storage");
     file_system::CreateFile(path + "/" + "certificate");
     mock_policy_manager_ =
-        utils::MakeShared<policy_manager_test::MockPolicyManager>();
+        utils::MakeShared<policy_manager::MockPolicyManager>();
     ASSERT_TRUE(mock_policy_manager_.valid());
 
     ON_CALL(app_manager_, connection_handler())

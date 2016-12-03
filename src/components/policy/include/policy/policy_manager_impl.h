@@ -174,10 +174,10 @@ class PolicyManagerImpl : public PolicyManager {
   bool CanAppStealFocus(const std::string& app_id) const;
   void MarkUnpairedDevice(const std::string& device_id);
 
-  virtual void AddApplication(const std::string& application_id);
+  void AddApplication(const std::string& application_id) ;
 #ifdef SDL_REMOTE_CONTROL
-  virtual void AddApplication(const std::string& application_id,
-                              const std::vector<int>& hmi_types);
+  void AddApplication(const std::string& application_id,
+                              const std::vector<int>& hmi_types) ;
 
   /**
        * Gets HMI types
@@ -186,7 +186,7 @@ class PolicyManagerImpl : public PolicyManager {
        * @return true if policy has specific policy for this application
        */
   virtual bool GetHMITypes(const std::string& application_id,
-                           std::vector<int>* app_types);
+                           std::vector<int>* app_types) OVERRIDE;
   virtual void set_access_remote(utils::SharedPtr<AccessRemote> access_remote);
   TypeAccess CheckDriverConsent(const Subject& who,
                                 const Object& what,

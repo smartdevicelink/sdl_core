@@ -129,6 +129,10 @@ class CANModule : public CANModuleInterface {
 
   void UnsubscribeAppForAllZones(uint32_t hmi_app_id, CANAppExtensionPtr app);
 
+  CANConnectionSPtr can_connection();
+
+  void set_can_connection(const CANConnectionSPtr can_connection);
+
  protected:
   /**
    * @brief Remove extension for all applications

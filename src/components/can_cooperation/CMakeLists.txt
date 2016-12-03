@@ -32,6 +32,7 @@ include_directories (
   ${COMPONENTS_DIR}/formatters/include/
   ${COMPONENTS_DIR}/policy/include/
   ${COMPONENTS_DIR}/rpc_base/include/
+  ${COMPONENTS_DIR}/application_manager/test/include/
 
   ${COMPONENTS_DIR}/smart_objects/include/
   ${COMPONENTS_DIR}/utils/include/
@@ -95,13 +96,13 @@ set (SOURCES
 
 set (LIBRARIES
     jsoncpp
+    ApplicationManager
     FunctionalModule
-    #ApplicationManager
     Utils
     ConfigProfile
 )
 
-add_library(${target} SHARED ${SOURCES})
+add_library(${target} ${SOURCES})
 target_link_libraries(${target} ${LIBRARIES} )
 
 if(ENABLE_LOG)

@@ -559,4 +559,11 @@ void CANModule::UnsubscribeAppsFromAllInteriorZones(uint32_t device_id) {
   }
 }
 
+CANConnectionSPtr CANModule::can_connection(){
+    return can_connection_;
+}
+
+void CANModule::set_can_connection(const CANConnectionSPtr can_connection){
+    can_connection_ = can_connection;
+}
 }  //  namespace can_cooperation

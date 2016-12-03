@@ -244,6 +244,20 @@ class MockMessageHelper {
                std::string(const uint32_t device_handle,
                            const ApplicationManager& app_mngr));
 
+#ifdef SDL_REMOTE_CONTROL
+  MOCK_METHOD3(SendHMIStatusNotification,
+               void(const Application& application_impl,
+                    ApplicationManager& application_manager,
+                    mobile_apis::DeviceRank::eType rank));
+  MOCK_METHOD4(SendActivateAppToHMI,
+               void(uint32_t const app_id,
+                    ApplicationManager& application_manager,
+                    hmi_apis::Common_HMILevel::eType level,
+                    bool send_policy_priority));
+  MOCK_METHOD1(StringToDeviceRank,
+               mobile_apis::DeviceRank::eType(const std::string& device_ranki));
+#endif
+
   static MockMessageHelper* message_helper_mock();
 };
 

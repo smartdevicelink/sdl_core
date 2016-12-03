@@ -3,7 +3,7 @@
 #include "functional_module/plugin_manager.h"
 #include "mock_generic_module.h"
 #include "mock_service.h"
-#include "mock_application.h"
+#include "application_manager/mock_application.h"
 
 using application_manager::Message;
 using application_manager::ProtocolVersion;
@@ -127,22 +127,22 @@ TEST_F(PluginManagerTest, ProcessHMIMessagePass) {
 }
 
 TEST_F(PluginManagerTest, IsAppForPlugins) {
-  application_manager::MockApplication* app =
-      new application_manager::MockApplication();
+  using test::components::application_manager_test::MockApplication;
+  MockApplication* app = new MockApplication();
   application_manager::ApplicationSharedPtr app_ptr(app);
   EXPECT_CALL(*module, IsAppForPlugin(app_ptr)).Times(1);
   manager->IsAppForPlugins(app_ptr);
 }
 
 TEST_F(PluginManagerTest, OnAppHMILevelChanged) {
-  NiceMock<application_manager::MockApplication>* app =
-      new NiceMock<application_manager::MockApplication>();
+  using test::components::application_manager_test::MockApplication;
+  NiceMock<MockApplication>* app = new NiceMock<MockApplication>();
   application_manager::ApplicationSharedPtr app_ptr(app);
 
-  std::string name("name");
+  const application_manager::custom_str::CustomString name("name");
   ON_CALL(*app, name()).WillByDefault(ReturnRef(name));
   mobile_apis::HMILevel::eType level = mobile_apis::HMILevel::eType::HMI_NONE;
-  ON_CALL(*app, hmi_level()).WillByDefault(ReturnRef(level));
+  ON_CALL(*app, hmi_level()).WillByDefault(Return(level));
 
   Expectation is_for_plugin =
       EXPECT_CALL(*module, IsAppForPlugin(app_ptr)).WillOnce(Return(true));
@@ -154,11 +154,11 @@ TEST_F(PluginManagerTest, OnAppHMILevelChanged) {
 }
 
 TEST_F(PluginManagerTest, CanAppChangeHMILevel) {
-  NiceMock<application_manager::MockApplication>* app =
-      new NiceMock<application_manager::MockApplication>();
+  using test::components::application_manager_test::MockApplication;
+  NiceMock<MockApplication>* app = new NiceMock<MockApplication>();
   application_manager::ApplicationSharedPtr app_ptr(app);
 
-  std::string name("name");
+  const application_manager::custom_str::CustomString name("name");
   ON_CALL(*app, name()).WillByDefault(ReturnRef(name));
 
   Expectation is_for_plugin =
@@ -172,11 +172,11 @@ TEST_F(PluginManagerTest, CanAppChangeHMILevel) {
 }
 
 TEST_F(PluginManagerTest, CanAppChangeHMILevelNegative) {
-  NiceMock<application_manager::MockApplication>* app =
-      new NiceMock<application_manager::MockApplication>();
+  using test::components::application_manager_test::MockApplication;
+  NiceMock<MockApplication>* app = new NiceMock<MockApplication>();
   application_manager::ApplicationSharedPtr app_ptr(app);
 
-  std::string name("name");
+  const application_manager::custom_str::CustomString name("name");
   ON_CALL(*app, name()).WillByDefault(ReturnRef(name));
 
   Expectation is_for_plugin =
@@ -190,11 +190,11 @@ TEST_F(PluginManagerTest, CanAppChangeHMILevelNegative) {
 }
 
 TEST_F(PluginManagerTest, CanAppChangeHMILevelNotForPlugin) {
-  NiceMock<application_manager::MockApplication>* app =
-      new NiceMock<application_manager::MockApplication>();
+  using test::components::application_manager_test::MockApplication;
+  NiceMock<MockApplication>* app = new NiceMock<MockApplication>();
   application_manager::ApplicationSharedPtr app_ptr(app);
 
-  std::string name("name");
+  const application_manager::custom_str::CustomString name("name");
   ON_CALL(*app, name()).WillByDefault(ReturnRef(name));
 
   Expectation is_for_plugin =

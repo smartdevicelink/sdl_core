@@ -83,7 +83,7 @@ TEST(CanLibraryTest, Load) {
   //  executed if the "wait" is ever processed.
   //  (see http://www.yolinux.com/TUTORIALS/LinuxTutorialPosixThreads.html)
   sleep(3);
-  CANModule::destroy();
+  //CANModule::destroy();
   int ret = dlclose(handle);
   EXPECT_FALSE(ret);
   EXPECT_FALSE(IsError(dlerror()));

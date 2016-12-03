@@ -205,31 +205,33 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
                     const smart_objects::SmartObject* app_types));
   MOCK_METHOD6(CheckAccess,
                application_manager::TypeAccess(
-                   const PTString& device_id,
-                   const PTString& app_id,
+                   const policy::PTString& device_id,
+                   const policy::PTString& app_id,
                    const application_manager::SeatLocation& zone,
-                   const PTString& module,
+                   const policy::PTString& module,
                    const std::string& rpc,
-                   const std::vector<PTString>& params));
+                   const std::vector<policy::PTString>& params));
 
   MOCK_METHOD2(CheckModule,
-               bool(const PTString& app_id, const PTString& module));
+               bool(const policy::PTString& app_id,
+                    const policy::PTString& module));
 
   MOCK_METHOD5(SetAccess,
-               void(const PTString& device_id,
-                    const PTString& app_id,
+               void(const policy::PTString& device_id,
+                    const policy::PTString& app_id,
                     const application_manager::SeatLocation& zone,
-                    const PTString& module,
+                    const policy::PTString& module,
                     bool allowed));
 
   MOCK_METHOD2(ResetAccess,
-               void(const PTString& device_id, const PTString& app_id));
+               void(const policy::PTString& device_id,
+                    const policy::PTString& app_id));
 
   MOCK_METHOD2(ResetAccess,
                void(const application_manager::SeatLocation& zone,
                     const std::string& module));
 
-  MOCK_METHOD1(SetPrimaryDevice, void(const PTString& dev_id));
+  MOCK_METHOD1(SetPrimaryDevice, void(const policy::PTString& dev_id));
 
   MOCK_METHOD0(ResetPrimaryDevice, void());
 

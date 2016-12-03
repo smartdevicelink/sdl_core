@@ -4,7 +4,7 @@ include_directories (
   ${CMAKE_SOURCE_DIR}/src/components/functional_module/include/
   ${CMAKE_SOURCE_DIR}/src/components/can_cooperation/include/
   ${CMAKE_SOURCE_DIR}/src/components/include/
-  ${CMAKE_SOURCE_DIR}/src/components/application_manager/include
+  ${CMAKE_SOURCE_DIR}/src/components/application_manager/include  
   ${CMAKE_SOURCE_DIR}/src/components/connection_handler/include
   ${CMAKE_SOURCE_DIR}/src/components/smart_objects/include
   ${CMAKE_SOURCE_DIR}/src/components/policy/src/policy/usage_statistics/include
@@ -60,5 +60,6 @@ SET(RPATH_DIRECTORIES
 )
 
 SET(CMAKE_INSTALL_RPATH "${RPATH_DIRECTORIES}")
+
 
 create_test("can_cooperation_test" "${SOURCES}" "${LIBRARIES}")

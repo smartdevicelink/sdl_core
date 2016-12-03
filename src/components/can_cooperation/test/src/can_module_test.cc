@@ -36,9 +36,11 @@
 #include "can_cooperation/can_module_constants.h"
 #include "can_cooperation/message_helper.h"
 #include "functional_module/module_observer.h"
-#include "mock_application.h"
+#include "application_manager/mock_application.h"
 #include "mock_service.h"
 #include "mock_can_connection.h"
+#include "utils/shared_ptr.h"
+#include "utils/make_shared.h"
 
 using functional_modules::PluginInfo;
 using functional_modules::ProcessResult;
@@ -46,7 +48,7 @@ using functional_modules::MobileFunctionID;
 using application_manager::ServicePtr;
 
 using application_manager::MockService;
-using application_manager::MockApplication;
+using test::components::application_manager_test::MockApplication;
 
 using ::testing::_;
 using ::testing::NiceMock;
@@ -58,20 +60,20 @@ namespace can_cooperation {
 
 class CanModuleTest : public ::testing::Test {
  public:
-  void static HandleMessage(application_manager::MessagePtr msg) {
-    module->HandleMessage(msg);
+  void HandleMessage(application_manager::MessagePtr msg) {
+    module->ProcessHMIMessage(msg);
   }
 
  protected:
-  static CANModule* module;
+  static utils::SharedPtr<CANModule> module;
   static MockService* mock_service;
   static MockCANConnection* mock_conn;
 
   static void SetUpTestCase() {
-    module = CANModule::instance();
+    module = utils::MakeShared<CANModule>();
     mock_conn = new MockCANConnection();
     ::can_cooperation::CANConnectionSPtr conn(mock_conn);
-    module->can_connection_ = conn;
+    module->set_can_connection(conn);
 
     mock_service = new MockService();
     ServicePtr exp_service(mock_service);
@@ -84,16 +86,15 @@ class CanModuleTest : public ::testing::Test {
     std::vector<application_manager::ApplicationSharedPtr> apps;
     EXPECT_CALL(*mock_service, GetApplications(module->GetModuleID()))
         .WillRepeatedly(Return(apps));
-    CANModule::destroy();
+    //CANModule::destroy();
   }
 };
-
-CANModule* CanModuleTest::module = 0;
+utils::SharedPtr<CANModule> CanModuleTest::module = 0;
 MockService* CanModuleTest::mock_service = 0;
 MockCANConnection* CanModuleTest::mock_conn = 0;
 
 TEST_F(CanModuleTest, Create) {
-  EXPECT_EQ(153, module->GetModuleID());
+  EXPECT_EQ(153, CanModuleTest::module->GetModuleID());
   PluginInfo plugin = module->GetPluginInfo();
   EXPECT_EQ(plugin.name, "ReverseSDLPlugin");
   EXPECT_EQ(plugin.version, 1);
@@ -177,6 +178,7 @@ TEST_F(CanModuleTest, ProcessMessagePass) {
   EXPECT_EQ(ProcessResult::PROCESSED, module->ProcessMessage(message));
 }
 
+
 TEST_F(CanModuleTest, RemoveAppExtensionPassWay) {
   MockApplication* app = new MockApplication();
   application_manager::ApplicationSharedPtr valid_app(app);
@@ -213,7 +215,7 @@ TEST_F(CanModuleTest, SendResponseToMobile) {
 }
 
 TEST_F(CanModuleTest, IsAppForPluginSuccess) {
-  MockApplication* app = new MockApplication();
+   MockApplication* app = new MockApplication();
   application_manager::ApplicationSharedPtr app_ptr(app);
   application_manager::AppExtensionPtr ext;
   CANAppExtension* valid_ext = new CANAppExtension(module->GetModuleID());
@@ -222,12 +224,11 @@ TEST_F(CanModuleTest, IsAppForPluginSuccess) {
       .WillRepeatedly(Return(valid_ext));
   EXPECT_CALL(*app, AddExtension(_)).WillOnce(Return(true));
   mobile_apis::HMILevel::eType hmi = mobile_apis::HMILevel::eType::HMI_FULL;
-  EXPECT_CALL(*app, hmi_level()).WillRepeatedly(ReturnRef(hmi));
+  EXPECT_CALL(*app, hmi_level()).WillRepeatedly(Return(hmi));
   EXPECT_CALL(*app, device()).WillOnce(Return(1));
-  EXPECT_CALL(*mock_service, NotifyHMIAboutHMILevel(app_ptr, _)).Times(1);
-  EXPECT_CALL(*mock_service, PrimaryDevice()).Times(1);
+  EXPECT_CALL(*mock_service, NotifyHMIAboutHMILevel(app_ptr, _));
+  EXPECT_CALL(*mock_service, PrimaryDevice());
   EXPECT_CALL(*mock_service, IsRemoteControlApplication(app_ptr))
-      .Times(1)
       .WillOnce(Return(true));
   ASSERT_TRUE(module->IsAppForPlugin(app_ptr));
 }
@@ -257,10 +258,10 @@ TEST_F(CanModuleTest, IsAppForPluginFail) {
 TEST_F(CanModuleTest, OnAppHMILevelChanged) {
   NiceMock<MockApplication>* app = new NiceMock<MockApplication>();
   application_manager::ApplicationSharedPtr app_ptr(app);
-  std::string name("name");
+  const application_manager::custom_str::CustomString name("name");
   ON_CALL(*app, name()).WillByDefault(ReturnRef(name));
   mobile_apis::HMILevel::eType hmi = mobile_apis::HMILevel::eType::HMI_NONE;
-  EXPECT_CALL(*app, hmi_level()).Times(2).WillRepeatedly(ReturnRef(hmi));
+  EXPECT_CALL(*app, hmi_level()).Times(2).WillRepeatedly(Return(hmi));
   EXPECT_CALL(
       *mock_service,
       NotifyHMIAboutHMILevel(app_ptr, mobile_apis::HMILevel::eType::HMI_NONE));
@@ -279,7 +280,7 @@ TEST_F(CanModuleTest, SetDriverDeviceOnRegister) {
   EXPECT_CALL(*app, AddExtension(_)).WillOnce(Return(true));
   EXPECT_CALL(*app, device()).WillOnce(Return(12));
   mobile_apis::HMILevel::eType hmi = mobile_apis::HMILevel::eType::HMI_NONE;
-  EXPECT_CALL(*app, hmi_level()).Times(1).WillRepeatedly(ReturnRef(hmi));
+  EXPECT_CALL(*app, hmi_level()).Times(1).WillRepeatedly(Return(hmi));
   EXPECT_CALL(*mock_service, NotifyHMIAboutHMILevel(app_ptr, _)).Times(1);
   EXPECT_CALL(*mock_service, PrimaryDevice()).Times(1).WillOnce(Return(12));
   EXPECT_CALL(*mock_service, IsRemoteControlApplication(app_ptr))
@@ -301,7 +302,7 @@ TEST_F(CanModuleTest, SetDriverDeviceOnRegisterFail) {
       .WillRepeatedly(Return(ext));
   EXPECT_CALL(*app, AddExtension(_)).WillOnce(Return(true));
   mobile_apis::HMILevel::eType hmi = mobile_apis::HMILevel::eType::HMI_FULL;
-  EXPECT_CALL(*app, hmi_level()).WillRepeatedly(ReturnRef(hmi));
+  EXPECT_CALL(*app, hmi_level()).WillRepeatedly(Return(hmi));
   EXPECT_CALL(*app, device()).WillOnce(Return(12));
   EXPECT_CALL(*mock_service, NotifyHMIAboutHMILevel(app_ptr, _)).Times(1);
   EXPECT_CALL(*mock_service, PrimaryDevice()).Times(1).WillOnce(Return(3));
@@ -341,7 +342,7 @@ TEST_F(CanModuleTest, ChangeDriverDevice) {
   CANAppExtension* ext = new CANAppExtension(module->GetModuleID());
 
   mobile_apis::HMILevel::eType hmi = mobile_apis::HMILevel::eType::HMI_FULL;
-  EXPECT_CALL(*app, hmi_level()).WillRepeatedly(ReturnRef(hmi));
+  EXPECT_CALL(*app, hmi_level()).WillRepeatedly(Return(hmi));
   EXPECT_CALL(*app, device()).WillRepeatedly(Return(1));
   EXPECT_CALL(*app, QueryInterface(module->GetModuleID()))
       .WillRepeatedly(Return(ext));
@@ -435,7 +436,7 @@ TEST_F(CanModuleTest, ChangeDriverDeviceToPassenger) {
   EXPECT_TRUE(ext->is_on_driver_device());
 
   mobile_apis::HMILevel::eType hmi = mobile_apis::HMILevel::eType::HMI_FULL;
-  EXPECT_CALL(*app, hmi_level()).WillRepeatedly(ReturnRef(hmi));
+  EXPECT_CALL(*app, hmi_level()).WillRepeatedly(Return(hmi));
   EXPECT_CALL(*app, device()).WillOnce(Return(1));
   EXPECT_CALL(*app, QueryInterface(module->GetModuleID()))
       .WillRepeatedly(Return(ext));
@@ -580,5 +581,4 @@ TEST_F(CanModuleTest, CanAppChangeHMILevelPassenger) {
   ASSERT_TRUE(module->CanAppChangeHMILevel(
       app_ptr, mobile_apis::HMILevel::eType::HMI_NONE));
 }
-
 }  // namespace can_cooperation

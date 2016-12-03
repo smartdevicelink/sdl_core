@@ -88,9 +88,10 @@ ${AM_SOURCE_DIR}/src/policies/delegates/app_permission_delegate.cc
 ${AM_SOURCE_DIR}/src/policies/delegates/statistics_delegate.cc
 )
 
-  include_directories(
-    ${COMPONENTS_DIR}/policy/src/policy_table/
-  )
+include_directories(
+  ${COMPONENTS_DIR}/policy/src/policy_table/
+)
+
 file (GLOB EVENT_ENGINE
   ${AM_SOURCE_DIR}/src/event_engine/*
 )
@@ -409,7 +410,9 @@ SET (LIBRARIES
   formatters
   dbms  
   Policy
+  FunctionalModule
 )
+
 
 if(REMOTE_CONTROL)
     SET (LIBRARIES

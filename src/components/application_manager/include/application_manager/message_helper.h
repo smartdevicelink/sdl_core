@@ -129,7 +129,7 @@ class MessageHelper {
    * is not possible
    */
   static mobile_api::DeviceRank::eType StringToDeviceRank(
-      const std::string& device_ranki);
+      const std::string& device_rank);
 
   /**
    * @brief Converts mobile Result enum value to string
