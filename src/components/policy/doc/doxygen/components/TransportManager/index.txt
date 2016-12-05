@@ -1,9 +1,0 @@
-/*! \page components_transportmanager Transport Manager
-
-Transport Manager is a component of SmartDeviceLink application which is designed to provide transparent access to transport layer for other components. Current implementation provides unified access to connections via Bluetooth and TCP. Also this component allows run automatic device discovery and provides information about found devices which is able to connect to SmartDeviceLink.
-
-More detailed information is described in following chapters:
-    - \subpage components_transportmanager_client "Transport Manager Client Specification"
-    - \subpage components_transportmanager_internal_design "Component Internal Design"
-    - \subpage components_transportmanager_use_cases "High-Level Use Cases to Test Component"
-*/
