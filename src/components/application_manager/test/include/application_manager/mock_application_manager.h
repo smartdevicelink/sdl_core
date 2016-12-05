@@ -70,8 +70,6 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                void(connection_handler::ConnectionHandler* handler));
   MOCK_CONST_METHOD0(applications,
                      DataAccessor<application_manager::ApplicationSet>());
-  MOCK_CONST_METHOD1(
-      application, application_manager::ApplicationSharedPtr(uint32_t app_id));
   MOCK_CONST_METHOD0(active_application,
                      application_manager::ApplicationSharedPtr());
   MOCK_CONST_METHOD1(
@@ -256,9 +254,9 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD0(OnTimerSendTTSGlobalProperties, void());
   MOCK_METHOD0(OnLowVoltage, void());
   MOCK_METHOD0(OnWakeUp, void());
+  MOCK_CONST_METHOD1(
+      application, application_manager::ApplicationSharedPtr(uint32_t app_id));
 
-  MOCK_METHOD1(application,
-               application_manager::ApplicationSharedPtr(uint32_t app_id));
 #ifdef SDL_REMOTE_CONTROL
   MOCK_CONST_METHOD2(application,
                      application_manager::ApplicationSharedPtr(
