@@ -410,7 +410,6 @@ SET (LIBRARIES
   formatters
   dbms  
   Policy
-  FunctionalModule
 )
 
 
@@ -418,6 +417,7 @@ if(REMOTE_CONTROL)
     SET (LIBRARIES
       ${LIBRARIES}
       CANCooperation
+      FunctionalModule
     )
 endif(REMOTE_CONTROL)
 
