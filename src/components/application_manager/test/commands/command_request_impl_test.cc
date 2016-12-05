@@ -374,7 +374,7 @@ TEST_F(CommandRequestImplTest, CheckAllowedParameters_NoMsgParamsMap_SUCCESS) {
   EXPECT_CALL(*app, hmi_level())
       .WillOnce(Return(mobile_apis::HMILevel::HMI_NONE));
 
-  EXPECT_CALL(app_mngr_, CheckPolicyPermissions(_, _, _, _, _))
+  EXPECT_CALL(app_mngr_, CheckPolicyPermissions(_, _, _, _))
       .WillOnce(Return(kMobResultSuccess));
 
   EXPECT_TRUE(command->CheckPermissions());
@@ -395,7 +395,7 @@ TEST_F(CommandRequestImplTest,
   EXPECT_CALL(*app, hmi_level())
       .WillOnce(Return(mobile_apis::HMILevel::HMI_NONE));
 
-  EXPECT_CALL(app_mngr_, CheckPolicyPermissions(_, _, _, _, _))
+  EXPECT_CALL(app_mngr_, CheckPolicyPermissions(_, _, _, _))
       .WillOnce(Return(mobile_apis::Result::INVALID_ENUM));
 
   MessageSharedPtr dummy_msg;
@@ -406,8 +406,8 @@ TEST_F(CommandRequestImplTest,
   EXPECT_FALSE(command->CheckPermissions());
 }
 
-ACTION_P(GetArg3, output) {
-  *output = arg3;
+ACTION_P(GetArg2, output) {
+  *output = arg2;
 }
 
 TEST_F(CommandRequestImplTest, CheckAllowedParameters_MsgParamsMap_SUCCESS) {
@@ -425,8 +425,8 @@ TEST_F(CommandRequestImplTest, CheckAllowedParameters_MsgParamsMap_SUCCESS) {
       .WillOnce(Return(mobile_apis::HMILevel::HMI_NONE));
 
   RPCParams params;
-  EXPECT_CALL(app_mngr_, CheckPolicyPermissions(_, _, _, _, _))
-      .WillOnce(DoAll(GetArg3(&params), Return(kMobResultSuccess)));
+  EXPECT_CALL(app_mngr_, CheckPolicyPermissions(_, _, _, _))
+      .WillOnce(DoAll(GetArg2(&params), Return(kMobResultSuccess)));
 
   EXPECT_TRUE(command->CheckPermissions());
   EXPECT_TRUE(params.end() !=

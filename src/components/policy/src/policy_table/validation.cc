@@ -193,5 +193,99 @@ bool PolicyTable::Validate() const {
 bool Table::Validate() const {
   return true;
 }
+
+#ifdef SDL_REMOTE_CONTROL
+
+bool InteriorZone::ValidateParameters(ModuleType module,
+                                      const Strings& parameters) const {
+  const std::string* begin = 0;
+  const std::string* end = 0;
+  switch (module) {
+    case MT_RADIO:
+      begin = kRadioParameters;
+      end = kRadioParameters + length_radio;
+      break;
+    case MT_CLIMATE:
+      begin = kClimateParameters;
+      end = kClimateParameters + length_climate;
+      break;
+  }
+  for (Strings::const_iterator i = parameters.begin(); i != parameters.end();
+       ++i) {
+    std::string name = *i;
+    bool found = std::find(begin, end, name) != end;
+    if (!found) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool InteriorZone::ValidateRemoteRpcs(ModuleType module,
+                                      const RemoteRpcs& rpcs) const {
+  for (RemoteRpcs::const_iterator i = rpcs.begin(); i != rpcs.end(); ++i) {
+    const std::string& name = i->first;
+    const Strings& parameters = i->second;
+    const std::string* begin = kRemoteRpcs;
+    const std::string* end = kRemoteRpcs + length;
+    bool found = std::find(begin, end, name) != end;
+    if (!found || !ValidateParameters(module, parameters)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool InteriorZone::ValidateAllow(const AccessModules& modules) const {
+  for (AccessModules::const_iterator i = modules.begin(); i != modules.end();
+       ++i) {
+    const std::string& name = i->first;
+    const RemoteRpcs& rpcs = i->second;
+    ModuleType module;
+    if (!EnumFromJsonString(name, &module) ||
+        !ValidateRemoteRpcs(module, rpcs)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool InteriorZone::Validate() const {
+  return ValidateAllow(auto_allow) && ValidateAllow(driver_allow);
+}
+
+namespace {
+struct IsDeniedChar {
+  bool operator()(wchar_t c) {
+    return c != '_' && !std::isalnum(c, std::locale(""));
+  }
+};
+}  // namespace
+
+bool Equipment::ValidateNameZone(const std::string& name) const {
+  if (name.empty()) {
+    return false;
+  }
+  std::vector<wchar_t> wchars(name.length() + 1, L'\0');
+  std::string current_locale = setlocale(LC_ALL, NULL);
+  setlocale(LC_ALL, "");
+  int n = mbstowcs(&(wchars.front()), name.c_str(), name.length());
+  setlocale(LC_ALL, current_locale.c_str());
+  if (n != -1) {
+    std::vector<wchar_t>::iterator real_end = wchars.begin() + n;
+    return std::find_if(wchars.begin(), real_end, IsDeniedChar()) == real_end;
+  }
+  return false;
+}
+
+bool Equipment::Validate() const {
+  for (Zones::const_iterator i = zones.begin(); i != zones.end(); ++i) {
+    if (!ValidateNameZone(i->first)) {
+      return false;
+    }
+  }
+  return true;
+}
+#endif
 }  // namespace policy_table_interface_base
 }  // namespace rpc

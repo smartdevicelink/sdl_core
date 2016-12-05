@@ -46,7 +46,7 @@ namespace policy {
 class MockCacheManagerInterface : public CacheManagerInterface {
  public:
   MOCK_METHOD4(CheckPermissions,
-               void(const PTString& app_id,
+               void(const policy_table::Strings& groups,
                     const PTString& hmi_level,
                     const PTString& rpc,
                     CheckPermissionResult& result));
@@ -200,6 +200,10 @@ class MockCacheManagerInterface : public CacheManagerInterface {
   MOCK_CONST_METHOD0(GetPT, utils::SharedPtr<policy_table::Table>());
   MOCK_CONST_METHOD0(GetCertificate, std::string());
   MOCK_METHOD1(SetDecryptedCertificate, void(const std::string&));
+
+  MOCK_METHOD1(GetHMITypes,
+               const policy_table::AppHMITypes*(const std::string& app_id));
+  MOCK_METHOD1(GetGroups, const policy_table::Strings&(const PTString& app_id));
 };
 
 }  // namespace policy

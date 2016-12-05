@@ -36,7 +36,7 @@
 #include "gmock/gmock.h"
 
 #include "application_manager/policies/policy_handler.h"
-#include "policy/mock_policy_manager.h"
+#include "policy/test/include/mock_cache_manager.h"
 #include "connection_handler/connection_handler_impl.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
@@ -57,7 +57,7 @@
 #include "policy/usage_statistics/statistics_manager.h"
 #include "interfaces/MOBILE_API.h"
 #include "policy/mock_policy_settings.h"
-#include "application_manager/mock_application.h"
+#include "application_manager/test/include/application_manager/mock_application.h"
 #include "policy/usage_statistics/mock_statistics_manager.h"
 #include "protocol_handler/mock_session_observer.h"
 #include "connection_handler/mock_connection_handler.h"
@@ -65,6 +65,7 @@
 #include "application_manager/policies/mock_policy_handler_observer.h"
 #include "application_manager/mock_event_dispatcher.h"
 #include "application_manager/mock_state_controller.h"
+#include "policy/test/include/mock_policy_manager.h"
 
 namespace test {
 namespace components {
@@ -108,7 +109,7 @@ class PolicyHandlerTest : public ::testing::Test {
   protocol_handler_test::MockSessionObserver mock_session_observer;
   application_manager_test::MockStateController mock_state_controller;
   PolicyHandler policy_handler_;
-  utils::SharedPtr<policy_manager_test::MockPolicyManager> mock_policy_manager_;
+  utils::SharedPtr<policy_manager::MockPolicyManager> mock_policy_manager_;
   application_manager_test::MockApplicationManager app_manager_;
   const std::string kPolicyAppId_;
   const std::string kMacAddr_;
@@ -134,7 +135,7 @@ class PolicyHandlerTest : public ::testing::Test {
     std::string path = file_system::CreateDirectory("storage");
     file_system::CreateFile(path + "/" + "certificate");
     mock_policy_manager_ =
-        utils::MakeShared<policy_manager_test::MockPolicyManager>();
+        utils::MakeShared<policy_manager::MockPolicyManager>();
     ASSERT_TRUE(mock_policy_manager_.valid());
 
     ON_CALL(app_manager_, connection_handler())
@@ -416,12 +417,22 @@ TEST_F(PolicyHandlerTest, CheckPermissions) {
   CheckPermissionResult result;
   RPCParams kRpc_params;
   // Check expectations
-  EXPECT_CALL(
-      *mock_policy_manager_,
-      CheckPermissions(kPolicyAppId_, kHmiLevel_, kRpc_, kRpc_params, _));
+  const uint32_t device = 3;
+  const mobile_apis::HMILevel::eType hmi_level =
+      mobile_apis::HMILevel::HMI_NONE;
+  EXPECT_CALL(*mock_app_, hmi_level()).WillOnce(Return(hmi_level));
+  EXPECT_CALL(*mock_app_, device()).WillOnce(Return(device));
+  EXPECT_CALL(*mock_app_, policy_app_id()).WillOnce(Return(kPolicyAppId_));
+  EXPECT_CALL(*mock_policy_manager_,
+              CheckPermissions(
+                  kDeviceId, kPolicyAppId_, kHmiLevel_, kRpc_, kRpc_params, _));
+  EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
+              StringifiedHMILevel(hmi_level)).WillOnce(Return(kHmiLevel_));
+  EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
+              GetDeviceMacAddressForHandle(device, _))
+      .WillOnce(Return(kDeviceId));
   // Act
-  policy_handler_.CheckPermissions(
-      kPolicyAppId_, kHmiLevel_, kRpc_, kRpc_params, result);
+  policy_handler_.CheckPermissions(mock_app_, kRpc_, kRpc_params, result);
 }
 
 TEST_F(PolicyHandlerTest, GetNotificationsNumber) {
@@ -1455,8 +1466,6 @@ TEST_F(PolicyHandlerTest, SendMessageToSDK) {
   const std::string url = "test_url";
   EnablePolicyAndPolicyManagerMock();
   test_app.insert(mock_app_);
-  // Check expectations for get app id
-  GetAppIDForSending();
   // Expectations
   EXPECT_CALL(app_manager_, application(kAppId_))
       .WillRepeatedly(Return(mock_app_));
@@ -1465,6 +1474,9 @@ TEST_F(PolicyHandlerTest, SendMessageToSDK) {
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
               SendPolicySnapshotNotification(kAppId_, msg, url, _));
   // Act
+  policy_handler_.last_used_app_ids().push_back(kAppId_);
+  EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
+              SendPolicySnapshotNotification(kAppId_, msg, url, _));
   EXPECT_TRUE(policy_handler_.SendMessageToSDK(msg, url));
 }
 

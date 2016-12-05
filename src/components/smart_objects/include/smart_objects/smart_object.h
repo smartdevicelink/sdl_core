@@ -197,6 +197,8 @@ class SmartObject FINAL {
    **/
   bool operator==(const SmartObject& Other) const;
 
+  bool operator<(const SmartObject& Other) const;
+
   /**
    * @name Support of type: int32_t
    * @{

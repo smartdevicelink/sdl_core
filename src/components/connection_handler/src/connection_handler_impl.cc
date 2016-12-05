@@ -174,6 +174,7 @@ void ConnectionHandlerImpl::OnDeviceRemoved(
   if (connection_handler_observer_) {
     connection_handler_observer_->RemoveDevice(device_info.device_handle());
   }
+  device_list_.erase(device_info.device_handle());
 }
 
 void ConnectionHandlerImpl::OnScanDevicesFinished() {
