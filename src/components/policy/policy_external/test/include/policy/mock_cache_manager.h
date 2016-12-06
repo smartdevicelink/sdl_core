@@ -83,10 +83,11 @@ class MockCacheManagerInterface : public ::policy::CacheManagerInterface {
   MOCK_CONST_METHOD1(GetCachedDeviceConsent,
                      DeviceConsent(const std::string& device_id));
   MOCK_METHOD1(SetVINValue, bool(const std::string& value));
-  MOCK_METHOD2(GetUserFriendlyMsg,
+  MOCK_METHOD3(GetUserFriendlyMsg,
                std::vector<UserFriendlyMessage>(
                    const std::vector<std::string>& msg_codes,
-                   const std::string& language));
+                   const std::string& language,
+                   const std::string& active_hmi_language));
   MOCK_METHOD2(GetUpdateUrls,
                void(const std::string& service_type,
                     EndpointUrls& out_end_points));

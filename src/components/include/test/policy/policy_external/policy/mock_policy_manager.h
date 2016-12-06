@@ -116,10 +116,11 @@ class MockPolicyManager : public PolicyManager {
   MOCK_CONST_METHOD2(GetPriority,
                      bool(const std::string& policy_app_id,
                           std::string* priority));
-  MOCK_METHOD2(GetUserFriendlyMessages,
+  MOCK_METHOD3(GetUserFriendlyMessages,
                std::vector<policy::UserFriendlyMessage>(
                    const std::vector<std::string>& message_code,
-                   const std::string& language));
+                   const std::string& language,
+                   const std::string& active_hmi_language));
   MOCK_CONST_METHOD1(IsApplicationRevoked, bool(const std::string& app_id));
   MOCK_METHOD3(
       GetPermissionsForApp,

@@ -66,6 +66,7 @@
 #include "application_manager/policies/mock_policy_handler_observer.h"
 #include "application_manager/mock_event_dispatcher.h"
 #include "application_manager/mock_state_controller.h"
+#include "application_manager/mock_hmi_capabilities.h"
 
 namespace test {
 namespace components {
@@ -114,6 +115,7 @@ class PolicyHandlerTest : public ::testing::Test {
   utils::SharedPtr<policy_manager_test::MockPolicyManager> mock_policy_manager_;
   application_manager_test::MockApplicationManager app_manager_;
   MockMessageHelper& mock_message_helper_;
+  application_manager_test::MockHMICapabilities mock_hmi_capabilities_;
   const std::string kPolicyAppId_;
   const std::string kMacAddr_;
   const std::string kDeviceId_;
@@ -880,9 +882,25 @@ TEST_F(PolicyHandlerTest, OnGetUserFriendlyMessage) {
   std::vector<std::string> message_codes;
   const std::string language("ru-ru");
   const uint32_t correlation_id = 2;
+#ifdef EXTERNAL_PROPRIETARY
+  const hmi_apis::Common_Language::eType default_language =
+      hmi_apis::Common_Language::EN_US;
+  const std::string default_language_string = "EN_US";
+  EXPECT_CALL(app_manager_, hmi_capabilities())
+      .WillOnce(ReturnRef(mock_hmi_capabilities_));
+  EXPECT_CALL(mock_message_helper_, CommonLanguageToString(default_language))
+      .WillOnce(Return(default_language_string));
+  EXPECT_CALL(mock_hmi_capabilities_, active_ui_language())
+      .WillOnce(Return(default_language));
+  EXPECT_CALL(
+      *mock_policy_manager_,
+      GetUserFriendlyMessages(message_codes, language, default_language_string))
+      .WillOnce(Return(std::vector<UserFriendlyMessage>()));
+#else
   EXPECT_CALL(*mock_policy_manager_,
               GetUserFriendlyMessages(message_codes, language))
       .WillOnce(Return(std::vector<UserFriendlyMessage>()));
+#endif  // EXTERNAL_PROPRIETARY
   EXPECT_CALL(mock_message_helper_,
               SendGetUserFriendlyMessageResponse(_, _, _));
   // Act

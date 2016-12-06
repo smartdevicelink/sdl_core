@@ -118,7 +118,8 @@ class PolicyManagerImpl : public PolicyManager {
 
   virtual std::vector<UserFriendlyMessage> GetUserFriendlyMessages(
       const std::vector<std::string>& message_code,
-      const std::string& language);
+      const std::string& language,
+      const std::string& active_hmi_language);
 
   virtual bool IsApplicationRevoked(const std::string& app_id) const;
 
