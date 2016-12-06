@@ -316,6 +316,19 @@ const std::string kCreateSchema =
     "    FOREIGN KEY(`message_type_name`) "
     "    REFERENCES `message_type`(`name`) "
     "); "
+
+    /* module type */
+    "CREATE TABLE IF NOT EXISTS `module_type`( "
+    "  `name` VARCHAR(50) NOT NULL, "
+    "  `application_id` VARCHAR(45) NOT NULL, "
+    "  PRIMARY KEY(`name`,`application_id`), "
+    "  CONSTRAINT `fk_module_type_application1` "
+    "    FOREIGN KEY(`application_id`) "
+    "    REFERENCES `application`(`id`) "
+    "); "
+    "CREATE INDEX IF NOT EXISTS `module_type.fk_module_type_application1_idx` "
+    "  ON `module_type`(`application_id`); "
+
     "CREATE INDEX IF NOT EXISTS `message.fk_messages_languages1_idx` "
     "  ON `message`(`language_code`);"
     "CREATE INDEX IF NOT EXISTS "
@@ -436,6 +449,8 @@ const std::string kSelectModuleTypes =
 
 const std::string kDropSchema =
     "BEGIN; "
+    "DROP INDEX IF EXISTS `module_type.fk_module_type_application1_idx`; "
+    "DROP TABLE IF EXISTS `module_type`; "
     "DROP INDEX IF EXISTS `message.fk_messages_languages1_idx`; "
     "DROP INDEX IF EXISTS "
     "`message.fk_message_consumer_friendly_messages1_idx`; "
@@ -500,6 +515,7 @@ const std::string kDropSchema =
 const std::string kDeleteData =
     "BEGIN; "
     "DELETE FROM `message`; "
+    "DELETE FROM `module_type`; "
     "DELETE FROM `endpoint`; "
     "DELETE FROM `consent_group`; "
     "DELETE FROM `app_type`; "
