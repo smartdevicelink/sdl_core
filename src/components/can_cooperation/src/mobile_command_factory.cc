@@ -121,7 +121,10 @@ utils::SharedPtr<commands::Command> MobileCommandFactory::CreateCommand(
        return utils::MakeShared< commands::OnPresetChangedNotification>(msg);
        break;
      }*/
-    default: { return NULL; }
+    default: {
+      utils::SharedPtr<commands::Command> invalid_command;
+      return invalid_command;
+    }
   }
 }
 

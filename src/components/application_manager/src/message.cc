@@ -66,7 +66,8 @@ Message::Message(protocol_handler::MessagePriority priority)
     , payload_size_(0)
     , version_(kUnknownProtocol) {}
 
-Message::Message(const Message& message) : priority_(message.priority_) {
+Message::Message(const Message& message)
+    : priority_(message.priority_), binary_data_(NULL) {
   *this = message;
 }
 
@@ -186,8 +187,7 @@ void Message::set_binary_data(BinaryData* data) {
   if (binary_data_) {
     delete binary_data_;
   }
-
-  binary_data_ = data;
+  binary_data_ = new BinaryData(*data);
 }
 
 void Message::set_json_message(const std::string& json_message) {
