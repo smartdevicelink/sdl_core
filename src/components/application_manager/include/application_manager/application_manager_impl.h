@@ -232,6 +232,7 @@ class ApplicationManagerImpl
 
   DataAccessor<ApplicationSet> applications() const OVERRIDE;
   ApplicationSharedPtr application(uint32_t app_id) const OVERRIDE;
+
 #ifdef SDL_REMOTE_CONTROL
   ApplicationSharedPtr application(
       const std::string& device_id,
