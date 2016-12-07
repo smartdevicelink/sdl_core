@@ -66,8 +66,9 @@ ValidationResult ModuleDataValidator::Validate(const Json::Value& json,
   }
 
   if (IsMember(json, kModuleZone)) {
-    result = InteriorZoneValidator::instance()->Validate(
-        json[kModuleZone], outgoing_json[kModuleZone]);
+    InteriorZoneValidator interior_zone_validator;
+    result = interior_zone_validator.Validate(json[kModuleZone],
+                                              outgoing_json[kModuleZone]);
   } else {
     result = ValidationResult::INVALID_DATA;
     LOG4CXX_ERROR(logger_, "Mandatory param " << kModuleZone << " missing!");
@@ -79,7 +80,8 @@ ValidationResult ModuleDataValidator::Validate(const Json::Value& json,
 
   if (enums_value::kRadio == outgoing_json[kModuleType].asString()) {
     if (IsMember(json, kRadioControlData)) {
-      return RadioControlDataValidator::instance()->Validate(
+      RadioControlDataValidator radio_control_data_validator;
+      return radio_control_data_validator.Validate(
           json[kRadioControlData], outgoing_json[kRadioControlData]);
     } else {
       LOG4CXX_ERROR(logger_, "Radio control data missed!");
@@ -87,7 +89,8 @@ ValidationResult ModuleDataValidator::Validate(const Json::Value& json,
     }
   } else if (enums_value::kClimate == outgoing_json[kModuleType].asString()) {
     if (IsMember(json, kClimateControlData)) {
-      return ClimateControlDataValidator::instance()->Validate(
+      ClimateControlDataValidator climate_control_data_validator;
+      return climate_control_data_validator.Validate(
           json[kClimateControlData], outgoing_json[kClimateControlData]);
     } else {
       LOG4CXX_ERROR(logger_, "Climate control data missed!");

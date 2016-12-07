@@ -77,9 +77,9 @@ ValidationResult ButtonPressRequestValidator::Validate(
     return result;
   }
 
+  InteriorZoneValidator validator;
   if (IsMember(json, kZone)) {
-    result = InteriorZoneValidator::instance()->Validate(json[kZone],
-                                                         outgoing_json[kZone]);
+    result = validator.Validate(json[kZone], outgoing_json[kZone]);
   } else {
     result = ValidationResult::INVALID_DATA;
     LOG4CXX_ERROR(logger_, "Mandatory param " << kZone << " missing!");

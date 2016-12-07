@@ -60,9 +60,9 @@ ValidationResult LocationValidator::Validate(const Json::Value& json,
     return result;
   }
 
+  AddressValidator validator;
   if (json.isMember(kAddress)) {
-    result = AddressValidator::instance()->Validate(json[kLocation],
-                                                    outgoing_json[kLocation]);
+    result = validator.Validate(json[kLocation], outgoing_json[kLocation]);
   }
 
   return result;

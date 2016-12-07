@@ -33,7 +33,6 @@
 #include "can_cooperation/request_controller.h"
 #include "json/json.h"
 #include "utils/logger.h"
-#include "functional_module/timer/timer_director_impl.h"
 #include "functional_module/settings.h"
 
 namespace can_cooperation {
@@ -49,11 +48,11 @@ RequestController::RequestController() {
   timer_.set_period(timeout_seconds);
   LOG4CXX_DEBUG(logger_, "Timeout is set to " << timeout_seconds);
   timer_.AddObserver(this);
-  functional_modules::TimerDirector::instance()->RegisterTimer(timer_);
+  time_director_.RegisterTimer(timer_);
 }
 
 RequestController::~RequestController() {
-  functional_modules::TimerDirector::instance()->UnregisterTimer(timer_);
+  time_director_.UnregisterTimer(timer_);
   timer_.RemoveObserver(this);
 }
 

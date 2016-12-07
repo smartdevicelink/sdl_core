@@ -65,10 +65,10 @@ ValidationResult OnRadioDetailsNotificationValidator::Validate(
   Json::Value outgoing_json;
 
   ValidationResult result = ValidationResult::INVALID_DATA;
-
+  SongInfoValidator song_info_validator;
   if (json.isMember(kRadioStation)) {
-    result = SongInfoValidator::instance()->Validate(
-        json[kRadioStation], outgoing_json[kRadioStation]);
+    result = song_info_validator.Validate(json[kRadioStation],
+                                          outgoing_json[kRadioStation]);
   }
 
   if (result != ValidationResult::SUCCESS) {
@@ -76,44 +76,48 @@ ValidationResult OnRadioDetailsNotificationValidator::Validate(
   }
 
   if (json.isMember(kSongInfo)) {
-    result = SongInfoValidator::instance()->Validate(json[kSongInfo],
-                                                     outgoing_json[kSongInfo]);
+    result =
+        song_info_validator.Validate(json[kSongInfo], outgoing_json[kSongInfo]);
   }
 
   if (result != ValidationResult::SUCCESS) {
     return result;
   }
 
+  EventDetailsValidator event_details_validator;
   if (json.isMember(kEvent)) {
-    result = EventDetailsValidator::instance()->Validate(json[kEvent],
-                                                         outgoing_json[kEvent]);
+    result =
+        event_details_validator.Validate(json[kEvent], outgoing_json[kEvent]);
   }
 
   if (result != ValidationResult::SUCCESS) {
     return result;
   }
 
+  AdvertisementValidator advertisement_validator;
   if (json.isMember(kAdvertisement)) {
-    result = AdvertisementValidator::instance()->Validate(
-        json[kAdvertisement], outgoing_json[kAdvertisement]);
+    result = advertisement_validator.Validate(json[kAdvertisement],
+                                              outgoing_json[kAdvertisement]);
   }
 
   if (result != ValidationResult::SUCCESS) {
     return result;
   }
 
+  WebActivityValidator web_activity_validator;
   if (json.isMember(kActivity)) {
-    result = WebActivityValidator::instance()->Validate(
-        json[kActivity], outgoing_json[kActivity]);
+    result = web_activity_validator.Validate(json[kActivity],
+                                             outgoing_json[kActivity]);
   }
 
   if (result != ValidationResult::SUCCESS) {
     return result;
   }
 
+  LocationValidator location_validator;
   if (json.isMember(kLocation)) {
-    result = LocationValidator::instance()->Validate(json[kLocation],
-                                                     outgoing_json[kLocation]);
+    result =
+        location_validator.Validate(json[kLocation], outgoing_json[kLocation]);
   }
 
   if (result != ValidationResult::SUCCESS) {

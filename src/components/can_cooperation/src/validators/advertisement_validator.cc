@@ -40,35 +40,7 @@ namespace validators {
 
 using namespace message_params;
 
-AdvertisementValidator::AdvertisementValidator() {
-  /*  // name="productName"
-    product_name_[kType] = ValueType::STRING; // TODO(VS): Research Min-Max
-    Length
-    product_name_[kMinLength] = 0;
-    product_name_[kMaxLength] = 100;
-    product_name_[kArray] = 0;
-    product_name_[kMandatory] = 0;
-
-    // name="companyName"
-    company_name_[kType] = ValueType::STRING; // TODO(VS): Research Min-Max
-    Length
-    company_name_[kMinLength] = 0;
-    company_name_[kMaxLength] = 100;
-    company_name_[kArray] = 0;
-    company_name_[kMandatory] = 0;
-
-    // name="phoneNumber"
-    phone_number_[kType] = ValueType::STRING; // TODO(VS): Research Min-Max
-    Length
-    phone_number_[kMinLength] = 0;
-    phone_number_[kMaxLength] = 100;
-    phone_number_[kArray] = 0;
-    phone_number_[kMandatory] = 0;
-
-    validation_scope_map_[kProductName] = &product_name_;
-    validation_scope_map_[kCompanyName] =  &company_name_;
-    validation_scope_map_[kPhoneNumber] = &phone_number_;*/
-}
+AdvertisementValidator::AdvertisementValidator() {}
 
 ValidationResult AdvertisementValidator::Validate(const Json::Value& json,
                                                   Json::Value& outgoing_json) {
@@ -78,9 +50,9 @@ ValidationResult AdvertisementValidator::Validate(const Json::Value& json,
     return result;
   }
 
+  LocationValidator validator;
   if (json.isMember(kLocation)) {
-    result = LocationValidator::instance()->Validate(json[kLocation],
-                                                     outgoing_json[kLocation]);
+    result = validator.Validate(json[kLocation], outgoing_json[kLocation]);
   }
 
   return result;

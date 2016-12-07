@@ -20,6 +20,7 @@ set(GCOV gcov)
 
 include_directories (
   ${COMPONENTS_DIR}/functional_module/include/
+  ${COMPONENTS_DIR}/can_cooperation/include/
   ${COMPONENTS_DIR}/include/
   ${COMPONENTS_DIR}/application_manager/include
   ${COMPONENTS_DIR}/connection_handler/include/
@@ -37,6 +38,7 @@ set (SOURCES
     ./src/generic_module.cc
     ./src/plugin_manager.cc
     ./src/settings.cc
+    ./src/timer/timer_director.cc
 )
 set (LIBRARIES
     ApplicationManager

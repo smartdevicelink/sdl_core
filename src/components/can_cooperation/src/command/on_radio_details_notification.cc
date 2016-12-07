@@ -51,16 +51,6 @@ OnRadioDetailsNotification::~OnRadioDetailsNotification() {}
 
 void OnRadioDetailsNotification::Execute() {
   LOG4CXX_AUTO_TRACE(logger_);
-
-  /*  std::string json = message_->json_message();
-    if (validators::ValidationResult::SUCCESS ==
-        validators::OnRadioDetailsNotificationValidator::instance()->
-        Validate(json)) {
-      message_->set_json_message(json);
-    } else {
-      LOG4CXX_INFO(logger_, "HMI notification validation failed!");
-      return;
-    }*/
 }
 
 }  // namespace commands

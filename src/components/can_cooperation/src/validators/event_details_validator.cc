@@ -76,19 +76,20 @@ ValidationResult EventDetailsValidator::Validate(const Json::Value& json,
   if (result != ValidationResult::SUCCESS) {
     return result;
   }
-
+  TimeValidator time_validator;
   if (json.isMember(kEventTime)) {
-    result = TimeValidator::instance()->Validate(json[kEventTime],
-                                                 outgoing_json[kEventTime]);
+    result =
+        time_validator.Validate(json[kEventTime], outgoing_json[kEventTime]);
   }
 
   if (result != ValidationResult::SUCCESS) {
     return result;
   }
 
+  LocationValidator location_validator;
   if (json.isMember(kLocation)) {
-    result = LocationValidator::instance()->Validate(json[kLocation],
-                                                     outgoing_json[kLocation]);
+    result =
+        location_validator.Validate(json[kLocation], outgoing_json[kLocation]);
   }
 
   return result;

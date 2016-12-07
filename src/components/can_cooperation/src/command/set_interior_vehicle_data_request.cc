@@ -70,7 +70,7 @@ void SetInteriorVehicleDataRequest::Execute() {
 }
 
 void SetInteriorVehicleDataRequest::OnEvent(
-    const event_engine::Event<application_manager::MessagePtr, std::string>&
+    const can_event_engine::Event<application_manager::MessagePtr, std::string>&
         event) {
   LOG4CXX_AUTO_TRACE(logger_);
 
@@ -96,12 +96,11 @@ void SetInteriorVehicleDataRequest::OnEvent(
 
     // TOD(VS): Create SetInteriorVehicleDataResponseValidator
     validators::ValidationResult validation_result = validators::SUCCESS;
-
+    validators::ModuleDataValidator validator;
     if (success) {
       if (IsMember(value[kResult], kModuleData)) {
-        validation_result =
-            validators::ModuleDataValidator::instance()->Validate(
-                value[kResult][kModuleData], response_params_[kModuleData]);
+        validation_result = validator.Validate(value[kResult][kModuleData],
+                                               response_params_[kModuleData]);
       } else {
         validation_result = validators::INVALID_DATA;
       }
@@ -126,10 +125,9 @@ bool SetInteriorVehicleDataRequest::Validate() {
   }
 
   Json::Value outgoing_json;
-
+  validators::SetInteriorVehicleDataRequestValidator set_interior_validator;
   if (validators::ValidationResult::SUCCESS !=
-      validators::SetInteriorVehicleDataRequestValidator::instance()->Validate(
-          json, outgoing_json)) {
+      set_interior_validator.Validate(json, outgoing_json)) {
     LOG4CXX_INFO(logger_, "SetInteriorVehicleDataRequest validation failed!");
     SendResponse(
         false, result_codes::kInvalidData, "Mobile request validation failed!");
@@ -138,8 +136,10 @@ bool SetInteriorVehicleDataRequest::Validate() {
 
   // TODO(VS): Create function for read only validation and move there similar
   // code
+  validators::RadioControlDataValidator radio_control_validator;
+  validators::ClimateControlDataValidator climat_control_validator;
   if (outgoing_json[kModuleData].isMember(kRadioControlData)) {
-    validators::RadioControlDataValidator::instance()->RemoveReadOnlyParams(
+    radio_control_validator.RemoveReadOnlyParams(
         outgoing_json[kModuleData][kRadioControlData]);
 
     if (0 == outgoing_json[kModuleData][kRadioControlData].size()) {
@@ -149,7 +149,7 @@ bool SetInteriorVehicleDataRequest::Validate() {
       return false;
     }
   } else if (outgoing_json[kModuleData].isMember(kClimateControlData)) {
-    validators::ClimateControlDataValidator::instance()->RemoveReadOnlyParams(
+    climat_control_validator.RemoveReadOnlyParams(
         outgoing_json[kModuleData][kClimateControlData]);
     if (0 == outgoing_json[kModuleData][kClimateControlData].size()) {
       SendResponse(false,

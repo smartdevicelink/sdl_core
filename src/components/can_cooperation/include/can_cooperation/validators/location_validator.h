@@ -43,9 +43,10 @@ namespace validators {
 /**
  * @brief LocationValidator class
  */
-class LocationValidator : public Validator,
-                          public utils::Singleton<LocationValidator> {
+class LocationValidator : public Validator {
  public:
+  LocationValidator();
+  ~LocationValidator() {}
   /**
    * @brief Validate json with message params
    *
@@ -60,11 +61,6 @@ class LocationValidator : public Validator,
 
  private:
   DISALLOW_COPY_AND_ASSIGN(LocationValidator);
-  FRIEND_BASE_SINGLETON_CLASS(LocationValidator);
-  LocationValidator();
-  ~LocationValidator(){};
-
-  /*  std::map<std::string, int> gps_coordinates_;*/
 };
 
 }  // namespace valdiators

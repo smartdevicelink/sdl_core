@@ -130,8 +130,8 @@ ValidationResult RadioControlDataValidator::Validate(
   }
 
   if (IsMember(json, kRdsData)) {
-    result = RdsDataValidator::instance()->Validate(json[kRdsData],
-                                                    outgoing_json[kRdsData]);
+    RdsDataValidator validator;
+    result = validator.Validate(json[kRdsData], outgoing_json[kRdsData]);
   }
 
   if (!outgoing_json.size()) {

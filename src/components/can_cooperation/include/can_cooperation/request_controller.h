@@ -37,6 +37,7 @@
 
 #include "can_cooperation/commands/command.h"
 #include "can_cooperation/can_module_timer.h"
+#include "functional_module/timer/timer_director.h"
 
 namespace can_cooperation {
 
@@ -88,6 +89,7 @@ class RequestController
 
   std::map<correlation_id, MobileRequestPtr> mobile_request_list_;
   functional_modules::ModuleTimer<TrackableMessage> timer_;
+  functional_modules::TimerDirector time_director_;
 };
 
 }  // namespace request_controller

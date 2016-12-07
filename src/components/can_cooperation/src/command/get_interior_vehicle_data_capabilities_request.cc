@@ -97,7 +97,7 @@ void GetInteriorVehicleDataCapabiliesRequest::UpdateModules(
 }
 
 void GetInteriorVehicleDataCapabiliesRequest::OnEvent(
-    const event_engine::Event<application_manager::MessagePtr, std::string>&
+    const can_event_engine::Event<application_manager::MessagePtr, std::string>&
         event) {
   LOG4CXX_AUTO_TRACE(logger_);
 
@@ -126,11 +126,12 @@ void GetInteriorVehicleDataCapabiliesRequest::OnEvent(
         if (value[kResult][kInteriorVehicleDataCapabilities].isArray() &&
             (capabilities_size >= capabilities_min_size) &&
             (capabilities_size <= capabilities_max_size)) {
+          validators::ModuleDescriptionValidator module_description_validator;
+
           for (int i = 0; i < capabilities_size; ++i) {
-            validation_result =
-                validators::ModuleDescriptionValidator::instance()->Validate(
-                    value[kResult][kInteriorVehicleDataCapabilities][i],
-                    response_params_[kInteriorVehicleDataCapabilities][i]);
+            validation_result = module_description_validator.Validate(
+                value[kResult][kInteriorVehicleDataCapabilities][i],
+                response_params_[kInteriorVehicleDataCapabilities][i]);
           }
         } else {
           validation_result = validators::INVALID_DATA;
@@ -219,10 +220,9 @@ bool GetInteriorVehicleDataCapabiliesRequest::Validate() {
     return false;
   }
   Json::Value outgoing_json;
-
+  validators::GetInteriorVehicleDataCapabilitiesRequestValidator validator;
   if (validators::ValidationResult::SUCCESS !=
-      validators::GetInteriorVehicleDataCapabilitiesRequestValidator::instance()
-          ->Validate(json, outgoing_json)) {
+      validator.Validate(json, outgoing_json)) {
     LOG4CXX_INFO(logger_,
                  "GetInteriorVehicleDataCapabiliesRequest validation failed!");
     SendResponse(
