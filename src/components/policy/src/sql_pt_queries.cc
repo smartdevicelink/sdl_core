@@ -62,19 +62,19 @@ const std::string kCreateSchema =
     "  `flag_update_required` BOOL NOT NULL "
     "); "
     "CREATE TABLE IF NOT EXISTS `module_config`( "
-      "  `preloaded_pt` BOOL NOT NULL, "
-      "  `is_first_run` BOOL NOT NULL, "
-      "  `exchange_after_x_ignition_cycles` INTEGER NOT NULL, "
-      "  `exchange_after_x_kilometers` INTEGER NOT NULL, "
-      "  `exchange_after_x_days` INTEGER NOT NULL, "
-      "  `timeout_after_x_seconds` INTEGER NOT NULL, "
-      "  `certificate` TEXT, "
-      "  `vehicle_make` VARCHAR(45), "
-      "  `vehicle_model` VARCHAR(45), "
-      "  `vehicle_year` VARCHAR(4),"
-      "  `user_consent_passengersRC` BOOL,"
-      "  `country_consent_passengersRC` BOOL "
-      "); "
+    "  `preloaded_pt` BOOL NOT NULL, "
+    "  `is_first_run` BOOL NOT NULL, "
+    "  `exchange_after_x_ignition_cycles` INTEGER NOT NULL, "
+    "  `exchange_after_x_kilometers` INTEGER NOT NULL, "
+    "  `exchange_after_x_days` INTEGER NOT NULL, "
+    "  `timeout_after_x_seconds` INTEGER NOT NULL, "
+    "  `certificate` TEXT, "
+    "  `vehicle_make` VARCHAR(45), "
+    "  `vehicle_model` VARCHAR(45), "
+    "  `vehicle_year` VARCHAR(4),"
+    "  `user_consent_passengersRC` BOOL,"
+    "  `country_consent_passengersRC` BOOL "
+    "); "
     "CREATE TABLE IF NOT EXISTS `functional_group`( "
     "  `id` INTEGER PRIMARY KEY NOT NULL, "
     "  `user_consent_prompt` TEXT, "
@@ -617,12 +617,12 @@ const std::string kInsertMessageString =
     "VALUES (?, ?)";
 
 const std::string kUpdateModuleConfig =
-  "UPDATE `module_config` SET `preloaded_pt` = ?, "
-  "  `exchange_after_x_ignition_cycles` = ?,"
-  "  `exchange_after_x_kilometers` = ?, `exchange_after_x_days` = ?, "
-  "  `timeout_after_x_seconds` = ?, `certificate` = ?, `vehicle_make` = ?, "
-  "  `vehicle_model` = ?, `vehicle_year` = ?, "
-  "  `user_consent_passengersRC` = ?, `country_consent_passengersRC` = ?";
+    "UPDATE `module_config` SET `preloaded_pt` = ?, "
+    "  `exchange_after_x_ignition_cycles` = ?,"
+    "  `exchange_after_x_kilometers` = ?, `exchange_after_x_days` = ?, "
+    "  `timeout_after_x_seconds` = ?, `certificate` = ?, `vehicle_make` = ?, "
+    "  `vehicle_model` = ?, `vehicle_year` = ?, "
+    "  `user_consent_passengersRC` = ?, `country_consent_passengersRC` = ?";
 
 const std::string kInsertEndpoint =
     "INSERT INTO `endpoint` (`service`, `url`, `application_id`) "
@@ -659,12 +659,12 @@ const std::string kDeleteRpc = "DELETE FROM `rpc`";
 const std::string kDeleteAppGroup = "DELETE FROM `app_group`";
 
 const std::string kSelectModuleConfig =
-  "SELECT `preloaded_pt`, `exchange_after_x_ignition_cycles`, "
-  " `exchange_after_x_kilometers`, `exchange_after_x_days`, "
-  " `timeout_after_x_seconds`, `certificate`, `vehicle_make`,"
-  " `vehicle_model`, `vehicle_year`, "
-  " `user_consent_passengersRC` , `country_consent_passengersRC` "
-  " FROM `module_config`";
+    "SELECT `preloaded_pt`, `exchange_after_x_ignition_cycles`, "
+    " `exchange_after_x_kilometers`, `exchange_after_x_days`, "
+    " `timeout_after_x_seconds`, `certificate`, `vehicle_make`,"
+    " `vehicle_model`, `vehicle_year`, "
+    " `user_consent_passengersRC` , `country_consent_passengersRC` "
+    " FROM `module_config`";
 
 const std::string kSelectEndpoints =
     "SELECT `url`, `service`, `application_id` FROM `endpoint` ";

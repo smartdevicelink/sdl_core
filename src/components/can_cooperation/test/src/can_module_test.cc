@@ -86,7 +86,7 @@ class CanModuleTest : public ::testing::Test {
     std::vector<application_manager::ApplicationSharedPtr> apps;
     EXPECT_CALL(*mock_service, GetApplications(module->GetModuleID()))
         .WillRepeatedly(Return(apps));
-    //CANModule::destroy();
+    // CANModule::destroy();
   }
 };
 utils::SharedPtr<CANModule> CanModuleTest::module = 0;
@@ -178,7 +178,6 @@ TEST_F(CanModuleTest, ProcessMessagePass) {
   EXPECT_EQ(ProcessResult::PROCESSED, module->ProcessMessage(message));
 }
 
-
 TEST_F(CanModuleTest, RemoveAppExtensionPassWay) {
   MockApplication* app = new MockApplication();
   application_manager::ApplicationSharedPtr valid_app(app);
@@ -215,7 +214,7 @@ TEST_F(CanModuleTest, SendResponseToMobile) {
 }
 
 TEST_F(CanModuleTest, IsAppForPluginSuccess) {
-   MockApplication* app = new MockApplication();
+  MockApplication* app = new MockApplication();
   application_manager::ApplicationSharedPtr app_ptr(app);
   application_manager::AppExtensionPtr ext;
   CANAppExtension* valid_ext = new CANAppExtension(module->GetModuleID());
