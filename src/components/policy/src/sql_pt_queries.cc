@@ -71,7 +71,9 @@ const std::string kCreateSchema =
     "  `certificate` TEXT, "
     "  `vehicle_make` VARCHAR(45), "
     "  `vehicle_model` VARCHAR(45), "
-    "  `vehicle_year` VARCHAR(4) "
+    "  `vehicle_year` VARCHAR(4),"
+    "  `user_consent_passengersRC` BOOL,"
+    "  `country_consent_passengersRC` BOOL "
     "); "
     "CREATE TABLE IF NOT EXISTS `functional_group`( "
     "  `id` INTEGER PRIMARY KEY NOT NULL, "
@@ -316,6 +318,19 @@ const std::string kCreateSchema =
     "    FOREIGN KEY(`message_type_name`) "
     "    REFERENCES `message_type`(`name`) "
     "); "
+
+    /* module type */
+    "CREATE TABLE IF NOT EXISTS `module_type`( "
+    "  `name` VARCHAR(50) NOT NULL, "
+    "  `application_id` VARCHAR(45) NOT NULL, "
+    "  PRIMARY KEY(`name`,`application_id`), "
+    "  CONSTRAINT `fk_module_type_application1` "
+    "    FOREIGN KEY(`application_id`) "
+    "    REFERENCES `application`(`id`) "
+    "); "
+    "CREATE INDEX IF NOT EXISTS `module_type.fk_module_type_application1_idx` "
+    "  ON `module_type`(`application_id`); "
+
     "CREATE INDEX IF NOT EXISTS `message.fk_messages_languages1_idx` "
     "  ON `message`(`language_code`);"
     "CREATE INDEX IF NOT EXISTS "
@@ -436,6 +451,8 @@ const std::string kSelectModuleTypes =
 
 const std::string kDropSchema =
     "BEGIN; "
+    "DROP INDEX IF EXISTS `module_type.fk_module_type_application1_idx`; "
+    "DROP TABLE IF EXISTS `module_type`; "
     "DROP INDEX IF EXISTS `message.fk_messages_languages1_idx`; "
     "DROP INDEX IF EXISTS "
     "`message.fk_message_consumer_friendly_messages1_idx`; "
@@ -500,6 +517,7 @@ const std::string kDropSchema =
 const std::string kDeleteData =
     "BEGIN; "
     "DELETE FROM `message`; "
+    "DELETE FROM `module_type`; "
     "DELETE FROM `endpoint`; "
     "DELETE FROM `consent_group`; "
     "DELETE FROM `app_type`; "
@@ -603,7 +621,8 @@ const std::string kUpdateModuleConfig =
     "  `exchange_after_x_ignition_cycles` = ?,"
     "  `exchange_after_x_kilometers` = ?, `exchange_after_x_days` = ?, "
     "  `timeout_after_x_seconds` = ?, `certificate` = ?, `vehicle_make` = ?, "
-    "  `vehicle_model` = ?, `vehicle_year` = ?";
+    "  `vehicle_model` = ?, `vehicle_year` = ?, "
+    "  `user_consent_passengersRC` = ?, `country_consent_passengersRC` = ?";
 
 const std::string kInsertEndpoint =
     "INSERT INTO `endpoint` (`service`, `url`, `application_id`) "
@@ -643,7 +662,8 @@ const std::string kSelectModuleConfig =
     "SELECT `preloaded_pt`, `exchange_after_x_ignition_cycles`, "
     " `exchange_after_x_kilometers`, `exchange_after_x_days`, "
     " `timeout_after_x_seconds`, `certificate`, `vehicle_make`,"
-    " `vehicle_model`, `vehicle_year` "
+    " `vehicle_model`, `vehicle_year`, "
+    " `user_consent_passengersRC` , `country_consent_passengersRC` "
     " FROM `module_config`";
 
 const std::string kSelectEndpoints =

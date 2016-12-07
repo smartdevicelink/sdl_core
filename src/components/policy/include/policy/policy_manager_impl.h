@@ -174,10 +174,10 @@ class PolicyManagerImpl : public PolicyManager {
   bool CanAppStealFocus(const std::string& app_id) const;
   void MarkUnpairedDevice(const std::string& device_id);
 
-  void AddApplication(const std::string& application_id) ;
+  void AddApplication(const std::string& application_id);
 #ifdef SDL_REMOTE_CONTROL
   void AddApplication(const std::string& application_id,
-                              const std::vector<int>& hmi_types) ;
+                      const std::vector<int>& hmi_types);
 
   /**
        * Gets HMI types

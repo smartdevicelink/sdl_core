@@ -1288,6 +1288,12 @@ TEST_F(StateControllerImplTest,
   InsertApplication(app_in_full);
   InsertApplication(app_moved_to_full);
 
+  EXPECT_CALL(*app_moved_to_full_mock, is_resuming())
+      .WillRepeatedly(Return(false));
+  EXPECT_CALL(*app_moved_to_full_mock, set_is_resuming(false));
+  EXPECT_CALL(*app_moved_to_full_mock, usage_report())
+      .WillOnce(ReturnRef(usage_stat));
+
   ExpectSuccesfullSetHmiState(app_moved_to_full,
                               app_moved_to_full_mock,
                               BackgroundState(),

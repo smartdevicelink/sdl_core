@@ -58,7 +58,7 @@ TEST(AccessRemoteImplTest, KeyMapTest) {
   Object what2 = {policy_table::MT_CLIMATE, zone};
   access_remote.Allow(who, what1);
   access_remote.Allow(who, what2);
-  ASSERT_EQ(2, access_remote.acl_.size());
+  ASSERT_EQ(2u, access_remote.acl_.size());
 }
 
 TEST(AccessRemoteImplTest, Deny) {
@@ -96,12 +96,12 @@ TEST(AccessRemoteImplTest, ResetBySubject) {
   Object what2 = {policy_table::MT_CLIMATE, zone};
   access_remote.Allow(who, what1);
   access_remote.Deny(who, what2);
-  ASSERT_EQ(2, access_remote.acl_.size());
-  ASSERT_EQ(1, access_remote.acl_[what1].size());
-  ASSERT_EQ(1, access_remote.acl_[what2].size());
+  ASSERT_EQ(2u, access_remote.acl_.size());
+  ASSERT_EQ(1u, access_remote.acl_[what1].size());
+  ASSERT_EQ(1u, access_remote.acl_[what2].size());
 
   access_remote.Reset(who);
-  ASSERT_EQ(2, access_remote.acl_.size());
+  ASSERT_EQ(2u, access_remote.acl_.size());
   EXPECT_TRUE(access_remote.acl_[what1].empty());
   EXPECT_TRUE(access_remote.acl_[what2].empty());
 }
@@ -114,8 +114,8 @@ TEST(AccessRemoteImplTest, ResetByObject) {
   Object what = {policy_table::MT_RADIO, zone};
   access_remote.Allow(who1, what);
   access_remote.Deny(who2, what);
-  ASSERT_EQ(1, access_remote.acl_.size());
-  ASSERT_EQ(2, access_remote.acl_[what].size());
+  ASSERT_EQ(1u, access_remote.acl_.size());
+  ASSERT_EQ(2u, access_remote.acl_[what].size());
 
   access_remote.Reset(what);
   EXPECT_TRUE(access_remote.acl_.empty());
@@ -228,7 +228,7 @@ TEST(AccessRemoteImplTest, SetDefaultHmiTypes) {
 
   EXPECT_NE(access_remote.hmi_types_.end(), access_remote.hmi_types_.find(who));
   policy_table::AppHMITypes& hmi_output = access_remote.hmi_types_[who];
-  EXPECT_EQ(2, hmi_output.size());
+  EXPECT_EQ(2u, hmi_output.size());
   EXPECT_EQ(policy_table::AHT_MEDIA, hmi_output[0]);
   EXPECT_EQ(policy_table::AHT_SOCIAL, hmi_output[1]);
 }

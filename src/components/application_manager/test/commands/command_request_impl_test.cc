@@ -370,9 +370,6 @@ TEST_F(CommandRequestImplTest, CheckAllowedParameters_NoMsgParamsMap_SUCCESS) {
   SharedPtr<ApplicationSet> app_set;
   MockAppPtr app(InitAppSetDataAccessor(app_set));
   EXPECT_CALL(*app, app_id()).WillOnce(Return(kConnectionKey));
-  EXPECT_CALL(*app, policy_app_id()).WillOnce(Return(kPolicyAppId));
-  EXPECT_CALL(*app, hmi_level())
-      .WillOnce(Return(mobile_apis::HMILevel::HMI_NONE));
 
   EXPECT_CALL(app_mngr_, CheckPolicyPermissions(_, _, _, _))
       .WillOnce(Return(kMobResultSuccess));
@@ -391,9 +388,6 @@ TEST_F(CommandRequestImplTest,
   SharedPtr<ApplicationSet> app_set;
   MockAppPtr app(InitAppSetDataAccessor(app_set));
   EXPECT_CALL(*app, app_id()).Times(2).WillRepeatedly(Return(kConnectionKey));
-  EXPECT_CALL(*app, policy_app_id()).WillOnce(Return(kPolicyAppId));
-  EXPECT_CALL(*app, hmi_level())
-      .WillOnce(Return(mobile_apis::HMILevel::HMI_NONE));
 
   EXPECT_CALL(app_mngr_, CheckPolicyPermissions(_, _, _, _))
       .WillOnce(Return(mobile_apis::Result::INVALID_ENUM));
@@ -420,9 +414,6 @@ TEST_F(CommandRequestImplTest, CheckAllowedParameters_MsgParamsMap_SUCCESS) {
   SharedPtr<ApplicationSet> app_set;
   MockAppPtr app(InitAppSetDataAccessor(app_set));
   EXPECT_CALL(*app, app_id()).WillOnce(Return(kConnectionKey));
-  EXPECT_CALL(*app, policy_app_id()).WillOnce(Return(kPolicyAppId));
-  EXPECT_CALL(*app, hmi_level())
-      .WillOnce(Return(mobile_apis::HMILevel::HMI_NONE));
 
   RPCParams params;
   EXPECT_CALL(app_mngr_, CheckPolicyPermissions(_, _, _, _))
