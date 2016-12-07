@@ -1,7 +1,7 @@
-set(target CANCooperation)
-set(library_name ${CMAKE_SHARED_LIBRARY_PREFIX}${target}${CMAKE_SHARED_LIBRARY_SUFFIX})
-set(install_destination ${CMAKE_BINARY_DIR}/bin/plugins)
-set(copy_destination ${CMAKE_BINARY_DIR}/src/appMain/plugins)
+#set(target CANCooperation)
+#set(library_name ${CMAKE_SHARED_LIBRARY_PREFIX}${target}${CMAKE_SHARED_LIBRARY_SUFFIX})
+#set(install_destination ${CMAKE_BINARY_DIR}/bin/plugins)
+#set(copy_destination ${CMAKE_BINARY_DIR}/src/appMain/plugins)
 
 if (ENABLE_GCOV)
   set(GCOV_FLAGS "-ftest-coverage -fprofile-arcs")
@@ -102,29 +102,29 @@ set (LIBRARIES
     ConfigProfile
 )
 
-add_library(${target} ${SOURCES})
-target_link_libraries(${target} ${LIBRARIES} )
+add_library("CANCooperation" ${SOURCES})
+target_link_libraries("CANCooperation" ${LIBRARIES} )
 
 if(ENABLE_LOG)
   target_link_libraries("CANCooperation" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
 endif()
 
 
-install(TARGETS ${target}
-  DESTINATION ${install_destination}
-  PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
-    GROUP_READ GROUP_EXECUTE
-    WORLD_READ WORLD_EXECUTE
-)
+#install(TARGETS ${target}
+#  DESTINATION ${install_destination}
+#  PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
+#    GROUP_READ GROUP_EXECUTE
+#    WORLD_READ WORLD_EXECUTE
+#)
 
 set(FILES_FOR_COPY
 ${CMAKE_CURRENT_SOURCE_DIR}/InteriorVehicleDataCapabilities.json
 )
 
-install(
-  FILES ${FILES_FOR_COPY}
-  DESTINATION ${install_destination}
-)
+#install(
+  #FILES ${FILES_FOR_COPY}
+  #DESTINATION ${install_destination}
+#)
 
 if(BUILD_TESTS)
   add_subdirectory(test)
