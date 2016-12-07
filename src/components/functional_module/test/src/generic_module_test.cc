@@ -51,7 +51,7 @@ TEST(GenericModuleTest, AddObserver) {
   MockModuleObserver observer;
   module.AddObserver(&observer);
   const DriverGenericModuleTest::Observers& full = module.observers();
-  ASSERT_EQ(1, full.size());
+  ASSERT_EQ(1u, full.size());
   EXPECT_EQ(&observer, full[0]);
 }
 
@@ -83,7 +83,7 @@ TEST(GenericModuleTest, WrongRemoveObserver) {
   MockModuleObserver* wrong_observer = new MockModuleObserver();
   module.RemoveObserver(wrong_observer);
   const DriverGenericModuleTest::Observers& empty = module.observers();
-  ASSERT_EQ(1, empty.size());
+  ASSERT_EQ(1u, empty.size());
   EXPECT_EQ(&observer, empty[0]);
   delete wrong_observer;
 }
