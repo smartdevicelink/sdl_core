@@ -35,6 +35,7 @@
 
 #include "application_manager/policies/policy_handler_interface.h"
 #include "gmock/gmock.h"
+
 #include "policy/policy_types.h"
 #include "smart_objects/smart_object.h"
 

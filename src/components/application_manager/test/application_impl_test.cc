@@ -50,7 +50,7 @@
 #include "resumption/last_state.h"
 #include "application_manager/resumption/resume_ctrl.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
-#include "policy/mock_statistics_manager.h"
+#include "policy/usage_statistics/mock_statistics_manager.h"
 #include "smart_objects/smart_object.h"
 
 namespace test {

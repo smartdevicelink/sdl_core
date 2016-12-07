@@ -74,7 +74,7 @@ class OnSystemRequestNotification : public CommandNotificationImpl {
    */
   void AddHeader(BinaryMessage& message) const;
   size_t ParsePTString(std::string& pt_string) const;
-#endif
+#endif  // EXTENDED_POLICY
 
   DISALLOW_COPY_AND_ASSIGN(OnSystemRequestNotification);
 };

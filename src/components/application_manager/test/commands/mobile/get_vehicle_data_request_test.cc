@@ -90,7 +90,7 @@ class UnwrappedGetVehicleDataRequest : public GetVehicleDataRequest {
                                  am::ApplicationManager& application_manager)
       : GetVehicleDataRequest(message, application_manager) {}
 
-  std::vector<std::string>& get_disallowed_params() {
+  policy::RPCParams& get_disallowed_params() {
     return removed_parameters_permissions_.disallowed_params;
   }
 
@@ -176,9 +176,8 @@ TEST_F(GetVehicleDataRequestTest,
   EXPECT_CALL(mock_message_helper_, vehicle_data())
       .WillRepeatedly(ReturnRef(kEmptyVehicleData));
 
-  std::vector<std::string>& disallowed_params =
-      command->get_disallowed_params();
-  disallowed_params.push_back("test_param");
+  policy::RPCParams& disallowed_params = command->get_disallowed_params();
+  disallowed_params.insert("test_param");
 
   MockAppPtr app(CreateMockApp());
   EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app));

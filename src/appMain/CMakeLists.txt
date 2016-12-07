@@ -120,7 +120,8 @@ include_directories (
   ${COMPONENTS_DIR}/smart_objects/include/
   ${COMPONENTS_DIR}/media_manager/include/
   ${COMPONENTS_DIR}/telemetry_monitor/include
-  ${COMPONENTS_DIR}/policy/include/
+  ${POLICY_PATH}/include/
+  ${POLICY_GLOBAL_INCLUDE_PATH}/
   ${COMPONENTS_DIR}/resumption/include/
   ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
   ${ENCRYPTION_INCLUDE_DIRECTORY}

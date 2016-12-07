@@ -1,0 +1,11 @@
+"Added-Group-1": {
+                "rpcs": {
+                    "AddedFunction1": {
+                        "hmi_levels": [
+                            "BACKGROUND",
+                            "FULL",
+                            "LIMITED"
+                        ]
+                    }
+                }
+        }
