@@ -58,9 +58,15 @@ add_subdirectory(./utils)
 if(ENABLE_SECURITY)
   add_subdirectory(./security_manager)
 endif()
-#
-# --- Policy_impl
-add_subdirectory(./policy)
+
+
+if (${EXTENDED_POLICY} STREQUAL "EXTENDED_PROPRIETARY")
+  add_subdirectory(./policy/policy_premium/)
+  message(STATUS "Use premium policy")
+else()
+  add_subdirectory(./policy/policy_regular/)
+  message(STATUS "Use regular policy")
+endif()
 
 # --- Validated types
 add_subdirectory(./rpc_base)

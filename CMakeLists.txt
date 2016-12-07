@@ -48,11 +48,15 @@ option(ENABLE_GCOV "gcov code coverage feature" OFF)
 option(ENABLE_SANITIZE "Sanitize tool" OFF)
 option(ENABLE_SECURITY "Security Ford protocol protection" ON)
 option(ENABLE_HMI_PTU_DECRYPTION "Policy table update parsed by hmi" ON)
-option(ENABLE_EXTENDED_POLICY "Turns extended flow which requires embedded system interaction" ON)
 option(USE_COTIRE "Use Cotire to speed up build (currently only for commands tests)" ON)
 option(USE_GOLD_LD "Use gold linker intead of GNU linker" ON)
 option(USE_CCACHE "Turn on ccache usage" ON)
 option(USE_DISTCC "Turn on distributed build_usage" ON)
+
+set (EXTENDED_POLICY "${EXTENDED_POLICY}" CACHE STRING "Policy mode (PROPRIETARY, HTTP or EXTENDED_PROPRIETARY)")
+if(EXTENDED_POLICY STREQUAL "")
+  set(EXTENDED_POLICY "PROPRIETARY")
+endif()
 
 set(OS_TYPE_OPTION 	"$ENV{OS_TYPE}")
 set(DEBUG_OPTION 	"$ENV{DEBUG}")
@@ -277,8 +281,22 @@ if (TELEMETRY_MONITOR)
     add_definitions(-DTELEMETRY_MONITOR)
 endif()
 
-if (ENABLE_EXTENDED_POLICY)
-    add_definitions(-DEXTENDED_POLICY)
+if (${EXTENDED_POLICY} STREQUAL "EXTENDED_PROPRIETARY")
+    add_definitions(-DEXTENDED_PROPRIETARY)
+    set(POLICY_PATH ${COMPONENTS_DIR}/policy/policy_premium/)
+    set(POLICY_GLOBAL_INCLUDE_PATH ${COMPONENTS_DIR}/include/policy/policy_premium/)
+    set(POLICY_MOCK_INCLUDE_PATH ${COMPONENTS_DIR}/include/test/policy/policy_premium/)
+    message(STATUS "DEFINED EXTENDED_PROPRIETARY")
+else()
+   if (${EXTENDED_POLICY} STREQUAL "PROPRIETARY")
+     add_definitions(-DEXTENDED_POLICY)
+     message(STATUS "DEFINED PROPRIETARY")
+   else()
+     message(STATUS "DEFAULT HTTP")
+   endif()
+   set(POLICY_PATH ${COMPONENTS_DIR}/policy/policy_regular/)
+   set(POLICY_GLOBAL_INCLUDE_PATH ${COMPONENTS_DIR}/include/policy/policy_regular/)
+   set(POLICY_MOCK_INCLUDE_PATH ${COMPONENTS_DIR}/include/test/policy/policy_regular/)
 endif()
 
 # TODO(AK): check current OS here
@@ -428,10 +446,13 @@ endif()
 include_directories(
   ${COMPONENTS_DIR}/include
   ${COMPONENTS_DIR}/protocol/include
-if (BUILD_TESTS)
-  ${COMPONENTS_DIR}/include/test
-endif ()
 )
+
+if (BUILD_TESTS)
+	include_directories(
+	  ${COMPONENTS_DIR}/include/test
+	)
+endif ()
 
 # --- 3rd party libs
 INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/src/3rd_party/set_3rd_party_paths.cmake)

@@ -1,4 +1,4 @@
-# Copyright (c) 2014, Ford Motor Company
+# Copyright (c) 2016, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -32,6 +32,7 @@
 include_directories (
   include
   ${COMPONENTS_DIR}/utils/include/
+  ${POLICY_GLOBAL_INCLUDE_PATH}/
   ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 

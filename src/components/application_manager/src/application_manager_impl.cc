@@ -1404,7 +1404,7 @@ void ApplicationManagerImpl::SendMessageToMobile(
       for (; iter != iter_end; ++iter) {
         if (true == iter->second.asBool()) {
           LOG4CXX_INFO(logger_, "Request's param: " << iter->first);
-          params.push_back(iter->first);
+          params.insert(iter->first);
         }
       }
     }
