@@ -1178,18 +1178,19 @@ bool SQLPTRepresentation::SaveModuleConfig(
   query.Bind(2, config.exchange_after_x_kilometers);
   query.Bind(3, config.exchange_after_x_days);
   query.Bind(4, config.timeout_after_x_seconds);
-  config.vehicle_make.is_initialized() ? query.Bind(5, *(config.vehicle_make))
-                                       : query.Bind(5);
-  config.vehicle_model.is_initialized() ? query.Bind(6, *(config.vehicle_model))
-                                        : query.Bind(6);
-  config.vehicle_year.is_initialized() ? query.Bind(7, *(config.vehicle_year))
-                                       : query.Bind(7);
+  query.Bind(5, (*config.certificate));
+  config.vehicle_make.is_initialized() ? query.Bind(6, *(config.vehicle_make))
+                                       : query.Bind(6);
+  config.vehicle_model.is_initialized() ? query.Bind(7, *(config.vehicle_model))
+                                        : query.Bind(7);
+  config.vehicle_year.is_initialized() ? query.Bind(8, *(config.vehicle_year))
+                                       : query.Bind(8);
   config.user_consent_passengersRC.is_initialized()
-      ? query.Bind(8, *(config.user_consent_passengersRC))
-      : query.Bind(8);
-  config.country_consent_passengersRC.is_initialized()
-      ? query.Bind(9, *(config.country_consent_passengersRC))
+      ? query.Bind(9, *(config.user_consent_passengersRC))
       : query.Bind(9);
+  config.country_consent_passengersRC.is_initialized()
+      ? query.Bind(10, *(config.country_consent_passengersRC))
+      : query.Bind(10);
 
   if (!query.Exec()) {
     LOG4CXX_WARN(logger_, "Incorrect update module config");
@@ -2099,6 +2100,17 @@ bool SQLPTRepresentation::SetDefaultPolicy(const std::string& app_id) {
 
   SetPreloaded(false);
 
+  policy_table::RequestTypes request_types;
+  if (!GatherRequestType(kDefaultId, &request_types) ||
+      !SaveRequestType(app_id, request_types)) {
+    return false;
+  }
+  policy_table::AppHMITypes app_types;
+  if (!GatherAppType(kDefaultId, &app_types) ||
+      !SaveAppType(app_id, app_types)) {
+    return false;
+  }
+
   policy_table::Strings default_groups;
   bool ret = (GatherAppGroup(kDefaultId, &default_groups) &&
               SaveAppGroup(app_id, default_groups));
@@ -2114,17 +2126,7 @@ bool SQLPTRepresentation::SetDefaultPolicy(const std::string& app_id) {
   if (ret) {
     return SetIsDefault(app_id, true);
   }
-  policy_table::RequestTypes request_types;
-  if (!GatherRequestType(kDefaultId, &request_types) ||
-      !SaveRequestType(app_id, request_types)) {
-    return false;
-  }
-  policy_table::AppHMITypes app_types;
-  if (!GatherAppType(kDefaultId, &app_types) ||
-      !SaveAppType(app_id, app_types)) {
-    return false;
-  }
-  return SetIsDefault(app_id, true);
+  return false;
 }
 
 bool SQLPTRepresentation::SetIsDefault(const std::string& app_id,
