@@ -8,7 +8,7 @@ TEST(ModuleTimerTest, set_period) {
   ModuleTimer<TestTrackable> timer;
   timer.set_period(10000);
   ModuleTimerTest test(timer);
-  EXPECT_EQ(10000, test.period());
+  EXPECT_EQ(10000u, test.period());
 }
 
 TEST(ModuleTimerTest, add_observer) {

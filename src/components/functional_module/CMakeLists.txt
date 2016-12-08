@@ -4,7 +4,7 @@ else()
   set(GCOV_FLAGS "")
 endif()
 
-set(CMAKE_CXX_FLAGS "-fPIC -std=gnu++0x -Wall -Werror ${GCOV_FLAGS}")
+set(CMAKE_CXX_FLAGS "-fPIC -std=gnu++0x -Wno-deprecated-declarations -Wall -Werror ${GCOV_FLAGS}")
 
 if (CMAKE_BUILD_TYPE)
   if (${CMAKE_BUILD_TYPE} STREQUAL "Release")

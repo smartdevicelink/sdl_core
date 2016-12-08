@@ -1,4 +1,4 @@
-#set(target CANCooperation)
+set(target "CANCooperation")
 #set(library_name ${CMAKE_SHARED_LIBRARY_PREFIX}${target}${CMAKE_SHARED_LIBRARY_SUFFIX})
 #set(install_destination ${CMAKE_BINARY_DIR}/bin/plugins)
 #set(copy_destination ${CMAKE_BINARY_DIR}/src/appMain/plugins)
@@ -102,11 +102,11 @@ set (LIBRARIES
     ConfigProfile
 )
 
-add_library("CANCooperation" ${SOURCES})
-target_link_libraries("CANCooperation" ${LIBRARIES} )
+add_library(${target} ${SOURCES})
+target_link_libraries(${target} ${LIBRARIES} )
 
 if(ENABLE_LOG)
-  target_link_libraries("CANCooperation" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
+  target_link_libraries(${target} log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
 endif()
 
 
