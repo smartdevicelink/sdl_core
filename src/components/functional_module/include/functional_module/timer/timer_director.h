@@ -36,7 +36,6 @@
 #include <map>
 #include "utils/threads/thread.h"
 #include "utils/conditional_variable.h"
-#include "utils/singleton.h"
 #include "functional_module/timer/module_timer.h"
 
 namespace functional_modules {
@@ -56,11 +55,12 @@ class TimerThreadDelegate : public threads::ThreadDelegate {
   friend class TimerThreadDelegateTest;
 };
 
-class TimerDirector : public utils::Singleton<TimerDirector> {
+class TimerDirector {
  public:
+  TimerDirector();
   ~TimerDirector();
 
-  /*
+  /**
    * @brief Register timer for execution in separate thread.
    Registers only one timer of a type. Attempt to register timer
    of already existing type will fail.
@@ -72,9 +72,7 @@ class TimerDirector : public utils::Singleton<TimerDirector> {
   void UnregisterAllTimers();
 
  private:
-  TimerDirector();
   DISALLOW_COPY_AND_ASSIGN(TimerDirector);
-  FRIEND_BASE_SINGLETON_CLASS(TimerDirector);
   std::map<std::string, threads::Thread*> timer_threads_;
 };
 

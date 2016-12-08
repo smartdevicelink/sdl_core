@@ -52,21 +52,6 @@ TuneRadioRequest::~TuneRadioRequest() {}
 void TuneRadioRequest::Execute() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  /*
-  Json::Value json;
-
-  json = MessageHelper::StringToValue(message_->json_message());
-  Json::Value outgoing_json;
-
-  if (validators::ValidationResult::SUCCESS !=
-      validators::TuneRadioRequestValidator::instance()->Validate(
-          json, outgoing_json)) {
-    LOG4CXX_INFO(logger_, "TuneRadioRequest validation failed!");
-    SendResponse(false, result_codes::kInvalidData,
-                 "Mobile request validation failed!");
-    return;
-  }*/
-
   Json::Value params;
 
   Json::Reader reader;
@@ -76,7 +61,7 @@ void TuneRadioRequest::Execute() {
 }
 
 void TuneRadioRequest::OnEvent(
-    const event_engine::Event<application_manager::MessagePtr, std::string>&
+    const can_event_engine::Event<application_manager::MessagePtr, std::string>&
         event) {
   LOG4CXX_AUTO_TRACE(logger_);
 

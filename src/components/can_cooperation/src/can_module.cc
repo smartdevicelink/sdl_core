@@ -33,7 +33,6 @@
 #include "can_cooperation/can_module.h"
 #include "can_cooperation/mobile_command_factory.h"
 #include "can_cooperation/can_module_event.h"
-#include "can_cooperation/event_engine/event_dispatcher.h"
 #include "can_cooperation/can_module_constants.h"
 #include "can_cooperation/can_app_extension.h"
 
@@ -51,7 +50,6 @@ using functional_modules::ProcessResult;
 using functional_modules::GenericModule;
 using functional_modules::PluginInfo;
 using functional_modules::MobileFunctionID;
-using event_engine::EventDispatcher;
 namespace hmi_api = functional_modules::hmi_api;
 
 using namespace json_keys;
@@ -236,8 +234,7 @@ functional_modules::ProcessResult CANModule::HandleMessage(
     case application_manager::MessageType::kResponse:
     case application_manager::MessageType::kErrorResponse: {
       CanModuleEvent event(msg, function_name);
-      EventDispatcher<application_manager::MessagePtr, std::string>::instance()
-          ->raise_event(event);
+      event_dispatcher_.raise_event(event);
       break;
     }
     case application_manager::MessageType::kNotification: {
@@ -566,4 +563,10 @@ CANConnectionSPtr CANModule::can_connection() {
 void CANModule::set_can_connection(const CANConnectionSPtr can_connection) {
   can_connection_ = can_connection;
 }
+
+can_event_engine::EventDispatcher<application_manager::MessagePtr, std::string>&
+CANModule::event_dispatcher() {
+  return event_dispatcher_;
+}
+
 }  //  namespace can_cooperation

@@ -41,6 +41,7 @@
 #include "can_cooperation/can_connection.h"
 #include "can_cooperation/request_controller.h"
 #include "utils/threads/message_loop_thread.h"
+#include "can_cooperation/event_engine/event_dispatcher.h"
 
 namespace can_cooperation {
 
@@ -133,6 +134,10 @@ class CANModule : public CANModuleInterface {
 
   void set_can_connection(const CANConnectionSPtr can_connection);
 
+  can_event_engine::EventDispatcher<application_manager::MessagePtr,
+                                    std::string>&
+  event_dispatcher();
+
  protected:
   /**
    * @brief Remove extension for all applications
@@ -157,6 +162,8 @@ class CANModule : public CANModuleInterface {
   threads::MessageLoopThread<std::queue<MessageFromMobile> > from_mobile_;
   bool is_scan_started_;
   request_controller::RequestController request_controller_;
+  can_event_engine::EventDispatcher<application_manager::MessagePtr,
+                                    std::string> event_dispatcher_;
 
   DISALLOW_COPY_AND_ASSIGN(CANModule);
 };

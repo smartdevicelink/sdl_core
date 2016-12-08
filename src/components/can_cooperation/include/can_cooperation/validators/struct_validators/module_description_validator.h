@@ -43,26 +43,24 @@ namespace validators {
 /**
  * @brief ModuleDescriptionValidator class
  */
-class ModuleDescriptionValidator
-    : public Validator,
-      public utils::Singleton<ModuleDescriptionValidator> {
+class ModuleDescriptionValidator : public Validator {
  public:
+  ModuleDescriptionValidator();
+
   /**
-   * @brief Validate json with message params
-   *
-   * @param json incoming json
-   * @param outgoing_json outgoing json where is param will be copied after
-   *verification
-   *
-   * @return validation result
-   */
+ * @brief Validate json with message params
+ *
+ * @param json incoming json
+ * @param outgoing_json outgoing json where is param will be copied after
+ *verification
+ *
+ * @return validation result
+ */
   ValidationResult Validate(const Json::Value& json,
                             Json::Value& outgoing_json);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(ModuleDescriptionValidator);
-  FRIEND_BASE_SINGLETON_CLASS(ModuleDescriptionValidator);
-  ModuleDescriptionValidator();
 
   ValidationScope module_type_;
 };

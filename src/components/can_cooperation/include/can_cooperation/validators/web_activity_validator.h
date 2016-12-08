@@ -43,9 +43,11 @@ namespace validators {
 /**
  * @brief WebActivityValidator class
  */
-class WebActivityValidator : public Validator,
-                             public utils::Singleton<WebActivityValidator> {
+class WebActivityValidator : public Validator {
  public:
+  WebActivityValidator();
+  ~WebActivityValidator() {}
+
   /**
    * @brief Validate json with message params
    *
@@ -60,12 +62,6 @@ class WebActivityValidator : public Validator,
 
  private:
   DISALLOW_COPY_AND_ASSIGN(WebActivityValidator);
-  FRIEND_BASE_SINGLETON_CLASS(WebActivityValidator);
-  WebActivityValidator();
-  ~WebActivityValidator(){};
-  /*
-    std::map<std::string, int> url_;
-    std::map<std::string, int> action_code_;*/
 };
 
 }  // namespace valdiators

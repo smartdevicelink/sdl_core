@@ -63,9 +63,10 @@ ValidationResult GetInteriorVehicleDataRequestValidator::Validate(
     return result;
   }
 
+  ModuleDescriptionValidator validator;
   if (IsMember(json, kModuleDescription)) {
-    result = ModuleDescriptionValidator::instance()->Validate(
-        json[kModuleDescription], outgoing_json[kModuleDescription]);
+    result = validator.Validate(json[kModuleDescription],
+                                outgoing_json[kModuleDescription]);
   } else {
     result = ValidationResult::INVALID_DATA;
     LOG4CXX_ERROR(logger_,

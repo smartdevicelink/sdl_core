@@ -38,7 +38,9 @@
 #include "functional_module/generic_module.h"
 #include "can_cooperation/can_connection.h"
 #include "can_cooperation/request_controller.h"
+#include "can_cooperation/event_engine/event_dispatcher.h"
 #include "utils/threads/message_loop_thread.h"
+#include "utils/shared_ptr.h"
 
 namespace can_cooperation {
 
@@ -147,6 +149,10 @@ class CANModuleInterface
 
   virtual void UnsubscribeAppForAllZones(uint32_t hmi_app_id,
                                          CANAppExtensionPtr app) = 0;
+
+  virtual can_event_engine::EventDispatcher<application_manager::MessagePtr,
+                                            std::string>&
+  event_dispatcher() = 0;
 
  protected:
   /**

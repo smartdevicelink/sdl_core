@@ -62,7 +62,7 @@ void GetInteriorVehicleDataRequest::Execute() {
 }
 
 void GetInteriorVehicleDataRequest::OnEvent(
-    const event_engine::Event<application_manager::MessagePtr, std::string>&
+    const can_event_engine::Event<application_manager::MessagePtr, std::string>&
         event) {
   LOG4CXX_AUTO_TRACE(logger_);
 
@@ -76,11 +76,9 @@ void GetInteriorVehicleDataRequest::OnEvent(
     bool success = ParseResultCode(value, result_code, info);
 
     validators::ValidationResult validation_result = validators::SUCCESS;
-
+    validators::GetInteriorVehicleDataResponseValidator validator;
     if (success) {
-      validation_result =
-          validators::GetInteriorVehicleDataResponseValidator::instance()
-              ->Validate(value[kResult], response_params_);
+      validation_result = validator.Validate(value[kResult], response_params_);
 
       if (validators::SUCCESS != validation_result) {
         success = false;
@@ -140,10 +138,9 @@ bool GetInteriorVehicleDataRequest::Validate() {
   }
 
   Json::Value outgoing_json;
-
+  validators::GetInteriorVehicleDataRequestValidator validator;
   if (validators::ValidationResult::SUCCESS !=
-      validators::GetInteriorVehicleDataRequestValidator::instance()->Validate(
-          json, outgoing_json)) {
+      validator.Validate(json, outgoing_json)) {
     LOG4CXX_INFO(logger_, "GetInteriorVehicleDataRequest validation failed!");
     SendResponse(
         false, result_codes::kInvalidData, "Mobile request validation failed!");

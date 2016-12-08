@@ -42,7 +42,7 @@ namespace can_cooperation {
 
 namespace commands {
 
-using event_engine::EventDispatcher;
+using can_event_engine::EventDispatcher;
 using application_manager::SeatLocation;
 using application_manager::SeatLocationPtr;
 
@@ -62,8 +62,7 @@ BaseCommandRequest::BaseCommandRequest(
 }
 
 BaseCommandRequest::~BaseCommandRequest() {
-  EventDispatcher<application_manager::MessagePtr, std::string>::instance()
-      ->remove_observer(this);
+  can_module_.event_dispatcher().remove_observer(this);
 }
 
 void BaseCommandRequest::OnTimeout() {
@@ -107,8 +106,8 @@ void BaseCommandRequest::SendRequest(const char* function_id,
     msg[kId] = MessageHelper::GetNextCANCorrelationID();
   }
 
-  EventDispatcher<application_manager::MessagePtr, std::string>::instance()
-      ->add_observer(function_id, msg[kId].asInt(), this);
+  can_module_.event_dispatcher().add_observer(
+      function_id, msg[kId].asInt(), this);
 
   msg[kJsonrpc] = "2.0";
   msg[kMethod] = function_id;
@@ -466,7 +465,7 @@ std::vector<std::string> BaseCommandRequest::ControlData(
 }
 
 void BaseCommandRequest::on_event(
-    const event_engine::Event<application_manager::MessagePtr, std::string>&
+    const can_event_engine::Event<application_manager::MessagePtr, std::string>&
         event) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (event.id() == functional_modules::hmi_api::get_user_consent) {
@@ -480,7 +479,7 @@ void BaseCommandRequest::on_event(
 }
 
 void BaseCommandRequest::UpdateHMILevel(
-    const event_engine::Event<application_manager::MessagePtr, std::string>&
+    const can_event_engine::Event<application_manager::MessagePtr, std::string>&
         event) {
   CANAppExtensionPtr extension = GetAppExtension(app_);
   if (!extension) {
@@ -497,7 +496,7 @@ void BaseCommandRequest::UpdateHMILevel(
 }
 
 void BaseCommandRequest::ProcessAccessResponse(
-    const event_engine::Event<application_manager::MessagePtr, std::string>&
+    const can_event_engine::Event<application_manager::MessagePtr, std::string>&
         event) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (!app_) {

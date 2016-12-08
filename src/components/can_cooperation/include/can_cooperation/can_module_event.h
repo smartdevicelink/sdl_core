@@ -42,7 +42,8 @@
 namespace can_cooperation {
 
 class CanModuleEvent
-    : public event_engine::Event<application_manager::MessagePtr, std::string> {
+    : public can_event_engine::Event<application_manager::MessagePtr,
+                                     std::string> {
  public:
   /*
    * @brief Constructor with parameters

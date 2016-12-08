@@ -51,18 +51,6 @@ OnPresetChangedNotification::~OnPresetChangedNotification() {}
 
 void OnPresetChangedNotification::Execute() {
   LOG4CXX_AUTO_TRACE(logger_);
-  /*
-    application_manager::MessagePtr message = message();
-    std::string json = message;
-    if (validators::ValidationResult::SUCCESS ==
-        validators::OnPresetChangedNotificationValidator::instance()->
-        Validate(json)) {
-      message->set_json_message(json);
-    } else {
-      LOG4CXX_INFO(logger_, "HMI notification validation failed!");
-      return;
-
-    }*/
 }
 
 }  // namespace commands

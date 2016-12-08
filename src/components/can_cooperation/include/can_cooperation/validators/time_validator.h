@@ -43,8 +43,11 @@ namespace validators {
 /**
  * @brief TimeValidator class
  */
-class TimeValidator : public Validator, public utils::Singleton<TimeValidator> {
+class TimeValidator : public Validator {
  public:
+  TimeValidator();
+  ~TimeValidator() {}
+
   /**
    * @brief Validate json with message params
    *
@@ -59,9 +62,6 @@ class TimeValidator : public Validator, public utils::Singleton<TimeValidator> {
 
  private:
   DISALLOW_COPY_AND_ASSIGN(TimeValidator);
-  FRIEND_BASE_SINGLETON_CLASS(TimeValidator);
-  TimeValidator();
-  ~TimeValidator(){};
 
   /*  std::map<std::string, int> hours_;
     std::map<std::string, int> minutes_;

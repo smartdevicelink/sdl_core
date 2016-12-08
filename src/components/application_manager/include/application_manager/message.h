@@ -68,7 +68,6 @@ enum ProtocolVersion {
 
 class Message {
  public:
-  Message();
   explicit Message(protocol_handler::MessagePriority priority);
   Message(const Message& message);
   Message& operator=(const Message& message);

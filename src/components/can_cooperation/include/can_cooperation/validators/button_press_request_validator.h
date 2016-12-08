@@ -43,25 +43,22 @@ namespace validators {
 /**
  * @brief ButtonPressRequestValidator class
  */
-class ButtonPressRequestValidator
-    : public Validator,
-      public utils::Singleton<ButtonPressRequestValidator> {
+class ButtonPressRequestValidator : public Validator {
  public:
+  ButtonPressRequestValidator();
   /**
-   * @brief Validate json with message params
-   *
-   * @param json_string string with message params(fake params will be cut off)
-   * @param outgoing_json outgoing json
-   *
-   * @return validation result
-   */
+ * @brief Validate json with message params
+ *
+ * @param json_string string with message params(fake params will be cut off)
+ * @param outgoing_json outgoing json
+ *
+ * @return validation result
+ */
   ValidationResult Validate(const Json::Value& json,
                             Json::Value& outgoing_json);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(ButtonPressRequestValidator);
-  FRIEND_BASE_SINGLETON_CLASS(ButtonPressRequestValidator);
-  ButtonPressRequestValidator();
 
   ValidationScope module_type_;
   ValidationScope button_name_;

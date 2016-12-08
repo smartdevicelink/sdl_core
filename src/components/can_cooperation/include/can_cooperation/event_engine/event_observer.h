@@ -36,7 +36,7 @@
 #include <string>
 #include "can_cooperation/event_engine/event.h"
 
-namespace event_engine {
+namespace can_event_engine {
 
 template <typename EventMessage, typename EventID>
 class Event;

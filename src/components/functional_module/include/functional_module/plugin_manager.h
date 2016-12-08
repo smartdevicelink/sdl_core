@@ -38,12 +38,10 @@
 #include "functional_module/generic_module.h"
 #include "application_manager/service.h"
 #include "application_manager/message.h"
-#include "utils/singleton.h"
 
 namespace functional_modules {
 
-class PluginManager : public utils::Singleton<PluginManager>,
-                      public ModuleObserver {
+class PluginManager : public ModuleObserver {
  public:
   PluginManager();
   ~PluginManager();
@@ -106,6 +104,7 @@ class PluginManager : public utils::Singleton<PluginManager>,
    * @param device removed
    */
   void OnDeviceRemoved(const connection_handler::DeviceHandle& device);
+  Modules& plugins();
 
  private:
   Modules plugins_;
@@ -114,7 +113,6 @@ class PluginManager : public utils::Singleton<PluginManager>,
   std::map<HMIFunctionID, ModulePtr> hmi_subscribers_;
   application_manager::ServicePtr service_;
 
-  friend class PluginManagerTest;
   DISALLOW_COPY_AND_ASSIGN(PluginManager);
 };
 

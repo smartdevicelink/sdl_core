@@ -64,8 +64,8 @@ ValidationResult ModuleDescriptionValidator::Validate(
   }
 
   if (IsMember(json, kModuleZone)) {
-    result = InteriorZoneValidator::instance()->Validate(
-        json[kModuleZone], outgoing_json[kModuleZone]);
+    InteriorZoneValidator validator;
+    result = validator.Validate(json[kModuleZone], outgoing_json[kModuleZone]);
   } else {
     result = ValidationResult::INVALID_DATA;
     LOG4CXX_ERROR(logger_, "Mandatory param " << kModuleZone << " missing!");

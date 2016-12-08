@@ -361,4 +361,8 @@ void PluginManager::OnDeviceRemoved(
   std::for_each(plugins_.begin(), plugins_.end(), HandleDeviceRemoved(device));
 }
 
+PluginManager::Modules& PluginManager::plugins() {
+  return plugins_;
+}
+
 }  //  namespace functional_modules
