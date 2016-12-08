@@ -55,8 +55,8 @@ namespace commands {
  */
 class BaseCommandRequest
     : public Command,
-      public event_engine::EventObserver<application_manager::MessagePtr,
-                                         std::string> {
+      public can_event_engine::EventObserver<application_manager::MessagePtr,
+                                             std::string> {
  public:
   /**
    * @brief BaseCommandRequest class constructor
@@ -78,8 +78,8 @@ class BaseCommandRequest
 
   // TODO(KKolodiy): need rename to Execute
   void Run();
-  void on_event(const event_engine::Event<application_manager::MessagePtr,
-                                          std::string>& event);
+  void on_event(const can_event_engine::Event<application_manager::MessagePtr,
+                                              std::string>& event);
 
  protected:
   application_manager::MessagePtr message_;
@@ -167,8 +167,8 @@ class BaseCommandRequest
    * @param event The received event
    */
   void virtual OnEvent(
-      const event_engine::Event<application_manager::MessagePtr, std::string>&
-          event) = 0;
+      const can_event_engine::Event<application_manager::MessagePtr,
+                                    std::string>& event) = 0;
 
   virtual std::string ModuleType(const Json::Value& message);
   virtual Json::Value GetInteriorZone(const Json::Value& message);
@@ -198,8 +198,9 @@ class BaseCommandRequest
  private:
   void CheckHMILevel(application_manager::TypeAccess access,
                      bool hmi_consented = false);
-  void UpdateHMILevel(const event_engine::Event<application_manager::MessagePtr,
-                                                std::string>& event);
+  void UpdateHMILevel(
+      const can_event_engine::Event<application_manager::MessagePtr,
+                                    std::string>& event);
   bool CheckPolicyPermissions();
   bool CheckDriverConsent();
   inline bool IsAutoAllowed(application_manager::TypeAccess access) const;
@@ -208,8 +209,8 @@ class BaseCommandRequest
   void SendDisallowed(application_manager::TypeAccess access);
   void SendGetUserConsent(const Json::Value& value);
   void ProcessAccessResponse(
-      const event_engine::Event<application_manager::MessagePtr, std::string>&
-          event);
+      const can_event_engine::Event<application_manager::MessagePtr,
+                                    std::string>& event);
   SeatLocation PrepareZone(const SeatLocation& interior_zone);
   Json::Value PrepareJsonZone(const Json::Value& value);
   application_manager::ApplicationSharedPtr app_;

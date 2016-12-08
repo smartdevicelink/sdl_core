@@ -63,7 +63,7 @@ void ButtonPressRequest::Execute() {
 }
 
 void ButtonPressRequest::OnEvent(
-    const event_engine::Event<application_manager::MessagePtr, std::string>&
+    const can_event_engine::Event<application_manager::MessagePtr, std::string>&
         event) {
   LOG4CXX_AUTO_TRACE(logger_);
 
@@ -93,9 +93,10 @@ bool ButtonPressRequest::Validate() {
 
   Json::Value outgoing_json;
 
+  validators::ButtonPressRequestValidator button_press_request_validator;
+
   if (validators::ValidationResult::SUCCESS !=
-      validators::ButtonPressRequestValidator::instance()->Validate(
-          json, outgoing_json)) {
+      button_press_request_validator.Validate(json, outgoing_json)) {
     LOG4CXX_INFO(logger_, "ButtonPressRequest validation failed!");
     SendResponse(
         false, result_codes::kInvalidData, "Mobile request validation failed!");

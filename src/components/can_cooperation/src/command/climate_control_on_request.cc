@@ -55,7 +55,7 @@ void ClimateControlOnRequest::Execute() {
 }
 
 void ClimateControlOnRequest::OnEvent(
-    const event_engine::Event<application_manager::MessagePtr, std::string>&
+    const can_event_engine::Event<application_manager::MessagePtr, std::string>&
         event) {
   LOG4CXX_AUTO_TRACE(logger_);
 

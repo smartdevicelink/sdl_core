@@ -43,9 +43,11 @@ namespace validators {
 /**
  * @brief SongInfoValidator class
  */
-class SongInfoValidator : public Validator,
-                          public utils::Singleton<SongInfoValidator> {
+class SongInfoValidator : public Validator {
  public:
+  SongInfoValidator();
+  ~SongInfoValidator() {}
+
   /**
    * @brief Validate json with message params
    *
@@ -60,16 +62,6 @@ class SongInfoValidator : public Validator,
 
  private:
   DISALLOW_COPY_AND_ASSIGN(SongInfoValidator);
-  FRIEND_BASE_SINGLETON_CLASS(SongInfoValidator);
-  SongInfoValidator();
-  ~SongInfoValidator(){};
-  /*
-    std::map<std::string, int> name_;
-    std::map<std::string, int> artist_;
-    std::map<std::string, int> genre_;
-    std::map<std::string, int> album_;
-    std::map<std::string, int> year_;
-    std::map<std::string, int> duration_;*/
 };
 
 }  // namespace valdiators

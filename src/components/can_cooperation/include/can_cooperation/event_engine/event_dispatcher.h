@@ -37,14 +37,13 @@
 #include <map>
 
 #include "utils/lock.h"
-#include "utils/singleton.h"
 
 #include "can_cooperation/event_engine/event.h"
 #include "can_cooperation/event_engine/event_observer.h"
 
 #include "interfaces/HMI_API.h"
 
-namespace event_engine {
+namespace can_event_engine {
 
 template <typename EventMessage, typename EventID>
 class Event;
@@ -53,9 +52,18 @@ template <typename EventMessage, typename EventID>
 class EventObserver;
 
 template <typename EventMessage, typename EventID>
-class EventDispatcher
-    : public utils::Singleton<EventDispatcher<EventMessage, EventID> > {
+class EventDispatcher {
  public:
+  /**
+   * @brief Default constructor
+   */
+  EventDispatcher();
+
+  /**
+   * @brief Destructor
+   */
+  virtual ~EventDispatcher();
+
   /*
    * @brief Delivers the event to all subscribers
    *
@@ -94,19 +102,7 @@ class EventDispatcher
 
  protected:
  private:
-  /*
-   * @brief Default constructor
-   */
-  EventDispatcher();
-
-  /*
-   * @brief Destructor
-   */
-  virtual ~EventDispatcher();
-
   DISALLOW_COPY_AND_ASSIGN(EventDispatcher);
-
-  FRIEND_BASE_SINGLETON_CLASS(EventDispatcher);
 
   // Data types section
   typedef std::list<EventObserver<EventMessage, EventID>*> ObserverList;

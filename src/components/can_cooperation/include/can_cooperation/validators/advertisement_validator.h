@@ -43,9 +43,11 @@ namespace validators {
 /**
  * @brief AdvertisementValidator class
  */
-class AdvertisementValidator : public Validator,
-                               public utils::Singleton<AdvertisementValidator> {
+class AdvertisementValidator : public Validator {
  public:
+  AdvertisementValidator();
+  ~AdvertisementValidator() {}
+
   /**
    * @brief Validate json with message params
    *
@@ -60,13 +62,6 @@ class AdvertisementValidator : public Validator,
 
  private:
   DISALLOW_COPY_AND_ASSIGN(AdvertisementValidator);
-  FRIEND_BASE_SINGLETON_CLASS(AdvertisementValidator);
-  AdvertisementValidator();
-  ~AdvertisementValidator(){};
-  /*
-    std::map<std::string, int> product_name_;
-    std::map<std::string, int> company_name_;
-    std::map<std::string, int> phone_number_;*/
 };
 
 }  // namespace valdiators

@@ -29,12 +29,9 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-#ifndef SRC_COMPONENTS_FUNCTIONAL_MODULE_SRC_TIMER_DIRECTOR_IMPL_H_
-#define SRC_COMPONENTS_FUNCTIONAL_MODULE_SRC_TIMER_DIRECTOR_IMPL_H_
-
-#include "functional_module/timer/timer_director.h"
 #include <typeinfo>
+#include "functional_module/timer/timer_director.h"
+#include "can_cooperation/can_module_timer.h"
 #include "utils/logger.h"
 
 namespace functional_modules {
@@ -99,6 +96,9 @@ void TimerDirector::RegisterTimer(ModuleTimer<T>& timer) {
   }
 }
 
+template void TimerDirector::RegisterTimer<can_cooperation::TrackableMessage>(
+    ModuleTimer<can_cooperation::TrackableMessage>& timer);
+
 template <class T>
 void TimerDirector::UnregisterTimer(const ModuleTimer<T>& timer) {
   std::string type_name = typeid(timer).name();
@@ -114,6 +114,9 @@ void TimerDirector::UnregisterTimer(const ModuleTimer<T>& timer) {
   timer_threads_.erase(it);
 }
 
+template void TimerDirector::UnregisterTimer<can_cooperation::TrackableMessage>(
+    const ModuleTimer<can_cooperation::TrackableMessage>& timer);
+
 void TimerDirector::UnregisterAllTimers() {
   for (std::map<std::string, threads::Thread*>::iterator it =
            timer_threads_.begin();
@@ -127,5 +130,3 @@ void TimerDirector::UnregisterAllTimers() {
 }
 
 }  //  namespace functional_modules
-
-#endif  //  SRC_COMPONENTS_FUNCTIONAL_MODULE_SRC_TIMER_DIRECTOR_IMPL_H_

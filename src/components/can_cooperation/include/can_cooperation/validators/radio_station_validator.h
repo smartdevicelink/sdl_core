@@ -43,9 +43,10 @@ namespace validators {
 /**
  * @brief RadioStationValidator class
  */
-class RadioStationValidator : public Validator,
-                              public utils::Singleton<RadioStationValidator> {
+class RadioStationValidator : public Validator {
  public:
+  RadioStationValidator();
+  ~RadioStationValidator() {}
   /**
    * @brief Validate json with message params
    *
@@ -60,14 +61,6 @@ class RadioStationValidator : public Validator,
 
  private:
   DISALLOW_COPY_AND_ASSIGN(RadioStationValidator);
-  FRIEND_BASE_SINGLETON_CLASS(RadioStationValidator);
-  RadioStationValidator();
-  ~RadioStationValidator(){};
-  /*
-    std::map<std::string, int> frequency_;
-    std::map<std::string, int> fraction_;
-    std::map<std::string, int> available_hds_;
-    std::map<std::string, int> current_hd_;*/
 };
 
 }  // namespace valdiators

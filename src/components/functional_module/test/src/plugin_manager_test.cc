@@ -4,6 +4,8 @@
 #include "mock_generic_module.h"
 #include "mock_service.h"
 #include "application_manager/mock_application.h"
+#include "utils/shared_ptr.h"
+#include "utils/make_shared.h"
 
 using application_manager::Message;
 using application_manager::ProtocolVersion;
@@ -16,29 +18,21 @@ namespace functional_modules {
 
 class PluginManagerTest : public ::testing::Test {
  protected:
-  static PluginManager* manager;
-  static MockService* service;
-  static MockGenericModule* module;
+  utils::SharedPtr<PluginManager> manager;
+  utils::SharedPtr<MockService> service;
+  utils::SharedPtr<MockGenericModule> module;
 
-  static void SetUpTestCase() {
-    manager = PluginManager::instance();
-    service = new MockService();
+  void SetUp() OVERRIDE {
+    manager = utils::MakeShared<PluginManager>();
+    service = utils::MakeShared<MockService>();
     manager->SetServiceHandler(service);
 
     ASSERT_EQ(1, manager->LoadPlugins("./plugins/"));
-    const PluginManager::Modules& plugins = manager->plugins_;
+    const PluginManager::Modules& plugins = manager->plugins();
     PluginManager::Modules::const_iterator i = plugins.begin();
     module = static_cast<MockGenericModule*>(i->second.get());
   }
-
-  static void TearDownTestCase() {
-    PluginManager::destroy();
-  }
 };
-
-PluginManager* PluginManagerTest::manager = 0;
-MockService* PluginManagerTest::service = 0;
-MockGenericModule* PluginManagerTest::module = 0;
 
 TEST_F(PluginManagerTest, ChangePluginsState) {
   ServiceState kState = ServiceState::SUSPENDED;

@@ -68,8 +68,8 @@ class GetInteriorVehicleDataRequest : public BaseCommandRequest {
    *
    * @param event The received event
    */
-  void OnEvent(const event_engine::Event<application_manager::MessagePtr,
-                                         std::string>& event);
+  void OnEvent(const can_event_engine::Event<application_manager::MessagePtr,
+                                             std::string>& event);
 
  protected:
   virtual std::string ModuleType(const Json::Value& message);

@@ -56,9 +56,9 @@ ValidationResult OnInteriorVehicleDataNotificationValidator::Validate(
 
   ValidationResult result;
 
+  ModuleDataValidator validator;
   if (IsMember(json, kModuleData)) {
-    result = ModuleDataValidator::instance()->Validate(
-        json[kModuleData], outgoing_json[kModuleData]);
+    result = validator.Validate(json[kModuleData], outgoing_json[kModuleData]);
   } else {
     result = ValidationResult::INVALID_DATA;
     LOG4CXX_ERROR(logger_, "Mandatory param " << kModuleData << " missing!");

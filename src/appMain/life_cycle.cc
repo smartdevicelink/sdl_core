@@ -355,9 +355,6 @@ void LifeCycle::Run() {
 void LifeCycle::StopComponents() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-#ifdef SDL_REMOTE_CONTROL
-  functional_modules::PluginManager::destroy();
-#endif
   DCHECK_OR_RETURN_VOID(hmi_handler_);
   hmi_handler_->set_message_observer(NULL);
 

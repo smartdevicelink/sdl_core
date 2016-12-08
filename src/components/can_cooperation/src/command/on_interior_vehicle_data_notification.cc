@@ -93,9 +93,8 @@ bool OnInteriorVehicleDataNotification::Validate() {
   application_manager::MessagePtr msg = message();
   std::string json = msg->json_message();
 
-  if (validators::ValidationResult::SUCCESS ==
-      validators::OnInteriorVehicleDataNotificationValidator::instance()
-          ->Validate(json)) {
+  validators::OnInteriorVehicleDataNotificationValidator validaror;
+  if (validators::ValidationResult::SUCCESS == validaror.Validate(json)) {
     msg->set_json_message(json);
   } else {
     LOG4CXX_INFO(logger_, "Invalid notification from the vehicle!");

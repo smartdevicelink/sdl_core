@@ -34,9 +34,14 @@
 #define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_EVENT_ENGINE_CAN_COOPERATION_EVENT_H_
 
 #include <string>
-#include <can_cooperation/event_engine/event_dispatcher.h>
+#include "can_cooperation/event_engine/event_dispatcher.h"
+#include "utils/shared_ptr.h"
+#include "application_manager/message.h"
 
-namespace event_engine {
+namespace can_event_engine {
+
+template <typename EventMessage, typename EventID>
+class EventDispatcher;
 
 template <typename EventMessage, typename EventID>
 class Event {
@@ -52,7 +57,7 @@ class Event {
   /*
    * @brief Destructor
    */
-  virtual ~Event(){};
+  virtual ~Event() {}
 
   /*
    * @brief Provides event ID
@@ -88,7 +93,7 @@ class Event {
    */
   virtual int32_t event_message_type() const = 0;
 
-  void raise();
+  void raise(EventDispatcher<EventMessage, EventID>& event_dispatcher);
 
  protected:
   EventMessage event_message_;
@@ -112,8 +117,9 @@ Event<EventMessage, EventID>::Event(EventMessage& message, const EventID& id)
     : event_message_(message), id_(id) {}
 
 template <typename EventMessage, typename EventID>
-void Event<EventMessage, EventID>::raise() {
-  EventDispatcher<EventMessage, EventID>::instance()->raise_event(*this);
+void Event<EventMessage, EventID>::raise(
+    EventDispatcher<EventMessage, EventID>& event_dispatcher) {
+  event_dispatcher.raise_event(*this);
 }
 
 }  // namespace event_engine

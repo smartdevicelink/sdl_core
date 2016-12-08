@@ -43,10 +43,10 @@ namespace validators {
 /**
  * @brief RadioControlDataValidator class
  */
-class RadioControlDataValidator
-    : public Validator,
-      public utils::Singleton<RadioControlDataValidator> {
+class RadioControlDataValidator : public Validator {
  public:
+  RadioControlDataValidator();
+
   /**
    * @brief Validate json with message params
    *
@@ -68,8 +68,6 @@ class RadioControlDataValidator
 
  private:
   DISALLOW_COPY_AND_ASSIGN(RadioControlDataValidator);
-  FRIEND_BASE_SINGLETON_CLASS(RadioControlDataValidator);
-  RadioControlDataValidator();
 
   /**
    * @brief Remove read only param from json if exist

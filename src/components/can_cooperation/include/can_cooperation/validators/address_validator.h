@@ -43,9 +43,11 @@ namespace validators {
 /**
  * @brief AddressValidator class
  */
-class AddressValidator : public Validator,
-                         public utils::Singleton<AddressValidator> {
+class AddressValidator : public Validator {
  public:
+  AddressValidator();
+  ~AddressValidator() {}
+
   /**
    * @brief Validate json with message params
    *
@@ -60,14 +62,6 @@ class AddressValidator : public Validator,
 
  private:
   DISALLOW_COPY_AND_ASSIGN(AddressValidator);
-  FRIEND_BASE_SINGLETON_CLASS(AddressValidator);
-  AddressValidator();
-  ~AddressValidator(){};
-
-  /*  std::map<std::string, int> state_;
-    std::map<std::string, int> zip_code_;
-    std::map<std::string, int> city_;
-    std::map<std::string, int> street_;*/
 };
 
 }  // namespace valdiators
