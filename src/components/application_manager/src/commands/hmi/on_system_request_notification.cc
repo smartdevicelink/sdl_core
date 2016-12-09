@@ -89,6 +89,22 @@ void OnSystemRequestNotification::Run() {
     return;
   }
 
+  std::string device_mac;
+  application_manager_.connection_handler()
+      .get_session_observer()
+      .GetDataOnDeviceID(app->device(), NULL, NULL, &device_mac, NULL);
+
+  if (policy::kDeviceAllowed !=
+      application_manager_.GetPolicyHandler().GetUserConsentForDevice(
+          device_mac)) {
+    LOG4CXX_WARN(logger_,
+                 "Application "
+                     << app->policy_app_id()
+                     << " is registered from non-consented device."
+                        "Can't forward notification to application.");
+    return;
+  }
+
   LOG4CXX_DEBUG(logger_,
                 "Sending request with application id " << app->policy_app_id());
 
