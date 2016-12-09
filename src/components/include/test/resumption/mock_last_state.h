@@ -30,33 +30,20 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_H_
-#define SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_H_
+#ifndef SRC_COMPONENTS_INCLUDE_TEST_RESUMPTION_MOCK_LAST_STATE_H_
+#define SRC_COMPONENTS_INCLUDE_TEST_RESUMPTION_MOCK_LAST_STATE_H_
 
-#include <string>
-
-#include "json/json.h"
+#include "gmock/gmock.h"
+#include "resumption/last_state.h"
 
 namespace resumption {
 
-class LastState {
+class MockLastState : public resumption::LastState {
  public:
-  /**
-   * @brief Destructor
-   */
-  virtual ~LastState() {}
-
-  /**
-   * @brief Saving dictionary to filesystem
-   */
-  virtual void SaveStateToFileSystem() = 0;
-
-  /**
-   * @brief Get reference to dictionary
-   */
-  virtual Json::Value& get_dictionary() = 0;
+  MOCK_METHOD0(SaveStateToFileSystem, void());
+  MOCK_METHOD0(get_dictionary, Json::Value&());
 };
 
-}  // namespace resumption
+}  // resumption
 
-#endif  // SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_H_
+#endif  // SRC_COMPONENTS_INCLUDE_TEST_RESUMPTION_MOCK_LAST_STATE_H_

@@ -30,33 +30,52 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_H_
-#define SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_H_
-
-#include <string>
-
-#include "json/json.h"
+#include "resumption/last_state_impl.h"
+#include "utils/file_system.h"
+#include "utils/logger.h"
 
 namespace resumption {
 
-class LastState {
- public:
-  /**
-   * @brief Destructor
-   */
-  virtual ~LastState() {}
+CREATE_LOGGERPTR_GLOBAL(logger_, "Resumption")
 
-  /**
-   * @brief Saving dictionary to filesystem
-   */
-  virtual void SaveStateToFileSystem() = 0;
+LastStateImpl::LastStateImpl(const std::string& app_storage_folder,
+                             const std::string& app_info_storage)
+    : app_storage_folder_(app_storage_folder)
+    , app_info_storage_(app_info_storage) {
+  LoadStateFromFileSystem();
+  LOG4CXX_AUTO_TRACE(logger_);
+}
 
-  /**
-   * @brief Get reference to dictionary
-   */
-  virtual Json::Value& get_dictionary() = 0;
-};
+LastStateImpl::~LastStateImpl() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  SaveStateToFileSystem();
+}
 
-}  // namespace resumption
+void LastStateImpl::SaveStateToFileSystem() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  const std::string& str = dictionary_.toStyledString();
+  const std::vector<uint8_t> char_vector_pdata(str.begin(), str.end());
 
-#endif  // SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_H_
+  DCHECK(file_system::CreateDirectoryRecursively(app_storage_folder_));
+  LOG4CXX_INFO(logger_,
+               "LastState::SaveStateToFileSystem " << app_info_storage_ << str);
+  DCHECK(file_system::Write(app_info_storage_, char_vector_pdata));
+}
+
+Json::Value& LastStateImpl::get_dictionary() {
+  return dictionary_;
+}
+
+void LastStateImpl::LoadStateFromFileSystem() {
+  std::string buffer;
+  bool result = file_system::ReadFile(app_info_storage_, buffer);
+  Json::Reader m_reader;
+  if (result && m_reader.parse(buffer, dictionary_)) {
+    LOG4CXX_INFO(logger_,
+                 "Valid last state was found." << dictionary_.toStyledString());
+    return;
+  }
+  LOG4CXX_WARN(logger_, "No valid last state was found.");
+}
+
+}  // resumption

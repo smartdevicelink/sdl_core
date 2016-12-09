@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,7 @@
 #include "transport_manager/transport_manager_default.h"
 #include "resumption/last_state.h"
 #include "transport_manager/mock_transport_manager_settings.h"
-#include "resumption/last_state.h"
+#include "resumption/last_state_impl.h"
 
 namespace test {
 namespace components {
@@ -46,7 +46,8 @@ TEST(TestTransportManagerDefault, Init_LastStateNotUsed) {
   MockTransportManagerSettings transport_manager_settings;
   transport_manager::TransportManagerDefault transport_manager(
       transport_manager_settings);
-  resumption::LastState last_state("app_storage_folder", "app_info_storage2");
+  resumption::LastStateImpl last_state("app_storage_folder",
+                                       "app_info_storage2");
 
   EXPECT_CALL(transport_manager_settings, use_last_state())
       .WillRepeatedly(Return(false));
@@ -60,7 +61,8 @@ TEST(TestTransportManagerDefault, DISABLED_Init_LastStateUsed) {
   MockTransportManagerSettings transport_manager_settings;
   transport_manager::TransportManagerDefault transport_manager(
       transport_manager_settings);
-  resumption::LastState last_state("app_storage_folder", "app_info_storage2");
+  resumption::LastStateImpl last_state("app_storage_folder",
+                                       "app_info_storage2");
 
   EXPECT_CALL(transport_manager_settings, use_last_state())
       .WillRepeatedly(Return(true));
