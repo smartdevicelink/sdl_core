@@ -98,10 +98,6 @@ class LifeCycle {
   protocol_handler::ProtocolHandlerImpl* protocol_handler_;
   connection_handler::ConnectionHandlerImpl* connection_handler_;
   application_manager::ApplicationManagerImpl* app_manager_;
-#ifdef SDL_REMOTE_CONTROL
-  functional_modules::PluginManager* plugin_manager_;
-  application_manager::CoreService* core_service_;
-#endif
 #ifdef ENABLE_SECURITY
   security_manager::CryptoManager* crypto_manager_;
   security_manager::SecurityManager* security_manager_;
@@ -129,6 +125,11 @@ class LifeCycle {
 
   const profile::Profile& profile_;
   bool components_started_;
+#ifdef SDL_REMOTE_CONTROL
+  functional_modules::PluginManager* plugin_manager_;
+  utils::SharedPtr<application_manager::CoreService> core_service_;
+#endif
+
   DISALLOW_COPY_AND_ASSIGN(LifeCycle);
 };
 }  //  namespace main_namespace

@@ -237,6 +237,85 @@ class ApplicationManagerImpl
   ApplicationSharedPtr application(
       const std::string& device_id,
       const std::string& policy_app_id) const OVERRIDE;
+  AppSharedPtrs applications_by_interior_vehicle_data(
+      smart_objects::SmartObject moduleDescription) OVERRIDE;
+  uint32_t GetDeviceHandle(uint32_t connection_key) OVERRIDE;
+  /**
+   * @brief ChangeAppsHMILevel the function that will change application's
+   * hmi level.
+   *
+   * @param app_id id of the application whose hmi level should be changed.
+   *
+   * @param level new hmi level for certain application.
+   */
+  void ChangeAppsHMILevel(uint32_t app_id, mobile_apis::HMILevel::eType level);
+  /**
+   * @brief MakeAppNotAudible allows to make certain application not audible.
+   *
+   * @param app_id applicatin's id whose audible state should be changed.
+   */
+  void MakeAppNotAudible(uint32_t app_id);
+
+  /**
+   * @brief MakeAppFullScreen allows ti change application's properties
+   * in order to make it full screen.
+   *
+   * @param app_id the id of application which should be in full screen  mode.
+   *
+   * @return true if operation was success, false otherwise.
+   */
+  bool MakeAppFullScreen(uint32_t app_id);
+  /**
+   * @brief  Places a message to the queue to be sent to mobile. Called from
+   * plugins.
+   * @param message Message to mobile
+   */
+  void PostMessageToMobileQueque(const MessagePtr& message) OVERRIDE;
+
+  /**
+   * @brief  Places a message to the queue to be sent to HMI. Called from
+   * plugins.
+   * @param message Message to HMI
+   */
+  void PostMessageToHMIQueque(const MessagePtr& message) OVERRIDE;
+
+  /**
+   * @brief Subscribes to notification from HMI
+   * @param hmi_notification string with notification name
+   */
+  void SubscribeToHMINotification(const std::string& hmi_notification) OVERRIDE;
+
+  /**
+   * @brief Checks HMI level and returns true if audio streaming is allowed
+   */
+  bool IsAudioStreamingAllowed(uint32_t connection_key) const OVERRIDE;
+
+  /**
+   * @brief Checks HMI level and returns true if video streaming is allowed
+   */
+  bool IsVideoStreamingAllowed(uint32_t connection_key) const OVERRIDE;
+  void Erase(ApplicationSharedPtr app_to_remove) {
+    app_to_remove->RemoveExtensions();
+    applications_.erase(app_to_remove);
+  }
+  /**
+   * @brief method adds application in FULL and LIMITED state
+   * to on_phone_call_app_list_.
+   * Also OnHMIStateNotification with BACKGROUND state sent for these apps
+   */
+  void CreatePhoneCallAppList() OVERRIDE;
+
+  /**
+   * @brief method removes application from on_phone_call_app_list_.
+   *
+   * Also OnHMIStateNotification with previous HMI state sent for these apps
+   */
+  void ResetPhoneCallAppList() OVERRIDE;
+  virtual functional_modules::PluginManager& GetPluginManager() OVERRIDE {
+    return plugin_manager_;
+  }
+  std::vector<std::string> devices(
+      const std::string& policy_app_id) const OVERRIDE;
 #endif
 
   ApplicationSharedPtr active_application() const OVERRIDE;
@@ -248,12 +327,6 @@ class ApplicationManagerImpl
 
   AppSharedPtrs applications_by_button(uint32_t button) OVERRIDE;
   AppSharedPtrs applications_with_navi() OVERRIDE;
-#ifdef SDL_REMOTE_CONTROL
-  AppSharedPtrs applications_by_interior_vehicle_data(
-      smart_objects::SmartObject moduleDescription) OVERRIDE;
-  can_cooperation::CANModuleInterface& can_module() OVERRIDE;
-#endif  // SDL_REMOTE_CONTROL
-
   ApplicationSharedPtr get_limited_media_application() const OVERRIDE;
   ApplicationSharedPtr get_limited_navi_application() const OVERRIDE;
   ApplicationSharedPtr get_limited_voice_application() const OVERRIDE;
@@ -298,10 +371,6 @@ class ApplicationManagerImpl
    * @param Application AppID
    */
   void UnsubscribeAppFromWayPoints(const uint32_t app_id) OVERRIDE;
-
-#ifdef SDL_REMOTE_CONTROL
-  uint32_t GetDeviceHandle(uint32_t connection_key) OVERRIDE;
-#endif  // SDL_REMOTE_CONTROL
 
   /**
    * @brief Is Any Application is subscribed for way points
@@ -521,34 +590,6 @@ class ApplicationManagerImpl
     state_ctrl_.SetRegularState(app, new_state, SendActivateApp);
   }
 
-#ifdef SDL_REMOTE_CONTROL
-  /**
-   * @brief ChangeAppsHMILevel the function that will change application's
-   * hmi level.
-   *
-   * @param app_id id of the application whose hmi level should be changed.
-   *
-   * @param level new hmi level for certain application.
-   */
-  void ChangeAppsHMILevel(uint32_t app_id, mobile_apis::HMILevel::eType level);
-  /**
-   * @brief MakeAppNotAudible allows to make certain application not audible.
-   *
-   * @param app_id applicatin's id whose audible state should be changed.
-   */
-  void MakeAppNotAudible(uint32_t app_id);
-
-  /**
-   * @brief MakeAppFullScreen allows ti change application's properties
-   * in order to make it full screen.
-   *
-   * @param app_id the id of application which should be in full screen  mode.
-   *
-   * @return true if operation was success, false otherwise.
-   */
-  bool MakeAppFullScreen(uint32_t app_id);
-#endif
-
   /**
       * @brief Checks, if given RPC is allowed at current HMI level for specific
       * application in policy table
@@ -564,38 +605,6 @@ class ApplicationManagerImpl
       const std::string& function_id,
       const RPCParams& rpc_params,
       CommandParametersPermissions* params_permissions = NULL) OVERRIDE;
-
-#ifdef SDL_REMOTE_CONTROL
-  /**
-   * @brief  Places a message to the queue to be sent to mobile. Called from
-   * plugins.
-   * @param message Message to mobile
-   */
-  void PostMessageToMobileQueque(const MessagePtr& message) OVERRIDE;
-
-  /**
-   * @brief  Places a message to the queue to be sent to HMI. Called from
-   * plugins.
-   * @param message Message to HMI
-   */
-  void PostMessageToHMIQueque(const MessagePtr& message) OVERRIDE;
-
-  /**
-   * @brief Subscribes to notification from HMI
-   * @param hmi_notification string with notification name
-   */
-  void SubscribeToHMINotification(const std::string& hmi_notification) OVERRIDE;
-
-  /**
-   * @brief Checks HMI level and returns true if audio streaming is allowed
-   */
-  bool IsAudioStreamingAllowed(uint32_t connection_key) const OVERRIDE;
-
-  /**
-   * @brief Checks HMI level and returns true if video streaming is allowed
-   */
-  bool IsVideoStreamingAllowed(uint32_t connection_key) const OVERRIDE;
-#endif
 
   /**
    * @brief IsApplicationForbidden allows to distinguish if application is
@@ -746,12 +755,6 @@ class ApplicationManagerImpl
     state_ctrl_.SetRegularState(app, state);
   }
 
-#ifdef SDL_REMOTE_CONTROL
-  void Erase(ApplicationSharedPtr app_to_remove) {
-    app_to_remove->RemoveExtensions();
-    applications_.erase(app_to_remove);
-  }
-#endif
   /**
    * @brief Checks, if particular state is active
    * @param state_id State
@@ -1066,22 +1069,6 @@ class ApplicationManagerImpl
    */
   void RemoveAppFromTTSGlobalPropertiesList(const uint32_t app_id) OVERRIDE;
 
-#ifdef SDL_REMOTE_CONTROL
-  /**
-   * @brief method adds application in FULL and LIMITED state
-   * to on_phone_call_app_list_.
-   * Also OnHMIStateNotification with BACKGROUND state sent for these apps
-   */
-  void CreatePhoneCallAppList() OVERRIDE;
-
-  /**
-   * @brief method removes application from on_phone_call_app_list_.
-   *
-   * Also OnHMIStateNotification with previous HMI state sent for these apps
-   */
-  void ResetPhoneCallAppList() OVERRIDE;
-
-#endif
   // TODO(AOleynik): Temporary added, to fix build. Should be reworked.
   connection_handler::ConnectionHandler& connection_handler() const OVERRIDE;
   protocol_handler::ProtocolHandler& protocol_handler() const OVERRIDE;
@@ -1089,12 +1076,6 @@ class ApplicationManagerImpl
   virtual policy::PolicyHandlerInterface& GetPolicyHandler() OVERRIDE {
     return *policy_handler_;
   }
-
-#ifdef SDL_REMOTE_CONTROL
-  virtual functional_modules::PluginManager& GetPluginManager() OVERRIDE {
-    return plugin_manager_;
-  }
-#endif
 
   /**
    * @brief Function Should be called when Low Voltage is occured
@@ -1476,10 +1457,7 @@ class ApplicationManagerImpl
       const connection_handler::DeviceHandle handle);
 
   void ClearTTSGlobalPropertiesList();
-#ifdef SDL_REMOTE_CONTROL
-  std::vector<std::string> devices(
-      const std::string& policy_app_id) const OVERRIDE;
-#endif
+
  private:
 #ifdef ENABLE_LOG
   static log4cxx::LoggerPtr logger_;
@@ -1533,7 +1511,6 @@ class ApplicationManagerImpl
 
 #ifdef SDL_REMOTE_CONTROL
   functional_modules::PluginManager plugin_manager_;
-  std::auto_ptr<can_cooperation::CANModuleInterface> can_module_;
   /**
    * @brief Map contains apps with HMI state before incoming call
    * After incoming call ends previous HMI state must restore

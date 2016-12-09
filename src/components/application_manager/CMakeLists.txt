@@ -416,7 +416,6 @@ SET (LIBRARIES
 if(REMOTE_CONTROL)
     SET (LIBRARIES
       ${LIBRARIES}
-      CANCooperation
       FunctionalModule
     )
 endif(REMOTE_CONTROL)

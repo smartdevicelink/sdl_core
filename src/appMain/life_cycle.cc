@@ -188,7 +188,7 @@ bool LifeCycle::StartComponents() {
 #ifdef SDL_REMOTE_CONTROL
   components_started_ = true;
 
-  core_service_ = new application_manager::CoreService(*app_manager_);
+  core_service_ = utils::MakeShared<application_manager::CoreService>(*app_manager_);
 
   plugin_manager_ = new functional_modules::PluginManager();
   plugin_manager_->SetServiceHandler(core_service_);
@@ -423,7 +423,7 @@ void LifeCycle::StopComponents() {
 
 #ifdef SDL_REMOTE_CONTROL
   delete plugin_manager_;
-  delete core_service_;
+  //delete core_service_;
 #endif
   LOG4CXX_INFO(logger_, "Destroying HMI Message Handler and MB adapter.");
 
