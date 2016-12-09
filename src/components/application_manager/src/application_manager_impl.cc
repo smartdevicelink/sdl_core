@@ -70,7 +70,6 @@
 
 #ifdef SDL_REMOTE_CONTROL
 #include "policy/usage_statistics/counter.h"
-#include "can_cooperation/can_module.h"
 #include "functional_module/plugin_manager.h"
 #endif
 
@@ -120,9 +119,6 @@ ApplicationManagerImpl::ApplicationManagerImpl(
     , policy_handler_(new policy::PolicyHandler(policy_settings, *this))
     , protocol_handler_(NULL)
     , request_ctrl_(am_settings)
-#ifdef SDL_REMOTE_CONTROL
-    , can_module_(new can_cooperation::CANModule())
-#endif  // SDL_REMOTE_CONTROL
     , hmi_so_factory_(NULL)
     , mobile_so_factory_(NULL)
     , messages_from_mobile_("AM FromMobile", this)
@@ -3596,10 +3592,6 @@ bool ApplicationManagerImpl::MakeAppFullScreen(uint32_t app_id) {
   }
 
   return true;
-}
-
-can_cooperation::CANModuleInterface& ApplicationManagerImpl::can_module() {
-  return *can_module_;
 }
 
 #endif

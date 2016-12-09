@@ -50,7 +50,6 @@
 #include "application_manager/hmi_interfaces.h"
 #ifdef SDL_REMOTE_CONTROL
 #include "functional_module/plugin_manager.h"
-#include "can_cooperation/can_module_interface.h"
 #endif
 namespace resumption {
 class LastState;
@@ -149,6 +148,29 @@ class ApplicationManager {
       const std::string& device_id, const std::string& policy_app_id) const = 0;
   virtual void SubscribeToHMINotification(
       const std::string& hmi_notification) = 0;
+  virtual AppSharedPtrs applications_by_interior_vehicle_data(
+      smart_objects::SmartObject moduleDescription) = 0;
+  virtual uint32_t GetDeviceHandle(uint32_t connection_key) = 0;
+
+  /**
+   * @brief Checks HMI level and returns true if audio streaming is allowed
+   */
+  virtual bool IsAudioStreamingAllowed(uint32_t connection_key) const = 0;
+
+  /**
+   * @brief Checks HMI level and returns true if video streaming is allowed
+   */
+  virtual bool IsVideoStreamingAllowed(uint32_t connection_key) const = 0;
+  virtual void ChangeAppsHMILevel(uint32_t app_id,
+                                  mobile_apis::HMILevel::eType level) = 0;
+  virtual void CreatePhoneCallAppList() = 0;
+  virtual void ResetPhoneCallAppList() = 0;
+  virtual functional_modules::PluginManager& GetPluginManager() = 0;
+  virtual std::vector<std::string> devices(
+      const std::string& policy_app_id) const = 0;
+  virtual void PostMessageToHMIQueque(const MessagePtr& message) = 0;
+  virtual void PostMessageToMobileQueque(const MessagePtr& message) = 0;
+
 #endif
   virtual ApplicationSharedPtr active_application() const = 0;
 
@@ -165,11 +187,6 @@ class ApplicationManager {
 
   virtual AppSharedPtrs applications_by_button(uint32_t button) = 0;
   virtual AppSharedPtrs applications_with_navi() = 0;
-#ifdef SDL_REMOTE_CONTROL
-  virtual AppSharedPtrs applications_by_interior_vehicle_data(
-      smart_objects::SmartObject moduleDescription) = 0;
-  virtual can_cooperation::CANModuleInterface& can_module() = 0;
-#endif  // SDL_REMOTE_CONTROL
 
   /**
    * @brief Returns media application with LIMITED HMI Level if exists
@@ -360,21 +377,6 @@ class ApplicationManager {
 
   virtual void MarkAppsGreyOut(const connection_handler::DeviceHandle handle,
                                bool is_greyed_out) = 0;
-
-#ifdef SDL_REMOTE_CONTROL
-  virtual uint32_t GetDeviceHandle(uint32_t connection_key) = 0;
-
-  /**
-   * @brief Checks HMI level and returns true if audio streaming is allowed
-   */
-  virtual bool IsAudioStreamingAllowed(uint32_t connection_key) const = 0;
-
-  /**
-   * @brief Checks HMI level and returns true if video streaming is allowed
-   */
-  virtual bool IsVideoStreamingAllowed(uint32_t connection_key) const = 0;
-#endif
-
   /**
    * @brief Returns pointer to application-to-be-registered (from QUERY_APP
    * list)
@@ -622,21 +624,8 @@ class ApplicationManager {
 
   virtual uint32_t GetAvailableSpaceForApp(const std::string& folder_name) = 0;
   virtual void OnTimerSendTTSGlobalProperties() = 0;
-#ifdef SDL_REMOTE_CONTROL
-  virtual void ChangeAppsHMILevel(uint32_t app_id,
-                                  mobile_apis::HMILevel::eType level) = 0;
-  virtual void CreatePhoneCallAppList() = 0;
-  virtual void ResetPhoneCallAppList() = 0;
-#endif
   virtual void OnLowVoltage() = 0;
   virtual void OnWakeUp() = 0;
-#ifdef SDL_REMOTE_CONTROL
-  virtual functional_modules::PluginManager& GetPluginManager() = 0;
-  virtual std::vector<std::string> devices(
-      const std::string& policy_app_id) const = 0;
-  virtual void PostMessageToHMIQueque(const MessagePtr& message) = 0;
-  virtual void PostMessageToMobileQueque(const MessagePtr& message) = 0;
-#endif
 };
 
 }  // namespace application_manager

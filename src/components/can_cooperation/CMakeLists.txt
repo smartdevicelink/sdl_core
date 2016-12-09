@@ -96,13 +96,12 @@ set (SOURCES
 
 set (LIBRARIES
     jsoncpp
-    ApplicationManager
     FunctionalModule
     Utils
     ConfigProfile
 )
 
-add_library(${target} ${SOURCES})
+add_library(${target} SHARED ${SOURCES})
 target_link_libraries(${target} ${LIBRARIES} )
 
 if(ENABLE_LOG)

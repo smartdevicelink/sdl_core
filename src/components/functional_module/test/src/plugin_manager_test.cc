@@ -17,14 +17,17 @@ using ::testing::ReturnRef;
 namespace functional_modules {
 
 class PluginManagerTest : public ::testing::Test {
+ public:
+  PluginManagerTest()
+      : manager(utils::MakeShared<PluginManager>())
+      , service(utils::MakeShared<MockService>()) {}
+
  protected:
   utils::SharedPtr<PluginManager> manager;
   utils::SharedPtr<MockService> service;
-  utils::SharedPtr<MockGenericModule> module;
+  MockGenericModule* module;
 
   void SetUp() OVERRIDE {
-    manager = utils::MakeShared<PluginManager>();
-    service = utils::MakeShared<MockService>();
     manager->SetServiceHandler(service);
 
     ASSERT_EQ(1, manager->LoadPlugins("./plugins/"));
@@ -36,7 +39,7 @@ class PluginManagerTest : public ::testing::Test {
 
 TEST_F(PluginManagerTest, ChangePluginsState) {
   ServiceState kState = ServiceState::SUSPENDED;
-  EXPECT_CALL(*module, OnServiceStateChanged(kState)).Times(1);
+  EXPECT_CALL(*module, OnServiceStateChanged(kState));
   manager->OnServiceStateChanged(kState);
 }
 
