@@ -89,8 +89,17 @@ void UpdateStatusManager::OnUpdateTimeoutOccurs() {
 void UpdateStatusManager::OnValidUpdateReceived() {
   LOG4CXX_AUTO_TRACE(logger_);
   update_status_thread_delegate_->updateTimeOut(0);  // Stop Timer
+  const bool is_another_update_planned = IsUpdateRequired();
+  if (is_another_update_planned) {
+    set_update_required(false);
+  }
+
   set_exchange_pending(false);
   set_exchange_in_progress(false);
+
+  if (is_another_update_planned) {
+    set_update_required(true);
+  }
 }
 
 void UpdateStatusManager::OnWrongUpdateReceived() {

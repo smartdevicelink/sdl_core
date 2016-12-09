@@ -100,12 +100,12 @@ TEST_F(OnSystemRequestNotificationTest, Run_ProprietaryType_SUCCESS) {
   EXPECT_CALL(mock_policy_handler, IsRequestTypeAllowed(_, _))
       .WillOnce(Return(true));
 
-#if defined(EXTENDED_POLICY) || defined(EXTERNAL_PROPRIETARY)
+#if defined(EXTENDED_POLICY)
   EXPECT_CALL(app_mngr_, GetPolicyHandler())
       .Times(2)
       .WillRepeatedly(ReturnRef(mock_policy_handler));
   EXPECT_CALL(mock_policy_handler, TimeoutExchange()).WillOnce(Return(5u));
-#endif  // EXTENDED_POLICY || EXTERNAL_PROPRIETARY
+#endif  // EXTENDED_POLICY
 
   EXPECT_CALL(message_helper_, PrintSmartObject(_)).WillOnce(Return(false));
   EXPECT_CALL(app_mngr_, SendMessageToMobile(msg, _));
