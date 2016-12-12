@@ -46,7 +46,7 @@ using ::testing::Return;
 
 class UpdateStatusManagerTest : public ::testing::Test {
  protected:
-  UpdateStatusManager* manager_;
+  utils::SharedPtr<UpdateStatusManager> manager_;
   PolicyTableStatus status_;
   const uint32_t k_timeout_;
   utils::SharedPtr<MockPolicyListener> listener_;
@@ -56,21 +56,19 @@ class UpdateStatusManagerTest : public ::testing::Test {
 
  public:
   UpdateStatusManagerTest()
-      : k_timeout_(1)
+      : manager_(utils::MakeShared<UpdateStatusManager>())
+      , k_timeout_(1)
       , listener_(utils::MakeShared<MockPolicyListener>())
       , up_to_date_status_("UP_TO_DATE")
       , update_needed_status_("UPDATE_NEEDED")
       , updating_status_("UPDATING") {}
 
-  void SetUp() {
-    manager_ = new UpdateStatusManager();
+  void SetUp() OVERRIDE {
     manager_->set_listener(listener_.get());
     ON_CALL(*listener_, OnUpdateStatusChanged(_)).WillByDefault(Return());
   }
 
-  void TearDown() {
-    delete manager_;
-  }
+  void TearDown() OVERRIDE {}
 };
 
 TEST_F(UpdateStatusManagerTest,
