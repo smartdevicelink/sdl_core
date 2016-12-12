@@ -1,4 +1,4 @@
-# Copyright (c) 2015, Ford Motor Company
+# Copyright (c) 2017, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -73,5 +73,4 @@ set(SOURCES
 
 create_test("transport_manager_test" "${SOURCES}" "${LIBRARIES}")
 file(COPY smartDeviceLink_test.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-file(COPY app_info_storage2 DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 endif()
