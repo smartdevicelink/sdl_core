@@ -1828,12 +1828,15 @@ void MessageHelper::SendPolicySnapshotNotification(
     LOG4CXX_WARN(logger_, "No service URLs");
   }
 
-  content[strings::msg_params][strings::request_type] =
-      mobile_apis::RequestType::PROPRIETARY;
   content[strings::params][strings::binary_data] =
       smart_objects::SmartObject(policy_data);
-  content[strings::msg_params][strings::file_type] =
-      mobile_apis::FileType::BINARY;
+#if defined(PROPRIETARY) || defined(EXTERNAL_PROPRIETARY)
+  content[strings::msg_params][strings::request_type] =
+      mobile_apis::RequestType::PROPRIETARY;
+#else
+  content[strings::msg_params][strings::request_type] =
+      mobile_apis::RequestType::HTTP;
+#endif  // PROPRIETARY || EXTERNAL_PROPRIETARY
 
   SendSystemRequestNotification(connection_key, content, app_mngr);
 }
