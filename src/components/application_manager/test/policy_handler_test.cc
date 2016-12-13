@@ -102,7 +102,14 @@ class PolicyHandlerTest : public ::testing::Test {
       , app_set(test_app, app_lock)
       , kAppId_(10u)
       , kSnapshotFile_("snapshot")
-      , kSnapshotStorage_("snapshot_storage") {}
+      , kSnapshotStorage_("snapshot_storage") {
+    Mock::VerifyAndClearExpectations(&mock_message_helper_);
+  }
+
+  ~PolicyHandlerTest() {
+    Mock::VerifyAndClearExpectations(&mock_message_helper_);
+    Mock::VerifyAndClearExpectations(&app_manager_);
+  }
 
  protected:
   NiceMock<MockPolicySettings> policy_settings_;
@@ -1319,7 +1326,6 @@ TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlAdded) {
 
   ExtendedPolicyExpectations();
 
-  EXPECT_CALL(mock_message_helper_, SendPolicySnapshotNotification(_, _, _, _));
   EXPECT_CALL(app_manager_, application(kAppId_))
       .WillRepeatedly(Return(mock_app_));
 
