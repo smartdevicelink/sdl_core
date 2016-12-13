@@ -64,14 +64,14 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
                void(const std::string& policy_app_id,
                     const policy::Permissions& permissions));
 
-#ifdef EXTERNAL_PROPRIETARY
+#ifdef EXTERNAL_PROPRIETARY_MODE
   MOCK_METHOD3(OnSnapshotCreated,
                void(const policy::BinaryMessage& pt_string,
                     const std::vector<int>& retry_delay_seconds,
                     int timeout_exchange));
-#else   // EXTERNAL_PROPRIETARY
+#else   // EXTERNAL_PROPRIETARY_MODE
   MOCK_METHOD1(OnSnapshotCreated, void(const policy::BinaryMessage& pt_string));
-#endif  // EXTERNAL_PROPRIETARY
+#endif  // EXTERNAL_PROPRIETARY_MODE
 
   MOCK_CONST_METHOD2(GetPriority,
                      bool(const std::string& policy_app_id,
@@ -188,9 +188,9 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
       const std::vector<std::string>(const std::string& policy_app_id));
   MOCK_CONST_METHOD0(GetVehicleInfo, const policy::VehicleInfo());
 
-#ifdef EXTERNAL_PROPRIETARY
+#ifdef EXTERNAL_PROPRIETARY_MODE
   MOCK_CONST_METHOD0(GetMetaInfo, const policy::MetaInfo());
-#endif  // EXTERNAL_PROPRIETARY
+#endif  // EXTERNAL_PROPRIETARY_MODE
 
   MOCK_METHOD1(Increment, void(usage_statistics::GlobalCounterId type));
   MOCK_METHOD2(Increment,

@@ -157,10 +157,10 @@
 #include "application_manager/commands/hmi/on_app_permission_changed_notification.h"
 #include "application_manager/commands/hmi/on_event_changed_notification.h"
 
-#ifdef EXTERNAL_PROPRIETARY
+#ifdef EXTERNAL_PROPRIETARY_MODE
 #include "application_manager/commands/hmi/decrypt_certificate_request.h"
 #include "application_manager/commands/hmi/decrypt_certificate_response.h"
-#endif  // EXTERNAL_PROPRIETARY
+#endif  // EXTERNAL_PROPRIETARY_MODE
 
 #ifdef HMI_DBUS_API
 #include "application_manager/commands/hmi/vi_get_vehicle_data_request_template.h"
@@ -333,7 +333,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
-#ifdef EXTERNAL_PROPRIETARY
+#ifdef EXTERNAL_PROPRIETARY_MODE
     case hmi_apis::FunctionID::BasicCommunication_DecryptCertificate: {
       if (is_response) {
         command.reset(new commands::DecryptCertificateResponse(
@@ -344,7 +344,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
-#endif  // EXTERNAL_PROPRIETARY
+#endif  // EXTERNAL_PROPRIETARY_MODE
     case hmi_apis::FunctionID::BasicCommunication_GetSystemInfo: {
       if (is_response) {
         command.reset(

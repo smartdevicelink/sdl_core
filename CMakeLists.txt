@@ -283,7 +283,7 @@ if (TELEMETRY_MONITOR)
 endif()
 
 if (${EXTENDED_POLICY} STREQUAL "EXTERNAL_PROPRIETARY")
-    add_definitions(-DEXTERNAL_PROPRIETARY)
+    add_definitions(-DEXTERNAL_PROPRIETARY_MODE)
     set(POLICY_PATH ${COMPONENTS_DIR}/policy/policy_external/)
     set(POLICY_GLOBAL_INCLUDE_PATH ${COMPONENTS_DIR}/include/policy/policy_external/)
     set(POLICY_MOCK_INCLUDE_PATH ${COMPONENTS_DIR}/include/test/policy/policy_external/)

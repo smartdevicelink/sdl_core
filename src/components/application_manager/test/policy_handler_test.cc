@@ -228,7 +228,7 @@ TEST_F(PolicyHandlerTest,
   EXPECT_FALSE(policy_handler_.ResetPolicyTable());
 }
 
-#ifdef EXTERNAL_PROPRIETARY
+#ifdef EXTERNAL_PROPRIETARY_MODE
 TEST_F(PolicyHandlerTest, ResetPolicyTable_PTNotInitialised_PTNotReset) {
   // Arrange
   EXPECT_CALL(app_manager_, event_dispatcher());
@@ -627,7 +627,7 @@ void PolicyHandlerTest::TestActivateApp(const uint32_t connection_key,
   permissions.appPermissionsConsentNeeded = true;
 
 // Check expectations
-#ifdef EXTERNAL_PROPRIETARY
+#ifdef EXTERNAL_PROPRIETARY_MODE
   const connection_handler::DeviceHandle device_handle = 0u;
   EXPECT_CALL(app_manager_, connection_handler())
       .WillRepeatedly(ReturnRef(conn_handler));
@@ -653,7 +653,7 @@ void PolicyHandlerTest::TestActivateApp(const uint32_t connection_key,
               SendOnAppPermissionsChangedNotification(kAppId_, _, _));
   EXPECT_CALL(mock_session_observer,
               GetDataOnDeviceID(device_handle, _, _, _, _));
-#endif  // EXTERNAL_PROPRIETARY
+#endif  // EXTERNAL_PROPRIETARY_MODE
 
   EXPECT_CALL(*application1, policy_app_id()).WillOnce(Return(kPolicyAppId_));
   EXPECT_CALL(*mock_policy_manager_, GetAppPermissionsChanges(_))
@@ -882,7 +882,7 @@ TEST_F(PolicyHandlerTest, OnGetUserFriendlyMessage) {
   std::vector<std::string> message_codes;
   const std::string language("ru-ru");
   const uint32_t correlation_id = 2;
-#ifdef EXTERNAL_PROPRIETARY
+#ifdef EXTERNAL_PROPRIETARY_MODE
   const hmi_apis::Common_Language::eType default_language =
       hmi_apis::Common_Language::EN_US;
   const std::string default_language_string = "EN_US";
@@ -900,7 +900,7 @@ TEST_F(PolicyHandlerTest, OnGetUserFriendlyMessage) {
   EXPECT_CALL(*mock_policy_manager_,
               GetUserFriendlyMessages(message_codes, language))
       .WillOnce(Return(std::vector<UserFriendlyMessage>()));
-#endif  // EXTERNAL_PROPRIETARY
+#endif  // EXTERNAL_PROPRIETARY_MODE
   EXPECT_CALL(mock_message_helper_,
               SendGetUserFriendlyMessageResponse(_, _, _));
   // Act
@@ -1271,19 +1271,19 @@ TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlNotAdded) {
   EnablePolicyAndPolicyManagerMock();
   BinaryMessage msg;
   EndpointUrls test_data;
-#if defined(PROPRIETARY_MODE) || defined(EXTERNAL_PROPRIETARY)
+#if defined(PROPRIETARY_MODE) || defined(EXTERNAL_PROPRIETARY_MODE)
   ExtendedPolicyExpectations();
-#endif  // PROPRIETARY_MODE || EXTERNAL_PROPRIETARY
-#ifdef EXTERNAL_PROPRIETARY
+#endif  // PROPRIETARY_MODE || EXTERNAL_PROPRIETARY_MODE
+#ifdef EXTERNAL_PROPRIETARY_MODE
   std::vector<int> retry_delay_seconds;
   const int timeout_exchange = 10;
   // TODO(AKutsan): Policy move issues
   EXPECT_CALL(*mock_policy_manager_, GetUpdateUrls("0x07", _))
       .WillRepeatedly(SetArgReferee<1>(test_data));
   policy_handler_.OnSnapshotCreated(msg, retry_delay_seconds, timeout_exchange);
-#else   // EXTERNAL_PROPRIETARY
+#else   // EXTERNAL_PROPRIETARY_MODE
   policy_handler_.OnSnapshotCreated(msg);
-#endif  // EXTERNAL_PROPRIETARY
+#endif  // EXTERNAL_PROPRIETARY_MODE
 }
 
 TEST_F(PolicyHandlerTest,
@@ -1307,7 +1307,7 @@ TEST_F(PolicyHandlerTest,
   policy_handler_.OnAllowSDLFunctionalityNotification(is_allowed,
                                                       kPolicyAppId_);
 }
-#ifdef EXTERNAL_PROPRIETARY
+#ifdef EXTERNAL_PROPRIETARY_MODE
 TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlAdded) {
   EnablePolicyAndPolicyManagerMock();
   BinaryMessage msg;
@@ -1325,7 +1325,7 @@ TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlAdded) {
 
   policy_handler_.OnSnapshotCreated(msg, retry_delay_seconds, timeout_exchange);
 }
-#else  // EXTERNAL_PROPRIETARY
+#else  // EXTERNAL_PROPRIETARY_MODE
 TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlAdded) {
   EnablePolicyAndPolicyManagerMock();
   BinaryMessage msg;
@@ -1355,7 +1355,7 @@ TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlAdded) {
 
   policy_handler_.OnSnapshotCreated(msg);
 }
-#endif  // EXTERNAL_PROPRIETARY
+#endif  // EXTERNAL_PROPRIETARY_MODE
 
 TEST_F(PolicyHandlerTest,
        OnAllowSDLFunctionalityNotification_Allowed_WithoutDevId_AppActivated) {
@@ -1461,7 +1461,7 @@ TEST_F(PolicyHandlerTest, OnDeviceConsentChanged_PredatePolicyNotAllowed) {
 
   policy_handler_.OnDeviceConsentChanged(kPolicyAppId_, is_allowed);
 }
-#ifdef EXTERNAL_PROPRIETARY
+#ifdef EXTERNAL_PROPRIETARY_MODE
 TEST_F(PolicyHandlerTest, OnCertificateUpdated) {
   const std::string app_storage = "storage";
   file_system::CreateFile("storage/certificate");

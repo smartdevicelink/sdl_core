@@ -95,9 +95,9 @@ void GetUrls::ProcessServiceURLs(const policy::EndpointUrls& endpoints) {
 
       service_info[strings::url] = app_url;
       if (policy::kDefaultId != endpoints[e].app_id) {
-#ifndef EXTERNAL_PROPRIETARY
+#ifndef EXTERNAL_PROPRIETARY_MODE
         service_info[hmi_response::policy_app_id] = endpoints[e].app_id;
-#else   // EXTERNAL_PROPRIETARY
+#else   // EXTERNAL_PROPRIETARY_MODE
         ApplicationSharedPtr app =
             application_manager_.application_by_policy_id(endpoints[e].app_id);
 
@@ -110,7 +110,7 @@ void GetUrls::ProcessServiceURLs(const policy::EndpointUrls& endpoints) {
         }
 
         service_info[strings::app_id] = app->hmi_app_id();
-#endif  // EXTERNAL_PROPRIETARY
+#endif  // EXTERNAL_PROPRIETARY_MODE
       }
     }
   }
