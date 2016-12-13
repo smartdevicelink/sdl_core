@@ -186,11 +186,11 @@ class PolicyHandlerTest : public ::testing::Test {
         .WillOnce(ReturnRef(kSnapshotFile_));
     EXPECT_CALL(policy_settings_, system_files_path())
         .WillOnce(ReturnRef(kSnapshotStorage_));
-#ifdef EXTENDED_POLICY
+#ifdef PROPRIETARY_MODE
     EXPECT_CALL(*mock_policy_manager_, TimeoutExchange()).WillOnce(Return(1));
     EXPECT_CALL(*mock_policy_manager_, RetrySequenceDelaysSeconds())
         .WillOnce(Return(retry_sequence_delay_seconds));
-#endif  // EXTENDED_POLICY
+#endif  // PROPRIETARY_MODE
     EXPECT_CALL(mock_message_helper_, SendPolicyUpdate(_, _, _, _));
   }
 };
@@ -1271,9 +1271,9 @@ TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlNotAdded) {
   EnablePolicyAndPolicyManagerMock();
   BinaryMessage msg;
   EndpointUrls test_data;
-#if defined(EXTENDED_POLICY) || defined(EXTERNAL_PROPRIETARY)
+#if defined(PROPRIETARY_MODE) || defined(EXTERNAL_PROPRIETARY)
   ExtendedPolicyExpectations();
-#endif  // EXTENDED_POLICY || EXTERNAL_PROPRIETARY
+#endif  // PROPRIETARY_MODE || EXTERNAL_PROPRIETARY
 #ifdef EXTERNAL_PROPRIETARY
   std::vector<int> retry_delay_seconds;
   const int timeout_exchange = 10;
@@ -1333,7 +1333,7 @@ TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlAdded) {
   EndpointData data("some_data");
   test_data.push_back(data);
 
-#ifdef EXTENDED_POLICY
+#ifdef PROPRIETARY_MODE
   ExtendedPolicyExpectations();
 #else
   EXPECT_CALL(*mock_policy_manager_, GetUpdateUrls("0x07", _))
@@ -1351,7 +1351,7 @@ TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlAdded) {
   EXPECT_CALL(app_manager_, application(kAppId_))
       .WillRepeatedly(Return(mock_app_));
   EXPECT_CALL(*mock_app_, policy_app_id()).WillOnce(Return(kPolicyAppId_));
-#endif  // EXTENDED_POLICY
+#endif  // PROPRIETARY_MODE
 
   policy_handler_.OnSnapshotCreated(msg);
 }
