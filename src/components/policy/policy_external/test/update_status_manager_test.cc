@@ -34,29 +34,41 @@
 #include "policy/mock_policy_listener.h"
 #include "policy/policy_manager_impl.h"
 #include "policy/update_status_manager.h"
+#include "utils/make_shared.h"
 
 namespace test {
 namespace components {
 namespace policy_test {
 
 using namespace ::policy;
+using ::testing::_;
+using ::testing::Return;
 
 class UpdateStatusManagerTest : public ::testing::Test {
  protected:
-  UpdateStatusManager* manager_;
+  utils::SharedPtr<UpdateStatusManager> manager_;
   PolicyTableStatus status_;
   const uint32_t k_timeout_;
+  utils::SharedPtr<MockPolicyListener> listener_;
+  const std::string up_to_date_status_;
+  const std::string update_needed_status_;
+  const std::string updating_status_;
 
  public:
-  UpdateStatusManagerTest() : k_timeout_(1) {}
+  UpdateStatusManagerTest()
+      : manager_(utils::MakeShared<UpdateStatusManager>())
+      , k_timeout_(1)
+      , listener_(utils::MakeShared<MockPolicyListener>())
+      , up_to_date_status_("UP_TO_DATE")
+      , update_needed_status_("UPDATE_NEEDED")
+      , updating_status_("UPDATING") {}
 
-  void SetUp() {
-    manager_ = new UpdateStatusManager();
+  void SetUp() OVERRIDE {
+    manager_->set_listener(listener_.get());
+    ON_CALL(*listener_, OnUpdateStatusChanged(_)).WillByDefault(Return());
   }
 
-  void TearDown() {
-    delete manager_;
-  }
+  void TearDown() OVERRIDE {}
 };
 
 TEST_F(UpdateStatusManagerTest,
@@ -86,13 +98,37 @@ TEST_F(UpdateStatusManagerTest,
 TEST_F(UpdateStatusManagerTest,
        OnValidUpdateReceived_SetValidUpdateReceived_ExpectStatusUpToDate) {
   // Arrange
+  EXPECT_CALL(*listener_, OnUpdateStatusChanged(updating_status_));
   manager_->OnUpdateSentOut(k_timeout_);
   status_ = manager_->GetLastUpdateStatus();
   EXPECT_EQ(StatusUpdatePending, status_);
+
+  EXPECT_CALL(*listener_, OnUpdateStatusChanged(up_to_date_status_));
   manager_->OnValidUpdateReceived();
   status_ = manager_->GetLastUpdateStatus();
   // Check
   EXPECT_EQ(StatusUpToDate, status_);
+}
+
+TEST_F(
+    UpdateStatusManagerTest,
+    SheduledUpdate_OnValidUpdateReceived_ExpectStatusUpToDateThanUpdateNeeded) {
+  using ::testing::InSequence;
+  // Arrange
+  EXPECT_CALL(*listener_, OnUpdateStatusChanged(updating_status_));
+  manager_->OnUpdateSentOut(k_timeout_);
+  status_ = manager_->GetLastUpdateStatus();
+  EXPECT_EQ(StatusUpdatePending, status_);
+  manager_->ScheduleUpdate();
+
+  InSequence s;
+  EXPECT_CALL(*listener_, OnUpdateStatusChanged(up_to_date_status_));
+  EXPECT_CALL(*listener_, OnUpdateStatusChanged(update_needed_status_));
+
+  manager_->OnValidUpdateReceived();
+  status_ = manager_->GetLastUpdateStatus();
+  // Check
+  EXPECT_EQ(StatusUpdateRequired, status_);
 }
 
 TEST_F(UpdateStatusManagerTest,
