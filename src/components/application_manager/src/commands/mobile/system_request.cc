@@ -528,8 +528,8 @@ void SystemRequest::Run() {
       }
       if (!(mobile_apis::RequestType::HTTP == request_type &&
             0 == origin_file_name.compare(kIVSU))) {
-        LOG4CXX_DEBUG(logger_, "Binary data required. Reject");
-        SendResponse(false, mobile_apis::Result::REJECTED);
+        LOG4CXX_DEBUG(logger_, "Binary data required. Invalid data");
+        SendResponse(false, mobile_apis::Result::INVALID_DATA);
         return;
       }
       LOG4CXX_DEBUG(logger_, "IVSU does not require binary data. Continue");
