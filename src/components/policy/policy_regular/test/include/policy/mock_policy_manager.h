@@ -145,7 +145,7 @@ class MockPolicyManager : public PolicyManager {
   MOCK_CONST_METHOD1(GetNotificationsNumber,
                      uint32_t(const std::string& priority));
   MOCK_METHOD1(SetVINValue, void(const std::string& value));
-  MOCK_METHOD1(IsPredataPolicy, bool(const std::string& policy_app_id));
+  MOCK_CONST_METHOD1(IsPredataPolicy, bool(const std::string& policy_app_id));
   MOCK_CONST_METHOD1(HeartBeatTimeout, uint32_t(const std::string& app_id));
   MOCK_METHOD1(SaveUpdateStatusRequired, void(bool is_update_needed));
   MOCK_METHOD0(OnAppsSearchStarted, void());

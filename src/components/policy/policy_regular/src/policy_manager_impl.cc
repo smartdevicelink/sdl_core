@@ -918,7 +918,8 @@ void PolicyManagerImpl::RemoveAppConsentForGroup(
   cache_->RemoveAppConsentForGroup(app_id, group_name);
 }
 
-bool PolicyManagerImpl::IsPredataPolicy(const std::string& policy_app_id) {
+bool PolicyManagerImpl::IsPredataPolicy(
+    const std::string& policy_app_id) const {
   LOG4CXX_INFO(logger_, "IsPredataApp");
   return cache_->IsPredataPolicy(policy_app_id);
 }

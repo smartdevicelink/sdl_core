@@ -398,7 +398,7 @@ class PolicyManager : public usage_statistics::StatisticsManager {
    * @param policy_app_id Unique application id
    * @return true, if policy assigned w/o data consent, otherwise -false
    */
-  virtual bool IsPredataPolicy(const std::string& policy_app_id) = 0;
+  virtual bool IsPredataPolicy(const std::string& policy_app_id) const = 0;
 
   /**
    * Returns heart beat timeout

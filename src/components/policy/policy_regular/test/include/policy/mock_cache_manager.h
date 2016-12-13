@@ -94,9 +94,9 @@ class MockCacheManagerInterface : public CacheManagerInterface {
   MOCK_METHOD1(GetFunctionalGroupings,
                bool(policy_table::FunctionalGroupings& groups));
   MOCK_CONST_METHOD1(IsApplicationRepresented, bool(const std::string& app_id));
-  MOCK_METHOD1(IsDefaultPolicy, bool(const std::string& app_id));
+  MOCK_CONST_METHOD1(IsDefaultPolicy, bool(const std::string& app_id));
   MOCK_METHOD1(SetIsDefault, bool(const std::string& app_id));
-  MOCK_METHOD1(IsPredataPolicy, bool(const std::string& app_id));
+  MOCK_CONST_METHOD1(IsPredataPolicy, bool(const std::string& app_id));
   MOCK_METHOD1(SetDefaultPolicy, bool(const std::string& app_id));
   MOCK_CONST_METHOD1(CanAppKeepContext, bool(const std::string& app_id));
   MOCK_CONST_METHOD1(CanAppStealFocus, bool(const std::string& app_id));

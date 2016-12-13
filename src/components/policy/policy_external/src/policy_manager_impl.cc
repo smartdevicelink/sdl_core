@@ -115,7 +115,7 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
   // Parse message into table struct
   utils::SharedPtr<policy_table::Table> pt_update = Parse(pt_content);
   if (!pt_update) {
-    LOG4CXX_WARN(logger_, "Parsed table pointer is 0.");
+    LOG4CXX_WARN(logger_, "Parsed table pointer is NULL.");
     update_status_manager_.OnWrongUpdateReceived();
     return false;
   }
@@ -1211,7 +1211,8 @@ void PolicyManagerImpl::RemoveAppConsentForGroup(
   cache_->RemoveAppConsentForGroup(app_id, group_name);
 }
 
-bool PolicyManagerImpl::IsPredataPolicy(const std::string& policy_app_id) {
+bool PolicyManagerImpl::IsPredataPolicy(
+    const std::string& policy_app_id) const {
   LOG4CXX_INFO(logger_, "IsPredataApp");
   return cache_->IsPredataPolicy(policy_app_id);
 }
