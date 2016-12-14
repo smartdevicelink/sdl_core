@@ -1,6 +1,6 @@
 /*
  *
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,7 +53,9 @@ TcpSocketConnection::TcpSocketConnection(const DeviceUID& device_uid,
                                          TransportAdapterController* controller)
     : ThreadedSocketConnection(device_uid, app_handle, controller) {}
 
-TcpSocketConnection::~TcpSocketConnection() {}
+TcpSocketConnection::~TcpSocketConnection() {
+  StopAndJoinThread();
+}
 
 bool TcpSocketConnection::Establish(ConnectError** error) {
   return true;
@@ -65,7 +67,9 @@ TcpServerOiginatedSocketConnection::TcpServerOiginatedSocketConnection(
     TransportAdapterController* controller)
     : ThreadedSocketConnection(device_uid, app_handle, controller) {}
 
-TcpServerOiginatedSocketConnection::~TcpServerOiginatedSocketConnection() {}
+TcpServerOiginatedSocketConnection::~TcpServerOiginatedSocketConnection() {
+  StopAndJoinThread();
+}
 
 bool TcpServerOiginatedSocketConnection::Establish(ConnectError** error) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -88,6 +92,14 @@ bool TcpServerOiginatedSocketConnection::Establish(ConnectError** error) {
     return false;
   }
 
+  if (IsConnectionTerminated()) {
+    LOG4CXX_ERROR(
+        logger_,
+        "Connection is already terminated. Socket will not be created");
+    *error = new ConnectError();
+    return false;
+  }
+
   const int socket = ::socket(AF_INET, SOCK_STREAM, 0);
   if (socket < 0) {
     LOG4CXX_ERROR(logger_, "Failed to create socket");
@@ -102,16 +114,16 @@ bool TcpServerOiginatedSocketConnection::Establish(ConnectError** error) {
 
   LOG4CXX_DEBUG(logger_,
                 "Connecting " << inet_ntoa(addr.sin_addr) << ":" << port);
-  if (::connect(socket, (struct sockaddr*)&addr, sizeof(addr)) < 0) {
+  set_socket(socket);
+  if (::connect(get_socket(), (struct sockaddr*)&addr, sizeof(addr)) < 0) {
     LOG4CXX_ERROR(logger_,
                   "Failed to connect for application " << application_handle()
                                                        << ", error " << errno);
     *error = new ConnectError();
-    ::close(socket);
+    ShutdownAndCloseSocket();
     return false;
   }
 
-  set_socket(socket);
   return true;
 }
 
