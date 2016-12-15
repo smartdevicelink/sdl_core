@@ -92,13 +92,13 @@ class PolicyHandler : public PolicyHandlerInterface,
   virtual void OnPermissionsUpdated(const std::string& policy_app_id,
                                     const Permissions& permissions) OVERRIDE;
 
-#ifdef EXTERNAL_PROPRIETARY
+#ifdef EXTERNAL_PROPRIETARY_MODE
   void OnSnapshotCreated(const BinaryMessage& pt_string,
                          const std::vector<int>& retry_delay_seconds,
                          int timeout_exchange) OVERRIDE;
-#else   // EXTERNAL_PROPRIETARY
+#else   // EXTERNAL_PROPRIETARY_MODE
   void OnSnapshotCreated(const BinaryMessage& pt_string) OVERRIDE;
-#endif  // EXTERNAL_PROPRIETARY
+#endif  // EXTERNAL_PROPRIETARY_MODE
   virtual bool GetPriority(const std::string& policy_app_id,
                            std::string* priority) const OVERRIDE;
   void CheckPermissions(const PTString& app_id,
@@ -307,9 +307,9 @@ class PolicyHandler : public PolicyHandlerInterface,
 
   virtual void OnCertificateUpdated(
       const std::string& certificate_data) OVERRIDE;
-#ifdef EXTERNAL_PROPRIETARY
+#ifdef EXTERNAL_PROPRIETARY_MODE
   void OnCertificateDecrypted(bool is_succeeded) OVERRIDE;
-#endif  // EXTERNAL_PROPRIETARY
+#endif  // EXTERNAL_PROPRIETARY_MODE
   virtual bool CanUpdate() OVERRIDE;
 
   virtual void OnDeviceConsentChanged(const std::string& device_id,
@@ -398,13 +398,13 @@ class PolicyHandler : public PolicyHandlerInterface,
    */
   const VehicleInfo GetVehicleInfo() const OVERRIDE;
 
-#ifdef EXTERNAL_PROPRIETARY
+#ifdef EXTERNAL_PROPRIETARY_MODE
   /**
    * @brief Gets meta information
    * @return meta information
    */
   const policy::MetaInfo GetMetaInfo() const OVERRIDE;
-#endif  // EXTERNAL_PROPRIETARY
+#endif  // EXTERNAL_PROPRIETARY_MODE
 
   // TODO(AKutsan) REMOVE THIS UGLY HOTFIX
   void Increment(usage_statistics::GlobalCounterId type) OVERRIDE;
@@ -506,9 +506,9 @@ class PolicyHandler : public PolicyHandlerInterface,
    private:
     PolicyHandler* policy_handler_;
   };
-#ifdef EXTERNAL_PROPRIETARY
+#ifdef EXTERNAL_PROPRIETARY_MODE
   void OnEmptyCertificateArrived() const;
-#endif  // EXTERNAL_PROPRIETARY
+#endif  // EXTERNAL_PROPRIETARY_MODE
   bool SaveSnapshot(const BinaryMessage& pt_string, std::string& snap_path);
   static const std::string kLibrary;
   mutable sync_primitives::RWLock policy_manager_lock_;

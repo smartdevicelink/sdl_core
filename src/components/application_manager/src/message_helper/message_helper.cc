@@ -1544,13 +1544,13 @@ void MessageHelper::SendGetUserFriendlyMessageResponse(
 
   smart_objects::SmartObject& user_friendly_messages =
       (*message)[strings::msg_params][messages];
-#ifdef EXTERNAL_PROPRIETARY
+#ifdef EXTERNAL_PROPRIETARY_MODE
   const std::string tts = "ttsString";
   const std::string label = "label";
   const std::string line1 = "line1";
   const std::string line2 = "line2";
   const std::string textBody = "textBody";
-#endif  // EXTERNAL_PROPRIETARY
+#endif  // EXTERNAL_PROPRIETARY_MODE
   const std::string message_code = "messageCode";
   std::vector<policy::UserFriendlyMessage>::const_iterator it = msg.begin();
   std::vector<policy::UserFriendlyMessage>::const_iterator it_end = msg.end();
@@ -1560,7 +1560,7 @@ void MessageHelper::SendGetUserFriendlyMessageResponse(
 
     smart_objects::SmartObject& obj = user_friendly_messages[index];
     obj[message_code] = it->message_code;
-#ifdef EXTERNAL_PROPRIETARY
+#ifdef EXTERNAL_PROPRIETARY_MODE
     if (!it->tts.empty()) {
       obj[tts] = it->tts;
     }
@@ -1576,7 +1576,7 @@ void MessageHelper::SendGetUserFriendlyMessageResponse(
     if (!it->text_body.empty()) {
       obj[textBody] = it->text_body;
     }
-#endif  // EXTERNAL_PROPRIETARY
+#endif  // EXTERNAL_PROPRIETARY_MODE
   }
 
   app_mngr.ManageHMICommand(message);
@@ -1828,12 +1828,15 @@ void MessageHelper::SendPolicySnapshotNotification(
     LOG4CXX_WARN(logger_, "No service URLs");
   }
 
-  content[strings::msg_params][strings::request_type] =
-      mobile_apis::RequestType::PROPRIETARY;
   content[strings::params][strings::binary_data] =
       smart_objects::SmartObject(policy_data);
-  content[strings::msg_params][strings::file_type] =
-      mobile_apis::FileType::BINARY;
+#if defined(PROPRIETARY_MODE) || defined(EXTERNAL_PROPRIETARY_MODE)
+  content[strings::msg_params][strings::request_type] =
+      mobile_apis::RequestType::PROPRIETARY;
+#else
+  content[strings::msg_params][strings::request_type] =
+      mobile_apis::RequestType::HTTP;
+#endif  // PROPRIETARY || EXTERNAL_PROPRIETARY_MODE
 
   SendSystemRequestNotification(connection_key, content, app_mngr);
 }

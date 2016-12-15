@@ -1419,7 +1419,7 @@ void ApplicationManagerImpl::SendMessageToMobile(
       return;
     }
 
-#ifdef EXTERNAL_PROPRIETARY
+#ifdef EXTERNAL_PROPRIETARY_MODE
     if (function_id == mobile_apis::FunctionID::OnSystemRequestID) {
       mobile_apis::RequestType::eType request_type =
           static_cast<mobile_apis::RequestType::eType>(
@@ -1429,7 +1429,7 @@ void ApplicationManagerImpl::SendMessageToMobile(
         GetPolicyHandler().OnUpdateRequestSentToMobile();
       }
     }
-#endif  // EXTERNAL_PROPRIETARY
+#endif  // EXTERNAL_PROPRIETARY_MODE
   }
 
   if (message_to_send->binary_data()) {

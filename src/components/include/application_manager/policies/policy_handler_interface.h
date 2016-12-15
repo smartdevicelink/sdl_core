@@ -68,13 +68,13 @@ class PolicyHandlerInterface {
   virtual void OnPermissionsUpdated(const std::string& policy_app_id,
                                     const Permissions& permissions) = 0;
 
-#ifdef EXTERNAL_PROPRIETARY
+#ifdef EXTERNAL_PROPRIETARY_MODE
   virtual void OnSnapshotCreated(const BinaryMessage& pt_string,
                                  const std::vector<int>& retry_delay_seconds,
                                  int timeout_exchange) = 0;
-#else   // EXTERNAL_PROPRIETARY
+#else   // EXTERNAL_PROPRIETARY_MODE
   virtual void OnSnapshotCreated(const BinaryMessage& pt_string) = 0;
-#endif  // EXTERNAL_PROPRIETARY
+#endif  // EXTERNAL_PROPRIETARY_MODE
 
   virtual bool GetPriority(const std::string& policy_app_id,
                            std::string* priority) const = 0;
@@ -289,9 +289,9 @@ class PolicyHandlerInterface {
       std::map<std::string, StringArray> app_hmi_types) = 0;
 
   virtual void OnCertificateUpdated(const std::string& certificate_data) = 0;
-#ifdef EXTERNAL_PROPRIETARY
+#ifdef EXTERNAL_PROPRIETARY_MODE
   virtual void OnCertificateDecrypted(bool is_succeeded) = 0;
-#endif  // EXTERNAL_PROPRIETARY
+#endif  // EXTERNAL_PROPRIETARY_MODE
   virtual bool CanUpdate() = 0;
 
   virtual void OnDeviceConsentChanged(const std::string& device_id,
@@ -370,13 +370,13 @@ class PolicyHandlerInterface {
    * @return Structure with vehicle information
    */
   virtual const VehicleInfo GetVehicleInfo() const = 0;
-#ifdef EXTERNAL_PROPRIETARY
+#ifdef EXTERNAL_PROPRIETARY_MODE
   /**
    * @brief Gets meta information
    * @return meta information
    */
   virtual const policy::MetaInfo GetMetaInfo() const = 0;
-#endif  // EXTERNAL_PROPRIETARY
+#endif  // EXTERNAL_PROPRIETARY_MODE
   virtual void Increment(usage_statistics::GlobalCounterId type) = 0;
   virtual void Increment(const std::string& app_id,
                          usage_statistics::AppCounterId type) = 0;
