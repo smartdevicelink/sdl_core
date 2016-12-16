@@ -163,7 +163,7 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
       LOG4CXX_INFO(logger_, "app_hmi_types is full calling OnUpdateHMIAppType");
       listener_->OnUpdateHMIAppType(app_hmi_types);
     } else {
-      LOG4CXX_INFO(logger_, "app_hmi_types empty" << pt_content.size());
+      LOG4CXX_INFO(logger_, "app_hmi_types empty");
     }
   }
 
