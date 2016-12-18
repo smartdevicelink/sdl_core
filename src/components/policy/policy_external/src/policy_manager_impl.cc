@@ -237,10 +237,6 @@ void PolicyManagerImpl::RequestPTUpdate() {
 
     listener_->OnSnapshotCreated(
         update, RetrySequenceDelaysSeconds(), TimeoutExchange());
-
-    // Need to reset update schedule since all currently registered applications
-    // were already added to the snapshot so no update for them required.
-    update_status_manager_.ResetUpdateSchedule();
   } else {
     LOG4CXX_ERROR(logger_, "Invalid Policy table snapshot - PTUpdate failed");
   }

@@ -127,6 +127,8 @@ TEST_F(PolicyManagerImplTest, ResetPT) {
 
 TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
   // Arrange
+  manager_->ForcePTExchange();
+  manager_->OnUpdateStarted();
   Json::Value table = createPTforLoad();
 
   policy_table::Table update(&table);
@@ -280,6 +282,7 @@ TEST_F(PolicyManagerImplTest2, GetPolicyTableStatus_ExpectUpToDate) {
 TEST_F(PolicyManagerImplTest,
        SetUpdateStarted_GetPolicyTableStatus_Expect_Updating) {
   // Arrange
+  manager_->ForcePTExchange();
   EXPECT_CALL(*cache_manager_, SaveUpdateRequired(true));
   manager_->OnUpdateStarted();
   // Check
@@ -311,6 +314,7 @@ TEST_F(PolicyManagerImplTest2,
        OnExceededTimeout_GetPolicyTableStatus_ExpectUpdateNeeded) {
   // Arrange
   CreateLocalPT(preloadet_pt_filename_);
+  manager_->ForcePTExchange();
   manager_->OnExceededTimeout();
   // Check
   EXPECT_EQ("UPDATE_NEEDED", manager_->GetPolicyTableStatus());

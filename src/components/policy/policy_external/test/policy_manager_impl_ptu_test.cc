@@ -87,6 +87,8 @@ TEST_F(PolicyManagerImplTest2, GetNotificationsNumberAfterPTUpdate) {
   // Arrange
 
   Json::Value table = createPTforLoad();
+  manager_->ForcePTExchange();
+  manager_->OnUpdateStarted();
   policy_table::Table update(&table);
   update.SetPolicyTableType(rpc::policy_table_interface_base::PT_UPDATE);
   // Act
@@ -792,6 +794,8 @@ TEST_F(PolicyManagerImplTest2,
 
 TEST_F(PolicyManagerImplTest, LoadPT_SetInvalidUpdatePT_PTIsNotLoaded) {
   // Arrange
+  manager_->ForcePTExchange();
+  manager_->OnUpdateStarted();
   Json::Value table(Json::objectValue);
 
   policy_table::Table update(&table);

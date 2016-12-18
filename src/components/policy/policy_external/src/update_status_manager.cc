@@ -40,13 +40,9 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "Policy")
 
 UpdateStatusManager::UpdateStatusManager()
     : listener_(NULL)
-    , exchange_in_progress_(false)
-    , update_required_(false)
-    , update_scheduled_(false)
-    , exchange_pending_(false)
+    , current_status_(new UpToDateStatus())
     , apps_search_in_progress_(false)
-    , app_registered_from_non_consented_device_(true)
-    , last_update_status_(policy::StatusUnknown) {
+    , app_registered_from_non_consented_device_(true) {
   update_status_thread_delegate_ = new UpdateThreadDelegate(this);
   thread_ = threads::CreateThread("UpdateStatusThread",
                                   update_status_thread_delegate_);
@@ -62,6 +58,20 @@ UpdateStatusManager::~UpdateStatusManager() {
   threads::DeleteThread(thread_);
 }
 
+void UpdateStatusManager::ProcessEvent(UpdateEvent event) {
+  sync_primitives::AutoLock lock(status_lock_);
+  current_status_->ProcessEvent(this, event);
+  DoTransition();
+}
+
+void UpdateStatusManager::SetNextStatus(utils::SharedPtr<Status> status) {
+  next_status_ = status;
+}
+
+void UpdateStatusManager::SetPostponedStatus(utils::SharedPtr<Status> status) {
+  postponed_status_ = status;
+}
+
 void UpdateStatusManager::set_listener(PolicyListener* listener) {
   listener_ = listener;
 }
@@ -72,16 +82,12 @@ void UpdateStatusManager::OnUpdateSentOut(uint32_t update_timeout) {
   const unsigned milliseconds_in_second = 1000;
   update_status_thread_delegate_->updateTimeOut(update_timeout *
                                                 milliseconds_in_second);
-  set_exchange_in_progress(true);
-  set_exchange_pending(true);
-  set_update_required(false);
+  ProcessEvent(kOnUpdateSentOut);
 }
 
 void UpdateStatusManager::OnUpdateTimeoutOccurs() {
   LOG4CXX_AUTO_TRACE(logger_);
-  set_update_required(true);
-  set_exchange_in_progress(false);
-  set_exchange_pending(false);
+  ProcessEvent(kOnUpdateTimeout);
   DCHECK(update_status_thread_delegate_);
   update_status_thread_delegate_->updateTimeOut(0);  // Stop Timer
 }
@@ -89,41 +95,27 @@ void UpdateStatusManager::OnUpdateTimeoutOccurs() {
 void UpdateStatusManager::OnValidUpdateReceived() {
   LOG4CXX_AUTO_TRACE(logger_);
   update_status_thread_delegate_->updateTimeOut(0);  // Stop Timer
-  const bool is_another_update_planned = IsUpdateRequired();
-  if (is_another_update_planned) {
-    set_update_required(false);
-  }
-
-  set_exchange_pending(false);
-  set_exchange_in_progress(false);
-
-  if (is_another_update_planned) {
-    set_update_required(true);
-  }
+  ProcessEvent(kOnValidUpdateReceived);
 }
 
 void UpdateStatusManager::OnWrongUpdateReceived() {
   LOG4CXX_AUTO_TRACE(logger_);
   update_status_thread_delegate_->updateTimeOut(0);  // Stop Timer
-  set_update_required(true);
-  set_exchange_in_progress(false);
-  set_exchange_pending(false);
+  ProcessEvent(kOnWrongUpdateReceived);
 }
 
 void UpdateStatusManager::OnResetDefaultPT(bool is_update_required) {
   LOG4CXX_AUTO_TRACE(logger_);
-  exchange_in_progress_ = false;
-  update_required_ = is_update_required;
-  exchange_pending_ = false;
-  last_update_status_ = policy::StatusUnknown;
+  if (is_update_required) {
+    ProcessEvent(kOnResetPolicyTableRequireUpdate);
+    return;
+  }
+  ProcessEvent(kOnResetPolicyTableNoUpdate);
 }
 
 void UpdateStatusManager::OnResetRetrySequence() {
   LOG4CXX_AUTO_TRACE(logger_);
-  if (exchange_in_progress_) {
-    set_exchange_pending(true);
-  }
-  set_update_required(true);
+  ProcessEvent(kOnResetRetrySequence);
 }
 
 void UpdateStatusManager::OnNewApplicationAdded(const DeviceConsent consent) {
@@ -133,61 +125,38 @@ void UpdateStatusManager::OnNewApplicationAdded(const DeviceConsent consent) {
     return;
   }
   app_registered_from_non_consented_device_ = false;
-  set_update_required(true);
+  ProcessEvent(kOnNewAppRegistered);
 }
 
 void UpdateStatusManager::OnPolicyInit(bool is_update_required) {
   LOG4CXX_AUTO_TRACE(logger_);
-  update_required_ = is_update_required;
+  if (is_update_required) {
+    current_status_.reset(new UpToDateStatus());
+    ProcessEvent(kScheduleUpdate);
+  }
 }
 
 void UpdateStatusManager::OnDeviceConsented() {
   LOG4CXX_AUTO_TRACE(logger_);
   if (app_registered_from_non_consented_device_) {
-    set_update_required(true);
+    ProcessEvent(kOnNewAppRegistered);
   }
-}
-
-PolicyTableStatus UpdateStatusManager::GetUpdateStatus() const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  if (!exchange_in_progress_ && !exchange_pending_ && !update_required_) {
-    return PolicyTableStatus::StatusUpToDate;
-  }
-
-  if (update_required_ && !exchange_in_progress_ && !exchange_pending_) {
-    return PolicyTableStatus::StatusUpdateRequired;
-  }
-
-  return PolicyTableStatus::StatusUpdatePending;
 }
 
 bool UpdateStatusManager::IsUpdateRequired() const {
-  return update_required_ || update_scheduled_;
+  return current_status_->IsUpdateRequired();
 }
 
 bool UpdateStatusManager::IsUpdatePending() const {
-  return exchange_pending_;
+  return current_status_->IsUpdatePending();
 }
 
 void UpdateStatusManager::ScheduleUpdate() {
-  update_scheduled_ = true;
-  update_required_ = true;
-}
-
-void UpdateStatusManager::ResetUpdateSchedule() {
-  update_scheduled_ = false;
+  ProcessEvent(kScheduleUpdate);
 }
 
 std::string UpdateStatusManager::StringifiedUpdateStatus() const {
-  switch (GetUpdateStatus()) {
-    case policy::StatusUpdatePending:
-      return "UPDATING";
-    case policy::StatusUpdateRequired:
-      return "UPDATE_NEEDED";
-    case policy::StatusUpToDate:
-      return "UP_TO_DATE";
-    default: { return "UNKNOWN"; }
-  }
+  return current_status_->get_status_string();
 }
 
 void policy::UpdateStatusManager::OnAppsSearchStarted() {
@@ -208,40 +177,23 @@ bool policy::UpdateStatusManager::IsAppsSearchInProgress() {
   return apps_search_in_progress_;
 }
 
-void UpdateStatusManager::CheckUpdateStatus() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  policy::PolicyTableStatus status = GetUpdateStatus();
-  if (listener_ && last_update_status_ != status) {
-    LOG4CXX_INFO(logger_, "Send OnUpdateStatusChanged");
-    listener_->OnUpdateStatusChanged(StringifiedUpdateStatus());
+void UpdateStatusManager::DoTransition() {
+  DCHECK_OR_RETURN_VOID(listener_);
+  if (!next_status_) {
+    return;
   }
-  last_update_status_ = status;
-}
 
-void UpdateStatusManager::set_exchange_in_progress(bool value) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  sync_primitives::AutoLock lock(exchange_in_progress_lock_);
-  LOG4CXX_INFO(logger_,
-               "Exchange in progress value is:" << std::boolalpha << value);
-  exchange_in_progress_ = value;
-  CheckUpdateStatus();
-}
+  current_status_ = next_status_;
+  next_status_.reset();
+  listener_->OnUpdateStatusChanged(current_status_->get_status_string());
 
-void UpdateStatusManager::set_exchange_pending(bool value) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  sync_primitives::AutoLock lock(exchange_pending_lock_);
-  LOG4CXX_INFO(logger_,
-               "Exchange pending value is:" << std::boolalpha << value);
-  exchange_pending_ = value;
-  CheckUpdateStatus();
-}
+  if (!postponed_status_) {
+    return;
+  }
 
-void UpdateStatusManager::set_update_required(bool value) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  sync_primitives::AutoLock lock(update_required_lock_);
-  LOG4CXX_INFO(logger_, "Update required value is:" << std::boolalpha << value);
-  update_required_ = value;
-  CheckUpdateStatus();
+  current_status_ = postponed_status_;
+  listener_->OnUpdateStatusChanged(current_status_->get_status_string());
+  postponed_status_.reset();
 }
 
 UpdateStatusManager::UpdateThreadDelegate::UpdateThreadDelegate(
