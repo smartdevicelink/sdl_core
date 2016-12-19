@@ -49,6 +49,12 @@ class HMIMessageHandler : public HMIMessageObserver, public HMIMessageSender {
   virtual ~HMIMessageHandler() {}
   virtual void AddHMIMessageAdapter(HMIMessageAdapter* adapter) = 0;
   virtual void RemoveHMIMessageAdapter(HMIMessageAdapter* adapter) = 0;
+  /**
+   * @brief Subscribes to notification from HMI
+   * @param hmi_notification string with notification name
+   */
+  virtual void SubscribeToHMINotification(
+      const std::string& hmi_notification) = 0;
 };
 
 }  // namespace hmi_message_handler

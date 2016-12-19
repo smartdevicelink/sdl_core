@@ -42,20 +42,54 @@ class PolicyListener {
  public:
   virtual ~PolicyListener() {
   }
-  virtual void OnPermissionsUpdated(const std::string& policy_app_id,
+  /**
+   *
+   * @param device_id
+   * @param policy_app_id
+   * @param permissions
+   * @param default_hmi
+   * @deprecated see OnPermissionsUpdated(const std::string&, const std::string&,
+   * const Permissions&) and OnUpdateHMILevel(const std::string&,
+   * const std::string& policy_app_id, const std::string& hmi_level)
+   */
+  virtual void OnPermissionsUpdated(const std::string& device_id,
+                                    const std::string& policy_app_id,
                                     const Permissions& permissions,
                                     const policy::HMILevel& default_hmi) = 0;
-  virtual void OnPermissionsUpdated(const std::string& policy_app_id,
+  virtual void OnPermissionsUpdated(const std::string& device_id,
+                                    const std::string& policy_app_id,
                                     const Permissions& permissions) = 0;
   virtual void OnPendingPermissionChange(const std::string& policy_app_id) = 0;
   virtual void OnUpdateStatusChanged(const std::string&) = 0;
+  /**
+   * Gets device ID
+   * @param policy_app_id
+   * @return device ID
+   * @deprecated see std::vector<std::string> GetDevicesIds(const std::string&)
+   */
   virtual std::string OnCurrentDeviceIdUpdateRequired(
       const std::string& policy_app_id) = 0;
+  /**
+   * Gets devices ids by policy application id
+   * @param policy_app_id
+   * @return list devices ids
+   */
+  virtual std::vector<std::string> GetDevicesIds(const std::string policy_app_id) = 0;
   virtual void OnSystemInfoUpdateRequired() = 0;
   virtual std::string GetAppName(const std::string& policy_app_id) = 0;
   virtual void OnUpdateHMIAppType(std::map<std::string, StringArray> app_hmi_types) = 0;
 
-    /**
+  /**
+   * Notifies about changing HMI level
+   * @param device_id unique identifier of device
+   * @param policy_app_id unique identifier of application in policy
+   * @param hmi_level default HMI level for this application
+   */
+  virtual void OnUpdateHMILevel(const std::string& device_id,
+                                const std::string& policy_app_id,
+                                const std::string& hmi_level) = 0;
+
+  /**
    * @brief CanUpdate allows to find active application
    * and check whether related device consented.
    *
@@ -99,6 +133,44 @@ class PolicyListener {
    * @param certificate_data the value of the updated field.
    */
   virtual void OnCertificateUpdated(const std::string& certificate_data) = 0;
+
+#ifdef SDL_REMOTE_CONTROL
+   /**
+    * @brief Signal that country_consent field was updated during PTU
+    * @param new_consent New value of country_consent
+    */
+   virtual void OnRemoteAllowedChanged(bool new_consent) = 0;
+
+   /**
+    * @brief Notifies Remote apps about change in permissions
+    * @param device_id Device on which app is running
+    * @param application_id ID of app whose permissions are changed
+    */
+  virtual void OnRemoteAppPermissionsChanged(const std::string& device_id,
+      const std::string& application_id) = 0;
+
+  /**
+   * Notifies about changing HMI status
+   * @param device_id unique identifier of device
+   * @param policy_app_id unique identifier of application in policy
+   * @param hmi_level default HMI level for this application
+   */
+  virtual void OnUpdateHMIStatus(const std::string& device_id,
+                                 const std::string& policy_app_id,
+                                 const std::string& hmi_level) = 0;
+
+  /**
+   * Notifies about changing HMI status
+   * @param device_id unique identifier of device
+   * @param policy_app_id unique identifier of application in policy
+   * @param hmi_level default HMI level for this application
+   * @param device_rank device rank
+   */
+  virtual void OnUpdateHMIStatus(const std::string& device_id,
+                                 const std::string& policy_app_id,
+                                 const std::string& hmi_level,
+                                 const std::string& device_rank) = 0;
+#endif  // SDL_REMOTE_CONTROL
 };
 }  //  namespace policy
 #endif  //  SRC_COMPONENTS_POLICY_INCLUDE_POLICY_LISTENER_H_

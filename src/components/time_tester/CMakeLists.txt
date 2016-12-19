@@ -60,6 +60,10 @@ set (SOURCES
     ${TIME_TESTER_SRC_DIR}/protocol_handler_metric.cc
 )
 
+set (LIBRARIES
+  HMI_API
+)
+
 add_library("TimeTester" ${SOURCES})
 target_link_libraries("TimeTester" ${LIBRARIES})
 add_dependencies("TimeTester" HMI_API MOBILE_API)

@@ -103,6 +103,18 @@
     return ; \
   }
 
+#define EXPORT_FUNCTION(TypeName) \
+  extern "C" TypeName* Create();
+
+#define EXPORT_FUNCTION_IMPL(TypeName) \
+  extern "C" TypeName* Create() { \
+    return TypeName::instance(); \
+  }
+
+#define PLUGIN_FACTORY(TypeName) \
+  TypeName* Create() { \
+    return new TypeName(); \
+  }
 
 #define NOTREACHED() DCHECK(!"Unreachable code")
 
@@ -125,6 +137,10 @@
 #ifdef BUILD_TESTS
 #define FRIEND_TEST(test_case_name, test_name)\
 friend class test_case_name##_##test_name##_Test
-#endif
+#else  // BUILD_TESTS
+#define FRIEND_TEST(test_case_name, test_name)
+#endif  // BUILD_TESTS
+
+#define UNUSED(x) (void) x;
 
 #endif  // SRC_COMPONENTS_INCLUDE_UTILS_MACRO_H_

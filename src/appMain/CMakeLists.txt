@@ -77,6 +77,7 @@ set(LIBRARIES
   jsoncpp
   ConfigProfile
   Resumption
+  FunctionalModule
 )
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -120,6 +121,7 @@ include_directories (
   ${COMPONENTS_DIR}/request_watchdog/include
   ${COMPONENTS_DIR}/smart_objects/include/
   ${COMPONENTS_DIR}/media_manager/include/
+  ${COMPONENTS_DIR}/functional_module/include/
   ${COMPONENTS_DIR}/time_tester/include
   ${COMPONENTS_DIR}/policy/src/policy/include/
   ${COMPONENTS_DIR}/resumption/include/
@@ -189,22 +191,38 @@ if (${QT_HMI})
   file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/start_hmi.sh
     "#!/bin/sh\n${start_command} ${command_arguments}\n")
 elseif (${WEB_HMI})
-  file(COPY ${CMAKE_HOME_DIRECTORY}/src/components/HMI/ DESTINATION ${CMAKE_BINARY_DIR}/src/components/HMI/)
-  file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/hmi_link
-    "${CMAKE_BINARY_DIR}/src/components/HMI/index.html")
+  #file(COPY ${CMAKE_HOME_DIRECTORY}/src/components/HMI/ DESTINATION ${CMAKE_BINARY_DIR}/src/components/HMI/)
+  #file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/hmi_link
+  #  "${CMAKE_BINARY_DIR}/src/components/HMI/index.html")
 endif ()
 
 # Install rules
 install(TARGETS ${PROJECT} DESTINATION bin)
-install(
-  FILES log4cxx.properties audio.8bit.wav test.txt smartDeviceLink.ini
-    hmi_capabilities.json sdl_preloaded_pt.json
-    ${CMAKE_SOURCE_DIR}/mycert.pem ${CMAKE_SOURCE_DIR}/mykey.pem
-  DESTINATION bin
-)
+# TODO(KKolodiy): In order to make the deployment is easier until SDL-RC is under developing.
+if (REMOTE_CONTROL)
+  install(
+    FILES log4cxx.properties audio.8bit.wav test.txt smartDeviceLink.ini
+      hmi_capabilities.json
+      ${CMAKE_SOURCE_DIR}/mycert.pem ${CMAKE_SOURCE_DIR}/mykey.pem
+    DESTINATION bin
+  )
+  install(
+    FILES "${CMAKE_SOURCE_DIR}/src/components/can_cooperation/reverse_sdl_pt.json"
+    DESTINATION ${CMAKE_BINARY_DIR}/bin
+    RENAME sdl_preloaded_pt.json
+  )
+else ()
+  install(
+    FILES log4cxx.properties audio.8bit.wav test.txt smartDeviceLink.ini
+      hmi_capabilities.json sdl_preloaded_pt.json
+      ${CMAKE_SOURCE_DIR}/mycert.pem ${CMAKE_SOURCE_DIR}/mykey.pem
+    DESTINATION bin
+  )
+endif ()
+
 if (${WEB_HMI})
   if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/hmi_link DESTINATION bin)
+    #install(FILES ${CMAKE_CURRENT_BINARY_DIR}/hmi_link DESTINATION bin)
   endif ()
 elseif (${QT_HMI})
   if (CMAKE_SYSTEM_NAME STREQUAL "QNX")

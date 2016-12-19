@@ -56,6 +56,7 @@ set(LIBRARIES
     Resumption
     Policy
     ${SecurityManagerLibrary}
+    FunctionalModule
 )
 
 if(EXTENDED_MEDIA_MODE)

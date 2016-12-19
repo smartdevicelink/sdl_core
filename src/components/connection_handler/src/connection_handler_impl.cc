@@ -69,6 +69,7 @@ transport_manager::ConnectionUID ConnectionUIDFromHandle(
 
 ConnectionHandlerImpl::ConnectionHandlerImpl()
   : connection_handler_observer_(NULL),
+    remote_services_observer_(0),
     transport_manager_(NULL),
     protocol_handler_(NULL),
     connection_list_lock_(true),
@@ -98,6 +99,11 @@ void ConnectionHandlerImpl::set_connection_handler_observer(
     LOG4CXX_WARN(logger_, "Set Null pointer to observer.");
   }
   connection_handler_observer_ = observer;
+}
+
+void ConnectionHandlerImpl::set_remote_services_observer(
+    RemoteServicesObserver* observer) {
+  remote_services_observer_ = observer;
 }
 
 void ConnectionHandlerImpl::set_transport_manager(
@@ -177,11 +183,11 @@ void ConnectionHandlerImpl::OnDeviceRemoved(
     RemoveConnection(*it);
   }
 
-  device_list_.erase(device_info.device_handle());
   sync_primitives::AutoLock lock(connection_handler_observer_lock_);
   if (connection_handler_observer_) {
     connection_handler_observer_->RemoveDevice(device_info.device_handle());
   }
+  device_list_.erase(device_info.device_handle());
 }
 
 void ConnectionHandlerImpl::OnScanDevicesFinished() {
@@ -340,7 +346,21 @@ uint32_t ConnectionHandlerImpl::OnSessionStartedCallback(
     if (hash_id) {
       *hash_id = protocol_handler::HASH_ID_NOT_SUPPORTED;
     }
+
+    const uint32_t session_key = KeyFromPair(connection_handle, new_session_id);
+
+    if (remote_services_observer_) {
+      std::string device_mac_address = "";
+      GetDataOnDeviceID(connection->connection_device_handle(), NULL, NULL,
+                        &device_mac_address);
+      if (remote_services_observer_->OnServiceStartedCallback(
+          session_key, service_type, device_mac_address)) {
+        LOG4CXX_INFO(logger_, "Remote service for RevSdl plugin started.");
+        return new_session_id;
+      }
+    }
   }
+
   sync_primitives::AutoLock lock2(connection_handler_observer_lock_);
   if (connection_handler_observer_) {
     const uint32_t session_key = KeyFromPair(connection_handle, new_session_id);
@@ -439,6 +459,11 @@ uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
                    << static_cast<uint32_t>(service_type));
       return 0;
     }
+  }
+
+  if (remote_services_observer_) {
+    remote_services_observer_->OnServiceEndedCallback(session_key,
+                                                      service_type);
   }
 
   sync_primitives::AutoLock lock2(connection_handler_observer_lock_);
@@ -803,6 +828,10 @@ void ConnectionHandlerImpl::CloseSession(ConnectionHandle connection_handle,
       for (;service_list_itr != service_list.end(); ++service_list_itr) {
         const protocol_handler::ServiceType service_type =
             service_list_itr->service_type;
+        if (remote_services_observer_) {
+          remote_services_observer_->OnServiceEndedCallback(session_key,
+                                                            service_type);
+        }
         connection_handler_observer_->OnServiceEndedCallback(session_key,
                                                              service_type);
       }
@@ -933,6 +962,10 @@ void ConnectionHandlerImpl::OnConnectionEnded(
       const ServiceList &service_list = session_it->second.service_list;
       for (ServiceList::const_iterator service_it = service_list.begin(), end =
            service_list.end(); service_it != end; ++service_it) {
+        if (remote_services_observer_) {
+          remote_services_observer_->OnServiceEndedCallback(
+              session_key, service_it->service_type);
+        }
         connection_handler_observer_->OnServiceEndedCallback(
               session_key, service_it->service_type);
       }

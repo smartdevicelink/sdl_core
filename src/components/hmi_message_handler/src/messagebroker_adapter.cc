@@ -136,6 +136,10 @@ void MessageBrokerAdapter::SubscribeTo() {
   LOG4CXX_INFO(logger_, "Subscribed to notifications.");
 }
 
+void MessageBrokerAdapter::SubscribeToHMINotification(
+    const std::string& hmi_notification) {
+  MessageBrokerController::subscribeTo(hmi_notification);
+}
 void* MessageBrokerAdapter::SubscribeAndBeginReceiverThread(void* param) {
   PassToThread(threads::Thread::CurrentId());
   // For PASA we don't need to subscribe and register controller

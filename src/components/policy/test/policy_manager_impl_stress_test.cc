@@ -47,24 +47,30 @@ namespace policy {
 class PolicyManagerImplStressTest : public ::testing::Test {
  protected:
   static const std::string kNameFile;
-  static const int kNumberGroups = 3;  //10;
-  static const int kNumberFuncs = 4;  //100;
-  static const int kNumberApps = 5;
-  static const int kNumberAppGroups = 5;
+  static const int kNumberFuncs = 999;
+  static const int kNumberGroups = 254;
+  static const int kNumberGroupFuncs = 49;
+  static const int kNumberApps = 999;
+  static const int kNumberAppGroups = 254;
   static PolicyManagerImpl* manager;
   static MockPolicyListener* mock_listener;
 
   static void SetUpTestCase();
   static void TearDownTestCase();
   static void CreateTable(std::ofstream& ofs);
+  static void CreateOther(std::ofstream& ofs);
   static void CreateGroups(std::ofstream& ofs);
-  static void CreateFuncs(std::ofstream& ofs);
   static void CreateApps(std::ofstream& ofs);
+  static void CreateFuncs(std::ofstream& ofs);
   static void CreateAppGroups(std::ofstream& ofs);
+  static void CreateGroup(int i, std::ofstream& ofs);
+  static void CreateFunction(int i, std::ofstream& ofs);
+  static void CreateHmiLevels(std::ofstream& ofs);
+  static void CreateParameters(std::ofstream& ofs);
 };
 
 const std::string PolicyManagerImplStressTest::kNameFile =
-    "sdl_preloaded_pt.json";
+    "perfomance_test_pt.json";
 PolicyManagerImpl* PolicyManagerImplStressTest::manager = 0;
 MockPolicyListener* PolicyManagerImplStressTest::mock_listener = 0;
 
@@ -80,7 +86,6 @@ void PolicyManagerImplStressTest::SetUpTestCase() {
   mock_listener = new MockPolicyListener();
   manager->set_listener(mock_listener);
 
-  //TODO(AGaliuzov) APPLINK-10657
   ASSERT_TRUE(manager->InitPT(kNameFile));
 }
 
@@ -93,46 +98,86 @@ void PolicyManagerImplStressTest::TearDownTestCase() {
 #endif  // __QNX__
 }
 
-void PolicyManagerImplStressTest::CreateGroups(std::ofstream& ofs) {
+void PolicyManagerImplStressTest::CreateHmiLevels(std::ofstream& ofs) {
+  ofs << "\"hmi_levels\":[\"BACKGROUND\", \"FULL\", \"LIMITED\"]";
+}
+
+void PolicyManagerImplStressTest::CreateParameters(std::ofstream& ofs) {
+  ofs << "\"parameters\":["
+      "\"gps\","
+      "\"speed\","
+      "\"engineTorque\","
+      "\"externalTemperature\","
+      "\"fuelLevel\","
+      "\"fuelLevel_State\","
+      "\"headLampStatus\","
+      "\"instantFuelConsumption\","
+      "\"odometer\","
+      "\"tirePressure\","
+      "\"wiperStatus\","
+      "\"vin\","
+      "\"accPedalPosition\","
+      "\"beltStatus\","
+      "\"driverBraking\","
+      "\"prndl\","
+      "\"rpm\","
+      "\"steeringWheelAngle\","
+      "\"myKey\","
+      "\"airbagStatus\","
+      "\"bodyInformation\","
+      "\"clusterModeStatus\","
+      "\"deviceStatus\","
+      "\"emergencyEvent\""
+      "]";
+}
+
+void PolicyManagerImplStressTest::CreateFunction(int i, std::ofstream& ofs) {
   std::stringstream ss;
   std::string number;
-  for (int i = 0; i < kNumberGroups - 1; ++i) {
-    ss << i << std::endl;
-    ss >> number;
-    ofs << "\"Group-" << number << "\":{\n \t\"rpcs\":{\n";
-    CreateFuncs(ofs);
-    ofs << "} },\n";
-  }
-  ss << kNumberGroups - 1 << std::endl;
+  ss << i << std::endl;
   ss >> number;
-  ofs << "\"Group-" << number << "\":{\n \t\"rpcs\":{\n";
+  ofs << "\"Func-" << number << "\":{\n\t";
+  CreateHmiLevels(ofs);
+  ofs << ",\n";
+  CreateParameters(ofs);
+  ofs << "\n}";
+}
+
+void PolicyManagerImplStressTest::CreateGroup(int i, std::ofstream& ofs) {
+  std::stringstream ss;
+  std::string number;
+  ss << i << std::endl;
+  ss >> number;
+  ofs << "\"Group-" << number << "\":{\n\t\"rpcs\":{\n";
   CreateFuncs(ofs);
-  ofs << "} }\n";
+  ofs << "}}";
+}
+
+void PolicyManagerImplStressTest::CreateGroups(std::ofstream& ofs) {
+  ofs << "\"functional_groupings\":{\n";
+  for (int i = 0; i < kNumberGroups - 1; ++i) {
+    ofs << "\t";
+    CreateGroup(i, ofs);
+    ofs << ",\n";
+  }
+  ofs << "\t";
+  CreateGroup(kNumberGroups - 1, ofs);
+  ofs << "\n}\n";
 }
 
 void PolicyManagerImplStressTest::CreateFuncs(std::ofstream& ofs) {
-  std::string func = "{\n"
-      "\t\t\"hmi_levels\":["
-      "\"BACKGROUND\","
-      "\"FULL\","
-      "\"LIMITED\""
-      "]"
-      "}";
-
-  std::stringstream ss;
-  std::string number;
-  for (int i = 0; i < kNumberFuncs - 1; ++i) {
-    ss << i << std::endl;
-    ss >> number;
-    ofs << "\t\"Func-" << number << "\":" << func << ",\n";
+  for (int i = 0; i < kNumberGroupFuncs - 1; ++i) {
+    ofs << "\t";
+    CreateFunction(rand() % kNumberFuncs, ofs);
+    ofs << ",\n";
   }
-  ss << kNumberFuncs - 1 << std::endl;
-  ss >> number;
-  ofs << "\t\"Func-" << number << "\":" + func;
+  ofs << "\t";
+  CreateFunction(0, ofs);
+  ofs << "\n";
 }
 
 void PolicyManagerImplStressTest::CreateApps(std::ofstream& ofs) {
-
+  ofs << "\"app_policies\":{";
   ofs << "\"default\":{\n";
   ofs << "\"keep_context\": true,\n"
       "\"steal_focus\": true,\n"
@@ -168,7 +213,7 @@ void PolicyManagerImplStressTest::CreateApps(std::ofstream& ofs) {
 
   ofs << "\"groups\": ";
   CreateAppGroups(ofs);
-  ofs << "}\n";
+  ofs << "}}";
 }
 
 void PolicyManagerImplStressTest::CreateAppGroups(std::ofstream& ofs) {
@@ -194,77 +239,73 @@ void PolicyManagerImplStressTest::CreateAppGroups(std::ofstream& ofs) {
   ofs << "]\n";
 }
 
-void PolicyManagerImplStressTest::CreateTable(std::ofstream& ofs) {
-  ofs << "{"
-      "\"policy_table\":{\n"
-      "\"module_config\":{\n"
-      "\t\"preloaded_pt\":true,\n"
-      "\t\"endpoints\":{\n"
-      "\t\t\"default\": {\n"
-      "\t\t\t\"default\":["
-      "\"http://sdl.net/api\""
-      "]\n"
-      "\t\t}\n"
-      "\t},\n"
-
+void PolicyManagerImplStressTest::CreateOther(std::ofstream& ofs) {
+  ofs << "\"module_config\":{\n"
+      "\"preloaded_pt\":true,\n"
+      "\"endpoints\":{\n"
+      "\"default\": {\n"
+      "\"default\":[\"http://sdl.net/api\"]\n"
+      "}},\n"
       "\"notifications_per_minute_by_priority\": {\n"
-      "\t\"EMERGENCY\": 60,\n"
-      "\t\"NAVIGATION\": 15,\n"
-      "\t\"COMMUNICATION\": 6,\n"
-      "\t\"NORMAL\": 4,\n"
-      "\t\"NONE\": 0\n"
+      "\"EMERGENCY\": 60,\n"
+      "\"NAVIGATION\": 15,\n"
+      "\"COMMUNICATION\": 6,\n"
+      "\"NORMAL\": 4,\n"
+      "\"NONE\": 0\n"
       "},\n"
-
       "\"exchange_after_x_ignition_cycles\": 40,\n"
       "\"exchange_after_x_kilometers\" : 2,\n"
       "\"exchange_after_x_days\" : 23,\n"
       "\"timeout_after_x_seconds\" : 20,\n"
       "\"seconds_between_retries\" : [10, 7, 5, 3, 1]\n"
-      "},"
+      "},\n"
+
       "\"consumer_friendly_messages\":{\n"
-      "\t\"version\":\"001.001.001\",\n"
-      "\t\"messages\":{} },\n"
-      "\"functional_groupings\":{\n";
+      "\"version\":\"001.001.001\",\n"
+      "\"messages\":{}\n"
+      "}";
+}
 
+void PolicyManagerImplStressTest::CreateTable(std::ofstream& ofs) {
+  ofs << "{\"policy_table\":{\n";
+  CreateOther(ofs);
+  ofs << ",\n";
   CreateGroups(ofs);
-
-  ofs << "}, \"app_policies\":{";
-
+  ofs << ",\n";
   CreateApps(ofs);
-
-  ofs << "} } }";
+  ofs << "\n}}";
 }
 
 TEST_F(PolicyManagerImplStressTest, OneCheck_AppAndFunctuionExisting_RpcAllowed) {
   ::policy::RPCParams input_params;
   ::policy::CheckPermissionResult output;
-  manager->CheckPermissions("2", "FULL", "Func-1", input_params, output);
+  manager->CheckPermissions("dev_1", "2", "FULL", "Func-0", input_params, output);
   EXPECT_EQ(::policy::kRpcAllowed, output.hmi_level_permitted);
 }
 
 TEST_F(PolicyManagerImplStressTest, NoApp_AppDoesNotExisted_RpcDissallowed) {
   ::policy::RPCParams input_params;
   ::policy::CheckPermissionResult output;
-  manager->CheckPermissions("150", "FULL", "Func-88", input_params, output);
+  manager->CheckPermissions("dev_1", "1500", "FULL", "Func-88", input_params, output);
   EXPECT_EQ(::policy::kRpcDisallowed, output.hmi_level_permitted);
 }
 
 TEST_F(PolicyManagerImplStressTest, NoFunc_FuncDoesNotExisted_RpcDissallowed) {
   ::policy::RPCParams input_params;
   ::policy::CheckPermissionResult output;
-  manager->CheckPermissions("2", "FULL", "Func-400", input_params, output);
+  manager->CheckPermissions("dev_1", "2", "FULL", "Func-1500", input_params, output);
   EXPECT_EQ(::policy::kRpcDisallowed, output.hmi_level_permitted);
 }
 
 TEST_F(PolicyManagerImplStressTest, NoHmi_HMIInLevelNone_RpcDissallowed) {
   ::policy::RPCParams input_params;
   ::policy::CheckPermissionResult output;
-  manager->CheckPermissions("2", "NONE", "Func-88", input_params, output);
+  manager->CheckPermissions("dev_1", "2", "NONE", "Func-88", input_params, output);
   EXPECT_EQ(::policy::kRpcDisallowed, output.hmi_level_permitted);
 }
 
-TEST_F(PolicyManagerImplStressTest, FewChecks_CheckSeveralFunctions_RpcAllowed) {
-  const int kNumberOfCheckings = kNumberFuncs;  //100;
+TEST_F(PolicyManagerImplStressTest, FewChecks_CheckSeveralFunctions) {
+  const int kNumberOfCheckings = 100;
   std::stringstream ss;
   int app, func;
   std::string app_number, func_number;
@@ -278,9 +319,9 @@ TEST_F(PolicyManagerImplStressTest, FewChecks_CheckSeveralFunctions_RpcAllowed) 
 
     ::policy::RPCParams input_params;
     ::policy::CheckPermissionResult output;
-    manager->CheckPermissions(app_number, "FULL", "Func-" + func_number,
+    manager->CheckPermissions("dev_1", app_number, "FULL", "Func-" + func_number,
                               input_params, output);
-    EXPECT_EQ(::policy::kRpcAllowed, output.hmi_level_permitted);
+    // This test always pass. It is needed only for measure performance.
   }
 }
 

@@ -1421,6 +1421,15 @@
     </param>
   </struct>
 
+  <enum name="DeviceRank">
+   <element name="DRIVER">
+    <description>The device is ranked as driver's</description>
+   </element>
+   <element name="PASSENGER">
+    <description>The device is ranked as passenger's</description>
+   </element>
+  </enum>
+
 <!-- ~~~~~~~~~~~~~~~~~~~~~~~~ -->     
 <!-- Ford Specific Data Items -->
 <!-- ~~~~~~~~~~~~~~~~~~~~~~~~ -->     
@@ -2165,6 +2174,7 @@
     <element name="BACKGROUND_PROCESS" />
     <element name="TESTING" />
     <element name="SYSTEM" />
+    <element name="REMOTE_CONTROL" />
   </enum>
 
   <enum name="PredefinedLayout" platform="documentation">
@@ -5064,6 +5074,10 @@
 
     <param name="systemContext" type="SystemContext">
       <description>See SystemContext</description>
+    </param>
+
+    <param name="deviceRank" type="DeviceRank" mandatory="false">
+     <description>If "DRIVER" - the application is running on device ranked as driver's. If "PASSENGER" - the application is running on device ranked as passenger's. </description>
     </param>
   </function>
 

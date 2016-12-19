@@ -38,29 +38,20 @@
 #include "mock_update_status_manager.h"
 #include "policy/policy_manager_impl.h"
 
+#ifdef SDL_REMOTE_CONTROL
+#  include "mock_access_remote.h"
+#endif  // SDL_REMOTE_CONTROL
+
 using ::testing::_;
 using ::testing::Return;
+using ::testing::ReturnRef;
 using ::testing::DoAll;
 using ::testing::SetArgReferee;
 using ::testing::NiceMock;
 using ::testing::AtLeast;
 
-using ::policy::PTRepresentation;
-using ::policy::MockPolicyListener;
-using ::policy::MockPTRepresentation;
-using ::policy::MockPTExtRepresentation;
-using ::policy::MockCacheManagerInterface;
-
-using ::policy::MockUpdateStatusManager;
-
-using ::policy::PolicyManagerImpl;
-using ::policy::PolicyTable;
-using ::policy::EndpointUrls;
-
 namespace policy_table = rpc::policy_table_interface_base;
 
-namespace test {
-namespace components {
 namespace policy {
 
 class PolicyManagerImplTest : public ::testing::Test {
@@ -69,12 +60,20 @@ class PolicyManagerImplTest : public ::testing::Test {
   MockCacheManagerInterface* cache_manager;
   MockUpdateStatusManager update_manager;
   MockPolicyListener* listener;
+#ifdef SDL_REMOTE_CONTROL
+  MockAccessRemote* access_remote;
+#endif  // SDL_REMOTE_CONTROL
 
   void SetUp() {
     manager = new PolicyManagerImpl();
 
     cache_manager = new MockCacheManagerInterface();
     manager->set_cache_manager(cache_manager);
+
+#ifdef SDL_REMOTE_CONTROL
+    access_remote = new MockAccessRemote();
+    manager->access_remote_ = access_remote;
+#endif  // SDL_REMOTE_CONTROL
 
     listener = new MockPolicyListener();
     manager->set_listener(listener);
@@ -94,6 +93,14 @@ class PolicyManagerImplTest : public ::testing::Test {
       return ::testing::AssertionFailure() << ::rpc::PrettyFormat(report);
     }
   }
+
+#ifdef SDL_REMOTE_CONTROL
+  bool CheckPTURemoteCtrlChange(
+      const utils::SharedPtr<policy_table::Table> pt_update,
+      const utils::SharedPtr<policy_table::Table> snapshot) {
+    return manager->CheckPTURemoteCtrlChange(pt_update, snapshot);
+  }
+#endif  // SDL_REMOTE_CONTROL
 };
 
 TEST_F(PolicyManagerImplTest, RefreshRetrySequence_SetSecondsBetweenRetries_ExpectRetryTimeoutSequenceWithSameSeconds) {
@@ -139,6 +146,7 @@ TEST_F(PolicyManagerImplTest, DISABLED_GetUpdateUrl) {
 TEST_F(PolicyManagerImplTest, ResetPT) {
   EXPECT_CALL(*cache_manager, ResetPT("filename")).WillOnce(Return(true))
       .WillOnce(Return(false));
+  EXPECT_CALL(*cache_manager, ResetCalculatedPermissions()).Times(2);
   EXPECT_CALL(*cache_manager, TimeoutResponse());
   EXPECT_CALL(*cache_manager, SecondsBetweenRetries(_));
 
@@ -154,14 +162,27 @@ TEST_F(PolicyManagerImplTest, CheckPermissions_SetHmiLevelFullForAlert_ExpectAll
   expected.list_of_allowed_params.push_back("speed");
   expected.list_of_allowed_params.push_back("gps");
 
+  policy_table::Strings groups;
+  groups.push_back("Group-1");
+
   //assert
-  EXPECT_CALL(*cache_manager, CheckPermissions("12345678", "FULL", "Alert", _)).
+  EXPECT_CALL(*cache_manager, IsApplicationRepresented("12345678")).
+      WillOnce(Return(true));
+#ifdef SDL_REMOTE_CONTROL
+  Subject who = { "dev1", "12345678" };
+  EXPECT_CALL(*access_remote, GetGroups(who)).WillOnce(ReturnRef(groups));
+#else  // SDL_REMOTE_CONTROL
+  EXPECT_CALL(*cache_manager, GetGroups("12345678")).
+      WillOnce(ReturnRef(groups));
+#endif  // SDL_REMOTE_CONTROL
+
+  EXPECT_CALL(*cache_manager, CheckPermissions(_, "FULL", "Alert", _)).
       WillOnce(SetArgReferee<3>(expected));
 
   //act
   ::policy::RPCParams input_params;
   ::policy::CheckPermissionResult output;
-  manager->CheckPermissions("12345678", "FULL", "Alert", input_params, output);
+  manager->CheckPermissions("dev1", "12345678", "FULL", "Alert", input_params, output);
 
   //assert
   EXPECT_EQ(::policy::kRpcAllowed, output.hmi_level_permitted);
@@ -242,6 +263,8 @@ TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
   app_policies["default"]["keep_context"] = Json::Value(true);
   app_policies["default"]["steal_focus"] = Json::Value(true);
   app_policies["default"]["certificate"] = Json::Value("sign");
+  app_policies["default"]["moduleType"] = Json::Value(Json::arrayValue);
+  app_policies["default"]["moduleType"][0] = Json::Value("RADIO");
   app_policies["1234"] = Json::Value(Json::objectValue);
   app_policies["1234"]["memory_kb"] = Json::Value(50);
   app_policies["1234"]["heart_beat_timeout_ms"] = Json::Value(100);
@@ -268,6 +291,11 @@ TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
       update.policy_table);
 
   //assert
+  std::map<std::string, StringArray> hmi_types;
+  hmi_types["1234"] = StringArray();
+  EXPECT_CALL(*cache_manager, GetHMIAppTypeAfterUpdate(_)).
+      WillOnce(SetArgReferee<0>(hmi_types));
+  EXPECT_CALL(*listener, OnUpdateHMIAppType(hmi_types));
   EXPECT_CALL(*cache_manager, GenerateSnapshot()).WillOnce(Return(snapshot));
   EXPECT_CALL(*cache_manager, ApplyUpdate(_)).WillOnce(Return(true));
   EXPECT_CALL(*listener, GetAppName("1234")).WillOnce(Return(""));
@@ -275,6 +303,9 @@ TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
   EXPECT_CALL(*cache_manager, SaveUpdateRequired(false));
   EXPECT_CALL(*cache_manager, TimeoutResponse());
   EXPECT_CALL(*cache_manager, SecondsBetweenRetries(_));
+#ifdef SDL_REMOTE_CONTROL
+  EXPECT_CALL(*access_remote, Init());
+#endif  // SDL_REMOTE_CONTROL
 
   EXPECT_TRUE(manager->LoadPT("file_pt_update.json", msg));
 }
@@ -286,12 +317,12 @@ TEST_F(PolicyManagerImplTest, RequestPTUpdate_SetPT_GeneratedSnapshotAndPTUpdate
       new ::policy_table::Table();
 
   //assert
+  EXPECT_CALL(*listener, OnSnapshotCreated(_, _, _));
   EXPECT_CALL(*cache_manager, GenerateSnapshot()).WillOnce(Return(p_table));
 
   //act
   manager->RequestPTUpdate();
 }
-
 
 TEST_F(PolicyManagerImplTest, DISABLED_AddApplication) {
   // TODO(AOleynik): Implementation of method should be changed to avoid
@@ -304,8 +335,187 @@ TEST_F(PolicyManagerImplTest, DISABLED_GetPolicyTableStatus) {
   //manager->GetPolicyTableStatus();
 }
 
+#ifdef SDL_REMOTE_CONTROL
+TEST_F(PolicyManagerImplTest, SetPrimaryDevice) {
+  EXPECT_CALL(*access_remote, SetPrimaryDevice("dev1"));
 
+  manager->SetPrimaryDevice("dev1");
 }
-// namespace policy
-}// namespace components
-}  // namespace test
+
+TEST_F(PolicyManagerImplTest, ResetAccessBySubject) {
+  Subject sub = {"dev1", "12345"};
+
+  EXPECT_CALL(*access_remote, Reset(sub));
+
+  manager->ResetAccess("dev1", "12345");
+}
+
+TEST_F(PolicyManagerImplTest, ResetAccessByObject) {
+  SeatLocation zone = {0, 0, 0};
+  Object obj = {policy_table::MT_RADIO, zone};
+
+  EXPECT_CALL(*access_remote, Reset(obj));
+
+  manager->ResetAccess(zone, "RADIO");
+}
+
+TEST_F(PolicyManagerImplTest, SetRemoteControl_Enable) {
+  EXPECT_CALL(*access_remote, Enable());
+
+  manager->SetRemoteControl(true);
+}
+
+TEST_F(PolicyManagerImplTest, SetRemoteControl_Disable) {
+  EXPECT_CALL(*access_remote, Disable());
+
+  manager->SetRemoteControl(false);
+}
+
+TEST_F(PolicyManagerImplTest, SetAccess_Allow) {
+  Subject who = {"dev1", "12345"};
+  SeatLocation zone = {0, 0, 0};
+  Object what = {policy_table::MT_CLIMATE, zone};
+
+  EXPECT_CALL(*access_remote, Allow(who, what));
+
+  manager->SetAccess("dev1", "12345", zone, "CLIMATE", true);
+}
+
+TEST_F(PolicyManagerImplTest, SetAccess_Deny) {
+  Subject who = {"dev1", "12345"};
+  SeatLocation zone = {0, 0, 0};
+  Object what = {policy_table::MT_RADIO, zone};
+
+  EXPECT_CALL(*access_remote, Deny(who, what));
+
+  manager->SetAccess("dev1", "12345", zone, "RADIO", false);
+}
+
+TEST_F(PolicyManagerImplTest, CheckAccess_PrimaryDevice) {
+  Subject who {"dev1", "12345"};
+  SeatLocation zone = {0, 0, 0};
+
+  EXPECT_CALL(*access_remote,
+              CheckModuleType("12345", policy_table::MT_CLIMATE)).
+      WillOnce(Return(true));
+  EXPECT_CALL(*access_remote, IsPrimaryDevice("dev1")).WillOnce(Return(true));
+
+  EXPECT_EQ(TypeAccess::kAllowed,
+            manager->CheckAccess("dev1", "12345", zone, "CLIMATE", "AnyRpc",
+                                 RemoteControlParams()));
+}
+
+TEST_F(PolicyManagerImplTest, CheckAccess_DisabledRremoteControl) {
+  EXPECT_CALL(*access_remote,
+              CheckModuleType("12345", policy_table::MT_RADIO)).
+      WillOnce(Return(true));
+  EXPECT_CALL(*access_remote, IsPrimaryDevice("dev1")).WillOnce(Return(false));
+  EXPECT_CALL(*access_remote, IsEnabled()).WillOnce(Return(false));
+
+  SeatLocation zone {0, 0, 0};
+  EXPECT_EQ(TypeAccess::kDisallowed,
+            manager->CheckAccess("dev1", "12345", zone, "RADIO", "",
+                                 RemoteControlParams()));
+}
+
+TEST_F(PolicyManagerImplTest, CheckAccess_Result) {
+  Subject who = {"dev1", "12345"};
+  SeatLocation zone = {0, 0, 0};
+  Object what = {policy_table::MT_RADIO, zone};
+
+  EXPECT_CALL(*access_remote,
+              CheckModuleType("12345", policy_table::MT_RADIO)).
+      WillOnce(Return(true));
+  EXPECT_CALL(*access_remote, IsPrimaryDevice("dev1")).WillOnce(Return(false));
+  EXPECT_CALL(*access_remote, IsEnabled()).WillOnce(Return(true));
+  EXPECT_CALL(*access_remote, CheckParameters(_, _, _)).WillOnce(Return(kManual));
+  EXPECT_CALL(*access_remote, Check(who, what)).
+      WillOnce(Return(TypeAccess::kAllowed));
+
+  EXPECT_EQ(TypeAccess::kAllowed,
+            manager->CheckAccess("dev1", "12345", zone, "RADIO", "",
+                                 RemoteControlParams()));
+}
+
+TEST_F(PolicyManagerImplTest, TwoDifferentDevice) {
+  Subject who1 = {"dev1", "12345"};
+  Subject who2 = {"dev2", "123456"};
+  SeatLocation zone = {0, 0, 0};
+  Object what = {policy_table::MT_RADIO, zone};
+
+  EXPECT_CALL(*access_remote,
+              CheckModuleType("12345", policy_table::MT_RADIO)).
+      WillOnce(Return(true));
+  EXPECT_CALL(*access_remote, IsPrimaryDevice("dev1")).WillOnce(Return(true));
+
+  EXPECT_CALL(*access_remote,
+              CheckModuleType("123456", policy_table::MT_RADIO)).
+      WillOnce(Return(true));
+  EXPECT_CALL(*access_remote, IsPrimaryDevice("dev2")).WillOnce(Return(false));
+  EXPECT_CALL(*access_remote, IsEnabled()).WillOnce(Return(true));
+  EXPECT_CALL(*access_remote, CheckParameters(_, _, _)).WillOnce(Return(kManual));
+  EXPECT_CALL(*access_remote, Check(who2, what)).
+        WillOnce(Return(TypeAccess::kDisallowed));
+
+  EXPECT_EQ(TypeAccess::kAllowed,
+            manager->CheckAccess("dev1", "12345", zone, "RADIO", "",
+                                 RemoteControlParams()));
+  EXPECT_EQ(TypeAccess::kDisallowed,
+              manager->CheckAccess("dev2", "123456", zone, "RADIO", "",
+                                   RemoteControlParams()));
+}
+
+TEST_F(PolicyManagerImplTest, CheckPTURemoteCtrlChange) {
+  utils::SharedPtr<policy_table::Table> update = new policy_table::Table();
+  utils::SharedPtr<policy_table::Table> snapshot = new policy_table::Table();
+  rpc::Optional<rpc::Boolean>& new_consent = update->policy_table.module_config
+      .country_consent_passengersRC;
+  rpc::Optional<rpc::Boolean>& old_consent = snapshot->policy_table
+      .module_config.country_consent_passengersRC;
+
+  EXPECT_CALL(*listener, OnRemoteAllowedChanged(true)).Times(4);
+
+  // Both are not initialized
+  EXPECT_FALSE(CheckPTURemoteCtrlChange(update, snapshot));
+
+  *old_consent = true;
+  *new_consent = true;
+  EXPECT_FALSE(CheckPTURemoteCtrlChange(update, snapshot));
+
+  *old_consent = false;
+  *new_consent = false;
+  EXPECT_FALSE(CheckPTURemoteCtrlChange(update, snapshot));
+
+  *old_consent = true;
+  *new_consent = false;
+  EXPECT_TRUE(CheckPTURemoteCtrlChange(update, snapshot));
+
+  *old_consent = false;
+  *new_consent = true;
+  EXPECT_TRUE(CheckPTURemoteCtrlChange(update, snapshot));
+
+  snapshot = new policy_table::Table();
+
+  // snapshot is not initialized, update is true
+  *new_consent = true;
+  EXPECT_FALSE(CheckPTURemoteCtrlChange(update, snapshot));
+
+  // snapshot is not initialized, update is false
+  *new_consent = false;
+  EXPECT_TRUE(CheckPTURemoteCtrlChange(update, snapshot));
+
+  update = new policy_table::Table();
+
+  // snapshot is true, update is not initialized
+  *(snapshot->policy_table.module_config
+      .country_consent_passengersRC) = true;
+  EXPECT_FALSE(CheckPTURemoteCtrlChange(update, snapshot));
+
+  // snapshot is false, update is not initialized
+  *(snapshot->policy_table.module_config
+      .country_consent_passengersRC) = false;
+  EXPECT_TRUE(CheckPTURemoteCtrlChange(update, snapshot));
+}
+#endif  // SDL_REMOTE_CONTROL
+
+} // namespace policy

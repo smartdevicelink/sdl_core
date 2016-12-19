@@ -394,10 +394,9 @@ bool CommandRequestImpl::CheckAllowedParameters() {
       CommandParametersPermissions params_permissions;
       mobile_apis::Result::eType check_result =
           application_manager::ApplicationManagerImpl::instance()->
-          CheckPolicyPermissions(
-            (*it_app_list).get()->mobile_app_id(),
-            (*it_app_list).get()->hmi_level(),
-            static_cast<mobile_api::FunctionID::eType>(function_id()),
+          CheckPolicyPermissions(*it_app_list,
+            MessageHelper::StringifiedFunctionID(
+                static_cast<mobile_api::FunctionID::eType>(function_id())),
             params,
             &params_permissions);
 

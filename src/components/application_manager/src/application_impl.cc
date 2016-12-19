@@ -34,7 +34,7 @@
 #include <strings.h>
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
-#include "application_manager/application_manager_impl.h"
+#include "functional_module/plugin_manager.h"
 #include "config_profile/profile.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/file_system.h"
@@ -125,6 +125,7 @@ ApplicationImpl::ApplicationImpl(uint32_t application_id,
 }
 
 ApplicationImpl::~ApplicationImpl() {
+  LOG4CXX_AUTO_TRACE(logger_);
   // TODO(AK): check if this is correct assimption
   if (active_message_) {
     delete active_message_;
@@ -799,6 +800,41 @@ void ApplicationImpl::UnsubscribeFromSoftButtons(int32_t cmd_id) {
   if(it != cmd_softbuttonid_.end()) {
     cmd_softbuttonid_.erase(it);
   }
+}
+
+AppExtensionPtr ApplicationImpl::QueryInterface(AppExtensionUID uid) {
+  std::list<AppExtensionPtr>::const_iterator it =
+      extensions_.begin();
+  for (;it != extensions_.end(); ++it) {
+    if ((*it)->uid() == uid) {
+      return (*it);
+    }
+  }
+
+  return AppExtensionPtr();
+}
+
+bool ApplicationImpl::AddExtension(AppExtensionPtr extension) {
+  if (!QueryInterface(extension->uid())) {
+    extensions_.push_back(extension);
+    return true;
+  }
+  return false;  
+}
+
+bool ApplicationImpl::RemoveExtension(AppExtensionUID uid) {
+  for(std::list<AppExtensionPtr>::iterator it = 
+    extensions_.begin(); extensions_.end() != it; ++it) {
+    if ((*it)->uid() == uid) {
+      extensions_.erase(it);
+      return true;
+    }
+  }
+  return false;
+}
+
+void ApplicationImpl::RemoveExtensions() {
+  functional_modules::PluginManager::instance()->RemoveAppExtension(app_id_);
 }
 
 }  // namespace application_manager

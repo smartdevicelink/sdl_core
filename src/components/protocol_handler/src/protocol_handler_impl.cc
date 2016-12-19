@@ -69,6 +69,7 @@ ProtocolHandlerImpl::ProtocolHandlerImpl(
     size_t malformed_message_frequency_time, size_t malformed_message_frequency_count)
     : protocol_observers_(),
       session_observer_(0),
+      remote_service_message_observer_(0),
       transport_manager_(transport_manager_param),
       kPeriodForNaviAck(5),
       message_max_frequency_(message_frequency_count),
@@ -149,6 +150,11 @@ void ProtocolHandlerImpl::set_session_observer(SessionObserver *observer) {
     // Do not return from here!
   }
   session_observer_ = observer;
+}
+
+void ProtocolHandlerImpl::set_remote_service_message_observer(
+    RemoteServicesMessageObserver* observer) {
+  remote_service_message_observer_ = observer;
 }
 
 void set_hash_id(uint32_t hash_id, protocol_handler::ProtocolPacket& packet) {
@@ -491,6 +497,14 @@ void ProtocolHandlerImpl::OnTMMessageReceiveFailed(
 
 void ProtocolHandlerImpl::NotifySubscribers(const RawMessagePtr message) {
   LOG4CXX_AUTO_TRACE(logger_);
+
+  if (remote_service_message_observer_) {
+    if (remote_service_message_observer_->OnMessageReceived(message)) {
+      LOG4CXX_INFO(logger_, "Message will be processed by RevSdl plugin.");
+      return;
+    }
+  }
+
   sync_primitives::AutoLock lock(protocol_observers_lock_);
   for (ProtocolObservers::iterator it = protocol_observers_.begin();
       protocol_observers_.end() != it; ++it) {

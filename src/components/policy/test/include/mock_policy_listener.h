@@ -32,8 +32,8 @@
 #ifndef SRC_COMPONENTS_POLICY_TEST_POLICY_INCLUDE_MOCK_POLICY_LISTENER_H_
 #define SRC_COMPONENTS_POLICY_TEST_POLICY_INCLUDE_MOCK_POLICY_LISTENER_H_
 
-
 #include <string>
+#include <vector>
 
 #include "gmock/gmock.h"
 
@@ -47,12 +47,14 @@ namespace policy {
 
 class MockPolicyListener : public PolicyListener {
  public:
-  MOCK_METHOD3(OnPermissionsUpdated,
-               void(const std::string& policy_app_id,
+  MOCK_METHOD4(OnPermissionsUpdated,
+               void(const std::string& device_id,
+                    const std::string& policy_app_id,
                     const Permissions& permissions,
                     const policy::HMILevel& default_hmi));
-  MOCK_METHOD2(OnPermissionsUpdated,
-               void(const std::string& policy_app_id,
+  MOCK_METHOD3(OnPermissionsUpdated,
+               void(const std::string& device_id,
+                    const std::string& policy_app_id,
                     const Permissions& permissions));
   MOCK_METHOD1(OnPendingPermissionChange,
                void(const std::string& policy_app_id));
@@ -80,6 +82,22 @@ class MockPolicyListener : public PolicyListener {
   MOCK_METHOD0(CanUpdate,
                bool());
   MOCK_METHOD1(OnCertificateUpdated, void (const std::string&));
+  MOCK_METHOD3(OnUpdateHMILevel, void(const std::string& device_id,
+                                      const std::string& policy_app_id,
+                                      const std::string& hmi_level));
+  MOCK_METHOD3(OnUpdateHMIStatus, void(const std::string& device_id,
+                                       const std::string& policy_app_id,
+                                       const std::string& hmi_level));
+  MOCK_METHOD4(OnUpdateHMIStatus, void(const std::string& device_id,
+                                       const std::string& policy_app_id,
+                                       const std::string& hmi_level,
+                                       const std::string& device_rank));
+  MOCK_METHOD1(OnRemoteAllowedChanged, void(bool new_consent));
+  MOCK_METHOD2(OnRemoteAppPermissionsChanged, void(
+      const std::string& device_id,
+      const std::string& application_id));
+  MOCK_METHOD1(GetDevicesIds, std::vector<std::string>(
+      const std::string policy_app_id));
 };
 
 }  // namespace policy

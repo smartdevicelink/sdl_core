@@ -79,6 +79,16 @@ add_subdirectory(./config_profile)
 
 # --- AudioManager
 add_subdirectory(./media_manager)
+# --- Functional module
+add_subdirectory(./functional_module)
+
+if (REMOTE_CONTROL)
+  # --- CAN Module
+  add_subdirectory(./can_cooperation)
+endif ()
+
+# --- VR module
+add_subdirectory(./vr_module)
 
 if (TIME_TESTER)
     add_subdirectory(./time_tester)

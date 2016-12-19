@@ -15,6 +15,7 @@ struct MessageLanguages;
 struct MessageString;
 struct RpcParameters;
 struct Rpcs;
+struct InteriorZone;
 }  // namespace policy_table_interface_base
 }  // namespace rpc
 
@@ -25,6 +26,8 @@ namespace policy_table_interface_base {
 typedef Array< String<1, 255>, 0, 255 > Strings;
 
 typedef Array< Enum<AppHMIType>, 0, 255 > AppHMITypes;
+
+typedef Array< Enum<ModuleType>, 0, 255 > ModuleTypes;
 
 typedef Array< Enum<HmiLevel>, 0, 4 > HmiLevels;
 
@@ -54,10 +57,19 @@ typedef Map< Rpcs, 1, 255 > FunctionalGroupings;
 
 typedef Map< DeviceParams, 0, 255 > DeviceData;
 
+typedef Map< InteriorZone, 2, 1000000 > Zones;
+
+typedef Map<Strings, 0, 255> RemoteRpcs;
+
+typedef Map<RemoteRpcs, 0, 255> AccessModules;
+
 struct ApplicationParams : CompositeType {
   public:
     Strings groups;
+    Optional< Strings > groups_primaryRC;
+    Optional< Strings > groups_nonPrimaryRC;
     Optional< Strings > nicknames;
+    mutable Optional< ModuleTypes > moduleType;
     Optional< AppHMITypes > AppHMIType;
     Enum<Priority> priority;
     Optional< Integer<uint16_t, 0, 65225> > memory_kb;
@@ -76,6 +88,7 @@ struct ApplicationParams : CompositeType {
     virtual void SetPolicyTableType(PolicyTableType pt_type);
   private:
     bool Validate() const;
+    bool ValidateModuleTypes() const;
 };
 
 struct RpcParameters : CompositeType {
@@ -116,6 +129,58 @@ struct Rpcs : CompositeType {
     bool Validate() const;
 };
 
+struct InteriorZone: CompositeType {
+  public:
+    Integer<uint8_t, 0, 100> col;
+    Integer<uint8_t, 0, 100> row;
+    Integer<uint8_t, 0, 100> level;
+    AccessModules auto_allow;
+    AccessModules driver_allow;
+  public:
+    InteriorZone();
+    InteriorZone(uint8_t col, uint8_t row, uint8_t level, const AccessModules& auto_allow, const AccessModules& driver_allow);
+    ~InteriorZone();
+    explicit InteriorZone(const Json::Value* value__);
+    Json::Value ToJsonValue() const;
+    bool is_valid() const;
+    bool is_initialized() const;
+    bool struct_empty() const;
+    void ReportErrors(rpc::ValidationReport* report__) const;
+    virtual void SetPolicyTableType(PolicyTableType pt_type);
+  private:
+    static const int length = 4;
+    static const std::string kRemoteRpcs[length];
+    static const int length_radio = 10;
+    static const std::string kRadioParameters[length_radio];
+    static const int length_climate = 9;
+    static const std::string kClimateParameters[length_climate];
+    void FillRemoteRpcs();
+    bool Validate() const;
+    inline bool ValidateAllow(const AccessModules& modules) const;
+    inline bool ValidateRemoteRpcs(ModuleType module,
+                                   const RemoteRpcs& rpcs) const;
+    inline bool ValidateParameters(ModuleType module,
+                                   const Strings& rpcs) const;
+};
+
+struct Equipment : CompositeType {
+  public:
+    Zones zones;
+  public:
+    Equipment();
+    ~Equipment();
+    explicit Equipment(const Json::Value* value__);
+    Json::Value ToJsonValue() const;
+    bool is_valid() const;
+    bool is_initialized() const;
+    bool struct_empty() const;
+    void ReportErrors(rpc::ValidationReport* report__) const;
+    virtual void SetPolicyTableType(PolicyTableType pt_type);
+  private:
+    bool Validate() const;
+    inline bool ValidateNameZone(const std::string& name) const;
+};
+
 struct ModuleConfig : CompositeType {
   public:
     Optional< Map< String<0, 100>, 0, 255 > > device_certificates;
@@ -131,6 +196,9 @@ struct ModuleConfig : CompositeType {
     Optional< String<1, 100> > vehicle_model;
     Optional< String<4, 4> > vehicle_year;
     Optional< String<0, 65535> > certificate;
+    Optional< Boolean > user_consent_passengersRC;
+    Optional< Boolean > country_consent_passengersRC;
+    Optional< Equipment > equipment;
   public:
     ModuleConfig();
     ModuleConfig(uint8_t exchange_after_x_ignition_cycles, int64_t exchange_after_x_kilometers, uint8_t exchange_after_x_days, uint16_t timeout_after_x_seconds, const SecondsBetweenRetries& seconds_between_retries, const ServiceEndpoints& endpoints, const NumberOfNotificationsPerMinute& notifications_per_minute_by_priority);
@@ -262,6 +330,7 @@ struct DeviceParams : CompositeType {
     bool is_initialized() const;
     bool struct_empty() const;
     void ReportErrors(rpc::ValidationReport* report__) const;
+    virtual void SetPolicyTableType(PolicyTableType pt_type);
   private:
     bool Validate() const;
 };

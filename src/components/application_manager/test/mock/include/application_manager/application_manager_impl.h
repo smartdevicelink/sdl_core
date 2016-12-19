@@ -216,8 +216,7 @@ class ApplicationManagerImpl : public ApplicationManager,
   MOCK_METHOD0(connection_handler, connection_handler::ConnectionHandler*());
   MOCK_METHOD0(protocol_handler, protocol_handler::ProtocolHandler*());
   MOCK_METHOD0(hmi_message_handler, hmi_message_handler::HMIMessageHandler*());
-  MOCK_METHOD5(CheckPolicyPermissions, mobile_apis::Result::eType(const std::string&,
-                                                           mobile_apis::HMILevel::eType,
+  MOCK_METHOD5(CheckPolicyPermissions, mobile_apis::Result::eType(const ApplicationSharedPtr app,,
                                                            mobile_apis::FunctionID::eType,
                                                            const RPCParams&,
                                                            CommandParametersPermissions*));

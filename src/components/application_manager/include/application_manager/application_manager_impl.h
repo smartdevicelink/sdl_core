@@ -206,7 +206,17 @@ class ApplicationManagerImpl : public ApplicationManager,
     /////////////////////////////////////////////////////
 
     ApplicationSharedPtr application(uint32_t app_id) const;
+    /**
+     * Gets application by policy id
+     * @param policy_app_id
+     * @return application
+     * @deprecated see application(const std::string&, const std::string&) const
+     */
     ApplicationSharedPtr application_by_policy_id(
+        const std::string& policy_app_id) const;
+    ApplicationSharedPtr application(const std::string& device_id,
+        const std::string& policy_app_id) const;
+    std::vector<std::string> devices(
         const std::string& policy_app_id) const;
     ApplicationSharedPtr active_application() const;
     std::vector<ApplicationSharedPtr> applications_by_button(uint32_t button);
@@ -454,6 +464,8 @@ class ApplicationManagerImpl : public ApplicationManager,
                                           std::vector<uint8_t>& binary_data);
 
     std::string GetDeviceName(connection_handler::DeviceHandle handle);
+
+    uint32_t GetDeviceHandle(uint32_t connection_key);
 
     /////////////////////////////////////////////////////
 
@@ -756,12 +768,12 @@ class ApplicationManagerImpl : public ApplicationManager,
     ApplicationSharedPtr application_by_hmi_app(uint32_t hmi_app_id) const;
 
     // TODO(AOleynik): Temporary added, to fix build. Should be reworked.
-    connection_handler::ConnectionHandler* connection_handler();
+    connection_handler::ConnectionHandler* connection_handler() const;
 
     /**
      * @brief Checks, if given RPC is allowed at current HMI level for specific
      * application in policy table
-     * @param policy_app_id Application id
+     * @param app Application
      * @param hmi_level Current HMI level of application
      * @param function_id FunctionID of RPC
      * @param params_permissions Permissions for RPC parameters (e.g.
@@ -769,11 +781,29 @@ class ApplicationManagerImpl : public ApplicationManager,
      * @return SUCCESS, if allowed, otherwise result code of check
      */
     mobile_apis::Result::eType CheckPolicyPermissions(
-        const std::string& policy_app_id,
-        mobile_apis::HMILevel::eType hmi_level,
-        mobile_apis::FunctionID::eType function_id,
+        const ApplicationSharedPtr app,
+        const std::string& function_id,
         const RPCParams& rpc_params,
         CommandParametersPermissions* params_permissions = NULL);
+
+    /**
+     * @brief  Places a message to the queue to be sent to mobile. Called from plugins.
+     * @param message Message to mobile
+     */
+    void PostMessageToMobileQueque(const MessagePtr& message);
+
+    /**
+     * @brief  Places a message to the queue to be sent to HMI. Called from plugins.
+     * @param message Message to HMI
+     */
+    void PostMessageToHMIQueque(const MessagePtr& message);
+
+    /*
+     * @brief Subscribes to notification from HMI
+     * @param hmi_notification string with notification name
+     */
+    void SubscribeToHMINotification( const std::string& hmi_notification);
+
     /*
      * @brief Function Should be called when Low Voltage is occured
      */
@@ -887,6 +917,7 @@ class ApplicationManagerImpl : public ApplicationManager,
       }
 
       void Erase(ApplicationSharedPtr app_to_remove) {
+        app_to_remove->RemoveExtensions();
         ApplicationManagerImpl::instance()->applications_.erase(app_to_remove);
       }
 
@@ -927,6 +958,20 @@ class ApplicationManagerImpl : public ApplicationManager,
       bool operator () (const ApplicationSharedPtr app) const {
         return app ? policy_app_id_ == app->mobile_app_id() : false;
       }
+    };
+
+    struct IsApplication {
+      IsApplication(connection_handler::DeviceHandle device_handle,
+                    const std::string& policy_app_id):
+        device_handle_(device_handle),
+        policy_app_id_(policy_app_id) {}
+      bool operator () (const ApplicationSharedPtr app) const {
+        return app && app->device() == device_handle_
+            && app->mobile_app_id() == policy_app_id_;
+      }
+     private:
+      connection_handler::DeviceHandle device_handle_;
+      const std::string& policy_app_id_;
     };
 
     struct SubscribedToButtonPredicate {

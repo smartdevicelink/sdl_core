@@ -36,6 +36,7 @@
 #include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
+#include "application_manager/policies/policy_handler.h"
 
 namespace application_manager {
 
@@ -70,6 +71,13 @@ void OnExitApplicationNotification::Run() {
       break;
     }
   }
+
+#ifdef SDL_REMOTE_CONTROL
+  std::string device_handle = MessageHelper::GetDeviceMacAddressForHandle(
+      app_impl->device());
+  policy::PolicyHandler::instance()->ResetAccess(device_handle,
+                                                 app_impl->mobile_app_id());
+#endif  // SDL_REMOTE_CONTROL
 
   ApplicationManagerImpl::instance()->ChangeAppsHMILevel(app_impl->app_id(),
                                                          mobile_apis::HMILevel::HMI_NONE);

@@ -34,7 +34,7 @@
 
 <interfaces name="SmartDeviceLink HMI API">
 
-<interface name="Common" version="1.1" date="2013-10-02">
+<interface name="Common" version="1.2" date="2015-11-16">
 
 <enum name="Result">
     <element name="SUCCESS" value="0"/>
@@ -62,6 +62,7 @@
     <element name="GENERIC_ERROR" value="22"/>
     <element name="USER_DISALLOWED" value="23"/>
     <element name="TRUNCATED_DATA" value="24"/>
+    <element name="READ_ONLY " value="25"/>
 </enum>
 
 <enum name="ButtonName">
@@ -231,6 +232,7 @@
   <element name="BACKGROUND_PROCESS" />
   <element name="TESTING" />
   <element name="SYSTEM" />
+  <element name="REMOTE_CONTROL" />
 </enum>
 
 <enum name="LayoutMode">
@@ -1225,9 +1227,9 @@
 </enum>
 
 <struct name="ModuleDescription">
-  <param name="moduleZone" type="Common.InteriorZone" mandatory="true">
+  <param name="moduleZone" type="Common.InteriorZone">
   </param>
-  <param name="moduleType" type="Common.ModuleType" mandatory="true">
+  <param name="moduleType" type="Common.ModuleType">
   </param>
 </struct>
 
@@ -1235,6 +1237,21 @@
   <element name="AM"/>
   <element name="FM"/>
   <element name="XM"/>
+</enum>
+
+<enum name="TemperatureUnit">
+  <element name="KELVIN"/>
+  <element name="FAHRENHEIT"/>
+  <element name="CELSIUS"/>
+</enum>
+
+<enum name="DeviceRank">
+  <element name="DRIVER">
+    <description>The device is ranked as driver's</description>
+  </element>
+  <element name="PASSENGER">
+    <description>The device is ranked as passenger's</description>
+  </element>
 </enum>
 
 <struct name="RdsData">
@@ -1313,9 +1330,11 @@
   </param>
   <param name="desiredTemp" type="Integer" minvalue="0" maxvalue="100" mandatory="false">
   </param>
+  <param name="temperatureUnit" type="Common.TemperatureUnit" mandatory="false">
+  </param>
   <param name="acEnable" type="Boolean" mandatory="false">
   </param>
-  <param name="recirculateAirEnable" type="Boolean" mandatory="false">
+  <param name="circulateAirEnable" type="Boolean" mandatory="false">
   </param>
   <param name="autoModeEnable" type="Boolean" mandatory="false">
   </param>
@@ -1652,6 +1671,15 @@
   </param>
   <param name="imageSupported" type="Boolean" mandatory="true">
     <description>Must be true if the button supports referencing a static or dynamic image.</description>
+  </param>
+</struct>
+
+<struct name="HMICapabilities">
+  <param name="navigation" type="Boolean" mandatory="false">
+    <description>Availability of build in Nav. True: Available, False: Not Available</description>
+  </param>
+  <param name="phoneCall" type="Boolean" mandatory="false">
+    <description>Availability of build in phone. True: Available, False: Not Available</description>
   </param>
 </struct>
 
@@ -2042,48 +2070,106 @@
 
 </interface>
 
-<interface name="RC" version="1.0" date="2015-05-01">
+<interface name="RC" version="1.0" date="2015-10-13">
   <function name="GetInteriorVehicleDataCapabilities" messagetype="request">
+    <description>Called to retrieve the available zones and supported control types</description>
     <param name="zone" type="Common.InteriorZone" mandatory="false">
+      <description>If included, only the corresponding modules able to be controlled by that zone will be sent back. If not included, all modules will be returned regardless of their ability to be controlled by specifc zones.</description>
     </param>
     <param name="moduleTypes" type="Common.ModuleType" array="true" mandatory="false" minsize="1" maxsize="1000">
+      <description>If included, only the corresponding type of modules a will be sent back. If not included, all module types will be returned.</description>
+    </param>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>Internal SDL-assigned ID of the related application</description>
     </param>
   </function>
   <function name="GetInteriorVehicleDataCapabilities" messagetype="response">
-    <param name="interiorVehicleDataCapabilities" type="Common.ModuleDescription" array="true" minsize="1" maxsize="1000" mandatory="false">
+    <param name="interiorVehicleDataCapabilities" type="Common.ModuleDescription" array="true" minsize="1" maxsize="1000">
   </param>
   </function>
-  <function name="SetInteriorVehicleData" messagetype="request">
+  <function name="SetInteriorVehicleData" functionID="SetInteriorVehicleDataID" messagetype="request">
     <param name="moduleData" type="Common.ModuleData">
-      <description>The data to set for the (zone, module) pair</description>
+      <description>The zone, module, and data to set for the (zone, module) pair</description>
+    </param>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>Internal SDL-assigned ID of the related application</description>
     </param>
   </function>
-  <function name="SetInteriorVehicleData" messagetype="response">
+  <function name="SetInteriorVehicleData" functionID="SetInteriorVehicleDataID" messagetype="response">
+    <description>Used to set the values of one zone and one data type within that zone</description>
     <param name="moduleData" type="Common.ModuleData">
-      <description>The updated data to set for the (zone, module) pair</description>
     </param>
   </function>
-  <function name="GetInteriorVehicleData" messagetype="request">
+  <function name="GetInteriorVehicleData" functionID="GetInteriorVehicleDataID" messagetype="request">
     <param name="moduleDescription" type="Common.ModuleDescription">
       <description>The zone and module data to retrieve from the vehicle for that zone</description>
     </param>
     <param name="subscribe" type="Boolean" mandatory="false" defvalue="false">
-      <description>If subscribe is true, the array values in requestedDataTypes override the current subscriptions for the zones requested, ie if the developer subscribes to A and B and then subscribes to A, the developer will no longer be subscribed to B. If the array is empty, data for all supported data types is returned</description>
+      <description>If subscribe is true, the head unit will send onInteriorVehicleData notifications for the moduleDescription</description>
+    </param>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>Internal SDL-assigned ID of the related application</description>
     </param>
   </function>
-  <function name="GetInteriorVehicleData" messagetype="response">
+  <function name="GetInteriorVehicleData" functionID="GetInteriorVehicleDataID" messagetype="response">
     <param name="moduleData" type="Common.ModuleData">
-      <description>The updated data to set for the (zone, module) pair</description>
+    </param>
+    <param name="isSubscribed" type="Boolean" mandatory="false" >
+      <description>Is a conditional-mandatory parameter: must be returned in case "subscribe" parameter was present in the related request.
+      if "true" - the "moduleDescription" from request is successfully subscribed and  the head unit will send onInteriorVehicleData notifications for the moduleDescription.
+      if "false" - the "moduleDescription" from request is either unsubscribed or failed to subscribe.</description>
+    </param>
+  </function>
+  <function name="GetInteriorVehicleDataConsent" messagetype="request">
+    <description>Sender: SDL->HMI. </description>
+    <description>HMI is expected to display a permission prompt to the driver showing the module, zone, and app details (for example, app's name). The driver is expected to have an ability to grant or deny the permission.</description>
+    <param name="moduleType" type="Common.ModuleType" mandatory="true">
+      <description>The module that the app requests to control.</description>
+    </param>
+    <param name="zone" type="Common.InteriorZone" mandatory="true">
+      <description>A zone from which the app requests to control the named module.</description>
+    </param>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of the application that triggers the permission prompt.</description>
+    </param>
+  </function>
+  <function name="GetInteriorVehicleDataConsent" messagetype="response">
+    <param name="allowed" type="Boolean" mandatory="true">
+      <description>"true" - if the driver grants the permission for controlling to the named app; "false" - in case the driver denies the permission for controlling to the named app.</description>
     </param>
   </function>
 
-  <function name="OnInteriorVehicleData" messagetype="notification">
-    <param name="moduleData" type="Common.ModuleData" mandatory="true">
+  <function name="OnInteriorVehicleData" functionID="OnInteriorVehicleDataID" messagetype="notification">
+    <param name="moduleData" type="Common.ModuleData">
+    </param>
+  </function>
+  <function name="OnReverseAppsAllowing" messagetype="notification">
+    <description>Sender: vehicle -> RSDL. Notification about remote-control for passenger`s applications must be either turned off or turned on. Sent after User`s choice through HMI.</description>
+    <param name="allowed" type="Boolean" mandatory="true" >
+      <description>If "true" - RC for passengers is allowed; if "false" - disallowed.</description>
+    </param>
+  </function>
+  <function name="OnDeviceRankChanged" messagetype="notification">
+    <description>Sender: vehicle->RSDL. Purpose: inform about the device is set either as driver`s or as passenger`s  device by the HMI settings or by the HMI User through the appropriate menu.</description>
+    <param name="deviceRank" type="Common.DeviceRank" mandatory="true">
+      <description>If "DRIVER" - the named by "DeviceInfo" device is set as driver`s. If "PASSENGER" -  the named by "DeviceInfo" device is set as passenger`s. </description>
+    </param>
+    <param name="device" type="Common.DeviceInfo" mandatory="true">
+      <description>The device info: name and ID. Initially is sent by SDL via UpdateDeviceList to the vehicle.</description>
+    </param>
+  </function>
+  <function name="OnDeviceLocationChanged" messagetype="notification">
+    <description>Sender: vehicle->RSDL. Purpose: inform about the device location in the vehicle interior.</description>
+    <param name="deviceLocation" type="Common.InteriorZone" mandatory="true">
+      <description>Defines the vehicle zone where the named device is located. </description>
+    </param>
+    <param name="device" type="Common.DeviceInfo" mandatory="true">
+      <description>The device info: name and ID. Initially is sent by SDL via UpdateDeviceList to HMI.</description>
     </param>
   </function>
 </interface>
 
-<interface name="Buttons" version="1.0" date="2013-04-12">
+<interface name="Buttons" version="1.1" date="2015-10-13">
     <function name="GetCapabilities" messagetype="request">
       <description>Method is invoked at system start-up. SDL requests the information about all supported hardware buttons and their capabilities</description>
     </function>
@@ -2098,15 +2184,18 @@
 
     <function name="ButtonPress" messagetype="request">
       <description>Method is invoked when the application tries to press a button</description>
-      <param name="name" type="Common.ButtonName" mandatory="true"/>
-      <param name="mode" type="Common.ButtonPressMode" mandatory="true">
-          <description>Indicates whether this is a LONG or SHORT button press event.</description>
+      <param name="zone" type="Common.InteriorZone">
+        <description>The zone where the button press should occur.</description>
       </param>
-      <param name="moduleType" type="Common.ModuleType" mandatory="true">
-        <description>The module where this command is being directed</description>
+      <param name="moduleType" type="Common.ModuleType">
+        <description>The module where the button should be pressed</description>
       </param>
-      <param name="interiorZone" type="Common.InteriorZone" mandatory="true">
-        <description>The interior zone where this command is being directed</description>
+      <param name="buttonName" type="Common.ButtonName"/>
+      <param name="buttonPressMode" type="Common.ButtonPressMode">
+        <description>Indicates whether this is a LONG or SHORT button press event.</description>
+      </param>
+      <param name="appID" type="Integer" mandatory="true">
+        <description>ID of the application that triggers the permission prompt.</description>
       </param>
     </function>
     <function name="ButtonPress" messagetype="response">
@@ -2989,8 +3078,11 @@
     </param>
     <param name="audioPassThruCapabilities" type="Common.AudioPassThruCapabilities" mandatory="true"/>
     <param name="hmiZoneCapabilities" type="Common.HmiZoneCapabilities" mandatory="true"/>
-    <param name="softButtonCapabilities" type="Common.SoftButtonCapabilities" mandatory="false">
+    <param name="softButtonCapabilities" type="Common.SoftButtonCapabilities" minsize="1" maxsize="100" array="true" mandatory="false">
       <description>Must be returned if the platform supports on-screen SoftButtons.</description>
+    </param>
+    <param name="hmiCapabilities" type="Common.HMICapabilities" mandatory="false">
+      <description>Specifies the HMI’s capabilities. See HMICapabilities.</description>
     </param>
   </function>
   <function name="ChangeRegistration" messagetype="request">

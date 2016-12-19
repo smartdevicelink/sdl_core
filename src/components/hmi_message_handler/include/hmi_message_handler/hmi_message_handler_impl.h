@@ -90,6 +90,12 @@ class HMIMessageHandlerImpl
   void OnErrorSending(MessageSharedPointer message);
   void AddHMIMessageAdapter(HMIMessageAdapter* adapter);
   void RemoveHMIMessageAdapter(HMIMessageAdapter* adapter);
+  /**
+   * @brief Subscribes to notification from HMI
+   * @param hmi_notification string with notification name
+   */
+  virtual void SubscribeToHMINotification(
+      const std::string& hmi_notification);
 
  private:
   HMIMessageHandlerImpl();

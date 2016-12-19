@@ -118,6 +118,15 @@ bool CacheManager::GetDefaultHMI(const std::string &app_id,
   return result;
 }
 
+const policy_table::AppHMITypes* CacheManager::GetHMITypes(const std::string &app_id) {
+  const policy_table::ApplicationPolicies& apps = pt_->policy_table.app_policies;
+  policy_table::ApplicationPolicies::const_iterator i = apps.find(app_id);
+  if (i != apps.end()) {
+    return &(*i->second.AppHMIType);
+  }
+  return NULL;
+}
+
 bool CacheManager::ResetUserConsent() {
   CACHE_MANAGER_CHECK(false);
   sync_primitives::AutoLock lock (cache_lock_);
@@ -204,6 +213,24 @@ bool CacheManager::ApplyUpdate(const policy_table::Table& update_pt) {
       pt_->policy_table.app_policies[iter->first] = iter->second;
     }
   }
+
+#ifdef SDL_REMOTE_CONTROL
+  for (policy_table::ApplicationPolicies::iterator it =
+        pt_->policy_table.app_policies.begin();
+        pt_->policy_table.app_policies.end() != it;
+        ++it) {
+    if (IsDefaultPolicy(it->first)) {
+      SetDefaultPolicy(it->first);
+    }
+  }
+
+  pt_->policy_table.module_config.country_consent_passengersRC =
+      update_pt.policy_table.module_config.country_consent_passengersRC;
+  if (update_pt.policy_table.module_config.equipment.is_initialized()) {
+    pt_->policy_table.module_config.equipment =
+      update_pt.policy_table.module_config.equipment;
+  }
+  #endif  // SDL_REMOTE_CONTROLs
 
   if (update_pt.policy_table.consumer_friendly_messages.is_initialized()) {
     pt_->policy_table.consumer_friendly_messages =
@@ -353,25 +380,19 @@ bool CacheManager::IsApplicationRevoked(const std::string& app_id) const {
   return is_revoked;
 }
 
-void CacheManager::CheckPermissions(const PTString &app_id,
+const policy_table::Strings& CacheManager::GetGroups(const PTString &app_id) {
+  return pt_->policy_table.app_policies[app_id].groups;
+}
+
+void CacheManager::CheckPermissions(const policy_table::Strings &groups,
                                     const PTString &hmi_level,
                                     const PTString &rpc,
                                     CheckPermissionResult &result) {
   LOG4CXX_AUTO_TRACE(logger_);
   CACHE_MANAGER_CHECK_VOID();
 
-  if (pt_->policy_table.app_policies.end() ==
-      pt_->policy_table.app_policies.find(app_id)) {
-    LOG4CXX_ERROR(logger_, "Application id " << app_id
-                  << " was not found in policy DB.");
-    return;
-  }
-
-  policy_table::Strings::const_iterator app_groups_iter =
-      pt_->policy_table.app_policies[app_id].groups.begin();
-
-  policy_table::Strings::const_iterator app_groups_iter_end =
-      pt_->policy_table.app_policies[app_id].groups.end();
+  policy_table::Strings::const_iterator app_groups_iter = groups.begin();
+  policy_table::Strings::const_iterator app_groups_iter_end = groups.end();
 
   policy_table::FunctionalGroupings::const_iterator concrete_group;
 
@@ -589,6 +610,21 @@ void CacheManager::CheckSnapshotInitialization() {
   *(snapshot_->policy_table.module_config.preloaded_pt) = false;
 }
 
+struct HandleModuleTypes {
+ private:
+  CacheManagerInterface* cache_;
+ public:
+  explicit HandleModuleTypes(CacheManagerInterface* cache) : cache_(cache) {}
+  void operator()(policy_table::ApplicationPolicies::value_type& item) {
+    const std::string& app_id = item.first;
+    if (cache_->IsPredataPolicy(app_id) || app_id == kDeviceId
+        || app_id == kPreConsentPassengersRC) {
+      LOG4CXX_INFO(logger_, "Clear module types for application " << app_id);
+      item.second.moduleType = rpc::Optional<policy_table::ModuleTypes>();
+    }
+  }
+};
+
 void CacheManager::PersistData() {
   LOG4CXX_AUTO_TRACE(logger_);
   if (backup_.valid()) {
@@ -598,6 +634,8 @@ void CacheManager::PersistData() {
       policy_table::Table copy_pt(*pt_);
       cache_lock_.Release();
 
+      policy_table::ApplicationPolicies& apps = copy_pt.policy_table.app_policies;
+      std::for_each(apps.begin(), apps.end(), HandleModuleTypes(this));
       backup_->Save(copy_pt);
       backup_->SaveUpdateRequired(update_required);
 
@@ -713,6 +751,11 @@ CacheManager::GenerateSnapshot() {
   snapshot_ = new policy_table::Table();
   snapshot_->policy_table = pt_->policy_table;
   CheckSnapshotInitialization();
+
+  policy_table::ConsumerFriendlyMessages messages(
+    snapshot_->policy_table.consumer_friendly_messages->version);
+  *(snapshot_->policy_table.consumer_friendly_messages) = messages;
+
   return snapshot_;
 }
 
@@ -1001,6 +1044,8 @@ bool CacheManager::LoadFromFile(const std::string& file_name) {
 
   pt_ = new policy_table::Table(&value);
   if (pt_->is_valid()) {
+    policy_table::ApplicationPolicies& apps = pt_->policy_table.app_policies;
+    std::for_each(apps.begin(), apps.end(), HandleModuleTypes(this));
     if (backup_->Save(*pt_)) {
       backup_->WriteDb();
       return true;
