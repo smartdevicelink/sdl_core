@@ -1261,6 +1261,9 @@ void CacheManager::CheckSnapshotInitialization() {
   if (!module_meta->pt_exchanged_at_odometer_x->is_initialized()) {
     *(module_meta->pt_exchanged_at_odometer_x) = 0;
   }
+  if (!module_meta->ignition_cycles_since_last_exchange->is_initialized()) {
+    *(module_meta->ignition_cycles_since_last_exchange) = 0;
+  }
 
   if (!module_meta->pt_exchanged_x_days_after_epoch->is_initialized()) {
     *(module_meta->pt_exchanged_x_days_after_epoch) = 0;
