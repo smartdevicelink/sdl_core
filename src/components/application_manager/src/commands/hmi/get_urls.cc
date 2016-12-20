@@ -106,6 +106,7 @@ void GetUrls::ProcessServiceURLs(const policy::EndpointUrls& endpoints) {
                         "Can't find application with policy id "
                             << endpoints[e].app_id
                             << " URLs adding for this appliation is skipped.");
+          index--;
           continue;
         }
 
