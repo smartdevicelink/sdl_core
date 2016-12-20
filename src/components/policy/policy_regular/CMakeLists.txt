@@ -52,6 +52,7 @@ set(SOURCES
   ${POLICY_PATH}/src/sql_pt_queries.cc
   ${POLICY_PATH}/src/sql_pt_representation.cc
   ${POLICY_PATH}/src/update_status_manager.cc
+  ${POLICY_PATH}/src/status.cc
   ${POLICY_PATH}/src/cache_manager.cc
   ${COMPONENTS_DIR}/rpc_base/src/rpc_base/rpc_base.cc
 )

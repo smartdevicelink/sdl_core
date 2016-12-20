@@ -274,11 +274,6 @@ bool PolicyManagerImpl::RequestPTUpdate() {
   BinaryMessage update(message_string.begin(), message_string.end());
 
   listener_->OnSnapshotCreated(update);
-
-  // Need to reset update schedule since all currenly registered applications
-  // were already added to the snapshot so no update for them required.
-  update_status_manager_.ResetUpdateSchedule();
-
   return true;
 }
 
@@ -907,7 +902,7 @@ void PolicyManagerImpl::AddApplication(const std::string& application_id) {
 
   if (IsNewApplication(application_id)) {
     AddNewApplication(application_id, device_consent);
-    update_status_manager_.OnNewApplicationAdded();
+    update_status_manager_.OnNewApplicationAdded(device_consent);
   } else {
     PromoteExistedApplication(application_id, device_consent);
   }

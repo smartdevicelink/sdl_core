@@ -35,6 +35,7 @@
 
 #include "utils/shared_ptr.h"
 #include "policy/policy_types.h"
+#include "policy/status.h"
 
 namespace policy {
 
@@ -43,6 +44,25 @@ class PolicyListener;
 class UpdateStatusManagerInterface {
  public:
   virtual ~UpdateStatusManagerInterface() {}
+
+  /**
+   * @brief Process event by current status implementations
+   * @param event Event
+   */
+  virtual void ProcessEvent(UpdateEvent event) = 0;
+
+  /**
+   * @brief Set next status during event processing
+   * @param status Status shared pointer
+   */
+  virtual void SetNextStatus(utils::SharedPtr<Status> status) = 0;
+
+  /**
+   * @brief Set postponed status (will be set after next status) during event
+   * processing
+   * @param status Status shared pointer
+   */
+  virtual void SetPostponedStatus(utils::SharedPtr<Status> status) = 0;
   /**
    * @brief Sets listener pointer
    * @param listener Pointer to policy listener implementation
@@ -84,19 +104,13 @@ class UpdateStatusManagerInterface {
   /**
    * @brief Update status handler on new application registering
    */
-  virtual void OnNewApplicationAdded() = 0;
+  virtual void OnNewApplicationAdded(DeviceConsent device_consent) = 0;
 
   /**
    * @brief Update status handler for policy initialization
    * @param is_update_required Update necessity flag
    */
   virtual void OnPolicyInit(bool is_update_required) = 0;
-
-  /**
-   * @brief Returns current policy update status
-   * @return
-   */
-  virtual PolicyTableStatus GetUpdateStatus() = 0;
 };
 
 typedef utils::SharedPtr<UpdateStatusManagerInterface>
