@@ -109,13 +109,16 @@ bool CacheManager::CanAppKeepContext(const std::string& app_id) const {
 uint32_t CacheManager::HeartBeatTimeout(const std::string& app_id) const {
   CACHE_MANAGER_CHECK(0);
   uint32_t result = 0;
-  if (AppExists(app_id)) {
-    if (pt_->policy_table.app_policies_section.apps[app_id]
-            .heart_beat_timeout_ms.is_initialized()) {
-      result = *(pt_->policy_table.app_policies_section.apps[app_id]
-                     .heart_beat_timeout_ms);
-    }
+  if (!AppExists(app_id)) {
+    return result;
   }
+
+  const policy_table::ApplicationPolicies::mapped_type& app =
+      pt_->policy_table.app_policies_section.apps[app_id];
+  if (app.heart_beat_timeout_ms.is_initialized()) {
+    result = *(app.heart_beat_timeout_ms);
+  }
+
   return result;
 }
 
@@ -823,6 +826,10 @@ void CacheManager::CheckSnapshotInitialization() {
         (*it).second.count_of_removals_for_bad_behavior = 0;
       }
 
+      if (!(*it).second.count_of_tls_errors.is_initialized()) {
+        (*it).second.count_of_tls_errors = 0;
+      }
+
       if (!(*it).second.count_of_run_attempts_while_revoked.is_initialized()) {
         (*it).second.count_of_run_attempts_while_revoked = 0;
       }
@@ -1173,7 +1180,7 @@ bool CacheManager::SetDefaultPolicy(const std::string& app_id) {
   return true;
 }
 
-bool CacheManager::IsDefaultPolicy(const std::string& app_id) {
+bool CacheManager::IsDefaultPolicy(const std::string& app_id) const {
   CACHE_MANAGER_CHECK(false);
   const bool result =
       pt_->policy_table.app_policies_section.apps.end() !=
@@ -1217,13 +1224,19 @@ bool CacheManager::SetPredataPolicy(const std::string& app_id) {
   return true;
 }
 
-bool CacheManager::IsPredataPolicy(const std::string& app_id) {
+bool CacheManager::IsPredataPolicy(const std::string& app_id) const {
   // TODO(AOleynik): Maybe change for comparison with pre_DataConsent
   // permissions or check string value from get_string()
-  policy_table::ApplicationParams& pre_data_app =
-      pt_->policy_table.app_policies_section.apps[kPreDataConsentId];
-  policy_table::ApplicationParams& specific_app =
-      pt_->policy_table.app_policies_section.apps[app_id];
+  if (!IsApplicationRepresented(app_id)) {
+    return false;
+  }
+
+  policy_table::ApplicationPolicies& apps =
+      pt_->policy_table.app_policies_section.apps;
+  const policy_table::ApplicationPolicies::mapped_type& pre_data_app =
+      apps[kPreDataConsentId];
+  const policy_table::ApplicationPolicies::mapped_type& specific_app =
+      apps[app_id];
 
   policy_table::Strings res;
   std::set_intersection(pre_data_app.groups.begin(),
@@ -1232,9 +1245,8 @@ bool CacheManager::IsPredataPolicy(const std::string& app_id) {
                         specific_app.groups.end(),
                         std::back_inserter(res));
 
-  bool is_marked_as_predata =
-      kPreDataConsentId ==
-      pt_->policy_table.app_policies_section.apps[app_id].get_string();
+  const bool is_marked_as_predata =
+      (kPreDataConsentId == specific_app.get_string());
 
   return !res.empty() && is_marked_as_predata;
 }
@@ -1387,9 +1399,6 @@ bool CacheManager::ResetPT(const std::string& file_name) {
 
 bool CacheManager::AppExists(const std::string& app_id) const {
   CACHE_MANAGER_CHECK(false);
-  if (kDeviceId == app_id) {
-    return true;
-  }
   policy_table::ApplicationPolicies::iterator policy_iter =
       pt_->policy_table.app_policies_section.apps.find(app_id);
   return pt_->policy_table.app_policies_section.apps.end() != policy_iter;
@@ -1415,6 +1424,11 @@ void CacheManager::GetAppRequestTypes(
     std::vector<std::string>& request_types) const {
   LOG4CXX_AUTO_TRACE(logger_);
   CACHE_MANAGER_CHECK_VOID();
+  if (kDeviceId == policy_app_id) {
+    LOG4CXX_DEBUG(logger_,
+                  "Request types not applicable for app_id " << kDeviceId);
+    return;
+  }
   policy_table::ApplicationPolicies::iterator policy_iter =
       pt_->policy_table.app_policies_section.apps.find(policy_app_id);
   if (pt_->policy_table.app_policies_section.apps.end() == policy_iter) {

@@ -263,7 +263,7 @@ class CacheManagerInterface {
    * @param app_id application id
    * @return true if application has default policy
    */
-  virtual bool IsDefaultPolicy(const std::string& app_id) = 0;
+  virtual bool IsDefaultPolicy(const std::string& app_id) const = 0;
 
   /**
    * @brief SetIsDefault Sets is_default flag for application
@@ -277,7 +277,7 @@ class CacheManagerInterface {
    * @param app_id application id
    * @return true if application has pre_data policy
    */
-  virtual bool IsPredataPolicy(const std::string& app_id) = 0;
+  virtual bool IsPredataPolicy(const std::string& app_id) const = 0;
 
   /**
    * Sets default policy for application

@@ -280,7 +280,7 @@ class CacheManager : public CacheManagerInterface {
    * @param app_id application id
    * @return true if application has default policy
    */
-  bool IsDefaultPolicy(const std::string& app_id);
+  bool IsDefaultPolicy(const std::string& app_id) const OVERRIDE;
 
   /**
    * @brief SetIsDefault Sets is_default flag for application
@@ -301,7 +301,7 @@ class CacheManager : public CacheManagerInterface {
    * @param app_id application id
    * @return true if application has pre_data policy
    */
-  bool IsPredataPolicy(const std::string& app_id);
+  bool IsPredataPolicy(const std::string& app_id) const OVERRIDE;
 
   /**
    * Sets default policy for application

@@ -175,7 +175,7 @@ class PolicyManagerImpl : public PolicyManager {
 
   virtual void SaveUpdateStatusRequired(bool is_update_needed);
 
-  virtual bool IsPredataPolicy(const std::string& policy_app_id);
+  virtual bool IsPredataPolicy(const std::string& policy_app_id) const OVERRIDE;
   void set_cache_manager(CacheManagerInterface* cache_manager);
 
   virtual void OnAppsSearchStarted();
