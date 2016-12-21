@@ -1698,6 +1698,10 @@ bool DeviceParams::struct_empty() const {
   if (max_number_rfcom_ports.is_initialized()) {
     return false;
   }
+
+  if (connection_type.is_initialized()) {
+    return false;
+  }
   return true;
 }
 
@@ -1727,6 +1731,9 @@ void DeviceParams::ReportErrors(rpc::ValidationReport* report__) const {
   if (!max_number_rfcom_ports.is_valid()) {
     max_number_rfcom_ports.ReportErrors(
         &report__->ReportSubobject("max_number_rfcom_ports"));
+  }
+  if (!connection_type.is_valid()) {
+    connection_type.ReportErrors(&report__->ReportSubobject("connection_type"));
   }
 }
 
