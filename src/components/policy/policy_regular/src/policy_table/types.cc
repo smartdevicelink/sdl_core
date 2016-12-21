@@ -1034,7 +1034,7 @@ Json::Value AppLevel::ToJsonValue() const {
   impl::WriteJsonField("count_of_removals_for_bad_behavior",
                        count_of_removals_for_bad_behavior,
                        &result__);
-  impl::WriteJsonField("count_of_tls_errors", count_of_tls_errors, &result__);
+  impl::WriteJsonField("count_of_TLS_errors", count_of_tls_errors, &result__);
   impl::WriteJsonField("count_of_run_attempts_while_revoked",
                        count_of_run_attempts_while_revoked,
                        &result__);
