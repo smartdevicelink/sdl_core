@@ -859,14 +859,37 @@ void ConsumerFriendlyMessages::SetPolicyTableType(PolicyTableType pt_type) {
 ModuleMeta::ModuleMeta() : CompositeType(kUninitialized) {}
 ModuleMeta::~ModuleMeta() {}
 ModuleMeta::ModuleMeta(const Json::Value* value__)
-    : CompositeType(InitHelper(value__, &Json::Value::isObject)) {}
+    : CompositeType(InitHelper(value__, &Json::Value::isObject))
+    , pt_exchanged_at_odometer_x(
+          impl::ValueMember(value__, "pt_exchanged_at_odometer_x"))
+    , pt_exchanged_x_days_after_epoch(
+          impl::ValueMember(value__, "pt_exchanged_x_days_after_epoch"))
+    , ignition_cycles_since_last_exchange(
+          impl::ValueMember(value__, "ignition_cycles_since_last_exchange")) {}
 Json::Value ModuleMeta::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
+  impl::WriteJsonField(
+      "pt_exchanged_at_odometer_x", pt_exchanged_at_odometer_x, &result__);
+  impl::WriteJsonField("pt_exchanged_x_days_after_epoch",
+                       pt_exchanged_x_days_after_epoch,
+                       &result__);
+  impl::WriteJsonField("ignition_cycles_since_last_exchange",
+                       ignition_cycles_since_last_exchange,
+                       &result__);
   return result__;
 }
 bool ModuleMeta::is_valid() const {
   if (struct_empty()) {
     return initialization_state__ == kInitialized && Validate();
+  }
+  if (!pt_exchanged_at_odometer_x.is_valid()) {
+    return false;
+  }
+  if (!pt_exchanged_x_days_after_epoch.is_valid()) {
+    return false;
+  }
+  if (!ignition_cycles_since_last_exchange.is_valid()) {
+    return false;
   }
   return Validate();
 }
@@ -874,12 +897,41 @@ bool ModuleMeta::is_initialized() const {
   return (initialization_state__ != kUninitialized) || (!struct_empty());
 }
 bool ModuleMeta::struct_empty() const {
+  if (pt_exchanged_at_odometer_x.is_initialized()) {
+    return false;
+  }
+
+  if (pt_exchanged_x_days_after_epoch.is_initialized()) {
+    return false;
+  }
+  if (ignition_cycles_since_last_exchange.is_initialized()) {
+    return false;
+  }
   return true;
 }
 void ModuleMeta::ReportErrors(rpc::ValidationReport* report__) const {
   if (struct_empty()) {
     rpc::CompositeType::ReportErrors(report__);
   }
+  if (!pt_exchanged_at_odometer_x.is_valid()) {
+    pt_exchanged_at_odometer_x.ReportErrors(
+        &report__->ReportSubobject("pt_exchanged_at_odometer_x"));
+  }
+  if (!pt_exchanged_x_days_after_epoch.is_valid()) {
+    pt_exchanged_x_days_after_epoch.ReportErrors(
+        &report__->ReportSubobject("pt_exchanged_x_days_after_epoch"));
+  }
+  if (!ignition_cycles_since_last_exchange.is_valid()) {
+    ignition_cycles_since_last_exchange.ReportErrors(
+        &report__->ReportSubobject("ignition_cycles_since_last_exchange"));
+  }
+}
+
+void ModuleMeta::SetPolicyTableType(PolicyTableType pt_type) {
+  CompositeType::SetPolicyTableType(pt_type);
+  pt_exchanged_at_odometer_x.SetPolicyTableType(pt_type);
+  pt_exchanged_x_days_after_epoch.SetPolicyTableType(pt_type);
+  ignition_cycles_since_last_exchange.SetPolicyTableType(pt_type);
 }
 
 // AppLevel methods

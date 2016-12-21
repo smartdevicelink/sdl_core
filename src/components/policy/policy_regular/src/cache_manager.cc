@@ -749,6 +749,18 @@ void CacheManager::CheckSnapshotInitialization() {
   snapshot_->policy_table.module_config.certificate =
       rpc::Optional<rpc::String<0, 65535> >();
 
+  rpc::Optional<policy_table::ModuleMeta>& module_meta =
+      snapshot_->policy_table.module_meta;
+  if (!module_meta->pt_exchanged_at_odometer_x->is_initialized()) {
+    *(module_meta->pt_exchanged_at_odometer_x) = 0;
+  }
+  if (!module_meta->ignition_cycles_since_last_exchange->is_initialized()) {
+    *(module_meta->ignition_cycles_since_last_exchange) = 0;
+  }
+  if (!module_meta->pt_exchanged_x_days_after_epoch->is_initialized()) {
+    *(module_meta->pt_exchanged_x_days_after_epoch) = 0;
+  }
+
   /* consumer_friendly_messages are required for the snapshot;
    * consumer_friendly_messages->version is required always, but
    * consumer_friendly_messages->messages must be omitted in PTS */
