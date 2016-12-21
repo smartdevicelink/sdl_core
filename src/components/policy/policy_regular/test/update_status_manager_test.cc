@@ -34,6 +34,7 @@
 #include "policy/mock_policy_listener.h"
 #include "policy/policy_manager_impl.h"
 #include "policy/update_status_manager.h"
+#include "utils/make_shared.h"
 
 using ::policy::MockPolicyListener;
 
@@ -42,23 +43,27 @@ namespace components {
 namespace policy {
 
 using namespace ::policy;
+using ::testing::_;
+using ::testing::Return;
 
 class UpdateStatusManagerTest : public ::testing::Test {
  protected:
-  UpdateStatusManager* manager_;
-  PolicyTableStatus status_;
+  utils::SharedPtr<UpdateStatusManager> manager_;
   const uint32_t k_timeout_;
+  utils::SharedPtr<MockPolicyListener> listener_;
 
  public:
-  UpdateStatusManagerTest() : k_timeout_(1) {}
+  UpdateStatusManagerTest()
+      : manager_(utils::MakeShared<UpdateStatusManager>())
+      , k_timeout_(1)
+      , listener_(utils::MakeShared<MockPolicyListener>()) {}
 
-  void SetUp() {
-    manager_ = new UpdateStatusManager();
+  void SetUp() OVERRIDE {
+    manager_->set_listener(listener_.get());
+    ON_CALL(*listener_, OnUpdateStatusChanged(_)).WillByDefault(Return());
   }
 
-  void TearDown() OVERRIDE {
-    delete manager_;
-  }
+  void TearDown() OVERRIDE {}
 };
 
 TEST_F(UpdateStatusManagerTest,
