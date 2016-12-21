@@ -88,30 +88,34 @@ void GetUrls::ProcessServiceURLs(const policy::EndpointUrls& endpoints) {
 
   size_t index = 0;
   for (size_t e = 0; e < endpoints.size(); ++e) {
-    for (size_t u = 0; u < endpoints[e].url.size(); ++u, ++index) {
-      const std::string app_url = endpoints[e].url[u];
+    ApplicationSharedPtr app =
+        application_manager_.application_by_policy_id(endpoints[e].app_id);
 
+#ifdef EXTERNAL_PROPRIETARY_MODE
+    bool registered_not_default = false;
+    if (policy::kDefaultId != endpoints[e].app_id) {
+      if (!app) {
+        LOG4CXX_ERROR(logger_,
+                      "Can't find application with policy id "
+                          << endpoints[e].app_id
+                          << " URLs adding for this application is skipped.");
+        continue;
+      }
+      registered_not_default = true;
+    }
+#endif  // EXTERNAL_PROPRIETARY_MODE
+    for (size_t u = 0; u < endpoints[e].url.size(); ++u, ++index) {
+      const std::string& app_url = endpoints[e].url[u];
       SmartObject& service_info = urls[index];
 
       service_info[strings::url] = app_url;
-      if (policy::kDefaultId != endpoints[e].app_id) {
-#ifndef EXTERNAL_PROPRIETARY_MODE
-        service_info[hmi_response::policy_app_id] = endpoints[e].app_id;
-#else   // EXTERNAL_PROPRIETARY_MODE
-        ApplicationSharedPtr app =
-            application_manager_.application_by_policy_id(endpoints[e].app_id);
-
-        if (!app) {
-          LOG4CXX_ERROR(logger_,
-                        "Can't find application with policy id "
-                            << endpoints[e].app_id
-                            << " URLs adding for this appliation is skipped.");
-          continue;
-        }
-
+#ifdef EXTERNAL_PROPRIETARY_MODE
+      if (registered_not_default) {
         service_info[strings::app_id] = app->hmi_app_id();
-#endif  // EXTERNAL_PROPRIETARY_MODE
       }
+#else
+      service_info[hmi_response::policy_app_id] = endpoints[e].app_id;
+#endif  // EXTERNAL_PROPRIETARY_MODE
     }
   }
   SendResponseToHMI(Common_Result::SUCCESS);
