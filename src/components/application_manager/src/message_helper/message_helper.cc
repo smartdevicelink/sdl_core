@@ -1470,12 +1470,13 @@ void MessageHelper::SendSDLActivateAppResponse(
         GetPriorityCode(permissions.priority);
   }
 
-  app_mngr.ManageHMICommand(message);
-
   // If application is revoked it should not be activated
-  if (permissions.appRevoked || !permissions.isSDLAllowed) {
-    return;
+  if (permissions.appRevoked) {
+    (*message)[strings::params][hmi_response::code] =
+        hmi_apis::Common_Result::REJECTED;
   }
+
+  app_mngr.ManageHMICommand(message);
 }
 
 void MessageHelper::SendOnSDLConsentNeeded(
