@@ -1229,7 +1229,7 @@ Json::Value AppLevel::ToJsonValue() const {
   impl::WriteJsonField("count_of_removals_for_bad_behavior",
                        count_of_removals_for_bad_behavior,
                        &result__);
-  impl::WriteJsonField("count_of_tls_errors", count_of_tls_errors, &result__);
+  impl::WriteJsonField("count_of_TLS_errors", count_of_tls_errors, &result__);
   impl::WriteJsonField("count_of_run_attempts_while_revoked",
                        count_of_run_attempts_while_revoked,
                        &result__);
@@ -1621,7 +1621,8 @@ DeviceParams::DeviceParams(const Json::Value* value__)
     , carrier(impl::ValueMember(value__, "carrier"))
     , user_consent_records(impl::ValueMember(value__, "user_consent_records"))
     , max_number_rfcom_ports(
-          impl::ValueMember(value__, "max_number_rfcom_ports")) {}
+          impl::ValueMember(value__, "max_number_rfcom_ports"))
+    , connection_type(impl::ValueMember(value__, "connection_type")) {}
 
 Json::Value DeviceParams::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
@@ -1633,6 +1634,7 @@ Json::Value DeviceParams::ToJsonValue() const {
   impl::WriteJsonField("user_consent_records", user_consent_records, &result__);
   impl::WriteJsonField(
       "max_number_rfcom_ports", max_number_rfcom_ports, &result__);
+  impl::WriteJsonField("connection_type", connection_type, &result__);
   return result__;
 }
 
@@ -1659,6 +1661,9 @@ bool DeviceParams::is_valid() const {
     return false;
   }
   if (!max_number_rfcom_ports.is_valid()) {
+    return false;
+  }
+  if (!connection_type.is_valid()) {
     return false;
   }
   return Validate();
@@ -1693,6 +1698,10 @@ bool DeviceParams::struct_empty() const {
   if (max_number_rfcom_ports.is_initialized()) {
     return false;
   }
+
+  if (connection_type.is_initialized()) {
+    return false;
+  }
   return true;
 }
 
@@ -1723,6 +1732,9 @@ void DeviceParams::ReportErrors(rpc::ValidationReport* report__) const {
     max_number_rfcom_ports.ReportErrors(
         &report__->ReportSubobject("max_number_rfcom_ports"));
   }
+  if (!connection_type.is_valid()) {
+    connection_type.ReportErrors(&report__->ReportSubobject("connection_type"));
+  }
 }
 
 void DeviceParams::SetPolicyTableType(PolicyTableType pt_type) {
@@ -1734,6 +1746,7 @@ void DeviceParams::SetPolicyTableType(PolicyTableType pt_type) {
   carrier.SetPolicyTableType(pt_type);
   user_consent_records.SetPolicyTableType(pt_type);
   max_number_rfcom_ports.SetPolicyTableType(pt_type);
+  connection_type.SetPolicyTableType(pt_type);
 }
 
 // PolicyTable methods
