@@ -46,14 +46,14 @@ set(LIBRARIES
     ConfigProfile
 )
 
-set(SOURCES 
+set(SOURCES
 ${COMPONENTS_DIR}/hmi_message_handler/test/hmi_message_handler_impl_test.cc
 ${COMPONENTS_DIR}/hmi_message_handler/test/hmi_message_adapter_test.cc
 )
 
 if(${QT_HMI})
-    list (APPEND SOURCES  
-    ${COMPONENTS_DIR}/hmi_message_handler/test/mock_subscriber.cc 
+    list (APPEND SOURCES
+    ${COMPONENTS_DIR}/hmi_message_handler/test/mock_subscriber.cc
     ${COMPONENTS_DIR}/hmi_message_handler/test/dbus_message_adapter_test.cc
   )
 endif()
