@@ -1902,30 +1902,11 @@ bool CacheManager::SetPredataPolicy(const std::string& app_id) {
 }
 
 bool CacheManager::IsPredataPolicy(const std::string& app_id) const {
-  // TODO(AOleynik): Maybe change for comparison with pre_DataConsent
-  // permissions or check string value from get_string()
   if (!IsApplicationRepresented(app_id)) {
     return false;
   }
-
-  policy_table::ApplicationPolicies& apps =
-      pt_->policy_table.app_policies_section.apps;
-  const policy_table::ApplicationPolicies::mapped_type& pre_data_app =
-      apps[kPreDataConsentId];
-  const policy_table::ApplicationPolicies::mapped_type& specific_app =
-      apps[app_id];
-
-  policy_table::Strings res;
-  std::set_intersection(pre_data_app.groups.begin(),
-                        pre_data_app.groups.end(),
-                        specific_app.groups.begin(),
-                        specific_app.groups.end(),
-                        std::back_inserter(res));
-
-  const bool is_marked_as_predata =
-      (kPreDataConsentId == specific_app.get_string());
-
-  return !res.empty() && is_marked_as_predata;
+  return kPreDataConsentId ==
+         pt_->policy_table.app_policies_section.apps[app_id].get_string();
 }
 
 bool CacheManager::SetUnpairedDevice(const std::string& device_id,
