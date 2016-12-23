@@ -86,13 +86,13 @@ class Status {
  * @brief Return current status as string value
  * @return Status as string
  */
-  virtual const std::string get_status_string() const;
+  const std::string get_status_string() const;
 
   /**
  * @brief Return status as enum value
  * @return Status as enum value
  */
-  virtual PolicyTableStatus get_status() const;
+  PolicyTableStatus get_status() const;
 
   /**
  * @brief Check whether update is required in terms of status
