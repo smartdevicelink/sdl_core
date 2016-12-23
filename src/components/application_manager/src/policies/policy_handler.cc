@@ -1283,7 +1283,24 @@ void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string) {
     LOG4CXX_ERROR(logger_, "Service URLs are empty! NOT sending PT to mobile!");
     return;
   }
-  SendMessageToSDK(pt_string, urls.front().url.front());
+
+  static size_t current_app = 0;
+  static size_t current_url = 0;
+  if (current_url >= urls.at(current_app).url.size()) {
+    ApplicationSharedPtr app;
+    current_url = 0;
+    do {
+      if (++current_app >= urls.size()) {
+        current_app = 0;
+      }
+      app =
+          application_manager_.application_by_policy_id(urls.at(current_app).app_id);
+    } while (!((urls.at(current_app).app_id == policy::kDefaultId) ||
+        (app && app->IsRegistered() && !urls.at(current_app).url.empty())));
+  }
+
+  SendMessageToSDK(pt_string, urls.at(current_app).url.at(current_url));
+  current_url++;
 #endif  // PROPRIETARY_MODE
   // reset update required false
   OnUpdateRequestSentToMobile();
