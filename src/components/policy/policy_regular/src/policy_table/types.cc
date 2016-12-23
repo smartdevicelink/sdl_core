@@ -177,7 +177,6 @@ Json::Value ApplicationParams::ToJsonValue() const {
   impl::WriteJsonField("memory_kb", memory_kb, &result__);
   impl::WriteJsonField(
       "heart_beat_timeout_ms", heart_beat_timeout_ms, &result__);
-  impl::WriteJsonField("certificate", certificate, &result__);
   return result__;
 }
 
@@ -859,14 +858,37 @@ void ConsumerFriendlyMessages::SetPolicyTableType(PolicyTableType pt_type) {
 ModuleMeta::ModuleMeta() : CompositeType(kUninitialized) {}
 ModuleMeta::~ModuleMeta() {}
 ModuleMeta::ModuleMeta(const Json::Value* value__)
-    : CompositeType(InitHelper(value__, &Json::Value::isObject)) {}
+    : CompositeType(InitHelper(value__, &Json::Value::isObject))
+    , pt_exchanged_at_odometer_x(
+          impl::ValueMember(value__, "pt_exchanged_at_odometer_x"))
+    , pt_exchanged_x_days_after_epoch(
+          impl::ValueMember(value__, "pt_exchanged_x_days_after_epoch"))
+    , ignition_cycles_since_last_exchange(
+          impl::ValueMember(value__, "ignition_cycles_since_last_exchange")) {}
 Json::Value ModuleMeta::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
+  impl::WriteJsonField(
+      "pt_exchanged_at_odometer_x", pt_exchanged_at_odometer_x, &result__);
+  impl::WriteJsonField("pt_exchanged_x_days_after_epoch",
+                       pt_exchanged_x_days_after_epoch,
+                       &result__);
+  impl::WriteJsonField("ignition_cycles_since_last_exchange",
+                       ignition_cycles_since_last_exchange,
+                       &result__);
   return result__;
 }
 bool ModuleMeta::is_valid() const {
   if (struct_empty()) {
     return initialization_state__ == kInitialized && Validate();
+  }
+  if (!pt_exchanged_at_odometer_x.is_valid()) {
+    return false;
+  }
+  if (!pt_exchanged_x_days_after_epoch.is_valid()) {
+    return false;
+  }
+  if (!ignition_cycles_since_last_exchange.is_valid()) {
+    return false;
   }
   return Validate();
 }
@@ -874,12 +896,41 @@ bool ModuleMeta::is_initialized() const {
   return (initialization_state__ != kUninitialized) || (!struct_empty());
 }
 bool ModuleMeta::struct_empty() const {
+  if (pt_exchanged_at_odometer_x.is_initialized()) {
+    return false;
+  }
+
+  if (pt_exchanged_x_days_after_epoch.is_initialized()) {
+    return false;
+  }
+  if (ignition_cycles_since_last_exchange.is_initialized()) {
+    return false;
+  }
   return true;
 }
 void ModuleMeta::ReportErrors(rpc::ValidationReport* report__) const {
   if (struct_empty()) {
     rpc::CompositeType::ReportErrors(report__);
   }
+  if (!pt_exchanged_at_odometer_x.is_valid()) {
+    pt_exchanged_at_odometer_x.ReportErrors(
+        &report__->ReportSubobject("pt_exchanged_at_odometer_x"));
+  }
+  if (!pt_exchanged_x_days_after_epoch.is_valid()) {
+    pt_exchanged_x_days_after_epoch.ReportErrors(
+        &report__->ReportSubobject("pt_exchanged_x_days_after_epoch"));
+  }
+  if (!ignition_cycles_since_last_exchange.is_valid()) {
+    ignition_cycles_since_last_exchange.ReportErrors(
+        &report__->ReportSubobject("ignition_cycles_since_last_exchange"));
+  }
+}
+
+void ModuleMeta::SetPolicyTableType(PolicyTableType pt_type) {
+  CompositeType::SetPolicyTableType(pt_type);
+  pt_exchanged_at_odometer_x.SetPolicyTableType(pt_type);
+  pt_exchanged_x_days_after_epoch.SetPolicyTableType(pt_type);
+  ignition_cycles_since_last_exchange.SetPolicyTableType(pt_type);
 }
 
 // AppLevel methods
@@ -949,43 +1000,10 @@ AppLevel::AppLevel(const Json::Value* value__)
     , count_of_tls_errors(impl::ValueMember(value__, "count_of_tls_errors"))
     , count_of_run_attempts_while_revoked(
           impl::ValueMember(value__, "count_of_run_attempts_while_revoked")) {}
+
 Json::Value AppLevel::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
-  impl::WriteJsonField("minutes_in_hmi_full", minutes_in_hmi_full, &result__);
-  impl::WriteJsonField("app_registration_language_gui",
-                       app_registration_language_gui,
-                       &result__);
-  impl::WriteJsonField("app_registration_language_vui",
-                       app_registration_language_vui,
-                       &result__);
-  impl::WriteJsonField(
-      "minutes_in_hmi_limited", minutes_in_hmi_limited, &result__);
-  impl::WriteJsonField(
-      "minutes_in_hmi_background", minutes_in_hmi_background, &result__);
-  impl::WriteJsonField("minutes_in_hmi_none", minutes_in_hmi_none, &result__);
-  impl::WriteJsonField(
-      "count_of_user_selections", count_of_user_selections, &result__);
-  impl::WriteJsonField("count_of_rejections_sync_out_of_memory",
-                       count_of_rejections_sync_out_of_memory,
-                       &result__);
-  impl::WriteJsonField("count_of_rejections_nickname_mismatch",
-                       count_of_rejections_nickname_mismatch,
-                       &result__);
-  impl::WriteJsonField("count_of_rejections_duplicate_name",
-                       count_of_rejections_duplicate_name,
-                       &result__);
-  impl::WriteJsonField(
-      "count_of_rejected_rpc_calls", count_of_rejected_rpc_calls, &result__);
-  impl::WriteJsonField("count_of_rpcs_sent_in_hmi_none",
-                       count_of_rpcs_sent_in_hmi_none,
-                       &result__);
-  impl::WriteJsonField("count_of_removals_for_bad_behavior",
-                       count_of_removals_for_bad_behavior,
-                       &result__);
-  impl::WriteJsonField("count_of_tls_errors", count_of_tls_errors, &result__);
-  impl::WriteJsonField("count_of_run_attempts_while_revoked",
-                       count_of_run_attempts_while_revoked,
-                       &result__);
+  impl::WriteJsonField("count_of_TLS_errors", count_of_tls_errors, &result__);
   return result__;
 }
 bool AppLevel::is_valid() const {

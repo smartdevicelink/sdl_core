@@ -301,6 +301,7 @@ struct ModuleMeta : CompositeType {
   bool is_initialized() const;
   bool struct_empty() const;
   void ReportErrors(rpc::ValidationReport* report__) const;
+  void SetPolicyTableType(PolicyTableType pt_type);
 
  private:
   bool Validate() const;
