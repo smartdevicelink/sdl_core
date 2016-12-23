@@ -63,6 +63,12 @@ class UpdateStatusManagerInterface;
 class Status {
  public:
   /**
+   * @brief Constructor
+   */
+  Status(const std::string& string_status,
+         const policy::PolicyTableStatus enum_status);
+
+  /**
  * @brief Destructor
  */
   virtual ~Status();
@@ -70,23 +76,23 @@ class Status {
   /**
  * @brief Process event by setting next status in case event can affect
  * current status or ignores the event
- * @param mng Status manager pointer
+ * @param manager Status manager pointer
  * @param event Event which needs to be processed
  */
-  virtual void ProcessEvent(UpdateStatusManagerInterface* mng,
+  virtual void ProcessEvent(UpdateStatusManagerInterface* manager,
                             UpdateEvent event) = 0;
 
   /**
  * @brief Return current status as string value
  * @return Status as string
  */
-  virtual const std::string get_status_string() const = 0;
+  virtual const std::string get_status_string() const;
 
   /**
  * @brief Return status as enum value
  * @return Status as enum value
  */
-  virtual PolicyTableStatus get_status() const = 0;
+  virtual PolicyTableStatus get_status() const;
 
   /**
  * @brief Check whether update is required in terms of status
@@ -99,6 +105,10 @@ class Status {
  * @return True if update is pending, otherwise - false
  */
   virtual bool IsUpdatePending() const;
+
+ private:
+  const std::string string_status_;
+  const PolicyTableStatus enum_status_;
 };
 
 /**
@@ -107,25 +117,18 @@ class Status {
 class UpToDateStatus : public Status {
  public:
   /**
+   * @brief Constructor
+   */
+  UpToDateStatus();
+
+  /**
  * @brief Process event by setting next status in case event can affect
  * current status or ignores the event
- * @param mng Status manager pointer
+ * @param manager Status manager pointer
  * @param event Event which needs to be processed
  */
-  void ProcessEvent(UpdateStatusManagerInterface* mng,
-                    UpdateEvent event) OVERRIDE;
-
-  /**
- * @brief Return current status as string value
- * @return Status as string
- */
-  const std::string get_status_string() const OVERRIDE;
-
-  /**
- * @brief Return status as enum value
- * @return Status as enum value
- */
-  PolicyTableStatus get_status() const OVERRIDE;
+  void ProcessEvent(UpdateStatusManagerInterface* manager,
+                    UpdateEvent event) FINAL;
 };
 
 /**
@@ -134,31 +137,24 @@ class UpToDateStatus : public Status {
 class UpdateNeededStatus : public Status {
  public:
   /**
+   * @brief Constructor
+   */
+  UpdateNeededStatus();
+
+  /**
  * @brief Process event by setting next status in case event can affect
  * current status or ignores the event
- * @param mng Status manager pointer
+ * @param manager Status manager pointer
  * @param event Event which needs to be processed
  */
-  void ProcessEvent(UpdateStatusManagerInterface* mng,
-                    UpdateEvent event) OVERRIDE;
-
-  /**
- * @brief Return current status as string value
- * @return Status as string
- */
-  const std::string get_status_string() const OVERRIDE;
-
-  /**
- * @brief Return status as enum value
- * @return Status as enum value
- */
-  PolicyTableStatus get_status() const OVERRIDE;
+  void ProcessEvent(UpdateStatusManagerInterface* manager,
+                    UpdateEvent event) FINAL;
 
   /**
  * @brief Check whether update is required in terms of status
  * @return True if update is required, otherwise - false
  */
-  bool IsUpdateRequired() const OVERRIDE;
+  bool IsUpdateRequired() const FINAL;
 };
 
 /**
@@ -167,37 +163,30 @@ class UpdateNeededStatus : public Status {
 class UpdatingStatus : public Status {
  public:
   /**
+   * @brief Constructor
+   */
+  UpdatingStatus();
+
+  /**
  * @brief Process event by setting next status in case event can affect
  * current status or ignores the event
- * @param mng Status manager pointer
+ * @param manager Status manager pointer
  * @param event Event which needs to be processed
  */
-  void ProcessEvent(UpdateStatusManagerInterface* mng,
-                    UpdateEvent event) OVERRIDE;
-
-  /**
- * @brief Return current status as string value
- * @return Status as string
- */
-  const std::string get_status_string() const OVERRIDE;
-
-  /**
- * @brief Return status as enum value
- * @return Status as enum value
- */
-  PolicyTableStatus get_status() const OVERRIDE;
+  void ProcessEvent(UpdateStatusManagerInterface* manager,
+                    UpdateEvent event) FINAL;
 
   /**
  * @brief Check whether update is required in terms of status
  * @return True if update is required, otherwise - false
  */
-  bool IsUpdateRequired() const OVERRIDE;
+  bool IsUpdateRequired() const FINAL;
 
   /**
  * @brief Check whether update is pending in terms of status
  * @return True if update is pending, otherwise - false
  */
-  bool IsUpdatePending() const OVERRIDE;
+  bool IsUpdatePending() const FINAL;
 };
 }
 

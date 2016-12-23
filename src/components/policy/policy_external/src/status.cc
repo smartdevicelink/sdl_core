@@ -34,91 +34,77 @@
 #include "policy/update_status_manager.h"
 #include "utils/make_shared.h"
 
-void policy::UpToDateStatus::ProcessEvent(UpdateStatusManager* mng,
+policy::UpToDateStatus::UpToDateStatus()
+    : Status("UP_TO_DATE", policy::PolicyTableStatus::StatusUpToDate) {}
+
+void policy::UpToDateStatus::ProcessEvent(UpdateStatusManager* manager,
                                           policy::UpdateEvent event) {
   switch (event) {
     case kOnNewAppRegistered:
     case kOnResetPolicyTableRequireUpdate:
     case kScheduleUpdate:
     case kOnResetRetrySequence:
-      mng->SetNextStatus(new UpdateNeededStatus());
+      manager->SetNextStatus(utils::MakeShared<UpdateNeededStatus>());
       break;
     default:
       break;
   }
 }
 
-const std::string policy::UpToDateStatus::get_status_string() const {
-  return "UP_TO_DATE";
+policy::UpdateNeededStatus::UpdateNeededStatus()
+    : Status("UPDATE_NEEDED", policy::PolicyTableStatus::StatusUpdateRequired) {
 }
 
-policy::PolicyTableStatus policy::UpToDateStatus::get_status() const {
-  return PolicyTableStatus::StatusUpToDate;
-}
-
-void policy::UpdateNeededStatus::ProcessEvent(policy::UpdateStatusManager* mng,
-                                              policy::UpdateEvent event) {
+void policy::UpdateNeededStatus::ProcessEvent(
+    policy::UpdateStatusManager* manager, policy::UpdateEvent event) {
   switch (event) {
     case kOnUpdateSentOut:
-      mng->SetNextStatus(utils::MakeShared<UpdatingStatus>());
+      manager->SetNextStatus(utils::MakeShared<UpdatingStatus>());
       break;
     case kOnResetPolicyTableRequireUpdate:
-      mng->SetNextStatus(utils::MakeShared<UpToDateStatus>());
-      mng->SetPostponedStatus(utils::MakeShared<UpdateNeededStatus>());
+      manager->SetNextStatus(utils::MakeShared<UpToDateStatus>());
+      manager->SetPostponedStatus(utils::MakeShared<UpdateNeededStatus>());
       break;
     case kOnResetPolicyTableNoUpdate:
-      mng->SetNextStatus(utils::MakeShared<UpToDateStatus>());
+      manager->SetNextStatus(utils::MakeShared<UpToDateStatus>());
       break;
     default:
       break;
   }
-}
-
-const std::string policy::UpdateNeededStatus::get_status_string() const {
-  return "UPDATE_NEEDED";
-}
-
-policy::PolicyTableStatus policy::UpdateNeededStatus::get_status() const {
-  return PolicyTableStatus::StatusUpdateRequired;
 }
 
 bool policy::UpdateNeededStatus::IsUpdateRequired() const {
   return true;
 }
 
-void policy::UpdatingStatus::ProcessEvent(policy::UpdateStatusManager* mng,
+policy::UpdatingStatus::UpdatingStatus()
+    : Status("UPDATING", policy::PolicyTableStatus::StatusUpdatePending) {}
+
+void policy::UpdatingStatus::ProcessEvent(policy::UpdateStatusManager* manager,
                                           policy::UpdateEvent event) {
   switch (event) {
     case kOnValidUpdateReceived:
     case kOnResetPolicyTableNoUpdate:
-      mng->SetNextStatus(utils::MakeShared<UpToDateStatus>());
+      manager->SetNextStatus(utils::MakeShared<UpToDateStatus>());
       break;
     case kOnNewAppRegistered:
-      mng->SetPostponedStatus(utils::MakeShared<UpdateNeededStatus>());
+      manager->SetPostponedStatus(utils::MakeShared<UpdateNeededStatus>());
       break;
     case kOnWrongUpdateReceived:
     case kOnUpdateTimeout:
-      mng->SetNextStatus(utils::MakeShared<UpdateNeededStatus>());
+      manager->SetNextStatus(utils::MakeShared<UpdateNeededStatus>());
       break;
     case kOnResetPolicyTableRequireUpdate:
-      mng->SetNextStatus(utils::MakeShared<UpToDateStatus>());
-      mng->SetPostponedStatus(utils::MakeShared<UpdateNeededStatus>());
+      manager->SetNextStatus(utils::MakeShared<UpToDateStatus>());
+      manager->SetPostponedStatus(utils::MakeShared<UpdateNeededStatus>());
       break;
     case kScheduleUpdate:
     case kOnResetRetrySequence:
-      mng->SetPostponedStatus(utils::MakeShared<UpdateNeededStatus>());
+      manager->SetPostponedStatus(utils::MakeShared<UpdateNeededStatus>());
       break;
     default:
       break;
   }
-}
-
-const std::string policy::UpdatingStatus::get_status_string() const {
-  return "UPDATING";
-}
-
-policy::PolicyTableStatus policy::UpdatingStatus::get_status() const {
-  return PolicyTableStatus::StatusUpdatePending;
 }
 
 bool policy::UpdatingStatus::IsUpdatePending() const {
@@ -129,7 +115,19 @@ bool policy::UpdatingStatus::IsUpdateRequired() const {
   return true;
 }
 
+policy::Status::Status(const std::string& string_status,
+                       const policy::PolicyTableStatus enum_status)
+    : string_status_(string_status), enum_status_(enum_status) {}
+
 policy::Status::~Status() {}
+
+const std::string policy::Status::get_status_string() const {
+  return string_status_;
+}
+
+policy::PolicyTableStatus policy::Status::get_status() const {
+  return enum_status_;
+}
 
 bool policy::Status::IsUpdateRequired() const {
   return false;

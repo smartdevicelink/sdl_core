@@ -33,6 +33,7 @@
 #include "policy/update_status_manager.h"
 #include "policy/policy_listener.h"
 #include "utils/logger.h"
+#include "utils/make_shared.h"
 
 namespace policy {
 
@@ -40,7 +41,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "Policy")
 
 UpdateStatusManager::UpdateStatusManager()
     : listener_(NULL)
-    , current_status_(new UpToDateStatus())
+    , current_status_(utils::MakeShared<UpToDateStatus>())
     , apps_search_in_progress_(false)
     , app_registered_from_non_consented_device_(true) {
   update_status_thread_delegate_ = new UpdateThreadDelegate(this);
