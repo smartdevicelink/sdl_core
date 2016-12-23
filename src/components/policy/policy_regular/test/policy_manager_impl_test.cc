@@ -461,6 +461,8 @@ TEST_F(PolicyManagerImplTest, GetNotificationsNumber) {
 TEST_F(PolicyManagerImplTest2, GetNotificationsNumberAfterPTUpdate) {
   // Arrange
   Json::Value table = CreatePTforLoad();
+  manager->ForcePTExchange();
+  manager->OnUpdateStarted();
   policy_table::Table update(&table);
   update.SetPolicyTableType(rpc::policy_table_interface_base::PT_UPDATE);
   // Act
@@ -692,6 +694,8 @@ TEST_F(PolicyManagerImplTest, ResetPT) {
 
 TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
   // Arrange
+  manager->ForcePTExchange();
+  manager->OnUpdateStarted();
   Json::Value table = CreatePTforLoad();
   policy_table::Table update(&table);
   update.SetPolicyTableType(rpc::policy_table_interface_base::PT_UPDATE);
@@ -723,6 +727,8 @@ TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
 TEST_F(PolicyManagerImplTest, LoadPT_SetInvalidUpdatePT_PTIsNotLoaded) {
   // Arrange
   Json::Value table(Json::objectValue);
+  manager->ForcePTExchange();
+  manager->OnUpdateStarted();
 
   policy_table::Table update(&table);
   update.SetPolicyTableType(rpc::policy_table_interface_base::PT_UPDATE);
@@ -991,6 +997,7 @@ TEST_F(PolicyManagerImplTest2,
        OnExceededTimeout_GetPolicyTableStatus_ExpectUpdateNeeded) {
   // Arrange
   CreateLocalPT("sdl_preloaded_pt.json");
+  manager->ForcePTExchange();
   manager->OnExceededTimeout();
   // Check
   EXPECT_EQ("UPDATE_NEEDED", manager->GetPolicyTableStatus());

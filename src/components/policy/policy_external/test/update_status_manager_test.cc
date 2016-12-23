@@ -74,6 +74,7 @@ class UpdateStatusManagerTest : public ::testing::Test {
 TEST_F(UpdateStatusManagerTest,
        OnUpdateSentOut_WaitForTimeoutExpired_ExpectStatusUpdateNeeded) {
   // Arrange
+  manager_->ScheduleUpdate();
   manager_->OnUpdateSentOut(k_timeout_);
   status_ = manager_->GetLastUpdateStatus();
   EXPECT_EQ(StatusUpdatePending, status_);
@@ -89,6 +90,7 @@ TEST_F(UpdateStatusManagerTest,
   // Arrange
   status_ = manager_->GetLastUpdateStatus();
   EXPECT_EQ(StatusUpToDate, status_);
+  manager_->ScheduleUpdate();
   manager_->OnUpdateTimeoutOccurs();
   status_ = manager_->GetLastUpdateStatus();
   // Check
@@ -98,6 +100,9 @@ TEST_F(UpdateStatusManagerTest,
 TEST_F(UpdateStatusManagerTest,
        OnValidUpdateReceived_SetValidUpdateReceived_ExpectStatusUpToDate) {
   // Arrange
+  EXPECT_CALL(*listener_, OnUpdateStatusChanged(update_needed_status_));
+  manager_->ScheduleUpdate();
+  EXPECT_EQ(StatusUpdateRequired, status_);
   EXPECT_CALL(*listener_, OnUpdateStatusChanged(updating_status_));
   manager_->OnUpdateSentOut(k_timeout_);
   status_ = manager_->GetLastUpdateStatus();
@@ -115,6 +120,10 @@ TEST_F(
     SheduledUpdate_OnValidUpdateReceived_ExpectStatusUpToDateThanUpdateNeeded) {
   using ::testing::InSequence;
   // Arrange
+  EXPECT_CALL(*listener_, OnUpdateStatusChanged(update_needed_status_));
+  manager_->ScheduleUpdate();
+  status_ = manager_->GetLastUpdateStatus();
+  EXPECT_EQ(StatusUpdateRequired, status_);
   EXPECT_CALL(*listener_, OnUpdateStatusChanged(updating_status_));
   manager_->OnUpdateSentOut(k_timeout_);
   status_ = manager_->GetLastUpdateStatus();
@@ -134,6 +143,9 @@ TEST_F(
 TEST_F(UpdateStatusManagerTest,
        OnWrongUpdateReceived_SetWrongUpdateReceived_ExpectStatusUpdateNeeded) {
   // Arrange
+  manager_->ScheduleUpdate();
+  status_ = manager_->GetLastUpdateStatus();
+  EXPECT_EQ(StatusUpdateRequired, status_);
   manager_->OnUpdateSentOut(k_timeout_);
   status_ = manager_->GetLastUpdateStatus();
   EXPECT_EQ(StatusUpdatePending, status_);
@@ -146,6 +158,9 @@ TEST_F(UpdateStatusManagerTest,
 TEST_F(UpdateStatusManagerTest,
        OnResetDefaulPT_ResetPTtoDefaultState_ExpectPTinDefaultState) {
   // Arrange
+  manager_->ScheduleUpdate();
+  status_ = manager_->GetLastUpdateStatus();
+  EXPECT_EQ(StatusUpdateRequired, status_);
   manager_->OnUpdateSentOut(k_timeout_);
   status_ = manager_->GetLastUpdateStatus();
   EXPECT_EQ(StatusUpdatePending, status_);
@@ -159,6 +174,9 @@ TEST_F(UpdateStatusManagerTest,
 TEST_F(UpdateStatusManagerTest,
        OnResetDefaulPT2_ResetPTtoDefaultState_ExpectPTinDefaultState) {
   // Arrange
+  manager_->ScheduleUpdate();
+  status_ = manager_->GetLastUpdateStatus();
+  EXPECT_EQ(StatusUpdateRequired, status_);
   manager_->OnUpdateSentOut(k_timeout_);
   status_ = manager_->GetLastUpdateStatus();
   EXPECT_EQ(StatusUpdatePending, status_);
@@ -171,6 +189,9 @@ TEST_F(UpdateStatusManagerTest,
 
 TEST_F(UpdateStatusManagerTest, OnResetRetrySequence_ExpectStatusUpToDate) {
   // Arrange
+  manager_->ScheduleUpdate();
+  status_ = manager_->GetLastUpdateStatus();
+  EXPECT_EQ(StatusUpdateRequired, status_);
   manager_->OnUpdateSentOut(k_timeout_);
   status_ = manager_->GetLastUpdateStatus();
   EXPECT_EQ(StatusUpdatePending, status_);
@@ -183,6 +204,9 @@ TEST_F(UpdateStatusManagerTest, OnResetRetrySequence_ExpectStatusUpToDate) {
 TEST_F(UpdateStatusManagerTest,
        OnNewApplicationAdded_ExpectStatusUpdateNeeded) {
   // Arrange
+  manager_->ScheduleUpdate();
+  status_ = manager_->GetLastUpdateStatus();
+  EXPECT_EQ(StatusUpdateRequired, status_);
   manager_->OnUpdateSentOut(k_timeout_);
   status_ = manager_->GetLastUpdateStatus();
   EXPECT_EQ(StatusUpdatePending, status_);
@@ -196,6 +220,9 @@ TEST_F(UpdateStatusManagerTest,
 
 TEST_F(UpdateStatusManagerTest, ScheduleUpdate_ExpectStatusUpdateNeeded) {
   // Arrange
+  manager_->ScheduleUpdate();
+  status_ = manager_->GetLastUpdateStatus();
+  EXPECT_EQ(StatusUpdateRequired, status_);
   manager_->OnUpdateSentOut(k_timeout_);
   status_ = manager_->GetLastUpdateStatus();
   EXPECT_EQ(StatusUpdatePending, status_);
@@ -210,29 +237,6 @@ TEST_F(UpdateStatusManagerTest, ScheduleUpdate_ExpectStatusUpdateNeeded) {
   EXPECT_EQ(StatusUpdateRequired, status_);
   EXPECT_FALSE(manager_->IsUpdatePending());
   EXPECT_TRUE(manager_->IsUpdateRequired());
-}
-
-TEST_F(UpdateStatusManagerTest,
-       ResetUpdateSchedule_SetUpdateScheduleThenReset_ExpectStatusUpToDate) {
-  // Arrange
-  status_ = manager_->GetLastUpdateStatus();
-  EXPECT_EQ(StatusUpToDate, status_);
-  EXPECT_FALSE(manager_->IsUpdatePending());
-  EXPECT_FALSE(manager_->IsUpdateRequired());
-  manager_->ScheduleUpdate();
-  // Check
-  EXPECT_TRUE(manager_->IsUpdateRequired());
-  // Act
-  manager_->OnPolicyInit(false);
-  // Check
-  EXPECT_TRUE(manager_->IsUpdateRequired());
-  // Act
-  manager_->ResetUpdateSchedule();
-  // Check
-  EXPECT_FALSE(manager_->IsUpdateRequired());
-  status_ = manager_->GetLastUpdateStatus();
-  // Check
-  EXPECT_EQ(StatusUpToDate, status_);
 }
 
 TEST_F(UpdateStatusManagerTest,

@@ -41,6 +41,7 @@
 #include "utils/lock.h"
 #include "utils/logger.h"
 #include "utils/macro.h"
+#include "policy/status.h"
 
 namespace policy {
 
@@ -54,6 +55,25 @@ class UpdateStatusManager {
   UpdateStatusManager();
 
   ~UpdateStatusManager();
+
+  /**
+   * @brief Process event by current status implementations
+   * @param event Event
+   */
+  void ProcessEvent(UpdateEvent event);
+
+  /**
+   * @brief Set next status during event processing
+   * @param status Status shared pointer
+   */
+  void SetNextStatus(utils::SharedPtr<Status> status);
+
+  /**
+   * @brief Set postponed status (will be set after next status) during event
+   * processing
+   * @param status Status shared pointer
+   */
+  void SetPostponedStatus(utils::SharedPtr<Status> status);
 
   /**
    * @brief Sets listener pointer
@@ -131,11 +151,6 @@ class UpdateStatusManager {
   void ScheduleUpdate();
 
   /**
-   * @brief ResetUpdateSchedule allows to reset all scheduled updates.
-   */
-  void ResetUpdateSchedule();
-
-  /**
    * @brief StringifiedUpdateStatus allows to obtain update status as a string.
    *
    * @return stringified update status.
@@ -160,59 +175,39 @@ class UpdateStatusManager {
 
 #ifdef BUILD_TESTS
   PolicyTableStatus GetLastUpdateStatus() const {
-    return GetUpdateStatus();
+    return current_status_->get_status();
   }
 #endif  // BUILD_TESTS
 
  private:
-  /*
-   * @brief Sets flag for update progress
-   *
-   * @param value
-   */
-  void set_exchange_in_progress(bool value);
-
-  /*
-   * @brief Sets flag for pending update
-   *
-   * @param value
-   */
-  void set_exchange_pending(bool value);
-
-  /*
-   * @brief Sets flag for update necessity
-   *
-   * @param value
-   */
-  void set_update_required(bool value);
-
   /**
-   * @brief Check update status and notify HMI on changes
+   * @brief Does statuses transitions after event handling and notifies the
+   * system
    */
-  void CheckUpdateStatus();
+  void DoTransition();
 
  private:
-  /**
-   * @brief Returns current policy update status
-   * @return
-   */
-  PolicyTableStatus GetUpdateStatus() const;
-
   PolicyListener* listener_;
-  bool exchange_in_progress_;
-  bool update_required_;
-  bool update_scheduled_;
-  bool exchange_pending_;
+
+  /**
+   * @brief Current update status
+   */
+  utils::SharedPtr<Status> current_status_;
+
+  /**
+   * @brief Next status after current to be set
+   */
+  utils::SharedPtr<Status> next_status_;
+
+  /**
+   * @brief Status to be set after 'next' status
+   */
+  utils::SharedPtr<Status> postponed_status_;
+  sync_primitives::Lock status_lock_;
+
   bool apps_search_in_progress_;
   bool app_registered_from_non_consented_device_;
-  sync_primitives::Lock exchange_in_progress_lock_;
-  sync_primitives::Lock update_required_lock_;
-  sync_primitives::Lock exchange_pending_lock_;
   sync_primitives::Lock apps_search_in_progress_lock_;
-  /**
-   * @brief Last status of policy table update
-   */
-  PolicyTableStatus last_update_status_;
 
   class UpdateThreadDelegate : public threads::ThreadDelegate {
    public:
