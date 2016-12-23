@@ -900,7 +900,7 @@ bool PolicyHandler::ReceiveMessageFromSDK(const std::string& file,
         correlation_id, vehicle_data_args, application_manager_);
   } else {
     LOG4CXX_WARN(logger_, "Exchange wasn't successful, trying another one.");
-    OnPTExchangeNeeded();
+    policy_manager_->ForcePTExchange();
   }
   return ret;
 }
