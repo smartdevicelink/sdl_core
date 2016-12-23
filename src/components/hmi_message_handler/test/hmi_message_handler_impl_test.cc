@@ -36,7 +36,7 @@
 #include "hmi_message_handler/messagebroker_adapter.h"
 #include "hmi_message_handler/mock_hmi_message_observer.h"
 #include "hmi_message_handler/mock_hmi_message_handler_settings.h"
-#include "hmi_message_handler/mock_hmi_message_adapter_impl.h"
+#include "/home/ilytvynenko/sdl/src/components/hmi_message_handler/test/include/hmi_message_handler/mock_hmi_message_adapter_impl.h"
 
 namespace test {
 namespace components {
@@ -177,7 +177,7 @@ TEST_F(HMIMessageHandlerImplTest, SendMessageToHMI_Success) {
   EXPECT_CALL(message_adapter, SendMessageToHMI(message));
 
   hmi_handler_->AddHMIMessageAdapter(&message_adapter);
-  hmi_handler_->SendMessageToHMI(message);
+  message_adapter.SendMessageToHMI(message);
 
   // Wait for the message to be processed
   hmi_handler_->messages_to_hmi()->WaitDumpQueue();
