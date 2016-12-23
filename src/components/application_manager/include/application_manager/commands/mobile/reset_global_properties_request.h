@@ -108,6 +108,16 @@ class ResetGlobalPropertiesRequest : public CommandRequestImpl {
       application_manager::ApplicationSharedPtr const app);
 
   /*
+   * @brief Prepare result for sending to mobile application
+   * @param out_result_code contains result code for sending to mobile
+   * application
+   * @param out_response_info contains info for sending to mobile applicaion
+   * @return result for sending to mobile application.
+   */
+  bool PrepareResponseParameters(mobile_apis::Result::eType& out_result_code,
+                                 std::string& out_response_info);
+
+  /*
    * @brief Check if there some not delivered hmi responses exist
    *
    * @return true if all responses received
@@ -124,6 +134,8 @@ class ResetGlobalPropertiesRequest : public CommandRequestImpl {
 
   hmi_apis::Common_Result::eType ui_result_;
   hmi_apis::Common_Result::eType tts_result_;
+  std::string ui_response_info_;
+  std::string tts_response_info_;
 };
 
 }  // namespace commands
