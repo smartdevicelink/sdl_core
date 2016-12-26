@@ -286,7 +286,7 @@ void CheckAppPolicy::SendPermissionsToApp(
                                notification_data);
 
   LOG4CXX_INFO(logger_, "Send notification for application_id: " << app_id);
-  pm_->listener()->OnPermissionsUpdated(device_id, app_id, notification_data);
+  pm_->listener()->OnPermissionsUpdated(app_id, notification_data);
 }
 
 bool CheckAppPolicy::IsAppRevoked(
@@ -803,7 +803,7 @@ bool UnwrapAppPolicies(policy_table::ApplicationPolicies& app_policies) {
 
 #ifdef SDL_REMOTE_CONTROL
 bool HaveGroupsChanged(const rpc::Optional<policy_table::Strings>& old_groups,
-                      const rpc::Optional<policy_table::Strings>& new_groups) {
+                       const rpc::Optional<policy_table::Strings>& new_groups) {
   if (!old_groups.is_initialized() && !new_groups.is_initialized()) {
     return false;
   }
@@ -818,33 +818,35 @@ bool HaveGroupsChanged(const rpc::Optional<policy_table::Strings>& old_groups,
   std::sort(new_groups_abs.begin(), new_groups_abs.end(), Compare);
   std::sort(old_groups_abs.begin(), old_groups_abs.end(), Compare);
 
-  return std::equal(new_groups_abs.begin(), new_groups_abs.end(),
-                    old_groups_abs.begin(), Compare);
+  return std::equal(new_groups_abs.begin(),
+                    new_groups_abs.end(),
+                    old_groups_abs.begin(),
+                    Compare);
 }
 
-void ProccessAppGroups::operator() (
-    const policy_table::ApplicationPolicies::value_type & app) {
-  policy_table::ApplicationPolicies::const_iterator i = new_apps_.find(app.first);
+void ProccessAppGroups::operator()(
+    const policy_table::ApplicationPolicies::value_type& app) {
+  policy_table::ApplicationPolicies::const_iterator i =
+      new_apps_.find(app.first);
   if (i == new_apps_.end() && default_ != new_apps_.end()) {
     i = default_;
   }
-  if (i != new_apps_.end() ) {
+  if (i != new_apps_.end()) {
     if (HaveGroupsChanged(i->second.groups_primaryRC,
                           app.second.groups_primaryRC)) {
-      LOG4CXX_DEBUG(logger_, "Primary groups for " << app.first
-          << " have changed");
+      LOG4CXX_DEBUG(logger_,
+                    "Primary groups for " << app.first << " have changed");
 
       pm_->OnPrimaryGroupsChanged(app.first);
     }
     if (HaveGroupsChanged(i->second.groups_nonPrimaryRC,
                           app.second.groups_nonPrimaryRC)) {
-      LOG4CXX_DEBUG(logger_, "Non-primary groups for " << app.first
-          << " have changed");
+      LOG4CXX_DEBUG(logger_,
+                    "Non-primary groups for " << app.first << " have changed");
       pm_->OnNonPrimaryGroupsChanged(app.first);
     }
   }
 }
 
 #endif  // SDL_REMOTE_CONTROL
-
 }
