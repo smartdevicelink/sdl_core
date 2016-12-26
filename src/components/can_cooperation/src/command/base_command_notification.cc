@@ -34,6 +34,7 @@
 #include "json/json.h"
 #include "can_cooperation/can_module.h"
 #include "can_cooperation/can_module_constants.h"
+#include "application_manager/application_manager.h"
 
 using application_manager::SeatLocation;
 
@@ -44,10 +45,9 @@ namespace commands {
 CREATE_LOGGERPTR_GLOBAL(logger_, "CANCooperation")
 
 BaseCommandNotification::BaseCommandNotification(
-    const application_manager::MessagePtr& message)
-  : message_(message) {
-  service_ = CANModule::instance()->service();
-
+    const application_manager::MessagePtr& message,
+    CANModuleInterface& can_module)
+    : Command(can_module), service_(can_module_.service()), message_(message) {
   Json::Value value;
   Json::Reader reader;
   reader.parse(message_->json_message(), value);
@@ -59,17 +59,15 @@ BaseCommandNotification::BaseCommandNotification(
   }
 }
 
-
-BaseCommandNotification::~BaseCommandNotification() {
-}
+BaseCommandNotification::~BaseCommandNotification() {}
 
 CANAppExtensionPtr BaseCommandNotification::GetAppExtension(
-  application_manager::ApplicationSharedPtr app) const {
+    application_manager::ApplicationSharedPtr app) const {
   if (!app) {
     return NULL;
   }
 
-  functional_modules::ModuleID id = CANModule::instance()->GetModuleID();
+  functional_modules::ModuleID id = can_module_.GetModuleID();
 
   CANAppExtensionPtr can_app_extension;
   application_manager::AppExtensionPtr app_extension = app->QueryInterface(id);
@@ -77,9 +75,8 @@ CANAppExtensionPtr BaseCommandNotification::GetAppExtension(
     return NULL;
   }
 
-  can_app_extension =
-    application_manager::AppExtensionPtr::static_pointer_cast<CANAppExtension>(
-      app_extension);
+  can_app_extension = application_manager::AppExtensionPtr::static_pointer_cast<
+      CANAppExtension>(app_extension);
 
   return can_app_extension;
 }
@@ -98,10 +95,9 @@ void BaseCommandNotification::Run() {
 void BaseCommandNotification::NotifyApplications() {
   LOG4CXX_AUTO_TRACE(logger_);
   typedef std::vector<application_manager::ApplicationSharedPtr> AppList;
-  AppList applications =
-      service_->GetApplications(CANModule::instance()->GetModuleID());
-  for (AppList::iterator i = applications.begin();
-      i != applications.end(); ++i) {
+  AppList applications = service_->GetApplications(can_module_.GetModuleID());
+  for (AppList::iterator i = applications.begin(); i != applications.end();
+       ++i) {
     application_manager::MessagePtr message(
         new application_manager::Message(*message_));
     message->set_connection_key((*i)->app_id());
@@ -117,7 +113,8 @@ void BaseCommandNotification::NotifyOneApplication(
   } else {
     LOG4CXX_WARN(logger_,
                  "Function \"" << message->function_name() << "\" (#"
-                 << message->function_id() << ") not allowed by policy");
+                               << message->function_id()
+                               << ") not allowed by policy");
   }
 }
 
@@ -128,9 +125,9 @@ bool BaseCommandNotification::CheckPolicy(
       service_->GetApplication(message->connection_key());
 
   if (!app) {
-    LOG4CXX_WARN(
-        logger_,
-        "Application doesn't " << message->connection_key() << " registered");
+    LOG4CXX_WARN(logger_,
+                 "Application doesn't " << message->connection_key()
+                                        << " registered");
     return false;
   }
 
@@ -142,8 +139,8 @@ bool BaseCommandNotification::CheckPolicy(
   LOG4CXX_DEBUG(logger_, "Notification: " << message->json_message());
   reader.parse(message->json_message(), value);
 
-  return permission == mobile_apis::Result::eType::SUCCESS
-      && service_->CheckModule(app->app_id(), ModuleType(value));
+  return permission == mobile_apis::Result::eType::SUCCESS &&
+         service_->CheckModule(app->app_id(), ModuleType(value));
 }
 
 std::string BaseCommandNotification::ModuleType(const Json::Value& message) {
@@ -162,7 +159,7 @@ SeatLocation BaseCommandNotification::CreateInteriorZone(
   int colspan = zone.get(message_params::kColspan, Json::Value(-1)).asInt();
   int rowspan = zone.get(message_params::kRowspan, Json::Value(-1)).asInt();
   int levelspan = zone.get(message_params::kLevelspan, Json::Value(-1)).asInt();
-  SeatLocation seat = { col, row, level, colspan, rowspan, levelspan };
+  SeatLocation seat = {col, row, level, colspan, rowspan, levelspan};
   return seat;
 }
 
@@ -174,4 +171,3 @@ std::vector<std::string> BaseCommandNotification::ControlData(
 }  // namespace commands
 
 }  // namespace can_cooperation
-

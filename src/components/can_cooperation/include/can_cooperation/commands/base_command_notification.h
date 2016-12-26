@@ -37,6 +37,7 @@
 #include "application_manager/message.h"
 #include "application_manager/service.h"
 #include "can_cooperation/can_app_extension.h"
+#include "can_cooperation/can_module_interface.h"
 #include "utils/logger.h"
 
 namespace Json {
@@ -59,8 +60,8 @@ class BaseCommandNotification : public Command {
    *
    * @param message Message from mobile
    **/
-  explicit BaseCommandNotification(
-      const application_manager::MessagePtr& message);
+  BaseCommandNotification(const application_manager::MessagePtr& message,
+                          CANModuleInterface& can_module);
 
   /**
    * @brief BaseCommandNotification class destructor

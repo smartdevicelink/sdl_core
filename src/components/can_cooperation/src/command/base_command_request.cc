@@ -36,12 +36,13 @@
 #include "can_cooperation/message_helper.h"
 #include "can_cooperation/can_module.h"
 #include "can_cooperation/can_module_constants.h"
+#include "application_manager/application_manager_impl.h"
 
 namespace can_cooperation {
 
 namespace commands {
 
-using event_engine::EventDispatcher;
+using can_event_engine::EventDispatcher;
 using application_manager::SeatLocation;
 using application_manager::SeatLocationPtr;
 
@@ -50,22 +51,19 @@ using namespace json_keys;
 CREATE_LOGGERPTR_GLOBAL(logger_, "CANCooperation")
 
 BaseCommandRequest::BaseCommandRequest(
-  const application_manager::MessagePtr& message)
-  : message_(message),
-    auto_allowed_(false) {
-  service_ = CANModule::instance()->service();
+    const application_manager::MessagePtr& message,
+    CANModuleInterface& can_module)
+    : Command(can_module), message_(message), auto_allowed_(false) {
+  service_ = can_module_.service();
   app_ = service_->GetApplication(message_->connection_key());
   if (app_) {
     device_location_ = service_->GetDeviceZone(app_->device());
   }
 }
 
-
 BaseCommandRequest::~BaseCommandRequest() {
-  EventDispatcher<application_manager::MessagePtr, std::string>::instance()->
-  remove_observer(this);
+  can_module_.event_dispatcher().remove_observer(this);
 }
-
 
 void BaseCommandRequest::OnTimeout() {
   SendResponse(false, result_codes::kTimedOut, "Request timeout expired.");
@@ -91,15 +89,15 @@ void BaseCommandRequest::SendResponse(bool success,
   std::string params = writer.write(msg_params);
   message_->set_json_message(params);
   if (0 == strcmp(result_code, result_codes::kTimedOut)) {
-    CANModule::instance()->SendTimeoutResponseToMobile(message_);
+    can_module_.SendTimeoutResponseToMobile(message_);
   } else {
-    CANModule::instance()->SendResponseToMobile(message_);
+    can_module_.SendResponseToMobile(message_);
   }
 }
 
-void  BaseCommandRequest::SendRequest(const char* function_id,
-                                      const Json::Value& message_params,
-                                      bool is_hmi_request) {
+void BaseCommandRequest::SendRequest(const char* function_id,
+                                     const Json::Value& message_params,
+                                     bool is_hmi_request) {
   Json::Value msg;
 
   if (is_hmi_request) {
@@ -108,8 +106,8 @@ void  BaseCommandRequest::SendRequest(const char* function_id,
     msg[kId] = MessageHelper::GetNextCANCorrelationID();
   }
 
-  EventDispatcher<application_manager::MessagePtr, std::string>::instance()->
-  add_observer(function_id, msg[kId].asInt(), this);
+  can_module_.event_dispatcher().add_observer(
+      function_id, msg[kId].asInt(), this);
 
   msg[kJsonrpc] = "2.0";
   msg[kMethod] = function_id;
@@ -122,40 +120,41 @@ void  BaseCommandRequest::SendRequest(const char* function_id,
   Json::FastWriter writer;
   if (is_hmi_request) {
     application_manager::MessagePtr message_to_send(
-      new application_manager::Message(
-        protocol_handler::MessagePriority::kDefault));
+        new application_manager::Message(
+            protocol_handler::MessagePriority::kDefault));
     message_to_send->set_protocol_version(
-      application_manager::ProtocolVersion::kHMI);
+        application_manager::ProtocolVersion::kHMI);
     message_to_send->set_correlation_id(msg[kId].asInt());
     std::string json_msg = writer.write(msg);
     message_to_send->set_json_message(json_msg);
     message_to_send->set_message_type(
-      application_manager::MessageType::kRequest);
+        application_manager::MessageType::kRequest);
 
     LOG4CXX_DEBUG(logger_, "Request to HMI: " << json_msg);
     service_->SendMessageToHMI(message_to_send);
   } else {
-    CANModule::instance()->SendMessageToCan(msg);
+    can_module_.SendMessageToCan(msg);
   }
 }
 
 bool BaseCommandRequest::ParseJsonString(Json::Value* parsed_msg) {
   DCHECK(parsed_msg);
-  if (!parsed_msg) return false;
+  if (!parsed_msg)
+    return false;
 
   (*parsed_msg) = MessageHelper::StringToValue(message_->json_message());
   if (Json::ValueType::nullValue == parsed_msg->type()) {
-    LOG4CXX_ERROR(logger_, "Invalid JSON received in " <<
-      message_->json_message());
-    SendResponse(false, result_codes::kInvalidData,
-                 "Mobile request validation failed!");
+    LOG4CXX_ERROR(logger_,
+                  "Invalid JSON received in " << message_->json_message());
+    SendResponse(
+        false, result_codes::kInvalidData, "Mobile request validation failed!");
     return false;
   }
   return true;
 }
 
 const char* BaseCommandRequest::GetMobileResultCode(
-  const hmi_apis::Common_Result::eType& hmi_code) const {
+    const hmi_apis::Common_Result::eType& hmi_code) const {
   switch (hmi_code) {
     case hmi_apis::Common_Result::SUCCESS: {
       return result_codes::kSuccess;
@@ -262,12 +261,12 @@ const char* BaseCommandRequest::GetMobileResultCode(
 }
 
 CANAppExtensionPtr BaseCommandRequest::GetAppExtension(
-  application_manager::ApplicationSharedPtr app) const {
+    application_manager::ApplicationSharedPtr app) const {
   if (!app) {
     return NULL;
   }
 
-  functional_modules::ModuleID id = CANModule::instance()->GetModuleID();
+  functional_modules::ModuleID id = can_module_.GetModuleID();
 
   CANAppExtensionPtr can_app_extension;
   application_manager::AppExtensionPtr app_extension = app->QueryInterface(id);
@@ -276,27 +275,26 @@ CANAppExtensionPtr BaseCommandRequest::GetAppExtension(
     app->AddExtension(app_extension);
   }
 
-  can_app_extension =
-    application_manager::AppExtensionPtr::static_pointer_cast<CANAppExtension>(
-      app_extension);
+  can_app_extension = application_manager::AppExtensionPtr::static_pointer_cast<
+      CANAppExtension>(app_extension);
 
   return can_app_extension;
 }
 
 bool BaseCommandRequest::ParseResultCode(const Json::Value& value,
-    std::string& result_code,
-    std::string& info) {
+                                         std::string& result_code,
+                                         std::string& info) {
   result_code = result_codes::kInvalidData;
   info = "";
 
   if (IsMember(value, kResult) && IsMember(value[kResult], kCode)) {
-    result_code = GetMobileResultCode(
-                    static_cast<hmi_apis::Common_Result::eType>(
-                      value[kResult][kCode].asInt()));
+    result_code =
+        GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
+            value[kResult][kCode].asInt()));
   } else if (IsMember(value, kError) && IsMember(value[kError], kCode)) {
-    result_code = GetMobileResultCode(
-                    static_cast<hmi_apis::Common_Result::eType>(
-                      value[kError][kCode].asInt()));
+    result_code =
+        GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
+            value[kError][kCode].asInt()));
 
     if (IsMember(value[kError], kMessage)) {
       info = value[kError][kMessage].asCString();
@@ -333,8 +331,9 @@ bool BaseCommandRequest::CheckPolicyPermissions() {
   if (ret != mobile_apis::Result::eType::SUCCESS) {
     SendResponse(false, result_codes::kDisallowed, "");
     LOG4CXX_WARN(logger_,
-        "Function \"" << message_->function_name() << "\" (#"
-        << message_->function_id() << ") not allowed by policy");
+                 "Function \"" << message_->function_name() << "\" (#"
+                               << message_->function_id()
+                               << ") not allowed by policy");
     return false;
   }
 
@@ -345,7 +344,9 @@ application_manager::TypeAccess BaseCommandRequest::CheckAccess(
     const Json::Value& message) {
   const SeatLocation& zone = PrepareZone(InteriorZone(message));
   const std::string& module = ModuleType(message);
-  return service_->CheckAccess(app_->app_id(), zone, module,
+  return service_->CheckAccess(app_->app_id(),
+                               zone,
+                               module,
                                message_->function_name(),
                                ControlData(message));
 }
@@ -394,9 +395,9 @@ void BaseCommandRequest::SendDisallowed(
     case application_manager::kManual:
       return;
     case application_manager::kDisallowed:
-      info =
-          disallowed_info_.empty() ?
-              "The RPC is disallowed by vehicle settings" : disallowed_info_;
+      info = disallowed_info_.empty()
+                 ? "The RPC is disallowed by vehicle settings"
+                 : disallowed_info_;
       break;
     case application_manager::kNone:
       info = "Internal issue";
@@ -417,7 +418,8 @@ void BaseCommandRequest::SendGetUserConsent(const Json::Value& value) {
   SendRequest(functional_modules::hmi_api::get_user_consent, params, true);
 }
 
-SeatLocation BaseCommandRequest::PrepareZone(const SeatLocation& interior_zone) {
+SeatLocation BaseCommandRequest::PrepareZone(
+    const SeatLocation& interior_zone) {
   return device_location_ ? *device_location_ : interior_zone;
 }
 
@@ -453,7 +455,7 @@ SeatLocation BaseCommandRequest::CreateInteriorZone(const Json::Value& zone) {
   int colspan = zone.get(message_params::kColspan, Json::Value(-1)).asInt();
   int rowspan = zone.get(message_params::kRowspan, Json::Value(-1)).asInt();
   int levelspan = zone.get(message_params::kLevelspan, Json::Value(-1)).asInt();
-  SeatLocation seat = { col, row, level, colspan, rowspan, levelspan };
+  SeatLocation seat = {col, row, level, colspan, rowspan, levelspan};
   return seat;
 }
 
@@ -463,8 +465,8 @@ std::vector<std::string> BaseCommandRequest::ControlData(
 }
 
 void BaseCommandRequest::on_event(
-    const event_engine::Event<application_manager::MessagePtr,
-    std::string>& event) {
+    const can_event_engine::Event<application_manager::MessagePtr, std::string>&
+        event) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (event.id() == functional_modules::hmi_api::get_user_consent) {
     ProcessAccessResponse(event);
@@ -477,14 +479,15 @@ void BaseCommandRequest::on_event(
 }
 
 void BaseCommandRequest::UpdateHMILevel(
-    const event_engine::Event<application_manager::MessagePtr, std::string>& event) {
+    const can_event_engine::Event<application_manager::MessagePtr, std::string>&
+        event) {
   CANAppExtensionPtr extension = GetAppExtension(app_);
   if (!extension) {
     return;
   }
   if (!extension->is_on_driver_device()) {
-    Json::Value value  = MessageHelper::StringToValue(
-        event.event_message()->json_message());
+    Json::Value value =
+        MessageHelper::StringToValue(event.event_message()->json_message());
     std::string result_code;
     std::string info;
     bool success = ParseResultCode(value, result_code, info);
@@ -493,8 +496,8 @@ void BaseCommandRequest::UpdateHMILevel(
 }
 
 void BaseCommandRequest::ProcessAccessResponse(
-    const event_engine::Event<application_manager::MessagePtr,
-    std::string>& event) {
+    const can_event_engine::Event<application_manager::MessagePtr, std::string>&
+        event) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (!app_) {
     LOG4CXX_ERROR(logger_, "Application doesn't registered!");
@@ -510,8 +513,8 @@ void BaseCommandRequest::ProcessAccessResponse(
   bool allowed = ParseResultCode(value, result_code, info);
   // Check if valid successfull message has arrived
   if (allowed) {
-    if (IsMember(value[kResult], message_params::kAllowed)
-        && value[kResult][message_params::kAllowed].isBool()) {
+    if (IsMember(value[kResult], message_params::kAllowed) &&
+        value[kResult][message_params::kAllowed].isBool()) {
       allowed = value[kResult][message_params::kAllowed].asBool();
     } else {
       allowed = false;
@@ -523,28 +526,32 @@ void BaseCommandRequest::ProcessAccessResponse(
     Json::Value request;
     reader.parse(message_->json_message(), request);
     std::string module = ModuleType(request);
-    LOG4CXX_DEBUG(
-        logger_,
-        "Setting allowed access for " << app_->app_id() << " for " << module);
-    service_->SetAccess(app_->app_id(), PrepareZone(InteriorZone(request)), module, allowed);
+    LOG4CXX_DEBUG(logger_,
+                  "Setting allowed access for " << app_->app_id() << " for "
+                                                << module);
+    service_->SetAccess(
+        app_->app_id(), PrepareZone(InteriorZone(request)), module, allowed);
     CheckHMILevel(application_manager::kManual, allowed);
     Execute();  // run child's logic
   } else {
-    SendResponse(false, result_codes::kUserDisallowed,
+    SendResponse(false,
+                 result_codes::kUserDisallowed,
                  "The driver disallows this remote-control RPC");
   }
 }
 
 void BaseCommandRequest::CheckHMILevel(application_manager::TypeAccess access,
-  bool user_consented) {
+                                       bool user_consented) {
   switch (access) {
     case application_manager::kAllowed:
       if (user_consented) {
         if (app_->hmi_level() == mobile_apis::HMILevel::eType::HMI_NONE) {
-        LOG4CXX_DEBUG(logger_, "RSDL functionality for "
-          << app_->name() << " is auto allowed; setting BACKGROUND level.");
-        service_->ChangeNotifyHMILevel(app_,
-          mobile_apis::HMILevel::eType::HMI_BACKGROUND);
+          LOG4CXX_DEBUG(logger_,
+                        "RSDL functionality for "
+                            << app_->name().c_str()
+                            << " is auto allowed; setting BACKGROUND level.");
+          service_->ChangeNotifyHMILevel(
+              app_, mobile_apis::HMILevel::eType::HMI_BACKGROUND);
         }
       }
       break;
@@ -552,10 +559,12 @@ void BaseCommandRequest::CheckHMILevel(application_manager::TypeAccess access,
       if (user_consented) {
         if (app_->hmi_level() == mobile_apis::HMILevel::eType::HMI_NONE ||
             app_->hmi_level() == mobile_apis::HMILevel::eType::HMI_BACKGROUND) {
-          LOG4CXX_DEBUG(logger_, "User consented RSDL functionality for "
-                        << app_->name() << "; setting LIMITED level.");
-          service_->ChangeNotifyHMILevel(app_,
-                                    mobile_apis::HMILevel::eType::HMI_LIMITED);
+          LOG4CXX_DEBUG(logger_,
+                        "User consented RSDL functionality for "
+                            << app_->name().c_str()
+                            << "; setting LIMITED level.");
+          service_->ChangeNotifyHMILevel(
+              app_, mobile_apis::HMILevel::eType::HMI_LIMITED);
         }
       }
       break;
@@ -563,7 +572,8 @@ void BaseCommandRequest::CheckHMILevel(application_manager::TypeAccess access,
     case application_manager::kDisallowed:
     case application_manager::kNone:
     default:
-      LOG4CXX_DEBUG(logger_, "No access information or disallowed: "
+      LOG4CXX_DEBUG(logger_,
+                    "No access information or disallowed: "
                         << "do nothing about hmi levels");
       break;
   }
@@ -571,4 +581,3 @@ void BaseCommandRequest::CheckHMILevel(application_manager::TypeAccess access,
 
 }  // namespace commands
 }  // namespace can_cooperation
-

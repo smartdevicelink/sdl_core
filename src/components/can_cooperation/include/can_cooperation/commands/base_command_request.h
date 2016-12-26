@@ -41,6 +41,7 @@
 #include "interfaces/HMI_API.h"
 #include "can_cooperation/can_app_extension.h"
 #include "json/json.h"
+#include "can_cooperation/can_module_interface.h"
 
 using application_manager::SeatLocation;
 using application_manager::SeatLocationPtr;
@@ -52,15 +53,18 @@ namespace commands {
 /**
  * @brief Base command class for requests
  */
-class BaseCommandRequest : public Command,
-  public event_engine::EventObserver<application_manager::MessagePtr, std::string> {
+class BaseCommandRequest
+    : public Command,
+      public can_event_engine::EventObserver<application_manager::MessagePtr,
+                                             std::string> {
  public:
   /**
    * @brief BaseCommandRequest class constructor
    *
    * @param message Message from mobile
    **/
-  explicit BaseCommandRequest(const application_manager::MessagePtr& message);
+  BaseCommandRequest(const application_manager::MessagePtr& message,
+                     CANModuleInterface& can_module);
 
   /**
    * @brief BaseCommandRequest class destructor
@@ -74,20 +78,21 @@ class BaseCommandRequest : public Command,
 
   // TODO(KKolodiy): need rename to Execute
   void Run();
-  void on_event(const event_engine::Event<application_manager::MessagePtr,
-                std::string>& event);
+  void on_event(const can_event_engine::Event<application_manager::MessagePtr,
+                                              std::string>& event);
 
  protected:
   application_manager::MessagePtr message_;
   Json::Value response_params_;
 
   /**
-   * @brief Get extension for specified application. If extension doesn't exist, it will be created
+   * @brief Get extension for specified application. If extension doesn't exist,
+   * it will be created
    * @param app pointer to application
    * @return pointer to extension
    */
   CANAppExtensionPtr GetAppExtension(
-    application_manager::ApplicationSharedPtr app) const;
+      application_manager::ApplicationSharedPtr app) const;
 
   /**
    * @brief Converts HMI result code to string with mobile result code
@@ -96,14 +101,16 @@ class BaseCommandRequest : public Command,
    * @return String with mobile result code
    */
   const char* GetMobileResultCode(
-    const hmi_apis::Common_Result::eType& hmi_code) const;
+      const hmi_apis::Common_Result::eType& hmi_code) const;
 
   /**
    * @brief Creates Mobile response
    *
    * @param success true if successful; false, if failed
-   * @param result_code Mobile result code in string ("SUCCESS", "INVALID_DATA", e.t.c)
-   * @param info Provides additional human readable info regarding the result(may be empty)
+   * @param result_code Mobile result code in string ("SUCCESS", "INVALID_DATA",
+   *e.t.c)
+   * @param info Provides additional human readable info regarding the
+   *result(may be empty)
    */
   void SendResponse(bool success,
                     const char* result_code,
@@ -113,12 +120,14 @@ class BaseCommandRequest : public Command,
    * @brief Parse result code from response
    *
    * @param message Response from HMI or Can
-   * @param result_code Outgoing param with mobile result code in string ("SUCCESS", "INVALID_DATA", e.t.c)
-   * @param info Outgoing param with additional human readable info regarding the result(may be empty)
+   * @param result_code Outgoing param with mobile result code in string
+   *("SUCCESS", "INVALID_DATA", e.t.c)
+   * @param info Outgoing param with additional human readable info regarding
+   *the result(may be empty)
    * @return true if it is success response? otherwise false
    */
   bool ParseResultCode(const Json::Value& value,
-                       std::string&  result_code,
+                       std::string& result_code,
                        std::string& info);
 
   /**
@@ -157,14 +166,16 @@ class BaseCommandRequest : public Command,
    * @brief Interface method that is called whenever new event received
    * @param event The received event
    */
-  void virtual OnEvent(const event_engine::Event<application_manager::MessagePtr,
-                  std::string>& event) = 0;
+  void virtual OnEvent(
+      const can_event_engine::Event<application_manager::MessagePtr,
+                                    std::string>& event) = 0;
 
   virtual std::string ModuleType(const Json::Value& message);
   virtual Json::Value GetInteriorZone(const Json::Value& message);
   virtual SeatLocation InteriorZone(const Json::Value& message);
   virtual std::vector<std::string> ControlData(const Json::Value& message);
-  virtual application_manager::TypeAccess CheckAccess(const Json::Value& message);
+  virtual application_manager::TypeAccess CheckAccess(
+      const Json::Value& message);
 
   SeatLocation CreateInteriorZone(const Json::Value& zone);
 
@@ -187,17 +198,19 @@ class BaseCommandRequest : public Command,
  private:
   void CheckHMILevel(application_manager::TypeAccess access,
                      bool hmi_consented = false);
-  void UpdateHMILevel(const event_engine::Event<application_manager::MessagePtr,
-                      std::string>& event);
+  void UpdateHMILevel(
+      const can_event_engine::Event<application_manager::MessagePtr,
+                                    std::string>& event);
   bool CheckPolicyPermissions();
   bool CheckDriverConsent();
   inline bool IsAutoAllowed(application_manager::TypeAccess access) const;
-  inline bool IsNeededDriverConsent(application_manager::TypeAccess access) const;
+  inline bool IsNeededDriverConsent(
+      application_manager::TypeAccess access) const;
   void SendDisallowed(application_manager::TypeAccess access);
   void SendGetUserConsent(const Json::Value& value);
   void ProcessAccessResponse(
-      const event_engine::Event<application_manager::MessagePtr,
-      std::string>& event);
+      const can_event_engine::Event<application_manager::MessagePtr,
+                                    std::string>& event);
   SeatLocation PrepareZone(const SeatLocation& interior_zone);
   Json::Value PrepareJsonZone(const Json::Value& value);
   application_manager::ApplicationSharedPtr app_;
