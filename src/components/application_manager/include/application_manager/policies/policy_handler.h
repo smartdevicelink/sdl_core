@@ -41,6 +41,7 @@
 #include <stdint.h>
 
 #include "policy/policy_manager.h"
+#include "application_manager/application.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/policies/policy_event_observer.h"
 #include "application_manager/policies/delegates/statistics_delegate.h"
@@ -64,11 +65,10 @@ class ApplicationManager;
 }
 
 namespace policy {
+
 typedef std::vector<uint32_t> AppIds;
 typedef std::vector<uint32_t> DeviceHandles;
 namespace custom_str = utils::custom_string;
-
-class PolicyManager;
 
 class PolicyHandler : public PolicyHandlerInterface,
                       public PolicyListener,
@@ -98,11 +98,11 @@ class PolicyHandler : public PolicyHandlerInterface,
 
   virtual bool GetPriority(const std::string& policy_app_id,
                            std::string* priority) const OVERRIDE;
-  void CheckPermissions(const PTString& app_id,
-                        const PTString& hmi_level,
-                        const PTString& rpc,
-                        const RPCParams& rpc_params,
-                        CheckPermissionResult& result) OVERRIDE;
+  virtual void CheckPermissions(
+      const application_manager::ApplicationSharedPtr app,
+      const PTString& rpc,
+      const RPCParams& rpc_params,
+      CheckPermissionResult& result) OVERRIDE;
 
   uint32_t GetNotificationsNumber(const std::string& priority) const OVERRIDE;
   virtual DeviceConsent GetUserConsentForDevice(
@@ -118,9 +118,11 @@ class PolicyHandler : public PolicyHandlerInterface,
    * @param params parameters list
    */
   application_manager::TypeAccess CheckAccess(
-      const PTString& device_id, const PTString& app_id,
+      const PTString& device_id,
+      const PTString& app_id,
       const application_manager::SeatLocation& zone,
-      const PTString& module, const std::string& rpc,
+      const PTString& module,
+      const std::string& rpc,
       const std::vector<PTString>& params);
 
   /**
@@ -139,7 +141,8 @@ class PolicyHandler : public PolicyHandlerInterface,
    * @param module type
    * @param allowed true if access is allowed
    */
-  void SetAccess(const PTString& device_id, const PTString& app_id,
+  void SetAccess(const PTString& device_id,
+                 const PTString& app_id,
                  const application_manager::SeatLocation& zone,
                  const PTString& module,
                  bool allowed);
@@ -215,7 +218,7 @@ class PolicyHandler : public PolicyHandlerInterface,
    * @param application_id ID of app whose permissions are changed
    */
   void OnRemoteAppPermissionsChanged(const std::string& device_id,
-      const std::string& application_id);
+                                     const std::string& application_id);
 
   virtual void OnUpdateHMIStatus(const std::string& device_id,
                                  const std::string& policy_app_id,
@@ -236,8 +239,6 @@ class PolicyHandler : public PolicyHandlerInterface,
                       std::vector<std::string>* modules) const;
 #endif  // SDL_REMOTE_CONTROL
 
-  uint32_t GetNotificationsNumber(const std::string& priority);
-  DeviceConsent GetUserConsentForDevice(const std::string& device_id);
   bool GetDefaultHmi(const std::string& policy_app_id,
                      std::string* default_hmi) const OVERRIDE;
   bool GetInitialAppData(const std::string& application_id,
@@ -360,21 +361,17 @@ class PolicyHandler : public PolicyHandlerInterface,
    */
   void OnUpdateStatusChanged(const std::string& status) OVERRIDE;
 
+#ifdef SDL_REMOTE_CONTROL
   /**
    * @brief Update currently used device id in policies manager for given
    * application
    * @param policy_app_id Application id
-   * @deprecated see std::vector<std::string> GetDevicesIds(const std::string&)
+   * @deprecated see
    */
+  std::vector<std::string> GetDevicesIds(const std::string&) OVERRIDE;
+#endif
   std::string OnCurrentDeviceIdUpdateRequired(
       const std::string& policy_app_id) OVERRIDE;
-
-  /**
-   * Gets devices ids by policy application id
-   * @param policy_app_id
-   * @return list devices ids
-   */
-  std::vector<std::string> GetDevicesIds(const std::string policy_app_id);
 
   /**
    * @brief Set parameters from OnSystemInfoChanged to policy table
@@ -438,9 +435,12 @@ class PolicyHandler : public PolicyHandlerInterface,
 
   virtual void OnUpdateHMIAppType(
       std::map<std::string, StringArray> app_hmi_types) OVERRIDE;
+
+#ifdef SDL_REMOTE_CONTROL
   virtual void OnUpdateHMILevel(const std::string& device_id,
                                 const std::string& policy_app_id,
-                                const std::string& hmi_level);
+                                const std::string& hmi_level) OVERRIDE;
+#endif
 
   virtual void OnCertificateUpdated(
       const std::string& certificate_data) OVERRIDE;
@@ -467,17 +467,18 @@ class PolicyHandler : public PolicyHandlerInterface,
    */
   void AddApplication(const std::string& application_id) OVERRIDE;
 
+#ifdef SDL_REMOTE_CONTROL
   /**
-   * Checks if application has HMI type
-   * @param application_id ID application
-   * @param hmi HMI type to check
-   * @param app_types additional list of HMI type to search in it
-   * @return true if hmi is contained in policy or app_types
-   */
+     * Checks if application has HMI type
+     * @param application_id ID application
+     * @param hmi HMI type to check
+     * @param app_types additional list of HMI type to search in it
+     * @return true if hmi is contained in policy or app_types
+     */
   bool CheckHMIType(const std::string& application_id,
                     mobile_apis::AppHMIType::eType hmi,
                     const smart_objects::SmartObject* app_types);
-
+#endif
   /**
    * Checks whether application is revoked
    * @param app_id id application
@@ -561,6 +562,11 @@ class PolicyHandler : public PolicyHandlerInterface,
   void SetPolicyManager(utils::SharedPtr<PolicyManager> pm) {
     policy_manager_ = pm;
   }
+
+  AppIds& last_used_app_ids() {
+    return last_used_app_ids_;
+  }
+
 #endif  // BUILD_TESTS
 
 #ifdef ENABLE_SECURITY
@@ -606,43 +612,10 @@ class PolicyHandler : public PolicyHandlerInterface,
   void OnAppPermissionConsentInternal(const uint32_t connection_key,
                                       PermissionConsent& permissions) OVERRIDE;
 
+#ifdef SDL_REMOTE_CONTROL
   void UpdateHMILevel(application_manager::ApplicationSharedPtr app,
                       mobile_apis::HMILevel::eType level);
-
-private:
-  class StatisticManagerImpl: public usage_statistics::StatisticsManager {
-      //TODO(AKutsan) REMOVE THIS UGLY HOTFIX
-        virtual void Increment(usage_statistics::GlobalCounterId type) {
-
-        PolicyHandler::instance()->AsyncRun(new StatisticsDelegate(type));
-      }
-
-        virtual void Increment(const std::string& app_id,
-                               usage_statistics::AppCounterId type) {
-
-        PolicyHandler::instance()->AsyncRun(new StatisticsDelegate(app_id,
-                                                                   type));
-      }
-
-        virtual void Set(const std::string& app_id,
-                         usage_statistics::AppInfoId type,
-                         const std::string& value) {
-
-        PolicyHandler::instance()->AsyncRun(new StatisticsDelegate(app_id,
-                                                                   type,
-                                                                   value));
-      }
-
-        virtual void Add(const std::string& app_id,
-                         usage_statistics::AppStopwatchId type,
-                         int32_t timespan_seconds) {
-
-        PolicyHandler::instance()->AsyncRun(new StatisticsDelegate(
-                                              app_id, type, timespan_seconds));
-      }
-  };
-  //TODO(AKutsan) REMOVE THIS UGLY HOTFIX
-
+#endif
   /**
    * @brief Sets days after epoch on successful policy update
    */
