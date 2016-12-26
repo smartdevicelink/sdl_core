@@ -40,8 +40,7 @@ namespace can_cooperation {
 class TrackableMessage : public functional_modules::Trackable {
  public:
   TrackableMessage(uint32_t app_id, uint32_t correlation_id)
-    : custom_interval_(0), app_id_(app_id), correlation_id_(correlation_id) {
-  }
+      : custom_interval_(0), app_id_(app_id), correlation_id_(correlation_id) {}
 
   functional_modules::TimeUnit custom_interval() const {
     return custom_interval_;

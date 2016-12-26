@@ -30,86 +30,103 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_CAN_MODULE_H_
-#define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_CAN_MODULE_H_
+#ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_CAN_MODULE_INTERFACE_H_
+#define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_CAN_MODULE_INTERFACE_H_
 
 #include <queue>
 #include <string>
-
-#include "can_cooperation/can_module_interface.h"
 #include "functional_module/generic_module.h"
 #include "can_cooperation/can_connection.h"
 #include "can_cooperation/request_controller.h"
-#include "utils/threads/message_loop_thread.h"
 #include "can_cooperation/event_engine/event_dispatcher.h"
+#include "utils/threads/message_loop_thread.h"
+#include "utils/shared_ptr.h"
 
 namespace can_cooperation {
 
-class CANModule : public CANModuleInterface {
- public:
-  CANModule();
-  ~CANModule();
+class CANAppExtension;
+typedef utils::SharedPtr<CANAppExtension> CANAppExtensionPtr;
 
-  functional_modules::PluginInfo GetPluginInfo() const;
+struct MessageFromCAN : public Json::Value {
+  explicit MessageFromCAN() {}
+  explicit MessageFromCAN(const Json::Value& other) : Json::Value(other) {}
+};
+
+typedef Json::Value MessageFromMobile;
+
+class CANModuleInterface
+    : public functional_modules::GenericModule,
+      public CANConnectionObserver,
+      public threads::MessageLoopThread<std::queue<MessageFromCAN> >::Handler,
+      public threads::MessageLoopThread<
+          std::queue<MessageFromMobile> >::Handler {
+ public:
+  CANModuleInterface() : GenericModule(kCANModuleID) {}
+  virtual ~CANModuleInterface() {}
+  virtual functional_modules::PluginInfo GetPluginInfo() const = 0;
   virtual functional_modules::ProcessResult ProcessMessage(
-      application_manager::MessagePtr msg);
+      application_manager::MessagePtr msg) = 0;
   virtual functional_modules::ProcessResult ProcessHMIMessage(
-      application_manager::MessagePtr msg);
-  void OnCANMessageReceived(const CANMessage& message);
-  void OnCANConnectionError(ConnectionState state, const std::string& info);
-  void Handle(const MessageFromMobile message);
-  void Handle(const MessageFromCAN message);
+      application_manager::MessagePtr msg) = 0;
+  virtual void OnCANMessageReceived(const CANMessage& message) = 0;
+  virtual void OnCANConnectionError(ConnectionState state,
+                                    const std::string& info) = 0;
+  virtual void Handle(const MessageFromMobile message) = 0;
+  virtual void Handle(const MessageFromCAN message) = 0;
 
   /**
    * @brief Sends response to mobile application
    * @param msg response mesage
    */
-  void SendResponseToMobile(application_manager::MessagePtr msg);
+  virtual void SendResponseToMobile(application_manager::MessagePtr msg) = 0;
 
   /**
    * @brief Sends timeout response to mobile application
    * @param msg response mesage
    */
-  void SendTimeoutResponseToMobile(application_manager::MessagePtr msg);
+  virtual void SendTimeoutResponseToMobile(
+      application_manager::MessagePtr msg) = 0;
 
   /**
    * @brief Post message to can to queue
    * @param msg response mesage
    */
-  void SendMessageToCan(const MessageFromMobile& msg);
+  virtual void SendMessageToCan(const MessageFromMobile& msg) = 0;
 
   /**
    * @brief Checks if radio scan started
    * @return true if radio scan started
    */
-  bool IsScanStarted() const;
+  virtual bool IsScanStarted() const = 0;
 
   /**
    * @brief Checks if radio scan started
    * @param is_scan_sarted true - scan started? false - scan stopped
    */
-  void SetScanStarted(bool is_scan_started);
+  virtual void SetScanStarted(bool is_scan_started) = 0;
 
   /**
    * @brief Remove extension created for specified application
    * @param app_id application id
    */
-  virtual void RemoveAppExtension(uint32_t app_id);
+  virtual void RemoveAppExtension(uint32_t app_id) = 0;
 
   /**
    * @brief Check registering app can be handled by plugin
    * @param msg Registration message
    * @param app Application basis already create by Core
    */
-  bool IsAppForPlugin(application_manager::ApplicationSharedPtr app);
+  virtual bool IsAppForPlugin(
+      application_manager::ApplicationSharedPtr app) = 0;
 
   /**
    * @brief Notify about change of HMILevel of plugin's app
    * @param app App with new HMILevel
    * @param old_level Old HMILevel of app
    */
-  void OnAppHMILevelChanged(application_manager::ApplicationSharedPtr app,
-                            mobile_apis::HMILevel::eType old_level);
+  virtual void OnAppHMILevelChanged(
+      application_manager::ApplicationSharedPtr app,
+      mobile_apis::HMILevel::eType old_level) = 0;
 
   /**
    * @brief Checks if plugin hasn't put restrictions on app's HMI Level
@@ -118,56 +135,35 @@ class CANModule : public CANModuleInterface {
    */
   virtual bool CanAppChangeHMILevel(
       application_manager::ApplicationSharedPtr app,
-      mobile_apis::HMILevel::eType new_level);
+      mobile_apis::HMILevel::eType new_level) = 0;
 
   /**
    * Handles removing (disconnecting) device
    * @param device removed
    */
-  void OnDeviceRemoved(const connection_handler::DeviceHandle& device);
+  virtual void OnDeviceRemoved(
+      const connection_handler::DeviceHandle& device) = 0;
 
-  void SendHmiStatusNotification(application_manager::ApplicationSharedPtr app);
+  virtual void SendHmiStatusNotification(
+      application_manager::ApplicationSharedPtr app) = 0;
 
-  void UnsubscribeAppForAllZones(uint32_t hmi_app_id, CANAppExtensionPtr app);
+  virtual void UnsubscribeAppForAllZones(uint32_t hmi_app_id,
+                                         CANAppExtensionPtr app) = 0;
 
-  CANConnectionSPtr can_connection();
-
-  void set_can_connection(const CANConnectionSPtr can_connection);
-
-  can_event_engine::EventDispatcher<application_manager::MessagePtr,
-                                    std::string>&
-  event_dispatcher();
+  virtual can_event_engine::EventDispatcher<application_manager::MessagePtr,
+                                            std::string>&
+  event_dispatcher() = 0;
 
  protected:
   /**
    * @brief Remove extension for all applications
    */
-  virtual void RemoveAppExtensions();
+  virtual void RemoveAppExtensions() = 0;
 
- private:
-  void SubscribeOnFunctions();
-  void NotifyMobiles(application_manager::MessagePtr msg);
-
-  void UnsubscribeAppsFromAllInteriorZones(uint32_t device_id);
-
-  functional_modules::ProcessResult HandleMessage(
-      application_manager::MessagePtr msg);
-  inline bool DoNeedUnsubscribe(uint32_t device_id,
-                                const application_manager::SeatLocation& zone);
-  inline application_manager::SeatLocation GetInteriorZone(
-      const Json::Value& device_location) const;
-  CANConnectionSPtr can_connection_;
-  functional_modules::PluginInfo plugin_info_;
-  threads::MessageLoopThread<std::queue<MessageFromCAN> > from_can_;
-  threads::MessageLoopThread<std::queue<MessageFromMobile> > from_mobile_;
-  bool is_scan_started_;
-  request_controller::RequestController request_controller_;
-  can_event_engine::EventDispatcher<application_manager::MessagePtr,
-                                    std::string> event_dispatcher_;
-
-  DISALLOW_COPY_AND_ASSIGN(CANModule);
+  // TODO(VS): must be uid
+  static const functional_modules::ModuleID kCANModuleID = 153;
 };
 
 }  // namespace can_cooperation
 
-#endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_CAN_MODULE_H_
+#endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_CAN_MODULE_INTERFACE_H_

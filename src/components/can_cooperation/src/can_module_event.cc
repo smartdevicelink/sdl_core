@@ -30,20 +30,16 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include "can_cooperation/can_module_event.h"
 
 namespace can_cooperation {
 
 CanModuleEvent::CanModuleEvent(application_manager::MessagePtr& message,
                                const std::string& id)
-: event_engine::Event<application_manager::MessagePtr,
-                      std::string>(message, id) {
-}
+    : can_event_engine::Event<application_manager::MessagePtr, std::string>(
+          message, id) {}
 
-
-CanModuleEvent::~CanModuleEvent() {
-}
+CanModuleEvent::~CanModuleEvent() {}
 
 int32_t CanModuleEvent::event_message_function_id() const {
   return event_message_->function_id();
