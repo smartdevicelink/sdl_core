@@ -51,12 +51,11 @@ using namespace message_params;
 CREATE_LOGGERPTR_GLOBAL(logger_, "SetInteriorVehicleDataRequest")
 
 SetInteriorVehicleDataRequest::SetInteriorVehicleDataRequest(
-  const application_manager::MessagePtr& message)
-  : BaseCommandRequest(message) {
-}
+    const application_manager::MessagePtr& message,
+    CANModuleInterface& can_module)
+    : BaseCommandRequest(message, can_module) {}
 
-SetInteriorVehicleDataRequest::~SetInteriorVehicleDataRequest() {
-}
+SetInteriorVehicleDataRequest::~SetInteriorVehicleDataRequest() {}
 
 void SetInteriorVehicleDataRequest::Execute() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -71,8 +70,8 @@ void SetInteriorVehicleDataRequest::Execute() {
 }
 
 void SetInteriorVehicleDataRequest::OnEvent(
-    const event_engine::Event<application_manager::MessagePtr,
-    std::string>& event) {
+    const can_event_engine::Event<application_manager::MessagePtr, std::string>&
+        event) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (functional_modules::hmi_api::set_interior_vehicle_data == event.id()) {
@@ -86,24 +85,22 @@ void SetInteriorVehicleDataRequest::OnEvent(
     bool success = false;
     if (IsMember(value, kError) && IsMember(value[kError], kCode) &&
         (hmi_apis::Common_Result::READ_ONLY == value[kError][kCode].asInt())) {
-        result_code = result_codes::kReadOnly;
+      result_code = result_codes::kReadOnly;
 
-        if (IsMember(value[kError], kMessage)) {
-          info = value[kError][kMessage].asCString();
-        }
+      if (IsMember(value[kError], kMessage)) {
+        info = value[kError][kMessage].asCString();
+      }
     } else {
       success = ParseResultCode(value, result_code, info);
     }
 
     // TOD(VS): Create SetInteriorVehicleDataResponseValidator
     validators::ValidationResult validation_result = validators::SUCCESS;
-
+    validators::ModuleDataValidator validator;
     if (success) {
       if (IsMember(value[kResult], kModuleData)) {
-        validation_result =
-            validators::ModuleDataValidator::instance()->Validate(
-                                              value[kResult][kModuleData],
-                                              response_params_[kModuleData]);
+        validation_result = validator.Validate(value[kResult][kModuleData],
+                                               response_params_[kModuleData]);
       } else {
         validation_result = validators::INVALID_DATA;
       }
@@ -128,33 +125,36 @@ bool SetInteriorVehicleDataRequest::Validate() {
   }
 
   Json::Value outgoing_json;
-
+  validators::SetInteriorVehicleDataRequestValidator set_interior_validator;
   if (validators::ValidationResult::SUCCESS !=
-    validators::SetInteriorVehicleDataRequestValidator::instance()->
-                                                Validate(json, outgoing_json)) {
-    LOG4CXX_INFO(logger_,
-                 "SetInteriorVehicleDataRequest validation failed!");
-    SendResponse(false, result_codes::kInvalidData,
-                 "Mobile request validation failed!");
+      set_interior_validator.Validate(json, outgoing_json)) {
+    LOG4CXX_INFO(logger_, "SetInteriorVehicleDataRequest validation failed!");
+    SendResponse(
+        false, result_codes::kInvalidData, "Mobile request validation failed!");
     return false;
   }
 
-  // TODO(VS): Create function for read only validation and move there similar code
+  // TODO(VS): Create function for read only validation and move there similar
+  // code
+  validators::RadioControlDataValidator radio_control_validator;
+  validators::ClimateControlDataValidator climat_control_validator;
   if (outgoing_json[kModuleData].isMember(kRadioControlData)) {
-    validators::RadioControlDataValidator::instance()->RemoveReadOnlyParams(
+    radio_control_validator.RemoveReadOnlyParams(
         outgoing_json[kModuleData][kRadioControlData]);
 
     if (0 == outgoing_json[kModuleData][kRadioControlData].size()) {
-      SendResponse(false, result_codes::kReadOnly,
-                  "Request contains just read only params!");
+      SendResponse(false,
+                   result_codes::kReadOnly,
+                   "Request contains just read only params!");
       return false;
     }
   } else if (outgoing_json[kModuleData].isMember(kClimateControlData)) {
-    validators::ClimateControlDataValidator::instance()->RemoveReadOnlyParams(
+    climat_control_validator.RemoveReadOnlyParams(
         outgoing_json[kModuleData][kClimateControlData]);
     if (0 == outgoing_json[kModuleData][kClimateControlData].size()) {
-      SendResponse(false, result_codes::kReadOnly,
-                  "Request contains just read only params!");
+      SendResponse(false,
+                   result_codes::kReadOnly,
+                   "Request contains just read only params!");
       return false;
     }
   } else {
@@ -170,28 +170,29 @@ std::string SetInteriorVehicleDataRequest::ModuleType(
     const Json::Value& message) {
   return message.get(message_params::kModuleData,
                      Json::Value(Json::objectValue))
-      .get(message_params::kModuleType, Json::Value("")).asString();
+      .get(message_params::kModuleType, Json::Value(""))
+      .asString();
 }
 
 Json::Value SetInteriorVehicleDataRequest::GetInteriorZone(
-  const Json::Value& message) {
+    const Json::Value& message) {
   return message.get(message_params::kModuleData,
-                                 Json::Value(Json::objectValue)).get(
-      message_params::kModuleZone, Json::Value(Json::objectValue));
+                     Json::Value(Json::objectValue))
+      .get(message_params::kModuleZone, Json::Value(Json::objectValue));
 }
 
 SeatLocation SetInteriorVehicleDataRequest::InteriorZone(
     const Json::Value& message) {
-  Json::Value zone = message.get(message_params::kModuleData,
-                                 Json::Value(Json::objectValue)).get(
-      message_params::kModuleZone, Json::Value(Json::objectValue));
+  Json::Value zone =
+      message.get(message_params::kModuleData, Json::Value(Json::objectValue))
+          .get(message_params::kModuleZone, Json::Value(Json::objectValue));
   return CreateInteriorZone(zone);
 }
 
 std::vector<std::string> SetInteriorVehicleDataRequest::ControlData(
     const Json::Value& message) {
-  Json::Value data = message.get(message_params::kModuleData,
-                                 Json::Value(Json::objectValue));
+  Json::Value data =
+      message.get(message_params::kModuleData, Json::Value(Json::objectValue));
   const char* name_control_data;
   std::string module = ModuleType(message);
   if (module == enums_value::kRadio) {
@@ -200,8 +201,8 @@ std::vector<std::string> SetInteriorVehicleDataRequest::ControlData(
   if (module == enums_value::kClimate) {
     name_control_data = message_params::kClimateControlData;
   }
-  Json::Value params = data.get(name_control_data,
-                                Json::Value(Json::objectValue));
+  Json::Value params =
+      data.get(name_control_data, Json::Value(Json::objectValue));
   return params.getMemberNames();
 }
 
