@@ -43,14 +43,16 @@ namespace validators {
 /**
  * @brief ClimateControlDataValidator class
  */
-class ClimateControlDataValidator : public Validator, public utils::Singleton<ClimateControlDataValidator> {
+class ClimateControlDataValidator : public Validator {
  public:
+  ClimateControlDataValidator();
 
   /**
    * @brief Validate json with message params
    *
    * @param json incoming json
-   * @param outgoing_json outgoing json where is param will be copied after verification
+   * @param outgoing_json outgoing json where is param will be copied after
+   *verification
    *
    * @return validation result
    */
@@ -65,8 +67,6 @@ class ClimateControlDataValidator : public Validator, public utils::Singleton<Cl
 
  private:
   DISALLOW_COPY_AND_ASSIGN(ClimateControlDataValidator);
-  FRIEND_BASE_SINGLETON_CLASS(ClimateControlDataValidator);
-  ClimateControlDataValidator();
 
   ValidationScope fan_speed_;
   ValidationScope current_temp_;

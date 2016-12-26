@@ -43,14 +43,16 @@ namespace validators {
 /**
  * @brief ModuleDataValidator class
  */
-class ModuleDataValidator : public Validator, public utils::Singleton<ModuleDataValidator> {
+class ModuleDataValidator : public Validator {
  public:
+  ModuleDataValidator();
 
   /**
    * @brief Validate json with message params
    *
    * @param json incoming json
-   * @param outgoing_json outgoing json where is param will be copied after verification
+   * @param outgoing_json outgoing json where is param will be copied after
+   *verification
    *
    * @return validation result
    */
@@ -59,8 +61,6 @@ class ModuleDataValidator : public Validator, public utils::Singleton<ModuleData
 
  private:
   DISALLOW_COPY_AND_ASSIGN(ModuleDataValidator);
-  FRIEND_BASE_SINGLETON_CLASS(ModuleDataValidator);
-  ModuleDataValidator();
 
   ValidationScope module_type_;
 };

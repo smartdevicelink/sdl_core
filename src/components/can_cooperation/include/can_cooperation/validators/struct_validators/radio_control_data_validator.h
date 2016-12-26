@@ -43,30 +43,31 @@ namespace validators {
 /**
  * @brief RadioControlDataValidator class
  */
-class RadioControlDataValidator : public Validator, public utils::Singleton<RadioControlDataValidator> {
+class RadioControlDataValidator : public Validator {
  public:
+  RadioControlDataValidator();
+
   /**
    * @brief Validate json with message params
    *
    * @param json incoming json
-   * @param outgoing_json outgoing json where is param will be copied after verification
+   * @param outgoing_json outgoing json where is param will be copied after
+   *verification
    *
    * @return validation result
    */
   ValidationResult Validate(const Json::Value& json,
                             Json::Value& outgoing_json);
 
- /**
-  * @brief Remove read only params from json
-  *
-  * @param json incoming json. Read only params will be cut off.
-  */
+  /**
+   * @brief Remove read only params from json
+   *
+   * @param json incoming json. Read only params will be cut off.
+   */
   void RemoveReadOnlyParams(Json::Value& json);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(RadioControlDataValidator);
-  FRIEND_BASE_SINGLETON_CLASS(RadioControlDataValidator);
-  RadioControlDataValidator();
 
   /**
    * @brief Remove read only param from json if exist

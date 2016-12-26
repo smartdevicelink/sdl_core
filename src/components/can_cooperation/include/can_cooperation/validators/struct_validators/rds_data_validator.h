@@ -43,14 +43,16 @@ namespace validators {
 /**
  * @brief RdsDataValidator class
  */
-class RdsDataValidator : public Validator, public utils::Singleton<RdsDataValidator> {
+class RdsDataValidator : public Validator {
  public:
+  RdsDataValidator();
 
   /**
    * @brief Validate json with message params
    *
    * @param json incoming json
-   * @param outgoing_json outgoing json where is param will be copied after verification
+   * @param outgoing_json outgoing json where is param will be copied after
+   *verification
    *
    * @return validation result
    */
@@ -59,8 +61,6 @@ class RdsDataValidator : public Validator, public utils::Singleton<RdsDataValida
 
  private:
   DISALLOW_COPY_AND_ASSIGN(RdsDataValidator);
-  FRIEND_BASE_SINGLETON_CLASS(RdsDataValidator);
-  RdsDataValidator();
 
   ValidationScope ps_;
   ValidationScope rt_;
