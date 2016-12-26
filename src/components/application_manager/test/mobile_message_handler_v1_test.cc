@@ -49,7 +49,7 @@ using protocol_handler::PROTOCOL_HEADER_V1_SIZE;
 namespace application_manager {
 namespace test {
 
-const int32_t connection_key_p1 = 1;
+const uint32_t connection_key_p1 = 1;
 const int32_t protocol_version_1 = 1;
 
 const std::string data_json(
