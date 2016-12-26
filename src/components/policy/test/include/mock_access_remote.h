@@ -35,65 +35,75 @@
 #include "gmock/gmock.h"
 #include "policy/access_remote.h"
 
-namespace policy {
+namespace test {
+namespace components {
+namespace access_remote_test {
 
-class MockSubject : public Subject {
+class MockSubject : public policy::Subject {
  public:
 };
 
-class MockObject : public Object {
+class MockObject : public policy::Object {
  public:
 };
 
-class MockAccessRemote : public AccessRemote {
+class MockAccessRemote : public policy::AccessRemote {
  public:
-  MOCK_METHOD0(Init,
-      void());
-  MOCK_METHOD0(Enable,
-      void());
-  MOCK_METHOD0(Disable,
-      void());
-  MOCK_CONST_METHOD0(IsEnabled,
-      bool());
-  MOCK_CONST_METHOD1(IsPrimaryDevice,
-      bool(const PTString& dev_id));
-  MOCK_METHOD1(SetPrimaryDevice,
-      void(const PTString& dev_id));
-  MOCK_CONST_METHOD0(PrimaryDevice, PTString());
+  MOCK_METHOD0(Init, void());
+  MOCK_METHOD0(Enable, void());
+  MOCK_METHOD0(Disable, void());
+  MOCK_CONST_METHOD0(IsEnabled, bool());
+  MOCK_CONST_METHOD1(IsPrimaryDevice, bool(const policy::PTString& dev_id));
+  MOCK_METHOD1(SetPrimaryDevice, void(const policy::PTString& dev_id));
+  MOCK_CONST_METHOD0(PrimaryDevice, policy::PTString());
   MOCK_CONST_METHOD2(IsPassengerZone,
-      bool(const SeatLocation& seat, const SeatLocation& zone));
+                     bool(const policy::SeatLocation& seat,
+                          const policy::SeatLocation& zone));
   MOCK_METHOD2(Allow,
-      void(const Subject& who, const Object& what));
+               void(const policy::Subject& who, const policy::Object& what));
   MOCK_METHOD2(Deny,
-      void(const Subject& who, const Object& what));
-  MOCK_METHOD1(Reset,
-      void(const Subject& who));
-  MOCK_METHOD1(Reset,
-      void(const Object& what));
+               void(const policy::Subject& who, const policy::Object& what));
+  MOCK_METHOD1(Reset, void(const policy::Subject& who));
+  MOCK_METHOD1(Reset, void(const policy::Object& what));
   MOCK_CONST_METHOD2(Check,
-      TypeAccess(const Subject& who, const Object& what));
-  MOCK_CONST_METHOD3(FindGroup,
-      PTString(const Subject& who, const PTString& rpc, const RemoteControlParams& params));
+                     policy::TypeAccess(const policy::Subject& who,
+                                        const policy::Object& what));
+  MOCK_CONST_METHOD3(
+      FindGroup,
+      policy::PTString(const policy::Subject& who,
+                       const policy::PTString& rpc,
+                       const policy::RemoteControlParams& params));
   MOCK_METHOD2(SetDefaultHmiTypes,
-      void(const Subject& who, const std::vector<int>& hmi_types));
+               void(const policy::Subject& who,
+                    const std::vector<int>& hmi_types));
   MOCK_METHOD1(GetGroups,
-      const policy_table::Strings&(const Subject& who));
+               const policy_table::Strings&(const policy::Subject& who));
   MOCK_METHOD3(GetPermissionsForApp,
-      bool (const std::string& device_id, const std::string& app_id, policy::FunctionalIdType& group_types));
-  MOCK_CONST_METHOD2(CheckModuleType, bool(const PTString& app_id,
-                                            policy_table::ModuleType module));
-  MOCK_CONST_METHOD3(CheckParameters,
-      TypeAccess(const Object& what, const std::string& rpc,
-                 const RemoteControlParams& params));
-  MOCK_METHOD1(IsAppReverse, bool(const Subject& who));
+               bool(const std::string& device_id,
+                    const std::string& app_id,
+                    policy::FunctionalIdType& group_types));
+  MOCK_CONST_METHOD2(CheckModuleType,
+                     bool(const policy::PTString& app_id,
+                          policy_table::ModuleType module));
+  MOCK_CONST_METHOD3(
+      CheckParameters,
+      policy::TypeAccess(const policy::Object& what,
+                         const std::string& rpc,
+                         const policy::RemoteControlParams& params));
+  MOCK_METHOD1(IsAppReverse, bool(const policy::Subject& who));
   MOCK_METHOD0(Reset, void());
-  MOCK_CONST_METHOD1(GetDeviceZone, const SeatLocation*(const std::string& device_id));
-  MOCK_METHOD2(SetDeviceZone, void(const std::string& device_id,
-                                   const SeatLocation& zone));
-  MOCK_METHOD2(GetModuleTypes, bool(const std::string& application_id,
-                                    std::vector<std::string>* modules));
+  MOCK_CONST_METHOD1(GetDeviceZone,
+                     const policy::SeatLocation*(const std::string& device_id));
+  MOCK_METHOD2(SetDeviceZone,
+               void(const std::string& device_id,
+                    const policy::SeatLocation& zone));
+  MOCK_METHOD2(GetModuleTypes,
+               bool(const std::string& application_id,
+                    std::vector<std::string>* modules));
 };
 
-}  // namespace policy
+}  // namespace access_remote_test
+}  // namespace components
+}  // namespace test
 
 #endif  // SRC_COMPONENTS_POLICY_TEST_INCLUDE_MOCK_ACCESS_REMOTE_H_
