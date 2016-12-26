@@ -124,7 +124,7 @@ void UsageStatistics::RecordAppRegistrationGuiLanguage(
 
 void UsageStatistics::RecordAppRegistrationVuiLanguage(
     Language::eType vui_language) {
-  app_registration_language_gui_.Update(LanguageIdToString(vui_language));
+  app_registration_language_vui_.Update(LanguageIdToString(vui_language));
 }
 
 void UsageStatistics::RecordRpcSentInHMINone() {
