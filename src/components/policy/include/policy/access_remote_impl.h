@@ -33,7 +33,7 @@
 #define SRC_COMPONENTS_POLICY_SRC_POLICY_INCLUDE_POLICY_ACCESS_REMOTE_IMPL_H_
 
 #include <map>
-#include "types.h"
+#include "policy/policy_table/types.h"
 #include "utils/macro.h"
 #include "utils/shared_ptr.h"
 #include "policy/access_remote.h"
@@ -71,8 +71,8 @@ class AccessRemoteImpl : public AccessRemote {
   virtual void SetDefaultHmiTypes(const Subject& who,
                                   const std::vector<int>& hmi_types);
   virtual const policy_table::Strings& GetGroups(const Subject& who);
-  virtual bool GetPermissionsForApp(const std::string &device_id,
-                                    const std::string &app_id,
+  virtual bool GetPermissionsForApp(const std::string& device_id,
+                                    const std::string& app_id,
                                     FunctionalIdType& group_types);
   virtual bool IsAppReverse(const Subject& who);
   virtual const SeatLocation* GetDeviceZone(const std::string& device_id) const;
@@ -89,10 +89,12 @@ class AccessRemoteImpl : public AccessRemote {
   inline void set_enabled(bool value);
   inline bool country_consent() const;
   const policy_table::AppHMITypes& HmiTypes(const Subject& who);
-  void GetGroupsIds(const std::string &device_id, const std::string &app_id,
+  void GetGroupsIds(const std::string& device_id,
+                    const std::string& app_id,
                     FunctionalGroupIDs& grops_ids);
   bool IsAllowed(const policy_table::AccessModules& modules,
-                 const std::string& module_name, const std::string& rpc_name,
+                 const std::string& module_name,
+                 const std::string& rpc_name,
                  RemoteControlParams* input) const;
   bool CompareParameters(const policy_table::Strings& parameters,
                          RemoteControlParams* input) const;

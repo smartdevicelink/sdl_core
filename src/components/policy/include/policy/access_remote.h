@@ -35,7 +35,7 @@
 #include <vector>
 #include <ostream>
 #include <string>
-#include "./types.h"
+#include "policy/policy_table/types.h"
 #include "policy/policy_types.h"
 
 namespace policy_table = ::rpc::policy_table_interface_base;
@@ -48,30 +48,26 @@ struct SeatLocation {
 };
 inline bool operator<(const SeatLocation& x, const SeatLocation& y) {
   return (x.col < y.col) || (x.col == y.col && x.row < y.row) ||
-      (x.col == y.col && x.row == y.row && x.level < y.level);
+         (x.col == y.col && x.row == y.row && x.level < y.level);
 }
 inline bool operator==(const SeatLocation& x, const SeatLocation& y) {
   return x.col == y.col && x.row == y.row && x.level == y.level;
 }
 inline bool operator==(const SeatLocation& x,
                        const policy_table::InteriorZone& y) {
-  return x == SeatLocation {y.col, y.row, y.level};
+  return x == SeatLocation{y.col, y.row, y.level};
 }
 inline bool operator==(const policy_table::InteriorZone& x,
                        const SeatLocation& y) {
   return y == x;
 }
 inline std::ostream& operator<<(std::ostream& output, const SeatLocation& x) {
-  output << "Interior zone(col:" << x.col << ", row:" << x.row << ", level:"
-         << x.level << ")";
+  output << "Interior zone(col:" << x.col << ", row:" << x.row
+         << ", level:" << x.level << ")";
   return output;
 }
 
-enum TypeAccess {
-  kDisallowed,
-  kAllowed,
-  kManual
-};
+enum TypeAccess { kDisallowed, kAllowed, kManual };
 inline std::ostream& operator<<(std::ostream& output, TypeAccess x) {
   output << "Access: ";
   switch (x) {
@@ -125,8 +121,7 @@ typedef std::vector<PTString> RemoteControlParams;
 
 class AccessRemote {
  public:
-  virtual ~AccessRemote() {
-  }
+  virtual ~AccessRemote() {}
 
   /**
    * Initializes oneself
@@ -225,7 +220,8 @@ class AccessRemote {
    * manual if need to ask driver
    */
   virtual TypeAccess CheckParameters(
-      const Object& what, const std::string& rpc,
+      const Object& what,
+      const std::string& rpc,
       const RemoteControlParams& params) const = 0;
 
   /**
@@ -250,8 +246,8 @@ class AccessRemote {
    * @param group_types
    * @return true if success
    */
-  virtual bool GetPermissionsForApp(const std::string &device_id,
-                                    const std::string &app_id,
+  virtual bool GetPermissionsForApp(const std::string& device_id,
+                                    const std::string& app_id,
                                     FunctionalIdType& group_types) = 0;
 
   /**
