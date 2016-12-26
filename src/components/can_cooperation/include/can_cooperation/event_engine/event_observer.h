@@ -36,14 +36,14 @@
 #include <string>
 #include "can_cooperation/event_engine/event.h"
 
+namespace can_event_engine {
 
-namespace event_engine {
+template <typename EventMessage, typename EventID>
+class Event;
 
-template<typename EventMessage, typename EventID>
-class EventObserver
-{
+template <typename EventMessage, typename EventID>
+class EventObserver {
  public:
-
   // Typedef for possible Observer ID's from mobile_apis functionID enum
   typedef unsigned long ObserverID;
 
@@ -63,7 +63,7 @@ class EventObserver
    *
    * @return Unique Observer id
    */
-  const ObserverID& id()  const {
+  const ObserverID& id() const {
     return id_;
   }
 
@@ -75,24 +75,22 @@ class EventObserver
   virtual void on_event(const Event<EventMessage, EventID>& event) = 0;
 
  private:
-
   ObserverID id_;
 
   DISALLOW_COPY_AND_ASSIGN(EventObserver);
 };
 
-template<typename EventMessage, typename EventID>
+template <typename EventMessage, typename EventID>
 EventObserver<EventMessage, EventID>::EventObserver()
- : id_(0) {
-  //Get unique id based on this
+    : id_(0) {
+  // Get unique id based on this
   id_ = reinterpret_cast<unsigned long>(this);
 }
 
-template<typename EventMessage, typename EventID>
+template <typename EventMessage, typename EventID>
 EventObserver<EventMessage, EventID>::~EventObserver() {
-  //unsubscribe_from_all_events();
+  // unsubscribe_from_all_events();
+}
 }
 
-}
-
-#endif // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_EVENT_ENGINE_EVENT_OBSERVER_H_
+#endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_EVENT_ENGINE_EVENT_OBSERVER_H_
