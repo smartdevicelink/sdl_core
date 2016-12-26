@@ -395,9 +395,19 @@ uint32_t PolicyHandler::GetAppIdForSending() const {
           (*first)->device(),
           application_manager_.connection_handler().get_session_observer());
 
-      if (kDeviceAllowed ==
-          policy_manager_->GetUserConsentForDevice(
-              device_params.device_mac_address)) {
+      const bool is_device_allowed = (kDeviceAllowed ==
+                                      policy_manager_->GetUserConsentForDevice(
+                                          device_params.device_mac_address));
+      const bool is_single_app = (1 == app_list.size());
+
+      if (is_device_allowed && is_single_app) {
+        return app_id;
+      }
+
+      const bool is_app_in_none =
+          ((*first)->hmi_level() == mobile_apis::HMILevel::HMI_NONE);
+
+      if (is_device_allowed && !is_app_in_none) {
         return app_id;
       }
     }
