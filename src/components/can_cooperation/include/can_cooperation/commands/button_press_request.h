@@ -50,8 +50,8 @@ class ButtonPressRequest : public BaseCommandRequest {
    *
    * @param message Message from mobile
    **/
-  explicit ButtonPressRequest(const application_manager::MessagePtr& message);
-
+  ButtonPressRequest(const application_manager::MessagePtr& message,
+                     CANModuleInterface& can_module);
   /**
    * @brief Execute command
    */
@@ -62,8 +62,8 @@ class ButtonPressRequest : public BaseCommandRequest {
    *
    * @param event The received event
    */
-  void OnEvent(const event_engine::Event<application_manager::MessagePtr,
-                std::string>& event);
+  void OnEvent(const can_event_engine::Event<application_manager::MessagePtr,
+                                             std::string>& event);
 
   /**
    * @brief ButtonPressRequest class destructor

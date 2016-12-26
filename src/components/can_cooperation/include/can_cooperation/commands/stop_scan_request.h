@@ -50,7 +50,8 @@ class StopScanRequest : public BaseCommandRequest {
    *
    * @param message Message from mobile
    **/
-  explicit StopScanRequest(const application_manager::MessagePtr& message);
+  StopScanRequest(const application_manager::MessagePtr& message,
+                  CANModuleInterface& can_module);
 
   /**
    * @brief Execute command
@@ -62,8 +63,8 @@ class StopScanRequest : public BaseCommandRequest {
    *
    * @param event The received event
    */
-  void OnEvent(const event_engine::Event<application_manager::MessagePtr,
-                std::string>& event);
+  void OnEvent(const can_event_engine::Event<application_manager::MessagePtr,
+                                             std::string>& event);
 
   /**
    * @brief StopScanRequest class destructor

@@ -42,12 +42,11 @@ namespace commands {
 CREATE_LOGGERPTR_GLOBAL(logger_, "ClimateControlOnRequest")
 
 ClimateControlOnRequest::ClimateControlOnRequest(
-  const application_manager::MessagePtr& message)
-  : BaseCommandRequest(message) {
-}
+    const application_manager::MessagePtr& message,
+    CANModuleInterface& can_module)
+    : BaseCommandRequest(message, can_module) {}
 
-ClimateControlOnRequest::~ClimateControlOnRequest() {
-}
+ClimateControlOnRequest::~ClimateControlOnRequest() {}
 
 void ClimateControlOnRequest::Execute() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -56,8 +55,8 @@ void ClimateControlOnRequest::Execute() {
 }
 
 void ClimateControlOnRequest::OnEvent(
-    const event_engine::Event<application_manager::MessagePtr,
-    std::string>& event) {
+    const can_event_engine::Event<application_manager::MessagePtr, std::string>&
+        event) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (functional_modules::can_api::climate_control_on == event.id()) {

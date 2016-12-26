@@ -42,20 +42,18 @@ namespace commands {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "StopScanRequest")
 
-StopScanRequest::StopScanRequest(
-  const application_manager::MessagePtr& message)
-  : BaseCommandRequest(message) {
-}
+StopScanRequest::StopScanRequest(const application_manager::MessagePtr& message,
+                                 CANModuleInterface& can_module)
+    : BaseCommandRequest(message, can_module) {}
 
-StopScanRequest::~StopScanRequest() {
-}
+StopScanRequest::~StopScanRequest() {}
 
 void StopScanRequest::Execute() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  if (!CANModule::instance()->IsScanStarted()) {
+  if (!can_module_.IsScanStarted()) {
     LOG4CXX_ERROR(logger_, "Scan doesn't started!");
-    SendResponse(false, result_codes::kRejected,  "");
+    SendResponse(false, result_codes::kRejected, "");
     return;
   }
 
@@ -63,8 +61,8 @@ void StopScanRequest::Execute() {
 }
 
 void StopScanRequest::OnEvent(
-    const event_engine::Event<application_manager::MessagePtr,
-    std::string>& event) {
+    const can_event_engine::Event<application_manager::MessagePtr, std::string>&
+        event) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (functional_modules::can_api::stop_scan == event.id()) {
@@ -78,7 +76,7 @@ void StopScanRequest::OnEvent(
     bool success = ParseResultCode(value, result_code, info);
 
     if (success) {
-      CANModule::instance()->SetScanStarted(false);
+      can_module_.SetScanStarted(false);
     }
 
     SendResponse(success, result_code.c_str(), info);

@@ -42,12 +42,11 @@ namespace commands {
 CREATE_LOGGERPTR_GLOBAL(logger_, "GetSeatControlRequest")
 
 GetSeatControlRequest::GetSeatControlRequest(
-  const application_manager::MessagePtr& message)
-  : BaseCommandRequest(message) {
-}
+    const application_manager::MessagePtr& message,
+    CANModuleInterface& can_module)
+    : BaseCommandRequest(message, can_module) {}
 
-GetSeatControlRequest::~GetSeatControlRequest() {
-}
+GetSeatControlRequest::~GetSeatControlRequest() {}
 
 void GetSeatControlRequest::Execute() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -61,8 +60,8 @@ void GetSeatControlRequest::Execute() {
 }
 
 void GetSeatControlRequest::OnEvent(
-    const event_engine::Event<application_manager::MessagePtr,
-    std::string>& event) {
+    const can_event_engine::Event<application_manager::MessagePtr, std::string>&
+        event) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (functional_modules::can_api::get_seat_control == event.id()) {
