@@ -43,31 +43,14 @@ namespace commands {
 CREATE_LOGGERPTR_GLOBAL(logger_, "TuneRadioRequest")
 
 TuneRadioRequest::TuneRadioRequest(
-  const application_manager::MessagePtr& message)
-  : BaseCommandRequest(message) {
-}
+    const application_manager::MessagePtr& message,
+    CANModuleInterface& can_module)
+    : BaseCommandRequest(message, can_module) {}
 
-TuneRadioRequest::~TuneRadioRequest() {
-}
+TuneRadioRequest::~TuneRadioRequest() {}
 
 void TuneRadioRequest::Execute() {
   LOG4CXX_AUTO_TRACE(logger_);
-
-
-  /*
-  Json::Value json;
-
-  json = MessageHelper::StringToValue(message_->json_message());
-  Json::Value outgoing_json;
-
-  if (validators::ValidationResult::SUCCESS !=
-      validators::TuneRadioRequestValidator::instance()->Validate(
-          json, outgoing_json)) {
-    LOG4CXX_INFO(logger_, "TuneRadioRequest validation failed!");
-    SendResponse(false, result_codes::kInvalidData,
-                 "Mobile request validation failed!");
-    return;
-  }*/
 
   Json::Value params;
 
@@ -78,8 +61,8 @@ void TuneRadioRequest::Execute() {
 }
 
 void TuneRadioRequest::OnEvent(
-    const event_engine::Event<application_manager::MessagePtr,
-    std::string>& event) {
+    const can_event_engine::Event<application_manager::MessagePtr, std::string>&
+        event) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (functional_modules::can_api::tune_radion == event.id()) {
