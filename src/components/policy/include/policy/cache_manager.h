@@ -55,7 +55,7 @@ class CacheManager : public CacheManagerInterface {
   CacheManager();
   ~CacheManager();
 
-  const policy_table::Strings& GetGroups(const PTString &app_id);
+  const policy_table::Strings& GetGroups(const PTString& app_id);
 
   /**
    * @brief Check if specified RPC for specified application
@@ -66,7 +66,7 @@ class CacheManager : public CacheManagerInterface {
    * @return CheckPermissionResult containing flag if HMI Level is allowed
    * and list of allowed params.
    */
-  virtual void CheckPermissions(const policy_table::Strings &groups,
+  virtual void CheckPermissions(const policy_table::Strings& groups,
                                 const PTString& hmi_level,
                                 const PTString& rpc,
                                 CheckPermissionResult& result);
@@ -217,13 +217,13 @@ class CacheManager : public CacheManagerInterface {
    * Gets flag updateRequired
    * @return true if update is required
    */
-  bool UpdateRequired() const;
+  virtual bool UpdateRequired() const;
 
   /**
    * @brief Saves flag updateRequired
    * @param status update status if true then update required.
    */
-  void SaveUpdateRequired(bool status);
+  virtual void SaveUpdateRequired(bool status);
 
   /**
    * @brief GetInitialAppData Retrieves data from app_policies
@@ -317,7 +317,7 @@ class CacheManager : public CacheManagerInterface {
    * @param app_id ID application
    * @return list of HMI types
    */
-  const policy_table::AppHMITypes* GetHMITypes(const std::string &app_id);
+  const policy_table::AppHMITypes* GetHMITypes(const std::string& app_id);
 
   /**
    * @brief Reset user consent for device data and applications permissions

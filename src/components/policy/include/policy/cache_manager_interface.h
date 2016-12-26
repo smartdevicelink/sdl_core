@@ -36,7 +36,7 @@
 #include <string>
 #include <vector>
 
-#include "types.h"
+#include "policy/policy_table/types.h"
 #include "policy/pt_representation.h"
 #include "utils/shared_ptr.h"
 #include "policy/usage_statistics/counter.h"
@@ -51,6 +51,8 @@ class CacheManagerInterface {
  public:
   virtual ~CacheManagerInterface() {}
 
+  virtual const policy_table::Strings& GetGroups(const PTString& app_id) = 0;
+
   /**
    * @brief Check if specified RPC for specified application
    * has permission to be executed in specified HMI Level
@@ -61,7 +63,7 @@ class CacheManagerInterface {
    * @return CheckPermissionResult containing flag if HMI Level is allowed
    * and list of allowed params.
    */
-  virtual void CheckPermissions(const PTString& app_id,
+  virtual void CheckPermissions(const policy_table::Strings& groups,
                                 const PTString& hmi_level,
                                 const PTString& rpc,
                                 CheckPermissionResult& result) = 0;
@@ -316,7 +318,8 @@ class CacheManagerInterface {
    * @param app_id ID application
    * @return list of HMI types
    */
-  virtual const policy_table::AppHMITypes* GetHMITypes(const std::string &app_id) = 0;
+  virtual const policy_table::AppHMITypes* GetHMITypes(
+      const std::string& app_id) = 0;
 
   /**
    * @brief Reset user consent for device data and applications permissions
@@ -613,13 +616,6 @@ class CacheManagerInterface {
   virtual void GetAppRequestTypes(
       const std::string& policy_app_id,
       std::vector<std::string>& request_types) const = 0;
-
-/**
-   * Gets groups list
-   * @param app_id ID application
-   * @return list of groups
-   */
-  virtual const policy_table::Strings& GetGroups(const PTString &app_id) = 0;
 
   /**
    * @brief GetCertificate allows to obtain certificate in order to
