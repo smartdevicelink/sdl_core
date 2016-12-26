@@ -39,7 +39,7 @@
 #include "application_manager/application.h"
 
 namespace Json {
-  class Value;
+class Value;
 }
 
 namespace application_manager {
@@ -54,7 +54,7 @@ class CoreService : public Service {
   /**
    * @brief CoreService class destructor
    */
-  CoreService();
+  explicit CoreService(ApplicationManager& application_manager);
 
   /**
    * @brief CoreService class destructor
@@ -118,8 +118,7 @@ class CoreService : public Service {
    * @param zone interior zone
    * @param module type
    */
-  virtual void ResetAccess(const SeatLocation& zone,
-                           const std::string& module);
+  virtual void ResetAccess(const SeatLocation& zone, const std::string& module);
 
   /**
    * Sets device as primary device
@@ -142,7 +141,7 @@ class CoreService : public Service {
    * @param dev_id ID device
    * @param zone device zone
    */
-  void SetDeviceZone(const uint32_t dev_id,const SeatLocation& zone);
+  void SetDeviceZone(const uint32_t dev_id, const SeatLocation& zone);
 
   /**
    * Gets device zone
@@ -201,7 +200,7 @@ class CoreService : public Service {
    * @return List with shared pointers to applications
    */
   virtual std::vector<ApplicationSharedPtr> GetApplications(
-    AppExtensionUID uid);
+      AppExtensionUID uid);
 
   /**
    * @brief Subscribes to notification from HMI
@@ -215,7 +214,7 @@ class CoreService : public Service {
    * @param level New HMI level of app
    */
   void ChangeNotifyHMILevel(ApplicationSharedPtr app,
-      mobile_apis::HMILevel::eType level);
+                            mobile_apis::HMILevel::eType level);
 
   /**
    * @brief Notify HMI about app changing HMI Level
@@ -224,7 +223,7 @@ class CoreService : public Service {
    * @param level New HMI level of app
    */
   void NotifyHMIAboutHMILevel(ApplicationSharedPtr app,
-      mobile_apis::HMILevel::eType level);
+                              mobile_apis::HMILevel::eType level);
 
   /**
    * Gets all allowed module types
@@ -242,6 +241,9 @@ class CoreService : public Service {
                    const std::vector<std::string>& allowed_params);
   bool IsAllowed(const std::string& name,
                  const std::vector<std::string>& allowed_params);
+
+  ApplicationManager& application_manager_;
+
   DISALLOW_COPY_AND_ASSIGN(CoreService);
 };
 
