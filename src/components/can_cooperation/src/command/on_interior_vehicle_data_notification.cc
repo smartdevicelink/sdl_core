@@ -47,12 +47,11 @@ namespace commands {
 CREATE_LOGGERPTR_GLOBAL(logger_, "OnInteriorVehicleDataNotification")
 
 OnInteriorVehicleDataNotification::OnInteriorVehicleDataNotification(
-  const application_manager::MessagePtr& message)
-  : BaseCommandNotification(message) {
-}
+    const application_manager::MessagePtr& message,
+    CANModuleInterface& can_module)
+    : BaseCommandNotification(message, can_module) {}
 
-OnInteriorVehicleDataNotification::~OnInteriorVehicleDataNotification() {
-}
+OnInteriorVehicleDataNotification::~OnInteriorVehicleDataNotification() {}
 
 void OnInteriorVehicleDataNotification::Execute() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -71,12 +70,13 @@ void OnInteriorVehicleDataNotification::Execute() {
       json[message_params::kModuleData][message_params::kModuleZone];
 
   std::vector<application_manager::ApplicationSharedPtr> applications =
-      service_->GetApplications(CANModule::instance()->GetModuleID());
+      service_->GetApplications(can_module_.GetModuleID());
 
   for (size_t i = 0; i < applications.size(); ++i) {
     CANAppExtensionPtr extension =
-      application_manager::AppExtensionPtr::static_pointer_cast<CANAppExtension>(
-        applications[i]->QueryInterface(CANModule::instance()->GetModuleID()));
+        application_manager::AppExtensionPtr::static_pointer_cast<
+            CANAppExtension>(
+            applications[i]->QueryInterface(can_module_.GetModuleID()));
     DCHECK(extension);
 
     if (extension->IsSubscibedToInteriorVehicleData(moduleDescription)) {
@@ -93,9 +93,8 @@ bool OnInteriorVehicleDataNotification::Validate() {
   application_manager::MessagePtr msg = message();
   std::string json = msg->json_message();
 
-  if (validators::ValidationResult::SUCCESS ==
-      validators::OnInteriorVehicleDataNotificationValidator::instance()->
-      Validate(json)) {
+  validators::OnInteriorVehicleDataNotificationValidator validaror;
+  if (validators::ValidationResult::SUCCESS == validaror.Validate(json)) {
     msg->set_json_message(json);
   } else {
     LOG4CXX_INFO(logger_, "Invalid notification from the vehicle!");
@@ -109,21 +108,22 @@ std::string OnInteriorVehicleDataNotification::ModuleType(
     const Json::Value& message) {
   return message.get(message_params::kModuleData,
                      Json::Value(Json::objectValue))
-      .get(message_params::kModuleType, Json::Value("")).asString();
+      .get(message_params::kModuleType, Json::Value(""))
+      .asString();
 }
 
 SeatLocation OnInteriorVehicleDataNotification::InteriorZone(
     const Json::Value& message) {
-  Json::Value zone = message.get(message_params::kModuleData,
-                                 Json::Value(Json::objectValue)).get(
-      message_params::kModuleZone, Json::Value(Json::objectValue));
+  Json::Value zone =
+      message.get(message_params::kModuleData, Json::Value(Json::objectValue))
+          .get(message_params::kModuleZone, Json::Value(Json::objectValue));
   return CreateInteriorZone(zone);
 }
 
 std::vector<std::string> OnInteriorVehicleDataNotification::ControlData(
     const Json::Value& message) {
-  Json::Value data = message.get(message_params::kModuleData,
-                                 Json::Value(Json::objectValue));
+  Json::Value data =
+      message.get(message_params::kModuleData, Json::Value(Json::objectValue));
   const char* name_control_data;
   std::string module = ModuleType(message);
   if (module == enums_value::kRadio) {
@@ -132,8 +132,8 @@ std::vector<std::string> OnInteriorVehicleDataNotification::ControlData(
   if (module == enums_value::kClimate) {
     name_control_data = message_params::kClimateControlData;
   }
-  Json::Value params = data.get(name_control_data,
-                                Json::Value(Json::objectValue));
+  Json::Value params =
+      data.get(name_control_data, Json::Value(Json::objectValue));
   return params.getMemberNames();
 }
 

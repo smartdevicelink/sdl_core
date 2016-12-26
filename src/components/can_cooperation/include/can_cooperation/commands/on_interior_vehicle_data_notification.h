@@ -49,7 +49,9 @@ class OnInteriorVehicleDataNotification : public BaseCommandNotification {
    *
    * @param message Message with notification
    **/
-  explicit OnInteriorVehicleDataNotification(const application_manager::MessagePtr& message);
+  OnInteriorVehicleDataNotification(
+      const application_manager::MessagePtr& message,
+      CANModuleInterface& can_module);
 
   /**
    * @brief Execute command
@@ -67,9 +69,9 @@ class OnInteriorVehicleDataNotification : public BaseCommandNotification {
   virtual ~OnInteriorVehicleDataNotification();
 
  protected:
-   virtual std::string ModuleType(const Json::Value& message);
-   virtual SeatLocation InteriorZone(const Json::Value& message);
-   virtual std::vector<std::string> ControlData(const Json::Value& message);
+  virtual std::string ModuleType(const Json::Value& message);
+  virtual SeatLocation InteriorZone(const Json::Value& message);
+  virtual std::vector<std::string> ControlData(const Json::Value& message);
 };
 
 }  // namespace commands
