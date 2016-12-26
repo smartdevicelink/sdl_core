@@ -114,7 +114,8 @@ SmartObject& SmartObject::operator=(const SmartObject& Other) {
 
 /*Wbool SmartObject::operator<(const SmartObject& Other) const{
 
-  return std::lexicographical_compare(m_data.map_value->begin(),m_data.map_value->end(),
+  return
+std::lexicographical_compare(m_data.map_value->begin(),m_data.map_value->end(),
     Other.m_data.map_value->begin(),Other.m_data.map_value->end());
 }*/
 

@@ -1487,8 +1487,8 @@ void Profile::UpdateValues() {
   LOG_UPDATED_VALUE(system_files_path_, kSystemFilesPathKey, kMainSection);
 
   // Plugins folder
-  ReadStringValue(&plugins_folder_, kDefaultPluginsPath, kMainSection,
-    kPluginsFolderKey);
+  ReadStringValue(
+      &plugins_folder_, kDefaultPluginsPath, kMainSection, kPluginsFolderKey);
   LOG_UPDATED_VALUE(plugins_folder_, kPluginsFolderKey, kMainSection);
   // Heartbeat timeout
   ReadUIntValue(&heart_beat_timeout_,
