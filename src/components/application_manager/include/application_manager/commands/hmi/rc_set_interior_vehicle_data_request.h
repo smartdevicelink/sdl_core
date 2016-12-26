@@ -41,8 +41,8 @@ namespace commands {
 
 class RCSetInteriorVehicleDataRequest : public RequestToHMI {
  public:
-
-  explicit RCSetInteriorVehicleDataRequest(const MessageSharedPtr& message);
+  explicit RCSetInteriorVehicleDataRequest(
+      const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   virtual ~RCSetInteriorVehicleDataRequest();
 

@@ -37,21 +37,20 @@ namespace application_manager {
 
 namespace commands {
 
-RCSetInteriorVehicleDataResponse::RCSetInteriorVehicleDataResponse(const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+RCSetInteriorVehicleDataResponse::RCSetInteriorVehicleDataResponse(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {}
 
-RCSetInteriorVehicleDataResponse::~RCSetInteriorVehicleDataResponse() {
-}
+RCSetInteriorVehicleDataResponse::~RCSetInteriorVehicleDataResponse() {}
 
 void RCSetInteriorVehicleDataResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   event_engine::Event event(hmi_apis::FunctionID::RC_SetInteriorVehicleData);
   event.set_smart_object(*message_);
-  event.raise();
+  event.raise(application_manager_.event_dispatcher());
 }
 
 }  // namespace commands
 
-} // namespace application_manager
+}  // namespace application_manager

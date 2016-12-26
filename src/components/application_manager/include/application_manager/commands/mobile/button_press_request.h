@@ -50,7 +50,8 @@ class ButtonPressRequest : public CommandRequestImpl {
   /**
    * @brief ScrollableMessageRequest class constructor
    **/
-  explicit ButtonPressRequest(const MessageSharedPtr& message);
+  explicit ButtonPressRequest(const MessageSharedPtr& message,
+                              ApplicationManager& application_manager);
 
   /**
    * @brief SliderCommand class destructor

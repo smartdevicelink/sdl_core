@@ -30,24 +30,32 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_BUTTON_PRESS_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_BUTTON_PRESS_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_PLAY_TONE_NOTIFICATION_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_PLAY_TONE_NOTIFICATION_H_
 
-#include "application_manager/commands/hmi/request_to_hmi.h"
+#include "application_manager/commands/hmi/notification_to_hmi.h"
 
 namespace application_manager {
 
 namespace commands {
 
 /**
- * @brief ButtonGetCapabilitiesRequest command class
+ * @brief OnPlayToneNotification command class
  **/
-class ButtonsButtonPressRequest : public RequestToHMI {
+class OnPlayToneNotification : public NotificationToHMI {
  public:
-  explicit ButtonsButtonPressRequest(const MessageSharedPtr& message,
-                                     ApplicationManager& application_manager);
+  /**
+   * @brief OnPlayToneNotification class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit OnPlayToneNotification(const MessageSharedPtr& message,
+                                  ApplicationManager& app_mngr);
 
-  virtual ~ButtonsButtonPressRequest();
+  /**
+   * @brief OnPlayToneNotification class destructor
+   **/
+  virtual ~OnPlayToneNotification();
 
   /**
    * @brief Execute command
@@ -55,11 +63,11 @@ class ButtonsButtonPressRequest : public RequestToHMI {
   virtual void Run();
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(ButtonsButtonPressRequest);
+  DISALLOW_COPY_AND_ASSIGN(OnPlayToneNotification);
 };
 
 }  // namespace commands
 
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_BUTTON_PRESS_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_PLAY_TONE_NOTIFICATION_H_

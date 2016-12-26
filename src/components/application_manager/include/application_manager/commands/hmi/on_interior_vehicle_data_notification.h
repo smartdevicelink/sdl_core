@@ -36,7 +36,6 @@
 #include "application_manager/commands/hmi/notification_from_hmi.h"
 #include "application_manager/application_manager_impl.h"
 
-
 namespace application_manager {
 
 namespace commands {
@@ -53,7 +52,8 @@ class OnInteriorVehicleDataNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnInteriorVehicleDataNotification(const MessageSharedPtr& message);
+  explicit OnInteriorVehicleDataNotification(
+      const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief OnInteriorVehicleDataNotification class destructor

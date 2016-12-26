@@ -32,23 +32,25 @@
  */
 
 #include "application_manager/commands/mobile/get_interior_vehicle_data_capabilities_response.h"
-#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_manager.h"
 
 namespace application_manager {
 
 namespace commands {
 
-GetInteriorVehicleDataCapabilitiesResponse::GetInteriorVehicleDataCapabilitiesResponse(const MessageSharedPtr& message)
-    : CommandResponseImpl(message) {
-}
+GetInteriorVehicleDataCapabilitiesResponse::
+    GetInteriorVehicleDataCapabilitiesResponse(
+        const MessageSharedPtr& message,
+        ApplicationManager& application_manager)
+    : CommandResponseImpl(message, application_manager) {}
 
-GetInteriorVehicleDataCapabilitiesResponse::~GetInteriorVehicleDataCapabilitiesResponse() {
-}
+GetInteriorVehicleDataCapabilitiesResponse::
+    ~GetInteriorVehicleDataCapabilitiesResponse() {}
 
 void GetInteriorVehicleDataCapabilitiesResponse::Run() {
   LOG4CXX_INFO(logger_, "ButtonPressResponse::Run");
-  
-  ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
+
+  application_manager_.SendMessageToMobile(message_);
 }
 
 }  // namespace commands

@@ -30,36 +30,24 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_BUTTON_PRESS_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_BUTTON_PRESS_REQUEST_H_
-
-#include "application_manager/commands/hmi/request_to_hmi.h"
+#include "application_manager/commands/hmi/on_play_tone_notification.h"
 
 namespace application_manager {
 
 namespace commands {
 
-/**
- * @brief ButtonGetCapabilitiesRequest command class
- **/
-class ButtonsButtonPressRequest : public RequestToHMI {
- public:
-  explicit ButtonsButtonPressRequest(const MessageSharedPtr& message,
-                                     ApplicationManager& application_manager);
+OnPlayToneNotification::OnPlayToneNotification(const MessageSharedPtr& message,
+                                               ApplicationManager& app_mngr)
+    : NotificationToHMI(message, app_mngr) {}
 
-  virtual ~ButtonsButtonPressRequest();
+OnPlayToneNotification::~OnPlayToneNotification() {}
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+void OnPlayToneNotification::Run() {
+  // LOG4CXX_AUTO_TRACE(logger_);
 
- private:
-  DISALLOW_COPY_AND_ASSIGN(ButtonsButtonPressRequest);
-};
+  SendNotification();
+}
 
 }  // namespace commands
 
 }  // namespace application_manager
-
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_BUTTON_PRESS_REQUEST_H_

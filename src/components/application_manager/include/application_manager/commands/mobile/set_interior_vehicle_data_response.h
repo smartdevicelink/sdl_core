@@ -42,8 +42,8 @@ namespace commands {
 
 class SetInteriorVehicleDataResponse : public CommandResponseImpl {
  public:
-
-  explicit SetInteriorVehicleDataResponse(const MessageSharedPtr& message);
+  explicit SetInteriorVehicleDataResponse(
+      const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   virtual ~SetInteriorVehicleDataResponse();
 
