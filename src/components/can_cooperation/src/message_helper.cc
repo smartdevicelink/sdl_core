@@ -39,27 +39,42 @@ using functional_modules::MobileFunctionID;
 namespace {
 std::map<MobileFunctionID, std::string> GenerateAPINames() {
   std::map<MobileFunctionID, std::string> result;
-  result.insert(std::make_pair<MobileFunctionID, std::string>(MobileFunctionID::BUTTON_PRESS, "ButtonPress"));
-  result.insert(std::make_pair<MobileFunctionID, std::string>(MobileFunctionID::GET_INTERIOR_VEHICLE_DATA_CAPABILITIES, "GetInteriorVehicleDataCapabilities"));
-  result.insert(std::make_pair<MobileFunctionID, std::string>(MobileFunctionID::GET_INTERIOR_VEHICLE_DATA, "GetInteriorVehicleData"));
-  result.insert(std::make_pair<MobileFunctionID, std::string>(MobileFunctionID::SET_INTERIOR_VEHICLE_DATA, "SetInteriorVehicleData"));
-  result.insert(std::make_pair<MobileFunctionID, std::string>(MobileFunctionID::ON_INTERIOR_VEHICLE_DATA, "OnInteriorVehicleData"));
-/*  result.insert(std::make_pair<MobileFunctionID, std::string>(MobileFunctionID::START_SCAN, "StartScan"));
-  result.insert(std::make_pair<MobileFunctionID, std::string>(MobileFunctionID::STOP_SCAN, "StopScan"));
-  result.insert(std::make_pair<MobileFunctionID, std::string>(MobileFunctionID::TUNE_RADIO, "TuneRadio"));
-  result.insert(std::make_pair<MobileFunctionID, std::string>(MobileFunctionID::TUNE_UP, "TuneUp"));
-  result.insert(std::make_pair<MobileFunctionID, std::string>(MobileFunctionID::TUNE_DOWN, "TuneDown"));
-  result.insert(std::make_pair<MobileFunctionID, std::string>(MobileFunctionID::ON_RADIO_DETAILS, "OnRadioDetails"));
-  result.insert(std::make_pair<MobileFunctionID, std::string>(MobileFunctionID::ON_PRESETS_CHANGED, "OnPresetsChanged"));
-  result.insert(std::make_pair<MobileFunctionID, std::string>(MobileFunctionID::CLIMATE_CONTROL_ON, "ClimateControlOn"));
-  result.insert(std::make_pair<MobileFunctionID, std::string>(MobileFunctionID::GET_SEAT_CONTROL, "GetSeatControl")); */
+  result.insert(std::make_pair<MobileFunctionID, std::string>(
+      MobileFunctionID::BUTTON_PRESS, "ButtonPress"));
+  result.insert(std::make_pair<MobileFunctionID, std::string>(
+      MobileFunctionID::GET_INTERIOR_VEHICLE_DATA_CAPABILITIES,
+      "GetInteriorVehicleDataCapabilities"));
+  result.insert(std::make_pair<MobileFunctionID, std::string>(
+      MobileFunctionID::GET_INTERIOR_VEHICLE_DATA, "GetInteriorVehicleData"));
+  result.insert(std::make_pair<MobileFunctionID, std::string>(
+      MobileFunctionID::SET_INTERIOR_VEHICLE_DATA, "SetInteriorVehicleData"));
+  result.insert(std::make_pair<MobileFunctionID, std::string>(
+      MobileFunctionID::ON_INTERIOR_VEHICLE_DATA, "OnInteriorVehicleData"));
+  /*  result.insert(std::make_pair<MobileFunctionID,
+    std::string>(MobileFunctionID::START_SCAN, "StartScan"));
+    result.insert(std::make_pair<MobileFunctionID,
+    std::string>(MobileFunctionID::STOP_SCAN, "StopScan"));
+    result.insert(std::make_pair<MobileFunctionID,
+    std::string>(MobileFunctionID::TUNE_RADIO, "TuneRadio"));
+    result.insert(std::make_pair<MobileFunctionID,
+    std::string>(MobileFunctionID::TUNE_UP, "TuneUp"));
+    result.insert(std::make_pair<MobileFunctionID,
+    std::string>(MobileFunctionID::TUNE_DOWN, "TuneDown"));
+    result.insert(std::make_pair<MobileFunctionID,
+    std::string>(MobileFunctionID::ON_RADIO_DETAILS, "OnRadioDetails"));
+    result.insert(std::make_pair<MobileFunctionID,
+    std::string>(MobileFunctionID::ON_PRESETS_CHANGED, "OnPresetsChanged"));
+    result.insert(std::make_pair<MobileFunctionID,
+    std::string>(MobileFunctionID::CLIMATE_CONTROL_ON, "ClimateControlOn"));
+    result.insert(std::make_pair<MobileFunctionID,
+    std::string>(MobileFunctionID::GET_SEAT_CONTROL, "GetSeatControl")); */
   return result;
 }
 }
 
 uint32_t MessageHelper::next_correlation_id_ = 1;
-const std::map<MobileFunctionID, std::string>
-MessageHelper::kMobileAPINames = GenerateAPINames();
+const std::map<MobileFunctionID, std::string> MessageHelper::kMobileAPINames =
+    GenerateAPINames();
 
 uint32_t MessageHelper::GetNextCANCorrelationID() {
   return next_correlation_id_++;
@@ -67,7 +82,7 @@ uint32_t MessageHelper::GetNextCANCorrelationID() {
 
 const std::string MessageHelper::GetMobileAPIName(MobileFunctionID func_id) {
   std::map<MobileFunctionID, std::string>::const_iterator it =
-    kMobileAPINames.find(func_id);
+      kMobileAPINames.find(func_id);
   if (kMobileAPINames.end() != it) {
     return it->second;
   } else {
@@ -104,19 +119,19 @@ bool IsMember(const Json::Value& value, const std::string& key) {
 // TODO(KKolodiy): after creating commands for notification from HMI
 // this validate methods may move to commands
 bool MessageHelper::ValidateDeviceInfo(const Json::Value& value) {
-  return value.isObject() && value.isMember(json_keys::kId)
-      && value[json_keys::kId].isIntegral()
-      && value.isMember(message_params::kName)
-      && value[message_params::kName].isString();
+  return value.isObject() && value.isMember(json_keys::kId) &&
+         value[json_keys::kId].isIntegral() &&
+         value.isMember(message_params::kName) &&
+         value[message_params::kName].isString();
 }
 
 bool MessageHelper::ValidateInteriorZone(const Json::Value& value) {
-  return value.isObject() && value.isMember(message_params::kCol)
-      && value[message_params::kCol].isInt()
-      && value.isMember(message_params::kRow)
-      && value[message_params::kRow].isInt()
-      && value.isMember(message_params::kLevel)
-      && value[message_params::kLevel].isInt();
+  return value.isObject() && value.isMember(message_params::kCol) &&
+         value[message_params::kCol].isInt() &&
+         value.isMember(message_params::kRow) &&
+         value[message_params::kRow].isInt() &&
+         value.isMember(message_params::kLevel) &&
+         value[message_params::kLevel].isInt();
 }
 
 }  // namespace can_cooperation
