@@ -96,7 +96,8 @@ LifeCycle::LifeCycle(const profile::Profile& profile)
     , mb_server_thread_(NULL)
     , mb_adapter_thread_(NULL)
 #endif  // MESSAGEBROKER_HMIADAPTER
-    , profile_(profile) {
+    , profile_(profile)
+    , components_started_(false) {
 }
 
 bool LifeCycle::StartComponents() {
@@ -128,11 +129,6 @@ bool LifeCycle::StartComponents() {
   hmi_handler_ = new hmi_message_handler::HMIMessageHandlerImpl(profile_);
 
   media_manager_ = new media_manager::MediaManagerImpl(*app_manager_, profile_);
-  app_manager_->set_connection_handler(connection_handler_);
-  if (!app_manager_->Init(*last_state_, media_manager_)) {
-    LOG4CXX_ERROR(logger_, "Application manager init failed.");
-    return false;
-  }
 
 #ifdef ENABLE_SECURITY
   security_manager_ = new security_manager::SecurityManagerImpl();
@@ -177,31 +173,18 @@ bool LifeCycle::StartComponents() {
 #endif  // TELEMETRY_MONITOR
   // It's important to initialise TM after setting up listener chain
   // [TM -> CH -> AM], otherwise some events from TM could arrive at nowhere
+  app_manager_->set_connection_handler(connection_handler_);
   app_manager_->set_protocol_handler(protocol_handler_);
   app_manager_->set_hmi_message_handler(hmi_handler_);
+
+  if (!app_manager_->Init(*last_state_, media_manager_)) {
+    LOG4CXX_ERROR(logger_, "Application manager init failed.");
+    return false;
+  }
 
   transport_manager_->Init(*last_state_);
   // start transport manager
   transport_manager_->Visibility(true);
-
-  components_started_ = true;
-
-  core_service_ = new application_manager::CoreService();
-
-  plugin_manager_ = functional_modules::PluginManager::instance();
-  plugin_manager_->SetServiceHandler(core_service_);
-  plugin_manager_->LoadPlugins(profile::Profile::instance()->plugins_folder());
-
-  if (!InitMessageSystem()) {
-    LOG4CXX_INFO(logger_, "InitMessageBroker failed");
-    return false;
-  }
-
-  LOG4CXX_INFO(logger_, "InitMessageBroker successful");
-
-  plugin_manager_->OnServiceStateChanged(
-    functional_modules::ServiceState::HMI_ADAPTER_INITIALIZED);
-
   return true;
 }
 
@@ -352,12 +335,6 @@ void LifeCycle::Run() {
 
 void LifeCycle::StopComponents() {
   LOG4CXX_AUTO_TRACE(logger_);
-  if (!components_started_) {
-    LOG4CXX_ERROR(logger_, "Components wasn't started");
-    return;
-  }
-
-  functional_modules::PluginManager::destroy();
 
   DCHECK_OR_RETURN_VOID(hmi_handler_);
   hmi_handler_->set_message_observer(NULL);

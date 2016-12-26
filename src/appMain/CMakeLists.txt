@@ -79,8 +79,13 @@ set(LIBRARIES
   jsoncpp
   ConfigProfile
   Resumption
-  FunctionalModule
 )
+if(REMOTE_CONTROL)
+    SET (LIBRARIES
+      ${LIBRARIES}
+      FunctionalModule
+    )
+endif(REMOTE_CONTROL)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   list(APPEND LIBRARIES pthread)
@@ -108,6 +113,10 @@ include_directories (
   ${COMPONENTS_DIR}/protocol_handler/include/
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${COMPONENTS_DIR}/application_manager/include
+
+  ${COMPONENTS_DIR}/can_cooperation/include
+  ${COMPONENTS_DIR}/rpc_base/include
+
   ${COMPONENTS_DIR}/formatters/include
   ${COMPONENTS_DIR}/transport_manager/include
   ${COMPONENTS_DIR}/security_manager/include
@@ -238,7 +247,7 @@ endif ()
 
 if (${WEB_HMI})
   if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    install( DIRECTORY ${CMAKE_HOME_DIRECTORY}/src/components/HMI/ DESTINATION bin/HMI)
+	  #install( DIRECTORY ${CMAKE_HOME_DIRECTORY}/src/components/HMI/ DESTINATION bin/HMI)
   endif ()
 elseif (${QT_HMI})
   if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
