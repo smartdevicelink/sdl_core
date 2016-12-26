@@ -38,13 +38,13 @@
 #include "functional_module/generic_module.h"
 #include "application_manager/service.h"
 #include "application_manager/message.h"
-#include "utils/singleton.h"
 
 namespace functional_modules {
 
-class PluginManager : public utils::Singleton<PluginManager>,
-  public ModuleObserver {
+class PluginManager : public ModuleObserver {
  public:
+  PluginManager();
+  ~PluginManager();
   typedef std::map<ModuleID, ModulePtr> Modules;
   int LoadPlugins(const std::string& plugin_path);
   void UnloadPlugins();
@@ -88,7 +88,7 @@ class PluginManager : public utils::Singleton<PluginManager>,
    * @param old_level Old HMILevel of app
    */
   void OnAppHMILevelChanged(application_manager::ApplicationSharedPtr app,
-    mobile_apis::HMILevel::eType old_level);
+                            mobile_apis::HMILevel::eType old_level);
 
   /**
    * @brief Checks if plugin hasn't put restrictions on app's HMI Level
@@ -97,25 +97,22 @@ class PluginManager : public utils::Singleton<PluginManager>,
    * @return false if any of the plugins returns false.
    */
   bool CanAppChangeHMILevel(application_manager::ApplicationSharedPtr app,
-    mobile_apis::HMILevel::eType new_level);
+                            mobile_apis::HMILevel::eType new_level);
 
   /**
    * Handles removing (disconnecting) device
    * @param device removed
    */
   void OnDeviceRemoved(const connection_handler::DeviceHandle& device);
+  Modules& plugins();
 
  private:
-  PluginManager();
-  ~PluginManager();
   Modules plugins_;
   std::map<ModuleID, void*> dlls_;
   std::map<MobileFunctionID, ModulePtr> mobile_subscribers_;
   std::map<HMIFunctionID, ModulePtr> hmi_subscribers_;
   application_manager::ServicePtr service_;
 
-  friend class PluginManagerTest;
-  FRIEND_BASE_SINGLETON_CLASS(PluginManager);
   DISALLOW_COPY_AND_ASSIGN(PluginManager);
 };
 
