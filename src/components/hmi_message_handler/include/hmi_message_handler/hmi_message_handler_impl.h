@@ -95,12 +95,15 @@ class HMIMessageHandlerImpl : public HMIMessageHandler,
   void OnErrorSending(MessageSharedPointer message);
   void AddHMIMessageAdapter(HMIMessageAdapter* adapter);
   void RemoveHMIMessageAdapter(HMIMessageAdapter* adapter);
+
+#ifdef SDL_REMOTE_CONTROL
   /**
    * @brief Subscribes to notification from HMI
    * @param hmi_notification string with notification name
    */
   virtual void SubscribeToHMINotification(
-      const std::string& hmi_notification);
+      const std::string& hmi_notification) OVERRIDE;
+#endif
 
   virtual const HMIMessageHandlerSettings& get_settings() const OVERRIDE;
 
