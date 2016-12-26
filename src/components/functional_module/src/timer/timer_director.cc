@@ -29,22 +29,18 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-#ifndef SRC_COMPONENTS_FUNCTIONAL_MODULE_SRC_TIMER_DIRECTOR_IMPL_H_
-#define SRC_COMPONENTS_FUNCTIONAL_MODULE_SRC_TIMER_DIRECTOR_IMPL_H_
-
-#include "functional_module/timer/timer_director.h"
 #include <typeinfo>
+#include "functional_module/timer/timer_director.h"
+#include "can_cooperation/can_module_timer.h"
 #include "utils/logger.h"
 
 namespace functional_modules {
 
-template<class T>
+template <class T>
 TimerThreadDelegate<T>::TimerThreadDelegate(ModuleTimer<T>& timer)
-  : timer_(timer), keep_running_(false) {
-}
+    : timer_(timer), keep_running_(false) {}
 
-template<class T>
+template <class T>
 void TimerThreadDelegate<T>::threadMain() {
   if (keep_running_) {
     this->exitThreadMain();
@@ -57,16 +53,15 @@ void TimerThreadDelegate<T>::threadMain() {
   while (keep_running_) {
     const size_t kMilisecsC = 1000;
     sync_primitives::ConditionalVariable::WaitStatus wait_status =
-      keep_running_cond_.WaitFor(run_lock,
-                                 timer_.period() * kMilisecsC);
-    if (sync_primitives::ConditionalVariable::kTimeout ==
-        wait_status && keep_running_) {
+        keep_running_cond_.WaitFor(run_lock, timer_.period() * kMilisecsC);
+    if (sync_primitives::ConditionalVariable::kTimeout == wait_status &&
+        keep_running_) {
       timer_.CheckTimeout();
     }
   }
 }
 
-template<class T>
+template <class T>
 void TimerThreadDelegate<T>::exitThreadMain() {
   if (keep_running_) {
     sync_primitives::AutoLock run_lock(keep_running_lock_);
@@ -75,24 +70,22 @@ void TimerThreadDelegate<T>::exitThreadMain() {
   }
 }
 
-TimerDirector::TimerDirector() {
-}
+TimerDirector::TimerDirector() {}
 
 TimerDirector::~TimerDirector() {
   UnregisterAllTimers();
 }
 
-template<class T>
+template <class T>
 void TimerDirector::RegisterTimer(ModuleTimer<T>& timer) {
   std::string type_name = typeid(timer).name();
   std::map<std::string, threads::Thread*>::iterator it =
-    timer_threads_.find(type_name);
+      timer_threads_.find(type_name);
   if (timer_threads_.end() != it) {
     //  Attempt to register timer of already existing type fail.
     return;
   }
-  TimerThreadDelegate<T>* delegate = new TimerThreadDelegate<T>(
-    timer);
+  TimerThreadDelegate<T>* delegate = new TimerThreadDelegate<T>(timer);
   threads::Thread* thread = threads::CreateThread(type_name.c_str(), delegate);
 
   const size_t kStackSize = 16384;
@@ -103,11 +96,14 @@ void TimerDirector::RegisterTimer(ModuleTimer<T>& timer) {
   }
 }
 
-template<class T>
+template void TimerDirector::RegisterTimer<can_cooperation::TrackableMessage>(
+    ModuleTimer<can_cooperation::TrackableMessage>& timer);
+
+template <class T>
 void TimerDirector::UnregisterTimer(const ModuleTimer<T>& timer) {
   std::string type_name = typeid(timer).name();
   std::map<std::string, threads::Thread*>::iterator it =
-    timer_threads_.find(type_name);
+      timer_threads_.find(type_name);
   if (timer_threads_.end() == it) {
     ///  Failed to unregister timer that was not registered
     return;
@@ -118,9 +114,14 @@ void TimerDirector::UnregisterTimer(const ModuleTimer<T>& timer) {
   timer_threads_.erase(it);
 }
 
+template void TimerDirector::UnregisterTimer<can_cooperation::TrackableMessage>(
+    const ModuleTimer<can_cooperation::TrackableMessage>& timer);
+
 void TimerDirector::UnregisterAllTimers() {
   for (std::map<std::string, threads::Thread*>::iterator it =
-         timer_threads_.begin(); timer_threads_.end() != it; ++it) {
+           timer_threads_.begin();
+       timer_threads_.end() != it;
+       ++it) {
     it->second->stop();
     delete it->second->delegate();
     DeleteThread(it->second);
@@ -129,5 +130,3 @@ void TimerDirector::UnregisterAllTimers() {
 }
 
 }  //  namespace functional_modules
-
-#endif  //  SRC_COMPONENTS_FUNCTIONAL_MODULE_SRC_TIMER_DIRECTOR_IMPL_H_
