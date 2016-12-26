@@ -1,15 +1,12 @@
-set(target CANCooperation)
-set(library_name ${CMAKE_SHARED_LIBRARY_PREFIX}${target}${CMAKE_SHARED_LIBRARY_SUFFIX})
+set(target "CANCooperation")
 set(install_destination ${CMAKE_BINARY_DIR}/bin/plugins)
-set(copy_destination ${CMAKE_BINARY_DIR}/src/appMain/plugins)
-
 if (ENABLE_GCOV)
   set(GCOV_FLAGS "-ftest-coverage -fprofile-arcs")
 else()
   set(GCOV_FLAGS "")
 endif()
 
-set(CMAKE_CXX_FLAGS "-fPIC -std=gnu++0x -Wall -Werror ${GCOV_FLAGS}")
+set(CMAKE_CXX_FLAGS "-fPIC -std=gnu++0x -Wall -Wno-deprecated-declarations -Werror ${GCOV_FLAGS}")
 
 if (CMAKE_BUILD_TYPE)
   if (${CMAKE_BUILD_TYPE} STREQUAL "Release")
@@ -22,11 +19,21 @@ if (CMAKE_BUILD_TYPE)
 endif()
 
 include_directories (
-  ./include/
-  ../include/
-  ../functional_module/include/
-  ../application_manager/include
-  ../connection_handler/include/
+  ${COMPONENTS_DIR}/include/
+  ${COMPONENTS_DIR}/application_manager/include
+  ${COMPONENTS_DIR}/can_cooperation/include/
+  ${COMPONENTS_DIR}/connection_handler/include/
+  ${COMPONENTS_DIR}/functional_module/include/
+  ${COMPONENTS_DIR}/config_profile/include/
+
+  ${COMPONENTS_DIR}/hmi_message_handler/include/
+  ${COMPONENTS_DIR}/formatters/include/
+  ${COMPONENTS_DIR}/policy/include/
+  ${COMPONENTS_DIR}/rpc_base/include/
+  ${COMPONENTS_DIR}/application_manager/test/include/
+
+  ${COMPONENTS_DIR}/smart_objects/include/
+  ${COMPONENTS_DIR}/utils/include/
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${LOG4CXX_INCLUDE_DIRECTORY}
   ${CMAKE_BINARY_DIR}/src/components/
@@ -88,7 +95,6 @@ set (SOURCES
 set (LIBRARIES
     jsoncpp
     FunctionalModule
-    ApplicationManager
     Utils
     ConfigProfile
 )
@@ -97,7 +103,7 @@ add_library(${target} SHARED ${SOURCES})
 target_link_libraries(${target} ${LIBRARIES} )
 
 if(ENABLE_LOG)
-  target_link_libraries("CANCooperation" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
+  target_link_libraries(${target} log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
 endif()
 
 

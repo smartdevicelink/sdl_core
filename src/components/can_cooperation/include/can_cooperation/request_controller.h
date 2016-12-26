@@ -33,23 +33,29 @@
 #ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_REQUEST_CONTROLLER_H_
 #define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_REQUEST_CONTROLLER_H_
 
-#include "can_cooperation/commands/command.h"
-#include "can_cooperation/can_module_timer.h"
-
 #include <map>
 
+#include "can_cooperation/commands/command.h"
+#include "can_cooperation/can_module_timer.h"
+#include "functional_module/timer/timer_director.h"
+
 namespace can_cooperation {
+
+namespace commands {
+class Command;
+}
+
 namespace request_controller {
 
 typedef utils::SharedPtr<commands::Command> MobileRequestPtr;
-typedef uint32_t  correlation_id;
+typedef uint32_t correlation_id;
 
 /**
  * @brief RequestController class is used to manage mobile requests lifetime.
  */
-class RequestController : public functional_modules::TimerObserver<TrackableMessage> {
+class RequestController
+    : public functional_modules::TimerObserver<TrackableMessage> {
  public:
-
   /**
   * @brief Class constructor
   *
@@ -67,7 +73,7 @@ class RequestController : public functional_modules::TimerObserver<TrackableMess
    * @param mobile_correlation_id mobile request correlation id
    * @param command pointer to request created in mobile factory
    */
-  void AddRequest(const uint32_t& mobile_correlation_id,
+  void AddRequest(const uint32_t mobile_correlation_id,
                   MobileRequestPtr request);
 
   /**
@@ -83,6 +89,7 @@ class RequestController : public functional_modules::TimerObserver<TrackableMess
 
   std::map<correlation_id, MobileRequestPtr> mobile_request_list_;
   functional_modules::ModuleTimer<TrackableMessage> timer_;
+  functional_modules::TimerDirector time_director_;
 };
 
 }  // namespace request_controller

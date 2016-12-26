@@ -57,6 +57,7 @@ class CANTCPConnection : public CANConnection {
   ~CANTCPConnection();
   ConnectionState SendMessage(const CANMessage& message);
   ConnectionState ReadMessage(CANMessage* message);
+
  private:
   ConnectionState OpenConnection();
   ConnectionState CloseConnection();

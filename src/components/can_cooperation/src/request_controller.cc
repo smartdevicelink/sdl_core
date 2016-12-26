@@ -33,7 +33,6 @@
 #include "can_cooperation/request_controller.h"
 #include "json/json.h"
 #include "utils/logger.h"
-#include "functional_module/timer/timer_director_impl.h"
 #include "functional_module/settings.h"
 
 namespace can_cooperation {
@@ -44,20 +43,20 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "CANRequestController")
 RequestController::RequestController() {
   functional_modules::TimeUnit timeout_seconds = 100;
   functional_modules::Settings settings;
-  settings.ReadParameter("Remote Control", "timeout_period_seconds",
-                         &timeout_seconds);
+  settings.ReadParameter(
+      "Remote Control", "timeout_period_seconds", &timeout_seconds);
   timer_.set_period(timeout_seconds);
   LOG4CXX_DEBUG(logger_, "Timeout is set to " << timeout_seconds);
   timer_.AddObserver(this);
-  functional_modules::TimerDirector::instance()->RegisterTimer(timer_);
+  time_director_.RegisterTimer(timer_);
 }
 
 RequestController::~RequestController() {
-  functional_modules::TimerDirector::instance()->UnregisterTimer(timer_);
+  time_director_.UnregisterTimer(timer_);
   timer_.RemoveObserver(this);
 }
 
-void RequestController::AddRequest(const uint32_t& mobile_correlation_id,
+void RequestController::AddRequest(const uint32_t mobile_correlation_id,
                                    MobileRequestPtr request) {
   // TODO(VS) Research and fix be problem with overlap correlation ids from two
   // different apllications(on two different mobile devices)
@@ -74,7 +73,7 @@ void RequestController::DeleteRequest(const uint32_t& mobile_correlation_id) {
 
 void RequestController::OnTimeoutTriggered(const TrackableMessage& expired) {
   std::map<correlation_id, MobileRequestPtr>::iterator it =
-    mobile_request_list_.find(expired.correlation_id());
+      mobile_request_list_.find(expired.correlation_id());
   if (mobile_request_list_.end() == it) {
     // no corresponding request found, error.
     return;
