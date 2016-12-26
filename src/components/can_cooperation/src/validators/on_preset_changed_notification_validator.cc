@@ -62,10 +62,9 @@ ValidationResult OnPresetChangedNotificationValidator::Validate(
 
   Json::Value outgoing_json;
 
-  ValidationResult result = ValidateSimpleValues(json,
-                                                 outgoing_json);
+  ValidationResult result = ValidateSimpleValues(json, outgoing_json);
 
-  if  (ValidationResult::SUCCESS == result) {
+  if (ValidationResult::SUCCESS == result) {
     json_string = MessageHelper::ValueToString(outgoing_json);
   }
 
@@ -75,4 +74,3 @@ ValidationResult OnPresetChangedNotificationValidator::Validate(
 }  // namespace valdiators
 
 }  // namespace can_cooperation
-

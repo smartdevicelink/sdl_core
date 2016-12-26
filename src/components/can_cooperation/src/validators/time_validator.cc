@@ -39,73 +39,71 @@ namespace validators {
 
 using namespace message_params;
 
-
 TimeValidator::TimeValidator() {
-/*  // name="hours"
-  hours_[kType] = ValueType::INT;
-  hours_[kMinValue] = 0;
-  hours_[kMaxValue] = 23;
-  hours_[kArray] = 0;
-  hours_[kMandatory] = 0;
+  /*  // name="hours"
+    hours_[kType] = ValueType::INT;
+    hours_[kMinValue] = 0;
+    hours_[kMaxValue] = 23;
+    hours_[kArray] = 0;
+    hours_[kMandatory] = 0;
 
-  // name="minutes"
-  minutes_[kType] = ValueType::INT;
-  minutes_[kMinValue] = 0;
-  minutes_[kMaxValue] = 59;
-  minutes_[kArray] = 0;
-  minutes_[kMandatory] = 0;
+    // name="minutes"
+    minutes_[kType] = ValueType::INT;
+    minutes_[kMinValue] = 0;
+    minutes_[kMaxValue] = 59;
+    minutes_[kArray] = 0;
+    minutes_[kMandatory] = 0;
 
-  // name="seconds"
-  seconds_[kType] = ValueType::INT;
-  seconds_[kMinValue] = 0;
-  seconds_[kMaxValue] = 59;
-  seconds_[kArray] = 0;
-  seconds_[kMandatory] = 0;
+    // name="seconds"
+    seconds_[kType] = ValueType::INT;
+    seconds_[kMinValue] = 0;
+    seconds_[kMaxValue] = 59;
+    seconds_[kArray] = 0;
+    seconds_[kMandatory] = 0;
 
-  // name="year"
-  year_[kType] = ValueType::INT;
-  year_[kMinValue] = 0;
-  year_[kMaxValue] = 3000;
-  year_[kArray] = 0;
-  year_[kMandatory] = 0;
+    // name="year"
+    year_[kType] = ValueType::INT;
+    year_[kMinValue] = 0;
+    year_[kMaxValue] = 3000;
+    year_[kArray] = 0;
+    year_[kMandatory] = 0;
 
-  // name="month"
-  month_[kType] = ValueType::INT;
-  month_[kMinValue] = 1;
-  month_[kMaxValue] = 12;
-  month_[kArray] = 0;
-  month_[kMandatory] = 0;
+    // name="month"
+    month_[kType] = ValueType::INT;
+    month_[kMinValue] = 1;
+    month_[kMaxValue] = 12;
+    month_[kArray] = 0;
+    month_[kMandatory] = 0;
 
-  // name="day"
-  day_[kType] = ValueType::INT;
-  day_[kMinValue] = 1;
-  day_[kMaxValue] = 31;
-  day_[kArray] = 0;
-  day_[kMandatory] = 0;
+    // name="day"
+    day_[kType] = ValueType::INT;
+    day_[kMinValue] = 1;
+    day_[kMaxValue] = 31;
+    day_[kArray] = 0;
+    day_[kMandatory] = 0;
 
-  // name="TZD"
-  tzd_[kType] = ValueType::STRING; // TODO(VS): Research why it's string
-  tzd_[kMinLength] = 0;
-  tzd_[kMaxLength] = 100;
-  tzd_[kArray] = 0;
-  tzd_[kMandatory] = 0;
+    // name="TZD"
+    tzd_[kType] = ValueType::STRING; // TODO(VS): Research why it's string
+    tzd_[kMinLength] = 0;
+    tzd_[kMaxLength] = 100;
+    tzd_[kArray] = 0;
+    tzd_[kMandatory] = 0;
 
 
-  validation_scope_map_[kHours] = &hours_;
-  validation_scope_map_[kMinutes] =  &minutes_;
-  validation_scope_map_[kSeconds] = &seconds_;
-  validation_scope_map_[kYear] = &year_;
-  validation_scope_map_[kMonth] = &month_;
-  validation_scope_map_[kDay] = &day_;
-  validation_scope_map_[kTZD] = &tzd_;*/
+    validation_scope_map_[kHours] = &hours_;
+    validation_scope_map_[kMinutes] =  &minutes_;
+    validation_scope_map_[kSeconds] = &seconds_;
+    validation_scope_map_[kYear] = &year_;
+    validation_scope_map_[kMonth] = &month_;
+    validation_scope_map_[kDay] = &day_;
+    validation_scope_map_[kTZD] = &tzd_;*/
 }
 
 ValidationResult TimeValidator::Validate(const Json::Value& json,
-                                                 Json::Value& outgoing_json) {
+                                         Json::Value& outgoing_json) {
   return ValidateSimpleValues(json, outgoing_json);
 }
 
 }  // namespace valdiators
 
 }  // namespace can_cooperation
-

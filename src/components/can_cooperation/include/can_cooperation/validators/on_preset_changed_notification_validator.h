@@ -43,10 +43,10 @@ namespace validators {
 /**
  * @brief OnPresetChangedNotificationValidator class
  */
-class OnPresetChangedNotificationValidator : public Validator,
-                  public utils::Singleton<OnPresetChangedNotificationValidator> {
+class OnPresetChangedNotificationValidator
+    : public Validator,
+      public utils::Singleton<OnPresetChangedNotificationValidator> {
  public:
-
   /**
    * @brief Validate json with message params
    *
@@ -60,7 +60,7 @@ class OnPresetChangedNotificationValidator : public Validator,
   DISALLOW_COPY_AND_ASSIGN(OnPresetChangedNotificationValidator);
   FRIEND_BASE_SINGLETON_CLASS(OnPresetChangedNotificationValidator);
   OnPresetChangedNotificationValidator();
-  ~OnPresetChangedNotificationValidator() {};
+  ~OnPresetChangedNotificationValidator(){};
 
   std::map<int, int> custom_presets_;
 };
