@@ -44,22 +44,19 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "SetInteriorVehicleDataRequestValidator")
 using namespace message_params;
 
 SetInteriorVehicleDataRequestValidator::
-SetInteriorVehicleDataRequestValidator() {
-};
+    SetInteriorVehicleDataRequestValidator() {}
 
 ValidationResult SetInteriorVehicleDataRequestValidator::Validate(
-                                                   const Json::Value& json,
-                                                   Json::Value& outgoing_json) {
+    const Json::Value& json, Json::Value& outgoing_json) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   ValidationResult result;
-
+  ModuleDataValidator validator;
   if (IsMember(json, kModuleData)) {
-    result = ModuleDataValidator::instance()->
-        Validate(json[kModuleData], outgoing_json[kModuleData]);
+    result = validator.Validate(json[kModuleData], outgoing_json[kModuleData]);
   } else {
     result = ValidationResult::INVALID_DATA;
-    LOG4CXX_ERROR(logger_, "Mandatory param " <<kModuleData <<" missing!" );
+    LOG4CXX_ERROR(logger_, "Mandatory param " << kModuleData << " missing!");
   }
 
   return result;
@@ -68,4 +65,3 @@ ValidationResult SetInteriorVehicleDataRequestValidator::Validate(
 }  // namespace valdiators
 
 }  // namespace can_cooperation
-

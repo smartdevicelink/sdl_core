@@ -44,7 +44,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "GetInteriorVehicleDataResponseValidator")
 using namespace message_params;
 
 GetInteriorVehicleDataResponseValidator::
-GetInteriorVehicleDataResponseValidator() {
+    GetInteriorVehicleDataResponseValidator() {
   // name="moduleType"
   is_subscribed_[ValidationParams::TYPE] = ValueType::BOOL;
   is_subscribed_[ValidationParams::ARRAY] = 0;
@@ -54,8 +54,7 @@ GetInteriorVehicleDataResponseValidator() {
 };
 
 ValidationResult GetInteriorVehicleDataResponseValidator::Validate(
-                                                   const Json::Value& json,
-                                                   Json::Value& outgoing_json) {
+    const Json::Value& json, Json::Value& outgoing_json) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   ValidationResult result = ValidateSimpleValues(json, outgoing_json);
@@ -64,12 +63,12 @@ ValidationResult GetInteriorVehicleDataResponseValidator::Validate(
     return result;
   }
 
+  ModuleDataValidator validator;
   if (IsMember(json, kModuleData)) {
-    result = ModuleDataValidator::instance()->
-        Validate(json[kModuleData], outgoing_json[kModuleData]);
+    result = validator.Validate(json[kModuleData], outgoing_json[kModuleData]);
   } else {
     result = ValidationResult::INVALID_DATA;
-    LOG4CXX_ERROR(logger_, "Mandatory param " <<kModuleData <<" missing!" );
+    LOG4CXX_ERROR(logger_, "Mandatory param " << kModuleData << " missing!");
   }
 
   return result;
@@ -78,4 +77,3 @@ ValidationResult GetInteriorVehicleDataResponseValidator::Validate(
 }  // namespace valdiators
 
 }  // namespace can_cooperation
-

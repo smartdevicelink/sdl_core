@@ -43,23 +43,21 @@ namespace validators {
 /**
  * @brief OnInteriorVehicleDataNotificationValidator class
  */
-class OnInteriorVehicleDataNotificationValidator : public Validator,
-                  public utils::Singleton<OnInteriorVehicleDataNotificationValidator> {
+class OnInteriorVehicleDataNotificationValidator : public Validator {
  public:
+  OnInteriorVehicleDataNotificationValidator();
 
   /**
-   * @brief Validate json with message params
-   *
-   * @param json_string string with message params(fake params will be cut off)
-   *
-   * @return validation result
-   */
+ * @brief Validate json with message params
+ *
+ * @param json_string string with message params(fake params will be cut off)
+ *
+ * @return validation result
+ */
   ValidationResult Validate(std::string& json_string);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(OnInteriorVehicleDataNotificationValidator);
-  FRIEND_BASE_SINGLETON_CLASS(OnInteriorVehicleDataNotificationValidator);
-  OnInteriorVehicleDataNotificationValidator();
 };
 
 }  // namespace valdiators

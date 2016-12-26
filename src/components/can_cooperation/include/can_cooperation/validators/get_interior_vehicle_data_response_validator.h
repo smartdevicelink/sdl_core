@@ -43,26 +43,24 @@ namespace validators {
 /**
  * @brief GetInteriorVehicleDataResponseValidator class
  */
-class GetInteriorVehicleDataResponseValidator : public Validator,
-   public utils::Singleton<GetInteriorVehicleDataResponseValidator> {
+class GetInteriorVehicleDataResponseValidator : public Validator {
  public:
+  GetInteriorVehicleDataResponseValidator();
+  ~GetInteriorVehicleDataResponseValidator() {}
 
   /**
-   * @brief Validate json with message params
-   *
-   * @param json_string string with message params(fake params will be cut off)
-   * @param outgoing_json outgoing json
-   *
-   * @return validation result
-   */
+ * @brief Validate json with message params
+ *
+ * @param json_string string with message params(fake params will be cut off)
+ * @param outgoing_json outgoing json
+ *
+ * @return validation result
+ */
   ValidationResult Validate(const Json::Value& json,
                             Json::Value& outgoing_json);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(GetInteriorVehicleDataResponseValidator);
-  FRIEND_BASE_SINGLETON_CLASS(GetInteriorVehicleDataResponseValidator);
-  GetInteriorVehicleDataResponseValidator();
-  ~GetInteriorVehicleDataResponseValidator() {};
 
   ValidationScope is_subscribed_;
 };
