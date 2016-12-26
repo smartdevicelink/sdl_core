@@ -191,6 +191,9 @@ TEST_F(PerformAudioPassThruRequestTest,
   (*response_msg_tts)[am::strings::msg_params][am::strings::cmd_id] = kCmdId;
   am::event_engine::Event event_tts(hmi_apis::FunctionID::TTS_Speak);
   event_tts.set_smart_object(*response_msg_tts);
+  ON_CALL(mock_message_helper_,
+          HMIToMobileResult(hmi_apis::Common_Result::SUCCESS))
+      .WillByDefault(Return(mobile_apis::Result::SUCCESS));
   command->on_event(event_tts);
 
   MessageSharedPtr ui_command_result;

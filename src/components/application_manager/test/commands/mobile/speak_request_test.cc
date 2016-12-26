@@ -76,16 +76,14 @@ using ::test::components::application_manager_test::MockApplication;
 class SpeakRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
   SpeakRequestTest()
-      : mock_message_helper_(*MockMessageHelper::message_helper_mock())
+      : mock_message_helper_(*am::MockMessageHelper::message_helper_mock())
       , request_(CreateMessage(smart_objects::SmartType_Map))
-      , response_(CreateMessage(smart_objects::SmartType_Map)) {}
-
-  void SetUp() OVERRIDE {
-    Mock::VerifyAndClearExpectations(&mock_message_helper_);
+      , response_(CreateMessage(smart_objects::SmartType_Map)) {
+    testing::Mock::VerifyAndClearExpectations(&mock_message_helper_);
   }
 
-  void TearDown() OVERRIDE {
-    Mock::VerifyAndClearExpectations(&mock_message_helper_);
+  ~SpeakRequestTest() {
+    testing::Mock::VerifyAndClearExpectations(&mock_message_helper_);
   }
 
   MessageSharedPtr ManageResponse() {
@@ -134,8 +132,7 @@ class SpeakRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
               static_cast<int32_t>(mobile_response));
   }
 
- protected:
-  MockMessageHelper& mock_message_helper_;
+  am::MockMessageHelper& mock_message_helper_;
 
  private:
   MessageSharedPtr request_;
@@ -158,9 +155,9 @@ TEST_F(SpeakRequestTest, OnEvent_SUCCESS_Expect_true) {
 
   MessageSharedPtr response_to_mobile;
 
-  EXPECT_CALL(mock_message_helper_, HMIToMobileResult(_))
+  EXPECT_CALL(mock_message_helper_,
+              HMIToMobileResult(hmi_apis::Common_Result::SUCCESS))
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
-
   EXPECT_CALL(
       app_mngr_,
       ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))

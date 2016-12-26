@@ -78,7 +78,7 @@ struct NotificationData {
 
 template <class NotificationDataT>
 class OnButtonNotificationCommandsTest
-    : public CommandsTest<CommandsTestMocks::kIsNice>,
+    : public CommandsTest<CommandsTestMocks::kNotNice>,
       public NotificationDataT {};
 
 typedef Types<NotificationData<commands::mobile::OnButtonEventNotification,
@@ -151,6 +151,9 @@ TYPED_TEST(OnButtonNotificationCommandsTest,
 
   SharedPtr<Notification> command(
       this->template CreateCommand<Notification>(notification_msg));
+
+  typename TestFixture::MockAppPtr mock_app = this->CreateMockApp();
+  EXPECT_CALL(this->app_mngr_, application(kAppId)).WillOnce(Return(mock_app));
 
   EXPECT_CALL(this->app_mngr_, SendMessageToMobile(_, _)).Times(0);
 
@@ -318,6 +321,7 @@ TYPED_TEST(OnButtonNotificationCommandsTest, Run_SUCCESS) {
   MessageSharedPtr notification_msg(
       this->CreateMessage(smart_objects::SmartType_Map));
 
+  (*notification_msg)[am::strings::msg_params][am::strings::app_id] = kAppId;
   (*notification_msg)[am::strings::msg_params][am::hmi_response::button_name] =
       kButtonName;
 
@@ -330,6 +334,8 @@ TYPED_TEST(OnButtonNotificationCommandsTest, Run_SUCCESS) {
 
   EXPECT_CALL(*mock_app, hmi_level())
       .WillRepeatedly(Return(mobile_apis::HMILevel::HMI_FULL));
+
+  ON_CALL(*mock_app, IsFullscreen()).WillByDefault(Return(true));
 
   EXPECT_CALL(this->app_mngr_, applications_by_button(kButtonName))
       .WillOnce(Return(subscribed_apps_list));
