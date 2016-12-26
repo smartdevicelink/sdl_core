@@ -39,10 +39,8 @@ namespace can_cooperation {
 
 class MockCANConnection : public CANConnection {
  public:
-  MOCK_METHOD1(SendMessage,
-               ConnectionState(const CANMessage& message));
-  MOCK_METHOD1(ReadMessage,
-               ConnectionState(CANMessage* message));
+  MOCK_METHOD1(SendMessage, ConnectionState(const CANMessage& message));
+  MOCK_METHOD1(ReadMessage, ConnectionState(CANMessage* message));
 };
 
 class MockCANConnectionObserver : public CANConnectionObserver {

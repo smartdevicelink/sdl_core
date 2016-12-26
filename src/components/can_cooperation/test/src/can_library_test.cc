@@ -74,13 +74,16 @@ TEST(CanLibraryTest, Load) {
   MockService* service = new MockService();
   module->set_service(service);
   std::vector<application_manager::ApplicationSharedPtr> apps;
-  EXPECT_CALL(*service, GetApplications(module->GetModuleID())).Times(1).WillOnce(Return(apps));
+  EXPECT_CALL(*service, GetApplications(module->GetModuleID()))
+      .Times(1)
+      .WillOnce(Return(apps));
 
   //  in order for all sub-threads to start before shutting them down
-  //  The logic conditions must be chosen to insure that the "signal" is executed if the "wait" is ever processed.
+  //  The logic conditions must be chosen to insure that the "signal" is
+  //  executed if the "wait" is ever processed.
   //  (see http://www.yolinux.com/TUTORIALS/LinuxTutorialPosixThreads.html)
   sleep(3);
-  CANModule::destroy();
+  // CANModule::destroy();
   int ret = dlclose(handle);
   EXPECT_FALSE(ret);
   EXPECT_FALSE(IsError(dlerror()));

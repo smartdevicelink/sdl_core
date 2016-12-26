@@ -36,11 +36,13 @@
 namespace can_cooperation {
 
 TEST(VehicleDataSubscription, CompareSuccess) {
-  std::string json_str1 = "{\"jsonrpc\": \"2.0\", \"method\": \"RC.OnInteriorVehicleData\",\
+  std::string json_str1 =
+      "{\"jsonrpc\": \"2.0\", \"method\": \"RC.OnInteriorVehicleData\",\
                         \"params\": {\"moduleData\": {\"moduleType\": \"CLIMATE\",\
                         \"moduleZone\":  {\"col\": 0,\"row\": 0,\"level\": 0,\"colspan\": 2,\
                         \"rowspan\": 2, \"levelspan\": 1} }}}";
-  std::string json_str2 = "{\"method\": \"RC.OnInteriorVehicleData\",\
+  std::string json_str2 =
+      "{\"method\": \"RC.OnInteriorVehicleData\",\
                         \"params\": {\"moduleData\": {\
                         \"moduleZone\":  {\"col\": 0,\"row\": 0,\"level\": 0,\"colspan\": 2,\
                         \"rowspan\": 2, \"levelspan\": 1}, \"moduleType\": \"CLIMATE\" }},\
@@ -62,11 +64,13 @@ TEST(VehicleDataSubscription, CompareSuccess) {
   subscribed.insert(json1["params"]["moduleData"]);
   subscribed.insert(json2["params"]["moduleData"]);
 
-  ASSERT_FALSE(subscribed.end() == subscribed.find(json2["params"]["moduleData"]));
+  ASSERT_FALSE(subscribed.end() ==
+               subscribed.find(json2["params"]["moduleData"]));
 }
 
 TEST(VehicleDataSubscription, CompareNull) {
-  std::string json_str1 = "{\"jsonrpc\": \"2.0\", \"method\": \"RC.OnInteriorVehicleData\",\
+  std::string json_str1 =
+      "{\"jsonrpc\": \"2.0\", \"method\": \"RC.OnInteriorVehicleData\",\
                         \"params\": {\"moduleData\": {\"moduleType\": \"CLIMATE\",\
                         \"moduleZone\":  {\"col\": 0,\"row\": 0,\"level\": 0,\"colspan\": 2,\
                         \"rowspan\": 2, \"levelspan\": 1} }}}";
@@ -81,7 +85,8 @@ TEST(VehicleDataSubscription, CompareNull) {
 }
 
 TEST(VehicleDataSubscription, CompareDifferentTypes) {
-  std::string json_str1 = "{\"jsonrpc\": \"2.0\", \"method\": \"RC.OnInteriorVehicleData\",\
+  std::string json_str1 =
+      "{\"jsonrpc\": \"2.0\", \"method\": \"RC.OnInteriorVehicleData\",\
                         \"params\": {\"moduleData\": {\"moduleType\": \"CLIMATE\",\
                         \"moduleZone\":  {\"col\": 0,\"row\": 0,\"level\": 0,\"colspan\": 2,\
                         \"rowspan\": 2, \"levelspan\": 1} }}}";
@@ -101,11 +106,13 @@ TEST(VehicleDataSubscription, CompareDifferentTypes) {
 }
 
 TEST(VehicleDataSubscription, CompareDifferentNesting) {
-  std::string json_str1 = "{\"jsonrpc\": \"2.0\", \"method\": \"RC.OnInteriorVehicleData\",\
+  std::string json_str1 =
+      "{\"jsonrpc\": \"2.0\", \"method\": \"RC.OnInteriorVehicleData\",\
                         \"params\": {\"moduleData\": {\"moduleType\": \"CLIMATE\",\
                         \"moduleZone\":  {\"col\": 0,\"row\": 0,\"level\": 0,\"colspan\": 2,\
                         \"rowspan\": 2, \"levelspan\": 1} }}}";
-  std::string json_str2 = "{\"moduleData\": {\"moduleType\": \"CLIMATE\",\
+  std::string json_str2 =
+      "{\"moduleData\": {\"moduleType\": \"CLIMATE\",\
                         \"moduleZone\":  {\"col\": 0,\"row\": 0,\"level\": 0,\"colspan\": 2,\
                         \"rowspan\": 2, \"levelspan\": 1} }}";
 
@@ -122,8 +129,8 @@ TEST(VehicleDataSubscription, CompareModuleDesciption) {
   Json::Value json1;
   json1["moduleDescription"] = Json::Value(Json::ValueType::objectValue);
   json1["moduleDescription"]["moduleType"] = "RADIO";
-  json1["moduleDescription"]["moduleZone"] = Json::Value(
-    Json::ValueType::objectValue);
+  json1["moduleDescription"]["moduleZone"] =
+      Json::Value(Json::ValueType::objectValue);
   json1["moduleDescription"]["moduleZone"]["col"] = 0;
   json1["moduleDescription"]["moduleZone"]["row"] = 0;
   json1["moduleDescription"]["moduleZone"]["level"] = 0;
@@ -133,8 +140,8 @@ TEST(VehicleDataSubscription, CompareModuleDesciption) {
 
   Json::Value json2;
   json2["moduleData"] = Json::Value(Json::ValueType::objectValue);
-  json2["moduleData"]["radioControlData"] = Json::Value(
-    Json::ValueType::objectValue);
+  json2["moduleData"]["radioControlData"] =
+      Json::Value(Json::ValueType::objectValue);
   json2["moduleData"]["moduleZone"] = Json::Value(Json::ValueType::objectValue);
   json2["moduleData"]["moduleZone"]["colspan"] = 2;
   json2["moduleData"]["moduleZone"]["rowspan"] = 2;
