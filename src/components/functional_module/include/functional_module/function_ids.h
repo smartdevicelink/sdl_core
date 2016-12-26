@@ -33,21 +33,20 @@
 #ifndef SRC_COMPONENTS_FUNCTINAL_MODULE_INCLUDE_FUNCTIONAL_MODULE_FUNCTION_IDS_H_
 #define SRC_COMPONENTS_FUNCTINAL_MODULE_INCLUDE_FUNCTIONAL_MODULE_FUNCTION_IDS_H_
 
-
 namespace functional_modules {
 
 enum MobileFunctionID {
   // Reverse SDL functions ids
-/*  GRANT_ACCESS = 100001,
-  START_SCAN = 100003,
-  STOP_SCAN = 100004,
-  TUNE_RADIO = 100005,
-  TUNE_UP = 100006,
-  TUNE_DOWN = 100007,
-  ON_RADIO_DETAILS = 100009,
-  ON_PRESETS_CHANGED = 100010,
-  CLIMATE_CONTROL_ON = 100011,
-  GET_SEAT_CONTROL = 100012,*/
+  /*  GRANT_ACCESS = 100001,
+    START_SCAN = 100003,
+    STOP_SCAN = 100004,
+    TUNE_RADIO = 100005,
+    TUNE_UP = 100006,
+    TUNE_DOWN = 100007,
+    ON_RADIO_DETAILS = 100009,
+    ON_PRESETS_CHANGED = 100010,
+    CLIMATE_CONTROL_ON = 100011,
+    GET_SEAT_CONTROL = 100012,*/
   BUTTON_PRESS = 100015,
   GET_INTERIOR_VEHICLE_DATA_CAPABILITIES = 100016,
   GET_INTERIOR_VEHICLE_DATA = 100017,
@@ -56,19 +55,19 @@ enum MobileFunctionID {
 };
 
 namespace hmi_api {
-  const char get_interior_vehicle_data_capabilities[] =
-                               "RC.GetInteriorVehicleDataCapabilities";
-  const char get_interior_vehicle_data[] = "RC.GetInteriorVehicleData";
-  const char set_interior_vehicle_data[] = "RC.SetInteriorVehicleData";
-  const char on_interior_vehicle_data[]  = "RC.OnInteriorVehicleData";
-  const char button_press[]              = "Buttons.ButtonPress";
+const char get_interior_vehicle_data_capabilities[] =
+    "RC.GetInteriorVehicleDataCapabilities";
+const char get_interior_vehicle_data[] = "RC.GetInteriorVehicleData";
+const char set_interior_vehicle_data[] = "RC.SetInteriorVehicleData";
+const char on_interior_vehicle_data[] = "RC.OnInteriorVehicleData";
+const char button_press[] = "Buttons.ButtonPress";
 
-  const char get_user_consent[]          = "RC.GetInteriorVehicleDataConsent";
-  const char on_reverse_apps_allowing[]  = "VehicleInfo.OnReverseAppsAllowing";
-  const char on_app_deactivated[]        = "BasicCommunication.OnAppDeactivated";
-  const char sdl_activate_app[]          = "SDL.ActivateApp";
-  const char on_device_rank_changed[]    = "RC.OnDeviceRankChanged";
-  const char on_device_location_changed[] = "RC.OnDeviceLocationChanged";
+const char get_user_consent[] = "RC.GetInteriorVehicleDataConsent";
+const char on_reverse_apps_allowing[] = "VehicleInfo.OnReverseAppsAllowing";
+const char on_app_deactivated[] = "BasicCommunication.OnAppDeactivated";
+const char sdl_activate_app[] = "SDL.ActivateApp";
+const char on_device_rank_changed[] = "RC.OnDeviceRankChanged";
+const char on_device_location_changed[] = "RC.OnDeviceLocationChanged";
 }
 
 /*namespace can_api {

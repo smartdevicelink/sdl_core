@@ -35,8 +35,7 @@
 
 namespace functional_modules {
 
-Settings::Settings()
-  : kConfigFile_("smartDeviceLink.ini") {
+Settings::Settings() : kConfigFile_("smartDeviceLink.ini") {
   config_file_ = kConfigFile_;
 }
 
@@ -53,8 +52,10 @@ std::string Settings::ReadParameter(const std::string& section_name,
   std::string result;
   char param_string[INI_LINE_LEN + 1];
   param_string[0] = '\0';
-  if (0 != profile::ini_read_value(config_file_.c_str(), section_name.c_str(),
-                                   param_name.c_str(), param_string)) {
+  if (0 != profile::ini_read_value(config_file_.c_str(),
+                                   section_name.c_str(),
+                                   param_name.c_str(),
+                                   param_string)) {
     result = param_string;
   }
   return result;

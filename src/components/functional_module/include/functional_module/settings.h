@@ -64,7 +64,7 @@ class Settings {
    * @param param_name Parameter name i.e. ServerAddress
    * @returns True if value was read from config file, false otherwise
    */
-  template<class T>
+  template <class T>
   bool ReadParameter(const std::string& section_name,
                      const std::string& param_name,
                      T* param_value) const;
@@ -75,9 +75,8 @@ class Settings {
    * @param param_name Parameter name i.e. ServerAddress
    * @returns True if value was read from config file, false otherwise
    */
-  template<class T>
-  bool ReadParameter(const std::string& param_name,
-                     T* param_value) const;
+  template <class T>
+  bool ReadParameter(const std::string& param_name, T* param_value) const;
 
   /*
    * @brief Changes path to configuration file
@@ -94,10 +93,10 @@ class Settings {
   std::string config_file_;
 };
 
-template<class T>
+template <class T>
 bool Settings::ReadParameter(const std::string& section_name,
-    const std::string& param_name,
-    T* param_value) const {
+                             const std::string& param_name,
+                             T* param_value) const {
   DCHECK(param_value);
   bool result = false;
   if (!param_value) {
@@ -115,9 +114,9 @@ bool Settings::ReadParameter(const std::string& section_name,
   return result;
 }
 
-template<class T>
+template <class T>
 bool Settings::ReadParameter(const std::string& param_name,
-    T* param_value) const {
+                             T* param_value) const {
   return ReadParameter<T>("MAIN", param_name, param_value);
 }
 

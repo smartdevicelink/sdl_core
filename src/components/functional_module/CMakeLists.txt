@@ -4,7 +4,7 @@ else()
   set(GCOV_FLAGS "")
 endif()
 
-set(CMAKE_CXX_FLAGS "-fPIC -std=gnu++0x -Wall -Werror ${GCOV_FLAGS}")
+set(CMAKE_CXX_FLAGS "-fPIC -std=gnu++0x -Wno-deprecated-declarations -Wall -Werror ${GCOV_FLAGS}")
 
 if (CMAKE_BUILD_TYPE)
   if (${CMAKE_BUILD_TYPE} STREQUAL "Release")
@@ -19,24 +19,33 @@ endif()
 set(GCOV gcov)
 
 include_directories (
-  ./include/
-  ../include/
-  ../application_manager/include
-  ../connection_handler/include/
-  ../utils/include
-  ../config_profile/include
+  ${COMPONENTS_DIR}/functional_module/include/
+  ${COMPONENTS_DIR}/can_cooperation/include/
+  ${COMPONENTS_DIR}/include/
+  ${COMPONENTS_DIR}/application_manager/include
+  ${COMPONENTS_DIR}/connection_handler/include/
+  ${COMPONENTS_DIR}/utils/include
+  ${COMPONENTS_DIR}/config_profile/include
+  ${COMPONENTS_DIR}/smart_objects/include
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${LOG4CXX_INCLUDE_DIRECTORY}
   ${CMAKE_BINARY_DIR}/src/components/
+
+  ${COMPONENTS_DIR}/application_manager/test/include/
 )
 
 set (SOURCES
     ./src/generic_module.cc
     ./src/plugin_manager.cc
     ./src/settings.cc
+    ./src/timer/timer_director.cc
+)
+set (LIBRARIES
+    ApplicationManager
 )
 
 add_library("FunctionalModule" ${SOURCES})
+target_link_libraries("FunctionalModule" ${LIBRARIES} )
 
 if(ENABLE_LOG)
   target_link_libraries("FunctionalModule" log4cxx -L${LOG4CXX_LIBS_DIRECTORY} ${GCOV})
