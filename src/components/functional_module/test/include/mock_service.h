@@ -40,53 +40,53 @@ namespace application_manager {
 class MockService : public Service {
  public:
   MOCK_METHOD1(CheckPolicyPermissions,
-      mobile_apis::Result::eType(MessagePtr msg));
-  MOCK_METHOD1(GetApplication,
-      ApplicationSharedPtr(ApplicationId app_id));
-  MOCK_METHOD1(SendMessageToHMI,
-      void(const MessagePtr& message));
-  MOCK_METHOD1(SendMessageToMobile,
-      void(const MessagePtr& message));
-  MOCK_METHOD0(GetNextCorrelationID,
-      uint32_t());
+               mobile_apis::Result::eType(MessagePtr msg));
+  MOCK_METHOD1(GetApplication, ApplicationSharedPtr(ApplicationId app_id));
+  MOCK_METHOD1(SendMessageToHMI, void(const MessagePtr& message));
+  MOCK_METHOD1(SendMessageToMobile, void(const MessagePtr& message));
+  MOCK_METHOD0(GetNextCorrelationID, uint32_t());
   MOCK_METHOD1(GetApplications,
-      std::vector<ApplicationSharedPtr>(AppExtensionUID));
+               std::vector<ApplicationSharedPtr>(AppExtensionUID));
   MOCK_METHOD1(SubscribeToHMINotification,
-      void(const std::string& hmi_notification));
-  MOCK_METHOD2(ChangeNotifyHMILevel, void(ApplicationSharedPtr app,
-      mobile_apis::HMILevel::eType level));
-  MOCK_METHOD2(NotifyHMIAboutHMILevel, void(ApplicationSharedPtr app,
-      mobile_apis::HMILevel::eType level));
+               void(const std::string& hmi_notification));
+  MOCK_METHOD2(ChangeNotifyHMILevel,
+               void(ApplicationSharedPtr app,
+                    mobile_apis::HMILevel::eType level));
+  MOCK_METHOD2(NotifyHMIAboutHMILevel,
+               void(ApplicationSharedPtr app,
+                    mobile_apis::HMILevel::eType level));
   MOCK_METHOD5(CheckAccess,
-      TypeAccess(const ApplicationId& app_id,
-                 const SeatLocation& zone,
-                 const std::string& module,
-                 const std::string& rpc,
-                 const std::vector<std::string>& params));
-  MOCK_METHOD2(CheckModule, bool(const ApplicationId& app_id,
-                                 const std::string& module));
+               TypeAccess(const ApplicationId& app_id,
+                          const SeatLocation& zone,
+                          const std::string& module,
+                          const std::string& rpc,
+                          const std::vector<std::string>& params));
+  MOCK_METHOD2(CheckModule,
+               bool(const ApplicationId& app_id, const std::string& module));
   MOCK_METHOD4(SetAccess,
-      void(const ApplicationId& app_id,
-           const SeatLocation& zone,
-           const std::string& module,
-           bool allowed));
+               void(const ApplicationId& app_id,
+                    const SeatLocation& zone,
+                    const std::string& module,
+                    bool allowed));
   MOCK_METHOD1(ResetAccess, void(const ApplicationId& app_id));
-  MOCK_METHOD2(ResetAccess, void(const SeatLocation& zone,
-                                 const std::string& module));
+  MOCK_METHOD2(ResetAccess,
+               void(const SeatLocation& zone, const std::string& module));
   MOCK_METHOD1(SetPrimaryDevice, void(const uint32_t dev_id));
   MOCK_METHOD0(ResetPrimaryDevice, void());
   MOCK_CONST_METHOD0(PrimaryDevice, uint32_t());
   MOCK_METHOD1(SetRemoteControl, void(bool enabled));
   MOCK_CONST_METHOD0(IsRemoteControlAllowed, bool());
-  MOCK_METHOD2(SetDeviceZone, void(const uint32_t dev_id,
-                                   const SeatLocation& zone));
-  MOCK_CONST_METHOD1(GetDeviceZone, const SeatLocationPtr(const uint32_t dev_id));
-  MOCK_CONST_METHOD1(IsRemoteControlApplication, bool(ApplicationSharedPtr app));
-  MOCK_CONST_METHOD2(GetModuleTypes, bool(const std::string& application_id,
-                                    std::vector<std::string>* modules));
+  MOCK_METHOD2(SetDeviceZone,
+               void(const uint32_t dev_id, const SeatLocation& zone));
+  MOCK_CONST_METHOD1(GetDeviceZone,
+                     const SeatLocationPtr(const uint32_t dev_id));
+  MOCK_CONST_METHOD1(IsRemoteControlApplication,
+                     bool(ApplicationSharedPtr app));
+  MOCK_CONST_METHOD2(GetModuleTypes,
+                     bool(const std::string& application_id,
+                          std::vector<std::string>* modules));
 };
-
 }
-  // namespace application_manager
+// namespace application_manager
 
 #endif  // TEST_COMPONENTS_CAN_COOPERATION_INCLUDE_MOCK_SERVICE_H_

@@ -55,8 +55,8 @@ TEST(Settings, ReadParamStringWithSectionSuccess) {
   Settings set;
   set.ChangeConfigFile("test.ini");
   std::string file_path;
-  bool result = set.ReadParameter<std::string>("Remote Control",
-                "InteriorVDCapabilitiesFile", &file_path);
+  bool result = set.ReadParameter<std::string>(
+      "Remote Control", "InteriorVDCapabilitiesFile", &file_path);
   ASSERT_TRUE(result);
   ASSERT_EQ("./plugins/InteriorVehicleDataCapabilities.json", file_path);
 }
@@ -65,8 +65,8 @@ TEST(Settings, ReadParamStringWithSectionFail) {
   Settings set;
   set.ChangeConfigFile("test.ini");
   std::string file_path;
-  bool result = set.ReadParameter("Remote Control",
-                "InteriorVDCFile", &file_path);
+  bool result =
+      set.ReadParameter("Remote Control", "InteriorVDCFile", &file_path);
   ASSERT_FALSE(result);
   ASSERT_EQ("", file_path);
 }

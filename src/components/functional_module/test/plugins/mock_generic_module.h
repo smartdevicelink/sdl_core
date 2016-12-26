@@ -46,32 +46,26 @@ using ::testing::Return;
 class MockGenericModule : public GenericModule {
  public:
   MockGenericModule();
-  MOCK_CONST_METHOD0(GetPluginInfo,
-      PluginInfo());
-  MOCK_METHOD1(set_service,
-      void(application_manager::ServicePtr service));
-  MOCK_METHOD0(service,
-      application_manager::ServicePtr());
+  MOCK_CONST_METHOD0(GetPluginInfo, PluginInfo());
+  MOCK_METHOD1(set_service, void(application_manager::ServicePtr service));
+  MOCK_METHOD0(service, application_manager::ServicePtr());
   MOCK_METHOD1(ProcessMessage,
-      ProcessResult(application_manager::MessagePtr msg));
+               ProcessResult(application_manager::MessagePtr msg));
   MOCK_METHOD1(ProcessHMIMessage,
-      ProcessResult(application_manager::MessagePtr msg));
-  MOCK_METHOD1(OnServiceStateChanged,
-      void(ServiceState state));
-  MOCK_METHOD1(RemoveAppExtension,
-      void(uint32_t app_id));
-  MOCK_METHOD1(IsAppForPlugin, bool(
-      application_manager::ApplicationSharedPtr app));
-  MOCK_METHOD2(OnAppHMILevelChanged, void(
-    application_manager::ApplicationSharedPtr app,
-    mobile_apis::HMILevel::eType old_level));
-  MOCK_METHOD1(OnDeviceRemoved, void(
-      const connection_handler::DeviceHandle& device));
-  MOCK_METHOD2(CanAppChangeHMILevel, bool(
-    application_manager::ApplicationSharedPtr app,
-    mobile_apis::HMILevel::eType new_level));
-  MOCK_METHOD0(RemoveAppExtensions,
-      void());
+               ProcessResult(application_manager::MessagePtr msg));
+  MOCK_METHOD1(OnServiceStateChanged, void(ServiceState state));
+  MOCK_METHOD1(RemoveAppExtension, void(uint32_t app_id));
+  MOCK_METHOD1(IsAppForPlugin,
+               bool(application_manager::ApplicationSharedPtr app));
+  MOCK_METHOD2(OnAppHMILevelChanged,
+               void(application_manager::ApplicationSharedPtr app,
+                    mobile_apis::HMILevel::eType old_level));
+  MOCK_METHOD1(OnDeviceRemoved,
+               void(const connection_handler::DeviceHandle& device));
+  MOCK_METHOD2(CanAppChangeHMILevel,
+               bool(application_manager::ApplicationSharedPtr app,
+                    mobile_apis::HMILevel::eType new_level));
+  MOCK_METHOD0(RemoveAppExtensions, void());
 };
 
 #endif  // TEST_COMPONENTS_FUNCTIONAL_MODULE_PLUGINS_MOCK_GENERIC_MODULE_H_
