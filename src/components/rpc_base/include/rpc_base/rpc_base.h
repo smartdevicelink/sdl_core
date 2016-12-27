@@ -58,7 +58,7 @@ enum PolicyTableType {
   PT_UPDATE,
   PT_SNAPSHOT
 };
-const std::string ommited_validation_info = "should be ommited in ";
+const std::string omitted_validation_info = "should be omitted in ";
 const std::string required_validation_info = "is required in ";
 
 std::string PolicyTableTypeToString(const PolicyTableType pt_type);

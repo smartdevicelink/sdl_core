@@ -2,6 +2,7 @@
 #include <algorithm>
 #include "policy/policy_table/types.h"
 #include "utils/logger.h"
+#include "utils/helpers.h"
 
 namespace {
 bool IsPredefinedApplication(const std::string& app_id) {
@@ -148,16 +149,25 @@ bool Rpcs::Validate() const {
   return true;
 }
 bool ModuleConfig::Validate() const {
-  if (PT_PRELOADED == GetPolicyTableType()) {
-    if (vehicle_make.is_initialized()) {
-      return false;
+  switch (GetPolicyTableType()) {
+    case PT_PRELOADED: {
+      if (helpers::Compare<bool, helpers::EQ, helpers::ONE>(
+              true,
+              vehicle_make.is_initialized(),
+              vehicle_year.is_initialized(),
+              vehicle_model.is_initialized())) {
+        return false;
+      }
+      break;
     }
-    if (vehicle_year.is_initialized()) {
-      return false;
+    case PT_UPDATE: {
+      if (preloaded_pt->is_initialized()) {
+        return false;
+      }
+      break;
     }
-    if (vehicle_model.is_initialized()) {
-      return false;
-    }
+    default:
+      break;
   }
   return true;
 }

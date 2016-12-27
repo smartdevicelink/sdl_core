@@ -1123,7 +1123,7 @@ void PolicyHandler::OnActivateApp(uint32_t connection_key,
     permissions.isSDLAllowed = kDeviceAllowed == consent;
 
     // According to the SDLAQ-CRS-2794, p.9
-    // 'priority' should be ommited in case when device
+    // 'priority' should be omitted in case when device
     // is not allowed.
     if (!permissions.isSDLAllowed) {
       permissions.priority.clear();

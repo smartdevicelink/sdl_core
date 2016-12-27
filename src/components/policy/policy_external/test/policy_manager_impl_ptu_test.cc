@@ -712,7 +712,7 @@ TEST_F(PolicyManagerImplTest2,
   // Load Json to cache
   // File have 2 functional groups: SendLocation and SendLocationOnly.
   // They have different parameters. One has dissalowed all params, other -
-  // ommited.
+  // omitted.
 
   // Arrange
   CreateLocalPT("json/sdl_preloaded_pt_send_location.json");
