@@ -530,7 +530,8 @@ void PolicyHandler::OnAppPermissionConsentInternal(
     return;
   }
 
-  sync_primitives::AutoLock lock(app_to_device_link_lock_);
+  LinkAppsToDevice();
+
   if (!app_to_device_link_.size()) {
     LOG4CXX_WARN(logger_,
                  "There are no applications previously stored for "
@@ -617,18 +618,7 @@ void PolicyHandler::OnGetListOfPermissions(const uint32_t connection_key,
   // If no specific app was passed, get permissions for all currently registered
   // applications
   if (!connection_key) {
-    sync_primitives::AutoLock lock(app_to_device_link_lock_);
-    LinkAppToDevice linker(app_to_device_link_, application_manager_);
-    {
-      const ApplicationSet& accessor =
-          application_manager_.applications().GetData();
-      ApplicationSetConstIt it_app = accessor.begin();
-      ApplicationSetConstIt it_app_end = accessor.end();
-
-      // Add all currently registered applications
-      std::for_each(it_app, it_app_end, linker);
-    }
-
+    LinkAppsToDevice();
     PermissionsConsolidator consolidator;
     std::vector<policy::FunctionalGroupPermission> group_permissions;
     std::map<std::string, std::string>::const_iterator it =
@@ -675,6 +665,23 @@ void PolicyHandler::OnGetListOfPermissions(const uint32_t connection_key,
 
     MessageHelper::SendGetListOfPermissionsResponse(
         group_permissions, correlation_id, application_manager_);
+  }
+}
+
+void PolicyHandler::LinkAppsToDevice() {
+  sync_primitives::AutoLock lock(app_to_device_link_lock_);
+  LinkAppToDevice linker(app_to_device_link_, application_manager_);
+  LOG4CXX_DEBUG(logger_, "add links to app.  no specific app was passed");
+  {
+    const ApplicationSet& accessor =
+        application_manager_.applications().GetData();
+    if (accessor.empty()) {
+      LOG4CXX_WARN(logger_,
+                   "application_manager doesn't have any applications");
+    } else {
+      // Add all currently registered applications
+      std::for_each(accessor.begin(), accessor.end(), linker);
+    }
   }
 }
 

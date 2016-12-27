@@ -471,6 +471,11 @@ class PolicyHandler : public PolicyHandlerInterface,
    */
   void SetDaysAfterEpoch();
 
+  /**
+   * @brief Link all currently registered applications
+   */
+  void LinkAppsToDevice();
+
  private:
   class StatisticManagerImpl : public usage_statistics::StatisticsManager {
    public:
