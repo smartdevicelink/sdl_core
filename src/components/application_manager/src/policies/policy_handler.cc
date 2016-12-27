@@ -1287,6 +1287,7 @@ void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string) {
   static size_t current_app = 0;
   static size_t current_url = 0;
   if (current_url >= urls.at(current_app).url.size()) {
+    bool is_default, is_registered, has_urls;
     ApplicationSharedPtr app;
     current_url = 0;
     do {
@@ -1295,8 +1296,11 @@ void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string) {
       }
       app =
           application_manager_.application_by_policy_id(urls.at(current_app).app_id);
-    } while (!((urls.at(current_app).app_id == policy::kDefaultId) ||
-        (app && app->IsRegistered() && !urls.at(current_app).url.empty())));
+
+      is_default = urls.at(current_app).app_id == policy::kDefaultId;
+      is_registered = app && app->IsRegistered();
+      has_urls = !urls.at(current_app).url.empty();
+    } while (!(is_default || (is_registered && has_urls)));
   }
 
   SendMessageToSDK(pt_string, urls.at(current_app).url.at(current_url));
