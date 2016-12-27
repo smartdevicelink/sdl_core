@@ -943,7 +943,7 @@ struct SDLAlowedNotification {
 
   void operator()(const ApplicationSharedPtr& app) {
     DCHECK_OR_RETURN_VOID(policy_manager_);
-    if (device_id_ == app->device()) {
+    if (app->device() == device_id_) {
       std::string hmi_level;
       mobile_apis::HMILevel::eType default_mobile_hmi;
       policy_manager_->GetDefaultHmi(app->policy_app_id(), &hmi_level);
@@ -974,55 +974,60 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(
   LOG4CXX_AUTO_TRACE(logger_);
   POLICY_LIB_CHECK_VOID();
   using namespace mobile_apis;
-  // Device ids, need to be changed
-  std::vector<std::string> device_macs;
   const bool device_specific = !device_mac.empty();
   // Common devices consents change
   connection_handler::ConnectionHandler& connection_handler =
       application_manager_.connection_handler();
+
   if (!device_specific) {
+    // Device ids, need to be changed
+    std::vector<std::string> device_macs;
     connection_handler.GetConnectedDevicesMAC(device_macs);
-  } else {
-    device_macs.push_back(device_mac);
-  }
+    std::vector<std::string>::const_iterator it_ids = device_macs.begin();
+    std::vector<std::string>::const_iterator it_ids_end = device_macs.end();
+    for (; it_ids != it_ids_end; ++it_ids) {
+      const std::string device_id = *it_ids;
 
-  std::vector<std::string>::const_iterator it_ids = device_macs.begin();
-  std::vector<std::string>::const_iterator it_ids_end = device_macs.end();
-  for (; it_ids != it_ids_end; ++it_ids) {
-    const std::string device_id = *it_ids;
+      if (kDefaultDeviceMacAddress == device_id) {
+        LOG4CXX_WARN(logger_,
+                     "Device with id " << device_id << " wasn't found.");
+        continue;
+      }
+      policy_manager_->SetUserConsentForDevice(device_id, is_allowed);
+      uint32_t device_handle = 0;
+      if (!connection_handler.GetDeviceID(device_id, &device_handle)) {
+        LOG4CXX_WARN(logger_,
+                     "Device handle with mac " << device_id
+                                               << " wasn't found.");
+      }
 
-    if (kDefaultDeviceMacAddress == device_id) {
-      LOG4CXX_WARN(logger_, "Device with id " << device_id << " wasn't found.");
-      return;
-    }
-    policy_manager_->SetUserConsentForDevice(device_id, is_allowed);
-    uint32_t device_handle = 0;
-    if (!connection_handler.GetDeviceID(device_mac, &device_handle)) {
-      LOG4CXX_WARN(logger_,
-                   "Device hadle with mac " << device_mac << " wasn't found.");
-    }
 #ifdef EXTERNAL_PROPRIETARY_MODE
-    DataAccessor<ApplicationSet> accessor = application_manager_.applications();
-    if (!is_allowed) {
-      std::for_each(
-          accessor.GetData().begin(),
-          accessor.GetData().end(),
-          DeactivateApplication(device_handle,
-                                application_manager_.state_controller()));
-    } else {
-      std::for_each(
-          accessor.GetData().begin(),
-          accessor.GetData().end(),
-          SDLAlowedNotification(device_handle,
-                                policy_manager_.get(),
-                                application_manager_.state_controller()));
-    }
+
+      DataAccessor<ApplicationSet> accessor =
+          application_manager_.applications();
+      if (!is_allowed) {
+        std::for_each(
+            accessor.GetData().begin(),
+            accessor.GetData().end(),
+            DeactivateApplication(device_handle,
+                                  application_manager_.state_controller()));
+      } else {
+        std::for_each(
+            accessor.GetData().begin(),
+            accessor.GetData().end(),
+            SDLAlowedNotification(device_handle,
+                                  policy_manager_.get(),
+                                  application_manager_.state_controller()));
+      }
+
 #endif  // EXTERNAL_PROPRIETARY_MODE
+    }
   }
 
   // Case, when specific device was changed
+  uint32_t device_handle = 0u;
   if (device_specific) {
-    uint32_t device_handle = 0u;
+    policy_manager_->SetUserConsentForDevice(device_mac, is_allowed);
     if (!connection_handler.GetDeviceID(device_mac, &device_handle)) {
       LOG4CXX_WARN(logger_,
                    "Device hadle with mac " << device_mac << " wasn't found.");
@@ -1037,8 +1042,10 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(
 
     pending_device_handles_.erase(it);
   }
+
 #ifdef EXTERNAL_PROPRIETARY_MODE
-  if (is_allowed && last_activated_app_id_) {
+
+  if (last_activated_app_id_) {
     ApplicationSharedPtr app =
         application_manager_.application(last_activated_app_id_);
 
@@ -1046,10 +1053,10 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(
       LOG4CXX_WARN(logger_,
                    "Application with id '"
                        << last_activated_app_id_
-                       << "' not found within registered applications.");
+                       << "' not found among registered applications.");
       return;
     }
-    if (app) {
+    if (is_allowed) {
       // Send HMI status notification to mobile
       // Put application in full
       AudioStreamingState::eType state = app->is_audio()
@@ -1059,6 +1066,10 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(
       application_manager_.state_controller().SetRegularState(
           app, mobile_apis::HMILevel::HMI_FULL, state, true);
       last_activated_app_id_ = 0;
+    } else {
+      DeactivateApplication deactivate_notification(
+          device_handle, application_manager_.state_controller());
+      deactivate_notification(app);
     }
   }
 #endif  // EXTERNAL_PROPRIETARY_MODE
