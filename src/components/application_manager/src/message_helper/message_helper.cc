@@ -388,7 +388,7 @@ mobile_apis::DeviceRank::eType MessageHelper::StringToDeviceRank(
   }
   return mobile_apis::DeviceRank::INVALID_ENUM;
 }
-#endif
+#endif  // SDL_REMOTE_CONTROL
 
 std::string MessageHelper::StringifiedHMILevel(
     mobile_apis::HMILevel::eType hmi_level) {

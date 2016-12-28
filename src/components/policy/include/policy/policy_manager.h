@@ -360,19 +360,6 @@ class PolicyManager : public usage_statistics::StatisticsManager {
    * @param Application id assigned by Ford to the application
    */
   virtual void AddApplication(const std::string& application_id) = 0;
-#ifdef SDL_REMOTE_CONTROL
-  virtual void AddApplication(const std::string& application_id,
-                              const std::vector<int>& hmi_types) = 0;
-
-  /**
-   * Gets HMI types
-   * @param application_id ID application
-   * @param app_types list to save HMI types
-   * @return true if policy has specific policy for this application
-   */
-  virtual bool GetHMITypes(const std::string& application_id,
-                           std::vector<int>* app_types) = 0;
-#endif  // SDL_REMOTE_CONTROL
 
   /**
    * @brief Removes unpaired device records and related records from DB
@@ -474,6 +461,18 @@ class PolicyManager : public usage_statistics::StatisticsManager {
   virtual const PolicySettings& get_settings() const = 0;
 
 #ifdef SDL_REMOTE_CONTROL
+  virtual void AddApplication(const std::string& application_id,
+                              const std::vector<int>& hmi_types) = 0;
+
+  /**
+   * Gets HMI types
+   * @param application_id ID application
+   * @param app_types list to save HMI types
+   * @return true if policy has specific policy for this application
+   */
+  virtual bool GetHMITypes(const std::string& application_id,
+                           std::vector<int>* app_types) = 0;
+
   /**
    * Checks access to equipment of vehicle for application by RPC
    * @param device_id unique identifier of device

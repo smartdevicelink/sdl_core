@@ -60,32 +60,12 @@ class PolicyListener {
    */
   virtual std::string OnCurrentDeviceIdUpdateRequired(
       const std::string& policy_app_id) = 0;
-/**
- * Gets devices ids by policy application id
- * @param policy_app_id
- * @return list devices ids
- */
-#ifdef SDL_REMOTE_CONTROL
-  virtual std::vector<std::string> GetDevicesIds(
-      const std::string& policy_app_id) = 0;
-#endif
   virtual void OnSystemInfoUpdateRequired() = 0;
   virtual custom_str::CustomString GetAppName(
       const std::string& policy_app_id) = 0;
   virtual void OnUpdateHMIAppType(
       std::map<std::string, StringArray> app_hmi_types) = 0;
 
-/**
- * Notifies about changing HMI level
- * @param device_id unique identifier of device
- * @param policy_app_id unique identifier of application in policy
- * @param hmi_level default HMI level for this application
- */
-#ifdef SDL_REMOTE_CONTROL
-  virtual void OnUpdateHMILevel(const std::string& device_id,
-                                const std::string& policy_app_id,
-                                const std::string& hmi_level) = 0;
-#endif
   /**
    * @brief CanUpdate allows to find active application
    * and check whether related device consented.
@@ -127,6 +107,23 @@ class PolicyListener {
   virtual void OnCertificateUpdated(const std::string& certificate_data) = 0;
 
 #ifdef SDL_REMOTE_CONTROL
+  /**
+   * Gets devices ids by policy application id
+   * @param policy_app_id
+   * @return list devices ids
+   */
+  virtual std::vector<std::string> GetDevicesIds(
+      const std::string& policy_app_id) = 0;
+
+  /**
+   * Notifies about changing HMI level
+   * @param device_id unique identifier of device
+   * @param policy_app_id unique identifier of application in policy
+   * @param hmi_level default HMI level for this application
+   */
+  virtual void OnUpdateHMILevel(const std::string& device_id,
+                                const std::string& policy_app_id,
+                                const std::string& hmi_level) = 0;
   /**
    * @brief Signal that country_consent field was updated during PTU
    * @param new_consent New value of country_consent

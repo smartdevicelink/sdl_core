@@ -237,6 +237,30 @@ class PolicyHandler : public PolicyHandlerInterface,
    */
   bool GetModuleTypes(const std::string& policy_app_id,
                       std::vector<std::string>* modules) const;
+
+  /**
+   * @brief Update currently used device id in policies manager for given
+   * application
+   * @param policy_app_id Application id
+   * @deprecated see
+   */
+  std::vector<std::string> GetDevicesIds(const std::string&) OVERRIDE;
+  virtual void OnUpdateHMILevel(const std::string& device_id,
+                                const std::string& policy_app_id,
+                                const std::string& hmi_level) OVERRIDE;
+  /**
+     * Checks if application has HMI type
+     * @param application_id ID application
+     * @param hmi HMI type to check
+     * @param app_types additional list of HMI type to search in it
+     * @return true if hmi is contained in policy or app_types
+     */
+  bool CheckHMIType(const std::string& application_id,
+                    mobile_apis::AppHMIType::eType hmi,
+                    const smart_objects::SmartObject* app_types);
+
+  void AddApplication(const std::string& application_id,
+                      const smart_objects::SmartObject* app_types) OVERRIDE;
 #endif  // SDL_REMOTE_CONTROL
 
   bool GetDefaultHmi(const std::string& policy_app_id,
@@ -361,15 +385,6 @@ class PolicyHandler : public PolicyHandlerInterface,
    */
   void OnUpdateStatusChanged(const std::string& status) OVERRIDE;
 
-#ifdef SDL_REMOTE_CONTROL
-  /**
-   * @brief Update currently used device id in policies manager for given
-   * application
-   * @param policy_app_id Application id
-   * @deprecated see
-   */
-  std::vector<std::string> GetDevicesIds(const std::string&) OVERRIDE;
-#endif
   std::string OnCurrentDeviceIdUpdateRequired(
       const std::string& policy_app_id) OVERRIDE;
 
@@ -436,15 +451,6 @@ class PolicyHandler : public PolicyHandlerInterface,
   virtual void OnUpdateHMIAppType(
       std::map<std::string, StringArray> app_hmi_types) OVERRIDE;
 
-#ifdef SDL_REMOTE_CONTROL
-  virtual void OnUpdateHMILevel(const std::string& device_id,
-                                const std::string& policy_app_id,
-                                const std::string& hmi_level) OVERRIDE;
-
-  void AddApplication(const std::string& application_id,
-                      const smart_objects::SmartObject* app_types) OVERRIDE;
-#endif
-
   virtual void OnCertificateUpdated(
       const std::string& certificate_data) OVERRIDE;
 
@@ -470,18 +476,6 @@ class PolicyHandler : public PolicyHandlerInterface,
    */
   void AddApplication(const std::string& application_id) OVERRIDE;
 
-#ifdef SDL_REMOTE_CONTROL
-  /**
-     * Checks if application has HMI type
-     * @param application_id ID application
-     * @param hmi HMI type to check
-     * @param app_types additional list of HMI type to search in it
-     * @return true if hmi is contained in policy or app_types
-     */
-  bool CheckHMIType(const std::string& application_id,
-                    mobile_apis::AppHMIType::eType hmi,
-                    const smart_objects::SmartObject* app_types);
-#endif
   /**
    * Checks whether application is revoked
    * @param app_id id application
@@ -618,10 +612,10 @@ class PolicyHandler : public PolicyHandlerInterface,
 #ifdef SDL_REMOTE_CONTROL
   void UpdateHMILevel(application_manager::ApplicationSharedPtr app,
                       mobile_apis::HMILevel::eType level);
-#endif
-  /**
-   * @brief Sets days after epoch on successful policy update
-   */
+#endif  // SDL_REMOTE_CONTROL
+        /**
+         * @brief Sets days after epoch on successful policy update
+         */
   void SetDaysAfterEpoch();
 
  private:

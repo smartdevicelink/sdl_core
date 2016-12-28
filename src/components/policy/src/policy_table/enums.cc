@@ -609,7 +609,7 @@ bool EnumFromJsonString(const std::string& literal, ModuleType* result) {
     return false;
   }
 }
-#endif
+#endif  // SDL_REMOTE_CONTROL
 
 const std::string kDefaultApp = "default";
 const std::string kPreDataConsentApp = "pre_DataConsent";

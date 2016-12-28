@@ -116,22 +116,6 @@ class PolicyHandlerInterface {
    */
   virtual bool CheckSystemAction(mobile_apis::SystemAction::eType system_action,
                                  const std::string& policy_app_id) const = 0;
-
-/**
-   * Checks if application has HMI type
-   * @param application_id ID application
-   * @param hmi HMI type to check
-   * @param app_types additional list of HMI type to search in it
-   * @return true if hmi is contained in policy or app_types
-   */
-
-#ifdef SDL_REMOTE_CONTROL
-  virtual bool CheckHMIType(const std::string& application_id,
-                            mobile_apis::AppHMIType::eType hmi,
-                            const smart_objects::SmartObject* app_types) = 0;
-  virtual void AddApplication(const std::string& application_id,
-                              const smart_objects::SmartObject* app_types) = 0;
-#endif
   /**
    * Lets client to notify PolicyHandler that more kilometers expired
    * @param kms New value of odometer
@@ -387,14 +371,28 @@ class PolicyHandlerInterface {
                    usage_statistics::AppStopwatchId type,
                    int32_t timespan_seconds) = 0;
 
-#ifdef ENABLE_SECURITY
-  virtual std::string RetrieveCertificate() const = 0;
-#endif  // ENABLE_SECURITY
-
   virtual const PolicySettings& get_settings() const = 0;
   virtual const std::string RemoteAppsUrl() const = 0;
 
+#ifdef ENABLE_SECURITY
+  virtual std::string RetrieveCertificate() const = 0;
+#endif  // ENABLE_SECURITY
 #ifdef SDL_REMOTE_CONTROL
+  /**
+     * Checks if application has HMI type
+     * @param application_id ID application
+     * @param hmi HMI type to check
+     * @param app_types additional list of HMI type to search in it
+     * @return true if hmi is contained in policy or app_types
+     */
+
+  virtual bool CheckHMIType(const std::string& application_id,
+                            mobile_apis::AppHMIType::eType hmi,
+                            const smart_objects::SmartObject* app_types) = 0;
+
+ virtual void AddApplication(const std::string& application_id,
+                              const smart_objects::SmartObject* app_types) = 0;
+
   /**
    * Checks access to equipment of vehicle for application by RPC
    * @param device_id unique identifier of device
@@ -527,7 +525,7 @@ class PolicyHandlerInterface {
                               std::vector<std::string>* modules) const = 0;
 #endif  // SDL_REMOTE_CONTROL
 
- private:
+ protected:
   virtual void OnAppPermissionConsentInternal(
       const uint32_t connection_key, PermissionConsent& permissions) = 0;
 

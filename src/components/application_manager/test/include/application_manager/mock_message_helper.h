@@ -243,7 +243,6 @@ class MockMessageHelper {
   MOCK_METHOD2(GetDeviceMacAddressForHandle,
                std::string(const uint32_t device_handle,
                            const ApplicationManager& app_mngr));
-
 #ifdef SDL_REMOTE_CONTROL
   MOCK_METHOD3(SendHMIStatusNotification,
                void(const Application& application_impl,
@@ -256,7 +255,7 @@ class MockMessageHelper {
                     bool send_policy_priority));
   MOCK_METHOD1(StringToDeviceRank,
                mobile_apis::DeviceRank::eType(const std::string& device_ranki));
-#endif
+#endif  // SDL_REMOTE_CONTROL
 
   static MockMessageHelper* message_helper_mock();
 };
