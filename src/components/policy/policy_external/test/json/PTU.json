@@ -1,7 +1,6 @@
-    {
-    "policy_table": {
-        "module_config": {
-            "preloaded_pt": true,
+{
+  "policy_table" : {
+    "module_config": {
             "preloaded_date": "2015-12-08",
             "exchange_after_x_ignition_cycles": 100,
             "exchange_after_x_kilometers": 1800,
@@ -1912,7 +1911,7 @@
             }
         },
         "app_policies": {
-            "default": {
+      "default": {
                 "keep_context": false,
                 "steal_focus": false,
                 "priority": "NONE",
@@ -1933,17 +1932,18 @@
                 "groups": ["DataConsent-2"]
             },
             "pre_DataConsent": {
-                "keep_context": false,
-                "steal_focus": false,
-                "priority": "NONE",
-                "default_hmi": "NONE",
-                "groups": ["BaseBeforeDataConsent"],
-                "RequestType": [
-                   "QUERY_APPS",
-                   "LAUNCH_APP",
-                   "PROPRIETARY"
-                ]
-            }
-        }
+        "keep_context" : false,
+                         "steal_focus"
+                         : false,
+                           "priority"
+                           : "NONE",
+                             "default_hmi"
+                             : "NONE",
+                               "groups" :
+                               ["BaseBeforeDataConsent"],
+                               "RequestType"
+                               :[ "QUERY_APPS", "LAUNCH_APP", "PROPRIETARY" ]
       }
     }
+  }
+}
