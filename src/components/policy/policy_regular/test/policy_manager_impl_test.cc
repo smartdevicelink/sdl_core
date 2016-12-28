@@ -1026,7 +1026,7 @@ TEST_F(PolicyManagerImplTest2,
 }
 
 TEST_F(PolicyManagerImplTest2,
-       GetDefaultHmi_SetDeviceAllowed_ExpectReceivedHmiCorrect) {
+       DISABLED_GetDefaultHmi_SetDeviceAllowed_ExpectReceivedHmiCorrect) {
   // Arrange
   CreateLocalPT("ptu2_requestType.json");
   manager->AddApplication(app_id2);
