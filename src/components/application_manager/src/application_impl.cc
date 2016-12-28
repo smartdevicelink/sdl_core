@@ -193,13 +193,6 @@ void ApplicationImpl::ChangeSupportingAppHMIType() {
   }
 }
 
-#ifdef SDL_REMOTE_CONTROL
-bool ApplicationImpl::IsAudible() const {
-  return mobile_api::HMILevel::HMI_FULL == hmi_level() ||
-         mobile_api::HMILevel::HMI_LIMITED == hmi_level();
-}
-#endif
-
 void ApplicationImpl::set_is_navi(bool allow) {
   is_navi_ = allow;
 }
@@ -560,39 +553,6 @@ void ApplicationImpl::increment_list_files_in_none_count() {
   ++list_files_in_none_count_;
 }
 
-#ifdef SDL_REMOTE_CONTROL
-void ApplicationImpl::set_system_context(
-    const mobile_api::SystemContext::eType& system_context) {
-  const HmiStatePtr hmi_state = CurrentHmiState();
-  hmi_state->set_system_context(system_context);
-}
-
-void ApplicationImpl::set_audio_streaming_state(
-    const mobile_api::AudioStreamingState::eType& state) {
-  if (!(is_media_application() || is_navi()) &&
-      state != mobile_api::AudioStreamingState::NOT_AUDIBLE) {
-    LOG4CXX_WARN(logger_,
-                 "Trying to set audio streaming state"
-                 " for non-media application to different from NOT_AUDIBLE");
-    return;
-  }
-  CurrentHmiState()->set_audio_streaming_state(state);
-}
-
-void ApplicationImpl::set_hmi_level(
-    const mobile_api::HMILevel::eType& hmi_level) {
-  if (mobile_api::HMILevel::HMI_NONE != hmi_level_ &&
-      mobile_api::HMILevel::HMI_NONE == hmi_level) {
-    put_file_in_none_count_ = 0;
-    delete_file_in_none_count_ = 0;
-    list_files_in_none_count_ = 0;
-  }
-  LOG4CXX_INFO(logger_, "hmi_level = " << hmi_level);
-  hmi_level_ = hmi_level;
-  usage_report_.RecordHmiStateChanged(hmi_level);
-}
-#endif
-
 bool ApplicationImpl::set_app_icon_path(const std::string& path) {
   if (app_files_.find(path) != app_files_.end()) {
     app_icon_path_ = path;
@@ -735,38 +695,6 @@ bool ApplicationImpl::UnsubscribeFromIVI(uint32_t vehicle_info_type) {
   return subscribed_vehicle_info_.erase(vehicle_info_type);
 }
 
-#ifdef SDL_REMOTE_CONTROL
-bool ApplicationImpl::SubscribeToInteriorVehicleData(
-    smart_objects::SmartObject module) {
-  // size_t old_size = subscribed_interior_vehicle_data_.size();
-  subscribed_interior_vehicle_data_.push_front(module);
-  return true;  //(subscribed_interior_vehicle_data_.size() == old_size + 1);
-}
-
-bool ApplicationImpl::IsSubscribedToInteriorVehicleData(
-    smart_objects::SmartObject module) {
-  for (auto it = subscribed_interior_vehicle_data_.begin();
-       it != subscribed_interior_vehicle_data_.end();
-       ++it) {
-    if (*it == module) {
-      return true;
-    }
-  }
-  return false;
-
-  // std::set<smart_objects::SmartObject>::iterator it =
-  // subscribed_interior_vehicle_data_.find(module);
-  // return(subscribed_interior_vehicle_data_.end()._M_node!=it._M_node); //!=
-  // subscribed_interior_vehicle_data_.find(module));
-}
-
-bool ApplicationImpl::UnsubscribeFromInteriorVehicleData(
-    smart_objects::SmartObject module) {
-  subscribed_interior_vehicle_data_.remove(module);
-  return true;
-}
-#endif  // SDL_REMOTE_CONTROL
-
 UsageStatistics& ApplicationImpl::usage_report() {
   return usage_report_;
 }
@@ -880,12 +808,6 @@ DataAccessor<VehicleInfoSubscriptions> ApplicationImpl::SubscribedIVI() const {
   return DataAccessor<VehicleInfoSubscriptions>(subscribed_vehicle_info_,
                                                 vi_lock_);
 }
-
-#ifdef SDL_REMOTE_CONTROL
-const std::set<uint32_t>& ApplicationImpl::SubscribesIVI() const {
-  return subscribed_vehicle_info_;
-}
-#endif
 
 const std::string& ApplicationImpl::curHash() const {
   return hash_val_;
@@ -1047,6 +969,76 @@ void ApplicationImpl::UnsubscribeFromSoftButtons(int32_t cmd_id) {
 }
 
 #ifdef SDL_REMOTE_CONTROL
+bool ApplicationImpl::IsAudible() const {
+  return mobile_api::HMILevel::HMI_FULL == hmi_level() ||
+         mobile_api::HMILevel::HMI_LIMITED == hmi_level();
+}
+
+void ApplicationImpl::set_system_context(
+    const mobile_api::SystemContext::eType& system_context) {
+  const HmiStatePtr hmi_state = CurrentHmiState();
+  hmi_state->set_system_context(system_context);
+}
+
+void ApplicationImpl::set_audio_streaming_state(
+    const mobile_api::AudioStreamingState::eType& state) {
+  if (!(is_media_application() || is_navi()) &&
+      state != mobile_api::AudioStreamingState::NOT_AUDIBLE) {
+    LOG4CXX_WARN(logger_,
+                 "Trying to set audio streaming state"
+                 " for non-media application to different from NOT_AUDIBLE");
+    return;
+  }
+  CurrentHmiState()->set_audio_streaming_state(state);
+}
+
+void ApplicationImpl::set_hmi_level(
+    const mobile_api::HMILevel::eType& hmi_level) {
+  if (mobile_api::HMILevel::HMI_NONE != hmi_level_ &&
+      mobile_api::HMILevel::HMI_NONE == hmi_level) {
+    put_file_in_none_count_ = 0;
+    delete_file_in_none_count_ = 0;
+    list_files_in_none_count_ = 0;
+  }
+  LOG4CXX_INFO(logger_, "hmi_level = " << hmi_level);
+  hmi_level_ = hmi_level;
+  usage_report_.RecordHmiStateChanged(hmi_level);
+}
+
+bool ApplicationImpl::SubscribeToInteriorVehicleData(
+    smart_objects::SmartObject module) {
+  // size_t old_size = subscribed_interior_vehicle_data_.size();
+  subscribed_interior_vehicle_data_.push_front(module);
+  return true;  //(subscribed_interior_vehicle_data_.size() == old_size + 1);
+}
+
+bool ApplicationImpl::IsSubscribedToInteriorVehicleData(
+    smart_objects::SmartObject module) {
+  for (auto it = subscribed_interior_vehicle_data_.begin();
+       it != subscribed_interior_vehicle_data_.end();
+       ++it) {
+    if (*it == module) {
+      return true;
+    }
+  }
+  return false;
+
+  // std::set<smart_objects::SmartObject>::iterator it =
+  // subscribed_interior_vehicle_data_.find(module);
+  // return(subscribed_interior_vehicle_data_.end()._M_node!=it._M_node); //!=
+  // subscribed_interior_vehicle_data_.find(module));
+}
+
+bool ApplicationImpl::UnsubscribeFromInteriorVehicleData(
+    smart_objects::SmartObject module) {
+  subscribed_interior_vehicle_data_.remove(module);
+  return true;
+}
+
+const std::set<uint32_t>& ApplicationImpl::SubscribesIVI() const {
+  return subscribed_vehicle_info_;
+}
+
 AppExtensionPtr ApplicationImpl::QueryInterface(AppExtensionUID uid) {
   std::list<AppExtensionPtr>::const_iterator it = extensions_.begin();
   for (; it != extensions_.end(); ++it) {

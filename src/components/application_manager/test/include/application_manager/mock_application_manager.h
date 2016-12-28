@@ -283,7 +283,7 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD1(GetDeviceHandle, uint32_t(uint32_t connection_key));
   MOCK_CONST_METHOD1(IsAudioStreamingAllowed, bool(uint32_t connection_key));
   MOCK_CONST_METHOD1(IsVideoStreamingAllowed, bool(uint32_t connection_key));
-#endif
+#endif  // SDL_REMOTE_CONTROL
 };
 
 }  // namespace application_manager_test

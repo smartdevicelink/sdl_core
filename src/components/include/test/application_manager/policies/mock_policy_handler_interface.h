@@ -268,7 +268,7 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
   MOCK_CONST_METHOD2(GetModuleTypes,
                      bool(const std::string& policy_app_id,
                           std::vector<std::string>* modules));
-#endif
+#endif  // SDL_REMOTE_CONTROL
 
  private:
   MOCK_METHOD2(OnAppPermissionConsentInternal,

@@ -187,7 +187,7 @@ class MockPolicyManager : public PolicyManager {
                           std::vector<std::string>* modules));
   MOCK_METHOD1(set_access_remote,
                void(utils::SharedPtr<AccessRemote> access_remote));
-#endif
+#endif  // SDL_REMOTE_CONTROL
   MOCK_METHOD0(CleanupUnpairedDevices, bool());
   MOCK_CONST_METHOD1(CanAppKeepContext, bool(const std::string& app_id));
   MOCK_CONST_METHOD1(CanAppStealFocus, bool(const std::string& app_id));

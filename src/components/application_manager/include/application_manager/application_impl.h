@@ -159,14 +159,6 @@ class ApplicationImpl : public virtual Application,
   void increment_put_file_in_none_count();
   void increment_delete_file_in_none_count();
   void increment_list_files_in_none_count();
-#ifdef SDL_REMOTE_CONTROL
-  void set_system_context(
-      const mobile_api::SystemContext::eType& system_context);
-  void set_audio_streaming_state(
-      const mobile_api::AudioStreamingState::eType& state);
-  virtual void set_hmi_level(
-      const mobile_api::HMILevel::eType& hmi_level) OVERRIDE;
-#endif
   bool set_app_icon_path(const std::string& path);
   void set_app_allowed(const bool allowed);
   void set_device(connection_handler::DeviceHandle device);
@@ -200,9 +192,6 @@ class ApplicationImpl : public virtual Application,
   bool IsSubscribedToInteriorVehicleData(smart_objects::SmartObject module);
   bool UnsubscribeFromInteriorVehicleData(smart_objects::SmartObject module);
 
-#ifdef SDL_REMOTE_CONTROL
-  virtual const std::set<uint32_t>& SubscribesIVI() const OVERRIDE;
-#endif
   /**
    * @brief ResetDataInNone reset data counters in NONE
    */
@@ -309,15 +298,6 @@ class ApplicationImpl : public virtual Application,
 
   void set_video_stream_retry_number(const uint32_t& video_stream_retry_number);
 
-#ifdef SDL_REMOTE_CONTROL
-  /**
-   * @brief Return pointer to extension by uid
-   * @param uid uid of extension
-   * @return Pointer to extension, if extension was initialized, otherwise NULL
-   */
-  AppExtensionPtr QueryInterface(AppExtensionUID uid) OVERRIDE;
-#endif
-
   /**
    * @brief Load persistent files from application folder.
    */
@@ -329,6 +309,23 @@ class ApplicationImpl : public virtual Application,
    * @return free app space.
    */
   uint32_t GetAvailableDiskSpace() OVERRIDE;
+
+#ifdef SDL_REMOTE_CONTROL
+  void set_system_context(
+      const mobile_api::SystemContext::eType& system_context);
+  void set_audio_streaming_state(
+      const mobile_api::AudioStreamingState::eType& state);
+  virtual void set_hmi_level(
+      const mobile_api::HMILevel::eType& hmi_level) OVERRIDE;
+  virtual const std::set<uint32_t>& SubscribesIVI() const OVERRIDE;
+
+  /**
+   * @brief Return pointer to extension by uid
+   * @param uid uid of extension
+   * @return Pointer to extension, if extension was initialized, otherwise NULL
+   */
+  AppExtensionPtr QueryInterface(AppExtensionUID uid) OVERRIDE;
+#endif
 
  protected:
   /**

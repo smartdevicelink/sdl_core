@@ -373,7 +373,6 @@ class Application : public virtual InitialApplicationData,
  public:
   enum ApplicationRegisterState { kRegistered = 0, kWaitingForRegistration };
 
- public:
   Application() : is_greyed_out_(false) {}
   virtual ~Application() {}
 
@@ -396,16 +395,6 @@ class Application : public virtual InitialApplicationData,
    * @return updated_hash
    */
   virtual void UpdateHash() = 0;
-
-#ifdef SDL_REMOTE_CONTROL
-  virtual bool IsSubscribedToInteriorVehicleData(
-      smart_objects::SmartObject module) = 0;
-  virtual bool SubscribeToInteriorVehicleData(
-      smart_objects::SmartObject module) = 0;
-  virtual bool UnsubscribeFromInteriorVehicleData(
-      smart_objects::SmartObject module) = 0;
-  virtual void set_hmi_level(const mobile_api::HMILevel::eType& hmi_level) = 0;
-#endif
 
   /**
    * @brief method is called when SDL is saving application data for resumption
@@ -532,12 +521,6 @@ class Application : public virtual InitialApplicationData,
   virtual void increment_put_file_in_none_count() = 0;
   virtual void increment_delete_file_in_none_count() = 0;
   virtual void increment_list_files_in_none_count() = 0;
-#ifdef SDL_REMOTE_CONTROL
-  virtual void set_system_context(
-      const mobile_api::SystemContext::eType& system_context) = 0;
-  virtual void set_audio_streaming_state(
-      const mobile_api::AudioStreamingState::eType& state) = 0;
-#endif
   virtual bool set_app_icon_path(const std::string& file_name) = 0;
   virtual void set_app_allowed(const bool allowed) = 0;
   virtual void set_device(connection_handler::DeviceHandle device) = 0;
@@ -576,18 +559,6 @@ class Application : public virtual InitialApplicationData,
   virtual bool IsSubscribedToIVI(uint32_t vehicle_info_type) const = 0;
   virtual bool UnsubscribeFromIVI(uint32_t vehicle_info_type) = 0;
 
-#ifdef SDL_REMOTE_CONTROL
-  /**
-   * @brief Return pointer to extension by uid
-   * @param uid uid of extension
-   * @return Pointer to extension, if extension was initialized, otherwise NULL
-   */
-  virtual AppExtensionPtr QueryInterface(AppExtensionUID uid) = 0;
-  virtual bool AddExtension(AppExtensionPtr extention) = 0;
-  virtual bool RemoveExtension(AppExtensionUID uid) = 0;
-  virtual void RemoveExtensions() = 0;
-  virtual const std::set<uint32_t>& SubscribesIVI() const = 0;
-#endif
   /**
    * @brief ResetDataInNone reset data counters in NONE
    */
@@ -790,6 +761,31 @@ class Application : public virtual InitialApplicationData,
    * @return free app space.
    */
   virtual uint32_t GetAvailableDiskSpace() = 0;
+
+#ifdef SDL_REMOTE_CONTROL
+  virtual void set_system_context(
+      const mobile_api::SystemContext::eType& system_context) = 0;
+  virtual void set_audio_streaming_state(
+      const mobile_api::AudioStreamingState::eType& state) = 0;
+  virtual bool IsSubscribedToInteriorVehicleData(
+      smart_objects::SmartObject module) = 0;
+  virtual bool SubscribeToInteriorVehicleData(
+      smart_objects::SmartObject module) = 0;
+  virtual bool UnsubscribeFromInteriorVehicleData(
+      smart_objects::SmartObject module) = 0;
+  virtual void set_hmi_level(const mobile_api::HMILevel::eType& hmi_level) = 0;
+
+  /**
+   * @brief Return pointer to extension by uid
+   * @param uid uid of extension
+   * @return Pointer to extension, if extension was initialized, otherwise NULL
+   */
+  virtual AppExtensionPtr QueryInterface(AppExtensionUID uid) = 0;
+  virtual bool AddExtension(AppExtensionPtr extention) = 0;
+  virtual bool RemoveExtension(AppExtensionUID uid) = 0;
+  virtual void RemoveExtensions() = 0;
+  virtual const std::set<uint32_t>& SubscribesIVI() const = 0;
+#endif
 
  protected:
   mutable sync_primitives::Lock hmi_states_lock_;

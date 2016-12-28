@@ -303,7 +303,7 @@ class MockApplication : public ::application_manager::Application {
   MOCK_METHOD1(RemoveExtension, bool(application_manager::AppExtensionUID uid));
   MOCK_METHOD0(RemoveExtensions, void());
   MOCK_CONST_METHOD0(SubscribesIVI, const std::set<uint32_t>&());
-#endif
+#endif  // SDL_REMOTE_CONTROL
 };
 
 }  // namespace application_manager_test

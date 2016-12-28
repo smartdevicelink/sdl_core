@@ -139,6 +139,6 @@ void HMIMessageHandlerImpl::SubscribeToHMINotification(
     (*it)->SubscribeToHMINotification(hmi_notification);
   }
 }
-#endif
+#endif  // SDL_REMOTE_CONTROL
 
 }  //  namespace hmi_message_handler
