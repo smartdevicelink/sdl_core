@@ -564,8 +564,6 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   applications_.insert(application);
   applications_list_lock_.Release();
 
-  GetPolicyHandler().AddApplication(application->policy_app_id());
-
   return application;
 }
 

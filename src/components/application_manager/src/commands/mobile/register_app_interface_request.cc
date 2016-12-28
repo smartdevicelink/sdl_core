@@ -638,14 +638,15 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
   SendOnAppRegisteredNotificationToHMI(
       *(application.get()), resumption, need_restore_vr);
 
+  // Start PTU after successfull registration
+  GetPolicyHandler().AddApplication(application->policy_app_id());
   // Default HMI level should be set before any permissions validation, since it
   // relies on HMI level.
   application_manager_.OnApplicationRegistered(application);
 
   // Sends OnPermissionChange notification to mobile right after RAI response
   // and HMI level set-up
-  application_manager_.GetPolicyHandler().OnAppRegisteredOnMobile(
-      application->policy_app_id());
+  GetPolicyHandler().OnAppRegisteredOnMobile(application->policy_app_id());
 
   if (result_code != mobile_apis::Result::RESUME_FAILED) {
     resumer.StartResumption(application, hash_id);
