@@ -1327,8 +1327,7 @@ void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string) {
         current_app = 0;
       }
       const std::string& app_id = urls.at(current_app).app_id;
-      app =
-          application_manager_.application_by_policy_id(app_id);
+      app = application_manager_.application_by_policy_id(app_id);
 
       is_default = (app_id == policy::kDefaultId);
       is_registered = (app && app->IsRegistered());
