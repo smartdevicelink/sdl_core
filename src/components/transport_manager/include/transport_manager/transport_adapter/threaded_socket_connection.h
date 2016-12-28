@@ -121,6 +121,15 @@ class ThreadedSocketConnection : public Connection {
    */
   virtual ~ThreadedSocketConnection();
 
+  /**
+   * @brief Check if we can start the connection attempt and establish
+   *connection status.
+   *
+   * @param error contains information of any error that occurred during
+   *connection attempt.
+   *
+   * @return result that states whether we successfully connected or not.
+   */
   virtual bool Establish(ConnectError** error) = 0;
 
   /**
