@@ -527,10 +527,12 @@ void SQLPTRepresentation::GatherModuleConfig(
     *config->vehicle_model = query.GetString(7);
     *config->vehicle_year = query.GetString(8);
     *config->preloaded_date = query.GetString(9);
+#ifdef SDL_REMOTE_CONTROL
     *config->user_consent_passengersRC =
         query.IsNull(8) ? true : query.GetBoolean(8);
     *config->country_consent_passengersRC =
         query.IsNull(9) ? true : query.GetBoolean(9);
+#endif  // SDL_REMOTE_CONTROL
   }
 
   utils::dbms::SQLQuery endpoints(db());
@@ -1185,13 +1187,14 @@ bool SQLPTRepresentation::SaveModuleConfig(
                                         : query.Bind(7);
   config.vehicle_year.is_initialized() ? query.Bind(8, *(config.vehicle_year))
                                        : query.Bind(8);
+#ifdef SDL_REMOTE_CONTROL
   config.user_consent_passengersRC.is_initialized()
       ? query.Bind(9, *(config.user_consent_passengersRC))
       : query.Bind(9);
   config.country_consent_passengersRC.is_initialized()
       ? query.Bind(10, *(config.country_consent_passengersRC))
       : query.Bind(10);
-
+#endif  // SDL_REMOTE_CONTROL
   if (!query.Exec()) {
     LOG4CXX_WARN(logger_, "Incorrect update module config");
     return false;

@@ -61,13 +61,11 @@ mobile_apis::Result::eType CoreService::CheckPolicyPermissions(MessagePtr msg) {
     return mobile_apis::Result::eType::APPLICATION_NOT_REGISTERED;
   }
 
-  const std::string function_id = MessageHelper::StringifiedFunctionID(
-      static_cast<mobile_apis::FunctionID::eType>(msg->function_id()));
   const RPCParams rpc_params;
   CommandParametersPermissions params;
   const mobile_apis::Result::eType ret =
       application_manager_.CheckPolicyPermissions(
-          app, function_id, rpc_params, &params);
+          app, msg->function_name(), rpc_params, &params);
 
   if (ret != mobile_apis::Result::eType::SUCCESS) {
     return ret;

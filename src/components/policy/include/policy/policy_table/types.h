@@ -278,9 +278,9 @@ struct ModuleConfig : CompositeType {
   Optional<String<4, 4> > vehicle_year;
   Optional<String<0, 10> > preloaded_date;
   Optional<String<0, 65535> > certificate;
+#ifdef SDL_REMOTE_CONTROL
   Optional<Boolean> user_consent_passengersRC;
   Optional<Boolean> country_consent_passengersRC;
-#ifdef SDL_REMOTE_CONTROL
   Optional<Equipment> equipment;
 #endif
  public:
