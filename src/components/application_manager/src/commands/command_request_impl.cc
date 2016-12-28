@@ -562,12 +562,11 @@ void CommandRequestImpl::RemoveDisallowedParameters() {
       parameters_permissions_.disallowed_params.end();
   for (; it_disallowed != it_disallowed_end; ++it_disallowed) {
     if (params.keyExists(*it_disallowed)) {
-      params.erase(*it_disallowed);
-      removed_parameters_permissions_.disallowed_params.push_back(
-          *it_disallowed);
-      LOG4CXX_INFO(
-          logger_,
-          "Following parameter is disallowed by user: " << *it_disallowed);
+      const std::string key = *it_disallowed;
+      params.erase(key);
+      removed_parameters_permissions_.disallowed_params.push_back(key);
+      LOG4CXX_INFO(logger_,
+                   "Following parameter is disallowed by user: " << key);
     }
   }
 
@@ -578,11 +577,11 @@ void CommandRequestImpl::RemoveDisallowedParameters() {
       parameters_permissions_.undefined_params.end();
   for (; it_undefined != it_undefined_end; ++it_undefined) {
     if (params.keyExists(*it_undefined)) {
-      params.erase(*it_undefined);
-      removed_parameters_permissions_.undefined_params.push_back(*it_undefined);
-      LOG4CXX_INFO(
-          logger_,
-          "Following parameter is disallowed by policy: " << *it_undefined);
+      const std::string key = *it_undefined;
+      params.erase(key);
+      removed_parameters_permissions_.undefined_params.push_back(key);
+      LOG4CXX_INFO(logger_,
+                   "Following parameter is disallowed by policy: " << key);
     }
   }
 
