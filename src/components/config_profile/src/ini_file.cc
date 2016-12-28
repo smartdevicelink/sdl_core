@@ -188,15 +188,18 @@ char ini_write_value(const char* fname,
 
       fd = mkstemp(temp_fname);
       if (-1 == fd) {
+        fclose(rd_fp);
         return FALSE;
       }
       wr_fp = fdopen(fd, "w");
       if (NULL == wr_fp) {
         unlink(temp_fname);
         close(fd);
+        fclose(rd_fp);
         return FALSE;
       }
     } else {
+      fclose(rd_fp);
       return FALSE;
     }
   }
