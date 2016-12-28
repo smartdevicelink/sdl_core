@@ -1293,17 +1293,20 @@ void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string) {
     bool is_default = false;
     bool is_registered = false;
     bool has_urls = false;
+    bool valid_app_found = false;
     do {
       if (++current_app >= urls.size()) {
         current_app = 0;
       }
+      const std::string& app_id = urls.at(current_app).app_id;
       app =
-          application_manager_.application_by_policy_id(urls.at(current_app).app_id);
+          application_manager_.application_by_policy_id(app_id);
 
-      is_default = (urls.at(current_app).app_id == policy::kDefaultId);
+      is_default = (app_id == policy::kDefaultId);
       is_registered = (app && app->IsRegistered());
       has_urls = !urls.at(current_app).url.empty();
-    } while (!(is_default || (is_registered && has_urls)));
+      valid_app_found = (is_default || (is_registered && has_urls));
+    } while (!valid_app_found);
   }
 
   SendMessageToSDK(pt_string, urls.at(current_app).url.at(current_url));
