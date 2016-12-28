@@ -177,7 +177,7 @@ Integer<T, minval, maxval>& Integer<T, minval, maxval>::operator=(
     const Integer& new_val) {
   this->value_ = new_val.value_;
   if (new_val.is_initialized()) {
-    this->value_state_ = range_.Includes(new_val.value_) ? kValid : kInvalid;
+    this->value_state_ = new_val.value_state_;
   }
 
   return *this;

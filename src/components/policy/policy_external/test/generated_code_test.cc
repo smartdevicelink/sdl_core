@@ -38,7 +38,9 @@
 #include "policy/policy_table/enums.h"
 #include "policy/policy_table/types.h"
 #include "rpc_base/gtest_support.h"
+#include "rpc_base/rpc_base.h"
 
+using rpc::Integer;
 using rpc::policy_table_interface_base::Table;
 
 namespace test {
@@ -65,6 +67,72 @@ TEST(PolicyGeneratedCodeTest, TestValidPTUpdateJsonIsValid) {
   Table table(&valid_table);
   table.SetPolicyTableType(rpc::policy_table_interface_base::PT_UPDATE);
   ASSERT_RPCTYPE_VALID(table);
+}
+
+TEST(PolicyGeneratedCodeTest, IntegerLimitsTest) {
+  const int32_t min_value = -5;
+  const int32_t max_value = 5;
+
+  Integer<int32_t, min_value, max_value> value;
+  EXPECT_FALSE(value.is_valid());
+
+  value = min_value;
+  EXPECT_TRUE(value.is_valid());
+
+  value = max_value;
+  EXPECT_TRUE(value.is_valid());
+
+  value = min_value + max_value;
+  EXPECT_TRUE(value.is_valid());
+
+  value = min_value - 1;
+  EXPECT_FALSE(value.is_valid());
+
+  value = max_value + 1;
+  EXPECT_FALSE(value.is_valid());
+}
+
+TEST(PolicyGeneratedCodeTest, IntegerConstructionAndAssignmentTest) {
+  const int32_t min_value = -5;
+  const int32_t max_value = 5;
+
+  const Json::Value json_null = Json::Value(Json::nullValue);
+  Integer<int32_t, min_value, max_value> value_from_json_null(&json_null);
+  EXPECT_FALSE(value_from_json_null.is_valid());
+
+  const Json::Value json_string = Json::Value("string");
+  Integer<int32_t, min_value, max_value> value_from_json_string(&json_string);
+  EXPECT_FALSE(value_from_json_string.is_valid());
+
+  const Json::Value json_float = Json::Value(10.5);
+  Integer<int32_t, min_value, max_value> value_from_json_float(&json_float);
+  EXPECT_FALSE(value_from_json_float.is_valid());
+
+  const Json::Value json_int_in_range = Json::Value(4);
+  Integer<int32_t, min_value, max_value> value_from_json_int_in_range(
+      &json_int_in_range);
+  EXPECT_TRUE(value_from_json_int_in_range.is_valid());
+
+  const Json::Value json_int_out_of_range = Json::Value(9);
+  Integer<int32_t, min_value, max_value> value_from_json_int_out_of_range(
+      &json_int_out_of_range);
+  EXPECT_FALSE(value_from_json_int_out_of_range.is_valid());
+
+  const Json::Value json_zero = Json::Value(0);
+  Integer<int32_t, min_value, max_value> value_from_json_zero(&json_zero);
+  EXPECT_TRUE(value_from_json_zero.is_valid());
+
+  Integer<int32_t, min_value, max_value> invalid_value(&json_string);
+  EXPECT_FALSE(invalid_value.is_valid());
+  Integer<int32_t, min_value, max_value> reassigned_value = invalid_value;
+  EXPECT_FALSE(reassigned_value.is_valid());
+
+  Integer<int32_t, min_value, max_value> another_invalid_value(&json_string);
+  EXPECT_FALSE(another_invalid_value.is_valid());
+  Integer<int32_t, min_value, max_value> valid_value(0);
+  EXPECT_TRUE(valid_value.is_valid());
+  valid_value = another_invalid_value;
+  EXPECT_FALSE(valid_value.is_valid());
 }
 
 }  // namespace policy_test

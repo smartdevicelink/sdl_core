@@ -45,6 +45,7 @@
 #include "application_manager/mock_application.h"
 #include "application_manager/event_engine/event.h"
 #include "application_manager/commands/mobile/get_dtcs_request.h"
+#include "application_manager/mock_message_helper.h"
 #include "interfaces/MOBILE_API.h"
 
 namespace test {
@@ -59,6 +60,7 @@ namespace am = ::application_manager;
 using am::commands::MessageSharedPtr;
 using am::commands::GetDTCsRequest;
 using am::event_engine::Event;
+using am::MockMessageHelper;
 namespace mobile_result = mobile_apis::Result;
 
 typedef SharedPtr<GetDTCsRequest> GetDTCsRequestPtr;
@@ -119,7 +121,11 @@ TEST_F(GetDTCsRequestTest, OnEvent_SUCCESS) {
 
   Event event(hmi_apis::FunctionID::VehicleInfo_GetDTCs);
   event.set_smart_object(*event_msg);
+  MockMessageHelper& mock_message_helper =
+      *MockMessageHelper::message_helper_mock();
 
+  ON_CALL(mock_message_helper, HMIToMobileResult(_))
+      .WillByDefault(Return(mobile_apis::Result::SUCCESS));
   EXPECT_CALL(
       app_mngr_,
       ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS), _));
