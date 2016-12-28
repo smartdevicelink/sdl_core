@@ -1016,6 +1016,7 @@ void PolicyManagerImpl::KmsChanged(int kilometers) {
     LOG4CXX_INFO(logger_, "Enough kilometers passed to send for PT update.");
     update_status_manager_.ScheduleUpdate();
     StartPTExchange();
+    PTUpdatedAt(KILOMETERS, kilometers);
   }
 }
 
