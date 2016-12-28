@@ -1,5 +1,5 @@
 {
-  "policy_table" : {
+  "policy_table": {
     "module_config": {
       "preloaded_date": "2015-12-02",
       "exchange_after_x_ignition_cycles": 100,
@@ -2554,6 +2554,18 @@
       }
     },
     "app_policies": {
+      "584421907": {
+        "keep_context": false,
+        "steal_focus": false,
+        "priority": "NONE",
+        "default_hmi": "NONE",
+        "groups": [
+          "BaseBeforeDataConsent"
+        ],
+        "RequestType": [
+          "PROPRIETARY"
+        ]
+      },
       "default": {
         "keep_context": false,
         "steal_focus": false,
@@ -2588,17 +2600,6 @@
         "RequestType": [
           "PROPRIETARY"
         ]
-      },
-      "584421907": {
-        "keep_context" : false,
-                         "steal_focus"
-                         : false,
-                           "priority" : "NONE",
-                                        "default_hmi"
-                                        : "NONE",
-                                          "groups" : ["BaseBeforeDataConsent"],
-                                                     "RequestType" :
-                                                     ["PROPRIETARY"]
       }
     }
   }
