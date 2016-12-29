@@ -174,7 +174,11 @@ class PolicyManagerImplTest2 : public ::testing::Test {
       , app_id2("1766825573")
       , dev_id1("XXX123456789ZZZ")
       , dev_id2("08-00-27-CE-76-FE")
-      , PTU_request_types(Json::arrayValue) {}
+      , PTU_request_types(Json::arrayValue) {
+    int* crash = 0;
+    int create_crash = *crash;
+    UNUSED(create_crash)
+  }
 
  protected:
   PolicyManagerImpl* manager;
