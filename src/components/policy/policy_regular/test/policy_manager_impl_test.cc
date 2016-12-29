@@ -177,7 +177,7 @@ class PolicyManagerImplTest2 : public ::testing::Test {
       , PTU_request_types(Json::arrayValue) {
     int* crash = 0;
     int create_crash = *crash;
-    UNUSED(create_crash)
+    UNUSED(create_crash);
   }
 
  protected:
