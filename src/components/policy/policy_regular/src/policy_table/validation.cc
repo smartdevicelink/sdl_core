@@ -66,7 +66,7 @@ bool ApplicationPoliciesSection::Validate() const {
 
   while (iter != end_iter) {
     ApplicationParams& app_params = (*iter).second;
-    bool is_request_type_ommited = !app_params.RequestType.is_initialized();
+    bool is_request_type_omitted = !app_params.RequestType.is_initialized();
     bool is_request_type_valid = app_params.RequestType.is_valid();
     bool is_request_type_empty = app_params.RequestType->empty();
 
@@ -83,9 +83,9 @@ bool ApplicationPoliciesSection::Validate() const {
         }
       }
     } else {
-      if (is_request_type_ommited) {
+      if (is_request_type_omitted) {
         LOG4CXX_WARN(logger_,
-                     "App policy RequestTypes ommited."
+                     "App policy RequestTypes omitted."
                      " Will be replaced with default.");
         app_params.RequestType = apps[kDefaultApp].RequestType;
         ++iter;

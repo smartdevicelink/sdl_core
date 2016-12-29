@@ -1,7 +1,6 @@
 {
-  "policy_table": {
+  "policy_table" : {
     "module_config": {
-      "preloaded_pt": true,
       "preloaded_date": "2015-12-02",
       "exchange_after_x_ignition_cycles": 100,
       "exchange_after_x_kilometers": 1800,
@@ -2596,19 +2595,20 @@
         ]
       },
       "584421907": {
-        "keep_context": false,
-        "steal_focus": false,
-        "priority": "NONE",
-        "default_hmi": "NONE",
-        "groups": [
-          "BaseBeforeDataConsent"
-        ],
-        "RequestType": [
-          "TRAFFIC_MESSAGE_CHANNEL",
-          "QUERY_APPS",
-          "LAUNCH_APP",
-          "PROPRIETARY"
-        ]
+        "keep_context" : false,
+                         "steal_focus" : false,
+                                         "priority"
+                                         : "NONE",
+                                           "default_hmi"
+                                           : "NONE",
+                                             "groups" :
+                                             ["BaseBeforeDataConsent"],
+                                             "RequestType" :[
+                                               "TRAFFIC_MESSAGE_CHANNEL",
+                                               "QUERY_APPS",
+                                               "LAUNCH_APP",
+                                               "PROPRIETARY"
+                                             ]
       }
     }
   }

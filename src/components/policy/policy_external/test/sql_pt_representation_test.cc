@@ -224,7 +224,6 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
     policy_table["app_policies"] = Json::Value(Json::objectValue);
 
     Json::Value& module_config = policy_table["module_config"];
-    module_config["preloaded_pt"] = Json::Value(false);
     module_config["preloaded_date"] = Json::Value("25-04-2015");
     module_config["exchange_after_x_ignition_cycles"] = Json::Value(10);
     module_config["exchange_after_x_kilometers"] = Json::Value(100);
@@ -1600,6 +1599,7 @@ TEST_F(SQLPTRepresentationTest,
   table["policy_table"]["app_policies"]["device"].removeMember("groups");
   table["policy_table"]["device_data"] = Json::Value(Json::objectValue);
   table["policy_table"]["module_meta"] = Json::Value(Json::objectValue);
+  table["policy_table"]["module_config"]["preloaded_pt"] = Json::Value(false);
   policy_table::Table expected(&table);
   Json::StyledWriter writer;
   // Checks

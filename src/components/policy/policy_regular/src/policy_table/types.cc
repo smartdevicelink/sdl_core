@@ -611,19 +611,19 @@ void ModuleConfig::ReportErrors(rpc::ValidationReport* report__) const {
   }
   if (PT_PRELOADED == GetPolicyTableType()) {
     std::string validation_info =
-        ommited_validation_info + PolicyTableTypeToString(GetPolicyTableType());
-    rpc::ValidationReport* ommited_field_report;
+        omitted_validation_info + PolicyTableTypeToString(GetPolicyTableType());
+    rpc::ValidationReport* omitted_field_report;
     if (vehicle_make.is_initialized()) {
-      ommited_field_report = &report__->ReportSubobject("vehicle_make");
-      ommited_field_report->set_validation_info(validation_info);
+      omitted_field_report = &report__->ReportSubobject("vehicle_make");
+      omitted_field_report->set_validation_info(validation_info);
     }
     if (vehicle_year.is_initialized()) {
-      ommited_field_report = &report__->ReportSubobject("vehicle_year");
-      ommited_field_report->set_validation_info(validation_info);
+      omitted_field_report = &report__->ReportSubobject("vehicle_year");
+      omitted_field_report->set_validation_info(validation_info);
     }
     if (vehicle_model.is_initialized()) {
-      ommited_field_report = &report__->ReportSubobject("vehicle_model");
-      ommited_field_report->set_validation_info(validation_info);
+      omitted_field_report = &report__->ReportSubobject("vehicle_model");
+      omitted_field_report->set_validation_info(validation_info);
     }
   }
 }
@@ -772,7 +772,7 @@ void MessageLanguages::ReportErrors(rpc::ValidationReport* report__) const {
   if (PT_SNAPSHOT == GetPolicyTableType()) {
     if (languages.is_initialized()) {
       std::string validation_info =
-          ommited_validation_info +
+          omitted_validation_info +
           PolicyTableTypeToString(GetPolicyTableType());
       report__->ReportSubobject("languages")
           .set_validation_info(validation_info);
@@ -837,7 +837,7 @@ void ConsumerFriendlyMessages::ReportErrors(
   if (PT_SNAPSHOT == GetPolicyTableType()) {
     if (messages.is_initialized()) {
       std::string validation_info =
-          ommited_validation_info +
+          omitted_validation_info +
           PolicyTableTypeToString(GetPolicyTableType());
       report__->ReportSubobject("messages")
           .set_validation_info(validation_info);
@@ -1118,7 +1118,7 @@ void AppLevel::ReportErrors(rpc::ValidationReport* report__) const {
   if (PT_PRELOADED == GetPolicyTableType() ||
       PT_UPDATE == GetPolicyTableType()) {
     std::string validation_info =
-        ommited_validation_info + PolicyTableTypeToString(GetPolicyTableType());
+        omitted_validation_info + PolicyTableTypeToString(GetPolicyTableType());
     report__->set_validation_info(validation_info);
   }
 }
@@ -1160,7 +1160,7 @@ void UsageAndErrorCounts::ReportErrors(rpc::ValidationReport* report__) const {
   if (PT_PRELOADED == GetPolicyTableType() ||
       PT_UPDATE == GetPolicyTableType()) {
     std::string validation_info =
-        ommited_validation_info + PolicyTableTypeToString(GetPolicyTableType());
+        omitted_validation_info + PolicyTableTypeToString(GetPolicyTableType());
     report__->set_validation_info(validation_info);
   }
   if (!app_level.is_valid()) {
@@ -1298,7 +1298,7 @@ void PolicyTable::ReportErrors(rpc::ValidationReport* report__) const {
   if (PT_PRELOADED == GetPolicyTableType() ||
       PT_UPDATE == GetPolicyTableType()) {
     std::string validation_info =
-        ommited_validation_info + PolicyTableTypeToString(GetPolicyTableType());
+        omitted_validation_info + PolicyTableTypeToString(GetPolicyTableType());
 
     if (device_data.is_initialized()) {
       report__->ReportSubobject("device_data")

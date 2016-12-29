@@ -92,7 +92,6 @@ Json::Value createPTforLoad() {
       "{"
       "\"policy_table\": {"
       "\"module_config\": {"
-      "\"preloaded_pt\": true,"
       "\"exchange_after_x_ignition_cycles\": 10,"
       "\"exchange_after_x_kilometers\": 100,"
       "\"exchange_after_x_days\": 5,"

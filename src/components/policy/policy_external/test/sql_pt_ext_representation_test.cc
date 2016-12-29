@@ -222,7 +222,6 @@ TEST_F(SQLPTExtRepresentationTest,
 
   Json::Value& module_config = policy_table["module_config"];
   module_config["preloaded_date"] = Json::Value("");
-  module_config["preloaded_pt"] = Json::Value(true);
   module_config["exchange_after_x_ignition_cycles"] = Json::Value(10);
   module_config["exchange_after_x_kilometers"] = Json::Value(100);
   module_config["exchange_after_x_days"] = Json::Value(5);
@@ -330,6 +329,7 @@ TEST_F(SQLPTExtRepresentationTest,
   policy_table["module_meta"] = Json::Value(Json::objectValue);
   policy_table["usage_and_error_counts"] = Json::Value(Json::objectValue);
   policy_table["device_data"] = Json::Value(Json::objectValue);
+  policy_table["module_config"]["preloaded_pt"] = Json::Value(false);
 
   Json::Value& module_meta = policy_table["module_meta"];
   module_meta["ccpu_version"] = Json::Value("");

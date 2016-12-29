@@ -125,7 +125,7 @@ TEST_F(PolicyManagerImplTest2, GetNotificationsNumberAfterPTUpdate) {
 
 TEST_F(PolicyManagerImplTest2, IsAppRevoked_SetRevokedAppID_ExpectAppRevoked) {
   // Arrange
-  std::ifstream ifile(preloadet_pt_filename_);
+  std::ifstream ifile(kValidSdlPtUpdateJson);
   Json::Reader reader;
   std::string json;
   Json::Value root(Json::objectValue);
@@ -177,7 +177,7 @@ TEST_F(PolicyManagerImplTest2,
   EXPECT_EQ(::policy::kRpcAllowed, output.hmi_level_permitted);
   ASSERT_TRUE(output.list_of_allowed_params.empty());
   // Act
-  std::ifstream ifile(preloadet_pt_filename_);
+  std::ifstream ifile(kValidSdlPtUpdateJson);
   Json::Reader reader;
   std::string json;
   Json::Value root(Json::objectValue);
@@ -219,7 +219,7 @@ TEST_F(PolicyManagerImplTest2,
   // Add app from consented device. App will be assigned with default policies
   manager_->AddApplication(application_id_);
   // Emulate PTU with new policies for app added above
-  std::ifstream ifile(preloadet_pt_filename_);
+  std::ifstream ifile(kValidSdlPtUpdateJson);
   Json::Reader reader;
   std::string json;
   Json::Value root(Json::objectValue);
@@ -712,7 +712,7 @@ TEST_F(PolicyManagerImplTest2,
   // Load Json to cache
   // File have 2 functional groups: SendLocation and SendLocationOnly.
   // They have different parameters. One has dissalowed all params, other -
-  // ommited.
+  // omitted.
 
   // Arrange
   CreateLocalPT("json/sdl_preloaded_pt_send_location.json");
