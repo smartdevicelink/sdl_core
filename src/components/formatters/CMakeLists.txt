@@ -1,4 +1,4 @@
-# Copyright (c) 2014, Ford Motor Company
+# Copyright (c) 2016, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,8 +28,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-
-set(FORMATTERS_SRC_DIR  ${COMPONENTS_DIR}/formatters/src)
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
 include_directories (
   include/
@@ -41,22 +40,13 @@ include_directories (
   ${COMPONENTS_DIR}/utils/include
 )
 
-set (SOURCES
-    ${FORMATTERS_SRC_DIR}/CSmartFactory.cc
+set(PATHS
+  ${CMAKE_CURRENT_SOURCE_DIR}/include
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
-set (FORMATTER_SOURCES
-   ${FORMATTERS_SRC_DIR}/CFormatterJsonBase.cc
-   ${FORMATTERS_SRC_DIR}/CFormatterJsonSDLRPCv1.cc
-   ${FORMATTERS_SRC_DIR}/CFormatterJsonSDLRPCv2.cc
-   ${FORMATTERS_SRC_DIR}/formatter_json_rpc.cc
-   ${FORMATTERS_SRC_DIR}/meta_formatter.cc
-   ${FORMATTERS_SRC_DIR}/generic_json_formatter.cc
-)
-
-add_library("formatters" ${SOURCES}
-        ${FORMATTER_SOURCES}
-)
+collect_sources(SOURCES "${PATHS}")
+add_library(formatters ${SOURCES})
 
 if(BUILD_TESTS)
   add_subdirectory(test)

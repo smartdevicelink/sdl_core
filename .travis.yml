@@ -7,7 +7,6 @@ only:
   - \/feature\/.+
   - \/fix\/.+
   - \/hotfix\/.+
-  - \/release\/.+
 
 addons:
   apt:
@@ -20,10 +19,10 @@ addons:
     - libbluetooth3
     - libbluetooth-dev
     - libudev-dev
+    - libusb-1.0
     - cmake
     - html2text
     - clang-format-3.6
-    - binutils
 before_install:
   - sudo apt-get -qq update
   - sudo apt-get -q -y install libavahi-client-dev bluez-tools sqlite3 libsqlite3-dev automake1.11
@@ -34,7 +33,8 @@ script:
   - bash -e tools/infrastructure/check_style.sh
   - mkdir build && cd build && cmake ../ -DBUILD_TESTS=ON -DENABLE_GCOV=ON && make install
   - sudo ldconfig
-  - make test
+  - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:`pwd`/bin/lib ; make test
+  - bash ../tools/infrastructure/show_disabled.sh 
   - bash -ex ../tools/infrastructure/collect_coverage.sh ./
 env:
   global:
@@ -56,6 +56,10 @@ deploy:
 notifications:
   email:
     - AKutsan@luxoft.com
+    - AByzhynar@luxoft.com
     - NSnitsar@luxoft.com
+    - RMalynovskyi@luxoft.com
     - MGhiumiusliu@luxoft.com
+    - AGaliuzov@luxoft.com
+    - ANosach@luxoft.com
 

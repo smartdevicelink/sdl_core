@@ -28,30 +28,26 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-
-set(RPC_BASE_INCLUDE_DIR ${COMPONENTS_DIR}/rpc_base/include)
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
 include_directories(
-  include
+  ${COMPONENTS_DIR}/rpc_base/include
+  ${COMPONENTS_DIR}/utils/include
   ${JSONCPP_INCLUDE_DIRECTORY}
 )
 
-set (SOURCES
-  ${COMPONENTS_DIR}/rpc_base/src/rpc_base/rpc_base.cc
+set(PATHS
+  ${CMAKE_CURRENT_SOURCE_DIR}/include
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
+collect_sources(SOURCES "${PATHS}")
+
+set(LIBRARIES
+  jsoncpp
 )
 
-set (HEADERS
-  ${RPC_BASE_INCLUDE_DIR}/rpc_base/gtest_support.h
-  ${RPC_BASE_INCLUDE_DIR}/rpc_base/rpc_base_dbus_inl.h
-  ${RPC_BASE_INCLUDE_DIR}/rpc_base/rpc_base.h
-  ${RPC_BASE_INCLUDE_DIR}/rpc_base/rpc_base_inl.h
-  ${RPC_BASE_INCLUDE_DIR}/rpc_base/rpc_base_json_inl.h
-  ${RPC_BASE_INCLUDE_DIR}/rpc_base/rpc_message.h
-  ${RPC_BASE_INCLUDE_DIR}/rpc_base/validation_report.h
-)
-
-add_library(rpc_base ${HEADERS} ${SOURCES})
-target_link_libraries(rpc_base jsoncpp)
+add_library(rpc_base ${SOURCES})
+target_link_libraries(rpc_base ${LIBRARIES})
 
 if(BUILD_TESTS)
   add_subdirectory(test)
