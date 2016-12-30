@@ -41,6 +41,7 @@
 #include <stdint.h>
 
 #include "policy/policy_manager.h"
+#include "application_manager/application.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/policies/policy_event_observer.h"
 #include "application_manager/policies/delegates/statistics_delegate.h"
@@ -294,8 +295,9 @@ class PolicyHandler : public PolicyHandlerInterface,
   void OnSystemError(int code) OVERRIDE;
 
   /**
-   * @brief Choose application id to be used for snapshot sending
-   * @return Application id or 0, if there are no applications registered
+   * @brief Chooses random application id to be used for snapshot sending
+   * considering HMI level
+   * @return Application id or 0, if there are no suitable applications
    */
   uint32_t GetAppIdForSending() const OVERRIDE;
 
@@ -475,6 +477,17 @@ class PolicyHandler : public PolicyHandlerInterface,
    * @brief Link all currently registered applications
    */
   void LinkAppsToDevice();
+
+  typedef std::vector<application_manager::ApplicationSharedPtr> Applications;
+
+  /**
+   * @brief Chooses application suitable for forwarding request for policy
+   * update to backend by checking its registration status and device consent
+   * @param app_list List of applications to choose from, list can be modified
+   * in the process of lookup
+   * @return Application id or 0 if no suitable application was found
+   */
+  uint32_t GetApplicationIdForPolicyUpdate(Applications app_list) const;
 
  private:
   class StatisticManagerImpl : public usage_statistics::StatisticsManager {
