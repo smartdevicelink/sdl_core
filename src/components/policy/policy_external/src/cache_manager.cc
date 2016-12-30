@@ -827,7 +827,6 @@ bool CacheManager::ReactOnUserDevConsentForApp(const std::string& app_id,
   LOG4CXX_AUTO_TRACE(logger_);
   CACHE_MANAGER_CHECK(false);
   bool result = true;
-  cache_lock_.Acquire();
   if (is_device_allowed) {
     // If app has pre_DataConsented groups it should be 'promoted' to default
     if (IsPredataPolicy(app_id)) {
@@ -836,7 +835,6 @@ bool CacheManager::ReactOnUserDevConsentForApp(const std::string& app_id,
   } else {
     SetIsPredata(app_id);
   }
-  cache_lock_.Release();
   Backup();
   return result;
 }
@@ -1837,6 +1835,7 @@ long CacheManager::ConvertSecondsToMinute(int seconds) {
 
 bool CacheManager::SetDefaultPolicy(const std::string& app_id) {
   CACHE_MANAGER_CHECK(false);
+  sync_primitives::AutoLock lock(cache_lock_);
   policy_table::ApplicationPolicies::const_iterator iter =
       pt_->policy_table.app_policies_section.apps.find(kDefaultId);
   if (pt_->policy_table.app_policies_section.apps.end() != iter) {
@@ -1871,6 +1870,7 @@ bool CacheManager::SetIsDefault(const std::string& app_id) {
 
 bool policy::CacheManager::SetIsPredata(const std::string& app_id) {
   CACHE_MANAGER_CHECK(false);
+  sync_primitives::AutoLock lock(cache_lock_);
   if (IsApplicationRepresented(app_id)) {
     pt_->policy_table.app_policies_section.apps[app_id].set_to_string(
         kPreDataConsentId);
@@ -1881,6 +1881,7 @@ bool policy::CacheManager::SetIsPredata(const std::string& app_id) {
 
 bool CacheManager::SetPredataPolicy(const std::string& app_id) {
   CACHE_MANAGER_CHECK(false);
+  sync_primitives::AutoLock lock(cache_lock_);
   policy_table::ApplicationPolicies::const_iterator iter =
       pt_->policy_table.app_policies_section.apps.find(kPreDataConsentId);
 

@@ -1180,6 +1180,7 @@ long CacheManager::ConvertSecondsToMinute(int seconds) {
 
 bool CacheManager::SetDefaultPolicy(const std::string& app_id) {
   CACHE_MANAGER_CHECK(false);
+  sync_primitives::AutoLock lock(cache_lock_);
   policy_table::ApplicationPolicies::const_iterator iter =
       pt_->policy_table.app_policies_section.apps.find(kDefaultId);
   if (pt_->policy_table.app_policies_section.apps.end() != iter) {
@@ -1216,6 +1217,7 @@ bool CacheManager::SetIsDefault(const std::string& app_id) {
 
 bool CacheManager::SetPredataPolicy(const std::string& app_id) {
   CACHE_MANAGER_CHECK(false);
+  sync_primitives::AutoLock lock(cache_lock_);
   policy_table::ApplicationPolicies::const_iterator iter =
       pt_->policy_table.app_policies_section.apps.find(kPreDataConsentId);
 
