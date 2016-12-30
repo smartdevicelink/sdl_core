@@ -227,8 +227,9 @@ TYPED_TEST(OnButtonNotificationCommandsTest, Run_CustomButton_SUCCESS) {
       this->template CreateCommand<Notification>(notification_msg));
 
   typename TestFixture::MockAppPtr mock_app = this->CreateMockApp();
+  ON_CALL(*mock_app, hmi_level())
+      .WillByDefault(Return(mobile_apis::HMILevel::HMI_FULL));
   EXPECT_CALL(this->app_mngr_, application(kAppId)).WillOnce(Return(mock_app));
-
   EXPECT_CALL(*mock_app, IsSubscribedToSoftButton(kCustomButtonId))
       .WillOnce(Return(true));
 
