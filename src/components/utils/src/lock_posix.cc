@@ -80,7 +80,7 @@ void Lock::Acquire() {
     LOG4CXX_FATAL(logger_,
                   "Failed to acquire mutex " << &mutex_ << ": "
                                              << strerror(status));
-    DCHECK(status != 0);
+    NOTREACHED();
   } else {
     AssertFreeAndMarkTaken();
   }
