@@ -49,7 +49,6 @@ set(LIBRARIES
     Utils    
     Resumption  
     jsoncpp
-    ConfigProfile
 )
 
 create_test(resumption_test "${SOURCES}" "${LIBRARIES}")

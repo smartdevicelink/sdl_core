@@ -31,7 +31,7 @@
 include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/platform.cmake)
 include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
-find_package(SDLSqlite3 REQUIRED)
+find_package(Sqlite3 REQUIRED)
 
 include_directories (
   ${COMPONENTS_DIR}/utils/include

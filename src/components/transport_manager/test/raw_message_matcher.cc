@@ -31,7 +31,6 @@
  */
 
 #include "include/transport_manager/raw_message_matcher.h"
-//#include "../../include/protocol/raw_message.h"
 
 namespace test {
 namespace components {
