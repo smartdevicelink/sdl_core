@@ -368,8 +368,8 @@ class SQLPTRepresentationTest2 : public ::testing::Test {
     delete reps;
   }
   const std::string kAppStorageFolder = "storage123";
-  const uint16_t kOpenAttemptTimeoutMs = 700u;
-  const uint16_t kAttemptsToOpenPolicyDB = 8u;
+  const uint16_t kOpenAttemptTimeoutMs = 70u;
+  const uint16_t kAttemptsToOpenPolicyDB = 2u;
 };
 
 TEST_F(SQLPTRepresentationTest2,
@@ -377,8 +377,6 @@ TEST_F(SQLPTRepresentationTest2,
   EXPECT_EQ(::policy::FAIL, reps->Init(&policy_settings_));
   // Check  Actual attempts number made to try to open DB
   EXPECT_EQ(kAttemptsToOpenPolicyDB, reps->open_counter());
-  // Check timeot value correctly read from config file.
-  EXPECT_EQ(700u, kOpenAttemptTimeoutMs);
 }
 
 TEST_F(SQLPTRepresentationTest,

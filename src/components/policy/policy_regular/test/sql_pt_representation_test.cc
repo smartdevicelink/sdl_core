@@ -358,8 +358,8 @@ class SQLPTRepresentationTest2 : public ::testing::Test {
  protected:
   SQLPTRepresentationTest2()
       : kAppStorageFolder("storage123")
-      , kOpenAttemptTimeoutMs(700u)
-      , kAttemptsToOpenPolicyDB(8u) {}
+      , kOpenAttemptTimeoutMs(70u)
+      , kAttemptsToOpenPolicyDB(2u) {}
 
   void SetUp() OVERRIDE {
     file_system::CreateDirectory(kAppStorageFolder);
