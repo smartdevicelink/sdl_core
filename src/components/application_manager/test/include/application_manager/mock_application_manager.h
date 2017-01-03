@@ -130,6 +130,7 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                      connection_handler::ConnectionHandler&());
   MOCK_CONST_METHOD0(protocol_handler, protocol_handler::ProtocolHandler&());
   MOCK_METHOD0(GetPolicyHandler, policy::PolicyHandlerInterface&());
+  MOCK_CONST_METHOD0(GetPolicyHandler, const policy::PolicyHandlerInterface&());
   MOCK_METHOD0(GetNextHMICorrelationID, uint32_t());
   MOCK_METHOD0(GenerateNewHMIAppID, uint32_t());
   MOCK_METHOD1(EndNaviServices, void(uint32_t app_id));
@@ -244,11 +245,6 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_CONST_METHOD0(
       AppsWaitingForRegistration,
       DataAccessor<application_manager::AppsWaitRegistrationSet>());
-
-  MOCK_METHOD1(ReplaceMobileByHMIAppId,
-               void(smart_objects::SmartObject& message));
-  MOCK_METHOD1(ReplaceHMIByMobileAppId,
-               void(smart_objects::SmartObject& message));
   MOCK_METHOD1(GetAvailableSpaceForApp,
                uint32_t(const std::string& folder_name));
   MOCK_METHOD0(OnTimerSendTTSGlobalProperties, void());
@@ -271,18 +267,16 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD1(IsVideoStreamingAllowed, bool(uint32_t connection_key));
   MOCK_METHOD2(ChangeAppsHMILevel,
                void(uint32_t app_id, mobile_apis::HMILevel::eType level));
-  MOCK_METHOD0(CreatePhoneCallAppList, void());
-  MOCK_METHOD0(ResetPhoneCallAppList, void());
   MOCK_METHOD0(GetPluginManager, functional_modules::PluginManager&());
   MOCK_CONST_METHOD1(
       devices, std::vector<std::string>(const std::string& policy_app_id));
-  MOCK_METHOD1(PostMessageToHMIQueque,
-               void(const application_manager::MessagePtr& message));
-  MOCK_METHOD1(PostMessageToMobileQueque,
-               void(const application_manager::MessagePtr& message));
   MOCK_METHOD1(GetDeviceHandle, uint32_t(uint32_t connection_key));
   MOCK_CONST_METHOD1(IsAudioStreamingAllowed, bool(uint32_t connection_key));
   MOCK_CONST_METHOD1(IsVideoStreamingAllowed, bool(uint32_t connection_key));
+  MOCK_METHOD1(SendPostMessageToMobile,
+               void(const application_manager::MessagePtr& message));
+  MOCK_METHOD1(SendPostMessageToHMI,
+               void(const application_manager::MessagePtr& message));
 #endif  // SDL_REMOTE_CONTROL
 };
 

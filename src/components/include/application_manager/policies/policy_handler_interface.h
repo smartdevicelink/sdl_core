@@ -390,7 +390,7 @@ class PolicyHandlerInterface {
                             mobile_apis::AppHMIType::eType hmi,
                             const smart_objects::SmartObject* app_types) = 0;
 
- virtual void AddApplication(const std::string& application_id,
+  virtual void AddApplication(const std::string& application_id,
                               const smart_objects::SmartObject* app_types) = 0;
 
   /**
