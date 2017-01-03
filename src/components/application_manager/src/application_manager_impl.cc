@@ -1008,10 +1008,10 @@ mobile_apis::HMILevel::eType ApplicationManagerImpl::GetDefaultHmiLevel(
   LOG4CXX_AUTO_TRACE(logger_);
   HMILevel::eType default_hmi = HMILevel::HMI_NONE;
 
-  if (policy_handler_->PolicyEnabled()) {
+  if (GetPolicyHandler().PolicyEnabled()) {
     const std::string policy_app_id = application->policy_app_id();
     std::string default_hmi_string = "";
-    if (policy_handler_->GetDefaultHmi(policy_app_id, &default_hmi_string)) {
+    if (GetPolicyHandler().GetDefaultHmi(policy_app_id, &default_hmi_string)) {
       if ("BACKGROUND" == default_hmi_string) {
         default_hmi = HMILevel::HMI_BACKGROUND;
       } else if ("FULL" == default_hmi_string) {
@@ -2824,13 +2824,13 @@ mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
   LOG4CXX_INFO(logger_, "CheckPolicyPermissions");
   // TODO(AOleynik): Remove check of policy_enable, when this flag will be
   // unused in config file
-  if (!policy_handler_->PolicyEnabled()) {
+  if (!GetPolicyHandler().PolicyEnabled()) {
     return mobile_apis::Result::SUCCESS;
   }
 
   DCHECK(app);
   policy::CheckPermissionResult result;
-  policy_handler_->CheckPermissions(app, function_id, rpc_params, result);
+  GetPolicyHandler().CheckPermissions(app, function_id, rpc_params, result);
 
   if (NULL != params_permissions) {
     params_permissions->allowed_params = result.list_of_allowed_params;
@@ -2846,10 +2846,11 @@ mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
     }
   }
 
+#ifdef ENABLE_LOG
   const std::string log_msg =
       "Application: " + app->policy_app_id() + ", RPC: " + function_id +
       ", HMI status: " + MessageHelper::StringifiedHMILevel(app->hmi_level());
-
+#endif  // ENABLE_LOG
   if (result.hmi_level_permitted != policy::kRpcAllowed) {
     LOG4CXX_WARN(logger_, "Request is blocked by policies. " << log_msg);
 
@@ -2864,7 +2865,7 @@ mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
         return mobile_apis::Result::INVALID_ENUM;
     }
   }
-  LOG4CXX_INFO(logger_, "Request is allowed by policies. " + log_msg);
+  LOG4CXX_DEBUG(logger_, "Request is allowed by policies. " << log_msg);
   return mobile_api::Result::SUCCESS;
 }
 
@@ -3207,7 +3208,7 @@ bool ApplicationManagerImpl::IsApplicationForbidden(
 
 policy::DeviceConsent ApplicationManagerImpl::GetUserConsentForDevice(
     const std::string& device_id) const {
-  return policy_handler_->GetUserConsentForDevice(device_id);
+  return GetPolicyHandler().GetUserConsentForDevice(device_id);
 }
 
 void ApplicationManagerImpl::OnWakeUp() {
@@ -3698,68 +3699,9 @@ bool ApplicationManagerImpl::IsVideoStreamingAllowed(
   return Compare<eType, EQ, ONE>(app->hmi_level(), HMI_FULL, HMI_LIMITED);
 }
 
-void ApplicationManagerImpl::PostMessageToMobileQueque(
-    const MessagePtr& message) {
-  messages_to_mobile_.PostMessage(impl::MessageToMobile(message, false));
-}
-
-void ApplicationManagerImpl::PostMessageToHMIQueque(const MessagePtr& message) {
-  messages_to_hmi_.PostMessage(impl::MessageToHmi(message));
-}
-
 void ApplicationManagerImpl::SubscribeToHMINotification(
     const std::string& hmi_notification) {
   hmi_handler_->SubscribeToHMINotification(hmi_notification);
-}
-
-void ApplicationManagerImpl::CreatePhoneCallAppList() {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  DataAccessor<ApplicationSet> accessor = applications();
-
-  ApplicationManagerImpl::ApplictionSetIt it = accessor.GetData().begin();
-  ApplicationManagerImpl::ApplictionSetIt itEnd = accessor.GetData().end();
-
-  using namespace mobile_apis::HMILevel;
-  using namespace helpers;
-  for (; it != itEnd; ++it) {
-    if (Compare<eType, EQ, ONE>((*it)->hmi_level(), HMI_FULL, HMI_LIMITED)) {
-      // back up app state
-      on_phone_call_app_list_.insert(
-          std::pair<uint32_t, AppState>((*it)->app_id(),
-                                        AppState((*it)->hmi_level(),
-                                                 (*it)->audio_streaming_state(),
-                                                 (*it)->system_context())));
-
-      ChangeAppsHMILevel((*it)->app_id(),
-                         (*it)->is_navi() ? HMI_LIMITED : HMI_BACKGROUND);
-
-      // app state during phone call
-      (*it)->set_audio_streaming_state(
-          mobile_api::AudioStreamingState::NOT_AUDIBLE);
-      (*it)->set_system_context(mobile_api::SystemContext::SYSCTXT_MAIN);
-      MessageHelper::SendHMIStatusNotification(*(*it), *this);
-    }
-  }
-}
-
-void ApplicationManagerImpl::ResetPhoneCallAppList() {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  std::map<uint32_t, AppState>::iterator it = on_phone_call_app_list_.begin();
-  std::map<uint32_t, AppState>::iterator it_end = on_phone_call_app_list_.end();
-  for (; it != it_end; ++it) {
-    ApplicationSharedPtr app = application(it->first);
-    if (app) {
-      ChangeAppsHMILevel(app->app_id(), it->second.hmi_level);
-
-      app->set_audio_streaming_state(it->second.audio_streaming_state);
-      app->set_system_context(it->second.system_context);
-      MessageHelper::SendHMIStatusNotification(*app, *this);
-    }
-  }
-
-  on_phone_call_app_list_.clear();
 }
 
 void ApplicationManagerImpl::ChangeAppsHMILevel(
@@ -3769,7 +3711,7 @@ void ApplicationManagerImpl::ChangeAppsHMILevel(
   LOG4CXX_DEBUG(logger_, "AppID to change: " << app_id << " -> " << level);
   ApplicationSharedPtr app = application(app_id);
   if (!app) {
-    LOG4CXX_DEBUG(logger_, "There is no app with id: " << app_id);
+    LOG4CXX_ERROR(logger_, "There is no app with id: " << app_id);
     return;
   }
   eType old_level = app->hmi_level();
@@ -3787,7 +3729,7 @@ void ApplicationManagerImpl::MakeAppNotAudible(uint32_t app_id) {
   using namespace mobile_apis;
   ApplicationSharedPtr app = application(app_id);
   if (!app) {
-    LOG4CXX_DEBUG(logger_, "There is no app with id: " << app_id);
+    LOG4CXX_ERROR(logger_, "There is no app with id: " << app_id);
     return;
   }
   ChangeAppsHMILevel(app_id, HMILevel::HMI_BACKGROUND);
@@ -3798,7 +3740,7 @@ bool ApplicationManagerImpl::MakeAppFullScreen(uint32_t app_id) {
   using namespace mobile_apis;
   ApplicationSharedPtr app = application(app_id);
   if (!app) {
-    LOG4CXX_DEBUG(logger_, "There is no app with id: " << app_id);
+    LOG4CXX_ERROR(logger_, "There is no app with id: " << app_id);
     return false;
   }
 
@@ -3821,6 +3763,15 @@ uint32_t ApplicationManagerImpl::GetDeviceHandle(uint32_t connection_key) {
   connection_handler().GetDataOnSessionKey(
       connection_key, 0, NULL, &device_handle);
   return device_handle;
+}
+
+void ApplicationManagerImpl::SendPostMessageToMobile(
+    const MessagePtr& message) {
+  messages_to_mobile_.PostMessage(impl::MessageToMobile(message, false));
+}
+
+void ApplicationManagerImpl::SendPostMessageToHMI(const MessagePtr& message) {
+  messages_to_hmi_.PostMessage(impl::MessageToHmi(message));
 }
 #endif  // SDL_REMOTE_CONTROL
 }  // namespace application_manager

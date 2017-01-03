@@ -163,15 +163,12 @@ class ApplicationManager {
   virtual bool IsVideoStreamingAllowed(uint32_t connection_key) const = 0;
   virtual void ChangeAppsHMILevel(uint32_t app_id,
                                   mobile_apis::HMILevel::eType level) = 0;
-  virtual void CreatePhoneCallAppList() = 0;
-  virtual void ResetPhoneCallAppList() = 0;
   virtual functional_modules::PluginManager& GetPluginManager() = 0;
   virtual std::vector<std::string> devices(
       const std::string& policy_app_id) const = 0;
-  virtual void PostMessageToHMIQueque(const MessagePtr& message) = 0;
-  virtual void PostMessageToMobileQueque(const MessagePtr& message) = 0;
-
-#endif
+  virtual void SendPostMessageToMobile(const MessagePtr& message) = 0;
+  virtual void SendPostMessageToHMI(const MessagePtr& message) = 0;
+#endif  // SDL_REMOTE_CONTROL
   virtual ApplicationSharedPtr active_application() const = 0;
 
   /**
@@ -330,6 +327,7 @@ class ApplicationManager {
   virtual connection_handler::ConnectionHandler& connection_handler() const = 0;
   virtual protocol_handler::ProtocolHandler& protocol_handler() const = 0;
   virtual policy::PolicyHandlerInterface& GetPolicyHandler() = 0;
+  virtual const policy::PolicyHandlerInterface& GetPolicyHandler() const = 0;
 
   virtual uint32_t GetNextHMICorrelationID() = 0;
   virtual uint32_t GenerateNewHMIAppID() = 0;

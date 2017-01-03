@@ -266,19 +266,6 @@ class ApplicationManagerImpl
    * @return true if operation was success, false otherwise.
    */
   bool MakeAppFullScreen(uint32_t app_id);
-  /**
-   * @brief  Places a message to the queue to be sent to mobile. Called from
-   * plugins.
-   * @param message Message to mobile
-   */
-  void PostMessageToMobileQueque(const MessagePtr& message) OVERRIDE;
-
-  /**
-   * @brief  Places a message to the queue to be sent to HMI. Called from
-   * plugins.
-   * @param message Message to HMI
-   */
-  void PostMessageToHMIQueque(const MessagePtr& message) OVERRIDE;
 
   /**
    * @brief Subscribes to notification from HMI
@@ -299,24 +286,13 @@ class ApplicationManagerImpl
     app_to_remove->RemoveExtensions();
     applications_.erase(app_to_remove);
   }
-  /**
-   * @brief method adds application in FULL and LIMITED state
-   * to on_phone_call_app_list_.
-   * Also OnHMIStateNotification with BACKGROUND state sent for these apps
-   */
-  void CreatePhoneCallAppList() OVERRIDE;
-
-  /**
-   * @brief method removes application from on_phone_call_app_list_.
-   *
-   * Also OnHMIStateNotification with previous HMI state sent for these apps
-   */
-  void ResetPhoneCallAppList() OVERRIDE;
   virtual functional_modules::PluginManager& GetPluginManager() OVERRIDE {
     return plugin_manager_;
   }
   std::vector<std::string> devices(
       const std::string& policy_app_id) const OVERRIDE;
+  virtual void SendPostMessageToMobile(const MessagePtr& message) OVERRIDE;
+  virtual void SendPostMessageToHMI(const MessagePtr& message) OVERRIDE;
 #endif
 
   ApplicationSharedPtr active_application() const OVERRIDE;
@@ -592,15 +568,15 @@ class ApplicationManagerImpl
   }
 
   /**
-      * @brief Checks, if given RPC is allowed at current HMI level for specific
-      * application in policy table
-      * @param app Application
-      * @param hmi_level Current HMI level of application
-      * @param function_id FunctionID of RPC
-      * @param params_permissions Permissions for RPC parameters (e.g.
-      * SubscribeVehicleData) defined in policy table
-      * @return SUCCESS, if allowed, otherwise result code of check
-      */
+   * @brief Checks, if given RPC is allowed at current HMI level for specific
+   * application in policy table
+   * @param app Application
+   * @param hmi_level Current HMI level of application
+   * @param function_id FunctionID of RPC
+   * @param params_permissions Permissions for RPC parameters (e.g.
+   * SubscribeVehicleData) defined in policy table
+   * @return SUCCESS, if allowed, otherwise result code of check
+   */
   mobile_apis::Result::eType CheckPolicyPermissions(
       const ApplicationSharedPtr app,
       const std::string& function_id,
@@ -1078,6 +1054,11 @@ class ApplicationManagerImpl
     return *policy_handler_;
   }
 
+  virtual const policy::PolicyHandlerInterface& GetPolicyHandler()
+      const OVERRIDE {
+    return *policy_handler_;
+  }
+
   /**
    * @brief Function Should be called when Low Voltage is occured
    */
@@ -1529,7 +1510,6 @@ class ApplicationManagerImpl
     mobile_apis::AudioStreamingState::eType audio_streaming_state;
     mobile_apis::SystemContext::eType system_context;
   };
-  std::map<uint32_t, AppState> on_phone_call_app_list_;
 #endif
 
   hmi_apis::HMI_API* hmi_so_factory_;
