@@ -44,9 +44,9 @@ option(EXTENDED_MEDIA_MODE "Turn on and off extended Madia Manager features rela
 option(BUILD_SHARED_LIBS "Build all libraries as shared (if ON) or static (if OFF)" OFF)
 option(BUILD_BT_SUPPORT "Bluetooth support" ON)
 option(BUILD_USB_SUPPORT "libusb support" ON)
-option(BUILD_BACKTRACE_SUPPORT "backtrace support" OFF)
-option(BUILD_TESTS "Possibility to build and run tests" ON)
-option(TELEMETRY_MONITOR "Enable profiling time test util" OFF)
+option(BUILD_BACKTRACE_SUPPORT "backtrace support" ON)
+option(BUILD_TESTS "Possibility to build and run tests" OFF)
+option(TELEMETRY_MONITOR "Enable profiling time test util" ON)
 option(ENABLE_LOG "Logging feature" ON)
 option(ENABLE_GCOV "gcov code coverage feature" OFF)
 option(ENABLE_SANITIZE "Sanitize tool" OFF)
@@ -239,14 +239,6 @@ endif()
 
 set(CMAKE_CXX_FLAGS_RELEASE " -DNDEBUG -s -O2")
 set(CMAKE_CXX_FLAGS_DEBUG   " -DDEBUG -g3 -ggdb3")
-
-if(QT_PORT)
-  set(CMAKE_AUTOMOC ON)
-  find_package(Qt5 REQUIRED Core Network)
-  include_directories(
-    ${Qt5Core_INCLUDE_DIRS}
-    ${Qt5Network_INCLUDE_DIRS})
-endif ()
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   add_definitions(-DOS_LINUX)

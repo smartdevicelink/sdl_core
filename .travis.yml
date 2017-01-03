@@ -7,6 +7,7 @@ only:
   - \/feature\/.+
   - \/fix\/.+
   - \/hotfix\/.+
+  - \/release\/.+
 
 addons:
   apt:
@@ -23,6 +24,7 @@ addons:
     - cmake
     - html2text
     - clang-format-3.6
+    - binutils
 before_install:
   - sudo apt-get -qq update
   - sudo apt-get -q -y install libavahi-client-dev bluez-tools sqlite3 libsqlite3-dev automake1.11
@@ -56,10 +58,6 @@ deploy:
 notifications:
   email:
     - AKutsan@luxoft.com
-    - AByzhynar@luxoft.com
     - NSnitsar@luxoft.com
-    - RMalynovskyi@luxoft.com
     - MGhiumiusliu@luxoft.com
-    - AGaliuzov@luxoft.com
-    - ANosach@luxoft.com
 
