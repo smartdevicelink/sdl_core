@@ -34,6 +34,7 @@
 #include <dlfcn.h>
 #include <algorithm>
 #include <vector>
+#include <functional>
 #include "application_manager/smart_object_keys.h"
 
 #include "application_manager/policies/delegates/app_permission_delegate.h"
@@ -115,7 +116,8 @@ const policy::DeviceParams GetDeviceParams(
 
 struct HMILevelPredicate
     : public std::unary_function<ApplicationSharedPtr, bool> {
-  HMILevelPredicate(const mobile_api::HMILevel::eType level) : level_(level) {}
+  explicit HMILevelPredicate(const mobile_api::HMILevel::eType level)
+      : level_(level) {}
 
   bool operator()(const ApplicationSharedPtr app) const {
     return level_ == app->hmi_level() ? true : false;
@@ -380,11 +382,10 @@ uint32_t PolicyHandler::GetAppIdForSending() const {
 
   HMILevelPredicate has_none_level(mobile_api::HMILevel::HMI_NONE);
   Applications apps_without_none_level;
-  std::copy_if(
-      accessor.begin(),
-      accessor.end(),
-      std::inserter(apps_without_none_level, apps_without_none_level.begin()),
-      std::not1(has_none_level));
+  std::copy_if(accessor.begin(),
+               accessor.end(),
+               std::back_inserter(apps_without_none_level),
+               std::not1(has_none_level));
 
   LOG4CXX_DEBUG(logger_,
                 "Number of apps with different from NONE level: "
@@ -401,11 +402,10 @@ uint32_t PolicyHandler::GetAppIdForSending() const {
   }
 
   Applications apps_with_none_level;
-  std::copy_if(
-      accessor.begin(),
-      accessor.end(),
-      std::inserter(apps_with_none_level, apps_with_none_level.begin()),
-      has_none_level);
+  std::copy_if(accessor.begin(),
+               accessor.end(),
+               std::back_inserter(apps_with_none_level),
+               has_none_level);
 
   LOG4CXX_DEBUG(
       logger_,
