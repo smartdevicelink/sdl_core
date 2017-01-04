@@ -20,6 +20,7 @@ addons:
     - libbluetooth3
     - libbluetooth-dev
     - libudev-dev
+    - libusb-1.0
     - cmake
     - html2text
     - clang-format-3.6
@@ -34,7 +35,8 @@ script:
   - bash -e tools/infrastructure/check_style.sh
   - mkdir build && cd build && cmake ../ -DBUILD_TESTS=ON -DENABLE_GCOV=ON && make install
   - sudo ldconfig
-  - make test
+  - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:`pwd`/bin/lib ; make test
+  - bash ../tools/infrastructure/show_disabled.sh 
   - bash -ex ../tools/infrastructure/collect_coverage.sh ./
 env:
   global:

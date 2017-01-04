@@ -1,4 +1,4 @@
-# Copyright (c) 2014, Ford Motor Company
+# Copyright (c) 2016, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,6 +28,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
 include_directories (
   ${DBUS_INCLUDE_DIRS}
@@ -40,17 +41,17 @@ include_directories (
   ${CMAKE_BINARY_DIR}/src/components/
 )
 
-set (SOURCES
+set(PATHS
+  ${CMAKE_CURRENT_SOURCE_DIR}/include
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
   ${CMAKE_CURRENT_BINARY_DIR}/introspection_xml.cc
   ${CMAKE_CURRENT_BINARY_DIR}/message_descriptions.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/dbus_adapter.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/dbus_message.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/dbus_message_controller.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/schema.cc
 )
+collect_sources(SOURCES "${PATHS}")
 
-set (LIBRARIES dbus-1 -L${DBUS_LIBS_DIRECTORY})
-
+set(LIBRARIES
+  dbus-1 -L${DBUS_LIBS_DIRECTORY}
+)
 
 add_custom_command(
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/message_descriptions.cc
@@ -71,7 +72,7 @@ add_custom_command(
 )
 
 add_library("DBus" ${SOURCES})
-ADD_DEPENDENCIES("DBus" Utils install-3rd_party_dbus)
+add_dependecnies("DBus" Utils install-3rd_party_dbus)
 
 target_link_libraries("DBus" "${LIBRARIES}")
 
