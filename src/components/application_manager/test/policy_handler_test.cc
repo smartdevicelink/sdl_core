@@ -1512,7 +1512,7 @@ TEST_F(PolicyHandlerTest, GetAppIdForSending_GetDefaultMacAddress) {
   // Check expectations
   test_app.insert(mock_app_);
   EXPECT_CALL(*mock_app_, IsRegistered()).WillOnce(Return(true));
-  EXPECT_CALL(*mock_app_, app_id()).WillOnce(Return(kAppId_));
+  EXPECT_CALL(*mock_app_, app_id()).WillRepeatedly(Return(kAppId_));
   EXPECT_CALL(*mock_app_, hmi_level())
       .WillOnce(Return(mobile_api::HMILevel::HMI_FULL));
   EXPECT_CALL(app_manager_, connection_handler())
@@ -1534,7 +1534,7 @@ void PolicyHandlerTest::GetAppIDForSending() {
   test_app.insert(mock_app_);
 
   // Check expectations
-  EXPECT_CALL(*mock_app_, app_id()).WillOnce(Return(kAppId_));
+  EXPECT_CALL(*mock_app_, app_id()).WillRepeatedly(Return(kAppId_));
   EXPECT_CALL(*mock_app_, IsRegistered()).WillOnce(Return(true));
   EXPECT_CALL(*mock_app_, hmi_level())
       .WillRepeatedly(Return(mobile_api::HMILevel::HMI_FULL));
