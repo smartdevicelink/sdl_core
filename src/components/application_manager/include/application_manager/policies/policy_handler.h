@@ -481,13 +481,20 @@ class PolicyHandler : public PolicyHandlerInterface,
   typedef std::vector<application_manager::ApplicationSharedPtr> Applications;
 
   /**
-   * @brief Chooses application suitable for forwarding request for policy
-   * update to backend by checking its registration status and device consent
-   * @param app_list List of applications to choose from, list can be modified
-   * in the process of lookup
-   * @return Application id or 0 if no suitable application was found
+   * @brief Checks application registration status (SDL4.0) and device consent
+   * to find out whether application is suitable
+   * @param value Item from applications collection
+   * @return true if application is suitable, otherwise - false
    */
-  uint32_t GetApplicationIdForPolicyUpdate(Applications app_list) const;
+  bool IsAppSuitableForPolicyUpdate(const Applications::value_type value) const;
+
+  /**
+   * @brief Chooses random application from list using
+   * IsAppSuitableForPolicyUpdate
+   * @param app_list Application collection
+   * @return Application id if suitable is found, otherwise - zero
+   */
+  uint32_t ChooseRandomAppForPolicyUpdate(Applications& app_list) const;
 
  private:
   class StatisticManagerImpl : public usage_statistics::StatisticsManager {

@@ -391,14 +391,11 @@ uint32_t PolicyHandler::GetAppIdForSending() const {
                 "Number of apps with different from NONE level: "
                     << apps_without_none_level.size());
 
-  std::random_shuffle(apps_without_none_level.begin(),
-                      apps_without_none_level.end());
+  uint32_t choosen_app_id =
+      ChooseRandomAppForPolicyUpdate(apps_without_none_level);
 
-  const uint32_t app_id =
-      GetApplicationIdForPolicyUpdate(apps_without_none_level);
-
-  if (app_id) {
-    return app_id;
+  if (choosen_app_id) {
+    return choosen_app_id;
   }
 
   Applications apps_with_none_level;
@@ -411,9 +408,7 @@ uint32_t PolicyHandler::GetAppIdForSending() const {
       logger_,
       "Number of apps with NONE level: " << apps_with_none_level.size());
 
-  std::random_shuffle(apps_with_none_level.begin(), apps_with_none_level.end());
-
-  return GetApplicationIdForPolicyUpdate(apps_with_none_level);
+  return ChooseRandomAppForPolicyUpdate(apps_with_none_level);
 }
 
 void PolicyHandler::OnAppPermissionConsent(
@@ -686,23 +681,16 @@ void PolicyHandler::LinkAppsToDevice() {
   }
 }
 
-uint32_t PolicyHandler::GetApplicationIdForPolicyUpdate(
-    Applications app_list) const {
+bool PolicyHandler::IsAppSuitableForPolicyUpdate(
+    const Applications::value_type value) const {
   LOG4CXX_AUTO_TRACE(logger_);
-  if (app_list.empty()) {
-    return 0;
-  }
 
-  Applications::const_iterator it_app = app_list.begin();
+  const uint32_t app_id = value->app_id();
 
-  const ApplicationSharedPtr application_ptr = *it_app;
-  const uint32_t app_id = application_ptr->app_id();
-
-  if (!application_ptr->IsRegistered()) {
+  if (!value->IsRegistered()) {
     LOG4CXX_DEBUG(logger_,
                   "Application " << app_id << " is not marked as registered.");
-    app_list.erase(it_app);
-    return GetApplicationIdForPolicyUpdate(app_list);
+    return false;
   }
 
   LOG4CXX_DEBUG(logger_,
@@ -710,7 +698,7 @@ uint32_t PolicyHandler::GetApplicationIdForPolicyUpdate(
                                             "Checking its parameters.");
 
   DeviceParams device_params = GetDeviceParams(
-      application_ptr->device(),
+      value->device(),
       application_manager_.connection_handler().get_session_observer());
 
   const bool is_device_allowed = (kDeviceAllowed ==
@@ -722,11 +710,28 @@ uint32_t PolicyHandler::GetApplicationIdForPolicyUpdate(
                              << std::boolalpha << is_device_allowed);
 
   if (!is_device_allowed) {
-    app_list.erase(it_app);
-    return GetApplicationIdForPolicyUpdate(app_list);
+    return false;
   }
 
-  return app_id;
+  return true;
+}
+
+uint32_t PolicyHandler::ChooseRandomAppForPolicyUpdate(
+    Applications& app_list) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  std::random_shuffle(app_list.begin(), app_list.end());
+
+  Applications::const_iterator choosen_app = std::find_if(
+      app_list.begin(),
+      app_list.end(),
+      std::bind1st(std::mem_fun(&PolicyHandler::IsAppSuitableForPolicyUpdate),
+                   this));
+
+  if (app_list.end() != choosen_app) {
+    return (*choosen_app)->app_id();
+  }
+
+  return 0;
 }
 
 void PolicyHandler::OnGetStatusUpdate(const uint32_t correlation_id) {
