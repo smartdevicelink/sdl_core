@@ -48,12 +48,17 @@ option(ENABLE_GCOV "gcov code coverage feature" OFF)
 option(ENABLE_SANITIZE "Sanitize tool" OFF)
 option(ENABLE_SECURITY "Security Ford protocol protection" ON)
 option(ENABLE_HMI_PTU_DECRYPTION "Policy table update parsed by hmi" ON)
-option(ENABLE_EXTENDED_POLICY "Turns extended flow which requires embedded system interaction" ON)
 option(REMOTE_CONTROL "Enable Reverse functionality" ON)
 option(USE_COTIRE "Use Cotire to speed up build (currently only for commands tests)" ON)
 option(USE_GOLD_LD "Use gold linker intead of GNU linker" ON)
 option(USE_CCACHE "Turn on ccache usage" ON)
 option(USE_DISTCC "Turn on distributed build_usage" ON)
+
+set (EXTENDED_POLICY "PROPRIETARY" CACHE STRING "Policy mode (PROPRIETARY, HTTP or EXTERNAL_PROPRIETARY)")
+set_property(CACHE EXTENDED_POLICY PROPERTY STRINGS PROPRIETARY HTTP EXTERNAL_PROPRIETARY)
+if(EXTENDED_POLICY STREQUAL "")
+  set(EXTENDED_POLICY "PROPRIETARY")
+endif()
 
 set(OS_TYPE_OPTION 	"$ENV{OS_TYPE}")
 set(DEBUG_OPTION 	"$ENV{DEBUG}")
@@ -284,8 +289,22 @@ if (TELEMETRY_MONITOR)
     add_definitions(-DTELEMETRY_MONITOR)
 endif()
 
-if (ENABLE_EXTENDED_POLICY)
-    add_definitions(-DEXTENDED_POLICY)
+if (${EXTENDED_POLICY} STREQUAL "EXTERNAL_PROPRIETARY")
+    add_definitions(-DEXTERNAL_PROPRIETARY_MODE)
+    set(POLICY_PATH ${COMPONENTS_DIR}/policy/policy_external/)
+    set(POLICY_GLOBAL_INCLUDE_PATH ${COMPONENTS_DIR}/include/policy/policy_external/)
+    set(POLICY_MOCK_INCLUDE_PATH ${COMPONENTS_DIR}/include/test/policy/policy_external/)
+    message(STATUS "DEFINED EXTERNAL_PROPRIETARY POLICY")
+else()
+   if (${EXTENDED_POLICY} STREQUAL "PROPRIETARY")
+     add_definitions(-DPROPRIETARY_MODE)
+     message(STATUS "DEFINED PROPRIETARY POLICY")
+   else()
+     message(STATUS "DEFINED HTTP POLICY")
+   endif()
+   set(POLICY_PATH ${COMPONENTS_DIR}/policy/policy_regular/)
+   set(POLICY_GLOBAL_INCLUDE_PATH ${COMPONENTS_DIR}/include/policy/policy_regular/)
+   set(POLICY_MOCK_INCLUDE_PATH ${COMPONENTS_DIR}/include/test/policy/policy_regular/)
 endif()
 
 # TODO(AK): check current OS here
@@ -435,10 +454,13 @@ endif()
 include_directories(
   ${COMPONENTS_DIR}/include
   ${COMPONENTS_DIR}/protocol/include
-if (BUILD_TESTS)
-  ${COMPONENTS_DIR}/include/test
-endif ()
 )
+
+if (BUILD_TESTS)
+	include_directories(
+	  ${COMPONENTS_DIR}/include/test
+	)
+endif ()
 
 # --- 3rd party libs
 INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/src/3rd_party/set_3rd_party_paths.cmake)

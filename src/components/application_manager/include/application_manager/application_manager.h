@@ -48,9 +48,11 @@
 #include "application_manager/application_manager_settings.h"
 #include "application_manager/state_controller.h"
 #include "application_manager/hmi_interfaces.h"
+#include "policy/policy_types.h"
 #ifdef SDL_REMOTE_CONTROL
 #include "functional_module/plugin_manager.h"
 #endif
+
 namespace resumption {
 class LastState;
 }
@@ -85,9 +87,8 @@ class EventDispatcher;
 class Application;
 class StateControllerImpl;
 struct CommandParametersPermissions;
-typedef std::vector<std::string> RPCParams;
+using policy::RPCParams;
 typedef std::vector<ApplicationSharedPtr> AppSharedPtrs;
-
 struct ApplicationsAppIdSorter {
   bool operator()(const ApplicationSharedPtr lhs,
                   const ApplicationSharedPtr rhs) const {

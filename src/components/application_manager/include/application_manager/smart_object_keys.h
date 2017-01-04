@@ -381,6 +381,7 @@ extern const char* keyboard_layout;
 extern const char* limited_character_list;
 extern const char* auto_complete_text;
 extern const char* file;
+extern const char* file_name;
 extern const char* retry;
 extern const char* service;
 }  // namespace hmi_request

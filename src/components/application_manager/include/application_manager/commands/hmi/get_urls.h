@@ -63,13 +63,13 @@ class GetUrls : public RequestFromHMI {
   void Run() OVERRIDE;
 
  private:
-#ifdef EXTENDED_POLICY
+#ifdef PROPRIETARY_MODE
   /**
    * @brief Processes URLs collecting for policy service
    * @param endpoints Endpoints section of policy table
    */
   void ProcessPolicyServiceURLs(const policy::EndpointUrls& endpoints);
-#endif
+#endif  // PROPRIETARY_MODE
 
   /**
    * @brief Process URLs collecting for service
@@ -82,14 +82,6 @@ class GetUrls : public RequestFromHMI {
    * @param result Result code
    */
   void SendResponseToHMI(hmi_apis::Common_Result::eType result);
-
-  /**
-   * @brief fills structure for sending to HMI with default urls
-   * @param urls structure for filling
-   * @param endpoints Endpoints section of policy table
-   */
-  void FillSODefaultUrls(smart_objects::SmartObject& urls,
-                         const policy::EndpointUrls& endpoints);
 
   DISALLOW_COPY_AND_ASSIGN(GetUrls);
 };

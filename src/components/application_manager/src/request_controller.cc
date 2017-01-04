@@ -224,12 +224,12 @@ void RequestController::removeNotification(
     if (it->get() == notification) {
       notification_list_.erase(it++);
       LOG4CXX_DEBUG(logger_, "Notification removed");
-      break;
+      return;
     } else {
       ++it;
     }
   }
-  LOG4CXX_DEBUG(logger_, "Cant find notification");
+  LOG4CXX_DEBUG(logger_, "Cannot find notification");
 }
 
 void RequestController::TerminateRequest(const uint32_t correlation_id,

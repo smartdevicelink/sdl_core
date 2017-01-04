@@ -25,6 +25,8 @@ include_directories (
   ${COMPONENTS_DIR}/application_manager/include
   ${COMPONENTS_DIR}/connection_handler/include/
   ${COMPONENTS_DIR}/utils/include
+  ${POLICY_PATH}/include/
+  ${POLICY_GLOBAL_INCLUDE_PATH}/
   ${COMPONENTS_DIR}/config_profile/include
   ${COMPONENTS_DIR}/smart_objects/include
   ${JSONCPP_INCLUDE_DIRECTORY}

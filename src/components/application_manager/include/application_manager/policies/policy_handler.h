@@ -30,8 +30,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_POLICY_HANDLER_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_POLICY_HANDLER_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_POLICIES_POLICY_HANDLER_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_POLICIES_POLICY_HANDLER_H_
 
 #include <string>
 #include <map>
@@ -94,8 +94,13 @@ class PolicyHandler : public PolicyHandlerInterface,
   virtual void OnPermissionsUpdated(const std::string& policy_app_id,
                                     const Permissions& permissions) OVERRIDE;
 
-  virtual void OnSnapshotCreated(const BinaryMessage& pt_string) OVERRIDE;
-
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  void OnSnapshotCreated(const BinaryMessage& pt_string,
+                         const std::vector<int>& retry_delay_seconds,
+                         int timeout_exchange) OVERRIDE;
+#else   // EXTERNAL_PROPRIETARY_MODE
+  void OnSnapshotCreated(const BinaryMessage& pt_string) OVERRIDE;
+#endif  // EXTERNAL_PROPRIETARY_MODE
   virtual bool GetPriority(const std::string& policy_app_id,
                            std::string* priority) const OVERRIDE;
   virtual void CheckPermissions(
@@ -265,8 +270,10 @@ class PolicyHandler : public PolicyHandlerInterface,
   bool GetInitialAppData(const std::string& application_id,
                          StringArray* nicknames = NULL,
                          StringArray* app_hmi_types = NULL) OVERRIDE;
-  void GetServiceUrls(const std::string& service_type,
-                      EndpointUrls& end_points) OVERRIDE;
+  void GetUpdateUrls(const std::string& service_type,
+                     EndpointUrls& out_end_points) OVERRIDE;
+  void GetUpdateUrls(const uint32_t service_type,
+                     EndpointUrls& out_end_points) OVERRIDE;
   virtual std::string GetLockScreenIconUrl() const OVERRIDE;
   void ResetRetrySequence() OVERRIDE;
   uint32_t NextRetryTimeout() OVERRIDE;
@@ -305,11 +312,11 @@ class PolicyHandler : public PolicyHandlerInterface,
 
   /**
    * @brief Process user consent on mobile data connection access
-   * @param Device id or empty string, if concern to all SDL functionality
-   * @param User consent from response
+   * @param is_allowed - user consent from response
+   * @param device_mac - mac adress of device
    */
   void OnAllowSDLFunctionalityNotification(
-      bool is_allowed, const std::string& device_id) OVERRIDE;
+      bool is_allowed, const std::string& device_mac) OVERRIDE;
 
   /**
    * @brief Increment counter for ignition cycles
@@ -450,7 +457,9 @@ class PolicyHandler : public PolicyHandlerInterface,
 
   virtual void OnCertificateUpdated(
       const std::string& certificate_data) OVERRIDE;
-
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  void OnCertificateDecrypted(bool is_succeeded) OVERRIDE;
+#endif  // EXTERNAL_PROPRIETARY_MODE
   virtual bool CanUpdate() OVERRIDE;
 
   virtual void OnDeviceConsentChanged(const std::string& device_id,
@@ -509,6 +518,15 @@ class PolicyHandler : public PolicyHandlerInterface,
   void OnAppsSearchCompleted() OVERRIDE;
 
   /**
+   * @brief OnAppRegisteredOnMobile allows to handle event when application were
+   * succesfully registered on mobile device.
+   * It will send OnAppPermissionSend notification and will try to start PTU.
+   *
+   * @param application_id registered application.
+   */
+  void OnAppRegisteredOnMobile(const std::string& application_id) OVERRIDE;
+
+  /**
    * @brief Checks if certain request type is allowed for application
    * @param policy_app_id Unique applicaion id
    * @param type Request type
@@ -532,25 +550,24 @@ class PolicyHandler : public PolicyHandlerInterface,
    */
   const VehicleInfo GetVehicleInfo() const OVERRIDE;
 
+#ifdef EXTERNAL_PROPRIETARY_MODE
   /**
-   * @brief OnAppRegisteredOnMobile allows to handle event when application were
-   * succesfully registered on mobile device.
-   * It will send OnAppPermissionSend notification and will try to start PTU.
-   * @param device_handle unique indetifier of device
-   * @param application_id registered application.
+   * @brief Gets meta information
+   * @return meta information
    */
-  void OnAppRegisteredOnMobile(const std::string& application_id) OVERRIDE;
+  const policy::MetaInfo GetMetaInfo() const OVERRIDE;
+#endif  // EXTERNAL_PROPRIETARY_MODE
 
   // TODO(AKutsan) REMOVE THIS UGLY HOTFIX
-  virtual void Increment(usage_statistics::GlobalCounterId type) OVERRIDE;
-  virtual void Increment(const std::string& app_id,
-                         usage_statistics::AppCounterId type) OVERRIDE;
-  virtual void Set(const std::string& app_id,
-                   usage_statistics::AppInfoId type,
-                   const std::string& value) OVERRIDE;
-  virtual void Add(const std::string& app_id,
-                   usage_statistics::AppStopwatchId type,
-                   int32_t timespan_seconds) OVERRIDE;
+  void Increment(usage_statistics::GlobalCounterId type) OVERRIDE;
+  void Increment(const std::string& app_id,
+                 usage_statistics::AppCounterId type) OVERRIDE;
+  void Set(const std::string& app_id,
+           usage_statistics::AppInfoId type,
+           const std::string& value) OVERRIDE;
+  void Add(const std::string& app_id,
+           usage_statistics::AppStopwatchId type,
+           int32_t timespan_seconds) OVERRIDE;
 
 #ifdef BUILD_TESTS
   void SetPolicyManager(utils::SharedPtr<PolicyManager> pm) {
@@ -615,6 +632,11 @@ class PolicyHandler : public PolicyHandlerInterface,
          */
   void SetDaysAfterEpoch();
 
+  /**
+   * @brief Link all currently registered applications
+   */
+  void LinkAppsToDevice();
+
  private:
   class StatisticManagerImpl : public usage_statistics::StatisticsManager {
    public:
@@ -623,26 +645,26 @@ class PolicyHandler : public PolicyHandlerInterface,
       DCHECK(policy_handler_);
     }
     // TODO(AKutsan) REMOVE THIS UGLY HOTFIX
-    virtual void Increment(usage_statistics::GlobalCounterId type) {
+    void Increment(usage_statistics::GlobalCounterId type) OVERRIDE {
       policy_handler_->AsyncRun(new StatisticsDelegate(*policy_handler_, type));
     }
 
     void Increment(const std::string& app_id,
-                   usage_statistics::AppCounterId type) {
+                   usage_statistics::AppCounterId type) OVERRIDE {
       policy_handler_->AsyncRun(
           new StatisticsDelegate(*policy_handler_, app_id, type));
     }
 
     void Set(const std::string& app_id,
              usage_statistics::AppInfoId type,
-             const std::string& value) {
+             const std::string& value) OVERRIDE {
       policy_handler_->AsyncRun(
           new StatisticsDelegate(*policy_handler_, app_id, type, value));
     }
 
     void Add(const std::string& app_id,
              usage_statistics::AppStopwatchId type,
-             int32_t timespan_seconds) {
+             int32_t timespan_seconds) OVERRIDE {
       policy_handler_->AsyncRun(new StatisticsDelegate(
           *policy_handler_, app_id, type, timespan_seconds));
     }
@@ -650,7 +672,9 @@ class PolicyHandler : public PolicyHandlerInterface,
    private:
     PolicyHandler* policy_handler_;
   };
-
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  void OnEmptyCertificateArrived() const;
+#endif  // EXTERNAL_PROPRIETARY_MODE
   bool SaveSnapshot(const BinaryMessage& pt_string, std::string& snap_path);
   static const std::string kLibrary;
   mutable sync_primitives::RWLock policy_manager_lock_;
@@ -669,7 +693,7 @@ class PolicyHandler : public PolicyHandlerInterface,
 
   typedef std::list<PolicyHandlerObserver*> HandlersCollection;
   HandlersCollection listeners_;
-  sync_primitives::Lock listeners_lock_;
+  mutable sync_primitives::Lock listeners_lock_;
 
   /**
    * @brief Application-to-device map is used for getting/setting user consents
