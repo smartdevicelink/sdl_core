@@ -1512,7 +1512,9 @@ TEST_F(PolicyHandlerTest, GetAppIdForSending_GetDefaultMacAddress) {
   // Check expectations
   test_app.insert(mock_app_);
   EXPECT_CALL(*mock_app_, IsRegistered()).WillOnce(Return(true));
-  EXPECT_CALL(*mock_app_, app_id()).WillOnce(Return(kAppId_));
+  EXPECT_CALL(*mock_app_, app_id()).WillRepeatedly(Return(kAppId_));
+  EXPECT_CALL(*mock_app_, hmi_level())
+      .WillOnce(Return(mobile_api::HMILevel::HMI_FULL));
   EXPECT_CALL(app_manager_, connection_handler())
       .WillOnce(ReturnRef(conn_handler));
 
@@ -1532,8 +1534,10 @@ void PolicyHandlerTest::GetAppIDForSending() {
   test_app.insert(mock_app_);
 
   // Check expectations
-  EXPECT_CALL(*mock_app_, app_id()).WillOnce(Return(kAppId_));
+  EXPECT_CALL(*mock_app_, app_id()).WillRepeatedly(Return(kAppId_));
   EXPECT_CALL(*mock_app_, IsRegistered()).WillOnce(Return(true));
+  EXPECT_CALL(*mock_app_, hmi_level())
+      .WillRepeatedly(Return(mobile_api::HMILevel::HMI_FULL));
   EXPECT_CALL(mock_session_observer, GetDataOnDeviceID(_, _, _, _, _))
       .WillOnce(DoAll(SetArgPointee<3>(kMacAddr_), Return(0)));
 
@@ -1546,6 +1550,111 @@ TEST_F(PolicyHandlerTest, GetAppIdForSending_SetMacAddress) {
   GetAppIDForSending();
   // Act
   EXPECT_EQ(kAppId_, policy_handler_.GetAppIdForSending());
+}
+
+TEST_F(PolicyHandlerTest, GetAppIdForSending_ExpectReturnAnyIdButNone) {
+  // Arrange
+  EnablePolicyAndPolicyManagerMock();
+
+  utils::SharedPtr<application_manager_test::MockApplication> mock_app_in_full =
+      utils::MakeShared<application_manager_test::MockApplication>();
+  const uint32_t app_in_full_id = 1;
+  EXPECT_CALL(*mock_app_in_full, app_id())
+      .WillRepeatedly(Return(app_in_full_id));
+  EXPECT_CALL(*mock_app_in_full, hmi_level())
+      .WillRepeatedly(Return(mobile_api::HMILevel::HMI_FULL));
+  ON_CALL(*mock_app_in_full, IsRegistered()).WillByDefault(Return(true));
+
+  test_app.insert(mock_app_in_full);
+
+  utils::SharedPtr<application_manager_test::MockApplication>
+      mock_app_in_limited =
+          utils::MakeShared<application_manager_test::MockApplication>();
+  const uint32_t app_in_limited_id = 2;
+  EXPECT_CALL(*mock_app_in_limited, app_id())
+      .WillRepeatedly(Return(app_in_limited_id));
+  EXPECT_CALL(*mock_app_in_limited, hmi_level())
+      .WillRepeatedly(Return(mobile_api::HMILevel::HMI_LIMITED));
+  ON_CALL(*mock_app_in_limited, IsRegistered()).WillByDefault(Return(true));
+
+  test_app.insert(mock_app_in_limited);
+
+  utils::SharedPtr<application_manager_test::MockApplication>
+      mock_app_in_background =
+          utils::MakeShared<application_manager_test::MockApplication>();
+  const uint32_t app_in_background_id = 3;
+  EXPECT_CALL(*mock_app_in_background, app_id())
+      .WillRepeatedly(Return(app_in_background_id));
+  EXPECT_CALL(*mock_app_in_background, hmi_level())
+      .WillRepeatedly(Return(mobile_api::HMILevel::HMI_BACKGROUND));
+  ON_CALL(*mock_app_in_background, IsRegistered()).WillByDefault(Return(true));
+
+  test_app.insert(mock_app_in_background);
+
+  utils::SharedPtr<application_manager_test::MockApplication> mock_app_in_none =
+      utils::MakeShared<application_manager_test::MockApplication>();
+  const uint32_t app_in_none_id = 4;
+  EXPECT_CALL(*mock_app_in_none, app_id())
+      .WillRepeatedly(Return(app_in_none_id));
+  EXPECT_CALL(*mock_app_in_none, hmi_level())
+      .WillRepeatedly(Return(mobile_api::HMILevel::HMI_NONE));
+  EXPECT_CALL(*mock_app_in_none, IsRegistered()).Times(0);
+
+  test_app.insert(mock_app_in_none);
+
+  // Check expectations
+
+  EXPECT_CALL(mock_session_observer, GetDataOnDeviceID(_, _, _, _, _))
+      .WillOnce(DoAll(SetArgPointee<3>(kMacAddr_), Return(0)));
+
+  EXPECT_CALL(*mock_policy_manager_, GetUserConsentForDevice(kMacAddr_))
+      .WillRepeatedly(Return(kDeviceAllowed));
+
+  // Act
+  EXPECT_NE(app_in_none_id, policy_handler_.GetAppIdForSending());
+}
+
+TEST_F(PolicyHandlerTest, GetAppIdForSending_ExpectReturnAnyAppInNone) {
+  // Arrange
+  EnablePolicyAndPolicyManagerMock();
+
+  utils::SharedPtr<application_manager_test::MockApplication>
+      mock_app_in_none_1 =
+          utils::MakeShared<application_manager_test::MockApplication>();
+  const uint32_t app_in_none_id_1 = 1;
+  EXPECT_CALL(*mock_app_in_none_1, app_id())
+      .WillRepeatedly(Return(app_in_none_id_1));
+  EXPECT_CALL(*mock_app_in_none_1, hmi_level())
+      .WillRepeatedly(Return(mobile_api::HMILevel::HMI_FULL));
+  ON_CALL(*mock_app_in_none_1, IsRegistered()).WillByDefault(Return(true));
+
+  test_app.insert(mock_app_in_none_1);
+
+  utils::SharedPtr<application_manager_test::MockApplication>
+      mock_app_in_none_2 =
+          utils::MakeShared<application_manager_test::MockApplication>();
+  const uint32_t app_in_none_id_2 = 2;
+  EXPECT_CALL(*mock_app_in_none_2, app_id())
+      .WillRepeatedly(Return(app_in_none_id_2));
+  EXPECT_CALL(*mock_app_in_none_2, hmi_level())
+      .WillRepeatedly(Return(mobile_api::HMILevel::HMI_NONE));
+  ON_CALL(*mock_app_in_none_2, IsRegistered()).WillByDefault(Return(true));
+
+  test_app.insert(mock_app_in_none_2);
+
+  // Check expectations
+
+  EXPECT_CALL(mock_session_observer, GetDataOnDeviceID(_, _, _, _, _))
+      .WillOnce(DoAll(SetArgPointee<3>(kMacAddr_), Return(0)));
+
+  EXPECT_CALL(*mock_policy_manager_, GetUserConsentForDevice(kMacAddr_))
+      .WillRepeatedly(Return(kDeviceAllowed));
+
+  // Act
+
+  const uint32_t app_id = policy_handler_.GetAppIdForSending();
+
+  EXPECT_EQ(app_in_none_id_1 || app_in_none_id_2, app_id);
 }
 
 TEST_F(PolicyHandlerTest, SendMessageToSDK) {
