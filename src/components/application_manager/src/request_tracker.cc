@@ -33,6 +33,7 @@
 #include "utils/logger.h"
 #include "utils/macro.h"
 #include "application_manager/request_tracker.h"
+#include "application_manager/message_helper.h"
 
 namespace application_manager {
 
@@ -48,7 +49,9 @@ TrackResult RequestTracker::Track(const ApplicationID& app_id,
   LOG4CXX_AUTO_TRACE(logger_);
   bool track_result = false;
 
-  LOG4CXX_DEBUG(logger_, "Tracking request for level: " << level);
+  LOG4CXX_DEBUG(logger_,
+                "Tracking request for level: "
+                    << MessageHelper::StringifiedHMILevel(level));
 
   if (mobile_apis::HMILevel::HMI_NONE == level) {
     track_result = Track(app_id,
@@ -56,7 +59,8 @@ TrackResult RequestTracker::Track(const ApplicationID& app_id,
                          settings_.app_hmi_level_none_time_scale_max_requests(),
                          none_level_tracker_);
 
-    return track_result ? kSuccess : kNoneLevelMaxRequestsExceeded;
+    return track_result ? TrackResult::kSuccess
+                        : TrackResult::kNoneLevelMaxRequestsExceeded;
   }
 
   track_result = Track(app_id,
@@ -64,7 +68,8 @@ TrackResult RequestTracker::Track(const ApplicationID& app_id,
                        settings_.app_time_scale_max_requests(),
                        tracker_);
 
-  return track_result ? kSuccess : kMaxRequestsExceeded;
+  return track_result ? TrackResult::kSuccess
+                      : TrackResult::kMaxRequestsExceeded;
 }
 
 bool RequestTracker::Track(const ApplicationID& app_id,
@@ -82,9 +87,9 @@ bool RequestTracker::Track(const ApplicationID& app_id,
                 "Time scale is: " << time_scale << ". Max requests number is: "
                                   << max_requests);
 
+  LOG4CXX_DEBUG(logger_, "Tracking app id: " << app_id);
   ApplicationsRequestsTracker::iterator it_app = tracker.find(app_id);
 
-  LOG4CXX_DEBUG(logger_, "Tracking app id: " << app_id);
   if (tracker.end() == it_app) {
     LOG4CXX_DEBUG(logger_, "Adding new application into tracking.");
     tracker[app_id].push_back(date_time::DateTime::getCurrentTime());

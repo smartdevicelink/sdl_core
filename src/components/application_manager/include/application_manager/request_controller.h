@@ -233,7 +233,7 @@ class RequestController {
    * @brief Checks whether all constraints are met before adding of request into
    * processing queue. Verifies amount of pending requests, amount of requests
    * per time scale for different HMI levels
-   * @param request - request to check contraints for
+   * @param request - request to check constraints for
    * @param level - HMI level in which request has been issued
    * @return Appropriate result code of verification
    */

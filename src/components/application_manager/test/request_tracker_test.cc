@@ -72,20 +72,20 @@ class RequestTrackerTestClass : public ::testing::Test {
 
   application_manager::request_controller::RequestTracker tracker_;
 
-  const uint32_t kDefaultAppHmiLevelNoneRequestsTimeScale = 10;
+  const uint32_t kDefaultAppHmiLevelNoneRequestsTimeScale = 10u;
   const uint32_t kDefaultAppHmiLevelNoneTimeScaleMaxRequests = 100u;
-  const uint32_t kDefaultAppTimeScaleMaxRequests = 5;
+  const uint32_t kDefaultAppTimeScaleMaxRequests = 5u;
   const uint32_t kDefaultAppRequestsTimeScale = 200u;
 };
 
 TEST_F(RequestTrackerTestClass, TrackAppRequestInNone_ExpectSuccessTillLimit) {
-  const uint32_t app_id = 1;
+  const uint32_t app_id = 1u;
   const mobile_apis::HMILevel::eType none_level =
       mobile_apis::HMILevel::HMI_NONE;
 
   SetDefaultConstraints();
 
-  for (size_t i = 0; i < kDefaultAppHmiLevelNoneTimeScaleMaxRequests; ++i) {
+  for (uint32_t i = 0; i < kDefaultAppHmiLevelNoneTimeScaleMaxRequests; ++i) {
     EXPECT_EQ(application_manager::request_controller::TrackResult::kSuccess,
               tracker_.Track(app_id, none_level));
   }
@@ -97,10 +97,6 @@ TEST_F(RequestTrackerTestClass, TrackAppRequestInNone_ExpectSuccessTillLimit) {
 
 TEST_F(RequestTrackerTestClass,
        TrackAppRequestInNone_NoLimits_ExpectAlwaysSuccess) {
-  const uint32_t app_id = 1;
-  const mobile_apis::HMILevel::eType none_level =
-      mobile_apis::HMILevel::HMI_NONE;
-
   const uint32_t no_limit = 0;
 
   EXPECT_CALL(mock_request_controller_settings_,
@@ -111,7 +107,11 @@ TEST_F(RequestTrackerTestClass,
               app_hmi_level_none_time_scale_max_requests())
       .WillRepeatedly(ReturnRef(no_limit));
 
-  for (size_t i = 0; i < kDefaultAppHmiLevelNoneTimeScaleMaxRequests; ++i) {
+  const uint32_t app_id = 1u;
+  const mobile_apis::HMILevel::eType none_level =
+      mobile_apis::HMILevel::HMI_NONE;
+
+  for (uint32_t i = 0; i < kDefaultAppHmiLevelNoneTimeScaleMaxRequests; ++i) {
     EXPECT_EQ(application_manager::request_controller::TrackResult::kSuccess,
               tracker_.Track(app_id, none_level));
   }
@@ -122,13 +122,13 @@ TEST_F(RequestTrackerTestClass,
 
 TEST_F(RequestTrackerTestClass,
        TrackAppRequestInOtherThanNone_ExpectSuccessTillLimit) {
-  const uint32_t app_id = 1;
+  const uint32_t app_id = 1u;
   mobile_apis::HMILevel::eType hmi_level =
       mobile_apis::HMILevel::HMI_BACKGROUND;
 
   SetDefaultConstraints();
 
-  for (size_t i = 0; i < kDefaultAppTimeScaleMaxRequests; ++i) {
+  for (uint32_t i = 0; i < kDefaultAppTimeScaleMaxRequests; ++i) {
     EXPECT_EQ(application_manager::request_controller::TrackResult::kSuccess,
               tracker_.Track(app_id, hmi_level));
     if (i % 2) {
@@ -145,10 +145,6 @@ TEST_F(RequestTrackerTestClass,
 
 TEST_F(RequestTrackerTestClass,
        TrackAppRequestInOtherThanNone_NoLimits_ExpectAlwaysSuccess) {
-  const uint32_t app_id = 1;
-  mobile_apis::HMILevel::eType hmi_level =
-      mobile_apis::HMILevel::HMI_BACKGROUND;
-
   const uint32_t no_limit = 0;
 
   EXPECT_CALL(mock_request_controller_settings_, app_time_scale())
@@ -157,7 +153,11 @@ TEST_F(RequestTrackerTestClass,
   EXPECT_CALL(mock_request_controller_settings_, app_time_scale_max_requests())
       .WillRepeatedly(ReturnRef(no_limit));
 
-  for (size_t i = 0; i < kDefaultAppTimeScaleMaxRequests; ++i) {
+  const uint32_t app_id = 1u;
+  mobile_apis::HMILevel::eType hmi_level =
+      mobile_apis::HMILevel::HMI_BACKGROUND;
+
+  for (uint32_t i = 0; i < kDefaultAppTimeScaleMaxRequests; ++i) {
     EXPECT_EQ(application_manager::request_controller::TrackResult::kSuccess,
               tracker_.Track(app_id, hmi_level));
     if (i % 2) {
@@ -173,15 +173,15 @@ TEST_F(RequestTrackerTestClass,
 
 TEST_F(RequestTrackerTestClass,
        TrackTwoAppsRequestInNone_ExpectSuccessTillLimit) {
-  const uint32_t app_id_1 = 1;
-  const uint32_t app_id_2 = 2;
+  const uint32_t app_id_1 = 1u;
+  const uint32_t app_id_2 = 2u;
 
   const mobile_apis::HMILevel::eType none_level =
       mobile_apis::HMILevel::HMI_NONE;
 
   SetDefaultConstraints();
 
-  for (size_t i = 0; i < kDefaultAppHmiLevelNoneTimeScaleMaxRequests; ++i) {
+  for (uint32_t i = 0; i < kDefaultAppHmiLevelNoneTimeScaleMaxRequests; ++i) {
     if (i % 2) {
       EXPECT_EQ(application_manager::request_controller::TrackResult::kSuccess,
                 tracker_.Track(app_id_1, none_level));
@@ -191,7 +191,8 @@ TEST_F(RequestTrackerTestClass,
     }
   }
 
-  for (size_t i = 0; i < kDefaultAppHmiLevelNoneTimeScaleMaxRequests / 2; ++i) {
+  for (uint32_t i = 0; i < kDefaultAppHmiLevelNoneTimeScaleMaxRequests / 2;
+       ++i) {
     EXPECT_EQ(application_manager::request_controller::TrackResult::kSuccess,
               tracker_.Track(app_id_1, none_level));
     EXPECT_EQ(application_manager::request_controller::TrackResult::kSuccess,
@@ -209,10 +210,6 @@ TEST_F(RequestTrackerTestClass,
 
 TEST_F(RequestTrackerTestClass,
        TrackAppRequestInNone_DoPause_TrackAgain_ExpectSuccessTillLimit) {
-  const uint32_t app_id = 1;
-  const mobile_apis::HMILevel::eType none_level =
-      mobile_apis::HMILevel::HMI_NONE;
-
   const uint32_t max_requests = 5;
   const uint32_t time_scale_ms = 1;
 
@@ -228,14 +225,18 @@ TEST_F(RequestTrackerTestClass,
               app_hmi_level_none_time_scale_max_requests())
       .WillRepeatedly(ReturnRef(max_requests));
 
-  for (size_t i = 0; i < max_requests; ++i) {
+  const uint32_t app_id = 1u;
+  const mobile_apis::HMILevel::eType none_level =
+      mobile_apis::HMILevel::HMI_NONE;
+
+  for (uint32_t i = 0; i < max_requests; ++i) {
     EXPECT_EQ(application_manager::request_controller::TrackResult::kSuccess,
               tracker_.Track(app_id, none_level));
   }
 
   awaiter.WaitFor(auto_lock, time_scale_ms * 2);
 
-  for (size_t i = 0; i < max_requests; ++i) {
+  for (uint32_t i = 0; i < max_requests; ++i) {
     EXPECT_EQ(application_manager::request_controller::TrackResult::kSuccess,
               tracker_.Track(app_id, none_level));
   }
