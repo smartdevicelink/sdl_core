@@ -444,9 +444,16 @@ TEST_F(PolicyHandlerTest, CheckPermissions) {
   EXPECT_CALL(*mock_app_, hmi_level()).WillOnce(Return(hmi_level));
   EXPECT_CALL(*mock_app_, device()).WillOnce(Return(device));
   EXPECT_CALL(*mock_app_, policy_app_id()).WillOnce(Return(kPolicyAppId_));
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  EXPECT_CALL(
+      *mock_policy_manager_,
+      CheckPermissions(kPolicyAppId_, kHmiLevel_, kRpc_, kRpc_params, _));
+
+#else   // EXTERNAL_PROPRIETARY_MODE
   EXPECT_CALL(*mock_policy_manager_,
               CheckPermissions(
                   kDeviceId, kPolicyAppId_, kHmiLevel_, kRpc_, kRpc_params, _));
+#endif  // EXTERNAL_PROPRIETARY_MODE
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
               StringifiedHMILevel(hmi_level)).WillOnce(Return(kHmiLevel_));
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),

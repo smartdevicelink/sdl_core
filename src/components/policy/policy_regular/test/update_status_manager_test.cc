@@ -36,7 +36,7 @@
 #include "policy/update_status_manager.h"
 #include "utils/make_shared.h"
 
-using ::policy::MockPolicyListener;
+using ::test::components::policy_test::MockPolicyListener;
 
 namespace test {
 namespace components {

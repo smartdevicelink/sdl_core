@@ -1,10 +1,43 @@
-// This file is generated, do not edit
+/*
+ * Copyright (c) 2017, Ford Motor Company
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following
+ * disclaimer in the documentation and/or other materials provided with the
+ * distribution.
+ *
+ * Neither the name of the Ford Motor Company nor the names of its contributors
+ * may be used to endorse or promote products derived from this software
+ * without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
 #ifndef SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_POLICY_TABLE_TYPES_H_
 #define SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_POLICY_TABLE_TYPES_H_
+
 #include <climits>
 
-#include "./enums.h"
+#include "policy/policy_table/enums.h"
 #include "rpc_base/rpc_message.h"
+
 namespace Json {
 class Value;
 }  // namespace Json
@@ -25,6 +58,7 @@ struct InteriorZone;
 
 namespace rpc {
 namespace policy_table_interface_base {
+
 // According to HMI API
 #define ODO_MAX 17000000
 
@@ -64,14 +98,13 @@ typedef Map<Rpcs, 1, 255> FunctionalGroupings;
 typedef Map<DeviceParams, 0, 255> DeviceData;
 
 typedef Array<Enum<RequestType>, 0, 255> RequestTypes;
+
 #ifdef SDL_REMOTE_CONTROL
 typedef Map<InteriorZone, 2, 1000000> Zones;
-#endif  // SDL_REMOTE_CONTROL
 typedef Map<Strings, 0, 255> RemoteRpcs;
-
 typedef Map<RemoteRpcs, 0, 255> AccessModules;
-
 typedef Array<Enum<ModuleType>, 0, 255> ModuleTypes;
+#endif  // SDL_REMOTE_CONTROL
 
 struct PolicyBase : CompositeType {
  public:
@@ -281,6 +314,7 @@ struct ModuleConfig : CompositeType {
   Optional<Boolean> country_consent_passengersRC;
   Optional<Equipment> equipment;
 #endif  // SDL_REMOTE_CONTROL
+
  public:
   ModuleConfig();
   ModuleConfig(uint8_t exchange_after_x_ignition_cycles,

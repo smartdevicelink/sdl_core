@@ -1388,8 +1388,13 @@ void PolicyHandler::CheckPermissions(
                "Checking permissions for  " << app->policy_app_id() << " in "
                                             << hmi_level << " on device "
                                             << device_id << " rpc " << rpc);
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  policy_manager_->CheckPermissions(
+      app->policy_app_id(), hmi_level, rpc, rpc_params, result);
+#else   // EXTERNAL_PROPRIETARY_MODE
   policy_manager_->CheckPermissions(
       device_id, app->policy_app_id(), hmi_level, rpc, rpc_params, result);
+#endif  // EXTERNAL_PROPRIETARY_MODE
 }
 
 uint32_t PolicyHandler::GetNotificationsNumber(

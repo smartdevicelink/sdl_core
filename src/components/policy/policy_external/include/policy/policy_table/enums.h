@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,6 +46,7 @@ enum Priority {
   P_NORMAL,
   P_NONE,
 };
+
 bool IsValidEnum(Priority val);
 const char* EnumToJsonString(Priority val);
 bool EnumFromJsonString(const std::string& literal, Priority* result);
@@ -118,19 +119,12 @@ enum AppHMIType {
   AHT_SOCIAL,
   AHT_BACKGROUND_PROCESS,
   AHT_TESTING,
-  AHT_SYSTEM
+  AHT_SYSTEM,
+  AHT_REMOTE_CONTROL,
 };
 bool IsValidEnum(AppHMIType val);
 const char* EnumToJsonString(AppHMIType val);
 bool EnumFromJsonString(const std::string& literal, AppHMIType* result);
-
-enum Input {
-  I_GUI,
-  I_VUI,
-};
-bool IsValidEnum(Input val);
-const char* EnumToJsonString(Input val);
-bool EnumFromJsonString(const std::string& literal, Input* result);
 
 enum RequestType {
   RT_HTTP,
@@ -154,9 +148,26 @@ enum RequestType {
   RT_MEDIA,
   RT_FOTA
 };
+
 bool IsValidEnum(RequestType val);
 const char* EnumToJsonString(RequestType val);
 bool EnumFromJsonString(const std::string& literal, RequestType* result);
+
+enum Input {
+  I_GUI,
+  I_VUI,
+};
+bool IsValidEnum(Input val);
+const char* EnumToJsonString(Input val);
+bool EnumFromJsonString(const std::string& literal, Input* result);
+
+enum ModuleType {
+  MT_CLIMATE,
+  MT_RADIO,
+};
+bool IsValidEnum(ModuleType val);
+const char* EnumToJsonString(ModuleType val);
+bool EnumFromJsonString(const std::string& literal, ModuleType* result);
 
 extern const std::string kDefaultApp;
 extern const std::string kPreDataConsentApp;

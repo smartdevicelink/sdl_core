@@ -366,7 +366,6 @@ bool RpcParameters::struct_empty() const {
   if (parameters.is_initialized()) {
     return false;
   }
-
   return true;
 }
 void RpcParameters::ReportErrors(rpc::ValidationReport* report__) const {
@@ -602,9 +601,11 @@ bool ModuleConfig::is_valid() const {
 #endif  // SDL_REMOTE_CONTROL
   return Validate();
 }
+
 bool ModuleConfig::is_initialized() const {
   return (initialization_state__ != kUninitialized) || (!struct_empty());
 }
+
 bool ModuleConfig::struct_empty() const {
   if (preloaded_pt.is_initialized()) {
     return false;
@@ -657,6 +658,7 @@ bool ModuleConfig::struct_empty() const {
 #endif  // SDL_REMOTE_CONTROL
   return true;
 }
+
 void ModuleConfig::ReportErrors(rpc::ValidationReport* report__) const {
   if (struct_empty()) {
     rpc::CompositeType::ReportErrors(report__);
@@ -930,7 +932,7 @@ void InteriorZone::SetPolicyTableType(PolicyTableType pt_type) {
   auto_allow.SetPolicyTableType(pt_type);
   driver_allow.SetPolicyTableType(pt_type);
 }
-#endif
+#endif  // SDL_REMOTE_CONTROL
 
 // MessageString methods
 MessageString::MessageString() : CompositeType(kUninitialized) {}
@@ -1259,6 +1261,7 @@ AppLevel::AppLevel(uint16_t minutes_in_hmi_full,
     , count_of_tls_errors(count_of_tls_errors)
     , count_of_run_attempts_while_revoked(count_of_run_attempts_while_revoked) {
 }
+
 AppLevel::~AppLevel() {}
 AppLevel::AppLevel(const Json::Value* value__)
     : CompositeType(InitHelper(value__, &Json::Value::isObject))

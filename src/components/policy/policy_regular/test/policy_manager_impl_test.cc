@@ -65,7 +65,7 @@ using ::testing::SetArgReferee;
 using ::testing::AtLeast;
 using ::testing::Return;
 
-using ::policy::MockPolicyListener;
+using ::test::components::policy_test::MockPolicyListener;
 
 using ::policy::MockCacheManagerInterface;
 using ::policy::MockUpdateStatusManager;
