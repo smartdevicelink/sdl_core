@@ -35,6 +35,7 @@
 #include "policy/policy_manager_impl.h"
 #include "policy/update_status_manager.h"
 #include "utils/make_shared.h"
+#include "utils/conditional_variable.h"
 
 namespace test {
 namespace components {
@@ -57,7 +58,7 @@ class UpdateStatusManagerTest : public ::testing::Test {
  public:
   UpdateStatusManagerTest()
       : manager_(utils::MakeShared<UpdateStatusManager>())
-      , k_timeout_(1)
+      , k_timeout_(1000)
       , listener_(utils::MakeShared<MockPolicyListener>())
       , up_to_date_status_("UP_TO_DATE")
       , update_needed_status_("UPDATE_NEEDED")
@@ -71,17 +72,55 @@ class UpdateStatusManagerTest : public ::testing::Test {
   void TearDown() OVERRIDE {}
 };
 
+namespace {
+class WaitAsync {
+public:
+
+    WaitAsync(uint32_t count, uint32_t  timeout) :
+        count_(count),
+        timeout_(timeout), cond_var_(){}
+
+    void Notify() {
+        count_--;
+        cond_var_.NotifyOne();
+    }
+
+    void Wait(sync_primitives::AutoLock& auto_lock) {
+        while(count_ > 0) {
+            sync_primitives::ConditionalVariable::WaitStatus wait_status
+                    = cond_var_.WaitFor(auto_lock, timeout_);
+            if (wait_status == sync_primitives::ConditionalVariable::kTimeout) {
+                break;
+            }
+        }
+    }
+
+private:
+  int count_;
+  uint32_t  timeout_;
+  sync_primitives::ConditionalVariable cond_var_;
+};
+}
+
+ACTION_P(NotifyAsync, waiter) {
+  waiter->Notify();
+}
+
 TEST_F(UpdateStatusManagerTest,
        OnUpdateSentOut_WaitForTimeoutExpired_ExpectStatusUpdateNeeded) {
   // Arrange
+  sync_primitives::Lock lock;
+  sync_primitives::AutoLock auto_lock(lock);
+  WaitAsync waiter_(3, 2 * k_timeout_);
+  EXPECT_CALL(*listener_, OnUpdateStatusChanged(_))
+          .WillRepeatedly(NotifyAsync(&waiter_));
   manager_->ScheduleUpdate();
   manager_->OnUpdateSentOut(k_timeout_);
   status_ = manager_->GetLastUpdateStatus();
   EXPECT_EQ(StatusUpdatePending, status_);
-  // Wait until timeout expired
-  sleep(k_timeout_ + 1);
-  status_ = manager_->GetLastUpdateStatus();
   // Check
+  waiter_.Wait(auto_lock);
+  status_ = manager_->GetLastUpdateStatus();
   EXPECT_EQ(StatusUpdateRequired, status_);
 }
 

@@ -812,7 +812,7 @@ void PolicyManagerImpl::OnExceededTimeout() {
 void PolicyManagerImpl::OnUpdateStarted() {
   int update_timeout = TimeoutExchange();
   LOG4CXX_DEBUG(logger_,
-                "Update timeout will be set to (sec): " << update_timeout);
+                "Update timeout will be set to (milisec): " << update_timeout);
   update_status_manager_.OnUpdateSentOut(update_timeout);
   cache_->SaveUpdateRequired(true);
 }

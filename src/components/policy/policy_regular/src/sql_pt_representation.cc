@@ -37,6 +37,7 @@
 #include <unistd.h>
 
 #include "utils/logger.h"
+#include "utils/date_time.h"
 #include "utils/file_system.h"
 #include "utils/gen_hash.h"
 #include "policy/sql_pt_representation.h"
@@ -186,10 +187,10 @@ int SQLPTRepresentation::TimeoutResponse() {
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt::kSelectTimeoutResponse) || !query.Exec()) {
     LOG4CXX_INFO(logger_, "Can not select timeout response for retry sequence");
-    const int kDefault = 30;
+    const int kDefault = 30000;
     return kDefault;
   }
-  return query.GetInteger(0);
+  return query.GetInteger(0) * date_time::DateTime::MILLISECONDS_IN_SECOND;
 }
 
 bool SQLPTRepresentation::SecondsBetweenRetries(std::vector<int>* seconds) {

@@ -857,7 +857,7 @@ TEST_F(SQLPTRepresentationTest, TimeoutResponse_Set60Seconds_GetEqualTimeout) {
   // Assert
   ASSERT_TRUE(dbms->Exec(query));
   // Check
-  EXPECT_EQ(60, reps->TimeoutResponse());
+  EXPECT_EQ(60000, reps->TimeoutResponse());
 }
 
 TEST_F(SQLPTRepresentationTest,
