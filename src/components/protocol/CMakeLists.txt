@@ -1,4 +1,4 @@
-# Copyright (c) 2016, Ford Motor Company
+# Copyright (c) 2014, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,18 +28,18 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
 include_directories(
-  ${COMPONENTS_DIR}/include
-  ${COMPONENTS_DIR}/utils/include
+  ./include
+  ${APR_INCLUDE_DIRECTORY}
 )
 
-collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}")
-
-set(LIBRARIES
-  Utils
+set(SOURCES
+  ${COMPONENTS_DIR}/protocol/src/raw_message.cc
+  ${COMPONENTS_DIR}/protocol/src/service_type.cc
+  ${COMPONENTS_DIR}/protocol/src/message_priority.cc
+  ${COMPONENTS_DIR}/protocol/src/rpc_type.cc
 )
 
 add_library(ProtocolLibrary ${SOURCES})
-target_link_libraries(ProtocolLibrary ${LIBRARIES})
+target_link_libraries(ProtocolLibrary Utils)

@@ -1,4 +1,4 @@
-# Copyright (c) 2016, Ford Motor Company
+# Copyright (c) 2013, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,35 +28,27 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-find_package(PythonInterp REQUIRED)
+set(target dbms)
 
-if(NOT PYTHONINTERP_FOUND)
-  message(STATUS "Python interpreter is not found")
-  message(STATUS "To install it type in the command line:")
-  message(STATUS "sudo apt-get install python")
-  message(FATAL_ERROR "Exiting!")
-endif(NOT PYTHONINTERP_FOUND)
+include_directories(${COMPONENTS_DIR}/utils/include/utils)
 
-set(INTEFRACE_GENERATOR "${CMAKE_SOURCE_DIR}/tools/InterfaceGenerator/Generator.py")
-set(INTEFRACE_GENERATOR_CMD ${PYTHON_EXECUTABLE} -B ${INTEFRACE_GENERATOR})
-file(GLOB_RECURSE INTERFACE_GENERATOR_DEPENDENCIES "${CMAKE_SOURCE_DIR}/tools/InterfaceGenerator/*.*")
+set(SOURCES
+  ./sql_database.cc
+  ./sql_query.cc
+  ./sql_error.cc
+)
 
-macro(generate_interface ARG_XML_NAME ARG_NAMESPACE PARSER_TYPE)
-  string(REGEX MATCH "^[a-zA-Z_0-9]*[^.]" FILE_NAME ${ARG_XML_NAME})  # TODO: make expression more robust
+add_library(${target} ${SOURCES})
+target_link_libraries(${target} qdb Utils)
 
-  set(HPP_FILE
-    "${CMAKE_CURRENT_BINARY_DIR}/${FILE_NAME}.h"
-    "${CMAKE_CURRENT_BINARY_DIR}/${FILE_NAME}_schema.h"
-  )
+if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
+  file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/policy.ini DESTINATION ${CMAKE_BINARY_DIR}/src/appMain)
+  file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/qdbserver.sh DESTINATION ${CMAKE_BINARY_DIR}/src/appMain)
+endif ()
 
-  set(CPP_FILE "${CMAKE_CURRENT_BINARY_DIR}/${FILE_NAME}_schema.cc")
-  set(FULL_XML_NAME "${CMAKE_CURRENT_SOURCE_DIR}/${ARG_XML_NAME}")
-
-  add_custom_command(
-    OUTPUT ${HPP_FILE} ${CPP_FILE}
-    COMMAND ${INTEFRACE_GENERATOR_CMD} ${FULL_XML_NAME} ${ARG_NAMESPACE} ${CMAKE_CURRENT_BINARY_DIR} "--parser-type" "${PARSER_TYPE}"
-    DEPENDS ${INTERFACE_GENERATOR_DEPENDENCIES} ${FULL_XML_NAME}
-    COMMENT "Generating files:\n   ${HPP_FILE}\n   ${CPP_FILE}\nfrom:\n   ${FULL_XML_NAME} ..."
-    VERBATIM
-  )
-endmacro()
+if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
+  install(FILES policy.ini DESTINATION bin)
+  install(FILES qdbserver.sh DESTINATION bin
+    PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ
+      GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+endif ()

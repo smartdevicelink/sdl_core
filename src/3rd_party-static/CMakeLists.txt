@@ -32,8 +32,8 @@
 add_subdirectory(./jsoncpp)
 set(JSONCPP_INCLUDE_DIRECTORY ${JSONCPP_INCLUDE_DIRECTORY} PARENT_SCOPE)
 
-# --- Message Broker
-add_subdirectory(./message_broker)
+# --- MessageBroker
+add_subdirectory(./MessageBroker)
 set(MESSAGE_BROKER_INCLUDE_DIRECTORY ${MESSAGE_BROKER_INCLUDE_DIRECTORY} PARENT_SCOPE)
 
 # --- encryption
@@ -48,9 +48,6 @@ if (BUILD_USB_SUPPORT)
   endif()
 endif()
 
-# --- gmock
 if(BUILD_TESTS)
-  add_subdirectory(./gmock-1.7.0)
-  set(GMOCK_INCLUDE_DIRECTORY ${GMOCK_INCLUDE_DIRECTORY} PARENT_SCOPE)
   add_subdirectory(test)
 endif()

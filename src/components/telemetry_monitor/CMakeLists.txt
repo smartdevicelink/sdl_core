@@ -28,7 +28,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
+
+set(TELEMETRY_MONITOR_SRC_DIR ${COMPONENTS_DIR}/telemetry_monitor/src)
 
 include_directories (
   include
@@ -48,15 +49,15 @@ include_directories (
   ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
-set(PATHS
-  ${CMAKE_CURRENT_SOURCE_DIR}/include
-  ${CMAKE_CURRENT_SOURCE_DIR}/src
-)
-collect_sources(SOURCES "${PATHS}")
-
-set(LIBRARIES
-  HMI_API
-  MOBILE_API
+set(SOURCES
+    ${TELEMETRY_MONITOR_SRC_DIR}/metric_wrapper.cc
+    ${TELEMETRY_MONITOR_SRC_DIR}/telemetry_monitor.cc
+    ${TELEMETRY_MONITOR_SRC_DIR}/application_manager_observer.cc
+    ${TELEMETRY_MONITOR_SRC_DIR}/transport_manager_observer.cc
+    ${TELEMETRY_MONITOR_SRC_DIR}/protocol_handler_observer.cc
+    ${TELEMETRY_MONITOR_SRC_DIR}/application_manager_metric_wrapper.cc
+    ${TELEMETRY_MONITOR_SRC_DIR}/transport_manager_metric_wrapper.cc
+    ${TELEMETRY_MONITOR_SRC_DIR}/protocol_handler_metric_wrapper.cc
 )
 
 add_library("TelemetryMonitor" ${SOURCES})
