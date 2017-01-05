@@ -60,6 +60,23 @@ namespace transport_adapter {
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 namespace {
+#ifdef BLUEZ5
+int ValidateAddr(char* dev_list_entry) {
+  const int BT_ADDRESS_LENGTH = 17;
+  if (strlen(dev_list_entry) == BT_ADDRESS_LENGTH) {
+    for (int i = 0; i < BT_ADDRESS_LENGTH; i++) {
+      if (i % 3 < 2 && !isxdigit(dev_list_entry[i])) {
+        return false;
+      } else if (i % 3 == 2 && dev_list_entry[i] != ':') {
+        return false;
+      }
+    }
+    return true;
+  } else {
+    return false;
+  }
+}
+#else
 char* SplitToAddr(char* dev_list_entry) {
   char* bl_address = strtok(dev_list_entry, "()");
   if (bl_address != NULL) {
@@ -69,12 +86,19 @@ char* SplitToAddr(char* dev_list_entry) {
     return NULL;
   }
 }
+#endif
 
 int FindPairedDevs(std::vector<bdaddr_t>* result) {
   LOG4CXX_TRACE(logger_, "enter. result adress: " << result);
   DCHECK(result != NULL);
 
+#ifdef BLUEZ5
+  const char* cmd =
+      "echo $\'paired-devices\\nquit\' | bluetoothctl | grep ^Device";
+#else
   const char* cmd = "bt-device -l";
+  size_t counter = 0;
+#endif
 
   FILE* pipe = popen(cmd, "r");
   if (!pipe) {
@@ -82,8 +106,20 @@ int FindPairedDevs(std::vector<bdaddr_t>* result) {
     return -1;
   }
   char* buffer = new char[1028];
-  size_t counter = 0;
+
   while (fgets(buffer, 1028, pipe) != NULL) {
+#ifdef BLUEZ5
+    // Ignore the first token (should be just "Device")
+    strtok(buffer, " ");
+    // Second token is the bluetooth address
+    char* bt_address = strtok(NULL, " ");
+    if (ValidateAddr(bt_address)) {
+      LOG4CXX_DEBUG(logger_, "Found paired device: " << bt_address);
+      bdaddr_t address;
+      str2ba(bt_address, &address);
+      result->push_back(address);
+    }
+#else
     if (0 < counter++) {  //  skip first line
       char* bt_address = SplitToAddr(buffer);
       if (bt_address) {
@@ -92,9 +128,11 @@ int FindPairedDevs(std::vector<bdaddr_t>* result) {
         result->push_back(address);
       }
     }
+#endif
     delete[] buffer;
     buffer = new char[1028];
   }
+
   pclose(pipe);
   LOG4CXX_TRACE(logger_, "exit with 0");
   delete[] buffer;
