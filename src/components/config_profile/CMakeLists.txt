@@ -1,4 +1,4 @@
-# Copyright (c) 2016, Ford Motor Company
+# Copyright (c) 2014, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,6 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
 include_directories (
   include
@@ -36,18 +35,13 @@ include_directories (
   ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
-set(PATHS
-  ${CMAKE_CURRENT_SOURCE_DIR}/include
-  ${CMAKE_CURRENT_SOURCE_DIR}/src
+set (SOURCES
+    ${COMPONENTS_DIR}/config_profile/src/profile.cc
+    ${COMPONENTS_DIR}/config_profile/src/ini_file.cc
 )
 
-set(LIBRARIES
-  Utils
-)
-
-collect_sources(SOURCES "${PATHS}")
 add_library("ConfigProfile" ${SOURCES})
-target_link_libraries("ConfigProfile" ${LIBRARIES})
+target_link_libraries("ConfigProfile" Utils)
 
 if(BUILD_TESTS)
   add_subdirectory(test)

@@ -28,7 +28,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
+if(BUILD_TESTS)
 
 include_directories(
     ${GMOCK_INCLUDE_DIRECTORY}
@@ -46,7 +46,9 @@ if(EXTENDED_MEDIA_MODE)
   )
 endif()
 
-collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}")
+set(SOURCES
+    ${COMPONENTS_DIR}/media_manager/test/media_manager_impl_test.cc
+)
 
 set(LIBRARIES
     SmartObjects
@@ -72,3 +74,7 @@ create_test("media_manager_test" "${SOURCES}" "${LIBRARIES}")
 if(ENABLE_LOG)
     target_link_libraries("media_manager_test" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
 endif()
+
+endif()
+
+# vim: set ts=2 sw=2 et:

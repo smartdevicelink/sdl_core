@@ -28,20 +28,23 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
+if(BUILD_TESTS)
 
 include_directories (
   ${GMOCK_INCLUDE_DIRECTORY}
   ${COMPONENTS_DIR}/config_profile/include
   )
+  
 
-set(LIBRARIES
+set(testSources
+  profile_test.cc
+  ini_file_test.cc
+)
+
+set(testLibraries
   gmock
   ConfigProfile
 )
-
-collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}")
-create_test(config_profile_test "${SOURCES}" "${LIBRARIES}")
  
 file(COPY smartDeviceLink.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY smartDeviceLink_test.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
@@ -49,3 +52,6 @@ file(COPY smartDeviceLink_invalid_pairs.ini DESTINATION ${CMAKE_CURRENT_BINARY_D
 file(COPY smartDeviceLink_invalid_string.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY smartDeviceLink_invalid_int.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR}) 
 file(COPY smartDeviceLink_invalid_boolean.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR}) 
+create_test("config_profile_test" "${testSources}" "${testLibraries}")
+
+endif()

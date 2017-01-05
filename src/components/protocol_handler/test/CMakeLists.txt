@@ -28,7 +28,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
+if (BUILD_TESTS)
 
 include_directories (
   include
@@ -38,12 +38,9 @@ include_directories (
   ${COMPONENTS_DIR}/protocol_handler/test/include
   ${COMPONENTS_DIR}/include/protocol
   ${JSONCPP_INCLUDE_DIRECTORY}
-  ${GMOCK_INCLUDE_DIRECTORY}
 )
 
-collect_sources(SOURCES ${CMAKE_CURRENT_SOURCE_DIR})
-
-set(LIBRARIES
+set (LIBRARIES
   gmock
   ProtocolHandler
   connectionHandler
@@ -52,4 +49,15 @@ set(LIBRARIES
   ProtocolLibrary
 )
 
-create_test(protocol_handler_test "${SOURCES}" "${LIBRARIES}")
+set (SOURCES
+  incoming_data_handler_test.cc
+  protocol_header_validator_test.cc
+  protocol_handler_tm_test.cc
+  protocol_packet_test.cc
+  protocol_payload_test.cc
+  multiframe_builder_test.cc
+)
+
+create_test ("protocol_handler_test" "${SOURCES}" "${LIBRARIES}")
+
+endif ()

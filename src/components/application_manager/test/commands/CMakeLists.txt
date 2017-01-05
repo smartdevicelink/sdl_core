@@ -28,7 +28,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
+include(sources)
 
 include_directories(
   ${GMOCK_INCLUDE_DIRECTORY}

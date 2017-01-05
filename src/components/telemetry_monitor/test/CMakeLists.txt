@@ -28,7 +28,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
+if(BUILD_TESTS)
 
 include_directories(
   include
@@ -40,10 +40,20 @@ include_directories(
   ${COMPONENTS_DIR}/resumption/include
   ${JSONCPP_INCLUDE_DIRECTORY}
 )
+  
 
-collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}")  
+set(testSources
+  metric_wrapper_test.cc
+  telemetry_monitor_test.cc
+  protocol_handler_metric_test.cc
+  protocol_handler_observer_test.cc
+  transport_manager_metric_test.cc
+  transport_manager_observer_test.cc
+  application_manager_metric_test.cc
+  application_manager_observer_test.cc
+)
 
-set(LIBRARIES
+set(testLibraries
   gmock
   TelemetryMonitor
   jsoncpp
@@ -58,7 +68,7 @@ set(LIBRARIES
   MessageHelper
   Resumption
   jsoncpp
-  TransportManager
+  transport_manager
   MediaManager
   ProtocolHandler
   connectionHandler
@@ -72,8 +82,8 @@ if (BUILD_BT_SUPPORT)
   list(APPEND testLibraries bluetooth)
 endif()
 
-create_test("telemetry_monitor_test" "${SOURCES}" "${LIBRARIES}")
+file(COPY log4cxx.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
-file(COPY ${COMPONENTS_DIR}/telemetry_monitor/test/log4cxx.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+create_test("telemetry_monitor_test" "${testSources}" "${testLibraries}")
 
-
+endif()

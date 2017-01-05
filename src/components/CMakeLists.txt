@@ -29,64 +29,68 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 set(COMPONENTS_DIR ${CMAKE_SOURCE_DIR}/src/components)
-set(COMPONENTS_DIR ${COMPONENTS_DIR} PARENT_SCOPE)
 
-# --- HMI, MOBILE Interfaces
+# --- HMI_API interfaces
 add_subdirectory(./interfaces)
 
-# --- Protocol Handler
+# --- ProtocolHandler
 add_subdirectory(./protocol)
 
-# --- Transport Manager
+# --- TransportManager
 add_subdirectory(./transport_manager)
 
-# --- Resumption
+# --- Policies
 add_subdirectory(./resumption)
 
-# --- Formatters
+# --- formatters
 add_subdirectory(./formatters)
 
-# --- Protocol Handler
+# --- ProtocolHandler
 add_subdirectory(./protocol_handler)
 
-# --- Connection Handler
+# --- ConnectionHandler
 add_subdirectory(./connection_handler)
 
 # --- Utils
 add_subdirectory(./utils)
 
-# --- Security Manager
+# --- Security manager
 if(ENABLE_SECURITY)
   add_subdirectory(./security_manager)
 endif()
-
-# --- Policy
+#
+# --- Policy_impl
 add_subdirectory(./policy)
 
-# --- Validated Types
+# --- Validated types
 add_subdirectory(./rpc_base)
 
-# --- Smart Objects
+# --- SmartObjects
 add_subdirectory(./smart_objects)
 
-# --- Application Manager
+# --- Application manager
 add_subdirectory(./application_manager)
 
 # --- HMI Message Handler
 add_subdirectory(./hmi_message_handler)
 
-# --- Config Profile
+# --- Config
 add_subdirectory(./config_profile)
 
-# --- Media Manager
+# --- AudioManager
 add_subdirectory(./media_manager)
 
-# --- Telemetry Monitor
-if(TELEMETRY_MONITOR)
-  add_subdirectory(./telemetry_monitor)
+if (TELEMETRY_MONITOR)
+    add_subdirectory(./telemetry_monitor)
 endif()
 
+
+if (${HMI_DBUS_API})
 # --- DBus
-if(HMI_DBUS_API)
-  add_subdirectory(./dbus)
-endif()
+    add_subdirectory(./dbus)
+endif ()
+if (${QT_HMI})
+# --- Qt HMI
+    add_subdirectory(./qt_hmi)
+endif ()
+
