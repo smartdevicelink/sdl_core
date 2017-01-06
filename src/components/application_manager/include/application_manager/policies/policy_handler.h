@@ -440,6 +440,9 @@ class PolicyHandler : public PolicyHandlerInterface,
   virtual void OnUpdateHMILevel(const std::string& device_id,
                                 const std::string& policy_app_id,
                                 const std::string& hmi_level) OVERRIDE;
+
+  void AddApplication(const std::string& application_id,
+                      const smart_objects::SmartObject* app_types) OVERRIDE;
 #endif
 
   virtual void OnCertificateUpdated(

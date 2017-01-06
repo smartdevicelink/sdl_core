@@ -129,6 +129,8 @@ class PolicyHandlerInterface {
   virtual bool CheckHMIType(const std::string& application_id,
                             mobile_apis::AppHMIType::eType hmi,
                             const smart_objects::SmartObject* app_types) = 0;
+  virtual void AddApplication(const std::string& application_id,
+                              const smart_objects::SmartObject* app_types) = 0;
 #endif
   /**
    * Lets client to notify PolicyHandler that more kilometers expired
