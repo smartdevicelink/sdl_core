@@ -55,6 +55,10 @@ enum UpdateEvent {
   kOnResetRetrySequence
 };
 
+const std::string kUpToDate = "UP_TO_DATE";
+const std::string kUpdateNeeded = "UPDATE_NEEDED";
+const std::string kUpdating = "UPDATING";
+
 class UpdateStatusManager;
 
 /**
