@@ -1739,7 +1739,6 @@ void PolicyHandler::OnAppsSearchCompleted() {
 
 void PolicyHandler::OnAppRegisteredOnMobile(const std::string& application_id) {
   POLICY_LIB_CHECK_VOID();
-  AddApplication(application_id);
   policy_manager_->OnAppRegisteredOnMobile(application_id);
 }
 
