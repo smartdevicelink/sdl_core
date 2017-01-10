@@ -385,6 +385,19 @@ const std::string kCreateSchema =
     "CREATE INDEX `access_module.fk_module_1_idx` ON "
     "`access_module`(`zone_id`); "
 
+    /* remote_rpc */
+    "CREATE TABLE `remote_rpc`( "
+    "  `id` INTEGER PRIMARY KEY NOT NULL, "
+    "  `name` VARCHAR(255) NOT NULL, "
+    "  `parameter` VARCHAR(45), "
+    "  `module_id` INTEGER NOT NULL, "
+    "CONSTRAINT `fk_remote_rpc_1` "
+    "  FOREIGN KEY(`module_id`) "
+    "  REFERENCES `access_module`(`id`) "
+    "); "
+    "CREATE INDEX `remote_rpc.fk_remote_rpc_1_idx` ON "
+    "`remote_rpc`(`module_id`); "
+
     /* module type */
     "CREATE TABLE IF NOT EXISTS `module_type`( "
     "  `name` VARCHAR(50) NOT NULL, "
@@ -590,6 +603,8 @@ const std::string kDropSchema =
     "DROP TABLE IF EXISTS `priority`; "
     "DROP TABLE IF EXISTS `functional_group`; "
     "DROP TABLE IF EXISTS `module_config`; "
+    "DROP TABLE IF EXISTS `remote_rpc`; "
+    "DROP INDEX IF EXISTS `remote_rpc.fk_remote_rpc_1_idx`; "
     "DROP TABLE IF EXISTS `module_meta`; "
     "DROP TABLE IF EXISTS `usage_and_error_count`; "
     "DROP TABLE IF EXISTS `device`; "
@@ -625,6 +640,7 @@ const std::string kDeleteData =
     "DELETE FROM `functional_group`; "
     "DELETE FROM `module_config`; "
     "DELETE FROM `module_meta`; "
+    "DELETE FROM `remote_rpc`; "
     "DELETE FROM `usage_and_error_count`; "
     "DELETE FROM `device`; "
     "COMMIT; "
