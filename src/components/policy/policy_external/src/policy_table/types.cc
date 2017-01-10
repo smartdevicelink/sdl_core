@@ -523,6 +523,7 @@ void ModuleConfig::SafeCopyFrom(const ModuleConfig& from) {
   exchange_after_x_days = from.exchange_after_x_days;
   exchange_after_x_kilometers = from.exchange_after_x_kilometers;
   exchange_after_x_days = from.exchange_after_x_days;
+  exchange_after_x_ignition_cycles = from.exchange_after_x_ignition_cycles;
   timeout_after_x_seconds = from.timeout_after_x_seconds;
   seconds_between_retries = from.seconds_between_retries;
   endpoints = from.endpoints;
