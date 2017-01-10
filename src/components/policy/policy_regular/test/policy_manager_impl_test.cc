@@ -894,7 +894,7 @@ TEST_F(PolicyManagerImplTest2, TimeOutExchange) {
   // Arrange
   CreateLocalPT("sdl_preloaded_pt.json");
   // Check value taken from PT
-  EXPECT_EQ(70, manager->TimeoutExchange());
+  EXPECT_EQ(70000, manager->TimeoutExchange());
 }
 
 TEST_F(PolicyManagerImplTest2, UpdatedPreloadedPT_ExpectLPT_IsUpdated) {
