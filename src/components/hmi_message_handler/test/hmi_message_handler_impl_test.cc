@@ -181,6 +181,7 @@ TEST_F(HMIMessageHandlerImplTest, SendMessageToHMI_Success) {
 
   // Wait for the message to be processed
   hmi_handler_->messages_to_hmi()->WaitDumpQueue();
+  testing::Mock::AsyncVerifyAndClearExpectations(100);
 }
 
 }  // namespace hmi_message_handler_test

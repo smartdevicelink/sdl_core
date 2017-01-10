@@ -94,6 +94,14 @@ void OnButtonEventNotification::Run() {
       return;
     }
 
+    if ((mobile_api::HMILevel::HMI_FULL != app->hmi_level()) &&
+        (mobile_api::HMILevel::HMI_LIMITED != app->hmi_level())) {
+      LOG4CXX_WARN(logger_,
+                   "CUSTOM_BUTTON OnButtonEvent notification is allowed only "
+                       << "in FULL or LIMITED hmi level");
+      return;
+    }
+
     SendButtonEvent(app);
     return;
   }
