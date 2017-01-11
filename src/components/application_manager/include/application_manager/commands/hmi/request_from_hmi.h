@@ -68,6 +68,7 @@ class RequestFromHMI : public CommandImpl, public event_engine::EventObserver {
    * @param correlation_id the correlation id for the response.
    * @param function_id the function id for which response will be sent
    * @param result_code the result code.
+   * @param error_message info message for error.
    */
   void SendErrorResponse(const uint32_t correlation_id,
                          const hmi_apis::FunctionID::eType function_id,
@@ -77,14 +78,13 @@ class RequestFromHMI : public CommandImpl, public event_engine::EventObserver {
  private:
   /**
    * @brief Fills common parameters for SO
-   * @param Contains SO for filling
+   * @param message Contains SO for filling
    * @param correlation_id the correlation id for the response.
    * @param function_id the function id for which response will be sent
    */
-  void FillCommonParametersOfSO(
-      NsSmartDeviceLink::NsSmartObjects::SmartObjectSPtr& message,
-      uint32_t correlation_id,
-      hmi_apis::FunctionID::eType function_id);
+  void FillCommonParametersOfSO(smart_objects::SmartObjectSPtr& message,
+                                uint32_t correlation_id,
+                                hmi_apis::FunctionID::eType function_id);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(RequestFromHMI);
