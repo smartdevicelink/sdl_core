@@ -35,7 +35,7 @@
 #include "utils/make_shared.h"
 
 policy::UpToDateStatus::UpToDateStatus()
-    : Status("UP_TO_DATE", policy::PolicyTableStatus::StatusUpToDate) {}
+    : Status(kUpToDate, policy::PolicyTableStatus::StatusUpToDate) {}
 
 void policy::UpToDateStatus::ProcessEvent(UpdateStatusManager* manager,
                                           policy::UpdateEvent event) {
@@ -52,8 +52,7 @@ void policy::UpToDateStatus::ProcessEvent(UpdateStatusManager* manager,
 }
 
 policy::UpdateNeededStatus::UpdateNeededStatus()
-    : Status("UPDATE_NEEDED", policy::PolicyTableStatus::StatusUpdateRequired) {
-}
+    : Status(kUpdateNeeded, policy::PolicyTableStatus::StatusUpdateRequired) {}
 
 void policy::UpdateNeededStatus::ProcessEvent(
     policy::UpdateStatusManager* manager, policy::UpdateEvent event) {
@@ -78,7 +77,7 @@ bool policy::UpdateNeededStatus::IsUpdateRequired() const {
 }
 
 policy::UpdatingStatus::UpdatingStatus()
-    : Status("UPDATING", policy::PolicyTableStatus::StatusUpdatePending) {}
+    : Status(kUpdating, policy::PolicyTableStatus::StatusUpdatePending) {}
 
 void policy::UpdatingStatus::ProcessEvent(policy::UpdateStatusManager* manager,
                                           policy::UpdateEvent event) {
