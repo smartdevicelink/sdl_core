@@ -657,8 +657,17 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   applications_.insert(application);
   applications_list_lock_.Release();
 
+#ifdef SDL_REMOTE_CONTROL
+  if (message[strings::msg_params].keyExists(strings::app_hmi_type)) {
+    GetPolicyHandler().AddApplication(
+        application->policy_app_id(),
+        &message[strings::msg_params][strings::app_hmi_type]);
+  } else {
+    GetPolicyHandler().AddApplication(application->policy_app_id());
+  }
+#else   // SDL_REMOTE_CONTROL
   GetPolicyHandler().AddApplication(application->policy_app_id());
-
+#endif  // SDL_REMOTE_CONTROL
   return application;
 }
 

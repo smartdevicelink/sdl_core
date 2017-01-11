@@ -493,6 +493,21 @@ void PolicyHandler::AddApplication(const std::string& application_id) {
 }
 
 #ifdef SDL_REMOTE_CONTROL
+void PolicyHandler::AddApplication(
+    const std::string& application_id,
+    const smart_objects::SmartObject* app_types) {
+  POLICY_LIB_CHECK_VOID();
+  std::vector<int> hmi_types;
+  if (app_types && app_types->asArray()) {
+    smart_objects::SmartArray* hmi_list = app_types->asArray();
+    std::transform(hmi_list->begin(),
+                   hmi_list->end(),
+                   std::back_inserter(hmi_types),
+                   SmartObjectToInt());
+  }
+  policy_manager_->AddApplication(application_id, hmi_types);
+}
+
 bool PolicyHandler::CheckHMIType(const std::string& application_id,
                                  mobile_apis::AppHMIType::eType hmi,
                                  const smart_objects::SmartObject* app_types) {
