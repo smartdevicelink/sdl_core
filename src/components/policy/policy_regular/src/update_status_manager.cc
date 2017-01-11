@@ -80,9 +80,7 @@ void UpdateStatusManager::set_listener(PolicyListener* listener) {
 void UpdateStatusManager::OnUpdateSentOut(uint32_t update_timeout) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK(update_status_thread_delegate_);
-  const unsigned milliseconds_in_second = 1000;
-  update_status_thread_delegate_->updateTimeOut(update_timeout *
-                                                milliseconds_in_second);
+  update_status_thread_delegate_->updateTimeOut(update_timeout);
   ProcessEvent(kOnUpdateSentOut);
 }
 
