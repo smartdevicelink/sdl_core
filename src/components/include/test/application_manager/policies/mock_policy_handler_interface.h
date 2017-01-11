@@ -213,6 +213,10 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
                void(const std::string& service_type,
                     policy::EndpointUrls& end_points));
 #ifdef SDL_REMOTE_CONTROL
+  MOCK_METHOD3(OnUpdateHMILevel,
+               void(const std::string& device_id,
+                    const std::string& policy_app_id,
+                    const std::string& hmi_level));
   MOCK_METHOD3(CheckHMIType,
                bool(const std::string& application_id,
                     mobile_apis::AppHMIType::eType hmi,

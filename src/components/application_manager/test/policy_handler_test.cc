@@ -120,7 +120,7 @@ class PolicyHandlerTest : public ::testing::Test {
   protocol_handler_test::MockSessionObserver mock_session_observer;
   application_manager_test::MockStateController mock_state_controller;
   PolicyHandler policy_handler_;
-  utils::SharedPtr<policy_manager::MockPolicyManager> mock_policy_manager_;
+  utils::SharedPtr<policy_manager_test::MockPolicyManager> mock_policy_manager_;
   application_manager_test::MockApplicationManager app_manager_;
   MockMessageHelper& mock_message_helper_;
   application_manager_test::MockHMICapabilities mock_hmi_capabilities_;
@@ -149,7 +149,7 @@ class PolicyHandlerTest : public ::testing::Test {
     std::string path = file_system::CreateDirectory("storage");
     file_system::CreateFile(path + "/" + "certificate");
     mock_policy_manager_ =
-        utils::MakeShared<policy_manager::MockPolicyManager>();
+        utils::MakeShared<policy_manager_test::MockPolicyManager>();
     ASSERT_TRUE(mock_policy_manager_.valid());
 
     ON_CALL(app_manager_, connection_handler())
