@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,10 +30,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "transport_manager/tcp/tcp_connection_factory.h"
-#include "transport_manager/tcp/tcp_socket_connection.h"
+#include "transport_manager/tcp/tcp_server_originated_socket_connection.h"
 
 #include "utils/logger.h"
+#include "utils/make_shared.h"
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -54,16 +56,17 @@ TransportAdapter::Error TcpConnectionFactory::CreateConnection(
   LOG4CXX_DEBUG(logger_,
                 "DeviceUID: " << &device_uid
                               << ", ApplicationHandle: " << &app_handle);
-  TcpServerOiginatedSocketConnection* connection(
-      new TcpServerOiginatedSocketConnection(
-          device_uid, app_handle, controller_));
-  if (connection->Start() == TransportAdapter::OK) {
-    LOG4CXX_DEBUG(logger_, "TCP connection initialised");
-    return TransportAdapter::OK;
-  } else {
-    LOG4CXX_ERROR(logger_, "Could not initialise TCP connection");
-    return TransportAdapter::FAIL;
+  utils::SharedPtr<TcpServerOriginatedSocketConnection> connection =
+      utils::MakeShared<TcpServerOriginatedSocketConnection>(
+          device_uid, app_handle, controller_);
+  controller_->ConnectionCreated(connection, device_uid, app_handle);
+  const TransportAdapter::Error error = connection->Start();
+  if (TransportAdapter::OK != error) {
+    LOG4CXX_ERROR(logger_,
+                  "TCP ServerOriginated connection::Start() failed with error: "
+                      << error);
   }
+  return error;
 }
 
 void TcpConnectionFactory::Terminate() {}

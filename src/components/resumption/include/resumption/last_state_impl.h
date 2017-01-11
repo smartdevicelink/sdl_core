@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,48 +30,54 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_IMPL_H_
+#define SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_IMPL_H_
+
 #include "resumption/last_state.h"
-#include "utils/file_system.h"
-#include "utils/logger.h"
+#include "utils/macro.h"
 
 namespace resumption {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "Resumption")
+/**
+ * @brief The LastStateImpl class handles interface of last state
+ */
 
-LastState::LastState(const std::string& app_storage_folder,
-                     const std::string& app_info_storage)
-    : app_storage_folder_(app_storage_folder)
-    , app_info_storage_(app_info_storage) {
-  LoadFromFileSystem();
-  LOG4CXX_AUTO_TRACE(logger_);
-}
+class LastStateImpl : public LastState {
+ public:
+  /**
+   * @brief Constructor
+   */
+  LastStateImpl(const std::string& app_storage_folder,
+                const std::string& app_info_storage);
 
-LastState::~LastState() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  SaveToFileSystem();
-}
+  /**
+   * @brief Destructor
+   */
+  ~LastStateImpl();
 
-void LastState::SaveToFileSystem() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  const std::string& str = dictionary.toStyledString();
-  const std::vector<uint8_t> char_vector_pdata(str.begin(), str.end());
+  /**
+   * @brief Saving dictionary to filesystem
+   */
+  void SaveStateToFileSystem() OVERRIDE;
 
-  DCHECK(file_system::CreateDirectoryRecursively(app_storage_folder_));
-  LOG4CXX_INFO(logger_,
-               "LastState::SaveToFileSystem " << app_info_storage_ << str);
-  DCHECK(file_system::Write(app_info_storage_, char_vector_pdata));
-}
+  /**
+   * @brief Get reference to dictionary
+   */
+  Json::Value& get_dictionary() OVERRIDE;
 
-void LastState::LoadFromFileSystem() {
-  std::string buffer;
-  bool result = file_system::ReadFile(app_info_storage_, buffer);
-  Json::Reader m_reader;
-  if (result && m_reader.parse(buffer, dictionary)) {
-    LOG4CXX_INFO(logger_,
-                 "Valid last state was found." << dictionary.toStyledString());
-    return;
-  }
-  LOG4CXX_WARN(logger_, "No valid last state was found.");
-}
+ private:
+  const std::string app_storage_folder_;
+  const std::string app_info_storage_;
+  Json::Value dictionary_;
 
-}  // resumption
+  /**
+   * @brief Load dictionary from filesystem
+   */
+  void LoadStateFromFileSystem();
+
+  DISALLOW_COPY_AND_ASSIGN(LastStateImpl);
+};
+
+}  // namespace resumption
+
+#endif  // SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_IMPL_H_

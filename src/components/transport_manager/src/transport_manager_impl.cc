@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -413,14 +413,17 @@ int TransportManagerImpl::AddTransportAdapter(
                   "transport_adapter_listeners_.end()");
     return E_ADAPTER_EXISTS;
   }
-  transport_adapter_listeners_[transport_adapter] =
-      new TransportAdapterListenerImpl(this, transport_adapter);
-  transport_adapter->AddListener(
-      transport_adapter_listeners_[transport_adapter]);
 
   if (transport_adapter->IsInitialised() ||
       transport_adapter->Init() == TransportAdapter::OK) {
+    transport_adapter_listeners_[transport_adapter] =
+        new TransportAdapterListenerImpl(this, transport_adapter);
+    transport_adapter->AddListener(
+        transport_adapter_listeners_[transport_adapter]);
+
     transport_adapters_.push_back(transport_adapter);
+  } else {
+    delete transport_adapter;
   }
   LOG4CXX_TRACE(logger_, "exit with E_SUCCESS");
   return E_SUCCESS;

@@ -1,4 +1,4 @@
-# Copyright (c) 2014, Ford Motor Company
+# Copyright (c) 2017, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -53,6 +53,7 @@ set (SOURCES
   ${TM_SRC_DIR}/transport_adapter/transport_adapter_listener_impl.cc
   ${TM_SRC_DIR}/transport_adapter/transport_adapter_impl.cc
   ${TM_SRC_DIR}/tcp/tcp_transport_adapter.cc
+  ${TM_SRC_DIR}/tcp/tcp_server_originated_socket_connection.cc
   ${TM_SRC_DIR}/transport_adapter/threaded_socket_connection.cc
   ${TM_SRC_DIR}/tcp/tcp_client_listener.cc
   ${TM_SRC_DIR}/tcp/tcp_device.cc

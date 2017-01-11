@@ -1,6 +1,6 @@
 /*
- * \file bluetooth_connection_factory.cc
- * \brief BluetoothConnectionFactory class source file.
+ * \file tcp_server_originated_socket_connection.h
+ * \brief TcpServerOriginatedSocketConnection class header file.
  *
  * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
@@ -33,47 +33,52 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "transport_manager/transport_adapter/transport_adapter_controller.h"
-#include "transport_manager/bluetooth/bluetooth_connection_factory.h"
-#include "transport_manager/bluetooth/bluetooth_socket_connection.h"
-#include "utils/logger.h"
-#include "utils/make_shared.h"
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_SERVER_ORIGINATED_SOCKET_CONNECTION_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_SERVER_ORIGINATED_SOCKET_CONNECTION_H_
+
+#include "transport_manager/transport_adapter/threaded_socket_connection.h"
 
 namespace transport_manager {
 namespace transport_adapter {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
+class TransportAdapterController;
 
-BluetoothConnectionFactory::BluetoothConnectionFactory(
-    TransportAdapterController* controller)
-    : controller_(controller) {}
+/**
+ * @brief Class responsible for communication over sockets that originated by
+ * server.
+ */
+class TcpServerOriginatedSocketConnection : public ThreadedSocketConnection {
+ public:
+  /**
+   * @brief Constructor.
+   *
+   * @param device_uid Device unique identifier.
+   * @param app_handle Handle of application.
+   * @param controller Pointer to the device adapter controller.
+   */
+  TcpServerOriginatedSocketConnection(const DeviceUID& device_uid,
+                                      const ApplicationHandle& app_handle,
+                                      TransportAdapterController* controller);
 
-TransportAdapter::Error BluetoothConnectionFactory::Init() {
-  return TransportAdapter::OK;
-}
+  /**
+   * @brief Destructor.
+   */
+  virtual ~TcpServerOriginatedSocketConnection();
 
-TransportAdapter::Error BluetoothConnectionFactory::CreateConnection(
-    const DeviceUID& device_uid, const ApplicationHandle& app_handle) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  utils::SharedPtr<BluetoothSocketConnection> connection =
-      utils::MakeShared<BluetoothSocketConnection>(
-          device_uid, app_handle, controller_);
-  controller_->ConnectionCreated(connection, device_uid, app_handle);
-  TransportAdapter::Error error = connection->Start();
-  if (TransportAdapter::OK != error) {
-    LOG4CXX_ERROR(logger_,
-                  "Bluetooth connection::Start() failed with error: " << error);
-  }
-  return error;
-}
-
-void BluetoothConnectionFactory::Terminate() {}
-
-bool BluetoothConnectionFactory::IsInitialised() const {
-  return true;
-}
-
-BluetoothConnectionFactory::~BluetoothConnectionFactory() {}
+ protected:
+  /**
+   * @brief Check if we can start the connection attempt and establish
+   *connection status.
+   *
+   * @param error contains information of any error that occurred during
+   *connection attempt.
+   *
+   * @return result that states whether we successfully connected or not.
+   */
+  virtual bool Establish(ConnectError** error);
+};
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
+
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_SERVER_ORIGINATED_SOCKET_CONNECTION_H_

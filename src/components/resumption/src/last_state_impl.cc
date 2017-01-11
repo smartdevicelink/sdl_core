@@ -1,7 +1,4 @@
 /*
- * \file bluetooth_connection_factory.cc
- * \brief BluetoothConnectionFactory class source file.
- *
  * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
@@ -33,47 +30,52 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "transport_manager/transport_adapter/transport_adapter_controller.h"
-#include "transport_manager/bluetooth/bluetooth_connection_factory.h"
-#include "transport_manager/bluetooth/bluetooth_socket_connection.h"
+#include "resumption/last_state_impl.h"
+#include "utils/file_system.h"
 #include "utils/logger.h"
-#include "utils/make_shared.h"
 
-namespace transport_manager {
-namespace transport_adapter {
+namespace resumption {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
+CREATE_LOGGERPTR_GLOBAL(logger_, "Resumption")
 
-BluetoothConnectionFactory::BluetoothConnectionFactory(
-    TransportAdapterController* controller)
-    : controller_(controller) {}
-
-TransportAdapter::Error BluetoothConnectionFactory::Init() {
-  return TransportAdapter::OK;
-}
-
-TransportAdapter::Error BluetoothConnectionFactory::CreateConnection(
-    const DeviceUID& device_uid, const ApplicationHandle& app_handle) {
+LastStateImpl::LastStateImpl(const std::string& app_storage_folder,
+                             const std::string& app_info_storage)
+    : app_storage_folder_(app_storage_folder)
+    , app_info_storage_(app_info_storage) {
+  LoadStateFromFileSystem();
   LOG4CXX_AUTO_TRACE(logger_);
-  utils::SharedPtr<BluetoothSocketConnection> connection =
-      utils::MakeShared<BluetoothSocketConnection>(
-          device_uid, app_handle, controller_);
-  controller_->ConnectionCreated(connection, device_uid, app_handle);
-  TransportAdapter::Error error = connection->Start();
-  if (TransportAdapter::OK != error) {
-    LOG4CXX_ERROR(logger_,
-                  "Bluetooth connection::Start() failed with error: " << error);
+}
+
+LastStateImpl::~LastStateImpl() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  SaveStateToFileSystem();
+}
+
+void LastStateImpl::SaveStateToFileSystem() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  const std::string& str = dictionary_.toStyledString();
+  const std::vector<uint8_t> char_vector_pdata(str.begin(), str.end());
+
+  DCHECK(file_system::CreateDirectoryRecursively(app_storage_folder_));
+  LOG4CXX_INFO(logger_,
+               "LastState::SaveStateToFileSystem " << app_info_storage_ << str);
+  DCHECK(file_system::Write(app_info_storage_, char_vector_pdata));
+}
+
+Json::Value& LastStateImpl::get_dictionary() {
+  return dictionary_;
+}
+
+void LastStateImpl::LoadStateFromFileSystem() {
+  std::string buffer;
+  bool result = file_system::ReadFile(app_info_storage_, buffer);
+  Json::Reader m_reader;
+  if (result && m_reader.parse(buffer, dictionary_)) {
+    LOG4CXX_INFO(logger_,
+                 "Valid last state was found." << dictionary_.toStyledString());
+    return;
   }
-  return error;
+  LOG4CXX_WARN(logger_, "No valid last state was found.");
 }
 
-void BluetoothConnectionFactory::Terminate() {}
-
-bool BluetoothConnectionFactory::IsInitialised() const {
-  return true;
-}
-
-BluetoothConnectionFactory::~BluetoothConnectionFactory() {}
-
-}  // namespace transport_adapter
-}  // namespace transport_manager
+}  // resumption

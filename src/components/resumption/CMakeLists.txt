@@ -1,4 +1,4 @@
-# Copyright (c) 2015, Ford Motor Company
+# Copyright (c) 2017, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,7 @@ include_directories (
 )
 
 set (SOURCES
-  ${COMPONENTS_DIR}/resumption/src/last_state.cc
+  ${COMPONENTS_DIR}/resumption/src/last_state_impl.cc
 )
 
 add_library("Resumption" ${SOURCES})
