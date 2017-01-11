@@ -42,11 +42,10 @@ include_directories(
   ${COMPONENTS_DIR}/policy/test/include/
 )
 
-collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}" "${EXCLUDE_PATHS}")
+collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}")
 
 set(LIBRARIES
   gmock
-  dbms
   Utils
   Policy
   UsageStatistics
