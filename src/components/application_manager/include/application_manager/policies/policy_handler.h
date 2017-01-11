@@ -455,6 +455,15 @@ class PolicyHandler : public PolicyHandlerInterface,
   virtual void OnUpdateHMIAppType(
       std::map<std::string, StringArray> app_hmi_types) OVERRIDE;
 
+#ifdef SDL_REMOTE_CONTROL
+  virtual void OnUpdateHMILevel(const std::string& device_id,
+                                const std::string& policy_app_id,
+                                const std::string& hmi_level) OVERRIDE;
+
+  void AddApplication(const std::string& application_id,
+                      const smart_objects::SmartObject* app_types) OVERRIDE;
+#endif
+
   virtual void OnCertificateUpdated(
       const std::string& certificate_data) OVERRIDE;
 #ifdef EXTERNAL_PROPRIETARY_MODE

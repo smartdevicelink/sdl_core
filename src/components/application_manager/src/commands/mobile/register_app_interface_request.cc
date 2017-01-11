@@ -85,17 +85,21 @@ mobile_apis::AppHMIType::eType StringToAppHMIType(const std::string& str) {
 }
 
 std::string AppHMITypeToString(mobile_apis::AppHMIType::eType type) {
-  const std::map<mobile_apis::AppHMIType::eType, std::string> app_hmi_type_map =
-      {{mobile_apis::AppHMIType::DEFAULT, "DEFAULT"},
-       {mobile_apis::AppHMIType::COMMUNICATION, "COMMUNICATION"},
-       {mobile_apis::AppHMIType::MEDIA, "MEDIA"},
-       {mobile_apis::AppHMIType::MESSAGING, "MESSAGING"},
-       {mobile_apis::AppHMIType::NAVIGATION, "NAVIGATION"},
-       {mobile_apis::AppHMIType::INFORMATION, "INFORMATION"},
-       {mobile_apis::AppHMIType::SOCIAL, "SOCIAL"},
-       {mobile_apis::AppHMIType::BACKGROUND_PROCESS, "BACKGROUND_PROCESS"},
-       {mobile_apis::AppHMIType::TESTING, "TESTING"},
-       {mobile_apis::AppHMIType::SYSTEM, "SYSTEM"}};
+  static const std::map<mobile_apis::AppHMIType::eType, std::string>
+      app_hmi_type_map = {
+          {mobile_apis::AppHMIType::DEFAULT, "DEFAULT"},
+#ifdef SDL_REMOTE_CONTROL
+          {mobile_apis::AppHMIType::REMOTE_CONTROL, "REMOTE_CONTROL"},
+#endif  // SDL_REMOTE_CONTROL
+          {mobile_apis::AppHMIType::COMMUNICATION, "COMMUNICATION"},
+          {mobile_apis::AppHMIType::MEDIA, "MEDIA"},
+          {mobile_apis::AppHMIType::MESSAGING, "MESSAGING"},
+          {mobile_apis::AppHMIType::NAVIGATION, "NAVIGATION"},
+          {mobile_apis::AppHMIType::INFORMATION, "INFORMATION"},
+          {mobile_apis::AppHMIType::SOCIAL, "SOCIAL"},
+          {mobile_apis::AppHMIType::BACKGROUND_PROCESS, "BACKGROUND_PROCESS"},
+          {mobile_apis::AppHMIType::TESTING, "TESTING"},
+          {mobile_apis::AppHMIType::SYSTEM, "SYSTEM"}};
 
   std::map<mobile_apis::AppHMIType::eType, std::string>::const_iterator iter =
       app_hmi_type_map.find(type);
