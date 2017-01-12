@@ -60,7 +60,7 @@ set(SOURCES
 
 if (NOT REMOTE_CONTROL)
     list(REMOVE_ITEM SOURCES
-        ${COMPONENTS_DIR}/policy/src/access_remote_impl.cc)
+        ${POLICY_PATH}/src/access_remote_impl.cc)
 endif()
 
 # --- Table struct section
