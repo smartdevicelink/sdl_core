@@ -235,8 +235,7 @@ void PolicyManagerImpl::RequestPTUpdate() {
 
     BinaryMessage update(message_string.begin(), message_string.end());
 
-    listener_->OnSnapshotCreated(
-        update, RetrySequenceDelaysSeconds(), TimeoutExchangeMSec());
+    listener_->OnSnapshotCreated(update);
   } else {
     LOG4CXX_ERROR(logger_, "Invalid Policy table snapshot - PTUpdate failed");
   }

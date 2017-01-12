@@ -1293,16 +1293,7 @@ TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlNotAdded) {
 #if defined(PROPRIETARY_MODE) || defined(EXTERNAL_PROPRIETARY_MODE)
   ExtendedPolicyExpectations();
 #endif  // PROPRIETARY_MODE || EXTERNAL_PROPRIETARY_MODE
-#ifdef EXTERNAL_PROPRIETARY_MODE
-  std::vector<int> retry_delay_seconds;
-  const int timeout_exchange = 10;
-  // TODO(AKutsan): Policy move issues
-  EXPECT_CALL(*mock_policy_manager_, GetUpdateUrls("0x07", _))
-      .WillRepeatedly(SetArgReferee<1>(test_data));
-  policy_handler_.OnSnapshotCreated(msg, retry_delay_seconds, timeout_exchange);
-#else   // EXTERNAL_PROPRIETARY_MODE
   policy_handler_.OnSnapshotCreated(msg);
-#endif  // EXTERNAL_PROPRIETARY_MODE
 }
 
 TEST_F(PolicyHandlerTest,
@@ -1333,7 +1324,6 @@ TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlAdded) {
   EndpointUrls test_data;
   EndpointData data("some_data");
   std::vector<int> retry_delay_seconds;
-  const int timeout_exchange = 10;
   test_data.push_back(data);
 
   ExtendedPolicyExpectations();
@@ -1341,7 +1331,7 @@ TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlAdded) {
   EXPECT_CALL(app_manager_, application(kAppId_))
       .WillRepeatedly(Return(mock_app_));
 
-  policy_handler_.OnSnapshotCreated(msg, retry_delay_seconds, timeout_exchange);
+  policy_handler_.OnSnapshotCreated(msg);
 }
 #else  // EXTERNAL_PROPRIETARY_MODE
 TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlAdded) {

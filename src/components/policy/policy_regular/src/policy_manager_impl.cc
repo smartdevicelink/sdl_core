@@ -58,7 +58,8 @@ void DeleteManager(policy::PolicyManager* pm) {
 }
 
 namespace {
-const uint32_t kDefaultRetryTimeoutInMSec = 60u * date_time::DateTime::MILLISECONDS_IN_SECOND;
+const uint32_t kDefaultRetryTimeoutInMSec =
+    60u * date_time::DateTime::MILLISECONDS_IN_SECOND;
 }  // namespace
 
 namespace policy {

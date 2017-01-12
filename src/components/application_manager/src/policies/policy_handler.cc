@@ -1325,38 +1325,10 @@ bool PolicyHandler::SaveSnapshot(const BinaryMessage& pt_string,
 
   return result;
 }
+#if !(defined(PROPRIETARY_MODE) || defined(EXTERNAL_PROPRIETARY_MODE))
 
-#ifdef EXTERNAL_PROPRIETARY_MODE
-void PolicyHandler::OnSnapshotCreated(
-    const BinaryMessage& pt_string,
-    const std::vector<int>& retry_delay_seconds,
-    const int timeout_exchange_ms) {
-  std::string policy_snapshot_full_path;
-  if (SaveSnapshot(pt_string, policy_snapshot_full_path)) {
-    const int timeout_exchange_s =
-        timeout_exchange_ms / date_time::DateTime::MILLISECONDS_IN_SECOND;
-    MessageHelper::SendPolicyUpdate(policy_snapshot_full_path,
-                                    timeout_exchange_s,
-                                    retry_delay_seconds,
-                                    application_manager_);
-  }
-}
-#else  // EXTERNAL_PROPRIETARY_MODE
-void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  POLICY_LIB_CHECK_VOID();
-#ifdef PROPRIETARY_MODE
-  std::string policy_snapshot_full_path;
-  if (!SaveSnapshot(pt_string, policy_snapshot_full_path)) {
-    LOG4CXX_ERROR(logger_, "Snapshot processing skipped.");
-    return;
-  }
-  MessageHelper::SendPolicyUpdate(policy_snapshot_full_path,
-                                  policy_manager_->TimeoutExchangeMSec(),
-                                  policy_manager_->RetrySequenceDelaysSeconds(),
-                                  application_manager_);
-#else   // PROPRIETARY_MODE
-  LOG4CXX_ERROR(logger_, "HTTP policy");
+void PolicyHandler::OnSnapshotCreatedHTTPExt(const BinaryMessage& pt_string) {
+  LOG4CXX_DEBUG(logger_, "HTTP policy");
   EndpointUrls urls;
   policy_manager_->GetUpdateUrls("0x07", urls);
 
@@ -1391,11 +1363,29 @@ void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string) {
 
   SendMessageToSDK(pt_string, urls.at(current_app).url.at(current_url));
   current_url++;
-#endif  // PROPRIETARY_MODE
-  // reset update required false
-  OnUpdateRequestSentToMobile();
 }
+#endif  // if !(defined(PROPRIETARY_MODE) || defined(EXTERNAL_PROPRIETARY_MODE))
+
+void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  POLICY_LIB_CHECK_VOID();
+#if defined(PROPRIETARY_MODE) || defined(EXTERNAL_PROPRIETARY_MODE)
+  std::string policy_snapshot_full_path;
+  if (SaveSnapshot(pt_string, policy_snapshot_full_path)) {
+    MessageHelper::SendPolicyUpdate(
+        policy_snapshot_full_path,
+        TimeoutExchangeSec(),
+        policy_manager_->RetrySequenceDelaysSeconds(),
+        application_manager_);
+  }
+#else
+  OnSnapshotCreatedHTTPExt(pt_string)
+#endif  // defined(PROPRIETARY_MODE) || defined(EXTERNAL_PROPRIETARY_MODE)
+
+#ifndef EXTERNAL_PROPRIETARY_MODE
+  OnUpdateRequestSentToMobile();
 #endif  // EXTERNAL_PROPRIETARY_MODE
+}
 
 bool PolicyHandler::GetPriority(const std::string& policy_app_id,
                                 std::string* priority) const {
