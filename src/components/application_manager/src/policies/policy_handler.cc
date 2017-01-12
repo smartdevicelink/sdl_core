@@ -1039,17 +1039,12 @@ void PolicyHandler::OnActivateApp(uint32_t connection_key,
   AppPermissions permissions(policy_app_id);
 
   sync_primitives::AutoReadLock lock(policy_manager_lock_);
-  if (!policy_manager_) {
-    LOG4CXX_DEBUG(logger_, "The shared library of policy is not loaded");
-    if (!PolicyEnabled()) {
-      permissions.isSDLAllowed = true;
-    }
-  } else {
-    permissions = policy_manager_->GetAppPermissionsChanges(policy_app_id);
 
-    permissions.isSDLAllowed = true;
-    policy_manager_->RemovePendingPermissionChanges(policy_app_id);
-  }
+  permissions = policy_manager_->GetAppPermissionsChanges(policy_app_id);
+
+  permissions.isSDLAllowed = true;
+  policy_manager_->RemovePendingPermissionChanges(policy_app_id);
+
   // If application is revoked it should not be activated
   // In this case we need to activate application
   if (false == permissions.appRevoked && true == permissions.isSDLAllowed) {
