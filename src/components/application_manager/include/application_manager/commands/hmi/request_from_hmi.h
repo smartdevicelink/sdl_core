@@ -82,9 +82,10 @@ class RequestFromHMI : public CommandImpl, public event_engine::EventObserver {
    * @param correlation_id the correlation id for the response.
    * @param function_id the function id for which response will be sent
    */
-  void FillCommonParametersOfSO(smart_objects::SmartObjectSPtr& message,
-                                uint32_t correlation_id,
-                                hmi_apis::FunctionID::eType function_id);
+  void FillCommonParametersOfSO(
+      NsSmartDeviceLink::NsSmartObjects::SmartObject& message,
+      uint32_t correlation_id,
+      hmi_apis::FunctionID::eType function_id);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(RequestFromHMI);
