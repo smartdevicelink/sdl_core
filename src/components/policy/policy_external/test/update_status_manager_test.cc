@@ -148,6 +148,7 @@ TEST_F(UpdateStatusManagerTest,
   // Arrange
   EXPECT_CALL(listener_, OnUpdateStatusChanged(update_needed_status_));
   manager_->ScheduleUpdate();
+  status_ = manager_->GetLastUpdateStatus();
   EXPECT_EQ(StatusUpdateRequired, status_);
   EXPECT_CALL(listener_, OnUpdateStatusChanged(updating_status_));
   manager_->OnUpdateSentOut(k_timeout_);
