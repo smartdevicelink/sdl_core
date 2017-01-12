@@ -58,7 +58,7 @@ void DeleteManager(policy::PolicyManager* pm) {
 }
 
 namespace {
-const uint32_t kDefaultRetryTimeoutInSec = 60u;
+const uint32_t kDefaultRetryTimeoutInMSec = 60u * date_time::DateTime::MILLISECONDS_IN_SECOND;
 }  // namespace
 
 namespace policy {
@@ -69,7 +69,7 @@ PolicyManagerImpl::PolicyManagerImpl()
     : PolicyManager()
     , listener_(NULL)
     , cache_(new CacheManager)
-    , retry_sequence_timeout_(kDefaultRetryTimeoutInSec)
+    , retry_sequence_timeout_(kDefaultRetryTimeoutInMSec)
     , retry_sequence_index_(0)
     , timer_retry_sequence_("Retry sequence timer",
                             new timer::TimerTaskImpl<PolicyManagerImpl>(
@@ -796,7 +796,7 @@ void PolicyManagerImpl::ResetRetrySequence() {
   update_status_manager_.OnResetRetrySequence();
 }
 
-int PolicyManagerImpl::TimeoutExchange() {
+uint32_t PolicyManagerImpl::TimeoutExchangeMSec() {
   return retry_sequence_timeout_;
 }
 
@@ -810,7 +810,7 @@ void PolicyManagerImpl::OnExceededTimeout() {
 }
 
 void PolicyManagerImpl::OnUpdateStarted() {
-  int update_timeout = TimeoutExchange();
+  uint32_t update_timeout = TimeoutExchangeMSec();
   LOG4CXX_DEBUG(logger_,
                 "Update timeout will be set to (milisec): " << update_timeout);
   update_status_manager_.OnUpdateSentOut(update_timeout);

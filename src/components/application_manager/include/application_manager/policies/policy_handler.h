@@ -96,7 +96,7 @@ class PolicyHandler : public PolicyHandlerInterface,
 #ifdef EXTERNAL_PROPRIETARY_MODE
   void OnSnapshotCreated(const BinaryMessage& pt_string,
                          const std::vector<int>& retry_delay_seconds,
-                         int timeout_exchange) OVERRIDE;
+                         uint32_t timeout_exchange) OVERRIDE;
 #else   // EXTERNAL_PROPRIETARY_MODE
   void OnSnapshotCreated(const BinaryMessage& pt_string) OVERRIDE;
 #endif  // EXTERNAL_PROPRIETARY_MODE
@@ -123,7 +123,8 @@ class PolicyHandler : public PolicyHandlerInterface,
   virtual std::string GetLockScreenIconUrl() const OVERRIDE;
   void ResetRetrySequence() OVERRIDE;
   uint32_t NextRetryTimeout() OVERRIDE;
-  int TimeoutExchange() OVERRIDE;
+  uint32_t TimeoutExchangeSec() OVERRIDE;
+  uint32_t TimeoutExchangeMSec() OVERRIDE;
   void OnExceededTimeout() OVERRIDE;
   void OnSystemReady() OVERRIDE;
   void PTUpdatedAt(Counters counter, int value) OVERRIDE;
