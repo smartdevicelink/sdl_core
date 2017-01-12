@@ -45,6 +45,7 @@ set(PATHS
 collect_sources(SOURCES "${PATHS}")
 
 add_library("Resumption" ${SOURCES})
+target_link_libraries("Resumption" Utils)
 
 if(BUILD_TESTS)
   add_subdirectory(test)

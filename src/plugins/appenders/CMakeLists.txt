@@ -43,6 +43,8 @@ set(LIBRARIES
 add_library(appenders ${SOURCES})
 target_link_libraries(appenders ${LIBRARIES})
 
+add_dependencies(appenders install-3rd_party_logger)
+
 install(TARGETS appenders
   DESTINATION bin
   PERMISSIONS

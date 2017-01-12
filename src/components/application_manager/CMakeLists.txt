@@ -363,10 +363,10 @@ set (HMI_COMMANDS_SOURCES_DBUS
 )
 
 if (${HMI_JSON_API})
-    set (HMI_COMMANDS_SOURCES ${HMI_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES_JSON})
+  set (HMI_COMMANDS_SOURCES ${HMI_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES_JSON})
 endif (${HMI_JSON_API})
 if (${HMI_DBUS_API})
-    set (HMI_COMMANDS_SOURCES ${HMI_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES_DBUS})
+  set (HMI_COMMANDS_SOURCES ${HMI_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES_DBUS})
 endif (${HMI_DBUS_API})
 
 set(EXCLUDE_PATHS
@@ -392,6 +392,7 @@ set(LIBRARIES
   dl
   formatters
   dbms
+  Utils
 )
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -406,15 +407,16 @@ add_library("AMEventEngine" ${EVENT_ENGINE_SOURCES})
 target_link_libraries("AMEventEngine" ${LIBRARIES})
 
 add_library("AMPolicyLibrary" ${POLICIES_MANAGER_SOURCES} )
-target_link_libraries("AMPolicyLibrary" ${LIBRARIES} AMEventEngine)
+target_link_libraries("AMPolicyLibrary" ${LIBRARIES})
 
 add_library("AMHMICommandsLibrary" ${HMI_COMMANDS_SOURCES})
-target_link_libraries("AMHMICommandsLibrary" ${LIBRARIES} AMEventEngine)
+target_link_libraries("AMHMICommandsLibrary" ${LIBRARIES})
 
 add_library("MessageHelper" ${MESSAGE_HELPER_SOURCES})
+target_link_libraries("MessageHelper" ${LIBRARIES})
 
 add_library("AMMobileCommandsLibrary" ${MOBILE_COMMANDS_SOURCES} )
-target_link_libraries("AMMobileCommandsLibrary" ${LIBRARIES} AMEventEngine)
+target_link_libraries("AMMobileCommandsLibrary" ${LIBRARIES})
 
 add_library("ApplicationManager" ${SOURCES})
 

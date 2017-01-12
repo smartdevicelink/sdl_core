@@ -45,8 +45,14 @@ set(PATHS
   ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
+set (LIBRARIES
+  Utils
+  SmartObjects  
+)
+
 collect_sources(SOURCES "${PATHS}")
-add_library(formatters ${SOURCES})
+add_library("formatters" ${SOURCES})
+target_link_libraries("formatters" "${LIBRARIES}")
 
 if(BUILD_TESTS)
   add_subdirectory(test)

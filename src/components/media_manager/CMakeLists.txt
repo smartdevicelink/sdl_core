@@ -32,21 +32,21 @@ include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/platform.cmake)
 include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
 include_directories(
-    include
-    ${COMPONENTS_DIR}/media_manager/include/audio/
-    ${COMPONENTS_DIR}/media_manager/include/video/
-    ${COMPONENTS_DIR}/utils/include/
-    ${COMPONENTS_DIR}/protocol_handler/include/
-    ${COMPONENTS_DIR}/connection_handler/include/
-    ${COMPONENTS_DIR}/application_manager/include/
-    ${COMPONENTS_DIR}/smart_objects/include/
-    ${COMPONENTS_DIR}/hmi_message_handler/include/
-    ${COMPONENTS_DIR}/formatters/include/
-    ${COMPONENTS_DIR}/config_profile/include/
-    ${JSONCPP_INCLUDE_DIRECTORY}
-    ${CMAKE_BINARY_DIR}/src/components/
-    ${COMPONENTS_DIR}/policy/include/
-    ${LOG4CXX_INCLUDE_DIRECTORY}
+  include
+  ${COMPONENTS_DIR}/media_manager/include/audio/
+  ${COMPONENTS_DIR}/media_manager/include/video/
+  ${COMPONENTS_DIR}/utils/include/
+  ${COMPONENTS_DIR}/protocol_handler/include/
+  ${COMPONENTS_DIR}/connection_handler/include/
+  ${COMPONENTS_DIR}/application_manager/include/
+  ${COMPONENTS_DIR}/smart_objects/include/
+  ${COMPONENTS_DIR}/hmi_message_handler/include/
+  ${COMPONENTS_DIR}/formatters/include/
+  ${COMPONENTS_DIR}/config_profile/include/
+  ${JSONCPP_INCLUDE_DIRECTORY}
+  ${CMAKE_BINARY_DIR}/src/components/
+  ${COMPONENTS_DIR}/policy/include/
+  ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
 set(PATHS
@@ -59,7 +59,9 @@ set(EXCLUDE_PATHS
 )
 
 set(LIBRARIES
-    ProtocolLibrary
+  MOBILE_API
+  ProtocolLibrary
+  Utils
 )
 
 if(EXTENDED_MEDIA_MODE)
@@ -74,9 +76,6 @@ if(EXTENDED_MEDIA_MODE)
     ${GSTREAMER_gstconfig_INCLUDE_DIR}
     ${GLIB_glib_2_INCLUDE_DIR}
   )
-  list(APPEND EXCLUDE_PATHS
-
-  )
   list(APPEND LIBRARIES
     ${GSTREAMER_gstreamer_LIBRARY}
     pulse-simple
@@ -86,9 +85,9 @@ if(EXTENDED_MEDIA_MODE)
   )
 else()
   list(APPEND EXCLUDE_PATHS
-	a2dp_source_player_adapter.cc
-	from_mic_recorder_adapter.cc
-	from_mic_to_file_recorder_thread.cc
+    a2dp_source_player_adapter.cc
+    from_mic_recorder_adapter.cc
+    from_mic_to_file_recorder_thread.cc
   )
 endif()
 
@@ -97,9 +96,9 @@ add_library("MediaManager" ${SOURCES})
 target_link_libraries("MediaManager" ${LIBRARIES})
 
 if(ENABLE_LOG)
-    target_link_libraries("MediaManager" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
+  target_link_libraries("MediaManager" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
 endif()
 
 if(BUILD_TESTS)
-    add_subdirectory(test)
+  add_subdirectory(test)
 endif()

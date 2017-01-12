@@ -54,6 +54,7 @@ set(USAGE_STATISTICS_PATHS
 )
 collect_sources(USAGE_STATISTICS_SOURCES "${USAGE_STATISTICS_PATHS}")
 add_library(UsageStatistics ${USAGE_STATISTICS_SOURCES})
+target_link_libraries(UsageStatistics Utils)
 
 set(EXCLUDE_PATHS
   ${POLICY_TABLE_PATHS}
