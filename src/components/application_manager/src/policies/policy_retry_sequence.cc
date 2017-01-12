@@ -57,7 +57,7 @@ void RetrySequence::StartNextRetry() {
   if (pt_snapshot) {
     policy_handler_->SendMessageToSDK(*pt_snapshot);
 
-    const int timeout = policy_handler_->TimeoutExchange();
+    const uint32_t timeout = policy_handler_->TimeoutExchangeSec();
     const int seconds = policy_handler_->NextRetryTimeout();
     LOG4CXX_DEBUG(logger_,
                   "Timeout response: " << timeout << " Next try: " << seconds);

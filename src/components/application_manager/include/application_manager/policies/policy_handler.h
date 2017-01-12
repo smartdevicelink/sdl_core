@@ -93,13 +93,10 @@ class PolicyHandler : public PolicyHandlerInterface,
   virtual void OnPermissionsUpdated(const std::string& policy_app_id,
                                     const Permissions& permissions) OVERRIDE;
 
-#ifdef EXTERNAL_PROPRIETARY_MODE
-  void OnSnapshotCreated(const BinaryMessage& pt_string,
-                         const std::vector<int>& retry_delay_seconds,
-                         int timeout_exchange) OVERRIDE;
-#else   // EXTERNAL_PROPRIETARY_MODE
+#if !(defined(PROPRIETARY_MODE) || defined(EXTERNAL_PROPRIETARY_MODE))
+  void OnSnapshotCreatedHTTPExt(const BinaryMessage& pt_string);
+#endif
   void OnSnapshotCreated(const BinaryMessage& pt_string) OVERRIDE;
-#endif  // EXTERNAL_PROPRIETARY_MODE
   virtual bool GetPriority(const std::string& policy_app_id,
                            std::string* priority) const OVERRIDE;
   void CheckPermissions(const PTString& app_id,
@@ -123,7 +120,8 @@ class PolicyHandler : public PolicyHandlerInterface,
   virtual std::string GetLockScreenIconUrl() const OVERRIDE;
   void ResetRetrySequence() OVERRIDE;
   uint32_t NextRetryTimeout() OVERRIDE;
-  int TimeoutExchange() OVERRIDE;
+  uint32_t TimeoutExchangeSec() OVERRIDE;
+  uint32_t TimeoutExchangeMSec() OVERRIDE;
   void OnExceededTimeout() OVERRIDE;
   void OnSystemReady() OVERRIDE;
   void PTUpdatedAt(Counters counter, int value) OVERRIDE;

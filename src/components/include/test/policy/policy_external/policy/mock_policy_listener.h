@@ -75,10 +75,7 @@ class MockPolicyListener : public ::policy::PolicyListener {
   MOCK_METHOD1(OnUpdateHMIAppType,
                void(std::map<std::string, policy::StringArray>));
   MOCK_METHOD1(GetAvailableApps, void(std::queue<std::string>&));
-  MOCK_METHOD3(OnSnapshotCreated,
-               void(const policy::BinaryMessage& pt_string,
-                    const std::vector<int>& retry_seconds,
-                    int timeout_exceed));
+  MOCK_METHOD1(OnSnapshotCreated, void(const policy::BinaryMessage& pt_string));
   MOCK_METHOD0(CanUpdate, bool());
   MOCK_METHOD1(OnCertificateUpdated, void(const std::string&));
   MOCK_CONST_METHOD2(SendOnAppPermissionsChanged,

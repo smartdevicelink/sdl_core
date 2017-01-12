@@ -104,7 +104,7 @@ TEST_F(OnSystemRequestNotificationTest, Run_ProprietaryType_SUCCESS) {
   EXPECT_CALL(app_mngr_, GetPolicyHandler())
       .Times(2)
       .WillRepeatedly(ReturnRef(mock_policy_handler));
-  EXPECT_CALL(mock_policy_handler, TimeoutExchange()).WillOnce(Return(5u));
+  EXPECT_CALL(mock_policy_handler, TimeoutExchangeMSec()).WillOnce(Return(5u));
 #endif  // PROPRIETARY_MODE
 
   EXPECT_CALL(message_helper_, PrintSmartObject(_)).WillOnce(Return(false));

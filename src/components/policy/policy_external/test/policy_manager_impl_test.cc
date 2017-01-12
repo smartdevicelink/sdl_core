@@ -223,7 +223,7 @@ TEST_F(PolicyManagerImplTest2, TimeOutExchange) {
   // Arrange
   CreateLocalPT(preloadet_pt_filename_);
   // Check value taken from PT
-  EXPECT_EQ(70000, manager_->TimeoutExchange());
+  EXPECT_EQ(70000u, manager_->TimeoutExchangeMSec());
 }
 
 TEST_F(PolicyManagerImplTest,
@@ -235,7 +235,7 @@ TEST_F(PolicyManagerImplTest,
   p_table->SetPolicyTableType(rpc::policy_table_interface_base::PT_UPDATE);
   EXPECT_TRUE(IsValid(*p_table));
 
-  EXPECT_CALL(listener_, OnSnapshotCreated(_, _, _));
+  EXPECT_CALL(listener_, OnSnapshotCreated(_));
   EXPECT_CALL(*cache_manager_, GenerateSnapshot()).WillOnce(Return(p_table));
 
   manager_->RequestPTUpdate();
@@ -247,7 +247,7 @@ TEST_F(PolicyManagerImplTest, RequestPTUpdate_InvalidPT_PTUpdateFail) {
   ASSERT_TRUE(p_table);
   EXPECT_FALSE(IsValid(*p_table));
 
-  EXPECT_CALL(listener_, OnSnapshotCreated(_, _, _)).Times(0);
+  EXPECT_CALL(listener_, OnSnapshotCreated(_)).Times(0);
   EXPECT_CALL(*cache_manager_, GenerateSnapshot()).WillOnce(Return(p_table));
 
   manager_->RequestPTUpdate();
@@ -257,7 +257,7 @@ TEST_F(PolicyManagerImplTest, RequestPTUpdate_InvalidSnapshot_PTUpdateFail) {
   utils::SharedPtr<policy_table::Table> p_table;
   EXPECT_FALSE(p_table);
 
-  EXPECT_CALL(listener_, OnSnapshotCreated(_, _, _)).Times(0);
+  EXPECT_CALL(listener_, OnSnapshotCreated(_)).Times(0);
   EXPECT_CALL(*cache_manager_, GenerateSnapshot()).WillOnce(Return(p_table));
 
   manager_->RequestPTUpdate();

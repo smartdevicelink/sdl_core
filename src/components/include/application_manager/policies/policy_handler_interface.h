@@ -68,14 +68,6 @@ class PolicyHandlerInterface {
   virtual void OnPermissionsUpdated(const std::string& policy_app_id,
                                     const Permissions& permissions) = 0;
 
-#ifdef EXTERNAL_PROPRIETARY_MODE
-  virtual void OnSnapshotCreated(const BinaryMessage& pt_string,
-                                 const std::vector<int>& retry_delay_seconds,
-                                 int timeout_exchange) = 0;
-#else   // EXTERNAL_PROPRIETARY_MODE
-  virtual void OnSnapshotCreated(const BinaryMessage& pt_string) = 0;
-#endif  // EXTERNAL_PROPRIETARY_MODE
-
   virtual bool GetPriority(const std::string& policy_app_id,
                            std::string* priority) const = 0;
   virtual void CheckPermissions(const PTString& app_id,
@@ -99,7 +91,8 @@ class PolicyHandlerInterface {
   virtual std::string GetLockScreenIconUrl() const = 0;
   virtual void ResetRetrySequence() = 0;
   virtual uint32_t NextRetryTimeout() = 0;
-  virtual int TimeoutExchange() = 0;
+  virtual uint32_t TimeoutExchangeSec() = 0;
+  virtual uint32_t TimeoutExchangeMSec() = 0;
   virtual void OnExceededTimeout() = 0;
   virtual void OnSystemReady() = 0;
   virtual void PTUpdatedAt(Counters counter, int value) = 0;

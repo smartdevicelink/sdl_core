@@ -104,7 +104,8 @@ void OnSystemRequestNotification::Run() {
 #ifdef PROPRIETARY_MODE
 void OnSystemRequestNotification::AddHeader(BinaryMessage& message) const {
   LOG4CXX_AUTO_TRACE(logger_);
-  const int timeout = application_manager_.GetPolicyHandler().TimeoutExchange();
+  const uint32_t timeout =
+      application_manager_.GetPolicyHandler().TimeoutExchangeSec();
 
   size_t content_length;
   char size_str[24];
