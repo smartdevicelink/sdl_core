@@ -194,7 +194,8 @@ class PolicyHandlerTest : public ::testing::Test {
     EXPECT_CALL(policy_settings_, system_files_path())
         .WillOnce(ReturnRef(kSnapshotStorage_));
 #ifdef PROPRIETARY_MODE
-    EXPECT_CALL(*mock_policy_manager_, TimeoutExchange()).WillOnce(Return(1));
+    EXPECT_CALL(*mock_policy_manager_, TimeoutExchangeMSec())
+        .WillOnce(Return(1));
     EXPECT_CALL(*mock_policy_manager_, RetrySequenceDelaysSeconds())
         .WillOnce(Return(retry_sequence_delay_seconds));
 #endif  // PROPRIETARY_MODE
@@ -515,13 +516,24 @@ TEST_F(PolicyHandlerTest, NextRetryTimeout) {
   policy_handler_.NextRetryTimeout();
 }
 
-TEST_F(PolicyHandlerTest, TimeoutExchange) {
+TEST_F(PolicyHandlerTest, TimeoutExchangeSec) {
   // Arrange
   EnablePolicyAndPolicyManagerMock();
   // Check expectations
-  EXPECT_CALL(*mock_policy_manager_, TimeoutExchange());
+  EXPECT_CALL(*mock_policy_manager_, TimeoutExchangeMSec())
+      .WillOnce(Return(1000));
   // Act
-  policy_handler_.TimeoutExchange();
+  EXPECT_EQ(1u, policy_handler_.TimeoutExchangeSec());
+}
+
+TEST_F(PolicyHandlerTest, TimeoutExchangeMsec) {
+  // Arrange
+  EnablePolicyAndPolicyManagerMock();
+  // Check expectations
+  EXPECT_CALL(*mock_policy_manager_, TimeoutExchangeMSec())
+      .WillOnce(Return(1000));
+  // Act
+  EXPECT_EQ(1000u, policy_handler_.TimeoutExchangeMSec());
 }
 
 TEST_F(PolicyHandlerTest, OnExceededTimeout) {

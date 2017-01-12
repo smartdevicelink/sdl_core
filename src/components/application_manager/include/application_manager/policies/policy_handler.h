@@ -123,7 +123,8 @@ class PolicyHandler : public PolicyHandlerInterface,
   virtual std::string GetLockScreenIconUrl() const OVERRIDE;
   void ResetRetrySequence() OVERRIDE;
   uint32_t NextRetryTimeout() OVERRIDE;
-  int TimeoutExchange() OVERRIDE;
+  uint32_t TimeoutExchangeSec() OVERRIDE;
+  uint32_t TimeoutExchangeMSec() OVERRIDE;
   void OnExceededTimeout() OVERRIDE;
   void OnSystemReady() OVERRIDE;
   void PTUpdatedAt(Counters counter, int value) OVERRIDE;

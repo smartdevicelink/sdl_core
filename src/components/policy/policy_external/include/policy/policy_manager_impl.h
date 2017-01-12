@@ -77,7 +77,7 @@ class PolicyManagerImpl : public PolicyManager {
   virtual std::string GetPolicyTableStatus() const;
   virtual void ResetRetrySequence();
   virtual int NextRetryTimeout();
-  virtual int TimeoutExchange();
+  virtual uint32_t TimeoutExchangeMSec();
   virtual const std::vector<int> RetrySequenceDelaysSeconds();
   virtual void OnExceededTimeout();
   virtual std::string GetLockScreenIconUrl() const OVERRIDE;
