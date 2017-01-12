@@ -78,10 +78,10 @@ void RequestFromHMI::SendResponse(
 }
 
 void RequestFromHMI::SendErrorResponse(
-    uint32_t correlation_id,
-    hmi_apis::FunctionID::eType function_id,
-    hmi_apis::Common_Result::eType result_code,
-    std::string error_message) {
+    const uint32_t correlation_id,
+    const hmi_apis::FunctionID::eType function_id,
+    const hmi_apis::Common_Result::eType result_code,
+    const std::string error_message) {
   smart_objects::SmartObjectSPtr message =
       ::utils::MakeShared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
@@ -97,8 +97,8 @@ void RequestFromHMI::SendErrorResponse(
 
 void RequestFromHMI::FillCommonParametersOfSO(
     smart_objects::SmartObject& message,
-    uint32_t correlation_id,
-    hmi_apis::FunctionID::eType function_id) {
+    const uint32_t correlation_id,
+    const hmi_apis::FunctionID::eType function_id) {
   (message)[strings::params][strings::function_id] = function_id;
   (message)[strings::params][strings::protocol_type] = hmi_protocol_type_;
   (message)[strings::params][strings::protocol_version] = protocol_version_;

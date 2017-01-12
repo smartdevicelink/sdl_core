@@ -73,7 +73,7 @@ class RequestFromHMI : public CommandImpl, public event_engine::EventObserver {
   void SendErrorResponse(const uint32_t correlation_id,
                          const hmi_apis::FunctionID::eType function_id,
                          const hmi_apis::Common_Result::eType result_code,
-                         std::string error_message);
+                         const std::string error_message);
 
  private:
   /**
@@ -84,8 +84,8 @@ class RequestFromHMI : public CommandImpl, public event_engine::EventObserver {
    */
   void FillCommonParametersOfSO(
       NsSmartDeviceLink::NsSmartObjects::SmartObject& message,
-      uint32_t correlation_id,
-      hmi_apis::FunctionID::eType function_id);
+      const uint32_t correlation_id,
+      const hmi_apis::FunctionID::eType function_id);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(RequestFromHMI);
