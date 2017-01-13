@@ -378,34 +378,20 @@ class HMICapabilitiesImpl : public HMICapabilities {
       const smart_objects::SmartObject& prerecorded_speech) OVERRIDE;
 
   /*
-   * @brief Interface used to store information if navigation
+   * @brief Interface used to store information about ui hmi capabilities
    * supported by the system
-   *
-   * @param supported Indicates if navigation supported by the system
-   */
-  void set_navigation_supported(const bool supported) OVERRIDE;
-
-  /*
-   * @brief Retrieves information if navi supported by the system
-   *
-   * @return TRUE if it supported, otherwise FALSE
-   */
-  bool navigation_supported() const OVERRIDE;
-
-  /*
-   * @brief Interface used to store information if phone call
+   * @param ui_hmi_capabilities contains ui hmi capabilities
    * supported by the system
-   *
-   * @param supported Indicates if navigation supported by the sustem
    */
-  void set_phone_call_supported(const bool supported) OVERRIDE;
+  void set_ui_hmi_capabilities(
+      const smart_objects::SmartObject& ui_hmi_capabilities) OVERRIDE;
 
   /*
-   * @brief Retrieves information if phone call supported by the system
-   *
-   * @return TRUE if it supported, otherwise FALSE
+   * @brief Retrieves ui hmi capabilities that is supported
+   * by system
+   * @return ui hmi capabilities
    */
-  bool phone_call_supported() const OVERRIDE;
+  const smart_objects::SmartObject& ui_hmi_capabilities() const OVERRIDE;
 
   void Init(resumption::LastState* last_state) OVERRIDE;
 
@@ -481,8 +467,7 @@ class HMICapabilitiesImpl : public HMICapabilities {
   smart_objects::SmartObject* audio_pass_thru_capabilities_;
   smart_objects::SmartObject* pcm_stream_capabilities_;
   smart_objects::SmartObject* prerecorded_speech_;
-  bool is_navigation_supported_;
-  bool is_phone_call_supported_;
+  smart_objects::SmartObject ui_hmi_capabilities_;
   std::string ccpu_version_;
 
   ApplicationManager& app_mngr_;
