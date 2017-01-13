@@ -95,7 +95,8 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
                void(int service_type, policy::EndpointUrls& end_points));
   MOCK_METHOD0(ResetRetrySequence, void());
   MOCK_METHOD0(NextRetryTimeout, uint32_t());
-  MOCK_METHOD0(TimeoutExchange, int());
+  MOCK_METHOD0(TimeoutExchangeSec, uint32_t());
+  MOCK_METHOD0(TimeoutExchangeMSec, uint32_t());
   MOCK_METHOD0(OnExceededTimeout, void());
   MOCK_METHOD0(OnSystemReady, void());
   MOCK_METHOD2(PTUpdatedAt, void(policy::Counters counter, int value));

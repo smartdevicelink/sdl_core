@@ -159,7 +159,7 @@ class PolicyManager : public usage_statistics::StatisticsManager {
    * Gets timeout to wait until receive response
    * @return timeout in seconds
    */
-  virtual int TimeoutExchange() = 0;
+  virtual uint32_t TimeoutExchangeMSec() = 0;
 
   /**
    * @brief List of timeouts in seconds between retries

@@ -38,7 +38,7 @@
 #include "application_manager/smart_object_keys.h"
 
 #include "application_manager/policies/delegates/app_permission_delegate.h"
-
+#include "policy/status.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/state_controller.h"
 #include "application_manager/message_helper.h"
@@ -1330,11 +1330,13 @@ bool PolicyHandler::SaveSnapshot(const BinaryMessage& pt_string,
 void PolicyHandler::OnSnapshotCreated(
     const BinaryMessage& pt_string,
     const std::vector<int>& retry_delay_seconds,
-    int timeout_exchange) {
+    const uint32_t timeout_exchange_ms) {
   std::string policy_snapshot_full_path;
   if (SaveSnapshot(pt_string, policy_snapshot_full_path)) {
+    const uint32_t timeout_exchange_s =
+        timeout_exchange_ms / date_time::DateTime::MILLISECONDS_IN_SECOND;
     MessageHelper::SendPolicyUpdate(policy_snapshot_full_path,
-                                    timeout_exchange,
+                                    timeout_exchange_s,
                                     retry_delay_seconds,
                                     application_manager_);
   }
@@ -1350,7 +1352,7 @@ void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string) {
     return;
   }
   MessageHelper::SendPolicyUpdate(policy_snapshot_full_path,
-                                  policy_manager_->TimeoutExchange(),
+                                  policy_manager_->TimeoutExchangeMSec(),
                                   policy_manager_->RetrySequenceDelaysSeconds(),
                                   application_manager_);
 #else   // PROPRIETARY_MODE
@@ -1463,9 +1465,13 @@ uint32_t PolicyHandler::NextRetryTimeout() {
   return policy_manager_->NextRetryTimeout();
 }
 
-int PolicyHandler::TimeoutExchange() {
+uint32_t PolicyHandler::TimeoutExchangeSec() {
+  return TimeoutExchangeMSec() / date_time::DateTime::MILLISECONDS_IN_SECOND;
+}
+
+uint32_t PolicyHandler::TimeoutExchangeMSec() {
   POLICY_LIB_CHECK(0);
-  return policy_manager_->TimeoutExchange();
+  return policy_manager_->TimeoutExchangeMSec();
 }
 
 void PolicyHandler::OnExceededTimeout() {
