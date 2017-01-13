@@ -1473,7 +1473,7 @@ TEST_F(PolicyHandlerTest,
 TEST_F(PolicyHandlerTest,
        OnAllowSDLFunctionalityNotification_DefaultDeviceId_UNSUCCESS) {
   const std::string default_mac_address("00:00:00:00:00:00");
-    std::vector<std::string> device_macs;
+  std::vector<std::string> device_macs;
   device_macs.push_back(default_mac_address);
   EnablePolicyAndPolicyManagerMock();
   TestActivateApp(kConnectionKey_, kCorrelationKey_);
@@ -1666,6 +1666,7 @@ TEST_F(PolicyHandlerTest, SendMessageToSDK_InavalidApp_UNSUCCESS) {
   EXPECT_FALSE(policy_handler_.SendMessageToSDK(msg, url));
 }
 
+#ifdef SDL_REMOTE_CONTROL
 TEST_F(PolicyHandlerTest,
        SendMessageToSDK_RemoteControlInvalidMobileAppId_UNSUCCESS) {
   // Precondition
@@ -1709,7 +1710,7 @@ TEST_F(PolicyHandlerTest, SendMessageToSDK_RemoteControlInvalidApp_UNSUCCESS) {
 
   EXPECT_FALSE(policy_handler_.SendMessageToSDK(msg, url));
 }
-
+#endif
 TEST_F(PolicyHandlerTest, CanUpdate) {
   GetAppIDForSending();
   EXPECT_TRUE(policy_handler_.CanUpdate());
@@ -1881,7 +1882,8 @@ TEST_F(PolicyHandlerTest,
 
   const std::string second_mac_adress = "00:00:00:01:00:00";
   EXPECT_CALL(mock_session_observer, GetDataOnDeviceID(_, _, NULL, _, _))
-      .WillRepeatedly(DoAll(SetDeviceParamsMacAdress(second_mac_adress), (Return(1u))));
+      .WillRepeatedly(
+          DoAll(SetDeviceParamsMacAdress(second_mac_adress), (Return(1u))));
 
   EXPECT_CALL(mock_message_helper_,
               SendGetListOfPermissionsResponse(_, kCorrelationKey_, _));
@@ -1914,7 +1916,8 @@ TEST_F(PolicyHandlerTest,
       .WillRepeatedly(ReturnRef(mock_session_observer));
 
   EXPECT_CALL(mock_session_observer, GetDataOnDeviceID(_, _, NULL, _, _))
-      .WillOnce(DoAll(SetDeviceParamsMacAdress(second_mac_adress), (Return(1u))))
+      .WillOnce(
+           DoAll(SetDeviceParamsMacAdress(second_mac_adress), (Return(1u))))
       .WillOnce(DoAll(SetDeviceParamsMacAdress(kMacAddr_), (Return(1u))));
   EXPECT_CALL(*mock_app_, device()).WillRepeatedly(Return(device));
   EXPECT_CALL(*second_mock_app, device()).WillRepeatedly(Return(device));
@@ -1991,8 +1994,7 @@ TEST_F(PolicyHandlerTest, OnSystemError_SUCCESS) {
   EXPECT_CALL(*mock_policy_manager_, Increment(_))
       .WillOnce(NotifyAsync(&waiter));
 
-  policy_handler_.OnSystemError(
-      hmi_apis::Common_SystemError::SYNC_REBOOTED);
+  policy_handler_.OnSystemError(hmi_apis::Common_SystemError::SYNC_REBOOTED);
   EXPECT_TRUE(waiter.Wait(auto_lock));
 
   WaitAsync waiter1(calls_count, timeout);
