@@ -847,7 +847,7 @@ void PolicyHandler::OnPendingPermissionChange(
         app,
         mobile_apis::HMILevel::HMI_NONE,
         mobile_apis::AudioStreamingState::NOT_AUDIBLE,
-        true);
+        false);
     policy_manager_->RemovePendingPermissionChanges(policy_app_id);
     return;
   }
