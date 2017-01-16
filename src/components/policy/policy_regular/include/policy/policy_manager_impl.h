@@ -171,7 +171,7 @@ class PolicyManagerImpl : public PolicyManager {
   bool CanAppStealFocus(const std::string& app_id) const;
   void MarkUnpairedDevice(const std::string& device_id);
 
-  void AddApplication(const std::string& application_id);
+  StatusNotifier AddApplication(const std::string& application_id);
 
   virtual void RemoveAppConsentForGroup(const std::string& app_id,
                                         const std::string& group_name);

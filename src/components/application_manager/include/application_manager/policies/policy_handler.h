@@ -330,8 +330,9 @@ class PolicyHandler : public PolicyHandlerInterface,
    * @brief Allows to add new or update existed application during
    * registration process
    * @param application_id The policy aplication id.
+   ** @return function that will notify update manager about new application
    */
-  void AddApplication(const std::string& application_id) OVERRIDE;
+  StatusNotifier AddApplication(const std::string& application_id) OVERRIDE;
 
   /**
    * Checks whether application is revoked

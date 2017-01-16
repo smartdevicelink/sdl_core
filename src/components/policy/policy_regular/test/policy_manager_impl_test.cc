@@ -771,7 +771,9 @@ TEST_F(
     AddApplication_AddNewApplicationFromDeviceWithoutConsent_ExpectUpdateRequired) {
   // Arrange
   CreateLocalPT("sdl_preloaded_pt.json");
-  manager->AddApplication(app_id1);
+  ::policy::StatusNotifier notifyer = manager->AddApplication(app_id1);
+  DCHECK(notifyer);
+  (*notifyer)();
   EXPECT_EQ("UPDATE_NEEDED", manager->GetPolicyTableStatus());
 }
 

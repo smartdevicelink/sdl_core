@@ -484,9 +484,10 @@ void PolicyHandler::GetAvailableApps(std::queue<std::string>& apps) {
   }
 }
 
-void PolicyHandler::AddApplication(const std::string& application_id) {
-  POLICY_LIB_CHECK_VOID();
-  policy_manager_->AddApplication(application_id);
+StatusNotifier PolicyHandler::AddApplication(
+    const std::string& application_id) {
+  POLICY_LIB_CHECK(utils::MakeShared<utils::CallNothing>());
+  return policy_manager_->AddApplication(application_id);
 }
 
 void PolicyHandler::AddDevice(const std::string& device_id,

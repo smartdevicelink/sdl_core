@@ -45,8 +45,11 @@
 #include "utils/custom_string.h"
 #include "policy/policy_settings.h"
 #include "smart_objects/smart_object.h"
+#include "utils/callable.h"
 
 namespace policy {
+typedef utils::SharedPtr<utils::Callable> StatusNotifier;
+
 class PolicyHandlerInterface {
  public:
   virtual ~PolicyHandlerInterface() {}
@@ -306,8 +309,9 @@ class PolicyHandlerInterface {
    * @brief Allows to add new or update existed application during
    * registration process
    * @param application_id The policy aplication id.
+   * @return function that will notify update manager about new application
    */
-  virtual void AddApplication(const std::string& application_id) = 0;
+  virtual StatusNotifier AddApplication(const std::string& application_id) = 0;
 
   /**
    * Checks whether application is revoked
