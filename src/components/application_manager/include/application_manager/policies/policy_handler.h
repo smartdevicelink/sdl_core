@@ -97,7 +97,7 @@ class PolicyHandler : public PolicyHandlerInterface,
 #ifdef EXTERNAL_PROPRIETARY_MODE
   void OnSnapshotCreated(const BinaryMessage& pt_string,
                          const std::vector<int>& retry_delay_seconds,
-                         int timeout_exchange) OVERRIDE;
+                         uint32_t timeout_exchange) OVERRIDE;
 #else   // EXTERNAL_PROPRIETARY_MODE
   void OnSnapshotCreated(const BinaryMessage& pt_string) OVERRIDE;
 #endif  // EXTERNAL_PROPRIETARY_MODE
@@ -281,7 +281,8 @@ class PolicyHandler : public PolicyHandlerInterface,
   virtual std::string GetLockScreenIconUrl() const OVERRIDE;
   void ResetRetrySequence() OVERRIDE;
   uint32_t NextRetryTimeout() OVERRIDE;
-  int TimeoutExchange() OVERRIDE;
+  uint32_t TimeoutExchangeSec() OVERRIDE;
+  uint32_t TimeoutExchangeMSec() OVERRIDE;
   void OnExceededTimeout() OVERRIDE;
   void OnSystemReady() OVERRIDE;
   void PTUpdatedAt(Counters counter, int value) OVERRIDE;
@@ -448,8 +449,9 @@ class PolicyHandler : public PolicyHandlerInterface,
   void OnSystemError(int code) OVERRIDE;
 
   /**
-   * @brief Choose application id to be used for snapshot sending
-   * @return Application id or 0, if there are no applications registered
+   * @brief Chooses random application id to be used for snapshot sending
+   * considering HMI level
+   * @return Application id or 0, if there are no suitable applications
    */
   uint32_t GetAppIdForSending() const OVERRIDE;
 
@@ -640,6 +642,24 @@ class PolicyHandler : public PolicyHandlerInterface,
    * @brief Link all currently registered applications
    */
   void LinkAppsToDevice();
+
+  typedef std::vector<application_manager::ApplicationSharedPtr> Applications;
+
+  /**
+   * @brief Checks application registration status (SDL4.0) and device consent
+   * to find out whether application is suitable
+   * @param value Item from applications collection
+   * @return true if application is suitable, otherwise - false
+   */
+  bool IsAppSuitableForPolicyUpdate(const Applications::value_type value) const;
+
+  /**
+   * @brief Chooses random application from list using
+   * IsAppSuitableForPolicyUpdate
+   * @param app_list Application collection
+   * @return Application id if suitable is found, otherwise - zero
+   */
+  uint32_t ChooseRandomAppForPolicyUpdate(Applications& app_list) const;
 
  private:
   class StatisticManagerImpl : public usage_statistics::StatisticsManager {

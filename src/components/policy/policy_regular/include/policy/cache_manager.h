@@ -115,7 +115,7 @@ class CacheManager : public CacheManagerInterface {
 
   /**
    * @brief Returns timeout to wait for a response of PT update
-   * @return value in seconds
+   * @return value in msec
    */
   virtual int TimeoutResponse();
 

@@ -55,7 +55,7 @@ class UpdateStatusManagerTest : public ::testing::Test {
  public:
   UpdateStatusManagerTest()
       : manager_(utils::MakeShared<UpdateStatusManager>())
-      , k_timeout_(1)
+      , k_timeout_(1000)
       , listener_(utils::MakeShared<MockPolicyListener>()) {}
 
   void SetUp() OVERRIDE {

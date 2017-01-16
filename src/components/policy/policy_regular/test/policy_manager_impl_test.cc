@@ -910,7 +910,7 @@ TEST_F(PolicyManagerImplTest2, NextRetryTimeout_ExpectTimeoutsFromPT) {
 
     for (uint32_t retry_number = 0u; retry_number < size; ++retry_number) {
       waiting_timeout += seconds_between_retries[retry_number].asInt();
-      waiting_timeout += manager->TimeoutExchange();
+      waiting_timeout += manager->TimeoutExchangeMSec();
 
       // it's in miliseconds
       EXPECT_EQ(waiting_timeout * date_time::DateTime::MILLISECONDS_IN_SECOND,
@@ -923,7 +923,7 @@ TEST_F(PolicyManagerImplTest2, TimeOutExchange) {
   // Arrange
   CreateLocalPT("sdl_preloaded_pt.json");
   // Check value taken from PT
-  EXPECT_EQ(70, manager->TimeoutExchange());
+  EXPECT_EQ(70000u, manager->TimeoutExchangeMSec());
 }
 
 TEST_F(PolicyManagerImplTest2, UpdatedPreloadedPT_ExpectLPT_IsUpdated) {

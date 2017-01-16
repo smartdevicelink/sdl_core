@@ -78,7 +78,7 @@ class MockPolicyListener : public ::policy::PolicyListener {
   MOCK_METHOD3(OnSnapshotCreated,
                void(const policy::BinaryMessage& pt_string,
                     const std::vector<int>& retry_seconds,
-                    int timeout_exceed));
+                    uint32_t timeout_exceed));
   MOCK_METHOD0(CanUpdate, bool());
   MOCK_METHOD1(OnCertificateUpdated, void(const std::string&));
   MOCK_CONST_METHOD2(SendOnAppPermissionsChanged,

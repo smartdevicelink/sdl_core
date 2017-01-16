@@ -49,6 +49,7 @@
 
 #include "application_manager/request_info.h"
 #include "application_manager/request_controller_settings.h"
+#include "application_manager/request_tracker.h"
 
 namespace application_manager {
 
@@ -229,11 +230,15 @@ class RequestController {
   void terminateWaitingForResponseAppRequests(const uint32_t& app_id);
 
   /**
-   * @brief Check Posibility to add new requests, or limits was exceeded
-   * @param request - request to check possipility to Add
-   * @return True if new request could be added, false otherwise
+   * @brief Checks whether all constraints are met before adding of request into
+   * processing queue. Verifies amount of pending requests, amount of requests
+   * per time scale for different HMI levels
+   * @param request - request to check constraints for
+   * @param level - HMI level in which request has been issued
+   * @return Appropriate result code of verification
    */
-  TResult CheckPosibilitytoAdd(const RequestPtr request);
+  TResult CheckPosibilitytoAdd(const RequestPtr request,
+                               const mobile_api::HMILevel::eType level);
 
   /**
    * @brief Check Posibility to add new requests, or limits was exceeded
@@ -272,6 +277,12 @@ class RequestController {
    * app_id and corr_id
    */
   RequestInfoSet waiting_for_response_;
+
+  /**
+   * @brief Tracker verifying time scale and maximum requests amount in
+   * different HMI levels
+   */
+  RequestTracker request_tracker_;
 
   /**
   * @brief Set of HMI notifications with timeout.

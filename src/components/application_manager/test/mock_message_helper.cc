@@ -202,7 +202,7 @@ void MessageHelper::SendSDLActivateAppResponse(
 }
 
 void MessageHelper::SendPolicyUpdate(const std::string& file_path,
-                                     int timeout,
+                                     const uint32_t timeout,
                                      const std::vector<int>& retries,
                                      ApplicationManager& app_mngr) {
   MockMessageHelper::message_helper_mock()->SendPolicyUpdate(

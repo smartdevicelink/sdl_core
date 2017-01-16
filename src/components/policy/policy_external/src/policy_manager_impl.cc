@@ -256,7 +256,7 @@ void PolicyManagerImpl::RequestPTUpdate() {
     BinaryMessage update(message_string.begin(), message_string.end());
 
     listener_->OnSnapshotCreated(
-        update, RetrySequenceDelaysSeconds(), TimeoutExchange());
+        update, RetrySequenceDelaysSeconds(), TimeoutExchangeMSec());
   } else {
     LOG4CXX_ERROR(logger_, "Invalid Policy table snapshot - PTUpdate failed");
   }
@@ -1101,7 +1101,7 @@ void PolicyManagerImpl::ResetRetrySequence() {
   update_status_manager_.OnResetRetrySequence();
 }
 
-int PolicyManagerImpl::TimeoutExchange() {
+uint32_t PolicyManagerImpl::TimeoutExchangeMSec() {
   return retry_sequence_timeout_;
 }
 
@@ -1115,9 +1115,9 @@ void PolicyManagerImpl::OnExceededTimeout() {
 }
 
 void PolicyManagerImpl::OnUpdateStarted() {
-  int update_timeout = TimeoutExchange();
+  uint32_t update_timeout = TimeoutExchangeMSec();
   LOG4CXX_DEBUG(logger_,
-                "Update timeout will be set to (sec): " << update_timeout);
+                "Update timeout will be set to (milisec): " << update_timeout);
   update_status_manager_.OnUpdateSentOut(update_timeout);
   cache_->SaveUpdateRequired(true);
 }

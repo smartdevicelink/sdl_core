@@ -34,10 +34,11 @@
 #include <dlfcn.h>
 #include <algorithm>
 #include <vector>
+#include <functional>
 #include "application_manager/smart_object_keys.h"
 
 #include "application_manager/policies/delegates/app_permission_delegate.h"
-
+#include "policy/status.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/state_controller.h"
 #include "application_manager/message_helper.h"
@@ -113,7 +114,21 @@ const policy::DeviceParams GetDeviceParams(
   device_params.device_handle = device_handle;
   return device_params;
 }
-}
+
+struct HMILevelPredicate
+    : public std::unary_function<ApplicationSharedPtr, bool> {
+  explicit HMILevelPredicate(const mobile_api::HMILevel::eType level)
+      : level_(level) {}
+
+  bool operator()(const ApplicationSharedPtr app) const {
+    return level_ == app->hmi_level() ? true : false;
+  }
+
+ private:
+  mobile_api::HMILevel::eType level_;
+};
+
+}  // namespace
 
 #define POLICY_LIB_CHECK(return_value)                                      \
   {                                                                         \
@@ -134,25 +149,6 @@ const policy::DeviceParams GetDeviceParams(
   }
 
 static const std::string kCerficateFileName = "certificate";
-
-struct ApplicationListHmiLevelSorter {
-  bool operator()(const application_manager::ApplicationSharedPtr& lhs,
-                  const application_manager::ApplicationSharedPtr& rhs) {
-    if (lhs && rhs) {
-      mobile_apis::HMILevel::eType lhs_hmi_level = lhs->hmi_level();
-      mobile_apis::HMILevel::eType rhs_hmi_level = rhs->hmi_level();
-
-      if (lhs_hmi_level == rhs_hmi_level) {
-        return lhs->app_id() < rhs->app_id();
-      }
-      return lhs_hmi_level < rhs_hmi_level;
-    }
-    return false;
-  }
-};
-
-typedef std::set<application_manager::ApplicationSharedPtr,
-                 ApplicationListHmiLevelSorter> HmiLevelOrderedApplicationList;
 
 struct DeactivateApplication {
   explicit DeactivateApplication(
@@ -380,40 +376,40 @@ bool PolicyHandler::ClearUserConsent() {
 }
 
 uint32_t PolicyHandler::GetAppIdForSending() const {
+  LOG4CXX_AUTO_TRACE(logger_);
   POLICY_LIB_CHECK(0);
   const ApplicationSet& accessor =
       application_manager_.applications().GetData();
-  HmiLevelOrderedApplicationList app_list(accessor.begin(), accessor.end());
 
-  LOG4CXX_INFO(logger_, "Apps size: " << app_list.size());
+  HMILevelPredicate has_none_level(mobile_api::HMILevel::HMI_NONE);
+  Applications apps_without_none_level;
+  std::copy_if(accessor.begin(),
+               accessor.end(),
+               std::back_inserter(apps_without_none_level),
+               std::not1(has_none_level));
 
-  for (HmiLevelOrderedApplicationList::const_iterator first = app_list.begin();
-       first != app_list.end();
-       ++first) {
-    if ((*first)->IsRegistered()) {
-      const uint32_t app_id = (*first)->app_id();
-      DeviceParams device_params = GetDeviceParams(
-          (*first)->device(),
-          application_manager_.connection_handler().get_session_observer());
+  LOG4CXX_DEBUG(logger_,
+                "Number of apps with different from NONE level: "
+                    << apps_without_none_level.size());
 
-      const bool is_device_allowed = (kDeviceAllowed ==
-                                      policy_manager_->GetUserConsentForDevice(
-                                          device_params.device_mac_address));
-      const bool is_single_app = (1 == app_list.size());
+  uint32_t choosen_app_id =
+      ChooseRandomAppForPolicyUpdate(apps_without_none_level);
 
-      if (is_device_allowed && is_single_app) {
-        return app_id;
-      }
-
-      const bool is_app_in_none =
-          ((*first)->hmi_level() == mobile_apis::HMILevel::HMI_NONE);
-
-      if (is_device_allowed && !is_app_in_none) {
-        return app_id;
-      }
-    }
+  if (choosen_app_id) {
+    return choosen_app_id;
   }
-  return 0;
+
+  Applications apps_with_none_level;
+  std::copy_if(accessor.begin(),
+               accessor.end(),
+               std::back_inserter(apps_with_none_level),
+               has_none_level);
+
+  LOG4CXX_DEBUG(
+      logger_,
+      "Number of apps with NONE level: " << apps_with_none_level.size());
+
+  return ChooseRandomAppForPolicyUpdate(apps_with_none_level);
 }
 
 void PolicyHandler::OnAppPermissionConsent(
@@ -692,6 +688,59 @@ void PolicyHandler::LinkAppsToDevice() {
   }
 }
 
+bool PolicyHandler::IsAppSuitableForPolicyUpdate(
+    const Applications::value_type value) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  const uint32_t app_id = value->app_id();
+
+  if (!value->IsRegistered()) {
+    LOG4CXX_DEBUG(logger_,
+                  "Application " << app_id << " is not marked as registered.");
+    return false;
+  }
+
+  LOG4CXX_DEBUG(logger_,
+                "Application " << app_id << " marked as registered."
+                                            "Checking its parameters.");
+
+  DeviceParams device_params = GetDeviceParams(
+      value->device(),
+      application_manager_.connection_handler().get_session_observer());
+
+  const bool is_device_allowed = (kDeviceAllowed ==
+                                  policy_manager_->GetUserConsentForDevice(
+                                      device_params.device_mac_address));
+
+  LOG4CXX_DEBUG(logger_,
+                "Is device " << device_params.device_mac_address << " allowed "
+                             << std::boolalpha << is_device_allowed);
+
+  if (!is_device_allowed) {
+    return false;
+  }
+
+  return true;
+}
+
+uint32_t PolicyHandler::ChooseRandomAppForPolicyUpdate(
+    Applications& app_list) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  std::random_shuffle(app_list.begin(), app_list.end());
+
+  Applications::const_iterator choosen_app = std::find_if(
+      app_list.begin(),
+      app_list.end(),
+      std::bind1st(std::mem_fun(&PolicyHandler::IsAppSuitableForPolicyUpdate),
+                   this));
+
+  if (app_list.end() != choosen_app) {
+    return (*choosen_app)->app_id();
+  }
+
+  return 0;
+}
+
 void PolicyHandler::OnGetStatusUpdate(const uint32_t correlation_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   POLICY_LIB_CHECK_VOID();
@@ -703,6 +752,8 @@ void PolicyHandler::OnGetStatusUpdate(const uint32_t correlation_id) {
 
 void PolicyHandler::OnUpdateStatusChanged(const std::string& status) {
   LOG4CXX_AUTO_TRACE(logger_);
+  POLICY_LIB_CHECK_VOID();
+  policy_manager_->SaveUpdateStatusRequired(policy::kUpToDate != status);
   MessageHelper::SendOnStatusUpdate(status, application_manager_);
 }
 
@@ -1303,11 +1354,13 @@ bool PolicyHandler::SaveSnapshot(const BinaryMessage& pt_string,
 void PolicyHandler::OnSnapshotCreated(
     const BinaryMessage& pt_string,
     const std::vector<int>& retry_delay_seconds,
-    int timeout_exchange) {
+    const uint32_t timeout_exchange_ms) {
   std::string policy_snapshot_full_path;
   if (SaveSnapshot(pt_string, policy_snapshot_full_path)) {
+    const uint32_t timeout_exchange_s =
+        timeout_exchange_ms / date_time::DateTime::MILLISECONDS_IN_SECOND;
     MessageHelper::SendPolicyUpdate(policy_snapshot_full_path,
-                                    timeout_exchange,
+                                    timeout_exchange_s,
                                     retry_delay_seconds,
                                     application_manager_);
   }
@@ -1323,7 +1376,7 @@ void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string) {
     return;
   }
   MessageHelper::SendPolicyUpdate(policy_snapshot_full_path,
-                                  policy_manager_->TimeoutExchange(),
+                                  policy_manager_->TimeoutExchangeMSec(),
                                   policy_manager_->RetrySequenceDelaysSeconds(),
                                   application_manager_);
 #else   // PROPRIETARY_MODE
@@ -1450,9 +1503,13 @@ uint32_t PolicyHandler::NextRetryTimeout() {
   return policy_manager_->NextRetryTimeout();
 }
 
-int PolicyHandler::TimeoutExchange() {
+uint32_t PolicyHandler::TimeoutExchangeSec() {
+  return TimeoutExchangeMSec() / date_time::DateTime::MILLISECONDS_IN_SECOND;
+}
+
+uint32_t PolicyHandler::TimeoutExchangeMSec() {
   POLICY_LIB_CHECK(0);
-  return policy_manager_->TimeoutExchange();
+  return policy_manager_->TimeoutExchangeMSec();
 }
 
 void PolicyHandler::OnExceededTimeout() {
@@ -1722,7 +1779,6 @@ void PolicyHandler::OnAppsSearchCompleted() {
 
 void PolicyHandler::OnAppRegisteredOnMobile(const std::string& application_id) {
   POLICY_LIB_CHECK_VOID();
-  AddApplication(application_id);
   policy_manager_->OnAppRegisteredOnMobile(application_id);
 }
 

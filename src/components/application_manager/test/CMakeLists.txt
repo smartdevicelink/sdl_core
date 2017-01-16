@@ -52,6 +52,7 @@ if (BUILD_TESTS)
     ${AM_TEST_DIR}/mobile_message_handler_test.cc
     ${AM_TEST_DIR}/mobile_message_handler_v1_test.cc
     ${AM_TEST_DIR}/request_info_test.cc
+    ${AM_TEST_DIR}/request_tracker_test.cc
     ${AM_TEST_DIR}/resumption_sql_queries_test.cc
     ${AM_TEST_DIR}/event_engine_test.cc
     ${AM_TEST_DIR}/policy_event_observer_test.cc
