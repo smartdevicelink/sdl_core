@@ -312,9 +312,9 @@ void PolicyManagerImpl::StartPTExchange() {
     if (update_status_manager_.IsUpdateRequired()) {
       if (RequestPTUpdate() && !timer_retry_sequence_.is_running()) {
         // Start retry sequency
-        const int t = NextRetryTimeout();
-        LOG4CXX_DEBUG(logger_, "Start retry sequence timeout = " << t);
-        timer_retry_sequence_.Start(t, timer::kPeriodic);
+        const int timeout_sec = NextRetryTimeout();
+        LOG4CXX_DEBUG(logger_, "Start retry sequence timeout = " << timeout_sec);
+        timer_retry_sequence_.Start(timeout_sec, timer::kPeriodic);
       }
     }
   }
@@ -1008,11 +1008,9 @@ void PolicyManagerImpl::RetrySequence() {
   uint32_t timeout = NextRetryTimeout();
 
   if (!timeout && timer_retry_sequence_.is_running()) {
-    LOG4CXX_DEBUG(logger_, "AKutsan Stop timer " << timeout);
     timer_retry_sequence_.Stop();
     return;
   }
-  LOG4CXX_DEBUG(logger_, "AKutsan start " << timeout);
   timer_retry_sequence_.Start(timeout, timer::kPeriodic);
 }
 

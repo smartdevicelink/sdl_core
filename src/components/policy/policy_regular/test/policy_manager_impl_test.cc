@@ -884,8 +884,7 @@ TEST_F(PolicyManagerImplTest2, NextRetryTimeout_ExpectTimeoutsFromPT) {
       waiting_timeout += manager->TimeoutExchangeMSec();
 
       // it's in miliseconds
-      EXPECT_EQ(waiting_timeout * date_time::DateTime::MILLISECONDS_IN_SECOND,
-                manager->NextRetryTimeout());
+      EXPECT_EQ(waiting_timeout, manager->NextRetryTimeout());
     }
   }
 }
