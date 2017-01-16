@@ -497,6 +497,9 @@
   <element name="phoneNumber">
     <description> Optional hone number of intended location / establishment (if applicable) for SendLocation.</description>
   </element>
+  <element name="audioPassThruIcon">
+	<description>The optional image field for AudioPassThru</description>
+  </element>
   <element name="timeToDestination"/>
     <!-- TO DO to be removed -->
     <element name="turnText"/>
@@ -538,6 +541,9 @@
   </element>
   <element name="locationImage">
     <description>The optional image of a destination / location</description>
+  </element>
+  <element name="audiPassThruIcon">
+    <description>The optional image for AudioPassThru</description>
   </element>
 </enum>
 
@@ -3203,6 +3209,12 @@
         If omitted, the value is set to true.
       </description>
     </param>
+    <param name="audioPassThruIcon" type="Common.Image" mandatory="false">
+	  <description>
+	    Image struct determinig wheter static or dynamic icon.
+		If omitted on supported displays, no (or the default if applicable) icon shall be displayed.
+	  </description>
+	</param>
   </function>
   <function name="PerformAudioPassThru" messagetype="response">
   </function>
