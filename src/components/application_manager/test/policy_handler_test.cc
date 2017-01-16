@@ -47,6 +47,7 @@
 #include "connection_handler/mock_connection_handler_settings.h"
 #include "transport_manager/mock_transport_manager.h"
 #include "policy/policy_types.h"
+#include "policy/access_remote.h"
 #include "json/reader.h"
 #include "json/writer.h"
 #include "json/value.h"
@@ -200,6 +201,56 @@ class PolicyHandlerTest : public ::testing::Test {
         .WillOnce(Return(retry_sequence_delay_seconds));
     EXPECT_CALL(mock_message_helper_, SendPolicyUpdate(_, _, _, _));
   }
+
+  void OnPermissionsUpdated(const std::string& default_hmi_level,
+                            const mobile_apis::HMILevel::eType hmi_level) {
+    EXPECT_CALL(app_manager_, application_by_policy_id(_))
+        .WillRepeatedly(Return(mock_app_));
+    EXPECT_CALL(*mock_app_, app_id()).WillRepeatedly(Return(kAppId1_));
+    EXPECT_CALL(*mock_app_, hmi_level())
+        .WillOnce(Return(mobile_apis::HMILevel::HMI_NONE));
+
+    EXPECT_CALL(mock_message_helper_, StringToHMILevel(default_hmi_level))
+        .WillOnce(Return(hmi_level));
+    EXPECT_CALL(mock_message_helper_,
+                SendOnPermissionsChangeNotification(kAppId1_, _, _));
+    EXPECT_CALL(app_manager_, state_controller()).Times(0);
+
+    Permissions permissions;
+    policy_handler_.OnPermissionsUpdated(
+        kPolicyAppId_, permissions, default_hmi_level);
+  }
+
+  void CreateFunctionalGroupPermission(
+      const GroupConsent state,
+      const std::string& group_alias,
+      const std::string& group_name,
+      policy::FunctionalGroupPermission& group_permission) {
+    group_permission.state = state;
+    group_permission.group_alias = group_alias;
+    group_permission.group_name = group_name;
+  }
+
+  application_manager::SeatLocation FillApplicationManagerSeatLocation(
+      const int col = 1,
+      const int row = 1,
+      const int level = 1,
+      const int colspan = 1,
+      const int rowspan = 1,
+      const int levelspan = 1) {
+    return {col, row, level, colspan, rowspan, levelspan};
+  }
+
+#ifdef SDL_REMOTE_CONTROL
+  policy::SeatLocation FillPolicySeatLocation(const int col = 1,
+                                              const int row = 1,
+                                              const int level = 1,
+                                              const int colspan = 1,
+                                              const int rowspan = 1,
+                                              const int levelspan = 1) {
+    return {col, row, level, colspan, rowspan, levelspan};
+  }
+#endif
 };
 
 TEST_F(PolicyHandlerTest, LoadPolicyLibrary_Method_ExpectLibraryLoaded) {
@@ -356,40 +407,12 @@ TEST_F(PolicyHandlerTest, OnPermissionsUpdated_InvalidApp_UNSUCCESS) {
 }
 
 TEST_F(PolicyHandlerTest, OnPermissionsUpdated_HmiLevelInvalidEnum_UNSUCCESS) {
-  EXPECT_CALL(app_manager_, application_by_policy_id(_))
-      .WillRepeatedly(Return(mock_app_));
-  EXPECT_CALL(*mock_app_, app_id()).WillRepeatedly(Return(kAppId1_));
-  EXPECT_CALL(*mock_app_, hmi_level())
-      .WillOnce(Return(mobile_apis::HMILevel::HMI_NONE));
-
-  const HMILevel default_hmi("INVALID_ENUM");
-  EXPECT_CALL(mock_message_helper_, StringToHMILevel(default_hmi))
-      .WillOnce(Return(mobile_apis::HMILevel::INVALID_ENUM));
-  EXPECT_CALL(mock_message_helper_,
-              SendOnPermissionsChangeNotification(kAppId1_, _, _));
-  EXPECT_CALL(app_manager_, state_controller()).Times(0);
-
-  Permissions permissions;
-  policy_handler_.OnPermissionsUpdated(kPolicyAppId_, permissions, default_hmi);
+  OnPermissionsUpdated("INVALID_ENUM", mobile_apis::HMILevel::INVALID_ENUM);
 }
 
 TEST_F(PolicyHandlerTest,
        OnPermissionsUpdated_HmiLevelEqualsToCurrentHmiLevel_UNSUCCESS) {
-  EXPECT_CALL(app_manager_, application_by_policy_id(_))
-      .WillRepeatedly(Return(mock_app_));
-  EXPECT_CALL(*mock_app_, app_id()).WillRepeatedly(Return(kAppId1_));
-  EXPECT_CALL(*mock_app_, hmi_level())
-      .WillOnce(Return(mobile_apis::HMILevel::HMI_NONE));
-
-  const HMILevel default_hmi("HMI_NONE");
-  EXPECT_CALL(mock_message_helper_, StringToHMILevel(default_hmi))
-      .WillOnce(Return(mobile_apis::HMILevel::HMI_NONE));
-  EXPECT_CALL(mock_message_helper_,
-              SendOnPermissionsChangeNotification(kAppId1_, _, _));
-  EXPECT_CALL(app_manager_, state_controller()).Times(0);
-
-  Permissions permissions;
-  policy_handler_.OnPermissionsUpdated(kPolicyAppId_, permissions, "HMI_NONE");
+  OnPermissionsUpdated("HMI_NONE", mobile_apis::HMILevel::HMI_NONE);
 }
 
 TEST_F(PolicyHandlerTest,
@@ -1340,24 +1363,28 @@ TEST_F(PolicyHandlerTest, OnGetListOfPermissions_GroupPermissions_SUCCESS) {
   test_app.insert(mock_app_);
 
   policy::FunctionalGroupPermission group_permission_disallowed1;
-  group_permission_disallowed1.state = GroupConsent::kGroupDisallowed;
-  group_permission_disallowed1.group_alias = "disallowed";
-  group_permission_disallowed1.group_name = "name_disallowed";
+  CreateFunctionalGroupPermission(GroupConsent::kGroupDisallowed,
+                                  "disallowed",
+                                  "name_disallowed",
+                                  group_permission_disallowed1);
 
   policy::FunctionalGroupPermission group_permission_disallowed2;
-  group_permission_disallowed2.state = GroupConsent::kGroupDisallowed;
-  group_permission_disallowed2.group_alias = "disallowed";
-  group_permission_disallowed2.group_name = "name_disallowed";
+  CreateFunctionalGroupPermission(GroupConsent::kGroupDisallowed,
+                                  "disallowed",
+                                  "name_disallowed",
+                                  group_permission_disallowed2);
 
   policy::FunctionalGroupPermission group_permission_allowed1;
-  group_permission_allowed1.state = GroupConsent::kGroupAllowed;
-  group_permission_allowed1.group_alias = "allowed";
-  group_permission_allowed1.group_name = "name_allowed";
+  CreateFunctionalGroupPermission(GroupConsent::kGroupAllowed,
+                                  "allowed",
+                                  "name_allowed",
+                                  group_permission_allowed1);
 
   policy::FunctionalGroupPermission group_permission_allowed2;
-  group_permission_allowed2.state = GroupConsent::kGroupAllowed;
-  group_permission_allowed2.group_alias = "allowed";
-  group_permission_allowed2.group_name = "name_allowed";
+  CreateFunctionalGroupPermission(GroupConsent::kGroupAllowed,
+                                  "allowed",
+                                  "name_allowed",
+                                  group_permission_allowed2);
 
   std::vector<policy::FunctionalGroupPermission> group_permissions;
   group_permissions.push_back(group_permission_allowed1);
@@ -1794,9 +1821,10 @@ TEST_F(PolicyHandlerTest,
   permissions.consent_source = "consent_source";
 
   policy::FunctionalGroupPermission group_permission_allowed;
-  group_permission_allowed.state = GroupConsent::kGroupAllowed;
-  group_permission_allowed.group_alias = "allowed";
-  group_permission_allowed.group_name = "name_allowed";
+  CreateFunctionalGroupPermission(GroupConsent::kGroupAllowed,
+                                  "allowed",
+                                  "name_allowed",
+                                  group_permission_allowed);
 
   permissions.group_permissions.push_back(group_permission_allowed);
 
@@ -1835,9 +1863,10 @@ TEST_F(PolicyHandlerTest,
   permissions.consent_source = "consent_source";
 
   policy::FunctionalGroupPermission group_permission_allowed;
-  group_permission_allowed.state = GroupConsent::kGroupAllowed;
-  group_permission_allowed.group_alias = "allowed";
-  group_permission_allowed.group_name = "name_allowed";
+  CreateFunctionalGroupPermission(GroupConsent::kGroupAllowed,
+                                  "allowed",
+                                  "name_allowed",
+                                  group_permission_allowed);
 
   permissions.group_permissions.push_back(group_permission_allowed);
 
@@ -1899,9 +1928,10 @@ TEST_F(PolicyHandlerTest,
   permissions.consent_source = "consent_source";
 
   policy::FunctionalGroupPermission group_permission_allowed;
-  group_permission_allowed.state = GroupConsent::kGroupAllowed;
-  group_permission_allowed.group_alias = "allowed";
-  group_permission_allowed.group_name = "name_allowed";
+  CreateFunctionalGroupPermission(GroupConsent::kGroupAllowed,
+                                  "allowed",
+                                  "name_allowed",
+                                  group_permission_allowed);
 
   permissions.group_permissions.push_back(group_permission_allowed);
 
@@ -1916,9 +1946,9 @@ TEST_F(PolicyHandlerTest,
       .WillRepeatedly(ReturnRef(mock_session_observer));
 
   EXPECT_CALL(mock_session_observer, GetDataOnDeviceID(_, _, NULL, _, _))
+      .WillOnce(DoAll(SetDeviceParamsMacAdress(kMacAddr_), (Return(1u))))
       .WillOnce(
-           DoAll(SetDeviceParamsMacAdress(second_mac_adress), (Return(1u))))
-      .WillOnce(DoAll(SetDeviceParamsMacAdress(kMacAddr_), (Return(1u))));
+          DoAll(SetDeviceParamsMacAdress(second_mac_adress), (Return(1u))));
   EXPECT_CALL(*mock_app_, device()).WillRepeatedly(Return(device));
   EXPECT_CALL(*second_mock_app, device()).WillRepeatedly(Return(device));
 
@@ -2076,11 +2106,10 @@ TEST_F(PolicyHandlerTest, OnUpdateHMILevel_HmiLevelChanged_SUCCESS) {
 
 TEST_F(PolicyHandlerTest, CheckAccess_SUCCESS) {
   EnablePolicyAndPolicyManagerMock();
-  application_manager::SeatLocation zone;
-  zone.col = 1;
-  zone.row = 1;
-  zone.level = 1;
-  policy::SeatLocation policy_zone = {zone.col, zone.row, zone.level};
+  application_manager::SeatLocation zone = FillApplicationManagerSeatLocation();
+
+  policy::SeatLocation policy_zone =
+      FillPolicySeatLocation(zone.col, zone.row, zone.level);
 
   const PTString module("module");
   const PTString pt_rpc("rpc");
@@ -2114,11 +2143,9 @@ TEST_F(PolicyHandlerTest, CheckAccess_SUCCESS) {
 
 TEST_F(PolicyHandlerTest, SetAccess_SUCCESS) {
   EnablePolicyAndPolicyManagerMock();
-  application_manager::SeatLocation zone;
-  zone.col = 1;
-  zone.row = 1;
-  zone.level = 1;
-  policy::SeatLocation policy_zone = {zone.col, zone.row, zone.level};
+  application_manager::SeatLocation zone = FillApplicationManagerSeatLocation();
+  policy::SeatLocation policy_zone =
+      FillPolicySeatLocation(zone.col, zone.row, zone.level);
 
   const PTString module("module");
   const bool allowed(true);
@@ -2139,11 +2166,9 @@ TEST_F(PolicyHandlerTest, ResetAccess_SUCCESS) {
 
 TEST_F(PolicyHandlerTest, ResetAccess_WithZone_SUCCESS) {
   EnablePolicyAndPolicyManagerMock();
-  application_manager::SeatLocation zone;
-  zone.col = 1;
-  zone.row = 1;
-  zone.level = 1;
-  policy::SeatLocation policy_zone = {zone.col, zone.row, zone.level};
+  application_manager::SeatLocation zone = FillApplicationManagerSeatLocation();
+  policy::SeatLocation policy_zone =
+      FillPolicySeatLocation(zone.col, zone.row, zone.level);
 
   const PTString module("module");
   EXPECT_CALL(*mock_policy_manager_, ResetAccess(policy_zone, module));
@@ -2257,18 +2282,14 @@ TEST_F(PolicyHandlerTest, PrimaryDevice_GetDeviceIdFalse_UNSUCCESS) {
 
 TEST_F(PolicyHandlerTest, SetDeviceZone_SUCCESS) {
   EnablePolicyAndPolicyManagerMock();
-  application_manager::SeatLocation zone;
-  zone.col = 1;
-  zone.row = 1;
-  zone.level = 1;
-  zone.colspan = 1, zone.rowspan = 1, zone.levelspan = 1;
+  application_manager::SeatLocation zone = FillApplicationManagerSeatLocation();
 
-  policy::SeatLocation policy_zone = {zone.col,
-                                      zone.row,
-                                      zone.level,
-                                      zone.colspan,
-                                      zone.rowspan,
-                                      zone.levelspan};
+  policy::SeatLocation policy_zone = FillPolicySeatLocation(zone.col,
+                                                            zone.row,
+                                                            zone.level,
+                                                            zone.colspan,
+                                                            zone.rowspan,
+                                                            zone.levelspan);
 
   EXPECT_CALL(*mock_policy_manager_, SetDeviceZone(kDeviceId_, policy_zone));
 
@@ -2295,11 +2316,7 @@ ACTION_P(SetZone, zone) {
 
 TEST_F(PolicyHandlerTest, GetDeviceZone_SUCCESS) {
   EnablePolicyAndPolicyManagerMock();
-  policy::SeatLocation policy_zone;
-  policy_zone.col = 1;
-  policy_zone.row = 2;
-  policy_zone.level = 3;
-  policy_zone.colspan = 4, policy_zone.rowspan = 5, policy_zone.levelspan = 6;
+  policy::SeatLocation policy_zone = FillPolicySeatLocation(1, 2, 3, 4, 5, 6);
 
   EXPECT_CALL(*mock_policy_manager_, GetDeviceZone(kDeviceId_, _))
       .WillOnce(DoAll(SetZone(policy_zone), Return(true)));
