@@ -2400,7 +2400,10 @@
                 "AppHMIType": ["REMOTE_CONTROL"]
             },
             "pre_consent_passengersRC": {
+                "keep_context": false,
+                "steal_focus": false,
                 "priority": "NONE",
+                "default_hmi":"NONE",
                 "groups": ["pre_BaseRC-1"]
             },
             "device": {
