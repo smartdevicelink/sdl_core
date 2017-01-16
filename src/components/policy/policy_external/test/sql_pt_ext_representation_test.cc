@@ -209,7 +209,8 @@ const bool SQLPTExtRepresentationTest::in_memory_ = true;
 }
 
 TEST_F(SQLPTExtRepresentationTest,
-       GenerateSnapshot_SetPolicyTable_SnapshotIsPresent) {
+       DISABLED_GenerateSnapshot_SetPolicyTable_SnapshotIsPresent) {
+  // TODO(AKutsan): APPLINK-31526 Test requires initial preloaded pt for preloaded date reading
   // Arrange
   Json::Value table(Json::objectValue);
   table["policy_table"] = Json::Value(Json::objectValue);
