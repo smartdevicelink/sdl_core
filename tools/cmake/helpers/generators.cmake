@@ -28,26 +28,35 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
+find_package(PythonInterp REQUIRED)
 
-include_directories (
-  include/
-  ${COMPONENTS_DIR}/protocol_handler/include/
-  ${COMPONENTS_DIR}/utils/include/
-  ${JSONCPP_INCLUDE_DIRECTORY}
-  ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
-  ${COMPONENTS_DIR}/smart_objects/include
-  ${COMPONENTS_DIR}/utils/include
-)
+if(NOT PYTHONINTERP_FOUND)
+  message(STATUS "Python interpreter is not found")
+  message(STATUS "To install it type in the command line:")
+  message(STATUS "sudo apt-get install python")
+  message(FATAL_ERROR "Exiting!")
+endif(NOT PYTHONINTERP_FOUND)
 
-set(PATHS
-  ${CMAKE_CURRENT_SOURCE_DIR}/include
-  ${CMAKE_CURRENT_SOURCE_DIR}/src
-)
+set(INTEFRACE_GENERATOR "${CMAKE_SOURCE_DIR}/tools/InterfaceGenerator/Generator.py")
+set(INTEFRACE_GENERATOR_CMD ${PYTHON_EXECUTABLE} -B ${INTEFRACE_GENERATOR})
+file(GLOB_RECURSE INTERFACE_GENERATOR_DEPENDENCIES "${CMAKE_SOURCE_DIR}/tools/InterfaceGenerator/*.*")
 
-collect_sources(SOURCES "${PATHS}")
-add_library(formatters ${SOURCES})
+macro(generate_interface ARG_XML_NAME ARG_NAMESPACE PARSER_TYPE)
+  string(REGEX MATCH "^[a-zA-Z_0-9]*[^.]" FILE_NAME ${ARG_XML_NAME})  # TODO: make expression more robust
 
-if(BUILD_TESTS)
-  add_subdirectory(test)
-endif()
+  set(HPP_FILE
+    "${CMAKE_CURRENT_BINARY_DIR}/${FILE_NAME}.h"
+    "${CMAKE_CURRENT_BINARY_DIR}/${FILE_NAME}_schema.h"
+  )
+
+  set(CPP_FILE "${CMAKE_CURRENT_BINARY_DIR}/${FILE_NAME}_schema.cc")
+  set(FULL_XML_NAME "${CMAKE_CURRENT_SOURCE_DIR}/${ARG_XML_NAME}")
+
+  add_custom_command(
+    OUTPUT ${HPP_FILE} ${CPP_FILE}
+    COMMAND ${INTEFRACE_GENERATOR_CMD} ${FULL_XML_NAME} ${ARG_NAMESPACE} ${CMAKE_CURRENT_BINARY_DIR} "--parser-type" "${PARSER_TYPE}"
+    DEPENDS ${INTERFACE_GENERATOR_DEPENDENCIES} ${FULL_XML_NAME}
+    COMMENT "Generating files:\n   ${HPP_FILE}\n   ${CPP_FILE}\nfrom:\n   ${FULL_XML_NAME} ..."
+    VERBATIM
+  )
+endmacro()

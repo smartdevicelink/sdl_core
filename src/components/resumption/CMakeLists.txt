@@ -28,6 +28,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
 include_directories (
   include
@@ -37,9 +38,11 @@ include_directories (
   ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
-set (SOURCES
-  ${COMPONENTS_DIR}/resumption/src/last_state_impl.cc
+set(PATHS
+  ${CMAKE_CURRENT_SOURCE_DIR}/include
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
+collect_sources(SOURCES "${PATHS}")
 
 add_library("Resumption" ${SOURCES})
 

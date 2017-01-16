@@ -28,24 +28,51 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-function(create_cotired_test NAME SOURCES LIBS)
-  add_executable(
-    ${NAME}
-    EXCLUDE_FROM_ALL
-    ${CMAKE_SOURCE_DIR}/src/components/test_main.cc
-    ${SOURCES}
-  )
-  if(${USE_COTIRE})
-    include(cotire)
-    cotire(${NAME})
-    set(NAME "${NAME}_unity")
-  endif()
-  target_link_libraries(${NAME} ${LIBS})
-  set_target_properties(
-    ${NAME}
-    PROPERTIES
-    EXCLUDE_FROM_ALL 0
-  )
-  add_test(NAME ${NAME}
-  COMMAND ${NAME} --gtest_output=xml:${CMAKE_BINARY_DIR}/test_results/)
-endfunction()
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
+
+set(MESSAGE_BROKER_INCLUDE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include)
+set(MESSAGE_BROKER_INCLUDE_DIRECTORY ${MESSAGE_BROKER_INCLUDE_DIRECTORY} PARENT_SCOPE)
+
+include_directories(
+  ${CMAKE_CURRENT_SOURCE_DIR}/include
+  ${JSONCPP_INCLUDE_DIRECTORY}
+)
+
+set(CLIENT_PATHS
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/client
+)
+collect_sources(CLIENT_SOURCES "${CLIENT_PATHS}")
+
+set(SERVER_PATHS
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/server
+)
+collect_sources(SERVER_SOURCES "${SERVER_PATHS}")
+
+set(EXCLUDE_PATHS
+  ${CLIENT_PATHS}
+  ${SERVER_PATHS}
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/example
+)
+
+set(PATHS
+  ${CMAKE_CURRENT_SOURCE_DIR}/include
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
+collect_sources(SOURCES "${PATHS}" "${EXCLUDE_PATHS}")
+
+set(LIBRARIES
+  Utils
+)
+
+add_library(message_broker ${SOURCES})
+target_link_libraries(message_broker ${LIBRARIES})
+
+list(APPEND LIBRARIES
+  message_broker
+)
+
+add_library(message_broker_client ${CLIENT_SOURCES})
+target_link_libraries(message_broker_client ${LIBRARIES})
+
+add_library(message_broker_server ${SERVER_SOURCES})
+target_link_libraries(message_broker_server ${LIBRARIES})

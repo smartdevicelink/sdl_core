@@ -76,10 +76,10 @@ if (${HMI_DBUS_API})
       ${CMAKE_SOURCE_DIR}/src/components/dbus/include
       ${DBUS_INCLUDE_DIRS}
   )
-  set (LIBRARIES ${LIBRARIES} DBus)
+  set (LIBRARIES ${LIBRARIES} dbus)
   set (SOURCES ${SOURCES} generated_interface_dbus_tests.cc)
 endif ()
 
 
 create_test(test_generated_interface "${SOURCES}" "${LIBRARIES}")
-endif()  
+endif()
