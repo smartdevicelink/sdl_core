@@ -37,6 +37,7 @@
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
 #include "utils/helpers.h"
+#include "utils/file_system.h"
 
 namespace application_manager {
 
@@ -49,6 +50,7 @@ PerformAudioPassThruRequest::PerformAudioPassThruRequest(
     : CommandRequestImpl(message, application_manager)
     , awaiting_tts_speak_response_(false)
     , awaiting_ui_response_(false)
+    , audio_pass_thru_icon_exists_(true)
     , result_tts_speak_(hmi_apis::Common_Result::INVALID_ENUM)
     , result_ui_(hmi_apis::Common_Result::INVALID_ENUM) {
   subscribe_on_event(hmi_apis::FunctionID::TTS_OnResetTimeout);
@@ -97,6 +99,7 @@ void PerformAudioPassThruRequest::Run() {
   // According with new implementation processing of UNSUPPORTE_RESOURCE
   // need set flag before sending to hmi
 
+  ProcessAudioPassThruIcon(app);
   awaiting_ui_response_ = true;
   if ((*message_)[str::msg_params].keyExists(str::initial_prompt) &&
       (0 < (*message_)[str::msg_params][str::initial_prompt].length())) {
@@ -193,21 +196,34 @@ bool PerformAudioPassThruRequest::PrepareResponseParameters(
     mobile_apis::Result::eType& result_code, std::string& info) {
   LOG4CXX_AUTO_TRACE(logger_);
 
+  bool result = true;
   ResponseInfo ui_perform_info(result_ui_, HmiInterfaces::HMI_INTERFACE_UI);
   ResponseInfo tts_perform_info(result_tts_speak_,
                                 HmiInterfaces::HMI_INTERFACE_TTS);
-  const bool result =
-      PrepareResultForMobileResponse(ui_perform_info, tts_perform_info);
 
+  SetResultCodeFlagsForHMIResponses(ui_perform_info, tts_perform_info);
   if (ui_perform_info.is_ok && tts_perform_info.is_unsupported_resource &&
       HmiInterfaces::STATE_AVAILABLE == tts_perform_info.interface_state) {
     result_code = mobile_apis::Result::WARNINGS;
     tts_info_ = "Unsupported phoneme type sent in a prompt";
-    info = MergeInfos(ui_perform_info, ui_info_, tts_perform_info, tts_info_);
-    return result;
+  } else if (IsResultCodeUnsupported(ui_perform_info, tts_perform_info)) {
+    result_code = mobile_apis::Result::UNSUPPORTED_RESOURCE;
+  } else if (IsAnyHMIComponentAborted(ui_perform_info, tts_perform_info)) {
+    result_code = mobile_apis::Result::ABORTED;
+    result = false;
+  } else {
+    result_code = PrepareAudioPassThruResultCodeForResponse(ui_perform_info,
+                                                            tts_perform_info);
+    if (!ui_perform_info.is_ok) {
+      result = false;
+    }
   }
-  result_code = PrepareResultCodeForResponse(ui_perform_info, tts_perform_info);
+
   info = MergeInfos(ui_perform_info, ui_info_, tts_perform_info, tts_info_);
+  if (!audio_pass_thru_icon_exists_) {
+    info = MergeInfos("Reference image(s) not found", info);
+  }
+
   return result;
 }
 
@@ -236,45 +252,53 @@ void PerformAudioPassThruRequest::SendSpeakRequest() {
 void PerformAudioPassThruRequest::SendPerformAudioPassThruRequest() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  smart_objects::SmartObject msg_params =
+  smart_objects::SmartObject msg_params_send =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
+  smart_objects::SmartObject msg_params_rcvd = (*message_)[str::msg_params];
 
-  msg_params[str::app_id] = connection_key();
+  msg_params_send[str::app_id] = connection_key();
 
-  msg_params[hmi_request::max_duration] =
-      (*message_)[str::msg_params][str::max_duration];
+  msg_params_send[hmi_request::max_duration] =
+      msg_params_rcvd[str::max_duration];
 
-  msg_params[hmi_request::audio_pass_display_texts] =
+  msg_params_send[hmi_request::audio_pass_display_texts] =
       smart_objects::SmartObject(smart_objects::SmartType_Array);
 
-  if ((*message_)[str::msg_params].keyExists(str::audio_pass_display_text1)) {
-    msg_params[hmi_request::audio_pass_display_texts][0]
-              [hmi_request::field_name] = static_cast<int32_t>(
-                  hmi_apis::Common_TextFieldName::audioPassThruDisplayText1);
-    msg_params[hmi_request::audio_pass_display_texts][0]
-              [hmi_request::field_text] =
-                  (*message_)[str::msg_params][str::audio_pass_display_text1];
+  if (msg_params_rcvd.keyExists(str::audio_pass_display_text1)) {
+    msg_params_send
+        [hmi_request::audio_pass_display_texts][0][hmi_request::field_name] =
+            static_cast<int32_t>(
+                hmi_apis::Common_TextFieldName::audioPassThruDisplayText1);
+    msg_params_send[hmi_request::audio_pass_display_texts][0]
+                   [hmi_request::field_text] =
+                       msg_params_rcvd[str::audio_pass_display_text1];
   }
 
-  if ((*message_)[str::msg_params].keyExists(str::audio_pass_display_text2)) {
-    msg_params[hmi_request::audio_pass_display_texts][1]
-              [hmi_request::field_name] = static_cast<int32_t>(
-                  hmi_apis::Common_TextFieldName::audioPassThruDisplayText2);
-    msg_params[hmi_request::audio_pass_display_texts][1]
-              [hmi_request::field_text] =
-                  (*message_)[str::msg_params][str::audio_pass_display_text2];
+  if (msg_params_rcvd.keyExists(str::audio_pass_display_text2)) {
+    msg_params_send
+        [hmi_request::audio_pass_display_texts][1][hmi_request::field_name] =
+            static_cast<int32_t>(
+                hmi_apis::Common_TextFieldName::audioPassThruDisplayText2);
+    msg_params_send[hmi_request::audio_pass_display_texts][1]
+                   [hmi_request::field_text] =
+                       msg_params_rcvd[str::audio_pass_display_text2];
   }
 
-  if ((*message_)[str::msg_params].keyExists(str::mute_audio)) {
-    msg_params[str::mute_audio] =
-        (*message_)[str::msg_params][str::mute_audio].asBool();
+  if (msg_params_rcvd.keyExists(str::mute_audio)) {
+    msg_params_send[str::mute_audio] =
+        msg_params_rcvd[str::mute_audio].asBool();
   } else {
     // If omitted, the value is set to true
-    msg_params[str::mute_audio] = true;
+    msg_params_send[str::mute_audio] = true;
+  }
+
+  if (msg_params_rcvd.keyExists(str::audio_pass_thru_icon)) {
+    msg_params_send[str::audio_pass_thru_icon] =
+        msg_params_rcvd[str::audio_pass_thru_icon];
   }
 
   SendHMIRequest(
-      hmi_apis::FunctionID::UI_PerformAudioPassThru, &msg_params, true);
+      hmi_apis::FunctionID::UI_PerformAudioPassThru, &msg_params_send, true);
 }
 
 void PerformAudioPassThruRequest::SendRecordStartNotification() {
@@ -344,6 +368,17 @@ bool PerformAudioPassThruRequest::IsWhiteSpaceExist() {
       return true;
     }
   }
+
+  if ((*message_)[strings::msg_params].keyExists(
+          strings::audio_pass_thru_icon)) {
+    str = (*message_)[strings::msg_params][strings::audio_pass_thru_icon]
+                     [strings::value].asCharArray();
+    if (!CheckSyntax(str)) {
+      LOG4CXX_ERROR(logger_,
+                    "Invalid audio_pass_thru_icon value syntax check failed");
+      return true;
+    }
+  }
   return false;
 }
 
@@ -363,6 +398,55 @@ void PerformAudioPassThruRequest::FinishTTSSpeak() {
 bool PerformAudioPassThruRequest::IsWaitingHMIResponse() {
   LOG4CXX_AUTO_TRACE(logger_);
   return awaiting_tts_speak_response_ || awaiting_ui_response_;
+}
+
+void PerformAudioPassThruRequest::ProcessAudioPassThruIcon(
+    ApplicationSharedPtr app) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  smart_objects::SmartObject msg_params = (*message_)[strings::msg_params];
+
+  audio_pass_thru_icon_exists_ = true;
+  if (msg_params.keyExists(strings::audio_pass_thru_icon)) {
+    smart_objects::SmartObject icon = msg_params[strings::audio_pass_thru_icon];
+    if (MessageHelper::VerifyImage(icon, app, application_manager_) !=
+        mobile_apis::Result::SUCCESS) {
+      LOG4CXX_WARN(
+          logger_,
+          "Invalid audio_pass_thru_icon doesn't exist in the file system");
+      audio_pass_thru_icon_exists_ = false;
+    }
+  }
+}
+
+mobile_apis::Result::eType
+PerformAudioPassThruRequest::PrepareAudioPassThruResultCodeForResponse(
+    const ResponseInfo& ui_response, const ResponseInfo& tts_response) {
+  mobile_apis::Result::eType result_code = mobile_apis::Result::INVALID_ENUM;
+
+  hmi_apis::Common_Result::eType common_result =
+      hmi_apis::Common_Result::INVALID_ENUM;
+  const hmi_apis::Common_Result::eType ui_result = ui_response.result_code;
+  const hmi_apis::Common_Result::eType tts_result = tts_response.result_code;
+
+  if ((ui_result == hmi_apis::Common_Result::SUCCESS) &&
+      (tts_result != hmi_apis::Common_Result::SUCCESS)) {
+    common_result = hmi_apis::Common_Result::WARNINGS;
+  } else if (ui_result == hmi_apis::Common_Result::INVALID_ENUM) {
+    common_result = tts_result;
+  } else {
+    common_result = ui_result;
+  }
+
+  result_code = MessageHelper::HMIToMobileResult(common_result);
+  return result_code;
+}
+
+bool PerformAudioPassThruRequest::IsAnyHMIComponentAborted(
+    const ResponseInfo& ui, const ResponseInfo& tts) {
+  using namespace helpers;
+
+  return ((ui.result_code == hmi_apis::Common_Result::ABORTED) ||
+          (tts.result_code == hmi_apis::Common_Result::ABORTED));
 }
 
 }  // namespace commands

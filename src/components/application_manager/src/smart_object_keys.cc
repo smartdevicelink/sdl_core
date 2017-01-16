@@ -353,6 +353,7 @@ const char* file = "file";
 const char* file_name = "fileName";
 const char* retry = "retry";
 const char* service = "service";
+const char* audio_pass_thru_icon = "audioPassThruIcon";
 }  // namespace hmi_request
 
 namespace hmi_response {

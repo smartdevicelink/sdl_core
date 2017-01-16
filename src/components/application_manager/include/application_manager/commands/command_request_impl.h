@@ -259,6 +259,30 @@ class CommandRequestImpl : public CommandImpl,
   mobile_apis::Result::eType PrepareResultCodeForResponse(
       const ResponseInfo& first, const ResponseInfo& second);
 
+  /**
+   * @brief Resolves if the return code must be
+   * UNSUPPORTED_RESOURCE
+   * @param first contains result_code from HMI response and
+   * interface that returns response
+   * @param second contains result_code from HMI response and
+   * interface that returns response.
+   * @return if the communication return code must be
+   * UNSUPPORTED_RESOURCE, function returns true, else
+   * false
+   */
+  bool IsResultCodeUnsupported(const ResponseInfo& first,
+                               const ResponseInfo& second) const;
+  /**
+   * @brief Checks result code from HMI for split RPC
+   * and set flags to the info structures.
+   * @param first contains result_code from HMI response and
+   * interface that returns response
+   * @param second contains result_code from HMI response and
+   * interface that returns response
+   */
+  void SetResultCodeFlagsForHMIResponses(ResponseInfo& out_first,
+                                         ResponseInfo& out_second) const;
+
  protected:
   /**
    * @brief Returns policy parameters permissions
