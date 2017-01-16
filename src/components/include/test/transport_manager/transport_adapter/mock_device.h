@@ -1,4 +1,5 @@
-/* Copyright (c) 2016, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,36 +29,31 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef SRC_COMPONENTS_INCLUDE_TEST_POLICY_MOCK_STATISTICS_MANAGER_H_
-#define SRC_COMPONENTS_INCLUDE_TEST_POLICY_MOCK_STATISTICS_MANAGER_H_
 
-#include <string>
+#ifndef SRC_COMPONENTS_INCLUDE_TEST_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_MOCK_DEVICE_H_
+#define SRC_COMPONENTS_INCLUDE_TEST_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_MOCK_DEVICE_H_
 
 #include "gmock/gmock.h"
-#include "policy/usage_statistics/statistics_manager.h"
+#include "transport_manager/transport_adapter/device.h"
 
 namespace test {
 namespace components {
-namespace usage_statistics_test {
+namespace transport_manager_test {
 
-class MockStatisticsManager : public usage_statistics::StatisticsManager {
+using transport_manager::transport_adapter::Device;
+
+class MockDevice : public Device {
  public:
-  MOCK_METHOD1(Increment, void(usage_statistics::GlobalCounterId type));
-  MOCK_METHOD2(Increment,
-               void(const std::string& app_id,
-                    usage_statistics::AppCounterId type));
-  MOCK_METHOD3(Set,
-               void(const std::string& app_id,
-                    usage_statistics::AppInfoId type,
-                    const std::string& value));
-  MOCK_METHOD3(Add,
-               void(const std::string& app_id,
-                    usage_statistics::AppStopwatchId type,
-                    int32_t timespan_seconds));
+  MOCK_CONST_METHOD1(IsSameAs,
+      bool(const Device* other_device));
+  MOCK_CONST_METHOD0(GetApplicationList,
+      transport_manager::ApplicationList());
+  MOCK_METHOD0(Stop,
+      void());
 };
 
-}  // namespace usage_statistics_test
+}  // namespace transport_manager_test
 }  // namespace components
 }  // namespace test
 
-#endif  // SRC_COMPONENTS_INCLUDE_TEST_POLICY_MOCK_STATISTICS_MANAGER_H_
+#endif  // SRC_COMPONENTS_INCLUDE_TEST_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_MOCK_DEVICE_H_
