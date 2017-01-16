@@ -330,4 +330,4 @@ class PTExtRepresentation : public virtual PTRepresentation {
 };
 }  //  namespace policy
 
-#endif  //  SRC_COMPONENTS_POLICY_INCLUDE_POLICY_PT_EXT_REPRESENTATION_H_
+#endif  // SRC_COMPONENTS_POLICY_INCLUDE_POLICY_PT_EXT_REPRESENTATION_H_

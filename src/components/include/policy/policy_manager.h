@@ -30,8 +30,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_POLICY_INCLUDE_POLICY_POLICY_MANAGER_H_
-#define SRC_COMPONENTS_POLICY_INCLUDE_POLICY_POLICY_MANAGER_H_
+#ifndef SRC_COMPONENTS_INCLUDE_POLICY_POLICY_MANAGER_H_
+#define SRC_COMPONENTS_INCLUDE_POLICY_POLICY_MANAGER_H_
 
 #include <vector>
 #include <cstdint>
@@ -478,4 +478,4 @@ class PolicyManager : public usage_statistics::StatisticsManager {
 extern "C" policy::PolicyManager* CreateManager();
 extern "C" void DeleteManager(policy::PolicyManager*);
 
-#endif  // SRC_COMPONENTS_POLICY_INCLUDE_POLICY_POLICY_MANAGER_H_
+#endif  // SRC_COMPONENTS_INCLUDE_POLICY_POLICY_MANAGER_H_
