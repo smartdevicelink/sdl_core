@@ -76,7 +76,7 @@ const std::string kCreateSchema =
     "  `vehicle_model` VARCHAR(45), "
     "  `vehicle_year` VARCHAR(4), "
     "  `preloaded_date` VARCHAR (10), "
-    "  `certificate` VARCHAR (45) "
+    "  `certificate` VARCHAR (45), "
     "  `user_consent_passengersRC` BOOL,"
     "  `country_consent_passengersRC` BOOL "
     "); "
