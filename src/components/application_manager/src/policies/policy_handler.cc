@@ -1352,7 +1352,7 @@ void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string) {
     return;
   }
   MessageHelper::SendPolicyUpdate(policy_snapshot_full_path,
-                                  policy_manager_->TimeoutExchangeMSec(),
+                                  TimeoutExchangeSec(),
                                   policy_manager_->RetrySequenceDelaysSeconds(),
                                   application_manager_);
 #else   // PROPRIETARY_MODE

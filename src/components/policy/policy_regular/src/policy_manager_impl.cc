@@ -58,7 +58,8 @@ void DeleteManager(policy::PolicyManager* pm) {
 }
 
 namespace {
-const uint32_t kDefaultRetryTimeoutInMSec = 60u * date_time::DateTime::MILLISECONDS_IN_SECOND;
+const uint32_t kDefaultRetryTimeoutInMSec =
+    60u * date_time::DateTime::MILLISECONDS_IN_SECOND;
 }  // namespace
 
 namespace policy {
@@ -311,7 +312,9 @@ void PolicyManagerImpl::StartPTExchange() {
     if (update_status_manager_.IsUpdateRequired()) {
       if (RequestPTUpdate() && !timer_retry_sequence_.is_running()) {
         // Start retry sequency
-        timer_retry_sequence_.Start(NextRetryTimeout(), timer::kPeriodic);
+        const int t = NextRetryTimeout();
+        LOG4CXX_DEBUG(logger_, "Start retry sequence timeout = " << t);
+        timer_retry_sequence_.Start(t, timer::kPeriodic);
       }
     }
   }
@@ -780,7 +783,7 @@ uint32_t PolicyManagerImpl::NextRetryTimeout() {
   }
 
   // Return miliseconds
-  return next * date_time::DateTime::MILLISECONDS_IN_SECOND;
+  return next;
 }
 
 void PolicyManagerImpl::RefreshRetrySequence() {
@@ -1005,10 +1008,11 @@ void PolicyManagerImpl::RetrySequence() {
   uint32_t timeout = NextRetryTimeout();
 
   if (!timeout && timer_retry_sequence_.is_running()) {
+    LOG4CXX_DEBUG(logger_, "AKutsan Stop timer " << timeout);
     timer_retry_sequence_.Stop();
     return;
   }
-
+  LOG4CXX_DEBUG(logger_, "AKutsan start " << timeout);
   timer_retry_sequence_.Start(timeout, timer::kPeriodic);
 }
 
