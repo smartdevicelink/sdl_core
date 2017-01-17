@@ -394,9 +394,10 @@ void PerformAudioPassThruRequest::ProcessAudioPassThruIcon(
   if ((*message_)[strings::msg_params].keyExists(
           strings::audio_pass_thru_icon)) {
     if (IsAudioPassThruIconParamValid()) {
-      const std::string& icon_storage_file = GetAudioPassThruIconFilename(app);
-
-      if (!file_system::FileExists(icon_storage_file)) {
+      smart_objects::SmartObject icon =
+          (*message_)[strings::msg_params][strings::audio_pass_thru_icon];
+      if (MessageHelper::VerifyImage(icon, app, application_manager_) !=
+          mobile_apis::Result::SUCCESS) {
         LOG4CXX_WARN(
             logger_,
             "Invalid audio_pass_thru_icon doesn't exist in the file system");
@@ -423,8 +424,6 @@ PerformAudioPassThruRequest::PrepareAudioPassThruResultCodeForResponse(
   if ((ui_result == hmi_apis::Common_Result::SUCCESS) &&
       (tts_result != hmi_apis::Common_Result::SUCCESS)) {
     common_result = hmi_apis::Common_Result::WARNINGS;
-  } else if (tts_result == hmi_apis::Common_Result::ABORTED) {
-    common_result = hmi_apis::Common_Result::ABORTED;
   } else if (ui_result == hmi_apis::Common_Result::INVALID_ENUM) {
     common_result = tts_result;
   } else {
@@ -449,21 +448,6 @@ bool PerformAudioPassThruRequest::IsAudioPassThruIconParamValid() {
   }
 
   return true;
-}
-
-std::string PerformAudioPassThruRequest::GetAudioPassThruIconFilename(
-    ApplicationSharedPtr app) {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  const std::string& str =
-      (*message_)[strings::msg_params][strings::audio_pass_thru_icon]
-                 [strings::value].asString();
-  const std::string storage_directory(
-      application_manager_.get_settings().app_storage_folder() + "/");
-  const std::string icon_storage_file(storage_directory + app->folder_name() +
-                                      "/" + str);
-
-  return icon_storage_file;
 }
 
 bool PerformAudioPassThruRequest::IsAnyHMIComponentAborted(

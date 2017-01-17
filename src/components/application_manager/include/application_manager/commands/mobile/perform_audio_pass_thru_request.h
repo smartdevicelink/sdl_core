@@ -152,14 +152,6 @@ class PerformAudioPassThruRequest : public CommandRequestImpl {
   bool IsAudioPassThruIconParamValid();
 
   /**
-   * @brief Maintains the full path filename for the
-   * audioPassThruIcon file
-   * @param app Pointer to the application whose storage directory
-   * must be accessed
-   */
-  std::string GetAudioPassThruIconFilename(ApplicationSharedPtr app);
-
-  /**
    * @brief Checks result code from HMI for splitted RPC
    * and returns parameter for sending to mobile app in
    * audioPassThru communication.
