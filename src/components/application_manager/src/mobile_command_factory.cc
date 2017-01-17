@@ -127,6 +127,7 @@
 #include "application_manager/commands/mobile/on_keyboard_input_notification.h"
 #include "application_manager/commands/mobile/on_touch_event_notification.h"
 #include "application_manager/commands/mobile/on_system_request_notification.h"
+#include "application_manager/commands/mobile/on_seek_media_clock_timer_notification.h"
 #include "application_manager/commands/mobile/diagnostic_message_request.h"
 #include "application_manager/commands/mobile/diagnostic_message_response.h"
 #include "application_manager/commands/mobile/send_location_request.h"
@@ -687,6 +688,11 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
     case mobile_apis::FunctionID::OnWayPointChangeID: {
       command = utils::MakeShared<commands::OnWayPointChangeNotification>(
           message, application_manager);
+      break;
+    }
+    case mobile_apis::FunctionID::OnSeekMediaClockTimerID: {
+      command.reset(new commands::mobile::OnSeekMediaClockTimerNotification(
+          message, application_manager));
       break;
     }
     default: {

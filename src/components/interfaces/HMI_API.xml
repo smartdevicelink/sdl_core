@@ -2762,6 +2762,15 @@
 </interface>
 
 <interface name="UI" version="1.0" date="2013-04-16">
+  <function name="OnSeekMediaClockTimer" functionID="OnSeekMediaClockTimerID" messagetype="notification">
+   <description>Callback for the seek media clock timer notification. Notification is triggered when the user selects a position and releases the mediaclock timer or when the user selects a position and holds for a full 2 second period. System will automatically the media clock timer position based on the seek notification location.</description> 
+   <param name="seekTime" type="Common.TimeFormat" mandatory="true">
+    <description>See StartTime.</description>
+   </param>
+   <param name="appID" type="Integer" mandatory="true">
+    <description>The ID of application that relates to this mediaclock position change.</description>
+   </param>
+  </function>
   <function name="Alert" messagetype="request">
     <description>Request from SDL to show an alert message on the display.</description>
     <param name="alertStrings" type="Common.TextFieldStruct" mandatory="true" array="true" minsize="0" maxsize="3">
@@ -2937,6 +2946,12 @@
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application that requested this RPC.</description>
     </param>
+    <param name="enableSeek" type="Boolean" mandatory="false">
+     <description>
+       Defines if seek media clock timer functionality will be available (when DD is off) allowing for touch input on the media clock timer from the user.
+       If omitted, the value is set to false.
+     </description>
+   </param>
   </function>
   <function name="SetMediaClockTimer" messagetype="response">
   </function>

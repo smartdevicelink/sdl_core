@@ -246,6 +246,7 @@
 #include "application_manager/commands/hmi/on_ui_keyboard_input_notification.h"
 #include "application_manager/commands/hmi/on_ui_touch_event_notification.h"
 #include "application_manager/commands/hmi/on_ui_reset_timeout_notification.h"
+#include "application_manager/commands/hmi/on_seek_media_clock_timer_notification.h"
 #include "application_manager/commands/hmi/navi_start_stream_request.h"
 #include "application_manager/commands/hmi/navi_start_stream_response.h"
 #include "application_manager/commands/hmi/navi_stop_stream_request.h"
@@ -1279,6 +1280,11 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     }
     case hmi_apis::FunctionID::UI_OnDriverDistraction: {
       command.reset(new commands::hmi::OnDriverDistractionNotification(
+          message, application_manager));
+      break;
+    }
+    case hmi_apis::FunctionID::UI_OnSeekMediaClockTimer: {
+      command.reset(new commands::hmi::OnSeekMediaClockTimerNotification(
           message, application_manager));
       break;
     }

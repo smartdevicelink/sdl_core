@@ -155,6 +155,7 @@ extern const char* hours;
 extern const char* minutes;
 extern const char* seconds;
 extern const char* update_mode;
+extern const char* enable_seek;
 extern const char* trigger_source;
 extern const char* hmi_level;
 extern const char* activate_app_hmi_level;
@@ -438,7 +439,6 @@ extern const char* policyfile;
 extern const char* is_active;
 extern const char* is_deactivated;
 extern const char* event_name;
-
 }  // namespace hmi_notification
 
 }  // namespace application_manager

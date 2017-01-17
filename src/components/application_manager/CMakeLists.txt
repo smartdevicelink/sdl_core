@@ -265,6 +265,7 @@ file (GLOB MOBILE_COMMANDS_SOURCES
   ${COMMANDS_SOURCE_DIR}/hmi/on_app_permission_changed_notification.cc
   ${COMMANDS_SOURCE_DIR}/hmi/on_app_unregistered_notification.cc
   ${COMMANDS_SOURCE_DIR}/hmi/on_driver_distraction_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_seek_media_clock_timer_notification.cc
   ${COMMANDS_SOURCE_DIR}/hmi/on_ignition_cycle_over_notification.cc
   ${COMMANDS_SOURCE_DIR}/hmi/on_system_info_changed_notification.cc
   ${COMMANDS_SOURCE_DIR}/hmi/on_file_removed_notification.cc

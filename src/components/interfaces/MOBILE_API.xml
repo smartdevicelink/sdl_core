@@ -2248,7 +2248,7 @@
     <element name="OnSystemRequestID" value="32781" hexvalue="800D" />
     <element name="OnHashChangeID" value="32782" hexvalue="800E" />
     <element name="OnWayPointChangeID" value="32783" hexvalue="800F" />
-
+    <element name="OnSeekMediaClockTimerID" value="32785" hexvalue="8011" />
 <!--
 	Ford Specific Request / Response RPCs
 	Range = 0x 0001 0000 - 0x 0001 7FFF
@@ -3335,6 +3335,13 @@
       	Enumeration to control the media clock.
       	In case of pause, resume, or clear, the start time value is ignored and shall be left out.  For resume, the time continues with the same value as it was when paused.
       </description>
+    </param>
+
+    <param name="enableSeek" type="Boolean" mandatory="false">
+     <description>
+       Defines if seek media clock timer functionality will be available (when DD is off) allowing for touch input on the media clock timer from the user.
+       If omitted, the value is set to false.
+     </description>
     </param>
   </function>
 
@@ -5331,6 +5338,12 @@
     </param>
   </function>
 
+  <function name="OnSeekMediaClockTimer" functionID="OnSeekMediaClockTimerID" messagetype="notification">
+     <description>Callback for the seek media clock timer notification. Notification is triggered when the user selects a position and releases the mediaclock timer or when the user selects a position and holds for a full 2 second period. System will automatically the media clock timer position based on the seek notification location.</description> 
+     <param name="seekTime" type="StartTime" mandatory="true">
+      <description>See StartTime.</description>
+     </param>
+  </function>
 
 <!-- Deprecating - covered by OnSystemRequest
   <function name="OnSyncPData" functionID="OnSyncPDataID" messagetype="notification" >
