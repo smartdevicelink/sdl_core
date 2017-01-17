@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,17 +29,20 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef SRC_COMPONENTS_INCLUDE_TEST_MEDIA_MANAGER_MOCK_MEDIA_MANAGER_H_
-#define SRC_COMPONENTS_INCLUDE_TEST_MEDIA_MANAGER_MOCK_MEDIA_MANAGER_H_
+#ifndef SRC_COMPONENTS_INCLUDE__TEST_MEDIA_MANAGER_MOCK_MEDIA_MANAGER_H_
+#define SRC_COMPONENTS_INCLUDE__TEST_MEDIA_MANAGER_MOCK_MEDIA_MANAGER_H_
 
-#include "gmock/gmock.h"
+#include <gmock/gmock.h>
+#include <stdint.h>
+#include <string>
 #include "media_manager/media_manager.h"
+#include "media_manager/mock_media_manager_settings.h"
 
 namespace test {
 namespace components {
 namespace media_manager_test {
 
-class MockMediaManager : public media_manager::MediaManager {
+class MockMediaManager : public ::media_manager::MediaManager {
  public:
   MOCK_METHOD1(PlayA2DPSource, void(int32_t application_key));
   MOCK_METHOD1(StopA2DPSource, void(int32_t application_key));
@@ -56,11 +59,11 @@ class MockMediaManager : public media_manager::MediaManager {
                     protocol_handler::ServiceType service_type));
   MOCK_METHOD2(FramesProcessed,
                void(int32_t application_key, int32_t frame_number));
-  MOCK_CONST_METHOD0(settings, const MediaManagerSettings&());
+  MOCK_CONST_METHOD0(settings, ::media_manager::MediaManagerSettings&());
 };
 
 }  // namespace media_manager_test
 }  // namespace components
 }  // namespace test
 
-#endif  // SRC_COMPONENTS_INCLUDE_TEST_MEDIA_MANAGER_MOCK_MEDIA_MANAGER_H_
+#endif  // SRC_COMPONENTS_INCLUDE__TEST_MEDIA_MANAGER_MOCK_MEDIA_MANAGER_SETTINGS_H_
