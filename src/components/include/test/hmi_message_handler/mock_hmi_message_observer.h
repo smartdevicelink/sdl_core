@@ -34,20 +34,22 @@
 #define SRC_COMPONENTS_INCLUDE_TEST_HMI_MESSAGE_HANDLER_MOCK_HMI_MESSAGE_OBSERVER_H_
 
 #include "gmock/gmock.h"
+#include "utils/singleton.h"
 #include "hmi_message_handler/hmi_message_observer.h"
 
 namespace test {
 namespace components {
 namespace hmi_message_handler_test {
 
-class MockHMIMessageObserver : public hmi_message_handler::HMIMessageObserver {
+class MockHMIMessageObserver : public hmi_message_handler::HMIMessageObserver,
+                               public utils::Singleton<MockHMIMessageObserver> {
  public:
   MOCK_METHOD1(OnMessageReceived,
-      void(utils::SharedPtr<application_manager::Message> message));
+               void(utils::SharedPtr<application_manager::Message> message));
   MOCK_METHOD1(OnErrorSending,
-      void(utils::SharedPtr<application_manager::Message> message));
+               void(utils::SharedPtr<application_manager::Message> message));
+  virtual ~MockHMIMessageObserver() {}
 };
-
 
 }  // namespace hmi_message_handler_test
 }  // namespace components

@@ -55,7 +55,7 @@ class HMIMessageHandlerImplTest : public ::testing::Test {
  protected:
   hmi_message_handler::MessageBrokerAdapter* mb_adapter_;
   hmi_message_handler::HMIMessageHandlerImpl* hmi_handler_;
-  hmi_message_handler::MockHMIMessageObserver* mock_hmi_message_observer_;
+  MockHMIMessageObserver* mock_hmi_message_observer_;
   testing::NiceMock<MockHMIMessageHandlerSettings>
       mock_hmi_message_handler_settings;
   const uint64_t stack_size = 1000u;
@@ -69,8 +69,7 @@ class HMIMessageHandlerImplTest : public ::testing::Test {
     mb_adapter_ = new hmi_message_handler::MessageBrokerAdapter(
         hmi_handler_, "localhost", 22);
     ASSERT_TRUE(NULL != mb_adapter_);
-    mock_hmi_message_observer_ =
-        new hmi_message_handler::MockHMIMessageObserver();
+    mock_hmi_message_observer_ = new MockHMIMessageObserver();
     ASSERT_TRUE(NULL != mock_hmi_message_observer_);
     hmi_handler_->set_message_observer(mock_hmi_message_observer_);
     EXPECT_TRUE(NULL != hmi_handler_->observer());
