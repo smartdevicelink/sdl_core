@@ -136,7 +136,7 @@ class PerformAudioPassThruRequest : public CommandRequestImpl {
   /**
    * @brief Validates audioPassThruIcon parameter and
    * removes it if is not valid
-   * @param Pointer to the application whose storage directory
+   * @param app Pointer to the application whose storage directory
    * must be accessed
    */
   void ProcessAudioPassThruIcon(ApplicationSharedPtr app);
@@ -154,7 +154,7 @@ class PerformAudioPassThruRequest : public CommandRequestImpl {
   /**
    * @brief Maintains the full path filename for the
    * audioPassThruIcon file
-   * @param Pointer to the application whose storage directory
+   * @param app Pointer to the application whose storage directory
    * must be accessed
    */
   std::string GetAudioPassThruIconFilename(ApplicationSharedPtr app);
@@ -174,8 +174,8 @@ class PerformAudioPassThruRequest : public CommandRequestImpl {
   /**
    * @brief Checks if any of audioPassThru communication components
    * returned ABORTED code
-   * @param ui_response contains result_code from UI
-   * @param tts_response contains result_code from TTS
+   * @param ui contains result_code from UI
+   * @param tts contains result_code from TTS
    * @return if TTS or UI responded with ABORTED function returns TRUE,
    * else is returns FALSE
    */
