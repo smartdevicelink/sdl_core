@@ -44,6 +44,7 @@ namespace application_manager_test {
 
 class MockHMICapabilities : public ::application_manager::HMICapabilities {
  public:
+  MOCK_CONST_METHOD0(is_hmi_capabilities_initialized, bool());
   MOCK_CONST_METHOD1(VerifyImageType, bool(const int32_t image_type));
 
   MOCK_CONST_METHOD0(is_vr_cooperating, bool());
