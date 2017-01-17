@@ -724,6 +724,26 @@ TEST_F(ProfileTest, CheckIntContainerInSecurityData) {
 }
 #endif
 
-}  // namespace profile_test
+TEST_F(ProfileTest, AppIconsFolder_ValuesFromIni_SUCCESS) {
+  profile_.set_config_file_name("smartDeviceLink_test.ini");
+  EXPECT_EQ("smartDeviceLink_test.ini", profile_.config_file_name());
+  EXPECT_EQ(file_system::CurrentWorkingDirectory() + "/storage",
+            profile_.app_icons_folder());
+  const uint32_t app_icons_folder_size_from_ini = 104857611u;
+  EXPECT_EQ(app_icons_folder_size_from_ini,
+            profile_.app_icons_folder_max_size());
+}
+
+TEST_F(ProfileTest, AppIconsFolder_DefaultValues_SUCCESS) {
+  profile_.set_config_file_name("smartDeviceLink.ini");
+  EXPECT_EQ("smartDeviceLink.ini", profile_.config_file_name());
+  EXPECT_EQ(file_system::CurrentWorkingDirectory(),
+            profile_.app_icons_folder());
+  const uint32_t app_icons_folder_size_default = 104857600u;
+  EXPECT_EQ(app_icons_folder_size_default,
+            profile_.app_icons_folder_max_size());
+}
+
+}  // namespace profile
 }  // namespace components
 }  // namespace test

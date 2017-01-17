@@ -439,4 +439,5 @@ target_link_libraries("ApplicationManager" ${LIBRARIES})
 
 if(BUILD_TESTS)
   add_subdirectory(test)
+  add_subdirectory(test/application_manager)
 endif()
