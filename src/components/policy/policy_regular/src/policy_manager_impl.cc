@@ -49,6 +49,7 @@
 #include "policy/update_status_manager.h"
 #include "config_profile/profile.h"
 #include "utils/timer_task_impl.h"
+#include "utils/make_shared.h"
 
 policy::PolicyManager* CreateManager() {
   return new policy::PolicyManagerImpl();
@@ -897,7 +898,24 @@ std::string PolicyManagerImpl::RetrieveCertificate() const {
   return cache_->GetCertificate();
 }
 
-void PolicyManagerImpl::AddApplication(const std::string& application_id) {
+class CallStatusChange : public utils::Callable {
+ public:
+  CallStatusChange(UpdateStatusManager& upd_manager,
+                   const DeviceConsent& device_consent)
+      : upd_manager_(upd_manager), device_consent_(device_consent) {}
+
+  // Callable interface
+  void operator()() const {
+    upd_manager_.OnNewApplicationAdded(device_consent_);
+  }
+
+ private:
+  UpdateStatusManager& upd_manager_;
+  const DeviceConsent device_consent_;
+};
+
+StatusNotifier PolicyManagerImpl::AddApplication(
+    const std::string& application_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   const std::string device_id = GetCurrentDeviceId(application_id);
   DeviceConsent device_consent = GetUserConsentForDevice(device_id);
@@ -905,9 +923,11 @@ void PolicyManagerImpl::AddApplication(const std::string& application_id) {
 
   if (IsNewApplication(application_id)) {
     AddNewApplication(application_id, device_consent);
-    update_status_manager_.OnNewApplicationAdded(device_consent);
+    return utils::MakeShared<CallStatusChange>(update_status_manager_,
+                                               device_consent);
   } else {
     PromoteExistedApplication(application_id, device_consent);
+    return utils::MakeShared<utils::CallNothing>();
   }
 }
 

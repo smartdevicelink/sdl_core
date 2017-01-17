@@ -1110,7 +1110,8 @@ TEST_F(PolicyHandlerTest, AddApplication) {
   // Arrange
   EnablePolicyAndPolicyManagerMock();
   // Check expectations
-  EXPECT_CALL(*mock_policy_manager_, AddApplication(kPolicyAppId_));
+  EXPECT_CALL(*mock_policy_manager_, AddApplication(kPolicyAppId_))
+      .WillOnce(Return(utils::MakeShared<utils::CallNothing>()));
   // Act
   policy_handler_.AddApplication(kPolicyAppId_);
 }
