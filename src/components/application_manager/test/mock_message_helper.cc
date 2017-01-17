@@ -121,9 +121,12 @@ mobile_api::HMILevel::eType MessageHelper::StringToHMILevel(
   return MockMessageHelper::message_helper_mock()->StringToHMILevel(hmi_level);
 }
 
-smart_objects::SmartObjectSPtr CreateDeviceListSO(
-    const connection_handler::DeviceMap& devices) {
-  return MockMessageHelper::message_helper_mock()->CreateDeviceListSO(devices);
+smart_objects::SmartObjectSPtr MessageHelper::CreateDeviceListSO(
+    const connection_handler::DeviceMap& devices,
+    const policy::PolicyHandlerInterface& policy_handler,
+    ApplicationManager& app_mngr) {
+  return MockMessageHelper::message_helper_mock()->CreateDeviceListSO(
+      devices, policy_handler, app_mngr);
 }
 
 void MessageHelper::SendOnAppPermissionsChangedNotification(
