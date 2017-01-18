@@ -177,6 +177,6 @@ TEST_F(EventEngineTest, Event_set_smart_object_ExpectObjectSet) {
   EXPECT_EQ(smart_object_with_type_notification, event_->smart_object());
 }
 
-}  // namespace event_engine
+}  // namespace event_engine_test
 }  // namespace components
 }  // namespace test
