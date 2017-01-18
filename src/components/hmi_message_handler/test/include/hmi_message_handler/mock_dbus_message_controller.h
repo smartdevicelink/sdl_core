@@ -36,6 +36,10 @@
 #include <pthread.h>
 #include "hmi_message_handler/dbus_message_controller.h"
 
+namespace test {
+namespace components {
+namespace hmi_message_handler_test {
+
 class MockDBusMessageController
     : public ::hmi_message_handler::DBusMessageController {
  public:
@@ -64,5 +68,9 @@ class MockDBusMessageController
     return 0;
   }
 };
+
+}  // namespace hmi_message_handler_test
+}  // namespace components
+}  // namespace test
 
 #endif  // SRC_COMPONENTS_HMI_MESSAGE_HANDLER_TEST_INCLUDE_HMI_MESSAGE_HANDLER_MOCK_DBUS_MESSAGE_CONTROLLER_H_
