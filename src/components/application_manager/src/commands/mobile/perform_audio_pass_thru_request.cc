@@ -201,7 +201,9 @@ bool PerformAudioPassThruRequest::PrepareResponseParameters(
   ResponseInfo tts_perform_info(result_tts_speak_,
                                 HmiInterfaces::HMI_INTERFACE_TTS);
 
-  PrepareResultForMobileResponse(ui_perform_info, tts_perform_info);
+  bool result_unused =
+      PrepareResultForMobileResponse(ui_perform_info, tts_perform_info);
+  UNUSED(result_unused);
 
   if (ui_perform_info.is_ok && tts_perform_info.is_unsupported_resource &&
       HmiInterfaces::STATE_AVAILABLE == tts_perform_info.interface_state) {
@@ -221,7 +223,7 @@ bool PerformAudioPassThruRequest::PrepareResponseParameters(
   }
 
   info = MergeInfos(ui_perform_info, ui_info_, tts_perform_info, tts_info_);
-  if (audio_pass_thru_icon_exists_ == false) {
+  if (!audio_pass_thru_icon_exists_) {
     info = MergeInfos("Reference image(s) not found", info);
   }
 
@@ -253,50 +255,53 @@ void PerformAudioPassThruRequest::SendSpeakRequest() {
 void PerformAudioPassThruRequest::SendPerformAudioPassThruRequest() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  smart_objects::SmartObject msg_params =
+  smart_objects::SmartObject msg_params_send =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
+  smart_objects::SmartObject msg_params_rcvd = (*message_)[str::msg_params];
 
-  msg_params[str::app_id] = connection_key();
+  msg_params_send[str::app_id] = connection_key();
 
-  msg_params[hmi_request::max_duration] =
-      (*message_)[str::msg_params][str::max_duration];
+  msg_params_send[hmi_request::max_duration] =
+      msg_params_rcvd[str::max_duration];
 
-  msg_params[hmi_request::audio_pass_display_texts] =
+  msg_params_send[hmi_request::audio_pass_display_texts] =
       smart_objects::SmartObject(smart_objects::SmartType_Array);
 
-  if ((*message_)[str::msg_params].keyExists(str::audio_pass_display_text1)) {
-    msg_params[hmi_request::audio_pass_display_texts][0]
-              [hmi_request::field_name] = static_cast<int32_t>(
-                  hmi_apis::Common_TextFieldName::audioPassThruDisplayText1);
-    msg_params[hmi_request::audio_pass_display_texts][0]
-              [hmi_request::field_text] =
-                  (*message_)[str::msg_params][str::audio_pass_display_text1];
+  if (msg_params_rcvd.keyExists(str::audio_pass_display_text1)) {
+    msg_params_send
+        [hmi_request::audio_pass_display_texts][0][hmi_request::field_name] =
+            static_cast<int32_t>(
+                hmi_apis::Common_TextFieldName::audioPassThruDisplayText1);
+    msg_params_send[hmi_request::audio_pass_display_texts][0]
+                   [hmi_request::field_text] =
+                       msg_params_rcvd[str::audio_pass_display_text1];
   }
 
-  if ((*message_)[str::msg_params].keyExists(str::audio_pass_display_text2)) {
-    msg_params[hmi_request::audio_pass_display_texts][1]
-              [hmi_request::field_name] = static_cast<int32_t>(
-                  hmi_apis::Common_TextFieldName::audioPassThruDisplayText2);
-    msg_params[hmi_request::audio_pass_display_texts][1]
-              [hmi_request::field_text] =
-                  (*message_)[str::msg_params][str::audio_pass_display_text2];
+  if (msg_params_rcvd.keyExists(str::audio_pass_display_text2)) {
+    msg_params_send
+        [hmi_request::audio_pass_display_texts][1][hmi_request::field_name] =
+            static_cast<int32_t>(
+                hmi_apis::Common_TextFieldName::audioPassThruDisplayText2);
+    msg_params_send[hmi_request::audio_pass_display_texts][1]
+                   [hmi_request::field_text] =
+                       msg_params_rcvd[str::audio_pass_display_text2];
   }
 
-  if ((*message_)[str::msg_params].keyExists(str::mute_audio)) {
-    msg_params[str::mute_audio] =
-        (*message_)[str::msg_params][str::mute_audio].asBool();
+  if (msg_params_rcvd.keyExists(str::mute_audio)) {
+    msg_params_send[str::mute_audio] =
+        msg_params_rcvd[str::mute_audio].asBool();
   } else {
     // If omitted, the value is set to true
-    msg_params[str::mute_audio] = true;
+    msg_params_send[str::mute_audio] = true;
   }
 
-  if ((*message_)[str::msg_params].keyExists(str::audio_pass_thru_icon)) {
-    msg_params[str::audio_pass_thru_icon] =
-        (*message_)[str::msg_params][str::audio_pass_thru_icon];
+  if (msg_params_rcvd.keyExists(str::audio_pass_thru_icon)) {
+    msg_params_send[str::audio_pass_thru_icon] =
+        msg_params_rcvd[str::audio_pass_thru_icon];
   }
 
   SendHMIRequest(
-      hmi_apis::FunctionID::UI_PerformAudioPassThru, &msg_params, true);
+      hmi_apis::FunctionID::UI_PerformAudioPassThru, &msg_params_send, true);
 }
 
 void PerformAudioPassThruRequest::SendRecordStartNotification() {
@@ -390,12 +395,13 @@ bool PerformAudioPassThruRequest::IsWaitingHMIResponse() {
 void PerformAudioPassThruRequest::ProcessAudioPassThruIcon(
     ApplicationSharedPtr app) {
   LOG4CXX_AUTO_TRACE(logger_);
+  smart_objects::SmartObject msg_params = (*message_)[strings::msg_params];
+
   audio_pass_thru_icon_exists_ = true;
-  if ((*message_)[strings::msg_params].keyExists(
-          strings::audio_pass_thru_icon)) {
+  if (msg_params.keyExists(strings::audio_pass_thru_icon)) {
     if (IsAudioPassThruIconParamValid()) {
       smart_objects::SmartObject icon =
-          (*message_)[strings::msg_params][strings::audio_pass_thru_icon];
+          msg_params[strings::audio_pass_thru_icon];
       if (MessageHelper::VerifyImage(icon, app, application_manager_) !=
           mobile_apis::Result::SUCCESS) {
         LOG4CXX_WARN(
@@ -406,7 +412,7 @@ void PerformAudioPassThruRequest::ProcessAudioPassThruIcon(
     } else {
       LOG4CXX_WARN(logger_,
                    "Invalid audio_pass_thru_icon validation check failed");
-      (*message_)[strings::msg_params].erase(strings::audio_pass_thru_icon);
+      msg_params.erase(strings::audio_pass_thru_icon);
     }
   }
 }
