@@ -49,26 +49,6 @@ set (SOURCES
     ./src/message_helper.cc
     ./src/command/base_command_request.cc
     ./src/command/base_command_notification.cc
-    #./src/command/start_scan_request.cc
-    #./src/command/stop_scan_request.cc
-    #./src/command/tune_radio_request.cc
-    #./src/command/tune_down_request.cc
-    #./src/command/tune_up_request.cc
-    #./src/command/climate_control_on_request.cc
-    #./src/command/get_seat_control_request.cc
-  	#./src/command/on_radio_details_notification.cc
-	#./src/command/on_preset_changed_notification.cc
-	#./src/validators/on_preset_changed_notification_validator.cc
-    #./src/validators/radio_station_validator.cc
-    #./src/validators/tune_radio_request_validator.cc
-    #./src/validators/time_validator.cc
-    #./src/validators/address_validator.cc
-    #./src/validators/location_validator.cc
-    #./src/validators/song_info_validator.cc
-    #./src/validators/advertisement_validator.cc
-    #./src/validators/event_details_validator.cc
-    #./src/validators/web_activity_validator.cc
-    #./src/validators/on_radio_details_notification_validator.cc
     ./src/command/button_press_request.cc
     ./src/command/get_interior_vehicle_data_capabilities_request.cc
     ./src/command/get_interior_vehicle_data_request.cc

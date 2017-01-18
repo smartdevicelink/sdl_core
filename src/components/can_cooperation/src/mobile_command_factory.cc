@@ -34,23 +34,10 @@
 #include "utils/make_shared.h"
 #include "can_cooperation/mobile_command_factory.h"
 #include "functional_module/function_ids.h"
-/*
-#include "can_cooperation/commands/start_scan_request.h"
-#include "can_cooperation/commands/stop_scan_request.h"
-#include "can_cooperation/commands/tune_radio_request.h"
-#include "can_cooperation/commands/tune_up_request.h"
-#include "can_cooperation/commands/tune_down_request.h"
-#include "can_cooperation/commands/climate_control_on_request.h"
-#include "can_cooperation/commands/get_seat_control_request.h"
-*/
 #include "can_cooperation/commands/button_press_request.h"
 #include "can_cooperation/commands/get_interior_vehicle_data_capabilities_request.h"
 #include "can_cooperation/commands/get_interior_vehicle_data_request.h"
 #include "can_cooperation/commands/set_interior_vehicle_data_request.h"
-/*
-#include "can_cooperation/commands/on_preset_changed_notification.h"
-#include "can_cooperation/commands/on_radio_details_notification.h"
-*/
 #include "can_cooperation/commands/on_interior_vehicle_data_notification.h"
 
 namespace can_cooperation {
@@ -85,42 +72,6 @@ utils::SharedPtr<commands::Command> MobileCommandFactory::CreateCommand(
           msg, can_module);
       break;
     }
-    /*  case MobileFunctionID::START_SCAN: {
-        return utils::MakeShared<commands::StartScanRequest>(msg);
-        break;
-      }
-      case MobileFunctionID::STOP_SCAN: {
-        return utils::MakeShared< commands::StopScanRequest>(msg);
-        break;
-      }
-      case MobileFunctionID::TUNE_RADIO: {
-        return utils::MakeShared<Request>(msg);
-        break;
-      }
-      case MobileFunctionID::TUNE_UP: {
-        return utils::MakeShared< commands::TuneUpRequest>(msg));
-        break;
-      }
-      case MobileFunctionID::TUNE_DOWN: {
-        return utils::MakeShared (commands::TuneDownRequest(msg);
-        break;
-      }
-      case MobileFunctionID::GET_SEAT_CONTROL: {
-        return utils::MakeShared< commands::GetSeatControlRequest>(msg);
-        break;
-      }
-      case MobileFunctionID::CLIMATE_CONTROL_ON: {
-        return utils::MakeShared<commands::ClimateControlOnRequest>(msg);
-        break;
-      }*/
-    /* case MobileFunctionID::ON_RADIO_DETAILS: {
-       return utils::MakeShared< commands::OnRadioDetailsNotification>(msg);
-       break;
-     }
-     case MobileFunctionID::ON_PRESETS_CHANGED: {
-       return utils::MakeShared< commands::OnPresetChangedNotification>(msg);
-       break;
-     }*/
     default: {
       utils::SharedPtr<commands::Command> invalid_command;
       return invalid_command;
