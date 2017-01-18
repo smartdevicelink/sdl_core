@@ -122,18 +122,6 @@ class CommandRequestTest : public CommandsTest<kIsNice> {
   }
 };
 
-MATCHER_P(MobileResultCodeIs, result_code, "") {
-  return result_code ==
-         static_cast<mobile_apis::Result::eType>(
-             (*arg)[am::strings::msg_params][am::strings::result_code].asInt());
-}
-
-MATCHER_P(HMIResultCodeIs, result_code, "") {
-  return result_code ==
-         static_cast<hmi_apis::FunctionID::eType>(
-             (*arg)[am::strings::params][am::strings::function_id].asInt());
-}
-
 }  // namespace commands_test
 }  // namespace components
 }  // namespace test
