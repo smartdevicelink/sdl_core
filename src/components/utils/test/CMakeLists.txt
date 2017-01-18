@@ -37,7 +37,7 @@ include_directories (
   ${COMPONENTS_DIR}/utils/include
   ${COMPONENTS_DIR}/rpc_base/include
   ${COMPONENTS_DIR}/utils/test/include
-  ${COMPONENTS_DIR}/policy/include
+  ${POLICY_PATH}/include
 )
 
 set(EXCLUDE_PATHS

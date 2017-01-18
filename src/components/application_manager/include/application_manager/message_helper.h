@@ -97,6 +97,13 @@ class MessageHelper {
    */
   static void SendOnLanguageChangeToMobile(uint32_t connection_key);
 
+  /**
+    * @brief Sends DecryptCertificate request to HMI
+    * @param file_name path to file containing encrypted certificate
+    */
+  static void SendDecryptCertificateToHMI(const std::string& file_name,
+                                          ApplicationManager& app_mngr);
+
   /*
    * @brief Retrieve vehicle data map for param name in mobile request
    * to VehicleDataType
@@ -334,11 +341,11 @@ class MessageHelper {
     * @brief Send request to SyncP process to read file and send
     * Policy Table Snapshot using Retry Strategy
     * @param file_path Path to file with PTS
-    * @param timeout Timeout to wait for PTU
+    * @param timeout Timeout to wait for PTU in seconds
     * @param retries Seconds between retries
     */
   static void SendPolicyUpdate(const std::string& file_path,
-                               int timeout,
+                               const uint32_t timeout,
                                const std::vector<int>& retries,
                                ApplicationManager& app_mngr);
 

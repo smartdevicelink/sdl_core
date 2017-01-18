@@ -1,4 +1,4 @@
-# Copyright (c) 2015, Ford Motor Company
+# Copyright (c) 2014, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -57,6 +57,12 @@ option(USE_COTIRE "Use Cotire to speed up build (currently only for commands tes
 option(USE_GOLD_LD "Use gold linker intead of GNU linker" ON)
 option(USE_CCACHE "Turn on ccache usage" ON)
 option(USE_DISTCC "Turn on distributed build_usage" ON)
+
+set (EXTENDED_POLICY "PROPRIETARY" CACHE STRING "Policy mode (PROPRIETARY, HTTP or EXTERNAL_PROPRIETARY)")
+set_property(CACHE EXTENDED_POLICY PROPERTY STRINGS PROPRIETARY HTTP EXTERNAL_PROPRIETARY)
+if(EXTENDED_POLICY STREQUAL "")
+  set(EXTENDED_POLICY "PROPRIETARY")
+endif()
 
 set(OS_TYPE_OPTION 	"$ENV{OS_TYPE}")
 set(DEBUG_OPTION 	"$ENV{DEBUG}")
@@ -177,6 +183,13 @@ add_custom_target(genivi-tarball
   COMMAND tar -cz -C /tmp/GENIVI -f ${CMAKE_BINARY_DIR}/genivi.tar.gz .
 )
 
+
+project (${PROJECT})
+
+#ADD_DEPENDENCIES(${PROJECT} Policy)
+
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+
 # Please do not change compiler/linker flags if You do not know how particular
 # flag is handled by CMake
 set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR})
@@ -249,11 +262,13 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "QNX")
   SET(EXTENDED_MEDIA_MODE OFF)
 endif()
 
+
 if (BUILD_USB_SUPPORT)
   add_definitions(-DUSB_SUPPORT)
   find_package(UDev REQUIRED)
   message(STATUS "USB support enabled")
 endif()
+
 
 if (BUILD_BT_SUPPORT)
   add_definitions(-DBLUETOOTH_SUPPORT)
@@ -276,9 +291,22 @@ if (TELEMETRY_MONITOR)
   message(STATUS "Telemetry monitor enabled")
 endif()
 
-if (ENABLE_EXTENDED_POLICY)
-  add_definitions(-DEXTENDED_POLICY)
-  message(STATUS "Extended policy enabled")
+if (${EXTENDED_POLICY} STREQUAL "EXTERNAL_PROPRIETARY")
+    add_definitions(-DEXTERNAL_PROPRIETARY_MODE)
+    set(POLICY_PATH ${COMPONENTS_DIR}/policy/policy_external/)
+    set(POLICY_GLOBAL_INCLUDE_PATH ${COMPONENTS_DIR}/include/policy/policy_external/)
+    set(POLICY_MOCK_INCLUDE_PATH ${COMPONENTS_DIR}/include/test/policy/policy_external/)
+    message(STATUS "EXTERNAL_PROPRIETARY policy enabled")
+else()
+   if (${EXTENDED_POLICY} STREQUAL "PROPRIETARY")
+     add_definitions(-DPROPRIETARY_MODE)
+     message(STATUS "PROPRIETARY policy enabled")
+   else()
+     message(STATUS "HTTP policy enabled")
+   endif()
+   set(POLICY_PATH ${COMPONENTS_DIR}/policy/policy_regular/)
+   set(POLICY_GLOBAL_INCLUDE_PATH ${COMPONENTS_DIR}/include/policy/policy_regular/)
+   set(POLICY_MOCK_INCLUDE_PATH ${COMPONENTS_DIR}/include/test/policy/policy_regular/)
 endif()
 
 # TODO(AK): check current OS here

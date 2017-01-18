@@ -28,7 +28,6 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-set(COMPONENTS_DIR ${CMAKE_SOURCE_DIR}/src/components)
 set(COMPONENTS_DIR ${COMPONENTS_DIR} PARENT_SCOPE)
 
 # --- HMI, MOBILE Interfaces
@@ -61,7 +60,13 @@ if(ENABLE_SECURITY)
 endif()
 
 # --- Policy
-add_subdirectory(./policy)
+if (${EXTENDED_POLICY} STREQUAL "EXTERNAL_PROPRIETARY")
+  add_subdirectory(./policy/policy_external/)
+  message(STATUS "Use external policy")
+else()
+  add_subdirectory(./policy/policy_regular/)
+  message(STATUS "Use regular policy")
+endif()
 
 # --- Validated Types
 add_subdirectory(./rpc_base)

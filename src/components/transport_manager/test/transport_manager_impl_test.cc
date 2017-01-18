@@ -127,7 +127,6 @@ class TransportManagerImplTest : public ::testing::Test {
 
     EXPECT_CALL(*tm_listener_, OnDeviceFound(dev_info_));
     EXPECT_CALL(*tm_listener_, OnDeviceAdded(dev_info_));
-    EXPECT_CALL(*tm_listener_, OnDeviceListUpdated(vector_dev_info));
 
     tm_.TestHandle(test_event);
     device_list_.pop_back();
@@ -718,7 +717,6 @@ TEST_F(TransportManagerImplTest, ReceiveEventFromDevice_DeviceListUpdated) {
 
   EXPECT_CALL(*tm_listener_, OnDeviceFound(dev_info_));
   EXPECT_CALL(*tm_listener_, OnDeviceAdded(dev_info_));
-  EXPECT_CALL(*tm_listener_, OnDeviceListUpdated(vector_dev_info));
 
   tm_.ReceiveEventFromDevice(test_event);
   device_list_.pop_back();

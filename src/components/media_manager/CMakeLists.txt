@@ -1,4 +1,4 @@
-# Copyright (c) 2014-2015, Ford Motor Company
+# Copyright (c) 2016, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -45,7 +45,8 @@ include_directories(
     ${COMPONENTS_DIR}/config_profile/include/
     ${JSONCPP_INCLUDE_DIRECTORY}
     ${CMAKE_BINARY_DIR}/src/components/
-    ${COMPONENTS_DIR}/policy/include/
+    ${POLICY_PATH}/include/
+    ${POLICY_GLOBAL_INCLUDE_PATH}/
     ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
