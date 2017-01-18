@@ -40,7 +40,7 @@ namespace test {
 namespace components {
 namespace connection_handler_test {
 
-class ConnectionHandlerObserverMock
+class MockConnectionHandlerObserver
     : public ::connection_handler::ConnectionHandlerObserver {
  public:
   MOCK_METHOD1(OnDeviceListUpdated,

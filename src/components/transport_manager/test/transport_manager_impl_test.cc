@@ -79,7 +79,7 @@ class TransportManagerImplTest : public ::testing::Test {
                                           "app_info_storage");
     tm_.Init(last_state_);
     mock_adapter_ = new MockTransportAdapter();
-    tm_listener_ = MakeShared<TransportManagerListenerMock>();
+    tm_listener_ = MakeShared<MockTransportManagerListener>();
 
 #ifdef TELEMETRY_MONITOR
     tm_.SetTelemetryObserver(&mock_metric_observer_);
@@ -319,7 +319,7 @@ class TransportManagerImplTest : public ::testing::Test {
 #endif  // TELEMETRY_MONITOR
   MockTransportAdapter* mock_adapter_;
 
-  utils::SharedPtr<TransportManagerListenerMock> tm_listener_;
+  utils::SharedPtr<MockTransportManagerListener> tm_listener_;
   const ApplicationHandle application_id_ = 1;
   ConnectionUID connection_key_;
   RawMessagePtr test_message_;
