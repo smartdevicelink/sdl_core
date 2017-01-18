@@ -110,7 +110,8 @@ void SDLActivateAppRequest::Run() {
                   "Sends response with result code REJECTED");
     SendErrorResponse(correlation_id(),
                       static_cast<eType>(function_id()),
-                      hmi_apis::Common_Result::REJECTED);
+                      hmi_apis::Common_Result::REJECTED,
+                      "HMIDeactivate is active");
   } else {
     const uint32_t application_id = app_id();
     application_manager_.GetPolicyHandler().OnActivateApp(application_id,
