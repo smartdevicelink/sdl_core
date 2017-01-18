@@ -36,7 +36,9 @@
 #include "gmock/gmock.h"
 #include "resumption/last_state.h"
 
-namespace resumption {
+namespace test {
+namespace components {
+namespace resumption_test {
 
 class MockLastState : public resumption::LastState {
  public:
@@ -44,6 +46,8 @@ class MockLastState : public resumption::LastState {
   MOCK_METHOD0(get_dictionary, Json::Value&());
 };
 
-}  // resumption
+}  // namespace resumption_test
+}  // namespace components
+}  // namespace test
 
 #endif  // SRC_COMPONENTS_INCLUDE_TEST_RESUMPTION_MOCK_LAST_STATE_H_

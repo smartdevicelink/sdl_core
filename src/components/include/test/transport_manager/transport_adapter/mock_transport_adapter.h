@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,52 +30,80 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_INCLUDE_TEST_TRANSPORT_MANAGER_MOCK_TRANSPORT_MANAGER_H_
-#define SRC_COMPONENTS_INCLUDE_TEST_TRANSPORT_MANAGER_MOCK_TRANSPORT_MANAGER_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_MOCK_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_MOCK_H_
 
 #include "gmock/gmock.h"
-#include <string>
-#include "transport_manager/transport_manager.h"
-#include "transport_manager/transport_adapter/transport_adapter_event.h"
-#include "telemetry_monitor/telemetry_observable.h"
-#include "resumption/last_state.h"
+#include "transport_manager/transport_adapter/transport_adapter.h"
 
 namespace test {
 namespace components {
 namespace transport_manager_test {
 
-using ::transport_manager::DeviceHandle;
-using ::transport_manager::ConnectionUID;
-using ::transport_manager::transport_adapter::TransportAdapter;
-using ::transport_manager::TransportAdapterEvent;
-using ::transport_manager::TransportManagerListener;
-/*
- * MOCK implementation of ::transport_manager::TransportManager interface
- */
-class MockTransportManager : public ::transport_manager::TransportManager,
-                             public ::telemetry_monitor::TelemetryObservable<
-                                 transport_manager::TMTelemetryObserver> {
+class MockTransportAdapter
+    : public ::transport_manager::transport_adapter::TransportAdapter {
  public:
-  MOCK_METHOD1(Init, int(resumption::LastState& last_state));
-  MOCK_METHOD0(Reinit, int());
-  MOCK_METHOD0(SearchDevices, int());
-  MOCK_METHOD1(ConnectDevice, int(const DeviceHandle));
-  MOCK_METHOD1(DisconnectDevice, int(const DeviceHandle));
-  MOCK_METHOD1(Disconnect, int(const ConnectionUID));
-  MOCK_METHOD1(DisconnectForce, int(const ConnectionUID));
-  MOCK_METHOD1(SendMessageToDevice,
-               int(const ::protocol_handler::RawMessagePtr));
-  MOCK_METHOD1(ReceiveEventFromDevice, int(const TransportAdapterEvent&));
-  MOCK_METHOD1(AddTransportAdapter, int(TransportAdapter* adapter));
-  MOCK_METHOD1(AddEventListener, int(TransportManagerListener* listener));
-  MOCK_METHOD0(Stop, int());
-  MOCK_METHOD1(RemoveDevice, int(const DeviceHandle));
-  MOCK_CONST_METHOD1(Visibility, int(const bool&));
-  MOCK_METHOD1(SetTelemetryObserver,
-               void(transport_manager::TMTelemetryObserver* observer));
+  MOCK_CONST_METHOD0(GetDeviceType,
+                     ::transport_manager::transport_adapter::DeviceType());
+  MOCK_CONST_METHOD0(GetConnectionType, ::transport_manager::ConnectionType());
+  MOCK_CONST_METHOD0(IsInitialised, bool());
+  MOCK_METHOD0(
+      Init, ::transport_manager::transport_adapter::TransportAdapter::Error());
+  MOCK_METHOD0(Terminate, void());
+  MOCK_METHOD1(
+      AddListener,
+      void(::transport_manager::transport_adapter::TransportAdapterListener*
+               listener));
+  MOCK_CONST_METHOD0(IsSearchDevicesSupported, bool());
+  MOCK_METHOD0(
+      SearchDevices,
+      ::transport_manager::transport_adapter::TransportAdapter::Error());
+  MOCK_CONST_METHOD0(IsServerOriginatedConnectSupported, bool());
+  MOCK_METHOD2(Connect,
+               ::transport_manager::transport_adapter::TransportAdapter::Error(
+                   const ::transport_manager::DeviceUID& device_handle,
+                   const ::transport_manager::ApplicationHandle& app_handle));
+  MOCK_METHOD1(ConnectDevice,
+               ::transport_manager::transport_adapter::TransportAdapter::Error(
+                   const ::transport_manager::DeviceUID& device_handle));
+  MOCK_METHOD2(RunAppOnDevice, void(const std::string&, const std::string&));
+  MOCK_CONST_METHOD0(IsClientOriginatedConnectSupported, bool());
+  MOCK_METHOD0(
+      StartClientListening,
+      ::transport_manager::transport_adapter::TransportAdapter::Error());
+  MOCK_METHOD0(
+      StopClientListening,
+      ::transport_manager::transport_adapter::TransportAdapter::Error());
+  MOCK_METHOD2(RemoveFinalizedConnection,
+               void(const ::transport_manager::DeviceUID& device_handle,
+                    const ::transport_manager::ApplicationHandle& app_handle));
+  MOCK_METHOD2(Disconnect,
+               ::transport_manager::transport_adapter::TransportAdapter::Error(
+                   const ::transport_manager::DeviceUID& device_handle,
+                   const ::transport_manager::ApplicationHandle& app_handle));
+  MOCK_METHOD1(DisconnectDevice,
+               Error(const ::transport_manager::DeviceUID& device_handle));
+  MOCK_METHOD3(SendData,
+               ::transport_manager::transport_adapter::TransportAdapter::Error(
+                   const ::transport_manager::DeviceUID& device_handle,
+                   const ::transport_manager::ApplicationHandle& app_handle,
+                   const protocol_handler::RawMessagePtr data));
+  MOCK_CONST_METHOD0(GetDeviceList, ::transport_manager::DeviceList());
+  MOCK_CONST_METHOD1(GetApplicationList,
+                     ::transport_manager::ApplicationList(
+                         const ::transport_manager::DeviceUID& device_handle));
+  MOCK_CONST_METHOD1(
+      DeviceName,
+      std::string(const ::transport_manager::DeviceUID& device_handle));
+
+#ifdef TELEMETRY_MONITOR
+  MOCK_METHOD0(GetTelemetryObserver,
+               ::transport_manager::TMTelemetryObserver*());
+#endif  // TELEMETRY_MONITOR
 };
 
 }  // namespace transport_manager_test
 }  // namespace components
 }  // namespace test
-#endif  // SRC_COMPONENTS_INCLUDE_TEST_TRANSPORT_MANAGER_MOCK_TRANSPORT_MANAGER_H_
+
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_MOCK_H_

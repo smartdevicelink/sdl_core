@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,30 +30,34 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_STATISTICS_MANAGER_MOCK_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_STATISTICS_MANAGER_MOCK_H_
+#ifndef SRC_COMPONENTS_MEDIA_MANAGER_TEST_INCLUDE_MEDIA_MANAGER_MOCK_MEDIA_ADAPTER_IMPL_H_
+#define SRC_COMPONENTS_MEDIA_MANAGER_TEST_INCLUDE_MEDIA_MANAGER_MOCK_MEDIA_ADAPTER_IMPL_H_
 
-#include <string>
 #include "gmock/gmock.h"
-#include "policy/usage_statistics/statistics_manager.h"
+#include "media_manager/media_adapter_impl.h"
 
 namespace test {
 namespace components {
-namespace state_controller_test {
+namespace media_manager_test {
 
-namespace us = usage_statistics;
+using namespace media_manager;
 
-class MockStatisticsManager : public us::StatisticsManager {
+class MockMediaAdapterImpl : public ::media_manager::MediaAdapterImpl {
  public:
-  MOCK_METHOD1(Increment, void(us::GlobalCounterId));
-  MOCK_METHOD2(Increment, void(const std::string&, us::AppCounterId));
-  MOCK_METHOD3(Set,
-               void(const std::string&, us::AppInfoId, const std::string&));
-  MOCK_METHOD3(Add, void(const std::string&, us::AppStopwatchId, int32_t));
+  MOCK_METHOD1(AddListener,
+               void(const utils::SharedPtr<MediaAdapterListener>&));
+  MOCK_METHOD1(RemoveListener,
+               void(const utils::SharedPtr<MediaAdapterListener>&));
+  MOCK_METHOD2(SendData,
+               void(int32_t application_key,
+                    const ::protocol_handler::RawMessagePtr message));
+  MOCK_METHOD1(StartActivity, void(int32_t application_key));
+  MOCK_METHOD1(StopActivity, void(int32_t application_key));
+  MOCK_CONST_METHOD1(is_app_performing_activity, bool(int32_t application_key));
 };
 
-}  // namespace state_controller_test
-}
-}
+}  // namespace media_manager_test
+}  // namespace components
+}  // namespace test
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_STATISTICS_MANAGER_MOCK_H_
+#endif  // SRC_COMPONENTS_MEDIA_MANAGER_TEST_INCLUDE_MEDIA_MANAGER_MOCK_MEDIA_ADAPTER_IMPL_H_

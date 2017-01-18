@@ -37,10 +37,9 @@
 #include "transport_manager/transport_manager_impl.h"
 
 #include "transport_manager/mock_telemetry_observer.h"
-#include "transport_manager/transport_manager_listener_mock.h"
-#include "transport_manager/mock_transport_adapter_listener.h"
+#include "transport_manager/mock_transport_manager_listener.h"
 #include "transport_manager/mock_telemetry_observer.h"
-#include "transport_manager/transport_adapter_mock.h"
+#include "transport_manager/transport_adapter/mock_transport_adapter.h"
 #include "transport_manager/mock_transport_manager_impl.h"
 #include "transport_manager/mock_transport_manager_settings.h"
 #include "utils/make_shared.h"

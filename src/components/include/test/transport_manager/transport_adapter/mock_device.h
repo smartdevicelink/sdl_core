@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,30 +30,42 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_INCLUDE_TEST_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_MOCK_DEVICE_H_
-#define SRC_COMPONENTS_INCLUDE_TEST_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_MOCK_DEVICE_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_TRANSPORT_MANAGER_DEVICE_MOCK_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_TRANSPORT_MANAGER_DEVICE_MOCK_H_
 
 #include "gmock/gmock.h"
 #include "transport_manager/transport_adapter/device.h"
+#include "transport_manager/common.h"
+#include "transport_manager/tcp/tcp_device.h"
 
 namespace test {
 namespace components {
 namespace transport_manager_test {
 
-using transport_manager::transport_adapter::Device;
-
-class MockDevice : public Device {
+class MockDevice : public ::transport_manager::transport_adapter::Device {
  public:
-  MOCK_CONST_METHOD1(IsSameAs,
-      bool(const Device* other_device));
-  MOCK_CONST_METHOD0(GetApplicationList,
-      transport_manager::ApplicationList());
-  MOCK_METHOD0(Stop,
-      void());
+  MockDevice(const std::string& name, const std::string& unique_device_id)
+      : Device(name, unique_device_id) {}
+  MOCK_CONST_METHOD1(IsSameAs, bool(const Device* other_device));
+  MOCK_CONST_METHOD0(GetApplicationList, std::vector<int>());
+  MOCK_CONST_METHOD1(LaunchApp, void(const std::string& bundle_id));
+  MOCK_METHOD0(Stop, void());
+};
+
+class MockTCPDevice : public ::transport_manager::transport_adapter::TcpDevice {
+ public:
+  MockTCPDevice(const uint32_t& in_addr_t, const std::string& name)
+      : TcpDevice(in_addr_t, name) {}
+  MOCK_CONST_METHOD1(IsSameAs, bool(const Device* other_device));
+  MOCK_CONST_METHOD0(GetApplicationList, std::vector<int>());
+  MOCK_METHOD0(Stop, void());
+  MOCK_CONST_METHOD1(
+      GetApplicationPort,
+      int(const ::transport_manager::ApplicationHandle app_handle));
 };
 
 }  // namespace transport_manager_test
 }  // namespace components
 }  // namespace test
 
-#endif  // SRC_COMPONENTS_INCLUDE_TEST_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_MOCK_DEVICE_H_
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_TRANSPORT_MANAGER_DEVICE_MOCK_H_

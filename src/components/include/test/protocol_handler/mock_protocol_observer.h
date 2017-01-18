@@ -30,10 +30,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_INCLUDE_TEST_PROTOCOL_HANDLER_PROTOCOL_OBSERVER_MOCK_H_
-#define SRC_COMPONENTS_INCLUDE_TEST_PROTOCOL_HANDLER_PROTOCOL_OBSERVER_MOCK_H_
+#ifndef SRC_COMPONENTS_INCLUDE_TEST_PROTOCOL_HANDLER_MOCK_PROTOCOL_OBSERVER_H_
+#define SRC_COMPONENTS_INCLUDE_TEST_PROTOCOL_HANDLER_MOCK_PROTOCOL_OBSERVER_H_
 
-#include <gmock/gmock.h>
+#include "gmock/gmock.h"
 #include <string>
 #include "protocol_handler/protocol_observer.h"
 
@@ -44,7 +44,7 @@ namespace protocol_handler_test {
 /*
  * MOCK implementation of ::protocol_handler::ProtocolObserver interface
  */
-class ProtocolObserverMock : public ::protocol_handler::ProtocolObserver {
+class MockProtocolObserver : public ::protocol_handler::ProtocolObserver {
  public:
   MOCK_METHOD1(OnMessageReceived,
                void(const ::protocol_handler::RawMessagePtr));
@@ -54,4 +54,4 @@ class ProtocolObserverMock : public ::protocol_handler::ProtocolObserver {
 }  // namespace protocol_handler_test
 }  // namespace components
 }  // namespace test
-#endif  // SRC_COMPONENTS_INCLUDE_TEST_PROTOCOL_HANDLER_PROTOCOL_OBSERVER_MOCK_H_
+#endif  // SRC_COMPONENTS_INCLUDE_TEST_PROTOCOL_HANDLER_MOCK_PROTOCOL_OBSERVER_H_
