@@ -346,6 +346,12 @@ void HMILanguageHandler::Init(resumption::LastState* value) {
   persisted_tts_language_ = get_language_for(INTERFACE_TTS);
 }
 
+#ifdef BUILD_TESTS
+const HMILanguageHandler::Apps& HMILanguageHandler::get_apps() const {
+  return apps_;
+}
+#endif  // BUILD_TESTS
+
 void HMILanguageHandler::OnUnregisterApplication(uint32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(apps_lock_);
