@@ -479,6 +479,6 @@ mobile_api::DeviceRank::eType MessageHelper::StringToDeviceRank(
   return MockMessageHelper::message_helper_mock()->StringToDeviceRank(
       device_rank);
 }
-#endif
+#endif  // SDL_REMOTE_CONTROL
 
 }  // namespace application_manager

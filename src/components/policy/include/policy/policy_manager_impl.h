@@ -381,7 +381,6 @@ class PolicyManagerImpl : public PolicyManager {
   virtual bool GetModuleTypes(const std::string& policy_app_id,
                               std::vector<std::string>* modules) const;
 #endif  // SDL_REMOTE_CONTROL
- private:
   PolicyListener* listener_;
 
   UpdateStatusManager update_status_manager_;

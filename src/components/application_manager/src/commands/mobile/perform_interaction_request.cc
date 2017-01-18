@@ -67,7 +67,7 @@ PerformInteractionRequest::PerformInteractionRequest(
   subscribe_on_event(hmi_apis::FunctionID::Buttons_OnButtonPress);
 #ifdef SDL_REMOTE_CONTROL
   subscribe_on_event(hmi_apis::FunctionID::RC_OnInteriorVehicleData);
-#endif
+#endif  // SDL_REMOTE_CONTROL
 }
 
 PerformInteractionRequest::~PerformInteractionRequest() {}

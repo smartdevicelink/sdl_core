@@ -80,7 +80,7 @@
 #define APR_HAVE_LIMITS_H        1
 #define APR_HAVE_NETDB_H         1
 #define APR_HAVE_NETINET_IN_H    1
-#define APR_HAVE_NETINET_SCTP_H  1
+#define APR_HAVE_NETINET_SCTP_H  0
 #define APR_HAVE_NETINET_SCTP_UIO_H 0
 #define APR_HAVE_NETINET_TCP_H   1
 #define APR_HAVE_PROCESS_H       0
@@ -260,7 +260,7 @@ extern "C" {
 #define APR_HAVE_MEMCHR         1
 #define APR_HAVE_STRUCT_RLIMIT  1
 #define APR_HAVE_UNION_SEMUN    0
-#define APR_HAVE_SCTP           1
+#define APR_HAVE_SCTP           0
 #define APR_HAVE_IOVEC          1
 
 /*  APR Feature Macros */
@@ -276,9 +276,9 @@ extern "C" {
 #define APR_HAS_UNICODE_FS        0
 #define APR_HAS_PROC_INVOKED      0
 #define APR_HAS_USER              1
-#define APR_HAS_LARGE_FILES       1
+#define APR_HAS_LARGE_FILES       0
 #define APR_HAS_XTHREAD_FILES     0
-#define APR_HAS_OS_UUID           1
+#define APR_HAS_OS_UUID           0
 
 #define APR_PROCATTR_USER_SET_REQUIRES_PASSWORD 0
 
@@ -314,7 +314,7 @@ typedef  unsigned short  apr_uint16_t;
 typedef  int             apr_int32_t;
 typedef  unsigned int    apr_uint32_t;
 
-#define APR_SIZEOF_VOIDP 4
+#define APR_SIZEOF_VOIDP 8
 
 /*
  * Darwin 10's default compiler (gcc42) builds for both 64 and
@@ -349,15 +349,15 @@ typedef  unsigned int    apr_uint32_t;
  #define UINT64_C(v)  (v ## ULL)
 #endif
 #else
- typedef  long long            apr_int64_t;
- typedef  unsigned long long   apr_uint64_t;
+ typedef  long            apr_int64_t;
+ typedef  unsigned long   apr_uint64_t;
 #endif
 
 typedef  size_t          apr_size_t;
 typedef  ssize_t         apr_ssize_t;
-typedef  off64_t           apr_off_t;
+typedef  off_t           apr_off_t;
 typedef  socklen_t       apr_socklen_t;
-typedef  unsigned long           apr_ino_t;
+typedef  ino_t           apr_ino_t;
 
 #if APR_SIZEOF_VOIDP == 8
 typedef  apr_uint64_t            apr_uintptr_t;
@@ -530,25 +530,25 @@ typedef  apr_uint32_t            apr_uintptr_t;
  * configure.in.
  */
 
-#define APR_SSIZE_T_FMT "d"
+#define APR_SSIZE_T_FMT "ld"
 
 /* And APR_SIZE_T_FMT */
-#define APR_SIZE_T_FMT "u"
+#define APR_SIZE_T_FMT "lu"
 
 /* And APR_OFF_T_FMT */
-#define APR_OFF_T_FMT APR_INT64_T_FMT
+#define APR_OFF_T_FMT "ld"
 
 /* And APR_PID_T_FMT */
 #define APR_PID_T_FMT "d"
 
 /* And APR_INT64_T_FMT */
-#define APR_INT64_T_FMT "lld"
+#define APR_INT64_T_FMT "ld"
 
 /* And APR_UINT64_T_FMT */
-#define APR_UINT64_T_FMT "llu"
+#define APR_UINT64_T_FMT "lu"
 
 /* And APR_UINT64_T_HEX_FMT */
-#define APR_UINT64_T_HEX_FMT "llx"
+#define APR_UINT64_T_HEX_FMT "lx"
 
 /*
  * Ensure we work with universal binaries on Darwin

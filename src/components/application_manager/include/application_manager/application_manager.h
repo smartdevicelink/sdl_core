@@ -161,17 +161,16 @@ class ApplicationManager {
    * @brief Checks HMI level and returns true if video streaming is allowed
    */
   virtual bool IsVideoStreamingAllowed(uint32_t connection_key) const = 0;
+
+  // TODO: Make RC to use StateCTRL APPLINK-31598
   virtual void ChangeAppsHMILevel(uint32_t app_id,
                                   mobile_apis::HMILevel::eType level) = 0;
-  virtual void CreatePhoneCallAppList() = 0;
-  virtual void ResetPhoneCallAppList() = 0;
   virtual functional_modules::PluginManager& GetPluginManager() = 0;
   virtual std::vector<std::string> devices(
       const std::string& policy_app_id) const = 0;
-  virtual void PostMessageToHMIQueque(const MessagePtr& message) = 0;
-  virtual void PostMessageToMobileQueque(const MessagePtr& message) = 0;
-
-#endif
+  virtual void SendPostMessageToMobile(const MessagePtr& message) = 0;
+  virtual void SendPostMessageToHMI(const MessagePtr& message) = 0;
+#endif  // SDL_REMOTE_CONTROL
   virtual ApplicationSharedPtr active_application() const = 0;
 
   /**
@@ -330,11 +329,10 @@ class ApplicationManager {
   virtual connection_handler::ConnectionHandler& connection_handler() const = 0;
   virtual protocol_handler::ProtocolHandler& protocol_handler() const = 0;
   virtual policy::PolicyHandlerInterface& GetPolicyHandler() = 0;
+  virtual const policy::PolicyHandlerInterface& GetPolicyHandler() const = 0;
 
   virtual uint32_t GetNextHMICorrelationID() = 0;
   virtual uint32_t GenerateNewHMIAppID() = 0;
-  virtual void ReplaceMobileByHMIAppId(smart_objects::SmartObject& message) = 0;
-  virtual void ReplaceHMIByMobileAppId(smart_objects::SmartObject& message) = 0;
 
   /**
    * @brief Ends opened navi services (audio/video) for application
@@ -499,15 +497,15 @@ class ApplicationManager {
       uint32_t app_id, protocol_handler::ServiceType service_type) const = 0;
 
   /**
-      * @brief Checks, if given RPC is allowed at current HMI level for specific
-      * application in policy table
-      * @param app Application
-      * @param hmi_level Current HMI level of application
-      * @param function_id FunctionID of RPC
-      * @param params_permissions Permissions for RPC parameters (e.g.
-      * SubscribeVehicleData) defined in policy table
-      * @return SUCCESS, if allowed, otherwise result code of check
-      */
+   * @brief Checks, if given RPC is allowed at current HMI level for specific
+   * application in policy table
+   * @param app Application
+   * @param hmi_level Current HMI level of application
+   * @param function_id FunctionID of RPC
+   * @param params_permissions Permissions for RPC parameters (e.g.
+   * SubscribeVehicleData) defined in policy table
+   * @return SUCCESS, if allowed, otherwise result code of check
+   */
   virtual mobile_apis::Result::eType CheckPolicyPermissions(
       const ApplicationSharedPtr app,
       const std::string& function_id,

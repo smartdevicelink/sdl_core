@@ -94,7 +94,7 @@ class MockPolicyListener : public PolicyListener {
                     const std::string& policy_app_id,
                     const std::string& hmi_level,
                     const std::string& device_rank));
-#endif
+#endif  // SDL_REMOTE_CONTROL
 };
 
 }  // namespace policy

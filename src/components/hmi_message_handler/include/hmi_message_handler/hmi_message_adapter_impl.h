@@ -60,7 +60,7 @@ class HMIMessageAdapterImpl : public HMIMessageAdapter {
    */
   virtual void SubscribeToHMINotification(
       const std::string& hmi_notification) OVERRIDE;
-#endif
+#endif  // SDL_REMOTE_CONTROL
 
  protected:
   virtual HMIMessageHandler* handler() const {

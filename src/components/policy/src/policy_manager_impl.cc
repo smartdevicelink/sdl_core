@@ -77,7 +77,6 @@ PolicyManagerImpl::PolicyManagerImpl()
 #ifdef SDL_REMOTE_CONTROL
     , access_remote_(new AccessRemoteImpl(
           CacheManagerInterfaceSPtr::static_pointer_cast<CacheManager>(cache_)))
-
 #endif  // SDL_REMOTE_CONTROL
     , retry_sequence_timeout_(kDefaultRetryTimeoutInSec)
     , retry_sequence_index_(0)
@@ -453,8 +452,6 @@ void PolicyManagerImpl::SendNotificationOnPermissionsUpdated(
     listener()->OnPermissionsUpdated(application_id, notification_data);
     return;
   }
-  //(TODO) OKozlov clarify
-  //#else   // SDL_REMOTE_CONTROL
   GetDefaultHmi(application_id, &default_hmi);
   listener()->OnUpdateHMILevel(device_id, application_id, default_hmi);
 
@@ -976,49 +973,6 @@ void PolicyManagerImpl::AddApplication(const std::string& application_id) {
   }
 }
 
-#if SDL_REMOTE_CONTROL
-void PolicyManagerImpl::AddApplication(const std::string& application_id,
-                                       const std::vector<int>& hmi_types) {
-  LOG4CXX_INFO(logger_, "AddApplication");
-  const std::string device_id = GetCurrentDeviceId(application_id);
-  DeviceConsent device_consent = GetUserConsentForDevice(device_id);
-  sync_primitives::AutoLock lock(apps_registration_lock_);
-
-  if (IsNewApplication(application_id)) {
-    AddNewApplication(application_id, device_consent);
-    update_status_manager_.OnNewApplicationAdded();
-  } else {
-    PromoteExistedApplication(application_id, device_consent);
-  }
-
-  Subject who = {device_id, application_id};
-  access_remote_->SetDefaultHmiTypes(who, hmi_types);
-}
-
-struct HMITypeToInt {
-  int operator()(const policy_table::AppHMITypes::value_type item) {
-    return policy_table::AppHMIType(item);
-  }
-};
-
-bool PolicyManagerImpl::GetHMITypes(const std::string& application_id,
-                                    std::vector<int>* app_types) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  if (cache_->IsDefaultPolicy(application_id)) {
-    return false;
-  }
-  const policy_table::AppHMITypes* hmi_types =
-      cache_->GetHMITypes(application_id);
-  if (hmi_types) {
-    std::transform(hmi_types->begin(),
-                   hmi_types->end(),
-                   std::back_inserter(*app_types),
-                   HMITypeToInt());
-  }
-  return hmi_types;
-}
-#endif  // SDL_REMOTE_CONTROL
-
 void PolicyManagerImpl::RemoveAppConsentForGroup(
     const std::string& app_id, const std::string& group_name) {
   cache_->RemoveAppConsentForGroup(app_id, group_name);
@@ -1127,7 +1081,48 @@ void PolicyManagerImpl::RetrySequence() {
   timer_retry_sequence_.Start(timeout, timer::kPeriodic);
 }
 
-#ifdef SDL_REMOTE_CONTROL
+#if SDL_REMOTE_CONTROL
+void PolicyManagerImpl::AddApplication(const std::string& application_id,
+                                       const std::vector<int>& hmi_types) {
+  LOG4CXX_INFO(logger_, "AddApplication");
+  const std::string device_id = GetCurrentDeviceId(application_id);
+  DeviceConsent device_consent = GetUserConsentForDevice(device_id);
+  sync_primitives::AutoLock lock(apps_registration_lock_);
+
+  if (IsNewApplication(application_id)) {
+    AddNewApplication(application_id, device_consent);
+    update_status_manager_.OnNewApplicationAdded();
+  } else {
+    PromoteExistedApplication(application_id, device_consent);
+  }
+
+  Subject who = {device_id, application_id};
+  access_remote_->SetDefaultHmiTypes(who, hmi_types);
+}
+
+struct HMITypeToInt {
+  int operator()(const policy_table::AppHMITypes::value_type item) {
+    return policy_table::AppHMIType(item);
+  }
+};
+
+bool PolicyManagerImpl::GetHMITypes(const std::string& application_id,
+                                    std::vector<int>* app_types) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (cache_->IsDefaultPolicy(application_id)) {
+    return false;
+  }
+  const policy_table::AppHMITypes* hmi_types =
+      cache_->GetHMITypes(application_id);
+  if (hmi_types) {
+    std::transform(hmi_types->begin(),
+                   hmi_types->end(),
+                   std::back_inserter(*app_types),
+                   HMITypeToInt());
+  }
+  return hmi_types;
+}
+
 TypeAccess PolicyManagerImpl::CheckAccess(const PTString& device_id,
                                           const PTString& app_id,
                                           const SeatLocation& zone,

@@ -210,11 +210,11 @@ ApplicationSharedPtr CoreService::GetApplication(ApplicationId app_id) {
 }
 
 void CoreService::SendMessageToHMI(const MessagePtr& message) {
-  application_manager_.PostMessageToHMIQueque(message);
+  application_manager_.SendPostMessageToHMI(message);
 }
 
 void CoreService::SendMessageToMobile(const MessagePtr& message) {
-  application_manager_.PostMessageToMobileQueque(message);
+  application_manager_.SendPostMessageToMobile(message);
 }
 
 uint32_t CoreService::GetNextCorrelationID() {
