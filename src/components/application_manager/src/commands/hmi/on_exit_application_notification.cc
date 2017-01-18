@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -68,11 +68,6 @@ void OnExitApplicationNotification::Run() {
 
   switch (reason) {
     case Common_ApplicationExitReason::DRIVER_DISTRACTION_VIOLATION: {
-      application_manager_.ManageMobileCommand(
-          MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
-              app_id,
-              AppInterfaceUnregisteredReason::DRIVER_DISTRACTION_VIOLATION),
-          commands::Command::ORIGIN_SDL);
       break;
     }
     case Common_ApplicationExitReason::USER_EXIT: {
@@ -100,13 +95,9 @@ void OnExitApplicationNotification::Run() {
       return;
     }
   }
-  ApplicationSharedPtr app = application_manager_.application(app_id);
-  if (app) {
-    application_manager_.state_controller().SetRegularState(
-        app, HMILevel::HMI_NONE, AudioStreamingState::NOT_AUDIBLE, false);
-  } else {
-    LOG4CXX_ERROR(logger_, "Unable to find appication " << app_id);
-  }
+
+  application_manager_.state_controller().SetRegularState(
+      app_impl, HMILevel::HMI_NONE, AudioStreamingState::NOT_AUDIBLE, false);
 }
 
 }  // namespace commands
