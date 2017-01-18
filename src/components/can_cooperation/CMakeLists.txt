@@ -39,37 +39,42 @@ include_directories (
   ${CMAKE_BINARY_DIR}/src/components/
 )
 
+set (CAN_SOURCE_DIR ${COMPONENTS_DIR}/can_cooperation/src)
+set (CAN_COMMANDS_DIR ${CAN_SOURCE_DIR}/commands)
+set (CAN_VALIDATORS_DIR ${CAN_SOURCE_DIR}/validators)
+set (CAN_STRUCT_VALIDATORS_DIR ${CAN_VALIDATORS_DIR}/struct_validators)
+
 set (SOURCES
-    ./src/can_module.cc
-    ./src/can_app_extension.cc
-    ./src/can_tcp_connection.cc
-    ./src/can_module_event.cc
-    ./src/mobile_command_factory.cc
-    ./src/request_controller.cc
-    ./src/message_helper.cc
-    ./src/command/base_command_request.cc
-    ./src/command/base_command_notification.cc
-    ./src/command/button_press_request.cc
-    ./src/command/get_interior_vehicle_data_capabilities_request.cc
-    ./src/command/get_interior_vehicle_data_request.cc
-    ./src/command/set_interior_vehicle_data_request.cc
-    ./src/command/on_interior_vehicle_data_notification.cc
-    ./src/validators/validator.cc
-    ./src/validators/struct_validators/interior_zone_validator.cc
-    ./src/validators/struct_validators/module_description_validator.cc
-    ./src/validators/struct_validators/module_data_validator.cc
-    ./src/validators/struct_validators/rds_data_validator.cc
-    ./src/validators/struct_validators/climate_control_data_validator.cc
-    ./src/validators/struct_validators/radio_control_data_validator.cc
-    ./src/validators/button_press_request_validator.cc
-    ./src/validators/get_interior_vehicle_data_capabilities_request_validator.cc
-    ./src/validators/get_interior_vehicle_data_request_validator.cc
-    ./src/validators/get_interior_vehicle_data_response_validator.cc
-    ./src/validators/set_interior_vehicle_data_request_validator.cc
-    ./src/validators/on_interior_vehicle_data_notification_validator.cc
-    ./src/policy_helper.cc
-    ./src/module_helper.cc
-    ./src/vehicle_capabilities.cc
+    ${CAN_SOURCE_DIR}/can_module.cc
+    ${CAN_SOURCE_DIR}/can_app_extension.cc
+    ${CAN_SOURCE_DIR}/can_tcp_connection.cc
+    ${CAN_SOURCE_DIR}/can_module_event.cc
+    ${CAN_SOURCE_DIR}/mobile_command_factory.cc
+    ${CAN_SOURCE_DIR}/request_controller.cc
+    ${CAN_SOURCE_DIR}/message_helper.cc
+    ${CAN_SOURCE_DIR}/policy_helper.cc
+    ${CAN_SOURCE_DIR}/module_helper.cc
+    ${CAN_SOURCE_DIR}/vehicle_capabilities.cc
+    ${CAN_COMMANDS_DIR}/base_command_request.cc
+    ${CAN_COMMANDS_DIR}/base_command_notification.cc
+    ${CAN_COMMANDS_DIR}/button_press_request.cc
+    ${CAN_COMMANDS_DIR}/get_interior_vehicle_data_capabilities_request.cc
+    ${CAN_COMMANDS_DIR}/get_interior_vehicle_data_request.cc
+    ${CAN_COMMANDS_DIR}/set_interior_vehicle_data_request.cc
+    ${CAN_COMMANDS_DIR}/on_interior_vehicle_data_notification.cc
+    ${CAN_VALIDATORS_DIR}/validator.cc
+    ${CAN_VALIDATORS_DIR}/button_press_request_validator.cc
+    ${CAN_VALIDATORS_DIR}/get_interior_vehicle_data_capabilities_request_validator.cc
+    ${CAN_VALIDATORS_DIR}/get_interior_vehicle_data_request_validator.cc
+    ${CAN_VALIDATORS_DIR}/get_interior_vehicle_data_response_validator.cc
+    ${CAN_VALIDATORS_DIR}/set_interior_vehicle_data_request_validator.cc
+    ${CAN_VALIDATORS_DIR}/on_interior_vehicle_data_notification_validator.cc
+    ${CAN_STRUCT_VALIDATORS_DIR}/interior_zone_validator.cc
+    ${CAN_STRUCT_VALIDATORS_DIR}/module_description_validator.cc
+    ${CAN_STRUCT_VALIDATORS_DIR}/module_data_validator.cc
+    ${CAN_STRUCT_VALIDATORS_DIR}/rds_data_validator.cc
+    ${CAN_STRUCT_VALIDATORS_DIR}/climate_control_data_validator.cc
+    ${CAN_STRUCT_VALIDATORS_DIR}/radio_control_data_validator.cc
 )
 
 set (LIBRARIES
