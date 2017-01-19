@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,6 +51,9 @@ namespace mobile_commands_test {
 namespace set_global_properties_request {
 
 namespace am = application_manager;
+namespace strings = am::strings;
+namespace hmi_request = am::hmi_request;
+namespace hmi_response = am::hmi_response;
 using am::commands::SetGlobalPropertiesRequest;
 using am::commands::CommandImpl;
 using am::commands::MessageSharedPtr;
@@ -63,10 +66,13 @@ using ::testing::Return;
 using ::testing::ReturnRef;
 
 namespace {
-const int32_t kCommandId = 1;
-const uint32_t kAppId = 1u;
-const uint32_t kCmdId = 1u;
 const uint32_t kConnectionKey = 2u;
+const uint32_t kVrPosition = 1u;
+const std::string kVrTitle = "vr_help_title";
+const std::string kVrText = "vr_help";
+const std::string kHelpPrompt = "help_prompt";
+const std::string kValidString = "correct_sting";
+const std::string kNotValidString = "wrong\t\nstring\\n";
 }  // namespace
 
 class SetGlobalPropertiesRequestTest
@@ -74,22 +80,8 @@ class SetGlobalPropertiesRequestTest
  public:
   SetGlobalPropertiesRequestTest()
       : mock_message_helper_(*MockMessageHelper::message_helper_mock())
-      , mock_app_(CreateMockApp()) {}
-
-  MessageSharedPtr CreateFullParamsSO() {
-    MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
-    (*msg)[am::strings::params][am::strings::connection_key] = kConnectionKey;
-    smart_objects::SmartObject msg_params =
-        smart_objects::SmartObject(smart_objects::SmartType_Map);
-    msg_params[am::strings::vr_help_title] = "vr_help_title";
-    msg_params[am::strings::vr_help][0][am::strings::text] = "vr_help";
-    msg_params[am::strings::vr_help][0][am::strings::position] = 1u;
-    msg_params[am::strings::help_prompt][0][am::strings::text] = "help_promt";
-    (*msg)[am::strings::msg_params] = msg_params;
-    return msg;
-  }
-
-  void SetUp() OVERRIDE {
+      , mock_app_(CreateMockApp()) {
+    Mock::VerifyAndClearExpectations(&mock_message_helper_);
     ON_CALL(app_mngr_, application(kConnectionKey))
         .WillByDefault(Return(mock_app_));
     ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kConnectionKey));
@@ -97,8 +89,30 @@ class SetGlobalPropertiesRequestTest
         .WillByDefault(ReturnRef(hmi_interfaces_));
   }
 
-  void TearDown() OVERRIDE {
+  ~SetGlobalPropertiesRequestTest() {
     Mock::VerifyAndClearExpectations(&mock_message_helper_);
+  }
+
+  MessageSharedPtr CreateMsgWithCommonParams() {
+    MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
+    (*msg)[strings::params][strings::connection_key] = kConnectionKey;
+
+    smart_objects::SmartObject keyboard_properties =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+    keyboard_properties[strings::auto_complete_text] = kValidString;
+    keyboard_properties[strings::auto_complete_list][0] = kValidString;
+
+    smart_objects::SmartObject msg_params =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+    msg_params[strings::vr_help_title] = kVrTitle;
+    msg_params[strings::vr_help][0][strings::text] = kVrText;
+    msg_params[strings::vr_help][0][strings::position] = kVrPosition;
+    msg_params[strings::help_prompt][0][strings::text] = kHelpPrompt;
+    msg_params[hmi_request::keyboard_properties] = keyboard_properties;
+
+    (*msg)[strings::msg_params] = msg_params;
+
+    return msg;
   }
 
   void SetHMIInterfaceState(const am::HmiInterfaces::InterfaceState ui_state,
@@ -114,11 +128,11 @@ class SetGlobalPropertiesRequestTest
   MessageSharedPtr PrepareResponseFromHMI(
       const hmi_apis::Common_Result::eType result_code, const char* info) {
     MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
-    (*msg)[am::strings::params][am::hmi_response::code] = result_code;
-    (*msg)[am::strings::msg_params] =
+    (*msg)[strings::params][hmi_response::code] = result_code;
+    (*msg)[strings::msg_params] =
         smart_objects::SmartObject(smart_objects::SmartType_Map);
     if (info) {
-      (*msg)[am::strings::msg_params][am::strings::info] = info;
+      (*msg)[strings::msg_params][strings::info] = info;
     }
     return msg;
   }
@@ -132,29 +146,29 @@ class SetGlobalPropertiesRequestTest
                          const am::HmiInterfaces::InterfaceState ui_state,
                          const am::HmiInterfaces::InterfaceState tts_state,
                          const bool success) {
-    MessageSharedPtr set_global_pr_msg = CreateFullParamsSO();
+    MessageSharedPtr set_global_pr_msg = CreateMsgWithCommonParams();
 
     utils::SharedPtr<SetGlobalPropertiesRequest> command =
         CreateCommand<SetGlobalPropertiesRequest>(set_global_pr_msg);
 
     EXPECT_CALL(app_mngr_,
                 RemoveAppFromTTSGlobalPropertiesList(kConnectionKey));
+    const smart_objects::SmartObject& set_global_pr_msg_params =
+        (*set_global_pr_msg)[strings::msg_params];
     const smart_objects::SmartObject* vr_help_title =
-        &((*set_global_pr_msg)[am::strings::msg_params]
-                              [am::strings::vr_help_title]);
+        &(set_global_pr_msg_params[strings::vr_help_title]);
     const smart_objects::SmartObject* vr_help =
-        &((*set_global_pr_msg)[am::strings::msg_params][am::strings::vr_help]);
-    const smart_objects::SmartObject* vr_help_prompt = &((
-        *set_global_pr_msg)[am::strings::msg_params][am::strings::help_prompt]);
+        &(set_global_pr_msg_params[strings::vr_help]);
+    const smart_objects::SmartObject* vr_help_prompt =
+        &(set_global_pr_msg_params[strings::help_prompt]);
     ON_CALL(*mock_app_, vr_help_title()).WillByDefault(Return(vr_help_title));
     ON_CALL(*mock_app_, vr_help()).WillByDefault(Return(vr_help));
     ON_CALL(*mock_app_, help_prompt()).WillByDefault(Return(vr_help_prompt));
     ON_CALL(
         mock_message_helper_,
         VerifyImageVrHelpItems(
-            (*set_global_pr_msg)[am::strings::msg_params][am::strings::vr_help],
-            _,
-            _)).WillByDefault(Return(mobile_apis::Result::SUCCESS));
+            (*set_global_pr_msg)[strings::msg_params][strings::vr_help], _, _))
+        .WillByDefault(Return(mobile_apis::Result::SUCCESS));
 
     ON_CALL(mock_message_helper_, VerifyImage(_, _, _))
         .WillByDefault(Return(mobile_apis::Result::SUCCESS));
@@ -182,7 +196,6 @@ class SetGlobalPropertiesRequestTest
 
     command->Run();
     command->on_event(event_tts);
-    SetHMIInterfaceState(ui_state, tts_state);
 
     MessageSharedPtr result_to_mobile;
     EXPECT_CALL(app_mngr_,
@@ -192,18 +205,41 @@ class SetGlobalPropertiesRequestTest
 
     command->on_event(event_ui);
 
-    EXPECT_EQ((*result_to_mobile)[am::strings::msg_params][am::strings::success]
-                  .asBool(),
-              success);
     EXPECT_EQ(
-        (*result_to_mobile)[am::strings::msg_params][am::strings::result_code]
-            .asInt(),
-        static_cast<int32_t>(mobile_response));
+        success,
+        (*result_to_mobile)[strings::msg_params][strings::success].asBool());
+    EXPECT_EQ(
+        static_cast<int32_t>(mobile_response),
+        (*result_to_mobile)[strings::msg_params][strings::result_code].asInt());
     if (mobile_info) {
-      EXPECT_EQ((*result_to_mobile)[am::strings::msg_params][am::strings::info]
-                    .asString(),
-                mobile_info);
+      EXPECT_EQ(
+          mobile_info,
+          (*result_to_mobile)[strings::msg_params][strings::info].asString());
     }
+  }
+
+  void TestOfNotValidParameters(const SmartObject& msg_params) {
+    MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
+    (*msg)[strings::params][strings::connection_key] = kConnectionKey;
+    (*msg)[strings::msg_params] = msg_params;
+
+    SharedPtr<SetGlobalPropertiesRequest> command(
+        CreateCommand<SetGlobalPropertiesRequest>(msg));
+
+    if ((*msg)[strings::msg_params].keyExists(strings::vr_help)) {
+      EXPECT_CALL(mock_message_helper_, VerifyImageVrHelpItems(_, _, _))
+          .WillOnce(Return(mobile_apis::Result::SUCCESS));
+    }
+    if ((*msg)[strings::msg_params].keyExists(strings::menu_icon)) {
+      EXPECT_CALL(mock_message_helper_, VerifyImage(_, _, _))
+          .WillOnce(Return(mobile_apis::Result::SUCCESS));
+    }
+
+    EXPECT_CALL(app_mngr_,
+                ManageMobileCommand(
+                    MobileResultCodeIs(mobile_apis::Result::INVALID_DATA), _));
+
+    command->Run();
   }
 
   sync_primitives::Lock lock_;
@@ -325,18 +361,16 @@ TEST_F(
 
 TEST_F(SetGlobalPropertiesRequestTest, OnEvent_SUCCESS_Expect_MessageNotSend) {
   MessageSharedPtr response = CreateMessage(smart_objects::SmartType_Map);
-  (*response)[am::strings::params][am::hmi_response::code] =
+  (*response)[strings::params][strings::connection_key] = kConnectionKey;
+  (*response)[strings::params][hmi_response::code] =
       hmi_apis::Common_Result::SUCCESS;
-  (*response)[am::strings::msg_params][am::strings::info] = "test";
+  (*response)[strings::msg_params][strings::info] = "test";
 
   am::event_engine::Event event(hmi_apis::FunctionID::TTS_SetGlobalProperties);
   event.set_smart_object(*response);
 
   utils::SharedPtr<SetGlobalPropertiesRequest> command =
       CreateCommand<SetGlobalPropertiesRequest>(response);
-
-  MockAppPtr mock_app(CreateMockApp());
-  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app));
 
   EXPECT_CALL(
       app_mngr_,
@@ -348,9 +382,10 @@ TEST_F(SetGlobalPropertiesRequestTest, OnEvent_SUCCESS_Expect_MessageNotSend) {
 TEST_F(SetGlobalPropertiesRequestTest,
        OnEvent_UNSUPPORTED_RESOURCE_Expect_false) {
   MessageSharedPtr response = CreateMessage(smart_objects::SmartType_Map);
-  (*response)[am::strings::params][am::hmi_response::code] =
+  (*response)[strings::params][strings::connection_key] = kConnectionKey;
+  (*response)[strings::params][hmi_response::code] =
       hmi_apis::Common_Result::SUCCESS;
-  (*response)[am::strings::msg_params][am::strings::info] = "qwe";
+  (*response)[strings::msg_params][strings::info] = "qwe";
 
   am::event_engine::Event event_tts(
       hmi_apis::FunctionID::TTS_SetGlobalProperties);
@@ -361,16 +396,10 @@ TEST_F(SetGlobalPropertiesRequestTest,
   utils::SharedPtr<SetGlobalPropertiesRequest> command =
       CreateCommand<SetGlobalPropertiesRequest>(response);
 
-  MockAppPtr mock_app(CreateMockApp());
-  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app));
-
   ON_CALL(mock_message_helper_, HMIToMobileResult(_))
       .WillByDefault(Return(mobile_apis::Result::UNSUPPORTED_RESOURCE));
 
-  MockHmiInterfaces hmi_interfaces;
-  EXPECT_CALL(app_mngr_, hmi_interfaces())
-      .WillRepeatedly(ReturnRef(hmi_interfaces));
-  EXPECT_CALL(hmi_interfaces, GetInterfaceState(_))
+  EXPECT_CALL(hmi_interfaces_, GetInterfaceState(_))
       .WillRepeatedly(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
 
   MessageSharedPtr response_to_mobile;
@@ -383,17 +412,48 @@ TEST_F(SetGlobalPropertiesRequestTest,
   command->on_event(event_ui);
   command->on_event(event_tts);
 
-  EXPECT_EQ((*response_to_mobile)[am::strings::msg_params][am::strings::success]
-                .asBool(),
-            false);
+  EXPECT_FALSE(
+      (*response_to_mobile)[strings::msg_params][strings::success].asBool());
   EXPECT_EQ(
-      (*response_to_mobile)[am::strings::msg_params][am::strings::result_code]
-          .asInt(),
-      static_cast<int32_t>(mobile_apis::Result::INVALID_DATA));
+      static_cast<int32_t>(mobile_apis::Result::INVALID_DATA),
+      (*response_to_mobile)[strings::msg_params][strings::result_code].asInt());
+}
+
+TEST_F(SetGlobalPropertiesRequestTest,
+       Run_MsgParametersContainNotValidData_INVALID_DATA) {
+  using namespace strings;
+  SmartObject test_so;
+  test_so[0][msg_params][help_prompt][0][text] = kNotValidString;
+
+  test_so[1][msg_params][timeout_prompt][0][text] = kNotValidString;
+
+  test_so[2][msg_params][vr_help][0][text] = kNotValidString;
+
+  test_so[3][msg_params][vr_help][0][text] = kValidString;
+  test_so[3][msg_params][vr_help][0][image][value] = kNotValidString;
+
+  test_so[4][msg_params][menu_icon][value] = kNotValidString;
+
+  test_so[5][msg_params][vr_help_title] = kNotValidString;
+
+  test_so[6][msg_params][menu_title] = kNotValidString;
+
+  test_so[7][msg_params][keyboard_properties][limited_character_list][0] =
+      kNotValidString;
+
+  test_so[8][msg_params][keyboard_properties][auto_complete_text] =
+      kNotValidString;
+
+  test_so[9][msg_params][keyboard_properties][auto_complete_list][0] =
+      kNotValidString;
+
+  for (size_t i = 0; i < test_so.length(); ++i) {
+    TestOfNotValidParameters(test_so[i][msg_params]);
+  }
 }
 
 }  // namespace set_global_properties_request
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components
-}  // namespace tests
+}  // namespace test
