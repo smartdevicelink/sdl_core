@@ -43,7 +43,7 @@ namespace components {
 namespace application_manager_test {
 
 namespace {
-  using namespace ::usage_statistics;
+using namespace ::usage_statistics;
 }
 
 class MockStatisticsManager : public StatisticsManager {

@@ -44,8 +44,7 @@ using hmi_message_handler::HMIMessageAdapter;
 
 class MockHMIMessageAdapter : public HMIMessageAdapter {
  public:
-  MOCK_METHOD0(SubscribeTo,
-      void());
+  MOCK_METHOD0(SubscribeTo, void());
 };
 
 }  // namespace hmi_message_handler_test

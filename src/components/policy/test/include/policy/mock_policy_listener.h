@@ -48,7 +48,7 @@ namespace components {
 namespace policy_test {
 
 namespace {
-  using namespace policy;
+using namespace policy;
 }
 
 namespace custom_str = utils::custom_string;
