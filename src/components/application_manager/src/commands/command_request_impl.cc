@@ -681,6 +681,18 @@ bool CommandRequestImpl::PrepareResultForMobileResponse(
 
 bool CommandRequestImpl::PrepareResultForMobileResponse(
     ResponseInfo& out_first, ResponseInfo& out_second) const {
+  SetResultCodeFlagsForHMIResponses(out_first, out_second);
+
+  bool result = (out_first.is_ok && out_second.is_ok) ||
+                (out_second.is_invalid_enum && out_first.is_ok) ||
+                (out_first.is_invalid_enum && out_second.is_ok);
+  result = result || CheckResultCode(out_first, out_second);
+  result = result || CheckResultCode(out_second, out_first);
+  return result;
+}
+
+void CommandRequestImpl::SetResultCodeFlagsForHMIResponses(
+    ResponseInfo& out_first, ResponseInfo& out_second) const {
   using namespace helpers;
 
   out_first.is_ok = Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
@@ -717,13 +729,6 @@ bool CommandRequestImpl::PrepareResultForMobileResponse(
   out_second.interface_state =
       application_manager_.hmi_interfaces().GetInterfaceState(
           out_second.interface);
-
-  bool result = (out_first.is_ok && out_second.is_ok) ||
-                (out_second.is_invalid_enum && out_first.is_ok) ||
-                (out_first.is_invalid_enum && out_second.is_ok);
-  result = result || CheckResultCode(out_first, out_second);
-  result = result || CheckResultCode(out_second, out_first);
-  return result;
 }
 
 void CommandRequestImpl::GetInfo(

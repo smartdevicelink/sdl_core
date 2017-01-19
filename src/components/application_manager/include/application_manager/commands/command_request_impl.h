@@ -272,6 +272,16 @@ class CommandRequestImpl : public CommandImpl,
    */
   bool IsResultCodeUnsupported(const ResponseInfo& first,
                                const ResponseInfo& second) const;
+  /**
+   * @brief Checks result code from HMI for split RPC
+   * and set flags to the info structures.
+   * @param first contains result_code from HMI response and
+   * interface that returns response
+   * @param second contains result_code from HMI response and
+   * interface that returns response
+   */
+  void SetResultCodeFlagsForHMIResponses(ResponseInfo& out_first,
+                                         ResponseInfo& out_second) const;
 
  protected:
   /**

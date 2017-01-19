@@ -201,10 +201,7 @@ bool PerformAudioPassThruRequest::PrepareResponseParameters(
   ResponseInfo tts_perform_info(result_tts_speak_,
                                 HmiInterfaces::HMI_INTERFACE_TTS);
 
-  bool result_unused =
-      PrepareResultForMobileResponse(ui_perform_info, tts_perform_info);
-  UNUSED(result_unused);
-
+  SetResultCodeFlagsForHMIResponses(ui_perform_info, tts_perform_info);
   if (ui_perform_info.is_ok && tts_perform_info.is_unsupported_resource &&
       HmiInterfaces::STATE_AVAILABLE == tts_perform_info.interface_state) {
     result_code = mobile_apis::Result::WARNINGS;
