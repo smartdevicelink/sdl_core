@@ -31,7 +31,7 @@
 include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
 include_directories (
-  include
+  ${COMPONENTS_DIR}/config_profile/include
   ${COMPONENTS_DIR}/utils/include/
   ${LOG4CXX_INCLUDE_DIRECTORY}
 )

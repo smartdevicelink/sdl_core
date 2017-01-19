@@ -65,15 +65,13 @@ set(LIBRARIES
 )
 
 if (BUILD_USB_SUPPORT)
-  list(APPEND testLibraries Libusb-1.0.16)
+  list(APPEND LIBRARIES Libusb-1.0.16)
 endif()
 
 if (BUILD_BT_SUPPORT)
-  list(APPEND testLibraries bluetooth)
+  list(APPEND LIBRARIES bluetooth)
 endif()
 
 create_test("telemetry_monitor_test" "${SOURCES}" "${LIBRARIES}")
 
 file(COPY ${COMPONENTS_DIR}/telemetry_monitor/test/log4cxx.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-
-

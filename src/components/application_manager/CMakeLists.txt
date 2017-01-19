@@ -43,14 +43,15 @@ include_directories (
   ${COMPONENTS_DIR}/protocol_handler/include/
   ${COMPONENTS_DIR}/smart_objects/include/
   ${COMPONENTS_DIR}/hmi_message_handler/include
-  ${COMPONENTS_DIR}/media_manager/include
-  ${COMPONENTS_DIR}/connection_handler/include
-  ${COMPONENTS_DIR}/config_profile/include
-  ${COMPONENTS_DIR}/request_watchdog/include
-  ${COMPONENTS_DIR}/resumption/include
-  ${COMPONENTS_DIR}/rpc_base/include
-  ${COMPONENTS_DIR}/policy/include
-  ${CMAKE_BINARY_DIR}/src/components
+  ${COMPONENTS_DIR}/media_manager/include/
+  ${COMPONENTS_DIR}/connection_handler/include/
+  ${COMPONENTS_DIR}/config_profile/include/
+  ${COMPONENTS_DIR}/request_watchdog/include/
+  ${COMPONENTS_DIR}/resumption/include/
+  ${COMPONENTS_DIR}/rpc_base/include/
+  ${COMPONENTS_DIR}/interfaces
+  ${CMAKE_BINARY_DIR}/src/components/
+  ${COMPONENTS_DIR}/policy/include/
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${ENCRYPTION_INCLUDE_DIRECTORY}
   ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
