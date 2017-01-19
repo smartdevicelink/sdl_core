@@ -38,7 +38,7 @@
 
 namespace test {
 namespace components {
-namespace transport_manager {
+namespace transport_manager_test {
 
 using namespace ::transport_manager::transport_adapter;
 
@@ -94,7 +94,7 @@ class MockTransportAdapterController : public TransportAdapterController {
                     const DataSendError& error));
 };
 
-}  // namespace transport_manager
+}  // namespace transport_manager_test
 }  // namespace components
 }  // namespace test
 
