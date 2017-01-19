@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sqlite_wrapper/sql_database.h"
+#include "utils/sqlite_wrapper/sql_database.h"
 #include <sqlite3.h>
 
 namespace utils {
