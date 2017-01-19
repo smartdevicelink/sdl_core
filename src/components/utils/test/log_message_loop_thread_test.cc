@@ -37,7 +37,7 @@
 
 namespace test {
 namespace components {
-namespace utils {
+namespace utils_test {
 
 using namespace ::logger;
 using ::testing::_;
@@ -73,6 +73,6 @@ TEST(LogMessageLoopThread, HandleNeverCalled) {
   logger::logger_status = LoggerThreadNotCreated;
 }
 
-}  // namespace utils
+}  // namespace utils_test
 }  // namespace components
 }  // namespace test

@@ -36,7 +36,7 @@
 
 namespace test {
 namespace components {
-namespace utils {
+namespace utils_test {
 
 TEST(DataAccessorTest, CreateDataAccessor) {
   // arrange
@@ -129,6 +129,6 @@ TEST(DataAccessorTest,
   testSet_lock_.Release();
 }
 
-}  // namespace utils
+}  // namespace utils_test
 }  // namespace components
 }  // namespace test
