@@ -43,9 +43,11 @@
 
 namespace policy_table = ::rpc::policy_table_interface_base;
 
-namespace policy {
+namespace test {
+namespace components {
+namespace policy_test {
 
-class MockPTRepresentation : virtual public PTRepresentation {
+class MockPTRepresentation : public policy::PTRepresentation {
  public:
   MOCK_METHOD4(CheckPermissions,
                void(const PTString& app_id,
@@ -100,6 +102,8 @@ class MockPTRepresentation : virtual public PTRepresentation {
   MOCK_CONST_METHOD1(IsPredataPolicy, bool(const std::string& app_id));
 };
 
-}  // namespace policy
+}  // namespace policy_test
+}  // namespace components
+}  // namespace test
 
 #endif  // SRC_COMPONENTS_POLICY_TEST_INCLUDE_MOCK_PT_REPRESENTATION_H_

@@ -63,11 +63,6 @@ using ::testing::SetArgReferee;
 using ::testing::AtLeast;
 using ::testing::Return;
 
-using ::policy::MockPolicyListener;
-
-using ::policy::MockCacheManagerInterface;
-using ::policy::MockUpdateStatusManager;
-
 using ::policy::PolicyManagerImpl;
 using ::policy::PolicyTable;
 
@@ -75,7 +70,7 @@ namespace policy_table = rpc::policy_table_interface_base;
 
 namespace test {
 namespace components {
-namespace policy {
+namespace policy_test {
 
 namespace custom_str = utils::custom_string;
 
@@ -1335,6 +1330,6 @@ TEST_F(
   EXPECT_EQ(heart_beat_timeout.asUInt(), result);
 }
 
-}  // namespace policy
+}  // namespace policy_test
 }  // namespace components
 }  // namespace test

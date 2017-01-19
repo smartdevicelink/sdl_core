@@ -44,9 +44,12 @@
 
 namespace policy_table = ::rpc::policy_table_interface_base;
 
-namespace policy {
+namespace test {
+namespace components {
+namespace policy_test {
+
 class MockPTExtRepresentation : public MockPTRepresentation,
-                                public PTExtRepresentation {
+                                public policy::PTExtRepresentation {
  public:
   MOCK_METHOD1(CanAppKeepContext, bool(const std::string& app_id));
   MOCK_METHOD1(CanAppStealFocus, bool(const std::string& app_id));
@@ -112,7 +115,7 @@ class MockPTExtRepresentation : public MockPTRepresentation,
                      void(const std::string& app_id,
                           const std::string& type,
                           const std::string& value));
-  MOCK_CONST_METHOD3(Add,
+  MOCK_CONST_METHOD3(}  // namespace policy_managerAdd,
                      void(const std::string& app_id,
                           const std::string& type,
                           int seconds));
@@ -134,6 +137,8 @@ class MockPTExtRepresentation : public MockPTRepresentation,
                           const std::string& functional_group));
 };
 
-}  // namespace policy
+}  // namespace policy_test
+}  // namespace components
+}  // namespace test
 
 #endif  // SRC_COMPONENTS_POLICY_TEST_INCLUDE_MOCK_PT_EXT_REPRESENTATION_H_
