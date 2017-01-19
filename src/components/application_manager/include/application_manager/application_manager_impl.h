@@ -980,20 +980,6 @@ class ApplicationManagerImpl
    */
   uint32_t GenerateNewHMIAppID() OVERRIDE;
 
-  /**
-   * @brief Parse smartObject and replace mobile app Id by HMI app ID
-   *
-   * @param message Smartobject to be parsed
-   */
-  void ReplaceMobileByHMIAppId(smart_objects::SmartObject& message) OVERRIDE;
-
-  /**
-   * @brief Parse smartObject and replace HMI app ID by mobile app Id
-   *
-   * @param message Smartobject to be parsed
-   */
-  void ReplaceHMIByMobileAppId(smart_objects::SmartObject& message) OVERRIDE;
-
   /*
    * @brief Save binary data to specified directory
    *

@@ -245,11 +245,6 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_CONST_METHOD0(
       AppsWaitingForRegistration,
       DataAccessor<application_manager::AppsWaitRegistrationSet>());
-
-  MOCK_METHOD1(ReplaceMobileByHMIAppId,
-               void(smart_objects::SmartObject& message));
-  MOCK_METHOD1(ReplaceHMIByMobileAppId,
-               void(smart_objects::SmartObject& message));
   MOCK_METHOD1(GetAvailableSpaceForApp,
                uint32_t(const std::string& folder_name));
   MOCK_METHOD0(OnTimerSendTTSGlobalProperties, void());

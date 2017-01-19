@@ -1012,9 +1012,8 @@ void ApplicationImpl::set_hmi_level(
 
 bool ApplicationImpl::SubscribeToInteriorVehicleData(
     smart_objects::SmartObject module) {
-  // size_t old_size = subscribed_interior_vehicle_data_.size();
   subscribed_interior_vehicle_data_.push_front(module);
-  return true;  //(subscribed_interior_vehicle_data_.size() == old_size + 1);
+  return true;
 }
 
 bool ApplicationImpl::IsSubscribedToInteriorVehicleData(
@@ -1027,11 +1026,6 @@ bool ApplicationImpl::IsSubscribedToInteriorVehicleData(
     }
   }
   return false;
-
-  // std::set<smart_objects::SmartObject>::iterator it =
-  // subscribed_interior_vehicle_data_.find(module);
-  // return(subscribed_interior_vehicle_data_.end()._M_node!=it._M_node); //!=
-  // subscribed_interior_vehicle_data_.find(module));
 }
 
 bool ApplicationImpl::UnsubscribeFromInteriorVehicleData(
