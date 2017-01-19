@@ -35,7 +35,7 @@
 #include "gmock/gmock.h"
 #include "smart_objects/enum_schema_item.h"
 #include "policy/usage_statistics/mock_statistics_manager.h"
-#include "mock_app_stopwatch.h"
+#include "policy/usage_statistics/mock_app_stopwatch.h"
 #include "utils/make_shared.h"
 #include "utils/shared_ptr.h"
 

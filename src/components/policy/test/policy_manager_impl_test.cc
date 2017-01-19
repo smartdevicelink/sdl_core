@@ -39,14 +39,14 @@
 #include "json/writer.h"
 #include "gtest/gtest.h"
 
-#include "policy/policy_manager_impl.h"
 #include "config_profile/profile.h"
+#include "policy/policy_manager_impl.h"
 #include "policy/policy_table/enums.h"
 #include "policy/policy_table/types.h"
 #include "policy/mock_policy_settings.h"
-#include "mock_policy_listener.h"
-#include "mock_cache_manager.h"
-#include "mock_update_status_manager.h"
+#include "policy/mock_policy_listener.h"
+#include "policy/mock_cache_manager.h"
+#include "policy/mock_update_status_manager.h"
 
 #include "utils/macro.h"
 #include "utils/file_system.h"

@@ -38,20 +38,18 @@
 #include <sys/stat.h>
 
 #include "gtest/gtest.h"
-#include "policy/test/include/driver_dbms.h"
+#include "policy/driver_dbms.h"
 #include "policy/sql_pt_representation.h"
 #include "policy/policy_types.h"
 #include "policy/mock_policy_settings.h"
+#include "policy/policy_table/types.h"
+#include "policy/policy_table/enums.h"
 #include "json/writer.h"
 #include "json/reader.h"
 #include "rpc_base/rpc_base.h"
-#include "policy/mock_policy_settings.h"
 #include "utils/shared_ptr.h"
 #include "utils/make_shared.h"
 #include "utils/file_system.h"
-#include "policy/policy_table/types.h"
-#include "policy/policy_table/enums.h"
-#include "rpc_base/rpc_base.h"
 #include "utils/sqlite_wrapper/sql_database.h"
 
 namespace policy_table = rpc::policy_table_interface_base;
