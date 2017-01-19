@@ -42,6 +42,23 @@
 namespace file_system {
 
 /**
+  * @brief Returns platform specific path delimiter
+  * @return Delimiter string
+  */
+std::string GetPathDelimiter();
+
+/**
+  * @brief Concatenates strings to platform specific path
+  * @param utf8_path Strings to be concatenated
+  * @return Concatenated path string
+  */
+std::string ConcatPath(const std::string& utf8_path1,
+                       const std::string& utf8_path2);
+std::string ConcatPath(const std::string& utf8_path1,
+                       const std::string& utf8_path2,
+                       const std::string& utf8_path3);
+
+/**
  * @brief Get available disc space.
  *
  * @param path to directory
