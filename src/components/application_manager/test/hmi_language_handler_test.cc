@@ -43,7 +43,7 @@
 #include "application_manager/mock_hmi_capabilities.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/smart_object_keys.h"
-#include "resumption/last_state_impl.h"
+#include "test/resumption/mock_last_state.h"
 #include "utils/shared_ptr.h"
 #include "utils/make_shared.h"
 #include "utils/lock.h"
@@ -82,8 +82,7 @@ const uint32_t kDefaultAppsSize = 0u;
 
 class HmiLanguageHandlerTest : public ::testing::Test {
  public:
-  HmiLanguageHandlerTest()
-      : last_state_("app_storage_folder", "app_info_storage") {
+  HmiLanguageHandlerTest() {
     EXPECT_CALL(app_manager_, event_dispatcher())
         .WillOnce(ReturnRef(event_dispatcher_));
     hmi_language_handler_ =
@@ -124,8 +123,8 @@ class HmiLanguageHandlerTest : public ::testing::Test {
                                    const uint32_t start_app_id,
                                    uint32_t count,
                                    bool expect_call = false) {
-    for (; count > 0; --count) {
-      app_set.insert(CreateMockApp(start_app_id + (count - 1), expect_call));
+    while (count-- > 0) {
+      app_set.insert(CreateMockApp(start_app_id + count, expect_call));
     }
   }
 
@@ -134,7 +133,7 @@ class HmiLanguageHandlerTest : public ::testing::Test {
   MockEventDispatcher event_dispatcher_;
   SharedPtr<am::HMILanguageHandler> hmi_language_handler_;
   ::sync_primitives::Lock app_set_lock_;
-  resumption::LastStateImpl last_state_;
+  resumption::MockLastState last_state_;
 };
 
 TEST_F(HmiLanguageHandlerTest, OnEvent_OnAppRegistered_SUCCESS) {
@@ -146,10 +145,10 @@ TEST_F(HmiLanguageHandlerTest, OnEvent_OnAppRegistered_SUCCESS) {
   smart_objects::SmartObject msg;
   msg[am::strings::params][am::strings::app_id] = 5u;
 
-  Event ev1(hmi_apis::FunctionID::BasicCommunication_OnAppRegistered);
-  ev1.set_smart_object(msg);
+  Event event(hmi_apis::FunctionID::BasicCommunication_OnAppRegistered);
+  event.set_smart_object(msg);
 
-  hmi_language_handler_->on_event(ev1);
+  hmi_language_handler_->on_event(event);
 
   // Expect that app been added to apps map.
   EXPECT_EQ(1u, kApps.size());
@@ -158,20 +157,21 @@ TEST_F(HmiLanguageHandlerTest, OnEvent_OnAppRegistered_SUCCESS) {
 TEST_F(HmiLanguageHandlerTest, OnEvent_AllLanguageIsReceivedAndSame_SUCCESS) {
   // Repeatedly add events to set `is_*_language_received_` flags up
 
-  Event ev1(hmi_apis::FunctionID::UI_GetLanguage);
-  hmi_language_handler_->on_event(ev1);
+  Event ui_event(hmi_apis::FunctionID::UI_GetLanguage);
+  hmi_language_handler_->on_event(ui_event);
 
-  Event ev2(hmi_apis::FunctionID::VR_GetLanguage);
-  hmi_language_handler_->on_event(ev2);
+  Event vr_event(hmi_apis::FunctionID::VR_GetLanguage);
+  hmi_language_handler_->on_event(vr_event);
 
   // After last flag gets up, `VerifyWithPersistedLanguages`
   // method been called to and then will call `hmi_capabilities`
-  EXPECT_CALL(app_manager_, hmi_capabilities())
-      .WillOnce(ReturnRef(hmi_capabilities_));
+  ON_CALL(app_manager_, hmi_capabilities())
+      .WillByDefault(ReturnRef(hmi_capabilities_));
 
   // Set up `active_*_language` and
   //`persisted_ui_language_` to be the same
-
+  Json::Value dictionary = Json::Value();
+  ON_CALL(last_state_, get_dictionary()).WillByDefault(ReturnRef(dictionary));
   hmi_language_handler_->Init(&last_state_);
   Init(hmi_apis::Common_Language::eType::EN_US,
        hmi_apis::Common_Language::eType::EN_US,
@@ -182,15 +182,15 @@ TEST_F(HmiLanguageHandlerTest, OnEvent_AllLanguageIsReceivedAndSame_SUCCESS) {
   // will never be called.
   EXPECT_CALL(app_manager_, applications()).Times(0);
 
-  Event ev3(hmi_apis::FunctionID::TTS_GetLanguage);
-  hmi_language_handler_->on_event(ev3);
+  Event tts_event(hmi_apis::FunctionID::TTS_GetLanguage);
+  hmi_language_handler_->on_event(tts_event);
 }
 
 TEST_F(HmiLanguageHandlerTest, OnEvent_AllReceivedLanguagesMismatch_SUCCESS) {
-  Event ev1(hmi_apis::FunctionID::UI_GetLanguage);
-  hmi_language_handler_->on_event(ev1);
-  Event ev2(hmi_apis::FunctionID::VR_GetLanguage);
-  hmi_language_handler_->on_event(ev2);
+  Event ui_event(hmi_apis::FunctionID::UI_GetLanguage);
+  hmi_language_handler_->on_event(ui_event);
+  Event vr_event(hmi_apis::FunctionID::VR_GetLanguage);
+  hmi_language_handler_->on_event(vr_event);
 
   const Apps& kApps = hmi_language_handler_->get_apps();
 
@@ -223,18 +223,18 @@ TEST_F(HmiLanguageHandlerTest, OnEvent_AllReceivedLanguagesMismatch_SUCCESS) {
   // app data will checked by `CheckApplication` method
   EXPECT_CALL(app_manager_, applications()).WillOnce(Return(data_accessor));
 
-  Event ev3(hmi_apis::FunctionID::TTS_GetLanguage);
-  hmi_language_handler_->on_event(ev3);
+  Event tts_event(hmi_apis::FunctionID::TTS_GetLanguage);
+  hmi_language_handler_->on_event(tts_event);
 
   // Expect that app been added to apps map.
   EXPECT_EQ(kAppCount, kApps.size());
 }
 
 TEST_F(HmiLanguageHandlerTest, OnEvent_AllReceivedLanguagesMismatch_UNSUCCESS) {
-  Event ev1(hmi_apis::FunctionID::UI_GetLanguage);
-  hmi_language_handler_->on_event(ev1);
-  Event ev2(hmi_apis::FunctionID::VR_GetLanguage);
-  hmi_language_handler_->on_event(ev2);
+  Event ui_event(hmi_apis::FunctionID::UI_GetLanguage);
+  hmi_language_handler_->on_event(ui_event);
+  Event vr_event(hmi_apis::FunctionID::VR_GetLanguage);
+  hmi_language_handler_->on_event(vr_event);
 
   const Apps& kApps = hmi_language_handler_->get_apps();
 
@@ -260,8 +260,8 @@ TEST_F(HmiLanguageHandlerTest, OnEvent_AllReceivedLanguagesMismatch_UNSUCCESS) {
   // Send empty application set.
   EXPECT_CALL(app_manager_, applications()).WillOnce(Return(data_accessor));
 
-  Event ev3(hmi_apis::FunctionID::TTS_GetLanguage);
-  hmi_language_handler_->on_event(ev3);
+  Event tts_event(hmi_apis::FunctionID::TTS_GetLanguage);
+  hmi_language_handler_->on_event(tts_event);
 }
 
 TEST_F(HmiLanguageHandlerTest,
@@ -318,11 +318,11 @@ TEST_F(HmiLanguageHandlerTest,
   smart_objects::SmartObject msg;
   msg[am::strings::params][am::strings::app_id] = 5u;
 
-  Event ev1(hmi_apis::FunctionID::BasicCommunication_OnAppRegistered);
-  ev1.set_smart_object(msg);
+  Event event(hmi_apis::FunctionID::BasicCommunication_OnAppRegistered);
+  event.set_smart_object(msg);
 
   EXPECT_CALL(app_manager_, hmi_capabilities()).Times(0);
-  hmi_language_handler_->on_event(ev1);
+  hmi_language_handler_->on_event(event);
 
   EXPECT_EQ(1u, kApps.size());
 
@@ -352,7 +352,7 @@ TEST_F(HmiLanguageHandlerTest,
 
   EXPECT_CALL(app_manager_, UnregisterApplication(_, _, _, _)).Times(1);
 
-  hmi_language_handler_->on_event(ev1);
+  hmi_language_handler_->on_event(event);
 
   EXPECT_EQ(kDefaultAppsSize, kApps.size());
 }
