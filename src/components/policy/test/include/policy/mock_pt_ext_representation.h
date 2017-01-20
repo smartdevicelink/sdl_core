@@ -1,4 +1,4 @@
-/* Copyright (c) 2014, Ford Motor Company
+/* Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -115,26 +115,26 @@ class MockPTExtRepresentation : public MockPTRepresentation,
                      void(const std::string& app_id,
                           const std::string& type,
                           const std::string& value));
-  MOCK_CONST_METHOD3(}  // namespace policy_managerAdd,
+  MOCK_CONST_METHOD3(Add,
                      void(const std::string& app_id,
                           const std::string& type,
                           int seconds));
-MOCK_CONST_METHOD3(CountUnconsentedGroups,
-                   bool(const std::string& app_id,
-                        const std::string& device_id,
-                        int* count));
-MOCK_METHOD1(GetFunctionalGroupNames, bool(FunctionalGroupNames& names));
-MOCK_CONST_METHOD1(CleanupUnpairedDevices, bool(const DeviceIds& device_ids));
-MOCK_METHOD2(ReactOnUserDevConsentForApp,
-             bool(const std::string& app_id, bool is_device_allowed));
-MOCK_METHOD1(SetPredataPolicy, bool(const std::string& app_id));
-MOCK_METHOD2(SetIsPredata, bool(const std::string& app_id, bool is_predata));
-MOCK_CONST_METHOD2(SetUnpairedDevice,
-                   bool(const std::string& device_id, bool unpaired));
-MOCK_CONST_METHOD1(UnpairedDevicesList, bool(DeviceIds* device_ids));
-MOCK_CONST_METHOD2(RemoveAppConsentForGroup,
-                   bool(const std::string& policy_app_id,
-                        const std::string& functional_group));
+  MOCK_CONST_METHOD3(CountUnconsentedGroups,
+                     bool(const std::string& app_id,
+                          const std::string& device_id,
+                          int* count));
+  MOCK_METHOD1(GetFunctionalGroupNames, bool(FunctionalGroupNames& names));
+  MOCK_CONST_METHOD1(CleanupUnpairedDevices, bool(const DeviceIds& device_ids));
+  MOCK_METHOD2(ReactOnUserDevConsentForApp,
+               bool(const std::string& app_id, bool is_device_allowed));
+  MOCK_METHOD1(SetPredataPolicy, bool(const std::string& app_id));
+  MOCK_METHOD2(SetIsPredata, bool(const std::string& app_id, bool is_predata));
+  MOCK_CONST_METHOD2(SetUnpairedDevice,
+                     bool(const std::string& device_id, bool unpaired));
+  MOCK_CONST_METHOD1(UnpairedDevicesList, bool(DeviceIds* device_ids));
+  MOCK_CONST_METHOD2(RemoveAppConsentForGroup,
+                     bool(const std::string& policy_app_id,
+                          const std::string& functional_group));
 };
 
 }  // namespace policy_test
