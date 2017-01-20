@@ -392,7 +392,7 @@ uint32_t PolicyHandler::GetAppIdForSending() const {
                 "Number of apps with different from NONE level: "
                     << apps_without_none_level.size());
 
-  uint32_t choosen_app_id =
+  const uint32_t choosen_app_id =
       ChooseRandomAppForPolicyUpdate(apps_without_none_level);
 
   if (choosen_app_id) {
@@ -715,12 +715,7 @@ bool PolicyHandler::IsAppSuitableForPolicyUpdate(
   LOG4CXX_DEBUG(logger_,
                 "Is device " << device_params.device_mac_address << " allowed "
                              << std::boolalpha << is_device_allowed);
-
-  if (!is_device_allowed) {
-    return false;
-  }
-
-  return true;
+  return is_device_allowed;
 }
 
 uint32_t PolicyHandler::ChooseRandomAppForPolicyUpdate(

@@ -58,8 +58,7 @@ enum class TrackResult {
  * requests
  * number and time scale for that number, so application must consider that,
  * otherwise it will be disconnected and won't be registered till next
- * ignition
- * cycle.
+ * ignition cycle.
  */
 class RequestTracker {
  public:
