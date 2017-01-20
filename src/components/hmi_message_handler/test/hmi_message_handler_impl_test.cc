@@ -36,13 +36,15 @@
 #include "hmi_message_handler/messagebroker_adapter.h"
 #include "hmi_message_handler/mock_hmi_message_observer.h"
 #include "hmi_message_handler/mock_hmi_message_handler_settings.h"
-#include "utils/make_shared.h"
+#include "hmi_message_handler/mock_hmi_message_adapter_impl.h"
 
 namespace test {
 namespace components {
 namespace hmi_message_handler_test {
 
 using ::testing::ReturnRef;
+using ::testing::_;
+
 class HMIMessageHandlerImplTest : public ::testing::Test {
  public:
   HMIMessageHandlerImplTest()
@@ -63,10 +65,13 @@ class HMIMessageHandlerImplTest : public ::testing::Test {
         .WillByDefault(ReturnRef(stack_size));
     hmi_handler_ = new hmi_message_handler::HMIMessageHandlerImpl(
         mock_hmi_message_handler_settings);
+    ASSERT_TRUE(NULL != hmi_handler_);
     mb_adapter_ = new hmi_message_handler::MessageBrokerAdapter(
         hmi_handler_, "localhost", 22);
+    ASSERT_TRUE(NULL != mb_adapter_);
     mock_hmi_message_observer_ =
         new hmi_message_handler::MockHMIMessageObserver();
+    ASSERT_TRUE(NULL != mock_hmi_message_observer_);
     hmi_handler_->set_message_observer(mock_hmi_message_observer_);
     EXPECT_TRUE(NULL != hmi_handler_->observer());
   }
@@ -76,6 +81,13 @@ class HMIMessageHandlerImplTest : public ::testing::Test {
     delete mock_hmi_message_observer_;
     delete hmi_handler_;
     delete mb_adapter_;
+  }
+
+  hmi_message_handler::MessageSharedPointer CreateMessage() {
+    // The ServiceType doesn't really matter
+    return new application_manager::Message(
+        protocol_handler::MessagePriority::FromServiceType(
+            protocol_handler::ServiceType::kInvalidServiceType));
   }
 };
 
@@ -91,12 +103,19 @@ TEST_F(HMIMessageHandlerImplTest,
 TEST_F(HMIMessageHandlerImplTest,
        OnErrorSending_NotEmptyMessage_ExpectOnErrorSendingProceeded) {
   // Arrange
-  utils::SharedPtr<application_manager::Message> message(
-      utils::MakeShared<application_manager::Message>(
-          protocol_handler::MessagePriority::FromServiceType(
-              protocol_handler::ServiceType::kControl)));
+  utils::SharedPtr<application_manager::Message> message = CreateMessage();
 
   EXPECT_CALL(*mock_hmi_message_observer_, OnErrorSending(message));
+  // Act
+  hmi_handler_->OnErrorSending(message);
+}
+
+TEST_F(HMIMessageHandlerImplTest, OnErrorSending_InvalidObserver_Cancelled) {
+  // Arrange
+  utils::SharedPtr<application_manager::Message> message = CreateMessage();
+
+  hmi_handler_->set_message_observer(NULL);
+  EXPECT_CALL(*mock_hmi_message_observer_, OnErrorSending(_)).Times(0);
   // Act
   hmi_handler_->OnErrorSending(message);
 }
@@ -129,6 +148,40 @@ TEST_F(HMIMessageHandlerImplTest, RemoveHMIMessageAdapter_ExpectRemoved) {
   hmi_handler_->RemoveHMIMessageAdapter(mb_adapter_);
   // Check after action
   EXPECT_TRUE(hmi_handler_->message_adapters().empty());
+}
+
+// TODO(atimchenko) SDLOPEN-44 Wrong message to observer
+TEST_F(HMIMessageHandlerImplTest,
+       DISABLED_OnMessageReceived_ValidObserver_Success) {
+  hmi_message_handler::MessageSharedPointer message = CreateMessage();
+  EXPECT_CALL(*mock_hmi_message_observer_, OnMessageReceived(message));
+
+  hmi_handler_->OnMessageReceived(message);
+  // Wait for the message to be processed
+  hmi_handler_->messages_from_hmi()->WaitDumpQueue();
+}
+
+TEST_F(HMIMessageHandlerImplTest, OnMessageReceived_InvalidObserver_Cancelled) {
+  hmi_message_handler::MessageSharedPointer message = CreateMessage();
+  EXPECT_CALL(*mock_hmi_message_observer_, OnMessageReceived(_)).Times(0);
+  // Make the observer invalid
+  hmi_handler_->set_message_observer(NULL);
+  hmi_handler_->OnMessageReceived(message);
+  hmi_handler_->messages_from_hmi()->WaitDumpQueue();
+}
+
+TEST_F(HMIMessageHandlerImplTest, SendMessageToHMI_Success) {
+  hmi_message_handler::MessageSharedPointer message = CreateMessage();
+
+  MockHMIMessageAdapterImpl message_adapter(hmi_handler_);
+  EXPECT_CALL(message_adapter, SendMessageToHMI(message));
+
+  hmi_handler_->AddHMIMessageAdapter(&message_adapter);
+  hmi_handler_->SendMessageToHMI(message);
+
+  // Wait for the message to be processed
+  hmi_handler_->messages_to_hmi()->WaitDumpQueue();
+  testing::Mock::AsyncVerifyAndClearExpectations(100);
 }
 
 }  // namespace hmi_message_handler_test

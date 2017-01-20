@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "resumption/last_state.h"
+#include "resumption/last_state_impl.h"
 #include "utils/file_system.h"
 #include "utils/logger.h"
 
@@ -38,37 +38,41 @@ namespace resumption {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "Resumption")
 
-LastState::LastState(const std::string& app_storage_folder,
-                     const std::string& app_info_storage)
+LastStateImpl::LastStateImpl(const std::string& app_storage_folder,
+                             const std::string& app_info_storage)
     : app_storage_folder_(app_storage_folder)
     , app_info_storage_(app_info_storage) {
-  LoadFromFileSystem();
+  LoadStateFromFileSystem();
   LOG4CXX_AUTO_TRACE(logger_);
 }
 
-LastState::~LastState() {
+LastStateImpl::~LastStateImpl() {
   LOG4CXX_AUTO_TRACE(logger_);
-  SaveToFileSystem();
+  SaveStateToFileSystem();
 }
 
-void LastState::SaveToFileSystem() {
+void LastStateImpl::SaveStateToFileSystem() {
   LOG4CXX_AUTO_TRACE(logger_);
-  const std::string& str = dictionary.toStyledString();
+  const std::string& str = dictionary_.toStyledString();
   const std::vector<uint8_t> char_vector_pdata(str.begin(), str.end());
 
   DCHECK(file_system::CreateDirectoryRecursively(app_storage_folder_));
   LOG4CXX_INFO(logger_,
-               "LastState::SaveToFileSystem " << app_info_storage_ << str);
+               "LastState::SaveStateToFileSystem " << app_info_storage_ << str);
   DCHECK(file_system::Write(app_info_storage_, char_vector_pdata));
 }
 
-void LastState::LoadFromFileSystem() {
+Json::Value& LastStateImpl::get_dictionary() {
+  return dictionary_;
+}
+
+void LastStateImpl::LoadStateFromFileSystem() {
   std::string buffer;
   bool result = file_system::ReadFile(app_info_storage_, buffer);
   Json::Reader m_reader;
-  if (result && m_reader.parse(buffer, dictionary)) {
+  if (result && m_reader.parse(buffer, dictionary_)) {
     LOG4CXX_INFO(logger_,
-                 "Valid last state was found." << dictionary.toStyledString());
+                 "Valid last state was found." << dictionary_.toStyledString());
     return;
   }
   LOG4CXX_WARN(logger_, "No valid last state was found.");

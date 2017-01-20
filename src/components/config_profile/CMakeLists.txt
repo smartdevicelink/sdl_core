@@ -28,6 +28,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
 include_directories (
   include
@@ -36,13 +37,18 @@ include_directories (
   ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
-set (SOURCES
-    ${COMPONENTS_DIR}/config_profile/src/profile.cc
-    ${COMPONENTS_DIR}/config_profile/src/ini_file.cc
+set(PATHS
+  ${CMAKE_CURRENT_SOURCE_DIR}/include
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
+set(LIBRARIES
+  Utils
+)
+
+collect_sources(SOURCES "${PATHS}")
 add_library("ConfigProfile" ${SOURCES})
-target_link_libraries("ConfigProfile" Utils)
+target_link_libraries("ConfigProfile" ${LIBRARIES})
 
 if(BUILD_TESTS)
   add_subdirectory(test)

@@ -110,7 +110,8 @@ void SDLActivateAppRequest::Run() {
                   "Sends response with result code REJECTED");
     SendErrorResponse(correlation_id(),
                       static_cast<eType>(function_id()),
-                      hmi_apis::Common_Result::REJECTED);
+                      hmi_apis::Common_Result::REJECTED,
+                      "HMIDeactivate is active");
   } else {
     const uint32_t application_id = app_id();
     application_manager_.GetPolicyHandler().OnActivateApp(application_id,
@@ -153,6 +154,18 @@ void SDLActivateAppRequest::Run() {
                 "Found application to activate. Application id is "
                     << app_to_activate->app_id());
 
+  if (application_manager_.state_controller().IsStateActive(
+          HmiState::StateID::STATE_ID_DEACTIVATE_HMI)) {
+    LOG4CXX_WARN(logger_,
+                 "DeactivateHmi state is active. "
+                 "Sends response with result code REJECTED");
+    SendErrorResponse(correlation_id(),
+                      static_cast<hmi_apis::FunctionID::eType>(function_id()),
+                      hmi_apis::Common_Result::REJECTED,
+                      "HMIDeactivate is active");
+    return;
+  }
+
   if (app_to_activate->IsRegistered()) {
     LOG4CXX_DEBUG(logger_, "Application is registered. Activating.");
     application_manager_.GetPolicyHandler().OnActivateApp(application_id,
@@ -169,7 +182,8 @@ void SDLActivateAppRequest::Run() {
                   "Can't find regular foreground app with the same "
                   "connection id:"
                       << device_handle);
-    SendResponse(false, correlation_id(), SDL_ActivateApp, NO_APPS_REGISTERED);
+    SendErrorResponse(
+        correlation_id(), SDL_ActivateApp, NO_APPS_REGISTERED, "");
     return;
   }
 
@@ -201,8 +215,8 @@ void SDLActivateAppRequest::onTimeOut() {
   using namespace hmi_apis::Common_Result;
   using namespace application_manager;
   unsubscribe_from_event(BasicCommunication_OnAppRegistered);
-  SendResponse(
-      false, correlation_id(), SDL_ActivateApp, APPLICATION_NOT_REGISTERED);
+  SendErrorResponse(
+      correlation_id(), SDL_ActivateApp, APPLICATION_NOT_REGISTERED, "");
 }
 
 void SDLActivateAppRequest::on_event(const event_engine::Event& event) {

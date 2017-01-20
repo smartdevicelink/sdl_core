@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,7 +46,7 @@
 #include "transport_manager/transport_adapter/connection.h"
 #include "protocol/raw_message.h"
 #include "utils/make_shared.h"
-#include "resumption/last_state.h"
+#include "resumption/last_state_impl.h"
 #include "config_profile/profile.h"
 
 namespace test {
@@ -74,7 +74,7 @@ class TransportAdapterTest : public ::testing::Test {
   }
 
   NiceMock<MockTransportManagerSettings> transport_manager_settings;
-  resumption::LastState last_state_;
+  resumption::LastStateImpl last_state_;
   std::string dev_id;
   std::string uniq_id;
   int app_handle;

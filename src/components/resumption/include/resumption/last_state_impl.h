@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,25 +30,54 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_INCLUDE_TEST_HMI_MESSAGE_HANDLER_MOCK_HMI_MESSAGE_HANDLER_H_
-#define SRC_COMPONENTS_INCLUDE_TEST_HMI_MESSAGE_HANDLER_MOCK_HMI_MESSAGE_HANDLER_H_
+#ifndef SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_IMPL_H_
+#define SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_IMPL_H_
 
-#include "gmock/gmock.h"
-#include "hmi_message_handler/hmi_message_handler.h"
+#include "resumption/last_state.h"
+#include "utils/macro.h"
 
-namespace test {
-namespace components {
-namespace hmi_message_handler_test {
+namespace resumption {
 
-using hmi_message_handler::HMIMessageAdapter;
+/**
+ * @brief The LastStateImpl class handles interface of last state
+ */
 
-class MockHMIMessageHandler : public ::hmi_message_handler::HMIMessageHandler {
+class LastStateImpl : public LastState {
  public:
-  MOCK_METHOD1(AddHMIMessageAdapter, void(HMIMessageAdapter* adapter));
-  MOCK_METHOD1(RemoveHMIMessageAdapter, void(HMIMessageAdapter* adapter));
-};
-}  // namespace hmi_message_handler_test
-}  // namespace components
-}  // namespace test
+  /**
+   * @brief Constructor
+   */
+  LastStateImpl(const std::string& app_storage_folder,
+                const std::string& app_info_storage);
 
-#endif  // SRC_COMPONENTS_INCLUDE_TEST_HMI_MESSAGE_HANDLER_MOCK_HMI_MESSAGE_HANDLER_H_
+  /**
+   * @brief Destructor
+   */
+  ~LastStateImpl();
+
+  /**
+   * @brief Saving dictionary to filesystem
+   */
+  void SaveStateToFileSystem() OVERRIDE;
+
+  /**
+   * @brief Get reference to dictionary
+   */
+  Json::Value& get_dictionary() OVERRIDE;
+
+ private:
+  const std::string app_storage_folder_;
+  const std::string app_info_storage_;
+  Json::Value dictionary_;
+
+  /**
+   * @brief Load dictionary from filesystem
+   */
+  void LoadStateFromFileSystem();
+
+  DISALLOW_COPY_AND_ASSIGN(LastStateImpl);
+};
+
+}  // namespace resumption
+
+#endif  // SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_IMPL_H_
