@@ -573,7 +573,7 @@ typedef Types<commands::OnVIGpsDataNotification,
               commands::AllowAllAppsRequest,
               commands::AllowAllAppsResponse,
               commands::AllowAppRequest,
-              //commands::UISetIconRequest,
+              // commands::UISetIconRequest,
               commands::AllowAppResponse> HMICommandsListFifth;
 
 TYPED_TEST_CASE(HMICommandsTestFirst, HMICommandsListFirst);

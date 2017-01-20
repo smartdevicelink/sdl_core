@@ -113,8 +113,7 @@ TEST_F(GetUrlsTest, RUN_SUCCESS) {
 
 TEST_F(GetUrlsTest, RUN_PolicyNotEnabled_UNSUCCESS) {
   EXPECT_CALL(mock_policy_handler_, PolicyEnabled()).WillOnce(Return(false));
-  EXPECT_CALL(app_mngr_, ManageHMICommand(command_msg_))
-      .WillOnce(Return(true));
+  EXPECT_CALL(app_mngr_, ManageHMICommand(command_msg_)).WillOnce(Return(true));
 
   request_command_->Run();
 
@@ -127,8 +126,7 @@ TEST_F(GetUrlsTest, RUN_PolicyNotEnabled_UNSUCCESS) {
 TEST_F(GetUrlsTest, RUN_EmptyEndpoints_UNSUCCESS) {
   EXPECT_CALL(mock_policy_handler_, GetServiceUrls(kInitialService, _));
   EXPECT_CALL(mock_policy_handler_, PolicyEnabled()).WillOnce(Return(true));
-  EXPECT_CALL(app_mngr_, ManageHMICommand(command_msg_))
-      .WillOnce(Return(true));
+  EXPECT_CALL(app_mngr_, ManageHMICommand(command_msg_)).WillOnce(Return(true));
 
   request_command_->Run();
 
@@ -160,8 +158,7 @@ TEST_F(GetUrlsTest, ProcessPolicyServiceURLs_SUCCESS) {
   EXPECT_CALL(app_mngr_, application(kAppIdForSending))
       .WillOnce(Return(mock_app));
   EXPECT_CALL(*mock_app, app_id()).WillOnce(Return(kAppIdForSending));
-  EXPECT_CALL(app_mngr_, ManageHMICommand(command_msg_))
-      .WillOnce(Return(true));
+  EXPECT_CALL(app_mngr_, ManageHMICommand(command_msg_)).WillOnce(Return(true));
 
   request_command_->Run();
 
@@ -197,8 +194,7 @@ TEST_F(GetUrlsTest, ProcessPolicyServiceURLs_IncorrectIdForSending_UNSUCCESS) {
   EXPECT_CALL(mock_policy_handler_, GetAppIdForSending())
       .WillOnce(Return(kInvalidAppId_));
 
-  EXPECT_CALL(app_mngr_, ManageHMICommand(command_msg_))
-      .WillOnce(Return(true));
+  EXPECT_CALL(app_mngr_, ManageHMICommand(command_msg_)).WillOnce(Return(true));
 
   EXPECT_CALL(app_mngr_, application(kInvalidAppId_)).Times(0);
 
@@ -226,8 +222,7 @@ TEST_F(GetUrlsTest, ProcessPolicyServiceURLs_ApplicationIsNotValid_UNSUCCESS) {
   EXPECT_CALL(app_mngr_, application(kAppIdForSending))
       .WillOnce(Return(invalid_mock_app));
 
-  EXPECT_CALL(app_mngr_, ManageHMICommand(command_msg_))
-      .WillOnce(Return(true));
+  EXPECT_CALL(app_mngr_, ManageHMICommand(command_msg_)).WillOnce(Return(true));
 
   request_command_->Run();
 
@@ -261,8 +256,7 @@ TEST_F(GetUrlsTest, ProcessPolicyServiceURLs_FoundURLForApplication_SUCCESS) {
 
   EXPECT_CALL(*mock_app, policy_app_id()).WillOnce(Return(kPolicyAppId));
 
-  EXPECT_CALL(app_mngr_, ManageHMICommand(command_msg_))
-      .WillOnce(Return(true));
+  EXPECT_CALL(app_mngr_, ManageHMICommand(command_msg_)).WillOnce(Return(true));
 
   request_command_->Run();
 

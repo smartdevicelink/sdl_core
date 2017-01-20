@@ -120,8 +120,7 @@ TEST_F(ResponseFromHMITest, CreateHMIRequest_CantManageCommand_Covering) {
   ResponseFromHMIPtr command(CreateCommand<ResponseFromHMI>());
 
   MessageSharedPtr result_msg;
-  ON_CALL(app_mngr_, GetNextHMICorrelationID())
-      .WillByDefault(Return(1u));
+  ON_CALL(app_mngr_, GetNextHMICorrelationID()).WillByDefault(Return(1u));
   EXPECT_CALL(app_mngr_, ManageHMICommand(_))
       .WillOnce(DoAll(SaveArg<0>(&result_msg), Return(false)));
 
