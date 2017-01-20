@@ -145,10 +145,6 @@ target_link_libraries(${PROJECT} ${LIBRARIES})
 
 add_dependencies(${PROJECT} Policy)
 
-if(ENABLE_LOG)
-  add_dependencies(${PROJECT} install-3rd_party_logger)
-endif()
-
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/log4cxx.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/audio.8bit.wav DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

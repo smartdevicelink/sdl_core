@@ -33,7 +33,7 @@ before_install:
 script:
   - sudo ln -sf /usr/bin/gcov-4.9 /usr/bin/gcov
   - bash -e tools/infrastructure/check_style.sh
-  - echo Number of processing units available: ${PROCESSING_UNITS_COUNT}
+  - echo "Number of processing units available ${PROCESSING_UNITS_COUNT}"
   - mkdir build && cd build && cmake ../ -DBUILD_TESTS=ON -DENABLE_GCOV=ON && make install -j${PROCESSING_UNITS_COUNT}
   - sudo ldconfig
   - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:`pwd`/bin/lib ; make test
