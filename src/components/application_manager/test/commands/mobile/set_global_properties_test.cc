@@ -392,6 +392,14 @@ TEST_F(SetGlobalPropertiesRequestTest, Run_VRNoMenuAndKeyboard_SUCCESS) {
 
   SharedPtr<SetGlobalPropertiesRequest> command(
       CreateCommand<SetGlobalPropertiesRequest>(msg));
+  EXPECT_CALL(
+      hmi_interfaces_,
+      GetInterfaceFromFunction(hmi_apis::FunctionID::UI_SetGlobalProperties))
+      .WillOnce(Return(am::HmiInterfaces::HMI_INTERFACE_UI));
+
+  ON_CALL(hmi_interfaces_,
+          GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
+      .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
 
   OnEventUISetupHelper(msg, command);
 }
@@ -424,6 +432,15 @@ TEST_F(SetGlobalPropertiesRequestTest, Run_VRWithMenuAndKeyboard_SUCCESS) {
   EXPECT_CALL(*mock_app_, set_menu_icon(menu_icon));
   EXPECT_CALL(*mock_app_, set_keyboard_props(keyboard_properties));
   EXPECT_CALL(*mock_app_, app_id()).WillOnce(Return(kAppId));
+
+  EXPECT_CALL(
+      hmi_interfaces_,
+      GetInterfaceFromFunction(hmi_apis::FunctionID::UI_SetGlobalProperties))
+      .WillOnce(Return(am::HmiInterfaces::HMI_INTERFACE_UI));
+
+  ON_CALL(hmi_interfaces_,
+          GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
+      .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
 
   SharedPtr<SetGlobalPropertiesRequest> command(
       CreateCommand<SetGlobalPropertiesRequest>(msg));
@@ -577,6 +594,14 @@ TEST_F(SetGlobalPropertiesRequestTest, Run_NoVR_SUCCESS) {
   EXPECT_CALL(*mock_app_, set_keyboard_props(keyboard_properties));
   EXPECT_CALL(*mock_app_, app_id()).WillOnce(Return(kAppId));
 
+  EXPECT_CALL(
+      hmi_interfaces_,
+      GetInterfaceFromFunction(hmi_apis::FunctionID::UI_SetGlobalProperties))
+      .WillOnce(Return(am::HmiInterfaces::HMI_INTERFACE_UI));
+  ON_CALL(hmi_interfaces_,
+          GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
+      .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
+
   SharedPtr<SetGlobalPropertiesRequest> command(
       CreateCommand<SetGlobalPropertiesRequest>(msg));
 
@@ -641,6 +666,14 @@ TEST_F(SetGlobalPropertiesRequestTest, Run_NoVRNoDataNoDefault_Canceled) {
   EXPECT_CALL(*mock_app_, set_keyboard_props(_));
   EXPECT_CALL(*mock_app_, app_id());
 
+  EXPECT_CALL(
+      hmi_interfaces_,
+      GetInterfaceFromFunction(hmi_apis::FunctionID::UI_SetGlobalProperties))
+      .WillOnce(Return(am::HmiInterfaces::HMI_INTERFACE_UI));
+  ON_CALL(hmi_interfaces_,
+          GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
+      .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
+
   SharedPtr<SetGlobalPropertiesRequest> command(
       CreateCommand<SetGlobalPropertiesRequest>(msg));
 
@@ -678,6 +711,13 @@ TEST_F(SetGlobalPropertiesRequestTest, Run_NoVRNoDataDefaultCreated_SUCCESS) {
   EXPECT_CALL(*mock_app_, set_menu_icon(_)).Times(0);
   EXPECT_CALL(*mock_app_, set_keyboard_props(keyboard_properties));
   EXPECT_CALL(*mock_app_, app_id()).WillOnce(Return(kAppId));
+  EXPECT_CALL(
+      hmi_interfaces_,
+      GetInterfaceFromFunction(hmi_apis::FunctionID::UI_SetGlobalProperties))
+      .WillOnce(Return(am::HmiInterfaces::HMI_INTERFACE_UI));
+  ON_CALL(hmi_interfaces_,
+          GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
+      .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
 
   SharedPtr<SetGlobalPropertiesRequest> command(
       CreateCommand<SetGlobalPropertiesRequest>(msg));
@@ -716,7 +756,13 @@ TEST_F(SetGlobalPropertiesRequestTest, Run_NoVRNoDataFromSynonyms_SUCCESS) {
   EXPECT_CALL(*mock_app_, set_menu_icon(_)).Times(0);
   EXPECT_CALL(*mock_app_, set_keyboard_props(keyboard_properties));
   EXPECT_CALL(*mock_app_, app_id()).WillOnce(Return(kAppId));
-
+  EXPECT_CALL(
+      hmi_interfaces_,
+      GetInterfaceFromFunction(hmi_apis::FunctionID::UI_SetGlobalProperties))
+      .WillOnce(Return(am::HmiInterfaces::HMI_INTERFACE_UI));
+  ON_CALL(hmi_interfaces_,
+          GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
+      .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
   SharedPtr<SetGlobalPropertiesRequest> command(
       CreateCommand<SetGlobalPropertiesRequest>(msg));
 
@@ -744,6 +790,14 @@ TEST_F(SetGlobalPropertiesRequestTest, Run_TTSHelpAndTimeout_SUCCESS) {
   EXPECT_CALL(*mock_app_, timeout_prompt()).WillOnce(Return(&timeout_prompt));
   EXPECT_CALL(*mock_app_, app_id()).WillOnce(Return(kAppId));
 
+  EXPECT_CALL(
+      hmi_interfaces_,
+      GetInterfaceFromFunction(hmi_apis::FunctionID::TTS_SetGlobalProperties))
+      .WillOnce(Return(am::HmiInterfaces::HMI_INTERFACE_TTS));
+  ON_CALL(hmi_interfaces_,
+          GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_TTS))
+      .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
+
   SharedPtr<SetGlobalPropertiesRequest> command(
       CreateCommand<SetGlobalPropertiesRequest>(msg));
 
@@ -767,7 +821,13 @@ TEST_F(SetGlobalPropertiesRequestTest, Run_TTSOnlyHelp_SUCCESS) {
   EXPECT_CALL(*mock_app_, set_timeout_prompt(_)).Times(0);
   EXPECT_CALL(*mock_app_, timeout_prompt()).Times(0);
   EXPECT_CALL(*mock_app_, app_id()).WillOnce(Return(kAppId));
-
+  EXPECT_CALL(
+      hmi_interfaces_,
+      GetInterfaceFromFunction(hmi_apis::FunctionID::TTS_SetGlobalProperties))
+      .WillOnce(Return(am::HmiInterfaces::HMI_INTERFACE_TTS));
+  ON_CALL(hmi_interfaces_,
+          GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_TTS))
+      .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
   SharedPtr<SetGlobalPropertiesRequest> command(
       CreateCommand<SetGlobalPropertiesRequest>(msg));
 
@@ -791,7 +851,13 @@ TEST_F(SetGlobalPropertiesRequestTest, Run_TTSOnlyTimeout_SUCCESS) {
   EXPECT_CALL(*mock_app_, set_timeout_prompt(timeout_prompt));
   EXPECT_CALL(*mock_app_, timeout_prompt()).WillOnce(Return(&timeout_prompt));
   EXPECT_CALL(*mock_app_, app_id()).WillOnce(Return(kAppId));
-
+  EXPECT_CALL(
+      hmi_interfaces_,
+      GetInterfaceFromFunction(hmi_apis::FunctionID::TTS_SetGlobalProperties))
+      .WillOnce(Return(am::HmiInterfaces::HMI_INTERFACE_TTS));
+  ON_CALL(hmi_interfaces_,
+          GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_TTS))
+      .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
   SharedPtr<SetGlobalPropertiesRequest> command(
       CreateCommand<SetGlobalPropertiesRequest>(msg));
 
@@ -996,17 +1062,31 @@ TEST_F(SetGlobalPropertiesRequestTest, OnEvent_UIAndSuccessResultCode_SUCCESS) {
 
   SharedPtr<SetGlobalPropertiesRequest> command(
       CreateCommand<SetGlobalPropertiesRequest>(msg));
+  ON_CALL(
+      hmi_interfaces_,
+      GetInterfaceFromFunction(hmi_apis::FunctionID::UI_SetGlobalProperties))
+      .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_UI));
+  ON_CALL(hmi_interfaces_,
+          GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
+      .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
 
   OnEventUISetupHelper(msg, command);
 
-  EXPECT_CALL(mock_message_helper_, HMIToMobileResult(response_code))
+  Event event(hmi_apis::FunctionID::UI_SetGlobalProperties);
+  event.set_smart_object(*msg);
+
+  EXPECT_CALL(mock_message_helper_, HMIToMobileResult(_))
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
   EXPECT_CALL(*mock_app_, UpdateHash());
 
-  Event event(hmi_apis::FunctionID::UI_SetGlobalProperties);
-  event.set_smart_object(*msg);
+  EXPECT_CALL(hmi_interfaces_, GetInterfaceState(_))
+      .WillRepeatedly(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
+
+  EXPECT_CALL(app_mngr_,
+              ManageMobileCommand(_, am::commands::Command::ORIGIN_SDL))
+      .WillOnce(Return(true));
 
   command->on_event(event);
 }
@@ -1019,7 +1099,13 @@ TEST_F(SetGlobalPropertiesRequestTest, OnEvent_UIAndWarningResultCode_SUCCESS) {
 
   SharedPtr<SetGlobalPropertiesRequest> command(
       CreateCommand<SetGlobalPropertiesRequest>(msg));
-
+  ON_CALL(
+      hmi_interfaces_,
+      GetInterfaceFromFunction(hmi_apis::FunctionID::UI_SetGlobalProperties))
+      .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_UI));
+  ON_CALL(hmi_interfaces_,
+          GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
+      .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
   OnEventUISetupHelper(msg, command);
 
   EXPECT_CALL(mock_message_helper_, HMIToMobileResult(_)).Times(0);
@@ -1030,6 +1116,18 @@ TEST_F(SetGlobalPropertiesRequestTest, OnEvent_UIAndWarningResultCode_SUCCESS) {
   Event event(hmi_apis::FunctionID::UI_SetGlobalProperties);
   event.set_smart_object(*msg);
 
+  EXPECT_CALL(hmi_interfaces_, GetInterfaceState(_))
+      .WillRepeatedly(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
+  EXPECT_CALL(mock_message_helper_, HMIToMobileResult(_))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
+  /*EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillOnce(Return(mock_app_));*/
+  EXPECT_CALL(app_mngr_,
+              ManageMobileCommand(_, am::commands::Command::ORIGIN_SDL))
+      .WillOnce(Return(true));
+
+  //EXPECT_CALL(*mock_app_, UpdateHash());
+
   command->on_event(event);
 }
 
@@ -1038,13 +1136,22 @@ TEST_F(SetGlobalPropertiesRequestTest, OnEvent_InvalidApp_Canceled) {
   hmi_apis::Common_Result::eType response_code =
       hmi_apis::Common_Result::WARNINGS;
   (*msg)[am::strings::params][am::hmi_response::code] = response_code;
-
+  ON_CALL(
+      hmi_interfaces_,
+      GetInterfaceFromFunction(hmi_apis::FunctionID::UI_SetGlobalProperties))
+      .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_UI));
+  ON_CALL(hmi_interfaces_,
+          GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
+      .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
   SharedPtr<SetGlobalPropertiesRequest> command(
       CreateCommand<SetGlobalPropertiesRequest>(msg));
 
   OnEventUISetupHelper(msg, command);
+  EXPECT_CALL(hmi_interfaces_, GetInterfaceState(_))
+      .WillRepeatedly(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
 
-  EXPECT_CALL(mock_message_helper_, HMIToMobileResult(_)).Times(0);
+  EXPECT_CALL(mock_message_helper_, HMIToMobileResult(_))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(MockAppPtr()));
   EXPECT_CALL(*mock_app_, UpdateHash()).Times(0);
@@ -1077,11 +1184,23 @@ TEST_F(SetGlobalPropertiesRequestTest,
   hmi_apis::Common_Result::eType response_code =
       hmi_apis::Common_Result::SUCCESS;
   (*msg)[am::strings::params][am::hmi_response::code] = response_code;
-
+  ON_CALL(
+      hmi_interfaces_,
+      GetInterfaceFromFunction(hmi_apis::FunctionID::TTS_SetGlobalProperties))
+      .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_TTS));
+  ON_CALL(hmi_interfaces_,
+          GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_TTS))
+      .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
   SharedPtr<SetGlobalPropertiesRequest> command(
       CreateCommand<SetGlobalPropertiesRequest>(msg));
 
   OnEventTTSSetupHelper(msg, command);
+  EXPECT_CALL(hmi_interfaces_, GetInterfaceState(_))
+      .WillRepeatedly(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
+
+  EXPECT_CALL(app_mngr_,
+              ManageMobileCommand(_, am::commands::Command::ORIGIN_SDL))
+      .WillOnce(Return(true));
 
   EXPECT_CALL(mock_message_helper_, HMIToMobileResult(response_code))
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
@@ -1101,13 +1220,27 @@ TEST_F(SetGlobalPropertiesRequestTest,
   hmi_apis::Common_Result::eType response_code =
       hmi_apis::Common_Result::WARNINGS;
   (*msg)[am::strings::params][am::hmi_response::code] = response_code;
-
+  ON_CALL(
+      hmi_interfaces_,
+      GetInterfaceFromFunction(hmi_apis::FunctionID::TTS_SetGlobalProperties))
+      .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_TTS));
+  ON_CALL(hmi_interfaces_,
+          GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_TTS))
+      .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
   SharedPtr<SetGlobalPropertiesRequest> command(
       CreateCommand<SetGlobalPropertiesRequest>(msg));
 
   OnEventTTSSetupHelper(msg, command);
 
-  EXPECT_CALL(mock_message_helper_, HMIToMobileResult(_)).Times(0);
+  EXPECT_CALL(hmi_interfaces_, GetInterfaceState(_))
+      .WillRepeatedly(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
+
+  EXPECT_CALL(app_mngr_,
+              ManageMobileCommand(_, am::commands::Command::ORIGIN_SDL))
+      .WillOnce(Return(true));
+
+  EXPECT_CALL(mock_message_helper_, HMIToMobileResult(_))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
   EXPECT_CALL(*mock_app_, UpdateHash());
