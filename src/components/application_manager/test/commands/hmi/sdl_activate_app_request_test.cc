@@ -61,6 +61,7 @@ using testing::Mock;
 using testing::Return;
 using testing::ReturnRef;
 using testing::Mock;
+using ::testing::NiceMock;
 using am::MockMessageHelper;
 using policy_test::MockPolicyHandlerInterface;
 using am::event_engine::Event;
@@ -129,9 +130,10 @@ class SDLActivateAppRequestTest
   am::MockMessageHelper* message_helper_mock_;
   policy_test::MockPolicyHandlerInterface policy_handler_;
   application_manager_test::MockStateController mock_state_controller_;
+  NiceMock<event_engine_test::MockEventDispatcher> mock_event_dispatcher_;
 };
 
-TEST_F(SDLActivateAppRequestTest, DISABLED_FindAppToRegister_SUCCESS) {
+TEST_F(SDLActivateAppRequestTest, FindAppToRegister_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
   SetCorrelationAndAppID(msg);
 
@@ -140,8 +142,6 @@ TEST_F(SDLActivateAppRequestTest, DISABLED_FindAppToRegister_SUCCESS) {
 
   MockAppPtr mock_app(CreateMockApp());
   EXPECT_CALL(app_mngr_, application(kAppID)).WillOnce(Return(mock_app));
-  EXPECT_CALL(app_mngr_, WaitingApplicationByID(kAppID))
-      .WillOnce(Return(mock_app));
 
   EXPECT_CALL(app_mngr_, state_controller())
       .WillOnce(ReturnRef(mock_state_controller_));
@@ -158,17 +158,26 @@ TEST_F(SDLActivateAppRequestTest, DISABLED_FindAppToRegister_SUCCESS) {
 
   app_list_.insert(mock_app_first);
   DataAccessor<ApplicationSet> accessor(app_list_, lock_);
-  EXPECT_CALL(app_mngr_, applications()).WillOnce(Return(accessor));
+  EXPECT_CALL(app_mngr_, applications()).WillRepeatedly(Return(accessor));
 
-  EXPECT_CALL(*mock_app_first, device()).WillOnce(Return(kHandle));
+  ON_CALL(*mock_app_first, device()).WillByDefault(Return(kHandle));
   EXPECT_CALL(*mock_app_first, is_foreground()).WillOnce(Return(false));
+  ON_CALL(*mock_app_first, protocol_version())
+      .WillByDefault(Return(am::ProtocolVersion::kV4));
+  ON_CALL(*mock_app, protocol_version())
+      .WillByDefault(Return(am::ProtocolVersion::kV4));
+
+  const std::string url = "url";
+  ON_CALL(*mock_app_first, SchemaUrl()).WillByDefault(Return(url));
+  const std::string package = "package";
+  ON_CALL(*mock_app_first, PackageName()).WillByDefault(Return(package));
 
   EXPECT_CALL(*message_helper_mock_, SendLaunchApp(_, _, _, _));
 
   command->Run();
 }
 
-TEST_F(SDLActivateAppRequestTest, DISABLED_AppIdNotFound_SUCCESS) {
+TEST_F(SDLActivateAppRequestTest, AppIdNotFound_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
   SetCorrelationAndAppID(msg);
 
@@ -183,7 +192,7 @@ TEST_F(SDLActivateAppRequestTest, DISABLED_AppIdNotFound_SUCCESS) {
   command->Run();
 }
 
-TEST_F(SDLActivateAppRequestTest, DISABLED_DevicesAppsEmpty_SUCCESS) {
+TEST_F(SDLActivateAppRequestTest, DevicesAppsEmpty_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
   SetCorrelationAndAppID(msg);
 
@@ -193,14 +202,23 @@ TEST_F(SDLActivateAppRequestTest, DISABLED_DevicesAppsEmpty_SUCCESS) {
   MockAppPtr mock_app(CreateMockApp());
   ON_CALL(app_mngr_, application(kAppID)).WillByDefault(Return(mock_app));
 
+  EXPECT_CALL(app_mngr_, state_controller())
+      .WillOnce(ReturnRef(mock_state_controller_));
+  EXPECT_CALL(mock_state_controller_,
+              IsStateActive(am::HmiState::StateID::STATE_ID_DEACTIVATE_HMI))
+      .WillOnce(Return(false));
+
+  EXPECT_CALL(*mock_app, IsRegistered()).WillOnce(Return(false));
+  ON_CALL(*mock_app, device()).WillByDefault(Return(kHandle));
+
   DataAccessor<ApplicationSet> accessor(app_list_, lock_);
-  EXPECT_CALL(app_mngr_, applications()).WillOnce(Return(accessor));
+  EXPECT_CALL(app_mngr_, applications()).WillRepeatedly(Return(accessor));
   app_list_ = accessor.GetData();
 
   command->Run();
 }
 
-TEST_F(SDLActivateAppRequestTest, DISABLED_FirstAppActive_SUCCESS) {
+TEST_F(SDLActivateAppRequestTest, FirstAppActive_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
   SetCorrelationAndAppID(msg);
 
@@ -209,11 +227,15 @@ TEST_F(SDLActivateAppRequestTest, DISABLED_FirstAppActive_SUCCESS) {
 
   MockAppPtr mock_app(CreateMockApp());
   ON_CALL(app_mngr_, application(kAppID)).WillByDefault(Return(mock_app));
-
+  EXPECT_CALL(app_mngr_, state_controller())
+      .WillOnce(ReturnRef(mock_state_controller_));
+  EXPECT_CALL(mock_state_controller_,
+              IsStateActive(am::HmiState::StateID::STATE_ID_DEACTIVATE_HMI))
+      .WillOnce(Return(false));
   EXPECT_CALL(*mock_app, device()).WillOnce(Return(kHandle));
 
   DataAccessor<ApplicationSet> accessor(app_list_, lock_);
-  EXPECT_CALL(app_mngr_, applications()).WillOnce(Return(accessor));
+  EXPECT_CALL(app_mngr_, applications()).WillRepeatedly(Return(accessor));
 
   app_list_ = accessor.GetData();
 
@@ -222,8 +244,10 @@ TEST_F(SDLActivateAppRequestTest, DISABLED_FirstAppActive_SUCCESS) {
       .WillByDefault(Return(mock_app_first));
 
   app_list_.insert(mock_app_first);
+  ON_CALL(*mock_app_first, protocol_version())
+      .WillByDefault(Return(am::ProtocolVersion::kV4));
 
-  EXPECT_CALL(*mock_app_first, device()).WillOnce(Return(kHandle));
+  ON_CALL(*mock_app_first, device()).WillByDefault(Return(kHandle));
   EXPECT_CALL(*mock_app_first, is_foreground()).WillRepeatedly(Return(true));
 
   EXPECT_CALL(*message_helper_mock_, SendLaunchApp(_, _, _, _));
@@ -231,7 +255,7 @@ TEST_F(SDLActivateAppRequestTest, DISABLED_FirstAppActive_SUCCESS) {
   command->Run();
 }
 
-TEST_F(SDLActivateAppRequestTest, DISABLED_FirstAppNotActive_SUCCESS) {
+TEST_F(SDLActivateAppRequestTest, FirstAppNotActive_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
   SetCorrelationAndAppID(msg);
 
@@ -240,20 +264,12 @@ TEST_F(SDLActivateAppRequestTest, DISABLED_FirstAppNotActive_SUCCESS) {
 
   MockAppPtr mock_app(CreateMockApp());
   ON_CALL(app_mngr_, application(kAppID)).WillByDefault(Return(mock_app));
-
-  EXPECT_CALL(*mock_app, device()).WillOnce(Return(kHandle));
-
-  MockAppPtr mock_app_first(CreateMockApp());
-  ON_CALL(*mock_app_first, device()).WillByDefault(Return(kHandle));
-  ON_CALL(*mock_app_first, is_foreground()).WillByDefault(Return(false));
-
-  app_list_.insert(mock_app_first);
-  DataAccessor<ApplicationSet> accessor(app_list_, lock_);
-  EXPECT_CALL(app_mngr_, applications()).WillOnce(Return(accessor));
-
+  EXPECT_CALL(app_mngr_, state_controller())
+      .WillOnce(ReturnRef(mock_state_controller_));
+  EXPECT_CALL(mock_state_controller_,
+              IsStateActive(am::HmiState::StateID::STATE_ID_DEACTIVATE_HMI))
+      .WillOnce(Return(false));
   EXPECT_CALL(*mock_app, IsRegistered()).WillOnce(Return(true));
-  EXPECT_CALL(*mock_app_first, device()).WillOnce(Return(kHandle));
-  EXPECT_CALL(*mock_app_first, is_foreground()).WillOnce(Return(false));
 
   EXPECT_CALL(app_mngr_, GetPolicyHandler())
       .WillOnce(ReturnRef(policy_handler_));
@@ -262,7 +278,7 @@ TEST_F(SDLActivateAppRequestTest, DISABLED_FirstAppNotActive_SUCCESS) {
   command->Run();
 }
 
-TEST_F(SDLActivateAppRequestTest, DISABLED_FirstAppIsForeground_SUCCESS) {
+TEST_F(SDLActivateAppRequestTest, FirstAppIsForeground_SUCCESS) {
   Mock::VerifyAndClearExpectations(&message_helper_mock_);
   MessageSharedPtr msg = CreateMessage();
   SetCorrelationAndAppID(msg);
@@ -280,17 +296,21 @@ TEST_F(SDLActivateAppRequestTest, DISABLED_FirstAppIsForeground_SUCCESS) {
   ON_CALL(app_mngr_, application(kAppID)).WillByDefault(Return(mock_app));
 
   EXPECT_CALL(*mock_app, device()).WillOnce(Return(kHandle));
-
+  EXPECT_CALL(*mock_app, IsRegistered()).WillOnce(Return(false));
+  EXPECT_CALL(app_mngr_, state_controller())
+      .WillOnce(ReturnRef(mock_state_controller_));
+  EXPECT_CALL(mock_state_controller_,
+              IsStateActive(am::HmiState::StateID::STATE_ID_DEACTIVATE_HMI))
+      .WillOnce(Return(false));
   MockAppPtr mock_app_first(CreateMockApp());
-  ON_CALL(*mock_app_first, device()).WillByDefault(Return(kHandle));
   ON_CALL(*mock_app_first, is_foreground()).WillByDefault(Return(false));
 
   app_list_.insert(mock_app_first);
   DataAccessor<ApplicationSet> accessor(app_list_, lock_);
-  EXPECT_CALL(app_mngr_, applications()).WillOnce(Return(accessor));
-
-  EXPECT_CALL(*mock_app, IsRegistered()).WillOnce(Return(true));
-  EXPECT_CALL(*mock_app_first, device()).WillOnce(Return(kHandle));
+  EXPECT_CALL(app_mngr_, applications()).WillRepeatedly(Return(accessor));
+  ON_CALL(*mock_app_first, protocol_version())
+      .WillByDefault(Return(am::ProtocolVersion::kV4));
+  ON_CALL(*mock_app_first, device()).WillByDefault(Return(kHandle));
   EXPECT_CALL(*mock_app_first, is_foreground()).WillOnce(Return(true));
 
   EXPECT_CALL(*message_helper_mock_, SendLaunchApp(_, schema, package_name, _));
@@ -299,8 +319,7 @@ TEST_F(SDLActivateAppRequestTest, DISABLED_FirstAppIsForeground_SUCCESS) {
   Mock::VerifyAndClearExpectations(&message_helper_mock_);
 }
 
-TEST_F(SDLActivateAppRequestTest,
-       DISABLED_FirstAppNotRegisteredAndEmpty_SUCCESS) {
+TEST_F(SDLActivateAppRequestTest, FirstAppNotRegisteredAndEmpty_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
   SetCorrelationAndAppID(msg);
 
@@ -310,6 +329,11 @@ TEST_F(SDLActivateAppRequestTest,
   MockAppPtr mock_app(CreateMockApp());
   ON_CALL(app_mngr_, application(kAppID)).WillByDefault(Return(mock_app));
   EXPECT_CALL(*mock_app, device()).WillOnce(Return(kHandle));
+  EXPECT_CALL(app_mngr_, state_controller())
+      .WillOnce(ReturnRef(mock_state_controller_));
+  EXPECT_CALL(mock_state_controller_,
+              IsStateActive(am::HmiState::StateID::STATE_ID_DEACTIVATE_HMI))
+      .WillOnce(Return(false));
 
   MockAppPtr mock_app_first(CreateMockApp());
   ON_CALL(*mock_app_first, device()).WillByDefault(Return(kHandle));
@@ -317,9 +341,9 @@ TEST_F(SDLActivateAppRequestTest,
 
   app_list_.insert(mock_app_first);
   DataAccessor<ApplicationSet> accessor(app_list_, lock_);
-  EXPECT_CALL(app_mngr_, applications()).WillOnce(Return(accessor));
-
-  EXPECT_CALL(*mock_app_first, device()).WillOnce(Return(kHandle));
+  EXPECT_CALL(app_mngr_, applications()).WillRepeatedly(Return(accessor));
+  ON_CALL(*mock_app_first, protocol_version())
+      .WillByDefault(Return(am::ProtocolVersion::kV4));
   EXPECT_CALL(*mock_app_first, is_foreground()).WillOnce(Return(false));
 
   EXPECT_CALL(*message_helper_mock_, SendLaunchApp(_, _, _, _));
@@ -327,7 +351,7 @@ TEST_F(SDLActivateAppRequestTest,
   command->Run();
 }
 
-TEST_F(SDLActivateAppRequestTest, DISABLED_FirstAppNotRegistered_SUCCESS) {
+TEST_F(SDLActivateAppRequestTest, FirstAppNotRegistered_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
   SetCorrelationAndAppID(msg);
 
@@ -337,9 +361,13 @@ TEST_F(SDLActivateAppRequestTest, DISABLED_FirstAppNotRegistered_SUCCESS) {
   MockAppPtr mock_app(CreateMockApp());
   ON_CALL(app_mngr_, application(kAppID)).WillByDefault(Return(mock_app));
   EXPECT_CALL(*mock_app, device()).WillOnce(Return(kHandle));
-
+  EXPECT_CALL(app_mngr_, state_controller())
+      .WillOnce(ReturnRef(mock_state_controller_));
+  EXPECT_CALL(mock_state_controller_,
+              IsStateActive(am::HmiState::StateID::STATE_ID_DEACTIVATE_HMI))
+      .WillOnce(Return(false));
   DataAccessor<ApplicationSet> accessor(app_list_, lock_);
-  EXPECT_CALL(app_mngr_, applications()).WillOnce(Return(accessor));
+  EXPECT_CALL(app_mngr_, applications()).WillRepeatedly(Return(accessor));
 
   app_list_ = accessor.GetData();
 
@@ -348,8 +376,8 @@ TEST_F(SDLActivateAppRequestTest, DISABLED_FirstAppNotRegistered_SUCCESS) {
   ON_CALL(*mock_app_first, is_foreground()).WillByDefault(Return(false));
 
   app_list_.insert(mock_app_first);
-
-  EXPECT_CALL(*mock_app_first, device()).WillOnce(Return(kHandle));
+  ON_CALL(*mock_app_first, protocol_version())
+      .WillByDefault(Return(am::ProtocolVersion::kV4));
   EXPECT_CALL(*mock_app_first, is_foreground()).WillRepeatedly(Return(true));
 
   EXPECT_CALL(*message_helper_mock_, SendLaunchApp(_, _, _, _));
@@ -357,21 +385,19 @@ TEST_F(SDLActivateAppRequestTest, DISABLED_FirstAppNotRegistered_SUCCESS) {
   command->Run();
 }
 
-TEST_F(SDLActivateAppRequestTest, DISABLED_OnTimeout_SUCCESS) {
+TEST_F(SDLActivateAppRequestTest, OnTimeout_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
   SetCorrelationAndAppID(msg);
 
   SharedPtr<SDLActivateAppRequest> command(
       CreateCommand<SDLActivateAppRequest>(msg));
-
-  EXPECT_CALL(app_mngr_,
-              ManageHMICommand(CheckMsgParams(false, kCorrelationID)))
-      .WillOnce(Return(true));
+  ON_CALL(mock_event_dispatcher_, remove_observer(_, _));
+  EXPECT_CALL(app_mngr_, ManageHMICommand(_)).WillOnce(Return(true));
 
   command->onTimeOut();
 }
 
-TEST_F(SDLActivateAppRequestTest, DISABLED_OnEvent_InvalidEventId_UNSUCCESS) {
+TEST_F(SDLActivateAppRequestTest, OnEvent_InvalidEventId_UNSUCCESS) {
   MessageSharedPtr event_msg = CreateMessage();
   (*event_msg)[am::strings::params][strings::correlation_id] = kCorrelationID;
 
@@ -385,7 +411,7 @@ TEST_F(SDLActivateAppRequestTest, DISABLED_OnEvent_InvalidEventId_UNSUCCESS) {
   command->on_event(event);
 }
 
-TEST_F(SDLActivateAppRequestTest, DISABLED_OnEvent_InvalidAppId_UNSUCCESS) {
+TEST_F(SDLActivateAppRequestTest, OnEvent_InvalidAppId_UNSUCCESS) {
   MessageSharedPtr event_msg = CreateMessage();
   (*event_msg)[strings::msg_params][strings::application][strings::app_id] =
       kAppID;
@@ -397,14 +423,14 @@ TEST_F(SDLActivateAppRequestTest, DISABLED_OnEvent_InvalidAppId_UNSUCCESS) {
   event.set_smart_object(*event_msg);
 
   MockAppPtr invalid_mock_app;
-  EXPECT_CALL(app_mngr_, application_by_hmi_app(kAppID))
+  EXPECT_CALL(app_mngr_, application_by_hmi_app(_))
       .WillOnce(Return(invalid_mock_app));
   EXPECT_CALL(app_mngr_, GetPolicyHandler()).Times(0);
 
   command->on_event(event);
 }
 
-TEST_F(SDLActivateAppRequestTest, DISABLED_OnEvent_SUCCESS) {
+TEST_F(SDLActivateAppRequestTest, OnEvent_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
   (*msg)[strings::params][strings::correlation_id] = kCorrelationID;
   SharedPtr<SDLActivateAppRequest> command(
@@ -418,8 +444,7 @@ TEST_F(SDLActivateAppRequestTest, DISABLED_OnEvent_SUCCESS) {
   event.set_smart_object(*event_msg);
 
   MockAppPtr mock_app(CreateMockApp());
-  EXPECT_CALL(app_mngr_, application_by_hmi_app(kAppID))
-      .WillOnce(Return(mock_app));
+  EXPECT_CALL(app_mngr_, application_by_hmi_app(_)).WillOnce(Return(mock_app));
   EXPECT_CALL(*mock_app, app_id()).WillOnce(Return(kAppID));
   EXPECT_CALL(app_mngr_, GetPolicyHandler())
       .WillOnce(ReturnRef(policy_handler_));

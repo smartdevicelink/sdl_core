@@ -1135,27 +1135,7 @@ TEST_F(HMICommandsNotificationsTest,
   utils::SharedPtr<Command> command =
       CreateCommand<OnExitApplicationNotification>(message);
 
-  smart_objects::SmartObjectSPtr notification =
-      utils::MakeShared<smart_objects::SmartObject>();
-  (*notification)[am::strings::params][am::strings::function_id] =
-      static_cast<int32_t>(
-          mobile_apis::FunctionID::OnAppInterfaceUnregisteredID);
-  (*notification)[am::strings::params][am::strings::message_type] =
-      static_cast<int32_t>(am::MessageType::kNotification);
-  (*notification)[am::strings::params][am::strings::connection_key] = kAppId_;
-  (*notification)[am::strings::msg_params][am::strings::reason] =
-      static_cast<int32_t>(mobile_apis::AppInterfaceUnregisteredReason::
-                               DRIVER_DISTRACTION_VIOLATION);
-
-  EXPECT_CALL(app_mngr_, application(kAppId_)).WillRepeatedly(Return(app_));
-  EXPECT_CALL(*message_helper_mock_,
-              GetOnAppInterfaceUnregisteredNotificationToMobile(
-                  kAppId_,
-                  mobile_apis::AppInterfaceUnregisteredReason::
-                      DRIVER_DISTRACTION_VIOLATION))
-      .WillOnce(Return(notification));
-  EXPECT_CALL(app_mngr_,
-              ManageMobileCommand(notification, Command::ORIGIN_SDL));
+  EXPECT_CALL(app_mngr_, application(kAppId_)).WillRepeatedly(Return(app_));    
 
   EXPECT_CALL(app_mngr_, state_controller())
       .WillOnce(ReturnRef(mock_state_controller_));
@@ -1164,43 +1144,6 @@ TEST_F(HMICommandsNotificationsTest,
                               mobile_apis::HMILevel::HMI_NONE,
                               mobile_apis::AudioStreamingState::NOT_AUDIBLE,
                               false));
-  command->Run();
-}
-
-TEST_F(HMICommandsNotificationsTest,
-       OnExitApplicationNotificationDriverDistractionInvalidApp) {
-  MessageSharedPtr message = CreateMessage();
-  (*message)[am::strings::msg_params][am::strings::app_id] = kAppId_;
-  (*message)[am::strings::msg_params][am::strings::reason] =
-      hmi_apis::Common_ApplicationExitReason::DRIVER_DISTRACTION_VIOLATION;
-  utils::SharedPtr<Command> command =
-      CreateCommand<OnExitApplicationNotification>(message);
-
-  smart_objects::SmartObjectSPtr notification =
-      utils::MakeShared<smart_objects::SmartObject>();
-  (*notification)[am::strings::params][am::strings::function_id] =
-      static_cast<int32_t>(
-          mobile_apis::FunctionID::OnAppInterfaceUnregisteredID);
-  (*notification)[am::strings::params][am::strings::message_type] =
-      static_cast<int32_t>(am::MessageType::kNotification);
-  (*notification)[am::strings::params][am::strings::connection_key] = kAppId_;
-  (*notification)[am::strings::msg_params][am::strings::reason] =
-      static_cast<int32_t>(mobile_apis::AppInterfaceUnregisteredReason::
-                               DRIVER_DISTRACTION_VIOLATION);
-
-  am::ApplicationSharedPtr invalid_app;
-  InSequence seq;
-  EXPECT_CALL(app_mngr_, application(kAppId_)).WillRepeatedly(Return(app_));
-  EXPECT_CALL(*message_helper_mock_,
-              GetOnAppInterfaceUnregisteredNotificationToMobile(
-                  kAppId_,
-                  mobile_apis::AppInterfaceUnregisteredReason::
-                      DRIVER_DISTRACTION_VIOLATION))
-      .WillOnce(Return(notification));
-  EXPECT_CALL(app_mngr_,
-              ManageMobileCommand(notification, Command::ORIGIN_SDL));
-  EXPECT_CALL(app_mngr_, application(kAppId_)).WillOnce(Return(invalid_app));
-  EXPECT_CALL(app_mngr_, state_controller()).Times(0);
   command->Run();
 }
 

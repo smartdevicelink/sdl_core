@@ -83,7 +83,9 @@ class SliderRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
   SliderRequestTest()
-      : mock_message_helper_(*MockMessageHelper::message_helper_mock()) {}
+      : mock_message_helper_(*MockMessageHelper::message_helper_mock())
+      , mock_app_(CreateMockApp())
+      , msg_(CreateMessage(smart_objects::SmartType_Map)) {}
 
   MessageSharedPtr CreateFullParamsUISO() {
     MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
@@ -141,8 +143,8 @@ class SliderRequestTest
 
   MockMessageHelper& mock_message_helper_;
   MockAppPtr mock_app_;
-  MockPolicyHandlerInterface mock_policy_handler_;
   MessageSharedPtr msg_;
+  MockPolicyHandlerInterface mock_policy_handler_;
 };
 
 TEST_F(SliderRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
@@ -211,7 +213,7 @@ class CallOnTimeOut {
   CommandRequestImpl& command_;
 };
 
-TEST_F(SliderRequestTest, DISABLED_Init_SUCCESS) {
+TEST_F(SliderRequestTest, Init_SUCCESS) {
   PreConditions();
   (*msg_)[am::strings::msg_params][am::strings::timeout] = kDefaultTimeout;
 
@@ -219,7 +221,7 @@ TEST_F(SliderRequestTest, DISABLED_Init_SUCCESS) {
   EXPECT_TRUE(command->Init());
 }
 
-TEST_F(SliderRequestTest, DISABLED_Run_ApplicationIsNotRegistered_UNSUCCESS) {
+TEST_F(SliderRequestTest, Run_ApplicationIsNotRegistered_UNSUCCESS) {
   PreConditions();
   ON_CALL(app_mngr_, application(kConnectionKey))
       .WillByDefault(Return(ApplicationSharedPtr()));
@@ -230,7 +232,7 @@ TEST_F(SliderRequestTest, DISABLED_Run_ApplicationIsNotRegistered_UNSUCCESS) {
   command->Run();
 }
 
-TEST_F(SliderRequestTest, DISABLED_Run_PositionGreaterTicks_UNSUCCESS) {
+TEST_F(SliderRequestTest, Run_PositionGreaterTicks_UNSUCCESS) {
   PreConditions();
   (*msg_)[am::strings::msg_params][am::strings::position] =
       kPositionGreaterTicks;
@@ -244,7 +246,7 @@ TEST_F(SliderRequestTest, DISABLED_Run_PositionGreaterTicks_UNSUCCESS) {
   command->Run();
 }
 
-TEST_F(SliderRequestTest, DISABLED_Run_SliderFooterNotEqToNumticks_UNSUCCESS) {
+TEST_F(SliderRequestTest, Run_SliderFooterNotEqToNumticks_UNSUCCESS) {
   PreConditions();
   (*msg_)[am::strings::msg_params][am::strings::slider_footer][2] =
       "slider_footer3";
@@ -257,7 +259,7 @@ TEST_F(SliderRequestTest, DISABLED_Run_SliderFooterNotEqToNumticks_UNSUCCESS) {
   command->Run();
 }
 
-TEST_F(SliderRequestTest, DISABLED_Run_InvalidSliderHeader_UNSUCCESS) {
+TEST_F(SliderRequestTest, Run_InvalidSliderHeader_UNSUCCESS) {
   PreConditions();
   (*msg_)[am::strings::msg_params][am::strings::slider_header] =
       "invalid_test_with_empty_str\\n";
@@ -270,7 +272,7 @@ TEST_F(SliderRequestTest, DISABLED_Run_InvalidSliderHeader_UNSUCCESS) {
   command->Run();
 }
 
-TEST_F(SliderRequestTest, DISABLED_Run_InvalidSliderFooter_UNSUCCESS) {
+TEST_F(SliderRequestTest, Run_InvalidSliderFooter_UNSUCCESS) {
   PreConditions();
   (*msg_)[am::strings::msg_params][am::strings::slider_footer][0] =
       "invalid_test_with_empty_str\\n";
@@ -283,7 +285,7 @@ TEST_F(SliderRequestTest, DISABLED_Run_InvalidSliderFooter_UNSUCCESS) {
   command->Run();
 }
 
-TEST_F(SliderRequestTest, DISABLED_Run_SUCCESS) {
+TEST_F(SliderRequestTest, Run_SUCCESS) {
   PreConditions();
   EXPECT_CALL(
       app_mngr_,
@@ -293,7 +295,7 @@ TEST_F(SliderRequestTest, DISABLED_Run_SUCCESS) {
   command->Run();
 }
 
-TEST_F(SliderRequestTest, DISABLED_OnEvent_UI_OnResetTimeout_UNSUCCESS) {
+TEST_F(SliderRequestTest, OnEvent_UI_OnResetTimeout_UNSUCCESS) {
   PreConditions();
   (*msg_)[am::strings::msg_params][am::strings::timeout] = kDefaultTimeout;
   (*msg_)[am::strings::params][am::strings::correlation_id] = kCorrelationId;
@@ -310,7 +312,7 @@ TEST_F(SliderRequestTest, DISABLED_OnEvent_UI_OnResetTimeout_UNSUCCESS) {
   command->on_event(event);
 }
 
-TEST_F(SliderRequestTest, DISABLED_OnEvent_UI_UnknownEventId_UNSUCCESS) {
+TEST_F(SliderRequestTest, OnEvent_UI_UnknownEventId_UNSUCCESS) {
   PreConditions();
   EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
 
@@ -321,7 +323,7 @@ TEST_F(SliderRequestTest, DISABLED_OnEvent_UI_UnknownEventId_UNSUCCESS) {
   command->on_event(event);
 }
 
-TEST_F(SliderRequestTest, DISABLED_OnEvent_UISliderPositionExists_SUCCESS) {
+TEST_F(SliderRequestTest, OnEvent_UISliderPositionExists_SUCCESS) {
   PreConditions();
   (*msg_)[am::strings::msg_params][am::strings::timeout] = kDefaultTimeout;
   (*msg_)[am::strings::params][am::hmi_response::code] =
@@ -341,7 +343,7 @@ TEST_F(SliderRequestTest, DISABLED_OnEvent_UISliderPositionExists_SUCCESS) {
   command->on_event(event);
 }
 
-TEST_F(SliderRequestTest, DISABLED_OnEvent_UISliderAborted_SUCCESS) {
+TEST_F(SliderRequestTest, OnEvent_UISliderAborted_SUCCESS) {
   PreConditions();
   (*msg_)[am::strings::msg_params][am::strings::timeout] = kDefaultTimeout;
   (*msg_)[am::strings::params][am::hmi_response::code] =
