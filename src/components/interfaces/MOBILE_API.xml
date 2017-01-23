@@ -747,10 +747,6 @@
       <description>The optional image of a destination / location</description>
     </element>
 
-    <element name="audioPassThruIcon">
-      <description>The optional image field for AudioPassThru</description>
-    </element>
-
   </enum>
 
   <enum name="CharacterSet">
@@ -3397,10 +3393,6 @@
 		Defines if the current audio source should be muted during the APT session.  If not, the audio source will play without interruption.
       	If omitted, the value is set to true.
       </description>
-    </param>
-    <param name="audioPassThruIcon" type="Image" mandatory="false">
-      <description>Image struct determinig wheter static or dynamic icon.
-        If omitted on supported displays, no (or the default if applicable) icon shall be displayed.</description>
     </param>
   </function>
 
