@@ -34,7 +34,7 @@
 #include <memory>
 
 #include "gtest/gtest.h"
-
+#include "utils/push_log.h"
 #include "utils/lock.h"
 #include "utils/file_system.h"
 #include "utils/make_shared.h"
@@ -50,6 +50,7 @@
 #include "connection_handler/mock_connection_handler.h"
 #include "protocol_handler/mock_session_observer.h"
 #include "policy/usage_statistics/mock_statistics_manager.h"
+#include "application_manager/test/include/application_manager/mock_message_helper.h"
 
 namespace test {
 namespace components {
@@ -60,6 +61,7 @@ namespace policy_test = test::components::policy_handler_test;
 namespace con_test = connection_handler_test;
 
 using testing::_;
+using ::testing::Mock;
 using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::NiceMock;
@@ -69,6 +71,7 @@ using ::testing::Truly;
 using ::testing::AtLeast;
 using ::testing::DoAll;
 using usage_statistics_test::MockStatisticsManager;
+using namespace application_manager;
 
 namespace {
 const std::string kHmiCapabilitiesFile("hmi_capabilities.json");
@@ -92,9 +95,17 @@ sync_primitives::ConditionalVariable state_condition_;
 }  // namespace
 
 class ApplicationManagerImplTest : public ::testing::Test {
+ public:
+    ApplicationManagerImplTest():
+      mock_message_helper_(application_manager::MockMessageHelper::message_helper_mock())
+      //message_helper_(new MessageHelper::MessageHelper())
+    {}
+
  protected:
   void SetUp() OVERRIDE {
     app_id_ = 10;
+
+    Mock::VerifyAndClearExpectations(&mock_message_helper_);
 
     CreateAppManager();
 
@@ -107,7 +118,12 @@ class ApplicationManagerImplTest : public ::testing::Test {
 
     mock_storage_ =
         ::utils::MakeShared<NiceMock<resumption_test::MockResumptionData> >(
-            mock_application_manager_settings_);
+            app_mngr_);
+    //app_mock = utils::MakeShared<NiceMock<MockApplication> >();
+    //res_ctrl = utils::MakeShared<ResumeCtrlImpl>(app_mngr_);
+    //res_ctrl->set_resumption_storage(mock_storage);
+
+    logger::create_log_message_loop_thread();
 
     app_manager_impl_->resume_controller().set_resumption_storage(
         mock_storage_);
@@ -146,12 +162,15 @@ class ApplicationManagerImplTest : public ::testing::Test {
   NiceMock<hmi_message_handler_test::MockHMIMessageHandler>
       mock_hmi_msg_handler_;
   NiceMock<MockApplicationManagerSettings> mock_application_manager_settings_;
+  application_manager_test::MockApplicationManager app_mngr_;
   std::auto_ptr<am::ApplicationManagerImpl> app_manager_impl_;
+  application_manager::MockMessageHelper* mock_message_helper_;
+  application_manager::MessageHelper* message_helper_;
 };
 
 struct AppIdExtractor {
   AppIdExtractor() {
-    hmi_app_id_ = 5u;
+    hmi_app_id_ = 0u;
     is_called_ = false;
   }
 
@@ -174,33 +193,52 @@ struct AppIdExtractor {
 };
 
 TEST_F(ApplicationManagerImplTest,
-       FindAppToRegister_SearchValidHmiId_ExpectSuccess) {
-  //  using namespace NsSmartDeviceLink::NsSmartObjects;
-  //  SmartObject app_data;
-  //  const uint32_t connection_key = 65537u;
-  //  const uint32_t app_id = 8975689u;
-  //  app_data[am::json::name] = "application_manager_test";
-  //  app_data[am::json::appId] = app_id;
-  //  app_data[am::json::android] = "bucket";
-  //  app_data[am::json::android][am::json::packageName] = "com.android.test";
-  //  smart_objects::SmartObject sm_object(SmartType_Map);
-  //  sm_object[am::json::response][0] = app_data;
+      FindAppToRegister_SearchValidHmiId_ExpectSuccess)
+{
+      using namespace NsSmartDeviceLink::NsSmartObjects;
+      SmartObject app_data;
+      const uint32_t connection_key = 65537u;
+      const uint32_t app_id = 0u;
+      app_data[am::json::name] = "application_manager_test";
+      app_data[am::json::appId] = app_id;
+      app_data[am::json::android] = "bucket";
+      app_data[am::json::android][am::json::packageName] = "com.android.test";
+      smart_objects::SmartObject sm_object(SmartType_Map);
+      sm_object[am::json::response][0] = app_data;
 
-  //  EXPECT_CALL(mock_hmi_msg_handler_,
-  //  SendMessageToHMI(Truly(AppIdExtractor())))
-  //      .Times(AtLeast(1u));
+      EXPECT_CALL(mock_hmi_msg_handler_, SendMessageToHMI(Truly(AppIdExtractor())))
+          .Times(AtLeast(1u));
 
-  //  app_manager_impl_->ProcessQueryApp(sm_object, connection_key);
+      smart_objects::SmartObjectSPtr module_info =
+          utils::MakeShared<smart_objects::SmartObject>(
+              smart_objects::SmartType_Map);
+      smart_objects::SmartObject& object = *module_info;
+      object[strings::params][strings::message_type] = static_cast<int>(kRequest);
+      object[strings::params][strings::function_id] = static_cast<int>(1);
+      object[strings::params][strings::correlation_id] =
+          app_manager_impl_->GetNextHMICorrelationID();//GetNextHMICorrelationID();
+      object[strings::msg_params] =
+          smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-  //  {
-  //    sync_primitives::AutoLock auto_lock(state_lock_);
-  //    while (!is_called_) {
-  //      ASSERT_NE(sync_primitives::ConditionalVariable::kTimeout,
-  //                state_condition_.WaitFor(auto_lock, kWaitFreeQueue));
-  //    }
-  //  }
 
-  //  EXPECT_TRUE(app_manager_impl_->FindAppToRegister(hmi_app_id_).valid());
+      ON_CALL(*mock_message_helper_, CreateModuleInfoSO(
+                  _, _)).WillByDefault(Return(module_info));
+
+      ON_CALL(*mock_message_helper_, CreateNegativeResponse(_,_,_,_)).WillByDefault(Return(module_info));
+
+      app_manager_impl_->ProcessQueryApp(sm_object, connection_key);
+
+//      {
+//        sync_primitives::AutoLock auto_lock(state_lock_);
+//        while (!is_called_) {
+//          ASSERT_NE(sync_primitives::ConditionalVariable::kTimeout,
+//                    state_condition_.WaitFor(auto_lock, kWaitFreeQueue));
+//        }
+//      }
+
+    const bool result = app_manager_impl_->application_by_hmi_app(hmi_app_id_).valid();
+    printf("%s", result ? "true" : "false");
+    EXPECT_TRUE(app_manager_impl_->application_by_hmi_app(hmi_app_id_).valid());
 }
 
 // TEST_F(ApplicationManagerImplTest,
@@ -243,7 +281,7 @@ TEST_F(ApplicationManagerImplTest,
 // TEST_F(ApplicationManagerImplTest,
 //       UnsubscribeAppForWayPoints_ExpectUnsubscriptionApp) {
 //  app_manager_impl_->SubscribeAppForWayPoints(app_id_);
-//  EXPECT_TRUE(app_manager_impl_->IsAppSubscribedForWayPoints(app_id_));
+//  EXPECT_TRUE(app_manager_impl_->IsAppSubscribedForWayPoi nts(app_id_));
 //  app_manager_impl_->UnsubscribeAppFromWayPoints(app_id_);
 //  EXPECT_FALSE(app_manager_impl_->IsAppSubscribedForWayPoints(app_id_));
 //  const std::set<int32_t> result =
