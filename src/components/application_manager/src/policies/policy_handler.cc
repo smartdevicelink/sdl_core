@@ -1391,7 +1391,8 @@ void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string) {
   }
 
   SendMessageToSDK(pt_string, urls.at(current_app).url.at(current_url));
-  current_url++;
+  if (!(urls.at(current_app).app_id == policy::kDefaultId))
+    current_url++;
 #endif  // PROPRIETARY_MODE
   // reset update required false
   OnUpdateRequestSentToMobile();
