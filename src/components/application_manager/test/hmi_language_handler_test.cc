@@ -89,9 +89,9 @@ class HmiLanguageHandlerTest : public ::testing::Test {
         ::utils::MakeShared<am::HMILanguageHandler>(app_manager_);
   }
 
-  void InitHMIAtciveLanguage(hmi_apis::Common_Language::eType ui_language,
-                             hmi_apis::Common_Language::eType vr_language,
-                             hmi_apis::Common_Language::eType tts_language) {
+  void InitHMIActiveLanguages(hmi_apis::Common_Language::eType ui_language,
+                              hmi_apis::Common_Language::eType vr_language,
+                              hmi_apis::Common_Language::eType tts_language) {
     EXPECT_CALL(hmi_capabilities_, active_ui_language())
         .WillRepeatedly(Return(ui_language));
     EXPECT_CALL(hmi_capabilities_, active_vr_language())
@@ -100,10 +100,11 @@ class HmiLanguageHandlerTest : public ::testing::Test {
         .WillRepeatedly(Return(tts_language));
   }
 
-  void Init(hmi_apis::Common_Language::eType ui_language,
-            hmi_apis::Common_Language::eType vr_language,
-            hmi_apis::Common_Language::eType tts_language) {
-    InitHMIAtciveLanguage(ui_language, vr_language, tts_language);
+  void InitHMICapabilitiesLanguages(
+      hmi_apis::Common_Language::eType ui_language,
+      hmi_apis::Common_Language::eType vr_language,
+      hmi_apis::Common_Language::eType tts_language) {
+    InitHMIActiveLanguages(ui_language, vr_language, tts_language);
     hmi_language_handler_->set_default_capabilities_languages(
         ui_language, vr_language, tts_language);
   }
@@ -136,24 +137,6 @@ class HmiLanguageHandlerTest : public ::testing::Test {
   resumption::MockLastState last_state_;
 };
 
-TEST_F(HmiLanguageHandlerTest, OnEvent_OnAppRegistered_SUCCESS) {
-  const Apps& kApps = hmi_language_handler_->get_apps();
-
-  ASSERT_EQ(kDefaultAppsSize, kApps.size());
-
-  // Create a message and set it to an event.
-  smart_objects::SmartObject msg;
-  msg[am::strings::params][am::strings::app_id] = 5u;
-
-  Event event(hmi_apis::FunctionID::BasicCommunication_OnAppRegistered);
-  event.set_smart_object(msg);
-
-  hmi_language_handler_->on_event(event);
-
-  // Expect that app been added to apps map.
-  EXPECT_EQ(1u, kApps.size());
-}
-
 TEST_F(HmiLanguageHandlerTest, OnEvent_AllLanguageIsReceivedAndSame_SUCCESS) {
   // Repeatedly add events to set `is_*_language_received_` flags up
 
@@ -173,15 +156,16 @@ TEST_F(HmiLanguageHandlerTest, OnEvent_AllLanguageIsReceivedAndSame_SUCCESS) {
   Json::Value dictionary = Json::Value();
   ON_CALL(last_state_, get_dictionary()).WillByDefault(ReturnRef(dictionary));
   hmi_language_handler_->Init(&last_state_);
-  Init(hmi_apis::Common_Language::eType::EN_US,
-       hmi_apis::Common_Language::eType::EN_US,
-       hmi_apis::Common_Language::eType::EN_US);
+  InitHMICapabilitiesLanguages(hmi_apis::Common_Language::eType::EN_US,
+                               hmi_apis::Common_Language::eType::EN_US,
+                               hmi_apis::Common_Language::eType::EN_US);
   // Then `active_*_language` and
   //`persisted_ui_language_` will be compared.
   // So if they same app_manager_'s method `applications`
   // will never be called.
   EXPECT_CALL(app_manager_, applications()).Times(0);
-
+  EXPECT_CALL(app_manager_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(app_manager_, UnregisterApplication(_, _, _, _)).Times(0);
   Event tts_event(hmi_apis::FunctionID::TTS_GetLanguage);
   hmi_language_handler_->on_event(tts_event);
 }
@@ -192,12 +176,8 @@ TEST_F(HmiLanguageHandlerTest, OnEvent_AllReceivedLanguagesMismatch_SUCCESS) {
   Event vr_event(hmi_apis::FunctionID::VR_GetLanguage);
   hmi_language_handler_->on_event(vr_event);
 
-  const Apps& kApps = hmi_language_handler_->get_apps();
-
-  ASSERT_EQ(kDefaultAppsSize, kApps.size());
-
-  EXPECT_CALL(app_manager_, hmi_capabilities())
-      .WillOnce(ReturnRef(hmi_capabilities_));
+  ON_CALL(app_manager_, hmi_capabilities())
+      .WillByDefault(ReturnRef(hmi_capabilities_));
 
   // Set up `active_*_language` and
   //`persisted_ui_language_` to be different
@@ -206,28 +186,26 @@ TEST_F(HmiLanguageHandlerTest, OnEvent_AllReceivedLanguagesMismatch_SUCCESS) {
       hmi_apis::Common_Language::eType::EN_US,
       hmi_apis::Common_Language::eType::EN_US);
 
-  InitHMIAtciveLanguage(hmi_apis::Common_Language::eType::RU_RU,
-                        hmi_apis::Common_Language::eType::RU_RU,
-                        hmi_apis::Common_Language::eType::RU_RU);
+  InitHMIActiveLanguages(hmi_apis::Common_Language::eType::RU_RU,
+                         hmi_apis::Common_Language::eType::RU_RU,
+                         hmi_apis::Common_Language::eType::RU_RU);
 
   ApplicationSet app_set;
   const uint32_t kAppCount = 5u;
   // Adding to app set `kAppCount` apps with app_id form 0 to `kAppCount`.
   AddMockAppsToApplicationSet(app_set, 0u, kAppCount);
-
   DataAccessor<ApplicationSet> data_accessor(app_set, app_set_lock_);
 
   // Because `active_*_language` and
   //`persisted_ui_language_` are different,
   // the `applications` will be called and
   // app data will checked by `CheckApplication` method
-  EXPECT_CALL(app_manager_, applications()).WillOnce(Return(data_accessor));
+  ON_CALL(app_manager_, applications()).WillByDefault(Return(data_accessor));
+  EXPECT_CALL(app_manager_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(app_manager_, UnregisterApplication(_, _, _, _)).Times(0);
 
   Event tts_event(hmi_apis::FunctionID::TTS_GetLanguage);
   hmi_language_handler_->on_event(tts_event);
-
-  // Expect that app been added to apps map.
-  EXPECT_EQ(kAppCount, kApps.size());
 }
 
 TEST_F(HmiLanguageHandlerTest, OnEvent_AllReceivedLanguagesMismatch_UNSUCCESS) {
@@ -236,12 +214,8 @@ TEST_F(HmiLanguageHandlerTest, OnEvent_AllReceivedLanguagesMismatch_UNSUCCESS) {
   Event vr_event(hmi_apis::FunctionID::VR_GetLanguage);
   hmi_language_handler_->on_event(vr_event);
 
-  const Apps& kApps = hmi_language_handler_->get_apps();
-
-  ASSERT_EQ(kDefaultAppsSize, kApps.size());
-
-  EXPECT_CALL(app_manager_, hmi_capabilities())
-      .WillOnce(ReturnRef(hmi_capabilities_));
+  ON_CALL(app_manager_, hmi_capabilities())
+      .WillByDefault(ReturnRef(hmi_capabilities_));
 
   // Set up `active_*_language` and
   //`persisted_ui_language_` to be different
@@ -250,15 +224,15 @@ TEST_F(HmiLanguageHandlerTest, OnEvent_AllReceivedLanguagesMismatch_UNSUCCESS) {
       hmi_apis::Common_Language::eType::EN_US,
       hmi_apis::Common_Language::eType::EN_US);
 
-  InitHMIAtciveLanguage(hmi_apis::Common_Language::eType::RU_RU,
-                        hmi_apis::Common_Language::eType::RU_RU,
-                        hmi_apis::Common_Language::eType::RU_RU);
+  InitHMIActiveLanguages(hmi_apis::Common_Language::eType::RU_RU,
+                         hmi_apis::Common_Language::eType::RU_RU,
+                         hmi_apis::Common_Language::eType::RU_RU);
 
   ApplicationSet app_set;
   DataAccessor<ApplicationSet> data_accessor(app_set, app_set_lock_);
 
   // Send empty application set.
-  EXPECT_CALL(app_manager_, applications()).WillOnce(Return(data_accessor));
+  ON_CALL(app_manager_, applications()).WillByDefault(Return(data_accessor));
 
   Event tts_event(hmi_apis::FunctionID::TTS_GetLanguage);
   hmi_language_handler_->on_event(tts_event);
@@ -311,10 +285,6 @@ TEST_F(HmiLanguageHandlerTest,
 
 TEST_F(HmiLanguageHandlerTest,
        HandleWrongLanguageApp_UnregisteredAppId_SUCCESS) {
-  const Apps& kApps = hmi_language_handler_->get_apps();
-
-  ASSERT_EQ(kDefaultAppsSize, kApps.size());
-
   smart_objects::SmartObject msg;
   msg[am::strings::params][am::strings::app_id] = 5u;
 
@@ -323,8 +293,6 @@ TEST_F(HmiLanguageHandlerTest,
 
   EXPECT_CALL(app_manager_, hmi_capabilities()).Times(0);
   hmi_language_handler_->on_event(event);
-
-  EXPECT_EQ(1u, kApps.size());
 
   EXPECT_CALL(app_manager_, hmi_capabilities())
       .WillOnce(ReturnRef(hmi_capabilities_));
@@ -336,25 +304,21 @@ TEST_F(HmiLanguageHandlerTest,
       hmi_apis::Common_Language::eType::EN_US,
       hmi_apis::Common_Language::eType::EN_US);
 
-  InitHMIAtciveLanguage(hmi_apis::Common_Language::eType::EN_US,
-                        hmi_apis::Common_Language::eType::EN_US,
-                        hmi_apis::Common_Language::eType::EN_US);
+  InitHMIActiveLanguages(hmi_apis::Common_Language::eType::RU_RU,
+                         hmi_apis::Common_Language::eType::RU_RU,
+                         hmi_apis::Common_Language::eType::RU_RU);
 
   // Needed to call of `ManageMobileCommand` method
-  EXPECT_CALL(*am::MockMessageHelper::message_helper_mock(),
-              GetOnAppInterfaceUnregisteredNotificationToMobile(_, _))
-      .WillOnce(Return(::utils::MakeShared<smart_objects::SmartObject>()));
+  ON_CALL(*am::MockMessageHelper::message_helper_mock(),
+          GetOnAppInterfaceUnregisteredNotificationToMobile(_, _))
+      .WillByDefault(Return(::utils::MakeShared<smart_objects::SmartObject>()));
 
   // Wait for `ManageMobileCommand` call twice.
   // First time in `SendOnLanguageChangeToMobile`
   // method, second time in `HandleWrongLanguageApp`.
   EXPECT_CALL(app_manager_, ManageMobileCommand(_, _)).Times(2);
-
   EXPECT_CALL(app_manager_, UnregisterApplication(_, _, _, _)).Times(1);
-
   hmi_language_handler_->on_event(event);
-
-  EXPECT_EQ(kDefaultAppsSize, kApps.size());
 }
 
 TEST_F(HmiLanguageHandlerTest, OnUnregisterApp_SUCCESS) {
@@ -365,14 +329,25 @@ TEST_F(HmiLanguageHandlerTest, OnUnregisterApp_SUCCESS) {
   Event event(hmi_apis::FunctionID::BasicCommunication_OnAppRegistered);
   event.set_smart_object(msg);
 
+  EXPECT_CALL(app_manager_, hmi_capabilities()).Times(0);
   hmi_language_handler_->on_event(event);
 
-  EXPECT_EQ(1u, hmi_language_handler_->get_apps().size());
-
   hmi_language_handler_->OnUnregisterApplication(app_id);
-  EXPECT_EQ(kDefaultAppsSize, hmi_language_handler_->get_apps().size());
-}
 
+  // Set up `active_*_language` and
+  //`persisted_ui_language_` to be different
+  hmi_language_handler_->set_default_capabilities_languages(
+      hmi_apis::Common_Language::eType::EN_US,
+      hmi_apis::Common_Language::eType::EN_US,
+      hmi_apis::Common_Language::eType::EN_US);
+
+  InitHMIActiveLanguages(hmi_apis::Common_Language::eType::RU_RU,
+                         hmi_apis::Common_Language::eType::RU_RU,
+                         hmi_apis::Common_Language::eType::RU_RU);
+  EXPECT_CALL(app_manager_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(app_manager_, UnregisterApplication(_, _, _, _)).Times(0);
+  hmi_language_handler_->on_event(event);
+}
 }  // namespace hmi_language_handler
 }  // namespace components
 }  // namespace test
