@@ -2447,7 +2447,7 @@
     </function>
 </interface>
 
-<interface name="BasicCommunication" version="1.0" date="2013-04-12">
+<interface name="BasicCommunication" version="1.1" date="2016-12-01">
     <function name="OnReady" messagetype="notification">
       <description>HMI must notify SDL about its readiness to start communication. In fact, this has to be the first message between SDL and HMI.</description>
     </function>
@@ -2685,8 +2685,8 @@
       <param name="fileName" type="String" maxlength="255" minlength="1" mandatory="true">
           <description>The path to file.</description>
       </param>
-      <param name="appID" type="Integer" mandatory="false">
-        <description>ID of application that requested this RPC.</description>
+      <param name="appID" type="Integer" mandatory="true">
+        <description>Internal ID of the application that requested this RPC.</description>
       </param>
     </function>
     <function name="SystemRequest" messagetype="response">
@@ -2784,6 +2784,15 @@
   <function name="OnIgnitionCycleOver" messagetype="notification">
     <description>Notification from system to SDL to let it know that ignition cycle is over.</description>
   </function>
+  <function name="DecryptCertificate" messagetype="request">
+     <description>Sender: SDL->HMI. Purpose: to decrypt the certificate received via the Updated Policy Table. </description>
+     <param name="fileName" type="String" maxlength="255" minlength="1" mandatory="true">
+         <description>The path to the file with the encrypted certificate from the PolicyTable.</description>
+     </param>
+   </function>
+   <function name="DecryptCertificate" messagetype="response">
+         <description>SUCCESS - in case the certificate is decrypted and placed to the same file from request.</description>
+   </function>
   <!-- End of Policies -->
    <function name="OnDeactivateHMI" messagetype="notification">
         <description>

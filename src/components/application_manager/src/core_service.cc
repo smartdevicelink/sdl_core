@@ -274,7 +274,7 @@ bool CoreService::AreParametersAllowed(
 }
 
 bool CoreService::CheckParams(const Json::Value& object,
-                              const std::vector<std::string>& allowed_params) {
+                              const RPCParams& allowed_params) {
   if (!object.isObject()) {
     return true;
   }
@@ -288,7 +288,7 @@ bool CoreService::CheckParams(const Json::Value& object,
 }
 
 bool CoreService::IsAllowed(const std::string& name,
-                            const std::vector<std::string>& allowed_params) {
+                            const RPCParams& allowed_params) {
   return std::find(allowed_params.begin(), allowed_params.end(), name) !=
          allowed_params.end();
 }

@@ -1361,7 +1361,7 @@ void ApplicationManagerImpl::SendMessageToMobile(
       for (; iter != iter_end; ++iter) {
         if (true == iter->second.asBool()) {
           LOG4CXX_INFO(logger_, "Request's param: " << iter->first);
-          params.push_back(iter->first);
+          params.insert(iter->first);
         }
       }
     }
@@ -1375,6 +1375,18 @@ void ApplicationManagerImpl::SendMessageToMobile(
                                  << ") not allowed by policy");
       return;
     }
+
+#ifdef EXTERNAL_PROPRIETARY_MODE
+    if (function_id == mobile_apis::FunctionID::OnSystemRequestID) {
+      mobile_apis::RequestType::eType request_type =
+          static_cast<mobile_apis::RequestType::eType>(
+              (*message)[strings::msg_params][strings::request_type].asUInt());
+      if (mobile_apis::RequestType::PROPRIETARY == request_type ||
+          mobile_apis::RequestType::HTTP == request_type) {
+        GetPolicyHandler().OnUpdateRequestSentToMobile();
+      }
+    }
+#endif  // EXTERNAL_PROPRIETARY_MODE
   }
 
   if (message_to_send->binary_data()) {

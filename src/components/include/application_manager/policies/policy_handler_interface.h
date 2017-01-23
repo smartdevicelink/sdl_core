@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -70,6 +70,14 @@ class PolicyHandlerInterface {
   virtual void OnPermissionsUpdated(const std::string& policy_app_id,
                                     const Permissions& permissions) = 0;
 
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  virtual void OnSnapshotCreated(const BinaryMessage& pt_string,
+                                 const std::vector<int>& retry_delay_seconds,
+                                 uint32_t timeout_exchange) = 0;
+#else   // EXTERNAL_PROPRIETARY_MODE
+  virtual void OnSnapshotCreated(const BinaryMessage& pt_string) = 0;
+#endif  // EXTERNAL_PROPRIETARY_MODE
+
   virtual bool GetPriority(const std::string& policy_app_id,
                            std::string* priority) const = 0;
   virtual void CheckPermissions(
@@ -87,12 +95,15 @@ class PolicyHandlerInterface {
   virtual bool GetInitialAppData(const std::string& application_id,
                                  StringArray* nicknames = NULL,
                                  StringArray* app_hmi_types = NULL) = 0;
-  virtual void GetServiceUrls(const std::string& service_type,
-                              EndpointUrls& end_points) = 0;
+  virtual void GetUpdateUrls(const std::string& service_type,
+                             EndpointUrls& out_end_points) = 0;
+  virtual void GetUpdateUrls(const uint32_t service_type,
+                             EndpointUrls& out_end_points) = 0;
   virtual std::string GetLockScreenIconUrl() const = 0;
   virtual void ResetRetrySequence() = 0;
   virtual uint32_t NextRetryTimeout() = 0;
-  virtual int TimeoutExchange() = 0;
+  virtual uint32_t TimeoutExchangeSec() = 0;
+  virtual uint32_t TimeoutExchangeMSec() = 0;
   virtual void OnExceededTimeout() = 0;
   virtual void OnSystemReady() = 0;
   virtual void PTUpdatedAt(Counters counter, int value) = 0;
@@ -131,11 +142,11 @@ class PolicyHandlerInterface {
 
   /**
    * @brief Process user consent on mobile data connection access
-   * @param Device id or empty string, if concern to all SDL functionality
-   * @param User consent from response
+   * @param is_allowed - user consent from response
+   * @param device_mac - mac adress of device
    */
   virtual void OnAllowSDLFunctionalityNotification(
-      bool is_allowed, const std::string& device_id) = 0;
+      bool is_allowed, const std::string& device_mac) = 0;
 
   /**
    * @brief Increment counter for ignition cycles
@@ -281,7 +292,9 @@ class PolicyHandlerInterface {
       std::map<std::string, StringArray> app_hmi_types) = 0;
 
   virtual void OnCertificateUpdated(const std::string& certificate_data) = 0;
-
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  virtual void OnCertificateDecrypted(bool is_succeeded) = 0;
+#endif  // EXTERNAL_PROPRIETARY_MODE
   virtual bool CanUpdate() = 0;
 
   virtual void OnDeviceConsentChanged(const std::string& device_id,
@@ -360,7 +373,13 @@ class PolicyHandlerInterface {
    * @return Structure with vehicle information
    */
   virtual const VehicleInfo GetVehicleInfo() const = 0;
-
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  /**
+   * @brief Gets meta information
+   * @return meta information
+   */
+  virtual const policy::MetaInfo GetMetaInfo() const = 0;
+#endif  // EXTERNAL_PROPRIETARY_MODE
   virtual void Increment(usage_statistics::GlobalCounterId type) = 0;
   virtual void Increment(const std::string& app_id,
                          usage_statistics::AppCounterId type) = 0;
@@ -377,21 +396,31 @@ class PolicyHandlerInterface {
 #ifdef ENABLE_SECURITY
   virtual std::string RetrieveCertificate() const = 0;
 #endif  // ENABLE_SECURITY
-#ifdef SDL_REMOTE_CONTROL
-  /**
-     * Checks if application has HMI type
-     * @param application_id ID application
-     * @param hmi HMI type to check
-     * @param app_types additional list of HMI type to search in it
-     * @return true if hmi is contained in policy or app_types
-     */
 
+#ifdef SDL_REMOTE_CONTROL
+  virtual void AddApplication(const std::string& application_id,
+                              const smart_objects::SmartObject* app_types) = 0;
+
+  /**
+   * Checks if application has HMI type
+   * @param application_id ID application
+   * @param hmi HMI type to check
+   * @param app_types additional list of HMI type to search in it
+   * @return true if hmi is contained in policy or app_types
+   */
   virtual bool CheckHMIType(const std::string& application_id,
                             mobile_apis::AppHMIType::eType hmi,
                             const smart_objects::SmartObject* app_types) = 0;
 
-  virtual void AddApplication(const std::string& application_id,
-                              const smart_objects::SmartObject* app_types) = 0;
+  /**
+   * Notifies about changing HMI level
+   * @param device_id unique identifier of device
+   * @param policy_app_id unique identifier of application in policy
+   * @param hmi_level default HMI level for this application
+   */
+  virtual void OnUpdateHMILevel(const std::string& device_id,
+                                const std::string& policy_app_id,
+                                const std::string& hmi_level) = 0;
 
   /**
    * Checks access to equipment of vehicle for application by RPC

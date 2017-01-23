@@ -68,7 +68,7 @@ void HMIMessageHandlerImpl::OnMessageReceived(MessageSharedPointer message) {
 }
 
 void HMIMessageHandlerImpl::SendMessageToHMI(MessageSharedPointer message) {
-  LOG4CXX_INFO(logger_, "HMIMessageHandlerImpl::~sendMessageToHMI()");
+  LOG4CXX_INFO(logger_, "SendMessageToHMI");
   messages_to_hmi_.PostMessage(impl::MessageToHmi(message));
 }
 

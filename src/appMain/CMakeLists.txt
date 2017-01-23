@@ -132,7 +132,8 @@ include_directories (
   ${COMPONENTS_DIR}/telemetry_monitor/include
   ${COMPONENTS_DIR}/functional_module/include/
   ${COMPONENTS_DIR}/time_tester/include
-  ${COMPONENTS_DIR}/policy/include/
+  ${POLICY_PATH}/include/
+  ${POLICY_GLOBAL_INCLUDE_PATH}/
   ${COMPONENTS_DIR}/resumption/include/
   ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
   ${ENCRYPTION_INCLUDE_DIRECTORY}

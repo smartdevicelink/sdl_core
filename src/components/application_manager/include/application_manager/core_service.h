@@ -37,6 +37,7 @@
 #include <vector>
 #include "application_manager/service.h"
 #include "application_manager/application.h"
+#include "policy/policy_types.h"
 
 namespace Json {
 class Value;
@@ -238,9 +239,9 @@ class CoreService : public Service {
   bool AreParametersAllowed(MessagePtr msg,
                             const CommandParametersPermissions& params);
   bool CheckParams(const Json::Value& object,
-                   const std::vector<std::string>& allowed_params);
+                   const policy::RPCParams& allowed_params);
   bool IsAllowed(const std::string& name,
-                 const std::vector<std::string>& allowed_params);
+                 const policy::RPCParams& allowed_params);
 
   ApplicationManager& application_manager_;
 

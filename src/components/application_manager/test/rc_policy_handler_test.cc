@@ -37,7 +37,7 @@
 
 #include "application_manager/policies/policy_handler.h"
 #include "application_manager/policies/delegates/app_permission_delegate.h"
-#include "policy/test/include/mock_cache_manager.h"
+#include "policy/mock_cache_manager.h"
 #include "application_manager/mock_message_helper.h"
 #include "connection_handler/mock_connection_handler_settings.h"
 #include "policy/policy_types.h"
@@ -50,14 +50,14 @@
 #include "utils/custom_string.h"
 #include "interfaces/MOBILE_API.h"
 #include "policy/mock_policy_settings.h"
-#include "application_manager/test/include/application_manager/mock_application.h"
+#include "application_manager/mock_application.h"
 #include "policy/usage_statistics/mock_statistics_manager.h"
 #include "protocol_handler/mock_session_observer.h"
 #include "connection_handler/mock_connection_handler.h"
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/policies/mock_policy_handler_observer.h"
 #include "application_manager/mock_event_dispatcher.h"
-#include "policy/test/include/mock_policy_manager.h"
+#include "policy/mock_policy_manager.h"
 
 namespace test {
 namespace components {
@@ -99,7 +99,7 @@ class RCPolicyHandlerTest : public ::testing::Test {
   components::usage_statistics_test::MockStatisticsManager
       mock_statistics_manager_;
   PolicyHandler policy_handler_;
-  utils::SharedPtr<policy_manager::MockPolicyManager> mock_policy_manager_;
+  utils::SharedPtr<policy_manager_test::MockPolicyManager> mock_policy_manager_;
   application_manager_test::MockApplicationManager app_manager_;
   const std::string kPolicyAppId_;
   const std::string kMacAddr_;
@@ -121,7 +121,7 @@ class RCPolicyHandlerTest : public ::testing::Test {
     ON_CALL(app_manager_, applications()).WillByDefault(Return(app_set));
     ON_CALL(policy_settings_, enable_policy()).WillByDefault(Return(true));
     mock_policy_manager_ =
-        utils::MakeShared<policy_manager::MockPolicyManager>();
+        utils::MakeShared<policy_manager_test::MockPolicyManager>();
     ASSERT_TRUE(mock_policy_manager_.valid());
 
     ON_CALL(app_manager_, connection_handler())

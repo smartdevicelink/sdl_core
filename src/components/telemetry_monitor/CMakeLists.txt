@@ -33,13 +33,15 @@ set(TELEMETRY_MONITOR_SRC_DIR ${COMPONENTS_DIR}/telemetry_monitor/src)
 
 include_directories (
   include
+  ${COMPONENTS_DIR}/include/application_manager/
   ${COMPONENTS_DIR}/utils/include/
   ${COMPONENTS_DIR}/protocol_handler/include/
   ${COMPONENTS_DIR}/connection_handler/include/
   ${COMPONENTS_DIR}/transport_manager/include/
   ${COMPONENTS_DIR}/application_manager/include/
   ${COMPONENTS_DIR}/can_cooperation/include/
-  ${COMPONENTS_DIR}/policy/include/
+  ${POLICY_PATH}/include/
+  ${POLICY_GLOBAL_INCLUDE_PATH}/
   ${COMPONENTS_DIR}/rpc_base/include/
   ${COMPONENTS_DIR}/functional_module/include/
   ${COMPONENTS_DIR}/hmi_message_handler/include/
