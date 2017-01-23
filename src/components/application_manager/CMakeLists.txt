@@ -57,7 +57,6 @@ include_directories (
   ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
   ${LOG4CXX_INCLUDE_DIRECTORY}
 )
-MESSAGE (ERROR "${POLICY_PATH}")
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
   include_directories(
