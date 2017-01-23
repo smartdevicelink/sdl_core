@@ -368,6 +368,17 @@ bool PerformAudioPassThruRequest::IsWhiteSpaceExist() {
       return true;
     }
   }
+
+  if ((*message_)[strings::msg_params].keyExists(
+          strings::audio_pass_thru_icon)) {
+    str = (*message_)[strings::msg_params][strings::audio_pass_thru_icon]
+                     [strings::value].asCharArray();
+    if (!CheckSyntax(str)) {
+      LOG4CXX_ERROR(logger_,
+                    "Invalid audio_pass_thru_icon value syntax check failed");
+      return true;
+    }
+  }
   return false;
 }
 
@@ -396,20 +407,13 @@ void PerformAudioPassThruRequest::ProcessAudioPassThruIcon(
 
   audio_pass_thru_icon_exists_ = true;
   if (msg_params.keyExists(strings::audio_pass_thru_icon)) {
-    if (IsAudioPassThruIconParamValid()) {
-      smart_objects::SmartObject icon =
-          msg_params[strings::audio_pass_thru_icon];
-      if (MessageHelper::VerifyImage(icon, app, application_manager_) !=
-          mobile_apis::Result::SUCCESS) {
-        LOG4CXX_WARN(
-            logger_,
-            "Invalid audio_pass_thru_icon doesn't exist in the file system");
-        audio_pass_thru_icon_exists_ = false;
-      }
-    } else {
-      LOG4CXX_WARN(logger_,
-                   "Invalid audio_pass_thru_icon validation check failed");
-      msg_params.erase(strings::audio_pass_thru_icon);
+    smart_objects::SmartObject icon = msg_params[strings::audio_pass_thru_icon];
+    if (MessageHelper::VerifyImage(icon, app, application_manager_) !=
+        mobile_apis::Result::SUCCESS) {
+      LOG4CXX_WARN(
+          logger_,
+          "Invalid audio_pass_thru_icon doesn't exist in the file system");
+      audio_pass_thru_icon_exists_ = false;
     }
   }
 }
@@ -435,22 +439,6 @@ PerformAudioPassThruRequest::PrepareAudioPassThruResultCodeForResponse(
 
   result_code = MessageHelper::HMIToMobileResult(common_result);
   return result_code;
-}
-
-bool PerformAudioPassThruRequest::IsAudioPassThruIconParamValid() {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  const std::string& value =
-      (*message_)[strings::msg_params][strings::audio_pass_thru_icon]
-                 [strings::value].asString();
-
-  if (!CheckSyntax(value, false)) {
-    LOG4CXX_WARN(logger_,
-                 "Invalid audio_pass_thru_icon value syntax check failed");
-    return false;
-  }
-
-  return true;
 }
 
 bool PerformAudioPassThruRequest::IsAnyHMIComponentAborted(
