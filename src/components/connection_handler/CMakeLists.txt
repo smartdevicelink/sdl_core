@@ -31,11 +31,11 @@
 include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
 include_directories (
-    include
-    ${COMPONENTS_DIR}/protocol_handler/include/
-    ${COMPONENTS_DIR}/utils/include/
-    ${ENCRYPTION_INCLUDE_DIRECTORY}
-    ${LOG4CXX_INCLUDE_DIRECTORY}
+  include
+  ${COMPONENTS_DIR}/protocol_handler/include/
+  ${COMPONENTS_DIR}/utils/include/
+  ${ENCRYPTION_INCLUDE_DIRECTORY}
+  ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
 set(PATHS
@@ -44,8 +44,9 @@ set(PATHS
 )
 
 set(LIBRARIES
-    ProtocolLibrary
-    encryption
+  ProtocolLibrary
+  encryption
+  Utils
 )
 
 collect_sources(SOURCES "${PATHS}")

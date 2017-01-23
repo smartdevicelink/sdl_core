@@ -52,6 +52,7 @@ set(EXCLUDE_PATHS)
 
 set(LIBRARIES
   ProtocolLibrary
+  Utils
 )
 
 if(BUILD_BT_SUPPORT)

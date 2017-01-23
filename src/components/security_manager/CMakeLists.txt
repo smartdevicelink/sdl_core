@@ -50,6 +50,7 @@ set(PATHS
 collect_sources(SOURCES "${PATHS}")
 
 set(LIBRARIES
+  Utils
   crypto
   ssl
   ProtocolHandler

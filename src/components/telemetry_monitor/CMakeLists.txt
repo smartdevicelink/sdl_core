@@ -57,6 +57,8 @@ collect_sources(SOURCES "${PATHS}")
 set(LIBRARIES
   HMI_API
   MOBILE_API
+  Utils
+  Policy
 )
 
 add_library("TelemetryMonitor" ${SOURCES})
