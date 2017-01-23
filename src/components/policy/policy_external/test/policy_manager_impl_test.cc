@@ -50,6 +50,9 @@ namespace policy_test {
 TEST_F(
     PolicyManagerImplTest,
     RefreshRetrySequence_SetSecondsBetweenRetries_ExpectRetryTimeoutSequenceWithSameSeconds) {
+  int* crash = 0;
+  int create_crash = *crash;
+  UNUSED(create_crash);
   // Arrange
   std::vector<int> seconds;
   seconds.push_back(50);
