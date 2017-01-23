@@ -365,16 +365,6 @@ TEST_F(PerformAudioPassThruRequestTest,
   ON_CALL(hmi_interfaces_, GetInterfaceState(_))
       .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
 
-  // EXPECT_CALL(mock_message_helper_,
-  //              HMIToMobileResult(hmi_apis::Common_Result::GENERIC_ERROR))
-  ///      .WillOnce(Return(am::mobile_api::Result::GENERIC_ERROR));
-
-  /*EXPECT_CALL(
-      app_mngr_,
-      ManageMobileCommand(
-          MobileResultCodeIs(am::mobile_api::Result::eType::GENERIC_ERROR), _))
-      .WillOnce(Return(false));
-  */
   EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
 
   CallOnEvent on_event_caller(*command_sptr_, event);

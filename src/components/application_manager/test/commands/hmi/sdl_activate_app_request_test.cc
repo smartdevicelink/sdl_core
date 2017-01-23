@@ -133,6 +133,52 @@ class SDLActivateAppRequestTest
   NiceMock<event_engine_test::MockEventDispatcher> mock_event_dispatcher_;
 };
 
+#ifdef EXTERNAL_PROPRIETARY_MODE
+
+TEST_F(SDLActivateAppRequestTest, Run_ActivateApp_SUCCESS) {
+  MessageSharedPtr msg = CreateMessage();
+  SetCorrelationAndAppID(msg);
+
+  SharedPtr<SDLActivateAppRequest> command(
+      CreateCommand<SDLActivateAppRequest>(msg));
+
+  EXPECT_CALL(app_mngr_, state_controller())
+      .WillOnce(ReturnRef(mock_state_controller_));
+  EXPECT_CALL(mock_state_controller_,
+              IsStateActive(am::HmiState::StateID::STATE_ID_DEACTIVATE_HMI))
+      .WillOnce(Return(false));
+
+  EXPECT_CALL(app_mngr_, GetPolicyHandler())
+      .WillOnce(ReturnRef(policy_handler_));
+  EXPECT_CALL(policy_handler_, OnActivateApp(kAppID, kCorrelationID));
+
+  command->Run();
+}
+
+TEST_F(SDLActivateAppRequestTest, DISABLED_Run_DactivateApp_REJECTED) {
+  MessageSharedPtr msg = CreateMessage();
+  SetCorrelationAndAppID(msg);
+  (*msg)[am::strings::msg_params][strings::function_id] =
+      hmi_apis::FunctionID::SDL_ActivateApp;
+
+  SharedPtr<SDLActivateAppRequest> command(
+      CreateCommand<SDLActivateAppRequest>(msg));
+
+  EXPECT_CALL(app_mngr_, state_controller())
+      .WillOnce(ReturnRef(mock_state_controller_));
+  EXPECT_CALL(mock_state_controller_,
+              IsStateActive(am::HmiState::StateID::STATE_ID_DEACTIVATE_HMI))
+      .WillOnce(Return(true));
+
+  EXPECT_CALL(
+      app_mngr_,
+      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::SDL_ActivateApp)))
+      .WillOnce(Return(true));
+
+  command->Run();
+}
+#else
+
 TEST_F(SDLActivateAppRequestTest, FindAppToRegister_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
   SetCorrelationAndAppID(msg);
@@ -384,6 +430,7 @@ TEST_F(SDLActivateAppRequestTest, FirstAppNotRegistered_SUCCESS) {
 
   command->Run();
 }
+#endif
 
 TEST_F(SDLActivateAppRequestTest, OnTimeout_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();

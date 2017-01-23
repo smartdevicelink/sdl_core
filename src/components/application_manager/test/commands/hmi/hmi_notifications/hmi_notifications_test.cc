@@ -129,6 +129,7 @@
 #include "test/application_manager/mock_application_manager_settings.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
 #include "application_manager/mock_message_helper.h"
+#include "protocol_handler/mock_session_observer.h"
 
 namespace am = application_manager;
 
@@ -245,6 +246,15 @@ class HMICommandsNotificationsTest
 
   am::ApplicationSharedPtr app_;
   NiceMock<MockApplication>* app_ptr_;
+
+  typedef IsNiceMock<connection_handler_test::MockConnectionHandler,
+                     kMocksAreNice>::Result MockConnectionHandler;
+
+  typedef IsNiceMock<protocol_handler_test::MockSessionObserver,
+                     kMocksAreNice>::Result MockSessionObserver;
+
+  MockConnectionHandler mock_connection_handler_;
+  MockSessionObserver mock_session_observer_;
 
   void InitCommand(const uint32_t& default_timeout) OVERRIDE {
     app_ = ConfigureApp(&app_ptr_, kAppId_, NOT_MEDIA, NOT_NAVI, NOT_VC);
@@ -627,6 +637,7 @@ TEST_F(HMICommandsNotificationsTest, OnPolicyUpdateNotificationPolicyHandler) {
   command->Run();
 }
 
+#if defined(PROPRIETARY_MODE) || defined(EXTERNAL_PROPRIETARY_MODE)
 TEST_F(HMICommandsNotificationsTest,
        OnReceivePolicyUpdateNotification_SUCCESS) {
   const std::string kFile = "./test_file.txt";
@@ -645,6 +656,7 @@ TEST_F(HMICommandsNotificationsTest,
   command->Run();
   EXPECT_TRUE(file_system::DeleteFile(kFile));
 }
+#endif
 
 TEST_F(HMICommandsNotificationsTest,
        OnReceivePolicyUpdateNotification_UNSUCCESS) {
@@ -1135,7 +1147,7 @@ TEST_F(HMICommandsNotificationsTest,
   utils::SharedPtr<Command> command =
       CreateCommand<OnExitApplicationNotification>(message);
 
-  EXPECT_CALL(app_mngr_, application(kAppId_)).WillRepeatedly(Return(app_));    
+  EXPECT_CALL(app_mngr_, application(kAppId_)).WillRepeatedly(Return(app_));
 
   EXPECT_CALL(app_mngr_, state_controller())
       .WillOnce(ReturnRef(mock_state_controller_));
@@ -1541,7 +1553,17 @@ TEST_F(HMICommandsNotificationsTest,
       CreateCommand<OnSystemRequestNotification>(message);
 
   EXPECT_CALL(app_mngr_, application(kAppId_)).WillOnce(Return(app_));
-  EXPECT_CALL(*app_ptr_, app_id()).WillOnce(Return(kAppId_));
+  ON_CALL(app_mngr_, connection_handler())
+      .WillByDefault(ReturnRef(mock_connection_handler_));
+  ON_CALL(mock_connection_handler_, get_session_observer())
+      .WillByDefault(ReturnRef(mock_session_observer_));
+  const int32_t device_id = 1;
+  ON_CALL(mock_session_observer_, GetDataOnDeviceID(_, NULL, NULL, _, NULL))
+      .WillByDefault(Return(device_id));
+
+  EXPECT_CALL(policy_interface_, GetUserConsentForDevice(_))
+      .WillOnce(Return(policy::kDeviceAllowed));
+
   EXPECT_CALL(app_mngr_,
               ManageMobileCommand(_, Command::CommandOrigin::ORIGIN_SDL));
   command->Run();
@@ -1576,10 +1598,21 @@ TEST_F(HMICommandsNotificationsTest,
   MessageSharedPtr message = CreateMessage();
   utils::SharedPtr<Command> command =
       CreateCommand<OnSystemRequestNotification>(message);
-  EXPECT_CALL(app_mngr_, GetPolicyHandler());
+  ON_CALL(app_mngr_, GetPolicyHandler())
+      .WillByDefault(ReturnRef(policy_interface_));
   EXPECT_CALL(policy_interface_, GetAppIdForSending())
       .WillOnce(Return(kAppId_));
   EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(app_));
+  ON_CALL(app_mngr_, connection_handler())
+      .WillByDefault(ReturnRef(mock_connection_handler_));
+  ON_CALL(mock_connection_handler_, get_session_observer())
+      .WillByDefault(ReturnRef(mock_session_observer_));
+  const int32_t device_id = 1;
+  ON_CALL(mock_session_observer_, GetDataOnDeviceID(_, NULL, NULL, _, NULL))
+      .WillByDefault(Return(device_id));
+
+  EXPECT_CALL(policy_interface_, GetUserConsentForDevice(_))
+      .WillOnce(Return(policy::kDeviceAllowed));
   EXPECT_CALL(app_mngr_,
               ManageMobileCommand(_, Command::CommandOrigin::ORIGIN_SDL));
   command->Run();

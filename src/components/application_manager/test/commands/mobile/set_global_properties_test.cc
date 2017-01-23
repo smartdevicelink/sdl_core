@@ -1120,13 +1120,9 @@ TEST_F(SetGlobalPropertiesRequestTest, OnEvent_UIAndWarningResultCode_SUCCESS) {
       .WillRepeatedly(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
   EXPECT_CALL(mock_message_helper_, HMIToMobileResult(_))
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
-  /*EXPECT_CALL(app_mngr_, application(kConnectionKey))
-      .WillOnce(Return(mock_app_));*/
   EXPECT_CALL(app_mngr_,
               ManageMobileCommand(_, am::commands::Command::ORIGIN_SDL))
       .WillOnce(Return(true));
-
-  //EXPECT_CALL(*mock_app_, UpdateHash());
 
   command->on_event(event);
 }

@@ -317,7 +317,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest, Run_FindChoiceSetFail_UNSUCCESS) {
 }
 
 TEST_F(CreateInteractionChoiceSetRequestTest,
-       DISABLED_Run_CheckChoiceSet_InvalidChoiceId_UNSUCCESS) {
+       Run_CheckChoiceSet_InvalidChoiceId_UNSUCCESS) {
   (*message_)[am::strings::msg_params][am::strings::choice_set][0]
              [am::strings::menu_name] = kMenuName;
   (*message_)[am::strings::msg_params][am::strings::choice_set][0]
@@ -326,12 +326,16 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
              [am::strings::choice_id] = kChoiceId1;
   (*message_)[am::strings::msg_params][am::strings::choice_set][0]
              [am::strings::secondary_image][am::strings::value] = kSecondImage;
+  (*message_)[am::strings::msg_params][am::strings::choice_set][0]
+             [am::strings::vr_commands][0] = kVrCommands1;
 
   FillMessageFieldsItem2(message_);
   (*message_)[am::strings::msg_params][am::strings::choice_set][1]
              [am::strings::vr_commands][0] = kVrCommands1;
   (*message_)[am::strings::msg_params][am::strings::choice_set][1]
              [am::strings::vr_commands][1] = " kVrCommands2\t";
+  (*message_)[am::strings::msg_params][am::strings::choice_set][1]
+             [am::strings::vr_commands][0] = kVrCommands1;
 
   EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(app_));
 
@@ -458,7 +462,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
 }
 
 TEST_F(CreateInteractionChoiceSetRequestTest,
-       DISABLED_Run_EmptyAmountVrCommands_SUCCESS) {
+       Run_EmptyAmountVrCommands_SUCCESS) {
   (*message_)[am::strings::msg_params][am::strings::choice_set][0]
              [am::strings::menu_name] = kMenuName;
   (*message_)[am::strings::msg_params][am::strings::choice_set][0]
@@ -467,13 +471,16 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
              [am::strings::choice_id] = kChoiceId1;
   (*message_)[am::strings::msg_params][am::strings::choice_set][0]
              [am::strings::secondary_image][am::strings::value] = kSecondImage;
-
+  (*message_)[am::strings::msg_params][am::strings::choice_set][0]
+             [am::strings::vr_commands][0] = kVrCommands1;
   (*message_)[am::strings::msg_params][am::strings::choice_set][1]
              [am::strings::choice_id] = kChoiceId2;
   (*message_)[am::strings::msg_params][am::strings::choice_set][1]
              [am::strings::menu_name] = kMenuName;
   (*message_)[am::strings::msg_params][am::strings::interaction_choice_set_id] =
       kChoiceSetId;
+  (*message_)[am::strings::msg_params][am::strings::choice_set][1]
+             [am::strings::vr_commands][0] = kVrCommands2;
 
   EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(app_));
 

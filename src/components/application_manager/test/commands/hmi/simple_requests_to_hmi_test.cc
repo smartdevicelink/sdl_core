@@ -227,10 +227,12 @@ typedef Types<am_commands::UIScrollableMessageRequest,
               am_commands::VRGetLanguageRequest,
               am_commands::VRPerformInteractionRequest,
               am_commands::AllowAppRequest,
-              // TODO (OKozlov). Need to clarify why UT fails
-              // for UISetIconRequest
-              // am_commands::UISetIconRequest,
+// TODO (OKozlov). Need to clarify why UT fails
+// for UISetIconRequest
+// am_commands::UISetIconRequest,
+#if defined(PROPRIETARY_MODE) || defined(EXTERNAL_PROPRIETARY_MODE)
               am_commands::SDLPolicyUpdate,
+#endif
               am_commands::hmi::DialNumberRequest> RequestCommandsList2;
 
 typedef Types<am_commands::VIIsReadyRequest,

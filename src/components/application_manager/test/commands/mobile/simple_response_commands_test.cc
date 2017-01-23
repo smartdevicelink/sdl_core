@@ -73,6 +73,7 @@
 #include "mobile/generic_response.h"
 #include "mobile/set_app_icon_response.h"
 #include "mobile/scrollable_message_response.h"
+#include "mobile/change_registration_response.h"
 
 namespace test {
 namespace components {
@@ -128,7 +129,8 @@ typedef Types<commands::ListFilesResponse,
               commands::AddCommandResponse,
               commands::SendLocationResponse,
               commands::SetAppIconResponse,
-              commands::SetDisplayLayoutResponse> ResponseCommandsList;
+              commands::SetDisplayLayoutResponse,
+              commands::ChangeRegistrationResponse> ResponseCommandsList;
 
 TYPED_TEST_CASE(MobileResponseCommandsTest, ResponseCommandsList);
 

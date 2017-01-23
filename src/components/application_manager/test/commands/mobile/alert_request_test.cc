@@ -82,7 +82,8 @@ class AlertRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
   AlertRequestTest()
       : mock_message_helper_(*MockMessageHelper::message_helper_mock())
-      , mock_app_(CreateMockApp()) {}
+      , mock_app_(CreateMockApp())
+      , msg_(CreateMessage()) {}
 
  protected:
   MessageSharedPtr CreateFullParamsUISO() {
@@ -195,10 +196,10 @@ class AlertRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
   sync_primitives::Lock lock_;
 
   MockMessageHelper& mock_message_helper_;
+  MockAppPtr mock_app_;
+  MessageSharedPtr msg_;
   MockPolicyHandlerInterface mock_policy_handler_;
   NiceMock<MockHmiInterfaces> hmi_interfaces_;
-  MessageSharedPtr msg_;
-  MockAppPtr mock_app_;
 };
 
 TEST_F(AlertRequestTest, OnTimeout_GENERIC_ERROR) {
@@ -286,7 +287,7 @@ class CallOnTimeOut {
 
   CommandRequestImpl& command_;
 };
-/*
+
 TEST_F(AlertRequestTest, Init_DurationExists_SUCCESS) {
   Expectations();
   (*msg_)[am::strings::msg_params][am::strings::duration] = kDefaultTimeout;
@@ -424,9 +425,11 @@ TEST_F(AlertRequestTest, OnEvent_InvalidEventId_UNSUCCESS) {
   command->on_event(event);
 }
 
-TEST_F(AlertRequestTest, OnEvent_UI_OnResetTimeout_SUCCESS) {
+TEST_F(AlertRequestTest, DISABLED_OnEvent_UI_OnResetTimeout_SUCCESS) {
+  PreConditions();
   Expectations();
   AddAlertTextsToMsg();
+
   (*msg_)[am::strings::msg_params][am::strings::duration] = kDefaultTimeout;
 
   CommandPtr command(CreateCommand<AlertRequest>(msg_));
@@ -440,6 +443,8 @@ TEST_F(AlertRequestTest, OnEvent_UI_OnResetTimeout_SUCCESS) {
 
   Event event(hmi_apis::FunctionID::UI_OnResetTimeout);
   event.set_smart_object(*msg_);
+  ON_CALL(mock_message_helper_, HMIToMobileResult(_))
+      .WillByDefault(Return(mobile_apis::Result::SUCCESS));
   command->on_event(event);
 }
 
@@ -474,7 +479,8 @@ TEST_F(AlertRequestTest, OnEvent_UIAlertHasHmiResponsesToWait_UNSUCCESS) {
   command->on_event(event);
 }
 
-TEST_F(AlertRequestTest, OnEvent_TTSWarnings_SUCCESS) {
+TEST_F(AlertRequestTest, DISABLED_OnEvent_TTSWarnings_SUCCESS) {
+  PreConditions();
   Expectations();
   AddTTSChunkToMsg();
   (*msg_)[am::strings::params][am::hmi_response::code] =
@@ -499,10 +505,12 @@ TEST_F(AlertRequestTest, OnEvent_TTSWarnings_SUCCESS) {
 
   Event event(hmi_apis::FunctionID::TTS_Speak);
   event.set_smart_object(*msg_);
+  ON_CALL(mock_message_helper_, HMIToMobileResult(_))
+      .WillByDefault(Return(mobile_apis::Result::SUCCESS));
   command->on_event(event);
 }
 
-TEST_F(AlertRequestTest, OnEvent_TTSUnsupportedResource_SUCCESS) {
+TEST_F(AlertRequestTest, DISABLED_OnEvent_TTSUnsupportedResource_SUCCESS) {
   Expectations();
   AddTTSChunkToMsg();
   (*msg_)[am::strings::params][am::hmi_response::code] =
@@ -526,10 +534,15 @@ TEST_F(AlertRequestTest, OnEvent_TTSUnsupportedResource_SUCCESS) {
 
   Event event(hmi_apis::FunctionID::TTS_Speak);
   event.set_smart_object(*msg_);
+  PreConditions();
+
   command->on_event(event);
 }
 
-TEST_F(AlertRequestTest, OnEvent_TTSUnsupportedResourceUiAlertSent_SUCCESS) {
+TEST_F(AlertRequestTest,
+       DISABLED_OnEvent_TTSUnsupportedResourceUiAlertSent_SUCCESS) {
+  PreConditions();
+
   Expectations();
   AddAlertTextsToMsg();
   AddTTSChunkToMsg();
@@ -562,12 +575,16 @@ TEST_F(AlertRequestTest, OnEvent_TTSUnsupportedResourceUiAlertSent_SUCCESS) {
 
   Event tts_stop_event(hmi_apis::FunctionID::TTS_StopSpeaking);
   tts_stop_event.set_smart_object(*msg_);
+  ON_CALL(mock_message_helper_, HMIToMobileResult(_))
+      .WillByDefault(Return(mobile_apis::Result::SUCCESS));
   command->on_event(tts_stop_event);
 
   ExpectManageMobileCommandWithResultCode(mobile_apis::Result::WARNINGS);
 
   Event event(hmi_apis::FunctionID::TTS_Speak);
   event.set_smart_object(*msg_);
+  ON_CALL(mock_message_helper_, HMIToMobileResult(_))
+      .WillByDefault(Return(mobile_apis::Result::SUCCESS));
   command->on_event(event);
 }
 
@@ -662,7 +679,7 @@ TEST_F(AlertRequestTest, OnEvent_TTSSuccesUiAlertInvalidEnum_SUCCESS) {
   command->on_event(event);
 }
 
-TEST_F(AlertRequestTest, OnEvent_TTSAbortedUiAlertNotSent_SUCCESS) {
+TEST_F(AlertRequestTest, DISABLED_OnEvent_TTSAbortedUiAlertNotSent_SUCCESS) {
   Expectations();
   AddTTSChunkToMsg();
   (*msg_)[am::strings::params][am::hmi_response::code] =
@@ -695,6 +712,8 @@ TEST_F(AlertRequestTest, OnEvent_TTSAbortedUiAlertNotSent_SUCCESS) {
 
   Event tts_stop_event(hmi_apis::FunctionID::TTS_StopSpeaking);
   tts_stop_event.set_smart_object(*msg_);
+  ON_CALL(mock_message_helper_, HMIToMobileResult(_))
+      .WillByDefault(Return(mobile_apis::Result::SUCCESS));
   command->on_event(tts_stop_event);
 
   (*msg_)[am::strings::params][am::hmi_response::code] =
@@ -704,10 +723,12 @@ TEST_F(AlertRequestTest, OnEvent_TTSAbortedUiAlertNotSent_SUCCESS) {
 
   Event event(hmi_apis::FunctionID::TTS_Speak);
   event.set_smart_object(*msg_);
+  ON_CALL(mock_message_helper_, HMIToMobileResult(_))
+      .WillByDefault(Return(mobile_apis::Result::SUCCESS));
   command->on_event(event);
 }
 
-TEST_F(AlertRequestTest, OnEvent_TTSWarningUiAlertWarning_SUCCESS) {
+TEST_F(AlertRequestTest, DISABLED_OnEvent_TTSWarningUiAlertWarning_SUCCESS) {
   Expectations();
   AddAlertTextsToMsg();
   (*msg_)[am::strings::params][am::hmi_response::code] =
@@ -730,6 +751,8 @@ TEST_F(AlertRequestTest, OnEvent_TTSWarningUiAlertWarning_SUCCESS) {
 
   Event ui_event(hmi_apis::FunctionID::UI_Alert);
   ui_event.set_smart_object(*msg_);
+  ON_CALL(mock_message_helper_, HMIToMobileResult(_))
+      .WillByDefault(Return(mobile_apis::Result::SUCCESS));
   command->on_event(ui_event);
 
   Event tts_stop_event(hmi_apis::FunctionID::TTS_StopSpeaking);
@@ -740,6 +763,8 @@ TEST_F(AlertRequestTest, OnEvent_TTSWarningUiAlertWarning_SUCCESS) {
 
   Event event(hmi_apis::FunctionID::TTS_Speak);
   event.set_smart_object(*msg_);
+  ON_CALL(mock_message_helper_, HMIToMobileResult(_))
+      .WillByDefault(Return(mobile_apis::Result::SUCCESS));
   command->on_event(event);
 }
 
@@ -780,7 +805,7 @@ TEST_F(AlertRequestTest, Run_InvalidTTSChunk_UNSUCCESS) {
 
   CommandPtr command(CreateCommand<AlertRequest>(msg_));
   command->Run();
-}*/
+}
 
 }  // namespace alert_request
 }  // namespace mobile_commands_test
