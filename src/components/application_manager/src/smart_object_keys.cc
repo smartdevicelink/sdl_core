@@ -132,6 +132,8 @@ const char* speech_capabilities = "speechCapabilities";
 const char* vr_capabilities = "vrCapabilities";
 const char* audio_pass_thru_capabilities = "audioPassThruCapabilities";
 const char* pcm_stream_capabilities = "pcmStreamCapabilities";
+const char* device_rank = "deviceRank";
+const char* audio_pass_thru_icon = "audioPassThruIcon";
 // PutFile
 const char* sync_file_name = "syncFileName";
 const char* file_name = "fileName";
@@ -351,6 +353,7 @@ const char* file = "file";
 const char* file_name = "fileName";
 const char* retry = "retry";
 const char* service = "service";
+const char* audio_pass_thru_icon = "audioPassThruIcon";
 }  // namespace hmi_request
 
 namespace hmi_response {

@@ -133,10 +133,46 @@ class PerformAudioPassThruRequest : public CommandRequestImpl {
    */
   bool IsWaitingHMIResponse();
 
+  /**
+   * @brief Validates audioPassThruIcon parameter and
+   * removes it if is not valid
+   * @param app Pointer to the application whose storage directory
+   * must be accessed
+   */
+  void ProcessAudioPassThruIcon(ApplicationSharedPtr app);
+
+  /**
+   * @brief Checks result code from HMI for splitted RPC
+   * and returns parameter for sending to mobile app in
+   * audioPassThru communication.
+   * @param ui_response contains result_code from UI
+   * @param tts_response contains result_code from TTS
+   * @return result code - 1) UI error code has precedence than TTS's
+   * 2) error_code from TTS is turned to WARNINGS
+   */
+  mobile_apis::Result::eType PrepareAudioPassThruResultCodeForResponse(
+      const ResponseInfo& ui_response, const ResponseInfo& tts_response);
+
+  /**
+   * @brief Checks if any of audioPassThru communication components
+   * returned ABORTED code
+   * @param ui contains result_code from UI
+   * @param tts contains result_code from TTS
+   * @return if TTS or UI responded with ABORTED function returns TRUE,
+   * else is returns FALSE
+   */
+  bool IsAnyHMIComponentAborted(const ResponseInfo& ui,
+                                const ResponseInfo& tts);
+
   /* flag display state of speak and ui perform audio
   during perform audio pass thru*/
   bool awaiting_tts_speak_response_;
   bool awaiting_ui_response_;
+
+  /* flag shows if last received audioPassThruIcon exists
+   * in the file system
+   */
+  bool audio_pass_thru_icon_exists_;
 
   hmi_apis::Common_Result::eType result_tts_speak_;
   hmi_apis::Common_Result::eType result_ui_;
