@@ -96,10 +96,11 @@ sync_primitives::ConditionalVariable state_condition_;
 
 class ApplicationManagerImplTest : public ::testing::Test {
  public:
-    ApplicationManagerImplTest():
-      mock_message_helper_(application_manager::MockMessageHelper::message_helper_mock())
-      //message_helper_(new MessageHelper::MessageHelper())
-    {}
+  ApplicationManagerImplTest()
+      : mock_message_helper_(
+            application_manager::MockMessageHelper::message_helper_mock())
+  // message_helper_(new MessageHelper::MessageHelper())
+  {}
 
  protected:
   void SetUp() OVERRIDE {
@@ -119,9 +120,9 @@ class ApplicationManagerImplTest : public ::testing::Test {
     mock_storage_ =
         ::utils::MakeShared<NiceMock<resumption_test::MockResumptionData> >(
             app_mngr_);
-    //app_mock = utils::MakeShared<NiceMock<MockApplication> >();
-    //res_ctrl = utils::MakeShared<ResumeCtrlImpl>(app_mngr_);
-    //res_ctrl->set_resumption_storage(mock_storage);
+    // app_mock = utils::MakeShared<NiceMock<MockApplication> >();
+    // res_ctrl = utils::MakeShared<ResumeCtrlImpl>(app_mngr_);
+    // res_ctrl->set_resumption_storage(mock_storage);
 
     logger::create_log_message_loop_thread();
 
@@ -192,122 +193,77 @@ struct AppIdExtractor {
   }
 };
 
-TEST_F(ApplicationManagerImplTest,
-      FindAppToRegister_SearchValidHmiId_ExpectSuccess)
-{
-      using namespace NsSmartDeviceLink::NsSmartObjects;
-      SmartObject app_data;
-      const uint32_t connection_key = 65537u;
-      const uint32_t app_id = 0u;
-      app_data[am::json::name] = "application_manager_test";
-      app_data[am::json::appId] = app_id;
-      app_data[am::json::android] = "bucket";
-      app_data[am::json::android][am::json::packageName] = "com.android.test";
-      smart_objects::SmartObject sm_object(SmartType_Map);
-      sm_object[am::json::response][0] = app_data;
+TEST_F(ApplicationManagerImplTest, ProcessQueryApp_ExpectSuccess) {
+  using namespace NsSmartDeviceLink::NsSmartObjects;
+  SmartObject app_data;
+  const uint32_t connection_key = 65537u;
+  const uint32_t app_id = 0u;
+  app_data[am::json::name] = "application_manager_test";
+  app_data[am::json::appId] = app_id;
+  app_data[am::json::android] = "bucket";
+  app_data[am::json::android][am::json::packageName] = "com.android.test";
+  smart_objects::SmartObject sm_object(SmartType_Map);
+  sm_object[am::json::response][0] = app_data;
 
-      EXPECT_CALL(mock_hmi_msg_handler_, SendMessageToHMI(Truly(AppIdExtractor())))
-          .Times(AtLeast(1u));
+  EXPECT_CALL(mock_hmi_msg_handler_, SendMessageToHMI(Truly(AppIdExtractor())))
+      .Times(AtLeast(1u));
 
-      smart_objects::SmartObjectSPtr module_info =
-          utils::MakeShared<smart_objects::SmartObject>(
-              smart_objects::SmartType_Map);
-      smart_objects::SmartObject& object = *module_info;
-      object[strings::params][strings::message_type] = static_cast<int>(kRequest);
-      object[strings::params][strings::function_id] = static_cast<int>(1);
-      object[strings::params][strings::correlation_id] =
-          app_manager_impl_->GetNextHMICorrelationID();//GetNextHMICorrelationID();
-      object[strings::msg_params] =
-          smart_objects::SmartObject(smart_objects::SmartType_Map);
+  smart_objects::SmartObjectSPtr module_info =
+      utils::MakeShared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Map);
+  smart_objects::SmartObject& object = *module_info;
+  object[strings::params][strings::message_type] = static_cast<int>(kRequest);
+  object[strings::params][strings::function_id] = static_cast<int>(1);
+  object[strings::params][strings::correlation_id] =
+      app_manager_impl_
+          ->GetNextHMICorrelationID();  // GetNextHMICorrelationID();
+  object[strings::msg_params] =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
 
+  ON_CALL(*mock_message_helper_, CreateModuleInfoSO(_, _))
+      .WillByDefault(Return(module_info));
 
-      ON_CALL(*mock_message_helper_, CreateModuleInfoSO(
-                  _, _)).WillByDefault(Return(module_info));
+  ON_CALL(*mock_message_helper_, CreateNegativeResponse(_, _, _, _))
+      .WillByDefault(Return(module_info));
 
-      ON_CALL(*mock_message_helper_, CreateNegativeResponse(_,_,_,_)).WillByDefault(Return(module_info));
-
-      app_manager_impl_->ProcessQueryApp(sm_object, connection_key);
-
-//      {
-//        sync_primitives::AutoLock auto_lock(state_lock_);
-//        while (!is_called_) {
-//          ASSERT_NE(sync_primitives::ConditionalVariable::kTimeout,
-//                    state_condition_.WaitFor(auto_lock, kWaitFreeQueue));
-//        }
-//      }
-
-    const bool result = app_manager_impl_->application_by_hmi_app(hmi_app_id_).valid();
-    printf("%s", result ? "true" : "false");
-    EXPECT_TRUE(app_manager_impl_->application_by_hmi_app(hmi_app_id_).valid());
+  app_manager_impl_->ProcessQueryApp(sm_object, connection_key);
+  // Can't test that functionality ofr the moment.
+  // EXPECT_CALL(app_mngr_, ManageHMICommand(_)).Times(AtLeast(1));
 }
 
-// TEST_F(ApplicationManagerImplTest,
-//       FindAppToRegister_SearchInvalidHmiId_ExpectFail) {
-//  using namespace NsSmartDeviceLink::NsSmartObjects;
-//  SmartObject app_data;
-//  const uint32_t connection_key = 65537u;
-//  const uint32_t app_id = 8975689u;
-//  app_data[am::json::name] = "application_manager_test";
-//  app_data[am::json::appId] = app_id;
-//  app_data[am::json::android] = "bucket";
-//  app_data[am::json::android][am::json::packageName] = "com.android.test";
-//  smart_objects::SmartObject sm_object(SmartType_Map);
-//  sm_object[am::json::response][0] = app_data;
+TEST_F(ApplicationManagerImplTest,
+       SubscribeAppForWayPoints_ExpectSubscriptionApp) {
+  app_manager_impl_->SubscribeAppForWayPoints(app_id_);
+  EXPECT_TRUE(app_manager_impl_->IsAppSubscribedForWayPoints(app_id_));
+}
 
-//  EXPECT_CALL(mock_hmi_msg_handler_,
-//  SendMessageToHMI(Truly(AppIdExtractor())))
-//      .Times(AtLeast(1u));
+TEST_F(ApplicationManagerImplTest,
+       UnsubscribeAppForWayPoints_ExpectUnsubscriptionApp) {
+  app_manager_impl_->SubscribeAppForWayPoints(app_id_);
+  EXPECT_TRUE(app_manager_impl_->IsAppSubscribedForWayPoints(app_id_));
+  app_manager_impl_->UnsubscribeAppFromWayPoints(app_id_);
+  EXPECT_FALSE(app_manager_impl_->IsAppSubscribedForWayPoints(app_id_));
+  const std::set<int32_t> result =
+      app_manager_impl_->GetAppsSubscribedForWayPoints();
+  EXPECT_TRUE(result.empty());
+}
 
-//  app_manager_impl_->ProcessQueryApp(sm_object, connection_key);
+TEST_F(
+    ApplicationManagerImplTest,
+    IsAnyAppSubscribedForWayPoints_SubcribeAppForWayPoints_ExpectCorrectResult) {
+  EXPECT_FALSE(app_manager_impl_->IsAnyAppSubscribedForWayPoints());
+  app_manager_impl_->SubscribeAppForWayPoints(app_id_);
+  EXPECT_TRUE(app_manager_impl_->IsAnyAppSubscribedForWayPoints());
+}
 
-//  {
-//    sync_primitives::AutoLock auto_lock(state_lock_);
-//    while (!is_called_) {
-//      ASSERT_NE(sync_primitives::ConditionalVariable::kTimeout,
-//                state_condition_.WaitFor(auto_lock, kWaitFreeQueue));
-//    }
-//  }
-
-//  hmi_app_id_ += 100;  // change hmi_id
-//  EXPECT_FALSE(app_manager_impl_->FindAppToRegister(hmi_app_id_).valid());
-//}
-
-// TEST_F(ApplicationManagerImplTest,
-//       SubscribeAppForWayPoints_ExpectSubscriptionApp) {
-//  app_manager_impl_->SubscribeAppForWayPoints(app_id_);
-//  EXPECT_TRUE(app_manager_impl_->IsAppSubscribedForWayPoints(app_id_));
-//}
-
-// TEST_F(ApplicationManagerImplTest,
-//       UnsubscribeAppForWayPoints_ExpectUnsubscriptionApp) {
-//  app_manager_impl_->SubscribeAppForWayPoints(app_id_);
-//  EXPECT_TRUE(app_manager_impl_->IsAppSubscribedForWayPoi nts(app_id_));
-//  app_manager_impl_->UnsubscribeAppFromWayPoints(app_id_);
-//  EXPECT_FALSE(app_manager_impl_->IsAppSubscribedForWayPoints(app_id_));
-//  const std::set<int32_t> result =
-//      app_manager_impl_->GetAppsSubscribedForWayPoints();
-//  EXPECT_TRUE(result.empty());
-//}
-
-// TEST_F(
-//    ApplicationManagerImplTest,
-//    IsAnyAppSubscribedForWayPoints_SubcribeAppForWayPoints_ExpectCorrectResult)
-//    {
-//  EXPECT_FALSE(app_manager_impl_->IsAnyAppSubscribedForWayPoints());
-//  app_manager_impl_->SubscribeAppForWayPoints(app_id_);
-//  EXPECT_TRUE(app_manager_impl_->IsAnyAppSubscribedForWayPoints());
-//}
-
-// TEST_F(
-//    ApplicationManagerImplTest,
-//    GetAppsSubscribedForWayPoints_SubcribeAppForWayPoints_ExpectCorrectResult)
-//    {
-//  app_manager_impl_->SubscribeAppForWayPoints(app_id_);
-//  std::set<int32_t> result =
-//  app_manager_impl_->GetAppsSubscribedForWayPoints();
-//  EXPECT_EQ(1u, result.size());
-//  EXPECT_TRUE(result.find(app_id_) != result.end());
-//}
+TEST_F(
+    ApplicationManagerImplTest,
+    GetAppsSubscribedForWayPoints_SubcribeAppForWayPoints_ExpectCorrectResult) {
+  app_manager_impl_->SubscribeAppForWayPoints(app_id_);
+  std::set<int32_t> result = app_manager_impl_->GetAppsSubscribedForWayPoints();
+  EXPECT_EQ(1u, result.size());
+  EXPECT_TRUE(result.find(app_id_) != result.end());
+}
 
 }  // application_manager_test
 }  // namespace components
