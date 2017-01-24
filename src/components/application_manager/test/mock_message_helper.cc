@@ -115,6 +115,11 @@ mobile_api::HMILevel::eType MessageHelper::StringToHMILevel(
   return MockMessageHelper::message_helper_mock()->StringToHMILevel(hmi_level);
 }
 
+smart_objects::SmartObjectSPtr CreateDeviceListSO(
+    const connection_handler::DeviceMap& devices) {
+  return MockMessageHelper::message_helper_mock()->CreateDeviceListSO(devices);
+}
+
 void MessageHelper::SendOnAppPermissionsChangedNotification(
     uint32_t connection_key,
     const policy::AppPermissions& permissions,
