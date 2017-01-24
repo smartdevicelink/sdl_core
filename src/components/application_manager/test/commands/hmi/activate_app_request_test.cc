@@ -86,6 +86,7 @@ TEST_F(ActivateAppRequestTest, Run_SUCCESS) {
 
   MockAppPtr mock_app = CreateMockApp();
   EXPECT_CALL(app_mngr_, application(kAppId)).WillOnce(Return(mock_app));
+// TODO(OKozlov) Invastigate and fix issue with using log
 #ifdef ENABLE_LOG
   (*msg)[strings::msg_params][strings::activate_app_hmi_level] =
       mobile_apis::HMILevel::HMI_FULL;

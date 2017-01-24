@@ -1139,7 +1139,7 @@ TEST_F(HMICommandsNotificationsTest, OnExitApplicationNotificationInvalidApp) {
 }
 
 TEST_F(HMICommandsNotificationsTest,
-       OnExitApplicationNotificationDriverDistractionValidApp) {
+       DISABLED_OnExitApplicationNotificationDriverDistractionValidApp) {
   MessageSharedPtr message = CreateMessage();
   (*message)[am::strings::msg_params][am::strings::app_id] = kAppId_;
   (*message)[am::strings::msg_params][am::strings::reason] =
