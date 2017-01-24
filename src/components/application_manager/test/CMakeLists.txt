@@ -56,7 +56,6 @@ set(testSources
   ${AM_TEST_DIR}/event_engine_test.cc
   ${AM_TEST_DIR}/policy_event_observer_test.cc
   ${AM_TEST_DIR}/application_impl_test.cc
-  ${AM_TEST_DIR}/application_manager_impl_test.cc
   ${AM_TEST_DIR}/hmi_capabilities_test.cc
   ${AM_TEST_DIR}/application_state_test.cc
   ${AM_TEST_DIR}/usage_statistics_test.cc

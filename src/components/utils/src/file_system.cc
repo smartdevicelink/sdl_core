@@ -48,20 +48,6 @@
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
 
-std::string file_system::GetPathDelimiter() {
-  return "/";
-}
-
-std::string file_system::ConcatPath(const std::string& utf8_path1,
-                                    const std::string& utf8_path2) {
-  return utf8_path1 + GetPathDelimiter() + utf8_path2;
-}
-std::string file_system::ConcatPath(const std::string& utf8_path1,
-                                    const std::string& utf8_path2,
-                                    const std::string& utf8_path3) {
-  return ConcatPath(ConcatPath(utf8_path1, utf8_path2), utf8_path3);
-}
-
 uint64_t file_system::GetAvailableDiskSpace(const std::string& path) {
   struct statvfs fsInfo = {0};
   if (statvfs(path.c_str(), &fsInfo) == 0) {
