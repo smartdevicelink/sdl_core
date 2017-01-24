@@ -1562,7 +1562,8 @@ TEST(SQLPTRepresentationTest3, RemoveDB_RemoveDB_ExpectFileDeleted) {
 
 TEST_F(SQLPTRepresentationTest,
        DISABLED_GenerateSnapshot_SetPolicyTable_SnapshotIsPresent) {
-  // TODO(AKutsan):APPLINK-31526 Test requires initial preloaded pt for preloaded date reading
+  // TODO(AKutsan):APPLINK-31526 Test requires initial preloaded pt for
+  // preloaded date reading
   // Arrange
   Json::Value table(Json::objectValue);
   PolicyTableUpdatePrepare(table);
@@ -1608,8 +1609,10 @@ TEST_F(SQLPTRepresentationTest,
             snapshot->ToJsonValue().toStyledString());
 }
 
-TEST_F(SQLPTRepresentationTest, DISABLED_Save_SetPolicyTableThenSave_ExpectSavedToPT) {
-  // TODO(AKutsan): APPLINK-31526 Test requires initial preloaded pt for preloaded date reading
+TEST_F(SQLPTRepresentationTest,
+       DISABLED_Save_SetPolicyTableThenSave_ExpectSavedToPT) {
+  // TODO(AKutsan): APPLINK-31526 Test requires initial preloaded pt for
+  // preloaded date reading
   // Arrange
   Json::Value table(Json::objectValue);
   PolicyTableUpdatePrepare(table);
