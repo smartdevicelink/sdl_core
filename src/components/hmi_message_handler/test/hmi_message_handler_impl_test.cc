@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
 #include "hmi_message_handler/messagebroker_adapter.h"
 #include "hmi_message_handler/mock_hmi_message_observer.h"
 #include "hmi_message_handler/mock_hmi_message_handler_settings.h"
-#include "hmi_message_handler/mock_hmi_message_adapter_impl.h"
+#include "hmi_message_handler/mock_hmi_message_adapter.h"
 
 namespace test {
 namespace components {
@@ -56,6 +56,7 @@ class HMIMessageHandlerImplTest : public ::testing::Test {
   hmi_message_handler::MessageBrokerAdapter* mb_adapter_;
   hmi_message_handler::HMIMessageHandlerImpl* hmi_handler_;
   hmi_message_handler::MockHMIMessageObserver* mock_hmi_message_observer_;
+  MockHMIMessageAdapter message_adapter_;
   testing::NiceMock<MockHMIMessageHandlerSettings>
       mock_hmi_message_handler_settings;
   const uint64_t stack_size = 1000u;
@@ -151,8 +152,7 @@ TEST_F(HMIMessageHandlerImplTest, RemoveHMIMessageAdapter_ExpectRemoved) {
 }
 
 // TODO(atimchenko) SDLOPEN-44 Wrong message to observer
-TEST_F(HMIMessageHandlerImplTest,
-       DISABLED_OnMessageReceived_ValidObserver_Success) {
+TEST_F(HMIMessageHandlerImplTest, OnMessageReceived_ValidObserver_Success) {
   hmi_message_handler::MessageSharedPointer message = CreateMessage();
   EXPECT_CALL(*mock_hmi_message_observer_, OnMessageReceived(message));
 
@@ -173,10 +173,9 @@ TEST_F(HMIMessageHandlerImplTest, OnMessageReceived_InvalidObserver_Cancelled) {
 TEST_F(HMIMessageHandlerImplTest, SendMessageToHMI_Success) {
   hmi_message_handler::MessageSharedPointer message = CreateMessage();
 
-  MockHMIMessageAdapterImpl message_adapter(hmi_handler_);
-  EXPECT_CALL(message_adapter, SendMessageToHMI(message));
+  EXPECT_CALL(message_adapter_, SendMessageToHMI(message));
 
-  hmi_handler_->AddHMIMessageAdapter(&message_adapter);
+  hmi_handler_->AddHMIMessageAdapter(&message_adapter_);
   hmi_handler_->SendMessageToHMI(message);
 
   // Wait for the message to be processed
