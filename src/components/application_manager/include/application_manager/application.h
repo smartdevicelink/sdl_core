@@ -163,6 +163,12 @@ typedef std::set<uint32_t> VehicleInfoSubscriptions;
  */
 typedef std::set<mobile_apis::ButtonName::eType> ButtonSubscriptions;
 
+/**
+ * @brief Defines vector of audio streaming indicators
+ */
+typedef std::vector<mobile_apis::AudioStreamingIndicator::eType>
+    AudioStreamingIndicators;
+
 class DynamicApplicationData {
  public:
   virtual ~DynamicApplicationData() {}
@@ -485,6 +491,12 @@ class Application : public virtual InitialApplicationData,
   virtual void set_folder_name(const std::string& folder_name) = 0;
   virtual const std::string folder_name() const = 0;
   virtual bool is_media_application() const = 0;
+  /**
+   * @brief Returns current audio streaming indicator of application
+   * @return Returns current audio streaming indicator of application
+   */
+  virtual mobile_api::AudioStreamingIndicator::eType audio_streaming_indicator()
+      const = 0;
   virtual bool is_foreground() const = 0;
   virtual void set_foreground(const bool is_foreground) = 0;
   virtual const mobile_api::HMILevel::eType hmi_level() const = 0;
@@ -526,6 +538,26 @@ class Application : public virtual InitialApplicationData,
   virtual void set_version(const Version& version) = 0;
   virtual void set_name(const custom_str::CustomString& name) = 0;
   virtual void set_is_media_application(bool is_media) = 0;
+  /**
+    * @brief Saves current audio streaming indicator for application
+    * @param indicator contains audio streaming indicator for this application
+    */
+  virtual void set_audio_streaming_indicator(
+      const mobile_api::AudioStreamingIndicator::eType indicator) = 0;
+  /**
+   * @brief Adds audio streaming indicator that is waiting for response from HMI
+   * @param indicator contains audio streaming indicator for this application
+   */
+  virtual bool AddIndicatorWaitForResponse(
+      const mobile_api::AudioStreamingIndicator::eType indicator) = 0;
+  /**
+   * @brief Remove audio streaming indicator after response from HMI or after
+   * timeout event from
+   * request controller
+   * @param indicator contains audio streaming indicator for removing
+   */
+  virtual void RemoveIndicatorWaitForResponse(
+      const mobile_api::AudioStreamingIndicator::eType indicator) = 0;
   virtual void increment_put_file_in_none_count() = 0;
   virtual void increment_delete_file_in_none_count() = 0;
   virtual void increment_list_files_in_none_count() = 0;
