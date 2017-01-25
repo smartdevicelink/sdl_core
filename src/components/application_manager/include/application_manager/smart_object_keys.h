@@ -311,6 +311,7 @@ extern const char* is_suscribed;
 extern const char* message_data;
 
 extern const char* delivery_mode;
+extern const char* audio_streaming_indicator;
 }  // namespace strings
 
 namespace json {

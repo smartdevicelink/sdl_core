@@ -1882,10 +1882,11 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
         }
 
         output.erase(strings::msg_params);
+        // Note(dtrunov): According to requirment APPLINK-15509
         output[strings::params][hmi_response::code] =
-            hmi_apis::Common_Result::INVALID_DATA;
+            hmi_apis::Common_Result::GENERIC_ERROR;
         output[strings::msg_params][strings::info] =
-            std::string("Received invalid data on HMI response");
+            std::string("Invalid message received from vehicle");
       }
       break;
     }
