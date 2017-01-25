@@ -142,16 +142,6 @@ class PerformAudioPassThruRequest : public CommandRequestImpl {
   void ProcessAudioPassThruIcon(ApplicationSharedPtr app);
 
   /**
-   * @brief Checks if the audioPassThruIcon parameter value
-   * contains special characters (\n,\t) or
-   * contains only white spaces
-   * @return If the audioPassthruIcon parameter value contains
-   * above mentioned symbols, the function returns FALSE, else
-   * the parameter value is valid and it returns TRUE
-   */
-  bool IsAudioPassThruIconParamValid();
-
-  /**
    * @brief Checks result code from HMI for splitted RPC
    * and returns parameter for sending to mobile app in
    * audioPassThru communication.
