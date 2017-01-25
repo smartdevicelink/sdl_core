@@ -134,7 +134,7 @@ class HmiLanguageHandlerTest : public ::testing::Test {
   MockEventDispatcher event_dispatcher_;
   SharedPtr<am::HMILanguageHandler> hmi_language_handler_;
   ::sync_primitives::Lock app_set_lock_;
-  resumption::MockLastState last_state_;
+  resumption_test::MockLastState last_state_;
 };
 
 TEST_F(HmiLanguageHandlerTest, OnEvent_AllLanguageIsReceivedAndSame_SUCCESS) {
