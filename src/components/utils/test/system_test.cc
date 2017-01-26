@@ -35,7 +35,7 @@
 
 namespace test {
 namespace components {
-namespace utils {
+namespace utils_test {
 
 using namespace ::utils;
 
@@ -125,6 +125,6 @@ TEST(SystemTest, ASynchronousInvokeEmptyCommand_InvokeSuccessfull) {
   ASSERT_TRUE(object.Execute());
 }
 
-}  // namespace utils
+}  // namespace utils_test
 }  // namespace components
 }  // namespace test

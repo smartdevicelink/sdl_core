@@ -43,7 +43,7 @@ using rpc::policy_table_interface_base::Table;
 
 namespace test {
 namespace components {
-namespace policy {
+namespace policy_test {
 
 TEST(PolicyGeneratedCodeTest, TestValidPTPreloadJsonIsValid) {
   std::ifstream json_file("sdl_preloaded_pt.json");
@@ -67,6 +67,6 @@ TEST(PolicyGeneratedCodeTest, TestValidPTUpdateJsonIsValid) {
   ASSERT_RPCTYPE_VALID(table);
 }
 
-}  // namespace policy
+}  // namespace policy_test
 }  // namespace components
 }  // namespace test

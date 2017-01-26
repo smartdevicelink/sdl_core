@@ -41,8 +41,8 @@
 #include "smart_objects/smart_object.h"
 #include "smart_objects/smart_schema.h"
 #include "smart_objects/schema_item.h"
-#include "formatters/CFormatterJsonSDLRPCv2.hpp"
-#include "formatters/CFormatterJsonSDLRPCv1.hpp"
+#include "formatters/CFormatterJsonSDLRPCv2.h"
+#include "formatters/CFormatterJsonSDLRPCv1.h"
 #include "smart_objects/array_schema_item.h"
 #include "smart_objects/bool_schema_item.h"
 #include "smart_objects/object_schema_item.h"
@@ -56,8 +56,7 @@
 
 namespace test {
 namespace components {
-namespace SmartObjects {
-namespace SmartObjectConvertionTimeTest {
+namespace smart_object_test {
 
 using namespace NsSmartDeviceLink::NsJSONHandler::strings;
 using namespace NsSmartDeviceLink::NsSmartObjects;
@@ -634,10 +633,10 @@ TEST_F(SmartObjectConvertionTimeTest, test_object_without_enum_convertion) {
   printf("\n Object without enum.\n");
   calculateConvertionTime(srcObj, dstObj);
 }
-}
-}
-}
-}
+
+}  // namespace smart_object_test
+}  // namespace components
+}  // namespace test
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {

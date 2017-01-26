@@ -80,4 +80,4 @@ class BluetoothSocketConnection : public ThreadedSocketConnection {
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif /* BLUETOOTH_SOCKET_CONNECTION_H_ */
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_SOCKET_CONNECTION_H_

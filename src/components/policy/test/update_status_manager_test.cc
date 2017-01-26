@@ -31,15 +31,13 @@
  */
 
 #include "gtest/gtest.h"
-#include "mock_policy_listener.h"
+#include "policy/mock_policy_listener.h"
 #include "policy/policy_manager_impl.h"
 #include "policy/update_status_manager.h"
 
-using ::policy::MockPolicyListener;
-
 namespace test {
 namespace components {
-namespace policy {
+namespace policy_test {
 
 using namespace ::policy;
 
@@ -87,6 +85,6 @@ TEST_F(UpdateStatusManagerTest,
   EXPECT_FALSE(manager_->IsAppsSearchInProgress());
 }
 
-}  // namespace policy
+}  // namespace policy_test
 }  // namespace components
 }  // namespace test

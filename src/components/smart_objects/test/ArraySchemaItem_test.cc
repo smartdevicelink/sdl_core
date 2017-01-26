@@ -40,8 +40,7 @@
 
 namespace test {
 namespace components {
-namespace SmartObjects {
-namespace SchemaItem {
+namespace smart_object_test {
 
 /**
  * Test ArraySchemaItem no schema item, no min and max size
@@ -339,7 +338,7 @@ TEST(test_map_validate, test_ArraySchemaItemTest) {
   EXPECT_EQ(std::string("Another String"), obj["array"][3].asString());
   EXPECT_EQ(std::string("Out of array"), obj["array"][4].asString());
 }
-}  // namespace SchemaItem
-}  // namespace SmartObjects
+
+}  // namespace smart_object_test
 }  // namespace components
 }  // namespace test

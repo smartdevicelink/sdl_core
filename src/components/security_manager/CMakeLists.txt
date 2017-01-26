@@ -32,14 +32,13 @@
 include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
 include_directories(
-  include/
+  ${COMPONENTS_DIR}/security_manager/include/
   ${COMPONENTS_DIR}/protocol_handler/include/
   ${COMPONENTS_DIR}/connection_handler/include
   ${COMPONENTS_DIR}/config_profile/include/
   ${COMPONENTS_DIR}/utils/include/
   ${COMPONENTS_DIR}/application_manager/include/
   ${JSONCPP_INCLUDE_DIRECTORY}
-  ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/jsoncpp/include
   ${APR_INCLUDE_DIRECTORY}
 )
 

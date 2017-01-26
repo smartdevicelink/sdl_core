@@ -1,5 +1,5 @@
-#ifndef POLICY_HANDLER_SETTINGS_H
-#define POLICY_HANDLER_SETTINGS_H
+#ifndef SRC_COMPONENTS_INCLUDE_POLICY_POLICY_SETTINGS_H_
+#define SRC_COMPONENTS_INCLUDE_POLICY_POLICY_SETTINGS_H_
 #include <string>
 #include <stdint.h>
 
@@ -39,4 +39,4 @@ class PolicySettings {
   virtual ~PolicySettings() {}
 };
 }  // namespace policy
-#endif  // POLICY_HANDLER_SETTINGS_H
+#endif  // SRC_COMPONENTS_INCLUDE_POLICY_POLICY_SETTINGS_H_

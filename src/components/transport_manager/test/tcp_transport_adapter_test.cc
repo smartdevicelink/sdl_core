@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Ford Motor Company
+ * Copyright (c) 2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,12 +32,12 @@
 
 #include "gtest/gtest.h"
 #include "transport_manager/tcp/tcp_transport_adapter.h"
-#include "transport_manager/transport_adapter/connection.h"
 #include "resumption/last_state_impl.h"
 #include "protocol/raw_message.h"
-#include "transport_manager/transport_adapter_listener_mock.h"
-#include "transport_manager/device_mock.h"
-#include "transport_manager/connection_mock.h"
+#include "transport_manager/transport_adapter/connection.h"
+#include "transport_manager/transport_adapter/mock_transport_adapter_listener.h"
+#include "transport_manager/transport_adapter/mock_device.h"
+#include "transport_manager/transport_adapter/mock_connection.h"
 #include "transport_manager/tcp/mock_tcp_transport_adapter.h"
 #include "transport_manager/mock_transport_manager_settings.h"
 

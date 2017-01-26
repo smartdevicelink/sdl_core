@@ -40,7 +40,7 @@ namespace test {
 namespace components {
 namespace transport_manager_test {
 
-using ::resumption::MockLastState;
+using resumption_test::MockLastState;
 using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::NiceMock;
@@ -62,7 +62,7 @@ TEST(TestTransportManagerDefault, Init_LastStateNotUsed) {
   transport_manager::TransportManagerDefault transport_manager(
       transport_manager_settings);
 
-  NiceMock<resumption::MockLastState> mock_last_state;
+  NiceMock<MockLastState> mock_last_state;
   Json::Value custom_dictionary = Json::Value();
 
   ON_CALL(mock_last_state, get_dictionary())
@@ -82,7 +82,7 @@ TEST(TestTransportManagerDefault, Init_LastStateUsed) {
   transport_manager::TransportManagerDefault transport_manager(
       transport_manager_settings);
 
-  NiceMock<resumption::MockLastState> mock_last_state;
+  NiceMock<MockLastState> mock_last_state;
   Json::Value custom_dictionary;
   Json::Value tcp_device;
   tcp_device[kDeviceName] = "unique_tcp_device_name";

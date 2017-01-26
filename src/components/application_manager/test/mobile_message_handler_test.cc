@@ -43,8 +43,9 @@
 #include "protocol/raw_message.h"
 #include "utils/make_shared.h"
 
-namespace application_manager {
 namespace test {
+namespace components {
+namespace application_manager_test {
 
 using protocol_handler::RawMessage;
 using protocol_handler::RawMessagePtr;
@@ -54,6 +55,8 @@ using protocol_handler::PROTOCOL_HEADER_V2_SIZE;
 using application_manager::MobileMessageHandler;
 using application_manager::ProtocolVersion;
 using ::testing::_;
+using ::application_manager::Message;
+using ::application_manager::MobileMessage;
 
 using testing::Return;
 
@@ -137,7 +140,7 @@ class MobileMessageHandlerTest : public testing::Test {
     EXPECT_EQ(full_data_size, message->data_size());
     EXPECT_EQ(payload_size, message->payload_size());
     EXPECT_TRUE(message->has_binary_data());
-    EXPECT_EQ(MessageType::kNotification, message->type());
+    EXPECT_EQ(application_manager::MessageType::kNotification, message->type());
   }
 
   void TestHandlingIncomingMessageWithoutBinaryDataProtocol(
@@ -157,15 +160,16 @@ class MobileMessageHandlerTest : public testing::Test {
     EXPECT_EQ(full_data_size, message->data_size());
     EXPECT_EQ(payload_size, message->payload_size());
     EXPECT_FALSE(message->has_binary_data());
-    EXPECT_EQ(MessageType::kNotification, message->type());
+    EXPECT_EQ(application_manager::MessageType::kNotification, message->type());
   }
 
-  MobileMessage CreateMessageForSending(uint32_t protocol_version,
-                                        uint32_t function_id,
-                                        uint32_t correlation_id,
-                                        uint32_t connection_key,
-                                        const std::string& json_msg,
-                                        BinaryData* data = NULL) {
+  MobileMessage CreateMessageForSending(
+      uint32_t protocol_version,
+      uint32_t function_id,
+      uint32_t correlation_id,
+      uint32_t connection_key,
+      const std::string& json_msg,
+      application_manager::BinaryData* data = NULL) {
     MobileMessage message = utils::MakeShared<Message>(
         MessagePriority::FromServiceType(ServiceType::kRpc));
     message->set_function_id(function_id);
@@ -173,7 +177,7 @@ class MobileMessageHandlerTest : public testing::Test {
     message->set_connection_key(connection_key);
     message->set_protocol_version(
         static_cast<ProtocolVersion>(protocol_version));
-    message->set_message_type(MessageType::kNotification);
+    message->set_message_type(application_manager::MessageType::kNotification);
     if (data) {
       message->set_binary_data(data);
     }
@@ -214,7 +218,8 @@ class MobileMessageHandlerTest : public testing::Test {
   void TestHandlingOutgoingMessageProtocolWithBinaryData(
       const uint32_t protocol_version) {
     // Arrange
-    BinaryData* bin_dat = new BinaryData;
+    application_manager::BinaryData* bin_dat =
+        new application_manager::BinaryData;
     bin_dat->push_back('\a');
 
     const uint32_t function_id = 247u;
@@ -251,7 +256,8 @@ TEST(mobile_message_test, basic_test) {
   MobileMessage message =
       utils::MakeShared<Message>(protocol_handler::MessagePriority::kDefault);
   EXPECT_FALSE(message->has_binary_data());
-  BinaryData* binary_data = new BinaryData;
+  application_manager::BinaryData* binary_data =
+      new application_manager::BinaryData;
   binary_data->push_back('X');
   message->set_binary_data(binary_data);
   EXPECT_TRUE(message->has_binary_data());
@@ -350,5 +356,6 @@ TEST_F(
   TestHandlingOutgoingMessageProtocolWithBinaryData(protocol_version);
 }
 
+}  // namespace application_manager_test
+}  // namespace components
 }  // namespace test
-}  // namespace application_manager

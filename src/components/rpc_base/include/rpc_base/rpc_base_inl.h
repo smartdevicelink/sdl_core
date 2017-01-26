@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef VALIDATED_TYPES_INL_H_
-#define VALIDATED_TYPES_INL_H_
+#ifndef SRC_COMPONENTS_RPC_BASE_INCLUDE_RPC_BASE_RPC_BASE_INL_H_
+#define SRC_COMPONENTS_RPC_BASE_INCLUDE_RPC_BASE_RPC_BASE_INL_H_
 
 #include "rpc_base.h"
 
@@ -672,4 +672,4 @@ void Stringifyable<T>::ReportErrors(ValidationReport* report) const {
 
 }  // namespace rpc
 
-#endif /* VALIDATED_TYPES_INL_H_ */
+#endif  // SRC_COMPONENTS_RPC_BASE_INCLUDE_RPC_BASE_RPC_BASE_INL_H_

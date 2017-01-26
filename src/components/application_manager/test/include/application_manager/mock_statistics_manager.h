@@ -28,8 +28,8 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_MOCK_STATISTICS_MANAGER_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_MOCK_STATISTICS_MANAGER_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_STATISTICS_MANAGER_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_STATISTICS_MANAGER_H_
 
 #include <string>
 
@@ -42,7 +42,10 @@ namespace test {
 namespace components {
 namespace application_manager_test {
 
+namespace {
 using namespace ::usage_statistics;
+}
+
 class MockStatisticsManager : public StatisticsManager {
  public:
   MOCK_METHOD1(Increment, void(GlobalCounterId type));
@@ -62,4 +65,4 @@ class MockStatisticsManager : public StatisticsManager {
 }  // namespace components
 }  // namespace test
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_MOCK_STATISTICS_MANAGER_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_STATISTICS_MANAGER_H_

@@ -48,7 +48,7 @@ include_directories(
   ${COMPONENTS_DIR}/application_manager/test/include/
 )
 
-set(testSources
+set(SOURCES
   ${AM_TEST_DIR}/mobile_message_handler_test.cc
   ${AM_TEST_DIR}/mobile_message_handler_v1_test.cc
   ${AM_TEST_DIR}/request_info_test.cc
@@ -64,54 +64,7 @@ set(testSources
   ${AM_TEST_DIR}/mock_message_helper.cc
 )
 
-set(request_controller_SOURCES
- ${AM_TEST_DIR}/request_controller/request_controller_test.cc
-)
-
-set(testLibraries
-  ApplicationManager
-  Utils
-  dbms
-  jsoncpp
-  Policy
-  connectionHandler
-  HMI_API
-  MOBILE_API
-  v4_protocol_v1_2_no_extra
-  SmartObjects
-  formatters
-  gmock_main
-  UsageStatistics
-  dl
-  ProtocolLibrary
-  ConfigProfile
-  MediaManager
-  Resumption
-  ProtocolHandler
-  SecurityManager
-)
-
-set(test_exec_libraries
-  HMI_API
-  MOBILE_API
-  v4_protocol_v1_2_no_extra
-  SmartObjects
-  formatters
-  ProtocolHandler
-  connectionHandler
-  HMIMessageHandler
-  Utils
-  jsoncpp
-  ConfigProfile
-  MediaManager
-  Resumption
-)
-
-if (${CMAKE_SYSTEM_NAME} MATCHES "QNX")
-  list(REMOVE_ITEM test_exec_libraries dl)
-endif()
-
-set(testLibraries
+set(LIBRARIES
   Utils
   ApplicationManager
   jsoncpp
@@ -134,7 +87,7 @@ set(testLibraries
 )
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "QNX")
-  list(REMOVE_ITEM test_exec_libraries dl)
+  list(REMOVE_ITEM LIBRARIES dl)
 endif()
 
 if (ENABLE_LOG)
@@ -151,12 +104,12 @@ file(COPY sdl_pt_update.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 add_custom_command(
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/libPolicy.so
   COMMAND ${CMAKE_COMMAND} -E
-  copy  ${COMPONENTS_DIR}/policy/libPolicy.so ${CMAKE_CURRENT_BINARY_DIR}
+  copy ${COMPONENTS_DIR}/policy/libPolicy.so ${CMAKE_CURRENT_BINARY_DIR}
 )
 set(CMAKE_EXE_LINKER_FLAGS
   "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath=${CMAKE_CURRENT_BINARY_DIR}"
 )
-create_test("application_manager_test" "${testSources}" "${testLibraries}")
+create_test("application_manager_test" "${SOURCES}" "${LIBRARIES}")
 
 # TODO [AKozoriz] : Fix not buildable tests
 set(ResumptionData_SOURCES
@@ -172,8 +125,9 @@ file(COPY smartDeviceLink_test.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/resumption)
 file(COPY smartDeviceLink_test.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/resumption)
-create_test("resumption/data_resumption_test" "${ResumptionData_SOURCES}" "${testLibraries}")
+create_test("resumption/data_resumption_test" "${ResumptionData_SOURCES}" "${LIBRARIES}")
 
 add_subdirectory(state_controller)
 add_subdirectory(app_launch)
 add_subdirectory(commands)
+add_subdirectory(message_helper)
