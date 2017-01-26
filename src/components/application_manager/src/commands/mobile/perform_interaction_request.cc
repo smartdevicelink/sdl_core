@@ -926,10 +926,10 @@ void PerformInteractionRequest::SendBothModeResponse(
   LOG4CXX_AUTO_TRACE(logger_);
   mobile_apis::Result::eType perform_interaction_result_code =
       mobile_apis::Result::INVALID_ENUM;
-  ResponseInfo ui_perform_info(ui_result_code_,
-                               HmiInterfaces::HMI_INTERFACE_UI);
-  ResponseInfo vr_perform_info(vr_result_code_,
-                               HmiInterfaces::HMI_INTERFACE_VR);
+  ResponseInfo ui_perform_info(
+      ui_result_code_, HmiInterfaces::HMI_INTERFACE_UI, application_manager_);
+  ResponseInfo vr_perform_info(
+      vr_result_code_, HmiInterfaces::HMI_INTERFACE_VR, application_manager_);
   const bool result =
       PrepareResultForMobileResponse(ui_perform_info, vr_perform_info);
   perform_interaction_result_code =

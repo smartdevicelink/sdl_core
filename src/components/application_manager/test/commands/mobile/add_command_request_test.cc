@@ -57,1055 +57,380 @@ namespace mobile_commands_test {
 namespace add_command_request {
 
 namespace am = application_manager;
+
+using am::commands::AddCommandRequest;
 using am::commands::CommandImpl;
 using am::ApplicationManager;
 using am::commands::MessageSharedPtr;
 using am::ApplicationSharedPtr;
 using am::MockMessageHelper;
 using am::MockHmiInterfaces;
+
 using ::testing::_;
-using ::utils::SharedPtr;
-using ::testing::Return;
 using ::testing::Mock;
-using ::testing::InSequence;
-using am::commands::AddCommandRequest;
-using NsSmartDeviceLink::NsSmartObjects::SmartObjectSPtr;
+using ::testing::Return;
+using ::testing::ReturnRef;
+using ::utils::SharedPtr;
 using ::test::components::application_manager_test::MockApplication;
-using am::event_engine::EventObserver;
-using namespace smart_objects;
 
 namespace custom_str = utils::custom_string;
 namespace strings = ::application_manager::strings;
-namespace mobile_result = mobile_apis::Result;
 namespace hmi_response = ::application_manager::hmi_response;
-namespace hmi_request = ::application_manager::hmi_request;
-using namespace strings;
 
 namespace {
-const hmi_apis::FunctionID::eType kInvalidFunctionId =
-    hmi_apis::FunctionID::INVALID_ENUM;
+const int32_t kCommandId = 1;
 const uint32_t kAppId = 1u;
 const uint32_t kCmdId = 1u;
 const uint32_t kConnectionKey = 2u;
-const std::string kMenuName = "LG";
-const uint32_t kFirstParentId = 10u;
-const uint32_t kSecondParentId = 1u;
-const std::string kErroredVRCommand = "l\namer";
-const std::string kFirstVrCommand = "lamer";
-const std::string kSecondVrCommand = "hacker";
-const uint32_t kFirstCommandId = 10u;
-const uint32_t kSecondCommandId = 11u;
-const int32_t kType = 34;
-const int32_t kGrammarId = 12;
-const int32_t kPosition = 10;
+const uint32_t kType = 34u;
+const uint32_t kGrammarId = 12u;
+const uint32_t kPosition = 10u;
+const uint32_t kCmdIcon = 1u;
 }  // namespace
 
 class AddCommandRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
   AddCommandRequestTest()
-      : msg_(CreateMessage())
-      , default_app_name_("test_default_app_name_")
-      , mock_message_helper_(*MockMessageHelper::message_helper_mock())
-      , mock_app_(CreateMockApp()) {
-    Mock::VerifyAndClearExpectations(&mock_message_helper_);
-    EXPECT_CALL(app_mngr_, application(kConnectionKey))
-        .WillRepeatedly(Return(mock_app_));
-    InitGetters();
-    InitBasicMessage();
-  }
-
-  ~AddCommandRequestTest() {
-    Mock::VerifyAndClearExpectations(&mock_message_helper_);
-  }
+      : mock_message_helper_(*MockMessageHelper::message_helper_mock())
+      , mock_app_(CreateMockApp()) {}
 
  protected:
-  void InitBasicMessage() {
-    (*msg_)[params][connection_key] = kConnectionKey;
-    (*msg_)[msg_params][app_id] = kAppId;
-    (*msg_)[msg_params][app_name] = default_app_name_;
+  MessageSharedPtr CreateFullParamsVRSO() {
+    MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
+    (*msg)[strings::params][strings::connection_key] = kConnectionKey;
+    smart_objects::SmartObject msg_params =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+    msg_params[strings::cmd_id] = kCmdId;
+    msg_params[strings::vr_commands] =
+        smart_objects::SmartObject(smart_objects::SmartType_Array);
+    msg_params[strings::vr_commands][0] = "lamer";
+    msg_params[strings::type] = kType;
+    msg_params[strings::grammar_id] = kGrammarId;
+    msg_params[strings::app_id] = kAppId;
+    (*msg)[strings::msg_params] = msg_params;
+
+    return msg;
   }
 
-  void InitGetters() {
-    ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kAppId));
-    ON_CALL(*mock_app_, FindCommand(kCmdId))
-        .WillByDefault(Return(so_ptr_.get()));
+  MessageSharedPtr CreateFullParamsUISO() {
+    MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
+    (*msg)[am::strings::params][am::strings::connection_key] = kConnectionKey;
+    smart_objects::SmartObject menu_params =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+    menu_params[am::strings::position] = kPosition;
+    menu_params[am::strings::menu_name] = "LG";
+
+    smart_objects::SmartObject msg_params =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+    msg_params[am::strings::cmd_id] = kCmdId;
+    msg_params[am::strings::menu_params] = menu_params;
+    msg_params[am::strings::app_id] = kAppId;
+    msg_params[am::strings::cmd_icon] = kCmdIcon;
+    msg_params[am::strings::cmd_icon][am::strings::value] = "10";
+    (*msg)[am::strings::msg_params] = msg_params;
+
+    return msg;
   }
 
-  void CreateBasicParamsUIRequest() {
-    SmartObject menu_params = SmartObject(SmartType_Map);
-    menu_params[position] = kPosition;
-    menu_params[menu_name] = kMenuName;
-    SmartObject& msg_params = (*msg_)[strings::msg_params];
-    msg_params[cmd_id] = kCmdId;
-    msg_params[strings::menu_params] = menu_params;
-    msg_params[cmd_icon] = 1;
-    msg_params[cmd_icon][value] = "10";
-    msg_params[info] = "UI info";
+  MessageSharedPtr CreateFullParamsSO() {
+    MessageSharedPtr msg = CreateFullParamsUISO();
+    smart_objects::SmartObject& msg_params = (*msg)[am::strings::msg_params];
+    msg_params[strings::vr_commands] =
+        smart_objects::SmartObject(smart_objects::SmartType_Array);
+    msg_params[strings::vr_commands][0] = "lamer";
+    msg_params[strings::type] = kType;
+    msg_params[strings::grammar_id] = kGrammarId;
+    return msg;
   }
 
-  void CreateBasicParamsVRRequest() {
-    SmartObject& msg_params = (*msg_)[strings::msg_params];
-    msg_params[cmd_id] = kCmdId;
-    msg_params[vr_commands] = SmartObject(SmartType_Array);
-    msg_params[vr_commands][0] = kFirstVrCommand;
-    msg_params[type] = kPosition;
-    msg_params[grammar_id] = kGrammarId;
-    msg_params[info] = "VR info";
+  MessageSharedPtr CreateParamsUISOWithOutCmdIcon() {
+    MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
+    (*msg)[am::strings::params][am::strings::connection_key] = kConnectionKey;
+    smart_objects::SmartObject menu_params =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+    menu_params[am::strings::position] = kPosition;
+    menu_params[am::strings::menu_name] = "LG";
+
+    smart_objects::SmartObject msg_params =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+    msg_params[am::strings::cmd_id] = kCmdId;
+    msg_params[am::strings::menu_params] = menu_params;
+    msg_params[am::strings::app_id] = kAppId;
+    (*msg)[am::strings::msg_params] = msg_params;
+
+    return msg;
   }
 
-  const am::CommandsMap CreateCommandsMap(SmartObject& first_command,
-                                          SmartObject& second_command) {
-    second_command[menu_params] = SmartObject(SmartType_Map);
-    second_command[menu_params][hmi_request::parent_id] = kFirstParentId;
-    second_command[menu_params][menu_name] = kMenuName;
-    second_command[vr_commands] = SmartObject(SmartType_Array);
-    second_command[vr_commands][0] = kSecondVrCommand;
-    am::CommandsMap commands_map;
-    commands_map.insert(std::make_pair(kFirstCommandId, &first_command));
-    commands_map.insert(std::make_pair(kSecondCommandId, &second_command));
-    return commands_map;
+  void SetStateForHMIInterfaces(am::HmiInterfaces::InterfaceState ui_state,
+                                am::HmiInterfaces::InterfaceState vr_state) {
+    ON_CALL(hmi_interfaces_, GetInterfaceFromFunction(_))
+        .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_UI));
+    ON_CALL(hmi_interfaces_,
+            GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
+        .WillByDefault(Return(ui_state));
+    ON_CALL(hmi_interfaces_,
+            GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_VR))
+        .WillByDefault(Return(vr_state));
   }
 
-  void CheckOnTimeOutCommandDeletion(
-      const hmi_apis::FunctionID::eType incoming_cmd,
-      const hmi_apis::FunctionID::eType cmd_to_delete) {
-    CreateBasicParamsVRRequest();
-    CreateBasicParamsUIRequest();
-    SmartObject& msg_params = (*msg_)[strings::msg_params];
-    msg_params[menu_params][hmi_request::parent_id] = kSecondParentId;
-    SmartObject& image = msg_params[cmd_icon];
-    EXPECT_CALL(mock_message_helper_, VerifyImage(image, _, _))
-        .WillOnce(Return(mobile_apis::Result::SUCCESS));
-    EXPECT_CALL(*mock_app_, FindCommand(kCmdId))
-        .WillOnce(Return(so_ptr_.get()));
-    SmartObject first_command = SmartObject(SmartType_Map);
-    SmartObject second_command = SmartObject(SmartType_Map);
-    const am::CommandsMap commands_map =
-        CreateCommandsMap(first_command, second_command);
-    EXPECT_CALL(*mock_app_, commands_map())
-        .WillRepeatedly(Return(DataAccessor<application_manager::CommandsMap>(
-            commands_map, lock_)));
-    so_ptr_ = utils::MakeShared<SmartObject>(SmartType_Map);
-    EXPECT_CALL(*mock_app_, FindSubMenu(kSecondParentId))
-        .WillOnce(Return(so_ptr_.get()));
-    {
-      InSequence dummy;
-      EXPECT_CALL(app_mngr_,
-                  ManageHMICommand(
-                      HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
-          .WillOnce(Return(true));
-      EXPECT_CALL(app_mngr_,
-                  ManageHMICommand(
-                      HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand)))
-          .WillOnce(Return(true));
+  void CommonExpectations(MessageSharedPtr msg) {
+    ON_CALL(*mock_app_, FindSubMenu(_)).WillByDefault(Return(&(*msg)));
+
+    smart_objects::SmartObject* ptr = NULL;
+    ON_CALL(*mock_app_, FindCommand(kCmdId)).WillByDefault(Return(ptr));
+    EXPECT_EQ(NULL, ptr);
+
+    ON_CALL(mock_message_helper_, HMIToMobileResult(_))
+        .WillByDefault(Return(mobile_apis::Result::SUCCESS));
+
+    ON_CALL(mock_message_helper_, VerifyImage(_, _, _))
+        .WillByDefault(Return(mobile_apis::Result::SUCCESS));
+
+    EXPECT_CALL(*mock_app_,
+                AddCommand(kCmdId, (*msg)[am::strings::msg_params]));
+    EXPECT_CALL(*mock_app_, UpdateHash());
+  }
+
+  MessageSharedPtr PrepareResponseFromHMI(
+      const hmi_apis::Common_Result::eType result_code, const char* info) {
+    MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
+    (*msg)[am::strings::params][am::hmi_response::code] = result_code;
+    (*msg)[strings::msg_params] =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+    if (info) {
+      (*msg)[am::strings::msg_params][am::strings::info] = info;
     }
-    EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
-    utils::SharedPtr<AddCommandRequest> request_ptr =
-        CreateCommand<AddCommandRequest>(msg_);
-    request_ptr->Run();
-    Event event(incoming_cmd);
-    event.set_smart_object(*msg_);
-    request_ptr->on_event(event);
-    EXPECT_CALL(*mock_app_, RemoveCommand(kCmdId));
-    EXPECT_CALL(app_mngr_, ManageHMICommand(HMIResultCodeIs(cmd_to_delete)))
-        .WillOnce(Return(true));
-    SmartObjectSPtr response;
-    EXPECT_CALL(
-        mock_message_helper_,
-        CreateNegativeResponse(_, _, _, mobile_apis::Result::GENERIC_ERROR))
-        .WillOnce(Return(response));
-    EXPECT_CALL(
-        app_mngr_,
-        ManageMobileCommand(response,
-                            am::commands::Command::CommandOrigin::ORIGIN_SDL));
-    utils::SharedPtr<CommandRequestImpl> base_class_request =
-        static_cast<utils::SharedPtr<CommandRequestImpl> >(request_ptr);
-    base_class_request->onTimeOut();
+    return msg;
   }
 
-  MessageSharedPtr msg_;
-  SmartObjectSPtr so_ptr_;
-  const utils::custom_string::CustomString default_app_name_;
-  am::MockMessageHelper& mock_message_helper_;
+  void SetUp() OVERRIDE {
+    ON_CALL(app_mngr_, application(kConnectionKey))
+        .WillByDefault(Return(mock_app_));
+    ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kConnectionKey));
+    ON_CALL(app_mngr_, hmi_interfaces())
+        .WillByDefault(ReturnRef(hmi_interfaces_));
+  }
+
+  void TearDown() OVERRIDE {
+    Mock::VerifyAndClearExpectations(&mock_message_helper_);
+  }
+
+  void ResultCommandExpectations(MessageSharedPtr msg,
+                                 mobile_apis::Result::eType result_code,
+                                 const std::string& info) {
+    EXPECT_EQ((*msg)[am::strings::msg_params][am::strings::success].asBool(),
+              true);
+    EXPECT_EQ((*msg)[am::strings::msg_params][am::strings::result_code].asInt(),
+              static_cast<int32_t>(result_code));
+    if (!info.empty()) {
+      EXPECT_EQ((*msg)[am::strings::msg_params][am::strings::info].asString(),
+                info);
+    }
+  }
+
   sync_primitives::Lock lock_;
+  NiceMock<MockHmiInterfaces> hmi_interfaces_;
+  MockMessageHelper& mock_message_helper_;
   MockAppPtr mock_app_;
 };
 
-TEST_F(AddCommandRequestTest, Run_AppNotExisted_EXPECT_AppNotRegistered) {
-  CreateBasicParamsUIRequest();
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
-      .WillOnce(Return(ApplicationSharedPtr()));
-  EXPECT_CALL(
-      app_mngr_,
-      ManageMobileCommand(
-          MobileResultCodeIs(mobile_result::APPLICATION_NOT_REGISTERED), _));
-  utils::SharedPtr<AddCommandRequest> request_ptr =
-      CreateCommand<AddCommandRequest>(msg_);
-  request_ptr->Run();
-}
+TEST_F(AddCommandRequestTest, OnTimeout_GENERIC_ERROR) {
+  MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
+  (*msg)[strings::msg_params][strings::result_code] =
+      am::mobile_api::Result::GENERIC_ERROR;
+  (*msg)[strings::msg_params][strings::success] = false;
+  (*msg)[strings::params][strings::connection_key] = kConnectionKey;
 
-TEST_F(AddCommandRequestTest, Run_ImageVerificationFailed_EXPECT_INVALID_DATA) {
-  CreateBasicParamsUIRequest();
-  SmartObject& msg_params = (*msg_)[strings::msg_params];
-  SmartObject& image = msg_params[cmd_icon];
-  EXPECT_CALL(mock_message_helper_, VerifyImage(image, _, _))
-      .WillOnce(Return(mobile_apis::Result::INVALID_DATA));
-  EXPECT_CALL(app_mngr_,
-              ManageMobileCommand(
-                  MobileResultCodeIs(mobile_apis::Result::INVALID_DATA), _));
-  utils::SharedPtr<AddCommandRequest> request_ptr =
-      CreateCommand<AddCommandRequest>(msg_);
-  request_ptr->Run();
-}
-
-TEST_F(AddCommandRequestTest, Run_MenuNameHasSyntaxError_EXPECT_INVALID_DATA) {
-  CreateBasicParamsUIRequest();
-  SmartObject& msg_params = (*msg_)[strings::msg_params];
-  msg_params[menu_params][hmi_request::parent_id] = kFirstParentId;
-  const std::string errored_menu_name = "L\nG";
-  msg_params[menu_params][menu_name] = errored_menu_name;
-  SmartObject& image = msg_params[cmd_icon];
-  EXPECT_CALL(mock_message_helper_, VerifyImage(image, _, _))
-      .WillOnce(Return(mobile_apis::Result::SUCCESS));
-  EXPECT_CALL(*mock_app_, FindCommand(kCmdId)).WillOnce(Return(so_ptr_.get()));
-  am::CommandsMap commands_map;
-  EXPECT_CALL(*mock_app_, commands_map())
-      .WillRepeatedly(Return(
-          DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
-  SmartObject parent = SmartObject(SmartType_Map);
-  EXPECT_CALL(*mock_app_, FindSubMenu(kFirstParentId))
-      .WillOnce(Return(&parent));
-  EXPECT_CALL(app_mngr_,
-              ManageMobileCommand(
-                  MobileResultCodeIs(mobile_apis::Result::INVALID_DATA), _));
-  utils::SharedPtr<AddCommandRequest> request_ptr =
-      CreateCommand<AddCommandRequest>(msg_);
-  request_ptr->Run();
-}
-
-TEST_F(AddCommandRequestTest,
-       Run_VRCommandsHaveSyntaxError_EXPECT_INVALID_DATA) {
-  CreateBasicParamsVRRequest();
-  SmartObject& msg_params = (*msg_)[strings::msg_params];
-  msg_params[vr_commands][0] = kErroredVRCommand;
-  EXPECT_CALL(*mock_app_, FindCommand(kCmdId)).WillOnce(Return(so_ptr_.get()));
-  am::CommandsMap commands_map;
-  EXPECT_CALL(*mock_app_, commands_map())
-      .WillRepeatedly(Return(
-          DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
-  EXPECT_CALL(app_mngr_,
-              ManageMobileCommand(
-                  MobileResultCodeIs(mobile_apis::Result::INVALID_DATA), _));
-  utils::SharedPtr<AddCommandRequest> request_ptr =
-      CreateCommand<AddCommandRequest>(msg_);
-  request_ptr->Run();
-}
-
-TEST_F(AddCommandRequestTest, Run_CMDIconHasError_EXPECT_INVALID_DATA) {
-  MessageSharedPtr msg = CreateMessage();
-  SmartObject& msg_params = (*msg)[strings::msg_params];
-  (*msg)[params][connection_key] = kConnectionKey;
-  msg_params[cmd_id] = kCmdId;
-  msg_params[cmd_icon] = 1;
-  const std::string errored_cmd_icon_value = "1\n0";
-  msg_params[cmd_icon][value] = errored_cmd_icon_value;
-  msg_params[vr_commands][0] = kFirstVrCommand;
-  SmartObject& image = msg_params[cmd_icon];
-  EXPECT_CALL(mock_message_helper_, VerifyImage(image, _, _))
-      .WillOnce(Return(mobile_apis::Result::SUCCESS));
-  EXPECT_CALL(*mock_app_, FindCommand(kCmdId)).WillOnce(Return(so_ptr_.get()));
-  am::CommandsMap commands_map;
-  EXPECT_CALL(*mock_app_, commands_map())
-      .WillRepeatedly(Return(
-          DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
-  EXPECT_CALL(app_mngr_,
-              ManageMobileCommand(
-                  MobileResultCodeIs(mobile_apis::Result::INVALID_DATA), _));
-  utils::SharedPtr<AddCommandRequest> request_ptr =
+  utils::SharedPtr<AddCommandRequest> command =
       CreateCommand<AddCommandRequest>(msg);
-  request_ptr->Run();
-}
 
-TEST_F(AddCommandRequestTest, Run_CommandIDAlreadyExists_EXPECT_INVALID_ID) {
-  CreateBasicParamsUIRequest();
-  SmartObject& msg_params = (*msg_)[strings::msg_params];
-  SmartObject& image = msg_params[cmd_icon];
-  EXPECT_CALL(mock_message_helper_, VerifyImage(image, _, _))
-      .WillOnce(Return(mobile_apis::Result::SUCCESS));
-  so_ptr_ = utils::MakeShared<SmartObject>(SmartType_Map);
-  EXPECT_CALL(*mock_app_, FindCommand(kCmdId)).WillOnce(Return(so_ptr_.get()));
-  EXPECT_CALL(app_mngr_,
-              ManageMobileCommand(
-                  MobileResultCodeIs(mobile_apis::Result::INVALID_ID), _));
-  utils::SharedPtr<AddCommandRequest> request_ptr =
-      CreateCommand<AddCommandRequest>(msg_);
-  request_ptr->Run();
-}
+  ON_CALL(*mock_app_, get_grammar_id()).WillByDefault(Return(kConnectionKey));
+  ON_CALL(*mock_app_, RemoveCommand(_)).WillByDefault(Return());
 
-TEST_F(AddCommandRequestTest,
-       Run_CommandNameAlreadyExists_EXPECT_DUPLICATE_NAME) {
-  CreateBasicParamsUIRequest();
-  SmartObject& msg_params = (*msg_)[strings::msg_params];
-  msg_params[menu_params][hmi_request::parent_id] = kFirstParentId;
-  SmartObject& image = msg_params[cmd_icon];
-  EXPECT_CALL(mock_message_helper_, VerifyImage(image, _, _))
-      .WillOnce(Return(mobile_apis::Result::SUCCESS));
-  EXPECT_CALL(*mock_app_, FindCommand(kCmdId)).WillOnce(Return(so_ptr_.get()));
-  SmartObject first_command = SmartObject(SmartType_Map);
-  SmartObject second_command = SmartObject(SmartType_Map);
-  const am::CommandsMap commands_map =
-      CreateCommandsMap(first_command, second_command);
-  EXPECT_CALL(*mock_app_, commands_map())
-      .WillRepeatedly(Return(
-          DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
-  EXPECT_CALL(app_mngr_,
-              ManageMobileCommand(
-                  MobileResultCodeIs(mobile_apis::Result::DUPLICATE_NAME), _));
-  utils::SharedPtr<AddCommandRequest> request_ptr =
-      CreateCommand<AddCommandRequest>(msg_);
-  request_ptr->Run();
-}
-
-TEST_F(AddCommandRequestTest,
-       Run_CmdAndMsgParentIDsAreDifferentSubmenuNotExisted_EXPECT_INVALID_ID) {
-  CreateBasicParamsUIRequest();
-  SmartObject& msg_params = (*msg_)[strings::msg_params];
-  msg_params[menu_params][hmi_request::parent_id] = kSecondParentId;
-  SmartObject& image = msg_params[cmd_icon];
-  EXPECT_CALL(mock_message_helper_, VerifyImage(image, _, _))
-      .WillOnce(Return(mobile_apis::Result::SUCCESS));
-  EXPECT_CALL(*mock_app_, FindCommand(kCmdId)).WillOnce(Return(so_ptr_.get()));
-  SmartObject first_command = SmartObject(SmartType_Map);
-  SmartObject second_command = SmartObject(SmartType_Map);
-  const am::CommandsMap commands_map =
-      CreateCommandsMap(first_command, second_command);
-  EXPECT_CALL(*mock_app_, commands_map())
-      .WillRepeatedly(Return(
-          DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
-  EXPECT_CALL(*mock_app_, FindSubMenu(kSecondParentId))
-      .WillOnce(Return(so_ptr_.get()));
-  EXPECT_CALL(app_mngr_,
-              ManageMobileCommand(
-                  MobileResultCodeIs(mobile_apis::Result::INVALID_ID), _));
-  utils::SharedPtr<AddCommandRequest> request_ptr =
-      CreateCommand<AddCommandRequest>(msg_);
-  request_ptr->Run();
-}
-
-TEST_F(AddCommandRequestTest,
-       Run_CmdAndMsgVrSynonymsAreTheSame_EXPECT_DUPLICATE_NAME) {
-  CreateBasicParamsVRRequest();
-  SmartObject& msg_params = (*msg_)[strings::msg_params];
-  msg_params[menu_params][hmi_request::parent_id] = kSecondParentId;
-  msg_params[vr_commands][0] = kSecondVrCommand;
-  SmartObject& image = msg_params[cmd_icon];
-  EXPECT_CALL(mock_message_helper_, VerifyImage(image, _, _))
-      .WillOnce(Return(mobile_apis::Result::SUCCESS));
-  EXPECT_CALL(*mock_app_, FindCommand(kCmdId)).WillOnce(Return(so_ptr_.get()));
-
-  SmartObject first_command = SmartObject(SmartType_Map);
-  SmartObject second_command = SmartObject(SmartType_Map);
-  const am::CommandsMap commands_map =
-      CreateCommandsMap(first_command, second_command);
-  EXPECT_CALL(*mock_app_, commands_map())
-      .WillRepeatedly(Return(
-          DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
-  so_ptr_ = utils::MakeShared<SmartObject>(SmartType_Map);
-  EXPECT_CALL(*mock_app_, FindSubMenu(kSecondParentId))
-      .WillOnce(Return(so_ptr_.get()));
-  EXPECT_CALL(app_mngr_,
-              ManageMobileCommand(
-                  MobileResultCodeIs(mobile_apis::Result::DUPLICATE_NAME), _));
-  utils::SharedPtr<AddCommandRequest> request_ptr =
-      CreateCommand<AddCommandRequest>(msg_);
-  request_ptr->Run();
-}
-
-TEST_F(AddCommandRequestTest, Run_MsgDataEmpty_EXPECT_INVALID_DATA) {
-  MessageSharedPtr msg = CreateMessage();
-  (*msg)[params][connection_key] = kConnectionKey;
-  SmartObject& msg_params = (*msg)[strings::msg_params];
-  msg_params[app_id] = kAppId;
-  msg_params[cmd_id] = kCmdId;
-  EXPECT_CALL(*mock_app_, FindCommand(kCmdId)).WillOnce(Return(so_ptr_.get()));
-  EXPECT_CALL(app_mngr_,
-              ManageMobileCommand(
-                  MobileResultCodeIs(mobile_apis::Result::INVALID_DATA), _));
-  utils::SharedPtr<AddCommandRequest> request_ptr =
-      CreateCommand<AddCommandRequest>(msg);
-  request_ptr->Run();
-}
-
-TEST_F(AddCommandRequestTest,
-       Run_CmdAndMsg_UI_and_Vr_AreCorrect_EXPECT_VR_AND_UI_SENT) {
-  CreateBasicParamsVRRequest();
-  CreateBasicParamsUIRequest();
-  SmartObject& msg_params = (*msg_)[strings::msg_params];
-  msg_params[menu_params][hmi_request::parent_id] = kSecondParentId;
-  SmartObject& image = msg_params[cmd_icon];
-  EXPECT_CALL(mock_message_helper_, VerifyImage(image, _, _))
-      .WillOnce(Return(mobile_apis::Result::SUCCESS));
-  EXPECT_CALL(*mock_app_, FindCommand(kCmdId)).WillOnce(Return(so_ptr_.get()));
-  SmartObject first_command = SmartObject(SmartType_Map);
-  SmartObject second_command = SmartObject(SmartType_Map);
-  const am::CommandsMap commands_map =
-      CreateCommandsMap(first_command, second_command);
-  EXPECT_CALL(*mock_app_, commands_map())
-      .WillRepeatedly(Return(
-          DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
-  so_ptr_ = utils::MakeShared<SmartObject>(SmartType_Map);
-  EXPECT_CALL(*mock_app_, FindSubMenu(kSecondParentId))
-      .WillOnce(Return(so_ptr_.get()));
-  {
-    InSequence dummy;
-    EXPECT_CALL(
-        app_mngr_,
-        ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
-        .WillOnce(Return(true));
-    EXPECT_CALL(
-        app_mngr_,
-        ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand)))
-        .WillOnce(Return(true));
-  }
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
-  utils::SharedPtr<AddCommandRequest> request_ptr =
-      CreateCommand<AddCommandRequest>(msg_);
-  request_ptr->Run();
-}
-
-TEST_F(AddCommandRequestTest, GetRunMethods_SUCCESS) {
-  CreateBasicParamsUIRequest();
-  SmartObject& image = (*msg_)[msg_params][cmd_icon];
-  EXPECT_CALL(mock_message_helper_, VerifyImage(image, _, _))
-      .WillOnce(Return(mobile_apis::Result::SUCCESS));
-  EXPECT_CALL(*mock_app_, FindCommand(kCmdId)).WillOnce(Return(so_ptr_.get()));
-  EXPECT_CALL(*mock_app_, AddCommand(kCmdId, (*msg_)[msg_params]));
-
-  am::CommandsMap commands_map;
-  EXPECT_CALL(*mock_app_, commands_map())
-      .WillRepeatedly(Return(
-          DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
-  EXPECT_CALL(
-      app_mngr_,
-      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
-      .WillOnce(Return(true));
-  utils::SharedPtr<AddCommandRequest> request_ptr =
-      CreateCommand<AddCommandRequest>(msg_);
-  request_ptr->Run();
-}
-
-TEST_F(AddCommandRequestTest, OnEvent_UI_SUCCESS) {
-  CreateBasicParamsUIRequest();
-  (*msg_)[params][hmi_response::code] = hmi_apis::Common_Result::SUCCESS;
-  SmartObject& image = (*msg_)[msg_params][cmd_icon];
-  EXPECT_CALL(mock_message_helper_, VerifyImage(image, _, _))
-      .WillOnce(Return(mobile_apis::Result::SUCCESS));
-  EXPECT_CALL(*mock_app_, AddCommand(kCmdId, (*msg_)[msg_params]));
-
-  am::CommandsMap commands_map;
-  EXPECT_CALL(*mock_app_, commands_map())
-      .WillRepeatedly(
-          Return(DataAccessor<am::CommandsMap>(commands_map, lock_)));
-
-  Event event(hmi_apis::FunctionID::UI_AddCommand);
-  event.set_smart_object(*msg_);
-  EXPECT_CALL(
-      app_mngr_,
-      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
-      .WillOnce(Return(true));
-  utils::SharedPtr<AddCommandRequest> request_ptr =
-      CreateCommand<AddCommandRequest>(msg_);
-  request_ptr->Run();
-  EXPECT_CALL(mock_message_helper_,
-              HMIToMobileResult(hmi_apis::Common_Result::SUCCESS))
-      .WillOnce(Return(mobile_apis::Result::SUCCESS));
-  EXPECT_CALL(*mock_app_, UpdateHash());
-  request_ptr->on_event(event);
-}
-
-TEST_F(AddCommandRequestTest, OnEvent_VR_SUCCESS) {
-  CreateBasicParamsVRRequest();
-  MessageSharedPtr msg = CreateMessage(SmartType_Map);
-  (*msg)[params][hmi_response::code] = hmi_apis::Common_Result::SUCCESS;
-  (*msg)[msg_params][cmd_id] = kCmdId;
-
-  Event event(hmi_apis::FunctionID::VR_AddCommand);
-  event.set_smart_object(*msg);
-  EXPECT_CALL(mock_message_helper_,
-              HMIToMobileResult(hmi_apis::Common_Result::SUCCESS))
-      .WillOnce(Return(mobile_apis::Result::SUCCESS));
-  EXPECT_CALL(*mock_app_, AddCommand(kCmdId, (*msg_)[msg_params]));
-
-  am::CommandsMap commands_map;
-  EXPECT_CALL(*mock_app_, commands_map())
-      .WillRepeatedly(
-          Return(DataAccessor<am::CommandsMap>(commands_map, lock_)));
-  EXPECT_CALL(*mock_app_, UpdateHash());
-  EXPECT_CALL(
-      app_mngr_,
-      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand)))
-      .WillOnce(Return(true));
-  utils::SharedPtr<AddCommandRequest> request_ptr =
-      CreateCommand<AddCommandRequest>(msg_);
-  request_ptr->Run();
-  request_ptr->on_event(event);
-}
-
-TEST_F(AddCommandRequestTest, OnTimeOut_EXPECT_VR_DeleteCommand) {
-  CheckOnTimeOutCommandDeletion(hmi_apis::FunctionID::VR_AddCommand,
-                                hmi_apis::FunctionID::VR_DeleteCommand);
-}
-
-TEST_F(AddCommandRequestTest, OnTimeOut_EXPECT_UI_DeleteCommand) {
-  CheckOnTimeOutCommandDeletion(hmi_apis::FunctionID::UI_AddCommand,
-                                hmi_apis::FunctionID::UI_DeleteCommand);
-}
-
-TEST_F(AddCommandRequestTest, OnEvent_BothSend_SUCCESS) {
-  MessageSharedPtr command_msg = CreateMessage(SmartType_Map);
-  (*command_msg)[params][connection_key] = kConnectionKey;
-  MessageSharedPtr event_msg = CreateMessage(SmartType_Map);
-  (*event_msg)[params][hmi_response::code] = hmi_apis::Common_Result::SUCCESS;
-  (*event_msg)[msg_params][cmd_id] = kCmdId;
-
-  Event event_ui(hmi_apis::FunctionID::UI_AddCommand);
-  event_ui.set_smart_object(*event_msg);
-
-  Event event_vr(hmi_apis::FunctionID::VR_AddCommand);
-  event_vr.set_smart_object(*event_msg);
-
-  EXPECT_CALL(*mock_app_, RemoveCommand(kCmdId)).Times(0);
-
-  utils::SharedPtr<AddCommandRequest> request_ptr =
-      CreateCommand<AddCommandRequest>(command_msg);
-  request_ptr->Run();
-  request_ptr->on_event(event_ui);
-  request_ptr->on_event(event_vr);
-}
-
-TEST_F(AddCommandRequestTest, OnEvent_UnknownEvent_UNSUCCESS) {
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
-  utils::SharedPtr<AddCommandRequest> request_ptr =
-      CreateCommand<AddCommandRequest>(msg_);
-  Event event(hmi_apis::FunctionID::INVALID_ENUM);
-  request_ptr->on_event(event);
-}
-
-TEST_F(AddCommandRequestTest, OnEvent_AppNotExisted_UNSUCCESS) {
-  CreateBasicParamsUIRequest();
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
-      .WillOnce(Return(ApplicationSharedPtr()));
-  Event event(hmi_apis::FunctionID::UI_AddCommand);
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
-  utils::SharedPtr<AddCommandRequest> request_ptr =
-      CreateCommand<AddCommandRequest>(msg_);
-  request_ptr->on_event(event);
-}
-
-TEST_F(AddCommandRequestTest,
-       OnEvent_HmiResponseCodeIsRejected_ExpectUICommandRemoved) {
-  CreateBasicParamsUIRequest();
-  SmartObject& params = (*msg_)[strings::params];
-  params[hmi_response::code] = hmi_apis::Common_Result::REJECTED;
-  SmartObject& image = (*msg_)[msg_params][cmd_icon];
-  EXPECT_CALL(mock_message_helper_, VerifyImage(image, _, _))
-      .WillOnce(Return(mobile_apis::Result::SUCCESS));
-  am::CommandsMap commands_map;
-  EXPECT_CALL(*mock_app_, commands_map())
-      .WillRepeatedly(Return(
-          DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
-  EXPECT_CALL(
-      app_mngr_,
-      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
-      .WillOnce(Return(true));
-  utils::SharedPtr<AddCommandRequest> request_ptr =
-      CreateCommand<AddCommandRequest>(msg_);
-  request_ptr->Run();
-  EXPECT_CALL(mock_message_helper_,
-              HMIToMobileResult(hmi_apis::Common_Result::REJECTED))
-      .WillOnce(Return(mobile_apis::Result::REJECTED));
-  EXPECT_CALL(*mock_app_, RemoveCommand(kCmdId));
-  EXPECT_CALL(app_mngr_,
-              ManageMobileCommand(
-                  MobileResultCodeIs(mobile_apis::Result::REJECTED), _));
-  Event event(hmi_apis::FunctionID::UI_AddCommand);
-  event.set_smart_object(*msg_);
-  request_ptr->on_event(event);
-}
-
-TEST_F(AddCommandRequestTest,
-       OnEvent_HmiResponseCodeIsWarnings_ExpectCommandUpdated) {
-  CreateBasicParamsVRRequest();
-  CreateBasicParamsUIRequest();
-  SmartObject& params = (*msg_)[strings::params];
-  params[hmi_response::code] = hmi_apis::Common_Result::WARNINGS;
-  SmartObject& image = (*msg_)[msg_params][cmd_icon];
-  EXPECT_CALL(mock_message_helper_, VerifyImage(image, _, _))
-      .WillOnce(Return(mobile_apis::Result::SUCCESS));
-  am::CommandsMap commands_map;
-  EXPECT_CALL(*mock_app_, commands_map())
-      .WillRepeatedly(Return(
-          DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
-  {
-    InSequence dummy;
-    EXPECT_CALL(
-        app_mngr_,
-        ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
-        .WillOnce(Return(true));
-    EXPECT_CALL(
-        app_mngr_,
-        ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand)))
-        .WillOnce(Return(true));
-  }
-  EXPECT_CALL(app_mngr_,
-              ManageMobileCommand(
-                  MobileResultCodeIs(mobile_apis::Result::WARNINGS), _));
-  utils::SharedPtr<AddCommandRequest> request_ptr =
-      CreateCommand<AddCommandRequest>(msg_);
-  request_ptr->Run();
-  Event event_ui(hmi_apis::FunctionID::UI_AddCommand);
-  event_ui.set_smart_object(*msg_);
-  Event event_vr(hmi_apis::FunctionID::VR_AddCommand);
-  event_vr.set_smart_object(*msg_);
-  EXPECT_CALL(*mock_app_, UpdateHash());
-  request_ptr->on_event(event_ui);
-  request_ptr->on_event(event_vr);
-}
-
-TEST_F(
-    AddCommandRequestTest,
-    OnEvent_UI_HmiResponseCodeIsGenericError_VR_HmiResponseCodeIsUnsupportedResourse_ExpectCommandRemoved) {
-  CreateBasicParamsVRRequest();
-  CreateBasicParamsUIRequest();
-  SmartObject& params = (*msg_)[strings::params];
-  params[hmi_response::code] = hmi_apis::Common_Result::GENERIC_ERROR;
-  SmartObject& image = (*msg_)[msg_params][cmd_icon];
-  EXPECT_CALL(mock_message_helper_, VerifyImage(image, _, _))
-      .WillOnce(Return(mobile_apis::Result::SUCCESS));
-  am::CommandsMap commands_map;
-  EXPECT_CALL(*mock_app_, commands_map())
-      .WillRepeatedly(Return(
-          DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
-  {
-    InSequence dummy;
-    EXPECT_CALL(
-        app_mngr_,
-        ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
-        .WillOnce(Return(true));
-    EXPECT_CALL(
-        app_mngr_,
-        ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand)))
-        .WillOnce(Return(true));
-  }
-
-  EXPECT_CALL(mock_message_helper_,
-              HMIToMobileResult(hmi_apis::Common_Result::GENERIC_ERROR))
-      .WillRepeatedly(Return(mobile_apis::Result::GENERIC_ERROR));
-  EXPECT_CALL(*mock_app_, RemoveCommand(kCmdId));
-  utils::SharedPtr<AddCommandRequest> request_ptr =
-      CreateCommand<AddCommandRequest>(msg_);
-  request_ptr->Run();
-
-  Event event_ui(hmi_apis::FunctionID::UI_AddCommand);
-  event_ui.set_smart_object(*msg_);
-  request_ptr->on_event(event_ui);
-
-  Event event_vr(hmi_apis::FunctionID::VR_AddCommand);
-  MessageSharedPtr msg_vr = CreateMessage(SmartType_Map);
-  (*msg_vr)[strings::params][hmi_response::code] =
-      hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
-  (*msg_vr)[msg_params][cmd_id] = kCmdId;
-  event_vr.set_smart_object(*msg_vr);
-  request_ptr->on_event(event_vr);
-}
-
-TEST_F(
-    AddCommandRequestTest,
-    OnEvent_VR_HmiResponseCodeIsGenericError_UI_HmiResponseCodeIsUnsupportedResourse_ExpectCommandRemoved) {
-  CreateBasicParamsVRRequest();
-  CreateBasicParamsUIRequest();
-  SmartObject& params = (*msg_)[strings::params];
-  params[hmi_response::code] = hmi_apis::Common_Result::GENERIC_ERROR;
-  SmartObject& image = (*msg_)[msg_params][cmd_icon];
-  EXPECT_CALL(mock_message_helper_, VerifyImage(image, _, _))
-      .WillOnce(Return(mobile_apis::Result::SUCCESS));
-  am::CommandsMap commands_map;
-  EXPECT_CALL(*mock_app_, commands_map())
-      .WillRepeatedly(Return(
-          DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
-  {
-    InSequence dummy;
-    EXPECT_CALL(
-        app_mngr_,
-        ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
-        .WillOnce(Return(true));
-    EXPECT_CALL(
-        app_mngr_,
-        ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand)))
-        .WillOnce(Return(true));
-  }
-
-  EXPECT_CALL(mock_message_helper_,
-              HMIToMobileResult(hmi_apis::Common_Result::GENERIC_ERROR))
-      .WillRepeatedly(Return(mobile_apis::Result::GENERIC_ERROR));
-  EXPECT_CALL(*mock_app_, RemoveCommand(kCmdId));
-  utils::SharedPtr<AddCommandRequest> request_ptr =
-      CreateCommand<AddCommandRequest>(msg_);
-  request_ptr->Run();
-
-  Event event_vr(hmi_apis::FunctionID::VR_AddCommand);
-  event_vr.set_smart_object(*msg_);
-  request_ptr->on_event(event_vr);
-
-  Event event_ui(hmi_apis::FunctionID::UI_AddCommand);
-  MessageSharedPtr msg_ui = CreateMessage(SmartType_Map);
-  (*msg_ui)[strings::params][hmi_response::code] =
-      hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
-  (*msg_ui)[msg_params][cmd_id] = kCmdId;
-  event_ui.set_smart_object(*msg_ui);
-  request_ptr->on_event(event_ui);
-}
-
-TEST_F(
-    AddCommandRequestTest,
-    OnEvent_UI_VR_HmiResponseCodeIsUnsupportedResourse_UI_NotAvailableInterfaceState_ExpectCommandRemoved) {
-  CreateBasicParamsVRRequest();
-  CreateBasicParamsUIRequest();
-  SmartObject& params = (*msg_)[strings::params];
-  params[hmi_response::code] = hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
-  SmartObject& image = (*msg_)[msg_params][cmd_icon];
-  EXPECT_CALL(mock_message_helper_, VerifyImage(image, _, _))
-      .WillOnce(Return(mobile_apis::Result::SUCCESS));
-  am::CommandsMap commands_map;
-  EXPECT_CALL(*mock_app_, commands_map())
-      .WillRepeatedly(Return(
-          DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
-  {
-    InSequence dummy;
-    EXPECT_CALL(
-        app_mngr_,
-        ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
-        .WillOnce(Return(true));
-    EXPECT_CALL(
-        app_mngr_,
-        ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand)))
-        .WillOnce(Return(true));
-  }
-  utils::SharedPtr<AddCommandRequest> request_ptr =
-      CreateCommand<AddCommandRequest>(msg_);
-  request_ptr->Run();
-
-  EXPECT_CALL(mock_hmi_interfaces_,
-              GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
-      .WillRepeatedly(
-          Return(am::HmiInterfaces::InterfaceState::STATE_NOT_AVAILABLE));
-  EXPECT_CALL(mock_hmi_interfaces_,
-              GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_VR))
-      .WillRepeatedly(Return(am::HmiInterfaces::STATE_AVAILABLE));
-  EXPECT_CALL(
-      app_mngr_,
-      ManageMobileCommand(
-          MobileResultCodeIs(mobile_apis::Result::UNSUPPORTED_RESOURCE), _));
-  EXPECT_CALL(*mock_app_, RemoveCommand(kCmdId));
-  Event event_ui(hmi_apis::FunctionID::UI_AddCommand);
-  event_ui.set_smart_object(*msg_);
-  Event event_vr(hmi_apis::FunctionID::VR_AddCommand);
-  event_vr.set_smart_object(*msg_);
-  request_ptr->on_event(event_ui);
-  request_ptr->on_event(event_vr);
-}
-
-TEST_F(
-    AddCommandRequestTest,
-    OnEvent_UI_VR_HmiResponseCodeIsUnsupportedResourse_VR_NotAvailableInterfaceState_ExpectCommandRemoved) {
-  CreateBasicParamsVRRequest();
-  CreateBasicParamsUIRequest();
-  SmartObject& params = (*msg_)[strings::params];
-  params[hmi_response::code] = hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
-  SmartObject& image = (*msg_)[msg_params][cmd_icon];
-  EXPECT_CALL(mock_message_helper_, VerifyImage(image, _, _))
-      .WillOnce(Return(mobile_apis::Result::SUCCESS));
-  am::CommandsMap commands_map;
-  EXPECT_CALL(*mock_app_, commands_map())
-      .WillRepeatedly(Return(
-          DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
-  {
-    InSequence dummy;
-    EXPECT_CALL(
-        app_mngr_,
-        ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
-        .WillOnce(Return(true));
-    EXPECT_CALL(
-        app_mngr_,
-        ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand)))
-        .WillOnce(Return(true));
-  }
-  utils::SharedPtr<AddCommandRequest> request_ptr =
-      CreateCommand<AddCommandRequest>(msg_);
-  request_ptr->Run();
-
-  EXPECT_CALL(mock_hmi_interfaces_,
-              GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
-      .WillRepeatedly(Return(am::HmiInterfaces::STATE_AVAILABLE));
-  EXPECT_CALL(mock_hmi_interfaces_,
-              GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_VR))
-      .WillRepeatedly(
-          Return(am::HmiInterfaces::InterfaceState::STATE_NOT_AVAILABLE));
-  EXPECT_CALL(
-      app_mngr_,
-      ManageMobileCommand(
-          MobileResultCodeIs(mobile_apis::Result::UNSUPPORTED_RESOURCE), _));
-  EXPECT_CALL(*mock_app_, RemoveCommand(kCmdId));
-  Event event_ui(hmi_apis::FunctionID::UI_AddCommand);
-  event_ui.set_smart_object(*msg_);
-  Event event_vr(hmi_apis::FunctionID::VR_AddCommand);
-  event_vr.set_smart_object(*msg_);
-  request_ptr->on_event(event_ui);
-  request_ptr->on_event(event_vr);
-}
-
-TEST_F(
-    AddCommandRequestTest,
-    OnEvent_UI_HmiResponseCodeIsUnsupportedResource_NotAvailableInterfaceState_ExpectCommandRemoved) {
-  CreateBasicParamsUIRequest();
-  SmartObject& params = (*msg_)[strings::params];
-  params[hmi_response::code] = hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
-  SmartObject& image = (*msg_)[msg_params][cmd_icon];
-  EXPECT_CALL(mock_message_helper_, VerifyImage(image, _, _))
-      .WillOnce(Return(mobile_apis::Result::SUCCESS));
-  am::CommandsMap commands_map;
-  EXPECT_CALL(*mock_app_, commands_map())
-      .WillRepeatedly(Return(
-          DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
-  EXPECT_CALL(
-      app_mngr_,
-      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
-      .WillOnce(Return(true));
-  utils::SharedPtr<AddCommandRequest> request_ptr =
-      CreateCommand<AddCommandRequest>(msg_);
-  request_ptr->Run();
-  EXPECT_CALL(mock_hmi_interfaces_,
-              GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
-      .WillRepeatedly(
-          Return(am::HmiInterfaces::InterfaceState::STATE_NOT_AVAILABLE));
-  EXPECT_CALL(mock_hmi_interfaces_,
-              GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_VR))
-      .WillRepeatedly(
-          Return(am::HmiInterfaces::InterfaceState::STATE_NOT_AVAILABLE));
-  EXPECT_CALL(*mock_app_, RemoveCommand(kCmdId));
-  EXPECT_CALL(
-      app_mngr_,
-      ManageMobileCommand(
-          MobileResultCodeIs(mobile_apis::Result::UNSUPPORTED_RESOURCE), _));
-  Event event(hmi_apis::FunctionID::UI_AddCommand);
-  event.set_smart_object(*msg_);
-  request_ptr->on_event(event);
-}
-
-TEST_F(
-    AddCommandRequestTest,
-    OnEvent_VR_HmiResponseCodeIsUnsupportedResource_NotAvailableInterfaceState_ExpectCommandRemoved) {
-  CreateBasicParamsVRRequest();
-  SmartObject& params = (*msg_)[strings::params];
-  params[hmi_response::code] = hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
-  am::CommandsMap commands_map;
-  EXPECT_CALL(*mock_app_, commands_map())
-      .WillRepeatedly(Return(
-          DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
-  EXPECT_CALL(
-      app_mngr_,
-      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand)))
-      .WillOnce(Return(true));
-  utils::SharedPtr<AddCommandRequest> request_ptr =
-      CreateCommand<AddCommandRequest>(msg_);
-  request_ptr->Run();
-  EXPECT_CALL(mock_hmi_interfaces_,
-              GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
-      .WillRepeatedly(
-          Return(am::HmiInterfaces::InterfaceState::STATE_NOT_AVAILABLE));
-  EXPECT_CALL(mock_hmi_interfaces_,
-              GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_VR))
-      .WillRepeatedly(
-          Return(am::HmiInterfaces::InterfaceState::STATE_NOT_AVAILABLE));
-  EXPECT_CALL(*mock_app_, RemoveCommand(kCmdId));
-  EXPECT_CALL(
-      app_mngr_,
-      ManageMobileCommand(
-          MobileResultCodeIs(mobile_apis::Result::UNSUPPORTED_RESOURCE), _));
-  Event event(hmi_apis::FunctionID::VR_AddCommand);
-  event.set_smart_object(*msg_);
-  request_ptr->on_event(event);
-}
-
-TEST_F(AddCommandRequestTest,
-       OnEvent_UI_EventWithNotSuccesResponseCode_ExpectVRCommandDelete) {
-  CreateBasicParamsVRRequest();
-  CreateBasicParamsUIRequest();
-  SmartObject& params = (*msg_)[strings::params];
-  params[hmi_response::code] = hmi_apis::Common_Result::SUCCESS;
-  SmartObject& image = (*msg_)[msg_params][cmd_icon];
-  EXPECT_CALL(mock_message_helper_, VerifyImage(image, _, _))
-      .WillOnce(Return(mobile_apis::Result::SUCCESS));
-  am::CommandsMap commands_map;
-  EXPECT_CALL(*mock_app_, commands_map())
-      .WillRepeatedly(Return(
-          DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
-  {
-    InSequence dummy;
-    EXPECT_CALL(
-        app_mngr_,
-        ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
-        .WillOnce(Return(true));
-    EXPECT_CALL(
-        app_mngr_,
-        ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand)))
-        .WillOnce(Return(true));
-  }
-  EXPECT_CALL(app_mngr_,
-              ManageMobileCommand(
-                  MobileResultCodeIs(mobile_apis::Result::GENERIC_ERROR), _));
-  utils::SharedPtr<AddCommandRequest> request_ptr =
-      CreateCommand<AddCommandRequest>(msg_);
-  request_ptr->Run();
-
-  MessageSharedPtr msg_ui = CreateMessage(SmartType_Map);
-  (*msg_ui)[strings::params][hmi_response::code] =
-      hmi_apis::Common_Result::ABORTED;
-  (*msg_ui)[msg_params][cmd_id] = kCmdId;
-  Event event_ui(hmi_apis::FunctionID::UI_AddCommand);
-  event_ui.set_smart_object(*msg_ui);
-  Event event_vr(hmi_apis::FunctionID::VR_AddCommand);
-  event_vr.set_smart_object(*msg_);
-  EXPECT_CALL(mock_message_helper_,
-              HMIToMobileResult(hmi_apis::Common_Result::ABORTED))
-      .WillOnce(Return(mobile_apis::Result::ABORTED));
-  EXPECT_CALL(
-      app_mngr_,
-      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::VR_DeleteCommand)))
-      .WillOnce(Return(true));
-  EXPECT_CALL(*mock_app_, RemoveCommand(kCmdId)).Times(2);
-  request_ptr->on_event(event_ui);
-  request_ptr->on_event(event_vr);
-}
-
-TEST_F(AddCommandRequestTest,
-       OnEvent_UI_VR_Events_VRErrorPresent_ExpectRemoveCommand) {
-  CreateBasicParamsVRRequest();
-  CreateBasicParamsUIRequest();
-  SmartObject& params = (*msg_)[strings::params];
-  params[hmi_response::code] = hmi_apis::Common_Result::SUCCESS;
-  SmartObject& image = (*msg_)[msg_params][cmd_icon];
-  EXPECT_CALL(mock_message_helper_, VerifyImage(image, _, _))
-      .WillOnce(Return(mobile_apis::Result::SUCCESS));
-  am::CommandsMap commands_map;
-  EXPECT_CALL(*mock_app_, commands_map())
-      .WillRepeatedly(Return(
-          DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
-  {
-    InSequence dummy;
-    EXPECT_CALL(
-        app_mngr_,
-        ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
-        .WillOnce(Return(true));
-    EXPECT_CALL(
-        app_mngr_,
-        ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand)))
-        .WillOnce(Return(true));
-  }
-  EXPECT_CALL(app_mngr_,
-              ManageMobileCommand(
-                  MobileResultCodeIs(mobile_apis::Result::GENERIC_ERROR), _));
-  utils::SharedPtr<AddCommandRequest> request_ptr =
-      CreateCommand<AddCommandRequest>(msg_);
-  request_ptr->Run();
-  EXPECT_CALL(mock_message_helper_,
-              HMIToMobileResult(hmi_apis::Common_Result::ABORTED))
-      .WillOnce(Return(mobile_apis::Result::ABORTED));
-
-  Event event_ui(hmi_apis::FunctionID::UI_AddCommand);
-  event_ui.set_smart_object(*msg_);
-  request_ptr->on_event(event_ui);
-  EXPECT_CALL(
-      app_mngr_,
-      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_DeleteCommand)))
-      .WillOnce(Return(true));
-  EXPECT_CALL(*mock_app_, RemoveCommand(kCmdId)).Times(2);
-  Event event_vr(hmi_apis::FunctionID::VR_AddCommand);
-  MessageSharedPtr msg_vr = CreateMessage(SmartType_Map);
-  (*msg_vr)[strings::params][hmi_response::code] =
-      hmi_apis::Common_Result::ABORTED;
-  (*msg_vr)[msg_params][cmd_id] = kCmdId;
-  event_vr.set_smart_object(*msg_vr);
-  request_ptr->on_event(event_vr);
-}
-
-TEST_F(AddCommandRequestTest,
-       OnTimeOut_AppNotExisted_NoAppRemoveCommandCalled) {
-  CreateBasicParamsUIRequest();
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
-      .WillOnce(Return(ApplicationSharedPtr()));
-  EXPECT_CALL(*mock_app_, RemoveCommand(kCmdId)).Times(0);
-  SmartObjectSPtr response;
   EXPECT_CALL(
       mock_message_helper_,
-      CreateNegativeResponse(_, _, _, mobile_apis::Result::GENERIC_ERROR))
-      .WillOnce(Return(response));
-  EXPECT_CALL(app_mngr_,
-              ManageMobileCommand(
-                  response, am::commands::Command::CommandOrigin::ORIGIN_SDL));
-  utils::SharedPtr<CommandRequestImpl> base_class_request =
-      static_cast<utils::SharedPtr<CommandRequestImpl> >(
-          CreateCommand<AddCommandRequest>(msg_));
-  base_class_request->onTimeOut();
+      CreateNegativeResponse(_, _, _, am::mobile_api::Result::GENERIC_ERROR))
+      .WillOnce(Return(msg));
+
+  MessageSharedPtr command_result;
+  EXPECT_CALL(
+      app_mngr_,
+      ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
+      .WillOnce(DoAll(SaveArg<0>(&command_result), Return(true)));
+
+  command->onTimeOut();
+  EXPECT_EQ((*command_result)[strings::msg_params][strings::success].asBool(),
+            false);
+  EXPECT_EQ(
+      (*command_result)[strings::msg_params][strings::result_code].asInt(),
+      static_cast<int32_t>(am::mobile_api::Result::GENERIC_ERROR));
 }
 
-TEST_F(AddCommandRequestTest, OnTimeOut_AppRemoveCommandCalled) {
-  CreateBasicParamsVRRequest();
-  CreateBasicParamsUIRequest();
-  SmartObject& msg_params = (*msg_)[strings::msg_params];
-  SmartObject& image = msg_params[cmd_icon];
-  msg_params[menu_params][hmi_request::parent_id] = kSecondParentId;
-  EXPECT_CALL(mock_message_helper_, VerifyImage(image, _, _))
-      .WillOnce(Return(mobile_apis::Result::SUCCESS));
-  EXPECT_CALL(*mock_app_, FindCommand(kCmdId)).WillOnce(Return(so_ptr_.get()));
-  SmartObject first_command = SmartObject(SmartType_Map);
-  SmartObject second_command = SmartObject(SmartType_Map);
-  const am::CommandsMap commands_map =
-      CreateCommandsMap(first_command, second_command);
-  EXPECT_CALL(*mock_app_, commands_map())
-      .WillRepeatedly(Return(
-          DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
-  so_ptr_ = utils::MakeShared<SmartObject>(SmartType_Map);
-  EXPECT_CALL(*mock_app_, FindSubMenu(kSecondParentId))
-      .WillOnce(Return(so_ptr_.get()));
-  {
-    InSequence dummy;
-    EXPECT_CALL(
-        app_mngr_,
-        ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
-        .WillOnce(Return(true));
-    EXPECT_CALL(
-        app_mngr_,
-        ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand)))
-        .WillOnce(Return(true));
-  }
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
-  utils::SharedPtr<AddCommandRequest> request_ptr =
-      CreateCommand<AddCommandRequest>(msg_);
-  request_ptr->Run();
-  EXPECT_CALL(*mock_app_, RemoveCommand(kCmdId));
-  SmartObjectSPtr response;
+TEST_F(AddCommandRequestTest, OnEvent_VR_HmiSendSuccess_UNSUPPORTED_RESOURCE) {
+  MessageSharedPtr add_command_msg = CreateFullParamsSO();
+
+  utils::SharedPtr<AddCommandRequest> command =
+      CreateCommand<AddCommandRequest>(add_command_msg);
+
+  SetStateForHMIInterfaces(am::HmiInterfaces::STATE_AVAILABLE,
+                           am::HmiInterfaces::STATE_NOT_AVAILABLE);
+
+  MessageSharedPtr msg_vr =
+      PrepareResponseFromHMI(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE,
+                             "VR is not supported by system");
+
+  Event event_vr(hmi_apis::FunctionID::VR_AddCommand);
+  event_vr.set_smart_object(*msg_vr);
+
+  MessageSharedPtr msg_ui =
+      PrepareResponseFromHMI(hmi_apis::Common_Result::SUCCESS, NULL);
+  Event event_ui(hmi_apis::FunctionID::UI_AddCommand);
+  event_ui.set_smart_object(*msg_ui);
+
+  CommonExpectations(add_command_msg);
+
+  am::CommandsMap commands_map;
+  ON_CALL(*mock_app_, commands_map())
+      .WillByDefault(
+          Return(DataAccessor<am::CommandsMap>(commands_map, lock_)));
+
+  command->Run();
+  command->on_event(event_ui);
+
+  MessageSharedPtr vr_command_result;
   EXPECT_CALL(
-      mock_message_helper_,
-      CreateNegativeResponse(_, _, _, mobile_apis::Result::GENERIC_ERROR))
-      .WillOnce(Return(response));
-  EXPECT_CALL(app_mngr_,
-              ManageMobileCommand(
-                  response, am::commands::Command::CommandOrigin::ORIGIN_SDL));
-  utils::SharedPtr<CommandRequestImpl> base_class_request =
-      static_cast<utils::SharedPtr<CommandRequestImpl> >(request_ptr);
-  base_class_request->onTimeOut();
+      app_mngr_,
+      ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
+      .WillOnce(DoAll(SaveArg<0>(&vr_command_result), Return(true)));
+
+  command->on_event(event_vr);
+
+  ResultCommandExpectations(vr_command_result,
+                            mobile_apis::Result::UNSUPPORTED_RESOURCE,
+                            "VR is not supported by system");
+}
+
+TEST_F(AddCommandRequestTest,
+       OnEvent_UI_HmiSendUnsupportedResource_UNSUPPORTED_RESOURCE) {
+  MessageSharedPtr add_command_msg = CreateFullParamsSO();
+
+  utils::SharedPtr<AddCommandRequest> command =
+      CreateCommand<AddCommandRequest>(add_command_msg);
+
+  SetStateForHMIInterfaces(am::HmiInterfaces::STATE_NOT_AVAILABLE,
+                           am::HmiInterfaces::STATE_AVAILABLE);
+
+  MessageSharedPtr msg_ui =
+      PrepareResponseFromHMI(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE,
+                             "UI is not supported by system");
+  Event event_ui(hmi_apis::FunctionID::UI_AddCommand);
+  event_ui.set_smart_object(*msg_ui);
+
+  MessageSharedPtr msg_vr =
+      PrepareResponseFromHMI(hmi_apis::Common_Result::SUCCESS, NULL);
+  Event event_vr(hmi_apis::FunctionID::VR_AddCommand);
+  event_vr.set_smart_object(*msg_vr);
+
+  CommonExpectations(add_command_msg);
+
+  am::CommandsMap commands_map;
+  ON_CALL(*mock_app_, commands_map())
+      .WillByDefault(
+          Return(DataAccessor<am::CommandsMap>(commands_map, lock_)));
+
+  command->Run();
+  command->on_event(event_vr);
+  MessageSharedPtr ui_command_result;
+  EXPECT_CALL(
+      app_mngr_,
+      ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
+      .WillOnce(DoAll(SaveArg<0>(&ui_command_result), Return(true)));
+
+  command->on_event(event_ui);
+
+  ResultCommandExpectations(ui_command_result,
+                            mobile_apis::Result::UNSUPPORTED_RESOURCE,
+                            "UI is not supported by system");
+}
+
+TEST_F(
+    AddCommandRequestTest,
+    OnEvent_UIHmiSendWarning_VRHmiSendAnySuccessfullCode_MobileResultWarning) {
+  MessageSharedPtr add_command_msg = CreateFullParamsSO();
+  utils::SharedPtr<AddCommandRequest> command =
+      CreateCommand<AddCommandRequest>(add_command_msg);
+  SetStateForHMIInterfaces(am::HmiInterfaces::STATE_AVAILABLE,
+                           am::HmiInterfaces::STATE_AVAILABLE);
+
+  MessageSharedPtr msg_ui =
+      PrepareResponseFromHMI(hmi_apis::Common_Result::SUCCESS, NULL);
+  Event event_ui(hmi_apis::FunctionID::UI_AddCommand);
+  event_ui.set_smart_object(*msg_ui);
+
+  MessageSharedPtr msg_vr =
+      PrepareResponseFromHMI(hmi_apis::Common_Result::WARNINGS, NULL);
+  Event event_vr(hmi_apis::FunctionID::VR_AddCommand);
+  event_vr.set_smart_object(*msg_vr);
+
+  CommonExpectations(add_command_msg);
+
+  am::CommandsMap commands_map;
+  ON_CALL(*mock_app_, commands_map())
+      .WillByDefault(
+          Return(DataAccessor<am::CommandsMap>(commands_map, lock_)));
+
+  command->Run();
+  command->on_event(event_vr);
+  MessageSharedPtr ui_command_result;
+  EXPECT_CALL(
+      app_mngr_,
+      ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
+      .WillOnce(DoAll(SaveArg<0>(&ui_command_result), Return(true)));
+
+  command->on_event(event_ui);
+
+  ResultCommandExpectations(
+      ui_command_result, mobile_apis::Result::WARNINGS, "");
+}
+
+TEST_F(AddCommandRequestTest,
+       OnEvent_UIHmiSendWarning_VRHmiSendUnsupported_MobileResultUnsupported) {
+  MessageSharedPtr add_command_msg = CreateFullParamsSO();
+  utils::SharedPtr<AddCommandRequest> command =
+      CreateCommand<AddCommandRequest>(add_command_msg);
+  SetStateForHMIInterfaces(am::HmiInterfaces::STATE_AVAILABLE,
+                           am::HmiInterfaces::STATE_NOT_RESPONSE);
+
+  MessageSharedPtr msg_ui =
+      PrepareResponseFromHMI(hmi_apis::Common_Result::WARNINGS, NULL);
+  Event event_ui(hmi_apis::FunctionID::UI_AddCommand);
+  event_ui.set_smart_object(*msg_ui);
+
+  MessageSharedPtr msg_vr = PrepareResponseFromHMI(
+      hmi_apis::Common_Result::UNSUPPORTED_RESOURCE, NULL);
+  Event event_vr(hmi_apis::FunctionID::VR_AddCommand);
+  event_vr.set_smart_object(*msg_vr);
+
+  CommonExpectations(add_command_msg);
+
+  am::CommandsMap commands_map;
+  ON_CALL(*mock_app_, commands_map())
+      .WillByDefault(
+          Return(DataAccessor<am::CommandsMap>(commands_map, lock_)));
+
+  command->Run();
+  command->on_event(event_vr);
+  MessageSharedPtr ui_command_result;
+  EXPECT_CALL(
+      app_mngr_,
+      ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
+      .WillOnce(DoAll(SaveArg<0>(&ui_command_result), Return(true)));
+
+  command->on_event(event_ui);
+
+  ResultCommandExpectations(
+      ui_command_result, mobile_apis::Result::UNSUPPORTED_RESOURCE, "");
 }
 
 }  // namespace add_command_test

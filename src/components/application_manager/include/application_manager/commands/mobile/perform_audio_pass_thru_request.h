@@ -147,11 +147,14 @@ class PerformAudioPassThruRequest : public CommandRequestImpl {
    * audioPassThru communication.
    * @param ui_response contains result_code from UI
    * @param tts_response contains result_code from TTS
+   * @param out_result contains result for mobile app
    * @return result code - 1) UI error code has precedence than TTS's
    * 2) error_code from TTS is turned to WARNINGS
    */
   mobile_apis::Result::eType PrepareAudioPassThruResultCodeForResponse(
-      const ResponseInfo& ui_response, const ResponseInfo& tts_response);
+      const ResponseInfo& ui_response,
+      const ResponseInfo& tts_response,
+      bool& out_result);
 
   /**
    * @brief Checks if any of audioPassThru communication components

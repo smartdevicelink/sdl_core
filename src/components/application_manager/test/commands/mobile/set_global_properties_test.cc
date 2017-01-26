@@ -80,27 +80,16 @@ class SetGlobalPropertiesRequestTest
       : mock_message_helper_(*MockMessageHelper::message_helper_mock())
       , mock_app_(CreateMockApp()) {}
 
-  MessageSharedPtr CreateFullParamsUISO() {
+  MessageSharedPtr CreateFullParamsSO() {
     MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
     (*msg)[am::strings::params][am::strings::connection_key] = kConnectionKey;
-    smart_objects::SmartObject menu_params =
-        smart_objects::SmartObject(smart_objects::SmartType_Map);
-    menu_params[am::strings::position] = 10;
-    menu_params[am::strings::menu_name] = "LG";
-
     smart_objects::SmartObject msg_params =
         smart_objects::SmartObject(smart_objects::SmartType_Map);
-    msg_params[am::strings::cmd_id] = kCmdId;
-    msg_params[am::strings::menu_params] = menu_params;
-    msg_params[am::strings::app_id] = kAppId;
-    msg_params[am::strings::cmd_icon] = 1;
-    msg_params[am::strings::cmd_icon][am::strings::value] = "10";
     msg_params[am::strings::vr_help_title] = "vr_help_title";
     msg_params[am::strings::vr_help][0][am::strings::text] = "vr_help";
     msg_params[am::strings::vr_help][0][am::strings::position] = 1u;
     msg_params[am::strings::help_prompt][0][am::strings::text] = "help_promt";
     (*msg)[am::strings::msg_params] = msg_params;
-
     return msg;
   }
 
@@ -224,18 +213,63 @@ class SetGlobalPropertiesRequestTest
     Mock::VerifyAndClearExpectations(&mock_message_helper_);
   }
 
-  void ResultCommandExpectations(MessageSharedPtr msg,
-                                 const std::string& info) {
-    EXPECT_EQ((*msg)[am::strings::msg_params][am::strings::success].asBool(),
-              true);
-    EXPECT_EQ(
-        (*msg)[am::strings::msg_params][am::strings::result_code].asInt(),
-        static_cast<int32_t>(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE));
-    EXPECT_EQ((*msg)[am::strings::msg_params][am::strings::info].asString(),
-              info);
+  void SetHMIInterfaceState(const am::HmiInterfaces::InterfaceState ui_state,
+                            const am::HmiInterfaces::InterfaceState tts_state) {
+    ON_CALL(hmi_interfaces_,
+            GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
+        .WillByDefault(Return(ui_state));
+    ON_CALL(hmi_interfaces_,
+            GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_TTS))
+        .WillByDefault(Return(tts_state));
   }
 
-  void ExpectationsHmiInterface_Run() {
+  MessageSharedPtr PrepareResponseFromHMI(
+      const hmi_apis::Common_Result::eType result_code, const char* info) {
+    MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
+    (*msg)[am::strings::params][am::hmi_response::code] = result_code;
+    (*msg)[am::strings::msg_params] =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+    if (info) {
+      (*msg)[am::strings::msg_params][am::strings::info] = info;
+    }
+    return msg;
+  }
+
+  void CheckExpectations(const hmi_apis::Common_Result::eType ui_hmi_response,
+                         const hmi_apis::Common_Result::eType tts_hmi_response,
+                         const char* ui_info,
+                         const char* tts_info,
+                         const mobile_apis::Result::eType mobile_response,
+                         const char* mobile_info,
+                         const am::HmiInterfaces::InterfaceState ui_state,
+                         const am::HmiInterfaces::InterfaceState tts_state,
+                         const bool success) {
+    MessageSharedPtr set_global_pr_msg = CreateFullParamsSO();
+
+    utils::SharedPtr<SetGlobalPropertiesRequest> command =
+        CreateCommand<SetGlobalPropertiesRequest>(set_global_pr_msg);
+
+    EXPECT_CALL(app_mngr_,
+                RemoveAppFromTTSGlobalPropertiesList(kConnectionKey));
+    const smart_objects::SmartObject* vr_help_title =
+        &((*set_global_pr_msg)[am::strings::msg_params]
+                              [am::strings::vr_help_title]);
+    const smart_objects::SmartObject* vr_help =
+        &((*set_global_pr_msg)[am::strings::msg_params][am::strings::vr_help]);
+    const smart_objects::SmartObject* vr_help_prompt = &((
+        *set_global_pr_msg)[am::strings::msg_params][am::strings::help_prompt]);
+    ON_CALL(*mock_app_, vr_help_title()).WillByDefault(Return(vr_help_title));
+    ON_CALL(*mock_app_, vr_help()).WillByDefault(Return(vr_help));
+    ON_CALL(*mock_app_, help_prompt()).WillByDefault(Return(vr_help_prompt));
+    ON_CALL(
+        mock_message_helper_,
+        VerifyImageVrHelpItems(
+            (*set_global_pr_msg)[am::strings::msg_params][am::strings::vr_help],
+            _,
+            _)).WillByDefault(Return(mobile_apis::Result::SUCCESS));
+
+    ON_CALL(mock_message_helper_, VerifyImage(_, _, _))
+        .WillByDefault(Return(mobile_apis::Result::SUCCESS));
     EXPECT_CALL(
         hmi_interfaces_,
         GetInterfaceFromFunction(hmi_apis::FunctionID::UI_SetGlobalProperties))
@@ -244,13 +278,46 @@ class SetGlobalPropertiesRequestTest
         hmi_interfaces_,
         GetInterfaceFromFunction(hmi_apis::FunctionID::TTS_SetGlobalProperties))
         .WillOnce(Return(am::HmiInterfaces::HMI_INTERFACE_TTS));
-    ON_CALL(hmi_interfaces_,
-            GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
-        .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
-    ON_CALL(hmi_interfaces_,
-            GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_TTS))
-        .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
+    SetHMIInterfaceState(ui_state, tts_state);
+    EXPECT_CALL(*mock_app_, UpdateHash());
+
+    MessageSharedPtr msg_ui = PrepareResponseFromHMI(ui_hmi_response, ui_info);
+
+    Event event_ui(hmi_apis::FunctionID::UI_SetGlobalProperties);
+    event_ui.set_smart_object(*msg_ui);
+
+    MessageSharedPtr msg_tts =
+        PrepareResponseFromHMI(tts_hmi_response, tts_info);
+
+    Event event_tts(hmi_apis::FunctionID::TTS_SetGlobalProperties);
+    event_tts.set_smart_object(*msg_tts);
+
+    command->Run();
+    command->on_event(event_tts);
+    SetHMIInterfaceState(ui_state, tts_state);
+
+    MessageSharedPtr result_to_mobile;
+    EXPECT_CALL(app_mngr_,
+                ManageMobileCommand(
+                    _, am::commands::Command::CommandOrigin::ORIGIN_SDL))
+        .WillOnce(DoAll(SaveArg<0>(&result_to_mobile), Return(true)));
+
+    command->on_event(event_ui);
+
+    EXPECT_EQ((*result_to_mobile)[am::strings::msg_params][am::strings::success]
+                  .asBool(),
+              success);
+    EXPECT_EQ(
+        (*result_to_mobile)[am::strings::msg_params][am::strings::result_code]
+            .asInt(),
+        static_cast<int32_t>(mobile_response));
+    if (mobile_info) {
+      EXPECT_EQ((*result_to_mobile)[am::strings::msg_params][am::strings::info]
+                    .asString(),
+                mobile_info);
+    }
   }
+
   sync_primitives::Lock lock_;
   NiceMock<MockHmiInterfaces> hmi_interfaces_;
   MockMessageHelper& mock_message_helper_;
@@ -259,63 +326,113 @@ class SetGlobalPropertiesRequestTest
 
 TEST_F(SetGlobalPropertiesRequestTest,
        OnEvent_UIHmiSendSuccess_UNSUPPORTED_RESOURCE) {
-  MessageSharedPtr msg_vr = CreateFullParamsUISO();
-  (*msg_vr)[am::strings::msg_params][am::strings::vr_commands][0] =
-      "vr_command";
-
-  utils::SharedPtr<SetGlobalPropertiesRequest> command =
-      CreateCommand<SetGlobalPropertiesRequest>(msg_vr);
-
-  EXPECT_CALL(app_mngr_, RemoveAppFromTTSGlobalPropertiesList(kConnectionKey));
-  const smart_objects::SmartObject* vr_help_title =
-      &((*msg_vr)[am::strings::msg_params][am::strings::vr_help_title]);
-  const smart_objects::SmartObject* vr_help =
-      &((*msg_vr)[am::strings::msg_params][am::strings::vr_help]);
-  const smart_objects::SmartObject* vr_help_prompt =
-      &((*msg_vr)[am::strings::msg_params][am::strings::help_prompt]);
-  ON_CALL(*mock_app_, vr_help_title()).WillByDefault(Return(vr_help_title));
-  ON_CALL(*mock_app_, vr_help()).WillByDefault(Return(vr_help));
-  ON_CALL(*mock_app_, help_prompt()).WillByDefault(Return(vr_help_prompt));
-
-  ExpectationsHmiInterface_Run();
-
-  MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
-  (*msg)[am::strings::params][am::hmi_response::code] =
+  const hmi_apis::Common_Result::eType ui_hmi_response =
       hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
-  (*msg)[am::strings::msg_params][am::strings::cmd_id] = kCommandId;
-  (*msg)[am::strings::msg_params][am::strings::info] =
-      "UI is not supported by system";
-
-  Event event(hmi_apis::FunctionID::UI_SetGlobalProperties);
-  event.set_smart_object(*msg);
-
-  ON_CALL(mock_message_helper_,
-          VerifyImageVrHelpItems(
-              (*msg_vr)[am::strings::msg_params][am::strings::vr_help], _, _))
-      .WillByDefault(Return(mobile_apis::Result::SUCCESS));
-
-  ON_CALL(mock_message_helper_, VerifyImage(_, _, _))
-      .WillByDefault(Return(mobile_apis::Result::SUCCESS));
-
-  EXPECT_CALL(*mock_app_, UpdateHash());
-
-  (*msg_vr)[am::strings::params][am::hmi_response::code] =
+  const hmi_apis::Common_Result::eType tts_hmi_response =
       hmi_apis::Common_Result::SUCCESS;
-  Event event_vr(hmi_apis::FunctionID::TTS_SetGlobalProperties);
-  event_vr.set_smart_object(*msg_vr);
+  const char* ui_info = "UI is not supported by system";
+  const char* tts_info = NULL;
+  const mobile_apis::Result::eType mobile_response =
+      mobile_apis::Result::UNSUPPORTED_RESOURCE;
+  const char* mobile_info = "UI is not supported by system";
+  const am::HmiInterfaces::InterfaceState ui_state =
+      am::HmiInterfaces::STATE_NOT_AVAILABLE;
+  const am::HmiInterfaces::InterfaceState tts_state =
+      am::HmiInterfaces::STATE_AVAILABLE;
+  const bool success = true;
+  CheckExpectations(ui_hmi_response,
+                    tts_hmi_response,
+                    ui_info,
+                    tts_info,
+                    mobile_response,
+                    mobile_info,
+                    ui_state,
+                    tts_state,
+                    success);
+}
 
-  command->Run();
-  command->on_event(event_vr);
+TEST_F(
+    SetGlobalPropertiesRequestTest,
+    BothInterfaceIsAvailable_TTSResultUnsupported_UIResultSUCCESS_MobileResultWarning) {
+  const hmi_apis::Common_Result::eType ui_hmi_response =
+      hmi_apis::Common_Result::SUCCESS;
+  const hmi_apis::Common_Result::eType tts_hmi_response =
+      hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
+  const char* ui_info = NULL;
+  const char* tts_info = NULL;
+  const mobile_apis::Result::eType mobile_response =
+      mobile_apis::Result::WARNINGS;
+  const char* mobile_info = NULL;
+  const am::HmiInterfaces::InterfaceState ui_state =
+      am::HmiInterfaces::STATE_AVAILABLE;
+  const am::HmiInterfaces::InterfaceState tts_state =
+      am::HmiInterfaces::STATE_AVAILABLE;
+  const bool success = true;
+  CheckExpectations(ui_hmi_response,
+                    tts_hmi_response,
+                    ui_info,
+                    tts_info,
+                    mobile_response,
+                    mobile_info,
+                    ui_state,
+                    tts_state,
+                    success);
+}
 
-  MessageSharedPtr ui_command_result;
-  EXPECT_CALL(
-      app_mngr_,
-      ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
-      .WillOnce(DoAll(SaveArg<0>(&ui_command_result), Return(true)));
+TEST_F(
+    SetGlobalPropertiesRequestTest,
+    BothInterfaceIsAvailable_TTSResultSUCCESS_UIResultWARNINGS_MobileResultWarning) {
+  const hmi_apis::Common_Result::eType ui_hmi_response =
+      hmi_apis::Common_Result::WARNINGS;
+  const hmi_apis::Common_Result::eType tts_hmi_response =
+      hmi_apis::Common_Result::SUCCESS;
+  const char* ui_info = NULL;
+  const char* tts_info = NULL;
+  const mobile_apis::Result::eType mobile_response =
+      mobile_apis::Result::WARNINGS;
+  const char* mobile_info = NULL;
+  const am::HmiInterfaces::InterfaceState ui_state =
+      am::HmiInterfaces::STATE_AVAILABLE;
+  const am::HmiInterfaces::InterfaceState tts_state =
+      am::HmiInterfaces::STATE_AVAILABLE;
+  const bool success = true;
+  CheckExpectations(ui_hmi_response,
+                    tts_hmi_response,
+                    ui_info,
+                    tts_info,
+                    mobile_response,
+                    mobile_info,
+                    ui_state,
+                    tts_state,
+                    success);
+}
 
-  command->on_event(event);
-
-  ResultCommandExpectations(ui_command_result, "UI is not supported by system");
+TEST_F(
+    SetGlobalPropertiesRequestTest,
+    TTSInterfaceNotRespond_TTSResultUnsupported_UIResultWARNINGS_MobileResultUnsupported) {
+  const hmi_apis::Common_Result::eType ui_hmi_response =
+      hmi_apis::Common_Result::WARNINGS;
+  const hmi_apis::Common_Result::eType tts_hmi_response =
+      hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
+  const char* ui_info = NULL;
+  const char* tts_info = NULL;
+  const mobile_apis::Result::eType mobile_response =
+      mobile_apis::Result::UNSUPPORTED_RESOURCE;
+  const char* mobile_info = NULL;
+  const am::HmiInterfaces::InterfaceState ui_state =
+      am::HmiInterfaces::STATE_AVAILABLE;
+  const am::HmiInterfaces::InterfaceState tts_state =
+      am::HmiInterfaces::STATE_NOT_RESPONSE;
+  const bool success = true;
+  CheckExpectations(ui_hmi_response,
+                    tts_hmi_response,
+                    ui_info,
+                    tts_info,
+                    mobile_response,
+                    mobile_info,
+                    ui_state,
+                    tts_state,
+                    success);
 }
 
 TEST_F(SetGlobalPropertiesRequestTest, OnEvent_SUCCESS_Expect_MessageNotSend) {
@@ -1107,8 +1224,6 @@ TEST_F(SetGlobalPropertiesRequestTest, OnEvent_UIAndWarningResultCode_SUCCESS) {
           GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
       .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
   OnEventUISetupHelper(msg, command);
-
-  EXPECT_CALL(mock_message_helper_, HMIToMobileResult(_)).Times(0);
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
   EXPECT_CALL(*mock_app_, UpdateHash());
@@ -1118,8 +1233,6 @@ TEST_F(SetGlobalPropertiesRequestTest, OnEvent_UIAndWarningResultCode_SUCCESS) {
 
   EXPECT_CALL(hmi_interfaces_, GetInterfaceState(_))
       .WillRepeatedly(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
-  EXPECT_CALL(mock_message_helper_, HMIToMobileResult(_))
-      .WillOnce(Return(mobile_apis::Result::SUCCESS));
   EXPECT_CALL(app_mngr_,
               ManageMobileCommand(_, am::commands::Command::ORIGIN_SDL))
       .WillOnce(Return(true));
@@ -1145,9 +1258,6 @@ TEST_F(SetGlobalPropertiesRequestTest, OnEvent_InvalidApp_Canceled) {
   OnEventUISetupHelper(msg, command);
   EXPECT_CALL(hmi_interfaces_, GetInterfaceState(_))
       .WillRepeatedly(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
-
-  EXPECT_CALL(mock_message_helper_, HMIToMobileResult(_))
-      .WillOnce(Return(mobile_apis::Result::SUCCESS));
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(MockAppPtr()));
   EXPECT_CALL(*mock_app_, UpdateHash()).Times(0);
@@ -1234,9 +1344,6 @@ TEST_F(SetGlobalPropertiesRequestTest,
   EXPECT_CALL(app_mngr_,
               ManageMobileCommand(_, am::commands::Command::ORIGIN_SDL))
       .WillOnce(Return(true));
-
-  EXPECT_CALL(mock_message_helper_, HMIToMobileResult(_))
-      .WillOnce(Return(mobile_apis::Result::SUCCESS));
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
   EXPECT_CALL(*mock_app_, UpdateHash());

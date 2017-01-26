@@ -43,21 +43,10 @@ namespace application_manager {
 namespace commands {
 
 struct ResponseInfo {
-  ResponseInfo()
-      : result_code(hmi_apis::Common_Result::INVALID_ENUM)
-      , interface(HmiInterfaces::HMI_INTERFACE_INVALID_ENUM)
-      , interface_state(HmiInterfaces::STATE_NOT_RESPONSE)
-      , is_ok(false)
-      , is_unsupported_resource(false)
-      , is_invalid_enum(false) {}
+  ResponseInfo();
   ResponseInfo(hmi_apis::Common_Result::eType result,
-               HmiInterfaces::InterfaceID interface)
-      : result_code(result)
-      , interface(interface)
-      , interface_state(HmiInterfaces::STATE_NOT_RESPONSE)
-      , is_ok(false)
-      , is_unsupported_resource(false)
-      , is_invalid_enum(false) {}
+               HmiInterfaces::InterfaceID hmi_interface,
+               ApplicationManager& application_manager);
   hmi_apis::Common_Result::eType result_code;
   HmiInterfaces::InterfaceID interface;
   HmiInterfaces::InterfaceState interface_state;
@@ -272,16 +261,6 @@ class CommandRequestImpl : public CommandImpl,
    */
   bool IsResultCodeUnsupported(const ResponseInfo& first,
                                const ResponseInfo& second) const;
-  /**
-   * @brief Checks result code from HMI for split RPC
-   * and set flags to the info structures.
-   * @param first contains result_code from HMI response and
-   * interface that returns response
-   * @param second contains result_code from HMI response and
-   * interface that returns response
-   */
-  void SetResultCodeFlagsForHMIResponses(ResponseInfo& out_first,
-                                         ResponseInfo& out_second) const;
 
  protected:
   /**

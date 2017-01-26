@@ -180,7 +180,7 @@ void SetGlobalPropertiesRequest::Run() {
   }
 
   // check TTS params
-  if (is_help_prompt_present || is_timeout_prompt_present) {
+  if (is_tts_send_) {
     LOG4CXX_DEBUG(logger_, "TTS params presents");
     smart_objects::SmartObject params =
         smart_objects::SmartObject(smart_objects::SmartType_Map);
@@ -281,14 +281,12 @@ bool SetGlobalPropertiesRequest::PrepareResponseParameters(
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace helpers;
 
-  ResponseInfo ui_properties_info(ui_result_, HmiInterfaces::HMI_INTERFACE_UI);
+  ResponseInfo ui_properties_info(
+      ui_result_, HmiInterfaces::HMI_INTERFACE_UI, application_manager_);
 
-  ResponseInfo tts_properties_info(tts_result_,
-                                   HmiInterfaces::HMI_INTERFACE_TTS);
-  const bool result =
-      PrepareResultForMobileResponse(ui_properties_info, tts_properties_info);
-  if (result &&
-      (HmiInterfaces::STATE_AVAILABLE == tts_properties_info.interface_state) &&
+  ResponseInfo tts_properties_info(
+      tts_result_, HmiInterfaces::HMI_INTERFACE_TTS, application_manager_);
+  if ((HmiInterfaces::STATE_AVAILABLE == tts_properties_info.interface_state) &&
       (tts_properties_info.is_unsupported_resource)) {
     result_code = mobile_apis::Result::WARNINGS;
     tts_response_info_ = "Unsupported phoneme type sent in a prompt";
@@ -296,8 +294,10 @@ bool SetGlobalPropertiesRequest::PrepareResponseParameters(
                       tts_response_info_,
                       ui_properties_info,
                       ui_response_info_);
-    return result;
+    return true;
   }
+  const bool result =
+      PrepareResultForMobileResponse(ui_properties_info, tts_properties_info);
   result_code =
       PrepareResultCodeForResponse(ui_properties_info, tts_properties_info);
   info = MergeInfos(tts_properties_info,
@@ -400,7 +400,6 @@ void SetGlobalPropertiesRequest::PrepareUIRequestMenuAndKeyboardData(
 void SetGlobalPropertiesRequest::SendTTSRequest(
     const smart_objects::SmartObject& params, bool use_events) {
   LOG4CXX_AUTO_TRACE(logger_);
-  is_tts_send_ = true;
   SendHMIRequest(
       hmi_apis::FunctionID::TTS_SetGlobalProperties, &params, use_events);
 }
