@@ -68,6 +68,11 @@ class MockMessageHelper {
   MOCK_METHOD1(CreateDeviceListSO,
                smart_objects::SmartObjectSPtr(
                    const connection_handler::DeviceMap& devices));
+  MOCK_METHOD3(CreateDeviceListSO,
+               smart_objects::SmartObjectSPtr(
+                   const connection_handler::DeviceMap& devices,
+                   const policy::PolicyHandlerInterface& policy_handler,
+                   ApplicationManager& app_mngr));
   MOCK_METHOD2(SendNaviStartStream,
                void(int32_t connection_key, ApplicationManager& app_mngr));
   MOCK_METHOD2(SendNaviStopStream,
