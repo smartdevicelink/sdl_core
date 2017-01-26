@@ -96,6 +96,7 @@ class AlertManeuverRequest : public CommandRequestImpl {
   std::string info_navi_;
   std::string info_tts_;
   Pending pending_requests_;
+  bool is_tts_chunks_exist_;
 
   DISALLOW_COPY_AND_ASSIGN(AlertManeuverRequest);
 };

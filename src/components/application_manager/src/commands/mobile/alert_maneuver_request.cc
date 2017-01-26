@@ -40,7 +40,8 @@ AlertManeuverRequest::AlertManeuverRequest(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
     : CommandRequestImpl(message, application_manager)
     , tts_speak_result_code_(hmi_apis::Common_Result::INVALID_ENUM)
-    , navi_alert_maneuver_result_code_(hmi_apis::Common_Result::INVALID_ENUM) {
+    , navi_alert_maneuver_result_code_(hmi_apis::Common_Result::INVALID_ENUM)
+    , is_tts_chunks_exist_(false) {
   subscribe_on_event(hmi_apis::FunctionID::TTS_OnResetTimeout);
 }
 
@@ -87,14 +88,11 @@ void AlertManeuverRequest::Run() {
     return;
   }
 
-  // Checking parameters and how many HMI requests should be sent
-  bool tts_is_ok = false;
-
   // check TTSChunk parameter
   if ((*message_)[strings::msg_params].keyExists(strings::tts_chunks)) {
     if (0 < (*message_)[strings::msg_params][strings::tts_chunks].length()) {
       pending_requests_.Add(hmi_apis::FunctionID::TTS_Speak);
-      tts_is_ok = true;
+      is_tts_chunks_exist_ = true;
     }
   }
 
@@ -114,7 +112,7 @@ void AlertManeuverRequest::Run() {
   SendHMIRequest(
       hmi_apis::FunctionID::Navigation_AlertManeuver, &msg_params, true);
 
-  if (tts_is_ok) {
+  if (is_tts_chunks_exist_) {
     smart_objects::SmartObject msg_params =
         smart_objects::SmartObject(smart_objects::SmartType_Map);
 
@@ -191,22 +189,28 @@ bool AlertManeuverRequest::PrepareResponseParameters(
 
   application_manager::commands::ResponseInfo navigation_alert_info(
       navi_alert_maneuver_result_code_,
-      HmiInterfaces::HMI_INTERFACE_Navigation);
+      HmiInterfaces::HMI_INTERFACE_Navigation,
+      application_manager_);
 
   application_manager::commands::ResponseInfo tts_alert_info(
-      tts_speak_result_code_, HmiInterfaces::HMI_INTERFACE_TTS);
+      tts_speak_result_code_,
+      HmiInterfaces::HMI_INTERFACE_TTS,
+      application_manager_);
+
+  // Note(dtrunov): According to requirment APPLINK-19591
+  if (is_tts_chunks_exist_ &&
+      (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE ==
+           tts_speak_result_code_ &&
+       (HmiInterfaces::STATE_AVAILABLE == tts_alert_info.interface_state &&
+        navigation_alert_info.is_ok))) {
+    result_code = mobile_apis::Result::WARNINGS;
+    return_info = std::string("Unsupported phoneme type sent in a prompt");
+    return true;
+  }
+
   const bool result =
       PrepareResultForMobileResponse(navigation_alert_info, tts_alert_info);
 
-  if (result && (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE ==
-                     tts_speak_result_code_ &&
-                 (HmiInterfaces::STATE_AVAILABLE ==
-                  application_manager_.hmi_interfaces().GetInterfaceState(
-                      HmiInterfaces::HMI_INTERFACE_TTS)))) {
-    result_code = mobile_apis::Result::WARNINGS;
-    return_info = std::string("Unsupported phoneme type sent in a prompt");
-    return result;
-  }
   result_code =
       PrepareResultCodeForResponse(navigation_alert_info, tts_alert_info);
   return_info =
