@@ -67,6 +67,11 @@ const int32_t kCommandId = 1;
 const uint32_t kAppId = 1u;
 const uint32_t kCmdId = 1u;
 const uint32_t kConnectionKey = 2u;
+const std::string kEmptyInfo = "";
+const std::string kIconName = "icon.png";
+const std::string kTypeStatic = "STATIC";
+const std::string kTypeDynamic = "DYNAMIC";
+const std::string kIconNameInvalid = "icon\t.png";
 }  // namespace
 
 class PerformAudioPassThruRequestTest
@@ -76,7 +81,7 @@ class PerformAudioPassThruRequestTest
       : mock_message_helper_(*MockMessageHelper::message_helper_mock())
       , mock_app_(CreateMockApp()) {}
 
-  MessageSharedPtr CreateFullParamsUISO() {
+  MessageSharedPtr CreateMobileMessageSO() {
     MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
     (*msg)[am::strings::params][am::strings::connection_key] = kConnectionKey;
     smart_objects::SmartObject menu_params =
@@ -96,6 +101,19 @@ class PerformAudioPassThruRequestTest
     return msg;
   }
 
+  MessageSharedPtr CreateHMIMessageSO(const int32_t code, const uint32_t cmd) {
+    MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
+    (*msg)[am::strings::params][am::hmi_response::code] = code;
+    (*msg)[am::strings::msg_params][am::strings::cmd_id] = cmd;
+
+    return msg;
+  }
+
+  bool CreateImageFile(const std::string& name) {
+    const std::string& full_file_path = file_system::CurrentWorkingDirectory();
+    return file_system::CreateFile(full_file_path + "/" + name);
+  }
+
   void SetUp() OVERRIDE {
     ON_CALL(app_mngr_, application(kConnectionKey))
         .WillByDefault(Return(mock_app_));
@@ -109,14 +127,44 @@ class PerformAudioPassThruRequestTest
   }
 
   void ResultCommandExpectations(MessageSharedPtr msg,
-                                 const std::string& info) {
+                                 const std::string& info,
+                                 const int32_t code,
+                                 const bool success) {
     EXPECT_EQ((*msg)[am::strings::msg_params][am::strings::success].asBool(),
-              true);
-    EXPECT_EQ(
-        (*msg)[am::strings::msg_params][am::strings::result_code].asInt(),
-        static_cast<int32_t>(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE));
+              success);
+    EXPECT_EQ((*msg)[am::strings::msg_params][am::strings::result_code].asInt(),
+              code);
     EXPECT_EQ((*msg)[am::strings::msg_params][am::strings::info].asString(),
               info);
+  }
+
+  void SetupIconParameter(MessageSharedPtr msg,
+                          const std::string& type,
+                          const std::string& value) {
+    smart_objects::SmartObject icon =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+    icon[am::strings::type] = type;
+    icon[am::strings::value] = value;
+    (*msg)[am::strings::msg_params][am::strings::audio_pass_thru_icon] = icon;
+  }
+
+  void DefineHMIAvailable() {
+    DefineInterfaceAvailable(am::HmiInterfaces::HMI_INTERFACE_UI);
+    DefineInterfaceAvailable(am::HmiInterfaces::HMI_INTERFACE_TTS);
+  }
+
+  void DefineInterfaceAvailable(
+      const am::HmiInterfaces::InterfaceID interface) {
+    ON_CALL(hmi_interfaces_, GetInterfaceState(interface))
+        .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
+  }
+
+  void DefineHMILevelUIAvailable() {
+    ON_CALL(*mock_app_, hmi_level())
+        .WillByDefault(Return(mobile_apis::HMILevel::HMI_FULL));
+    ON_CALL(hmi_interfaces_, GetInterfaceFromFunction(_))
+        .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_UI));
+    DefineInterfaceAvailable(am::HmiInterfaces::HMI_INTERFACE_UI);
   }
 
   sync_primitives::Lock lock_;
@@ -126,86 +174,408 @@ class PerformAudioPassThruRequestTest
 };
 
 TEST_F(PerformAudioPassThruRequestTest, OnTimeout_GENERIC_ERROR) {
-  MessageSharedPtr msg_ui = CreateMessage(smart_objects::SmartType_Map);
-  (*msg_ui)[am::strings::msg_params][am::strings::result_code] =
+  MessageSharedPtr msg_mobile_response =
+      CreateMessage(smart_objects::SmartType_Map);
+  (*msg_mobile_response)[am::strings::msg_params][am::strings::result_code] =
       am::mobile_api::Result::GENERIC_ERROR;
-  (*msg_ui)[am::strings::msg_params][am::strings::success] = false;
+  (*msg_mobile_response)[am::strings::msg_params][am::strings::success] = false;
 
   utils::SharedPtr<PerformAudioPassThruRequest> command =
       CreateCommand<PerformAudioPassThruRequest>();
 
   EXPECT_CALL(app_mngr_, EndAudioPassThrough()).WillOnce(Return(true));
   EXPECT_CALL(app_mngr_, StopAudioPassThru(_));
-
   EXPECT_CALL(
       mock_message_helper_,
       CreateNegativeResponse(_, _, _, am::mobile_api::Result::GENERIC_ERROR))
-      .WillOnce(Return(msg_ui));
-
-  MessageSharedPtr vr_command_result;
+      .WillOnce(Return(msg_mobile_response));
   EXPECT_CALL(
       app_mngr_,
       ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
-      .WillOnce(DoAll(SaveArg<0>(&vr_command_result), Return(true)));
+      .WillOnce(DoAll(SaveArg<0>(&msg_mobile_response), Return(true)));
 
   command->onTimeOut();
-  EXPECT_EQ((*vr_command_result)[am::strings::msg_params][am::strings::success]
-                .asBool(),
-            false);
-  EXPECT_EQ(
-      (*vr_command_result)[am::strings::msg_params][am::strings::result_code]
-          .asInt(),
-      static_cast<int32_t>(am::mobile_api::Result::GENERIC_ERROR));
-  Mock::VerifyAndClearExpectations(&mock_message_helper_);
+
+  ResultCommandExpectations(msg_mobile_response,
+                            kEmptyInfo,
+                            am::mobile_api::Result::GENERIC_ERROR,
+                            false);
 }
 
 TEST_F(PerformAudioPassThruRequestTest,
        OnEvent_UIHmiSendUnsupportedResource_UNSUPPORTED_RESOURCE) {
-  MessageSharedPtr msg_ui = CreateFullParamsUISO();
-  (*msg_ui)[am::strings::params][am::strings::connection_key] = kConnectionKey;
-
+  MessageSharedPtr msg_mobile = CreateMobileMessageSO();
   utils::SharedPtr<PerformAudioPassThruRequest> command =
-      CreateCommand<PerformAudioPassThruRequest>(msg_ui);
+      CreateCommand<PerformAudioPassThruRequest>(msg_mobile);
 
-  MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
-  (*msg)[am::strings::params][am::hmi_response::code] =
-      hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
-  (*msg)[am::strings::msg_params][am::strings::cmd_id] = kCommandId;
-  (*msg)[am::strings::msg_params][am::strings::info] =
-      "UI is not supported by system";
+  MessageSharedPtr msg_tts =
+      CreateHMIMessageSO(hmi_apis::Common_Result::SUCCESS, kCmdId);
+  Event event_tts(hmi_apis::FunctionID::TTS_Speak);
+  event_tts.set_smart_object(*msg_tts);
 
-  Event event(hmi_apis::FunctionID::UI_PerformAudioPassThru);
-  event.set_smart_object(*msg);
+  DefineHMIAvailable();
+  EXPECT_CALL(mock_message_helper_,
+              HMIToMobileResult(hmi_apis::Common_Result::SUCCESS))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
 
-  ON_CALL(hmi_interfaces_,
-          GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
-      .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
-  ON_CALL(hmi_interfaces_,
-          GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_TTS))
-      .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
-
-  MessageSharedPtr response_msg_tts =
-      CreateMessage(smart_objects::SmartType_Map);
-  (*response_msg_tts)[am::strings::params][am::hmi_response::code] =
-      hmi_apis::Common_Result::SUCCESS;
-  (*response_msg_tts)[am::strings::msg_params][am::strings::cmd_id] = kCmdId;
-  am::event_engine::Event event_tts(hmi_apis::FunctionID::TTS_Speak);
-  event_tts.set_smart_object(*response_msg_tts);
-  ON_CALL(mock_message_helper_,
-          HMIToMobileResult(hmi_apis::Common_Result::SUCCESS))
-      .WillByDefault(Return(mobile_apis::Result::SUCCESS));
   command->on_event(event_tts);
 
-  MessageSharedPtr ui_command_result;
+  MessageSharedPtr msg_ui = CreateHMIMessageSO(
+      hmi_apis::Common_Result::UNSUPPORTED_RESOURCE, kCommandId);
+  (*msg_ui)[am::strings::msg_params][am::strings::info] =
+      "UI is not supported by system";
+  Event event_ui(hmi_apis::FunctionID::UI_PerformAudioPassThru);
+  event_ui.set_smart_object(*msg_ui);
+
   EXPECT_CALL(app_mngr_, EndAudioPassThrough()).WillOnce(Return(false));
+
+  MessageSharedPtr msg_mobile_response;
   EXPECT_CALL(
       app_mngr_,
       ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
-      .WillOnce(DoAll(SaveArg<0>(&ui_command_result), Return(true)));
+      .WillOnce(DoAll(SaveArg<0>(&msg_mobile_response), Return(true)));
 
-  command->on_event(event);
+  command->on_event(event_ui);
 
-  ResultCommandExpectations(ui_command_result, "UI is not supported by system");
+  ResultCommandExpectations(msg_mobile_response,
+                            "UI is not supported by system",
+                            am::mobile_api::Result::UNSUPPORTED_RESOURCE,
+                            true);
+}
+
+TEST_F(PerformAudioPassThruRequestTest,
+       OnEvent_UIHmiSendTruncatedData_TRUNCATED_DATA) {
+  MessageSharedPtr msg_mobile = CreateMobileMessageSO();
+  utils::SharedPtr<PerformAudioPassThruRequest> command =
+      CreateCommand<PerformAudioPassThruRequest>(msg_mobile);
+
+  MessageSharedPtr msg_tts =
+      CreateHMIMessageSO(hmi_apis::Common_Result::SUCCESS, kCmdId);
+  Event event_tts(hmi_apis::FunctionID::TTS_Speak);
+  event_tts.set_smart_object(*msg_tts);
+
+  DefineHMIAvailable();
+  EXPECT_CALL(mock_message_helper_,
+              HMIToMobileResult(hmi_apis::Common_Result::SUCCESS))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
+
+  command->on_event(event_tts);
+
+  MessageSharedPtr msg_ui =
+      CreateHMIMessageSO(hmi_apis::Common_Result::TRUNCATED_DATA, kCommandId);
+  Event event_ui(hmi_apis::FunctionID::UI_PerformAudioPassThru);
+  event_ui.set_smart_object(*msg_ui);
+
+  EXPECT_CALL(mock_message_helper_,
+              HMIToMobileResult(hmi_apis::Common_Result::TRUNCATED_DATA))
+      .WillOnce(Return(mobile_apis::Result::TRUNCATED_DATA));
+  EXPECT_CALL(app_mngr_, EndAudioPassThrough()).WillOnce(Return(false));
+
+  MessageSharedPtr msg_mobile_response;
+  EXPECT_CALL(
+      app_mngr_,
+      ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
+      .WillOnce(DoAll(SaveArg<0>(&msg_mobile_response), Return(true)));
+
+  command->on_event(event_ui);
+
+  ResultCommandExpectations(msg_mobile_response,
+                            kEmptyInfo,
+                            am::mobile_api::Result::TRUNCATED_DATA,
+                            false);
+}
+
+TEST_F(PerformAudioPassThruRequestTest,
+       OnEvent_TTSHmiSendTruncatedData_TRUNCATED_DATA) {
+  MessageSharedPtr msg_mobile = CreateMobileMessageSO();
+  utils::SharedPtr<PerformAudioPassThruRequest> command =
+      CreateCommand<PerformAudioPassThruRequest>(msg_mobile);
+
+  MessageSharedPtr msg_tts =
+      CreateHMIMessageSO(hmi_apis::Common_Result::TRUNCATED_DATA, kCmdId);
+  Event event_tts(hmi_apis::FunctionID::TTS_Speak);
+  event_tts.set_smart_object(*msg_tts);
+
+  DefineHMIAvailable();
+  EXPECT_CALL(mock_message_helper_,
+              HMIToMobileResult(hmi_apis::Common_Result::TRUNCATED_DATA))
+      .WillOnce(Return(mobile_apis::Result::TRUNCATED_DATA));
+
+  command->on_event(event_tts);
+
+  MessageSharedPtr msg_ui =
+      CreateHMIMessageSO(hmi_apis::Common_Result::SUCCESS, kCommandId);
+  Event event_ui(hmi_apis::FunctionID::UI_PerformAudioPassThru);
+  event_ui.set_smart_object(*msg_ui);
+
+  EXPECT_CALL(mock_message_helper_,
+              HMIToMobileResult(hmi_apis::Common_Result::WARNINGS))
+      .WillOnce(Return(mobile_apis::Result::WARNINGS));
+  EXPECT_CALL(app_mngr_, EndAudioPassThrough()).WillOnce(Return(false));
+
+  MessageSharedPtr msg_mobile_response;
+  EXPECT_CALL(
+      app_mngr_,
+      ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
+      .WillOnce(DoAll(SaveArg<0>(&msg_mobile_response), Return(true)));
+
+  command->on_event(event_ui);
+
+  ResultCommandExpectations(
+      msg_mobile_response, kEmptyInfo, am::mobile_api::Result::WARNINGS, true);
+}
+
+TEST_F(PerformAudioPassThruRequestTest,
+       OnEvent_UISendInvalidIdTTSSendTruncatedData_INVALID_ID) {
+  MessageSharedPtr msg_mobile = CreateMobileMessageSO();
+  utils::SharedPtr<PerformAudioPassThruRequest> command =
+      CreateCommand<PerformAudioPassThruRequest>(msg_mobile);
+
+  MessageSharedPtr msg_tts =
+      CreateHMIMessageSO(hmi_apis::Common_Result::TRUNCATED_DATA, kCmdId);
+  Event event_tts(hmi_apis::FunctionID::TTS_Speak);
+  event_tts.set_smart_object(*msg_tts);
+
+  DefineHMIAvailable();
+  EXPECT_CALL(mock_message_helper_,
+              HMIToMobileResult(hmi_apis::Common_Result::TRUNCATED_DATA))
+      .WillOnce(Return(mobile_apis::Result::TRUNCATED_DATA));
+
+  command->on_event(event_tts);
+
+  MessageSharedPtr msg_ui =
+      CreateHMIMessageSO(hmi_apis::Common_Result::INVALID_ID, kCommandId);
+  Event event_ui(hmi_apis::FunctionID::UI_PerformAudioPassThru);
+  event_ui.set_smart_object(*msg_ui);
+
+  EXPECT_CALL(mock_message_helper_,
+              HMIToMobileResult(hmi_apis::Common_Result::INVALID_ID))
+      .WillOnce(Return(mobile_apis::Result::INVALID_ID));
+  EXPECT_CALL(app_mngr_, EndAudioPassThrough()).WillOnce(Return(false));
+
+  MessageSharedPtr msg_mobile_response;
+  EXPECT_CALL(
+      app_mngr_,
+      ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
+      .WillOnce(DoAll(SaveArg<0>(&msg_mobile_response), Return(true)));
+
+  command->on_event(event_ui);
+
+  ResultCommandExpectations(msg_mobile_response,
+                            kEmptyInfo,
+                            am::mobile_api::Result::INVALID_ID,
+                            false);
+}
+
+TEST_F(PerformAudioPassThruRequestTest,
+       Run_MobileSendAudioPassThruIconMissing_WARNINGS) {
+  MessageSharedPtr msg_mobile = CreateMobileMessageSO();
+  utils::SharedPtr<PerformAudioPassThruRequest> command =
+      CreateCommand<PerformAudioPassThruRequest>(msg_mobile);
+
+  DefineHMILevelUIAvailable();
+  EXPECT_CALL(mock_message_helper_, VerifyImage(_, _, _)).Times(0);
+
+  command->Run();
+
+  MessageSharedPtr msg_tts =
+      CreateHMIMessageSO(hmi_apis::Common_Result::SUCCESS, kCmdId);
+  Event event_tts(hmi_apis::FunctionID::TTS_Speak);
+  event_tts.set_smart_object(*msg_tts);
+
+  DefineHMIAvailable();
+
+  command->on_event(event_tts);
+
+  MessageSharedPtr msg_ui =
+      CreateHMIMessageSO(hmi_apis::Common_Result::WARNINGS, kCommandId);
+  Event event_ui(hmi_apis::FunctionID::UI_PerformAudioPassThru);
+  event_ui.set_smart_object(*msg_ui);
+
+  EXPECT_CALL(mock_message_helper_,
+              HMIToMobileResult(hmi_apis::Common_Result::WARNINGS))
+      .WillOnce(Return(mobile_apis::Result::WARNINGS));
+  EXPECT_CALL(app_mngr_, EndAudioPassThrough()).WillOnce(Return(false));
+
+  MessageSharedPtr msg_mobile_response;
+  EXPECT_CALL(
+      app_mngr_,
+      ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
+      .WillOnce(DoAll(SaveArg<0>(&msg_mobile_response), Return(true)));
+
+  command->on_event(event_ui);
+
+  ResultCommandExpectations(
+      msg_mobile_response, kEmptyInfo, am::mobile_api::Result::WARNINGS, true);
+}
+
+TEST_F(PerformAudioPassThruRequestTest,
+       Run_MobileSendAudioPassThruIconStatic_SUCCESS) {
+  MessageSharedPtr msg_mobile = CreateMobileMessageSO();
+  SetupIconParameter(msg_mobile, kTypeStatic, kIconName);
+  utils::SharedPtr<PerformAudioPassThruRequest> command =
+      CreateCommand<PerformAudioPassThruRequest>(msg_mobile);
+
+  DefineHMILevelUIAvailable();
+  ON_CALL(app_mngr_, ManageHMICommand(_)).WillByDefault(Return(true));
+  EXPECT_CALL(mock_message_helper_,
+              VerifyImage((*msg_mobile)[am::strings::msg_params]
+                                       [am::strings::audio_pass_thru_icon],
+                          _,
+                          _)).WillOnce(Return(mobile_apis::Result::SUCCESS));
+
+  command->Run();
+
+  MessageSharedPtr msg_tts =
+      CreateHMIMessageSO(hmi_apis::Common_Result::SUCCESS, kCmdId);
+  Event event_tts(hmi_apis::FunctionID::TTS_Speak);
+  event_tts.set_smart_object(*msg_tts);
+
+  DefineHMIAvailable();
+
+  command->on_event(event_tts);
+
+  MessageSharedPtr msg_ui =
+      CreateHMIMessageSO(hmi_apis::Common_Result::SUCCESS, kCommandId);
+  Event event_ui(hmi_apis::FunctionID::UI_PerformAudioPassThru);
+  event_ui.set_smart_object(*msg_ui);
+
+  EXPECT_CALL(mock_message_helper_,
+              HMIToMobileResult(hmi_apis::Common_Result::SUCCESS))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
+  EXPECT_CALL(app_mngr_, EndAudioPassThrough()).WillOnce(Return(false));
+
+  MessageSharedPtr msg_mobile_response;
+  EXPECT_CALL(
+      app_mngr_,
+      ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
+      .WillOnce(DoAll(SaveArg<0>(&msg_mobile_response), Return(true)));
+
+  command->on_event(event_ui);
+
+  ResultCommandExpectations(
+      msg_mobile_response, kEmptyInfo, am::mobile_api::Result::SUCCESS, true);
+}
+
+TEST_F(PerformAudioPassThruRequestTest,
+       Run_MobileSendAudioPassThruIconDynamic_WARNINGS) {
+  MessageSharedPtr msg_mobile = CreateMobileMessageSO();
+  SetupIconParameter(msg_mobile, kTypeDynamic, kIconName);
+  utils::SharedPtr<PerformAudioPassThruRequest> command =
+      CreateCommand<PerformAudioPassThruRequest>(msg_mobile);
+
+  DefineHMILevelUIAvailable();
+  EXPECT_CALL(mock_message_helper_,
+              VerifyImage((*msg_mobile)[am::strings::msg_params]
+                                       [am::strings::audio_pass_thru_icon],
+                          _,
+                          _))
+      .WillOnce(Return(mobile_apis::Result::INVALID_DATA));
+
+  command->Run();
+
+  MessageSharedPtr msg_tts =
+      CreateHMIMessageSO(hmi_apis::Common_Result::SUCCESS, kCmdId);
+  Event event_tts(hmi_apis::FunctionID::TTS_Speak);
+  event_tts.set_smart_object(*msg_tts);
+
+  DefineHMIAvailable();
+
+  command->on_event(event_tts);
+
+  MessageSharedPtr msg_ui =
+      CreateHMIMessageSO(hmi_apis::Common_Result::WARNINGS, kCommandId);
+  Event event_ui(hmi_apis::FunctionID::UI_PerformAudioPassThru);
+  event_ui.set_smart_object(*msg_ui);
+
+  EXPECT_CALL(mock_message_helper_,
+              HMIToMobileResult(hmi_apis::Common_Result::WARNINGS))
+      .WillOnce(Return(mobile_apis::Result::WARNINGS));
+  EXPECT_CALL(app_mngr_, EndAudioPassThrough()).WillOnce(Return(false));
+
+  MessageSharedPtr msg_mobile_response;
+  EXPECT_CALL(
+      app_mngr_,
+      ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
+      .WillOnce(DoAll(SaveArg<0>(&msg_mobile_response), Return(true)));
+
+  command->on_event(event_ui);
+
+  ResultCommandExpectations(msg_mobile_response,
+                            "Reference image(s) not found",
+                            am::mobile_api::Result::WARNINGS,
+                            true);
+}
+
+TEST_F(PerformAudioPassThruRequestTest,
+       Run_MobileSendAudioPassThruIconDynamic_SUCCESS) {
+  MessageSharedPtr msg_mobile = CreateMobileMessageSO();
+  ASSERT_TRUE(CreateImageFile(kIconName));
+  SetupIconParameter(msg_mobile, kTypeDynamic, kIconName);
+  utils::SharedPtr<PerformAudioPassThruRequest> command =
+      CreateCommand<PerformAudioPassThruRequest>(msg_mobile);
+
+  DefineHMILevelUIAvailable();
+  EXPECT_CALL(mock_message_helper_,
+              VerifyImage((*msg_mobile)[am::strings::msg_params]
+                                       [am::strings::audio_pass_thru_icon],
+                          _,
+                          _)).WillOnce(Return(mobile_apis::Result::SUCCESS));
+
+  command->Run();
+
+  MessageSharedPtr msg_tts =
+      CreateHMIMessageSO(hmi_apis::Common_Result::SUCCESS, kCmdId);
+  Event event_tts(hmi_apis::FunctionID::TTS_Speak);
+  event_tts.set_smart_object(*msg_tts);
+
+  DefineHMIAvailable();
+
+  command->on_event(event_tts);
+
+  MessageSharedPtr msg_ui =
+      CreateHMIMessageSO(hmi_apis::Common_Result::SUCCESS, kCommandId);
+  Event event_ui(hmi_apis::FunctionID::UI_PerformAudioPassThru);
+  event_ui.set_smart_object(*msg_ui);
+
+  EXPECT_CALL(mock_message_helper_,
+              HMIToMobileResult(hmi_apis::Common_Result::SUCCESS))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
+  EXPECT_CALL(app_mngr_, EndAudioPassThrough()).WillOnce(Return(false));
+
+  MessageSharedPtr msg_mobile_response;
+  EXPECT_CALL(
+      app_mngr_,
+      ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
+      .WillOnce(DoAll(SaveArg<0>(&msg_mobile_response), Return(true)));
+
+  command->on_event(event_ui);
+
+  ResultCommandExpectations(
+      msg_mobile_response, kEmptyInfo, am::mobile_api::Result::SUCCESS, true);
+}
+
+TEST_F(PerformAudioPassThruRequestTest,
+       Run_MobileSendAudioPassThruIconInvalid_INVALID_DATA) {
+  MessageSharedPtr msg_mobile = CreateMobileMessageSO();
+  SetupIconParameter(msg_mobile, kTypeStatic, kIconNameInvalid);
+  utils::SharedPtr<PerformAudioPassThruRequest> command =
+      CreateCommand<PerformAudioPassThruRequest>(msg_mobile);
+
+  DefineHMILevelUIAvailable();
+  EXPECT_CALL(mock_message_helper_, VerifyImage(_, _, _)).Times(0);
+
+  MessageSharedPtr msg_mobile_response;
+  EXPECT_CALL(
+      app_mngr_,
+      ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
+      .WillOnce(DoAll(SaveArg<0>(&msg_mobile_response), Return(true)));
+  command->Run();
+
+  ResultCommandExpectations(msg_mobile_response,
+                            kEmptyInfo,
+                            am::mobile_api::Result::INVALID_DATA,
+                            false);
 }
 
 }  // namespace perform_audio_pass_thru_request
