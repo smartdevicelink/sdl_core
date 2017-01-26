@@ -133,7 +133,7 @@ class PerformAudioPassThruRequestTest
     EXPECT_EQ((*msg)[am::strings::msg_params][am::strings::success].asBool(),
               success);
     EXPECT_EQ((*msg)[am::strings::msg_params][am::strings::result_code].asInt(),
-              (code));
+              code);
     EXPECT_EQ((*msg)[am::strings::msg_params][am::strings::info].asString(),
               info);
   }
@@ -148,21 +148,15 @@ class PerformAudioPassThruRequestTest
     (*msg)[am::strings::msg_params][am::strings::audio_pass_thru_icon] = icon;
   }
 
-  void DefineUIsAvailable() {
-    ON_CALL(hmi_interfaces_,
-            GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
-        .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
-  }
-
-  void DefineTTSsAvailable() {
-    ON_CALL(hmi_interfaces_,
-            GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_TTS))
-        .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
-  }
-
   void DefineHMIAvailable() {
-    DefineUIsAvailable();
-    DefineTTSsAvailable();
+    DefineInterfaceAvailable(am::HmiInterfaces::HMI_INTERFACE_UI);
+    DefineInterfaceAvailable(am::HmiInterfaces::HMI_INTERFACE_TTS);
+  }
+
+  void DefineInterfaceAvailable(
+      const am::HmiInterfaces::InterfaceID interface) {
+    ON_CALL(hmi_interfaces_, GetInterfaceState(interface))
+        .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
   }
 
   void DefineHMILevelUIAvailable() {
@@ -170,7 +164,7 @@ class PerformAudioPassThruRequestTest
         .WillByDefault(Return(mobile_apis::HMILevel::HMI_FULL));
     ON_CALL(hmi_interfaces_, GetInterfaceFromFunction(_))
         .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_UI));
-    DefineUIsAvailable();
+    DefineInterfaceAvailable(am::HmiInterfaces::HMI_INTERFACE_UI);
   }
 
   sync_primitives::Lock lock_;
@@ -216,7 +210,7 @@ TEST_F(PerformAudioPassThruRequestTest,
 
   MessageSharedPtr msg_tts =
       CreateHMIMessageSO(hmi_apis::Common_Result::SUCCESS, kCmdId);
-  am::event_engine::Event event_tts(hmi_apis::FunctionID::TTS_Speak);
+  Event event_tts(hmi_apis::FunctionID::TTS_Speak);
   event_tts.set_smart_object(*msg_tts);
 
   DefineHMIAvailable();
@@ -257,7 +251,7 @@ TEST_F(PerformAudioPassThruRequestTest,
 
   MessageSharedPtr msg_tts =
       CreateHMIMessageSO(hmi_apis::Common_Result::SUCCESS, kCmdId);
-  am::event_engine::Event event_tts(hmi_apis::FunctionID::TTS_Speak);
+  Event event_tts(hmi_apis::FunctionID::TTS_Speak);
   event_tts.set_smart_object(*msg_tts);
 
   DefineHMIAvailable();
@@ -299,7 +293,7 @@ TEST_F(PerformAudioPassThruRequestTest,
 
   MessageSharedPtr msg_tts =
       CreateHMIMessageSO(hmi_apis::Common_Result::TRUNCATED_DATA, kCmdId);
-  am::event_engine::Event event_tts(hmi_apis::FunctionID::TTS_Speak);
+  Event event_tts(hmi_apis::FunctionID::TTS_Speak);
   event_tts.set_smart_object(*msg_tts);
 
   DefineHMIAvailable();
@@ -339,7 +333,7 @@ TEST_F(PerformAudioPassThruRequestTest,
 
   MessageSharedPtr msg_tts =
       CreateHMIMessageSO(hmi_apis::Common_Result::TRUNCATED_DATA, kCmdId);
-  am::event_engine::Event event_tts(hmi_apis::FunctionID::TTS_Speak);
+  Event event_tts(hmi_apis::FunctionID::TTS_Speak);
   event_tts.set_smart_object(*msg_tts);
 
   DefineHMIAvailable();
@@ -386,7 +380,7 @@ TEST_F(PerformAudioPassThruRequestTest,
 
   MessageSharedPtr msg_tts =
       CreateHMIMessageSO(hmi_apis::Common_Result::SUCCESS, kCmdId);
-  am::event_engine::Event event_tts(hmi_apis::FunctionID::TTS_Speak);
+  Event event_tts(hmi_apis::FunctionID::TTS_Speak);
   event_tts.set_smart_object(*msg_tts);
 
   DefineHMIAvailable();
@@ -434,7 +428,7 @@ TEST_F(PerformAudioPassThruRequestTest,
 
   MessageSharedPtr msg_tts =
       CreateHMIMessageSO(hmi_apis::Common_Result::SUCCESS, kCmdId);
-  am::event_engine::Event event_tts(hmi_apis::FunctionID::TTS_Speak);
+  Event event_tts(hmi_apis::FunctionID::TTS_Speak);
   event_tts.set_smart_object(*msg_tts);
 
   DefineHMIAvailable();
@@ -482,7 +476,7 @@ TEST_F(PerformAudioPassThruRequestTest,
 
   MessageSharedPtr msg_tts =
       CreateHMIMessageSO(hmi_apis::Common_Result::SUCCESS, kCmdId);
-  am::event_engine::Event event_tts(hmi_apis::FunctionID::TTS_Speak);
+  Event event_tts(hmi_apis::FunctionID::TTS_Speak);
   event_tts.set_smart_object(*msg_tts);
 
   DefineHMIAvailable();
@@ -532,7 +526,7 @@ TEST_F(PerformAudioPassThruRequestTest,
 
   MessageSharedPtr msg_tts =
       CreateHMIMessageSO(hmi_apis::Common_Result::SUCCESS, kCmdId);
-  am::event_engine::Event event_tts(hmi_apis::FunctionID::TTS_Speak);
+  Event event_tts(hmi_apis::FunctionID::TTS_Speak);
   event_tts.set_smart_object(*msg_tts);
 
   DefineHMIAvailable();
