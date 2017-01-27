@@ -37,6 +37,7 @@
 #include "hmi_message_handler/mock_hmi_message_observer.h"
 #include "hmi_message_handler/mock_hmi_message_handler_settings.h"
 #include "hmi_message_handler/mock_hmi_message_adapter_impl.h"
+#include "utils/test_async_waiter.h"
 
 namespace test {
 namespace components {
@@ -172,15 +173,19 @@ TEST_F(HMIMessageHandlerImplTest, OnMessageReceived_InvalidObserver_Cancelled) {
 TEST_F(HMIMessageHandlerImplTest, SendMessageToHMI_Success) {
   hmi_message_handler::MessageSharedPointer message = CreateMessage();
 
+  TestAsyncWaiter waiter;
+
   MockHMIMessageAdapterImpl message_adapter(hmi_handler_);
-  EXPECT_CALL(message_adapter, SendMessageToHMI(message));
+  EXPECT_CALL(message_adapter, SendMessageToHMI(message))
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
 
   hmi_handler_->AddHMIMessageAdapter(&message_adapter);
   hmi_handler_->SendMessageToHMI(message);
 
   // Wait for the message to be processed
   hmi_handler_->messages_to_hmi()->WaitDumpQueue();
-  testing::Mock::AsyncVerifyAndClearExpectations(100);
+
+  EXPECT_TRUE(waiter.WaitFor(1, 1000));
 }
 
 }  // namespace hmi_message_handler_test
