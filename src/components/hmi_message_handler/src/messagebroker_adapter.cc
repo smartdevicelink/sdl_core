@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -91,6 +91,12 @@ void MessageBrokerAdapter::SubscribeTo() {
   MessageBrokerController::subscribeTo("Buttons.OnButtonEvent");
   MessageBrokerController::subscribeTo("Buttons.OnButtonPress");
   MessageBrokerController::subscribeTo("RC.OnInteriorVehicleData");
+
+  // new subscriptions
+  MessageBrokerController::subscribeTo("RC.OnDeviceLocationChanged");
+  MessageBrokerController::subscribeTo("RC.OnDeviceRankChanged");
+  MessageBrokerController::subscribeTo("VehicleInfo.OnReverseAppsAllowing");
+
   MessageBrokerController::subscribeTo("UI.OnCommand");
   MessageBrokerController::subscribeTo("VR.OnCommand");
   MessageBrokerController::subscribeTo("BasicCommunication.OnReady");
