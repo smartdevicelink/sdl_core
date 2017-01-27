@@ -112,8 +112,11 @@ class MockMessageHelper {
 
   MOCK_METHOD4(SendPolicyUpdate,
                void(const std::string& file_path,
-                    int timeout,
+                    const uint32_t timeout,
                     const std::vector<int>& retries,
+                    ApplicationManager& app_mngr));
+  MOCK_METHOD2(SendDecryptCertificateToHMI,
+               void(const std::string& file_name,
                     ApplicationManager& app_mngr));
   MOCK_METHOD3(
       SendGetListOfPermissionsResponse,

@@ -703,7 +703,6 @@ void TransportManagerImpl::OnDeviceListUpdated(TransportAdapter* ta) {
     device_infos.push_back(it->second);
   }
   device_list_lock_.Release();
-  RaiseEvent(&TransportManagerListener::OnDeviceListUpdated, device_infos);
   LOG4CXX_TRACE(logger_, "exit");
 }
 

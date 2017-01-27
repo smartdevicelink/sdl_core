@@ -41,7 +41,7 @@ include_directories(
   ${JSONCPP_INCLUDE_DIRECTORY}
 )
 
-collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}")  
+collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}")
 
 set(LIBRARIES
   gmock
