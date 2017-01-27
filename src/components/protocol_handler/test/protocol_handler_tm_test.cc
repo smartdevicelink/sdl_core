@@ -44,6 +44,7 @@
 #include "security_manager/mock_ssl_context.h"
 #include "transport_manager/mock_transport_manager.h"
 #include "utils/make_shared.h"
+#include "utils/test_async_waiter.h"
 
 namespace test {
 namespace components {
@@ -156,8 +157,10 @@ class ProtocolHandlerImplTest : public ::testing::Test {
   }
 
   void TearDown() OVERRIDE {
-    // Wait call methods in thread
-    testing::Mock::AsyncVerifyAndClearExpectations(10000);
+    const_cast<protocol_handler::impl::FromMobileQueue&>(
+        protocol_handler_impl->get_from_mobile_queue()).WaitDumpQueue();
+    const_cast<protocol_handler::impl::ToMobileQueue&>(
+        protocol_handler_impl->get_to_mobile_queue()).WaitDumpQueue();
   }
 
   // Emulate connection establish
@@ -168,7 +171,8 @@ class ProtocolHandlerImplTest : public ::testing::Test {
                                                     std::string("BTMAC")),
                                          connection_id);
   }
-  void AddSession() {
+
+  void AddSession(TestAsyncWaiter* waiter, uint32_t* times) {
     AddConnection();
     const ServiceType start_service = kRpc;
 #ifdef ENABLE_SECURITY
@@ -179,22 +183,48 @@ class ProtocolHandlerImplTest : public ::testing::Test {
     // use protection OFF
     const bool callback_protection_flag = PROTECTION_OFF;
 #endif  // ENABLE_SECURITY
+
     // Expect ConnectionHandler check
-    EXPECT_CALL(session_observer_mock,
-                OnSessionStartedCallback(connection_id,
-                                         NEW_SESSION_ID,
-                                         start_service,
-                                         callback_protection_flag,
-                                         _))
-        .
-        // Return sessions start success
-        WillOnce(Return(session_id));
+    if (waiter) {
+      EXPECT_CALL(session_observer_mock,
+                  OnSessionStartedCallback(connection_id,
+                                           NEW_SESSION_ID,
+                                           start_service,
+                                           callback_protection_flag,
+                                           _))
+          .
+          // Return sessions start success
+          WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(session_id)));
+      if (times) {
+        (*times)++;
+      }
+    } else {
+      EXPECT_CALL(session_observer_mock,
+                  OnSessionStartedCallback(connection_id,
+                                           NEW_SESSION_ID,
+                                           start_service,
+                                           callback_protection_flag,
+                                           _))
+          .
+          // Return sessions start success
+          WillOnce(Return(session_id));
+    }
 
     // Expect send Ack with PROTECTION_OFF (on no Security Manager)
-    EXPECT_CALL(transport_manager_mock,
-                SendMessageToDevice(ControlMessage(FRAME_DATA_START_SERVICE_ACK,
-                                                   PROTECTION_OFF)))
-        .WillOnce(Return(E_SUCCESS));
+    if (waiter) {
+      EXPECT_CALL(transport_manager_mock,
+                  SendMessageToDevice(ControlMessage(
+                      FRAME_DATA_START_SERVICE_ACK, PROTECTION_OFF)))
+          .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(E_SUCCESS)));
+      if (times) {
+        (*times)++;
+      }
+    } else {
+      EXPECT_CALL(transport_manager_mock,
+                  SendMessageToDevice(ControlMessage(
+                      FRAME_DATA_START_SERVICE_ACK, PROTECTION_OFF)))
+          .WillOnce(Return(E_SUCCESS));
+    }
 
     SendControlMessage(
         PROTECTION_ON, start_service, NEW_SESSION_ID, FRAME_DATA_START_SERVICE);
@@ -206,6 +236,7 @@ class ProtocolHandlerImplTest : public ::testing::Test {
     protocol_handler_impl->set_security_manager(&security_manager_mock);
   }
 #endif  // ENABLE_SECURITY
+
   void SendTMMessage(uint8_t connection_id,
                      uint8_t version,
                      bool protection,
@@ -327,6 +358,9 @@ TEST_F(ProtocolHandlerImplTest,
        StartSession_Unprotected_SessionObserverReject) {
   const int call_times = 5;
   AddConnection();
+
+  TestAsyncWaiter waiter;
+  uint32_t times = 0;
   // Expect ConnectionHandler check
   EXPECT_CALL(
       session_observer_mock,
@@ -338,14 +372,17 @@ TEST_F(ProtocolHandlerImplTest,
       .Times(call_times)
       .
       // Return sessions start rejection
-      WillRepeatedly(Return(SESSION_START_REJECT));
+      WillRepeatedly(
+          DoAll(NotifyTestAsyncWaiter(&waiter), Return(SESSION_START_REJECT)));
+  times += call_times;
 
   // Expect send NAck
   EXPECT_CALL(transport_manager_mock,
               SendMessageToDevice(ControlMessage(FRAME_DATA_START_SERVICE_NACK,
                                                  PROTECTION_OFF)))
       .Times(call_times)
-      .WillRepeatedly(Return(E_SUCCESS));
+      .WillRepeatedly(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+  times += call_times;
 
   SendControlMessage(
       PROTECTION_OFF, kControl, NEW_SESSION_ID, FRAME_DATA_START_SERVICE);
@@ -357,6 +394,8 @@ TEST_F(ProtocolHandlerImplTest,
       PROTECTION_OFF, kMobileNav, NEW_SESSION_ID, FRAME_DATA_START_SERVICE);
   SendControlMessage(
       PROTECTION_OFF, kBulk, NEW_SESSION_ID, FRAME_DATA_START_SERVICE);
+
+  EXPECT_TRUE(waiter.WaitFor(times, 1000));
 }
 /*
  * ProtocolHandler shall send NAck on session_observer rejection
@@ -375,6 +414,9 @@ TEST_F(ProtocolHandlerImplTest, StartSession_Protected_SessionObserverReject) {
   // use protection OFF
   const bool callback_protection_flag = PROTECTION_OFF;
 #endif  // ENABLE_SECURITY
+
+  TestAsyncWaiter waiter;
+  uint32_t times = 0;
   // Expect ConnectionHandler check
   EXPECT_CALL(
       session_observer_mock,
@@ -386,14 +428,17 @@ TEST_F(ProtocolHandlerImplTest, StartSession_Protected_SessionObserverReject) {
       .Times(call_times)
       .
       // Return sessions start rejection
-      WillRepeatedly(Return(SESSION_START_REJECT));
+      WillRepeatedly(
+          DoAll(NotifyTestAsyncWaiter(&waiter), Return(SESSION_START_REJECT)));
+  times += call_times;
 
   // Expect send NAck with encryption OFF
   EXPECT_CALL(transport_manager_mock,
               SendMessageToDevice(ControlMessage(FRAME_DATA_START_SERVICE_NACK,
                                                  PROTECTION_OFF)))
       .Times(call_times)
-      .WillRepeatedly(Return(E_SUCCESS));
+      .WillRepeatedly(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+  times += call_times;
 
   SendControlMessage(
       PROTECTION_ON, kControl, NEW_SESSION_ID, FRAME_DATA_START_SERVICE);
@@ -405,6 +450,8 @@ TEST_F(ProtocolHandlerImplTest, StartSession_Protected_SessionObserverReject) {
       PROTECTION_ON, kMobileNav, NEW_SESSION_ID, FRAME_DATA_START_SERVICE);
   SendControlMessage(
       PROTECTION_ON, kBulk, NEW_SESSION_ID, FRAME_DATA_START_SERVICE);
+
+  EXPECT_TRUE(waiter.WaitFor(times, 1000));
 }
 /*
  * ProtocolHandler shall send Ack on session_observer accept
@@ -414,6 +461,9 @@ TEST_F(ProtocolHandlerImplTest,
        StartSession_Unprotected_SessionObserverAccept) {
   AddConnection();
   const ServiceType start_service = kRpc;
+
+  TestAsyncWaiter waiter;
+  uint32_t times = 0;
   // Expect ConnectionHandler check
   EXPECT_CALL(
       session_observer_mock,
@@ -421,17 +471,21 @@ TEST_F(ProtocolHandlerImplTest,
           connection_id, NEW_SESSION_ID, start_service, PROTECTION_OFF, _))
       .
       // Return sessions start success
-      WillOnce(Return(session_id));
+      WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(session_id)));
+  times++;
 
   SetProtocolVersion2();
   // Expect send Ack
   EXPECT_CALL(transport_manager_mock,
               SendMessageToDevice(
                   ControlMessage(FRAME_DATA_START_SERVICE_ACK, PROTECTION_OFF)))
-      .WillOnce(Return(E_SUCCESS));
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+  times++;
 
   SendControlMessage(
       PROTECTION_OFF, start_service, NEW_SESSION_ID, FRAME_DATA_START_SERVICE);
+
+  EXPECT_TRUE(waiter.WaitFor(times++, 1000));
 }
 /*
  * ProtocolHandler shall send Ack on session_observer accept
@@ -441,7 +495,13 @@ TEST_F(ProtocolHandlerImplTest,
  */
 TEST_F(ProtocolHandlerImplTest, StartSession_Protected_SessionObserverAccept) {
   SetProtocolVersion2();
-  AddSession();
+
+  TestAsyncWaiter waiter;
+  uint32_t times = 0;
+
+  AddSession(&waiter, &times);
+
+  EXPECT_TRUE(waiter.WaitFor(times, 1000));
 }
 // TODO(EZamakhov): add test for get_hash_id/set_hash_id from
 // protocol_handler_impl.cc
@@ -449,7 +509,10 @@ TEST_F(ProtocolHandlerImplTest, StartSession_Protected_SessionObserverAccept) {
  * ProtocolHandler shall send NAck on session_observer rejection
  */
 TEST_F(ProtocolHandlerImplTest, EndSession_SessionObserverReject) {
-  AddSession();
+  TestAsyncWaiter waiter;
+  uint32_t times = 0;
+
+  AddSession(&waiter, &times);
   const ServiceType service = kRpc;
 
   // Expect ConnectionHandler check
@@ -457,23 +520,31 @@ TEST_F(ProtocolHandlerImplTest, EndSession_SessionObserverReject) {
               OnSessionEndedCallback(connection_id, session_id, _, service))
       .
       // reject session start
-      WillOnce(Return(SESSION_START_REJECT));
+      WillOnce(
+          DoAll(NotifyTestAsyncWaiter(&waiter), Return(SESSION_START_REJECT)));
+  times++;
 
   SetProtocolVersion2();
   // Expect send NAck
   EXPECT_CALL(transport_manager_mock,
               SendMessageToDevice(
                   ControlMessage(FRAME_DATA_END_SERVICE_NACK, PROTECTION_OFF)))
-      .WillOnce(Return(E_SUCCESS));
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+  times++;
 
   SendControlMessage(
       PROTECTION_OFF, service, session_id, FRAME_DATA_END_SERVICE);
+
+  EXPECT_TRUE(waiter.WaitFor(times, 1000));
 }
 /*
  * ProtocolHandler shall send NAck on wrong hash code
  */
 TEST_F(ProtocolHandlerImplTest, EndSession_Success) {
-  AddSession();
+  TestAsyncWaiter waiter;
+  uint32_t times = 0;
+
+  AddSession(&waiter, &times);
   const ServiceType service = kRpc;
 
   // Expect ConnectionHandler check
@@ -481,17 +552,21 @@ TEST_F(ProtocolHandlerImplTest, EndSession_Success) {
               OnSessionEndedCallback(connection_id, session_id, _, service))
       .
       // return sessions start success
-      WillOnce(Return(connection_key));
+      WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(connection_key)));
+  times++;
 
   SetProtocolVersion2();
   // Expect send Ack
   EXPECT_CALL(transport_manager_mock,
               SendMessageToDevice(
                   ControlMessage(FRAME_DATA_END_SERVICE_ACK, PROTECTION_OFF)))
-      .WillOnce(Return(E_SUCCESS));
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+  times++;
 
   SendControlMessage(
       PROTECTION_OFF, service, session_id, FRAME_DATA_END_SERVICE);
+
+  EXPECT_TRUE(waiter.WaitFor(times, 1000));
 }
 
 #ifdef ENABLE_SECURITY
@@ -500,7 +575,11 @@ TEST_F(ProtocolHandlerImplTest, EndSession_Success) {
  * Check session_observer with PROTECTION_OFF and Ack with PROTECTION_OFF
  */
 TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtocoloV1) {
-  AddConnection();
+  TestAsyncWaiter waiter;
+  uint32_t times = 0;
+
+  AddSession(&waiter, &times);
+
   // Add security manager
   AddSecurityManager();
   const ServiceType start_service = kRpc;
@@ -511,14 +590,17 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtocoloV1) {
           connection_id, NEW_SESSION_ID, start_service, PROTECTION_OFF, _))
       .
       // Return sessions start success
-      WillOnce(Return(session_id));
+      WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(session_id)));
+  times++;
 
   SetProtocolVersion2();
   // Expect send Ack with PROTECTION_OFF (on no Security Manager)
   EXPECT_CALL(transport_manager_mock,
               SendMessageToDevice(
                   ControlMessage(FRAME_DATA_START_SERVICE_ACK, PROTECTION_OFF)))
-      .WillOnce(Return(E_SUCCESS));
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)))
+      .RetiresOnSaturation();
+  times++;
 
   SendTMMessage(connection_id,
                 PROTOCOL_VERSION_1,
@@ -529,6 +611,8 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtocoloV1) {
                 NEW_SESSION_ID,
                 0,
                 message_id);
+
+  EXPECT_TRUE(waiter.WaitFor(times, 1000));
 }
 /*
  * ProtocolHandler shall not call Security logics on start session with
@@ -539,6 +623,9 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionUnprotected) {
   // Add security manager
   AddSecurityManager();
   const ServiceType start_service = kRpc;
+
+  TestAsyncWaiter waiter;
+  uint32_t times = 0;
   // Expect ConnectionHandler check
   EXPECT_CALL(
       session_observer_mock,
@@ -546,17 +633,21 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionUnprotected) {
           connection_id, NEW_SESSION_ID, start_service, PROTECTION_OFF, _))
       .
       // Return sessions start success
-      WillOnce(Return(session_id));
+      WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(session_id)));
+  times++;
 
   SetProtocolVersion2();
   // Expect send Ack with PROTECTION_OFF (on no Security Manager)
   EXPECT_CALL(transport_manager_mock,
               SendMessageToDevice(
                   ControlMessage(FRAME_DATA_START_SERVICE_ACK, PROTECTION_OFF)))
-      .WillOnce(Return(E_SUCCESS));
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+  times++;
 
   SendControlMessage(
       PROTECTION_OFF, start_service, NEW_SESSION_ID, FRAME_DATA_START_SERVICE);
+
+  EXPECT_TRUE(waiter.WaitFor(times, 1000));
 }
 /*
  * ProtocolHandler shall send Ack with PROTECTION_OFF on fail SLL creation
@@ -565,6 +656,9 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtected_Fail) {
   AddConnection();
   AddSecurityManager();
   const ServiceType start_service = kRpc;
+
+  TestAsyncWaiter waiter;
+  uint32_t times = 0;
   // Expect ConnectionHandler check
   EXPECT_CALL(
       session_observer_mock,
@@ -572,23 +666,28 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtected_Fail) {
           connection_id, NEW_SESSION_ID, start_service, PROTECTION_ON, _))
       .
       // Return sessions start success
-      WillOnce(Return(session_id));
+      WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(session_id)));
+  times++;
 
   SetProtocolVersion2();
   // Expect start protection for unprotected session
   EXPECT_CALL(security_manager_mock, CreateSSLContext(connection_key))
       .
       // Return fail protection
-      WillOnce(ReturnNull());
+      WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), ReturnNull()));
+  times++;
 
   // Expect send Ack with PROTECTION_OFF (on fail SLL creation)
   EXPECT_CALL(transport_manager_mock,
               SendMessageToDevice(
                   ControlMessage(FRAME_DATA_START_SERVICE_ACK, PROTECTION_OFF)))
-      .WillOnce(Return(E_SUCCESS));
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+  times++;
 
   SendControlMessage(
       PROTECTION_ON, start_service, NEW_SESSION_ID, FRAME_DATA_START_SERVICE);
+
+  EXPECT_TRUE(waiter.WaitFor(times, 1000));
 }
 /*
  * ProtocolHandler shall send Ack with PROTECTION_ON on already established and
@@ -599,6 +698,9 @@ TEST_F(ProtocolHandlerImplTest,
   AddConnection();
   AddSecurityManager();
   const ServiceType start_service = kRpc;
+
+  TestAsyncWaiter waiter;
+  uint32_t times = 0;
   // Expect ConnectionHandler check
   EXPECT_CALL(
       session_observer_mock,
@@ -606,33 +708,42 @@ TEST_F(ProtocolHandlerImplTest,
           connection_id, NEW_SESSION_ID, start_service, PROTECTION_ON, _))
       .
       // Return sessions start success
-      WillOnce(Return(session_id));
+      WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(session_id)));
+  times++;
 
   SetProtocolVersion2();
   // call new SSLContext creation
   EXPECT_CALL(security_manager_mock, CreateSSLContext(connection_key))
       .
       // Return new SSLContext
-      WillOnce(Return(&ssl_context_mock));
+      WillOnce(
+          DoAll(NotifyTestAsyncWaiter(&waiter), Return(&ssl_context_mock)));
+  times++;
 
   // Initilization check
   EXPECT_CALL(ssl_context_mock, IsInitCompleted())
       .
       // emulate SSL is initilized
-      WillOnce(Return(true));
+      WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(true)));
+  times++;
 
   // Expect service protection enable
   EXPECT_CALL(session_observer_mock,
-              SetProtectionFlag(connection_key, start_service));
+              SetProtectionFlag(connection_key, start_service))
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+  times++;
 
   // Expect send Ack with PROTECTION_ON (on SSL is initilized)
   EXPECT_CALL(transport_manager_mock,
               SendMessageToDevice(
                   ControlMessage(FRAME_DATA_START_SERVICE_ACK, PROTECTION_ON)))
-      .WillOnce(Return(E_SUCCESS));
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+  times++;
 
   SendControlMessage(
       PROTECTION_ON, start_service, NEW_SESSION_ID, FRAME_DATA_START_SERVICE);
+
+  EXPECT_TRUE(waiter.WaitFor(times, 1000));
 }
 /*
  * ProtocolHandler shall send Ack with PROTECTION_OFF on session handshhake fail
@@ -642,6 +753,9 @@ TEST_F(ProtocolHandlerImplTest,
   AddConnection();
   AddSecurityManager();
   const ServiceType start_service = kRpc;
+
+  TestAsyncWaiter waiter;
+  uint32_t times = 0;
   // Expect ConnectionHandler check
   EXPECT_CALL(
       session_observer_mock,
@@ -649,7 +763,8 @@ TEST_F(ProtocolHandlerImplTest,
           connection_id, NEW_SESSION_ID, start_service, PROTECTION_ON, _))
       .
       // Return sessions start success
-      WillOnce(Return(session_id));
+      WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(session_id)));
+  times++;
 
   std::vector<int> services;
   // TODO(AKutsan) : APPLINK-21398 use named constants instead of magic numbers
@@ -668,13 +783,15 @@ TEST_F(ProtocolHandlerImplTest,
   EXPECT_CALL(ssl_context_mock, IsInitCompleted())
       .
       // emulate SSL is not initilized
-      WillOnce(Return(false));
+      WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(false)));
+  times++;
 
   // Pending handshake check
   EXPECT_CALL(ssl_context_mock, IsHandshakePending())
       .
       // emulate is pending
-      WillOnce(Return(true));
+      WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(true)));
+  times++;
 
   // Expect add listener for handshake result
   EXPECT_CALL(security_manager_mock, AddListener(_))
@@ -694,10 +811,13 @@ TEST_F(ProtocolHandlerImplTest,
   EXPECT_CALL(transport_manager_mock,
               SendMessageToDevice(
                   ControlMessage(FRAME_DATA_START_SERVICE_ACK, PROTECTION_OFF)))
-      .WillOnce(Return(E_SUCCESS));
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+  times++;
 
   SendControlMessage(
       PROTECTION_ON, start_service, NEW_SESSION_ID, FRAME_DATA_START_SERVICE);
+
+  EXPECT_TRUE(waiter.WaitFor(times, 1000));
 }
 /*
  * ProtocolHandler shall send Ack with PROTECTION_ON on session handshhake
@@ -714,6 +834,8 @@ TEST_F(ProtocolHandlerImplTest,
   ON_CALL(protocol_handler_settings_mock, force_protected_service())
       .WillByDefault(ReturnRefOfCopy(services));
 
+  TestAsyncWaiter waiter;
+  uint32_t times = 0;
   // Expect ConnectionHandler check
   EXPECT_CALL(
       session_observer_mock,
@@ -721,52 +843,66 @@ TEST_F(ProtocolHandlerImplTest,
           connection_id, NEW_SESSION_ID, start_service, PROTECTION_ON, _))
       .
       // Return sessions start success
-      WillOnce(Return(session_id));
+      WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(session_id)));
+  times++;
 
   // call new SSLContext creation
   EXPECT_CALL(security_manager_mock, CreateSSLContext(connection_key))
       .
       // Return new SSLContext
-      WillOnce(Return(&ssl_context_mock));
+      WillOnce(
+          DoAll(NotifyTestAsyncWaiter(&waiter), Return(&ssl_context_mock)));
+  times++;
 
   // Initilization check
   EXPECT_CALL(ssl_context_mock, IsInitCompleted())
       .
       // emulate SSL is not initilized
-      WillOnce(Return(false));
+      WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(false)));
+  times++;
 
   // Pending handshake check
   EXPECT_CALL(ssl_context_mock, IsHandshakePending())
       .
       // emulate is pending
-      WillOnce(Return(true));
+      WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(true)));
+  times++;
 
   // Expect add listener for handshake result
   EXPECT_CALL(security_manager_mock, AddListener(_))
       // Emulate handshake fail
-      .WillOnce(Invoke(OnHandshakeDoneFunctor(
-          connection_key,
-          security_manager::SSLContext::Handshake_Result_Success)));
+      .WillOnce(
+          DoAll(NotifyTestAsyncWaiter(&waiter),
+                Invoke(OnHandshakeDoneFunctor(
+                    connection_key,
+                    security_manager::SSLContext::Handshake_Result_Success))));
+  times++;
 
   // Listener check SSLContext
   EXPECT_CALL(session_observer_mock,
               GetSSLContext(connection_key, start_service))
       .
       // Emulate protection for service is not enabled
-      WillOnce(ReturnNull());
+      WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), ReturnNull()));
+  times++;
 
   // Expect service protection enable
   EXPECT_CALL(session_observer_mock,
-              SetProtectionFlag(connection_key, start_service));
+              SetProtectionFlag(connection_key, start_service))
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+  times++;
 
   // Expect send Ack with PROTECTION_OFF (on fail handshake)
   EXPECT_CALL(transport_manager_mock,
               SendMessageToDevice(
                   ControlMessage(FRAME_DATA_START_SERVICE_ACK, PROTECTION_ON)))
-      .WillOnce(Return(E_SUCCESS));
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+  times++;
 
   SendControlMessage(
       PROTECTION_ON, start_service, NEW_SESSION_ID, FRAME_DATA_START_SERVICE);
+
+  EXPECT_TRUE(waiter.WaitFor(times, 1000));
 }
 /*
  * ProtocolHandler shall send Ack with PROTECTION_ON on session handshhake
@@ -783,6 +919,8 @@ TEST_F(
   ON_CALL(protocol_handler_settings_mock, force_protected_service())
       .WillByDefault(ReturnRefOfCopy(services));
 
+  TestAsyncWaiter waiter;
+  uint32_t times = 0;
   // Expect ConnectionHandler check
   EXPECT_CALL(
       session_observer_mock,
@@ -790,13 +928,16 @@ TEST_F(
           connection_id, NEW_SESSION_ID, start_service, PROTECTION_ON, _))
       .
       // Return sessions start success
-      WillOnce(Return(session_id));
+      WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(session_id)));
+  times++;
 
   // call new SSLContext creation
   EXPECT_CALL(security_manager_mock, CreateSSLContext(connection_key))
       .
       // Return new SSLContext
-      WillOnce(Return(&ssl_context_mock));
+      WillOnce(
+          DoAll(NotifyTestAsyncWaiter(&waiter), Return(&ssl_context_mock)));
+  times++;
 
   // Initilization check
   EXPECT_CALL(ssl_context_mock, IsInitCompleted())
@@ -808,34 +949,44 @@ TEST_F(
   EXPECT_CALL(ssl_context_mock, IsHandshakePending())
       .
       // emulate is pending
-      WillOnce(Return(true));
+      WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(true)));
+  times++;
 
   // Expect add listener for handshake result
   EXPECT_CALL(security_manager_mock, AddListener(_))
       // Emulate handshake fail
-      .WillOnce(Invoke(OnHandshakeDoneFunctor(
-          connection_key,
-          security_manager::SSLContext::Handshake_Result_Success)));
+      .WillOnce(
+          DoAll(NotifyTestAsyncWaiter(&waiter),
+                Invoke(OnHandshakeDoneFunctor(
+                    connection_key,
+                    security_manager::SSLContext::Handshake_Result_Success))));
+  times++;
 
   // Listener check SSLContext
   EXPECT_CALL(session_observer_mock,
               GetSSLContext(connection_key, start_service))
       .
       // Emulate protection for service is not enabled
-      WillOnce(ReturnNull());
+      WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), ReturnNull()));
+  times++;
 
   // Expect service protection enable
   EXPECT_CALL(session_observer_mock,
-              SetProtectionFlag(connection_key, start_service));
+              SetProtectionFlag(connection_key, start_service))
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+  times++;
 
   // Expect send Ack with PROTECTION_OFF (on fail handshake)
   EXPECT_CALL(transport_manager_mock,
               SendMessageToDevice(
                   ControlMessage(FRAME_DATA_START_SERVICE_ACK, PROTECTION_ON)))
-      .WillOnce(Return(E_SUCCESS));
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+  times++;
 
   SendControlMessage(
       PROTECTION_ON, start_service, NEW_SESSION_ID, FRAME_DATA_START_SERVICE);
+
+  EXPECT_TRUE(waiter.WaitFor(times, 1000));
 }
 /*
  * ProtocolHandler shall send Ack with PROTECTION_ON on session handshhake
@@ -851,6 +1002,8 @@ TEST_F(ProtocolHandlerImplTest,
   ON_CALL(protocol_handler_settings_mock, force_protected_service())
       .WillByDefault(ReturnRefOfCopy(services));
 
+  TestAsyncWaiter waiter;
+  uint32_t times = 0;
   // Expect ConnectionHandler check
   EXPECT_CALL(
       session_observer_mock,
@@ -858,28 +1011,35 @@ TEST_F(ProtocolHandlerImplTest,
           connection_id, NEW_SESSION_ID, start_service, PROTECTION_ON, _))
       .
       // Return sessions start success
-      WillOnce(Return(session_id));
+      WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(session_id)));
+  times++;
 
   // call new SSLContext creation
   EXPECT_CALL(security_manager_mock, CreateSSLContext(connection_key))
       .
       // Return new SSLContext
-      WillOnce(Return(&ssl_context_mock));
+      WillOnce(
+          DoAll(NotifyTestAsyncWaiter(&waiter), Return(&ssl_context_mock)));
+  times++;
 
   // Initilization check
   EXPECT_CALL(ssl_context_mock, IsInitCompleted())
       .
       // emulate SSL is not initilized
-      WillOnce(Return(false));
+      WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(false)));
+  times++;
 
   // Pending handshake check
   EXPECT_CALL(ssl_context_mock, IsHandshakePending())
       .
       // emulate is pending
-      WillOnce(Return(false));
+      WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(false)));
+  times++;
 
   // Wait restart handshake operation
-  EXPECT_CALL(security_manager_mock, StartHandshake(connection_key));
+  EXPECT_CALL(security_manager_mock, StartHandshake(connection_key))
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+  times++;
 
   // Expect add listener for handshake result
   EXPECT_CALL(security_manager_mock, AddListener(_))
@@ -903,10 +1063,13 @@ TEST_F(ProtocolHandlerImplTest,
   EXPECT_CALL(transport_manager_mock,
               SendMessageToDevice(
                   ControlMessage(FRAME_DATA_START_SERVICE_ACK, PROTECTION_ON)))
-      .WillOnce(Return(E_SUCCESS));
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+  times++;
 
   SendControlMessage(
       PROTECTION_ON, start_service, NEW_SESSION_ID, FRAME_DATA_START_SERVICE);
+
+  EXPECT_TRUE(waiter.WaitFor(times, 1000));
 }
 #endif  // ENABLE_SECURITY
 
@@ -915,11 +1078,17 @@ TEST_F(ProtocolHandlerImplTest, FloodVerification) {
   const size_t max_messages = 1000;
   InitProtocolHandlerImpl(period_msec, max_messages);
   AddConnection();
-  AddSession();
+
+  TestAsyncWaiter waiter;
+  uint32_t times = 0;
+
+  AddSession(&waiter, &times);
 
   // Expect flood notification to CH
   EXPECT_CALL(session_observer_mock, OnApplicationFloodCallBack(connection_key))
-      .Times(1);
+      .Times(1)
+      .WillRepeatedly(NotifyTestAsyncWaiter(&waiter));
+  times++;
 
   ON_CALL(protocol_handler_settings_mock, message_frequency_time())
       .WillByDefault(Return(period_msec));
@@ -938,13 +1107,20 @@ TEST_F(ProtocolHandlerImplTest, FloodVerification) {
                   message_id,
                   &some_data[0]);
   }
+
+  EXPECT_TRUE(waiter.WaitFor(times, period_msec));
 }
+
 TEST_F(ProtocolHandlerImplTest, FloodVerification_ThresholdValue) {
   const size_t period_msec = 10000;
   const size_t max_messages = 1000;
   InitProtocolHandlerImpl(period_msec, max_messages);
   AddConnection();
-  AddSession();
+
+  TestAsyncWaiter waiter;
+  uint32_t times = 0;
+
+  AddSession(&waiter, &times);
 
   ON_CALL(protocol_handler_settings_mock, message_frequency_time())
       .WillByDefault(Return(period_msec));
@@ -954,6 +1130,7 @@ TEST_F(ProtocolHandlerImplTest, FloodVerification_ThresholdValue) {
   // Expect NO flood notification to CH
   EXPECT_CALL(session_observer_mock, OnApplicationFloodCallBack(connection_key))
       .Times(0);
+
   for (size_t i = 0; i < max_messages - 1; ++i) {
     SendTMMessage(connection_id,
                   PROTOCOL_VERSION_3,
@@ -966,13 +1143,20 @@ TEST_F(ProtocolHandlerImplTest, FloodVerification_ThresholdValue) {
                   message_id,
                   &some_data[0]);
   }
+
+  EXPECT_TRUE(waiter.WaitFor(times, period_msec));
 }
+
 TEST_F(ProtocolHandlerImplTest, FloodVerification_VideoFrameSkip) {
   const size_t period_msec = 10000;
   const size_t max_messages = 1000;
   InitProtocolHandlerImpl(period_msec, max_messages);
   AddConnection();
-  AddSession();
+
+  TestAsyncWaiter waiter;
+  uint32_t times = 0;
+
+  AddSession(&waiter, &times);
 
   // Expect NO flood notification to CH on video data streaming
   for (size_t i = 0; i < max_messages + 1; ++i) {
@@ -987,13 +1171,20 @@ TEST_F(ProtocolHandlerImplTest, FloodVerification_VideoFrameSkip) {
                   message_id,
                   &some_data[0]);
   }
+
+  EXPECT_TRUE(waiter.WaitFor(times, period_msec));
 }
+
 TEST_F(ProtocolHandlerImplTest, FloodVerification_AudioFrameSkip) {
   const size_t period_msec = 10000;
   const size_t max_messages = 1000;
   InitProtocolHandlerImpl(period_msec, max_messages);
   AddConnection();
-  AddSession();
+
+  TestAsyncWaiter waiter;
+  uint32_t times = 0;
+
+  AddSession(&waiter, &times);
 
   // Expect NO flood notification to CH on video data streaming
   for (size_t i = 0; i < max_messages + 1; ++i) {
@@ -1008,13 +1199,20 @@ TEST_F(ProtocolHandlerImplTest, FloodVerification_AudioFrameSkip) {
                   message_id,
                   &some_data[0]);
   }
+
+  EXPECT_TRUE(waiter.WaitFor(times, period_msec));
 }
+
 TEST_F(ProtocolHandlerImplTest, FloodVerificationDisable) {
   const size_t period_msec = 0;
   const size_t max_messages = 0;
   InitProtocolHandlerImpl(period_msec, max_messages);
   AddConnection();
-  AddSession();
+
+  TestAsyncWaiter waiter;
+  uint32_t times = 0;
+
+  AddSession(&waiter, &times);
 
   // Expect NO flood notification to session observer
   for (size_t i = 0; i < max_messages + 1; ++i) {
@@ -1029,6 +1227,8 @@ TEST_F(ProtocolHandlerImplTest, FloodVerificationDisable) {
                   message_id,
                   &some_data[0]);
   }
+
+  EXPECT_TRUE(waiter.WaitFor(times, 1000));
 }
 
 TEST_F(ProtocolHandlerImplTest, MalformedVerificationDisable) {
@@ -1036,7 +1236,11 @@ TEST_F(ProtocolHandlerImplTest, MalformedVerificationDisable) {
   const size_t max_messages = 100;
   InitProtocolHandlerImpl(0u, 0u, false, period_msec, max_messages);
   AddConnection();
-  AddSession();
+
+  TestAsyncWaiter waiter;
+  uint32_t times = 0;
+
+  AddSession(&waiter, &times);
 
   // Expect malformed notification to CH
   EXPECT_CALL(session_observer_mock, OnMalformedMessageCallback(connection_id))
@@ -1055,6 +1259,8 @@ TEST_F(ProtocolHandlerImplTest, MalformedVerificationDisable) {
                   message_id,
                   &some_data[0]);
   }
+
+  EXPECT_TRUE(waiter.WaitFor(times, 1000));
 }
 
 TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification) {
@@ -1062,11 +1268,17 @@ TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification) {
   const size_t max_messages = 100;
   InitProtocolHandlerImpl(0u, 0u, true, period_msec, max_messages);
   AddConnection();
-  AddSession();
+
+  TestAsyncWaiter waiter;
+  uint32_t times = 0;
+
+  AddSession(&waiter, &times);
 
   // Expect malformed notification to CH
   EXPECT_CALL(session_observer_mock, OnMalformedMessageCallback(connection_id))
-      .Times(1);
+      .Times(1)
+      .WillRepeatedly(NotifyTestAsyncWaiter(&waiter));
+  times++;
 
   // Sending malformed packets
   const uint8_t malformed_version = PROTOCOL_VERSION_MAX;
@@ -1094,6 +1306,8 @@ TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification) {
                   message_id,
                   &some_data[0]);
   }
+
+  EXPECT_TRUE(waiter.WaitFor(times, 1000));
 }
 
 TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification_MalformedStock) {
@@ -1101,11 +1315,17 @@ TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification_MalformedStock) {
   const size_t max_messages = 100;
   InitProtocolHandlerImpl(0u, 0u, true, period_msec, max_messages);
   AddConnection();
-  AddSession();
+
+  TestAsyncWaiter waiter;
+  uint32_t times = 0;
+
+  AddSession(&waiter, &times);
 
   // Expect malformed notification to CH
   EXPECT_CALL(session_observer_mock, OnMalformedMessageCallback(connection_id))
-      .Times(1);
+      .Times(1)
+      .WillRepeatedly(NotifyTestAsyncWaiter(&waiter));
+  times++;
 
   // Sending malformed packets
   const uint8_t malformed_version = PROTOCOL_VERSION_MAX;
@@ -1158,6 +1378,8 @@ TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification_MalformedStock) {
                   message_id,
                   &some_data[0]);
   }
+
+  EXPECT_TRUE(waiter.WaitFor(times, 1000));
 }
 
 TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification_MalformedOnly) {
@@ -1165,7 +1387,11 @@ TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification_MalformedOnly) {
   const size_t max_messages = 100;
   InitProtocolHandlerImpl(0u, 0u, true, period_msec, max_messages);
   AddConnection();
-  AddSession();
+
+  TestAsyncWaiter waiter;
+  uint32_t times = 0;
+
+  AddSession(&waiter, &times);
 
   // Expect NO malformed notification to CH
   EXPECT_CALL(session_observer_mock, OnMalformedMessageCallback(connection_id))
@@ -1212,6 +1438,8 @@ TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification_MalformedOnly) {
 
     // No common message
   }
+
+  EXPECT_TRUE(waiter.WaitFor(times, 1000));
 }
 
 TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification_NullTimePeriod) {
@@ -1219,7 +1447,11 @@ TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification_NullTimePeriod) {
   const size_t max_messages = 1000;
   InitProtocolHandlerImpl(0u, 0u, true, period_msec, max_messages);
   AddConnection();
-  AddSession();
+
+  TestAsyncWaiter waiter;
+  uint32_t times = 0;
+
+  AddSession(&waiter, &times);
 
   // Expect no malformed notification to CH
   EXPECT_CALL(session_observer_mock, OnMalformedMessageCallback(connection_id))
@@ -1239,13 +1471,20 @@ TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification_NullTimePeriod) {
                   message_id,
                   &some_data[0]);
   }
+
+  EXPECT_TRUE(waiter.WaitFor(times, 1000));
 }
+
 TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification_NullCount) {
   const size_t period_msec = 10000;
   const size_t max_messages = 0;
   InitProtocolHandlerImpl(0u, 0u, true, period_msec, max_messages);
   AddConnection();
-  AddSession();
+
+  TestAsyncWaiter waiter;
+  uint32_t times = 0;
+
+  AddSession(&waiter, &times);
 
   // Expect no malformed notification to CH
   EXPECT_CALL(session_observer_mock, OnMalformedMessageCallback(connection_id))
@@ -1265,6 +1504,8 @@ TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification_NullCount) {
                   message_id,
                   &some_data[0]);
   }
+
+  EXPECT_TRUE(waiter.WaitFor(times, 1000));
 }
 
 TEST_F(ProtocolHandlerImplTest,
@@ -1281,7 +1522,11 @@ TEST_F(ProtocolHandlerImplTest,
 
 TEST_F(ProtocolHandlerImplTest, SendEndServicePrivate_EndSession_MessageSent) {
   // Arrange
-  AddSession();
+  TestAsyncWaiter waiter;
+  uint32_t times = 0;
+
+  AddSession(&waiter, &times);
+
   // Expect check connection with ProtocolVersionUsed
   EXPECT_CALL(session_observer_mock,
               ProtocolVersionUsed(connection_id, session_id, _))
@@ -1294,12 +1539,17 @@ TEST_F(ProtocolHandlerImplTest, SendEndServicePrivate_EndSession_MessageSent) {
       .WillOnce(Return(E_SUCCESS));
   // Act
   protocol_handler_impl->SendEndSession(connection_id, session_id);
+
+  EXPECT_TRUE(waiter.WaitFor(times, 1000));
 }
 
 TEST_F(ProtocolHandlerImplTest,
        SendEndServicePrivate_ServiceTypeControl_MessageSent) {
   // Arrange
-  AddSession();
+  TestAsyncWaiter waiter;
+  uint32_t times = 0;
+
+  AddSession(&waiter, &times);
   // Expect check connection with ProtocolVersionUsed
   EXPECT_CALL(session_observer_mock,
               ProtocolVersionUsed(connection_id, session_id, _))
@@ -1310,9 +1560,13 @@ TEST_F(ProtocolHandlerImplTest,
                                                   FRAME_DATA_END_SERVICE,
                                                   PROTECTION_OFF,
                                                   kControl)))
-      .WillOnce(Return(E_SUCCESS));
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+  times++;
+
   // Act
   protocol_handler_impl->SendEndService(connection_id, session_id, kControl);
+
+  EXPECT_TRUE(waiter.WaitFor(times, 1000));
 }
 
 TEST_F(ProtocolHandlerImplTest, SendHeartBeat_NoConnection_NotSent) {
@@ -1328,7 +1582,10 @@ TEST_F(ProtocolHandlerImplTest, SendHeartBeat_NoConnection_NotSent) {
 
 TEST_F(ProtocolHandlerImplTest, SendHeartBeat_Successful) {
   // Arrange
-  AddSession();
+  TestAsyncWaiter waiter;
+  uint32_t times = 0;
+
+  AddSession(&waiter, &times);
   // Expect check connection with ProtocolVersionUsed
   EXPECT_CALL(session_observer_mock,
               ProtocolVersionUsed(connection_id, session_id, _))
@@ -1341,11 +1598,16 @@ TEST_F(ProtocolHandlerImplTest, SendHeartBeat_Successful) {
       .WillOnce(Return(E_SUCCESS));
   // Act
   protocol_handler_impl->SendHeartBeat(connection_id, session_id);
+
+  EXPECT_TRUE(waiter.WaitFor(times, 1000));
 }
 
 TEST_F(ProtocolHandlerImplTest, SendHeartBeatAck_Successful) {
   // Arrange
-  AddSession();
+  TestAsyncWaiter waiter;
+  uint32_t times = 0;
+
+  AddSession(&waiter, &times);
   // Expect double check connection and protocol version with
   // ProtocolVersionUsed
   EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(connection_id, _, _))
@@ -1357,15 +1619,23 @@ TEST_F(ProtocolHandlerImplTest, SendHeartBeatAck_Successful) {
                                                   FRAME_DATA_HEART_BEAT_ACK,
                                                   PROTECTION_OFF,
                                                   kControl)))
-      .WillOnce(Return(E_SUCCESS));
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+  times++;
+
   // Act
   SendControlMessage(
       PROTECTION_OFF, kControl, session_id, FRAME_DATA_HEART_BEAT);
+
+  EXPECT_TRUE(waiter.WaitFor(times, 1000));
 }
 
 TEST_F(ProtocolHandlerImplTest, SendHeartBeatAck_WrongProtocolVersion_NotSent) {
   // Arrange
-  AddSession();
+  TestAsyncWaiter waiter;
+  uint32_t times = 0;
+
+  AddSession(&waiter, &times);
+
   // Expect two checks of connection and protocol version with
   // ProtocolVersionUsed
   EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(connection_id, _, _))
@@ -1383,12 +1653,18 @@ TEST_F(ProtocolHandlerImplTest, SendHeartBeatAck_WrongProtocolVersion_NotSent) {
       PROTECTION_OFF, kControl, session_id, FRAME_DATA_HEART_BEAT);
   SendControlMessage(
       PROTECTION_OFF, kControl, session_id, FRAME_DATA_HEART_BEAT);
+
+  EXPECT_TRUE(waiter.WaitFor(times, 1000));
 }
 
 TEST_F(ProtocolHandlerImplTest,
        SendMessageToMobileApp_SendSingleControlMessage) {
   // Arrange
-  AddSession();
+  TestAsyncWaiter waiter;
+  uint32_t times = 0;
+
+  AddSession(&waiter, &times);
+
   const bool is_final = true;
   const uint32_t total_data_size = 1;
   UCharDataVector data(total_data_size);
@@ -1413,12 +1689,18 @@ TEST_F(ProtocolHandlerImplTest,
       .WillOnce(Return(E_SUCCESS));
   // Act
   protocol_handler_impl->SendMessageToMobileApp(message, is_final);
+
+  EXPECT_TRUE(waiter.WaitFor(times, 1000));
 }
 
 TEST_F(ProtocolHandlerImplTest,
        SendMessageToMobileApp_SendSingleNonControlMessage) {
   // Arrange
-  AddSession();
+  TestAsyncWaiter waiter;
+  uint32_t times = 0;
+
+  AddSession(&waiter, &times);
+
   const bool is_final = true;
   const uint32_t total_data_size = 1;
   UCharDataVector data(total_data_size);
@@ -1434,21 +1716,31 @@ TEST_F(ProtocolHandlerImplTest,
   EXPECT_CALL(session_observer_mock,
               GetSSLContext(message->connection_key(), message->service_type()))
       .Times(2)
-      .WillRepeatedly(Return(&ssl_context_mock));
+      .WillRepeatedly(
+          DoAll(NotifyTestAsyncWaiter(&waiter), Return(&ssl_context_mock)));
+  times += 2;
   AddSecurityManager();
 #endif  // ENABLE_SECURITY
   // Expect send message to mobile
   EXPECT_CALL(transport_manager_mock,
               SendMessageToDevice(ExpectedMessage(
                   FRAME_TYPE_SINGLE, FRAME_DATA_SINGLE, PROTECTION_OFF, kRpc)))
-      .WillOnce(Return(E_SUCCESS));
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+  times++;
+
   // Act
   protocol_handler_impl->SendMessageToMobileApp(message, is_final);
+
+  EXPECT_TRUE(waiter.WaitFor(times, 1000));
 }
 
 TEST_F(ProtocolHandlerImplTest, SendMessageToMobileApp_SendMultiframeMessage) {
   // Arrange
-  AddSession();
+  TestAsyncWaiter waiter;
+  uint32_t times = 0;
+
+  AddSession(&waiter, &times);
+
   const bool is_final = true;
   const uint32_t total_data_size = MAXIMUM_FRAME_DATA_V2_SIZE * 2;
   UCharDataVector data(total_data_size);
@@ -1465,28 +1757,36 @@ TEST_F(ProtocolHandlerImplTest, SendMessageToMobileApp_SendMultiframeMessage) {
   EXPECT_CALL(session_observer_mock,
               GetSSLContext(message->connection_key(), message->service_type()))
       .Times(4)
-      .WillRepeatedly(Return(&ssl_context_mock));
+      .WillRepeatedly(
+          DoAll(NotifyTestAsyncWaiter(&waiter), Return(&ssl_context_mock)));
+  times += 4;
   AddSecurityManager();
 #endif  // ENABLE_SECURITY
   // Expect sending message frame by frame to mobile
   EXPECT_CALL(transport_manager_mock,
               SendMessageToDevice(ExpectedMessage(
                   FRAME_TYPE_FIRST, FRAME_DATA_FIRST, PROTECTION_OFF, kBulk)))
-      .WillOnce(Return(E_SUCCESS));
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+  times++;
   EXPECT_CALL(transport_manager_mock,
               SendMessageToDevice(ExpectedMessage(FRAME_TYPE_CONSECUTIVE,
                                                   first_consecutive_frame,
                                                   PROTECTION_OFF,
                                                   kBulk)))
-      .WillOnce(Return(E_SUCCESS));
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+  times++;
   EXPECT_CALL(transport_manager_mock,
               SendMessageToDevice(ExpectedMessage(FRAME_TYPE_CONSECUTIVE,
                                                   FRAME_DATA_LAST_CONSECUTIVE,
                                                   PROTECTION_OFF,
                                                   kBulk)))
-      .WillOnce(Return(E_SUCCESS));
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+  times++;
+
   // Act
   protocol_handler_impl->SendMessageToMobileApp(message, is_final);
+
+  EXPECT_TRUE(waiter.WaitFor(times, 1000));
 }
 
 }  // namespace protocol_handler_test
