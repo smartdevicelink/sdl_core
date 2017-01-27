@@ -109,6 +109,15 @@ bool CheckResultCode(const ResponseInfo& first, const ResponseInfo& second) {
   return false;
 }
 
+bool IsResultCodeUnsupported(const ResponseInfo& first,
+                             const ResponseInfo& second) {
+  return ((first.is_ok || first.is_invalid_enum) &&
+          second.is_unsupported_resource) ||
+         ((second.is_ok || second.is_invalid_enum) &&
+          first.is_unsupported_resource) ||
+         (first.is_unsupported_resource && second.is_unsupported_resource);
+}
+
 struct DisallowedParamsInserter {
   DisallowedParamsInserter(smart_objects::SmartObject& response,
                            mobile_apis::VehicleDataResultCode::eType code)
@@ -681,18 +690,6 @@ bool CommandRequestImpl::PrepareResultForMobileResponse(
 
 bool CommandRequestImpl::PrepareResultForMobileResponse(
     ResponseInfo& out_first, ResponseInfo& out_second) const {
-  SetResultCodeFlagsForHMIResponses(out_first, out_second);
-
-  bool result = (out_first.is_ok && out_second.is_ok) ||
-                (out_second.is_invalid_enum && out_first.is_ok) ||
-                (out_first.is_invalid_enum && out_second.is_ok);
-  result = result || CheckResultCode(out_first, out_second);
-  result = result || CheckResultCode(out_second, out_first);
-  return result;
-}
-
-void CommandRequestImpl::SetResultCodeFlagsForHMIResponses(
-    ResponseInfo& out_first, ResponseInfo& out_second) const {
   using namespace helpers;
 
   out_first.is_ok = Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
@@ -729,6 +726,13 @@ void CommandRequestImpl::SetResultCodeFlagsForHMIResponses(
   out_second.interface_state =
       application_manager_.hmi_interfaces().GetInterfaceState(
           out_second.interface);
+
+  bool result = (out_first.is_ok && out_second.is_ok) ||
+                (out_second.is_invalid_enum && out_first.is_ok) ||
+                (out_first.is_invalid_enum && out_second.is_ok);
+  result = result || CheckResultCode(out_first, out_second);
+  result = result || CheckResultCode(out_second, out_first);
+  return result;
 }
 
 void CommandRequestImpl::GetInfo(
@@ -769,15 +773,6 @@ mobile_apis::Result::eType CommandRequestImpl::PrepareResultCodeForResponse(
 const CommandParametersPermissions& CommandRequestImpl::parameters_permissions()
     const {
   return parameters_permissions_;
-}
-
-bool CommandRequestImpl::IsResultCodeUnsupported(
-    const ResponseInfo& first, const ResponseInfo& second) const {
-  return ((first.is_ok || first.is_invalid_enum) &&
-          second.is_unsupported_resource) ||
-         ((second.is_ok || second.is_invalid_enum) &&
-          first.is_unsupported_resource) ||
-         (first.is_unsupported_resource && second.is_unsupported_resource);
 }
 
 }  // namespace commands
