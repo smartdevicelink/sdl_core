@@ -154,10 +154,12 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
    */
   const uint16_t video_streaming_port() const OVERRIDE;
 
+  const uint16_t audio_streaming_port() const OVERRIDE;
+
   /**
-    * @brief Returns port for audio streaming
+    * @brief Returns folder containing all plugins
     */
-  const uint16_t audio_streaming_port() const;
+  const std::string& plugins_folder() const;
 
   /**
    * @brief Returns streaming timeout
@@ -344,10 +346,19 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
 
   // TransportManageSettings interface
 
+  /*
+   * @brief Returns true if last state singleton is used
+   */
   bool use_last_state() const OVERRIDE;
 
+  /**
+    * @brief Returns port for audio streaming
+    */
   uint32_t transport_manager_disconnect_timeout() const OVERRIDE;
 
+  /**
+   * @brief Returns port for TCP transport adapter
+   */
   uint16_t transport_manager_tcp_adapter_port() const OVERRIDE;
 
   // TransportManageMMESettings interface
@@ -836,6 +847,7 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   std::string iap_pool_protocol_mask_;
   std::string iap_system_config_;
   std::string iap2_system_config_;
+  std::string plugins_folder_;
   int iap2_hub_connect_attempts_;
   int iap_hub_connection_wait_timeout_;
   uint16_t tts_global_properties_timeout_;

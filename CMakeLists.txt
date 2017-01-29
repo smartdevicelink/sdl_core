@@ -49,6 +49,11 @@ option(ENABLE_SANITIZE "Sanitize tool" OFF)
 option(ENABLE_SECURITY "Security Ford protocol protection" ON)
 option(ENABLE_HMI_PTU_DECRYPTION "Policy table update parsed by hmi" ON)
 option(ENABLE_EXTENDED_POLICY "Turns extended flow which requires embedded system interaction" ON)
+option(REMOTE_CONTROL "Enable Reverse functionality" OFF)
+option(USE_COTIRE "Use Cotire to speed up build (currently only for commands tests)" ON)
+option(USE_GOLD_LD "Use gold linker intead of GNU linker" ON)
+option(USE_CCACHE "Turn on ccache usage" ON)
+option(USE_DISTCC "Turn on distributed build_usage" ON)
 
 set(OS_TYPE_OPTION 	"$ENV{OS_TYPE}")
 set(DEBUG_OPTION 	"$ENV{DEBUG}")
@@ -152,6 +157,10 @@ if (OS_TYPE_OPTION)
     set (BUILD_TESTS OFF)
   endif()
 endif()
+if (REMOTE_CONTROL)
+  add_definitions(-DSDL_REMOTE_CONTROL)
+  message(STATUS "Remote control support is enabled (aka Reverse SDL or SDL-RC)")
+endif()
 
 #Jenkins integration section end
 
@@ -186,15 +195,59 @@ set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
 
 set(CMAKE_CXX_FLAGS "-fPIC -std=gnu++0x -Wall -Werror -Wno-deprecated-declarations -Wuninitialized -Wvla")
 
+if (USE_GOLD_LD)
+  execute_process(COMMAND ld -v OUTPUT_VARIABLE result)
+  string(FIND ${result} Binutils GOLD_LD_FOUND)
+  if (GOLD_LD_FOUND EQUAL -1)
+    message(SEND_ERROR "Gold linker not found!")
+  else()
+    message(INFO " Use gold linker")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fuse-ld=gold")
+  endif()
+endif(USE_GOLD_LD)
+
+if (USE_CCACHE)
+# Configure CCache if available
+  find_program(CCACHE_FOUND ccache)
+  if(CCACHE_FOUND)
+    get_property(RULE_LAUNCH_COMPILE GLOBAL PROPERTY RULE_LAUNCH_COMPILE)
+    set(RULE_LAUNCH_COMPILE "${RULE_LAUNCH_COMPILE} ccache")
+    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ${RULE_LAUNCH_COMPILE})
+
+    get_property(RULE_LAUNCH_LINK GLOBAL PROPERTY RULE_LAUNCH_LINK)
+    set(RULE_LAUNCH_LINK "${RULE_LAUNCH_LINK} ccache")
+    set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ${RULE_LAUNCH_LINK})
+
+    message(INFO " Used CCache for compilation.")
+  else(CCACHE_FOUND)
+    message(WARNING " CCache was not found.")
+  endif(CCACHE_FOUND)
+endif(USE_CCACHE)
+
+if (USE_DISTCC)
+# Configure distributed compilation if available
+  find_program(DISTCC_FOUND distcc)
+  if(DISTCC_FOUND)
+    get_property(RULE_LAUNCH_COMPILE GLOBAL PROPERTY RULE_LAUNCH_COMPILE)
+    set(RULE_LAUNCH_COMPILE "${RULE_LAUNCH_COMPILE} distcc")
+    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ${RULE_LAUNCH_COMPILE})
+    message(INFO " Used distributed build.")
+  else(CCACHE_FOUND)
+    message(WARNING " distcc was not found. Distributed compilation is impossible.")
+  endif(DISTCC_FOUND)
+endif(USE_DISTCC)
+
 if(ENABLE_SANITIZE)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")
 endif()
-if(ENABLE_GCOV)
+
+if (ENABLE_GCOV)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
   add_definitions(-DGCOV_ENABLED)
+  message(STATUS "Code coverage enabled")
 endif()
-set(CMAKE_CXX_FLAGS_RELEASE " -DNDEBUG -s -O2")
-set(CMAKE_CXX_FLAGS_DEBUG   " -DDEBUG -g3 -ggdb3")
+#set(CMAKE_CXX_FLAGS_RELEASE " -DNDEBUG -s -O2")
+#set(CMAKE_CXX_FLAGS_DEBUG   " -DDEBUG -g3 -ggdb3")
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   add_definitions(-DOS_LINUX)
@@ -640,6 +693,18 @@ set(RTLIB rt)
 if(CMAKE_SYSTEM_NAME STREQUAL "QNX")
 set(RTLIB )
 endif()
+
+SET(RPATH_DIRECTORIES
+  ${CMAKE_INSTALL_PREFIX}/bin/plugins
+  /usr/local/lib
+  /usr/local
+  ${CMAKE_INSTALL_PREFIX}/bin
+)
+SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
+SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+SET(CMAKE_INSTALL_RPATH "${RPATH_DIRECTORIES}")
+SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
 
 # Building tests
 if(BUILD_TESTS)

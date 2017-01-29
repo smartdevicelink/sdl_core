@@ -39,18 +39,11 @@
 #include "json/json.h"
 #include "utils/macro.h"
 #include "application_manager/hmi_language_handler.h"
-
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
-class SmartObject;
-}  // namespace NsSmartObjects
-}  // namespace NsSmartDeviceLink
+#include "smart_objects/smart_object.h"
 
 namespace resumption {
 class LastState;
 }  // namespace resumption
-
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 namespace application_manager {
 class ApplicationManager;

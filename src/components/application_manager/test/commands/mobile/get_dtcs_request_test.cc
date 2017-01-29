@@ -51,6 +51,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace get_dtcs_request {
 
 using ::testing::_;
 using ::testing::Return;
@@ -126,6 +127,7 @@ TEST_F(GetDTCsRequestTest, OnEvent_SUCCESS) {
   command->on_event(event);
 }
 
+}  // namespace get_dtcs_request
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

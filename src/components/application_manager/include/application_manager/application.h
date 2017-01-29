@@ -45,20 +45,12 @@
 #include "application_manager/hmi_state.h"
 #include "application_manager/application_state.h"
 #include "protocol_handler/protocol_handler.h"
-
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
-
-class SmartObject;
-}
-}
+#include "smart_objects/smart_object.h"
+#include "application_manager/app_extension.h"
 
 namespace application_manager {
 
 namespace mobile_api = mobile_apis;
-
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
-
 namespace custom_str = utils::custom_string;
 
 typedef int32_t ErrorCode;
@@ -119,7 +111,6 @@ class InitialApplicationData {
   virtual void set_app_types(const smart_objects::SmartObject& app_types) = 0;
   virtual void set_vr_synonyms(
       const smart_objects::SmartObject& vr_synonyms) = 0;
-  virtual void set_mobile_app_id(const std::string& policy_app_id) = 0;
   virtual void set_tts_name(const smart_objects::SmartObject& tts_name) = 0;
   virtual void set_ngn_media_screen_name(
       const smart_objects::SmartObject& ngn_name) = 0;
@@ -406,6 +397,16 @@ class Application : public virtual InitialApplicationData,
    */
   virtual void UpdateHash() = 0;
 
+#ifdef SDL_REMOTE_CONTROL
+  virtual bool IsSubscribedToInteriorVehicleData(
+      smart_objects::SmartObject module) = 0;
+  virtual bool SubscribeToInteriorVehicleData(
+      smart_objects::SmartObject module) = 0;
+  virtual bool UnsubscribeFromInteriorVehicleData(
+      smart_objects::SmartObject module) = 0;
+  virtual void set_hmi_level(const mobile_api::HMILevel::eType& hmi_level) = 0;
+#endif
+
   /**
    * @brief method is called when SDL is saving application data for resumption
    * @return TRUE if data of application need to save for resumption, otherwise
@@ -531,6 +532,12 @@ class Application : public virtual InitialApplicationData,
   virtual void increment_put_file_in_none_count() = 0;
   virtual void increment_delete_file_in_none_count() = 0;
   virtual void increment_list_files_in_none_count() = 0;
+#ifdef SDL_REMOTE_CONTROL
+  virtual void set_system_context(
+      const mobile_api::SystemContext::eType& system_context) = 0;
+  virtual void set_audio_streaming_state(
+      const mobile_api::AudioStreamingState::eType& state) = 0;
+#endif
   virtual bool set_app_icon_path(const std::string& file_name) = 0;
   virtual void set_app_allowed(const bool allowed) = 0;
   virtual void set_device(connection_handler::DeviceHandle device) = 0;
@@ -569,6 +576,18 @@ class Application : public virtual InitialApplicationData,
   virtual bool IsSubscribedToIVI(uint32_t vehicle_info_type) const = 0;
   virtual bool UnsubscribeFromIVI(uint32_t vehicle_info_type) = 0;
 
+#ifdef SDL_REMOTE_CONTROL
+  /**
+   * @brief Return pointer to extension by uid
+   * @param uid uid of extension
+   * @return Pointer to extension, if extension was initialized, otherwise NULL
+   */
+  virtual AppExtensionPtr QueryInterface(AppExtensionUID uid) = 0;
+  virtual bool AddExtension(AppExtensionPtr extention) = 0;
+  virtual bool RemoveExtension(AppExtensionUID uid) = 0;
+  virtual void RemoveExtensions() = 0;
+  virtual const std::set<uint32_t>& SubscribesIVI() const = 0;
+#endif
   /**
    * @brief ResetDataInNone reset data counters in NONE
    */
@@ -786,6 +805,7 @@ class Application : public virtual InitialApplicationData,
 
 typedef utils::SharedPtr<Application> ApplicationSharedPtr;
 typedef utils::SharedPtr<const Application> ApplicationConstSharedPtr;
+typedef uint32_t ApplicationId;
 
 }  // namespace application_manager
 

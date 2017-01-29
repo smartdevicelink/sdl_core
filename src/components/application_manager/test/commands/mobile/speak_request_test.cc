@@ -53,6 +53,8 @@
 namespace test {
 namespace components {
 namespace commands_test {
+namespace mobile_commands_test {
+namespace speak_request {
 
 namespace am = application_manager;
 namespace hmi_response = ::application_manager::hmi_response;
@@ -64,17 +66,27 @@ using am::ApplicationSharedPtr;
 using am::MockMessageHelper;
 using am::MockHmiInterfaces;
 using ::testing::_;
-using ::utils::SharedPtr;
+using ::testing::Mock;
 using ::testing::Return;
 using ::testing::ReturnRef;
+using ::utils::SharedPtr;
 using am::commands::SpeakRequest;
 using ::test::components::application_manager_test::MockApplication;
 
 class SpeakRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
   SpeakRequestTest()
-      : request_(CreateMessage(smart_objects::SmartType_Map))
+      : mock_message_helper_(*MockMessageHelper::message_helper_mock())
+      , request_(CreateMessage(smart_objects::SmartType_Map))
       , response_(CreateMessage(smart_objects::SmartType_Map)) {}
+
+  void SetUp() OVERRIDE {
+    Mock::VerifyAndClearExpectations(&mock_message_helper_);
+  }
+
+  void TearDown() OVERRIDE {
+    Mock::VerifyAndClearExpectations(&mock_message_helper_);
+  }
 
   MessageSharedPtr ManageResponse() {
     return response_;
@@ -104,9 +116,7 @@ class SpeakRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
     EXPECT_CALL(app_mngr_, hmi_interfaces())
         .WillOnce(ReturnRef(hmi_interfaces));
     EXPECT_CALL(hmi_interfaces, GetInterfaceState(_)).WillOnce(Return(state));
-    MockMessageHelper* mock_message_helper =
-        MockMessageHelper::message_helper_mock();
-    EXPECT_CALL(*mock_message_helper, HMIToMobileResult(_))
+    EXPECT_CALL(mock_message_helper_, HMIToMobileResult(_))
         .WillOnce(Return(mobile_response));
 
     EXPECT_CALL(app_mngr_,
@@ -123,6 +133,9 @@ class SpeakRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
                   .asInt(),
               static_cast<int32_t>(mobile_response));
   }
+
+ protected:
+  MockMessageHelper& mock_message_helper_;
 
  private:
   MessageSharedPtr request_;
@@ -144,6 +157,9 @@ TEST_F(SpeakRequestTest, OnEvent_SUCCESS_Expect_true) {
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app));
 
   MessageSharedPtr response_to_mobile;
+
+  EXPECT_CALL(mock_message_helper_, HMIToMobileResult(_))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
 
   EXPECT_CALL(
       app_mngr_,
@@ -184,6 +200,8 @@ TEST_F(SpeakRequestTest,
                     true);
 }
 
+}  // namespace speak_request
+}  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace component
 }  // namespace test

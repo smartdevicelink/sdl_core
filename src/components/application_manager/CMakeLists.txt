@@ -36,11 +36,14 @@ set (AM_MOCK_DIR ${AM_TEST_DIR}/mock)
 include_directories (
   include/
   ${COMPONENTS_DIR}
+  ${COMPONENTS_DIR}/can_cooperation/include/
+  ${COMPONENTS_DIR}/functional_module/include/
+  ${COMPONENTS_DIR}/can_cooperation/include/
   ${COMPONENTS_DIR}/utils/include/
   ${COMPONENTS_DIR}/formatters/include/
   ${COMPONENTS_DIR}/protocol_handler/include/
   ${COMPONENTS_DIR}/smart_objects/include/
-  ${COMPONENTS_DIR}/hmi_message_handler/include
+  ${COMPONENTS_DIR}/hmi_message_handler/include/
   ${COMPONENTS_DIR}/media_manager/include/
   ${COMPONENTS_DIR}/connection_handler/include/
   ${COMPONENTS_DIR}/config_profile/include/
@@ -85,9 +88,10 @@ ${AM_SOURCE_DIR}/src/policies/delegates/app_permission_delegate.cc
 ${AM_SOURCE_DIR}/src/policies/delegates/statistics_delegate.cc
 )
 
-  include_directories(
-    ${COMPONENTS_DIR}/policy/src/policy/policy_table/table_struct
-  )
+include_directories(
+  ${COMPONENTS_DIR}/policy/src/policy_table/
+)
+
 file (GLOB EVENT_ENGINE
   ${AM_SOURCE_DIR}/src/event_engine/*
 )
@@ -109,6 +113,28 @@ file (GLOB MOBILE_COMMANDS_SOURCES
   ${COMMANDS_SOURCE_DIR}/mobile/*
 )
 
+if (NOT REMOTE_CONTROL)    
+    list(REMOVE_ITEM MOBILE_COMMANDS_SOURCES
+        ${COMMANDS_SOURCE_DIR}/mobile/set_interior_vehicle_data_request.cc)
+    list(REMOVE_ITEM MOBILE_COMMANDS_SOURCES
+        ${COMMANDS_SOURCE_DIR}/mobile/get_interior_vehicle_data_response.cc)
+    list(REMOVE_ITEM MOBILE_COMMANDS_SOURCES
+        ${COMMANDS_SOURCE_DIR}/mobile/get_interior_vehicle_data_capabilities_response.cc)
+    list(REMOVE_ITEM MOBILE_COMMANDS_SOURCES
+        ${COMMANDS_SOURCE_DIR}/mobile/on_interior_vehicle_data_notification.cc)
+    list(REMOVE_ITEM MOBILE_COMMANDS_SOURCES
+        ${COMMANDS_SOURCE_DIR}/mobile/button_press_request.cc)
+    list(REMOVE_ITEM MOBILE_COMMANDS_SOURCES
+        ${COMMANDS_SOURCE_DIR}/mobile/button_press_response.cc)
+    list(REMOVE_ITEM MOBILE_COMMANDS_SOURCES
+        ${COMMANDS_SOURCE_DIR}/mobile/get_interior_vehicle_data_capabilities_request.cc)
+    list(REMOVE_ITEM MOBILE_COMMANDS_SOURCES
+        ${COMMANDS_SOURCE_DIR}/mobile/get_interior_vehicle_data_request.cc)
+    list(REMOVE_ITEM MOBILE_COMMANDS_SOURCES
+        ${COMMANDS_SOURCE_DIR}/mobile/set_interior_vehicle_data_response.cc)
+    list(REMOVE_ITEM SOURCES
+        ${COMPONENTS_DIR}/application_manager/src/core_service.cc)
+endif()
 
   set (HMI_COMMANDS_SOURCES
   ${COMMANDS_SOURCE_DIR}/hmi/request_to_hmi.cc
@@ -357,6 +383,22 @@ if (${HMI_DBUS_API})
     set (HMI_COMMANDS_SOURCES ${HMI_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES_DBUS})
 endif (${HMI_DBUS_API})
 
+if (${REMOTE_CONTROL})
+    set (
+        HMI_COMMANDS_SOURCES
+        ${HMI_COMMANDS_SOURCES}
+        ${COMMANDS_SOURCE_DIR}/hmi/rc_get_interior_vehicle_data_capabilities_request.cc
+        ${COMMANDS_SOURCE_DIR}/hmi/rc_get_interior_vehicle_data_capabilities_response.cc
+        ${COMMANDS_SOURCE_DIR}/hmi/rc_get_interior_vehicle_data_request.cc
+        ${COMMANDS_SOURCE_DIR}/hmi/rc_get_interior_vehicle_data_response.cc
+        ${COMMANDS_SOURCE_DIR}/hmi/rc_set_interior_vehicle_data_request.cc
+        ${COMMANDS_SOURCE_DIR}/hmi/rc_set_interior_vehicle_data_response.cc
+        ${COMMANDS_SOURCE_DIR}/hmi/button_press_response.cc
+        ${COMMANDS_SOURCE_DIR}/hmi/button_press_request.cc
+        ${COMMANDS_SOURCE_DIR}/hmi/on_interior_vehicle_data_notification.cc
+    )
+endif (${REMOTE_CONTROL})
+
 SET (LIBRARIES
   HMI_API
   MOBILE_API
@@ -366,8 +408,18 @@ SET (LIBRARIES
   UsageStatistics
   dl
   formatters
-  dbms
+  dbms  
+  Policy
 )
+
+
+if(REMOTE_CONTROL)
+    SET (LIBRARIES
+      ${LIBRARIES}
+      CANCooperation
+      FunctionalModule
+    )
+endif(REMOTE_CONTROL)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   list(APPEND LIBRARIES sqlite3)

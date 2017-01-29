@@ -54,6 +54,7 @@
 namespace test {
 namespace components {
 namespace commands_test {
+namespace command_request_impl {
 
 namespace am = application_manager;
 namespace strings = am::strings;
@@ -369,11 +370,8 @@ TEST_F(CommandRequestImplTest, CheckAllowedParameters_NoMsgParamsMap_SUCCESS) {
   SharedPtr<ApplicationSet> app_set;
   MockAppPtr app(InitAppSetDataAccessor(app_set));
   EXPECT_CALL(*app, app_id()).WillOnce(Return(kConnectionKey));
-  EXPECT_CALL(*app, policy_app_id()).WillOnce(Return(kPolicyAppId));
-  EXPECT_CALL(*app, hmi_level())
-      .WillOnce(Return(mobile_apis::HMILevel::HMI_NONE));
 
-  EXPECT_CALL(app_mngr_, CheckPolicyPermissions(_, _, _, _, _))
+  EXPECT_CALL(app_mngr_, CheckPolicyPermissions(_, _, _, _))
       .WillOnce(Return(kMobResultSuccess));
 
   EXPECT_TRUE(command->CheckPermissions());
@@ -390,11 +388,8 @@ TEST_F(CommandRequestImplTest,
   SharedPtr<ApplicationSet> app_set;
   MockAppPtr app(InitAppSetDataAccessor(app_set));
   EXPECT_CALL(*app, app_id()).Times(2).WillRepeatedly(Return(kConnectionKey));
-  EXPECT_CALL(*app, policy_app_id()).WillOnce(Return(kPolicyAppId));
-  EXPECT_CALL(*app, hmi_level())
-      .WillOnce(Return(mobile_apis::HMILevel::HMI_NONE));
 
-  EXPECT_CALL(app_mngr_, CheckPolicyPermissions(_, _, _, _, _))
+  EXPECT_CALL(app_mngr_, CheckPolicyPermissions(_, _, _, _))
       .WillOnce(Return(mobile_apis::Result::INVALID_ENUM));
 
   MessageSharedPtr dummy_msg;
@@ -405,8 +400,8 @@ TEST_F(CommandRequestImplTest,
   EXPECT_FALSE(command->CheckPermissions());
 }
 
-ACTION_P(GetArg3, output) {
-  *output = arg3;
+ACTION_P(GetArg2, output) {
+  *output = arg2;
 }
 
 TEST_F(CommandRequestImplTest, CheckAllowedParameters_MsgParamsMap_SUCCESS) {
@@ -419,13 +414,10 @@ TEST_F(CommandRequestImplTest, CheckAllowedParameters_MsgParamsMap_SUCCESS) {
   SharedPtr<ApplicationSet> app_set;
   MockAppPtr app(InitAppSetDataAccessor(app_set));
   EXPECT_CALL(*app, app_id()).WillOnce(Return(kConnectionKey));
-  EXPECT_CALL(*app, policy_app_id()).WillOnce(Return(kPolicyAppId));
-  EXPECT_CALL(*app, hmi_level())
-      .WillOnce(Return(mobile_apis::HMILevel::HMI_NONE));
 
   RPCParams params;
-  EXPECT_CALL(app_mngr_, CheckPolicyPermissions(_, _, _, _, _))
-      .WillOnce(DoAll(GetArg3(&params), Return(kMobResultSuccess)));
+  EXPECT_CALL(app_mngr_, CheckPolicyPermissions(_, _, _, _))
+      .WillOnce(DoAll(GetArg2(&params), Return(kMobResultSuccess)));
 
   EXPECT_TRUE(command->CheckPermissions());
   EXPECT_TRUE(params.end() !=
@@ -514,6 +506,7 @@ TEST_F(CommandRequestImplTest,
       (*result)[strings::msg_params][strings::info].asString().empty());
 }
 
+}  // namespace command_request_impl
 }  // namespace commands_test
 }  // namespace components
 }  // namespace test

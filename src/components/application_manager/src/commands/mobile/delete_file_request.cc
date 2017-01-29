@@ -1,6 +1,6 @@
 /*
 
- Copyright (c) 2013, Ford Motor Company
+ Copyright (c) 2016, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -93,7 +93,7 @@ void DeleteFileRequest::Run() {
       SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
     }
   } else {
-    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    SendResponse(false, mobile_apis::Result::REJECTED);
   }
 }
 

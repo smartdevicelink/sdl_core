@@ -83,9 +83,9 @@ class ResumeCtrlTest : public ::testing::Test {
     ON_CALL(app_mngr_, event_dispatcher())
         .WillByDefault(ReturnRef(mock_event_dispatcher_));
     mock_storage =
-        ::utils::MakeShared<NiceMock<resumption_test::MockResumptionData>>(
+        ::utils::MakeShared<NiceMock<resumption_test::MockResumptionData> >(
             app_mngr_);
-    app_mock = utils::MakeShared<NiceMock<MockApplication>>();
+    app_mock = utils::MakeShared<NiceMock<MockApplication> >();
     res_ctrl = utils::MakeShared<ResumeCtrlImpl>(app_mngr_);
     res_ctrl->set_resumption_storage(mock_storage);
 
@@ -113,8 +113,8 @@ class ResumeCtrlTest : public ::testing::Test {
   application_manager_test::MockApplicationManager app_mngr_;
   MockStateController state_controller_;
   utils::SharedPtr<ResumeCtrl> res_ctrl;
-  utils::SharedPtr<NiceMock<resumption_test::MockResumptionData>> mock_storage;
-  utils::SharedPtr<NiceMock<MockApplication>> app_mock;
+  utils::SharedPtr<NiceMock<resumption_test::MockResumptionData> > mock_storage;
+  utils::SharedPtr<NiceMock<MockApplication> > app_mock;
   // app_mock.app_id() will return this value
   const uint32_t kTestAppId_;
   const std::string kTestPolicyAppId_;

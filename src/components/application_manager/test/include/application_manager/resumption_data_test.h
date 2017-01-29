@@ -38,7 +38,7 @@
 #include "gtest/gtest.h"
 #include "application_manager/usage_statistics.h"
 #include "application_manager/mock_application.h"
-#include "application_manager/mock_application_manager.h"
+#include "application_manager/test/include/application_manager/mock_application_manager.h"
 #include "utils/data_accessor.h"
 #include "config_profile/profile.h"
 #include "application_manager/policies/policy_handler.h"
@@ -73,7 +73,7 @@ class ResumptionDataTest : public ::testing::Test {
   void CheckSavedApp(sm::SmartObject& saved_data);
   // Set data for resumption
   virtual void PrepareData();
-  utils::SharedPtr<NiceMock<application_manager_test::MockApplication>>
+  utils::SharedPtr<NiceMock<application_manager_test::MockApplication> >
       app_mock;
 
   profile::Profile profile_;

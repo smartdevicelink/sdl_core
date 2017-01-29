@@ -55,6 +55,7 @@
 namespace test {
 namespace components {
 namespace commands_test {
+namespace mobile_commands_test {
 namespace change_registration_request {
 
 namespace am = application_manager;
@@ -88,7 +89,8 @@ class ChangeRegistrationRequestTest
  public:
   ChangeRegistrationRequestTest()
       : mock_message_helper_(*MockMessageHelper::message_helper_mock())
-      , mock_app_(CreateMockApp()) {}
+      , mock_app_(CreateMockApp())
+      , supported_languages_(CreateMessage(smart_objects::SmartType_Array)) {}
 
   MessageSharedPtr CreateMsgFromMobile() {
     MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
@@ -103,15 +105,14 @@ class ChangeRegistrationRequestTest
   void PrepareExpectationBeforeRun() {
     ON_CALL(app_mngr_, hmi_capabilities())
         .WillByDefault(ReturnRef(hmi_capabilities_));
-    smart_objects::SmartObject supported_languages(
-        smart_objects::SmartType_Array);
-    supported_languages[0] = static_cast<int32_t>(mobile_apis::Language::EN_US);
+    (*supported_languages_)[0] =
+        static_cast<int32_t>(mobile_apis::Language::EN_US);
     EXPECT_CALL(hmi_capabilities_, ui_supported_languages())
-        .WillOnce(Return(&supported_languages));
+        .WillOnce(Return(supported_languages_.get()));
     EXPECT_CALL(hmi_capabilities_, vr_supported_languages())
-        .WillOnce(Return(&supported_languages));
+        .WillOnce(Return(supported_languages_.get()));
     EXPECT_CALL(hmi_capabilities_, tts_supported_languages())
-        .WillOnce(Return(&supported_languages));
+        .WillOnce(Return(supported_languages_.get()));
 
     EXPECT_CALL(app_mngr_, hmi_interfaces())
         .WillRepeatedly(ReturnRef(hmi_interfaces_));
@@ -287,6 +288,7 @@ class ChangeRegistrationRequestTest
   NiceMock<MockHmiInterfaces> hmi_interfaces_;
   MockMessageHelper& mock_message_helper_;
   MockAppPtr mock_app_;
+  MessageSharedPtr supported_languages_;
 };
 
 typedef ChangeRegistrationRequestTest::MockHMICapabilities MockHMICapabilities;
@@ -534,6 +536,7 @@ TEST_F(ChangeRegistrationRequestTest,
 }
 
 }  // namespace change_registration_request
+}  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components
 }  // namespace tests

@@ -1,4 +1,6 @@
 // This file is generated, do not edit
+#include <algorithm>
+
 #include "policy/policy_table/types.h"
 #include "rpc_base/rpc_base_json_inl.h"
 
@@ -179,6 +181,36 @@ Json::Value ApplicationParams::ToJsonValue() const {
       "heart_beat_timeout_ms", heart_beat_timeout_ms, &result__);
   impl::WriteJsonField("certificate", certificate, &result__);
   return result__;
+}
+
+bool ApplicationParams::ValidateModuleTypes() const {
+  // moduleType is optional so see Optional<T>::is_valid()
+  bool is_initialized = moduleType->is_initialized();
+  if (!is_initialized) {
+    // valid if not initialized
+    return true;
+  }
+  bool is_valid = moduleType->is_valid();
+  if (is_valid) {
+    return true;
+  }
+
+  struct IsInvalid {
+    bool operator()(Enum<ModuleType> item) const {
+      return !item.is_valid();
+    }
+  };
+  // cut invalid items
+  moduleType->erase(
+      std::remove_if(moduleType->begin(), moduleType->end(), IsInvalid()),
+      moduleType->end());
+  bool empty = moduleType->empty();
+  if (empty) {
+    // set non initialized value
+    ModuleTypes non_initialized;
+    moduleType = Optional<ModuleTypes>(non_initialized);
+  }
+  return true;
 }
 
 bool ApplicationParams::is_valid() const {
@@ -643,6 +675,175 @@ void ModuleConfig::SetPolicyTableType(PolicyTableType pt_type) {
   vehicle_model.SetPolicyTableType(pt_type);
   vehicle_year.SetPolicyTableType(pt_type);
 }
+
+#ifdef SDL_REMOTE_CONTROL
+// Equipment methods
+Equipment::Equipment() : CompositeType(kUninitialized) {}
+Equipment::~Equipment() {}
+Equipment::Equipment(const Json::Value* value__)
+    : CompositeType(InitHelper(value__, &Json::Value::isObject))
+    , zones(impl::ValueMember(value__, "zones")) {}
+Json::Value Equipment::ToJsonValue() const {
+  Json::Value result__(Json::objectValue);
+  impl::WriteJsonField("zones", zones, &result__);
+  return result__;
+}
+bool Equipment::is_valid() const {
+  if (!zones.is_valid()) {
+    return false;
+  }
+
+  return Validate();
+}
+bool Equipment::is_initialized() const {
+  return (initialization_state__ != kUninitialized) || (!struct_empty());
+}
+bool Equipment::struct_empty() const {
+  if (zones.is_initialized()) {
+    return false;
+  }
+
+  return true;
+}
+void Equipment::ReportErrors(rpc::ValidationReport* report__) const {
+  if (struct_empty()) {
+    rpc::CompositeType::ReportErrors(report__);
+  }
+  if (!zones.is_valid()) {
+    zones.ReportErrors(&report__->ReportSubobject("zones"));
+  }
+}
+
+void Equipment::SetPolicyTableType(PolicyTableType pt_type) {
+  CompositeType::SetPolicyTableType(pt_type);
+  zones.SetPolicyTableType(pt_type);
+}
+
+// InteriorZone methods
+const std::string InteriorZone::kRemoteRpcs[] = {
+    "ButtonPress",
+    "GetInteriorVehicleDataCapabilities",
+    "GetInteriorVehicleData",
+    "SetInteriorVehicleData"};
+const std::string InteriorZone::kRadioParameters[] = {"frequencyInteger",
+                                                      "frequencyFraction",
+                                                      "band",
+                                                      "rdsData",
+                                                      "availableHDs",
+                                                      "hdChannel",
+                                                      "signalStrength",
+                                                      "signalChangeThreshold",
+                                                      "radioEnable",
+                                                      "state"};
+const std::string InteriorZone::kClimateParameters[] = {"fanSpeed",
+                                                        "currentTemp",
+                                                        "desiredTemp",
+                                                        "temperatureUnit",
+                                                        "acEnable",
+                                                        "circulateAirEnable",
+                                                        "autoModeEnable",
+                                                        "defrostZone",
+                                                        "dualModeEnable"};
+InteriorZone::InteriorZone() : CompositeType(kUninitialized) {}
+InteriorZone::InteriorZone(uint8_t col,
+                           uint8_t row,
+                           uint8_t level,
+                           const AccessModules& auto_allow,
+                           const AccessModules& driver_allow)
+    : CompositeType(kUninitialized)
+    , col(col)
+    , row(row)
+    , level(level)
+    , auto_allow(auto_allow)
+    , driver_allow(driver_allow) {}
+InteriorZone::~InteriorZone() {}
+InteriorZone::InteriorZone(const Json::Value* value__)
+    : CompositeType(InitHelper(value__, &Json::Value::isObject))
+    , col(impl::ValueMember(value__, "col"))
+    , row(impl::ValueMember(value__, "row"))
+    , level(impl::ValueMember(value__, "level"))
+    , auto_allow(impl::ValueMember(value__, "auto_allow"))
+    , driver_allow(impl::ValueMember(value__, "driver_allow")) {}
+Json::Value InteriorZone::ToJsonValue() const {
+  Json::Value result__(Json::objectValue);
+  impl::WriteJsonField("col", col, &result__);
+  impl::WriteJsonField("row", row, &result__);
+  impl::WriteJsonField("level", level, &result__);
+  impl::WriteJsonField("auto_allow", auto_allow, &result__);
+  impl::WriteJsonField("driver_allow", driver_allow, &result__);
+  return result__;
+}
+bool InteriorZone::is_valid() const {
+  if (!col.is_valid()) {
+    return false;
+  }
+  if (!row.is_valid()) {
+    return false;
+  }
+  if (!level.is_valid()) {
+    return false;
+  }
+  if (!auto_allow.is_valid()) {
+    return false;
+  }
+  if (!driver_allow.is_valid()) {
+    return false;
+  }
+
+  return Validate();
+}
+bool InteriorZone::is_initialized() const {
+  return (initialization_state__ != kUninitialized) || (!struct_empty());
+}
+bool InteriorZone::struct_empty() const {
+  if (col.is_initialized()) {
+    return false;
+  }
+  if (row.is_initialized()) {
+    return false;
+  }
+  if (level.is_initialized()) {
+    return false;
+  }
+  if (auto_allow.is_initialized()) {
+    return false;
+  }
+  if (driver_allow.is_initialized()) {
+    return false;
+  }
+
+  return true;
+}
+void InteriorZone::ReportErrors(rpc::ValidationReport* report__) const {
+  if (struct_empty()) {
+    rpc::CompositeType::ReportErrors(report__);
+  }
+  if (!col.is_valid()) {
+    col.ReportErrors(&report__->ReportSubobject("col"));
+  }
+  if (!row.is_valid()) {
+    row.ReportErrors(&report__->ReportSubobject("row"));
+  }
+  if (!level.is_valid()) {
+    level.ReportErrors(&report__->ReportSubobject("level"));
+  }
+  if (!auto_allow.is_valid()) {
+    auto_allow.ReportErrors(&report__->ReportSubobject("auto_allow"));
+  }
+  if (!driver_allow.is_valid()) {
+    driver_allow.ReportErrors(&report__->ReportSubobject("driver_allow"));
+  }
+}
+
+void InteriorZone::SetPolicyTableType(PolicyTableType pt_type) {
+  CompositeType::SetPolicyTableType(pt_type);
+  col.SetPolicyTableType(pt_type);
+  row.SetPolicyTableType(pt_type);
+  level.SetPolicyTableType(pt_type);
+  auto_allow.SetPolicyTableType(pt_type);
+  driver_allow.SetPolicyTableType(pt_type);
+}
+#endif
 
 // MessageString methods
 MessageString::MessageString() : CompositeType(kUninitialized) {}

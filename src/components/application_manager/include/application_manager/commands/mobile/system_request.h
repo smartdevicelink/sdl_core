@@ -40,12 +40,6 @@
 #include "application_manager/event_engine/event.h"
 #include "smart_objects/smart_object.h"
 
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
-class SmartObject;
-}
-}
-
 namespace application_manager {
 
 namespace commands {

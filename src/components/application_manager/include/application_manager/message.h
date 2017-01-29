@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,8 +41,6 @@
 #include "protocol/rpc_type.h"
 #include "smart_objects/smart_object.h"
 
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
-
 namespace application_manager {
 
 typedef std::vector<uint8_t> BinaryData;
@@ -70,16 +68,17 @@ enum ProtocolVersion {
 
 class Message {
  public:
-  Message(protocol_handler::MessagePriority priority);
+  explicit Message(protocol_handler::MessagePriority priority);
   Message(const Message& message);
   Message& operator=(const Message& message);
   bool operator==(const Message& message);
   ~Message();
 
   //! --------------------------------------------------------------------------
+  std::string function_name() const;
   int32_t function_id() const;
-  int32_t correlation_id() const;
-  int32_t connection_key() const;
+  uint32_t correlation_id() const;
+  uint32_t connection_key() const;
 
   MessageType type() const;
   ProtocolVersion protocol_version() const;
@@ -92,6 +91,7 @@ class Message {
   const smart_objects::SmartObject& smart_object() const;
 
   //! --------------------------------------------------------------------------
+  void set_function_name(const std::string& name);
   void set_function_id(int32_t id);
   void set_correlation_id(int32_t id);
   void set_connection_key(int32_t key);
@@ -108,9 +108,10 @@ class Message {
   }
 
  private:
-  int32_t function_id_;     // @remark protocol V2.
-  int32_t correlation_id_;  // @remark protocol V2.
-  MessageType type_;        // @remark protocol V2.
+  int32_t function_id_;        // @remark protocol V2.
+  std::string function_name_;  // string
+  int32_t correlation_id_;     // @remark protocol V2.
+  MessageType type_;           // @remark protocol V2.
 
   // Pre-calculated message priority, higher priority messages are
   // Processed first
@@ -126,6 +127,8 @@ class Message {
   size_t payload_size_;
   ProtocolVersion version_;
 };
+typedef utils::SharedPtr<application_manager::Message> MobileMessage;
+typedef utils::SharedPtr<application_manager::Message> MessagePtr;
 }  // namespace application_manager
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_MESSAGE_H_

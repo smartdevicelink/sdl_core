@@ -426,7 +426,7 @@ TEST_F(SQLPTRepresentationTest,
   ASSERT_EQ(0, dbms->FetchOneInt(query_select));
   ASSERT_TRUE(reps->RefreshDB());
   // Check PT structure destroyed and tables number is 0
-  ASSERT_EQ(25, dbms->FetchOneInt(query_select));
+  ASSERT_EQ(26, dbms->FetchOneInt(query_select));
   const char* query_select_count_of_iap_buffer_full =
       "SELECT `count_of_iap_buffer_full` FROM `usage_and_error_count`";
   const char* query_select_count_sync_out_of_memory =
@@ -1104,7 +1104,7 @@ TEST_F(SQLPTRepresentationTest,
        GetInitialAppData_SetData_ExpectCorrectValuesReceived) {
   // Arrange
   const char* query_insert =
-      "INSERT INTO `nickname` (`application_id`, `name`)"
+      "INSERT INTO `nickname` (`application_id`, `name`) "
       "VALUES ('1111', 'first_app') , "
       "('2222', 'second_app'), ('3333', 'third_app')";
   ASSERT_TRUE(dbms->Exec(query_insert));

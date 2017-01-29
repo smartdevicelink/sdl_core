@@ -47,6 +47,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace subscribe_way_points_request {
 
 using ::testing::_;
 using ::testing::Return;
@@ -112,6 +113,7 @@ TEST_F(SubscribeWayPointsRequestTest, OnEvent_SUCCESS) {
   command->on_event(event);
 }
 
+}  // namespace subscribe_way_points_request
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

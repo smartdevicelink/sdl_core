@@ -48,7 +48,10 @@
 #include "application_manager/application_manager_settings.h"
 #include "application_manager/state_controller.h"
 #include "application_manager/hmi_interfaces.h"
-
+#ifdef SDL_REMOTE_CONTROL
+#include "functional_module/plugin_manager.h"
+#include "can_cooperation/can_module_interface.h"
+#endif
 namespace resumption {
 class LastState;
 }
@@ -84,6 +87,7 @@ class Application;
 class StateControllerImpl;
 struct CommandParametersPermissions;
 typedef std::vector<std::string> RPCParams;
+typedef std::vector<ApplicationSharedPtr> AppSharedPtrs;
 
 struct ApplicationsAppIdSorter {
   bool operator()(const ApplicationSharedPtr lhs,
@@ -140,6 +144,12 @@ class ApplicationManager {
   virtual DataAccessor<ApplicationSet> applications() const = 0;
 
   virtual ApplicationSharedPtr application(uint32_t app_id) const = 0;
+#ifdef SDL_REMOTE_CONTROL
+  virtual ApplicationSharedPtr application(
+      const std::string& device_id, const std::string& policy_app_id) const = 0;
+  virtual void SubscribeToHMINotification(
+      const std::string& hmi_notification) = 0;
+#endif
   virtual ApplicationSharedPtr active_application() const = 0;
 
   /**
@@ -153,9 +163,13 @@ class ApplicationManager {
   virtual ApplicationSharedPtr application_by_policy_id(
       const std::string& policy_app_id) const = 0;
 
-  virtual std::vector<ApplicationSharedPtr> applications_by_button(
-      uint32_t button) = 0;
-  virtual std::vector<ApplicationSharedPtr> applications_with_navi() = 0;
+  virtual AppSharedPtrs applications_by_button(uint32_t button) = 0;
+  virtual AppSharedPtrs applications_with_navi() = 0;
+#ifdef SDL_REMOTE_CONTROL
+  virtual AppSharedPtrs applications_by_interior_vehicle_data(
+      smart_objects::SmartObject moduleDescription) = 0;
+  virtual can_cooperation::CANModuleInterface& can_module() = 0;
+#endif  // SDL_REMOTE_CONTROL
 
   /**
    * @brief Returns media application with LIMITED HMI Level if exists
@@ -302,6 +316,8 @@ class ApplicationManager {
 
   virtual uint32_t GetNextHMICorrelationID() = 0;
   virtual uint32_t GenerateNewHMIAppID() = 0;
+  virtual void ReplaceMobileByHMIAppId(smart_objects::SmartObject& message) = 0;
+  virtual void ReplaceHMIByMobileAppId(smart_objects::SmartObject& message) = 0;
 
   /**
    * @brief Ends opened navi services (audio/video) for application
@@ -334,8 +350,8 @@ class ApplicationManager {
    * @param vehicle_info Enum value of type of vehicle data
    * @param new value (for integer values currently) of vehicle data
    */
-  virtual std::vector<ApplicationSharedPtr> IviInfoUpdated(
-      VehicleDataType vehicle_info, int value) = 0;
+  virtual AppSharedPtrs IviInfoUpdated(VehicleDataType vehicle_info,
+                                       int value) = 0;
 
   virtual ApplicationSharedPtr RegisterApplication(const utils::SharedPtr<
       smart_objects::SmartObject>& request_for_registration) = 0;
@@ -344,6 +360,20 @@ class ApplicationManager {
 
   virtual void MarkAppsGreyOut(const connection_handler::DeviceHandle handle,
                                bool is_greyed_out) = 0;
+
+#ifdef SDL_REMOTE_CONTROL
+  virtual uint32_t GetDeviceHandle(uint32_t connection_key) = 0;
+
+  /**
+   * @brief Checks HMI level and returns true if audio streaming is allowed
+   */
+  virtual bool IsAudioStreamingAllowed(uint32_t connection_key) const = 0;
+
+  /**
+   * @brief Checks HMI level and returns true if video streaming is allowed
+   */
+  virtual bool IsVideoStreamingAllowed(uint32_t connection_key) const = 0;
+#endif
 
   /**
    * @brief Returns pointer to application-to-be-registered (from QUERY_APP
@@ -467,19 +497,18 @@ class ApplicationManager {
       uint32_t app_id, protocol_handler::ServiceType service_type) const = 0;
 
   /**
-   * @brief Checks, if given RPC is allowed at current HMI level for specific
-   * application in policy table
-   * @param policy_app_id Application id
-   * @param hmi_level Current HMI level of application
-   * @param function_id FunctionID of RPC
-   * @param params_permissions Permissions for RPC parameters (e.g.
-   * SubscribeVehicleData) defined in policy table
-   * @return SUCCESS, if allowed, otherwise result code of check
-   */
+      * @brief Checks, if given RPC is allowed at current HMI level for specific
+      * application in policy table
+      * @param app Application
+      * @param hmi_level Current HMI level of application
+      * @param function_id FunctionID of RPC
+      * @param params_permissions Permissions for RPC parameters (e.g.
+      * SubscribeVehicleData) defined in policy table
+      * @return SUCCESS, if allowed, otherwise result code of check
+      */
   virtual mobile_apis::Result::eType CheckPolicyPermissions(
-      const std::string& policy_app_id,
-      mobile_apis::HMILevel::eType hmi_level,
-      mobile_apis::FunctionID::eType function_id,
+      const ApplicationSharedPtr app,
+      const std::string& function_id,
       const RPCParams& rpc_params,
       CommandParametersPermissions* params_permissions = NULL) = 0;
 
@@ -590,6 +619,24 @@ class ApplicationManager {
   virtual const ApplicationManagerSettings& get_settings() const = 0;
 
   virtual event_engine::EventDispatcher& event_dispatcher() = 0;
+
+  virtual uint32_t GetAvailableSpaceForApp(const std::string& folder_name) = 0;
+  virtual void OnTimerSendTTSGlobalProperties() = 0;
+#ifdef SDL_REMOTE_CONTROL
+  virtual void ChangeAppsHMILevel(uint32_t app_id,
+                                  mobile_apis::HMILevel::eType level) = 0;
+  virtual void CreatePhoneCallAppList() = 0;
+  virtual void ResetPhoneCallAppList() = 0;
+#endif
+  virtual void OnLowVoltage() = 0;
+  virtual void OnWakeUp() = 0;
+#ifdef SDL_REMOTE_CONTROL
+  virtual functional_modules::PluginManager& GetPluginManager() = 0;
+  virtual std::vector<std::string> devices(
+      const std::string& policy_app_id) const = 0;
+  virtual void PostMessageToHMIQueque(const MessagePtr& message) = 0;
+  virtual void PostMessageToMobileQueque(const MessagePtr& message) = 0;
+#endif
 };
 
 }  // namespace application_manager

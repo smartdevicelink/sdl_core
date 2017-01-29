@@ -88,20 +88,28 @@ struct ProtocolAndCipher {
 class SSLTest : public testing::Test {
  protected:
   static void SetUpTestCase() {
-    std::ifstream certificate_file("server/spt_credential_unsigned.p12");
+    SetCertificate("server/spt_credential_unsigned.p12.enc",
+                   server_certificate_data_base64_);
+    SetCertificate("client/client_credential_unsigned.p12.enc",
+                   client_certificate_data_base64_);
+  }
+
+  static void SetCertificate(const std::string& file_name,
+                             std::string& out_certificate_data) {
+    std::ifstream certificate_file(file_name.c_str());
+    ASSERT_TRUE(certificate_file.is_open()) << "Could not open " << file_name
+                                            << "certificate data file";
     std::stringstream certificate;
-    if (certificate_file.is_open()) {
-      certificate << certificate_file.rdbuf();
-    }
+    certificate << certificate_file.rdbuf();
     certificate_file.close();
-    certificate_data_base64_ = certificate.str();
-    ASSERT_FALSE(certificate_data_base64_.empty())
-        << "Certificate data file is empty";
+    out_certificate_data = certificate.str();
+    ASSERT_FALSE(out_certificate_data.empty()) << file_name
+                                               << " data file is empty";
   }
 
   virtual void SetUp() OVERRIDE {
     mock_crypto_manager_settings_ = utils::MakeShared<
-        NiceMock<security_manager_test::MockCryptoManagerSettings>>();
+        NiceMock<security_manager_test::MockCryptoManagerSettings> >();
     utils::SharedPtr<security_manager::CryptoManagerSettings> crypto_set(
         mock_crypto_manager_settings_);
     crypto_manager_ = new security_manager::CryptoManagerImpl(crypto_set);
@@ -112,7 +120,7 @@ class SSLTest : public testing::Test {
                 security_manager_protocol_name())
         .WillOnce(Return(security_manager::TLSv1_2));
     EXPECT_CALL(*mock_crypto_manager_settings_, certificate_data())
-        .WillOnce(ReturnRef(certificate_data_base64_));
+        .WillOnce(ReturnRef(server_certificate_data_base64_));
     EXPECT_CALL(*mock_crypto_manager_settings_, ciphers_list())
         .WillRepeatedly(ReturnRef(kAllCiphers));
     EXPECT_CALL(*mock_crypto_manager_settings_, ca_cert_path())
@@ -123,7 +131,7 @@ class SSLTest : public testing::Test {
     EXPECT_TRUE(crypto_manager_initialization);
 
     mock_client_manager_settings_ = utils::MakeShared<
-        NiceMock<security_manager_test::MockCryptoManagerSettings>>();
+        NiceMock<security_manager_test::MockCryptoManagerSettings> >();
     utils::SharedPtr<security_manager::CryptoManagerSettings> client_crypto(
         mock_client_manager_settings_);
     client_manager_ = new security_manager::CryptoManagerImpl(client_crypto);
@@ -134,7 +142,7 @@ class SSLTest : public testing::Test {
                 security_manager_protocol_name())
         .WillOnce(Return(security_manager::TLSv1_2));
     EXPECT_CALL(*mock_client_manager_settings_, certificate_data())
-        .WillOnce(ReturnRef(certificate_data_base64_));
+        .WillOnce(ReturnRef(client_certificate_data_base64_));
     EXPECT_CALL(*mock_client_manager_settings_, ciphers_list())
         .WillRepeatedly(ReturnRef(kAllCiphers));
     EXPECT_CALL(*mock_client_manager_settings_, ca_cert_path())
@@ -182,16 +190,18 @@ class SSLTest : public testing::Test {
   const size_t kMaximumPayloadSize = 1000u;
   security_manager::CryptoManager* crypto_manager_;
   security_manager::CryptoManager* client_manager_;
-  utils::SharedPtr<NiceMock<security_manager_test::MockCryptoManagerSettings>>
+  utils::SharedPtr<NiceMock<security_manager_test::MockCryptoManagerSettings> >
       mock_crypto_manager_settings_;
-  utils::SharedPtr<NiceMock<security_manager_test::MockCryptoManagerSettings>>
+  utils::SharedPtr<NiceMock<security_manager_test::MockCryptoManagerSettings> >
       mock_client_manager_settings_;
   security_manager::SSLContext* server_ctx;
   security_manager::SSLContext* client_ctx;
 
-  static std::string certificate_data_base64_;
+  static std::string client_certificate_data_base64_;
+  static std::string server_certificate_data_base64_;
 };
-std::string SSLTest::certificate_data_base64_;
+std::string SSLTest::client_certificate_data_base64_;
+std::string SSLTest::server_certificate_data_base64_;
 
 // StartHandshake() fails when client and server protocols are not TLSv1_2
 class SSLTestParam : public testing::TestWithParam<ProtocolAndCipher> {
@@ -209,7 +219,7 @@ class SSLTestParam : public testing::TestWithParam<ProtocolAndCipher> {
     certificate_data_base64_ = certificate;
 
     mock_crypto_manager_settings_ = utils::MakeShared<
-        NiceMock<security_manager_test::MockCryptoManagerSettings>>();
+        NiceMock<security_manager_test::MockCryptoManagerSettings> >();
     utils::SharedPtr<security_manager::CryptoManagerSettings> server_crypto(
         mock_crypto_manager_settings_);
     crypto_manager = new security_manager::CryptoManagerImpl(server_crypto);
@@ -221,7 +231,7 @@ class SSLTestParam : public testing::TestWithParam<ProtocolAndCipher> {
     EXPECT_TRUE(crypto_manager_initialization);
 
     mock_client_manager_settings_ = utils::MakeShared<
-        NiceMock<security_manager_test::MockCryptoManagerSettings>>();
+        NiceMock<security_manager_test::MockCryptoManagerSettings> >();
 
     utils::SharedPtr<security_manager::CryptoManagerSettings> client_crypto(
         mock_client_manager_settings_);
@@ -289,9 +299,9 @@ class SSLTestParam : public testing::TestWithParam<ProtocolAndCipher> {
         .WillByDefault(Return(false));
   }
 
-  utils::SharedPtr<NiceMock<security_manager_test::MockCryptoManagerSettings>>
+  utils::SharedPtr<NiceMock<security_manager_test::MockCryptoManagerSettings> >
       mock_crypto_manager_settings_;
-  utils::SharedPtr<NiceMock<security_manager_test::MockCryptoManagerSettings>>
+  utils::SharedPtr<NiceMock<security_manager_test::MockCryptoManagerSettings> >
       mock_client_manager_settings_;
   security_manager::CryptoManager* crypto_manager;
   security_manager::CryptoManager* client_manager;
@@ -378,20 +388,21 @@ TEST_F(SSLTest, OnTSL2Protocol_BrokenHandshake) {
 // TODO {AKozoriz} : Unexpected uncomplited init of SSL component.
 // In this and next tests.
 // Must be fixed after merge to develop.
-TEST_F(SSLTest, DISABLED_OnTSL2Protocol_Positive) {
+TEST_F(SSLTest, OnTSL2Protocol_Positive) {
   ASSERT_EQ(client_ctx->StartHandshake(&kClientBuf, &client_buf_len),
             security_manager::SSLContext::Handshake_Result_Success);
-  ASSERT_FALSE(NULL == kClientBuf);
-  ASSERT_LT(0u, client_buf_len);
-  EXPECT_TRUE(server_ctx->IsInitCompleted());
+  EXPECT_FALSE(server_ctx->IsInitCompleted());
 
   while (true) {
+    ASSERT_TRUE(NULL != kClientBuf);
+    ASSERT_LT(0u, client_buf_len);
+
     const security_manager::SSLContext::HandshakeResult server_result =
         server_ctx->DoHandshakeStep(
             kClientBuf, client_buf_len, &kServerBuf, &server_buf_len);
     ASSERT_EQ(security_manager::SSLContext::Handshake_Result_Success,
               server_result);
-    ASSERT_FALSE(NULL == kServerBuf);
+    ASSERT_TRUE(NULL != kServerBuf);
     ASSERT_LT(0u, server_buf_len);
 
     const security_manager::SSLContext::HandshakeResult client_result =
@@ -433,7 +444,7 @@ TEST_F(SSLTest, DISABLED_OnTSL2Protocol_Positive) {
   ASSERT_EQ(strncmp(reinterpret_cast<const char*>(text), "abra", 4), 0);
 }
 
-TEST_F(SSLTest, DISABLED_OnTSL2Protocol_EcncryptionFail) {
+TEST_F(SSLTest, OnTSL2Protocol_EcncryptionFail) {
   ASSERT_EQ(security_manager::SSLContext::Handshake_Result_Success,
             client_ctx->StartHandshake(&kClientBuf, &client_buf_len));
 
