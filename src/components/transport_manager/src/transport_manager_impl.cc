@@ -627,11 +627,11 @@ void TransportManagerImpl::RemoveConnection(
        it != connections_.end();
        ++it) {
     if (it->id == id) {
-      connections_.erase(it);
       if (transport_adapter) {
         transport_adapter->RemoveFinalizedConnection(it->device,
                                                      it->application);
       }
+      connections_.erase(it);
       break;
     }
   }

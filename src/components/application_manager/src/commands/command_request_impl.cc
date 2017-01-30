@@ -562,11 +562,11 @@ void CommandRequestImpl::RemoveDisallowedParameters() {
       parameters_permissions_.disallowed_params.end();
   for (; it_disallowed != it_disallowed_end; ++it_disallowed) {
     if (params.keyExists(*it_disallowed)) {
-      params.erase(*it_disallowed);
       removed_parameters_permissions_.disallowed_params.insert(*it_disallowed);
       LOG4CXX_INFO(
           logger_,
           "Following parameter is disallowed by user: " << *it_disallowed);
+      params.erase(*it_disallowed);
     }
   }
 
@@ -577,11 +577,11 @@ void CommandRequestImpl::RemoveDisallowedParameters() {
       parameters_permissions_.undefined_params.end();
   for (; it_undefined != it_undefined_end; ++it_undefined) {
     if (params.keyExists(*it_undefined)) {
-      params.erase(*it_undefined);
       removed_parameters_permissions_.undefined_params.insert(*it_undefined);
       LOG4CXX_INFO(
           logger_,
           "Following parameter is disallowed by policy: " << *it_undefined);
+      params.erase(*it_undefined);
     }
   }
 
