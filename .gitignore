@@ -1,3 +1,7 @@
 build/
-*.user
+*.user*
 src/appMain/sdl_preloaded_pt.json
+CMakeCache.txt
+CMakeFiles/
+*.pyc
+.idea

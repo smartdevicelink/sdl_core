@@ -152,8 +152,8 @@ class SendLocationRequestTest
   void AllowMandatoryFields() {
     application_manager::CommandParametersPermissions& permissions =
         command_->get_parameters_permissions();
-    permissions.allowed_params.push_back(strings::longitude_degrees);
-    permissions.allowed_params.push_back(strings::latitude_degrees);
+    permissions.allowed_params.insert(strings::longitude_degrees);
+    permissions.allowed_params.insert(strings::latitude_degrees);
   }
 
   MockAppPtr mock_app_;
@@ -383,9 +383,9 @@ TEST_F(SendLocationRequestTest, Run_MandatoryParamsDisallowed_InvalidData) {
   application_manager::CommandParametersPermissions& permissions =
       command_->get_parameters_permissions();
   // 1st one allowed
-  permissions.allowed_params.push_back(strings::longitude_degrees);
+  permissions.allowed_params.insert(strings::longitude_degrees);
   // 2nd one disallowed
-  permissions.disallowed_params.push_back(strings::latitude_degrees);
+  permissions.disallowed_params.insert(strings::latitude_degrees);
   EXPECT_CALL(app_mngr_,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_apis::Result::INVALID_DATA), _));

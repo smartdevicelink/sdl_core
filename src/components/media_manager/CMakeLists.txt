@@ -1,4 +1,4 @@
-# Copyright (c) 2014-2015, Ford Motor Company
+# Copyright (c) 2016, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -32,21 +32,22 @@ include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/platform.cmake)
 include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
 include_directories(
-  include
-  ${COMPONENTS_DIR}/media_manager/include/audio/
-  ${COMPONENTS_DIR}/media_manager/include/video/
-  ${COMPONENTS_DIR}/utils/include/
-  ${COMPONENTS_DIR}/protocol_handler/include/
-  ${COMPONENTS_DIR}/connection_handler/include/
-  ${COMPONENTS_DIR}/application_manager/include/
-  ${COMPONENTS_DIR}/smart_objects/include/
-  ${COMPONENTS_DIR}/hmi_message_handler/include/
-  ${COMPONENTS_DIR}/formatters/include/
-  ${COMPONENTS_DIR}/config_profile/include/
-  ${JSONCPP_INCLUDE_DIRECTORY}
-  ${CMAKE_BINARY_DIR}/src/components/
-  ${COMPONENTS_DIR}/policy/include/
-  ${LOG4CXX_INCLUDE_DIRECTORY}
+    include
+    ${COMPONENTS_DIR}/media_manager/include/audio/
+    ${COMPONENTS_DIR}/media_manager/include/video/
+    ${COMPONENTS_DIR}/utils/include/
+    ${COMPONENTS_DIR}/protocol_handler/include/
+    ${COMPONENTS_DIR}/connection_handler/include/
+    ${COMPONENTS_DIR}/application_manager/include/
+    ${COMPONENTS_DIR}/smart_objects/include/
+    ${COMPONENTS_DIR}/hmi_message_handler/include/
+    ${COMPONENTS_DIR}/formatters/include/
+    ${COMPONENTS_DIR}/config_profile/include/
+    ${JSONCPP_INCLUDE_DIRECTORY}
+    ${CMAKE_BINARY_DIR}/src/components/
+    ${POLICY_PATH}/include/
+    ${POLICY_GLOBAL_INCLUDE_PATH}/
+    ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
 set(PATHS
@@ -75,6 +76,8 @@ if(EXTENDED_MEDIA_MODE)
     ${GSTREAMER_gst_INCLUDE_DIR}
     ${GSTREAMER_gstconfig_INCLUDE_DIR}
     ${GLIB_glib_2_INCLUDE_DIR}
+  )
+  list(APPEND EXCLUDE_PATHS
   )
   list(APPEND LIBRARIES
     ${GSTREAMER_gstreamer_LIBRARY}

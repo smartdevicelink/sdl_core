@@ -171,6 +171,11 @@ bool ApplicationImpl::IsFullscreen() const {
   return mobile_api::HMILevel::HMI_FULL == hmi_level();
 }
 
+bool ApplicationImpl::is_audio() const {
+  return is_media_application() || is_voice_communication_supported() ||
+         is_navi();
+}
+
 void ApplicationImpl::ChangeSupportingAppHMIType() {
   is_navi_ = false;
   is_voice_communication_application_ = false;

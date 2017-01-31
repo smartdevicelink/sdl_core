@@ -33,6 +33,7 @@ include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 include_directories (
   ${COMPONENTS_DIR}/config_profile/include
   ${COMPONENTS_DIR}/utils/include/
+  ${POLICY_GLOBAL_INCLUDE_PATH}/
   ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
