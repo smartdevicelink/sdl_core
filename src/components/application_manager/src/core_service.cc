@@ -223,7 +223,7 @@ uint32_t CoreService::GetNextCorrelationID() {
 
 std::vector<ApplicationSharedPtr> CoreService::GetApplications(
     AppExtensionUID uid) {
-  ApplicationSet accessor;
+  ApplicationSet accessor = application_manager_.applications().GetData();
   AppExtensionPredicate predicate;
   predicate.uid = uid;
 
