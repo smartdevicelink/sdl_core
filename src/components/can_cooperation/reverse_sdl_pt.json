@@ -2388,17 +2388,6 @@
                 "groups_primaryRC": ["Base-4", "RemoteControl"],
                 "groups_nonPrimaryRC": ["Notifications-RC", "RemoteControl"]
             },
-            "8675311": {
-                "keep_context": false,
-                "steal_focus": false,
-                "priority": "NONE",
-                "default_hmi": "NONE",
-                "moduleType": ["RADIO"],
-                "groups": ["Base-4"],
-                "groups_primaryRC": ["Base-4", "RemoteControl"],
-                "groups_nonPrimaryRC": ["Notifications-RC", "RemoteControl"],
-                "AppHMIType": ["REMOTE_CONTROL"]
-            },
             "pre_consent_passengersRC": {
                 "keep_context": false,
                 "steal_focus": false,
