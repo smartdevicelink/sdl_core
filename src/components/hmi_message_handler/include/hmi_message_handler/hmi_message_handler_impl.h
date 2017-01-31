@@ -136,8 +136,9 @@ class HMIMessageHandlerImpl : public HMIMessageHandler,
  private:
   const HMIMessageHandlerSettings& settings_;
   HMIMessageObserver* observer_;
-  mutable sync_primitives::Lock observer_locker_;
   std::set<HMIMessageAdapter*> message_adapters_;
+  mutable sync_primitives::Lock observer_locker_;
+  mutable sync_primitives::Lock message_adapters_locker_;
 
   // Construct message threads when everything is already created
 
