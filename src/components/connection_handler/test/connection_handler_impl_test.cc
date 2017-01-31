@@ -844,7 +844,7 @@ TEST_F(ConnectionHandlerTest, CloseSessionWithCommonReason) {
 
   connection_handler_->CloseSession(connection_key_, kCommon);
 
-  EXPECT_TRUE(waiter.WaitFor(1, 1000));
+  EXPECT_TRUE(waiter.WaitFor(times++, 1000));
 }
 
 TEST_F(ConnectionHandlerTest, CloseSessionWithFloodReason) {
@@ -890,7 +890,7 @@ TEST_F(ConnectionHandlerTest, CloseSessionWithFloodReason) {
 
   connection_handler_->CloseSession(connection_key_, kFlood);
 
-  EXPECT_TRUE(waiter.WaitFor(1, 1000));
+  EXPECT_TRUE(waiter.WaitFor(times++, 1000));
 }
 
 TEST_F(ConnectionHandlerTest, CloseSessionWithMalformedMessage) {
@@ -934,7 +934,7 @@ TEST_F(ConnectionHandlerTest, CloseSessionWithMalformedMessage) {
 
   connection_handler_->CloseSession(connection_key_, kMalformed);
 
-  EXPECT_TRUE(waiter.WaitFor(1, 1000));
+  EXPECT_TRUE(waiter.WaitFor(times++, 1000));
 }
 
 TEST_F(ConnectionHandlerTest, CloseConnectionSessionsWithMalformedMessage) {
@@ -978,7 +978,7 @@ TEST_F(ConnectionHandlerTest, CloseConnectionSessionsWithMalformedMessage) {
 
   connection_handler_->CloseConnectionSessions(uid_, kMalformed);
 
-  EXPECT_TRUE(waiter.WaitFor(1, 1000));
+  EXPECT_TRUE(waiter.WaitFor(times++, 1000));
 }
 
 TEST_F(ConnectionHandlerTest, CloseConnectionSessionsWithCommonReason) {
@@ -1024,7 +1024,7 @@ TEST_F(ConnectionHandlerTest, CloseConnectionSessionsWithCommonReason) {
 
   connection_handler_->CloseConnectionSessions(uid_, kCommon);
 
-  EXPECT_TRUE(waiter.WaitFor(1, 1000));
+  EXPECT_TRUE(waiter.WaitFor(times++, 1000));
 }
 
 TEST_F(ConnectionHandlerTest, StartService_withServices) {
