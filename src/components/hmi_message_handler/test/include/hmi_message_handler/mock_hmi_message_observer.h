@@ -43,8 +43,7 @@ namespace hmi_message_handler {
 
 using ::hmi_message_handler::HMIMessageObserver;
 
-class MockHMIMessageObserver : public HMIMessageObserver,
-                               public utils::Singleton<MockHMIMessageObserver> {
+class MockHMIMessageObserver : public HMIMessageObserver {
  public:
   MOCK_METHOD1(OnMessageReceived,
                void(utils::SharedPtr<application_manager::Message> message));

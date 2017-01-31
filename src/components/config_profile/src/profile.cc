@@ -509,7 +509,7 @@ const uint16_t& Profile::time_testing_port() const {
   return time_testing_port_;
 }
 
-const uint64_t& Profile::thread_min_stack_size() const {
+const uint64_t Profile::thread_min_stack_size() const {
   return min_tread_stack_size_;
 }
 
