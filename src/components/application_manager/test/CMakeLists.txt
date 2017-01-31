@@ -51,6 +51,7 @@ include_directories(
 )
 
 set(testSources
+  ${AM_TEST_DIR}/mock_message_helper.cc
   ${AM_TEST_DIR}/mobile_message_handler_test.cc
   ${AM_TEST_DIR}/mobile_message_handler_v1_test.cc
   ${AM_TEST_DIR}/request_info_test.cc
@@ -63,7 +64,6 @@ set(testSources
   ${AM_TEST_DIR}/application_state_test.cc
   ${AM_TEST_DIR}/usage_statistics_test.cc
   ${AM_TEST_DIR}/policy_handler_test.cc
-  ${AM_TEST_DIR}/mock_message_helper.cc
   ${AM_TEST_DIR}/application_manager_impl_test.cc
 )
 
@@ -112,7 +112,7 @@ add_custom_command(
 set(CMAKE_EXE_LINKER_FLAGS
   "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath=${CMAKE_CURRENT_BINARY_DIR}"
 )
-create_test("application_manager_test" "${SOURCES}" "${LIBRARIES}")
+create_test("application_manager_test" "${testSources}" "${LIBRARIES}")
 
 # TODO [AKozoriz] : Fix not buildable tests
 set(ResumptionData_SOURCES
