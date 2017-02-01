@@ -74,8 +74,8 @@ namespace components {
 namespace state_controller_test {
 
 namespace constants {
-const uint32_t kCorrID = 314;
-const uint32_t kHMIAppID = 2718;
+const uint32_t kCorrID = 314u;
+const uint32_t kHMIAppID = 2718u;
 }
 
 struct HmiStatesComparator {
@@ -134,7 +134,16 @@ class StateControllerImplTest : public ::testing::Test {
       , usage_stat("0",
                    utils::SharedPtr<usage_statistics::StatisticsManager>(
                        new usage_statistics_test::MockStatisticsManager))
-      , applications_(application_set_, applications_lock_) {}
+      , applications_(application_set_, applications_lock_)
+      , message_helper_mock_(
+            *application_manager::MockMessageHelper::message_helper_mock()) {
+    Mock::VerifyAndClearExpectations(&message_helper_mock_);
+  }
+
+  ~StateControllerImplTest() {
+    Mock::VerifyAndClearExpectations(&message_helper_mock_);
+  }
+
   NiceMock<application_manager_test::MockApplicationManager> app_manager_mock_;
   NiceMock<policy_test::MockPolicyHandlerInterface> policy_interface_;
   NiceMock<connection_handler_test::MockConnectionHandler>
@@ -193,7 +202,7 @@ class StateControllerImplTest : public ::testing::Test {
       mock_connection_handler__settings;
   transport_manager_test::MockTransportManager mock_transport_manager;
   connection_handler::ConnectionHandlerImpl* conn_handler;
-  application_manager::MockMessageHelper* message_helper_mock_;
+  application_manager::MockMessageHelper& message_helper_mock_;
 
   am::HmiStatePtr createHmiState(
       mobile_apis::HMILevel::eType hmi_level,
@@ -217,9 +226,9 @@ class StateControllerImplTest : public ::testing::Test {
    */
   template <class HmiStateType>
   am::HmiStatePtr CreateHmiStateByHmiStateType(
-      mobile_apis::HMILevel::eType hmi_level,
-      mobile_apis::AudioStreamingState::eType audio_ss,
-      mobile_apis::SystemContext::eType system_context,
+      const mobile_apis::HMILevel::eType hmi_level,
+      const mobile_apis::AudioStreamingState::eType audio_ss,
+      const mobile_apis::SystemContext::eType system_context,
       const uint32_t app_id) {
     am::HmiStatePtr new_state =
         utils::MakeShared<HmiStateType>(app_id, app_manager_mock_);
@@ -623,8 +632,6 @@ class StateControllerImplTest : public ::testing::Test {
     namespace AudioStreamingState = mobile_apis::AudioStreamingState;
     namespace SystemContext = mobile_apis::SystemContext;
     // Valid states for not audio app
-    message_helper_mock_ =
-        application_manager::MockMessageHelper::message_helper_mock();
     valid_states_for_not_audio_app_.push_back(
         createHmiState(HMILevel::HMI_NONE,
                        AudioStreamingState::NOT_AUDIBLE,
@@ -890,7 +897,7 @@ class StateControllerImplTest : public ::testing::Test {
         new smart_objects::SmartObject();
     (*bc_activate_app_request)[am::strings::params]
                               [am::strings::correlation_id] = corr_id;
-    ON_CALL(*message_helper_mock_,
+    ON_CALL(message_helper_mock_,
             GetBCActivateAppRequestToHMI(_, _, _, hmi_lvl, _, _))
         .WillByDefault(Return(bc_activate_app_request));
 
@@ -1294,7 +1301,7 @@ TEST_F(StateControllerImplTest, MoveAudioResumeAppToValidStates) {
     // Audio resume app when HMI level is LIMITED or FULL gets audible state
     if (state_to_setup->hmi_level() == HMILevel::HMI_LIMITED) {
       EXPECT_CALL(*audio_app_mock, is_resuming()).WillRepeatedly(Return(true));
-      EXPECT_CALL(*message_helper_mock_,
+      EXPECT_CALL(message_helper_mock_,
                   SendOnResumeAudioSourceToHMI(media_navi_vc_app_id_, _));
       state_to_check->set_audio_streaming_state(AudioStreamingState::AUDIBLE);
 
@@ -2453,7 +2460,7 @@ TEST_F(StateControllerImplTest, SetRegularStateMediaToNonMediaApp_VR_Stopped) {
 
   EXPECT_CALL(*simple_app_ptr_, is_resuming()).WillRepeatedly(Return(false));
 
-  EXPECT_CALL(*message_helper_mock_,
+  EXPECT_CALL(message_helper_mock_,
               SendOnResumeAudioSourceToHMI(simple_app_id_, _)).Times(0);
   EXPECT_CALL(*simple_app_ptr_,
               SetPostponedState(Truly(HmiStatesComparator(check_state))))
@@ -2471,7 +2478,7 @@ TEST_F(StateControllerImplTest, SetRegularStateMediaToNonMediaApp_VR_Stopped) {
 
   EXPECT_CALL(*media_app_ptr_, is_resuming()).WillRepeatedly(Return(true));
 
-  EXPECT_CALL(*message_helper_mock_,
+  EXPECT_CALL(message_helper_mock_,
               SendOnResumeAudioSourceToHMI(media_app_id_, _));
   EXPECT_CALL(*media_app_ptr_,
               SetPostponedState(Truly(HmiStatesComparator(check_state))))
@@ -2745,7 +2752,7 @@ TEST_F(StateControllerImplTest, OnEventOnAppDeactivatedAudioApplication) {
       hmi_apis::FunctionID::BasicCommunication_OnAppDeactivated;
   am::event_engine::Event event(event_id);
   event.set_smart_object(msg);
-  const HmiStatePtr kState =
+  const HmiStatePtr state =
       createHmiState(mobile_apis::HMILevel::HMI_LIMITED,
                      mobile_apis::AudioStreamingState::AUDIBLE,
                      mobile_apis::SystemContext::SYSCTXT_MAIN);
@@ -2756,7 +2763,7 @@ TEST_F(StateControllerImplTest, OnEventOnAppDeactivatedAudioApplication) {
   EXPECT_CALL(*simple_app_ptr_, hmi_level())
       .WillRepeatedly(Return(mobile_apis::HMILevel::HMI_FULL));
   // DeactivateApp
-  EXPECT_CALL(*simple_app_ptr_, RegularHmiState()).WillOnce(Return(kState));
+  EXPECT_CALL(*simple_app_ptr_, RegularHmiState()).WillOnce(Return(state));
   EXPECT_CALL(*simple_app_ptr_, IsAudioApplication())
       .WillRepeatedly(Return(true));
   EXPECT_CALL(*simple_app_ptr_, CurrentHmiState())
@@ -2773,7 +2780,7 @@ TEST_F(StateControllerImplTest, OnEventOnAppDeactivatedNotAudioApplication) {
       hmi_apis::FunctionID::BasicCommunication_OnAppDeactivated;
   am::event_engine::Event event(event_id);
   event.set_smart_object(msg);
-  const HmiStatePtr kState =
+  const HmiStatePtr state =
       createHmiState(mobile_apis::HMILevel::HMI_BACKGROUND,
                      mobile_apis::AudioStreamingState::NOT_AUDIBLE,
                      mobile_apis::SystemContext::SYSCTXT_MAIN);
@@ -2784,7 +2791,7 @@ TEST_F(StateControllerImplTest, OnEventOnAppDeactivatedNotAudioApplication) {
   EXPECT_CALL(*simple_app_ptr_, hmi_level())
       .WillRepeatedly(Return(mobile_apis::HMILevel::HMI_FULL));
   // DeactivateApp
-  EXPECT_CALL(*simple_app_ptr_, RegularHmiState()).WillOnce(Return(kState));
+  EXPECT_CALL(*simple_app_ptr_, RegularHmiState()).WillOnce(Return(state));
   EXPECT_CALL(*simple_app_ptr_, IsAudioApplication())
       .WillRepeatedly(Return(false));
 
