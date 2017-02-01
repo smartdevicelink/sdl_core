@@ -44,7 +44,7 @@ class HMIMessageHandlerSettings {
  public:
   virtual ~HMIMessageHandlerSettings() {}
 
-  virtual const uint64_t& thread_min_stack_size() const = 0;
+  virtual const uint64_t thread_min_stack_size() const = 0;
 };
 }  // namespace  hmi_message_handler
 #endif  // SRC_COMPONENTS_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_HANDLER_SETTINGS_H_

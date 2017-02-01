@@ -44,7 +44,7 @@ namespace hmi_message_handler_test {
 class MockHMIMessageHandlerSettings
     : public ::hmi_message_handler::HMIMessageHandlerSettings {
  public:
-  MOCK_CONST_METHOD0(thread_min_stack_size, const uint64_t&());
+  MOCK_CONST_METHOD0(thread_min_stack_size, const uint64_t());
 };
 }  // namespace hmi_message_handler_test
 }  // namespace components
