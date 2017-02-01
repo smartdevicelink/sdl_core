@@ -125,10 +125,6 @@ class LifeCycle {
 
   const profile::Profile& profile_;
   bool components_started_;
-#ifdef SDL_REMOTE_CONTROL
-  functional_modules::PluginManager* plugin_manager_;
-  utils::SharedPtr<application_manager::CoreService> core_service_;
-#endif
 
   DISALLOW_COPY_AND_ASSIGN(LifeCycle);
 };

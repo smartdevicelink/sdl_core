@@ -197,6 +197,7 @@ char ini_write_value(const char* fname,
         return FALSE;
       }
     } else {
+      fclose(rd_fp);
       return FALSE;
     }
   }
