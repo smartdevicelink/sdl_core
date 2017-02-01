@@ -2019,8 +2019,6 @@ ACTION_P(NotifyAsync, waiter) {
 
 TEST_F(PolicyHandlerTest,
        OnAppPermissionConsentInternal_ValidConnectionKey_SUCCESS) {
-  // EnablePolicyAndPolicyManagerMock();
-
   ChangePolicyManagerToMock();
   const uint32_t device = 2u;
 
@@ -2093,42 +2091,13 @@ ACTION_P(SetDeviceParamsMacAdress, mac_adress) {
 TEST_F(PolicyHandlerTest,
        OnAppPermissionConsentInternal_ExistAppsPreviouslyStored_SUCCESS) {
   EnablePolicyAndPolicyManagerMock();
-  utils::SharedPtr<application_manager_test::MockApplication> second_mock_app =
-      utils::MakeShared<application_manager_test::MockApplication>();
 
   EXPECT_CALL(*mock_app_, app_id()).WillRepeatedly(Return(kAppId1_));
-  EXPECT_CALL(*second_mock_app, app_id()).WillRepeatedly(Return(kAppId2_));
 
   test_app.insert(mock_app_);
-  test_app.insert(second_mock_app);
 
   const uint32_t invalid_connection_key = 0u;
-  EXPECT_CALL(*mock_policy_manager_, GetUserConsentForApp(_, _, _)).Times(2);
-
   const uint32_t device = 2u;
-  const std::string second_policy_app_id = "second_policy_app_id";
-  EXPECT_CALL(*mock_app_, policy_app_id())
-      .WillRepeatedly(Return(kPolicyAppId_));
-  EXPECT_CALL(*second_mock_app, policy_app_id())
-      .WillRepeatedly(Return(second_policy_app_id));
-  EXPECT_CALL(app_manager_, connection_handler())
-      .WillRepeatedly(ReturnRef(conn_handler));
-  EXPECT_CALL(conn_handler, get_session_observer())
-      .WillRepeatedly(ReturnRef(mock_session_observer));
-
-  const std::string second_mac_adress = "00:00:00:01:00:00";
-  EXPECT_CALL(mock_session_observer, GetDataOnDeviceID(_, _, NULL, _, _))
-      .WillRepeatedly(
-          DoAll(SetDeviceParamsMacAdress(second_mac_adress), (Return(1u))));
-
-  EXPECT_CALL(mock_message_helper_,
-              SendGetListOfPermissionsResponse(_, kCorrelationKey_, _));
-
-  EXPECT_CALL(*mock_app_, device()).WillRepeatedly(Return(device));
-  EXPECT_CALL(*second_mock_app, device()).WillRepeatedly(Return(device));
-
-  policy_handler_.OnGetListOfPermissions(invalid_connection_key,
-                                         kCorrelationKey_);
 
   PermissionConsent permissions;
   permissions.device_id = kDeviceId_;
@@ -2141,10 +2110,15 @@ TEST_F(PolicyHandlerTest,
                                   group_permission_allowed);
 
   permissions.group_permissions.push_back(group_permission_allowed);
+  EXPECT_CALL(app_manager_, applications()).WillRepeatedly(Return(app_set));
 
-  EXPECT_CALL(app_manager_, application(_)).Times(0);
+  EXPECT_CALL(*mock_app_, device()).WillRepeatedly(Return(1u));
+  EXPECT_CALL(*mock_app_, policy_app_id())
+      .WillRepeatedly(Return(kPolicyAppId_));
+
+  EXPECT_CALL(mock_session_observer, GetDataOnDeviceID(_, _, NULL, _, _))
+      .WillRepeatedly(DoAll(SetDeviceParamsMacAdress(kMacAddr_), (Return(1u))));
   EXPECT_CALL(app_manager_, application_by_policy_id(_))
-      .WillOnce(Return(second_mock_app))
       .WillOnce(Return(mock_app_));
 
   EXPECT_CALL(app_manager_, connection_handler())
@@ -2152,12 +2126,7 @@ TEST_F(PolicyHandlerTest,
   EXPECT_CALL(conn_handler, get_session_observer())
       .WillRepeatedly(ReturnRef(mock_session_observer));
 
-  EXPECT_CALL(mock_session_observer, GetDataOnDeviceID(_, _, NULL, _, _))
-      .WillOnce(DoAll(SetDeviceParamsMacAdress(kMacAddr_), (Return(1u))))
-      .WillRepeatedly(
-          DoAll(SetDeviceParamsMacAdress(second_mac_adress), (Return(1u))));
   EXPECT_CALL(*mock_app_, device()).WillRepeatedly(Return(device));
-  EXPECT_CALL(*second_mock_app, device()).WillRepeatedly(Return(device));
 
   sync_primitives::Lock wait_hmi_lock;
   sync_primitives::AutoLock auto_lock(wait_hmi_lock);
@@ -2167,6 +2136,7 @@ TEST_F(PolicyHandlerTest,
       .WillOnce(NotifyAsync(&waiter));
 
   policy_handler_.OnAppPermissionConsent(invalid_connection_key, permissions);
+  Mock::VerifyAndClearExpectations(mock_app_.get());
   EXPECT_TRUE(waiter.Wait(auto_lock));
 }
 
