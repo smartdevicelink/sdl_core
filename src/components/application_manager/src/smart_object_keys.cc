@@ -346,6 +346,7 @@ const char* keyboard_layout = "keyboardLayout";
 const char* limited_character_list = "limitedCharacterList";
 const char* auto_complete_text = "autoCompleteText";
 const char* file = "file";
+const char* file_name = "fileName";
 const char* retry = "retry";
 const char* service = "service";
 }  // namespace hmi_request

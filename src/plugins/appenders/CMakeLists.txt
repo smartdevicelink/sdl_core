@@ -40,7 +40,7 @@ set(LIBRARIES
   log4cxx -L${LOG4CXX_LIBS_DIRECTORY}
 )
 
-add_library(appenders ${SOURCES})
+add_library(appenders SHARED ${SOURCES})
 target_link_libraries(appenders ${LIBRARIES})
 
 add_dependencies(appenders install-3rd_party_logger)

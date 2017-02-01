@@ -31,13 +31,16 @@
 include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
 include_directories (
+  include/
+  ${COMPONENTS_DIR}/include/application_manager/
   ${COMPONENTS_DIR}/telemetry_monitor/include/
   ${COMPONENTS_DIR}/utils/include/
   ${COMPONENTS_DIR}/protocol_handler/include/
   ${COMPONENTS_DIR}/connection_handler/include/
   ${COMPONENTS_DIR}/transport_manager/include/
   ${COMPONENTS_DIR}/application_manager/include/
-  ${COMPONENTS_DIR}/policy/include/
+  ${POLICY_PATH}/include/
+  ${POLICY_GLOBAL_INCLUDE_PATH}/
   ${COMPONENTS_DIR}/hmi_message_handler/include/
   ${COMPONENTS_DIR}/formatters/include/
   ${COMPONENTS_DIR}/media_manager/include/

@@ -41,14 +41,17 @@ include_directories(
   ${COMPONENTS_DIR}/utils/include/
   ${COMPONENTS_DIR}/resumption/include/
   ${COMPONENTS_DIR}/utils/include/
-  ${COMPONENTS_DIR}/policy/include/
+  ${POLICY_PATH}/include/
+  ${POLICY_PATH}/policy/test/include/
+  ${POLICY_MOCK_INCLUDE_PATH}/
   ${COMPONENTS_DIR}/media_manager/include/
   ${COMPONENTS_DIR}/security_manager/include/
   ${COMPONENTS_DIR}/policy/test/include/
   ${COMPONENTS_DIR}/application_manager/test/include/
 )
 
-set(SOURCES
+set(testSources
+  ${AM_TEST_DIR}/mock_message_helper.cc
   ${AM_TEST_DIR}/mobile_message_handler_test.cc
   ${AM_TEST_DIR}/mobile_message_handler_v1_test.cc
   ${AM_TEST_DIR}/request_info_test.cc
@@ -67,6 +70,7 @@ set(SOURCES
 
 set (RequestController_SOURCES
   ${AM_TEST_DIR}/request_controller/request_controller_test.cc
+  ${AM_TEST_DIR}/mock_message_helper.cc
 )
 
 set(LIBRARIES
@@ -109,12 +113,12 @@ file(COPY sdl_pt_update.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 add_custom_command(
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/libPolicy.so
   COMMAND ${CMAKE_COMMAND} -E
-  copy ${COMPONENTS_DIR}/policy/libPolicy.so ${CMAKE_CURRENT_BINARY_DIR}
+  copy  ${POLICY_PATH}/libPolicy.so ${CMAKE_CURRENT_BINARY_DIR}
 )
 set(CMAKE_EXE_LINKER_FLAGS
   "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath=${CMAKE_CURRENT_BINARY_DIR}"
 )
-create_test("application_manager_test" "${SOURCES}" "${LIBRARIES}")
+create_test("application_manager_test" "${testSources}" "${LIBRARIES}")
 create_test("request_controller_test" "${RequestController_SOURCES}" "${LIBRARIES}")
 
 # TODO [AKozoriz] : Fix not buildable tests

@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2013, Ford Motor Company
+ Copyright (c) 2015, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -33,9 +33,9 @@
 #ifndef SRC_COMPONENTS_INCLUDE_APPLICATION_MANAGER_POLICIES_POLICY_HANDLER_OBSERVER_H_
 #define SRC_COMPONENTS_INCLUDE_APPLICATION_MANAGER_POLICIES_POLICY_HANDLER_OBSERVER_H_
 
+#include <map>
 #include <vector>
 #include <string>
-#include <map>
 
 namespace policy {
 

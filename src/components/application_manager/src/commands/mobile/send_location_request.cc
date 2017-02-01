@@ -62,11 +62,9 @@ void SendLocationRequest::Run() {
 
   smart_objects::SmartObject& msg_params = (*message_)[strings::msg_params];
   if (msg_params.keyExists(strings::delivery_mode)) {
-    const std::vector<std::string>& allowed_params =
-        parameters_permissions().allowed_params;
-    if (allowed_params.end() == std::find(allowed_params.begin(),
-                                          allowed_params.end(),
-                                          strings::delivery_mode)) {
+    const RPCParams& allowed_params = parameters_permissions().allowed_params;
+
+    if (helpers::in_range(allowed_params, strings::delivery_mode)) {
       msg_params.erase(strings::delivery_mode);
     }
   }

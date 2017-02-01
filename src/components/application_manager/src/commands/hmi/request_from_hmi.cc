@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2013, Ford Motor Company
+ Copyright (c) 2016, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -89,7 +89,6 @@ void RequestFromHMI::SendErrorResponse(
   (*message)[strings::params][strings::message_type] =
       MessageType::kErrorResponse;
   (*message)[strings::params][hmi_response::code] = result_code;
-
   (*message)[strings::params][strings::error_msg] = error_message;
 
   application_manager_.ManageHMICommand(message);
