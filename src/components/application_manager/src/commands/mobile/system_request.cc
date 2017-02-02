@@ -466,6 +466,13 @@ void SystemRequest::Run() {
     file_name = kSYNC;
   }
 
+  const std::size_t backslash_index = file_name.find('\\');
+  if (backslash_index != std::string::npos) {
+    LOG4CXX_ERROR(logger_, "File name contains backslash");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    return;
+  }
+
   bool is_system_file = std::string::npos != file_name.find(kSYNC) ||
                         std::string::npos != file_name.find(kIVSU);
 

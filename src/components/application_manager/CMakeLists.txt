@@ -369,6 +369,7 @@ if (${HMI_DBUS_API})
 endif (${HMI_DBUS_API})
 
 SET (LIBRARIES
+  jsoncpp
   HMI_API
   MOBILE_API
   v4_protocol_v1_2_no_extra
