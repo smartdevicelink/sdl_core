@@ -140,7 +140,8 @@ class MockPolicyManager : public PolicyManager {
   MOCK_METHOD1(SendNotificationOnPermissionsUpdated,
                void(const std::string& application_id));
   MOCK_METHOD1(MarkUnpairedDevice, void(const std::string& device_id));
-  MOCK_METHOD1(AddApplication, void(const std::string& application_id));
+  MOCK_METHOD1(AddApplication,
+               StatusNotifier(const std::string& application_id));
 #ifdef SDL_REMOTE_CONTROL
   MOCK_METHOD2(AddApplication,
                void(const std::string& application_id,

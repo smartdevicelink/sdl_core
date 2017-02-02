@@ -49,6 +49,7 @@
 #include "policy/update_status_manager.h"
 #include "config_profile/profile.h"
 #include "utils/timer_task_impl.h"
+#include "utils/make_shared.h"
 
 #ifdef SDL_REMOTE_CONTROL
 #include "policy/access_remote.h"
@@ -223,8 +224,6 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
     }
   }
 
-  apps_registration_lock_.Release();
-
   // If there was a user request for policy table update, it should be started
   // right after current update is finished
   if (update_status_manager_.IsUpdateRequired()) {
@@ -328,7 +327,10 @@ void PolicyManagerImpl::StartPTExchange() {
     if (update_status_manager_.IsUpdateRequired()) {
       if (RequestPTUpdate() && !timer_retry_sequence_.is_running()) {
         // Start retry sequency
-        timer_retry_sequence_.Start(NextRetryTimeout(), timer::kPeriodic);
+        const int timeout_sec = NextRetryTimeout();
+        LOG4CXX_DEBUG(logger_,
+                      "Start retry sequence timeout = " << timeout_sec);
+        timer_retry_sequence_.Start(timeout_sec, timer::kPeriodic);
       }
     }
   }
@@ -846,7 +848,7 @@ uint32_t PolicyManagerImpl::NextRetryTimeout() {
   }
 
   // Return miliseconds
-  return next * date_time::DateTime::MILLISECONDS_IN_SECOND;
+  return next;
 }
 
 void PolicyManagerImpl::RefreshRetrySequence() {
@@ -960,7 +962,24 @@ std::string PolicyManagerImpl::RetrieveCertificate() const {
   return cache_->GetCertificate();
 }
 
-void PolicyManagerImpl::AddApplication(const std::string& application_id) {
+class CallStatusChange : public utils::Callable {
+ public:
+  CallStatusChange(UpdateStatusManager& upd_manager,
+                   const DeviceConsent& device_consent)
+      : upd_manager_(upd_manager), device_consent_(device_consent) {}
+
+  // Callable interface
+  void operator()() const {
+    upd_manager_.OnNewApplicationAdded(device_consent_);
+  }
+
+ private:
+  UpdateStatusManager& upd_manager_;
+  const DeviceConsent device_consent_;
+};
+
+StatusNotifier PolicyManagerImpl::AddApplication(
+    const std::string& application_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   const std::string device_id = GetCurrentDeviceId(application_id);
   DeviceConsent device_consent = GetUserConsentForDevice(device_id);
@@ -968,9 +987,11 @@ void PolicyManagerImpl::AddApplication(const std::string& application_id) {
 
   if (IsNewApplication(application_id)) {
     AddNewApplication(application_id, device_consent);
-    update_status_manager_.OnNewApplicationAdded(device_consent);
+    return utils::MakeShared<CallStatusChange>(update_status_manager_,
+                                               device_consent);
   } else {
     PromoteExistedApplication(application_id, device_consent);
+    return utils::MakeShared<utils::CallNothing>();
   }
 }
 
@@ -1079,7 +1100,6 @@ void PolicyManagerImpl::RetrySequence() {
     timer_retry_sequence_.Stop();
     return;
   }
-
   timer_retry_sequence_.Start(timeout, timer::kPeriodic);
 }
 

@@ -35,7 +35,7 @@
 #include "application_manager/event_engine/event_observer.h"
 #include "application_manager/event_engine/event.h"
 #include "application_manager/event_engine/event_dispatcher_impl.h"
-#include "application_manager/event_observer_mock.h"
+#include "application_manager/mock_event_observer.h"
 #include "application_manager/mock_event_dispatcher.h"
 #include "smart_objects/smart_object.h"
 #include "utils/make_shared.h"
@@ -177,6 +177,6 @@ TEST_F(EventEngineTest, Event_set_smart_object_ExpectObjectSet) {
   EXPECT_EQ(smart_object_with_type_notification, event_->smart_object());
 }
 
-}  // namespace event_engine
+}  // namespace event_engine_test
 }  // namespace components
 }  // namespace test

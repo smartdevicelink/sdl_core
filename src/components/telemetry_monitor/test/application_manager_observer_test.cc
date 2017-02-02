@@ -55,6 +55,6 @@ TEST(ApplicationManagerObserver, CallOnMessage) {
   app_observer.OnMessage(ptr);
 }
 
-}  // namespace telemetry_monitor
+}  // namespace telemetry_monitor_test
 }  // namespace components
 }  // namespace test

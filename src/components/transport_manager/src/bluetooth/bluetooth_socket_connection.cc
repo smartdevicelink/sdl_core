@@ -1,6 +1,6 @@
 /*
  *
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,7 +56,9 @@ BluetoothSocketConnection::BluetoothSocketConnection(
     TransportAdapterController* controller)
     : ThreadedSocketConnection(device_uid, app_handle, controller) {}
 
-BluetoothSocketConnection::~BluetoothSocketConnection() {}
+BluetoothSocketConnection::~BluetoothSocketConnection() {
+  StopAndJoinThread();
+}
 
 bool BluetoothSocketConnection::Establish(ConnectError** error) {
   LOG4CXX_AUTO_TRACE(logger_);

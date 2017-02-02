@@ -48,6 +48,7 @@
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/mock_message_helper.h"
 #include "policy/mock_policy_settings.h"
+#include "policy/usage_statistics/mock_statistics_manager.h"
 #include "protocol_handler/mock_session_observer.h"
 #include "connection_handler/mock_connection_handler.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
@@ -130,7 +131,6 @@ class StateControllerImplTest : public ::testing::Test {
       : ::testing::Test()
       , usage_stat("0",
                    utils::SharedPtr<usage_statistics::StatisticsManager>(
-
                        new usage_statistics_test::MockStatisticsManager))
       , applications_(application_set_, applications_lock_) {}
   NiceMock<application_manager_test::MockApplicationManager> app_manager_mock_;

@@ -38,8 +38,8 @@ using ::utils::dbms::SQLDatabase;
 
 namespace test {
 namespace components {
-namespace utils {
-namespace dbms {
+namespace utils_test {
+namespace dbms_test {
 
 ::testing::AssertionResult IsError(SQLError error) {
   if (error.number() != ::utils::dbms::OK) {
@@ -217,7 +217,7 @@ TEST(SQLDatabaseTest, IsReadWrite_FirstOpenDBIsRWSecondIsNot) {
   remove("test-database.sqlite");
 }
 
-}  // namespace dbms
-}  // namespace utils
+}  // namespace dbms_test
+}  // namespace utils_test
 }  // namespace components
 }  // namespace test

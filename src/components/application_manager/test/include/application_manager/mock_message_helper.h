@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_TEST_MOCK_MESSAGE_HELPER_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_TEST_MOCK_MESSAGE_HELPER_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_MESSAGE_HELPER_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_MESSAGE_HELPER_H_
 #include "gmock/gmock.h"
 #include "application_manager/application.h"
 #include "application_manager/message_helper.h"
@@ -65,9 +65,11 @@ class MockMessageHelper {
                    const mobile_api::Result::eType mobile_result));
   MOCK_METHOD1(StringToHMILevel,
                mobile_api::HMILevel::eType(const std::string& hmi_level));
-  MOCK_METHOD1(CreateDeviceListSO,
+  MOCK_METHOD3(CreateDeviceListSO,
                smart_objects::SmartObjectSPtr(
-                   const connection_handler::DeviceMap& devices));
+                   const connection_handler::DeviceMap& devices,
+                   const policy::PolicyHandlerInterface& policy_handler,
+                   ApplicationManager& app_mngr));
   MOCK_METHOD2(SendNaviStartStream,
                void(int32_t connection_key, ApplicationManager& app_mngr));
   MOCK_METHOD2(SendNaviStopStream,
@@ -264,4 +266,4 @@ class MockMessageHelper {
 };
 
 }  // namespace application_manager
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_TEST_MOCK_MESSAGE_HELPER_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_MESSAGE_HELPER_H_

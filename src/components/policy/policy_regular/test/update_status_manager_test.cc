@@ -40,7 +40,7 @@ using ::test::components::policy_test::MockPolicyListener;
 
 namespace test {
 namespace components {
-namespace policy {
+namespace policy_test {
 
 using namespace ::policy;
 using ::testing::_;
@@ -92,6 +92,6 @@ TEST_F(UpdateStatusManagerTest,
   EXPECT_FALSE(manager_->IsAppsSearchInProgress());
 }
 
-}  // namespace policy
+}  // namespace policy_test
 }  // namespace components
 }  // namespace test

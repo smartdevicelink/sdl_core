@@ -100,6 +100,7 @@ class Thread {
   sync_primitives::ConditionalVariable run_cond_;
 
  public:
+  static int count;
   /**
    * @brief Starts the thread.
    * @return true if the thread was successfully started.

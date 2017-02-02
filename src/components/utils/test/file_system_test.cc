@@ -40,7 +40,7 @@
 
 namespace test {
 namespace components {
-namespace utils {
+namespace utils_test {
 
 typedef std::vector<std::string> StringArray;
 
@@ -1271,6 +1271,6 @@ TEST(FileSystemTest, GetAbsolutePath_TrickiPath_CorrectAbsolutePath) {
   }
 }
 
-}  // namespace utils
+}  // namespace utils_test
 }  // namespace components
 }  // namespace test

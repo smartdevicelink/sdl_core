@@ -46,11 +46,13 @@
 
 namespace policy_table = ::rpc::policy_table_interface_base;
 
-using namespace policy;
-
 namespace test {
 namespace components {
 namespace policy_manager_test {
+
+namespace {
+using namespace policy;
+}
 
 class MockPolicyManager : public PolicyManager {
  public:
@@ -140,7 +142,8 @@ class MockPolicyManager : public PolicyManager {
   MOCK_METHOD1(SendNotificationOnPermissionsUpdated,
                void(const std::string& application_id));
   MOCK_METHOD1(MarkUnpairedDevice, void(const std::string& device_id));
-  MOCK_METHOD1(AddApplication, void(const std::string& application_id));
+  MOCK_METHOD1(AddApplication,
+               StatusNotifier(const std::string& application_id));
 #ifdef SDL_REMOTE_CONTROL
   MOCK_METHOD2(AddApplication,
                void(const std::string& application_id,
@@ -218,6 +221,8 @@ class MockPolicyManager : public PolicyManager {
   MOCK_METHOD0(ExceededIgnitionCycles, bool());
   MOCK_METHOD0(ExceededDays, bool());
   MOCK_METHOD0(StartPTExchange, void());
+
+  // --- Statistics Manager section
   MOCK_METHOD1(Increment, void(usage_statistics::GlobalCounterId type));
   MOCK_METHOD2(Increment,
                void(const std::string& app_id,
@@ -245,6 +250,7 @@ class MockPolicyManager : public PolicyManager {
       void(const std::string& policy_app_id,
            const std::vector<FunctionalGroupPermission>& current_permissions));
 };
+
 }  // namespace policy_manager_test
 }  // namespace components
 }  // namespace test

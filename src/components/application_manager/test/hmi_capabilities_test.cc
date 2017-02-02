@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,7 +45,7 @@
 #include "application_manager/mock_application_manager_settings.h"
 #include "application_manager/mock_event_dispatcher.h"
 #include "application_manager/state_controller.h"
-#include "resumption/last_state.h"
+#include "resumption/last_state_impl.h"
 #include "application_manager/resumption/resume_ctrl.h"
 
 namespace test {
@@ -94,7 +94,7 @@ class HMICapabilitiesTest : public ::testing::Test {
   void SetCooperating();
   MockApplicationManager app_mngr_;
   event_engine_test::MockEventDispatcher mock_event_dispatcher;
-  resumption::LastState last_state_;
+  resumption::LastStateImpl last_state_;
   MockApplicationManagerSettings mock_application_manager_settings_;
   utils::SharedPtr<HMICapabilitiesForTesting> hmi_capabilities_test;
   const std::string file_name_;

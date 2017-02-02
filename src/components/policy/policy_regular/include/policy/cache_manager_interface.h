@@ -42,6 +42,7 @@
 #include "policy/usage_statistics/counter.h"
 #include "policy/policy_types.h"
 #include "policy/policy_settings.h"
+#include "policy/policy_table/types.h"
 
 namespace policy_table = rpc::policy_table_interface_base;
 

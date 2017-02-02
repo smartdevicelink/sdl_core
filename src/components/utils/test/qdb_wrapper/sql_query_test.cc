@@ -44,8 +44,8 @@ using ::utils::dbms::SQLQuery;
 
 namespace test {
 namespace components {
-namespace utils {
-namespace dbms {
+namespace utils_test {
+namespace dbms_test {
 
 class SQLQueryTest : public ::testing::Test {
  protected:
@@ -305,7 +305,7 @@ TEST_F(SQLQueryTest, DoublePrepare) {
   EXPECT_FALSE(IsError(query.LastError()));
 }
 
-}  // namespace dbms
-}  // namespace utils
+}  // namespace dbms_test
+}  // namespace utils_test
 }  // namespace components
 }  // namespace test

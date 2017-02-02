@@ -40,7 +40,7 @@
 #include "security_manager/mock_security_manager.h"
 #include "security_manager/mock_ssl_context.h"
 #include "protocol_handler/mock_protocol_handler.h"
-#include "connection_handler/connection_handler_observer_mock.h"
+#include "connection_handler/mock_connection_handler_observer.h"
 #include "connection_handler/mock_connection_handler_settings.h"
 #include "transport_manager/mock_transport_manager.h"
 #include "encryption/hashing.h"
@@ -448,7 +448,7 @@ TEST_F(ConnectionHandlerTest, SendEndService) {
 TEST_F(ConnectionHandlerTest, OnFindNewApplicationsRequest) {
   AddTestDeviceConnection();
   AddTestSession();
-  connection_handler_test::ConnectionHandlerObserverMock
+  connection_handler_test::MockConnectionHandlerObserver
       mock_connection_handler_observer;
   connection_handler_->set_connection_handler_observer(
       &mock_connection_handler_observer);
@@ -458,7 +458,7 @@ TEST_F(ConnectionHandlerTest, OnFindNewApplicationsRequest) {
 }
 
 TEST_F(ConnectionHandlerTest, OnFindNewApplicationsRequestWithoutObserver) {
-  connection_handler_test::ConnectionHandlerObserverMock
+  connection_handler_test::MockConnectionHandlerObserver
       mock_connection_handler_observer;
   EXPECT_CALL(mock_connection_handler_observer, OnFindNewApplicationsRequest())
       .Times(0);
@@ -466,7 +466,7 @@ TEST_F(ConnectionHandlerTest, OnFindNewApplicationsRequestWithoutObserver) {
 }
 
 TEST_F(ConnectionHandlerTest, OnFindNewApplicationsRequestWithoutSession) {
-  connection_handler_test::ConnectionHandlerObserverMock
+  connection_handler_test::MockConnectionHandlerObserver
       mock_connection_handler_observer;
   connection_handler_->set_connection_handler_observer(
       &mock_connection_handler_observer);
@@ -480,7 +480,7 @@ TEST_F(ConnectionHandlerTest, OnMalformedMessageCallback) {
   AddTestSession();
   AddTestService(kAudio);
   AddTestService(kMobileNav);
-  connection_handler_test::ConnectionHandlerObserverMock
+  connection_handler_test::MockConnectionHandlerObserver
       mock_connection_handler_observer;
   connection_handler_->set_connection_handler_observer(
       &mock_connection_handler_observer);
@@ -506,7 +506,7 @@ TEST_F(ConnectionHandlerTest, OnApplicationFloodCallBack) {
   AddTestSession();
   AddTestService(kAudio);
   AddTestService(kMobileNav);
-  connection_handler_test::ConnectionHandlerObserverMock
+  connection_handler_test::MockConnectionHandlerObserver
       mock_connection_handler_observer;
   connection_handler_->set_connection_handler_observer(
       &mock_connection_handler_observer);
@@ -534,7 +534,7 @@ TEST_F(ConnectionHandlerTest, OnApplicationFloodCallBack_SessionFound) {
   AddTestService(kAudio);
   AddTestService(kMobileNav);
 
-  connection_handler_test::ConnectionHandlerObserverMock
+  connection_handler_test::MockConnectionHandlerObserver
       mock_connection_handler_observer;
   connection_handler_->set_connection_handler_observer(
       &mock_connection_handler_observer);
@@ -558,7 +558,7 @@ TEST_F(ConnectionHandlerTest, StartDevicesDiscovery) {
   AddTestDeviceConnection();
   AddTestSession();
 
-  connection_handler_test::ConnectionHandlerObserverMock
+  connection_handler_test::MockConnectionHandlerObserver
       mock_connection_handler_observer;
   connection_handler_->set_connection_handler_observer(
       &mock_connection_handler_observer);
@@ -599,7 +599,7 @@ TEST_F(ConnectionHandlerTest, UpdateDeviceList) {
   // Precondition
   AddTestDeviceConnection();
   AddTestSession();
-  connection_handler_test::ConnectionHandlerObserverMock
+  connection_handler_test::MockConnectionHandlerObserver
       mock_connection_handler_observer;
   connection_handler_->set_connection_handler_observer(
       &mock_connection_handler_observer);
@@ -678,7 +678,7 @@ TEST_F(ConnectionHandlerTest, OnDeviceRemoved_ServiceNotStarted) {
   connection_handler_->OnDeviceAdded(device1);
   connection_handler_->OnDeviceAdded(device2);
 
-  connection_handler_test::ConnectionHandlerObserverMock
+  connection_handler_test::MockConnectionHandlerObserver
       mock_connection_handler_observer;
   connection_handler_->set_connection_handler_observer(
       &mock_connection_handler_observer);
@@ -697,7 +697,7 @@ TEST_F(ConnectionHandlerTest, OnDeviceRemoved_ServiceStarted) {
   const transport_manager::DeviceInfo device1(
       device_handle_, mac_address_, device_name_, connection_type_);
 
-  connection_handler_test::ConnectionHandlerObserverMock
+  connection_handler_test::MockConnectionHandlerObserver
       mock_connection_handler_observer;
   connection_handler_->set_connection_handler_observer(
       &mock_connection_handler_observer);
@@ -715,7 +715,7 @@ TEST_F(ConnectionHandlerTest, OnConnectionClosed) {
   AddTestDeviceConnection();
   AddTestSession();
 
-  connection_handler_test::ConnectionHandlerObserverMock
+  connection_handler_test::MockConnectionHandlerObserver
       mock_connection_handler_observer;
   connection_handler_->set_connection_handler_observer(
       &mock_connection_handler_observer);
@@ -732,7 +732,7 @@ TEST_F(ConnectionHandlerTest, OnUnexpectedDisconnect) {
   AddTestDeviceConnection();
   AddTestSession();
 
-  connection_handler_test::ConnectionHandlerObserverMock
+  connection_handler_test::MockConnectionHandlerObserver
       mock_connection_handler_observer;
   connection_handler_->set_connection_handler_observer(
       &mock_connection_handler_observer);
@@ -805,7 +805,7 @@ TEST_F(ConnectionHandlerTest, CloseSessionWithCommonReason) {
   AddTestSession();
   AddTestService(kAudio);
   AddTestService(kMobileNav);
-  connection_handler_test::ConnectionHandlerObserverMock
+  connection_handler_test::MockConnectionHandlerObserver
       mock_connection_handler_observer;
   connection_handler_->set_connection_handler_observer(
       &mock_connection_handler_observer);
@@ -833,7 +833,7 @@ TEST_F(ConnectionHandlerTest, CloseSessionWithFloodReason) {
   AddTestSession();
   AddTestService(kAudio);
   AddTestService(kMobileNav);
-  connection_handler_test::ConnectionHandlerObserverMock
+  connection_handler_test::MockConnectionHandlerObserver
       mock_connection_handler_observer;
   connection_handler_->set_connection_handler_observer(
       &mock_connection_handler_observer);
@@ -861,7 +861,7 @@ TEST_F(ConnectionHandlerTest, CloseSessionWithMalformedMessage) {
   AddTestSession();
   AddTestService(kAudio);
   AddTestService(kMobileNav);
-  connection_handler_test::ConnectionHandlerObserverMock
+  connection_handler_test::MockConnectionHandlerObserver
       mock_connection_handler_observer;
   connection_handler_->set_connection_handler_observer(
       &mock_connection_handler_observer);
@@ -892,7 +892,7 @@ TEST_F(ConnectionHandlerTest, CloseConnectionSessionsWithMalformedMessage) {
   AddTestSession();
   AddTestService(kAudio);
   AddTestService(kMobileNav);
-  connection_handler_test::ConnectionHandlerObserverMock
+  connection_handler_test::MockConnectionHandlerObserver
       mock_connection_handler_observer;
   connection_handler_->set_connection_handler_observer(
       &mock_connection_handler_observer);
@@ -923,7 +923,7 @@ TEST_F(ConnectionHandlerTest, CloseConnectionSessionsWithCommonReason) {
   AddTestSession();
   AddTestService(kAudio);
   AddTestService(kMobileNav);
-  connection_handler_test::ConnectionHandlerObserverMock
+  connection_handler_test::MockConnectionHandlerObserver
       mock_connection_handler_observer;
   connection_handler_->set_connection_handler_observer(
       &mock_connection_handler_observer);
@@ -1051,7 +1051,7 @@ TEST_F(ConnectionHandlerTest, SessionStarted_WithRpc) {
   // Add virtual device and connection
   AddTestDeviceConnection();
   // Expect that rpc service has started
-  connection_handler_test::ConnectionHandlerObserverMock
+  connection_handler_test::MockConnectionHandlerObserver
       mock_connection_handler_observer;
   connection_handler_->set_connection_handler_observer(
       &mock_connection_handler_observer);

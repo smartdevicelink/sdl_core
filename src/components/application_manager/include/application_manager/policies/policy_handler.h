@@ -485,8 +485,9 @@ class PolicyHandler : public PolicyHandlerInterface,
    * @param device_id unique identifier of device
    * @param application_id The policy aplication id.
    * @param app_types list of hmi types
+   * @return function that will notify update manager about new application
    */
-  void AddApplication(const std::string& application_id) OVERRIDE;
+  StatusNotifier AddApplication(const std::string& application_id) OVERRIDE;
 
   /**
    * Checks whether application is revoked
@@ -738,4 +739,4 @@ class PolicyHandler : public PolicyHandlerInterface,
 
 }  //  namespace policy
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_POLICY_HANDLER_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_POLICIES_POLICY_HANDLER_H_
