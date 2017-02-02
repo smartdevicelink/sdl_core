@@ -61,9 +61,11 @@ namespace test {
 namespace components {
 namespace transport_manager_test {
 
+namespace {
 const std::string kAppStorageFolder = "app_storage_folder";
 const std::string kAppInfoFolder = "app_info_folder";
-const int kAsyncExpectationsTimeout = 10000;
+const uint32_t kAsyncExpectationsTimeout = 10000u;
+}
 
 class TransportManagerImplTest : public ::testing::Test {
  protected:

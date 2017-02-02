@@ -353,7 +353,7 @@ TEST_F(AppLaunchCtrlTest, LaunchMultipleAppsInHMILevelOrder) {
     EXPECT_CALL(connection_handler_mock_,
                 RunAppOnDevice(it->second->device_mac_, it->second->bundle_id_))
         .Times(AtLeast(1))
-        .WillOnce(DoAll(
+        .WillRepeatedly(DoAll(
             InvokeOnAppRegistered(app_launch_ctrl_.get(), it->first.get()),
             NotifyTestAsyncWaiter(&waiter)));
   }

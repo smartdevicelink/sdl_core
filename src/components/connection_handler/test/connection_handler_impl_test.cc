@@ -59,6 +59,10 @@ using ::testing::Mock;
 using ::testing::Return;
 using ::testing::ReturnRefOfCopy;
 
+namespace {
+const uint32_t kAsyncExpectationsTimeout = 10000u;
+}
+
 // For service types and PROTECTION_ON/OFF
 
 enum UnnamedService { kServedService1 = 0x06, kServedService2 = 0x08 };
@@ -816,35 +820,30 @@ TEST_F(ConnectionHandlerTest, CloseSessionWithCommonReason) {
   TestAsyncWaiter waiter;
   uint32_t times = 0;
   EXPECT_CALL(mock_protocol_handler_, SendEndSession(uid_, start_session_id_))
-      .Times(1)
-      .WillRepeatedly(NotifyTestAsyncWaiter(&waiter));
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
   times++;
 
   InSequence seq;
   EXPECT_CALL(mock_connection_handler_observer,
               OnServiceEndedCallback(connection_key_, kMobileNav, kCommon))
-      .Times(1)
-      .WillRepeatedly(NotifyTestAsyncWaiter(&waiter));
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
   times++;
   EXPECT_CALL(mock_connection_handler_observer,
               OnServiceEndedCallback(connection_key_, kAudio, kCommon))
-      .Times(1)
-      .WillRepeatedly(NotifyTestAsyncWaiter(&waiter));
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
   times++;
   EXPECT_CALL(mock_connection_handler_observer,
               OnServiceEndedCallback(connection_key_, kBulk, kCommon))
-      .Times(1)
-      .WillRepeatedly(NotifyTestAsyncWaiter(&waiter));
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
   times++;
   EXPECT_CALL(mock_connection_handler_observer,
               OnServiceEndedCallback(connection_key_, kRpc, kCommon))
-      .Times(1)
-      .WillRepeatedly(NotifyTestAsyncWaiter(&waiter));
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
   times++;
 
   connection_handler_->CloseSession(connection_key_, kCommon);
 
-  EXPECT_TRUE(waiter.WaitFor(times++, 1000));
+  EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
 }
 
 TEST_F(ConnectionHandlerTest, CloseSessionWithFloodReason) {
@@ -862,35 +861,30 @@ TEST_F(ConnectionHandlerTest, CloseSessionWithFloodReason) {
   TestAsyncWaiter waiter;
   uint32_t times = 0;
   EXPECT_CALL(mock_protocol_handler_, SendEndSession(uid_, start_session_id_))
-      .Times(1)
-      .WillRepeatedly(NotifyTestAsyncWaiter(&waiter));
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
   times++;
 
   InSequence seq;
   EXPECT_CALL(mock_connection_handler_observer,
               OnServiceEndedCallback(connection_key_, kMobileNav, kFlood))
-      .Times(1)
-      .WillRepeatedly(NotifyTestAsyncWaiter(&waiter));
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
   times++;
   EXPECT_CALL(mock_connection_handler_observer,
               OnServiceEndedCallback(connection_key_, kAudio, kFlood))
-      .Times(1)
-      .WillRepeatedly(NotifyTestAsyncWaiter(&waiter));
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
   times++;
   EXPECT_CALL(mock_connection_handler_observer,
               OnServiceEndedCallback(connection_key_, kBulk, kFlood))
-      .Times(1)
-      .WillRepeatedly(NotifyTestAsyncWaiter(&waiter));
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
   times++;
   EXPECT_CALL(mock_connection_handler_observer,
               OnServiceEndedCallback(connection_key_, kRpc, kFlood))
-      .Times(1)
-      .WillRepeatedly(NotifyTestAsyncWaiter(&waiter));
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
   times++;
 
   connection_handler_->CloseSession(connection_key_, kFlood);
 
-  EXPECT_TRUE(waiter.WaitFor(times++, 1000));
+  EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
 }
 
 TEST_F(ConnectionHandlerTest, CloseSessionWithMalformedMessage) {
@@ -913,28 +907,24 @@ TEST_F(ConnectionHandlerTest, CloseSessionWithMalformedMessage) {
   InSequence seq;
   EXPECT_CALL(mock_connection_handler_observer,
               OnServiceEndedCallback(connection_key_, kMobileNav, kMalformed))
-      .Times(1)
-      .WillRepeatedly(NotifyTestAsyncWaiter(&waiter));
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
   times++;
   EXPECT_CALL(mock_connection_handler_observer,
               OnServiceEndedCallback(connection_key_, kAudio, kMalformed))
-      .Times(1)
-      .WillRepeatedly(NotifyTestAsyncWaiter(&waiter));
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
   times++;
   EXPECT_CALL(mock_connection_handler_observer,
               OnServiceEndedCallback(connection_key_, kBulk, kMalformed))
-      .Times(1)
-      .WillRepeatedly(NotifyTestAsyncWaiter(&waiter));
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
   times++;
   EXPECT_CALL(mock_connection_handler_observer,
               OnServiceEndedCallback(connection_key_, kRpc, kMalformed))
-      .Times(1)
-      .WillRepeatedly(NotifyTestAsyncWaiter(&waiter));
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
   times++;
 
   connection_handler_->CloseSession(connection_key_, kMalformed);
 
-  EXPECT_TRUE(waiter.WaitFor(times++, 1000));
+  EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
 }
 
 TEST_F(ConnectionHandlerTest, CloseConnectionSessionsWithMalformedMessage) {
@@ -957,28 +947,24 @@ TEST_F(ConnectionHandlerTest, CloseConnectionSessionsWithMalformedMessage) {
   InSequence seq;
   EXPECT_CALL(mock_connection_handler_observer,
               OnServiceEndedCallback(connection_key_, kMobileNav, kMalformed))
-      .Times(1)
-      .WillRepeatedly(NotifyTestAsyncWaiter(&waiter));
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
   times++;
   EXPECT_CALL(mock_connection_handler_observer,
               OnServiceEndedCallback(connection_key_, kAudio, kMalformed))
-      .Times(1)
-      .WillRepeatedly(NotifyTestAsyncWaiter(&waiter));
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
   times++;
   EXPECT_CALL(mock_connection_handler_observer,
               OnServiceEndedCallback(connection_key_, kBulk, kMalformed))
-      .Times(1)
-      .WillRepeatedly(NotifyTestAsyncWaiter(&waiter));
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
   times++;
   EXPECT_CALL(mock_connection_handler_observer,
               OnServiceEndedCallback(connection_key_, kRpc, kMalformed))
-      .Times(1)
-      .WillRepeatedly(NotifyTestAsyncWaiter(&waiter));
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
   times++;
 
   connection_handler_->CloseConnectionSessions(uid_, kMalformed);
 
-  EXPECT_TRUE(waiter.WaitFor(times++, 1000));
+  EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
 }
 
 TEST_F(ConnectionHandlerTest, CloseConnectionSessionsWithCommonReason) {
@@ -996,35 +982,30 @@ TEST_F(ConnectionHandlerTest, CloseConnectionSessionsWithCommonReason) {
   TestAsyncWaiter waiter;
   uint32_t times = 0;
   EXPECT_CALL(mock_protocol_handler_, SendEndSession(uid_, start_session_id_))
-      .Times(1)
-      .WillRepeatedly(NotifyTestAsyncWaiter(&waiter));
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
   times++;
 
   InSequence seq;
   EXPECT_CALL(mock_connection_handler_observer,
               OnServiceEndedCallback(connection_key_, kMobileNav, kCommon))
-      .Times(1)
-      .WillRepeatedly(NotifyTestAsyncWaiter(&waiter));
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
   times++;
   EXPECT_CALL(mock_connection_handler_observer,
               OnServiceEndedCallback(connection_key_, kAudio, kCommon))
-      .Times(1)
-      .WillRepeatedly(NotifyTestAsyncWaiter(&waiter));
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
   times++;
   EXPECT_CALL(mock_connection_handler_observer,
               OnServiceEndedCallback(connection_key_, kBulk, kCommon))
-      .Times(1)
-      .WillRepeatedly(NotifyTestAsyncWaiter(&waiter));
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
   times++;
   EXPECT_CALL(mock_connection_handler_observer,
               OnServiceEndedCallback(connection_key_, kRpc, kCommon))
-      .Times(1)
-      .WillRepeatedly(NotifyTestAsyncWaiter(&waiter));
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
   times++;
 
   connection_handler_->CloseConnectionSessions(uid_, kCommon);
 
-  EXPECT_TRUE(waiter.WaitFor(times++, 1000));
+  EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
 }
 
 TEST_F(ConnectionHandlerTest, StartService_withServices) {

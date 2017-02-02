@@ -185,7 +185,7 @@ TEST_F(HMIMessageHandlerImplTest, SendMessageToHMI_Success) {
   // Wait for the message to be processed
   hmi_handler_->messages_to_hmi()->WaitDumpQueue();
 
-  EXPECT_TRUE(waiter.WaitFor(1, 1000));
+  EXPECT_TRUE(waiter.WaitFor(1, 100));
 }
 
 }  // namespace hmi_message_handler_test

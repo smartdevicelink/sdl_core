@@ -179,6 +179,7 @@ TEST_F(HeartBeatMonitorTest, TwoSessionsElapsed) {
   EXPECT_CALL(connection_handler_mock, CloseSession(_, kSession2, _))
       .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter),
                       RemoveSession(conn, kSession2)));
+  times++;
   EXPECT_CALL(connection_handler_mock, CloseConnection(_))
       .WillOnce(NotifyTestAsyncWaiter(&waiter));
   times++;

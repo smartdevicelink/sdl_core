@@ -73,6 +73,7 @@ using ::testing::DoAll;
 using ::testing::SetArgPointee;
 using ::testing::_;
 
+namespace {
 // Sample data for handshake data emulation
 const int32_t key = 0x1;
 const int32_t seq_number = 0x2;
@@ -88,6 +89,8 @@ uint8_t handshake_data_out[] = {0x6, 0x7, 0x8};
 uint8_t* handshake_data_out_pointer = handshake_data_out;
 const size_t handshake_data_out_size =
     sizeof(handshake_data_out) / sizeof(handshake_data_out[0]);
+const uint32_t kAsyncExpectationsTimeout = 10000u;
+}
 
 class SecurityManagerTest : public ::testing::Test {
  protected:
@@ -282,7 +285,7 @@ TEST_F(SecurityManagerTest, SecurityManager_NULLCryptoManager) {
   const uint8_t data = 0;
   EmulateMobileMessage(header, &data, 1);
 
-  EXPECT_TRUE(waiter.WaitFor(1, 1000));
+  EXPECT_TRUE(waiter.WaitFor(1, kAsyncExpectationsTimeout));
 }
 /*
  * Shall skip all OnMobileMessageSent
@@ -377,7 +380,7 @@ TEST_F(SecurityManagerTest, GetInvalidQueryId) {
   const uint8_t data = 0;
   EmulateMobileMessage(header, &data, 1);
 
-  EXPECT_TRUE(waiter.WaitFor(times, 1000));
+  EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
 }
 /*
  * Shall send Internall Error on call
@@ -633,7 +636,7 @@ TEST_F(SecurityManagerTest, ProccessHandshakeData_WrongDataSize) {
 
   EmulateMobileMessageHandshake(NULL, 0);
 
-  EXPECT_TRUE(waiter.WaitFor(1, 1000));
+  EXPECT_TRUE(waiter.WaitFor(1, kAsyncExpectationsTimeout));
 }
 /*
  * Shall send InternallError on
@@ -676,7 +679,7 @@ TEST_F(SecurityManagerTest, ProccessHandshakeData_ServiceNotProtected) {
   const uint8_t data[] = {0x1, 0x2};
   EmulateMobileMessageHandshake(data, sizeof(data) / sizeof(data[0]));
 
-  EXPECT_TRUE(waiter.WaitFor(times, 1000));
+  EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
 }
 /*
  * Shall send InternallError on getting
@@ -756,7 +759,7 @@ TEST_F(SecurityManagerTest, ProccessHandshakeData_InvalidData) {
   EmulateMobileMessageHandshake(
       handshake_data, handshake_data_size, handshake_emulates);
 
-  EXPECT_TRUE(waiter.WaitFor(times, 1000));
+  EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
 }
 /*
  * Shall send HandshakeData on getting SEND_HANDSHAKE_DATA from mobile side
@@ -828,7 +831,7 @@ TEST_F(SecurityManagerTest, ProccessHandshakeData_Answer) {
   EmulateMobileMessageHandshake(
       handshake_data, handshake_data_size, handshake_emulates);
 
-  EXPECT_TRUE(waiter.WaitFor(times, 1000));
+  EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
 }
 /*
  * Shall call all listeners on success end handshake
@@ -919,7 +922,7 @@ TEST_F(SecurityManagerTest, ProccessHandshakeData_HandshakeFinished) {
   EmulateMobileMessageHandshake(
       handshake_data, handshake_data_size, handshake_emulates);
 
-  EXPECT_TRUE(waiter.WaitFor(times, 1000));
+  EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
 }
 /*
  * Shall not any query on getting empty SEND_INTERNAL_ERROR
