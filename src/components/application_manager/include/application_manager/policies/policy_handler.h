@@ -570,6 +570,15 @@ class PolicyHandler : public PolicyHandlerInterface,
   application_manager::ApplicationManager& application_manager_;
   friend class AppPermissionDelegate;
 
+  /**
+   * @brief Checks if the application with the given policy
+   * application id is registered or it is default id
+   * @param policy_app_id Application policy id
+   * @return TRUE if the application with given id is registered or
+   * it is default id, otherwise FALSE
+   */
+  bool IsUrlAppIdValid(const std::string& policy_app_id) const;
+
   DISALLOW_COPY_AND_ASSIGN(PolicyHandler);
 };
 

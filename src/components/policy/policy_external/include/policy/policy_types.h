@@ -364,6 +364,19 @@ struct MetaInfo {
   std::string language;
 };
 
+struct RetrySequenceURL {
+  int app;
+  int url;
+  RetrySequenceURL(int app_idx, int url_idx) {
+    app = app_idx;
+    url = url_idx;
+  }
+}
+
+typedef struct RetrySequenceURL RetrySequenceURL;
+
+typedef std::pair<std::string, std::string> AppIdURL;
+
 }  //  namespace policy
 
 #endif  // SRC_COMPONENTS_POLICY_POLICY_EXTERNAL_INCLUDE_POLICY_POLICY_TYPES_H_
