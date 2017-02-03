@@ -257,6 +257,8 @@ class PolicyManagerImpl : public PolicyManager {
 
   const PolicySettings& get_settings() const OVERRIDE;
 
+  virtual AppIdURL GetNextUpdateUrl(const EndpointUrls& urls);
+
  private:
   void CheckTriggers();
   /*
@@ -430,6 +432,12 @@ class PolicyManagerImpl : public PolicyManager {
   const PolicySettings* settings_;
   friend struct CheckAppPolicy;
   friend struct ProccessAppGroups;
+
+  /**
+   * @brief Pair of app index and url index from Endpoints vector
+   * that contains all application URLs
+   */
+  RetrySequenceURL retry_sequence_url_;
 };
 
 }  // namespace policy

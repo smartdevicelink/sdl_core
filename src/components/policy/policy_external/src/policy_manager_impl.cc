@@ -75,7 +75,8 @@ PolicyManagerImpl::PolicyManagerImpl()
 #endif  // SDL_REMOTE_CONTROL
     , retry_sequence_timeout_(60)
     , retry_sequence_index_(0)
-    , ignition_check(true) {
+    , ignition_check(true)
+    , retry_sequence_url_(0, 0) {
 }
 
 PolicyManagerImpl::PolicyManagerImpl(bool in_memory)
@@ -88,7 +89,8 @@ PolicyManagerImpl::PolicyManagerImpl(bool in_memory)
 #endif  // SDL_REMOTE_CONTROL
     , retry_sequence_timeout_(60)
     , retry_sequence_index_(0)
-    , ignition_check(true) {
+    , ignition_check(true)
+    , retry_sequence_url_(0, 0) {
 }
 
 void PolicyManagerImpl::set_listener(PolicyListener* listener) {
@@ -1241,6 +1243,27 @@ void PolicyManagerImpl::SetDecryptedCertificate(
     const std::string& certificate) {
   LOG4CXX_AUTO_TRACE(logger_);
   cache_->SetDecryptedCertificate(certificate);
+}
+
+AppIdURL PolicyManagerImpl::GetNextUpdateUrl(const EndpointUrls& urls) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  AppIdURL next_app_url;
+  uint32_t url = retry_sequence_url_.url;
+  uint32_t app = retry_sequence_url_.app;
+
+  if (url >= urls[app].url.size()) {
+    url = 0;
+    if (++app >= urls.size()) {
+      app = 0;
+    }
+  }
+
+  next_app_url = std::make_pair(urls[app].app_id, urls[app].url[url]);
+  retry_sequence_url_.url = url + 1;
+  retry_sequence_url_.app = app;
+
+  return next_app_url;
 }
 
 /**

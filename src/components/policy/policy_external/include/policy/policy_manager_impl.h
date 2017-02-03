@@ -419,6 +419,12 @@ class PolicyManagerImpl : public PolicyManager {
 
   const PolicySettings* settings_;
   friend struct CheckAppPolicy;
+
+  /**
+   * @brief Pair of app index and url index from Endpoints vector
+   * that contains all application URLs
+   */
+  RetrySequenceURL retry_sequence_url_;
   friend struct ProccessAppGroups;
 };
 
