@@ -365,15 +365,14 @@ struct MetaInfo {
 };
 
 struct RetrySequenceURL {
-  int app;
-  int url;
-  RetrySequenceURL(int app_idx, int url_idx) {
-    app = app_idx;
-    url = url_idx;
+  int app_idx_;
+  int url_idx_;
+  RetrySequenceURL(int app, int url) : app_idx_(app), url_idx_(url) {}
+  RetrySequenceURL() {
+    app_idx_ = 0;
+    url_idx_ = 0;
   }
 }
-
-typedef struct RetrySequenceURL RetrySequenceURL;
 
 typedef std::pair<std::string, std::string> AppIdURL;
 
