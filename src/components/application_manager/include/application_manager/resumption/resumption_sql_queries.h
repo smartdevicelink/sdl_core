@@ -63,6 +63,7 @@ extern const std::string kDeleteApplicationFilesArray;
 extern const std::string kDeleteSubMenu;
 extern const std::string kDeleteApplicationSubMenuArray;
 extern const std::string kDeleteApplicationSubscribtionsArray;
+extern const std::string kDeleteImageFromSubMenu;
 extern const std::string kDeleteImageFromCommands;
 extern const std::string kDeleteVrCommands;
 extern const std::string kDeleteCommands;
