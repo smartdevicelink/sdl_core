@@ -257,7 +257,7 @@ class PolicyManagerImpl : public PolicyManager {
 
   const PolicySettings& get_settings() const OVERRIDE;
 
-  virtual AppIdURL GetNextUpdateUrl(const EndpointUrls& urls);
+  virtual AppIdURL GetNextUpdateUrl(const EndpointUrls& urls) OVERRIDE;
 
  private:
   void CheckTriggers();

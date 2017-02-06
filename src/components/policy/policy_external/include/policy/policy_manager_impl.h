@@ -247,6 +247,7 @@ class PolicyManagerImpl : public PolicyManager {
 
   const PolicySettings& get_settings() const OVERRIDE;
 
+  virtual AppIdURL GetNextUpdateUrl(const EndpointUrls& urls) OVERRIDE;
   bool SaveExternalConsentStatus(const ExternalConsentStatus& status) OVERRIDE;
   ExternalConsentStatus GetExternalConsentStatus() OVERRIDE;
 
