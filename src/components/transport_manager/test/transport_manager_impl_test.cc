@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,16 +37,15 @@
 #include "transport_manager/transport_manager_impl.h"
 
 #include "transport_manager/mock_telemetry_observer.h"
-#include "transport_manager/transport_manager_listener_mock.h"
-#include "transport_manager/mock_transport_adapter_listener.h"
+#include "transport_manager/mock_transport_manager_listener.h"
 #include "transport_manager/mock_telemetry_observer.h"
-#include "transport_manager/transport_adapter_mock.h"
+#include "transport_manager/transport_adapter/mock_transport_adapter.h"
 #include "transport_manager/mock_transport_manager_impl.h"
 #include "transport_manager/mock_transport_manager_settings.h"
 #include "utils/make_shared.h"
 #include "utils/shared_ptr.h"
 
-#include "resumption/last_state.h"
+#include "resumption/last_state_impl.h"
 #include "utils/make_shared.h"
 
 using ::testing::_;
@@ -76,10 +75,11 @@ class TransportManagerImplTest : public ::testing::Test {
       , dev_info_(device_handle_, mac_address_, "TestDeviceName", "BTMAC") {}
 
   void SetUp() OVERRIDE {
-    resumption::LastState last_state_("app_storage_folder", "app_info_storage");
+    resumption::LastStateImpl last_state_("app_storage_folder",
+                                          "app_info_storage");
     tm_.Init(last_state_);
     mock_adapter_ = new MockTransportAdapter();
-    tm_listener_ = MakeShared<TransportManagerListenerMock>();
+    tm_listener_ = MakeShared<MockTransportManagerListener>();
 
 #ifdef TELEMETRY_MONITOR
     tm_.SetTelemetryObserver(&mock_metric_observer_);
@@ -318,7 +318,7 @@ class TransportManagerImplTest : public ::testing::Test {
 #endif  // TELEMETRY_MONITOR
   MockTransportAdapter* mock_adapter_;
 
-  utils::SharedPtr<TransportManagerListenerMock> tm_listener_;
+  utils::SharedPtr<MockTransportManagerListener> tm_listener_;
   const ApplicationHandle application_id_ = 1;
   ConnectionUID connection_key_;
   RawMessagePtr test_message_;

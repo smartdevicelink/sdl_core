@@ -316,4 +316,4 @@ inline int32_t DynamicApplicationDataImpl::perform_interaction_mode() const {
 
 }  //  namespace application_manager
 
-#endif  //  SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_DATA_IMPL_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_DATA_IMPL_H_

@@ -35,7 +35,7 @@
 
 namespace test {
 namespace components {
-namespace utils {
+namespace utils_test {
 
 using namespace date_time;
 TEST(DateTimeTest, GetCurrentTime) {
@@ -398,6 +398,6 @@ TEST(DateTimeTest, Operator_minus_TimevalStruct_negative) {
   ASSERT_NE(-8000000, date_time::DateTime::getSecs(time2 - time1));
 }
 
-}  // namespace utils
+}  // namespace utils_test
 }  // namespace components
 }  // namespace test

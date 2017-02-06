@@ -36,7 +36,7 @@
 #include "protocol/common.h"
 #include "protocol_handler/control_message_matcher.h"
 #include "protocol_handler/mock_protocol_handler.h"
-#include "protocol_handler/protocol_observer_mock.h"
+#include "protocol_handler/mock_protocol_observer.h"
 #include "protocol_handler/mock_protocol_handler_settings.h"
 #include "protocol_handler/mock_session_observer.h"
 #include "connection_handler/mock_connection_handler.h"

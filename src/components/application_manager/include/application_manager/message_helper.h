@@ -189,7 +189,7 @@ class MessageHelper {
   * @param hmi_level Desired HMI Level
   */
   static std::string StringifiedHMILevel(
-      mobile_apis::HMILevel::eType hmi_level);
+      const mobile_apis::HMILevel::eType hmi_level);
 
   /*
   * @brief Used to obtain function name by its id

@@ -1,4 +1,4 @@
-# Copyright (c) 2015, Ford Motor Company
+# Copyright (c) 2016, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,9 +28,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-if(BUILD_TESTS)
-
-set(appMain_DIR ${CMAKE_SOURCE_DIR}/src/appMain)
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
 include_directories(
     ${GMOCK_INCLUDE_DIRECTORY}
@@ -46,15 +44,7 @@ set(LIBRARIES
     ProtocolHandler
 )
 
-set(SOURCES
-    connection_handler_impl_test.cc
-    connection_test.cc
-    device_test.cc
-    heart_beat_monitor_test.cc
-)
+collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}")
+create_test(connection_handler_test "${SOURCES}" "${LIBRARIES}")
 
-file(COPY ${appMain_DIR}/smartDeviceLink.ini DESTINATION "./")
-
-create_test("connection_handler_test" "${SOURCES}" "${LIBRARIES}")
-
-endif()
+file(COPY ${CMAKE_SOURCE_DIR}/src/appMain/smartDeviceLink.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

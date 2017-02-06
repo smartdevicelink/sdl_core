@@ -34,8 +34,8 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_RESUMPTION_RESUMPTION_DATA_DB_H_
 #include "application_manager/resumption/resumption_data.h"
 
-#include "sql_database.h"
-#include "sql_query.h"
+#include "utils/sqlite_wrapper/sql_database.h"
+#include "utils/sqlite_wrapper/sql_query.h"
 
 namespace resumption {
 

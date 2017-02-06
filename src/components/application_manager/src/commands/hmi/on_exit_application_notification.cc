@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -69,11 +69,6 @@ void OnExitApplicationNotification::Run() {
 
   switch (reason) {
     case Common_ApplicationExitReason::DRIVER_DISTRACTION_VIOLATION: {
-      application_manager_.ManageMobileCommand(
-          MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
-              app_id,
-              AppInterfaceUnregisteredReason::DRIVER_DISTRACTION_VIOLATION),
-          commands::Command::ORIGIN_SDL);
       break;
     }
     case Common_ApplicationExitReason::USER_EXIT: {

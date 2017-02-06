@@ -47,6 +47,7 @@
 #include "policy/cache_manager.h"
 #include "policy/update_status_manager.h"
 #include "config_profile/profile.h"
+#include "utils/make_shared.h"
 
 #ifdef SDL_REMOTE_CONTROL
 #include "policy/access_remote.h"
@@ -1231,7 +1232,27 @@ void PolicyManagerImpl::SetDecryptedCertificate(
   cache_->SetDecryptedCertificate(certificate);
 }
 
-void PolicyManagerImpl::AddApplication(const std::string& application_id) {
+/**
+ * @brief The CallStatusChange class notify update manager aboun new application
+ */
+class CallStatusChange : public utils::Callable {
+ public:
+  CallStatusChange(UpdateStatusManager& upd_manager,
+                   const DeviceConsent& device_consent)
+      : upd_manager_(upd_manager), device_consent_(device_consent) {}
+
+  // Callable interface
+  void operator()() const {
+    upd_manager_.OnNewApplicationAdded(device_consent_);
+  }
+
+ private:
+  UpdateStatusManager& upd_manager_;
+  const DeviceConsent device_consent_;
+};
+
+StatusNotifier PolicyManagerImpl::AddApplication(
+    const std::string& application_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   const std::string device_id = GetCurrentDeviceId(application_id);
   DeviceConsent device_consent = GetUserConsentForDevice(device_id);
@@ -1239,9 +1260,11 @@ void PolicyManagerImpl::AddApplication(const std::string& application_id) {
 
   if (IsNewApplication(application_id)) {
     AddNewApplication(application_id, device_consent);
-    update_status_manager_.OnNewApplicationAdded(device_consent);
+    return utils::MakeShared<CallStatusChange>(update_status_manager_,
+                                               device_consent);
   } else {
     PromoteExistedApplication(application_id, device_consent);
+    return utils::MakeShared<utils::CallNothing>();
   }
 }
 

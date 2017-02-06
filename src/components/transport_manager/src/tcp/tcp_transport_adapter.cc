@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -110,7 +110,7 @@ void TcpTransportAdapter::Store() const {
     }
   }
   tcp_adapter_dictionary["devices"] = devices_dictionary;
-  Json::Value& dictionary = last_state().dictionary;
+  Json::Value& dictionary = last_state().get_dictionary();
   dictionary["TransportManager"]["TcpAdapter"] = tcp_adapter_dictionary;
 }
 
@@ -118,7 +118,7 @@ bool TcpTransportAdapter::Restore() {
   LOG4CXX_AUTO_TRACE(logger_);
   bool errors_occurred = false;
   const Json::Value tcp_adapter_dictionary =
-      last_state().dictionary["TransportManager"]["TcpAdapter"];
+      last_state().get_dictionary()["TransportManager"]["TcpAdapter"];
   const Json::Value devices_dictionary = tcp_adapter_dictionary["devices"];
   for (Json::Value::const_iterator i = devices_dictionary.begin();
        i != devices_dictionary.end();

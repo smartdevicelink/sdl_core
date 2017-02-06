@@ -490,10 +490,10 @@ struct SmartObjectToInt {
     return item.asInt();
   }
 };
-
-void PolicyHandler::AddApplication(const std::string& application_id) {
-  POLICY_LIB_CHECK_VOID();
-  policy_manager_->AddApplication(application_id);
+StatusNotifier PolicyHandler::AddApplication(
+    const std::string& application_id) {
+  POLICY_LIB_CHECK(utils::MakeShared<utils::CallNothing>());
+  return policy_manager_->AddApplication(application_id);
 }
 
 void PolicyHandler::AddDevice(const std::string& device_id,
@@ -1371,7 +1371,7 @@ void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string) {
     return;
   }
   MessageHelper::SendPolicyUpdate(policy_snapshot_full_path,
-                                  policy_manager_->TimeoutExchangeMSec(),
+                                  TimeoutExchangeSec(),
                                   policy_manager_->RetrySequenceDelaysSeconds(),
                                   application_manager_);
 #else   // PROPRIETARY_MODE

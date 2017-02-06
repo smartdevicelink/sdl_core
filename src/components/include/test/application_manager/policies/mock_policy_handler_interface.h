@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_POLICY_HANDLER_INTERFACE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_POLICY_HANDLER_INTERFACE_H_
+#ifndef SRC_COMPONENTS_INCLUDE_TEST_APPLICATION_MANAGER_POLICIES_MOCK_POLICY_HANDLER_INTERFACE_H_
+#define SRC_COMPONENTS_INCLUDE_TEST_APPLICATION_MANAGER_POLICIES_MOCK_POLICY_HANDLER_INTERFACE_H_
 
 #include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/application_manager.h"
@@ -173,7 +173,8 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
                           const std::string& policy_app_id));
   MOCK_METHOD0(OnPTExchangeNeeded, void());
   MOCK_METHOD1(GetAvailableApps, void(std::queue<std::string>& apps));
-  MOCK_METHOD1(AddApplication, void(const std::string& application_id));
+  MOCK_METHOD1(AddApplication,
+               policy::StatusNotifier(const std::string& application_id));
   MOCK_METHOD1(IsApplicationRevoked, bool(const std::string& app_id));
   MOCK_METHOD0(OnUpdateRequestSentToMobile, void());
   MOCK_CONST_METHOD1(HeartBeatTimeout, uint32_t(const std::string& app_id));
@@ -302,4 +303,4 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
 }  // namespace components
 }  // namespace test
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_POLICY_HANDLER_INTERFACE_H_
+#endif  // SRC_COMPONENTS_INCLUDE_TEST_APPLICATION_MANAGER_POLICIES_MOCK_POLICY_HANDLER_INTERFACE_H_

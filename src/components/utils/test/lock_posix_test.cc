@@ -35,7 +35,7 @@
 
 namespace test {
 namespace components {
-namespace utils {
+namespace utils_test {
 
 using sync_primitives::Lock;
 
@@ -118,6 +118,6 @@ TEST(LockPosixTest, TryLockRecursiveMutex_ExpectMutexLockedTwice) {
   test_mutex.Release();
 }
 
-}  // namespace utils
+}  // namespace utils_test
 }  // namespace components
 }  // namespace test

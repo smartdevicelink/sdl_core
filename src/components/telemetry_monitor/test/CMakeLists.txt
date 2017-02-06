@@ -28,7 +28,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-if(BUILD_TESTS)
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
 include_directories(
   include
@@ -40,20 +40,10 @@ include_directories(
   ${COMPONENTS_DIR}/resumption/include
   ${JSONCPP_INCLUDE_DIRECTORY}
 )
-  
 
-set(testSources
-  metric_wrapper_test.cc
-  telemetry_monitor_test.cc
-  protocol_handler_metric_test.cc
-  protocol_handler_observer_test.cc
-  transport_manager_metric_test.cc
-  transport_manager_observer_test.cc
-  application_manager_metric_test.cc
-  application_manager_observer_test.cc
-)
+collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}")
 
-set(testLibraries
+set(LIBRARIES
   gmock
   TelemetryMonitor
   jsoncpp
@@ -68,22 +58,20 @@ set(testLibraries
   MessageHelper
   Resumption
   jsoncpp
-  transport_manager
+  TransportManager
   MediaManager
   ProtocolHandler
   connectionHandler
 )
 
 if (BUILD_USB_SUPPORT)
-  list(APPEND testLibraries Libusb-1.0.16)
+  list(APPEND LIBRARIES Libusb-1.0.16)
 endif()
 
 if (BUILD_BT_SUPPORT)
-  list(APPEND testLibraries bluetooth)
+  list(APPEND LIBRARIES bluetooth)
 endif()
 
-file(COPY log4cxx.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+create_test("telemetry_monitor_test" "${SOURCES}" "${LIBRARIES}")
 
-create_test("telemetry_monitor_test" "${testSources}" "${testLibraries}")
-
-endif()
+file(COPY ${COMPONENTS_DIR}/telemetry_monitor/test/log4cxx.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
