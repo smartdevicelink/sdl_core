@@ -43,6 +43,7 @@
 #include "application_manager/mock_message_helper.h"
 #include "application_manager/event_engine/event.h"
 #include "application_manager/mock_hmi_interface.h"
+#include "utils/file_system.h"
 
 namespace test {
 namespace components {

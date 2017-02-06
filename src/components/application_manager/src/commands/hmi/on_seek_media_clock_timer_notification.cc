@@ -53,7 +53,15 @@ void OnSeekMediaClockTimerNotification::Run() {
   (*message_)[strings::params][strings::function_id] =
       static_cast<int32_t>(mobile_apis::FunctionID::OnSeekMediaClockTimerID);
 
-  SendNotificationToMobile(message_);
+  const ApplicationSet& accessor =
+      application_manager_.applications().GetData();
+
+  ApplicationSetIt it = accessor.begin();
+  for (; accessor.end() != it; ++it) {
+    const ApplicationSharedPtr app = *it;
+    (*message_)[strings::params][strings::connection_key] = app->app_id();
+    SendNotificationToMobile(message_);
+  }
 }
 
 }  // namespace hmi

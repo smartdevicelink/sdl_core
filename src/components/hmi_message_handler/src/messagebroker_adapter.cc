@@ -96,6 +96,7 @@ void MessageBrokerAdapter::SubscribeTo() {
   MessageBrokerController::subscribeTo(
       "BasicCommunication.OnExitAllApplications");
   MessageBrokerController::subscribeTo("UI.OnDriverDistraction");
+  MessageBrokerController::subscribeTo("UI.OnSeekMediaClockTimer");
   MessageBrokerController::subscribeTo("UI.OnSystemContext");
   MessageBrokerController::subscribeTo("UI.OnAppActivated");
   MessageBrokerController::subscribeTo("UI.OnKeyboardInput");
