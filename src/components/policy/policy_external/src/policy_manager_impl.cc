@@ -1195,20 +1195,21 @@ void PolicyManagerImpl::SetDecryptedCertificate(
 AppIdURL PolicyManagerImpl::GetNextUpdateUrl(const EndpointUrls& urls) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  AppIdURL next_app_url;
-  uint32_t url = retry_sequence_url_.url;
-  uint32_t app = retry_sequence_url_.app;
+  uint32_t current_url_idx = retry_sequence_url_.url_idx_;
+  uint32_t current_app_idx = retry_sequence_url_.app_idx_;
 
-  if (url >= urls[app].url.size()) {
-    url = 0;
-    if (++app >= urls.size()) {
-      app = 0;
+  if (current_url_idx >= urls[current_app_idx].url.size()) {
+    current_url_idx = 0;
+    if (++current_app_idx >= urls.size()) {
+      current_app_idx = 0;
     }
   }
 
-  next_app_url = std::make_pair(urls[app].app_id, urls[app].url[url]);
-  retry_sequence_url_.url = url + 1;
-  retry_sequence_url_.app = app;
+  const std::string app = urls[current_app_idx].app_id;
+  const std::string url = urls[current_app_idx].url[current_url_idx];
+  const AppIdURL next_app_url = std::make_pair(app, url);
+  retry_sequence_url_.url_idx_ = current_url_idx + 1;
+  retry_sequence_url_.app_idx_ = current_app_idx;
 
   return next_app_url;
 }

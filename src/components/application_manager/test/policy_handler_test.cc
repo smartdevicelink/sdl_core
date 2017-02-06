@@ -85,6 +85,8 @@ using ::testing::DoAll;
 using ::testing::SetArgReferee;
 using ::testing::Mock;
 
+const std::string kDummyData = "some_data";
+
 class PolicyHandlerTest : public ::testing::Test {
  public:
   PolicyHandlerTest()
@@ -1349,9 +1351,9 @@ TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlAdded) {
   EnablePolicyAndPolicyManagerMock();
   BinaryMessage msg;
   EndpointUrls test_data;
-  EndpointData data("some_data");
+  EndpointData data(kDummyData);
   test_data.push_back(data);
-  AppIdURL next_app_url = std::make_pair("default", "some data");
+  AppIdURL next_app_url = std::make_pair(kDefaultId, kDummyData);
   ApplicationSharedPtr mock_app;
 
 #ifdef PROPRIETARY_MODE

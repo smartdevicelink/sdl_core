@@ -484,7 +484,7 @@ class PolicyManager : public usage_statistics::StatisticsManager {
   /**
    * @brief Finds the next URL that must be sent on OnSystemRequest retry
    * @param urls vector of vectors that contain urls for each application
-   * @return Pair of policy application id and application url
+   * @return Pair of policy application id and application url id
    */
   virtual AppIdURL GetNextUpdateUrl(const EndpointUrls& urls) = 0;
  protected:

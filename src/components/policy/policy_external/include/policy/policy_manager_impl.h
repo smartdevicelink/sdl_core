@@ -205,6 +205,10 @@ class PolicyManagerImpl : public PolicyManager {
 
   const PolicySettings& get_settings() const OVERRIDE;
 
+  AppIdURL GetNextUpdateUrl(const EndpointUrls& urls) OVERRIDE;
+
+  AppIdURL RetrySequenceUrl(const struct RetrySequenceURL& rs,
+                            const EndpointUrls& urls) const OVERRIDE;
  protected:
   virtual utils::SharedPtr<policy_table::Table> Parse(
       const BinaryMessage& pt_content);

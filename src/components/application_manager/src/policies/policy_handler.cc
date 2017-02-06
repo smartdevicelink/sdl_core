@@ -1366,8 +1366,7 @@ void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string) {
     return;
   }
 
-  AppIdURL app_url;
-  app_url = policy_manager_->GetNextUpdateUrl(urls);
+  AppIdURL app_url = policy_manager_->GetNextUpdateUrl(urls);
   while (!IsUrlAppIdValid(app_url.first)) {
     app_url = policy_manager_->GetNextUpdateUrl(urls);
   }
@@ -1800,14 +1799,11 @@ void PolicyHandler::Add(const std::string& app_id,
 }
 
 bool PolicyHandler::IsUrlAppIdValid(const std::string& policy_app_id) const {
-  bool is_registered = false;
-  bool is_default = false;
-
   ApplicationSharedPtr app =
       application_manager_.application_by_policy_id(policy_app_id);
 
-  is_registered = (app && (app->IsRegistered()));
-  is_default = (policy_app_id == policy::kDefaultId);
+  const bool is_registered = (app && (app->IsRegistered()));
+  const bool is_default = (policy_app_id == policy::kDefaultId);
 
   return (is_registered || is_default);
 }
