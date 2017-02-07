@@ -1353,7 +1353,7 @@ TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlAdded) {
   EndpointUrls test_data;
   EndpointData data(kDummyData);
   test_data.push_back(data);
-  AppIdURL next_app_url = std::make_pair(kDefaultId, kDummyData);
+  AppIdURL next_app_url = std::make_pair(0, 0);
   ApplicationSharedPtr mock_app;
 
 #ifdef PROPRIETARY_MODE
