@@ -120,7 +120,7 @@ class SetGlobalPropertiesRequestTest
     smart_objects::SmartObject keyboard_properties =
         smart_objects::SmartObject(smart_objects::SmartType_Map);
     keyboard_properties[strings::auto_complete_text] = kValidString;
-    keyboard_properties[strings::auto_complete_list][0] = kValidString;
+    keyboard_properties[hmi_request::auto_complete_list][0] = kValidString;
 
     smart_objects::SmartObject msg_params =
         smart_objects::SmartObject(smart_objects::SmartType_Map);
@@ -587,8 +587,8 @@ TEST_F(SetGlobalPropertiesRequestTest,
   test_so[8][msg_params][keyboard_properties][auto_complete_text] =
       kNotValidString;
 
-  test_so[9][msg_params][keyboard_properties][auto_complete_list][0] =
-      kNotValidString;
+  test_so[9][msg_params][keyboard_properties][hmi_request::auto_complete_list]
+         [0] = kNotValidString;
 
   for (size_t i = 0; i < test_so.length(); ++i) {
     TestOfNotValidParameters(test_so[i][msg_params]);

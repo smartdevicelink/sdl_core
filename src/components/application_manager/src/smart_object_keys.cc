@@ -3,7 +3,8 @@
 namespace application_manager {
 
 namespace strings {
-
+// TODO (dcherniev) : Remove from strings namespace all duplicate fields that
+// are present in other more specific namespaces
 const char* params = "params";
 const char* message_type = "message_type";
 const char* correlation_id = "correlation_id";
@@ -185,7 +186,6 @@ const char* key_press_mode = "keypressMode";
 // duplicate names from hmi_request
 const char* limited_character_list = "limitedCharacterList";
 const char* auto_complete_text = "autoCompleteText";
-const char* auto_complete_list = "autoCompleteList";
 const char* navigation_text = "navigationText";
 
 // vehicle info

@@ -218,7 +218,6 @@ extern const char* key_press_mode;
 // duplicate names from hmi_request
 extern const char* limited_character_list;
 extern const char* auto_complete_text;
-extern const char* auto_complete_list;
 extern const char* navigation_text;
 
 // vehicle info

@@ -400,7 +400,7 @@ void SetGlobalPropertiesRequest::PrepareUIRequestMenuAndKeyboardData(
             strings::auto_complete_text);
     const bool is_auto_complete_list_present =
         out_params[hmi_request::keyboard_properties].keyExists(
-            strings::auto_complete_list);
+            hmi_request::auto_complete_list);
     if (is_auto_complete_list_present && is_auto_complete_text_present) {
       out_params[hmi_request::keyboard_properties].erase(
           strings::auto_complete_text);
@@ -566,10 +566,10 @@ bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
     }
 
     if (msg_params[strings::keyboard_properties].keyExists(
-            strings::auto_complete_list)) {
+            hmi_request::auto_complete_list)) {
       const smart_objects::SmartArray* acl_array =
-          msg_params[strings::keyboard_properties][strings::auto_complete_list]
-              .asArray();
+          msg_params[strings::keyboard_properties]
+                    [hmi_request::auto_complete_list].asArray();
 
       smart_objects::SmartArray::const_iterator it_acl = acl_array->begin();
       smart_objects::SmartArray::const_iterator it_acl_end = acl_array->end();
