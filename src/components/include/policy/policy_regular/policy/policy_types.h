@@ -313,6 +313,11 @@ struct MetaInfo {
   std::string language;
 };
 
+/**
+ * @brief The index of the application and the index of its URL
+ * from the Endpoints vector that will be sent on the next
+ * OnSystemRequest retry sequence
+ */
 struct RetrySequenceURL {
   int app_idx_;
   int url_idx_;
@@ -323,7 +328,7 @@ struct RetrySequenceURL {
   }
 };
 
-typedef std::pair<std::string, std::string> AppIdURL;
+typedef std::pair<int, int> AppIdURL;
 
 }  //  namespace policy
 

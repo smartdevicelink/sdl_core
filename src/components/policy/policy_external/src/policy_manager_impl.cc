@@ -1195,21 +1195,26 @@ void PolicyManagerImpl::SetDecryptedCertificate(
 AppIdURL PolicyManagerImpl::GetNextUpdateUrl(const EndpointUrls& urls) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  uint32_t current_url_idx = retry_sequence_url_.url_idx_;
-  uint32_t current_app_idx = retry_sequence_url_.app_idx_;
+  const AppIdURL next_app_url = RetrySequenceUrl(retry_sequence_url_, urls);
 
-  if (current_url_idx >= urls[current_app_idx].url.size()) {
-    current_url_idx = 0;
-    if (++current_app_idx >= urls.size()) {
-      current_app_idx = 0;
+  retry_sequence_url_.url_idx_ = next_app_url.second + 1;
+  retry_sequence_url_.app_idx_ = next_app_url.first;
+
+  return next_app_url;
+}
+
+AppIdURL PolicyManagerImpl::RetrySequenceUrl(const struct RetrySequenceURL& rs,
+                                             const EndpointUrls& urls) const {
+  uint32_t url_idx = rs.url_idx_;
+  uint32_t app_idx = rs.app_idx_;
+
+  if (url_idx >= urls[app_idx].url.size()) {
+    url_idx = 0;
+    if (++app_idx >= urls.size()) {
+      app_idx = 0;
     }
   }
-
-  const std::string app = urls[current_app_idx].app_id;
-  const std::string url = urls[current_app_idx].url[current_url_idx];
-  const AppIdURL next_app_url = std::make_pair(app, url);
-  retry_sequence_url_.url_idx_ = current_url_idx + 1;
-  retry_sequence_url_.app_idx_ = current_app_idx;
+  const AppIdURL next_app_url = std::make_pair(app_idx, url_idx);
 
   return next_app_url;
 }

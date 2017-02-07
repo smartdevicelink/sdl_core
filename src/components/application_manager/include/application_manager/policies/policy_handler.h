@@ -573,11 +573,13 @@ class PolicyHandler : public PolicyHandlerInterface,
   /**
    * @brief Checks if the application with the given policy
    * application id is registered or it is default id
-   * @param policy_app_id Application policy id
-   * @return TRUE if the application with given id is registered or
-   * it is default id, otherwise FALSE
+   * @param app_idx Application idx from EndpointUrls vector
+   * @param urls EndpointUrls vector
+   * @return TRUE if the vector with URLs with given idx is not empty
+   * and is related to a registered application or these are default URLs,
+   * otherwise FALSE
    */
-  bool IsUrlAppIdValid(const std::string& policy_app_id) const;
+  bool IsUrlAppIdValid(const int app_idx, const EndpointUrls& urls) const;
 
   DISALLOW_COPY_AND_ASSIGN(PolicyHandler);
 };
