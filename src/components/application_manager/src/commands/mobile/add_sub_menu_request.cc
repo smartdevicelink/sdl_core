@@ -95,8 +95,12 @@ void AddSubMenuRequest::Run() {
       (*message_)[strings::msg_params][strings::menu_name];
   msg_params[strings::app_id] = app->app_id();
 
-  if (((*message_)[strings::msg_params].keyExists(strings::sub_menu_icon)) &&
-      CheckSubMenuIcon()) {
+  if (((*message_)[strings::msg_params].keyExists(strings::sub_menu_icon))) {
+    if (!CheckSubMenuIcon()) {
+      LOG4CXX_ERROR(logger_, "Sub-menu icon is not valid.");
+      SendResponse(false, mobile_apis::Result::INVALID_DATA);
+      return;
+    }
     msg_params[strings::sub_menu_icon] =
         (*message_)[strings::msg_params][strings::sub_menu_icon];
   }
@@ -163,9 +167,6 @@ bool AddSubMenuRequest::CheckSubMenuName() {
 }
 
 bool AddSubMenuRequest::CheckSubMenuIcon() {
-  if (!(*message_)[strings::msg_params].keyExists(strings::sub_menu_icon)) {
-    return false;
-  }
   const std::string str =
       (*message_)[strings::msg_params][strings::sub_menu_icon][strings::value]
           .asString();
