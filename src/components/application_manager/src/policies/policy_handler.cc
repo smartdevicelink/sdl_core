@@ -1415,10 +1415,11 @@ void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string) {
   }
 
   AppIdURL app_url = policy_manager_->GetNextUpdateUrl(urls);
-  while (!IsUrlAppIdValid(app_url.first)) {
+  while (!IsUrlAppIdValid(app_url.first, urls)) {
     app_url = policy_manager_->GetNextUpdateUrl(urls);
   }
-  SendMessageToSDK(pt_string, app_url.second);
+  const std::string& url = urls[app_url.first].url[app_url.second];
+  SendMessageToSDK(pt_string, url);
 #endif  // PROPRIETARY_MODE
   // reset update required false
   OnUpdateRequestSentToMobile();
@@ -1854,14 +1855,18 @@ void PolicyHandler::Add(const std::string& app_id,
   policy_manager_->Add(app_id, type, timespan_seconds);
 }
 
-bool PolicyHandler::IsUrlAppIdValid(const std::string& policy_app_id) const {
-  ApplicationSharedPtr app =
-      application_manager_.application_by_policy_id(policy_app_id);
+bool PolicyHandler::IsUrlAppIdValid(const int app_idx,
+                                    const EndpointUrls& urls) const {
+  const EndpointData& app_data = urls[app_idx];
+  const std::vector<std::string> app_urls = app_data.url;
+  const ApplicationSharedPtr app =
+      application_manager_.application_by_policy_id(app_data.app_id);
 
   const bool is_registered = (app && (app->IsRegistered()));
-  const bool is_default = (policy_app_id == policy::kDefaultId);
+  const bool is_default = (app_data.app_id == policy::kDefaultId);
+  const bool is_empty_urls = app_urls.empty();
 
-  return (is_registered || is_default);
+  return ((is_registered && !is_empty_urls) || is_default);
 }
 #ifdef SDL_REMOTE_CONTROL
 void PolicyHandler::UpdateHMILevel(ApplicationSharedPtr app,
