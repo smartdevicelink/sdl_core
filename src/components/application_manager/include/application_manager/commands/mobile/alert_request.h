@@ -106,15 +106,8 @@ class AlertRequest : public CommandRequestImpl {
    *
    * @param app_id Id of application requested this RPC
    *
-   * @param tts_chunks_exists if tts chunks exists in
-   * message contains true, otherwise contains false
-   *
-   * @param length_tts_chunks contains length of array
-   * tts chunks.
    */
-  void SendSpeakRequest(int32_t app_id,
-                        bool tts_chunks_exists,
-                        size_t length_tts_chunks);
+  void SendSpeakRequest(int32_t app_id);
 
   /*
    * @brief Tells if there are sent requests without responses
@@ -147,6 +140,7 @@ class AlertRequest : public CommandRequestImpl {
   hmi_apis::Common_Result::eType tts_speak_result_;
   std::string ui_response_info_;
   std::string tts_response_info_;
+  bool is_tts_chunk_exist_;
 
   DISALLOW_COPY_AND_ASSIGN(AlertRequest);
 };

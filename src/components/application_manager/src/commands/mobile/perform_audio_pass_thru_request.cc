@@ -32,6 +32,7 @@
  */
 
 #include <cstring>
+
 #include "application_manager/commands/mobile/perform_audio_pass_thru_request.h"
 
 #include "application_manager/application_impl.h"
@@ -96,9 +97,9 @@ void PerformAudioPassThruRequest::Run() {
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
+
   // According with new implementation processing of UNSUPPORTE_RESOURCE
   // need set flag before sending to hmi
-
   ProcessAudioPassThruIcon(app);
   awaiting_ui_response_ = true;
   if ((*message_)[str::msg_params].keyExists(str::initial_prompt) &&
@@ -196,34 +197,37 @@ bool PerformAudioPassThruRequest::PrepareResponseParameters(
     mobile_apis::Result::eType& result_code, std::string& info) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  bool result = true;
-  ResponseInfo ui_perform_info(result_ui_, HmiInterfaces::HMI_INTERFACE_UI);
+  ResponseInfo ui_perform_info(
+      result_ui_, HmiInterfaces::HMI_INTERFACE_UI, application_manager_);
   ResponseInfo tts_perform_info(result_tts_speak_,
-                                HmiInterfaces::HMI_INTERFACE_TTS);
+                                HmiInterfaces::HMI_INTERFACE_TTS,
+                                application_manager_);
 
-  SetResultCodeFlagsForHMIResponses(ui_perform_info, tts_perform_info);
+  // Note(dtrunov): According to requirment APPLINK-19591
   if (ui_perform_info.is_ok && tts_perform_info.is_unsupported_resource &&
       HmiInterfaces::STATE_AVAILABLE == tts_perform_info.interface_state) {
     result_code = mobile_apis::Result::WARNINGS;
     tts_info_ = "Unsupported phoneme type sent in a prompt";
-  } else if (IsResultCodeUnsupported(ui_perform_info, tts_perform_info)) {
+    info = MergeInfos(ui_perform_info, ui_info_, tts_perform_info, tts_info_);
+    return true;
+  }
+
+  bool result =
+      PrepareResultForMobileResponse(ui_perform_info, tts_perform_info);
+
+  if (IsResultCodeUnsupported(ui_perform_info, tts_perform_info)) {
     result_code = mobile_apis::Result::UNSUPPORTED_RESOURCE;
   } else if (IsAnyHMIComponentAborted(ui_perform_info, tts_perform_info)) {
     result_code = mobile_apis::Result::ABORTED;
-    result = false;
   } else {
-    result_code = PrepareAudioPassThruResultCodeForResponse(ui_perform_info,
-                                                            tts_perform_info);
-    if (!ui_perform_info.is_ok) {
-      result = false;
-    }
+    result_code = PrepareAudioPassThruResultCodeForResponse(
+        ui_perform_info, tts_perform_info, result);
   }
 
   info = MergeInfos(ui_perform_info, ui_info_, tts_perform_info, tts_info_);
   if (!audio_pass_thru_icon_exists_) {
     info = MergeInfos("Reference image(s) not found", info);
   }
-
   return result;
 }
 
@@ -420,7 +424,9 @@ void PerformAudioPassThruRequest::ProcessAudioPassThruIcon(
 
 mobile_apis::Result::eType
 PerformAudioPassThruRequest::PrepareAudioPassThruResultCodeForResponse(
-    const ResponseInfo& ui_response, const ResponseInfo& tts_response) {
+    const ResponseInfo& ui_response,
+    const ResponseInfo& tts_response,
+    bool& out_result) {
   mobile_apis::Result::eType result_code = mobile_apis::Result::INVALID_ENUM;
 
   hmi_apis::Common_Result::eType common_result =
@@ -431,12 +437,12 @@ PerformAudioPassThruRequest::PrepareAudioPassThruResultCodeForResponse(
   if ((ui_result == hmi_apis::Common_Result::SUCCESS) &&
       (tts_result != hmi_apis::Common_Result::SUCCESS)) {
     common_result = hmi_apis::Common_Result::WARNINGS;
+    out_result = true;
   } else if (ui_result == hmi_apis::Common_Result::INVALID_ENUM) {
     common_result = tts_result;
   } else {
     common_result = ui_result;
   }
-
   result_code = MessageHelper::HMIToMobileResult(common_result);
   return result_code;
 }
