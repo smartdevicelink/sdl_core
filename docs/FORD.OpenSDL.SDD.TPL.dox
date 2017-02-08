@@ -349,7 +349,7 @@ Example:
 For more precise document change history follow github history -
 <!!!!!!!!!!!BEGIN_INSTRUCTION!!!!!!!!!!!!!>
 Example for this template:
-- https://github.com/smartdevicelink/sdl_core/commits/master/docs/software_detailed_design_template.dox
-- https://github.com/smartdevicelink/sdl_core/commits/develop/docs/software_detailed_design_template.dox
+- https://github.com/smartdevicelink/sdl_core/commits/master/docs/FORD.OpenSDL.SDD.TPL.dox
+- https://github.com/smartdevicelink/sdl_core/commits/develop/docs/FORD.OpenSDL.SDD.TPL.dox
 <!!!!!!!!!!!END_INSTRUCTION!!!!!!!!!!!!!>
 */
