@@ -231,6 +231,8 @@ functional_modules::ProcessResult CANModule::HandleMessage(
     return ProcessResult::FAILED;
   }
 
+  msg->set_protocol_version(application_manager::ProtocolVersion::kV3);
+
   switch (msg->type()) {
     case application_manager::MessageType::kResponse:
     case application_manager::MessageType::kErrorResponse: {
