@@ -1060,7 +1060,7 @@ TEST_F(ProtocolHandlerImplTest,
 }
 #endif  // ENABLE_SECURITY
 
-TEST_F(ProtocolHandlerImplTest, FloodVerification) {
+TEST_F(ProtocolHandlerImplTest, DISABLED_FloodVerification) {
   const size_t period_msec = 10000;
   const size_t max_messages = 1000;
   InitProtocolHandlerImpl(period_msec, max_messages);
@@ -1097,7 +1097,7 @@ TEST_F(ProtocolHandlerImplTest, FloodVerification) {
   EXPECT_TRUE(waiter->WaitFor(times, period_msec));
 }
 
-TEST_F(ProtocolHandlerImplTest, FloodVerification_ThresholdValue) {
+TEST_F(ProtocolHandlerImplTest, DISABLED_FloodVerification_ThresholdValue) {
   const size_t period_msec = 10000;
   const size_t max_messages = 1000;
   InitProtocolHandlerImpl(period_msec, max_messages);
@@ -1133,7 +1133,7 @@ TEST_F(ProtocolHandlerImplTest, FloodVerification_ThresholdValue) {
   EXPECT_TRUE(waiter->WaitFor(times, period_msec));
 }
 
-TEST_F(ProtocolHandlerImplTest, FloodVerification_VideoFrameSkip) {
+TEST_F(ProtocolHandlerImplTest, DISABLED_FloodVerification_VideoFrameSkip) {
   const size_t period_msec = 10000;
   const size_t max_messages = 1000;
   InitProtocolHandlerImpl(period_msec, max_messages);
@@ -1161,7 +1161,7 @@ TEST_F(ProtocolHandlerImplTest, FloodVerification_VideoFrameSkip) {
   EXPECT_TRUE(waiter->WaitFor(times, period_msec));
 }
 
-TEST_F(ProtocolHandlerImplTest, FloodVerification_AudioFrameSkip) {
+TEST_F(ProtocolHandlerImplTest, DISABLED_FloodVerification_AudioFrameSkip) {
   const size_t period_msec = 10000;
   const size_t max_messages = 1000;
   InitProtocolHandlerImpl(period_msec, max_messages);
@@ -1189,7 +1189,7 @@ TEST_F(ProtocolHandlerImplTest, FloodVerification_AudioFrameSkip) {
   EXPECT_TRUE(waiter->WaitFor(times, period_msec));
 }
 
-TEST_F(ProtocolHandlerImplTest, FloodVerificationDisable) {
+TEST_F(ProtocolHandlerImplTest, DISABLED_FloodVerificationDisable) {
   const size_t period_msec = 0;
   const size_t max_messages = 0;
   InitProtocolHandlerImpl(period_msec, max_messages);
