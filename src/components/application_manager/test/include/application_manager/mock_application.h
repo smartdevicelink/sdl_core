@@ -43,6 +43,7 @@ namespace test {
 namespace components {
 namespace application_manager_test {
 
+namespace custom_str = utils::custom_string;
 class MockApplication : public ::application_manager::Application {
  public:
   MockApplication() {}
@@ -86,10 +87,7 @@ class MockApplication : public ::application_manager::Application {
   MOCK_CONST_METHOD0(version, const ::application_manager::Version&());
   MOCK_METHOD1(set_hmi_application_id, void(uint32_t hmi_app_id));
   MOCK_CONST_METHOD0(hmi_app_id, uint32_t());
-
-  MOCK_CONST_METHOD0(name,
-                     const application_manager::custom_str::CustomString&());
-
+  MOCK_CONST_METHOD0(name, const custom_str::CustomString&());
   MOCK_METHOD1(set_folder_name, void(const std::string& folder_name));
   MOCK_CONST_METHOD0(folder_name, const std::string());
   MOCK_CONST_METHOD0(is_media_application, bool());
@@ -112,8 +110,7 @@ class MockApplication : public ::application_manager::Application {
   MOCK_METHOD0(tts_properties_in_full, bool());
   MOCK_METHOD1(set_version,
                void(const ::application_manager::Version& version));
-  MOCK_METHOD1(set_name,
-               void(const application_manager::custom_str::CustomString& name));
+  MOCK_METHOD1(set_name, void(const custom_str::CustomString& name));
   MOCK_METHOD1(set_is_media_application, void(bool is_media));
   MOCK_METHOD0(increment_put_file_in_none_count, void());
   MOCK_METHOD0(increment_delete_file_in_none_count, void());
@@ -283,6 +280,8 @@ class MockApplication : public ::application_manager::Application {
   MOCK_CONST_METHOD0(is_foreground, bool());
   MOCK_METHOD1(set_foreground, void(bool is_foreground));
   MOCK_CONST_METHOD0(IsRegistered, bool());
+  MOCK_CONST_METHOD0(SchemaUrl, std::string());
+  MOCK_CONST_METHOD0(PackageName, std::string());
 #ifdef SDL_REMOTE_CONTROL
   MOCK_METHOD1(set_hmi_level,
                void(const mobile_apis::HMILevel::eType& hmi_level));

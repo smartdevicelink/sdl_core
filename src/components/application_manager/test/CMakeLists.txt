@@ -50,37 +50,30 @@ include_directories(
   ${COMPONENTS_DIR}/application_manager/test/include/
 )
 
-  include_directories(
-    ${GMOCK_INCLUDE_DIRECTORY}
-    ${CMAKE_BINARY_DIR}/src/components/
-    ${COMPONENTS_DIR}/application_manager/include/
-    ${COMPONENTS_DIR}/utils/include/
-    ${COMPONENTS_DIR}/resumption/include/
-    ${COMPONENTS_DIR}/utils/include/
-    ${POLICY_PATH}/include/
-    ${COMPONENTS_DIR}/media_manager/include/
-    ${COMPONENTS_DIR}/security_manager/include/
-    ${POLICY_PATH}/test/include/
-    ${POLICY_GLOBAL_INCLUDE_PATH}/
-    ${POLICY_MOCK_INCLUDE_PATH}/
-    ${COMPONENTS_DIR}/application_manager/test/include/
-    )
+# TODO{ILytvynenko}: SDLOPEN-797 Uncomment application_manager_impl_test and
+# cover with UT missed files.
+set(testSources
+  ${AM_TEST_DIR}/mock_message_helper.cc
+  ${AM_TEST_DIR}/mobile_message_handler_test.cc
+  ${AM_TEST_DIR}/mobile_message_handler_v1_test.cc
+  ${AM_TEST_DIR}/request_info_test.cc
+  ${AM_TEST_DIR}/resumption_sql_queries_test.cc
+  ${AM_TEST_DIR}/event_engine_test.cc
+  ${AM_TEST_DIR}/policy_event_observer_test.cc
+  ${AM_TEST_DIR}/application_impl_test.cc
+  ${AM_TEST_DIR}/hmi_capabilities_test.cc
+  ${AM_TEST_DIR}/hmi_language_handler_test.cc
+  ${AM_TEST_DIR}/application_state_test.cc
+  ${AM_TEST_DIR}/usage_statistics_test.cc
+  ${AM_TEST_DIR}/policy_handler_test.cc
+  ${AM_TEST_DIR}/mock_message_helper.cc
+ #${AM_TEST_DIR}/application_manager_impl_test.cc
+)
 
-  set(testSources
-    ${AM_TEST_DIR}/mobile_message_handler_test.cc
-    ${AM_TEST_DIR}/mobile_message_handler_v1_test.cc
-    ${AM_TEST_DIR}/request_info_test.cc
-    ${AM_TEST_DIR}/request_tracker_test.cc
-    ${AM_TEST_DIR}/resumption_sql_queries_test.cc
-    ${AM_TEST_DIR}/event_engine_test.cc
-    ${AM_TEST_DIR}/policy_event_observer_test.cc
-    ${AM_TEST_DIR}/application_impl_test.cc
-    ${AM_TEST_DIR}/hmi_capabilities_test.cc
-    ${AM_TEST_DIR}/application_state_test.cc
-    ${AM_TEST_DIR}/usage_statistics_test.cc
-    ${AM_TEST_DIR}/policy_handler_test.cc        
-    ${AM_TEST_DIR}/mock_message_helper.cc
-  )
+set (RequestController_SOURCES
+  ${AM_TEST_DIR}/request_controller/request_controller_test.cc
+  ${AM_TEST_DIR}/mock_message_helper.cc
+)
 
 set(LIBRARIES
   Utils

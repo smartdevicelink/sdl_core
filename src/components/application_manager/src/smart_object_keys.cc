@@ -70,6 +70,7 @@ const char* cmd_id = "cmdID";
 const char* menu_params = "menuParams";
 const char* menu_title = "menuTitle";
 const char* menu_icon = "menuIcon";
+const char* sub_menu_icon = "subMenuIcon";
 const char* keyboard_properties = "keyboardProperties";
 const char* vr_commands = "vrCommands";
 const char* position = "position";
@@ -131,7 +132,10 @@ const char* speech_capabilities = "speechCapabilities";
 const char* vr_capabilities = "vrCapabilities";
 const char* audio_pass_thru_capabilities = "audioPassThruCapabilities";
 const char* pcm_stream_capabilities = "pcmStreamCapabilities";
+const char* audio_pass_thru_icon = "audioPassThruIcon";
+const char* way_points = "wayPoints";
 const char* device_rank = "deviceRank";
+
 // PutFile
 const char* sync_file_name = "syncFileName";
 const char* file_name = "fileName";

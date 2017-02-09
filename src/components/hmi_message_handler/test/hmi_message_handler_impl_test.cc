@@ -38,7 +38,8 @@
 #include "hmi_message_handler/messagebroker_adapter.h"
 #include "hmi_message_handler/mock_hmi_message_observer.h"
 #include "hmi_message_handler/mock_hmi_message_handler_settings.h"
-#include "hmi_message_handler/mock_hmi_message_adapter.h"
+#include "hmi_message_handler/mock_hmi_message_adapter_impl.h"
+#include "utils/test_async_waiter.h"
 
 namespace test {
 namespace components {
@@ -46,37 +47,45 @@ namespace hmi_message_handler_test {
 
 using ::testing::Return;
 using ::testing::_;
-using namespace ::hmi_message_handler;
 
 class HMIMessageHandlerImplTest : public ::testing::Test {
  public:
   HMIMessageHandlerImplTest()
-      : hmi_handler_(InitHmiHandler())
-      , mock_hmi_message_observer_(utils::MakeShared<MockHMIMessageObserver>())
-      , message_adapter_(utils::MakeShared<MockHMIMessageAdapter>()) {
-    hmi_handler_->set_message_observer(mock_hmi_message_observer_.get());
+      : mb_adapter_(NULL)
+      , hmi_handler_(NULL)
+      , mock_hmi_message_observer_(NULL) {}
+
+ protected:
+  hmi_message_handler::MessageBrokerAdapter* mb_adapter_;
+  hmi_message_handler::HMIMessageHandlerImpl* hmi_handler_;
+  MockHMIMessageObserver* mock_hmi_message_observer_;
+  testing::NiceMock<MockHMIMessageHandlerSettings>
+      mock_hmi_message_handler_settings;
+  const uint64_t stack_size = 1000u;
+
+  virtual void SetUp() OVERRIDE {
+    ON_CALL(mock_hmi_message_handler_settings, thread_min_stack_size())
+        .WillByDefault(Return(stack_size));
+    hmi_handler_ = new hmi_message_handler::HMIMessageHandlerImpl(
+        mock_hmi_message_handler_settings);
+    ASSERT_TRUE(NULL != hmi_handler_);
+    mb_adapter_ = new hmi_message_handler::MessageBrokerAdapter(
+        hmi_handler_, "localhost", 22);
+    ASSERT_TRUE(NULL != mb_adapter_);
+    mock_hmi_message_observer_ = new MockHMIMessageObserver();
+    ASSERT_TRUE(NULL != mock_hmi_message_observer_);
+    hmi_handler_->set_message_observer(mock_hmi_message_observer_);
+    EXPECT_TRUE(NULL != hmi_handler_->observer());
   }
 
   void TearDown() OVERRIDE {
-    hmi_handler_.reset();
+    hmi_handler_->set_message_observer(NULL);
+    delete mock_hmi_message_observer_;
+    delete hmi_handler_;
+    delete mb_adapter_;
   }
 
- protected:
-  testing::NiceMock<MockHMIMessageHandlerSettings>
-      mock_hmi_message_handler_settings_;
-  utils::SharedPtr<HMIMessageHandlerImpl> hmi_handler_;
-  utils::SharedPtr<MockHMIMessageObserver> mock_hmi_message_observer_;
-  utils::SharedPtr<MockHMIMessageAdapter> message_adapter_;
-  static const uint64_t stack_size = 1000u;
-
-  utils::SharedPtr<HMIMessageHandlerImpl> InitHmiHandler() {
-    EXPECT_CALL(mock_hmi_message_handler_settings_, thread_min_stack_size())
-        .WillRepeatedly(Return(stack_size));
-    return utils::MakeShared<HMIMessageHandlerImpl>(
-        mock_hmi_message_handler_settings_);
-  }
-
-  MessageSharedPointer CreateMessage() {
+  hmi_message_handler::MessageSharedPointer CreateMessage() {
     // The ServiceType doesn't really matter
     return new application_manager::Message(
         protocol_handler::MessagePriority::FromServiceType(
@@ -87,7 +96,7 @@ class HMIMessageHandlerImplTest : public ::testing::Test {
 TEST_F(HMIMessageHandlerImplTest,
        OnErrorSending_EmptyMessage_OnErrorSendingProceeded) {
   // Arrange
-  MessageSharedPointer empty_message;
+  hmi_message_handler::MessageSharedPointer empty_message;
   EXPECT_CALL(*mock_hmi_message_observer_, OnErrorSending(empty_message));
   // Act
   hmi_handler_->OnErrorSending(empty_message);
@@ -118,7 +127,7 @@ TEST_F(HMIMessageHandlerImplTest,
   // Check before action
   EXPECT_TRUE(hmi_handler_->message_adapters().empty());
   // Act
-  hmi_handler_->AddHMIMessageAdapter(message_adapter_.get());
+  hmi_handler_->AddHMIMessageAdapter(mb_adapter_);
   // Check after action
   EXPECT_EQ(1u, hmi_handler_->message_adapters().size());
 }
@@ -128,22 +137,25 @@ TEST_F(HMIMessageHandlerImplTest,
   // Check before action
   EXPECT_TRUE(hmi_handler_->message_adapters().empty());
   // Act
-  hmi_handler_->AddHMIMessageAdapter(NULL);
+  mb_adapter_ = NULL;
+  hmi_handler_->AddHMIMessageAdapter(mb_adapter_);
   // Check adapter not added
   EXPECT_TRUE(hmi_handler_->message_adapters().empty());
 }
 
 TEST_F(HMIMessageHandlerImplTest, RemoveHMIMessageAdapter_ExpectRemoved) {
   // Arrange
-  hmi_handler_->AddHMIMessageAdapter(message_adapter_.get());
+  hmi_handler_->AddHMIMessageAdapter(mb_adapter_);
   // Act
-  hmi_handler_->RemoveHMIMessageAdapter(message_adapter_.get());
+  hmi_handler_->RemoveHMIMessageAdapter(mb_adapter_);
   // Check after action
   EXPECT_TRUE(hmi_handler_->message_adapters().empty());
 }
 
-TEST_F(HMIMessageHandlerImplTest, OnMessageReceived_ValidObserver_Success) {
-  MessageSharedPointer message = CreateMessage();
+// TODO(atimchenko) SDLOPEN-44 Wrong message to observer
+TEST_F(HMIMessageHandlerImplTest,
+       DISABLED_OnMessageReceived_ValidObserver_Success) {
+  hmi_message_handler::MessageSharedPointer message = CreateMessage();
   EXPECT_CALL(*mock_hmi_message_observer_, OnMessageReceived(message));
 
   hmi_handler_->OnMessageReceived(message);
@@ -152,7 +164,7 @@ TEST_F(HMIMessageHandlerImplTest, OnMessageReceived_ValidObserver_Success) {
 }
 
 TEST_F(HMIMessageHandlerImplTest, OnMessageReceived_InvalidObserver_Cancelled) {
-  MessageSharedPointer message = CreateMessage();
+  hmi_message_handler::MessageSharedPointer message = CreateMessage();
   EXPECT_CALL(*mock_hmi_message_observer_, OnMessageReceived(_)).Times(0);
   // Make the observer invalid
   hmi_handler_->set_message_observer(NULL);
@@ -161,15 +173,21 @@ TEST_F(HMIMessageHandlerImplTest, OnMessageReceived_InvalidObserver_Cancelled) {
 }
 
 TEST_F(HMIMessageHandlerImplTest, SendMessageToHMI_Success) {
-  MessageSharedPointer message = CreateMessage();
+  hmi_message_handler::MessageSharedPointer message = CreateMessage();
 
-  EXPECT_CALL(*message_adapter_, SendMessageToHMI(message));
+  TestAsyncWaiter waiter;
 
-  hmi_handler_->AddHMIMessageAdapter(message_adapter_.get());
+  MockHMIMessageAdapterImpl message_adapter(hmi_handler_);
+  EXPECT_CALL(message_adapter, SendMessageToHMI(message))
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+
+  hmi_handler_->AddHMIMessageAdapter(&message_adapter);
   hmi_handler_->SendMessageToHMI(message);
 
   // Wait for the message to be processed
   hmi_handler_->messages_to_hmi()->WaitDumpQueue();
+
+  EXPECT_TRUE(waiter.WaitFor(1, 100));
 }
 
 }  // namespace hmi_message_handler_test

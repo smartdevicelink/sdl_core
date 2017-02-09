@@ -103,6 +103,7 @@ extern const char* cmd_id;
 extern const char* menu_params;
 extern const char* menu_title;
 extern const char* menu_icon;
+extern const char* sub_menu_icon;
 extern const char* keyboard_properties;
 extern const char* vr_commands;
 extern const char* position;
@@ -164,6 +165,8 @@ extern const char* speech_capabilities;
 extern const char* vr_capabilities;
 extern const char* audio_pass_thru_capabilities;
 extern const char* pcm_stream_capabilities;
+extern const char* audio_pass_thru_icon;
+extern const char* way_points;
 extern const char* device_rank;
 
 // PutFile

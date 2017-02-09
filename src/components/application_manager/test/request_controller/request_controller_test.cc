@@ -50,6 +50,7 @@
 #include "application_manager/resumption/resume_ctrl.h"
 #include "application_manager/mock_request_controller_settings.h"
 #include "application_manager/mock_application_manager.h"
+#include "utils/test_async_waiter.h"
 
 namespace test {
 namespace components {
@@ -246,15 +247,17 @@ TEST_F(RequestControllerTestClass, OnTimer_SUCCESS) {
   RequestPtr mock_request = GetMockRequest(
       kDefaultCorrelationID, kDefaultConnectionKey, request_timeout);
 
+  TestAsyncWaiter waiter;
   EXPECT_EQ(RequestController::SUCCESS,
             AddRequest(default_settings_,
                        mock_request,
                        RequestInfo::RequestType::MobileRequest));
 
-  EXPECT_CALL(*mock_request, onTimeOut());
+  EXPECT_CALL(*mock_request, onTimeOut())
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
 
   // Waiting for call of `onTimeOut` for `kTimeScale` seconds
-  testing::Mock::AsyncVerifyAndClearExpectations(kTimeScale);
+  EXPECT_TRUE(waiter.WaitFor(1, kTimeScale));
 }
 
 }  // namespace request_controller_test
