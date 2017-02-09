@@ -71,16 +71,15 @@ namespace policy_test {
 class SQLPTRepresentationTest : public SQLPTRepresentation,
                                 public ::testing::Test {
  protected:
-  static DBMS* dbms;
-  static SQLPTRepresentation* reps;
+  DBMS* dbms;
+  SQLPTRepresentation* reps;
   static const std::string kDatabaseName;
   static const std::string kAppStorageFolder;
   // Gtest can show message that this object doesn't destroyed
-  static std::auto_ptr<policy_handler_test::MockPolicySettings>
-      policy_settings_;
+  std::auto_ptr<policy_handler_test::MockPolicySettings> policy_settings_;
 
-  static void SetUpTestCase() {
-    file_system::DeleteFile(kAppStorageFolder + "/policy.sqlite");
+  void SetUp() OVERRIDE {
+    file_system::CreateDirectory(kAppStorageFolder);
     reps = new SQLPTRepresentation;
     policy_settings_ = std::auto_ptr<policy_handler_test::MockPolicySettings>(
         new policy_handler_test::MockPolicySettings());
@@ -93,15 +92,13 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
 
   void TearDown() OVERRIDE {
     EXPECT_TRUE(reps->Clear());
-  }
-
-  static void TearDownTestCase() {
     EXPECT_TRUE(reps->Drop());
     EXPECT_TRUE(reps->Close());
     reps->RemoveDB();
     delete reps;
     dbms->Close();
-    file_system::RemoveDirectory(kAppStorageFolder);
+    file_system::remove_directory_content(kAppStorageFolder);
+    file_system::RemoveDirectory(kAppStorageFolder, true);
     policy_settings_.reset();
   }
 
@@ -346,12 +343,8 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
   }
 };
 
-DBMS* SQLPTRepresentationTest::dbms = 0;
-SQLPTRepresentation* SQLPTRepresentationTest::reps = 0;
 const std::string SQLPTRepresentationTest::kDatabaseName = "policy.sqlite";
 const std::string SQLPTRepresentationTest::kAppStorageFolder = "storage1";
-std::auto_ptr<policy_handler_test::MockPolicySettings>
-    SQLPTRepresentationTest::policy_settings_;
 
 class SQLPTRepresentationTest2 : public ::testing::Test {
  protected:
