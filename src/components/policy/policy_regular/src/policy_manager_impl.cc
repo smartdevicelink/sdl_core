@@ -314,8 +314,7 @@ void PolicyManagerImpl::StartPTExchange() {
       if (RequestPTUpdate() && !timer_retry_sequence_.is_running()) {
         // Start retry sequency
         const int timeout_sec = NextRetryTimeout();
-        LOG4CXX_DEBUG(logger_,
-                      "Start retry sequence timeout = " << timeout_sec);
+        LOG4CXX_DEBUG(logger_, "Start retry sequence timeout = " << timeout_sec);
         timer_retry_sequence_.Start(timeout_sec, timer::kPeriodic);
       }
     }
