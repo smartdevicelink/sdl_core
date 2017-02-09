@@ -1052,6 +1052,14 @@ void PolicyManagerImpl::PromoteExistedApplication(
       cache_->IsPredataPolicy(application_id)) {
     cache_->SetDefaultPolicy(application_id);
   }
+  if (HasCertificate()) {
+    LOG4CXX_DEBUG(logger_, "Certificate exits, no update required.");
+    return;
+  }
+
+  if (cache_->AppHasHMIType(application_id, policy_table::AHT_NAVIGATION)) {
+    update_status_manager_.ScheduleUpdate();
+  }
 }
 
 bool PolicyManagerImpl::IsNewApplication(

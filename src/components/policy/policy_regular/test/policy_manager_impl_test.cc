@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,8 +39,9 @@
 #include "json/writer.h"
 #include "gtest/gtest.h"
 
-#include "config_profile/profile.h"
+#include "policy/policy_types.h"
 #include "policy/policy_manager_impl.h"
+#include "config_profile/profile.h"
 #include "policy/policy_table/enums.h"
 #include "policy/policy_table/types.h"
 #include "policy/mock_policy_settings.h"
@@ -62,6 +63,9 @@ using ::testing::_;
 using ::testing::SetArgReferee;
 using ::testing::AtLeast;
 using ::testing::Return;
+
+using ::policy::MockPolicyListener;
+using ::policy::MockUpdateStatusManager;
 
 using ::policy::PolicyManagerImpl;
 using ::policy::PolicyTable;
@@ -127,12 +131,6 @@ struct StringsForUpdate CreateNewRandomData(StringsForUpdate& str) {
     str.new_field_value_ += GenRandomString(alphanum);
   }
   return str;
-}
-
-policy_table::AppHmiTypes HmiTypes(const policy_table::AppHMIType hmi_type) {
-  policy_table::AppHmiTypes hmi_types;
-  hmi_types.push_back(hmi_type);
-  return hmi_types;
 }
 
 class PolicyManagerImplTest : public ::testing::Test {
@@ -266,7 +264,7 @@ class PolicyManagerImplTest2 : public ::testing::Test {
     // Arrange
     CreateLocalPT("sdl_preloaded_pt.json");
     // Add app
-    manager->AddApplication(section_name, HmiTypes(policy_table::AHT_DEFAULT));
+    manager->AddApplication(section_name);
     // Check app gets RequestTypes from pre_DataConsent of app_policies
     // section
     PT_request_types = manager->GetAppRequestTypes(section_name);
@@ -462,7 +460,6 @@ TEST_F(PolicyManagerImplTest2, GetNotificationsNumberAfterPTUpdate) {
   // Arrange
   Json::Value table = CreatePTforLoad();
   manager->ForcePTExchange();
-  manager->SetSendOnUpdateSentOut(false);
   manager->OnUpdateStarted();
   policy_table::Table update(&table);
   update.SetPolicyTableType(rpc::policy_table_interface_base::PT_UPDATE);
@@ -683,6 +680,20 @@ TEST_F(PolicyManagerImplTest, AddAppStopwatch) {
   EXPECT_CALL(*cache_manager,
               Add("12345", usage_statistics::SECONDS_HMI_FULL, 30));
   manager->Add("12345", usage_statistics::SECONDS_HMI_FULL, 30);
+}
+
+TEST_F(
+    PolicyManagerImplTest,
+    TriggerPTUForNaviAppInCaseNoCertificateExistsInPolicyTable_UPDATE_NEEDED) {
+  EXPECT_CALL(*cache_manager, IsPredataPolicy(_)).WillOnce(Return(false));
+  EXPECT_CALL(*cache_manager, IsApplicationRepresented(_))
+      .WillOnce(Return(true));
+  EXPECT_CALL(*cache_manager, GetCertificate()).WillOnce(Return(""));
+  EXPECT_CALL(*cache_manager, AppHasHMIType(_, policy_table::AHT_NAVIGATION))
+      .WillOnce(Return(true));
+  EXPECT_EQ("UP_TO_DATE", manager->GetPolicyTableStatus());
+  manager->AddApplication(policy::kDefaultId);
+  EXPECT_EQ("UPDATE_NEEDED", manager->GetPolicyTableStatus());
 }
 
 TEST_F(PolicyManagerImplTest, ResetPT) {
@@ -1285,7 +1296,7 @@ TEST_F(
   manager->SetUserConsentForDevice(dev_id2, true);
   EXPECT_CALL(listener, OnCurrentDeviceIdUpdateRequired(app_id2))
       .WillRepeatedly(Return(dev_id2));
-  manager->AddApplication(app_id2, HmiTypes(policy_table::AHT_DEFAULT));
+  manager->AddApplication(app_id2);
 
   GetPTU("valid_sdl_pt_update.json");
   ::policy::PermissionConsent perm_consent;
