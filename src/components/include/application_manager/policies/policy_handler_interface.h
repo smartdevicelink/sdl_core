@@ -402,8 +402,9 @@ class PolicyHandlerInterface {
 #endif  // ENABLE_SECURITY
 
 #ifdef SDL_REMOTE_CONTROL
-  virtual void AddApplication(const std::string& application_id,
-                              const smart_objects::SmartObject* app_types) = 0;
+  virtual StatusNotifier AddApplication(
+      const std::string& application_id,
+      const smart_objects::SmartObject* app_types) = 0;
 
   /**
    * Checks if application has HMI type

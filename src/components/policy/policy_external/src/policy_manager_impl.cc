@@ -1393,7 +1393,7 @@ std::ostream& operator<<(std::ostream& output,
   return output;
 }
 
-#if SDL_REMOTE_CONTROL
+#ifdef SDL_REMOTE_CONTROL
 void PolicyManagerImpl::AddApplication(const std::string& application_id,
                                        const std::vector<int>& hmi_types) {
   LOG4CXX_INFO(logger_, "AddApplication");

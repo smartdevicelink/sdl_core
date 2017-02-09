@@ -1101,9 +1101,9 @@ void PolicyManagerImpl::RetrySequence() {
   timer_retry_sequence_.Start(timeout, timer::kPeriodic);
 }
 
-#if SDL_REMOTE_CONTROL
-void PolicyManagerImpl::AddApplication(const std::string& application_id,
-                                       const std::vector<int>& hmi_types) {
+#ifdef SDL_REMOTE_CONTROL
+StatusNotifier PolicyManagerImpl::AddApplication(
+    const std::string& application_id, const std::vector<int>& hmi_types) {
   LOG4CXX_INFO(logger_, "AddApplication");
   const std::string device_id = GetCurrentDeviceId(application_id);
   DeviceConsent device_consent = GetUserConsentForDevice(device_id);
@@ -1112,12 +1112,16 @@ void PolicyManagerImpl::AddApplication(const std::string& application_id,
   if (IsNewApplication(application_id)) {
     AddNewApplication(application_id, device_consent);
     update_status_manager_.OnNewApplicationAdded(device_consent);
+    Subject who = {device_id, application_id};
+    access_remote_->SetDefaultHmiTypes(who, hmi_types);
+    return utils::MakeShared<CallStatusChange>(update_status_manager_,
+                                               device_consent);
   } else {
     PromoteExistedApplication(application_id, device_consent);
+    Subject who = {device_id, application_id};
+    access_remote_->SetDefaultHmiTypes(who, hmi_types);
+    return utils::MakeShared<utils::CallNothing>();
   }
-
-  Subject who = {device_id, application_id};
-  access_remote_->SetDefaultHmiTypes(who, hmi_types);
 }
 
 struct HMITypeToInt {
@@ -1333,6 +1337,7 @@ void PolicyManagerImpl::OnChangedRemoteControl(
 
 void PolicyManagerImpl::UpdateDeviceRank(const Subject& who,
                                          const std::string& rank) {
+
   std::string default_hmi("NONE");
   if (GetDefaultHmi(who.app_id, &default_hmi)) {
     access_remote_->Reset(who);

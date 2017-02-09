@@ -383,7 +383,6 @@ void RegisterAppInterfaceRequest::Run() {
     LOG4CXX_WARN(logger_, "The ApplicationManager is stopping!");
     return;
   }
-
   const std::string mobile_app_id =
       (*message_)[strings::msg_params][strings::app_id].asString();
 
@@ -394,7 +393,6 @@ void RegisterAppInterfaceRequest::Run() {
     SendResponse(false, mobile_apis::Result::APPLICATION_REGISTERED_ALREADY);
     return;
   }
-
   const smart_objects::SmartObject& msg_params =
       (*message_)[strings::msg_params];
 
@@ -436,11 +434,6 @@ void RegisterAppInterfaceRequest::Run() {
     return;
   }
 
-  if (IsApplicationWithSameAppIdRegistered()) {
-    SendResponse(false, mobile_apis::Result::DISALLOWED);
-    return;
-  }
-
   if (IsWhiteSpaceExist()) {
     LOG4CXX_INFO(logger_,
                  "Incoming register app interface has contains \t\n \\t \\n");
@@ -454,6 +447,7 @@ void RegisterAppInterfaceRequest::Run() {
     LOG4CXX_ERROR(logger_, "Application hasn't been registered!");
     return;
   }
+
   // For resuming application need to restore hmi_app_id from resumeCtrl
   resumption::ResumeCtrl& resumer = application_manager_.resume_controller();
   const std::string& device_mac = application->mac_address();
@@ -527,6 +521,7 @@ void RegisterAppInterfaceRequest::Run() {
   GetPolicyHandler().SetDeviceInfo(device_mac, device_info);
 
   SendRegisterAppInterfaceResponseToMobile();
+
   smart_objects::SmartObjectSPtr so =
       GetLockScreenIconUrlNotification(connection_key(), application);
   application_manager_.ManageMobileCommand(so, commands::Command::ORIGIN_SDL);
@@ -825,28 +820,42 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
                                             application->mac_address());
   }
 
-  policy::StatusNotifier notify_upd_manager =
+  policy::StatusNotifier notify_upd_manager;
+#ifdef SDL_REMOTE_CONTROL
+  if ((*message_)[strings::msg_params].keyExists(strings::app_hmi_type)) {
+    notify_upd_manager = GetPolicyHandler().AddApplication(
+        application->policy_app_id(),
+        &((*message_)[strings::msg_params][strings::app_hmi_type]));
+  } else {
+    notify_upd_manager =
+        GetPolicyHandler().AddApplication(application->policy_app_id());
+  }
+#else
+  notify_upd_manager =
       GetPolicyHandler().AddApplication(application->policy_app_id());
-  SendResponse(true, result_code, add_info.c_str(), &response_params);
+#endif
+
   SendOnAppRegisteredNotificationToHMI(
       *(application.get()), resumption, need_restore_vr);
 
-  // Default HMI level should be set before any permissions validation, since it
+  // Default HMI level should be set before any permissions validation, since
+  // it
   // relies on HMI level.
   application_manager_.OnApplicationRegistered(application);
+
+  SendResponse(true, result_code, add_info.c_str(), &response_params);
+
   (*notify_upd_manager)();
 
   // Start PTU after successfull registration
   // Sends OnPermissionChange notification to mobile right after RAI response
   // and HMI level set-up
   GetPolicyHandler().OnAppRegisteredOnMobile(application->policy_app_id());
-
   if (result_code != mobile_apis::Result::RESUME_FAILED) {
     resumer.StartResumption(application, hash_id);
   } else {
     resumer.StartResumptionOnlyHMILevel(application);
   }
-
   // By default app subscribed to CUSTOM_BUTTON
   SendSubscribeCustomButtonNotification();
   SendChangeRegistrationOnHMI(application);
@@ -908,6 +917,7 @@ void RegisterAppInterfaceRequest::SendOnAppRegisteredNotificationToHMI(
     const Application& application_impl,
     bool resumption,
     bool need_restore_vr) {
+  LOG4CXX_AUTO_TRACE(logger_);
   using namespace smart_objects;
   SmartObjectSPtr notification = utils::MakeShared<SmartObject>(SmartType_Map);
   if (!notification) {
@@ -969,7 +979,6 @@ void RegisterAppInterfaceRequest::SendOnAppRegisteredNotificationToHMI(
   if (app_type) {
     application[strings::app_type] = *app_type;
   }
-
   std::vector<std::string> request_types =
       GetPolicyHandler().GetAppRequestTypes(application_impl.policy_app_id());
 
@@ -998,7 +1007,6 @@ void RegisterAppInterfaceRequest::SendOnAppRegisteredNotificationToHMI(
     LOG4CXX_ERROR(logger_,
                   "Failed to extract information for device " << handle);
   }
-
   device_info[strings::name] = device_name;
   device_info[strings::id] = mac_address;
 
@@ -1009,7 +1017,6 @@ void RegisterAppInterfaceRequest::SendOnAppRegisteredNotificationToHMI(
 
   device_info[strings::transport_type] =
       application_manager_.GetDeviceTransportType(transport_type);
-
   DCHECK(application_manager_.ManageHMICommand(notification));
 }
 
@@ -1019,10 +1026,29 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckCoincidence() {
       (*message_)[strings::msg_params];
 
   ApplicationSet accessor = application_manager_.applications().GetData();
-
-  ApplicationSetConstIt it = accessor.begin();
   const custom_str::CustomString& app_name =
       msg_params[strings::app_name].asCustomString();
+
+#ifdef SDL_REMOTE_CONTROL
+  const smart_objects::SmartArray* vr_synonyms = 0;
+  if (msg_params.keyExists(strings::vr_synonyms)) {
+    vr_synonyms = msg_params[strings::vr_synonyms].asArray();
+  }
+
+  const std::string mobile_app_id =
+      (*message_)[strings::msg_params][strings::app_id].asString();
+  IsSameAppName matcher(app_name.AsMBString(),
+                        vr_synonyms,
+                        IsRemoteControl(mobile_app_id),
+                        IsDriverDevice(),
+                        application_manager_);
+
+  bool duplicate =
+      std::find_if(accessor.begin(), accessor.end(), matcher) != accessor.end();
+  return duplicate ? mobile_apis::Result::DUPLICATE_NAME
+                   : mobile_apis::Result::SUCCESS;
+#else
+  ApplicationSetConstIt it = accessor.begin();
 
   for (; accessor.end() != it; ++it) {
     // name check
@@ -1058,29 +1084,6 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckCoincidence() {
 
   }  // application for end
 
-  const smart_objects::SmartArray* vr_synonyms = 0;
-  if (msg_params.keyExists(strings::vr_synonyms)) {
-    vr_synonyms = msg_params[strings::vr_synonyms].asArray();
-  }
-#ifdef SDL_REMOTE_CONTROL
-  const std::string mobile_app_id =
-      (*message_)[strings::msg_params][strings::app_id].asString();
-  IsSameAppName matcher(app_name.AsMBString(),
-                        vr_synonyms,
-                        IsRemoteControl(mobile_app_id),
-                        IsDriverDevice(),
-                        application_manager_);
-//(TODO) OKozlov clarify
-#else   // SDL_REMOTE_CONTROL
-  IsSameAppName matcher(app_name.AsMBString(), vr_synonyms);
-#endif  // SDL_REMOTE_CONTROL
-
-#ifdef SDL_REMOTE_CONTROL
-  bool duplicate =
-      std::find_if(accessor.begin(), accessor.end(), matcher) != accessor.end();
-  return duplicate ? mobile_apis::Result::DUPLICATE_NAME
-                   : mobile_apis::Result::SUCCESS;
-#else
   return mobile_apis::Result::SUCCESS;
 #endif
 }  // method end
@@ -1132,7 +1135,8 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckWithPolicyData() {
   // If AppHMIType is not included in policy - allow any type
   if (!app_hmi_types.empty()) {
     if (message[strings::msg_params].keyExists(strings::app_hmi_type)) {
-      // If AppHMITypes are partially same, the system should allow those listed
+      // If AppHMITypes are partially same, the system should allow those
+      // listed
       // in the policy table and send warning info on missed values
       smart_objects::SmartArray app_types =
           *(message[strings::msg_params][strings::app_hmi_type].asArray());
@@ -1209,29 +1213,22 @@ bool RegisterAppInterfaceRequest::IsApplicationWithSameAppIdRegistered() {
   const ApplicationSet& applications =
       application_manager_.applications().GetData();
 
-  ApplicationSetConstIt it = applications.begin();
-  ApplicationSetConstIt it_end = applications.end();
-
-  for (; it != it_end; ++it) {
-    if (mobile_app_id.CompareIgnoreCase((*it)->policy_app_id().c_str())) {
-      return true;
-    }
-  }
-
 #ifdef SDL_REMOTE_CONTROL
   IsSameAppId matcher(mobile_app_id.AsMBString(),
                       IsRemoteControl(mobile_app_id.AsMBString()),
                       IsDriverDevice(),
                       application_manager_);
-//(TODO) OKozlov clarify
-#else   // SDL_REMOTE_CONTROL
-  IsSameAppId matcher(mobile_app_id.AsMBString());
-#endif  // SDL_REMOTE_CONTROL
 
-#ifdef SDL_REMOTE_CONTROL
   return std::find_if(applications.begin(), applications.end(), matcher) !=
          applications.end();
 #else
+  ApplicationSetConstIt it = applications.begin();
+  ApplicationSetConstIt it_end = applications.end();
+  for (; it != it_end; ++it) {
+    if (mobile_app_id.CompareIgnoreCase((*it)->policy_app_id().c_str())) {
+      return true;
+    }
+  }
   return false;
 #endif
 }
