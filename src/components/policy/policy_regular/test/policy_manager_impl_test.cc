@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,6 +39,7 @@
 #include "json/writer.h"
 #include "gtest/gtest.h"
 
+#include "policy/policy_types.h"
 #include "policy/policy_manager_impl.h"
 #include "config_profile/profile.h"
 #include "policy/policy_table/enums.h"
@@ -64,18 +65,15 @@ using ::testing::AtLeast;
 using ::testing::Return;
 
 using ::policy::MockPolicyListener;
-
-using ::policy::MockCacheManagerInterface;
 using ::policy::MockUpdateStatusManager;
 
 using ::policy::PolicyManagerImpl;
 using ::policy::PolicyTable;
 
-namespace policy_table = rpc::policy_table_interface_base;
-
 namespace test {
 namespace components {
-namespace policy {
+namespace policy_test {
+namespace policy_table = rpc::policy_table_interface_base;
 
 namespace custom_str = utils::custom_string;
 
@@ -678,6 +676,20 @@ TEST_F(PolicyManagerImplTest, AddAppStopwatch) {
   EXPECT_CALL(*cache_manager,
               Add("12345", usage_statistics::SECONDS_HMI_FULL, 30));
   manager->Add("12345", usage_statistics::SECONDS_HMI_FULL, 30);
+}
+
+TEST_F(
+    PolicyManagerImplTest,
+    TriggerPTUForNaviAppInCaseNoCertificateExistsInPolicyTable_UPDATE_NEEDED) {
+  EXPECT_CALL(*cache_manager, IsPredataPolicy(_)).WillOnce(Return(false));
+  EXPECT_CALL(*cache_manager, IsApplicationRepresented(_))
+      .WillOnce(Return(true));
+  EXPECT_CALL(*cache_manager, GetCertificate()).WillOnce(Return(""));
+  EXPECT_CALL(*cache_manager, AppHasHMIType(_, policy_table::AHT_NAVIGATION))
+      .WillOnce(Return(true));
+  EXPECT_EQ("UP_TO_DATE", manager->GetPolicyTableStatus());
+  manager->AddApplication(policy::kDefaultId);
+  EXPECT_EQ("UPDATE_NEEDED", manager->GetPolicyTableStatus());
 }
 
 TEST_F(PolicyManagerImplTest, ResetPT) {
@@ -1342,6 +1354,6 @@ TEST_F(
   EXPECT_EQ(heart_beat_timeout.asUInt(), result);
 }
 
-}  // namespace policy
+}  // namespace policy_test
 }  // namespace components
 }  // namespace test

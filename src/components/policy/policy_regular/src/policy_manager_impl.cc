@@ -894,6 +894,10 @@ std::string PolicyManagerImpl::RetrieveCertificate() const {
   return cache_->GetCertificate();
 }
 
+bool PolicyManagerImpl::HasCertificate() const {
+  return !cache_->GetCertificate().empty();
+}
+
 void PolicyManagerImpl::AddApplication(const std::string& application_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   const std::string device_id = GetCurrentDeviceId(application_id);
@@ -933,6 +937,14 @@ void PolicyManagerImpl::PromoteExistedApplication(
   if (kDeviceAllowed == device_consent &&
       cache_->IsPredataPolicy(application_id)) {
     cache_->SetDefaultPolicy(application_id);
+  }
+  if (HasCertificate()) {
+    LOG4CXX_DEBUG(logger_, "Certificate exits, no update required.");
+    return;
+  }
+
+  if (cache_->AppHasHMIType(application_id, policy_table::AHT_NAVIGATION)) {
+    update_status_manager_.ScheduleUpdate();
   }
 }
 

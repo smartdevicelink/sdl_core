@@ -211,6 +211,15 @@ class CacheManagerInterface {
       std::map<std::string, StringArray>& app_hmi_types) = 0;
 
   /**
+   * @brief AppHasHMIType checks whether app has been registered with certain
+   *HMI type.
+   *
+   * @return true in case app contains certain HMI type, false otherwise.
+   */
+  virtual bool AppHasHMIType(const std::string& application_id,
+                             policy_table::AppHMIType hmi_type) const = 0;
+
+  /**
    * Gets flag updateRequired
    * @return true if update is required
    */

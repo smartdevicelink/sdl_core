@@ -160,6 +160,7 @@ class MockPolicyManager : public PolicyManager {
   MOCK_CONST_METHOD0(GetVehicleInfo, const policy::VehicleInfo());
   MOCK_CONST_METHOD0(GetMetaInfo, const policy::MetaInfo());
   MOCK_CONST_METHOD0(RetrieveCertificate, std::string());
+  MOCK_CONST_METHOD0(HasCertificate, bool());
   MOCK_METHOD1(SetDecryptedCertificate, void(const std::string&));
   MOCK_METHOD0(ExceededIgnitionCycles, bool());
   MOCK_METHOD0(ExceededDays, bool());
