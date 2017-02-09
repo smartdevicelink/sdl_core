@@ -96,7 +96,7 @@ class PolicyHandler : public PolicyHandlerInterface,
 #ifdef EXTERNAL_PROPRIETARY_MODE
   void OnSnapshotCreated(const BinaryMessage& pt_string,
                          const std::vector<int>& retry_delay_seconds,
-                         int timeout_exchange) OVERRIDE;
+                         uint32_t timeout_exchange) OVERRIDE;
 #else   // EXTERNAL_PROPRIETARY_MODE
   void OnSnapshotCreated(const BinaryMessage& pt_string) OVERRIDE;
 #endif  // EXTERNAL_PROPRIETARY_MODE
@@ -123,7 +123,8 @@ class PolicyHandler : public PolicyHandlerInterface,
   virtual std::string GetLockScreenIconUrl() const OVERRIDE;
   void ResetRetrySequence() OVERRIDE;
   uint32_t NextRetryTimeout() OVERRIDE;
-  int TimeoutExchange() OVERRIDE;
+  uint32_t TimeoutExchangeSec() OVERRIDE;
+  uint32_t TimeoutExchangeMSec() OVERRIDE;
   void OnExceededTimeout() OVERRIDE;
   void OnSystemReady() OVERRIDE;
   void PTUpdatedAt(Counters counter, int value) OVERRIDE;
@@ -329,8 +330,9 @@ class PolicyHandler : public PolicyHandlerInterface,
    * @brief Allows to add new or update existed application during
    * registration process
    * @param application_id The policy aplication id.
+   ** @return function that will notify update manager about new application
    */
-  void AddApplication(const std::string& application_id) OVERRIDE;
+  StatusNotifier AddApplication(const std::string& application_id) OVERRIDE;
 
   /**
    * Checks whether application is revoked
@@ -573,4 +575,4 @@ class PolicyHandler : public PolicyHandlerInterface,
 
 }  //  namespace policy
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_POLICY_HANDLER_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_POLICIES_POLICY_HANDLER_H_

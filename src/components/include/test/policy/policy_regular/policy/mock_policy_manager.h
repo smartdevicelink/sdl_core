@@ -45,11 +45,13 @@
 
 namespace policy_table = ::rpc::policy_table_interface_base;
 
-using namespace policy;
-
 namespace test {
 namespace components {
 namespace policy_manager_test {
+
+namespace {
+using namespace policy;
+}
 
 class MockPolicyManager : public PolicyManager {
  public:
@@ -80,7 +82,7 @@ class MockPolicyManager : public PolicyManager {
   MOCK_METHOD0(ForcePTExchange, std::string());
   MOCK_METHOD0(ResetRetrySequence, void());
   MOCK_METHOD0(NextRetryTimeout, uint32_t());
-  MOCK_METHOD0(TimeoutExchange, int());
+  MOCK_METHOD0(TimeoutExchangeMSec, uint32_t());
   MOCK_METHOD0(RetrySequenceDelaysSeconds, const std::vector<int>());
   MOCK_METHOD0(OnExceededTimeout, void());
   MOCK_METHOD0(OnUpdateStarted, void());
@@ -139,7 +141,8 @@ class MockPolicyManager : public PolicyManager {
   MOCK_METHOD1(SendNotificationOnPermissionsUpdated,
                void(const std::string& application_id));
   MOCK_METHOD1(MarkUnpairedDevice, void(const std::string& device_id));
-  MOCK_METHOD1(AddApplication, void(const std::string& application_id));
+  MOCK_METHOD1(AddApplication,
+               StatusNotifier(const std::string& application_id));
   MOCK_METHOD0(CleanupUnpairedDevices, bool());
   MOCK_CONST_METHOD1(CanAppKeepContext, bool(const std::string& app_id));
   MOCK_CONST_METHOD1(CanAppStealFocus, bool(const std::string& app_id));
@@ -164,6 +167,8 @@ class MockPolicyManager : public PolicyManager {
   MOCK_METHOD0(ExceededIgnitionCycles, bool());
   MOCK_METHOD0(ExceededDays, bool());
   MOCK_METHOD0(StartPTExchange, void());
+
+  // --- Statistics Manager section
   MOCK_METHOD1(Increment, void(usage_statistics::GlobalCounterId type));
   MOCK_METHOD2(Increment,
                void(const std::string& app_id,
@@ -180,6 +185,7 @@ class MockPolicyManager : public PolicyManager {
   MOCK_METHOD1(set_settings, void(const PolicySettings* get_settings));
   MOCK_CONST_METHOD0(GetLockScreenIconUrl, std::string());
 };
+
 }  // namespace policy_manager_test
 }  // namespace components
 }  // namespace test

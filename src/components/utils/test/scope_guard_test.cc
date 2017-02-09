@@ -36,7 +36,7 @@
 
 namespace test {
 namespace components {
-namespace utils {
+namespace utils_test {
 
 using ::utils::ScopeGuard;
 using ::utils::MakeGuard;
@@ -116,6 +116,6 @@ TEST(ScopeGuardTest, DismissCallObjectFunctionWithParam) {
   }
 }
 
-}  // namespace utils
-}  // components
+}  // namespace utils_test
+}  // namespace components
 }  // namesapce test

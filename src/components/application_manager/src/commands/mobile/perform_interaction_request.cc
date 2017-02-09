@@ -205,6 +205,7 @@ void PerformInteractionRequest::Run() {
 
   app->set_perform_interaction_mode(static_cast<int32_t>(interaction_mode_));
   app->set_perform_interaction_active(true);
+  app->set_perform_interaction_layout(interaction_layout);
   // increment amount of active requests
   ++pi_requests_count_;
   SendVRPerformInteractionRequest(app);

@@ -39,7 +39,7 @@ namespace custom_str = utils::custom_string;
 
 namespace test {
 namespace components {
-namespace utils {
+namespace utils_test {
 
 std::string CreateMultibyteString(uint8_t* array, size_t array_size) {
   return std::string(array, array + array_size);
@@ -314,6 +314,6 @@ TEST_F(
   EXPECT_TRUE(obj.CompareIgnoreCase(mbstring.c_str()));
 }
 
-}  // namespace utils
+}  // namespace utils_test
 }  // namespace components
 }  // namespace test

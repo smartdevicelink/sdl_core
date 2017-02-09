@@ -39,9 +39,13 @@
 
 #include "policy/cache_manager_interface.h"
 
-namespace policy_table = rpc::policy_table_interface_base;
 
-namespace policy {
+namespace test {
+namespace components {
+namespace policy_test {
+namespace policy_table = rpc::policy_table_interface_base;
+using namespace ::policy;
+
 
 class MockCacheManagerInterface : public CacheManagerInterface {
  public:
@@ -66,7 +70,8 @@ class MockCacheManagerInterface : public CacheManagerInterface {
                std::vector<UserFriendlyMessage>(
                    const std::vector<std::string>& msg_codes,
                    const std::string& language));
-  MOCK_METHOD1(
+
+ MOCK_METHOD1(
       GetNotificationsNumber,
       policy_table::NumberOfNotificationsType(const std::string& priority));
   MOCK_CONST_METHOD2(GetPriority,
@@ -204,6 +209,8 @@ class MockCacheManagerInterface : public CacheManagerInterface {
   MOCK_METHOD1(SetDecryptedCertificate, void(const std::string&));
 };
 
-}  // namespace policy
+}  // namespace policy_test
+}  // namespace components
+}  // namespace test
 
 #endif  // SRC_COMPONENTS_POLICY_POLICY_REGULAR_TEST_INCLUDE_MOCK_CACHE_MANAGER_H_

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@
 #include "utils/make_shared.h"
 #include "utils/file_system.h"
 #include "utils/date_time.h"
-#include "resumption/last_state.h"
+#include "resumption/last_state_impl.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/mock_app_launch_settings.h"
@@ -68,7 +68,7 @@ class AppLaunchDataJsonTest : public ::testing::Test {
   virtual void SetUp() {
     ::file_system::DeleteFile(kAppStorageFile);
     test_last_state_ = std::auto_ptr<resumption::LastState>(
-        new resumption::LastState(kAppStorageFolder, kAppInfoStorage));
+        new resumption::LastStateImpl(kAppStorageFolder, kAppInfoStorage));
     ASSERT_TRUE(::file_system::CreateFile(kAppStorageFile));
 
     NiceMock<app_launch_test::MockAppLaunchSettings> mock_app_launch_settings_;

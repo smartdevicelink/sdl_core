@@ -203,8 +203,20 @@ class RegisterAppInterfaceRequestTest
   MockHmiInterfaces mock_hmi_interfaces_;
 };
 
-TEST_F(RegisterAppInterfaceRequestTest, DISABLED_Run_MinimalData_SUCCESS) {
+TEST_F(RegisterAppInterfaceRequestTest, Init_SUCCESS) {
+  EXPECT_TRUE(command_->Init());
+}
+
+TEST_F(RegisterAppInterfaceRequestTest, Run_MinimalData_SUCCESS) {
   InitBasicMessage();
+  (*msg_)[am::strings::msg_params][am::strings::hash_id] = kAppId;
+  EXPECT_CALL(app_mngr_, IsStopping())
+      .WillOnce(Return(false))
+      .WillOnce(Return(true))
+      .WillOnce(Return(false));
+  ON_CALL(app_mngr_, IsHMICooperating()).WillByDefault(Return(false));
+  EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _));
+  EXPECT_CALL(app_mngr_, IsApplicationForbidden(_, _)).WillOnce(Return(false));
 
   MockAppPtr mock_app = CreateBasicMockedApp();
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
@@ -216,6 +228,10 @@ TEST_F(RegisterAppInterfaceRequestTest, DISABLED_Run_MinimalData_SUCCESS) {
   ON_CALL(mock_policy_handler_, PolicyEnabled()).WillByDefault(Return(true));
   ON_CALL(mock_policy_handler_, GetInitialAppData(kAppId, _, _))
       .WillByDefault(Return(true));
+  policy::StatusNotifier notify_upd_manager =
+      utils::MakeShared<utils::CallNothing>();
+  ON_CALL(mock_policy_handler_, AddApplication(_))
+      .WillByDefault(Return(notify_upd_manager));
 
   EXPECT_CALL(app_mngr_, RegisterApplication(msg_)).WillOnce(Return(mock_app));
   EXPECT_CALL(app_mngr_,
@@ -226,9 +242,9 @@ TEST_F(RegisterAppInterfaceRequestTest, DISABLED_Run_MinimalData_SUCCESS) {
               ManageHMICommand(HMIResultCodeIs(
                   hmi_apis::FunctionID::Buttons_OnButtonSubscription)))
       .WillOnce(Return(true));
-  EXPECT_CALL(
-      app_mngr_,
-      ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS), _));
+  EXPECT_CALL(app_mngr_,
+              ManageMobileCommand(_, am::commands::Command::ORIGIN_SDL))
+      .Times(2);
   command_->Run();
 }
 
@@ -255,8 +271,16 @@ MATCHER_P(CheckHMIInterfacesRealtedData, expected_data, "") {
 }
 
 TEST_F(RegisterAppInterfaceRequestTest,
-       DISABLED_Run_HmiInterfacesStateAvailable_SUCCESS) {
+       Run_HmiInterfacesStateAvailable_SUCCESS) {
   InitBasicMessage();
+
+  EXPECT_CALL(app_mngr_, IsStopping())
+      .WillOnce(Return(false))
+      .WillOnce(Return(true))
+      .WillOnce(Return(false));
+  ON_CALL(app_mngr_, IsHMICooperating()).WillByDefault(Return(false));
+  EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _));
+  EXPECT_CALL(app_mngr_, IsApplicationForbidden(_, _)).WillOnce(Return(false));
 
   MockAppPtr mock_app = CreateBasicMockedApp();
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
@@ -299,6 +323,10 @@ TEST_F(RegisterAppInterfaceRequestTest,
   ON_CALL(mock_policy_handler_, PolicyEnabled()).WillByDefault(Return(true));
   ON_CALL(mock_policy_handler_, GetInitialAppData(kAppId, _, _))
       .WillByDefault(Return(true));
+  policy::StatusNotifier notify_upd_manager =
+      utils::MakeShared<utils::CallNothing>();
+  ON_CALL(mock_policy_handler_, AddApplication(_))
+      .WillByDefault(Return(notify_upd_manager));
 
   EXPECT_CALL(app_mngr_, RegisterApplication(msg_)).WillOnce(Return(mock_app));
 
@@ -325,9 +353,9 @@ TEST_F(RegisterAppInterfaceRequestTest,
               ManageHMICommand(
                   HMIResultCodeIs(hmi_apis::FunctionID::UI_ChangeRegistration)))
       .WillOnce(Return(true));
-  EXPECT_CALL(
-      app_mngr_,
-      ManageMobileCommand(CheckHMIInterfacesRealtedData(expected_message), _));
+  EXPECT_CALL(app_mngr_,
+              ManageMobileCommand(_, am::commands::Command::ORIGIN_SDL))
+      .Times(2);
 
   command_->Run();
 }

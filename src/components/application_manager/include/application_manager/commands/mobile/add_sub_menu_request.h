@@ -31,8 +31,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ADD_SUB_MENU_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ADD_SUB_MENU_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_ADD_SUB_MENU_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_ADD_SUB_MENU_REQUEST_H_
 
 #include "application_manager/commands/command_request_impl.h"
 #include "utils/macro.h"
@@ -79,10 +79,24 @@ class AddSubMenuRequest : public CommandRequestImpl {
    */
   bool CheckSubMenuName();
 
+  /*
+   * @brief Check if submenu icon is valid
+   *
+   * @return TRUE on success, otherwise FALSE
+   */
+  bool CheckSubMenuIcon();
+
+  /*
+   * @brief Check if submenu icon is existed in storage folder
+   *
+   * @return TRUE on success, otherwise FALSE
+   */
+  bool CheckMenuIconExistedInStorage();
+
   DISALLOW_COPY_AND_ASSIGN(AddSubMenuRequest);
 };
 
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ADD_SUB_MENU_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_ADD_SUB_MENU_REQUEST_H_

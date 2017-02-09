@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_TEST_MOCK_MESSAGE_HELPER_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_TEST_MOCK_MESSAGE_HELPER_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_MESSAGE_HELPER_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_MESSAGE_HELPER_H_
 #include "gmock/gmock.h"
 #include "application_manager/application.h"
 #include "application_manager/message_helper.h"
@@ -112,7 +112,7 @@ class MockMessageHelper {
 
   MOCK_METHOD4(SendPolicyUpdate,
                void(const std::string& file_path,
-                    int timeout,
+                    const uint32_t timeout,
                     const std::vector<int>& retries,
                     ApplicationManager& app_mngr));
   MOCK_METHOD2(SendDecryptCertificateToHMI,
@@ -250,4 +250,4 @@ class MockMessageHelper {
 };
 
 }  // namespace application_manager
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_TEST_MOCK_MESSAGE_HELPER_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_MESSAGE_HELPER_H_

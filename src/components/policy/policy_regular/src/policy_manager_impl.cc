@@ -49,6 +49,7 @@
 #include "policy/update_status_manager.h"
 #include "config_profile/profile.h"
 #include "utils/timer_task_impl.h"
+#include "utils/make_shared.h"
 
 policy::PolicyManager* CreateManager() {
   return new policy::PolicyManagerImpl();
@@ -58,7 +59,8 @@ void DeleteManager(policy::PolicyManager* pm) {
 }
 
 namespace {
-const uint32_t kDefaultRetryTimeoutInSec = 60u;
+const uint32_t kDefaultRetryTimeoutInMSec =
+    60u * date_time::DateTime::MILLISECONDS_IN_SECOND;
 }  // namespace
 
 namespace policy {
@@ -69,7 +71,7 @@ PolicyManagerImpl::PolicyManagerImpl()
     : PolicyManager()
     , listener_(NULL)
     , cache_(new CacheManager)
-    , retry_sequence_timeout_(kDefaultRetryTimeoutInSec)
+    , retry_sequence_timeout_(kDefaultRetryTimeoutInMSec)
     , retry_sequence_index_(0)
     , timer_retry_sequence_("Retry sequence timer",
                             new timer::TimerTaskImpl<PolicyManagerImpl>(
@@ -311,7 +313,10 @@ void PolicyManagerImpl::StartPTExchange() {
     if (update_status_manager_.IsUpdateRequired()) {
       if (RequestPTUpdate() && !timer_retry_sequence_.is_running()) {
         // Start retry sequency
-        timer_retry_sequence_.Start(NextRetryTimeout(), timer::kPeriodic);
+        const int timeout_sec = NextRetryTimeout();
+        LOG4CXX_DEBUG(logger_,
+                      "Start retry sequence timeout = " << timeout_sec);
+        timer_retry_sequence_.Start(timeout_sec, timer::kPeriodic);
       }
     }
   }
@@ -780,7 +785,7 @@ uint32_t PolicyManagerImpl::NextRetryTimeout() {
   }
 
   // Return miliseconds
-  return next * date_time::DateTime::MILLISECONDS_IN_SECOND;
+  return next;
 }
 
 void PolicyManagerImpl::RefreshRetrySequence() {
@@ -796,7 +801,7 @@ void PolicyManagerImpl::ResetRetrySequence() {
   update_status_manager_.OnResetRetrySequence();
 }
 
-int PolicyManagerImpl::TimeoutExchange() {
+uint32_t PolicyManagerImpl::TimeoutExchangeMSec() {
   return retry_sequence_timeout_;
 }
 
@@ -810,9 +815,9 @@ void PolicyManagerImpl::OnExceededTimeout() {
 }
 
 void PolicyManagerImpl::OnUpdateStarted() {
-  int update_timeout = TimeoutExchange();
+  uint32_t update_timeout = TimeoutExchangeMSec();
   LOG4CXX_DEBUG(logger_,
-                "Update timeout will be set to (sec): " << update_timeout);
+                "Update timeout will be set to (milisec): " << update_timeout);
   update_status_manager_.OnUpdateSentOut(update_timeout);
   cache_->SaveUpdateRequired(true);
 }
@@ -894,7 +899,24 @@ std::string PolicyManagerImpl::RetrieveCertificate() const {
   return cache_->GetCertificate();
 }
 
-void PolicyManagerImpl::AddApplication(const std::string& application_id) {
+class CallStatusChange : public utils::Callable {
+ public:
+  CallStatusChange(UpdateStatusManager& upd_manager,
+                   const DeviceConsent& device_consent)
+      : upd_manager_(upd_manager), device_consent_(device_consent) {}
+
+  // Callable interface
+  void operator()() const {
+    upd_manager_.OnNewApplicationAdded(device_consent_);
+  }
+
+ private:
+  UpdateStatusManager& upd_manager_;
+  const DeviceConsent device_consent_;
+};
+
+StatusNotifier PolicyManagerImpl::AddApplication(
+    const std::string& application_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   const std::string device_id = GetCurrentDeviceId(application_id);
   DeviceConsent device_consent = GetUserConsentForDevice(device_id);
@@ -902,9 +924,11 @@ void PolicyManagerImpl::AddApplication(const std::string& application_id) {
 
   if (IsNewApplication(application_id)) {
     AddNewApplication(application_id, device_consent);
-    update_status_manager_.OnNewApplicationAdded(device_consent);
+    return utils::MakeShared<CallStatusChange>(update_status_manager_,
+                                               device_consent);
   } else {
     PromoteExistedApplication(application_id, device_consent);
+    return utils::MakeShared<utils::CallNothing>();
   }
 }
 
@@ -1008,7 +1032,6 @@ void PolicyManagerImpl::RetrySequence() {
     timer_retry_sequence_.Stop();
     return;
   }
-
   timer_retry_sequence_.Start(timeout, timer::kPeriodic);
 }
 

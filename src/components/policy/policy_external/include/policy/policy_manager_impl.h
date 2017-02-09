@@ -77,7 +77,7 @@ class PolicyManagerImpl : public PolicyManager {
   virtual std::string GetPolicyTableStatus() const;
   virtual void ResetRetrySequence();
   virtual int NextRetryTimeout();
-  virtual int TimeoutExchange();
+  virtual uint32_t TimeoutExchangeMSec();
   virtual const std::vector<int> RetrySequenceDelaysSeconds();
   virtual void OnExceededTimeout();
   virtual std::string GetLockScreenIconUrl() const OVERRIDE;
@@ -166,7 +166,7 @@ class PolicyManagerImpl : public PolicyManager {
   bool CanAppStealFocus(const std::string& app_id) const;
   void MarkUnpairedDevice(const std::string& device_id);
 
-  void AddApplication(const std::string& application_id);
+  StatusNotifier AddApplication(const std::string& application_id);
 
   virtual void RemoveAppConsentForGroup(const std::string& app_id,
                                         const std::string& group_name);

@@ -78,7 +78,7 @@ class MockPolicyManager : public PolicyManager {
   MOCK_METHOD0(ForcePTExchange, std::string());
   MOCK_METHOD0(ResetRetrySequence, void());
   MOCK_METHOD0(NextRetryTimeout, int());
-  MOCK_METHOD0(TimeoutExchange, int());
+  MOCK_METHOD0(TimeoutExchangeMSec, uint32_t());
   MOCK_METHOD0(RetrySequenceDelaysSeconds, const std::vector<int>());
   MOCK_METHOD0(OnExceededTimeout, void());
   MOCK_METHOD0(OnUpdateStarted, void());
@@ -137,7 +137,8 @@ class MockPolicyManager : public PolicyManager {
   MOCK_METHOD1(SendNotificationOnPermissionsUpdated,
                void(const std::string& application_id));
   MOCK_METHOD1(MarkUnpairedDevice, void(const std::string& device_id));
-  MOCK_METHOD1(AddApplication, void(const std::string& application_id));
+  MOCK_METHOD1(AddApplication,
+               StatusNotifier(const std::string& application_id));
   MOCK_METHOD0(CleanupUnpairedDevices, bool());
   MOCK_CONST_METHOD1(CanAppKeepContext, bool(const std::string& app_id));
   MOCK_CONST_METHOD1(CanAppStealFocus, bool(const std::string& app_id));

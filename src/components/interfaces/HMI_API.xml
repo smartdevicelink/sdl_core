@@ -590,6 +590,9 @@
   <element name="audiPassThruIcon">
     <description>The optional image for AudioPassThru</description>
   </element>
+  <element name="subMenuIcon">
+    <description>The image field for AddSubMenu </description>
+  </element>
 </enum>
 
 <enum name="TextAlignment">
@@ -3220,6 +3223,11 @@
     </param>
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application that requested this RPC.</description>
+    </param>
+    <param name="subMenuIcon" type="Common.Image" mandatory="false">
+      <description>
+        If omited on supported displays, no (or the default if applicable) icon shall be displayed.
+      </description>
     </param>
   </function>
   <function name="AddSubMenu" messagetype="response">

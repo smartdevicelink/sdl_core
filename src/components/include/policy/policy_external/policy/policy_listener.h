@@ -81,7 +81,7 @@ class PolicyListener {
    */
   virtual void OnSnapshotCreated(const BinaryMessage& pt_string,
                                  const std::vector<int>& retry_seconds,
-                                 int timeout_exceed) = 0;
+                                 uint32_t timeout_exceed) = 0;
 
   /**
    * @brief Make appropriate changes for related applications permissions and

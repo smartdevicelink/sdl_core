@@ -735,6 +735,11 @@ void ModuleConfig::ReportErrors(rpc::ValidationReport* report__) const {
             report__->ReportSubobject("preloaded_pt");
         preloaded_pt_omitted_field_report.set_validation_info(validation_info);
       }
+      if (preloaded_date.is_initialized()) {
+        rpc::ValidationReport& preloaded_pt_omitted_field_report =
+            report__->ReportSubobject("preloaded_date");
+        preloaded_pt_omitted_field_report.set_validation_info(validation_info);
+      }
       break;
     }
     default:

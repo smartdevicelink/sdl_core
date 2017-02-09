@@ -387,8 +387,7 @@ mobile_apis::HMILevel::eType MessageHelper::StringToHMILevel(
   return mobile_apis::HMILevel::INVALID_ENUM;
 }
 
-std::string MessageHelper::StringifiedHMILevel(
-    mobile_apis::HMILevel::eType hmi_level) {
+std::string MessageHelper::StringifiedHMILevel(const mobile_apis::HMILevel::eType hmi_level) {
   using namespace NsSmartDeviceLink::NsSmartObjects;
   const char* str = 0;
   if (EnumConversionHelper<mobile_apis::HMILevel::eType>::EnumToCString(
@@ -1320,12 +1319,18 @@ smart_objects::SmartObjectList MessageHelper::CreateAddSubMenuRequestToHMI(
 
     smart_objects::SmartObject msg_params =
         smart_objects::SmartObject(smart_objects::SmartType_Map);
-
+    const smart_objects::SmartObject& message_body = *i->second;
     msg_params[strings::menu_id] = i->first;
     msg_params[strings::menu_params][strings::position] =
-        (*i->second)[strings::position];
+        message_body[strings::position];
+    if ((message_body.keyExists(strings::sub_menu_icon)) &&
+        (!message_body[strings::sub_menu_icon][strings::value].empty())) {
+      msg_params[strings::sub_menu_icon] = message_body[strings::sub_menu_icon];
+      msg_params[strings::sub_menu_icon][strings::value] =
+          message_body[strings::sub_menu_icon][strings::value].asString();
+    }
     msg_params[strings::menu_params][strings::menu_name] =
-        (*i->second)[strings::menu_name];
+        message_body[strings::menu_name];
     msg_params[strings::app_id] = app->app_id();
     (*ui_sub_menu)[strings::msg_params] = msg_params;
     requsets.push_back(ui_sub_menu);
@@ -1498,7 +1503,7 @@ void MessageHelper::SendOnSDLConsentNeeded(
 }
 
 void MessageHelper::SendPolicyUpdate(const std::string& file_path,
-                                     const int timeout,
+                                     const uint32_t timeout,
                                      const std::vector<int>& retries,
                                      ApplicationManager& app_mngr) {
   smart_objects::SmartObjectSPtr message =
@@ -1891,15 +1896,13 @@ void MessageHelper::SendQueryApps(const uint32_t connection_key,
 
   policy::PolicyHandlerInterface& policy_handler = app_mngr.GetPolicyHandler();
 
+  const uint32_t timeout = policy_handler.TimeoutExchangeSec();
   smart_objects::SmartObject content(smart_objects::SmartType_Map);
   content[strings::msg_params][strings::request_type] = RequestType::QUERY_APPS;
   content[strings::msg_params][strings::url] = policy_handler.RemoteAppsUrl();
-  content[strings::msg_params][strings::timeout] =
-      policy_handler.TimeoutExchange();
+  content[strings::msg_params][strings::timeout] = timeout;
 
   Json::Value http_header;
-
-  const int timeout = policy_handler.TimeoutExchange();
 
   http_header[http_request::content_type] = "application/json";
   http_header[http_request::connect_timeout] = timeout;

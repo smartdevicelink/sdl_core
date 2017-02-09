@@ -164,6 +164,9 @@ bool ModuleConfig::Validate() const {
       if (preloaded_pt->is_initialized()) {
         return false;
       }
+      if (preloaded_date->is_initialized()) {
+        return false;
+      }
       break;
     }
     default:
