@@ -265,39 +265,6 @@ TEST_F(ResetGlobalPropertiesRequestTest, OnEvent_InvalidEventId_UNSUCCESS) {
 }
 
 TEST_F(ResetGlobalPropertiesRequestTest,
-       OnEvent_UI_SetGlobalProperties_SUCCESS) {
-  Event event(hmi_apis::FunctionID::UI_SetGlobalProperties);
-  (*msg_)[am::strings::params][am::hmi_response::code] =
-      hmi_apis::Common_Result::eType::SUCCESS;
-
-  (*msg_)[am::strings::msg_params][am::strings::properties][0] =
-      mobile_apis::GlobalProperty::VRHELPTITLE;
-
-  EXPECT_CALL(*mock_app_, reset_vr_help_title());
-  EXPECT_CALL(*mock_app_, reset_vr_help());
-
-  EXPECT_CALL(*mock_app_, set_reset_global_properties_active(true));
-
-  smart_objects::SmartObjectSPtr vr_help =
-      ::utils::MakeShared<smart_objects::SmartObject>(
-          smart_objects::SmartType_Map);
-  EXPECT_CALL(*mock_message_helper_, CreateAppVrHelp(_))
-      .WillOnce(Return(vr_help));
-
-  command_->Run();
-
-  event.set_smart_object(*msg_);
-
-  EXPECT_CALL(app_mngr_,
-              ManageMobileCommand(
-                  MobileResultCodeIs(mobile_apis::Result::eType::SUCCESS),
-                  am::commands::Command::ORIGIN_SDL));
-  EXPECT_CALL(*mock_app_, UpdateHash());
-
-  command_->on_event(event);
-}
-
-TEST_F(ResetGlobalPropertiesRequestTest,
        OnEvent_TTS_SetGlobalProperties_SUCCESS) {
   Event event(hmi_apis::FunctionID::TTS_SetGlobalProperties);
   (*msg_)[am::strings::params][am::hmi_response::code] =
@@ -361,43 +328,6 @@ TEST_F(ResetGlobalPropertiesResponseTest, Run_Sendmsg_SUCCESS) {
 
   EXPECT_CALL(app_mngr_, SendMessageToMobile(message, _));
   command->Run();
-}
-
-TEST_F(ResetGlobalPropertiesRequestTest, OnEvent_InvalidApp_UNSUCCESS) {
-  Event event(hmi_apis::FunctionID::UI_SetGlobalProperties);
-  (*msg_)[am::strings::params][am::hmi_response::code] =
-      hmi_apis::Common_Result::eType::SUCCESS;
-
-  (*msg_)[am::strings::msg_params][am::strings::properties][0] =
-      mobile_apis::GlobalProperty::VRHELPTITLE;
-
-  EXPECT_CALL(*mock_app_, reset_vr_help_title());
-  EXPECT_CALL(*mock_app_, reset_vr_help());
-
-  EXPECT_CALL(*mock_app_, set_reset_global_properties_active(true));
-
-  smart_objects::SmartObjectSPtr vr_help =
-      ::utils::MakeShared<smart_objects::SmartObject>(
-          smart_objects::SmartType_Map);
-  EXPECT_CALL(*mock_message_helper_, CreateAppVrHelp(_))
-      .WillOnce(Return(vr_help));
-
-  command_->Run();
-
-  event.set_smart_object(*msg_);
-
-  EXPECT_CALL(app_mngr_,
-              ManageMobileCommand(
-                  MobileResultCodeIs(mobile_apis::Result::eType::SUCCESS),
-                  am::commands::Command::ORIGIN_SDL));
-
-  MockAppPtr invalid_app;
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
-      .WillOnce(Return(invalid_app));
-
-  EXPECT_CALL(*mock_app_, UpdateHash()).Times(0);
-
-  command_->on_event(event);
 }
 
 }  // namespace reset_global_properties
