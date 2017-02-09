@@ -319,6 +319,8 @@ file (GLOB MOBILE_COMMANDS_SOURCES
   ${COMMANDS_SOURCE_DIR}/hmi/dial_number_request.cc
   ${COMMANDS_SOURCE_DIR}/hmi/dial_number_response.cc
   ${COMMANDS_SOURCE_DIR}/hmi/on_event_changed_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/ui_set_audio_streaming_indicator_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/ui_set_audio_streaming_indicator_response.cc
 )
 
 set (HMI_COMMANDS_SOURCES_JSON
