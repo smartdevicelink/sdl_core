@@ -33,6 +33,7 @@
 #include "application_manager/application_impl.h"
 #include <string>
 #include <strings.h>
+#include <algorithm>
 #include "application_manager/message_helper.h"
 #include "protocol_handler/protocol_handler.h"
 #include "application_manager/application_manager.h"
@@ -100,6 +101,8 @@ ApplicationImpl::ApplicationImpl(
     , tts_properties_in_full_(false)
     , is_foreground_(false)
     , is_application_data_changed_(false)
+    , audio_streaming_indicator_(
+          mobile_apis::AudioStreamingIndicator::INVALID_ENUM)
     , put_file_in_none_count_(0)
     , delete_file_in_none_count_(0)
     , list_files_in_none_count_(0)
@@ -286,6 +289,11 @@ bool ApplicationImpl::is_media_application() const {
   return is_media_;
 }
 
+mobile_apis::AudioStreamingIndicator::eType
+ApplicationImpl::audio_streaming_indicator() const {
+  return audio_streaming_indicator_;
+}
+
 const mobile_api::HMILevel::eType ApplicationImpl::hmi_level() const {
   using namespace mobile_apis;
   const HmiStatePtr hmi_state = CurrentHmiState();
@@ -345,6 +353,40 @@ void ApplicationImpl::set_name(const custom_str::CustomString& name) {
 
 void ApplicationImpl::set_is_media_application(bool is_media) {
   is_media_ = is_media;
+}
+
+void ApplicationImpl::set_audio_streaming_indicator(
+    const mobile_apis::AudioStreamingIndicator::eType indicator) {
+  audio_streaming_indicator_ = indicator;
+}
+
+bool ApplicationImpl::AddIndicatorWaitForResponse(
+    const mobile_api::AudioStreamingIndicator::eType indicator) {
+  if (indicator == audio_streaming_indicator()) {
+    return false;
+  }
+  sync_primitives::AutoLock lock(indicators_lock_);
+  AudioStreamingIndicators::iterator it =
+      std::find(indicators_waiting_for_response_.begin(),
+                indicators_waiting_for_response_.end(),
+                indicator);
+  if (it != indicators_waiting_for_response_.end()) {
+    return false;
+  }
+  indicators_waiting_for_response_.push_back(indicator);
+  return true;
+}
+
+void ApplicationImpl::RemoveIndicatorWaitForResponse(
+    const mobile_api::AudioStreamingIndicator::eType indicator) {
+  sync_primitives::AutoLock lock(indicators_lock_);
+  AudioStreamingIndicators::iterator it =
+      std::find(indicators_waiting_for_response_.begin(),
+                indicators_waiting_for_response_.end(),
+                indicator);
+  if (it != indicators_waiting_for_response_.end()) {
+    indicators_waiting_for_response_.erase(it);
+  }
 }
 
 bool IsTTSState(const HmiStatePtr state) {

@@ -34,7 +34,7 @@
 
 <interfaces name="SmartDeviceLink HMI API">
 
-<interface name="Common" version="1.6" date="2017-01-24">
+<interface name="Common" version="1.7" date="2017-01-23">
 
 <enum name="Result">
     <element name="SUCCESS" value="0"/>
@@ -1261,10 +1261,22 @@
 </enum>
 
 <enum name="SteeringWheelLocation"> 
-<description>Describes the location of the Steering Wheel.</description>
-<element name="LEFT" />
-<element name="RIGHT" />
-<element name="CENTER" />
+  <description>Describes the location of the Steering Wheel.</description>
+  <element name="LEFT" />
+  <element name="RIGHT" />
+  <element name="CENTER" />
+</enum>
+
+<enum name="AudioStreamingIndicator">
+  <element name="PLAY_PAUSE">
+    <description>Indicates to use the Play/Pause icon.</description>
+  </element>
+  <element name="PLAY">
+    <description>Indicates to use the Play only icon.</description>
+  </element>
+  <element name="PAUSE">
+    <description>Indicates to use the Pause only icon.</description>
+  </element>
 </enum>
 
 <!-- Policies -->
@@ -3109,7 +3121,7 @@
   </function>
 </interface>
 
-<interface name="UI" version="1.1" date="2017-01-24">
+<interface name="UI" version="1.2" date="2017-01-25">
   <function name="OnSeekMediaClockTimer" functionID="OnSeekMediaClockTimerID" messagetype="notification">
    <description>Callback for the seek media clock timer notification. Notification is triggered when the user selects a position and releases the mediaclock timer or when the user selects a position and holds for a full 2 second period. System will automatically the media clock timer position based on the seek notification location.</description> 
    <param name="seekTime" type="Common.TimeFormat" mandatory="true">
@@ -3626,6 +3638,17 @@
       <description>ID of application related to this RPC.</description>
     </param>
   </function>
+  <function name="SetAudioStreamingIndicator" messagetype="request">
+    <description>Sets the icon properly to the current audio playback of the app.</description>
+    <param name="audioStreamingIndicator" type="Common.AudioStreamingIndicator" mandatory="true">
+      <description>
+        See AudioStreamingIndicator.
+      </description>
+    </param>
+  </function>
+  <function name="SetAudioStreamingIndicator" messagetype="response">
+  </function>
+
 </interface>
 
 <interface name="Navigation" version="1.2" date="2016-06-09">
