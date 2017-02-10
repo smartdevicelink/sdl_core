@@ -271,14 +271,17 @@ class MockApplication : public application_manager::Application {
   MOCK_METHOD1(UnsubscribeFromSoftButtons, void(int32_t cmd_id));
   MOCK_CONST_METHOD0(IsAudioApplication, bool());
   MOCK_METHOD0(LoadPersistentFiles, void());
-  MOCK_METHOD1(set_audio_streaming_indicator,
-               void(const mobile_apis::AudioStreamingIdicator::eType indicator));
+  MOCK_METHOD1(
+      set_audio_streaming_indicator,
+      void(const mobile_apis::AudioStreamingIdicator::eType indicator));
   MOCK_CONST_METHOD0(audio_streaming_indicator,
                      mobile_apis::AudioStreamingIdicator::eType());
-  MOCK_METHOD1(AddIndicatorWaitForResponse,
-               bool(const mobile_apis::AudioStreamingIndicator::eType indicator));
-  MOCK_METHOD1(RemoveIndicatorWaitForResponse,
-               void(const mobile_apis::AudioStreamingIndicator::eType indicator));
+  MOCK_METHOD1(
+      AddIndicatorWaitForResponse,
+      bool(const mobile_apis::AudioStreamingIndicator::eType indicator));
+  MOCK_METHOD1(
+      RemoveIndicatorWaitForResponse,
+      void(const mobile_apis::AudioStreamingIndicator::eType indicator));
 };
 
 }  // namespace state_controller_test
