@@ -1625,7 +1625,7 @@ void PolicyManagerImpl::OnChangedRemoteControl(
 
 void PolicyManagerImpl::UpdateDeviceRank(const Subject& who,
                                          const std::string& rank) {
-  std::string default_hmi;
+  std::string default_hmi("NONE");
   if (GetDefaultHmi(who.app_id, &default_hmi)) {
     access_remote_->Reset(who);
     listener()->OnUpdateHMIStatus(who.dev_id, who.app_id, default_hmi, rank);
@@ -1637,7 +1637,7 @@ void PolicyManagerImpl::UpdateDeviceRank(const Subject& who,
 }
 
 void PolicyManagerImpl::SendHMILevelChanged(const Subject& who) {
-  std::string default_hmi;
+  std::string default_hmi("NONE");
   if (GetDefaultHmi(who.app_id, &default_hmi)) {
     access_remote_->Reset(who);
     listener()->OnUpdateHMIStatus(who.dev_id, who.app_id, default_hmi);
