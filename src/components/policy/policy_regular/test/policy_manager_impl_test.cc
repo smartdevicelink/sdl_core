@@ -211,10 +211,10 @@ class PolicyManagerImplTest2 : public ::testing::Test {
   const std::string dev_id2;
   Json::Value PTU_request_types;
   NiceMock<policy_handler_test::MockPolicySettings> policy_settings_;
-  const std::string kAppStorageFolder = "storage1";
+  const std::string kAppStorageFolder = "storage_PolicyManagerImplTest2";
 
   void SetUp() OVERRIDE {
-    file_system::CreateDirectory("storage1");
+    file_system::CreateDirectory(kAppStorageFolder);
     file_system::DeleteFile("policy.sqlite");
 
     manager = new PolicyManagerImpl();
@@ -253,7 +253,7 @@ class PolicyManagerImplTest2 : public ::testing::Test {
   }
 
   void CreateLocalPT(const std::string& file_name) {
-    file_system::remove_directory_content("storage1");
+    file_system::remove_directory_content(kAppStorageFolder);
     ON_CALL(policy_settings_, app_storage_folder())
         .WillByDefault(ReturnRef(kAppStorageFolder));
     ASSERT_TRUE(manager->InitPT(file_name, &policy_settings_));
@@ -377,6 +377,8 @@ class PolicyManagerImplTest2 : public ::testing::Test {
 
   void TearDown() OVERRIDE {
     delete manager;
+    file_system::remove_directory_content(kAppStorageFolder);
+    file_system::RemoveDirectory(kAppStorageFolder, true);
   }
 };
 
