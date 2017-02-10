@@ -751,6 +751,10 @@
       <description>The optional image field for AudioPassThru</description>
     </element>
 
+    <element name="subMenuIcon">
+      <description>The image field for AddSubMenu </description>
+    </element>
+
   </enum>
 
   <enum name="CharacterSet">
@@ -2853,6 +2857,12 @@
 
     <param name="menuName" maxlength="500" type="String">
       <description>Text to show in the menu for this sub menu.</description>
+    </param>
+
+    <param name="subMenuIcon" type="Image" mandatory="false">
+      <description>
+       If omited on supported displays, no (or the default if applicable) icon shall be displayed.
+      </description>
     </param>
   </function>
 
