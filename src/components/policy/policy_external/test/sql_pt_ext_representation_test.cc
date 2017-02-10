@@ -75,7 +75,7 @@ class SQLPTExtRepresentationTest : public ::testing::Test {
   FunctionalGroupPermission group2_perm;
   utils::dbms::SQLQuery* query_wrapper_;
   static const bool in_memory_;
-  const std::string kAppStorageFolder = "storage1";
+  const std::string kAppStorageFolder = "storage_SQLPTExtRepresentationTest";
 
   void SetUp() OVERRIDE {
     file_system::DeleteFile(kDatabaseName);
