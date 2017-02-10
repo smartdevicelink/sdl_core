@@ -68,6 +68,8 @@ namespace test {
 namespace components {
 namespace policy_test {
 
+using policy_handler_test::MockPolicySettings;
+
 class SQLPTRepresentationTest : public SQLPTRepresentation,
                                 public ::testing::Test {
  protected:
@@ -76,13 +78,13 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
   static const std::string kDatabaseName;
   static const std::string kAppStorageFolder;
   // Gtest can show message that this object doesn't destroyed
-  std::auto_ptr<policy_handler_test::MockPolicySettings> policy_settings_;
+  std::auto_ptr<NiceMock<MockPolicySettings> > policy_settings_;
 
   void SetUp() OVERRIDE {
     file_system::CreateDirectory(kAppStorageFolder);
     reps = new SQLPTRepresentation;
-    policy_settings_ = std::auto_ptr<policy_handler_test::MockPolicySettings>(
-        new policy_handler_test::MockPolicySettings());
+    policy_settings_ = std::auto_ptr<NiceMock<MockPolicySettings> >(
+        new NiceMock<MockPolicySettings>());
     ON_CALL(*policy_settings_, app_storage_folder())
         .WillByDefault(ReturnRef(kAppStorageFolder));
     EXPECT_EQ(::policy::SUCCESS, reps->Init(policy_settings_.get()));
@@ -344,7 +346,8 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
 };
 
 const std::string SQLPTRepresentationTest::kDatabaseName = "policy.sqlite";
-const std::string SQLPTRepresentationTest::kAppStorageFolder = "storage1";
+const std::string SQLPTRepresentationTest::kAppStorageFolder =
+    "storage_SQLPTRepresentationTest";
 
 class SQLPTRepresentationTest2 : public ::testing::Test {
  protected:
@@ -371,7 +374,7 @@ class SQLPTRepresentationTest2 : public ::testing::Test {
   }
 
   SQLPTRepresentation* reps;
-  NiceMock<policy_handler_test::MockPolicySettings> policy_settings_;
+  NiceMock<MockPolicySettings> policy_settings_;
   const std::string kAppStorageFolder;
   const uint16_t kOpenAttemptTimeoutMs;
   const uint16_t kAttemptsToOpenPolicyDB;
@@ -392,7 +395,7 @@ class SQLPTRepresentationTest3 : public ::testing::Test {
   }
 
   SQLPTRepresentation* reps;
-  NiceMock<policy_handler_test::MockPolicySettings> policy_settings_;
+  NiceMock<MockPolicySettings> policy_settings_;
   const std::string kAppStorageFolder;
 };
 

@@ -80,7 +80,7 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
       policy_settings_;
 
   static void SetUpTestCase() {
-    const std::string kAppStorageFolder = "storage1";
+    const std::string kAppStorageFolder = "storage_SQLPTRepresentationTest";
     reps = new SQLPTRepresentation(in_memory_);
     ASSERT_TRUE(reps != NULL);
     policy_settings_ = std::auto_ptr<policy_handler_test::MockPolicySettings>(
