@@ -435,9 +435,6 @@ class ApplicationImpl : public virtual Application,
   static log4cxx::LoggerPtr logger_;
 #endif  // ENABLE_LOG
 
-#ifdef SDL_REMOTE_CONTROL
-  mobile_api::HMILevel::eType hmi_level_;
-#endif
   /**
    * @brief Defines number per time in seconds limits
    */
