@@ -297,6 +297,16 @@ class ProtocolHandlerImpl
 
   SessionObserver& get_session_observer() OVERRIDE;
 
+#ifdef BUILD_TESTS
+  const impl::FromMobileQueue& get_from_mobile_queue() const {
+    return raw_ford_messages_from_mobile_;
+  }
+
+  const impl::ToMobileQueue& get_to_mobile_queue() const {
+    return raw_ford_messages_to_mobile_;
+  }
+#endif
+
  private:
   void SendEndServicePrivate(int32_t connection_id,
                              uint8_t session_id,

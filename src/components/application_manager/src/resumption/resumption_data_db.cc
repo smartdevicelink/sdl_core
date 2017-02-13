@@ -833,14 +833,26 @@ bool ResumptionDataDB::SelectSubmenuData(
   /* Position of data in "select_sub_menu" :
      field "menuID" from table "subMenu" = 0
      field "menuName" from table "subMenu" = 1
-     field "position" from table "subMenu" = 2*/
+     field "position" from table "subMenu" = 2
+     field "value" from table "image" = 3
+     field "imageType" from table "image" = 4*/
   uint32_t i = 0;
   while (select_sub_menu.Next()) {
     SmartObject array_item(SmartType_Map);
+    SmartObject submenu_icon(SmartType_Map);
     array_item[strings::menu_id] = select_sub_menu.GetInteger(0);
     array_item[strings::menu_name] = select_sub_menu.GetString(1);
     if (!(select_sub_menu.IsNull(2))) {
       array_item[strings::position] = select_sub_menu.GetInteger(2);
+    }
+    if (!(select_sub_menu.IsNull(3))) {
+      submenu_icon[strings::value] = select_sub_menu.GetString(3);
+    }
+    if (!(select_sub_menu.IsNull(4))) {
+      submenu_icon[strings::image_type] = select_sub_menu.GetInteger(4);
+    }
+    if (!submenu_icon.empty()) {
+      array_item[strings::sub_menu_icon] = submenu_icon;
     }
     saved_app[strings::application_submenus][i++] = array_item;
   }
@@ -1482,6 +1494,12 @@ bool ResumptionDataDB::DeleteSavedSubMenu(const std::string& policy_app_id,
                                           const std::string& device_id) {
   LOG4CXX_AUTO_TRACE(logger_);
 
+  if (!ExecQueryToDeleteData(
+          policy_app_id, device_id, kDeleteImageFromSubMenu)) {
+    LOG4CXX_WARN(logger_, "Incorrect delete image from SubMenu.");
+    return false;
+  }
+
   if (!ExecQueryToDeleteData(policy_app_id, device_id, kDeleteSubMenu)) {
     LOG4CXX_WARN(logger_, "Incorrect delete from subMenu.");
     return false;
@@ -2037,11 +2055,25 @@ bool ResumptionDataDB::InsertSubMenuData(
   /* Positions of binding data for "query_insert_submenu":
      field "menuID" from table "submenu" = 0
      field "menuName" from table "submenu" = 1
-     field "position" from table "submenu" = 2*/
+     field "position" from table "submenu" = 2
+     field "idimage" from table "submenu" = 3*/
+
+  int64_t image_primary_key = 0;
   for (size_t i = 0; i < length_submenu_array; ++i) {
     query_insert_submenu.Bind(0, (submenus[i][strings::menu_id]).asInt());
     query_insert_submenu.Bind(1, (submenus[i][strings::menu_name]).asString());
     CustomBind(strings::position, submenus[i], query_insert_submenu, 2);
+
+    if (submenus[i].keyExists(strings::sub_menu_icon)) {
+      if (!ExecInsertImage(image_primary_key,
+                           submenus[i][strings::sub_menu_icon])) {
+        LOG4CXX_WARN(logger_, "Problem with insert submenu icon to DB");
+        return false;
+      }
+      query_insert_submenu.Bind(3, image_primary_key);
+    } else {
+      query_insert_submenu.Bind(3);
+    }
 
     if (!query_insert_submenu.Exec()) {
       LOG4CXX_WARN(logger_, "Incorrect insertion of submenu data");

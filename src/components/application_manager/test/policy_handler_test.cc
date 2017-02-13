@@ -37,7 +37,6 @@
 
 #include "application_manager/policies/policy_handler.h"
 #include "application_manager/policies/delegates/app_permission_delegate.h"
-#include "policy/mock_cache_manager.h"
 #include "connection_handler/connection_handler_impl.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"

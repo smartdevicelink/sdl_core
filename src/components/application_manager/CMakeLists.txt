@@ -331,6 +331,7 @@ set (HMI_COMMANDS_SOURCES
   ${COMMANDS_SOURCE_DIR}/hmi/on_event_changed_notification.cc
   ${COMMANDS_SOURCE_DIR}/hmi/decrypt_certificate_request.cc
   ${COMMANDS_SOURCE_DIR}/hmi/decrypt_certificate_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/ui_set_icon_request.cc
 )
 
 set (HMI_COMMANDS_SOURCES_JSON
@@ -370,9 +371,8 @@ set (HMI_COMMANDS_SOURCES_DBUS
 if (${HMI_JSON_API})
   set (HMI_COMMANDS_SOURCES ${HMI_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES_JSON})
 endif (${HMI_JSON_API})
-if (${HMI_DBUS_API})
-  set (HMI_COMMANDS_SOURCES ${HMI_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES_DBUS})
-endif (${HMI_DBUS_API})
+
+set (HMI_COMMANDS_SOURCES ${HMI_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES_DBUS})
 
 set(EXCLUDE_PATHS
   ${COMMANDS_SOURCE_DIR}
@@ -426,16 +426,16 @@ add_library("AMEventEngine" ${EVENT_ENGINE_SOURCES})
 target_link_libraries("AMEventEngine" ${LIBRARIES})
 
 add_library("AMPolicyLibrary" ${POLICIES_MANAGER_SOURCES} )
-target_link_libraries("AMPolicyLibrary" ${LIBRARIES})
+target_link_libraries("AMPolicyLibrary" ${LIBRARIES} AMEventEngine)
 
 add_library("AMHMICommandsLibrary" ${HMI_COMMANDS_SOURCES})
-target_link_libraries("AMHMICommandsLibrary" ${LIBRARIES})
+target_link_libraries("AMHMICommandsLibrary" ${LIBRARIES} AMEventEngine)
 
 add_library("MessageHelper" ${MESSAGE_HELPER_SOURCES})
 target_link_libraries("MessageHelper" ${LIBRARIES})
 
 add_library("AMMobileCommandsLibrary" ${MOBILE_COMMANDS_SOURCES} )
-target_link_libraries("AMMobileCommandsLibrary" ${LIBRARIES})
+target_link_libraries("AMMobileCommandsLibrary" ${LIBRARIES} AMEventEngine)
 
 add_library("ApplicationManager" ${SOURCES})
 
