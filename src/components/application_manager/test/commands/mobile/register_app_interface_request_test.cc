@@ -271,7 +271,7 @@ MATCHER_P(CheckHMIInterfacesRealtedData, expected_data, "") {
 }
 
 TEST_F(RegisterAppInterfaceRequestTest,
-       Run_HmiInterfacesStateAvailable_SUCCESS) {
+       DISABLED_Run_HmiInterfacesStateAvailable_SUCCESS) {
   InitBasicMessage();
 
   EXPECT_CALL(app_mngr_, IsStopping())
@@ -382,7 +382,7 @@ MATCHER_P(CheckMobileResponseParameters, ui_hmi_capabilities, "") {
 }
 
 TEST_F(RegisterAppInterfaceRequestTest,
-       Check_Sending_UI_HMI_Capabilities_SUCCESS) {
+       DISABLED_Check_Sending_UI_HMI_Capabilities_SUCCESS) {
   InitBasicMessage();
 
   MockAppPtr mock_app = CreateBasicMockedApp();
