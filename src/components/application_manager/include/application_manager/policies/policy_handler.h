@@ -633,6 +633,9 @@ class PolicyHandler : public PolicyHandlerInterface,
 #ifdef SDL_REMOTE_CONTROL
   void UpdateHMILevel(application_manager::ApplicationSharedPtr app,
                       mobile_apis::HMILevel::eType level);
+
+  mobile_apis::DeviceRank::eType device_rank(
+      const std::string& application_id) OVERRIDE;
 #endif  // SDL_REMOTE_CONTROL
         /**
          * @brief Sets days after epoch on successful policy update

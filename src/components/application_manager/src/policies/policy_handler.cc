@@ -2241,5 +2241,25 @@ void PolicyHandler::OnUpdateHMILevel(const std::string& device_id,
   }
   UpdateHMILevel(app, level);
 }
+
+mobile_apis::DeviceRank::eType PolicyHandler::device_rank(
+    const std::string& application_id) {
+  const std::string device_id =
+      policy_manager_->GetCurrentDeviceId(application_id);
+  const Subject who = {device_id, application_id};
+
+  if (policy_manager_->access_remote()->IsAppReverse(who)) {
+    const std::string device_rank =
+        policy_manager_->access_remote()->IsPrimaryDevice(who.dev_id)
+            ? "DRIVER"
+            : "PASSENGER";
+    mobile_apis::DeviceRank::eType rank =
+        MessageHelper::StringToDeviceRank(device_rank);
+
+    return rank;
+  }
+  return mobile_apis::DeviceRank::INVALID_ENUM;
+}
+
 #endif  // SDL_REMOTE_CONTROL
 }  //  namespace policy

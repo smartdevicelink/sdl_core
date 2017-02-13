@@ -447,9 +447,6 @@ void PolicyManagerImpl::SendNotificationOnPermissionsUpdated(
 #ifdef SDL_REMOTE_CONTROL
   const Subject who = {device_id, application_id};
   if (access_remote_->IsAppReverse(who)) {
-    const std::string rank =
-        access_remote_->IsPrimaryDevice(who.dev_id) ? "DRIVER" : "PASSENGER";
-    UpdateDeviceRank(who, rank);
     listener()->OnPermissionsUpdated(application_id, notification_data);
     return;
   }
@@ -1488,6 +1485,10 @@ void PolicyManagerImpl::set_access_remote(
     utils::SharedPtr<AccessRemote> access_remote) {
   access_remote_ = access_remote;
 }
+utils::SharedPtr<AccessRemote> PolicyManagerImpl::access_remote() {
+  return access_remote_;
+}
+
 #endif  // SDL_REMOTE_CONTROL
 
 }  //  namespace policy

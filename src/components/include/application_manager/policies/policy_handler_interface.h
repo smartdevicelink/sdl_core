@@ -557,6 +557,9 @@ class PolicyHandlerInterface {
    */
   virtual bool GetModuleTypes(const std::string& policy_app_id,
                               std::vector<std::string>* modules) const = 0;
+
+  virtual mobile_apis::DeviceRank::eType device_rank(
+      const std::string& application_id) = 0;
 #endif  // SDL_REMOTE_CONTROL
 
  protected:
