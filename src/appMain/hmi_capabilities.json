@@ -349,7 +349,7 @@
 },
     "TTS":
 	{
-		"capabilities":["TEXT"],
+		"capabilities":"TEXT",
 		"language":"EN-US",
 	    "languages":
 	    [
