@@ -451,6 +451,7 @@ void CANModule::RemoveAppExtension(uint32_t app_id) {
 }
 
 bool CANModule::IsAppForPlugin(application_manager::ApplicationSharedPtr app) {
+  LOG4CXX_AUTO_TRACE(logger_);
   application_manager::AppExtensionPtr app_extension =
       app->QueryInterface(GetModuleID());
   if (app_extension) {

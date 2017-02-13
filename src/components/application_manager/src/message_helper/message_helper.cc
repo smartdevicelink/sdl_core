@@ -2570,6 +2570,7 @@ void MessageHelper::SendActivateAppToHMI(
     ApplicationManager& application_manager,
     hmi_apis::Common_HMILevel::eType level,
     bool send_policy_priority) {
+  LOG4CXX_AUTO_TRACE(logger_);
   application_manager::ApplicationConstSharedPtr app =
       application_manager.application(app_id);
   if (!app) {

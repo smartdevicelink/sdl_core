@@ -181,7 +181,7 @@ struct SDLAllowedNotification {
   void operator()(const ApplicationSharedPtr& app) {
     DCHECK_OR_RETURN_VOID(policy_manager_);
     if (device_id_ == app->device()) {
-      std::string hmi_level;
+      std::string hmi_level = "NONE";
       mobile_apis::HMILevel::eType default_mobile_hmi;
       policy_manager_->GetDefaultHmi(app->policy_app_id(), &hmi_level);
       if ("BACKGROUND" == hmi_level) {
@@ -2177,10 +2177,11 @@ bool PolicyHandler::GetModuleTypes(const std::string& policy_app_id,
   return policy_manager_->GetModuleTypes(policy_app_id, modules);
 }
 
-void PolicyHandler::AddApplication(
+StatusNotifier PolicyHandler::AddApplication(
     const std::string& application_id,
     const smart_objects::SmartObject* app_types) {
-  POLICY_LIB_CHECK_VOID();
+  LOG4CXX_AUTO_TRACE(logger_);
+  POLICY_LIB_CHECK(utils::MakeShared<utils::CallNothing>());
   std::vector<int> hmi_types;
   if (app_types && app_types->asArray()) {
     smart_objects::SmartArray* hmi_list = app_types->asArray();
@@ -2189,7 +2190,7 @@ void PolicyHandler::AddApplication(
                    std::back_inserter(hmi_types),
                    SmartObjectToInt());
   }
-  policy_manager_->AddApplication(application_id, hmi_types);
+  return policy_manager_->AddApplication(application_id, hmi_types);
 }
 
 bool PolicyHandler::CheckHMIType(const std::string& application_id,

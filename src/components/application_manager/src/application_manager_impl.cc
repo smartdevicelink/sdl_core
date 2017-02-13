@@ -584,17 +584,6 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   applications_.insert(application);
   applications_list_lock_.Release();
 
-#ifdef SDL_REMOTE_CONTROL
-  if (message[strings::msg_params].keyExists(strings::app_hmi_type)) {
-    GetPolicyHandler().AddApplication(
-        application->policy_app_id(),
-        &message[strings::msg_params][strings::app_hmi_type]);
-  } else {
-    GetPolicyHandler().AddApplication(application->policy_app_id());
-  }
-#else   // SDL_REMOTE_CONTROL
-  GetPolicyHandler().AddApplication(application->policy_app_id());
-#endif  // SDL_REMOTE_CONTROL
   return application;
 }
 
@@ -1019,7 +1008,7 @@ mobile_apis::HMILevel::eType ApplicationManagerImpl::GetDefaultHmiLevel(
 
   if (GetPolicyHandler().PolicyEnabled()) {
     const std::string policy_app_id = application->policy_app_id();
-    std::string default_hmi_string = "";
+    std::string default_hmi_string = "NONE";
     if (GetPolicyHandler().GetDefaultHmi(policy_app_id, &default_hmi_string)) {
       if ("BACKGROUND" == default_hmi_string) {
         default_hmi = HMILevel::HMI_BACKGROUND;
@@ -1339,7 +1328,11 @@ void ApplicationManagerImpl::SendMessageToMobile(
   }
 
   smart_objects::SmartObject& msg_to_mobile = *message;
-
+#ifdef SDL_REMOTE_CONTROL
+  mobile_apis::FunctionID::eType function_id =
+      static_cast<mobile_apis::FunctionID::eType>(
+          (*message)[strings::params][strings::function_id].asUInt());
+#endif
   // If correlation_id is not present, it is from-HMI message which should be
   // checked against policy permissions
   if (msg_to_mobile[strings::params].keyExists(strings::correlation_id)) {
@@ -1347,6 +1340,16 @@ void ApplicationManagerImpl::SendMessageToMobile(
         msg_to_mobile[strings::params][strings::correlation_id].asUInt(),
         msg_to_mobile[strings::params][strings::connection_key].asUInt(),
         msg_to_mobile[strings::params][strings::function_id].asInt());
+#ifdef SDL_REMOTE_CONTROL
+    if (function_id == mobile_apis::FunctionID::RegisterAppInterfaceID &&
+        (*message)[strings::msg_params][strings::success].asBool()) {
+      bool is_for_plugin = plugin_manager_.IsAppForPlugins(app);
+      LOG4CXX_INFO(logger_,
+                   "Registered app " << app->app_id() << " is "
+                                     << (is_for_plugin ? "" : "not ")
+                                     << "for plugins.");
+    }
+#endif
   } else if (app) {
     mobile_apis::FunctionID::eType function_id =
         static_cast<mobile_apis::FunctionID::eType>(

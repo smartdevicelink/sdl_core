@@ -146,8 +146,8 @@ class MockPolicyManager : public PolicyManager {
                StatusNotifier(const std::string& application_id));
 #ifdef SDL_REMOTE_CONTROL
   MOCK_METHOD2(AddApplication,
-               void(const std::string& application_id,
-                    const std::vector<int>& hmi_types));
+               StatusNotifier(const std::string& application_id,
+                              const std::vector<int>& hmi_types));
   MOCK_METHOD2(GetHMITypes,
                bool(const std::string& application_id,
                     std::vector<int>* app_types));
