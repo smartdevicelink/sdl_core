@@ -1140,7 +1140,7 @@ TEST_F(SetGlobalPropertiesRequestTest, Run_NoData_Canceled) {
   command->Run();
 }
 
-TEST_F(SetGlobalPropertiesRequestTest, DISABLED_Run_InvalidApp_Canceled) {
+TEST_F(SetGlobalPropertiesRequestTest, Run_InvalidApp_Canceled) {
   MessageSharedPtr msg = CreateMessage();
   (*msg)[am::strings::params][am::strings::connection_key] = kConnectionKey;
 
@@ -1245,7 +1245,7 @@ TEST_F(SetGlobalPropertiesRequestTest,
   command->on_event(event);
 }
 
-TEST_F(SetGlobalPropertiesRequestTest, OnEvent_InvalidApp_Canceled) {
+TEST_F(SetGlobalPropertiesRequestTest, DISABLED_OnEvent_InvalidApp_Canceled) {
   MessageSharedPtr msg = CreateMsgParams();
   hmi_apis::Common_Result::eType response_code =
       hmi_apis::Common_Result::WARNINGS;
