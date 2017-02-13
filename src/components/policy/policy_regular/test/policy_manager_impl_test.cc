@@ -39,7 +39,6 @@
 #include "json/writer.h"
 #include "gtest/gtest.h"
 
-#include "policy/policy_types.h"
 #include "policy/policy_manager_impl.h"
 #include "config_profile/profile.h"
 #include "policy/policy_table/enums.h"
@@ -67,11 +66,12 @@ using ::testing::Return;
 using ::policy::PolicyManagerImpl;
 using ::policy::PolicyTable;
 
+namespace policy_table = rpc::policy_table_interface_base;
+
 namespace test {
 namespace components {
 namespace policy_test {
 
-namespace policy_table = rpc::policy_table_interface_base;
 namespace custom_str = utils::custom_string;
 
 typedef std::multimap<std::string, policy_table::Rpcs&>
