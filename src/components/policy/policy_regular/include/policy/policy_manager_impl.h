@@ -202,6 +202,8 @@ class PolicyManagerImpl : public PolicyManager {
 
   virtual std::string RetrieveCertificate() const OVERRIDE;
 
+  virtual bool HasCertificate() const OVERRIDE;
+
  protected:
 #ifdef USE_HMI_PTU_DECRYPTION
   virtual utils::SharedPtr<policy_table::Table> Parse(

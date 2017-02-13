@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,9 +39,11 @@
 
 #include "policy/cache_manager_interface.h"
 
+namespace test {
+namespace components {
+namespace policy_test {
 namespace policy_table = rpc::policy_table_interface_base;
-
-namespace policy {
+using namespace ::policy;
 
 class MockCacheManagerInterface : public CacheManagerInterface {
  public:
@@ -190,6 +192,9 @@ class MockCacheManagerInterface : public CacheManagerInterface {
                           std::vector<std::string>& request_types));
   MOCK_METHOD1(GetHMIAppTypeAfterUpdate,
                void(std::map<std::string, StringArray>& app_hmi_types));
+  MOCK_CONST_METHOD2(AppHasHMIType,
+                     bool(const std::string& application_id,
+                          policy_table::AppHMIType hmi_type));
   MOCK_METHOD0(ResetCalculatedPermissions, void());
   MOCK_METHOD3(AddCalculatedPermissions,
                void(const std::string& device_id,
@@ -204,6 +209,8 @@ class MockCacheManagerInterface : public CacheManagerInterface {
   MOCK_METHOD1(SetDecryptedCertificate, void(const std::string&));
 };
 
-}  // namespace policy
+}  // namespace policy_test
+}  // namespace components
+}  // namespace test
 
 #endif  // SRC_COMPONENTS_POLICY_POLICY_REGULAR_TEST_INCLUDE_MOCK_CACHE_MANAGER_H_
