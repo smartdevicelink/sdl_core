@@ -49,19 +49,11 @@ OnSeekMediaClockTimerNotification::~OnSeekMediaClockTimerNotification() {}
 
 void OnSeekMediaClockTimerNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-
   (*message_)[strings::params][strings::function_id] =
       static_cast<int32_t>(mobile_apis::FunctionID::OnSeekMediaClockTimerID);
-
-  const ApplicationSet& accessor =
-      application_manager_.applications().GetData();
-
-  ApplicationSetIt it = accessor.begin();
-  for (; accessor.end() != it; ++it) {
-    const ApplicationSharedPtr app = *it;
-    (*message_)[strings::params][strings::connection_key] = app->app_id();
-    SendNotificationToMobile(message_);
-  }
+  uint32_t app_id = (*message_)[strings::msg_params][strings::app_id].asUInt();
+  (*message_)[strings::params][strings::connection_key] = app_id;
+  SendNotificationToMobile(message_);
 }
 
 }  // namespace hmi
