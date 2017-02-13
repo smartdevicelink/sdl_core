@@ -455,6 +455,14 @@ class PolicyManager : public usage_statistics::StatisticsManager {
    */
   virtual std::string RetrieveCertificate() const = 0;
 
+  /**
+   * @brief HasCertificate check whether policy table has certificate
+   * int module_config section.
+   *
+   * @return true in case certificate exists, false otherwise
+   */
+  virtual bool HasCertificate() const = 0;
+
   virtual const PolicySettings& get_settings() const = 0;
 
  protected:

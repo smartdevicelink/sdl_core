@@ -275,6 +275,26 @@ void CacheManager::GetHMIAppTypeAfterUpdate(
   }
 }
 
+bool CacheManager::AppHasHMIType(const std::string& application_id,
+                                 policy_table::AppHMIType hmi_type) const {
+  const policy_table::ApplicationPolicies& policies =
+      pt_->policy_table.app_policies_section.apps;
+
+  policy_table::ApplicationPolicies::const_iterator policy_iter =
+      policies.find(application_id);
+
+  if (policy_iter == policies.end()) {
+    return false;
+  }
+
+  if (policy_iter->second.AppHMIType.is_initialized()) {
+    return helpers::in_range(*(policy_iter->second.AppHMIType),
+                             rpc::Enum<policy_table::AppHMIType>(hmi_type));
+  }
+
+  return false;
+}
+
 void CacheManager::Backup() {
   sync_primitives::AutoLock lock(backuper_locker_);
   DCHECK(backuper_);

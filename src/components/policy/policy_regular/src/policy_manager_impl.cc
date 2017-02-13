@@ -899,6 +899,10 @@ std::string PolicyManagerImpl::RetrieveCertificate() const {
   return cache_->GetCertificate();
 }
 
+bool PolicyManagerImpl::HasCertificate() const {
+  return !cache_->GetCertificate().empty();
+}
+
 class CallStatusChange : public utils::Callable {
  public:
   CallStatusChange(UpdateStatusManager& upd_manager,
@@ -1032,6 +1036,7 @@ void PolicyManagerImpl::RetrySequence() {
     timer_retry_sequence_.Stop();
     return;
   }
+
   timer_retry_sequence_.Start(timeout, timer::kPeriodic);
 }
 
