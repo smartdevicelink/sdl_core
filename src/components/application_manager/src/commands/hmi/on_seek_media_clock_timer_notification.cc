@@ -51,7 +51,8 @@ void OnSeekMediaClockTimerNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   (*message_)[strings::params][strings::function_id] =
       static_cast<int32_t>(mobile_apis::FunctionID::OnSeekMediaClockTimerID);
-  uint32_t app_id = (*message_)[strings::msg_params][strings::app_id].asUInt();
+  const uint32_t app_id =
+      (*message_)[strings::msg_params][strings::app_id].asUInt();
   (*message_)[strings::params][strings::connection_key] = app_id;
   SendNotificationToMobile(message_);
 }
