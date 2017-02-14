@@ -998,16 +998,20 @@ void ApplicationImpl::set_audio_streaming_state(
 }
 
 void ApplicationImpl::set_hmi_level(
-    const mobile_api::HMILevel::eType& hmi_level) {
-  if (mobile_api::HMILevel::HMI_NONE != hmi_level_ &&
-      mobile_api::HMILevel::HMI_NONE == hmi_level) {
+    const mobile_api::HMILevel::eType& new_hmi_level) {
+  using namespace mobile_apis;
+  const HMILevel::eType current_hmi_level = hmi_level();
+  if (HMILevel::HMI_NONE != current_hmi_level &&
+      HMILevel::HMI_NONE == new_hmi_level) {
     put_file_in_none_count_ = 0;
     delete_file_in_none_count_ = 0;
     list_files_in_none_count_ = 0;
   }
-  LOG4CXX_INFO(logger_, "hmi_level = " << hmi_level);
-  hmi_level_ = hmi_level;
-  usage_report_.RecordHmiStateChanged(hmi_level);
+  ApplicationSharedPtr app = application_manager_.application(app_id());
+  DCHECK_OR_RETURN_VOID(app)
+  application_manager_.state_controller().SetRegularState(app, new_hmi_level);
+  LOG4CXX_INFO(logger_, "hmi_level = " << new_hmi_level);
+  usage_report_.RecordHmiStateChanged(new_hmi_level);
 }
 
 bool ApplicationImpl::SubscribeToInteriorVehicleData(
