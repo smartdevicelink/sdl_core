@@ -403,11 +403,12 @@ bool PerformAudioPassThruRequest::IsWaitingHMIResponse() {
 void PerformAudioPassThruRequest::ProcessAudioPassThruIcon(
     ApplicationSharedPtr app) {
   LOG4CXX_AUTO_TRACE(logger_);
-  smart_objects::SmartObject msg_params = (*message_)[strings::msg_params];
+  smart_objects::SmartObject& msg_params = (*message_)[strings::msg_params];
 
   audio_pass_thru_icon_exists_ = true;
   if (msg_params.keyExists(strings::audio_pass_thru_icon)) {
-    smart_objects::SmartObject icon = msg_params[strings::audio_pass_thru_icon];
+    smart_objects::SmartObject& icon =
+        msg_params[strings::audio_pass_thru_icon];
     if (MessageHelper::VerifyImage(icon, app, application_manager_) !=
         mobile_apis::Result::SUCCESS) {
       LOG4CXX_WARN(
