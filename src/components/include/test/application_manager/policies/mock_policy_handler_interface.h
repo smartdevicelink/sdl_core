@@ -280,6 +280,11 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
                     const std::string& policy_app_id,
                     const std::string& hmi_level));
 
+  MOCK_METHOD3(ChangeAppsHMILevel,
+               void(const std::string& device_id,
+                    const std::string& policy_app_id,
+                    const std::string& hmi_level));
+
   MOCK_METHOD4(OnUpdateHMIStatus,
                void(const std::string& device_id,
                     const std::string& policy_app_id,
@@ -293,8 +298,8 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
                void(const std::string& application_id,
                     const smart_objects::SmartObject* app_types));
 
-  MOCK_METHOD1(
-      device_rank,
+  MOCK_CONST_METHOD1(
+      GetDeviceRank,
       mobile_apis::DeviceRank::eType(const std::string& application_id));
 #endif  // SDL_REMOTE_CONTROL
 

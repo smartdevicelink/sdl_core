@@ -57,6 +57,8 @@ class MockGenericModule : public GenericModule {
   MOCK_METHOD1(RemoveAppExtension, void(uint32_t app_id));
   MOCK_METHOD1(IsAppForPlugin,
                bool(application_manager::ApplicationSharedPtr app));
+  MOCK_METHOD1(AddAppForPlugin,
+               bool(application_manager::ApplicationSharedPtr app));
   MOCK_METHOD2(OnAppHMILevelChanged,
                void(application_manager::ApplicationSharedPtr app,
                     mobile_apis::HMILevel::eType old_level));
