@@ -1393,21 +1393,11 @@ std::ostream& operator<<(std::ostream& output,
   return output;
 }
 
-#ifdef SDL_REMOTE_CONTROL
-void PolicyManagerImpl::AddApplication(const std::string& application_id,
-                                       const std::vector<int>& hmi_types) {
-  LOG4CXX_INFO(logger_, "AddApplication");
+#if SDL_REMOTE_CONTROL
+void PolicyManagerImpl::SetDefaultHmiTypes(const std::string& application_id,
+                                           const std::vector<int>& hmi_types) {
+  LOG4CXX_INFO(logger_, "SetDefaultHmiTypes");
   const std::string device_id = GetCurrentDeviceId(application_id);
-  DeviceConsent device_consent = GetUserConsentForDevice(device_id);
-  sync_primitives::AutoLock lock(apps_registration_lock_);
-
-  if (IsNewApplication(application_id)) {
-    AddNewApplication(application_id, device_consent);
-    update_status_manager_.OnNewApplicationAdded(device_consent);
-  } else {
-    PromoteExistedApplication(application_id, device_consent);
-  }
-
   Subject who = {device_id, application_id};
   access_remote_->SetDefaultHmiTypes(who, hmi_types);
 }
