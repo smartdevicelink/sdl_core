@@ -460,7 +460,9 @@ bool CANModule::AddAppForPlugin(application_manager::ApplicationSharedPtr app) {
   application_manager::AppExtensionPtr app_extension =
       app->QueryInterface(GetModuleID());
   if (app_extension) {
-    LOG4CXX_WARN(logger_, "Application"<< app->policy_app_id() << " already added to plugin");
+    LOG4CXX_WARN(logger_,
+                 "Application" << app->policy_app_id()
+                               << " already added to plugin");
     return false;
   }
 
@@ -475,7 +477,6 @@ bool CANModule::AddAppForPlugin(application_manager::ApplicationSharedPtr app) {
   LOG4CXX_WARN(logger_, "Adding to plugin not reverse application");
   return false;
 }
-
 
 void CANModule::OnAppHMILevelChanged(
     application_manager::ApplicationSharedPtr app,

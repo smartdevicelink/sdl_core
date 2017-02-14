@@ -308,7 +308,6 @@ bool PluginManager::AddAppForPlugin(
   return i != plugins_.end() ? i->second->AddAppForPlugin(app) : false;
 }
 
-
 void PluginManager::OnAppHMILevelChanged(
     application_manager::ApplicationSharedPtr app,
     mobile_apis::HMILevel::eType old_level) {

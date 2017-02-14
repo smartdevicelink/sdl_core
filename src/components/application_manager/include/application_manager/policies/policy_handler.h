@@ -238,14 +238,14 @@ class PolicyHandler : public PolicyHandlerInterface,
                                   const std::string& policy_app_id,
                                   const std::string& hmi_level);
 
-      /**
-       * Gets all allowed module types
-       * @param app_id unique identifier of application
-       * @param list of allowed module types
-       * @return true if application has allowed modules
-       */
-      bool GetModuleTypes(const std::string& policy_app_id,
-                          std::vector<std::string>* modules) const;
+  /**
+   * Gets all allowed module types
+   * @param app_id unique identifier of application
+   * @param list of allowed module types
+   * @return true if application has allowed modules
+   */
+  bool GetModuleTypes(const std::string& policy_app_id,
+                      std::vector<std::string>* modules) const;
 
   /**
    * @brief Update currently used device id in policies manager for given

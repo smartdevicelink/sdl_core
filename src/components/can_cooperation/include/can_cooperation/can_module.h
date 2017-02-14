@@ -110,7 +110,6 @@ class CANModule : public CANModuleInterface {
    */
   bool AddAppForPlugin(application_manager::ApplicationSharedPtr app);
 
-
   /**
    * @brief Notify about change of HMILevel of plugin's app
    * @param app App with new HMILevel

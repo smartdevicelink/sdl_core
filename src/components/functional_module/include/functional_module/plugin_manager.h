@@ -81,8 +81,6 @@ class PluginManager : public ModuleObserver {
   bool IsAppForPlugin(application_manager::ApplicationSharedPtr app,
                       ModuleID module_id) const;
 
-
-
   /**
    * Adds reverse app for cooperating with plugin
    * @param app application

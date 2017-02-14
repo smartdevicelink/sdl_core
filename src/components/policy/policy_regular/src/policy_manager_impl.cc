@@ -1099,7 +1099,7 @@ void PolicyManagerImpl::RetrySequence() {
   timer_retry_sequence_.Start(timeout, timer::kPeriodic);
 }
 
-#if SDL_REMOTE_CONTROL
+#ifdef SDL_REMOTE_CONTROL
 void PolicyManagerImpl::SetDefaultHmiTypes(const std::string& application_id,
                                            const std::vector<int>& hmi_types) {
   LOG4CXX_INFO(logger_, "SetDefaultHmiTypes");

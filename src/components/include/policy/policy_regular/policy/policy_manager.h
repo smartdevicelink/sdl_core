@@ -621,7 +621,6 @@ class PolicyManager : public usage_statistics::StatisticsManager {
 
   virtual void set_access_remote(
       utils::SharedPtr<AccessRemote> access_remote) = 0;
-
   virtual utils::SharedPtr<AccessRemote> access_remote() = 0;
 #endif  // SDL_REMOTE_CONTROL
 
