@@ -172,8 +172,8 @@ class PolicyManagerImpl : public PolicyManager {
 
   StatusNotifier AddApplication(const std::string& application_id);
 #ifdef SDL_REMOTE_CONTROL
-  void AddApplication(const std::string& application_id,
-                      const std::vector<int>& hmi_types);
+  void SetDefaultHmiTypes(const std::string& application_id,
+                          const std::vector<int>& hmi_types);
 
   /**
        * Gets HMI types

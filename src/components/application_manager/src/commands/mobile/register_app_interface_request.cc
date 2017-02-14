@@ -820,26 +820,17 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
                                             application->mac_address());
   }
 
-  policy::StatusNotifier notify_upd_manager;
-#ifdef SDL_REMOTE_CONTROL
-  if ((*message_)[strings::msg_params].keyExists(strings::app_hmi_type)) {
-    notify_upd_manager = GetPolicyHandler().AddApplication(
-        application->policy_app_id(),
-        &((*message_)[strings::msg_params][strings::app_hmi_type]));
-  } else {
-    notify_upd_manager =
-        GetPolicyHandler().AddApplication(application->policy_app_id());
-  }
-#else
-  notify_upd_manager =
+  policy::StatusNotifier notify_upd_manager =
       GetPolicyHandler().AddApplication(application->policy_app_id());
-#endif
-
   SendOnAppRegisteredNotificationToHMI(
       *(application.get()), resumption, need_restore_vr);
-
-  // Default HMI level should be set before any permissions validation, since
-  // it
+#ifdef SDL_REMOTE_CONTROL
+  if (msg_params.keyExists(strings::app_hmi_type)) {
+    GetPolicyHandler().SetDefaultHmiTypes(application->policy_app_id(),
+                                          &(msg_params[strings::app_hmi_type]));
+  }
+#endif  // SDL_REMOTE_CONTROL
+  // Default HMI level should be set before any permissions validation, since it
   // relies on HMI level.
   application_manager_.OnApplicationRegistered(application);
 
