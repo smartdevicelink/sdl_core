@@ -210,6 +210,7 @@ class PolicyManagerImpl : public PolicyManager {
 
   void SendHMILevelChanged(const Subject& who);
   void UpdateDeviceRank(const Subject& who, const std::string& rank);
+  void UpdateDeviceRank(const Subject& who);
 
   void OnPrimaryGroupsChanged(const std::string& application_id);
   void OnNonPrimaryGroupsChanged(const std::string& application_id);

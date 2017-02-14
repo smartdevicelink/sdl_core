@@ -3052,7 +3052,7 @@ void ApplicationManagerImpl::SendHMIStatusNotification(
 
 #ifdef SDL_REMOTE_CONTROL
   mobile_apis::DeviceRank::eType rank =
-      GetPolicyHandler().device_rank(app->policy_app_id());
+      GetPolicyHandler().GetDeviceRank(app->policy_app_id());
   if (mobile_apis::DeviceRank::eType::INVALID_ENUM != rank) {
     message[strings::msg_params][strings::device_rank] =
         static_cast<int32_t>(rank);

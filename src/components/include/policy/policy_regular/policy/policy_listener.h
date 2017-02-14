@@ -149,6 +149,16 @@ class PolicyListener {
                                  const std::string& hmi_level) = 0;
 
   /**
+   * Do the same as OnUpdateHMIStatus but does not send notification about
+   * changing HMI status
+   * @param device_id unique identifier of device
+   * @param policy_app_id unique identifier of application in policy
+   * @param hmi_level default HMI level for this application
+   */
+  virtual void ChangeAppsHMILevel(const std::string& device_id,
+                                  const std::string& policy_app_id,
+                                  const std::string& hmi_level) = 0;
+  /**
    * Notifies about changing HMI status
    * @param device_id unique identifier of device
    * @param policy_app_id unique identifier of application in policy
