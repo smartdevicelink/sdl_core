@@ -120,7 +120,6 @@ bool IsMember(const Json::Value& value, const std::string& key) {
 // this validate methods may move to commands
 bool MessageHelper::ValidateDeviceInfo(const Json::Value& value) {
   return value.isObject() && value.isMember(json_keys::kId) &&
-         value[json_keys::kId].isIntegral() &&
          value.isMember(message_params::kName) &&
          value[message_params::kName].isString();
 }
