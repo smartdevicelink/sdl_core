@@ -466,8 +466,8 @@ class PolicyManager : public usage_statistics::StatisticsManager {
   virtual const PolicySettings& get_settings() const = 0;
 
 #ifdef SDL_REMOTE_CONTROL
-  virtual StatusNotifier AddApplication(const std::string& application_id,
-                                        const std::vector<int>& hmi_types) = 0;
+  virtual void SetDefaultHmiTypes(const std::string& application_id,
+                                  const std::vector<int>& hmi_types) = 0;
 
   /**
    * Gets HMI types

@@ -254,9 +254,8 @@ class PolicyHandler : public PolicyHandlerInterface,
                                 const std::string& policy_app_id,
                                 const std::string& hmi_level) OVERRIDE;
 
-  StatusNotifier AddApplication(
-      const std::string& application_id,
-      const smart_objects::SmartObject* app_types) OVERRIDE;
+  void SetDefaultHmiTypes(const std::string& application_id,
+                          const smart_objects::SmartObject* app_types) OVERRIDE;
 
   /**
      * Checks if application has HMI type

@@ -2177,11 +2177,11 @@ bool PolicyHandler::GetModuleTypes(const std::string& policy_app_id,
   return policy_manager_->GetModuleTypes(policy_app_id, modules);
 }
 
-StatusNotifier PolicyHandler::AddApplication(
+void PolicyHandler::SetDefaultHmiTypes(
     const std::string& application_id,
     const smart_objects::SmartObject* app_types) {
   LOG4CXX_AUTO_TRACE(logger_);
-  POLICY_LIB_CHECK(utils::MakeShared<utils::CallNothing>());
+  POLICY_LIB_CHECK_VOID();
   std::vector<int> hmi_types;
   if (app_types && app_types->asArray()) {
     smart_objects::SmartArray* hmi_list = app_types->asArray();
@@ -2190,7 +2190,7 @@ StatusNotifier PolicyHandler::AddApplication(
                    std::back_inserter(hmi_types),
                    SmartObjectToInt());
   }
-  return policy_manager_->AddApplication(application_id, hmi_types);
+  policy_manager_->SetDefaultHmiTypes(application_id, hmi_types);
 }
 
 bool PolicyHandler::CheckHMIType(const std::string& application_id,
