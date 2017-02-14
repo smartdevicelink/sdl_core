@@ -72,13 +72,13 @@ const std::string kMethodName = "Navigation.GetWayPoints";
 class GetWayPointsRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
-    GetWayPointsRequestTest()
-        : message_helper_mock_(*am::MockMessageHelper::message_helper_mock()) {
-      Mock::VerifyAndClearExpectations(&message_helper_mock_);
-    }
-    ~GetWayPointsRequestTest() {
-      Mock::VerifyAndClearExpectations(&message_helper_mock_);
-    }
+  GetWayPointsRequestTest()
+      : message_helper_mock_(*am::MockMessageHelper::message_helper_mock()) {
+    Mock::VerifyAndClearExpectations(&message_helper_mock_);
+  }
+  ~GetWayPointsRequestTest() {
+    Mock::VerifyAndClearExpectations(&message_helper_mock_);
+  }
   void SetUp() OVERRIDE {
     message_ = utils::MakeShared<SmartObject>(::smart_objects::SmartType_Map);
     (*message_)[am::strings::msg_params] =
@@ -96,7 +96,6 @@ class GetWayPointsRequestTest
   MessageSharedPtr message_;
   utils::SharedPtr<application_manager::commands::GetWayPointsRequest>
       command_sptr_;
-
 };
 
 class GetWayPointsRequestOnEventTest
@@ -206,7 +205,6 @@ TEST_F(GetWayPointsRequestTest,
   event.set_smart_object(*message_);
 
   CallOnEvent caller(*command_sptr_, event);
-
 
   ON_CALL(message_helper_mock_,
           HMIToMobileResult(hmi_apis::Common_Result::SUCCESS))
