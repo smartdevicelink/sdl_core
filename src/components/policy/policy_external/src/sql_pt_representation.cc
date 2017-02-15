@@ -697,9 +697,8 @@ bool SQLPTRepresentation::GatherFunctionalGroupings(
 
       policy_table::DisallowedByExternalConsentEntities&
           external_consent_entities_container =
-              kExternalConsentEntitiesTypeStringOn ==
-                      external_consent_entities.GetString(2)
-                  ? *rpcs_tbl.disallowed_by_external_consent_entities_on
+              "ON" == external_consent_entities.GetString(2)
+                  ? *rpcs_tbl.disallowed_by_external_consent_entities_off
                   : *rpcs_tbl.disallowed_by_external_consent_entities_off;
 
       external_consent_entities_container.push_back(external_consent_entity);
@@ -896,20 +895,21 @@ bool SQLPTRepresentation::SaveFunctionalGroupings(
 
     const int64_t last_group_id = query.LastInsertId();
 
-    if (!SaveRpcs(last_group_id, groups_it->second.rpcs)) {
+
+    if (!SaveRpcs(last_group_id, it->second.rpcs)) {
       return false;
     }
 
     if (!SaveExternalConsentEntities(
             last_group_id,
-            *groups_it->second.disallowed_by_external_consent_entities_on,
+            *it->second.disallowed_by_external_consent_entities_on,
             kExternalConsentEntitiesTypeOn)) {
       return false;
     }
 
     if (!SaveExternalConsentEntities(
             last_group_id,
-            *groups_it->second.disallowed_by_external_consent_entities_off,
+            *it->second.disallowed_by_external_consent_entities_off,
             kExternalConsentEntitiesTypeOff)) {
       return false;
     }
@@ -987,10 +987,9 @@ bool SQLPTRepresentation::SaveExternalConsentEntities(
     return false;
   }
 
-  const std::string external_consent_entity_type =
-      kExternalConsentEntitiesTypeOn == type
-          ? kExternalConsentEntitiesTypeStringOn
-          : kExternalConsentEntitiesTypeStringOff;
+
+  const std::string on_off =
+      kExternalConsentEntitiesTypeOn == type ? "ON" : "OFF";
 
   policy_table::DisallowedByExternalConsentEntities::const_iterator it_entity =
       entities.begin();
@@ -998,11 +997,10 @@ bool SQLPTRepresentation::SaveExternalConsentEntities(
     query.Bind(0, group_id);
     query.Bind(1, it_entity->entity_type);
     query.Bind(2, it_entity->entity_id);
-    query.Bind(3, external_consent_entity_type);
+    query.Bind(3, on_off);
     if (!query.Exec() || !query.Reset()) {
       LOG4CXX_ERROR(logger_,
-                    "Can't insert '" << external_consent_entity_type
-                                     << "' external consent entity.");
+                    "Can't insert '" << on_off << "' external consent entity.");
       return false;
     }
   }
