@@ -99,7 +99,7 @@ TEST_F(ActivateAppRequestTest, Run_SUCCESS) {
               SendMessageToHMI(CheckMessage(mobile_apis::HMILevel::HMI_FULL)));
 #else
   EXPECT_CALL(app_mngr_,
-              SendMessageToHMI(msg)));
+              SendMessageToHMI(msg));
 #endif
   command->Run();
 
