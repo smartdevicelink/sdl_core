@@ -28,13 +28,15 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-include(sources)
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
 include_directories(
   ${GMOCK_INCLUDE_DIRECTORY}
   ${COMPONENTS_DIR}/application_manager/include/
   ${COMPONENTS_DIR}/application_manager/include/application_manager/
   ${COMPONENTS_DIR}/application_manager/include/application_manager/commands/
+  ${COMPONENTS_DIR}/application_manager/include/application_manager/commands/hmi/
+  ${COMPONENTS_DIR}/application_manager/include/application_manager/commands/mobile/
   ${COMPONENTS_DIR}/application_manager/test/include/
   ${COMPONENTS_DIR}/application_manager/test/include/application_manager/
 )
@@ -44,9 +46,9 @@ set(COMMANDS_TEST_DIR ${AM_TEST_DIR}/commands)
 file(GLOB SOURCES
   ${COMPONENTS_DIR}/application_manager/test/mock_message_helper.cc
   ${COMPONENTS_DIR}/application_manager/src/smart_object_keys.cc
-  ${COMMANDS_TEST_DIR}/*
-  ${COMMANDS_TEST_DIR}/mobile/*
   ${COMMANDS_TEST_DIR}/hmi/*
+  ${COMMANDS_TEST_DIR}/hmi/hmi_notifications/*
+  ${COMMANDS_TEST_DIR}/mobile/*
 )
 
 set(LIBRARIES

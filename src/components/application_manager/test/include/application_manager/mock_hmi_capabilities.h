@@ -149,7 +149,6 @@ class MockHMICapabilities : public ::application_manager::HMICapabilities {
                void(const smart_objects::SmartObject& prerecorded_speech));
 
   MOCK_CONST_METHOD0(ui_hmi_capabilities, const smart_objects::SmartObject&());
-
   MOCK_METHOD1(set_ui_hmi_capabilities,
                void(const smart_objects::SmartObject& ui_hmi_capabilities));
 

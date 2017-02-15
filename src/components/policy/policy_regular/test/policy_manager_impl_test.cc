@@ -39,7 +39,6 @@
 #include "json/writer.h"
 #include "gtest/gtest.h"
 
-#include "policy/policy_types.h"
 #include "policy/policy_manager_impl.h"
 #include "config_profile/profile.h"
 #include "policy/policy_table/enums.h"
@@ -64,16 +63,14 @@ using ::testing::SetArgReferee;
 using ::testing::AtLeast;
 using ::testing::Return;
 
-using ::policy::MockPolicyListener;
-using ::policy::MockUpdateStatusManager;
-
 using ::policy::PolicyManagerImpl;
 using ::policy::PolicyTable;
+
+namespace policy_table = rpc::policy_table_interface_base;
 
 namespace test {
 namespace components {
 namespace policy_test {
-namespace policy_table = rpc::policy_table_interface_base;
 
 namespace custom_str = utils::custom_string;
 
@@ -783,7 +780,9 @@ TEST_F(
     AddApplication_AddNewApplicationFromDeviceWithoutConsent_ExpectUpdateRequired) {
   // Arrange
   CreateLocalPT("sdl_preloaded_pt.json");
-  manager->AddApplication(app_id1);
+  ::policy::StatusNotifier notifyer = manager->AddApplication(app_id1);
+  DCHECK(notifyer);
+  (*notifyer)();
   EXPECT_EQ("UPDATE_NEEDED", manager->GetPolicyTableStatus());
 }
 
@@ -893,7 +892,7 @@ TEST_F(PolicyManagerImplTest2, NextRetryTimeout_ExpectTimeoutsFromPT) {
 
     for (uint32_t retry_number = 0u; retry_number < size; ++retry_number) {
       waiting_timeout += seconds_between_retries[retry_number].asInt();
-      waiting_timeout += manager->TimeoutExchange();
+      waiting_timeout += manager->TimeoutExchangeMSec();
 
       // it's in miliseconds
       EXPECT_EQ(waiting_timeout * date_time::DateTime::MILLISECONDS_IN_SECOND,
@@ -906,7 +905,7 @@ TEST_F(PolicyManagerImplTest2, TimeOutExchange) {
   // Arrange
   CreateLocalPT("sdl_preloaded_pt.json");
   // Check value taken from PT
-  EXPECT_EQ(70, manager->TimeoutExchange());
+  EXPECT_EQ(70000u, manager->TimeoutExchangeMSec());
 }
 
 TEST_F(PolicyManagerImplTest2, UpdatedPreloadedPT_ExpectLPT_IsUpdated) {

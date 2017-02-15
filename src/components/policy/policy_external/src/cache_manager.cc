@@ -42,6 +42,7 @@
 #include "json/features.h"
 #include "json/writer.h"
 #include "utils/logger.h"
+#include "utils/date_time.h"
 #include "utils/gen_hash.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
@@ -1067,7 +1068,8 @@ void CacheManager::ResetIgnitionCycles() {
 
 int CacheManager::TimeoutResponse() {
   CACHE_MANAGER_CHECK(0);
-  return pt_->policy_table.module_config.timeout_after_x_seconds;
+  return pt_->policy_table.module_config.timeout_after_x_seconds *
+         date_time::DateTime::MILLISECONDS_IN_SECOND;
 }
 
 bool CacheManager::SecondsBetweenRetries(std::vector<int>& seconds) {

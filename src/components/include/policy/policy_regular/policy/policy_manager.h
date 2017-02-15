@@ -36,12 +36,14 @@
 #include <vector>
 #include <cstdint>
 
+#include "utils/callable.h"
 #include "policy/policy_types.h"
 #include "policy/policy_listener.h"
 #include "policy/usage_statistics/statistics_manager.h"
 
 namespace policy {
 class PolicySettings;
+typedef utils::SharedPtr<utils::Callable> StatusNotifier;
 
 class PolicyManager : public usage_statistics::StatisticsManager {
  public:
@@ -159,7 +161,7 @@ class PolicyManager : public usage_statistics::StatisticsManager {
    * Gets timeout to wait until receive response
    * @return timeout in seconds
    */
-  virtual int TimeoutExchange() = 0;
+  virtual uint32_t TimeoutExchangeMSec() = 0;
 
   /**
    * @brief List of timeouts in seconds between retries
@@ -352,8 +354,9 @@ class PolicyManager : public usage_statistics::StatisticsManager {
    * @brief Adds, application to the db or update existed one
    * run PTU if policy update is necessary for application.
    * @param Application id assigned by Ford to the application
+   * @return function that will notify update manager about new application
    */
-  virtual void AddApplication(const std::string& application_id) = 0;
+  virtual StatusNotifier AddApplication(const std::string& application_id) = 0;
 
   /**
    * @brief Removes unpaired device records and related records from DB

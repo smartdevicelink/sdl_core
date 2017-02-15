@@ -29,15 +29,16 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 set(target dbms)
+set(SQLITE_SRC_DIR ${COMPONENTS_DIR}/utils/src/sqlite_wrapper)
 
 find_package(Sqlite3 REQUIRED)
 
 include_directories(${COMPONENTS_DIR}/utils/include/utils)
 
 set(SOURCES
-  ./sql_database.cc
-  ./sql_query.cc
-  ./sql_error.cc
+  ${SQLITE_SRC_DIR}/sql_database.cc
+  ${SQLITE_SRC_DIR}/sql_query.cc
+  ${SQLITE_SRC_DIR}/sql_error.cc
 )
 
 add_library(${target} ${SOURCES})

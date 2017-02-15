@@ -156,7 +156,7 @@ void AudioStartStreamRequest::RetryStartSession() {
   }
 
   uint32_t curr_retry_number = app->audio_stream_retry_number();
-  if (curr_retry_number < retry_number_ - 1) {
+  if (curr_retry_number < retry_number_) {
     LOG4CXX_DEBUG(
         logger_,
         "Send AudioStartStream retry. retry_number = " << curr_retry_number);

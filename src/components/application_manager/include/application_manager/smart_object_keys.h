@@ -168,6 +168,7 @@ extern const char* audio_pass_thru_capabilities;
 extern const char* pcm_stream_capabilities;
 extern const char* device_rank;
 extern const char* audio_pass_thru_icon;
+extern const char* way_points;
 
 // PutFile
 extern const char* sync_file_name;

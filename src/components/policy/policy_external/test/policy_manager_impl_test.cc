@@ -223,7 +223,7 @@ TEST_F(PolicyManagerImplTest2, TimeOutExchange) {
   // Arrange
   CreateLocalPT(preloadet_pt_filename_);
   // Check value taken from PT
-  EXPECT_EQ(70, manager_->TimeoutExchange());
+  EXPECT_EQ(70000u, manager_->TimeoutExchangeMSec());
 }
 
 TEST_F(PolicyManagerImplTest,

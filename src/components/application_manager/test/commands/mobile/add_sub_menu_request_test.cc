@@ -383,6 +383,15 @@ TEST_F(AddSubMenuRequestTest, Run_MenuIconWhiteSpace_SendINVALID_DATA) {
   EXPECT_EQ(mobile_apis::Result::INVALID_DATA, received_result);
 }
 
+TEST_F(AddSubMenuRequestTest, OnEvent_UnknownEvent_UNSUCCESS) {
+  Event event(hmi_apis::FunctionID::INVALID_ENUM);
+  AddSubMenuPtr command(CreateCommand<AddSubMenuRequest>());
+
+  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
+
+  command->on_event(event);
+}
+
 }  // namespace add_sub_menu_request
 }  // namespace mobile_commands_test
 }  // namespace commands_test

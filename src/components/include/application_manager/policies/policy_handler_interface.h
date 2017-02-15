@@ -45,8 +45,11 @@
 #include "utils/custom_string.h"
 #include "policy/policy_settings.h"
 #include "smart_objects/smart_object.h"
+#include "utils/callable.h"
 
 namespace policy {
+typedef utils::SharedPtr<utils::Callable> StatusNotifier;
+
 class PolicyHandlerInterface {
  public:
   virtual ~PolicyHandlerInterface() {}
@@ -71,7 +74,7 @@ class PolicyHandlerInterface {
 #ifdef EXTERNAL_PROPRIETARY_MODE
   virtual void OnSnapshotCreated(const BinaryMessage& pt_string,
                                  const std::vector<int>& retry_delay_seconds,
-                                 int timeout_exchange) = 0;
+                                 uint32_t timeout_exchange) = 0;
 #else   // EXTERNAL_PROPRIETARY_MODE
   virtual void OnSnapshotCreated(const BinaryMessage& pt_string) = 0;
 #endif  // EXTERNAL_PROPRIETARY_MODE
@@ -99,7 +102,8 @@ class PolicyHandlerInterface {
   virtual std::string GetLockScreenIconUrl() const = 0;
   virtual void ResetRetrySequence() = 0;
   virtual uint32_t NextRetryTimeout() = 0;
-  virtual int TimeoutExchange() = 0;
+  virtual uint32_t TimeoutExchangeSec() = 0;
+  virtual uint32_t TimeoutExchangeMSec() = 0;
   virtual void OnExceededTimeout() = 0;
   virtual void OnSystemReady() = 0;
   virtual void PTUpdatedAt(Counters counter, int value) = 0;
@@ -305,8 +309,9 @@ class PolicyHandlerInterface {
    * @brief Allows to add new or update existed application during
    * registration process
    * @param application_id The policy aplication id.
+   * @return function that will notify update manager about new application
    */
-  virtual void AddApplication(const std::string& application_id) = 0;
+  virtual StatusNotifier AddApplication(const std::string& application_id) = 0;
 
   /**
    * Checks whether application is revoked

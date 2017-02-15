@@ -106,6 +106,14 @@ class HMIMessageHandlerImpl : public HMIMessageHandler,
   HMIMessageObserver* observer() const {
     return observer_;
   }
+
+  impl::ToHmiQueue* messages_to_hmi() {
+    return &messages_to_hmi_;
+  }
+
+  impl::FromHmiQueue* messages_from_hmi() {
+    return &messages_from_hmi_;
+  }
 #endif  // BUILD_TESTS
 
  private:

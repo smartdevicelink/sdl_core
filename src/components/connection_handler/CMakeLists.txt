@@ -1,4 +1,4 @@
-# Copyright (c) 2014, Ford Motor Company
+# Copyright (c) 2016, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,31 +28,31 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-
-set(CH_SRC_DIR ${COMPONENTS_DIR}/connection_handler/src)
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
 include_directories (
-    include
-    ${COMPONENTS_DIR}/protocol_handler/include/
-    ${COMPONENTS_DIR}/utils/include/
-    ${ENCRYPTION_INCLUDE_DIRECTORY}
-    ${LOG4CXX_INCLUDE_DIRECTORY}
+  include
+  ${COMPONENTS_DIR}/protocol_handler/include/
+  ${COMPONENTS_DIR}/utils/include/
+  ${ENCRYPTION_INCLUDE_DIRECTORY}
+  ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
-set (SOURCES
-    ${CH_SRC_DIR}/connection_handler_impl.cc
-    ${CH_SRC_DIR}/connection.cc
-    ${CH_SRC_DIR}/device.cc
-    ${CH_SRC_DIR}/heartbeat_monitor.cc
+set(PATHS
+  ${CMAKE_CURRENT_SOURCE_DIR}/include
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
 set(LIBRARIES
-    ProtocolLibrary
+  ProtocolLibrary
+  encryption
+  Utils
 )
 
+collect_sources(SOURCES "${PATHS}")
 add_library(connectionHandler ${SOURCES})
-target_link_libraries(connectionHandler encryption)
+target_link_libraries(connectionHandler ${LIBRARIES})
 
 if(BUILD_TESTS)
-    add_subdirectory(test)
+  add_subdirectory(test)
 endif()
