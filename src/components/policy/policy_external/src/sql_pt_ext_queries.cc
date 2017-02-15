@@ -85,6 +85,9 @@ const std::string kSelectDeviceData = "SELECT * FROM `device`";
 const std::string kSelectConsentGroup =
     "SELECT * FROM `consent_group` WHERE `device_id` = ? ";
 
+const std::string kSelectExternalConsentStatusGroup =
+    "SELECT * FROM `external_consent_status_group` WHERE `device_id` = ? ";
+
 const std::string kInsertPreconsentedGroups =
     "INSERT INTO `preconsented_group` (`application_id`, `functional_group_id`)"
     "  SELECT ?, `id` FROM `functional_group` WHERE `name` = ? LIMIT 1";
@@ -132,6 +135,12 @@ const std::string kInsertDeviceData =
 
 const std::string kInsertConsentGroups =
     "INSERT OR REPLACE INTO `consent_group` "
+    "(`device_id`, `application_id`, `functional_group_id`, `is_consented`, "
+    "`input`, `time_stamp`) "
+    "VALUES (?,?,?,?,?,?)";
+
+const std::string kInsertExternalConsentStatusGroups =
+    "INSERT OR REPLACE INTO `external_consent_status_group` "
     "(`device_id`, `application_id`, `functional_group_id`, `is_consented`, "
     "`input`, `time_stamp`) "
     "VALUES (?,?,?,?,?,?)";

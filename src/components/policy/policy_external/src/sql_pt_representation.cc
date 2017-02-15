@@ -631,19 +631,32 @@ bool SQLPTRepresentation::GatherFunctionalGroupings(
     LOG4CXX_WARN(logger_, "Incorrect select from functional_groupings");
     return false;
   }
+
   utils::dbms::SQLQuery rpcs(db());
   if (!rpcs.Prepare(sql_pt::kSelectAllRpcs)) {
     LOG4CXX_WARN(logger_, "Incorrect select all from rpc");
     return false;
   }
 
+  utils::dbms::SQLQuery external_consent_entities(db());
+  if (!external_consent_entities.Prepare(
+          sql_pt::kSelectExternalConsentEntities)) {
+    LOG4CXX_WARN(logger_,
+                 "Incorrect select statement for 'external_consent_entities'.");
+    return false;
+  }
+
   while (func_group.Next()) {
     policy_table::Rpcs rpcs_tbl;
+
     if (!func_group.IsNull(2)) {
       *rpcs_tbl.user_consent_prompt = func_group.GetString(2);
     }
-    int func_id = func_group.GetInteger(0);
-    rpcs.Bind(0, func_id);
+
+    const int group_id = func_group.GetInteger(0);
+
+    rpcs.Bind(0, group_id);
+
     while (rpcs.Next()) {
       if (!rpcs.IsNull(1)) {
         policy_table::HmiLevel level;
@@ -664,10 +677,29 @@ bool SQLPTRepresentation::GatherFunctionalGroupings(
         }
       }
     }
+
+    rpcs.Reset();
+
     if (!rpcs_tbl.rpcs.is_initialized()) {
       rpcs_tbl.rpcs.set_to_null();
     }
-    rpcs.Reset();
+
+    // Collecting entities for disallowed_by_external_consent_entities_on/off
+    external_consent_entities.Bind(0, group_id);
+    while (external_consent_entities.Next()) {
+      policy_table::ExternalConsentEntity external_consent_entity(
+          external_consent_entities.GetInteger(0),
+          external_consent_entities.GetInteger(1));
+
+      policy_table::DisallowedByExternalConsentEntities&
+          external_consent_entities_container =
+              "ON" == external_consent_entities.GetString(2)
+                  ? *rpcs_tbl.disallowed_by_external_consent_entities_off
+                  : *rpcs_tbl.disallowed_by_external_consent_entities_off;
+
+      external_consent_entities_container.push_back(external_consent_entity);
+    }
+
     (*groups)[func_group.GetString(1)] = rpcs_tbl;
   }
   return true;
@@ -818,11 +850,17 @@ bool SQLPTRepresentation::SaveFunctionalGroupings(
     return false;
   }
 
+  if (!query_delete.Exec(sql_pt::kDeleteExternalConsentEntities)) {
+    LOG4CXX_WARN(logger_, "Incorrect delete from external consent entities.");
+    return false;
+  }
+
   utils::dbms::SQLQuery query(db());
   if (!query.Exec(sql_pt::kDeleteFunctionalGroup)) {
     LOG4CXX_WARN(logger_, "Incorrect delete from seconds between retries.");
     return false;
   }
+
   if (!query.Prepare(sql_pt::kInsertFunctionalGroup)) {
     LOG4CXX_WARN(logger_, "Incorrect insert statement for functional groups");
     return false;
@@ -851,10 +889,27 @@ bool SQLPTRepresentation::SaveFunctionalGroupings(
       return false;
     }
 
-    if (!SaveRpcs(query.LastInsertId(), it->second.rpcs)) {
+    const int64_t last_group_id = query.LastInsertId();
+
+    if (!SaveRpcs(last_group_id, it->second.rpcs)) {
+      return false;
+    }
+
+    if (!SaveExternalConsentEntities(
+            last_group_id,
+            *it->second.disallowed_by_external_consent_entities_on,
+            kExternalConsentEntitiesTypeOn)) {
+      return false;
+    }
+
+    if (!SaveExternalConsentEntities(
+            last_group_id,
+            *it->second.disallowed_by_external_consent_entities_off,
+            kExternalConsentEntitiesTypeOff)) {
       return false;
     }
   }
+
   return true;
 }
 
@@ -910,6 +965,37 @@ bool SQLPTRepresentation::SaveRpcs(int64_t group_id,
           return false;
         }
       }
+    }
+  }
+
+  return true;
+}
+
+bool SQLPTRepresentation::SaveExternalConsentEntities(
+    const int64_t group_id,
+    const policy_table::DisallowedByExternalConsentEntities& entities,
+    ExternalConsentEntitiesType type) const {
+  utils::dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kInsertExternalConsentEntity)) {
+    LOG4CXX_WARN(logger_,
+                 "Incorrect insert statement for external consent entities.");
+    return false;
+  }
+
+  const std::string on_off =
+      kExternalConsentEntitiesTypeOn == type ? "ON" : "OFF";
+
+  policy_table::DisallowedByExternalConsentEntities::const_iterator it_entity =
+      entities.begin();
+  for (; entities.end() != it_entity; ++it_entity) {
+    query.Bind(0, group_id);
+    query.Bind(1, it_entity->entity_type);
+    query.Bind(2, it_entity->entity_id);
+    query.Bind(3, on_off);
+    if (!query.Exec() || !query.Reset()) {
+      LOG4CXX_ERROR(logger_,
+                    "Can't insert '" << on_off << "' external consent entity.");
+      return false;
     }
   }
 
