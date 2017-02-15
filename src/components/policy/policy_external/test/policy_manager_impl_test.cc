@@ -62,13 +62,13 @@ TEST_F(
       .WillOnce(DoAll(SetArgReferee<0>(seconds), Return(true)));
 
   // Act
-  manager_->RefreshRetrySequence();
+  policy_manager_->RefreshRetrySequence();
 
   // Assert
-  EXPECT_EQ(50, manager_->NextRetryTimeout());
-  EXPECT_EQ(100, manager_->NextRetryTimeout());
-  EXPECT_EQ(200, manager_->NextRetryTimeout());
-  EXPECT_EQ(0, manager_->NextRetryTimeout());
+  EXPECT_EQ(50, policy_manager_->NextRetryTimeout());
+  EXPECT_EQ(100, policy_manager_->NextRetryTimeout());
+  EXPECT_EQ(200, policy_manager_->NextRetryTimeout());
+  EXPECT_EQ(0, policy_manager_->NextRetryTimeout());
 }
 
 TEST_F(PolicyManagerImplTest, GetNotificationsNumber) {
@@ -77,34 +77,34 @@ TEST_F(PolicyManagerImplTest, GetNotificationsNumber) {
   EXPECT_CALL(*cache_manager_, GetNotificationsNumber(priority))
       .WillOnce(Return(notif_number));
 
-  EXPECT_EQ(notif_number, manager_->GetNotificationsNumber(priority));
+  EXPECT_EQ(notif_number, policy_manager_->GetNotificationsNumber(priority));
 }
 
 TEST_F(PolicyManagerImplTest, IncrementGlobalCounter) {
   // Assert
   EXPECT_CALL(*cache_manager_, Increment(usage_statistics::SYNC_REBOOTS));
-  manager_->Increment(usage_statistics::SYNC_REBOOTS);
+  policy_manager_->Increment(usage_statistics::SYNC_REBOOTS);
 }
 
 TEST_F(PolicyManagerImplTest, IncrementAppCounter) {
   // Assert
   EXPECT_CALL(*cache_manager_,
               Increment("12345", usage_statistics::USER_SELECTIONS));
-  manager_->Increment("12345", usage_statistics::USER_SELECTIONS);
+  policy_manager_->Increment("12345", usage_statistics::USER_SELECTIONS);
 }
 
 TEST_F(PolicyManagerImplTest, SetAppInfo) {
   // Assert
   EXPECT_CALL(*cache_manager_,
               Set("12345", usage_statistics::LANGUAGE_GUI, "de-de"));
-  manager_->Set("12345", usage_statistics::LANGUAGE_GUI, "de-de");
+  policy_manager_->Set("12345", usage_statistics::LANGUAGE_GUI, "de-de");
 }
 
 TEST_F(PolicyManagerImplTest, AddAppStopwatch) {
   // Assert
   EXPECT_CALL(*cache_manager_,
               Add("12345", usage_statistics::SECONDS_HMI_FULL, 30));
-  manager_->Add("12345", usage_statistics::SECONDS_HMI_FULL, 30);
+  policy_manager_->Add("12345", usage_statistics::SECONDS_HMI_FULL, 30);
 }
 
 TEST_F(PolicyManagerImplTest, ResetPT) {
@@ -118,17 +118,17 @@ TEST_F(PolicyManagerImplTest, ResetPT) {
   EXPECT_CALL(*cache_manager_, TimeoutResponse());
   EXPECT_CALL(*cache_manager_, SecondsBetweenRetries(_));
 
-  policy::CacheManagerInterfaceSPtr cache = manager_->GetCache();
-  EXPECT_TRUE(manager_->ResetPT("filename"));
+  policy::CacheManagerInterfaceSPtr cache = policy_manager_->GetCache();
+  EXPECT_TRUE(policy_manager_->ResetPT("filename"));
   EXPECT_TRUE(cache->IsPTPreloaded());
-  EXPECT_FALSE(manager_->ResetPT("filename"));
+  EXPECT_FALSE(policy_manager_->ResetPT("filename"));
   EXPECT_FALSE(cache->IsPTPreloaded());
 }
 
 TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
   // Arrange
-  manager_->ForcePTExchange();
-  manager_->OnUpdateStarted();
+  policy_manager_->ForcePTExchange();
+  policy_manager_->OnUpdateStarted();
   Json::Value table = createPTforLoad();
 
   policy_table::Table update(&table);
@@ -155,9 +155,9 @@ TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
   EXPECT_CALL(*cache_manager_, TimeoutResponse());
   EXPECT_CALL(*cache_manager_, SecondsBetweenRetries(_));
 
-  EXPECT_TRUE(manager_->LoadPT(kFilePtUpdateJson, msg));
+  EXPECT_TRUE(policy_manager_->LoadPT(kFilePtUpdateJson, msg));
   EXPECT_CALL(*cache_manager_, IsPTPreloaded());
-  EXPECT_FALSE(manager_->GetCache()->IsPTPreloaded());
+  EXPECT_FALSE(policy_manager_->GetCache()->IsPTPreloaded());
 }
 
 TEST_F(PolicyManagerImplTest2,
@@ -165,24 +165,24 @@ TEST_F(PolicyManagerImplTest2,
   // Arrange
   CreateLocalPT(preloadet_pt_filename_);
   ::policy::Counters counter = ::policy::Counters::KILOMETERS;
-  manager_->PTUpdatedAt(counter, 50000);
-  EXPECT_EQ("UP_TO_DATE", manager_->GetPolicyTableStatus());
+  policy_manager_->PTUpdatedAt(counter, 50000);
+  EXPECT_EQ("UP_TO_DATE", policy_manager_->GetPolicyTableStatus());
   // Set kms changed but not exceed limit
-  manager_->KmsChanged(51500);
-  EXPECT_EQ("UP_TO_DATE", manager_->GetPolicyTableStatus());
+  policy_manager_->KmsChanged(51500);
+  EXPECT_EQ("UP_TO_DATE", policy_manager_->GetPolicyTableStatus());
   // Set kms changed and exceed limit
-  manager_->KmsChanged(52500);
-  EXPECT_EQ("UPDATE_NEEDED", manager_->GetPolicyTableStatus());
+  policy_manager_->KmsChanged(52500);
+  EXPECT_EQ("UPDATE_NEEDED", policy_manager_->GetPolicyTableStatus());
 }
 
 TEST_F(PolicyManagerImplTest2, ForcePTExchange_ExpectUpdateNeeded) {
   // Arrange
   CreateLocalPT(preloadet_pt_filename_);
-  EXPECT_EQ("UP_TO_DATE", manager_->GetPolicyTableStatus());
+  EXPECT_EQ("UP_TO_DATE", policy_manager_->GetPolicyTableStatus());
   // Force OT Exchange
-  manager_->ForcePTExchange();
+  policy_manager_->ForcePTExchange();
   // Check update required
-  EXPECT_EQ("UPDATE_NEEDED", manager_->GetPolicyTableStatus());
+  EXPECT_EQ("UPDATE_NEEDED", policy_manager_->GetPolicyTableStatus());
 }
 
 TEST_F(PolicyManagerImplTest2, OnSystemReady) {
@@ -190,16 +190,16 @@ TEST_F(PolicyManagerImplTest2, OnSystemReady) {
   CreateLocalPT(preloadet_pt_filename_);
   // Check
   EXPECT_CALL(listener_, OnSystemInfoUpdateRequired());
-  manager_->OnSystemReady();
+  policy_manager_->OnSystemReady();
 }
 
 TEST_F(PolicyManagerImplTest2, ResetRetrySequence) {
   // Arrange
   CreateLocalPT(preloadet_pt_filename_);
-  manager_->ResetRetrySequence();
-  EXPECT_EQ("UPDATE_NEEDED", manager_->GetPolicyTableStatus());
-  manager_->OnUpdateStarted();
-  EXPECT_EQ("UPDATING", manager_->GetPolicyTableStatus());
+  policy_manager_->ResetRetrySequence();
+  EXPECT_EQ("UPDATE_NEEDED", policy_manager_->GetPolicyTableStatus());
+  policy_manager_->OnUpdateStarted();
+  EXPECT_EQ("UPDATING", policy_manager_->GetPolicyTableStatus());
 }
 
 TEST_F(PolicyManagerImplTest2, NextRetryTimeout_ExpectTimeoutsFromPT) {
@@ -214,7 +214,8 @@ TEST_F(PolicyManagerImplTest2, NextRetryTimeout_ExpectTimeoutsFromPT) {
     uint32_t size = seconds_between_retries.size();
     CreateLocalPT(preloadet_pt_filename_);
     for (uint32_t i = 0; i < size; ++i) {
-      EXPECT_EQ(seconds_between_retries[i], manager_->NextRetryTimeout());
+      EXPECT_EQ(seconds_between_retries[i],
+                policy_manager_->NextRetryTimeout());
     }
   }
 }
@@ -223,7 +224,7 @@ TEST_F(PolicyManagerImplTest2, TimeOutExchange) {
   // Arrange
   CreateLocalPT(preloadet_pt_filename_);
   // Check value taken from PT
-  EXPECT_EQ(70000u, manager_->TimeoutExchangeMSec());
+  EXPECT_EQ(70000u, policy_manager_->TimeoutExchangeMSec());
 }
 
 TEST_F(PolicyManagerImplTest,
@@ -238,7 +239,7 @@ TEST_F(PolicyManagerImplTest,
   EXPECT_CALL(listener_, OnSnapshotCreated(_, _, _));
   EXPECT_CALL(*cache_manager_, GenerateSnapshot()).WillOnce(Return(p_table));
 
-  manager_->RequestPTUpdate();
+  policy_manager_->RequestPTUpdate();
 }
 
 TEST_F(PolicyManagerImplTest, RequestPTUpdate_InvalidPT_PTUpdateFail) {
@@ -250,7 +251,7 @@ TEST_F(PolicyManagerImplTest, RequestPTUpdate_InvalidPT_PTUpdateFail) {
   EXPECT_CALL(listener_, OnSnapshotCreated(_, _, _)).Times(0);
   EXPECT_CALL(*cache_manager_, GenerateSnapshot()).WillOnce(Return(p_table));
 
-  manager_->RequestPTUpdate();
+  policy_manager_->RequestPTUpdate();
 }
 
 TEST_F(PolicyManagerImplTest, RequestPTUpdate_InvalidSnapshot_PTUpdateFail) {
@@ -260,7 +261,7 @@ TEST_F(PolicyManagerImplTest, RequestPTUpdate_InvalidSnapshot_PTUpdateFail) {
   EXPECT_CALL(listener_, OnSnapshotCreated(_, _, _)).Times(0);
   EXPECT_CALL(*cache_manager_, GenerateSnapshot()).WillOnce(Return(p_table));
 
-  manager_->RequestPTUpdate();
+  policy_manager_->RequestPTUpdate();
 }
 
 TEST_F(PolicyManagerImplTest, ResetUserConsent_ResetOnlyOnce) {
@@ -268,25 +269,25 @@ TEST_F(PolicyManagerImplTest, ResetUserConsent_ResetOnlyOnce) {
       .WillOnce(Return(true))
       .WillOnce(Return(false));
 
-  EXPECT_TRUE(manager_->ResetUserConsent());
-  EXPECT_FALSE(manager_->ResetUserConsent());
+  EXPECT_TRUE(policy_manager_->ResetUserConsent());
+  EXPECT_FALSE(policy_manager_->ResetUserConsent());
 }
 
 TEST_F(PolicyManagerImplTest2, GetPolicyTableStatus_ExpectUpToDate) {
   // Arrange
   CreateLocalPT(preloadet_pt_filename_);
   // Check
-  EXPECT_EQ("UP_TO_DATE", manager_->GetPolicyTableStatus());
+  EXPECT_EQ("UP_TO_DATE", policy_manager_->GetPolicyTableStatus());
 }
 
 TEST_F(PolicyManagerImplTest,
        SetUpdateStarted_GetPolicyTableStatus_Expect_Updating) {
   // Arrange
-  manager_->ForcePTExchange();
+  policy_manager_->ForcePTExchange();
   EXPECT_CALL(*cache_manager_, SaveUpdateRequired(true));
-  manager_->OnUpdateStarted();
+  policy_manager_->OnUpdateStarted();
   // Check
-  EXPECT_EQ("UPDATING", manager_->GetPolicyTableStatus());
+  EXPECT_EQ("UPDATING", policy_manager_->GetPolicyTableStatus());
 }
 
 TEST_F(PolicyManagerImplTest2,
@@ -301,7 +302,7 @@ TEST_F(PolicyManagerImplTest2,
         root["policy_table"]["module_config"]["seconds_between_retries"];
     uint32_t size = seconds_between_retries.size();
     CreateLocalPT(preloadet_pt_filename_);
-    std::vector<int> delaySecs = manager_->RetrySequenceDelaysSeconds();
+    std::vector<int> delaySecs = policy_manager_->RetrySequenceDelaysSeconds();
     // Check
     ASSERT_EQ(size, delaySecs.size());
     for (uint32_t i = 0; i < size; ++i) {
@@ -314,10 +315,10 @@ TEST_F(PolicyManagerImplTest2,
        OnExceededTimeout_GetPolicyTableStatus_ExpectUpdateNeeded) {
   // Arrange
   CreateLocalPT(preloadet_pt_filename_);
-  manager_->ForcePTExchange();
-  manager_->OnExceededTimeout();
+  policy_manager_->ForcePTExchange();
+  policy_manager_->OnExceededTimeout();
   // Check
-  EXPECT_EQ("UPDATE_NEEDED", manager_->GetPolicyTableStatus());
+  EXPECT_EQ("UPDATE_NEEDED", policy_manager_->GetPolicyTableStatus());
 }
 
 TEST_F(PolicyManagerImplTest, MarkUnpairedDevice) {
@@ -331,13 +332,13 @@ TEST_F(PolicyManagerImplTest, MarkUnpairedDevice) {
   EXPECT_CALL(*cache_manager_, IgnitionCyclesBeforeExchange());
   EXPECT_CALL(*cache_manager_, DaysBeforeExchange(_));
   // Act
-  manager_->MarkUnpairedDevice(unpaired_device_id_);
+  policy_manager_->MarkUnpairedDevice(unpaired_device_id_);
 }
 
 TEST_F(PolicyManagerImplTest2, GetCurrentDeviceId) {
   // Arrange
-  EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(app_id_2_)).Times(1);
-  EXPECT_EQ("", manager_->GetCurrentDeviceId(app_id_2_));
+  EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(app_id_2_));
+  EXPECT_EQ("", policy_manager_->GetCurrentDeviceId(app_id_2_));
 }
 
 }  // namespace policy

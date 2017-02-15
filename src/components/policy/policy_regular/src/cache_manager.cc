@@ -1333,7 +1333,9 @@ bool CacheManager::Init(const std::string& file_name,
           backup_->UpdateDBVersion();
           Backup();
         }
-        MergePreloadPT(file_name);
+        if (!MergePreloadPT(file_name)) {
+          result = false;
+        }
       }
     } break;
     case InitResult::SUCCESS: {
@@ -1475,12 +1477,12 @@ std::string CacheManager::GetCertificate() const {
   return std::string("");
 }
 
-void CacheManager::MergePreloadPT(const std::string& file_name) {
+bool CacheManager::MergePreloadPT(const std::string& file_name) {
   LOG4CXX_AUTO_TRACE(logger_);
   policy_table::Table table;
   if (!LoadFromFile(file_name, table)) {
     LOG4CXX_DEBUG(logger_, "Unable to load preloaded PT.");
-    return;
+    return false;
   }
 
   sync_primitives::AutoLock lock(cache_lock_);
@@ -1495,6 +1497,7 @@ void CacheManager::MergePreloadPT(const std::string& file_name) {
     MergeCFM(new_table, current);
     Backup();
   }
+  return true;
 }
 
 void CacheManager::MergeMC(const policy_table::PolicyTable& new_pt,

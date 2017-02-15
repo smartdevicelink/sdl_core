@@ -209,6 +209,10 @@ bool UsageAndErrorCounts::Validate() const {
   return true;
 }
 bool ConsentRecords::Validate() const {
+  if (PT_SNAPSHOT != GetPolicyTableType()) {
+    return !external_consent_status_groups->is_initialized();
+  }
+
   return true;
 }
 bool DeviceParams::Validate() const {

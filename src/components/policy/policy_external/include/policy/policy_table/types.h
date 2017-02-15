@@ -229,10 +229,35 @@ struct RpcParameters : CompositeType {
   bool Validate() const;
 };
 
+struct ExternalConsentEntity : CompositeType {
+ public:
+  typedef Integer<int32_t, 0, 128> EntityInt;
+  EntityInt entity_type;
+  EntityInt entity_id;
+
+ public:
+  ExternalConsentEntity();
+  explicit ExternalConsentEntity(const Json::Value* value__);
+  ExternalConsentEntity(const int32_t type, const int32_t id);
+  Json::Value ToJsonValue() const;
+  bool operator==(const ExternalConsentEntity& rhs) const;
+  bool is_valid() const;
+  bool is_initialized() const;
+  void ReportErrors(rpc::ValidationReport* report__) const;
+  void SetPolicyTableType(PolicyTableType pt_type) OVERRIDE;
+};
+
+typedef Array<ExternalConsentEntity, 0, 100>
+    DisallowedByExternalConsentEntities;
+
 struct Rpcs : CompositeType {
  public:
   Optional<String<1, 255> > user_consent_prompt;
   Nullable<Rpc> rpcs;
+  Optional<DisallowedByExternalConsentEntities>
+      disallowed_by_external_consent_entities_on;
+  Optional<DisallowedByExternalConsentEntities>
+      disallowed_by_external_consent_entities_off;
 
  public:
   Rpcs();
@@ -453,6 +478,7 @@ struct UsageAndErrorCounts : CompositeType {
 struct ConsentRecords : CompositeType {
  public:
   Optional<ConsentGroups> consent_groups;
+  Optional<ConsentGroups> external_consent_status_groups;
   Optional<Enum<Input> > input;
   Optional<String<1, 255> > time_stamp;
 

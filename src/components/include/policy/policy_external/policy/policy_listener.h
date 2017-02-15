@@ -113,6 +113,14 @@ class PolicyListener {
    * @param certificate_data the value of the updated field.
    */
   virtual void OnCertificateUpdated(const std::string& certificate_data) = 0;
+
+  /**
+ * @brief Collects currently registered applications ids linked to their
+ * device id
+ * @return Collection of device_id-to-app_id links
+ */
+  virtual void GetRegisteredLinks(
+      std::map<std::string, std::string>& out_links) const = 0;
 };
 }  //  namespace policy
 #endif  // SRC_COMPONENTS_INCLUDE_POLICY_POLICY_LISTENER_H_

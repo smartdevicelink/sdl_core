@@ -83,6 +83,15 @@ const std::string kCreateSchema =
     "  `user_consent_prompt` TEXT, "
     "  `name` VARCHAR(100) NOT NULL "
     "); "
+    "CREATE TABLE IF NOT EXISTS `external_consent_entities`( "
+    "  `group_id` INTEGER NOT NULL, "
+    "  `entity_type` INTEGER NOT NULL, "
+    "  `entity_id` INTEGER NOT NULL, "
+    "  `on_off` TEXT NOT NULL, "
+    "  CONSTRAINT `fk_external_consent_entities_group_id` "
+    "    FOREIGN KEY(`group_id`) "
+    "    REFERENCES `functional_group`(`id`) "
+    "); "
     "CREATE TABLE IF NOT EXISTS `priority`( "
     "  `value` VARCHAR(45) PRIMARY KEY NOT NULL "
     "); "
@@ -288,6 +297,24 @@ const std::string kCreateSchema =
     "    FOREIGN KEY(`functional_group_id`) "
     "    REFERENCES `functional_group`(`id`) "
     "); "
+    "CREATE TABLE IF NOT EXISTS `external_consent_status_group`( "
+    "  `device_id` VARCHAR(100) NOT NULL, "
+    "  `application_id` VARCHAR(45) NOT NULL, "
+    "  `functional_group_id` INTEGER NOT NULL, "
+    "  `is_consented` BOOL NOT NULL, "
+    "  `input` VARCHAR(45), "
+    "  `time_stamp` VARCHAR(45), "
+    "  PRIMARY KEY(`application_id`,`functional_group_id`,`device_id`), "
+    "  CONSTRAINT `fk_external_consent_status_group_device1` "
+    "    FOREIGN KEY(`device_id`) "
+    "    REFERENCES `device`(`id`), "
+    "  CONSTRAINT `fk_external_consent_status_group_application1` "
+    "    FOREIGN KEY(`application_id`) "
+    "    REFERENCES `application`(`id`), "
+    "  CONSTRAINT `fk_external_consent_status_group_functional_group1` "
+    "    FOREIGN KEY(`functional_group_id`) "
+    "    REFERENCES `functional_group`(`id`) "
+    "); "
     "CREATE INDEX IF NOT EXISTS "
     "`consent_group.fk_consent_group_device1_idx` "
     "  ON `device_consent_group`(`device_id`); "
@@ -369,6 +396,8 @@ const std::string kDropSchema =
     "DROP INDEX IF EXISTS "
     "`consent_group.fk_consent_group_functional_group1_idx`; "
     "DROP TABLE IF EXISTS `consent_group`; "
+    "DROP TABLE IF EXISTS `external_consent_status_group`; "
+    "DROP TABLE IF EXISTS `external_consent_entities`; "
     "DROP INDEX IF EXISTS `app_type.fk_app_type_application1_idx`; "
     "DROP TABLE IF EXISTS `app_type`; "
     "DROP TABLE IF EXISTS `request_type`; "
@@ -426,6 +455,8 @@ const std::string kDeleteData =
     "DELETE FROM `message`; "
     "DELETE FROM `endpoint`; "
     "DELETE FROM `consent_group`; "
+    "DELETE FROM `external_consent_status_group`; "
+    "DELETE FROM `external_consent_entities`; "
     "DELETE FROM `app_type`; "
     "DELETE FROM `nickname`; "
     "DELETE FROM `app_level`; "
@@ -486,6 +517,11 @@ const std::string kInsertFunctionalGroup =
 const std::string kInsertRpc =
     "INSERT INTO `rpc` (`name`, `hmi_level_value`, `functional_group_id`) "
     "  VALUES (?, ?, ?)";
+
+const std::string kInsertExternalConsentEntity =
+    "INSERT INTO `external_consent_entities` (`group_id`, `entity_type`, "
+    "`entity_id`, `on_off`) "
+    "  VALUES (?, ?, ?, ?)";
 
 const std::string kInsertRpcWithParameter =
     "INSERT INTO `rpc` (`name`, `hmi_level_value`, `parameter`, "
@@ -571,6 +607,9 @@ const std::string kDeleteFunctionalGroup = "DELETE FROM `functional_group`";
 
 const std::string kDeleteRpc = "DELETE FROM `rpc`";
 
+const std::string kDeleteExternalConsentEntities =
+    "DELETE FROM `external_consent_entities`";
+
 const std::string kDeleteAppGroup = "DELETE FROM `app_group`";
 
 const std::string kSelectModuleConfig =
@@ -600,6 +639,10 @@ const std::string kSelectFunctionalGroups =
 const std::string kSelectAllRpcs =
     "SELECT `name`, `hmi_level_value`, `parameter` "
     "FROM `rpc` WHERE `functional_group_id` = ? ";
+
+const std::string kSelectExternalConsentEntities =
+    "SELECT `entity_type`, `entity_id`, `on_off` "
+    "FROM `external_consent_entities` WHERE `group_id` = ? ";
 
 const std::string kSelectUserMsgsVersion =
     "SELECT DISTINCT `number` FROM `version`";

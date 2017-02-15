@@ -1803,4 +1803,56 @@ bool SQLPTExtRepresentation::RemoveAppConsentForGroup(
   return true;
 }
 
+bool SQLPTExtRepresentation::SaveExternalConsentStatus(
+    const ExternalConsentStatus& status) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  utils::dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt_ext::kInsertExternalConsentStatus)) {
+    LOG4CXX_ERROR(logger_,
+                  "Incorrect statement for saving external consent status.");
+    return false;
+  }
+
+  ExternalConsentStatus::const_iterator it = status.begin();
+  ExternalConsentStatus::const_iterator end = status.end();
+  for (; end != it; ++it) {
+    query.Bind(0, static_cast<int>(it->entity_type_));
+    query.Bind(1, static_cast<int>(it->entity_id_));
+    // Due to query structure need to provide that twice
+    query.Bind(2, static_cast<int>(it->entity_type_));
+    query.Bind(3, static_cast<int>(it->entity_id_));
+    query.Bind(4,
+               policy::kStatusOn == it->status_ ? std::string("ON")
+                                                : std::string("OFF"));
+    if (!query.Exec() || !query.Reset()) {
+      LOG4CXX_ERROR(logger_, "Error during ExternalConsent status saving.");
+      return false;
+    }
+  }
+
+  return true;
+}
+
+ExternalConsentStatus SQLPTExtRepresentation::GetExternalConsentStatus() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  utils::dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt_ext::kSelectExternalConsentStatus)) {
+    LOG4CXX_ERROR(logger_,
+                  "Incorrect statement for selecting external consent status.");
+    return ExternalConsentStatus();
+  }
+
+  ExternalConsentStatus status;
+  while (query.Next()) {
+    const policy::EntityStatus on_off =
+        query.GetString(2) == "ON" ? policy::kStatusOn : policy::kStatusOff;
+    ExternalConsentStatusItem item(static_cast<uint32_t>(query.GetInteger(0)),
+                                   static_cast<uint32_t>(query.GetInteger(1)),
+                                   on_off);
+    status.insert(item);
+  }
+
+  return status;
+}
+
 }  // namespace policy

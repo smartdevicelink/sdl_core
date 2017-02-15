@@ -536,6 +536,14 @@ class PolicyHandler : public PolicyHandlerInterface,
   void OnEmptyCertificateArrived() const;
 #endif  // EXTERNAL_PROPRIETARY_MODE
   bool SaveSnapshot(const BinaryMessage& pt_string, std::string& snap_path);
+
+  /**
+ * @brief Collects currently registered applications ids linked to their
+ * device id
+ * @param out_links Collection of device_id-to-app_id links
+ */
+  void GetRegisteredLinks(std::map<std::string, std::string>& out_links) const;
+
   static const std::string kLibrary;
   mutable sync_primitives::RWLock policy_manager_lock_;
   utils::SharedPtr<PolicyManager> policy_manager_;

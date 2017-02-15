@@ -193,18 +193,18 @@ void InsertRpcParametersInList(::policy::RPCParams& input_params) {
 // PolicyManagerImplTest class methods
 PolicyManagerImplTest::PolicyManagerImplTest()
     : unpaired_device_id_("08-00-27-CE-76-FE")
-    , manager_(NULL)
+    , policy_manager_(NULL)
     , cache_manager_(NULL) {}
 
 void PolicyManagerImplTest::SetUp() {
-  manager_ = new PolicyManagerImpl();
+  policy_manager_ = new PolicyManagerImpl();
   cache_manager_ = new MockCacheManagerInterface();
-  manager_->set_cache_manager(cache_manager_);
-  manager_->set_listener(&listener_);
+  policy_manager_->set_cache_manager(cache_manager_);
+  policy_manager_->set_listener(&listener_);
 }
 
 void PolicyManagerImplTest::TearDown() {
-  delete manager_;
+  delete policy_manager_;
 }
 
 ::testing::AssertionResult PolicyManagerImplTest::IsValid(
@@ -229,7 +229,7 @@ PolicyManagerImplTest2::PolicyManagerImplTest2()
     , app_storage_folder_("storage1")
     , preloadet_pt_filename_(kSdlPreloadedPtJson)
     , in_memory_(true)
-    , manager_(NULL)
+    , policy_manager_(NULL)
     , ptu_request_types_size_(0u)
     , index_(0u)
     , ptu_request_types_(Json::arrayValue) {}
@@ -237,10 +237,10 @@ PolicyManagerImplTest2::PolicyManagerImplTest2()
 void PolicyManagerImplTest2::SetUp() {
   file_system::CreateDirectory(app_storage_folder_);
 
-  manager_ = new PolicyManagerImpl(in_memory_);
+  policy_manager_ = new PolicyManagerImpl(in_memory_);
   ON_CALL(policy_settings_, app_storage_folder())
       .WillByDefault(ReturnRef(app_storage_folder_));
-  manager_->set_listener(&listener_);
+  policy_manager_->set_listener(&listener_);
   const char* levels[] = {"BACKGROUND", "FULL", "LIMITED", "NONE"};
   hmi_level_.assign(levels, levels + sizeof(levels) / sizeof(levels[0]));
   srand(time(NULL));
@@ -268,8 +268,8 @@ const Json::Value PolicyManagerImplTest2::GetPTU(const std::string& file_name) {
   ifile.close();
   ::policy::BinaryMessage msg(json.begin(), json.end());
   // Load Json to cache
-  EXPECT_TRUE(manager_->LoadPT(kFilePtUpdateJson, msg));
-  EXPECT_FALSE(manager_->GetCache()->IsPTPreloaded());
+  EXPECT_TRUE(policy_manager_->LoadPT(kFilePtUpdateJson, msg));
+  EXPECT_FALSE(policy_manager_->GetCache()->IsPTPreloaded());
   return root;
 }
 
@@ -277,8 +277,8 @@ void PolicyManagerImplTest2::CreateLocalPT(const std::string& file_name) {
   file_system::remove_directory_content(app_storage_folder_);
   ON_CALL(policy_settings_, app_storage_folder())
       .WillByDefault(ReturnRef(app_storage_folder_));
-  ASSERT_TRUE(manager_->InitPT(file_name, &policy_settings_));
-  EXPECT_TRUE(manager_->GetCache()->IsPTPreloaded());
+  ASSERT_TRUE(policy_manager_->InitPT(file_name, &policy_settings_));
+  EXPECT_TRUE(policy_manager_->GetCache()->IsPTPreloaded());
 }
 
 void PolicyManagerImplTest2::AddRTtoPT(const std::string& update_file_name,
@@ -288,7 +288,7 @@ void PolicyManagerImplTest2::AddRTtoPT(const std::string& update_file_name,
   // Arrange
   CreateLocalPT(preloadet_pt_filename_);
   // Get RequestTypes from section of preloaded_pt app_policies
-  pt_request_types_ = manager_->GetAppRequestTypes(section_name);
+  pt_request_types_ = policy_manager_->GetAppRequestTypes(section_name);
   EXPECT_EQ(rt_number, pt_request_types_.size());
   Json::Value root = GetPTU(update_file_name);
   // Get Request Types from JSON (PTU)
@@ -297,7 +297,7 @@ void PolicyManagerImplTest2::AddRTtoPT(const std::string& update_file_name,
   ptu_request_types_size_ = ptu_request_types_.size();
   pt_request_types_.clear();
   // Get RequestTypes from section of PT app policies after update
-  pt_request_types_ = manager_->GetAppRequestTypes(section_name);
+  pt_request_types_ = policy_manager_->GetAppRequestTypes(section_name);
   // Check number of RT in PTU and PT now are equal
   ASSERT_EQ(ptu_request_types_size_ - invalid_rt_number,
             pt_request_types_.size());
@@ -311,10 +311,10 @@ void PolicyManagerImplTest2::AddRTtoAppSectionPT(
   // Arrange
   CreateLocalPT(preloadet_pt_filename_);
   // Add app
-  manager_->AddApplication(section_name);
+  policy_manager_->AddApplication(section_name);
   // Check app gets RequestTypes from pre_DataConsent of app_policies
   // section
-  pt_request_types_ = manager_->GetAppRequestTypes(section_name);
+  pt_request_types_ = policy_manager_->GetAppRequestTypes(section_name);
   EXPECT_EQ(rt_number, pt_request_types_.size());
   EXPECT_CALL(listener_, OnPendingPermissionChange(section_name)).Times(1);
   Json::Value root = GetPTU(update_file_name);
@@ -326,13 +326,13 @@ void PolicyManagerImplTest2::AddRTtoAppSectionPT(
 
   pt_request_types_.clear();
   // Get RequestTypes from <app_id> section of app policies after PT update
-  pt_request_types_ = manager_->GetAppRequestTypes(section_name);
+  pt_request_types_ = policy_manager_->GetAppRequestTypes(section_name);
   // Check sizes of Request types of PT and PTU
   ASSERT_EQ(ptu_request_types_size_ - invalid_rt_number,
             pt_request_types_.size());
 
   ::policy::AppPermissions permissions =
-      manager_->GetAppPermissionsChanges(section_name);
+      policy_manager_->GetAppPermissionsChanges(section_name);
   EXPECT_TRUE(permissions.requestTypeChanged);
 }
 
@@ -392,7 +392,7 @@ void PolicyManagerImplTest2::FillMultimapFromFunctionalGroupings(
 void PolicyManagerImplTest2::GetFunctionalGroupingsFromManager(
     policy_table::FunctionalGroupings& input_functional_groupings) {
   // Get cache
-  ::policy::CacheManagerInterfaceSPtr cache = manager_->GetCache();
+  ::policy::CacheManagerInterfaceSPtr cache = policy_manager_->GetCache();
   // Get table_snapshot
   utils::SharedPtr<policy_table::Table> table = cache->GenerateSnapshot();
   // Set functional groupings from policy table
@@ -400,7 +400,7 @@ void PolicyManagerImplTest2::GetFunctionalGroupingsFromManager(
 }
 
 void PolicyManagerImplTest2::TearDown() {
-  delete manager_;
+  delete policy_manager_;
   file_system::RemoveDirectory(app_storage_folder_, true);
 }
 
@@ -418,8 +418,8 @@ void PolicyManagerImplTest2::
         const std::string& update_file) {
   // Arrange
   CreateLocalPT("json/sdl_preloaded_pt_send_location.json");
-  manager_->AddDevice(device_id_1_, "Bluetooth");
-  policy::CacheManagerInterfaceSPtr cache = manager_->GetCache();
+  policy_manager_->AddDevice(device_id_1_, "Bluetooth");
+  policy::CacheManagerInterfaceSPtr cache = policy_manager_->GetCache();
   ASSERT_TRUE(cache->SetDeviceData(device_id_1_,
                                    "hardware IPX",
                                    "v.8.0.1",
@@ -430,7 +430,7 @@ void PolicyManagerImplTest2::
                                    "Bluetooth"));
 
   // Add app from consented device. App will be assigned with default policies
-  manager_->AddApplication(application_id_);
+  policy_manager_->AddApplication(application_id_);
 
   // Expect all parameters are allowed
   std::ifstream ifile(update_file);
@@ -443,7 +443,7 @@ void PolicyManagerImplTest2::
   json = root.toStyledString();
   ifile.close();
   ::policy::BinaryMessage msg(json.begin(), json.end());
-  EXPECT_TRUE(manager_->LoadPT(kFilePtUpdateJson, msg));
+  EXPECT_TRUE(policy_manager_->LoadPT(kFilePtUpdateJson, msg));
   EXPECT_FALSE(cache->IsPTPreloaded());
 
   // Will be called each time permissions are checked
@@ -457,7 +457,7 @@ void PolicyManagerImplTest2::
 
   ::policy::CheckPermissionResult output;
   // Rpc in FULL level
-  manager_->CheckPermissions(
+  policy_manager_->CheckPermissions(
       application_id_, kHmiLevelFull, "SendLocation", input_params, output);
   // Check RPC is allowed
   EXPECT_EQ(::policy::kRpcAllowed, output.hmi_level_permitted);
@@ -468,7 +468,7 @@ void PolicyManagerImplTest2::
   ResetOutputList(output);
 
   // Rpc in LIMITED level
-  manager_->CheckPermissions(
+  policy_manager_->CheckPermissions(
       application_id_, kHmiLevelLimited, "SendLocation", input_params, output);
   // Check RPC is allowed
   EXPECT_EQ(::policy::kRpcAllowed, output.hmi_level_permitted);
@@ -479,11 +479,11 @@ void PolicyManagerImplTest2::
   ResetOutputList(output);
 
   // Rpc in BACKGROUND level
-  manager_->CheckPermissions(application_id_,
-                             kHmiLevelBackground,
-                             "SendLocation",
-                             input_params,
-                             output);
+  policy_manager_->CheckPermissions(application_id_,
+                                    kHmiLevelBackground,
+                                    "SendLocation",
+                                    input_params,
+                                    output);
   // Check RPC is allowed
   EXPECT_EQ(::policy::kRpcAllowed, output.hmi_level_permitted);
   // Check list of allowed parameters is not empty
@@ -494,7 +494,7 @@ void PolicyManagerImplTest2::
   ResetOutputList(output);
 
   // Rpc in NONE level
-  manager_->CheckPermissions(
+  policy_manager_->CheckPermissions(
       application_id_, kHmiLevelNone, "SendLocation", input_params, output);
   // Check RPC is disallowed
   EXPECT_EQ(::policy::kRpcDisallowed, output.hmi_level_permitted);
@@ -508,7 +508,7 @@ void PolicyManagerImplTest2::CheckRpcPermissions(
     const std::string& rpc_name, const PermitResult& expected_permission) {
   ::policy::RPCParams input_params;
   ::policy::CheckPermissionResult output;
-  manager_->CheckPermissions(
+  policy_manager_->CheckPermissions(
       application_id_, kHmiLevelFull, rpc_name, input_params, output);
   EXPECT_EQ(expected_permission, output.hmi_level_permitted);
 }
@@ -516,8 +516,8 @@ void PolicyManagerImplTest2::CheckRpcPermissions(
 // To avoid duplicate arrange of test
 void PolicyManagerImplTest2::AddSetDeviceData() {
   CreateLocalPT("json/sdl_preloaded_pt_send_location.json");
-  manager_->AddDevice(device_id_1_, "Bluetooth");
-  ASSERT_TRUE((manager_->GetCache())
+  policy_manager_->AddDevice(device_id_1_, "Bluetooth");
+  ASSERT_TRUE((policy_manager_->GetCache())
                   ->SetDeviceData(device_id_1_,
                                   "hardware IPX",
                                   "v.8.0.1",
@@ -528,8 +528,8 @@ void PolicyManagerImplTest2::AddSetDeviceData() {
                                   "Bluetooth"));
 
   // Add app from consented device. App will be assigned with default policies
-  manager_->AddApplication(application_id_);
-  (manager_->GetCache())->AddDevice(device_id_1_, "Bluetooth");
+  policy_manager_->AddApplication(application_id_);
+  (policy_manager_->GetCache())->AddDevice(device_id_1_, "Bluetooth");
 }
 
 // Load Json File and set it as PTU
@@ -546,8 +546,8 @@ void PolicyManagerImplTest2::LoadPTUFromJsonFile(
   json = root.toStyledString();
   ifile.close();
   ::policy::BinaryMessage msg(json.begin(), json.end());
-  EXPECT_TRUE(manager_->LoadPT(kFilePtUpdateJson, msg));
-  EXPECT_FALSE(manager_->GetCache()->IsPTPreloaded());
+  EXPECT_TRUE(policy_manager_->LoadPT(kFilePtUpdateJson, msg));
+  EXPECT_FALSE(policy_manager_->GetCache()->IsPTPreloaded());
 }
 
 // PolicyManagerImplTest_RequestTypes class methods

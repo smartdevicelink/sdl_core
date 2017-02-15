@@ -444,10 +444,12 @@ class CacheManagerInterface {
   /**
    * @brief Set user consent on functional groups
    * @param permissions User consent on functional group
+   * @param out_app_permissions_changed Indicates whether the permissions were
+   * changed
    * @return true, if operation succedeed, otherwise - false
    */
-  virtual bool SetUserPermissionsForApp(
-      const PermissionConsent& permissions) = 0;
+  virtual bool SetUserPermissionsForApp(const PermissionConsent& permissions,
+                                        bool* out_app_permissions_changed) = 0;
 
   /**
    * @brief Records information about head unit system to PT
@@ -698,6 +700,52 @@ class CacheManagerInterface {
     * @param certificate content of certificate
     */
   virtual void SetDecryptedCertificate(const std::string& certificate) = 0;
+
+  /**
+   * @brief Saves customer connectivity settings status
+   * @param status external consent status
+   * @return true if succeeded, otherwise - false
+   */
+  virtual bool SetExternalConsentStatus(
+      const ExternalConsentStatus& status) = 0;
+
+  /**
+   * @brief Gets customer connectivity settings status
+   * @return external consent status
+   */
+  virtual ExternalConsentStatus GetExternalConsentStatus() = 0;
+
+  /**
+ * @brief Creates collection of ExternalConsent items known by current
+ * functional
+ * groupings and appropiate section
+ * (disallowed_by_external_consent_entities_on/off) where
+ * is item is being holded
+ * @param status Current status containing collection of ExternalConsent items
+ * @return Collection of ExternalConsent items mapped to list of groups with
+ * section
+ * marker where the item is found
+ */
+  virtual GroupsByExternalConsentStatus GetGroupsWithSameEntities(
+      const ExternalConsentStatus& status) = 0;
+
+  /**
+ * @brief Gets collection of links device-to-application from device_data
+ * section of policy table if there any application records present, i.e. if
+ * any specific user consent is present
+ * @return Collection of device-to-application links
+ */
+  virtual std::map<std::string, std::string> GetKnownLinksFromPT() = 0;
+
+  /**
+ * @brief Sets groups permissions affected by customer connectivity settings
+ * entities status, i.e. groups assigned to particular application on
+ * particular device which have same entities as current ExternalConsent status
+ * @param permissions Groups permissions which result current ExternalConsent
+ * status
+ */
+  virtual void SetExternalConsentForApp(
+      const PermissionConsent& permissions) = 0;
 
 #ifdef BUILD_TESTS
   /**

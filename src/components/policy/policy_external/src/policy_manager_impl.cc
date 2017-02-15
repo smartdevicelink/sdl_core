@@ -56,6 +56,129 @@ void DeleteManager(policy::PolicyManager* pm) {
   delete pm;
 }
 
+namespace {
+
+/**
+ * @brief Extracts group name from group permission structure
+ */
+struct GroupNamesAppender
+    : public std::unary_function<void,
+                                 const policy::FunctionalGroupPermission&> {
+  GroupNamesAppender(policy_table::Strings& names) : names_(names) {}
+
+  void operator()(const policy::FunctionalGroupPermission& value) {
+    names_.push_back(value.group_name);
+  }
+
+ private:
+  policy_table::Strings& names_;
+};
+
+/**
+ * @brief Updates permission state of input group permission value in case
+ * group name is found within allowed or disallowed groups lists
+ * Also collects matched groups names to separate collection for futher
+ * processing
+ */
+struct ConsentsUpdater
+    : public std::unary_function<void, policy::FunctionalGroupPermission&> {
+  ConsentsUpdater(const policy::GroupsNames& allowed,
+                  const policy::GroupsNames& disallowed,
+                  std::vector<policy::FunctionalGroupPermission>&
+                      out_external_consent_matches)
+      : allowed_(allowed)
+      , disallowed_(disallowed)
+      , out_external_consent_matches_(out_external_consent_matches) {}
+
+  void operator()(policy::FunctionalGroupPermission& value) {
+    if (helpers::in_range(disallowed_, value.group_name)) {
+      value.state = policy::kGroupDisallowed;
+      out_external_consent_matches_.push_back(value);
+      return;
+    }
+
+    if (helpers::in_range(allowed_, value.group_name)) {
+      value.state = policy::kGroupAllowed;
+      out_external_consent_matches_.push_back(value);
+    }
+  }
+
+ private:
+  const policy::GroupsNames& allowed_;
+  const policy::GroupsNames& disallowed_;
+  std::vector<policy::FunctionalGroupPermission>& out_external_consent_matches_;
+};
+
+/**
+ * @brief Checks whether ExternalConsent entity status is the same as name of
+ * group
+ * container where entity has been found in. In case of match group is added to
+ * 'disallowed' list, otherwise - to 'allowed' one.
+ * E.g. if entity has "ON" status and is found in
+ * 'disallowed_by_external_consent_entities_on' it will be added to
+ * 'disallowed'. If it has
+ * been found in 'disallowed_by_external_consent_entities_off' than group is
+ * added to
+ * 'allowed' list.
+ */
+struct GroupChecker
+    : std::unary_function<
+          void,
+          policy::GroupsByExternalConsentStatus::mapped_type::value_type> {
+  GroupChecker(const policy::EntityStatus entity_status,
+               policy::GroupsNames& out_allowed,
+               policy::GroupsNames& out_disallowed)
+      : entity_status_(entity_status)
+      , out_allowed_(out_allowed)
+      , out_disallowed_(out_disallowed) {}
+
+  void operator()(
+      const policy::GroupsByExternalConsentStatus::mapped_type::value_type
+          value) {
+    using namespace policy;
+
+    const std::string group_name = value.first;
+
+    if ((value.second && (kStatusOn == entity_status_)) ||
+        (!value.second && (kStatusOff == entity_status_))) {
+      out_disallowed_.insert(group_name);
+    } else {
+      out_allowed_.insert(group_name);
+    }
+  }
+
+ private:
+  const policy::EntityStatus entity_status_;
+  policy::GroupsNames& out_allowed_;
+  policy::GroupsNames& out_disallowed_;
+};
+
+/**
+ * @brief Sorts groups for 'allowed' and 'disallowed' by ExternalConsent
+ * entities statuses.
+ * Wraps GroupChecker logic.
+ */
+struct GroupSorter
+    : std::unary_function<
+          void,
+          const policy::GroupsByExternalConsentStatus::value_type&> {
+  GroupSorter(policy::GroupsNames& out_allowed,
+              policy::GroupsNames& out_disallowed)
+      : out_allowed_(out_allowed), out_disallowed_(out_disallowed) {}
+
+  void operator()(
+      const policy::GroupsByExternalConsentStatus::value_type& value) {
+    GroupChecker checker(value.first.status_, out_allowed_, out_disallowed_);
+    std::for_each(value.second.begin(), value.second.end(), checker);
+  }
+
+ private:
+  policy::GroupsNames& out_allowed_;
+  policy::GroupsNames& out_disallowed_;
+};
+
+}  // namespace
+
 namespace policy {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "Policy")
@@ -706,24 +829,38 @@ void PolicyManagerImpl::CheckPendingPermissionsChanges(
 void PolicyManagerImpl::SetUserConsentForApp(
     const PermissionConsent& permissions) {
   LOG4CXX_AUTO_TRACE(logger_);
+
+  if (permissions.group_permissions.empty()) {
+    LOG4CXX_DEBUG(logger_, "Permissions list is empty, skipping update.");
+    return;
+  }
+
   cache_->ResetCalculatedPermissions();
   PermissionConsent verified_permissions =
       EnsureCorrectPermissionConsent(permissions);
 
-  if (!cache_->SetUserPermissionsForApp(verified_permissions)) {
+  bool app_permissions_changed = false;
+  if (!cache_->SetUserPermissionsForApp(verified_permissions,
+                                        &app_permissions_changed)) {
     LOG4CXX_WARN(logger_, "Can't set user permissions for application.");
   }
 
-  // Send OnPermissionChange notification, since consents were changed
-  std::vector<FunctionalGroupPermission> app_group_permissons;
+  if (!app_permissions_changed) {
+    LOG4CXX_WARN(logger_,
+                 "Application permissions were not changed, skipping "
+                 "permission change notification");
+    return;
+  }
+
+  std::vector<FunctionalGroupPermission> updated_app_group_permissons;
   GetPermissionsForApp(verified_permissions.device_id,
                        verified_permissions.policy_app_id,
-                       app_group_permissons);
+                       updated_app_group_permissons);
 
   // Change pending permissions isConsentNeeded state, if no unconsented
   // groups left
   CheckPendingPermissionsChanges(permissions.policy_app_id,
-                                 app_group_permissons);
+                                 updated_app_group_permissons);
 
   // Get current functional groups from DB with RPC permissions
   policy_table::FunctionalGroupings functional_groups;
@@ -732,17 +869,19 @@ void PolicyManagerImpl::SetUserConsentForApp(
   // Get list of groups assigned to application
   policy_table::Strings app_groups;
   std::vector<FunctionalGroupPermission>::const_iterator it =
-      app_group_permissons.begin();
+      updated_app_group_permissons.begin();
   std::vector<FunctionalGroupPermission>::const_iterator it_end =
-      app_group_permissons.end();
+      updated_app_group_permissons.end();
   for (; it != it_end; ++it) {
     app_groups.push_back((*it).group_name);
   }
 
   // Fill notification data according to group permissions
   Permissions notification_data;
-  PrepareNotificationData(
-      functional_groups, app_groups, app_group_permissons, notification_data);
+  PrepareNotificationData(functional_groups,
+                          app_groups,
+                          updated_app_group_permissons,
+                          notification_data);
 
   listener()->OnPermissionsUpdated(verified_permissions.policy_app_id,
                                    notification_data);
@@ -995,6 +1134,162 @@ bool PolicyManagerImpl::IsPTValid(
 const PolicySettings& PolicyManagerImpl::get_settings() const {
   DCHECK(settings_);
   return *settings_;
+}
+
+void PolicyManagerImpl::UpdateAppConsentWithExternalConsent(
+    const std::string& device_id,
+    const std::string& application_id,
+    const GroupsNames& allowed_groups,
+    const GroupsNames& disallowed_groups) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (allowed_groups.empty() && disallowed_groups.empty()) {
+    LOG4CXX_DEBUG(logger_,
+                  "Allowed and disallowed groups are empty, skipping update by "
+                  "external user consent.");
+    return;
+  }
+
+  std::vector<FunctionalGroupPermission> current_permissions;
+  GetUserConsentForApp(device_id, application_id, current_permissions);
+
+  std::vector<FunctionalGroupPermission> external_consent_groups_matches;
+  ConsentsUpdater updater(
+      allowed_groups, disallowed_groups, external_consent_groups_matches);
+  std::for_each(
+      current_permissions.begin(), current_permissions.end(), updater);
+
+  const std::string source = "GUI";
+
+  PermissionConsent updated_user_permissions;
+  updated_user_permissions.group_permissions = current_permissions;
+  updated_user_permissions.device_id = device_id;
+  updated_user_permissions.policy_app_id = application_id;
+  updated_user_permissions.consent_source = source;
+
+  // Need to check to which app to send notification since maybe app registered
+  // from different device
+  SetUserConsentForApp(updated_user_permissions);
+
+  PermissionConsent updated_external_consent_permissions;
+  updated_external_consent_permissions.group_permissions =
+      external_consent_groups_matches;
+  updated_external_consent_permissions.device_id = device_id;
+  updated_external_consent_permissions.policy_app_id = application_id;
+  updated_user_permissions.consent_source = source;
+
+  cache_->SetExternalConsentForApp(updated_external_consent_permissions);
+}
+
+void PolicyManagerImpl::NotifySystem(
+    const PolicyManagerImpl::AppPoliciesValueType& app_policy) const {
+  listener()->OnPendingPermissionChange(app_policy.first);
+}
+
+void PolicyManagerImpl::SendPermissionsToApp(
+    const PolicyManagerImpl::AppPoliciesValueType& app_policy) {
+  const std::string app_id = app_policy.first;
+
+  const std::string device_id = GetCurrentDeviceId(app_id);
+  if (device_id.empty()) {
+    LOG4CXX_WARN(logger_,
+                 "Couldn't find device info for application id: " << app_id);
+    return;
+  }
+  std::vector<FunctionalGroupPermission> group_permissons;
+  GetPermissionsForApp(device_id, app_id, group_permissons);
+
+  Permissions notification_data;
+
+  // Need to get rid of this call
+  utils::SharedPtr<policy_table::Table> policy_table_snapshot =
+      cache_->GenerateSnapshot();
+
+  PrepareNotificationData(
+      policy_table_snapshot->policy_table.functional_groupings,
+      app_policy.second.groups,
+      group_permissons,
+      notification_data);
+
+  LOG4CXX_INFO(logger_, "Send notification for application_id: " << app_id);
+  listener()->OnPermissionsUpdated(
+      app_id,
+      notification_data,
+      policy_table::EnumToJsonString(app_policy.second.default_hmi));
+}
+
+void PolicyManagerImpl::ProcessExternalConsentStatusUpdate(
+    const GroupsByExternalConsentStatus& groups_by_status) {
+  GroupsNames allowed_groups;
+  GroupsNames disallowed_groups;
+  CalculateGroupsConsentFromExternalConsent(
+      groups_by_status, allowed_groups, disallowed_groups);
+
+  std::map<std::string, std::string> known_links =
+      cache_->GetKnownLinksFromPT();
+  std::map<std::string, std::string> registered_links;
+  listener_->GetRegisteredLinks(registered_links);
+
+  std::map<std::string, std::string> all_known;
+  std::merge(known_links.begin(),
+             known_links.end(),
+             registered_links.begin(),
+             registered_links.end(),
+             std::inserter(all_known, all_known.begin()));
+
+  std::map<std::string, std::string>::const_iterator it_links =
+      all_known.begin();
+  for (; all_known.end() != it_links; ++it_links) {
+    UpdateAppConsentWithExternalConsent(
+        it_links->first, it_links->second, allowed_groups, disallowed_groups);
+  }
+}
+
+bool PolicyManagerImpl::SetExternalConsentStatus(
+    const ExternalConsentStatus& status) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (status.empty()) {
+    LOG4CXX_INFO(logger_, "External consent status is empty, skipping update.");
+    return false;
+  }
+
+  if (!cache_->SetExternalConsentStatus(status)) {
+    LOG4CXX_WARN(logger_, "Can't set external user consent status.");
+    return false;
+  }
+
+  GroupsByExternalConsentStatus groups_by_status =
+      cache_->GetGroupsWithSameEntities(status);
+  ProcessExternalConsentStatusUpdate(groups_by_status);
+
+  return true;
+}
+
+ExternalConsentStatus PolicyManagerImpl::GetExternalConsentStatus() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return cache_->GetExternalConsentStatus();
+}
+
+void PolicyManagerImpl::CalculateGroupsConsentFromExternalConsent(
+    const GroupsByExternalConsentStatus& groups_by_external_consent,
+    GroupsNames& out_allowed_groups,
+    GroupsNames& out_disallowed_groups) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  GroupSorter sorter(out_allowed_groups, out_disallowed_groups);
+  std::for_each(groups_by_external_consent.begin(),
+                groups_by_external_consent.end(),
+                sorter);
+
+  GroupsNames filtered_allowed_groups;
+  std::set_difference(
+      out_allowed_groups.begin(),
+      out_allowed_groups.end(),
+      out_disallowed_groups.begin(),
+      out_disallowed_groups.end(),
+      std::inserter(filtered_allowed_groups, filtered_allowed_groups.begin()));
+
+  out_allowed_groups = filtered_allowed_groups;
 }
 
 bool PolicyManagerImpl::ExceededDays() {

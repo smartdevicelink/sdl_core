@@ -237,6 +237,43 @@ struct LinkAppToDevice {
   const ApplicationManager& application_manager_;
 };
 
+/**
+ * @brief Gets from system list of currently registered applications and
+ * create collection of links device-to-application
+ */
+struct LinksCollector {
+  LinksCollector(const ApplicationManager& application_manager,
+                 std::map<std::string, std::string>& out_app_to_device_link)
+      : application_manager_(application_manager)
+      , out_app_to_device_link_(out_app_to_device_link) {
+    out_app_to_device_link_.clear();
+  }
+
+  void operator()(const ApplicationSharedPtr& app) {
+    if (!app.valid()) {
+      LOG4CXX_WARN(logger_,
+                   "Invalid pointer to application was passed."
+                   "Skip current application.");
+      return;
+    }
+    DeviceParams device_params = GetDeviceParams(
+        app->device(),
+        application_manager_.connection_handler().get_session_observer());
+    const std::string app_id = app->policy_app_id();
+    if (device_params.device_mac_address.empty()) {
+      LOG4CXX_WARN(logger_,
+                   "Couldn't find device, which hosts application " << app_id);
+      return;
+    }
+    out_app_to_device_link_.insert(
+        std::make_pair(device_params.device_mac_address, app_id));
+  }
+
+ private:
+  const ApplicationManager& application_manager_;
+  std::map<std::string, std::string>& out_app_to_device_link_;
+};
+
 struct PermissionsConsolidator {
   void Consolidate(
       const std::vector<policy::FunctionalGroupPermission>& permissions) {
@@ -612,6 +649,16 @@ void PolicyHandler::OnGetUserFriendlyMessage(
   // Send response to HMI with gathered data
   MessageHelper::SendGetUserFriendlyMessageResponse(
       result, correlation_id, application_manager_);
+}
+
+void PolicyHandler::GetRegisteredLinks(
+    std::map<std::string, std::string>& out_links) const {
+  DataAccessor<ApplicationSet> accessor = application_manager_.applications();
+  ApplicationSetConstIt it_app = accessor.GetData().begin();
+  ApplicationSetConstIt it_app_end = accessor.GetData().end();
+
+  LinksCollector linker(application_manager_, out_links);
+  std::for_each(it_app, it_app_end, linker);
 }
 
 void PolicyHandler::OnGetListOfPermissions(const uint32_t connection_key,

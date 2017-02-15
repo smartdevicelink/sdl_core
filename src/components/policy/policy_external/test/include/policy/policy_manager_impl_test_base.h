@@ -108,7 +108,7 @@ class PolicyManagerImplTest : public ::testing::Test {
  protected:
   const std::string unpaired_device_id_;
 
-  PolicyManagerImpl* manager_;
+  PolicyManagerImpl* policy_manager_;
   MockCacheManagerInterface* cache_manager_;
   MockUpdateStatusManager update_manager_;
   NiceMock<MockPolicyListener> listener_;
@@ -135,7 +135,7 @@ class PolicyManagerImplTest2 : public ::testing::Test {
   const std::string preloadet_pt_filename_;
   const bool in_memory_;
 
-  PolicyManagerImpl* manager_;
+  PolicyManagerImpl* policy_manager_;
   NiceMock<MockPolicyListener> listener_;
   ::policy::StringArray hmi_level_;
   ::policy::StringArray pt_request_types_;
