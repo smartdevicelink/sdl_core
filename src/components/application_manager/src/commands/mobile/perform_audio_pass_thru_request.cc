@@ -51,7 +51,6 @@ PerformAudioPassThruRequest::PerformAudioPassThruRequest(
     : CommandRequestImpl(message, application_manager)
     , awaiting_tts_speak_response_(false)
     , awaiting_ui_response_(false)
-    , audio_pass_thru_icon_exists_(true)
     , result_tts_speak_(hmi_apis::Common_Result::INVALID_ENUM)
     , result_ui_(hmi_apis::Common_Result::INVALID_ENUM) {
   subscribe_on_event(hmi_apis::FunctionID::TTS_OnResetTimeout);
@@ -223,11 +222,8 @@ bool PerformAudioPassThruRequest::PrepareResponseParameters(
     result_code = PrepareAudioPassThruResultCodeForResponse(
         ui_perform_info, tts_perform_info, result);
   }
-
   info = MergeInfos(ui_perform_info, ui_info_, tts_perform_info, tts_info_);
-  if (!audio_pass_thru_icon_exists_) {
-    info = MergeInfos("Reference image(s) not found", info);
-  }
+
   return result;
 }
 
@@ -409,7 +405,6 @@ void PerformAudioPassThruRequest::ProcessAudioPassThruIcon(
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObject msg_params = (*message_)[strings::msg_params];
 
-  audio_pass_thru_icon_exists_ = true;
   if (msg_params.keyExists(strings::audio_pass_thru_icon)) {
     smart_objects::SmartObject icon = msg_params[strings::audio_pass_thru_icon];
     if (MessageHelper::VerifyImage(icon, app, application_manager_) !=
@@ -417,7 +412,6 @@ void PerformAudioPassThruRequest::ProcessAudioPassThruIcon(
       LOG4CXX_WARN(
           logger_,
           "Invalid audio_pass_thru_icon doesn't exist in the file system");
-      audio_pass_thru_icon_exists_ = false;
     }
   }
 }

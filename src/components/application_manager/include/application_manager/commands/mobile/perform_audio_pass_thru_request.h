@@ -172,11 +172,6 @@ class PerformAudioPassThruRequest : public CommandRequestImpl {
   bool awaiting_tts_speak_response_;
   bool awaiting_ui_response_;
 
-  /* flag shows if last received audioPassThruIcon exists
-   * in the file system
-   */
-  bool audio_pass_thru_icon_exists_;
-
   hmi_apis::Common_Result::eType result_tts_speak_;
   hmi_apis::Common_Result::eType result_ui_;
   std::string ui_info_;
