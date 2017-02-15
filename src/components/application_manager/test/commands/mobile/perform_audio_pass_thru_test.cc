@@ -587,6 +587,7 @@ TEST_F(PerformAudioPassThruRequestTest,
 
 TEST_F(PerformAudioPassThruRequestTest,
        Run_MobileSendAudioPassThruIconDynamic_WARNINGS) {
+  const char *hmi_info = "Reference image(s) not found";
   MessageSharedPtr msg_mobile = CreateMobileMessageSO();
   SetupIconParameter(msg_mobile, kTypeDynamic, kIconName);
   utils::SharedPtr<PerformAudioPassThruRequest> command =
@@ -613,6 +614,7 @@ TEST_F(PerformAudioPassThruRequestTest,
 
   MessageSharedPtr msg_ui =
       PrepareResponseFromHMI(hmi_apis::Common_Result::WARNINGS, NULL);
+  (*msg_ui)[am::strings::msg_params][am::strings::info] = hmi_info;
   Event event_ui(hmi_apis::FunctionID::UI_PerformAudioPassThru);
   event_ui.set_smart_object(*msg_ui);
 
@@ -630,7 +632,7 @@ TEST_F(PerformAudioPassThruRequestTest,
   command->on_event(event_ui);
 
   ResultCommandExpectations(msg_mobile_response,
-                            "Reference image(s) not found",
+                            hmi_info,
                             am::mobile_api::Result::WARNINGS,
                             true);
 }
