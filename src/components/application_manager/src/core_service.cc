@@ -143,6 +143,13 @@ void CoreService::ResetAccess(const SeatLocation& zone,
 #endif  // SDL_REMOTE_CONTROL
 }
 
+uint32_t CoreService::GetDeviceHandlerById(const std::string& device_id) {
+  uint32_t device_handle = 0;
+  application_manager_.connection_handler().GetDeviceID(device_id,
+                                                        &device_handle);
+  return device_handle;
+}
+
 void CoreService::SetPrimaryDevice(const uint32_t dev_id) {
 #ifdef SDL_REMOTE_CONTROL
   std::string device_handle =

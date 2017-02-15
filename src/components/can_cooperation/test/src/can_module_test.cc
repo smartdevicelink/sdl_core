@@ -64,6 +64,12 @@ using ::application_manager::MessageType;
 using ::application_manager::ApplicationSharedPtr;
 using ::protocol_handler::MessagePriority;
 
+namespace {
+const bool kDeviceHandle = 1u;
+const std::string kDeviceId = "1";
+const std::string kDeviceName = "1";
+}
+
 namespace can_cooperation {
 
 class CanModuleTest : public ::testing::Test {
@@ -303,9 +309,10 @@ TEST_F(CanModuleTest, ChangeDriverDevice) {
   value[json_keys::kParams] = Json::Value(Json::ValueType::objectValue);
   value[json_keys::kParams][message_params::kDevice] =
       Json::Value(Json::ValueType::objectValue);
-  value[json_keys::kParams][message_params::kDevice][json_keys::kId] = 1;
+  value[json_keys::kParams][message_params::kDevice][json_keys::kId] =
+      kDeviceId;
   value[json_keys::kParams][message_params::kDevice][message_params::kName] =
-      "1";
+      kDeviceName;
   value[json_keys::kParams][message_params::kRank] = "DRIVER";
   Json::FastWriter writer;
   std::string json_str = writer.write(value);
@@ -323,7 +330,9 @@ TEST_F(CanModuleTest, ChangeDriverDevice) {
       .WillRepeatedly(Return(can_app_extention_));
   EXPECT_CALL(*mock_service_, GetApplications(module_.GetModuleID()))
       .WillOnce(Return(apps_));
-  EXPECT_CALL(*mock_service_, SetPrimaryDevice(1)).Times(1);
+  EXPECT_CALL(*mock_service_, GetDeviceHandlerById(kDeviceId))
+      .WillRepeatedly(Return(kDeviceHandle));
+  EXPECT_CALL(*mock_service_, SetPrimaryDevice(kDeviceHandle)).Times(1);
   EXPECT_CALL(*mock_service_, ResetPrimaryDevice()).Times(0);
 
   CanModuleTest::HandleMessage();
@@ -337,9 +346,10 @@ TEST_F(CanModuleTest, ChangeDriverDeviceOnOther) {
   value[json_keys::kParams] = Json::Value(Json::ValueType::objectValue);
   value[json_keys::kParams][message_params::kDevice] =
       Json::Value(Json::ValueType::objectValue);
-  value[json_keys::kParams][message_params::kDevice][json_keys::kId] = 1;
+  value[json_keys::kParams][message_params::kDevice][json_keys::kId] =
+      kDeviceId;
   value[json_keys::kParams][message_params::kDevice][message_params::kName] =
-      "1";
+      kDeviceName;
   value[json_keys::kParams][message_params::kRank] = "DRIVER";
   Json::FastWriter writer;
   std::string json_str = writer.write(value);
@@ -364,7 +374,9 @@ TEST_F(CanModuleTest, ChangeDriverDeviceOnOther) {
       .WillOnce(Return(can_app_extention_));
   EXPECT_CALL(*mock_service_, GetApplications(module_.GetModuleID()))
       .WillRepeatedly(Return(apps_));
-  EXPECT_CALL(*mock_service_, SetPrimaryDevice(1)).Times(1);
+  EXPECT_CALL(*mock_service_, GetDeviceHandlerById(kDeviceId))
+      .WillRepeatedly(Return(kDeviceHandle));
+  EXPECT_CALL(*mock_service_, SetPrimaryDevice(kDeviceHandle)).Times(1);
   EXPECT_CALL(*mock_service_, ResetPrimaryDevice()).Times(0);
 
   CanModuleTest::HandleMessage();
@@ -379,9 +391,10 @@ TEST_F(CanModuleTest, ChangeDriverDeviceToPassenger) {
   value[json_keys::kParams] = Json::Value(Json::ValueType::objectValue);
   value[json_keys::kParams][message_params::kDevice] =
       Json::Value(Json::ValueType::objectValue);
-  value[json_keys::kParams][message_params::kDevice][json_keys::kId] = 1;
+  value[json_keys::kParams][message_params::kDevice][json_keys::kId] =
+      kDeviceId;
   value[json_keys::kParams][message_params::kDevice][message_params::kName] =
-      "1";
+      kDeviceName;
   value[json_keys::kParams][message_params::kRank] = "PASSENGER";
   Json::FastWriter writer;
   std::string json_str = writer.write(value);
@@ -402,6 +415,8 @@ TEST_F(CanModuleTest, ChangeDriverDeviceToPassenger) {
       .WillRepeatedly(Return(can_app_extention_));
   EXPECT_CALL(*mock_service_, GetApplications(module_.GetModuleID()))
       .WillRepeatedly(Return(apps_));
+  EXPECT_CALL(*mock_service_, GetDeviceHandlerById(kDeviceId))
+      .WillRepeatedly(Return(kDeviceHandle));
   EXPECT_CALL(*mock_service_, PrimaryDevice()).Times(1).WillOnce(Return(1));
   EXPECT_CALL(*mock_service_, ResetPrimaryDevice()).Times(1);
 
@@ -416,9 +431,10 @@ TEST_F(CanModuleTest, ChangePassengerDeviceToPassenger) {
   value[json_keys::kParams] = Json::Value(Json::ValueType::objectValue);
   value[json_keys::kParams][message_params::kDevice] =
       Json::Value(Json::ValueType::objectValue);
-  value[json_keys::kParams][message_params::kDevice][json_keys::kId] = 1;
+  value[json_keys::kParams][message_params::kDevice][json_keys::kId] =
+      kDeviceId;
   value[json_keys::kParams][message_params::kDevice][message_params::kName] =
-      "1";
+      kDeviceName;
   value[json_keys::kParams][message_params::kRank] = "PASSENGER";
   Json::FastWriter writer;
   std::string json_str = writer.write(value);

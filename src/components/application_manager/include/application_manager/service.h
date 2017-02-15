@@ -123,6 +123,13 @@ class Service {
                            const std::string& module) = 0;
 
   /**
+   * Gets device handler for device with certain ID
+   * @param device_id the ID of the connected device
+   * @return device handler if device with requested ID was found
+   */
+  virtual uint32_t GetDeviceHandlerById(const std::string& device_id) = 0;
+
+  /**
    * Sets device as primary device
    * @param dev_id ID device
    */

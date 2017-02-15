@@ -275,11 +275,13 @@ functional_modules::ProcessResult CANModule::HandleMessage(
               params.isMember(message_params::kRank) &&
               params[message_params::kRank].isString();
           if (valid) {
-            uint32_t device_id =
-                params[message_params::kDevice][json_keys::kId].asUInt();
+            const std::string device_id =
+                params[message_params::kDevice][json_keys::kId].asString();
+            const uint32_t device_handle =
+                service()->GetDeviceHandlerById(device_id);
             std::string rank = params[message_params::kRank].asString();
-            PolicyHelper::ChangeDeviceRank(device_id, rank, *this);
-            ModuleHelper::ProccessDeviceRankChanged(device_id, rank, *this);
+            PolicyHelper::ChangeDeviceRank(device_handle, rank, *this);
+            ModuleHelper::ProccessDeviceRankChanged(device_handle, rank, *this);
           } else {
             LOG4CXX_ERROR(logger_,
                           "Invalid RC.OnDeviceRankChanged notification");
@@ -300,16 +302,18 @@ functional_modules::ProcessResult CANModule::HandleMessage(
                   params.get(message_params::kDeviceLocation,
                              Json::Value(Json::nullValue)));
           if (valid) {
-            uint32_t device_id =
-                params[message_params::kDevice][json_keys::kId].asUInt();
+            const std::string device_id =
+                params[message_params::kDevice][json_keys::kId].asString();
+            const uint32_t device_handle =
+                service()->GetDeviceHandlerById(device_id);
             SeatLocation zone =
                 GetInteriorZone(params[message_params::kDeviceLocation]);
 
-            if (DoNeedUnsubscribe(device_id, zone)) {
-              UnsubscribeAppsFromAllInteriorZones(device_id);
+            if (DoNeedUnsubscribe(device_handle, zone)) {
+              UnsubscribeAppsFromAllInteriorZones(device_handle);
             }
 
-            service()->SetDeviceZone(device_id, zone);
+            service()->SetDeviceZone(device_handle, zone);
 
           } else {
             LOG4CXX_ERROR(logger_,
