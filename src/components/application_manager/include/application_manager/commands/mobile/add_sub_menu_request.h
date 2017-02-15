@@ -79,20 +79,6 @@ class AddSubMenuRequest : public CommandRequestImpl {
    */
   bool CheckSubMenuName();
 
-  /*
-   * @brief Check if submenu icon is valid
-   *
-   * @return TRUE on success, otherwise FALSE
-   */
-  bool CheckSubMenuIcon();
-
-  /*
-   * @brief Check if submenu icon is existed in storage folder
-   *
-   * @return TRUE on success, otherwise FALSE
-   */
-  bool CheckMenuIconExistedInStorage();
-
   DISALLOW_COPY_AND_ASSIGN(AddSubMenuRequest);
 };
 
