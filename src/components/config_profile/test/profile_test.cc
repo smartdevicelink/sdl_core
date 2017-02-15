@@ -729,7 +729,7 @@ TEST_F(ProfileTest, AppIconsFolder_ValuesFromIni_SUCCESS) {
   EXPECT_EQ("smartDeviceLink_test.ini", profile_.config_file_name());
   EXPECT_EQ(file_system::CurrentWorkingDirectory() + "/storage",
             profile_.app_icons_folder());
-  const uint32_t app_icons_folder_size_from_ini = 104857611u;
+  const uint32_t app_icons_folder_size_from_ini = 1048577u;
   EXPECT_EQ(app_icons_folder_size_from_ini,
             profile_.app_icons_folder_max_size());
 }
@@ -739,7 +739,7 @@ TEST_F(ProfileTest, AppIconsFolder_DefaultValues_SUCCESS) {
   EXPECT_EQ("smartDeviceLink.ini", profile_.config_file_name());
   EXPECT_EQ(file_system::CurrentWorkingDirectory(),
             profile_.app_icons_folder());
-  const uint32_t app_icons_folder_size_default = 104857600u;
+  const uint32_t app_icons_folder_size_default = 1048576u;
   EXPECT_EQ(app_icons_folder_size_default,
             profile_.app_icons_folder_max_size());
 }
