@@ -494,7 +494,8 @@ bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
       }
 
       if ((*it_vh).keyExists(strings::image)) {
-        const char* sub_str = (*it_vh)[strings::image][strings::value].asCharArray();
+        const char* sub_str =
+            (*it_vh)[strings::image][strings::value].asCharArray();
         if (!CheckSyntax(sub_str)) {
           LOG4CXX_ERROR(logger_,
                         "Invalid vr_help image value syntax check failed");
