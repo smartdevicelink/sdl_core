@@ -135,6 +135,93 @@ TEST(PolicyGeneratedCodeTest, IntegerConstructionAndAssignmentTest) {
   EXPECT_FALSE(valid_value.is_valid());
 }
 
+TEST(PolicyGeneratedCodeTest, TestConsentsGroup_Validation) {
+  using namespace rpc::policy_table_interface_base;
+  // Need to validate CCS consents container wrapped with Optional for case w/o
+  // specific values assigned since it is of generic 'Map' type which requires
+  // to be empty + initialized in order to be valid
+  // Also Map type does not have specific validation on PT type
+
+  Optional<ConsentGroups> consent_groups;
+
+  EXPECT_TRUE(consent_groups.is_valid());
+
+  consent_groups->insert(std::make_pair(std::string("Group1"), Boolean(true)));
+
+  EXPECT_TRUE(consent_groups.is_valid());
+
+  // Adds more than container maximum size
+  for (size_t number = 0; number < 256; ++number) {
+    std::stringstream name;
+    name << "Group" << number;
+    consent_groups->insert(std::make_pair(name.str(), Boolean(true)));
+  }
+
+  EXPECT_FALSE(consent_groups.is_valid());
+}
+
+TEST(PolicyGeneratedCodeTest, TestConsentRecords_CCSConsents_PT_Validation) {
+  using namespace rpc::policy_table_interface_base;
+  ConsentRecords consent_records;
+
+  // PT_SNAPSHOT does not care of consents since their type is 'optional'
+  // PT_UPDATE and PT_SNAPSHOT have consents as 'omitted' so they must be absent
+  consent_records.SetPolicyTableType(PT_UPDATE);
+  EXPECT_TRUE(consent_records.is_valid());
+
+  consent_records.SetPolicyTableType(PT_PRELOADED);
+  EXPECT_TRUE(consent_records.is_valid());
+
+  consent_records.SetPolicyTableType(PT_SNAPSHOT);
+  EXPECT_TRUE(consent_records.is_valid());
+
+  consent_records.ccs_consent_groups->insert(
+      std::make_pair(std::string("Group1"), true));
+
+  consent_records.ccs_consent_groups->insert(
+      std::make_pair(std::string("Group2"), false));
+
+  consent_records.SetPolicyTableType(PT_UPDATE);
+  EXPECT_FALSE(consent_records.is_valid());
+
+  consent_records.SetPolicyTableType(PT_PRELOADED);
+  EXPECT_FALSE(consent_records.is_valid());
+
+  consent_records.SetPolicyTableType(PT_SNAPSHOT);
+  EXPECT_TRUE(consent_records.is_valid());
+}
+
+TEST(PolicyGeneratedCodeTest, TestCCSEntities_PT_Validation) {
+  using namespace rpc::policy_table_interface_base;
+  Optional<DisallowedByExternalConsentEntities>
+      disallowed_by_external_consent_entities_on;
+
+  // PT_SNAPSHOT, PT_UPDATE, PT_SNAPSHOT do not care of CCS entities since their
+  // type is 'optional'
+  disallowed_by_external_consent_entities_on.SetPolicyTableType(PT_UPDATE);
+  EXPECT_TRUE(disallowed_by_external_consent_entities_on.is_valid());
+
+  disallowed_by_external_consent_entities_on.SetPolicyTableType(PT_PRELOADED);
+  EXPECT_TRUE(disallowed_by_external_consent_entities_on.is_valid());
+
+  disallowed_by_external_consent_entities_on.SetPolicyTableType(PT_SNAPSHOT);
+  EXPECT_TRUE(disallowed_by_external_consent_entities_on.is_valid());
+
+  disallowed_by_external_consent_entities_on->push_back(
+      ExternalConsentEntity(0, 0));
+  disallowed_by_external_consent_entities_on->push_back(
+      ExternalConsentEntity(1, 1));
+
+  disallowed_by_external_consent_entities_on.SetPolicyTableType(PT_UPDATE);
+  EXPECT_TRUE(disallowed_by_external_consent_entities_on.is_valid());
+
+  disallowed_by_external_consent_entities_on.SetPolicyTableType(PT_PRELOADED);
+  EXPECT_TRUE(disallowed_by_external_consent_entities_on.is_valid());
+
+  disallowed_by_external_consent_entities_on.SetPolicyTableType(PT_SNAPSHOT);
+  EXPECT_TRUE(disallowed_by_external_consent_entities_on.is_valid());
+}
+
 }  // namespace policy_test
 }  // namespace components
 }  // namespace test
