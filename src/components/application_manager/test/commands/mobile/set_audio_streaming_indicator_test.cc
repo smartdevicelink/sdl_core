@@ -103,10 +103,6 @@ class SetAudioStreamingIndicatorRequestTest
         .WillByDefault(ReturnRef(hmi_interfaces_));
   }
 
-  void TearDown() OVERRIDE {
-    Mock::VerifyAndClearExpectations(&mock_message_helper_);
-  }
-
   void DefineInterfaceAvailable(
       const am::HmiInterfaces::InterfaceID interface) {
     ON_CALL(hmi_interfaces_, GetInterfaceState(interface))
