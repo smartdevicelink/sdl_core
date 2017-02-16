@@ -385,6 +385,7 @@ extern const char* method_name;
 extern const char* keyboard_layout;
 extern const char* limited_character_list;
 extern const char* auto_complete_text;
+extern const char* auto_complete_list;
 extern const char* file;
 extern const char* file_name;
 extern const char* retry;
