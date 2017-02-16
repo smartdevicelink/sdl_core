@@ -430,7 +430,8 @@ PerformAudioPassThruRequest::PrepareAudioPassThruResultCodeForResponse(
   const hmi_apis::Common_Result::eType tts_result = tts_response.result_code;
 
   if ((ui_result == hmi_apis::Common_Result::SUCCESS) &&
-      (tts_result != hmi_apis::Common_Result::SUCCESS)) {
+      (tts_result != hmi_apis::Common_Result::SUCCESS) &&
+      (tts_result != hmi_apis::Common_Result::INVALID_ENUM)) {
     common_result = hmi_apis::Common_Result::WARNINGS;
     out_result = true;
   } else if (ui_result == hmi_apis::Common_Result::INVALID_ENUM) {
