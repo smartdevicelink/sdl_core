@@ -87,9 +87,11 @@ class SetAudioStreamingIndicatorRequestTest
 
   MessageSharedPtr CreateFullParamsSO() {
     MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
-    (*msg)[am::strings::params][am::strings::connection_key] = kConnectionKey;
     smart_objects::SmartObject msg_params =
         smart_objects::SmartObject(smart_objects::SmartType_Map);
+    (*msg)[am::strings::params][am::strings::connection_key] = kConnectionKey;
+    msg_params[am::strings::audio_streaming_indicator] =
+        mobile_apis::AudioStreamingIndicator::PLAY;
     (*msg)[am::strings::msg_params] = msg_params;
     return msg;
   }
@@ -157,23 +159,14 @@ class SetAudioStreamingIndicatorRequestTest
     AppSetup(kIsNotNavi, kIsNotVoiceCommunication, kIsNotMedia);
   }
 
-  void TestCommandRunMethod(
-      MessageSharedPtr msg,
-      const mobile_apis::Result::eType mobile_code,
-      const bool is_success,
-      utils::SharedPtr<SetAudioStreamingIndicatorRequest> cmd) {
-    EXPECT_CALL(app_mngr_,
-                ManageMobileCommand(
-                    _, am::commands::Command::CommandOrigin::ORIGIN_SDL))
-        .WillOnce(DoAll(SaveArg<0>(&msg), Return(true)));
-
-    cmd->Run();
-
-    VerifyCommandResults(msg, mobile_code, is_success);
+  mobile_apis::AudioStreamingIndicator::eType GetIndicator(
+      MessageSharedPtr msg) {
+    return (static_cast<mobile_apis::AudioStreamingIndicator::eType>(
+        (*msg)[am::strings::msg_params][am::strings::audio_streaming_indicator]
+            .asInt()));
   }
 
   void TestCommandOnEventCall(
-      MessageSharedPtr msg_mobile_response,
       const mobile_apis::Result::eType mobile_code,
       const bool is_success,
       MessageSharedPtr msg_hmi_response,
@@ -188,13 +181,9 @@ class SetAudioStreamingIndicatorRequestTest
 
     EXPECT_CALL(mock_message_helper_, HMIToMobileResult(hmi_code))
         .WillOnce(Return(mobile_code));
-    EXPECT_CALL(app_mngr_,
-                ManageMobileCommand(
-                    _, am::commands::Command::CommandOrigin::ORIGIN_SDL))
-        .WillOnce(DoAll(SaveArg<0>(&msg_mobile_response), Return(true)));
 
-    cmd->on_event(event_ui);
-
+    MessageSharedPtr msg_mobile_response =
+        CatchMobileCommandResult(CallOnEvent(*cmd, event_ui));
     VerifyCommandResults(msg_mobile_response, mobile_code, is_success);
   }
 
@@ -208,9 +197,8 @@ TEST_F(SetAudioStreamingIndicatorRequestTest,
   MessageSharedPtr msg_mobile = CreateFullParamsSO();
   utils::SharedPtr<SetAudioStreamingIndicatorRequest> command =
       CreateCommand<SetAudioStreamingIndicatorRequest>(msg_mobile);
-  MessageSharedPtr msg_mobile_response = CreateFullParamsSO();
 
-  const mobile_apis::Result::eType mobile_response =
+  const mobile_apis::Result::eType mobile_response_code =
       mobile_apis::Result::APPLICATION_NOT_REGISTERED;
   const bool is_success = kIsNotSuccess;
 
@@ -218,8 +206,9 @@ TEST_F(SetAudioStreamingIndicatorRequestTest,
   ON_CALL(app_mngr_, application(kConnectionKey))
       .WillByDefault(Return(mock_app_empty));
 
-  TestCommandRunMethod(
-      msg_mobile_response, mobile_response, is_success, command);
+  MessageSharedPtr msg_mobile_response =
+      CatchMobileCommandResult(CallRun(*command));
+  VerifyCommandResults(msg_mobile_response, mobile_response_code, is_success);
 }
 
 TEST_F(SetAudioStreamingIndicatorRequestTest, Run_NaviApplication_REJECTED) {
@@ -227,15 +216,15 @@ TEST_F(SetAudioStreamingIndicatorRequestTest, Run_NaviApplication_REJECTED) {
   utils::SharedPtr<SetAudioStreamingIndicatorRequest> command =
       CreateCommand<SetAudioStreamingIndicatorRequest>(msg_mobile);
 
-  MessageSharedPtr msg_mobile_response = CreateFullParamsSO();
-  const mobile_apis::Result::eType mobile_response =
+  const mobile_apis::Result::eType mobile_response_code =
       mobile_apis::Result::REJECTED;
   const bool is_success = kIsNotSuccess;
 
   NaviAppSetup();
 
-  TestCommandRunMethod(
-      msg_mobile_response, mobile_response, is_success, command);
+  MessageSharedPtr msg_mobile_response =
+      CatchMobileCommandResult(CallRun(*command));
+  VerifyCommandResults(msg_mobile_response, mobile_response_code, is_success);
 }
 
 TEST_F(SetAudioStreamingIndicatorRequestTest,
@@ -244,15 +233,15 @@ TEST_F(SetAudioStreamingIndicatorRequestTest,
   utils::SharedPtr<SetAudioStreamingIndicatorRequest> command =
       CreateCommand<SetAudioStreamingIndicatorRequest>(msg_mobile);
 
-  MessageSharedPtr msg_mobile_response = CreateFullParamsSO();
-  const mobile_apis::Result::eType mobile_response =
+  const mobile_apis::Result::eType mobile_response_code =
       mobile_apis::Result::REJECTED;
   const bool is_success = kIsNotSuccess;
 
   IncorrectAppSetup();
 
-  TestCommandRunMethod(
-      msg_mobile_response, mobile_response, is_success, command);
+  MessageSharedPtr msg_mobile_response =
+      CatchMobileCommandResult(CallRun(*command));
+  VerifyCommandResults(msg_mobile_response, mobile_response_code, is_success);
 }
 
 TEST_F(SetAudioStreamingIndicatorRequestTest,
@@ -261,15 +250,15 @@ TEST_F(SetAudioStreamingIndicatorRequestTest,
   utils::SharedPtr<SetAudioStreamingIndicatorRequest> command =
       CreateCommand<SetAudioStreamingIndicatorRequest>(msg_mobile);
 
-  MessageSharedPtr msg_mobile_response = CreateFullParamsSO();
-  const mobile_apis::Result::eType mobile_response =
+  const mobile_apis::Result::eType mobile_response_code =
       mobile_apis::Result::REJECTED;
   const bool is_success = kIsNotSuccess;
 
   VoiceCommunicationAppSetup();
 
-  TestCommandRunMethod(
-      msg_mobile_response, mobile_response, is_success, command);
+  MessageSharedPtr msg_mobile_response =
+      CatchMobileCommandResult(CallRun(*command));
+  VerifyCommandResults(msg_mobile_response, mobile_response_code, is_success);
 }
 
 TEST_F(SetAudioStreamingIndicatorRequestTest,
@@ -277,36 +266,186 @@ TEST_F(SetAudioStreamingIndicatorRequestTest,
   MessageSharedPtr msg_mobile = CreateFullParamsSO();
   utils::SharedPtr<SetAudioStreamingIndicatorRequest> command =
       CreateCommand<SetAudioStreamingIndicatorRequest>(msg_mobile);
+  mobile_apis::AudioStreamingIndicator::eType indicator =
+      GetIndicator(msg_mobile);
 
-  MessageSharedPtr msg_mobile_response = CreateFullParamsSO();
-  const mobile_apis::Result::eType mobile_response =
+  const mobile_apis::Result::eType mobile_response_code =
       mobile_apis::Result::IGNORED;
   const bool is_success = kIsNotSuccess;
 
   MediaAppSetup();
 
-  ON_CALL(*mock_app_, AddIndicatorWaitForResponse(_))
+  ON_CALL(*mock_app_, AddIndicatorWaitForResponse(indicator))
       .WillByDefault(Return(false));
 
-  TestCommandRunMethod(
-      msg_mobile_response, mobile_response, is_success, command);
+  MessageSharedPtr msg_mobile_response =
+      CatchMobileCommandResult(CallRun(*command));
+  VerifyCommandResults(msg_mobile_response, mobile_response_code, is_success);
 }
 
 TEST_F(SetAudioStreamingIndicatorRequestTest,
-       Run_SetAudioStreamingIndicatorRequestOK_SendToHmi) {
+       Run_SetAudioStreamingIndicatorRequestOK_SendRequestToHmi) {
   MessageSharedPtr msg_mobile_response = CreateFullParamsSO();
   MessageSharedPtr msg_mobile = CreateFullParamsSO();
   utils::SharedPtr<SetAudioStreamingIndicatorRequest> command =
       CreateCommand<SetAudioStreamingIndicatorRequest>(msg_mobile);
+  mobile_apis::AudioStreamingIndicator::eType indicator =
+      GetIndicator(msg_mobile);
 
   MediaAppSetup();
-  ON_CALL(*mock_app_, AddIndicatorWaitForResponse(_))
+  ON_CALL(*mock_app_, AddIndicatorWaitForResponse(indicator))
       .WillByDefault(Return(true));
 
   DefineHMILevelUIAvailable();
-  EXPECT_CALL(app_mngr_, ManageHMICommand(_));
+  EXPECT_CALL(app_mngr_,
+              ManageHMICommand(HMIResultCodeIs(
+                  hmi_apis::FunctionID::UI_SetAudioStreamingIndicator)));
 
   command->Run();
+}
+
+TEST_F(SetAudioStreamingIndicatorRequestTest, OnEvent_IncorrectFunctionId) {
+  MessageSharedPtr msg_mobile = CreateFullParamsSO();
+  utils::SharedPtr<SetAudioStreamingIndicatorRequest> command =
+      CreateCommand<SetAudioStreamingIndicatorRequest>(msg_mobile);
+
+  MessageSharedPtr msg_hmi_response = CreateFullParamsSO();
+
+  Event event_ui(hmi_apis::FunctionID::UI_PerformAudioPassThru);
+  event_ui.set_smart_object(*msg_hmi_response);
+
+  EXPECT_CALL(mock_message_helper_, HMIToMobileResult(_)).Times(0);
+  EXPECT_CALL(
+      app_mngr_,
+      ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
+      .Times(0);
+
+  command->on_event(event_ui);
+}
+
+TEST_F(SetAudioStreamingIndicatorRequestTest,
+       OnEvent_HMIResponseSUCCESS_SUCCESS) {
+  MessageSharedPtr msg_mobile = CreateFullParamsSO();
+  utils::SharedPtr<SetAudioStreamingIndicatorRequest> command =
+      CreateCommand<SetAudioStreamingIndicatorRequest>(msg_mobile);
+  mobile_apis::AudioStreamingIndicator::eType indicator =
+      GetIndicator(msg_mobile);
+
+  MessageSharedPtr msg_hmi_response = CreateFullParamsSO();
+  (*msg_hmi_response)[am::strings::params][am::hmi_response::code] =
+      hmi_apis::Common_Result::SUCCESS;
+
+  const mobile_apis::Result::eType mobile_response_code =
+      mobile_apis::Result::SUCCESS;
+  const bool is_success = kIsSuccess;
+
+  MediaAppSetup();
+  DefineHMILevelUIAvailable();
+  ON_CALL(*mock_app_, AddIndicatorWaitForResponse(indicator))
+      .WillByDefault(Return(true));
+  EXPECT_CALL(app_mngr_,
+              ManageHMICommand(HMIResultCodeIs(
+                  hmi_apis::FunctionID::UI_SetAudioStreamingIndicator)));
+
+  command->Run();
+
+  EXPECT_CALL(*mock_app_, set_audio_streaming_indicator(indicator));
+  EXPECT_CALL(*mock_app_, RemoveIndicatorWaitForResponse(indicator));
+  TestCommandOnEventCall(
+      mobile_response_code, is_success, msg_hmi_response, command);
+}
+
+TEST_F(SetAudioStreamingIndicatorRequestTest,
+       OnEvent_HMIResponseUNSUPPORTED_RESOURCE_SUCCESS) {
+  MessageSharedPtr msg_mobile = CreateFullParamsSO();
+  utils::SharedPtr<SetAudioStreamingIndicatorRequest> command =
+      CreateCommand<SetAudioStreamingIndicatorRequest>(msg_mobile);
+  mobile_apis::AudioStreamingIndicator::eType indicator =
+      GetIndicator(msg_mobile);
+
+  MessageSharedPtr msg_hmi_response = CreateFullParamsSO();
+  (*msg_hmi_response)[am::strings::params][am::hmi_response::code] =
+      hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
+
+  const mobile_apis::Result::eType mobile_response_code =
+      mobile_apis::Result::UNSUPPORTED_RESOURCE;
+  const bool is_success = kIsSuccess;
+
+  MediaAppSetup();
+  DefineHMILevelUIAvailable();
+  ON_CALL(*mock_app_, AddIndicatorWaitForResponse(indicator))
+      .WillByDefault(Return(true));
+  EXPECT_CALL(app_mngr_,
+              ManageHMICommand(HMIResultCodeIs(
+                  hmi_apis::FunctionID::UI_SetAudioStreamingIndicator)));
+
+  command->Run();
+
+  EXPECT_CALL(*mock_app_, set_audio_streaming_indicator(indicator));
+  EXPECT_CALL(*mock_app_, RemoveIndicatorWaitForResponse(indicator));
+  TestCommandOnEventCall(
+      mobile_response_code, is_success, msg_hmi_response, command);
+}
+
+TEST_F(SetAudioStreamingIndicatorRequestTest,
+       OnEvent_HMIResponseUNSUPPORTED_RESOURCE_NOT_SUCCESS) {
+  MessageSharedPtr msg_mobile = CreateFullParamsSO();
+  utils::SharedPtr<SetAudioStreamingIndicatorRequest> command =
+      CreateCommand<SetAudioStreamingIndicatorRequest>(msg_mobile);
+  mobile_apis::AudioStreamingIndicator::eType indicator =
+      GetIndicator(msg_mobile);
+
+  MessageSharedPtr msg_hmi_response = CreateFullParamsSO();
+  (*msg_hmi_response)[am::strings::params][am::hmi_response::code] =
+      hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
+
+  const mobile_apis::Result::eType mobile_response_code =
+      mobile_apis::Result::UNSUPPORTED_RESOURCE;
+  const bool is_success = kIsNotSuccess;
+
+  MediaAppSetup();
+  DefineHMILevelUIAvailable();
+  ON_CALL(*mock_app_, AddIndicatorWaitForResponse(indicator))
+      .WillByDefault(Return(true));
+  ON_CALL(app_mngr_, ManageHMICommand(_)).WillByDefault(Return(true));
+
+  command->Run();
+
+  DefineInterfaceNotAvailable(am::HmiInterfaces::HMI_INTERFACE_UI);
+  EXPECT_CALL(*mock_app_, RemoveIndicatorWaitForResponse(indicator));
+  TestCommandOnEventCall(
+      mobile_response_code, is_success, msg_hmi_response, command);
+}
+
+TEST_F(SetAudioStreamingIndicatorRequestTest,
+       OnEvent_HMIResponseUSER_DISALLOWED_USER_DISALLOWED) {
+  MessageSharedPtr msg_mobile = CreateFullParamsSO();
+  utils::SharedPtr<SetAudioStreamingIndicatorRequest> command =
+      CreateCommand<SetAudioStreamingIndicatorRequest>(msg_mobile);
+  mobile_apis::AudioStreamingIndicator::eType indicator =
+      GetIndicator(msg_mobile);
+
+  MessageSharedPtr msg_hmi_response = CreateFullParamsSO();
+  (*msg_hmi_response)[am::strings::params][am::hmi_response::code] =
+      hmi_apis::Common_Result::USER_DISALLOWED;
+
+  const mobile_apis::Result::eType mobile_response_code =
+      mobile_apis::Result::USER_DISALLOWED;
+  const bool is_success = kIsNotSuccess;
+
+  MediaAppSetup();
+  DefineHMILevelUIAvailable();
+  ON_CALL(*mock_app_, AddIndicatorWaitForResponse(indicator))
+      .WillByDefault(Return(true));
+  EXPECT_CALL(app_mngr_,
+              ManageHMICommand(HMIResultCodeIs(
+                  hmi_apis::FunctionID::UI_SetAudioStreamingIndicator)));
+
+  command->Run();
+
+  EXPECT_CALL(*mock_app_, RemoveIndicatorWaitForResponse(indicator));
+  TestCommandOnEventCall(
+      mobile_response_code, is_success, msg_hmi_response, command);
 }
 
 TEST_F(SetAudioStreamingIndicatorRequestTest,
@@ -368,153 +507,6 @@ TEST_F(SetAudioStreamingIndicatorRequestTest,
 
   VerifyCommandResults(msg_mobile_response, mobile_response, is_success);
 }
-
-TEST_F(SetAudioStreamingIndicatorRequestTest, OnEvent_IncorrectFunctionId) {
-  MessageSharedPtr msg_mobile = CreateFullParamsSO();
-  utils::SharedPtr<SetAudioStreamingIndicatorRequest> command =
-      CreateCommand<SetAudioStreamingIndicatorRequest>(msg_mobile);
-
-  MessageSharedPtr msg_hmi_response = CreateFullParamsSO();
-
-  Event event_ui(hmi_apis::FunctionID::UI_PerformAudioPassThru);
-  event_ui.set_smart_object(*msg_hmi_response);
-
-  EXPECT_CALL(mock_message_helper_, HMIToMobileResult(_)).Times(0);
-  EXPECT_CALL(
-      app_mngr_,
-      ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
-      .Times(0);
-
-  command->on_event(event_ui);
-}
-
-TEST_F(SetAudioStreamingIndicatorRequestTest,
-       OnEvent_HMIResponseSUCCESS_SUCCESS) {
-  MessageSharedPtr msg_mobile = CreateFullParamsSO();
-  utils::SharedPtr<SetAudioStreamingIndicatorRequest> command =
-      CreateCommand<SetAudioStreamingIndicatorRequest>(msg_mobile);
-
-  MessageSharedPtr msg_hmi_response = CreateFullParamsSO();
-  (*msg_hmi_response)[am::strings::params][am::hmi_response::code] =
-      hmi_apis::Common_Result::SUCCESS;
-
-  MessageSharedPtr msg_mobile_response = CreateFullParamsSO();
-  const mobile_apis::Result::eType mobile_response =
-      mobile_apis::Result::SUCCESS;
-  const bool is_success = kIsSuccess;
-
-  MediaAppSetup();
-  DefineHMILevelUIAvailable();
-  ON_CALL(*mock_app_, AddIndicatorWaitForResponse(_))
-      .WillByDefault(Return(true));
-  EXPECT_CALL(app_mngr_, ManageHMICommand(_));
-
-  command->Run();
-
-  EXPECT_CALL(*mock_app_, set_audio_streaming_indicator(_));
-  EXPECT_CALL(*mock_app_, RemoveIndicatorWaitForResponse(_));
-  TestCommandOnEventCall(msg_mobile_response,
-                         mobile_response,
-                         is_success,
-                         msg_hmi_response,
-                         command);
-}
-
-TEST_F(SetAudioStreamingIndicatorRequestTest,
-       OnEvent_HMIResponseUNSUPPORTED_RESOURCE_SUCCESS) {
-  MessageSharedPtr msg_mobile = CreateFullParamsSO();
-  utils::SharedPtr<SetAudioStreamingIndicatorRequest> command =
-      CreateCommand<SetAudioStreamingIndicatorRequest>(msg_mobile);
-
-  MessageSharedPtr msg_hmi_response = CreateFullParamsSO();
-  (*msg_hmi_response)[am::strings::params][am::hmi_response::code] =
-      hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
-
-  MessageSharedPtr msg_mobile_response = CreateFullParamsSO();
-  const mobile_apis::Result::eType mobile_response =
-      mobile_apis::Result::UNSUPPORTED_RESOURCE;
-  const bool is_success = kIsSuccess;
-
-  MediaAppSetup();
-  DefineHMILevelUIAvailable();
-  ON_CALL(*mock_app_, AddIndicatorWaitForResponse(_))
-      .WillByDefault(Return(true));
-  EXPECT_CALL(app_mngr_, ManageHMICommand(_));
-
-  command->Run();
-
-  EXPECT_CALL(*mock_app_, set_audio_streaming_indicator(_));
-  EXPECT_CALL(*mock_app_, RemoveIndicatorWaitForResponse(_));
-  TestCommandOnEventCall(msg_mobile_response,
-                         mobile_response,
-                         is_success,
-                         msg_hmi_response,
-                         command);
-}
-
-TEST_F(SetAudioStreamingIndicatorRequestTest,
-       OnEvent_HMIResponseUNSUPPORTED_RESOURCE_NOT_SUCCESS) {
-  MessageSharedPtr msg_mobile = CreateFullParamsSO();
-  utils::SharedPtr<SetAudioStreamingIndicatorRequest> command =
-      CreateCommand<SetAudioStreamingIndicatorRequest>(msg_mobile);
-
-  MessageSharedPtr msg_hmi_response = CreateFullParamsSO();
-  (*msg_hmi_response)[am::strings::params][am::hmi_response::code] =
-      hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
-
-  MessageSharedPtr msg_mobile_response = CreateFullParamsSO();
-  const mobile_apis::Result::eType mobile_response =
-      mobile_apis::Result::UNSUPPORTED_RESOURCE;
-  const bool is_success = kIsNotSuccess;
-
-  MediaAppSetup();
-  DefineHMILevelUIAvailable();
-  ON_CALL(*mock_app_, AddIndicatorWaitForResponse(_))
-      .WillByDefault(Return(true));
-  ON_CALL(app_mngr_, ManageHMICommand(_)).WillByDefault(Return(true));
-
-  command->Run();
-
-  DefineInterfaceNotAvailable(am::HmiInterfaces::HMI_INTERFACE_UI);
-  EXPECT_CALL(*mock_app_, RemoveIndicatorWaitForResponse(_));
-  TestCommandOnEventCall(msg_mobile_response,
-                         mobile_response,
-                         is_success,
-                         msg_hmi_response,
-                         command);
-}
-
-TEST_F(SetAudioStreamingIndicatorRequestTest,
-       OnEvent_HMIResponseUSER_DISALLOWED_USER_DISALLOWED) {
-  MessageSharedPtr msg_mobile = CreateFullParamsSO();
-  utils::SharedPtr<SetAudioStreamingIndicatorRequest> command =
-      CreateCommand<SetAudioStreamingIndicatorRequest>(msg_mobile);
-
-  MessageSharedPtr msg_hmi_response = CreateFullParamsSO();
-  (*msg_hmi_response)[am::strings::params][am::hmi_response::code] =
-      hmi_apis::Common_Result::USER_DISALLOWED;
-
-  MessageSharedPtr msg_mobile_response = CreateFullParamsSO();
-  const mobile_apis::Result::eType mobile_response =
-      mobile_apis::Result::USER_DISALLOWED;
-  const bool is_success = kIsNotSuccess;
-
-  MediaAppSetup();
-  DefineHMILevelUIAvailable();
-  ON_CALL(*mock_app_, AddIndicatorWaitForResponse(_))
-      .WillByDefault(Return(true));
-  EXPECT_CALL(app_mngr_, ManageHMICommand(_));
-
-  command->Run();
-
-  EXPECT_CALL(*mock_app_, RemoveIndicatorWaitForResponse(_));
-  TestCommandOnEventCall(msg_mobile_response,
-                         mobile_response,
-                         is_success,
-                         msg_hmi_response,
-                         command);
-}
-
 }  // namespace set_audio_streaming_indicator_request
 }  // namespace mobile_commands_test
 }  // namespace commands_test
