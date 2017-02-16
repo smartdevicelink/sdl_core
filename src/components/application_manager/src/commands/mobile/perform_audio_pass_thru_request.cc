@@ -216,8 +216,6 @@ bool PerformAudioPassThruRequest::PrepareResponseParameters(
 
   if (IsResultCodeUnsupported(ui_perform_info, tts_perform_info)) {
     result_code = mobile_apis::Result::UNSUPPORTED_RESOURCE;
-  } else if (IsAnyHMIComponentAborted(ui_perform_info, tts_perform_info)) {
-    result_code = mobile_apis::Result::ABORTED;
   } else {
     result_code = PrepareAudioPassThruResultCodeForResponse(
         ui_perform_info, tts_perform_info, result);
@@ -443,14 +441,6 @@ PerformAudioPassThruRequest::PrepareAudioPassThruResultCodeForResponse(
   }
   result_code = MessageHelper::HMIToMobileResult(common_result);
   return result_code;
-}
-
-bool PerformAudioPassThruRequest::IsAnyHMIComponentAborted(
-    const ResponseInfo& ui, const ResponseInfo& tts) {
-  using namespace helpers;
-
-  return ((ui.result_code == hmi_apis::Common_Result::ABORTED) ||
-          (tts.result_code == hmi_apis::Common_Result::ABORTED));
 }
 
 }  // namespace commands

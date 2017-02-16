@@ -156,17 +156,6 @@ class PerformAudioPassThruRequest : public CommandRequestImpl {
       const ResponseInfo& tts_response,
       bool& out_result);
 
-  /**
-   * @brief Checks if any of audioPassThru communication components
-   * returned ABORTED code
-   * @param ui contains result_code from UI
-   * @param tts contains result_code from TTS
-   * @return if TTS or UI responded with ABORTED function returns TRUE,
-   * else is returns FALSE
-   */
-  bool IsAnyHMIComponentAborted(const ResponseInfo& ui,
-                                const ResponseInfo& tts);
-
   /* flag display state of speak and ui perform audio
   during perform audio pass thru*/
   bool awaiting_tts_speak_response_;
