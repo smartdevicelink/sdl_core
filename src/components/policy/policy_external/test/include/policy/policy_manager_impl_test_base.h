@@ -48,6 +48,18 @@ namespace test {
 namespace components {
 namespace policy_test {
 
+namespace CCS {
+const uint32_t type_1 = 0;
+const uint32_t id_1 = 1;
+const uint32_t type_2 = 2;
+const uint32_t id_2 = 3;
+const uint32_t type_3 = 4;
+const uint32_t id_3 = 5;
+const std::string group_name_1 = "Group1";
+const std::string group_name_2 = "Group2";
+const std::string group_name_3 = "Group3";
+}
+
 using ::testing::NiceMock;
 using ::policy::PolicyManagerImpl;
 
@@ -193,6 +205,14 @@ class PolicyManagerImplTest2 : public ::testing::Test {
 
   // Load Json File and set it as PTU
   void LoadPTUFromJsonFile(const std::string& update_file);
+
+  bool CheckPolicyTimeStamp(const std::string& str) const;
+
+  void PreconditionCCSPreparePTWithAppGroupsAndConsents();
+
+  void PreconditionCCSPreparePTWithAppPolicy();
+
+  policy_table::Table PreparePTWithGroupsHavingCCS();
 };
 
 class PolicyManagerImplTest_RequestTypes : public ::testing::Test {
@@ -236,6 +256,37 @@ class PolicyManagerImplTest_RequestTypes : public ::testing::Test {
       const policy_table::RequestTypes& received_data);
 
   void TearDown() OVERRIDE;
+};
+
+class PolicyManagerImplTest_CCS : public PolicyManagerImplTest2 {
+ public:
+  PolicyManagerImplTest_CCS()
+      : PolicyManagerImplTest2()
+      , group_name_1_("Group1")
+      , group_name_2_("Group2")
+      , group_name_3_("Group3") {}
+
+ protected:
+  void PreconditionCCSPreparePTWithAppGroupsAndConsents();
+
+  void PreconditionCCSPreparePTWithAppPolicy();
+
+  policy_table::Table PreparePTWithGroupsHavingCCS();
+
+  std::string PreparePTUWithNewGroup(const uint32_t type,
+                                     const uint32_t id,
+                                     const std::string& group_name);
+
+  const uint32_t type_1_ = 0;
+  const uint32_t id_1_ = 1;
+  const uint32_t type_2_ = 2;
+  const uint32_t id_2_ = 3;
+  const uint32_t type_3_ = 4;
+  const uint32_t id_3_ = 5;
+
+  const std::string group_name_1_;
+  const std::string group_name_2_;
+  const std::string group_name_3_;
 };
 
 }  // namespace policy_test

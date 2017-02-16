@@ -39,6 +39,7 @@
 
 #include "utils/file_system.h"
 #include "utils/make_shared.h"
+#include "utils/gen_hash.h"
 #include "json/reader.h"
 
 #include "policy/mock_pt_ext_representation.h"
@@ -50,6 +51,7 @@ namespace policy_test {
 using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::ContainerEq;
+using ::testing::_;
 
 // Help functions
 char GenRandomChar(char range_from, char range_to) {
@@ -201,6 +203,15 @@ void PolicyManagerImplTest::SetUp() {
   cache_manager_ = new MockCacheManagerInterface();
   manager_->set_cache_manager(cache_manager_);
   manager_->set_listener(&listener_);
+  ON_CALL(*cache_manager_, GetCCSStatus()).WillByDefault(Return(CCSStatus()));
+  ON_CALL(*cache_manager_, GetGroupsWithSameEntities(_, _))
+      .WillByDefault(Return(GroupsByCCSStatus()));
+  ON_CALL(*cache_manager_, GetGroupsWithSameEntities(_))
+      .WillByDefault(Return(GroupsByCCSStatus()));
+  ON_CALL(*cache_manager_, GetKnownUserConsentsIds())
+      .WillByDefault(Return(KnownConsentsIds()));
+  ON_CALL(listener_, GetRegisteredApps())
+      .WillByDefault(Return(policy::KnownConsentsIds()));
 }
 
 void PolicyManagerImplTest::TearDown() {
@@ -235,6 +246,8 @@ PolicyManagerImplTest2::PolicyManagerImplTest2()
     , ptu_request_types_(Json::arrayValue) {}
 
 void PolicyManagerImplTest2::SetUp() {
+  ON_CALL(listener_, GetRegisteredApps())
+      .WillByDefault(Return(policy::KnownConsentsIds()));
   file_system::CreateDirectory(app_storage_folder_);
 
   manager_ = new PolicyManagerImpl(in_memory_);
@@ -281,6 +294,106 @@ void PolicyManagerImplTest2::CreateLocalPT(const std::string& file_name) {
   EXPECT_TRUE(manager_->GetCache()->IsPTPreloaded());
 }
 
+bool PolicyManagerImplTest2::CheckPolicyTimeStamp(
+    const std::string& str) const {
+  return str.find('T') != std::string::npos &&
+         str.find('Z') != std::string::npos;
+}
+
+void PolicyManagerImplTest2::
+    PreconditionCCSPreparePTWithAppGroupsAndConsents() {
+  using namespace policy_table;
+  using namespace rpc;
+
+  CreateLocalPT(preloaded_pt_filename_);
+  Table t = PreparePTWithGroupsHavingCCS();
+
+  ApplicationParams app_params;
+  app_params.groups.push_back(CCS::group_name_1);
+  app_params.groups.push_back(CCS::group_name_2);
+
+  t.policy_table.app_policies_section.apps.insert(
+      std::make_pair(app_id_1_, app_params));
+
+  EXPECT_TRUE(policy_manager_->GetCache()->ApplyUpdate(t));
+
+  // User allows first group and disallows second group. Third is kept
+  // untouched.
+  PermissionConsent permissions;
+  permissions.device_id = device_id_1_;
+  permissions.policy_app_id = app_id_1_;
+
+  FunctionalGroupPermission group_permissions_1;
+  group_permissions_1.group_name = CCS::group_name_1;
+  group_permissions_1.group_alias = CCS::group_name_1;
+  group_permissions_1.group_id = utils::Djb2HashFromString(CCS::group_name_1);
+  group_permissions_1.state = kGroupAllowed;
+
+  FunctionalGroupPermission group_permissions_2;
+  group_permissions_2.group_name = CCS::group_name_2;
+  group_permissions_2.group_alias = CCS::group_name_2;
+  group_permissions_2.group_id = utils::Djb2HashFromString(CCS::group_name_2);
+  group_permissions_2.state = kGroupDisallowed;
+
+  permissions.group_permissions.push_back(group_permissions_1);
+  permissions.group_permissions.push_back(group_permissions_2);
+
+  policy_manager_->SetUserConsentForApp(permissions);
+}
+
+void PolicyManagerImplTest2::PreconditionCCSPreparePTWithAppPolicy() {
+  using namespace policy_table;
+  using namespace rpc;
+
+  // PT has 3 functional groups with some entities in
+  // disallowed_by_ccs_entities_on/off. Groups consents can be changed.
+  CreateLocalPT(preloaded_pt_filename_);
+  Table t = PreparePTWithGroupsHavingCCS();
+
+  ApplicationParams app_params;
+  app_params.groups.push_back(CCS::group_name_1);
+  app_params.groups.push_back(CCS::group_name_2);
+
+  t.policy_table.app_policies_section.apps.insert(
+      std::make_pair(app_id_1_, app_params));
+
+  EXPECT_TRUE(policy_manager_->GetCache()->ApplyUpdate(t));
+}
+
+rpc::policy_table_interface_base::Table
+PolicyManagerImplTest2::PreparePTWithGroupsHavingCCS() {
+  using namespace policy_table;
+  using namespace rpc;
+
+  // PT has 3 functional groups with some entities in
+  // disallowed_by_ccs_entities_on/off. Groups consents can be changed.
+
+  CCS_Entity entity_1(CCS::type_1, CCS::id_1);
+  CCS_Entity entity_2(CCS::type_2, CCS::id_2);
+  CCS_Entity entity_3(CCS::type_3, CCS::id_3);
+
+  Rpcs rpcs_1;
+  rpcs_1.disallowed_by_ccs_entities_on->push_back(entity_1);
+  *rpcs_1.user_consent_prompt = CCS::group_name_1;
+  rpcs_1.rpcs.set_to_null();
+  Rpcs rpcs_2;
+  rpcs_2.disallowed_by_ccs_entities_off->push_back(entity_2);
+  *rpcs_2.user_consent_prompt = CCS::group_name_2;
+  rpcs_1.rpcs.set_to_null();
+  Rpcs rpcs_3;
+  rpcs_3.disallowed_by_ccs_entities_on->push_back(entity_3);
+  *rpcs_3.user_consent_prompt = CCS::group_name_3;
+  rpcs_1.rpcs.set_to_null();
+  Table t;
+  t.policy_table.functional_groupings.insert(
+      std::make_pair(CCS::group_name_1, rpcs_1));
+  t.policy_table.functional_groupings.insert(
+      std::make_pair(CCS::group_name_2, rpcs_2));
+  t.policy_table.functional_groupings.insert(
+      std::make_pair(CCS::group_name_3, rpcs_3));
+
+  return t;
+}
 void PolicyManagerImplTest2::AddRTtoPT(const std::string& update_file_name,
                                        const std::string& section_name,
                                        const uint32_t rt_number,
@@ -586,6 +699,8 @@ PolicyManagerImplTest_RequestTypes::PolicyManagerImplTest_RequestTypes()
     , preloadet_pt_filename_(kSdlPreloadedPtJson) {}
 
 void PolicyManagerImplTest_RequestTypes::SetUp() {
+  ON_CALL(listener_, GetRegisteredApps())
+      .WillByDefault(Return(policy::KnownConsentsIds()));
   file_system::CreateDirectory(app_storage_folder_);
   const bool in_memory = true;
   policy_manager_impl_sptr_ = utils::MakeShared<PolicyManagerImpl>(in_memory);

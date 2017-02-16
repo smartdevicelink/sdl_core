@@ -135,6 +135,38 @@ TEST(PolicyGeneratedCodeTest, IntegerConstructionAndAssignmentTest) {
   EXPECT_FALSE(valid_value.is_valid());
 }
 
+TEST(PolicyGeneratedCodeTest, CCSEntity_ConstructionValidationTest) {
+  using namespace rpc::policy_table_interface_base;
+
+  CCS_Entity empty_entity;
+  EXPECT_FALSE(empty_entity.is_valid());
+
+  const std::string corrent_entity_type_field = "entityType";
+  const std::string correct_entity_id_field = "entityID";
+
+  Json::Value correct_json_entity;
+  correct_json_entity[corrent_entity_type_field] = 1;
+  correct_json_entity[correct_entity_id_field] = 2;
+
+  CCS_Entity entity_from_correct_json(&correct_json_entity);
+  EXPECT_TRUE(entity_from_correct_json.is_valid());
+
+  const std::string wrong_entity_id_field = "entityId";
+
+  Json::Value wrong_json_entity;
+  wrong_json_entity[corrent_entity_type_field] = 1;
+  wrong_json_entity[wrong_entity_id_field] = 2;
+
+  CCS_Entity entity_from_wrong_json(&wrong_json_entity);
+  EXPECT_FALSE(entity_from_wrong_json.is_valid());
+
+  CCS_Entity entity_from_valid_ints(1, 2);
+  EXPECT_TRUE(entity_from_valid_ints.is_valid());
+
+  CCS_Entity entity_from_wrong_ints(129, 129);
+  EXPECT_FALSE(entity_from_wrong_ints.is_valid());
+}
+
 }  // namespace policy_test
 }  // namespace components
 }  // namespace test

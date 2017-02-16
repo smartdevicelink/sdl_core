@@ -232,6 +232,15 @@ class MockCacheManagerInterface : public ::policy::CacheManagerInterface {
   MOCK_CONST_METHOD0(GetCertificate, std::string());
   MOCK_METHOD1(SetDecryptedCertificate, void(const std::string&));
   MOCK_METHOD1(set_settings, void(const PolicySettings* settings));
+  MOCK_METHOD1(SetCCSStatus, bool(const CCSStatus&));
+  MOCK_METHOD0(GetCCSStatus, CCSStatus());
+  MOCK_CONST_METHOD2(
+      GetGroupsWithSameEntities,
+      GroupsByCCSStatus(const CCSStatus&,
+                        const policy_table::FunctionalGroupings&));
+  MOCK_METHOD1(GetGroupsWithSameEntities, GroupsByCCSStatus(const CCSStatus&));
+  MOCK_METHOD0(GetKnownUserConsentsIds, KnownConsentsIds());
+  MOCK_METHOD1(SetCCSConsentsForApp, void(const PermissionConsent&));
 };
 
 }  // namespace policy_test
