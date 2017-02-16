@@ -45,9 +45,9 @@ command -v $FORMATER >/dev/null 2>&1 || { echo >&2 "$FORMATER is not installed. 
 
 FILE_NAMES=$(find src -name \*.h -print -o -name \*.cpp -print  -o -name \*.cc -print | grep -v 3rd_party)
 
-
+RET_CODE=0
 check_style() {
-	$FORMATER -style=file $1 | diff $1 -
+	$FORMATER -style=file $1 | diff $1 - || RET_CODE=$?
 }
 
 fix_style() {
@@ -60,4 +60,5 @@ then
 else
   for FILE_NAME in $FILE_NAMES; do check_style $FILE_NAME; done
 fi
+exit $RET_CODE
 
