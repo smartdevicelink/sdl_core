@@ -318,7 +318,7 @@ struct ExternalConsentEntity : CompositeType {
  public:
   ExternalConsentEntity();
   explicit ExternalConsentEntity(const Json::Value* value__);
-  ExternalConsentEntity(int32_t type, int32_t id);
+  ExternalConsentEntity(const int32_t type, const int32_t id);
   Json::Value ToJsonValue() const;
   bool operator==(const ExternalConsentEntity& rhs) const;
   bool is_valid() const;

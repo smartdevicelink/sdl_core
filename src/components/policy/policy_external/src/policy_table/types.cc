@@ -2080,7 +2080,8 @@ ExternalConsentEntity::ExternalConsentEntity(const Json::Value* value__)
     , entity_type(impl::ValueMember(value__, "entityType"))
     , entity_id(impl::ValueMember(value__, "entityID")) {}
 
-ExternalConsentEntity::ExternalConsentEntity(int32_t type, int32_t id)
+ExternalConsentEntity::ExternalConsentEntity(const int32_t type,
+                                             const int32_t id)
     : CompositeType(kUninitialized), entity_type(type), entity_id(id) {}
 
 Json::Value ExternalConsentEntity::ToJsonValue() const {

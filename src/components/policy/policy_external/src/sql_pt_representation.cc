@@ -71,6 +71,10 @@ const char* kDatabaseName = "policy.db";
 #else   // CUSTOMER_PASA
 const char* kDatabaseName = "policy";
 #endif  // CUSTOMER_PASA
+
+const std::string kExternalConsentEntitiesTypeStringOn = "ON";
+const std::string kExternalConsentEntitiesTypeStringOff = "OFF";
+
 }  // namespace
 
 SQLPTRepresentation::SQLPTRepresentation()
@@ -693,8 +697,9 @@ bool SQLPTRepresentation::GatherFunctionalGroupings(
 
       policy_table::DisallowedByExternalConsentEntities&
           external_consent_entities_container =
-              "ON" == external_consent_entities.GetString(2)
-                  ? *rpcs_tbl.disallowed_by_external_consent_entities_off
+              kExternalConsentEntitiesTypeStringOn ==
+                      external_consent_entities.GetString(2)
+                  ? *rpcs_tbl.disallowed_by_external_consent_entities_on
                   : *rpcs_tbl.disallowed_by_external_consent_entities_off;
 
       external_consent_entities_container.push_back(external_consent_entity);
@@ -866,22 +871,22 @@ bool SQLPTRepresentation::SaveFunctionalGroupings(
     return false;
   }
 
-  policy_table::FunctionalGroupings::const_iterator it;
+  policy_table::FunctionalGroupings::const_iterator groups_it;
 
-  for (it = groups.begin(); it != groups.end(); ++it) {
+  for (groups_it = groups.begin(); groups_it != groups.end(); ++groups_it) {
     // Since we uses this id in other tables, we have to be sure
     // that id for certain group will be same in case when
     // we drop records from the table and add them again.
     // That's why we use hash as a primary key insted of
     // simple auto incremental index.
-    const long int id = abs(utils::Djb2HashFromString(it->first));
+    const long int id = abs(utils::Djb2HashFromString(groups_it->first));
     // SQLite's Bind doesn support 'long' type
     // So we need to explicitly cast it to int64_t
     // to avoid ambiguity.
     query.Bind(0, static_cast<int64_t>(id));
-    query.Bind(1, it->first);
-    it->second.user_consent_prompt.is_initialized()
-        ? query.Bind(2, *(it->second.user_consent_prompt))
+    query.Bind(1, groups_it->first);
+    groups_it->second.user_consent_prompt.is_initialized()
+        ? query.Bind(2, *(groups_it->second.user_consent_prompt))
         : query.Bind(2);
 
     if (!query.Exec() || !query.Reset()) {
@@ -891,20 +896,20 @@ bool SQLPTRepresentation::SaveFunctionalGroupings(
 
     const int64_t last_group_id = query.LastInsertId();
 
-    if (!SaveRpcs(last_group_id, it->second.rpcs)) {
+    if (!SaveRpcs(last_group_id, groups_it->second.rpcs)) {
       return false;
     }
 
     if (!SaveExternalConsentEntities(
             last_group_id,
-            *it->second.disallowed_by_external_consent_entities_on,
+            *groups_it->second.disallowed_by_external_consent_entities_on,
             kExternalConsentEntitiesTypeOn)) {
       return false;
     }
 
     if (!SaveExternalConsentEntities(
             last_group_id,
-            *it->second.disallowed_by_external_consent_entities_off,
+            *groups_it->second.disallowed_by_external_consent_entities_off,
             kExternalConsentEntitiesTypeOff)) {
       return false;
     }
@@ -982,8 +987,10 @@ bool SQLPTRepresentation::SaveExternalConsentEntities(
     return false;
   }
 
-  const std::string on_off =
-      kExternalConsentEntitiesTypeOn == type ? "ON" : "OFF";
+  const std::string external_consent_entity_type =
+      kExternalConsentEntitiesTypeOn == type
+          ? kExternalConsentEntitiesTypeStringOn
+          : kExternalConsentEntitiesTypeStringOff;
 
   policy_table::DisallowedByExternalConsentEntities::const_iterator it_entity =
       entities.begin();
@@ -991,10 +998,11 @@ bool SQLPTRepresentation::SaveExternalConsentEntities(
     query.Bind(0, group_id);
     query.Bind(1, it_entity->entity_type);
     query.Bind(2, it_entity->entity_id);
-    query.Bind(3, on_off);
+    query.Bind(3, external_consent_entity_type);
     if (!query.Exec() || !query.Reset()) {
       LOG4CXX_ERROR(logger_,
-                    "Can't insert '" << on_off << "' external consent entity.");
+                    "Can't insert '" << external_consent_entity_type
+                                     << "' external consent entity.");
       return false;
     }
   }

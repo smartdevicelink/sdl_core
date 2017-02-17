@@ -68,7 +68,7 @@ namespace components {
 namespace policy_test {
 
 namespace {
-const int32_t policy_tables_number = 33;
+const int32_t kPolicyTablesNumber = 33;
 }
 
 class SQLPTRepresentationTest : public SQLPTRepresentation,
@@ -406,7 +406,7 @@ TEST_F(SQLPTRepresentationTest,
   // Check PT structure destroyed and tables number is 0
   query.Prepare(query_select);
   query.Next();
-  ASSERT_EQ(25, query.GetInteger(0));
+  ASSERT_EQ(kPolicyTablesNumber, query.GetInteger(0));
 
   const std::string query_select_count_of_iap_buffer_full =
       "SELECT `count_of_iap_buffer_full` FROM `usage_and_error_count`";
