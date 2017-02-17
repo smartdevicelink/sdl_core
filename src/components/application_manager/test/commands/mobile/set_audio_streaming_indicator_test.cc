@@ -203,8 +203,8 @@ TEST_F(SetAudioStreamingIndicatorRequestTest,
   const bool is_success = kIsNotSuccess;
 
   ApplicationSharedPtr mock_app_empty;
-  ON_CALL(app_mngr_, application(kConnectionKey))
-      .WillByDefault(Return(mock_app_empty));
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillOnce(Return(mock_app_empty));
 
   MessageSharedPtr msg_mobile_response =
       CatchMobileCommandResult(CallRun(*command));
@@ -275,8 +275,8 @@ TEST_F(SetAudioStreamingIndicatorRequestTest,
 
   MediaAppSetup();
 
-  ON_CALL(*mock_app_, AddIndicatorWaitForResponse(indicator))
-      .WillByDefault(Return(false));
+  EXPECT_CALL(*mock_app_, AddIndicatorWaitForResponse(indicator))
+      .WillOnce(Return(false));
 
   MessageSharedPtr msg_mobile_response =
       CatchMobileCommandResult(CallRun(*command));
@@ -293,8 +293,8 @@ TEST_F(SetAudioStreamingIndicatorRequestTest,
       GetIndicator(msg_mobile);
 
   MediaAppSetup();
-  ON_CALL(*mock_app_, AddIndicatorWaitForResponse(indicator))
-      .WillByDefault(Return(true));
+  EXPECT_CALL(*mock_app_, AddIndicatorWaitForResponse(indicator))
+      .WillOnce(Return(true));
 
   DefineHMILevelUIAvailable();
   EXPECT_CALL(app_mngr_,
@@ -341,8 +341,8 @@ TEST_F(SetAudioStreamingIndicatorRequestTest,
 
   MediaAppSetup();
   DefineHMILevelUIAvailable();
-  ON_CALL(*mock_app_, AddIndicatorWaitForResponse(indicator))
-      .WillByDefault(Return(true));
+  EXPECT_CALL(*mock_app_, AddIndicatorWaitForResponse(indicator))
+      .WillOnce(Return(true));
   EXPECT_CALL(app_mngr_,
               ManageHMICommand(HMIResultCodeIs(
                   hmi_apis::FunctionID::UI_SetAudioStreamingIndicator)));
@@ -373,8 +373,8 @@ TEST_F(SetAudioStreamingIndicatorRequestTest,
 
   MediaAppSetup();
   DefineHMILevelUIAvailable();
-  ON_CALL(*mock_app_, AddIndicatorWaitForResponse(indicator))
-      .WillByDefault(Return(true));
+  EXPECT_CALL(*mock_app_, AddIndicatorWaitForResponse(indicator))
+      .WillOnce(Return(true));
   EXPECT_CALL(app_mngr_,
               ManageHMICommand(HMIResultCodeIs(
                   hmi_apis::FunctionID::UI_SetAudioStreamingIndicator)));
@@ -405,9 +405,12 @@ TEST_F(SetAudioStreamingIndicatorRequestTest,
 
   MediaAppSetup();
   DefineHMILevelUIAvailable();
-  ON_CALL(*mock_app_, AddIndicatorWaitForResponse(indicator))
-      .WillByDefault(Return(true));
-  ON_CALL(app_mngr_, ManageHMICommand(_)).WillByDefault(Return(true));
+  EXPECT_CALL(*mock_app_, AddIndicatorWaitForResponse(indicator))
+      .WillOnce(Return(true));
+  EXPECT_CALL(app_mngr_,
+              ManageHMICommand(HMIResultCodeIs(
+                  hmi_apis::FunctionID::UI_SetAudioStreamingIndicator)))
+      .WillOnce(Return(true));
 
   command->Run();
 
@@ -435,8 +438,8 @@ TEST_F(SetAudioStreamingIndicatorRequestTest,
 
   MediaAppSetup();
   DefineHMILevelUIAvailable();
-  ON_CALL(*mock_app_, AddIndicatorWaitForResponse(indicator))
-      .WillByDefault(Return(true));
+  EXPECT_CALL(*mock_app_, AddIndicatorWaitForResponse(indicator))
+      .WillOnce(Return(true));
   EXPECT_CALL(app_mngr_,
               ManageHMICommand(HMIResultCodeIs(
                   hmi_apis::FunctionID::UI_SetAudioStreamingIndicator)));
@@ -490,8 +493,8 @@ TEST_F(SetAudioStreamingIndicatorRequestTest,
   const bool is_success = kIsNotSuccess;
 
   ApplicationSharedPtr mock_app_empty;
-  ON_CALL(app_mngr_, application(kConnectionKey))
-      .WillByDefault(Return(mock_app_empty));
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillOnce(Return(mock_app_empty));
 
   EXPECT_CALL(*mock_app_, RemoveIndicatorWaitForResponse(_)).Times(0);
   EXPECT_CALL(
