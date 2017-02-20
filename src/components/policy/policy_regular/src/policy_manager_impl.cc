@@ -370,7 +370,6 @@ void PolicyManagerImpl::CheckPermissions(const PTString& app_id,
     } else {
       result.hmi_level_permitted = kRpcDisallowed;
     }
-    return;
   }
 }
 
