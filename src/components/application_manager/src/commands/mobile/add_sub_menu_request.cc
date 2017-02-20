@@ -1,6 +1,6 @@
 /*
 
- Copyright (c) 2013, Ford Motor Company
+ Copyright (c) 2017, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -94,14 +94,42 @@ void AddSubMenuRequest::Run() {
   msg_params[strings::menu_params][strings::menu_name] =
       (*message_)[strings::msg_params][strings::menu_name];
   msg_params[strings::app_id] = app->app_id();
+  const bool is_key_icon_exist =
+      ((*message_)[strings::msg_params].keyExists(strings::sub_menu_icon));
+  const bool is_icon_path_valid = CheckSubMenuIcon();
+  const uint32_t image_type =
+      (*message_)[strings::msg_params][strings::sub_menu_icon]
+                 [strings::image_type].asUInt();
+  const mobile_apis::ImageType::eType type =
+      static_cast<mobile_apis::ImageType::eType>(image_type);
+  const bool is_dynamic_image = mobile_apis::ImageType::DYNAMIC == type;
 
-  if (((*message_)[strings::msg_params].keyExists(strings::sub_menu_icon)) &&
-      CheckSubMenuIcon()) {
+  if (is_key_icon_exist && is_icon_path_valid && is_dynamic_image) {
+    (*message_)[strings::msg_params][strings::sub_menu_icon][strings::value] =
+        ImageFullPath((*message_)[strings::msg_params][strings::sub_menu_icon]
+                                 [strings::value].asString(),
+                      app,
+                      application_manager_);
+
     msg_params[strings::sub_menu_icon] =
         (*message_)[strings::msg_params][strings::sub_menu_icon];
+    SendHMIRequest(hmi_apis::FunctionID::UI_AddSubMenu, &msg_params, true);
+  } else {
+    LOG4CXX_ERROR(logger_, "Sub-menu icon is not valid.");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
   }
-
-  SendHMIRequest(hmi_apis::FunctionID::UI_AddSubMenu, &msg_params, true);
+}
+std::string AddSubMenuRequest::ImageFullPath(const std::string& file_name,
+                                             ApplicationConstSharedPtr app,
+                                             ApplicationManager& app_mngr) {
+  std::string full_file_path;
+  const std::string& app_storage_folder =
+      app_mngr.get_settings().app_storage_folder() + "/";
+  full_file_path = app_storage_folder;
+  full_file_path += app->folder_name();
+  full_file_path += "/";
+  full_file_path += file_name;
+  return full_file_path;
 }
 
 void AddSubMenuRequest::on_event(const event_engine::Event& event) {
