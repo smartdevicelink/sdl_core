@@ -72,7 +72,6 @@ extern const std::string kSelectDays;
 extern const std::string kSelectTimeoutResponse;
 extern const std::string kInsertFunctionalGroup;
 extern const std::string kInsertRpc;
-extern const std::string kInsertExternalConsentEntity;
 extern const std::string kInsertRpcWithParameter;
 extern const std::string kInsertApplication;
 extern const std::string kInsertAppGroup;

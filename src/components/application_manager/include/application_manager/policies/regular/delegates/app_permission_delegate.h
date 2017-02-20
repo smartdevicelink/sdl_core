@@ -57,6 +57,7 @@ class AppPermissionDelegate : public threads::ThreadDelegate {
    */
   AppPermissionDelegate(const uint32_t connection_key,
                         const PermissionConsent& permissions,
+                        const ExternalConsentStatus& external_consent_status,
                         policy::PolicyHandlerInterface& policy_handler);
 
   /**
@@ -74,6 +75,7 @@ class AppPermissionDelegate : public threads::ThreadDelegate {
  private:
   uint32_t connection_key_;
   PermissionConsent permissions_;
+  ExternalConsentStatus external_consent_status_;
   policy::PolicyHandlerInterface& policy_handler_;
 };
 

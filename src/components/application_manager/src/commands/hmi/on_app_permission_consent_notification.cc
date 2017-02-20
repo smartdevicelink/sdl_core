@@ -79,15 +79,17 @@ struct PermissionsAppender
  * @brief Converts SmartObject data to customer connectivity status item and
  * appends to collection
  */
-struct CCSStatusAppender
+struct ExternalConsentStatusAppender
     : std::unary_function<void, const smart_objects::SmartArray::value_type&> {
-  CCSStatusAppender(policy::CCSStatus& ccs_status) : ccs_status_(ccs_status) {}
+  ExternalConsentStatusAppender(
+      policy::ExternalConsentStatus& external_consent_status)
+      : external_consent_status_(external_consent_status) {}
   void operator()(const smart_objects::SmartArray::value_type& item) const {
     using namespace policy;
     using namespace hmi_apis;
     using namespace application_manager;
 
-    CCSStatusItem status_item(
+    ExternalConsentStatusItem status_item(
         static_cast<uint32_t>(item[strings::entity_type].asUInt()),
         static_cast<uint32_t>(item[strings::entity_id].asUInt()),
         static_cast<Common_EntityStatus::eType>(
@@ -95,11 +97,11 @@ struct CCSStatusAppender
             ? policy::kStatusOn
             : policy::kStatusOff);
 
-    ccs_status_.insert(status_item);
+    external_consent_status_.insert(status_item);
   }
 
  private:
-  policy::CCSStatus& ccs_status_;
+  policy::ExternalConsentStatus& external_consent_status_;
 };
 
 }  // namespace
@@ -122,14 +124,14 @@ void OnAppPermissionConsentNotification::Run() {
 
   policy::PermissionConsent permission_consent;
 
-  PermissionConsent permission_consent;
-  if (msg_params.keyExists(strings::consented_functions)) {
-    const SmartArray* user_consents =
-        msg_params[strings::consented_functions].asArray();
+  // If user defined group permissions for specific app
+  if (msg_params.keyExists(strings::app_id)) {
+    connection_key = msg_params[strings::app_id].asUInt();
+  }
 
-  if (msg_params.keyExists("consentedFunctions")) {
-    smart_objects::SmartArray* user_consent =
-        msg_params["consentedFunctions"].asArray();
+  if (msg_params.keyExists(strings::consented_functions)) {
+    const smart_objects::SmartArray* user_consent =
+        msg_params[strings::consented_functions].asArray();
 
     smart_objects::SmartArray::const_iterator it = user_consent->begin();
     smart_objects::SmartArray::const_iterator it_end = user_consent->end();
@@ -151,16 +153,17 @@ void OnAppPermissionConsentNotification::Run() {
     permission_consent.consent_source = msg_params[strings::source].asString();
   }
 
-  CCSStatus ccs_status;
-  if (msg_params.keyExists(strings::ccs_status)) {
-    const SmartArray* system_ccs_status =
-        msg_params[strings::ccs_status].asArray();
-
-    application_manager_.GetPolicyHandler().OnAppPermissionConsent(
-        connection_key, permission_consent);
+  policy::ExternalConsentStatus external_consent_status;
+  if (msg_params.keyExists(strings::external_consent_status)) {
+    const smart_objects::SmartArray* system_external_consent_status =
+        msg_params[strings::external_consent_status].asArray();
+    ExternalConsentStatusAppender status_appender(external_consent_status);
+    std::for_each(system_external_consent_status->begin(),
+                  system_external_consent_status->end(),
+                  status_appender);
   }
+  application_manager_.GetPolicyHandler().OnAppPermissionConsent(
+      connection_key, permission_consent, external_consent_status);
 }
-
-}  // namespace commands
-
+}  // commands
 }  // namespace application_manager

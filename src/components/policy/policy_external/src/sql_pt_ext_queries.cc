@@ -283,5 +283,16 @@ const std::string kInsertExternalConsentStatus =
     "`_internal_external_consent_status` "
     "WHERE `entity_type` = ? AND `entity_id` = ?), ?, ?, ?)";
 
+const std::string kDeleteExternalConsentEntities =
+    "DELETE FROM `external_consent_entities`";
+
+const std::string kInsertExternalConsentEntity =
+    "INSERT INTO `external_consent_entities` (`group_id`, `entity_type`, "
+    "`entity_id`, `on_off`) "
+    "  VALUES (?, ?, ?, ?)";
+
+const std::string kSelectExternalConsentEntity =
+    "SELECT `group_id`, `entity_type`, `entity_id`, `on_off` from "
+    "`external_consent_entities`";
 }  // namespace sql_pt_ext
 }  // namespace policy

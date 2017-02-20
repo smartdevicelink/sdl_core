@@ -378,7 +378,7 @@ class MessageHelper {
    */
   static void SendGetListOfPermissionsResponse(
       const std::vector<policy::FunctionalGroupPermission>& permissions,
-#if EXTERNAL_PROPRIETARY_MODE
+#ifdef EXTERNAL_PROPRIETARY_MODE
       const policy::ExternalConsentStatus& external_consent_status,
 #endif  // EXTERNAL_PROPRIETARY_MODE
       const uint32_t correlation_id,

@@ -61,6 +61,7 @@ class MockPolicyManager : public PolicyManager {
   MOCK_METHOD2(LoadPT,
                bool(const std::string& file, const BinaryMessage& pt_content));
   MOCK_METHOD1(ResetPT, bool(const std::string& file_name));
+  MOCK_METHOD1(GetUpdateUrl, std::string(int service_type));
   MOCK_METHOD2(GetUpdateUrls,
                void(const uint32_t service_type, EndpointUrls& out_end_points));
   MOCK_METHOD2(GetUpdateUrls,

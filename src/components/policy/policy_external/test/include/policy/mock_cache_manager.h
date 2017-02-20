@@ -232,19 +232,16 @@ class MockCacheManagerInterface : public ::policy::CacheManagerInterface {
   MOCK_CONST_METHOD0(GetCertificate, std::string());
   MOCK_METHOD1(SetDecryptedCertificate, void(const std::string&));
   MOCK_METHOD1(set_settings, void(const PolicySettings* settings));
-  MOCK_METHOD1(SaveExternalConsentStatus, bool(const ExternalConsentStatus&));
-  MOCK_METHOD0(GetExternalConsentStatus, ExternalConsentStatus());
   MOCK_METHOD1(GetHMITypes,
                const policy_table::AppHMITypes*(const std::string& app_id));
   MOCK_METHOD1(GetGroups, const policy_table::Strings&(const PTString& app_id));
 
-  MOCK_METHOD1(SetCCSStatus, bool(const CCSStatus&));
-
-  MOCK_METHOD0(GetCCSStatus, CCSStatus());
-  MOCK_METHOD1(GetGroupsWithSameEntities, GroupsByCCSStatus(const CCSStatus&));
-  MOCK_METHOD0(GetKnownLinksFromPT, ApplicationsLinks());
-  MOCK_METHOD1(SetCCSConsentsForApp, void(const PermissionConsent&));
-  MOCK_METHOD1(UpdateUserConsentsWithCCS, void(const CCSStatus&));
+  MOCK_METHOD1(SetExternalConsentStatus, bool(const ExternalConsentStatus&));
+  MOCK_METHOD0(GetExternalConsentStatus, ExternalConsentStatus());
+  MOCK_METHOD1(GetGroupsWithSameEntities,
+               GroupsByExternalConsentStatus(const ExternalConsentStatus&));
+  MOCK_METHOD0(GetKnownLinksFromPT, std::map<std::string, std::string>());
+  MOCK_METHOD1(SetExternalConsentForApp, void(const PermissionConsent&));
 };
 
 }  // namespace policy_test

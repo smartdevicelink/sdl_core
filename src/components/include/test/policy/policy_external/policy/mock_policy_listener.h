@@ -104,8 +104,7 @@ class MockPolicyListener : public ::policy::PolicyListener {
                     const std::string& hmi_level,
                     const std::string& device_rank));
 #endif  // SDL_REMOTE_CONTROL
-  MOCK_CONST_METHOD0(GetRegisteredApps, policy::KnownConsentsIds());
-  MOCK_CONST_METHOD0(GetRegisteredLinks, policy::ApplicationsLinks());
+  MOCK_CONST_METHOD0(GetRegisteredLinks, std::map<std::string, std::string>());
 };
 
 }  // namespace policy_test

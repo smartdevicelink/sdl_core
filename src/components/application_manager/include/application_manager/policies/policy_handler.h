@@ -365,12 +365,14 @@ class PolicyHandler : public PolicyHandlerInterface,
    * @param connection_key Connection key of application, 0 if no key has been
    * provided by notification
    * @param permissions Structure containing group permissions changes
-   * @param ccs_status Structure containig customer connectivity settings
+   * @param external_consent_status Structure containig customer connectivity
+   * settings
    * changes
    */
-  void OnAppPermissionConsent(const uint32_t connection_key,
-                              const PermissionConsent& permissions,
-                              const CCSStatus& ccs_status) FINAL;
+  void OnAppPermissionConsent(
+      const uint32_t connection_key,
+      const PermissionConsent& permissions,
+      const ExternalConsentStatus& external_consent_status) OVERRIDE;
 
   /**
    * @brief Get appropriate message parameters and send them with response
@@ -407,13 +409,6 @@ class PolicyHandler : public PolicyHandlerInterface,
 
   std::string OnCurrentDeviceIdUpdateRequired(
       const std::string& policy_app_id) OVERRIDE;
-
-  /**
- * @brief Collects currently registered applications ids linked to their
- * device id
- * @return Collection of device_id-to-app_id links
- */
-  ApplicationsLinks GetRegisteredLinks() const FINAL;
 
   /**
    * @brief Set parameters from OnSystemInfoChanged to policy table
@@ -641,17 +636,20 @@ class PolicyHandler : public PolicyHandlerInterface,
   /**
    * @brief Processes data received via OnAppPermissionChanged notification
    * from. Being started asyncronously from AppPermissionDelegate class.
-   * Sets updated permissions and CCS for registered applications and
+   * Sets updated permissions and ExternalConsent for registered applications
+   * and
    * applications which already have appropriate group assigned which related to
    * devices already known by policy
    * @param connection_key Connection key of application, 0 if no key has been
    * provided within notification
-   * @param ccs_status Customer connectivity settings changes to process
+   * @param external_consent_status Customer connectivity settings changes to
+   * process
    * @param permissions Permissions changes to process
    */
-  void OnAppPermissionConsentInternal(const uint32_t connection_key,
-                                      const CCSStatus& ccs_status,
-                                      PermissionConsent& out_permissions) FINAL;
+  void OnAppPermissionConsentInternal(
+      const uint32_t connection_key,
+      const ExternalConsentStatus& external_consent_status,
+      PermissionConsent& out_permissions) OVERRIDE;
 
 #ifdef SDL_REMOTE_CONTROL
   void UpdateHMILevel(application_manager::ApplicationSharedPtr app,
@@ -725,23 +723,6 @@ class PolicyHandler : public PolicyHandlerInterface,
 #endif  // EXTERNAL_PROPRIETARY_MODE
   bool SaveSnapshot(const BinaryMessage& pt_string, std::string& snap_path);
 
-  /**
-   * @brief Collects permissions for all currently registered applications on
-   * all devices
-   * @return consolidated permissions list or empty list if no
-   * applications/devices currently present
-   */
-  std::vector<FunctionalGroupPermission> CollectRegisteredAppsPermissions();
-
-  /**
-   * @brief Collects permissions for application with certain connection key
-   * @param connection_key Connection key of application to look for
-   * @return list of application permissions or empty list if no such
-   * application found
-   */
-  std::vector<FunctionalGroupPermission> CollectAppPermissions(
-      const uint32_t connection_key);
-
  private:
   static const std::string kLibrary;
 
@@ -767,7 +748,8 @@ class PolicyHandler : public PolicyHandlerInterface,
  * device id
  * @param out_links Collection of device_id-to-app_id links
  */
-  void GetRegisteredLinks(ApplicationsLinks& out_links) const;
+  void GetRegisteredLinks(std::map<std::string, std::string>& out_links) const;
+  std::map<std::string, std::string> GetRegisteredLinks() const;
 
  private:
   mutable sync_primitives::RWLock policy_manager_lock_;
@@ -793,7 +775,7 @@ class PolicyHandler : public PolicyHandlerInterface,
    * consents to provide for HMI request and process response with possible
    * changes done by user
    */
-  ApplicationsLinks app_to_device_link_;
+  std::map<std::string, std::string> app_to_device_link_;
 
   // Lock for app to device list
   sync_primitives::Lock app_to_device_link_lock_;

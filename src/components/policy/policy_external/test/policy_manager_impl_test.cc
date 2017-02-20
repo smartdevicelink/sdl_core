@@ -165,48 +165,48 @@ TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
 TEST_F(PolicyManagerImplTest2,
        KmsChanged_SetExceededKms_ExpectCorrectSchedule) {
   // Arrange
-  CreateLocalPT(preloadet_pt_filename_);
+  CreateLocalPT(preloaded_pt_filename_);
   ::policy::Counters counter = ::policy::Counters::KILOMETERS;
-  manager_->PTUpdatedAt(counter, 50000);
-  EXPECT_EQ("UP_TO_DATE", manager_->GetPolicyTableStatus());
+  policy_manager_->PTUpdatedAt(counter, 50000);
+  EXPECT_EQ("UP_TO_DATE", policy_manager_->GetPolicyTableStatus());
   // Set kms changed but not exceed limit
-  manager_->KmsChanged(51500);
-  EXPECT_EQ("UP_TO_DATE", manager_->GetPolicyTableStatus());
+  policy_manager_->KmsChanged(51500);
+  EXPECT_EQ("UP_TO_DATE", policy_manager_->GetPolicyTableStatus());
   // Set kms changed and exceed limit
-  manager_->KmsChanged(52500);
-  EXPECT_EQ("UPDATE_NEEDED", manager_->GetPolicyTableStatus());
+  policy_manager_->KmsChanged(52500);
+  EXPECT_EQ("UPDATE_NEEDED", policy_manager_->GetPolicyTableStatus());
 }
 
 TEST_F(PolicyManagerImplTest2, ForcePTExchange_ExpectUpdateNeeded) {
   // Arrange
-  CreateLocalPT(preloadet_pt_filename_);
-  EXPECT_EQ("UP_TO_DATE", manager_->GetPolicyTableStatus());
+  CreateLocalPT(preloaded_pt_filename_);
+  EXPECT_EQ("UP_TO_DATE", policy_manager_->GetPolicyTableStatus());
   // Force OT Exchange
-  manager_->ForcePTExchange();
+  policy_manager_->ForcePTExchange();
   // Check update required
-  EXPECT_EQ("UPDATE_NEEDED", manager_->GetPolicyTableStatus());
+  EXPECT_EQ("UPDATE_NEEDED", policy_manager_->GetPolicyTableStatus());
 }
 
 TEST_F(PolicyManagerImplTest2, OnSystemReady) {
   // Arrange
-  CreateLocalPT(preloadet_pt_filename_);
+  CreateLocalPT(preloaded_pt_filename_);
   // Check
   EXPECT_CALL(listener_, OnSystemInfoUpdateRequired());
-  manager_->OnSystemReady();
+  policy_manager_->OnSystemReady();
 }
 
 TEST_F(PolicyManagerImplTest2, ResetRetrySequence) {
   // Arrange
-  CreateLocalPT(preloadet_pt_filename_);
-  manager_->ResetRetrySequence();
-  EXPECT_EQ("UPDATE_NEEDED", manager_->GetPolicyTableStatus());
-  manager_->OnUpdateStarted();
-  EXPECT_EQ("UPDATING", manager_->GetPolicyTableStatus());
+  CreateLocalPT(preloaded_pt_filename_);
+  policy_manager_->ResetRetrySequence();
+  EXPECT_EQ("UPDATE_NEEDED", policy_manager_->GetPolicyTableStatus());
+  policy_manager_->OnUpdateStarted();
+  EXPECT_EQ("UPDATING", policy_manager_->GetPolicyTableStatus());
 }
 
 TEST_F(PolicyManagerImplTest2, NextRetryTimeout_ExpectTimeoutsFromPT) {
   // Arrange
-  std::ifstream ifile(preloadet_pt_filename_);
+  std::ifstream ifile(preloaded_pt_filename_);
   Json::Reader reader;
   Json::Value root(Json::objectValue);
   if (ifile.is_open() && reader.parse(ifile, root, true)) {
@@ -214,18 +214,19 @@ TEST_F(PolicyManagerImplTest2, NextRetryTimeout_ExpectTimeoutsFromPT) {
     seconds_between_retries =
         root["policy_table"]["module_config"]["seconds_between_retries"];
     uint32_t size = seconds_between_retries.size();
-    CreateLocalPT(preloadet_pt_filename_);
+    CreateLocalPT(preloaded_pt_filename_);
     for (uint32_t i = 0; i < size; ++i) {
-      EXPECT_EQ(seconds_between_retries[i], manager_->NextRetryTimeout());
+      EXPECT_EQ(seconds_between_retries[i],
+                policy_manager_->NextRetryTimeout());
     }
   }
 }
 
 TEST_F(PolicyManagerImplTest2, TimeOutExchange) {
   // Arrange
-  CreateLocalPT(preloadet_pt_filename_);
+  CreateLocalPT(preloaded_pt_filename_);
   // Check value taken from PT
-  EXPECT_EQ(70000u, manager_->TimeoutExchangeMSec());
+  EXPECT_EQ(70000u, policy_manager_->TimeoutExchangeMSec());
 }
 
 TEST_F(PolicyManagerImplTest,
@@ -276,9 +277,9 @@ TEST_F(PolicyManagerImplTest, ResetUserConsent_ResetOnlyOnce) {
 
 TEST_F(PolicyManagerImplTest2, GetPolicyTableStatus_ExpectUpToDate) {
   // Arrange
-  CreateLocalPT(preloadet_pt_filename_);
+  CreateLocalPT(preloaded_pt_filename_);
   // Check
-  EXPECT_EQ("UP_TO_DATE", manager_->GetPolicyTableStatus());
+  EXPECT_EQ("UP_TO_DATE", policy_manager_->GetPolicyTableStatus());
 }
 
 TEST_F(PolicyManagerImplTest,
@@ -294,7 +295,7 @@ TEST_F(PolicyManagerImplTest,
 TEST_F(PolicyManagerImplTest2,
        RetrySequenceDelaysSeconds_Expect_CorrectValues) {
   // Arrange
-  std::ifstream ifile(preloadet_pt_filename_);
+  std::ifstream ifile(preloaded_pt_filename_);
   Json::Reader reader;
   Json::Value root(Json::objectValue);
   if (ifile.is_open() && reader.parse(ifile, root, true)) {
@@ -302,8 +303,8 @@ TEST_F(PolicyManagerImplTest2,
     seconds_between_retries =
         root["policy_table"]["module_config"]["seconds_between_retries"];
     uint32_t size = seconds_between_retries.size();
-    CreateLocalPT(preloadet_pt_filename_);
-    std::vector<int> delaySecs = manager_->RetrySequenceDelaysSeconds();
+    CreateLocalPT(preloaded_pt_filename_);
+    std::vector<int> delaySecs = policy_manager_->RetrySequenceDelaysSeconds();
     // Check
     ASSERT_EQ(size, delaySecs.size());
     for (uint32_t i = 0; i < size; ++i) {
@@ -315,11 +316,11 @@ TEST_F(PolicyManagerImplTest2,
 TEST_F(PolicyManagerImplTest2,
        OnExceededTimeout_GetPolicyTableStatus_ExpectUpdateNeeded) {
   // Arrange
-  CreateLocalPT(preloadet_pt_filename_);
-  manager_->ForcePTExchange();
-  manager_->OnExceededTimeout();
+  CreateLocalPT(preloaded_pt_filename_);
+  policy_manager_->ForcePTExchange();
+  policy_manager_->OnExceededTimeout();
   // Check
-  EXPECT_EQ("UPDATE_NEEDED", manager_->GetPolicyTableStatus());
+  EXPECT_EQ("UPDATE_NEEDED", policy_manager_->GetPolicyTableStatus());
 }
 
 TEST_F(PolicyManagerImplTest, MarkUnpairedDevice) {
@@ -339,20 +340,21 @@ TEST_F(PolicyManagerImplTest, MarkUnpairedDevice) {
 TEST_F(PolicyManagerImplTest2, GetCurrentDeviceId) {
   // Arrange
   EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(app_id_2_)).Times(1);
-  EXPECT_EQ("", manager_->GetCurrentDeviceId(app_id_2_));
+  EXPECT_EQ("", policy_manager_->GetCurrentDeviceId(app_id_2_));
 }
 
-TEST_F(PolicyManagerImplTest_CCS,
-       CCS_SetCCSStatusWhileAppExists_ExpectUserConsentsUpdateForApp) {
+TEST_F(
+    PolicyManagerImplTest_ExternalConsent,
+    ExternalConsent_SetExternalConsentStatusWhileAppExists_ExpectUserConsentsUpdateForApp) {
   using namespace policy_table;
   using namespace rpc;
 
-  PreconditionCCSPreparePTWithAppGroupsAndConsents();
+  PreconditionExternalConsentPreparePTWithAppGroupsAndConsents();
 
   utils::SharedPtr<policy_table::Table> pt =
       policy_manager_->GetCache()->GetPT();
 
-  // Checking groups consents before setting CCS status
+  // Checking groups consents before setting ExternalConsent status
   const policy_table::DeviceData::const_iterator device_data =
       pt->policy_table.device_data->find(device_id_1_);
 
@@ -383,17 +385,17 @@ TEST_F(PolicyManagerImplTest_CCS,
   EXPECT_FALSE(updated_consent_records->second.consent_groups->end() !=
                group_3);
 
-  // Act - setting new CCS status
-  CCSStatus status;
-  status.insert(CCSStatusItem(type_1_, id_1_, kStatusOn));
-  status.insert(CCSStatusItem(type_2_, id_2_, kStatusOn));
-  status.insert(CCSStatusItem(type_3_, id_3_, kStatusOn));
+  // Act - setting new ExternalConsent status
+  ExternalConsentStatus status;
+  status.insert(ExternalConsentStatusItem(type_1_, id_1_, kStatusOn));
+  status.insert(ExternalConsentStatusItem(type_2_, id_2_, kStatusOn));
+  status.insert(ExternalConsentStatusItem(type_3_, id_3_, kStatusOn));
 
   EXPECT_CALL(listener_, OnPermissionsUpdated(app_id_1_, _));
 
-  EXPECT_TRUE(policy_manager_->SetCCSStatus(status));
+  EXPECT_TRUE(policy_manager_->SetExternalConsentStatus(status));
 
-  // Checking groups consent after setting CCS status
+  // Checking groups consent after setting ExternalConsent status
   EXPECT_EQ(Boolean(false), group_1->second);
   EXPECT_EQ(Boolean(true), group_2->second);
 
@@ -405,18 +407,19 @@ TEST_F(PolicyManagerImplTest_CCS,
                updated_group_3);
 }
 
-TEST_F(PolicyManagerImplTest_CCS,
-       CCS_SetCCSStatusWhileAppExists_ExpectCCSConsentsUpdateForApp) {
+TEST_F(
+    PolicyManagerImplTest_ExternalConsent,
+    ExternalConsent_SetExternalConsentStatusWhileAppExists_ExpectExternalConsentUpdateForApp) {
   using namespace policy_table;
   using namespace rpc;
 
-  PreconditionCCSPreparePTWithAppGroupsAndConsents();
+  PreconditionExternalConsentPreparePTWithAppGroupsAndConsents();
 
   // Act
   utils::SharedPtr<policy_table::Table> pt =
       policy_manager_->GetCache()->GetPT();
 
-  // Checking CCS consents before setting new CCS status
+  // Checking ExternalConsent consents before setting new ExternalConsent status
   policy_table::DeviceData::const_iterator updated_device_data =
       pt->policy_table.device_data->find(device_id_1_);
 
@@ -428,21 +431,22 @@ TEST_F(PolicyManagerImplTest_CCS,
   EXPECT_TRUE(updated_device_data->second.user_consent_records->end() !=
               updated_consent_records);
 
-  EXPECT_TRUE(updated_consent_records->second.ccs_consent_groups->empty());
+  EXPECT_TRUE(
+      updated_consent_records->second.external_consent_status_groups->empty());
 
-  // Act - setting new CCS status
-  CCSStatus status;
-  status.insert(CCSStatusItem(type_1_, id_1_, kStatusOn));
-  status.insert(CCSStatusItem(type_2_, id_2_, kStatusOn));
-  status.insert(CCSStatusItem(type_3_, id_3_, kStatusOn));
+  // Act - setting new ExternalConsent status
+  ExternalConsentStatus status;
+  status.insert(ExternalConsentStatusItem(type_1_, id_1_, kStatusOn));
+  status.insert(ExternalConsentStatusItem(type_2_, id_2_, kStatusOn));
+  status.insert(ExternalConsentStatusItem(type_3_, id_3_, kStatusOn));
 
   EXPECT_CALL(listener_, OnPermissionsUpdated(app_id_1_, _));
 
-  EXPECT_TRUE(policy_manager_->SetCCSStatus(status));
+  EXPECT_TRUE(policy_manager_->SetExternalConsentStatus(status));
 
-  // Checking CCS consents after setting new CCS status
-  const ConsentGroups& ccs_consents =
-      *updated_consent_records->second.ccs_consent_groups;
+  // Checking ExternalConsent consents after setting new ExternalConsent status
+  const ConsentGroups& external_consent_statuss =
+      *updated_consent_records->second.external_consent_status_groups;
 
   const ApplicationPolicies::const_iterator app_parameters =
       pt->policy_table.app_policies_section.apps.find(app_id_1_);
@@ -450,41 +454,43 @@ TEST_F(PolicyManagerImplTest_CCS,
   EXPECT_TRUE(pt->policy_table.app_policies_section.apps.end() !=
               app_parameters);
 
-  EXPECT_EQ(app_parameters->second.groups.size(), ccs_consents.size());
+  EXPECT_EQ(app_parameters->second.groups.size(),
+            external_consent_statuss.size());
 
   const ConsentGroups::const_iterator updated_group_1 =
-      ccs_consents.find(group_name_1_);
+      external_consent_statuss.find(group_name_1_);
 
-  EXPECT_TRUE(ccs_consents.end() != updated_group_1);
+  EXPECT_TRUE(external_consent_statuss.end() != updated_group_1);
 
   const ConsentGroups::const_iterator updated_group_2 =
-      ccs_consents.find(group_name_2_);
+      external_consent_statuss.find(group_name_2_);
 
-  EXPECT_TRUE(ccs_consents.end() != updated_group_2);
+  EXPECT_TRUE(external_consent_statuss.end() != updated_group_2);
 
   EXPECT_EQ(Boolean(false), updated_group_1->second);
   EXPECT_EQ(Boolean(true), updated_group_2->second);
 }
 
-TEST_F(PolicyManagerImplTest_CCS,
-       CCS_SetCCSStatusNewAppAddedAfterward_ExpectCCSConsentsUpdateForApp) {
+TEST_F(
+    PolicyManagerImplTest_ExternalConsent,
+    ExternalConsent_SetExternalConsentStatusNewAppAddedAfterward_ExpectExternalConsentUpdateForApp) {
   using namespace policy_table;
   using namespace rpc;
 
-  PreconditionCCSPreparePTWithAppPolicy();
+  PreconditionExternalConsentPreparePTWithAppPolicy();
 
   // Act
   utils::SharedPtr<policy_table::Table> pt =
       policy_manager_->GetCache()->GetPT();
 
-  CCSStatus status;
-  status.insert(CCSStatusItem(type_1_, id_1_, kStatusOn));
-  status.insert(CCSStatusItem(type_2_, id_2_, kStatusOn));
-  status.insert(CCSStatusItem(type_3_, id_3_, kStatusOn));
+  ExternalConsentStatus status;
+  status.insert(ExternalConsentStatusItem(type_1_, id_1_, kStatusOn));
+  status.insert(ExternalConsentStatusItem(type_2_, id_2_, kStatusOn));
+  status.insert(ExternalConsentStatusItem(type_3_, id_3_, kStatusOn));
 
-  EXPECT_TRUE(policy_manager_->SetCCSStatus(status));
+  EXPECT_TRUE(policy_manager_->SetExternalConsentStatus(status));
 
-  // Checking CCS consents after setting new CCS status
+  // Checking ExternalConsent consents after setting new ExternalConsent status
   policy_table::DeviceData::const_iterator updated_device_data =
       pt->policy_table.device_data->find(device_id_1_);
 
@@ -494,9 +500,9 @@ TEST_F(PolicyManagerImplTest_CCS,
   EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(app_id_1_))
       .WillRepeatedly(Return(device_id_1_));
 
-  policy_manager_->AddApplication(app_id_1_, AppHmiTypes());
+  policy_manager_->AddApplication(app_id_1_);
 
-  // Check CCS consents for application
+  // Check ExternalConsent consents for application
   updated_device_data = pt->policy_table.device_data->find(device_id_1_);
 
   EXPECT_TRUE(pt->policy_table.device_data->end() != updated_device_data);
@@ -504,8 +510,8 @@ TEST_F(PolicyManagerImplTest_CCS,
   UserConsentRecords::const_iterator updated_consent_records =
       updated_device_data->second.user_consent_records->find(app_id_1_);
 
-  const ConsentGroups& ccs_consents =
-      *updated_consent_records->second.ccs_consent_groups;
+  const ConsentGroups& external_consent_statuss =
+      *updated_consent_records->second.external_consent_status_groups;
 
   ApplicationPolicies::const_iterator app_parameters =
       pt->policy_table.app_policies_section.apps.find(app_id_1_);
@@ -515,41 +521,43 @@ TEST_F(PolicyManagerImplTest_CCS,
   EXPECT_TRUE(pt->policy_table.app_policies_section.apps.end() !=
               app_parameters);
 
-  EXPECT_EQ(app_parameters->second.groups.size(), ccs_consents.size());
+  EXPECT_EQ(app_parameters->second.groups.size(),
+            external_consent_statuss.size());
 
   ConsentGroups::const_iterator updated_group_1 =
-      ccs_consents.find(group_name_1_);
+      external_consent_statuss.find(group_name_1_);
 
-  EXPECT_TRUE(ccs_consents.end() != updated_group_1);
+  EXPECT_TRUE(external_consent_statuss.end() != updated_group_1);
 
   ConsentGroups::const_iterator updated_group_2 =
-      ccs_consents.find(group_name_2_);
+      external_consent_statuss.find(group_name_2_);
 
-  EXPECT_TRUE(ccs_consents.end() != updated_group_2);
+  EXPECT_TRUE(external_consent_statuss.end() != updated_group_2);
 
   EXPECT_EQ(Boolean(false), updated_group_1->second);
   EXPECT_EQ(Boolean(true), updated_group_2->second);
 }
 
-TEST_F(PolicyManagerImplTest_CCS,
-       CCS_SetCCSStatusNewAppAddedAfterward_ExpectUserConsentsUpdateForApp) {
+TEST_F(
+    PolicyManagerImplTest_ExternalConsent,
+    ExternalConsent_SetExternalConsentStatusNewAppAddedAfterward_ExpectUserConsentsUpdateForApp) {
   using namespace policy_table;
   using namespace rpc;
 
-  PreconditionCCSPreparePTWithAppPolicy();
+  PreconditionExternalConsentPreparePTWithAppPolicy();
 
   // Act
   utils::SharedPtr<policy_table::Table> pt =
       policy_manager_->GetCache()->GetPT();
 
-  CCSStatus status;
-  status.insert(CCSStatusItem(type_1_, id_1_, kStatusOn));
-  status.insert(CCSStatusItem(type_2_, id_2_, kStatusOn));
-  status.insert(CCSStatusItem(type_3_, id_3_, kStatusOn));
+  ExternalConsentStatus status;
+  status.insert(ExternalConsentStatusItem(type_1_, id_1_, kStatusOn));
+  status.insert(ExternalConsentStatusItem(type_2_, id_2_, kStatusOn));
+  status.insert(ExternalConsentStatusItem(type_3_, id_3_, kStatusOn));
 
-  EXPECT_TRUE(policy_manager_->SetCCSStatus(status));
+  EXPECT_TRUE(policy_manager_->SetExternalConsentStatus(status));
 
-  // Checking CCS consents after setting new CCS status
+  // Checking ExternalConsent consents after setting new ExternalConsent status
   policy_table::DeviceData::const_iterator updated_device_data =
       pt->policy_table.device_data->find(device_id_1_);
 
@@ -559,9 +567,9 @@ TEST_F(PolicyManagerImplTest_CCS,
   EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(app_id_1_))
       .WillRepeatedly(Return(device_id_1_));
 
-  policy_manager_->AddApplication(app_id_1_, AppHmiTypes());
+  policy_manager_->AddApplication(app_id_1_);
 
-  // Checking CCS consents after setting new CCS status
+  // Checking ExternalConsent consents after setting new ExternalConsent status
   ApplicationPolicies::const_iterator app_parameters =
       pt->policy_table.app_policies_section.apps.find(app_id_1_);
 
@@ -578,32 +586,34 @@ TEST_F(PolicyManagerImplTest_CCS,
   EXPECT_TRUE(updated_device_data->second.user_consent_records->end() !=
               updated_consent_records);
 
-  const ConsentGroups& ccs_consents =
+  const ConsentGroups& external_consent_statuss =
       *updated_consent_records->second.consent_groups;
 
-  EXPECT_EQ(app_parameters->second.groups.size(), ccs_consents.size());
+  EXPECT_EQ(app_parameters->second.groups.size(),
+            external_consent_statuss.size());
 
   ConsentGroups::const_iterator updated_group_1 =
-      ccs_consents.find(group_name_1_);
+      external_consent_statuss.find(group_name_1_);
 
-  EXPECT_TRUE(ccs_consents.end() != updated_group_1);
+  EXPECT_TRUE(external_consent_statuss.end() != updated_group_1);
 
   ConsentGroups::const_iterator updated_group_2 =
-      ccs_consents.find(group_name_2_);
+      external_consent_statuss.find(group_name_2_);
 
-  EXPECT_TRUE(ccs_consents.end() != updated_group_2);
+  EXPECT_TRUE(external_consent_statuss.end() != updated_group_2);
 
   EXPECT_EQ(Boolean(false), updated_group_1->second);
   EXPECT_EQ(Boolean(true), updated_group_2->second);
 }
 
-TEST_F(PolicyManagerImplTest_CCS,
-       CCS_SetCCSStatusNewAppPromotedAfterward_ExpectUserConsentsUpdateForApp) {
+TEST_F(
+    PolicyManagerImplTest_ExternalConsent,
+    ExternalConsent_SetExternalConsentStatusNewAppPromotedAfterward_ExpectUserConsentsUpdateForApp) {
   using namespace policy_table;
   using namespace rpc;
 
   CreateLocalPT(preloaded_pt_filename_);
-  Table t = PreparePTWithGroupsHavingCCS();
+  Table t = PreparePTWithGroupsHavingExternalConsent();
 
   EXPECT_TRUE(policy_manager_->GetCache()->ApplyUpdate(t));
 
@@ -614,20 +624,20 @@ TEST_F(PolicyManagerImplTest_CCS,
       .WillRepeatedly(Return(device_id_1_));  // again registered
 
   // First register w/o app having groups to consent
-  policy_manager_->AddApplication(app_id_1_, AppHmiTypes());
+  policy_manager_->AddApplication(app_id_1_);
 
   // Act
   utils::SharedPtr<policy_table::Table> pt =
       policy_manager_->GetCache()->GetPT();
 
-  CCSStatus status;
-  status.insert(CCSStatusItem(type_1_, id_1_, kStatusOn));
-  status.insert(CCSStatusItem(type_2_, id_2_, kStatusOn));
-  status.insert(CCSStatusItem(type_3_, id_3_, kStatusOn));
+  ExternalConsentStatus status;
+  status.insert(ExternalConsentStatusItem(type_1_, id_1_, kStatusOn));
+  status.insert(ExternalConsentStatusItem(type_2_, id_2_, kStatusOn));
+  status.insert(ExternalConsentStatusItem(type_3_, id_3_, kStatusOn));
 
-  EXPECT_TRUE(policy_manager_->SetCCSStatus(status));
+  EXPECT_TRUE(policy_manager_->SetExternalConsentStatus(status));
 
-  // Checking CCS consents after setting new CCS status
+  // Checking ExternalConsent consents after setting new ExternalConsent status
   policy_table::DeviceData::const_iterator updated_device_data =
       pt->policy_table.device_data->find(device_id_1_);
 
@@ -645,9 +655,9 @@ TEST_F(PolicyManagerImplTest_CCS,
   EXPECT_TRUE(policy_manager_->GetCache()->ApplyUpdate(t));
 
   // Second time register w/ app having groups to consent
-  policy_manager_->AddApplication(app_id_1_, AppHmiTypes());
+  policy_manager_->AddApplication(app_id_1_);
 
-  // Checking CCS consents after setting new CCS status
+  // Checking ExternalConsent consents after setting new ExternalConsent status
   ApplicationPolicies::const_iterator app_parameters =
       pt->policy_table.app_policies_section.apps.find(app_id_1_);
 
@@ -664,32 +674,34 @@ TEST_F(PolicyManagerImplTest_CCS,
   EXPECT_TRUE(updated_device_data->second.user_consent_records->end() !=
               updated_consent_records);
 
-  const ConsentGroups& ccs_consents =
+  const ConsentGroups& external_consent_statuss =
       *updated_consent_records->second.consent_groups;
 
-  EXPECT_EQ(app_parameters->second.groups.size(), ccs_consents.size());
+  EXPECT_EQ(app_parameters->second.groups.size(),
+            external_consent_statuss.size());
 
   ConsentGroups::const_iterator updated_group_1 =
-      ccs_consents.find(group_name_1_);
+      external_consent_statuss.find(group_name_1_);
 
-  EXPECT_TRUE(ccs_consents.end() != updated_group_1);
+  EXPECT_TRUE(external_consent_statuss.end() != updated_group_1);
 
   ConsentGroups::const_iterator updated_group_2 =
-      ccs_consents.find(group_name_2_);
+      external_consent_statuss.find(group_name_2_);
 
-  EXPECT_TRUE(ccs_consents.end() != updated_group_2);
+  EXPECT_TRUE(external_consent_statuss.end() != updated_group_2);
 
   EXPECT_EQ(Boolean(false), updated_group_1->second);
   EXPECT_EQ(Boolean(true), updated_group_2->second);
 }
 
-TEST_F(PolicyManagerImplTest_CCS,
-       CCS_SetCCSStatusNewAppPromotedAfterward_ExpectCCSConsentsUpdateForApp) {
+TEST_F(
+    PolicyManagerImplTest_ExternalConsent,
+    ExternalConsent_SetExternalConsentStatusNewAppPromotedAfterward_ExpectExternalConsentUpdateForApp) {
   using namespace policy_table;
   using namespace rpc;
 
   CreateLocalPT(preloaded_pt_filename_);
-  Table t = PreparePTWithGroupsHavingCCS();
+  Table t = PreparePTWithGroupsHavingExternalConsent();
 
   EXPECT_TRUE(policy_manager_->GetCache()->ApplyUpdate(t));
 
@@ -700,20 +712,20 @@ TEST_F(PolicyManagerImplTest_CCS,
       .WillRepeatedly(Return(device_id_1_));  // registered again
 
   // First register w/o app having groups to consent
-  policy_manager_->AddApplication(app_id_1_, AppHmiTypes());
+  policy_manager_->AddApplication(app_id_1_);
 
   // Act
   utils::SharedPtr<policy_table::Table> pt =
       policy_manager_->GetCache()->GetPT();
 
-  CCSStatus status;
-  status.insert(CCSStatusItem(type_1_, id_1_, kStatusOn));
-  status.insert(CCSStatusItem(type_2_, id_2_, kStatusOn));
-  status.insert(CCSStatusItem(type_3_, id_3_, kStatusOn));
+  ExternalConsentStatus status;
+  status.insert(ExternalConsentStatusItem(type_1_, id_1_, kStatusOn));
+  status.insert(ExternalConsentStatusItem(type_2_, id_2_, kStatusOn));
+  status.insert(ExternalConsentStatusItem(type_3_, id_3_, kStatusOn));
 
-  EXPECT_TRUE(policy_manager_->SetCCSStatus(status));
+  EXPECT_TRUE(policy_manager_->SetExternalConsentStatus(status));
 
-  // Checking CCS consents after setting new CCS status
+  // Checking ExternalConsent consents after setting new ExternalConsent status
   policy_table::DeviceData::const_iterator updated_device_data =
       pt->policy_table.device_data->find(device_id_1_);
 
@@ -731,9 +743,9 @@ TEST_F(PolicyManagerImplTest_CCS,
   EXPECT_TRUE(policy_manager_->GetCache()->ApplyUpdate(t));
 
   // Second time register w/ app having groups to consent
-  policy_manager_->AddApplication(app_id_1_, AppHmiTypes());
+  policy_manager_->AddApplication(app_id_1_);
 
-  // Check CCS consents for application
+  // Check ExternalConsent consents for application
   updated_device_data = pt->policy_table.device_data->find(device_id_1_);
 
   EXPECT_TRUE(pt->policy_table.device_data->end() != updated_device_data);
@@ -741,8 +753,8 @@ TEST_F(PolicyManagerImplTest_CCS,
   UserConsentRecords::const_iterator updated_consent_records =
       updated_device_data->second.user_consent_records->find(app_id_1_);
 
-  const ConsentGroups& ccs_consents =
-      *updated_consent_records->second.ccs_consent_groups;
+  const ConsentGroups& external_consent_statuss =
+      *updated_consent_records->second.external_consent_status_groups;
 
   ApplicationPolicies::const_iterator app_parameters =
       pt->policy_table.app_policies_section.apps.find(app_id_1_);
@@ -752,51 +764,53 @@ TEST_F(PolicyManagerImplTest_CCS,
   EXPECT_TRUE(pt->policy_table.app_policies_section.apps.end() !=
               app_parameters);
 
-  EXPECT_EQ(app_parameters->second.groups.size(), ccs_consents.size());
+  EXPECT_EQ(app_parameters->second.groups.size(),
+            external_consent_statuss.size());
 
   ConsentGroups::const_iterator updated_group_1 =
-      ccs_consents.find(group_name_1_);
+      external_consent_statuss.find(group_name_1_);
 
-  EXPECT_TRUE(ccs_consents.end() != updated_group_1);
+  EXPECT_TRUE(external_consent_statuss.end() != updated_group_1);
 
   ConsentGroups::const_iterator updated_group_2 =
-      ccs_consents.find(group_name_2_);
+      external_consent_statuss.find(group_name_2_);
 
-  EXPECT_TRUE(ccs_consents.end() != updated_group_2);
+  EXPECT_TRUE(external_consent_statuss.end() != updated_group_2);
 
   EXPECT_EQ(Boolean(false), updated_group_1->second);
   EXPECT_EQ(Boolean(true), updated_group_2->second);
 }
 
-TEST_F(PolicyManagerImplTest_CCS,
-       CCS_PTUWithNewGroups_ExpectCCSConsentsUpdateForApp) {
+TEST_F(PolicyManagerImplTest_ExternalConsent,
+       ExternalConsent_PTUWithNewGroups_ExpectExternalConsentUpdateForApp) {
   using namespace policy_table;
   using namespace rpc;
 
-  PreconditionCCSPreparePTWithAppGroupsAndConsents();
+  PreconditionExternalConsentPreparePTWithAppGroupsAndConsents();
 
   const uint32_t type_4 = 6u;
   const uint32_t id_4 = 7u;
   const std::string group_name_4 = "NewGroup";
 
-  // CCS status has new group, which is not yet assigned to any application
-  CCSStatus status;
-  status.insert(CCSStatusItem(type_1_, id_1_, kStatusOn));
-  status.insert(CCSStatusItem(type_2_, id_2_, kStatusOn));
-  status.insert(CCSStatusItem(type_4, id_4, kStatusOn));
+  // ExternalConsent status has new group, which is not yet assigned to any
+  // application
+  ExternalConsentStatus status;
+  status.insert(ExternalConsentStatusItem(type_1_, id_1_, kStatusOn));
+  status.insert(ExternalConsentStatusItem(type_2_, id_2_, kStatusOn));
+  status.insert(ExternalConsentStatusItem(type_4, id_4, kStatusOn));
 
-  EXPECT_TRUE(policy_manager_->SetCCSStatus(status));
+  EXPECT_TRUE(policy_manager_->SetExternalConsentStatus(status));
 
   EXPECT_CALL(listener_, OnPermissionsUpdated(app_id_1_, _)).Times(AtLeast(1));
   EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(app_id_1_))
       .WillRepeatedly(Return(device_id_1_));
 
-  policy_manager_->AddApplication(app_id_1_, AppHmiTypes());
+  policy_manager_->AddApplication(app_id_1_);
 
   utils::SharedPtr<policy_table::Table> pt =
       policy_manager_->GetCache()->GetPT();
 
-  // Check CCS consents for application
+  // Check ExternalConsent consents for application
   policy_table::DeviceData::const_iterator initial_device_data =
       pt->policy_table.device_data->find(device_id_1_);
 
@@ -808,20 +822,23 @@ TEST_F(PolicyManagerImplTest_CCS,
   EXPECT_TRUE(initial_device_data->second.user_consent_records->end() !=
               initial_consent_records);
 
-  const ConsentGroups& ccs_consents =
-      *initial_consent_records->second.ccs_consent_groups;
+  const ConsentGroups& external_consent_statuss =
+      *initial_consent_records->second.external_consent_status_groups;
 
-  ConsentGroups::const_iterator group_1 = ccs_consents.find(group_name_1_);
+  ConsentGroups::const_iterator group_1 =
+      external_consent_statuss.find(group_name_1_);
 
-  EXPECT_TRUE(ccs_consents.end() != group_1);
+  EXPECT_TRUE(external_consent_statuss.end() != group_1);
 
-  ConsentGroups::const_iterator group_2 = ccs_consents.find(group_name_2_);
+  ConsentGroups::const_iterator group_2 =
+      external_consent_statuss.find(group_name_2_);
 
-  EXPECT_TRUE(ccs_consents.end() != group_2);
+  EXPECT_TRUE(external_consent_statuss.end() != group_2);
 
-  ConsentGroups::const_iterator group_4 = ccs_consents.find(group_name_4);
+  ConsentGroups::const_iterator group_4 =
+      external_consent_statuss.find(group_name_4);
 
-  EXPECT_FALSE(ccs_consents.end() != group_4);
+  EXPECT_FALSE(external_consent_statuss.end() != group_4);
 
   // Consents for known groups have been done
   EXPECT_EQ(Boolean(false), group_1->second);
@@ -835,7 +852,8 @@ TEST_F(PolicyManagerImplTest_CCS,
   EXPECT_TRUE(pt->policy_table.app_policies_section.apps.end() !=
               app_parameters);
 
-  EXPECT_EQ(app_parameters->second.groups.size(), ccs_consents.size());
+  EXPECT_EQ(app_parameters->second.groups.size(),
+            external_consent_statuss.size());
 
   const std::string ptu_json =
       PreparePTUWithNewGroup(type_4, id_4, group_name_4);
@@ -843,7 +861,7 @@ TEST_F(PolicyManagerImplTest_CCS,
   const BinaryMessage msg(ptu_json.begin(), ptu_json.end());
 
   ON_CALL(listener_, GetRegisteredLinks())
-      .WillByDefault(Return(policy::ApplicationsLinks()));
+      .WillByDefault(Return(std::map<std::string, std::string>()));
 
   EXPECT_CALL(listener_, OnCertificateUpdated(_));
 
@@ -862,20 +880,20 @@ TEST_F(PolicyManagerImplTest_CCS,
   EXPECT_TRUE(updated_device_data->second.user_consent_records->end() !=
               updated_consent_records);
 
-  const ConsentGroups& updated_ccs_consents =
-      *updated_consent_records->second.ccs_consent_groups;
+  const ConsentGroups& updated_external_consent_statuss =
+      *updated_consent_records->second.external_consent_status_groups;
 
-  group_1 = updated_ccs_consents.find(group_name_1_);
+  group_1 = updated_external_consent_statuss.find(group_name_1_);
 
-  EXPECT_TRUE(updated_ccs_consents.end() != group_1);
+  EXPECT_TRUE(updated_external_consent_statuss.end() != group_1);
 
-  group_2 = updated_ccs_consents.find(group_name_2_);
+  group_2 = updated_external_consent_statuss.find(group_name_2_);
 
-  EXPECT_TRUE(updated_ccs_consents.end() != group_2);
+  EXPECT_TRUE(updated_external_consent_statuss.end() != group_2);
 
-  group_4 = updated_ccs_consents.find(group_name_4);
+  group_4 = updated_external_consent_statuss.find(group_name_4);
 
-  EXPECT_TRUE(updated_ccs_consents.end() != group_4);
+  EXPECT_TRUE(updated_external_consent_statuss.end() != group_4);
 
   EXPECT_EQ(Boolean(false), group_1->second);
   EXPECT_EQ(Boolean(true), group_2->second);
@@ -886,37 +904,38 @@ TEST_F(PolicyManagerImplTest_CCS,
   EXPECT_TRUE(pt->policy_table.app_policies_section.apps.end() !=
               app_parameters);
 
-  EXPECT_EQ(app_parameters->second.groups.size(), ccs_consents.size());
+  EXPECT_EQ(app_parameters->second.groups.size(),
+            external_consent_statuss.size());
 }
 
-TEST_F(PolicyManagerImplTest_CCS,
-       CCS_PTUWithNewGroups_ExpectUserConsentsUpdateForApp) {
+TEST_F(PolicyManagerImplTest_ExternalConsent,
+       ExternalConsent_PTUWithNewGroups_ExpectUserConsentsUpdateForApp) {
   using namespace policy_table;
   using namespace rpc;
 
-  PreconditionCCSPreparePTWithAppGroupsAndConsents();
+  PreconditionExternalConsentPreparePTWithAppGroupsAndConsents();
 
   const uint32_t type_4 = 6u;
   const uint32_t id_4 = 7u;
   const std::string group_name_4 = "NewGroup";
 
-  CCSStatus status;
-  status.insert(CCSStatusItem(type_1_, id_1_, kStatusOn));
-  status.insert(CCSStatusItem(type_2_, id_2_, kStatusOn));
-  status.insert(CCSStatusItem(type_4, id_4, kStatusOn));
+  ExternalConsentStatus status;
+  status.insert(ExternalConsentStatusItem(type_1_, id_1_, kStatusOn));
+  status.insert(ExternalConsentStatusItem(type_2_, id_2_, kStatusOn));
+  status.insert(ExternalConsentStatusItem(type_4, id_4, kStatusOn));
 
-  EXPECT_TRUE(policy_manager_->SetCCSStatus(status));
+  EXPECT_TRUE(policy_manager_->SetExternalConsentStatus(status));
 
   EXPECT_CALL(listener_, OnPermissionsUpdated(app_id_1_, _)).Times(AtLeast(1));
   EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(app_id_1_))
       .WillRepeatedly(Return(device_id_1_));
 
-  policy_manager_->AddApplication(app_id_1_, AppHmiTypes());
+  policy_manager_->AddApplication(app_id_1_);
 
   utils::SharedPtr<policy_table::Table> pt =
       policy_manager_->GetCache()->GetPT();
 
-  // Check CCS consents for application
+  // Check ExternalConsent consents for application
   policy_table::DeviceData::const_iterator initial_device_data =
       pt->policy_table.device_data->find(device_id_1_);
 
@@ -962,7 +981,7 @@ TEST_F(PolicyManagerImplTest_CCS,
   const BinaryMessage msg(ptu_json.begin(), ptu_json.end());
 
   ON_CALL(listener_, GetRegisteredLinks())
-      .WillByDefault(Return(policy::ApplicationsLinks()));
+      .WillByDefault(Return(std::map<std::string, std::string>()));
 
   EXPECT_CALL(listener_, OnCertificateUpdated(_));
 
@@ -1008,18 +1027,19 @@ TEST_F(PolicyManagerImplTest_CCS,
   EXPECT_EQ(app_parameters->second.groups.size(), user_consents.size());
 }
 
-TEST_F(PolicyManagerImplTest_CCS,
-       CCS_SetCCSStatusTurnOnThanOff_ExpectCCSConsentsUpdateForApp) {
+TEST_F(
+    PolicyManagerImplTest_ExternalConsent,
+    ExternalConsent_SetExternalConsentStatusTurnOnThanOff_ExpectExternalConsentUpdateForApp) {
   using namespace policy_table;
   using namespace rpc;
 
-  PreconditionCCSPreparePTWithAppGroupsAndConsents();
+  PreconditionExternalConsentPreparePTWithAppGroupsAndConsents();
 
   // Act
   utils::SharedPtr<policy_table::Table> pt =
       policy_manager_->GetCache()->GetPT();
 
-  // Checking CCS consents before setting new CCS status
+  // Checking ExternalConsent consents before setting new ExternalConsent status
   policy_table::DeviceData::const_iterator updated_device_data =
       pt->policy_table.device_data->find(device_id_1_);
 
@@ -1031,21 +1051,22 @@ TEST_F(PolicyManagerImplTest_CCS,
   EXPECT_TRUE(updated_device_data->second.user_consent_records->end() !=
               updated_consent_records);
 
-  EXPECT_TRUE(updated_consent_records->second.ccs_consent_groups->empty());
+  EXPECT_TRUE(
+      updated_consent_records->second.external_consent_status_groups->empty());
 
-  // Act - setting new CCS status
-  CCSStatus status_on;
-  status_on.insert(CCSStatusItem(type_1_, id_1_, kStatusOn));
-  status_on.insert(CCSStatusItem(type_2_, id_2_, kStatusOn));
-  status_on.insert(CCSStatusItem(type_3_, id_3_, kStatusOn));
+  // Act - setting new ExternalConsent status
+  ExternalConsentStatus status_on;
+  status_on.insert(ExternalConsentStatusItem(type_1_, id_1_, kStatusOn));
+  status_on.insert(ExternalConsentStatusItem(type_2_, id_2_, kStatusOn));
+  status_on.insert(ExternalConsentStatusItem(type_3_, id_3_, kStatusOn));
 
   EXPECT_CALL(listener_, OnPermissionsUpdated(app_id_1_, _));
 
-  EXPECT_TRUE(policy_manager_->SetCCSStatus(status_on));
+  EXPECT_TRUE(policy_manager_->SetExternalConsentStatus(status_on));
 
-  // Checking CCS consents after setting new CCS status
-  const ConsentGroups& ccs_consents =
-      *updated_consent_records->second.ccs_consent_groups;
+  // Checking ExternalConsent consents after setting new ExternalConsent status
+  const ConsentGroups& external_consent_statuss =
+      *updated_consent_records->second.external_consent_status_groups;
 
   ApplicationPolicies::const_iterator app_parameters =
       pt->policy_table.app_policies_section.apps.find(app_id_1_);
@@ -1053,30 +1074,31 @@ TEST_F(PolicyManagerImplTest_CCS,
   EXPECT_TRUE(pt->policy_table.app_policies_section.apps.end() !=
               app_parameters);
 
-  EXPECT_EQ(app_parameters->second.groups.size(), ccs_consents.size());
+  EXPECT_EQ(app_parameters->second.groups.size(),
+            external_consent_statuss.size());
 
   ConsentGroups::const_iterator updated_group_1 =
-      ccs_consents.find(group_name_1_);
+      external_consent_statuss.find(group_name_1_);
 
-  EXPECT_TRUE(ccs_consents.end() != updated_group_1);
+  EXPECT_TRUE(external_consent_statuss.end() != updated_group_1);
 
   ConsentGroups::const_iterator updated_group_2 =
-      ccs_consents.find(group_name_2_);
+      external_consent_statuss.find(group_name_2_);
 
-  EXPECT_TRUE(ccs_consents.end() != updated_group_2);
+  EXPECT_TRUE(external_consent_statuss.end() != updated_group_2);
 
   EXPECT_EQ(Boolean(false), updated_group_1->second);
   EXPECT_EQ(Boolean(true), updated_group_2->second);
 
-  // Switching CCS status off
-  CCSStatus status_off;
-  status_off.insert(CCSStatusItem(type_1_, id_1_, kStatusOff));
-  status_off.insert(CCSStatusItem(type_2_, id_2_, kStatusOff));
-  status_off.insert(CCSStatusItem(type_3_, id_3_, kStatusOff));
+  // Switching ExternalConsent status off
+  ExternalConsentStatus status_off;
+  status_off.insert(ExternalConsentStatusItem(type_1_, id_1_, kStatusOff));
+  status_off.insert(ExternalConsentStatusItem(type_2_, id_2_, kStatusOff));
+  status_off.insert(ExternalConsentStatusItem(type_3_, id_3_, kStatusOff));
 
   EXPECT_CALL(listener_, OnPermissionsUpdated(app_id_1_, _));
 
-  EXPECT_TRUE(policy_manager_->SetCCSStatus(status_on));
+  EXPECT_TRUE(policy_manager_->SetExternalConsentStatus(status_on));
 
   EXPECT_EQ(Boolean(true), updated_group_1->second);
   EXPECT_EQ(Boolean(false), updated_group_2->second);

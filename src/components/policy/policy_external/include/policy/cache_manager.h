@@ -643,8 +643,40 @@ class CacheManager : public CacheManagerInterface {
 
   virtual void SetDecryptedCertificate(const std::string& certificate) OVERRIDE;
 
-  bool SetExternalConsentStatus(const ExternalConsentStatus& status) FINAL;
-  ExternalConsentStatus GetExternalConsentStatus() FINAL;
+  bool SetExternalConsentStatus(const ExternalConsentStatus& status) OVERRIDE;
+  ExternalConsentStatus GetExternalConsentStatus() OVERRIDE;
+
+  /**
+ * @brief Creates collection of ExternalConsent items known by current
+ * functional
+ * groupings and appropiate section
+ * (disallowed_by_external_consent_entities_on/off) where
+ * is item is being holded. If item is not found it's not included into
+ * collection
+ * @param status Current status containing collection of ExternalConsent items
+ * @return Collection of ExternalConsent items mapped to list of groups with
+ * section
+ * marker where the item is found
+ */
+  GroupsByExternalConsentStatus GetGroupsWithSameEntities(
+      const ExternalConsentStatus& status) OVERRIDE;
+
+  /**
+  * @brief Gets collection of links device-to-application from device_data
+  * section of policy table if there any application records present, i.e. if
+  * any specific user consent is present
+  * @return Collection of device-to-application links
+  */
+  std::map<std::string, std::string> GetKnownLinksFromPT() OVERRIDE;
+
+  /**
+ * @brief Sets groups permissions affected by customer connectivity settings
+ * entities status, i.e. groups assigned to particular application on
+ * particular device which have same entities as current ExternalConsent status
+ * @param permissions Groups permissions which result current ExternalConsent
+ * status
+ */
+  void SetExternalConsentForApp(const PermissionConsent& permissions) OVERRIDE;
 
 #ifdef BUILD_TESTS
   utils::SharedPtr<policy_table::Table> GetPT() const {

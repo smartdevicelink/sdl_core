@@ -204,13 +204,14 @@ void PolicyManagerImplTest::SetUp() {
   manager_->set_cache_manager(cache_manager_);
   manager_->set_listener(&listener_);
 
-  ON_CALL(*cache_manager_, GetCCSStatus()).WillByDefault(Return(CCSStatus()));
+  ON_CALL(*cache_manager_, GetExternalConsentStatus())
+      .WillByDefault(Return(ExternalConsentStatus()));
   ON_CALL(*cache_manager_, GetGroupsWithSameEntities(_))
-      .WillByDefault(Return(GroupsByCCSStatus()));
+      .WillByDefault(Return(GroupsByExternalConsentStatus()));
   ON_CALL(*cache_manager_, GetKnownLinksFromPT())
-      .WillByDefault(Return(ApplicationsLinks()));
+      .WillByDefault(Return(std::map<std::string, std::string>()));
   ON_CALL(listener_, GetRegisteredLinks())
-      .WillByDefault(Return(policy::ApplicationsLinks()));
+      .WillByDefault(Return(std::map<std::string, std::string>()));
 }
 
 void PolicyManagerImplTest::TearDown() {
@@ -236,24 +237,24 @@ PolicyManagerImplTest2::PolicyManagerImplTest2()
     , device_id_1_("XXX123456789ZZZ")
     , device_id_2_("08-00-27-CE-76-FE")
     , application_id_("1234")
-    , app_storage_folder_("storage_PolicyManagerImplTest2")
-    , preloadet_pt_filename_(kSdlPreloadedPtJson)
+    , app_storage_folder_("storage1")
+    , preloaded_pt_filename_(kSdlPreloadedPtJson)
     , in_memory_(true)
-    , manager_(NULL)
+    , policy_manager_(NULL)
     , ptu_request_types_size_(0u)
     , index_(0u)
     , ptu_request_types_(Json::arrayValue) {}
 
 void PolicyManagerImplTest2::SetUp() {
   ON_CALL(listener_, GetRegisteredLinks())
-      .WillByDefault(Return(policy::ApplicationsLinks()));
+      .WillByDefault(Return(std::map<std::string, std::string>()));
 
   file_system::CreateDirectory(app_storage_folder_);
 
-  manager_ = new PolicyManagerImpl(in_memory_);
+  policy_manager_ = new PolicyManagerImpl(in_memory_);
   ON_CALL(policy_settings_, app_storage_folder())
       .WillByDefault(ReturnRef(app_storage_folder_));
-  manager_->set_listener(&listener_);
+  policy_manager_->set_listener(&listener_);
   const char* levels[] = {"BACKGROUND", "FULL", "LIMITED", "NONE"};
   hmi_level_.assign(levels, levels + sizeof(levels) / sizeof(levels[0]));
   srand(time(NULL));
@@ -281,8 +282,8 @@ const Json::Value PolicyManagerImplTest2::GetPTU(const std::string& file_name) {
   ifile.close();
   ::policy::BinaryMessage msg(json.begin(), json.end());
   // Load Json to cache
-  EXPECT_TRUE(manager_->LoadPT(kFilePtUpdateJson, msg));
-  EXPECT_FALSE(manager_->GetCache()->IsPTPreloaded());
+  EXPECT_TRUE(policy_manager_->LoadPT(kFilePtUpdateJson, msg));
+  EXPECT_FALSE(policy_manager_->GetCache()->IsPTPreloaded());
   return root;
 }
 
@@ -290,8 +291,8 @@ void PolicyManagerImplTest2::CreateLocalPT(const std::string& file_name) {
   file_system::remove_directory_content(app_storage_folder_);
   ON_CALL(policy_settings_, app_storage_folder())
       .WillByDefault(ReturnRef(app_storage_folder_));
-  ASSERT_TRUE(manager_->InitPT(file_name, &policy_settings_));
-  EXPECT_TRUE(manager_->GetCache()->IsPTPreloaded());
+  ASSERT_TRUE(policy_manager_->InitPT(file_name, &policy_settings_));
+  EXPECT_TRUE(policy_manager_->GetCache()->IsPTPreloaded());
 }
 
 void PolicyManagerImplTest2::AddRTtoPT(const std::string& update_file_name,
@@ -299,9 +300,9 @@ void PolicyManagerImplTest2::AddRTtoPT(const std::string& update_file_name,
                                        const uint32_t rt_number,
                                        const uint32_t invalid_rt_number) {
   // Arrange
-  CreateLocalPT(preloadet_pt_filename_);
+  CreateLocalPT(preloaded_pt_filename_);
   // Get RequestTypes from section of preloaded_pt app_policies
-  pt_request_types_ = manager_->GetAppRequestTypes(section_name);
+  pt_request_types_ = policy_manager_->GetAppRequestTypes(section_name);
   EXPECT_EQ(rt_number, pt_request_types_.size());
   Json::Value root = GetPTU(update_file_name);
   // Get Request Types from JSON (PTU)
@@ -310,7 +311,7 @@ void PolicyManagerImplTest2::AddRTtoPT(const std::string& update_file_name,
   ptu_request_types_size_ = ptu_request_types_.size();
   pt_request_types_.clear();
   // Get RequestTypes from section of PT app policies after update
-  pt_request_types_ = manager_->GetAppRequestTypes(section_name);
+  pt_request_types_ = policy_manager_->GetAppRequestTypes(section_name);
   // Check number of RT in PTU and PT now are equal
   ASSERT_EQ(ptu_request_types_size_ - invalid_rt_number,
             pt_request_types_.size());
@@ -322,12 +323,12 @@ void PolicyManagerImplTest2::AddRTtoAppSectionPT(
     const uint32_t rt_number,
     const uint32_t invalid_rt_number) {
   // Arrange
-  CreateLocalPT(preloadet_pt_filename_);
+  CreateLocalPT(preloaded_pt_filename_);
   // Add app
-  manager_->AddApplication(section_name);
+  policy_manager_->AddApplication(section_name);
   // Check app gets RequestTypes from pre_DataConsent of app_policies
   // section
-  pt_request_types_ = manager_->GetAppRequestTypes(section_name);
+  pt_request_types_ = policy_manager_->GetAppRequestTypes(section_name);
   EXPECT_EQ(rt_number, pt_request_types_.size());
   EXPECT_CALL(listener_, OnPendingPermissionChange(section_name)).Times(1);
   Json::Value root = GetPTU(update_file_name);
@@ -339,13 +340,13 @@ void PolicyManagerImplTest2::AddRTtoAppSectionPT(
 
   pt_request_types_.clear();
   // Get RequestTypes from <app_id> section of app policies after PT update
-  pt_request_types_ = manager_->GetAppRequestTypes(section_name);
+  pt_request_types_ = policy_manager_->GetAppRequestTypes(section_name);
   // Check sizes of Request types of PT and PTU
   ASSERT_EQ(ptu_request_types_size_ - invalid_rt_number,
             pt_request_types_.size());
 
   ::policy::AppPermissions permissions =
-      manager_->GetAppPermissionsChanges(section_name);
+      policy_manager_->GetAppPermissionsChanges(section_name);
   EXPECT_TRUE(permissions.requestTypeChanged);
 }
 
@@ -405,7 +406,7 @@ void PolicyManagerImplTest2::FillMultimapFromFunctionalGroupings(
 void PolicyManagerImplTest2::GetFunctionalGroupingsFromManager(
     policy_table::FunctionalGroupings& input_functional_groupings) {
   // Get cache
-  ::policy::CacheManagerInterfaceSPtr cache = manager_->GetCache();
+  ::policy::CacheManagerInterfaceSPtr cache = policy_manager_->GetCache();
   // Get table_snapshot
   utils::SharedPtr<policy_table::Table> table = cache->GenerateSnapshot();
   // Set functional groupings from policy table
@@ -413,7 +414,7 @@ void PolicyManagerImplTest2::GetFunctionalGroupingsFromManager(
 }
 
 void PolicyManagerImplTest2::TearDown() {
-  delete manager_;
+  delete policy_manager_;
   file_system::RemoveDirectory(app_storage_folder_, true);
 }
 
@@ -431,8 +432,8 @@ void PolicyManagerImplTest2::
         const std::string& update_file) {
   // Arrange
   CreateLocalPT("json/sdl_preloaded_pt_send_location.json");
-  manager_->AddDevice(device_id_1_, "Bluetooth");
-  policy::CacheManagerInterfaceSPtr cache = manager_->GetCache();
+  policy_manager_->AddDevice(device_id_1_, "Bluetooth");
+  policy::CacheManagerInterfaceSPtr cache = policy_manager_->GetCache();
   ASSERT_TRUE(cache->SetDeviceData(device_id_1_,
                                    "hardware IPX",
                                    "v.8.0.1",
@@ -443,7 +444,7 @@ void PolicyManagerImplTest2::
                                    "Bluetooth"));
 
   // Add app from consented device. App will be assigned with default policies
-  manager_->AddApplication(application_id_);
+  policy_manager_->AddApplication(application_id_);
 
   // Expect all parameters are allowed
   std::ifstream ifile(update_file);
@@ -456,7 +457,7 @@ void PolicyManagerImplTest2::
   json = root.toStyledString();
   ifile.close();
   ::policy::BinaryMessage msg(json.begin(), json.end());
-  EXPECT_TRUE(manager_->LoadPT(kFilePtUpdateJson, msg));
+  EXPECT_TRUE(policy_manager_->LoadPT(kFilePtUpdateJson, msg));
   EXPECT_FALSE(cache->IsPTPreloaded());
 
   // Will be called each time permissions are checked
@@ -470,7 +471,7 @@ void PolicyManagerImplTest2::
 
   ::policy::CheckPermissionResult output;
   // Rpc in FULL level
-  manager_->CheckPermissions(
+  policy_manager_->CheckPermissions(
       application_id_, kHmiLevelFull, "SendLocation", input_params, output);
   // Check RPC is allowed
   EXPECT_EQ(::policy::kRpcAllowed, output.hmi_level_permitted);
@@ -481,7 +482,7 @@ void PolicyManagerImplTest2::
   ResetOutputList(output);
 
   // Rpc in LIMITED level
-  manager_->CheckPermissions(
+  policy_manager_->CheckPermissions(
       application_id_, kHmiLevelLimited, "SendLocation", input_params, output);
   // Check RPC is allowed
   EXPECT_EQ(::policy::kRpcAllowed, output.hmi_level_permitted);
@@ -492,11 +493,11 @@ void PolicyManagerImplTest2::
   ResetOutputList(output);
 
   // Rpc in BACKGROUND level
-  manager_->CheckPermissions(application_id_,
-                             kHmiLevelBackground,
-                             "SendLocation",
-                             input_params,
-                             output);
+  policy_manager_->CheckPermissions(application_id_,
+                                    kHmiLevelBackground,
+                                    "SendLocation",
+                                    input_params,
+                                    output);
   // Check RPC is allowed
   EXPECT_EQ(::policy::kRpcAllowed, output.hmi_level_permitted);
   // Check list of allowed parameters is not empty
@@ -507,7 +508,7 @@ void PolicyManagerImplTest2::
   ResetOutputList(output);
 
   // Rpc in NONE level
-  manager_->CheckPermissions(
+  policy_manager_->CheckPermissions(
       application_id_, kHmiLevelNone, "SendLocation", input_params, output);
   // Check RPC is disallowed
   EXPECT_EQ(::policy::kRpcDisallowed, output.hmi_level_permitted);
@@ -521,16 +522,43 @@ void PolicyManagerImplTest2::CheckRpcPermissions(
     const std::string& rpc_name, const PermitResult& expected_permission) {
   ::policy::RPCParams input_params;
   ::policy::CheckPermissionResult output;
-  manager_->CheckPermissions(
+  policy_manager_->CheckPermissions(
       application_id_, kHmiLevelFull, rpc_name, input_params, output);
   EXPECT_EQ(expected_permission, output.hmi_level_permitted);
+}
+
+void PolicyManagerImplTest2::CheckRpcPermissions(
+    const std::string& app_id,
+    const std::string& rpc_name,
+    const policy::PermitResult& out_expected_permission) {
+  ::policy::RPCParams input_params;
+  ::policy::CheckPermissionResult output;
+  policy_manager_->CheckPermissions(
+      app_id, kHmiLevelFull, rpc_name, input_params, output);
+  EXPECT_EQ(out_expected_permission, output.hmi_level_permitted);
+}
+
+void PolicyManagerImplTest2::EmulatePTAppRevoked(const std::string& ptu_name) {
+  std::ifstream ifile(ptu_name);
+  Json::Reader reader;
+  std::string json;
+  Json::Value root(Json::objectValue);
+  if (ifile.is_open() && reader.parse(ifile, root, true)) {
+    // Emulate application is revoked
+    root["policy_table"]["app_policies"]["1234"]["is_revoked"] = 1;
+    json = root.toStyledString();
+  }
+  ifile.close();
+
+  ::policy::BinaryMessage msg(json.begin(), json.end());
+  ASSERT_TRUE(policy_manager_->LoadPT(kDummyUpdateFileName, msg));
 }
 
 // To avoid duplicate arrange of test
 void PolicyManagerImplTest2::AddSetDeviceData() {
   CreateLocalPT("json/sdl_preloaded_pt_send_location.json");
-  manager_->AddDevice(device_id_1_, "Bluetooth");
-  ASSERT_TRUE((manager_->GetCache())
+  policy_manager_->AddDevice(device_id_1_, "Bluetooth");
+  ASSERT_TRUE((policy_manager_->GetCache())
                   ->SetDeviceData(device_id_1_,
                                   "hardware IPX",
                                   "v.8.0.1",
@@ -541,8 +569,8 @@ void PolicyManagerImplTest2::AddSetDeviceData() {
                                   "Bluetooth"));
 
   // Add app from consented device. App will be assigned with default policies
-  manager_->AddApplication(application_id_);
-  (manager_->GetCache())->AddDevice(device_id_1_, "Bluetooth");
+  policy_manager_->AddApplication(application_id_);
+  (policy_manager_->GetCache())->AddDevice(device_id_1_, "Bluetooth");
 }
 
 // Load Json File and set it as PTU
@@ -559,8 +587,8 @@ void PolicyManagerImplTest2::LoadPTUFromJsonFile(
   json = root.toStyledString();
   ifile.close();
   ::policy::BinaryMessage msg(json.begin(), json.end());
-  EXPECT_TRUE(manager_->LoadPT(kFilePtUpdateJson, msg));
-  EXPECT_FALSE(manager_->GetCache()->IsPTPreloaded());
+  EXPECT_TRUE(policy_manager_->LoadPT(kFilePtUpdateJson, msg));
+  EXPECT_FALSE(policy_manager_->GetCache()->IsPTPreloaded());
 }
 
 // PolicyManagerImplTest_RequestTypes class methods
@@ -596,11 +624,11 @@ PolicyManagerImplTest_RequestTypes::PolicyManagerImplTest_RequestTypes()
     , kAppId("1766825573")
     , kDefaultAppId(policy::kDefaultId)
     , app_storage_folder_("storage3")
-    , preloadet_pt_filename_(kSdlPreloadedPtJson) {}
+    , preloaded_pt_filename_(kSdlPreloadedPtJson) {}
 
 void PolicyManagerImplTest_RequestTypes::SetUp() {
   ON_CALL(listener_, GetRegisteredLinks())
-      .WillByDefault(Return(policy::ApplicationsLinks()));
+      .WillByDefault(Return(std::map<std::string, std::string>()));
 
   file_system::CreateDirectory(app_storage_folder_);
   const bool in_memory = true;
@@ -663,7 +691,7 @@ PolicyManagerImplTest_RequestTypes::GetRequestTypesForApplication(
 void PolicyManagerImplTest_RequestTypes::CompareAppRequestTypesWithDefault(
     const std::string& app_id, const std::string& ptu_file) {
   // Refresh policy table with invalid RequestType in application
-  RefreshPT(preloadet_pt_filename_, ptu_file);
+  RefreshPT(preloaded_pt_filename_, ptu_file);
 
   // Get <app_id> RequestType array
   policy_table::RequestTypes app_request_types =
@@ -721,13 +749,13 @@ void PolicyManagerImplTest_RequestTypes::TearDown() {
   file_system::RemoveDirectory(app_storage_folder_, true);
 }
 
-void PolicyManagerImplTest_CCS::
-    PreconditionCCSPreparePTWithAppGroupsAndConsents() {
+void PolicyManagerImplTest_ExternalConsent::
+    PreconditionExternalConsentPreparePTWithAppGroupsAndConsents() {
   using namespace policy_table;
   using namespace rpc;
 
   CreateLocalPT(preloaded_pt_filename_);
-  Table t = PreparePTWithGroupsHavingCCS();
+  Table t = PreparePTWithGroupsHavingExternalConsent();
 
   ApplicationParams app_params;
   app_params.groups.push_back(group_name_1_);
@@ -762,14 +790,16 @@ void PolicyManagerImplTest_CCS::
   policy_manager_->SetUserConsentForApp(permissions);
 }
 
-void PolicyManagerImplTest_CCS::PreconditionCCSPreparePTWithAppPolicy() {
+void PolicyManagerImplTest_ExternalConsent::
+    PreconditionExternalConsentPreparePTWithAppPolicy() {
   using namespace policy_table;
   using namespace rpc;
 
   // PT has 3 functional groups with some entities in
-  // disallowed_by_ccs_entities_on/off. Groups consents can be changed.
+  // disallowed_by_external_consent_entities_on/off. Groups consents can be
+  // changed.
   CreateLocalPT(preloaded_pt_filename_);
-  Table t = PreparePTWithGroupsHavingCCS();
+  Table t = PreparePTWithGroupsHavingExternalConsent();
 
   ApplicationParams app_params;
   app_params.groups.push_back(group_name_1_);
@@ -781,30 +811,31 @@ void PolicyManagerImplTest_CCS::PreconditionCCSPreparePTWithAppPolicy() {
   EXPECT_TRUE(policy_manager_->GetCache()->ApplyUpdate(t));
 }
 
-rpc::policy_table_interface_base::Table
-PolicyManagerImplTest_CCS::PreparePTWithGroupsHavingCCS() {
+rpc::policy_table_interface_base::Table PolicyManagerImplTest_ExternalConsent::
+    PreparePTWithGroupsHavingExternalConsent() {
   using namespace policy_table;
   using namespace rpc;
 
   // PT has 3 functional groups with some entities in
-  // disallowed_by_ccs_entities_on/off. Groups consents can be changed.
+  // disallowed_by_external_consent_entities_on/off. Groups consents can be
+  // changed.
 
-  CCS_Entity entity_1(type_1_, id_1_);
-  CCS_Entity entity_2(type_2_, id_2_);
-  CCS_Entity entity_3(type_3_, id_3_);
+  ExternalConsentEntity entity_1(type_1_, id_1_);
+  ExternalConsentEntity entity_2(type_2_, id_2_);
+  ExternalConsentEntity entity_3(type_3_, id_3_);
 
   Rpcs rpcs_1;
-  rpcs_1.disallowed_by_ccs_entities_on->push_back(entity_1);
+  rpcs_1.disallowed_by_external_consent_entities_on->push_back(entity_1);
   *rpcs_1.user_consent_prompt = group_name_1_;
   rpcs_1.rpcs.set_to_null();
 
   Rpcs rpcs_2;
-  rpcs_2.disallowed_by_ccs_entities_off->push_back(entity_2);
+  rpcs_2.disallowed_by_external_consent_entities_off->push_back(entity_2);
   *rpcs_2.user_consent_prompt = group_name_2_;
   rpcs_2.rpcs.set_to_null();
 
   Rpcs rpcs_3;
-  rpcs_3.disallowed_by_ccs_entities_on->push_back(entity_3);
+  rpcs_3.disallowed_by_external_consent_entities_on->push_back(entity_3);
   *rpcs_3.user_consent_prompt = group_name_3_;
   rpcs_3.rpcs.set_to_null();
 
@@ -819,7 +850,7 @@ PolicyManagerImplTest_CCS::PreparePTWithGroupsHavingCCS() {
   return t;
 }
 
-std::string PolicyManagerImplTest_CCS::PreparePTUWithNewGroup(
+std::string PolicyManagerImplTest_ExternalConsent::PreparePTUWithNewGroup(
     const uint32_t type, const uint32_t id, const std::string& group_name) {
   using namespace policy_table;
   using namespace rpc;
@@ -829,12 +860,12 @@ std::string PolicyManagerImplTest_CCS::PreparePTUWithNewGroup(
   std::string json;
   Json::Value root(Json::objectValue);
   if (ifile.is_open() && reader.parse(ifile, root, true)) {
-    Table t = PreparePTWithGroupsHavingCCS();
+    Table t = PreparePTWithGroupsHavingExternalConsent();
 
-    CCS_Entity entity_4(type, id);
+    ExternalConsentEntity entity_4(type, id);
 
     Rpcs rpcs_4;
-    rpcs_4.disallowed_by_ccs_entities_on->push_back(entity_4);
+    rpcs_4.disallowed_by_external_consent_entities_on->push_back(entity_4);
     *rpcs_4.user_consent_prompt = group_name;
     rpcs_4.rpcs.set_to_null();
 
@@ -864,6 +895,9 @@ std::string PolicyManagerImplTest_CCS::PreparePTUWithNewGroup(
 
     root[policy_table_key][app_policies_key][app_id_1_] =
         overriden_table[policy_table_key][app_policies_key][app_id_1_];
+
+    root[policy_table_key]["module_config"].removeMember("preloaded_pt");
+    root[policy_table_key]["module_config"].removeMember("preloaded_date");
 
     json = root.toStyledString();
   }

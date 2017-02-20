@@ -127,32 +127,6 @@ struct GroupsAppender
   int32_t index_;
 };
 
-struct GroupsAppender
-    : std::unary_function<void, const PermissionsList::value_type&> {
-  GroupsAppender(smart_objects::SmartObject& groups)
-      : groups_(groups), index_(0) {}
-
-  void operator()(const PermissionsList::value_type& item) {
-    using namespace smart_objects;
-    using namespace policy;
-    groups_[index_] = SmartObject(SmartType_Map);
-
-    SmartObject& group = groups_[index_];
-    group[strings::name] = item.group_alias;
-    group[strings::id] = item.group_id;
-    GroupConsent permission_state = item.state;
-    // If state undefined, 'allowed' parameter should be absent
-    if (kGroupUndefined != permission_state) {
-      group["allowed"] = kGroupAllowed == permission_state;
-    }
-    ++index_;
-  }
-
- private:
-  smart_objects::SmartObject& groups_;
-  int32_t index_;
-};
-
 #ifdef EXTERNAL_PROPRIETARY_MODE
 struct ExternalConsentStatusAppender
     : std::unary_function<void,
@@ -167,10 +141,10 @@ struct ExternalConsentStatusAppender
     status_[index_] = SmartObject(SmartType_Map);
 
     SmartObject& external_consent_status = status_[index_];
-    external_consent_status["entityType"] = item.entity_type;
-    external_consent_status["entityID"] = item.entity_id;
-    external_consent_status["status"] =
-        0 == strcasecmp("ON", item.entity_status.c_str())
+    external_consent_status[strings::entity_type] = item.entity_type_;
+    external_consent_status[strings::entity_id] = item.entity_id_;
+    external_consent_status[strings::status] =
+        policy::kStatusOn == item.status_
             ? static_cast<int32_t>(Common_EntityStatus::ON)
             : static_cast<int32_t>(Common_EntityStatus::OFF);
     ++index_;
@@ -182,41 +156,39 @@ struct ExternalConsentStatusAppender
 };
 #endif  // EXTERNAL_PROPRIETARY_MODE
 
-} // namespace
+}  // namespace
 
 std::pair<std::string, VehicleDataType> kVehicleDataInitializer[] = {
-    std::make_pair(strings::gps, VehicleDataType::GPS),
-    std::make_pair(strings::speed, VehicleDataType::SPEED),
-    std::make_pair(strings::rpm, VehicleDataType::RPM),
-    std::make_pair(strings::fuel_level, VehicleDataType::FUELLEVEL),
-    std::make_pair(strings::fuel_level_state, VehicleDataType::FUELLEVEL_STATE),
-    std::make_pair(strings::instant_fuel_consumption,
-                   VehicleDataType::FUELCONSUMPTION),
-    std::make_pair(strings::external_temp, VehicleDataType::EXTERNTEMP),
-    std::make_pair(strings::vin, VehicleDataType::VIN),
-    std::make_pair(strings::prndl, VehicleDataType::PRNDL),
-    std::make_pair(strings::tire_pressure, VehicleDataType::TIREPRESSURE),
-    std::make_pair(strings::odometer, VehicleDataType::ODOMETER),
-    std::make_pair(strings::belt_status, VehicleDataType::BELTSTATUS),
-    std::make_pair(strings::body_information, VehicleDataType::BODYINFO),
-    std::make_pair(strings::device_status, VehicleDataType::DEVICESTATUS),
-    std::make_pair(strings::driver_braking, VehicleDataType::BRAKING),
-    std::make_pair(strings::wiper_status, VehicleDataType::WIPERSTATUS),
-    std::make_pair(strings::head_lamp_status, VehicleDataType::HEADLAMPSTATUS),
-    std::make_pair(strings::e_call_info, VehicleDataType::ECALLINFO),
-    std::make_pair(strings::airbag_status, VehicleDataType::AIRBAGSTATUS),
-    std::make_pair(strings::emergency_event, VehicleDataType::EMERGENCYEVENT),
-    std::make_pair(strings::cluster_mode_status,
-                   VehicleDataType::CLUSTERMODESTATUS),
-    std::make_pair(strings::my_key, VehicleDataType::MYKEY),
+    std::make_pair(strings::gps, GPS),
+    std::make_pair(strings::speed, SPEED),
+    std::make_pair(strings::rpm, RPM),
+    std::make_pair(strings::fuel_level, FUELLEVEL),
+    std::make_pair(strings::fuel_level_state, FUELLEVEL_STATE),
+    std::make_pair(strings::instant_fuel_consumption, FUELCONSUMPTION),
+    std::make_pair(strings::external_temp, EXTERNTEMP),
+    std::make_pair(strings::vin, VIN),
+    std::make_pair(strings::prndl, PRNDL),
+    std::make_pair(strings::tire_pressure, TIREPRESSURE),
+    std::make_pair(strings::odometer, ODOMETER),
+    std::make_pair(strings::belt_status, BELTSTATUS),
+    std::make_pair(strings::body_information, BODYINFO),
+    std::make_pair(strings::device_status, DEVICESTATUS),
+    std::make_pair(strings::driver_braking, BRAKING),
+    std::make_pair(strings::wiper_status, WIPERSTATUS),
+    std::make_pair(strings::head_lamp_status, HEADLAMPSTATUS),
+    std::make_pair(strings::e_call_info, ECALLINFO),
+    std::make_pair(strings::airbag_status, AIRBAGSTATUS),
+    std::make_pair(strings::emergency_event, EMERGENCYEVENT),
+    std::make_pair(strings::cluster_mode_status, CLUSTERMODESTATUS),
+    std::make_pair(strings::my_key, MYKEY),
     /*
      NOT DEFINED in mobile API
-     std::make_pair(strings::gps, VehicleDataType::BATTVOLTAGE),
+     std::make_pair(strings::gps,
+     BATTVOLTAGE),
      */
-    std::make_pair(strings::engine_torque, VehicleDataType::ENGINETORQUE),
-    std::make_pair(strings::acc_pedal_pos, VehicleDataType::ACCPEDAL),
-    std::make_pair(strings::steering_wheel_angle,
-                   VehicleDataType::STEERINGWHEEL),
+    std::make_pair(strings::engine_torque, ENGINETORQUE),
+    std::make_pair(strings::acc_pedal_pos, ACCPEDAL),
+    std::make_pair(strings::steering_wheel_angle, STEERINGWHEEL),
 };
 
 const VehicleData MessageHelper::vehicle_data_(
@@ -284,17 +256,6 @@ const uint32_t MessageHelper::GetPriorityCode(const std::string& priority) {
   return static_cast<uint32_t>(hmi_apis::Common_AppPriority::INVALID_ENUM);
 }
 
-std::string MessageHelper::CommonLanguageToString(
-    hmi_apis::Common_Language::eType language) {
-  using namespace NsSmartDeviceLink::NsSmartObjects;
-  const char* str = 0;
-  if (EnumConversionHelper<hmi_apis::Common_Language::eType>::EnumToCString(
-          language, &str)) {
-    return str ? str : "";
-  }
-  return std::string();
-}
-
 hmi_apis::Common_Language::eType MessageHelper::CommonLanguageFromString(
     const std::string& language) {
   using namespace NsSmartDeviceLink::NsSmartObjects;
@@ -313,6 +274,17 @@ std::string MessageHelper::GetDeviceMacAddressForHandle(
       device_handle, NULL, NULL, &device_mac_address);
   LOG4CXX_DEBUG(logger_, "result : " << device_handle);
   return device_mac_address;
+}
+
+std::string MessageHelper::CommonLanguageToString(
+    hmi_apis::Common_Language::eType language) {
+  using namespace NsSmartDeviceLink::NsSmartObjects;
+  const char* str = 0;
+  if (EnumConversionHelper<hmi_apis::Common_Language::eType>::EnumToCString(
+          language, &str)) {
+    return str ? str : "";
+  }
+  return std::string();
 }
 
 smart_objects::SmartObjectSPtr MessageHelper::CreateRequestObject(

@@ -30,8 +30,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_INCLUDE_POLICY_POLICY_LISTENER_H_
-#define SRC_COMPONENTS_INCLUDE_POLICY_POLICY_LISTENER_H_
+#ifndef SRC_COMPONENTS_POLICY_POLICY_EXTERNAL_INCLUDE_POLICY_POLICY_LISTENER_H_
+#define SRC_COMPONENTS_POLICY_POLICY_EXTERNAL_INCLUDE_POLICY_POLICY_LISTENER_H_
 
 #include <queue>
 
@@ -175,13 +175,12 @@ class PolicyListener {
                                  const std::string& device_rank) = 0;
 #endif  // SDL_REMOTE_CONTROL
 
-    virtual KnownConsentsIds GetRegisteredApps() const = 0;
   /**
  * @brief Collects currently registered applications ids linked to their
  * device id
  * @return Collection of device_id-to-app_id links
  */
-  virtual ApplicationsLinks GetRegisteredLinks() const = 0;
+  virtual std::map<std::string, std::string> GetRegisteredLinks() const = 0;
 };
 }  //  namespace policy
-#endif  // SRC_COMPONENTS_INCLUDE_POLICY_POLICY_LISTENER_H_
+#endif  // SRC_COMPONENTS_POLICY_POLICY_EXTERNAL_INCLUDE_POLICY_POLICY_LISTENER_H_

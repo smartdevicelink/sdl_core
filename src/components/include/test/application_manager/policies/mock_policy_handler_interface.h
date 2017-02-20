@@ -131,9 +131,11 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
   MOCK_METHOD2(SetDeviceInfo,
                void(const std::string& device_id,
                     const policy::DeviceInfo& device_info));
-  MOCK_METHOD2(OnAppPermissionConsent,
-               void(const uint32_t connection_key,
-                    const policy::PermissionConsent& permissions));
+  MOCK_METHOD3(
+      OnAppPermissionConsent,
+      void(const uint32_t connection_key,
+           const policy::PermissionConsent& permissions,
+           const policy::ExternalConsentStatus& external_consent_status));
   MOCK_METHOD3(OnGetUserFriendlyMessage,
                void(const std::vector<std::string>& message_codes,
                     const std::string& language,
@@ -296,7 +298,7 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
  private:
   MOCK_METHOD3(OnAppPermissionConsentInternal,
                void(const uint32_t,
-                    const policy::CCSStatus&,
+                    const policy::ExternalConsentStatus&,
                     policy::PermissionConsent&));
 };
 

@@ -64,6 +64,8 @@ class PolicyManagerImpl : public PolicyManager {
                       const PolicySettings* settings);
   virtual bool LoadPT(const std::string& file, const BinaryMessage& pt_content);
   virtual bool ResetPT(const std::string& file_name);
+
+  virtual std::string GetUpdateUrl(int service_type);
   virtual void GetUpdateUrls(const uint32_t service_type,
                              EndpointUrls& out_end_points);
   virtual void GetUpdateUrls(const std::string& service_type,
@@ -252,6 +254,10 @@ class PolicyManagerImpl : public PolicyManager {
   AppIdURL RetrySequenceUrl(const struct RetrySequenceURL& rs,
                             const EndpointUrls& urls) const OVERRIDE;
 
+  /**
+   * @brief Gets customer connectivity settings status
+   * @return ExternalConsent status
+   */
   bool SetExternalConsentStatus(const ExternalConsentStatus& status) OVERRIDE;
   ExternalConsentStatus GetExternalConsentStatus() OVERRIDE;
 
@@ -411,34 +417,44 @@ class PolicyManagerImpl : public PolicyManager {
       const std::vector<FunctionalGroupPermission>& app_group_permissions);
 
   /**
-   * @brief Processes updated CCS status received via OnAppPermissionConsent
-   * notification by updating user consents and CCS consents for registered and
+   * @brief Processes updated ExternalConsent status received via
+   * OnAppPermissionConsent
+   * notification by updating user consents and ExternalConsent consents for
+   * registered and
    * known before by policy table (must have any user consent records)
-   * @param groups_by_status Collection of CCS entities with their statuses
+   * @param groups_by_status Collection of ExternalConsent entities with their
+   * statuses
    */
-  void ProcessCCSStatusUpdate(const GroupsByCCSStatus& groups_by_status);
+  void ProcessExternalConsentStatusUpdate(
+      const GroupsByExternalConsentStatus& groups_by_status);
 
   /**
-   * @brief Processes CCS status for application registered afterward, so its
-   * user consents (if any) and CCS consents (if any) will be updated
-   * appropiately to current CCS status stored by policy table
+   * @brief Processes ExternalConsent status for application registered
+   * afterward, so its
+   * user consents (if any) and ExternalConsent consents (if any) will be
+   * updated
+   * appropiately to current ExternalConsent status stored by policy table
    * @param application_id Application id
    */
-  void ProcessCCSStatusForApp(const std::string& application_id);
+  void ProcessExternalConsentStatusForApp(const std::string& application_id);
   /**
-   * @brief Directly updates user consent and CCS consents (if any) for
+   * @brief Directly updates user consent and ExternalConsent consents (if any)
+   * for
    * application if it has assigned any of group from allowed or disallowed
    * lists
    * @param device_id Device id which is linked to application id
    * @param application_id Application id
-   * @param allowed_groups List of group names allowed by current CCS status
-   * @param disallowed_groups List of group names disallwed by current CCS
+   * @param allowed_groups List of group names allowed by current
+   * ExternalConsent status
+   * @param disallowed_groups List of group names disallwed by current
+   * ExternalConsent
    * status
    */
-  void UpdateAppConsentWithCCS(const std::string& device_id,
-                               const std::string& application_id,
-                               const GroupsNames& allowed_groups,
-                               const GroupsNames& disallowed_groups);
+  void UpdateAppConsentWithExternalConsent(
+      const std::string& device_id,
+      const std::string& application_id,
+      const GroupsNames& allowed_groups,
+      const GroupsNames& disallowed_groups);
 
   typedef policy_table::ApplicationPolicies::value_type AppPoliciesValueType;
 
@@ -465,16 +481,20 @@ class PolicyManagerImpl : public PolicyManager {
       const;
 
   /**
-   * @brief Calculates consents for groups based on mapped CCS entities statuses
+   * @brief Calculates consents for groups based on mapped ExternalConsent
+   * entities statuses
    * and groups containers where entities have been found
-   * @param groups_by_ccs CCS entities mapped to functional groups names and
+   * @param groups_by_external_consent ExternalConsent entities mapped to
+   * functional groups names and
    * their containters where this entity has been found
-   * @param out_allowed_groups List of groups allowed by CCS status
-   * @param out_disallowed_groups List of groups disallowed by CCS status
+   * @param out_allowed_groups List of groups allowed by ExternalConsent status
+   * @param out_disallowed_groups List of groups disallowed by ExternalConsent
+   * status
    */
-  void CalculateGroupsConsentFromCCS(const GroupsByCCSStatus& groups_by_ccs,
-                                     GroupsNames& out_allowed_groups,
-                                     GroupsNames& out_disallowed_groups) const;
+  void CalculateGroupsConsentFromExternalConsent(
+      const GroupsByExternalConsentStatus& groups_by_external_consent,
+      GroupsNames& out_allowed_groups,
+      GroupsNames& out_disallowed_groups) const;
 
   PolicyListener* listener_;
 
@@ -524,7 +544,6 @@ class PolicyManagerImpl : public PolicyManager {
 
   const PolicySettings* settings_;
   friend struct CheckAppPolicy;
-<<<<<<< HEAD
 
   /**
    * @brief Pair of app index and url index from Endpoints vector
@@ -532,8 +551,6 @@ class PolicyManagerImpl : public PolicyManager {
    */
   RetrySequenceURL retry_sequence_url_;
   friend struct ProccessAppGroups;
-=======
->>>>>>> Adds draft business logic for 'CCS ON' case and unit test
 };
 
 }  // namespace policy
