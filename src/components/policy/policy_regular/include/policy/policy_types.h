@@ -391,9 +391,8 @@ typedef std::pair<uint32_t, uint32_t> AppIdURL;
 enum EntityStatus { kStatusOn, kStatusOff };
 
 /**
- * @brief The ExternalConsentStatusItem struct represents customer connectivity
- * settings
- * item
+ * @brief The ExternalConsentStatusItem struct represents external user consent
+ * settings item
  */
 struct ExternalConsentStatusItem {
   ExternalConsentStatusItem(const uint32_t type,
