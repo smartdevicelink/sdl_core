@@ -1207,22 +1207,26 @@
 </enum>
 
 <!-- Policies -->
-<enum name="UpdateResult">
+  <enum name="UpdateResult">
     <element name="UP_TO_DATE"/>
     <element name="UPDATING" />
     <element name="UPDATE_NEEDED"/>
   </enum>
+  
   <enum name="SystemError">
     <element name="SYNC_REBOOTED"/>
     <element name="SYNC_OUT_OF_MEMMORY" />
   </enum>
+  
   <enum name="StatisticsType">
     <element name="iAPP_BUFFER_FULL"/>
   </enum>
+  
   <enum name="ConsentSource">
     <element name="GUI"/>
     <element name="VUI" />
   </enum>
+  
   <enum name="DeviceState">
     <element name="UNKNOWN"/>
     <element name="UNPAIRED"/>
@@ -1235,17 +1239,19 @@
     <param name="line2" type="String" mandatory="false"/>
     <param name="textBody" type="String" mandatory="false"/>
   </struct>
+  
   <struct name="PermissionItem">
-  <param name="name" type="String" mandatory="true">
-    <description>Code of message of user-friendly text about functional group to be allowed/disallowed</description>
-  </param>
-  <param name="id" type="Integer" mandatory="true">
-    <description>Id of corresponding functional group, needed by SDL.</description>
-  </param>
-  <param name="allowed" type="Boolean" mandatory="false">
-    <description>Specifies whether functionality was allowed/disallowed. If ommited - no information about User Consent is yet found for app.</description>
-  </param>
+	<param name="name" type="String" mandatory="true">
+	  <description>Code of message of user-friendly text about functional group to be allowed/disallowed</description>
+	</param>
+	<param name="id" type="Integer" mandatory="true">
+	  <description>Id of corresponding functional group, needed by SDL.</description>
+	</param>
+	<param name="allowed" type="Boolean" mandatory="false">
+	  <description>Specifies whether functionality was allowed/disallowed. If ommited - no information about User Consent is yet found for app.</description>
+	</param>
   </struct>
+  
   <struct name="ServiceInfo">
     <param name="url" type="String" mandatory="true">
       <description>Get URL based on service type.</description>
@@ -4163,6 +4169,9 @@
     <function name="GetListOfPermissions" messagetype="response">
       <param name="allowedFunctions" type="Common.PermissionItem" mandatory="true" array="true" minsize="0" maxsize="100">
         <description>If no permissions were specified for application the array will come empty.</description>
+      </param>
+	  <param name="externalConsentStatus" type="Common.ExternalConsentStatus" mandatory="true" array="true" minsize="0" maxsize="100">
+        <description>External User Consent Settings (defined by entityType and entityID) status: enabled/disabled. If empty array is returned, SDL does not have any stored status.</description>
       </param>
     </function>
 
