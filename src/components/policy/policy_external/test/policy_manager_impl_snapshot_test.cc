@@ -50,9 +50,9 @@ TEST_F(PolicyManagerImplTest2, UpdatedPreloadedPT_ExpectLPT_IsUpdated) {
   new_data.new_field_name_ = "Notifications-";
   CreateNewRandomData(new_data);
   // Create Initial LocalPT from preloadedPT
-  CreateLocalPT(preloadet_pt_filename_);
+  CreateLocalPT(preloaded_pt_filename_);
   // Update preloadedPT
-  std::ifstream ifile(preloadet_pt_filename_);
+  std::ifstream ifile(preloaded_pt_filename_);
   Json::Reader reader;
   Json::Value root(Json::objectValue);
 
@@ -72,7 +72,7 @@ TEST_F(PolicyManagerImplTest2, UpdatedPreloadedPT_ExpectLPT_IsUpdated) {
   ifile.close();
 
   Json::StyledStreamWriter writer;
-  std::ofstream ofile(preloadet_pt_filename_);
+  std::ofstream ofile(preloaded_pt_filename_);
   writer.write(ofile, root);
   ofile.flush();
   ofile.close();
@@ -80,7 +80,7 @@ TEST_F(PolicyManagerImplTest2, UpdatedPreloadedPT_ExpectLPT_IsUpdated) {
   //  Make PolicyManager to update LocalPT
   policy::CacheManagerInterfaceSPtr cache = policy_manager_->GetCache();
   EXPECT_TRUE(
-      policy_manager_->InitPT(preloadet_pt_filename_, &policy_settings_));
+      policy_manager_->InitPT(preloaded_pt_filename_, &policy_settings_));
   EXPECT_TRUE(cache->IsPTPreloaded());
 
   // Arrange
@@ -117,7 +117,7 @@ TEST_F(PolicyManagerImplTest2, UpdatedPreloadedPT_ExpectLPT_IsUpdated) {
 TEST_F(PolicyManagerImplTest2,
        SetSystemLanguage_ExpectSystemLanguageSetSuccessfully) {
   // Arrange
-  CreateLocalPT(preloadet_pt_filename_);
+  CreateLocalPT(preloaded_pt_filename_);
   policy_manager_->SetSystemLanguage("it-it");
   utils::SharedPtr<policy_table::Table> pt =
       (policy_manager_->GetCache())->GetPT();
@@ -127,7 +127,7 @@ TEST_F(PolicyManagerImplTest2,
 
 TEST_F(PolicyManagerImplTest2, SetVINValue_ExpectVINSetSuccessfully) {
   // Arrange
-  CreateLocalPT(preloadet_pt_filename_);
+  CreateLocalPT(preloaded_pt_filename_);
   std::string vin_code("1FAPP6242VH100001");
   policy_manager_->SetVINValue(vin_code);
   utils::SharedPtr<policy_table::Table> pt =
@@ -138,7 +138,7 @@ TEST_F(PolicyManagerImplTest2, SetVINValue_ExpectVINSetSuccessfully) {
 
 TEST_F(PolicyManagerImplTest2, SetSystemInfo_ExpectSystemInfoSetSuccessfully) {
   // Arrange
-  CreateLocalPT(preloadet_pt_filename_);
+  CreateLocalPT(preloaded_pt_filename_);
   policy_manager_->SetSystemInfo("4.1.3.B_EB355B", "WAEGB", "ru-ru");
   policy::CacheManagerInterfaceSPtr cache = policy_manager_->GetCache();
   utils::SharedPtr<policy_table::Table> pt = cache->GetPT();
@@ -152,7 +152,7 @@ TEST_F(PolicyManagerImplTest2, SetSystemInfo_ExpectSystemInfoSetSuccessfully) {
 
 TEST_F(PolicyManagerImplTest2, CleanUnpairedDevice_ExpectDevicesDeleted) {
   // Arrange
-  CreateLocalPT(preloadet_pt_filename_);
+  CreateLocalPT(preloaded_pt_filename_);
   // Add first device
   ::policy::DeviceInfo dev_info1;
   dev_info1.hardware = "hardware IPX";
@@ -262,9 +262,9 @@ TEST_F(
   const std::string& app_id = application_id_;
 
   // Arrange
-  CreateLocalPT(preloadet_pt_filename_);
+  CreateLocalPT(preloaded_pt_filename_);
   // Add app
-  policy_manager_->AddApplication(app_id, hmi_types_);
+  policy_manager_->AddApplication(app_id, HmiTypes(policy_table::AHT_DEFAULT));
   // Check app gets RequestTypes from pre_DataConsent of app_policies
   // section
   pt_request_types_ = policy_manager_->GetAppRequestTypes(app_id);

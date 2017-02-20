@@ -57,6 +57,7 @@ const std::string kDefaultDeviceConnectionType = "UNKNOWN";
 const std::string kPreDataConsentId = "pre_DataConsent";
 const std::string kDefaultId = "default";
 const std::string kDeviceId = "device";
+const std::string kPrimary = "rc_primaryDevice";
 
 /*
  *@brief Policy Services specifies Users of Updates

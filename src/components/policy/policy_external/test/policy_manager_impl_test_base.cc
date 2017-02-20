@@ -192,6 +192,13 @@ void InsertRpcParametersInList(::policy::RPCParams& input_params) {
   input_params.insert("timeStamp");
   input_params.insert("address");
 }
+
+policy_table::AppHmiTypes HmiTypes(const policy_table::AppHMIType hmi_type) {
+  policy_table::AppHmiTypes hmi_types;
+  hmi_types.push_back(hmi_type);
+  return hmi_types;
+}
+
 // PolicyManagerImplTest class methods
 PolicyManagerImplTest::PolicyManagerImplTest()
     : unpaired_device_id_("08-00-27-CE-76-FE")
@@ -201,16 +208,16 @@ PolicyManagerImplTest::PolicyManagerImplTest()
 void PolicyManagerImplTest::SetUp() {
   policy_manager_ = new PolicyManagerImpl();
   cache_manager_ = new MockCacheManagerInterface();
-  manager_->set_cache_manager(cache_manager_);
-  manager_->set_listener(&listener_);
+  policy_manager_->set_cache_manager(cache_manager_);
+  policy_manager_->set_listener(&listener_);
 
-  ON_CALL(*cache_manager_, GetCCSStatus()).WillByDefault(Return(CCSStatus()));
+  ON_CALL(*cache_manager_, GetExternalConsentStatus())
+      .WillByDefault(Return(ExternalConsentStatus()));
   ON_CALL(*cache_manager_, GetGroupsWithSameEntities(_))
-      .WillByDefault(Return(GroupsByCCSStatus()));
+      .WillByDefault(Return(GroupsByExternalConsentStatus()));
   ON_CALL(*cache_manager_, GetKnownLinksFromPT())
-      .WillByDefault(Return(ApplicationsLinks()));
-  ON_CALL(listener_, GetRegisteredLinks())
-      .WillByDefault(Return(policy::ApplicationsLinks()));
+      .WillByDefault(Return(std::map<std::string, std::string>()));
+  ON_CALL(listener_, GetRegisteredLinks(_)).WillByDefault(Return());
 }
 
 void PolicyManagerImplTest::TearDown() {
@@ -237,7 +244,7 @@ PolicyManagerImplTest2::PolicyManagerImplTest2()
     , device_id_2_("08-00-27-CE-76-FE")
     , application_id_("1234")
     , app_storage_folder_("storage1")
-    , preloadet_pt_filename_(kSdlPreloadedPtJson)
+    , preloaded_pt_filename_(kSdlPreloadedPtJson)
     , in_memory_(true)
     , policy_manager_(NULL)
     , ptu_request_types_size_(0u)
@@ -245,8 +252,7 @@ PolicyManagerImplTest2::PolicyManagerImplTest2()
     , ptu_request_types_(Json::arrayValue) {}
 
 void PolicyManagerImplTest2::SetUp() {
-  ON_CALL(listener_, GetRegisteredLinks())
-      .WillByDefault(Return(policy::ApplicationsLinks()));
+  ON_CALL(listener_, GetRegisteredLinks(_)).WillByDefault(Return());
 
   file_system::CreateDirectory(app_storage_folder_);
 
@@ -299,7 +305,7 @@ void PolicyManagerImplTest2::AddRTtoPT(const std::string& update_file_name,
                                        const uint32_t rt_number,
                                        const uint32_t invalid_rt_number) {
   // Arrange
-  CreateLocalPT(preloadet_pt_filename_);
+  CreateLocalPT(preloaded_pt_filename_);
   // Get RequestTypes from section of preloaded_pt app_policies
   pt_request_types_ = policy_manager_->GetAppRequestTypes(section_name);
   EXPECT_EQ(rt_number, pt_request_types_.size());
@@ -322,9 +328,10 @@ void PolicyManagerImplTest2::AddRTtoAppSectionPT(
     const uint32_t rt_number,
     const uint32_t invalid_rt_number) {
   // Arrange
-  CreateLocalPT(preloadet_pt_filename_);
+  CreateLocalPT(preloaded_pt_filename_);
   // Add app
-  policy_manager_->AddApplication(section_name);
+  policy_manager_->AddApplication(section_name,
+                                  HmiTypes(policy_table::AHT_DEFAULT));
   // Check app gets RequestTypes from pre_DataConsent of app_policies
   // section
   pt_request_types_ = policy_manager_->GetAppRequestTypes(section_name);
@@ -443,7 +450,8 @@ void PolicyManagerImplTest2::
                                    "Bluetooth"));
 
   // Add app from consented device. App will be assigned with default policies
-  policy_manager_->AddApplication(application_id_);
+  policy_manager_->AddApplication(application_id_,
+                                  HmiTypes(policy_table::AHT_DEFAULT));
 
   // Expect all parameters are allowed
   std::ifstream ifile(update_file);
@@ -526,6 +534,33 @@ void PolicyManagerImplTest2::CheckRpcPermissions(
   EXPECT_EQ(expected_permission, output.hmi_level_permitted);
 }
 
+void PolicyManagerImplTest2::CheckRpcPermissions(
+    const std::string& app_id,
+    const std::string& rpc_name,
+    const policy::PermitResult& out_expected_permission) {
+  ::policy::RPCParams input_params;
+  ::policy::CheckPermissionResult output;
+  policy_manager_->CheckPermissions(
+      app_id, kHmiLevelFull, rpc_name, input_params, output);
+  EXPECT_EQ(out_expected_permission, output.hmi_level_permitted);
+}
+
+void PolicyManagerImplTest2::EmulatePTAppRevoked(const std::string& ptu_name) {
+  std::ifstream ifile(ptu_name);
+  Json::Reader reader;
+  std::string json;
+  Json::Value root(Json::objectValue);
+  if (ifile.is_open() && reader.parse(ifile, root, true)) {
+    // Emulate application is revoked
+    root["policy_table"]["app_policies"]["1234"]["is_revoked"] = 1;
+    json = root.toStyledString();
+  }
+  ifile.close();
+
+  ::policy::BinaryMessage msg(json.begin(), json.end());
+  ASSERT_TRUE(policy_manager_->LoadPT(kDummyUpdateFileName, msg));
+}
+
 // To avoid duplicate arrange of test
 void PolicyManagerImplTest2::AddSetDeviceData() {
   CreateLocalPT("json/sdl_preloaded_pt_send_location.json");
@@ -541,7 +576,8 @@ void PolicyManagerImplTest2::AddSetDeviceData() {
                                   "Bluetooth"));
 
   // Add app from consented device. App will be assigned with default policies
-  policy_manager_->AddApplication(application_id_);
+  policy_manager_->AddApplication(application_id_,
+                                  HmiTypes(policy_table::AHT_DEFAULT));
   (policy_manager_->GetCache())->AddDevice(device_id_1_, "Bluetooth");
 }
 
@@ -596,11 +632,10 @@ PolicyManagerImplTest_RequestTypes::PolicyManagerImplTest_RequestTypes()
     , kAppId("1766825573")
     , kDefaultAppId(policy::kDefaultId)
     , app_storage_folder_("storage3")
-    , preloadet_pt_filename_(kSdlPreloadedPtJson) {}
+    , preloaded_pt_filename_(kSdlPreloadedPtJson) {}
 
 void PolicyManagerImplTest_RequestTypes::SetUp() {
-  ON_CALL(listener_, GetRegisteredLinks())
-      .WillByDefault(Return(policy::ApplicationsLinks()));
+  ON_CALL(listener_, GetRegisteredLinks(_)).WillByDefault(Return());
 
   file_system::CreateDirectory(app_storage_folder_);
   const bool in_memory = true;
@@ -663,7 +698,7 @@ PolicyManagerImplTest_RequestTypes::GetRequestTypesForApplication(
 void PolicyManagerImplTest_RequestTypes::CompareAppRequestTypesWithDefault(
     const std::string& app_id, const std::string& ptu_file) {
   // Refresh policy table with invalid RequestType in application
-  RefreshPT(preloadet_pt_filename_, ptu_file);
+  RefreshPT(preloaded_pt_filename_, ptu_file);
 
   // Get <app_id> RequestType array
   policy_table::RequestTypes app_request_types =
@@ -721,13 +756,13 @@ void PolicyManagerImplTest_RequestTypes::TearDown() {
   file_system::RemoveDirectory(app_storage_folder_, true);
 }
 
-void PolicyManagerImplTest_CCS::
-    PreconditionCCSPreparePTWithAppGroupsAndConsents() {
+void PolicyManagerImplTest_ExternalConsent::
+    PreconditionExternalConsentPreparePTWithAppGroupsAndConsents() {
   using namespace policy_table;
   using namespace rpc;
 
   CreateLocalPT(preloaded_pt_filename_);
-  Table t = PreparePTWithGroupsHavingCCS();
+  Table t = PreparePTWithGroupsHavingExternalConsent();
 
   ApplicationParams app_params;
   app_params.groups.push_back(group_name_1_);
@@ -762,14 +797,16 @@ void PolicyManagerImplTest_CCS::
   policy_manager_->SetUserConsentForApp(permissions);
 }
 
-void PolicyManagerImplTest_CCS::PreconditionCCSPreparePTWithAppPolicy() {
+void PolicyManagerImplTest_ExternalConsent::
+    PreconditionExternalConsentPreparePTWithAppPolicy() {
   using namespace policy_table;
   using namespace rpc;
 
   // PT has 3 functional groups with some entities in
-  // disallowed_by_ccs_entities_on/off. Groups consents can be changed.
+  // disallowed_by_external_consent_entities_on/off. Groups consents can be
+  // changed.
   CreateLocalPT(preloaded_pt_filename_);
-  Table t = PreparePTWithGroupsHavingCCS();
+  Table t = PreparePTWithGroupsHavingExternalConsent();
 
   ApplicationParams app_params;
   app_params.groups.push_back(group_name_1_);
@@ -781,30 +818,31 @@ void PolicyManagerImplTest_CCS::PreconditionCCSPreparePTWithAppPolicy() {
   EXPECT_TRUE(policy_manager_->GetCache()->ApplyUpdate(t));
 }
 
-rpc::policy_table_interface_base::Table
-PolicyManagerImplTest_CCS::PreparePTWithGroupsHavingCCS() {
+rpc::policy_table_interface_base::Table PolicyManagerImplTest_ExternalConsent::
+    PreparePTWithGroupsHavingExternalConsent() {
   using namespace policy_table;
   using namespace rpc;
 
   // PT has 3 functional groups with some entities in
-  // disallowed_by_ccs_entities_on/off. Groups consents can be changed.
+  // disallowed_by_external_consent_entities_on/off. Groups consents can be
+  // changed.
 
-  CCS_Entity entity_1(type_1_, id_1_);
-  CCS_Entity entity_2(type_2_, id_2_);
-  CCS_Entity entity_3(type_3_, id_3_);
+  ExternalConsentEntity entity_1(type_1_, id_1_);
+  ExternalConsentEntity entity_2(type_2_, id_2_);
+  ExternalConsentEntity entity_3(type_3_, id_3_);
 
   Rpcs rpcs_1;
-  rpcs_1.disallowed_by_ccs_entities_on->push_back(entity_1);
+  rpcs_1.disallowed_by_external_consent_entities_on->push_back(entity_1);
   *rpcs_1.user_consent_prompt = group_name_1_;
   rpcs_1.rpcs.set_to_null();
 
   Rpcs rpcs_2;
-  rpcs_2.disallowed_by_ccs_entities_off->push_back(entity_2);
+  rpcs_2.disallowed_by_external_consent_entities_off->push_back(entity_2);
   *rpcs_2.user_consent_prompt = group_name_2_;
   rpcs_2.rpcs.set_to_null();
 
   Rpcs rpcs_3;
-  rpcs_3.disallowed_by_ccs_entities_on->push_back(entity_3);
+  rpcs_3.disallowed_by_external_consent_entities_on->push_back(entity_3);
   *rpcs_3.user_consent_prompt = group_name_3_;
   rpcs_3.rpcs.set_to_null();
 
@@ -819,7 +857,7 @@ PolicyManagerImplTest_CCS::PreparePTWithGroupsHavingCCS() {
   return t;
 }
 
-std::string PolicyManagerImplTest_CCS::PreparePTUWithNewGroup(
+std::string PolicyManagerImplTest_ExternalConsent::PreparePTUWithNewGroup(
     const uint32_t type, const uint32_t id, const std::string& group_name) {
   using namespace policy_table;
   using namespace rpc;
@@ -829,12 +867,12 @@ std::string PolicyManagerImplTest_CCS::PreparePTUWithNewGroup(
   std::string json;
   Json::Value root(Json::objectValue);
   if (ifile.is_open() && reader.parse(ifile, root, true)) {
-    Table t = PreparePTWithGroupsHavingCCS();
+    Table t = PreparePTWithGroupsHavingExternalConsent();
 
-    CCS_Entity entity_4(type, id);
+    ExternalConsentEntity entity_4(type, id);
 
     Rpcs rpcs_4;
-    rpcs_4.disallowed_by_ccs_entities_on->push_back(entity_4);
+    rpcs_4.disallowed_by_external_consent_entities_on->push_back(entity_4);
     *rpcs_4.user_consent_prompt = group_name;
     rpcs_4.rpcs.set_to_null();
 
@@ -864,6 +902,9 @@ std::string PolicyManagerImplTest_CCS::PreparePTUWithNewGroup(
 
     root[policy_table_key][app_policies_key][app_id_1_] =
         overriden_table[policy_table_key][app_policies_key][app_id_1_];
+
+    root[policy_table_key]["module_config"].removeMember("preloaded_pt");
+    root[policy_table_key]["module_config"].removeMember("preloaded_date");
 
     json = root.toStyledString();
   }

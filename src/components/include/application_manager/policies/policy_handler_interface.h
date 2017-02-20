@@ -39,14 +39,17 @@
 #include <vector>
 #include <queue>
 #include "interfaces/MOBILE_API.h"
-#include "policy/policy_types.h"
 #include "application_manager/policies/policy_handler_observer.h"
+#include "application_manager/application.h"
 #include "policy/usage_statistics/statistics_manager.h"
 #include "utils/custom_string.h"
+#include "utils/callable.h"
 #include "policy/policy_settings.h"
 #include "smart_objects/smart_object.h"
-#include "utils/callable.h"
+#include "policy/policy_types.h"
+#include "policy/policy_table/types.h"
 
+using namespace ::rpc::policy_table_interface_base;
 namespace policy {
 typedef utils::SharedPtr<utils::Callable> StatusNotifier;
 
@@ -81,11 +84,12 @@ class PolicyHandlerInterface {
 
   virtual bool GetPriority(const std::string& policy_app_id,
                            std::string* priority) const = 0;
-  virtual void CheckPermissions(const PTString& app_id,
-                                const PTString& hmi_level,
-                                const PTString& rpc,
-                                const RPCParams& rpc_params,
-                                CheckPermissionResult& result) = 0;
+  virtual void CheckPermissions(
+      const application_manager::ApplicationSharedPtr app,
+      const PTString& rpc,
+      const RPCParams& rpc_params,
+      CheckPermissionResult& result) = 0;
+
   virtual uint32_t GetNotificationsNumber(
       const std::string& priority) const = 0;
   virtual DeviceConsent GetUserConsentForDevice(
@@ -177,16 +181,23 @@ class PolicyHandlerInterface {
   virtual void SetDeviceInfo(const std::string& device_id,
                              const DeviceInfo& device_info) = 0;
 
-  /**
- * @brief Processes data from OnAppPermissionConsent notification with
- * permissions changes and CCS status changes done by user
- * @param connection_key Connection key of application, 0 if no key has been
- * provided
- * @param permissions Groups permissions changes
- * @param ccs_status Customer connectivity settings status changes
- */
+/**
+*@brief Processes data from OnAppPermissionConsent notification with
+*permissions changes and ExternalConsent status changes done by user
+*@param connection_key Connection key of application, 0 if no key has been
+*provided
+*@param permissions Groups permissions changes
+*@param external_consent_status Customer connectivity settings status changes
+*/
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  virtual void OnAppPermissionConsent(
+      const uint32_t connection_key,
+      const PermissionConsent& permissions,
+      const ExternalConsentStatus& external_consent_status) = 0;
+#else
   virtual void OnAppPermissionConsent(const uint32_t connection_key,
                                       const PermissionConsent& permissions) = 0;
+#endif
 
   /**
    * @brief Get appropriate message parameters and send them with response
@@ -312,7 +323,9 @@ class PolicyHandlerInterface {
    * @param application_id The policy aplication id.
    * @return function that will notify update manager about new application
    */
-  virtual StatusNotifier AddApplication(const std::string& application_id) = 0;
+  virtual StatusNotifier AddApplication(
+      const std::string& application_id,
+      const rpc::policy_table_interface_base::AppHmiTypes& hmi_types) = 0;
 
   /**
    * Checks whether application is revoked
@@ -401,21 +414,28 @@ class PolicyHandlerInterface {
   virtual const std::string RemoteAppsUrl() const = 0;
 
  private:
-  /**
-   * @brief Processes data received via OnAppPermissionChanged notification
-   * from. Being started asyncronously from AppPermissionDelegate class.
-   * Sets updated permissions and CCS for registered applications and
-   * applications which already have appropriate group assigned which related to
-   * devices already known by policy
-   * @param connection_key Connection key of application, 0 if no key has been
-   * provided within notification
-   * @param ccs_status Customer connectivity settings changes to process
-   * @param permissions Permissions changes to process
-   */
+/**
+ * @brief Processes data received via OnAppPermissionChanged notification
+ * from. Being started asyncronously from AppPermissionDelegate class.
+ * Sets updated permissions and ExternalConsent for registered applications
+*and
+ * applications which already have appropriate group assigned which related to
+ * devices already known by policy
+ * @param connection_key Connection key of application, 0 if no key has been
+ * provided within notification
+ * @param external_consent_status Customer connectivity settings changes to
+*process
+*@param permissions Permissions changes to process
+ */
+#ifdef EXTERNAL_PROPRIETARY_MODE
   virtual void OnAppPermissionConsentInternal(
       const uint32_t connection_key,
-      const CCSStatus& ccs_status,
+      const ExternalConsentStatus& external_consent_status,
       PermissionConsent& out_permissions) = 0;
+#else
+  virtual void OnAppPermissionConsentInternal(
+      const uint32_t connection_key, PermissionConsent& out_permissions) = 0;
+#endif
 
   friend class AppPermissionDelegate;
 };

@@ -43,6 +43,7 @@
 #include "utils/gen_hash.h"
 #include "policy/sql_pt_representation.h"
 #include "policy/sql_wrapper.h"
+#include "policy/sql_pt_ext_queries.h"
 #include "policy/sql_pt_queries.h"
 #include "policy/policy_helper.h"
 #include "policy/cache_manager.h"
@@ -690,7 +691,7 @@ bool SQLPTRepresentation::GatherFunctionalGroupings(
 
       external_consent_entities_container.push_back(external_consent_entity);
     }
-
+    external_consent_entities.Reset();
     (*groups)[func_group.GetString(1)] = rpcs_tbl;
   }
   return true;
@@ -924,40 +925,6 @@ bool SQLPTRepresentation::SaveRpcs(int64_t group_id,
           return false;
         }
       }
-    }
-  }
-
-  return true;
-}
-
-bool SQLPTRepresentation::SaveExternalConsentEntities(
-    const int64_t group_id,
-    const policy_table::DisallowedByExternalConsentEntities& entities,
-    ExternalConsentEntitiesType type) const {
-  utils::dbms::SQLQuery query(db());
-  if (!query.Prepare(sql_pt::kInsertExternalConsentEntity)) {
-    LOG4CXX_WARN(logger_,
-                 "Incorrect insert statement for external consent entities.");
-    return false;
-  }
-
-  const std::string external_consent_entity_type =
-      kExternalConsentEntitiesTypeOn == type
-          ? kExternalConsentEntitiesTypeStringOn
-          : kExternalConsentEntitiesTypeStringOff;
-
-  policy_table::DisallowedByExternalConsentEntities::const_iterator it_entity =
-      entities.begin();
-  for (; entities.end() != it_entity; ++it_entity) {
-    query.Bind(0, group_id);
-    query.Bind(1, it_entity->entity_type);
-    query.Bind(2, it_entity->entity_id);
-    query.Bind(3, external_consent_entity_type);
-    if (!query.Exec() || !query.Reset()) {
-      LOG4CXX_ERROR(logger_,
-                    "Can't insert '" << external_consent_entity_type
-                                     << "' external consent entity.");
-      return false;
     }
   }
 
@@ -1832,6 +1799,40 @@ void SQLPTRepresentation::SetPreloaded(bool value) {
 }
 
 bool SQLPTRepresentation::SetVINValue(const std::string& value) {
+  return true;
+}
+
+bool SQLPTRepresentation::SaveExternalConsentEntities(
+    const int64_t group_id,
+    const policy_table::DisallowedByExternalConsentEntities& entities,
+    ExternalConsentEntitiesType type) const {
+  utils::dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt_ext::kInsertExternalConsentEntity)) {
+    LOG4CXX_WARN(logger_,
+                 "Incorrect insert statement for external consent entities.");
+    return false;
+  }
+
+  const std::string external_consent_entity_type =
+      kExternalConsentEntitiesTypeOn == type
+          ? kExternalConsentEntitiesTypeStringOn
+          : kExternalConsentEntitiesTypeStringOff;
+
+  policy_table::DisallowedByExternalConsentEntities::const_iterator it_entity =
+      entities.begin();
+  for (; entities.end() != it_entity; ++it_entity) {
+    query.Bind(0, group_id);
+    query.Bind(1, it_entity->entity_type);
+    query.Bind(2, it_entity->entity_id);
+    query.Bind(3, external_consent_entity_type);
+    if (!query.Exec() || !query.Reset()) {
+      LOG4CXX_ERROR(logger_,
+                    "Can't insert '" << external_consent_entity_type
+                                     << "' external consent entity.");
+      return false;
+    }
+  }
+
   return true;
 }
 

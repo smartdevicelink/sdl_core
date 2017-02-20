@@ -3,7 +3,7 @@
 #define SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_POLICY_TABLE_TYPES_H_
 #include <climits>
 
-#include "./enums.h"
+#include "policy/policy_table/enums.h"
 #include "rpc_base/rpc_message.h"
 namespace Json {
 class Value;
@@ -62,6 +62,9 @@ typedef Map<Rpcs, 1, 255> FunctionalGroupings;
 typedef Map<DeviceParams, 0, 255> DeviceData;
 
 typedef Array<Enum<RequestType>, 0, 255> RequestTypes;
+
+typedef AppHMIType AppHmiType;
+typedef std::vector<AppHMIType> AppHmiTypes;
 
 struct PolicyBase : CompositeType {
  public:

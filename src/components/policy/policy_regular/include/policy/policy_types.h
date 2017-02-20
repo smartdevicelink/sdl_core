@@ -1,4 +1,4 @@
-/*
+﻿/*
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
@@ -30,16 +30,17 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_INCLUDE_POLICY_POLICY_TYPES_H_
-#define SRC_COMPONENTS_INCLUDE_POLICY_POLICY_TYPES_H_
+#ifndef SRC_COMPONENTS_POLICY_POLICY_EXTERNAL_INCLUDE_POLICY_POLICY_TYPES_H_
+#define SRC_COMPONENTS_POLICY_POLICY_EXTERNAL_INCLUDE_POLICY_POLICY_TYPES_H_
 
+#include <algorithm>
 #include <string>
 #include <vector>
 #include <map>
 #include <set>
+#include <utility>
 #include "utils/shared_ptr.h"
 #include "utils/helpers.h"
-
 namespace policy {
 
 // TODO(PV): specify errors
@@ -56,6 +57,12 @@ const std::string kDefaultDeviceConnectionType = "UNKNOWN";
 const std::string kPreDataConsentId = "pre_DataConsent";
 const std::string kDefaultId = "default";
 const std::string kDeviceId = "device";
+
+/*
+ *@brief Policy Services specifies Users of Updates
+ * received from cloud through mobile device
+ */
+enum PolicyServiceTypes { SERVICE_NONE = 0, IVSU = 0x04, POLICY = 0x07 };
 
 /*
  * @brief Status of policy table update
@@ -78,8 +85,16 @@ typedef std::string RpcName;
 typedef std::set<std::string> RPCParams;
 
 typedef std::map<std::string, std::set<policy::HMILevel> > HMIPermissions;
-typedef std::map<std::string, std::set<policy::Parameter> >
-    ParameterPermissions;
+struct ParameterPermissions
+    : std::map<std::string, std::set<policy::Parameter> > {
+  ParameterPermissions()
+      : any_parameter_allowed(false)
+      , any_parameter_disallowed_by_user(false)
+      , any_parameter_disallowed_by_policy(false) {}
+  bool any_parameter_allowed;
+  bool any_parameter_disallowed_by_user;
+  bool any_parameter_disallowed_by_policy;
+};
 
 struct RpcPermissions {
   HMIPermissions hmi_permissions;
@@ -112,6 +127,38 @@ struct CheckPermissionResult {
   RPCParams list_of_allowed_params;
   RPCParams list_of_disallowed_params;
   RPCParams list_of_undefined_params;
+
+  bool HasParameter(const PTString& parameter) {
+    const bool is_allowed =
+        helpers::in_range(list_of_allowed_params, parameter);
+    const bool is_disallowed =
+        helpers::in_range(list_of_disallowed_params, parameter);
+    const bool is_undefined =
+        helpers::in_range(list_of_undefined_params, parameter);
+
+    return is_allowed || is_disallowed || is_undefined;
+  }
+
+  bool DisallowedInclude(const RPCParams& parameters) {
+    if (parameters.empty()) {
+      return false;
+    }
+    return std::includes(list_of_disallowed_params.begin(),
+                         list_of_disallowed_params.end(),
+                         parameters.begin(),
+                         parameters.end());
+  }
+
+  bool IsAnyAllowed(const RPCParams& parameters) {
+    if (parameters.empty()) {
+      return true;
+    }
+    return list_of_allowed_params.end() !=
+           std::find_first_of(list_of_allowed_params.begin(),
+                              list_of_allowed_params.end(),
+                              parameters.begin(),
+                              parameters.end());
+  }
 };
 
 /**
@@ -249,6 +296,11 @@ struct PermissionConsent {
  */
 struct UserFriendlyMessage {
   std::string message_code;
+  std::string tts;
+  std::string label;
+  std::string line1;
+  std::string line2;
+  std::string text_body;
 };
 
 /**
@@ -333,6 +385,121 @@ struct RetrySequenceURL {
  */
 typedef std::pair<uint32_t, uint32_t> AppIdURL;
 
+/**
+ * @brief Represents ExternalConsent entity status received from the system
+ */
+enum EntityStatus { kStatusOn, kStatusOff };
+
+/**
+ * @brief The ExternalConsentStatusItem struct represents customer connectivity
+ * settings
+ * item
+ */
+struct ExternalConsentStatusItem {
+  ExternalConsentStatusItem(const uint32_t type,
+                            const uint32_t id,
+                            const EntityStatus status)
+      : entity_type_(type), entity_id_(id), status_(status) {}
+
+  bool operator==(const ExternalConsentStatusItem& rhs) const {
+    return (entity_type_ == rhs.entity_type_) && (entity_id_ == rhs.entity_id_);
+  }
+
+  bool operator<(const ExternalConsentStatusItem& rhs) const {
+    return (entity_type_ < rhs.entity_type_) || (entity_id_ < rhs.entity_id_);
+  }
+
+  const uint32_t entity_type_;
+  const uint32_t entity_id_;
+  const EntityStatus status_;
+};
+
+struct ExternalConsentStatusItemSorter {
+  bool operator()(const ExternalConsentStatusItem& lhs,
+                  const ExternalConsentStatusItem& rhs) const {
+    return (lhs.entity_type_ < rhs.entity_type_) ||
+           (lhs.entity_id_ < rhs.entity_id_);
+  }
+};
+
+/**
+ * @brief Customer connectivity settings status
+ */
+typedef std::set<ExternalConsentStatusItem, ExternalConsentStatusItemSorter>
+    ExternalConsentStatus;
+
+/**
+ * @brief GroupsByExternalConsentStatus represents list of group names, which
+ * has mapped ExternalConsent item (entity type + entity id) in their
+ * disallowed_by_external_consent_ containers. Boolean value represents
+ * whether ExternalConsent item has been found in
+ * disallowed_by_external_consent_ON or in disallowed_by_external_consent_OFF
+ * container
+ */
+typedef std::map<ExternalConsentStatusItem,
+                 std::vector<std::pair<std::string, bool> > >
+    GroupsByExternalConsentStatus;
+
+/**
+ * @brief GroupsNames represents groups names from policy table -> functional
+ * groupings groups container
+ */
+typedef std::set<std::string> GroupsNames;
+
+typedef std::string ApplicationId;
+typedef std::string DeviceId;
+
+/**
+ * @brief Link of device to application
+ */
+typedef std::pair<policy::DeviceId, policy::ApplicationId> Link;
+
+/**
+ * @brief Collection of links
+ */
+typedef std::set<Link> ApplicationsLinks;
+
+/**
+ * @brief Represents possible result codes for policy table update check
+ */
+enum PermissionsCheckResult {
+  RESULT_NO_CHANGES,
+  RESULT_APP_REVOKED,
+  RESULT_NICKNAME_MISMATCH,
+  RESULT_PERMISSIONS_REVOKED,
+  RESULT_CONSENT_NEEDED,
+  RESULT_CONSENT_NOT_REQIURED,
+  RESULT_PERMISSIONS_REVOKED_AND_CONSENT_NEEDED,
+  RESULT_REQUEST_TYPE_CHANGED
+};
+
+/**
+ * @brief Per application collection of results done by checking policy table
+ * update
+ */
+typedef std::set<std::pair<std::string, PermissionsCheckResult> >
+    CheckAppPolicyResults;
+
+/**
+ * @brief The index of the application, the index of its URL
+ * and the policy application id from the Endpoints vector
+ * that will be sent on the next OnSystemRequest retry sequence
+ */
+struct RetrySequenceURL {
+  uint32_t app_idx_;
+  uint32_t url_idx_;
+  std::string policy_app_id_;
+  RetrySequenceURL(uint32_t app, uint32_t url, const std::string& app_id)
+      : app_idx_(app), url_idx_(url), policy_app_id_(app_id) {}
+  RetrySequenceURL() : app_idx_(0), url_idx_(0) {}
+};
+
+/**
+ * @brief Index of the application, index of its URL
+ * from the Endpoints vector
+ */
+typedef std::pair<uint32_t, uint32_t> AppIdURL;
+
 }  //  namespace policy
 
-#endif  // SRC_COMPONENTS_INCLUDE_POLICY_POLICY_TYPES_H_
+#endif  // SRC_COMPONENTS_POLICY_POLICY_EXTERNAL_INCLUDE_POLICY_POLICY_TYPES_H_

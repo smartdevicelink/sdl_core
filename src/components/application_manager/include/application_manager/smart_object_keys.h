@@ -329,7 +329,7 @@ extern const char* const auto_complete_text_supported;
 extern const char* const entity_type;
 extern const char* const entity_id;
 extern const char* const status;
-extern const char* const ccs_status;
+extern const char* const external_consent_status;
 extern const char* const consented_functions;
 extern const char* const source;
 }  // namespace strings

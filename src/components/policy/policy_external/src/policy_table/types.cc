@@ -1608,7 +1608,7 @@ Json::Value ConsentRecords::ToJsonValue() const {
 
 bool ConsentRecords::is_valid() const {
   if (struct_empty()) {
-    return initialization_state__ == kInitialized && Validate();
+    return initialization_state__ == kUninitialized && Validate();
   }
   if (!consent_groups.is_valid()) {
     return false;
@@ -2079,7 +2079,7 @@ ExternalConsentEntity::ExternalConsentEntity(const Json::Value* value__)
 
 ExternalConsentEntity::ExternalConsentEntity(const int32_t type,
                                              const int32_t id)
-    : CompositeType(kUninitialized), entity_type(type), entity_id(id) {}
+    : CompositeType(kInitialized), entity_type(type), entity_id(id) {}
 
 Json::Value ExternalConsentEntity::ToJsonValue() const {
   Json::Value result__(Json::objectValue);

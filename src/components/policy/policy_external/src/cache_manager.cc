@@ -74,19 +74,6 @@ bool IsEntityExists(
 }
 
 /**
- * @brief Returns group consent record constructed from input group permissions
- */
-struct ExternalConsentConsentGroupAppender
-    : public std::unary_function<policy_table::ConsentGroups,
-                                 const policy::FunctionalGroupPermission&> {
-  policy_table::ConsentGroups::value_type operator()(
-      const policy::FunctionalGroupPermission& value) const {
-    return std::make_pair(value.group_name,
-                          rpc::Boolean(value.state == policy::kGroupAllowed));
-  }
-};
-
-/**
  * @brief Looks for ExternalConsent entity in
  * disallowed_by_external_consent_entities_on/off sections
  * of each functional group
@@ -205,6 +192,20 @@ struct LinkCollector
   std::string device_id_;
   std::map<std::string, std::string>& links_;
 };
+
+/**
+ * @brief Returns group consent record constructed from input group permissions
+ */
+struct ExternalConsentConsentGroupAppender
+    : public std::unary_function<policy_table::ConsentGroups,
+                                 const policy::FunctionalGroupPermission&> {
+  policy_table::ConsentGroups::value_type operator()(
+      const policy::FunctionalGroupPermission& value) const {
+    return std::make_pair(value.group_name,
+                          rpc::Boolean(value.state == policy::kGroupAllowed));
+  }
+};
+
 }  // namespace
 
 namespace policy {

@@ -1010,6 +1010,31 @@ void SQLPTExtRepresentation::GatherConsentGroup(
     *app_consent_records->input = input;
     *app_consent_records->time_stamp = query.GetString(5);
   }
+  if (!query.Reset()) {
+    return;
+  }
+
+  // Fill data for ExternalConsent consents
+  if (!query.Prepare(sql_pt_ext::kSelectExternalConsentStatusGroup)) {
+    LOG4CXX_WARN(
+        logger_,
+        "Incorrect select statement for ExternalConsent consented groups.");
+    return;
+  }
+
+  query.Bind(0, device_id);
+
+  // Fill device_data -> user_consent_records -> <app_id> ->
+  // external_consent_status_groups
+  while (query.Next()) {
+    policy_table::ConsentRecords* app_consent_records =
+        &(*records)[query.GetString(1)];
+    policy_table::ConsentGroups& external_consent_status_groups =
+        *app_consent_records->external_consent_status_groups;
+    external_consent_status_groups[query.GetString(2)] = query.GetBoolean(3);
+    policy_table::Input input;
+    policy_table::EnumFromJsonString(query.GetString(4), &input);
+  }
 }
 
 bool SQLPTExtRepresentation::SaveDeviceData(
@@ -1129,6 +1154,37 @@ bool SQLPTExtRepresentation::SaveConsentGroup(
         return false;
       }
     }
+
+    policy_table::ConsentGroups::const_iterator it_external_consent_consent =
+        it->second.external_consent_status_groups->begin();
+    policy_table::ConsentGroups::const_iterator end_external_consent_consent =
+        it->second.external_consent_status_groups->end();
+
+    for (; end_external_consent_consent != it_external_consent_consent;
+         ++it_external_consent_consent) {
+      if (!query.Prepare(sql_pt_ext::kInsertExternalConsentStatusGroups)) {
+        LOG4CXX_WARN(logger_,
+                     "Incorrect insert statement for external consent group.");
+        return false;
+      }
+      query.Bind(0, device_id);
+      query.Bind(1, it->first);
+      query.Bind(2, it_external_consent_consent->first);
+      query.Bind(3, it_external_consent_consent->second);
+      query.Bind(
+          4, std::string(policy_table::EnumToJsonString(*(it->second.input))));
+      query.Bind(5, std::string(*(it->second.time_stamp)));
+      LOG4CXX_INFO(logger_,
+                   "Device:"
+                       << "time stamp " << std::string(*(it->second.time_stamp))
+                       << " group " << it_external_consent_consent->first
+                       << " consent " << it_external_consent_consent->second);
+
+      if (!query.Exec() || !query.Reset()) {
+        LOG4CXX_WARN(logger_, "Incorrect insert into external consent group.");
+        return false;
+      }
+    }  // external_consent_consent_group
   }
 
   return true;
@@ -1768,8 +1824,7 @@ bool SQLPTExtRepresentation::SetVINValue(const std::string& value) {
   return result;
 }
 
-
-bool SQLPTExtRepresentation::SetExternalConsentStatus(
+bool SQLPTExtRepresentation::SaveExternalConsentStatus(
     const ExternalConsentStatus& status) const {
   LOG4CXX_AUTO_TRACE(logger_);
   utils::dbms::SQLQuery query(db());
@@ -1819,6 +1874,41 @@ ExternalConsentStatus SQLPTExtRepresentation::GetExternalConsentStatus() const {
   }
 
   return status;
+}
+
+bool SQLPTExtRepresentation::RemoveAppConsentForGroup(
+    const std::string& policy_app_id,
+    const std::string& functional_group_name) const {
+  utils::dbms::SQLQuery query_group_id(db());
+  if (!query_group_id.Prepare(sql_pt_ext::kSelectGroupId)) {
+    LOG4CXX_WARN(logger_, "Incorect statement for select group name.");
+    return false;
+  }
+
+  query_group_id.Bind(0, functional_group_name);
+
+  if (!query_group_id.Exec()) {
+    LOG4CXX_WARN(logger_, "Failed to select group id.");
+    return false;
+  }
+
+  const int id = query_group_id.GetInteger(0);
+
+  utils::dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt_ext::kDeleteAppGroupConsent)) {
+    LOG4CXX_WARN(logger_, "Incorect statement for remove app consent.");
+    return false;
+  }
+
+  query.Bind(0, policy_app_id);
+  query.Bind(1, id);
+
+  if (!query.Exec()) {
+    LOG4CXX_WARN(logger_, "Failed to remove app consent.");
+    return false;
+  }
+
+  return true;
 }
 
 }  // namespace policy

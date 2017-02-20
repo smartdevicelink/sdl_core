@@ -1254,6 +1254,25 @@
       <description>ID of application that requested this RPC.</description>
     </param>
   </struct>
+
+  <enum name="EntityStatus">
+      <element name="ON"/>
+      <element name="OFF"/>
+  </enum>
+
+  <struct name="ExternalConsentStatus">
+        <param name="entityType" type="Integer" minvalue="0" maxvalue="128" mandatory="true">
+          <description>The entityType which status is informed by "status" param.</description>
+        </param>
+
+        <param name="entityID" type="Integer" minvalue="0" maxvalue="128" mandatory="true">
+          <description>The corresponding ID of entityType which status is informed by "status" param</description>
+        </param>
+
+        <param name="status" type="Common.EntityStatus" mandatory="true">
+          <description>Status of the ExternalConsentStatus entity: "ON" or "OFF". </description>
+        </param>
+  </struct>
 <!-- End of Policies -->
 
 <struct name="TextField">
@@ -4152,8 +4171,8 @@
       <param name="appID" type="Integer" mandatory="false">
           <description>Information about the application. See HMIApplication. If omitted - allow/disallow all applications </description>
       </param>
-      <param name="consentedFunctions" type="Common.PermissionItem" mandatory="true" array="true" minsize="1" maxsize="100">
-      </param>
+      <param name="consentedFunctions" type="Common.PermissionItem" mandatory="false" array="true" minsize="1" maxsize="100"/>
+      <param name="externalConsentStatus" type="Common.ExternalConsentStatus" mandatory="false" array="true" minsize="1" maxsize="100"/>
       <param name="source" type="Common.ConsentSource" mandatory="true"/>
      </function>
 

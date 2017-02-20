@@ -133,7 +133,7 @@ class UpToDateStatus : public Status {
  * @param event Event which needs to be processed
  */
   void ProcessEvent(UpdateStatusManagerInterface* manager,
-                    UpdateEvent event) FINAL;
+                    UpdateEvent event) OVERRIDE;
 };
 
 /**
@@ -153,13 +153,13 @@ class UpdateNeededStatus : public Status {
  * @param event Event which needs to be processed
  */
   void ProcessEvent(UpdateStatusManagerInterface* manager,
-                    UpdateEvent event) FINAL;
+                    UpdateEvent event) OVERRIDE;
 
   /**
  * @brief Check whether update is required in terms of status
  * @return True if update is required, otherwise - false
  */
-  bool IsUpdateRequired() const FINAL;
+  bool IsUpdateRequired() const OVERRIDE;
 };
 
 /**
@@ -179,19 +179,19 @@ class UpdatingStatus : public Status {
  * @param event Event which needs to be processed
  */
   void ProcessEvent(UpdateStatusManagerInterface* manager,
-                    UpdateEvent event) FINAL;
+                    UpdateEvent event) OVERRIDE;
 
   /**
  * @brief Check whether update is required in terms of status
  * @return True if update is required, otherwise - false
  */
-  bool IsUpdateRequired() const FINAL;
+  bool IsUpdateRequired() const OVERRIDE;
 
   /**
  * @brief Check whether update is pending in terms of status
  * @return True if update is pending, otherwise - false
  */
-  bool IsUpdatePending() const FINAL;
+  bool IsUpdatePending() const OVERRIDE;
 };
 }
 

@@ -142,8 +142,11 @@ class MockPolicyManager : public PolicyManager {
   MOCK_METHOD1(SendNotificationOnPermissionsUpdated,
                void(const std::string& application_id));
   MOCK_METHOD1(MarkUnpairedDevice, void(const std::string& device_id));
-  MOCK_METHOD1(AddApplication,
-               StatusNotifier(const std::string& application_id));
+  MOCK_METHOD2(
+      AddApplication,
+      StatusNotifier(
+          const std::string& application_id,
+          const rpc::policy_table_interface_base::AppHmiTypes& hmi_types));
   MOCK_METHOD0(CleanupUnpairedDevices, bool());
   MOCK_CONST_METHOD1(CanAppKeepContext, bool(const std::string& app_id));
   MOCK_CONST_METHOD1(CanAppStealFocus, bool(const std::string& app_id));
@@ -164,6 +167,7 @@ class MockPolicyManager : public PolicyManager {
   MOCK_CONST_METHOD0(GetVehicleInfo, const policy::VehicleInfo());
   MOCK_CONST_METHOD0(GetMetaInfo, const policy::MetaInfo());
   MOCK_CONST_METHOD0(RetrieveCertificate, std::string());
+  MOCK_CONST_METHOD0(HasCertificate, bool());
   MOCK_METHOD1(SetDecryptedCertificate, void(const std::string&));
   MOCK_METHOD0(ExceededIgnitionCycles, bool());
   MOCK_METHOD0(ExceededDays, bool());
@@ -189,6 +193,13 @@ class MockPolicyManager : public PolicyManager {
   MOCK_CONST_METHOD2(RetrySequenceUrl,
                      AppIdURL(const struct RetrySequenceURL&,
                               const EndpointUrls& urls));
+  MOCK_METHOD6(CheckPermissions,
+               void(const PTString& device_id,
+                    const PTString& app_id,
+                    const PTString& hmi_level,
+                    const PTString& rpc,
+                    const RPCParams& rpc_params,
+                    CheckPermissionResult& result));
 };
 
 }  // namespace policy_manager_test

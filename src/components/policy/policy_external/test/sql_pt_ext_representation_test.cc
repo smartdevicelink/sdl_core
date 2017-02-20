@@ -64,10 +64,10 @@ class SQLPTExtRepresentationTest : public ::testing::Test {
   // Collection of pairs of group alias and corresponding group name
   typedef vector<pair<string, string> > GroupsAliasNameCollection;
 
-  SQLPTExtRepresentationTest() : reps(0) {}
+  SQLPTExtRepresentationTest() : reps_(NULL) {}
 
  protected:
-  SQLPTExtRepresentation* reps;
+  SQLPTExtRepresentation* reps_;
   policy_handler_test::MockPolicySettings policy_settings_;
   static const string kDatabaseName;
   PermissionConsent perm_consent;
@@ -75,24 +75,24 @@ class SQLPTExtRepresentationTest : public ::testing::Test {
   FunctionalGroupPermission group2_perm;
   utils::dbms::SQLQuery* query_wrapper_;
   static const bool in_memory_;
-  const std::string kAppStorageFolder = "storage1";
+  const std::string kAppStorageFolder = "storage_SQLPTExtRepresentationTest";
 
   void SetUp() OVERRIDE {
     file_system::DeleteFile(kDatabaseName);
-    reps = new SQLPTExtRepresentation(in_memory_);
-    ASSERT_TRUE(reps != NULL);
+    reps_ = new SQLPTExtRepresentation(in_memory_);
+    ASSERT_TRUE(reps_ != NULL);
     ON_CALL(policy_settings_, app_storage_folder())
         .WillByDefault(ReturnRef(kAppStorageFolder));
-    ASSERT_EQ(SUCCESS, reps->Init(&policy_settings_));
-    query_wrapper_ = new utils::dbms::SQLQuery(reps->db());
+    ASSERT_EQ(SUCCESS, reps_->Init(&policy_settings_));
+    query_wrapper_ = new utils::dbms::SQLQuery(reps_->db());
     ASSERT_TRUE(query_wrapper_ != NULL);
   }
 
   void TearDown() OVERRIDE {
     delete query_wrapper_;
-    EXPECT_TRUE(reps->Drop());
-    EXPECT_TRUE(reps->Close());
-    delete reps;
+    EXPECT_TRUE(reps_->Drop());
+    EXPECT_TRUE(reps_->Close());
+    delete reps_;
   }
 
   void FillGroupPermission(
@@ -193,7 +193,75 @@ class SQLPTExtRepresentationTest : public ::testing::Test {
     }
     return result;
   }
+  // Attempt of simplifying policy table checks, hides internal stuff, add
+  // basic checks for data existence before getting of data
+  // For usage example see SaveUserConsentRecords_ExpectedSaved,
+  // SaveFunctionalGroupings_ExpectedSaved tests
+  template <typename ParentType, typename KeyType>
+  bool IsExist(const ParentType& parent) const;
+
+  template <typename ParentType, typename Value>
+  bool IsKeyExist(const ParentType& parent, const Value& value) const {
+    return parent.end() != std::find(parent.begin(), parent.end(), value);
+  }
+
+  template <typename ParentType>
+  bool IsKeyExist(const ParentType& parent, const std::string& value) const {
+    return parent.end() != parent.find(value);
+  }
+
+  template <typename ParentType, typename KeyType>
+  const KeyType& GetData(const ParentType& parent) const {
+    EXPECT_TRUE((IsExist<ParentType, KeyType>(parent)));
+    return GetDataInternal<ParentType, KeyType>(parent);
+  }
+
+  template <typename ParentType, typename KeyType>
+  const KeyType& GetKeyData(const ParentType& parent,
+                            const std::string& key_name) const {
+    EXPECT_TRUE((IsKeyExist<ParentType>(parent, key_name)));
+    return GetKeyDataInternal<ParentType, KeyType>(parent, key_name);
+  }
+
+ private:
+  template <typename ParentType, typename KeyType>
+  const KeyType& GetDataInternal(const ParentType& parent) const;
+
+  template <typename ParentType, typename KeyType>
+  const KeyType& GetKeyDataInternal(const ParentType& parent,
+                                    const std::string& key_name) const {
+    return parent.find(key_name)->second;
+  }
 };
+
+// Specializations for 'policy_table' section
+
+template <>
+bool SQLPTExtRepresentationTest::IsExist<policy_table::Table,
+                                         policy_table::DeviceData>(
+    const policy_table::Table& table) const {
+  return table.policy_table.device_data.is_initialized();
+}
+
+template <>
+bool SQLPTExtRepresentationTest::IsExist<policy_table::Table,
+                                         policy_table::FunctionalGroupings>(
+    const policy_table::Table& table) const {
+  return table.policy_table.functional_groupings.is_initialized();
+}
+
+template <>
+const policy_table::DeviceData& SQLPTExtRepresentationTest::GetDataInternal(
+    const policy_table::Table& table) const {
+  return *table.policy_table.device_data;
+}
+
+template <>
+const policy_table::FunctionalGroupings&
+SQLPTExtRepresentationTest::GetDataInternal(
+    const policy_table::Table& table) const {
+  return table.policy_table.functional_groupings;
+}
 
 const string SQLPTExtRepresentationTest::kDatabaseName = ":memory:";
 const bool SQLPTExtRepresentationTest::in_memory_ = true;
@@ -322,10 +390,10 @@ TEST_F(SQLPTExtRepresentationTest,
 
   // Assert
   ASSERT_TRUE(IsValid(update));
-  ASSERT_TRUE(reps->Save(update));
+  ASSERT_TRUE(reps_->Save(update));
 
   // Act
-  utils::SharedPtr<policy_table::Table> snapshot = reps->GenerateSnapshot();
+  utils::SharedPtr<policy_table::Table> snapshot = reps_->GenerateSnapshot();
   snapshot->SetPolicyTableType(rpc::policy_table_interface_base::PT_SNAPSHOT);
 
   policy_table["module_meta"] = Json::Value(Json::objectValue);
@@ -368,8 +436,8 @@ TEST_F(
 
   // Assert
   ASSERT_TRUE(query_wrapper_->Exec(query_insert_12345));
-  EXPECT_FALSE(reps->CanAppKeepContext("0"));
-  EXPECT_TRUE(reps->CanAppKeepContext("12345"));
+  EXPECT_FALSE(reps_->CanAppKeepContext("0"));
+  EXPECT_TRUE(reps_->CanAppKeepContext("12345"));
   // Act
   const std::string query_insert_123 =
       "INSERT INTO `application` (`id`, `memory_kb`,"
@@ -377,7 +445,7 @@ TEST_F(
 
   // Assert
   ASSERT_TRUE(query_wrapper_->Exec(query_insert_123));
-  EXPECT_FALSE(reps->CanAppKeepContext("123"));
+  EXPECT_FALSE(reps_->CanAppKeepContext("123"));
 }
 
 TEST_F(SQLPTExtRepresentationTest,
@@ -393,8 +461,8 @@ TEST_F(SQLPTExtRepresentationTest,
 
   // Assert
   ASSERT_TRUE(query_wrapper_->Exec(query_insert_12345));
-  EXPECT_TRUE(reps->CanAppStealFocus("12345"));
-  EXPECT_FALSE(reps->CanAppStealFocus("0"));
+  EXPECT_TRUE(reps_->CanAppStealFocus("12345"));
+  EXPECT_FALSE(reps_->CanAppStealFocus("0"));
   // Act
   const std::string query_insert_123 =
       "INSERT INTO `application` (`id`, `memory_kb`,"
@@ -402,7 +470,7 @@ TEST_F(SQLPTExtRepresentationTest,
 
   // Assert
   ASSERT_TRUE(query_wrapper_->Exec(query_insert_123));
-  EXPECT_FALSE(reps->CanAppStealFocus("123"));
+  EXPECT_FALSE(reps_->CanAppStealFocus("123"));
 }
 
 TEST_F(SQLPTExtRepresentationTest,
@@ -419,7 +487,7 @@ TEST_F(SQLPTExtRepresentationTest,
   std::string result;
   // Assert
   ASSERT_TRUE(query_wrapper_->Exec(query_insert_12345));
-  EXPECT_TRUE(reps->GetDefaultHMI("12345", &result));
+  EXPECT_TRUE(reps_->GetDefaultHMI("12345", &result));
   EXPECT_EQ("NONE", result);
   const std::string query_insert_123 =
       "INSERT INTO `application` (`id`, `memory_kb`,"
@@ -428,7 +496,7 @@ TEST_F(SQLPTExtRepresentationTest,
 
   // Assert
   ASSERT_TRUE(query_wrapper_->Exec(query_insert_123));
-  EXPECT_TRUE(reps->GetDefaultHMI("123", &result));
+  EXPECT_TRUE(reps_->GetDefaultHMI("123", &result));
   EXPECT_EQ("LIMITED", result);
 }
 
@@ -437,7 +505,7 @@ TEST_F(SQLPTExtRepresentationTest,
   // Arrange
   StringArray allowed_groups;
   StringArray disallowed_groups;
-  EXPECT_TRUE(reps->GetUserPermissionsForDevice(
+  EXPECT_TRUE(reps_->GetUserPermissionsForDevice(
       "XXX12345ZZZ", &allowed_groups, &disallowed_groups));
   EXPECT_EQ(0u, allowed_groups.size());
   EXPECT_EQ(0u, disallowed_groups.size());
@@ -457,7 +525,7 @@ TEST_F(SQLPTExtRepresentationTest,
       "('XXX12345ZZZ', 'Navigation-1', 0,'GUI', '2015-01-01T00:00:52Z')";
   // Assert
   ASSERT_TRUE(query_wrapper_->Exec(query_insert_Navigation));
-  EXPECT_TRUE(reps->GetUserPermissionsForDevice(
+  EXPECT_TRUE(reps_->GetUserPermissionsForDevice(
       "XXX12345ZZZ", &allowed_groups, &disallowed_groups));
   EXPECT_EQ(1u, allowed_groups.size());
   EXPECT_EQ(1u, disallowed_groups.size());
@@ -468,19 +536,19 @@ TEST_F(SQLPTExtRepresentationTest,
   // Arrange
   StringArray allowed_groups;
   StringArray disallowed_groups;
-  EXPECT_TRUE(reps->GetUserPermissionsForDevice(
+  EXPECT_TRUE(reps_->GetUserPermissionsForDevice(
       "XXX12345ZZZ", &allowed_groups, &disallowed_groups));
   EXPECT_EQ(0u, allowed_groups.size());
   EXPECT_EQ(0u, disallowed_groups.size());
   allowed_groups.push_back("DataConsent-2");
   disallowed_groups.push_back("Navigation-1");
-  EXPECT_TRUE(reps->SetUserPermissionsForDevice(
+  EXPECT_TRUE(reps_->SetUserPermissionsForDevice(
       "XXX12345ZZZ", allowed_groups, disallowed_groups));
 
   allowed_groups.clear();
   disallowed_groups.clear();
   // Act
-  EXPECT_TRUE(reps->GetUserPermissionsForDevice(
+  EXPECT_TRUE(reps_->GetUserPermissionsForDevice(
       "XXX12345ZZZ", &allowed_groups, &disallowed_groups));
   // Checks
   EXPECT_EQ(1u, allowed_groups.size());
@@ -498,19 +566,19 @@ TEST_F(SQLPTExtRepresentationTest,
   // Arrange
   StringArray allowed_groups;
   StringArray disallowed_groups;
-  EXPECT_TRUE(reps->GetUserPermissionsForDevice(
+  EXPECT_TRUE(reps_->GetUserPermissionsForDevice(
       "XXX12345ZZZ", &allowed_groups, &disallowed_groups));
   EXPECT_EQ(0u, allowed_groups.size());
   EXPECT_EQ(0u, disallowed_groups.size());
   allowed_groups.push_back("DataConsent-2");
   disallowed_groups.push_back("Navigation-1");
-  EXPECT_TRUE(reps->SetUserPermissionsForDevice(
+  EXPECT_TRUE(reps_->SetUserPermissionsForDevice(
       "XXX12345ZZZ", allowed_groups, disallowed_groups));
 
   allowed_groups.clear();
   disallowed_groups.clear();
   // Act
-  EXPECT_TRUE(reps->GetUserPermissionsForDevice(
+  EXPECT_TRUE(reps_->GetUserPermissionsForDevice(
       "XXX12345ZZZ", &allowed_groups, &disallowed_groups));
   // Checks
   EXPECT_EQ(1u, allowed_groups.size());
@@ -524,8 +592,8 @@ TEST_F(SQLPTExtRepresentationTest,
   allowed_groups.clear();
   disallowed_groups.clear();
   // Act
-  reps->ResetDeviceConsents();
-  EXPECT_TRUE(reps->GetUserPermissionsForDevice(
+  reps_->ResetDeviceConsents();
+  EXPECT_TRUE(reps_->GetUserPermissionsForDevice(
       "XXX12345ZZZ", &allowed_groups, &disallowed_groups));
   // Checks
   EXPECT_EQ(0u, allowed_groups.size());
@@ -557,7 +625,8 @@ TEST_F(SQLPTExtRepresentationTest,
   disallowed_groups.push_back(std::make_pair("", "Base-4"));
   FillPermissionStruct("", "", "", allowed_groups, disallowed_groups);
   FunctionalIdType group_types;
-  ASSERT_TRUE(reps->GetPermissionsForApp("XXX12345ZZZ", "12345", &group_types));
+  ASSERT_TRUE(
+      reps_->GetPermissionsForApp("XXX12345ZZZ", "12345", &group_types));
   EXPECT_TRUE(
       CheckGroupTypesExist(group_types, allowed_groups, disallowed_groups));
 }
@@ -572,10 +641,11 @@ TEST_F(SQLPTExtRepresentationTest,
   disallowed_groups.push_back(std::make_pair("DataConsent", "DataConsent-2"));
   FillPermissionStruct(
       "XXX12345ZZZ", "12345", "VR", allowed_groups, disallowed_groups);
-  EXPECT_TRUE(reps->SetUserPermissionsForApp(perm_consent));
+  EXPECT_TRUE(reps_->SetUserPermissionsForApp(perm_consent));
 
   FunctionalIdType group_types;
-  ASSERT_TRUE(reps->GetPermissionsForApp("XXX12345ZZZ", "12345", &group_types));
+  ASSERT_TRUE(
+      reps_->GetPermissionsForApp("XXX12345ZZZ", "12345", &group_types));
   EXPECT_TRUE(
       CheckGroupTypesExist(group_types, allowed_groups, disallowed_groups));
 }
@@ -590,15 +660,17 @@ TEST_F(SQLPTExtRepresentationTest,
   disallowed_groups.push_back(std::make_pair("DataConsent", "DataConsent-2"));
   FillPermissionStruct(
       "XXX12345ZZZ", "12345", "VR", allowed_groups, disallowed_groups);
-  EXPECT_TRUE(reps->SetUserPermissionsForApp(perm_consent));
+  EXPECT_TRUE(reps_->SetUserPermissionsForApp(perm_consent));
 
   FunctionalIdType group_types;
-  ASSERT_TRUE(reps->GetPermissionsForApp("XXX12345ZZZ", "12345", &group_types));
+  ASSERT_TRUE(
+      reps_->GetPermissionsForApp("XXX12345ZZZ", "12345", &group_types));
   EXPECT_TRUE(
       CheckGroupTypesExist(group_types, allowed_groups, disallowed_groups));
 
-  reps->ResetAppConsents();
-  ASSERT_TRUE(reps->GetPermissionsForApp("XXX12345ZZZ", "12345", &group_types));
+  reps_->ResetAppConsents();
+  ASSERT_TRUE(
+      reps_->GetPermissionsForApp("XXX12345ZZZ", "12345", &group_types));
   EXPECT_FALSE(
       CheckGroupTypesExist(group_types, allowed_groups, disallowed_groups));
 }
@@ -619,10 +691,11 @@ TEST_F(SQLPTExtRepresentationTest,
                        perm_allowed_groups,
                        perm_disallowed_groups);
   // Set permissions for app
-  EXPECT_TRUE(reps->SetUserPermissionsForApp(perm_consent));
+  EXPECT_TRUE(reps_->SetUserPermissionsForApp(perm_consent));
 
   FunctionalIdType group_types;
-  ASSERT_TRUE(reps->GetPermissionsForApp("XXX12345ZZZ", "12345", &group_types));
+  ASSERT_TRUE(
+      reps_->GetPermissionsForApp("XXX12345ZZZ", "12345", &group_types));
   EXPECT_TRUE(CheckGroupTypesExist(
       group_types, perm_allowed_groups, perm_disallowed_groups));
 
@@ -631,19 +704,20 @@ TEST_F(SQLPTExtRepresentationTest,
   allowed_groups.push_back("DataConsent-2");
   disallowed_groups.push_back("Navigation-1");
   // Set permissions for device
-  EXPECT_TRUE(reps->SetUserPermissionsForDevice(
+  EXPECT_TRUE(reps_->SetUserPermissionsForDevice(
       "XXX12345ZZZ", allowed_groups, disallowed_groups));
 
   allowed_groups.clear();
   disallowed_groups.clear();
   // Act
-  reps->ResetUserConsent();
-  EXPECT_TRUE(reps->GetUserPermissionsForDevice(
+  reps_->ResetUserConsent();
+  EXPECT_TRUE(reps_->GetUserPermissionsForDevice(
       "XXX12345ZZZ", &allowed_groups, &disallowed_groups));
   // Checks
   EXPECT_EQ(0u, allowed_groups.size());
   EXPECT_EQ(0u, disallowed_groups.size());
-  EXPECT_TRUE(reps->GetPermissionsForApp("XXX12345ZZZ", "12345", &group_types));
+  EXPECT_TRUE(
+      reps_->GetPermissionsForApp("XXX12345ZZZ", "12345", &group_types));
   EXPECT_FALSE(CheckGroupTypesExist(
       group_types, perm_allowed_groups, perm_disallowed_groups));
 }
@@ -686,7 +760,8 @@ TEST_F(SQLPTExtRepresentationTest,
   policy_table::Strings groups;
   policy_table::Strings preconsented_groups;
 
-  EXPECT_TRUE(reps->GetDeviceGroupsFromPolicies(&groups, &preconsented_groups));
+  EXPECT_TRUE(
+      reps_->GetDeviceGroupsFromPolicies(&groups, &preconsented_groups));
   EXPECT_EQ(2u, groups.size());
   EXPECT_EQ(1u, preconsented_groups.size());
 
@@ -707,15 +782,15 @@ TEST_F(SQLPTExtRepresentationTest,
 TEST_F(SQLPTExtRepresentationTest,
        SetDeviceData_SetDeviceData_ExpectValuesThatSetInParams) {
   // Arrange
-  utils::dbms::SQLQuery query(reps->db());
-  reps->SetDeviceData("08-00-27-CE-76-FE",
-                      "hardware IPX",
-                      "v.8.0.1",
-                      "Android",
-                      "4.4.2",
-                      "Life",
-                      2,
-                      "Bluetooth");
+  utils::dbms::SQLQuery query(reps_->db());
+  reps_->SetDeviceData("08-00-27-CE-76-FE",
+                       "hardware IPX",
+                       "v.8.0.1",
+                       "Android",
+                       "4.4.2",
+                       "Life",
+                       2,
+                       "Bluetooth");
   const std::string query_select_hardware =
       "SELECT `hardware` FROM `device` WHERE `id` = '08-00-27-CE-76-FE'";
   const std::string query_select_firmware_rev =
@@ -805,9 +880,9 @@ TEST_F(
   // Assert
   ASSERT_TRUE(query_wrapper_->Exec(query_insert_application));
 
-  EXPECT_TRUE(reps->IsPredataPolicy("1234"));
-  reps->ReactOnUserDevConsentForApp("1234", true);
-  EXPECT_TRUE(reps->IsDefaultPolicy("1234"));
+  EXPECT_TRUE(reps_->IsPredataPolicy("1234"));
+  reps_->ReactOnUserDevConsentForApp("1234", true);
+  EXPECT_TRUE(reps_->IsDefaultPolicy("1234"));
 }
 
 TEST_F(
@@ -873,9 +948,9 @@ TEST_F(
   // Assert
   ASSERT_TRUE(query_wrapper_->Exec(query_insert_application));
   FunctionalIdType group_types;
-  ASSERT_TRUE(reps->GetPermissionsForApp("XXX12345ZZZ", "1234", &group_types));
-  EXPECT_FALSE(reps->IsPredataPolicy("1234"));
-  EXPECT_FALSE(reps->IsDefaultPolicy("1234"));
+  ASSERT_TRUE(reps_->GetPermissionsForApp("XXX12345ZZZ", "1234", &group_types));
+  EXPECT_FALSE(reps_->IsPredataPolicy("1234"));
+  EXPECT_FALSE(reps_->IsDefaultPolicy("1234"));
   std::map<GroupType, FunctionalGroupIDs>::iterator it1 =
       group_types.find(GroupType::kTypeAllowed);
   EXPECT_TRUE(group_types.end() != it1);
@@ -885,13 +960,13 @@ TEST_F(
   ASSERT_TRUE(it2 != it1->second.end());
   it2 = std::find(it1->second.begin(), it1->second.end(), 1809526495);
   ASSERT_TRUE(it2 != it1->second.end());
-  reps->SetIsPredata("1234", true);
-  EXPECT_TRUE(reps->IsPredataPolicy("1234"));
-  reps->ReactOnUserDevConsentForApp("1234", true);
+  reps_->SetIsPredata("1234", true);
+  EXPECT_TRUE(reps_->IsPredataPolicy("1234"));
+  reps_->ReactOnUserDevConsentForApp("1234", true);
   group_types.clear();
-  ASSERT_TRUE(reps->GetPermissionsForApp("XXX12345ZZZ", "1234", &group_types));
-  EXPECT_FALSE(reps->IsPredataPolicy("1234"));
-  EXPECT_FALSE(reps->IsDefaultPolicy("1234"));
+  ASSERT_TRUE(reps_->GetPermissionsForApp("XXX12345ZZZ", "1234", &group_types));
+  EXPECT_FALSE(reps_->IsPredataPolicy("1234"));
+  EXPECT_FALSE(reps_->IsDefaultPolicy("1234"));
   it1 = group_types.find(GroupType::kTypeAllowed);
   EXPECT_TRUE(group_types.end() != it1);
   EXPECT_EQ(2u, it1->second.size());
@@ -916,7 +991,7 @@ TEST_F(SQLPTExtRepresentationTest,
   msg_code.push_back("AppPermissions");
   // Act
   std::vector<UserFriendlyMessage> result =
-      reps->GetUserFriendlyMsg(msg_code, string("en-en"));
+      reps_->GetUserFriendlyMsg(msg_code, string("en-en"));
   // Checks
   ASSERT_EQ(1u, result.size());
   EXPECT_EQ(result[0].message_code, "AppPermissions");
@@ -930,7 +1005,7 @@ TEST_F(SQLPTExtRepresentationTest,
 TEST_F(SQLPTExtRepresentationTest,
        IncrementGlobalCounter_IncrementThreeTimes_ExpectCountEqual3) {
   // Arrange
-  utils::dbms::SQLQuery query(reps->db());
+  utils::dbms::SQLQuery query(reps_->db());
   const std::string query_update =
       "UPDATE `usage_and_error_count` SET"
       " `count_of_sync_reboots` = 0";
@@ -939,9 +1014,9 @@ TEST_F(SQLPTExtRepresentationTest,
   ASSERT_TRUE(query_wrapper_->Exec(query_update));
 
   // Act
-  reps->Increment("count_of_sync_reboots");
-  reps->Increment("count_of_sync_reboots");
-  reps->Increment("count_of_sync_reboots");
+  reps_->Increment("count_of_sync_reboots");
+  reps_->Increment("count_of_sync_reboots");
+  reps_->Increment("count_of_sync_reboots");
 
   const std::string query_select =
       "SELECT `count_of_sync_reboots` FROM `usage_and_error_count`";
@@ -955,7 +1030,7 @@ TEST_F(
     SQLPTExtRepresentationTest,
     IncrementAppCounter_IncrementCountOfUserSelections3Times_ExpectCountEqual3) {
   // Arrange
-  utils::dbms::SQLQuery query(reps->db());
+  utils::dbms::SQLQuery query(reps_->db());
   const std::string query_delete =
       "DELETE FROM `app_level` WHERE `application_id` = '12345'";
 
@@ -963,9 +1038,9 @@ TEST_F(
   ASSERT_TRUE(query_wrapper_->Exec(query_delete));
 
   // Act
-  reps->Increment("12345", "count_of_user_selections");
-  reps->Increment("12345", "count_of_user_selections");
-  reps->Increment("12345", "count_of_user_selections");
+  reps_->Increment("12345", "count_of_user_selections");
+  reps_->Increment("12345", "count_of_user_selections");
+  reps_->Increment("12345", "count_of_user_selections");
 
   const std::string query_select =
       "SELECT `count_of_user_selections` FROM `app_level`"
@@ -980,15 +1055,15 @@ TEST_F(
 TEST_F(SQLPTExtRepresentationTest,
        AppInfo_SetLanguageRuInGUIAndEnInVUI_ExpectRuInGUIAndEnInVUI) {
   // Arrange
-  utils::dbms::SQLQuery query(reps->db());
+  utils::dbms::SQLQuery query(reps_->db());
   const std::string query_delete =
       "DELETE FROM `app_level` WHERE `application_id` = '12345'";
 
   // Assert
   ASSERT_TRUE(query_wrapper_->Exec(query_delete));
   // Act
-  reps->Set("12345", "app_registration_language_gui", "ru-ru");
-  reps->Set("12345", "app_registration_language_vui", "en-en");
+  reps_->Set("12345", "app_registration_language_gui", "ru-ru");
+  reps_->Set("12345", "app_registration_language_vui", "en-en");
 
   const std::string query_select_gui =
       "SELECT `app_registration_language_gui`"
@@ -1011,14 +1086,14 @@ TEST_F(SQLPTExtRepresentationTest,
 TEST_F(SQLPTExtRepresentationTest,
        AddAppStopwatch_Set10And60MinutesForStopwatch_Expect70Minutes) {
   // Arrange
-  utils::dbms::SQLQuery query(reps->db());
+  utils::dbms::SQLQuery query(reps_->db());
   const std::string query_delete =
       "DELETE FROM `app_level` WHERE `application_id` = '12345'";
   // Assert
   ASSERT_TRUE(query_wrapper_->Exec(query_delete));
   // Act
-  reps->Add("12345", "minutes_in_hmi_full", 10);
-  reps->Add("12345", "minutes_in_hmi_full", 60);
+  reps_->Add("12345", "minutes_in_hmi_full", 10);
+  reps_->Add("12345", "minutes_in_hmi_full", 60);
 
   const std::string query_select =
       "SELECT `minutes_in_hmi_full` FROM `app_level`"
@@ -1034,7 +1109,7 @@ TEST_F(
     SQLPTExtRepresentationTest,
     SetUnpairedDevice_SetUnpairedDeviceId12345_ExpectUnpairedDeviceIdEquals12345) {
   // Arrange
-  utils::dbms::SQLQuery query(reps->db());
+  utils::dbms::SQLQuery query(reps_->db());
   const std::string query_delete = "DELETE FROM `device`";
   // Assert
   ASSERT_TRUE(query_wrapper_->Exec(query_delete));
@@ -1043,7 +1118,7 @@ TEST_F(
       "INSERT INTO `device` (`id`) VALUES('12345')";
   // Assert
   ASSERT_TRUE(query_wrapper_->Exec(query_insert));
-  ASSERT_TRUE(reps->SetUnpairedDevice("12345", true));
+  ASSERT_TRUE(reps_->SetUnpairedDevice("12345", true));
   // Act
   const std::string query_select =
       "SELECT `id` FROM `device` WHERE `unpaired` = 1";
@@ -1074,7 +1149,7 @@ TEST_F(
   // Act
   std::vector<std::string> output;
   // Assert
-  ASSERT_TRUE(reps->UnpairedDevicesList(&output));
+  ASSERT_TRUE(reps_->UnpairedDevicesList(&output));
   ASSERT_EQ(2u, output.size());
   EXPECT_NE(output.end(), std::find(output.begin(), output.end(), "12345"));
   EXPECT_NE(output.end(), std::find(output.begin(), output.end(), "54321"));
@@ -1083,8 +1158,8 @@ TEST_F(
 TEST_F(SQLPTExtRepresentationTest,
        SetMetaInfo_SetMetaInfo_ExpectValuesSetInParams) {
   // Arrange
-  ASSERT_TRUE(reps->SetMetaInfo("4.1.3.B_EB355B", "WAEGB", "ru-ru"));
-  utils::dbms::SQLQuery query(reps->db());
+  ASSERT_TRUE(reps_->SetMetaInfo("4.1.3.B_EB355B", "WAEGB", "ru-ru"));
+  utils::dbms::SQLQuery query(reps_->db());
   const std::string query_select_ccpu =
       "SELECT `ccpu_version` FROM `module_meta`";
   const std::string query_select_wers_country_code =
@@ -1111,14 +1186,14 @@ TEST_F(SQLPTExtRepresentationTest,
       "UPDATE `module_meta` SET `ccpu_version` = '4.1.3.B_EB355B', "
       "`wers_country_code` = 'WAEGB', `language` = 'ru-ru' ";
   ASSERT_TRUE(query_wrapper_->Exec(query_insert_meta_info));
-  EXPECT_TRUE(reps->IsMetaInfoPresent());
+  EXPECT_TRUE(reps_->IsMetaInfoPresent());
 }
 
 TEST_F(SQLPTExtRepresentationTest,
        SetSystemLanguage_SetSystemLanguage_ExpectValueSetInParams) {
   // Arrange
-  utils::dbms::SQLQuery query(reps->db());
-  ASSERT_TRUE(reps->SetSystemLanguage("ru-ru"));
+  utils::dbms::SQLQuery query(reps_->db());
+  ASSERT_TRUE(reps_->SetSystemLanguage("ru-ru"));
   const std::string query_select_language =
       "SELECT `language` FROM `module_meta`";
   // Assert
@@ -1148,7 +1223,7 @@ TEST_F(
 
   std::map<uint32_t, std::pair<std::string, std::string> > FunctionalGroupNames;
   std::map<uint32_t, std::pair<std::string, std::string> >::iterator it;
-  reps->GetFunctionalGroupNames(FunctionalGroupNames);
+  reps_->GetFunctionalGroupNames(FunctionalGroupNames);
   EXPECT_EQ(3u, FunctionalGroupNames.size());
   ASSERT_TRUE(FunctionalGroupNames.end() !=
               (it = FunctionalGroupNames.find(129372391)));
@@ -1208,12 +1283,12 @@ TEST_F(
   FillPermissionStruct(
       "XXX12345ZZZ", "1234", "VR", allowed_groups, disallowed_groups);
   FunctionalIdType group_types;
-  ASSERT_TRUE(reps->GetPermissionsForApp("XXX12345ZZZ", "1234", &group_types));
+  ASSERT_TRUE(reps_->GetPermissionsForApp("XXX12345ZZZ", "1234", &group_types));
   EXPECT_TRUE(
       CheckGroupTypesExist(group_types, allowed_groups, disallowed_groups));
   group_types.clear();
-  reps->RemoveAppConsentForGroup("1234", "Notifications");
-  ASSERT_TRUE(reps->GetPermissionsForApp("XXX12345ZZZ", "1234", &group_types));
+  reps_->RemoveAppConsentForGroup("1234", "Notifications");
+  ASSERT_TRUE(reps_->GetPermissionsForApp("XXX12345ZZZ", "1234", &group_types));
   allowed_groups.pop_back();
   EXPECT_TRUE(
       CheckGroupTypesExist(group_types, allowed_groups, disallowed_groups));
@@ -1222,25 +1297,25 @@ TEST_F(
 TEST_F(SQLPTExtRepresentationTest,
        CleanUnpaireDevices_SetDevicesThenCleanup_ExpectDevicesDeleted) {
   // Arrange
-  utils::dbms::SQLQuery query(reps->db());
-  reps->SetDeviceData("XXX12345ZZZ",
-                      "hardware IPX",
-                      "v.8.0.1",
-                      "Android",
-                      "4.4.2",
-                      "Life",
-                      2,
-                      "Bluetooth");
+  utils::dbms::SQLQuery query(reps_->db());
+  reps_->SetDeviceData("XXX12345ZZZ",
+                       "hardware IPX",
+                       "v.8.0.1",
+                       "Android",
+                       "4.4.2",
+                       "Life",
+                       2,
+                       "Bluetooth");
 
   StringArray allowed_groups;
   StringArray disallowed_groups;
-  EXPECT_TRUE(reps->GetUserPermissionsForDevice(
+  EXPECT_TRUE(reps_->GetUserPermissionsForDevice(
       "XXX12345ZZZ", &allowed_groups, &disallowed_groups));
   EXPECT_EQ(0u, allowed_groups.size());
   EXPECT_EQ(0u, disallowed_groups.size());
   allowed_groups.push_back("DataConsent-2");
   disallowed_groups.push_back("Navigation-1");
-  EXPECT_TRUE(reps->SetUserPermissionsForDevice(
+  EXPECT_TRUE(reps_->SetUserPermissionsForDevice(
       "XXX12345ZZZ", allowed_groups, disallowed_groups));
 
   GroupsAliasNameCollection perm_allowed_groups;
@@ -1255,7 +1330,7 @@ TEST_F(SQLPTExtRepresentationTest,
                        perm_allowed_groups,
                        perm_disallowed_groups);
 
-  EXPECT_TRUE(reps->SetUserPermissionsForApp(perm_consent));
+  EXPECT_TRUE(reps_->SetUserPermissionsForApp(perm_consent));
 
   const std::string query_select_device =
       "SELECT COUNT(*) FROM `device` WHERE `id` = 'XXX12345ZZZ'";
@@ -1277,11 +1352,11 @@ TEST_F(SQLPTExtRepresentationTest,
   query.Next();
   EXPECT_EQ(2, query.GetInteger(0));
 
-  EXPECT_TRUE(reps->SetUnpairedDevice("XXX12345ZZZ", true));
+  EXPECT_TRUE(reps_->SetUnpairedDevice("XXX12345ZZZ", true));
 
   std::vector<std::string> DeviceIds;
   DeviceIds.push_back("XXX12345ZZZ");
-  EXPECT_TRUE(reps->CleanupUnpairedDevices(DeviceIds));
+  EXPECT_TRUE(reps_->CleanupUnpairedDevices(DeviceIds));
 
   // Assert
   query.Prepare(query_select_device);
@@ -1317,15 +1392,15 @@ TEST_F(
   disallowed_groups.push_back(std::make_pair("DataConsent", "DataConsent-2"));
   FillPermissionStruct(
       "XXX12345ZZZ", "12345", "VR", allowed_groups, disallowed_groups);
-  EXPECT_TRUE(reps->SetUserPermissionsForApp(perm_consent));
+  EXPECT_TRUE(reps_->SetUserPermissionsForApp(perm_consent));
   // Act
-  ASSERT_TRUE(reps->SetIsPredata("12345", true));
+  ASSERT_TRUE(reps_->SetIsPredata("12345", true));
   // Check
-  EXPECT_TRUE(reps->IsPredataPolicy("12345"));
+  EXPECT_TRUE(reps_->IsPredataPolicy("12345"));
   // Act
-  EXPECT_TRUE(reps->SetDefaultPolicy("12345"));
+  EXPECT_TRUE(reps_->SetDefaultPolicy("12345"));
   // Check
-  EXPECT_TRUE(reps->IsDefaultPolicy("12345"));
+  EXPECT_TRUE(reps_->IsDefaultPolicy("12345"));
 }
 
 TEST_F(SQLPTExtRepresentationTest,
@@ -1347,16 +1422,16 @@ TEST_F(SQLPTExtRepresentationTest,
   disallowed_groups.push_back(std::make_pair("DataConsent", "DataConsent-2"));
   FillPermissionStruct(
       "XXX12345ZZZ", "12345", "VR", allowed_groups, disallowed_groups);
-  EXPECT_TRUE(reps->SetUserPermissionsForApp(perm_consent));
-  EXPECT_FALSE(reps->IsPredataPolicy("12345"));
+  EXPECT_TRUE(reps_->SetUserPermissionsForApp(perm_consent));
+  EXPECT_FALSE(reps_->IsPredataPolicy("12345"));
   // Act
-  ASSERT_TRUE(reps->SetIsPredata("12345", false));
+  ASSERT_TRUE(reps_->SetIsPredata("12345", false));
   // Check
-  EXPECT_FALSE(reps->IsPredataPolicy("12345"));
+  EXPECT_FALSE(reps_->IsPredataPolicy("12345"));
   // Act
-  ASSERT_TRUE(reps->SetIsPredata("12345", true));
+  ASSERT_TRUE(reps_->SetIsPredata("12345", true));
   // Check
-  EXPECT_TRUE(reps->IsPredataPolicy("12345"));
+  EXPECT_TRUE(reps_->IsPredataPolicy("12345"));
 }
 
 TEST_F(
@@ -1379,12 +1454,12 @@ TEST_F(
   disallowed_groups.push_back(std::make_pair("DataConsent", "DataConsent-2"));
   FillPermissionStruct(
       "XXX12345ZZZ", "12345", "VR", allowed_groups, disallowed_groups);
-  EXPECT_TRUE(reps->SetUserPermissionsForApp(perm_consent));
-  EXPECT_FALSE(reps->IsPredataPolicy("12345"));
+  EXPECT_TRUE(reps_->SetUserPermissionsForApp(perm_consent));
+  EXPECT_FALSE(reps_->IsPredataPolicy("12345"));
   // Act
-  ASSERT_TRUE(reps->SetPredataPolicy("12345"));
+  ASSERT_TRUE(reps_->SetPredataPolicy("12345"));
   // Check
-  EXPECT_TRUE(reps->IsPredataPolicy("12345"));
+  EXPECT_TRUE(reps_->IsPredataPolicy("12345"));
 }
 
 TEST_F(SQLPTExtRepresentationTest,
@@ -1408,7 +1483,7 @@ TEST_F(SQLPTExtRepresentationTest, SaveUserConsentRecords_ExpectedSaved) {
 
   const std::string device_id = "test_device_id";
   const std::string app_id = "test_app_id";
-  const std::string ccs_group = "CCSGroup";
+  const std::string external_consent_group = "ExternalConsentGroup";
   const std::string consent_group = "ConsentGroup";
   const std::string time_stamp = "2016-08-29T17:12:07Z";
   const Input input = Input::I_GUI;
@@ -1420,8 +1495,8 @@ TEST_F(SQLPTExtRepresentationTest, SaveUserConsentRecords_ExpectedSaved) {
 
   UserConsentRecords::mapped_type& app_records = user_consent_records[app_id];
 
-  app_records.ccs_consent_groups->insert(
-      std::make_pair(ccs_group, Boolean(true)));
+  app_records.external_consent_status_groups->insert(
+      std::make_pair(external_consent_group, Boolean(true)));
 
   app_records.consent_groups->insert(
       std::make_pair(consent_group, Boolean(true)));
@@ -1446,8 +1521,8 @@ TEST_F(SQLPTExtRepresentationTest, SaveUserConsentRecords_ExpectedSaved) {
 
   EXPECT_TRUE(
       (IsKeyExist<ConsentGroups>(*consents.consent_groups, consent_group)));
-  EXPECT_TRUE(
-      (IsKeyExist<ConsentGroups>(*consents.ccs_consent_groups, ccs_group)));
+  EXPECT_TRUE((IsKeyExist<ConsentGroups>(
+      *consents.external_consent_status_groups, external_consent_group)));
   EXPECT_EQ((String<1, 255>(time_stamp)), *consents.time_stamp);
   EXPECT_EQ(input, *consents.input);
 }
@@ -1461,10 +1536,10 @@ TEST_F(SQLPTExtRepresentationTest, SaveFunctionalGroupings_ExpectedSaved) {
   const std::string rpc_name = "RpcName";
   const std::string user_consent_prompt = "TestConsentPrompt";
   const std::string another_user_consent_prompt = "AnotherTestConsentPrompt";
-  CCS_Entity off_entity_1(0, 0);
-  CCS_Entity off_entity_2(0, 1);
-  CCS_Entity on_entity_1(1, 0);
-  CCS_Entity on_entity_2(1, 1);
+  ExternalConsentEntity off_entity_1(0, 0);
+  ExternalConsentEntity off_entity_2(0, 1);
+  ExternalConsentEntity on_entity_1(1, 0);
+  ExternalConsentEntity on_entity_2(1, 1);
 
   const HmiLevel test_level_1 = HL_FULL;
   const HmiLevel test_level_2 = HL_LIMITED;
@@ -1473,11 +1548,11 @@ TEST_F(SQLPTExtRepresentationTest, SaveFunctionalGroupings_ExpectedSaved) {
 
   Rpcs rpcs;
 
-  rpcs.disallowed_by_ccs_entities_off->push_back(off_entity_1);
-  rpcs.disallowed_by_ccs_entities_off->push_back(off_entity_2);
+  rpcs.disallowed_by_external_consent_entities_off->push_back(off_entity_1);
+  rpcs.disallowed_by_external_consent_entities_off->push_back(off_entity_2);
 
-  rpcs.disallowed_by_ccs_entities_on->push_back(on_entity_1);
-  rpcs.disallowed_by_ccs_entities_on->push_back(on_entity_2);
+  rpcs.disallowed_by_external_consent_entities_on->push_back(on_entity_1);
+  rpcs.disallowed_by_external_consent_entities_on->push_back(on_entity_2);
 
   *rpcs.user_consent_prompt = user_consent_prompt;
 
@@ -1493,13 +1568,15 @@ TEST_F(SQLPTExtRepresentationTest, SaveFunctionalGroupings_ExpectedSaved) {
       original_table.policy_table.functional_groupings;
   groupings.insert(std::make_pair(group_name, rpcs));
 
-  CCS_Entity off_entity_3(3, 4);
-  CCS_Entity on_entity_3(5, 6);
+  ExternalConsentEntity off_entity_3(3, 4);
+  ExternalConsentEntity on_entity_3(5, 6);
 
   Rpcs another_rpcs;
 
-  another_rpcs.disallowed_by_ccs_entities_off->push_back(off_entity_3);
-  another_rpcs.disallowed_by_ccs_entities_on->push_back(on_entity_3);
+  another_rpcs.disallowed_by_external_consent_entities_off->push_back(
+      off_entity_3);
+  another_rpcs.disallowed_by_external_consent_entities_on->push_back(
+      on_entity_3);
   *another_rpcs.user_consent_prompt = another_user_consent_prompt;
 
   const HmiLevel test_level_3 = HL_BACKGROUND;
@@ -1522,15 +1599,15 @@ TEST_F(SQLPTExtRepresentationTest, SaveFunctionalGroupings_ExpectedSaved) {
   Rpcs loaded_rpcs =
       GetKeyData<FunctionalGroupings, Rpcs>(loaded_groupings, group_name);
 
-  EXPECT_TRUE((IsKeyExist<DisallowedByCCSEntities>(
-      *loaded_rpcs.disallowed_by_ccs_entities_off, off_entity_1)));
-  EXPECT_TRUE((IsKeyExist<DisallowedByCCSEntities>(
-      *loaded_rpcs.disallowed_by_ccs_entities_off, off_entity_2)));
+  EXPECT_TRUE((IsKeyExist<DisallowedByExternalConsentEntities>(
+      *loaded_rpcs.disallowed_by_external_consent_entities_off, off_entity_1)));
+  EXPECT_TRUE((IsKeyExist<DisallowedByExternalConsentEntities>(
+      *loaded_rpcs.disallowed_by_external_consent_entities_off, off_entity_2)));
 
-  EXPECT_TRUE((IsKeyExist<DisallowedByCCSEntities>(
-      *loaded_rpcs.disallowed_by_ccs_entities_on, on_entity_1)));
-  EXPECT_TRUE((IsKeyExist<DisallowedByCCSEntities>(
-      *loaded_rpcs.disallowed_by_ccs_entities_on, on_entity_2)));
+  EXPECT_TRUE((IsKeyExist<DisallowedByExternalConsentEntities>(
+      *loaded_rpcs.disallowed_by_external_consent_entities_on, on_entity_1)));
+  EXPECT_TRUE((IsKeyExist<DisallowedByExternalConsentEntities>(
+      *loaded_rpcs.disallowed_by_external_consent_entities_on, on_entity_2)));
 
   RpcParameters loaded_parameters =
       GetKeyData<Rpc, RpcParameters>(loaded_rpcs.rpcs, rpc_name);
@@ -1548,11 +1625,13 @@ TEST_F(SQLPTExtRepresentationTest, SaveFunctionalGroupings_ExpectedSaved) {
   Rpcs another_loaded_rpcs = GetKeyData<FunctionalGroupings, Rpcs>(
       loaded_groupings, another_group_name);
 
-  EXPECT_TRUE((IsKeyExist<DisallowedByCCSEntities>(
-      *another_loaded_rpcs.disallowed_by_ccs_entities_off, off_entity_3)));
+  EXPECT_TRUE((IsKeyExist<DisallowedByExternalConsentEntities>(
+      *another_loaded_rpcs.disallowed_by_external_consent_entities_off,
+      off_entity_3)));
 
-  EXPECT_TRUE((IsKeyExist<DisallowedByCCSEntities>(
-      *another_loaded_rpcs.disallowed_by_ccs_entities_on, on_entity_3)));
+  EXPECT_TRUE((IsKeyExist<DisallowedByExternalConsentEntities>(
+      *another_loaded_rpcs.disallowed_by_external_consent_entities_on,
+      on_entity_3)));
 
   RpcParameters another_loaded_parameters =
       GetKeyData<Rpc, RpcParameters>(another_loaded_rpcs.rpcs, rpc_name);
@@ -1564,7 +1643,7 @@ TEST_F(SQLPTExtRepresentationTest, SaveFunctionalGroupings_ExpectedSaved) {
                                       test_parameter_3)));
 }
 
-TEST_F(SQLPTExtRepresentationTest, JsonContentsCCS_ExpectParsed) {
+TEST_F(SQLPTExtRepresentationTest, JsonContentsExternalConsent_ExpectParsed) {
   using namespace policy_table;
   using namespace rpc;
 
@@ -1588,14 +1667,15 @@ TEST_F(SQLPTExtRepresentationTest, JsonContentsCCS_ExpectParsed) {
   entity_on["entityType"] = entity_on_type;
   entity_on["entityID"] = entity_on_id;
 
-  functional_groupings[group_name]["disallowed_by_ccs_entities_on"][0] =
-      entity_on;
+  functional_groupings[group_name]["disallowed_by_external_consent_entities_on"]
+                      [0] = entity_on;
 
   Json::Value entity_off = Json::Value(Json::objectValue);
   entity_off["entityType"] = entity_off_type;
   entity_off["entityID"] = entity_off_id;
-  functional_groupings[group_name]["disallowed_by_ccs_entities_off"][0] =
-      entity_off;
+  functional_groupings[group_name]
+                      ["disallowed_by_external_consent_entities_off"][0] =
+                          entity_off;
 
   policy_table::Table parsed_table(&json_table);
 
@@ -1605,26 +1685,26 @@ TEST_F(SQLPTExtRepresentationTest, JsonContentsCCS_ExpectParsed) {
   Rpcs loaded_rpcs =
       GetKeyData<FunctionalGroupings, Rpcs>(loaded_groupings, group_name);
 
-  CCS_Entity off_entity_1(entity_off_type, entity_off_id);
-  CCS_Entity on_entity_1(entity_on_type, entity_on_id);
+  ExternalConsentEntity off_entity_1(entity_off_type, entity_off_id);
+  ExternalConsentEntity on_entity_1(entity_on_type, entity_on_id);
 
-  EXPECT_TRUE((IsKeyExist<DisallowedByCCSEntities>(
-      *loaded_rpcs.disallowed_by_ccs_entities_off, off_entity_1)));
+  EXPECT_TRUE((IsKeyExist<DisallowedByExternalConsentEntities>(
+      *loaded_rpcs.disallowed_by_external_consent_entities_off, off_entity_1)));
 
-  EXPECT_TRUE((IsKeyExist<DisallowedByCCSEntities>(
-      *loaded_rpcs.disallowed_by_ccs_entities_on, on_entity_1)));
+  EXPECT_TRUE((IsKeyExist<DisallowedByExternalConsentEntities>(
+      *loaded_rpcs.disallowed_by_external_consent_entities_on, on_entity_1)));
 }
 
-TEST_F(SQLPTExtRepresentationTest, SaveCCSStatus_ExpectSaved) {
-  CCSStatusItem item_1(0, 0, kStatusOn);
-  CCSStatusItem item_2(1, 1, kStatusOff);
-  CCSStatus in_status;
+TEST_F(SQLPTExtRepresentationTest, SaveExternalConsentStatus_ExpectSaved) {
+  ExternalConsentStatusItem item_1(0, 0, kStatusOn);
+  ExternalConsentStatusItem item_2(1, 1, kStatusOff);
+  ExternalConsentStatus in_status;
   in_status.insert(item_1);
   in_status.insert(item_2);
 
-  EXPECT_TRUE(reps_->SaveCCSStatus(in_status));
+  EXPECT_TRUE(reps_->SaveExternalConsentStatus(in_status));
 
-  CCSStatus out_status = reps_->GetCCSStatus();
+  ExternalConsentStatus out_status = reps_->GetExternalConsentStatus();
   EXPECT_TRUE(in_status.size() == out_status.size());
 
   EXPECT_TRUE(out_status.end() !=

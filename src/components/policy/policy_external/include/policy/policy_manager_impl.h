@@ -60,6 +60,8 @@ class PolicyManagerImpl : public PolicyManager {
                       const PolicySettings* settings);
   virtual bool LoadPT(const std::string& file, const BinaryMessage& pt_content);
   virtual bool ResetPT(const std::string& file_name);
+
+  virtual std::string GetUpdateUrl(int service_type);
   virtual void GetUpdateUrls(const uint32_t service_type,
                              EndpointUrls& out_end_points);
   virtual void GetUpdateUrls(const std::string& service_type,
@@ -167,7 +169,9 @@ class PolicyManagerImpl : public PolicyManager {
   bool CanAppStealFocus(const std::string& app_id) const;
   void MarkUnpairedDevice(const std::string& device_id);
 
-  StatusNotifier AddApplication(const std::string& application_id);
+  StatusNotifier AddApplication(
+      const std::string& application_id,
+      const rpc::policy_table_interface_base::AppHmiTypes& hmi_types);
 
   virtual void RemoveAppConsentForGroup(const std::string& app_id,
                                         const std::string& group_name);
@@ -211,6 +215,10 @@ class PolicyManagerImpl : public PolicyManager {
   AppIdURL RetrySequenceUrl(const struct RetrySequenceURL& rs,
                             const EndpointUrls& urls) const OVERRIDE;
 
+  /**
+   * @brief Gets customer connectivity settings status
+   * @return ExternalConsent status
+   */
   bool SetExternalConsentStatus(const ExternalConsentStatus& status) OVERRIDE;
   ExternalConsentStatus GetExternalConsentStatus() OVERRIDE;
 
@@ -412,83 +420,6 @@ class PolicyManagerImpl : public PolicyManager {
       const GroupsByExternalConsentStatus& groups_by_external_consent,
       GroupsNames& out_allowed_groups,
       GroupsNames& out_disallowed_groups) const;
-
-  /**
-   * @brief Notify application about its permissions changes by preparing and
-   * sending OnPermissionsChanged notification
-   * @param policy_app_id Application id to send notification to
-   * @param app_group_permissons Current permissions for groups assigned to
-   * application
-   */
-  void NotifyPermissionsChanges(
-      const std::string& policy_app_id,
-      const std::vector<FunctionalGroupPermission>& app_group_permissions);
-
-  /**
-   * @brief Processes updated CCS status received via OnAppPermissionConsent
-   * notification by updating user consents and CCS consents for registered and
-   * known before by policy table (must have any user consent records)
-   * @param groups_by_status Collection of CCS entities with their statuses
-   */
-  void ProcessCCSStatusUpdate(const GroupsByCCSStatus& groups_by_status);
-
-  /**
-   * @brief Processes CCS status for application registered afterward, so its
-   * user consents (if any) and CCS consents (if any) will be updated
-   * appropiately to current CCS status stored by policy table
-   * @param application_id Application id
-   */
-  void ProcessCCSStatusForApp(const std::string& application_id);
-  /**
-   * @brief Directly updates user consent and CCS consents (if any) for
-   * application if it has assigned any of group from allowed or disallowed
-   * lists
-   * @param device_id Device id which is linked to application id
-   * @param application_id Application id
-   * @param allowed_groups List of group names allowed by current CCS status
-   * @param disallowed_groups List of group names disallwed by current CCS
-   * status
-   */
-  void UpdateAppConsentWithCCS(const std::string& device_id,
-                               const std::string& application_id,
-                               const GroupsNames& allowed_groups,
-                               const GroupsNames& disallowed_groups);
-
-  typedef policy_table::ApplicationPolicies::value_type AppPoliciesValueType;
-
-  /**
-   * @brief Notifies system by sending OnAppPermissionChanged notification
-   * @param app_policy Reference to application policy
-   */
-  void NotifySystem(const AppPoliciesValueType& app_policy) const;
-
-  /**
-   * @brief Sends OnPermissionChange notification to application if its
-   * currently registered
-   * @param app_policy Reference to application policy
-   */
-  void SendPermissionsToApp(const AppPoliciesValueType& app_policy);
-
-  /**
-   * @brief Gets groups names from collection of groups permissions
-   * @param app_group_permissions Collection of groups permissions
-   * @return Collection of group names
-   */
-  policy_table::Strings GetGroupsNames(
-      const std::vector<FunctionalGroupPermission>& app_group_permissions)
-      const;
-
-  /**
-   * @brief Calculates consents for groups based on mapped CCS entities statuses
-   * and groups containers where entities have been found
-   * @param groups_by_ccs CCS entities mapped to functional groups names and
-   * their containters where this entity has been found
-   * @param out_allowed_groups List of groups allowed by CCS status
-   * @param out_disallowed_groups List of groups disallowed by CCS status
-   */
-  void CalculateGroupsConsentFromCCS(const GroupsByCCSStatus& groups_by_ccs,
-                                     GroupsNames& out_allowed_groups,
-                                     GroupsNames& out_disallowed_groups) const;
 
   PolicyListener* listener_;
 

@@ -38,6 +38,7 @@
 #include "utils/callable.h"
 
 #include "policy/policy_types.h"
+#include "policy/policy_table/types.h"
 #include "policy/policy_listener.h"
 #include "usage_statistics/statistics_manager.h"
 
@@ -77,11 +78,13 @@ class PolicyManager : public usage_statistics::StatisticsManager {
    */
   virtual bool ResetPT(const std::string& file_name) = 0;
 
+  virtual std::string GetUpdateUrl(int service_type) = 0;
+
   /**
-   * @brief Gets all URLs for sending PTS to from PT itself.
-   * @param service_type Service specifies user of URL
-   * @return vector of urls
-   */
+ * @brief Gets all URLs for sending PTS to from PT itself.
+ * @param service_type Service specifies user of URL
+ * @return vector of urls
+ */
 
   virtual void GetUpdateUrls(const uint32_t service_type,
                              EndpointUrls& out_end_points) = 0;
@@ -364,7 +367,9 @@ class PolicyManager : public usage_statistics::StatisticsManager {
    * @param Application id assigned by Ford to the application
    * @return function that will notify update manager about new application
    */
-  virtual StatusNotifier AddApplication(const std::string& application_id) = 0;
+  virtual StatusNotifier AddApplication(
+      const std::string& application_id,
+      const rpc::policy_table_interface_base::AppHmiTypes& hmi_types) = 0;
 
   /**
    * @brief Removes unpaired device records and related records from DB
@@ -485,6 +490,26 @@ class PolicyManager : public usage_statistics::StatisticsManager {
   virtual void SetDecryptedCertificate(const std::string& certificate) = 0;
 
   virtual const PolicySettings& get_settings() const = 0;
+
+  /**
+   * @brief Finds the next URL that must be sent on OnSystemRequest retry
+   * @param urls vector of vectors that contain urls for each application
+   * @return Pair of policy application id and application url id from the
+   * urls vector
+   */
+  virtual AppIdURL GetNextUpdateUrl(const EndpointUrls& urls) = 0;
+
+  /**
+   * @brief Checks if there is existing URL in the EndpointUrls vector with
+   * index saved in the policy manager and if not, it moves to the next
+   * application index
+   * @param rs contains the application index and url index from the
+   * urls vector that are to be sent on the next OnSystemRequest
+   * @param urls vector of vectors that contain urls for each application
+   * @return Pair of application index and url index
+   */
+  virtual AppIdURL RetrySequenceUrl(const struct RetrySequenceURL& rs,
+                                    const EndpointUrls& urls) const = 0;
   /**
    * @brief Saves customer connectivity settings status
    * @param status ExternalConsent status

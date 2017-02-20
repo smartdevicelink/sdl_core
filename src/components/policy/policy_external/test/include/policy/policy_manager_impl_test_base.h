@@ -66,10 +66,12 @@ const std::string kHmiLevelBackground = "BACKGROUND";
 const std::string kHmiLevelNone = "None";
 
 const std::string kPtuJson = "json/PTU.json";
+const std::string kPtu2Json = "json/PTU2.json";
 const std::string kPtu3Json = "json/PTU3.json";
 const std::string kValidSdlPtUpdateJson = "json/valid_sdl_pt_update.json";
 const std::string kPtuRequestTypeJson = "json/ptu_requestType.json";
 const std::string kPtu2RequestTypeJson = "json/ptu2_requestType.json";
+const std::string kDummyUpdateFileName = "DummyName";
 }  // namespace
 
 struct StringsForUpdate {
@@ -84,6 +86,7 @@ void CheckIsParamInList(const ::policy::RPCParams& list,
                         const std::string& parameter);
 Json::Value createPTforLoad();
 void InsertRpcParametersInList(::policy::RPCParams& input_params);
+policy_table::AppHmiTypes HmiTypes(const policy_table::AppHMIType hmi_type);
 
 template <typename T>
 void SortAndCheckEquality(std::vector<T> first, std::vector<T> second) {
@@ -132,7 +135,7 @@ class PolicyManagerImplTest2 : public ::testing::Test {
   const std::string device_id_2_;
   const std::string application_id_;
   const std::string app_storage_folder_;
-  const std::string preloadet_pt_filename_;
+  const std::string preloaded_pt_filename_;
   const bool in_memory_;
 
   PolicyManagerImpl* policy_manager_;
@@ -188,6 +191,10 @@ class PolicyManagerImplTest2 : public ::testing::Test {
   void CheckRpcPermissions(const std::string& rpc_name,
                            const PermitResult& expected_permission);
 
+  void CheckRpcPermissions(const std::string& app_id,
+                           const std::string& rpc_name,
+                           const policy::PermitResult& out_expected_permission);
+
   // To avoid duplicate arrange of test
   void AddSetDeviceData();
 
@@ -195,12 +202,6 @@ class PolicyManagerImplTest2 : public ::testing::Test {
   void LoadPTUFromJsonFile(const std::string& update_file);
 
   void EmulatePTAppRevoked(const std::string& ptu_name);
-
-  void TestSetDeviceUSBConnection(
-      const policy_table::UserSetting usb_transport_status);
-
-  void TestUpdateUSBConnectionStatus(
-      const policy_table::UserSetting usb_transport_status);
 
   utils::SharedPtr<policy_table::Table> PreconditionForBasicValidateSnapshot();
 
@@ -233,7 +234,7 @@ class PolicyManagerImplTest_RequestTypes : public ::testing::Test {
   const std::string kAppId;
   const std::string kDefaultAppId;
   const std::string app_storage_folder_;
-  const std::string preloadet_pt_filename_;
+  const std::string preloaded_pt_filename_;
 
   utils::SharedPtr<PolicyManagerImpl> policy_manager_impl_sptr_;
   NiceMock<MockPolicyListener> listener_;
@@ -267,20 +268,20 @@ class PolicyManagerImplTest_RequestTypes : public ::testing::Test {
   void TearDown() OVERRIDE;
 };
 
-class PolicyManagerImplTest_CCS : public PolicyManagerImplTest2 {
+class PolicyManagerImplTest_ExternalConsent : public PolicyManagerImplTest2 {
  public:
-  PolicyManagerImplTest_CCS()
+  PolicyManagerImplTest_ExternalConsent()
       : PolicyManagerImplTest2()
       , group_name_1_("Group1")
       , group_name_2_("Group2")
       , group_name_3_("Group3") {}
 
  protected:
-  void PreconditionCCSPreparePTWithAppGroupsAndConsents();
+  void PreconditionExternalConsentPreparePTWithAppGroupsAndConsents();
 
-  void PreconditionCCSPreparePTWithAppPolicy();
+  void PreconditionExternalConsentPreparePTWithAppPolicy();
 
-  policy_table::Table PreparePTWithGroupsHavingCCS();
+  policy_table::Table PreparePTWithGroupsHavingExternalConsent();
 
   std::string PreparePTUWithNewGroup(const uint32_t type,
                                      const uint32_t id,
