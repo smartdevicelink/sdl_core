@@ -64,8 +64,6 @@ void PerformAudioPassThruRequest::onTimeOut() {
 }
 
 bool PerformAudioPassThruRequest::Init() {
-  default_timeout_ +=
-      (((*message_)[str::msg_params][str::max_duration].asUInt()));
   return true;
 }
 
@@ -157,10 +155,6 @@ void PerformAudioPassThruRequest::on_event(const event_engine::Event& event) {
       if (is_tts_speak_success_unsuported) {
         SendRecordStartNotification();
         StartMicrophoneRecording();
-
-        // update request timeout to get time for perform audio recording
-        application_manager_.updateRequestTimeout(
-            connection_key(), correlation_id(), default_timeout());
       }
       break;
     }
