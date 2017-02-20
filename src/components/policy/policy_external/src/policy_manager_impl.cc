@@ -1037,6 +1037,17 @@ const PolicySettings& PolicyManagerImpl::get_settings() const {
   return *settings_;
 }
 
+bool PolicyManagerImpl::SaveExternalConsentStatus(
+    const ExternalConsentStatus& status) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return cache_->SaveExternalConsentStatus(status);
+}
+
+ExternalConsentStatus PolicyManagerImpl::GetExternalConsentStatus() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return cache_->GetExternalConsentStatus();
+}
+
 bool PolicyManagerImpl::ExceededDays() {
   LOG4CXX_AUTO_TRACE(logger_);
 

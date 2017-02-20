@@ -365,6 +365,40 @@ struct MetaInfo {
   std::string language;
 };
 
+/**
+ * @brief The ExternalConsentStatusItem struct represents external user consent
+ * settings item
+ */
+struct ExternalConsentStatusItem {
+  ExternalConsentStatusItem(const uint32_t type,
+                            const uint32_t id,
+                            const std::string& status)
+      : entity_type(type), entity_id(id), on_off(status) {}
+
+  bool operator==(const ExternalConsentStatusItem& rhs) const {
+    return (this->entity_type == rhs.entity_type) &&
+           (this->entity_id == rhs.entity_id);
+  }
+
+  const uint32_t entity_type;
+  const uint32_t entity_id;
+  const std::string on_off;
+};
+
+struct ExternalConsentStatusItemComparator {
+  bool operator()(const ExternalConsentStatusItem& lhs,
+                  const ExternalConsentStatusItem& rhs) const {
+    return (lhs.entity_type < rhs.entity_type) ||
+           (lhs.entity_id < rhs.entity_id);
+  }
+};
+
+/**
+ * @brief Customer connectivity settings status
+ */
+typedef std::set<ExternalConsentStatusItem, ExternalConsentStatusItemComparator>
+    ExternalConsentStatus;
+
 }  //  namespace policy
 
 #endif  // SRC_COMPONENTS_POLICY_POLICY_EXTERNAL_INCLUDE_POLICY_POLICY_TYPES_H_

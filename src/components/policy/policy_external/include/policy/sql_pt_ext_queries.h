@@ -92,6 +92,8 @@ extern const std::string kSelectUnpairedDevices;
 extern const std::string kHasMsgLanguageCode;
 extern const std::string kDeletePreconsentedGroupsByApplicationId;
 extern const std::string kDeleteAppConsent;
+extern const std::string kSelectExternalConsentStatus;
+extern const std::string kInsertExternalConsentStatus;
 
 }  // namespace sql_pt_ext
 }  // namespace policy

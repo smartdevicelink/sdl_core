@@ -235,6 +235,8 @@ class MockPolicyManager : public PolicyManager {
                     int32_t timespan_seconds));
   MOCK_CONST_METHOD0(get_settings, const PolicySettings&());
   MOCK_METHOD1(set_settings, void(const PolicySettings* get_settings));
+  MOCK_METHOD1(SaveExternalConsentStatus, bool(const ExternalConsentStatus&));
+  MOCK_METHOD0(GetExternalConsentStatus, ExternalConsentStatus());
 };
 }  // namespace policy_manager_test
 }  // namespace components

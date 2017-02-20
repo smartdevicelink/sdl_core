@@ -2170,6 +2170,19 @@ void CacheManager::SetDecryptedCertificate(const std::string& certificate) {
   Backup();
 }
 
+bool CacheManager::SaveExternalConsentStatus(
+    const ExternalConsentStatus& status) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock auto_lock(cache_lock_);
+  return ex_backup_->SaveExternalConsentStatus(status);
+}
+
+ExternalConsentStatus CacheManager::GetExternalConsentStatus() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock auto_lock(cache_lock_);
+  return ex_backup_->GetExternalConsentStatus();
+}
+
 void CacheManager::MergePreloadPT(const std::string& file_name) {
   LOG4CXX_AUTO_TRACE(logger_);
   policy_table::Table table;
