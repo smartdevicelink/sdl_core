@@ -723,6 +723,7 @@ PolicyHandler::CollectRegisteredAppsPermissions() {
   }
   return consolidator.GetConsolidatedPermissions();
 }
+
 std::vector<FunctionalGroupPermission> PolicyHandler::CollectAppPermissions(
     const uint32_t connection_key) {
   // Single app only

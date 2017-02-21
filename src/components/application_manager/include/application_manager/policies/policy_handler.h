@@ -575,9 +575,6 @@ class PolicyHandler : public PolicyHandlerInterface,
 #endif  // EXTERNAL_PROPRIETARY_MODE
   bool SaveSnapshot(const BinaryMessage& pt_string, std::string& snap_path);
 
- private:
-  static const std::string kLibrary;
-
   /**
    * @brief Collects permissions for all currently registered applications on
    * all devices
@@ -594,6 +591,9 @@ class PolicyHandler : public PolicyHandlerInterface,
    */
   std::vector<FunctionalGroupPermission> CollectAppPermissions(
       const uint32_t connection_key);
+
+ private:
+  static const std::string kLibrary;
 
   /**
  * @brief Collects currently registered applications ids linked to their
