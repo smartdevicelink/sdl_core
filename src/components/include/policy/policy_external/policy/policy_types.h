@@ -373,16 +373,15 @@ struct ExternalConsentStatusItem {
   ExternalConsentStatusItem(const uint32_t type,
                             const uint32_t id,
                             const std::string& status)
-      : entity_type(type), entity_id(id), on_off(status) {}
+      : entity_type(type), entity_id(id), entity_status(status) {}
 
   bool operator==(const ExternalConsentStatusItem& rhs) const {
-    return (this->entity_type == rhs.entity_type) &&
-           (this->entity_id == rhs.entity_id);
+    return (entity_type == rhs.entity_type) && (entity_id == rhs.entity_id);
   }
 
   const uint32_t entity_type;
   const uint32_t entity_id;
-  const std::string on_off;
+  const std::string entity_status;
 };
 
 struct ExternalConsentStatusItemComparator {

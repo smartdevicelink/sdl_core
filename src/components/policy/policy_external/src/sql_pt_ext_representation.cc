@@ -1842,7 +1842,7 @@ bool SQLPTExtRepresentation::SaveExternalConsentStatus(
     // Due to query structure need to provide that twice
     query.Bind(2, static_cast<int>(it->entity_type));
     query.Bind(3, static_cast<int>(it->entity_id));
-    query.Bind(4, it->on_off);
+    query.Bind(4, it->entity_status);
     if (!query.Exec() || !query.Reset()) {
       LOG4CXX_ERROR(logger_, "Error during external consent status saving.");
       return false;

@@ -142,7 +142,7 @@ struct ExternalConsentStatusAppender
     SmartObject& ccs_status = status_[index_];
     ccs_status["entityType"] = item.entity_type;
     ccs_status["entityID"] = item.entity_id;
-    ccs_status["status"] = 0 == strcasecmp("ON", item.on_off.c_str())
+    ccs_status["status"] = 0 == strcasecmp("ON", item.entity_status.c_str())
                                ? static_cast<int32_t>(Common_EntityStatus::ON)
                                : static_cast<int32_t>(Common_EntityStatus::OFF);
     ++index_;
