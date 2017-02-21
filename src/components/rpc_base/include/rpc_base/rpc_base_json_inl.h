@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef VALIDATED_TYPES_JSON_INL_H_
-#define VALIDATED_TYPES_JSON_INL_H_
+#ifndef SRC_COMPONENTS_RPC_BASE_INCLUDE_RPC_BASE_RPC_BASE_JSON_INL_H_
+#define SRC_COMPONENTS_RPC_BASE_INCLUDE_RPC_BASE_RPC_BASE_JSON_INL_H_
 
 #include "rpc_base/rpc_base.h"
 #include "json/value.h"
@@ -383,4 +383,4 @@ inline Json::Value Stringifyable<T>::ToJsonValue() const {
 
 }  // namespace rpc
 
-#endif /* VALIDATED_TYPES_JSON_INL_H_ */
+#endif  // SRC_COMPONENTS_RPC_BASE_INCLUDE_RPC_BASE_RPC_BASE_JSON_INL_H_

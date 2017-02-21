@@ -28,12 +28,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-set(target Policy)
-set(install_destination bin)
-set(copy_destination ${CMAKE_BINARY_DIR}/src/appMain)
-set(library_name ${CMAKE_SHARED_LIBRARY_PREFIX}${target}${CMAKE_SHARED_LIBRARY_SUFFIX})
-
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/platform.cmake)
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
 include_directories (
   ${POLICY_PATH}/include
@@ -45,40 +41,50 @@ include_directories (
   ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
-set(SOURCES
-  ${POLICY_PATH}/src/policy_manager_impl.cc
-  ${POLICY_PATH}/src/policy_helper.cc
-  ${POLICY_PATH}/src/policy_table.cc
-  ${POLICY_PATH}/src/sql_pt_queries.cc
-  ${POLICY_PATH}/src/sql_pt_representation.cc
-  ${POLICY_PATH}/src/update_status_manager.cc
-  ${POLICY_PATH}/src/status.cc
-  ${POLICY_PATH}/src/cache_manager.cc
+set(POLICY_TABLE_PATHS
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/policy/policy_table
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/policy_table
+)
+collect_sources(POLICY_TABLE_SOURCES "${POLICY_TABLE_PATHS}")
+add_library(policy_struct ${POLICY_TABLE_SOURCES})
+target_link_libraries(policy_struct Utils)
+
+set(USAGE_STATISTICS_PATHS
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/policy/usage_statistics
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/usage_statistics
+)
+collect_sources(USAGE_STATISTICS_SOURCES "${USAGE_STATISTICS_PATHS}")
+add_library(UsageStatistics ${USAGE_STATISTICS_SOURCES})
+target_link_libraries(UsageStatistics Utils)
+
+set(EXCLUDE_PATHS
+  ${POLICY_TABLE_PATHS}
+  ${USAGE_STATISTICS_PATHS}
+  sql_pt_ext_queries.cc
+  sql_pt_ext_representation.cc
+)
+
+set(PATHS
+  ${CMAKE_CURRENT_SOURCE_DIR}/include
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
   ${COMPONENTS_DIR}/rpc_base/src/rpc_base/rpc_base.cc
 )
+collect_sources(SOURCES "${PATHS}" "${EXCLUDE_PATHS}")
+if (NOT REMOTE_CONTROL)
+  list(REMOVE_ITEM SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/access_remote_impl.cc)
+endif()
 
-# --- Table struct section
-set(policy_struct_target policy_struct)
-set(POLICY_TABLE_SOURCES
-  ${POLICY_PATH}/src/policy_table/enums.cc
-  ${POLICY_PATH}/src/policy_table/types.cc
-  ${POLICY_PATH}/src/policy_table/validation.cc
+set(LIBRARIES
+  ConfigProfile
+  policy_struct
+  dbms
+  jsoncpp
+  Utils
 )
 
-add_library(${policy_struct_target} ${POLICY_TABLE_SOURCES})
-target_link_libraries(${policy_struct_target} Utils)
-# --- end of Table struct section
-
-# --- Usage statistics section
-set(USAGE_STATISTICS_SOURCES
-  ${POLICY_PATH}/src/usage_statistics/counter.cc
-)
-add_library(UsageStatistics ${USAGE_STATISTICS_SOURCES})
-# --- end of Usage statistics section
-
-set(LIBRARIES ConfigProfile policy_struct dbms jsoncpp Utils)
 if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
-  # --- QDB Wrapper
+  # --- QDB Wrapper 
   include_directories (${COMPONENTS_DIR}/utils/include/utils)
 else ()
   # --- SQLite Wrapper
@@ -86,22 +92,28 @@ else ()
   list(APPEND LIBRARIES sqlite3)
 endif ()
 
-add_library(${target} SHARED ${SOURCES})
-target_link_libraries(${target} ${LIBRARIES} )
+add_library(Policy SHARED ${SOURCES})
+target_link_libraries(Policy ${LIBRARIES})
 
 if(ENABLE_LOG)
-  target_link_libraries(${target} log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
+  target_link_libraries(Policy log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
 endif()
 
-add_custom_target(copy_library_${target} ALL
-  COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    ${CMAKE_CURRENT_BINARY_DIR}/${library_name}
-    ${copy_destination}
-    DEPENDS ${target}
-    COMMENT "Copying library ${library_name}")
+set(LIBRARY_NAME ${CMAKE_SHARED_LIBRARY_PREFIX}Policy${CMAKE_SHARED_LIBRARY_SUFFIX})
+set(TARGET_LOCATION ${CMAKE_CURRENT_BINARY_DIR}/${LIBRARY_NAME})
+set(INSTALL_DESTINATION bin)
+set(COPY_DESTINATION ${CMAKE_BINARY_DIR}/src/appMain)
 
-install(TARGETS ${target}
-  DESTINATION ${install_destination}
+add_custom_target(copy_policy_library ALL
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    ${TARGET_LOCATION}
+    ${COPY_DESTINATION}/${LIBRARY_NAME}
+    DEPENDS Policy
+    COMMENT "Copying library ${LIBRARY_NAME}"
+)
+
+install(TARGETS Policy
+  DESTINATION ${INSTALL_DESTINATION}
   PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
     GROUP_READ GROUP_EXECUTE
     WORLD_READ WORLD_EXECUTE
@@ -109,4 +121,4 @@ install(TARGETS ${target}
 
 if(BUILD_TESTS)
   add_subdirectory(test)
-endif() # BUILD_TESTS
+endif()

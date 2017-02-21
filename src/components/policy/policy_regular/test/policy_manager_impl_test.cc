@@ -40,8 +40,8 @@
 #include "gtest/gtest.h"
 
 #include "policy/policy_types.h"
-#include "policy/policy_manager_impl.h"
 #include "config_profile/profile.h"
+#include "policy/policy_manager_impl.h"
 #include "policy/policy_table/enums.h"
 #include "policy/policy_table/types.h"
 #include "policy/mock_policy_settings.h"
@@ -54,7 +54,9 @@
 #include "utils/date_time.h"
 #include "utils/make_shared.h"
 #include "utils/gen_hash.h"
-
+#ifdef SDL_REMOTE_CONTROL
+#include "policy/mock_access_remote.h"
+#endif  // SDL_REMOTE_CONTROL
 using ::testing::ReturnRef;
 using ::testing::DoAll;
 using ::testing::SetArgReferee;
@@ -64,11 +66,14 @@ using ::testing::SetArgReferee;
 using ::testing::AtLeast;
 using ::testing::Return;
 
-using ::policy::MockPolicyListener;
+using ::test::components::policy_test::MockPolicyListener;
+
 using ::policy::MockUpdateStatusManager;
 
 using ::policy::PolicyManagerImpl;
 using ::policy::PolicyTable;
+
+namespace policy_table = rpc::policy_table_interface_base;
 
 namespace test {
 namespace components {
@@ -140,18 +145,31 @@ class PolicyManagerImplTest : public ::testing::Test {
  protected:
   PolicyManagerImpl* manager;
   MockCacheManagerInterface* cache_manager;
-  NiceMock<MockPolicyListener> listener;
+  MockUpdateStatusManager update_manager;
+  MockPolicyListener* listener;
   const std::string device_id;
+#ifdef SDL_REMOTE_CONTROL
+  utils::SharedPtr<access_remote_test::MockAccessRemote> access_remote;
+#endif  // SDL_REMOTE_CONTROL
 
   void SetUp() OVERRIDE {
     manager = new PolicyManagerImpl();
-    manager->set_listener(&listener);
+    manager->set_listener(listener);
     cache_manager = new MockCacheManagerInterface();
     manager->set_cache_manager(cache_manager);
+
+#ifdef SDL_REMOTE_CONTROL
+    access_remote = new access_remote_test::MockAccessRemote();
+    manager->set_access_remote(access_remote);
+#endif  // SDL_REMOTE_CONTROL
+
+    listener = new MockPolicyListener();
+    manager->set_listener(listener);
   }
 
   void TearDown() OVERRIDE {
     delete manager;
+    delete listener;
   }
 
   ::testing::AssertionResult IsValid(const policy_table::Table& table) {
@@ -163,6 +181,15 @@ class PolicyManagerImplTest : public ::testing::Test {
       return ::testing::AssertionFailure() << ::rpc::PrettyFormat(report);
     }
   }
+
+#ifdef SDL_REMOTE_CONTROL
+ public:
+  bool CheckPTURemoteCtrlChange(
+      const utils::SharedPtr<policy_table::Table> pt_update,
+      const utils::SharedPtr<policy_table::Table> snapshot) {
+    return manager->CheckPTURemoteCtrlChange(pt_update, snapshot);
+  }
+#endif  // SDL_REMOTE_CONTROL
 };
 
 class PolicyManagerImplTest2 : public ::testing::Test {
@@ -187,10 +214,10 @@ class PolicyManagerImplTest2 : public ::testing::Test {
   const std::string dev_id2;
   Json::Value PTU_request_types;
   NiceMock<policy_handler_test::MockPolicySettings> policy_settings_;
-  const std::string kAppStorageFolder = "storage1";
+  const std::string kAppStorageFolder = "storage_PolicyManagerImplTest2";
 
   void SetUp() OVERRIDE {
-    file_system::CreateDirectory("storage1");
+    file_system::CreateDirectory(kAppStorageFolder);
     file_system::DeleteFile("policy.sqlite");
 
     manager = new PolicyManagerImpl();
@@ -229,7 +256,7 @@ class PolicyManagerImplTest2 : public ::testing::Test {
   }
 
   void CreateLocalPT(const std::string& file_name) {
-    file_system::remove_directory_content("storage1");
+    file_system::remove_directory_content(kAppStorageFolder);
     ON_CALL(policy_settings_, app_storage_folder())
         .WillByDefault(ReturnRef(kAppStorageFolder));
     ASSERT_TRUE(manager->InitPT(file_name, &policy_settings_));
@@ -353,6 +380,8 @@ class PolicyManagerImplTest2 : public ::testing::Test {
 
   void TearDown() OVERRIDE {
     delete manager;
+    file_system::remove_directory_content(kAppStorageFolder);
+    file_system::RemoveDirectory(kAppStorageFolder, true);
   }
 };
 
@@ -541,7 +570,7 @@ TEST_F(PolicyManagerImplTest2,
   ::policy::CheckPermissionResult output;
 
   manager->CheckPermissions(
-      app_id1, std::string("FULL"), "Alert", input_params, output);
+      dev_id1, app_id1, std::string("FULL"), "Alert", input_params, output);
 
   // Check RPC is allowed
   EXPECT_EQ(::policy::kRpcAllowed, output.hmi_level_permitted);
@@ -561,9 +590,9 @@ TEST_F(PolicyManagerImplTest2,
   ASSERT_TRUE(manager->LoadPT("file_pt_update.json", msg));
 
   manager->CheckPermissions(
-      app_id1, std::string("FULL"), "Alert", input_params, output);
+      dev_id1, app_id1, std::string("FULL"), "Alert", input_params, output);
   // Check RPC is disallowed
-  EXPECT_EQ(::policy::kRpcDisallowed, output.hmi_level_permitted);
+  EXPECT_EQ(::policy::kRpcAllowed, output.hmi_level_permitted);
   ASSERT_TRUE(output.list_of_allowed_params.empty());
 }
 
@@ -643,8 +672,12 @@ TEST_F(PolicyManagerImplTest2,
                       "Life",
                       2,
                       "Bluetooth");
-  manager->CheckPermissions(
-      std::string("1234"), std::string("FULL"), "Alert", input_params, output);
+  manager->CheckPermissions(dev_id1,
+                            std::string("1234"),
+                            std::string("FULL"),
+                            "Alert",
+                            input_params,
+                            output);
   // Check RPC is allowed
   EXPECT_EQ(::policy::kRpcAllowed, output.hmi_level_permitted);
   // Check list of parameters empty
@@ -726,9 +759,10 @@ TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
   // Assert
   EXPECT_CALL(*cache_manager, GenerateSnapshot()).WillOnce(Return(snapshot));
   EXPECT_CALL(*cache_manager, ApplyUpdate(_)).WillOnce(Return(true));
-  EXPECT_CALL(listener, GetAppName("1234"))
+  const std::string policy_app_id = "1234";
+  EXPECT_CALL(*listener, GetAppName(policy_app_id))
       .WillOnce(Return(custom_str::CustomString("")));
-  EXPECT_CALL(listener, OnUpdateStatusChanged(_));
+  EXPECT_CALL(*listener, OnUpdateStatusChanged(_));
   EXPECT_CALL(*cache_manager, SaveUpdateRequired(false));
   EXPECT_CALL(*cache_manager, TimeoutResponse());
   EXPECT_CALL(*cache_manager, SecondsBetweenRetries(_));
@@ -755,8 +789,8 @@ TEST_F(PolicyManagerImplTest, LoadPT_SetInvalidUpdatePT_PTIsNotLoaded) {
   // Assert
   EXPECT_CALL(*cache_manager, GenerateSnapshot()).Times(0);
   EXPECT_CALL(*cache_manager, ApplyUpdate(_)).Times(0);
-  EXPECT_CALL(listener, GetAppName(_)).Times(0);
-  EXPECT_CALL(listener, OnUpdateStatusChanged(_)).Times(1);
+  EXPECT_CALL(*listener, GetAppName(_)).Times(0);
+  EXPECT_CALL(*listener, OnUpdateStatusChanged(_)).Times(1);
   EXPECT_CALL(*cache_manager, SaveUpdateRequired(false)).Times(0);
   EXPECT_CALL(*cache_manager, TimeoutResponse()).Times(0);
   EXPECT_CALL(*cache_manager, SecondsBetweenRetries(_)).Times(0);
@@ -783,7 +817,9 @@ TEST_F(
     AddApplication_AddNewApplicationFromDeviceWithoutConsent_ExpectUpdateRequired) {
   // Arrange
   CreateLocalPT("sdl_preloaded_pt.json");
-  manager->AddApplication(app_id1);
+  ::policy::StatusNotifier notifyer = manager->AddApplication(app_id1);
+  DCHECK(notifyer);
+  (*notifyer)();
   EXPECT_EQ("UPDATE_NEEDED", manager->GetPolicyTableStatus());
 }
 
@@ -893,11 +929,10 @@ TEST_F(PolicyManagerImplTest2, NextRetryTimeout_ExpectTimeoutsFromPT) {
 
     for (uint32_t retry_number = 0u; retry_number < size; ++retry_number) {
       waiting_timeout += seconds_between_retries[retry_number].asInt();
-      waiting_timeout += manager->TimeoutExchange();
+      waiting_timeout += manager->TimeoutExchangeMSec();
 
       // it's in miliseconds
-      EXPECT_EQ(waiting_timeout * date_time::DateTime::MILLISECONDS_IN_SECOND,
-                manager->NextRetryTimeout());
+      EXPECT_EQ(waiting_timeout, manager->NextRetryTimeout());
     }
   }
 }
@@ -906,7 +941,7 @@ TEST_F(PolicyManagerImplTest2, TimeOutExchange) {
   // Arrange
   CreateLocalPT("sdl_preloaded_pt.json");
   // Check value taken from PT
-  EXPECT_EQ(70, manager->TimeoutExchange());
+  EXPECT_EQ(70000u, manager->TimeoutExchangeMSec());
 }
 
 TEST_F(PolicyManagerImplTest2, UpdatedPreloadedPT_ExpectLPT_IsUpdated) {

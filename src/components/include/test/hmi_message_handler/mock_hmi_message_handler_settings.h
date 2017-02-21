@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_INCLUDE_HMI_MESSAGE_HANDLER_MOCK_HMI_MESSAGE_HANDLER_SETTINGS_H_
-#define SRC_COMPONENTS_INCLUDE_HMI_MESSAGE_HANDLER_MOCK_HMI_MESSAGE_HANDLER_SETTINGS_H_
+#ifndef SRC_COMPONENTS_INCLUDE_TEST_HMI_MESSAGE_HANDLER_MOCK_HMI_MESSAGE_HANDLER_SETTINGS_H_
+#define SRC_COMPONENTS_INCLUDE_TEST_HMI_MESSAGE_HANDLER_MOCK_HMI_MESSAGE_HANDLER_SETTINGS_H_
 
 #include <stdint.h>
 #include "gmock/gmock.h"
@@ -44,9 +44,9 @@ namespace hmi_message_handler_test {
 class MockHMIMessageHandlerSettings
     : public ::hmi_message_handler::HMIMessageHandlerSettings {
  public:
-  MOCK_CONST_METHOD0(thread_min_stack_size, const uint64_t&());
+  MOCK_CONST_METHOD0(thread_min_stack_size, const uint64_t());
 };
 }  // namespace hmi_message_handler_test
 }  // namespace components
 }  // namespace test
-#endif  // SRC_COMPONENTS_INCLUDE_HMI_MESSAGE_HANDLER_MOCK_HMI_MESSAGE_HANDLER_SETTINGS_H_
+#endif  // SRC_COMPONENTS_INCLUDE_TEST_HMI_MESSAGE_HANDLER_MOCK_HMI_MESSAGE_HANDLER_SETTINGS_H_

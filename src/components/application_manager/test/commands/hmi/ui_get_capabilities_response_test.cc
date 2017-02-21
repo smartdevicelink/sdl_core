@@ -195,7 +195,30 @@ TEST_F(UIGetCapabilitiesResponseTest, Run_SetUICapabilities_SUCCESS) {
   ::smart_objects::SmartObject hmi_capabilities_so =
       (*command_msg)[strings::msg_params][strings::hmi_capabilities];
   EXPECT_CALL(mock_hmi_capabilities_,
-              set_ui_hmi_capabilities(hmi_capabilities_so));
+              set_navigation_supported(
+                  hmi_capabilities_so[strings::navigation].asBool()));
+
+  command->Run();
+}
+
+TEST_F(UIGetCapabilitiesResponseTest, SetPhoneCall_SUCCESS) {
+  MessageSharedPtr command_msg = CreateCommandMsg();
+  (*command_msg)[strings::msg_params][strings::hmi_capabilities] =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+  (*command_msg)[strings::msg_params][strings::hmi_capabilities]
+                [strings::phone_call] = true;
+
+  ResponseFromHMIPtr command(
+      CreateCommand<UIGetCapabilitiesResponse>(command_msg));
+
+  EXPECT_CALL(app_mngr_, hmi_capabilities())
+      .WillOnce(ReturnRef(mock_hmi_capabilities_));
+
+  smart_objects::SmartObject hmi_capabilities_so =
+      (*command_msg)[strings::msg_params][strings::hmi_capabilities];
+  EXPECT_CALL(mock_hmi_capabilities_,
+              set_phone_call_supported(
+                  hmi_capabilities_so[strings::phone_call].asBool()));
 
   command->Run();
 }

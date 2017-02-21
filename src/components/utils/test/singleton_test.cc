@@ -36,7 +36,7 @@
 
 namespace test {
 namespace components {
-namespace utils {
+namespace utils_test {
 
 using ::utils::Singleton;
 
@@ -184,6 +184,6 @@ TEST(SingletonTest, DeleteSingletonInDifferentThread) {
   ASSERT_FALSE(SingletonTest::exists());
 }
 
-}  // namespace utils
+}  // namespace utils_test
 }  // namespace components
 }  // namespace test

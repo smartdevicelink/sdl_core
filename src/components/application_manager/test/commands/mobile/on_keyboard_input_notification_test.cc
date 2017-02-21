@@ -108,6 +108,8 @@ TEST_F(OnKeyBoardInputNotificationTest, Run_ActionActive_SUCCESS) {
 
   MockAppPtr mock_app(InitAppSetDataAccessor(app_set_));
   EXPECT_CALL(*mock_app, is_perform_interaction_active()).WillOnce(Return(1));
+  EXPECT_CALL(*mock_app, perform_interaction_layout())
+      .WillOnce(Return(mobile_apis::LayoutMode::KEYBOARD));
   EXPECT_CALL(*mock_app, hmi_level()).Times(0);
 
   EXPECT_CALL(*mock_app, app_id()).WillOnce(Return(kConnectionKey));

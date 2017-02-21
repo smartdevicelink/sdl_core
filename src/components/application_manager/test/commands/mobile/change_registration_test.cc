@@ -51,6 +51,7 @@
 #include "application_manager/mock_hmi_capabilities.h"
 #include "application_manager/event_engine/event.h"
 #include "application_manager/mock_hmi_interface.h"
+#include "application_manager/policies/mock_policy_handler_interface.h"
 
 namespace test {
 namespace components {
@@ -70,7 +71,9 @@ using ::testing::Mock;
 using ::utils::SharedPtr;
 using ::testing::Return;
 using ::testing::ReturnRef;
+using ::testing::SetArgPointee;
 using am::commands::ChangeRegistrationRequest;
+using policy_test::MockPolicyHandlerInterface;
 using ::test::components::application_manager_test::MockApplication;
 
 namespace custom_str = utils::custom_string;
@@ -289,6 +292,7 @@ class ChangeRegistrationRequestTest
   MockMessageHelper& mock_message_helper_;
   MockAppPtr mock_app_;
   MessageSharedPtr supported_languages_;
+  MockPolicyHandlerInterface mock_policy_handler_;
 };
 
 typedef ChangeRegistrationRequestTest::MockHMICapabilities MockHMICapabilities;
@@ -296,9 +300,9 @@ typedef ChangeRegistrationRequestTest::MockHMICapabilities MockHMICapabilities;
 TEST_F(ChangeRegistrationRequestTest,
        OnEvent_VRHmiSendSuccess_UNSUPPORTED_RESOURCE) {
   MessageSharedPtr msg_from_mobile = CreateMsgFromMobile();
-
   utils::SharedPtr<ChangeRegistrationRequest> command =
       CreateCommand<ChangeRegistrationRequest>(msg_from_mobile);
+
   am::ApplicationSet application_set;
   const utils::custom_string::CustomString name("name");
   MockAppPtr app = CreateMockApp();

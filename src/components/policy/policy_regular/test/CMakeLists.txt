@@ -28,6 +28,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
+
 include_directories(
   include
   ${COMPONENTS_DIR}
@@ -41,26 +43,21 @@ include_directories(
   ${POLICY_MOCK_INCLUDE_PATH}/
 )
 
-set(testLibraries
+collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}")
+if (NOT REMOTE_CONTROL)
+  list (REMOVE_ITEM SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/access_remote_impl_test.cc
+  )
+endif ()
+
+set(LIBRARIES
   gmock
   Utils
   Policy
   UsageStatistics
 )
 
-set(testSources
-  counter_test.cc
-  shared_library_test.cc
-  generated_code_test.cc
-  policy_manager_impl_test.cc
-  update_status_manager_test.cc
-)
-
-list (APPEND testSources
-  sql_pt_representation_test.cc
-)
-
-create_test("policy_test" "${testSources}" "${testLibraries}")
+create_test(policy_test "${SOURCES}" "${LIBRARIES}")
 
 file(COPY valid_sdl_pt_update.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY sdl_preloaded_pt.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

@@ -220,6 +220,15 @@ hmi_apis::Common_Language::eType MessageHelper::CommonLanguageFromString(
   return hmi_apis::Common_Language::INVALID_ENUM;
 }
 
+std::string MessageHelper::GetDeviceMacAddressForHandle(
+    const uint32_t device_handle, const ApplicationManager& app_mngr) {
+  std::string device_mac_address = "";
+  app_mngr.connection_handler().get_session_observer().GetDataOnDeviceID(
+      device_handle, NULL, NULL, &device_mac_address);
+  LOG4CXX_DEBUG(logger_, "result : " << device_handle);
+  return device_mac_address;
+}
+
 smart_objects::SmartObjectSPtr MessageHelper::CreateRequestObject(
     const uint32_t correlation_id) {
   using namespace smart_objects;
@@ -386,6 +395,19 @@ mobile_apis::HMILevel::eType MessageHelper::StringToHMILevel(
   }
   return mobile_apis::HMILevel::INVALID_ENUM;
 }
+
+#ifdef SDL_REMOTE_CONTROL
+mobile_apis::DeviceRank::eType MessageHelper::StringToDeviceRank(
+    const std::string& device_rank) {
+  using namespace NsSmartDeviceLink::NsSmartObjects;
+  mobile_apis::DeviceRank::eType value;
+  if (EnumConversionHelper<mobile_apis::DeviceRank::eType>::StringToEnum(
+          device_rank, &value)) {
+    return value;
+  }
+  return mobile_apis::DeviceRank::INVALID_ENUM;
+}
+#endif  // SDL_REMOTE_CONTROL
 
 std::string MessageHelper::StringifiedHMILevel(
     mobile_apis::HMILevel::eType hmi_level) {
@@ -1504,7 +1526,7 @@ void MessageHelper::SendOnSDLConsentNeeded(
 }
 
 void MessageHelper::SendPolicyUpdate(const std::string& file_path,
-                                     const int timeout,
+                                     const uint32_t timeout,
                                      const std::vector<int>& retries,
                                      ApplicationManager& app_mngr) {
   smart_objects::SmartObjectSPtr message =
@@ -1897,15 +1919,13 @@ void MessageHelper::SendQueryApps(const uint32_t connection_key,
 
   policy::PolicyHandlerInterface& policy_handler = app_mngr.GetPolicyHandler();
 
+  const uint32_t timeout = policy_handler.TimeoutExchangeSec();
   smart_objects::SmartObject content(smart_objects::SmartType_Map);
   content[strings::msg_params][strings::request_type] = RequestType::QUERY_APPS;
   content[strings::msg_params][strings::url] = policy_handler.RemoteAppsUrl();
-  content[strings::msg_params][strings::timeout] =
-      policy_handler.TimeoutExchange();
+  content[strings::msg_params][strings::timeout] = timeout;
 
   Json::Value http_header;
-
-  const int timeout = policy_handler.TimeoutExchange();
 
   http_header[http_request::content_type] = "application/json";
   http_header[http_request::connect_timeout] = timeout;
@@ -2504,6 +2524,102 @@ bool MessageHelper::PrintSmartObject(const smart_objects::SmartObject& object) {
   }
 #endif
   return true;
+}
+
+void MessageHelper::SendHMIStatusNotification(
+    const Application& application_impl,
+    ApplicationManager& application_manager,
+    mobile_apis::DeviceRank::eType rank) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  smart_objects::SmartObjectSPtr notification = new smart_objects::SmartObject;
+  if (!notification) {
+    LOG4CXX_ERROR(logger_, "Failed to create smart object");
+    return;
+  }
+  smart_objects::SmartObject& message = *notification;
+
+  message[strings::params][strings::function_id] =
+      static_cast<int32_t>(mobile_api::FunctionID::OnHMIStatusID);
+
+  message[strings::params][strings::message_type] =
+      static_cast<int32_t>(application_manager::MessageType::kNotification);
+
+  message[strings::params][strings::connection_key] =
+      static_cast<int32_t>(application_impl.app_id());
+
+  message[strings::msg_params][strings::hmi_level] =
+      static_cast<int32_t>(application_impl.hmi_level());
+
+  message[strings::msg_params][strings::audio_streaming_state] =
+      static_cast<int32_t>(application_impl.audio_streaming_state());
+
+  message[strings::msg_params][strings::system_context] =
+      static_cast<int32_t>(application_impl.system_context());
+
+  if (rank != mobile_apis::DeviceRank::eType::INVALID_ENUM) {
+    message[strings::msg_params][strings::device_rank] =
+        static_cast<int32_t>(rank);
+  }
+
+  application_manager.ManageMobileCommand(notification,
+                                          commands::Command::ORIGIN_SDL);
+}
+
+void MessageHelper::SendActivateAppToHMI(
+    uint32_t const app_id,
+    ApplicationManager& application_manager,
+    hmi_apis::Common_HMILevel::eType level,
+    bool send_policy_priority) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  application_manager::ApplicationConstSharedPtr app =
+      application_manager.application(app_id);
+  if (!app) {
+    LOG4CXX_WARN(logger_, "Invalid app_id: " << app_id);
+    return;
+  }
+
+  utils::SharedPtr<smart_objects::SmartObject> message =
+      new smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  (*message)[strings::params][strings::function_id] =
+      hmi_apis::FunctionID::BasicCommunication_ActivateApp;
+  (*message)[strings::params][strings::message_type] = MessageType::kRequest;
+  (*message)[strings::params][strings::correlation_id] =
+      application_manager.GetNextHMICorrelationID();
+  (*message)[strings::msg_params][strings::app_id] = app_id;
+
+  if (send_policy_priority) {
+    std::string priority;
+    // TODO(KKolodiy): need remove method policy_manager
+
+    application_manager.GetPolicyHandler().GetPriority(app->policy_app_id(),
+                                                       &priority);
+    // According SDLAQ-CRS-2794
+    // SDL have to send ActivateApp without "proirity" parameter to HMI.
+    // in case of unconsented device
+    std::string mac_adress;
+    connection_handler::DeviceHandle device_handle = app->device();
+    application_manager.connection_handler()
+        .get_session_observer()
+        .GetDataOnDeviceID(device_handle, NULL, NULL, &mac_adress, NULL);
+
+    policy::DeviceConsent consent =
+        application_manager.GetPolicyHandler().GetUserConsentForDevice(
+            mac_adress);
+    if (!priority.empty() &&
+        (policy::DeviceConsent::kDeviceAllowed == consent)) {
+      (*message)[strings::msg_params][strings::priority] =
+          GetPriorityCode(priority);
+    }
+  }
+
+  // We haven't send HMI level to HMI in case it FULL.
+  if (hmi_apis::Common_HMILevel::INVALID_ENUM != level &&
+      hmi_apis::Common_HMILevel::FULL != level) {
+    (*message)[strings::msg_params][strings::activate_app_hmi_level] = level;
+  }
+
+  application_manager.ManageHMICommand(message);
 }
 
 }  //  namespace application_manager

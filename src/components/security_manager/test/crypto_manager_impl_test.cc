@@ -91,7 +91,6 @@ class CryptoManagerTest : public testing::Test {
 
   void TearDown() OVERRIDE {
     delete mock_security_manager_settings_;
-    testing::Mock::AsyncVerifyAndClearExpectations(1000);
   }
 
   void InitSecurityManager() {

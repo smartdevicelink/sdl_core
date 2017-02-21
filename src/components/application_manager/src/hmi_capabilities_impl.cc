@@ -44,6 +44,9 @@
 #include "utils/file_system.h"
 
 namespace application_manager {
+
+CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager");
+
 namespace Formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
 
 namespace {

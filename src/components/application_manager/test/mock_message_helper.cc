@@ -205,7 +205,7 @@ void MessageHelper::SendSDLActivateAppResponse(
 }
 
 void MessageHelper::SendPolicyUpdate(const std::string& file_path,
-                                     int timeout,
+                                     const uint32_t timeout,
                                      const std::vector<int>& retries,
                                      ApplicationManager& app_mngr) {
   MockMessageHelper::message_helper_mock()->SendPolicyUpdate(
@@ -458,5 +458,36 @@ std::string MessageHelper::StringifiedHMILevel(
   return MockMessageHelper::message_helper_mock()->StringifiedHMILevel(
       hmi_level);
 }
+
+std::string MessageHelper::GetDeviceMacAddressForHandle(
+    const uint32_t device_handle, const ApplicationManager& app_mngr) {
+  return MockMessageHelper::message_helper_mock()->GetDeviceMacAddressForHandle(
+      device_handle, app_mngr);
+}
+
+#ifdef SDL_REMOTE_CONTROL
+void MessageHelper::SendHMIStatusNotification(
+    const Application& application_impl,
+    ApplicationManager& application_manager,
+    mobile_apis::DeviceRank::eType rank) {
+  return MockMessageHelper::message_helper_mock()->SendHMIStatusNotification(
+      application_impl, application_manager, rank);
+}
+
+void MessageHelper::SendActivateAppToHMI(
+    uint32_t const app_id,
+    ApplicationManager& application_manager,
+    hmi_apis::Common_HMILevel::eType level,
+    bool send_policy_priority) {
+  return MockMessageHelper::message_helper_mock()->SendActivateAppToHMI(
+      app_id, application_manager, level, send_policy_priority);
+}
+
+mobile_api::DeviceRank::eType MessageHelper::StringToDeviceRank(
+    const std::string& device_rank) {
+  return MockMessageHelper::message_helper_mock()->StringToDeviceRank(
+      device_rank);
+}
+#endif  // SDL_REMOTE_CONTROL
 
 }  // namespace application_manager

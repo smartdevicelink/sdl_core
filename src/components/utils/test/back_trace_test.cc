@@ -35,7 +35,7 @@
 
 namespace test {
 namespace components {
-namespace utils {
+namespace utils_test {
 
 using namespace ::utils;
 
@@ -47,6 +47,6 @@ TEST(BackTraceTest, CallStackShouldNotBeEmpty) {
   ASSERT_FALSE(symbols.empty());
 }
 
-}  // namespace utils
+}  // namespace utils_test
 }  // namespace components
 }  // namespace test

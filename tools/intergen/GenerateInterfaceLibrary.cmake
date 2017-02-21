@@ -51,6 +51,7 @@ function (GenerateInterfaceLibrary xml_file_name generated_interface_names)
       ${GENERATED_LIB_HEADER_DEPENDENCIES}
     )
     add_library(${interface_name} ${SOURCES})
+    add_dependencies(${interface_name} intergen)
 
     # |previous_interface| ensures that interface libraries are built in the same order
     # as they defined in |generated_interface_names|

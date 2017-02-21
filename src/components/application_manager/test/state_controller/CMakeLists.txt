@@ -43,7 +43,7 @@ set(LIBRARIES
 )
 
 set(SOURCES
-    state_controller_test.cc
+    ${COMPONENTS_DIR}/application_manager/test/state_controller/state_controller_test.cc
     ${COMPONENTS_DIR}/application_manager/test/mock_message_helper.cc
 )
 

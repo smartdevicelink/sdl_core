@@ -36,11 +36,11 @@
 #include "policy/update_status_manager.h"
 #include "utils/make_shared.h"
 
-using ::policy::MockPolicyListener;
+using ::test::components::policy_test::MockPolicyListener;
 
 namespace test {
 namespace components {
-namespace policy {
+namespace policy_test {
 
 using namespace ::policy;
 using ::testing::_;
@@ -55,7 +55,7 @@ class UpdateStatusManagerTest : public ::testing::Test {
  public:
   UpdateStatusManagerTest()
       : manager_(utils::MakeShared<UpdateStatusManager>())
-      , k_timeout_(1)
+      , k_timeout_(1000)
       , listener_(utils::MakeShared<MockPolicyListener>()) {}
 
   void SetUp() OVERRIDE {
@@ -92,6 +92,6 @@ TEST_F(UpdateStatusManagerTest,
   EXPECT_FALSE(manager_->IsAppsSearchInProgress());
 }
 
-}  // namespace policy
+}  // namespace policy_test
 }  // namespace components
 }  // namespace test
