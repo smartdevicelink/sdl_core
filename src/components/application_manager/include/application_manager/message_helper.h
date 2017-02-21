@@ -373,11 +373,13 @@ class MessageHelper {
   /**
    * @brief Send GetListOfPermissions response to HMI
    * @param permissions Array of groups permissions
+   * @param external_consent_status External user consent status
    * @param correlation_id Correlation id of request
    */
   static void SendGetListOfPermissionsResponse(
       const std::vector<policy::FunctionalGroupPermission>& permissions,
-      uint32_t correlation_id,
+      const policy::ExternalConsentStatus& external_consent_status,
+      const uint32_t correlation_id,
       ApplicationManager& app_mngr);
 
   /*

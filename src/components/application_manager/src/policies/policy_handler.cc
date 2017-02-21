@@ -696,7 +696,10 @@ void PolicyHandler::OnGetListOfPermissions(const uint32_t connection_key,
   }
 
   MessageHelper::SendGetListOfPermissionsResponse(
-      permissions, correlation_id, application_manager_);
+      permissions,
+      policy_manager_->GetExternalConsentStatus(),
+      correlation_id,
+      application_manager_);
 }
 
 void PolicyHandler::LinkAppsToDevice() {

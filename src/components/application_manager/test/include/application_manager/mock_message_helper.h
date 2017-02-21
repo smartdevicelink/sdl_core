@@ -118,9 +118,10 @@ class MockMessageHelper {
   MOCK_METHOD2(SendDecryptCertificateToHMI,
                void(const std::string& file_name,
                     ApplicationManager& app_mngr));
-  MOCK_METHOD3(
+  MOCK_METHOD4(
       SendGetListOfPermissionsResponse,
       void(const std::vector<policy::FunctionalGroupPermission>& permissions,
+           const policy::ExternalConsentStatus& external_consent_status,
            uint32_t correlation_id,
            ApplicationManager& app_mngr));
   MOCK_METHOD3(SendOnPermissionsChangeNotification,
