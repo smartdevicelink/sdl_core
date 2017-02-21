@@ -153,6 +153,12 @@ class MockHMICapabilities : public ::application_manager::HMICapabilities {
   MOCK_METHOD1(set_ui_hmi_capabilities,
                void(const smart_objects::SmartObject& ui_hmi_capabilities));
 
+  MOCK_CONST_METHOD0(navigation_supported, bool());
+  MOCK_METHOD1(set_navigation_supported, void(const bool supported));
+
+  MOCK_CONST_METHOD0(phone_call_supported, bool());
+  MOCK_METHOD1(set_phone_call_supported, void(const bool supported));
+
   MOCK_METHOD1(Init, void(resumption::LastState* last_state));
 
   MOCK_CONST_METHOD0(ccpu_version, const std::string&());

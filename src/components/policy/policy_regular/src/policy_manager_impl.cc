@@ -85,7 +85,8 @@ PolicyManagerImpl::PolicyManagerImpl()
     , timer_retry_sequence_("Retry sequence timer",
                             new timer::TimerTaskImpl<PolicyManagerImpl>(
                                 this, &PolicyManagerImpl::RetrySequence))
-    , ignition_check(true) {}
+    , ignition_check(true) {
+}
 
 void PolicyManagerImpl::set_listener(PolicyListener* listener) {
   listener_ = listener;
@@ -392,7 +393,14 @@ void PolicyManagerImpl::CheckPermissions(const PTString& device_id,
                "CheckPermissions for " << app_id << " and rpc " << rpc
                                        << " for " << hmi_level << " level.");
 
-  cache_->CheckPermissions(app_id, hmi_level, rpc, result);
+#ifdef SDL_REMOTE_CONTROL
+  Subject who = {device_id, app_id};
+  const policy_table::Strings& groups = access_remote_->GetGroups(who);
+#else   // SDL_REMOTE_CONTROL
+  const policy_table::Strings& groups = cache_->GetGroups(app_id);
+#endif  // SDL_REMOTE_CONTROL
+  LOG4CXX_DEBUG(logger_, "Groups: " << groups);
+  cache_->CheckPermissions(groups, hmi_level, rpc, result);
   if (cache_->IsApplicationRevoked(app_id)) {
     // SDL must be able to notify mobile side with its status after app has
     // been revoked by backend
@@ -402,14 +410,6 @@ void PolicyManagerImpl::CheckPermissions(const PTString& device_id,
       result.hmi_level_permitted = kRpcDisallowed;
     }
   }
-#ifdef SDL_REMOTE_CONTROL
-  Subject who = {device_id, app_id};
-  const policy_table::Strings& groups = access_remote_->GetGroups(who);
-#else   // SDL_REMOTE_CONTROL
-  const policy_table::Strings& groups = cache_->GetGroups(app_id);
-#endif  // SDL_REMOTE_CONTROL
-  LOG4CXX_DEBUG(logger_, "Groups: " << groups);
-  cache_->CheckPermissions(groups, hmi_level, rpc, result);
 }
 
 bool PolicyManagerImpl::ResetUserConsent() {
@@ -982,7 +982,7 @@ class CallStatusChange : public utils::Callable {
   // Callable interface
   void operator()() const {
     upd_manager_.OnNewApplicationAdded(device_consent_);
-}
+  }
 
  private:
   UpdateStatusManager& upd_manager_;

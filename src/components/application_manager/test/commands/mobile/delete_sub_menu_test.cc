@@ -261,12 +261,14 @@ TEST_F(DeleteSubMenuRequestTest, OnEvent_DeleteSubmenu_SUCCESS) {
   (*message_)[am::strings::msg_params][am::strings::menu_params]
              [am::hmi_request::parent_id] = kMenuId;
   (*message_)[am::strings::params][am::hmi_response::code] =
-      am::mobile_api::Result::SUCCESS;
+      hmi_apis::Common_Result::SUCCESS;
   event.set_smart_object(*message_);
 
   commands_map_.insert(
       std::make_pair(0, &((*message_)[am::strings::msg_params])));
-
+  EXPECT_CALL(mock_message_helper_,
+              HMIToMobileResult(hmi_apis::Common_Result::SUCCESS))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
   InSequence seq;
   EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(app_));
   EXPECT_CALL(*app_, commands_map()).WillOnce(Return(accessor_));
@@ -302,7 +304,7 @@ TEST_F(DeleteSubMenuRequestTest,
   (*message_)[am::strings::params][am::strings::connection_key] =
       kConnectionKey;
   (*message_)[am::strings::params][am::hmi_response::code] =
-      am::mobile_api::Result::SUCCESS;
+      hmi_apis::Common_Result::SUCCESS;
   event.set_smart_object(*message_);
 
   commands_map_.insert(
@@ -312,6 +314,9 @@ TEST_F(DeleteSubMenuRequestTest,
   EXPECT_CALL(app_mngr_, ManageHMICommand(_)).Times(0);
   EXPECT_CALL(*app_, commands_map()).Times(2).WillRepeatedly(Return(accessor_));
   EXPECT_CALL(*app_, RemoveCommand(_)).Times(0);
+  EXPECT_CALL(mock_message_helper_,
+              HMIToMobileResult(hmi_apis::Common_Result::SUCCESS))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
 
   command_->on_event(event);
 }
@@ -325,11 +330,14 @@ TEST_F(DeleteSubMenuRequestTest,
   (*message_)[am::strings::params][am::strings::connection_key] =
       kConnectionKey;
   (*message_)[am::strings::params][am::hmi_response::code] =
-      am::mobile_api::Result::SUCCESS;
+      hmi_apis::Common_Result::SUCCESS;
   event.set_smart_object(*message_);
 
   commands_map_.insert(
       std::make_pair(0, &((*message_)[am::strings::msg_params])));
+  EXPECT_CALL(mock_message_helper_,
+              HMIToMobileResult(hmi_apis::Common_Result::SUCCESS))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
 
   EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(app_));
   EXPECT_CALL(app_mngr_, ManageHMICommand(_)).Times(0);

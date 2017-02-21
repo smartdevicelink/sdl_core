@@ -132,6 +132,10 @@ class RegisterAppInterfaceRequestTest
     ON_CALL(app_mngr_, IsHMICooperating()).WillByDefault(Return(true));
     ON_CALL(app_mngr_, GetPolicyHandler())
         .WillByDefault(ReturnRef(mock_policy_handler_));
+#ifdef SDL_REMOTE_CONTROL
+    ON_CALL(app_mngr_, GetPluginManager())
+        .WillByDefault(ReturnRef(plugin_manager_));
+#endif  // SDL_REMOTE_CONTROL
     ON_CALL(app_mngr_, resume_controller())
         .WillByDefault(ReturnRef(mock_resume_crt_));
     ON_CALL(app_mngr_, connection_handler())
@@ -194,7 +198,9 @@ class RegisterAppInterfaceRequestTest
 
   typedef IsNiceMock<am::MockHmiInterfaces, kMocksAreNice>::Result
       MockHmiInterfaces;
-
+#ifdef SDL_REMOTE_CONTROL
+  functional_modules::PluginManager plugin_manager_;
+#endif  // SDL_REMOTE_CONTROL
   MockPolicyHandlerInterface mock_policy_handler_;
   MockResumeCtrl mock_resume_crt_;
   MockConnectionHandler mock_connection_handler_;
@@ -403,6 +409,9 @@ TEST_F(RegisterAppInterfaceRequestTest,
               ManageHMICommand(
                   HMIResultCodeIs(hmi_apis::FunctionID::UI_ChangeRegistration)))
       .WillOnce(Return(true));
+  policy::StatusNotifier notifier = utils::MakeShared<utils::CallNothing>();
+  EXPECT_CALL(mock_policy_handler_, AddApplication(_))
+      .WillOnce(Return(notifier));
   {
     InSequence s;
     EXPECT_CALL(app_mngr_,

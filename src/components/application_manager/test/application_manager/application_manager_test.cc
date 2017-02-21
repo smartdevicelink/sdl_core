@@ -42,7 +42,7 @@
 #include "application_manager/mock_hmi_capabilities.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
 #include "media_manager/mock_media_manager.h"
-#include "resumption/last_state.h"
+#include "resumption/last_state_impl.h"
 #include "policy/mock_policy_settings.h"
 #include "utils/shared_ptr.h"
 #include "utils/make_shared.h"
@@ -101,8 +101,8 @@ class ApplicationManagerImplTest : public ::testing::Test {
 
     app_manager_impl_ = utils::MakeShared<am::ApplicationManagerImpl>(
         mock_application_manager_settings_, mock_policy_settings_);
-    last_state_ = utils::MakeShared<resumption::LastState>(kAppStorageFolder,
-                                                           kAppInfoStorage);
+    last_state_ = utils::MakeShared<resumption::LastStateImpl>(
+        kAppStorageFolder, kAppInfoStorage);
   }
 
   void TearDown() OVERRIDE {

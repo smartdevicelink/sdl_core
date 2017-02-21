@@ -1,4 +1,0 @@
-[submodule "sdl"]
-	path = sdl
-    url = git@adc.luxoft.com:ford
-    branch = develop

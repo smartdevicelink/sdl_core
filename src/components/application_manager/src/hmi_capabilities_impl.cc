@@ -354,6 +354,8 @@ HMICapabilitiesImpl::HMICapabilitiesImpl(ApplicationManager& app_mngr)
     , pcm_stream_capabilities_(NULL)
     , prerecorded_speech_(NULL)
     , ui_hmi_capabilities_(smart_objects::SmartType_Map)
+    , is_navigation_supported_(false)
+    , is_phone_call_supported_(false)
     , app_mngr_(app_mngr)
     , hmi_language_handler_(app_mngr) {
   InitCapabilities();
@@ -589,6 +591,13 @@ void HMICapabilitiesImpl::set_prerecorded_speech(
   prerecorded_speech_ = new smart_objects::SmartObject(prerecorded_speech);
 }
 
+void HMICapabilitiesImpl::set_navigation_supported(const bool supported) {
+  is_navigation_supported_ = supported;
+}
+
+void HMICapabilitiesImpl::set_phone_call_supported(const bool supported) {
+  is_phone_call_supported_ = supported;
+}
 void HMICapabilitiesImpl::set_ui_hmi_capabilities(
     const smart_objects::SmartObject& ui_hmi_capabilities) {
   if (ui_hmi_capabilities.keyExists(strings::navigation)) {
@@ -711,6 +720,14 @@ const smart_objects::SmartObject* HMICapabilitiesImpl::prerecorded_speech()
 const smart_objects::SmartObject& HMICapabilitiesImpl::ui_hmi_capabilities()
     const {
   return ui_hmi_capabilities_;
+}
+
+bool HMICapabilitiesImpl::navigation_supported() const {
+  return is_navigation_supported_;
+}
+
+bool HMICapabilitiesImpl::phone_call_supported() const {
+  return is_phone_call_supported_;
 }
 
 bool HMICapabilitiesImpl::load_capabilities_from_file() {
