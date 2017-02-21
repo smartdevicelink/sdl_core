@@ -129,6 +129,7 @@ class MockMessageHelper {
   MOCK_METHOD3(
       SendGetListOfPermissionsResponse,
       void(const std::vector<policy::FunctionalGroupPermission>& permissions,
+           const policy::ExternalConsentStatus& external_consent_status,
            uint32_t correlation_id,
            ApplicationManager& app_mngr));
 #endif  // #ifdef EXTERNAL_PROPRIETARY_MODE

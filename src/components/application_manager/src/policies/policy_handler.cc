@@ -241,6 +241,39 @@ struct LinksCollector {
   std::map<std::string, std::string>& out_app_to_device_link_;
 };
 
+struct LinkAppToDevice {
+  explicit LinkAppToDevice(
+      std::map<std::string, std::string>& app_to_device_link,
+      const ApplicationManager& application_manager)
+      : app_to_device_link_(app_to_device_link)
+      , application_manager_(application_manager) {
+    app_to_device_link_.clear();
+  }
+
+  void operator()(const ApplicationSharedPtr& app) {
+    if (!app.valid()) {
+      LOG4CXX_WARN(logger_,
+                   "Invalid pointer to application was passed."
+                   "Skip current application.");
+      return;
+    }
+    DeviceParams device_params = GetDeviceParams(
+        app->device(),
+        application_manager_.connection_handler().get_session_observer());
+    const std::string app_id = app->policy_app_id();
+    if (device_params.device_mac_address.empty()) {
+      LOG4CXX_WARN(logger_,
+                   "Couldn't find device, which hosts application " << app_id);
+      return;
+    }
+    app_to_device_link_[app_id] = device_params.device_mac_address;
+  }
+
+ private:
+  std::map<std::string, std::string>& app_to_device_link_;
+  const ApplicationManager& application_manager_;
+};
+
 struct PermissionsConsolidator {
   void Consolidate(
       const std::vector<policy::FunctionalGroupPermission>& permissions) {
@@ -784,6 +817,23 @@ void PolicyHandler::OnGetListOfPermissions(const uint32_t connection_key,
 #endif  // EXTERNAL_PROPRIETARY_MODE
       correlation_id,
       application_manager_);
+}
+
+void PolicyHandler::LinkAppsToDevice() {
+  sync_primitives::AutoLock lock(app_to_device_link_lock_);
+  LinkAppToDevice linker(app_to_device_link_, application_manager_);
+  LOG4CXX_DEBUG(logger_, "add links to app.  no specific app was passed");
+  {
+    const ApplicationSet& accessor =
+        application_manager_.applications().GetData();
+    if (accessor.empty()) {
+      LOG4CXX_WARN(logger_,
+                   "application_manager doesn't have any applications");
+    } else {
+      // Add all currently registered applications
+      std::for_each(accessor.begin(), accessor.end(), linker);
+    }
+  }
 }
 
 bool PolicyHandler::IsAppSuitableForPolicyUpdate(
