@@ -614,61 +614,89 @@ void PolicyHandler::OnGetUserFriendlyMessage(
       result, correlation_id, application_manager_);
 }
 
-void PolicyHandler::OnGetListOfPermissions(const uint32_t connection_key,
-                                           const uint32_t correlation_id) {
+std::vector<policy::FunctionalGroupPermission>
+PolicyHandler::CollectRegisteredAppsPermissions() {
   LOG4CXX_AUTO_TRACE(logger_);
-  POLICY_LIB_CHECK_VOID();
+  POLICY_LIB_CHECK(std::vector<policy::FunctionalGroupPermission>());
   // If no specific app was passed, get permissions for all currently registered
   // applications
-  if (!connection_key) {
-    LinkAppsToDevice();
-    PermissionsConsolidator consolidator;
-    std::vector<policy::FunctionalGroupPermission> group_permissions;
-    std::map<std::string, std::string>::const_iterator it =
-        app_to_device_link_.begin();
-    for (; it != app_to_device_link_.end(); ++it) {
-      policy_manager_->GetUserConsentForApp(
-          it->second, it->first, group_permissions);
-      consolidator.Consolidate(group_permissions);
-    }
+  sync_primitives::AutoLock lock(app_to_device_link_lock_);
+  LinkAppToDevice linker(app_to_device_link_, application_manager_);
+  {
+    DataAccessor<ApplicationSet> accessor = application_manager_.applications();
+    ApplicationSetConstIt it_app = accessor.GetData().begin();
+    ApplicationSetConstIt it_app_end = accessor.GetData().end();
 
-    MessageHelper::SendGetListOfPermissionsResponse(
-        consolidator.GetConsolidatedPermissions(),
-        correlation_id,
-        application_manager_);
-
-    return;
+    // Add all currently registered applications
+    std::for_each(it_app, it_app_end, linker);
   }
 
+  PermissionsConsolidator consolidator;
+  std::vector<policy::FunctionalGroupPermission> group_permissions;
+  std::map<std::string, std::string>::const_iterator it =
+      app_to_device_link_.begin();
+  for (; it != app_to_device_link_.end(); ++it) {
+    policy_manager_->GetUserConsentForApp(
+        it->second, it->first, group_permissions);
+    consolidator.Consolidate(group_permissions);
+  }
+
+  return consolidator.GetConsolidatedPermissions();
+}
+
+std::vector<FunctionalGroupPermission> PolicyHandler::CollectAppPermissions(
+    const uint32_t connection_key) {
   // Single app only
   ApplicationSharedPtr app = application_manager_.application(connection_key);
+  std::vector<FunctionalGroupPermission> group_permissions;
 
-  if (!app.valid()) {
+  if (!app) {
     LOG4CXX_WARN(logger_,
                  "Connection key '"
                      << connection_key
                      << "' "
                         "not found within registered applications.");
-    return;
+
+    return group_permissions;
   }
 
   DeviceParams device_params = GetDeviceParams(
       app->device(),
       application_manager_.connection_handler().get_session_observer());
 
-  std::vector<FunctionalGroupPermission> group_permissions;
   if (device_params.device_mac_address.empty()) {
     LOG4CXX_WARN(logger_, "Couldn't find device, which hosts application.");
-  } else if (!app) {
-    LOG4CXX_WARN(logger_, "Couldn't find application to get permissions.");
-  } else {
-    policy_manager_->GetUserConsentForApp(device_params.device_mac_address,
-                                          app->policy_app_id(),
-                                          group_permissions);
-
-    MessageHelper::SendGetListOfPermissionsResponse(
-        group_permissions, correlation_id, application_manager_);
+    return group_permissions;
   }
+
+  policy_manager_->GetUserConsentForApp(device_params.device_mac_address,
+                                        app->policy_app_id(),
+                                        group_permissions);
+
+  return group_permissions;
+}
+
+void PolicyHandler::OnGetListOfPermissions(const uint32_t connection_key,
+                                           const uint32_t correlation_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  POLICY_LIB_CHECK_VOID();
+  const std::vector<policy::FunctionalGroupPermission> permissions =
+      connection_key ? CollectAppPermissions(connection_key)
+                     : CollectRegisteredAppsPermissions();
+
+  // Added to keep logic being here before moving permissions collecting out
+  // For application response wasn't sent, but was no such check for all
+  // registered applications.
+  // Need to double check requirements
+  if (permissions.empty() && connection_key) {
+    LOG4CXX_ERROR(logger_,
+                  "No permissions found for application with connection key:"
+                      << connection_key);
+    return;
+  }
+
+  MessageHelper::SendGetListOfPermissionsResponse(
+      permissions, correlation_id, application_manager_);
 }
 
 void PolicyHandler::LinkAppsToDevice() {

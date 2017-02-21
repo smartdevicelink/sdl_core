@@ -701,6 +701,25 @@ class PolicyHandler : public PolicyHandlerInterface,
   void OnEmptyCertificateArrived() const;
 #endif  // EXTERNAL_PROPRIETARY_MODE
   bool SaveSnapshot(const BinaryMessage& pt_string, std::string& snap_path);
+
+  /**
+   * @brief Collects permissions for all currently registered applications on
+   * all devices
+   * @return consolidated permissions list or empty list if no
+   * applications/devices currently present
+   */
+  std::vector<FunctionalGroupPermission> CollectRegisteredAppsPermissions();
+
+  /**
+   * @brief Collects permissions for application with certain connection key
+   * @param connection_key Connection key of application to look for
+   * @return list of application permissions or empty list if no such
+   * application found
+   */
+  std::vector<FunctionalGroupPermission> CollectAppPermissions(
+      const uint32_t connection_key);
+
+ private:
   static const std::string kLibrary;
   mutable sync_primitives::RWLock policy_manager_lock_;
   utils::SharedPtr<PolicyManager> policy_manager_;
