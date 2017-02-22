@@ -2277,32 +2277,35 @@
     <element name="notification" value="2" />
   </enum>
 
-    <struct name="DateTime">
-       <param name="second" type="Integer" minvalue="0" maxvalue="60" mandatory="true">
-          <description>Seconds part of time</description>
-       </param>
-       <param name="minute" type="Integer" minvalue="0" maxvalue="59" mandatory="true">
-          <description>Minutes part of time</description>
-       </param>
-       <param name="hour" type="Integer" minvalue="0" maxvalue="23" mandatory="true">
-          <description>Hours part of time. Note that this structure accepts time only in 24 Hr format</description>
-       </param>
-       <param name="day" type="Integer" minvalue="1" maxvalue="31" mandatory="true">
-          <description>Day of the month</description>
-       </param>
-       <param name="month" type="Integer" minvalue="1" maxvalue="12" mandatory="true">
-          <description>Month of the year</description>
-       </param>
-       <param name="year" type="Integer" maxvalue="4095" mandatory="true">
-          <description>The year in YYYY format</description>
-       </param>
-       <param name="tz_hour" type="Integer" minvalue="-12" maxvalue="14" defvalue="0" mandatory="true">
-          <description>Time zone offset in Hours wrt UTC.</description>
-       </param>
-       <param name="tz_minute" type="Integer" minvalue="0" maxvalue="59" defvalue="0" mandatory="true">
-          <description>Time zone offset in Min wrt UTC.</description>
-       </param>
-    </struct>
+  <struct name="DateTime">
+    <param name="millisecond" type="Integer" minvalue="0" maxvalue="999" mandatory="false">
+      <description>Milliseconds </description>     
+    </param>
+    <param name="second" type="Integer" minvalue="0" maxvalue="60" mandatory="false">
+      <description>Seconds part of time</description>
+    </param>
+    <param name="minute" type="Integer" minvalue="0" maxvalue="59" mandatory="false">
+      <description>Minutes part of time</description>
+    </param>
+    <param name="hour" type="Integer" minvalue="0" maxvalue="23" mandatory="false">
+      <description>Hours part of time. Note that this structure accepts time only in 24 Hr format</description>
+    </param>
+    <param name="day" type="Integer" minvalue="1" maxvalue="31" mandatory="false">
+      <description>Day of the month</description>
+    </param>
+    <param name="month" type="Integer" minvalue="1" maxvalue="12" mandatory="false">
+      <description>Month of the year</description>
+    </param>
+    <param name="year" type="Integer" maxvalue="4095" mandatory="false">
+      <description>The year in YYYY format</description>
+    </param>
+    <param name="tz_hour" type="Integer" minvalue="-12" maxvalue="14" defvalue="0" mandatory="false">
+      <description>Time zone offset in Hours wrt UTC.</description>
+    </param>
+    <param name="tz_minute" type="Integer" minvalue="0" maxvalue="59" defvalue="0" mandatory="false">
+      <description>Time zone offset in Min wrt UTC.</description>
+    </param>
+  </struct>
 
   <enum name="WayPointType">
     <description>Describes what kind of waypoint is requested/provided.</description>
