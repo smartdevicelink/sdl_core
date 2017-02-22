@@ -66,6 +66,11 @@ typedef SharedPtr<AddSubMenuRequest> AddSubMenuPtr;
 namespace {
 const uint32_t kConnectionKey = 2u;
 const int32_t kMenuId = 5;
+const std::string kMenuName = "valid_sub_menu_name";
+const std::string kFileStorage = "test_storage";
+const std::string kFolderName = "folder_name";
+const std::string kTestPosition = "test_position";
+const std::string kFileName = "file_name";
 }  // namespace
 
 class AddSubMenuRequestTest
@@ -206,9 +211,8 @@ TEST_F(AddSubMenuRequestTest,
   EXPECT_CALL(app_mngr_, get_settings())
       .WillOnce(ReturnRef(app_mngr_settings_));
 
-  const std::string file_storage = "test_storage";
   EXPECT_CALL(app_mngr_settings_, app_storage_folder())
-      .WillOnce(ReturnRef(file_storage));
+      .WillOnce(ReturnRef(kFileStorage));
 
   EXPECT_CALL(mock_message_helper_,
               HMIToMobileResult(hmi_apis::Common_Result::WARNINGS))
@@ -287,13 +291,20 @@ TEST_F(AddSubMenuRequestTest, Run_NotValidSubMenuName_UNSUCCESS) {
 }
 
 TEST_F(AddSubMenuRequestTest, Run_SUCCESS) {
-  (*command_msg_)[am::strings::msg_params][am::strings::menu_name] =
-      "valid_sub_menu_name";
+  (*command_msg_)[am::strings::msg_params][am::strings::menu_name] = kMenuName;
   (*command_msg_)[am::strings::msg_params][am::strings::position] =
-      "test_position";
+      kTestPosition;
+  (*command_msg_)[am::strings::msg_params][am::strings::sub_menu_icon]
+                 [am::strings::image_type] = mobile_apis::ImageType::DYNAMIC;
   EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app));
+  ON_CALL(app_mngr_, get_settings())
+      .WillByDefault(ReturnRef(app_mngr_settings_));
+  EXPECT_CALL(app_mngr_settings_, app_storage_folder())
+      .WillOnce(ReturnRef(kFileStorage));
+  EXPECT_CALL(*app, folder_name()).WillOnce(Return(kFolderName));
+  (*command_msg_)[am::strings::msg_params][am::strings::sub_menu_icon]
+                 [am::strings::value] = kFileName;
   EXPECT_CALL(*app, FindSubMenu(kMenuId)).WillOnce(ReturnNull());
-
   AddSubMenuPtr command(CreateCommand<AddSubMenuRequest>(command_msg_));
   MessageSharedPtr result_msg(CatchHMICommandResult(CallRun(*command)));
   const hmi_apis::FunctionID::eType received_result =
@@ -303,33 +314,40 @@ TEST_F(AddSubMenuRequestTest, Run_SUCCESS) {
 }
 
 TEST_F(AddSubMenuRequestTest, Run_MenuIconCorrectName_SUCCESS) {
-  (*command_msg_)[am::strings::msg_params][am::strings::menu_name] =
-      "valid_sub_menu_name";
+  (*command_msg_)[am::strings::msg_params][am::strings::menu_name] = kMenuName;
   (*command_msg_)[am::strings::msg_params][am::strings::position] =
-      "test_position";
+      kTestPosition;
   (*command_msg_)[am::strings::msg_params][am::strings::sub_menu_icon]
-                 [am::strings::value] = "icon.png";
-  (*command_msg_)[am::strings::msg_params][am::strings::sub_menu_icon]
-                 [am::strings::type] = "DYNAMIC";
+                 [am::strings::image_type] = mobile_apis::ImageType::DYNAMIC;
 
-  AddSubMenuPtr command(CreateCommand<AddSubMenuRequest>(command_msg_));
   EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app));
-  EXPECT_CALL(*app, FindSubMenu(kMenuId)).WillOnce(ReturnNull());
+  ON_CALL(app_mngr_, get_settings())
+      .WillByDefault(ReturnRef(app_mngr_settings_));
+  EXPECT_CALL(app_mngr_settings_, app_storage_folder())
+      .WillOnce(ReturnRef(kFileStorage));
+  EXPECT_CALL(*app, folder_name()).WillOnce(Return(kFolderName));
 
+  (*command_msg_)[am::strings::msg_params][am::strings::sub_menu_icon]
+                 [am::strings::value] = kFileName;
+  EXPECT_CALL(*app, FindSubMenu(kMenuId)).WillOnce(ReturnNull());
+  AddSubMenuPtr command(CreateCommand<AddSubMenuRequest>(command_msg_));
   MessageSharedPtr result_msg(CatchHMICommandResult(CallRun(*command)));
   const hmi_apis::FunctionID::eType received_result =
       static_cast<hmi_apis::FunctionID::eType>(
           (*result_msg)[am::strings::params][am::strings::function_id].asInt());
   EXPECT_EQ(hmi_apis::FunctionID::UI_AddSubMenu, received_result);
 
-  EXPECT_EQ("icon.png",
+  const std::string full_file_path =
+      kFileStorage + "/" + kFolderName + "/" + kFileName;
+
+  EXPECT_EQ(full_file_path,
             (*result_msg)[am::strings::msg_params][am::strings::sub_menu_icon]
                          [am::strings::value].asString());
 }
 
-TEST_F(AddSubMenuRequestTest, Run_MenuIconNewLineChar_SendWithoutIcon) {
-  (*command_msg_)[am::strings::msg_params][am::strings::menu_name] =
-      "valid_sub_menu_name";
+TEST_F(AddSubMenuRequestTest, Run_MenuIconNewLineChar_SendINVALID_DATA) {
+  // Not valid sub_menu_icon
+  (*command_msg_)[am::strings::msg_params][am::strings::menu_name] = kMenuName;
   (*command_msg_)[am::strings::msg_params][am::strings::sub_menu_icon]
                  [am::strings::value] = "ico\nn.png";
 
@@ -347,9 +365,9 @@ TEST_F(AddSubMenuRequestTest, Run_MenuIconNewLineChar_SendWithoutIcon) {
       am::strings::sub_menu_icon));
 }
 
-TEST_F(AddSubMenuRequestTest, Run_MenuIconTabChar_SendWithoutIcon) {
-  (*command_msg_)[am::strings::msg_params][am::strings::menu_name] =
-      "valid_sub_menu_name";
+TEST_F(AddSubMenuRequestTest, Run_MenuIconTabChar_SendINVALID_DATA) {
+  // Not valid sub_menu_icon
+  (*command_msg_)[am::strings::msg_params][am::strings::menu_name] = kMenuName;
   (*command_msg_)[am::strings::msg_params][am::strings::sub_menu_icon]
                  [am::strings::value] = "ico\tn.png";
 
@@ -367,9 +385,8 @@ TEST_F(AddSubMenuRequestTest, Run_MenuIconTabChar_SendWithoutIcon) {
       am::strings::sub_menu_icon));
 }
 
-TEST_F(AddSubMenuRequestTest, Run_MenuIconWhiteSpace_SendWithoutIcon) {
-  (*command_msg_)[am::strings::msg_params][am::strings::menu_name] =
-      "valid_sub_menu_name";
+TEST_F(AddSubMenuRequestTest, Run_MenuIconWhiteSpace_SendINVALID_DATA) {
+  (*command_msg_)[am::strings::msg_params][am::strings::menu_name] = kMenuName;
   (*command_msg_)[am::strings::msg_params][am::strings::sub_menu_icon]
                  [am::strings::value] = "ico n.png";
 
