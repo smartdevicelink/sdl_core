@@ -239,8 +239,14 @@ ApplicationParams::ApplicationParams(const Json::Value* value__)
     , AppHMIType(impl::ValueMember(value__, "AppHMIType"))
     , RequestType(impl::ValueMember(value__, "RequestType"))
     , memory_kb(impl::ValueMember(value__, "memory_kb"), 0)
-    , heart_beat_timeout_ms(
-          impl::ValueMember(value__, "heart_beat_timeout_ms")) {}
+    , heart_beat_timeout_ms(impl::ValueMember(value__, "heart_beat_timeout_ms"))
+#ifdef SDL_REMOTE_CONTROL
+    , groups_primaryRC(impl::ValueMember(value__, "groups_primaryRC"))
+    , groups_nonPrimaryRC(impl::ValueMember(value__, "groups_nonPrimaryRC"))
+    , moduleType(impl::ValueMember(value__, "moduleType"))
+#endif  // SDL_REMOTE_CONTROL
+{
+}
 
 Json::Value ApplicationParams::ToJsonValue() const {
   Json::Value result__(PolicyBase::ToJsonValue());
@@ -250,6 +256,11 @@ Json::Value ApplicationParams::ToJsonValue() const {
   impl::WriteJsonField("memory_kb", memory_kb, &result__);
   impl::WriteJsonField(
       "heart_beat_timeout_ms", heart_beat_timeout_ms, &result__);
+#ifdef SDL_REMOTE_CONTROL
+  impl::WriteJsonField("groups_primaryRC", groups_primaryRC, &result__);
+  impl::WriteJsonField("groups_nonPrimaryRC", groups_nonPrimaryRC, &result__);
+  impl::WriteJsonField("moduleType", moduleType, &result__);
+#endif  // SDL_REMOTE_CONTROL
   return result__;
 }
 
@@ -271,7 +282,17 @@ bool ApplicationParams::is_valid() const {
   if (!heart_beat_timeout_ms.is_valid()) {
     return false;
   }
-
+#ifdef SDL_REMOTE_CONTROL
+  if (!groups_primaryRC.is_valid()) {
+    return false;
+  }
+  if (!groups_nonPrimaryRC.is_valid()) {
+    return false;
+  }
+  if (!moduleType.is_valid()) {
+    return false;
+  }
+#endif  // SDL_REMOTE_CONTROL
   return Validate();
 }
 
@@ -298,6 +319,17 @@ bool ApplicationParams::struct_empty() const {
   if (heart_beat_timeout_ms.is_initialized()) {
     return false;
   }
+#ifdef SDL_REMOTE_CONTROL
+  if (groups_primaryRC.is_initialized()) {
+    return false;
+  }
+  if (groups_nonPrimaryRC.is_initialized()) {
+    return false;
+  }
+  if (moduleType.is_initialized()) {
+    return false;
+  }
+#endif  // SDL_REMOTE_CONTROL
   return true;
 }
 
@@ -340,6 +372,20 @@ void ApplicationParams::ReportErrors(rpc::ValidationReport* report__) const {
     heart_beat_timeout_ms.ReportErrors(
         &report__->ReportSubobject("heart_beat_timeout_ms"));
   }
+
+#ifdef SDL_REMOTE_CONTROL
+  if (!groups_primaryRC.is_valid()) {
+    groups_primaryRC.ReportErrors(
+        &report__->ReportSubobject("groups_primaryRC"));
+  }
+  if (!groups_nonPrimaryRC.is_valid()) {
+    groups_nonPrimaryRC.ReportErrors(
+        &report__->ReportSubobject("groups_nonPrimaryRC"));
+  }
+  if (!moduleType.is_valid()) {
+    moduleType.ReportErrors(&report__->ReportSubobject("moduleType"));
+  }
+#endif  // SDL_REMOTE_CONTROL
 }
 
 void ApplicationParams::SetPolicyTableType(PolicyTableType pt_type) {
@@ -348,6 +394,11 @@ void ApplicationParams::SetPolicyTableType(PolicyTableType pt_type) {
   RequestType.SetPolicyTableType(pt_type);
   memory_kb.SetPolicyTableType(pt_type);
   heart_beat_timeout_ms.SetPolicyTableType(pt_type);
+#ifdef SDL_REMOTE_CONTROL
+  groups_primaryRC.SetPolicyTableType(pt_type);
+  groups_nonPrimaryRC.SetPolicyTableType(pt_type);
+  moduleType.SetPolicyTableType(pt_type);
+#endif  // SDL_REMOTE_CONTROL
 }
 
 // RpcParameters methods
@@ -550,7 +601,16 @@ ModuleConfig::ModuleConfig(const Json::Value* value__)
     , vehicle_year(impl::ValueMember(value__, "vehicle_year"))
     , preloaded_date(impl::ValueMember(value__, "preloaded_date"))
     , certificate(impl::ValueMember(value__, "certificate"))
-    , preloaded_pt(impl::ValueMember(value__, "preloaded_pt")) {}
+    , preloaded_pt(impl::ValueMember(value__, "preloaded_pt"))
+#ifdef SDL_REMOTE_CONTROL
+    , user_consent_passengersRC(
+          impl::ValueMember(value__, "user_consent_passengersRC"))
+    , country_consent_passengersRC(
+          impl::ValueMember(value__, "country_consent_passengersRC"))
+    , equipment(impl::ValueMember(value__, "equipment"))
+#endif  // SDL_REMOTE_CONTROL
+{
+}
 
 void ModuleConfig::SafeCopyFrom(const ModuleConfig& from) {
   exchange_after_x_days = from.exchange_after_x_days;
@@ -567,6 +627,12 @@ void ModuleConfig::SafeCopyFrom(const ModuleConfig& from) {
   vehicle_make.assign_if_valid(from.vehicle_make);
   vehicle_model.assign_if_valid(from.vehicle_model);
   vehicle_year.assign_if_valid(from.vehicle_year);
+#ifdef SDL_REMOTE_CONTROL
+  user_consent_passengersRC.assign_if_valid(from.user_consent_passengersRC);
+  country_consent_passengersRC.assign_if_valid(
+      from.country_consent_passengersRC);
+  equipment.assign_if_valid(from.equipment);
+#endif  // SDL_REMOTE_CONTROL
 }
 
 Json::Value ModuleConfig::ToJsonValue() const {
@@ -593,6 +659,13 @@ Json::Value ModuleConfig::ToJsonValue() const {
   impl::WriteJsonField("vehicle_year", vehicle_year, &result__);
   impl::WriteJsonField("certificate", certificate, &result__);
   impl::WriteJsonField("preloaded_date", preloaded_date, &result__);
+#ifdef SDL_REMOTE_CONTROL
+  impl::WriteJsonField(
+      "user_consent_passengersRC", user_consent_passengersRC, &result__);
+  impl::WriteJsonField(
+      "country_consent_passengersRC", country_consent_passengersRC, &result__);
+  impl::WriteJsonField("equipment", equipment, &result__);
+#endif  // SDL_REMOTE_CONTROL
   return result__;
 }
 
@@ -639,6 +712,17 @@ bool ModuleConfig::is_valid() const {
   if (!preloaded_date.is_valid()) {
     return false;
   }
+#ifdef SDL_REMOTE_CONTROL
+  if (!user_consent_passengersRC.is_valid()) {
+    return false;
+  }
+  if (!country_consent_passengersRC.is_valid()) {
+    return false;
+  }
+  if (!equipment.is_valid()) {
+    return false;
+  }
+#endif  // SDL_REMOTE_CONTROL
   return Validate();
 }
 
@@ -688,7 +772,17 @@ bool ModuleConfig::struct_empty() const {
   if (vehicle_year.is_initialized()) {
     return false;
   }
-
+#ifdef SDL_REMOTE_CONTROL
+  if (user_consent_passengersRC.is_initialized()) {
+    return false;
+  }
+  if (country_consent_passengersRC.is_initialized()) {
+    return false;
+  }
+  if (equipment.is_initialized()) {
+    return false;
+  }
+#endif  // SDL_REMOTE_CONTROL
   return true;
 }
 
@@ -738,34 +832,54 @@ void ModuleConfig::ReportErrors(rpc::ValidationReport* report__) const {
   if (!vehicle_year.is_valid()) {
     vehicle_year.ReportErrors(&report__->ReportSubobject("vehicle_year"));
   }
-
+#ifdef SDL_REMOTE_CONTROL
+  if (!user_consent_passengersRC.is_valid()) {
+    user_consent_passengersRC.ReportErrors(
+        &report__->ReportSubobject("user_consent_passengersRC"));
+  }
+  if (!country_consent_passengersRC.is_valid()) {
+    country_consent_passengersRC.ReportErrors(
+        &report__->ReportSubobject("country_consent_passengersRC"));
+  }
+  if (!equipment.is_valid()) {
+    equipment.ReportErrors(&report__->ReportSubobject("equipment"));
+  }
+#endif  // SDL_REMOTE_CONTROL
   const std::string validation_info =
       omitted_validation_info + PolicyTableTypeToString(GetPolicyTableType());
 
+  rpc::ValidationReport* omitted_field_report = NULL;
   switch (GetPolicyTableType()) {
     case PT_PRELOADED: {
       if (vehicle_make.is_initialized()) {
-        rpc::ValidationReport& vehicle_make_omitted_field_report =
-            report__->ReportSubobject("vehicle_make");
-        vehicle_make_omitted_field_report.set_validation_info(validation_info);
+        omitted_field_report = &report__->ReportSubobject("vehicle_make");
+        omitted_field_report->set_validation_info(validation_info);
       }
       if (vehicle_year.is_initialized()) {
-        rpc::ValidationReport& vehicle_year_omitted_field_report =
-            report__->ReportSubobject("vehicle_year");
-        vehicle_year_omitted_field_report.set_validation_info(validation_info);
+        omitted_field_report = &report__->ReportSubobject("vehicle_year");
+        omitted_field_report->set_validation_info(validation_info);
       }
       if (vehicle_model.is_initialized()) {
-        rpc::ValidationReport& vehicle_model_omitted_field_report =
-            report__->ReportSubobject("vehicle_model");
-        vehicle_model_omitted_field_report.set_validation_info(validation_info);
+        omitted_field_report = &report__->ReportSubobject("vehicle_model");
+        omitted_field_report->set_validation_info(validation_info);
       }
-
+#ifdef SDL_REMOTE_CONTROL
+      if (user_consent_passengersRC.is_initialized()) {
+        omitted_field_report =
+            &report__->ReportSubobject("user_consent_passengersRC");
+        omitted_field_report->set_validation_info(validation_info);
+      }
+#endif  // SDL_REMOTE_CONTROL
       break;
     }
     case PT_UPDATE: {
       if (preloaded_pt.is_initialized()) {
+        omitted_field_report = &report__->ReportSubobject("preloaded_pt");
+        omitted_field_report->set_validation_info(validation_info);
+      }
+      if (preloaded_date.is_initialized()) {
         rpc::ValidationReport& preloaded_pt_omitted_field_report =
-            report__->ReportSubobject("preloaded_pt");
+            report__->ReportSubobject("preloaded_date");
         preloaded_pt_omitted_field_report.set_validation_info(validation_info);
       }
       break;
@@ -789,7 +903,181 @@ void ModuleConfig::SetPolicyTableType(PolicyTableType pt_type) {
   vehicle_make.SetPolicyTableType(pt_type);
   vehicle_model.SetPolicyTableType(pt_type);
   vehicle_year.SetPolicyTableType(pt_type);
+#ifdef SDL_REMOTE_CONTROL
+  user_consent_passengersRC.SetPolicyTableType(pt_type);
+  country_consent_passengersRC.SetPolicyTableType(pt_type);
+  equipment.SetPolicyTableType(pt_type);
+#endif  // SDL_REMOTE_CONTROL
 }
+
+#ifdef SDL_REMOTE_CONTROL
+// Equipment methods
+Equipment::Equipment() : CompositeType(kUninitialized) {}
+Equipment::~Equipment() {}
+Equipment::Equipment(const Json::Value* value__)
+    : CompositeType(InitHelper(value__, &Json::Value::isObject))
+    , zones(impl::ValueMember(value__, "zones")) {}
+Json::Value Equipment::ToJsonValue() const {
+  Json::Value result__(Json::objectValue);
+  impl::WriteJsonField("zones", zones, &result__);
+  return result__;
+}
+bool Equipment::is_valid() const {
+  if (!zones.is_valid()) {
+    return false;
+  }
+
+  return Validate();
+}
+bool Equipment::is_initialized() const {
+  return (initialization_state__ != kUninitialized) || (!struct_empty());
+}
+bool Equipment::struct_empty() const {
+  if (zones.is_initialized()) {
+    return false;
+  }
+
+  return true;
+}
+void Equipment::ReportErrors(rpc::ValidationReport* report__) const {
+  if (struct_empty()) {
+    rpc::CompositeType::ReportErrors(report__);
+  }
+  if (!zones.is_valid()) {
+    zones.ReportErrors(&report__->ReportSubobject("zones"));
+  }
+}
+
+void Equipment::SetPolicyTableType(PolicyTableType pt_type) {
+  CompositeType::SetPolicyTableType(pt_type);
+  zones.SetPolicyTableType(pt_type);
+}
+
+// InteriorZone methods
+const std::string InteriorZone::kRemoteRpcs[] = {
+    "ButtonPress",
+    "GetInteriorVehicleDataCapabilities",
+    "GetInteriorVehicleData",
+    "SetInteriorVehicleData"};
+const std::string InteriorZone::kRadioParameters[] = {"frequencyInteger",
+                                                      "frequencyFraction",
+                                                      "band",
+                                                      "rdsData",
+                                                      "availableHDs",
+                                                      "hdChannel",
+                                                      "signalStrength",
+                                                      "signalChangeThreshold",
+                                                      "radioEnable",
+                                                      "state"};
+const std::string InteriorZone::kClimateParameters[] = {"fanSpeed",
+                                                        "currentTemp",
+                                                        "desiredTemp",
+                                                        "temperatureUnit",
+                                                        "acEnable",
+                                                        "circulateAirEnable",
+                                                        "autoModeEnable",
+                                                        "defrostZone",
+                                                        "dualModeEnable"};
+InteriorZone::InteriorZone() : CompositeType(kUninitialized) {}
+InteriorZone::InteriorZone(uint8_t col,
+                           uint8_t row,
+                           uint8_t level,
+                           const AccessModules& auto_allow,
+                           const AccessModules& driver_allow)
+    : CompositeType(kUninitialized)
+    , col(col)
+    , row(row)
+    , level(level)
+    , auto_allow(auto_allow)
+    , driver_allow(driver_allow) {}
+InteriorZone::~InteriorZone() {}
+InteriorZone::InteriorZone(const Json::Value* value__)
+    : CompositeType(InitHelper(value__, &Json::Value::isObject))
+    , col(impl::ValueMember(value__, "col"))
+    , row(impl::ValueMember(value__, "row"))
+    , level(impl::ValueMember(value__, "level"))
+    , auto_allow(impl::ValueMember(value__, "auto_allow"))
+    , driver_allow(impl::ValueMember(value__, "driver_allow")) {}
+Json::Value InteriorZone::ToJsonValue() const {
+  Json::Value result__(Json::objectValue);
+  impl::WriteJsonField("col", col, &result__);
+  impl::WriteJsonField("row", row, &result__);
+  impl::WriteJsonField("level", level, &result__);
+  impl::WriteJsonField("auto_allow", auto_allow, &result__);
+  impl::WriteJsonField("driver_allow", driver_allow, &result__);
+  return result__;
+}
+bool InteriorZone::is_valid() const {
+  if (!col.is_valid()) {
+    return false;
+  }
+  if (!row.is_valid()) {
+    return false;
+  }
+  if (!level.is_valid()) {
+    return false;
+  }
+  if (!auto_allow.is_valid()) {
+    return false;
+  }
+  if (!driver_allow.is_valid()) {
+    return false;
+  }
+
+  return Validate();
+}
+bool InteriorZone::is_initialized() const {
+  return (initialization_state__ != kUninitialized) || (!struct_empty());
+}
+bool InteriorZone::struct_empty() const {
+  if (col.is_initialized()) {
+    return false;
+  }
+  if (row.is_initialized()) {
+    return false;
+  }
+  if (level.is_initialized()) {
+    return false;
+  }
+  if (auto_allow.is_initialized()) {
+    return false;
+  }
+  if (driver_allow.is_initialized()) {
+    return false;
+  }
+
+  return true;
+}
+void InteriorZone::ReportErrors(rpc::ValidationReport* report__) const {
+  if (struct_empty()) {
+    rpc::CompositeType::ReportErrors(report__);
+  }
+  if (!col.is_valid()) {
+    col.ReportErrors(&report__->ReportSubobject("col"));
+  }
+  if (!row.is_valid()) {
+    row.ReportErrors(&report__->ReportSubobject("row"));
+  }
+  if (!level.is_valid()) {
+    level.ReportErrors(&report__->ReportSubobject("level"));
+  }
+  if (!auto_allow.is_valid()) {
+    auto_allow.ReportErrors(&report__->ReportSubobject("auto_allow"));
+  }
+  if (!driver_allow.is_valid()) {
+    driver_allow.ReportErrors(&report__->ReportSubobject("driver_allow"));
+  }
+}
+
+void InteriorZone::SetPolicyTableType(PolicyTableType pt_type) {
+  CompositeType::SetPolicyTableType(pt_type);
+  col.SetPolicyTableType(pt_type);
+  row.SetPolicyTableType(pt_type);
+  level.SetPolicyTableType(pt_type);
+  auto_allow.SetPolicyTableType(pt_type);
+  driver_allow.SetPolicyTableType(pt_type);
+}
+#endif  // SDL_REMOTE_CONTROL
 
 // MessageString methods
 MessageString::MessageString() : CompositeType(kUninitialized) {}
@@ -1013,6 +1301,9 @@ void ConsumerFriendlyMessages::ReportErrors(
   if (struct_empty()) {
     rpc::CompositeType::ReportErrors(report__);
   }
+  if (!version.is_valid()) {
+    version.ReportErrors(&report__->ReportSubobject("version"));
+  }
   if (PT_SNAPSHOT == GetPolicyTableType()) {
     if (messages.is_initialized()) {
       std::string validation_info =
@@ -1021,9 +1312,6 @@ void ConsumerFriendlyMessages::ReportErrors(
       report__->ReportSubobject("messages")
           .set_validation_info(validation_info);
     }
-  }
-  if (!version.is_valid()) {
-    version.ReportErrors(&report__->ReportSubobject("version"));
   }
   if (!messages.is_valid()) {
     messages.ReportErrors(&report__->ReportSubobject("messages"));
