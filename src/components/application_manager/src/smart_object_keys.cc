@@ -134,8 +134,10 @@ const char* speech_capabilities = "speechCapabilities";
 const char* vr_capabilities = "vrCapabilities";
 const char* audio_pass_thru_capabilities = "audioPassThruCapabilities";
 const char* pcm_stream_capabilities = "pcmStreamCapabilities";
-const char* device_rank = "deviceRank";
 const char* audio_pass_thru_icon = "audioPassThruIcon";
+const char* way_points = "wayPoints";
+const char* device_rank = "deviceRank";
+
 // PutFile
 const char* sync_file_name = "syncFileName";
 const char* file_name = "fileName";

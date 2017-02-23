@@ -83,7 +83,7 @@ class UpdateStatusManager : public UpdateStatusManagerInterface {
 
   /**
    * @brief Update status hanlder for PTS sending out
-   * @param update_timeout Timeout for waiting of incoming PTU
+   * @param update_timeout Timeout for waiting of incoming PTU (msec)
    */
   void OnUpdateSentOut(uint32_t update_timeout);
 

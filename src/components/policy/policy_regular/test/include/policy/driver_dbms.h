@@ -40,7 +40,7 @@
 
 namespace test {
 namespace components {
-namespace policy {
+namespace policy_test {
 
 #ifdef __QNX__
 class DBMS {

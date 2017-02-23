@@ -115,6 +115,12 @@
                         "hmi_levels": ["FULL",
                         "LIMITED"]
                     },
+                    "OnInteriorVehicleData": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED",
+                        "NONE"]
+                    },
                     "OnCommand": {
                         "hmi_levels": ["BACKGROUND",
                         "FULL",

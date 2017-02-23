@@ -395,6 +395,36 @@ class HMICapabilities {
    */
   virtual const smart_objects::SmartObject& ui_hmi_capabilities() const = 0;
 
+  /*
+   * @brief Interface used to store information if navigation
+   * supported by the system
+   *
+   * @param supported Indicates if navigation supported by the system
+   */
+  virtual void set_navigation_supported(const bool supported) = 0;
+
+  /*
+   * @brief Retrieves information if navi supported by the system
+   *
+   * @return TRUE if it supported, otherwise FALSE
+   */
+  virtual bool navigation_supported() const = 0;
+
+  /*
+   * @brief Interface used to store information if phone call
+   * supported by the system
+   *
+   * @param supported Indicates if navigation supported by the sustem
+   */
+  virtual void set_phone_call_supported(const bool supported) = 0;
+
+  /*
+   * @brief Retrieves information if phone call supported by the system
+   *
+   * @return TRUE if it supported, otherwise FALSE
+   */
+  virtual bool phone_call_supported() const = 0;
+
   virtual void Init(resumption::LastState* last_state) = 0;
 
   /**

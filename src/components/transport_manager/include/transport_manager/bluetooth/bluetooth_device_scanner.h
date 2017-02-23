@@ -188,4 +188,4 @@ class BluetoothDeviceScanner : public DeviceScanner {
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
-#endif /* BLUETOOTH_DEVICE_SCANNER_H_ */
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_DEVICE_SCANNER_H_

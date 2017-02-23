@@ -72,7 +72,7 @@ class UIGetCapabilitiesResponseTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {
  public:
   MessageSharedPtr CreateCommandMsg() {
-    MessageSharedPtr command_msg(CreateMessage(::smart_objects::SmartType_Map));
+    MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
     (*command_msg)[strings::msg_params][strings::number] = "123";
     (*command_msg)[strings::params][strings::connection_key] = kConnectionKey;
     (*command_msg)[strings::params][hmi_response::code] =
@@ -84,13 +84,13 @@ class UIGetCapabilitiesResponseTest
   }
 
   MockHMICapabilities mock_hmi_capabilities_;
-  ::smart_objects::SmartObject capabilities_;
+  SmartObject capabilities_;
 };
 
-TEST_F(UIGetCapabilitiesResponseTest, Run_SetDisplay_SUCCESSS) {
+TEST_F(UIGetCapabilitiesResponseTest, RUN_SetDisplay_SUCCESSS) {
   MessageSharedPtr command_msg = CreateCommandMsg();
   (*command_msg)[strings::msg_params][hmi_response::display_capabilities] =
-      ::smart_objects::SmartObject(::smart_objects::SmartType_Map);
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
   (*command_msg)[strings::msg_params][hmi_response::display_capabilities]
                 [hmi_response::display_type] = "GEN2_8_DMA";
 
@@ -100,7 +100,7 @@ TEST_F(UIGetCapabilitiesResponseTest, Run_SetDisplay_SUCCESSS) {
   EXPECT_CALL(app_mngr_, hmi_capabilities())
       .WillOnce(ReturnRef(mock_hmi_capabilities_));
 
-  ::smart_objects::SmartObject display_capabilities_so =
+  smart_objects::SmartObject display_capabilities_so =
       (*command_msg)[strings::msg_params][hmi_response::display_capabilities];
 
   MessageSharedPtr display_caps_old =
@@ -115,10 +115,10 @@ TEST_F(UIGetCapabilitiesResponseTest, Run_SetDisplay_SUCCESSS) {
   command->Run();
 }
 
-TEST_F(UIGetCapabilitiesResponseTest, Run_SetSoftButton_SUCCESS) {
+TEST_F(UIGetCapabilitiesResponseTest, SetSoftButton_SUCCESS) {
   MessageSharedPtr command_msg = CreateCommandMsg();
   (*command_msg)[strings::msg_params][hmi_response::soft_button_capabilities] =
-      ::smart_objects::SmartObject(::smart_objects::SmartType_Array);
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
   (*command_msg)[strings::msg_params][hmi_response::soft_button_capabilities]
                 [hmi_response::image_supported] = true;
 
@@ -128,7 +128,7 @@ TEST_F(UIGetCapabilitiesResponseTest, Run_SetSoftButton_SUCCESS) {
   EXPECT_CALL(app_mngr_, hmi_capabilities())
       .WillOnce(ReturnRef(mock_hmi_capabilities_));
 
-  ::smart_objects::SmartObject soft_button_capabilities_so = (*command_msg)
+  smart_objects::SmartObject soft_button_capabilities_so = (*command_msg)
       [strings::msg_params][hmi_response::soft_button_capabilities];
 
   EXPECT_CALL(mock_hmi_capabilities_,
@@ -137,10 +137,10 @@ TEST_F(UIGetCapabilitiesResponseTest, Run_SetSoftButton_SUCCESS) {
   command->Run();
 }
 
-TEST_F(UIGetCapabilitiesResponseTest, Run_SetHmiZone_SUCCESS) {
+TEST_F(UIGetCapabilitiesResponseTest, SetHmiZone_SUCCESS) {
   MessageSharedPtr command_msg = CreateCommandMsg();
   (*command_msg)[strings::msg_params][hmi_response::hmi_zone_capabilities] =
-      ::smart_objects::SmartObject(::smart_objects::SmartType_Array);
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
   (*command_msg)[strings::msg_params][hmi_response::hmi_zone_capabilities][0] =
       "FRONT";
 
@@ -150,7 +150,7 @@ TEST_F(UIGetCapabilitiesResponseTest, Run_SetHmiZone_SUCCESS) {
   EXPECT_CALL(app_mngr_, hmi_capabilities())
       .WillOnce(ReturnRef(mock_hmi_capabilities_));
 
-  ::smart_objects::SmartObject hmi_zone_capabilities_so =
+  smart_objects::SmartObject hmi_zone_capabilities_so =
       (*command_msg)[strings::msg_params][hmi_response::hmi_zone_capabilities];
 
   EXPECT_CALL(mock_hmi_capabilities_,
@@ -159,10 +159,10 @@ TEST_F(UIGetCapabilitiesResponseTest, Run_SetHmiZone_SUCCESS) {
   command->Run();
 }
 
-TEST_F(UIGetCapabilitiesResponseTest, Run_SetAudioPassThru_SUCCESS) {
+TEST_F(UIGetCapabilitiesResponseTest, SetAudioPassThru_SUCCESS) {
   MessageSharedPtr command_msg = CreateCommandMsg();
   (*command_msg)[strings::msg_params][strings::audio_pass_thru_capabilities] =
-      ::smart_objects::SmartObject(::smart_objects::SmartType_Array);
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
 
   ResponseFromHMIPtr command(
       CreateCommand<UIGetCapabilitiesResponse>(command_msg));
@@ -170,7 +170,7 @@ TEST_F(UIGetCapabilitiesResponseTest, Run_SetAudioPassThru_SUCCESS) {
   EXPECT_CALL(app_mngr_, hmi_capabilities())
       .WillOnce(ReturnRef(mock_hmi_capabilities_));
 
-  ::smart_objects::SmartObject audio_pass_thru_capabilities_so = (*command_msg)
+  smart_objects::SmartObject audio_pass_thru_capabilities_so = (*command_msg)
       [strings::msg_params][strings::audio_pass_thru_capabilities];
   EXPECT_CALL(
       mock_hmi_capabilities_,
@@ -179,10 +179,10 @@ TEST_F(UIGetCapabilitiesResponseTest, Run_SetAudioPassThru_SUCCESS) {
   command->Run();
 }
 
-TEST_F(UIGetCapabilitiesResponseTest, Run_SetUICapabilities_SUCCESS) {
+TEST_F(UIGetCapabilitiesResponseTest, SetNavigation_SUCCESS) {
   MessageSharedPtr command_msg = CreateCommandMsg();
   (*command_msg)[strings::msg_params][strings::hmi_capabilities] =
-      ::smart_objects::SmartObject(::smart_objects::SmartType_Map);
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
   (*command_msg)[strings::msg_params][strings::hmi_capabilities]
                 [strings::navigation] = true;
 
@@ -192,10 +192,33 @@ TEST_F(UIGetCapabilitiesResponseTest, Run_SetUICapabilities_SUCCESS) {
   EXPECT_CALL(app_mngr_, hmi_capabilities())
       .WillOnce(ReturnRef(mock_hmi_capabilities_));
 
-  ::smart_objects::SmartObject hmi_capabilities_so =
+  smart_objects::SmartObject hmi_capabilities_so =
       (*command_msg)[strings::msg_params][strings::hmi_capabilities];
   EXPECT_CALL(mock_hmi_capabilities_,
-              set_ui_hmi_capabilities(hmi_capabilities_so));
+              set_navigation_supported(
+                  hmi_capabilities_so[strings::navigation].asBool()));
+
+  command->Run();
+}
+
+TEST_F(UIGetCapabilitiesResponseTest, SetPhoneCall_SUCCESS) {
+  MessageSharedPtr command_msg = CreateCommandMsg();
+  (*command_msg)[strings::msg_params][strings::hmi_capabilities] =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+  (*command_msg)[strings::msg_params][strings::hmi_capabilities]
+                [strings::phone_call] = true;
+
+  ResponseFromHMIPtr command(
+      CreateCommand<UIGetCapabilitiesResponse>(command_msg));
+
+  EXPECT_CALL(app_mngr_, hmi_capabilities())
+      .WillOnce(ReturnRef(mock_hmi_capabilities_));
+
+  smart_objects::SmartObject hmi_capabilities_so =
+      (*command_msg)[strings::msg_params][strings::hmi_capabilities];
+  EXPECT_CALL(mock_hmi_capabilities_,
+              set_phone_call_supported(
+                  hmi_capabilities_so[strings::phone_call].asBool()));
 
   command->Run();
 }

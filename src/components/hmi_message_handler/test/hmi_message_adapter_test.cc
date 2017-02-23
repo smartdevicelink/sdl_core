@@ -42,7 +42,7 @@ namespace test {
 namespace components {
 namespace hmi_message_handler_test {
 
-using ::testing::ReturnRef;
+using ::testing::Return;
 using hmi_message_handler::HMIMessageHandlerImpl;
 
 typedef utils::SharedPtr<MockHMIMessageAdapterImpl>
@@ -53,7 +53,7 @@ TEST(HMIMessageAdapterImplTest, Handler_CorrectPointer_CorrectReturnedPointer) {
       mock_hmi_message_handler_settings;
   const uint64_t stack_size = 1000u;
   ON_CALL(mock_hmi_message_handler_settings, thread_min_stack_size())
-      .WillByDefault(ReturnRef(stack_size));
+      .WillByDefault(Return(stack_size));
   HMIMessageHandler* message_handler =
       new hmi_message_handler::HMIMessageHandlerImpl(
           mock_hmi_message_handler_settings);

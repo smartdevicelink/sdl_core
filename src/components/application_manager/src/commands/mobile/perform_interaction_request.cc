@@ -65,6 +65,9 @@ PerformInteractionRequest::PerformInteractionRequest(
   subscribe_on_event(hmi_apis::FunctionID::UI_OnResetTimeout);
   subscribe_on_event(hmi_apis::FunctionID::VR_OnCommand);
   subscribe_on_event(hmi_apis::FunctionID::Buttons_OnButtonPress);
+#ifdef SDL_REMOTE_CONTROL
+  subscribe_on_event(hmi_apis::FunctionID::RC_OnInteriorVehicleData);
+#endif  // SDL_REMOTE_CONTROL
 }
 
 PerformInteractionRequest::~PerformInteractionRequest() {}
@@ -205,6 +208,7 @@ void PerformInteractionRequest::Run() {
 
   app->set_perform_interaction_mode(static_cast<int32_t>(interaction_mode_));
   app->set_perform_interaction_active(true);
+  app->set_perform_interaction_layout(interaction_layout);
   // increment amount of active requests
   ++pi_requests_count_;
   SendVRPerformInteractionRequest(app);

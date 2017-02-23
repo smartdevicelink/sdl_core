@@ -30,8 +30,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_POLICY_INCLUDE_POLICY_POLICY_TYPES_H_
-#define SRC_COMPONENTS_POLICY_INCLUDE_POLICY_POLICY_TYPES_H_
+#ifndef SRC_COMPONENTS_INCLUDE_POLICY_POLICY_TYPES_H_
+#define SRC_COMPONENTS_INCLUDE_POLICY_POLICY_TYPES_H_
 
 #include <string>
 #include <vector>
@@ -55,7 +55,9 @@ const std::string kDefaultDeviceConnectionType = "UNKNOWN";
  */
 const std::string kPreDataConsentId = "pre_DataConsent";
 const std::string kDefaultId = "default";
+const std::string kPreConsentPassengersRC = "pre_consent_passengersRC";
 const std::string kDeviceId = "device";
+const std::string kPrimary = "rc_primaryDevice";
 
 /*
  * @brief Status of policy table update
@@ -315,4 +317,4 @@ struct MetaInfo {
 
 }  //  namespace policy
 
-#endif  //  SRC_COMPONENTS_POLICY_INCLUDE_POLICY_POLICY_TYPES_H_
+#endif  // SRC_COMPONENTS_INCLUDE_POLICY_POLICY_TYPES_H_
