@@ -85,7 +85,7 @@ TEST_F(PolicyManagerImplTest,
 
 TEST_F(PolicyManagerImplTest2, GetNotificationsNumberAfterPTUpdate) {
   // Arrange
-
+  CreateLocalPT(preloaded_pt_filename_);
   Json::Value table = createPTforLoad();
   manager_->ForcePTExchange();
   manager_->OnUpdateStarted();
@@ -124,7 +124,9 @@ TEST_F(PolicyManagerImplTest2, GetNotificationsNumberAfterPTUpdate) {
 }
 
 TEST_F(PolicyManagerImplTest2, IsAppRevoked_SetRevokedAppID_ExpectAppRevoked) {
-  // Arrange
+  CreateLocalPT(preloaded_pt_filename_);
+  AppHmiTypes types;
+  policy_manager_->AddApplication(app_id_1_, types);
   std::ifstream ifile(kValidSdlPtUpdateJson);
   Json::Reader reader;
   std::string json;
@@ -139,6 +141,45 @@ TEST_F(PolicyManagerImplTest2, IsAppRevoked_SetRevokedAppID_ExpectAppRevoked) {
   ASSERT_TRUE(manager_->LoadPT(kFilePtUpdateJson, msg));
   EXPECT_FALSE(manager_->GetCache()->IsPTPreloaded());
   EXPECT_TRUE(manager_->IsApplicationRevoked(app_id_1_));
+}
+
+TEST_F(PolicyManagerImplTest2, AppRevokedOne_AppRegistered) {
+  // Arrange
+  CreateLocalPT(preloaded_pt_filename_);
+  EmulatePTAppRevoked(kPtu2Json);
+
+  EXPECT_FALSE(policy_manager_->GetCache()->IsPTPreloaded());
+  ASSERT_TRUE(
+      (policy_manager_->GetCache())->AddDevice(device_id_2_, "Bluetooth"));
+  policy_manager_->AddApplication(application_id_, hmi_types_);
+  // Registration is allowed
+  CheckRpcPermissions("RegisterAppInterface", ::policy::kRpcAllowed);
+}
+
+// Related to manual test APPLINK-18794
+TEST_F(PolicyManagerImplTest2, AppRevokedOne_AppRegistered_HMIDefault) {
+  // Arrange
+  CreateLocalPT(preloaded_pt_filename_);
+  EmulatePTAppRevoked(kPtu2Json);
+
+  EXPECT_FALSE(policy_manager_->GetCache()->IsPTPreloaded());
+  policy_manager_->AddApplication(application_id_, hmi_types_);
+
+  std::string default_hmi;
+  // Default HMI level is NONE
+  EXPECT_TRUE(policy_manager_->GetDefaultHmi(application_id_, &default_hmi));
+  EXPECT_EQ("NONE", default_hmi);
+}
+
+TEST_F(PolicyManagerImplTest2, GetUpdateUrl) {
+  // Arrange
+  CreateLocalPT(preloaded_pt_filename_);
+  GetPTU(preloaded_pt_filename_);
+  // Check expectations
+  const std::string update_url(
+      "http://policies.telematics.ford.com/api/policies");
+  EXPECT_EQ(update_url, policy_manager_->GetUpdateUrl(7));
+  EXPECT_EQ("", policy_manager_->GetUpdateUrl(4));
 }
 
 TEST_F(PolicyManagerImplTest2,
