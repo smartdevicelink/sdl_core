@@ -414,6 +414,7 @@ PerformAudioPassThruRequest::PrepareAudioPassThruResultCodeForResponse(
     const ResponseInfo& ui_response,
     const ResponseInfo& tts_response,
     bool& out_result) {
+  using namespace helpers;
   mobile_apis::Result::eType result_code = mobile_apis::Result::INVALID_ENUM;
 
   hmi_apis::Common_Result::eType common_result =
@@ -426,7 +427,27 @@ PerformAudioPassThruRequest::PrepareAudioPassThruResultCodeForResponse(
       (tts_result != hmi_apis::Common_Result::INVALID_ENUM)) {
     common_result = hmi_apis::Common_Result::WARNINGS;
     out_result = true;
-  } else if (ui_result == hmi_apis::Common_Result::INVALID_ENUM) {
+  }
+
+  else if ((ui_result == hmi_apis::Common_Result::WARNINGS ||
+            tts_result == hmi_apis::Common_Result::WARNINGS) &&
+           Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
+               ui_result, hmi_apis::Common_Result::SUCCESS,
+               hmi_apis::Common_Result::WARNINGS,
+               hmi_apis::Common_Result::WRONG_LANGUAGE,
+               hmi_apis::Common_Result::RETRY,
+               hmi_apis::Common_Result::SAVED) &&
+           Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
+               tts_result, hmi_apis::Common_Result::SUCCESS,
+               hmi_apis::Common_Result::WARNINGS,
+               hmi_apis::Common_Result::WRONG_LANGUAGE,
+               hmi_apis::Common_Result::RETRY,
+               hmi_apis::Common_Result::SAVED)) {
+    common_result = hmi_apis::Common_Result::WARNINGS;
+    out_result = true;
+  }
+
+  else if (ui_result == hmi_apis::Common_Result::INVALID_ENUM) {
     common_result = tts_result;
   } else {
     common_result = ui_result;
