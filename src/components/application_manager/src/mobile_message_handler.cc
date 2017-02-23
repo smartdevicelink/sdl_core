@@ -135,10 +135,6 @@ MobileMessageHandler::HandleIncomingMessageProtocolV1(
       new application_manager::Message(
           protocol_handler::MessagePriority::FromServiceType(
               message->service_type()));
-  if (!message) {
-    NOTREACHED();
-    return NULL;
-  }
 
   outgoing_message->set_connection_key(message->connection_key());
   outgoing_message->set_protocol_version(
