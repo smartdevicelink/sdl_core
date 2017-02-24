@@ -403,19 +403,24 @@ void ApplicationParams::SetPolicyTableType(PolicyTableType pt_type) {
 
 // RpcParameters methods
 RpcParameters::RpcParameters() : CompositeType(kUninitialized) {}
+
 RpcParameters::RpcParameters(const HmiLevels& hmi_levels)
     : CompositeType(kUninitialized), hmi_levels(hmi_levels) {}
+
 RpcParameters::~RpcParameters() {}
+
 RpcParameters::RpcParameters(const Json::Value* value__)
     : CompositeType(InitHelper(value__, &Json::Value::isObject))
     , hmi_levels(impl::ValueMember(value__, "hmi_levels"))
     , parameters(impl::ValueMember(value__, "parameters")) {}
+
 Json::Value RpcParameters::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
   impl::WriteJsonField("hmi_levels", hmi_levels, &result__);
   impl::WriteJsonField("parameters", parameters, &result__);
   return result__;
 }
+
 bool RpcParameters::is_valid() const {
   if (!hmi_levels.is_valid()) {
     return false;
@@ -425,9 +430,11 @@ bool RpcParameters::is_valid() const {
   }
   return Validate();
 }
+
 bool RpcParameters::is_initialized() const {
   return (initialization_state__ != kUninitialized) || (!struct_empty());
 }
+
 bool RpcParameters::struct_empty() const {
   if (hmi_levels.is_initialized()) {
     return false;
@@ -437,6 +444,7 @@ bool RpcParameters::struct_empty() const {
   }
   return true;
 }
+
 void RpcParameters::ReportErrors(rpc::ValidationReport* report__) const {
   if (struct_empty()) {
     rpc::CompositeType::ReportErrors(report__);
@@ -457,18 +465,33 @@ void RpcParameters::SetPolicyTableType(PolicyTableType pt_type) {
 
 // Rpcs methods
 Rpcs::Rpcs() : CompositeType(kUninitialized) {}
+
 Rpcs::Rpcs(const Rpc& rpcs) : CompositeType(kUninitialized), rpcs(rpcs) {}
+
 Rpcs::~Rpcs() {}
+
 Rpcs::Rpcs(const Json::Value* value__)
     : CompositeType(InitHelper(value__, &Json::Value::isObject))
     , user_consent_prompt(impl::ValueMember(value__, "user_consent_prompt"))
-    , rpcs(impl::ValueMember(value__, "rpcs")) {}
+    , rpcs(impl::ValueMember(value__, "rpcs"))
+    , disallowed_by_external_consent_entities_on(impl::ValueMember(
+          value__, "disallowed_by_external_consent_entities_on"))
+    , disallowed_by_external_consent_entities_off(impl::ValueMember(
+          value__, "disallowed_by_external_consent_entities_off")) {}
+
 Json::Value Rpcs::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
   impl::WriteJsonField("user_consent_prompt", user_consent_prompt, &result__);
   impl::WriteJsonField("rpcs", rpcs, &result__);
+  impl::WriteJsonField("disallowed_by_external_consent_entities_on",
+                       disallowed_by_external_consent_entities_on,
+                       &result__);
+  impl::WriteJsonField("disallowed_by_external_consent_entities_off",
+                       disallowed_by_external_consent_entities_off,
+                       &result__);
   return result__;
 }
+
 bool Rpcs::is_valid() const {
   if (!user_consent_prompt.is_valid()) {
     return false;
@@ -476,11 +499,19 @@ bool Rpcs::is_valid() const {
   if (!rpcs.is_valid()) {
     return false;
   }
+  if (!disallowed_by_external_consent_entities_on.is_valid()) {
+    return false;
+  }
+  if (!disallowed_by_external_consent_entities_off.is_valid()) {
+    return false;
+  }
   return Validate();
 }
+
 bool Rpcs::is_initialized() const {
   return (initialization_state__ != kUninitialized) || (!struct_empty());
 }
+
 bool Rpcs::struct_empty() const {
   if (user_consent_prompt.is_initialized()) {
     return false;
@@ -488,9 +519,15 @@ bool Rpcs::struct_empty() const {
   if (rpcs.is_initialized()) {
     return false;
   }
-
+  if (disallowed_by_external_consent_entities_on.is_initialized()) {
+    return false;
+  }
+  if (disallowed_by_external_consent_entities_off.is_initialized()) {
+    return false;
+  }
   return true;
 }
+
 void Rpcs::ReportErrors(rpc::ValidationReport* report__) const {
   if (struct_empty()) {
     rpc::CompositeType::ReportErrors(report__);
@@ -502,16 +539,29 @@ void Rpcs::ReportErrors(rpc::ValidationReport* report__) const {
   if (!rpcs.is_valid()) {
     rpcs.ReportErrors(&report__->ReportSubobject("rpcs"));
   }
+  if (!disallowed_by_external_consent_entities_on.is_valid()) {
+    disallowed_by_external_consent_entities_on.ReportErrors(
+        &report__->ReportSubobject(
+            "disallowed_by_external_consent_entities_on"));
+  }
+  if (!disallowed_by_external_consent_entities_off.is_valid()) {
+    disallowed_by_external_consent_entities_off.ReportErrors(
+        &report__->ReportSubobject(
+            "disallowed_by_external_consent_entities_off"));
+  }
 }
 
 void Rpcs::SetPolicyTableType(PolicyTableType pt_type) {
   CompositeType::SetPolicyTableType(pt_type);
   user_consent_prompt.SetPolicyTableType(pt_type);
   rpcs.SetPolicyTableType(pt_type);
+  disallowed_by_external_consent_entities_off.SetPolicyTableType(pt_type);
+  disallowed_by_external_consent_entities_on.SetPolicyTableType(pt_type);
 }
 
 // ModuleConfig methods
 ModuleConfig::ModuleConfig() : CompositeType(kUninitialized) {}
+
 ModuleConfig::ModuleConfig(
     uint8_t exchange_after_x_ignition_cycles,
     int64_t exchange_after_x_kilometers,
@@ -529,7 +579,9 @@ ModuleConfig::ModuleConfig(
     , endpoints(endpoints)
     , notifications_per_minute_by_priority(
           notifications_per_minute_by_priority) {}
+
 ModuleConfig::~ModuleConfig() {}
+
 ModuleConfig::ModuleConfig(const Json::Value* value__)
     : CompositeType(InitHelper(value__, &Json::Value::isObject))
     , exchange_after_x_ignition_cycles(
@@ -1029,7 +1081,9 @@ void InteriorZone::SetPolicyTableType(PolicyTableType pt_type) {
 
 // MessageString methods
 MessageString::MessageString() : CompositeType(kUninitialized) {}
+
 MessageString::~MessageString() {}
+
 MessageString::MessageString(const Json::Value* value__)
     : CompositeType(InitHelper(value__, &Json::Value::isObject))
     , line1(impl::ValueMember(value__, "line1"))
@@ -1037,6 +1091,7 @@ MessageString::MessageString(const Json::Value* value__)
     , tts(impl::ValueMember(value__, "tts"))
     , label(impl::ValueMember(value__, "label"))
     , textBody(impl::ValueMember(value__, "textBody")) {}
+
 Json::Value MessageString::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
   impl::WriteJsonField("line1", line1, &result__);
@@ -1046,6 +1101,7 @@ Json::Value MessageString::ToJsonValue() const {
   impl::WriteJsonField("textBody", textBody, &result__);
   return result__;
 }
+
 bool MessageString::is_valid() const {
   if (struct_empty()) {
     return initialization_state__ == kInitialized && Validate();
@@ -1067,9 +1123,11 @@ bool MessageString::is_valid() const {
   }
   return Validate();
 }
+
 bool MessageString::is_initialized() const {
   return (initialization_state__ != kUninitialized) || (!struct_empty());
 }
+
 bool MessageString::struct_empty() const {
   if (line1.is_initialized()) {
     return false;
@@ -1090,6 +1148,7 @@ bool MessageString::struct_empty() const {
   }
   return true;
 }
+
 void MessageString::ReportErrors(rpc::ValidationReport* report__) const {
   if (struct_empty()) {
     rpc::CompositeType::ReportErrors(report__);
@@ -1124,17 +1183,22 @@ void MessageString::SetPolicyTableType(PolicyTableType pt_type) {
 const std::string MessageLanguages::default_language_("en-us");
 
 MessageLanguages::MessageLanguages() : CompositeType(kUninitialized) {}
+
 MessageLanguages::MessageLanguages(const Languages& languages)
     : CompositeType(kUninitialized), languages(languages) {}
+
 MessageLanguages::~MessageLanguages() {}
+
 MessageLanguages::MessageLanguages(const Json::Value* value__)
     : CompositeType(InitHelper(value__, &Json::Value::isObject))
     , languages(impl::ValueMember(value__, "languages")) {}
+
 Json::Value MessageLanguages::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
   impl::WriteJsonField("languages", languages, &result__);
   return result__;
 }
+
 bool MessageLanguages::is_valid() const {
   if (!languages.is_valid()) {
     return false;
@@ -1145,9 +1209,11 @@ bool MessageLanguages::is_valid() const {
   }
   return Validate();
 }
+
 bool MessageLanguages::is_initialized() const {
   return (initialization_state__ != kUninitialized) || (!struct_empty());
 }
+
 bool MessageLanguages::struct_empty() const {
   if (languages.is_initialized()) {
     return false;
@@ -1186,13 +1252,17 @@ void MessageLanguages::SetPolicyTableType(PolicyTableType pt_type) {
 // ConsumerFriendlyMessages methods
 ConsumerFriendlyMessages::ConsumerFriendlyMessages()
     : CompositeType(kUninitialized) {}
+
 ConsumerFriendlyMessages::ConsumerFriendlyMessages(const std::string& version)
     : CompositeType(kUninitialized), version(version) {}
+
 ConsumerFriendlyMessages::~ConsumerFriendlyMessages() {}
+
 ConsumerFriendlyMessages::ConsumerFriendlyMessages(const Json::Value* value__)
     : CompositeType(InitHelper(value__, &Json::Value::isObject))
     , version(impl::ValueMember(value__, "version"))
     , messages(impl::ValueMember(value__, "messages")) {}
+
 Json::Value ConsumerFriendlyMessages::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
   impl::WriteJsonField("version", version, &result__);
@@ -1200,6 +1270,7 @@ Json::Value ConsumerFriendlyMessages::ToJsonValue() const {
   // impl::WriteJsonField("messages", messages, &result__);
   return result__;
 }
+
 bool ConsumerFriendlyMessages::is_valid() const {
   if (!version.is_valid()) {
     return false;
@@ -1209,9 +1280,11 @@ bool ConsumerFriendlyMessages::is_valid() const {
   }
   return Validate();
 }
+
 bool ConsumerFriendlyMessages::is_initialized() const {
   return (initialization_state__ != kUninitialized) || (!struct_empty());
 }
+
 bool ConsumerFriendlyMessages::struct_empty() const {
   if (version.is_initialized()) {
     return false;
@@ -1222,6 +1295,7 @@ bool ConsumerFriendlyMessages::struct_empty() const {
 
   return true;
 }
+
 void ConsumerFriendlyMessages::ReportErrors(
     rpc::ValidationReport* report__) const {
   if (struct_empty()) {
@@ -1284,6 +1358,7 @@ Json::Value ModuleMeta::ToJsonValue() const {
   impl::WriteJsonField("vin", vin, &result__);
   return result__;
 }
+
 bool ModuleMeta::is_valid() const {
   if (struct_empty()) {
     return initialization_state__ == kInitialized && Validate();
@@ -1431,6 +1506,7 @@ AppLevel::AppLevel(uint16_t minutes_in_hmi_full,
 }
 
 AppLevel::~AppLevel() {}
+
 AppLevel::AppLevel(const Json::Value* value__)
     : CompositeType(InitHelper(value__, &Json::Value::isObject))
     , minutes_in_hmi_full(impl::ValueMember(value__, "minutes_in_hmi_full"))
@@ -1549,9 +1625,11 @@ bool AppLevel::is_valid() const {
   }
   return Validate();
 }
+
 bool AppLevel::is_initialized() const {
   return (initialization_state__ != kUninitialized) || (!struct_empty());
 }
+
 bool AppLevel::struct_empty() const {
   if (minutes_in_hmi_full.is_initialized()) {
     return false;
@@ -1803,12 +1881,17 @@ ConsentRecords::~ConsentRecords() {}
 ConsentRecords::ConsentRecords(const Json::Value* value__)
     : CompositeType(InitHelper(value__, &Json::Value::isObject))
     , consent_groups(impl::ValueMember(value__, "consent_groups"))
+    , external_consent_status_groups(
+          impl::ValueMember(value__, "external_consent_status_groups"))
     , input(impl::ValueMember(value__, "input"))
     , time_stamp(impl::ValueMember(value__, "time_stamp")) {}
 
 Json::Value ConsentRecords::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
   impl::WriteJsonField("consent_groups", consent_groups, &result__);
+  impl::WriteJsonField("external_consent_status_groups",
+                       external_consent_status_groups,
+                       &result__);
   impl::WriteJsonField("input", input, &result__);
   impl::WriteJsonField("time_stamp", time_stamp, &result__);
   return result__;
@@ -1819,6 +1902,9 @@ bool ConsentRecords::is_valid() const {
     return initialization_state__ == kInitialized && Validate();
   }
   if (!consent_groups.is_valid()) {
+    return false;
+  }
+  if (!external_consent_status_groups.is_valid()) {
     return false;
   }
   if (!input.is_valid()) {
@@ -1838,6 +1924,10 @@ bool ConsentRecords::struct_empty() const {
   if (consent_groups.is_initialized()) {
     return false;
   }
+
+  if (external_consent_status_groups.is_initialized()) {
+    return false;
+  }
   if (input.is_initialized()) {
     return false;
   }
@@ -1845,6 +1935,7 @@ bool ConsentRecords::struct_empty() const {
   if (time_stamp.is_initialized()) {
     return false;
   }
+
   return true;
 }
 
@@ -1854,6 +1945,10 @@ void ConsentRecords::ReportErrors(rpc::ValidationReport* report__) const {
   }
   if (!consent_groups.is_valid()) {
     consent_groups.ReportErrors(&report__->ReportSubobject("consent_groups"));
+  }
+  if (!consent_groups.is_valid()) {
+    external_consent_status_groups.ReportErrors(
+        &report__->ReportSubobject("external_consent_status_groups"));
   }
   if (!input.is_valid()) {
     input.ReportErrors(&report__->ReportSubobject("input"));
@@ -1866,6 +1961,7 @@ void ConsentRecords::ReportErrors(rpc::ValidationReport* report__) const {
 void ConsentRecords::SetPolicyTableType(PolicyTableType pt_type) {
   CompositeType::SetPolicyTableType(pt_type);
   consent_groups.SetPolicyTableType(pt_type);
+  external_consent_status_groups.SetPolicyTableType(pt_type);
   input.SetPolicyTableType(pt_type);
   time_stamp.SetPolicyTableType(pt_type);
 }
@@ -2261,5 +2357,61 @@ bool RequestTypes::is_empty() const {
 bool RequestTypes::is_cleaned_up() const {
   return is_cleaned_up_;
 }
+
+ExternalConsentEntity::ExternalConsentEntity()
+    : CompositeType(kUninitialized)
+    , entity_type(INT32_MAX)
+    , entity_id(INT32_MAX) {}
+
+ExternalConsentEntity::ExternalConsentEntity(const Json::Value* value__)
+    : CompositeType(InitHelper(value__, &Json::Value::isObject))
+    , entity_type(impl::ValueMember(value__, "entityType"))
+    , entity_id(impl::ValueMember(value__, "entityID")) {}
+
+ExternalConsentEntity::ExternalConsentEntity(const int32_t type,
+                                             const int32_t id)
+    : CompositeType(kUninitialized), entity_type(type), entity_id(id) {}
+
+Json::Value ExternalConsentEntity::ToJsonValue() const {
+  Json::Value result__(Json::objectValue);
+  impl::WriteJsonField("entityType", entity_type, &result__);
+  impl::WriteJsonField("entityID", entity_id, &result__);
+  return result__;
+}
+
+bool ExternalConsentEntity::operator==(const ExternalConsentEntity& rhs) const {
+  return rhs.entity_id == this->entity_id &&
+         rhs.entity_type == this->entity_type;
+}
+
+bool ExternalConsentEntity::is_valid() const {
+  if (!entity_type.is_valid()) {
+    return false;
+  }
+  if (!entity_id.is_valid()) {
+    return false;
+  }
+  return true;
+}
+
+bool ExternalConsentEntity::is_initialized() const {
+  return kInitialized == initialization_state__;
+}
+
+void ExternalConsentEntity::ReportErrors(ValidationReport* report__) const {
+  if (!entity_type.is_valid()) {
+    entity_type.ReportErrors(&report__->ReportSubobject("entityType"));
+  }
+  if (!entity_id.is_valid()) {
+    entity_id.ReportErrors(&report__->ReportSubobject("entityID"));
+  }
+}
+
+void ExternalConsentEntity::SetPolicyTableType(PolicyTableType pt_type) {
+  CompositeType::SetPolicyTableType(pt_type);
+  entity_type.SetPolicyTableType(pt_type);
+  entity_id.SetPolicyTableType(pt_type);
+}
+
 }  // namespace policy_table_interface_base
 }  // namespace rpc
