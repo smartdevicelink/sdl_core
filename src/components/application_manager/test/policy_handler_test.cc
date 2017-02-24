@@ -1465,7 +1465,7 @@ TEST_F(PolicyHandlerTest, OnGetListOfPermissions) {
   EXPECT_CALL(*mock_policy_manager_, GetUserConsentForApp(default_mac, _, _));
 
   EXPECT_CALL(mock_message_helper_,
-              SendGetListOfPermissionsResponse(_, kCorId, _));
+              SendGetListOfPermissionsResponse(_, _, kCorId, _));
 
   EXPECT_CALL(app_manager_, application(kAppId1_))
       .WillRepeatedly(Return(mock_app_));
@@ -1484,7 +1484,7 @@ TEST_F(PolicyHandlerTest, OnGetListOfPermissions_WithoutConnectionKey) {
   // Expectations
   EXPECT_CALL(app_manager_, applications()).WillRepeatedly(Return(app_set));
   EXPECT_CALL(mock_message_helper_,
-              SendGetListOfPermissionsResponse(_, kCorId, _));
+              SendGetListOfPermissionsResponse(_, _, kCorId, _));
 
   policy_handler_.OnGetListOfPermissions(kAppId1_, kCorId);
 }
@@ -1534,7 +1534,7 @@ TEST_F(PolicyHandlerTest, OnGetListOfPermissions_GroupPermissions_SUCCESS) {
   const uint32_t correlation_id = 1u;
   EXPECT_CALL(app_manager_, applications()).WillRepeatedly(Return(app_set));
   EXPECT_CALL(mock_message_helper_,
-              SendGetListOfPermissionsResponse(_, correlation_id, _));
+              SendGetListOfPermissionsResponse(_, _, correlation_id, _));
 
   const uint32_t connection_id = 0u;
   policy_handler_.OnGetListOfPermissions(connection_id, correlation_id);

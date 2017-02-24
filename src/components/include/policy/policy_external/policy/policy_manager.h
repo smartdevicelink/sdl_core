@@ -642,6 +642,20 @@ class PolicyManager : public usage_statistics::StatisticsManager {
       utils::SharedPtr<AccessRemote> access_remote) = 0;
 #endif  // SDL_REMOTE_CONTROL
 
+  /**
+   * @brief Saves customer connectivity settings status
+   * @param status external consent status
+   * @return true if succeeded, otherwise - false
+   */
+  virtual bool SaveExternalConsentStatus(
+      const ExternalConsentStatus& status) = 0;
+
+  /**
+   * @brief Gets customer connectivity settings status
+   * @return external consent status
+   */
+  virtual ExternalConsentStatus GetExternalConsentStatus() = 0;
+
  protected:
   /**
    * Checks is PT exceeded IgnitionCycles
@@ -661,20 +675,6 @@ class PolicyManager : public usage_statistics::StatisticsManager {
    * condition is true.
    */
   virtual void StartPTExchange() = 0;
-
-  /**
-   * @brief Saves customer connectivity settings status
-   * @param status external consent status
-   * @return true if succeeded, otherwise - false
-   */
-  virtual bool SaveExternalConsentStatus(
-      const ExternalConsentStatus& status) = 0;
-
-  /**
-   * @brief Gets customer connectivity settings status
-   * @return external consent status
-   */
-  virtual ExternalConsentStatus GetExternalConsentStatus() = 0;
 };
 
 }  // namespace policy
