@@ -139,12 +139,13 @@ struct ExternalConsentStatusAppender
     using namespace hmi_apis;
     status_[index_] = SmartObject(SmartType_Map);
 
-    SmartObject& ccs_status = status_[index_];
-    ccs_status["entityType"] = item.entity_type;
-    ccs_status["entityID"] = item.entity_id;
-    ccs_status["status"] = 0 == strcasecmp("ON", item.entity_status.c_str())
-                               ? static_cast<int32_t>(Common_EntityStatus::ON)
-                               : static_cast<int32_t>(Common_EntityStatus::OFF);
+    SmartObject& external_consent_status = status_[index_];
+    external_consent_status["entityType"] = item.entity_type;
+    external_consent_status["entityID"] = item.entity_id;
+    external_consent_status["status"] =
+        0 == strcasecmp("ON", item.entity_status.c_str())
+            ? static_cast<int32_t>(Common_EntityStatus::ON)
+            : static_cast<int32_t>(Common_EntityStatus::OFF);
     ++index_;
   }
 
