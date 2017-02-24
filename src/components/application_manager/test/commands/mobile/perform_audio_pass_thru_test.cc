@@ -473,6 +473,74 @@ TEST_F(
                     success);
 }
 
+
+TEST_F(
+    PerformAudioPassThruRequestTest,
+    OnEvent_BothInterfaceIsAvailable_TTSResultWARNINGS_UIResultSUCCESS_WARNINGS) {
+  const hmi_apis::Common_Result::eType ui_hmi_response =
+      hmi_apis::Common_Result::SUCCESS;
+  const hmi_apis::Common_Result::eType tts_hmi_response =
+      hmi_apis::Common_Result::WARNINGS;
+  const char* ui_info = NULL;
+  const char* tts_info = NULL;
+  const mobile_apis::Result::eType mobile_response =
+      mobile_apis::Result::WARNINGS;
+  const char* mobile_info = NULL;
+  const am::HmiInterfaces::InterfaceState ui_state =
+      am::HmiInterfaces::STATE_AVAILABLE;
+  const am::HmiInterfaces::InterfaceState tts_state =
+      am::HmiInterfaces::STATE_AVAILABLE;
+  const bool success = true;
+
+  EXPECT_CALL(mock_message_helper_,
+              HMIToMobileResult(hmi_apis::Common_Result::WARNINGS))
+      .WillOnce(Return(mobile_response));
+
+  CheckExpectations(ui_hmi_response,
+                    tts_hmi_response,
+                    ui_info,
+                    tts_info,
+                    mobile_response,
+                    mobile_info,
+                    ui_state,
+                    tts_state,
+                    success);
+}
+
+
+TEST_F(
+    PerformAudioPassThruRequestTest,
+    OnEvent_BothInterfaceIsAvailable_TTSResultSUCCESS_UIResultWARNINGS_WARNINGS) {
+  const hmi_apis::Common_Result::eType ui_hmi_response =
+      hmi_apis::Common_Result::WARNINGS;
+  const hmi_apis::Common_Result::eType tts_hmi_response =
+      hmi_apis::Common_Result::SUCCESS;
+  const char* ui_info = NULL;
+  const char* tts_info = NULL;
+  const mobile_apis::Result::eType mobile_response =
+      mobile_apis::Result::WARNINGS;
+  const char* mobile_info = NULL;
+  const am::HmiInterfaces::InterfaceState ui_state =
+      am::HmiInterfaces::STATE_AVAILABLE;
+  const am::HmiInterfaces::InterfaceState tts_state =
+      am::HmiInterfaces::STATE_AVAILABLE;
+  const bool success = true;
+
+  EXPECT_CALL(mock_message_helper_,
+              HMIToMobileResult(hmi_apis::Common_Result::WARNINGS))
+      .WillOnce(Return(mobile_response));
+
+  CheckExpectations(ui_hmi_response,
+                    tts_hmi_response,
+                    ui_info,
+                    tts_info,
+                    mobile_response,
+                    mobile_info,
+                    ui_state,
+                    tts_state,
+                    success);
+}
+
 TEST_F(PerformAudioPassThruRequestTest,
        Run_MobileSendAudioPassThruIconStatic_SUCCESS) {
   MessageSharedPtr msg_mobile = CreateMobileMessageSO();
@@ -637,6 +705,7 @@ TEST_F(PerformAudioPassThruRequestTest,
   ResultCommandExpectations(
       msg_mobile_response, NULL, am::mobile_api::Result::INVALID_DATA, false);
 }
+
 
 }  // namespace perform_audio_pass_thru_request
 }  // namespace mobile_commands_test
