@@ -916,14 +916,20 @@ AppIdURL PolicyManagerImpl::RetrySequenceUrl(const struct RetrySequenceURL& rs,
                                              const EndpointUrls& urls) const {
   uint32_t url_idx = rs.url_idx_;
   uint32_t app_idx = rs.app_idx_;
-  const std::string app_id = rs.policy_app_id_;
+  const std::string& app_id = rs.policy_app_id_;
 
   if (urls.size() <= app_idx) {
+    // Index of current application doesn't exist any more due to app(s)
+    // unregistration
     url_idx = 0;
     app_idx = 0;
   } else if (urls[app_idx].app_id != app_id) {
+    // Index of current application points to another one due to app(s)
+    // registration/unregistration
     url_idx = 0;
   } else if (url_idx >= urls[app_idx].url.size()) {
+    // Index of current application is OK, but all of its URL are sent,
+    // move to the next application
     url_idx = 0;
     if (++app_idx >= urls.size()) {
       app_idx = 0;
