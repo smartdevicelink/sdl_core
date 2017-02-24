@@ -365,17 +365,20 @@ struct MetaInfo {
 };
 
 /**
- * @brief The index of the application and the index of its URL
- * from the Endpoints vector that will be sent on the next
- * OnSystemRequest retry sequence
+ * @brief The index of the application, the index of its URL
+ * and the policy application id from the Endpoints vector
+ * that will be sent on the next OnSystemRequest retry sequence
  */
 struct RetrySequenceURL {
   int app_idx_;
   int url_idx_;
-  RetrySequenceURL(int app, int url) : app_idx_(app), url_idx_(url) {}
+  std::string policy_app_id_;
+  RetrySequenceURL(int app, int url, const std::string& app_id)
+      : app_idx_(app), url_idx_(url), policy_app_id_(app_id) {}
   RetrySequenceURL() {
     app_idx_ = 0;
     url_idx_ = 0;
+    policy_app_id_ = "";
   }
 }
 
