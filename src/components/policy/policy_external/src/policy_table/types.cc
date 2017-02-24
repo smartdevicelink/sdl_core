@@ -1899,7 +1899,7 @@ Json::Value ConsentRecords::ToJsonValue() const {
 
 bool ConsentRecords::is_valid() const {
   if (struct_empty()) {
-    return initialization_state__ == kInitialized && Validate();
+    return initialization_state__ == kUninitialized && Validate();
   }
   if (!consent_groups.is_valid()) {
     return false;

@@ -142,11 +142,12 @@ TEST(PolicyGeneratedCodeTest, TestConsentsGroup_Validation) {
   // to be empty + initialized in order to be valid
   // Also Map type does not have specific validation on PT type
 
-  Optional<ConsentGroups> consent_groups;
+  rpc::Optional<ConsentGroups> consent_groups;
 
   EXPECT_TRUE(consent_groups.is_valid());
 
-  consent_groups->insert(std::make_pair(std::string("Group1"), Boolean(true)));
+  consent_groups->insert(
+      std::make_pair(std::string("Group1"), rpc::Boolean(true)));
 
   EXPECT_TRUE(consent_groups.is_valid());
 
@@ -154,13 +155,14 @@ TEST(PolicyGeneratedCodeTest, TestConsentsGroup_Validation) {
   for (size_t number = 0; number < 256; ++number) {
     std::stringstream name;
     name << "Group" << number;
-    consent_groups->insert(std::make_pair(name.str(), Boolean(true)));
+    consent_groups->insert(std::make_pair(name.str(), rpc::Boolean(true)));
   }
 
   EXPECT_FALSE(consent_groups.is_valid());
 }
 
-TEST(PolicyGeneratedCodeTest, TestConsentRecords_CCSConsents_PT_Validation) {
+TEST(PolicyGeneratedCodeTest,
+     TestConsentRecords_ExternalConsents_PT_Validation) {
   using namespace rpc::policy_table_interface_base;
   ConsentRecords consent_records;
 
@@ -175,10 +177,10 @@ TEST(PolicyGeneratedCodeTest, TestConsentRecords_CCSConsents_PT_Validation) {
   consent_records.SetPolicyTableType(PT_SNAPSHOT);
   EXPECT_TRUE(consent_records.is_valid());
 
-  consent_records.ccs_consent_groups->insert(
+  consent_records.external_consent_status_groups->insert(
       std::make_pair(std::string("Group1"), true));
 
-  consent_records.ccs_consent_groups->insert(
+  consent_records.external_consent_status_groups->insert(
       std::make_pair(std::string("Group2"), false));
 
   consent_records.SetPolicyTableType(PT_UPDATE);
@@ -193,7 +195,7 @@ TEST(PolicyGeneratedCodeTest, TestConsentRecords_CCSConsents_PT_Validation) {
 
 TEST(PolicyGeneratedCodeTest, TestCCSEntities_PT_Validation) {
   using namespace rpc::policy_table_interface_base;
-  Optional<DisallowedByExternalConsentEntities>
+  rpc::Optional<DisallowedByExternalConsentEntities>
       disallowed_by_external_consent_entities_on;
 
   // PT_SNAPSHOT, PT_UPDATE, PT_SNAPSHOT do not care of CCS entities since their

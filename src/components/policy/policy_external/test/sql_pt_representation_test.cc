@@ -407,8 +407,7 @@ TEST_F(SQLPTRepresentationTest,
   query.Prepare(query_select);
   query.Next();
 
-  const int32_t tables_number = 27;
-  ASSERT_EQ(tables_number, query.GetInteger(0));
+  ASSERT_EQ(kPolicyTablesNumber, query.GetInteger(0));
 
   const std::string query_select_count_of_iap_buffer_full =
       "SELECT `count_of_iap_buffer_full` FROM `usage_and_error_count`";

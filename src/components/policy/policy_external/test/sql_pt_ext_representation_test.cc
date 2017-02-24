@@ -1482,7 +1482,7 @@ TEST_F(SQLPTExtRepresentationTest, SaveUserConsentRecords_ExpectedSaved) {
 
   const std::string device_id = "test_device_id";
   const std::string app_id = "test_app_id";
-  const std::string ccs_group = "CCSGroup";
+  const std::string external_consent_group = "ExternalConsentGroup";
   const std::string consent_group = "ConsentGroup";
   const std::string time_stamp = "2016-08-29T17:12:07Z";
   const Input input = Input::I_GUI;
@@ -1495,7 +1495,7 @@ TEST_F(SQLPTExtRepresentationTest, SaveUserConsentRecords_ExpectedSaved) {
   UserConsentRecords::mapped_type& app_records = user_consent_records[app_id];
 
   app_records.external_consent_status_groups->insert(
-      std::make_pair(ccs_group, Boolean(true)));
+      std::make_pair(external_consent_group, Boolean(true)));
 
   app_records.consent_groups->insert(
       std::make_pair(consent_group, Boolean(true)));
@@ -1521,7 +1521,7 @@ TEST_F(SQLPTExtRepresentationTest, SaveUserConsentRecords_ExpectedSaved) {
   EXPECT_TRUE(
       (IsKeyExist<ConsentGroups>(*consents.consent_groups, consent_group)));
   EXPECT_TRUE((IsKeyExist<ConsentGroups>(
-      *consents.external_consent_status_groups, ccs_group)));
+      *consents.external_consent_status_groups, external_consent_group)));
   EXPECT_EQ((String<1, 255>(time_stamp)), *consents.time_stamp);
   EXPECT_EQ(input, *consents.input);
 }
