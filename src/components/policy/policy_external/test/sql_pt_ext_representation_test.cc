@@ -46,6 +46,7 @@
 #include "policy/mock_policy_settings.h"
 #include "utils/shared_ptr.h"
 #include "utils/make_shared.h"
+#include "rpc_base/rpc_base.h"
 
 using namespace ::policy;
 namespace policy_table = rpc::policy_table_interface_base;
@@ -193,7 +194,78 @@ class SQLPTExtRepresentationTest : public ::testing::Test {
     }
     return result;
   }
+
+  // Attempt of simplifying policy table checks, hides internal stuff, add
+  // basic checks for data existence before getting of data
+  // For usage example see SaveUserConsentRecords_ExpectedSaved,
+  // SaveFunctionalGroupings_ExpectedSaved tests
+  template <typename ParentType, typename KeyType>
+  bool IsExist(const ParentType& parent) const;
+
+  template <typename ParentType, typename Value>
+  bool IsKeyExist(const ParentType& parent, const Value& value) const {
+    return parent.end() != std::find(parent.begin(), parent.end(), value);
+  }
+
+  template <typename ParentType>
+  bool IsKeyExist(const ParentType& parent, const std::string& value) const {
+    return parent.end() != parent.find(value);
+  }
+
+  template <typename ParentType, typename KeyType>
+  const KeyType& GetData(const ParentType& parent) const {
+    EXPECT_TRUE((IsExist<ParentType, KeyType>(parent)));
+    return GetDataInternal<ParentType, KeyType>(parent);
+  }
+
+  template <typename ParentType, typename KeyType>
+  const KeyType& GetKeyData(const ParentType& parent,
+                            const std::string& key_name) const {
+    EXPECT_TRUE((IsKeyExist<ParentType>(parent, key_name)));
+    return GetKeyDataInternal<ParentType, KeyType>(parent, key_name);
+  }
+
+ private:
+  template <typename ParentType, typename KeyType>
+  const KeyType& GetDataInternal(const ParentType& parent) const;
+
+  template <typename ParentType, typename KeyType>
+  const KeyType& GetKeyDataInternal(const ParentType& parent,
+                                    const std::string& key_name) const {
+    return parent.find(key_name)->second;
+  }
 };
+
+// Specializations for 'policy_table' section
+
+template <>
+bool SQLPTExtRepresentationTest::IsExist<policy_table::Table,
+                                         policy_table::DeviceData>(
+    const policy_table::Table& table) const {
+  return table.policy_table.device_data.is_initialized();
+}
+
+template <>
+bool SQLPTExtRepresentationTest::IsExist<policy_table::Table,
+                                         policy_table::FunctionalGroupings>(
+    const policy_table::Table& table) const {
+  return table.policy_table.functional_groupings.is_initialized();
+}
+
+template <>
+const policy_table::DeviceData& SQLPTExtRepresentationTest::GetDataInternal(
+    const policy_table::Table& table) const {
+  return *table.policy_table.device_data;
+}
+
+template <>
+const policy_table::FunctionalGroupings&
+SQLPTExtRepresentationTest::GetDataInternal(
+    const policy_table::Table& table) const {
+  return table.policy_table.functional_groupings;
+}
+
+// section end
 
 const string SQLPTExtRepresentationTest::kDatabaseName = ":memory:";
 const bool SQLPTExtRepresentationTest::in_memory_ = true;
@@ -1402,6 +1474,129 @@ TEST_F(SQLPTExtRepresentationTest,
   ASSERT_TRUE(query_wrapper_->Exec(query_insert_app));
   // Check
   EXPECT_TRUE(reps->IsPredataPolicy("12345"));
+}
+
+TEST_F(SQLPTExtRepresentationTest, SaveUserConsentRecords_ExpectedSaved) {
+  using namespace policy_table;
+  using namespace rpc;
+
+  const std::string device_id = "test_device_id";
+  const std::string app_id = "test_app_id";
+  const std::string external_consent_group = "ExternalConsentGroup";
+  const std::string consent_group = "ConsentGroup";
+  const std::string time_stamp = "2016-08-29T17:12:07Z";
+  const Input input = Input::I_GUI;
+
+  Table original_table;
+  UserConsentRecords& user_consent_records =
+      *(*original_table.policy_table.device_data)[device_id]
+           .user_consent_records;
+
+  UserConsentRecords::mapped_type& app_records = user_consent_records[app_id];
+
+  app_records.external_consent_status_groups->insert(
+      std::make_pair(external_consent_group, Boolean(true)));
+
+  app_records.consent_groups->insert(
+      std::make_pair(consent_group, Boolean(true)));
+
+  *app_records.input = input;
+  *app_records.time_stamp = time_stamp;
+
+  // Act
+  EXPECT_TRUE(reps->Save(original_table));
+  utils::SharedPtr<Table> loaded_table = reps->GenerateSnapshot();
+
+  // GetData/GetKeyData methods do internal existence check - no need to do it
+  // separately. In case of data is missing expectations will be violated.
+  DeviceData device_data = GetData<Table, DeviceData>(*loaded_table);
+
+  policy_table::DeviceParams device_parameters =
+      GetKeyData<DeviceData, policy_table::DeviceParams>(device_data,
+                                                         device_id);
+
+  ConsentRecords consents = GetKeyData<UserConsentRecords, ConsentRecords>(
+      *device_parameters.user_consent_records, app_id);
+
+  EXPECT_TRUE(
+      (IsKeyExist<ConsentGroups>(*consents.consent_groups, consent_group)));
+  EXPECT_TRUE((IsKeyExist<ConsentGroups>(
+      *consents.external_consent_status_groups, external_consent_group)));
+  EXPECT_EQ((String<1, 255>(time_stamp)), *consents.time_stamp);
+  EXPECT_EQ(input, *consents.input);
+}
+
+TEST_F(SQLPTExtRepresentationTest, SaveFunctionalGroupings_ExpectedSaved) {
+  using namespace policy_table;
+  using namespace rpc;
+
+  const std::string group_name = "GroupName";
+  const std::string rpc_name = "RpcName";
+  const std::string user_consent_prompt = "TestConsentPrompt";
+  ExternalConsentEntity off_entity_1(0, 0);
+  ExternalConsentEntity off_entity_2(0, 1);
+  ExternalConsentEntity on_entity_1(1, 0);
+  ExternalConsentEntity on_entity_2(1, 1);
+
+  const HmiLevel test_level_1 = HL_FULL;
+  const HmiLevel test_level_2 = HL_LIMITED;
+  const policy_table::Parameter test_parameter_1 = P_GPS;
+  const policy_table::Parameter test_parameter_2 = P_SPEED;
+
+  Rpcs rpcs;
+
+  rpcs.disallowed_by_external_consent_entities_off->push_back(off_entity_1);
+  rpcs.disallowed_by_external_consent_entities_off->push_back(off_entity_2);
+
+  rpcs.disallowed_by_external_consent_entities_on->push_back(on_entity_1);
+  rpcs.disallowed_by_external_consent_entities_on->push_back(on_entity_2);
+
+  *rpcs.user_consent_prompt = user_consent_prompt;
+
+  RpcParameters parameters;
+  parameters.hmi_levels.push_back(test_level_1);
+  parameters.hmi_levels.push_back(test_level_2);
+  parameters.parameters->push_back(test_parameter_1);
+  parameters.parameters->push_back(test_parameter_2);
+  rpcs.rpcs.insert(std::make_pair(rpc_name, parameters));
+
+  Table original_table;
+  FunctionalGroupings& groupings =
+      original_table.policy_table.functional_groupings;
+  groupings.insert(std::make_pair(group_name, rpcs));
+
+  // Act
+  EXPECT_TRUE(reps->Save(original_table));
+  utils::SharedPtr<Table> loaded_table = reps->GenerateSnapshot();
+
+  FunctionalGroupings loaded_groupings =
+      GetData<Table, FunctionalGroupings>(*loaded_table);
+
+  Rpcs loaded_rpcs =
+      GetKeyData<FunctionalGroupings, Rpcs>(loaded_groupings, group_name);
+
+  EXPECT_TRUE((IsKeyExist<DisallowedByExternalConsentEntities>(
+      *loaded_rpcs.disallowed_by_external_consent_entities_off, off_entity_1)));
+  EXPECT_TRUE((IsKeyExist<DisallowedByExternalConsentEntities>(
+      *loaded_rpcs.disallowed_by_external_consent_entities_off, off_entity_2)));
+
+  EXPECT_TRUE((IsKeyExist<DisallowedByExternalConsentEntities>(
+      *loaded_rpcs.disallowed_by_external_consent_entities_on, on_entity_1)));
+  EXPECT_TRUE((IsKeyExist<DisallowedByExternalConsentEntities>(
+      *loaded_rpcs.disallowed_by_external_consent_entities_on, on_entity_2)));
+
+  RpcParameters loaded_parameters =
+      GetKeyData<Rpc, RpcParameters>(loaded_rpcs.rpcs, rpc_name);
+
+  EXPECT_TRUE(
+      (IsKeyExist<HmiLevels>(loaded_parameters.hmi_levels, test_level_1)));
+  EXPECT_TRUE(
+      (IsKeyExist<HmiLevels>(loaded_parameters.hmi_levels, test_level_2)));
+
+  EXPECT_TRUE((
+      IsKeyExist<Parameters>(*loaded_parameters.parameters, test_parameter_1)));
+  EXPECT_TRUE((
+      IsKeyExist<Parameters>(*loaded_parameters.parameters, test_parameter_2)));
 }
 
 }  // namespace policy_test
