@@ -429,20 +429,8 @@ PerformAudioPassThruRequest::PrepareAudioPassThruResultCodeForResponse(
     out_result = true;
   }
 
-  else if ((ui_result == hmi_apis::Common_Result::WARNINGS ||
-            tts_result == hmi_apis::Common_Result::WARNINGS) &&
-           Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
-               ui_result, hmi_apis::Common_Result::SUCCESS,
-               hmi_apis::Common_Result::WARNINGS,
-               hmi_apis::Common_Result::WRONG_LANGUAGE,
-               hmi_apis::Common_Result::RETRY,
-               hmi_apis::Common_Result::SAVED) &&
-           Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
-               tts_result, hmi_apis::Common_Result::SUCCESS,
-               hmi_apis::Common_Result::WARNINGS,
-               hmi_apis::Common_Result::WRONG_LANGUAGE,
-               hmi_apis::Common_Result::RETRY,
-               hmi_apis::Common_Result::SAVED)) {
+  else if (ui_response.is_ok &&
+           tts_result == hmi_apis::Common_Result::WARNINGS) {
     common_result = hmi_apis::Common_Result::WARNINGS;
     out_result = true;
   }
