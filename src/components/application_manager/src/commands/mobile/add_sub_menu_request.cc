@@ -94,6 +94,7 @@ void AddSubMenuRequest::Run() {
   msg_params[strings::menu_params][strings::menu_name] =
       (*message_)[strings::msg_params][strings::menu_name];
   msg_params[strings::app_id] = app->app_id();
+  
   const bool is_key_icon_exist =
       ((*message_)[strings::msg_params].keyExists(strings::sub_menu_icon));
   const bool is_icon_path_valid = CheckSubMenuIcon();
@@ -115,8 +116,7 @@ void AddSubMenuRequest::Run() {
         (*message_)[strings::msg_params][strings::sub_menu_icon];
     SendHMIRequest(hmi_apis::FunctionID::UI_AddSubMenu, &msg_params, true);
   } else {
-    LOG4CXX_ERROR(logger_, "Sub-menu icon is not valid.");
-    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    SendHMIRequest(hmi_apis::FunctionID::UI_AddSubMenu, &msg_params, true);
   }
 }
 std::string AddSubMenuRequest::ImageFullPath(const std::string& file_name,
