@@ -414,7 +414,6 @@ PerformAudioPassThruRequest::PrepareAudioPassThruResultCodeForResponse(
     const ResponseInfo& ui_response,
     const ResponseInfo& tts_response,
     bool& out_result) {
-  using namespace helpers;
   mobile_apis::Result::eType result_code = mobile_apis::Result::INVALID_ENUM;
 
   hmi_apis::Common_Result::eType common_result =
@@ -428,13 +427,11 @@ PerformAudioPassThruRequest::PrepareAudioPassThruResultCodeForResponse(
     common_result = hmi_apis::Common_Result::WARNINGS;
     out_result = true;
   }
-
   else if (ui_response.is_ok &&
            tts_result == hmi_apis::Common_Result::WARNINGS) {
     common_result = hmi_apis::Common_Result::WARNINGS;
     out_result = true;
   }
-
   else if (ui_result == hmi_apis::Common_Result::INVALID_ENUM) {
     common_result = tts_result;
   } else {
