@@ -319,19 +319,19 @@ struct MetaInfo {
  * that will be sent on the next OnSystemRequest retry sequence
  */
 struct RetrySequenceURL {
-  int app_idx_;
-  int url_idx_;
+  uint32_t app_idx_;
+  uint32_t url_idx_;
   std::string policy_app_id_;
-  RetrySequenceURL(int app, int url, const std::string& app_id)
+  RetrySequenceURL(uint32_t app, uint32_t url, const std::string& app_id)
       : app_idx_(app), url_idx_(url), policy_app_id_(app_id) {}
-  RetrySequenceURL() {
-    app_idx_ = 0;
-    url_idx_ = 0;
-    policy_app_id_ = "";
-  }
+  RetrySequenceURL() : app_idx_(0), url_idx_(0) {}
 };
 
-typedef std::pair<int, int> AppIdURL;
+/**
+ * @brief Index of the application, index of its URL
+ * from the Endpoints vector
+ */
+typedef std::pair<uint32_t, uint32_t> AppIdURL;
 
 }  //  namespace policy
 

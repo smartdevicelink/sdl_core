@@ -579,7 +579,7 @@ class PolicyHandler : public PolicyHandlerInterface,
    * and is related to a registered application or these are default URLs,
    * otherwise FALSE
    */
-  bool IsUrlAppIdValid(const int app_idx, const EndpointUrls& urls) const;
+  bool IsUrlAppIdValid(const uint32_t app_idx, const EndpointUrls& urls) const;
 
   DISALLOW_COPY_AND_ASSIGN(PolicyHandler);
 };
