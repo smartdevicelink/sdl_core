@@ -5100,7 +5100,7 @@
     <param name="requestType" type="RequestType" mandatory="true">
       <description>The type of system request.</description>
     </param>
-    <param name="url" type="String" maxlength="1000" minsize="1" maxsize="100" array="true" mandatory="false">
+    <param name="url" type="String" maxlength="1000" mandatory="false">
       <description>
         Optional URL for HTTP requests.
         If blank, the binary data shall be forwarded to the app.
