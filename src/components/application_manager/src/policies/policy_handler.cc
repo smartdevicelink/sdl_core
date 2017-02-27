@@ -1799,7 +1799,7 @@ void PolicyHandler::Add(const std::string& app_id,
   policy_manager_->Add(app_id, type, timespan_seconds);
 }
 
-bool PolicyHandler::IsUrlAppIdValid(const int app_idx,
+bool PolicyHandler::IsUrlAppIdValid(const uint32_t app_idx,
                                     const EndpointUrls& urls) const {
   const EndpointData& app_data = urls[app_idx];
   const std::vector<std::string> app_urls = app_data.url;

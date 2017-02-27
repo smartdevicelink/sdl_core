@@ -935,9 +935,8 @@ AppIdURL PolicyManagerImpl::RetrySequenceUrl(const struct RetrySequenceURL& rs,
       app_idx = 0;
     }
   }
-  const AppIdURL next_app_url = std::make_pair(app_idx, url_idx);
 
-  return next_app_url;
+  return std::make_pair(app_idx, url_idx);
 }
 
 class CallStatusChange : public utils::Callable {
