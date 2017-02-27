@@ -550,11 +550,12 @@ TEST_F(PerformAudioPassThruRequestTest,
 
   DefineHMILevelUIAvailable();
   ON_CALL(app_mngr_, ManageHMICommand(_)).WillByDefault(Return(true));
-  EXPECT_CALL(mock_message_helper_,
-              VerifyImage((*msg_mobile)[am::strings::msg_params]
-                                       [am::strings::audio_pass_thru_icon],
-                          _,
-                          _)).WillOnce(Return(mobile_apis::Result::SUCCESS));
+  EXPECT_CALL(
+      mock_message_helper_,
+      VerifyImageApplyPath((*msg_mobile)[am::strings::msg_params]
+                                        [am::strings::audio_pass_thru_icon],
+                           _,
+                           _)).WillOnce(Return(mobile_apis::Result::SUCCESS));
 
   command->Run();
 
@@ -597,11 +598,11 @@ TEST_F(PerformAudioPassThruRequestTest,
 
   DefineHMILevelUIAvailable();
   EXPECT_CALL(mock_message_helper_,
-              VerifyImage((*msg_mobile)[am::strings::msg_params]
-                                       [am::strings::audio_pass_thru_icon],
-                          _,
-                          _))
-      .WillOnce(Return(mobile_apis::Result::INVALID_DATA));
+              VerifyImageApplyPath(
+                  (*msg_mobile)[am::strings::msg_params]
+                               [am::strings::audio_pass_thru_icon],
+                  _,
+                  _)).WillOnce(Return(mobile_apis::Result::INVALID_DATA));
 
   command->Run();
 
@@ -646,11 +647,12 @@ TEST_F(PerformAudioPassThruRequestTest,
       CreateCommand<PerformAudioPassThruRequest>(msg_mobile);
 
   DefineHMILevelUIAvailable();
-  EXPECT_CALL(mock_message_helper_,
-              VerifyImage((*msg_mobile)[am::strings::msg_params]
-                                       [am::strings::audio_pass_thru_icon],
-                          _,
-                          _)).WillOnce(Return(mobile_apis::Result::SUCCESS));
+  EXPECT_CALL(
+      mock_message_helper_,
+      VerifyImageApplyPath((*msg_mobile)[am::strings::msg_params]
+                                        [am::strings::audio_pass_thru_icon],
+                           _,
+                           _)).WillOnce(Return(mobile_apis::Result::SUCCESS));
 
   command->Run();
 
@@ -693,7 +695,7 @@ TEST_F(PerformAudioPassThruRequestTest,
       CreateCommand<PerformAudioPassThruRequest>(msg_mobile);
 
   DefineHMILevelUIAvailable();
-  EXPECT_CALL(mock_message_helper_, VerifyImage(_, _, _)).Times(0);
+  EXPECT_CALL(mock_message_helper_, VerifyImageApplyPath(_, _, _)).Times(0);
 
   MessageSharedPtr msg_mobile_response;
   EXPECT_CALL(

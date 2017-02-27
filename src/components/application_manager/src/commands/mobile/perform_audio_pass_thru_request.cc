@@ -400,11 +400,12 @@ bool PerformAudioPassThruRequest::IsWaitingHMIResponse() {
 void PerformAudioPassThruRequest::ProcessAudioPassThruIcon(
     ApplicationSharedPtr app) {
   LOG4CXX_AUTO_TRACE(logger_);
-  smart_objects::SmartObject msg_params = (*message_)[strings::msg_params];
+  smart_objects::SmartObject& msg_params = (*message_)[strings::msg_params];
 
   if (msg_params.keyExists(strings::audio_pass_thru_icon)) {
-    smart_objects::SmartObject icon = msg_params[strings::audio_pass_thru_icon];
-    if (MessageHelper::VerifyImage(icon, app, application_manager_) !=
+    smart_objects::SmartObject& icon =
+        msg_params[strings::audio_pass_thru_icon];
+    if (MessageHelper::VerifyImageApplyPath(icon, app, application_manager_) !=
         mobile_apis::Result::SUCCESS) {
       LOG4CXX_WARN(
           logger_,
@@ -426,7 +427,8 @@ PerformAudioPassThruRequest::PrepareAudioPassThruResultCodeForResponse(
   const hmi_apis::Common_Result::eType tts_result = tts_response.result_code;
 
   if ((ui_result == hmi_apis::Common_Result::SUCCESS) &&
-      (tts_result != hmi_apis::Common_Result::SUCCESS)) {
+      (tts_result != hmi_apis::Common_Result::SUCCESS) &&
+      (tts_result != hmi_apis::Common_Result::INVALID_ENUM)) {
     common_result = hmi_apis::Common_Result::WARNINGS;
     out_result = true;
   } else if (ui_response.is_ok &&
