@@ -1456,37 +1456,64 @@ TEST_F(PolicyHandlerTest, OnGetListOfPermissions) {
   // Arrange
   EnablePolicyAndPolicyManagerMock();
 
-  const uint32_t kAppId1_ = 10u;
-  const uint32_t kCorId = 1u;
+  const uint32_t app_id = 10u;
+  const uint32_t corr_id = 1u;
   const std::string default_mac = "00:00:00:00:00:00";
   test_app.insert(mock_app_);
 
   // Expectations
   EXPECT_CALL(*mock_policy_manager_, GetUserConsentForApp(default_mac, _, _));
 
-  EXPECT_CALL(mock_message_helper_,
-              SendGetListOfPermissionsResponse(_, _, kCorId, _));
-
-  EXPECT_CALL(app_manager_, application(kAppId1_))
+  EXPECT_CALL(app_manager_, connection_handler())
+      .WillOnce(ReturnRef(conn_handler));
+  EXPECT_CALL(conn_handler, get_session_observer())
+      .WillOnce(ReturnRef(mock_session_observer));
+  EXPECT_CALL(*mock_app_, device()).WillOnce(Return(0));
+  EXPECT_CALL(app_manager_, application(app_id))
       .WillRepeatedly(Return(mock_app_));
+  EXPECT_CALL(*mock_app_, policy_app_id()).WillOnce(Return(std::string()));
+  EXPECT_CALL(mock_session_observer, GetDataOnDeviceID(_, _, _, _, _));
 
-  policy_handler_.OnGetListOfPermissions(kAppId1_, kCorId);
+  policy_handler_.OnGetListOfPermissions(app_id, corr_id);
 }
 
 TEST_F(PolicyHandlerTest, OnGetListOfPermissions_WithoutConnectionKey) {
   // Arrange
   EnablePolicyAndPolicyManagerMock();
 
-  const uint32_t kAppId1_ = 0u;
-  const uint32_t kCorId = 1u;
+  const uint32_t app_id = 0u;
+  const uint32_t corr_id = 1u;
+  const std::string default_mac = "00:00:00:00:00:00";
   test_app.insert(mock_app_);
 
   // Expectations
-  EXPECT_CALL(app_manager_, applications()).WillRepeatedly(Return(app_set));
-  EXPECT_CALL(mock_message_helper_,
-              SendGetListOfPermissionsResponse(_, _, kCorId, _));
+  EXPECT_CALL(*mock_policy_manager_, GetUserConsentForApp(default_mac, _, _));
 
-  policy_handler_.OnGetListOfPermissions(kAppId1_, kCorId);
+  EXPECT_CALL(app_manager_, application(app_id))
+      .WillRepeatedly(Return(mock_app_));
+  EXPECT_CALL(app_manager_, connection_handler())
+      .WillOnce(ReturnRef(conn_handler));
+  EXPECT_CALL(conn_handler, get_session_observer())
+      .WillOnce(ReturnRef(mock_session_observer));
+  EXPECT_CALL(app_manager_, applications()).WillRepeatedly(Return(app_set));
+  EXPECT_CALL(*mock_app_, device()).WillOnce(Return(0));
+  EXPECT_CALL(*mock_app_, policy_app_id()).WillOnce(Return(std::string()));
+  EXPECT_CALL(mock_session_observer, GetDataOnDeviceID(_, _, _, _, _));
+
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  policy::ExternalConsentStatus external_consent_status =
+      policy::ExternalConsentStatus();
+  EXPECT_CALL(
+      mock_message_helper_,
+      SendGetListOfPermissionsResponse(_, external_consent_status, corr_id, _));
+  EXPECT_CALL(*mock_policy_manager_, GetExternalConsentStatus())
+      .WillOnce(Return(external_consent_status));
+#else
+  EXPECT_CALL(mock_message_helper_,
+              SendGetListOfPermissionsResponse(_, corr_id, _));
+#endif  // #ifdef EXTERNAL_PROPRIETARY_MODE
+
+  policy_handler_.OnGetListOfPermissions(app_id, corr_id);
 }
 
 ACTION_P(SetGroupPermissions, permissions) {
@@ -1494,9 +1521,8 @@ ACTION_P(SetGroupPermissions, permissions) {
 }
 
 TEST_F(PolicyHandlerTest, OnGetListOfPermissions_GroupPermissions_SUCCESS) {
+  // Arrange
   EnablePolicyAndPolicyManagerMock();
-
-  test_app.insert(mock_app_);
 
   policy::FunctionalGroupPermission group_permission_disallowed1;
   CreateFunctionalGroupPermission(GroupConsent::kGroupDisallowed,
@@ -1528,16 +1554,40 @@ TEST_F(PolicyHandlerTest, OnGetListOfPermissions_GroupPermissions_SUCCESS) {
   group_permissions.push_back(group_permission_disallowed1);
   group_permissions.push_back(group_permission_disallowed2);
 
+  const uint32_t app_id = 0u;
+  const uint32_t corr_id = 1u;
+  const std::string default_mac = "00:00:00:00:00:00";
+  test_app.insert(mock_app_);
+
+  // Expectations
   EXPECT_CALL(*mock_policy_manager_, GetUserConsentForApp(_, _, _))
       .WillOnce(SetGroupPermissions(group_permissions));
 
-  const uint32_t correlation_id = 1u;
+  EXPECT_CALL(app_manager_, application(app_id))
+      .WillRepeatedly(Return(mock_app_));
+  EXPECT_CALL(app_manager_, connection_handler())
+      .WillOnce(ReturnRef(conn_handler));
+  EXPECT_CALL(conn_handler, get_session_observer())
+      .WillOnce(ReturnRef(mock_session_observer));
   EXPECT_CALL(app_manager_, applications()).WillRepeatedly(Return(app_set));
-  EXPECT_CALL(mock_message_helper_,
-              SendGetListOfPermissionsResponse(_, _, correlation_id, _));
+  EXPECT_CALL(*mock_app_, device()).WillOnce(Return(0));
+  EXPECT_CALL(*mock_app_, policy_app_id()).WillOnce(Return(std::string()));
+  EXPECT_CALL(mock_session_observer, GetDataOnDeviceID(_, _, _, _, _));
 
-  const uint32_t connection_id = 0u;
-  policy_handler_.OnGetListOfPermissions(connection_id, correlation_id);
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  policy::ExternalConsentStatus external_consent_status =
+      policy::ExternalConsentStatus();
+  EXPECT_CALL(
+      mock_message_helper_,
+      SendGetListOfPermissionsResponse(_, external_consent_status, corr_id, _));
+  EXPECT_CALL(*mock_policy_manager_, GetExternalConsentStatus())
+      .WillOnce(Return(external_consent_status));
+#else
+  EXPECT_CALL(mock_message_helper_,
+              SendGetListOfPermissionsResponse(_, corr_id, _));
+#endif  // #ifdef EXTERNAL_PROPRIETARY_MODE
+
+  policy_handler_.OnGetListOfPermissions(app_id, corr_id);
 }
 
 TEST_F(PolicyHandlerTest, RetrieveCertificate) {

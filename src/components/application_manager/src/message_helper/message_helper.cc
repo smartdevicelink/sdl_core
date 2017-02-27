@@ -127,6 +127,7 @@ struct GroupsAppender
   int32_t index_;
 };
 
+#ifdef EXTERNAL_PROPRIETARY_MODE
 struct ExternalConsentStatusAppender
     : std::unary_function<void,
                           const policy::ExternalConsentStatus::value_type&> {
@@ -153,6 +154,7 @@ struct ExternalConsentStatusAppender
   smart_objects::SmartObject& status_;
   int32_t index_;
 };
+#endif  // EXTERNAL_PROPRIETARY_MODE
 
 }  // namespace
 
@@ -1671,7 +1673,9 @@ void MessageHelper::SendGetUserFriendlyMessageResponse(
 
 void MessageHelper::SendGetListOfPermissionsResponse(
     const std::vector<policy::FunctionalGroupPermission>& permissions,
+#ifdef EXTERNAL_PROPRIETARY_MODE
     const policy::ExternalConsentStatus& external_consent_status,
+#endif  // EXTERNAL_PROPRIETARY_MODE
     uint32_t correlation_id,
     ApplicationManager& app_mngr) {
   using namespace smart_objects;
@@ -1697,6 +1701,7 @@ void MessageHelper::SendGetListOfPermissionsResponse(
   GroupsAppender groups_appender(allowed_functions_array);
   std::for_each(permissions.begin(), permissions.end(), groups_appender);
 
+#ifdef EXTERNAL_PROPRIETARY_MODE
   const std::string external_consent_status_key = "externalConsentStatus";
   msg_params[external_consent_status_key] = SmartObject(SmartType_Array);
 
@@ -1708,6 +1713,7 @@ void MessageHelper::SendGetListOfPermissionsResponse(
   std::for_each(external_consent_status.begin(),
                 external_consent_status.end(),
                 external_consent_status_appender);
+#endif  // EXTERNAL_PROPRIETARY_MODE
 
   app_mngr.ManageHMICommand(message);
 }

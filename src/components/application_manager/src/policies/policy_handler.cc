@@ -650,7 +650,7 @@ std::vector<FunctionalGroupPermission> PolicyHandler::CollectAppPermissions(
   ApplicationSharedPtr app = application_manager_.application(connection_key);
   std::vector<FunctionalGroupPermission> group_permissions;
 
-  if (!app) {
+  if (NULL == app.get() || !app.valid()) {
     LOG4CXX_WARN(logger_,
                  "Connection key '"
                      << connection_key
@@ -680,15 +680,17 @@ void PolicyHandler::OnGetListOfPermissions(const uint32_t connection_key,
                                            const uint32_t correlation_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   POLICY_LIB_CHECK_VOID();
-  const std::vector<policy::FunctionalGroupPermission> permissions =
-      connection_key ? CollectAppPermissions(connection_key)
-                     : CollectRegisteredAppsPermissions();
 
-  // Added to keep logic being here before moving permissions collecting out
-  // For application response wasn't sent, but was no such check for all
-  // registered applications.
-  // Need to double check requirements
-  if (permissions.empty() && connection_key) {
+  application_manager::ApplicationSharedPtr app =
+      application_manager_.application(connection_key);
+  const bool is_app_registered = NULL != app.get();
+  const bool is_connection_key_valid = is_app_registered && connection_key;
+
+  const std::vector<policy::FunctionalGroupPermission> permissions =
+      is_connection_key_valid ? CollectAppPermissions(connection_key)
+                              : CollectRegisteredAppsPermissions();
+
+  if (permissions.empty() && is_connection_key_valid) {
     LOG4CXX_ERROR(logger_,
                   "No permissions found for application with connection key:"
                       << connection_key);
@@ -697,7 +699,9 @@ void PolicyHandler::OnGetListOfPermissions(const uint32_t connection_key,
 
   MessageHelper::SendGetListOfPermissionsResponse(
       permissions,
+#ifdef EXTERNAL_PROPRIETARY_MODE
       policy_manager_->GetExternalConsentStatus(),
+#endif  // EXTERNAL_PROPRIETARY_MODE
       correlation_id,
       application_manager_);
 }
