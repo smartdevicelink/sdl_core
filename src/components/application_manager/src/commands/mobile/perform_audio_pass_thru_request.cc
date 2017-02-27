@@ -400,7 +400,7 @@ void PerformAudioPassThruRequest::ProcessAudioPassThruIcon(
   if (msg_params.keyExists(strings::audio_pass_thru_icon)) {
     smart_objects::SmartObject& icon =
         msg_params[strings::audio_pass_thru_icon];
-    if (MessageHelper::VerifyImage(icon, app, application_manager_) !=
+    if (MessageHelper::VerifyImageApplyPath(icon, app, application_manager_) !=
         mobile_apis::Result::SUCCESS) {
       LOG4CXX_WARN(
           logger_,
@@ -426,13 +426,11 @@ PerformAudioPassThruRequest::PrepareAudioPassThruResultCodeForResponse(
       (tts_result != hmi_apis::Common_Result::INVALID_ENUM)) {
     common_result = hmi_apis::Common_Result::WARNINGS;
     out_result = true;
-  }
-  else if (ui_response.is_ok &&
-           tts_result == hmi_apis::Common_Result::WARNINGS) {
+  } else if (ui_response.is_ok &&
+             tts_result == hmi_apis::Common_Result::WARNINGS) {
     common_result = hmi_apis::Common_Result::WARNINGS;
     out_result = true;
-  }
-  else if (ui_result == hmi_apis::Common_Result::INVALID_ENUM) {
+  } else if (ui_result == hmi_apis::Common_Result::INVALID_ENUM) {
     common_result = tts_result;
   } else {
     common_result = ui_result;

@@ -286,6 +286,14 @@ mobile_apis::Result::eType MessageHelper::VerifyImage(
       message, app, app_mngr);
 }
 
+mobile_apis::Result::eType MessageHelper::VerifyImageApplyPath(
+    smart_objects::SmartObject& message,
+    ApplicationConstSharedPtr app,
+    ApplicationManager& app_mngr) {
+  return MockMessageHelper::message_helper_mock()->VerifyImageApplyPath(
+      message, app, app_mngr);
+}
+
 mobile_apis::Result::eType MessageHelper::VerifyImageFiles(
     smart_objects::SmartObject& message,
     ApplicationConstSharedPtr app,
