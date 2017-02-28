@@ -2394,22 +2394,38 @@ void ApplicationManagerImpl::HeadUnitReset(
       GetPolicyHandler().UnloadPolicyLibrary();
 
       resume_controller().StopSavePersistentDataTimer();
-      file_system::remove_directory_content(
-          get_settings().app_storage_folder());
+      ClearUserStorage();
       break;
     }
     case mobile_api::AppInterfaceUnregisteredReason::FACTORY_DEFAULTS: {
       GetPolicyHandler().ClearUserConsent();
 
       resume_controller().StopSavePersistentDataTimer();
-      file_system::remove_directory_content(
-          get_settings().app_storage_folder());
+
+      ClearUserStorage();
       break;
     }
     default: {
       LOG4CXX_ERROR(logger_, "Bad AppInterfaceUnregisteredReason");
       return;
     }
+  }
+}
+
+void ApplicationManagerImpl::ClearUserStorage() {
+  const ApplicationSet& accessor = applications().GetData();
+
+  ApplicationSetConstIt it_app_list = accessor.begin();
+  ApplicationSetConstIt it_app_list_end = accessor.end();
+  const std::string storage_folder = get_settings().app_storage_folder() + "/";
+  const std::string icon_folder = get_settings().app_icons_folder() + "/";
+  for (; it_app_list != it_app_list_end; ++it_app_list) {
+    const std::string directory_path =
+        storage_folder + (*it_app_list).get()->folder_name();
+    file_system::RemoveDirectory(directory_path);
+    const std::string icon_path =
+        icon_folder + (*it_app_list).get()->policy_app_id();
+    file_system::DeleteFile(icon_path);
   }
 }
 
