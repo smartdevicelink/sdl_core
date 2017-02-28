@@ -49,6 +49,8 @@ namespace Formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
 namespace {
 std::map<std::string, hmi_apis::Common_VrCapabilities::eType>
     vr_enum_capabilities;
+std::map<std::string, hmi_apis::Common_SpeechCapabilities::eType>
+    tts_enum_capabilities;
 std::map<std::string, hmi_apis::Common_ButtonName::eType> button_enum_name;
 std::map<std::string, hmi_apis::Common_TextFieldName::eType>
     text_fields_enum_name;
@@ -70,6 +72,23 @@ std::map<std::string, hmi_apis::Common_CharacterSet::eType> character_set_enum;
 void InitCapabilities() {
   vr_enum_capabilities.insert(std::make_pair(
       std::string("TEXT"), hmi_apis::Common_VrCapabilities::VR_TEXT));
+
+  tts_enum_capabilities.insert(std::make_pair(
+      std::string("TEXT"), hmi_apis::Common_SpeechCapabilities::SC_TEXT));
+  tts_enum_capabilities.insert(
+      std::make_pair(std::string("SAPI_PHONEMES"),
+                     hmi_apis::Common_SpeechCapabilities::SAPI_PHONEMES));
+  tts_enum_capabilities.insert(
+      std::make_pair(std::string("LHPLUS_PHONEMES"),
+                     hmi_apis::Common_SpeechCapabilities::LHPLUS_PHONEMES));
+  tts_enum_capabilities.insert(
+      std::make_pair(std::string("SAPI_PHONEMES"),
+                     hmi_apis::Common_SpeechCapabilities::SAPI_PHONEMES));
+  tts_enum_capabilities.insert(
+      std::make_pair(std::string("PRE_RECORDED"),
+                     hmi_apis::Common_SpeechCapabilities::PRE_RECORDED));
+  tts_enum_capabilities.insert(std::make_pair(
+      std::string("SILENCE"), hmi_apis::Common_SpeechCapabilities::SILENCE));
 
   button_enum_name.insert(
       std::make_pair(std::string("OK"), hmi_apis::Common_ButtonName::OK));
@@ -995,8 +1014,14 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
       }
 
       if (check_existing_json_member(tts, "capabilities")) {
-        set_speech_capabilities(
-            smart_objects::SmartObject(tts.get("capabilities", "").asString()));
+        Json::Value capabilities = tts.get("capabilities", "");
+        smart_objects::SmartObject tts_capabilities_so =
+            smart_objects::SmartObject(smart_objects::SmartType_Array);
+        for (uint32_t i = 0; i < capabilities.size(); ++i) {
+          tts_capabilities_so[i] =
+              tts_enum_capabilities.find(capabilities[i].asString())->second;
+        }
+        set_speech_capabilities(tts_capabilities_so);
       }
     }  // TTS end
 

@@ -229,6 +229,13 @@ TEST_F(HMICapabilitiesTest, LoadCapabilitiesFromFile) {
             static_cast<hmi_apis::Common_Language::eType>(
                 tts_supported_languages[2].asInt()));
 
+  // Check TTS capabilities
+  const smart_objects::SmartObject tts_capabilities =
+      *(hmi_capabilities_test->speech_capabilities());
+  EXPECT_EQ(hmi_apis::Common_SpeechCapabilities::SC_TEXT,
+            static_cast<hmi_apis::Common_SpeechCapabilities::eType>(
+                tts_capabilities[0].asInt()));
+
   // Check button capabilities
   const smart_objects::SmartObject buttons_capabilities_so =
       *(hmi_capabilities_test->button_capabilities());
