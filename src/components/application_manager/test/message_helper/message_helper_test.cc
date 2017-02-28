@@ -782,6 +782,36 @@ TEST_F(MessageHelperTest, VerifyImage_ImageValueNotValid_InvalidData) {
   EXPECT_EQ(mobile_apis::Result::INVALID_DATA, result);
 }
 
+TEST_F(MessageHelperTest, VerifyImageApplyPath_ImageTypeIsStatic_Success) {
+  // Creating sharedPtr to MockApplication
+  MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
+  // Creating input data for method
+  smart_objects::SmartObject image;
+  image[strings::image_type] = mobile_apis::ImageType::STATIC;
+  image[strings::value] = "icon.png";
+  // Method call
+  mobile_apis::Result::eType result = MessageHelper::VerifyImageApplyPath(
+      image, appSharedMock, mock_application_manager);
+  // EXPECT
+  EXPECT_EQ(mobile_apis::Result::SUCCESS, result);
+  EXPECT_EQ("icon.png", image[strings::value]);
+}
+
+TEST_F(MessageHelperTest, VerifyImageApplyPath_ImageValueNotValid_InvalidData) {
+  // Creating sharedPtr to MockApplication
+  MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
+  // Creating input data for method
+  smart_objects::SmartObject image;
+  image[strings::image_type] = mobile_apis::ImageType::DYNAMIC;
+  // Invalid value
+  image[strings::value] = "   ";
+  // Method call
+  mobile_apis::Result::eType result = MessageHelper::VerifyImageApplyPath(
+      image, appSharedMock, mock_application_manager);
+  // EXPECT
+  EXPECT_EQ(mobile_apis::Result::INVALID_DATA, result);
+}
+
 TEST_F(MessageHelperTest, VerifyImageFiles_SmartObjectWithValidData_Success) {
   // Creating sharedPtr to MockApplication
   MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();

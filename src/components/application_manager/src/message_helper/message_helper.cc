@@ -2279,16 +2279,16 @@ mobile_apis::Result::eType MessageHelper::VerifyImage(
     smart_objects::SmartObject& image,
     ApplicationConstSharedPtr app,
     ApplicationManager& app_mngr) {
-  smart_objects::SmartObject img = image;
+  smart_objects::SmartObject temp_image = image;
   const uint32_t image_type = image[strings::image_type].asUInt();
-  mobile_apis::ImageType::eType type =
+  const mobile_apis::ImageType::eType type =
       static_cast<mobile_apis::ImageType::eType>(image_type);
-  mobile_apis::Result::eType result;
 
-  result = VerifyImageApplyPath(img, app, app_mngr);
+  const mobile_apis::Result::eType result =
+      VerifyImageApplyPath(temp_image, app, app_mngr);
   if ((mobile_apis::Result::SUCCESS == result) &&
       (mobile_apis::ImageType::DYNAMIC == type)) {
-    image[strings::value] = img[strings::value];
+    image[strings::value] = temp_image[strings::value];
   }
 
   return result;
