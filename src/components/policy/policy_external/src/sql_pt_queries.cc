@@ -449,6 +449,12 @@ const std::string kCreateSchema =
     "CREATE TABLE IF NOT EXISTS `_internal_data`( "
     "   `db_version_hash` INTEGER "
     "  ); "
+    "CREATE TABLE IF NOT EXISTS `_internal_external_consent_status`( "
+    "  `id` INTEGER PRIMARY KEY AUTOINCREMENT, "
+    "  `entity_type` INTEGER NOT NULL, "
+    "  `entity_id` INTEGER NOT NULL, "
+    "  `on_off` TEXT NOT NULL "
+    "  ); "
     "COMMIT;";
 
 const std::string kInsertInitData =
@@ -643,6 +649,7 @@ const std::string kDropSchema =
     "DROP TABLE IF EXISTS `usage_and_error_count`; "
     "DROP TABLE IF EXISTS `device`; "
     "DROP TABLE IF EXISTS `_internal_data`; "
+    "DROP TABLE IF EXISTS `_internal_external_consent_status`; "
     "COMMIT; "
     "VACUUM;";
 

@@ -1824,6 +1824,53 @@ bool SQLPTExtRepresentation::SetVINValue(const std::string& value) {
   return result;
 }
 
+bool SQLPTExtRepresentation::SaveExternalConsentStatus(
+    const ExternalConsentStatus& status) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  utils::dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt_ext::kInsertExternalConsentStatus)) {
+    LOG4CXX_ERROR(logger_,
+                  "Incorrect statement for saving external consent status.");
+    return false;
+  }
+
+  ExternalConsentStatus::const_iterator it = status.begin();
+  ExternalConsentStatus::const_iterator end = status.end();
+  for (; end != it; ++it) {
+    query.Bind(0, static_cast<int>(it->entity_type));
+    query.Bind(1, static_cast<int>(it->entity_id));
+    // Due to query structure need to provide that twice
+    query.Bind(2, static_cast<int>(it->entity_type));
+    query.Bind(3, static_cast<int>(it->entity_id));
+    query.Bind(4, it->entity_status);
+    if (!query.Exec() || !query.Reset()) {
+      LOG4CXX_ERROR(logger_, "Error during external consent status saving.");
+      return false;
+    }
+  }
+
+  return true;
+}
+
+ExternalConsentStatus SQLPTExtRepresentation::GetExternalConsentStatus() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  utils::dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt_ext::kSelectExternalConsentStatus)) {
+    LOG4CXX_ERROR(logger_,
+                  "Incorrect statement for selecting external consent status.");
+    return ExternalConsentStatus();
+  }
+
+  ExternalConsentStatus status;
+  while (query.Next()) {
+    ExternalConsentStatusItem item(
+        query.GetInteger(0), query.GetInteger(1), query.GetString(2));
+    status.insert(item);
+  }
+
+  return status;
+}
+
 bool SQLPTExtRepresentation::RemoveAppConsentForGroup(
     const std::string& policy_app_id,
     const std::string& functional_group_name) const {

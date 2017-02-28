@@ -643,6 +643,9 @@ class CacheManager : public CacheManagerInterface {
 
   virtual void SetDecryptedCertificate(const std::string& certificate) OVERRIDE;
 
+  bool SaveExternalConsentStatus(const ExternalConsentStatus& status) FINAL;
+  ExternalConsentStatus GetExternalConsentStatus() FINAL;
+
 #ifdef BUILD_TESTS
   utils::SharedPtr<policy_table::Table> GetPT() const {
     return pt_;

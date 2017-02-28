@@ -247,6 +247,9 @@ class PolicyManagerImpl : public PolicyManager {
 
   const PolicySettings& get_settings() const OVERRIDE;
 
+  bool SaveExternalConsentStatus(const ExternalConsentStatus& status) OVERRIDE;
+  ExternalConsentStatus GetExternalConsentStatus() OVERRIDE;
+
  protected:
   virtual utils::SharedPtr<policy_table::Table> Parse(
       const BinaryMessage& pt_content);

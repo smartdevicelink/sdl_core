@@ -173,10 +173,18 @@ void MessageHelper::CreateGetVehicleDataRequest(
 
 void MessageHelper::SendGetListOfPermissionsResponse(
     const std::vector<policy::FunctionalGroupPermission>& permissions,
+#ifdef EXTERNAL_PROPRIETARY_MODE
+    const policy::ExternalConsentStatus& external_consent_status,
+#endif  // EXTERNAL_PROPRIETARY_MODE
     uint32_t correlation_id,
     ApplicationManager& app_mngr) {
   MockMessageHelper::message_helper_mock()->SendGetListOfPermissionsResponse(
-      permissions, correlation_id, app_mngr);
+      permissions,
+#ifdef EXTERNAL_PROPRIETARY_MODE
+      external_consent_status,
+#endif  // EXTERNAL_PROPRIETARY_MODE
+      correlation_id,
+      app_mngr);
 }
 
 void MessageHelper::SendOnPermissionsChangeNotification(

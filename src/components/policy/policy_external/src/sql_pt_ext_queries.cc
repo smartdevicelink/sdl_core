@@ -272,5 +272,16 @@ const std::string kHasMsgLanguageCode =
 const std::string kDeletePreconsentedGroupsByApplicationId =
     "DELETE FROM `preconsented_group` WHERE `application_id` = ?";
 
+const std::string kSelectExternalConsentStatus =
+    "SELECT `entity_type`, `entity_id`, `on_off` from "
+    "`_internal_external_consent_status`";
+
+const std::string kInsertExternalConsentStatus =
+    "INSERT OR REPLACE INTO `_internal_external_consent_status` "
+    "(`id`,`entity_type`, "
+    "`entity_id`, `on_off`) VALUES ((SELECT `id` from "
+    "`_internal_external_consent_status` "
+    "WHERE `entity_type` = ? AND `entity_id` = ?), ?, ?, ?)";
+
 }  // namespace sql_pt_ext
 }  // namespace policy

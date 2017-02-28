@@ -232,7 +232,8 @@ class MockCacheManagerInterface : public ::policy::CacheManagerInterface {
   MOCK_CONST_METHOD0(GetCertificate, std::string());
   MOCK_METHOD1(SetDecryptedCertificate, void(const std::string&));
   MOCK_METHOD1(set_settings, void(const PolicySettings* settings));
-
+  MOCK_METHOD1(SaveExternalConsentStatus, bool(const ExternalConsentStatus&));
+  MOCK_METHOD0(GetExternalConsentStatus, ExternalConsentStatus());
   MOCK_METHOD1(GetHMITypes,
                const policy_table::AppHMITypes*(const std::string& app_id));
   MOCK_METHOD1(GetGroups, const policy_table::Strings&(const PTString& app_id));

@@ -132,6 +132,10 @@ class SQLPTExtRepresentation : public SQLPTRepresentation,
 
   virtual bool SetVINValue(const std::string& value);
 
+  bool SaveExternalConsentStatus(
+      const ExternalConsentStatus& status) const OVERRIDE;
+  ExternalConsentStatus GetExternalConsentStatus() const OVERRIDE;
+
  private:
   void GatherModuleMeta(policy_table::ModuleMeta* meta) const;
   void GatherPreconsentedGroup(const std::string& app_id,

@@ -711,6 +711,20 @@ class CacheManagerInterface {
     */
   virtual void SetDecryptedCertificate(const std::string& certificate) = 0;
 
+  /**
+   * @brief Saves customer connectivity settings status
+   * @param status external consent status
+   * @return true if succeeded, otherwise - false
+   */
+  virtual bool SaveExternalConsentStatus(
+      const ExternalConsentStatus& status) = 0;
+
+  /**
+   * @brief Gets customer connectivity settings status
+   * @return external consent status
+   */
+  virtual ExternalConsentStatus GetExternalConsentStatus() = 0;
+
 #ifdef BUILD_TESTS
   /**
    * @brief GetPT allows to obtain SharedPtr to PT.

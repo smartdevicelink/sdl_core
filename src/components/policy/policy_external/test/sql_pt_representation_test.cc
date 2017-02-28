@@ -68,7 +68,7 @@ namespace components {
 namespace policy_test {
 
 namespace {
-const int32_t kPolicyTablesNumber = 33;
+const int32_t kPolicyTablesNumber = 34;
 }
 
 class SQLPTRepresentationTest : public SQLPTRepresentation,
@@ -389,7 +389,8 @@ TEST_F(SQLPTRepresentationTest,
   // Check
   utils::dbms::SQLQuery query(reps->db());
   const std::string query_select =
-      "SELECT COUNT(*) FROM sqlite_master WHERE `type` = 'table'";
+      "SELECT COUNT(*) FROM sqlite_master"
+      " WHERE `type` = 'table' AND `name` NOT LIKE 'sqlite_%'";
   // In normally created PT there are more than 0 tables
   query.Prepare(query_select);
   query.Next();
