@@ -713,10 +713,7 @@ void PolicyManagerImpl::CheckPermissions(const PTString& app_id,
 }
 
 bool PolicyManagerImpl::ResetUserConsent() {
-  bool result = true;
-  result = cache_->ResetUserConsent();
-
-  return result;
+  return cache_->ResetUserConsent();
 }
 
 policy_table::Strings PolicyManagerImpl::GetGroupsNames(

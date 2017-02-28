@@ -2409,38 +2409,81 @@ void ApplicationManagerImpl::RemovePolicyObserver(
 
 void ApplicationManagerImpl::SetUnregisterAllApplicationsReason(
     mobile_api::AppInterfaceUnregisteredReason::eType reason) {
+  LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_TRACE(logger_, "reason = " << reason);
   unregister_reason_ = reason;
 }
 
 void ApplicationManagerImpl::HeadUnitReset(
     mobile_api::AppInterfaceUnregisteredReason::eType reason) {
+  LOG4CXX_AUTO_TRACE(logger_);
   stopping_application_mng_lock_.Acquire();
   is_stopping_ = true;
   stopping_application_mng_lock_.Release();
   switch (reason) {
     case mobile_api::AppInterfaceUnregisteredReason::MASTER_RESET: {
+      LOG4CXX_TRACE(logger_, "Performing MASTER_RESET");
       UnregisterAllApplications();
       GetPolicyHandler().ResetPolicyTable();
       GetPolicyHandler().UnloadPolicyLibrary();
 
       resume_controller().StopSavePersistentDataTimer();
-      file_system::remove_directory_content(
-          get_settings().app_storage_folder());
+
+      const std::string storage_folder = get_settings().app_storage_folder();
+      file_system::RemoveDirectory(storage_folder, true);
+      ClearAppsPersistentData();
       break;
     }
     case mobile_api::AppInterfaceUnregisteredReason::FACTORY_DEFAULTS: {
+      LOG4CXX_TRACE(logger_, "Performing FACTORY_DEFAULTS");
       GetPolicyHandler().ClearUserConsent();
 
       resume_controller().StopSavePersistentDataTimer();
-      file_system::remove_directory_content(
-          get_settings().app_storage_folder());
+
+      ClearAppsPersistentData();
       break;
     }
     default: {
       LOG4CXX_ERROR(logger_, "Bad AppInterfaceUnregisteredReason");
       return;
     }
+  }
+}
+
+void ApplicationManagerImpl::ClearAppsPersistentData() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  typedef std::vector<std::string> FilesList;
+  const std::string apps_info_storage_file = get_settings().app_info_storage();
+  file_system::DeleteFile(apps_info_storage_file);
+
+  const std::string storage_folder = get_settings().app_storage_folder();
+
+  FilesList files = file_system::ListFiles(storage_folder);
+  FilesList::iterator element_to_skip =
+      std::find(files.begin(), files.end(), "policy.sqlite");
+  if (element_to_skip != files.end()) {
+    files.erase(element_to_skip);
+  }
+
+  FilesList::iterator it = files.begin();
+  for (; it != files.end(); ++it) {
+    const std::string path_to_item = storage_folder + "/";
+    const std::string item_to_remove = path_to_item + (*it);
+    LOG4CXX_TRACE(logger_, "Removing : " << item_to_remove);
+    if (file_system::IsDirectory(item_to_remove)) {
+      LOG4CXX_TRACE(logger_,
+                    "Removal result : " << file_system::RemoveDirectory(
+                        item_to_remove, true));
+    } else {
+      LOG4CXX_TRACE(
+          logger_,
+          "Removal result : " << file_system::DeleteFile(item_to_remove));
+    }
+  }
+
+  const std::string apps_icons_folder = get_settings().app_icons_folder();
+  if (storage_folder != apps_icons_folder) {
+    file_system::RemoveDirectory(apps_icons_folder, true);
   }
 }
 
