@@ -246,6 +246,11 @@ class PolicyManagerImpl : public PolicyManager {
 
   virtual bool HasCertificate() const OVERRIDE;
 
+  AppIdURL GetNextUpdateUrl(const EndpointUrls& urls) OVERRIDE;
+
+  AppIdURL RetrySequenceUrl(const struct RetrySequenceURL& rs,
+                            const EndpointUrls& urls) const OVERRIDE;
+
  protected:
 #ifdef USE_HMI_PTU_DECRYPTION
   virtual utils::SharedPtr<policy_table::Table> Parse(
@@ -430,6 +435,12 @@ class PolicyManagerImpl : public PolicyManager {
   const PolicySettings* settings_;
   friend struct CheckAppPolicy;
   friend struct ProccessAppGroups;
+
+  /**
+   * @brief Pair of app index and url index from Endpoints vector
+   * that contains all application URLs
+   */
+  RetrySequenceURL retry_sequence_url_;
 };
 
 }  // namespace policy

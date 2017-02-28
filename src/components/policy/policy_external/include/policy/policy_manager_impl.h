@@ -247,6 +247,11 @@ class PolicyManagerImpl : public PolicyManager {
 
   const PolicySettings& get_settings() const OVERRIDE;
 
+  AppIdURL GetNextUpdateUrl(const EndpointUrls& urls) OVERRIDE;
+
+  AppIdURL RetrySequenceUrl(const struct RetrySequenceURL& rs,
+                            const EndpointUrls& urls) const OVERRIDE;
+  virtual AppIdURL GetNextUpdateUrl(const EndpointUrls& urls) OVERRIDE;
   bool SaveExternalConsentStatus(const ExternalConsentStatus& status) OVERRIDE;
   ExternalConsentStatus GetExternalConsentStatus() OVERRIDE;
 
@@ -419,6 +424,12 @@ class PolicyManagerImpl : public PolicyManager {
 
   const PolicySettings* settings_;
   friend struct CheckAppPolicy;
+
+  /**
+   * @brief Pair of app index and url index from Endpoints vector
+   * that contains all application URLs
+   */
+  RetrySequenceURL retry_sequence_url_;
   friend struct ProccessAppGroups;
 };
 
