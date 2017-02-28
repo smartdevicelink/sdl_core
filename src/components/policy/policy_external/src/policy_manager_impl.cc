@@ -76,7 +76,7 @@ PolicyManagerImpl::PolicyManagerImpl()
     , retry_sequence_timeout_(60)
     , retry_sequence_index_(0)
     , ignition_check(true)
-    , retry_sequence_url_(0, 0) {
+    , retry_sequence_url_(0, 0, "") {
 }
 
 PolicyManagerImpl::PolicyManagerImpl(bool in_memory)
@@ -90,7 +90,7 @@ PolicyManagerImpl::PolicyManagerImpl(bool in_memory)
     , retry_sequence_timeout_(60)
     , retry_sequence_index_(0)
     , ignition_check(true)
-    , retry_sequence_url_(0, 0) {
+    , retry_sequence_url_(0, 0, "") {
 }
 
 void PolicyManagerImpl::set_listener(PolicyListener* listener) {
