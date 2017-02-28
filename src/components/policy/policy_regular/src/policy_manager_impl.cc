@@ -77,7 +77,7 @@ PolicyManagerImpl::PolicyManagerImpl()
                             new timer::TimerTaskImpl<PolicyManagerImpl>(
                                 this, &PolicyManagerImpl::RetrySequence))
     , ignition_check(true)
-    , retry_sequence_url_(0, 0) {
+    , retry_sequence_url_(0, 0, "") {
 }
 
 void PolicyManagerImpl::set_listener(PolicyListener* listener) {
