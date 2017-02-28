@@ -75,14 +75,18 @@ void InitCapabilities() {
 
   tts_enum_capabilities.insert(std::make_pair(
       std::string("TEXT"), hmi_apis::Common_SpeechCapabilities::SC_TEXT));
-  tts_enum_capabilities.insert(std::make_pair(
-      std::string("SAPI_PHONEMES"), hmi_apis::Common_SpeechCapabilities::SAPI_PHONEMES));
-  tts_enum_capabilities.insert(std::make_pair(
-      std::string("LHPLUS_PHONEMES"), hmi_apis::Common_SpeechCapabilities::LHPLUS_PHONEMES));
-  tts_enum_capabilities.insert(std::make_pair(
-      std::string("SAPI_PHONEMES"), hmi_apis::Common_SpeechCapabilities::SAPI_PHONEMES));
-  tts_enum_capabilities.insert(std::make_pair(
-      std::string("PRE_RECORDED"), hmi_apis::Common_SpeechCapabilities::PRE_RECORDED));
+  tts_enum_capabilities.insert(
+      std::make_pair(std::string("SAPI_PHONEMES"),
+                     hmi_apis::Common_SpeechCapabilities::SAPI_PHONEMES));
+  tts_enum_capabilities.insert(
+      std::make_pair(std::string("LHPLUS_PHONEMES"),
+                     hmi_apis::Common_SpeechCapabilities::LHPLUS_PHONEMES));
+  tts_enum_capabilities.insert(
+      std::make_pair(std::string("SAPI_PHONEMES"),
+                     hmi_apis::Common_SpeechCapabilities::SAPI_PHONEMES));
+  tts_enum_capabilities.insert(
+      std::make_pair(std::string("PRE_RECORDED"),
+                     hmi_apis::Common_SpeechCapabilities::PRE_RECORDED));
   tts_enum_capabilities.insert(std::make_pair(
       std::string("SILENCE"), hmi_apis::Common_SpeechCapabilities::SILENCE));
 
