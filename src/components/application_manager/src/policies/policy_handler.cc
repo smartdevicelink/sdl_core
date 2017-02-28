@@ -484,6 +484,12 @@ void PolicyHandler::GetAvailableApps(std::queue<std::string>& apps) {
   }
 }
 
+struct SmartObjectToInt {
+  int operator()(const smart_objects::SmartObject& item) const {
+    return item.asInt();
+  }
+};
+
 StatusNotifier PolicyHandler::AddApplication(
     const std::string& application_id) {
   POLICY_LIB_CHECK(utils::MakeShared<utils::CallNothing>());
