@@ -1040,6 +1040,12 @@ class ApplicationManagerImpl
     return is_stopping_;
   }
 
+  /**
+   * @brief Clear all applications' persistent data in app_storage and
+   * AppIconsFolder
+   */
+  void ClearUserStorage();
+
   StateController& state_controller() OVERRIDE;
   const ApplicationManagerSettings& get_settings() const OVERRIDE;
   virtual event_engine::EventDispatcher& event_dispatcher() OVERRIDE;
