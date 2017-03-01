@@ -251,7 +251,7 @@ class PolicyManagerImpl : public PolicyManager {
 
   AppIdURL RetrySequenceUrl(const struct RetrySequenceURL& rs,
                             const EndpointUrls& urls) const OVERRIDE;
-  virtual AppIdURL GetNextUpdateUrl(const EndpointUrls& urls) OVERRIDE;
+
   bool SaveExternalConsentStatus(const ExternalConsentStatus& status) OVERRIDE;
   ExternalConsentStatus GetExternalConsentStatus() OVERRIDE;
 
