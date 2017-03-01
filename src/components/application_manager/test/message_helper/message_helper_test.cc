@@ -68,6 +68,8 @@ using testing::AtLeast;
 using testing::ReturnRefOfCopy;
 using testing::ReturnRef;
 using testing::Return;
+using testing::SaveArg;
+using testing::_;
 
 TEST(MessageHelperTestCreate,
      CreateBlockedByPoliciesResponse_SmartObject_Equal) {
@@ -786,6 +788,36 @@ TEST_F(MessageHelperTest, VerifyImage_ImageValueNotValid_InvalidData) {
   EXPECT_EQ(mobile_apis::Result::INVALID_DATA, result);
 }
 
+TEST_F(MessageHelperTest, VerifyImageApplyPath_ImageTypeIsStatic_Success) {
+  // Creating sharedPtr to MockApplication
+  MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
+  // Creating input data for method
+  smart_objects::SmartObject image;
+  image[strings::image_type] = mobile_apis::ImageType::STATIC;
+  image[strings::value] = "icon.png";
+  // Method call
+  mobile_apis::Result::eType result = MessageHelper::VerifyImageApplyPath(
+      image, appSharedMock, mock_application_manager);
+  // EXPECT
+  EXPECT_EQ(mobile_apis::Result::SUCCESS, result);
+  EXPECT_EQ("icon.png", image[strings::value].asString());
+}
+
+TEST_F(MessageHelperTest, VerifyImageApplyPath_ImageValueNotValid_InvalidData) {
+  // Creating sharedPtr to MockApplication
+  MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
+  // Creating input data for method
+  smart_objects::SmartObject image;
+  image[strings::image_type] = mobile_apis::ImageType::DYNAMIC;
+  // Invalid value
+  image[strings::value] = "   ";
+  // Method call
+  mobile_apis::Result::eType result = MessageHelper::VerifyImageApplyPath(
+      image, appSharedMock, mock_application_manager);
+  // EXPECT
+  EXPECT_EQ(mobile_apis::Result::INVALID_DATA, result);
+}
+
 TEST_F(MessageHelperTest, VerifyImageFiles_SmartObjectWithValidData_Success) {
   // Creating sharedPtr to MockApplication
   MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
@@ -908,6 +940,34 @@ TEST_F(MessageHelperTest, SubscribeApplicationToSoftButton_CallFromApp) {
               SubscribeToSoftButtons(function_id, SoftButtonID())).Times(1);
   MessageHelper::SubscribeApplicationToSoftButton(
       message_params, appSharedPtr, function_id);
+}
+#ifdef EXTERNAL_PROPRIETARY_MODE
+TEST_F(MessageHelperTest, SendGetListOfPermissionsResponse_SUCCESS) {
+  std::vector<policy::FunctionalGroupPermission> permissions;
+  policy::ExternalConsentStatus external_consent_status;
+  policy::FunctionalGroupPermission permission;
+  permission.state = policy::GroupConsent::kGroupAllowed;
+  permissions.push_back(permission);
+
+  smart_objects::SmartObjectSPtr result;
+  EXPECT_CALL(mock_application_manager, ManageHMICommand(_))
+      .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
+
+  const uint32_t correlation_id = 0u;
+  MessageHelper::SendGetListOfPermissionsResponse(permissions,
+                                                  external_consent_status,
+                                                  correlation_id,
+                                                  mock_application_manager);
+
+  ASSERT_TRUE(result);
+
+  EXPECT_EQ(hmi_apis::FunctionID::SDL_GetListOfPermissions,
+            (*result)[strings::params][strings::function_id].asInt());
+
+  smart_objects::SmartObject& msg_params = (*result)[strings::msg_params];
+  const std::string external_consent_status_key = "externalConsentStatus";
+  EXPECT_TRUE(msg_params.keyExists(external_consent_status_key));
+  EXPECT_TRUE(msg_params[external_consent_status_key].empty());
 }
 
 TEST_F(MessageHelperTest,
