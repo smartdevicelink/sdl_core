@@ -1599,6 +1599,24 @@ TEST_F(SQLPTExtRepresentationTest, SaveFunctionalGroupings_ExpectedSaved) {
       IsKeyExist<Parameters>(*loaded_parameters.parameters, test_parameter_2)));
 }
 
+TEST_F(SQLPTExtRepresentationTest, SaveExternalConsentStatus_ExpectSaved) {
+  policy::ExternalConsentStatusItem item_1(0, 0, "ON");
+  policy::ExternalConsentStatusItem item_2(1, 1, "OFF");
+  policy::ExternalConsentStatus in_status;
+  in_status.insert(item_1);
+  in_status.insert(item_2);
+
+  EXPECT_TRUE(reps->SaveExternalConsentStatus(in_status));
+
+  policy::ExternalConsentStatus out_status = reps->GetExternalConsentStatus();
+  EXPECT_TRUE(in_status.size() == out_status.size());
+
+  EXPECT_TRUE(out_status.end() !=
+              find(out_status.begin(), out_status.end(), item_1));
+  EXPECT_TRUE(out_status.end() !=
+              find(out_status.begin(), out_status.end(), item_2));
+}
+
 }  // namespace policy_test
 }  // namespace components
 }  // namespace test
