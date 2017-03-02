@@ -208,6 +208,7 @@ void UnsubscribeVehicleDataRequest::Run() {
                    &response_params);
     } else {
       SendResponse(true, mobile_apis::Result::SUCCESS, NULL, &response_params);
+      UpdateHash();
     }
     return;
   }
