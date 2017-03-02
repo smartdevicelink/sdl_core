@@ -48,7 +48,7 @@ set(LIBRARIES
 )
 
 set(SOURCES
-    #${COMPONENTS_DIR}/application_manager/test/message_helper/message_helper_test.cc
+    ${COMPONENTS_DIR}/application_manager/test/message_helper/message_helper_test.cc
 )
 
 create_test("message_helper_test" "${SOURCES}" "${LIBRARIES}")

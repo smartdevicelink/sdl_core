@@ -64,6 +64,8 @@ using testing::AtLeast;
 using testing::ReturnRefOfCopy;
 using testing::ReturnRef;
 using testing::Return;
+using testing::SaveArg;
+using testing::_;
 
 TEST(MessageHelperTestCreate,
      CreateBlockedByPoliciesResponse_SmartObject_Equal) {
@@ -791,7 +793,7 @@ TEST_F(MessageHelperTest, VerifyImageApplyPath_ImageTypeIsStatic_Success) {
       image, appSharedMock, mock_application_manager);
   // EXPECT
   EXPECT_EQ(mobile_apis::Result::SUCCESS, result);
-  EXPECT_EQ("icon.png", image[strings::value]);
+  EXPECT_EQ("icon.png", image[strings::value].asString());
 }
 
 TEST_F(MessageHelperTest, VerifyImageApplyPath_ImageValueNotValid_InvalidData) {
@@ -932,7 +934,93 @@ TEST_F(MessageHelperTest, SubscribeApplicationToSoftButton_CallFromApp) {
   MessageHelper::SubscribeApplicationToSoftButton(
       message_params, appSharedPtr, function_id);
 }
+#ifdef EXTERNAL_PROPRIETARY_MODE
+TEST_F(MessageHelperTest, SendGetListOfPermissionsResponse_SUCCESS) {
+  std::vector<policy::FunctionalGroupPermission> permissions;
+  policy::ExternalConsentStatus external_consent_status;
+  policy::FunctionalGroupPermission permission;
+  permission.state = policy::GroupConsent::kGroupAllowed;
+  permissions.push_back(permission);
 
+  smart_objects::SmartObjectSPtr result;
+  EXPECT_CALL(mock_application_manager, ManageHMICommand(_))
+      .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
+
+  const uint32_t correlation_id = 0u;
+  MessageHelper::SendGetListOfPermissionsResponse(permissions,
+                                                  external_consent_status,
+                                                  correlation_id,
+                                                  mock_application_manager);
+
+  ASSERT_TRUE(result);
+
+  EXPECT_EQ(hmi_apis::FunctionID::SDL_GetListOfPermissions,
+            (*result)[strings::params][strings::function_id].asInt());
+
+  smart_objects::SmartObject& msg_params = (*result)[strings::msg_params];
+  const std::string external_consent_status_key = "externalConsentStatus";
+  EXPECT_TRUE(msg_params.keyExists(external_consent_status_key));
+  EXPECT_TRUE(msg_params[external_consent_status_key].empty());
+}
+
+TEST_F(MessageHelperTest,
+       SendGetListOfPermissionsResponse_ExternalConsentStatusNonEmpty_SUCCESS) {
+  std::vector<policy::FunctionalGroupPermission> permissions;
+
+  policy::ExternalConsentStatus external_consent_status;
+  const int32_t entity_type_1 = 1;
+  const int32_t entity_id_1 = 2;
+  const std::string entity_status_1 = "ON";
+  const std::string entity_status_2 = "OFF";
+  const int32_t entity_type_2 = 3;
+  const int32_t entity_id_2 = 4;
+  external_consent_status.insert(policy::ExternalConsentStatusItem(
+      entity_type_1, entity_id_1, entity_status_1));
+  external_consent_status.insert(policy::ExternalConsentStatusItem(
+      entity_type_2, entity_id_2, entity_status_2));
+
+  smart_objects::SmartObjectSPtr result;
+  EXPECT_CALL(mock_application_manager, ManageHMICommand(_))
+      .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
+
+  const uint32_t correlation_id = 0u;
+  MessageHelper::SendGetListOfPermissionsResponse(permissions,
+                                                  external_consent_status,
+                                                  correlation_id,
+                                                  mock_application_manager);
+
+  ASSERT_TRUE(result);
+
+  smart_objects::SmartObject& msg_params = (*result)[strings::msg_params];
+  const std::string external_consent_status_key = "externalConsentStatus";
+  EXPECT_TRUE(msg_params.keyExists(external_consent_status_key));
+
+  smart_objects::SmartArray* status_array =
+      msg_params[external_consent_status_key].asArray();
+  EXPECT_TRUE(external_consent_status.size() == status_array->size());
+
+  const std::string entityType = "entityType";
+  const std::string entityID = "entityID";
+  const std::string status = "status";
+
+  smart_objects::SmartObject item_1_so =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+  item_1_so[entityType] = entity_type_1;
+  item_1_so[entityID] = entity_id_1;
+  item_1_so[status] = hmi_apis::Common_EntityStatus::ON;
+
+  smart_objects::SmartObject item_2_so =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+  item_2_so[entityType] = entity_type_2;
+  item_2_so[entityID] = entity_id_2;
+  item_2_so[status] = hmi_apis::Common_EntityStatus::OFF;
+
+  EXPECT_TRUE(status_array->end() !=
+              std::find(status_array->begin(), status_array->end(), item_1_so));
+  EXPECT_TRUE(status_array->end() !=
+              std::find(status_array->begin(), status_array->end(), item_2_so));
+}
+#endif
 }  // namespace application_manager_test
 }  // namespace components
 }  // namespace test
