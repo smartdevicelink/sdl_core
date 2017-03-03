@@ -46,6 +46,14 @@ set(COMMON_CONFIGURE_FLAGS
   "LDFLAGS=-L${EXPAT_LIBS_DIRECTORY}"
 )
 
+if(CROSS_HOST)
+  set(EXTRA_CONFIGURE_FLAGS
+    "--host=${CROSS_HOST}"
+  )
+else()
+  set(EXTRA_CONFIGURE_FLAGS "")
+endif()
+
 if(CMAKE_SYSTEM_NAME STREQUAL "QNX")
   if (CMAKE_SYSTEM_PROCESSOR MATCHES arm*)
     set (ARCHITECTURE arm) # log4cxx doesn't recognize armv7
@@ -54,32 +62,48 @@ if(CMAKE_SYSTEM_NAME STREQUAL "QNX")
   endif ()
   set(CONFIGURE_FLAGS "--host=${ARCHITECTURE}-nto-qnx" ${COMMON_CONFIGURE_FLAGS})
 else()
-  set(CONFIGURE_FLAGS ${COMMON_CONFIGURE_FLAGS})
+  set(CONFIGURE_FLAGS ${COMMON_CONFIGURE_FLAGS} ${EXTRA_CONFIGURE_FLAGS})
 endif()
 
-add_custom_command(OUTPUT ${LOG4CXX_BUILD_DIRECTORY}/Makefile
-  COMMAND CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} ${LOG4CXX_SOURCE_DIRECTORY}/configure ${CONFIGURE_FLAGS}
-  DEPENDS libapr-1
-  DEPENDS apr-util
-  WORKING_DIRECTORY ${LOG4CXX_BUILD_DIRECTORY}
-)
+if(CROSS_HOST)
+  add_custom_command(OUTPUT ${LOG4CXX_BUILD_DIRECTORY}/Makefile
+    COMMAND ${LOG4CXX_SOURCE_DIRECTORY}/configure ${CONFIGURE_FLAGS}
+    DEPENDS libapr-1
+    DEPENDS apr-util
+    WORKING_DIRECTORY ${LOG4CXX_BUILD_DIRECTORY}
+  )
+else()
+  add_custom_command(OUTPUT ${LOG4CXX_BUILD_DIRECTORY}/Makefile
+    COMMAND CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} ${LOG4CXX_SOURCE_DIRECTORY}/configure ${CONFIGURE_FLAGS}
+    DEPENDS libapr-1
+    DEPENDS apr-util
+    WORKING_DIRECTORY ${LOG4CXX_BUILD_DIRECTORY}
+  )
+endif()
 
-add_custom_target(liblog4cxx ALL make
-  COMMAND /bin/bash -c \"
-	cd ${CMAKE_CURRENT_SOURCE_DIR}\;
-	git log . 1>/dev/null 2>&1\;
-        if [ \\$$? == 0 ]; then
-          grep \\".commit_hash\\" ${LOG4CXX_LIBS_DIRECTORY}/liblog4cxx.so 1>/dev/null 2>&1\;
-          if [ ! \\\$$? == 0 ]\; then
-            cd ${CMAKE_CURRENT_SOURCE_DIR} &&
-            git log --pretty=\\"format:%H\\" -1 ${LOG4CXX_SOURCE_DIRECTORY} > /tmp/commit_hash 2>/dev/null &&
-            echo \\"Adding .commit_hash section\\" &&
-            objcopy --add-section .commit_hash=/tmp/commit_hash ${LOG4CXX_LIBS_DIRECTORY}/liblog4cxx.so ${LOG4CXX_LIBS_DIRECTORY}/liblog4cxx.so 1>/dev/null 2>&1\;
-          fi;
-        fi\"
-  DEPENDS ${LOG4CXX_BUILD_DIRECTORY}/Makefile
-  WORKING_DIRECTORY ${LOG4CXX_BUILD_DIRECTORY}
-)
+if(CROSS_HOST)
+  add_custom_target(liblog4cxx ALL make
+    DEPENDS ${LOG4CXX_BUILD_DIRECTORY}/Makefile
+    WORKING_DIRECTORY ${LOG4CXX_BUILD_DIRECTORY}
+  )
+else()
+  add_custom_target(liblog4cxx ALL make
+    COMMAND /bin/bash -c \"
+    cd ${CMAKE_CURRENT_SOURCE_DIR}\;
+    git log . 1>/dev/null 2>&1\;
+          if [ \\$$? == 0 ]; then
+            grep \\".commit_hash\\" ${LOG4CXX_LIBS_DIRECTORY}/liblog4cxx.so 1>/dev/null 2>&1\;
+            if [ ! \\\$$? == 0 ]\; then
+              cd ${CMAKE_CURRENT_SOURCE_DIR} &&
+              git log --pretty=\\"format:%H\\" -1 ${LOG4CXX_SOURCE_DIRECTORY} > /tmp/commit_hash 2>/dev/null &&
+              echo \\"Adding .commit_hash section\\" &&
+              objcopy --add-section .commit_hash=/tmp/commit_hash ${LOG4CXX_LIBS_DIRECTORY}/liblog4cxx.so ${LOG4CXX_LIBS_DIRECTORY}/liblog4cxx.so 1>/dev/null 2>&1\;
+            fi;
+          fi\"
+    DEPENDS ${LOG4CXX_BUILD_DIRECTORY}/Makefile
+    WORKING_DIRECTORY ${LOG4CXX_BUILD_DIRECTORY}
+  )
+endif()
 
 install(
   DIRECTORY ${LOG4CXX_LIBS_DIRECTORY}/
