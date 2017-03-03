@@ -143,10 +143,11 @@ function(create_test NAME SOURCES LIBS)
 endfunction()
 
 function(create_cotired_test NAME SOURCES LIBS)
+  list(APPEND SOURCES
+              ${CMAKE_SOURCE_DIR}/src/components/test_main.cc)
   add_executable(
     ${NAME}
     EXCLUDE_FROM_ALL
-    ${CMAKE_SOURCE_DIR}/src/components/test_main.cc
     ${SOURCES}
   )
   # TODO: Fix problems with Cotire on Windows and Qt APPLINK-28060
