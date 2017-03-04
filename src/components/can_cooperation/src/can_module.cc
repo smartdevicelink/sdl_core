@@ -43,6 +43,8 @@
 #include "utils/logger.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/macro.h"
+#include "utils/make_shared.h"
+#include "application_manager/smart_object_keys.h"
 
 namespace can_cooperation {
 
@@ -71,19 +73,6 @@ CANModule::CANModule()
 }
 
 void CANModule::SubscribeOnFunctions() {
-  /* plugin_info_.mobile_function_list.push_back(MobileFunctionID::TUNE_RADIO);
-   plugin_info_.mobile_function_list.push_back(MobileFunctionID::TUNE_UP);
-   plugin_info_.mobile_function_list.push_back(MobileFunctionID::TUNE_DOWN);
-   plugin_info_.mobile_function_list.push_back(MobileFunctionID::START_SCAN);
-   plugin_info_.mobile_function_list.push_back(MobileFunctionID::STOP_SCAN);
-   plugin_info_.mobile_function_list.push_back(
-     MobileFunctionID::GET_SEAT_CONTROL);
-   plugin_info_.mobile_function_list.push_back(
-     MobileFunctionID::CLIMATE_CONTROL_ON);
-   plugin_info_.mobile_function_list.push_back(
-     MobileFunctionID::ON_RADIO_DETAILS);
-   plugin_info_.mobile_function_list.push_back(
-     MobileFunctionID::ON_PRESETS_CHANGED);*/
   plugin_info_.mobile_function_list.push_back(MobileFunctionID::BUTTON_PRESS);
   plugin_info_.mobile_function_list.push_back(
       MobileFunctionID::GET_INTERIOR_VEHICLE_DATA_CAPABILITIES);
@@ -231,8 +220,6 @@ functional_modules::ProcessResult CANModule::HandleMessage(
     return ProcessResult::FAILED;
   }
 
-  msg->set_protocol_version(application_manager::ProtocolVersion::kV3);
-
   switch (msg->type()) {
     case application_manager::MessageType::kResponse:
     case application_manager::MessageType::kErrorResponse: {
@@ -254,6 +241,8 @@ functional_modules::ProcessResult CANModule::HandleMessage(
             if ((!value[json_keys::kParams][message_params::kAllowed]
                       .asBool()) &&
                 this->service()->IsRemoteControlAllowed()) {
+              msg->set_protocol_version(
+                  application_manager::ProtocolVersion::kV3);
               ModuleHelper::ProccessOnReverseAppsDisallowed(*this);
             }
             PolicyHelper::OnRSDLFunctionalityAllowing(
@@ -327,7 +316,7 @@ functional_modules::ProcessResult CANModule::HandleMessage(
       std::string func_name = MessageHelper::GetMobileAPIName(
           static_cast<functional_modules::MobileFunctionID>(func_id));
       msg->set_function_name(func_name);
-
+      msg->set_protocol_version(application_manager::ProtocolVersion::kV3);
       NotifyMobiles(msg);
       break;
     }
@@ -341,7 +330,7 @@ functional_modules::ProcessResult CANModule::HandleMessage(
     default: { return ProcessResult::FAILED; }
   }
 
-  return ProcessResult::PROCESSED;
+  return ProcessResult::CANNOT_PROCESS;
 }
 
 bool CANModule::DoNeedUnsubscribe(uint32_t device_id,
