@@ -330,7 +330,7 @@ functional_modules::ProcessResult CANModule::HandleMessage(
     default: { return ProcessResult::FAILED; }
   }
 
-  return ProcessResult::CANNOT_PROCESS;
+  return ProcessResult::PROCESSED;
 }
 
 bool CANModule::DoNeedUnsubscribe(uint32_t device_id,

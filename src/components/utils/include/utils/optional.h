@@ -66,6 +66,7 @@ class Optional {
   bool is_initialized() const {
     return value_state_;
   }
+
  private:
   Type value_;
   bool value_state_;
