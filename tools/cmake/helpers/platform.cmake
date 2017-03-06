@@ -76,7 +76,7 @@ endfunction()
 function(get_arch ARCH)
   if( CMAKE_SIZEOF_VOID_P MATCHES 8 )
     # void ptr = 8 byte --> x86_64
-    set(${ARCH} "x86" PARENT_SCOPE) 
+    set(${ARCH} "x64" PARENT_SCOPE) 
   elseif( CMAKE_SIZEOF_VOID_P MATCHES 4 )
     # void ptr = 4 byte --> x86
     set(${ARCH} "x86" PARENT_SCOPE)
