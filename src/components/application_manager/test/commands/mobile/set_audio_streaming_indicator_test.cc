@@ -493,8 +493,9 @@ TEST_F(SetAudioStreamingIndicatorRequestTest,
   const bool is_success = kIsNotSuccess;
 
   ApplicationSharedPtr mock_app_empty;
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
-      .WillOnce(Return(mock_app_empty));
+  EXPECT_CALL(app_mngr_, application(_))
+      .Times(2)
+      .WillRepeatedly(Return(mock_app_empty));
 
   EXPECT_CALL(*mock_app_, RemoveIndicatorWaitForResponse(_)).Times(0);
   EXPECT_CALL(

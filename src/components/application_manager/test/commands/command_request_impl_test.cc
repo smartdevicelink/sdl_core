@@ -179,6 +179,9 @@ TEST_F(CommandRequestImplTest, OnTimeOut_StateAwaitingHMIResponse_SUCCESS) {
       app_mngr_,
       ManageMobileCommand(dummy_msg, Command::CommandOrigin::ORIGIN_SDL));
 
+  MockAppPtr app = CreateMockApp();
+  EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(app));
+
   command->onTimeOut();
 
   // If `command` not done till now, then state should change to `kTimedOut`

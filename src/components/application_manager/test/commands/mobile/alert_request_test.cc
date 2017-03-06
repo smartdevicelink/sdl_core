@@ -224,6 +224,8 @@ TEST_F(AlertRequestTest, OnTimeout_GENERIC_ERROR) {
       ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
       .WillOnce(DoAll(SaveArg<0>(&ui_command_result), Return(true)));
 
+  EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(mock_app_));
+
   command->onTimeOut();
   EXPECT_EQ((*ui_command_result)[am::strings::msg_params][am::strings::success]
                 .asBool(),
@@ -318,6 +320,8 @@ TEST_F(AlertRequestTest, OnTimeOut_SUCCESS) {
       mock_message_helper_,
       CreateNegativeResponse(_, _, _, mobile_apis::Result::GENERIC_ERROR))
       .WillOnce(Return(result_msg));
+
+  EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(mock_app_));
 
   CommandPtr command(CreateCommand<AlertRequest>());
   MessageSharedPtr received_result_msg(

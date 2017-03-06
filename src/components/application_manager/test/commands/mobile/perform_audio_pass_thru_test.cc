@@ -340,6 +340,8 @@ TEST_F(PerformAudioPassThruRequestTest, OnTimeout_GENERIC_ERROR) {
       ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
       .WillOnce(DoAll(SaveArg<0>(&msg_mobile_response), Return(true)));
 
+  EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(mock_app_));
+
   command->onTimeOut();
 
   ResultCommandExpectations(
