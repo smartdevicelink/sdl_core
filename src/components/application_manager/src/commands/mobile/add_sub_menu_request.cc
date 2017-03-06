@@ -104,19 +104,19 @@ void AddSubMenuRequest::Run() {
   const mobile_apis::ImageType::eType type =
       static_cast<mobile_apis::ImageType::eType>(image_type);
   const bool is_dynamic_image = mobile_apis::ImageType::DYNAMIC == type;
-  if (!is_key_icon_exist) {
-    SendHMIRequest(hmi_apis::FunctionID::UI_AddSubMenu, &msg_params, true);
-  } else if (is_key_icon_exist && is_icon_path_valid && is_dynamic_image) {
+
+  if (is_key_icon_exist && is_icon_path_valid && is_dynamic_image) {
     (*message_)[strings::msg_params][strings::sub_menu_icon][strings::value] =
         ImageFullPath((*message_)[strings::msg_params][strings::sub_menu_icon]
                                  [strings::value].asString(),
                       app,
                       application_manager_);
-
     msg_params[strings::sub_menu_icon] =
         (*message_)[strings::msg_params][strings::sub_menu_icon];
-    SendHMIRequest(hmi_apis::FunctionID::UI_AddSubMenu, &msg_params, true);
-  } 
+  } else {
+     msg_params.erase(strings::sub_menu_icon);
+  }
+  SendHMIRequest(hmi_apis::FunctionID::UI_AddSubMenu, &msg_params, true);
 }
 std::string AddSubMenuRequest::ImageFullPath(const std::string& file_name,
                                              ApplicationConstSharedPtr app,
