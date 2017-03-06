@@ -113,9 +113,6 @@ void AddSubMenuRequest::Run() {
     msg_params[strings::sub_menu_icon] =
         (*message_)[strings::msg_params][strings::sub_menu_icon];
   }
-  if(!is_key_icon_exist) {
-     msg_params.erase(strings::sub_menu_icon);
-  }
   SendHMIRequest(hmi_apis::FunctionID::UI_AddSubMenu, &msg_params, true);
 }
 std::string AddSubMenuRequest::ImageFullPath(const std::string& file_name,
