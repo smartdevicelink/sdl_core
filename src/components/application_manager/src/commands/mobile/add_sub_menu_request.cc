@@ -113,7 +113,8 @@ void AddSubMenuRequest::Run() {
                       application_manager_);
     msg_params[strings::sub_menu_icon] =
         (*message_)[strings::msg_params][strings::sub_menu_icon];
-  } else {
+  }
+  if(!is_key_icon_exist) {
      msg_params.erase(strings::sub_menu_icon);
   }
   SendHMIRequest(hmi_apis::FunctionID::UI_AddSubMenu, &msg_params, true);
