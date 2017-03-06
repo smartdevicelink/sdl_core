@@ -467,9 +467,6 @@ void PolicyManagerImpl::SendNotificationOnPermissionsUpdated(
 #endif  // SDL_REMOTE_CONTROL
   std::string default_hmi("NONE");
   GetDefaultHmi(application_id, &default_hmi);
-#ifdef SDL_REMOTE_CONTROL
-  listener()->OnUpdateHMILevel(device_id, application_id, default_hmi);
-#endif  // SDL_REMOTE_CONTROL
   listener()->OnPermissionsUpdated(
       application_id, notification_data, default_hmi);
 }
