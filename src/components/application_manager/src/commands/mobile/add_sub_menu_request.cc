@@ -102,23 +102,28 @@ void AddSubMenuRequest::Run() {
                  [strings::image_type].asUInt();
   const mobile_apis::ImageType::eType type =
       static_cast<mobile_apis::ImageType::eType>(image_type);
-  const bool is_dynamic_image = mobile_apis::ImageType::DYNAMIC == type;
 
-  if (is_key_icon_exist && is_icon_path_valid && is_dynamic_image) {
-    (*message_)[strings::msg_params][strings::sub_menu_icon][strings::value] =
-        ImageFullPath((*message_)[strings::msg_params][strings::sub_menu_icon]
-                                 [strings::value].asString(),
-                      app,
-                      application_manager_);
-
+  if (is_key_icon_exist && is_icon_path_valid) {
     msg_params[strings::sub_menu_icon] =
         (*message_)[strings::msg_params][strings::sub_menu_icon];
-    SendHMIRequest(hmi_apis::FunctionID::UI_AddSubMenu, &msg_params, true);
-  } else {
+    const bool is_dynamic_image = mobile_apis::ImageType::DYNAMIC == type;
+    if (is_dynamic_image) {
+      msg_params[strings::sub_menu_icon][strings::value] =
+          ImageFullPath((*message_)[strings::msg_params][strings::sub_menu_icon]
+                                   [strings::value].asString(),
+                        app,
+                        application_manager_);
+    }
+  }
+
+  if (is_key_icon_exist && !is_icon_path_valid) {
     LOG4CXX_ERROR(logger_, "Sub-menu icon is not valid.");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
+  } else {  // no matter, exists key_icon or not
+    SendHMIRequest(hmi_apis::FunctionID::UI_AddSubMenu, &msg_params, true);
   }
 }
+
 std::string AddSubMenuRequest::ImageFullPath(const std::string& file_name,
                                              ApplicationConstSharedPtr app,
                                              ApplicationManager& app_mngr) {
