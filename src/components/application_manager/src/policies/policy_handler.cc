@@ -451,11 +451,19 @@ uint32_t PolicyHandler::GetAppIdForSending() const {
 
 void PolicyHandler::OnAppPermissionConsent(
     const uint32_t connection_key,
-    const PermissionConsent& permissions,
-    const ExternalConsentStatus& external_consent_status) {
+    const PermissionConsent& permissions
+#ifdef EXTERNAL_PROPRIETARY_MODE
+    ,
+    const ExternalConsentStatus& external_consent_status
+#endif
+    ) {
   LOG4CXX_AUTO_TRACE(logger_);
-  AsyncRun(new AppPermissionDelegate(
-      connection_key, permissions, external_consent_status, *this));
+  AsyncRun(new AppPermissionDelegate(connection_key,
+                                     permissions,
+#ifdef EXTERNAL_PROPRIETARY_MODE
+                                     external_consent_status,
+#endif
+                                     *this));
 }
 
 void PolicyHandler::OnDeviceConsentChanged(const std::string& device_id,
@@ -555,7 +563,9 @@ void PolicyHandler::SetDeviceInfo(const std::string& device_id,
 
 void PolicyHandler::OnAppPermissionConsentInternal(
     const uint32_t connection_key,
+#ifdef EXTERNAL_PROPRIETARY_MODE
     const ExternalConsentStatus& external_consent_status,
+#endif
     PermissionConsent& out_permissions) {
   POLICY_LIB_CHECK_VOID();
 

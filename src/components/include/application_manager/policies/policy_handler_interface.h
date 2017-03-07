@@ -189,8 +189,12 @@ class PolicyHandlerInterface {
  */
   virtual void OnAppPermissionConsent(
       const uint32_t connection_key,
-      const PermissionConsent& permissions,
-      const ExternalConsentStatus& external_consent_status) = 0;
+      const PermissionConsent& permissions
+#ifdef EXTERNAL_PROPRIETARY_MODE
+      ,
+      const ExternalConsentStatus& external_consent_status
+#endif
+      ) = 0;
 
   /**
    * @brief Get appropriate message parameters and send them with response
@@ -578,7 +582,9 @@ class PolicyHandlerInterface {
    */
   virtual void OnAppPermissionConsentInternal(
       const uint32_t connection_key,
+#ifdef EXTERNAL_PROPRIETARY_MODE
       const ExternalConsentStatus& external_consent_status,
+#endif
       PermissionConsent& out_permissions) = 0;
 
   friend class AppPermissionDelegate;

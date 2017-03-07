@@ -39,18 +39,26 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "PolicyHandler")
 AppPermissionDelegate::AppPermissionDelegate(
     const uint32_t connection_key,
     const PermissionConsent& permissions,
+#ifdef EXTERNAL_PROPRIETARY_MODE
     const ExternalConsentStatus& external_consent_status,
+#endif
     policy::PolicyHandlerInterface& policy_handler)
     : connection_key_(connection_key)
     , permissions_(permissions)
+#ifdef EXTERNAL_PROPRIETARY_MODE
     , external_consent_status_(external_consent_status)
-    , policy_handler_(policy_handler) {}
+#endif
+    , policy_handler_(policy_handler) {
+}
 
 void AppPermissionDelegate::threadMain() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  policy_handler_.OnAppPermissionConsentInternal(
-      connection_key_, external_consent_status_, permissions_);
+  policy_handler_.OnAppPermissionConsentInternal(connection_key_,
+#ifdef EXTERNAL_PROPRIETARY_MODE
+                                                 external_consent_status_,
+#endif
+                                                 permissions_);
 }
 
 void AppPermissionDelegate::exitThreadMain() {

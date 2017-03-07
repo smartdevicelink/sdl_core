@@ -75,6 +75,7 @@ struct PermissionsAppender
   policy::PermissionConsent& consents_;
 };
 
+#ifdef EXTERNAL_PROPRIETARY_MODE
 /**
  * @brief Converts SmartObject data to customer connectivity status item and
  * appends to collection
@@ -103,7 +104,7 @@ struct ExternalConsentStatusAppender
  private:
   policy::ExternalConsentStatus& external_consent_status_;
 };
-
+#endif
 }  // namespace
 
 namespace application_manager {
@@ -152,7 +153,7 @@ void OnAppPermissionConsentNotification::Run() {
 
     permission_consent.consent_source = msg_params[strings::source].asString();
   }
-
+#ifdef EXTERNAL_PROPRIETARY_MODE
   policy::ExternalConsentStatus external_consent_status;
   if (msg_params.keyExists(strings::external_consent_status)) {
     const smart_objects::SmartArray* system_external_consent_status =
@@ -162,8 +163,15 @@ void OnAppPermissionConsentNotification::Run() {
                   system_external_consent_status->end(),
                   status_appender);
   }
+#endif
   application_manager_.GetPolicyHandler().OnAppPermissionConsent(
-      connection_key, permission_consent, external_consent_status);
+      connection_key,
+      permission_consent
+#ifdef EXTERNAL_PROPRIETARY_MODE
+      ,
+      external_consent_status
+#endif
+      );
 }
 }  // commands
 }  // namespace application_manager

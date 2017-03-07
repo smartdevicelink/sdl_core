@@ -371,8 +371,12 @@ class PolicyHandler : public PolicyHandlerInterface,
    */
   void OnAppPermissionConsent(
       const uint32_t connection_key,
-      const PermissionConsent& permissions,
-      const ExternalConsentStatus& external_consent_status) OVERRIDE;
+      const PermissionConsent& permissions
+#ifdef EXTERNAL_PROPRIETARY_MODE
+      ,
+      const ExternalConsentStatus& external_consent_status
+#endif
+      ) OVERRIDE;
 
   /**
    * @brief Get appropriate message parameters and send them with response
@@ -648,7 +652,9 @@ class PolicyHandler : public PolicyHandlerInterface,
    */
   void OnAppPermissionConsentInternal(
       const uint32_t connection_key,
+#ifdef EXTERNAL_PROPRIETARY_MODE
       const ExternalConsentStatus& external_consent_status,
+#endif
       PermissionConsent& out_permissions) OVERRIDE;
 
 #ifdef SDL_REMOTE_CONTROL

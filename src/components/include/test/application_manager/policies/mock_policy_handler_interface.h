@@ -131,11 +131,17 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
   MOCK_METHOD2(SetDeviceInfo,
                void(const std::string& device_id,
                     const policy::DeviceInfo& device_info));
+#ifdef EXTERNAL_PROPRIETARY_MODE
   MOCK_METHOD3(
       OnAppPermissionConsent,
       void(const uint32_t connection_key,
            const policy::PermissionConsent& permissions,
            const policy::ExternalConsentStatus& external_consent_status));
+#else
+  MOCK_METHOD2(OnAppPermissionConsent,
+               void(const uint32_t connection_key,
+                    const policy::PermissionConsent& permissions));
+#endif
   MOCK_METHOD3(OnGetUserFriendlyMessage,
                void(const std::vector<std::string>& message_codes,
                     const std::string& language,
@@ -296,10 +302,15 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
 #endif  // SDL_REMOTE_CONTROL
 
  private:
+#ifdef EXTERNAL_PROPRIETARY_MODE
   MOCK_METHOD3(OnAppPermissionConsentInternal,
                void(const uint32_t,
                     const policy::ExternalConsentStatus&,
                     policy::PermissionConsent&));
+#else
+  MOCK_METHOD2(OnAppPermissionConsentInternal,
+               void(const uint32_t, policy::PermissionConsent&));
+#endif
 };
 
 }  // namespace policy_test
