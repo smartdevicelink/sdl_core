@@ -719,8 +719,9 @@ class CacheManager : public CacheManagerInterface {
    * JSON date is different than current database.
    *
    * @param file_name the preloaded policy table JSON file.
+   * @return false in case of invalid preloaded_pt
    */
-  void MergePreloadPT(const std::string& file_name);
+  bool MergePreloadPT(const std::string& file_name);
 
   bool GetPermissionsList(StringArray& perm_list) const;
 
