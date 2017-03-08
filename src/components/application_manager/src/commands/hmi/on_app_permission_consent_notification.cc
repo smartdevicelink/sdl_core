@@ -40,6 +40,7 @@
 #include <string>
 #include "policy/policy_types.h"
 #include "smart_objects/smart_object.h"
+#include "utils/make_shared.h"
 
 namespace {
 
@@ -156,22 +157,20 @@ void OnAppPermissionConsentNotification::Run() {
 #ifdef EXTERNAL_PROPRIETARY_MODE
   policy::ExternalConsentStatus external_consent_status;
   if (msg_params.keyExists(strings::external_consent_status)) {
-    const smart_objects::SmartArray* system_external_consent_status =
-        msg_params[strings::external_consent_status].asArray();
+    const utils::SharedPtr<smart_objects::SmartArray>
+        system_external_consent_status =
+            msg_params[strings::external_consent_status].asArray();
     ExternalConsentStatusAppender status_appender(external_consent_status);
     std::for_each(system_external_consent_status->begin(),
                   system_external_consent_status->end(),
                   status_appender);
   }
-#endif
   application_manager_.GetPolicyHandler().OnAppPermissionConsent(
-      connection_key,
-      permission_consent
-#ifdef EXTERNAL_PROPRIETARY_MODE
-      ,
-      external_consent_status
+      connection_key, permission_consent, external_consent_status);
+#else
+  application_manager_.GetPolicyHandler().OnAppPermissionConsent(
+      connection_key, permission_consent);
 #endif
-      );
 }
 }  // commands
 }  // namespace application_manager

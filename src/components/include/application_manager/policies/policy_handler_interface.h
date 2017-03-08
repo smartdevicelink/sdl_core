@@ -179,22 +179,23 @@ class PolicyHandlerInterface {
   virtual void SetDeviceInfo(const std::string& device_id,
                              const DeviceInfo& device_info) = 0;
 
-  /**
- * @brief Processes data from OnAppPermissionConsent notification with
- * permissions changes and ExternalConsent status changes done by user
- * @param connection_key Connection key of application, 0 if no key has been
- * provided
- * @param permissions Groups permissions changes
- * @param external_consent_status Customer connectivity settings status changes
- */
+/**
+*@brief Processes data from OnAppPermissionConsent notification with
+*permissions changes and ExternalConsent status changes done by user
+*@param connection_key Connection key of application, 0 if no key has been
+*provided
+*@param permissions Groups permissions changes
+*@param external_consent_status Customer connectivity settings status changes
+*/
+#ifdef EXTERNAL_PROPRIETARY_MODE
   virtual void OnAppPermissionConsent(
       const uint32_t connection_key,
-      const PermissionConsent& permissions
-#ifdef EXTERNAL_PROPRIETARY_MODE
-      ,
-      const ExternalConsentStatus& external_consent_status
+      const PermissionConsent& permissions,
+      const ExternalConsentStatus& external_consent_status) = 0;
+#else
+  virtual void OnAppPermissionConsent(const uint32_t connection_key,
+                                      const PermissionConsent& permissions) = 0;
 #endif
-      ) = 0;
 
   /**
    * @brief Get appropriate message parameters and send them with response
@@ -567,25 +568,28 @@ class PolicyHandlerInterface {
 #endif  // SDL_REMOTE_CONTROL
 
  private:
-  /**
-   * @brief Processes data received via OnAppPermissionChanged notification
-   * from. Being started asyncronously from AppPermissionDelegate class.
-   * Sets updated permissions and ExternalConsent for registered applications
- * and
-   * applications which already have appropriate group assigned which related to
-   * devices already known by policy
-   * @param connection_key Connection key of application, 0 if no key has been
-   * provided within notification
-   * @param external_consent_status Customer connectivity settings changes to
- * process
- * @param permissions Permissions changes to process
-   */
+/**
+ * @brief Processes data received via OnAppPermissionChanged notification
+ * from. Being started asyncronously from AppPermissionDelegate class.
+ * Sets updated permissions and ExternalConsent for registered applications
+*and
+ * applications which already have appropriate group assigned which related to
+ * devices already known by policy
+ * @param connection_key Connection key of application, 0 if no key has been
+ * provided within notification
+ * @param external_consent_status Customer connectivity settings changes to
+*process
+*@param permissions Permissions changes to process
+ */
+#ifdef EXTERNAL_PROPRIETARY_MODE
   virtual void OnAppPermissionConsentInternal(
       const uint32_t connection_key,
-#ifdef EXTERNAL_PROPRIETARY_MODE
       const ExternalConsentStatus& external_consent_status,
-#endif
       PermissionConsent& out_permissions) = 0;
+#else
+  virtual void OnAppPermissionConsentInternal(
+      const uint32_t connection_key, PermissionConsent& out_permissions) = 0;
+#endif
 
   friend class AppPermissionDelegate;
 };

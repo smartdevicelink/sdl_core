@@ -1332,8 +1332,8 @@ void PolicyManagerImpl::ProcessExternalConsentStatusUpdate(
 
   std::map<std::string, std::string> known_links =
       cache_->GetKnownLinksFromPT();
-  std::map<std::string, std::string> registered_links =
-      listener_->GetRegisteredLinks();
+  std::map<std::string, std::string> registered_links;
+  listener_->GetRegisteredLinks(registered_links);
 
   std::map<std::string, std::string> all_known;
   std::merge(known_links.begin(),

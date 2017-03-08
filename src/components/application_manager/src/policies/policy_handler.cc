@@ -150,39 +150,6 @@ struct HMILevelPredicate
 
 static const std::string kCerficateFileName = "certificate";
 
-struct LinkAppToDevice {
-  explicit LinkAppToDevice(
-      std::map<std::string, std::string>& app_to_device_link,
-      const ApplicationManager& application_manager)
-      : app_to_device_link_(app_to_device_link)
-      , application_manager_(application_manager) {
-    app_to_device_link_.clear();
-  }
-
-  void operator()(const ApplicationSharedPtr& app) {
-    if (!app.valid()) {
-      LOG4CXX_WARN(logger_,
-                   "Invalid pointer to application was passed."
-                   "Skip current application.");
-      return;
-    }
-    DeviceParams device_params = GetDeviceParams(
-        app->device(),
-        application_manager_.connection_handler().get_session_observer());
-    const std::string app_id = app->policy_app_id();
-    if (device_params.device_mac_address.empty()) {
-      LOG4CXX_WARN(logger_,
-                   "Couldn't find device, which hosts application " << app_id);
-      return;
-    }
-    app_to_device_link_[app_id] = device_params.device_mac_address;
-  }
-
- private:
-  std::map<std::string, std::string>& app_to_device_link_;
-  const ApplicationManager& application_manager_;
-};
-
 struct DeactivateApplication {
   explicit DeactivateApplication(
       const connection_handler::DeviceHandle& device_id,
@@ -449,22 +416,23 @@ uint32_t PolicyHandler::GetAppIdForSending() const {
   return ChooseRandomAppForPolicyUpdate(apps_with_none_level);
 }
 
+#ifdef EXTERNAL_PROPRIETARY_MODE
 void PolicyHandler::OnAppPermissionConsent(
     const uint32_t connection_key,
-    const PermissionConsent& permissions
-#ifdef EXTERNAL_PROPRIETARY_MODE
-    ,
-    const ExternalConsentStatus& external_consent_status
-#endif
-    ) {
+    const PermissionConsent& permissions,
+    const ExternalConsentStatus& external_consent_status) {
   LOG4CXX_AUTO_TRACE(logger_);
-  AsyncRun(new AppPermissionDelegate(connection_key,
-                                     permissions,
-#ifdef EXTERNAL_PROPRIETARY_MODE
-                                     external_consent_status,
-#endif
-                                     *this));
+  AsyncRun(new AppPermissionDelegate(
+      connection_key, permissions, external_consent_status, *this));
 }
+#else
+void PolicyHandler::OnAppPermissionConsent(
+    const uint32_t connection_key, const PermissionConsent& permissions) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  AsyncRun(new AppPermissionDelegate(connection_key, permissions, *this));
+}
+
+#endif
 
 void PolicyHandler::OnDeviceConsentChanged(const std::string& device_id,
                                            const bool is_allowed) {
@@ -561,11 +529,10 @@ void PolicyHandler::SetDeviceInfo(const std::string& device_id,
   policy_manager_->SetDeviceInfo(device_id, device_info);
 }
 
+#ifdef EXTERNAL_PROPRIETARY_MODE
 void PolicyHandler::OnAppPermissionConsentInternal(
     const uint32_t connection_key,
-#ifdef EXTERNAL_PROPRIETARY_MODE
     const ExternalConsentStatus& external_consent_status,
-#endif
     PermissionConsent& out_permissions) {
   POLICY_LIB_CHECK_VOID();
 
@@ -622,12 +589,71 @@ void PolicyHandler::OnAppPermissionConsentInternal(
                  "There are no applications previously stored for "
                  "setting common permissions.");
   }
-#ifdef EXTERNAL_PROPRIETARY_MODE
   if (!policy_manager_->SetExternalConsentStatus(external_consent_status)) {
     LOG4CXX_WARN(logger_, "ExternalConsent status has not been set!");
   }
-#endif
 }
+#else
+void PolicyHandler::OnAppPermissionConsentInternal(
+    const uint32_t connection_key, PermissionConsent& out_permissions) {
+  POLICY_LIB_CHECK_VOID();
+
+  if (connection_key) {
+    ApplicationSharedPtr app = application_manager_.application(connection_key);
+
+    if (app.valid()) {
+      out_permissions.policy_app_id = app->policy_app_id();
+      DeviceParams device_params = GetDeviceParams(
+          app->device(),
+          application_manager_.connection_handler().get_session_observer());
+
+      out_permissions.device_id = device_params.device_mac_address;
+    }
+
+    if (!out_permissions.policy_app_id.empty()) {
+      policy_manager_->SetUserConsentForApp(out_permissions);
+    }
+  } else if (!app_to_device_link_.empty()) {
+    sync_primitives::AutoLock lock(app_to_device_link_lock_);
+    std::map<std::string, std::string>::const_iterator it =
+        app_to_device_link_.begin();
+    for (; app_to_device_link_.end() != it; ++it) {
+      ApplicationSharedPtr app =
+          application_manager_.application_by_policy_id(it->second);
+
+      // If list of apps sent to HMI for user consents is not the same as
+      // current,
+      // permissions should be set only for coincident to registered apps
+      if (!app.valid()) {
+        LOG4CXX_WARN(logger_,
+                     "Invalid pointer to application was passed."
+                     "Permissions setting skipped.");
+        continue;
+      }
+
+      DeviceParams device_params = GetDeviceParams(
+          app->device(),
+          application_manager_.connection_handler().get_session_observer());
+
+      if (device_params.device_mac_address != it->first) {
+        LOG4CXX_WARN(logger_,
+                     "Device_id of application is changed."
+                     "Permissions setting skipped.");
+        continue;
+      }
+
+      out_permissions.policy_app_id = it->second;
+      out_permissions.device_id = it->first;
+      policy_manager_->SetUserConsentForApp(out_permissions);
+    }
+  } else {
+    LOG4CXX_WARN(logger_,
+                 "There are no applications previously stored for "
+                 "setting common permissions.");
+  }
+}
+#endif
+
 void policy::PolicyHandler::SetDaysAfterEpoch() {
   POLICY_LIB_CHECK_VOID();
   TimevalStruct current_time = date_time::DateTime::getCurrentTime();
@@ -760,23 +786,6 @@ void PolicyHandler::OnGetListOfPermissions(const uint32_t connection_key,
       application_manager_);
 }
 
-void PolicyHandler::LinkAppsToDevice() {
-  sync_primitives::AutoLock lock(app_to_device_link_lock_);
-  LinkAppToDevice linker(app_to_device_link_, application_manager_);
-  LOG4CXX_DEBUG(logger_, "add links to app.  no specific app was passed");
-  {
-    const ApplicationSet& accessor =
-        application_manager_.applications().GetData();
-    if (accessor.empty()) {
-      LOG4CXX_WARN(logger_,
-                   "application_manager doesn't have any applications");
-    } else {
-      // Add all currently registered applications
-      std::for_each(accessor.begin(), accessor.end(), linker);
-    }
-  }
-}
-
 bool PolicyHandler::IsAppSuitableForPolicyUpdate(
     const Applications::value_type value) const {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -860,12 +869,6 @@ std::string PolicyHandler::OnCurrentDeviceIdUpdateRequired(
       application_manager_.connection_handler().get_session_observer());
 
   return device_params.device_mac_address;
-}
-
-std::map<std::string, std::string> PolicyHandler::GetRegisteredLinks() const {
-  std::map<std::string, std::string> links;
-  GetRegisteredLinks(links);
-  return links;
 }
 
 void PolicyHandler::OnSystemInfoChanged(const std::string& language) {

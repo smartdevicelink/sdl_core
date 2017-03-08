@@ -210,8 +210,7 @@ void PolicyManagerImplTest::SetUp() {
       .WillByDefault(Return(GroupsByExternalConsentStatus()));
   ON_CALL(*cache_manager_, GetKnownLinksFromPT())
       .WillByDefault(Return(std::map<std::string, std::string>()));
-  ON_CALL(listener_, GetRegisteredLinks())
-      .WillByDefault(Return(std::map<std::string, std::string>()));
+  ON_CALL(listener_, GetRegisteredLinks(_)).WillByDefault(Return());
 }
 
 void PolicyManagerImplTest::TearDown() {
@@ -246,8 +245,7 @@ PolicyManagerImplTest2::PolicyManagerImplTest2()
     , ptu_request_types_(Json::arrayValue) {}
 
 void PolicyManagerImplTest2::SetUp() {
-  ON_CALL(listener_, GetRegisteredLinks())
-      .WillByDefault(Return(std::map<std::string, std::string>()));
+  ON_CALL(listener_, GetRegisteredLinks(_)).WillByDefault(Return());
 
   file_system::CreateDirectory(app_storage_folder_);
 
@@ -627,8 +625,7 @@ PolicyManagerImplTest_RequestTypes::PolicyManagerImplTest_RequestTypes()
     , preloaded_pt_filename_(kSdlPreloadedPtJson) {}
 
 void PolicyManagerImplTest_RequestTypes::SetUp() {
-  ON_CALL(listener_, GetRegisteredLinks())
-      .WillByDefault(Return(std::map<std::string, std::string>()));
+  ON_CALL(listener_, GetRegisteredLinks(_)).WillByDefault(Return());
 
   file_system::CreateDirectory(app_storage_folder_);
   const bool in_memory = true;

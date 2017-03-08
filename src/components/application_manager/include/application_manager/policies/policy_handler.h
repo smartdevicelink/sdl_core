@@ -352,31 +352,32 @@ class PolicyHandler : public PolicyHandlerInterface,
   void SetDeviceInfo(const std::string& device_id,
                      const DeviceInfo& device_info) OVERRIDE;
 
-  /**
-   * @brief Store user-changed permissions consent to DB
-   * @param connection_key Connection key of application or 0, if permissions
-   * should be applied to all applications
-   * @param permissions User-changed group permissions consent
-   */
+/**
+ * @brief Store user-changed permissions consent to DB
+ * @param connection_key Connection key of application or 0, if permissions
+ * should be applied to all applications
+ * @param permissions User-changed group permissions consent
+ */
 
-  /**
-   * @brief Processes permissions changes received from system via
-   * OnAppPermissionConsent notification
-   * @param connection_key Connection key of application, 0 if no key has been
-   * provided by notification
-   * @param permissions Structure containing group permissions changes
-   * @param external_consent_status Structure containig customer connectivity
-   * settings
-   * changes
-   */
+/**
+ * @brief Processes permissions changes received from system via
+ * OnAppPermissionConsent notification
+ * @param connection_key Connection key of application, 0 if no key has been
+ * provided by notification
+ * @param permissions Structure containing group permissions changes
+ * @param external_consent_status Structure containig customer connectivity
+ * settings
+ * changes
+ */
+#ifdef EXTERNAL_PROPRIETARY_MODE
   void OnAppPermissionConsent(
       const uint32_t connection_key,
-      const PermissionConsent& permissions
-#ifdef EXTERNAL_PROPRIETARY_MODE
-      ,
-      const ExternalConsentStatus& external_consent_status
+      const PermissionConsent& permissions,
+      const ExternalConsentStatus& external_consent_status) OVERRIDE;
+#else
+  void OnAppPermissionConsent(const uint32_t connection_key,
+                              const PermissionConsent& permissions) OVERRIDE;
 #endif
-      ) OVERRIDE;
 
   /**
    * @brief Get appropriate message parameters and send them with response
@@ -637,25 +638,29 @@ class PolicyHandler : public PolicyHandlerInterface,
    */
   bool CheckStealFocus(const std::string& policy_app_id) const;
 
-  /**
-   * @brief Processes data received via OnAppPermissionChanged notification
-   * from. Being started asyncronously from AppPermissionDelegate class.
-   * Sets updated permissions and ExternalConsent for registered applications
-   * and
-   * applications which already have appropriate group assigned which related to
-   * devices already known by policy
-   * @param connection_key Connection key of application, 0 if no key has been
-   * provided within notification
-   * @param external_consent_status Customer connectivity settings changes to
-   * process
-   * @param permissions Permissions changes to process
-   */
+/**
+ * @brief Processes data received via OnAppPermissionChanged notification
+ * from. Being started asyncronously from AppPermissionDelegate class.
+ * Sets updated permissions and ExternalConsent for registered applications
+ * and
+ * applications which already have appropriate group assigned which related to
+ * devices already known by policy
+ * @param connection_key Connection key of application, 0 if no key has been
+ * provided within notification
+ * @param external_consent_status Customer connectivity settings changes to
+ * process
+ * @param permissions Permissions changes to process
+ */
+#ifdef EXTERNAL_PROPRIETARY_MODE
   void OnAppPermissionConsentInternal(
       const uint32_t connection_key,
-#ifdef EXTERNAL_PROPRIETARY_MODE
       const ExternalConsentStatus& external_consent_status,
-#endif
       PermissionConsent& out_permissions) OVERRIDE;
+#else
+  void OnAppPermissionConsentInternal(
+      const uint32_t connection_key,
+      PermissionConsent& out_permissions) OVERRIDE;
+#endif
 
 #ifdef SDL_REMOTE_CONTROL
   void UpdateHMILevel(application_manager::ApplicationSharedPtr app,
@@ -755,7 +760,6 @@ class PolicyHandler : public PolicyHandlerInterface,
  * @param out_links Collection of device_id-to-app_id links
  */
   void GetRegisteredLinks(std::map<std::string, std::string>& out_links) const;
-  std::map<std::string, std::string> GetRegisteredLinks() const;
 
  private:
   mutable sync_primitives::RWLock policy_manager_lock_;

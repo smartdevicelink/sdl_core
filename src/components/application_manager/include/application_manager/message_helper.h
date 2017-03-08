@@ -376,13 +376,19 @@ class MessageHelper {
    * @param external_consent_status External user consent status
    * @param correlation_id Correlation id of request
    */
+#ifdef EXTERNAL_PROPRIETARY_MODE
   static void SendGetListOfPermissionsResponse(
       const std::vector<policy::FunctionalGroupPermission>& permissions,
-#ifdef EXTERNAL_PROPRIETARY_MODE
       const policy::ExternalConsentStatus& external_consent_status,
-#endif  // EXTERNAL_PROPRIETARY_MODE
       const uint32_t correlation_id,
       ApplicationManager& app_mngr);
+#else
+  static void SendGetListOfPermissionsResponse(
+      const std::vector<policy::FunctionalGroupPermission>& permissions,
+      const uint32_t correlation_id,
+      ApplicationManager& app_mngr);
+#endif  // EXTERNAL_PROPRIETARY_MODE
+
 
   /*
    * @brief Sends notification to HMI to start video streaming

@@ -180,7 +180,8 @@ class PolicyListener {
  * device id
  * @return Collection of device_id-to-app_id links
  */
-  virtual std::map<std::string, std::string> GetRegisteredLinks() const = 0;
+  virtual void GetRegisteredLinks(
+      std::map<std::string, std::string>& out_links) const = 0;
 };
 }  //  namespace policy
 #endif  // SRC_COMPONENTS_POLICY_POLICY_EXTERNAL_INCLUDE_POLICY_POLICY_LISTENER_H_

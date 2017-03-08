@@ -860,8 +860,7 @@ TEST_F(PolicyManagerImplTest_ExternalConsent,
 
   const BinaryMessage msg(ptu_json.begin(), ptu_json.end());
 
-  ON_CALL(listener_, GetRegisteredLinks())
-      .WillByDefault(Return(std::map<std::string, std::string>()));
+  ON_CALL(listener_, GetRegisteredLinks(_)).WillByDefault(Return());
 
   EXPECT_CALL(listener_, OnCertificateUpdated(_));
 
@@ -980,8 +979,7 @@ TEST_F(PolicyManagerImplTest_ExternalConsent,
 
   const BinaryMessage msg(ptu_json.begin(), ptu_json.end());
 
-  ON_CALL(listener_, GetRegisteredLinks())
-      .WillByDefault(Return(std::map<std::string, std::string>()));
+  ON_CALL(listener_, GetRegisteredLinks(_)).WillByDefault(Return());
 
   EXPECT_CALL(listener_, OnCertificateUpdated(_));
 
