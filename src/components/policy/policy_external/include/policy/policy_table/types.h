@@ -311,7 +311,7 @@ struct RpcParameters : CompositeType {
 
 struct ExternalConsentEntity : CompositeType {
  public:
-  typedef Integer<int32_t, INT32_MIN, INT32_MAX> EntityInt;
+  typedef Integer<int32_t, 0, 128> EntityInt;
   EntityInt entity_type;
   EntityInt entity_id;
 
