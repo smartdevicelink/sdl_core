@@ -102,6 +102,43 @@ class QueryAppsDataValidator {
     return true;
   }
 
+  bool CheckIfHasOmittedParam(const smart_objects::SmartObject& languages) {
+    const size_t languages_array_size = languages.length();
+    for (size_t idx = 0; idx < languages_array_size; ++idx) {
+      const smart_objects::SmartObject& language = languages.getElement(idx);
+      if (smart_objects::SmartType_Map != language.getType()) {
+        LOG4CXX_WARN(logger_,
+                     kQueryAppsValidationFailedPrefix
+                         << "language is not a map.");
+        return false;
+      }
+      const std::string language_name = (*language.map_begin()).first;
+      if (!language[language_name].keyExists(json::ttsName) ||
+          language[language_name][json::ttsName].empty()) {
+        LOG4CXX_WARN(logger_,
+                     kQueryAppsValidationFailedPrefix
+                         << "'languages.ttsName' doesn't exist");
+        return true;
+      }
+    }
+    return false;
+  }
+
+  void WriteAppIdToOmittedParam(smart_objects::SmartObject& languages,
+                                const std::string& app_id) {
+    const size_t languages_array_size = languages.length();
+    for (size_t idx = 0; idx < languages_array_size; ++idx) {
+      smart_objects::SmartObject& language = languages[idx];
+      // ttsName verification
+      const std::string language_name = (*language.map_begin()).first;
+      if (!language[language_name].keyExists(json::ttsName)) {
+        language[language_name][json::ttsName] = app_id;
+        language.asString();
+        LOG4CXX_INFO(logger_, "app_id written instead of ttsName");
+      }
+    }
+  }
+
   bool ValidateAppDataAndOsAndLanguagesData() {
     smart_objects::SmartArray* objects_array = data_[json::response].asArray();
 
@@ -118,7 +155,7 @@ class QueryAppsDataValidator {
     smart_objects::SmartArray::iterator applications_iterator =
         objects_array->begin();
     for (; applications_iterator != objects_array->end();) {
-      smart_objects::SmartObject& app_data = *applications_iterator;
+      const smart_objects::SmartObject& app_data = *applications_iterator;
 
       if (!app_data.isValid()) {
         LOG4CXX_WARN(logger_,
@@ -180,8 +217,16 @@ class QueryAppsDataValidator {
         return false;
       }
 
+      auto& app_data_non_const = *(objects_array->begin());
+      if (CheckIfHasOmittedParam(app_data[os_type][json::languages])) {
+        WriteAppIdToOmittedParam(
+            app_data_non_const[os_type][json::languages],
+            app_data[json::appId]
+                .asString());
+      }
+
       if (!ValidateLanguages(app_data[os_type][json::languages],
-                             synonyms_map, app_data[json::appId].asString())) {
+                             synonyms_map)) {
         return false;
       }
       has_response_valid_application = true;
@@ -231,12 +276,10 @@ class QueryAppsDataValidator {
     return true;
   }
 
-  bool ValidateLanguages(smart_objects::SmartObject& languages,
-                         SynonymsMap& synonyms_map, const std::string& app_id) const {
-
+  bool ValidateLanguages(const smart_objects::SmartObject& languages,
+                         SynonymsMap& synonyms_map) const {
     bool default_language_found = false;
     const size_t languages_array_size = languages.length();
-    LOG4CXX_WARN(logger_, "Validate languages LOL");
     if (languages_array_size > kLanguageArraySizeMax) {
       LOG4CXX_WARN(logger_,
                    kQueryAppsValidationFailedPrefix
@@ -247,7 +290,7 @@ class QueryAppsDataValidator {
     }
     // Every language has ttsname string and vrsynonyms array
     for (size_t idx = 0; idx < languages_array_size; ++idx) {
-      smart_objects::SmartObject& language = languages[idx];
+      const smart_objects::SmartObject& language = languages.getElement(idx);
       if (smart_objects::SmartType_Map != language.getType()) {
         LOG4CXX_WARN(logger_,
                      kQueryAppsValidationFailedPrefix
@@ -280,10 +323,7 @@ class QueryAppsDataValidator {
         LOG4CXX_WARN(logger_,
                      kQueryAppsValidationFailedPrefix
                          << "'languages.ttsName' doesn't exist");
-        if(app_id.empty())
-            return false;
-        language[language_name][json::ttsName] = app_id;
-        LOG4CXX_WARN(logger_, "Writing app_id ot ttsName because it's empty, app_id: " << app_id);
+        return false;
       }
       const smart_objects::SmartObject& ttsNameObject =
           language[language_name][json::ttsName];
