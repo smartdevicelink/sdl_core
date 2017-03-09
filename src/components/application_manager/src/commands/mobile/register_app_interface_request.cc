@@ -816,11 +816,11 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
                                           &(msg_params[strings::app_hmi_type]));
   }
 #endif  // SDL_REMOTE_CONTROL
+  SendResponse(true, result_code, add_info.c_str(), &response_params);
+
   // Default HMI level should be set before any permissions validation, since it
   // relies on HMI level.
   application_manager_.OnApplicationRegistered(application);
-
-  SendResponse(true, result_code, add_info.c_str(), &response_params);
 
   (*notify_upd_manager)();
 
