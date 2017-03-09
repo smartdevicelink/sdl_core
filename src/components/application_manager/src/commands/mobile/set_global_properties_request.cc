@@ -364,7 +364,7 @@ bool SetGlobalPropertiesRequest::PrepareUIRequestDefaultVRHelpData(
     // No one AddCommand happened before, so get vrHelp from first vrSynonym
     // that was taken at registration
     LOG4CXX_DEBUG(logger_, "Create vrHelp from vrSynonyms");
-    if (!app->vr_synonyms()->empty()) {
+    if (app->vr_synonyms() && !app->vr_synonyms()->empty()) {
       app->set_vr_help(app->vr_synonyms()->getElement(0));
     } else {
       LOG4CXX_ERROR(logger_, "Can't create default vrHelp");
