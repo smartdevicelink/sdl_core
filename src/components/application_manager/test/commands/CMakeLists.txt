@@ -49,6 +49,7 @@ file(GLOB SOURCES
   ${COMMANDS_TEST_DIR}/hmi/*
   ${COMMANDS_TEST_DIR}/hmi/hmi_notifications/*
   ${COMMANDS_TEST_DIR}/mobile/*
+  ${COMMANDS_TEST_DIR}/*
 )
 
 set(LIBRARIES

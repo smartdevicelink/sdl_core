@@ -225,6 +225,8 @@ void CommandRequestImpl::onTimeOut() {
                                             correlation_id(),
                                             mobile_api::Result::GENERIC_ERROR);
 
+  AddTimeOutComponentInfoToMessage(response);
+
   application_manager_.ManageMobileCommand(response, ORIGIN_SDL);
 }
 
@@ -786,6 +788,78 @@ bool CommandRequestImpl::IsResultCodeUnsupported(
          ((second.is_ok || second.is_invalid_enum) &&
           first.is_unsupported_resource) ||
          (first.is_unsupported_resource && second.is_unsupported_resource);
+}
+
+void CommandRequestImpl::AddTimeOutComponentInfoToMessage(
+    smart_objects::SmartObjectSPtr& response) const {
+  using NsSmartDeviceLink::NsSmartObjects::SmartObject;
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (!response) {
+    LOG4CXX_WARN(logger_, "Invalid message object");
+    return;
+  }
+
+  const uint32_t app_connection_key = connection_key();
+  const ApplicationSharedPtr app =
+      application_manager_.application(app_connection_key);
+  if (!app) {
+    LOG4CXX_WARN(logger_, "Invalid connection_key: " << app_connection_key);
+    return;
+  }
+
+  const SmartObject* app_type = app->app_types();
+  if (!app_type) {
+    LOG4CXX_WARN(logger_, "Empty application types array!");
+    return;
+  }
+
+  if (NsSmartDeviceLink::NsSmartObjects::SmartType_Array !=
+      app_type->getType()) {
+    LOG4CXX_WARN(logger_, "Application types are not an array!");
+    return;
+  }
+
+  const SmartObject& app_type_so = app_type->getElement(0);
+  if (NsSmartDeviceLink::NsSmartObjects::invalid_object_value == app_type_so) {
+    LOG4CXX_WARN(logger_, "Invalid object for component type!");
+    return;
+  }
+
+  const int64_t app_hmi_type = app_type_so.asInt();
+  const std::string& component_name = AppHMITypeToString(
+      static_cast<mobile_apis::AppHMIType::eType>(app_hmi_type));
+  const std::string component_info =
+      component_name + " component does not respond";
+  (*response)[strings::msg_params][strings::info] = component_info;
+}
+
+std::string CommandRequestImpl::AppHMITypeToString(
+    const mobile_apis::AppHMIType::eType app_hmi_type) const {
+  switch (app_hmi_type) {
+    case mobile_apis::AppHMIType::DEFAULT:
+      return "Default";
+    case mobile_apis::AppHMIType::COMMUNICATION:
+      return "Communication";
+    case mobile_apis::AppHMIType::MEDIA:
+      return "Media";
+    case mobile_apis::AppHMIType::MESSAGING:
+      return "Messaging";
+    case mobile_apis::AppHMIType::NAVIGATION:
+      return "Navigation";
+    case mobile_apis::AppHMIType::INFORMATION:
+      return "Information";
+    case mobile_apis::AppHMIType::SOCIAL:
+      return "Social";
+    case mobile_apis::AppHMIType::BACKGROUND_PROCESS:
+      return "Background Process";
+    case mobile_apis::AppHMIType::TESTING:
+      return "Testing";
+    case mobile_apis::AppHMIType::SYSTEM:
+      return "System";
+    default:
+      return "Invalid Component Type";
+  }
 }
 
 }  // namespace commands

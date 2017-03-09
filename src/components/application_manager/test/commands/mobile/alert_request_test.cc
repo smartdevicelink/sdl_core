@@ -213,6 +213,9 @@ TEST_F(AlertRequestTest, OnTimeout_GENERIC_ERROR) {
 
   utils::SharedPtr<AlertRequest> command = CreateCommand<AlertRequest>();
 
+  ON_CALL(app_mngr_, application(command->connection_key()))
+      .WillByDefault(Return(mock_app_));
+
   EXPECT_CALL(
       mock_message_helper_,
       CreateNegativeResponse(_, _, _, am::mobile_api::Result::GENERIC_ERROR))
@@ -320,8 +323,13 @@ TEST_F(AlertRequestTest, OnTimeOut_SUCCESS) {
       .WillOnce(Return(result_msg));
 
   CommandPtr command(CreateCommand<AlertRequest>());
+
+  ON_CALL(app_mngr_, application(command->connection_key()))
+      .WillByDefault(Return(mock_app_));
+
   MessageSharedPtr received_result_msg(
       CatchMobileCommandResult(CallOnTimeOut(*command)));
+
   EXPECT_EQ(result_msg, received_result_msg);
 }
 

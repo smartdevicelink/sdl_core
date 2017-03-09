@@ -294,6 +294,21 @@ class CommandRequestImpl : public CommandImpl,
   bool ProcessHMIInterfacesAvailability(
       const uint32_t hmi_correlation_id,
       const hmi_apis::FunctionID::eType& function_id);
+
+  /**
+   * @brief Add information for the component of response in case of timeout
+   * @param response Response message, which info should be extended
+   */
+  void AddTimeOutComponentInfoToMessage(
+      smart_objects::SmartObjectSPtr& response) const;
+
+  /**
+   * @brief Method transforms AppHMIType to string
+   * @param enum AppHMIType app_hmi_type contains enum value
+   * @return string of AppHMIType
+   */
+  std::string AppHMITypeToString(
+      const mobile_apis::AppHMIType::eType app_hmi_type) const;
 };
 
 }  // namespace commands

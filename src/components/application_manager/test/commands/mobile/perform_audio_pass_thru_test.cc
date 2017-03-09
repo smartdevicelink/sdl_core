@@ -329,6 +329,9 @@ TEST_F(PerformAudioPassThruRequestTest, OnTimeout_GENERIC_ERROR) {
   utils::SharedPtr<PerformAudioPassThruRequest> command =
       CreateCommand<PerformAudioPassThruRequest>();
 
+  ON_CALL(app_mngr_, application(command->connection_key()))
+      .WillByDefault(Return(mock_app_));
+
   EXPECT_CALL(app_mngr_, EndAudioPassThrough()).WillOnce(Return(true));
   EXPECT_CALL(app_mngr_, StopAudioPassThru(_));
   EXPECT_CALL(
