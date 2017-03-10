@@ -102,12 +102,17 @@ class QueryAppsDataValidator {
     return true;
   }
 
+  /**
+   * \brief Function checks, if language json array has 'ttsName' parameter omitted.
+   * \param languages SmartObject containing languages json array
+   * \return true of parameter was omitted, false otherwise
+  */
   bool CheckIfHasOmittedParam(const smart_objects::SmartObject& languages) {
     const size_t languages_array_size = languages.length();
     for (size_t idx = 0; idx < languages_array_size; ++idx) {
       const smart_objects::SmartObject& language = languages.getElement(idx);
       if (smart_objects::SmartType_Map != language.getType()) {
-        LOG4CXX_WARN(logger_,
+        LOG4CXX_DEBUG(logger_,
                      kQueryAppsValidationFailedPrefix
                          << "language is not a map.");
         return false;
@@ -115,7 +120,7 @@ class QueryAppsDataValidator {
       const std::string language_name = (*language.map_begin()).first;
       if (!language[language_name].keyExists(json::ttsName) ||
           language[language_name][json::ttsName].empty()) {
-        LOG4CXX_WARN(logger_,
+        LOG4CXX_DEBUG(logger_,
                      kQueryAppsValidationFailedPrefix
                          << "'languages.ttsName' doesn't exist");
         return true;
@@ -124,6 +129,12 @@ class QueryAppsDataValidator {
     return false;
   }
 
+  /**
+   * \brief Function writes 'app_id' value to ttsName parameter.
+   * \param languages SmartObject containing languages json array
+   * \param app_id string containt application id
+   * \return true of parameter was omitted, false otherwise
+  */
   void WriteAppIdToOmittedParam(smart_objects::SmartObject& languages,
                                 const std::string& app_id) {
     const size_t languages_array_size = languages.length();
@@ -134,7 +145,7 @@ class QueryAppsDataValidator {
       if (!language[language_name].keyExists(json::ttsName)) {
         language[language_name][json::ttsName] = app_id;
         language.asString();
-        LOG4CXX_INFO(logger_, "app_id written instead of ttsName");
+        LOG4CXX_DEBUG(logger_, "app_id written instead of ttsName");
       }
     }
   }
