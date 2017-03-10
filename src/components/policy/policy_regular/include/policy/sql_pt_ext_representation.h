@@ -30,8 +30,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_POLICY_POLICY_EXTERNAL_INCLUDE_POLICY_SQL_PT_EXT_REPRESENTATION_H_
-#define SRC_COMPONENTS_POLICY_POLICY_EXTERNAL_INCLUDE_POLICY_SQL_PT_EXT_REPRESENTATION_H_
+#ifndef SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_SQL_PT_EXT_REPRESENTATION_H_
+#define SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_SQL_PT_EXT_REPRESENTATION_H_
 
 #include <string>
 #include "policy/sql_pt_representation.h"
@@ -42,8 +42,6 @@ namespace policy {
 class SQLPTExtRepresentation : public SQLPTRepresentation,
                                public PTExtRepresentation {
  public:
-  SQLPTExtRepresentation();
-  explicit SQLPTExtRepresentation(bool in_memory);
   bool CanAppKeepContext(const std::string& app_id);
   bool CanAppStealFocus(const std::string& app_id);
   bool GetDefaultHMI(const std::string& policy_app_id,
@@ -135,10 +133,6 @@ class SQLPTExtRepresentation : public SQLPTRepresentation,
   ExternalConsentStatus GetExternalConsentStatus() const;
 
  private:
-  enum ExternalConsentEntitiesType {
-    kExternalConsentEntitiesTypeOn,
-    kExternalConsentEntitiesTypeOff
-  };
   void GatherModuleMeta(policy_table::ModuleMeta* meta) const;
   void GatherPreconsentedGroup(const std::string& app_id,
                                policy_table::Strings* groups) const;
@@ -207,12 +201,6 @@ class SQLPTExtRepresentation : public SQLPTRepresentation,
   bool IsMsgLanguagePresent(const std::string& message,
                             const std::string& language);
 
-  bool SaveExternalConsentEntities(
-      const int64_t group_id,
-      const policy_table::DisallowedByExternalConsentEntities& entities,
-      ExternalConsentEntitiesType type) const;
-};
-
 }  // namespace policy
 
-#endif  // SRC_COMPONENTS_POLICY_POLICY_EXTERNAL_INCLUDE_POLICY_SQL_PT_EXT_REPRESENTATION_H_
+#endif  // SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_SQL_PT_EXT_REPRESENTATION_H_

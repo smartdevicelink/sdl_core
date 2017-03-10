@@ -141,10 +141,10 @@ struct ExternalConsentStatusAppender
     status_[index_] = SmartObject(SmartType_Map);
 
     SmartObject& external_consent_status = status_[index_];
-    external_consent_status["entityType"] = item.entity_type;
-    external_consent_status["entityID"] = item.entity_id;
-    external_consent_status["status"] =
-        0 == strcasecmp("ON", item.entity_status.c_str())
+    external_consent_status[strings::entity_type] = item.entity_type_;
+    external_consent_status[strings::entity_id] = item.entity_id_;
+    external_consent_status[strings::status] =
+        policy::kStatusOn == item.status_
             ? static_cast<int32_t>(Common_EntityStatus::ON)
             : static_cast<int32_t>(Common_EntityStatus::OFF);
     ++index_;
@@ -159,38 +159,36 @@ struct ExternalConsentStatusAppender
 }  // namespace
 
 std::pair<std::string, VehicleDataType> kVehicleDataInitializer[] = {
-    std::make_pair(strings::gps, VehicleDataType::GPS),
-    std::make_pair(strings::speed, VehicleDataType::SPEED),
-    std::make_pair(strings::rpm, VehicleDataType::RPM),
-    std::make_pair(strings::fuel_level, VehicleDataType::FUELLEVEL),
-    std::make_pair(strings::fuel_level_state, VehicleDataType::FUELLEVEL_STATE),
-    std::make_pair(strings::instant_fuel_consumption,
-                   VehicleDataType::FUELCONSUMPTION),
-    std::make_pair(strings::external_temp, VehicleDataType::EXTERNTEMP),
-    std::make_pair(strings::vin, VehicleDataType::VIN),
-    std::make_pair(strings::prndl, VehicleDataType::PRNDL),
-    std::make_pair(strings::tire_pressure, VehicleDataType::TIREPRESSURE),
-    std::make_pair(strings::odometer, VehicleDataType::ODOMETER),
-    std::make_pair(strings::belt_status, VehicleDataType::BELTSTATUS),
-    std::make_pair(strings::body_information, VehicleDataType::BODYINFO),
-    std::make_pair(strings::device_status, VehicleDataType::DEVICESTATUS),
-    std::make_pair(strings::driver_braking, VehicleDataType::BRAKING),
-    std::make_pair(strings::wiper_status, VehicleDataType::WIPERSTATUS),
-    std::make_pair(strings::head_lamp_status, VehicleDataType::HEADLAMPSTATUS),
-    std::make_pair(strings::e_call_info, VehicleDataType::ECALLINFO),
-    std::make_pair(strings::airbag_status, VehicleDataType::AIRBAGSTATUS),
-    std::make_pair(strings::emergency_event, VehicleDataType::EMERGENCYEVENT),
-    std::make_pair(strings::cluster_mode_status,
-                   VehicleDataType::CLUSTERMODESTATUS),
-    std::make_pair(strings::my_key, VehicleDataType::MYKEY),
+    std::make_pair(strings::gps, GPS),
+    std::make_pair(strings::speed, SPEED),
+    std::make_pair(strings::rpm, RPM),
+    std::make_pair(strings::fuel_level, FUELLEVEL),
+    std::make_pair(strings::fuel_level_state, FUELLEVEL_STATE),
+    std::make_pair(strings::instant_fuel_consumption, FUELCONSUMPTION),
+    std::make_pair(strings::external_temp, EXTERNTEMP),
+    std::make_pair(strings::vin, VIN),
+    std::make_pair(strings::prndl, PRNDL),
+    std::make_pair(strings::tire_pressure, TIREPRESSURE),
+    std::make_pair(strings::odometer, ODOMETER),
+    std::make_pair(strings::belt_status, BELTSTATUS),
+    std::make_pair(strings::body_information, BODYINFO),
+    std::make_pair(strings::device_status, DEVICESTATUS),
+    std::make_pair(strings::driver_braking, BRAKING),
+    std::make_pair(strings::wiper_status, WIPERSTATUS),
+    std::make_pair(strings::head_lamp_status, HEADLAMPSTATUS),
+    std::make_pair(strings::e_call_info, ECALLINFO),
+    std::make_pair(strings::airbag_status, AIRBAGSTATUS),
+    std::make_pair(strings::emergency_event, EMERGENCYEVENT),
+    std::make_pair(strings::cluster_mode_status, CLUSTERMODESTATUS),
+    std::make_pair(strings::my_key, MYKEY),
     /*
      NOT DEFINED in mobile API
-     std::make_pair(strings::gps, VehicleDataType::BATTVOLTAGE),
+     std::make_pair(strings::gps,
+     BATTVOLTAGE),
      */
-    std::make_pair(strings::engine_torque, VehicleDataType::ENGINETORQUE),
-    std::make_pair(strings::acc_pedal_pos, VehicleDataType::ACCPEDAL),
-    std::make_pair(strings::steering_wheel_angle,
-                   VehicleDataType::STEERINGWHEEL),
+    std::make_pair(strings::engine_torque, ENGINETORQUE),
+    std::make_pair(strings::acc_pedal_pos, ACCPEDAL),
+    std::make_pair(strings::steering_wheel_angle, STEERINGWHEEL),
 };
 
 const VehicleData MessageHelper::vehicle_data_(
@@ -258,17 +256,6 @@ const uint32_t MessageHelper::GetPriorityCode(const std::string& priority) {
   return static_cast<uint32_t>(hmi_apis::Common_AppPriority::INVALID_ENUM);
 }
 
-std::string MessageHelper::CommonLanguageToString(
-    hmi_apis::Common_Language::eType language) {
-  using namespace NsSmartDeviceLink::NsSmartObjects;
-  const char* str = 0;
-  if (EnumConversionHelper<hmi_apis::Common_Language::eType>::EnumToCString(
-          language, &str)) {
-    return str ? str : "";
-  }
-  return std::string();
-}
-
 hmi_apis::Common_Language::eType MessageHelper::CommonLanguageFromString(
     const std::string& language) {
   using namespace NsSmartDeviceLink::NsSmartObjects;
@@ -287,6 +274,17 @@ std::string MessageHelper::GetDeviceMacAddressForHandle(
       device_handle, NULL, NULL, &device_mac_address);
   LOG4CXX_DEBUG(logger_, "result : " << device_handle);
   return device_mac_address;
+}
+
+std::string MessageHelper::CommonLanguageToString(
+    hmi_apis::Common_Language::eType language) {
+  using namespace NsSmartDeviceLink::NsSmartObjects;
+  const char* str = 0;
+  if (EnumConversionHelper<hmi_apis::Common_Language::eType>::EnumToCString(
+          language, &str)) {
+    return str ? str : "";
+  }
+  return std::string();
 }
 
 smart_objects::SmartObjectSPtr MessageHelper::CreateRequestObject(
@@ -1671,11 +1669,10 @@ void MessageHelper::SendGetUserFriendlyMessageResponse(
   app_mngr.ManageHMICommand(message);
 }
 
+#ifdef EXTERNAL_PROPRIETARY_MODE
 void MessageHelper::SendGetListOfPermissionsResponse(
     const std::vector<policy::FunctionalGroupPermission>& permissions,
-#ifdef EXTERNAL_PROPRIETARY_MODE
     const policy::ExternalConsentStatus& external_consent_status,
-#endif  // EXTERNAL_PROPRIETARY_MODE
     uint32_t correlation_id,
     ApplicationManager& app_mngr) {
   using namespace smart_objects;
@@ -1701,7 +1698,6 @@ void MessageHelper::SendGetListOfPermissionsResponse(
   GroupsAppender groups_appender(allowed_functions_array);
   std::for_each(permissions.begin(), permissions.end(), groups_appender);
 
-#ifdef EXTERNAL_PROPRIETARY_MODE
   const std::string external_consent_status_key = "externalConsentStatus";
   msg_params[external_consent_status_key] = SmartObject(SmartType_Array);
 
@@ -1713,10 +1709,39 @@ void MessageHelper::SendGetListOfPermissionsResponse(
   std::for_each(external_consent_status.begin(),
                 external_consent_status.end(),
                 external_consent_status_appender);
-#endif  // EXTERNAL_PROPRIETARY_MODE
 
   app_mngr.ManageHMICommand(message);
 }
+#else
+void MessageHelper::SendGetListOfPermissionsResponse(
+    const std::vector<policy::FunctionalGroupPermission>& permissions,
+    uint32_t correlation_id,
+    ApplicationManager& app_mngr) {
+  using namespace smart_objects;
+  using namespace hmi_apis;
+
+  SmartObjectSPtr message = utils::MakeShared<SmartObject>(SmartType_Map);
+  DCHECK_OR_RETURN_VOID(message);
+
+  SmartObject& params = (*message)[strings::params];
+
+  params[strings::function_id] = FunctionID::SDL_GetListOfPermissions;
+  params[strings::message_type] = MessageType::kResponse;
+  params[strings::correlation_id] = correlation_id;
+  params[hmi_response::code] = static_cast<int32_t>(Common_Result::SUCCESS);
+
+  SmartObject& msg_params = (*message)[strings::msg_params];
+
+  const std::string allowed_functions = "allowedFunctions";
+  msg_params[allowed_functions] = SmartObject(SmartType_Array);
+
+  SmartObject& allowed_functions_array = msg_params[allowed_functions];
+
+  GroupsAppender groups_appender(allowed_functions_array);
+  std::for_each(permissions.begin(), permissions.end(), groups_appender);
+  app_mngr.ManageHMICommand(message);
+}
+#endif  // EXTERNAL_PROPRIETARY_MODE
 
 smart_objects::SmartObjectSPtr MessageHelper::CreateNegativeResponse(
     uint32_t connection_key,

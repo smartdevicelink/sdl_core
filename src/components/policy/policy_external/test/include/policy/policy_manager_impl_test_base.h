@@ -66,10 +66,12 @@ const std::string kHmiLevelBackground = "BACKGROUND";
 const std::string kHmiLevelNone = "None";
 
 const std::string kPtuJson = "json/PTU.json";
+const std::string kPtu2Json = "json/PTU2.json";
 const std::string kPtu3Json = "json/PTU3.json";
 const std::string kValidSdlPtUpdateJson = "json/valid_sdl_pt_update.json";
 const std::string kPtuRequestTypeJson = "json/ptu_requestType.json";
 const std::string kPtu2RequestTypeJson = "json/ptu2_requestType.json";
+const std::string kDummyUpdateFileName = "DummyName";
 }  // namespace
 
 struct StringsForUpdate {
@@ -132,10 +134,10 @@ class PolicyManagerImplTest2 : public ::testing::Test {
   const std::string device_id_2_;
   const std::string application_id_;
   const std::string app_storage_folder_;
-  const std::string preloadet_pt_filename_;
+  const std::string preloaded_pt_filename_;
   const bool in_memory_;
 
-  PolicyManagerImpl* manager_;
+  PolicyManagerImpl* policy_manager_;
   NiceMock<MockPolicyListener> listener_;
   ::policy::StringArray hmi_level_;
   ::policy::StringArray pt_request_types_;
@@ -188,11 +190,38 @@ class PolicyManagerImplTest2 : public ::testing::Test {
   void CheckRpcPermissions(const std::string& rpc_name,
                            const PermitResult& expected_permission);
 
+  void CheckRpcPermissions(const std::string& app_id,
+                           const std::string& rpc_name,
+                           const policy::PermitResult& out_expected_permission);
+
   // To avoid duplicate arrange of test
   void AddSetDeviceData();
 
   // Load Json File and set it as PTU
   void LoadPTUFromJsonFile(const std::string& update_file);
+
+  void EmulatePTAppRevoked(const std::string& ptu_name);
+
+  utils::SharedPtr<policy_table::Table> PreconditionForBasicValidateSnapshot();
+
+  template <typename ParentType, typename Value>
+  bool IsKeyExisted(const ParentType& parent, const Value& value) const {
+    return parent.end() != std::find(parent.begin(), parent.end(), value);
+  }
+
+  template <typename ParentType>
+  bool IsKeyExisted(const ParentType& parent, const std::string& value) const {
+    return parent.end() != parent.find(value);
+  }
+
+  template <typename ParentType, typename KeyType>
+  const KeyType& GetKeyData(const ParentType& parent,
+                            const std::string& key_name) const {
+    DCHECK(IsKeyExisted<ParentType>(parent, key_name));
+    return parent.find(key_name)->second;
+  }
+
+  bool CheckPolicyTimeStamp(const std::string& str) const;
 };
 
 class PolicyManagerImplTest_RequestTypes : public ::testing::Test {
@@ -204,7 +233,7 @@ class PolicyManagerImplTest_RequestTypes : public ::testing::Test {
   const std::string kAppId;
   const std::string kDefaultAppId;
   const std::string app_storage_folder_;
-  const std::string preloadet_pt_filename_;
+  const std::string preloaded_pt_filename_;
 
   utils::SharedPtr<PolicyManagerImpl> policy_manager_impl_sptr_;
   NiceMock<MockPolicyListener> listener_;
@@ -236,6 +265,37 @@ class PolicyManagerImplTest_RequestTypes : public ::testing::Test {
       const policy_table::RequestTypes& received_data);
 
   void TearDown() OVERRIDE;
+};
+
+class PolicyManagerImplTest_ExternalConsent : public PolicyManagerImplTest2 {
+ public:
+  PolicyManagerImplTest_ExternalConsent()
+      : PolicyManagerImplTest2()
+      , group_name_1_("Group1")
+      , group_name_2_("Group2")
+      , group_name_3_("Group3") {}
+
+ protected:
+  void PreconditionExternalConsentPreparePTWithAppGroupsAndConsents();
+
+  void PreconditionExternalConsentPreparePTWithAppPolicy();
+
+  policy_table::Table PreparePTWithGroupsHavingExternalConsent();
+
+  std::string PreparePTUWithNewGroup(const uint32_t type,
+                                     const uint32_t id,
+                                     const std::string& group_name);
+
+  const uint32_t type_1_ = 0;
+  const uint32_t id_1_ = 1;
+  const uint32_t type_2_ = 2;
+  const uint32_t id_2_ = 3;
+  const uint32_t type_3_ = 4;
+  const uint32_t id_3_ = 5;
+
+  const std::string group_name_1_;
+  const std::string group_name_2_;
+  const std::string group_name_3_;
 };
 
 }  // namespace policy_test

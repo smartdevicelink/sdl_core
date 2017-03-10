@@ -2370,7 +2370,7 @@ ExternalConsentEntity::ExternalConsentEntity(const Json::Value* value__)
 
 ExternalConsentEntity::ExternalConsentEntity(const int32_t type,
                                              const int32_t id)
-    : CompositeType(kUninitialized), entity_type(type), entity_id(id) {}
+    : CompositeType(kInitialized), entity_type(type), entity_id(id) {}
 
 Json::Value ExternalConsentEntity::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
@@ -2385,6 +2385,9 @@ bool ExternalConsentEntity::operator==(const ExternalConsentEntity& rhs) const {
 }
 
 bool ExternalConsentEntity::is_valid() const {
+  if (!is_initialized()) {
+    return false;
+  }
   if (!entity_type.is_valid()) {
     return false;
   }

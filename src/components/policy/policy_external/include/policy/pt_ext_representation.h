@@ -327,11 +327,12 @@ class PTExtRepresentation : public virtual PTRepresentation {
   virtual bool RemoveAppConsentForGroup(
       const std::string& policy_app_id,
       const std::string& functional_group_name) const = 0;
+
   /**
-   * @brief Saves eternal user consent settings status
-   * @param status external consent status
-   * @return true if succeeded, otherwise - false
-   */
+ * @brief Saves eternal user consent settings status
+ * @param status external consent status
+ * @return true if succeeded, otherwise - false
+ */
   virtual bool SaveExternalConsentStatus(
       const ExternalConsentStatus& status) const = 0;
 

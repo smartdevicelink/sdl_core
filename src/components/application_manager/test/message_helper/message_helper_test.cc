@@ -46,6 +46,10 @@
 #include "application_manager/state_controller.h"
 #include "application_manager/resumption/resume_ctrl.h"
 
+#ifdef EXTERNAL_PROPRIETARY_MODE
+#include "policy/policy_external/include/policy/policy_types.h"
+#endif
+
 namespace test {
 namespace components {
 namespace application_manager_test {
@@ -970,8 +974,8 @@ TEST_F(MessageHelperTest,
   policy::ExternalConsentStatus external_consent_status;
   const int32_t entity_type_1 = 1;
   const int32_t entity_id_1 = 2;
-  const std::string entity_status_1 = "ON";
-  const std::string entity_status_2 = "OFF";
+  const policy::EntityStatus entity_status_1 = policy::kStatusOn;
+  const policy::EntityStatus entity_status_2 = policy::kStatusOff;
   const int32_t entity_type_2 = 3;
   const int32_t entity_id_2 = 4;
   external_consent_status.insert(policy::ExternalConsentStatusItem(

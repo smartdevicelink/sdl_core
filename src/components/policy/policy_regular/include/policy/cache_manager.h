@@ -222,7 +222,7 @@ class CacheManager : public CacheManagerInterface {
    * @return true in case app contains certain HMI type, false otherwise.
    */
   virtual bool AppHasHMIType(const std::string& application_id,
-                             policy_table::AppHMIType hmi_type) const FINAL;
+                             policy_table::AppHMIType hmi_type) const OVERRIDE;
 
   /**
    * Gets flag updateRequired

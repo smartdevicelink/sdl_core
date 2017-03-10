@@ -36,6 +36,9 @@
 #include <functional>
 #include <ctime>
 #include <cmath>
+#include <utility>
+#include <string>
+#include <vector>
 
 #include "utils/file_system.h"
 #include "json/reader.h"
@@ -52,6 +55,158 @@
 #include "policy/sql_pt_ext_representation.h"
 
 namespace policy_table = rpc::policy_table_interface_base;
+
+namespace {
+
+/**
+ * @brief Looks for ExternalConsent entity in the list of entities
+ * @param entities ExternalConsent entities list
+ * @param entity Entity to look for
+ * @return True if found in the list, otherwise - false
+ */
+bool IsEntityExists(
+    const policy_table::DisallowedByExternalConsentEntities& entities,
+    const policy_table::ExternalConsentEntity& entity) {
+  const policy_table::DisallowedByExternalConsentEntities::const_iterator
+      it_entity = std::find(entities.begin(), entities.end(), entity);
+
+  return entities.end() != it_entity;
+}
+
+/**
+ * @brief Looks for ExternalConsent entity in
+ * disallowed_by_external_consent_entities_on/off sections
+ * of each functional group
+ */
+struct GroupByEntityFinder
+    : public std::unary_function<
+          void,
+          const policy_table::FunctionalGroupings::value_type&> {
+  GroupByEntityFinder(
+      const policy::ExternalConsentStatusItem& external_consent_item,
+      policy::GroupsByExternalConsentStatus& out_groups_by_external_consent)
+      : external_consent_item_(external_consent_item)
+      , out_groups_by_external_consent_(out_groups_by_external_consent) {}
+
+  void operator()(
+      const policy_table::FunctionalGroupings::value_type& group) const {
+    if (!group.second.user_consent_prompt.is_initialized()) {
+      return;
+    }
+
+    policy_table::ExternalConsentEntity entity(
+        external_consent_item_.entity_type_, external_consent_item_.entity_id_);
+    const std::string group_name = group.first;
+
+    if (IsEntityExists(*group.second.disallowed_by_external_consent_entities_on,
+                       entity)) {
+      const bool disallowed_by_external_consent_entities_on_marker = true;
+      out_groups_by_external_consent_[external_consent_item_].push_back(
+          std::make_pair(group_name,
+                         disallowed_by_external_consent_entities_on_marker));
+    }
+
+    if (IsEntityExists(
+            *group.second.disallowed_by_external_consent_entities_off,
+            entity)) {
+      const bool disallowed_by_external_consent_entities_off_marker = false;
+      out_groups_by_external_consent_[external_consent_item_].push_back(
+          std::make_pair(group_name,
+                         disallowed_by_external_consent_entities_off_marker));
+    }
+  }
+
+ private:
+  const policy::ExternalConsentStatusItem& external_consent_item_;
+  policy::GroupsByExternalConsentStatus& out_groups_by_external_consent_;
+};
+
+/**
+ * @brief Maps ExternalConsent status item to the list of functional groups
+ * names specifying
+ * container where item is found. If item is not found it won't be added.
+ */
+struct GroupByExternalConsentItemFinder
+    : public std::unary_function<
+          void,
+          const policy::ExternalConsentStatus::value_type&> {
+  GroupByExternalConsentItemFinder(
+      const policy_table::FunctionalGroupings& groups,
+      policy::GroupsByExternalConsentStatus& out_groups_by_external_consent)
+      : groups_(groups), out_groups_by_css_(out_groups_by_external_consent) {}
+
+  void operator()(const policy::ExternalConsentStatus::value_type&
+                      external_consent_item) const {
+    GroupByEntityFinder group_finder(external_consent_item, out_groups_by_css_);
+    std::for_each(groups_.begin(), groups_.end(), group_finder);
+  }
+
+ private:
+  const policy_table::FunctionalGroupings& groups_;
+  policy::GroupsByExternalConsentStatus& out_groups_by_css_;
+};
+
+/**
+ * @brief Template for getting 'first' of std::pair to use with standard
+ * algorithm below
+ */
+template <typename T1, typename T2>
+const T1& pair_first(const std::pair<T1, T2>& item) {
+  return item.first;
+}
+
+/**
+ * @brief Collects known links device-to-application form
+ * device_data/user_consent_records is any record is present
+ */
+struct LinkCollector
+    : public std::unary_function<void,
+                                 const policy_table::DeviceData::value_type&> {
+  typedef std::vector<policy_table::UserConsentRecords::key_type>
+      ApplicationsIds;
+
+  LinkCollector(std::map<std::string, std::string>& links) : links_(links) {}
+
+  void operator()(const policy_table::DeviceData::value_type& value) {
+    using namespace policy_table;
+
+    device_id_ = value.first;
+
+    ApplicationsIds applications_ids;
+    std::transform(value.second.user_consent_records->begin(),
+                   value.second.user_consent_records->end(),
+                   std::back_inserter(applications_ids),
+                   &pair_first<UserConsentRecords::key_type,
+                               UserConsentRecords::mapped_type>);
+
+    std::for_each(applications_ids.begin(),
+                  applications_ids.end(),
+                  std::bind1st(std::mem_fun(&LinkCollector::FillLinks), this));
+  }
+
+ private:
+  void FillLinks(const ApplicationsIds::value_type app_id) const {
+    links_.insert(std::make_pair(device_id_, app_id));
+  }
+
+  std::string device_id_;
+  std::map<std::string, std::string>& links_;
+};
+
+/**
+ * @brief Returns group consent record constructed from input group permissions
+ */
+struct ExternalConsentConsentGroupAppender
+    : public std::unary_function<policy_table::ConsentGroups,
+                                 const policy::FunctionalGroupPermission&> {
+  policy_table::ConsentGroups::value_type operator()(
+      const policy::FunctionalGroupPermission& value) const {
+    return std::make_pair(value.group_name,
+                          rpc::Boolean(value.state == policy::kGroupAllowed));
+  }
+};
+
+}  // namespace
 
 namespace policy {
 
@@ -2173,10 +2328,15 @@ void CacheManager::SetDecryptedCertificate(const std::string& certificate) {
   Backup();
 }
 
-bool CacheManager::SaveExternalConsentStatus(
+bool CacheManager::SetExternalConsentStatus(
     const ExternalConsentStatus& status) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock auto_lock(cache_lock_);
+  if (status.empty()) {
+    LOG4CXX_INFO(logger_, "No ExternalConsent status update.");
+    return false;
+  }
+
   return ex_backup_->SaveExternalConsentStatus(status);
 }
 
@@ -2184,6 +2344,57 @@ ExternalConsentStatus CacheManager::GetExternalConsentStatus() {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock auto_lock(cache_lock_);
   return ex_backup_->GetExternalConsentStatus();
+}
+
+GroupsByExternalConsentStatus CacheManager::GetGroupsWithSameEntities(
+    const ExternalConsentStatus& status) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  CACHE_MANAGER_CHECK(policy::GroupsByExternalConsentStatus());
+  sync_primitives::AutoLock auto_lock(cache_lock_);
+  GroupsByExternalConsentStatus groups_by_external_consent;
+
+  GroupByExternalConsentItemFinder groups_by_external_consent_finder(
+      pt_->policy_table.functional_groupings, groups_by_external_consent);
+  std::for_each(
+      status.begin(), status.end(), groups_by_external_consent_finder);
+
+  return groups_by_external_consent;
+}
+
+std::map<std::string, std::string> CacheManager::GetKnownLinksFromPT() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  CACHE_MANAGER_CHECK((std::map<std::string, std::string>()));
+  std::map<std::string, std::string> links;
+  sync_primitives::AutoLock auto_lock(cache_lock_);
+
+  LinkCollector collector(links);
+  std::for_each(pt_->policy_table.device_data->begin(),
+                pt_->policy_table.device_data->end(),
+                collector);
+
+  return links;
+}
+
+void CacheManager::SetExternalConsentForApp(
+    const PermissionConsent& permissions) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  CACHE_MANAGER_CHECK_VOID();
+  sync_primitives::AutoLock auto_lock(cache_lock_);
+  policy_table::ConsentGroups& external_consent_groups =
+      *(*(*pt_->policy_table.device_data)[permissions.device_id]
+             .user_consent_records)[permissions.policy_app_id]
+           .external_consent_status_groups;
+
+  external_consent_groups.clear();
+
+  ExternalConsentConsentGroupAppender appender;
+  std::transform(
+      permissions.group_permissions.begin(),
+      permissions.group_permissions.end(),
+      std::inserter(external_consent_groups, external_consent_groups.begin()),
+      appender);
+
+  Backup();
 }
 
 bool CacheManager::MergePreloadPT(const std::string& file_name) {

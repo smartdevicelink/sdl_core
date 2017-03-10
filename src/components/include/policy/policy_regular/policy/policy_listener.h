@@ -52,12 +52,6 @@ class PolicyListener {
                                     const Permissions& permissions) = 0;
   virtual void OnPendingPermissionChange(const std::string& policy_app_id) = 0;
   virtual void OnUpdateStatusChanged(const std::string&) = 0;
-  /**
-   * Gets device ID
-   * @param policy_app_id
-   * @return device ID
-   * @deprecated see std::vector<std::string> GetDevicesIds(const std::string&)
-   */
   virtual std::string OnCurrentDeviceIdUpdateRequired(
       const std::string& policy_app_id) = 0;
   virtual void OnSystemInfoUpdateRequired() = 0;
@@ -67,12 +61,12 @@ class PolicyListener {
       std::map<std::string, StringArray> app_hmi_types) = 0;
 
   /**
-   * @brief CanUpdate allows to find active application
-   * and check whether related device consented.
-   *
-   * @return true if there are at least one application has been registered
-   * with consented device.
-   */
+ * @brief CanUpdate allows to find active application
+ * and check whether related device consented.
+ *
+ * @return true if there are at least one application has been registered
+ * with consented device.
+ */
   virtual bool CanUpdate() = 0;
 
   /**
@@ -81,6 +75,9 @@ class PolicyListener {
    *
    * @param pt_string the snapshot
    *
+   * @param retry_seconds retry sequence timeouts.
+   *
+   * @param timeout_exceed timeout.
    */
   virtual void OnSnapshotCreated(const BinaryMessage& pt_string) = 0;
 
@@ -92,6 +89,15 @@ class PolicyListener {
    */
   virtual void OnDeviceConsentChanged(const std::string& device_id,
                                       bool is_allowed) = 0;
+
+  /**
+   * @brief Sends OnAppPermissionsChanged notification to HMI
+   * @param permissions contains parameter for OnAppPermisionChanged
+   * @param policy_app_id contains policy application id
+   */
+  virtual void SendOnAppPermissionsChanged(
+      const AppPermissions& permissions,
+      const std::string& policy_app_id) const = 0;
 
   /**
    * @brief GetAvailableApps allows to obtain list of registered applications.
@@ -162,4 +168,4 @@ class PolicyListener {
 #endif  // SDL_REMOTE_CONTROL
 };
 }  //  namespace policy
-#endif  //  SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_POLICY_LISTENER_H_
+#endif  // SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_POLICY_LISTENER_H_

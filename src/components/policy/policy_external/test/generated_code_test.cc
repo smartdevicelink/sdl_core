@@ -193,35 +193,34 @@ TEST(PolicyGeneratedCodeTest,
   EXPECT_TRUE(consent_records.is_valid());
 }
 
-TEST(PolicyGeneratedCodeTest, TestCCSEntities_PT_Validation) {
+TEST(PolicyGeneratedCodeTest,
+     ExternalConsentEntity_ConstructionValidationTest) {
   using namespace rpc::policy_table_interface_base;
-  rpc::Optional<DisallowedByExternalConsentEntities>
-      disallowed_by_external_consent_entities_on;
 
-  // PT_SNAPSHOT, PT_UPDATE, PT_SNAPSHOT do not care of CCS entities since their
-  // type is 'optional'
-  disallowed_by_external_consent_entities_on.SetPolicyTableType(PT_UPDATE);
-  EXPECT_TRUE(disallowed_by_external_consent_entities_on.is_valid());
+  ExternalConsentEntity empty_entity;
+  EXPECT_FALSE(empty_entity.is_valid());
 
-  disallowed_by_external_consent_entities_on.SetPolicyTableType(PT_PRELOADED);
-  EXPECT_TRUE(disallowed_by_external_consent_entities_on.is_valid());
+  const std::string corrent_entity_type_field = "entityType";
+  const std::string correct_entity_id_field = "entityID";
 
-  disallowed_by_external_consent_entities_on.SetPolicyTableType(PT_SNAPSHOT);
-  EXPECT_TRUE(disallowed_by_external_consent_entities_on.is_valid());
+  Json::Value correct_json_entity;
+  correct_json_entity[corrent_entity_type_field] = 1;
+  correct_json_entity[correct_entity_id_field] = 2;
 
-  disallowed_by_external_consent_entities_on->push_back(
-      ExternalConsentEntity(0, 0));
-  disallowed_by_external_consent_entities_on->push_back(
-      ExternalConsentEntity(1, 1));
+  ExternalConsentEntity entity_from_correct_json(&correct_json_entity);
+  EXPECT_TRUE(entity_from_correct_json.is_valid());
 
-  disallowed_by_external_consent_entities_on.SetPolicyTableType(PT_UPDATE);
-  EXPECT_TRUE(disallowed_by_external_consent_entities_on.is_valid());
+  const std::string wrong_entity_id_field = "entityId";
 
-  disallowed_by_external_consent_entities_on.SetPolicyTableType(PT_PRELOADED);
-  EXPECT_TRUE(disallowed_by_external_consent_entities_on.is_valid());
+  Json::Value wrong_json_entity;
+  wrong_json_entity[corrent_entity_type_field] = 1;
+  wrong_json_entity[wrong_entity_id_field] = 2;
 
-  disallowed_by_external_consent_entities_on.SetPolicyTableType(PT_SNAPSHOT);
-  EXPECT_TRUE(disallowed_by_external_consent_entities_on.is_valid());
+  ExternalConsentEntity entity_from_wrong_json(&wrong_json_entity);
+  EXPECT_FALSE(entity_from_wrong_json.is_valid());
+
+  ExternalConsentEntity entity_from_valid_ints(1, 2);
+  EXPECT_TRUE(entity_from_valid_ints.is_valid());
 }
 
 }  // namespace policy_test

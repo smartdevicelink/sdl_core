@@ -1260,7 +1260,7 @@
   <element name="QUEUE" />
 </enum>
 
-<enum name="SteeringWheelLocation"> 
+<enum name="SteeringWheelLocation">
   <description>Describes the location of the Steering Wheel.</description>
   <element name="LEFT" />
   <element name="RIGHT" />
@@ -3126,7 +3126,7 @@
 
 <interface name="UI" version="1.2" date="2017-01-25">
   <function name="OnSeekMediaClockTimer" functionID="OnSeekMediaClockTimerID" messagetype="notification">
-   <description>Callback for the seek media clock timer notification. Notification is triggered when the user selects a position and releases the mediaclock timer or when the user selects a position and holds for a full 2 second period. System will automatically the media clock timer position based on the seek notification location.</description> 
+   <description>Callback for the seek media clock timer notification. Notification is triggered when the user selects a position and releases the mediaclock timer or when the user selects a position and holds for a full 2 second period. System will automatically the media clock timer position based on the seek notification location.</description>
    <param name="seekTime" type="Common.TimeFormat" mandatory="true">
     <description>See StartTime.</description>
    </param>
@@ -4583,8 +4583,8 @@
       <param name="appID" type="Integer" mandatory="false">
           <description>Information about the application. See HMIApplication. If omitted - allow/disallow all applications </description>
       </param>
-      <param name="consentedFunctions" type="Common.PermissionItem" mandatory="true" array="true" minsize="1" maxsize="100">
-      </param>
+      <param name="consentedFunctions" type="Common.PermissionItem" mandatory="false" array="true" minsize="1" maxsize="100"/>
+      <param name="externalConsentStatus" type="Common.ExternalConsentStatus" mandatory="false" array="true" minsize="1" maxsize="100"/>
       <param name="source" type="Common.ConsentSource" mandatory="true"/>
      </function>
 

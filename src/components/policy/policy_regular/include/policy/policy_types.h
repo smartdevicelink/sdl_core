@@ -38,6 +38,7 @@
 #include <vector>
 #include <map>
 #include <set>
+#include <utility>
 #include "utils/shared_ptr.h"
 #include "utils/helpers.h"
 namespace policy {
@@ -57,6 +58,7 @@ const std::string kPreDataConsentId = "pre_DataConsent";
 const std::string kDefaultId = "default";
 const std::string kPreConsentPassengersRC = "pre_consent_passengersRC";
 const std::string kDeviceId = "device";
+const std::string kPrimary = "rc_primaryDevice";
 
 /*
  *@brief Policy Services specifies Users of Updates
@@ -366,6 +368,101 @@ struct MetaInfo {
 };
 
 /**
+ * @brief Represents ExternalConsent entity status received from the system
+ */
+enum EntityStatus { kStatusOn, kStatusOff };
+
+/**
+ * @brief The ExternalConsentStatusItem struct represents customer connectivity
+ * settings
+ * item
+ */
+struct ExternalConsentStatusItem {
+  ExternalConsentStatusItem(const uint32_t type,
+                            const uint32_t id,
+                            const EntityStatus status)
+      : entity_type_(type), entity_id_(id), status_(status) {}
+
+  bool operator==(const ExternalConsentStatusItem& rhs) const {
+    return (entity_type_ == rhs.entity_type_) && (entity_id_ == rhs.entity_id_);
+  }
+
+  bool operator<(const ExternalConsentStatusItem& rhs) const {
+    return (entity_type_ < rhs.entity_type_) || (entity_id_ < rhs.entity_id_);
+  }
+
+  const uint32_t entity_type_;
+  const uint32_t entity_id_;
+  const EntityStatus status_;
+};
+
+struct ExternalConsentStatusItemSorter {
+  bool operator()(const ExternalConsentStatusItem& lhs,
+                  const ExternalConsentStatusItem& rhs) const {
+    return (lhs.entity_type_ < rhs.entity_type_) ||
+           (lhs.entity_id_ < rhs.entity_id_);
+  }
+};
+
+/**
+ * @brief Customer connectivity settings status
+ */
+typedef std::set<ExternalConsentStatusItem, ExternalConsentStatusItemSorter>
+    ExternalConsentStatus;
+
+/**
+ * @brief GroupsByExternalConsentStatus represents list of group names, which
+ * has mapped ExternalConsent item (entity type + entity id) in their
+ * disallowed_by_external_consent_ containers. Boolean value represents
+ * whether ExternalConsent item has been found in
+ * disallowed_by_external_consent_ON or in disallowed_by_external_consent_OFF
+ * container
+ */
+typedef std::map<ExternalConsentStatusItem,
+                 std::vector<std::pair<std::string, bool> > >
+    GroupsByExternalConsentStatus;
+
+/**
+ * @brief GroupsNames represents groups names from policy table -> functional
+ * groupings groups container
+ */
+typedef std::set<std::string> GroupsNames;
+
+typedef std::string ApplicationId;
+typedef std::string DeviceId;
+
+/**
+ * @brief Link of device to application
+ */
+typedef std::pair<policy::DeviceId, policy::ApplicationId> Link;
+
+/**
+ * @brief Collection of links
+ */
+typedef std::set<Link> ApplicationsLinks;
+
+/**
+ * @brief Represents possible result codes for policy table update check
+ */
+enum PermissionsCheckResult {
+  RESULT_NO_CHANGES,
+  RESULT_APP_REVOKED,
+  RESULT_NICKNAME_MISMATCH,
+  RESULT_PERMISSIONS_REVOKED,
+  RESULT_CONSENT_NEEDED,
+  RESULT_CONSENT_NOT_REQIURED,
+  RESULT_PERMISSIONS_REVOKED_AND_CONSENT_NEEDED,
+  RESULT_REQUEST_TYPE_CHANGED
+};
+
+/**
+ * @brief Per application collection of results done by checking policy table
+ * update
+ */
+typedef std::set<std::pair<std::string, PermissionsCheckResult> >
+    CheckAppPolicyResults;
+
+/**
  * @brief The index of the application, the index of its URL
  * and the policy application id from the Endpoints vector
  * that will be sent on the next OnSystemRequest retry sequence
@@ -384,39 +481,6 @@ struct RetrySequenceURL {
  * from the Endpoints vector
  */
 typedef std::pair<uint32_t, uint32_t> AppIdURL;
-
-/**
- * @brief The ExternalConsentStatusItem struct represents external user consent
- * settings item
- */
-struct ExternalConsentStatusItem {
-  ExternalConsentStatusItem(const uint32_t type,
-                            const uint32_t id,
-                            const std::string& status)
-      : entity_type(type), entity_id(id), entity_status(status) {}
-
-  bool operator==(const ExternalConsentStatusItem& rhs) const {
-    return (entity_type == rhs.entity_type) && (entity_id == rhs.entity_id);
-  }
-
-  const uint32_t entity_type;
-  const uint32_t entity_id;
-  const std::string entity_status;
-};
-
-struct ExternalConsentStatusItemComparator {
-  bool operator()(const ExternalConsentStatusItem& lhs,
-                  const ExternalConsentStatusItem& rhs) const {
-    return (lhs.entity_type < rhs.entity_type) ||
-           (lhs.entity_id < rhs.entity_id);
-  }
-};
-
-/**
- * @brief Customer connectivity settings status
- */
-typedef std::set<ExternalConsentStatusItem, ExternalConsentStatusItemComparator>
-    ExternalConsentStatus;
 
 }  //  namespace policy
 

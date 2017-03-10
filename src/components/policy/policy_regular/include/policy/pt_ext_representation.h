@@ -327,6 +327,9 @@ class PTExtRepresentation : public virtual PTRepresentation {
   virtual bool RemoveAppConsentForGroup(
       const std::string& policy_app_id,
       const std::string& functional_group_name) const = 0;
+  virtual bool SaveExternalConsentStatus(
+      const ExternalConsentStatus& status) const = 0;
+  virtual ExternalConsentStatus GetExternalConsentStatus() const = 0;
 };
 }  //  namespace policy
 
