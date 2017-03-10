@@ -105,7 +105,7 @@ class QueryAppsDataValidator {
   /**
    * \brief Function checks, if language json array has 'ttsName' parameter omitted.
    * \param languages SmartObject containing languages json array
-   * \return true of parameter was omitted, false otherwise
+   * \return true if parameter was omitted, false otherwise
   */
   bool CheckIfHasOmittedParam(const smart_objects::SmartObject& languages) {
     const size_t languages_array_size = languages.length();
@@ -132,8 +132,7 @@ class QueryAppsDataValidator {
   /**
    * \brief Function writes 'app_id' value to ttsName parameter.
    * \param languages SmartObject containing languages json array
-   * \param app_id string containt application id
-   * \return true of parameter was omitted, false otherwise
+   * \param app_id string containing application id
   */
   void WriteAppIdToOmittedParam(smart_objects::SmartObject& languages,
                                 const std::string& app_id) {
@@ -144,7 +143,6 @@ class QueryAppsDataValidator {
       const std::string language_name = (*language.map_begin()).first;
       if (!language[language_name].keyExists(json::ttsName)) {
         language[language_name][json::ttsName] = app_id;
-        language.asString();
         LOG4CXX_DEBUG(logger_, "app_id written instead of ttsName");
       }
     }
