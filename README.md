@@ -20,6 +20,7 @@ Pull Requests Welcome!
   * [Transport Manager Programming Guide](https://smartdevicelink.com/en/guides/core/transport-manager-programming/)
   * [Software Detailed Design](https://app.box.com/s/ohgrvemtx39f8hfea1ab676xxrzvyx1y)
   * [Integration Guidelines](https://smartdevicelink.com/en/docs/hmi/master/overview/)
+  * [Evolution Proposals versus Issues](https://github.com/smartdevicelink/sdl_evolution/blob/master/proposals_versus_issues.md)
 
 ## SDL Core
 
