@@ -340,12 +340,12 @@ bool SetGlobalPropertiesRequest::PrepareUIRequestDefaultVRHelpData(
 
   LOG4CXX_DEBUG(logger_, "Generate default VRHelp data");
   const DataAccessor<CommandsMap> accessor = app->commands_map();
-  const CommandsMap& cmdMap = accessor.GetData();
+  const CommandsMap& cmd_map = accessor.GetData();
 
   int32_t index = 0;
   smart_objects::SmartObject vr_help_items;
-  for (CommandsMap::const_iterator command_it = cmdMap.begin();
-       cmdMap.end() != command_it;
+  for (CommandsMap::const_iterator command_it = cmd_map.begin();
+       cmd_map.end() != command_it;
        ++command_it) {
     const smart_objects::SmartObject& command = *command_it->second;
     if (!command.keyExists(strings::vr_commands)) {
@@ -358,13 +358,24 @@ bool SetGlobalPropertiesRequest::PrepareUIRequestDefaultVRHelpData(
         (*command_it->second)[strings::vr_commands][0];
   }
 
-  app->set_vr_help_title(smart_objects::SmartObject(app->name()));
-
-  out_params[strings::vr_help_title] = (*app->vr_help_title());
-  if (vr_help_items.length() > 0) {
+  if (!vr_help_items.empty()) {
     app->set_vr_help(vr_help_items);
-    out_params[strings::vr_help] = (*app->vr_help());
+  } else {
+    // No one AddCommand happened before, so get vrHelp from first vrSynonym
+    // that was taken at registration
+    LOG4CXX_DEBUG(logger_, "Create vrHelp from vrSynonyms");
+    if (app->vr_synonyms() && !app->vr_synonyms()->empty()) {
+      app->set_vr_help(app->vr_synonyms()->getElement(0));
+    } else {
+      LOG4CXX_ERROR(logger_, "Can't create default vrHelp");
+      return false;
+    }
   }
+
+  app->set_vr_help_title(smart_objects::SmartObject(app->name()));
+  out_params[strings::vr_help_title] = (*app->vr_help_title());
+  out_params[strings::vr_help] = (*app->vr_help());
+
   return true;
 }
 
