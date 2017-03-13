@@ -2702,9 +2702,7 @@ void ApplicationManagerImpl::Handle(const impl::MessageToMobile message) {
       close_session = true;
     }
   }
-#ifdef SDL_REMOTE_CONTROL
   protocol_handler_->SendMessageToMobileApp(rawMessage, is_final);
-#endif
   LOG4CXX_INFO(logger_, "Message for mobile given away");
 
   if (close_session) {
