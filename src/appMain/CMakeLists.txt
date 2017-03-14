@@ -1,4 +1,4 @@
-# Copyright (c) 2014, Ford Motor Company
+# Copyright (c) 2016, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,12 +28,44 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-IF (HMIADAPTER STREQUAL "messagebroker")
-set (BROKER_LIBRARIES
-  MessageBrokerClient
-  MessageBrokerServer
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
+
+find_package(SDLOpenSSL REQUIRED)
+
+include_directories(
+  ${COMPONENTS_DIR}/protocol_handler/include
+  ${COMPONENTS_DIR}/application_manager/include
+  ${COMPONENTS_DIR}/formatters/include
+  ${COMPONENTS_DIR}/transport_manager/include
+  ${COMPONENTS_DIR}/security_manager/include
+  ${COMPONENTS_DIR}/security_manager/include
+  ${COMPONENTS_DIR}/config_profile/include
+  ${COMPONENTS_DIR}/utils/include
+  ${COMPONENTS_DIR}/connection_handler/include
+  ${COMPONENTS_DIR}/hmi_message_handler/include
+  ${COMPONENTS_DIR}/request_watchdog/include
+  ${COMPONENTS_DIR}/smart_objects/include
+  ${COMPONENTS_DIR}/media_manager/include
+  ${COMPONENTS_DIR}/telemetry_monitor/include
+  ${POLICY_PATH}/include/
+  ${POLICY_GLOBAL_INCLUDE_PATH}/
+  ${COMPONENTS_DIR}/resumption/include
+  ${COMPONENTS_DIR}/dbus/include
+  ${CMAKE_BINARY_DIR}/src/components
+  ${JSONCPP_INCLUDE_DIRECTORY}
+  ${LOG4CXX_INCLUDE_DIRECTORY}
+  ${OPENSSL_INCLUDE_DIRECTORY}
+  ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
 )
-ENDIF ()
+
+collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}")
+
+if (HMIADAPTER STREQUAL "messagebroker")
+  set (BROKER_LIBRARIES
+    message_broker_client
+    message_broker_server
+  )
+endif()
 
 cmake_policy(PUSH)
 # make link_directories() treat paths relative to the source dir
@@ -43,18 +75,18 @@ link_directories(${LIBUSB_LIBS_DIRECTORY})
 cmake_policy(POP)
 
 if (EXTENDED_MEDIA_MODE)
-set(default_media_inc
-${GSTREAMER_gst_INCLUDE_DIR}
-${GSTREAMER_gstconfig_INCLUDE_DIR}
-)
+  set(default_media_inc
+    ${GSTREAMER_gst_INCLUDE_DIR}
+    ${GSTREAMER_gstconfig_INCLUDE_DIR}
+  )
 else(EXTENDED_MEDIA_MODE)
-set(default_media_inc
-)
+  set(default_media_inc)
 endif()
 
 if (TELEMETRY_MONITOR)
-    set(TELEMETRY_MONITOR_LIB
-        TelemetryMonitor)
+  set(TELEMETRY_MONITOR_LIB
+    TelemetryMonitor
+  )
 endif()
 
 set(LIBRARIES
@@ -73,13 +105,19 @@ set(LIBRARIES
   TransportManager
   ${SecurityManagerLibrary}
   HMIMessageHandler
-  MessageBroker
+  message_broker
   ${BROKER_LIBRARIES}
   Utils
   jsoncpp
   ConfigProfile
   Resumption
 )
+if(REMOTE_CONTROL)
+    SET (LIBRARIES
+      ${LIBRARIES}
+      FunctionalModule
+    )
+endif(REMOTE_CONTROL)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   list(APPEND LIBRARIES pthread)
@@ -87,12 +125,15 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 endif()
 
 if (BUILD_BT_SUPPORT)
-  list(APPEND LIBRARIES bluetooth)
+  if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    list(APPEND LIBRARIES bluetooth)
+  endif()
 endif()
+
 if (BUILD_USB_SUPPORT)
-if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-  list(APPEND LIBRARIES Libusb-1.0.16)
-endif()
+  if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    list(APPEND LIBRARIES Libusb-1.0.16)
+  endif()
 endif()
 
 if(ENABLE_LOG)
@@ -107,6 +148,10 @@ include_directories (
   ${COMPONENTS_DIR}/protocol_handler/include/
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${COMPONENTS_DIR}/application_manager/include
+
+  ${COMPONENTS_DIR}/can_cooperation/include
+  ${COMPONENTS_DIR}/rpc_base/include
+
   ${COMPONENTS_DIR}/formatters/include
   ${COMPONENTS_DIR}/transport_manager/include
   ${COMPONENTS_DIR}/security_manager/include
@@ -120,7 +165,10 @@ include_directories (
   ${COMPONENTS_DIR}/smart_objects/include/
   ${COMPONENTS_DIR}/media_manager/include/
   ${COMPONENTS_DIR}/telemetry_monitor/include
-  ${COMPONENTS_DIR}/policy/include/
+  ${COMPONENTS_DIR}/functional_module/include/
+  ${COMPONENTS_DIR}/time_tester/include
+  ${POLICY_PATH}/include/
+  ${POLICY_GLOBAL_INCLUDE_PATH}/
   ${COMPONENTS_DIR}/resumption/include/
   ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
   ${ENCRYPTION_INCLUDE_DIRECTORY}
@@ -147,6 +195,7 @@ endif()
 add_executable(${PROJECT} ${SOURCES})
 target_link_libraries(${PROJECT} ${LIBRARIES})
 
+add_dependencies(${PROJECT} Policy)
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/log4cxx.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/audio.8bit.wav DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
@@ -201,18 +250,27 @@ endif ()
 
 # Install rules
 install(TARGETS ${PROJECT} DESTINATION bin)
+
 install(
   FILES log4cxx.properties audio.8bit.wav test.txt smartDeviceLink.ini
-    hmi_capabilities.json sdl_preloaded_pt.json
+    hmi_capabilities.json
     ${CMAKE_SOURCE_DIR}/mycert.pem ${CMAKE_SOURCE_DIR}/mykey.pem
   DESTINATION bin
 )
+if (REMOTE_CONTROL)
+  install(
+    FILES "${CMAKE_SOURCE_DIR}/src/components/can_cooperation/reverse_sdl_pt.json"
+    DESTINATION ${CMAKE_BINARY_DIR}/bin
+    RENAME sdl_preloaded_pt.json
+  )
+else ()
+  install(
+    FILES sdl_preloaded_pt.json
+    DESTINATION bin
+  )
+endif ()
 
-if (${WEB_HMI})
-  if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    install( DIRECTORY ${CMAKE_HOME_DIRECTORY}/src/components/HMI/ DESTINATION bin/HMI)
-  endif ()
-elseif (${QT_HMI})
+if (${QT_HMI})
   if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
     install(FILES start-qml.sh DESTINATION bin
       PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ

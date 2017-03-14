@@ -84,4 +84,4 @@ class ClientConnectionListener {
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif /* CLIENT_CONNECTION_LISTENER_H_ */
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_CLIENT_CONNECTION_LISTENER_H_

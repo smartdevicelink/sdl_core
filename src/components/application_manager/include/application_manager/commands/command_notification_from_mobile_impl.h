@@ -34,12 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_COMMAND_NOTIFICATION_FROM_MOBILE_IMPL_H_
 
 #include "application_manager/commands/command_impl.h"
-
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
-class SmartObject;
-}
-}
+#include "smart_objects/smart_object.h"
 
 namespace application_manager {
 

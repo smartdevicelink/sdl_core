@@ -36,8 +36,8 @@
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager_settings.h"
 #include "interfaces/MOBILE_API.h"
-#include "sql_database.h"
-#include "sql_query.h"
+#include "utils/sqlite_wrapper/sql_database.h"
+#include "utils/sqlite_wrapper/sql_query.h"
 #include "utils/make_shared.h"
 #include "utils/file_system.h"
 #include "application_manager/resumption_data_test.h"
@@ -346,7 +346,7 @@ void ResumptionDataDBTest::CheckCharacters(int64_t global_properties_key) {
 }
 
 void ResumptionDataDBTest::CheckSubmenuData() {
-  utils::dbms::SQLQuery select_submenu(test_db());
+  ::utils::dbms::SQLQuery select_submenu(test_db());
 
   EXPECT_TRUE(select_submenu.Prepare(kSelectCountSubMenu));
   BindId(select_submenu);
@@ -357,13 +357,23 @@ void ResumptionDataDBTest::CheckSubmenuData() {
   BindId(select_submenu);
   int i = 10;
   while (select_submenu.Next()) {
-    uint32_t test_id = (*test_submenu_map[i])[am::strings::menu_id].asUInt();
-    std::string name =
+    const uint32_t test_id =
+        (*test_submenu_map[i])[am::strings::menu_id].asUInt();
+    const std::string name =
         (*test_submenu_map[i])[am::strings::menu_name].asString();
-    int position = (*test_submenu_map[i])[am::strings::position].asInt();
+
+    const int position = (*test_submenu_map[i])[am::strings::position].asInt();
+    const std::string image_value =
+        (*test_submenu_map[i])[am::strings::sub_menu_icon][am::strings::value]
+            .asString();
+    const int image_type =
+        (*test_submenu_map[i])[am::strings::sub_menu_icon]
+                              [am::strings::image_type].asInt();
     EXPECT_EQ(test_id, select_submenu.GetUInteger(0));
     EXPECT_EQ(name, select_submenu.GetString(1));
     EXPECT_EQ(position, select_submenu.GetInteger(2));
+    EXPECT_EQ(image_value, select_submenu.GetString(3));
+    EXPECT_EQ(image_type, select_submenu.GetInteger(4));
     i++;
   }
 }
@@ -848,7 +858,7 @@ TEST_F(ResumptionDataDBTest, DropAppResumptionData) {
 
   EXPECT_TRUE(res_db()->DropAppDataResumption(kMacAddress_, policy_app_id_));
 
-  am::smart_objects::SmartObject app;
+  smart_objects::SmartObject app;
   EXPECT_TRUE(res_db()->GetSavedApplication(policy_app_id_, kMacAddress_, app));
 
   EXPECT_TRUE(app.keyExists(am::strings::application_commands) &&

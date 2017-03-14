@@ -34,6 +34,7 @@
 #include <string>
 
 #include "application_manager/commands/mobile/delete_sub_menu_request.h"
+#include "application_manager/commands/mobile/delete_sub_menu_response.h"
 
 #include "gtest/gtest.h"
 #include "application_manager/commands/command_request_test.h"
@@ -47,34 +48,80 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace delete_sub_menu_request {
 
 using ::testing::_;
 using ::testing::Mock;
 using ::testing::Return;
 using ::testing::ReturnRef;
+using ::testing::InSequence;
 namespace am = ::application_manager;
-using am::commands::DeleteSubMenuRequest;
 using am::commands::MessageSharedPtr;
 using am::event_engine::Event;
 using am::MockHmiInterfaces;
 using am::MockMessageHelper;
 
-typedef SharedPtr<DeleteSubMenuRequest> AddSubMenuPtr;
+using am::commands::DeleteSubMenuRequest;
+using am::commands::DeleteSubMenuResponse;
+
+typedef SharedPtr<DeleteSubMenuRequest> DeleteSubMenuRequestPtr;
+typedef SharedPtr<DeleteSubMenuResponse> DeleteSubMenuResponsePtr;
+
+MATCHER_P(CheckMessageResultCode, result_code, "") {
+  return (*arg)[am::strings::msg_params][am::strings::result_code].asInt() ==
+         result_code;
+}
+
+MATCHER_P(CheckMessageConnectionKey, connection_key, "") {
+  return (*arg)[am::strings::msg_params][am::strings::connection_key].asInt() ==
+         connection_key;
+}
+
+ACTION_P(DeleteCommand, commands_map) {
+  am::CommandsMap::iterator it = (*commands_map).begin();
+  if ((*commands_map).end() != it) {
+    (*commands_map).erase(it);
+  }
+}
 
 namespace {
 const uint32_t kConnectionKey = 2u;
+const uint32_t kCorrelationId = 10u;
+const uint32_t kMenuId = 100u;
+const uint32_t kGrammarId = 101u;
+const int32_t kCmdId = 102;
 }  // namespace
 
 class DeleteSubMenuRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
   DeleteSubMenuRequestTest()
-      : mock_message_helper_(*MockMessageHelper::message_helper_mock()) {}
+      : accessor_(commands_map_, commands_lock_)
+      , mock_message_helper_(*MockMessageHelper::message_helper_mock())
+      , message_(CreateMessage())
+      , command_(CreateCommand<DeleteSubMenuRequest>(message_))
+      , app_(CreateMockApp()) {
+    Mock::VerifyAndClearExpectations(&mock_message_helper_);
+  }
+
+  ~DeleteSubMenuRequestTest() {
+    Mock::VerifyAndClearExpectations(&mock_message_helper_);
+  }
+
+  am::CommandsMap commands_map_;
+  mutable sync_primitives::Lock commands_lock_;
+  DataAccessor<am::CommandsMap> accessor_;
+
   MockMessageHelper& mock_message_helper_;
-  sync_primitives::Lock lock_;
+  MessageSharedPtr message_;
+  DeleteSubMenuRequestPtr command_;
+  MockAppPtr app_;
 };
 
-TEST_F(DeleteSubMenuRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
+class DeleteSubMenuResponseTest
+    : public CommandsTest<CommandsTestMocks::kIsNice> {};
+
+TEST_F(DeleteSubMenuRequestTest, DISABLED_OnEvent_UI_UNSUPPORTED_RESOURCE) {
   MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
   (*msg)[am::strings::params][am::strings::connection_key] = kConnectionKey;
   (*msg)[am::strings::msg_params][am::strings::menu_id] = 10u;
@@ -109,7 +156,8 @@ TEST_F(DeleteSubMenuRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
   am::CommandsMap commands_map;
   smart_objects::SmartObject commands_msg(smart_objects::SmartType_Map);
   commands_map.insert(std::pair<uint32_t, SmartObject*>(1u, &commands_msg));
-  DataAccessor<am::CommandsMap> accessor(commands_map, lock_);
+  sync_primitives::Lock lock;
+  DataAccessor<am::CommandsMap> accessor(commands_map, lock);
   EXPECT_CALL(*mock_app, commands_map())
       .WillOnce(Return(accessor))
       .WillOnce(Return(accessor));
@@ -136,9 +184,170 @@ TEST_F(DeleteSubMenuRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
             .asString()
             .empty());
   }
-  Mock::VerifyAndClearExpectations(&mock_message_helper_);
 }
 
+TEST_F(DeleteSubMenuRequestTest, Run_InvalidApp_UNSUCCESS) {
+  MockAppPtr invalid_app;
+  EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(invalid_app));
+  EXPECT_CALL(
+      app_mngr_,
+      ManageMobileCommand(CheckMessageResultCode(
+                              mobile_apis::Result::APPLICATION_NOT_REGISTERED),
+                          am::commands::Command::CommandOrigin::ORIGIN_SDL));
+  EXPECT_CALL(*app_, FindSubMenu(_)).Times(0);
+  command_->Run();
+}
+
+TEST_F(DeleteSubMenuRequestTest, Run_FindSubMenuFalse_UNSUCCESS) {
+  (*message_)[am::strings::msg_params][am::strings::menu_id] = kMenuId;
+  (*message_)[am::strings::params][am::strings::connection_key] =
+      kConnectionKey;
+
+  smart_objects::SmartObject* invalid_sub_menu = NULL;
+  EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app_));
+  EXPECT_CALL(*app_, FindSubMenu(kMenuId)).WillOnce(Return(invalid_sub_menu));
+
+  EXPECT_CALL(app_mngr_,
+              ManageMobileCommand(
+                  CheckMessageResultCode(mobile_apis::Result::INVALID_ID),
+                  am::commands::Command::CommandOrigin::ORIGIN_SDL));
+  EXPECT_CALL(*app_, app_id()).Times(0);
+  command_->Run();
+}
+
+TEST_F(DeleteSubMenuRequestTest, Run_SendHMIRequest_SUCCESS) {
+  (*message_)[am::strings::msg_params][am::strings::menu_id] = kMenuId;
+  (*message_)[am::strings::params][am::strings::connection_key] =
+      kConnectionKey;
+
+  smart_objects::SmartObject* sub_menu =
+      &((*message_)[am::strings::msg_params][am::strings::menu_id]);
+  EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app_));
+  EXPECT_CALL(*app_, FindSubMenu(kMenuId)).WillOnce(Return(sub_menu));
+
+  EXPECT_CALL(*app_, app_id()).WillOnce(Return(kConnectionKey));
+  EXPECT_CALL(app_mngr_, GetNextHMICorrelationID())
+      .WillOnce(Return(kCorrelationId));
+
+  command_->Run();
+}
+
+TEST_F(DeleteSubMenuRequestTest, OnEvent_UnknownEventId_UNSUCCESS) {
+  Event event(hmi_apis::FunctionID::INVALID_ENUM);
+  EXPECT_CALL(app_mngr_, application(_)).Times(0);
+  command_->on_event(event);
+}
+
+TEST_F(DeleteSubMenuRequestTest, OnEvent_InvalidApp_UNSUCCESS) {
+  Event event(hmi_apis::FunctionID::UI_DeleteSubMenu);
+  (*message_)[am::strings::params][am::hmi_response::code] =
+      am::mobile_api::Result::SUCCESS;
+  event.set_smart_object(*message_);
+
+  MockAppPtr invalid_app;
+  EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(invalid_app));
+  EXPECT_CALL(*app_, RemoveSubMenu(_)).Times(0);
+  command_->on_event(event);
+}
+
+TEST_F(DeleteSubMenuRequestTest, OnEvent_DeleteSubmenu_SUCCESS) {
+  Event event(hmi_apis::FunctionID::UI_DeleteSubMenu);
+  (*message_)[am::strings::msg_params][am::strings::menu_id] = kMenuId;
+  (*message_)[am::strings::params][am::strings::connection_key] =
+      kConnectionKey;
+  (*message_)[am::strings::msg_params][am::strings::vr_commands] =
+      "vr_commands";
+  (*message_)[am::strings::msg_params][am::strings::cmd_id] = kCmdId;
+  (*message_)[am::strings::msg_params][am::strings::menu_params]
+             [am::hmi_request::parent_id] = kMenuId;
+  (*message_)[am::strings::params][am::hmi_response::code] =
+      hmi_apis::Common_Result::SUCCESS;
+  event.set_smart_object(*message_);
+
+  commands_map_.insert(
+      std::make_pair(0, &((*message_)[am::strings::msg_params])));
+  EXPECT_CALL(mock_message_helper_,
+              HMIToMobileResult(hmi_apis::Common_Result::SUCCESS))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
+  InSequence seq;
+  EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(app_));
+  EXPECT_CALL(*app_, commands_map()).WillOnce(Return(accessor_));
+  EXPECT_CALL(*app_, app_id()).WillOnce(Return(kConnectionKey));
+  EXPECT_CALL(*app_, get_grammar_id()).WillOnce(Return(kGrammarId));
+
+  EXPECT_CALL(*app_, commands_map()).WillOnce(Return(accessor_));
+  EXPECT_CALL(*app_, app_id()).WillOnce(Return(kConnectionKey));
+  EXPECT_CALL(*app_, RemoveCommand(_)).WillOnce(DeleteCommand(&commands_map_));
+
+  EXPECT_CALL(*app_, RemoveSubMenu(_));
+  EXPECT_CALL(*app_, UpdateHash());
+  command_->on_event(event);
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(app_.get()));
+}
+
+TEST_F(DeleteSubMenuResponseTest, Run_SUCCESS) {
+  MessageSharedPtr message(CreateMessage());
+  (*message)[am::strings::msg_params][am::strings::connection_key] =
+      kConnectionKey;
+  DeleteSubMenuResponsePtr command(
+      CreateCommand<DeleteSubMenuResponse>(message));
+  EXPECT_CALL(
+      app_mngr_,
+      SendMessageToMobile(CheckMessageConnectionKey(kConnectionKey), _));
+  command->Run();
+}
+
+TEST_F(DeleteSubMenuRequestTest,
+       DeleteSubmenu_CommandhaventVrCommadsAndMenuParams_DontSendHMIRequest) {
+  Event event(hmi_apis::FunctionID::UI_DeleteSubMenu);
+  (*message_)[am::strings::msg_params][am::strings::menu_id] = kMenuId;
+  (*message_)[am::strings::params][am::strings::connection_key] =
+      kConnectionKey;
+  (*message_)[am::strings::params][am::hmi_response::code] =
+      hmi_apis::Common_Result::SUCCESS;
+  event.set_smart_object(*message_);
+
+  commands_map_.insert(
+      std::make_pair(0, &((*message_)[am::strings::msg_params])));
+
+  EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(app_));
+  EXPECT_CALL(app_mngr_, ManageHMICommand(_)).Times(0);
+  EXPECT_CALL(*app_, commands_map()).Times(2).WillRepeatedly(Return(accessor_));
+  EXPECT_CALL(*app_, RemoveCommand(_)).Times(0);
+  EXPECT_CALL(mock_message_helper_,
+              HMIToMobileResult(hmi_apis::Common_Result::SUCCESS))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
+
+  command_->on_event(event);
+}
+
+TEST_F(DeleteSubMenuRequestTest,
+       DeleteSubmenu_NotAChildOfMenupartam_DontSendHMIRequest) {
+  Event event(hmi_apis::FunctionID::UI_DeleteSubMenu);
+  (*message_)[am::strings::msg_params][am::strings::menu_id] = kMenuId;
+  (*message_)[am::strings::msg_params][am::strings::menu_params]
+             [am::hmi_request::parent_id] = kMenuId + 1;
+  (*message_)[am::strings::params][am::strings::connection_key] =
+      kConnectionKey;
+  (*message_)[am::strings::params][am::hmi_response::code] =
+      hmi_apis::Common_Result::SUCCESS;
+  event.set_smart_object(*message_);
+
+  commands_map_.insert(
+      std::make_pair(0, &((*message_)[am::strings::msg_params])));
+  EXPECT_CALL(mock_message_helper_,
+              HMIToMobileResult(hmi_apis::Common_Result::SUCCESS))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
+
+  EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(app_));
+  EXPECT_CALL(app_mngr_, ManageHMICommand(_)).Times(0);
+  EXPECT_CALL(*app_, commands_map()).Times(2).WillRepeatedly(Return(accessor_));
+  EXPECT_CALL(*app_, RemoveCommand(_)).Times(0);
+
+  command_->on_event(event);
+}
+
+}  // namespace delete_sub_menu_request
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

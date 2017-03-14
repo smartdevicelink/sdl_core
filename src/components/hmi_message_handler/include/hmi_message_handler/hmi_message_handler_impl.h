@@ -96,6 +96,15 @@ class HMIMessageHandlerImpl : public HMIMessageHandler,
   void AddHMIMessageAdapter(HMIMessageAdapter* adapter);
   void RemoveHMIMessageAdapter(HMIMessageAdapter* adapter);
 
+#ifdef SDL_REMOTE_CONTROL
+  /**
+   * @brief Subscribes to notification from HMI
+   * @param hmi_notification string with notification name
+   */
+  virtual void SubscribeToHMINotification(
+      const std::string& hmi_notification) OVERRIDE;
+#endif  // SDL_REMOTE_CONTROL
+
   virtual const HMIMessageHandlerSettings& get_settings() const OVERRIDE;
 
 #ifdef BUILD_TESTS
@@ -105,6 +114,14 @@ class HMIMessageHandlerImpl : public HMIMessageHandler,
 
   HMIMessageObserver* observer() const {
     return observer_;
+  }
+
+  impl::ToHmiQueue* messages_to_hmi() {
+    return &messages_to_hmi_;
+  }
+
+  impl::FromHmiQueue* messages_from_hmi() {
+    return &messages_from_hmi_;
   }
 #endif  // BUILD_TESTS
 
@@ -119,8 +136,9 @@ class HMIMessageHandlerImpl : public HMIMessageHandler,
  private:
   const HMIMessageHandlerSettings& settings_;
   HMIMessageObserver* observer_;
-  mutable sync_primitives::Lock observer_locker_;
   std::set<HMIMessageAdapter*> message_adapters_;
+  mutable sync_primitives::Lock observer_locker_;
+  mutable sync_primitives::Lock message_adapters_locker_;
 
   // Construct message threads when everything is already created
 

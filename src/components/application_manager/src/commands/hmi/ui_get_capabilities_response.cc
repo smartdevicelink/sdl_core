@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -70,6 +70,10 @@ void UIGetCapabilitiesResponse::Run() {
   }
 
   if (msg_params.keyExists(strings::hmi_capabilities)) {
+    if (msg_params.keyExists(strings::hmi_capabilities)) {
+      hmi_capabilities.set_ui_hmi_capabilities(
+          msg_params[strings::hmi_capabilities]);
+    }
     if (msg_params[strings::hmi_capabilities].keyExists(strings::navigation)) {
       hmi_capabilities.set_navigation_supported(
           msg_params[strings::hmi_capabilities][strings::navigation].asBool());

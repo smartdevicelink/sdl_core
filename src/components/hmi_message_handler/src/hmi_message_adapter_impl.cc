@@ -40,4 +40,11 @@ HMIMessageAdapterImpl::~HMIMessageAdapterImpl() {
   handler_ = 0;
 }
 
+#ifdef SDL_REMOTE_CONTROL
+void HMIMessageAdapterImpl::SubscribeToHMINotification(
+    const std::string& hmi_notification) {
+  // TODO(SL): Find an immplementation
+}
+#endif  // SDL_REMOTE_CONTROL
+
 }  // namespace hmi_message_handler

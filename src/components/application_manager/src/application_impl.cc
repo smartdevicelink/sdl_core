@@ -33,9 +33,11 @@
 #include "application_manager/application_impl.h"
 #include <string>
 #include <strings.h>
+#include <algorithm>
 #include "application_manager/message_helper.h"
 #include "protocol_handler/protocol_handler.h"
 #include "application_manager/application_manager.h"
+#include "functional_module/plugin_manager.h"
 #include "config_profile/profile.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/file_system.h"
@@ -71,9 +73,9 @@ mobile_apis::FileType::eType StringToFileType(const char* str) {
 }
 }
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
-
 namespace application_manager {
+
+CREATE_LOGGERPTR_LOCAL(ApplicationImpl::logger_, "ApplicationManager");
 
 ApplicationImpl::ApplicationImpl(
     uint32_t application_id,
@@ -100,6 +102,8 @@ ApplicationImpl::ApplicationImpl(
     , tts_properties_in_full_(false)
     , is_foreground_(false)
     , is_application_data_changed_(false)
+    , audio_streaming_indicator_(
+          mobile_apis::AudioStreamingIndicator::INVALID_ENUM)
     , put_file_in_none_count_(0)
     , delete_file_in_none_count_(0)
     , list_files_in_none_count_(0)
@@ -147,6 +151,7 @@ ApplicationImpl::ApplicationImpl(
 }
 
 ApplicationImpl::~ApplicationImpl() {
+  LOG4CXX_AUTO_TRACE(logger_);
   // TODO(AK): check if this is correct assimption
   if (active_message_) {
     delete active_message_;
@@ -169,6 +174,11 @@ void ApplicationImpl::CloseActiveMessage() {
 
 bool ApplicationImpl::IsFullscreen() const {
   return mobile_api::HMILevel::HMI_FULL == hmi_level();
+}
+
+bool ApplicationImpl::is_audio() const {
+  return is_media_application() || is_voice_communication_supported() ||
+         is_navi();
 }
 
 void ApplicationImpl::ChangeSupportingAppHMIType() {
@@ -281,6 +291,11 @@ bool ApplicationImpl::is_media_application() const {
   return is_media_;
 }
 
+mobile_apis::AudioStreamingIndicator::eType
+ApplicationImpl::audio_streaming_indicator() const {
+  return audio_streaming_indicator_;
+}
+
 const mobile_api::HMILevel::eType ApplicationImpl::hmi_level() const {
   using namespace mobile_apis;
   const HmiStatePtr hmi_state = CurrentHmiState();
@@ -311,7 +326,6 @@ const mobile_api::SystemContext::eType ApplicationImpl::system_context() const {
   using namespace mobile_apis;
   const HmiStatePtr hmi_state = CurrentHmiState();
   return hmi_state ? hmi_state->system_context() : SystemContext::INVALID_ENUM;
-  ;
 }
 
 const std::string& ApplicationImpl::app_icon_path() const {
@@ -340,6 +354,40 @@ void ApplicationImpl::set_name(const custom_str::CustomString& name) {
 
 void ApplicationImpl::set_is_media_application(bool is_media) {
   is_media_ = is_media;
+}
+
+void ApplicationImpl::set_audio_streaming_indicator(
+    const mobile_apis::AudioStreamingIndicator::eType indicator) {
+  audio_streaming_indicator_ = indicator;
+}
+
+bool ApplicationImpl::AddIndicatorWaitForResponse(
+    const mobile_api::AudioStreamingIndicator::eType indicator) {
+  if (indicator == audio_streaming_indicator()) {
+    return false;
+  }
+  sync_primitives::AutoLock lock(indicators_lock_);
+  AudioStreamingIndicators::iterator it =
+      std::find(indicators_waiting_for_response_.begin(),
+                indicators_waiting_for_response_.end(),
+                indicator);
+  if (it != indicators_waiting_for_response_.end()) {
+    return false;
+  }
+  indicators_waiting_for_response_.push_back(indicator);
+  return true;
+}
+
+void ApplicationImpl::RemoveIndicatorWaitForResponse(
+    const mobile_api::AudioStreamingIndicator::eType indicator) {
+  sync_primitives::AutoLock lock(indicators_lock_);
+  AudioStreamingIndicators::iterator it =
+      std::find(indicators_waiting_for_response_.begin(),
+                indicators_waiting_for_response_.end(),
+                indicator);
+  if (it != indicators_waiting_for_response_.end()) {
+    indicators_waiting_for_response_.erase(it);
+  }
 }
 
 bool IsTTSState(const HmiStatePtr state) {
@@ -966,5 +1014,110 @@ void ApplicationImpl::UnsubscribeFromSoftButtons(int32_t cmd_id) {
     cmd_softbuttonid_.erase(it);
   }
 }
+
+#ifdef SDL_REMOTE_CONTROL
+bool ApplicationImpl::IsAudible() const {
+  return mobile_api::HMILevel::HMI_FULL == hmi_level() ||
+         mobile_api::HMILevel::HMI_LIMITED == hmi_level();
+}
+
+void ApplicationImpl::set_system_context(
+    const mobile_api::SystemContext::eType& system_context) {
+  const HmiStatePtr hmi_state = CurrentHmiState();
+  hmi_state->set_system_context(system_context);
+}
+
+void ApplicationImpl::set_audio_streaming_state(
+    const mobile_api::AudioStreamingState::eType& state) {
+  if (!(is_media_application() || is_navi()) &&
+      state != mobile_api::AudioStreamingState::NOT_AUDIBLE) {
+    LOG4CXX_WARN(logger_,
+                 "Trying to set audio streaming state"
+                 " for non-media application to different from NOT_AUDIBLE");
+    return;
+  }
+  CurrentHmiState()->set_audio_streaming_state(state);
+}
+
+void ApplicationImpl::set_hmi_level(
+    const mobile_api::HMILevel::eType& new_hmi_level) {
+  using namespace mobile_apis;
+  const HMILevel::eType current_hmi_level = hmi_level();
+  if (HMILevel::HMI_NONE != current_hmi_level &&
+      HMILevel::HMI_NONE == new_hmi_level) {
+    put_file_in_none_count_ = 0;
+    delete_file_in_none_count_ = 0;
+    list_files_in_none_count_ = 0;
+  }
+  ApplicationSharedPtr app = application_manager_.application(app_id());
+  DCHECK_OR_RETURN_VOID(app)
+  application_manager_.state_controller().SetRegularState(app, new_hmi_level);
+  LOG4CXX_INFO(logger_, "hmi_level = " << new_hmi_level);
+  usage_report_.RecordHmiStateChanged(new_hmi_level);
+}
+
+bool ApplicationImpl::SubscribeToInteriorVehicleData(
+    smart_objects::SmartObject module) {
+  subscribed_interior_vehicle_data_.push_front(module);
+  return true;
+}
+
+bool ApplicationImpl::IsSubscribedToInteriorVehicleData(
+    smart_objects::SmartObject module) {
+  for (auto it = subscribed_interior_vehicle_data_.begin();
+       it != subscribed_interior_vehicle_data_.end();
+       ++it) {
+    if (*it == module) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool ApplicationImpl::UnsubscribeFromInteriorVehicleData(
+    smart_objects::SmartObject module) {
+  subscribed_interior_vehicle_data_.remove(module);
+  return true;
+}
+
+const std::set<uint32_t>& ApplicationImpl::SubscribesIVI() const {
+  return subscribed_vehicle_info_;
+}
+
+AppExtensionPtr ApplicationImpl::QueryInterface(AppExtensionUID uid) {
+  std::list<AppExtensionPtr>::const_iterator it = extensions_.begin();
+  for (; it != extensions_.end(); ++it) {
+    if ((*it)->uid() == uid) {
+      return (*it);
+    }
+  }
+
+  return AppExtensionPtr();
+}
+
+bool ApplicationImpl::AddExtension(AppExtensionPtr extension) {
+  if (!QueryInterface(extension->uid())) {
+    extensions_.push_back(extension);
+    return true;
+  }
+  return false;
+}
+
+bool ApplicationImpl::RemoveExtension(AppExtensionUID uid) {
+  for (std::list<AppExtensionPtr>::iterator it = extensions_.begin();
+       extensions_.end() != it;
+       ++it) {
+    if ((*it)->uid() == uid) {
+      extensions_.erase(it);
+      return true;
+    }
+  }
+  return false;
+}
+
+void ApplicationImpl::RemoveExtensions() {
+  application_manager_.GetPluginManager().RemoveAppExtension(app_id_);
+}
+#endif  // SDL_REMOTE_CONTROL
 
 }  // namespace application_manager

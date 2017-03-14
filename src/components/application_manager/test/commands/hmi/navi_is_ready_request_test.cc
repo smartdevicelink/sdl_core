@@ -47,6 +47,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
+namespace navi_is_ready_request {
 
 using ::testing::_;
 using ::testing::ReturnRef;
@@ -133,6 +134,7 @@ TEST_F(NaviIsReadyRequestTest,
   command_->on_event(event);
 }
 
+}  // namespace navi_is_ready_request
 }  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components

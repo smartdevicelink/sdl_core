@@ -41,7 +41,7 @@ using namespace std;
 
 namespace test {
 namespace components {
-namespace utils {
+namespace utils_test {
 
 void get_version_from_file(int& first_version, int& second_version) {
   // Supposed that major and minor version include one number
@@ -72,6 +72,6 @@ TEST(GeneratorTool, GetCorrectVersion) {
   EXPECT_EQ(second_version, application_manager::minor_version);
 }
 
-}  // namespace utils
+}  // namespace utils_test
 }  // namespace components
 }  // namespace test

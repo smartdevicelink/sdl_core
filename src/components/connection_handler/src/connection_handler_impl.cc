@@ -173,7 +173,9 @@ void ConnectionHandlerImpl::OnDeviceRemoved(
   sync_primitives::AutoReadLock read_lock(connection_handler_observer_lock_);
   if (connection_handler_observer_) {
     connection_handler_observer_->RemoveDevice(device_info.device_handle());
+    connection_handler_observer_->OnDeviceListUpdated(device_list_);
   }
+  device_list_.erase(device_info.device_handle());
 }
 
 void ConnectionHandlerImpl::OnScanDevicesFinished() {

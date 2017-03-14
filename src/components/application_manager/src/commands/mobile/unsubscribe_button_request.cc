@@ -33,6 +33,8 @@
 
 #include "application_manager/commands/mobile/unsubscribe_button_request.h"
 
+#include <algorithm>
+
 #include "application_manager/application_impl.h"
 
 namespace application_manager {
@@ -41,6 +43,22 @@ namespace commands {
 
 namespace str = strings;
 
+namespace {
+struct FindButtonName {
+  FindButtonName(const mobile_apis::ButtonName::eType target_name)
+      : target_name_(target_name) {}
+
+  const mobile_apis::ButtonName::eType target_name_;
+
+  bool operator()(const smart_objects::SmartObject& buttonSO) const {
+    using namespace mobile_apis;
+    const ButtonName::eType name = static_cast<ButtonName::eType>(
+        buttonSO.getElement(hmi_response::button_name).asInt());
+    return name == target_name_;
+  }
+};
+}  // namespace
+
 UnsubscribeButtonRequest::UnsubscribeButtonRequest(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
     : CommandRequestImpl(message, application_manager) {}
@@ -48,6 +66,7 @@ UnsubscribeButtonRequest::UnsubscribeButtonRequest(
 UnsubscribeButtonRequest::~UnsubscribeButtonRequest() {}
 
 void UnsubscribeButtonRequest::Run() {
+  using namespace mobile_apis;
   LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app = application_manager_.application(connection_key());
@@ -58,8 +77,15 @@ void UnsubscribeButtonRequest::Run() {
     return;
   }
 
-  const uint32_t btn_id =
-      (*message_)[str::msg_params][str::button_name].asUInt();
+  const ButtonName::eType btn_id = static_cast<ButtonName::eType>(
+      (*message_)[str::msg_params][str::button_name].asUInt());
+
+  if (!CheckHMICapabilities(btn_id)) {
+    LOG4CXX_ERROR(logger_,
+                  "Button " << btn_id << " isn't allowed by HMI capabilities");
+    SendResponse(false, mobile_apis::Result::UNSUPPORTED_RESOURCE);
+    return;
+  }
 
   if (!app->UnsubscribeFromButton(
           static_cast<mobile_apis::ButtonName::eType>(btn_id))) {
@@ -71,6 +97,28 @@ void UnsubscribeButtonRequest::Run() {
   SendUnsubscribeButtonNotification();
   SendResponse(true, mobile_apis::Result::SUCCESS);
   app->UpdateHash();
+}
+
+bool UnsubscribeButtonRequest::CheckHMICapabilities(
+    mobile_apis::ButtonName::eType button) const {
+  using namespace smart_objects;
+  using namespace mobile_apis;
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  const HMICapabilities& hmi_caps = application_manager_.hmi_capabilities();
+  if (!hmi_caps.is_ui_cooperating()) {
+    LOG4CXX_ERROR(logger_, "UI is not supported by HMI.");
+    return false;
+  }
+
+  const SmartObject* button_caps_ptr = hmi_caps.button_capabilities();
+  if (button_caps_ptr && button_caps_ptr->asArray()) {
+    const SmartArray& button_caps = *button_caps_ptr->asArray();
+    const SmartArray::const_iterator result = std::find_if(
+        button_caps.begin(), button_caps.end(), FindButtonName(button));
+    return result != button_caps.end();
+  }
+  return false;
 }
 
 void UnsubscribeButtonRequest::SendUnsubscribeButtonNotification() {

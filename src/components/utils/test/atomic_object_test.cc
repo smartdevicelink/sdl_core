@@ -34,7 +34,8 @@
 #include "gtest/gtest.h"
 
 namespace test {
-namespace utils {
+namespace components {
+namespace utils_test {
 
 TEST(AtomicObjectTest, Construct) {
   sync_primitives::atomic_int var(5);
@@ -51,5 +52,6 @@ TEST(AtomicObjectTest, Construct) {
   EXPECT_FALSE(flag == true);
 }
 
-}  // utils
-}  // test
+}  // namespace utils_test
+}  // namespace components
+}  // namespace test

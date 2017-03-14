@@ -38,17 +38,11 @@
 #include "json/json.h"
 #include "utils/macro.h"
 #include "application_manager/hmi_language_handler.h"
+#include "smart_objects/smart_object.h"
 
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
-class SmartObject;
-}
-}
 namespace resumption {
 class LastState;
 }
-
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 namespace application_manager {
 class ApplicationManager;
@@ -384,6 +378,22 @@ class HMICapabilities {
    */
   virtual void set_prerecorded_speech(
       const smart_objects::SmartObject& prerecorded_speech) = 0;
+
+  /*
+   * @brief Interface used to store ui hmi capabilities that is
+   * supported by the system
+   * @param ui_hmi_capabilities contains ui hmi capabilities
+   * supported by the system
+   */
+  virtual void set_ui_hmi_capabilities(
+      const smart_objects::SmartObject& ui_hmi_capabilities) = 0;
+
+  /*
+   * @brief Retrieves ui hmi capabilities that is supported
+   * by system
+   * @return ui hmi capabilities
+   */
+  virtual const smart_objects::SmartObject& ui_hmi_capabilities() const = 0;
 
   /*
    * @brief Interface used to store information if navigation

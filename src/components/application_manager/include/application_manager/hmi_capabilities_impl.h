@@ -39,18 +39,11 @@
 #include "json/json.h"
 #include "utils/macro.h"
 #include "application_manager/hmi_language_handler.h"
-
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
-class SmartObject;
-}  // namespace NsSmartObjects
-}  // namespace NsSmartDeviceLink
+#include "smart_objects/smart_object.h"
 
 namespace resumption {
 class LastState;
 }  // namespace resumption
-
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 namespace application_manager {
 class ApplicationManager;
@@ -385,6 +378,21 @@ class HMICapabilitiesImpl : public HMICapabilities {
       const smart_objects::SmartObject& prerecorded_speech) OVERRIDE;
 
   /*
+   * @brief Interface used to store information about ui hmi capabilities
+   * supported by the system
+   * @param ui_hmi_capabilities contains ui hmi capabilities
+   * supported by the system
+   */
+  void set_ui_hmi_capabilities(
+      const smart_objects::SmartObject& ui_hmi_capabilities) OVERRIDE;
+
+  /*
+   * @brief Retrieves ui hmi capabilities that is supported
+   * by system
+   * @return ui hmi capabilities
+   */
+  const smart_objects::SmartObject& ui_hmi_capabilities() const OVERRIDE;
+  /*
    * @brief Interface used to store information if navigation
    * supported by the system
    *
@@ -488,6 +496,7 @@ class HMICapabilitiesImpl : public HMICapabilities {
   smart_objects::SmartObject* audio_pass_thru_capabilities_;
   smart_objects::SmartObject* pcm_stream_capabilities_;
   smart_objects::SmartObject* prerecorded_speech_;
+  smart_objects::SmartObject ui_hmi_capabilities_;
   bool is_navigation_supported_;
   bool is_phone_call_supported_;
   std::string ccpu_version_;
@@ -500,4 +509,4 @@ class HMICapabilitiesImpl : public HMICapabilities {
 
 }  //  namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMI_CAPABILITIES_IMPL_H_
+#endif  //  SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMI_CAPABILITIES_IMPL_H_

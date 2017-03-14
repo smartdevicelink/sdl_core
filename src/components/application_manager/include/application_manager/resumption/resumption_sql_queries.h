@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_RESUMPTION_RESUMPTION_SQL_QUERY_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_RESUMPTION_RESUMPTION_SQL_QUERY_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_RESUMPTION_RESUMPTION_SQL_QUERIES_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_RESUMPTION_RESUMPTION_SQL_QUERIES_H_
 
 #include <string>
 
@@ -63,6 +63,7 @@ extern const std::string kDeleteApplicationFilesArray;
 extern const std::string kDeleteSubMenu;
 extern const std::string kDeleteApplicationSubMenuArray;
 extern const std::string kDeleteApplicationSubscribtionsArray;
+extern const std::string kDeleteImageFromSubMenu;
 extern const std::string kDeleteImageFromCommands;
 extern const std::string kDeleteVrCommands;
 extern const std::string kDeleteCommands;
@@ -135,4 +136,4 @@ extern const std::string kSelectSubscribedForWayPoints;
 extern const std::string kDeleteSubscribedForWayPoints;
 }  // namespace resumption
 
-#endif  //  SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_RESUMPTION_RESUMPTION_SQL_QUERY_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_RESUMPTION_RESUMPTION_SQL_QUERIES_H_

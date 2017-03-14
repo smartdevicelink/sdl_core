@@ -112,6 +112,13 @@ SmartObject& SmartObject::operator=(const SmartObject& Other) {
   return *this;
 }
 
+/*Wbool SmartObject::operator<(const SmartObject& Other) const{
+
+  return
+std::lexicographical_compare(m_data.map_value->begin(),m_data.map_value->end(),
+    Other.m_data.map_value->begin(),Other.m_data.map_value->end());
+}*/
+
 bool SmartObject::operator==(const SmartObject& Other) const {
   if (m_type != Other.m_type)
     return false;

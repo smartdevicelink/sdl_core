@@ -1,4 +1,4 @@
-# Copyright (c) 2014, Ford Motor Company
+# Copyright (c) 2017, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,8 +28,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-set(target TransportManager)
-set(TM_SRC_DIR ${COMPONENTS_DIR}/transport_manager/src)
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/platform.cmake)
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
 include_directories (
   include
@@ -38,87 +38,69 @@ include_directories (
   ${COMPONENTS_DIR}/connection_handler/include
   ${COMPONENTS_DIR}/config_profile/include
   ${COMPONENTS_DIR}/resumption/include
+  ${POLICY_GLOBAL_INCLUDE_PATH}/
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${LIBUSB_INCLUDE_DIRECTORY}
   ${LOG4CXX_INCLUDE_DIRECTORY}
 )
-if (BUILD_BT_SUPPORT)
-  include_directories(
-  )
-endif()
 
-set (SOURCES
-  ${TM_SRC_DIR}/transport_manager_impl.cc
-  ${TM_SRC_DIR}/transport_manager_default.cc
-  ${TM_SRC_DIR}/transport_adapter/transport_adapter_listener_impl.cc
-  ${TM_SRC_DIR}/transport_adapter/transport_adapter_impl.cc
-  ${TM_SRC_DIR}/tcp/tcp_transport_adapter.cc
-  ${TM_SRC_DIR}/transport_adapter/threaded_socket_connection.cc
-  ${TM_SRC_DIR}/tcp/tcp_client_listener.cc
-  ${TM_SRC_DIR}/tcp/tcp_device.cc
-  ${TM_SRC_DIR}/tcp/tcp_socket_connection.cc
-  ${TM_SRC_DIR}/tcp/tcp_connection_factory.cc
+set(PATHS
+  ${CMAKE_CURRENT_SOURCE_DIR}/include
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
-if (BUILD_BT_SUPPORT)
-  list (APPEND SOURCES
-  ${TM_SRC_DIR}/bluetooth/bluetooth_device_scanner.cc
-  ${TM_SRC_DIR}/bluetooth/bluetooth_transport_adapter.cc
-  ${TM_SRC_DIR}/bluetooth/bluetooth_connection_factory.cc
-  ${TM_SRC_DIR}/bluetooth/bluetooth_socket_connection.cc
-  ${TM_SRC_DIR}/bluetooth/bluetooth_device.cc
+set(EXCLUDE_PATHS)
+
+set(LIBRARIES
+  ProtocolLibrary
+  Utils
+)
+
+if(BUILD_BT_SUPPORT)
+  list(APPEND LIBRARIES
+    bluetooth
+  )
+else()
+  list(APPEND EXCLUDE_PATHS
+    ${COMPONENTS_DIR}/transport_manager/include/transport_manager/bluetooth
+    ${COMPONENTS_DIR}/transport_manager/src/bluetooth
   )
 endif()
 
-if (BUILD_USB_SUPPORT)
-  list (APPEND SOURCES
-    ${TM_SRC_DIR}/usb/usb_aoa_adapter.cc
-    ${TM_SRC_DIR}/usb/usb_connection_factory.cc
-    ${TM_SRC_DIR}/usb/usb_device_scanner.cc
-  )
+if(BUILD_USB_SUPPORT)
   if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    list (APPEND SOURCES
-    ${TM_SRC_DIR}/usb/libusb/usb_handler.cc
-    ${TM_SRC_DIR}/usb/libusb/usb_connection.cc
-    ${TM_SRC_DIR}/usb/libusb/platform_usb_device.cc
+    set(EXCLUDE_PATHS
+      ${COMPONENTS_DIR}/transport_manager/include/transport_manager/usb/qnx
+      ${COMPONENTS_DIR}/transport_manager/src/usb/qnx
+    )
+    list(APPEND LIBRARIES
+      Libusb-1.0.16
     )
   elseif(CMAKE_SYSTEM_NAME STREQUAL "QNX")
-    list(APPEND SOURCES
-    ${TM_SRC_DIR}/usb/qnx/usb_handler.cc
-    ${TM_SRC_DIR}/usb/qnx/usb_connection.cc
-    ${TM_SRC_DIR}/usb/qnx/platform_usb_device.cc
+    set(EXCLUDE_PATHS
+      ${COMPONENTS_DIR}/transport_manager/include/transport_manager/usb/libusb
+      ${COMPONENTS_DIR}/transport_manager/src/usb/libusb
+    )
+    list(APPEND LIBRARIES
+      usbdi
     )
   endif()
-endif(BUILD_USB_SUPPORT)
-
-
-if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
+else()
+  list(APPEND EXCLUDE_PATHS
+    ${COMPONENTS_DIR}/transport_manager/include/transport_manager/usb
+    ${COMPONENTS_DIR}/transport_manager/src/usb
+  )
 endif()
 
-add_library(${target} ${SOURCES})
-target_link_libraries(${target} ProtocolLibrary)
+collect_sources(SOURCES "${PATHS}" "${EXCLUDE_PATHS}")
 
-if (BUILD_USB_SUPPORT)
-  if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
-    target_link_libraries(${target} usbdi)
-  endif()
-endif(BUILD_USB_SUPPORT)
+add_library("TransportManager" ${SOURCES})
+target_link_libraries("TransportManager" ${LIBRARIES})
 
 if(ENABLE_LOG)
-  target_link_libraries(${target} log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
+  target_link_libraries("TransportManager" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
 endif()
-
-if (BUILD_BT_SUPPORT)
-  target_link_libraries(${target} bluetooth)
-endif()
-
-if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
-endif()
-
-add_library("transport_manager" ${SOURCES}
-        ${TRANSPORT_MANAGER_SOURCES}
-)
 
 if(BUILD_TESTS)
-  add_subdirectory(test)
+  #add_subdirectory(test)
 endif()

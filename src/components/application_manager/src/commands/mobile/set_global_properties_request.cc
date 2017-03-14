@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2015, Ford Motor Company
+ Copyright (c) 2017, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -133,6 +133,7 @@ void SetGlobalPropertiesRequest::Run() {
   if (is_help_prompt_present || is_timeout_prompt_present) {
     is_tts_send_ = true;
   }
+
   if (is_vr_help_title_present && is_vr_help_present) {
     LOG4CXX_DEBUG(logger_, "VRHelp params presents");
 
@@ -180,7 +181,7 @@ void SetGlobalPropertiesRequest::Run() {
   }
 
   // check TTS params
-  if (is_help_prompt_present || is_timeout_prompt_present) {
+  if (is_tts_send_) {
     LOG4CXX_DEBUG(logger_, "TTS params presents");
     smart_objects::SmartObject params =
         smart_objects::SmartObject(smart_objects::SmartType_Map);
@@ -281,14 +282,12 @@ bool SetGlobalPropertiesRequest::PrepareResponseParameters(
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace helpers;
 
-  ResponseInfo ui_properties_info(ui_result_, HmiInterfaces::HMI_INTERFACE_UI);
+  ResponseInfo ui_properties_info(
+      ui_result_, HmiInterfaces::HMI_INTERFACE_UI, application_manager_);
 
-  ResponseInfo tts_properties_info(tts_result_,
-                                   HmiInterfaces::HMI_INTERFACE_TTS);
-  const bool result =
-      PrepareResultForMobileResponse(ui_properties_info, tts_properties_info);
-  if (result &&
-      (HmiInterfaces::STATE_AVAILABLE == tts_properties_info.interface_state) &&
+  ResponseInfo tts_properties_info(
+      tts_result_, HmiInterfaces::HMI_INTERFACE_TTS, application_manager_);
+  if ((HmiInterfaces::STATE_AVAILABLE == tts_properties_info.interface_state) &&
       (tts_properties_info.is_unsupported_resource)) {
     result_code = mobile_apis::Result::WARNINGS;
     tts_response_info_ = "Unsupported phoneme type sent in a prompt";
@@ -296,8 +295,10 @@ bool SetGlobalPropertiesRequest::PrepareResponseParameters(
                       tts_response_info_,
                       ui_properties_info,
                       ui_response_info_);
-    return result;
+    return true;
   }
+  const bool result =
+      PrepareResultForMobileResponse(ui_properties_info, tts_properties_info);
   result_code =
       PrepareResultCodeForResponse(ui_properties_info, tts_properties_info);
   info = MergeInfos(tts_properties_info,
@@ -393,14 +394,25 @@ void SetGlobalPropertiesRequest::PrepareUIRequestMenuAndKeyboardData(
   if (is_keyboard_props_present) {
     out_params[hmi_request::keyboard_properties] =
         msg_params[hmi_request::keyboard_properties];
-    app->set_keyboard_props(msg_params[hmi_request::keyboard_properties]);
+
+    const bool is_auto_complete_text_present =
+        out_params[hmi_request::keyboard_properties].keyExists(
+            strings::auto_complete_text);
+    const bool is_auto_complete_list_present =
+        out_params[hmi_request::keyboard_properties].keyExists(
+            hmi_request::auto_complete_list);
+    if (is_auto_complete_list_present && is_auto_complete_text_present) {
+      out_params[hmi_request::keyboard_properties].erase(
+          strings::auto_complete_text);
+    }
+
+    app->set_keyboard_props(out_params[hmi_request::keyboard_properties]);
   }
 }
 
 void SetGlobalPropertiesRequest::SendTTSRequest(
     const smart_objects::SmartObject& params, bool use_events) {
   LOG4CXX_AUTO_TRACE(logger_);
-  is_tts_send_ = true;
   SendHMIRequest(
       hmi_apis::FunctionID::TTS_SetGlobalProperties, &params, use_events);
 }
@@ -431,7 +443,6 @@ bool SetGlobalPropertiesRequest::ValidateConditionalMandatoryParameters(
 
 bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
   LOG4CXX_AUTO_TRACE(logger_);
-  const char* str;
 
   const smart_objects::SmartObject& msg_params =
       (*message_)[strings::msg_params];
@@ -444,7 +455,7 @@ bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
     smart_objects::SmartArray::const_iterator it_hp_end = hp_array->end();
 
     for (; it_hp != it_hp_end; ++it_hp) {
-      str = (*it_hp)[strings::text].asCharArray();
+      const char* str = (*it_hp)[strings::text].asCharArray();
       if (strlen(str) && !CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_, "Invalid help_prompt syntax check failed");
         return true;
@@ -460,7 +471,7 @@ bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
     smart_objects::SmartArray::const_iterator it_tp_end = tp_array->end();
 
     for (; it_tp != it_tp_end; ++it_tp) {
-      str = (*it_tp)[strings::text].asCharArray();
+      const char* str = (*it_tp)[strings::text].asCharArray();
       if (strlen(str) && !CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_, "Invalid timeout_prompt syntax check failed");
         return true;
@@ -476,15 +487,16 @@ bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
     smart_objects::SmartArray::const_iterator it_vh_end = vh_array->end();
 
     for (; it_vh != it_vh_end; ++it_vh) {
-      str = (*it_vh)[strings::text].asCharArray();
+      const char* str = (*it_vh)[strings::text].asCharArray();
       if (!CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_, "Invalid vr_help text syntax check failed");
         return true;
       }
 
       if ((*it_vh).keyExists(strings::image)) {
-        str = (*it_vh)[strings::image][strings::value].asCharArray();
-        if (!CheckSyntax(str)) {
+        const char* sub_str =
+            (*it_vh)[strings::image][strings::value].asCharArray();
+        if (!CheckSyntax(sub_str)) {
           LOG4CXX_ERROR(logger_,
                         "Invalid vr_help image value syntax check failed");
           return true;
@@ -494,7 +506,8 @@ bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
   }
 
   if (msg_params.keyExists(strings::menu_icon)) {
-    str = msg_params[strings::menu_icon][strings::value].asCharArray();
+    const char* str =
+        msg_params[strings::menu_icon][strings::value].asCharArray();
     if (!CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_, "Invalid menu_icon value syntax check failed");
       return true;
@@ -502,7 +515,7 @@ bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
   }
 
   if (msg_params.keyExists(strings::vr_help_title)) {
-    str = msg_params[strings::vr_help_title].asCharArray();
+    const char* str = msg_params[strings::vr_help_title].asCharArray();
     if (!CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_, "Invalid vr_help_title value syntax check failed");
       return true;
@@ -510,7 +523,7 @@ bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
   }
 
   if (msg_params.keyExists(strings::menu_title)) {
-    str = msg_params[strings::menu_title].asCharArray();
+    const char* str = msg_params[strings::menu_title].asCharArray();
     if (!CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_, "Invalid menu_title value syntax check failed");
       return true;
@@ -528,7 +541,7 @@ bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
       smart_objects::SmartArray::const_iterator it_lcl_end = lcl_array->end();
 
       for (; it_lcl != it_lcl_end; ++it_lcl) {
-        str = (*it_lcl).asCharArray();
+        const char* str = (*it_lcl).asCharArray();
         if (!CheckSyntax(str)) {
           LOG4CXX_ERROR(logger_,
                         "Invalid keyboard_properties "
@@ -540,7 +553,7 @@ bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
 
     if (msg_params[strings::keyboard_properties].keyExists(
             strings::auto_complete_text)) {
-      str =
+      const char* str =
           msg_params[strings::keyboard_properties][strings::auto_complete_text]
               .asCharArray();
 
@@ -549,6 +562,26 @@ bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
                       "Invalid keyboard_properties "
                       "auto_complete_text syntax check failed");
         return true;
+      }
+    }
+
+    if (msg_params[strings::keyboard_properties].keyExists(
+            hmi_request::auto_complete_list)) {
+      const smart_objects::SmartArray* acl_array =
+          msg_params[strings::keyboard_properties]
+                    [hmi_request::auto_complete_list].asArray();
+
+      smart_objects::SmartArray::const_iterator it_acl = acl_array->begin();
+      smart_objects::SmartArray::const_iterator it_acl_end = acl_array->end();
+
+      for (; it_acl != it_acl_end; ++it_acl) {
+        const char* str = (*it_acl).asCharArray();
+        if (!CheckSyntax(str)) {
+          LOG4CXX_ERROR(logger_,
+                        "Invalid keyboard_properties "
+                        "auto_complete_list syntax check failed");
+          return true;
+        }
       }
     }
   }

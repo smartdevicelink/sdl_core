@@ -127,12 +127,15 @@
 #include "application_manager/commands/mobile/on_keyboard_input_notification.h"
 #include "application_manager/commands/mobile/on_touch_event_notification.h"
 #include "application_manager/commands/mobile/on_system_request_notification.h"
+#include "application_manager/commands/mobile/on_seek_media_clock_timer_notification.h"
 #include "application_manager/commands/mobile/diagnostic_message_request.h"
 #include "application_manager/commands/mobile/diagnostic_message_response.h"
 #include "application_manager/commands/mobile/send_location_request.h"
 #include "application_manager/commands/mobile/send_location_response.h"
 #include "application_manager/commands/mobile/dial_number_request.h"
 #include "application_manager/commands/mobile/dial_number_response.h"
+#include "application_manager/commands/mobile/set_audio_streaming_indicator_response.h"
+#include "application_manager/commands/mobile/set_audio_streaming_indicator_request.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/make_shared.h"
 
@@ -609,11 +612,6 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
           message, application_manager));
       break;
     }
-    case mobile_apis::FunctionID::OnButtonPressID: {
-      command.reset(new commands::mobile::OnButtonPressNotification(
-          message, application_manager));
-      break;
-    }
     case mobile_apis::FunctionID::OnAudioPassThruID: {
       command.reset(new commands::OnAudioPassThruNotification(
           message, application_manager));
@@ -687,6 +685,24 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
     case mobile_apis::FunctionID::OnWayPointChangeID: {
       command = utils::MakeShared<commands::OnWayPointChangeNotification>(
           message, application_manager);
+      break;
+    }
+    case mobile_apis::FunctionID::OnSeekMediaClockTimerID: {
+      command.reset(new commands::mobile::OnSeekMediaClockTimerNotification(
+          message, application_manager));
+      break;
+    }
+    case mobile_apis::FunctionID::SetAudioStreamingIndicatorID: {
+      if ((*message)[strings::params][strings::message_type] ==
+          static_cast<int>(application_manager::MessageType::kRequest)) {
+        command =
+            utils::MakeShared<commands::SetAudioStreamingIndicatorRequest>(
+                message, application_manager);
+      } else {
+        command =
+            utils::MakeShared<commands::SetAudioStreamingIndicatorResponse>(
+                message, application_manager);
+      }
       break;
     }
     default: {

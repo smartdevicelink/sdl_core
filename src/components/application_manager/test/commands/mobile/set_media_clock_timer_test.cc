@@ -60,10 +60,17 @@ using ::testing::Mock;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
+namespace UpdateMode = mobile_apis::UpdateMode;
+
 typedef SharedPtr<SetMediaClockRequest> SetMediaClockRequestPtr;
 
 namespace {
 const uint32_t kConnectionKey = 2u;
+const uint32_t kCorrelationId = 2u;
+const uint32_t kAppID = 2u;
+const uint32_t kHours = 2u;
+const uint32_t kMinutes = 26u;
+const uint32_t kSeconds = 1u;
 }  // namespace
 
 class SetMediaClockRequestTest
@@ -94,6 +101,20 @@ class SetMediaClockRequestTest
         static_cast<int32_t>(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE));
     EXPECT_EQ((*msg)[am::strings::msg_params][am::strings::info].asString(),
               info);
+  }
+
+  MessageSharedPtr CreateMsgParams() {
+    MessageSharedPtr msg = CreateMessage();
+    (*msg)[am::strings::params][am::strings::connection_key] = kConnectionKey;
+    return msg;
+  }
+
+  void ExpectationsSetupHelper(bool is_media) {
+    EXPECT_CALL(app_mngr_, application(kConnectionKey))
+        .WillOnce(Return(mock_app_));
+    EXPECT_CALL(*mock_app_, is_media_application()).WillOnce(Return(is_media));
+    EXPECT_CALL(*mock_app_, app_id()).Times(0);
+    EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _));
   }
 
   NiceMock<MockHmiInterfaces> hmi_interfaces_;
@@ -136,6 +157,210 @@ TEST_F(SetMediaClockRequestTest,
   command->on_event(event);
 
   ResultCommandExpectations(ui_command_result, "UI is not supported by system");
+}
+
+TEST_F(SetMediaClockRequestTest, Run_UpdateCountUp_SUCCESS) {
+  MessageSharedPtr msg = CreateMsgParams();
+  (*msg)[am::strings::msg_params][am::strings::update_mode] =
+      UpdateMode::COUNTUP;
+  (*msg)[am::strings::msg_params][am::strings::start_time][am::strings::hours] =
+      kHours;
+  (*msg)[am::strings::msg_params][am::strings::start_time]
+        [am::strings::minutes] = kMinutes;
+  (*msg)[am::strings::msg_params][am::strings::end_time][am::strings::hours] =
+      kHours;
+  (*msg)[am::strings::msg_params][am::strings::end_time][am::strings::minutes] =
+      kMinutes;
+  (*msg)[am::strings::msg_params][am::strings::end_time][am::strings::seconds] =
+      kSeconds;
+
+  SharedPtr<SetMediaClockRequest> command(
+      CreateCommand<SetMediaClockRequest>(msg));
+
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillOnce(Return(mock_app_));
+  EXPECT_CALL(*mock_app_, is_media_application()).WillOnce(Return(true));
+  EXPECT_CALL(*mock_app_, app_id()).WillOnce(Return(kAppID));
+  EXPECT_CALL(app_mngr_, GetNextHMICorrelationID())
+      .WillOnce(Return(kCorrelationId));
+  ON_CALL(hmi_interfaces_,
+          GetInterfaceFromFunction(hmi_apis::FunctionID::UI_SetMediaClockTimer))
+      .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_UI));
+  ON_CALL(hmi_interfaces_,
+          GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
+      .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
+  EXPECT_CALL(app_mngr_, ManageHMICommand(_)).WillOnce(Return(true));
+
+  command->Run();
+}
+
+TEST_F(SetMediaClockRequestTest, Run_UpdateCountDown_SUCCESS) {
+  MessageSharedPtr msg = CreateMsgParams();
+  (*msg)[am::strings::msg_params][am::strings::update_mode] =
+      UpdateMode::COUNTDOWN;
+  (*msg)[am::strings::msg_params][am::strings::start_time][am::strings::hours] =
+      kHours;
+  (*msg)[am::strings::msg_params][am::strings::start_time]
+        [am::strings::minutes] = kMinutes;
+  (*msg)[am::strings::msg_params][am::strings::start_time]
+        [am::strings::seconds] = kSeconds;
+  (*msg)[am::strings::msg_params][am::strings::end_time][am::strings::hours] =
+      kHours;
+  (*msg)[am::strings::msg_params][am::strings::end_time][am::strings::minutes] =
+      kMinutes;
+
+  SharedPtr<SetMediaClockRequest> command(
+      CreateCommand<SetMediaClockRequest>(msg));
+
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillOnce(Return(mock_app_));
+  EXPECT_CALL(*mock_app_, is_media_application()).WillOnce(Return(true));
+  EXPECT_CALL(*mock_app_, app_id()).WillOnce(Return(kAppID));
+  EXPECT_CALL(app_mngr_, GetNextHMICorrelationID())
+      .WillOnce(Return(kCorrelationId));
+  ON_CALL(hmi_interfaces_,
+          GetInterfaceFromFunction(hmi_apis::FunctionID::UI_SetMediaClockTimer))
+      .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_UI));
+  ON_CALL(hmi_interfaces_,
+          GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
+      .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
+  EXPECT_CALL(app_mngr_, ManageHMICommand(_)).WillOnce(Return(true));
+
+  command->Run();
+}
+
+TEST_F(SetMediaClockRequestTest, Run_UpdateCountUpWrongTime_Canceled) {
+  MessageSharedPtr msg = CreateMsgParams();
+  (*msg)[am::strings::msg_params][am::strings::update_mode] =
+      UpdateMode::COUNTUP;
+  (*msg)[am::strings::msg_params][am::strings::start_time][am::strings::hours] =
+      kHours;
+  (*msg)[am::strings::msg_params][am::strings::start_time]
+        [am::strings::minutes] = kMinutes;
+  (*msg)[am::strings::msg_params][am::strings::start_time]
+        [am::strings::seconds] = kSeconds;
+  (*msg)[am::strings::msg_params][am::strings::end_time][am::strings::hours] =
+      kHours;
+  (*msg)[am::strings::msg_params][am::strings::end_time][am::strings::minutes] =
+      kMinutes;
+
+  SharedPtr<SetMediaClockRequest> command(
+      CreateCommand<SetMediaClockRequest>(msg));
+
+  ExpectationsSetupHelper(true);
+
+  command->Run();
+}
+
+TEST_F(SetMediaClockRequestTest, Run_UpdateCountDownWrongTime_Canceled) {
+  MessageSharedPtr msg = CreateMsgParams();
+  (*msg)[am::strings::msg_params][am::strings::update_mode] =
+      UpdateMode::COUNTDOWN;
+  (*msg)[am::strings::msg_params][am::strings::start_time][am::strings::hours] =
+      kHours;
+  (*msg)[am::strings::msg_params][am::strings::start_time]
+        [am::strings::minutes] = kMinutes;
+  (*msg)[am::strings::msg_params][am::strings::end_time][am::strings::hours] =
+      kHours;
+  (*msg)[am::strings::msg_params][am::strings::end_time][am::strings::minutes] =
+      kMinutes;
+  (*msg)[am::strings::msg_params][am::strings::end_time][am::strings::seconds] =
+      kSeconds;
+
+  SharedPtr<SetMediaClockRequest> command(
+      CreateCommand<SetMediaClockRequest>(msg));
+
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillOnce(Return(mock_app_));
+  EXPECT_CALL(*mock_app_, is_media_application()).WillOnce(Return(true));
+  EXPECT_CALL(*mock_app_, app_id()).Times(0);
+  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _));
+
+  command->Run();
+}
+
+TEST_F(SetMediaClockRequestTest, Run_NoStartTime_Canceled) {
+  MessageSharedPtr msg = CreateMsgParams();
+  (*msg)[am::strings::msg_params][am::strings::update_mode] =
+      UpdateMode::COUNTDOWN;
+
+  SharedPtr<SetMediaClockRequest> command(
+      CreateCommand<SetMediaClockRequest>(msg));
+
+  ExpectationsSetupHelper(true);
+
+  command->Run();
+}
+
+TEST_F(SetMediaClockRequestTest, Run_NoUpdateMode_Canceled) {
+  MessageSharedPtr msg = CreateMsgParams();
+
+  SharedPtr<SetMediaClockRequest> command(
+      CreateCommand<SetMediaClockRequest>(msg));
+
+  ExpectationsSetupHelper(true);
+
+  command->Run();
+}
+
+TEST_F(SetMediaClockRequestTest, Run_NotMediaApp_Canceled) {
+  MessageSharedPtr msg = CreateMsgParams();
+
+  SharedPtr<SetMediaClockRequest> command(
+      CreateCommand<SetMediaClockRequest>(msg));
+
+  ExpectationsSetupHelper(false);
+
+  command->Run();
+}
+
+TEST_F(SetMediaClockRequestTest, Run_InvalidApp_Canceled) {
+  MessageSharedPtr msg = CreateMsgParams();
+
+  SharedPtr<SetMediaClockRequest> command(
+      CreateCommand<SetMediaClockRequest>(msg));
+
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillOnce(Return(MockAppPtr()));
+  EXPECT_CALL(*mock_app_, is_media_application()).Times(0);
+  EXPECT_CALL(*mock_app_, app_id()).Times(0);
+  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _));
+
+  command->Run();
+}
+
+TEST_F(SetMediaClockRequestTest, OnEvent_Success) {
+  MessageSharedPtr msg = CreateMessage();
+  (*msg)[am::strings::params][am::hmi_response::code] =
+      hmi_apis::Common_Result::SUCCESS;
+  (*msg)[am::strings::msg_params] = SmartObject(smart_objects::SmartType_Null);
+
+  SharedPtr<SetMediaClockRequest> command(
+      CreateCommand<SetMediaClockRequest>(msg));
+
+  EXPECT_CALL(mock_message_helper_,
+              HMIToMobileResult(hmi_apis::Common_Result::SUCCESS))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
+  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _));
+
+  Event event(hmi_apis::FunctionID::UI_SetMediaClockTimer);
+  event.set_smart_object(*msg);
+
+  command->on_event(event);
+}
+
+TEST_F(SetMediaClockRequestTest, OnEvent_Canceled) {
+  MessageSharedPtr msg = CreateMessage();
+
+  SharedPtr<SetMediaClockRequest> command(
+      CreateCommand<SetMediaClockRequest>(msg));
+
+  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
+
+  Event event(hmi_apis::FunctionID::UI_Slider);
+  event.set_smart_object(*msg);
+
+  command->on_event(event);
 }
 
 }  // namespace set_media_clock_timer_request

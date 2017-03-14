@@ -86,13 +86,18 @@ class ApplicationManagerSettings : public RequestControlerSettings,
   virtual const uint32_t& app_resuming_timeout() const = 0;
   virtual uint16_t attempts_to_open_resumption_db() const = 0;
   virtual uint16_t open_attempt_timeout_ms_resumption_db() const = 0;
-  virtual void config_file_name(const std::string& fileName) = 0;
+  virtual void set_config_file_name(const std::string& fileName) = 0;
   virtual const std::pair<uint32_t, int32_t>& start_stream_retry_amount()
       const = 0;
   virtual const std::string& app_icons_folder() const = 0;
   virtual const uint32_t& app_icons_folder_max_size() const = 0;
   virtual const uint32_t& app_icons_amount_to_remove() const = 0;
   virtual const uint32_t& list_files_response_size() const = 0;
+
+  /**
+   * @brief Returns folder containing all plugins
+   */
+  virtual const std::string& plugins_folder() const = 0;
 };
 
 }  // namespace application_manager

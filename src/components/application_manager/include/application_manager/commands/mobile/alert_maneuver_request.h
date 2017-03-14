@@ -31,8 +31,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ALERT_MANEUVER_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ALERT_MANEUVER_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_ALERT_MANEUVER_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_ALERT_MANEUVER_REQUEST_H_
 
 #include "application_manager/commands/command_request_impl.h"
 #include "application_manager/commands/pending.h"
@@ -96,6 +96,7 @@ class AlertManeuverRequest : public CommandRequestImpl {
   std::string info_navi_;
   std::string info_tts_;
   Pending pending_requests_;
+  bool is_tts_chunks_exist_;
 
   DISALLOW_COPY_AND_ASSIGN(AlertManeuverRequest);
 };
@@ -103,4 +104,4 @@ class AlertManeuverRequest : public CommandRequestImpl {
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ALERT_MANEUVER_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_ALERT_MANEUVER_REQUEST_H_

@@ -31,13 +31,15 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_PERFORM_INTERACTION_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_PERFORM_INTERACTION_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_PERFORM_INTERACTION_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_PERFORM_INTERACTION_REQUEST_H_
+
 #include <string>
 
 #include "application_manager/commands/command_request_impl.h"
 #include "application_manager/application.h"
 #include "utils/macro.h"
+#include "utils/optional.h"
 
 namespace application_manager {
 
@@ -230,6 +232,7 @@ class PerformInteractionRequest : public CommandRequestImpl {
   hmi_apis::Common_Result::eType ui_result_code_;
   std::string ui_info_;
   std::string vr_info_;
+  optional::Optional<uint32_t> vr_choice_id_;
 
   DISALLOW_COPY_AND_ASSIGN(PerformInteractionRequest);
 };
@@ -237,4 +240,4 @@ class PerformInteractionRequest : public CommandRequestImpl {
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_PERFORM_INTERACTION_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_PERFORM_INTERACTION_REQUEST_H_

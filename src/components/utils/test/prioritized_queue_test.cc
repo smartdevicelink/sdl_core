@@ -35,7 +35,7 @@
 
 namespace test {
 namespace components {
-namespace utils {
+namespace utils_test {
 
 using ::utils::PrioritizedQueue;
 
@@ -207,6 +207,6 @@ TEST_F(PrioritizedQueueTest,
   EXPECT_EQ(message3, test_queue.front());
 }
 
-}  // namespace utils
+}  // namespace utils_test
 }  // namespace components
 }  // namespace test

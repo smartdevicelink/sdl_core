@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2013, Ford Motor Company
+ Copyright (c) 2016, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -78,8 +78,8 @@
 #include "application_manager/commands/hmi/close_popup_response.h"
 #include "application_manager/commands/hmi/button_get_capabilities_request.h"
 #include "application_manager/commands/hmi/button_get_capabilities_response.h"
-#include "application_manager/commands/hmi/ui_add_command_request.h"
 #include "application_manager/commands/hmi/ui_add_command_response.h"
+#include "application_manager/commands/hmi/ui_add_command_request.h"
 #include "application_manager/commands/hmi/ui_delete_command_request.h"
 #include "application_manager/commands/hmi/ui_delete_command_response.h"
 #include "application_manager/commands/hmi/ui_add_submenu_request.h"
@@ -156,6 +156,11 @@
 #include "application_manager/commands/hmi/sdl_activate_app_response.h"
 #include "application_manager/commands/hmi/on_app_permission_changed_notification.h"
 #include "application_manager/commands/hmi/on_event_changed_notification.h"
+
+#ifdef EXTERNAL_PROPRIETARY_MODE
+#include "application_manager/commands/hmi/decrypt_certificate_request.h"
+#include "application_manager/commands/hmi/decrypt_certificate_response.h"
+#endif  // EXTERNAL_PROPRIETARY_MODE
 
 #ifdef HMI_DBUS_API
 #include "application_manager/commands/hmi/vi_get_vehicle_data_request_template.h"
@@ -241,6 +246,7 @@
 #include "application_manager/commands/hmi/on_ui_keyboard_input_notification.h"
 #include "application_manager/commands/hmi/on_ui_touch_event_notification.h"
 #include "application_manager/commands/hmi/on_ui_reset_timeout_notification.h"
+#include "application_manager/commands/hmi/on_seek_media_clock_timer_notification.h"
 #include "application_manager/commands/hmi/navi_start_stream_request.h"
 #include "application_manager/commands/hmi/navi_start_stream_response.h"
 #include "application_manager/commands/hmi/navi_stop_stream_request.h"
@@ -271,9 +277,13 @@
 #include "application_manager/commands/hmi/on_tts_reset_timeout_notification.h"
 #include "application_manager/commands/hmi/dial_number_request.h"
 #include "application_manager/commands/hmi/dial_number_response.h"
+#include "application_manager/commands/hmi/ui_set_audio_streaming_indicator_request.h"
+#include "application_manager/commands/hmi/ui_set_audio_streaming_indicator_response.h"
+#include "utils/make_shared.h"
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 namespace application_manager {
+
+CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager");
 
 CommandSharedPtr HMICommandFactory::CreateCommand(
     const commands::MessageSharedPtr& message,
@@ -328,6 +338,18 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
+#ifdef EXTERNAL_PROPRIETARY_MODE
+    case hmi_apis::FunctionID::BasicCommunication_DecryptCertificate: {
+      if (is_response) {
+        command.reset(new commands::DecryptCertificateResponse(
+            message, application_manager));
+      } else {
+        command.reset(new commands::DecryptCertificateRequest(
+            message, application_manager));
+      }
+      break;
+    }
+#endif  // EXTERNAL_PROPRIETARY_MODE
     case hmi_apis::FunctionID::BasicCommunication_GetSystemInfo: {
       if (is_response) {
         command.reset(
@@ -1262,6 +1284,11 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     }
     case hmi_apis::FunctionID::UI_OnDriverDistraction: {
       command.reset(new commands::hmi::OnDriverDistractionNotification(
+          message, application_manager));
+      break;
+    }
+    case hmi_apis::FunctionID::UI_OnSeekMediaClockTimer: {
+      command.reset(new commands::hmi::OnSeekMediaClockTimerNotification(
           message, application_manager));
       break;
     }
@@ -2233,6 +2260,18 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     case hmi_apis::FunctionID::Navigation_OnWayPointChange: {
       command.reset(new commands::OnNaviWayPointChangeNotification(
           message, application_manager));
+      break;
+    }
+    case hmi_apis::FunctionID::UI_SetAudioStreamingIndicator: {
+      if (is_response) {
+        command =
+            utils::MakeShared<commands::UISetAudioStreamingIndicatorResponse>(
+                message, application_manager);
+      } else {
+        command =
+            utils::MakeShared<commands::UISetAudioStreamingIndicatorRequest>(
+                message, application_manager);
+      }
       break;
     }
   }

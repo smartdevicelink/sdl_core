@@ -45,20 +45,12 @@
 #include "application_manager/hmi_state.h"
 #include "application_manager/application_state.h"
 #include "protocol_handler/protocol_handler.h"
-
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
-
-class SmartObject;
-}
-}
+#include "smart_objects/smart_object.h"
+#include "application_manager/app_extension.h"
 
 namespace application_manager {
 
 namespace mobile_api = mobile_apis;
-
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
-
 namespace custom_str = utils::custom_string;
 
 typedef int32_t ErrorCode;
@@ -119,7 +111,6 @@ class InitialApplicationData {
   virtual void set_app_types(const smart_objects::SmartObject& app_types) = 0;
   virtual void set_vr_synonyms(
       const smart_objects::SmartObject& vr_synonyms) = 0;
-  virtual void set_mobile_app_id(const std::string& policy_app_id) = 0;
   virtual void set_tts_name(const smart_objects::SmartObject& tts_name) = 0;
   virtual void set_ngn_media_screen_name(
       const smart_objects::SmartObject& ngn_name) = 0;
@@ -172,6 +163,12 @@ typedef std::set<uint32_t> VehicleInfoSubscriptions;
  */
 typedef std::set<mobile_apis::ButtonName::eType> ButtonSubscriptions;
 
+/**
+ * @brief Defines vector of audio streaming indicators
+ */
+typedef std::vector<mobile_apis::AudioStreamingIndicator::eType>
+    AudioStreamingIndicators;
+
 class DynamicApplicationData {
  public:
   virtual ~DynamicApplicationData() {}
@@ -218,9 +215,16 @@ class DynamicApplicationData {
   virtual void set_video_stream_retry_number(
       const uint32_t& video_stream_retry_number) = 0;
 
-  /*
-   * @brief Adds a command to the in application menu
+  /**
+   * @brief Checks if application is media, voice communication or navigation
+   * @return true if application is media, voice communication or navigation,
+   * false otherwise
    */
+  virtual bool is_audio() const = 0;
+
+  /*
+ * @brief Adds a command to the in application menu
+ */
   virtual void AddCommand(uint32_t cmd_id,
                           const smart_objects::SmartObject& command) = 0;
 
@@ -382,7 +386,6 @@ class Application : public virtual InitialApplicationData,
  public:
   enum ApplicationRegisterState { kRegistered = 0, kWaitingForRegistration };
 
- public:
   Application() : is_greyed_out_(false) {}
   virtual ~Application() {}
 
@@ -487,6 +490,12 @@ class Application : public virtual InitialApplicationData,
   virtual void set_folder_name(const std::string& folder_name) = 0;
   virtual const std::string folder_name() const = 0;
   virtual bool is_media_application() const = 0;
+  /**
+   * @brief Returns current audio streaming indicator of application
+   * @return Returns current audio streaming indicator of application
+   */
+  virtual mobile_api::AudioStreamingIndicator::eType audio_streaming_indicator()
+      const = 0;
   virtual bool is_foreground() const = 0;
   virtual void set_foreground(const bool is_foreground) = 0;
   virtual const mobile_api::HMILevel::eType hmi_level() const = 0;
@@ -528,6 +537,26 @@ class Application : public virtual InitialApplicationData,
   virtual void set_version(const Version& version) = 0;
   virtual void set_name(const custom_str::CustomString& name) = 0;
   virtual void set_is_media_application(bool is_media) = 0;
+  /**
+    * @brief Saves current audio streaming indicator for application
+    * @param indicator contains audio streaming indicator for this application
+    */
+  virtual void set_audio_streaming_indicator(
+      const mobile_api::AudioStreamingIndicator::eType indicator) = 0;
+  /**
+   * @brief Adds audio streaming indicator that is waiting for response from HMI
+   * @param indicator contains audio streaming indicator for this application
+   */
+  virtual bool AddIndicatorWaitForResponse(
+      const mobile_api::AudioStreamingIndicator::eType indicator) = 0;
+  /**
+   * @brief Remove audio streaming indicator after response from HMI or after
+   * timeout event from
+   * request controller
+   * @param indicator contains audio streaming indicator for removing
+   */
+  virtual void RemoveIndicatorWaitForResponse(
+      const mobile_api::AudioStreamingIndicator::eType indicator) = 0;
   virtual void increment_put_file_in_none_count() = 0;
   virtual void increment_delete_file_in_none_count() = 0;
   virtual void increment_list_files_in_none_count() = 0;
@@ -772,6 +801,31 @@ class Application : public virtual InitialApplicationData,
    */
   virtual uint32_t GetAvailableDiskSpace() = 0;
 
+#ifdef SDL_REMOTE_CONTROL
+  virtual void set_system_context(
+      const mobile_api::SystemContext::eType& system_context) = 0;
+  virtual void set_audio_streaming_state(
+      const mobile_api::AudioStreamingState::eType& state) = 0;
+  virtual bool IsSubscribedToInteriorVehicleData(
+      smart_objects::SmartObject module) = 0;
+  virtual bool SubscribeToInteriorVehicleData(
+      smart_objects::SmartObject module) = 0;
+  virtual bool UnsubscribeFromInteriorVehicleData(
+      smart_objects::SmartObject module) = 0;
+  virtual void set_hmi_level(const mobile_api::HMILevel::eType& hmi_level) = 0;
+
+  /**
+   * @brief Return pointer to extension by uid
+   * @param uid uid of extension
+   * @return Pointer to extension, if extension was initialized, otherwise NULL
+   */
+  virtual AppExtensionPtr QueryInterface(AppExtensionUID uid) = 0;
+  virtual bool AddExtension(AppExtensionPtr extention) = 0;
+  virtual bool RemoveExtension(AppExtensionUID uid) = 0;
+  virtual void RemoveExtensions() = 0;
+  virtual const std::set<uint32_t>& SubscribesIVI() const = 0;
+#endif
+
  protected:
   mutable sync_primitives::Lock hmi_states_lock_;
 
@@ -786,6 +840,7 @@ class Application : public virtual InitialApplicationData,
 
 typedef utils::SharedPtr<Application> ApplicationSharedPtr;
 typedef utils::SharedPtr<const Application> ApplicationConstSharedPtr;
+typedef uint32_t ApplicationId;
 
 }  // namespace application_manager
 

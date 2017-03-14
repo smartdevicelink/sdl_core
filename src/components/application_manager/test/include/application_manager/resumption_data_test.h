@@ -68,12 +68,13 @@ class ResumptionDataTest : public ::testing::Test {
       , kCountOfSubmenues_(3u)
       , kCountOfFiles_(8u)
       , kCountOfVrhelptitle_(2u)
-      , kMacAddress_("12345") {}
+      , kMacAddress_("12345")
+      , kSubmenuStartId_(10u) {}
   // Check structure in saved application
   void CheckSavedApp(sm::SmartObject& saved_data);
   // Set data for resumption
   virtual void PrepareData();
-  utils::SharedPtr<NiceMock<application_manager_test::MockApplication>>
+  utils::SharedPtr<NiceMock<application_manager_test::MockApplication> >
       app_mock;
 
   profile::Profile profile_;
@@ -130,6 +131,7 @@ class ResumptionDataTest : public ::testing::Test {
   const size_t kCountOfFiles_;
   const size_t kCountOfVrhelptitle_;
   const std::string kMacAddress_;
+  const size_t kSubmenuStartId_;
 
   am::CommandsMap test_commands_map;
   am::SubMenuMap test_submenu_map;

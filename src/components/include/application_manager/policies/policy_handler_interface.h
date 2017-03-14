@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,9 +45,13 @@
 #include "utils/custom_string.h"
 #include "policy/policy_settings.h"
 #include "smart_objects/smart_object.h"
+#include "application_manager/application.h"
+#include "application_manager/service.h"
+#include "utils/callable.h"
 
 namespace policy {
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
+typedef utils::SharedPtr<utils::Callable> StatusNotifier;
+
 class PolicyHandlerInterface {
  public:
   virtual ~PolicyHandlerInterface() {}
@@ -69,13 +73,21 @@ class PolicyHandlerInterface {
   virtual void OnPermissionsUpdated(const std::string& policy_app_id,
                                     const Permissions& permissions) = 0;
 
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  virtual void OnSnapshotCreated(const BinaryMessage& pt_string,
+                                 const std::vector<int>& retry_delay_seconds,
+                                 uint32_t timeout_exchange) = 0;
+#else   // EXTERNAL_PROPRIETARY_MODE
+  virtual void OnSnapshotCreated(const BinaryMessage& pt_string) = 0;
+#endif  // EXTERNAL_PROPRIETARY_MODE
+
   virtual bool GetPriority(const std::string& policy_app_id,
                            std::string* priority) const = 0;
-  virtual void CheckPermissions(const PTString& app_id,
-                                const PTString& hmi_level,
-                                const PTString& rpc,
-                                const RPCParams& rpc_params,
-                                CheckPermissionResult& result) = 0;
+  virtual void CheckPermissions(
+      const application_manager::ApplicationSharedPtr app,
+      const PTString& rpc,
+      const RPCParams& rpc_params,
+      CheckPermissionResult& result) = 0;
 
   virtual uint32_t GetNotificationsNumber(
       const std::string& priority) const = 0;
@@ -86,12 +98,15 @@ class PolicyHandlerInterface {
   virtual bool GetInitialAppData(const std::string& application_id,
                                  StringArray* nicknames = NULL,
                                  StringArray* app_hmi_types = NULL) = 0;
-  virtual void GetServiceUrls(const std::string& service_type,
-                              EndpointUrls& end_points) = 0;
+  virtual void GetUpdateUrls(const std::string& service_type,
+                             EndpointUrls& out_end_points) = 0;
+  virtual void GetUpdateUrls(const uint32_t service_type,
+                             EndpointUrls& out_end_points) = 0;
   virtual std::string GetLockScreenIconUrl() const = 0;
   virtual void ResetRetrySequence() = 0;
   virtual uint32_t NextRetryTimeout() = 0;
-  virtual int TimeoutExchange() = 0;
+  virtual uint32_t TimeoutExchangeSec() = 0;
+  virtual uint32_t TimeoutExchangeMSec() = 0;
   virtual void OnExceededTimeout() = 0;
   virtual void OnSystemReady() = 0;
   virtual void PTUpdatedAt(Counters counter, int value) = 0;
@@ -115,7 +130,6 @@ class PolicyHandlerInterface {
    */
   virtual bool CheckSystemAction(mobile_apis::SystemAction::eType system_action,
                                  const std::string& policy_app_id) const = 0;
-
   /**
    * Lets client to notify PolicyHandler that more kilometers expired
    * @param kms New value of odometer
@@ -131,11 +145,11 @@ class PolicyHandlerInterface {
 
   /**
    * @brief Process user consent on mobile data connection access
-   * @param Device id or empty string, if concern to all SDL functionality
-   * @param User consent from response
+   * @param is_allowed - user consent from response
+   * @param device_mac - mac adress of device
    */
   virtual void OnAllowSDLFunctionalityNotification(
-      bool is_allowed, const std::string& device_id) = 0;
+      bool is_allowed, const std::string& device_mac) = 0;
 
   /**
    * @brief Increment counter for ignition cycles
@@ -210,10 +224,10 @@ class PolicyHandlerInterface {
   virtual void OnUpdateStatusChanged(const std::string& status) = 0;
 
   /**
-   * @brief Update currently used device id in policies manager for given
-   * application
-   * @param policy_app_id Application id
-   */
+ * @brief Update currently used device id in policies manager for given
+ * application
+ * @param policy_app_id Application id
+ */
   virtual std::string OnCurrentDeviceIdUpdateRequired(
       const std::string& policy_app_id) = 0;
 
@@ -281,7 +295,9 @@ class PolicyHandlerInterface {
       std::map<std::string, StringArray> app_hmi_types) = 0;
 
   virtual void OnCertificateUpdated(const std::string& certificate_data) = 0;
-
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  virtual void OnCertificateDecrypted(bool is_succeeded) = 0;
+#endif  // EXTERNAL_PROPRIETARY_MODE
   virtual bool CanUpdate() = 0;
 
   virtual void OnDeviceConsentChanged(const std::string& device_id,
@@ -295,8 +311,9 @@ class PolicyHandlerInterface {
    * @brief Allows to add new or update existed application during
    * registration process
    * @param application_id The policy aplication id.
+   * @return function that will notify update manager about new application
    */
-  virtual void AddApplication(const std::string& application_id) = 0;
+  virtual StatusNotifier AddApplication(const std::string& application_id) = 0;
 
   /**
    * Checks whether application is revoked
@@ -360,7 +377,13 @@ class PolicyHandlerInterface {
    * @return Structure with vehicle information
    */
   virtual const VehicleInfo GetVehicleInfo() const = 0;
-
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  /**
+   * @brief Gets meta information
+   * @return meta information
+   */
+  virtual const policy::MetaInfo GetMetaInfo() const = 0;
+#endif  // EXTERNAL_PROPRIETARY_MODE
   virtual void Increment(usage_statistics::GlobalCounterId type) = 0;
   virtual void Increment(const std::string& app_id,
                          usage_statistics::AppCounterId type) = 0;
@@ -371,14 +394,172 @@ class PolicyHandlerInterface {
                    usage_statistics::AppStopwatchId type,
                    int32_t timespan_seconds) = 0;
 
+  virtual const PolicySettings& get_settings() const = 0;
+  virtual const std::string RemoteAppsUrl() const = 0;
+
 #ifdef ENABLE_SECURITY
   virtual std::string RetrieveCertificate() const = 0;
 #endif  // ENABLE_SECURITY
 
-  virtual const PolicySettings& get_settings() const = 0;
-  virtual const std::string RemoteAppsUrl() const = 0;
+#ifdef SDL_REMOTE_CONTROL
+  virtual void SetDefaultHmiTypes(
+      const std::string& application_id,
+      const smart_objects::SmartObject* app_types) = 0;
 
- private:
+  /**
+   * Checks if application has HMI type
+   * @param application_id ID application
+   * @param hmi HMI type to check
+   * @param app_types additional list of HMI type to search in it
+   * @return true if hmi is contained in policy or app_types
+   */
+  virtual bool CheckHMIType(const std::string& application_id,
+                            mobile_apis::AppHMIType::eType hmi,
+                            const smart_objects::SmartObject* app_types) = 0;
+
+  /**
+   * Notifies about changing HMI level
+   * @param device_id unique identifier of device
+   * @param policy_app_id unique identifier of application in policy
+   * @param hmi_level default HMI level for this application
+   */
+  virtual void OnUpdateHMILevel(const std::string& device_id,
+                                const std::string& policy_app_id,
+                                const std::string& hmi_level) = 0;
+
+  /**
+   * Checks access to equipment of vehicle for application by RPC
+   * @param device_id unique identifier of device
+   * @param app_id policy id application
+   * @param zone interior zone
+   * @param module type
+   * @param rpc name of rpc
+   * @param params parameters list
+   */
+  virtual application_manager::TypeAccess CheckAccess(
+      const PTString& device_id,
+      const PTString& app_id,
+      const application_manager::SeatLocation& zone,
+      const PTString& module,
+      const std::string& rpc,
+      const std::vector<PTString>& params) = 0;
+
+  /**
+   * Checks access to module for application
+   * @param app_id policy id application
+   * @param module
+   * @return true if module is allowed for application
+   */
+  virtual bool CheckModule(const PTString& app_id, const PTString& module) = 0;
+
+  /**
+   * Sets access to equipment of vehicle for application by RPC
+   * @param device_id unique identifier of device
+   * @param app_id policy id application
+   * @param zone interior zone
+   * @param module type
+   * @param allowed true if access is allowed
+   */
+  virtual void SetAccess(const PTString& device_id,
+                         const PTString& app_id,
+                         const application_manager::SeatLocation& zone,
+                         const PTString& module,
+                         bool allowed) = 0;
+
+  /**
+   * Resets access application to all resources
+   * @param device_id unique identifier of device
+   * @param app_id policy id application
+   */
+  virtual void ResetAccess(const PTString& device_id,
+                           const PTString& app_id) = 0;
+
+  /**
+   * Resets access by group name for all applications
+   * @param zone interior zone
+   * @param module type
+   */
+  virtual void ResetAccess(const application_manager::SeatLocation& zone,
+                           const std::string& module) = 0;
+
+  /**
+   * Sets device as primary device
+   * @param dev_id ID device
+   */
+  virtual void SetPrimaryDevice(const PTString& dev_id) = 0;
+
+  /**
+   * Resets driver's device
+   */
+  virtual void ResetPrimaryDevice() = 0;
+
+  /*
+   * Return id of primary device
+   */
+  virtual uint32_t PrimaryDevice() const = 0;
+
+  /**
+   * Sets device zone
+   * @param device_id unique identifier of device
+   * @param zone device zone
+   */
+  virtual void SetDeviceZone(const std::string& device_id,
+                             const application_manager::SeatLocation& zone) = 0;
+
+  /**
+   * Gets device zone
+   * @param dev_id ID device
+   * @return device zone is unknown otherwise 0
+   */
+  virtual const application_manager::SeatLocationPtr GetDeviceZone(
+      const std::string& device_id) const = 0;
+
+  /**
+   * Sets mode of remote control (on/off)
+   * @param enabled true if remote control is turned on
+   */
+  virtual void SetRemoteControl(bool enabled) = 0;
+
+  /**
+   * @brief If remote control is enabled
+   * by User and by Policy
+   */
+  virtual bool GetRemoteControl() const = 0;
+
+  /**
+   * @brief Notifies passengers' apps about change
+   * @param new_consent New value of remote permission
+   */
+  virtual void OnRemoteAllowedChanged(bool new_consent) = 0;
+
+  /**
+   * @brief Notifies Remote apps about change in permissions
+   * @param device_id Device on which app is running
+   * @param application_id ID of app whose permissions are changed
+   */
+  virtual void OnRemoteAppPermissionsChanged(
+      const std::string& device_id, const std::string& application_id) = 0;
+
+  virtual void OnUpdateHMIStatus(const std::string& device_id,
+                                 const std::string& policy_app_id,
+                                 const std::string& hmi_level) = 0;
+
+  virtual void OnUpdateHMIStatus(const std::string& device_id,
+                                 const std::string& policy_app_id,
+                                 const std::string& hmi_level,
+                                 const std::string& device_rank) = 0;
+
+  /**
+   * Gets all allowed module types
+   * @param app_id unique identifier of application
+   * @param list of allowed module types
+   * @return true if application has allowed modules
+   */
+  virtual bool GetModuleTypes(const std::string& policy_app_id,
+                              std::vector<std::string>* modules) const = 0;
+#endif  // SDL_REMOTE_CONTROL
+
+ protected:
   virtual void OnAppPermissionConsentInternal(
       const uint32_t connection_key, PermissionConsent& permissions) = 0;
 

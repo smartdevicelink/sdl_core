@@ -137,7 +137,7 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   /**
    * @brief Sets the path to the config file
    */
-  void config_file_name(const std::string& fileName);
+  void set_config_file_name(const std::string& file_name);
 
   /**
    * @brief Returns server address
@@ -154,10 +154,12 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
    */
   const uint16_t video_streaming_port() const OVERRIDE;
 
+  const uint16_t audio_streaming_port() const OVERRIDE;
+
   /**
-    * @brief Returns port for audio streaming
+    * @brief Returns folder containing all plugins
     */
-  const uint16_t audio_streaming_port() const;
+  const std::string& plugins_folder() const OVERRIDE;
 
   /**
    * @brief Returns streaming timeout
@@ -209,7 +211,7 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   /**
    * @brief Returns desirable thread stack size
    */
-  const uint64_t& thread_min_stack_size() const;
+  const uint64_t thread_min_stack_size() const;
 
   /**
     * @brief Returns true if audio mixing is supported
@@ -344,10 +346,19 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
 
   // TransportManageSettings interface
 
+  /*
+   * @brief Returns true if last state singleton is used
+   */
   bool use_last_state() const OVERRIDE;
 
+  /**
+    * @brief Returns port for audio streaming
+    */
   uint32_t transport_manager_disconnect_timeout() const OVERRIDE;
 
+  /**
+   * @brief Returns port for TCP transport adapter
+   */
   uint16_t transport_manager_tcp_adapter_port() const OVERRIDE;
 
   // TransportManageMMESettings interface
@@ -620,10 +631,17 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
    */
   const bool enable_app_launch_ios() const OVERRIDE;
 
-  /*
+  /**
    * @brief Updates all related values from ini file
    */
   void UpdateValues();
+
+  /**
+   * @brief Gets reading result of all related values from ini file
+   * @returns TRUE if no error appeared during updating
+   * otherwise FALSE
+   */
+  const bool ErrorOccured() const;
 
   const uint32_t& list_files_response_size() const OVERRIDE;
 
@@ -637,7 +655,20 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   const std::pair<uint32_t, int32_t>& start_stream_retry_amount()
       const OVERRIDE;
 
+  /**
+   * @brief Returns error description
+   * @return Actual error description if error appears otherwise empty line
+   */
+  const std::string ErrorDescription() const;
+
  private:
+  /**
+   * @brief Checks that filename consists of portable symbols
+   * @param file_name - file name to check
+   * @return FALSE if file name has unportable symbols otherwise TRUE
+   */
+  bool IsFileNamePortable(const std::string& file_name) const;
+
   /**
    * @brief Reads a string value from the profile and interpret it
    * as \c true on "true" value or as \c false on any other value
@@ -836,6 +867,7 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   std::string iap_pool_protocol_mask_;
   std::string iap_system_config_;
   std::string iap2_system_config_;
+  std::string plugins_folder_;
   int iap2_hub_connect_attempts_;
   int iap_hub_connection_wait_timeout_;
   uint16_t tts_global_properties_timeout_;
@@ -855,6 +887,8 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   uint16_t max_number_of_ios_device_;
   uint16_t wait_time_between_apps_;
   bool enable_app_launch_ios_;
+  bool error_occured_;
+  std::string error_description_;
 
   DISALLOW_COPY_AND_ASSIGN(Profile);
 };

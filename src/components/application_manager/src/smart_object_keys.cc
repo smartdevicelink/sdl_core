@@ -3,7 +3,8 @@
 namespace application_manager {
 
 namespace strings {
-
+// TODO (dcherniev) : Remove from strings namespace all duplicate fields that
+// are present in other more specific namespaces
 const char* params = "params";
 const char* message_type = "message_type";
 const char* correlation_id = "correlation_id";
@@ -70,6 +71,7 @@ const char* cmd_id = "cmdID";
 const char* menu_params = "menuParams";
 const char* menu_title = "menuTitle";
 const char* menu_icon = "menuIcon";
+const char* sub_menu_icon = "subMenuIcon";
 const char* keyboard_properties = "keyboardProperties";
 const char* vr_commands = "vrCommands";
 const char* position = "position";
@@ -122,6 +124,7 @@ const char* hours = "hours";
 const char* minutes = "minutes";
 const char* seconds = "seconds";
 const char* update_mode = "updateMode";
+const char* enable_seek = "enableSeek";
 const char* trigger_source = "triggerSource";
 const char* hmi_level = "hmiLevel";
 const char* activate_app_hmi_level = "level";
@@ -131,6 +134,10 @@ const char* speech_capabilities = "speechCapabilities";
 const char* vr_capabilities = "vrCapabilities";
 const char* audio_pass_thru_capabilities = "audioPassThruCapabilities";
 const char* pcm_stream_capabilities = "pcmStreamCapabilities";
+const char* audio_pass_thru_icon = "audioPassThruIcon";
+const char* way_points = "wayPoints";
+const char* device_rank = "deviceRank";
+
 // PutFile
 const char* sync_file_name = "syncFileName";
 const char* file_name = "fileName";
@@ -224,6 +231,7 @@ const char* phone_call = "phoneCall";
 const char* sdl_version = "sdlVersion";
 const char* system_software_version = "systemSoftwareVersion";
 const char* priority = "priority";
+const char* steering_wheel_location = "steeringWheelLocation";
 
 // resuming
 const char* application_commands = "applicationCommands";
@@ -273,6 +281,7 @@ const char* is_suscribed = "isSubscribed";
 const char* message_data = "messageData";
 
 const char* delivery_mode = "deliveryMode";
+const char* audio_streaming_indicator = "audioStreamingIndicator";
 }  // namespace strings
 
 namespace json {
@@ -345,9 +354,12 @@ const char* method_name = "methodName";
 const char* keyboard_layout = "keyboardLayout";
 const char* limited_character_list = "limitedCharacterList";
 const char* auto_complete_text = "autoCompleteText";
+const char* auto_complete_list = "autoCompleteList";
 const char* file = "file";
+const char* file_name = "fileName";
 const char* retry = "retry";
 const char* service = "service";
+const char* audio_pass_thru_icon = "audioPassThruIcon";
 }  // namespace hmi_request
 
 namespace hmi_response {
@@ -403,6 +415,7 @@ const char* policyfile = "policyfile";
 const char* is_active = "isActive";
 const char* is_deactivated = "isDeactivated";
 const char* event_name = "eventName";
+const char* enable_seek = "enable_seek";
 
 }  // namespace hmi_notification
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -70,10 +70,7 @@ ThreadedSocketConnection::ThreadedSocketConnection(
 
 ThreadedSocketConnection::~ThreadedSocketConnection() {
   LOG4CXX_AUTO_TRACE(logger_);
-  Disconnect();
-  thread_->join();
-  delete thread_->delegate();
-  threads::DeleteThread(thread_);
+  DCHECK(NULL == thread_);
 
   if (-1 != read_fd_) {
     close(read_fd_);
@@ -81,6 +78,14 @@ ThreadedSocketConnection::~ThreadedSocketConnection() {
   if (-1 != write_fd_) {
     close(write_fd_);
   }
+}
+
+void ThreadedSocketConnection::StopAndJoinThread() {
+  Disconnect();
+  thread_->join();
+  delete thread_->delegate();
+  threads::DeleteThread(thread_);
+  thread_ = NULL;
 }
 
 void ThreadedSocketConnection::Abort() {
@@ -126,7 +131,8 @@ void ThreadedSocketConnection::Finalize() {
     LOG4CXX_DEBUG(logger_, "not unexpected_disconnect");
     controller_->ConnectionFinished(device_handle(), application_handle());
   }
-  close(socket_);
+
+  ShutdownAndCloseSocket();
 }
 
 TransportAdapter::Error ThreadedSocketConnection::Notify() const {
@@ -157,12 +163,12 @@ TransportAdapter::Error ThreadedSocketConnection::SendData(
 TransportAdapter::Error ThreadedSocketConnection::Disconnect() {
   LOG4CXX_AUTO_TRACE(logger_);
   terminate_flag_ = true;
+  ShutdownAndCloseSocket();
   return Notify();
 }
 
 void ThreadedSocketConnection::threadMain() {
   LOG4CXX_AUTO_TRACE(logger_);
-  controller_->ConnectionCreated(this, device_handle(), application_handle());
   ConnectError* connect_error = NULL;
   if (!Establish(&connect_error)) {
     LOG4CXX_ERROR(logger_, "Connection Establish failed");
@@ -189,6 +195,22 @@ bool ThreadedSocketConnection::IsFramesToSendQueueEmpty() const {
   // Check Frames queue is empty or not
   sync_primitives::AutoLock auto_lock(frames_to_send_mutex_);
   return frames_to_send_.empty();
+}
+
+void ThreadedSocketConnection::ShutdownAndCloseSocket() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  const int socket = socket_;
+  socket_ = -1;
+  if (socket != -1) {
+    if (shutdown(socket, SHUT_RDWR) != 0) {
+      LOG4CXX_WARN(logger_, "Socket was unable to be shutdowned");
+    }
+    if (close(socket) != 0) {
+      LOG4CXX_ERROR_WITH_ERRNO(logger_, "Failed to close socket");
+    }
+  } else {
+    LOG4CXX_WARN(logger_, "Socket has been already closed or not created yet");
+  }
 }
 
 void ThreadedSocketConnection::Transmit() {

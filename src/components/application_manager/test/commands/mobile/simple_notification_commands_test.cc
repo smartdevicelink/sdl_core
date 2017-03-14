@@ -44,11 +44,13 @@
 #include "application_manager/commands/mobile/on_driver_distraction_notification.h"
 #include "application_manager/commands/mobile/on_language_change_notification.h"
 #include "application_manager/commands/mobile/on_permissions_change_notification.h"
+#include "application_manager/commands/mobile/on_seek_media_clock_timer_notification.h"
 
 namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace simple_notification_commands_test {
 
 namespace am = ::application_manager;
 namespace commands = am::commands;
@@ -67,6 +69,7 @@ typedef Types<commands::OnAppInterfaceUnregisteredNotification,
               commands::OnAudioPassThruNotification,
               commands::OnLanguageChangeNotification,
               commands::OnPermissionsChangeNotification,
+              commands::mobile::OnSeekMediaClockTimerNotification,
               commands::mobile::OnDriverDistractionNotification>
     NotificationCommandsList;
 
@@ -89,6 +92,7 @@ TYPED_TEST(MobileNotificationCommandsTest, Run_SendMessageToMobile_SUCCESS) {
   command->Run();
 }
 
+}  // namespace simple_notification_commands_test
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

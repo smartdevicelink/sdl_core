@@ -1,0 +1,28 @@
+This instruction contains the information on how to build and run CAN simulation utility on OS Ubuntu
+
+1) General workspace preparation
+  1.1: Linux workspace preparation:
+    1.1.1: Install Ubuntu/Xubuntu 12.04 or higher
+    1.1.2: Configure source repositories (check "Canonical Partners" repositories in Update Manager->Settings->SW source).
+            Note: Fore Ubuntu 12.04 "Update Manager->Settings->Other Software"
+    1.1.3: Perform "sudo apt-get install git" command in terminal.
+    1.1.4: Clone git repository with "git clone https://adc.luxoft.com/stash/scm/ford/revsdl.git ".
+        Note: System will request your credentials.
+    1.1.5. Switch to current release branch: "git checkout -t origin/develop_revsdl".
+            Note: you can get list of branches with command "$ git branch -a"
+            Note: in above cases the <Project_Root_Src> is the path to 'Project_Root_Src' git folder (e.g. "/home/user_name/Work/Project_Root_src").
+
+2) Build and run on Linux.
+  2.1: Build CAN:
+    2.1.1: Make build directory "$mkdir <Project_Build_SimulatorCAN>  && cd <Project_Build_SimulatorCAN>"
+    2.1.2: Configure build "cmake <Project_Root_Src/test/canSimulation>".
+    2.1.3: Run build process "$make"
+
+  2.2 Run SDL:
+    2.2.1: Go to the binary folder "cd <Project_Build_SimulatorCAN>".
+    2.2.2: Prepare RUN Environment.
+            "$ CMAKE_PREFIX_PATH=/home/user/Programs/<other_stuff>"
+	    	where references the compiler etc, so that this complete path is valid:
+		/home/user/Programs/<other_stuff>/bin/qmake*
+            "$ export CMAKE_PREFIX_PATH"
+    2.2.3: Run SDL "$ ./CAN".

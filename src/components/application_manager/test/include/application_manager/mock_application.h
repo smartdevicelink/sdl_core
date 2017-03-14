@@ -37,13 +37,13 @@
 #include "smart_objects/smart_object.h"
 #include "utils/custom_string.h"
 #include "application_manager/usage_statistics.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace test {
 namespace components {
 namespace application_manager_test {
 
 namespace custom_str = utils::custom_string;
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 class MockApplication : public ::application_manager::Application {
  public:
   MockApplication() {}
@@ -68,6 +68,7 @@ class MockApplication : public ::application_manager::Application {
   MOCK_METHOD1(set_video_streaming_allowed, void(bool state));
   MOCK_CONST_METHOD0(audio_streaming_allowed, bool());
   MOCK_METHOD1(set_audio_streaming_allowed, void(bool state));
+  MOCK_CONST_METHOD0(is_audio, bool());
   MOCK_METHOD1(StartStreaming,
                void(protocol_handler::ServiceType service_type));
   MOCK_METHOD1(StopStreaming, void(protocol_handler::ServiceType service_type));
@@ -279,6 +280,41 @@ class MockApplication : public ::application_manager::Application {
   MOCK_CONST_METHOD0(is_foreground, bool());
   MOCK_METHOD1(set_foreground, void(bool is_foreground));
   MOCK_CONST_METHOD0(IsRegistered, bool());
+  MOCK_CONST_METHOD0(SchemaUrl, std::string());
+  MOCK_CONST_METHOD0(PackageName, std::string());
+  MOCK_METHOD1(
+      set_audio_streaming_indicator,
+      void(const mobile_apis::AudioStreamingIndicator::eType indicator));
+  MOCK_CONST_METHOD0(audio_streaming_indicator,
+                     mobile_apis::AudioStreamingIndicator::eType());
+  MOCK_METHOD1(
+      AddIndicatorWaitForResponse,
+      bool(const mobile_apis::AudioStreamingIndicator::eType indicator));
+  MOCK_METHOD1(
+      RemoveIndicatorWaitForResponse,
+      void(const mobile_apis::AudioStreamingIndicator::eType indicator));
+#ifdef SDL_REMOTE_CONTROL
+  MOCK_METHOD1(set_hmi_level,
+               void(const mobile_apis::HMILevel::eType& hmi_level));
+  MOCK_METHOD1(IsSubscribedToInteriorVehicleData,
+               bool(smart_objects::SmartObject module));
+  MOCK_METHOD1(SubscribeToInteriorVehicleData,
+               bool(smart_objects::SmartObject module));
+  MOCK_METHOD1(UnsubscribeFromInteriorVehicleData,
+               bool(smart_objects::SmartObject module));
+  MOCK_METHOD1(set_system_context,
+               void(const mobile_apis::SystemContext::eType& system_context));
+  MOCK_METHOD1(set_audio_streaming_state,
+               void(const mobile_apis::AudioStreamingState::eType& state));
+  MOCK_METHOD1(QueryInterface,
+               application_manager::AppExtensionPtr(
+                   application_manager::AppExtensionUID uid));
+  MOCK_METHOD1(AddExtension,
+               bool(application_manager::AppExtensionPtr extention));
+  MOCK_METHOD1(RemoveExtension, bool(application_manager::AppExtensionUID uid));
+  MOCK_METHOD0(RemoveExtensions, void());
+  MOCK_CONST_METHOD0(SubscribesIVI, const std::set<uint32_t>&());
+#endif  // SDL_REMOTE_CONTROL
 };
 
 }  // namespace application_manager_test

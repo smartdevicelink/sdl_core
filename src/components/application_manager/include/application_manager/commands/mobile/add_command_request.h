@@ -31,8 +31,9 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ADD_COMMAND_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ADD_COMMAND_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_ADD_COMMAND_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_ADD_COMMAND_REQUEST_H_
+
 #include <string>
 
 #include "application_manager/application.h"
@@ -115,6 +116,27 @@ class AddCommandRequest : public CommandRequestImpl {
    */
   void RemoveCommand();
 
+  /**
+   * @brief Prepare result code and result for sending to mobile application
+   * @param out_result_code contains result code for sending to mobile
+   * application
+   * @param out_info contain info for sending to mobile app
+   * @return result for sending to mobile application.
+   */
+  bool PrepareResponseParameters(mobile_apis::Result::eType& out_result_code,
+                                 std::string& out_info);
+
+  /**
+   * @brief Checks particular case for calculation result code
+   * @param first_info contains information about result code from hmi
+   * @param second_info contains information about result code from hmi
+   * @param result_code contain result code to mobile
+   * @return true if result code was calculated otherwise return false.
+   */
+  bool CalculateResultCode(const ResponseInfo& first_info,
+                           const ResponseInfo& second_info,
+                           mobile_apis::Result::eType& out_result_code);
+
   DISALLOW_COPY_AND_ASSIGN(AddCommandRequest);
 
   /*
@@ -134,12 +156,6 @@ class AddCommandRequest : public CommandRequestImpl {
 
   inline bool BothSend() const;
 
-  /**
-   * @brief GenerateMobileResponseInfo generated info for mobile response
-   * depends from UI and VR responses
-   * @return info for mobile response
-   */
-  const std::string GenerateMobileResponseInfo();
   bool send_ui_;
   bool send_vr_;
 
@@ -156,4 +172,4 @@ class AddCommandRequest : public CommandRequestImpl {
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ADD_COMMAND_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_ADD_COMMAND_REQUEST_H_

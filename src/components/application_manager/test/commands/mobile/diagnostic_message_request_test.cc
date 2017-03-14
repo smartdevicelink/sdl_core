@@ -44,6 +44,7 @@
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/event_engine/event.h"
+#include "application_manager/mock_message_helper.h"
 #include "application_manager/commands/mobile/diagnostic_message_request.h"
 #include "interfaces/MOBILE_API.h"
 
@@ -51,6 +52,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace diagnostic_message_request {
 
 using ::testing::_;
 using ::testing::Return;
@@ -69,7 +71,17 @@ const uint32_t kDiagnosticMode = 5u;
 }  // namespace
 
 class DiagnosticMessageRequestTest
-    : public CommandRequestTest<CommandsTestMocks::kIsNice> {};
+    : public CommandRequestTest<CommandsTestMocks::kIsNice> {
+ public:
+  DiagnosticMessageRequestTest()
+      : mock_message_helper_(*am::MockMessageHelper::message_helper_mock()) {
+    testing::Mock::VerifyAndClearExpectations(&mock_message_helper_);
+  }
+  ~DiagnosticMessageRequestTest() {
+    testing::Mock::VerifyAndClearExpectations(&mock_message_helper_);
+  }
+  am::MockMessageHelper& mock_message_helper_;
+};
 
 TEST_F(DiagnosticMessageRequestTest, Run_ApplicationIsNotRegistered_UNSUCCESS) {
   MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
@@ -169,6 +181,10 @@ TEST_F(DiagnosticMessageRequestTest, OnEvent_SUCCESS) {
   DiagnosticMessageRequestPtr command(
       CreateCommand<DiagnosticMessageRequest>());
 
+  EXPECT_CALL(mock_message_helper_,
+              HMIToMobileResult(hmi_apis::Common_Result::SUCCESS))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
+
   EXPECT_CALL(
       app_mngr_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::SUCCESS), _));
@@ -176,6 +192,7 @@ TEST_F(DiagnosticMessageRequestTest, OnEvent_SUCCESS) {
   command->on_event(event);
 }
 
+}  // namespace diagnostic_message_request
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

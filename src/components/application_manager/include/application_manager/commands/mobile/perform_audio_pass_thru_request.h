@@ -31,8 +31,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_PERFORM_AUDIO_PASS_THRU_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_PERFORM_AUDIO_PASS_THRU_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_PERFORM_AUDIO_PASS_THRU_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_PERFORM_AUDIO_PASS_THRU_REQUEST_H_
 
 #include "application_manager/commands/command_request_impl.h"
 #include "utils/macro.h"
@@ -133,6 +133,29 @@ class PerformAudioPassThruRequest : public CommandRequestImpl {
    */
   bool IsWaitingHMIResponse();
 
+  /**
+   * @brief Validates audioPassThruIcon parameter and
+   * removes it if is not valid
+   * @param app Pointer to the application whose storage directory
+   * must be accessed
+   */
+  void ProcessAudioPassThruIcon(ApplicationSharedPtr app);
+
+  /**
+   * @brief Checks result code from HMI for splitted RPC
+   * and returns parameter for sending to mobile app in
+   * audioPassThru communication.
+   * @param ui_response contains result_code from UI
+   * @param tts_response contains result_code from TTS
+   * @param out_result contains result for mobile app
+   * @return result code - 1) UI error code has precedence than TTS's
+   * 2) error_code from TTS is turned to WARNINGS
+   */
+  mobile_apis::Result::eType PrepareAudioPassThruResultCodeForResponse(
+      const ResponseInfo& ui_response,
+      const ResponseInfo& tts_response,
+      bool& out_result);
+
   /* flag display state of speak and ui perform audio
   during perform audio pass thru*/
   bool awaiting_tts_speak_response_;
@@ -149,4 +172,4 @@ class PerformAudioPassThruRequest : public CommandRequestImpl {
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_PERFORM_AUDIO_PASS_THRU_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_PERFORM_AUDIO_PASS_THRU_REQUEST_H_

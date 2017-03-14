@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,7 +45,7 @@
 #include "application_manager/mock_application_manager_settings.h"
 #include "application_manager/mock_event_dispatcher.h"
 #include "application_manager/state_controller.h"
-#include "resumption/last_state.h"
+#include "resumption/last_state_impl.h"
 #include "application_manager/resumption/resume_ctrl.h"
 
 namespace test {
@@ -59,7 +59,6 @@ using ::testing::AtLeast;
 using ::testing::Invoke;
 using ::testing::InSequence;
 
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 using namespace application_manager;
 
 class HMICapabilitiesTest : public ::testing::Test {
@@ -95,7 +94,7 @@ class HMICapabilitiesTest : public ::testing::Test {
   void SetCooperating();
   MockApplicationManager app_mngr_;
   event_engine_test::MockEventDispatcher mock_event_dispatcher;
-  resumption::LastState last_state_;
+  resumption::LastStateImpl last_state_;
   MockApplicationManagerSettings mock_application_manager_settings_;
   utils::SharedPtr<HMICapabilitiesForTesting> hmi_capabilities_test;
   const std::string file_name_;
@@ -179,6 +178,14 @@ TEST_F(HMICapabilitiesTest, LoadCapabilitiesFromFile) {
     EXPECT_TRUE(::file_system::DeleteFile("./app_info_data"));
   }
   EXPECT_TRUE(hmi_capabilities_test->LoadCapabilitiesFromFile());
+
+  // Check ui hmiCapabilities
+  const smart_objects::SmartObject ui_hmi_capabilities =
+      hmi_capabilities_test->ui_hmi_capabilities();
+  EXPECT_FALSE(ui_hmi_capabilities[strings::navigation].asBool());
+  EXPECT_TRUE(ui_hmi_capabilities[strings::phone_call].asBool());
+  EXPECT_EQ(static_cast<int64_t>(hmi_apis::Common_SteeringWheelLocation::LEFT),
+            ui_hmi_capabilities[strings::steering_wheel_location].asInt());
 
   // Check active languages
   EXPECT_EQ(hmi_apis::Common_Language::EN_US,

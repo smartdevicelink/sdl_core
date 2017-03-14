@@ -1,6 +1,6 @@
 /*
 
- Copyright (c) 2013, Ford Motor Company
+ Copyright (c) 2017, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -36,6 +36,7 @@
 #include "application_manager/message_helper.h"
 #include "application_manager/application.h"
 #include "utils/helpers.h"
+#include "utils/file_system.h"
 
 namespace application_manager {
 
@@ -93,8 +94,47 @@ void AddSubMenuRequest::Run() {
   msg_params[strings::menu_params][strings::menu_name] =
       (*message_)[strings::msg_params][strings::menu_name];
   msg_params[strings::app_id] = app->app_id();
+  const bool is_key_icon_exist =
+      ((*message_)[strings::msg_params].keyExists(strings::sub_menu_icon));
+  const bool is_icon_path_valid = CheckSubMenuIcon();
+  const uint32_t image_type =
+      (*message_)[strings::msg_params][strings::sub_menu_icon]
+                 [strings::image_type].asUInt();
+  const mobile_apis::ImageType::eType type =
+      static_cast<mobile_apis::ImageType::eType>(image_type);
 
-  SendHMIRequest(hmi_apis::FunctionID::UI_AddSubMenu, &msg_params, true);
+  if (is_key_icon_exist && is_icon_path_valid) {
+    msg_params[strings::sub_menu_icon] =
+        (*message_)[strings::msg_params][strings::sub_menu_icon];
+    const bool is_dynamic_image = mobile_apis::ImageType::DYNAMIC == type;
+    if (is_dynamic_image) {
+      msg_params[strings::sub_menu_icon][strings::value] =
+          ImageFullPath((*message_)[strings::msg_params][strings::sub_menu_icon]
+                                   [strings::value].asString(),
+                        app,
+                        application_manager_);
+    }
+  }
+
+  if (is_key_icon_exist && !is_icon_path_valid) {
+    LOG4CXX_ERROR(logger_, "Sub-menu icon is not valid.");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+  } else {  // no matter, exists key_icon or not
+    SendHMIRequest(hmi_apis::FunctionID::UI_AddSubMenu, &msg_params, true);
+  }
+}
+
+std::string AddSubMenuRequest::ImageFullPath(const std::string& file_name,
+                                             ApplicationConstSharedPtr app,
+                                             ApplicationManager& app_mngr) {
+  std::string full_file_path;
+  const std::string& app_storage_folder =
+      app_mngr.get_settings().app_storage_folder() + "/";
+  full_file_path = app_storage_folder;
+  full_file_path += app->folder_name();
+  full_file_path += "/";
+  full_file_path += file_name;
+  return full_file_path;
 }
 
 void AddSubMenuRequest::on_event(const event_engine::Event& event) {
@@ -123,6 +163,9 @@ void AddSubMenuRequest::on_event(const event_engine::Event& event) {
         application->AddSubMenu(
             (*message_)[strings::msg_params][strings::menu_id].asInt(),
             (*message_)[strings::msg_params]);
+        if (!CheckMenuIconExistedInStorage()) {
+          response_info = "Reference image(s) not found";
+        }
       }
       SendResponse(result,
                    MessageHelper::HMIToMobileResult(result_code),
@@ -147,6 +190,35 @@ bool AddSubMenuRequest::CheckSubMenuName() {
   str = (*message_)[strings::msg_params][strings::menu_name].asCharArray();
   if (!CheckSyntax(str)) {
     LOG4CXX_INFO(logger_, "Invalid subMenu name.");
+    return false;
+  }
+  return true;
+}
+
+bool AddSubMenuRequest::CheckSubMenuIcon() {
+  const std::string str =
+      (*message_)[strings::msg_params][strings::sub_menu_icon][strings::value]
+          .asString();
+  if (!CheckSyntax(str) || std::string::npos != str.find(" ")) {
+    LOG4CXX_ERROR(logger_, "Invalid menu icon syntax check failed.");
+    return false;
+  }
+
+  return true;
+}
+
+bool AddSubMenuRequest::CheckMenuIconExistedInStorage() {
+  if (!(*message_)[strings::msg_params].keyExists(strings::sub_menu_icon)) {
+    return true;
+  }
+  std::string full_file_path =
+      application_manager_.get_settings().app_storage_folder() + "/";
+
+  full_file_path +=
+      (*message_)[strings::msg_params][strings::sub_menu_icon][strings::value]
+          .asString();
+
+  if (!file_system::FileExists(full_file_path)) {
     return false;
   }
   return true;

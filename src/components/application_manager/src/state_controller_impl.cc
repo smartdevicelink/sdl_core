@@ -95,9 +95,7 @@ void StateControllerImpl::SetRegularState(ApplicationSharedPtr app,
       static_cast<hmi_apis::Common_HMILevel::eType>(
           resolved_state->hmi_level());
 
-  const bool is_full_allowed = (hmi_apis::Common_HMILevel::FULL == hmi_level);
-
-  if (send_activate_app && is_full_allowed) {
+  if (send_activate_app) {
     const int64_t corr_id = SendBCActivateApp(app, hmi_level, true);
     if (-1 != corr_id) {
       subscribe_on_event(hmi_apis::FunctionID::BasicCommunication_ActivateApp,

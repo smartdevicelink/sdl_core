@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2015, Ford Motor Company
+ Copyright (c) 2016, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -46,12 +46,7 @@
 #include "policy/policy_types.h"
 #include "protocol_handler/session_observer.h"
 #include "application_manager/policies/policy_handler_interface.h"
-
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
-class SmartObject;
-}
-}
+#include "smart_objects/smart_object.h"
 
 namespace policy {
 class PolicyHandlerInterface;
@@ -59,7 +54,6 @@ class PolicyHandlerInterface;
 
 namespace application_manager {
 namespace mobile_api = mobile_apis;
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 /*
  * @brief Typedef for VehicleData
@@ -103,6 +97,13 @@ class MessageHelper {
    */
   static void SendOnLanguageChangeToMobile(uint32_t connection_key);
 
+  /**
+    * @brief Sends DecryptCertificate request to HMI
+    * @param file_name path to file containing encrypted certificate
+    */
+  static void SendDecryptCertificateToHMI(const std::string& file_name,
+                                          ApplicationManager& app_mngr);
+
   /*
    * @brief Retrieve vehicle data map for param name in mobile request
    * to VehicleDataType
@@ -129,6 +130,15 @@ class MessageHelper {
       const std::string& hmi_result);
 
   /**
+   * @brief Converts string to device rank, if possible
+   * @param device_rank Stringified device rank
+   * @return Appropriate enum from device rank, or INVALID_ENUM, if conversion
+   * is not possible
+   */
+  static mobile_api::DeviceRank::eType StringToDeviceRank(
+      const std::string& device_rank);
+
+  /**
    * @brief Converts mobile Result enum value to string
    * @param mobile_result mobile Result enum value
    * @return stringified value for enum if succedeed, otherwise - empty string
@@ -136,6 +146,8 @@ class MessageHelper {
   static std::string MobileResultToString(
       mobile_apis::Result::eType mobile_result);
 
+  static std::string GetDeviceMacAddressForHandle(
+      const uint32_t device_handle, const ApplicationManager& app_mngr);
   /**
    * @brief Converts string to mobile Result enum value
    * @param mobile_result stringified value
@@ -177,7 +189,7 @@ class MessageHelper {
   * @param hmi_level Desired HMI Level
   */
   static std::string StringifiedHMILevel(
-      mobile_apis::HMILevel::eType hmi_level);
+      const mobile_apis::HMILevel::eType hmi_level);
 
   /*
   * @brief Used to obtain function name by its id
@@ -192,13 +204,13 @@ class MessageHelper {
       const uint32_t correlation_id,
       uint32_t connection_key);
 
-  /*
-   * @brief Prepare GetDeviceListResponse
-   *
-   *
-   * @param devices Devices list
-   *
-   */
+  /**
+ * @brief Prepare GetDeviceListResponse
+ *
+ *
+ * @param devices Devices list
+ *
+ */
   static smart_objects::SmartObjectSPtr CreateDeviceListSO(
       const connection_handler::DeviceMap& devices,
       const policy::PolicyHandlerInterface& policy_handler,
@@ -340,11 +352,11 @@ class MessageHelper {
     * @brief Send request to SyncP process to read file and send
     * Policy Table Snapshot using Retry Strategy
     * @param file_path Path to file with PTS
-    * @param timeout Timeout to wait for PTU
+    * @param timeout Timeout to wait for PTU in seconds
     * @param retries Seconds between retries
     */
   static void SendPolicyUpdate(const std::string& file_path,
-                               int timeout,
+                               const uint32_t timeout,
                                const std::vector<int>& retries,
                                ApplicationManager& app_mngr);
 
@@ -361,11 +373,15 @@ class MessageHelper {
   /**
    * @brief Send GetListOfPermissions response to HMI
    * @param permissions Array of groups permissions
+   * @param external_consent_status External user consent status
    * @param correlation_id Correlation id of request
    */
   static void SendGetListOfPermissionsResponse(
       const std::vector<policy::FunctionalGroupPermission>& permissions,
-      uint32_t correlation_id,
+#if EXTERNAL_PROPRIETARY_MODE
+      const policy::ExternalConsentStatus& external_consent_status,
+#endif  // EXTERNAL_PROPRIETARY_MODE
+      const uint32_t correlation_id,
       ApplicationManager& app_mngr);
 
   /*
@@ -517,6 +533,21 @@ class MessageHelper {
       int32_t function_id,
       const uint32_t correlation_id,
       int32_t result_code);
+  /*
+     * @brief Verify image and add image file full path
+     * and add path, although the image doesn't exist
+     *
+     * @param SmartObject with image
+     *
+     * @param app current application
+     *
+     * @return verification result
+     *
+     */
+  static mobile_apis::Result::eType VerifyImageApplyPath(
+      smart_objects::SmartObject& image,
+      ApplicationConstSharedPtr app,
+      ApplicationManager& app_mngr);
 
   /*
    * @brief Verify image and add image file full path
@@ -665,6 +696,25 @@ class MessageHelper {
   GetOnAppInterfaceUnregisteredNotificationToMobile(
       int32_t connection_key,
       mobile_api::AppInterfaceUnregisteredReason::eType reason);
+
+  /**
+   * @brief Sends HMI status notification to mobile
+   *
+   * @param application_impl application with changed HMI status
+   * @param rank device rank
+   *
+   **/
+  static void SendHMIStatusNotification(
+      const Application& application_impl,
+      ApplicationManager& application_manager,
+      mobile_apis::DeviceRank::eType rank =
+          mobile_apis::DeviceRank::eType::INVALID_ENUM);
+
+  static void SendActivateAppToHMI(
+      uint32_t const app_id,
+      ApplicationManager& application_manager,
+      hmi_apis::Common_HMILevel::eType level = hmi_apis::Common_HMILevel::FULL,
+      bool send_policy_priority = true);
 
  private:
   /**

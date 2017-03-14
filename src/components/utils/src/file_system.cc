@@ -71,14 +71,8 @@ size_t file_system::DirectorySize(const std::string& path) {
   int32_t return_code = 0;
   DIR* directory = NULL;
 
-#ifndef __QNXNTO__
   struct dirent dir_element_;
   struct dirent* dir_element = &dir_element_;
-#else
-  char* direntbuffer = new char[offsetof(struct dirent, d_name) +
-                                pathconf(path.c_str(), _PC_NAME_MAX) + 1];
-  struct dirent* dir_element = new (direntbuffer) dirent;
-#endif
   struct dirent* result = NULL;
   struct stat file_info = {0};
   directory = opendir(path.c_str());
@@ -100,9 +94,6 @@ size_t file_system::DirectorySize(const std::string& path) {
     }
   }
   closedir(directory);
-#ifdef __QNXNTO__
-  delete[] direntbuffer;
-#endif
   return size;
 }
 
@@ -305,15 +296,8 @@ std::vector<std::string> file_system::ListFiles(
 
   int32_t return_code = 0;
   DIR* directory = NULL;
-#ifndef __QNXNTO__
   struct dirent dir_element_;
   struct dirent* dir_element = &dir_element_;
-#else
-  char* direntbuffer =
-      new char[offsetof(struct dirent, d_name) +
-               pathconf(directory_name.c_str(), _PC_NAME_MAX) + 1];
-  struct dirent* dir_element = new (direntbuffer) dirent;
-#endif
   struct dirent* result = NULL;
 
   directory = opendir(directory_name.c_str());
@@ -332,11 +316,6 @@ std::vector<std::string> file_system::ListFiles(
 
     closedir(directory);
   }
-
-#ifdef __QNXNTO__
-  delete[] direntbuffer;
-#endif
-
   return listFiles;
 }
 
