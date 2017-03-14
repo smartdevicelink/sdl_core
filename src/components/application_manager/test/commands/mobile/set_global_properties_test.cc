@@ -260,7 +260,7 @@ TEST_F(SetGlobalPropertiesRequestTest,
       mobile_apis::Result::UNSUPPORTED_RESOURCE;
   const char* mobile_info = "UI is not supported by system";
   const am::HmiInterfaces::InterfaceState ui_state =
-      am::HmiInterfaces::STATE_NOT_AVAILABLE;
+      am::HmiInterfaces::STATE_AVAILABLE;
   const am::HmiInterfaces::InterfaceState tts_state =
       am::HmiInterfaces::STATE_AVAILABLE;
   const bool success = true;

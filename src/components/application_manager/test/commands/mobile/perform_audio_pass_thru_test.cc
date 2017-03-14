@@ -365,7 +365,7 @@ TEST_F(
       am::HmiInterfaces::STATE_AVAILABLE;
   const am::HmiInterfaces::InterfaceState tts_state =
       am::HmiInterfaces::STATE_AVAILABLE;
-  const bool success = false;
+  const bool success = true;
   CheckExpectations(ui_hmi_response,
                     tts_hmi_response,
                     ui_info,
