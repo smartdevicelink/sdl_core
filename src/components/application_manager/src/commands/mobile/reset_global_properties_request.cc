@@ -299,9 +299,10 @@ bool ResetGlobalPropertiesRequest::PrepareResponseParameters(
   using namespace helpers;
 
   bool result = false;
-  ResponseInfo ui_properties_info(ui_result_, HmiInterfaces::HMI_INTERFACE_UI, application_manager_);
-  ResponseInfo tts_properties_info(tts_result_,
-                                   HmiInterfaces::HMI_INTERFACE_TTS, application_manager_);
+  ResponseInfo ui_properties_info(
+      ui_result_, HmiInterfaces::HMI_INTERFACE_UI, application_manager_);
+  ResponseInfo tts_properties_info(
+      tts_result_, HmiInterfaces::HMI_INTERFACE_TTS, application_manager_);
 
   HmiInterfaces::InterfaceState tts_interface_state =
       application_manager_.hmi_interfaces().GetInterfaceState(

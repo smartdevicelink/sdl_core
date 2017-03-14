@@ -107,7 +107,7 @@ class AlertRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
   void ResultCommandExpectations(MessageSharedPtr msg,
                                  const std::string& info) {
     EXPECT_EQ((*msg)[am::strings::msg_params][am::strings::success].asBool(),
-              false);
+              true);
     EXPECT_EQ(
         (*msg)[am::strings::msg_params][am::strings::result_code].asInt(),
         static_cast<int32_t>(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE));
@@ -196,12 +196,12 @@ class AlertRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
     ON_CALL(hmi_interfaces_,
             GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
         .WillByDefault(
-            Return(am::HmiInterfaces::InterfaceState::STATE_NOT_AVAILABLE));
+            Return(am::HmiInterfaces::InterfaceState::STATE_AVAILABLE));
 
     ON_CALL(hmi_interfaces_,
             GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_TTS))
         .WillByDefault(
-            Return(am::HmiInterfaces::InterfaceState::STATE_NOT_AVAILABLE));
+            Return(am::HmiInterfaces::InterfaceState::STATE_AVAILABLE));
   }
 
   void Expectations() {
@@ -292,12 +292,12 @@ TEST_F(AlertRequestTest, OnTimeout_GENERIC_ERROR) {
 
   command->onTimeOut();
   EXPECT_EQ(
-      (*mobile_command_result)[am::strings::msg_params][am::strings::success]
-          .asBool(),
-      false);
-  EXPECT_EQ((*mobile_command_result)[am::strings::msg_params]
-                                    [am::strings::result_code].asInt(),
-            static_cast<int32_t>(am::mobile_api::Result::GENERIC_ERROR));
+      (*mobile_command_result)[am::strings::msg_params][am::strings::result_code]
+          .asInt(),
+      static_cast<int32_t>(am::mobile_api::Result::GENERIC_ERROR));
+  EXPECT_FALSE((*mobile_command_result)[am::strings::msg_params][am::strings::info].empty());
+  EXPECT_EQ((*mobile_command_result)[am::strings::msg_params][am::strings::info].asString(),
+          "UI component does not respond");
 }
 
 TEST_F(AlertRequestTest, OnEvent_UI_HmiSendSuccess_UNSUPPORTED_RESOURCE) {
@@ -393,7 +393,7 @@ TEST_F(
   const hmi_apis::Common_Result::eType ui_hmi_response =
       hmi_apis::Common_Result::WARNINGS;
   const mobile_apis::Result::eType mobile_response =
-      mobile_apis::Result::UNSUPPORTED_RESOURCE;
+      mobile_apis::Result::WARNINGS;
   const am::HmiInterfaces::InterfaceState tts_state =
       am::HmiInterfaces::STATE_NOT_RESPONSE;
   const am::HmiInterfaces::InterfaceState ui_state =

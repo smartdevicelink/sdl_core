@@ -438,13 +438,11 @@ PerformAudioPassThruRequest::PrepareAudioPassThruResultCodeForResponse(
       (tts_result != hmi_apis::Common_Result::SUCCESS)) {
     common_result = hmi_apis::Common_Result::WARNINGS;
     out_result = true;
-  }
-  else if (ui_response.is_ok &&
-           tts_result == hmi_apis::Common_Result::WARNINGS) {
+  } else if (ui_response.is_ok &&
+             tts_result == hmi_apis::Common_Result::WARNINGS) {
     common_result = hmi_apis::Common_Result::WARNINGS;
     out_result = true;
-  }
-  else if (ui_result == hmi_apis::Common_Result::INVALID_ENUM) {
+  } else if (ui_result == hmi_apis::Common_Result::INVALID_ENUM) {
     common_result = tts_result;
   } else {
     common_result = ui_result;

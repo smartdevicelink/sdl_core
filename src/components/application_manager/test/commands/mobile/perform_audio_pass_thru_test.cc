@@ -362,7 +362,7 @@ TEST_F(
       am::HmiInterfaces::STATE_AVAILABLE;
   const am::HmiInterfaces::InterfaceState tts_state =
       am::HmiInterfaces::STATE_AVAILABLE;
-  const bool success = false;
+  const bool success = true;
   CheckExpectations(ui_hmi_response,
                     tts_hmi_response,
                     ui_info,
@@ -473,7 +473,6 @@ TEST_F(
                     success);
 }
 
-
 TEST_F(
     PerformAudioPassThruRequestTest,
     OnEvent_BothInterfaceIsAvailable_TTSResultWARNINGS_UIResultSUCCESS_WARNINGS) {
@@ -506,7 +505,6 @@ TEST_F(
                     tts_state,
                     success);
 }
-
 
 TEST_F(
     PerformAudioPassThruRequestTest,
@@ -705,7 +703,6 @@ TEST_F(PerformAudioPassThruRequestTest,
   ResultCommandExpectations(
       msg_mobile_response, NULL, am::mobile_api::Result::INVALID_DATA, false);
 }
-
 
 }  // namespace perform_audio_pass_thru_request
 }  // namespace mobile_commands_test
