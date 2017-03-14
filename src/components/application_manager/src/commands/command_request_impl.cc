@@ -104,7 +104,7 @@ const std::string CreateInfoForUnsupportedResult(
 
 bool CheckResultCode(const ResponseInfo& first, const ResponseInfo& second) {
   if (first.is_ok && second.is_unsupported_resource &&
-      (second.interface_state != HmiInterfaces::STATE_AVAILABLE)) {
+      HmiInterfaces::STATE_NOT_AVAILABLE != second.interface_state) {
     return true;
   }
   return false;
