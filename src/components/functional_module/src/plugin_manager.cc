@@ -172,29 +172,33 @@ ProcessResult PluginManager::ProcessHMIMessage(
   Json::Reader reader;
   reader.parse(msg->json_message(), value);
 
-  std::string function_name;
   if (application_manager::ProtocolVersion::kHMI == msg->protocol_version()) {
+    std::string msg_method;
     // Request or notification from HMI
     if (value.isMember("method")) {
-      function_name = value["method"].asCString();
+      msg_method = value["method"].asCString();
       // Response from HMI
     } else if (value.isMember("result") && value["result"].isMember("method")) {
-      function_name = value["result"]["method"].asCString();
+      msg_method = value["result"]["method"].asCString();
       // Error response from HMI
     } else if (value.isMember("error") && value["error"].isMember("data") &&
                value["error"]["data"].isMember("method")) {
-      function_name = value["error"]["data"]["method"].asCString();
+      msg_method = value["error"]["data"]["method"].asCString();
     } else {
-      DCHECK(false);
+      LOG4CXX_WARN(logger_,
+                   "Message with HMI protocol version can not be handled by "
+                   "plugin manager, because required 'method' field was not "
+                   "found.");
       return ProcessResult::CANNOT_PROCESS;
+    }
+
+    PluginHMIFunctionsIterator subscribed_plugin_itr =
+        hmi_subscribers_.find(msg_method);
+    if (hmi_subscribers_.end() != subscribed_plugin_itr) {
+      return subscribed_plugin_itr->second->ProcessHMIMessage(msg);
     }
   }
 
-  PluginHMIFunctionsIterator subscribed_plugin_itr =
-      hmi_subscribers_.find(function_name);
-  if (hmi_subscribers_.end() != subscribed_plugin_itr) {
-    return subscribed_plugin_itr->second->ProcessHMIMessage(msg);
-  }
   return ProcessResult::CANNOT_PROCESS;
 }
 
@@ -226,23 +230,26 @@ bool PluginManager::IsHMIMessageForPlugin(application_manager::MessagePtr msg) {
   reader.parse(msg->json_message(), value);
 
   if (application_manager::ProtocolVersion::kHMI == msg->protocol_version()) {
+    std::string msg_method;
     // Request or notification from HMI
     if (value.isMember("method")) {
-      return (hmi_subscribers_.find(value["method"].asCString()) !=
-              hmi_subscribers_.end());
+      msg_method = value["method"].asCString();
       // Response from HMI
     } else if (value.isMember("result") && value["result"].isMember("method")) {
-      return (hmi_subscribers_.find(value["result"]["method"].asCString()) !=
-              hmi_subscribers_.end());
+      msg_method = value["result"]["method"].asCString();
       // Error response from HMI
     } else if (value.isMember("error") && value["error"].isMember("data") &&
                value["error"]["data"].isMember("method")) {
-      return (
-          hmi_subscribers_.find(value["error"]["data"]["method"].asCString()) !=
-          hmi_subscribers_.end());
+      msg_method = value["error"]["data"]["method"].asCString();
     } else {
-      DCHECK(false);
+      LOG4CXX_WARN(logger_,
+                   "Message with HMI protocol version can not be handled by "
+                   "plugin manager, because required 'method' field was not "
+                   "found.");
+      return false;
     }
+
+    return (hmi_subscribers_.find(msg_method) != hmi_subscribers_.end());
   }
 
   return false;
