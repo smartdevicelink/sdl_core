@@ -516,6 +516,11 @@ void SystemRequest::Run() {
   std::string file_name;
   if ((*message_)[strings::msg_params].keyExists(strings::file_name)) {
     file_name = (*message_)[strings::msg_params][strings::file_name].asString();
+    if (std::string::npos != file_name.find("/")) {
+      LOG4CXX_ERROR(logger_, "File name has forbidden symbol.");
+      SendResponse(false, mobile_apis::Result::INVALID_DATA);
+      return;
+    }
   } else {
     file_name = kSYNC;
   }
