@@ -247,7 +247,10 @@ bool AlertManeuverRequest::IsWhiteSpaceExist() {
 
     for (; it_sb != it_sb_end; ++it_sb) {
       str = (*it_sb)[strings::text].asCharArray();
-      if (!CheckSyntax(str, false)) {
+      if (strlen(str) && !CheckSyntax(str)) {
+        LOG4CXX_ERROR(logger_, "Invalid soft_buttons syntax check failed");
+        return true;
+      } else if (!CheckSyntax(str, false)) {
         LOG4CXX_ERROR(logger_, "Invalid soft_buttons syntax check failed");
         return true;
       }
