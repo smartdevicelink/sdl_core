@@ -238,6 +238,22 @@ bool AlertManeuverRequest::IsWhiteSpaceExist() {
       }
     }
   }
+  if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
+    const smart_objects::SmartArray* sb_array =
+        (*message_)[strings::msg_params][strings::soft_buttons].asArray();
+
+    smart_objects::SmartArray::const_iterator it_sb = sb_array->begin();
+    smart_objects::SmartArray::const_iterator it_sb_end = sb_array->end();
+
+    for (; it_sb != it_sb_end; ++it_sb) {
+      str = (*it_sb)[strings::text].asCharArray();
+      if (!CheckSyntax(str, false)) {
+        LOG4CXX_ERROR(logger_, "Invalid soft_buttons syntax check failed");
+        return true;
+      }
+    }
+  }
+
   return false;
 }
 
