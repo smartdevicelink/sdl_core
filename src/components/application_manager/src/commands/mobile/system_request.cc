@@ -103,7 +103,8 @@ class QueryAppsDataValidator {
   }
 
   /**
-   * \brief Function checks, if language json array has 'ttsName' parameter omitted.
+   * \brief Function checks, if language json array has 'ttsName' parameter
+   * omitted.
    * \param languages SmartObject containing languages json array
    * \return true if parameter was omitted, false otherwise
   */
@@ -113,16 +114,16 @@ class QueryAppsDataValidator {
       const smart_objects::SmartObject& language = languages.getElement(idx);
       if (smart_objects::SmartType_Map != language.getType()) {
         LOG4CXX_DEBUG(logger_,
-                     kQueryAppsValidationFailedPrefix
-                         << "language is not a map.");
+                      kQueryAppsValidationFailedPrefix
+                          << "language is not a map.");
         return false;
       }
       const std::string language_name = (*language.map_begin()).first;
       if (!language[language_name].keyExists(json::ttsName) ||
           language[language_name][json::ttsName].empty()) {
         LOG4CXX_DEBUG(logger_,
-                     kQueryAppsValidationFailedPrefix
-                         << "'languages.ttsName' doesn't exist");
+                      kQueryAppsValidationFailedPrefix
+                          << "'languages.ttsName' doesn't exist");
         return true;
       }
     }
@@ -228,10 +229,8 @@ class QueryAppsDataValidator {
 
       auto& app_data_non_const = *(objects_array->begin());
       if (CheckIfHasOmittedParam(app_data[os_type][json::languages])) {
-        WriteAppIdToOmittedParam(
-            app_data_non_const[os_type][json::languages],
-            app_data[json::appId]
-                .asString());
+        WriteAppIdToOmittedParam(app_data_non_const[os_type][json::languages],
+                                 app_data[json::appId].asString());
       }
 
       if (!ValidateLanguages(app_data[os_type][json::languages],
