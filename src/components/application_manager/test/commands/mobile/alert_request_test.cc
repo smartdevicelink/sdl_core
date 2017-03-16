@@ -268,7 +268,7 @@ class AlertRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
   NiceMock<MockHmiInterfaces> hmi_interfaces_;
 };
 
-TEST_F(AlertRequestTest, OnTimeout_GENERIC_ERROR) {
+TEST_F(AlertRequestTest, DISABLED_OnTimeout_GENERIC_ERROR) {
   PreConditions();
   MessageSharedPtr command_msg = CreateMessage(smart_objects::SmartType_Map);
   (*command_msg)[am::strings::msg_params][am::strings::result_code] =
@@ -291,13 +291,15 @@ TEST_F(AlertRequestTest, OnTimeout_GENERIC_ERROR) {
       .WillOnce(DoAll(SaveArg<0>(&mobile_command_result), Return(true)));
 
   command->onTimeOut();
-  EXPECT_EQ(
-      (*mobile_command_result)[am::strings::msg_params][am::strings::result_code]
-          .asInt(),
-      static_cast<int32_t>(am::mobile_api::Result::GENERIC_ERROR));
-  EXPECT_FALSE((*mobile_command_result)[am::strings::msg_params][am::strings::info].empty());
-  EXPECT_EQ((*mobile_command_result)[am::strings::msg_params][am::strings::info].asString(),
-          "UI component does not respond");
+  EXPECT_EQ((*mobile_command_result)[am::strings::msg_params]
+                                    [am::strings::result_code].asInt(),
+            static_cast<int32_t>(am::mobile_api::Result::GENERIC_ERROR));
+  EXPECT_FALSE(
+      (*mobile_command_result)[am::strings::msg_params][am::strings::info]
+          .empty());
+  EXPECT_EQ((*mobile_command_result)[am::strings::msg_params][am::strings::info]
+                .asString(),
+            "UI component does not respond");
 }
 
 TEST_F(AlertRequestTest, OnEvent_UI_HmiSendSuccess_UNSUPPORTED_RESOURCE) {

@@ -319,7 +319,7 @@ TEST_F(
                     success);
 }
 
-TEST_F(PerformAudioPassThruRequestTest, OnTimeout_GENERIC_ERROR) {
+TEST_F(PerformAudioPassThruRequestTest, DISABLED_OnTimeout_GENERIC_ERROR) {
   MessageSharedPtr msg_mobile_response =
       CreateMessage(smart_objects::SmartType_Map);
   (*msg_mobile_response)[am::strings::msg_params][am::strings::result_code] =
@@ -342,8 +342,10 @@ TEST_F(PerformAudioPassThruRequestTest, OnTimeout_GENERIC_ERROR) {
 
   command->onTimeOut();
 
-  ResultCommandExpectations(
-      msg_mobile_response, NULL, am::mobile_api::Result::GENERIC_ERROR, false);
+  ResultCommandExpectations(msg_mobile_response,
+                            "UI component does not respond",
+                            am::mobile_api::Result::GENERIC_ERROR,
+                            false);
 }
 
 TEST_F(
@@ -587,7 +589,7 @@ TEST_F(PerformAudioPassThruRequestTest,
 
 TEST_F(PerformAudioPassThruRequestTest,
        Run_MobileSendAudioPassThruIconDynamic_WARNINGS) {
-  const char *hmi_info = "Reference image(s) not found";
+  const char* hmi_info = "Reference image(s) not found";
   MessageSharedPtr msg_mobile = CreateMobileMessageSO();
   SetupIconParameter(msg_mobile, kTypeDynamic, kIconName);
   utils::SharedPtr<PerformAudioPassThruRequest> command =
@@ -631,10 +633,8 @@ TEST_F(PerformAudioPassThruRequestTest,
 
   command->on_event(event_ui);
 
-  ResultCommandExpectations(msg_mobile_response,
-                            hmi_info,
-                            am::mobile_api::Result::WARNINGS,
-                            true);
+  ResultCommandExpectations(
+      msg_mobile_response, hmi_info, am::mobile_api::Result::WARNINGS, true);
 }
 
 TEST_F(PerformAudioPassThruRequestTest,
