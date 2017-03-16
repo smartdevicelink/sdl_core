@@ -43,6 +43,8 @@
 #include "application_manager/mock_message_helper.h"
 #include "application_manager/event_engine/event.h"
 #include "application_manager/mock_hmi_interface.h"
+#include "application_manager/commands/commands_test.h"
+#include "utils/custom_string.h"
 
 namespace test {
 namespace components {
@@ -60,12 +62,14 @@ using am::commands::MessageSharedPtr;
 using am::MockMessageHelper;
 using am::MockHmiInterfaces;
 using ::utils::SharedPtr;
+using ::utils::custom_string::CustomString;
 using ::testing::_;
 using ::testing::Mock;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
 namespace {
+const uint32_t kAppID = 2u;
 const uint32_t kConnectionKey = 2u;
 const uint32_t kVrPosition = 1u;
 const std::string kVrTitle = "vr_help_title";
@@ -90,6 +94,8 @@ class SetGlobalPropertiesRequestTest
   }
 
   ~SetGlobalPropertiesRequestTest() {
+    // Required for proper DataAccessor release
+    Mock::VerifyAndClearExpectations(&app_mngr_);
     Mock::VerifyAndClearExpectations(&mock_message_helper_);
   }
 
@@ -450,6 +456,147 @@ TEST_F(SetGlobalPropertiesRequestTest,
   for (size_t i = 0; i < test_so.length(); ++i) {
     TestOfNotValidParameters(test_so[i][msg_params]);
   }
+}
+
+TEST_F(SetGlobalPropertiesRequestTest,
+       Run_NoVRHelpDataDefaultCreatedFromAppName_SUCCESS) {
+  MessageSharedPtr msg = CreateMessage();
+  (*msg)[strings::params][strings::connection_key] = kConnectionKey;
+  (*msg)[strings::msg_params][strings::app_id] = kAppID;
+  SmartObject keyboard_properties(smart_objects::SmartType_Map);
+  (*msg)[strings::msg_params][hmi_request::keyboard_properties] =
+      keyboard_properties;
+
+  ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kAppID));
+  const CustomString app_name("test_app");
+  ON_CALL(*mock_app_, name()).WillByDefault(ReturnRef(app_name));
+  am::CommandsMap commands_map;
+  ON_CALL(*mock_app_, commands_map())
+      .WillByDefault(Return(
+          DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
+  SmartObject vr_synonyms(smart_objects::SmartType_Null);
+  ON_CALL(*mock_app_, vr_synonyms()).WillByDefault(Return(&vr_synonyms));
+
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillOnce(Return(mock_app_));
+  EXPECT_CALL(mock_message_helper_, VerifyImageVrHelpItems(_, _, _)).Times(0);
+
+  SmartObject vr_help_title(smart_objects::SmartType_Null);
+  SmartObject default_vr_help_title(app_name.AsMBString());
+  EXPECT_CALL(*mock_app_, vr_help_title())
+      .WillOnce(Return(&vr_help_title))
+      .WillRepeatedly(Return(&default_vr_help_title));
+
+  SmartObject default_vr_help(smart_objects::SmartType_Array);
+  SmartObject vr_help_item(smart_objects::SmartType_Map);
+  vr_help_item[strings::text] = app_name.AsMBString();
+  vr_help_item[strings::position] = 1;
+  default_vr_help[0] = vr_help_item;
+  EXPECT_CALL(*mock_app_, vr_help()).WillRepeatedly(Return(&default_vr_help));
+
+  EXPECT_CALL(*mock_app_, set_menu_title(_)).Times(0);
+  EXPECT_CALL(*mock_app_, set_menu_icon(_)).Times(0);
+  EXPECT_CALL(*mock_app_, set_vr_help(_));
+  EXPECT_CALL(*mock_app_, set_vr_help_title(_));
+
+  EXPECT_CALL(hmi_interfaces_,
+              GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
+      .WillOnce(Return(am::HmiInterfaces::STATE_AVAILABLE));
+  EXPECT_CALL(hmi_interfaces_, GetInterfaceFromFunction(_))
+      .WillOnce(Return(am::HmiInterfaces::HMI_INTERFACE_UI));
+
+  SharedPtr<SetGlobalPropertiesRequest> command(
+      CreateCommand<SetGlobalPropertiesRequest>(msg));
+
+  MessageSharedPtr request_to_hmi;
+  EXPECT_CALL(app_mngr_, ManageHMICommand(_))
+      .WillOnce(DoAll(SaveArg<0>(&request_to_hmi), Return(true)));
+
+  command->Run();
+
+  EXPECT_EQ(app_name.AsMBString(),
+            (*request_to_hmi)[strings::msg_params][strings::vr_help_title]
+                .asString());
+  EXPECT_EQ(1u,
+            (*request_to_hmi)[strings::msg_params][strings::vr_help].length());
+  EXPECT_EQ(
+      app_name.AsMBString(),
+      (*request_to_hmi)[strings::msg_params][strings::vr_help][0][strings::text]
+          .asString());
+  EXPECT_EQ(1,
+            (*request_to_hmi)[strings::msg_params][strings::vr_help][0]
+                             [strings::position].asInt());
+}
+
+TEST_F(SetGlobalPropertiesRequestTest,
+       Run_NoVRHelpDataDefaultCreatedFromSynonyms_SUCCESS) {
+  MessageSharedPtr msg = CreateMessage();
+  (*msg)[strings::params][strings::connection_key] = kConnectionKey;
+  (*msg)[strings::msg_params][strings::app_id] = kAppID;
+  SmartObject keyboard_properties(smart_objects::SmartType_Map);
+  (*msg)[strings::msg_params][hmi_request::keyboard_properties] =
+      keyboard_properties;
+
+  ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kAppID));
+  const CustomString app_name("test_app");
+  ON_CALL(*mock_app_, name()).WillByDefault(ReturnRef(app_name));
+  am::CommandsMap commands_map;
+  ON_CALL(*mock_app_, commands_map())
+      .WillByDefault(Return(
+          DataAccessor<application_manager::CommandsMap>(commands_map, lock_)));
+  SmartObject vr_synonyms(smart_objects::SmartType_Array);
+  vr_synonyms[0] = kHelpPrompt;
+  ON_CALL(*mock_app_, vr_synonyms()).WillByDefault(Return(&vr_synonyms));
+
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillOnce(Return(mock_app_));
+  EXPECT_CALL(mock_message_helper_, VerifyImageVrHelpItems(_, _, _)).Times(0);
+
+  SmartObject vr_help_title(smart_objects::SmartType_Null);
+  SmartObject default_vr_help_title(app_name.AsMBString());
+  EXPECT_CALL(*mock_app_, vr_help_title())
+      .WillOnce(Return(&vr_help_title))
+      .WillRepeatedly(Return(&default_vr_help_title));
+
+  SmartObject default_vr_help(smart_objects::SmartType_Array);
+  SmartObject vr_help_item(smart_objects::SmartType_Map);
+  vr_help_item[strings::text] = kHelpPrompt;
+  vr_help_item[strings::position] = 1;
+  default_vr_help[0] = vr_help_item;
+  EXPECT_CALL(*mock_app_, vr_help()).WillRepeatedly(Return(&default_vr_help));
+
+  EXPECT_CALL(*mock_app_, set_menu_title(_)).Times(0);
+  EXPECT_CALL(*mock_app_, set_menu_icon(_)).Times(0);
+  EXPECT_CALL(*mock_app_, set_vr_help(_));
+  EXPECT_CALL(*mock_app_, set_vr_help_title(_));
+
+  EXPECT_CALL(hmi_interfaces_,
+              GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
+      .WillOnce(Return(am::HmiInterfaces::STATE_AVAILABLE));
+  EXPECT_CALL(hmi_interfaces_, GetInterfaceFromFunction(_))
+      .WillOnce(Return(am::HmiInterfaces::HMI_INTERFACE_UI));
+
+  SharedPtr<SetGlobalPropertiesRequest> command(
+      CreateCommand<SetGlobalPropertiesRequest>(msg));
+
+  MessageSharedPtr request_to_hmi;
+  EXPECT_CALL(app_mngr_, ManageHMICommand(_))
+      .WillOnce(DoAll(SaveArg<0>(&request_to_hmi), Return(true)));
+
+  command->Run();
+
+  EXPECT_EQ(app_name.AsMBString(),
+            (*request_to_hmi)[strings::msg_params][strings::vr_help_title]
+                .asString());
+  EXPECT_EQ(1u,
+            (*request_to_hmi)[strings::msg_params][strings::vr_help].length());
+  EXPECT_EQ(
+      kHelpPrompt,
+      (*request_to_hmi)[strings::msg_params][strings::vr_help][0][strings::text]
+          .asString());
+  EXPECT_EQ(1,
+            (*request_to_hmi)[strings::msg_params][strings::vr_help][0]
+                             [strings::position].asInt());
 }
 
 }  // namespace set_global_properties_request
