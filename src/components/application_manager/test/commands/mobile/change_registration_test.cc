@@ -126,7 +126,6 @@ class ChangeRegistrationRequestTest
     EXPECT_CALL(hmi_interfaces_,
                 GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
         .WillOnce(Return(am::HmiInterfaces::STATE_AVAILABLE));
-
     EXPECT_CALL(
         hmi_interfaces_,
         GetInterfaceFromFunction(hmi_apis::FunctionID::VR_ChangeRegistration))
@@ -134,7 +133,6 @@ class ChangeRegistrationRequestTest
     EXPECT_CALL(hmi_interfaces_,
                 GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_VR))
         .WillOnce(Return(am::HmiInterfaces::STATE_AVAILABLE));
-
     EXPECT_CALL(
         hmi_interfaces_,
         GetInterfaceFromFunction(hmi_apis::FunctionID::TTS_ChangeRegistration))
@@ -273,13 +271,13 @@ class ChangeRegistrationRequestTest
 
   void ResultCommandExpectations(MessageSharedPtr msg,
                                  const std::string& info) {
-    EXPECT_EQ((*msg)[am::strings::msg_params][am::strings::success].asBool(),
-              true);
+    EXPECT_EQ(true,
+              (*msg)[am::strings::msg_params][am::strings::success].asBool());
     EXPECT_EQ(
-        (*msg)[am::strings::msg_params][am::strings::result_code].asInt(),
-        static_cast<int32_t>(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE));
-    EXPECT_EQ((*msg)[am::strings::msg_params][am::strings::info].asString(),
-              info);
+        static_cast<int32_t>(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE),
+        (*msg)[am::strings::msg_params][am::strings::result_code].asInt());
+    EXPECT_EQ(info,
+              (*msg)[am::strings::msg_params][am::strings::info].asString());
   }
 
   typedef TypeIf<kMocksAreNice,
@@ -322,27 +320,18 @@ TEST_F(ChangeRegistrationRequestTest,
 
   ExpectationsHmiCapabilities(supported_languages);
 
+  ON_CALL(hmi_interfaces_, GetInterfaceState(_))
+      .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
   ON_CALL(hmi_interfaces_,
           GetInterfaceFromFunction(hmi_apis::FunctionID::UI_ChangeRegistration))
       .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_UI));
   ON_CALL(hmi_interfaces_,
-          GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
-      .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
-
-  ON_CALL(hmi_interfaces_,
           GetInterfaceFromFunction(hmi_apis::FunctionID::VR_ChangeRegistration))
       .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_VR));
-  ON_CALL(hmi_interfaces_,
-          GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_VR))
-      .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_RESPONSE));
-
   ON_CALL(
       hmi_interfaces_,
       GetInterfaceFromFunction(hmi_apis::FunctionID::TTS_ChangeRegistration))
       .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_TTS));
-  ON_CALL(hmi_interfaces_,
-          GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_TTS))
-      .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
   command->Run();
 
   MessageSharedPtr ui_response = CreateMessage(smart_objects::SmartType_Map);
@@ -367,12 +356,6 @@ TEST_F(ChangeRegistrationRequestTest,
       hmi_apis::FunctionID::TTS_ChangeRegistration);
   event_tts.set_smart_object(*tts_response);
 
-  MockHmiInterfaces hmi_interfaces;
-  EXPECT_CALL(app_mngr_, hmi_interfaces())
-      .WillRepeatedly(ReturnRef(hmi_interfaces));
-  EXPECT_CALL(hmi_interfaces, GetInterfaceState(_))
-      .WillRepeatedly(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
-
   MessageSharedPtr response_to_mobile;
 
   EXPECT_CALL(
@@ -392,7 +375,7 @@ TEST_F(ChangeRegistrationRequestTest,
        OnEvent_TTS_UNSUPPORTED_RESOURCE_STATE_NOT_AVAILABLE_Expect_true) {
   CheckExpectations(hmi_apis::Common_Result::SUCCESS,
                     mobile_apis::Result::UNSUPPORTED_RESOURCE,
-                    am::HmiInterfaces::STATE_NOT_AVAILABLE,
+                    am::HmiInterfaces::STATE_AVAILABLE,
                     true);
 }
 
@@ -412,11 +395,12 @@ TEST_F(ChangeRegistrationRequestTest,
                     false);
 }
 
-TEST_F(ChangeRegistrationRequestTest,
-       OnEvent_TTS_UNSUPPORTED_RESOURCE_SUCCESS_STATE_AVAILABLE_Expect_false) {
+TEST_F(
+    ChangeRegistrationRequestTest,
+    OnEvent_TTS_UNSUPPORTED_RESOURCE_SUCCESS_STATE_NOT_AVAILABLE_Expect_false) {
   CheckExpectations(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE,
                     mobile_apis::Result::UNSUPPORTED_RESOURCE,
-                    am::HmiInterfaces::STATE_AVAILABLE,
+                    am::HmiInterfaces::STATE_NOT_AVAILABLE,
                     false,
                     hmi_apis::Common_Result::SUCCESS,
                     hmi_apis::Common_Result::SUCCESS);
@@ -483,14 +467,14 @@ TEST_F(ChangeRegistrationRequestTest,
       .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_UI));
   ON_CALL(hmi_interfaces_,
           GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
-      .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
+      .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
 
   ON_CALL(hmi_interfaces_,
           GetInterfaceFromFunction(hmi_apis::FunctionID::VR_ChangeRegistration))
       .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_VR));
   ON_CALL(hmi_interfaces_,
           GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_VR))
-      .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
+      .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
 
   ON_CALL(
       hmi_interfaces_,
@@ -498,7 +482,7 @@ TEST_F(ChangeRegistrationRequestTest,
       .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_TTS));
   ON_CALL(hmi_interfaces_,
           GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_TTS))
-      .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
+      .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
 
   command->Run();
 
