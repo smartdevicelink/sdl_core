@@ -327,7 +327,7 @@ struct ExternalConsentEntity : CompositeType {
   void SetPolicyTableType(PolicyTableType pt_type) OVERRIDE;
 };
 
-typedef Array<ExternalConsentEntity, 0, 255>
+typedef Array<ExternalConsentEntity, 0, 100>
     DisallowedByExternalConsentEntities;
 
 struct Rpcs : CompositeType {
