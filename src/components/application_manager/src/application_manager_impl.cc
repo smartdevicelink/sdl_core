@@ -78,6 +78,39 @@ namespace {
 int get_rand_from_range(uint32_t from = 0, int to = RAND_MAX) {
   return std::rand() % to + from;
 }
+
+/**
+ * @brief Get parameter data from application's specific language table
+ * @param app_data is SO that contains application data
+ * @param idx is index of array in language table
+ * @param lang_name contains name of language
+ * @param name_so_param is name of parameter to search in language table
+ * @param out_parameter_data is SO which should get requested data
+ * @return true if app_data contains needed information otherwise return false
+ */
+bool get_parameter_data_from_language_table(
+    const smart_objects::SmartObject& app_data,
+    size_t idx,
+    const std::string& lang_name,
+    const std::string& name_so_param,
+    smart_objects::SmartObject& out_parameter_data) {
+  using namespace application_manager;
+  if (idx != std::string::npos &&
+      app_data[json::languages][idx][lang_name].keyExists(name_so_param)) {
+    LOG4CXX_DEBUG(logger_,
+                  "Getting value for " << name_so_param
+                                       << " parameter, from language table "
+                                       << lang_name);
+    out_parameter_data =
+        app_data[json::languages][idx][lang_name][name_so_param];
+    return true;
+  }
+  LOG4CXX_DEBUG(logger_,
+                "No data was found for " << name_so_param
+                                         << " parameter, from language table "
+                                         << lang_name);
+  return false;
+}
 }
 
 namespace application_manager {
@@ -2140,51 +2173,74 @@ void ApplicationManagerImpl::PullLanguagesInfo(const SmartObject& app_data,
   }
 
   const HMICapabilities& hmi_cap = hmi_capabilities();
+  std::string cur_tts_lang(
+      MessageHelper::CommonLanguageToString(hmi_cap.active_tts_language()));
   std::string cur_vr_lang(
       MessageHelper::CommonLanguageToString(hmi_cap.active_vr_language()));
   const SmartObject& languages = app_data[json::languages];
 
+  std::transform(cur_tts_lang.begin(),
+                 cur_tts_lang.end(),
+                 cur_tts_lang.begin(),
+                 ::toupper);
   std::transform(
       cur_vr_lang.begin(), cur_vr_lang.end(), cur_vr_lang.begin(), ::toupper);
 
-  ssize_t default_idx = -1;
-  ssize_t specific_idx = -1;
+  size_t specific_tts_idx = std::string::npos;
+  size_t specific_vr_idx = std::string::npos;
+  size_t default_idx = std::string::npos;
 
   const size_t size = languages.length();
   for (size_t idx = 0; idx < size; ++idx) {
-    if (languages[idx].keyExists(cur_vr_lang)) {
-      LOG4CXX_DEBUG(logger_, "Found active HMI language " << cur_vr_lang);
-      specific_idx = idx;
+    if (languages[idx].keyExists(cur_tts_lang)) {
+      LOG4CXX_DEBUG(logger_, "Found active TTS HMI language " << cur_tts_lang);
+      specific_tts_idx = idx;
+    } else if (languages[idx].keyExists(cur_vr_lang)) {
+      LOG4CXX_DEBUG(logger_, "Found active VR HMI language " << cur_vr_lang);
+      specific_vr_idx = idx;
     } else if (languages[idx].keyExists(json::default_)) {
       LOG4CXX_DEBUG(logger_, "Found default language");
       default_idx = idx;
     }
   }
 
-  if ((-1 == specific_idx) && (-1 == default_idx)) {
+  if ((std::string::npos == specific_tts_idx) &&
+      (std::string::npos == specific_vr_idx) &&
+      (std::string::npos == default_idx)) {
     LOG4CXX_DEBUG(logger_, "No suitable language found");
     return;
   }
 
-  if (app_data[json::languages][specific_idx][cur_vr_lang].keyExists(
-          json::ttsName)) {
-    LOG4CXX_DEBUG(logger_, "Get ttsName from " << cur_vr_lang << " language");
-    ttsName =
-        app_data[json::languages][specific_idx][cur_vr_lang][json::ttsName];
-  } else {
-    LOG4CXX_DEBUG(logger_,
-                  "No data for ttsName for " << cur_vr_lang << " language");
+  // if current language table doesn't contain TTS name or VR synonyms then SDL
+  // will try to find them in default language table
+  if (!get_parameter_data_from_language_table(
+          app_data, specific_tts_idx, cur_tts_lang, json::ttsName, ttsName)) {
+    if (!get_parameter_data_from_language_table(
+            app_data, default_idx, json::default_, json::ttsName, ttsName)) {
+      LOG4CXX_WARN(logger_,
+                   "Valid data for "
+                       << json::ttsName
+                       << " parameter was not found in default language table, "
+                          "parameter remain uninitialized");
+    }
   }
 
-  if (app_data[json::languages][specific_idx][cur_vr_lang].keyExists(
-          json::vrSynonyms)) {
-    LOG4CXX_DEBUG(logger_,
-                  "Get vrSynonyms from " << cur_vr_lang << " language");
-    vrSynonym =
-        app_data[json::languages][specific_idx][cur_vr_lang][json::vrSynonyms];
-  } else {
-    LOG4CXX_DEBUG(logger_,
-                  "No data for vrSynonyms for " << cur_vr_lang << " language");
+  if (!get_parameter_data_from_language_table(app_data,
+                                              specific_vr_idx,
+                                              cur_vr_lang,
+                                              json::vrSynonyms,
+                                              vrSynonym)) {
+    if (!get_parameter_data_from_language_table(app_data,
+                                                default_idx,
+                                                json::default_,
+                                                json::vrSynonyms,
+                                                vrSynonym)) {
+      LOG4CXX_WARN(logger_,
+                   "Valid data for "
+                       << json::vrSynonyms
+                       << " parameter was not found in default language table, "
+                          "parameter remain uninitialized");
+    }
   }
 }
 
@@ -2230,15 +2286,6 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
     }
 
     PullLanguagesInfo(app_data[os_type], ttsName, vrSynonym);
-
-    if (ttsName.empty()) {
-      ttsName = SmartObject(SmartType_Array);
-      ttsName[0] = appName;
-    }
-    if (vrSynonym.empty()) {
-      vrSynonym = SmartObject(SmartType_Array);
-      vrSynonym[0] = appName;
-    }
 
     const std::string app_icon_dir(settings_.app_icons_folder());
     const std::string full_icon_path(app_icon_dir + "/" + policy_app_id);
