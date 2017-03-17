@@ -59,7 +59,7 @@ TelemetryMonitor::TelemetryMonitor(const std::string& server_address,
     , ph_observer(this) {}
 
 void TelemetryMonitor::Start() {
-  streamer_ = new Streamer(this);
+  streamer_ = streamer_ ? streamer_ : new Streamer(this);
   thread_ = threads::CreateThread("TelemetryMonitor", streamer_);
 }
 
@@ -86,6 +86,7 @@ int16_t TelemetryMonitor::port() const {
 
 TelemetryMonitor::~TelemetryMonitor() {
   Stop();
+  delete streamer_;
 }
 
 void TelemetryMonitor::Init(
@@ -170,6 +171,7 @@ void Streamer::exitThreadMain() {
   LOG4CXX_AUTO_TRACE(logger_);
   Stop();
   messages_.Shutdown();
+  ThreadDelegate::exitThreadMain();
 }
 
 void Streamer::Start() {

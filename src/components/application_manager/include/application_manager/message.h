@@ -96,7 +96,7 @@ class Message {
   void set_correlation_id(int32_t id);
   void set_connection_key(int32_t key);
   void set_message_type(MessageType type);
-  void set_binary_data(BinaryData* data);
+  void set_binary_data(const BinaryData* data);
   void set_json_message(const std::string& json_message);
   void set_protocol_version(ProtocolVersion version);
   void set_smart_object(const smart_objects::SmartObject& object);
