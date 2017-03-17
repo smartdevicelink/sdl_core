@@ -135,7 +135,7 @@ void SetGlobalPropertiesRequest::Run() {
   }
 
   if (is_vr_help_title_present && is_vr_help_present) {
-    LOG4CXX_DEBUG(logger_, "VRHelp params presents");
+    LOG4CXX_DEBUG(logger_, "VRHelp params are present");
 
     if (!CheckVrHelpItemsOrder(msg_params[strings::vr_help])) {
       LOG4CXX_ERROR(logger_,
@@ -154,7 +154,7 @@ void SetGlobalPropertiesRequest::Run() {
     params[strings::app_id] = app->app_id();
     SendUIRequest(params, true);
   } else {
-    LOG4CXX_DEBUG(logger_, "VRHelp params does not present");
+    LOG4CXX_DEBUG(logger_, "VRHelp params are not present");
     DCHECK_OR_RETURN_VOID(!is_vr_help_title_present && !is_vr_help_present);
 
     smart_objects::SmartObject params =
@@ -163,7 +163,7 @@ void SetGlobalPropertiesRequest::Run() {
     if (ValidateVRHelpTitle(app->vr_help_title())) {
       LOG4CXX_DEBUG(logger_, "App already contains VRHelp data");
     } else if (!PrepareUIRequestDefaultVRHelpData(app, params)) {
-      LOG4CXX_ERROR(logger_, "default VRHElp data could not be generated");
+      LOG4CXX_ERROR(logger_, "Default VRHelp data could not be generated");
       SendResponse(false, mobile_apis::Result::INVALID_DATA);
       return;
     }
