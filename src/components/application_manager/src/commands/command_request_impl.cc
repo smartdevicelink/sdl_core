@@ -249,7 +249,7 @@ void CommandRequestImpl::SendResponse(
   }
 
   smart_objects::SmartObjectSPtr result =
-          utils::MakeShared<smart_objects::SmartObject>();
+      utils::MakeShared<smart_objects::SmartObject>();
 
   smart_objects::SmartObject& response = *result;
 
