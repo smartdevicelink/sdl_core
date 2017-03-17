@@ -40,6 +40,7 @@
 #include "interfaces/MOBILE_API.h"
 #include "utils/file_system.h"
 #include "utils/logger.h"
+#include "utils/helpers.h"
 #include "utils/gen_hash.h"
 #include "utils/make_shared.h"
 #include "utils/timer_task_impl.h"
@@ -442,11 +443,17 @@ void ApplicationImpl::StopStreaming(
 
   SuspendStreaming(service_type);
 
-  if (service_type == ServiceType::kMobileNav && video_streaming_approved()) {
-    StopNaviStreaming();
-  } else if (service_type == ServiceType::kAudio &&
-             audio_streaming_approved()) {
+  if (!helpers::Compare<ServiceType, helpers::EQ, helpers::ONE>(
+          service_type, ServiceType::kMobileNav, ServiceType::kAudio)) {
+    return;
+  }
+
+  if (audio_streaming_approved()) {
     StopAudioStreaming();
+  }
+
+  if (video_streaming_approved()) {
+    StopNaviStreaming();
   }
 }
 
