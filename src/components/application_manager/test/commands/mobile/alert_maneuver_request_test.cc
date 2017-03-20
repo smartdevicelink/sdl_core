@@ -245,7 +245,8 @@ TEST_F(AlertManeuverRequestTest, Run_ApplicationIsNotRegistered_UNSUCCESS) {
 
 TEST_F(AlertManeuverRequestTest, Run_ProcessingResult_UNSUCCESS) {
   MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
-  (*msg)[am::strings::msg_params][am::strings::soft_buttons] = 0;
+  (*msg)[am::strings::msg_params][am::strings::soft_buttons][0]
+        [am::strings::text] = "text";
 
   CommandPtr command(CreateCommand<AlertManeuverRequest>(msg));
 
@@ -292,7 +293,8 @@ TEST_F(AlertManeuverRequestTest, Run_IsWhiteSpaceExist_UNSUCCESS) {
 
 TEST_F(AlertManeuverRequestTest, Run_ProcessingResult_SUCCESS) {
   MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
-  (*msg)[am::strings::msg_params][am::strings::soft_buttons] = 0;
+  (*msg)[am::strings::msg_params][am::strings::soft_buttons][0]
+        [am::strings::text] = "text";
 
   CommandPtr command(CreateCommand<AlertManeuverRequest>(msg));
 

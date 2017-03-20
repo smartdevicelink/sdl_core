@@ -221,7 +221,6 @@ bool AlertManeuverRequest::PrepareResponseParameters(
 
 bool AlertManeuverRequest::IsWhiteSpaceExist() {
   LOG4CXX_AUTO_TRACE(logger_);
-  const char* str = NULL;
 
   if ((*message_)[strings::msg_params].keyExists(strings::tts_chunks)) {
     const smart_objects::SmartArray* tc_array =
@@ -231,13 +230,33 @@ bool AlertManeuverRequest::IsWhiteSpaceExist() {
     smart_objects::SmartArray::const_iterator it_tc_end = tc_array->end();
 
     for (; it_tc != it_tc_end; ++it_tc) {
-      str = (*it_tc)[strings::text].asCharArray();
+      const char* str = (*it_tc)[strings::text].asCharArray();
       if (strlen(str) && !CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_, "Invalid tts_chunks syntax check failed");
         return true;
       }
     }
   }
+  if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
+    DCHECK_OR_RETURN(
+        (*message_)[strings::msg_params][strings::soft_buttons].getType() ==
+            smart_objects::SmartType_Array,
+        true);
+    const smart_objects::SmartArray* sb_array =
+        (*message_)[strings::msg_params][strings::soft_buttons].asArray();
+
+    smart_objects::SmartArray::const_iterator it_sb = sb_array->begin();
+    smart_objects::SmartArray::const_iterator it_sb_end = sb_array->end();
+
+    for (; it_sb != it_sb_end; ++it_sb) {
+      const char* str = (*it_sb)[strings::text].asCharArray();
+      if (!CheckSyntax(str)) {
+        LOG4CXX_ERROR(logger_, "Invalid soft_buttons syntax check failed");
+        return true;
+      }
+    }
+  }
+
   return false;
 }
 
