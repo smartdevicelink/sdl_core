@@ -290,7 +290,7 @@ const char* const auto_complete_text_supported = "autoCompleteTextSupported";
 const char* const entity_type = "entityType";
 const char* const entity_id = "entityID";
 const char* const status = "status";
-const char* const external_consent_status = "ExternalConsentStatus";
+const char* const external_consent_status = "externalConsentStatus";
 const char* const consented_functions = "consentedFunctions";
 const char* const source = "source";
 }  // namespace strings
