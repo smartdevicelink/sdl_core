@@ -133,10 +133,28 @@ class PerformAudioPassThruRequest : public CommandRequestImpl {
    */
   bool IsWaitingHMIResponse();
 
-  /* flag display state of speak and ui perform audio
-  during perform audio pass thru*/
-  bool awaiting_tts_speak_response_;
-  bool awaiting_ui_response_;
+  /**
+   * @brief Validates audioPassThruIcon parameter and
+   * removes it if is not valid
+   * @param app Pointer to the application whose storage directory
+   * must be accessed
+   */
+  void ProcessAudioPassThruIcon(ApplicationSharedPtr app);
+
+  /**
+   * @brief Checks result code from HMI for splitted RPC
+   * and returns parameter for sending to mobile app in
+   * audioPassThru communication.
+   * @param ui_response contains result_code from UI
+   * @param tts_response contains result_code from TTS
+   * @param out_result contains result for mobile app
+   * @return result code - 1) UI error code has precedence than TTS's
+   * 2) error_code from TTS is turned to WARNINGS
+   */
+  mobile_apis::Result::eType PrepareAudioPassThruResultCodeForResponse(
+      const ResponseInfo& ui_response,
+      const ResponseInfo& tts_response,
+      bool& out_result);
 
   hmi_apis::Common_Result::eType result_tts_speak_;
   hmi_apis::Common_Result::eType result_ui_;
