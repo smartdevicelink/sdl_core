@@ -225,13 +225,11 @@ struct IsSameAppId : public IsSameApp {
     if (AreBothRemoteControl(other) && !IsSameDeviceType(other)) {
       return false;
     }
-    return strncmp(app_id_.c_str(),
-                   other->policy_app_id().c_str(),
-                   app_id_.length()) == 0;
+    return app_id_ == other->policy_app_id();
   }
 
  private:
-  const std::string& app_id_;
+  const std::string app_id_;
 };
 
 struct IsSameAppName : public IsSameApp {
@@ -249,8 +247,7 @@ struct IsSameAppName : public IsSameApp {
       return false;
     }
 
-    bool same =
-        strncmp(name_.c_str(), other->name().c_str(), name_.length()) == 0;
+    bool same = (name_ == other->name().AsMBString());
     if (same) {
       LOG4CXX_AUTO_TRACE(logger_);
       LOG4CXX_ERROR(logger_, "Application name is known already.");
@@ -283,7 +280,7 @@ struct IsSameAppName : public IsSameApp {
   }
 
  private:
-  const std::string& name_;
+  const std::string name_;
   CoincidencePredicateVR matcher_;
   const smart_objects::SmartArray* vr_synonyms_;
 };
@@ -291,21 +288,18 @@ struct IsSameAppName : public IsSameApp {
 struct IsSameAppId {
   explicit IsSameAppId(const std::string& app_id) : app_id_(app_id) {}
   bool operator()(ApplicationSharedPtr other) const {
-    return strncmp(app_id_.c_str(),
-                   other->policy_app_id().c_str(),
-                   app_id.length()) == 0;
+    return app_id_ == other->policy_app_id();
   }
 
  private:
-  const std::string& app_id_;
+  const std::string app_id_;
 };
 struct IsSameAppName {
   IsSameAppName(const std::string& name,
                 const smart_objects::SmartArray* vr_synonyms)
       : name_(name), matcher_(name_), vr_synonyms_(vr_synonyms) {}
   bool operator()(ApplicationSharedPtr other) const {
-    bool same =
-        strncmp(name_.c_str(), other->name().c_str(), name_.length()) == 0;
+    bool same = (name_ == other->name().AsMBString());
     if (same) {
       LOG4CXX_AUTO_TRACE(logger_);
       LOG4CXX_ERROR(logger_, "Application name is known already.");
@@ -338,7 +332,7 @@ struct IsSameAppName {
   }
 
  private:
-  const std::string& name_;
+  const std::string name_;
   CoincidencePredicateVR matcher_;
   const smart_objects::SmartArray* vr_synonyms_;
 };
@@ -1021,8 +1015,7 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckCoincidence() {
 
   const std::string mobile_app_id =
       (*message_)[strings::msg_params][strings::app_id].asString();
-  const std::string tmp_app_name = app_name.AsMBString();
-  IsSameAppName matcher(tmp_app_name,
+  IsSameAppName matcher(app_name.AsMBString(),
                         vr_synonyms,
                         IsRemoteControl(mobile_app_id),
                         IsDriverDevice(),
@@ -1038,7 +1031,7 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckCoincidence() {
   for (; accessor.end() != it; ++it) {
     // name check
     const custom_str::CustomString& cur_name = (*it)->name();
-    if (!strncmp(app_name.c_str(), cur_name.c_str()), app_name.length()) {
+    if (app_name == cur_name.AsMBString()) {
       LOG4CXX_ERROR(logger_, "Application name is known already.");
       return mobile_apis::Result::DUPLICATE_NAME;
     }
@@ -1199,8 +1192,7 @@ bool RegisterAppInterfaceRequest::IsApplicationWithSameAppIdRegistered() {
       application_manager_.applications().GetData();
 
 #ifdef SDL_REMOTE_CONTROL
-  const std::string tmp_mobile_app_id = mobile_app_id.AsMBString();
-  IsSameAppId matcher(tmp_mobile_app_id,
+  IsSameAppId matcher(mobile_app_id.AsMBString(),
                       IsRemoteControl(mobile_app_id.AsMBString()),
                       IsDriverDevice(),
                       application_manager_);
@@ -1211,9 +1203,7 @@ bool RegisterAppInterfaceRequest::IsApplicationWithSameAppIdRegistered() {
   ApplicationSetConstIt it = applications.begin();
   ApplicationSetConstIt it_end = applications.end();
   for (; it != it_end; ++it) {
-    if (!strncmp(mobile_app_id.c_str(),
-                 (*it)->policy_app_id().c_str(),
-                 mobile_app_id.length())) {
+    if (mobile_app_id == (*it)->policy_app_id()) {
       return true;
     }
   }
