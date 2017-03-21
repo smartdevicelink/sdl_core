@@ -485,7 +485,16 @@ void ApplicationImpl::StopStreaming(
 
   SuspendStreaming(service_type);
 
-  if (service_type == ServiceType::kMobileNav && video_streaming_approved()) {
+  if (service_type == ServiceType::kMobileNav && video_streaming_approved() &&
+      audio_streaming_approved()) {
+    StopNaviStreaming();
+    StopAudioStreaming();
+  } else if (service_type == ServiceType::kMobileNav &&
+             video_streaming_approved()) {
+    StopNaviStreaming();
+  } else if (service_type == ServiceType::kAudio &&
+             audio_streaming_approved() && video_streaming_approved()) {
+    StopAudioStreaming();
     StopNaviStreaming();
   } else if (service_type == ServiceType::kAudio &&
              audio_streaming_approved()) {
