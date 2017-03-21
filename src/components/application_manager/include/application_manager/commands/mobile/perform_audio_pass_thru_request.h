@@ -156,11 +156,6 @@ class PerformAudioPassThruRequest : public CommandRequestImpl {
       const ResponseInfo& tts_response,
       bool& out_result);
 
-  /* flag display state of speak and ui perform audio
-  during perform audio pass thru*/
-  bool awaiting_tts_speak_response_;
-  bool awaiting_ui_response_;
-
   hmi_apis::Common_Result::eType result_tts_speak_;
   hmi_apis::Common_Result::eType result_ui_;
   std::string ui_info_;
