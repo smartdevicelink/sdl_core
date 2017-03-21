@@ -128,11 +128,6 @@ bool LifeCycle::StartComponents() {
   hmi_handler_ = new hmi_message_handler::HMIMessageHandlerImpl(profile_);
 
   media_manager_ = new media_manager::MediaManagerImpl(*app_manager_, profile_);
-  app_manager_->set_connection_handler(connection_handler_);
-  if (!app_manager_->Init(*last_state_, media_manager_)) {
-    LOG4CXX_ERROR(logger_, "Application manager init failed.");
-    return false;
-  }
 
   transport_manager_->AddEventListener(protocol_handler_);
   transport_manager_->AddEventListener(connection_handler_);
@@ -157,6 +152,7 @@ bool LifeCycle::StartComponents() {
 #endif  // TELEMETRY_MONITOR
   // It's important to initialise TM after setting up listener chain
   // [TM -> CH -> AM], otherwise some events from TM could arrive at nowhere
+  app_manager_->set_connection_handler(connection_handler_);
   app_manager_->set_protocol_handler(protocol_handler_);
   app_manager_->set_hmi_message_handler(hmi_handler_);
 
@@ -179,6 +175,7 @@ bool LifeCycle::StartComponents() {
   security_manager_->AddListener(app_manager_);
 
   app_manager_->AddPolicyObserver(crypto_manager_);
+  app_manager_->AddPolicyObserver(protocol_handler_);
   if (!crypto_manager_->Init()) {
     LOG4CXX_ERROR(logger_, "CryptoManager initialization fail.");
     return false;

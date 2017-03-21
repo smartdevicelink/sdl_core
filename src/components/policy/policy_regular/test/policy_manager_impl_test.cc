@@ -1305,7 +1305,7 @@ TEST_F(
   manager->SetUserConsentForDevice(dev_id2, true);
   EXPECT_CALL(listener, OnCurrentDeviceIdUpdateRequired(app_id2))
       .WillRepeatedly(Return(dev_id2));
-  manager->AddApplication(app_id2);
+  manager->AddApplication(app_id2, HmiTypes(policy_table::AHT_DEFAULT));
 
   GetPTU("valid_sdl_pt_update.json");
   ::policy::PermissionConsent perm_consent;
