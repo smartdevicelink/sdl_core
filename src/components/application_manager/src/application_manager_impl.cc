@@ -95,9 +95,10 @@ bool get_parameter_data_from_language_table(
     const std::string& name_so_param,
     smart_objects::SmartObject& out_parameter_data) {
   using namespace application_manager;
+  CREATE_LOGGERPTR_LOCAL(logger, "ApplicationManager");
   if (idx != std::string::npos &&
       app_data[json::languages][idx][lang_name].keyExists(name_so_param)) {
-    LOG4CXX_DEBUG(logger_,
+    LOG4CXX_DEBUG(logger,
                   "Getting value for " << name_so_param
                                        << " parameter, from language table "
                                        << lang_name);
@@ -105,7 +106,7 @@ bool get_parameter_data_from_language_table(
         app_data[json::languages][idx][lang_name][name_so_param];
     return true;
   }
-  LOG4CXX_DEBUG(logger_,
+  LOG4CXX_DEBUG(logger,
                 "No data was found for " << name_so_param
                                          << " parameter, from language table "
                                          << lang_name);
