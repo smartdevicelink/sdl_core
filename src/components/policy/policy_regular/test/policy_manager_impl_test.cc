@@ -133,6 +133,12 @@ struct StringsForUpdate CreateNewRandomData(StringsForUpdate& str) {
   return str;
 }
 
+policy_table::AppHmiTypes HmiTypes(const policy_table::AppHMIType hmi_type) {
+  policy_table::AppHmiTypes hmi_types;
+  hmi_types.push_back(hmi_type);
+  return hmi_types;
+}
+
 class PolicyManagerImplTest : public ::testing::Test {
  public:
   PolicyManagerImplTest() : device_id("08-00-27-CE-76-FE") {}
@@ -264,7 +270,7 @@ class PolicyManagerImplTest2 : public ::testing::Test {
     // Arrange
     CreateLocalPT("sdl_preloaded_pt.json");
     // Add app
-    manager->AddApplication(section_name);
+    manager->AddApplication(section_name, HmiTypes(policy_table::AHT_DEFAULT));
     // Check app gets RequestTypes from pre_DataConsent of app_policies
     // section
     PT_request_types = manager->GetAppRequestTypes(section_name);
@@ -688,11 +694,14 @@ TEST_F(
   EXPECT_CALL(*cache_manager, IsPredataPolicy(_)).WillOnce(Return(false));
   EXPECT_CALL(*cache_manager, IsApplicationRepresented(_))
       .WillOnce(Return(true));
-  EXPECT_CALL(*cache_manager, GetCertificate()).WillOnce(Return(""));
+  EXPECT_CALL(*cache_manager, GetCertificate())
+      .Times(2)
+      .WillRepeatedly(Return(""));
   EXPECT_CALL(*cache_manager, AppHasHMIType(_, policy_table::AHT_NAVIGATION))
       .WillOnce(Return(true));
   EXPECT_EQ("UP_TO_DATE", manager->GetPolicyTableStatus());
-  manager->AddApplication(policy::kDefaultId);
+  manager->AddApplication(policy::kDefaultId,
+                          HmiTypes(policy_table::AHT_NAVIGATION));
   EXPECT_EQ("UPDATE_NEEDED", manager->GetPolicyTableStatus());
 }
 
