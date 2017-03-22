@@ -181,8 +181,11 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
                           const std::string& policy_app_id));
   MOCK_METHOD0(OnPTExchangeNeeded, void());
   MOCK_METHOD1(GetAvailableApps, void(std::queue<std::string>& apps));
-  MOCK_METHOD1(AddApplication,
-               policy::StatusNotifier(const std::string& application_id));
+  MOCK_METHOD2(
+      AddApplication,
+      policy::StatusNotifier(
+          const std::string& application_id,
+          const rpc::policy_table_interface_base::AppHmiTypes& hmi_types));
   MOCK_METHOD1(IsApplicationRevoked, bool(const std::string& app_id));
   MOCK_METHOD0(OnUpdateRequestSentToMobile, void());
   MOCK_CONST_METHOD1(HeartBeatTimeout, uint32_t(const std::string& app_id));

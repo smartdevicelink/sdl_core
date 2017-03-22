@@ -112,6 +112,9 @@ typedef Map<RemoteRpcs, 0, 255> AccessModules;
 typedef Array<Enum<ModuleType>, 0, 255> ModuleTypes;
 #endif  // SDL_REMOTE_CONTROL
 
+typedef AppHMIType AppHmiType;
+typedef std::vector<AppHMIType> AppHmiTypes;
+
 struct RequestTypes : public RequestsTypeArray {
   RequestTypes();
   explicit RequestTypes(Json::Value* value);

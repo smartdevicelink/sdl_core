@@ -265,6 +265,12 @@ class PolicyHandlerTest : public ::testing::Test {
       const int levelspan = 1) {
     return {col, row, level, colspan, rowspan, levelspan};
   }
+
+  policy_table::AppHmiTypes HmiTypes(const policy_table::AppHMIType hmi_type) {
+    policy_table::AppHmiTypes hmi_types;
+    hmi_types.push_back(hmi_type);
+    return hmi_types;
+  }
 };
 
 namespace {
@@ -1323,10 +1329,13 @@ TEST_F(PolicyHandlerTest, AddApplication) {
   // Arrange
   EnablePolicyAndPolicyManagerMock();
   // Check expectations
-  EXPECT_CALL(*mock_policy_manager_, AddApplication(kPolicyAppId_))
+  EXPECT_CALL(
+      *mock_policy_manager_,
+      AddApplication(kPolicyAppId_, HmiTypes(policy_table::AHT_DEFAULT)))
       .WillOnce(Return(utils::MakeShared<utils::CallNothing>()));
   // Act
-  policy_handler_.AddApplication(kPolicyAppId_);
+  policy_handler_.AddApplication(kPolicyAppId_,
+                                 HmiTypes(policy_table::AHT_DEFAULT));
 }
 
 TEST_F(PolicyHandlerTest, HeartBeatTimeout) {

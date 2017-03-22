@@ -410,7 +410,7 @@ TEST_F(RegisterAppInterfaceRequestTest,
                   HMIResultCodeIs(hmi_apis::FunctionID::UI_ChangeRegistration)))
       .WillOnce(Return(true));
   policy::StatusNotifier notifier = utils::MakeShared<utils::CallNothing>();
-  EXPECT_CALL(mock_policy_handler_, AddApplication(_))
+  EXPECT_CALL(mock_policy_handler_, AddApplication(_, _))
       .WillOnce(Return(notifier));
   {
     InSequence s;

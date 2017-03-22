@@ -1027,18 +1027,25 @@ class CallStatusChange : public utils::Callable {
 };
 
 StatusNotifier PolicyManagerImpl::AddApplication(
-    const std::string& application_id) {
+    const std::string& application_id,
+    const rpc::policy_table_interface_base::AppHmiTypes& hmi_types) {
   LOG4CXX_AUTO_TRACE(logger_);
   const std::string device_id = GetCurrentDeviceId(application_id);
   DeviceConsent device_consent = GetUserConsentForDevice(device_id);
   sync_primitives::AutoLock lock(apps_registration_lock_);
-
   if (IsNewApplication(application_id)) {
     AddNewApplication(application_id, device_consent);
     return utils::MakeShared<CallStatusChange>(update_status_manager_,
                                                device_consent);
   } else {
     PromoteExistedApplication(application_id, device_consent);
+    const policy_table::AppHMIType type = policy_table::AHT_NAVIGATION;
+    if (helpers::in_range(hmi_types,
+                          (rpc::Enum<policy_table::AppHMIType>)type) &&
+        !HasCertificate()) {
+      LOG4CXX_DEBUG(logger_, "Certificate does not exist, scheduling update.");
+      update_status_manager_.ScheduleUpdate();
+    }
     return utils::MakeShared<utils::CallNothing>();
   }
 }

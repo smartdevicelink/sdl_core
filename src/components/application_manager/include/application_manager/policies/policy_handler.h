@@ -505,7 +505,9 @@ class PolicyHandler : public PolicyHandlerInterface,
    * @param app_types list of hmi types
    * @return function that will notify update manager about new application
    */
-  StatusNotifier AddApplication(const std::string& application_id) OVERRIDE;
+  StatusNotifier AddApplication(
+      const std::string& application_id,
+      const rpc::policy_table_interface_base::AppHmiTypes& hmi_types) OVERRIDE;
 
   /**
    * Checks whether application is revoked

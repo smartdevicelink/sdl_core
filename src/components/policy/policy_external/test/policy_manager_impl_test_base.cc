@@ -192,6 +192,13 @@ void InsertRpcParametersInList(::policy::RPCParams& input_params) {
   input_params.insert("timeStamp");
   input_params.insert("address");
 }
+
+policy_table::AppHmiTypes HmiTypes(const policy_table::AppHMIType hmi_type) {
+  policy_table::AppHmiTypes hmi_types;
+  hmi_types.push_back(hmi_type);
+  return hmi_types;
+}
+
 // PolicyManagerImplTest class methods
 PolicyManagerImplTest::PolicyManagerImplTest()
     : unpaired_device_id_("08-00-27-CE-76-FE")
@@ -323,7 +330,8 @@ void PolicyManagerImplTest2::AddRTtoAppSectionPT(
   // Arrange
   CreateLocalPT(preloaded_pt_filename_);
   // Add app
-  policy_manager_->AddApplication(section_name);
+  policy_manager_->AddApplication(section_name,
+                                  HmiTypes(policy_table::AHT_DEFAULT));
   // Check app gets RequestTypes from pre_DataConsent of app_policies
   // section
   pt_request_types_ = policy_manager_->GetAppRequestTypes(section_name);
@@ -442,7 +450,8 @@ void PolicyManagerImplTest2::
                                    "Bluetooth"));
 
   // Add app from consented device. App will be assigned with default policies
-  policy_manager_->AddApplication(application_id_);
+  policy_manager_->AddApplication(application_id_,
+                                  HmiTypes(policy_table::AHT_DEFAULT));
 
   // Expect all parameters are allowed
   std::ifstream ifile(update_file);
@@ -567,7 +576,8 @@ void PolicyManagerImplTest2::AddSetDeviceData() {
                                   "Bluetooth"));
 
   // Add app from consented device. App will be assigned with default policies
-  policy_manager_->AddApplication(application_id_);
+  policy_manager_->AddApplication(application_id_,
+                                  HmiTypes(policy_table::AHT_DEFAULT));
   (policy_manager_->GetCache())->AddDevice(device_id_1_, "Bluetooth");
 }
 

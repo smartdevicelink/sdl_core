@@ -513,9 +513,10 @@ struct SmartObjectToInt {
 };
 
 StatusNotifier PolicyHandler::AddApplication(
-    const std::string& application_id) {
+    const std::string& application_id,
+    const rpc::policy_table_interface_base::AppHmiTypes& hmi_types) {
   POLICY_LIB_CHECK(utils::MakeShared<utils::CallNothing>());
-  return policy_manager_->AddApplication(application_id);
+  return policy_manager_->AddApplication(application_id, hmi_types);
 }
 
 void PolicyHandler::AddDevice(const std::string& device_id,
