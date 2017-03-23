@@ -296,13 +296,23 @@ const CryptoManagerSettings& CryptoManagerImpl::get_settings() const {
 }
 
 bool CryptoManagerImpl::set_certificate(const std::string& cert_data) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
   if (cert_data.empty()) {
     LOG4CXX_WARN(logger_, "Empty certificate");
     return false;
   }
 
-  BIO* bio_cert =
-      BIO_new_mem_buf(const_cast<char*>(cert_data.c_str()), cert_data.length());
+  LOG4CXX_DEBUG(logger_,
+                "Updating certificate and key from base64 data: \" "
+                    << cert_data);
+
+  BIO* bio_cert = BIO_new_mem_buf(
+      const_cast<std::string::pointer>(cert_data.data()), cert_data.length());
+  if (NULL == bio_cert) {
+    LOG4CXX_WARN(logger_, "Unable to update certificate. BIO not created");
+    return false;
+  }
 
   utils::ScopeGuard bio_guard = utils::MakeGuard(BIO_free, bio_cert);
   UNUSED(bio_guard)
@@ -314,9 +324,7 @@ bool CryptoManagerImpl::set_certificate(const std::string& cert_data) {
   if (1 == BIO_reset(bio_cert)) {
     PEM_read_bio_PrivateKey(bio_cert, &pkey, 0, 0);
   } else {
-    LOG4CXX_WARN(logger_,
-                 "Unabled to reset BIO in order to read private key, "
-                     << LastError());
+    LOG4CXX_WARN(logger_, "Unabled to reset BIO to read private key");
   }
 
   if (NULL == cert || NULL == pkey) {
@@ -339,6 +347,9 @@ bool CryptoManagerImpl::set_certificate(const std::string& cert_data) {
     LOG4CXX_ERROR(logger_, "Could not use certificate ");
     return false;
   }
+
+  LOG4CXX_DEBUG(logger_, "Certificate and key data successfully updated");
+
   return true;
 }
 
