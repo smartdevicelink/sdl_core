@@ -310,7 +310,7 @@ bool CryptoManagerImpl::set_certificate(const std::string& cert_data) {
   BIO* bio_cert = BIO_new_mem_buf(
       const_cast<std::string::pointer>(cert_data.data()), cert_data.length());
   if (NULL == bio_cert) {
-    LOG4CXX_WARN(logger_, "Unable to update certificate. BIO not created");
+    LOG4CXX_WARN(logger_, "Could not update certificate, BIO not created");
     return false;
   }
 
@@ -324,31 +324,33 @@ bool CryptoManagerImpl::set_certificate(const std::string& cert_data) {
   if (1 == BIO_reset(bio_cert)) {
     PEM_read_bio_PrivateKey(bio_cert, &pkey, 0, 0);
   } else {
-    LOG4CXX_WARN(logger_, "Unabled to reset BIO to read private key");
+    LOG4CXX_WARN(logger_, "Could not reset BIO to read key: " << LastError());
   }
 
   if (NULL == cert || NULL == pkey) {
-    LOG4CXX_WARN(logger_, "Either certificate or key not valid.");
+    LOG4CXX_WARN(logger_,
+                 "Either certificate or key are not valid: " << LastError());
     return false;
   }
 
   if (!SSL_CTX_use_certificate(context_, cert)) {
-    LOG4CXX_WARN(logger_, "Could not use certificate");
+    LOG4CXX_WARN(logger_, "Could not use certificate: " << LastError());
     return false;
   }
 
   asn1_time_to_tm(X509_get_notAfter(cert));
 
   if (!SSL_CTX_use_PrivateKey(context_, pkey)) {
-    LOG4CXX_ERROR(logger_, "Could not use key");
-    return false;
-  }
-  if (!SSL_CTX_check_private_key(context_)) {
-    LOG4CXX_ERROR(logger_, "Could not use certificate ");
+    LOG4CXX_ERROR(logger_, "Could not use key: " << LastError());
     return false;
   }
 
-  LOG4CXX_DEBUG(logger_, "Certificate and key data successfully updated");
+  if (!SSL_CTX_check_private_key(context_)) {
+    LOG4CXX_ERROR(logger_, "Could not check key: " << LastError());
+    return false;
+  }
+
+  LOG4CXX_DEBUG(logger_, "Certificate and key successfully updated");
 
   return true;
 }
