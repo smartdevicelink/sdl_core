@@ -214,14 +214,12 @@ def main():
     concat_files(server_verification_ca_cert_file, server_root_cert_file, ford_server_cert_file)
     concat_files(client_verification_ca_cert_file, client_root_cert_file, ford_client_cert_file)
 
-
     print
     print " --== Client certificate generating ==-- "
     client_key_file  = os.path.join(client_dir, "client.key")
     client_cert_file = os.path.join(client_dir, "client.crt")
     gen_rsa_key(client_key_file, 2048)
     gen_cert(client_cert_file, client_key_file, ford_client_cert_file, ford_client_key_file, days, client_answer)
-
 
     print
     print " --== Server certificate generating ==-- "

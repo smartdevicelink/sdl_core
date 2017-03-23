@@ -134,26 +134,6 @@ bool LifeCycle::StartComponents() {
     return false;
   }
 
-#ifdef ENABLE_SECURITY
-  security_manager_ = new security_manager::SecurityManagerImpl();
-  crypto_manager_ = new security_manager::CryptoManagerImpl(
-      utils::MakeShared<security_manager::CryptoManagerSettingsImpl>(
-          profile_, app_manager_->GetPolicyHandler().RetrieveCertificate()));
-  protocol_handler_->AddProtocolObserver(security_manager_);
-  protocol_handler_->set_security_manager(security_manager_);
-
-  security_manager_->set_session_observer(connection_handler_);
-  security_manager_->set_protocol_handler(protocol_handler_);
-  security_manager_->set_crypto_manager(crypto_manager_);
-  security_manager_->AddListener(app_manager_);
-
-  app_manager_->AddPolicyObserver(crypto_manager_);
-  if (!crypto_manager_->Init()) {
-    LOG4CXX_ERROR(logger_, "CryptoManager initialization fail.");
-    return false;
-  }
-#endif  // ENABLE_SECURITY
-
   transport_manager_->AddEventListener(protocol_handler_);
   transport_manager_->AddEventListener(connection_handler_);
 
@@ -180,10 +160,34 @@ bool LifeCycle::StartComponents() {
   app_manager_->set_protocol_handler(protocol_handler_);
   app_manager_->set_hmi_message_handler(hmi_handler_);
 
+  if (!app_manager_->Init(*last_state_, media_manager_)) {
+    LOG4CXX_ERROR(logger_, "Application manager init failed.");
+    return false;
+  }
+
+#ifdef ENABLE_SECURITY
+  security_manager_ = new security_manager::SecurityManagerImpl();
+  crypto_manager_ = new security_manager::CryptoManagerImpl(
+      utils::MakeShared<security_manager::CryptoManagerSettingsImpl>(
+          profile_, app_manager_->GetPolicyHandler().RetrieveCertificate()));
+  protocol_handler_->AddProtocolObserver(security_manager_);
+  protocol_handler_->set_security_manager(security_manager_);
+
+  security_manager_->set_session_observer(connection_handler_);
+  security_manager_->set_protocol_handler(protocol_handler_);
+  security_manager_->set_crypto_manager(crypto_manager_);
+  security_manager_->AddListener(app_manager_);
+
+  app_manager_->AddPolicyObserver(crypto_manager_);
+  if (!crypto_manager_->Init()) {
+    LOG4CXX_ERROR(logger_, "CryptoManager initialization fail.");
+    return false;
+  }
+#endif  // ENABLE_SECURITY
+
   transport_manager_->Init(*last_state_);
   // start transport manager
   transport_manager_->Visibility(true);
-
   return true;
 }
 

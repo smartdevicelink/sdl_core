@@ -295,6 +295,7 @@ const CryptoManagerSettings& CryptoManagerImpl::get_settings() const {
 }
 
 bool CryptoManagerImpl::set_certificate(const std::string& cert_data) {
+  LOG4CXX_AUTO_TRACE(logger_);
   if (cert_data.empty()) {
     LOG4CXX_WARN(logger_, "Empty certificate");
     return false;
@@ -307,7 +308,12 @@ bool CryptoManagerImpl::set_certificate(const std::string& cert_data) {
   char* buf = new char[cert_data.length()];
   int len = BIO_read(bmem, buf, cert_data.length());
 
-  BIO* bio_cert = BIO_new(BIO_s_mem());
+  LOG4CXX_DEBUG(logger_,
+                "Updating certificate and key from base64 data: \" "
+                    << cert_data);
+
+  BIO* bio_cert = BIO_new_mem_buf(
+      const_cast<std::string::pointer>(cert_data.data()), cert_data.length());
   if (NULL == bio_cert) {
     LOG4CXX_WARN(logger_, "Unable to update certificate. BIO not created");
     return false;
@@ -351,6 +357,8 @@ bool CryptoManagerImpl::set_certificate(const std::string& cert_data) {
     LOG4CXX_ERROR(logger_, "Could not use certificate ");
     return false;
   }
+
+  LOG4CXX_DEBUG(logger_, "Certificate and key data successfully updated");
   return true;
 }
 
