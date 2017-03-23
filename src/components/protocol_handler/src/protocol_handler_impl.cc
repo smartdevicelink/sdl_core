@@ -176,13 +176,16 @@ void set_hash_id(uint32_t hash_id, protocol_handler::ProtocolPacket& packet) {
 
 void ProtocolHandlerImpl::SendStartSessionAck(ConnectionID connection_id,
                                               uint8_t session_id,
-                                              uint8_t,
+                                              uint8_t protocol_version,
                                               uint32_t hash_id,
                                               uint8_t service_type,
                                               bool protection) {
   LOG4CXX_AUTO_TRACE(logger_);
-
   uint8_t protocolVersion = SupportedSDLProtocolVersion();
+
+  if (kRpc != service_type) {
+    protocolVersion = protocol_version;
+  }
 
   ProtocolFramePtr ptr(
       new protocol_handler::ProtocolPacket(connection_id,
