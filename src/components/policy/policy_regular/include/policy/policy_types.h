@@ -482,6 +482,8 @@ struct RetrySequenceURL {
  */
 typedef std::pair<uint32_t, uint32_t> AppIdURL;
 
+enum ReturnValue { kZero, kNonZero };
+
 }  //  namespace policy
 
 #endif  // SRC_COMPONENTS_POLICY_POLICY_EXTERNAL_INCLUDE_POLICY_POLICY_TYPES_H_

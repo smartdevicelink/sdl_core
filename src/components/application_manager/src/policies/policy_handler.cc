@@ -356,10 +356,7 @@ bool PolicyHandler::InitPolicyTable() {
       hmi_apis::FunctionID::BasicCommunication_OnReady);
   std::string preloaded_file = get_settings().preloaded_pt_file();
   if (file_system::FileExists(preloaded_file)) {
-    const bool result =
-        policy_manager_->InitPT(preloaded_file, &get_settings());
-    SetDaysAfterEpoch();
-    return result;
+    return policy_manager_->InitPT(preloaded_file, &get_settings());
   }
   LOG4CXX_FATAL(logger_, "The file which contains preloaded PT is not exist");
   return false;
