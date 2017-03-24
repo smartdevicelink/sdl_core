@@ -1085,9 +1085,15 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
 #endif  // ENABLE_SECURITY
 
   uint32_t hash_id;
+  bool protection_requested = false;
   const ConnectionID connection_id = packet.connection_id();
-  const uint32_t session_id = session_observer_.OnSessionStartedCallback(
-      connection_id, packet.session_id(), service_type, protection, &hash_id);
+  const uint32_t session_id =
+      session_observer_.OnSessionStartedCallback(connection_id,
+                                                 packet.session_id(),
+                                                 service_type,
+                                                 protection,
+                                                 &hash_id,
+                                                 &protection_requested);
 
   if (0 == session_id) {
     LOG4CXX_WARN(logger_,
@@ -1102,7 +1108,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
 
 #ifdef ENABLE_SECURITY
   // for packet is encrypted and security plugin is enable
-  if (protection && security_manager_) {
+  if (protection_requested && security_manager_) {
     const uint32_t connection_key =
         session_observer_.KeyFromPair(connection_id, session_id);
 
