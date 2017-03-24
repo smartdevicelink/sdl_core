@@ -264,7 +264,7 @@ TEST_F(
   // Arrange
   CreateLocalPT(preloaded_pt_filename_);
   // Add app
-  policy_manager_->AddApplication(app_id);
+  policy_manager_->AddApplication(app_id, HmiTypes(policy_table::AHT_DEFAULT));
   // Check app gets RequestTypes from pre_DataConsent of app_policies
   // section
   pt_request_types_ = policy_manager_->GetAppRequestTypes(app_id);

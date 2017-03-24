@@ -86,6 +86,7 @@ void CheckIsParamInList(const ::policy::RPCParams& list,
                         const std::string& parameter);
 Json::Value createPTforLoad();
 void InsertRpcParametersInList(::policy::RPCParams& input_params);
+policy_table::AppHmiTypes HmiTypes(const policy_table::AppHMIType hmi_type);
 
 template <typename T>
 void SortAndCheckEquality(std::vector<T> first, std::vector<T> second) {

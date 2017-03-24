@@ -47,7 +47,9 @@
 #include "policy/policy_settings.h"
 #include "smart_objects/smart_object.h"
 #include "policy/policy_types.h"
+#include "policy/policy_table/types.h"
 
+using namespace ::rpc::policy_table_interface_base;
 namespace policy {
 typedef utils::SharedPtr<utils::Callable> StatusNotifier;
 
@@ -321,7 +323,9 @@ class PolicyHandlerInterface {
    * @param application_id The policy aplication id.
    * @return function that will notify update manager about new application
    */
-  virtual StatusNotifier AddApplication(const std::string& application_id) = 0;
+  virtual StatusNotifier AddApplication(
+      const std::string& application_id,
+      const rpc::policy_table_interface_base::AppHmiTypes& hmi_types) = 0;
 
   /**
    * Checks whether application is revoked

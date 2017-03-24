@@ -151,6 +151,13 @@ struct CheckMissedTypes {
   std::string& log_;
 };
 
+class SmartArrayValueExtractor {
+ public:
+  AppHmiType operator()(const smart_objects::SmartObject& so) const {
+    return static_cast<AppHmiType>(so.asInt());
+  }
+};
+
 struct IsSameNickname {
   IsSameNickname(const custom_str::CustomString& app_id) : app_id_(app_id) {}
   bool operator()(const policy::StringArray::value_type& nickname) const {
@@ -805,9 +812,22 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
     resumption = resumer.IsApplicationSaved(application->policy_app_id(),
                                             application->mac_address());
   }
+  AppHmiTypes hmi_types;
+  if ((*message_)[strings::msg_params].keyExists(strings::app_hmi_type)) {
+    smart_objects::SmartArray* hmi_types_ptr =
+        (*message_)[strings::msg_params][strings::app_hmi_type].asArray();
+    DCHECK_OR_RETURN_VOID(hmi_types_ptr);
+    SmartArrayValueExtractor extractor;
+    if (hmi_types_ptr && 0 < hmi_types_ptr->size()) {
+      std::transform(hmi_types_ptr->begin(),
+                     hmi_types_ptr->end(),
+                     std::back_inserter(hmi_types),
+                     extractor);
+    }
+  }
 
-  policy::StatusNotifier notify_upd_manager =
-      GetPolicyHandler().AddApplication(application->policy_app_id());
+  policy::StatusNotifier notify_upd_manager = GetPolicyHandler().AddApplication(
+      application->policy_app_id(), hmi_types);
   SendOnAppRegisteredNotificationToHMI(
       *(application.get()), resumption, need_restore_vr);
 #ifdef SDL_REMOTE_CONTROL
