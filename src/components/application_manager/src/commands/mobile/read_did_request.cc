@@ -87,7 +87,7 @@ void ReadDIDRequest::Run() {
       (*message_)[strings::msg_params][strings::ecu_name];
   msg_params[strings::did_location] =
       (*message_)[strings::msg_params][strings::did_location];
-
+  StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VehicleInfo);
   SendHMIRequest(hmi_apis::FunctionID::VehicleInfo_ReadDID, &msg_params, true);
 }
 
@@ -97,6 +97,7 @@ void ReadDIDRequest::on_event(const event_engine::Event& event) {
 
   switch (event.id()) {
     case hmi_apis::FunctionID::VehicleInfo_ReadDID: {
+      EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VehicleInfo);
       hmi_apis::Common_Result::eType result_code =
           static_cast<hmi_apis::Common_Result::eType>(
               message[strings::params][hmi_response::code].asInt());
