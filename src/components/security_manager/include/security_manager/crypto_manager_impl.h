@@ -127,6 +127,7 @@ class CryptoManagerImpl : public CryptoManager {
 
   int pull_number_from_buf(char* buf, int* idx);
   void asn1_time_to_tm(ASN1_TIME* time);
+  void InitCertExpTime();
 
   const utils::SharedPtr<const CryptoManagerSettings> settings_;
   SSL_CTX* context_;
