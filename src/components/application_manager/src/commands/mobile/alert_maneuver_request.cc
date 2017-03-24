@@ -111,6 +111,7 @@ void AlertManeuverRequest::Run() {
   }
 
   pending_requests_.Add(hmi_apis::FunctionID::Navigation_AlertManeuver);
+  StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_Navigation);
   SendHMIRequest(
       hmi_apis::FunctionID::Navigation_AlertManeuver, &msg_params, true);
 
@@ -123,6 +124,7 @@ void AlertManeuverRequest::Run() {
     msg_params[hmi_request::speak_type] =
         hmi_apis::Common_MethodName::ALERT_MANEUVER;
 
+    StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_TTS);
     SendHMIRequest(hmi_apis::FunctionID::TTS_Speak, &msg_params, true);
   }
 }
@@ -134,6 +136,7 @@ void AlertManeuverRequest::on_event(const event_engine::Event& event) {
   switch (event_id) {
     case hmi_apis::FunctionID::Navigation_AlertManeuver: {
       LOG4CXX_INFO(logger_, "Received Navigation_AlertManeuver event");
+      EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_Navigation);
       pending_requests_.Remove(event_id);
       navi_alert_maneuver_result_code_ =
           static_cast<hmi_apis::Common_Result::eType>(
@@ -143,6 +146,7 @@ void AlertManeuverRequest::on_event(const event_engine::Event& event) {
     }
     case hmi_apis::FunctionID::TTS_Speak: {
       LOG4CXX_INFO(logger_, "Received TTS_Speak event");
+      EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_TTS);
       pending_requests_.Remove(event_id);
       tts_speak_result_code_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());

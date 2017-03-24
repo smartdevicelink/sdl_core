@@ -802,15 +802,6 @@ void CommandRequestImpl::EndAwaitForInterface(
   }
 }
 
-bool CommandRequestImpl::IsResultCodeUnsupported(
-    const ResponseInfo& first, const ResponseInfo& second) const {
-  return ((first.is_ok || first.is_invalid_enum) &&
-          second.is_unsupported_resource) ||
-         ((second.is_ok || second.is_invalid_enum) &&
-          first.is_unsupported_resource) ||
-         (first.is_unsupported_resource && second.is_unsupported_resource);
-}
-
 std::string GetComponentNameFromInterface(
     const HmiInterfaces::InterfaceID& interface) {
   switch (interface) {

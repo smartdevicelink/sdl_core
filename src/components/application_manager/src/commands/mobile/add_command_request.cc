@@ -187,10 +187,12 @@ void AddCommandRequest::Run() {
   }
 
   if (send_ui_) {
+    StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
     SendHMIRequest(hmi_apis::FunctionID::UI_AddCommand, &ui_msg_params, true);
   }
 
   if (send_vr_) {
+    StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VR);
     SendHMIRequest(hmi_apis::FunctionID::VR_AddCommand, &vr_msg_params, true);
   }
 }
@@ -312,6 +314,7 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_AddCommand: {
       LOG4CXX_INFO(logger_, "Received UI_AddCommand event");
+      EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
       is_ui_received_ = true;
       ui_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
@@ -323,6 +326,7 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
     }
     case hmi_apis::FunctionID::VR_AddCommand: {
       LOG4CXX_INFO(logger_, "Received VR_AddCommand event");
+      EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VR);
       is_vr_received_ = true;
       vr_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());

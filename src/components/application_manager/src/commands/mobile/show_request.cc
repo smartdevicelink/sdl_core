@@ -212,6 +212,7 @@ void ShowRequest::Run() {
         (*message_)[strings::msg_params][strings::custom_presets];
   }
 
+  StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
   SendHMIRequest(hmi_apis::FunctionID::UI_Show, &msg_params, true);
 
   MessageSharedPtr persistentData = new smart_objects::SmartObject(msg_params);
@@ -227,6 +228,7 @@ void ShowRequest::on_event(const event_engine::Event& event) {
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_Show: {
       LOG4CXX_DEBUG(logger_, "Received UI_Show event.");
+      EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
       std::string response_info;
       hmi_apis::Common_Result::eType result_code =
           static_cast<hmi_apis::Common_Result::eType>(

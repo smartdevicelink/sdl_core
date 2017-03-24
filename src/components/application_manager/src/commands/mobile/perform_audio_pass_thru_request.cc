@@ -364,6 +364,53 @@ bool PerformAudioPassThruRequest::IsWaitingHMIResponse() {
          GetInterfaceAwaitState(HmiInterfaces::HMI_INTERFACE_UI);
 }
 
+void PerformAudioPassThruRequest::ProcessAudioPassThruIcon(
+    ApplicationSharedPtr app) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  smart_objects::SmartObject& msg_params = (*message_)[strings::msg_params];
+
+  if (msg_params.keyExists(strings::audio_pass_thru_icon)) {
+    smart_objects::SmartObject& icon =
+        msg_params[strings::audio_pass_thru_icon];
+    if (MessageHelper::VerifyImageApplyPath(icon, app, application_manager_) !=
+        mobile_apis::Result::SUCCESS) {
+      LOG4CXX_WARN(
+          logger_,
+          "Invalid audio_pass_thru_icon doesn't exist in the file system");
+    }
+  }
+}
+
+mobile_apis::Result::eType
+PerformAudioPassThruRequest::PrepareAudioPassThruResultCodeForResponse(
+    const ResponseInfo& ui_response,
+    const ResponseInfo& tts_response,
+    bool& out_result) {
+  mobile_apis::Result::eType result_code = mobile_apis::Result::INVALID_ENUM;
+
+  hmi_apis::Common_Result::eType common_result =
+      hmi_apis::Common_Result::INVALID_ENUM;
+  const hmi_apis::Common_Result::eType ui_result = ui_response.result_code;
+  const hmi_apis::Common_Result::eType tts_result = tts_response.result_code;
+
+  if ((ui_result == hmi_apis::Common_Result::SUCCESS) &&
+      (tts_result != hmi_apis::Common_Result::SUCCESS) &&
+      (tts_result != hmi_apis::Common_Result::INVALID_ENUM)) {
+    common_result = hmi_apis::Common_Result::WARNINGS;
+    out_result = true;
+  } else if (ui_response.is_ok &&
+             tts_result == hmi_apis::Common_Result::WARNINGS) {
+    common_result = hmi_apis::Common_Result::WARNINGS;
+    out_result = true;
+  } else if (ui_result == hmi_apis::Common_Result::INVALID_ENUM) {
+    common_result = tts_result;
+  } else {
+    common_result = ui_result;
+  }
+  result_code = MessageHelper::HMIToMobileResult(common_result);
+  return result_code;
+}
+
 }  // namespace commands
 
 }  // namespace application_manager

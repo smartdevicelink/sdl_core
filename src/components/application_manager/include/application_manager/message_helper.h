@@ -520,6 +520,22 @@ class MessageHelper {
       int32_t result_code);
 
   /*
+     * @brief Verify image and add image file full path
+     * and add path, although the image doesn't exist
+     *
+     * @param SmartObject with image
+     *
+     * @param app current application
+     *
+     * @return verification result
+     *
+     */
+  static mobile_apis::Result::eType VerifyImageApplyPath(
+      smart_objects::SmartObject& image,
+      ApplicationConstSharedPtr app,
+      ApplicationManager& app_mngr);
+
+  /*
    * @brief Verify image and add image file full path
    *
    * @param SmartObject with image

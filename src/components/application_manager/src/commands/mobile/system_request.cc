@@ -583,6 +583,7 @@ void SystemRequest::Run() {
 
   msg_params[strings::request_type] =
       (*message_)[strings::msg_params][strings::request_type];
+  StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_BasicCommunication);
   SendHMIRequest(hmi_apis::FunctionID::BasicCommunication_SystemRequest,
                  &msg_params,
                  true);
@@ -596,6 +597,7 @@ void SystemRequest::on_event(const event_engine::Event& event) {
 
   switch (event.id()) {
     case hmi_apis::FunctionID::BasicCommunication_SystemRequest: {
+      EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_BasicCommunication);
       mobile_apis::Result::eType result_code =
           GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
               message[strings::params][hmi_response::code].asUInt()));

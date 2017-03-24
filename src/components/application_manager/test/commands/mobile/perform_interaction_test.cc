@@ -199,10 +199,10 @@ TEST_F(PerformInteractionRequestTest,
 
   EXPECT_CALL(hmi_interfaces,
               GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
-      .WillRepeatedly(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
+      .WillRepeatedly(Return(am::HmiInterfaces::STATE_AVAILABLE));
   EXPECT_CALL(hmi_interfaces,
               GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_VR))
-      .WillRepeatedly(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
+      .WillRepeatedly(Return(am::HmiInterfaces::STATE_AVAILABLE));
 
   MessageSharedPtr response_to_mobile;
 
@@ -230,10 +230,10 @@ TEST_F(PerformInteractionRequestTest,
 
   ON_CALL(hmi_interfaces_,
           GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
-      .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
+      .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
   ON_CALL(hmi_interfaces_,
           GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_VR))
-      .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
+      .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
 
   MessageSharedPtr response_msg_vr =
       CreateMessage(smart_objects::SmartType_Map);

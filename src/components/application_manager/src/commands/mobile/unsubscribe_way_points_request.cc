@@ -30,6 +30,7 @@ void UnSubscribeWayPointsRequest::Run() {
     return;
   }
 
+  StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_Navigation);
   SendHMIRequest(
       hmi_apis::FunctionID::Navigation_UnsubscribeWayPoints, NULL, true);
 }
@@ -41,6 +42,7 @@ void UnSubscribeWayPointsRequest::on_event(const event_engine::Event& event) {
   switch (event.id()) {
     case hmi_apis::FunctionID::Navigation_UnsubscribeWayPoints: {
       LOG4CXX_INFO(logger_, "Received Navigation_UnSubscribeWayPoints event");
+      EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_Navigation);
       const hmi_apis::Common_Result::eType result_code =
           static_cast<hmi_apis::Common_Result::eType>(
               message[strings::params][hmi_response::code].asInt());

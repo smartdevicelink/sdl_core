@@ -131,6 +131,7 @@ void ChangeRegistrationRequest::Run() {
         msg_params[strings::ngn_media_screen_app_name]);
   }
 
+  StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
   SendHMIRequest(hmi_apis::FunctionID::UI_ChangeRegistration, &ui_params, true);
 
   // VR processing
@@ -143,6 +144,7 @@ void ChangeRegistrationRequest::Run() {
     vr_params[strings::vr_synonyms] = msg_params[strings::vr_synonyms];
     app->set_vr_synonyms(msg_params[strings::vr_synonyms]);
   }
+  StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VR);
   SendHMIRequest(hmi_apis::FunctionID::VR_ChangeRegistration, &vr_params, true);
 
   // TTS processing
@@ -155,7 +157,7 @@ void ChangeRegistrationRequest::Run() {
     tts_params[strings::tts_name] = msg_params[strings::tts_name];
     app->set_tts_name(msg_params[strings::tts_name]);
   }
-
+  StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_TTS);
   SendHMIRequest(
       hmi_apis::FunctionID::TTS_ChangeRegistration, &tts_params, true);
 }
@@ -169,6 +171,7 @@ void ChangeRegistrationRequest::on_event(const event_engine::Event& event) {
   switch (event_id) {
     case hmi_apis::FunctionID::UI_ChangeRegistration: {
       LOG4CXX_INFO(logger_, "Received UI_ChangeRegistration event");
+      EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
       pending_requests_.Remove(event_id);
       ui_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
@@ -177,6 +180,7 @@ void ChangeRegistrationRequest::on_event(const event_engine::Event& event) {
     }
     case hmi_apis::FunctionID::VR_ChangeRegistration: {
       LOG4CXX_INFO(logger_, "Received VR_ChangeRegistration event");
+      EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VR);
       pending_requests_.Remove(event_id);
       vr_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
@@ -185,6 +189,7 @@ void ChangeRegistrationRequest::on_event(const event_engine::Event& event) {
     }
     case hmi_apis::FunctionID::TTS_ChangeRegistration: {
       LOG4CXX_INFO(logger_, "Received TTS_ChangeRegistration event");
+      EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_TTS);
       pending_requests_.Remove(event_id);
       tts_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
