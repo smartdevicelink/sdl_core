@@ -364,6 +364,18 @@ bool AccessRemoteImpl::GetPermissionsForApp(const std::string& device_id,
   GetGroupsIds(device_id, kDefaultId, group_types[kTypeDefault]);
   GetGroupsIds(
       device_id, kPreDataConsentId, group_types[kTypePreDataConsented]);
+
+  cache_->GetPreConsentedGroups(app_id, group_types[kTypePreconsented]);
+
+  cache_->GetConsentedGroups(device_id,
+                             app_id,
+                             group_types[kTypeAllowed],
+                             group_types[kTypeDisallowed]);
+
+  cache_->GetUnconsentedGroups(
+      device_id, app_id, group_types[kTypeUnconsented]);
+
+  cache_->GetAllAppGroups(kDeviceId, group_types[kTypeDevice]);
   return true;
 }
 
