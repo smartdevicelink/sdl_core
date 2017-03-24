@@ -48,6 +48,12 @@
 #include "utils/lock.h"
 #include "utils/shared_ptr.h"
 
+// Handshake using DTLSv1 with OpenSSL 1.0.1
+// fails as described in bug:
+// #3657: OpenSSL 1.0.1k DTLS handshake no longer works
+// https://rt.openssl.org/Ticket/Display.html?id=3657&user=guest&pass=guest
+#define DTLSV1_HANDSHAKE_BUG_VERSION 0x1000106fL
+
 namespace security_manager {
 class CryptoManagerImpl : public CryptoManager {
  private:
