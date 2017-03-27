@@ -32,12 +32,14 @@
 #include "security_manager/crypto_manager_impl.h"
 
 #include <assert.h>
-#include <openssl/bio.h>
-#include <openssl/ssl.h>
-#include <openssl/err.h>
 #include <memory.h>
 #include <map>
 #include <algorithm>
+#include <sstream>
+
+#include <openssl/bio.h>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
 
 #include "utils/macro.h"
 
@@ -136,23 +138,33 @@ std::map<std::string, CryptoManagerImpl::SSLContextImpl::BlockSizeGetter>
     CryptoManagerImpl::SSLContextImpl::max_block_sizes =
         CryptoManagerImpl::SSLContextImpl::create_max_block_sizes();
 
+std::string GetName(X509_NAME* x509_name) {
+  char* tmp_str = X509_NAME_oneline(x509_name, NULL, 0);
+  std::string name(tmp_str);
+  OPENSSL_free(tmp_str);
+  std::stringstream output;
+  while (name.length()) {
+    size_t pos = name.find('/');
+    std::string data(name.substr(0, pos));
+    if (data.find("CN=") == std::string::npos &&
+        data.find("serialNumber=") == std::string::npos) {
+      // Will write in output stream all except CN and serialNumber
+      output << data << ' ';
+    }
+    name = std::string::npos != pos ? name.substr(pos + 1, name.length()) : "";
+  }
+  return output.str();
+}
+
 void CryptoManagerImpl::SSLContextImpl::PrintCertData(
     X509* cert, const std::string& cert_owner) {
   if (cert) {
-    X509_NAME* subj_name = X509_get_subject_name(cert);
-    char* subj = X509_NAME_oneline(subj_name, NULL, 0);
-    if (subj) {
-      std::replace(subj, subj + strlen(subj), '/', ' ');
-      LOG4CXX_DEBUG(logger_, cert_owner << " subject:" << subj);
-      OPENSSL_free(subj);
-    }
-    char* issuer = X509_NAME_oneline(X509_get_issuer_name(cert), NULL, 0);
-    if (issuer) {
-      std::replace(issuer, issuer + strlen(issuer), '/', ' ');
-      LOG4CXX_DEBUG(logger_, cert_owner << " issuer:" << issuer);
-      OPENSSL_free(issuer);
-    }
-
+    LOG4CXX_DEBUG(logger_,
+                  cert_owner
+                      << " subject:" << GetName(X509_get_subject_name(cert)));
+    LOG4CXX_DEBUG(logger_,
+                  cert_owner
+                      << " issuer:" << GetName(X509_get_issuer_name(cert)));
     ASN1_TIME* notBefore = X509_get_notBefore(cert);
     ASN1_TIME* notAfter = X509_get_notAfter(cert);
 
