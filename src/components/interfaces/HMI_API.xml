@@ -34,7 +34,7 @@
 
 <interfaces name="SmartDeviceLink HMI API">
 
-<interface name="Common" version="1.4" date="2016-05-11">
+<interface name="Common" version="1.5" date="2017-03-27">
 
 <enum name="Result">
     <element name="SUCCESS" value="0"/>
