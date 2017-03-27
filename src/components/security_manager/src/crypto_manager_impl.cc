@@ -300,36 +300,20 @@ bool CryptoManagerImpl::set_certificate(const std::string& cert_data) {
     return false;
   }
 
-  BIO* bio = BIO_new(BIO_f_base64());
-  BIO* bmem = BIO_new_mem_buf((char*)cert_data.c_str(), cert_data.length());
-  bmem = BIO_push(bio, bmem);
-
-  char* buf = new char[cert_data.length()];
-  int len = BIO_read(bmem, buf, cert_data.length());
-
-  BIO* bio_cert = BIO_new(BIO_s_mem());
-  if (NULL == bio_cert) {
-    LOG4CXX_WARN(logger_, "Unable to update certificate. BIO not created");
-    return false;
-  }
+  BIO* bio_cert = BIO_new_mem_buf(const_cast<char*>(cert_data.c_str()), cert_data.length());
 
   utils::ScopeGuard bio_guard = utils::MakeGuard(BIO_free, bio_cert);
   UNUSED(bio_guard)
-  int k = 0;
-  if ((k = BIO_write(bio_cert, buf, len)) <= 0) {
-    LOG4CXX_WARN(logger_, "Unable to write into BIO");
-    return false;
-  }
 
-  PKCS12* p12 = d2i_PKCS12_bio(bio_cert, NULL);
-  if (NULL == p12) {
-    LOG4CXX_ERROR(logger_, "Unable to parse certificate");
-    return false;
-  }
+  X509* cert = NULL;
+  PEM_read_bio_X509(bio_cert, &cert,0, 0);
 
   EVP_PKEY* pkey = NULL;
-  X509* cert = NULL;
-  PKCS12_parse(p12, NULL, &pkey, &cert, NULL);
+  if (1 == BIO_reset(bio_cert)) {
+    PEM_read_bio_PrivateKey(bio_cert, &pkey, 0,0);
+  } else {
+    LOG4CXX_WARN(logger_, "Unabled to reset BIO in order to read private key, " << LastError());
+  }
 
   if (NULL == cert || NULL == pkey) {
     LOG4CXX_WARN(logger_, "Either certificate or key not valid.");
