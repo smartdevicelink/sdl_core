@@ -108,6 +108,10 @@ class ConnectionHandlerObserver {
 #ifdef ENABLE_SECURITY
   virtual security_manager::SSLContext::HandshakeContext GetHandshakeContext(
       uint32_t key) const = 0;
+
+  virtual bool CanStartProtectedService(
+      const int32_t& session_key,
+      const protocol_handler::ServiceType& type) const = 0;
 #endif  // ENABLE_SECURITY
  protected:
   /**

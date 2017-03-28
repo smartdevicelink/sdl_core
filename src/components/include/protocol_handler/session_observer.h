@@ -69,8 +69,9 @@ class SessionObserver {
    * \param sessionId Identifier of the session to be start
    * \param service_type Type of service
    * \param protocol_version Version of protocol
-   * \param is_protected would be service protected
-   * \param hash_id pointer for session hash identifier, uint32_t* hash_id
+   * \param is_protected request service protection
+   * \param out_hash_id pointer for session hash identifier, uint32_t* hash_id
+   * \param out_start_protected whether service protection is used
    * \return uint32_t Id (number) of new session if successful, otherwise 0.
    */
   virtual uint32_t OnSessionStartedCallback(
@@ -78,7 +79,8 @@ class SessionObserver {
       const uint8_t sessionId,
       const protocol_handler::ServiceType& service_type,
       const bool is_protected,
-      uint32_t* hash_id) = 0;
+      uint32_t* out_hash_id,
+      bool* out_start_protected) = 0;
 
   /**
    * \brief Callback function used by ProtocolHandler

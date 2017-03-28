@@ -57,9 +57,14 @@ class MockConnectionHandlerObserver
       void(const int32_t& session_key,
            const protocol_handler::ServiceType& type,
            const connection_handler::CloseSessionReason& close_reason));
+#ifdef ENABLE_SECURITY
   MOCK_CONST_METHOD1(
       GetHandshakeContext,
       security_manager::SSLContext::HandshakeContext(uint32_t key));
+  MOCK_CONST_METHOD2(CanStartProtectedService,
+                     bool(const int32_t& session_key,
+                          const protocol_handler::ServiceType& type));
+#endif  // ENABLE_SECURITY
 };
 
 }  // namespace connection_handler_test
