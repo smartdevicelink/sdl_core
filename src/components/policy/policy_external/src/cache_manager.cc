@@ -1220,7 +1220,7 @@ bool CacheManager::SetCountersPassedForSuccessfulUpdate(
 
 ReturnValue CacheManager::DaysBeforeExchange(uint16_t current) {
   LOG4CXX_AUTO_TRACE(logger_);
-  CACHE_MANAGER_CHECK(0);
+  CACHE_MANAGER_CHECK(kZero);
 
   const rpc::Optional<rpc::Integer<uint16_t, 0, 65535> > days_after_epoch =
       (pt_->policy_table.module_meta->pt_exchanged_x_days_after_epoch);

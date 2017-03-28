@@ -129,6 +129,8 @@ TEST_F(PolicyManagerImplTest, ResetPT) {
 
 TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
   // Arrange
+  EXPECT_CALL(*cache_manager_, DaysBeforeExchange(_))
+      .WillOnce(Return(kNonZero));
   manager_->ForcePTExchange();
   manager_->OnUpdateStarted();
   Json::Value table = createPTforLoad();
@@ -285,6 +287,8 @@ TEST_F(PolicyManagerImplTest2, GetPolicyTableStatus_ExpectUpToDate) {
 TEST_F(PolicyManagerImplTest,
        SetUpdateStarted_GetPolicyTableStatus_Expect_Updating) {
   // Arrange
+  EXPECT_CALL(*cache_manager_, DaysBeforeExchange(_))
+      .WillOnce(Return(kNonZero));
   manager_->ForcePTExchange();
   EXPECT_CALL(*cache_manager_, SaveUpdateRequired(true));
   manager_->OnUpdateStarted();
@@ -332,7 +336,8 @@ TEST_F(PolicyManagerImplTest, MarkUnpairedDevice) {
               HasDeviceSpecifiedConsent(unpaired_device_id_, false))
       .WillRepeatedly(Return(true));
   EXPECT_CALL(*cache_manager_, IgnitionCyclesBeforeExchange());
-  EXPECT_CALL(*cache_manager_, DaysBeforeExchange(_));
+  EXPECT_CALL(*cache_manager_, DaysBeforeExchange(_))
+      .WillOnce(Return(kNonZero));
   // Act
   manager_->MarkUnpairedDevice(unpaired_device_id_);
 }
