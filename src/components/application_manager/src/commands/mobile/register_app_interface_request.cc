@@ -1051,7 +1051,7 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckCoincidence() {
   for (; accessor.end() != it; ++it) {
     // name check
     const custom_str::CustomString& cur_name = (*it)->name();
-    if (app_name.Compare(cur_name.AsMBString())) {
+    if (app_name.Compare(cur_name)) {
       LOG4CXX_ERROR(logger_, "Application name is known already.");
       return mobile_apis::Result::DUPLICATE_NAME;
     }
@@ -1223,7 +1223,7 @@ bool RegisterAppInterfaceRequest::IsApplicationWithSameAppIdRegistered() {
   ApplicationSetConstIt it = applications.begin();
   ApplicationSetConstIt it_end = applications.end();
   for (; it != it_end; ++it) {
-    if (mobile_app_id.Compare(policy_app_id().c_str())) {
+    if (mobile_app_id.Compare((*it)->policy_app_id().c_str())) {
       return true;
     }
   }
