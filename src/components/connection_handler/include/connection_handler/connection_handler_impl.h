@@ -179,7 +179,7 @@ class ConnectionHandlerImpl
    * \param session_id Identifier of the session to be started
    * \param service_type Type of service
    * \param is_protected request service protection
-   * \param hash_id pointer for session hash identifier
+   * \param out_hash_id pointer for session hash identifier
    * \param out_start_protected whether service protection is requested
    * \return uint32_t Id (number) of new session if successful, otherwise 0.
    */
@@ -188,7 +188,7 @@ class ConnectionHandlerImpl
       const uint8_t session_id,
       const protocol_handler::ServiceType& service_type,
       const bool is_protected,
-      uint32_t* hash_id,
+      uint32_t* out_hash_id,
       bool* out_start_protected) OVERRIDE;
 
   /**

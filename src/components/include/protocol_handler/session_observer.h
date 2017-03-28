@@ -70,7 +70,7 @@ class SessionObserver {
    * \param service_type Type of service
    * \param protocol_version Version of protocol
    * \param is_protected request service protection
-   * \param hash_id pointer for session hash identifier, uint32_t* hash_id
+   * \param out_hash_id pointer for session hash identifier, uint32_t* hash_id
    * \param out_start_protected whether service protection is used
    * \return uint32_t Id (number) of new session if successful, otherwise 0.
    */
@@ -79,7 +79,7 @@ class SessionObserver {
       const uint8_t sessionId,
       const protocol_handler::ServiceType& service_type,
       const bool is_protected,
-      uint32_t* hash_id,
+      uint32_t* out_hash_id,
       bool* out_start_protected) = 0;
 
   /**

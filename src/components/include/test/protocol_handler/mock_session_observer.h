@@ -52,7 +52,7 @@ class MockSessionObserver : public ::protocol_handler::SessionObserver {
                const uint8_t sessionId,
                const protocol_handler::ServiceType& service_type,
                const bool is_protected,
-               uint32_t* hash_id,
+               uint32_t* out_hash_id,
                bool* out_start_protected));
   MOCK_METHOD4(
       OnSessionEndedCallback,

@@ -285,12 +285,12 @@ uint32_t ConnectionHandlerImpl::OnSessionStartedCallback(
     const uint8_t session_id,
     const protocol_handler::ServiceType& service_type,
     const bool is_protected,
-    uint32_t* hash_id,
+    uint32_t* out_hash_id,
     bool* out_start_protected) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  if (hash_id) {
-    *hash_id = protocol_handler::HASH_ID_WRONG;
+  if (out_hash_id) {
+    *out_hash_id = protocol_handler::HASH_ID_WRONG;
   }
 
 #ifdef ENABLE_SECURITY
@@ -321,8 +321,8 @@ uint32_t ConnectionHandlerImpl::OnSessionStartedCallback(
       LOG4CXX_ERROR(logger_, "Couldn't start new session!");
       return 0;
     }
-    if (hash_id) {
-      *hash_id = KeyFromPair(connection_handle, new_session_id);
+    if (out_hash_id) {
+      *out_hash_id = KeyFromPair(connection_handle, new_session_id);
     }
   } else {  // Could be create new service or protected exists one
     if (!connection->AddNewService(
@@ -337,8 +337,8 @@ uint32_t ConnectionHandlerImpl::OnSessionStartedCallback(
       return 0;
     }
     new_session_id = session_id;
-    if (hash_id) {
-      *hash_id = protocol_handler::HASH_ID_NOT_SUPPORTED;
+    if (out_hash_id) {
+      *out_hash_id = protocol_handler::HASH_ID_NOT_SUPPORTED;
     }
   }
   sync_primitives::AutoReadLock read_lock(connection_handler_observer_lock_);
