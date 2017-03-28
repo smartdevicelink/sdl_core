@@ -1218,7 +1218,7 @@ bool CacheManager::SetCountersPassedForSuccessfulUpdate(
   return true;
 }
 
-int CacheManager::DaysBeforeExchange(uint16_t current) {
+ReturnValue CacheManager::DaysBeforeExchange(uint16_t current) {
   LOG4CXX_AUTO_TRACE(logger_);
   CACHE_MANAGER_CHECK(0);
 
@@ -1239,7 +1239,7 @@ int CacheManager::DaysBeforeExchange(uint16_t current) {
       std::max(static_cast<uint16_t>(current - *days_after_epoch), uint16_t(0));
   LOG4CXX_DEBUG(logger_, "The days since last update: " << actual);
 
-  return std::max(limit - actual, 0);
+  return (std::max(limit - actual, 0) ? kNonZero : kZero);
 }
 
 void CacheManager::IncrementIgnitionCycles() {

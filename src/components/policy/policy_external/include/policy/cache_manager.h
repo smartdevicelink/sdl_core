@@ -102,7 +102,7 @@ class CacheManager : public CacheManagerInterface {
    * @param current value in days after epoch
    * @return value in days
    */
-  virtual int DaysBeforeExchange(uint16_t current);
+  virtual ReturnValue DaysBeforeExchange(uint16_t current);
 
   /**
    * @brief Increments number of ignition cycles since last exchange by 1

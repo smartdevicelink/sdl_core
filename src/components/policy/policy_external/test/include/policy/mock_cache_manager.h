@@ -60,7 +60,7 @@ class MockCacheManagerInterface : public ::policy::CacheManagerInterface {
   MOCK_CONST_METHOD1(GetPermissionsList, bool(StringArray& perm_list));
   MOCK_METHOD2(SetCountersPassedForSuccessfulUpdate,
                bool(Counters counter, int value));
-  MOCK_METHOD1(DaysBeforeExchange, int(uint16_t current));
+  MOCK_METHOD1(DaysBeforeExchange, ReturnValue(uint16_t current));
   MOCK_METHOD0(IncrementIgnitionCycles, void());
 
   MOCK_METHOD2(SaveDeviceConsentToCache,
