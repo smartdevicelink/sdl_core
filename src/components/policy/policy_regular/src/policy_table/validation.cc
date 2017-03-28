@@ -233,6 +233,10 @@ bool ApplicationParams::ValidateModuleTypes() const {
     ModuleTypes non_initialized;
     moduleType = Optional<ModuleTypes>(non_initialized);
   }
+  // Check for empty "groups" sub-sections
+  if (groups.empty()) {
+    return false;
+  }
   return true;
 }
 
@@ -309,15 +313,33 @@ bool UsageAndErrorCounts::Validate() const {
 bool DeviceParams::Validate() const {
   return true;
 }
+
 bool PolicyTable::Validate() const {
-  if (PT_PRELOADED == GetPolicyTableType() ||
-      PT_UPDATE == GetPolicyTableType()) {
+  PolicyTableType policy_table_type = GetPolicyTableType();
+
+  if (PT_PRELOADED == policy_table_type || PT_UPDATE == policy_table_type) {
     if (device_data.is_initialized()) {
       return false;
     }
   }
+
+  if (PT_PRELOADED == policy_table_type || PT_SNAPSHOT == policy_table_type) {
+    // Check upper bound of each "groups" sub section in the app policies
+    const FunctionalGroupings::size_type functional_groupings_count =
+        functional_groupings.size();
+    for (ApplicationPolicies::const_iterator app_policiies_it =
+             app_policies_section.apps.begin();
+         app_policies_section.apps.end() != app_policiies_it;
+         ++app_policiies_it) {
+      if (app_policiies_it->second.groups.size() > functional_groupings_count) {
+        return false;
+      }
+    }
+  }
+
   return true;
 }
+
 bool Table::Validate() const {
   return true;
 }
