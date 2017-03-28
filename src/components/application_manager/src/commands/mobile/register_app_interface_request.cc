@@ -232,11 +232,11 @@ struct IsSameAppId : public IsSameApp {
     if (AreBothRemoteControl(other) && !IsSameDeviceType(other)) {
       return false;
     }
-    return strcasecmp(app_id_.c_str(), other->policy_app_id().c_str()) == 0;
+    return app_id_ == other->policy_app_id();
   }
 
  private:
-  const std::string& app_id_;
+  const std::string app_id_;
 };
 
 struct IsSameAppName : public IsSameApp {
@@ -253,7 +253,8 @@ struct IsSameAppName : public IsSameApp {
     if (AreBothRemoteControl(other) && !IsSameDeviceType(other)) {
       return false;
     }
-    bool same = strcasecmp(name_.c_str(), other->name().c_str()) == 0;
+
+    const bool same = (name_ == other->name().AsMBString());
     if (same) {
       LOG4CXX_AUTO_TRACE(logger_);
       LOG4CXX_ERROR(logger_, "Application name is known already.");
@@ -286,7 +287,7 @@ struct IsSameAppName : public IsSameApp {
   }
 
  private:
-  const std::string& name_;
+  const std::string name_;
   CoincidencePredicateVR matcher_;
   const smart_objects::SmartArray* vr_synonyms_;
 };
@@ -294,18 +295,18 @@ struct IsSameAppName : public IsSameApp {
 struct IsSameAppId {
   explicit IsSameAppId(const std::string& app_id) : app_id_(app_id) {}
   bool operator()(ApplicationSharedPtr other) const {
-    return strcasecmp(app_id_.c_str(), other->policy_app_id().c_str()) == 0;
+    return app_id_ == other->policy_app_id();
   }
 
  private:
-  const std::string& app_id_;
+  const std::string app_id_;
 };
 struct IsSameAppName {
   IsSameAppName(const std::string& name,
                 const smart_objects::SmartArray* vr_synonyms)
       : name_(name), matcher_(name_), vr_synonyms_(vr_synonyms) {}
   bool operator()(ApplicationSharedPtr other) const {
-    bool same = strcasecmp(name_.c_str(), other->name().c_str()) == 0;
+    const bool same = (name_ == other->name().AsMBString());
     if (same) {
       LOG4CXX_AUTO_TRACE(logger_);
       LOG4CXX_ERROR(logger_, "Application name is known already.");
@@ -338,7 +339,7 @@ struct IsSameAppName {
   }
 
  private:
-  const std::string& name_;
+  const std::string name_;
   CoincidencePredicateVR matcher_;
   const smart_objects::SmartArray* vr_synonyms_;
 };
@@ -1050,7 +1051,7 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckCoincidence() {
   for (; accessor.end() != it; ++it) {
     // name check
     const custom_str::CustomString& cur_name = (*it)->name();
-    if (app_name.CompareIgnoreCase(cur_name)) {
+    if (app_name.Compare(cur_name.AsMBString())) {
       LOG4CXX_ERROR(logger_, "Application name is known already.");
       return mobile_apis::Result::DUPLICATE_NAME;
     }
@@ -1222,7 +1223,7 @@ bool RegisterAppInterfaceRequest::IsApplicationWithSameAppIdRegistered() {
   ApplicationSetConstIt it = applications.begin();
   ApplicationSetConstIt it_end = applications.end();
   for (; it != it_end; ++it) {
-    if (mobile_app_id.CompareIgnoreCase((*it)->policy_app_id().c_str())) {
+    if (mobile_app_id.Compare(policy_app_id().c_str())) {
       return true;
     }
   }
