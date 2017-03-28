@@ -49,8 +49,6 @@ namespace str = strings;
 PerformAudioPassThruRequest::PerformAudioPassThruRequest(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
     : CommandRequestImpl(message, application_manager)
-    , awaiting_tts_speak_response_(false)
-    , awaiting_ui_response_(false)
     , result_tts_speak_(hmi_apis::Common_Result::INVALID_ENUM)
     , result_ui_(hmi_apis::Common_Result::INVALID_ENUM) {
   subscribe_on_event(hmi_apis::FunctionID::TTS_OnResetTimeout);
@@ -98,7 +96,7 @@ void PerformAudioPassThruRequest::Run() {
   // According with new implementation processing of UNSUPPORTE_RESOURCE
   // need set flag before sending to hmi
   ProcessAudioPassThruIcon(app);
-  awaiting_ui_response_ = true;
+  StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
   if ((*message_)[str::msg_params].keyExists(str::initial_prompt) &&
       (0 < (*message_)[str::msg_params][str::initial_prompt].length())) {
     // In case TTS Speak, subscribe on notification
@@ -120,7 +118,7 @@ void PerformAudioPassThruRequest::on_event(const event_engine::Event& event) {
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_PerformAudioPassThru: {
       LOG4CXX_TRACE(logger_, "Received UI_PerformAudioPassThru");
-      awaiting_ui_response_ = false;
+      EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
 
       result_ui_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asUInt());
@@ -143,7 +141,7 @@ void PerformAudioPassThruRequest::on_event(const event_engine::Event& event) {
       result_tts_speak_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asUInt());
       GetInfo(message, tts_info_);
-      awaiting_tts_speak_response_ = false;
+      EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_TTS);
       const bool is_tts_speak_success_unsuported =
           Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
               result_tts_speak_,
@@ -237,7 +235,7 @@ void PerformAudioPassThruRequest::SendSpeakRequest() {
   // app_id
   msg_params[strings::app_id] = connection_key();
   msg_params[hmi_request::speak_type] = Common_MethodName::AUDIO_PASS_THRU;
-  awaiting_tts_speak_response_ = true;
+  StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_TTS);
   SendHMIRequest(FunctionID::TTS_Speak, &msg_params, true);
 }
 
@@ -380,7 +378,7 @@ void PerformAudioPassThruRequest::FinishTTSSpeak() {
     LOG4CXX_DEBUG(logger_, "Stop AudioPassThru.");
     application_manager_.StopAudioPassThru(connection_key());
   }
-  if (!awaiting_tts_speak_response_) {
+  if (!GetInterfaceAwaitState(HmiInterfaces::HMI_INTERFACE_TTS)) {
     LOG4CXX_WARN(logger_, "TTS Speak is inactive.");
     return;
   }
@@ -389,7 +387,8 @@ void PerformAudioPassThruRequest::FinishTTSSpeak() {
 
 bool PerformAudioPassThruRequest::IsWaitingHMIResponse() {
   LOG4CXX_AUTO_TRACE(logger_);
-  return awaiting_tts_speak_response_ || awaiting_ui_response_;
+  return GetInterfaceAwaitState(HmiInterfaces::HMI_INTERFACE_TTS) ||
+         GetInterfaceAwaitState(HmiInterfaces::HMI_INTERFACE_UI);
 }
 
 void PerformAudioPassThruRequest::ProcessAudioPassThruIcon(
