@@ -1338,11 +1338,12 @@ bool SQLPTRepresentation::SaveConsumerFriendlyMessages(
   // the policy table. So it won't be changed/updated
   if (messages.messages.is_initialized()) {
     utils::dbms::SQLQuery query(db());
-    if (!query.Exec(sql_pt::kDeleteMessageString)) {
-      LOG4CXX_WARN(logger_, "Incorrect delete from message.");
-      return false;
+    if (!messages.messages->empty()) {
+      if (!query.Exec(sql_pt::kDeleteMessageString)) {
+        LOG4CXX_WARN(logger_, "Incorrect delete from message.");
+        return false;
+      }
     }
-
     if (query.Prepare(sql_pt::kUpdateVersion)) {
       query.Bind(0, messages.version);
       if (!query.Exec()) {
