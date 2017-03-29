@@ -409,14 +409,18 @@ bool file_system::CreateFile(const std::string& path) {
   }
 }
 
-uint64_t file_system::GetFileModificationTime(const std::string& path) {
+struct timespec file_system::GetFileModificationTime(const std::string& path) {
   struct stat info;
   stat(path.c_str(), &info);
+  struct timespec modification_time = {0, 0};
 #ifndef __QNXNTO__
-  return static_cast<uint64_t>(info.st_mtim.tv_nsec);
+  modification_time.tv_sec = info.st_mtim.tv_sec;
+  modification_time.tv_nsec = info.st_mtim.tv_nsec;
 #else
-  return static_cast<uint64_t>(info.st_mtime);
+  modification_time.tv_sec = info.st_mtime;
+  modification_time.tv_nsec = info.st_mtimensec;
 #endif
+  return modification_time;
 }
 
 bool file_system::CopyFile(const std::string& src, const std::string& dst) {

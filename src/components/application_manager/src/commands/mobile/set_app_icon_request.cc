@@ -190,7 +190,8 @@ void SetAppIconRequest::CopyToIconStorage(
 void SetAppIconRequest::RemoveOldestIcons(const std::string& storage,
                                           const uint32_t icons_amount) const {
   const std::vector<std::string> icons_list = file_system::ListFiles(storage);
-  std::map<uint64_t, std::string> icon_modification_time;
+  std::set<file_system::FileDescriptor, file_system::FileDescriptor>
+      info_about_icons;
   std::vector<std::string>::const_iterator it = icons_list.begin();
   for (; it != icons_list.end(); ++it) {
     const std::string file_name = *it;
@@ -198,23 +199,28 @@ void SetAppIconRequest::RemoveOldestIcons(const std::string& storage,
     if (!file_system::FileExists(file_path)) {
       continue;
     }
-    const uint64_t time = file_system::GetFileModificationTime(file_path);
-    icon_modification_time[time] = file_name;
+    struct timespec modification_time =
+        file_system::GetFileModificationTime(file_path);
+    file_system::FileDescriptor icon_descriptor;
+    icon_descriptor.file_name = file_name;
+    icon_descriptor.modification_time = modification_time;
+    info_about_icons.insert(icon_descriptor);
   }
 
   for (size_t counter = 0; counter < icons_amount; ++counter) {
-    if (!icon_modification_time.size()) {
+    if (!info_about_icons.size()) {
       LOG4CXX_ERROR(logger_, "No more icons left for deletion.");
       return;
     }
-    const std::string file_name = icon_modification_time.begin()->second;
+    const std::string file_name = (*info_about_icons.begin()).file_name;
     const std::string file_path = storage + "/" + file_name;
-    if (!file_system::DeleteFile(file_path)) {
-      LOG4CXX_DEBUG(logger_, "Error while deleting icon " << file_path);
+    if (file_system::DeleteFile(file_path)) {
+      LOG4CXX_DEBUG(logger_,
+                    "Old icon " << file_path << " was deleted successfully.");
+    } else {
+      LOG4CXX_WARN(logger_, "Error while deleting icon " << file_path);
     }
-    icon_modification_time.erase(icon_modification_time.begin());
-    LOG4CXX_DEBUG(logger_,
-                  "Old icon " << file_path << " was deleted successfully.");
+    info_about_icons.erase(info_about_icons.begin());
   }
 }
 
