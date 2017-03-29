@@ -55,13 +55,13 @@ set(LIBRARIES
   gmock
   Utils
   SmartObjects
-  jsoncpp
   HMI_API
   MOBILE_API
   ApplicationManager
   AMHMICommandsLibrary
   AMMobileCommandsLibrary
   connectionHandler
+  jsoncpp
 )
 
 create_cotired_test("commands_test" "${SOURCES}" "${LIBRARIES}" )
