@@ -237,7 +237,9 @@ TEST_F(PerformInteractionRequestTest, DISABLED_OnTimeout_VR_GENERIC_ERROR) {
   EXPECT_EQ(
       (*vr_command_result)[strings::msg_params][strings::result_code].asInt(),
       static_cast<int32_t>(am::mobile_api::Result::GENERIC_ERROR));
-  EXPECT_FALSE((*vr_command_result)[strings::msg_params][strings::info].asString().empty());
+  EXPECT_FALSE((*vr_command_result)[strings::msg_params][strings::info]
+                   .asString()
+                   .empty());
 }
 
 TEST_F(
