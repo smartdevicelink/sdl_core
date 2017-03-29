@@ -42,6 +42,33 @@
 namespace file_system {
 
 /**
+ * @brief This struct allow to bind file name with time stamp representing it's
+ * last modification time
+ */
+struct FileDescriptor {
+  std::string file_name;
+  timespec modification_time;
+
+  /**
+   * @brief Compare time stamps for file A and file B
+   * @param file_a contains file descriptor for file A
+   * @param file_b contains file descriptor for file B
+   * @return true if file A is older than file B, false otherwise
+   */
+  bool operator()(FileDescriptor file_a, FileDescriptor file_b) const {
+    if (file_a.modification_time.tv_sec < file_b.modification_time.tv_sec) {
+      return true;
+    } else if (file_a.modification_time.tv_sec ==
+               file_b.modification_time.tv_sec) {
+      if (file_a.modification_time.tv_nsec < file_b.modification_time.tv_nsec) {
+        return true;
+      }
+    }
+    return false;
+  }
+};
+
+/**
  * @brief Get available disc space.
  *
  * @param path to directory
@@ -241,11 +268,12 @@ const std::string ConvertPathForURL(const std::string& path);
 bool CreateFile(const std::string& path);
 
 /**
- * @brief Get modification time of file
- * @param path Path to file
- * @return Modification time in nanoseconds
+ * @brief Get information of file's last modification time
+ * @param path contains full path to file (including file name and extension)
+ * @return time stamp with file modification time information, which represents
+ * modification time in seconds and nanoseconds
  */
-uint64_t GetFileModificationTime(const std::string& path);
+struct timespec GetFileModificationTime(const std::string& path);
 
 /**
   * @brief Copy file from source to destination
