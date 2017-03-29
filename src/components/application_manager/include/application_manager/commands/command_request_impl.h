@@ -277,13 +277,15 @@ class CommandRequestImpl : public CommandImpl,
   /**
    * @brief Gets interface await state.
      @param interface_id interface which SDL awaits for response in given time
-     @return true if SDL awaits for response from given interface in interface_id
+     @return true if SDL awaits for response from given interface in
+   interface_id
   */
   bool GetInterfaceAwaitState(const HmiInterfaces::InterfaceID& interface_id);
 
   /**
    * @brief Sets given HMI interface await status to false
-     @param interface_id interface which SDL no longer awaits for response in given time
+     @param interface_id interface which SDL no longer awaits for response in
+   given time
   */
   void EndAwaitForInterface(const HmiInterfaces::InterfaceID& interface_id);
 
@@ -329,11 +331,13 @@ class CommandRequestImpl : public CommandImpl,
       const mobile_apis::AppHMIType::eType app_hmi_type) const;
 
   /**
-   * @brief Adds information to result message "info" param in case of GENERIC_ERROR
+   * @brief Adds information to result message "info" param in case of
+   GENERIC_ERROR
             about component which not responded in time
    * @param response Response message, which info should be extended
    */
-  void AddTimeOutComponentInfoToMessage(smart_objects::SmartObject& response) const;
+  void AddTimeOutComponentInfoToMessage(
+      smart_objects::SmartObject& response) const;
 };
 
 }  // namespace commands

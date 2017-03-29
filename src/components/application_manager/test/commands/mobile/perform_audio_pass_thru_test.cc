@@ -345,8 +345,10 @@ TEST_F(PerformAudioPassThruRequestTest, DISABLED_OnTimeout_GENERIC_ERROR) {
 
   command->onTimeOut();
 
-  ResultCommandExpectations(
-      msg_mobile_response, "UI component does not respond", am::mobile_api::Result::GENERIC_ERROR, false);
+  ResultCommandExpectations(msg_mobile_response,
+                            "UI component does not respond",
+                            am::mobile_api::Result::GENERIC_ERROR,
+                            false);
 }
 
 TEST_F(

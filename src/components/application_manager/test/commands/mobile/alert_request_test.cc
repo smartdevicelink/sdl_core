@@ -235,9 +235,11 @@ TEST_F(AlertRequestTest, DISABLED_OnTimeout_GENERIC_ERROR) {
       (*ui_command_result)[am::strings::msg_params][am::strings::result_code]
           .asInt(),
       static_cast<int32_t>(am::mobile_api::Result::GENERIC_ERROR));
-  EXPECT_FALSE((*ui_command_result)[am::strings::msg_params][am::strings::info].empty());
-  EXPECT_EQ((*ui_command_result)[am::strings::msg_params][am::strings::info].asString(),
-          "UI component does not respond");
+  EXPECT_FALSE(
+      (*ui_command_result)[am::strings::msg_params][am::strings::info].empty());
+  EXPECT_EQ((*ui_command_result)[am::strings::msg_params][am::strings::info]
+                .asString(),
+            "UI component does not respond");
 }
 
 TEST_F(AlertRequestTest, OnEvent_UI_HmiSendSuccess_UNSUPPORTED_RESOURCE) {

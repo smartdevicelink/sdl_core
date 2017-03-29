@@ -157,9 +157,8 @@ void OnAppPermissionConsentNotification::Run() {
 #ifdef EXTERNAL_PROPRIETARY_MODE
   policy::ExternalConsentStatus external_consent_status;
   if (msg_params.keyExists(strings::external_consent_status)) {
-    const smart_objects::SmartArray*
-        system_external_consent_status =
-            msg_params[strings::external_consent_status].asArray();
+    const smart_objects::SmartArray* system_external_consent_status =
+        msg_params[strings::external_consent_status].asArray();
     ExternalConsentStatusAppender status_appender(external_consent_status);
     std::for_each(system_external_consent_status->begin(),
                   system_external_consent_status->end(),
