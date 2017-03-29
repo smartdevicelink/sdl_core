@@ -239,10 +239,41 @@ TEST_F(CryptoManagerTest, OnCertificateUpdated_NullString) {
   EXPECT_FALSE(crypto_manager_->OnCertificateUpdated(std::string()));
 }
 
-TEST_F(CryptoManagerTest, OnCertificateUpdated_MalformedSign) {
+TEST_F(CryptoManagerTest, OnCertificateUpdated_MalformedCertificateSign) {
   InitSecurityManager();
+
+  std::size_t start_pos =
+      certificate_data_base64_.find("-----BEGIN CERTIFICATE-----");
+  ASSERT_TRUE(start_pos != std::string::npos);
+  std::size_t end_pos =
+      certificate_data_base64_.find("-----END CERTIFICATE-----");
+  ASSERT_TRUE(end_pos != std::string::npos);
+
   // Corrupt the middle symbol
-  certificate_data_base64_[certificate_data_base64_.size() / 2] = '?';
+  certificate_data_base64_[(end_pos - start_pos) / 2] = '?';
+
+  EXPECT_FALSE(crypto_manager_->OnCertificateUpdated(certificate_data_base64_));
+}
+
+TEST_F(CryptoManagerTest, OnCertificateUpdated_MalformedKeySign) {
+  InitSecurityManager();
+
+  std::size_t start_pos =
+      certificate_data_base64_.find("-----BEGIN PRIVATE KEY-----");
+  bool is_rsa_key = false;
+  if (std::string::npos == start_pos) {
+    start_pos =
+        certificate_data_base64_.find("-----BEGIN RSA PRIVATE KEY-----");
+    is_rsa_key = true;
+  }
+  ASSERT_TRUE(start_pos != std::string::npos);
+  std::size_t end_pos = certificate_data_base64_.find(
+      !is_rsa_key ? "-----END PRIVATE KEY-----"
+                  : "-----END RSA PRIVATE KEY-----");
+  ASSERT_TRUE(end_pos != std::string::npos);
+
+  // Corrupt the middle symbol
+  certificate_data_base64_[(end_pos - start_pos) / 2] = '?';
 
   EXPECT_FALSE(crypto_manager_->OnCertificateUpdated(certificate_data_base64_));
 }
