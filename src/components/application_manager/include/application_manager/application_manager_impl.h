@@ -1154,6 +1154,8 @@ class ApplicationManagerImpl
 
   void OnApplicationListUpdateTimer();
 
+  void OnApplicationSearchTimer();
+
   /**
    * @brief CreateApplications creates aplpication adds it to application list
    * and prepare data for sending AppIcon request.
@@ -1420,6 +1422,8 @@ class ApplicationManagerImpl
 #endif  // TELEMETRY_MONITOR
 
   Timer application_list_update_timer_;
+
+  Timer application_search_timer_;
 
   Timer tts_global_properties_timer_;
 
