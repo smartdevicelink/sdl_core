@@ -881,6 +881,8 @@ TEST_F(PolicyManagerImplTest2,
 
 TEST_F(PolicyManagerImplTest, LoadPT_SetInvalidUpdatePT_PTIsNotLoaded) {
   // Arrange
+  EXPECT_CALL(*cache_manager_, DaysBeforeExchange(_))
+      .WillOnce(Return(kNonZero));
   manager_->ForcePTExchange();
   manager_->OnUpdateStarted();
   Json::Value table(Json::objectValue);

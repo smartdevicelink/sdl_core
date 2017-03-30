@@ -1218,22 +1218,28 @@ bool CacheManager::SetCountersPassedForSuccessfulUpdate(
   return true;
 }
 
-int CacheManager::DaysBeforeExchange(uint16_t current) {
+ReturnValue CacheManager::DaysBeforeExchange(uint16_t current) {
   LOG4CXX_AUTO_TRACE(logger_);
-  CACHE_MANAGER_CHECK(0);
+  CACHE_MANAGER_CHECK(kZero);
+
+  const rpc::Optional<rpc::Integer<uint16_t, 0, 65535> > days_after_epoch =
+      (pt_->policy_table.module_meta->pt_exchanged_x_days_after_epoch);
+
+  if (!days_after_epoch->is_initialized()) {
+    return kNonZero;
+  }
+
   const uint8_t limit = pt_->policy_table.module_config.exchange_after_x_days;
   LOG4CXX_DEBUG(logger_,
                 "Exchange after: " << static_cast<int>(limit) << " days");
 
-  const uint16_t days_after_epoch =
-      (*pt_->policy_table.module_meta->pt_exchanged_x_days_after_epoch);
-  LOG4CXX_DEBUG(logger_, "Epoch since last update: " << days_after_epoch);
+  LOG4CXX_DEBUG(logger_, "Epoch since last update: " << *days_after_epoch);
 
   const uint16_t actual =
-      std::max(static_cast<uint16_t>(current - days_after_epoch), uint16_t(0));
+      std::max(static_cast<uint16_t>(current - *days_after_epoch), uint16_t(0));
   LOG4CXX_DEBUG(logger_, "The days since last update: " << actual);
 
-  return std::max(limit - actual, 0);
+  return (std::max(limit - actual, 0) ? kNonZero : kZero);
 }
 
 void CacheManager::IncrementIgnitionCycles() {
