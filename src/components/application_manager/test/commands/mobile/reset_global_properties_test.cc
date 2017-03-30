@@ -364,11 +364,9 @@ TEST_F(ResetGlobalPropertiesRequestTest,
 
   Event ui_event(hmi_apis::FunctionID::UI_SetGlobalProperties);
   ui_event.set_smart_object(*ui_msg);
-
   command_->on_event(ui_event);
 
   // TTS doesn't respond, so timeout should send generic error
-
   smart_objects::SmartObjectSPtr response =
       utils::MakeShared<smart_objects::SmartObject>();
   (*response)[am::strings::msg_params][am::strings::result_code] =
@@ -428,9 +426,9 @@ TEST_F(ResetGlobalPropertiesRequestTest,
 
   Event tts_event(hmi_apis::FunctionID::TTS_SetGlobalProperties);
   tts_event.set_smart_object(*tts_msg);
-
   command_->on_event(tts_event);
 
+  // UI doesn't respond, so timeout should send generic error
   smart_objects::SmartObjectSPtr response =
       utils::MakeShared<smart_objects::SmartObject>();
   (*response)[am::strings::msg_params][am::strings::result_code] =
@@ -448,7 +446,7 @@ TEST_F(ResetGlobalPropertiesRequestTest,
 }
 
 TEST_F(ResetGlobalPropertiesRequestTest,
-       Run_WaitUIAndTTS_Timeout_GENERIC_ERROR_TTSUINotRespond) {
+       Run_WaitUIAndTTS_Timeout_GENERIC_ERROR_TTSAndUINotRespond) {
   Event event(hmi_apis::FunctionID::TTS_SetGlobalProperties);
   (*msg_)[am::strings::params][am::hmi_response::code] =
       hmi_apis::Common_Result::eType::UNSUPPORTED_RESOURCE;
@@ -483,7 +481,7 @@ TEST_F(ResetGlobalPropertiesRequestTest,
       .WillOnce(Return(true));
 
   command_->Run();
-
+  // TTS and UI don't respond, so timeout should send generic error
   std::string info = "TTS, UI component does not respond";
   smart_objects::SmartObjectSPtr response =
       utils::MakeShared<smart_objects::SmartObject>();
