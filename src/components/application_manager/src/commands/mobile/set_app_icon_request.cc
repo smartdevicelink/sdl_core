@@ -83,10 +83,6 @@ void SetAppIconRequest::Run() {
     return;
   }
 
-  if (is_icons_saving_enabled_) {
-    CopyToIconStorage(full_file_path);
-  }
-
   smart_objects::SmartObject msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
 
@@ -253,6 +249,10 @@ void SetAppIconRequest::on_event(const event_engine::Event& event) {
         const std::string& path =
             (*message_)[strings::msg_params][strings::sync_file_name]
                        [strings::value].asString();
+        if (is_icons_saving_enabled_) {
+          CopyToIconStorage(path);
+        }
+
         app->set_app_icon_path(path);
 
         LOG4CXX_INFO(logger_,
