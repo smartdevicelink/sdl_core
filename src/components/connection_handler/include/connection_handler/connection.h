@@ -172,7 +172,7 @@ class Connection {
   bool AddNewService(uint8_t session_id,
                      protocol_handler::ServiceType service_type,
                      const bool is_protected,
-                     bool* service_exists);
+                     bool* out_service_exists);
   /**
    * @brief Removes service from session
    * @param session_id session ID

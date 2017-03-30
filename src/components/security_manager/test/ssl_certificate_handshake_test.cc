@@ -479,6 +479,9 @@ TEST_F(SSLHandshakeTest, UnsignedCert) {
 }
 
 TEST_F(SSLHandshakeTest, ExpiredCert) {
+  // When the certificate is expired the SSL context will
+  // not be created, pointer value will have NULL value and
+  // InitServerManagers() will return false
   ASSERT_FALSE(InitServerManagers(security_manager::TLSv1_2,
                                   server_expired_cert_file,
                                   "ALL",

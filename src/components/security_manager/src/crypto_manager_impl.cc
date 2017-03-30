@@ -234,7 +234,7 @@ bool CryptoManagerImpl::OnCertificateUpdated(const std::string& data) {
 }
 
 SSLContext* CryptoManagerImpl::CreateSSLContext() {
-  if ((context_ == NULL) || (IsCertificateUpdateRequired())) {
+  if (NULL == context_ || IsCertificateUpdateRequired()) {
     return NULL;
   }
 

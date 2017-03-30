@@ -190,7 +190,7 @@ class ConnectionHandlerImpl
       const bool is_protected,
       uint32_t* out_hash_id,
       bool* out_start_protected,
-      bool* service_exists) OVERRIDE;
+      bool* out_service_exists) OVERRIDE;
 
   /**
    * \brief Callback function used by ProtocolHandler

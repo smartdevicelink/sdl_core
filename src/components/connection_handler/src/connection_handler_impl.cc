@@ -287,7 +287,7 @@ uint32_t ConnectionHandlerImpl::OnSessionStartedCallback(
     const bool is_protected,
     uint32_t* out_hash_id,
     bool* out_start_protected,
-    bool* service_exists) {
+    bool* out_service_exists) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (out_hash_id) {
@@ -327,8 +327,10 @@ uint32_t ConnectionHandlerImpl::OnSessionStartedCallback(
       *out_hash_id = KeyFromPair(connection_handle, new_session_id);
     }
   } else {  // Could be create new service or protected exists one
-    if (!connection->AddNewService(
-            session_id, service_type, can_start_protected, service_exists)) {
+    if (!connection->AddNewService(session_id,
+                                   service_type,
+                                   can_start_protected,
+                                   out_service_exists)) {
       LOG4CXX_ERROR(logger_,
                     "Couldn't establish "
 #ifdef ENABLE_SECURITY
@@ -1046,10 +1048,9 @@ uint32_t ConnectionHandlerImpl::FindAppIdBySession(
     const transport_manager::ConnectionUID connection_handle,
     const uint8_t& session_id) const {
   const uint32_t conn_key = KeyFromPair(connection_handle, session_id);
-  std::list<int32_t> sessions_list;
-  uint32_t device_id, app_id;
+  uint32_t app_id = 0;
 
-  if (GetDataOnSessionKey(conn_key, &app_id, &sessions_list, &device_id)) {
+  if (GetDataOnSessionKey(conn_key, &app_id, NULL, NULL)) {
     app_id = 0;
   }
 

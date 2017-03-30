@@ -108,9 +108,8 @@ class ConnectionHandlerTest : public ::testing::Test {
     // Remove all specific services
   }
   void AddTestSession() {
-    bool session_exists = false;
     start_session_id_ = connection_handler_->OnSessionStartedCallback(
-        uid_, 0, kRpc, PROTECTION_OFF, &out_hash_id_, NULL, &session_exists);
+        uid_, 0, kRpc, PROTECTION_OFF, &out_hash_id_, NULL, NULL);
     EXPECT_NE(0u, start_session_id_);
     EXPECT_EQ(SessionHash(uid_, start_session_id_), out_hash_id_);
     connection_key_ = connection_handler_->KeyFromPair(uid_, start_session_id_);
@@ -124,7 +123,6 @@ class ConnectionHandlerTest : public ::testing::Test {
     EXPECT_EQ(SessionHash(uid_, start_session_id_), out_hash_id_);
     connection_key_ = connection_handler_->KeyFromPair(uid_, start_session_id_);
     CheckSessionExists(uid_, start_session_id_);
-    bool session_exists = false;
     uint32_t session_id =
         connection_handler_->OnSessionStartedCallback(uid_,
                                                       start_session_id_,
@@ -132,7 +130,7 @@ class ConnectionHandlerTest : public ::testing::Test {
                                                       PROTECTION_OFF,
                                                       NULL,
                                                       NULL,
-                                                      &session_exists);
+                                                      NULL);
     EXPECT_EQ(session_id, start_session_id_);
   }
 
@@ -275,15 +273,8 @@ TEST_F(ConnectionHandlerTest, StartSession_NoConnection) {
   // Null sessionId for start new session
   const uint8_t sessionID = 0;
   // Start new session with RPC service
-  bool session_exists = false;
-  const uint32_t result_fail =
-      connection_handler_->OnSessionStartedCallback(uid_,
-                                                    sessionID,
-                                                    kRpc,
-                                                    PROTECTION_ON,
-                                                    &out_hash_id_,
-                                                    NULL,
-                                                    &session_exists);
+  const uint32_t result_fail = connection_handler_->OnSessionStartedCallback(
+      uid_, sessionID, kRpc, PROTECTION_ON, &out_hash_id_, NULL, NULL);
   // Unknown connection error is '0'
   EXPECT_EQ(0u, result_fail);
   EXPECT_EQ(protocol_handler::HASH_ID_WRONG, out_hash_id_);
@@ -1027,9 +1018,7 @@ TEST_F(ConnectionHandlerTest, StartService_withServices) {
   // Add virtual device and connection
   AddTestDeviceConnection();
   AddTestSession();
-
   // Start Audio service
-  bool session_exists = false;
   const uint32_t start_audio =
       connection_handler_->OnSessionStartedCallback(uid_,
                                                     start_session_id_,
@@ -1037,7 +1026,7 @@ TEST_F(ConnectionHandlerTest, StartService_withServices) {
                                                     PROTECTION_OFF,
                                                     &out_hash_id_,
                                                     NULL,
-                                                    &session_exists);
+                                                    NULL);
   EXPECT_EQ(start_session_id_, start_audio);
   CheckServiceExists(uid_, start_session_id_, kAudio, true);
   EXPECT_EQ(protocol_handler::HASH_ID_NOT_SUPPORTED, out_hash_id_);
@@ -1050,7 +1039,7 @@ TEST_F(ConnectionHandlerTest, StartService_withServices) {
                                                     PROTECTION_OFF,
                                                     &out_hash_id_,
                                                     NULL,
-                                                    &session_exists);
+                                                    NULL);
   EXPECT_EQ(start_session_id_, start_video);
   CheckServiceExists(uid_, start_session_id_, kMobileNav, true);
   EXPECT_EQ(protocol_handler::HASH_ID_NOT_SUPPORTED, out_hash_id_);
@@ -1081,7 +1070,6 @@ TEST_F(ConnectionHandlerTest, ServiceStop) {
   // Check ignoring hash_id on stop non-rpc service
   for (uint32_t some_hash_id = 0; some_hash_id < 0xFF; ++some_hash_id) {
     // Start audio service
-    bool session_exists = false;
     const uint32_t start_audio =
         connection_handler_->OnSessionStartedCallback(uid_,
                                                       start_session_id_,
@@ -1089,7 +1077,7 @@ TEST_F(ConnectionHandlerTest, ServiceStop) {
                                                       PROTECTION_OFF,
                                                       &out_hash_id_,
                                                       NULL,
-                                                      &session_exists);
+                                                      NULL);
     EXPECT_EQ(start_session_id_, start_audio);
     EXPECT_EQ(protocol_handler::HASH_ID_NOT_SUPPORTED, out_hash_id_);
 
@@ -1156,11 +1144,9 @@ TEST_F(ConnectionHandlerTest, SessionStarted_WithRpc) {
   EXPECT_CALL(mock_connection_handler_observer,
               OnServiceStartedCallback(device_handle_, session_key, kRpc))
       .WillOnce(Return(true));
-
   // Start new session with RPC service
-  bool session_exists = false;
   uint32_t new_session_id = connection_handler_->OnSessionStartedCallback(
-      uid_, 0, kRpc, PROTECTION_OFF, &out_hash_id_, NULL, &session_exists);
+      uid_, 0, kRpc, PROTECTION_OFF, &out_hash_id_, NULL, NULL);
 
   EXPECT_NE(0u, new_session_id);
 }
@@ -1175,10 +1161,9 @@ TEST_F(ConnectionHandlerTest,
   protected_services_.push_back(kRpc);
   SetSpecificServices();
   // Start new session with RPC service
-  bool session_exists = false;
   const uint32_t session_id_fail =
       connection_handler_->OnSessionStartedCallback(
-          uid_, 0, kRpc, PROTECTION_OFF, &out_hash_id_, NULL, &session_exists);
+          uid_, 0, kRpc, PROTECTION_OFF, &out_hash_id_, NULL, NULL);
 #ifdef ENABLE_SECURITY
   EXPECT_EQ(0u, session_id_fail);
   EXPECT_EQ(protocol_handler::HASH_ID_WRONG, out_hash_id_);
@@ -1193,7 +1178,7 @@ TEST_F(ConnectionHandlerTest,
   SetSpecificServices();
   // Start new session with RPC service
   const uint32_t session_id = connection_handler_->OnSessionStartedCallback(
-      uid_, 0, kRpc, PROTECTION_OFF, &out_hash_id_, NULL, &session_exists);
+      uid_, 0, kRpc, PROTECTION_OFF, &out_hash_id_, NULL, NULL);
   EXPECT_NE(0u, session_id);
   CheckService(uid_, session_id, kRpc, NULL, PROTECTION_OFF);
   EXPECT_EQ(SessionHash(uid_, session_id), out_hash_id_);
@@ -1210,10 +1195,9 @@ TEST_F(ConnectionHandlerTest,
   unprotected_services_.push_back(kControl);
   SetSpecificServices();
   // Start new session with RPC service
-  bool session_exists = false;
   const uint32_t session_id_fail =
       connection_handler_->OnSessionStartedCallback(
-          uid_, 0, kRpc, PROTECTION_ON, NULL, NULL, &session_exists);
+          uid_, 0, kRpc, PROTECTION_ON, NULL, NULL, NULL);
 #ifdef ENABLE_SECURITY
   EXPECT_EQ(0u, session_id_fail);
 #else
@@ -1226,7 +1210,7 @@ TEST_F(ConnectionHandlerTest,
   SetSpecificServices();
   // Start new session with RPC service
   const uint32_t session_id = connection_handler_->OnSessionStartedCallback(
-      uid_, 0, kRpc, PROTECTION_ON, &out_hash_id_, NULL, &session_exists);
+      uid_, 0, kRpc, PROTECTION_ON, &out_hash_id_, NULL, NULL);
   EXPECT_NE(0u, session_id);
   EXPECT_EQ(SessionHash(uid_, session_id), out_hash_id_);
 
@@ -1246,15 +1230,8 @@ TEST_F(ConnectionHandlerTest,
   protected_services_.push_back(kControl);
   SetSpecificServices();
   // Start new session with Audio service
-  bool session_exists = false;
-  const uint32_t session_id2 =
-      connection_handler_->OnSessionStartedCallback(uid_,
-                                                    start_session_id_,
-                                                    kAudio,
-                                                    PROTECTION_OFF,
-                                                    NULL,
-                                                    NULL,
-                                                    &session_exists);
+  const uint32_t session_id2 = connection_handler_->OnSessionStartedCallback(
+      uid_, start_session_id_, kAudio, PROTECTION_OFF, NULL, NULL, NULL);
 #ifdef ENABLE_SECURITY
   EXPECT_EQ(0u, session_id2);
 #else
@@ -1274,7 +1251,7 @@ TEST_F(ConnectionHandlerTest,
                                                     PROTECTION_OFF,
                                                     &out_hash_id_,
                                                     NULL,
-                                                    &session_exists);
+                                                    NULL);
 // Returned original session id
 #ifdef ENABLE_SECURITY
   EXPECT_EQ(start_session_id_, session_id3);
@@ -1298,15 +1275,9 @@ TEST_F(ConnectionHandlerTest,
   unprotected_services_.push_back(kControl);
   SetSpecificServices();
   // Start new session with Audio service
-  bool session_exists = false;
   const uint32_t session_id_reject =
-      connection_handler_->OnSessionStartedCallback(uid_,
-                                                    start_session_id_,
-                                                    kAudio,
-                                                    PROTECTION_ON,
-                                                    NULL,
-                                                    NULL,
-                                                    &session_exists);
+      connection_handler_->OnSessionStartedCallback(
+          uid_, start_session_id_, kAudio, PROTECTION_ON, NULL, NULL, NULL);
 #ifdef ENABLE_SECURITY
   EXPECT_EQ(0u, session_id_reject);
 #else
@@ -1322,7 +1293,7 @@ TEST_F(ConnectionHandlerTest,
                                                     PROTECTION_ON,
                                                     &out_hash_id_,
                                                     NULL,
-                                                    &session_exists);
+                                                    NULL);
 // Returned original session id
 #ifdef ENABLE_SECURITY
   EXPECT_EQ(start_session_id_, session_id3);
@@ -1338,17 +1309,9 @@ TEST_F(ConnectionHandlerTest,
 TEST_F(ConnectionHandlerTest, SessionStarted_DealyProtect) {
   AddTestDeviceConnection();
   AddTestSession();
-
   // Start RPC protection
-  bool session_exists = false;
-  const uint32_t session_id_new =
-      connection_handler_->OnSessionStartedCallback(uid_,
-                                                    start_session_id_,
-                                                    kRpc,
-                                                    PROTECTION_ON,
-                                                    &out_hash_id_,
-                                                    NULL,
-                                                    &session_exists);
+  const uint32_t session_id_new = connection_handler_->OnSessionStartedCallback(
+      uid_, start_session_id_, kRpc, PROTECTION_ON, &out_hash_id_, NULL, NULL);
 #ifdef ENABLE_SECURITY
   EXPECT_EQ(start_session_id_, session_id_new);
   // Post protection nedd no hash
@@ -1360,7 +1323,6 @@ TEST_F(ConnectionHandlerTest, SessionStarted_DealyProtect) {
   EXPECT_EQ(protocol_handler::HASH_ID_WRONG, out_hash_id_);
   CheckService(uid_, start_session_id_, kRpc, NULL, PROTECTION_OFF);
 #endif  // ENABLE_SECURITY
-
   // Start Audio session without protection
   const uint32_t session_id2 =
       connection_handler_->OnSessionStartedCallback(uid_,
@@ -1369,11 +1331,10 @@ TEST_F(ConnectionHandlerTest, SessionStarted_DealyProtect) {
                                                     PROTECTION_OFF,
                                                     &out_hash_id_,
                                                     NULL,
-                                                    &session_exists);
+                                                    NULL);
   EXPECT_EQ(start_session_id_, session_id2);
   EXPECT_EQ(protocol_handler::HASH_ID_NOT_SUPPORTED, out_hash_id_);
   CheckService(uid_, start_session_id_, kAudio, NULL, PROTECTION_OFF);
-
   // Start Audio protection
   const uint32_t session_id3 =
       connection_handler_->OnSessionStartedCallback(uid_,
@@ -1382,7 +1343,7 @@ TEST_F(ConnectionHandlerTest, SessionStarted_DealyProtect) {
                                                     PROTECTION_ON,
                                                     &out_hash_id_,
                                                     NULL,
-                                                    &session_exists);
+                                                    NULL);
 #ifdef ENABLE_SECURITY
   EXPECT_EQ(start_session_id_, session_id3);
   EXPECT_EQ(protocol_handler::HASH_ID_NOT_SUPPORTED, out_hash_id_);
@@ -1397,16 +1358,8 @@ TEST_F(ConnectionHandlerTest, SessionStarted_DealyProtect) {
 TEST_F(ConnectionHandlerTest, SessionStarted_DealyProtectBulk) {
   AddTestDeviceConnection();
   AddTestSession();
-
-  bool session_exists = false;
-  const uint32_t session_id_new =
-      connection_handler_->OnSessionStartedCallback(uid_,
-                                                    start_session_id_,
-                                                    kBulk,
-                                                    PROTECTION_ON,
-                                                    NULL,
-                                                    NULL,
-                                                    &session_exists);
+  const uint32_t session_id_new = connection_handler_->OnSessionStartedCallback(
+      uid_, start_session_id_, kBulk, PROTECTION_ON, NULL, NULL, NULL);
 #ifdef ENABLE_SECURITY
   EXPECT_EQ(start_session_id_, session_id_new);
   CheckService(uid_, start_session_id_, kRpc, NULL, PROTECTION_ON);
@@ -1502,15 +1455,8 @@ TEST_F(ConnectionHandlerTest, GetSSLContext_ByProtectedService) {
   EXPECT_EQ(connection_handler_->GetSSLContext(connection_key_, kAudio),
             reinterpret_cast<security_manager::SSLContext*>(NULL));
   // Open kAudio service
-  bool session_exists = false;
-  const uint32_t session_id =
-      connection_handler_->OnSessionStartedCallback(uid_,
-                                                    start_session_id_,
-                                                    kAudio,
-                                                    PROTECTION_ON,
-                                                    NULL,
-                                                    NULL,
-                                                    &session_exists);
+  const uint32_t session_id = connection_handler_->OnSessionStartedCallback(
+      uid_, start_session_id_, kAudio, PROTECTION_ON, NULL, NULL, NULL);
   EXPECT_EQ(session_id, start_session_id_);
   CheckService(uid_, session_id, kAudio, &mock_ssl_context, PROTECTION_ON);
 
@@ -1534,15 +1480,8 @@ TEST_F(ConnectionHandlerTest, GetSSLContext_ByDealyProtectedRPC) {
             reinterpret_cast<security_manager::SSLContext*>(NULL));
 
   // Protect kRpc (Bulk will be protect also)
-  bool session_exists = false;
-  const uint32_t session_id =
-      connection_handler_->OnSessionStartedCallback(uid_,
-                                                    start_session_id_,
-                                                    kRpc,
-                                                    PROTECTION_ON,
-                                                    NULL,
-                                                    NULL,
-                                                    &session_exists);
+  const uint32_t session_id = connection_handler_->OnSessionStartedCallback(
+      uid_, start_session_id_, kRpc, PROTECTION_ON, NULL, NULL, NULL);
   EXPECT_EQ(start_session_id_, session_id);
   CheckService(uid_, session_id, kRpc, &mock_ssl_context, PROTECTION_ON);
 
@@ -1569,15 +1508,8 @@ TEST_F(ConnectionHandlerTest, GetSSLContext_ByDealyProtectedBulk) {
             reinterpret_cast<security_manager::SSLContext*>(NULL));
 
   // Protect Bulk (kRpc will be protected also)
-  bool session_exists = false;
-  const uint32_t session_id =
-      connection_handler_->OnSessionStartedCallback(uid_,
-                                                    start_session_id_,
-                                                    kBulk,
-                                                    PROTECTION_ON,
-                                                    NULL,
-                                                    NULL,
-                                                    &session_exists);
+  const uint32_t session_id = connection_handler_->OnSessionStartedCallback(
+      uid_, start_session_id_, kBulk, PROTECTION_ON, NULL, NULL, NULL);
   EXPECT_EQ(start_session_id_, session_id);
   CheckService(uid_, session_id, kRpc, &mock_ssl_context, PROTECTION_ON);
 
