@@ -46,14 +46,15 @@ namespace protocol_handler_test {
  */
 class MockSessionObserver : public ::protocol_handler::SessionObserver {
  public:
-  MOCK_METHOD6(
+  MOCK_METHOD7(
       OnSessionStartedCallback,
       uint32_t(const transport_manager::ConnectionUID connection_handle,
                const uint8_t sessionId,
                const protocol_handler::ServiceType& service_type,
                const bool is_protected,
                uint32_t* out_hash_id,
-               bool* out_start_protected));
+               bool* out_start_protected,
+               bool* service_exists));
   MOCK_METHOD4(
       OnSessionEndedCallback,
       uint32_t(const transport_manager::ConnectionUID connection_handle,

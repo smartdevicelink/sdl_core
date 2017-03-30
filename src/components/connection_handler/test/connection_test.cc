@@ -86,8 +86,9 @@ class ConnectionTest : public ::testing::Test {
                      const bool protection,
                      const bool expect_add_new_service_call_result,
                      const bool expect_exist_service) {
-    const bool result =
-        connection_->AddNewService(session_id, service_type, protection);
+    bool session_exists = false;
+    const bool result = connection_->AddNewService(
+        session_id, service_type, protection, &session_exists);
     EXPECT_EQ(result, expect_add_new_service_call_result);
 
 #ifdef ENABLE_SECURITY
@@ -203,13 +204,13 @@ TEST_F(ConnectionTest, HeartBeat_Protocol4_ZeroHeartBeat_NotSupported) {
 
 // Try to add service without session
 TEST_F(ConnectionTest, Session_AddNewServiceWithoutSession) {
-  EXPECT_EQ(connection_->AddNewService(session_id, kAudio, true),
+  EXPECT_EQ(connection_->AddNewService(session_id, kAudio, true, NULL),
             EXPECT_RETURN_FALSE);
-  EXPECT_EQ(connection_->AddNewService(session_id, kAudio, false),
+  EXPECT_EQ(connection_->AddNewService(session_id, kAudio, false, NULL),
             EXPECT_RETURN_FALSE);
-  EXPECT_EQ(connection_->AddNewService(session_id, kMobileNav, true),
+  EXPECT_EQ(connection_->AddNewService(session_id, kMobileNav, true, NULL),
             EXPECT_RETURN_FALSE);
-  EXPECT_EQ(connection_->AddNewService(session_id, kMobileNav, false),
+  EXPECT_EQ(connection_->AddNewService(session_id, kMobileNav, false, NULL),
             EXPECT_RETURN_FALSE);
 }
 

@@ -72,6 +72,9 @@ class CryptoManager : public policy::PolicyHandlerObserver {
   * \return pointer to crypto manager settings class
   */
   virtual const CryptoManagerSettings& get_settings() const = 0;
+#ifdef BUILD_TESTS
+  virtual void SetCertFutureExpTime(const std::string& time) = 0;
+#endif  // BUILD_TESTS
   virtual ~CryptoManager() {}
 };
 
