@@ -141,7 +141,8 @@ uint32_t Connection::RemoveSession(uint8_t session_id) {
 
 bool Connection::AddNewService(uint8_t session_id,
                                protocol_handler::ServiceType service_type,
-                               const bool request_protection) {
+                               const bool request_protection,
+                               bool* service_exists) {
   // Ignore wrong services
   if (protocol_handler::kControl == service_type ||
       protocol_handler::kInvalidServiceType == service_type) {
@@ -159,6 +160,7 @@ bool Connection::AddNewService(uint8_t session_id,
   Service* service = session.FindService(service_type);
   // if service already exists
   if (service) {
+    *service_exists = true;
 #ifdef ENABLE_SECURITY
     if (!request_protection) {
       LOG4CXX_WARN(logger_,
@@ -181,6 +183,7 @@ bool Connection::AddNewService(uint8_t session_id,
     return false;
 #endif  // ENABLE_SECURITY
   }
+  *service_exists = false;
   // id service is not exists
   session.service_list.push_back(Service(service_type));
   return true;

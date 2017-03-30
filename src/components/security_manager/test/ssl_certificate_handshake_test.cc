@@ -479,11 +479,11 @@ TEST_F(SSLHandshakeTest, UnsignedCert) {
 }
 
 TEST_F(SSLHandshakeTest, ExpiredCert) {
-  ASSERT_TRUE(InitServerManagers(security_manager::TLSv1_2,
-                                 server_expired_cert_file,
-                                 "ALL",
-                                 verify_peer,
-                                 client_ca_cert_filename))
+  ASSERT_FALSE(InitServerManagers(security_manager::TLSv1_2,
+                                  server_expired_cert_file,
+                                  "ALL",
+                                  verify_peer,
+                                  client_ca_cert_filename))
       << server_manager->LastError();
   ASSERT_TRUE(InitClientManagers(security_manager::TLSv1_2,
                                  client_certificate,
@@ -491,9 +491,6 @@ TEST_F(SSLHandshakeTest, ExpiredCert) {
                                  verify_peer,
                                  server_ca_cert_filename))
       << client_manager->LastError();
-
-  GTEST_TRACE(HandshakeProcedure_ClientSideFail(
-      security_manager::SSLContext::Handshake_Result_CertExpired));
 }
 
 TEST_F(SSLHandshakeTest, AppNameAndAppIDInvalid) {

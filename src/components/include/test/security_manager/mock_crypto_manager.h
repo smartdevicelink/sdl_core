@@ -53,6 +53,9 @@ class MockCryptoManager : public ::security_manager::CryptoManager {
   MOCK_METHOD1(ReleaseSSLContext, void(::security_manager::SSLContext*));
   MOCK_CONST_METHOD0(LastError, std::string());
   MOCK_CONST_METHOD0(IsCertificateUpdateRequired, bool());
+#ifdef BUILD_TESTS
+  MOCK_METHOD1(SetCertFutureExpTime, void(const std::string& time));
+#endif  // BUILD_TESTS
 };
 }  // namespace security_manager_test
 }  // namespace components

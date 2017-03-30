@@ -189,7 +189,8 @@ class ConnectionHandlerImpl
       const protocol_handler::ServiceType& service_type,
       const bool is_protected,
       uint32_t* out_hash_id,
-      bool* out_start_protected) OVERRIDE;
+      bool* out_start_protected,
+      bool* service_exists) OVERRIDE;
 
   /**
    * \brief Callback function used by ProtocolHandler
@@ -452,6 +453,9 @@ class ConnectionHandlerImpl
   bool CanStartProtectedService(
       const int32_t& session_key,
       const protocol_handler::ServiceType& type) const;
+  uint32_t FindAppIdBySession(
+      const transport_manager::ConnectionUID connection_handle,
+      const uint8_t& session_id) const;
 #endif  // ENABLE_SECURITY
 
   const ConnectionHandlerSettings& settings_;
