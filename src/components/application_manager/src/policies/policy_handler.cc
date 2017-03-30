@@ -486,9 +486,9 @@ void PolicyHandler::SendOnAppPermissionsChanged(
 }
 
 void PolicyHandler::OnPTExchangeNeeded() {
+  LOG4CXX_AUTO_TRACE(logger_);
   POLICY_LIB_CHECK_VOID();
-  MessageHelper::SendOnStatusUpdate(policy_manager_->ForcePTExchange(),
-                                    application_manager_);
+  policy_manager_->ForcePTExchange();
 }
 
 void PolicyHandler::GetAvailableApps(std::queue<std::string>& apps) {
