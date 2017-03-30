@@ -1298,6 +1298,22 @@ ApplicationManagerImpl::GetHandshakeContext(uint32_t key) const {
   }
   return SSLContext::HandshakeContext();
 }
+
+bool ApplicationManagerImpl::CanStartProtectedService(
+    const int32_t& session_key,
+    const protocol_handler::ServiceType& type) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_DEBUG(logger_,
+                "Request for service protection, type: "
+                    << type << ", session: " << std::hex << session_key);
+
+  ApplicationSharedPtr app = application(session_key);
+  LOG4CXX_INFO(logger_,
+               "Service " << (app ? "can" : "cannot")
+                          << " be started protected");
+  return app;
+}
+
 #endif  // ENABLE_SECURITY
 
 void ApplicationManagerImpl::set_hmi_message_handler(

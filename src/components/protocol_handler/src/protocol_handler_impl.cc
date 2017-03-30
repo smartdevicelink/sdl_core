@@ -1082,9 +1082,17 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
 #endif  // ENABLE_SECURITY
 
   uint32_t hash_id;
+  bool protection_requested = false;
+  bool service_exists = false;
   const ConnectionID connection_id = packet.connection_id();
-  const uint32_t session_id = session_observer_.OnSessionStartedCallback(
-      connection_id, packet.session_id(), service_type, protection, &hash_id);
+  const uint32_t session_id =
+      session_observer_.OnSessionStartedCallback(connection_id,
+                                                 packet.session_id(),
+                                                 service_type,
+                                                 protection,
+                                                 &hash_id,
+                                                 &protection_requested,
+                                                 &service_exists);
 
   if (0 == session_id) {
     LOG4CXX_WARN(logger_,
@@ -1099,7 +1107,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
 
 #ifdef ENABLE_SECURITY
   // for packet is encrypted and security plugin is enable
-  if (protection && security_manager_) {
+  if (protection_requested && security_manager_) {
     const uint32_t connection_key =
         session_observer_.KeyFromPair(connection_id, session_id);
 
@@ -1113,12 +1121,19 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
           security_manager::SecurityManager::ERROR_INTERNAL,
           error);
       // Start service without protection
-      SendStartSessionAck(connection_id,
-                          session_id,
-                          packet.protocol_version(),
-                          hash_id,
-                          packet.service_type(),
-                          PROTECTION_OFF);
+      if (service_exists) {
+        SendStartSessionNAck(connection_id,
+                             packet.session_id(),
+                             protocol_version,
+                             packet.service_type());
+      } else {
+        SendStartSessionAck(connection_id,
+                            session_id,
+                            packet.protocol_version(),
+                            hash_id,
+                            packet.service_type(),
+                            PROTECTION_OFF);
+      }
       return RESULT_OK;
     }
     if (ssl_context->IsInitCompleted()) {

@@ -284,17 +284,28 @@ uint32_t ConnectionHandlerImpl::OnSessionStartedCallback(
     const uint8_t session_id,
     const protocol_handler::ServiceType& service_type,
     const bool is_protected,
-    uint32_t* hash_id) {
+    uint32_t* out_hash_id,
+    bool* out_start_protected,
+    bool* out_service_exists) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  if (hash_id) {
-    *hash_id = protocol_handler::HASH_ID_WRONG;
+  if (out_hash_id) {
+    *out_hash_id = protocol_handler::HASH_ID_WRONG;
   }
 #ifdef ENABLE_SECURITY
   if (!AllowProtection(get_settings(), service_type, is_protected)) {
     return 0;
   }
+  const uint32_t app_id = FindAppIdBySession(connection_handle, session_id);
+  bool can_start_protected =
+      is_protected && CanStartProtectedService(app_id, service_type);
+#else
+  bool can_start_protected = false;
 #endif  // ENABLE_SECURITY
+  if (out_start_protected) {
+    *out_start_protected = can_start_protected;
+  }
+
   sync_primitives::AutoReadLock lock(connection_list_lock_);
   ConnectionList::iterator it = connection_list_.find(connection_handle);
   if (connection_list_.end() == it) {
@@ -310,23 +321,26 @@ uint32_t ConnectionHandlerImpl::OnSessionStartedCallback(
       LOG4CXX_ERROR(logger_, "Couldn't start new session!");
       return 0;
     }
-    if (hash_id) {
-      *hash_id = KeyFromPair(connection_handle, new_session_id);
+    if (out_hash_id) {
+      *out_hash_id = KeyFromPair(connection_handle, new_session_id);
     }
   } else {  // Could be create new service or protected exists one
-    if (!connection->AddNewService(session_id, service_type, is_protected)) {
+    if (!connection->AddNewService(session_id,
+                                   service_type,
+                                   can_start_protected,
+                                   out_service_exists)) {
       LOG4CXX_ERROR(logger_,
                     "Couldn't establish "
 #ifdef ENABLE_SECURITY
-                        << (is_protected ? "protected" : "non-protected")
+                        << (can_start_protected ? "protected" : "non-protected")
 #endif  // ENABLE_SECURITY
                         << " service " << static_cast<int>(service_type)
                         << " for session " << static_cast<int>(session_id));
       return 0;
     }
     new_session_id = session_id;
-    if (hash_id) {
-      *hash_id = protocol_handler::HASH_ID_NOT_SUPPORTED;
+    if (out_hash_id) {
+      *out_hash_id = protocol_handler::HASH_ID_NOT_SUPPORTED;
     }
   }
   sync_primitives::AutoReadLock read_lock(connection_handler_observer_lock_);
@@ -1013,6 +1027,34 @@ bool ConnectionHandlerImpl::ProtocolVersionUsed(
   LOG4CXX_WARN(logger_, "Connection not found !");
   return false;
 }
+
+#ifdef ENABLE_SECURITY
+
+bool ConnectionHandlerImpl::CanStartProtectedService(
+    const int32_t& session_key,
+    const protocol_handler::ServiceType& type) const {
+  sync_primitives::AutoReadLock read_lock(connection_handler_observer_lock_);
+  if (connection_handler_observer_) {
+    return connection_handler_observer_->CanStartProtectedService(session_key,
+                                                                  type);
+  }
+  return true;
+}
+
+uint32_t ConnectionHandlerImpl::FindAppIdBySession(
+    const transport_manager::ConnectionUID connection_handle,
+    const uint8_t& session_id) const {
+  const uint32_t conn_key = KeyFromPair(connection_handle, session_id);
+  uint32_t app_id = 0;
+
+  if (GetDataOnSessionKey(conn_key, &app_id, NULL, NULL)) {
+    app_id = 0;
+  }
+
+  return app_id;
+}
+
+#endif  // ENABLE_SECURITY
 
 #ifdef BUILD_TESTS
 ConnectionList& ConnectionHandlerImpl::getConnectionList() {

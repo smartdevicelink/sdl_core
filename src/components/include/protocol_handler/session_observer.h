@@ -78,7 +78,9 @@ class SessionObserver {
       const uint8_t sessionId,
       const protocol_handler::ServiceType& service_type,
       const bool is_protected,
-      uint32_t* hash_id) = 0;
+      uint32_t* out_hash_id,
+      bool* out_start_protected,
+      bool* out_service_exists) = 0;
 
   /**
    * \brief Callback function used by ProtocolHandler
