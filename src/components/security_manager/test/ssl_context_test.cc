@@ -244,9 +244,9 @@ class SSLTestParam : public testing::TestWithParam<ProtocolAndCipher> {
     EXPECT_TRUE(client_manager_initialization);
 
     const std::string& time = "1 Jan 9999 00:00:00";
-    crypto_manager->SetCertFutureExpTime(time);
+    crypto_manager->SetCertExpTime(time);
     server_ctx = crypto_manager->CreateSSLContext();
-    client_manager->SetCertFutureExpTime(time);
+    client_manager->SetCertExpTime(time);
     client_ctx = client_manager->CreateSSLContext();
 
     using custom_str::CustomString;
