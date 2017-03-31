@@ -44,6 +44,9 @@
 #include "application_manager/event_engine/event.h"
 #include "application_manager/mock_hmi_interface.h"
 
+#include "include/test/protocol_handler/mock_protocol_handler.h"
+#include "include/test/protocol_handler/mock_protocol_handler_settings.h"
+
 namespace test {
 namespace components {
 namespace commands_test {
@@ -113,6 +116,13 @@ TEST_F(SetAppIconRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
   MockAppPtr mock_app = CreateMockApp();
   ON_CALL(app_mngr_, application(kConnectionKey))
       .WillByDefault(Return(mock_app));
+
+  protocol_handler_test::MockProtocolHandler mock_protocol;
+  protocol_handler_test::MockProtocolHandlerSettings mock_protocol_settings;
+  ON_CALL(app_mngr_, protocol_handler())
+      .WillByDefault(ReturnRef(mock_protocol));
+  ON_CALL(mock_protocol, get_settings())
+      .WillByDefault(ReturnRef(mock_protocol_settings));
 
   ON_CALL(*mock_app, app_id()).WillByDefault(Return(kConnectionKey));
   ON_CALL(*mock_app, set_app_icon_path(_)).WillByDefault(Return(true));
