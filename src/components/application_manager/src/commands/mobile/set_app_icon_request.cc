@@ -151,8 +151,16 @@ void SetAppIconRequest::CopyToIconStorage(
       return;
     }
 
-    while (!IsEnoughSpaceForIcon(file_size)) {
-      RemoveOldestIcons(icon_storage, icons_amount);
+    bool is_correct_removed = true;
+    while (!IsEnoughSpaceForIcon(file_size) && is_correct_removed) {
+      RemoveOldestIcons(icon_storage, icons_amount, is_correct_removed);
+    }
+    if (!is_correct_removed &&
+        (storage_max_size < (file_size + storage_size))) {
+      LOG4CXX_WARN(logger_,
+                   "Enable to got enough space for storing icon. "
+                   "Icon saving skipped.");
+      return;
     }
   }
   ApplicationConstSharedPtr app =
@@ -184,7 +192,8 @@ void SetAppIconRequest::CopyToIconStorage(
 }
 
 void SetAppIconRequest::RemoveOldestIcons(const std::string& storage,
-                                          const uint32_t icons_amount) const {
+                                          const uint32_t icons_amount,
+                                          bool& is_correct_removed) const {
   const std::vector<std::string> icons_list = file_system::ListFiles(storage);
   std::set<file_system::FileDescriptor, file_system::FileDescriptor>
       info_about_icons;
@@ -215,6 +224,7 @@ void SetAppIconRequest::RemoveOldestIcons(const std::string& storage,
                     "Old icon " << file_path << " was deleted successfully.");
     } else {
       LOG4CXX_WARN(logger_, "Error while deleting icon " << file_path);
+      is_correct_removed = false;
     }
     info_about_icons.erase(info_about_icons.begin());
   }
