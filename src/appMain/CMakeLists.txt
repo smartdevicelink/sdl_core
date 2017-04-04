@@ -270,7 +270,11 @@ else ()
   )
 endif ()
 
-if (${QT_HMI})
+if (${WEB_HMI})
+  if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    install( DIRECTORY ${CMAKE_HOME_DIRECTORY}/src/components/HMI/ DESTINATION bin/HMI)
+  endif ()
+elseif (${QT_HMI})
   if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
     install(FILES start-qml.sh DESTINATION bin
       PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ
