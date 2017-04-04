@@ -175,20 +175,22 @@ ProcessResult PluginManager::ProcessHMIMessage(
   if (application_manager::ProtocolVersion::kHMI == msg->protocol_version()) {
     std::string msg_method;
     // Request or notification from HMI
-    if (value.isMember("method")) {
+    if (value.isMember("method") && value["method"].isString()) {
       msg_method = value["method"].asCString();
       // Response from HMI
-    } else if (value.isMember("result") && value["result"].isMember("method")) {
+    } else if (value.isMember("result") && value["result"].isMember("method") &&
+               value["result"]["method"].isString()) {
       msg_method = value["result"]["method"].asCString();
       // Error response from HMI
     } else if (value.isMember("error") && value["error"].isMember("data") &&
-               value["error"]["data"].isMember("method")) {
+               value["error"]["data"].isMember("method") &&
+               value["error"]["data"]["method"].isString()) {
       msg_method = value["error"]["data"]["method"].asCString();
     } else {
       LOG4CXX_WARN(logger_,
                    "Message with HMI protocol version can not be handled by "
                    "plugin manager, because required 'method' field was not "
-                   "found.");
+                   "found, or was containing an invalid string.");
       return ProcessResult::CANNOT_PROCESS;
     }
 
@@ -232,20 +234,22 @@ bool PluginManager::IsHMIMessageForPlugin(application_manager::MessagePtr msg) {
   if (application_manager::ProtocolVersion::kHMI == msg->protocol_version()) {
     std::string msg_method;
     // Request or notification from HMI
-    if (value.isMember("method")) {
+    if (value.isMember("method") && value["method"].isString()) {
       msg_method = value["method"].asCString();
       // Response from HMI
-    } else if (value.isMember("result") && value["result"].isMember("method")) {
+    } else if (value.isMember("result") && value["result"].isMember("method") &&
+               value["result"]["method"].isString()) {
       msg_method = value["result"]["method"].asCString();
       // Error response from HMI
     } else if (value.isMember("error") && value["error"].isMember("data") &&
-               value["error"]["data"].isMember("method")) {
+               value["error"]["data"].isMember("method") &&
+               value["error"]["data"]["method"].isString()) {
       msg_method = value["error"]["data"]["method"].asCString();
     } else {
       LOG4CXX_WARN(logger_,
                    "Message with HMI protocol version can not be handled by "
                    "plugin manager, because required 'method' field was not "
-                   "found.");
+                   "found, or was containing an invalid string.");
       return false;
     }
 
