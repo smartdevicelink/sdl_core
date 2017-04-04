@@ -87,10 +87,11 @@ class SetAppIconRequest : public CommandRequestImpl {
    * @brief Remove oldest icons
    * @param storage Path to icons storage
    * @param icons_amount Amount of icons to be deleted
+   * @param is_correct_removed_out Checks, if removing of icons was correct
    */
   void RemoveOldestIcons(const std::string& storage,
                          const uint32_t icons_amount,
-                         bool& is_correct_removed) const;
+                         bool& is_correct_removed_out) const;
 
   /**
    * @brief Checks, if there enough space in storage for icon copy
