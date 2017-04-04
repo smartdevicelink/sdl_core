@@ -156,8 +156,9 @@ class MockCacheManagerInterface : public ::policy::CacheManagerInterface {
                     const StringArray& disallowed_groups));
   MOCK_METHOD2(ReactOnUserDevConsentForApp,
                bool(const std::string& app_id, bool is_device_allowed));
-  MOCK_METHOD1(SetUserPermissionsForApp,
-               bool(const PermissionConsent& permissions));
+  MOCK_METHOD2(SetUserPermissionsForApp,
+               bool(const PermissionConsent& permissions,
+                    bool* out_app_permissions_changed));
   MOCK_METHOD3(SetMetaInfo,
                bool(const std::string& ccpu_version,
                     const std::string& wers_country_code,

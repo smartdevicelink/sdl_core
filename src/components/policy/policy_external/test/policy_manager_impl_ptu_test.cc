@@ -83,7 +83,7 @@ TEST_F(PolicyManagerImplTest,
       .WillOnce(Return(true))
       .WillOnce(Return(true));
 
-  EXPECT_CALL(*cache_manager_, SetUserPermissionsForApp(_))
+  EXPECT_CALL(*cache_manager_, SetUserPermissionsForApp(_, _))
       .WillOnce(Return(false));
 
   EXPECT_CALL(*cache_manager_, SetExternalConsentForApp(_));
