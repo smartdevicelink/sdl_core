@@ -107,8 +107,7 @@ void SetAppIconRequest::Run() {
   SendHMIRequest(hmi_apis::FunctionID::UI_SetAppIcon, &msg_params, true);
 }
 
-void SetAppIconRequest::CopyToIconStorage(
-    const std::string& path_to_file) const {
+void SetAppIconRequest::CopyToIconStorage(const std::string& path_to_file) {
   if (!application_manager_.protocol_handler()
            .get_settings()
            .enable_protocol_4()) {
@@ -151,14 +150,13 @@ void SetAppIconRequest::CopyToIconStorage(
       return;
     }
 
-    bool is_correct_removed_out = true;
-    while (!IsEnoughSpaceForIcon(file_size) && is_correct_removed_out) {
-      RemoveOldestIcons(icon_storage, icons_amount, is_correct_removed_out);
+    while (!IsEnoughSpaceForIcon(file_size) && is_icons_saving_enabled_) {
+      RemoveOldestIcons(icon_storage, icons_amount);
     }
-    if (!is_correct_removed_out &&
+    if (!is_icons_saving_enabled_ &&
         (storage_max_size < (file_size + storage_size))) {
       LOG4CXX_WARN(logger_,
-                   "Enable to got enough space for storing icon. "
+                   "Unable to get enough space for storing icon. "
                    "Icon saving skipped.");
       return;
     }
@@ -192,8 +190,7 @@ void SetAppIconRequest::CopyToIconStorage(
 }
 
 void SetAppIconRequest::RemoveOldestIcons(const std::string& storage,
-                                          const uint32_t icons_amount,
-                                          bool& is_correct_removed_out) const {
+                                          const uint32_t icons_amount) {
   const std::vector<std::string> icons_list = file_system::ListFiles(storage);
   std::set<file_system::FileDescriptor, file_system::FileDescriptor>
       info_about_icons;
@@ -215,7 +212,7 @@ void SetAppIconRequest::RemoveOldestIcons(const std::string& storage,
   for (size_t counter = 0; counter < icons_amount; ++counter) {
     if (!info_about_icons.size()) {
       LOG4CXX_ERROR(logger_, "No more icons left for deletion.");
-      is_correct_removed_out = false;
+      is_icons_saving_enabled_ = false;
       return;
     }
     const std::string file_name = (*info_about_icons.begin()).file_name;
@@ -225,7 +222,7 @@ void SetAppIconRequest::RemoveOldestIcons(const std::string& storage,
                     "Old icon " << file_path << " was deleted successfully.");
     } else {
       LOG4CXX_WARN(logger_, "Error while deleting icon " << file_path);
-      is_correct_removed_out = false;
+      is_icons_saving_enabled_ = false;
     }
     info_about_icons.erase(info_about_icons.begin());
   }

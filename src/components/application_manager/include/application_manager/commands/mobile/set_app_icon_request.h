@@ -81,17 +81,15 @@ class SetAppIconRequest : public CommandRequestImpl {
    * @brief Copies file to icon storage
    * @param path_to_file Path to icon
    */
-  void CopyToIconStorage(const std::string& path_to_file) const;
+  void CopyToIconStorage(const std::string& path_to_file);
 
   /**
    * @brief Remove oldest icons
    * @param storage Path to icons storage
    * @param icons_amount Amount of icons to be deleted
-   * @param is_correct_removed_out Checks, if removing of icons was correct
    */
   void RemoveOldestIcons(const std::string& storage,
-                         const uint32_t icons_amount,
-                         bool& is_correct_removed_out) const;
+                         const uint32_t icons_amount);
 
   /**
    * @brief Checks, if there enough space in storage for icon copy
@@ -101,7 +99,6 @@ class SetAppIconRequest : public CommandRequestImpl {
   bool IsEnoughSpaceForIcon(const uint64_t icon_size) const;
   DISALLOW_COPY_AND_ASSIGN(SetAppIconRequest);
 
- private:
   /**
    * @brief Checks, if icons saving to configured folder is enabled
    */
