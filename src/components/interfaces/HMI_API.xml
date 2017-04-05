@@ -34,7 +34,7 @@
 
 <interfaces name="SmartDeviceLink HMI API">
 
-<interface name="Common" version="1.4" date="2016-05-11">
+<interface name="Common" version="1.5" date="2017-03-29">
 
 <enum name="Result">
     <element name="SUCCESS" value="0"/>
@@ -3248,7 +3248,7 @@
   </function>
 </interface>
 
-<interface name="Navigation" version="1.2" date="2016-06-09">
+<interface name="Navigation" version="1.3" date="2017-03-29">
 
   <function name="IsReady" messagetype="request">
     <description>Method is invoked at system startup. Response must provide the information about presence of UI Navigation module and its readiness to cooperate with SDL.</description>
@@ -3415,7 +3415,7 @@
   </function>
   <function name="GetWayPoints" functionID="GetWayPointsID" messagetype="request">
     <description>Request for getting waypoint/destination data.</description>
-    <param name="wayPointType" type="Common.WayPointType" defvalue="ALL" mandatory="false">
+    <param name="wayPointType" type="Common.WayPointType" mandatory="true">
       <description>To request for either the destination only or for all waypoints including destination</description>
     </param>
     <param name="appID" type="Integer" mandatory="true"> 

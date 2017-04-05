@@ -1,7 +1,7 @@
 <?xml version="1.0" standalone="no"?>
 <?xml-stylesheet type="text/xml" href="protocol2html.xsl"?>
 
-<interface name="Ford Sync RAPI" version="4.2" date="2016-11-16">
+<interface name="Ford Sync RAPI" version="4.3" date="2016-11-16">
 
   <enum name="Result" internal_scope="base">
     <element name="SUCCESS">
@@ -2223,9 +2223,9 @@
     <element name="SystemRequestID" value="38" hexvalue="26" />
     <element name="SendLocationID" value="39" hexvalue="27" />
     <element name="DialNumberID" value="40" hexvalue="28" />
-    <element name="GetWayPointsID" value="41" hexvalue="29" />
-    <element name="SubscribeWayPointsID" value="42" hexvalue="2A"/>
-    <element name="UnsubscribeWayPointsID" value="43" hexvalue="2B"/>
+    <element name="GetWayPointsID" value="45" hexvalue="2D" />
+    <element name="SubscribeWayPointsID" value="46" hexvalue="2E"/>
+    <element name="UnsubscribeWayPointsID" value="47" hexvalue="2F"/>
 
 <!--
 	Base Notifications
@@ -2247,7 +2247,7 @@
     <element name="OnTouchEventID" value="32780" hexvalue="800C" />
     <element name="OnSystemRequestID" value="32781" hexvalue="800D" />
     <element name="OnHashChangeID" value="32782" hexvalue="800E" />
-    <element name="OnWayPointChangeID" value="32783" hexvalue="800F" />
+    <element name="OnWayPointChangeID" value="32784" hexvalue="8010" />
 
 <!--
 	Ford Specific Request / Response RPCs
@@ -4918,6 +4918,86 @@
     </param>
   </function>
 
+  <function name="SubscribeWayPoints" functionID="SubscribeWayPointsID" messagetype="request">
+    <description>To subscribe in getting changes for Waypoints/destinations</description>
+  </function>
+
+  <function name="SubscribeWayPoints" functionID="SubscribeWayPointsID" messagetype="response">
+    <param name="success" type="Boolean" platform="documentation">
+      <description> true, if successful; false, if failed </description>
+    </param>
+    <param name="resultCode" type="Result" platform="documentation">
+      <description>See Result</description>
+      <element name="SUCCESS"/>
+      <element name="INVALID_DATA"/>
+      <element name="GENERIC_ERROR"/>
+      <element name="REJECTED"/>
+      <element name="UNSUPPORTED_RESOURCE"/>
+      <element name="IGNORED"/>
+      <element name="DISALLOWED"/>
+    </param>
+    <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
+       <description>Provides additional human readable info regarding the result.</description>
+    </param>
+  </function>
+
+  <function name="GetWayPoints" functionID="GetWayPointsID" messagetype="request">
+    <description>Request for getting waypoint/destination data.</description>
+    <param name="wayPointType" type="WayPointType" mandatory="true">
+      <description>To request for either the destination only or for all waypoints including destination</description>
+    </param>
+  </function>
+
+  <function name="GetWayPoints" functionID="GetWayPointsID" messagetype="response">
+    <param name="success" type="Boolean" platform="documentation">
+      <description> true, if successful; false, if failed </description>
+    </param>
+    <param name="resultCode" type="Result" platform="documentation">
+      <description>See Result</description>
+      <element name="SUCCESS"/>
+      <element name="INVALID_DATA"/>
+      <element name="TIMED_OUT"/>
+      <element name="GENERIC_ERROR"/>
+      <element name="REJECTED"/>
+      <element name="UNSUPPORTED_RESOURCE"/>
+      <element name="IGNORED"/>
+      <element name="IN_USE"/>
+      <element name="DISALLOWED"/>
+    </param>
+    <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
+       <description>Provides additional human readable info regarding the result.</description>
+    </param>
+    <param name="wayPoints" type="LocationDetails" mandatory="false" array="true" minsize="1" maxsize="10"> 
+      <description>See LocationDetails</description>
+    </param>
+  </function>
+
+  <function name="UnsubscribeWayPoints" functionID="UnsubscribeWayPointsID" messagetype="request">
+    <description>Request to unsubscribe from WayPoints and Destination</description>
+  </function>
+
+  <function name="UnsubscribeWayPoints" functionID="UnsubscribeWayPointsID" messagetype="response">
+    <param name="success" type="Boolean" platform="documentation">
+      <description> true, if successful; false, if failed </description>
+    </param>
+    <param name="resultCode" type="Result" platform="documentation">
+      <description>See Result</description>
+      <element name="SUCCESS"/>
+      <element name="INVALID_DATA"/>
+      <element name="GENERIC_ERROR"/>
+      <element name="REJECTED"/>
+      <element name="UNSUPPORTED_RESOURCE"/>
+      <element name="IGNORED"/>
+      <element name="DISALLOWED"/>
+    </param>
+    <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
+      <description>Provides additional human readable info regarding the result.</description>
+    </param>
+    <param name="wayPoints" type="LocationDetails" mandatory="false" array="true" minsize="1" maxsize="10">
+      <description>See LocationDetails</description>
+    </param>
+  </function>
+
   <!-- Notifications -->
 
   <function name="OnHMIStatus" functionID="OnHMIStatusID" messagetype="notification">
@@ -5159,6 +5239,13 @@
 	</param>
   </function>
 
+  <function name="OnWayPointChange" functionID="OnWayPointChangeID" messagetype="notification">
+    <description>Notification which provides the entire LocationDetails when there is a change to any waypoints or destination.</description>
+    <param name="wayPoints" type="LocationDetails" mandatory="true" array="true" minsize="1" maxsize="10">
+      <description>See LocationDetails</description>
+    </param>
+  </function>
+
 <!-- ~~~~~~~~~~~~~~~~~~ -->
 <!-- Ford Specific APIs -->
 <!-- ~~~~~~~~~~~~~~~~~~ -->
@@ -5248,90 +5335,6 @@
       	If not blank, the SyncP data shall be forwarded with the provided timeout in seconds.
       </description>
     </param>  
-  </function>
-
-  <function name="SubscribeWayPoints" functionID="SubscribeWayPointsID" messagetype="request">
-        <description>To subscribe in getting changes for Waypoints/destinations</description>
-    </function>
-
-    <function name="SubscribeWayPoints" functionID="SubscribeWayPointsID" messagetype="response">
-      <param name="success" type="Boolean" platform="documentation">
-        <description> true, if successful; false, if failed </description>
-      </param>
-      <param name="resultCode" type="Result" platform="documentation">
-        <description>See Result</description>
-        <element name="SUCCESS"/>
-        <element name="INVALID_DATA"/>
-        <element name="GENERIC_ERROR"/>
-        <element name="REJECTED"/>
-        <element name="UNSUPPORTED_RESOURCE"/>
-        <element name="IGNORED"/>
-        <element name="DISALLOWED"/>
-      </param>
-      <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
-         <description>Provides additional human readable info regarding the result.</description>
-      </param>
-    </function>
-
-  <function name="GetWayPoints" functionID="GetWayPointsID" messagetype="request">
-    <description>Request for getting waypoint/destination data.</description>
-    <param name="wayPointType" type="WayPointType" defvalue="ALL" mandatory="false">
-      <description>To request for either the destination only or for all waypoints including destination</description>
-    </param>
-  </function>
-
-  <function name="GetWayPoints" functionID="GetWayPointsID" messagetype="response">
-    <param name="success" type="Boolean" platform="documentation">
-      <description> true, if successful; false, if failed </description>
-    </param>
-    <param name="resultCode" type="Result" platform="documentation">
-      <description>See Result</description>
-      <element name="SUCCESS"/>
-      <element name="INVALID_DATA"/>
-      <element name="TIMED_OUT"/>
-      <element name="GENERIC_ERROR"/>
-      <element name="REJECTED"/>
-      <element name="UNSUPPORTED_RESOURCE"/>
-      <element name="IGNORED"/>
-      <element name="IN_USE"/>
-      <element name="DISALLOWED"/>
-    </param>
-    <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
-       <description>Provides additional human readable info regarding the result.</description>
-    </param>
-  </function>
-
-  <function name="UnsubscribeWayPoints" functionID="UnsubscribeWayPointsID" messagetype="request">
-    <description>Request to unsubscribe from WayPoints and Destination</description>
-  </function>
-
-  <function name="UnsubscribeWayPoints" functionID="UnsubscribeWayPointsID" messagetype="response">
-    <param name="success" type="Boolean" platform="documentation">
-      <description> true, if successful; false, if failed </description>
-    </param>
-    <param name="resultCode" type="Result" platform="documentation">
-      <description>See Result</description>
-      <element name="SUCCESS"/>
-      <element name="INVALID_DATA"/>
-      <element name="GENERIC_ERROR"/>
-      <element name="REJECTED"/>
-      <element name="UNSUPPORTED_RESOURCE"/>
-      <element name="IGNORED"/>
-      <element name="DISALLOWED"/>
-    </param>
-    <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
-      <description>Provides additional human readable info regarding the result.</description>
-    </param>
-    <param name="wayPoints" type="LocationDetails" mandatory="false" array="true" minsize="1" maxsize="10">
-      <description>See LocationDetails</description>
-    </param>
-  </function>
-
-  <function name="OnWayPointChange" functionID="OnWayPointChangeID" messagetype="notification">
-    <description>Notification which provides the entire LocationDetails when there is a change to any waypoints or destination.</description>
-    <param name="wayPoints" type="LocationDetails" mandatory="true" array="true" minsize="1" maxsize="10">
-      <description>See LocationDetails</description>
-    </param>
   </function>
 
 
