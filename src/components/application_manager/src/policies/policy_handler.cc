@@ -1088,6 +1088,7 @@ bool PolicyHandler::ReceiveMessageFromSDK(const std::string& file,
     LOG4CXX_WARN(logger_, "Exchange wasn't successful, trying another one.");
     policy_manager_->ForcePTExchange();
   }
+  OnPTUFinished(ret);
   return ret;
 }
 
@@ -1759,6 +1760,16 @@ void PolicyHandler::OnCertificateUpdated(const std::string& certificate_data) {
   }
 }
 #endif  // EXTERNAL_PROPRIETARY_MODE
+
+void PolicyHandler::OnPTUFinished(const bool ptu_result) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(listeners_lock_);
+  HandlersCollection::const_iterator it = listeners_.begin();
+  for (; it != listeners_.end(); ++it) {
+    PolicyHandlerObserver* observer = *it;
+    observer->OnPTUFinished(ptu_result);
+  }
+}
 
 bool PolicyHandler::CanUpdate() {
   return 0 != GetAppIdForSending();

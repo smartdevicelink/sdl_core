@@ -734,6 +734,7 @@ class ApplicationManagerImpl
   bool CanStartProtectedService(
       const int32_t& session_key,
       const protocol_handler::ServiceType& type) const OVERRIDE;
+  bool IsNaviApp(const int32_t& session_key) const OVERRIDE;
 #endif  // ENABLE_SECURITY
 
   /**

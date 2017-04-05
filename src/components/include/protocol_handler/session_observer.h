@@ -43,6 +43,12 @@
          *\namespace protocol_handlerHandler
          *\brief Namespace for SmartDeviceLink ProtocolHandler related functionality.
          */
+struct ExistingSessionInfo {
+  uint32_t hash_id_;
+  bool start_protected_;
+  bool service_exists_;
+  bool is_navi_;
+};
 namespace protocol_handler {
 /**
  * \brief HASH_ID constants.
@@ -79,9 +85,7 @@ class SessionObserver {
       const uint8_t sessionId,
       const protocol_handler::ServiceType& service_type,
       const bool is_protected,
-      uint32_t* out_hash_id,
-      bool* out_start_protected,
-      bool* out_service_exists) = 0;
+      struct ExistingSessionInfo* si) = 0;
 
   /**
    * \brief Callback function used by ProtocolHandler
