@@ -236,16 +236,16 @@ TEST_F(PerformInteractionRequestTest,
 
   caller();
 
-  const hmi_apis::FunctionID::eType kHmiResult =
+  const hmi_apis::FunctionID::eType hmi_result =
       static_cast<hmi_apis::FunctionID::eType>(
           (*hmi_result_msg)[strings::params][strings::function_id].asInt());
-  const mobile_api::Result::eType kMobileResult =
+  const mobile_api::Result::eType mobile_result =
       static_cast<mobile_api::Result::eType>(
           (*mobile_result_msg)[strings::msg_params][strings::result_code]
               .asInt());
 
-  EXPECT_EQ(hmi_apis::FunctionID::UI_ClosePopUp, kHmiResult);
-  EXPECT_EQ(mobile_apis::Result::GENERIC_ERROR, kMobileResult);
+  EXPECT_EQ(hmi_apis::FunctionID::UI_ClosePopUp, hmi_result);
+  EXPECT_EQ(mobile_apis::Result::GENERIC_ERROR, mobile_result);
 }
 
 TEST_F(PerformInteractionRequestTest, DISABLED_OnTimeout_VR_GENERIC_ERROR) {
@@ -635,7 +635,7 @@ TEST_F(PerformInteractionRequestTest,
           msg_params_[strings::interaction_choice_set_id_list][0].asInt()))
       .Times(3)
       .WillOnce(Return(&choise_set_1))
-      // Second call will be scipped in method cycles
+      // Second call will be skipped in method cycles
       .WillOnce(ReturnNull())
       // Third call value will be compared to value from first call
       .WillOnce(Return(&choise_set_2));
@@ -662,7 +662,7 @@ TEST_F(PerformInteractionRequestTest, CheckMenuNames_AllRight_Success) {
   EXPECT_CALL(*mock_application_sptr_, FindChoiceSet(_))
       .Times(6)
       .WillOnce(Return(&choise_set_1))
-      // Second call will be scipped in method cycles
+      // Second call will be skipped in method cycles
       .WillOnce(ReturnNull())
       // Third call value will be compared to value from first call
       .WillOnce(Return(&choise_set_2))
@@ -767,15 +767,15 @@ TEST_F(PerformInteractionRequestTest,
   }
   caller();
 
-  const hmi_apis::FunctionID::eType kFirstResult =
+  const hmi_apis::FunctionID::eType first_result =
       static_cast<hmi_apis::FunctionID::eType>(
           (*first_msg)[strings::params][strings::function_id].asInt());
-  EXPECT_EQ(hmi_apis::FunctionID::VR_PerformInteraction, kFirstResult);
+  EXPECT_EQ(hmi_apis::FunctionID::VR_PerformInteraction, first_result);
 
-  const hmi_apis::FunctionID::eType kSecondResult =
+  const hmi_apis::FunctionID::eType second_result =
       static_cast<hmi_apis::FunctionID::eType>(
           (*second_msg)[strings::params][strings::function_id].asInt());
-  EXPECT_EQ(hmi_apis::FunctionID::UI_PerformInteraction, kSecondResult);
+  EXPECT_EQ(hmi_apis::FunctionID::UI_PerformInteraction, second_result);
 }
 
 TEST_F(PerformInteractionRequestTest, OnEvent_OnResetTimeout_UpdateTimeout) {
