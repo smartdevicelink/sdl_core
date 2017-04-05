@@ -549,6 +549,10 @@ class PolicyHandlerInterface {
                                  const std::string& hmi_level,
                                  const std::string& device_rank) = 0;
 
+  virtual void ChangeAppsHMILevel(const std::string& device_id,
+                                  const std::string& policy_app_id,
+                                  const std::string& hmi_level) = 0;
+
   /**
    * Gets all allowed module types
    * @param app_id unique identifier of application
@@ -557,6 +561,9 @@ class PolicyHandlerInterface {
    */
   virtual bool GetModuleTypes(const std::string& policy_app_id,
                               std::vector<std::string>* modules) const = 0;
+
+  virtual mobile_apis::DeviceRank::eType GetDeviceRank(
+      const std::string& application_id) const = 0;
 #endif  // SDL_REMOTE_CONTROL
 
  protected:

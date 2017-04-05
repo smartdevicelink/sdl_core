@@ -218,7 +218,13 @@ TEST_F(CanModuleTest, SendResponseToMobile) {
   module_.SendResponseToMobile(message_);
 }
 
-TEST_F(CanModuleTest, IsAppForPluginSuccess) {
+TEST_F(CanModuleTest, IsAppForPlugin_SUCCESS) {
+  EXPECT_CALL(*mock_service_, IsRemoteControlApplication(Eq(app0_)))
+      .WillOnce(Return(true));
+  ASSERT_TRUE(module_.IsAppForPlugin(app0_));
+}
+
+TEST_F(CanModuleTest, AddAppForPlugin_SUCCESS) {
   application_manager::AppExtensionPtr invalid_ext;
   EXPECT_CALL(*app0_, QueryInterface(module_.GetModuleID()))
       .WillOnce(Return(invalid_ext))
@@ -228,27 +234,28 @@ TEST_F(CanModuleTest, IsAppForPluginSuccess) {
   EXPECT_CALL(*app0_, hmi_level()).WillRepeatedly(Return(hmi));
   EXPECT_CALL(*app0_, device()).WillOnce(Return(1));
   EXPECT_CALL(*mock_service_, NotifyHMIAboutHMILevel(Eq(app0_), _));
-  EXPECT_CALL(*mock_service_, PrimaryDevice());
   EXPECT_CALL(*mock_service_, IsRemoteControlApplication(Eq(app0_)))
       .WillOnce(Return(true));
-  ASSERT_TRUE(module_.IsAppForPlugin(app0_));
+  EXPECT_CALL(*mock_service_, PrimaryDevice());
+  ASSERT_TRUE(module_.AddAppForPlugin(app0_));
 }
 
-TEST_F(CanModuleTest, IsAppForPluginNotNew) {
+TEST_F(CanModuleTest, AddAppForPlugin_QueryInterfaceRegistered_SUCCESS) {
   EXPECT_CALL(*app0_, QueryInterface(module_.GetModuleID()))
       .WillOnce(Return(can_app_extention_));
   EXPECT_CALL(*mock_service_, NotifyHMIAboutHMILevel(Eq(app0_), _)).Times(0);
-  ASSERT_TRUE(module_.IsAppForPlugin(app0_));
+  ASSERT_FALSE(module_.AddAppForPlugin(app0_));
 }
 
-TEST_F(CanModuleTest, IsAppForPluginFail) {
+TEST_F(CanModuleTest, AddAppForPlugin_NotRemoteControl_UNSUCCESS) {
   application_manager::AppExtensionPtr invalid_ext;
   EXPECT_CALL(*app0_, QueryInterface(module_.GetModuleID()))
-      .WillOnce(Return(invalid_ext));
+      .WillOnce(Return(invalid_ext))
+      .WillRepeatedly(Return(can_app_extention_));
   EXPECT_CALL(*mock_service_, IsRemoteControlApplication(Eq(app0_)))
       .Times(1)
       .WillOnce(Return(false));
-  ASSERT_FALSE(module_.IsAppForPlugin(app0_));
+  ASSERT_FALSE(module_.AddAppForPlugin(app0_));
 }
 
 TEST_F(CanModuleTest, OnAppHMILevelChanged) {
@@ -278,7 +285,7 @@ TEST_F(CanModuleTest, SetDriverDeviceOnRegister) {
       .Times(1)
       .WillOnce(Return(true));
 
-  ASSERT_TRUE(module_.IsAppForPlugin(app0_));
+  ASSERT_TRUE(module_.AddAppForPlugin(app0_));
   ASSERT_TRUE(can_app_extention_->is_on_driver_device());
 }
 
@@ -298,7 +305,7 @@ TEST_F(CanModuleTest, SetDriverDeviceOnRegisterFail) {
       .Times(1)
       .WillOnce(Return(true));
 
-  ASSERT_TRUE(module_.IsAppForPlugin(app0_));
+  ASSERT_TRUE(module_.AddAppForPlugin(app0_));
   ASSERT_FALSE(can_app_extention_->is_on_driver_device());
 }
 

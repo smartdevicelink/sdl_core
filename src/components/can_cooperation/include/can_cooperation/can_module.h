@@ -104,6 +104,13 @@ class CANModule : public CANModuleInterface {
   bool IsAppForPlugin(application_manager::ApplicationSharedPtr app);
 
   /**
+   * @brief Check registering app can be handled by plugin
+   * @param msg Registration message
+   * @param app Application basis already create by Core
+   */
+  bool AddAppForPlugin(application_manager::ApplicationSharedPtr app);
+
+  /**
    * @brief Notify about change of HMILevel of plugin's app
    * @param app App with new HMILevel
    * @param old_level Old HMILevel of app

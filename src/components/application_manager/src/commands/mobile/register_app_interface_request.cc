@@ -183,6 +183,8 @@ struct CoincidencePredicateVR {
 namespace application_manager {
 
 namespace commands {
+static const functional_modules::ModuleID kCANModuleID = 153;
+
 CREATE_LOGGERPTR_LOCAL(logger_, "Commands")
 
 #ifdef SDL_REMOTE_CONTROL
@@ -209,7 +211,6 @@ struct IsSameApp {
   static log4cxx::LoggerPtr logger_;
 #endif  // ENABLE_LOG
  private:
-  static const functional_modules::ModuleID kCANModuleID = 153;
   bool is_remote_control_;
   bool is_driver_;
   functional_modules::PluginManager& plugin_manager_;
@@ -830,11 +831,17 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
                                           &(msg_params[strings::app_hmi_type]));
   }
 #endif  // SDL_REMOTE_CONTROL
+
+  SendResponse(true, result_code, add_info.c_str(), &response_params);
+
   // Default HMI level should be set before any permissions validation, since it
   // relies on HMI level.
   application_manager_.OnApplicationRegistered(application);
 
-  SendResponse(true, result_code, add_info.c_str(), &response_params);
+#ifdef SDL_REMOTE_CONTROL
+  application_manager_.GetPluginManager().AddAppForPlugin(application,
+                                                          kCANModuleID);
+#endif  // SDL_REMOTE_CONTROL
 
   (*notify_upd_manager)();
 
@@ -842,6 +849,7 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
   // Sends OnPermissionChange notification to mobile right after RAI response
   // and HMI level set-up
   GetPolicyHandler().OnAppRegisteredOnMobile(application->policy_app_id());
+
   if (result_code != mobile_apis::Result::RESUME_FAILED) {
     resumer.StartResumption(application, hash_id);
   } else {

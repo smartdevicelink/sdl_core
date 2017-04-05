@@ -447,9 +447,7 @@ void PolicyManagerImpl::SendNotificationOnPermissionsUpdated(
 #ifdef SDL_REMOTE_CONTROL
   const Subject who = {device_id, application_id};
   if (access_remote_->IsAppReverse(who)) {
-    const std::string rank =
-        access_remote_->IsPrimaryDevice(who.dev_id) ? "DRIVER" : "PASSENGER";
-    UpdateDeviceRank(who, rank);
+    UpdateDeviceRank(who);
     listener()->OnPermissionsUpdated(application_id, notification_data);
     return;
   }
@@ -1101,7 +1099,7 @@ void PolicyManagerImpl::RetrySequence() {
   timer_retry_sequence_.Start(timeout, timer::kPeriodic);
 }
 
-#if SDL_REMOTE_CONTROL
+#ifdef SDL_REMOTE_CONTROL
 void PolicyManagerImpl::SetDefaultHmiTypes(const std::string& application_id,
                                            const std::vector<int>& hmi_types) {
   LOG4CXX_INFO(logger_, "SetDefaultHmiTypes");
@@ -1323,10 +1321,25 @@ void PolicyManagerImpl::OnChangedRemoteControl(
 
 void PolicyManagerImpl::UpdateDeviceRank(const Subject& who,
                                          const std::string& rank) {
+  LOG4CXX_AUTO_TRACE(logger_);
   std::string default_hmi("NONE");
   if (GetDefaultHmi(who.app_id, &default_hmi)) {
     access_remote_->Reset(who);
     listener()->OnUpdateHMIStatus(who.dev_id, who.app_id, default_hmi, rank);
+  } else {
+    LOG4CXX_WARN(logger_,
+                 "Couldn't get default HMI level for application "
+                     << who.app_id);
+  }
+}
+
+void PolicyManagerImpl::UpdateDeviceRank(const Subject& who) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_WARN(logger_, "Does not send notification");
+  std::string default_hmi("NONE");
+  if (GetDefaultHmi(who.app_id, &default_hmi)) {
+    access_remote_->Reset(who);
+    listener()->ChangeAppsHMILevel(who.dev_id, who.app_id, default_hmi);
   } else {
     LOG4CXX_WARN(logger_,
                  "Couldn't get default HMI level for application "
@@ -1488,6 +1501,10 @@ void PolicyManagerImpl::set_access_remote(
     utils::SharedPtr<AccessRemote> access_remote) {
   access_remote_ = access_remote;
 }
+utils::SharedPtr<AccessRemote> PolicyManagerImpl::access_remote() {
+  return access_remote_;
+}
+
 #endif  // SDL_REMOTE_CONTROL
 
 }  //  namespace policy

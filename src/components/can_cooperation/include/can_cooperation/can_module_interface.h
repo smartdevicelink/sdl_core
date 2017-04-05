@@ -112,11 +112,19 @@ class CANModuleInterface
   virtual void RemoveAppExtension(uint32_t app_id) = 0;
 
   /**
-   * @brief Check registering app can be handled by plugin
+   * @brief Check if app already handles by plugin
    * @param msg Registration message
    * @param app Application basis already create by Core
    */
   virtual bool IsAppForPlugin(
+      application_manager::ApplicationSharedPtr app) = 0;
+
+  /**
+   * @brief Adds reverse app to plugin
+   * @param msg Registration message
+   * @param app Application basis already create by Core
+   */
+  virtual bool AddAppForPlugin(
       application_manager::ApplicationSharedPtr app) = 0;
 
   /**

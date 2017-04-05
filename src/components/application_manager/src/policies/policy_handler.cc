@@ -1860,8 +1860,6 @@ void PolicyHandler::UpdateHMILevel(ApplicationSharedPtr app,
                        << app->app_id() << " to default hmi level " << level);
       // Set application hmi level
       application_manager_.ChangeAppsHMILevel(app->app_id(), level);
-      // If hmi Level is full, it will be seted after ActivateApp response
-      MessageHelper::SendHMIStatusNotification(*app, application_manager_);
     }
   }
 }
@@ -2128,6 +2126,34 @@ void PolicyHandler::OnUpdateHMIStatus(const std::string& device_id,
   MessageHelper::SendHMIStatusNotification(*app, application_manager_);
 }
 
+void PolicyHandler::ChangeAppsHMILevel(const std::string& device_id,
+                                       const std::string& policy_app_id,
+                                       const std::string& hmi_level) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  ApplicationSharedPtr app =
+      application_manager_.application(device_id, policy_app_id);
+  if (!app) {
+    LOG4CXX_WARN(logger_,
+                 "Could not find application: " << device_id << " - "
+                                                << policy_app_id);
+    return;
+  }
+  mobile_apis::HMILevel::eType level =
+      MessageHelper::StringToHMILevel(hmi_level);
+  if (mobile_apis::HMILevel::INVALID_ENUM == level) {
+    LOG4CXX_WARN(logger_,
+                 "Couldn't convert default hmi level " << hmi_level
+                                                       << " to enum.");
+    return;
+  }
+
+  LOG4CXX_INFO(logger_,
+               "Changing hmi level of application "
+                   << app->app_id() << " to default hmi level " << level);
+  // Set application hmi level
+  application_manager_.ChangeAppsHMILevel(app->app_id(), level);
+}
+
 void PolicyHandler::OnUpdateHMIStatus(const std::string& device_id,
                                       const std::string& policy_app_id,
                                       const std::string& hmi_level,
@@ -2241,5 +2267,22 @@ void PolicyHandler::OnUpdateHMILevel(const std::string& device_id,
   }
   UpdateHMILevel(app, level);
 }
+
+mobile_apis::DeviceRank::eType PolicyHandler::GetDeviceRank(
+    const std::string& application_id) const {
+  const std::string device_id =
+      policy_manager_->GetCurrentDeviceId(application_id);
+  const Subject who = {device_id, application_id};
+
+  if (policy_manager_->access_remote()->IsAppReverse(who)) {
+    const std::string device_rank =
+        policy_manager_->access_remote()->IsPrimaryDevice(who.dev_id)
+            ? "DRIVER"
+            : "PASSENGER";
+    return MessageHelper::StringToDeviceRank(device_rank);
+  }
+  return mobile_apis::DeviceRank::INVALID_ENUM;
+}
+
 #endif  // SDL_REMOTE_CONTROL
 }  //  namespace policy

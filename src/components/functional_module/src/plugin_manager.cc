@@ -302,6 +302,12 @@ bool PluginManager::IsAppForPlugin(
   return i != plugins_.end() ? i->second->IsAppForPlugin(app) : false;
 }
 
+bool PluginManager::AddAppForPlugin(
+    application_manager::ApplicationSharedPtr app, ModuleID module_id) const {
+  Modules::const_iterator i = plugins_.find(module_id);
+  return i != plugins_.end() ? i->second->AddAppForPlugin(app) : false;
+}
+
 void PluginManager::OnAppHMILevelChanged(
     application_manager::ApplicationSharedPtr app,
     mobile_apis::HMILevel::eType old_level) {

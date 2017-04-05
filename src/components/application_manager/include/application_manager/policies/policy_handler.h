@@ -234,6 +234,10 @@ class PolicyHandler : public PolicyHandlerInterface,
                                  const std::string& hmi_level,
                                  const std::string& device_rank);
 
+  virtual void ChangeAppsHMILevel(const std::string& device_id,
+                                  const std::string& policy_app_id,
+                                  const std::string& hmi_level);
+
   /**
    * Gets all allowed module types
    * @param app_id unique identifier of application
@@ -633,6 +637,9 @@ class PolicyHandler : public PolicyHandlerInterface,
 #ifdef SDL_REMOTE_CONTROL
   void UpdateHMILevel(application_manager::ApplicationSharedPtr app,
                       mobile_apis::HMILevel::eType level);
+
+  mobile_apis::DeviceRank::eType GetDeviceRank(
+      const std::string& application_id) const OVERRIDE;
 #endif  // SDL_REMOTE_CONTROL
         /**
          * @brief Sets days after epoch on successful policy update

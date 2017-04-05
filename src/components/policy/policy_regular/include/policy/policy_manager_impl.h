@@ -210,6 +210,7 @@ class PolicyManagerImpl : public PolicyManager {
 
   void SendHMILevelChanged(const Subject& who);
   void UpdateDeviceRank(const Subject& who, const std::string& rank);
+  void UpdateDeviceRank(const Subject& who);
 
   void OnPrimaryGroupsChanged(const std::string& application_id);
   void OnNonPrimaryGroupsChanged(const std::string& application_id);
@@ -380,6 +381,7 @@ class PolicyManagerImpl : public PolicyManager {
                                          const std::string& application_id);
   virtual bool GetModuleTypes(const std::string& policy_app_id,
                               std::vector<std::string>* modules) const;
+  virtual utils::SharedPtr<AccessRemote> access_remote();
 #endif  // SDL_REMOTE_CONTROL
   PolicyListener* listener_;
 

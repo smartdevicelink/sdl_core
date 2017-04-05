@@ -73,13 +73,22 @@ class PluginManager : public ModuleObserver {
   bool IsAppForPlugins(application_manager::ApplicationSharedPtr app);
 
   /**
-   * Check if app cooperates with plugin
+   * Check if app already cooperates with plugin
    * @param app application
    * @param module_id unique identifier of plugin
    * @return true if application cooperates with this plugin
    */
   bool IsAppForPlugin(application_manager::ApplicationSharedPtr app,
                       ModuleID module_id) const;
+
+  /**
+   * Adds reverse app for cooperating with plugin
+   * @param app application
+   * @param module_id unique identifier of plugin
+   * @return true if application cooperates with this plugin
+   */
+  bool AddAppForPlugin(application_manager::ApplicationSharedPtr app,
+                       ModuleID module_id) const;
 
   /**
    * @brief Notify plugins about change of HMILevel of app

@@ -92,6 +92,10 @@ class MockPolicyListener : public ::policy::PolicyListener {
                void(const std::string& device_id,
                     const std::string& policy_app_id,
                     const std::string& hmi_level));
+  MOCK_METHOD3(ChangeAppsHMILevel,
+               void(const std::string& device_id,
+                    const std::string& policy_app_id,
+                    const std::string& hmi_level));
   MOCK_METHOD4(OnUpdateHMIStatus,
                void(const std::string& device_id,
                     const std::string& policy_app_id,

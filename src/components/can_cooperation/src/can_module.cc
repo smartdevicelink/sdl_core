@@ -456,10 +456,18 @@ void CANModule::RemoveAppExtension(uint32_t app_id) {
 
 bool CANModule::IsAppForPlugin(application_manager::ApplicationSharedPtr app) {
   LOG4CXX_AUTO_TRACE(logger_);
+  return service()->IsRemoteControlApplication(app);
+}
+
+bool CANModule::AddAppForPlugin(application_manager::ApplicationSharedPtr app) {
+  LOG4CXX_AUTO_TRACE(logger_);
   application_manager::AppExtensionPtr app_extension =
       app->QueryInterface(GetModuleID());
   if (app_extension) {
-    return true;
+    LOG4CXX_WARN(logger_,
+                 "Application" << app->policy_app_id()
+                               << " already added to plugin");
+    return false;
   }
 
   if (service()->IsRemoteControlApplication(app)) {
@@ -469,6 +477,8 @@ bool CANModule::IsAppForPlugin(application_manager::ApplicationSharedPtr app) {
     PolicyHelper::SetIsAppOnPrimaryDevice(app, *this);
     return true;
   }
+
+  LOG4CXX_WARN(logger_, "Adding to plugin not reverse application");
   return false;
 }
 
