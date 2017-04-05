@@ -404,12 +404,11 @@ struct ExternalConsentStatusItem {
 
   ExternalConsentStatusItem() {}
 
-  ExternalConsentStatusItem operator=(const ExternalConsentStatusItem& rhs)
-  {
-      this->entity_id_ = rhs.entity_id_;
-      this->entity_type_ = rhs.entity_type_;
-      this->status_ = rhs.status_;
-      return *this; // calls copy constructor
+  ExternalConsentStatusItem operator=(const ExternalConsentStatusItem& rhs) {
+    this->entity_id_ = rhs.entity_id_;
+    this->entity_type_ = rhs.entity_type_;
+    this->status_ = rhs.status_;
+    return *this;  // calls copy constructor
   }
 
   bool operator==(const ExternalConsentStatusItem& rhs) const {
