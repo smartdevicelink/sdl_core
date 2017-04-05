@@ -44,13 +44,18 @@
 #include "hmi_message_handler/messagebroker_adapter.h"
 #endif  // #if ( defined (MESSAGEBROKER_HMIADAPTER) || defined(PASA_HMI)  )
 #include "application_manager/application_manager_impl.h"
+#include "application_manager/core_service.h"
 #include "connection_handler/connection_handler_impl.h"
 #include "protocol_handler/protocol_handler_impl.h"
 #include "transport_manager/transport_manager.h"
 #include "transport_manager/transport_manager_default.h"
 #include "media_manager/media_manager_impl.h"
+#include "functional_module/plugin_manager.h"
 #ifdef TELEMETRY_MONITOR
 #include "telemetry_monitor/telemetry_monitor.h"
+#endif
+#ifdef TIME_TESTER
+#include "time_tester/time_manager.h"
 #endif
 
 //#if ( defined (MESSAGEBROKER_HMIADAPTER) || defined(PASA_HMI)  )
@@ -116,6 +121,8 @@ class LifeCycle {
 #endif  // MESSAGEBROKER_HMIADAPTER
 
   const profile::Profile& profile_;
+  bool components_started_;
+
   DISALLOW_COPY_AND_ASSIGN(LifeCycle);
 };
 }  //  namespace main_namespace

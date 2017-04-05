@@ -46,6 +46,7 @@
 #include "application_manager/application_state.h"
 #include "protocol_handler/protocol_handler.h"
 #include "smart_objects/smart_object.h"
+#include "application_manager/app_extension.h"
 
 namespace application_manager {
 
@@ -110,7 +111,6 @@ class InitialApplicationData {
   virtual void set_app_types(const smart_objects::SmartObject& app_types) = 0;
   virtual void set_vr_synonyms(
       const smart_objects::SmartObject& vr_synonyms) = 0;
-  virtual void set_mobile_app_id(const std::string& policy_app_id) = 0;
   virtual void set_tts_name(const smart_objects::SmartObject& tts_name) = 0;
   virtual void set_ngn_media_screen_name(
       const smart_objects::SmartObject& ngn_name) = 0;
@@ -380,7 +380,6 @@ class Application : public virtual InitialApplicationData,
  public:
   enum ApplicationRegisterState { kRegistered = 0, kWaitingForRegistration };
 
- public:
   Application() : is_greyed_out_(false) {}
   virtual ~Application() {}
 
@@ -770,6 +769,31 @@ class Application : public virtual InitialApplicationData,
    */
   virtual uint32_t GetAvailableDiskSpace() = 0;
 
+#ifdef SDL_REMOTE_CONTROL
+  virtual void set_system_context(
+      const mobile_api::SystemContext::eType& system_context) = 0;
+  virtual void set_audio_streaming_state(
+      const mobile_api::AudioStreamingState::eType& state) = 0;
+  virtual bool IsSubscribedToInteriorVehicleData(
+      smart_objects::SmartObject module) = 0;
+  virtual bool SubscribeToInteriorVehicleData(
+      smart_objects::SmartObject module) = 0;
+  virtual bool UnsubscribeFromInteriorVehicleData(
+      smart_objects::SmartObject module) = 0;
+  virtual void set_hmi_level(const mobile_api::HMILevel::eType& hmi_level) = 0;
+
+  /**
+   * @brief Return pointer to extension by uid
+   * @param uid uid of extension
+   * @return Pointer to extension, if extension was initialized, otherwise NULL
+   */
+  virtual AppExtensionPtr QueryInterface(AppExtensionUID uid) = 0;
+  virtual bool AddExtension(AppExtensionPtr extention) = 0;
+  virtual bool RemoveExtension(AppExtensionUID uid) = 0;
+  virtual void RemoveExtensions() = 0;
+  virtual const std::set<uint32_t>& SubscribesIVI() const = 0;
+#endif
+
  protected:
   mutable sync_primitives::Lock hmi_states_lock_;
 
@@ -784,6 +808,7 @@ class Application : public virtual InitialApplicationData,
 
 typedef utils::SharedPtr<Application> ApplicationSharedPtr;
 typedef utils::SharedPtr<const Application> ApplicationConstSharedPtr;
+typedef uint32_t ApplicationId;
 
 }  // namespace application_manager
 

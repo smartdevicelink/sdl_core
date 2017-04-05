@@ -117,6 +117,10 @@ CacheManager::~CacheManager() {
   threads::DeleteThread(backup_thread_);
 }
 
+const policy_table::Strings& CacheManager::GetGroups(const PTString& app_id) {
+  return pt_->policy_table.app_policies_section.apps[app_id].groups;
+}
+
 bool CacheManager::CanAppKeepContext(const std::string& app_id) const {
   CACHE_MANAGER_CHECK(false);
   bool result = false;
@@ -141,6 +145,32 @@ uint32_t CacheManager::HeartBeatTimeout(const std::string& app_id) const {
     result = *(app.heart_beat_timeout_ms);
   }
 
+  return result;
+}
+
+const policy_table::AppHMITypes* CacheManager::GetHMITypes(
+    const std::string& app_id) {
+  const policy_table::ApplicationPolicies& apps =
+      pt_->policy_table.app_policies_section.apps;
+  policy_table::ApplicationPolicies::const_iterator i = apps.find(app_id);
+  if (i != apps.end()) {
+    return &(*i->second.AppHMIType);
+  }
+  return NULL;
+}
+
+int32_t CacheManager::GenerateHash(const std::string& str_to_hash) {
+  uint32_t hash = 5381U;
+  std::string::const_iterator it = str_to_hash.begin();
+  std::string::const_iterator it_end = str_to_hash.end();
+
+  for (; it != it_end; ++it) {
+    hash = ((hash << 5) + hash) + (*it);
+  }
+
+  // Reset sign bit in case it has been set.
+  // This is needed to avoid overflow for signed int.
+  const int32_t result = hash & 0x7FFFFFFF;
   return result;
 }
 
@@ -1352,6 +1382,8 @@ void CacheManager::CheckSnapshotInitialization() {
         (*it).second.count_of_run_attempts_while_revoked = 0;
       }
     }
+  } else {
+    LOG4CXX_WARN(logger_, "app_level is not initialized");
   }
 }
 

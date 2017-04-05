@@ -39,18 +39,16 @@
 
 #include "policy/cache_manager_interface.h"
 
-
 namespace test {
 namespace components {
 namespace policy_test {
 namespace policy_table = rpc::policy_table_interface_base;
 using namespace ::policy;
 
-
 class MockCacheManagerInterface : public CacheManagerInterface {
  public:
   MOCK_METHOD4(CheckPermissions,
-               void(const PTString& app_id,
+               void(const policy_table::Strings& groups,
                     const PTString& hmi_level,
                     const PTString& rpc,
                     CheckPermissionResult& result));
@@ -71,7 +69,7 @@ class MockCacheManagerInterface : public CacheManagerInterface {
                    const std::vector<std::string>& msg_codes,
                    const std::string& language));
 
- MOCK_METHOD1(
+  MOCK_METHOD1(
       GetNotificationsNumber,
       policy_table::NumberOfNotificationsType(const std::string& priority));
   MOCK_CONST_METHOD2(GetPriority,
@@ -207,6 +205,10 @@ class MockCacheManagerInterface : public CacheManagerInterface {
   MOCK_CONST_METHOD0(GetPT, utils::SharedPtr<policy_table::Table>());
   MOCK_CONST_METHOD0(GetCertificate, std::string());
   MOCK_METHOD1(SetDecryptedCertificate, void(const std::string&));
+
+  MOCK_METHOD1(GetHMITypes,
+               const policy_table::AppHMITypes*(const std::string& app_id));
+  MOCK_METHOD1(GetGroups, const policy_table::Strings&(const PTString& app_id));
 };
 
 }  // namespace policy_test

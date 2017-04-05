@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_ON_SYSTEM_REQUEST_NOTIFICATION_H_
 
 #include "application_manager/commands/command_notification_impl.h"
+
 #include <vector>
 
 namespace application_manager {

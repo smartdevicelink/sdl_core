@@ -1,0 +1,13 @@
+<RCC>
+    <qresource lang="qml" prefix="/">
+        <file>qml/main.qml</file>
+        <file>qml/components/Media.qml</file>
+        <file>qml/components/qmldir</file>
+        <file>qml/components/Style.qml</file>
+        <file>qml/components/CastomInput.qml</file>
+        <file>qml/components/LabelText.qml</file>
+        <file>qml/components/Settings.qml</file>
+        <file>qml/components/RequestHandler.qml</file>
+        <file>qml/components/CastomButton.qml</file>
+    </qresource>
+</RCC>

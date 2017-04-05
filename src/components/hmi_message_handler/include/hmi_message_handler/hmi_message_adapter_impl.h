@@ -53,6 +53,15 @@ class HMIMessageAdapterImpl : public HMIMessageAdapter {
    */
   virtual ~HMIMessageAdapterImpl();
 
+#ifdef SDL_REMOTE_CONTROL
+  /**
+   * @brief Subscribes to notification from HMI
+   * @param hmi_notification string with notification name
+   */
+  virtual void SubscribeToHMINotification(
+      const std::string& hmi_notification) OVERRIDE;
+#endif  // SDL_REMOTE_CONTROL
+
  protected:
   virtual HMIMessageHandler* handler() const {
     return handler_;

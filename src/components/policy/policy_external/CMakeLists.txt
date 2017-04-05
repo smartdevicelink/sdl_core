@@ -49,6 +49,7 @@ include_directories (
 set(SOURCES
   ${POLICY_PATH}/src/policy_manager_impl.cc
   ${POLICY_PATH}/src/policy_helper.cc
+  ${POLICY_PATH}/src/access_remote_impl.cc
   ${POLICY_PATH}/src/policy_table.cc
   ${POLICY_PATH}/src/sql_pt_queries.cc
   ${POLICY_PATH}/src/sql_pt_representation.cc
@@ -57,6 +58,12 @@ set(SOURCES
   ${POLICY_PATH}/src/cache_manager.cc
   ${COMPONENTS_DIR}/rpc_base/src/rpc_base/rpc_base.cc
 )
+
+if (NOT REMOTE_CONTROL)
+    list(REMOVE_ITEM SOURCES
+        ${POLICY_PATH}/src/access_remote_impl.cc)
+endif()
+
 
 list(APPEND SOURCES
   ${POLICY_PATH}/src/sql_pt_ext_queries.cc

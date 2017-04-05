@@ -36,9 +36,11 @@
 #include <map>
 #include <set>
 #include <vector>
+#include <list>
 #include <utility>
 #include <list>
 #include <stdint.h>
+#include <forward_list>
 
 #include "utils/date_time.h"
 #include "application_manager/application_data_impl.h"
@@ -52,6 +54,10 @@
 #include "utils/custom_string.h"
 #include "utils/timer.h"
 
+#ifdef SDL_REMOTE_CONTROL
+#include "utils/timer_thread.h"
+#endif
+
 namespace usage_statistics {
 
 class StatisticsManager;
@@ -64,7 +70,8 @@ using namespace timer;
 namespace mobile_api = mobile_apis;
 namespace custom_str = custom_string;
 
-class ApplicationImpl : public virtual InitialApplicationDataImpl,
+class ApplicationImpl : public virtual Application,
+                        public virtual InitialApplicationDataImpl,
                         public virtual DynamicApplicationDataImpl {
  public:
   ApplicationImpl(
@@ -90,6 +97,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
    * @brief change supporting COMMUNICATION NAVIGATION
    */
   virtual void ChangeSupportingAppHMIType();
+  bool IsAudible() const;
 
   inline bool is_navi() const {
     return is_navi_;
@@ -123,13 +131,13 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   void set_hmi_application_id(uint32_t hmi_app_id);
   inline uint32_t hmi_app_id() const;
   inline uint32_t app_id() const;
-  const custom_str::CustomString& name() const;
+  const custom_str::CustomString& name() const OVERRIDE;
   void set_folder_name(const std::string& folder_name) OVERRIDE;
   const std::string folder_name() const;
   bool is_media_application() const;
   bool is_foreground() const OVERRIDE;
   void set_foreground(const bool is_foreground) OVERRIDE;
-  const mobile_apis::HMILevel::eType hmi_level() const;
+  virtual const mobile_apis::HMILevel::eType hmi_level() const OVERRIDE;
   const uint32_t put_file_in_none_count() const;
   const uint32_t delete_file_in_none_count() const;
   const uint32_t list_files_in_none_count() const;
@@ -180,6 +188,10 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   bool UnsubscribeFromIVI(uint32_t vehicle_info_type) OVERRIDE;
   DataAccessor<VehicleInfoSubscriptions> SubscribedIVI() const OVERRIDE;
   inline bool IsRegistered() const OVERRIDE;
+
+  bool SubscribeToInteriorVehicleData(smart_objects::SmartObject module);
+  bool IsSubscribedToInteriorVehicleData(smart_objects::SmartObject module);
+  bool UnsubscribeFromInteriorVehicleData(smart_objects::SmartObject module);
 
   /**
    * @brief ResetDataInNone reset data counters in NONE
@@ -299,11 +311,49 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
    */
   uint32_t GetAvailableDiskSpace() OVERRIDE;
 
+#ifdef SDL_REMOTE_CONTROL
+  void set_system_context(
+      const mobile_api::SystemContext::eType& system_context);
+  void set_audio_streaming_state(
+      const mobile_api::AudioStreamingState::eType& state);
+  virtual void set_hmi_level(
+      const mobile_api::HMILevel::eType& hmi_level) OVERRIDE;
+  virtual const std::set<uint32_t>& SubscribesIVI() const OVERRIDE;
+
+  /**
+   * @brief Return pointer to extension by uid
+   * @param uid uid of extension
+   * @return Pointer to extension, if extension was initialized, otherwise NULL
+   */
+  AppExtensionPtr QueryInterface(AppExtensionUID uid) OVERRIDE;
+#endif
+
  protected:
   /**
    * @brief Clean up application folder. Persistent files will stay
    */
   void CleanupFiles();
+
+#ifdef SDL_REMOTE_CONTROL
+  /**
+   * @brief Add extension to application
+   * @param extension pointer to extension
+   * @return true if success, false if extension already initialized
+   */
+  bool AddExtension(AppExtensionPtr extention) OVERRIDE;
+
+  /**
+   * @brief Remove extension from application
+   * @param uid uid of extension
+   * @return true if success, false if extension is not present
+   */
+  bool RemoveExtension(AppExtensionUID uid) OVERRIDE;
+
+  /**
+   * @brief Removes all extensions
+   */
+  void RemoveExtensions() OVERRIDE;
+#endif
 
  private:
   /**
@@ -376,6 +426,15 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   Timer video_stream_suspend_timer_;
   Timer audio_stream_suspend_timer_;
 
+  std::list<AppExtensionPtr> extensions_;
+
+  std::forward_list<smart_objects::SmartObject>
+      subscribed_interior_vehicle_data_;
+
+#ifdef ENABLE_LOG
+  static log4cxx::LoggerPtr logger_;
+#endif  // ENABLE_LOG
+
   /**
    * @brief Defines number per time in seconds limits
    */
@@ -399,6 +458,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   sync_primitives::Lock button_lock_;
   std::string folder_name_;
   ApplicationManager& application_manager_;
+
   DISALLOW_COPY_AND_ASSIGN(ApplicationImpl);
 };
 

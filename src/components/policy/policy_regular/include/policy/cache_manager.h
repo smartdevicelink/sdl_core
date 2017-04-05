@@ -55,17 +55,18 @@ class CacheManager : public CacheManagerInterface {
   CacheManager();
   ~CacheManager();
 
+  const policy_table::Strings& GetGroups(const PTString& app_id);
+
   /**
    * @brief Check if specified RPC for specified application
    * has permission to be executed in specified HMI Level
    * and also its permitted params.
-   * @param app_id Id of application provided during registration
-   * @param hmi_level Current HMI Level of application
+   * @param groups list of groups
    * @param rpc Name of RPC
    * @return CheckPermissionResult containing flag if HMI Level is allowed
    * and list of allowed params.
    */
-  virtual void CheckPermissions(const PTString& app_id,
+  virtual void CheckPermissions(const policy_table::Strings& groups,
                                 const PTString& hmi_level,
                                 const PTString& rpc,
                                 CheckPermissionResult& result);
@@ -218,13 +219,13 @@ class CacheManager : public CacheManagerInterface {
    * Gets flag updateRequired
    * @return true if update is required
    */
-  bool UpdateRequired() const;
+  virtual bool UpdateRequired() const;
 
   /**
    * @brief Saves flag updateRequired
    * @param status update status if true then update required.
    */
-  void SaveUpdateRequired(bool status);
+  virtual void SaveUpdateRequired(bool status);
 
   /**
    * @brief GetInitialAppData Retrieves data from app_policies
@@ -312,6 +313,13 @@ class CacheManager : public CacheManagerInterface {
    * @return true, if succedeed, otherwise - false
    */
   bool GetDefaultHMI(const std::string& app_id, std::string& default_hmi) const;
+
+  /**
+   * Gets HMI types from specific policy
+   * @param app_id ID application
+   * @return list of HMI types
+   */
+  const policy_table::AppHMITypes* GetHMITypes(const std::string& app_id);
 
   /**
    * @brief Reset user consent for device data and applications permissions
@@ -755,6 +763,12 @@ class CacheManager : public CacheManagerInterface {
   sync_primitives::Lock backuper_locker_;
   BackgroundBackuper* backuper_;
   const PolicySettings* settings_;
+
+  friend class AccessRemoteImpl;
+  FRIEND_TEST(AccessRemoteImplTest, CheckModuleType);
+  FRIEND_TEST(AccessRemoteImplTest, EnableDisable);
+  FRIEND_TEST(AccessRemoteImplTest, GetGroups);
+  FRIEND_TEST(AccessRemoteImplTest, CheckParameters);
 };
 }  // namespace policy
 #endif  // SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_CACHE_MANAGER_H_

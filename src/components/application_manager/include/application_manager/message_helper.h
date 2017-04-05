@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2015, Ford Motor Company
+ Copyright (c) 2016, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -130,6 +130,15 @@ class MessageHelper {
       const std::string& hmi_result);
 
   /**
+   * @brief Converts string to device rank, if possible
+   * @param device_rank Stringified device rank
+   * @return Appropriate enum from device rank, or INVALID_ENUM, if conversion
+   * is not possible
+   */
+  static mobile_api::DeviceRank::eType StringToDeviceRank(
+      const std::string& device_rank);
+
+  /**
    * @brief Converts mobile Result enum value to string
    * @param mobile_result mobile Result enum value
    * @return stringified value for enum if succedeed, otherwise - empty string
@@ -137,6 +146,8 @@ class MessageHelper {
   static std::string MobileResultToString(
       mobile_apis::Result::eType mobile_result);
 
+  static std::string GetDeviceMacAddressForHandle(
+      const uint32_t device_handle, const ApplicationManager& app_mngr);
   /**
    * @brief Converts string to mobile Result enum value
    * @param mobile_result stringified value
@@ -193,13 +204,13 @@ class MessageHelper {
       const uint32_t correlation_id,
       uint32_t connection_key);
 
-  /*
-   * @brief Prepare GetDeviceListResponse
-   *
-   *
-   * @param devices Devices list
-   *
-   */
+  /**
+ * @brief Prepare GetDeviceListResponse
+ *
+ *
+ * @param devices Devices list
+ *
+ */
   static smart_objects::SmartObjectSPtr CreateDeviceListSO(
       const connection_handler::DeviceMap& devices,
       const policy::PolicyHandlerInterface& policy_handler,
@@ -666,6 +677,25 @@ class MessageHelper {
   GetOnAppInterfaceUnregisteredNotificationToMobile(
       int32_t connection_key,
       mobile_api::AppInterfaceUnregisteredReason::eType reason);
+
+  /**
+   * @brief Sends HMI status notification to mobile
+   *
+   * @param application_impl application with changed HMI status
+   * @param rank device rank
+   *
+   **/
+  static void SendHMIStatusNotification(
+      const Application& application_impl,
+      ApplicationManager& application_manager,
+      mobile_apis::DeviceRank::eType rank =
+          mobile_apis::DeviceRank::eType::INVALID_ENUM);
+
+  static void SendActivateAppToHMI(
+      uint32_t const app_id,
+      ApplicationManager& application_manager,
+      hmi_apis::Common_HMILevel::eType level = hmi_apis::Common_HMILevel::FULL,
+      bool send_policy_priority = true);
 
  private:
   /**

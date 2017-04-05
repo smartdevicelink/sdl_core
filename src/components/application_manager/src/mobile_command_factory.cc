@@ -609,11 +609,6 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
           message, application_manager));
       break;
     }
-    case mobile_apis::FunctionID::OnButtonPressID: {
-      command.reset(new commands::mobile::OnButtonPressNotification(
-          message, application_manager));
-      break;
-    }
     case mobile_apis::FunctionID::OnAudioPassThruID: {
       command.reset(new commands::OnAudioPassThruNotification(
           message, application_manager));

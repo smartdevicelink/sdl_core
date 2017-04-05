@@ -133,10 +133,10 @@ class MobileMessageHandlerTest : public testing::Test {
 
     // Checks
     EXPECT_EQ(data, message->json_message());
-    EXPECT_EQ(1, message->connection_key());
+    EXPECT_EQ(1u, message->connection_key());
     EXPECT_EQ(247, message->function_id());
     EXPECT_EQ(protocol_version, message->protocol_version());
-    EXPECT_EQ(0x5c, message->correlation_id());
+    EXPECT_EQ(0x5cu, message->correlation_id());
     EXPECT_EQ(full_data_size, message->data_size());
     EXPECT_EQ(payload_size, message->payload_size());
     EXPECT_TRUE(message->has_binary_data());
@@ -153,10 +153,10 @@ class MobileMessageHandlerTest : public testing::Test {
 
     // Checks
     EXPECT_EQ(data, message->json_message());
-    EXPECT_EQ(1, message->connection_key());
+    EXPECT_EQ(1u, message->connection_key());
     EXPECT_EQ(247, message->function_id());
     EXPECT_EQ(protocol_version, (uint32_t)message->protocol_version());
-    EXPECT_EQ(0x5c, message->correlation_id());
+    EXPECT_EQ(0x5cu, message->correlation_id());
     EXPECT_EQ(full_data_size, message->data_size());
     EXPECT_EQ(payload_size, message->payload_size());
     EXPECT_FALSE(message->has_binary_data());

@@ -36,6 +36,8 @@
 #include <string>
 #include <vector>
 
+#include "policy/policy_table/types.h"
+#include "policy/pt_representation.h"
 #include "utils/shared_ptr.h"
 #include "policy/usage_statistics/counter.h"
 #include "policy/policy_types.h"
@@ -50,17 +52,19 @@ class CacheManagerInterface {
  public:
   virtual ~CacheManagerInterface() {}
 
+  virtual const policy_table::Strings& GetGroups(const PTString& app_id) = 0;
+
   /**
    * @brief Check if specified RPC for specified application
    * has permission to be executed in specified HMI Level
    * and also its permitted params.
-   * @param app_id Id of application provided during registration
+   * @param groups list of functional groups
    * @param hmi_level Current HMI Level of application
    * @param rpc Name of RPC
    * @return CheckPermissionResult containing flag if HMI Level is allowed
    * and list of allowed params.
    */
-  virtual void CheckPermissions(const PTString& app_id,
+  virtual void CheckPermissions(const policy_table::Strings& groups,
                                 const PTString& hmi_level,
                                 const PTString& rpc,
                                 CheckPermissionResult& result) = 0;
@@ -311,6 +315,14 @@ class CacheManagerInterface {
    */
   virtual bool GetDefaultHMI(const std::string& app_id,
                              std::string& default_hmi) const = 0;
+
+  /**
+   * Gets HMI types from specific policy
+   * @param app_id ID application
+   * @return list of HMI types
+   */
+  virtual const policy_table::AppHMITypes* GetHMITypes(
+      const std::string& app_id) = 0;
 
   /**
    * @brief Reset user consent for device data and applications permissions

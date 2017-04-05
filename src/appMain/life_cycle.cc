@@ -96,7 +96,8 @@ LifeCycle::LifeCycle(const profile::Profile& profile)
     , mb_server_thread_(NULL)
     , mb_adapter_thread_(NULL)
 #endif  // MESSAGEBROKER_HMIADAPTER
-    , profile_(profile) {
+    , profile_(profile)
+    , components_started_(false) {
 }
 
 bool LifeCycle::StartComponents() {
@@ -128,11 +129,6 @@ bool LifeCycle::StartComponents() {
   hmi_handler_ = new hmi_message_handler::HMIMessageHandlerImpl(profile_);
 
   media_manager_ = new media_manager::MediaManagerImpl(*app_manager_, profile_);
-  app_manager_->set_connection_handler(connection_handler_);
-  if (!app_manager_->Init(*last_state_, media_manager_)) {
-    LOG4CXX_ERROR(logger_, "Application manager init failed.");
-    return false;
-  }
 
 #ifdef ENABLE_SECURITY
   security_manager_ = new security_manager::SecurityManagerImpl();
@@ -177,13 +173,18 @@ bool LifeCycle::StartComponents() {
 #endif  // TELEMETRY_MONITOR
   // It's important to initialise TM after setting up listener chain
   // [TM -> CH -> AM], otherwise some events from TM could arrive at nowhere
+  app_manager_->set_connection_handler(connection_handler_);
   app_manager_->set_protocol_handler(protocol_handler_);
   app_manager_->set_hmi_message_handler(hmi_handler_);
+
+  if (!app_manager_->Init(*last_state_, media_manager_)) {
+    LOG4CXX_ERROR(logger_, "Application manager init failed.");
+    return false;
+  }
 
   transport_manager_->Init(*last_state_);
   // start transport manager
   transport_manager_->Visibility(true);
-
   return true;
 }
 

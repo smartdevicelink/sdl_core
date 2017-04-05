@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -88,57 +88,81 @@ void MessageBrokerAdapter::processNotification(Json::Value& root) {
 
 void MessageBrokerAdapter::SubscribeTo() {
   LOG4CXX_INFO(logger_, "MessageBrokerAdapter::subscribeTo");
-  MessageBrokerController::subscribeTo("Buttons.OnButtonEvent");
-  MessageBrokerController::subscribeTo("Buttons.OnButtonPress");
-  MessageBrokerController::subscribeTo("UI.OnCommand");
-  MessageBrokerController::subscribeTo("VR.OnCommand");
-  MessageBrokerController::subscribeTo("BasicCommunication.OnReady");
-  MessageBrokerController::subscribeTo(
-      "BasicCommunication.OnExitAllApplications");
-  MessageBrokerController::subscribeTo("UI.OnDriverDistraction");
-  MessageBrokerController::subscribeTo("UI.OnSystemContext");
-  MessageBrokerController::subscribeTo("UI.OnAppActivated");
-  MessageBrokerController::subscribeTo("UI.OnKeyboardInput");
-  MessageBrokerController::subscribeTo("UI.OnTouchEvent");
-  MessageBrokerController::subscribeTo("UI.OnResetTimeout");
-  MessageBrokerController::subscribeTo("TTS.OnResetTimeout");
-  MessageBrokerController::subscribeTo("BasicCommunication.OnAppDeactivated");
-  MessageBrokerController::subscribeTo(
-      "BasicCommunication.OnStartDeviceDiscovery");
-  MessageBrokerController::subscribeTo("BasicCommunication.OnUpdateDeviceList");
-  MessageBrokerController::subscribeTo("BasicCommunication.OnFindApplications");
+
+  // BasicCommunication
   MessageBrokerController::subscribeTo("BasicCommunication.OnAppActivated");
-  MessageBrokerController::subscribeTo("BasicCommunication.OnExitApplication");
+  MessageBrokerController::subscribeTo("BasicCommunication.OnAppDeactivated");
+  MessageBrokerController::subscribeTo("BasicCommunication.OnDeviceChosen");
+  MessageBrokerController::subscribeTo("BasicCommunication.OnEventChanged");
   MessageBrokerController::subscribeTo(
       "BasicCommunication.OnExitAllApplications");
-  MessageBrokerController::subscribeTo("BasicCommunication.OnDeviceChosen");
-  MessageBrokerController::subscribeTo("UI.OnLanguageChange");
-  MessageBrokerController::subscribeTo("VR.OnLanguageChange");
-  MessageBrokerController::subscribeTo("TTS.OnLanguageChange");
-  MessageBrokerController::subscribeTo("VehicleInfo.OnVehicleData");
-  MessageBrokerController::subscribeTo("Navigation.OnTBTClientState");
-  MessageBrokerController::subscribeTo("Navigation.OnWayPointChange");
-  MessageBrokerController::subscribeTo("TTS.Started");
-  MessageBrokerController::subscribeTo("TTS.Stopped");
-  MessageBrokerController::subscribeTo("VR.Started");
-  MessageBrokerController::subscribeTo("VR.Stopped");
-  MessageBrokerController::subscribeTo("BasicCommunication.OnSystemRequest");
+  MessageBrokerController::subscribeTo("BasicCommunication.OnExitApplication");
+  MessageBrokerController::subscribeTo("BasicCommunication.OnFindApplications");
   MessageBrokerController::subscribeTo(
       "BasicCommunication.OnIgnitionCycleOver");
+  MessageBrokerController::subscribeTo("BasicCommunication.OnReady");
+  MessageBrokerController::subscribeTo(
+      "BasicCommunication.OnStartDeviceDiscovery");
   MessageBrokerController::subscribeTo(
       "BasicCommunication.OnSystemInfoChanged");
-  MessageBrokerController::subscribeTo("SDL.OnAppPermissionConsent");
-  MessageBrokerController::subscribeTo("SDL.OnAllowSDLFunctionality");
-  MessageBrokerController::subscribeTo("SDL.OnReceivedPolicyUpdate");
-  MessageBrokerController::subscribeTo("SDL.OnSystemError");
+  MessageBrokerController::subscribeTo("BasicCommunication.OnSystemRequest");
+  MessageBrokerController::subscribeTo("BasicCommunication.OnUpdateDeviceList");
+
+  // Buttons
+  MessageBrokerController::subscribeTo("Buttons.OnButtonEvent");
+  MessageBrokerController::subscribeTo("Buttons.OnButtonPress");
+
+  // Navigation
+  MessageBrokerController::subscribeTo("Navigation.OnTBTClientState");
+  MessageBrokerController::subscribeTo("Navigation.OnWayPointChange");
+
+  // RC
+  MessageBrokerController::subscribeTo("RC.OnDeviceLocationChanged");
+  MessageBrokerController::subscribeTo("RC.OnDeviceRankChanged");
+  MessageBrokerController::subscribeTo("RC.OnInteriorVehicleData");
+
+  // SDL
   MessageBrokerController::subscribeTo("SDL.AddStatisticsInfo");
+  MessageBrokerController::subscribeTo("SDL.OnAllowSDLFunctionality");
+  MessageBrokerController::subscribeTo("SDL.OnAppPermissionConsent");
   MessageBrokerController::subscribeTo("SDL.OnDeviceStateChanged");
   MessageBrokerController::subscribeTo("SDL.OnPolicyUpdate");
-  MessageBrokerController::subscribeTo("BasicCommunication.OnEventChanged");
+  MessageBrokerController::subscribeTo("SDL.OnReceivedPolicyUpdate");
+  MessageBrokerController::subscribeTo("SDL.OnSystemError");
+
+  // TTS
+  MessageBrokerController::subscribeTo("TTS.OnLanguageChange");
+  MessageBrokerController::subscribeTo("TTS.OnResetTimeout");
+  MessageBrokerController::subscribeTo("TTS.Started");
+  MessageBrokerController::subscribeTo("TTS.Stopped");
+
+  // UI
+  MessageBrokerController::subscribeTo("UI.OnAppActivated");
+  MessageBrokerController::subscribeTo("UI.OnCommand");
+  MessageBrokerController::subscribeTo("UI.OnDriverDistraction");
+  MessageBrokerController::subscribeTo("UI.OnKeyboardInput");
+  MessageBrokerController::subscribeTo("UI.OnLanguageChange");
+  MessageBrokerController::subscribeTo("UI.OnResetTimeout");
+  MessageBrokerController::subscribeTo("UI.OnSystemContext");
+  MessageBrokerController::subscribeTo("UI.OnTouchEvent");
+
+  // VehicleInfo
+  MessageBrokerController::subscribeTo("VehicleInfo.OnReverseAppsAllowing");
+  MessageBrokerController::subscribeTo("VehicleInfo.OnVehicleData");
+
+  // VR
+  MessageBrokerController::subscribeTo("VR.OnCommand");
+  MessageBrokerController::subscribeTo("VR.OnLanguageChange");
+  MessageBrokerController::subscribeTo("VR.Started");
+  MessageBrokerController::subscribeTo("VR.Stopped");
 
   LOG4CXX_INFO(logger_, "Subscribed to notifications.");
 }
 
+void MessageBrokerAdapter::SubscribeToHMINotification(
+    const std::string& hmi_notification) {
+  MessageBrokerController::subscribeTo(hmi_notification);
+}
 void* MessageBrokerAdapter::SubscribeAndBeginReceiverThread(void* param) {
   PassToThread(threads::Thread::CurrentId());
   // For PASA we don't need to subscribe and register controller

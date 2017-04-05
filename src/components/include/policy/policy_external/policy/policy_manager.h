@@ -39,7 +39,10 @@
 
 #include "policy/policy_types.h"
 #include "policy/policy_listener.h"
-#include "usage_statistics/statistics_manager.h"
+#include "policy/usage_statistics/statistics_manager.h"
+#ifdef SDL_REMOTE_CONTROL
+#include "policy/access_remote.h"
+#endif  // SDL_REMOTE_CONTROL
 
 namespace policy {
 class PolicySettings;
@@ -480,6 +483,164 @@ class PolicyManager : public usage_statistics::StatisticsManager {
   virtual void SetDecryptedCertificate(const std::string& certificate) = 0;
 
   virtual const PolicySettings& get_settings() const = 0;
+
+#ifdef SDL_REMOTE_CONTROL
+  virtual void SetDefaultHmiTypes(const std::string& application_id,
+                                  const std::vector<int>& hmi_types) = 0;
+
+  /**
+   * Gets HMI types
+   * @param application_id ID application
+   * @param app_types list to save HMI types
+   * @return true if policy has specific policy for this application
+   */
+  virtual bool GetHMITypes(const std::string& application_id,
+                           std::vector<int>* app_types) = 0;
+
+  /**
+   * Checks access to equipment of vehicle for application by RPC
+   * @param device_id unique identifier of device
+   * @param app_id policy id application
+   * @param zone control
+   * @param module
+   * @param rpc name of rpc
+   * @param params parameters list
+   */
+  virtual TypeAccess CheckAccess(const PTString& device_id,
+                                 const PTString& app_id,
+                                 const SeatLocation& zone,
+                                 const PTString& module,
+                                 const PTString& rpc,
+                                 const RemoteControlParams& params) = 0;
+
+  /**
+   * Checks access to module for application
+   * @param app_id policy id application
+   * @param module
+   * @return true if module is allowed for application
+   */
+  virtual bool CheckModule(const PTString& app_id, const PTString& module) = 0;
+
+  /**
+   * Sets access to equipment of vehicle for application by RPC
+   * @param dev_id unique identifier of device
+   * @param app_id policy id application
+   * @param zone control
+   * @param module type
+   * @param allowed true if access is allowed
+   */
+  virtual void SetAccess(const PTString& dev_id,
+                         const PTString& app_id,
+                         const SeatLocation& zone,
+                         const PTString& module,
+                         bool allowed) = 0;
+
+  /**
+   * Resets access application to all resources
+   * @param dev_id unique identifier of device
+   * @param app_id policy id application
+   */
+  virtual void ResetAccess(const PTString& dev_id, const PTString& app_id) = 0;
+
+  /**
+   * Resets access by functional group for all applications
+   * @param zone control
+   * @param module type
+   */
+  virtual void ResetAccess(const SeatLocation& zone,
+                           const PTString& module) = 0;
+
+  /**
+   * Sets driver as primary device
+   * @param dev_id ID device
+   */
+  virtual void SetPrimaryDevice(const PTString& dev_id) = 0;
+
+  /**
+   * Resets driver's device
+   */
+  virtual void ResetPrimaryDevice() = 0;
+
+  /**
+   * Gets current primary device
+   * @return ID device
+   */
+  virtual PTString PrimaryDevice() const = 0;
+
+  /**
+   * Sets device zone
+   * @param dev_id unique identifier of device
+   * @param zone device zone
+   */
+  virtual void SetDeviceZone(const PTString& dev_id,
+                             const SeatLocation& zone) = 0;
+
+  /**
+   * Gets device zone
+   * @param dev_id unique identifier of device
+   * @param zone value to return zone if device has zone
+   * @return true if device has zone
+   */
+  virtual bool GetDeviceZone(const PTString& dev_id,
+                             SeatLocation* zone) const = 0;
+
+  /**
+   * Sets mode of remote control (on/off)
+   * @param enabled true if remote control is turned on
+   */
+  virtual void SetRemoteControl(bool enabled) = 0;
+
+  /*
+   * @brief If remote control is enabled
+   * by User and by Policy
+   */
+  virtual bool GetRemoteControl() const = 0;
+
+  /**
+   * Handles changed primary device event for a application
+   * @param device_id Device on which app is running
+   * @param application_id ID application
+   */
+  virtual void OnChangedPrimaryDevice(const std::string& device_id,
+                                      const std::string& application_id) = 0;
+
+  /**
+   * Handles changed remote control event for a application
+   * @param device_id Device on which app is running
+   * @param application_id ID application
+   */
+  virtual void OnChangedRemoteControl(const std::string& device_id,
+                                      const std::string& application_id) = 0;
+
+  /**
+   * Handles changed device zone event for a application
+   * @param device_id Device on which app is running
+   * @param application_id ID application
+   */
+  virtual void OnChangedDeviceZone(const std::string& device_id,
+                                   const std::string& application_id) = 0;
+
+  /*
+   * Send OnPermissionsChange notification to mobile app
+   * when it's permissions are changed.
+   * @param device_id Device on which app is running
+   * @param application_id ID of app whose permissions are changed
+   */
+  virtual void SendAppPermissionsChanged(const std::string& device_id,
+                                         const std::string& application_id) = 0;
+
+  /**
+   * Gets all allowed module types
+   * @param app_id unique identifier of application
+   * @param list of allowed module types
+   * @return true if application has allowed modules
+   */
+  virtual bool GetModuleTypes(const std::string& policy_app_id,
+                              std::vector<std::string>* modules) const = 0;
+
+  virtual void set_access_remote(
+      utils::SharedPtr<AccessRemote> access_remote) = 0;
+#endif  // SDL_REMOTE_CONTROL
 
  protected:
   /**

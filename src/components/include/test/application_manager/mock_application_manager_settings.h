@@ -122,6 +122,8 @@ class MockApplicationManagerSettings
   MOCK_CONST_METHOD0(max_number_of_ios_device, const uint16_t());
   MOCK_CONST_METHOD0(wait_time_between_apps, const uint16_t());
   MOCK_CONST_METHOD0(enable_app_launch_ios, const bool());
+
+  MOCK_CONST_METHOD0(plugins_folder, const std::string&());
 };
 
 }  // namespace application_manager_test

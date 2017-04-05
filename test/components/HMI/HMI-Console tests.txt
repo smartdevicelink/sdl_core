@@ -1,0 +1,27 @@
+VehicleInfo.ReadDID     FFW.VehicleInfo.client.onWSMessage({data:'{"method":"VehicleInfo.ReadDID", "params":{"ecuName": 1, "didLocation":["123","123","123123","123","123","123123","123","123","123123","123","123","123123"], "encrypted": false}, "id": 6000}'})
+
+VehicleInfo.GetDTCs     FFW.VehicleInfo.client.onWSMessage({data:'{"method":"VehicleInfo.GetDTCs", "params":{"encrypted": false}, "id": 6000}'})
+
+UI.Alert                FFW.UI.client.onWSMessage({data:'{"method":"UI.Alert", "params":{"appId":-1, "AlertText1":"Test1", "AlertText2":"Test2", "alertText3":"Test3", "ttsChunks":{"ttsChunks":[{"text":"speak","type":"TEXT"},{"text":"INITIAL_JINGLE","type":"PRE_RECORDED"}]}, "duration":5000, "playTone":true, "softButtons":[{"isHighlighted":false,"softButtonID":5432,"systemAction":"KEEP_CONTEXT","text":"KeepContext","type":"TEXT"},{"isHighlighted":false,"softButtonID":5431,"systemAction":"STEAL_FOCUS","text":"StealFocus","type":"TEXT"},{"isHighlighted":false,"softButtonID":5430,"systemAction":"DEFAULT_ACTION","text":"Default","type":"TEXT"},{"isHighlighted":false,"softButtonID":5430,"systemAction":"DEFAULT_ACTION","text":"Default","type":"TEXT"}]}, "id": 6000}'})
+
+UI.AlertManeuver         FFW.UI.client.onWSMessage({data:'{"method":"UI.AlertManeuver", "params":{"appId":-1, "ttsChunks":{"ttsChunks":[{"text":"speak","type":"TEXT"},{"text":"INITIAL_JINGLE","type":"PRE_RECORDED"}]},"softButtons":[{"isHighlighted":false,"softButtonID":5432,"systemAction":"KEEP_CONTEXT","text":"KeepContext","type":"TEXT"}]}, "id": 6000}'})
+
+UI.ChangeRegistration   FFW.UI.client.onWSMessage({data:'{"method":"UI.ChangeRegistration", "params":{"hmiDisplayLanguage": "RU-RU"}, "id": 6000}'})
+
+TTS.ChangeRegistration  FFW.TTS.client.onWSMessage({data:'{"method":"TTS.ChangeRegistration", "params":{"language": "RU-RU"}, "id": 6000}'})
+
+VR.ChangeRegistration   FFW.VR.client.onWSMessage({data:'{"method":"VR.ChangeRegistration", "params":{"language": "RU-RU"}, "id": 6000}'})
+
+UI.PerformAudioPassThru FFW.UI.client.onWSMessage({data:'{"method":"UI.PerformAudioPassThru", "params":{"appId":-1, "audioPassThruDisplayText1":"Test1", "audioPassThruDisplayText2":"Test2", "initialPrompt":{"ttsChunks":[{"text":"speak","type":"TEXT"},{"text":"INITIAL_JINGLE","type":"PRE_RECORDED"}]}, "maxDuration":5000}, "id": 6000}'})
+
+UI.EndAudioPassThru     FFW.UI.client.onWSMessage({data:'{"method":"UI.EndAudioPassThru", "params":{"appId":-1}}, "id": 6000}'})
+
+UI.Slider               FFW.UI.client.onWSMessage({data:'{"method":"UI.Slider","params":{"appId":-1,"numTicks":2,"position":1,"sliderFooter":["Line 1","Line 2"],"sliderHeader":"Slider Header","timeout":5000},"id": 6000}'});
+
+UI.ShowConstantTBT      FFW.UI.client.onWSMessage({data:'{"method":"UI.ShowConstantTBT","params":{"softButtons":[{"isHighlighted":false,"softButtonID":5432,"systemAction":"KEEP_CONTEXT","text":"KeepContext","type":"TEXT"},{"isHighlighted":false,"softButtonID":5431,"systemAction":"STEAL_FOCUS","text":"StealFocus","type":"TEXT"},{"isHighlighted":false,"softButtonID":5430,"systemAction":"DEFAULT_ACTION","text":"Default","type":"TEXT"}],"navigationText1":"Text","navigationText2":"Text2","eta":"100","totalDistance":"5000","distanceToManeuver":"50","distanceToManeuverScale":"20","maneuverComplete":true, "appId": 65537, "turnIcon":"/home/dev/Projects/Ford/source/build/src/appMain/SyncProxyTester/syncFileName" },"id": 6000}'});
+
+SDL.ActivateApp
+
+		SDL.SDLModel.activateAppRequestsList[5013] = 846930886
+		FFW.BasicCommunication.client.onWSMessage({"data":'{"id":5013,"jsonrpc":"2.0","result":{"code":0,"isAppPermissionsRevoked":false,"isAppRevoked":false,"isPermissionsConsentNeeded":false,"isSDLAllowed":true,"method":"SDL.ActivateApp","priority":"EMERGENCY"}}'})
+Turn ON CD SDL.States.goToState("media.player");

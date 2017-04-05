@@ -86,9 +86,16 @@ add_subdirectory(./config_profile)
 # --- Media Manager
 add_subdirectory(./media_manager)
 
+if(REMOTE_CONTROL)
+  # --- CAN Module
+  add_subdirectory(./can_cooperation)
+  # --- Functional module
+  add_subdirectory(./functional_module)
+endif()
+
 # --- Telemetry Monitor
-if(TELEMETRY_MONITOR)
-  add_subdirectory(./telemetry_monitor)
+if (TELEMETRY_MONITOR)
+    add_subdirectory(./telemetry_monitor)
 endif()
 
 # --- DBus

@@ -142,6 +142,59 @@ class MockPolicyManager : public PolicyManager {
   MOCK_METHOD1(MarkUnpairedDevice, void(const std::string& device_id));
   MOCK_METHOD1(AddApplication,
                StatusNotifier(const std::string& application_id));
+#ifdef SDL_REMOTE_CONTROL
+  MOCK_METHOD2(SetDefaultHmiTypes,
+               void(const std::string& application_id,
+                    const std::vector<int>& hmi_types));
+  MOCK_METHOD2(GetHMITypes,
+               bool(const std::string& application_id,
+                    std::vector<int>* app_types));
+  MOCK_METHOD6(CheckAccess,
+               TypeAccess(const PTString& device_id,
+                          const PTString& app_id,
+                          const SeatLocation& zone,
+                          const PTString& module,
+                          const PTString& rpc,
+                          const RemoteControlParams& params));
+  MOCK_METHOD2(CheckModule,
+               bool(const PTString& app_id, const PTString& module));
+  MOCK_METHOD5(SetAccess,
+               void(const PTString& dev_id,
+                    const PTString& app_id,
+                    const SeatLocation& zone,
+                    const PTString& module,
+                    bool allowed));
+  MOCK_METHOD2(ResetAccess,
+               void(const PTString& dev_id, const PTString& app_id));
+  MOCK_METHOD2(ResetAccess,
+               void(const SeatLocation& zone, const PTString& module));
+  MOCK_METHOD1(SetPrimaryDevice, void(const PTString& dev_id));
+  MOCK_METHOD0(ResetPrimaryDevice, void());
+  MOCK_CONST_METHOD0(PrimaryDevice, PTString());
+  MOCK_METHOD2(SetDeviceZone,
+               void(const PTString& dev_id, const SeatLocation& zone));
+  MOCK_CONST_METHOD2(GetDeviceZone,
+                     bool(const PTString& dev_id, SeatLocation* zone));
+  MOCK_METHOD1(SetRemoteControl, void(bool enabled));
+  MOCK_CONST_METHOD0(GetRemoteControl, bool());
+  MOCK_METHOD2(OnChangedPrimaryDevice,
+               void(const std::string& device_id,
+                    const std::string& application_id));
+  MOCK_METHOD2(OnChangedRemoteControl,
+               void(const std::string& device_id,
+                    const std::string& application_id));
+  MOCK_METHOD2(OnChangedDeviceZone,
+               void(const std::string& device_id,
+                    const std::string& application_id));
+  MOCK_METHOD2(SendAppPermissionsChanged,
+               void(const std::string& device_id,
+                    const std::string& application_id));
+  MOCK_CONST_METHOD2(GetModuleTypes,
+                     bool(const std::string& policy_app_id,
+                          std::vector<std::string>* modules));
+  MOCK_METHOD1(set_access_remote,
+               void(utils::SharedPtr<AccessRemote> access_remote));
+#endif  // SDL_REMOTE_CONTROL
   MOCK_METHOD0(CleanupUnpairedDevices, bool());
   MOCK_CONST_METHOD1(CanAppKeepContext, bool(const std::string& app_id));
   MOCK_CONST_METHOD1(CanAppStealFocus, bool(const std::string& app_id));

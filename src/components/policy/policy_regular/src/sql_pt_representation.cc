@@ -51,6 +51,8 @@ namespace policy {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "Policy")
 
+namespace dbms = utils::dbms;
+
 namespace {
 template <typename T, typename K>
 void InsertUnique(K value, T* array) {
@@ -526,6 +528,12 @@ void SQLPTRepresentation::GatherModuleConfig(
     *config->vehicle_model = query.GetString(7);
     *config->vehicle_year = query.GetString(8);
     *config->preloaded_date = query.GetString(9);
+#ifdef SDL_REMOTE_CONTROL
+    *config->user_consent_passengersRC =
+        query.IsNull(8) ? true : query.GetBoolean(8);
+    *config->country_consent_passengersRC =
+        query.IsNull(9) ? true : query.GetBoolean(9);
+#endif  // SDL_REMOTE_CONTROL
   }
 
   utils::dbms::SQLQuery endpoints(db());
@@ -558,6 +566,12 @@ void SQLPTRepresentation::GatherModuleConfig(
       config->seconds_between_retries.push_back(seconds.GetInteger(0));
     }
   }
+
+#ifdef SDL_REMOTE_CONTROL
+  if (!GatherEquipment(&*config->equipment)) {
+    LOG4CXX_WARN(logger_, "Couldn't gather equipment");
+  }
+#endif  // SDL_REMOTE_CONTROL
 }
 
 bool SQLPTRepresentation::GatherUsageAndErrorCounts(
@@ -705,6 +719,24 @@ bool SQLPTRepresentation::GatherApplicationPoliciesSection(
     if (!GatherAppGroup(app_id, &params.groups)) {
       return false;
     }
+#ifdef SDL_REMOTE_CONTROL
+    if (!GatherAppGroupPrimary(app_id, &*params.groups_primaryRC)) {
+      return false;
+    }
+    if (!GatherAppGroupNonPrimary(app_id, &*params.groups_nonPrimaryRC)) {
+      return false;
+    }
+    bool denied = false;
+    if (!GatherRemoteControlDenied(app_id, &denied)) {
+      return false;
+    }
+    if (!denied) {
+      if (!GatherModuleType(app_id, &*params.moduleType)) {
+        return false;
+      }
+    }
+#endif  // SDL_REMOTE_CONTROL
+    // TODO(IKozyrenko): Check logic if optional container is missing
     if (!GatherNickName(app_id, &*params.nicknames)) {
       return false;
     }
@@ -859,6 +891,20 @@ bool SQLPTRepresentation::SaveApplicationPoliciesSection(
     LOG4CXX_WARN(logger_, "Incorrect delete from app_group.");
     return false;
   }
+#ifdef SDL_REMOTE_CONTROL
+  if (!query_delete.Exec(sql_pt::kDeleteAppGroupPrimary)) {
+    LOG4CXX_WARN(logger_, "Incorrect delete from app_group_primary.");
+    return false;
+  }
+  if (!query_delete.Exec(sql_pt::kDeleteAppGroupNonPrimary)) {
+    LOG4CXX_WARN(logger_, "Incorrect delete from app_group_non_primary.");
+    return false;
+  }
+  if (!query_delete.Exec(sql_pt::kDeleteModuleTypes)) {
+    LOG4CXX_WARN(logger_, "Incorrect delete from module_type.");
+    return false;
+  }
+#endif  // SDL_REMOTE_CONTROL
   if (!query_delete.Exec(sql_pt::kDeleteApplication)) {
     LOG4CXX_WARN(logger_, "Incorrect delete from application.");
     return false;
@@ -886,7 +932,20 @@ bool SQLPTRepresentation::SaveApplicationPoliciesSection(
       return false;
     }
   }
-
+  policy_table::ApplicationPolicies::const_iterator it_pre_consent_passengerRC =
+      policies.apps.find(kPreConsentPassengersRC);
+  if (policies.apps.end() != it_pre_consent_passengerRC) {
+    if (!SaveSpecificAppPolicy(*it_pre_consent_passengerRC)) {
+      return false;
+    }
+  }
+  policy_table::ApplicationPolicies::const_iterator it_device =
+      policies.apps.find(kDeviceId);
+  if (policies.apps.end() != it_device) {
+    if (!SaveSpecificAppPolicy(*it_device)) {
+      return false;
+    }
+  }
   if (!SaveDevicePolicy(policies.device)) {
     return false;
   }
@@ -938,9 +997,26 @@ bool SQLPTRepresentation::SaveSpecificAppPolicy(
     }
   }
 
+  LOG4CXX_DEBUG(logger_, "App: " << app.first);
+
   if (!SaveAppGroup(app.first, app.second.groups)) {
     return false;
   }
+#ifdef SDL_REMOTE_CONTROL
+  if (!SaveAppGroupPrimary(app.first, *app.second.groups_primaryRC)) {
+    return false;
+  }
+  if (!SaveAppGroupNonPrimary(app.first, *app.second.groups_nonPrimaryRC)) {
+    return false;
+  }
+
+  bool denied = !app.second.moduleType->is_initialized();
+  if (!SaveRemoteControlDenied(app.first, denied) ||
+      !SaveModuleType(app.first, *app.second.moduleType)) {
+    return false;
+  }
+#endif  // SDL_REMOTE_CONTROL
+  // TODO(IKozyrenko): Check logic if optional container is missing
   if (!SaveNickname(app.first, *app.second.nicknames)) {
     return false;
   }
@@ -1090,7 +1166,8 @@ bool SQLPTRepresentation::SaveModuleMeta(const policy_table::ModuleMeta& meta) {
 
 bool SQLPTRepresentation::SaveModuleConfig(
     const policy_table::ModuleConfig& config) {
-  utils::dbms::SQLQuery query(db());
+  LOG4CXX_AUTO_TRACE(logger_);
+  dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt::kUpdateModuleConfig)) {
     LOG4CXX_WARN(logger_, "Incorrect update statement for module config");
     return false;
@@ -1111,7 +1188,14 @@ bool SQLPTRepresentation::SaveModuleConfig(
                                         : query.Bind(7);
   config.vehicle_year.is_initialized() ? query.Bind(8, *(config.vehicle_year))
                                        : query.Bind(8);
-
+#ifdef SDL_REMOTE_CONTROL
+  config.user_consent_passengersRC.is_initialized()
+      ? query.Bind(9, *(config.user_consent_passengersRC))
+      : query.Bind(9);
+  config.country_consent_passengersRC.is_initialized()
+      ? query.Bind(10, *(config.country_consent_passengersRC))
+      : query.Bind(10);
+#endif  // SDL_REMOTE_CONTROL
   if (!query.Exec()) {
     LOG4CXX_WARN(logger_, "Incorrect update module config");
     return false;
@@ -1129,6 +1213,12 @@ bool SQLPTRepresentation::SaveModuleConfig(
   if (!SaveServiceEndpoints(config.endpoints)) {
     return false;
   }
+
+#ifdef SDL_REMOTE_CONTROL
+  if (!SaveEquipment(*config.equipment)) {
+    return false;
+  }
+#endif  // SDL_REMOTE_CONTROL
 
   return true;
 }
@@ -1318,7 +1408,12 @@ bool SQLPTRepresentation::SaveNumberOfNotificationsPerMinute(
 
 bool SQLPTRepresentation::SaveDeviceData(
     const policy_table::DeviceData& devices) {
-  utils::dbms::SQLQuery query(db());
+  LOG4CXX_AUTO_TRACE(logger_);
+  dbms::SQLQuery query(db());
+  if (!query.Exec(sql_pt::kDeleteAllDevices)) {
+    LOG4CXX_WARN(logger_, "Could not clear device table.");
+    return false;
+  }
   if (!query.Prepare(sql_pt::kInsertDeviceData)) {
     LOG4CXX_WARN(logger_, "Incorrect insert statement for device data.");
     return false;
@@ -1326,7 +1421,9 @@ bool SQLPTRepresentation::SaveDeviceData(
 
   policy_table::DeviceData::const_iterator it;
   for (it = devices.begin(); it != devices.end(); ++it) {
-    query.Bind(0, it->first);
+    const std::string& device = it->first;
+
+    query.Bind(0, device);
     if (!query.Exec() || !query.Reset()) {
       LOG4CXX_WARN(logger_, "Incorrect insert into device data.");
       return false;
@@ -1418,6 +1515,12 @@ bool SQLPTRepresentation::GetInitialAppData(const std::string& app_id,
     LOG4CXX_WARN(logger_, "Incorrect select from app types");
     return false;
   }
+  dbms::SQLQuery module_types(db());
+  if (!module_types.Prepare(sql_pt::kSelectModuleTypes)) {
+    LOG4CXX_WARN(logger_, "Incorrect select from module types");
+    return false;
+  }
+
   app_names.Bind(0, app_id);
   while (app_names.Next()) {
     nicknames->push_back(app_names.GetString(0));
@@ -1428,6 +1531,12 @@ bool SQLPTRepresentation::GetInitialAppData(const std::string& app_id,
     app_types->push_back(app_hmi_types.GetString(0));
   }
   app_hmi_types.Reset();
+  module_types.Bind(0, app_id);
+  while (module_types.Next()) {
+    app_types->push_back(module_types.GetString(0));
+  }
+  module_types.Reset();
+
   return true;
 }
 
@@ -1506,6 +1615,378 @@ bool SQLPTRepresentation::GatherAppGroup(
   return true;
 }
 
+#ifdef SDL_REMOTE_CONTROL
+bool SQLPTRepresentation::GatherAppGroupPrimary(
+    const std::string& app_id, policy_table::Strings* app_groups) const {
+  dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kSelectAppGroupsPrimary)) {
+    LOG4CXX_WARN(logger_, "Incorrect select from app groups for primary RC");
+    return false;
+  }
+
+  query.Bind(0, app_id);
+  while (query.Next()) {
+    app_groups->push_back(query.GetString(0));
+  }
+  return true;
+}
+
+bool SQLPTRepresentation::GatherAppGroupNonPrimary(
+    const std::string& app_id, policy_table::Strings* app_groups) const {
+  dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kSelectAppGroupsNonPrimary)) {
+    LOG4CXX_WARN(logger_,
+                 "Incorrect select from app groups for non primary RC");
+    return false;
+  }
+
+  query.Bind(0, app_id);
+  while (query.Next()) {
+    app_groups->push_back(query.GetString(0));
+  }
+  return true;
+}
+
+bool SQLPTRepresentation::GatherRemoteControlDenied(const std::string& app_id,
+                                                    bool* denied) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kSelectRemoteControlDenied)) {
+    LOG4CXX_WARN(logger_, "Incorrect select remote control flag");
+    return false;
+  }
+  query.Bind(0, app_id);
+  if (query.Next()) {
+    *denied = query.GetBoolean(0);
+  } else {
+    return false;
+  }
+  return true;
+}
+
+bool SQLPTRepresentation::GatherModuleType(
+    const std::string& app_id, policy_table::ModuleTypes* app_types) const {
+  dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kSelectModuleTypes)) {
+    LOG4CXX_WARN(logger_, "Incorrect select from app types");
+    return false;
+  }
+
+  query.Bind(0, app_id);
+  while (query.Next()) {
+    policy_table::ModuleType type;
+    if (!policy_table::EnumFromJsonString(query.GetString(0), &type)) {
+      return false;
+    }
+    app_types->push_back(type);
+  }
+  return true;
+}
+
+bool SQLPTRepresentation::SaveAppGroupPrimary(
+    const std::string& app_id, const policy_table::Strings& app_groups) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kInsertAppGroupPrimary)) {
+    LOG4CXX_WARN(logger_, "Incorrect insert statement for app group primary");
+    return false;
+  }
+  policy_table::Strings::const_iterator it;
+  for (it = app_groups.begin(); it != app_groups.end(); ++it) {
+    std::string ssss = *it;
+    LOG4CXX_INFO(logger_, "Group: " << ssss);
+    query.Bind(0, app_id);
+    query.Bind(1, *it);
+    if (!query.Exec() || !query.Reset()) {
+      LOG4CXX_WARN(logger_,
+                   "Incorrect insert into app group primary."
+                       << query.LastError().text());
+      return false;
+    }
+  }
+
+  return true;
+}
+
+bool SQLPTRepresentation::SaveAppGroupNonPrimary(
+    const std::string& app_id, const policy_table::Strings& app_groups) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kInsertAppGroupNonPrimary)) {
+    LOG4CXX_WARN(logger_,
+                 "Incorrect insert statement for app group non primary");
+    return false;
+  }
+  policy_table::Strings::const_iterator it;
+  for (it = app_groups.begin(); it != app_groups.end(); ++it) {
+    std::string ssss = *it;
+    LOG4CXX_INFO(logger_, "Group: " << ssss);
+    query.Bind(0, app_id);
+    query.Bind(1, *it);
+    if (!query.Exec() || !query.Reset()) {
+      LOG4CXX_WARN(logger_,
+                   "Incorrect insert into app group non primary."
+                       << query.LastError().text());
+      return false;
+    }
+  }
+
+  return true;
+}
+
+bool SQLPTRepresentation::SaveRemoteControlDenied(const std::string& app_id,
+                                                  bool deny) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kUpdateRemoteControlDenied)) {
+    LOG4CXX_WARN(logger_, "Incorrect update statement for remote control flag");
+    return false;
+  }
+  LOG4CXX_DEBUG(logger_, "App: " << app_id << std::boolalpha << " - " << deny);
+  query.Bind(0, deny);
+  query.Bind(1, app_id);
+  if (!query.Exec()) {
+    LOG4CXX_WARN(logger_, "Incorrect update remote control flag.");
+    return false;
+  }
+  return true;
+}
+
+bool SQLPTRepresentation::SaveModuleType(
+    const std::string& app_id, const policy_table::ModuleTypes& types) {
+  dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kInsertModuleType)) {
+    LOG4CXX_WARN(logger_, "Incorrect insert statement for module type");
+    return false;
+  }
+
+  policy_table::ModuleTypes::const_iterator it;
+  for (it = types.begin(); it != types.end(); ++it) {
+    query.Bind(0, app_id);
+    std::string module(policy_table::EnumToJsonString(*it));
+    query.Bind(1, module);
+    LOG4CXX_DEBUG(logger_,
+                  "Module(app: " << app_id << ", type: " << module << ")");
+    if (!query.Exec() || !query.Reset()) {
+      LOG4CXX_WARN(logger_, "Incorrect insert into module type.");
+      return false;
+    }
+  }
+
+  return true;
+}
+
+bool SQLPTRepresentation::SaveEquipment(
+    const policy_table::Equipment& equipment) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_DEBUG(logger_,
+                "PRELOADED: " << equipment.ToJsonValue().toStyledString());
+  dbms::SQLQuery is_empty(db());
+  if (!is_empty.Prepare(sql_pt::kCountInteriorZones)) {
+    LOG4CXX_WARN(logger_, "Incorrect statement for count interior zones");
+    return false;
+  }
+  if (!is_empty.Exec()) {
+    LOG4CXX_WARN(logger_, "Couldn't count interior zones");
+    return false;
+  }
+  if (is_empty.GetInteger(0) > 0) {
+    LOG4CXX_WARN(logger_, "Equipment exists into database");
+    dbms::SQLQuery query_delete(db());
+    if (!query_delete.Exec(sql_pt::kDeleteInteriorZones)) {
+      LOG4CXX_WARN(logger_, "Incorrect delete from interior zones.");
+      return false;
+    }
+    if (!query_delete.Exec(sql_pt::kDeleteAccessModules)) {
+      LOG4CXX_WARN(logger_, "Incorrect delete from access modules.");
+      return false;
+    }
+    if (!query_delete.Exec(sql_pt::kDeleteRemoteRpc)) {
+      LOG4CXX_WARN(logger_, "Incorrect delete from remote rpcs.");
+      return false;
+    }
+  }
+
+  dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kInsertInteriorZone)) {
+    LOG4CXX_WARN(logger_, "Incorrect insert statement for interior zone");
+    return false;
+  }
+
+  policy_table::Zones::const_iterator i;
+  for (i = equipment.zones.begin(); i != equipment.zones.end(); ++i) {
+    const std::string& name = i->first;
+    const policy_table::InteriorZone& zone = i->second;
+    query.Bind(0, name);
+    query.Bind(1, zone.col);
+    query.Bind(2, zone.row);
+    query.Bind(3, zone.level);
+    if (!query.Exec()) {
+      LOG4CXX_WARN(logger_, "Incorrect insert into interior zone.");
+      return false;
+    }
+    int id = query.LastInsertId();
+    if (!query.Reset()) {
+      LOG4CXX_WARN(logger_, "Couldn't reset query interior zone.");
+      return false;
+      ;
+    }
+    if (!SaveAccessModule(id, kAllowed, zone.auto_allow)) {
+      return false;
+    }
+    if (!SaveAccessModule(id, kManual, zone.driver_allow)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool SQLPTRepresentation::GatherEquipment(
+    policy_table::Equipment* equipment) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kSelectInteriorZones)) {
+    LOG4CXX_WARN(logger_, "Incorrect select from interior zone");
+    return false;
+  }
+
+  while (query.Next()) {
+    policy_table::InteriorZone zone;
+    int id = query.GetInteger(0);
+    std::string name = query.GetString(1);
+    zone.col = query.GetInteger(2);
+    zone.row = query.GetInteger(3);
+    zone.level = query.GetInteger(4);
+    if (!GatherAccessModule(id, kAllowed, &zone.auto_allow)) {
+      return false;
+    }
+    if (!GatherAccessModule(id, kManual, &zone.driver_allow)) {
+      return false;
+    }
+    equipment->zones[name] = zone;
+  }
+  return true;
+}
+
+bool SQLPTRepresentation::SaveAccessModule(
+    int zone_id,
+    TypeAccess access,
+    const policy_table::AccessModules& modules) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kInsertAccessModule)) {
+    LOG4CXX_WARN(logger_, "Incorrect insert statement for access module");
+    return false;
+  }
+
+  policy_table::AccessModules::const_iterator i;
+  for (i = modules.begin(); i != modules.end(); ++i) {
+    const std::string& name = i->first;
+    const policy_table::RemoteRpcs& rpcs = i->second;
+    query.Bind(0, name);
+    query.Bind(1, zone_id);
+    query.Bind(2, access);
+    if (!query.Exec()) {
+      LOG4CXX_WARN(logger_, "Incorrect insert into access module.");
+      return false;
+    }
+    int id = query.LastInsertId();
+    if (!query.Reset()) {
+      LOG4CXX_WARN(logger_, "Couldn't reset query access module.");
+      return false;
+    }
+    if (!SaveRemoteRpc(id, rpcs)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool SQLPTRepresentation::GatherAccessModule(
+    int zone_id,
+    TypeAccess access,
+    policy_table::AccessModules* modules) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kSelectAccessModules)) {
+    LOG4CXX_WARN(logger_, "Incorrect select from access module");
+    return false;
+  }
+
+  query.Bind(0, zone_id);
+  query.Bind(1, access);
+  while (query.Next()) {
+    int id = query.GetInteger(0);
+    std::string name = query.GetString(1);
+    policy_table::RemoteRpcs rpcs;
+    if (!GatherRemoteRpc(id, &rpcs)) {
+      return false;
+    }
+    modules->insert(std::make_pair(name, rpcs));
+  }
+  return true;
+}
+
+bool SQLPTRepresentation::SaveRemoteRpc(int module_id,
+                                        const policy_table::RemoteRpcs& rpcs) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kInsertRemoteRpc)) {
+    LOG4CXX_WARN(logger_, "Incorrect insert statement for remote rpc");
+    return false;
+  }
+  policy_table::RemoteRpcs::const_iterator i;
+  for (i = rpcs.begin(); i != rpcs.end(); ++i) {
+    const std::string& name = i->first;
+    const policy_table::Strings& params = i->second;
+    policy_table::Strings::const_iterator j;
+    if (params.empty()) {
+      query.Bind(0, module_id);
+      query.Bind(1, name);
+      query.Bind(2);
+      if (!query.Exec() || !query.Reset()) {
+        LOG4CXX_WARN(logger_, "Incorrect insert into remote rpc.");
+        return false;
+      }
+    } else {
+      for (j = params.begin(); j != params.end(); ++j) {
+        const std::string& param = *j;
+        query.Bind(0, module_id);
+        query.Bind(1, name);
+        query.Bind(2, param);
+        if (!query.Exec() || !query.Reset()) {
+          LOG4CXX_WARN(logger_, "Incorrect insert into remote rpc.");
+          return false;
+        }
+      }
+    }
+  }
+  return true;
+}
+
+bool SQLPTRepresentation::GatherRemoteRpc(
+    int module_id, policy_table::RemoteRpcs* rpcs) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kSelectRemoteRpcs)) {
+    LOG4CXX_WARN(logger_, "Incorrect select from remote rpc");
+    return false;
+  }
+
+  query.Bind(0, module_id);
+  while (query.Next()) {
+    std::string name = query.GetString(0);
+    if (!query.IsNull(1)) {
+      std::string parameter = query.GetString(1);
+      (*rpcs)[name].push_back(parameter);
+    } else {
+      rpcs->insert(std::make_pair(name, policy_table::Strings()));
+    }
+  }
+  return true;
+}
+#endif  // SDL_REMOTE_CONTROL
+
 bool SQLPTRepresentation::SaveApplicationCustomData(const std::string& app_id,
                                                     bool is_revoked,
                                                     bool is_default,
@@ -1580,7 +2061,8 @@ bool SQLPTRepresentation::IsPredataPolicy(const std::string& app_id) const {
 }
 
 bool SQLPTRepresentation::SetDefaultPolicy(const std::string& app_id) {
-  utils::dbms::SQLQuery query(db());
+  LOG4CXX_AUTO_TRACE(logger_);
+  dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt::kDeleteAppGroupByApplicationId)) {
     LOG4CXX_ERROR(logger_, "Incorrect statement to delete from app_group.");
     return false;
@@ -1590,6 +2072,31 @@ bool SQLPTRepresentation::SetDefaultPolicy(const std::string& app_id) {
     LOG4CXX_ERROR(logger_, "Failed deleting from app_group.");
     return false;
   }
+#ifdef SDL_REMOTE_CONTROL
+  dbms::SQLQuery query_p(db());
+  if (!query_p.Prepare(sql_pt::kDeleteAppGroupPrimaryByApplicationId)) {
+    LOG4CXX_ERROR(logger_,
+                  "Incorrect statement to delete from app_group_primary.");
+    return false;
+  }
+  query_p.Bind(0, app_id);
+  if (!query_p.Exec()) {
+    LOG4CXX_ERROR(logger_, "Failed deleting from app_group_primary.");
+    return false;
+  }
+
+  dbms::SQLQuery query_np(db());
+  if (!query_np.Prepare(sql_pt::kDeleteAppGroupNonPrimaryByApplicationId)) {
+    LOG4CXX_ERROR(logger_,
+                  "Incorrect statement to delete from app_group_non_primary.");
+    return false;
+  }
+  query_np.Bind(0, app_id);
+  if (!query_np.Exec()) {
+    LOG4CXX_ERROR(logger_, "Failed deleting from app_group_non_primary.");
+    return false;
+  }
+#endif  // SDL_REMOTE_CONTROL
 
   if (!CopyApplication(kDefaultId, app_id)) {
     return false;
@@ -1597,11 +2104,6 @@ bool SQLPTRepresentation::SetDefaultPolicy(const std::string& app_id) {
 
   SetPreloaded(false);
 
-  policy_table::Strings default_groups;
-  if (!GatherAppGroup(kDefaultId, &default_groups) ||
-      !SaveAppGroup(app_id, default_groups)) {
-    return false;
-  }
   policy_table::RequestTypes request_types;
   if (!GatherRequestType(kDefaultId, &request_types) ||
       !SaveRequestType(app_id, request_types)) {
@@ -1612,7 +2114,23 @@ bool SQLPTRepresentation::SetDefaultPolicy(const std::string& app_id) {
       !SaveAppType(app_id, app_types)) {
     return false;
   }
-  return SetIsDefault(app_id, true);
+
+  policy_table::Strings default_groups;
+  bool ret = (GatherAppGroup(kDefaultId, &default_groups) &&
+              SaveAppGroup(app_id, default_groups));
+#ifdef SDL_REMOTE_CONTROL
+  policy_table::Strings groups_primary;
+  ret = ret && (GatherAppGroupPrimary(kDefaultId, &groups_primary) &&
+                SaveAppGroupPrimary(app_id, groups_primary));
+  policy_table::Strings groups_non_primary;
+  ret = ret && (GatherAppGroupNonPrimary(kDefaultId, &groups_non_primary) &&
+                SaveAppGroupNonPrimary(app_id, groups_non_primary));
+#endif  // SDL_REMOTE_CONTROL
+
+  if (ret) {
+    return SetIsDefault(app_id, true);
+  }
+  return false;
 }
 
 bool SQLPTRepresentation::SetIsDefault(const std::string& app_id,

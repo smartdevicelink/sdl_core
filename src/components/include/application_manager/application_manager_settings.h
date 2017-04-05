@@ -93,6 +93,11 @@ class ApplicationManagerSettings : public RequestControlerSettings,
   virtual const uint32_t& app_icons_folder_max_size() const = 0;
   virtual const uint32_t& app_icons_amount_to_remove() const = 0;
   virtual const uint32_t& list_files_response_size() const = 0;
+
+  /**
+   * @brief Returns folder containing all plugins
+   */
+  virtual const std::string& plugins_folder() const = 0;
 };
 
 }  // namespace application_manager

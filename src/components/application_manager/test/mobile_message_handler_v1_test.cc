@@ -51,7 +51,7 @@ namespace test {
 namespace components {
 namespace application_manager_test {
 
-const int32_t connection_key_p1 = 1;
+const uint32_t connection_key_p1 = 1;
 const int32_t protocol_version_1 = 1;
 
 const std::string data_json(

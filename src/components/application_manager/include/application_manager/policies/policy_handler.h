@@ -65,6 +65,7 @@ class ApplicationManager;
 }
 
 namespace policy {
+
 typedef std::vector<uint32_t> AppIds;
 typedef std::vector<uint32_t> DeviceHandles;
 namespace custom_str = utils::custom_string;
@@ -102,15 +103,172 @@ class PolicyHandler : public PolicyHandlerInterface,
 #endif  // EXTERNAL_PROPRIETARY_MODE
   virtual bool GetPriority(const std::string& policy_app_id,
                            std::string* priority) const OVERRIDE;
-  void CheckPermissions(const PTString& app_id,
-                        const PTString& hmi_level,
-                        const PTString& rpc,
-                        const RPCParams& rpc_params,
-                        CheckPermissionResult& result) OVERRIDE;
+  virtual void CheckPermissions(
+      const application_manager::ApplicationSharedPtr app,
+      const PTString& rpc,
+      const RPCParams& rpc_params,
+      CheckPermissionResult& result) OVERRIDE;
 
   uint32_t GetNotificationsNumber(const std::string& priority) const OVERRIDE;
   virtual DeviceConsent GetUserConsentForDevice(
       const std::string& device_id) const OVERRIDE;
+#ifdef SDL_REMOTE_CONTROL
+  /**
+   * Checks access to equipment of vehicle for application by RPC
+   * @param device_id unique identifier of device
+   * @param app_id policy id application
+   * @param zone interior zone
+   * @param module type
+   * @param rpc name of rpc
+   * @param params parameters list
+   */
+  application_manager::TypeAccess CheckAccess(
+      const PTString& device_id,
+      const PTString& app_id,
+      const application_manager::SeatLocation& zone,
+      const PTString& module,
+      const std::string& rpc,
+      const std::vector<PTString>& params);
+
+  /**
+   * Checks access to module for application
+   * @param app_id policy id application
+   * @param module
+   * @return true if module is allowed for application
+   */
+  bool CheckModule(const PTString& app_id, const PTString& module);
+
+  /**
+   * Sets access to equipment of vehicle for application by RPC
+   * @param device_id unique identifier of device
+   * @param app_id policy id application
+   * @param zone interior zone
+   * @param module type
+   * @param allowed true if access is allowed
+   */
+  void SetAccess(const PTString& device_id,
+                 const PTString& app_id,
+                 const application_manager::SeatLocation& zone,
+                 const PTString& module,
+                 bool allowed);
+
+  /**
+   * Resets access application to all resources
+   * @param device_id unique identifier of device
+   * @param app_id policy id application
+   */
+  void ResetAccess(const PTString& device_id, const PTString& app_id);
+
+  /**
+   * Resets access by group name for all applications
+   * @param zone interior zone
+   * @param module type
+   */
+  void ResetAccess(const application_manager::SeatLocation& zone,
+                   const std::string& module);
+
+  /**
+   * Sets device as primary device
+   * @param dev_id ID device
+   */
+  void SetPrimaryDevice(const PTString& dev_id);
+
+  /**
+   * Resets driver's device
+   */
+  void ResetPrimaryDevice();
+
+  /*
+   * Return id of primary device
+   */
+  uint32_t PrimaryDevice() const;
+
+  /**
+   * Sets device zone
+   * @param device_id unique identifier of device
+   * @param zone device zone
+   */
+  void SetDeviceZone(const std::string& device_id,
+                     const application_manager::SeatLocation& zone);
+
+  /**
+   * Gets device zone
+   * @param dev_id ID device
+   * @return device zone is unknown otherwise 0
+   */
+  const application_manager::SeatLocationPtr GetDeviceZone(
+      const std::string& device_id) const;
+
+  /**
+   * Sets mode of remote control (on/off)
+   * @param enabled true if remote control is turned on
+   */
+  void SetRemoteControl(bool enabled);
+
+  /*
+   * @brief If remote control is enabled
+   * by User and by Policy
+   */
+  bool GetRemoteControl() const;
+
+  /*
+   * @brief Notifies passengers' apps about change
+   * @param new_consent New value of remote permission
+   */
+  void OnRemoteAllowedChanged(bool new_consent);
+
+  /*
+   * @brief Notifies Remote apps about change in permissions
+   * @param device_id Device on which app is running
+   * @param application_id ID of app whose permissions are changed
+   */
+  void OnRemoteAppPermissionsChanged(const std::string& device_id,
+                                     const std::string& application_id);
+
+  virtual void OnUpdateHMIStatus(const std::string& device_id,
+                                 const std::string& policy_app_id,
+                                 const std::string& hmi_level);
+
+  virtual void OnUpdateHMIStatus(const std::string& device_id,
+                                 const std::string& policy_app_id,
+                                 const std::string& hmi_level,
+                                 const std::string& device_rank);
+
+  /**
+   * Gets all allowed module types
+   * @param app_id unique identifier of application
+   * @param list of allowed module types
+   * @return true if application has allowed modules
+   */
+  bool GetModuleTypes(const std::string& policy_app_id,
+                      std::vector<std::string>* modules) const;
+
+  /**
+   * @brief Update currently used device id in policies manager for given
+   * application
+   * @param policy_app_id Application id
+   * @deprecated see
+   */
+  std::vector<std::string> GetDevicesIds(const std::string&) OVERRIDE;
+  virtual void OnUpdateHMILevel(const std::string& device_id,
+                                const std::string& policy_app_id,
+                                const std::string& hmi_level) OVERRIDE;
+
+  void SetDefaultHmiTypes(const std::string& application_id,
+                          const smart_objects::SmartObject* app_types) OVERRIDE;
+
+  /**
+     * Checks if application has HMI type
+     * @param application_id ID application
+     * @param hmi HMI type to check
+     * @param app_types additional list of HMI type to search in it
+     * @return true if hmi is contained in policy or app_types
+     */
+  bool CheckHMIType(const std::string& application_id,
+                    mobile_apis::AppHMIType::eType hmi,
+                    const smart_objects::SmartObject* app_types);
+#endif  // SDL_REMOTE_CONTROL
+
   bool GetDefaultHmi(const std::string& policy_app_id,
                      std::string* default_hmi) const OVERRIDE;
   bool GetInitialAppData(const std::string& application_id,
@@ -236,11 +394,6 @@ class PolicyHandler : public PolicyHandlerInterface,
    */
   void OnUpdateStatusChanged(const std::string& status) OVERRIDE;
 
-  /**
-   * @brief Update currently used device id in policies manager for given
-   * application
-   * @param policy_app_id Application id
-   */
   std::string OnCurrentDeviceIdUpdateRequired(
       const std::string& policy_app_id) OVERRIDE;
 
@@ -329,8 +482,10 @@ class PolicyHandler : public PolicyHandlerInterface,
   /**
    * @brief Allows to add new or update existed application during
    * registration process
+   * @param device_id unique identifier of device
    * @param application_id The policy aplication id.
-   ** @return function that will notify update manager about new application
+   * @param app_types list of hmi types
+   * @return function that will notify update manager about new application
    */
   StatusNotifier AddApplication(const std::string& application_id) OVERRIDE;
 
@@ -425,6 +580,11 @@ class PolicyHandler : public PolicyHandlerInterface,
   void SetPolicyManager(utils::SharedPtr<PolicyManager> pm) {
     policy_manager_ = pm;
   }
+
+  AppIds& last_used_app_ids() {
+    return last_used_app_ids_;
+  }
+
 #endif  // BUILD_TESTS
 
 #ifdef ENABLE_SECURITY
@@ -470,9 +630,13 @@ class PolicyHandler : public PolicyHandlerInterface,
   void OnAppPermissionConsentInternal(const uint32_t connection_key,
                                       PermissionConsent& permissions) OVERRIDE;
 
-  /**
-   * @brief Sets days after epoch on successful policy update
-   */
+#ifdef SDL_REMOTE_CONTROL
+  void UpdateHMILevel(application_manager::ApplicationSharedPtr app,
+                      mobile_apis::HMILevel::eType level);
+#endif  // SDL_REMOTE_CONTROL
+        /**
+         * @brief Sets days after epoch on successful policy update
+         */
   void SetDaysAfterEpoch();
 
   /**

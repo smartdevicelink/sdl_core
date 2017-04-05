@@ -34,9 +34,6 @@ include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 # TODO{ALeshin}: APPLINK-10792. Do not write tests which use
 # application manager(AM) singleton while refactoring of AM is finished.
 
-# TODO{ILytvynenko}: SDLOPEN-797 Uncomment application_manager_impl_test and
-# cover with UT missed files.
-
 include_directories(
   ${GMOCK_INCLUDE_DIRECTORY}
   ${CMAKE_BINARY_DIR}/src/components/
@@ -53,6 +50,8 @@ include_directories(
   ${COMPONENTS_DIR}/application_manager/test/include/
 )
 
+# TODO{ILytvynenko}: SDLOPEN-797 Uncomment application_manager_impl_test and
+# cover with UT missed files.
 set(testSources
   ${AM_TEST_DIR}/mock_message_helper.cc
   ${AM_TEST_DIR}/mobile_message_handler_test.cc
@@ -69,11 +68,10 @@ set(testSources
   ${AM_TEST_DIR}/policy_handler_test.cc
   ${AM_TEST_DIR}/mock_message_helper.cc
  #${AM_TEST_DIR}/application_manager_impl_test.cc
-
 )
 
 set (RequestController_SOURCES
-  ${AM_TEST_DIR}/request_controller/request_controller_test.cc
+  #${AM_TEST_DIR}/request_controller/request_controller_test.cc
   ${AM_TEST_DIR}/mock_message_helper.cc
 )
 

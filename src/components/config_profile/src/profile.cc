@@ -137,6 +137,7 @@ const char* kTimeoutPromptKey = "TimeOutPromt";
 const char* kHelpTitleKey = "HelpTitle";
 const char* kHelpCommandKey = "HelpCommand";
 const char* kSystemFilesPathKey = "SystemFilesPath";
+const char* kPluginsFolderKey = "PluginFolder";
 const char* kHeartBeatTimeoutKey = "HeartBeatTimeout";
 const char* kMaxSupportedProtocolVersionKey = "MaxSupportedProtocolVersion";
 const char* kUseLastStateKey = "UseLastState";
@@ -215,6 +216,7 @@ const char* kDefaultPreloadedPTFileName = "sdl_preloaded_pt.json";
 const char* kDefaultServerAddress = "127.0.0.1";
 const char* kDefaultAppInfoFileName = "app_info.dat";
 const char* kDefaultSystemFilesPath = "/tmp/fs/mp/images/ivsu_cache";
+const char* kDefaultPluginsPath = "plugins";
 const char* kDefaultTtsDelimiter = ",";
 const uint32_t kDefaultAudioDataStoppedTimeout = 1000;
 const uint32_t kDefaultVideoDataStoppedTimeout = 1000;
@@ -507,7 +509,7 @@ const uint16_t& Profile::time_testing_port() const {
   return time_testing_port_;
 }
 
-const uint64_t& Profile::thread_min_stack_size() const {
+const uint64_t Profile::thread_min_stack_size() const {
   return min_tread_stack_size_;
 }
 
@@ -627,6 +629,9 @@ const std::string& Profile::system_files_path() const {
   return system_files_path_;
 }
 
+const std::string& Profile::plugins_folder() const {
+  return plugins_folder_;
+}
 const std::vector<uint32_t>& Profile::supported_diag_modes() const {
   return supported_diag_modes_;
 }
@@ -964,6 +969,8 @@ void Profile::UpdateValues() {
   ReadBoolValue(&logs_enabled_, false, kMainSection, kLogsEnabledKey);
 
   LOG_UPDATED_BOOL_VALUE(logs_enabled_, kLogsEnabledKey, kMainSection);
+
+  logs_enabled_ = true;
 
   // Application config folder
   ReadStringValue(&app_config_folder_,
@@ -1500,6 +1507,10 @@ void Profile::UpdateValues() {
 
   LOG_UPDATED_VALUE(system_files_path_, kSystemFilesPathKey, kMainSection);
 
+  // Plugins folder
+  ReadStringValue(
+      &plugins_folder_, kDefaultPluginsPath, kMainSection, kPluginsFolderKey);
+  LOG_UPDATED_VALUE(plugins_folder_, kPluginsFolderKey, kMainSection);
   // Heartbeat timeout
   ReadUIntValue(&heart_beat_timeout_,
                 kDefaultHeartBeatTimeout,

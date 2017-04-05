@@ -70,8 +70,6 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                void(connection_handler::ConnectionHandler* handler));
   MOCK_CONST_METHOD0(applications,
                      DataAccessor<application_manager::ApplicationSet>());
-  MOCK_CONST_METHOD1(
-      application, application_manager::ApplicationSharedPtr(uint32_t app_id));
   MOCK_CONST_METHOD0(active_application,
                      application_manager::ApplicationSharedPtr());
   MOCK_CONST_METHOD1(
@@ -132,6 +130,7 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                      connection_handler::ConnectionHandler&());
   MOCK_CONST_METHOD0(protocol_handler, protocol_handler::ProtocolHandler&());
   MOCK_METHOD0(GetPolicyHandler, policy::PolicyHandlerInterface&());
+  MOCK_CONST_METHOD0(GetPolicyHandler, const policy::PolicyHandlerInterface&());
   MOCK_METHOD0(GetNextHMICorrelationID, uint32_t());
   MOCK_METHOD0(GenerateNewHMIAppID, uint32_t());
   MOCK_METHOD1(EndNaviServices, void(uint32_t app_id));
@@ -191,13 +190,13 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_CONST_METHOD2(HMILevelAllowsStreaming,
                      bool(uint32_t app_id,
                           protocol_handler::ServiceType service_type));
-  MOCK_METHOD5(CheckPolicyPermissions,
+  MOCK_METHOD4(CheckPolicyPermissions,
                mobile_apis::Result::eType(
-                   const std::string&,
-                   mobile_apis::HMILevel::eType,
-                   mobile_apis::FunctionID::eType,
-                   const application_manager::RPCParams&,
-                   application_manager::CommandParametersPermissions*));
+                   const application_manager::ApplicationSharedPtr app,
+                   const std::string& function_id,
+                   const application_manager::RPCParams& rpc_params,
+                   application_manager::CommandParametersPermissions*
+                       params_permissions));
   MOCK_CONST_METHOD2(IsApplicationForbidden,
                      bool(uint32_t connection_key,
                           const std::string& policy_app_id));
@@ -246,6 +245,39 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_CONST_METHOD0(
       AppsWaitingForRegistration,
       DataAccessor<application_manager::AppsWaitRegistrationSet>());
+  MOCK_METHOD1(GetAvailableSpaceForApp,
+               uint32_t(const std::string& folder_name));
+  MOCK_METHOD0(OnTimerSendTTSGlobalProperties, void());
+  MOCK_METHOD0(OnLowVoltage, void());
+  MOCK_METHOD0(OnWakeUp, void());
+  MOCK_CONST_METHOD1(
+      application, application_manager::ApplicationSharedPtr(uint32_t app_id));
+
+#ifdef SDL_REMOTE_CONTROL
+  MOCK_CONST_METHOD2(application,
+                     application_manager::ApplicationSharedPtr(
+                         const std::string& device_id,
+                         const std::string& policy_app_id));
+  MOCK_METHOD1(SubscribeToHMINotification,
+               void(const std::string& hmi_notification));
+  MOCK_METHOD1(applications_by_interior_vehicle_data,
+               application_manager::AppSharedPtrs(
+                   smart_objects::SmartObject moduleDescription));
+  MOCK_METHOD1(IsAudioStreamingAllowed, bool(uint32_t connection_key));
+  MOCK_METHOD1(IsVideoStreamingAllowed, bool(uint32_t connection_key));
+  MOCK_METHOD2(ChangeAppsHMILevel,
+               void(uint32_t app_id, mobile_apis::HMILevel::eType level));
+  MOCK_METHOD0(GetPluginManager, functional_modules::PluginManager&());
+  MOCK_CONST_METHOD1(
+      devices, std::vector<std::string>(const std::string& policy_app_id));
+  MOCK_METHOD1(GetDeviceHandle, uint32_t(uint32_t connection_key));
+  MOCK_CONST_METHOD1(IsAudioStreamingAllowed, bool(uint32_t connection_key));
+  MOCK_CONST_METHOD1(IsVideoStreamingAllowed, bool(uint32_t connection_key));
+  MOCK_METHOD1(SendPostMessageToMobile,
+               void(const application_manager::MessagePtr& message));
+  MOCK_METHOD1(SendPostMessageToHMI,
+               void(const application_manager::MessagePtr& message));
+#endif  // SDL_REMOTE_CONTROL
 };
 
 }  // namespace application_manager_test

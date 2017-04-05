@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,6 +38,7 @@
 
 #include "policy/policy_table/enums.h"
 #include "rpc_base/rpc_message.h"
+
 namespace Json {
 class Value;
 }  // namespace Json
@@ -51,6 +52,9 @@ struct MessageLanguages;
 struct MessageString;
 struct RpcParameters;
 struct Rpcs;
+#ifdef SDL_REMOTE_CONTROL
+struct InteriorZone;
+#endif  // SDL_REMOTE_CONTROL
 }  // namespace policy_table_interface_base
 }  // namespace rpc
 
@@ -100,6 +104,13 @@ typedef Map<Rpcs, 1, 255> FunctionalGroupings;
 typedef Map<DeviceParams, 0, 255> DeviceData;
 
 typedef Array<Enum<RequestType>, 0, 255> RequestsTypeArray;
+
+#ifdef SDL_REMOTE_CONTROL
+typedef Map<InteriorZone, 2, 1000000> Zones;
+typedef Map<Strings, 0, 255> RemoteRpcs;
+typedef Map<RemoteRpcs, 0, 255> AccessModules;
+typedef Array<Enum<ModuleType>, 0, 255> ModuleTypes;
+#endif  // SDL_REMOTE_CONTROL
 
 struct RequestTypes : public RequestsTypeArray {
   RequestTypes();
@@ -158,6 +169,67 @@ struct DevicePolicy : PolicyBase {
   explicit DevicePolicy(const Json::Value* value__);
 };
 
+#ifdef SDL_REMOTE_CONTROL
+struct InteriorZone : CompositeType {
+ public:
+  Integer<uint8_t, 0, 100> col;
+  Integer<uint8_t, 0, 100> row;
+  Integer<uint8_t, 0, 100> level;
+  AccessModules auto_allow;
+  AccessModules driver_allow;
+
+ public:
+  InteriorZone();
+  InteriorZone(uint8_t col,
+               uint8_t row,
+               uint8_t level,
+               const AccessModules& auto_allow,
+               const AccessModules& driver_allow);
+  ~InteriorZone();
+  explicit InteriorZone(const Json::Value* value__);
+  Json::Value ToJsonValue() const;
+  bool is_valid() const;
+  bool is_initialized() const;
+  bool struct_empty() const;
+  void ReportErrors(rpc::ValidationReport* report__) const;
+  virtual void SetPolicyTableType(PolicyTableType pt_type);
+
+ private:
+  static const int length = 4;
+  static const std::string kRemoteRpcs[length];
+  static const int length_radio = 10;
+  static const std::string kRadioParameters[length_radio];
+  static const int length_climate = 9;
+  static const std::string kClimateParameters[length_climate];
+  void FillRemoteRpcs();
+  bool Validate() const;
+  inline bool ValidateAllow(const AccessModules& modules) const;
+  inline bool ValidateRemoteRpcs(ModuleType module,
+                                 const RemoteRpcs& rpcs) const;
+  inline bool ValidateParameters(ModuleType module, const Strings& rpcs) const;
+};
+
+struct Equipment : CompositeType {
+ public:
+  Zones zones;
+
+ public:
+  Equipment();
+  ~Equipment();
+  explicit Equipment(const Json::Value* value__);
+  Json::Value ToJsonValue() const;
+  bool is_valid() const;
+  bool is_initialized() const;
+  bool struct_empty() const;
+  void ReportErrors(rpc::ValidationReport* report__) const;
+  virtual void SetPolicyTableType(PolicyTableType pt_type);
+
+ private:
+  bool Validate() const;
+  inline bool ValidateNameZone(const std::string& name) const;
+};
+#endif  // SDL_REMOTE_CONTROL
+
 struct ApplicationParams : PolicyBase {
  public:
   Optional<Strings> nicknames;
@@ -165,6 +237,11 @@ struct ApplicationParams : PolicyBase {
   Optional<RequestTypes> RequestType;
   Optional<Integer<uint16_t, 0, 65225> > memory_kb;
   Optional<Integer<uint32_t, 0, UINT_MAX> > heart_beat_timeout_ms;
+#ifdef SDL_REMOTE_CONTROL
+  Optional<Strings> groups_primaryRC;
+  Optional<Strings> groups_nonPrimaryRC;
+  mutable Optional<ModuleTypes> moduleType;
+#endif  // SDL_REMOTE_CONTROL
 
  public:
   ApplicationParams();
@@ -184,6 +261,9 @@ struct ApplicationParams : PolicyBase {
 
  private:
   bool Validate() const;
+#ifdef SDL_REMOTE_CONTROL
+  bool ValidateModuleTypes() const;
+#endif  // SDL_REMOTE_CONTROL
 };
 
 struct ApplicationPoliciesSection : CompositeType {
@@ -265,6 +345,11 @@ struct ModuleConfig : CompositeType {
   Optional<String<0, 10> > preloaded_date;
   Optional<String<0, 65535> > certificate;
   Optional<Boolean> preloaded_pt;
+#ifdef SDL_REMOTE_CONTROL
+  Optional<Boolean> user_consent_passengersRC;
+  Optional<Boolean> country_consent_passengersRC;
+  Optional<Equipment> equipment;
+#endif  // SDL_REMOTE_CONTROL
 
  public:
   ModuleConfig();

@@ -39,8 +39,11 @@ include_directories (
   ${COMPONENTS_DIR}/connection_handler/include/
   ${COMPONENTS_DIR}/transport_manager/include/
   ${COMPONENTS_DIR}/application_manager/include/
+  ${COMPONENTS_DIR}/can_cooperation/include/
   ${POLICY_PATH}/include/
   ${POLICY_GLOBAL_INCLUDE_PATH}/
+  ${COMPONENTS_DIR}/rpc_base/include/
+  ${COMPONENTS_DIR}/functional_module/include/
   ${COMPONENTS_DIR}/hmi_message_handler/include/
   ${COMPONENTS_DIR}/formatters/include/
   ${COMPONENTS_DIR}/media_manager/include/
@@ -67,6 +70,14 @@ set(LIBRARIES
 add_library("TelemetryMonitor" ${SOURCES})
 target_link_libraries("TelemetryMonitor" ${LIBRARIES})
 add_dependencies("TelemetryMonitor" HMI_API MOBILE_API)
+
+set (LIBRARIES
+  HMI_API
+)
+
+add_library("TimeTester" ${SOURCES})
+target_link_libraries("TimeTester" ${LIBRARIES})
+add_dependencies("TimeTester" HMI_API MOBILE_API)
 
 if(BUILD_TESTS)
   add_subdirectory(test)

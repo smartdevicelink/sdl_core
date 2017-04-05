@@ -36,8 +36,10 @@
 #include <string>
 #include <vector>
 
+#include "policy/policy_table/types.h"
+#include "policy/pt_representation.h"
 #include "utils/shared_ptr.h"
-#include "usage_statistics/counter.h"
+#include "policy/usage_statistics/counter.h"
 #include "policy/policy_types.h"
 #include "policy/policy_settings.h"
 
@@ -48,6 +50,8 @@ namespace policy {
 class CacheManagerInterface {
  public:
   virtual ~CacheManagerInterface() {}
+
+  virtual const policy_table::Strings& GetGroups(const PTString& app_id) = 0;
 
   /**
    * @brief Check if specified RPC for specified application
@@ -328,6 +332,14 @@ class CacheManagerInterface {
    */
   virtual bool GetDefaultHMI(const std::string& app_id,
                              std::string& default_hmi) const = 0;
+
+  /**
+   * Gets HMI types from specific policy
+   * @param app_id ID application
+   * @return list of HMI types
+   */
+  virtual const policy_table::AppHMITypes* GetHMITypes(
+      const std::string& app_id) = 0;
 
   /**
    * @brief Resets user consent for device data and applications permissions

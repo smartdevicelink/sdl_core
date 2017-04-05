@@ -69,9 +69,10 @@ using am::ApplicationSharedPtr;
 using am::MockMessageHelper;
 using am::MockHmiInterfaces;
 using ::testing::_;
-using ::utils::SharedPtr;
+using ::testing::Mock;
 using ::testing::Return;
 using ::testing::ReturnRef;
+using ::utils::SharedPtr;
 using am::commands::SpeakRequest;
 using ::test::components::application_manager_test::MockApplication;
 
@@ -117,9 +118,7 @@ class SpeakRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
     EXPECT_CALL(app_mngr_, hmi_interfaces())
         .WillOnce(ReturnRef(hmi_interfaces));
     EXPECT_CALL(hmi_interfaces, GetInterfaceState(_)).WillOnce(Return(state));
-    MockMessageHelper* mock_message_helper =
-        MockMessageHelper::message_helper_mock();
-    EXPECT_CALL(*mock_message_helper, HMIToMobileResult(_))
+    EXPECT_CALL(mock_message_helper_, HMIToMobileResult(_))
         .WillOnce(Return(mobile_response));
 
     EXPECT_CALL(app_mngr_,

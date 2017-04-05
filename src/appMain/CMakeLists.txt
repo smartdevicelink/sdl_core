@@ -112,6 +112,12 @@ set(LIBRARIES
   ConfigProfile
   Resumption
 )
+if(REMOTE_CONTROL)
+    SET (LIBRARIES
+      ${LIBRARIES}
+      FunctionalModule
+    )
+endif(REMOTE_CONTROL)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   list(APPEND LIBRARIES pthread)
@@ -136,6 +142,51 @@ if(ENABLE_LOG)
   list(APPEND LIBRARIES aprutil-1 -L${APR_UTIL_LIBS_DIRECTORY})
   list(APPEND LIBRARIES expat -L${EXPAT_LIBS_DIRECTORY})
 endif()
+
+include_directories (
+  ./
+  ${COMPONENTS_DIR}/protocol_handler/include/
+  ${JSONCPP_INCLUDE_DIRECTORY}
+  ${COMPONENTS_DIR}/application_manager/include
+
+  ${COMPONENTS_DIR}/can_cooperation/include
+  ${COMPONENTS_DIR}/rpc_base/include
+
+  ${COMPONENTS_DIR}/formatters/include
+  ${COMPONENTS_DIR}/transport_manager/include
+  ${COMPONENTS_DIR}/security_manager/include
+  ${SecurityManagerIncludeDir}
+  ${COMPONENTS_DIR}/security_manager/include
+  ${COMPONENTS_DIR}/config_profile/include
+  ${COMPONENTS_DIR}/utils/include/
+  ${COMPONENTS_DIR}/connection_handler/include/
+  ${COMPONENTS_DIR}/hmi_message_handler/include
+  ${COMPONENTS_DIR}/request_watchdog/include
+  ${COMPONENTS_DIR}/smart_objects/include/
+  ${COMPONENTS_DIR}/media_manager/include/
+  ${COMPONENTS_DIR}/telemetry_monitor/include
+  ${COMPONENTS_DIR}/functional_module/include/
+  ${COMPONENTS_DIR}/time_tester/include
+  ${POLICY_PATH}/include/
+  ${POLICY_GLOBAL_INCLUDE_PATH}/
+  ${COMPONENTS_DIR}/resumption/include/
+  ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
+  ${ENCRYPTION_INCLUDE_DIRECTORY}
+  ${COMPONENTS_DIR}
+  ${CMAKE_BINARY_DIR}/src/components/
+  ${COMPONENTS_DIR}/dbus/include/
+  ${CMAKE_SOURCE_DIR}
+  ${default_media_inc}
+  ${LOG4CXX_INCLUDE_DIRECTORY}
+  ${CMAKE_SOURCE_DIR}/src/3rd_party/dbus-1.7.8
+  ${CMAKE_SOURCE_DIR}/src/3rd_party/dbus-1.7.8/dbus/
+)
+
+set (SOURCES
+  main.cc
+  life_cycle.cc
+  signal_handlers.cc
+)
 
 if( NOT CMAKE_BUILD_TYPE )
   set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build. Options are: None, Debug, Release, RelWithDebInfo, MinSizeRel." FORCE)
@@ -199,12 +250,25 @@ endif ()
 
 # Install rules
 install(TARGETS ${PROJECT} DESTINATION bin)
+
 install(
   FILES log4cxx.properties audio.8bit.wav test.txt smartDeviceLink.ini
-    hmi_capabilities.json sdl_preloaded_pt.json
+    hmi_capabilities.json
     ${CMAKE_SOURCE_DIR}/mycert.pem ${CMAKE_SOURCE_DIR}/mykey.pem
   DESTINATION bin
 )
+if (REMOTE_CONTROL)
+  install(
+    FILES "${CMAKE_SOURCE_DIR}/src/components/can_cooperation/reverse_sdl_pt.json"
+    DESTINATION ${CMAKE_BINARY_DIR}/bin
+    RENAME sdl_preloaded_pt.json
+  )
+else ()
+  install(
+    FILES sdl_preloaded_pt.json
+    DESTINATION bin
+  )
+endif ()
 
 if (${QT_HMI})
   if (CMAKE_SYSTEM_NAME STREQUAL "QNX")

@@ -52,16 +52,16 @@
     </element>
     <element name="TIMED_OUT">
       <description>Overlay reached the maximum timeout and closed.</description>
-    </element>          
+    </element>
     <element name="INVALID_DATA">
       <description>
-      	The data sent is invalid. For example:
-		    Invalid Json syntax
-      	Parameters out of bounds (number or enum range)
-      	Mandatory parameters not provided
-      	Parameter provided with wrong type
-      	Invalid characters
-      	Empty string
+        The data sent is invalid. For example:
+                    Invalid Json syntax
+        Parameters out of bounds (number or enum range)
+        Mandatory parameters not provided
+        Parameter provided with wrong type
+        Invalid characters
+        Empty string
       </description>
     </element>
     <element name="CHAR_LIMIT_EXCEEDED"></element>
@@ -76,13 +76,13 @@
     </element>
     <element name="APPLICATION_NOT_REGISTERED">
       <description>An command can not be executed because no application has been registered with RegisterApplication.</description>
-    </element>    
+    </element>
     <element name="WRONG_LANGUAGE">
       <description>
         The requested language is currently not supported.
         Might be because of a mismatch of the currently active language on Sync and the requested language
       </description>
-    </element>   
+    </element>
     <element name="OUT_OF_MEMORY">
       <description>The system could not process the request because the necessary memory couldn't be allocated</description>
     </element>
@@ -107,7 +107,7 @@
     </element>
     <element name="TRUNCATED_DATA">
       <description>The RPC (e.g. ReadDID) executed successfully but the data exceeded the platform maximum threshold and thus, only part of the data is available.</description>
-    </element>  
+    </element>
     <element name="UNSUPPORTED_VERSION">
       <description>Sync doesn't support the protocol that is requested by the mobile application</description>
     </element>
@@ -119,7 +119,7 @@
     </element>
     <element name="CANCEL_ROUTE">
       <description>User selected to Cancel Route.</description>
-    </element>        
+    </element>
     <element name="SAVED">
       <description>The RPC (e.g. Slider) executed successfully and the user elected to save the current position / value.</description>
     </element>
@@ -132,19 +132,22 @@
     <element name="RESUME_FAILED">
       <description>The provided hash ID does not match the hash of the current set of registered data or the core could not resume the previous data.</description>
     </element>
+    <element name="READ_ONLY">
+          <description>The value being set is read only</description>
+    </element>
   </enum>
 
   <enum name="ButtonPressMode">
     <element name="LONG">
       <description>
-      	A button was released, after it was pressed for a long time
-      	Actual timing is defined by Sync and may vary
+        A button was released, after it was pressed for a long time
+        Actual timing is defined by Sync and may vary
       </description>
     </element>
     <element name="SHORT">
       <description>
-      	A button was released, after it was pressed for a short time
-      	Actual timing is defined by Sync and may vary
+        A button was released, after it was pressed for a short time
+        Actual timing is defined by Sync and may vary
       </description>
     </element>
   </enum>
@@ -275,18 +278,18 @@
     <description>For application-requested interactions, this mode indicates the method in which the user is notified and uses the interaction.</description>
     <element name="MANUAL_ONLY" />
     <description>
-    	This mode causes the interaction to only occur on the display, meaning the choices are provided only via the display.
-    	Selections are made with the OK and Seek Right and Left, Tune Up and Down buttons.
+        This mode causes the interaction to only occur on the display, meaning the choices are provided only via the display.
+        Selections are made with the OK and Seek Right and Left, Tune Up and Down buttons.
     </description>
     <element name="VR_ONLY" />
     <description>
-    	This mode causes the interaction to only occur using V4.
-    	Selections are made by saying the command.
+        This mode causes the interaction to only occur using V4.
+        Selections are made by saying the command.
     </description>
     <element name="BOTH" />
     <description>
-    	This mode causes both a VR and display selection option for an interaction.
-    	Selections can be made either from the menu display or by speaking the command.
+        This mode causes both a VR and display selection option for an interaction.
+        Selections can be made either from the menu display or by speaking the command.
     </description>
   </enum>
 
@@ -294,23 +297,23 @@
     <description>For touchscreen interactions, the mode of how the choices are presented.</description>
     <element name="ICON_ONLY" />
     <description>
-    	This mode causes the interaction to display the previous set of choices as icons.
+        This mode causes the interaction to display the previous set of choices as icons.
     </description>
     <element name="ICON_WITH_SEARCH" />
     <description>
-    	This mode causes the interaction to display the previous set of choices as icons along with a search field in the HMI.
+        This mode causes the interaction to display the previous set of choices as icons along with a search field in the HMI.
     </description>
     <element name="LIST_ONLY" />
     <description>
-    	This mode causes the interaction to display the previous set of choices as a list.
+        This mode causes the interaction to display the previous set of choices as a list.
     </description>
     <element name="LIST_WITH_SEARCH" />
     <description>
-    	This mode causes the interaction to display the previous set of choices as a list along with a search field in the HMI.
+        This mode causes the interaction to display the previous set of choices as a list along with a search field in the HMI.
     </description>
     <element name="KEYBOARD" />
     <description>
-    	This mode causes the interaction to immediately display a keyboard entry through the HMI.
+        This mode causes the interaction to immediately display a keyboard entry through the HMI.
     </description>
   </enum>
 
@@ -448,7 +451,7 @@
     <description>
       Describes different audio type configurations for PerformAudioPassThru.
       e.g. {8kHz,8-bit,PCM}
-    </description>     
+    </description>
     <param name="samplingRate" type="SamplingRate"/>
     <param name="bitsPerSample" type="BitsPerSample"/>
     <param name="audioType" type="AudioType"/>
@@ -457,7 +460,7 @@
   <enum name="VehicleDataType">
     <description>Defines the data types that can be published and subscribed to.</description>
     <element name="VEHICLEDATA_GPS">
-    	<description>Notifies GPSData may be subscribed</description>
+        <description>Notifies GPSData may be subscribed</description>
     </element>
     <element name="VEHICLEDATA_SPEED" />
     <element name="VEHICLEDATA_RPM" />
@@ -505,66 +508,88 @@
     <element name="PRESET_9" />
     <element name="CUSTOM_BUTTON" />
     <element name="SEARCH" />
+
+    <!-- Climate Buttons -->
+    <element name="AC_MAX" />
+    <element name="AC" />
+    <element name="RECIRCULATE" />
+    <element name="FAN_UP" />
+    <element name="FAN_DOWN" />
+    <element name="TEMP_UP" />
+    <element name="TEMP_DOWN" />
+    <element name="DEFROST_MAX" />
+    <element name="DEFROST" />
+    <element name="DEFROST_REAR" />
+    <element name="UPPER_VENT" />
+    <element name="LOWER_VENT" />
+
+    <!-- Radio Buttons -->
+    <element name="VOLUME_UP" />
+    <element name="VOLUME_DOWN" />
+    <element name="EJECT" />
+    <element name="SOURCE" />
+    <element name="SHUFFLE" />
+    <element name="REPEAT" />
   </enum>
 
   <enum name="MediaClockFormat">
     <element name="CLOCK1">
       <description>
-      	minutesFieldWidth = 2;minutesFieldMax = 19;secondsFieldWidth = 2;secondsFieldMax = 99;maxHours = 19;maxMinutes = 59;maxSeconds = 59;
-      	used for Type II and CID headunits
+        minutesFieldWidth = 2;minutesFieldMax = 19;secondsFieldWidth = 2;secondsFieldMax = 99;maxHours = 19;maxMinutes = 59;maxSeconds = 59;
+        used for Type II and CID headunits
       </description>
     </element>
     <element name="CLOCK2">
       <description>
-      	minutesFieldWidth = 3;minutesFieldMax = 199;secondsFieldWidth = 2;secondsFieldMax = 99;maxHours = 59;maxMinutes = 59;maxSeconds = 59;
-	  	used for Type V headunit
-	  </description>
+        minutesFieldWidth = 3;minutesFieldMax = 199;secondsFieldWidth = 2;secondsFieldMax = 99;maxHours = 59;maxMinutes = 59;maxSeconds = 59;
+                used for Type V headunit
+          </description>
     </element>
     <element name="CLOCK3">
       <description>
-      	minutesFieldWidth = 2;minutesFieldMax = 59;secondsFieldWidth = 2;secondsFieldMax = 59;maxHours = 9;maxMinutes = 59;maxSeconds = 59;
-	  	used for GEN1.1 MFD3/4/5 headunits
-	  </description>
+        minutesFieldWidth = 2;minutesFieldMax = 59;secondsFieldWidth = 2;secondsFieldMax = 59;maxHours = 9;maxMinutes = 59;maxSeconds = 59;
+                used for GEN1.1 MFD3/4/5 headunits
+          </description>
     </element>
     <element name="CLOCKTEXT1">
       <description>
-      	5 characters possible
-      	Format:      1|sp   c   :|sp   c   c
-      	1|sp : digit "1" or space
-      	c    : character out of following character set: sp|0-9|[letters, see TypeII column in XLS. See [@TODO: create file ref]]
-      	:|sp : colon or space
-	  	used for Type II headunit
-	  </description>
+        5 characters possible
+        Format:      1|sp   c   :|sp   c   c
+        1|sp : digit "1" or space
+        c    : character out of following character set: sp|0-9|[letters, see TypeII column in XLS. See [@TODO: create file ref]]
+        :|sp : colon or space
+                used for Type II headunit
+          </description>
     </element>
     <element name="CLOCKTEXT2">
       <description>
-      	5 chars possible
-      	Format:      1|sp   c   :|sp   c   c
-      	1|sp : digit "1" or space
-      	c    : character out of following character set: sp|0-9|[letters, see CID column in XLS. See [@TODO: create file ref]]
-      	:|sp : colon or space
-	  	used for CID headunit
-	  	NOTE: difference between CLOCKTEXT1 and CLOCKTEXT2 is the supported character set
-	  </description>
+        5 chars possible
+        Format:      1|sp   c   :|sp   c   c
+        1|sp : digit "1" or space
+        c    : character out of following character set: sp|0-9|[letters, see CID column in XLS. See [@TODO: create file ref]]
+        :|sp : colon or space
+                used for CID headunit
+                NOTE: difference between CLOCKTEXT1 and CLOCKTEXT2 is the supported character set
+          </description>
     </element>
     <element name="CLOCKTEXT3">
       <description>
-      	6 chars possible
-      	Format:      1|sp   c   c   :|sp   c   c
-      	1|sp : digit "1" or space
-      	c    : character out of following character set: sp|0-9|[letters, see Type 5 column in XLS]. See [@TODO: create file ref]
-      	:|sp : colon or space
-	  	used for Type V headunit
-	  </description>
+        6 chars possible
+        Format:      1|sp   c   c   :|sp   c   c
+        1|sp : digit "1" or space
+        c    : character out of following character set: sp|0-9|[letters, see Type 5 column in XLS]. See [@TODO: create file ref]
+        :|sp : colon or space
+                used for Type V headunit
+          </description>
     </element>
     <element name="CLOCKTEXT4">
       <description>
-      	6 chars possible
-      	Format:      c   :|sp   c   c   :   c   c
-      	:|sp : colon or space
-      	c    : character out of following character set: sp|0-9|[letters].
-	  	used for GEN1.1 MFD3/4/5 headunits
-	  </description>
+        6 chars possible
+        Format:      c   :|sp   c   c   :   c   c
+        :|sp : colon or space
+        c    : character out of following character set: sp|0-9|[letters].
+                used for GEN1.1 MFD3/4/5 headunits
+          </description>
     </element>
   </enum>
 
@@ -788,8 +813,8 @@
 
   <enum name="DriverDistractionState">
     <description>Enumeration that describes possible states of driver distraction.</description>
-    	<element name="DD_ON" />
-	<element name="DD_OFF" />
+        <element name="DD_ON" />
+        <element name="DD_OFF" />
   </enum>
 
   <enum name="ImageType">
@@ -806,7 +831,7 @@
   </enum>
 
   <struct name="Image">
-    <param name="value" minlength="0" maxlength="65535" type="String"> 
+    <param name="value" minlength="0" maxlength="65535" type="String">
       <description>Either the static hex icon value or the binary image file name identifier (sent by PutFile).</description>
     </param>
     <param name="imageType" type="ImageType">
@@ -825,10 +850,10 @@
       <description>Optional image struct for SoftButton (if defined as IMAGE or BOTH)</description>
     </param>
     <param name="isHighlighted" type="Boolean" defvalue="false" mandatory="false">
-    	<description>
-    		True, if highlighted
-    		False, if not highlighted
-    	</description>
+        <description>
+                True, if highlighted
+                False, if not highlighted
+        </description>
     </param>
     <param name="softButtonID" type="Integer" minvalue="0" maxvalue="65535">
       <description>Value which is returned via OnButtonPress / OnButtonEvent</description>
@@ -881,22 +906,22 @@
   <enum name="GlobalProperty">
     <description>The different global properties.</description>
     <element name="HELPPROMPT">
-    	<description>The property helpPrompt of setGlobalProperties</description>
+        <description>The property helpPrompt of setGlobalProperties</description>
     </element>
     <element name="TIMEOUTPROMPT">
-    	<description>The property timeoutPrompt of setGlobalProperties</description>
+        <description>The property timeoutPrompt of setGlobalProperties</description>
     </element>
     <element name="VRHELPTITLE">
-    	<description>The property vrHelpTitle of setGlobalProperties</description>
+        <description>The property vrHelpTitle of setGlobalProperties</description>
     </element>
     <element name="VRHELPITEMS">
-    	<description>The property array of vrHelp of setGlobalProperties</description>
+        <description>The property array of vrHelp of setGlobalProperties</description>
     </element>
     <element name="MENUNAME">
-    	<description>The property in-app menu name of setGlobalProperties</description>
+        <description>The property in-app menu name of setGlobalProperties</description>
     </element>
     <element name="MENUICON">
-    	<description>The property in-app menu icon of setGlobalProperties</description>
+        <description>The property in-app menu icon of setGlobalProperties</description>
     </element>
     <element name="KEYBOARDPROPERTIES">
       <description>The on-screen keyboard configuration of setGlobalProperties</description>
@@ -939,21 +964,21 @@
   <enum name="PRNDL">
     <description>The selected gear.</description>
     <element name="PARK">
-    	<description>Parking</description>
+        <description>Parking</description>
     </element>
     <element name="REVERSE">
-    	<description>Reverse gear</description>
+        <description>Reverse gear</description>
     </element>
     <element name="NEUTRAL">
-    	<description>No gear</description>
+        <description>No gear</description>
     </element>
     <element name="DRIVE">
     </element>
     <element name="SPORT">
-    	<description>Drive Sport mode</description>
+        <description>Drive Sport mode</description>
     </element>
     <element name="LOWGEAR">
-    	<description>1st gear hold</description>
+        <description>1st gear hold</description>
     </element>
     <element name="FIRST">
     </element>
@@ -996,7 +1021,7 @@
   <struct name="SingleTireStatus">
     <param name="status" type="ComponentVolumeStatus">
       <description>See ComponentVolumeStatus.</description>
-	</param>
+        </param>
   </struct>
 
   <enum name="WarningLightStatus">
@@ -1167,120 +1192,136 @@
   <struct name="BeltStatus">
     <param name="driverBeltDeployed" type="VehicleDataEventStatus">
       <description>References signal "VedsDrvBelt_D_Ltchd". See VehicleDataEventStatus.</description>
-	</param>
+        </param>
     <param name="passengerBeltDeployed" type="VehicleDataEventStatus">
       <description>References signal "VedsPasBelt_D_Ltchd". See VehicleDataEventStatus.</description>
-	</param>
+        </param>
     <param name="passengerBuckleBelted" type="VehicleDataEventStatus">
       <description>References signal "VedsRw1PasBckl_D_Ltchd". See VehicleDataEventStatus.</description>
-	</param>
+        </param>
     <param name="driverBuckleBelted" type="VehicleDataEventStatus">
       <description>References signal "VedsRw1DrvBckl_D_Ltchd". See VehicleDataEventStatus.</description>
-	</param>
+        </param>
     <param name="leftRow2BuckleBelted" type="VehicleDataEventStatus">
       <description>References signal "VedsRw2lBckl_D_Ltchd". See VehicleDataEventStatus.</description>
-	</param>
+        </param>
     <param name="passengerChildDetected" type="VehicleDataEventStatus">
       <description>References signal "VedsRw1PasChld_D_Ltchd". See VehicleDataEventStatus.</description>
-	</param>
+        </param>
     <param name="rightRow2BuckleBelted" type="VehicleDataEventStatus">
       <description>References signal "VedsRw2rBckl_D_Ltchd". See VehicleDataEventStatus.</description>
-	</param>
+        </param>
     <param name="middleRow2BuckleBelted" type="VehicleDataEventStatus">
       <description>References signal "VedsRw2mBckl_D_Ltchd". See VehicleDataEventStatus.</description>
-	</param>
+        </param>
     <param name="middleRow3BuckleBelted" type="VehicleDataEventStatus">
       <description>References signal "VedsRw3mBckl_D_Ltchd". See VehicleDataEventStatus.</description>
-	</param>
+        </param>
     <param name="leftRow3BuckleBelted" type="VehicleDataEventStatus">
       <description>References signal "VedsRw3lBckl_D_Ltchd". See VehicleDataEventStatus.</description>
-	</param>
+        </param>
     <param name="rightRow3BuckleBelted" type="VehicleDataEventStatus">
       <description>References signal "VedsRw3rBckl_D_Ltchd". See VehicleDataEventStatus.</description>
-	</param>
+        </param>
     <param name="leftRearInflatableBelted" type="VehicleDataEventStatus">
       <description>References signal "VedsRw2lRib_D_Ltchd". See VehicleDataEventStatus.</description>
-	</param>
+        </param>
     <param name="rightRearInflatableBelted" type="VehicleDataEventStatus">
       <description>References signal "VedsRw2rRib_D_Ltchd". See VehicleDataEventStatus.</description>
-	</param>
+        </param>
     <param name="middleRow1BeltDeployed" type="VehicleDataEventStatus">
       <description>References signal "VedsRw1mBelt_D_Ltchd". See VehicleDataEventStatus.</description>
-	</param>
+        </param>
     <param name="middleRow1BuckleBelted" type="VehicleDataEventStatus">
       <description>References signal "VedsRw1mBckl_D_Ltchd". See VehicleDataEventStatus.</description>
-	</param>
+        </param>
   </struct>
 
   <struct name="BodyInformation">
     <param name="parkBrakeActive" type="Boolean">
       <description>References signal "PrkBrkActv_B_Actl".</description>
-	</param>
+        </param>
     <param name="ignitionStableStatus" type="IgnitionStableStatus">
       <description>References signal "Ignition_Switch_Stable". See IgnitionStableStatus.</description>
-	</param>
+        </param>
     <param name="ignitionStatus" type="IgnitionStatus">
       <description>References signal "Ignition_status". See IgnitionStatus.</description>
-	</param>
+        </param>
     <param name="driverDoorAjar" type="Boolean" mandatory="false">
       <description>References signal "DrStatDrv_B_Actl".</description>
-	</param>
+        </param>
     <param name="passengerDoorAjar" type="Boolean" mandatory="false">
       <description>References signal "DrStatPsngr_B_Actl".</description>
-	</param>
+        </param>
     <param name="rearLeftDoorAjar" type="Boolean" mandatory="false">
       <description>References signal "DrStatRl_B_Actl".</description>
-	</param>
+        </param>
     <param name="rearRightDoorAjar" type="Boolean" mandatory="false">
       <description>References signal "DrStatRr_B_Actl".</description>
-	</param>
+        </param>
   </struct>
 
   <struct name="DeviceStatus">
     <param name="voiceRecOn" type="Boolean">
       <description>References signal "CPM_VoiceRec_STAT".</description>
-	</param>
+        </param>
     <param name="btIconOn" type="Boolean">
       <description>References signal "BT_ICON".</description>
-	</param>
+        </param>
     <param name="callActive" type="Boolean">
       <description>References signal "CPM_Call_Active_STAT".</description>
-	</param>
+        </param>
     <param name="phoneRoaming" type="Boolean">
       <description>References signal "CPM_Phone_Roaming_STAT".</description>
-	</param>
+        </param>
     <param name="textMsgAvailable" type="Boolean">
       <description>References signal "CPM_TextMsg_AVAL".</description>
-	</param>
+        </param>
     <param name="battLevelStatus" type="DeviceLevelStatus">
       <description>Device battery level status.  References signal "CPM_Batt_Level_STAT". See DeviceLevelStatus.</description>
-	</param>
+        </param>
     <param name="stereoAudioOutputMuted" type="Boolean">
       <description>References signal "CPM_Stereo_Audio_Output".</description>
-	</param>
+        </param>
     <param name="monoAudioOutputMuted" type="Boolean">
       <description>References signal "CPM_Mono_Audio_Output".</description>
-	</param>
+        </param>
     <param name="signalLevelStatus" type="DeviceLevelStatus">
       <description>Device signal level status.  References signal "CPM_Signal_Strength_STAT". See DeviceLevelStatus.</description>
-	</param>
+        </param>
     <param name="primaryAudioSource" type="PrimaryAudioSource">
       <description>References signal "CPM_Stereo_PAS_Source". See PrimaryAudioSource.</description>
-	</param>
+        </param>
     <param name="eCallEventActive" type="Boolean">
       <description>References signal "eCall_Event".</description>
-	</param>
+        </param>
   </struct>
 
   <struct name="HeadLampStatus">
     <param name="lowBeamsOn" type="Boolean">
       <description>Status of the low beam lamps.  References signal "HeadLampLoActv_B_Stat".</description>
-	</param>
+        </param>
     <param name="highBeamsOn" type="Boolean">
       <description>Status of the high beam lamps.  References signal "HeadLghtHiOn_B_Stat".</description>
-	</param>
+        </param>
     <param name="ambientLightSensorStatus" type="AmbientLightStatus" mandatory="false">
       <description>Status of the ambient light sensor.</description>
+    </param>
+  </struct>
+
+  <struct name="InteriorZone">
+    <description>Describes the origin and span of a zone in the vehicle. Vehicle zones can be overlapping</description>
+    <param name="col" type="Integer" minvalue="0" maxvalue="100">
+    </param>
+    <param name="row" type="Integer" minvalue="0" maxvalue="100">
+    </param>
+    <param name="level" type="Integer" minvalue="0" maxvalue="100">
+    </param>
+    <param name="colspan" type="Integer" minvalue="0" maxvalue="100">
+    </param>
+    <param name="rowspan" type="Integer" minvalue="0" maxvalue="100">
+    </param>
+    <param name="levelspan" type="Integer" minvalue="0" maxvalue="100">
     </param>
   </struct>
 
@@ -1304,15 +1345,142 @@
     </param>
   </struct>
 
-<!-- ~~~~~~~~~~~~~~~~~~~~~~~~ -->     
+ <enum name="ModuleType">
+    <element name="CLIMATE"/>
+    <element name="RADIO"/>
+  </enum>
+
+  <struct name="ModuleDescription">
+    <param name="moduleZone" type="InteriorZone">
+    </param>
+    <param name="moduleType" type="ModuleType">
+    </param>
+  </struct>
+
+  <enum name="RadioBand">
+    <element name="AM"/>
+    <element name="FM"/>
+    <element name="XM"/>
+  </enum>
+
+  <struct name="RdsData">
+    <param name="PS" type="String" minlength="0" maxlength="8">
+      <description>Program Service Name</description>
+    </param>
+    <param name="RT" type="String" minlength="0" maxlength="64">
+      <description>Radio Text</description>
+    </param>
+    <param name="CT" type="String" minlength="24" maxlength="24">
+      <description>The clock text in UTC format as YYYY-MM-DDThh:mm:ss.sTZD</description>
+    </param>
+    <param name="PI" type="String" minlength="0" maxlength="6">
+      <description>Program Identification - the call sign for the radio station</description>
+    </param>
+    <param name="PTY" type="Integer" minvalue="0" maxvalue="31">
+      <description>The program type - The region should be used to differentiate between EU and North America program types</description>
+    </param>
+    <param name="TP" type="Boolean">
+      <description>Traffic Program Identification - Identifies a station that offers traffic</description>
+    </param>
+    <param name="TA" type="Boolean">
+      <description>Traffic Announcement Identification - Indicates an ongoing traffic announcement</description>
+    </param>
+    <param name="REG" type="String">
+      <description>Region</description>
+    </param>
+  </struct>
+
+  <enum name="RadioState">
+    <element name="ACQUIRING"/>
+    <element name="ACQUIRED"/>
+    <element name="MULTICAST"/>
+    <element name="NOT_FOUND"/>
+  </enum>
+
+  <struct name="RadioControlData">
+    <param name="frequencyInteger" type="Integer" minvalue="0" maxvalue="1710" mandatory="false">
+      <description>The integer part of the frequency ie for 101.7 this value should be 101</description>
+    </param>
+    <param name="frequencyFraction" type="Integer" minvalue="0" maxvalue="9" mandatory="false">
+      <description>The fractional part of the frequency for 101.7 is 7</description>
+    </param>
+    <param name="band" type="RadioBand" mandatory="false">
+    </param>
+    <param name="rdsData" type="RdsData" mandatory="false">
+    </param>
+    <param name="availableHDs" type="Integer" minvalue="1" maxvalue="3" mandatory="false">
+      <description>number of HD sub-channels if available</description>
+    </param>
+    <param name="hdChannel" type="Integer" minvalue="1" maxvalue="3" mandatory="false">
+      <description>Current HD sub-channel if available</description>
+    </param>
+    <param name="signalStrength" type="Integer" minvalue="0" maxvalue="100" mandatory="false">
+    </param>
+    <param name="signalChangeThreshold" type="Integer" minvalue="0" maxvalue="100" mandatory="false">
+      <description>If the signal strength falls below the set value for this parameter, the radio will tune to an alternative frequency</description>
+    </param>
+    <param name="radioEnable" type="Boolean" mandatory="false">
+      <description> True if the radio is on, false is the radio is off</description>
+    </param>
+    <param name="state" type="RadioState" mandatory="false">
+    </param>
+  </struct>
+
+  <enum name="DefrostZone">
+    <element name="FRONT"/>
+    <element name="REAR"/>
+    <element name="ALL"/>
+  </enum>
+
+  <struct name="ClimateControlData">
+    <param name="fanSpeed" type="Integer" minvalue="0" maxvalue="100" mandatory="false">
+    </param>
+    <param name="currentTemp" type="Integer" minvalue="0" maxvalue="100" mandatory="false">
+    </param>
+    <param name="desiredTemp" type="Integer" minvalue="0" maxvalue="100" mandatory="false">
+    </param>
+    <param name="acEnable" type="Boolean" mandatory="false">
+    </param>
+    <param name="recirculateAirEnable" type="Boolean" mandatory="false">
+    </param>
+    <param name="autoModeEnable" type="Boolean" mandatory="false">
+    </param>
+    <param name="defrostZone" type="DefrostZone" mandatory="false">
+    </param>
+    <param name="dualModeEnable" type="Boolean" mandatory="false">
+    </param>
+  </struct>
+
+  <struct name="ModuleData">
+    <description>The moduleType indicates which type of data should be changed and identifies which data object exists in this struct. For example, if the moduleType is CLIMATE then a "climateControlData" should exist</description>
+    <param name="moduleType" type="ModuleType">
+    </param>
+    <param name="moduleZone" type="InteriorZone">
+    </param>
+    <param name="radioControlData" type="RadioControlData" mandatory="false">
+    </param>
+    <param name="climateControlData" type="ClimateControlData" mandatory="false">
+    </param>
+  </struct>
+
+  <enum name="DeviceRank">
+   <element name="DRIVER">
+    <description>The device is ranked as driver's</description>
+   </element>
+   <element name="PASSENGER">
+    <description>The device is ranked as passenger's</description>
+   </element>
+  </enum>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~ -->
 <!-- Ford Specific Data Items -->
-<!-- ~~~~~~~~~~~~~~~~~~~~~~~~ -->     
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~ -->
   <enum name="FileType">
     <description>Enumeration listing possible file types.</description>
-    <element name="GRAPHIC_BMP" />   
-    <element name="GRAPHIC_JPEG" />   
+    <element name="GRAPHIC_BMP" />
+    <element name="GRAPHIC_JPEG" />
     <element name="GRAPHIC_PNG" />
-    <element name="AUDIO_WAVE" />   
+    <element name="AUDIO_WAVE" />
     <element name="AUDIO_MP3" />
     <element name="AUDIO_AAC" />
     <element name="BINARY" />
@@ -1414,52 +1582,52 @@
   <struct name="ECallInfo">
     <param name="eCallNotificationStatus" type="VehicleDataNotificationStatus">
       <description>References signal "eCallNotification_4A". See VehicleDataNotificationStatus.</description>
-	</param>
+        </param>
     <param name="auxECallNotificationStatus" type="VehicleDataNotificationStatus">
       <description>References signal "eCallNotification". See VehicleDataNotificationStatus.</description>
-	</param>
+        </param>
     <param name="eCallConfirmationStatus" type="ECallConfirmationStatus">
       <description>References signal "eCallConfirmation". See ECallConfirmationStatus.</description>
-	</param>
+        </param>
   </struct>
 
   <struct name="AirbagStatus">
     <param name="driverAirbagDeployed" type="VehicleDataEventStatus">
       <description>References signal "VedsDrvBag_D_Ltchd". See VehicleDataEventStatus.</description>
-	</param>
+        </param>
     <param name="driverSideAirbagDeployed" type="VehicleDataEventStatus">
       <description>References signal "VedsDrvSideBag_D_Ltchd". See VehicleDataEventStatus.</description>
-	</param>
+        </param>
     <param name="driverCurtainAirbagDeployed" type="VehicleDataEventStatus">
       <description>References signal "VedsDrvCrtnBag_D_Ltchd". See VehicleDataEventStatus.</description>
-	</param>
+        </param>
     <param name="passengerAirbagDeployed" type="VehicleDataEventStatus">
       <description>References signal "VedsPasBag_D_Ltchd". See VehicleDataEventStatus.</description>
-	</param>
+        </param>
     <param name="passengerCurtainAirbagDeployed" type="VehicleDataEventStatus">
       <description>References signal "VedsPasCrtnBag_D_Ltchd". See VehicleDataEventStatus.</description>
-	</param>
+        </param>
     <param name="driverKneeAirbagDeployed" type="VehicleDataEventStatus">
       <description>References signal "VedsKneeDrvBag_D_Ltchd". See VehicleDataEventStatus.</description>
-	</param>
+        </param>
     <param name="passengerSideAirbagDeployed" type="VehicleDataEventStatus">
       <description>References signal "VedsPasSideBag_D_Ltchd". See VehicleDataEventStatus.</description>
-	</param>
+        </param>
     <param name="passengerKneeAirbagDeployed" type="VehicleDataEventStatus">
       <description>References signal "VedsKneePasBag_D_Ltchd". See VehicleDataEventStatus.</description>
-	</param>
+        </param>
   </struct>
 
   <struct name="EmergencyEvent">
     <param name="emergencyEventType" type="EmergencyEventType">
       <description>References signal "VedsEvntType_D_Ltchd". See EmergencyEventType.</description>
-	</param>
+        </param>
     <param name="fuelCutoffStatus" type="FuelCutoffStatus">
       <description>References signal "RCM_FuelCutoff". See FuelCutoffStatus.</description>
-	</param>
+        </param>
     <param name="rolloverEvent" type="VehicleDataEventStatus">
       <description>References signal "VedsEvntRoll_D_Ltchd". See VehicleDataEventStatus.</description>
-	</param>
+        </param>
 
     <param name="maximumChangeVelocity" type="Integer" minvalue="0" maxvalue="255">
       <description>References signal "VedsMaxDeltaV_D_Ltchd". Change in velocity in KPH.  Additional reserved values:
@@ -1470,28 +1638,28 @@
     </param>
     <param name="multipleEvents" type="VehicleDataEventStatus">
       <description>References signal "VedsMultiEvnt_D_Ltchd". See VehicleDataEventStatus.</description>
-	</param>
+        </param>
   </struct>
 
   <struct name="ClusterModeStatus">
     <param name="powerModeActive" type="Boolean">
       <description>References signal "PowerMode_UB".</description>
-	</param>
+        </param>
     <param name="powerModeQualificationStatus" type="PowerModeQualificationStatus">
       <description>References signal "PowerModeQF". See PowerModeQualificationStatus.</description>
-	</param>
+        </param>
     <param name="carModeStatus" type="CarModeStatus">
       <description>References signal "CarMode". See CarMode.</description>
-	</param>
+        </param>
     <param name="powerModeStatus" type="PowerModeStatus">
       <description>References signal "PowerMode". See PowerMode.</description>
-	</param>
+        </param>
   </struct>
 
   <struct name="MyKey">
     <param name="e911Override" type="VehicleDataStatus">
       <description>Indicates whether e911 override is on.  References signal "MyKey_e911Override_St". See VehicleDataStatus.</description>
-	</param>
+        </param>
   </struct>
 
 <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
@@ -1503,7 +1671,7 @@
     <element name="SUCCESS" internal_name="VDRC_SUCCESS">
       <description>Individual vehicle data item / DTC / DID request or subscription successful</description>
     </element>
-    <element name="TRUNCATED_DATA" internal_name="VDRC_TRUNCATED_DATA">   
+    <element name="TRUNCATED_DATA" internal_name="VDRC_TRUNCATED_DATA">
       <description>DTC / DID request successful, however, not all active DTCs or full contents of DID location available</description>
     </element>
     <element name="DISALLOWED" internal_name="VDRC_DISALLOWED">
@@ -1524,7 +1692,7 @@
     <element name="DATA_NOT_SUBSCRIBED" internal_name="VDRC_DATA_NOT_SUBSCRIBED">
       <description>The vehicle data item cannot be unsubscribed because it is not currently subscribed.</description>
     </element>
-    <element name="IGNORED" internal_name="VDRC_IGNORED">    
+    <element name="IGNORED" internal_name="VDRC_IGNORED">
       <description>The request for this item is ignored because it is already in progress.</description>
     </element>
   </enum>
@@ -1534,83 +1702,83 @@
 
     <param name="pressureTelltale" type="WarningLightStatus">
       <description>Status of the Tire Pressure Telltale. See WarningLightStatus.</description>
-	</param>
+        </param>
     <param name="leftFront" type="SingleTireStatus">
       <description>The status of the left front tire.</description>
-	</param>
+        </param>
     <param name="rightFront" type="SingleTireStatus">
       <description>The status of the right front tire.</description>
-	</param>
+        </param>
     <param name="leftRear" type="SingleTireStatus">
       <description>The status of the left rear tire.</description>
-	</param>
+        </param>
     <param name="rightRear" type="SingleTireStatus">
       <description>The status of the right rear tire.</description>
-	</param>
+        </param>
     <param name="innerLeftRear" type="SingleTireStatus">
       <description>The status of the inner left rear.</description>
-	</param>
+        </param>
     <param name="innerRightRear" type="SingleTireStatus">
       <description>The status of the inner right rear.</description>
-	</param>
+        </param>
   </struct>
 
   <struct name="GPSData">
     <description>Struct with the GPS data.</description>
-	<param name="longitudeDegrees" type="Float" minvalue="-180" maxvalue="180">
-	</param>
-	<param name="latitudeDegrees" type="Float" minvalue="-90" maxvalue="90">
-	</param>
+        <param name="longitudeDegrees" type="Float" minvalue="-180" maxvalue="180">
+        </param>
+        <param name="latitudeDegrees" type="Float" minvalue="-90" maxvalue="90">
+        </param>
     <param name="utcYear" type="Integer" minvalue="2010" maxvalue="2100">
-    	<description>The current UTC year.</description>
+        <description>The current UTC year.</description>
     </param>
     <param name="utcMonth" type="Integer" minvalue="1" maxvalue="12">
-    	<description>The current UTC month.</description>
+        <description>The current UTC month.</description>
     </param>
     <param name="utcDay" type="Integer" minvalue="1" maxvalue="31">
-    	<description>The current UTC day.</description>
+        <description>The current UTC day.</description>
     </param>
     <param name="utcHours" type="Integer" minvalue="0" maxvalue="23">
-    	<description>The current UTC hour.</description>
+        <description>The current UTC hour.</description>
     </param>
     <param name="utcMinutes" type="Integer" minvalue="0" maxvalue="59">
-    	<description>The current UTC minute.</description>
+        <description>The current UTC minute.</description>
     </param>
     <param name="utcSeconds" type="Integer" minvalue="0" maxvalue="59">
-    	<description>The current UTC second.</description>
+        <description>The current UTC second.</description>
     </param>
     <param name="compassDirection" type="CompassDirection">
-    	<description>See CompassDirection.</description>
+        <description>See CompassDirection.</description>
     </param>
     <param name="pdop" type="Float" minvalue="0" maxvalue="10" defvalue="0">
-    	<description>PDOP.  If undefined or unavailable, then value shall be set to 0.</description>
+        <description>PDOP.  If undefined or unavailable, then value shall be set to 0.</description>
     </param>
     <param name="hdop" type="Float" minvalue="0" maxvalue="10" defvalue="0">
-    	<description>HDOP.  If value is unknown, value shall be set to 0.</description>
+        <description>HDOP.  If value is unknown, value shall be set to 0.</description>
     </param>
     <param name="vdop" type="Float" minvalue="0" maxvalue="10" defvalue="0">
-    	<description>VDOP.  If value is unknown, value shall be set to 0.</description>
+        <description>VDOP.  If value is unknown, value shall be set to 0.</description>
     </param>
     <param name="actual" type="Boolean">
-    	<description>
-    		True, if actual.
-    		False, if infered.
-    	</description>
+        <description>
+                True, if actual.
+                False, if infered.
+        </description>
     </param>
     <param name="satellites" type="Integer" minvalue="0" maxvalue="31">
-    	<description>Number of satellites in view</description>
+        <description>Number of satellites in view</description>
     </param>
     <param name="dimension" type="Dimension">
-    	<description>See Dimension</description>
+        <description>See Dimension</description>
     </param>
     <param name="altitude" type="Float" minvalue="-10000" maxvalue="10000">
-    	<description>Altitude in meters</description>
+        <description>Altitude in meters</description>
     </param>
-	<param name="heading" type="Float" minvalue="0" maxvalue="359.99">
-    	<description>The heading. North is 0. Resolution is 0.01</description>
+        <param name="heading" type="Float" minvalue="0" maxvalue="359.99">
+        <description>The heading. North is 0. Resolution is 0.01</description>
     </param>
     <param name="speed" type="Float" minvalue="0" maxvalue="500">
-    	<description>The speed in KPH</description>
+        <description>The speed in KPH</description>
     </param>
   </struct>
 
@@ -1639,11 +1807,11 @@
 
   <struct name="StartTime">
     <param name="hours" type="Integer" minvalue="0" maxvalue="59">
-    	<description>
-    		The hour of the media clock.
-    		Some radios only support a max of 19 hours. If out of range, it will be rejected.
-    	</description>
-   	</param>
+        <description>
+                The hour of the media clock.
+                Some radios only support a max of 19 hours. If out of range, it will be rejected.
+        </description>
+        </param>
     <param name="minutes" type="Integer" minvalue="0" maxvalue="59" />
     <param name="seconds" type="Integer" minvalue="0" maxvalue="59" />
   </struct>
@@ -1716,7 +1884,7 @@
       </description>
     </param>
     <param name="c" type="TouchCoord" mandatory="true" array="true" minsize="1" maxsize="1000">
-	</param>
+        </param>
   </struct>
 
    <struct name="TouchEventCapabilities">
@@ -1765,8 +1933,8 @@
 
   <struct name="PermissionItem">
     <param name="rpcName" type="String" maxlength="100">
-    	<description>Name of the individual RPC in the policy table.</description>
-   	</param>
+        <description>Name of the individual RPC in the policy table.</description>
+        </param>
     <param name="hmiPermissions" type="HMIPermissions" />
     <param name="parameterPermissions" type="ParameterPermissions" />
  </struct>
@@ -1808,21 +1976,21 @@
     </param>
     <param name="shortPressAvailable" type="Boolean">
       <description>
-      	The button supports a short press.
-      	Whenever the button is pressed short, onButtonPressed( SHORT) will be invoked.
+        The button supports a short press.
+        Whenever the button is pressed short, onButtonPressed( SHORT) will be invoked.
       </description>
     </param>
     <param name="longPressAvailable" type="Boolean">
       <description>
-      	The button supports a LONG press.
-      	Whenever the button is pressed long, onButtonPressed( LONG) will be invoked.
+        The button supports a LONG press.
+        Whenever the button is pressed long, onButtonPressed( LONG) will be invoked.
       </description>
     </param>
     <param name="upDownAvailable" type="Boolean">
       <description>
-      	The button supports "button down" and "button up".
-      	Whenever the button is pressed, onButtonEvent( DOWN) will be invoked.
-      	Whenever the button is released, onButtonEvent( UP) will be invoked.
+        The button supports "button down" and "button up".
+        Whenever the button is pressed, onButtonEvent( DOWN) will be invoked.
+        Whenever the button is released, onButtonEvent( UP) will be invoked.
       </description>
     </param>
   </struct>
@@ -1831,21 +1999,21 @@
     <description>Contains information about a SoftButton's capabilities.</description>
     <param name="shortPressAvailable" type="Boolean">
       <description>
-      	The button supports a short press.
-      	Whenever the button is pressed short, onButtonPressed( SHORT) will be invoked.
+        The button supports a short press.
+        Whenever the button is pressed short, onButtonPressed( SHORT) will be invoked.
       </description>
     </param>
     <param name="longPressAvailable" type="Boolean">
       <description>
-    	The button supports a LONG press.
-      	Whenever the button is pressed long, onButtonPressed( LONG) will be invoked.
+        The button supports a LONG press.
+        Whenever the button is pressed long, onButtonPressed( LONG) will be invoked.
       </description>
     </param>
     <param name="upDownAvailable" type="Boolean">
       <description>
-      	The button supports "button down" and "button up".
-      	Whenever the button is pressed, onButtonEvent( DOWN) will be invoked.
-      	Whenever the button is released, onButtonEvent( UP) will be invoked.
+        The button supports "button down" and "button up".
+        Whenever the button is pressed, onButtonEvent( DOWN) will be invoked.
+        Whenever the button is released, onButtonEvent( UP) will be invoked.
       </description>
     </param>
     <param name="imageSupported" type="Boolean">
@@ -1872,18 +2040,18 @@
   <struct name="MenuParams">
     <param name="parentID" type="Integer" minvalue="0" maxvalue="2000000000" defvalue="0" mandatory="false">
       <description>
-      	unique ID of the sub menu, the command will be added to.
-      	If not provided, it will be provided to the top level of the in application menu.
+        unique ID of the sub menu, the command will be added to.
+        If not provided, it will be provided to the top level of the in application menu.
       </description>
     </param>
 
     <param name="position" type="Integer" minvalue="0" maxvalue="1000" mandatory="false">
       <description>
-      	Position within the items that are are at top level of the in application menu.
-      	0 will insert at the front.
-    	1 will insert at the second position.
-      	if position is greater or equal than the number of items on top level, the sub menu will be appended to the end.
-      	If this param was omitted the entry will be added at the end.
+        Position within the items that are are at top level of the in application menu.
+        0 will insert at the front.
+        1 will insert at the second position.
+        if position is greater or equal than the number of items on top level, the sub menu will be appended to the end.
+        If this param was omitted the entry will be added at the end.
       </description>
     </param>
 
@@ -1896,8 +2064,8 @@
     <description>A TTS chunk, that consists of the text/phonemes to speak and the type (like text or SAPI)</description>
     <param name="text" minlength="0" maxlength="500" type="String">
       <description>
-      	The text or phonemes to speak.
-      	May not be empty.
+        The text or phonemes to speak.
+        May not be empty.
       </description>
     </param>
     <param name="type" type="SpeechCapabilities">
@@ -1971,8 +2139,8 @@
 
     <param name="keypressMode" type="KeypressMode" mandatory="false" >
       <description>
-      	Desired keypress mode.
-      	If omitted, this value will be set to RESEND_CURRENT_ENTRY.
+        Desired keypress mode.
+        If omitted, this value will be set to RESEND_CURRENT_ENTRY.
       </description>
     </param>
 
@@ -1984,7 +2152,7 @@
 
     <param name="autoCompleteText" type="String" maxlength="1000" mandatory="false">
       <description>Allows an app to prepopulate the text field with a suggested or completed entry as the user types</description>
-    </param>   
+    </param>
 
   </struct>
 
@@ -1992,24 +2160,24 @@
     <description>Various information abount connecting device.</description>
 
     <param name="hardware" type="String"  minlength="0" maxlength="500" mandatory="false">
-      <description>Device model</description>    
+      <description>Device model</description>
     </param>
     <param name="firmwareRev" type="String" minlength="0" maxlength="500" mandatory="false">
-      <description>Device firmware revision</description>    
+      <description>Device firmware revision</description>
     </param>
     <param name="os" type="String" minlength="0" maxlength="500" mandatory="false">
-      <description>Device OS</description>    
+      <description>Device OS</description>
     </param>
     <param name="osVersion" type="String" minlength="0" maxlength="500" mandatory="false">
-      <description>Device OS version</description>    
+      <description>Device OS version</description>
     </param>
     <param name="carrier" type="String" minlength="0" maxlength="500" mandatory="false">
-      <description>Device mobile carrier (if applicable)</description>    
+      <description>Device mobile carrier (if applicable)</description>
     </param>
     <param name="maxNumberRFCOMMPorts" type="Integer" minvalue="0" maxvalue="100" mandatory="false">
       <description>Omitted if connected not via BT.</description>
     </param>
-    
+
   </struct>
 
   <enum name="RequestType">
@@ -2020,20 +2188,20 @@
     <element name="AUTH_CHALLENGE" />
     <element name="AUTH_ACK" />
     <element name="PROPRIETARY" />
-    <element name="QUERY_APPS" /> 
-    <element name="LAUNCH_APP" /> 
-    <element name="LOCK_SCREEN_ICON_URL" /> 
+    <element name="QUERY_APPS" />
+    <element name="LAUNCH_APP" />
+    <element name="LOCK_SCREEN_ICON_URL" />
     <element name="TRAFFIC_MESSAGE_CHANNEL" />
     <element name="DRIVER_PROFILE" />
-    <element name="VOICE_SEARCH" /> 
+    <element name="VOICE_SEARCH" />
     <element name="NAVIGATION" />
     <element name="PHONE" />
     <element name="CLIMATE" />
     <element name="SETTINGS" />
     <element name="VEHICLE_DIAGNOSTICS" />
     <element name="EMERGENCY" />
-    <element name="MEDIA" />  
-    <element name="FOTA" />      
+    <element name="MEDIA" />
+    <element name="FOTA" />
   </enum>
 
   <enum name="AppHMIType">
@@ -2048,131 +2216,132 @@
     <element name="BACKGROUND_PROCESS" />
     <element name="TESTING" />
     <element name="SYSTEM" />
+    <element name="REMOTE_CONTROL" />
   </enum>
 
   <enum name="PredefinedLayout" platform="documentation">
     <description>Predefined screen layout.</description>
 
     <element name="DEFAULT" rootscreen="true">
-    	<description>
-    		Default media / non-media screen.
-    		Can be set as a root screen.
-    	</description>
+        <description>
+                Default media / non-media screen.
+                Can be set as a root screen.
+        </description>
     </element>
     <element name="MEDIA" rootscreen="true">
-    	<description>
-    		Default Media screen.
-    		Can be set as a root screen.
-    	</description>
+        <description>
+                Default Media screen.
+                Can be set as a root screen.
+        </description>
     </element>
     <element name="NON-MEDIA" internal_name="NON_MEDIA" rootscreen="true">
-    	<description>
-    		Default Non-media screen.
-    		Can be set as a root screen.
-    	</description>
+        <description>
+                Default Non-media screen.
+                Can be set as a root screen.
+        </description>
     </element>
     <element name="ONSCREEN_PRESETS" rootscreen="true">
-    	<description>
-    		Custom root media screen containing app-defined onscreen presets.
-    		Can be set as a root screen.    		
-    	</description>
+        <description>
+                Custom root media screen containing app-defined onscreen presets.
+                Can be set as a root screen.
+        </description>
     </element>
     <element name="NAV_FULLSCREEN_MAP" rootscreen="true" >
-    	<description>
-    		Custom root template screen containing full screen map with navigation controls.
-    		Can be set as a root screen.    		
-    	</description>
+        <description>
+                Custom root template screen containing full screen map with navigation controls.
+                Can be set as a root screen.
+        </description>
     </element>
     <element name="NAV_LIST" rootscreen="true" >
-    	<description>
-    		Custom root template screen containing video represented list.
-    		Can be set as a root screen.    		
-    	</description>
+        <description>
+                Custom root template screen containing video represented list.
+                Can be set as a root screen.
+        </description>
     </element>
     <element name="NAV_KEYBOARD" rootscreen="true" >
-    	<description>
-    		Custom root template screen containing video represented keyboard.
-    		Can be set as a root screen.    		
-    	</description>
-    </element>    
+        <description>
+                Custom root template screen containing video represented keyboard.
+                Can be set as a root screen.
+        </description>
+    </element>
     <element name="GRAPHIC_WITH_TEXT" rootscreen="true">
-    	<description>
-    		Custom root template screen containing half-screen graphic with lines of text.
-    		Can be set as a root screen.    		
-    	</description>
+        <description>
+                Custom root template screen containing half-screen graphic with lines of text.
+                Can be set as a root screen.
+        </description>
     </element>
     <element name="TEXT_WITH_GRAPHIC" rootscreen="true">
-    	<description>
-    		Custom root template screen containing lines of text with half-screen graphic.
-    		Can be set as a root screen.    		
-    	</description>
+        <description>
+                Custom root template screen containing lines of text with half-screen graphic.
+                Can be set as a root screen.
+        </description>
     </element>
     <element name="TILES_ONLY" rootscreen="true">
-    	<description>
-    		Custom root template screen containing only tiled SoftButtons.
-    		Can be set as a root screen.    		
-    	</description>
+        <description>
+                Custom root template screen containing only tiled SoftButtons.
+                Can be set as a root screen.
+        </description>
     </element>
     <element name="TEXTBUTTONS_ONLY" rootscreen="true">
-    	<description>
-    		Custom root template screen containing only text SoftButtons.
-    		Can be set as a root screen.    		
-    	</description>
-    </element>        
+        <description>
+                Custom root template screen containing only text SoftButtons.
+                Can be set as a root screen.
+        </description>
+    </element>
     <element name="GRAPHIC_WITH_TILES" rootscreen="true">
-    	<description>
-    		Custom root template screen containing half-screen graphic with tiled SoftButtons.
-    		Can be set as a root screen.    		
-    	</description>
+        <description>
+                Custom root template screen containing half-screen graphic with tiled SoftButtons.
+                Can be set as a root screen.
+        </description>
     </element>
     <element name="TILES_WITH_GRAPHIC" rootscreen="true">
-    	<description>
-    		Custom root template screen containing tiled SoftButtons with half-screen graphic.
-    		Can be set as a root screen.    		
-    	</description>
+        <description>
+                Custom root template screen containing tiled SoftButtons with half-screen graphic.
+                Can be set as a root screen.
+        </description>
     </element>
     <element name="GRAPHIC_WITH_TEXT_AND_SOFTBUTTONS" rootscreen="true">
-    	<description>
-    		Custom root template screen containing half-screen graphic with text and SoftButtons.
-    		Can be set as a root screen.    		
-    	</description>
+        <description>
+                Custom root template screen containing half-screen graphic with text and SoftButtons.
+                Can be set as a root screen.
+        </description>
     </element>
     <element name="TEXT_AND_SOFTBUTTONS_WITH_GRAPHIC" rootscreen="true">
-    	<description>
-    		Custom root template screen containing text and SoftButtons with half-screen graphic.
-    		Can be set as a root screen.    		
-    	</description>
+        <description>
+                Custom root template screen containing text and SoftButtons with half-screen graphic.
+                Can be set as a root screen.
+        </description>
     </element>
     <element name="GRAPHIC_WITH_TEXTBUTTONS" rootscreen="true">
-    	<description>
-    		Custom root template screen containing half-screen graphic with text only SoftButtons.
-    		Can be set as a root screen.    		
-    	</description>
+        <description>
+                Custom root template screen containing half-screen graphic with text only SoftButtons.
+                Can be set as a root screen.
+        </description>
     </element>
     <element name="TEXTBUTTONS_WITH_GRAPHIC" rootscreen="true">
-    	<description>
-    		Custom root template screen containing text only SoftButtons with half-screen graphic.
-    		Can be set as a root screen.    		
-    	</description>
+        <description>
+                Custom root template screen containing text only SoftButtons with half-screen graphic.
+                Can be set as a root screen.
+        </description>
     </element>
     <element name="LARGE_GRAPHIC_WITH_SOFTBUTTONS" rootscreen="true">
-    	<description>
-    		Custom root template screen containing a large graphic and SoftButtons.
-    		Can be set as a root screen.    		
-    	</description>
-    </element>    
+        <description>
+                Custom root template screen containing a large graphic and SoftButtons.
+                Can be set as a root screen.
+        </description>
+    </element>
     <element name="DOUBLE_GRAPHIC_WITH_SOFTBUTTONS" rootscreen="true">
-    	<description>
-    		Custom root template screen containing two graphics and SoftButtons.
-    		Can be set as a root screen.    		
-    	</description>
+        <description>
+                Custom root template screen containing two graphics and SoftButtons.
+                Can be set as a root screen.
+        </description>
     </element>
     <element name="LARGE_GRAPHIC_ONLY" rootscreen="true">
-   	<description>
-    		Custom root template screen containing only a large graphic.
-    		Can be set as a root screen.    		
-    	</description>
-    </element> 
+        <description>
+                Custom root template screen containing only a large graphic.
+                Can be set as a root screen.
+        </description>
+    </element>
   </enum>
 
   <enum name="FunctionID" internal_scope="base">
@@ -2180,8 +2349,8 @@
     <description>Assumes enumeration starts at value 0.</description>
     <element name="RESERVED" value="0" />
 <!--
-	Base Request / Response RPCs
-	Range = 0x 0000 0001 - 0x 0000 7FFF
+        Base Request / Response RPCs
+        Range = 0x 0000 0001 - 0x 0000 7FFF
 -->
     <element name="RegisterAppInterfaceID" value="1" hexvalue="1" />
     <element name="UnregisterAppInterfaceID" value="2" hexvalue="2" />
@@ -2228,8 +2397,8 @@
     <element name="UnsubscribeWayPointsID" value="43" hexvalue="2B"/>
 
 <!--
-	Base Notifications
-	Range = 0x 0000 8000 - 0x 0000 FFFF
+        Base Notifications
+        Range = 0x 0000 8000 - 0x 0000 FFFF
 -->
 
     <element name="OnHMIStatusID" value="32768" hexvalue="8000" />
@@ -2250,16 +2419,16 @@
     <element name="OnWayPointChangeID" value="32783" hexvalue="800F" />
 
 <!--
-	Ford Specific Request / Response RPCs
-	Range = 0x 0001 0000 - 0x 0001 7FFF
+        Ford Specific Request / Response RPCs
+        Range = 0x 0001 0000 - 0x 0001 7FFF
 -->
 
     <element name="EncodedSyncPDataID" value="65536" hexvalue="10000" />
     <element name="SyncPDataID" value="65537" hexvalue="10001" />
 
 <!--
-	Ford Specific Notifications
-	Range = 0x 0001 8000 - 0x 0001 FFFF
+        Ford Specific Notifications
+        Range = 0x 0001 8000 - 0x 0001 FFFF
 -->
 
     <element name="OnEncodedSyncPDataID" value="98304" hexvalue="18000" />
@@ -2269,8 +2438,8 @@
 
   <enum name="messageType">
     <description>
-    	Enumeration linking message types with function types in WiPro protocol.
-    	Assumes enumeration starts at value 0.
+        Enumeration linking message types with function types in WiPro protocol.
+        Assumes enumeration starts at value 0.
     </description>
     <element name="request" value="0" />
     <element name="response" value="1" />
@@ -2379,8 +2548,8 @@
 
   <function name="RegisterAppInterface" functionID="RegisterAppInterfaceID" messagetype="request">
     <description>
-    	Establishes an interface with a mobile application.
-    	Before registerAppInterface no other commands will be accepted/executed.
+        Establishes an interface with a mobile application.
+        Before registerAppInterface no other commands will be accepted/executed.
     </description>
 
     <param name="syncMsgVersion" type="SyncMsgVersion">
@@ -2389,68 +2558,68 @@
 
     <param name="appName" type="String" maxlength="100">
       <description>
-      	The mobile application name, e.g. "Ford Drive Green".
-      	Needs to be unique over all applications.
-      	May not be empty.
-      	May not start with a new line character.
-      	May not interfere with any name or synonym of previously registered applications and any predefined blacklist of words (global commands)
-      	Needs to be unique over all applications. Applications with the same name will be rejected.
-      	Only characters from char set [@TODO: Create char set (character/hex value) for each ACM and refer to] are supported.
+        The mobile application name, e.g. "Ford Drive Green".
+        Needs to be unique over all applications.
+        May not be empty.
+        May not start with a new line character.
+        May not interfere with any name or synonym of previously registered applications and any predefined blacklist of words (global commands)
+        Needs to be unique over all applications. Applications with the same name will be rejected.
+        Only characters from char set [@TODO: Create char set (character/hex value) for each ACM and refer to] are supported.
       </description>
     </param>
 
     <param name="ttsName" type="TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false" >
       <description>
-      	TTS string for VR recognition of the mobile application name, e.g. "Ford Drive Green".
-      	Meant to overcome any failing on speech engine in properly pronouncing / understanding app name.
-      	Needs to be unique over all applications.
-      	May not be empty.
-      	May not start with a new line character.
-      	Only characters from char set [@TODO: Create char set (character/hex value) for each ACM and refer to] are supported.
+        TTS string for VR recognition of the mobile application name, e.g. "Ford Drive Green".
+        Meant to overcome any failing on speech engine in properly pronouncing / understanding app name.
+        Needs to be unique over all applications.
+        May not be empty.
+        May not start with a new line character.
+        Only characters from char set [@TODO: Create char set (character/hex value) for each ACM and refer to] are supported.
       </description>
     </param>
 
     <param name="ngnMediaScreenAppName" type="String" maxlength="100" mandatory="false">
       <description>
-      	Provides an abbreviated version of the app name (if needed), that will be displayed on the NGN media screen.
-      	If not provided, the appName is used instead (and will be truncated if too long)
-      	Only characters from char set [@TODO: Create char set (character/hex value) for each ACM and refer to] are supported.
+        Provides an abbreviated version of the app name (if needed), that will be displayed on the NGN media screen.
+        If not provided, the appName is used instead (and will be truncated if too long)
+        Only characters from char set [@TODO: Create char set (character/hex value) for each ACM and refer to] are supported.
       </description>
     </param>
 
     <param name="vrSynonyms" type="String" maxlength="40" minsize="1" maxsize="100" array="true" mandatory="false">
       <description>
-      	Defines an additional voice recognition command.
-      	May not interfere with any app name of previously registered applications and any predefined blacklist of words (global commands)
-      	Only characters from char set [@TODO: Create char set (character/hex value) for each ACM and refer to] are supported.
+        Defines an additional voice recognition command.
+        May not interfere with any app name of previously registered applications and any predefined blacklist of words (global commands)
+        Only characters from char set [@TODO: Create char set (character/hex value) for each ACM and refer to] are supported.
       </description>
     </param>
 
     <param name="isMediaApplication" type="Boolean">
       <description>
-      	Indicates if the application is a media or a non-media application.
-      	Only media applications will be able to stream audio to Sync that is audible outside of the BT media source.
+        Indicates if the application is a media or a non-media application.
+        Only media applications will be able to stream audio to Sync that is audible outside of the BT media source.
       </description>
     </param>
     <param name="languageDesired" type="Language" mandatory="true">
       <description>
-      	See Language
-      	Current app's expected VR+TTS language
-      	If there is a mismatch with SYNC, the app will be able to change this registration with changeRegistration prior to app being brought into focus.
+        See Language
+        Current app's expected VR+TTS language
+        If there is a mismatch with SYNC, the app will be able to change this registration with changeRegistration prior to app being brought into focus.
       </description>
     </param>
     <param name="hmiDisplayLanguageDesired" type="Language" mandatory="true">
       <description>
-      	See Language
-      	Current app's expected display language
-      	If there is a mismatch with SYNC, the app will be able to change this registration with changeRegistration prior to app being brought into focus.
+        See Language
+        Current app's expected display language
+        If there is a mismatch with SYNC, the app will be able to change this registration with changeRegistration prior to app being brought into focus.
       </description>
     </param>
 
     <param name="appHMIType" type="AppHMIType" minsize="1" maxsize="100" array="true" mandatory="false">
       <description>
-      	See AppHMIType
-      	List of all applicable app HMI types stating which HMI classifications to be given to the app.
+        See AppHMIType
+        List of all applicable app HMI types stating which HMI classifications to be given to the app.
       </description>
     </param>
 
@@ -2459,7 +2628,7 @@
         ID used to uniquely identify current state of all app data that can persist through connection cycles (e.g. ignition cycles).
         This registered data (commands, submenus, choice sets, etc.) can be reestablished without needing to explicitly reregister each piece.
         If omitted, then the previous state of an app's commands, etc. will not be restored.
-        When sending hashID, all RegisterAppInterface parameters should still be provided (e.g. ttsName, etc.). 
+        When sending hashID, all RegisterAppInterface parameters should still be provided (e.g. ttsName, etc.).
       </description>
     </param>
     <param name="deviceInfo" type="DeviceInfo" mandatory="false">
@@ -2481,8 +2650,8 @@
     <description>The response to registerAppInterface</description>
 
     <param name="success" type="Boolean" platform="documentation">
-		<description> true if successful; false, if failed </description>
-	</param>
+                <description> true if successful; false, if failed </description>
+        </param>
 
     <param name="resultCode" type="Result" platform="documentation">
       <description>See Result</description>
@@ -2534,7 +2703,7 @@
     </param>
 
     <param name="hmiZoneCapabilities" type="HmiZoneCapabilities" minsize="1" maxsize="100" array="true" mandatory="false">
-		<issue creator="rs">If not used yet => remove</issue>
+                <issue creator="rs">If not used yet => remove</issue>
       <description>See HmiZoneCapabilities</description>
     </param>
 
@@ -2564,14 +2733,14 @@
 
     <param name="supportedDiagModes" type="Integer" minvalue="0" maxvalue="255" array="true" minsize="1" maxsize="100" mandatory="false" >
       <description>
-      	Specifies the white-list of supported diagnostic modes (0x00-0xFF) capable for DiagnosticMessage requests.
-      	If a mode outside this list is requested, it will be rejected.
+        Specifies the white-list of supported diagnostic modes (0x00-0xFF) capable for DiagnosticMessage requests.
+        If a mode outside this list is requested, it will be rejected.
       </description>
     </param>
 
     <param name="hmiCapabilities" type="HMICapabilities" mandatory="false">
       <description>Specifies the HMIÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢s capabilities. See HMICapabilities.</description>
-    </param>                 
+    </param>
 
     <param name="sdlVersion" type="String" maxlength="100" mandatory="false" platform="documentation">
       <description>The SmartDeviceLink version.</description>
@@ -2585,17 +2754,17 @@
 
   <function name="UnregisterAppInterface" functionID="UnregisterAppInterfaceID" messagetype="request">
     <description>
-    	Closes an interface from a mobile application.
-    	After unregisterAppInterface, no commands other than registerAppInterface will be accepted/executed.
-    	Will fail, if no registerAppInterface was completed successfully before.
+        Closes an interface from a mobile application.
+        After unregisterAppInterface, no commands other than registerAppInterface will be accepted/executed.
+        Will fail, if no registerAppInterface was completed successfully before.
     </description>
   </function>
 
   <function name="UnregisterAppInterface" functionID="UnregisterAppInterfaceID" messagetype="response">
 
     <param name="success" type="Boolean" platform="documentation">
-		<description> true if successful; false, if failed </description>
-	  </param>
+                <description> true if successful; false, if failed </description>
+          </param>
 
     <param name="resultCode" type="Result" platform="documentation">
       <description>See Result</description>
@@ -2618,34 +2787,34 @@
 
     <param name="helpPrompt" type="TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false" >
       <description>
-      	The help prompt.
-      	An array of text chunks of type TTSChunk. See TTSChunk.
-      	The array must have at least one item.
+        The help prompt.
+        An array of text chunks of type TTSChunk. See TTSChunk.
+        The array must have at least one item.
       </description>
     </param>
 
     <param name="timeoutPrompt" type="TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false" >
       <description>
-      	Help text for a wait timeout.
-      	An array of text chunks of type TTSChunk. See TTSChunk.
-      	The array must have at least one item.
+        Help text for a wait timeout.
+        An array of text chunks of type TTSChunk. See TTSChunk.
+        The array must have at least one item.
       </description>
     </param>
 
     <param name="vrHelpTitle" type="String" maxlength="500" mandatory="false">
       <description>
-      	VR Help Title text.
-      	If omitted on supported displays, the default SYNC help title shall be used.
-      	If omitted and one or more vrHelp items are provided, the request will be rejected.
+        VR Help Title text.
+        If omitted on supported displays, the default SYNC help title shall be used.
+        If omitted and one or more vrHelp items are provided, the request will be rejected.
       </description>
     </param>
 
     <param name="vrHelp" type="VrHelpItem" minsize="1" maxsize="100" array="true" mandatory="false">
       <description>
-      	VR Help Items.
-      	If omitted on supported displays, the default AppLink VR help / What Can I Say? screen shall be used.
-      	If the list of VR Help Items contains nonsequential positions (e.g. [1,2,4]), the RPC shall be rejected.
-      	If omitted and a vrHelpTitle is provided, the request will be rejected.
+        VR Help Items.
+        If omitted on supported displays, the default AppLink VR help / What Can I Say? screen shall be used.
+        If the list of VR Help Items contains nonsequential positions (e.g. [1,2,4]), the RPC shall be rejected.
+        If omitted and a vrHelpTitle is provided, the request will be rejected.
       </description>
     </param>
     <param name="menuTitle" maxlength="500" type="String" mandatory="false">
@@ -2664,7 +2833,7 @@
   <function name="SetGlobalProperties" functionID="SetGlobalPropertiesID" messagetype="response">
 
     <param name="success" type="Boolean" platform="documentation">
-		<description> true if successful; false, if failed </description>
+                <description> true if successful; false, if failed </description>
     </param>
 
     <param name="resultCode" type="Result" platform="documentation">
@@ -2676,8 +2845,8 @@
       <element name="APPLICATION_NOT_REGISTERED"/>
       <element name="GENERIC_ERROR"/>
       <element name="REJECTED"/>
-      <element name="UNSUPPORTED_RESOURCE"/>      
-      <element name="WARNINGS"/>                   
+      <element name="UNSUPPORTED_RESOURCE"/>
+      <element name="WARNINGS"/>
       <element name="DISALLOWED"/>
     </param>
 
@@ -2720,8 +2889,8 @@
 
   <function name="AddCommand" functionID="AddCommandID" messagetype="request">
     <description>
-    	Adds a command to the in application menu.
-    	Either menuParams or vrCommands must be provided.
+        Adds a command to the in application menu.
+        Either menuParams or vrCommands must be provided.
     </description>
 
     <param name="cmdID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
@@ -2734,15 +2903,15 @@
 
     <param name="vrCommands" type="String" minsize="1" maxsize="100" maxlength="99" array="true" mandatory="false">
       <description>
-      	An array of strings to be used as VR synonyms for this command.
-      	If this array is provided, it may not be empty.
+        An array of strings to be used as VR synonyms for this command.
+        If this array is provided, it may not be empty.
       </description>
     </param>
 
     <param name="cmdIcon" type="Image" mandatory="false">
        <description>
-       	Image struct determining whether static or dynamic icon.
-       	If omitted on supported displays, no (or the default if applicable) icon shall be displayed.
+        Image struct determining whether static or dynamic icon.
+        If omitted on supported displays, no (or the default if applicable) icon shall be displayed.
        </description>
      </param>
 
@@ -2751,8 +2920,8 @@
   <function name="AddCommand" functionID="AddCommandID" messagetype="response">
 
     <param name="success" type="Boolean" platform="documentation">
-		<description> true if successful; false, if failed </description>
-	  </param>
+                <description> true if successful; false, if failed </description>
+          </param>
 
     <param name="resultCode" type="Result" platform="documentation">
       <description>See Result</description>
@@ -2767,7 +2936,7 @@
       <element name="DUPLICATE_NAME"/>
       <element name="UNSUPPORTED_RESOURCE"/>
       <element name="DISALLOWED"/>
-      <element name="WARNINGS"/>         
+      <element name="WARNINGS"/>
     </param>
 
     <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
@@ -2787,8 +2956,8 @@
 
   <function name="DeleteCommand" functionID="DeleteCommandID" messagetype="response">
     <param name="success" type="Boolean" platform="documentation">
-		<description> true if successful; false, if failed </description>
-	</param>
+                <description> true if successful; false, if failed </description>
+        </param>
 
     <param name="resultCode" type="Result" platform="documentation">
       <description>See Result</description>
@@ -2818,12 +2987,12 @@
 
     <param name="position" type="Integer" minvalue="0" maxvalue="1000" defvalue="1000" mandatory="false">
       <description>
-      	Position within the items that are are at top level of the in application menu.
-      	0 will insert at the front.
-      	1 will insert at the second position.
-      	If position is greater or equal than the number of items on top level, the sub menu will be appended to the end.
-      	Position of any submenu will always be located before the return and exit options
-      	If this param was omitted the entry will be added at the end.
+        Position within the items that are are at top level of the in application menu.
+        0 will insert at the front.
+        1 will insert at the second position.
+        If position is greater or equal than the number of items on top level, the sub menu will be appended to the end.
+        Position of any submenu will always be located before the return and exit options
+        If this param was omitted the entry will be added at the end.
       </description>
     </param>
 
@@ -2834,8 +3003,8 @@
 
   <function name="AddSubMenu" functionID="AddSubMenuID" messagetype="response">
     <param name="success" type="Boolean" platform="documentation">
-		<description> true if successful; false, if failed </description>
-	  </param>
+                <description> true if successful; false, if failed </description>
+          </param>
 
     <param name="resultCode" type="Result" platform="documentation">
       <description>See Result</description>
@@ -2867,8 +3036,8 @@
   <function name="DeleteSubMenu" functionID="DeleteSubMenuID" messagetype="response">
 
     <param name="success" type="Boolean" platform="documentation">
-		<description> true if successful; false, if failed </description>
-	</param>
+                <description> true if successful; false, if failed </description>
+        </param>
 
     <param name="resultCode" type="Result" platform="documentation">
       <description>See Result</description>
@@ -2901,8 +3070,8 @@
 
   <function name="CreateInteractionChoiceSet" functionID="CreateInteractionChoiceSetID" messagetype="response">
     <param name="success" type="Boolean" platform="documentation">
-		<description> true if successful; false, if failed </description>
-	</param>
+                <description> true if successful; false, if failed </description>
+        </param>
 
     <param name="resultCode" type="Result" platform="documentation">
       <description>See Result</description>
@@ -2934,9 +3103,9 @@
 
     <param name="initialPrompt" type="TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false">
       <description>
-      	This is the intial prompt spoken to the user at the start of an interaction.
-      	An array of text chunks of type TTSChunk. See TTSChunk.
-      	The array must have at least one item.
+        This is the intial prompt spoken to the user at the start of an interaction.
+        An array of text chunks of type TTSChunk. See TTSChunk.
+        The array must have at least one item.
       </description>
     </param>
 
@@ -2950,32 +3119,32 @@
 
     <param name="helpPrompt" type="TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false">
       <description>
-      	Help text. This is the spoken string when a user speaks "help" when the interaction is occuring.
-      	An array of text chunks of type TTSChunk. See TTSChunk.
-      	The array must have at least one item.
+        Help text. This is the spoken string when a user speaks "help" when the interaction is occuring.
+        An array of text chunks of type TTSChunk. See TTSChunk.
+        The array must have at least one item.
       </description>
     </param>
 
     <param name="timeoutPrompt" type="TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false">
       <description>
-      	Timeout text. This text is spoken when a VR interaction times out.
-      	An array of text chunks of type TTSChunk. See TTSChunk.
-      	The array must have at least one item.
+        Timeout text. This text is spoken when a VR interaction times out.
+        An array of text chunks of type TTSChunk. See TTSChunk.
+        The array must have at least one item.
       </description>
     </param>
 
     <param name="timeout" type="Integer" minvalue="5000" maxvalue="100000" defvalue="10000" mandatory="false">
       <description>
-      	Timeout in milliseconds.
-	  	If omitted a standard value of 10000 milliseconds is used.
-	  	Applies only to the menu portion of the interaction. The VR timeout will be handled by the platform.
-	  </description>
+        Timeout in milliseconds.
+                If omitted a standard value of 10000 milliseconds is used.
+                Applies only to the menu portion of the interaction. The VR timeout will be handled by the platform.
+          </description>
     </param>
 
     <param name="vrHelp" type="VrHelpItem" minsize="1" maxsize="100" array="true" mandatory="false">
       <description>
-      	Ability to send suggested VR Help Items to display on-screen during Perform Interaction.
-      	If omitted on supported displays, the default SYNC generated list of suggested choices shall be displayed.
+        Ability to send suggested VR Help Items to display on-screen during Perform Interaction.
+        If omitted on supported displays, the default SYNC generated list of suggested choices shall be displayed.
       </description>
     </param>
 
@@ -2987,9 +3156,9 @@
 
   <function name="PerformInteraction" functionID="PerformInteractionID" messagetype="response">
 
-  	<param name="success" type="Boolean" platform="documentation">
-		<description> true if successful; false, if failed </description>
-	</param>
+        <param name="success" type="Boolean" platform="documentation">
+                <description> true if successful; false, if failed </description>
+        </param>
 
     <param name="resultCode" type="Result" platform="documentation">
       <description>See Result</description>
@@ -3014,22 +3183,22 @@
 
     <param name="choiceID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
       <description>
-      	ID of the choice that was selected in response to PerformInteraction.
-      	Only is valid if general result is "success:true".
+        ID of the choice that was selected in response to PerformInteraction.
+        Only is valid if general result is "success:true".
       </description>
     </param>
 
     <param name="manualTextEntry" type="String" maxlength="500" mandatory="false">
       <description>
-      	Manually entered text selection, e.g. through keyboard
-      	Can be returned in lieu of choiceID, depending on trigger source
+        Manually entered text selection, e.g. through keyboard
+        Can be returned in lieu of choiceID, depending on trigger source
       </description>
     </param>
 
     <param name="triggerSource" type="TriggerSource" mandatory="false">
       <description>
-      	See TriggerSource
-      	Only is valid if resultCode is SUCCESS.
+        See TriggerSource
+        Only is valid if resultCode is SUCCESS.
       </description>
     </param>
 
@@ -3046,8 +3215,8 @@
 
   <function name="DeleteInteractionChoiceSet" functionID="DeleteInteractionChoiceSetID" messagetype="response">
     <param name="success" type="Boolean" platform="documentation">
-		<description> true if successful; false, if failed </description>
-	</param>
+                <description> true if successful; false, if failed </description>
+        </param>
 
     <param name="resultCode" type="Result" platform="documentation">
       <description>See Result</description>
@@ -3084,36 +3253,36 @@
 
     <param name="ttsChunks" type="TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false">
       <description>
-      	An array of text chunks of type TTSChunk. See TTSChunk.
-      	The array must have at least one item.
+        An array of text chunks of type TTSChunk. See TTSChunk.
+        The array must have at least one item.
       </description>
     </param>
 
     <param name="duration" type="Integer" minvalue="3000" maxvalue="10000" defvalue="5000" mandatory="false">
       <description>
-      	Timeout in milliseconds.
-      	Typical timeouts are 3-5 seconds.
-      	If omitted, timeout is set to 5s.
+        Timeout in milliseconds.
+        Typical timeouts are 3-5 seconds.
+        If omitted, timeout is set to 5s.
       </description>
     </param>
 
     <param name="playTone" type="Boolean" mandatory="false">
       <description>
-      	Defines if tone should be played. Tone is played before TTS.
-      	If omitted, no tone is played.
+        Defines if tone should be played. Tone is played before TTS.
+        If omitted, no tone is played.
       </description>
     </param>
 
     <param name="progressIndicator" type="Boolean" mandatory="false">
       <description>
-      	If supported on the given platform, the alert GUI will include some sort of animation indicating that loading of a feature is progressing.  e.g. a spinning wheel or hourglass, etc.
+        If supported on the given platform, the alert GUI will include some sort of animation indicating that loading of a feature is progressing.  e.g. a spinning wheel or hourglass, etc.
       </description>
     </param>
 
     <param name="softButtons" type="SoftButton" minsize="0" maxsize="4" array="true" mandatory="false">
       <description>
-      	App defined SoftButtons.
-    	If omitted on supported displays, the displayed alert shall not have any SoftButtons.
+        App defined SoftButtons.
+        If omitted on supported displays, the displayed alert shall not have any SoftButtons.
       </description>
     </param>
 
@@ -3122,8 +3291,8 @@
   <function name="Alert" functionID="AlertID" messagetype="response">
 
     <param name="success" type="Boolean" platform="documentation">
-		<description> true if successful; false, if failed </description>
-	</param>
+                <description> true if successful; false, if failed </description>
+        </param>
 
     <param name="resultCode" type="Result" platform="documentation">
       <description>See Result</description>
@@ -3147,9 +3316,9 @@
 
     <param name="tryAgainTime" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
       <description>
-      	Amount of time (in seconds) that an app must wait before resending an alert.
-      	If provided, another system event or overlay currently has a higher priority than this alert.
-      	An app must not send an alert without waiting at least the amount of time dictated.
+        Amount of time (in seconds) that an app must wait before resending an alert.
+        If provided, another system event or overlay currently has a higher priority than this alert.
+        An app must not send an alert without waiting at least the amount of time dictated.
       </description>
     </param>
 
@@ -3160,40 +3329,40 @@
 
     <param name="mainField1" type="String" minlength="0" maxlength="500" mandatory="false">
       <description>
-      	The text that should be displayed in a single or upper display line.
-      	If this text is not set, the text of mainField1 stays unchanged.
-      	If this text is empty "", the field will be cleared.
+        The text that should be displayed in a single or upper display line.
+        If this text is not set, the text of mainField1 stays unchanged.
+        If this text is empty "", the field will be cleared.
       </description>
     </param>
 
     <param name="mainField2" type="String" minlength="0" maxlength="500" mandatory="false">
       <description>
-      	The text that should be displayed on the second display line.
-      	If this text is not set, the text of mainField2 stays unchanged.
-      	If this text is empty "", the field will be cleared.
+        The text that should be displayed on the second display line.
+        If this text is not set, the text of mainField2 stays unchanged.
+        If this text is empty "", the field will be cleared.
       </description>
     </param>
 
     <param name="mainField3" type="String" minlength="0" maxlength="500" mandatory="false">
       <description>
-      	The text that should be displayed on the second "page" first display line.
-      	If this text is not set, the text of mainField3 stays unchanged.
-      	If this text is empty "", the field will be cleared.
+        The text that should be displayed on the second "page" first display line.
+        If this text is not set, the text of mainField3 stays unchanged.
+        If this text is empty "", the field will be cleared.
       </description>
     </param>
 
     <param name="mainField4" type="String" minlength="0" maxlength="500" mandatory="false">
       <description>
-      	The text that should be displayed on the second "page" second display line.
-      	If this text is not set, the text of mainField4 stays unchanged.
-      	If this text is empty "", the field will be cleared.
+        The text that should be displayed on the second "page" second display line.
+        If this text is not set, the text of mainField4 stays unchanged.
+        If this text is empty "", the field will be cleared.
       </description>
     </param>
 
     <param name="alignment" type="TextAlignment" mandatory="false">
       <description>
-      	Specifies how mainField1 and mainField2 texts should be aligned on display.
-      	If omitted, texts will be centered.
+        Specifies how mainField1 and mainField2 texts should be aligned on display.
+        If omitted, texts will be centered.
       </description>
     </param>
 
@@ -3203,45 +3372,45 @@
 
     <param name="mediaClock" type="String" minlength="0" maxlength="500" mandatory="false">
       <description>
-      	Text value for MediaClock field. Has to be properly formatted by Mobile App according to Sync capabilities.
-      	If this text is set, any automatic media clock updates previously set with SetMediaClockTimer will be stopped.
+        Text value for MediaClock field. Has to be properly formatted by Mobile App according to Sync capabilities.
+        If this text is set, any automatic media clock updates previously set with SetMediaClockTimer will be stopped.
       </description>
     </param>
 
     <param name="mediaTrack" type="String" minlength="0" maxlength="500" mandatory="false">
       <description>
-      	The text that should be displayed in the track field.
-      	If this text is not set, the text of mediaTrack stays unchanged.
-      	If this text is empty "", the field will be cleared.
+        The text that should be displayed in the track field.
+        If this text is not set, the text of mediaTrack stays unchanged.
+        If this text is empty "", the field will be cleared.
       </description>
     </param>
 
      <param name="graphic" type="Image" mandatory="false">
        <description>
-       	Image struct determining whether static or dynamic image to display in app.
-       	If omitted on supported displays, the displayed graphic shall not change.
+        Image struct determining whether static or dynamic image to display in app.
+        If omitted on supported displays, the displayed graphic shall not change.
        </description>
      </param>
 
      <param name="secondaryGraphic" type="Image" mandatory="false">
        <description>
-       	Image struct determining whether static or dynamic secondary image to display in app.
-       	If omitted on supported displays, the displayed secondary graphic shall not change.
+        Image struct determining whether static or dynamic secondary image to display in app.
+        If omitted on supported displays, the displayed secondary graphic shall not change.
        </description>
      </param>
 
 
     <param name="softButtons" type="SoftButton" minsize="0" maxsize="8" array="true" mandatory="false">
       <description>
-      	App defined SoftButtons.
-      	If omitted on supported displays, the currently displayed SoftButton values will not change.
+        App defined SoftButtons.
+        If omitted on supported displays, the currently displayed SoftButton values will not change.
       </description>
     </param>
 
     <param name="customPresets" type="String" maxlength="500" minsize="0" maxsize="10" array="true" mandatory="false">
       <description>
-      	App labeled on-screen presets (i.e. on-screen media presets or dynamic search suggestions).
-      	If omitted on supported displays, the presets will be shown as not defined.
+        App labeled on-screen presets (i.e. on-screen media presets or dynamic search suggestions).
+        If omitted on supported displays, the presets will be shown as not defined.
       </description>
     </param>
 
@@ -3250,7 +3419,7 @@
   <function name="Show" functionID="ShowID" messagetype="response">
 
     <param name="success" type="Boolean" platform="documentation">
-		<description> true if successful; false, if failed </description>
+                <description> true if successful; false, if failed </description>
     </param>
 
     <param name="resultCode" type="Result" platform="documentation">
@@ -3264,7 +3433,7 @@
       <element name="REJECTED"/>
       <element name="DISALLOWED"/>
       <element name="UNSUPPORTED_RESOURCE"/>
-      <element name="WARNINGS"/>            
+      <element name="WARNINGS"/>
       <element name="ABORTED"/>
     </param>
 
@@ -3278,8 +3447,8 @@
 
     <param name="ttsChunks" type="TTSChunk" minsize="1" maxsize="100" array="true">
       <description>
-      	An array of text chunks of type TTSChunk. See TTSChunk.
-      	The array must have at least one item.
+        An array of text chunks of type TTSChunk. See TTSChunk.
+        The array must have at least one item.
       </description>
     </param>
 
@@ -3288,7 +3457,7 @@
   <function name="Speak" functionID="SpeakID" messagetype="response">
 
     <param name="success" type="Boolean" platform="documentation">
-		<description> true if successful; false, if failed </description>
+                <description> true if successful; false, if failed </description>
     </param>
 
     <param name="resultCode" type="Result" platform="documentation">
@@ -3316,34 +3485,34 @@
 
     <param name="startTime" type="StartTime" mandatory="false">
       <description>
-      	See StartTime.
-      	startTime must be provided for "COUNTUP" and "COUNTDOWN".
-      	startTime will be ignored for "RESUME", and "CLEAR"
-      	startTime can be sent for "PAUSE", in which case it will update the paused startTime
+        See StartTime.
+        startTime must be provided for "COUNTUP" and "COUNTDOWN".
+        startTime will be ignored for "RESUME", and "CLEAR"
+        startTime can be sent for "PAUSE", in which case it will update the paused startTime
       </description>
     </param>
 
     <param name="endTime" type="StartTime" mandatory="false">
       <description>
-      	See StartTime.
-      	endTime can be provided for "COUNTUP" and "COUNTDOWN"; to be used to calculate any visual progress bar (if not provided, this feature is ignored)
-      	If endTime is greater then startTime for COUNTDOWN or less than startTime for COUNTUP, then the request will return an INVALID_DATA.
-      	endTime will be ignored for "RESUME", and "CLEAR"
-      	endTime can be sent for "PAUSE", in which case it will update the paused endTime
+        See StartTime.
+        endTime can be provided for "COUNTUP" and "COUNTDOWN"; to be used to calculate any visual progress bar (if not provided, this feature is ignored)
+        If endTime is greater then startTime for COUNTDOWN or less than startTime for COUNTUP, then the request will return an INVALID_DATA.
+        endTime will be ignored for "RESUME", and "CLEAR"
+        endTime can be sent for "PAUSE", in which case it will update the paused endTime
       </description>
     </param>
 
     <param name="updateMode" type="UpdateMode" mandatory="true">
       <description>
-      	Enumeration to control the media clock.
-      	In case of pause, resume, or clear, the start time value is ignored and shall be left out.  For resume, the time continues with the same value as it was when paused.
+        Enumeration to control the media clock.
+        In case of pause, resume, or clear, the start time value is ignored and shall be left out.  For resume, the time continues with the same value as it was when paused.
       </description>
     </param>
   </function>
 
   <function name="SetMediaClockTimer" functionID="SetMediaClockTimerID" messagetype="response">
    <param name="success" type="Boolean" platform="documentation">
-		<description> true if successful; false, if failed </description>
+                <description> true if successful; false, if failed </description>
     </param>
 
     <param name="resultCode" type="Result" platform="documentation">
@@ -3367,10 +3536,10 @@
     <description>Starts audio pass thru session </description>
     <param name="initialPrompt" type="TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false">
       <description>
-      	SYNC will speak this prompt before opening the audio pass thru session.
-      	An array of text chunks of type TTSChunk. See TTSChunk.
-      	The array must have at least one item.
-      	If omitted, then no initial prompt is spoken.
+        SYNC will speak this prompt before opening the audio pass thru session.
+        An array of text chunks of type TTSChunk. See TTSChunk.
+        The array must have at least one item.
+        If omitted, then no initial prompt is spoken.
       </description>
     </param>
     <param name="audioPassThruDisplayText1" type="String" mandatory="false" maxlength="500">
@@ -3393,15 +3562,15 @@
     </param>
     <param name="muteAudio" type="Boolean" mandatory="false">
       <description>
-		Defines if the current audio source should be muted during the APT session.  If not, the audio source will play without interruption.
-      	If omitted, the value is set to true.
+                Defines if the current audio source should be muted during the APT session.  If not, the audio source will play without interruption.
+        If omitted, the value is set to true.
       </description>
     </param>
   </function>
 
   <function name="PerformAudioPassThru" functionID="PerformAudioPassThruID" messagetype="response">
     <param name="success" type="Boolean" platform="documentation">
-		<description> true if successful; false, if failed </description>
+                <description> true if successful; false, if failed </description>
     </param>
 
     <param name="resultCode" type="Result" platform="documentation">
@@ -3430,7 +3599,7 @@
 
   <function name="EndAudioPassThru" functionID="EndAudioPassThruID" messagetype="response">
      <param name="success" type="Boolean" platform="documentation">
-		<description> true if successful; false, if failed </description>
+                <description> true if successful; false, if failed </description>
     </param>
 
     <param name="resultCode" type="Result" platform="documentation">
@@ -3452,9 +3621,9 @@
 
   <function name="SubscribeButton" functionID="SubscribeButtonID" messagetype="request">
     <description>
-    	Subscribes to built-in HMI buttons.
-    	The application will be notified by the OnButtonEvent and OnButtonPress.
-    	To unsubscribe the notifications, use unsubscribeButton.
+        Subscribes to built-in HMI buttons.
+        The application will be notified by the OnButtonEvent and OnButtonPress.
+        To unsubscribe the notifications, use unsubscribeButton.
     </description>
 
     <param name="buttonName" type="ButtonName">
@@ -3464,8 +3633,8 @@
 
   <function name="SubscribeButton" functionID="SubscribeButtonID" messagetype="response">
     <param name="success" type="Boolean" platform="documentation">
-		<description> true if successful; false, if failed </description>
-	</param>
+                <description> true if successful; false, if failed </description>
+        </param>
 
     <param name="resultCode" type="Result" platform="documentation">
       <description>See Result</description>
@@ -3495,8 +3664,8 @@
 
   <function name="UnsubscribeButton" functionID="UnsubscribeButtonID" messagetype="response">
     <param name="success" type="Boolean" platform="documentation">
-		<description> true if successful; false, if failed </description>
-	</param>
+                <description> true if successful; false, if failed </description>
+        </param>
 
     <param name="resultCode" type="Result" platform="documentation">
       <description>See Result</description>
@@ -3518,10 +3687,10 @@
 
   <function name="SubscribeVehicleData" functionID="SubscribeVehicleDataID" messagetype="request">
     <description>
-    	Subscribes for specific published data items.
-    	The data will be only sent if it has changed.
-    	The application will be notified by the onVehicleData notification whenever new data is available.
-    	To unsubscribe the notifications, use unsubscribe with the same subscriptionType.
+        Subscribes for specific published data items.
+        The data will be only sent if it has changed.
+        The application will be notified by the onVehicleData notification whenever new data is available.
+        To unsubscribe the notifications, use unsubscribe with the same subscriptionType.
     </description>
 
     <param name="gps" type="Boolean" mandatory="false">
@@ -3582,7 +3751,7 @@
       <description>Current angle of the steering wheel (in deg)</description>
     </param>
 
-	<!-- Ford Specific Data Items -->
+        <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Boolean" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
     </param>
@@ -3599,14 +3768,14 @@
       <description>Information related to the MyKey feature</description>
     </param>
 
-	<!-- / Ford Specific Data Items -->
+        <!-- / Ford Specific Data Items -->
 
   </function>
 
   <function name="SubscribeVehicleData" functionID="SubscribeVehicleDataID" messagetype="response">
    <param name="success" type="Boolean" platform="documentation">
-		<description> true, if successful; false, if failed </description>
-	  </param>
+                <description> true, if successful; false, if failed </description>
+          </param>
 
     <param name="resultCode" type="Result" platform="documentation">
       <description>See Result</description>
@@ -3685,7 +3854,7 @@
       <description>Current angle of the steering wheel (in deg)</description>
     </param>
 
-	<!-- Ford Specific Data Items -->
+        <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="VehicleDataResult" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
     </param>
@@ -3701,7 +3870,7 @@
     <param name="myKey" type="VehicleDataResult" mandatory="false">
       <description>Information related to the MyKey feature</description>
     </param>
-	<!-- / Ford Specific Data Items -->
+        <!-- / Ford Specific Data Items -->
 
   </function>
 
@@ -3766,7 +3935,7 @@
       <description>Current angle of the steering wheel (in deg)</description>
     </param>
 
-	<!-- Ford Specific Data Items -->
+        <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Boolean" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
     </param>
@@ -3782,13 +3951,13 @@
     <param name="myKey" type="Boolean" mandatory="false">
       <description>Information related to the MyKey feature</description>
     </param>
-	<!-- / Ford Specific Data Items -->
+        <!-- / Ford Specific Data Items -->
 
   </function>
 
   <function name="UnsubscribeVehicleData" functionID="UnsubscribeVehicleDataID" messagetype="response">
     <param name="success" type="Boolean" platform="documentation">
-		<description> true, if successful; false, if failed </description>
+                <description> true, if successful; false, if failed </description>
     </param>
 
     <param name="resultCode" type="Result" platform="documentation">
@@ -3867,11 +4036,11 @@
       <description>Current angle of the steering wheel (in deg)</description>
     </param>
 
-	<!-- Ford Specific Data Items -->
+        <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="VehicleDataResult" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
     </param>
-    <param name="airbagStatus" type="VehicleDataResult" mandatory="false" >                                                           
+    <param name="airbagStatus" type="VehicleDataResult" mandatory="false" >
       <description>The status of the air bags</description>
     </param>
     <param name="emergencyEvent" type="VehicleDataResult" mandatory="false">
@@ -3883,7 +4052,7 @@
     <param name="myKey" type="VehicleDataResult" mandatory="false">
       <description>Information related to the MyKey feature</description>
     </param>
-	<!-- / Ford Specific Data Items -->
+        <!-- / Ford Specific Data Items -->
 
   </function>
 
@@ -3951,7 +4120,7 @@
       <description>Current angle of the steering wheel (in deg)</description>
     </param>
 
-	<!-- Ford Specific Data Items -->
+        <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Boolean" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
     </param>
@@ -3967,15 +4136,15 @@
     <param name="myKey" type="Boolean" mandatory="false">
       <description>Information related to the MyKey feature</description>
     </param>
-	<!-- / Ford Specific Data Items -->
+        <!-- / Ford Specific Data Items -->
 
   </function>
 
   <function name="GetVehicleData" functionID="GetVehicleDataID" messagetype="response">
 
     <param name="success" type="Boolean" platform="documentation">
-		<description> true, if successful; false, if failed </description>
-	</param>
+                <description> true, if successful; false, if failed </description>
+        </param>
 
     <param name="resultCode" type="Result" platform="documentation">
       <description>See Result</description>
@@ -4056,7 +4225,7 @@
       <description>Current angle of the steering wheel (in deg)</description>
     </param>
 
-	<!-- Ford Specific Data Items -->
+        <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="ECallInfo" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
     </param>
@@ -4072,7 +4241,7 @@
     <param name="myKey" type="MyKey" mandatory="false">
       <description>Information related to the MyKey feature</description>
     </param>
-	<!-- / Ford Specific Data Items -->
+        <!-- / Ford Specific Data Items -->
 
   </function>
 
@@ -4090,8 +4259,8 @@
   <function name="ReadDID" functionID="ReadDIDID" messagetype="response">
 
     <param name="success" type="Boolean" platform="documentation">
-		<description> true, if successful; false, if failed </description>
-	  </param>
+                <description> true, if successful; false, if failed </description>
+          </param>
 
     <param name="resultCode" type="Result" platform="documentation">
       <description>See Result</description>
@@ -4133,8 +4302,8 @@
   <function name="GetDTCs" functionID="GetDTCsID" messagetype="response">
 
     <param name="success" type="Boolean" platform="documentation">
-		<description> true, if successful; false, if failed </description>
-	  </param>
+                <description> true, if successful; false, if failed </description>
+          </param>
 
     <param name="resultCode" type="Result" platform="documentation">
       <description>See Result</description>
@@ -4160,8 +4329,8 @@
 
     <param name="dtc" type="String" mandatory="false" minsize="1" maxsize="15" maxlength="10" array="true">
       <description>
-      	Array of all reported DTCs on module (ecuHeader contains information if list is truncated).
-      	Each DTC is represented by 4 bytes (3 bytes of data and 1 byte status as defined in VHR_Layout_Specification_DTCs.pdf).
+        Array of all reported DTCs on module (ecuHeader contains information if list is truncated).
+        Each DTC is represented by 4 bytes (3 bytes of data and 1 byte status as defined in VHR_Layout_Specification_DTCs.pdf).
       </description>
     </param>
 
@@ -4180,7 +4349,7 @@
 
     <param name="messageData" type="Integer" minvalue="0" maxvalue="255" minsize="1" maxsize="65535" array="true" mandatory="true">
       <description>
-      	Array of bytes comprising CAN message.
+        Array of bytes comprising CAN message.
       </description>
     </param>
   </function>
@@ -4211,7 +4380,7 @@
 
     <param name="messageDataResult" type="Integer" minvalue="0" maxvalue="255" minsize="1" maxsize="65535" array="true" mandatory="true">
       <description>
-      	Array of bytes comprising CAN message result.
+        Array of bytes comprising CAN message result.
       </description>
     </param>
 
@@ -4227,16 +4396,16 @@
     </param>
     <param name="softButtons" type="SoftButton" minsize="0" maxsize="8" array="true" mandatory="false">
       <description>
-      	App defined SoftButtons.
-      	If omitted on supported displays, only the system defined "Close" SoftButton will be displayed.
+        App defined SoftButtons.
+        If omitted on supported displays, only the system defined "Close" SoftButton will be displayed.
       </description>
     </param>
   </function>
 
   <function name="ScrollableMessage" functionID="ScrollableMessageID" messagetype="response">
     <param name="success" type="Boolean" platform="documentation">
-		<description> true, if successful; false, if failed </description>
-	  </param>
+                <description> true, if successful; false, if failed </description>
+          </param>
 
     <param name="resultCode" type="Result" platform="documentation">
       <description>See Result</description>
@@ -4272,25 +4441,25 @@
     </param>
     <param name="sliderFooter" type="String" maxlength="500"  minsize="1" maxsize="26" array="true" mandatory="false">
       <description>
-      	Text footer to display (meant to display min/max threshold descriptors).
-      	For a static text footer, only one footer string shall be provided in the array.
-      	For a dynamic text footer, the number of footer text string in the array must match the numTicks value.
-      	For a dynamic text footer, text array string should correlate with potential slider position index.
-      	If omitted on supported displays, no footer text shall be displayed.
+        Text footer to display (meant to display min/max threshold descriptors).
+        For a static text footer, only one footer string shall be provided in the array.
+        For a dynamic text footer, the number of footer text string in the array must match the numTicks value.
+        For a dynamic text footer, text array string should correlate with potential slider position index.
+        If omitted on supported displays, no footer text shall be displayed.
       </description>
     </param>
     <param name="timeout" type="Integer" minvalue="1000" maxvalue="65535" defvalue="10000" mandatory="false">
       <description>
-      	App defined timeout.  Indicates how long of a timeout from the last action (i.e. sliding control resets timeout).
-      	If omitted, the value is set to 10000.
+        App defined timeout.  Indicates how long of a timeout from the last action (i.e. sliding control resets timeout).
+        If omitted, the value is set to 10000.
       </description>
     </param>
   </function>
 
   <function name="Slider" functionID="SliderID" messagetype="response">
     <param name="success" type="Boolean" platform="documentation">
-		<description> true, if successful; false, if failed </description>
-	  </param>
+                <description> true, if successful; false, if failed </description>
+          </param>
 
     <param name="resultCode" type="Result" platform="documentation">
       <description>See Result</description>
@@ -4314,8 +4483,8 @@
 
     <param name="sliderPosition" type="Integer" minvalue="1" maxvalue="26" mandatory="false">
       <description>
-      	Current slider value returned when saved or canceled (aborted)
-      	This value is only returned for resultCodes "SAVED" or "ABORTED"
+        Current slider value returned when saved or canceled (aborted)
+        This value is only returned for resultCodes "SAVED" or "ABORTED"
       </description>
     </param>
   </function>
@@ -4337,33 +4506,33 @@
     </param>
     <param name="distanceToManeuver" type="Float" minvalue="0" maxvalue="1000000000" mandatory="false">
       <description>
-      	Fraction of distance till next maneuver (starting from when AlertManeuver is triggered).
-      	Used to calculate progress bar.
+        Fraction of distance till next maneuver (starting from when AlertManeuver is triggered).
+        Used to calculate progress bar.
       </description>
     </param>
     <param name="distanceToManeuverScale" type="Float" minvalue="0" maxvalue="1000000000" mandatory="false">
       <description>
-      	Distance till next maneuver (starting from) from previous maneuver.
-      	Used to calculate progress bar.
+        Distance till next maneuver (starting from) from previous maneuver.
+        Used to calculate progress bar.
       </description>
     </param>
     <param name="maneuverComplete" type="Boolean" mandatory="false">
       <description>
-      	If and when a maneuver has completed while an AlertManeuver is active, the app must send this value set to TRUE in order to clear the AlertManeuver overlay.
-      	If omitted the value will be assumed as FALSE.
+        If and when a maneuver has completed while an AlertManeuver is active, the app must send this value set to TRUE in order to clear the AlertManeuver overlay.
+        If omitted the value will be assumed as FALSE.
       </description>
     </param>
     <param name="softButtons" type="SoftButton" minsize="0" maxsize="3" array="true" mandatory="false">
       <description>
-      	Three dynamic SoftButtons available (first SoftButton is fixed to "Turns").
-      	If omitted on supported displays, the currently displayed SoftButton values will not change.
+        Three dynamic SoftButtons available (first SoftButton is fixed to "Turns").
+        If omitted on supported displays, the currently displayed SoftButton values will not change.
       </description>
     </param>
   </function>
 
   <function name="ShowConstantTBT" functionID="ShowConstantTBTID" messagetype="response">
     <param name="success" type="Boolean" platform="documentation">
-		<description> true, if successful; false, if failed </description>
+                <description> true, if successful; false, if failed </description>
     </param>
     <param name="resultCode" type="Result" platform="documentation">
         <description>See Result</description>
@@ -4394,7 +4563,7 @@
 
   <function name="AlertManeuver" functionID="AlertManeuverID" messagetype="response">
     <param name="success" type="Boolean" platform="documentation">
-		<description> true, if successful; false, if failed </description>
+                <description> true, if successful; false, if failed </description>
     </param>
     <param name="resultCode" type="Result" platform="documentation">
         <description>See Result</description>
@@ -4427,7 +4596,7 @@
 
   <function name="UpdateTurnList" functionID="UpdateTurnListID" messagetype="response">
     <param name="success" type="Boolean" platform="documentation">
-		<description> true, if successful; false, if failed </description>
+                <description> true, if successful; false, if failed </description>
     </param>
     <param name="resultCode" type="Result" platform="documentation">
         <description>See Result</description>
@@ -4474,11 +4643,11 @@
   <function name="ChangeRegistration" functionID="ChangeRegistrationID" messagetype="response">
 
     <param name="success" type="Boolean" platform="documentation">
-		  <description>
-		  	true, if successful
-		  	false, if failed
-		  </description>
-	  </param>
+                  <description>
+                        true, if successful
+                        false, if failed
+                  </description>
+          </param>
 
     <param name="resultCode" type="Result" platform="documentation">
       <description>See Result</description>
@@ -4500,12 +4669,12 @@
 
   <function name="GenericResponse" functionID="GenericResponseID" messagetype="response">
     <description>
-    	Generic Response is sent, when the name of a received msg cannot be retrieved. Only used in case of an error.
-		Currently, only resultCode INVALID_DATA is used.
-	</description>
+        Generic Response is sent, when the name of a received msg cannot be retrieved. Only used in case of an error.
+                Currently, only resultCode INVALID_DATA is used.
+        </description>
    <param name="success" type="Boolean" platform="documentation">
-		<description> true, if successful; false, if failed </description>
-	  </param>
+                <description> true, if successful; false, if failed </description>
+          </param>
 
     <param name="resultCode" type="Result" platform="documentation">
       <description>See Result</description>
@@ -4519,9 +4688,9 @@
 
   <function name="PutFile" functionID="PutFileID" messagetype="request">
     <description>
-    	Used to push a binary data onto the SYNC module from a mobile device, such as icons and album art
-    	Not supported on first generation SYNC vehicles.
-    	Binary data is in binary part of hybrid msg.
+        Used to push a binary data onto the SYNC module from a mobile device, such as icons and album art
+        Not supported on first generation SYNC vehicles.
+        Binary data is in binary part of hybrid msg.
     </description>
 
     <param name="syncFileName" type="String" maxlength="255" mandatory="true">
@@ -4534,19 +4703,19 @@
 
     <param name="persistentFile" type="Boolean" defvalue="false" mandatory="false">
       <description>
-      	Indicates if the file is meant to persist between sessions / ignition cycles.
-      	If set to TRUE, then the system will aim to persist this file through session / cycles.
-      	While files with this designation will have priority over others, they are subject to deletion by the system at any time.
-      	In the event of automatic deletion by the system, the app will receive a rejection and have to resend the file.
-      	If omitted, the value will be set to false.
+        Indicates if the file is meant to persist between sessions / ignition cycles.
+        If set to TRUE, then the system will aim to persist this file through session / cycles.
+        While files with this designation will have priority over others, they are subject to deletion by the system at any time.
+        In the event of automatic deletion by the system, the app will receive a rejection and have to resend the file.
+        If omitted, the value will be set to false.
       </description>
     </param>
 
     <param name="systemFile" type="Boolean" defvalue="false" mandatory="false" >
       <description>
-      	Indicates if the file is meant to be passed thru core to elsewhere on the system.
-      	If set to TRUE, then the system will instead pass the data thru as it arrives to a predetermined area outside of core.
-      	If omitted, the value will be set to false.
+        Indicates if the file is meant to be passed thru core to elsewhere on the system.
+        If set to TRUE, then the system will instead pass the data thru as it arrives to a predetermined area outside of core.
+        If omitted, the value will be set to false.
       </description>
     </param>
 
@@ -4555,19 +4724,19 @@
     </param>
     <param name="length" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
       <description>
-      	Optional length in bytes for resuming partial data chunks
-      	If offset is set to 0, then length is the total length of the file to be downloaded
+        Optional length in bytes for resuming partial data chunks
+        If offset is set to 0, then length is the total length of the file to be downloaded
       </description>
-    </param>  
+    </param>
 
   </function>
 
   <function name="PutFile" functionID="PutFileID" messagetype="response">
     <description>Response is sent, when the file data was copied (success case). Or when an error occured.</description>
     <description>Not supported on First generation SYNC vehicles. </description>
-  	<param name="success" type="Boolean" platform="documentation">
-		<description> true, if successful; false, if failed </description>
-	</param>
+        <param name="success" type="Boolean" platform="documentation">
+                <description> true, if successful; false, if failed </description>
+        </param>
 
     <param name="resultCode" type="Result" platform="documentation">
       <description>See Result</description>
@@ -4583,8 +4752,8 @@
 
     <param name="spaceAvailable" type="Integer" minvalue="0" maxvalue="2000000000">
           <description>
-          	Provides the total local space available in SDL Core for the registered app.
-          	If the transfer has systemFile enabled, then the value will be set to 0 automatically.
+                Provides the total local space available in SDL Core for the registered app.
+                If the transfer has systemFile enabled, then the value will be set to 0 automatically.
           </description>
     </param>
 
@@ -4595,8 +4764,8 @@
 
   <function name="DeleteFile" functionID="DeleteFileID" messagetype="request">
     <description>
-    	Used to delete a file resident on the SYNC module in the app's local cache.
-    	Not supported on first generation SYNC vehicles.
+        Used to delete a file resident on the SYNC module in the app's local cache.
+        Not supported on first generation SYNC vehicles.
     </description>
 
     <param name="syncFileName" type="String" maxlength="500" mandatory="true">
@@ -4607,12 +4776,12 @@
 
   <function name="DeleteFile" functionID="DeleteFileID" messagetype="response">
     <description>
-    	Response is sent, when the file data was deleted (success case). Or when an error occured.
-    	Not supported on First generation SYNC vehicles.
+        Response is sent, when the file data was deleted (success case). Or when an error occured.
+        Not supported on First generation SYNC vehicles.
     </description>
-  	<param name="success" type="Boolean" platform="documentation">
-		<description> true if successful; false, if failed </description>
-	</param>
+        <param name="success" type="Boolean" platform="documentation">
+                <description> true if successful; false, if failed </description>
+        </param>
 
     <param name="resultCode" type="Result" platform="documentation">
       <description>See Result</description>
@@ -4637,19 +4806,19 @@
 
   <function name="ListFiles" functionID="ListFilesID" messagetype="request">
     <description>
-    	Requests the current list of resident filenames for the registered app.
-    	Not supported on first generation SYNC vehicles.
+        Requests the current list of resident filenames for the registered app.
+        Not supported on first generation SYNC vehicles.
     </description>
   </function>
 
   <function name="ListFiles" functionID="ListFilesID" messagetype="response">
     <description>
-    	Returns the current list of resident filenames for the registered app along with the current space available
-    	Not supported on First generation SYNC vehicles.
+        Returns the current list of resident filenames for the registered app along with the current space available
+        Not supported on First generation SYNC vehicles.
     </description>
-   	<param name="success" type="Boolean" platform="documentation">
-		<description> true, if successful; false, if failed </description>
-	</param>
+        <param name="success" type="Boolean" platform="documentation">
+                <description> true, if successful; false, if failed </description>
+        </param>
 
     <param name="resultCode" type="Result" platform="documentation">
       <description>See Result</description>
@@ -4665,8 +4834,8 @@
 
     <param name="filenames" type="String" maxlength="500" minsize="0" maxsize="1000" array="true" mandatory="false">
       <description>
-      	An array of all filenames resident on SYNC for the given registered app.
-      	If omitted, then no files currently reside on the system.
+        An array of all filenames resident on SYNC for the given registered app.
+        If omitted, then no files currently reside on the system.
       </description>
     </param>
 
@@ -4681,8 +4850,8 @@
 
   <function name="SetAppIcon" functionID="SetAppIconID" messagetype="request">
     <description>
-    	Used to set existing local file on SYNC as the app's icon
-    	Not supported on first generation SYNC vehicles.
+        Used to set existing local file on SYNC as the app's icon
+        Not supported on first generation SYNC vehicles.
     </description>
 
     <param name="syncFileName" type="String" maxlength="500" mandatory="true">
@@ -4693,13 +4862,13 @@
 
   <function name="SetAppIcon" functionID="SetAppIconID" messagetype="response">
     <description>
-    	Response is sent, when the file data was copied (success case). Or when an error occured.
-    	Not supported on First generation SYNC vehicles.
+        Response is sent, when the file data was copied (success case). Or when an error occured.
+        Not supported on First generation SYNC vehicles.
     </description>
 
-  	<param name="success" type="Boolean" platform="documentation">
-		<description> true, if successful; false, if failed </description>
-	</param>
+        <param name="success" type="Boolean" platform="documentation">
+                <description> true, if successful; false, if failed </description>
+        </param>
 
     <param name="resultCode" type="Result" platform="documentation">
       <description>See Result</description>
@@ -4721,14 +4890,14 @@
 
   <function name="SetDisplayLayout" functionID="SetDisplayLayoutID" messagetype="request">
     <description>
-    	Used to set an alternate display layout.
-    	If not sent, default screen for given platform will be shown
+        Used to set an alternate display layout.
+        If not sent, default screen for given platform will be shown
     </description>
 
     <param name="displayLayout" type="String" maxlength="500" mandatory="true">
       <description>
-      	Predefined or dynamically created screen layout.
-      	Currently only predefined screen layouts are defined.
+        Predefined or dynamically created screen layout.
+        Currently only predefined screen layouts are defined.
       </description>
     </param>
 
@@ -4736,9 +4905,9 @@
 
   <function name="SetDisplayLayout" functionID="SetDisplayLayoutID" messagetype="response">
 
-  	<param name="success" type="Boolean" platform="documentation">
-		<description> true, if successful; false, if failed </description>
-	</param>
+        <param name="success" type="Boolean" platform="documentation">
+                <description> true, if successful; false, if failed </description>
+        </param>
 
     <param name="resultCode" type="Result" platform="documentation">
       <description>See Result</description>
@@ -4786,7 +4955,7 @@
       <description>
         Filename of HTTP data to store in predefined system staging area.
         Mandatory if requestType is HTTP.
-        PROPRIETARY requestType should ignore this parameter. 
+        PROPRIETARY requestType should ignore this parameter.
       </description>
     </param>
   </function>
@@ -4814,13 +4983,13 @@
       <element name="WARNINGS"/>
       <element name="TIMED_OUT"/>
       <element name="IGNORED"/>
-    </param> 
+    </param>
   </function>
 
   <function name="SendLocation" functionID="SendLocationID" messagetype="request">
-     <param name="longitudeDegrees" type="Float" minvalue="-180" maxvalue="180" mandatory="false">
+    <param name="longitudeDegrees" type="Float" minvalue="-180" maxvalue="180" mandatory="true">
     </param>
-     <param name="latitudeDegrees" type="Float" minvalue="-90" maxvalue="90" mandatory="false">
+    <param name="latitudeDegrees" type="Float" minvalue="-90" maxvalue="90" mandatory="true">
     </param>
     <param name="locationName" type="String" maxlength="500" mandatory="false">
       <description>
@@ -4882,26 +5051,26 @@
 
     <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
       <description>Provides additional human readable info regarding the result.</description>
-    </param>     
+    </param>
   </function>
 
   <function name="DialNumber" functionID="DialNumberID" messagetype="request">
     <description>Dials a phone number and switches to phone application.</description>
 
     <param name="number" type="String" maxlength="40">
-	      <description>
-	        Phone number is a string, which can be up to 40 chars.
+              <description>
+                Phone number is a string, which can be up to 40 chars.
             All characters shall be stripped from string except digits 0-9 and * # , ; +
-	      </description>
+              </description>
     </param>
   </function>
 
   <function name="DialNumber" functionID="DialNumberID" messagetype="response">
     <param name="success" type="Boolean" platform="documentation">
-		  <description>true, if successful</description>
-		  <description>false, if failed</description>
-	  </param>
-  
+                  <description>true, if successful</description>
+                  <description>false, if failed</description>
+          </param>
+
     <param name="resultCode" type="Result" platform="documentation">
       <description>See Result</description>
       <element name="SUCCESS"/>
@@ -4909,7 +5078,7 @@
       <element name="OUT_OF_MEMORY"/>
       <element name="TOO_MANY_PENDING_REQUESTS"/>
       <element name="APPLICATION_NOT_REGISTERED"/>
-      <element name="GENERIC_ERROR"/>      
+      <element name="GENERIC_ERROR"/>
       <element name="REJECTED"/>
     </param>
 
@@ -4931,6 +5100,10 @@
 
     <param name="systemContext" type="SystemContext">
       <description>See SystemContext</description>
+    </param>
+
+    <param name="deviceRank" type="DeviceRank" mandatory="false">
+     <description>If "DRIVER" - the application is running on device ranked as driver's. If "PASSENGER" - the application is running on device ranked as passenger's. </description>
     </param>
   </function>
 
@@ -5090,7 +5263,7 @@
   </function>
 
   <function name="OnKeyboardInput" functionID="OnKeyboardInputID" messagetype="notification" >
-   
+
     <description>On-screen keyboard event.</description>
     <description>Can be full string or individual keypresses depending on keyboard mode.</description>
 
@@ -5134,8 +5307,8 @@
     </param>
     <param name="timeout" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
       <description>
-      	Optional timeout for HTTP requests
-      	Required if a URL is provided
+        Optional timeout for HTTP requests
+        Required if a URL is provided
       </description>
     </param>
     <param name="fileType" type="FileType" mandatory="false">
@@ -5150,13 +5323,13 @@
   </function>
 
   <function name="OnHashChange" functionID="OnHashChangeID" messagetype="notification">
-	<description>
-		Notification containing an updated hashID which can be used over connection cycles (i.e. loss of connection, ignition cycles, etc.).
-		Sent after initial registration and subsequently after any change in the calculated hash of all persisted app data.
-	</description>
-	<param name="hashID" type="String" maxlength="100" mandatory="true">
-		<description>Calculated hash ID to be referenced during RegisterAppInterface.</description>
-	</param>
+        <description>
+                Notification containing an updated hashID which can be used over connection cycles (i.e. loss of connection, ignition cycles, etc.).
+                Sent after initial registration and subsequently after any change in the calculated hash of all persisted app data.
+        </description>
+        <param name="hashID" type="String" maxlength="100" mandatory="true">
+                <description>Calculated hash ID to be referenced during RegisterAppInterface.</description>
+        </param>
   </function>
 
 <!-- ~~~~~~~~~~~~~~~~~~ -->
@@ -5165,21 +5338,21 @@
 
   <function name="EncodedSyncPData" functionID="EncodedSyncPDataID" messagetype="request" >
     <description>
-    	Allows encoded data in the form of SyncP packets to be sent to the SYNC module.
-    	Legacy / v1 Protocol implementation; use SyncPData instead.
-    	*** DEPRECATED ***
+        Allows encoded data in the form of SyncP packets to be sent to the SYNC module.
+        Legacy / v1 Protocol implementation; use SyncPData instead.
+        *** DEPRECATED ***
     </description>
 
     <param name="data" type="String" maxlength="1000000" minsize="1" maxsize="100" array="true" mandatory="true">
       <description>Contains base64 encoded string of SyncP packets.</description>
       <todo>What is the maxlength?</todo>
-    </param> 
+    </param>
   </function>
 
   <function name="EncodedSyncPData" functionID="EncodedSyncPDataID" messagetype="response" >
-  	<param name="success" type="Boolean" platform="documentation">
-		<description> true, if successful; false, if failed </description>
-	</param>
+        <param name="success" type="Boolean" platform="documentation">
+                <description> true, if successful; false, if failed </description>
+        </param>
 
     <param name="resultCode" type="Result" platform="documentation">
       <description>See Result</description>
@@ -5189,12 +5362,12 @@
       <element name="TOO_MANY_PENDING_REQUESTS"/>
       <element name="APPLICATION_NOT_REGISTERED"/>
       <element name="GENERIC_ERROR"/>
-      <element name="REJECTED"/> 
+      <element name="REJECTED"/>
     </param>
 
     <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
       <description>Provides additional human readable info regarding the result.</description>
-    </param>    
+    </param>
   </function>
 
 <!-- Deprecating - covered by SystemRequest
@@ -5209,7 +5382,7 @@
     <param name="success" type="Boolean" platform="documentation">
       <description> true, if successful; false, if failed </description>
     </param>
-    
+
     <param name="resultCode" type="Result" platform="documentation">
       <description>See Result</description>
       <element name="SUCCESS"/>
@@ -5218,36 +5391,36 @@
       <element name="TOO_MANY_PENDING_REQUESTS"/>
       <element name="APPLICATION_NOT_REGISTERED"/>
       <element name="GENERIC_ERROR"/>
-      <element name="REJECTED"/> 
+      <element name="REJECTED"/>
     </param>
-    
+
     <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
       <description>Provides additional human readable info regarding the result.</description>
-    </param>    
+    </param>
   </function>
 -->
 
   <function name="OnEncodedSyncPData" functionID="OnEncodedSyncPDataID" messagetype="notification" >
     <description>
-    	Callback including encoded data of any SyncP packets that SYNC needs to send back to the mobile device.
-    	Legacy / v1 Protocol implementation; responds to EncodedSyncPData.
-    	*** DEPRECATED ***
-    </description>    
+        Callback including encoded data of any SyncP packets that SYNC needs to send back to the mobile device.
+        Legacy / v1 Protocol implementation; responds to EncodedSyncPData.
+        *** DEPRECATED ***
+    </description>
     <param name="data" type="String" maxlength="1000000" minsize="1" maxsize="100" mandatory="true" array="true">
       <description>Contains base64 encoded string of SyncP packets.</description>
     </param>
     <param name="URL" type="String" maxlength="1000" mandatory="false">
       <description>
-      	If blank, the SyncP data shall be forwarded to the app.
-      	If not blank, the SyncP data shall be forwarded to the provided URL.
+        If blank, the SyncP data shall be forwarded to the app.
+        If not blank, the SyncP data shall be forwarded to the provided URL.
       </description>
     </param>
     <param name="Timeout" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
       <description>
-      	If blank, the SyncP data shall be forwarded to the app.
-      	If not blank, the SyncP data shall be forwarded with the provided timeout in seconds.
+        If blank, the SyncP data shall be forwarded to the app.
+        If not blank, the SyncP data shall be forwarded with the provided timeout in seconds.
       </description>
-    </param>  
+    </param>
   </function>
 
   <function name="SubscribeWayPoints" functionID="SubscribeWayPointsID" messagetype="request">
@@ -5342,20 +5515,20 @@
       Responds to SyncPData.
       Binary data is in binary part of hybrid msg.
     </description>
-      
+
     <param name="URL" type="String" maxlength="1000" mandatory="false">
       <description>
-      	If blank, the SyncP data shall be forwarded to the app.
-      	If not blank, the SyncP data shall be forwarded to the provided URL.
+        If blank, the SyncP data shall be forwarded to the app.
+        If not blank, the SyncP data shall be forwarded to the provided URL.
       </description>
     </param>
     <param name="Timeout" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
       <description>
-      	If blank, the SyncP data shall be forwarded to the app.
-      	If not blank, the SyncP data shall be forwarded with the provided timeout in seconds.
+        If blank, the SyncP data shall be forwarded to the app.
+        If not blank, the SyncP data shall be forwarded with the provided timeout in seconds.
       </description>
-    </param>  
-    
+    </param>
+
   </function>
 -->
 </interface>

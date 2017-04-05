@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,6 +31,8 @@
  */
 
 #include "gtest/gtest.h"
+#include "utils/shared_ptr.h"
+#include "utils/make_shared.h"
 #include "application_manager/message.h"
 #include "hmi_message_handler/hmi_message_handler_impl.h"
 #include "hmi_message_handler/messagebroker_adapter.h"
@@ -43,7 +45,7 @@ namespace test {
 namespace components {
 namespace hmi_message_handler_test {
 
-using ::testing::ReturnRef;
+using ::testing::Return;
 using ::testing::_;
 
 class HMIMessageHandlerImplTest : public ::testing::Test {
@@ -63,7 +65,7 @@ class HMIMessageHandlerImplTest : public ::testing::Test {
 
   virtual void SetUp() OVERRIDE {
     ON_CALL(mock_hmi_message_handler_settings, thread_min_stack_size())
-        .WillByDefault(ReturnRef(stack_size));
+        .WillByDefault(Return(stack_size));
     hmi_handler_ = new hmi_message_handler::HMIMessageHandlerImpl(
         mock_hmi_message_handler_settings);
     ASSERT_TRUE(NULL != hmi_handler_);

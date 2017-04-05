@@ -52,7 +52,7 @@ option(ENABLE_GCOV "gcov code coverage feature" OFF)
 option(ENABLE_SANITIZE "Sanitize tool" OFF)
 option(ENABLE_SECURITY "Security Ford protocol protection" ON)
 option(ENABLE_HMI_PTU_DECRYPTION "Policy table update parsed by hmi" ON)
-option(ENABLE_EXTENDED_POLICY "Turns extended flow which requires embedded system interaction" ON)
+option(REMOTE_CONTROL "Enable Reverse functionality" ON)
 option(USE_COTIRE "Use Cotire to speed up build (currently only for commands tests)" ON)
 option(USE_GOLD_LD "Use gold linker intead of GNU linker" ON)
 option(USE_CCACHE "Turn on ccache usage" ON)
@@ -163,6 +163,10 @@ if (OS_TYPE_OPTION)
     set (BUILD_TESTS OFF)
   endif()
 endif()
+if (REMOTE_CONTROL)
+  add_definitions(-DSDL_REMOTE_CONTROL)
+  message(STATUS "Remote control support is enabled (aka Reverse SDL or SDL-RC)")
+endif()
 
 #Jenkins integration section end
 
@@ -244,10 +248,10 @@ if(ENABLE_SANITIZE)
   message(STATUS "Sanitizing enabled")
 endif()
 
-if(ENABLE_GCOV)
+if (ENABLE_GCOV)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
   add_definitions(-DGCOV_ENABLED)
-  message(STATUS "GCOV enabled")
+  message(STATUS "Code coverage enabled")
 endif()
 
 set(CMAKE_CXX_FLAGS_RELEASE " -DNDEBUG -s -O2")
@@ -410,6 +414,18 @@ set(RTLIB rt)
 if(CMAKE_SYSTEM_NAME STREQUAL "QNX")
   set(RTLIB )
 endif()
+
+SET(RPATH_DIRECTORIES
+  ${CMAKE_INSTALL_PREFIX}/bin/plugins
+  /usr/local/lib
+  /usr/local
+  ${CMAKE_INSTALL_PREFIX}/bin
+)
+SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
+SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+SET(CMAKE_INSTALL_RPATH "${RPATH_DIRECTORIES}")
+SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
 
 # Building tests
 if(BUILD_TESTS)

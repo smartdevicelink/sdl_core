@@ -63,5 +63,4 @@ set(LIBRARIES
   AMMobileCommandsLibrary
   connectionHandler
 )
-
 create_cotired_test("commands_test" "${SOURCES}" "${LIBRARIES}" )

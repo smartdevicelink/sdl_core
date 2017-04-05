@@ -33,7 +33,7 @@
 #ifndef SRC_COMPONENTS_INCLUDE_POLICY_USAGE_STATISTICS_APP_STOPWATCH_H_
 #define SRC_COMPONENTS_INCLUDE_POLICY_USAGE_STATISTICS_APP_STOPWATCH_H_
 
-#include "statistics_manager.h"
+#include "policy/usage_statistics/statistics_manager.h"
 
 namespace usage_statistics {
 

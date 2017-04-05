@@ -36,7 +36,8 @@ include_directories(
   ${COMPONENTS_DIR}/rpc_base/include
   ${COMPONENTS_DIR}/config_profile/include
   ${COMPONENTS_DIR}/utils/include/
-  ${POLICY_MOCK_INCLUDE_PATH}
+  ${POLICY_PATH}/test/include/
+  ${POLICY_MOCK_INCLUDE_PATH}/
 )
 
 set(testLibraries
@@ -54,6 +55,12 @@ file (GLOB POLICY_TEST_SOURCES
 # Unbuildable
 list (REMOVE_ITEM POLICY_TEST_SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/policy_manager_impl_stress_test.cc)
+
+if (REMOTE_CONTROL)
+  list (APPEND testSources
+    access_remote_impl_test.cc
+  )
+endif ()
 
 create_test("policy_test" "${POLICY_TEST_SOURCES}" "${testLibraries}")
 

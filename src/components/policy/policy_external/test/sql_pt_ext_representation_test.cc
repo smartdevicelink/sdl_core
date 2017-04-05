@@ -75,7 +75,7 @@ class SQLPTExtRepresentationTest : public ::testing::Test {
   FunctionalGroupPermission group2_perm;
   utils::dbms::SQLQuery* query_wrapper_;
   static const bool in_memory_;
-  const std::string kAppStorageFolder = "storage1";
+  const std::string kAppStorageFolder = "storage_SQLPTExtRepresentationTest";
 
   void SetUp() OVERRIDE {
     file_system::DeleteFile(kDatabaseName);
@@ -255,6 +255,8 @@ TEST_F(SQLPTExtRepresentationTest,
   module_config["vehicle_model"] = Json::Value("ModelT");
   module_config["vehicle_year"] = Json::Value("2014");
   module_config["certificate"] = Json::Value("my_cert");
+  module_config["country_consent_passengersRC"] = Json::Value(false);
+  module_config["user_consent_passengersRC"] = Json::Value(false);
 
   Json::Value& functional_groupings = policy_table["functional_groupings"];
   functional_groupings["default"] = Json::Value(Json::objectValue);

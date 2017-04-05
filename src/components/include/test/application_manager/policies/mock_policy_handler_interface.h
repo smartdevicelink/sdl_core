@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_INCLUDE_TEST_APPLICATION_MANAGER_POLICIES_MOCK_POLICY_HANDLER_INTERFACE_H_
 
 #include "application_manager/policies/policy_handler_interface.h"
+#include "application_manager/application_manager.h"
 #include "gmock/gmock.h"
 #include "policy/policy_types.h"
 #include "smart_objects/smart_object.h"
@@ -76,11 +77,10 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
   MOCK_CONST_METHOD2(GetPriority,
                      bool(const std::string& policy_app_id,
                           std::string* priority));
-  MOCK_METHOD5(CheckPermissions,
-               void(const policy::PTString& app_id,
-                    const policy::PTString& hmi_level,
+  MOCK_METHOD4(CheckPermissions,
+               void(const application_manager::ApplicationSharedPtr app,
                     const policy::PTString& rpc,
-                    const policy::RPCParams& rpc_params,
+                    const application_manager::RPCParams& rpc_params,
                     policy::CheckPermissionResult& result));
   MOCK_CONST_METHOD1(GetNotificationsNumber,
                      uint32_t(const std::string& priority));
@@ -214,6 +214,84 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
   MOCK_METHOD2(GetUpdateUrls,
                void(const std::string& service_type,
                     policy::EndpointUrls& end_points));
+#ifdef SDL_REMOTE_CONTROL
+  MOCK_METHOD3(OnUpdateHMILevel,
+               void(const std::string& device_id,
+                    const std::string& policy_app_id,
+                    const std::string& hmi_level));
+  MOCK_METHOD3(CheckHMIType,
+               bool(const std::string& application_id,
+                    mobile_apis::AppHMIType::eType hmi,
+                    const smart_objects::SmartObject* app_types));
+  MOCK_METHOD6(CheckAccess,
+               application_manager::TypeAccess(
+                   const policy::PTString& device_id,
+                   const policy::PTString& app_id,
+                   const application_manager::SeatLocation& zone,
+                   const policy::PTString& module,
+                   const std::string& rpc,
+                   const std::vector<policy::PTString>& params));
+
+  MOCK_METHOD2(CheckModule,
+               bool(const policy::PTString& app_id,
+                    const policy::PTString& module));
+
+  MOCK_METHOD5(SetAccess,
+               void(const policy::PTString& device_id,
+                    const policy::PTString& app_id,
+                    const application_manager::SeatLocation& zone,
+                    const policy::PTString& module,
+                    bool allowed));
+
+  MOCK_METHOD2(ResetAccess,
+               void(const policy::PTString& device_id,
+                    const policy::PTString& app_id));
+
+  MOCK_METHOD2(ResetAccess,
+               void(const application_manager::SeatLocation& zone,
+                    const std::string& module));
+
+  MOCK_METHOD1(SetPrimaryDevice, void(const policy::PTString& dev_id));
+
+  MOCK_METHOD0(ResetPrimaryDevice, void());
+
+  MOCK_CONST_METHOD0(PrimaryDevice, uint32_t());
+
+  MOCK_METHOD2(SetDeviceZone,
+               void(const std::string& device_id,
+                    const application_manager::SeatLocation& zone));
+
+  MOCK_CONST_METHOD1(
+      GetDeviceZone,
+      const application_manager::SeatLocationPtr(const std::string& device_id));
+
+  MOCK_METHOD1(SetRemoteControl, void(bool enabled));
+
+  MOCK_CONST_METHOD0(GetRemoteControl, bool());
+
+  MOCK_METHOD1(OnRemoteAllowedChanged, void(bool new_consent));
+
+  MOCK_METHOD2(OnRemoteAppPermissionsChanged,
+               void(const std::string& device_id,
+                    const std::string& application_id));
+
+  MOCK_METHOD3(OnUpdateHMIStatus,
+               void(const std::string& device_id,
+                    const std::string& policy_app_id,
+                    const std::string& hmi_level));
+
+  MOCK_METHOD4(OnUpdateHMIStatus,
+               void(const std::string& device_id,
+                    const std::string& policy_app_id,
+                    const std::string& hmi_level,
+                    const std::string& device_rank));
+  MOCK_CONST_METHOD2(GetModuleTypes,
+                     bool(const std::string& policy_app_id,
+                          std::vector<std::string>* modules));
+  MOCK_METHOD2(SetDefaultHmiTypes,
+               void(const std::string& application_id,
+                    const smart_objects::SmartObject* app_types));
+#endif  // SDL_REMOTE_CONTROL
 
  private:
   MOCK_METHOD2(OnAppPermissionConsentInternal,

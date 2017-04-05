@@ -20,7 +20,7 @@
 namespace NsMessageBroker
 {
    /**
-    * \class CMessageBrokerControllerAVA
+    * \class CMessageBrokerControllerAVA
     * \brief MessageBroker Controller.
     */
    class CMessageBrokerControllerAVA : public CMessageBrokerController

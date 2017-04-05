@@ -35,16 +35,24 @@
 
 #include "gmock/gmock.h"
 #include "hmi_message_handler/hmi_message_adapter.h"
+#include "hmi_message_handler/hmi_message_handler.h"
 
 namespace test {
 namespace components {
 namespace hmi_message_handler_test {
 
-using hmi_message_handler::HMIMessageAdapter;
+using hmi_message_handler::HMIMessageAdapterImpl;
+using hmi_message_handler::HMIMessageHandler;
+using hmi_message_handler::MessageSharedPointer;
 
-class MockHMIMessageAdapter : public HMIMessageAdapter {
+class MockHMIMessageAdapter : public hmi_message_handler::HMIMessageAdapter {
  public:
   MOCK_METHOD0(SubscribeTo, void());
+  MOCK_METHOD1(SendMessageToHMI, void(MessageSharedPointer SPtr));
+#ifdef SDL_REMOTE_CONTROL
+  MOCK_METHOD1(SubscribeToHMINotification,
+               void(const std::string& hmi_notification));
+#endif  // SDL_REMOTE_CONTROL
 };
 
 }  // namespace hmi_message_handler_test
