@@ -1299,6 +1299,15 @@ ApplicationManagerImpl::GetHandshakeContext(uint32_t key) const {
   return SSLContext::HandshakeContext();
 }
 
+bool ApplicationManagerImpl::HasNaviApp(const int32_t& session_key) const {
+  ApplicationSharedPtr app = application(session_key);
+  if (app) {
+    return app->is_navi();
+  }
+
+  return false;
+}
+
 bool ApplicationManagerImpl::CanStartProtectedService(
     const int32_t& session_key,
     const protocol_handler::ServiceType& type) const {

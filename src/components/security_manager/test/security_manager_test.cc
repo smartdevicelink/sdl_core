@@ -607,8 +607,6 @@ TEST_F(SecurityManagerTest, StartHandshake_SSLInitIsComplete) {
       .WillOnce(Return(&mock_ssl_context_exists));
   EXPECT_CALL(mock_ssl_context_exists, IsInitCompleted())
       .WillOnce(Return(true));
-  EXPECT_CALL(mock_crypto_manager, IsCertificateUpdateRequired())
-      .WillOnce(Return(false));
 
   security_manager_->StartHandshake(key);
 }

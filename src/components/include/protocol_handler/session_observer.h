@@ -43,6 +43,7 @@
          *\namespace protocol_handlerHandler
          *\brief Namespace for SmartDeviceLink ProtocolHandler related functionality.
          */
+
 namespace protocol_handler {
 /**
  * \brief HASH_ID constants.
@@ -61,6 +62,12 @@ enum { HASH_ID_NOT_SUPPORTED = 0, HASH_ID_WRONG = 0xFFFF0000 };
 // TODO(EZamakhov): Reconsider rename KeyFromPair and PairFromKey
 class SessionObserver {
  public:
+  struct ExistingSessionInfo {
+    uint32_t hash_id_;
+    bool start_protected_;
+    bool service_exists_;
+    bool is_navi_;
+  };
   /**
    * \brief Callback function used by ProtocolHandler
    * when Mobile Application initiates start of new session.
@@ -78,9 +85,7 @@ class SessionObserver {
       const uint8_t sessionId,
       const protocol_handler::ServiceType& service_type,
       const bool is_protected,
-      uint32_t* out_hash_id,
-      bool* out_start_protected,
-      bool* out_service_exists) = 0;
+      struct ExistingSessionInfo* out_session_info) = 0;
 
   /**
    * \brief Callback function used by ProtocolHandler

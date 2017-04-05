@@ -188,10 +188,6 @@ void SecurityManagerImpl::StartHandshake(uint32_t connection_key) {
     return;
   }
 
-  if (crypto_manager_->IsCertificateUpdateRequired()) {
-    NotifyOnCertififcateUpdateRequired();
-  }
-
   if (ssl_context->IsInitCompleted()) {
     NotifyListenersOnHandshakeDone(connection_key,
                                    SSLContext::Handshake_Result_Success);
@@ -413,4 +409,8 @@ const char* SecurityManagerImpl::ConfigSection() {
   return "Security Manager";
 }
 
+bool SecurityManagerImpl::IsCertificateUpdateRequired() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return crypto_manager_->IsCertificateUpdateRequired();
+}
 }  // namespace security_manager

@@ -418,4 +418,6 @@ void CryptoManagerImpl::InitCertExpTime() {
   strptime("1 Jan 1970 00:00:00", "%d %b %Y %H:%M:%S", &expiration_time_);
 }
 
+void CryptoManagerImpl::OnPTUFinished(const bool ptu_result) {}
+
 }  // namespace security_manager

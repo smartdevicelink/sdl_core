@@ -323,11 +323,6 @@ class PolicyHandler : public PolicyHandlerInterface,
   custom_str::CustomString GetAppName(
       const std::string& policy_app_id) OVERRIDE;
 
-  virtual void OnUpdateHMIAppType(
-      std::map<std::string, StringArray> app_hmi_types) OVERRIDE;
-
-  virtual void OnCertificateUpdated(
-      const std::string& certificate_data) OVERRIDE;
 #ifdef EXTERNAL_PROPRIETARY_MODE
   void OnCertificateDecrypted(bool is_succeeded) OVERRIDE;
 #endif  // EXTERNAL_PROPRIETARY_MODE
@@ -456,6 +451,12 @@ class PolicyHandler : public PolicyHandlerInterface,
 #endif  // ENABLE_SECURITY
 
   const PolicySettings& get_settings() const OVERRIDE;
+
+  virtual void OnUpdateHMIAppType(
+      std::map<std::string, StringArray> app_hmi_types) OVERRIDE;
+
+  virtual void OnCertificateUpdated(
+      const std::string& certificate_data) OVERRIDE;
 
   virtual void OnPTUFinished(const bool ptu_result) OVERRIDE;
 

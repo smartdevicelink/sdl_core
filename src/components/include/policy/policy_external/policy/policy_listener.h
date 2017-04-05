@@ -121,7 +121,7 @@ class PolicyListener {
   virtual void OnCertificateUpdated(const std::string& certificate_data) = 0;
 
   /**
-   * @brief OnPTUFinishedd the callback which signals PTU has finished
+   * @brief OnPTUFinished the callback which signals PTU has finished
    *
    * @param ptu_result the result from the PTU - true if successful,
    * otherwise false.

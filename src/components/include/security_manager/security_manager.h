@@ -132,6 +132,14 @@ class SecurityManager : public protocol_handler::ProtocolObserver {
    */
   virtual void AddListener(SecurityManagerListener* const listener) = 0;
   virtual void RemoveListener(SecurityManagerListener* const listener) = 0;
+  virtual void NotifyOnCertififcateUpdateRequired() = 0;
+
+  /**
+   * \brief Checks if the SSL certificate is not expired
+   * @return true if the certificate is expired or not set,
+   * otherwise false
+   */
+  virtual bool IsCertificateUpdateRequired() const = 0;
 };
 }  // namespace security_manager
 #endif  // SRC_COMPONENTS_INCLUDE_SECURITY_MANAGER_SECURITY_MANAGER_H_

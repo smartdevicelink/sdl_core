@@ -79,9 +79,9 @@ ProtocolHandlerImpl::ProtocolHandlerImpl(
           "PH ToMobile", this, threads::ThreadOptions(kStackSize))
 #ifdef TELEMETRY_MONITOR
     , metric_observer_(NULL)
+    ,
 #endif  // TELEMETRY_MONITOR
-
-{
+    ptu_state_(kNotTriggered) {
   LOG4CXX_AUTO_TRACE(logger_);
   protocol_header_validator_.set_max_payload_size(
       get_settings().maximum_payload_size());
@@ -1074,25 +1074,17 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
 
 #ifdef ENABLE_SECURITY
   const bool protection =
-      // Protocolo version 1 is not support protection
+      // Protocol version 1 is not support protection
       (protocol_version > PROTOCOL_VERSION_1) ? packet.protection_flag()
                                               : false;
 #else
   const bool protection = false;
 #endif  // ENABLE_SECURITY
 
-  uint32_t hash_id;
-  bool protection_requested = false;
-  bool service_exists = false;
+  struct SessionObserver::ExistingSessionInfo si = {0};
   const ConnectionID connection_id = packet.connection_id();
-  const uint32_t session_id =
-      session_observer_.OnSessionStartedCallback(connection_id,
-                                                 packet.session_id(),
-                                                 service_type,
-                                                 protection,
-                                                 &hash_id,
-                                                 &protection_requested,
-                                                 &service_exists);
+  const uint32_t session_id = session_observer_.OnSessionStartedCallback(
+      connection_id, packet.session_id(), service_type, protection, &si);
 
   if (0 == session_id) {
     LOG4CXX_WARN(logger_,
@@ -1106,65 +1098,60 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
   }
 
 #ifdef ENABLE_SECURITY
-  // for packet is encrypted and security plugin is enable
-  if (protection_requested && security_manager_) {
+  // if encryption of the service is requested and security plug-in is enable
+  if (si.start_protected_ && security_manager_) {
     const uint32_t connection_key =
         session_observer_.KeyFromPair(connection_id, session_id);
-
     security_manager::SSLContext* ssl_context =
         security_manager_->CreateSSLContext(connection_key);
-    if (!ssl_context) {
+    if (!ssl_context || security_manager_->IsCertificateUpdateRequired()) {
       const std::string error("CreateSSLContext failed");
       LOG4CXX_ERROR(logger_, error);
       security_manager_->SendInternalError(
           connection_key,
           security_manager::SecurityManager::ERROR_INTERNAL,
           error);
-      // Start service without protection
-      if (service_exists) {
+      if (si.is_navi_) {
+        if (si.service_exists_) {
+          SendStartSessionNAck(connection_id,
+                               packet.session_id(),
+                               protocol_version,
+                               packet.service_type());
+        } else {
+          SendStartSessionAck(connection_id,
+                              session_id,
+                              packet.protocol_version(),
+                              si.hash_id_,
+                              packet.service_type(),
+                              PROTECTION_OFF);
+        }
+        return RESULT_OK;
+      }
+      sync_primitives::AutoLock lock(ptu_state_lock_);
+      if (ptu_state_ == kNotTriggered) {
+        ptu_state_ = kTriggered;
+        pending_session_ = SessionInfo(connection_id,
+                                       packet.session_id(),
+                                       protocol_version,
+                                       packet.service_type(),
+                                       si.hash_id_,
+                                       si.service_exists_);
+        security_manager_->NotifyOnCertififcateUpdateRequired();
+      } else if (ptu_state_ != kTriggered) {
         SendStartSessionNAck(connection_id,
                              packet.session_id(),
                              protocol_version,
                              packet.service_type());
-      } else {
-        SendStartSessionAck(connection_id,
-                            session_id,
-                            packet.protocol_version(),
-                            hash_id,
-                            packet.service_type(),
-                            PROTECTION_OFF);
       }
       return RESULT_OK;
     }
-    if (ssl_context->IsInitCompleted()) {
-      // mark service as protected
-      session_observer_.SetProtectionFlag(connection_key, service_type);
-      // Start service as protected with current SSLContext
-      SendStartSessionAck(connection_id,
-                          session_id,
-                          packet.protocol_version(),
-                          hash_id,
-                          packet.service_type(),
-                          PROTECTION_ON);
-    } else {
-      security_manager_->AddListener(
-          new StartSessionHandler(connection_key,
-                                  this,
-                                  session_observer_,
-                                  connection_id,
-                                  session_id,
-                                  packet.protocol_version(),
-                                  hash_id,
-                                  service_type,
-                                  get_settings().force_protected_service()));
-      if (!ssl_context->IsHandshakePending()) {
-        // Start handshake process
-        security_manager_->StartHandshake(connection_key);
-      }
-    }
-    LOG4CXX_DEBUG(logger_,
-                  "Protection establishing for connection "
-                      << connection_key << " is in progress");
+    struct SessionInfo session_info = SessionInfo(connection_id,
+                                                  packet.session_id(),
+                                                  protocol_version,
+                                                  packet.service_type(),
+                                                  si.hash_id_,
+                                                  si.service_exists_);
+    StartEncryptedService(session_info);
     return RESULT_OK;
   }
 #endif  // ENABLE_SECURITY
@@ -1172,7 +1159,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
   SendStartSessionAck(connection_id,
                       session_id,
                       packet.protocol_version(),
-                      hash_id,
+                      si.hash_id_,
                       packet.service_type(),
                       PROTECTION_OFF);
   return RESULT_OK;
@@ -1532,4 +1519,81 @@ uint8_t ProtocolHandlerImpl::SupportedSDLProtocolVersion() const {
   }
   return PROTOCOL_VERSION_2;
 }
+
+void ProtocolHandlerImpl::OnPTUFinished(const bool ptu_result) {
+  LOG4CXX_AUTO_TRACE(logger_);
+#ifdef ENABLE_SECURITY
+  sync_primitives::AutoLock lock(ptu_state_lock_);
+  if (ptu_state_ != kTriggered) {
+    return;
+  }
+  if (ptu_result) {
+    ptu_state_ = kFinSuccess;
+    StartEncryptedService(pending_session_);
+    return;
+  }
+  ptu_state_ = kFinNotSuccess;
+  SendStartSessionNAck(pending_session_.connection_id_,
+                       pending_session_.session_id_,
+                       pending_session_.protocol_version_,
+                       pending_session_.service_type_);
+#endif
+}
+
+bool ProtocolHandlerImpl::OnCertificateUpdated(
+    const std::string& certificate_data) {
+  LOG4CXX_AUTO_TRACE(logger_);
+#ifdef ENABLE_SECURITY
+  sync_primitives::AutoLock lock(ptu_state_lock_);
+  if (ptu_state_ != kTriggered) {
+    ptu_state_ = kNotTriggered;
+  }
+  return false;
+#else
+  return false;
+#endif
+}
+
+void ProtocolHandlerImpl::OnUpdateHMIAppType(
+    std::map<std::string, std::vector<std::string> > app_hmi_types) {}
+
+#ifdef ENABLE_SECURITY
+void ProtocolHandlerImpl::StartEncryptedService(const SessionInfo& si) {
+  // mark service as protected
+  const uint32_t connection_key =
+      session_observer_.KeyFromPair(si.connection_id_, si.session_id_);
+  session_observer_.SetProtectionFlag(connection_key,
+                                      ServiceTypeFromByte(si.service_type_));
+  security_manager::SSLContext* ssl_context = session_observer_.GetSSLContext(
+      connection_key, protocol_handler::kControl);
+  // Start service as protected with current SSLContext
+  if (ssl_context && ssl_context->IsInitCompleted()) {
+    SendStartSessionAck(si.connection_id_,
+                        si.session_id_,
+                        si.protocol_version_,
+                        si.hash_id_,
+                        si.service_type_,
+                        PROTECTION_ON);
+  } else {
+    security_manager_->AddListener(
+        new StartSessionHandler(connection_key,
+                                this,
+                                session_observer_,
+                                si.connection_id_,
+                                si.session_id_,
+                                si.protocol_version_,
+                                si.hash_id_,
+                                ServiceTypeFromByte(si.service_type_),
+                                get_settings().force_protected_service()));
+    if (!ssl_context->IsHandshakePending()) {
+      // Start handshake process
+      security_manager_->StartHandshake(connection_key);
+    }
+  }
+  LOG4CXX_DEBUG(logger_,
+                "Protection establishing for connection " << connection_key
+                                                          << " is in progress");
+}
+#endif
+
 }  // namespace protocol_handler
