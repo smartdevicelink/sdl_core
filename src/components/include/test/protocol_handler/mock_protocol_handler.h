@@ -62,6 +62,10 @@ class MockProtocolHandler : public ::protocol_handler::ProtocolHandler {
   MOCK_CONST_METHOD0(get_settings,
                      const ::protocol_handler::ProtocolHandlerSettings&());
   MOCK_METHOD0(get_session_observer, protocol_handler::SessionObserver&());
+  MOCK_METHOD1(OnPTUFinished, void(const bool ptu_result));
+  MOCK_METHOD1(OnUpdateHMIAppType,
+               void(std::map<std::string, std::vector<std::string> >));
+  MOCK_METHOD1(OnCertificateUpdated, bool(const std::string&));
 };
 }  // namespace protocol_handler_test
 }  // namespace components

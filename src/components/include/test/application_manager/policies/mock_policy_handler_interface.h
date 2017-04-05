@@ -172,6 +172,7 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
   MOCK_METHOD1(OnUpdateHMIAppType,
                void(std::map<std::string, policy::StringArray> app_hmi_types));
   MOCK_METHOD1(OnCertificateUpdated, void(const std::string& certificate_data));
+  MOCK_METHOD1(OnPTUFinished, void(const bool ptu_result));
   MOCK_METHOD1(OnCertificateDecrypted, void(bool is_succeeded));
   MOCK_METHOD0(CanUpdate, bool());
   MOCK_METHOD2(OnDeviceConsentChanged,

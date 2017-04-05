@@ -122,6 +122,7 @@ class CryptoManagerImpl : public CryptoManager {
   virtual bool IsCertificateUpdateRequired() const OVERRIDE;
   virtual const CryptoManagerSettings& get_settings() const OVERRIDE;
   virtual void SetCertExpTime(const std::string& time) OVERRIDE;
+  void OnPTUFinished(const bool ptu_result) OVERRIDE;
 
  private:
   bool set_certificate(const std::string& cert_data);

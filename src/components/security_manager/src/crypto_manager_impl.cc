@@ -406,4 +406,6 @@ void CryptoManagerImpl::SetCertExpTime(const std::string& time) {
   strptime(time.c_str(), "%d %b %Y %H:%M:%S", &expiration_time_);
 }
 
+void CryptoManagerImpl::OnPTUFinished(const bool ptu_result) {}
+
 }  // namespace security_manager

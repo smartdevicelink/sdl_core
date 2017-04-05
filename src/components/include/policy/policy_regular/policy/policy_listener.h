@@ -112,6 +112,14 @@ class PolicyListener {
    */
   virtual void OnCertificateUpdated(const std::string& certificate_data) = 0;
 
+  /**
+   * @brief OnPTUFinishedd the callback which signals PTU has finished
+   *
+   * @param ptu_result the result from the PTU - true if successful,
+   * otherwise false.
+   */
+  virtual void OnPTUFinished(const bool ptu_result) = 0;
+
 #ifdef SDL_REMOTE_CONTROL
   /**
    * Gets devices ids by policy application id
