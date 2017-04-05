@@ -1371,6 +1371,31 @@ void PolicyManagerImpl::ProcessExternalConsentStatusUpdate(
   }
 }
 
+bool ConsentStatusComparatorFunc(const ExternalConsentStatusItem& i1, const ExternalConsentStatusItem& i2) {
+    return (i1.entity_id_ < i2.entity_id_) || (i1.entity_type_ < i2.entity_type_) ||
+            (i1.status_ < i2.status_);
+}
+
+bool PolicyManagerImpl::IsNeedToUpdateExternalConsentStatus(
+        const ExternalConsentStatus& new_status) const {
+    LOG4CXX_AUTO_TRACE(logger_);
+    typedef std::vector<ExternalConsentStatusItem> ItemV;
+    const ExternalConsentStatus existing_status = cache_->GetExternalConsentEntities();
+
+    ItemV new_status_v(new_status.begin(), new_status.end());
+    ItemV existing_status_v(existing_status.begin(), existing_status.end());
+
+    ItemV difference_v;
+    difference_v.resize(new_status_v.size() + existing_status_v.size());
+
+    ItemV::iterator ci = difference_v.begin();
+    ci = std::set_difference(new_status_v.begin(), new_status_v.end(), existing_status_v.begin(),
+                             existing_status_v.end(), difference_v.begin(), ConsentStatusComparatorFunc);
+    difference_v.resize(ci - difference_v.begin());
+
+    return !difference_v.empty();
+}
+
 bool PolicyManagerImpl::SetExternalConsentStatus(
     const ExternalConsentStatus& status) {
   LOG4CXX_AUTO_TRACE(logger_);

@@ -665,6 +665,14 @@ class PolicyManager : public usage_statistics::StatisticsManager {
   virtual AppIdURL RetrySequenceUrl(const struct RetrySequenceURL& rs,
                                     const EndpointUrls& urls) const = 0;
 
+ /**
+ * @brief Checks, if SDL needs to update it's policy table "external consent status" section
+ * @param status ExternalConsent status
+ * @return true if there's such a need, otherwise - false
+ */
+  virtual bool IsNeedToUpdateExternalConsentStatus(
+            const ExternalConsentStatus& status) const = 0;
+
   /**
 
     * @brief Saves customer connectivity settings status

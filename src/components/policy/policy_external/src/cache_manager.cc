@@ -2368,6 +2368,26 @@ ExternalConsentStatus CacheManager::GetExternalConsentStatus() {
   return ex_backup_->GetExternalConsentStatus();
 }
 
+ExternalConsentStatus CacheManager::GetExternalConsentEntities() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock auto_lock(cache_lock_);
+  ExternalConsentStatus items;
+  for(policy_table::FunctionalGroupings::const_iterator it = pt_->policy_table.functional_groupings.begin();
+          it!= pt_->policy_table.functional_groupings.end(); ++it) {
+       policy_table::DisallowedByExternalConsentEntities::const_iterator it_1 =
+               (*it->second.disallowed_by_external_consent_entities_on).begin();
+       for(; it_1 != (*it->second.disallowed_by_external_consent_entities_on).end(); ++it_1) {
+           items.insert(ExternalConsentStatusItem(it_1->entity_type, it_1->entity_id, EntityStatus::kStatusOn));
+       }
+       policy_table::DisallowedByExternalConsentEntities::const_iterator it_2 =
+               (*it->second.disallowed_by_external_consent_entities_off).begin();
+       for(; it_2 != (*it->second.disallowed_by_external_consent_entities_off).end(); ++it_2) {
+           items.insert(ExternalConsentStatusItem(it_2->entity_type, it_2->entity_id, EntityStatus::kStatusOff));
+       }
+  }
+  return items;
+}
+
 GroupsByExternalConsentStatus CacheManager::GetGroupsWithSameEntities(
     const ExternalConsentStatus& status) {
   LOG4CXX_AUTO_TRACE(logger_);
