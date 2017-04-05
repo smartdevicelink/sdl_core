@@ -344,7 +344,7 @@ TEST_F(PolicyManagerImplTest, MarkUnpairedDevice) {
 
 TEST_F(PolicyManagerImplTest2, GetCurrentDeviceId) {
   // Arrange
-  EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(app_id_2_)).Times(1);
+  EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(app_id_2_));
   EXPECT_EQ("", policy_manager_->GetCurrentDeviceId(app_id_2_));
 }
 
@@ -624,7 +624,7 @@ TEST_F(
 
   EXPECT_TRUE(policy_manager_->GetCache()->ApplyUpdate(t));
 
-  EXPECT_CALL(listener_, OnPermissionsUpdated(app_id_1_, _)).Times(1);
+  EXPECT_CALL(listener_, OnPermissionsUpdated(app_id_1_, _));
   EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(app_id_1_))
       .WillOnce(Return(device_id_1_))         // registered
       .WillOnce(Return(""))                   // not registered
@@ -714,7 +714,7 @@ TEST_F(
 
   EXPECT_TRUE(policy_manager_->GetCache()->ApplyUpdate(t));
 
-  EXPECT_CALL(listener_, OnPermissionsUpdated(app_id_1_, _)).Times(1);
+  EXPECT_CALL(listener_, OnPermissionsUpdated(app_id_1_, _));
   EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(app_id_1_))
       .WillOnce(Return(device_id_1_))         // registered
       .WillOnce(Return(""))                   // not registered
