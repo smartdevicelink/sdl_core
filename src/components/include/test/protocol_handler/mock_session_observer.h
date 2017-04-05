@@ -52,7 +52,7 @@ class MockSessionObserver : public ::protocol_handler::SessionObserver {
                const uint8_t sessionId,
                const protocol_handler::ServiceType& service_type,
                const bool is_protected,
-               struct ExistingSessionInfo* out_si));
+               struct ExistingSessionInfo* out_session_info));
   MOCK_METHOD4(
       OnSessionEndedCallback,
       uint32_t(const transport_manager::ConnectionUID connection_handle,

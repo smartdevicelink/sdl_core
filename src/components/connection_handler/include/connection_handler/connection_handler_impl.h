@@ -188,7 +188,7 @@ class ConnectionHandlerImpl
       const uint8_t session_id,
       const protocol_handler::ServiceType& service_type,
       const bool is_protected,
-      struct ExistingSessionInfo* out_si) OVERRIDE;
+      struct ExistingSessionInfo* out_session_info) OVERRIDE;
 
   /**
    * \brief Callback function used by ProtocolHandler
@@ -451,7 +451,7 @@ class ConnectionHandlerImpl
   bool CanStartProtectedService(
       const int32_t& session_key,
       const protocol_handler::ServiceType& type) const;
-  bool IsNaviApp(const int32_t& session_key) const;
+  bool HasNaviApp(const int32_t& session_key) const;
   uint32_t FindAppIdBySession(
       const transport_manager::ConnectionUID connection_handle,
       const uint8_t& session_id) const;

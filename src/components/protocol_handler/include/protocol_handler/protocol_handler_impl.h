@@ -622,6 +622,7 @@ class ProtocolHandlerImpl
 #endif  // TELEMETRY_MONITOR
   PTUState ptu_state_;
   struct SessionInfo pending_session_;
+  mutable sync_primitives::Lock ptu_state_lock_;
 };
 }  // namespace protocol_handler
 #endif  // SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_HANDLER_IMPL_H_

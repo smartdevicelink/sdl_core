@@ -66,7 +66,7 @@ class MockConnectionHandlerObserver
                           const protocol_handler::ServiceType& type));
   MOCK_CONST_METHOD1(CanStartProtectedService,
                      bool(const int32_t& session_key));
-  MOCK_CONST_METHOD1(IsNaviApp, bool(const int32_t& session_key));
+  MOCK_CONST_METHOD1(HasNaviApp, bool(const int32_t& session_key));
 #endif  // ENABLE_SECURITY
 };
 

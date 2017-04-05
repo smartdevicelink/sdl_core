@@ -113,7 +113,7 @@ class ConnectionHandlerObserver {
       const int32_t& session_key,
       const protocol_handler::ServiceType& type) const = 0;
 
-  virtual bool IsNaviApp(const int32_t& session_key) const = 0;
+  virtual bool HasNaviApp(const int32_t& session_key) const = 0;
 #endif  // ENABLE_SECURITY
  protected:
   /**

@@ -1284,7 +1284,7 @@ ApplicationManagerImpl::GetHandshakeContext(uint32_t key) const {
   return SSLContext::HandshakeContext();
 }
 
-bool ApplicationManagerImpl::IsNaviApp(const int32_t& session_key) const {
+bool ApplicationManagerImpl::HasNaviApp(const int32_t& session_key) const {
   ApplicationSharedPtr app = application(session_key);
   if (app) {
     return app->is_navi();

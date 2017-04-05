@@ -1084,7 +1084,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
   const bool protection = false;
 #endif  // ENABLE_SECURITY
 
-  struct ExistingSessionInfo si;
+  struct SessionObserver::ExistingSessionInfo si = {0};
   const ConnectionID connection_id = packet.connection_id();
   const uint32_t session_id = session_observer_.OnSessionStartedCallback(
       connection_id, packet.session_id(), service_type, protection, &si);
@@ -1101,7 +1101,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
   }
 
 #ifdef ENABLE_SECURITY
-  // for packet is encrypted and security plug-in is enable
+  // if encryption of the service is requested and security plug-in is enable
   if (si.start_protected_ && security_manager_) {
     const uint32_t connection_key =
         session_observer_.KeyFromPair(connection_id, session_id);
@@ -1130,6 +1130,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
         }
         return RESULT_OK;
       }
+      sync_primitives::AutoLock lock(ptu_state_lock_);
       if (ptu_state_ == kNotTriggered) {
         ptu_state_ = kTriggered;
         pending_session_ = SessionInfo(connection_id,
@@ -1147,13 +1148,13 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
       }
       return RESULT_OK;
     }
-    struct SessionInfo si = SessionInfo(connection_id,
-                                        packet.session_id(),
-                                        protocol_version,
-                                        packet.service_type(),
-                                        si.hash_id_,
-                                        si.service_exists_);
-    StartEncryptedService(si);
+    struct SessionInfo session_info = SessionInfo(connection_id,
+                                                  packet.session_id(),
+                                                  protocol_version,
+                                                  packet.service_type(),
+                                                  si.hash_id_,
+                                                  si.service_exists_);
+    StartEncryptedService(session_info);
     return RESULT_OK;
   }
 #endif  // ENABLE_SECURITY
@@ -1525,6 +1526,7 @@ uint8_t ProtocolHandlerImpl::SupportedSDLProtocolVersion() const {
 void ProtocolHandlerImpl::OnPTUFinished(const bool ptu_result) {
   LOG4CXX_AUTO_TRACE(logger_);
 #ifdef ENABLE_SECURITY
+  sync_primitives::AutoLock lock(ptu_state_lock_);
   if (ptu_state_ != kTriggered) {
     return;
   }
@@ -1545,6 +1547,7 @@ bool ProtocolHandlerImpl::OnCertificateUpdated(
     const std::string& certificate_data) {
   LOG4CXX_AUTO_TRACE(logger_);
 #ifdef ENABLE_SECURITY
+  sync_primitives::AutoLock lock(ptu_state_lock_);
   if (ptu_state_ != kTriggered) {
     ptu_state_ = kNotTriggered;
   }
