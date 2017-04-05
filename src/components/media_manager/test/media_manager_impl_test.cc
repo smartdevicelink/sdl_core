@@ -80,7 +80,7 @@ const std::string kNamedVideoPipePath = "named_video_pipe_path";
 const std::string kNamedAudioPipePath = "named_audio_pipe_path";
 const std::string kVideoStreamFile = "video_stream_file";
 const std::string kAudioStreamFile = "audio_stream_file";
-const std::string kServer_address = "server_address";
+const std::string kServerAddress = "server_address";
 const std::string kSocketValue = "socket";
 const std::string kPipeValue = "pipe";
 const std::string kFileValue = "file";
@@ -129,33 +129,45 @@ class MediaManagerImplTest : public ::testing::Test {
         .WillOnce(ReturnRef(kRecordingFileSource));
   }
 
-  void InitMediaManager(const std::string& server_type) {
+  void InitMediaManagerPrecondition(const std::string& server_type) {
     EXPECT_CALL(mock_media_manager_settings_, video_server_type())
         .WillRepeatedly(ReturnRef(server_type));
     EXPECT_CALL(mock_media_manager_settings_, audio_server_type())
         .WillRepeatedly(ReturnRef(server_type));
-    if (server_type == kSocketValue) {
-      EXPECT_CALL(mock_media_manager_settings_, server_address())
-          .WillRepeatedly(ReturnRef(kServer_address));
-      EXPECT_CALL(mock_media_manager_settings_, video_streaming_port())
-          .WillOnce(Return(kVideoStreamingPort));
-      EXPECT_CALL(mock_media_manager_settings_, audio_streaming_port())
-          .WillOnce(Return(kAudioStreamingPort));
-    } else if (server_type == kPipeValue) {
-      EXPECT_CALL(mock_media_manager_settings_, named_video_pipe_path())
-          .WillOnce(ReturnRef(kNamedAudioPipePath));
-      EXPECT_CALL(mock_media_manager_settings_, named_audio_pipe_path())
-          .WillOnce(ReturnRef(kNamedAudioPipePath));
-    } else if (server_type == kFileValue) {
-      EXPECT_CALL(mock_media_manager_settings_, video_stream_file())
-          .WillOnce(ReturnRef(kVideoStreamFile));
-      EXPECT_CALL(mock_media_manager_settings_, audio_stream_file())
-          .WillOnce(ReturnRef(kAudioStreamFile));
-    }
-    if ((server_type == kPipeValue) || (server_type == kFileValue)) {
-      EXPECT_CALL(mock_media_manager_settings_, app_storage_folder())
-          .WillRepeatedly(ReturnRef(kStorageFolder));
-    }
+  }
+
+  void InitMediaManagerSocketServerType() {
+    InitMediaManagerPrecondition(kSocketValue);
+    EXPECT_CALL(mock_media_manager_settings_, server_address())
+        .WillRepeatedly(ReturnRef(kServerAddress));
+    EXPECT_CALL(mock_media_manager_settings_, video_streaming_port())
+        .WillOnce(Return(kVideoStreamingPort));
+    EXPECT_CALL(mock_media_manager_settings_, audio_streaming_port())
+        .WillOnce(Return(kAudioStreamingPort));
+    media_manager_impl_.reset(
+        new MediaManagerImpl(app_mngr_, mock_media_manager_settings_));
+  }
+
+  void InitMediaManagerPipeServerType() {
+    InitMediaManagerPrecondition(kPipeValue);
+    EXPECT_CALL(mock_media_manager_settings_, named_video_pipe_path())
+        .WillOnce(ReturnRef(kNamedAudioPipePath));
+    EXPECT_CALL(mock_media_manager_settings_, named_audio_pipe_path())
+        .WillOnce(ReturnRef(kNamedAudioPipePath));
+    EXPECT_CALL(mock_media_manager_settings_, app_storage_folder())
+        .WillRepeatedly(ReturnRef(kStorageFolder));
+    media_manager_impl_.reset(
+        new MediaManagerImpl(app_mngr_, mock_media_manager_settings_));
+  }
+
+  void InitMediaManagerFileServerType() {
+    InitMediaManagerPrecondition(kFileValue);
+    EXPECT_CALL(mock_media_manager_settings_, video_stream_file())
+        .WillOnce(ReturnRef(kVideoStreamFile));
+    EXPECT_CALL(mock_media_manager_settings_, audio_stream_file())
+        .WillOnce(ReturnRef(kAudioStreamFile));
+    EXPECT_CALL(mock_media_manager_settings_, app_storage_folder())
+        .WillRepeatedly(ReturnRef(kStorageFolder));
     media_manager_impl_.reset(
         new MediaManagerImpl(app_mngr_, mock_media_manager_settings_));
   }
@@ -251,15 +263,15 @@ TEST_F(MediaManagerImplTest, OnMessageReceived_WithVideoServiceType_SUCCESS) {
 }
 
 TEST_F(MediaManagerImplTest, Init_Settings_ExpectSocketValue) {
-  InitMediaManager(kSocketValue);
+  InitMediaManagerSocketServerType();
 }
 
 TEST_F(MediaManagerImplTest, Init_Settings_ExpectPipeValue) {
-  InitMediaManager(kPipeValue);
+  InitMediaManagerPipeServerType();
 }
 
 TEST_F(MediaManagerImplTest, Init_Settings_ExpectFileValue) {
-  InitMediaManager(kFileValue);
+  InitMediaManagerFileServerType();
 }
 
 TEST_F(MediaManagerImplTest, PlayA2DPSource_WithCorrectA2DP_SUCCESS) {
