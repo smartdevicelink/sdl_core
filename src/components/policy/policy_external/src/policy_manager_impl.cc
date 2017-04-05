@@ -960,12 +960,27 @@ void PolicyManagerImpl::NotifyPermissionsChanges(
 void PolicyManagerImpl::SetUserConsentForApp(
     const PermissionConsent& permissions) {
   LOG4CXX_AUTO_TRACE(logger_);
+
+  if (permissions.group_permissions.empty()) {
+    LOG4CXX_DEBUG(logger_, "Permissions list is empty, skipping update.");
+    return;
+  }
+
   cache_->ResetCalculatedPermissions();
   PermissionConsent verified_permissions =
       EnsureCorrectPermissionConsent(permissions);
 
-  if (!cache_->SetUserPermissionsForApp(verified_permissions)) {
+  bool app_permissions_changed = false;
+  if (!cache_->SetUserPermissionsForApp(verified_permissions,
+                                        &app_permissions_changed)) {
     LOG4CXX_WARN(logger_, "Can't set user permissions for application.");
+    return;
+  }
+
+  if (!app_permissions_changed) {
+    LOG4CXX_WARN(logger_,
+                 "Application permissions were not changed, skipping "
+                 "permission change notification");
     return;
   }
 
@@ -1252,6 +1267,15 @@ void PolicyManagerImpl::UpdateAppConsentWithExternalConsent(
     const std::string& application_id,
     const GroupsNames& allowed_groups,
     const GroupsNames& disallowed_groups) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (allowed_groups.empty() && disallowed_groups.empty()) {
+    LOG4CXX_DEBUG(logger_,
+                  "Allowed and disallowed groups are empty, skipping update by "
+                  "external user consent.");
+    return;
+  }
+
   std::vector<FunctionalGroupPermission> current_permissions;
   GetUserConsentForApp(device_id, application_id, current_permissions);
 
@@ -1350,7 +1374,14 @@ void PolicyManagerImpl::ProcessExternalConsentStatusUpdate(
 bool PolicyManagerImpl::SetExternalConsentStatus(
     const ExternalConsentStatus& status) {
   LOG4CXX_AUTO_TRACE(logger_);
+
+  if (status.empty()) {
+    LOG4CXX_INFO(logger_, "External consent status is empty, skipping update.");
+    return false;
+  }
+
   if (!cache_->SetExternalConsentStatus(status)) {
+    LOG4CXX_WARN(logger_, "Can't set external user consent status.");
     return false;
   }
 

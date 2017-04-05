@@ -74,18 +74,6 @@ TEST_F(PolicyManagerImplTest,
               GetGroupsWithSameEntities(external_consent_status))
       .WillOnce(Return(group));
 
-  EXPECT_CALL(*cache_manager_, ResetCalculatedPermissions());
-
-  EXPECT_CALL(*cache_manager_, GetPermissionsForApp(_, _, _))
-      .WillOnce(Return(true))
-      .WillOnce(Return(true));
-  EXPECT_CALL(*cache_manager_, GetFunctionalGroupNames(_))
-      .WillOnce(Return(true))
-      .WillOnce(Return(true));
-
-  EXPECT_CALL(*cache_manager_, SetUserPermissionsForApp(_))
-      .WillOnce(Return(false));
-
   EXPECT_CALL(*cache_manager_, SetExternalConsentForApp(_));
 
   EXPECT_CALL(*cache_manager_, IsPredataPolicy(_)).WillOnce(Return(false));

@@ -450,9 +450,12 @@ class CacheManager : public CacheManagerInterface {
   /**
    * @brief Set user consent on functional groups
    * @param permissions User consent on functional group
+   * @param out_app_permissions_changed Indicates whether the permissions were
+   * changed
    * @return true, if operation succedeed, otherwise - false
    */
-  bool SetUserPermissionsForApp(const PermissionConsent& permissions);
+  bool SetUserPermissionsForApp(const PermissionConsent& permissions,
+                                bool* out_app_permissions_changed);
 
   /**
    * @brief Records information about head unit system to PT

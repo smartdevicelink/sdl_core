@@ -1043,7 +1043,7 @@ void CacheManager::GetGroupNameByHashID(const int32_t group_id,
 }
 
 bool CacheManager::SetUserPermissionsForApp(
-    const PermissionConsent& permissions) {
+    const PermissionConsent& permissions, bool* out_app_permissions_changed) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock auto_lock(cache_lock_);
   CACHE_MANAGER_CHECK(false);
@@ -1051,6 +1051,10 @@ bool CacheManager::SetUserPermissionsForApp(
       permissions.group_permissions.begin();
   std::vector<FunctionalGroupPermission>::const_iterator iter_end =
       permissions.group_permissions.end();
+
+  if (out_app_permissions_changed) {
+    *out_app_permissions_changed = false;
+  }
 
   std::string group_name;
   for (; iter != iter_end; ++iter) {
@@ -1062,8 +1066,20 @@ bool CacheManager::SetUserPermissionsForApp(
 
       GetGroupNameByHashID((*iter).group_id, group_name);
 
-      (*ucr.consent_groups)[group_name] =
-          ((*iter).state == policy::kGroupAllowed);
+      const bool set_group_to_allowed =
+          (policy::kGroupAllowed == (*iter).state);
+      if (out_app_permissions_changed) {
+        policy_table::ConsentGroups::const_iterator found_consent_group_it =
+            ucr.consent_groups->find(group_name);
+        // Permission change occurs if there is no group that has ever been
+        // consented or consent status of the existing one differs from the
+        // requested
+        *out_app_permissions_changed =
+            (ucr.consent_groups->end() == found_consent_group_it ||
+             set_group_to_allowed != found_consent_group_it->second);
+      }
+
+      (*ucr.consent_groups)[group_name] = set_group_to_allowed;
       *ucr.input = policy_table::Input::I_GUI;
       *ucr.time_stamp = currentDateTime();
     }
