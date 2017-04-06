@@ -123,37 +123,29 @@ void OnAppPermissionConsentNotification::Run() {
   smart_objects::SmartObject& msg_params = (*message_)[strings::msg_params];
 
   uint32_t connection_key = 0;
-
-  policy::PermissionConsent permission_consent;
-
   // If user defined group permissions for specific app
   if (msg_params.keyExists(strings::app_id)) {
     connection_key = msg_params[strings::app_id].asUInt();
   }
 
+  policy::PermissionConsent permission_consent;
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  // SDL assigns "functional grouping" status according to the received
+  // "externalConsentStatus" even if received "consentedFunctions" status
+  // is different
+  if (!msg_params.keyExists(strings::external_consent_status) &&
+      msg_params.keyExists(strings::consented_functions)) {
+#else
   if (msg_params.keyExists(strings::consented_functions)) {
+#endif
     const smart_objects::SmartArray* user_consent =
         msg_params[strings::consented_functions].asArray();
-
-    smart_objects::SmartArray::const_iterator it = user_consent->begin();
-    smart_objects::SmartArray::const_iterator it_end = user_consent->end();
-    for (; it != it_end; ++it) {
-      policy::FunctionalGroupPermission permissions;
-      permissions.group_id = (*it)["id"].asInt();
-      permissions.group_alias = (*it)["name"].asString();
-      if ((*it).keyExists("allowed")) {
-        permissions.state = (*it)["allowed"].asBool()
-                                ? policy::kGroupAllowed
-                                : policy::kGroupDisallowed;
-      } else {
-        permissions.state = policy::kGroupUndefined;
-      }
-
-      permission_consent.group_permissions.push_back(permissions);
-    }
-
+    PermissionsAppender permission_appender(permission_consent);
+    std::for_each(
+        user_consent->begin(), user_consent->end(), permission_appender);
     permission_consent.consent_source = msg_params[strings::source].asString();
   }
+
 #ifdef EXTERNAL_PROPRIETARY_MODE
   policy::ExternalConsentStatus external_consent_status;
   if (msg_params.keyExists(strings::external_consent_status)) {
