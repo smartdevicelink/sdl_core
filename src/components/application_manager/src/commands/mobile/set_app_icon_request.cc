@@ -153,8 +153,7 @@ void SetAppIconRequest::CopyToIconStorage(const std::string& path_to_file) {
     while (!IsEnoughSpaceForIcon(file_size) && is_icons_saving_enabled_) {
       RemoveOldestIcons(icon_storage, icons_amount);
     }
-    if (!is_icons_saving_enabled_ &&
-        (storage_max_size < (file_size + storage_size))) {
+    if (!is_icons_saving_enabled_ && !IsEnoughSpaceForIcon(file_size)) {
       LOG4CXX_WARN(logger_,
                    "Unable to get enough space for storing icon. "
                    "Icon saving skipped.");
