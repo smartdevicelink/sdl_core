@@ -101,8 +101,8 @@ class ApplicationManagerImplTest : public ::testing::Test {
 
     app_manager_impl_ = utils::MakeShared<am::ApplicationManagerImpl>(
         mock_application_manager_settings_, mock_policy_settings_);
-    last_state_ = utils::MakeShared<resumption::LastStateImpl>(kAppStorageFolder,
-                                                           kAppInfoStorage);
+    last_state_ = utils::MakeShared<resumption::LastStateImpl>(
+        kAppStorageFolder, kAppInfoStorage);
   }
 
   void TearDown() OVERRIDE {

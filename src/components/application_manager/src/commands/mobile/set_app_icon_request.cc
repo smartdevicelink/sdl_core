@@ -158,6 +158,12 @@ void SetAppIconRequest::CopyToIconStorage(
     while (!IsEnoughSpaceForIcon(file_size)) {
       RemoveOldestIcons(icon_storage, icons_amount);
     }
+    if (!is_icons_saving_enabled_ && !IsEnoughSpaceForIcon(file_size)) {
+      LOG4CXX_WARN(logger_,
+                   "Unable to get enough space for storing icon. "
+                   "Icon saving skipped.");
+      return;
+    }
   }
   ApplicationConstSharedPtr app =
       application_manager_.application(connection_key());
