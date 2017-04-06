@@ -950,7 +950,25 @@ void PerformInteractionRequest::SendBothModeResponse(
                info.empty() ? NULL : info.c_str(),
                response_params);
 }
-
+#if BUILD_TESTS
+bool PerformInteractionRequest::CallCheckMethod(CheckMethod method) {
+  ApplicationSharedPtr app = application_manager_.application(connection_key());
+  switch (method) {
+    case CheckMethod::CHECK_VR_SYNONYMS: {
+      return CheckChoiceSetVRSynonyms(app);
+    }
+    case CheckMethod::CHECK_MENU_NAMES: {
+      return CheckChoiceSetMenuNames(app);
+    }
+    case CheckMethod::CHECK_VR_HELP_ITEM: {
+      return CheckVrHelpItemPositions(app);
+    }
+    default:
+      break;
+  }
+  return false;
+}
+#endif  // BUILD_TESTS
 }  // namespace commands
 
 }  // namespace application_manager

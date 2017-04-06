@@ -88,7 +88,19 @@ class PerformInteractionRequest : public CommandRequestImpl {
    *
    */
   virtual void onTimeOut();
+#if BUILD_TESTS
+  enum CheckMethod {
+    CHECK_VR_SYNONYMS = 0,
+    CHECK_MENU_NAMES,
+    CHECK_VR_HELP_ITEM
+  };
 
+  /**
+   * @brief Method for easier check methods in unit tests.
+   * Needed because Run method have ways which cannot be validated.
+   */
+  bool CallCheckMethod(CheckMethod);
+#endif  // BUILD_TESTS
  private:
   /**
    * @brief Function will be called when VR_OnCommand event

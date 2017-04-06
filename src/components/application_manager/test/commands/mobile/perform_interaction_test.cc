@@ -32,23 +32,16 @@
 
 #include <stdint.h>
 #include <string>
-#include <set>
-
-#include "application_manager/commands/mobile/perform_interaction_request.h"
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
 #include "utils/helpers.h"
-#include "utils/make_shared.h"
-#include "smart_objects/smart_object.h"
-#include "utils/custom_string.h"
+
 #include "application_manager/commands/command_request_test.h"
-#include "application_manager/smart_object_keys.h"
-#include "application_manager/mock_application.h"
-#include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_message_helper.h"
-#include "application_manager/event_engine/event.h"
-#include "application_manager/mock_hmi_interface.h"
+
+#include "mobile/perform_interaction_request.h"
+
+#include "utils/data_accessor.h"
 
 namespace test {
 namespace components {
@@ -56,60 +49,49 @@ namespace commands_test {
 namespace mobile_commands_test {
 namespace perform_interaction_request {
 
-namespace am = application_manager;
-using am::commands::CommandImpl;
-using am::ApplicationManager;
-using am::commands::MessageSharedPtr;
-using am::ApplicationSharedPtr;
-using am::MockMessageHelper;
-using am::MockHmiInterfaces;
-using ::testing::_;
-using ::testing::Mock;
-using ::utils::SharedPtr;
-using ::testing::Return;
-using ::testing::ReturnRef;
-using am::commands::PerformInteractionRequest;
-using ::test::components::application_manager_test::MockApplication;
+using namespace application_manager;
 
-namespace strings = ::application_manager::strings;
-namespace hmi_response = ::application_manager::hmi_response;
+using ::testing::Return;
+using ::testing::ReturnNull;
+using ::testing::ReturnPointee;
+using ::testing::Mock;
+using ::testing::_;
+using am::commands::PerformInteractionRequest;
 
 namespace {
-const int32_t kCommandId = 1;
-const uint32_t kCmdId = 1u;
+const std::string kNotValidText = "wrong prompt\n";
+const std::string kValidText = "correct prompt";
+const int32_t kSomeNumber = 1;
+const int32_t kSomeAnotherNumber = 123;
 const uint32_t kConnectionKey = 2u;
-}  // namespace
+}
 
 class PerformInteractionRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
   PerformInteractionRequestTest()
-      : mock_message_helper_(*MockMessageHelper::message_helper_mock())
+      : message_(utils::MakeShared<SmartObject>(::smart_objects::SmartType_Map))
+      , msg_params_((*message_)[strings::msg_params])
+      , mock_message_helper_(*MockMessageHelper::message_helper_mock())
       , mock_app_(CreateMockApp()) {}
 
-  void SetUp() OVERRIDE {
-    ON_CALL(app_mngr_, application(kConnectionKey))
-        .WillByDefault(Return(mock_app_));
-    ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kConnectionKey));
-    ON_CALL(app_mngr_, hmi_interfaces())
-        .WillByDefault(ReturnRef(hmi_interfaces_));
-  }
-
-  void TearDown() OVERRIDE {
+  ~PerformInteractionRequestTest() {
     Mock::VerifyAndClearExpectations(&mock_message_helper_);
+    Mock::VerifyAndClearExpectations(mock_application_sptr_.get());
   }
 
-  void ResultCommandExpectations(MessageSharedPtr msg,
-                                 const std::string& info) {
-    EXPECT_EQ((*msg)[am::strings::msg_params][am::strings::success].asBool(),
-              true);
-    EXPECT_EQ(
-        (*msg)[am::strings::msg_params][am::strings::result_code].asInt(),
-        static_cast<int32_t>(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE));
-    EXPECT_EQ((*msg)[am::strings::msg_params][am::strings::info].asString(),
-              info);
+  void SetUp() OVERRIDE {
+    command_sptr_ =
+        CreateCommand<commands::PerformInteractionRequest>(message_);
+
+    mock_application_sptr_ = CreateMockApp();
+    ON_CALL(app_mngr_, application(_))
+        .WillByDefault(Return(mock_application_sptr_));
+    ON_CALL(*mock_application_sptr_, is_perform_interaction_active())
+        .WillByDefault(Return(false));
   }
 
+ protected:
   void SetHMIInterfaceState(const am::HmiInterfaces::InterfaceState ui_state,
                             const am::HmiInterfaces::InterfaceState vr_state) {
     ON_CALL(hmi_interfaces_,
@@ -188,11 +170,83 @@ class PerformInteractionRequestTest
     }
   }
 
-  sync_primitives::Lock lock_;
+  void ExpectMobileResult(mobile_api::Result::eType result) {
+    CallRun caller(*command_sptr_);
+    MessageSharedPtr result_message = CatchMobileCommandResult(caller);
+
+    const mobile_api::Result::eType result_value =
+        static_cast<mobile_api::Result::eType>(
+            (*result_message)[strings::msg_params][strings::result_code]
+                .asInt());
+    EXPECT_EQ(result, result_value);
+  }
+
+  void TestPromptFieldValidation(const std::string& field) {
+    msg_params_[strings::interaction_choice_set_id_list][0] = kSomeNumber;
+
+    ::smart_objects::SmartObject choise_sets;
+    choise_sets[strings::choice_set][0][strings::choice_id] = kSomeNumber;
+    EXPECT_CALL(*mock_application_sptr_, FindChoiceSet(_))
+        .WillOnce(Return(&choise_sets));
+
+    msg_params_[strings::initial_text] = kValidText;
+    msg_params_[field][0][strings::text] = kNotValidText;
+
+    ExpectMobileResult(mobile_api::Result::INVALID_DATA);
+  }
+
+  sync_primitives::Lock test_lock_;
+  MessageSharedPtr message_;
+  ::smart_objects::SmartObject& msg_params_;
+  utils::SharedPtr<commands::PerformInteractionRequest> command_sptr_;
+  MockAppPtr mock_application_sptr_;
   NiceMock<MockHmiInterfaces> hmi_interfaces_;
   MockMessageHelper& mock_message_helper_;
   MockAppPtr mock_app_;
 };
+
+TEST_F(PerformInteractionRequestTest,
+       OnEvent_VRResponceRPIWrongChoiset_ResponceGenericError) {
+  event_engine::Event event(hmi_apis::FunctionID::VR_PerformInteraction);
+  CallOnEvent caller(*command_sptr_, event);
+
+  (*message_)[strings::msg_params][strings::choice_id] = kSomeNumber;
+  (*message_)[strings::params][hmi_response::code] =
+      mobile_apis::Result::SUCCESS;
+
+  event.set_smart_object(*message_);
+
+  PerformChoiceSetMap empty_choice_set_map;
+  const DataAccessor<PerformChoiceSetMap> empty_data_accessor(
+      empty_choice_set_map, test_lock_);
+  EXPECT_CALL(*mock_application_sptr_, performinteraction_choice_set_map())
+      .WillOnce(Return(empty_data_accessor));
+
+  MessageSharedPtr hmi_result_msg;
+  MessageSharedPtr mobile_result_msg;
+
+  {
+    ::testing::InSequence dummy;
+    EXPECT_CALL(app_mngr_, ManageHMICommand(_))
+        .WillOnce(DoAll(SaveArg<0>(&hmi_result_msg), Return(true)));
+
+    EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _))
+        .WillOnce(DoAll(SaveArg<0>(&mobile_result_msg), Return(true)));
+  }
+
+  caller();
+
+  const hmi_apis::FunctionID::eType hmi_result =
+      static_cast<hmi_apis::FunctionID::eType>(
+          (*hmi_result_msg)[strings::params][strings::function_id].asInt());
+  const mobile_api::Result::eType mobile_result =
+      static_cast<mobile_api::Result::eType>(
+          (*mobile_result_msg)[strings::msg_params][strings::result_code]
+              .asInt());
+
+  EXPECT_EQ(hmi_apis::FunctionID::UI_ClosePopUp, hmi_result);
+  EXPECT_EQ(mobile_apis::Result::GENERIC_ERROR, mobile_result);
+}
 
 TEST_F(PerformInteractionRequestTest, DISABLED_OnTimeout_VR_GENERIC_ERROR) {
   MessageSharedPtr response_msg_vr =
@@ -354,8 +408,447 @@ TEST_F(
                     success);
 }
 
+TEST_F(PerformInteractionRequestTest, Init_CorrectTimeout) {
+  const uint32_t new_timeout = 1000u;
+  msg_params_[strings::timeout] = new_timeout;
+  msg_params_[strings::interaction_mode] =
+      mobile_api::InteractionMode::MANUAL_ONLY;
+
+  EXPECT_EQ(kDefaultTimeout_, command_sptr_->default_timeout());
+
+  command_sptr_->Init();
+  EXPECT_EQ(new_timeout * 2, command_sptr_->default_timeout());
+}
+
+TEST_F(PerformInteractionRequestTest,
+       Run_InvalidApp_ApplicationNotRegisteredResponce) {
+  utils::SharedPtr<Application> null_application_sptr;
+  EXPECT_CALL(app_mngr_, application(_))
+      .WillOnce(Return(null_application_sptr));
+
+  ExpectMobileResult(mobile_api::Result::APPLICATION_NOT_REGISTERED);
+}
+
+TEST_F(PerformInteractionRequestTest, Run_VROnlyAndKeyboardLayout_InvalidData) {
+  msg_params_[hmi_request::interaction_layout] =
+      mobile_api::LayoutMode::KEYBOARD;
+  msg_params_[strings::interaction_mode] = mobile_api::InteractionMode::VR_ONLY;
+  command_sptr_->Init();
+
+  ExpectMobileResult(mobile_api::Result::INVALID_DATA);
+}
+
+TEST_F(PerformInteractionRequestTest, Run_BothAndKeyboardLayout_InvalidData) {
+  msg_params_[hmi_request::interaction_layout] =
+      mobile_api::LayoutMode::KEYBOARD;
+  msg_params_[strings::interaction_mode] = mobile_api::InteractionMode::BOTH;
+  command_sptr_->Init();
+
+  ExpectMobileResult(mobile_api::Result::INVALID_DATA);
+}
+
+TEST_F(PerformInteractionRequestTest,
+       Run_SetIdsEmptyAndLayoutNotKeyboard_InvalidData) {
+  msg_params_[hmi_request::interaction_layout] =
+      mobile_api::LayoutMode::ICON_ONLY;
+
+  ExpectMobileResult(mobile_api::Result::INVALID_DATA);
+}
+
+TEST_F(PerformInteractionRequestTest, Run_FoundInvalidChouiseSet_InvalidId) {
+  msg_params_[strings::interaction_choice_set_id_list][0] = kSomeNumber;
+  EXPECT_CALL(*mock_application_sptr_, FindChoiceSet(_)).WillOnce(ReturnNull());
+
+  ExpectMobileResult(mobile_api::Result::INVALID_ID);
+}
+
+TEST_F(PerformInteractionRequestTest, Run_TwoSameChoisesetIds_InvalidId) {
+  msg_params_[strings::interaction_choice_set_id_list][0] = kSomeNumber;
+
+  ::smart_objects::SmartObject choise_sets;
+  choise_sets[strings::choice_set][0][strings::choice_id] = kSomeNumber;
+  choise_sets[strings::choice_set][1][strings::choice_id] = kSomeNumber;
+
+  EXPECT_CALL(*mock_application_sptr_, FindChoiceSet(_))
+      .WillOnce(Return(&choise_sets));
+
+  ExpectMobileResult(mobile_api::Result::INVALID_ID);
+}
+
+TEST_F(PerformInteractionRequestTest, Run_InvalidImageVrHelpItems_InvalidData) {
+  msg_params_[strings::interaction_choice_set_id_list][0] = kSomeNumber;
+
+  ::smart_objects::SmartObject choise_sets;
+  choise_sets[strings::choice_set][0][strings::choice_id] = kSomeNumber;
+  EXPECT_CALL(*mock_application_sptr_, FindChoiceSet(_))
+      .WillOnce(Return(&choise_sets));
+
+  msg_params_[strings::vr_help] = "vr_help";
+  EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
+              VerifyImageVrHelpItems(_, _, _))
+      .WillOnce(Return(mobile_api::Result::INVALID_ENUM));
+
+  ExpectMobileResult(mobile_api::Result::INVALID_DATA);
+}
+
+TEST_F(PerformInteractionRequestTest,
+       Run_WhiteSpaceExistsInInitialText_InvalidData) {
+  msg_params_[strings::interaction_choice_set_id_list][0] = kSomeNumber;
+
+  ::smart_objects::SmartObject choise_sets;
+  choise_sets[strings::choice_set][0][strings::choice_id] = kSomeNumber;
+  EXPECT_CALL(*mock_application_sptr_, FindChoiceSet(_))
+      .WillOnce(Return(&choise_sets));
+
+  msg_params_[strings::initial_text] = kNotValidText;
+
+  ExpectMobileResult(mobile_api::Result::INVALID_DATA);
+}
+
+TEST_F(PerformInteractionRequestTest,
+       Run_WhiteSpaceExistsInInitialPrompt_InvalidData) {
+  TestPromptFieldValidation(strings::initial_prompt);
+}
+
+TEST_F(PerformInteractionRequestTest,
+       Run_WhiteSpaceExistsInHelpPrompt_InvalidData) {
+  TestPromptFieldValidation(strings::help_prompt);
+}
+
+TEST_F(PerformInteractionRequestTest,
+       Run_WhiteSpaceExistsInTimeoutPrompt_InvalidData) {
+  TestPromptFieldValidation(strings::timeout_prompt);
+}
+
+TEST_F(PerformInteractionRequestTest,
+       Run_WhiteSpaceExistsInVrHelpText_InvalidData) {
+  msg_params_[strings::interaction_choice_set_id_list][0] = kSomeNumber;
+
+  ::smart_objects::SmartObject choise_sets;
+  choise_sets[strings::choice_set][0][strings::choice_id] = kSomeNumber;
+  EXPECT_CALL(*mock_application_sptr_, FindChoiceSet(_))
+      .WillOnce(Return(&choise_sets));
+
+  EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
+              VerifyImageVrHelpItems(_, _, _))
+      .WillOnce(Return(mobile_api::Result::SUCCESS));
+
+  msg_params_[strings::initial_text] = kValidText;
+  msg_params_[strings::vr_help][0][strings::text] = kNotValidText;
+
+  ExpectMobileResult(mobile_api::Result::INVALID_DATA);
+}
+
+TEST_F(PerformInteractionRequestTest,
+       Run_WhiteSpaceExistsInVrHelpImageValue_InvalidData) {
+  msg_params_[strings::interaction_choice_set_id_list][0] = kSomeNumber;
+
+  ::smart_objects::SmartObject choise_sets;
+  choise_sets[strings::choice_set][0][strings::choice_id] = kSomeNumber;
+  EXPECT_CALL(*mock_application_sptr_, FindChoiceSet(_))
+      .WillOnce(Return(&choise_sets));
+
+  EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
+              VerifyImageVrHelpItems(_, _, _))
+      .WillOnce(Return(mobile_api::Result::SUCCESS));
+
+  msg_params_[strings::initial_text] = kValidText;
+  msg_params_[strings::vr_help][0][strings::text] = kValidText;
+  msg_params_[strings::vr_help][0][strings::image][strings::value] =
+      kNotValidText;
+
+  ExpectMobileResult(mobile_api::Result::INVALID_DATA);
+}
+
+TEST_F(PerformInteractionRequestTest,
+       ChecVrSynonyms_InvalidChoiseSet_InvalidId) {
+  msg_params_[strings::interaction_choice_set_id_list][0] = 1u;
+  msg_params_[strings::interaction_choice_set_id_list][1] = 1u;
+  msg_params_[strings::interaction_choice_set_id_list][2] = 1u;
+
+  EXPECT_CALL(*mock_application_sptr_, FindChoiceSet(_))
+      .WillRepeatedly(ReturnNull());
+  EXPECT_CALL(app_mngr_,
+              ManageMobileCommand(
+                  MobileResultCodeIs(mobile_apis::Result::INVALID_ID), _));
+
+  command_sptr_->CallCheckMethod(
+      commands::PerformInteractionRequest::CheckMethod::CHECK_VR_SYNONYMS);
+}
+
+TEST_F(PerformInteractionRequestTest,
+       ChecVrSynonyms_TwoSameVrCommands_DuplicateName) {
+  msg_params_[strings::interaction_choice_set_id_list][0] = kSomeNumber;
+  msg_params_[strings::interaction_choice_set_id_list][1] = kSomeNumber;
+  ::smart_objects::SmartObject choise_sets;
+  choise_sets[strings::grammar_id] = kSomeNumber;
+  choise_sets[strings::choice_set][0][strings::vr_commands][0] = kSomeNumber;
+  choise_sets[strings::choice_set][0][strings::vr_commands][1] = kSomeNumber;
+
+  EXPECT_CALL(*mock_application_sptr_, FindChoiceSet(_))
+      .WillRepeatedly(Return(&choise_sets));
+
+  EXPECT_CALL(app_mngr_,
+              ManageMobileCommand(
+                  MobileResultCodeIs(mobile_apis::Result::DUPLICATE_NAME), _));
+
+  const bool result = command_sptr_->CallCheckMethod(
+      commands::PerformInteractionRequest::CheckMethod::CHECK_VR_SYNONYMS);
+
+  EXPECT_FALSE(result);
+}
+
+TEST_F(PerformInteractionRequestTest,
+       CheckMenuNames_InvalidListOfNames_InvalidId) {
+  msg_params_[strings::interaction_choice_set_id_list][0] = kSomeNumber;
+  msg_params_[strings::interaction_choice_set_id_list][1] = kSomeNumber;
+
+  EXPECT_CALL(
+      *mock_application_sptr_,
+      FindChoiceSet(
+          msg_params_[strings::interaction_choice_set_id_list][0].asInt()))
+      .Times(3)
+      .WillRepeatedly(ReturnNull());
+  EXPECT_CALL(app_mngr_,
+              ManageMobileCommand(
+                  MobileResultCodeIs(mobile_apis::Result::INVALID_ID), _));
+
+  const bool result = command_sptr_->CallCheckMethod(
+      commands::PerformInteractionRequest::CheckMethod::CHECK_MENU_NAMES);
+
+  EXPECT_FALSE(result);
+}
+
+TEST_F(PerformInteractionRequestTest,
+       CheckMenuNames_TwoSameNames_DuplicateName) {
+  msg_params_[strings::interaction_choice_set_id_list][0] = kSomeNumber;
+  msg_params_[strings::interaction_choice_set_id_list][1] = kSomeNumber;
+
+  ::smart_objects::SmartObject choise_set_1;
+  ::smart_objects::SmartObject choise_set_2;
+  choise_set_1[strings::choice_set][0][strings::menu_name] = "MenuName";
+  choise_set_2[strings::choice_set][0][strings::menu_name] = "MenuName";
+
+  EXPECT_CALL(
+      *mock_application_sptr_,
+      FindChoiceSet(
+          msg_params_[strings::interaction_choice_set_id_list][0].asInt()))
+      .Times(3)
+      .WillOnce(Return(&choise_set_1))
+      // Second call will be skipped in method cycles
+      .WillOnce(ReturnNull())
+      // Third call value will be compared to value from first call
+      .WillOnce(Return(&choise_set_2));
+
+  EXPECT_CALL(app_mngr_,
+              ManageMobileCommand(
+                  MobileResultCodeIs(mobile_apis::Result::DUPLICATE_NAME), _));
+
+  const bool result = command_sptr_->CallCheckMethod(
+      commands::PerformInteractionRequest::CheckMethod::CHECK_MENU_NAMES);
+
+  EXPECT_FALSE(result);
+}
+
+TEST_F(PerformInteractionRequestTest, CheckMenuNames_AllRight_Success) {
+  msg_params_[strings::interaction_choice_set_id_list][0] = kSomeNumber;
+  msg_params_[strings::interaction_choice_set_id_list][1] = kSomeNumber;
+
+  ::smart_objects::SmartObject choise_set_1;
+  ::smart_objects::SmartObject choise_set_2;
+  choise_set_1[strings::choice_set][0][strings::menu_name] = "MenuName";
+  choise_set_2[strings::choice_set][0][strings::menu_name] = "AnotherMenuName";
+
+  EXPECT_CALL(*mock_application_sptr_, FindChoiceSet(_))
+      .Times(6)
+      .WillOnce(Return(&choise_set_1))
+      // Second call will be skipped in method cycles
+      .WillOnce(ReturnNull())
+      // Third call value will be compared to value from first call
+      .WillOnce(Return(&choise_set_2))
+      // First cycle second iteration
+      .WillOnce(Return(&choise_set_2))
+      // Second cycle first iteration
+      .WillOnce(Return(&choise_set_1))
+      // Second cycle second iteration will be skipped
+      .WillOnce(ReturnNull());
+
+  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
+
+  const bool result = command_sptr_->CallCheckMethod(
+      commands::PerformInteractionRequest::CheckMethod::CHECK_MENU_NAMES);
+
+  EXPECT_TRUE(result);
+}
+
+TEST_F(PerformInteractionRequestTest, CheckVrHelpItem_VrHelpNotExists_Success) {
+  const bool result = command_sptr_->CallCheckMethod(
+      commands::PerformInteractionRequest::CheckMethod::CHECK_VR_HELP_ITEM);
+
+  EXPECT_TRUE(result);
+}
+
+TEST_F(PerformInteractionRequestTest,
+       CheckVrHelpItem_IncorrectPosition_Rejected) {
+  msg_params_[strings::vr_help][0][strings::position] = kSomeNumber;
+  msg_params_[strings::vr_help][1][strings::position] = kSomeAnotherNumber;
+
+  EXPECT_CALL(app_mngr_,
+              ManageMobileCommand(
+                  MobileResultCodeIs(mobile_apis::Result::REJECTED), _));
+
+  const bool result = command_sptr_->CallCheckMethod(
+      commands::PerformInteractionRequest::CheckMethod::CHECK_VR_HELP_ITEM);
+
+  EXPECT_FALSE(result);
+}
+
+TEST_F(PerformInteractionRequestTest,
+       CheckVrHelpItem_CorrectPositions_Success) {
+  msg_params_[strings::vr_help][0][strings::position] = kSomeNumber;
+  msg_params_[strings::vr_help][1][strings::position] = kSomeNumber + 1;
+
+  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
+
+  const bool result = command_sptr_->CallCheckMethod(
+      commands::PerformInteractionRequest::CheckMethod::CHECK_VR_HELP_ITEM);
+
+  EXPECT_TRUE(result);
+}
+
+TEST_F(PerformInteractionRequestTest,
+       Run_InvalidInteractionMode_StopProcessing) {
+  msg_params_[strings::interaction_choice_set_id_list][0] = kSomeNumber;
+  msg_params_[strings::interaction_mode] =
+      mobile_api::InteractionMode::INVALID_ENUM;
+  msg_params_[strings::initial_text] = kValidText;
+
+  ::smart_objects::SmartObject choise_sets;
+  choise_sets[strings::choice_set][0][strings::choice_id] = kSomeNumber;
+
+  EXPECT_CALL(*mock_application_sptr_, FindChoiceSet(_))
+      .WillOnce(Return(&choise_sets));
+
+  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(app_mngr_, ManageHMICommand(_)).Times(0);
+
+  CallRun caller(*command_sptr_);
+  caller();
+}
+
+TEST_F(PerformInteractionRequestTest,
+       Run_AllRight_SendVRAndUIRequests_Success) {
+  msg_params_[strings::interaction_choice_set_id_list][0] = 1u;
+  msg_params_[strings::interaction_mode] = mobile_api::InteractionMode::VR_ONLY;
+  msg_params_[strings::initial_text] = kValidText;
+  msg_params_[strings::help_prompt][0][strings::text] = "Prompt";
+
+  ::smart_objects::SmartObject choise_sets;
+  choise_sets[strings::grammar_id] = kSomeNumber;
+  choise_sets[strings::choice_set][0][strings::choice_id] = kSomeNumber;
+  choise_sets[strings::choice_set][0][strings::vr_commands][0] = kSomeNumber;
+
+  EXPECT_CALL(*mock_application_sptr_, FindChoiceSet(_))
+      .WillRepeatedly(Return(&choise_sets));
+
+  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
+
+  command_sptr_->Init();
+  CallRun caller(*command_sptr_);
+
+  MessageSharedPtr first_msg;
+  MessageSharedPtr second_msg;
+  {
+    ::testing::InSequence dummy;
+    EXPECT_CALL(this->app_mngr_, ManageHMICommand(_))
+        .WillOnce(DoAll(SaveArg<0>(&first_msg), Return(true)));
+    EXPECT_CALL(this->app_mngr_, ManageHMICommand(_))
+        .WillOnce(DoAll(SaveArg<0>(&second_msg), Return(true)));
+  }
+  caller();
+
+  const hmi_apis::FunctionID::eType first_result =
+      static_cast<hmi_apis::FunctionID::eType>(
+          (*first_msg)[strings::params][strings::function_id].asInt());
+  EXPECT_EQ(hmi_apis::FunctionID::VR_PerformInteraction, first_result);
+
+  const hmi_apis::FunctionID::eType second_result =
+      static_cast<hmi_apis::FunctionID::eType>(
+          (*second_msg)[strings::params][strings::function_id].asInt());
+  EXPECT_EQ(hmi_apis::FunctionID::UI_PerformInteraction, second_result);
+}
+
+TEST_F(PerformInteractionRequestTest, OnEvent_OnResetTimeout_UpdateTimeout) {
+  event_engine::Event event(hmi_apis::FunctionID::UI_OnResetTimeout);
+  CallOnEvent caller(*command_sptr_, event);
+
+  EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _));
+
+  caller();
+}
+
+TEST_F(PerformInteractionRequestTest,
+       OnEvent_PerformInteractionResponce_Unsuccess) {
+  event_engine::Event event(hmi_apis::FunctionID::UI_PerformInteraction);
+  CallOnEvent caller(*command_sptr_, event);
+
+  ApplicationSharedPtr null_application;
+  EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(null_application));
+  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
+
+  caller();
+}
+
+TEST_F(PerformInteractionRequestTest,
+       OnEvent_VRResponceIncorrectApp_NoResponces) {
+  event_engine::Event event(hmi_apis::FunctionID::VR_PerformInteraction);
+  CallOnEvent caller(*command_sptr_, event);
+
+  ApplicationSharedPtr null_application;
+  EXPECT_CALL(app_mngr_, application(_))
+      .WillRepeatedly(Return(null_application));
+  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(app_mngr_, ManageHMICommand(_)).Times(0);
+
+  caller();
+}
+
+TEST_F(PerformInteractionRequestTest,
+       OnEvent_VRResponceRPIcodeTimeOut_ResetTimeout) {
+  event_engine::Event event(hmi_apis::FunctionID::VR_PerformInteraction);
+  CallOnEvent caller(*command_sptr_, event);
+
+  (*message_)[strings::params][hmi_response::code] =
+      mobile_apis::Result::TIMED_OUT;
+
+  event.set_smart_object(*message_);
+
+  EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _));
+  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
+
+  caller();
+}
+
+TEST_F(PerformInteractionRequestTest,
+       OnEvent_VRResponceRPIcodeSuccessManualOnly_Return) {
+  event_engine::Event event(hmi_apis::FunctionID::VR_PerformInteraction);
+  CallOnEvent caller(*command_sptr_, event);
+
+  (*message_)[strings::params][hmi_response::code] =
+      mobile_apis::Result::SUCCESS;
+
+  event.set_smart_object(*message_);
+
+  (*message_)[strings::msg_params][strings::interaction_mode] =
+      mobile_api::InteractionMode::MANUAL_ONLY;
+  command_sptr_->Init();
+
+  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
+
+  caller();
+}
 }  // namespace perform_interaction_request
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components
-}  // namespace tests
+}  // namespace test
