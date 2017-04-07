@@ -402,6 +402,15 @@ struct ExternalConsentStatusItem {
                             const EntityStatus status)
       : entity_type_(type), entity_id_(id), status_(status) {}
 
+  ExternalConsentStatusItem() {}
+
+  ExternalConsentStatusItem operator=(const ExternalConsentStatusItem& rhs) {
+    this->entity_id_ = rhs.entity_id_;
+    this->entity_type_ = rhs.entity_type_;
+    this->status_ = rhs.status_;
+    return *this;  // calls copy constructor
+  }
+
   bool operator==(const ExternalConsentStatusItem& rhs) const {
     return (entity_type_ == rhs.entity_type_) && (entity_id_ == rhs.entity_id_);
   }
@@ -410,9 +419,9 @@ struct ExternalConsentStatusItem {
     return (entity_type_ < rhs.entity_type_) || (entity_id_ < rhs.entity_id_);
   }
 
-  const uint32_t entity_type_;
-  const uint32_t entity_id_;
-  const EntityStatus status_;
+  uint32_t entity_type_;
+  uint32_t entity_id_;
+  EntityStatus status_;
 };
 
 struct ExternalConsentStatusItemSorter {
