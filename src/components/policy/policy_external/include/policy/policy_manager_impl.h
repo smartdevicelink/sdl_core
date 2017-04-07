@@ -257,15 +257,6 @@ class PolicyManagerImpl : public PolicyManager {
                             const EndpointUrls& urls) const OVERRIDE;
 
   /**
-   * @brief  Checks, if SDL needs to update it's policy table section
-             "external_consent_status"
-   * @param  ExternalConsent status
-   * @return true if such check is needed, false - if not.
-   */
-  bool IsNeedToUpdateExternalConsentStatus(
-      const ExternalConsentStatus& status) const;
-
-  /**
    * @brief Gets customer connectivity settings status
    * @return ExternalConsent status
    */
