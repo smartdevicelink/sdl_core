@@ -50,8 +50,6 @@ include_directories(
   ${COMPONENTS_DIR}/application_manager/test/include/
 )
 
-# TODO{ILytvynenko}: SDLOPEN-797 Uncomment application_manager_impl_test and
-# cover with UT missed files.
 set(testSources
   ${AM_TEST_DIR}/mock_message_helper.cc
   ${AM_TEST_DIR}/mobile_message_handler_test.cc
@@ -67,7 +65,6 @@ set(testSources
   ${AM_TEST_DIR}/usage_statistics_test.cc
   ${AM_TEST_DIR}/policy_handler_test.cc
   ${AM_TEST_DIR}/mock_message_helper.cc
- #${AM_TEST_DIR}/application_manager_impl_test.cc
   ${AM_TEST_DIR}/application_data_impl_test.cc
 )
 
