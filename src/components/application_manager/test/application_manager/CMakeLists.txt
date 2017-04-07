@@ -69,7 +69,7 @@ set(LIBRARIES
 
 set(SOURCES
   ${AM_TEST_DIR}/mock_message_helper.cc
-  application_manager_test  
+  application_manager_impl_test
 )
 
 create_test("app_manager_test" "${SOURCES}" "${LIBRARIES}")
