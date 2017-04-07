@@ -187,6 +187,7 @@ class ConnectionHandlerImpl
       const uint8_t session_id,
       const protocol_handler::ServiceType& service_type,
       const bool is_protected,
+      const bool can_start,
       struct ExistingSessionInfo* out_session_info) OVERRIDE;
 
   /**

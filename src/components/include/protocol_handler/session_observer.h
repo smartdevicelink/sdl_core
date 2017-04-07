@@ -65,6 +65,7 @@ class SessionObserver {
   struct ExistingSessionInfo {
     uint32_t hash_id_;
     bool start_protected_;
+    bool can_be_unprotected_;
     bool service_exists_;
     bool is_navi_;
   };
@@ -85,6 +86,7 @@ class SessionObserver {
       const uint8_t sessionId,
       const protocol_handler::ServiceType& service_type,
       const bool is_protected,
+      const bool can_start,
       struct ExistingSessionInfo* out_session_info) = 0;
 
   /**

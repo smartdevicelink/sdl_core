@@ -1083,8 +1083,14 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
 
   struct SessionObserver::ExistingSessionInfo si = {0};
   const ConnectionID connection_id = packet.connection_id();
-  const uint32_t session_id = session_observer_.OnSessionStartedCallback(
-      connection_id, packet.session_id(), service_type, protection, &si);
+  const bool first_try = false;
+  const uint32_t session_id =
+      session_observer_.OnSessionStartedCallback(connection_id,
+                                                 packet.session_id(),
+                                                 service_type,
+                                                 protection,
+                                                 first_try,
+                                                 &si);
 
   if (0 == session_id) {
     LOG4CXX_WARN(logger_,
@@ -1122,17 +1128,87 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
       // PTU for navi application has already been triggered by RAI
       // so that there is no need of new PTU
       if (si.is_navi_) {
+        LOG4CXX_INFO(logger_, "application is navi ");
         // if service has already been started as non encrypted
+        // or it has to be protected
         // and there is no valid certificate
         // Nack should be sent
-        if (si.service_exists_) {
+        if (si.service_exists_ ||
+            (si.start_protected_ && !si.can_be_unprotected_)) {
+          LOG4CXX_INFO(logger_,
+                       "application is " << si.start_protected_ << ", "
+                                         << si.can_be_unprotected_
+                                         << ", service exist"
+                                         << si.service_exists_);
+          //              if (!si.start_protected_) {
           SendStartSessionNAck(connection_id,
                                packet.session_id(),
                                protocol_version,
                                packet.service_type());
         } else {
+          const bool second_try = true;
+          const uint32_t session_id =
+              session_observer_.OnSessionStartedCallback(connection_id,
+                                                         packet.session_id(),
+                                                         service_type,
+                                                         protection,
+                                                         second_try,
+                                                         &si);
+
           // service has not been started yet
           // so that start it as non encrypted
+          // Ack encryption=false should be sent
+          // Service was started, so session_id should not be = 0
+          if (session_id != 0) {
+            SendStartSessionAck(connection_id,
+                                session_id,
+                                packet.protocol_version(),
+                                si.hash_id_,
+                                packet.service_type(),
+                                PROTECTION_OFF);
+          } else {
+            SendStartSessionNAck(connection_id,
+                                 packet.session_id(),
+                                 protocol_version,
+                                 packet.service_type());
+          }
+        }
+        return RESULT_OK;
+      }
+      LOG4CXX_INFO(logger_, "application is not navi ");
+      // This is non navi application,
+      // so that a PTU must be triggered if no certificate is provided
+      // and PTU has not been triggered by this reason
+      sync_primitives::AutoLock lock(ptu_state_lock_);
+      // PTU has not been triggered
+      // trigger PTU
+
+      // TODO ADD LOGS HERE
+      if (ptu_state_ == kNotTriggered) {
+        LOG4CXX_INFO(logger_, "application should trigger PTU now");
+        ptu_state_ = kTriggered;
+        pending_session_ = session_info;
+        security_manager_->NotifyOnCertififcateUpdateRequired();
+      } else if (ptu_state_ != kTriggered) {
+        // PTU has already been triggered
+        // and had brought no valid certificate
+        // Nack should be sent
+
+        if (si.can_be_unprotected_) {
+          // service has not been started yet
+          // so that start can be started both as non encrypted and encrypted
+          // And TLS handshake failed
+          // We should start session as not encrypted
+          LOG4CXX_INFO(logger_, "application can start unprotected");
+          const bool second_try = true;
+          const uint32_t session_id =
+              session_observer_.OnSessionStartedCallback(connection_id,
+                                                         packet.session_id(),
+                                                         service_type,
+                                                         protection,
+                                                         second_try,
+                                                         &si);
+
           // Ack encryption=false should be sent
           SendStartSessionAck(connection_id,
                               session_id,
@@ -1141,27 +1217,13 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
                               packet.service_type(),
                               PROTECTION_OFF);
         }
-        return RESULT_OK;
-      }
-      // This is non navi application,
-      // so that a PTU must be triggered if no certificate is provided
-      // and PTU has not been triggered by this reason
-      sync_primitives::AutoLock lock(ptu_state_lock_);
-      // PTU has not been triggered
-      // trigger PTU
-      if (ptu_state_ == kNotTriggered) {
-        ptu_state_ = kTriggered;
-        pending_session_ = session_info;
-        security_manager_->NotifyOnCertififcateUpdateRequired();
-      } else if (ptu_state_ != kTriggered) {
-        // PTU has already been triggered
-        // and had brought no valid certificate
-        // Nack should be sent
+        LOG4CXX_INFO(logger_, "application cannot start unprotected");
         SendStartSessionNAck(connection_id,
                              packet.session_id(),
                              protocol_version,
                              packet.service_type());
       }
+
       return RESULT_OK;
     }
     // Certificate is existing and doesn't rquire update,
@@ -1594,6 +1656,16 @@ security_manager::SSLContext* ProtocolHandlerImpl::GetSSLContextBySession(
 
 void ProtocolHandlerImpl::StartEncryptedService(const SessionInfo& si) {
   security_manager::SSLContext* ssl_context = GetSSLContextBySession(si);
+
+  struct SessionObserver::ExistingSessionInfo dump = {0};
+  const ServiceType service_type = ServiceTypeFromByte(si.service_type_);
+  const bool try_start = true;
+  session_observer_.OnSessionStartedCallback(si.connection_id_,
+                                             si.session_id_,
+                                             service_type,
+                                             PROTECTION_ON,
+                                             try_start,
+                                             &dump);
 
   // Start service as protected with current SSLContext
   if (ssl_context && ssl_context->IsInitCompleted()) {
