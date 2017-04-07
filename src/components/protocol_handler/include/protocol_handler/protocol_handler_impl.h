@@ -95,18 +95,21 @@ struct SessionInfo {
   uint8_t protocol_version_;
   uint8_t service_type_;
   uint32_t hash_id_;
+  uint32_t connection_key_;
   bool service_exists_;
   SessionInfo(ConnectionID connection_id,
               uint8_t session_id,
               uint8_t protocol_version,
               uint8_t service_type,
               uint32_t hash_id,
+              uint32_t connection_key,
               bool service_exists)
       : connection_id_(connection_id)
       , session_id_(session_id)
       , protocol_version_(protocol_version)
       , service_type_(service_type)
       , hash_id_(hash_id)
+      , connection_key_(connection_key)
       , service_exists_(service_exists) {}
   SessionInfo()
       : connection_id_(0)
@@ -114,7 +117,8 @@ struct SessionInfo {
       , protocol_version_(0)
       , service_type_(0)
       , hash_id_(0)
-      , service_exists_(0) {}
+      , connection_key_(0)
+      , service_exists_(false) {}
 };
 
 namespace impl {
@@ -533,6 +537,8 @@ class ProtocolHandlerImpl
   uint8_t SupportedSDLProtocolVersion() const;
 
   void StartEncryptedService(const SessionInfo& si);
+  security_manager::SSLContext* GetSSLContextBySession(
+      const SessionInfo& session_info);
 
   const ProtocolHandlerSettings& settings_;
 

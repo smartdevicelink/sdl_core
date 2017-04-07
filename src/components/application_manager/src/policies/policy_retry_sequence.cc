@@ -70,6 +70,7 @@ void RetrySequence::StartNextRetry() {
       StartNextRetry();
     } else {
       LOG4CXX_INFO(logger_, "End retry sequence. Update PT was not received");
+      policy_handler_->OnPTUFinished(false);
     }
   }
 }

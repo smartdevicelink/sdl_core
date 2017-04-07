@@ -840,7 +840,7 @@ uint32_t PolicyManagerImpl::NextRetryTimeout() {
   LOG4CXX_DEBUG(logger_, "Index: " << retry_sequence_index_);
   uint32_t next = 0u;
   if (retry_sequence_seconds_.empty() ||
-      retry_sequence_index_ >= retry_sequence_seconds_.size()) {
+      retry_sequence_index_ >= (retry_sequence_seconds_.size())) {
     return next;
   }
 
@@ -1161,6 +1161,7 @@ void PolicyManagerImpl::RetrySequence() {
 
   if (!timeout && timer_retry_sequence_.is_running()) {
     timer_retry_sequence_.Stop();
+    listener()->OnPTUFinished(false);
     return;
   }
   timer_retry_sequence_.Start(timeout, timer::kPeriodic);
