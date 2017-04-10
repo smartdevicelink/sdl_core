@@ -241,10 +241,10 @@ TEST(MessageHelperTestCreate,
   DataAccessor<application_manager::CommandsMap> data_accessor(vis, true);
 
   EXPECT_CALL(*appSharedMock, commands_map()).WillOnce(Return(data_accessor));
-  application_manager_test::MockApplicationManager mock_application_manager_;
+  application_manager_test::MockApplicationManager mock_application_manager;
   smart_objects::SmartObjectList ptr =
       MessageHelper::CreateAddCommandRequestToHMI(appSharedMock,
-                                                  mock_application_manager_);
+                                                  mock_application_manager);
 
   EXPECT_TRUE(ptr.empty());
 }
@@ -267,10 +267,10 @@ TEST(MessageHelperTestCreate,
 
   EXPECT_CALL(*appSharedMock, commands_map()).WillOnce(Return(data_accessor));
   EXPECT_CALL(*appSharedMock, app_id()).WillOnce(Return(1u));
-  application_manager_test::MockApplicationManager mock_application_manager_;
+  application_manager_test::MockApplicationManager mock_application_manager;
   smart_objects::SmartObjectList ptr =
       MessageHelper::CreateAddCommandRequestToHMI(appSharedMock,
-                                                  mock_application_manager_);
+                                                  mock_application_manager);
 
   EXPECT_FALSE(ptr.empty());
 
@@ -297,10 +297,10 @@ TEST(MessageHelperTestCreate,
   DataAccessor< ::application_manager::ChoiceSetMap> data_accessor(vis, true);
 
   EXPECT_CALL(*appSharedMock, choice_set_map()).WillOnce(Return(data_accessor));
-  application_manager_test::MockApplicationManager mock_application_manager_;
+  application_manager_test::MockApplicationManager mock_application_manager;
   smart_objects::SmartObjectList ptr =
       MessageHelper::CreateAddVRCommandRequestFromChoiceToHMI(
-          appSharedMock, mock_application_manager_);
+          appSharedMock, mock_application_manager);
 
   EXPECT_TRUE(ptr.empty());
 }
@@ -330,10 +330,10 @@ TEST(MessageHelperTestCreate,
   EXPECT_CALL(*appSharedMock, app_id())
       .Times(AtLeast(5))
       .WillRepeatedly(Return(1u));
-  application_manager_test::MockApplicationManager mock_application_manager_;
+  application_manager_test::MockApplicationManager mock_application_manager;
   smart_objects::SmartObjectList ptr =
       MessageHelper::CreateAddVRCommandRequestFromChoiceToHMI(
-          appSharedMock, mock_application_manager_);
+          appSharedMock, mock_application_manager);
 
   EXPECT_FALSE(ptr.empty());
 
@@ -776,6 +776,25 @@ TEST_F(MessageHelperTest, VerifySoftButtonString_CorrectStrings_True) {
   for (size_t i = 0; i < wrong_strings.size(); ++i) {
     EXPECT_TRUE(MessageHelper::VerifySoftButtonString(wrong_strings[i]));
   }
+}
+
+TEST_F(MessageHelperTest,
+       GetIVISubscriptionRequests_ValidApplication_HmiRequestNotEmpty) {
+  // Creating sharedPtr to MockApplication
+  MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
+  // Creating data acessor
+  application_manager::VehicleInfoSubscriptions vis;
+  DataAccessor<application_manager::VehicleInfoSubscriptions> data_accessor(
+      vis, true);
+  // Calls for ApplicationManager
+  EXPECT_CALL(*appSharedMock, app_id()).WillOnce(Return(kAppId));
+  EXPECT_CALL(*appSharedMock, SubscribedIVI()).WillOnce(Return(data_accessor));
+
+  smart_objects::SmartObjectList outList =
+      MessageHelper::GetIVISubscriptionRequests(appSharedMock,
+                                                mock_application_manager_);
+  // Expect not empty request
+  EXPECT_FALSE(outList.empty());
 }
 
 TEST_F(MessageHelperTest,
