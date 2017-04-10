@@ -1898,10 +1898,6 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
         LOG4CXX_WARN(logger_, "Failed to attach schema to object.");
         return false;
       }
-
-      const std::string invalid_msg_from_hmi =
-          "Invalid message received from vehicle";
-
       if (output.validate() != smart_objects::Errors::OK) {
         LOG4CXX_ERROR(logger_, "Incorrect parameter from HMI");
 
@@ -1921,15 +1917,9 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
         // Note(dtrunov): According to requirment APPLINK-15509
         output[strings::params][hmi_response::code] =
             hmi_apis::Common_Result::GENERIC_ERROR;
-        output[strings::msg_params][strings::info] = invalid_msg_from_hmi;
+        output[strings::msg_params][strings::info] =
+            std::string("Invalid message received from vehicle");
       }
-
-      if ((output)[strings::msg_params][strings::info].asString().empty()) {
-        (output)[strings::params][hmi_response::code] =
-            mobile_api::Result::eType::GENERIC_ERROR;
-        (output)[strings::msg_params][strings::info] = invalid_msg_from_hmi;
-      }
-
       break;
     }
     case ProtocolVersion::kV1: {
