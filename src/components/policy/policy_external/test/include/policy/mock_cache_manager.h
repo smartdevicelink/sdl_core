@@ -239,6 +239,7 @@ class MockCacheManagerInterface : public ::policy::CacheManagerInterface {
 
   MOCK_METHOD1(SetExternalConsentStatus, bool(const ExternalConsentStatus&));
   MOCK_METHOD0(GetExternalConsentStatus, ExternalConsentStatus());
+  MOCK_METHOD0(GetExternalConsentEntities, ExternalConsentStatus());
   MOCK_METHOD1(GetGroupsWithSameEntities,
                GroupsByExternalConsentStatus(const ExternalConsentStatus&));
   MOCK_METHOD0(GetKnownLinksFromPT, std::map<std::string, std::string>());
