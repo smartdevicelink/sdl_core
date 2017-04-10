@@ -245,6 +245,9 @@ class MockPolicyManager : public PolicyManager {
                               const EndpointUrls& urls));
   MOCK_METHOD1(SetExternalConsentStatus, bool(const ExternalConsentStatus&));
   MOCK_METHOD0(GetExternalConsentStatus, ExternalConsentStatus());
+  MOCK_METHOD0(GetExternalConsentEntities, ExternalConsentStatus());
+  MOCK_CONST_METHOD1(IsNeedToUpdateExternalConsentStatus,
+                     bool(const ExternalConsentStatus&));
 };
 }  // namespace policy_manager_test
 }  // namespace components
