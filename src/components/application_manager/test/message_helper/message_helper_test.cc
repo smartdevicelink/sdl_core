@@ -45,6 +45,9 @@
 #include "application_manager/event_engine/event_dispatcher.h"
 #include "application_manager/state_controller.h"
 #include "application_manager/resumption/resume_ctrl.h"
+#include "application_manager/mock_application_manager_settings.h"
+#include "application_manager/policies/mock_policy_handler_interface.h"
+#include "protocol_handler/mock_session_observer.h"
 
 #ifdef EXTERNAL_PROPRIETARY_MODE
 #include "policy/policy_external/include/policy/policy_types.h"
@@ -441,141 +444,154 @@ TEST(MessageHelperTestCreate, CreateNegativeResponse_SendSmartObject_Equal) {
   EXPECT_EQ(connection_key, objConnection_key);
 }
 
+namespace {
+const uint32_t kCorrelationId = 1u;
+const uint32_t kAppId = 123u;
+const uint32_t kCmdId = 1u;
+const uint32_t kGrammarId = 2u;
+const uint32_t kConnectionKey = 10u;
+
+const std::string kMacAdress = "mac_adress";
+const std::string kPolicyAppId = "policy_app_id";
+
+const smart_objects::SmartObject kVrCommands;
+}  // namespace
+
 class MessageHelperTest : public ::testing::Test {
  public:
   MessageHelperTest()
-      : language_strings{"EN-US", "ES-MX", "FR-CA", "DE-DE", "ES-ES", "EN-GB",
-                         "RU-RU", "TR-TR", "PL-PL", "FR-FR", "IT-IT", "SV-SE",
-                         "PT-PT", "NL-NL", "EN-AU", "ZH-CN", "ZH-TW", "JA-JP",
-                         "AR-SA", "KO-KR", "PT-BR", "CS-CZ", "DA-DK", "NO-NO",
-                         "NL-BE", "EL-GR", "HU-HU", "FI-FI", "SK-SK"}
-      , hmi_result_strings{"SUCCESS",
-                           "UNSUPPORTED_REQUEST",
-                           "UNSUPPORTED_RESOURCE",
-                           "DISALLOWED",
-                           "REJECTED",
-                           "ABORTED",
-                           "IGNORED",
-                           "RETRY",
-                           "IN_USE",
-                           "DATA_NOT_AVAILABLE",
-                           "TIMED_OUT",
-                           "INVALID_DATA",
-                           "CHAR_LIMIT_EXCEEDED",
-                           "INVALID_ID",
-                           "DUPLICATE_NAME",
-                           "APPLICATION_NOT_REGISTERED",
-                           "WRONG_LANGUAGE",
-                           "OUT_OF_MEMORY",
-                           "TOO_MANY_PENDING_REQUESTS",
-                           "NO_APPS_REGISTERED",
-                           "NO_DEVICES_CONNECTED",
-                           "WARNINGS",
-                           "GENERIC_ERROR",
-                           "USER_DISALLOWED",
-                           "TRUNCATED_DATA"}
-      , mobile_result_strings{"SUCCESS",
-                              "UNSUPPORTED_REQUEST",
-                              "UNSUPPORTED_RESOURCE",
-                              "DISALLOWED",
-                              "REJECTED",
-                              "ABORTED",
-                              "IGNORED",
-                              "RETRY",
-                              "IN_USE",
-                              "VEHICLE_DATA_NOT_AVAILABLE",
-                              "TIMED_OUT",
-                              "INVALID_DATA",
-                              "CHAR_LIMIT_EXCEEDED",
-                              "INVALID_ID",
-                              "DUPLICATE_NAME",
-                              "APPLICATION_NOT_REGISTERED",
-                              "WRONG_LANGUAGE",
-                              "OUT_OF_MEMORY",
-                              "TOO_MANY_PENDING_REQUESTS",
-                              "TOO_MANY_APPLICATIONS",
-                              "APPLICATION_REGISTERED_ALREADY",
-                              "WARNINGS",
-                              "GENERIC_ERROR",
-                              "USER_DISALLOWED",
-                              "UNSUPPORTED_VERSION",
-                              "VEHICLE_DATA_NOT_ALLOWED",
-                              "FILE_NOT_FOUND",
-                              "CANCEL_ROUTE",
-                              "TRUNCATED_DATA",
-                              "SAVED",
-                              "INVALID_CERT",
-                              "EXPIRED_CERT",
-                              "RESUME_FAILED"}
-      , function_id_strings{"RESERVED",
-                            "RegisterAppInterface",
-                            "UnregisterAppInterface",
-                            "SetGlobalProperties",
-                            "ResetGlobalProperties",
-                            "AddCommand",
-                            "DeleteCommand",
-                            "AddSubMenu",
-                            "DeleteSubMenu",
-                            "CreateInteractionChoiceSet",
-                            "PerformInteraction",
-                            "DeleteInteractionChoiceSet",
-                            "Alert",
-                            "Show",
-                            "Speak",
-                            "SetMediaClockTimer",
-                            "PerformAudioPassThru",
-                            "EndAudioPassThru",
-                            "SubscribeButton",
-                            "UnsubscribeButton",
-                            "SubscribeVehicleData",
-                            "UnsubscribeVehicleData",
-                            "GetVehicleData",
-                            "ReadDID",
-                            "GetDTCs",
-                            "ScrollableMessage",
-                            "Slider",
-                            "ShowConstantTBT",
-                            "AlertManeuver",
-                            "UpdateTurnList",
-                            "ChangeRegistration",
-                            "GenericResponse",
-                            "PutFile",
-                            "DeleteFile",
-                            "ListFiles",
-                            "SetAppIcon",
-                            "SetDisplayLayout",
-                            "DiagnosticMessage",
-                            "SystemRequest",
-                            "SendLocation",
-                            "DialNumber"}
-      , events_id_strings{"OnHMIStatus",
-                          "OnAppInterfaceUnregistered",
-                          "OnButtonEvent",
-                          "OnButtonPress",
-                          "OnVehicleData",
-                          "OnCommand",
-                          "OnTBTClientState",
-                          "OnDriverDistraction",
-                          "OnPermissionsChange",
-                          "OnAudioPassThru",
-                          "OnLanguageChange",
-                          "OnKeyboardInput",
-                          "OnTouchEvent",
-                          "OnSystemRequest",
-                          "OnHashChange"}
-      , hmi_level_strings{"FULL", "LIMITED", "BACKGROUND", "NONE"}
-      , delta_from_functions_id(32768) {}
+      : language_strings_{"EN-US", "ES-MX", "FR-CA", "DE-DE", "ES-ES", "EN-GB",
+                          "RU-RU", "TR-TR", "PL-PL", "FR-FR", "IT-IT", "SV-SE",
+                          "PT-PT", "NL-NL", "EN-AU", "ZH-CN", "ZH-TW", "JA-JP",
+                          "AR-SA", "KO-KR", "PT-BR", "CS-CZ", "DA-DK", "NO-NO",
+                          "NL-BE", "EL-GR", "HU-HU", "FI-FI", "SK-SK"}
+      , hmi_result_strings_{"SUCCESS",
+                            "UNSUPPORTED_REQUEST",
+                            "UNSUPPORTED_RESOURCE",
+                            "DISALLOWED",
+                            "REJECTED",
+                            "ABORTED",
+                            "IGNORED",
+                            "RETRY",
+                            "IN_USE",
+                            "DATA_NOT_AVAILABLE",
+                            "TIMED_OUT",
+                            "INVALID_DATA",
+                            "CHAR_LIMIT_EXCEEDED",
+                            "INVALID_ID",
+                            "DUPLICATE_NAME",
+                            "APPLICATION_NOT_REGISTERED",
+                            "WRONG_LANGUAGE",
+                            "OUT_OF_MEMORY",
+                            "TOO_MANY_PENDING_REQUESTS",
+                            "NO_APPS_REGISTERED",
+                            "NO_DEVICES_CONNECTED",
+                            "WARNINGS",
+                            "GENERIC_ERROR",
+                            "USER_DISALLOWED",
+                            "TRUNCATED_DATA"}
+      , mobile_result_strings_{"SUCCESS",
+                               "UNSUPPORTED_REQUEST",
+                               "UNSUPPORTED_RESOURCE",
+                               "DISALLOWED",
+                               "REJECTED",
+                               "ABORTED",
+                               "IGNORED",
+                               "RETRY",
+                               "IN_USE",
+                               "VEHICLE_DATA_NOT_AVAILABLE",
+                               "TIMED_OUT",
+                               "INVALID_DATA",
+                               "CHAR_LIMIT_EXCEEDED",
+                               "INVALID_ID",
+                               "DUPLICATE_NAME",
+                               "APPLICATION_NOT_REGISTERED",
+                               "WRONG_LANGUAGE",
+                               "OUT_OF_MEMORY",
+                               "TOO_MANY_PENDING_REQUESTS",
+                               "TOO_MANY_APPLICATIONS",
+                               "APPLICATION_REGISTERED_ALREADY",
+                               "WARNINGS",
+                               "GENERIC_ERROR",
+                               "USER_DISALLOWED",
+                               "TRUNCATED_DATA",
+                               "UNSUPPORTED_VERSION",
+                               "VEHICLE_DATA_NOT_ALLOWED",
+                               "FILE_NOT_FOUND",
+                               "CANCEL_ROUTE",
+                               "SAVED",
+                               "INVALID_CERT",
+                               "EXPIRED_CERT",
+                               "RESUME_FAILED"}
+      , function_id_strings_{"RESERVED",
+                             "RegisterAppInterface",
+                             "UnregisterAppInterface",
+                             "SetGlobalProperties",
+                             "ResetGlobalProperties",
+                             "AddCommand",
+                             "DeleteCommand",
+                             "AddSubMenu",
+                             "DeleteSubMenu",
+                             "CreateInteractionChoiceSet",
+                             "PerformInteraction",
+                             "DeleteInteractionChoiceSet",
+                             "Alert",
+                             "Show",
+                             "Speak",
+                             "SetMediaClockTimer",
+                             "PerformAudioPassThru",
+                             "EndAudioPassThru",
+                             "SubscribeButton",
+                             "UnsubscribeButton",
+                             "SubscribeVehicleData",
+                             "UnsubscribeVehicleData",
+                             "GetVehicleData",
+                             "ReadDID",
+                             "GetDTCs",
+                             "ScrollableMessage",
+                             "Slider",
+                             "ShowConstantTBT",
+                             "AlertManeuver",
+                             "UpdateTurnList",
+                             "ChangeRegistration",
+                             "GenericResponse",
+                             "PutFile",
+                             "DeleteFile",
+                             "ListFiles",
+                             "SetAppIcon",
+                             "SetDisplayLayout",
+                             "DiagnosticMessage",
+                             "SystemRequest",
+                             "SendLocation",
+                             "DialNumber"}
+      , events_id_strings_{"OnHMIStatus",
+                           "OnAppInterfaceUnregistered",
+                           "OnButtonEvent",
+                           "OnButtonPress",
+                           "OnVehicleData",
+                           "OnCommand",
+                           "OnTBTClientState",
+                           "OnDriverDistraction",
+                           "OnPermissionsChange",
+                           "OnAudioPassThru",
+                           "OnLanguageChange",
+                           "OnKeyboardInput",
+                           "OnTouchEvent",
+                           "OnSystemRequest",
+                           "OnHashChange"}
+      , hmi_level_strings_{"FULL", "LIMITED", "BACKGROUND", "NONE"}
+      , delta_from_functions_id_(32768) {}
 
  protected:
-  application_manager_test::MockApplicationManager mock_application_manager;
-  const StringArray language_strings;
-  const StringArray hmi_result_strings;
-  const StringArray mobile_result_strings;
-  const StringArray function_id_strings;
-  const StringArray events_id_strings;
-  const StringArray hmi_level_strings;
-
-  const size_t delta_from_functions_id;
+  application_manager_test::MockApplicationManager mock_application_manager_;
+  const StringArray language_strings_;
+  const StringArray hmi_result_strings_;
+  const StringArray mobile_result_strings_;
+  const StringArray function_id_strings_;
+  const StringArray events_id_strings_;
+  const StringArray hmi_level_strings_;
+  MockApplicationSharedPtr mock_app_ = utils::MakeShared<MockApplication>();
+  const size_t delta_from_functions_id_;
 };
 
 TEST_F(MessageHelperTest,
@@ -583,11 +599,11 @@ TEST_F(MessageHelperTest,
   HmiLanguage::eType enum_value;
   HmiLanguage::eType enum_from_string_value;
   // Check all languages >= 0
-  for (size_t array_index = 0; array_index < language_strings.size();
+  for (size_t array_index = 0; array_index < language_strings_.size();
        ++array_index) {
     enum_value = static_cast<HmiLanguage::eType>(array_index);
     enum_from_string_value =
-        MessageHelper::CommonLanguageFromString(language_strings[array_index]);
+        MessageHelper::CommonLanguageFromString(language_strings_[array_index]);
     EXPECT_EQ(enum_value, enum_from_string_value);
   }
   // Check InvalidEnum == -1
@@ -601,11 +617,11 @@ TEST_F(MessageHelperTest,
   std::string string_from_enum;
   HmiLanguage::eType casted_enum;
   // Check all languages >=0
-  for (size_t array_index = 0; array_index < language_strings.size();
+  for (size_t array_index = 0; array_index < language_strings_.size();
        ++array_index) {
     casted_enum = static_cast<HmiLanguage::eType>(array_index);
     string_from_enum = MessageHelper::CommonLanguageToString(casted_enum);
-    EXPECT_EQ(language_strings[array_index], string_from_enum);
+    EXPECT_EQ(language_strings_[array_index], string_from_enum);
   }
   // Check InvalidEnum == -1
   string_from_enum =
@@ -627,11 +643,11 @@ TEST_F(MessageHelperTest, HMIResultFromString_StringValueOfEnum_CorrectEType) {
   HmiResults::eType enum_value;
   HmiResults::eType enum_from_string_value;
   // Check all results >= 0
-  for (size_t array_index = 0; array_index < hmi_result_strings.size();
+  for (size_t array_index = 0; array_index < hmi_result_strings_.size();
        ++array_index) {
     enum_value = static_cast<HmiResults::eType>(array_index);
     enum_from_string_value =
-        MessageHelper::HMIResultFromString(hmi_result_strings[array_index]);
+        MessageHelper::HMIResultFromString(hmi_result_strings_[array_index]);
     EXPECT_EQ(enum_value, enum_from_string_value);
   }
   // Check InvalidEnum == -1
@@ -644,15 +660,74 @@ TEST_F(MessageHelperTest, HMIResultToString_ETypeValueOfEnum_CorrectString) {
   std::string string_from_enum;
   HmiResults::eType casted_enum;
   // Check all results >=0
-  for (size_t array_index = 0; array_index < hmi_result_strings.size();
+  for (size_t array_index = 0; array_index < hmi_result_strings_.size();
        ++array_index) {
     casted_enum = static_cast<HmiResults::eType>(array_index);
     string_from_enum = MessageHelper::HMIResultToString(casted_enum);
-    EXPECT_EQ(hmi_result_strings[array_index], string_from_enum);
+    EXPECT_EQ(hmi_result_strings_[array_index], string_from_enum);
   }
   // Check InvalidEnum == -1
   string_from_enum = MessageHelper::HMIResultToString(HmiResults::INVALID_ENUM);
   EXPECT_EQ("", string_from_enum);
+}
+
+TEST_F(MessageHelperTest,
+       MobileResultFromString_StringValueOfEnum_CorrectEType) {
+  MobileResults::eType tested_enum;
+  MobileResults::eType converted;
+  // Check enums >=0
+  for (size_t array_index = 0; array_index < mobile_result_strings_.size();
+       ++array_index) {
+    tested_enum = static_cast<MobileResults::eType>(array_index);
+    converted = MessageHelper::MobileResultFromString(
+        mobile_result_strings_[array_index]);
+    EXPECT_EQ(tested_enum, converted);
+  }
+  // Check invalid enums == -1
+  tested_enum = MobileResults::INVALID_ENUM;
+  converted = MessageHelper::MobileResultFromString("");
+  EXPECT_EQ(tested_enum, converted);
+}
+
+TEST_F(MessageHelperTest, MobileResultToString_ETypeValueOfEnum_CorrectString) {
+  std::string string_from_enum;
+  MobileResults::eType casted_enum;
+  // Check all results >=0
+  for (size_t array_index = 0; array_index < mobile_result_strings_.size();
+       ++array_index) {
+    casted_enum = static_cast<MobileResults::eType>(array_index);
+    string_from_enum = MessageHelper::MobileResultToString(casted_enum);
+    EXPECT_EQ(mobile_result_strings_[array_index], string_from_enum);
+  }
+  // Check InvalidEnum == -1
+  string_from_enum =
+      MessageHelper::MobileResultToString(MobileResults::INVALID_ENUM);
+  EXPECT_EQ("", string_from_enum);
+}
+
+TEST_F(MessageHelperTest,
+       MobileToHMIResult_MobileResultEType_GetCorrectHmiResultEType) {
+  HmiResults::eType tested_enum;
+  MobileResults::eType casted_mobile_enum;
+  HmiResults::eType converted_enum;
+  // Check enums >=0
+  for (size_t enum_index = 0; enum_index < mobile_result_strings_.size();
+       ++enum_index) {
+    tested_enum =
+        MessageHelper::HMIResultFromString(mobile_result_strings_[enum_index]);
+    casted_mobile_enum = static_cast<MobileResults::eType>(enum_index);
+    converted_enum = MessageHelper::MobileToHMIResult(casted_mobile_enum);
+    EXPECT_EQ(tested_enum, converted_enum);
+  }
+  // Check invalid enums == -1
+  tested_enum = HmiResults::INVALID_ENUM;
+  converted_enum =
+      MessageHelper::MobileToHMIResult(MobileResults::INVALID_ENUM);
+  EXPECT_EQ(tested_enum, converted_enum);
+  // Check when out of range (true == result.empty())
+  casted_mobile_enum = static_cast<MobileResults::eType>(INT_MAX);
+  converted_enum = MessageHelper::MobileToHMIResult(casted_mobile_enum);
+  EXPECT_EQ(tested_enum, converted_enum);
 }
 
 TEST_F(MessageHelperTest,
@@ -661,10 +736,10 @@ TEST_F(MessageHelperTest,
   HmiResults::eType casted_hmi_enum;
   MobileResults::eType converted_enum;
   // Check enums >=0
-  for (size_t enum_index = 0; enum_index < hmi_result_strings.size();
+  for (size_t enum_index = 0; enum_index < hmi_result_strings_.size();
        ++enum_index) {
     tested_enum =
-        MessageHelper::MobileResultFromString(hmi_result_strings[enum_index]);
+        MessageHelper::MobileResultFromString(hmi_result_strings_[enum_index]);
     casted_hmi_enum = static_cast<HmiResults::eType>(enum_index);
     converted_enum = MessageHelper::HMIToMobileResult(casted_hmi_enum);
     EXPECT_EQ(tested_enum, converted_enum);
@@ -712,36 +787,32 @@ TEST_F(MessageHelperTest,
   DataAccessor<application_manager::VehicleInfoSubscriptions> data_accessor(
       vis, true);
   // Calls for ApplicationManager
-  EXPECT_CALL(*appSharedMock, app_id()).WillOnce(Return(1u));
+  EXPECT_CALL(*appSharedMock, app_id()).WillOnce(Return(kAppId));
   EXPECT_CALL(*appSharedMock, SubscribedIVI()).WillOnce(Return(data_accessor));
 
   smart_objects::SmartObjectList outList =
       MessageHelper::GetIVISubscriptionRequests(appSharedMock,
-                                                mock_application_manager);
+                                                mock_application_manager_);
   // Expect not empty request
   EXPECT_FALSE(outList.empty());
 }
 
 TEST_F(MessageHelperTest,
        ProcessSoftButtons_SmartObjectWithoutButtonsKey_Success) {
-  // Creating sharedPtr to MockApplication
-  MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
   // Creating input data for method
   smart_objects::SmartObject object;
   policy_handler_test::MockPolicySettings policy_settings_;
   const policy::PolicyHandler policy_handler(policy_settings_,
-                                             mock_application_manager);
+                                             mock_application_manager_);
   // Method call
   mobile_apis::Result::eType result = MessageHelper::ProcessSoftButtons(
-      object, appSharedMock, policy_handler, mock_application_manager);
+      object, mock_app_, policy_handler, mock_application_manager_);
   // Expect
   EXPECT_EQ(mobile_apis::Result::SUCCESS, result);
 }
 
 TEST_F(MessageHelperTest,
        ProcessSoftButtons_IncorectSoftButonValue_InvalidData) {
-  // Creating sharedPtr to MockApplication
-  MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
   // Creating input data for method
   smart_objects::SmartObject object;
   smart_objects::SmartObject& buttons = object[strings::soft_buttons];
@@ -749,60 +820,336 @@ TEST_F(MessageHelperTest,
   buttons[0][strings::image][strings::value] = "invalid\\nvalue";
   policy_handler_test::MockPolicySettings policy_settings_;
   const policy::PolicyHandler policy_handler(policy_settings_,
-                                             mock_application_manager);
+                                             mock_application_manager_);
   // Method call
   mobile_apis::Result::eType result = MessageHelper::ProcessSoftButtons(
-      object, appSharedMock, policy_handler, mock_application_manager);
+      object, mock_app_, policy_handler, mock_application_manager_);
   // Expect
   EXPECT_EQ(mobile_apis::Result::INVALID_DATA, result);
 }
 
+TEST_F(MessageHelperTest, ProcessSoftButtons_CheckWithPolicy_Disallowed) {
+  smart_objects::SmartObject soft_button;
+  soft_button[strings::system_action] = mobile_apis::SystemAction::INVALID_ENUM;
+  smart_objects::SmartObject message_params;
+  message_params[strings::soft_buttons] = soft_button;
+  application_manager_test::MockApplicationManager mock_application_manager_;
+  policy_test::MockPolicyHandlerInterface policy_handler;
+
+  EXPECT_CALL(policy_handler, PolicyEnabled()).WillOnce(Return(true));
+  EXPECT_CALL(policy_handler, CheckSystemAction(_, _)).WillOnce(Return(false));
+  EXPECT_CALL(*mock_app_, policy_app_id()).WillOnce(Return(""));
+  EXPECT_EQ(mobile_apis::Result::DISALLOWED,
+            MessageHelper::ProcessSoftButtons(message_params,
+                                              mock_app_,
+                                              policy_handler,
+                                              mock_application_manager_));
+}
+
+TEST_F(MessageHelperTest,
+       ProcessSoftButtons_TextAndImageDoesNotExists_InvalidData) {
+  smart_objects::SmartObject soft_button;
+  soft_button[strings::system_action] = mobile_apis::SystemAction::INVALID_ENUM;
+
+  std::vector<mobile_apis::SoftButtonType::eType> button_types_list;
+  button_types_list.push_back(mobile_apis::SoftButtonType::SBT_BOTH);
+  button_types_list.push_back(mobile_apis::SoftButtonType::SBT_IMAGE);
+  button_types_list.push_back(mobile_apis::SoftButtonType::SBT_TEXT);
+
+  smart_objects::SmartObject message_params;
+  std::vector<mobile_apis::SoftButtonType::eType>::iterator it =
+      button_types_list.begin();
+  for (; it != button_types_list.end(); ++it) {
+    soft_button[strings::type] = (*it);
+    message_params[strings::soft_buttons][0] = soft_button;
+
+    application_manager_test::MockApplicationManager mock_application_manager_;
+    policy_test::MockPolicyHandlerInterface policy_handler;
+
+    EXPECT_CALL(policy_handler, PolicyEnabled()).WillOnce(Return(true));
+    EXPECT_CALL(policy_handler, CheckSystemAction(_, _)).WillOnce(Return(true));
+    EXPECT_CALL(*mock_app_, policy_app_id()).WillOnce(Return(""));
+    EXPECT_EQ(mobile_apis::Result::INVALID_DATA,
+              MessageHelper::ProcessSoftButtons(message_params,
+                                                mock_app_,
+                                                policy_handler,
+                                                mock_application_manager_));
+  }
+}
+
+TEST_F(MessageHelperTest, ProcessSoftButtons_Text_InvalidData) {
+  smart_objects::SmartObject soft_button;
+  soft_button[strings::system_action] = mobile_apis::SystemAction::INVALID_ENUM;
+  soft_button[strings::text] = "";
+  std::vector<mobile_apis::SoftButtonType::eType> button_types_list;
+  button_types_list.push_back(mobile_apis::SoftButtonType::SBT_BOTH);
+  button_types_list.push_back(mobile_apis::SoftButtonType::SBT_IMAGE);
+  button_types_list.push_back(mobile_apis::SoftButtonType::SBT_TEXT);
+
+  std::vector<mobile_apis::SoftButtonType::eType>::iterator it =
+      button_types_list.begin();
+  for (; it != button_types_list.end(); ++it) {
+    soft_button[strings::type] = (*it);
+    smart_objects::SmartObject message_params;
+    message_params[strings::soft_buttons][0] = soft_button;
+
+    application_manager_test::MockApplicationManager mock_application_manager_;
+    policy_test::MockPolicyHandlerInterface policy_handler;
+
+    EXPECT_CALL(policy_handler, PolicyEnabled()).WillOnce(Return(true));
+    EXPECT_CALL(policy_handler, CheckSystemAction(_, _)).WillOnce(Return(true));
+    EXPECT_CALL(*mock_app_, policy_app_id()).WillOnce(Return(""));
+    EXPECT_EQ(mobile_apis::Result::INVALID_DATA,
+              MessageHelper::ProcessSoftButtons(message_params,
+                                                mock_app_,
+                                                policy_handler,
+                                                mock_application_manager_));
+  }
+}
+
+TEST_F(MessageHelperTest, ProcessSoftButton_InvalidSoftButtonType_SUCCESS) {
+  smart_objects::SmartObject soft_button;
+  soft_button[strings::system_action] = mobile_apis::SystemAction::INVALID_ENUM;
+  soft_button[strings::type] = mobile_apis::SoftButtonType::INVALID_ENUM;
+  smart_objects::SmartObject message_params;
+  message_params[strings::soft_buttons][0] = soft_button;
+
+  application_manager_test::MockApplicationManager mock_application_manager_;
+  policy_test::MockPolicyHandlerInterface policy_handler;
+
+  EXPECT_CALL(policy_handler, PolicyEnabled()).WillOnce(Return(true));
+  EXPECT_CALL(policy_handler, CheckSystemAction(_, _)).WillOnce(Return(true));
+  EXPECT_CALL(*mock_app_, policy_app_id()).WillOnce(Return(""));
+  EXPECT_EQ(mobile_apis::Result::SUCCESS,
+            MessageHelper::ProcessSoftButtons(message_params,
+                                              mock_app_,
+                                              policy_handler,
+                                              mock_application_manager_));
+}
+
+TEST_F(MessageHelperTest, CreateAddVRCommandToHMI_ValidVrCommand_SUCCESS) {
+  application_manager_test::MockApplicationManager mock_application_manager_;
+
+  smart_objects::SmartObjectSPtr valid_vr_command =
+      utils::MakeShared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Map);
+  (*valid_vr_command)[strings::params][strings::function_id] =
+      hmi_apis::FunctionID::VR_AddCommand;
+  smart_objects::SmartObject msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+  msg_params[strings::cmd_id] = kCmdId;
+  msg_params[strings::app_id] = kAppId;
+  msg_params[strings::grammar_id] = kGrammarId;
+  msg_params[strings::type] = hmi_apis::Common_VRCommandType::Command;
+  (*valid_vr_command)[strings::msg_params] = msg_params;
+
+  EXPECT_CALL(mock_application_manager_, GetNextHMICorrelationID())
+      .WillOnce(Return(kAppId));
+  EXPECT_CALL(mock_application_manager_, application(kAppId))
+      .WillOnce(Return(mock_app_));
+  EXPECT_CALL(*mock_app_, get_grammar_id()).WillOnce(Return(kGrammarId));
+
+  smart_objects::SmartObjectSPtr vr_command =
+      MessageHelper::CreateAddVRCommandToHMI(
+          kCmdId, kVrCommands, kAppId, mock_application_manager_);
+
+  EXPECT_EQ((*valid_vr_command)[strings::msg_params][strings::cmd_id],
+            (*vr_command)[strings::msg_params][strings::cmd_id]);
+  EXPECT_EQ((*valid_vr_command)[strings::msg_params][strings::app_id],
+            (*vr_command)[strings::msg_params][strings::app_id]);
+  EXPECT_EQ((*valid_vr_command)[strings::msg_params][strings::grammar_id],
+            (*vr_command)[strings::msg_params][strings::grammar_id]);
+  EXPECT_EQ((*valid_vr_command)[strings::msg_params][strings::type],
+            (*vr_command)[strings::msg_params][strings::type]);
+  EXPECT_EQ((*valid_vr_command)[strings::params][strings::function_id],
+            (*vr_command)[strings::params][strings::function_id]);
+}
+
+TEST_F(MessageHelperTest, CreateAddVRCommandToHMI_NullAppId_SUCCESS) {
+  const uint32_t cmd_id = 0u;
+  const uint32_t app_id = 0u;
+  application_manager_test::MockApplicationManager mock_application_manager_;
+
+  smart_objects::SmartObjectSPtr valid_vr_command =
+      utils::MakeShared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Map);
+  (*valid_vr_command)[strings::params][strings::function_id] =
+      hmi_apis::FunctionID::VR_AddCommand;
+  smart_objects::SmartObject msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+  msg_params[strings::cmd_id] = cmd_id;
+  msg_params[strings::app_id] = app_id;
+  msg_params[strings::grammar_id] = kGrammarId;
+  msg_params[strings::type] = hmi_apis::Common_VRCommandType::Command;
+  (*valid_vr_command)[strings::msg_params] = msg_params;
+
+  EXPECT_CALL(mock_application_manager_, GetNextHMICorrelationID())
+      .WillOnce(Return(app_id));
+  EXPECT_CALL(mock_application_manager_, application(app_id))
+      .WillOnce(Return(mock_app_));
+  EXPECT_CALL(*mock_app_, get_grammar_id()).WillOnce(Return(kGrammarId));
+
+  const smart_objects::SmartObject vr_command_so;
+  smart_objects::SmartObjectSPtr vr_command =
+      MessageHelper::CreateAddVRCommandToHMI(
+          cmd_id, vr_command_so, app_id, mock_application_manager_);
+
+  EXPECT_NE((*valid_vr_command)[strings::msg_params][strings::cmd_id],
+            (*vr_command)[strings::msg_params][strings::cmd_id]);
+  EXPECT_NE((*valid_vr_command)[strings::msg_params][strings::app_id],
+            (*vr_command)[strings::msg_params][strings::app_id]);
+  EXPECT_EQ((*valid_vr_command)[strings::msg_params][strings::grammar_id],
+            (*vr_command)[strings::msg_params][strings::grammar_id]);
+  EXPECT_EQ((*valid_vr_command)[strings::msg_params][strings::type],
+            (*vr_command)[strings::msg_params][strings::type]);
+  EXPECT_EQ((*valid_vr_command)[strings::params][strings::function_id],
+            (*vr_command)[strings::params][strings::function_id]);
+}
+
+TEST_F(MessageHelperTest,
+       FillAppRevokedPermissions_FromSendSDLActivateAppResponse_SUCCESS) {
+  application_manager_test::MockApplicationManager mock_application_manager_;
+  policy::AppPermissions permissions(kPolicyAppId);
+  permissions.isAppPermissionsRevoked = true;
+  permissions.appRevokedPermissions.push_back(
+      policy::FunctionalGroupPermission());
+  permissions.appRevokedPermissions[0].state = policy::kGroupAllowed;
+  EXPECT_CALL(mock_application_manager_, ManageHMICommand(_)).Times(1);
+  MessageHelper::SendSDLActivateAppResponse(
+      permissions, kCorrelationId, mock_application_manager_);
+}
+
+TEST_F(MessageHelperTest,
+       GetBCActivateAppRequestToHMI_SendPolicyPriorityFalse_SUCCESS) {
+  const bool send_policy_priority = false;
+  protocol_handler_test::MockSessionObserver mock_session_observer;
+  policy_test::MockPolicyHandlerInterface policy_handler;
+  application_manager_test::MockApplicationManager mock_application_manager_;
+  EXPECT_CALL(*mock_app_, app_id()).WillOnce(Return(kAppId));
+  EXPECT_CALL(mock_application_manager_, GetNextHMICorrelationID())
+      .WillOnce(Return(kCorrelationId));
+  smart_objects::SmartObjectSPtr message =
+      MessageHelper::GetBCActivateAppRequestToHMI(
+          mock_app_,
+          mock_session_observer,
+          policy_handler,
+          hmi_apis::Common_HMILevel::BACKGROUND,
+          send_policy_priority,
+          mock_application_manager_);
+  EXPECT_EQ(hmi_apis::FunctionID::BasicCommunication_ActivateApp,
+            (*message)[strings::params][strings::function_id].asInt());
+  EXPECT_EQ(MessageType::kRequest,
+            (*message)[strings::params][strings::message_type].asInt());
+  EXPECT_EQ(kCorrelationId,
+            (*message)[strings::params][strings::correlation_id].asInt());
+  EXPECT_EQ(kAppId, (*message)[strings::msg_params][strings::app_id].asInt());
+  EXPECT_EQ(
+      hmi_apis::Common_HMILevel::BACKGROUND,
+      (*message)[strings::msg_params][strings::activate_app_hmi_level].asInt());
+}
+
+TEST_F(MessageHelperTest,
+       GetBCActivateAppRequestToHMI_SendPolicyPriorityTrue_SUCCESS) {
+  const bool send_policy_priority = true;
+  protocol_handler_test::MockSessionObserver mock_session_observer;
+  policy_test::MockPolicyHandlerInterface policy_handler;
+  application_manager_test::MockApplicationManager mock_application_manager_;
+  EXPECT_CALL(policy_handler, GetUserConsentForDevice(kMacAdress))
+      .WillOnce(Return(policy::kDeviceAllowed));
+  EXPECT_CALL(*mock_app_, mac_address()).WillOnce(ReturnRef(kMacAdress));
+  EXPECT_CALL(policy_handler, GetPriority(_, _)).WillOnce(Return(true));
+  EXPECT_CALL(*mock_app_, policy_app_id()).WillOnce(Return(kPolicyAppId));
+  EXPECT_CALL(*mock_app_, app_id()).WillOnce(Return(kAppId));
+  EXPECT_CALL(mock_application_manager_, GetNextHMICorrelationID())
+      .WillOnce(Return(kCorrelationId));
+  smart_objects::SmartObjectSPtr message =
+      MessageHelper::GetBCActivateAppRequestToHMI(
+          mock_app_,
+          mock_session_observer,
+          policy_handler,
+          hmi_apis::Common_HMILevel::BACKGROUND,
+          send_policy_priority,
+          mock_application_manager_);
+  EXPECT_EQ(hmi_apis::FunctionID::BasicCommunication_ActivateApp,
+            (*message)[strings::params][strings::function_id].asInt());
+  EXPECT_EQ(MessageType::kRequest,
+            (*message)[strings::params][strings::message_type].asInt());
+  EXPECT_EQ(kCorrelationId,
+            (*message)[strings::params][strings::correlation_id].asInt());
+  EXPECT_EQ(kAppId, (*message)[strings::msg_params][strings::app_id].asInt());
+  EXPECT_EQ(
+      hmi_apis::Common_HMILevel::BACKGROUND,
+      (*message)[strings::msg_params][strings::activate_app_hmi_level].asInt());
+}
+
+TEST_F(MessageHelperTest,
+       GetOnAppInterfaceUnregisteredNotificationToMobile_CheckMessage_SUCCESS) {
+  const application_manager::mobile_api::AppInterfaceUnregisteredReason::eType
+      reason = application_manager::mobile_api::AppInterfaceUnregisteredReason::
+          APP_UNAUTHORIZED;
+  smart_objects::SmartObjectSPtr message =
+      MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
+          kConnectionKey, reason);
+  EXPECT_EQ(
+      application_manager::mobile_api::FunctionID::OnAppInterfaceUnregisteredID,
+      (*message)[strings::params][strings::function_id].asInt());
+  EXPECT_EQ(application_manager::kNotification,
+            (*message)[strings::params][strings::message_type].asInt());
+  EXPECT_EQ(kConnectionKey,
+            (*message)[strings::params][strings::connection_key].asInt());
+  EXPECT_EQ(reason, (*message)[strings::msg_params][strings::reason].asInt());
+}
+
+TEST_F(MessageHelperTest, GetPriorityCode_InvalidEnum_SUCCESS) {
+  const std::string priority = "DEFAULT";
+  EXPECT_EQ(static_cast<uint32_t>(hmi_apis::Common_AppPriority::INVALID_ENUM),
+            MessageHelper::GetPriorityCode(priority));
+}
+
+TEST_F(MessageHelperTest, GetPriorityCode_ValidEnum_SUCCESS) {
+  const std::string priority = "NORMAL";
+  EXPECT_EQ(static_cast<uint32_t>(hmi_apis::Common_AppPriority::NORMAL),
+            MessageHelper::GetPriorityCode(priority));
+}
+
 TEST_F(MessageHelperTest, VerifyImage_ImageTypeIsStatic_Success) {
-  // Creating sharedPtr to MockApplication
-  MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
   // Creating input data for method
   smart_objects::SmartObject image;
   image[strings::image_type] = mobile_apis::ImageType::STATIC;
   // Method call
-  mobile_apis::Result::eType result = MessageHelper::VerifyImage(
-      image, appSharedMock, mock_application_manager);
+  mobile_apis::Result::eType result =
+      MessageHelper::VerifyImage(image, mock_app_, mock_application_manager_);
   // EXPECT
   EXPECT_EQ(mobile_apis::Result::SUCCESS, result);
 }
 
 TEST_F(MessageHelperTest, VerifyImage_ImageValueNotValid_InvalidData) {
-  // Creating sharedPtr to MockApplication
-  MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
   // Creating input data for method
   smart_objects::SmartObject image;
   image[strings::image_type] = mobile_apis::ImageType::DYNAMIC;
   // Invalid value
   image[strings::value] = "   ";
   // Method call
-  mobile_apis::Result::eType result = MessageHelper::VerifyImage(
-      image, appSharedMock, mock_application_manager);
+  mobile_apis::Result::eType result =
+      MessageHelper::VerifyImage(image, mock_app_, mock_application_manager_);
   // EXPECT
   EXPECT_EQ(mobile_apis::Result::INVALID_DATA, result);
 }
 
 TEST_F(MessageHelperTest, VerifyImageApplyPath_ImageTypeIsStatic_Success) {
-  // Creating sharedPtr to MockApplication
-  MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
   // Creating input data for method
   smart_objects::SmartObject image;
   image[strings::image_type] = mobile_apis::ImageType::STATIC;
   image[strings::value] = "icon.png";
   // Method call
   mobile_apis::Result::eType result = MessageHelper::VerifyImageApplyPath(
-      image, appSharedMock, mock_application_manager);
+      image, mock_app_, mock_application_manager_);
   // EXPECT
   EXPECT_EQ(mobile_apis::Result::SUCCESS, result);
   EXPECT_EQ("icon.png", image[strings::value].asString());
 }
 
 TEST_F(MessageHelperTest, VerifyImageApplyPath_ImageValueNotValid_InvalidData) {
-  // Creating sharedPtr to MockApplication
-  MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
   // Creating input data for method
   smart_objects::SmartObject image;
   image[strings::image_type] = mobile_apis::ImageType::DYNAMIC;
@@ -810,29 +1157,25 @@ TEST_F(MessageHelperTest, VerifyImageApplyPath_ImageValueNotValid_InvalidData) {
   image[strings::value] = "   ";
   // Method call
   mobile_apis::Result::eType result = MessageHelper::VerifyImageApplyPath(
-      image, appSharedMock, mock_application_manager);
+      image, mock_app_, mock_application_manager_);
   // EXPECT
   EXPECT_EQ(mobile_apis::Result::INVALID_DATA, result);
 }
 
 TEST_F(MessageHelperTest, VerifyImageFiles_SmartObjectWithValidData_Success) {
-  // Creating sharedPtr to MockApplication
-  MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
   // Creating input data for method
   smart_objects::SmartObject images;
   images[0][strings::image_type] = mobile_apis::ImageType::STATIC;
   images[1][strings::image_type] = mobile_apis::ImageType::STATIC;
   // Method call
   mobile_apis::Result::eType result = MessageHelper::VerifyImageFiles(
-      images, appSharedMock, mock_application_manager);
+      images, mock_app_, mock_application_manager_);
   // EXPECT
   EXPECT_EQ(mobile_apis::Result::SUCCESS, result);
 }
 
 TEST_F(MessageHelperTest,
        VerifyImageFiles_SmartObjectWithInvalidData_NotSuccsess) {
-  // Creating sharedPtr to MockApplication
-  MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
   // Creating input data for method
   smart_objects::SmartObject images;
   images[0][strings::image_type] = mobile_apis::ImageType::DYNAMIC;
@@ -842,15 +1185,13 @@ TEST_F(MessageHelperTest,
   images[1][strings::value] = "image\\n";
   // Method call
   mobile_apis::Result::eType result = MessageHelper::VerifyImageFiles(
-      images, appSharedMock, mock_application_manager);
+      images, mock_app_, mock_application_manager_);
   // EXPECT
   EXPECT_EQ(mobile_apis::Result::INVALID_DATA, result);
 }
 
 TEST_F(MessageHelperTest,
        VerifyImageVrHelpItems_SmartObjectWithSeveralValidImages_Succsess) {
-  // Creating sharedPtr to MockApplication
-  MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
   // Creating input data for method
   smart_objects::SmartObject message;
   message[0][strings::image][strings::image_type] =
@@ -859,15 +1200,13 @@ TEST_F(MessageHelperTest,
       mobile_apis::ImageType::STATIC;
   // Method call
   mobile_apis::Result::eType result = MessageHelper::VerifyImageVrHelpItems(
-      message, appSharedMock, mock_application_manager);
+      message, mock_app_, mock_application_manager_);
   // EXPECT
   EXPECT_EQ(mobile_apis::Result::SUCCESS, result);
 }
 
 TEST_F(MessageHelperTest,
        VerifyImageVrHelpItems_SmartObjWithSeveralInvalidImages_NotSuccsess) {
-  // Creating sharedPtr to MockApplication
-  MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
   // Creating input data for method
   smart_objects::SmartObject message;
   message[0][strings::image][strings::image_type] =
@@ -879,7 +1218,7 @@ TEST_F(MessageHelperTest,
   message[1][strings::image][strings::value] = "image\\n";
   // Method call
   mobile_apis::Result::eType result = MessageHelper::VerifyImageVrHelpItems(
-      message, appSharedMock, mock_application_manager);
+      message, mock_app_, mock_application_manager_);
   // EXPECT
   EXPECT_EQ(mobile_apis::Result::INVALID_DATA, result);
 }
@@ -890,18 +1229,18 @@ TEST_F(MessageHelperTest,
   // if FUNCTION ID == 1 inner DCHECK is false
   mobile_apis::FunctionID::eType casted_enum;
   std::string converted;
-  for (size_t i = 1; i < function_id_strings.size(); ++i) {
+  for (size_t i = 1; i < function_id_strings_.size(); ++i) {
     casted_enum = static_cast<mobile_apis::FunctionID::eType>(i);
     converted = MessageHelper::StringifiedFunctionID(casted_enum);
-    EXPECT_EQ(function_id_strings[i], converted);
+    EXPECT_EQ(function_id_strings_[i], converted);
   }
-  // EventIDs emum strarts from delta_from_functions_id = 32768
-  for (size_t i = delta_from_functions_id;
-       i < events_id_strings.size() + delta_from_functions_id;
+  // EventIDs emum strarts from delta_from_functions_id_ = 32768
+  for (size_t i = delta_from_functions_id_;
+       i < events_id_strings_.size() + delta_from_functions_id_;
        ++i) {
     casted_enum = static_cast<mobile_apis::FunctionID::eType>(i);
     converted = MessageHelper::StringifiedFunctionID(casted_enum);
-    EXPECT_EQ(events_id_strings[i - delta_from_functions_id], converted);
+    EXPECT_EQ(events_id_strings_[i - delta_from_functions_id_], converted);
   }
 }
 
@@ -909,19 +1248,19 @@ TEST_F(MessageHelperTest,
        StringifiedHmiLevel_LevelEnum_EqualsWithStringsInArray) {
   mobile_apis::HMILevel::eType casted_enum;
   std::string converted_value;
-  for (size_t i = 0; i < hmi_level_strings.size(); ++i) {
+  for (size_t i = 0; i < hmi_level_strings_.size(); ++i) {
     casted_enum = static_cast<mobile_apis::HMILevel::eType>(i);
     converted_value = MessageHelper::StringifiedHMILevel(casted_enum);
-    EXPECT_EQ(hmi_level_strings[i], converted_value);
+    EXPECT_EQ(hmi_level_strings_[i], converted_value);
   }
 }
 
 TEST_F(MessageHelperTest, StringToHmiLevel_LevelString_EqEType) {
   mobile_apis::HMILevel::eType tested_enum;
   mobile_apis::HMILevel::eType converted_enum;
-  for (size_t i = 0; i < hmi_level_strings.size(); ++i) {
+  for (size_t i = 0; i < hmi_level_strings_.size(); ++i) {
     tested_enum = static_cast<mobile_apis::HMILevel::eType>(i);
-    converted_enum = MessageHelper::StringToHMILevel(hmi_level_strings[i]);
+    converted_enum = MessageHelper::StringToHMILevel(hmi_level_strings_[i]);
     EXPECT_EQ(tested_enum, converted_enum);
   }
 }
@@ -947,14 +1286,14 @@ TEST_F(MessageHelperTest, SendGetListOfPermissionsResponse_SUCCESS) {
   permissions.push_back(permission);
 
   smart_objects::SmartObjectSPtr result;
-  EXPECT_CALL(mock_application_manager, ManageHMICommand(_))
+  EXPECT_CALL(mock_application_manager_, ManageHMICommand(_))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
   const uint32_t correlation_id = 0u;
   MessageHelper::SendGetListOfPermissionsResponse(permissions,
                                                   external_consent_status,
                                                   correlation_id,
-                                                  mock_application_manager);
+                                                  mock_application_manager_);
 
   ASSERT_TRUE(result);
 
@@ -984,14 +1323,14 @@ TEST_F(MessageHelperTest,
       entity_type_2, entity_id_2, entity_status_2));
 
   smart_objects::SmartObjectSPtr result;
-  EXPECT_CALL(mock_application_manager, ManageHMICommand(_))
+  EXPECT_CALL(mock_application_manager_, ManageHMICommand(_))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
   const uint32_t correlation_id = 0u;
   MessageHelper::SendGetListOfPermissionsResponse(permissions,
                                                   external_consent_status,
                                                   correlation_id,
-                                                  mock_application_manager);
+                                                  mock_application_manager_);
 
   ASSERT_TRUE(result);
 
