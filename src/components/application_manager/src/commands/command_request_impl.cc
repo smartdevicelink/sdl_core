@@ -510,7 +510,7 @@ bool CommandRequestImpl::CheckAllowedParameters() {
         for (; iter != iter_end; ++iter) {
           if (true == iter->second.asBool()) {
             LOG4CXX_DEBUG(logger_, "Request's param: " << iter->first);
-            params.push_back(iter->first);
+            params.insert(iter->first);
           }
         }
       }
@@ -556,33 +556,32 @@ void CommandRequestImpl::RemoveDisallowedParameters() {
   smart_objects::SmartObject& params = (*message_)[strings::msg_params];
 
   // Remove from request all disallowed parameters
-  std::vector<std::string>::const_iterator it_disallowed =
+  RPCParams::const_iterator it_disallowed =
       parameters_permissions_.disallowed_params.begin();
-  std::vector<std::string>::const_iterator it_disallowed_end =
+  RPCParams::const_iterator it_disallowed_end =
       parameters_permissions_.disallowed_params.end();
   for (; it_disallowed != it_disallowed_end; ++it_disallowed) {
     if (params.keyExists(*it_disallowed)) {
-      params.erase(*it_disallowed);
-      removed_parameters_permissions_.disallowed_params.push_back(
-          *it_disallowed);
-      LOG4CXX_INFO(
-          logger_,
-          "Following parameter is disallowed by user: " << *it_disallowed);
+      const std::string key = *it_disallowed;
+      params.erase(key);
+      removed_parameters_permissions_.disallowed_params.insert(key);
+      LOG4CXX_INFO(logger_,
+                   "Following parameter is disallowed by user: " << key);
     }
   }
 
   // Remove from request all undefined yet parameters
-  std::vector<std::string>::const_iterator it_undefined =
+  RPCParams::const_iterator it_undefined =
       parameters_permissions_.undefined_params.begin();
-  std::vector<std::string>::const_iterator it_undefined_end =
+  RPCParams::const_iterator it_undefined_end =
       parameters_permissions_.undefined_params.end();
   for (; it_undefined != it_undefined_end; ++it_undefined) {
     if (params.keyExists(*it_undefined)) {
-      params.erase(*it_undefined);
-      removed_parameters_permissions_.undefined_params.push_back(*it_undefined);
-      LOG4CXX_INFO(
-          logger_,
-          "Following parameter is disallowed by policy: " << *it_undefined);
+      const std::string key = *it_undefined;
+      params.erase(key);
+      removed_parameters_permissions_.undefined_params.insert(key);
+      LOG4CXX_INFO(logger_,
+                   "Following parameter is disallowed by policy: " << key);
     }
   }
 
@@ -600,7 +599,7 @@ void CommandRequestImpl::RemoveDisallowedParameters() {
                       parameters_permissions_.allowed_params.end(),
                       key)) {
       params.erase(key);
-      removed_parameters_permissions_.undefined_params.push_back(key);
+      removed_parameters_permissions_.undefined_params.insert(key);
       LOG4CXX_INFO(logger_,
                    "Following parameter is not found among allowed parameters '"
                        << key << "' and will be treated as disallowed.");
@@ -622,7 +621,7 @@ void CommandRequestImpl::AddDisallowedParametersToInfo(
     smart_objects::SmartObject& response) const {
   std::string info;
 
-  std::vector<std::string>::const_iterator it =
+  RPCParams::const_iterator it =
       removed_parameters_permissions_.disallowed_params.begin();
   for (; it != removed_parameters_permissions_.disallowed_params.end(); ++it) {
     AddDissalowedParameterToInfoString(info, (*it));

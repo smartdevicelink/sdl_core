@@ -164,6 +164,8 @@ extern const char* speech_capabilities;
 extern const char* vr_capabilities;
 extern const char* audio_pass_thru_capabilities;
 extern const char* pcm_stream_capabilities;
+extern const char* audio_pass_thru_icon;
+extern const char* way_points;
 
 // PutFile
 extern const char* sync_file_name;
@@ -380,6 +382,7 @@ extern const char* keyboard_layout;
 extern const char* limited_character_list;
 extern const char* auto_complete_text;
 extern const char* file;
+extern const char* file_name;
 extern const char* retry;
 extern const char* service;
 }  // namespace hmi_request

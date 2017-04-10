@@ -28,17 +28,18 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-
-set(TELEMETRY_MONITOR_SRC_DIR ${COMPONENTS_DIR}/telemetry_monitor/src)
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
 include_directories (
   include
+  ${COMPONENTS_DIR}/include/application_manager/
   ${COMPONENTS_DIR}/utils/include/
   ${COMPONENTS_DIR}/protocol_handler/include/
   ${COMPONENTS_DIR}/connection_handler/include/
   ${COMPONENTS_DIR}/transport_manager/include/
   ${COMPONENTS_DIR}/application_manager/include/
-  ${COMPONENTS_DIR}/policy/include/
+  ${POLICY_PATH}/include/
+  ${POLICY_GLOBAL_INCLUDE_PATH}/
   ${COMPONENTS_DIR}/hmi_message_handler/include/
   ${COMPONENTS_DIR}/formatters/include/
   ${COMPONENTS_DIR}/media_manager/include/
@@ -49,15 +50,15 @@ include_directories (
   ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
-set(SOURCES
-    ${TELEMETRY_MONITOR_SRC_DIR}/metric_wrapper.cc
-    ${TELEMETRY_MONITOR_SRC_DIR}/telemetry_monitor.cc
-    ${TELEMETRY_MONITOR_SRC_DIR}/application_manager_observer.cc
-    ${TELEMETRY_MONITOR_SRC_DIR}/transport_manager_observer.cc
-    ${TELEMETRY_MONITOR_SRC_DIR}/protocol_handler_observer.cc
-    ${TELEMETRY_MONITOR_SRC_DIR}/application_manager_metric_wrapper.cc
-    ${TELEMETRY_MONITOR_SRC_DIR}/transport_manager_metric_wrapper.cc
-    ${TELEMETRY_MONITOR_SRC_DIR}/protocol_handler_metric_wrapper.cc
+set(PATHS
+  ${CMAKE_CURRENT_SOURCE_DIR}/include
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
+collect_sources(SOURCES "${PATHS}")
+
+set(LIBRARIES
+  HMI_API
+  MOBILE_API
 )
 
 add_library("TelemetryMonitor" ${SOURCES})

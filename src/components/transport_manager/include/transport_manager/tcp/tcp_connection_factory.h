@@ -2,7 +2,7 @@
  * \file tcp_connection_factory.h
  * \brief TcpConnectionFactory class header file.
  *
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,10 +37,11 @@
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_CONNECTION_FACTORY_H_
 
 #include "transport_manager/transport_adapter/server_connection_factory.h"
-#include "transport_manager/transport_adapter/transport_adapter_controller.h"
 
 namespace transport_manager {
 namespace transport_adapter {
+
+class TransportAdapterController;
 
 /**
  * @brief Create connections.

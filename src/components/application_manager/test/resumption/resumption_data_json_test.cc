@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,7 @@
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_resumption_data.h"
 #include "interfaces/MOBILE_API.h"
-#include "resumption/last_state.h"
+#include "resumption/last_state_impl.h"
 
 #include "application_manager/resumption_data_test.h"
 #include "formatters/CFormatterJsonBase.h"
@@ -81,7 +81,7 @@ class ResumptionDataJsonTest : public ResumptionDataTest {
   }
 
   void CheckSavedJson() {
-    Value& dictionary = last_state_.dictionary;
+    Value& dictionary = last_state_.get_dictionary();
     ASSERT_TRUE(dictionary[am::strings::resumption].isObject());
     ASSERT_TRUE(
         dictionary[am::strings::resumption][am::strings::resume_app_list]
@@ -97,13 +97,13 @@ class ResumptionDataJsonTest : public ResumptionDataTest {
   }
 
   void SetZeroIgnOff() {
-    Value& dictionary = last_state_.dictionary;
+    Value& dictionary = last_state_.get_dictionary();
     Value& res = dictionary[am::strings::resumption];
     res[am::strings::last_ign_off_time] = 0;
-    last_state_.SaveToFileSystem();
+    last_state_.SaveStateToFileSystem();
   }
 
-  resumption::LastState last_state_;
+  resumption::LastStateImpl last_state_;
   ResumptionDataJson res_json;
 };
 

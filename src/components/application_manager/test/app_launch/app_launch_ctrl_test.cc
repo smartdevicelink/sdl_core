@@ -61,8 +61,8 @@ typedef utils::SharedPtr<am_test::MockApplication> MockAppPtr;
 class AppLaunchCtrlTest : public ::testing::Test {
  public:
   MockAppPtr AppFromAppData(const app_launch::ApplicationData& app_data) {
-    utils::SharedPtr<NiceMock<am_test::MockApplication>> app =
-        utils::MakeShared<NiceMock<am_test::MockApplication>>();
+    utils::SharedPtr<NiceMock<am_test::MockApplication> > app =
+        utils::MakeShared<NiceMock<am_test::MockApplication> >();
 
     ON_CALL(*app, mac_address()).WillByDefault(ReturnRef(app_data.device_mac_));
     ON_CALL(*app, bundle_id()).WillByDefault(ReturnRef(app_data.bundle_id_));
@@ -74,7 +74,7 @@ class AppLaunchCtrlTest : public ::testing::Test {
   app_launch::ApplicationDataPtr AppDataFromApp(
       const am_test::MockApplication& app) {
     app_launch::ApplicationDataPtr app_data =
-        utils::MakeShared<NiceMock<app_launch::ApplicationData>>(
+        utils::MakeShared<NiceMock<app_launch::ApplicationData> >(
             app.policy_app_id(), app.bundle_id(), app.mac_address());
     return app_data;
   }

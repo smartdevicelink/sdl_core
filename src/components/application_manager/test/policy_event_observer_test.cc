@@ -42,12 +42,11 @@ namespace test {
 namespace components {
 namespace policy_test {
 
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 using application_manager::event_engine::Event;
 using namespace policy;
 
 using testing::_;
-using ::testing::Return;
+namespace smart_objects = ::smart_objects;
 
 class PolicyEventObserverTest : public ::testing::Test {
  public:

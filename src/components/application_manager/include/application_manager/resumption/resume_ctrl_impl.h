@@ -380,8 +380,8 @@ class ResumeCtrlImpl : public ResumeCtrl,
 
   /**
    * @brief CheckDelayAfterIgnOn should check if SDL was started less
-   * then N secconds ago. N will be readed from profile.
-   * @return true if SDL started N secconds ago, otherwise return false
+   * then N seconds ago. N will be readed from profile.
+   * @return true if SDL started N seconds ago, otherwise return false
    */
   bool CheckDelayAfterIgnOn();
 

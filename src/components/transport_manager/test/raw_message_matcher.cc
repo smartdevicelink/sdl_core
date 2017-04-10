@@ -30,8 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "include/raw_message_matcher.h"
-//#include "../../include/protocol/raw_message.h"
+#include "include/transport_manager/raw_message_matcher.h"
 
 namespace test {
 namespace components {

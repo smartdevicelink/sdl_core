@@ -76,7 +76,7 @@ TEST_F(ProfileTest, SetConfigFileWithoutCallUpdate) {
   EXPECT_EQ(vr_help_title_, profile_.vr_help_title());
   EXPECT_EQ("smartDeviceLink.ini", profile_.config_file_name());
 
-  profile_.config_file_name("smartDeviceLink.ini");
+  profile_.set_config_file_name("smartDeviceLink.ini");
   EXPECT_EQ("smartDeviceLink.ini", profile_.config_file_name());
 
   // Value was updated
@@ -91,7 +91,7 @@ TEST_F(ProfileTest, SetConfigFileWithUpdate) {
   // Default value
   uint32_t thread_min_stack_size = threads::Thread::kMinStackSize;
   EXPECT_EQ(thread_min_stack_size, profile_.thread_min_stack_size());
-  profile_.config_file_name("smartDeviceLink.ini");
+  profile_.set_config_file_name("smartDeviceLink.ini");
   EXPECT_EQ("smartDeviceLink.ini", profile_.config_file_name());
 
   // Value was updated
@@ -108,7 +108,7 @@ TEST_F(ProfileTest, SetConfigFileWithUpdate) {
 TEST_F(ProfileTest, UpdateManyTimesDefaultFile) {
   // using for check logger's work - core dump when this test was started and
   // log4cxx exists in test derictory
-  profile_.config_file_name("smartDeviceLink.ini");
+  profile_.set_config_file_name("smartDeviceLink.ini");
   EXPECT_EQ("smartDeviceLink.ini", profile_.config_file_name());
   // Update config many times
   for (int i = 0; i < 10; i++) {
@@ -123,7 +123,7 @@ TEST_F(ProfileTest, UpdateIntValues) {
   EXPECT_EQ(thread_min_stack_size, profile_.thread_min_stack_size());
 
   // Set config file with default name
-  profile_.config_file_name("smartDeviceLink.ini");
+  profile_.set_config_file_name("smartDeviceLink.ini");
   EXPECT_EQ("smartDeviceLink.ini", profile_.config_file_name());
 
   // Value changes
@@ -136,7 +136,7 @@ TEST_F(ProfileTest, UpdateIntValues) {
   EXPECT_EQ(thread_min_stack_size, profile_.thread_min_stack_size());
 
   // Set new config file
-  profile_.config_file_name("smartDeviceLink_test.ini");
+  profile_.set_config_file_name("smartDeviceLink_test.ini");
   EXPECT_EQ("smartDeviceLink_test.ini", profile_.config_file_name());
 
   // Value changes
@@ -151,7 +151,7 @@ TEST_F(ProfileTest, UpdateIntValues) {
   EXPECT_EQ(thread_min_stack_size, profile_.thread_min_stack_size());
 
   // Set config file with default name again
-  profile_.config_file_name("smartDeviceLink.ini");
+  profile_.set_config_file_name("smartDeviceLink.ini");
   EXPECT_EQ("smartDeviceLink.ini", profile_.config_file_name());
 
   // Value should be changed
@@ -166,7 +166,7 @@ TEST_F(ProfileTest, UpdateBoolValues) {
   EXPECT_FALSE(profile_.enable_policy());
 
   // Set config file
-  profile_.config_file_name("smartDeviceLink.ini");
+  profile_.set_config_file_name("smartDeviceLink.ini");
   // Check values
   EXPECT_TRUE(profile_.launch_hmi());
   EXPECT_TRUE(profile_.enable_policy());
@@ -180,7 +180,7 @@ TEST_F(ProfileTest, UpdateBoolValues) {
   EXPECT_FALSE(profile_.is_redecoding_enabled());
 
   // Change config file
-  profile_.config_file_name("smartDeviceLink_test.ini");
+  profile_.set_config_file_name("smartDeviceLink_test.ini");
   EXPECT_EQ("smartDeviceLink_test.ini", profile_.config_file_name());
 
   // Parameters after updating
@@ -208,7 +208,7 @@ TEST_F(ProfileTest, UpdateStringValue) {
   EXPECT_EQ(recording_file_name, profile_.recording_file_name());
   EXPECT_EQ(server_address, profile_.server_address());
 
-  profile_.config_file_name("smartDeviceLink.ini");
+  profile_.set_config_file_name("smartDeviceLink.ini");
   EXPECT_EQ("smartDeviceLink.ini", profile_.config_file_name());
 
   // Check values
@@ -234,7 +234,7 @@ TEST_F(ProfileTest, UpdateInt_ValueAppearsInFileTwice) {
   uint32_t server_port = 8087;
   EXPECT_EQ(server_port, profile_.server_port());
   // Change config file
-  profile_.config_file_name("smartDeviceLink_test.ini");
+  profile_.set_config_file_name("smartDeviceLink_test.ini");
   EXPECT_EQ("smartDeviceLink_test.ini", profile_.config_file_name());
   // Update config file
   // First server_port = 8088
@@ -246,7 +246,7 @@ TEST_F(ProfileTest, UpdateBool_ValueAppearsInFileTwice) {
   // Default values
   EXPECT_FALSE(profile_.is_mixing_audio_supported());
   // Change config file
-  profile_.config_file_name("smartDeviceLink_test.ini");
+  profile_.set_config_file_name("smartDeviceLink_test.ini");
   EXPECT_EQ("smartDeviceLink_test.ini", profile_.config_file_name());
   // Update config file
   // First value is false
@@ -258,7 +258,7 @@ TEST_F(ProfileTest, UpdateVectorOfString_ValueAppearsInFileTwice) {
   std::vector<std::string> time_out_promt;
   EXPECT_EQ(time_out_promt, profile_.time_out_promt());
   // Change config file
-  profile_.config_file_name("smartDeviceLink_test.ini");
+  profile_.set_config_file_name("smartDeviceLink_test.ini");
   EXPECT_EQ("smartDeviceLink_test.ini", profile_.config_file_name());
   // Update config file
   time_out_promt.push_back("Please say a command,");
@@ -270,7 +270,7 @@ TEST_F(ProfileTest, UpdateString_ValueAppearsInFileTwice) {
   std::string recording_file_name = "record.wav";
   EXPECT_EQ(recording_file_name, profile_.recording_file_name());
   // Change config file
-  profile_.config_file_name("smartDeviceLink_test.ini");
+  profile_.set_config_file_name("smartDeviceLink_test.ini");
   EXPECT_EQ("smartDeviceLink_test.ini", profile_.config_file_name());
   // Update config file
   recording_file_name = "video.wav";
@@ -284,7 +284,7 @@ TEST_F(ProfileTest, UpdatePairsValue) {
   value.second = 0;
   EXPECT_EQ(value, profile_.get_vehicle_data_frequency());
 
-  profile_.config_file_name("smartDeviceLink.ini");
+  profile_.set_config_file_name("smartDeviceLink.ini");
   EXPECT_EQ("smartDeviceLink.ini", profile_.config_file_name());
 
   value.first = 5;
@@ -305,7 +305,7 @@ TEST_F(ProfileTest, PairsValueEmpty) {
   value.second = 0;
   EXPECT_EQ(value, profile_.read_did_frequency());
 
-  profile_.config_file_name("smartDeviceLink_invalid_pairs.ini");
+  profile_.set_config_file_name("smartDeviceLink_invalid_pairs.ini");
   EXPECT_EQ("smartDeviceLink_invalid_pairs.ini", profile_.config_file_name());
 
   // Default values
@@ -325,7 +325,7 @@ TEST_F(ProfileTest, CharValueInPairInsteadOfInt) {
   value.second = 0;
   EXPECT_EQ(value, profile_.get_vehicle_data_frequency());
 
-  profile_.config_file_name("smartDeviceLink_invalid_string.ini");
+  profile_.set_config_file_name("smartDeviceLink_invalid_string.ini");
   EXPECT_EQ("smartDeviceLink_invalid_string.ini", profile_.config_file_name());
 
   EXPECT_EQ(value, profile_.get_vehicle_data_frequency());
@@ -337,7 +337,7 @@ TEST_F(ProfileTest, CharValueInPairInsteadOfInt) {
 }
 
 TEST_F(ProfileTest, EmptyValuesInPair) {
-  profile_.config_file_name("smartDeviceLink_invalid_pairs.ini");
+  profile_.set_config_file_name("smartDeviceLink_invalid_pairs.ini");
   EXPECT_EQ("smartDeviceLink_invalid_pairs.ini", profile_.config_file_name());
 
   std::pair<uint32_t, int32_t> value;
@@ -358,7 +358,7 @@ TEST_F(ProfileTest, IntInsteadOfPair) {
   value.second = 0;
   EXPECT_EQ(value, profile_.start_stream_retry_amount());
 
-  profile_.config_file_name("smartDeviceLink_invalid_pairs.ini");
+  profile_.set_config_file_name("smartDeviceLink_invalid_pairs.ini");
   EXPECT_EQ("smartDeviceLink_invalid_pairs.ini", profile_.config_file_name());
   // Ini file includes only one element
   value.first = 9;
@@ -377,7 +377,7 @@ TEST_F(ProfileTest, WrongIntValue) {
   EXPECT_EQ(heart_beat_timeout, profile_.heart_beat_timeout());
 
   // Change config file
-  profile_.config_file_name("smartDeviceLink_invalid_int.ini");
+  profile_.set_config_file_name("smartDeviceLink_invalid_int.ini");
   EXPECT_EQ("smartDeviceLink_invalid_int.ini", profile_.config_file_name());
 
   // Value in file includes letters. Check that value is default
@@ -395,7 +395,7 @@ TEST_F(ProfileTest, WrongMaxIntValue) {
   EXPECT_EQ(maxvalue, profile_.max_cmd_id());
 
   // Change config file
-  profile_.config_file_name("smartDeviceLink_invalid_int.ini");
+  profile_.set_config_file_name("smartDeviceLink_invalid_int.ini");
   EXPECT_EQ("smartDeviceLink_invalid_int.ini", profile_.config_file_name());
 
   // Value in file is more than could be saved.
@@ -416,7 +416,7 @@ TEST_F(ProfileTest, WrongMinIntValue) {
   EXPECT_EQ(server_port, profile_.server_port());
 
   // Change config file
-  profile_.config_file_name("smartDeviceLink_invalid_int.ini");
+  profile_.set_config_file_name("smartDeviceLink_invalid_int.ini");
   EXPECT_EQ("smartDeviceLink_invalid_int.ini", profile_.config_file_name());
 
   // File include 0, value should be lefted as default
@@ -441,7 +441,7 @@ TEST_F(ProfileTest, CheckCorrectValueWhenOtherValueInvalid) {
   EXPECT_EQ(thread_min_stack_size, profile_.thread_min_stack_size());
 
   // Change config file
-  profile_.config_file_name("smartDeviceLink_test.ini");
+  profile_.set_config_file_name("smartDeviceLink_test.ini");
   EXPECT_EQ("smartDeviceLink_test.ini", profile_.config_file_name());
 
   // Check that value is default
@@ -462,7 +462,7 @@ TEST_F(ProfileTest, CheckCorrectValueWhenOtherValueInvalid) {
 
 TEST_F(ProfileTest, PairsValueInsteadOfInt) {
   // Set new config file
-  profile_.config_file_name("smartDeviceLink_invalid_int.ini");
+  profile_.set_config_file_name("smartDeviceLink_invalid_int.ini");
   EXPECT_EQ("smartDeviceLink_invalid_int.ini", profile_.config_file_name());
   // Get first number
   uint32_t list_files_in_none = 5;
@@ -482,7 +482,7 @@ TEST_F(ProfileTest, StringValueIncludeSlashesAndRussianLetters) {
   std::string app_storage_folder = "";
   std::string current_dir = file_system::CurrentWorkingDirectory();
 
-  profile_.config_file_name("smartDeviceLink_invalid_string.ini");
+  profile_.set_config_file_name("smartDeviceLink_invalid_string.ini");
   EXPECT_EQ("smartDeviceLink_invalid_string.ini", profile_.config_file_name());
 
   // Check values
@@ -508,7 +508,7 @@ TEST_F(ProfileTest, StringUpperBoundValue) {
   EXPECT_EQ(vr_help_title, profile_.vr_help_title());
   EXPECT_EQ(recording_file_name, profile_.recording_file_name());
 
-  profile_.config_file_name("smartDeviceLink_invalid_string.ini");
+  profile_.set_config_file_name("smartDeviceLink_invalid_string.ini");
   EXPECT_EQ("smartDeviceLink_invalid_string.ini", profile_.config_file_name());
 
   // Total count of elements in ini file's string will be less 512
@@ -548,14 +548,14 @@ TEST_F(ProfileTest, CapitalLetterInBoolValue) {
   EXPECT_FALSE(profile_.enable_policy());
 
   // Set config file
-  profile_.config_file_name("smartDeviceLink.ini");
+  profile_.set_config_file_name("smartDeviceLink.ini");
   // Check values
   EXPECT_TRUE(profile_.launch_hmi());
   EXPECT_TRUE(profile_.enable_policy());
   EXPECT_FALSE(profile_.is_redecoding_enabled());
 
   // Change config file
-  profile_.config_file_name("smartDeviceLink_invalid_boolean.ini");
+  profile_.set_config_file_name("smartDeviceLink_invalid_boolean.ini");
   EXPECT_EQ("smartDeviceLink_invalid_boolean.ini", profile_.config_file_name());
 
   // Parameters after updating
@@ -569,7 +569,7 @@ TEST_F(ProfileTest, CapitalLetterInBoolValue) {
 
 TEST_F(ProfileTest, CheckReadStringValue) {
   // Set new config file
-  profile_.config_file_name("smartDeviceLink_test.ini");
+  profile_.set_config_file_name("smartDeviceLink_test.ini");
   EXPECT_EQ("smartDeviceLink_test.ini", profile_.config_file_name());
 
   std::string app_storage_folder_;
@@ -586,7 +586,7 @@ TEST_F(ProfileTest, CheckReadStringValue) {
 
 TEST_F(ProfileTest, CheckReadBoolValue) {
   // Set new config file
-  profile_.config_file_name("smartDeviceLink_test.ini");
+  profile_.set_config_file_name("smartDeviceLink_test.ini");
   EXPECT_EQ("smartDeviceLink_test.ini", profile_.config_file_name());
 
   bool enable_policy;
@@ -600,7 +600,7 @@ TEST_F(ProfileTest, CheckReadBoolValue) {
 
 TEST_F(ProfileTest, CheckReadIntValue) {
   // Set new config file
-  profile_.config_file_name("smartDeviceLink_test.ini");
+  profile_.set_config_file_name("smartDeviceLink_test.ini");
   EXPECT_EQ("smartDeviceLink_test.ini", profile_.config_file_name());
 
   int server_port = 0;
@@ -611,7 +611,7 @@ TEST_F(ProfileTest, CheckReadIntValue) {
 
 TEST_F(ProfileTest, CheckIntContainer) {
   // Set new config file
-  profile_.config_file_name("smartDeviceLink_test.ini");
+  profile_.set_config_file_name("smartDeviceLink_test.ini");
   EXPECT_EQ("smartDeviceLink_test.ini", profile_.config_file_name());
 
   bool isread = false;
@@ -639,7 +639,7 @@ TEST_F(ProfileTest, CheckIntContainer) {
 }
 
 TEST_F(ProfileTest, CheckVectorContainer) {
-  profile_.config_file_name("smartDeviceLink_test.ini");
+  profile_.set_config_file_name("smartDeviceLink_test.ini");
   EXPECT_EQ("smartDeviceLink_test.ini", profile_.config_file_name());
 
   // Get diag_modes after updating
@@ -668,7 +668,7 @@ TEST_F(ProfileTest, CheckVectorContainer) {
 
 TEST_F(ProfileTest, CheckStringContainer) {
   // Set new config file
-  profile_.config_file_name("smartDeviceLink_test.ini");
+  profile_.set_config_file_name("smartDeviceLink_test.ini");
   EXPECT_EQ("smartDeviceLink_test.ini", profile_.config_file_name());
 
   bool isread = false;
@@ -697,7 +697,7 @@ TEST_F(ProfileTest, CheckStringContainer) {
 #ifdef ENABLE_SECURITY
 TEST_F(ProfileTest, CheckIntContainerInSecurityData) {
   // Set new config file
-  profile_.config_file_name("smartDeviceLink_test.ini");
+  profile_.set_config_file_name("smartDeviceLink_test.ini");
   EXPECT_EQ("smartDeviceLink_test.ini", profile_.config_file_name());
 
   std::vector<int> force_unprotected_list = profile_.ReadIntContainer(

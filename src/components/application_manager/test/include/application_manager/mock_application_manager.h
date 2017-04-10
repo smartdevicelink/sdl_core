@@ -50,11 +50,11 @@
 #include "application_manager/app_launch/app_launch_ctrl.h"
 #include "application_manager/event_engine/event_dispatcher.h"
 #include "application_manager/state_controller.h"
+#include "smart_objects/smart_object.h"
 
 namespace test {
 namespace components {
 namespace application_manager_test {
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 class MockApplicationManager : public application_manager::ApplicationManager {
  public:

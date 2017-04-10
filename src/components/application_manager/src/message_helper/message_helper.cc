@@ -251,6 +251,25 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateHashUpdateNotification(
   return message;
 }
 
+void MessageHelper::SendDecryptCertificateToHMI(const std::string& file_name,
+                                                ApplicationManager& app_mngr) {
+  using namespace smart_objects;
+  SmartObjectSPtr message =
+      CreateRequestObject(app_mngr.GetNextHMICorrelationID());
+  DCHECK(message);
+
+  SmartObject& object = *message;
+  object[strings::params][strings::function_id] =
+      hmi_apis::FunctionID::BasicCommunication_DecryptCertificate;
+
+  SmartObject msg_params = SmartObject(SmartType_Map);
+
+  msg_params[hmi_request::file_name] = file_name;
+  object[strings::msg_params] = msg_params;
+
+  app_mngr.ManageHMICommand(message);
+}
+
 void MessageHelper::SendHashUpdateNotification(const uint32_t app_id,
                                                ApplicationManager& app_mngr) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -1452,8 +1471,9 @@ void MessageHelper::SendSDLActivateAppResponse(
   }
 
   // If application is revoked it should not be activated
-  if (permissions.appRevoked || !permissions.isSDLAllowed) {
-    return;
+  if (permissions.appRevoked) {
+    (*message)[strings::params][hmi_response::code] =
+        hmi_apis::Common_Result::REJECTED;
   }
 
   app_mngr.ManageHMICommand(message);
@@ -1478,7 +1498,7 @@ void MessageHelper::SendOnSDLConsentNeeded(
 }
 
 void MessageHelper::SendPolicyUpdate(const std::string& file_path,
-                                     const int timeout,
+                                     const uint32_t timeout,
                                      const std::vector<int>& retries,
                                      ApplicationManager& app_mngr) {
   smart_objects::SmartObjectSPtr message =
@@ -1496,15 +1516,16 @@ void MessageHelper::SendPolicyUpdate(const std::string& file_path,
   }
   app_mngr.ManageHMICommand(message);
 }
-
 void MessageHelper::SendGetUserFriendlyMessageResponse(
     const std::vector<policy::UserFriendlyMessage>& msg,
-    uint32_t correlation_id,
+    const uint32_t correlation_id,
     ApplicationManager& app_mngr) {
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObjectSPtr message =
-      utils::MakeShared<smart_objects::SmartObject>(
-          smart_objects::SmartType_Map);
+      new smart_objects::SmartObject(smart_objects::SmartType_Map);
+  if (!message) {
+    return;
+  }
 
   (*message)[strings::params][strings::function_id] =
       hmi_apis::FunctionID::SDL_GetUserFriendlyMessage;
@@ -1524,9 +1545,14 @@ void MessageHelper::SendGetUserFriendlyMessageResponse(
 
   smart_objects::SmartObject& user_friendly_messages =
       (*message)[strings::msg_params][messages];
-
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  const std::string tts = "ttsString";
+  const std::string label = "label";
+  const std::string line1 = "line1";
+  const std::string line2 = "line2";
+  const std::string textBody = "textBody";
+#endif  // EXTERNAL_PROPRIETARY_MODE
   const std::string message_code = "messageCode";
-
   std::vector<policy::UserFriendlyMessage>::const_iterator it = msg.begin();
   std::vector<policy::UserFriendlyMessage>::const_iterator it_end = msg.end();
   for (uint32_t index = 0; it != it_end; ++it, ++index) {
@@ -1535,6 +1561,23 @@ void MessageHelper::SendGetUserFriendlyMessageResponse(
 
     smart_objects::SmartObject& obj = user_friendly_messages[index];
     obj[message_code] = it->message_code;
+#ifdef EXTERNAL_PROPRIETARY_MODE
+    if (!it->tts.empty()) {
+      obj[tts] = it->tts;
+    }
+    if (!it->label.empty()) {
+      obj[label] = it->label;
+    }
+    if (!it->line1.empty()) {
+      obj[line1] = it->line1;
+    }
+    if (!it->line2.empty()) {
+      obj[line2] = it->line2;
+    }
+    if (!it->text_body.empty()) {
+      obj[textBody] = it->text_body;
+    }
+#endif  // EXTERNAL_PROPRIETARY_MODE
   }
 
   app_mngr.ManageHMICommand(message);
@@ -1786,12 +1829,15 @@ void MessageHelper::SendPolicySnapshotNotification(
     LOG4CXX_WARN(logger_, "No service URLs");
   }
 
-  content[strings::msg_params][strings::request_type] =
-      mobile_apis::RequestType::PROPRIETARY;
   content[strings::params][strings::binary_data] =
       smart_objects::SmartObject(policy_data);
-  content[strings::msg_params][strings::file_type] =
-      mobile_apis::FileType::BINARY;
+#if defined(PROPRIETARY_MODE) || defined(EXTERNAL_PROPRIETARY_MODE)
+  content[strings::msg_params][strings::request_type] =
+      mobile_apis::RequestType::PROPRIETARY;
+#else
+  content[strings::msg_params][strings::request_type] =
+      mobile_apis::RequestType::HTTP;
+#endif  // PROPRIETARY || EXTERNAL_PROPRIETARY_MODE
 
   SendSystemRequestNotification(connection_key, content, app_mngr);
 }
@@ -1845,15 +1891,13 @@ void MessageHelper::SendQueryApps(const uint32_t connection_key,
 
   policy::PolicyHandlerInterface& policy_handler = app_mngr.GetPolicyHandler();
 
+  const uint32_t timeout = policy_handler.TimeoutExchangeSec();
   smart_objects::SmartObject content(smart_objects::SmartType_Map);
   content[strings::msg_params][strings::request_type] = RequestType::QUERY_APPS;
   content[strings::msg_params][strings::url] = policy_handler.RemoteAppsUrl();
-  content[strings::msg_params][strings::timeout] =
-      policy_handler.TimeoutExchange();
+  content[strings::msg_params][strings::timeout] = timeout;
 
   Json::Value http_header;
-
-  const int timeout = policy_handler.TimeoutExchange();
 
   http_header[http_request::content_type] = "application/json";
   http_header[http_request::connect_timeout] = timeout;
@@ -2432,6 +2476,7 @@ bool MessageHelper::PrintSmartObject(const smart_objects::SmartObject& object) {
       break;
     }
     case NsSmartDeviceLink::NsSmartObjects::SmartType_Integer:
+      printf("%lld", static_cast<long long int>(object.asInt()));
       break;
     case NsSmartDeviceLink::NsSmartObjects::SmartType_String:
       printf("%s", object.asString().c_str());

@@ -115,7 +115,7 @@ class RequestInfoTest : public ::testing::Test {
 };
 
 TEST_F(RequestInfoTest, RequestInfoEqualEndTime) {
-  std::vector<utils::SharedPtr<TestRequestInfo>> requests;
+  std::vector<utils::SharedPtr<TestRequestInfo> > requests;
   const TimevalStruct& time = date_time::DateTime::getCurrentTime();
   for (uint32_t i = 0; i < count_of_requests_for_test_; ++i) {
     utils::SharedPtr<TestRequestInfo> request = CreateTestInfo(
@@ -142,7 +142,7 @@ TEST_F(RequestInfoTest, AddRemoveHMIRequests) {
 }
 
 TEST_F(RequestInfoTest, AddHMIRequests_RemoveAllRequests) {
-  std::vector<utils::SharedPtr<TestRequestInfo>> requests;
+  std::vector<utils::SharedPtr<TestRequestInfo> > requests;
 
   // Add hmi requests
   for (uint32_t i = 0; i < count_of_requests_for_test_; ++i) {
@@ -158,7 +158,7 @@ TEST_F(RequestInfoTest, AddHMIRequests_RemoveAllRequests) {
   EXPECT_EQ(count_of_requests_for_test_, request_info_set_.Size());
 
   // Delete every request
-  std::vector<utils::SharedPtr<TestRequestInfo>>::iterator req_it =
+  std::vector<utils::SharedPtr<TestRequestInfo> >::iterator req_it =
       requests.begin();
 
   for (; req_it != requests.end(); ++req_it) {
@@ -175,107 +175,6 @@ TEST_F(RequestInfoTest, AddHMIRequests_RemoveAllRequests) {
   EXPECT_EQ(count_of_requests_for_test_,
             request_info_set_.RemoveByConnectionKey(hmi_connection_key_));
   EXPECT_EQ(0u, request_info_set_.Size());
-}
-
-TEST_F(RequestInfoTest, CheckRequestsMaxCount) {
-  const uint32_t app_hmi_level_time_scale = 100;
-  const uint32_t hmi_level_count = 1000;
-
-  // Count of added requests is less than max possible
-  std::vector<utils::SharedPtr<TestRequestInfo>> requests;
-  for (uint32_t i = 0; i < hmi_level_count - 1; ++i) {
-    utils::SharedPtr<TestRequestInfo> request =
-        CreateTestInfo(mobile_connection_key1_,
-                       i,
-                       request_info::RequestInfo::MobileRequest,
-                       date_time::DateTime::getCurrentTime(),
-                       default_timeout_);
-
-    request->set_hmi_level(mobile_apis::HMILevel::HMI_FULL);
-    requests.push_back(request);
-    EXPECT_TRUE(request_info_set_.Add(request));
-  }
-  EXPECT_EQ(hmi_level_count - 1, request_info_set_.Size());
-
-  EXPECT_TRUE(request_info_set_.CheckHMILevelTimeScaleMaxRequest(
-      mobile_apis::HMILevel::HMI_FULL,
-      mobile_connection_key1_,
-      app_hmi_level_time_scale,
-      hmi_level_count));
-
-  // Adding new request is correct
-  utils::SharedPtr<TestRequestInfo> new_request =
-      CreateTestInfo(mobile_connection_key1_,
-                     hmi_level_count,
-                     request_info::RequestInfo::MobileRequest,
-                     date_time::DateTime::getCurrentTime(),
-                     default_timeout_);
-  new_request->set_hmi_level(mobile_apis::HMILevel::HMI_FULL);
-  EXPECT_TRUE(request_info_set_.Add(new_request));
-  EXPECT_EQ(hmi_level_count, request_info_set_.Size());
-
-  // Count of added requests is max
-  EXPECT_FALSE(request_info_set_.CheckHMILevelTimeScaleMaxRequest(
-      mobile_apis::HMILevel::HMI_FULL,
-      mobile_connection_key1_,
-      app_hmi_level_time_scale,
-      hmi_level_count));
-
-  utils::SharedPtr<TestRequestInfo> new_request2 =
-      CreateTestInfo(mobile_connection_key1_,
-                     hmi_level_count + 1,
-                     request_info::RequestInfo::MobileRequest,
-                     date_time::DateTime::getCurrentTime(),
-                     default_timeout_);
-
-  EXPECT_TRUE(request_info_set_.Add(new_request2));
-}
-
-TEST_F(RequestInfoTest, CheckMaxCountOfRequest) {
-  const uint32_t app_hmi_level_time_scale = 100;
-  const uint32_t hmi_level_count = 1000;
-
-  // Count of added requests is less than max possible
-  std::vector<utils::SharedPtr<TestRequestInfo>> requests;
-  for (uint32_t i = 0; i < hmi_level_count - 1; ++i) {
-    utils::SharedPtr<TestRequestInfo> request =
-        CreateTestInfo(mobile_connection_key1_,
-                       i,
-                       request_info::RequestInfo::MobileRequest,
-                       date_time::DateTime::getCurrentTime(),
-                       default_timeout_);
-    request->set_hmi_level(mobile_apis::HMILevel::HMI_FULL);
-    requests.push_back(request);
-    EXPECT_TRUE(request_info_set_.Add(request));
-  }
-  EXPECT_EQ(hmi_level_count - 1, request_info_set_.Size());
-
-  EXPECT_TRUE(request_info_set_.CheckTimeScaleMaxRequest(
-      mobile_connection_key1_, app_hmi_level_time_scale, hmi_level_count));
-
-  // Adding new request is correct
-  utils::SharedPtr<TestRequestInfo> new_request =
-      CreateTestInfo(mobile_connection_key1_,
-                     hmi_level_count,
-                     request_info::RequestInfo::MobileRequest,
-                     date_time::DateTime::getCurrentTime(),
-                     default_timeout_);
-  new_request->set_hmi_level(mobile_apis::HMILevel::HMI_FULL);
-  EXPECT_TRUE(request_info_set_.Add(new_request));
-  EXPECT_EQ(hmi_level_count, request_info_set_.Size());
-
-  // Count of added requests is max
-  EXPECT_FALSE(request_info_set_.CheckTimeScaleMaxRequest(
-      mobile_connection_key1_, app_hmi_level_time_scale, hmi_level_count));
-
-  utils::SharedPtr<TestRequestInfo> new_request2 =
-      CreateTestInfo(mobile_connection_key1_,
-                     hmi_level_count + 1,
-                     request_info::RequestInfo::MobileRequest,
-                     date_time::DateTime::getCurrentTime(),
-                     default_timeout_);
-
-  EXPECT_TRUE(request_info_set_.Add(new_request2));
 }
 
 TEST_F(RequestInfoTest, AddMobileRequests_RemoveMobileRequests) {
@@ -299,7 +198,7 @@ TEST_F(RequestInfoTest, AddMobileRequests_RemoveMobileRequests) {
 }
 
 TEST_F(RequestInfoTest, AddMobileRequests_RemoveMobileRequestsByConnectionKey) {
-  std::vector<utils::SharedPtr<TestRequestInfo>> requests;
+  std::vector<utils::SharedPtr<TestRequestInfo> > requests;
   const uint32_t count_of_mobile_request1 = 200;
   const uint32_t count_of_mobile_request2 = 100;
   for (uint32_t i = 0; i < count_of_mobile_request1; ++i) {
@@ -361,14 +260,14 @@ TEST_F(RequestInfoTest, RequestInfoSetFront) {
 }
 
 TEST_F(RequestInfoTest, RequestInfoSetFind) {
-  std::vector<std::pair<uint32_t, uint32_t>> appid_connection_id;
+  std::vector<std::pair<uint32_t, uint32_t> > appid_connection_id;
   for (uint32_t i = 0; i < count_of_requests_for_test_; ++i) {
     appid_connection_id.push_back(
         std::pair<uint32_t, uint32_t>(i, count_of_requests_for_test_ - i));
   }
-  std::vector<std::pair<uint32_t, uint32_t>>::iterator req_it =
+  std::vector<std::pair<uint32_t, uint32_t> >::iterator req_it =
       appid_connection_id.begin();
-  const std::vector<std::pair<uint32_t, uint32_t>>::iterator end =
+  const std::vector<std::pair<uint32_t, uint32_t> >::iterator end =
       appid_connection_id.end();
 
   for (; req_it != end; ++req_it) {

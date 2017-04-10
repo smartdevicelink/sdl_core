@@ -48,10 +48,6 @@ generate_function_to_interface_convert_map() {
       HmiInterfaces::HMI_INTERFACE_BasicCommunication;
   convert_map[BasicCommunication_OnUpdateDeviceList] =
       HmiInterfaces::HMI_INTERFACE_BasicCommunication;
-  convert_map[BasicCommunication_OnPhoneCall] =
-      HmiInterfaces::HMI_INTERFACE_BasicCommunication;
-  convert_map[BasicCommunication_OnEmergencyEvent] =
-      HmiInterfaces::HMI_INTERFACE_BasicCommunication;
   convert_map[BasicCommunication_OnResumeAudioSource] =
       HmiInterfaces::HMI_INTERFACE_BasicCommunication;
   convert_map[BasicCommunication_OnSDLPersistenceComplete] =
@@ -103,8 +99,6 @@ generate_function_to_interface_convert_map() {
   convert_map[BasicCommunication_OnSystemInfoChanged] =
       HmiInterfaces::HMI_INTERFACE_BasicCommunication;
   convert_map[BasicCommunication_OnIgnitionCycleOver] =
-      HmiInterfaces::HMI_INTERFACE_BasicCommunication;
-  convert_map[BasicCommunication_OnDeactivateHMI] =
       HmiInterfaces::HMI_INTERFACE_BasicCommunication;
   convert_map[BasicCommunication_OnEventChanged] =
       HmiInterfaces::HMI_INTERFACE_BasicCommunication;

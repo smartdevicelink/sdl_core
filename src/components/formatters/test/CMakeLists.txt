@@ -29,7 +29,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 
-if(BUILD_TESTS)
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
 include_directories(
   ${GMOCK_INCLUDE_DIRECTORY}
@@ -49,19 +49,15 @@ set(LIBRARIES
   jsoncpp
 )
 
-set(SOURCES
-  ${COMPONENTS_DIR}/formatters/test/src/SmartFactoryTestHelper.cc
-  ${COMPONENTS_DIR}/formatters/test/CSmartFactory_test.cc
-  ${COMPONENTS_DIR}/formatters/test/CFormatterJsonBase_test.cc
-  ${COMPONENTS_DIR}/formatters/test/generic_json_formatter_test.cc
-  ${COMPONENTS_DIR}/formatters/test/formatter_json_rpc_test.cc
-  ${COMPONENTS_DIR}/formatters/test/src/create_smartSchema.cc 
-  ${COMPONENTS_DIR}/formatters/test/cFormatterJsonSDLRPCv1_test.cc
-  ${COMPONENTS_DIR}/formatters/test/cFormatterJsonSDLRPCv2_test.cc
-  ${COMPONENTS_DIR}/formatters/test/src/meta_formatter_test_helper.cc
-  ${COMPONENTS_DIR}/formatters/test/meta_formatter_test.cc
+set (SOURCES
+  ${CMAKE_CURRENT_SOURCE_DIR}/include
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
+  ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-create_test("formatters_test" "${SOURCES}" "${LIBRARIES}")
+set (EXCLUDE_PATHS
+)
 
-endif()
+collect_sources(SOURCES "")
+create_test(formatters_test "${SOURCES}" "${LIBRARIES}")
+

@@ -1,4 +1,4 @@
-# Copyright (c) 2014, Ford Motor Company
+# Copyright (c) 2016, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,22 +28,22 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-SET(target "appenders")
-
-SET(SOURCES
-  safe_file_appender.cc
-  safe_rolling_file_appender.cc
-)
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
 include_directories(
   ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
-add_library(${target} MODULE ${SOURCES})
+collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}")
 
-target_link_libraries(${target} log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
+set(LIBRARIES
+  log4cxx -L${LOG4CXX_LIBS_DIRECTORY}
+)
 
-install(TARGETS ${target}
+add_library(appenders SHARED ${SOURCES})
+target_link_libraries(appenders ${LIBRARIES})
+
+install(TARGETS appenders
   DESTINATION bin
   PERMISSIONS
     OWNER_READ OWNER_WRITE OWNER_EXECUTE

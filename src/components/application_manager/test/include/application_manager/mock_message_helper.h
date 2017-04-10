@@ -39,10 +39,10 @@
 #include "policy/policy_types.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/application_manager.h"
+#include "smart_objects/smart_object.h"
 
 namespace application_manager {
 
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 class MockMessageHelper {
  public:
   MOCK_METHOD1(GetHashUpdateNotification,
@@ -110,8 +110,11 @@ class MockMessageHelper {
 
   MOCK_METHOD4(SendPolicyUpdate,
                void(const std::string& file_path,
-                    int timeout,
+                    const uint32_t timeout,
                     const std::vector<int>& retries,
+                    ApplicationManager& app_mngr));
+  MOCK_METHOD2(SendDecryptCertificateToHMI,
+               void(const std::string& file_name,
                     ApplicationManager& app_mngr));
   MOCK_METHOD3(
       SendGetListOfPermissionsResponse,

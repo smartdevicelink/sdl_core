@@ -48,6 +48,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace add_sub_menu_request {
 
 namespace am = ::application_manager;
 using am::commands::AddSubMenuRequest;
@@ -63,6 +64,7 @@ typedef SharedPtr<AddSubMenuRequest> AddSubMenuPtr;
 
 namespace {
 const uint32_t kConnectionKey = 2u;
+const int32_t kMenuId = 5;
 }  // namespace
 
 class AddSubMenuRequestTest
@@ -132,6 +134,175 @@ TEST_F(AddSubMenuRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
   Mock::VerifyAndClearExpectations(&mock_message_helper_);
 }
 
+TEST_F(AddSubMenuRequestTest, OnEvent_UnknownEvent_UNSUCCESS) {
+  Event event(hmi_apis::FunctionID::INVALID_ENUM);
+  AddSubMenuPtr command(CreateCommand<AddSubMenuRequest>());
+
+  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
+
+  command->on_event(event);
+}
+
+TEST_F(AddSubMenuRequestTest, OnEvent_SUCCESS) {
+  Event event(hmi_apis::FunctionID::UI_AddSubMenu);
+  MessageSharedPtr event_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*event_msg)[am::strings::params][am::hmi_response::code] =
+      mobile_apis::Result::SUCCESS;
+  (*event_msg)[am::strings::msg_params] = 0;
+
+  event.set_smart_object(*event_msg);
+
+  MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*command_msg)[am::strings::params][am::strings::connection_key] =
+      kConnectionKey;
+
+  AddSubMenuPtr command(CreateCommand<AddSubMenuRequest>(command_msg));
+
+  MockAppPtr app(CreateMockApp());
+  EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app));
+
+  EXPECT_CALL(mock_message_helper_,
+              HMIToMobileResult(hmi_apis::Common_Result::SUCCESS))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
+
+  MessageSharedPtr result_msg(
+      CatchMobileCommandResult(CallOnEvent(*command, event)));
+  const mobile_apis::Result::eType kReceivedResult =
+      static_cast<mobile_apis::Result::eType>(
+          (*result_msg)[am::strings::msg_params][am::strings::result_code]
+              .asInt());
+  EXPECT_EQ(mobile_apis::Result::SUCCESS, kReceivedResult);
+}
+
+TEST_F(AddSubMenuRequestTest, Run_ApplicationIsNotRegistered_UNSUCCESS) {
+  AddSubMenuPtr command(CreateCommand<AddSubMenuRequest>());
+
+  EXPECT_CALL(app_mngr_, application(_))
+      .WillOnce(Return(ApplicationSharedPtr()));
+
+  MessageSharedPtr result_msg(CatchMobileCommandResult(CallRun(*command)));
+  const mobile_apis::Result::eType kReceivedResult =
+      static_cast<mobile_apis::Result::eType>(
+          (*result_msg)[am::strings::msg_params][am::strings::result_code]
+              .asInt());
+  EXPECT_EQ(mobile_apis::Result::APPLICATION_NOT_REGISTERED, kReceivedResult);
+}
+
+TEST_F(AddSubMenuRequestTest, OnEvent_ApplicationIsNotRegistered_UNSUCCESS) {
+  Event event(hmi_apis::FunctionID::UI_AddSubMenu);
+  MessageSharedPtr event_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*event_msg)[am::strings::params][am::hmi_response::code] =
+      mobile_apis::Result::SUCCESS;
+  (*event_msg)[am::strings::msg_params] = 0;
+
+  event.set_smart_object(*event_msg);
+
+  MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*command_msg)[am::strings::params][am::strings::connection_key] =
+      kConnectionKey;
+
+  AddSubMenuPtr command(CreateCommand<AddSubMenuRequest>(command_msg));
+
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillOnce(Return(ApplicationSharedPtr()));
+  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
+
+  command->on_event(event);
+}
+
+TEST_F(AddSubMenuRequestTest, Run_InvalidSubMenuId_UNSUCCESS) {
+  MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*command_msg)[am::strings::msg_params][am::strings::menu_id] = kMenuId;
+  (*command_msg)[am::strings::params][am::strings::connection_key] =
+      kConnectionKey;
+
+  AddSubMenuPtr command(CreateCommand<AddSubMenuRequest>(command_msg));
+
+  MockAppPtr app(CreateMockApp());
+  MessageSharedPtr dummy_sub_menu(CreateMessage(smart_objects::SmartType_Null));
+  EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app));
+  EXPECT_CALL(*app, FindSubMenu(kMenuId))
+      .WillOnce(Return(dummy_sub_menu.get()));
+
+  MessageSharedPtr result_msg(CatchMobileCommandResult(CallRun(*command)));
+  const mobile_apis::Result::eType kReceivedResult =
+      static_cast<mobile_apis::Result::eType>(
+          (*result_msg)[am::strings::msg_params][am::strings::result_code]
+              .asInt());
+  EXPECT_EQ(mobile_apis::Result::INVALID_ID, kReceivedResult);
+}
+
+TEST_F(AddSubMenuRequestTest, Run_DuplicatedSubMenuName_UNSUCCESS) {
+  MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*command_msg)[am::strings::msg_params][am::strings::menu_id] = kMenuId;
+  (*command_msg)[am::strings::params][am::strings::connection_key] =
+      kConnectionKey;
+
+  AddSubMenuPtr command(CreateCommand<AddSubMenuRequest>(command_msg));
+
+  MockAppPtr app(CreateMockApp());
+
+  EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app));
+  EXPECT_CALL(*app, FindSubMenu(kMenuId))
+      .WillOnce(Return(static_cast<SmartObject*>(NULL)));
+  EXPECT_CALL(*app, IsSubMenuNameAlreadyExist(_)).WillOnce(Return(true));
+
+  MessageSharedPtr result_msg(CatchMobileCommandResult(CallRun(*command)));
+  const mobile_apis::Result::eType kReceivedResult =
+      static_cast<mobile_apis::Result::eType>(
+          (*result_msg)[am::strings::msg_params][am::strings::result_code]
+              .asInt());
+  EXPECT_EQ(mobile_apis::Result::DUPLICATE_NAME, kReceivedResult);
+}
+
+TEST_F(AddSubMenuRequestTest, Run_NotValidSubMenuName_UNSUCCESS) {
+  MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*command_msg)[am::strings::msg_params][am::strings::menu_id] = kMenuId;
+  (*command_msg)[am::strings::params][am::strings::connection_key] =
+      kConnectionKey;
+  // Not valid sub-menu name.
+  (*command_msg)[am::strings::msg_params][am::strings::menu_name] = "\t\n";
+
+  AddSubMenuPtr command(CreateCommand<AddSubMenuRequest>(command_msg));
+
+  MockAppPtr app(CreateMockApp());
+  EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app));
+  EXPECT_CALL(*app, FindSubMenu(kMenuId))
+      .WillOnce(Return(static_cast<SmartObject*>(NULL)));
+
+  MessageSharedPtr result_msg(CatchMobileCommandResult(CallRun(*command)));
+  const mobile_apis::Result::eType kReceivedResult =
+      static_cast<mobile_apis::Result::eType>(
+          (*result_msg)[am::strings::msg_params][am::strings::result_code]
+              .asInt());
+  EXPECT_EQ(mobile_apis::Result::INVALID_DATA, kReceivedResult);
+}
+
+TEST_F(AddSubMenuRequestTest, Run_SUCCESS) {
+  MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*command_msg)[am::strings::msg_params][am::strings::menu_id] = kMenuId;
+  (*command_msg)[am::strings::params][am::strings::connection_key] =
+      kConnectionKey;
+  (*command_msg)[am::strings::msg_params][am::strings::menu_name] =
+      "valid_sub_menu_name";
+  (*command_msg)[am::strings::msg_params][am::strings::position] =
+      "test_position";
+
+  AddSubMenuPtr command(CreateCommand<AddSubMenuRequest>(command_msg));
+
+  MockAppPtr app(CreateMockApp());
+  EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app));
+  EXPECT_CALL(*app, FindSubMenu(kMenuId))
+      .WillOnce(Return(static_cast<SmartObject*>(NULL)));
+
+  MessageSharedPtr result_msg(CatchHMICommandResult(CallRun(*command)));
+  const hmi_apis::FunctionID::eType kReceivedResult =
+      static_cast<hmi_apis::FunctionID::eType>(
+          (*result_msg)[am::strings::params][am::strings::function_id].asInt());
+  EXPECT_EQ(hmi_apis::FunctionID::UI_AddSubMenu, kReceivedResult);
+}
+
+}  // namespace add_sub_menu_request
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

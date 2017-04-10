@@ -38,6 +38,8 @@
 #include <sstream>
 #include <algorithm>
 
+#include <string>
+
 #include "config_profile/ini_file.h"
 #include "utils/logger.h"
 #include "utils/threads/thread.h"
@@ -292,6 +294,8 @@ const uint16_t kDefaultRemoveBundleIDattempts = 3;
 const uint16_t kDefaultMaxNumberOfiOSDevice = 10;
 const uint16_t kDefaultWaitTimeBetweenApps = 4000;
 const bool kDefaultEnableAppLaunchIOS = true;
+const std::string kAllowedSymbols =
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890_.-";
 }  // namespace
 
 namespace profile {
@@ -380,7 +384,9 @@ Profile::Profile()
     , remove_bundle_id_attempts_(kDefaultRemoveBundleIDattempts)
     , max_number_of_ios_device_(kDefaultMaxNumberOfiOSDevice)
     , wait_time_between_apps_(kDefaultWaitTimeBetweenApps)
-    , enable_app_launch_ios_(kDefaultEnableAppLaunchIOS) {
+    , enable_app_launch_ios_(kDefaultEnableAppLaunchIOS)
+    , error_occured_(false)
+    , error_description_() {
   // SDL version
   ReadStringValue(
       &sdl_version_, kDefaultSDLVersion, kMainSection, kSDLVersionKey);
@@ -388,9 +394,9 @@ Profile::Profile()
 
 Profile::~Profile() {}
 
-void Profile::config_file_name(const std::string& fileName) {
-  if (false == fileName.empty()) {
-    config_file_name_ = fileName;
+void Profile::set_config_file_name(const std::string& file_name) {
+  if (false == file_name.empty()) {
+    config_file_name_ = file_name;
     UpdateValues();
   }
 }
@@ -872,6 +878,21 @@ const uint16_t Profile::remove_bundle_id_attempts() const {
 
 const uint16_t Profile::wait_time_between_apps() const {
   return wait_time_between_apps_;
+}
+
+const bool Profile::ErrorOccured() const {
+  return error_occured_;
+}
+
+const std::string Profile::ErrorDescription() const {
+  return error_description_;
+}
+
+bool Profile::IsFileNamePortable(const std::string& file_name) const {
+  if (file_name.find_first_not_of(kAllowedSymbols) != std::string::npos) {
+    return false;
+  }
+  return true;
 }
 
 void Profile::UpdateValues() {
@@ -1566,6 +1587,11 @@ void Profile::UpdateValues() {
 
   LOG_UPDATED_VALUE(
       policy_snapshot_file_name_, kPathToSnapshotKey, kPolicySection);
+
+  if (!IsFileNamePortable(policy_snapshot_file_name_)) {
+    error_occured_ = true;
+    error_description_ = "PathToSnapshot has forbidden(non-portable) symbols";
+  }
 
   // Attempts number for opening policy DB
   ReadUIntValue(&attempts_to_open_policy_db_,

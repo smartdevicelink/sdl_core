@@ -54,6 +54,9 @@ bool SQLDatabase::Open() {
   if (conn_)
     return true;
   error_ = sqlite3_open(get_path().c_str(), &conn_);
+  if (error_ != SQLITE_OK) {
+    conn_ = NULL;
+  }
   return error_ == SQLITE_OK;
 }
 

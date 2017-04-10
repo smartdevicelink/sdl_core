@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,7 +46,7 @@
 #include "utils/make_shared.h"
 #include "utils/shared_ptr.h"
 
-#include "resumption/last_state.h"
+#include "resumption/last_state_impl.h"
 #include "utils/make_shared.h"
 
 using ::testing::_;
@@ -76,7 +76,8 @@ class TransportManagerImplTest : public ::testing::Test {
       , dev_info_(device_handle_, mac_address_, "TestDeviceName", "BTMAC") {}
 
   void SetUp() OVERRIDE {
-    resumption::LastState last_state_("app_storage_folder", "app_info_storage");
+    resumption::LastStateImpl last_state_("app_storage_folder",
+                                          "app_info_storage");
     tm_.Init(last_state_);
     mock_adapter_ = new MockTransportAdapter();
     tm_listener_ = MakeShared<TransportManagerListenerMock>();
@@ -126,7 +127,6 @@ class TransportManagerImplTest : public ::testing::Test {
 
     EXPECT_CALL(*tm_listener_, OnDeviceFound(dev_info_));
     EXPECT_CALL(*tm_listener_, OnDeviceAdded(dev_info_));
-    EXPECT_CALL(*tm_listener_, OnDeviceListUpdated(vector_dev_info));
 
     tm_.TestHandle(test_event);
     device_list_.pop_back();
@@ -717,7 +717,6 @@ TEST_F(TransportManagerImplTest, ReceiveEventFromDevice_DeviceListUpdated) {
 
   EXPECT_CALL(*tm_listener_, OnDeviceFound(dev_info_));
   EXPECT_CALL(*tm_listener_, OnDeviceAdded(dev_info_));
-  EXPECT_CALL(*tm_listener_, OnDeviceListUpdated(vector_dev_info));
 
   tm_.ReceiveEventFromDevice(test_event);
   device_list_.pop_back();

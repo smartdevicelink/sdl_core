@@ -58,7 +58,7 @@ enum PolicyTableType {
   PT_UPDATE,
   PT_SNAPSHOT
 };
-const std::string ommited_validation_info = "should be ommited in ";
+const std::string omitted_validation_info = "should be omitted in ";
 const std::string required_validation_info = "is required in ";
 
 std::string PolicyTableTypeToString(const PolicyTableType pt_type);
@@ -300,7 +300,7 @@ class Array : public std::vector<T>, public CompositeType {
   Json::Value ToJsonValue() const;
   void ToDbusWriter(dbus::MessageWriter* writer) const;
 
-  bool is_valid() const;
+  virtual bool is_valid() const;
   bool is_initialized() const;
   void ReportErrors(ValidationReport* report) const;
   virtual void SetPolicyTableType(

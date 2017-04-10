@@ -46,12 +46,7 @@
 #include "policy/policy_types.h"
 #include "protocol_handler/session_observer.h"
 #include "application_manager/policies/policy_handler_interface.h"
-
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
-class SmartObject;
-}
-}
+#include "smart_objects/smart_object.h"
 
 namespace policy {
 class PolicyHandlerInterface;
@@ -59,7 +54,6 @@ class PolicyHandlerInterface;
 
 namespace application_manager {
 namespace mobile_api = mobile_apis;
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 /*
  * @brief Typedef for VehicleData
@@ -102,6 +96,13 @@ class MessageHelper {
    * @param connection_key Connection key of application
    */
   static void SendOnLanguageChangeToMobile(uint32_t connection_key);
+
+  /**
+    * @brief Sends DecryptCertificate request to HMI
+    * @param file_name path to file containing encrypted certificate
+    */
+  static void SendDecryptCertificateToHMI(const std::string& file_name,
+                                          ApplicationManager& app_mngr);
 
   /*
    * @brief Retrieve vehicle data map for param name in mobile request
@@ -340,11 +341,11 @@ class MessageHelper {
     * @brief Send request to SyncP process to read file and send
     * Policy Table Snapshot using Retry Strategy
     * @param file_path Path to file with PTS
-    * @param timeout Timeout to wait for PTU
+    * @param timeout Timeout to wait for PTU in seconds
     * @param retries Seconds between retries
     */
   static void SendPolicyUpdate(const std::string& file_path,
-                               int timeout,
+                               const uint32_t timeout,
                                const std::vector<int>& retries,
                                ApplicationManager& app_mngr);
 

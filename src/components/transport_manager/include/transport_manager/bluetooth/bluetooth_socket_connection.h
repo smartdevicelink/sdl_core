@@ -2,7 +2,7 @@
  * \file bluetooth_socket_connection.h
  * \brief BluetoothSocketConnection class header file.
  *
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -66,12 +66,13 @@ class BluetoothSocketConnection : public ThreadedSocketConnection {
 
  protected:
   /**
-   * @brief Establish connection.
+   * @brief Check if we can start the connection attempt and establish
+   *connection status.
    *
-   * @param error Connection error.
+   * @param error contains information of any error that occurred during
+   *connection attempt.
    *
-   * @return True - connection established.
-   * false - connection not established.
+   * @return result that states whether we successfully connected or not.
    */
   virtual bool Establish(ConnectError** error);
 };

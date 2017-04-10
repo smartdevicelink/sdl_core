@@ -91,13 +91,7 @@
 #include "utils/lock.h"
 #include "utils/data_accessor.h"
 #include "utils/timer.h"
-
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
-class SmartObject;
-}
-}
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
+#include "smart_objects/smart_object.h"
 
 namespace threads {
 class Thread;
@@ -193,7 +187,6 @@ typedef std::queue<AudioData> RawAudioDataQueue;
 typedef threads::MessageLoopThread<RawAudioDataQueue> AudioPassThruQueue;
 }
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
-typedef std::vector<std::string> RPCParams;
 typedef utils::SharedPtr<timer::Timer> TimerSPtr;
 
 class ApplicationManagerImpl

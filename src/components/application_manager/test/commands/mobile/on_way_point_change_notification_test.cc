@@ -46,6 +46,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace on_way_point_change_notification {
 
 namespace am = ::application_manager;
 
@@ -108,6 +109,7 @@ TEST_F(OnWayPointChangeNotificationTest,
   command_->Run();
 }
 
+}  // namespace on_way_point_change_notification
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

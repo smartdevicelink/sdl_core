@@ -278,8 +278,8 @@ TEST(ValidatedTypesJson, OptionalMapAbsentValueTest) {
 
 TEST(ValidatedTypesJson, ArrayJsonTest) {
   Value array_value;
-  array_value.append(Value("Hello"));
-  array_value.append(Value("World"));
+  array_value.append(Value(10));
+  array_value.append(Value(20));
   Array<Integer<int8_t, 0, 32>, 2, 4> int_array(&array_value);
   ASSERT_TRUE(int_array.is_initialized());
   ASSERT_TRUE(int_array.is_valid());

@@ -44,6 +44,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace unregister_app_interface_request {
 
 namespace am = ::application_manager;
 namespace mobile_result = mobile_apis::Result;
@@ -110,6 +111,7 @@ TEST_F(UnregisterAppInterfaceRequestTest, Run_SUCCESS) {
   command->Run();
 }
 
+}  // namespace unregister_app_interface_request
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

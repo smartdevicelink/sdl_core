@@ -1,4 +1,4 @@
-# Copyright (c) 2014, Ford Motor Company
+# Copyright (c) 2015, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -27,7 +27,9 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
- 
+
+
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
 include_directories(
   include/
@@ -41,15 +43,22 @@ include_directories(
   ${APR_INCLUDE_DIRECTORY}
 )
 
-set (SOURCES
-  ${COMPONENTS_DIR}/security_manager/src/security_manager_impl.cc
-  ${COMPONENTS_DIR}/security_manager/src/security_query.cc
-  ${COMPONENTS_DIR}/security_manager/src/crypto_manager_impl.cc
-  ${COMPONENTS_DIR}/security_manager/src/ssl_context_impl.cc
+set(PATHS
+  ${CMAKE_CURRENT_SOURCE_DIR}/include
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
+collect_sources(SOURCES "${PATHS}")
+
+set(LIBRARIES
+  crypto
+  ssl
+  ProtocolHandler
+  jsoncpp
+  ProtocolLibrary
 )
 
 add_library(SecurityManager ${SOURCES})
-target_link_libraries(SecurityManager crypto ssl ProtocolHandler jsoncpp ProtocolLibrary)
+target_link_libraries(SecurityManager ${LIBRARIES})
 
 if(BUILD_TESTS)
   add_subdirectory(test)

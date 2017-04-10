@@ -56,8 +56,7 @@ void OnButtonPressNotification::Run() {
 
   const bool is_app_id_exists =
       (*message_)[strings::msg_params].keyExists(strings::app_id);
-  const ApplicationSharedPtr app = application_manager_.application(
-      (*message_)[strings::msg_params][strings::app_id].asUInt());
+  ApplicationSharedPtr app;
 
   // CUSTOM_BUTTON notification
   if (static_cast<uint32_t>(mobile_apis::ButtonName::CUSTOM_BUTTON) == btn_id) {
@@ -66,6 +65,9 @@ void OnButtonPressNotification::Run() {
       LOG4CXX_ERROR(logger_, "CUSTOM_BUTTON OnButtonPress without app_id.");
       return;
     }
+
+    app = application_manager_.application(
+        (*message_)[strings::msg_params][strings::app_id].asUInt());
 
     // custom_button_id is mandatory for CUSTOM_BUTTON notification
     if (false ==
@@ -89,6 +91,15 @@ void OnButtonPressNotification::Run() {
     if (false == app->IsSubscribedToSoftButton(custom_btn_id)) {
       LOG4CXX_ERROR(logger_,
                     "Application doesn't subscribed to this custom_button_id.");
+      return;
+    }
+
+    // Send ButtonPress notification only in HMI_FULL or HMI_LIMITED mode
+    if ((mobile_api::HMILevel::HMI_FULL != app->hmi_level()) &&
+        (mobile_api::HMILevel::HMI_LIMITED != app->hmi_level())) {
+      LOG4CXX_WARN(logger_,
+                   "CUSTOM_BUTTON OnButtonPress notification is allowed only "
+                       << "in FULL or LIMITED hmi level");
       return;
     }
 

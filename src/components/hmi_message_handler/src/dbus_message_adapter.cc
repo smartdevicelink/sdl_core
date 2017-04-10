@@ -34,8 +34,8 @@
 #include <sstream>
 #include "utils/logger.h"
 #include "formatters/CSmartFactory.h"
+#include "smart_objects/smart_object.h"
 
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 namespace sos = NsSmartDeviceLink::NsJSONHandler::strings;
 
 namespace hmi_message_handler {
@@ -126,8 +126,6 @@ void DBusMessageAdapter::SubscribeTo() {
   DBusMessageController::SubscribeTo("BasicCommunication", "OnSystemRequest");
   DBusMessageController::SubscribeTo("BasicCommunication",
                                      "OnSystemInfoChanged");
-  DBusMessageController::SubscribeTo("BasicCommunication", "OnPhoneCall");
-  DBusMessageController::SubscribeTo("BasicCommunication", "OnEmergencyEvent");
   DBusMessageController::SubscribeTo("TTS", "Started");
   DBusMessageController::SubscribeTo("TTS", "Stopped");
   DBusMessageController::SubscribeTo("TTS", "OnLanguageChange");

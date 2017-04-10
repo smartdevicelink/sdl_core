@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,7 @@
 #include "gtest/gtest.h"
 #include "transport_manager/tcp/tcp_transport_adapter.h"
 #include "transport_manager/transport_adapter/connection.h"
-#include "resumption/last_state.h"
+#include "resumption/last_state_impl.h"
 #include "protocol/raw_message.h"
 #include "transport_manager/transport_adapter_listener_mock.h"
 #include "transport_manager/device_mock.h"
@@ -58,7 +58,7 @@ class TcpAdapterTest : public ::testing::Test {
  protected:
   TcpAdapterTest() : last_state_("app_storage_folder", "app_info_storage") {}
   MockTransportManagerSettings transport_manager_settings;
-  resumption::LastState last_state_;
+  resumption::LastStateImpl last_state_;
   const uint32_t port = 12345;
   const std::string string_port = "12345";
 };
@@ -90,7 +90,7 @@ TEST_F(TcpAdapterTest, StoreDataWithOneDeviceAndOneApplication) {
 
   // Check that value is saved
   Json::Value& tcp_dict =
-      last_state_.dictionary["TransportManager"]["TcpAdapter"];
+      last_state_.get_dictionary()["TransportManager"]["TcpAdapter"];
 
   ASSERT_TRUE(tcp_dict.isObject());
   ASSERT_FALSE(tcp_dict["devices"].isNull());
@@ -142,7 +142,8 @@ TEST_F(TcpAdapterTest, StoreDataWithSeveralDevicesAndOneApplication) {
 
   // Check that values are saved
   Json::Value& tcp_dict =
-      last_state_.dictionary["TransportManager"]["TcpAdapter"];
+      last_state_.get_dictionary()["TransportManager"]["TcpAdapter"];
+
   ASSERT_TRUE(tcp_dict.isObject());
   ASSERT_FALSE(tcp_dict["devices"].isNull());
   for (uint32_t i = 0; i < count_dev; i++) {
@@ -199,7 +200,7 @@ TEST_F(TcpAdapterTest, StoreDataWithSeveralDevicesAndSeveralApplications) {
 
   // Check that value is saved
   Json::Value& tcp_dict =
-      last_state_.dictionary["TransportManager"]["TcpAdapter"];
+      last_state_.get_dictionary()["TransportManager"]["TcpAdapter"];
 
   ASSERT_TRUE(tcp_dict.isObject());
   ASSERT_FALSE(tcp_dict["devices"].isNull());
@@ -236,13 +237,15 @@ TEST_F(TcpAdapterTest, StoreData_ConnectionNotExist_DataNotStored) {
 
   // Check that value is not saved
   Json::Value& tcp_dict =
-      last_state_.dictionary["TransportManager"]["TcpAdapter"]["devices"];
+      last_state_.get_dictionary()["TransportManager"]["TcpAdapter"]["devices"];
+
   ASSERT_TRUE(tcp_dict.isNull());
 }
 
 TEST_F(TcpAdapterTest, RestoreData_DataNotStored) {
   Json::Value& tcp_adapter_dictionary =
-      last_state_.dictionary["TransportManager"]["TcpAdapter"];
+      last_state_.get_dictionary()["TransportManager"]["TcpAdapter"];
+
   tcp_adapter_dictionary = Json::Value();
   MockTCPTransportAdapter transport_adapter(
       port, last_state_, transport_manager_settings);

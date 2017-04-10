@@ -131,6 +131,9 @@ const char* speech_capabilities = "speechCapabilities";
 const char* vr_capabilities = "vrCapabilities";
 const char* audio_pass_thru_capabilities = "audioPassThruCapabilities";
 const char* pcm_stream_capabilities = "pcmStreamCapabilities";
+const char* audio_pass_thru_icon = "audioPassThruIcon";
+const char* way_points = "wayPoints";
+
 // PutFile
 const char* sync_file_name = "syncFileName";
 const char* file_name = "fileName";
@@ -346,6 +349,7 @@ const char* keyboard_layout = "keyboardLayout";
 const char* limited_character_list = "limitedCharacterList";
 const char* auto_complete_text = "autoCompleteText";
 const char* file = "file";
+const char* file_name = "fileName";
 const char* retry = "retry";
 const char* service = "service";
 }  // namespace hmi_request

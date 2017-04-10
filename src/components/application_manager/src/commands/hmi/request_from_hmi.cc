@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2013, Ford Motor Company
+ Copyright (c) 2016, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -65,9 +65,10 @@ void RequestFromHMI::SendResponse(
     const uint32_t correlation_id,
     const hmi_apis::FunctionID::eType function_id,
     const hmi_apis::Common_Result::eType result_code) {
-  smart_objects::SmartObject* message =
-      new smart_objects::SmartObject(smart_objects::SmartType_Map);
-  FillCommonParametersOfSO(message, correlation_id, function_id);
+  smart_objects::SmartObjectSPtr message =
+      ::utils::MakeShared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Map);
+  FillCommonParametersOfSO(*message, correlation_id, function_id);
   (*message)[strings::params][strings::message_type] = MessageType::kResponse;
   (*message)[strings::params][hmi_response::code] = 0;
   (*message)[strings::msg_params][strings::success] = success;
@@ -76,30 +77,31 @@ void RequestFromHMI::SendResponse(
   application_manager_.ManageHMICommand(message);
 }
 
-// void RequestFromHMI::SendErrorResponse(uint32_t correlation_id,
-//                                       hmi_apis::FunctionID::eType
-//                                       function_id,
-//                                       hmi_apis::Common_Result::eType
-//                                       result_code) {
-//  smart_objects::SmartObject* message = new smart_objects::SmartObject(
-//      smart_objects::SmartType_Map);
-//  FillCommonParametersOfSO(message, correlation_id, function_id);
-//  (*message)[strings::params][strings::message_type] =
-//  MessageType::kErrorResponse;
-//  (*message)[strings::params][hmi_response::code] = result_code;
-//  (*message)[strings::params][strings::error_msg] = "HMIDeactivate is active";
+void RequestFromHMI::SendErrorResponse(
+    const uint32_t correlation_id,
+    const hmi_apis::FunctionID::eType function_id,
+    const hmi_apis::Common_Result::eType result_code,
+    const std::string error_message) {
+  smart_objects::SmartObjectSPtr message =
+      ::utils::MakeShared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Map);
+  FillCommonParametersOfSO(*message, correlation_id, function_id);
+  (*message)[strings::params][strings::message_type] =
+      MessageType::kErrorResponse;
+  (*message)[strings::params][hmi_response::code] = result_code;
+  (*message)[strings::params][strings::error_msg] = error_message;
 
-//  application_manager_.ManageHMICommand(message);
-//}
+  application_manager_.ManageHMICommand(message);
+}
 
 void RequestFromHMI::FillCommonParametersOfSO(
-    smart_objects::SmartObject* message,
-    uint32_t correlation_id,
-    hmi_apis::FunctionID::eType function_id) {
-  (*message)[strings::params][strings::function_id] = function_id;
-  (*message)[strings::params][strings::protocol_type] = hmi_protocol_type_;
-  (*message)[strings::params][strings::protocol_version] = protocol_version_;
-  (*message)[strings::params][strings::correlation_id] = correlation_id;
+    smart_objects::SmartObject& message,
+    const uint32_t correlation_id,
+    const hmi_apis::FunctionID::eType function_id) {
+  (message)[strings::params][strings::function_id] = function_id;
+  (message)[strings::params][strings::protocol_type] = hmi_protocol_type_;
+  (message)[strings::params][strings::protocol_version] = protocol_version_;
+  (message)[strings::params][strings::correlation_id] = correlation_id;
 }
 
 }  // namespace commands
