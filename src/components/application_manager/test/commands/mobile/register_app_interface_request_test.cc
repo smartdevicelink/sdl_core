@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -209,7 +209,23 @@ class RegisterAppInterfaceRequestTest
   MockHmiInterfaces mock_hmi_interfaces_;
 };
 
-TEST_F(RegisterAppInterfaceRequestTest, DISABLED_Run_MinimalData_SUCCESS) {
+TEST_F(RegisterAppInterfaceRequestTest, Init_Expect_True) {
+  EXPECT_TRUE(command_->Init());
+}
+
+TEST_F(
+    RegisterAppInterfaceRequestTest,
+    AppManagerIsNotStopping_HMINotCooperating_ExpectUpdateRequestTimeoutCall) {
+  ON_CALL(app_mngr_, IsHMICooperating()).WillByDefault(Return(false));
+  EXPECT_CALL(app_mngr_, IsStopping())
+      .WillOnce(Return(false))
+      .WillRepeatedly(Return(true));
+  EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _));
+  EXPECT_CALL(app_mngr_, ManageHMICommand(_)).WillRepeatedly(Return(true));
+  command_->Run();
+}
+
+TEST_F(RegisterAppInterfaceRequestTest, Run_MinimalData_SUCCESS) {
   InitBasicMessage();
 
   MockAppPtr mock_app = CreateBasicMockedApp();
@@ -232,9 +248,16 @@ TEST_F(RegisterAppInterfaceRequestTest, DISABLED_Run_MinimalData_SUCCESS) {
               ManageHMICommand(HMIResultCodeIs(
                   hmi_apis::FunctionID::Buttons_OnButtonSubscription)))
       .WillOnce(Return(true));
-  EXPECT_CALL(
-      app_mngr_,
-      ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS), _));
+  policy::StatusNotifier notifier = utils::MakeShared<utils::CallNothing>();
+  EXPECT_CALL(mock_policy_handler_, AddApplication(_, _))
+      .WillOnce(Return(notifier));
+  {
+    InSequence s;
+    EXPECT_CALL(app_mngr_,
+                ManageMobileCommand(
+                    MobileResultCodeIs(mobile_apis::Result::SUCCESS), _));
+    EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _));
+  }
   command_->Run();
 }
 
@@ -261,7 +284,7 @@ MATCHER_P(CheckHMIInterfacesRealtedData, expected_data, "") {
 }
 
 TEST_F(RegisterAppInterfaceRequestTest,
-       DISABLED_Run_HmiInterfacesStateAvailable_SUCCESS) {
+       Run_HmiInterfacesStateAvailable_SUCCESS) {
   InitBasicMessage();
 
   MockAppPtr mock_app = CreateBasicMockedApp();
@@ -300,6 +323,16 @@ TEST_F(RegisterAppInterfaceRequestTest,
       .WillByDefault(
           Return(&(*expected_message)[am::hmi_response::display_capabilities]));
 
+  MessageSharedPtr dummy_smart_array =
+      CreateMessage(smart_objects::SmartType_Array);
+  ON_CALL(mock_hmi_capabilities_, audio_pass_thru_capabilities())
+      .WillByDefault(Return(dummy_smart_array.get()));
+
+  MessageSharedPtr ui_hmi_capabilities =
+      CreateMessage(smart_objects::SmartType_Map);
+  ON_CALL(mock_hmi_capabilities_, ui_hmi_capabilities())
+      .WillByDefault(ReturnRef((*ui_hmi_capabilities)));
+
   ON_CALL(app_mngr_, applications())
       .WillByDefault(Return(DataAccessor<am::ApplicationSet>(app_set_, lock_)));
   ON_CALL(mock_policy_handler_, PolicyEnabled()).WillByDefault(Return(true));
@@ -331,10 +364,16 @@ TEST_F(RegisterAppInterfaceRequestTest,
               ManageHMICommand(
                   HMIResultCodeIs(hmi_apis::FunctionID::UI_ChangeRegistration)))
       .WillOnce(Return(true));
-  EXPECT_CALL(
-      app_mngr_,
-      ManageMobileCommand(CheckHMIInterfacesRealtedData(expected_message), _));
-
+  policy::StatusNotifier notifier = utils::MakeShared<utils::CallNothing>();
+  EXPECT_CALL(mock_policy_handler_, AddApplication(_, _))
+      .WillOnce(Return(notifier));
+  {
+    InSequence s;
+    EXPECT_CALL(app_mngr_,
+                ManageMobileCommand(
+                    CheckHMIInterfacesRealtedData(expected_message), _));
+    EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _));
+  }
   command_->Run();
 }
 
