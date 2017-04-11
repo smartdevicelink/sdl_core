@@ -285,6 +285,7 @@ uint32_t ConnectionHandlerImpl::OnSessionStartedCallback(
     const uint8_t session_id,
     const protocol_handler::ServiceType& service_type,
     const bool is_protected,
+    const bool can_start,
     struct ExistingSessionInfo* out_session_info) {
   LOG4CXX_AUTO_TRACE(logger_);
 
@@ -302,11 +303,23 @@ uint32_t ConnectionHandlerImpl::OnSessionStartedCallback(
   }
   bool can_start_protected =
       is_protected && CanStartProtectedService(app_id, service_type);
+
+  bool can_be_unprotected =
+      (std::find(get_settings().force_protected_service().begin(),
+                 get_settings().force_protected_service().end(),
+                 service_type) ==
+       get_settings().force_protected_service().end());
 #else
   bool can_start_protected = false;
 #endif  // ENABLE_SECURITY
   if (out_session_info) {
     out_session_info->start_protected_ = can_start_protected;
+    out_session_info->can_be_unprotected_ = can_be_unprotected;
+
+    LOG4CXX_INFO(logger_,
+                 "out_session_info has "
+                     << out_session_info->start_protected_ << ","
+                     << out_session_info->can_be_unprotected_);
   }
 
   sync_primitives::AutoReadLock lock(connection_list_lock_);
@@ -329,18 +342,27 @@ uint32_t ConnectionHandlerImpl::OnSessionStartedCallback(
           KeyFromPair(connection_handle, new_session_id);
     }
   } else {  // Could be create new service or protected exists one
+    // only for unprotected
     bool service_exists = false;
-    if (!connection->AddNewService(
-            session_id, service_type, can_start_protected, &service_exists)) {
-      LOG4CXX_ERROR(logger_,
-                    "Couldn't establish "
+    if (can_start_protected == false ||
+        (can_start == true && can_be_unprotected == true)) {
+      LOG4CXX_INFO(logger_, "Now service can be added");
+      if (!connection->AddNewService(
+              session_id, service_type, can_start_protected, &service_exists)) {
+        LOG4CXX_ERROR(
+            logger_,
+            "Couldn't establish "
 #ifdef ENABLE_SECURITY
-                        << (can_start_protected ? "protected" : "non-protected")
+                << (can_start_protected ? "protected" : "non-protected")
 #endif  // ENABLE_SECURITY
-                        << " service " << static_cast<int>(service_type)
-                        << " for session " << static_cast<int>(session_id));
-      return 0;
+                << " service " << static_cast<int>(service_type)
+                << " for session " << static_cast<int>(session_id));
+        return 0;
+      }
+    } else {
+      LOG4CXX_INFO(logger_, "Now service couldn`t be added");
     }
+
     new_session_id = session_id;
     if (out_session_info) {
       out_session_info->hash_id_ = protocol_handler::HASH_ID_NOT_SUPPORTED;
@@ -349,18 +371,29 @@ uint32_t ConnectionHandlerImpl::OnSessionStartedCallback(
   }
   sync_primitives::AutoReadLock read_lock(connection_handler_observer_lock_);
   if (connection_handler_observer_) {
-    const uint32_t session_key = KeyFromPair(connection_handle, new_session_id);
-    const bool success = connection_handler_observer_->OnServiceStartedCallback(
-        connection->connection_device_handle(), session_key, service_type);
-    if (!success) {
-      LOG4CXX_WARN(logger_,
-                   "Service starting forbidden by connection_handler_observer");
-      if (protocol_handler::kRpc == service_type) {
-        connection->RemoveSession(new_session_id);
-      } else {
-        connection->RemoveService(session_id, service_type);
+    if (can_start_protected == false ||
+        (can_start == true && can_be_unprotected == true)) {
+      LOG4CXX_INFO(logger_, "Now service should start");
+      const uint32_t session_key =
+          KeyFromPair(connection_handle, new_session_id);
+      const bool success =
+          connection_handler_observer_->OnServiceStartedCallback(
+              connection->connection_device_handle(),
+              session_key,
+              service_type);
+      if (!success) {
+        LOG4CXX_WARN(
+            logger_,
+            "Service starting forbidden by connection_handler_observer");
+        if (protocol_handler::kRpc == service_type) {
+          connection->RemoveSession(new_session_id);
+        } else {
+          connection->RemoveService(session_id, service_type);
+        }
+        return 0;
       }
-      return 0;
+    } else {
+      LOG4CXX_INFO(logger_, "Now service should not be started");
     }
   }
   return new_session_id;
