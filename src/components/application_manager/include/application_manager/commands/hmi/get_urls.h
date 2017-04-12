@@ -63,13 +63,13 @@ class GetUrls : public RequestFromHMI {
   void Run() OVERRIDE;
 
  private:
-#if defined(PROPRIETARY_MODE) || defined(EXTERNAL_PROPRIETARY_MODE)
+#ifdef PROPRIETARY_MODE
   /**
    * @brief Processes URLs collecting for policy service
    * @param endpoints Endpoints section of policy table
    */
   void ProcessPolicyServiceURLs(const policy::EndpointUrls& endpoints);
-#endif  // PROPRIETARY_MODE || EXTERNAL_PROPRIETARY_MODE
+#endif  // PROPRIETARY_MODE
 
   /**
    * @brief Process URLs collecting for service
