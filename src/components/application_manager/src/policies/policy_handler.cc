@@ -1524,6 +1524,7 @@ void PolicyHandler::ResetRetrySequence() {
 
 uint32_t PolicyHandler::NextRetryTimeout() {
   POLICY_LIB_CHECK(0);
+  LOG4CXX_AUTO_TRACE(logger_);
   return policy_manager_->NextRetryTimeout();
 }
 

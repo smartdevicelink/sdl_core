@@ -227,6 +227,7 @@ void UpdateStatusManager::UpdateThreadDelegate::threadMain() {
     } else {
       // Time is not active, wait until timeout will be set,
       // or UpdateStatusManager will be deleted
+      LOG4CXX_DEBUG(logger_, "Timeout is equal to 0");
       termination_condition_.Wait(auto_lock);
     }
   }
