@@ -58,6 +58,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace simple_response_commands_test {
 
 namespace commands = ::application_manager::commands;
 
@@ -99,6 +100,7 @@ TYPED_TEST(MobileResponseCommandsTest, Run_SendResponseToMobile_SUCCESS) {
   command->Run();
 }
 
+}  // namespace simple_response_commands_test
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

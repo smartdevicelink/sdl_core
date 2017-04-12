@@ -54,6 +54,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace alert_maneuver_request {
 
 using ::testing::_;
 using ::testing::Return;
@@ -271,6 +272,7 @@ TEST_F(AlertManeuverRequestTest, OnEvent_UNSUPPORTED_RESOURCE_Case4) {
                     false);
 }
 
+}  // namespace alert_maneuver_request
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

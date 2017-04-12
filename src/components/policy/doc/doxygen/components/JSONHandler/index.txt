@@ -1,8 +1,0 @@
-/*! \page components_jsonhandler JSON Handler
-
-Here will be information about JSON Handler component
-
-Detailed information:
-    - \subpage components_jsonhandler_formatters "Smart Objects Formatters"
-
-*/

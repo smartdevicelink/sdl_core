@@ -292,15 +292,6 @@ bool LifeCycle::InitMessageSystem() {
 }
 #endif  // DBUS_HMIADAPTER
 
-#ifdef MQUEUE_HMIADAPTER
-bool LifeCycle::InitMessageSystem() {
-  hmi_message_adapter_ = new hmi_message_handler::MqueueAdapter(hmi_handler_);
-  hmi_handler.AddHMIMessageAdapter(hmi_message_adapter_);
-  return true;
-}
-
-#endif  // MQUEUE_HMIADAPTER
-
 namespace {
 void sig_handler(int sig) {
   switch (sig) {

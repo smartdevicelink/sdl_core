@@ -35,10 +35,10 @@
 
 #include "application_manager/commands/hmi/request_from_hmi.h"
 #include "policy/policy_types.h"
+#include "smart_objects/smart_object.h"
 
 namespace application_manager {
 namespace commands {
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 /**
  * @brief GetUrls command class
  **/

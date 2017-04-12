@@ -34,10 +34,10 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_POLICIES_POLICY_EVENT_OBSERVER_H_
 
 #include "application_manager/event_engine/event_observer.h"
+#include "smart_objects/smart_object.h"
 #include "utils/lock.h"
 
 namespace policy {
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 class PolicyHandlerInterface;
 

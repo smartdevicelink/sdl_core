@@ -47,7 +47,6 @@
 #include "smart_objects/smart_object.h"
 
 namespace policy {
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 class PolicyHandlerInterface {
  public:
   virtual ~PolicyHandlerInterface() {}

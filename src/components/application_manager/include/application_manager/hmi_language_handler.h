@@ -36,6 +36,8 @@
 #include "application_manager/event_engine/event_observer.h"
 #include "utils/lock.h"
 #include "interfaces/HMI_API.h"
+#include "smart_objects/smart_object.h"
+
 namespace resumption {
 class LastState;
 }
@@ -84,8 +86,7 @@ class HMILanguageHandler : public event_engine::EventObserver {
    * @brief Trigger waiting for response
    * @param request Request object
    */
-  void set_handle_response_for(
-      const event_engine::smart_objects::SmartObject& request);
+  void set_handle_response_for(const smart_objects::SmartObject& request);
 
   /**
    * @brief Sets default languages from HMI capabilities

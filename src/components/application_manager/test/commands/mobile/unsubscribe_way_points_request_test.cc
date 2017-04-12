@@ -43,6 +43,7 @@
 #include "application_manager/application.h"
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_application.h"
+#include "application_manager/mock_message_helper.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/event_engine/event.h"
 
@@ -50,6 +51,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace unsubscribe_way_points_request {
 
 namespace am = ::application_manager;
 namespace mobile_result = mobile_apis::Result;
@@ -70,13 +72,20 @@ class UnSubscribeWayPointsRequestTest
  public:
   UnSubscribeWayPointsRequestTest()
       : command_msg_(CreateMessage(smart_objects::SmartType_Map))
-      , command_(CreateCommand<UnSubscribeWayPointsRequest>(command_msg_)) {
+      , command_(CreateCommand<UnSubscribeWayPointsRequest>(command_msg_))
+      , mock_message_helper_(*am::MockMessageHelper::message_helper_mock()) {
     (*command_msg_)[am::strings::params][am::strings::connection_key] =
         kConnectionKey;
+    testing::Mock::VerifyAndClearExpectations(&mock_message_helper_);
+  }
+
+  ~UnSubscribeWayPointsRequestTest() {
+    testing::Mock::VerifyAndClearExpectations(&mock_message_helper_);
   }
 
   MessageSharedPtr command_msg_;
   ::utils::SharedPtr<UnSubscribeWayPointsRequest> command_;
+  am::MockMessageHelper& mock_message_helper_;
 };
 
 TEST_F(UnSubscribeWayPointsRequestTest,
@@ -156,6 +165,10 @@ TEST_F(UnSubscribeWayPointsRequestTest,
 
   EXPECT_CALL(app_mngr_, UnsubscribeAppFromWayPoints(kAppId));
 
+  EXPECT_CALL(mock_message_helper_,
+              HMIToMobileResult(hmi_apis::Common_Result::SUCCESS))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
+
   EXPECT_CALL(
       app_mngr_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::SUCCESS), _));
@@ -163,6 +176,7 @@ TEST_F(UnSubscribeWayPointsRequestTest,
   command_->on_event(event);
 }
 
+}  // namespace unsubscribe_way_points_request
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

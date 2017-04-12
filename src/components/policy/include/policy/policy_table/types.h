@@ -54,7 +54,7 @@ typedef Map<MessageLanguages, 0, 255> Messages;
 
 typedef Map<AppLevel, 0, 255> AppLevels;
 
-typedef Map<Stringifyable<Nullable<ApplicationParams>>, 1, 1000>
+typedef Map<Stringifyable<Nullable<ApplicationParams> >, 1, 1000>
     ApplicationPolicies;
 
 typedef Map<Rpcs, 1, 255> FunctionalGroupings;
@@ -97,9 +97,9 @@ struct ApplicationParams : PolicyBase {
   Optional<Strings> nicknames;
   Optional<AppHMITypes> AppHMIType;
   Optional<RequestTypes> RequestType;
-  Optional<Integer<uint16_t, 0, 65225>> memory_kb;
-  Optional<Integer<uint32_t, 0, UINT_MAX>> heart_beat_timeout_ms;
-  Optional<String<0, 255>> certificate;
+  Optional<Integer<uint16_t, 0, 65225> > memory_kb;
+  Optional<Integer<uint32_t, 0, UINT_MAX> > heart_beat_timeout_ms;
+  Optional<String<0, 255> > certificate;
 
  public:
   ApplicationParams();
@@ -162,7 +162,7 @@ struct RpcParameters : CompositeType {
 
 struct Rpcs : CompositeType {
  public:
-  Optional<String<1, 255>> user_consent_prompt;
+  Optional<String<1, 255> > user_consent_prompt;
   Nullable<Rpc> rpcs;
 
  public:
@@ -183,7 +183,7 @@ struct Rpcs : CompositeType {
 
 struct ModuleConfig : CompositeType {
  public:
-  Optional<Map<String<0, 100>, 0, 255>> device_certificates;
+  Optional<Map<String<0, 100>, 0, 255> > device_certificates;
   Optional<Boolean> preloaded_pt;
   Integer<uint8_t, 0, 255> exchange_after_x_ignition_cycles;
   Integer<int64_t, 0, 4294967296ll> exchange_after_x_kilometers;
@@ -192,11 +192,11 @@ struct ModuleConfig : CompositeType {
   SecondsBetweenRetries seconds_between_retries;
   ServiceEndpoints endpoints;
   NumberOfNotificationsPerMinute notifications_per_minute_by_priority;
-  Optional<String<1, 100>> vehicle_make;
-  Optional<String<1, 100>> vehicle_model;
-  Optional<String<4, 4>> vehicle_year;
-  Optional<String<0, 10>> preloaded_date;
-  Optional<String<0, 65535>> certificate;
+  Optional<String<1, 100> > vehicle_make;
+  Optional<String<1, 100> > vehicle_model;
+  Optional<String<4, 4> > vehicle_year;
+  Optional<String<0, 10> > preloaded_date;
+  Optional<String<0, 65535> > certificate;
 
  public:
   ModuleConfig();
@@ -224,11 +224,11 @@ struct ModuleConfig : CompositeType {
 
 struct MessageString : CompositeType {
  public:
-  Optional<String<1, 65535>> line1;
-  Optional<String<1, 65535>> line2;
-  Optional<String<1, 65535>> tts;
-  Optional<String<1, 65535>> label;
-  Optional<String<1, 65535>> textBody;
+  Optional<String<1, 65535> > line1;
+  Optional<String<1, 65535> > line2;
+  Optional<String<1, 65535> > tts;
+  Optional<String<1, 65535> > label;
+  Optional<String<1, 65535> > textBody;
 
  public:
   MessageString();
@@ -288,9 +288,9 @@ struct ConsumerFriendlyMessages : CompositeType {
 
 struct ModuleMeta : CompositeType {
  public:
-  Optional<Integer<uint32_t, 0, ODO_MAX>> pt_exchanged_at_odometer_x;
-  Optional<Integer<uint16_t, 0, 65535>> pt_exchanged_x_days_after_epoch;
-  Optional<Integer<uint16_t, 0, 65535>> ignition_cycles_since_last_exchange;
+  Optional<Integer<uint32_t, 0, ODO_MAX> > pt_exchanged_at_odometer_x;
+  Optional<Integer<uint16_t, 0, 65535> > pt_exchanged_x_days_after_epoch;
+  Optional<Integer<uint16_t, 0, 65535> > ignition_cycles_since_last_exchange;
 
  public:
   ModuleMeta();

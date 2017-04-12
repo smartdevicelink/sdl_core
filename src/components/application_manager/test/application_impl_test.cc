@@ -51,6 +51,7 @@
 #include "application_manager/resumption/resume_ctrl.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
 #include "policy/mock_statistics_manager.h"
+#include "smart_objects/smart_object.h"
 
 namespace test {
 namespace components {
@@ -59,7 +60,6 @@ namespace application_manager_test {
 using namespace application_manager;
 
 using namespace mobile_apis;
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 namespace custom_str = utils::custom_string;
 
 using ::testing::_;

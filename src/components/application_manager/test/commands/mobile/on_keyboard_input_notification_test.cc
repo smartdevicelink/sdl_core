@@ -42,6 +42,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace on_keyboard_input_notification {
 
 namespace strings = application_manager::strings;
 
@@ -165,6 +166,7 @@ TEST_F(OnKeyBoardInputNotificationTest, Run_InvalidApp_NoNotification) {
   command->Run();
 }
 
+}  // namespace on_keyboard_input_notification
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

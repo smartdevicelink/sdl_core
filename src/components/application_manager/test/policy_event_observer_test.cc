@@ -42,7 +42,6 @@ namespace test {
 namespace components {
 namespace policy_test {
 
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 using application_manager::event_engine::Event;
 using namespace policy;
 
