@@ -1474,6 +1474,7 @@ std::string PolicyManagerImpl::GetPolicyTableStatus() const {
 }
 
 int PolicyManagerImpl::NextRetryTimeout() {
+  LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock auto_lock(retry_sequence_lock_);
   LOG4CXX_DEBUG(logger_, "Index: " << retry_sequence_index_);
   int next = 0;

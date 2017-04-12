@@ -806,21 +806,21 @@ uint32_t PolicyManagerImpl::NextRetryTimeout() {
   uint32_t next = 0u;
   if (retry_sequence_seconds_.empty() ||
       retry_sequence_index_ >= (retry_sequence_seconds_.size())) {
+    sync_primitives::ConditionalVariable termination_condition_;
+    termination_condition_.WaitFor(auto_lock, retry_sequence_timeout_ * 60);
     return next;
   }
 
-  if (0 == retry_sequence_index_) {
-    ++retry_sequence_index_;
-    // Return miliseconds
-    return retry_sequence_timeout_;
-  }
+  ++retry_sequence_index_;
 
   for (uint32_t i = 0u; i < retry_sequence_index_; ++i) {
-    next += retry_sequence_seconds_[i] *
-            date_time::DateTime::MILLISECONDS_IN_SECOND;
+    next += retry_sequence_seconds_[i];
+    // According to requirement APPLINK-18244
     next += retry_sequence_timeout_;
   }
-  ++retry_sequence_index_;
+  if (retry_sequence_index_ == retry_sequence_seconds_.size()) {
+    retry_sequence_timeout_ = 1;
+  }
 
   // Return miliseconds
   return next;
@@ -1129,9 +1129,11 @@ void PolicyManagerImpl::RetrySequence() {
   RequestPTUpdate();
 
   uint32_t timeout = NextRetryTimeout();
-
+  LOG4CXX_INFO(logger_, "new timeout is" << timeout);
   if (!timeout && timer_retry_sequence_.is_running()) {
+    LOG4CXX_INFO(logger_, "Stop retry PTU");
     timer_retry_sequence_.Stop();
+
     listener()->OnPTUFinished(false);
     return;
   }
