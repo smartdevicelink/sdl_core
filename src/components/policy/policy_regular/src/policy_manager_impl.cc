@@ -851,6 +851,9 @@ uint32_t PolicyManagerImpl::NextRetryTimeout() {
     // According to requirement APPLINK-18244
     next += retry_sequence_timeout_;
   }
+  if (retry_sequence_index_ == retry_sequence_seconds_.size()) {
+    retry_sequence_timeout_ = 1;
+  }
 
   // Return miliseconds
   return next;
@@ -1158,9 +1161,11 @@ void PolicyManagerImpl::RetrySequence() {
   RequestPTUpdate();
 
   uint32_t timeout = NextRetryTimeout();
-
+  LOG4CXX_INFO(logger_, "new timeout is" << timeout);
   if (!timeout && timer_retry_sequence_.is_running()) {
+    LOG4CXX_INFO(logger_, "Stop retry PTU");
     timer_retry_sequence_.Stop();
+
     listener()->OnPTUFinished(false);
     return;
   }
