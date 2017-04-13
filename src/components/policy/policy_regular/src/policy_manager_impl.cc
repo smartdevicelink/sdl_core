@@ -857,7 +857,8 @@ uint32_t PolicyManagerImpl::NextRetryTimeout() {
   ++retry_sequence_index_;
 
   for (uint32_t i = 0u; i < retry_sequence_index_; ++i) {
-    next += retry_sequence_seconds_[i];
+    next += retry_sequence_seconds_[i] *
+            date_time::DateTime::MILLISECONDS_IN_SECOND;
     // According to requirement APPLINK-18244
     next += retry_sequence_timeout_;
   }
