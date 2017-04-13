@@ -841,6 +841,8 @@ uint32_t PolicyManagerImpl::NextRetryTimeout() {
   uint32_t next = 0u;
   if (retry_sequence_seconds_.empty() ||
       retry_sequence_index_ >= (retry_sequence_seconds_.size())) {
+    sync_primitives::ConditionalVariable termination_condition_;
+    termination_condition_.WaitFor(auto_lock, retry_sequence_timeout_ * 60);
     return next;
   }
 
