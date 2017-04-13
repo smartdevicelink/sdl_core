@@ -598,11 +598,11 @@ void PolicyHandler::OnAppPermissionConsentInternal(
       out_permissions.device_id = it->first;
 #ifdef EXTERNAL_PROPRIETARY_MODE
       if (!k_isNeedToUpdateExternalConsent) {
-#endif
         policy_manager_->SetUserConsentForApp(out_permissions);
-#ifdef EXTERNAL_PROPRIETARY_MODE
       }
-#endif
+#else
+      policy_manager_->SetUserConsentForApp(out_permissions);
+#endif  // EXTERNAL_PROPRIETARY_MODE
     }
   } else {
     LOG4CXX_WARN(logger_,
