@@ -2085,7 +2085,7 @@ ACTION_P(NotifyAsync, waiter) {
 }
 
 TEST_F(PolicyHandlerTest,
-       OnAppPermissionConsentInternal_ValidConnectionKey_SUCCESS) {
+       DISABLED_OnAppPermissionConsentInternal_ValidConnectionKey_SUCCESS) {
   ChangePolicyManagerToMock();
   const uint32_t device = 2u;
 
@@ -2101,25 +2101,18 @@ TEST_F(PolicyHandlerTest,
 
   permissions.group_permissions.push_back(group_permission_allowed);
 
-  EXPECT_CALL(app_manager_, connection_handler())
-      .WillOnce(ReturnRef(conn_handler));
+#ifdef EXTERNAL_PROPRIETARY_MODE
   EXPECT_CALL(conn_handler, get_session_observer())
       .WillOnce(ReturnRef(mock_session_observer));
   EXPECT_CALL(mock_session_observer, GetDataOnDeviceID(device, _, NULL, _, _))
       .WillOnce(Return(1u));
-
   EXPECT_CALL(app_manager_, application(kConnectionKey_))
-      .WillOnce(Return(mock_app_));
+      .WillRepeatedly(Return(mock_app_));
+#endif
   EXPECT_CALL(*mock_app_, policy_app_id()).WillOnce(Return(kPolicyAppId_));
   EXPECT_CALL(*mock_app_, device()).WillOnce(Return(device));
 
-  sync_primitives::Lock wait_hmi_lock_first;
-  sync_primitives::AutoLock auto_lock_first(wait_hmi_lock_first);
   WaitAsync waiter_first(kCallsCount_, kTimeout_);
-
-  EXPECT_CALL(*mock_policy_manager_, SetUserConsentForApp(_))
-      .WillOnce(NotifyAsync(&waiter_first));
-
   ExternalConsentStatusItem item(1u, 1u, kStatusOn);
   ExternalConsentStatus external_consent_status;
   external_consent_status.insert(item);
@@ -2131,19 +2124,14 @@ TEST_F(PolicyHandlerTest,
 
   ON_CALL(*mock_policy_manager_, IsNeedToUpdateExternalConsentStatus(_))
       .WillByDefault(Return(true));
-
   EXPECT_CALL(*mock_policy_manager_,
               SetExternalConsentStatus(external_consent_status))
       .WillOnce(DoAll(NotifyAsync(&waiter_second), Return(true)));
   policy_handler_.OnAppPermissionConsent(
       kConnectionKey_, permissions, external_consent_status);
+  EXPECT_TRUE(waiter_second.Wait(auto_lock_second));
 #else
   policy_handler_.OnAppPermissionConsent(kConnectionKey_, permissions);
-
-#endif
-  EXPECT_TRUE(waiter_first.Wait(auto_lock_first));
-#ifdef EXTERNAL_PROPRIETARY_MODE
-  EXPECT_TRUE(waiter_second.Wait(auto_lock_second));
 #endif
 }
 
