@@ -940,7 +940,8 @@ TEST_F(PolicyManagerImplTest2, NextRetryTimeout_ExpectTimeoutsFromPT) {
     uint32_t waiting_timeout = 0u;
 
     for (uint32_t retry_number = 0u; retry_number < size; ++retry_number) {
-      waiting_timeout += seconds_between_retries[retry_number].asInt();
+      waiting_timeout += seconds_between_retries[retry_number].asInt() *
+                         date_time::DateTime::MILLISECONDS_IN_SECOND;
       waiting_timeout += manager->TimeoutExchangeMSec();
 
       // it's in miliseconds
