@@ -87,11 +87,11 @@ void ListFilesRequest::Run() {
   for (; it != persistent_files.end(); ++it) {
     if (i < application_manager_.get_settings().list_files_response_size()) {
       LOG4CXX_DEBUG(logger_,
-                    "File " + filename + " added to ListFiles response");
+                    "File " + *it + " added to ListFiles response");
       (*message_)[strings::msg_params][strings::filenames][i++] = *it;
     } else {
       LOG4CXX_DEBUG(logger_,
-                    "File " + filename + " not added to ListFiles response");
+                    "File " + *it + " not added to ListFiles response");
     }
   }
   (*message_)[strings::params][strings::message_type] =
