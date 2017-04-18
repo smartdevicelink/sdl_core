@@ -467,12 +467,6 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
                           GetPolicyHandler().GetStatisticManager(),
                           *this));
   if (!application) {
-    usage_statistics::AppCounter count_of_rejections_sync_out_of_memory(
-        GetPolicyHandler().GetStatisticManager(),
-        policy_app_id,
-        usage_statistics::REJECTIONS_SYNC_OUT_OF_MEMORY);
-    ++count_of_rejections_sync_out_of_memory;
-
     utils::SharedPtr<smart_objects::SmartObject> response(
         MessageHelper::CreateNegativeResponse(
             connection_key,
@@ -1351,9 +1345,12 @@ void ApplicationManagerImpl::SendMessageToMobile(
   ApplicationSharedPtr app = application(
       (*message)[strings::params][strings::connection_key].asUInt());
 
+  const bool is_result_code_exists =
+      (*message)[strings::msg_params].keyExists(strings::result_code);
+
   if (!app) {
     LOG4CXX_ERROR(logger_, "No application associated with connection key");
-    if ((*message)[strings::msg_params].keyExists(strings::result_code) &&
+    if (is_result_code_exists &&
         ((*message)[strings::msg_params][strings::result_code] ==
          NsSmartDeviceLinkRPC::V1::Result::UNSUPPORTED_VERSION)) {
       (*message)[strings::params][strings::protocol_version] =
@@ -1365,6 +1362,12 @@ void ApplicationManagerImpl::SendMessageToMobile(
   } else {
     (*message)[strings::params][strings::protocol_version] =
         app->protocol_version();
+  }
+
+  if (app && is_result_code_exists &&
+      (*message)[strings::msg_params][strings::result_code] ==
+          mobile_apis::Result::OUT_OF_MEMORY) {
+    app->usage_report().RecordRejectionsSyncOutOfMemory();
   }
 
   mobile_so_factory().attachSchema(*message, false);
