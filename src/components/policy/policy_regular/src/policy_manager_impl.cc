@@ -927,7 +927,8 @@ StatusNotifier PolicyManagerImpl::AddApplication(
                                                device_consent);
   } else {
     PromoteExistedApplication(application_id, device_consent);
-    return utils::MakeShared<utils::CallNothing>();
+    return utils::MakeShared<CallStatusChange>(update_status_manager_,
+                                               device_consent);
   }
 }
 

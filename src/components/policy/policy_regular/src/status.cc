@@ -68,6 +68,9 @@ void policy::UpdateNeededStatus::ProcessEvent(
     case kOnResetPolicyTableNoUpdate:
       manager->SetNextStatus(utils::MakeShared<UpToDateStatus>());
       break;
+    case kOnNewAppRegistered:
+      manager->SetNextStatus(utils::MakeShared<UpdateNeededStatus>());
+      break;
     default:
       break;
   }
