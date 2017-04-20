@@ -355,11 +355,12 @@ TEST_F(AddSubMenuRequestTest, Run_MenuIconNewLineChar_SendINVALID_DATA) {
   EXPECT_CALL(*app, FindSubMenu(kMenuId)).WillOnce(ReturnNull());
 
   AddSubMenuPtr command(CreateCommand<AddSubMenuRequest>(command_msg_));
-  MessageSharedPtr result_msg(CatchHMICommandResult(CallRun(*command)));
-  const hmi_apis::FunctionID::eType received_result =
-      static_cast<hmi_apis::FunctionID::eType>(
-          (*result_msg)[am::strings::params][am::strings::function_id].asInt());
-  EXPECT_EQ(hmi_apis::FunctionID::UI_AddSubMenu, received_result);
+  MessageSharedPtr result_msg(CatchMobileCommandResult(CallRun(*command)));
+  const mobile_apis::Result::eType received_result =
+      static_cast<mobile_apis::Result::eType>(
+          (*result_msg)[am::strings::msg_params][am::strings::result_code]
+              .asInt());
+  EXPECT_EQ(mobile_apis::Result::INVALID_DATA, received_result);
 
   EXPECT_FALSE((*result_msg)[am::strings::msg_params].keyExists(
       am::strings::sub_menu_icon));
@@ -375,11 +376,12 @@ TEST_F(AddSubMenuRequestTest, Run_MenuIconTabChar_SendINVALID_DATA) {
   EXPECT_CALL(*app, FindSubMenu(kMenuId)).WillOnce(ReturnNull());
 
   AddSubMenuPtr command(CreateCommand<AddSubMenuRequest>(command_msg_));
-  MessageSharedPtr result_msg(CatchHMICommandResult(CallRun(*command)));
-  const hmi_apis::FunctionID::eType received_result =
-      static_cast<hmi_apis::FunctionID::eType>(
-          (*result_msg)[am::strings::params][am::strings::function_id].asInt());
-  EXPECT_EQ(hmi_apis::FunctionID::UI_AddSubMenu, received_result);
+  MessageSharedPtr result_msg(CatchMobileCommandResult(CallRun(*command)));
+  const mobile_apis::Result::eType received_result =
+      static_cast<mobile_apis::Result::eType>(
+          (*result_msg)[am::strings::msg_params][am::strings::result_code]
+              .asInt());
+  EXPECT_EQ(mobile_apis::Result::INVALID_DATA, received_result);
 
   EXPECT_FALSE((*result_msg)[am::strings::msg_params].keyExists(
       am::strings::sub_menu_icon));
@@ -394,11 +396,12 @@ TEST_F(AddSubMenuRequestTest, Run_MenuIconWhiteSpace_SendINVALID_DATA) {
   EXPECT_CALL(*app, FindSubMenu(kMenuId)).WillOnce(ReturnNull());
 
   AddSubMenuPtr command(CreateCommand<AddSubMenuRequest>(command_msg_));
-  MessageSharedPtr result_msg(CatchHMICommandResult(CallRun(*command)));
-  const hmi_apis::FunctionID::eType received_result =
-      static_cast<hmi_apis::FunctionID::eType>(
-          (*result_msg)[am::strings::params][am::strings::function_id].asInt());
-  EXPECT_EQ(hmi_apis::FunctionID::UI_AddSubMenu, received_result);
+  MessageSharedPtr result_msg(CatchMobileCommandResult(CallRun(*command)));
+  const mobile_apis::Result::eType received_result =
+      static_cast<mobile_apis::Result::eType>(
+          (*result_msg)[am::strings::msg_params][am::strings::result_code]
+              .asInt());
+  EXPECT_EQ(mobile_apis::Result::INVALID_DATA, received_result);
 
   EXPECT_FALSE((*result_msg)[am::strings::msg_params].keyExists(
       am::strings::sub_menu_icon));

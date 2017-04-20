@@ -107,7 +107,7 @@ class CommandRequestTest : public CommandsTest<kIsNice> {
     EXPECT_CALL(this->app_mngr_, ManageHMICommand(_))
         .WillOnce(DoAll(SaveArg<0>(&result_msg), Return(call_return)));
     delegate();
-    return result_msg;
+    return result_msg.valid() ? result_msg : this->CreateMessage();
   }
 
   MockEventDisp event_dispatcher_;
