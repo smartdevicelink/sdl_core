@@ -2167,10 +2167,13 @@ TEST_F(PolicyHandlerTest,
   sync_primitives::Lock wait_hmi_lock_first;
   sync_primitives::AutoLock auto_lock_first(wait_hmi_lock_first);
   WaitAsync waiter_first(kCallsCount_, kTimeout_);
-
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  EXPECT_CALL(*mock_policy_manager_, SetUserConsentForApp(_, _))
+      .WillOnce(NotifyAsync(&waiter_first));
+#else
   EXPECT_CALL(*mock_policy_manager_, SetUserConsentForApp(_))
       .WillOnce(NotifyAsync(&waiter_first));
-
+#endif
   ExternalConsentStatusItem item(1u, 1u, kStatusOn);
   ExternalConsentStatus external_consent_status;
   external_consent_status.insert(item);

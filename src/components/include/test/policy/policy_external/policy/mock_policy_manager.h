@@ -109,8 +109,9 @@ class MockPolicyManager : public PolicyManager {
   MOCK_METHOD2(SetDeviceInfo,
                void(const std::string& device_id,
                     const policy::DeviceInfo& device_info));
-  MOCK_METHOD1(SetUserConsentForApp,
-               void(const policy::PermissionConsent& permissions));
+  MOCK_METHOD2(SetUserConsentForApp,
+               void(const policy::PermissionConsent& permissions,
+                    const NotificationMode mode));
   MOCK_CONST_METHOD2(GetDefaultHmi,
                      bool(const std::string& policy_app_id,
                           std::string* default_hmi));

@@ -114,7 +114,8 @@ class PolicyManagerImpl : public PolicyManager {
   virtual void SetDeviceInfo(const std::string& device_id,
                              const DeviceInfo& device_info);
 
-  virtual void SetUserConsentForApp(const PermissionConsent& permissions);
+  void SetUserConsentForApp(const PermissionConsent& permissions,
+                            const NotificationMode mode) OVERRIDE;
 
   virtual bool GetDefaultHmi(const std::string& policy_app_id,
                              std::string* default_hmi) const;
