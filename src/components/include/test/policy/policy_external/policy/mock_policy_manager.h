@@ -159,7 +159,7 @@ class MockPolicyManager : public PolicyManager {
   MOCK_CONST_METHOD1(HeartBeatTimeout, uint32_t(const std::string& app_id));
   MOCK_METHOD1(SaveUpdateStatusRequired, void(bool is_update_needed));
   MOCK_METHOD0(OnAppsSearchStarted, void());
-  MOCK_METHOD0(OnAppsSearchCompleted, void());
+  MOCK_METHOD1(OnAppsSearchCompleted, void(const bool trigger_ptu));
   MOCK_METHOD1(OnAppRegisteredOnMobile,
                void(const std::string& application_id));
   MOCK_CONST_METHOD0(GetLockScreenIconUrl, std::string());
@@ -194,6 +194,8 @@ class MockPolicyManager : public PolicyManager {
                               const EndpointUrls& urls));
   MOCK_METHOD1(SetExternalConsentStatus, bool(const ExternalConsentStatus&));
   MOCK_METHOD0(GetExternalConsentStatus, ExternalConsentStatus());
+  MOCK_CONST_METHOD1(IsNeedToUpdateExternalConsentStatus,
+                     bool(const ExternalConsentStatus&));
 };
 }  // namespace policy_manager_test
 }  // namespace components

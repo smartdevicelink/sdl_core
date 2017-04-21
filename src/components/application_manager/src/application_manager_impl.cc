@@ -139,6 +139,7 @@ ApplicationManagerImpl::ApplicationManagerImpl(
           new TimerTaskImpl<ApplicationManagerImpl>(
               this, &ApplicationManagerImpl::OnTimerSendTTSGlobalProperties))
     , is_low_voltage_(false)
+    , apps_size_(0)
     , is_stopping_(false) {
   std::srand(std::time(0));
   AddPolicyObserver(this);
@@ -556,6 +557,7 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   applications_list_lock_.Acquire();
   application->MarkRegistered();
   applications_.insert(application);
+  apps_size_ = applications_.size();
   applications_list_lock_.Release();
 
   return application;
@@ -3261,8 +3263,12 @@ bool ApplicationManagerImpl::IsHMICooperating() const {
 
 void ApplicationManagerImpl::OnApplicationListUpdateTimer() {
   LOG4CXX_DEBUG(logger_, "Application list update timer finished");
+
+  apps_to_register_list_lock_.Acquire();
+  const bool trigger_ptu = apps_size_ != applications_.size();
+  apps_to_register_list_lock_.Release();
   SendUpdateAppList();
-  GetPolicyHandler().OnAppsSearchCompleted();
+  GetPolicyHandler().OnAppsSearchCompleted(trigger_ptu);
 }
 
 void ApplicationManagerImpl::OnTimerSendTTSGlobalProperties() {

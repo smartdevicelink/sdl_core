@@ -386,7 +386,7 @@ class PolicyHandler : public PolicyHandlerInterface,
   /**
    * @brief Handler on applications search completed
    */
-  void OnAppsSearchCompleted() OVERRIDE;
+  void OnAppsSearchCompleted(const bool trigger_ptu) OVERRIDE;
 
   /**
    * @brief OnAppRegisteredOnMobile allows to handle event when application were

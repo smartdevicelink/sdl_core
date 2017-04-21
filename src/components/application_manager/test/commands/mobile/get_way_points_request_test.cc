@@ -72,6 +72,14 @@ const std::string kMethodName = "Navigation.GetWayPoints";
 class GetWayPointsRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
+  GetWayPointsRequestTest()
+      : message_helper_mock_(*am::MockMessageHelper::message_helper_mock()) {
+    Mock::VerifyAndClearExpectations(&message_helper_mock_);
+  }
+  ~GetWayPointsRequestTest() {
+    Mock::VerifyAndClearExpectations(&message_helper_mock_);
+  }
+
   void SetUp() OVERRIDE {
     message_ = utils::MakeShared<SmartObject>(::smart_objects::SmartType_Map);
     (*message_)[am::strings::msg_params] =

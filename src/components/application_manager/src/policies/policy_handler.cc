@@ -1849,9 +1849,9 @@ void PolicyHandler::OnAppsSearchStarted() {
   policy_manager_->OnAppsSearchStarted();
 }
 
-void PolicyHandler::OnAppsSearchCompleted() {
+void PolicyHandler::OnAppsSearchCompleted(const bool trigger_ptu) {
   POLICY_LIB_CHECK();
-  policy_manager_->OnAppsSearchCompleted();
+  policy_manager_->OnAppsSearchCompleted(trigger_ptu);
 }
 
 void PolicyHandler::OnAppRegisteredOnMobile(const std::string& application_id) {

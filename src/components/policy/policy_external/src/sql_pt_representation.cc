@@ -53,6 +53,8 @@ namespace policy {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "Policy")
 
+namespace dbms = utils::dbms;
+
 namespace {
 template <typename T, typename K>
 void InsertUnique(K value, T* array) {
@@ -705,7 +707,21 @@ bool SQLPTRepresentation::GatherConsumerFriendlyMessages(
     LOG4CXX_WARN(logger_, "Incorrect select from consumer_friendly_messages");
     return false;
   }
+
   messages->version = query.GetString(0);
+
+  if (query.Prepare(sql_pt::kCollectFriendlyMsg)) {
+    while (query.Next()) {
+      UserFriendlyMessage msg;
+      msg.message_code = query.GetString(7);
+      std::string language = query.GetString(6);
+
+      (*messages->messages)[msg.message_code].languages[language];
+    }
+  } else {
+    LOG4CXX_WARN(logger_, "Incorrect statement for select friendly messages.");
+  }
+
   return true;
 }
 
@@ -1250,9 +1266,11 @@ bool SQLPTRepresentation::SaveConsumerFriendlyMessages(
   // the policy table. So it won't be changed/updated
   if (messages.messages.is_initialized()) {
     utils::dbms::SQLQuery query(db());
-    if (!query.Exec(sql_pt::kDeleteMessageString)) {
-      LOG4CXX_WARN(logger_, "Incorrect delete from message.");
-      return false;
+    if (!messages.messages->empty()) {
+      if (!query.Exec(sql_pt::kDeleteMessageString)) {
+        LOG4CXX_WARN(logger_, "Incorrect delete from message.");
+        return false;
+      }
     }
 
     if (query.Prepare(sql_pt::kUpdateVersion)) {
@@ -1479,6 +1497,12 @@ bool SQLPTRepresentation::GetInitialAppData(const std::string& app_id,
     LOG4CXX_WARN(logger_, "Incorrect select from app types");
     return false;
   }
+  dbms::SQLQuery module_types(db());
+  if (!module_types.Prepare(sql_pt::kSelectModuleTypes)) {
+    LOG4CXX_WARN(logger_, "Incorrect select from module types");
+    return false;
+  }
+
   app_names.Bind(0, app_id);
   while (app_names.Next()) {
     nicknames->push_back(app_names.GetString(0));
@@ -1489,6 +1513,12 @@ bool SQLPTRepresentation::GetInitialAppData(const std::string& app_id,
     app_types->push_back(app_hmi_types.GetString(0));
   }
   app_hmi_types.Reset();
+  module_types.Bind(0, app_id);
+  while (module_types.Next()) {
+    app_types->push_back(module_types.GetString(0));
+  }
+  module_types.Reset();
+
   return true;
 }
 
@@ -1657,6 +1687,17 @@ bool SQLPTRepresentation::SetDefaultPolicy(const std::string& app_id) {
   }
 
   SetPreloaded(false);
+
+  policy_table::RequestTypes request_types;
+  if (!GatherRequestType(kDefaultId, &request_types) ||
+      !SaveRequestType(app_id, request_types)) {
+    return false;
+  }
+  policy_table::AppHMITypes app_types;
+  if (!GatherAppType(kDefaultId, &app_types) ||
+      !SaveAppType(app_id, app_types)) {
+    return false;
+  }
 
   policy_table::Strings default_groups;
   if (GatherAppGroup(kDefaultId, &default_groups) &&

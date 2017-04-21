@@ -425,7 +425,7 @@ class PolicyManager : public usage_statistics::StatisticsManager {
   /**
    * @brief Handler on applications search completed
    */
-  virtual void OnAppsSearchCompleted() = 0;
+  virtual void OnAppsSearchCompleted(const bool trigger_ptu) = 0;
   /**
    * @brief Gets request types for application
    * @param policy_app_id Unique application id

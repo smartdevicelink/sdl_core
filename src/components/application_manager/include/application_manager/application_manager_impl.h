@@ -1494,6 +1494,8 @@ class ApplicationManagerImpl
 
   bool is_low_voltage_;
 
+  uint32_t apps_size_;
+
   volatile bool is_stopping_;
 
   DISALLOW_COPY_AND_ASSIGN(ApplicationManagerImpl);

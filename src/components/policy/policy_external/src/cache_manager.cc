@@ -338,6 +338,7 @@ bool CacheManager::ResetUserConsent() {
   for (; iter != iter_end; ++iter) {
     iter->second.user_consent_records->clear();
   }
+  Backup();
   return true;
 }
 
