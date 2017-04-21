@@ -85,7 +85,9 @@ class ResetGlobalPropertiesRequestTest
   ResetGlobalPropertiesRequestTest()
       : mock_message_helper_(am::MockMessageHelper::message_helper_mock())
       , msg_(CreateMessage())
-      , mock_app_(CreateMockApp()) {}
+      , mock_app_(CreateMockApp()) {
+    Mock::VerifyAndClearExpectations(mock_message_helper_);
+  }
 
   void SetUp() OVERRIDE {
     (*msg_)[am::strings::params][am::strings::connection_key] = kConnectionKey;
@@ -101,7 +103,7 @@ class ResetGlobalPropertiesRequestTest
   }
 
   void TearDown() OVERRIDE {
-    Mock::VerifyAndClearExpectations(&mock_message_helper_);
+    Mock::VerifyAndClearExpectations(mock_message_helper_);
   }
   am::MockMessageHelper* mock_message_helper_;
   MessageSharedPtr msg_;
@@ -267,8 +269,11 @@ TEST_F(ResetGlobalPropertiesRequestTest, OnEvent_InvalidEventId_UNSUCCESS) {
 TEST_F(ResetGlobalPropertiesRequestTest,
        OnEvent_UI_SetGlobalProperties_SUCCESS) {
   Event event(hmi_apis::FunctionID::UI_SetGlobalProperties);
-  (*msg_)[am::strings::params][am::hmi_response::code] =
-      hmi_apis::Common_Result::eType::SUCCESS;
+  const hmi_apis::Common_Result::eType result_code =
+      hmi_apis::Common_Result::SUCCESS;
+  (*msg_)[am::strings::params][am::hmi_response::code] = result_code;
+  ON_CALL(*mock_message_helper_, HMIToMobileResult(result_code))
+      .WillByDefault(Return(am::mobile_api::Result::SUCCESS));
 
   (*msg_)[am::strings::msg_params][am::strings::properties][0] =
       mobile_apis::GlobalProperty::VRHELPTITLE;
