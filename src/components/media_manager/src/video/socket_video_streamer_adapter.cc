@@ -38,6 +38,7 @@ const std::string kHeader =
     "Connection: Keep-Alive\r\n"
     "Keep-Alive: timeout=15, max=300\r\n"
     "Server: SDL\r\n"
+    "Access-Control-Allow-Origin: *\r\n"
     "Content-Type: video/mp4\r\n\r\n";
 }
 
