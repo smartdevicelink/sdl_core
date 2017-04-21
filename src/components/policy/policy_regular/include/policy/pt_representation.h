@@ -39,7 +39,6 @@
 #include "policy/policy_table/types.h"
 #include "policy/policy_settings.h"
 
-
 namespace policy {
 namespace policy_table = rpc::policy_table_interface_base;
 

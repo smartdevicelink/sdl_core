@@ -655,7 +655,8 @@ TEST_F(ResumeCtrlTest, SetAppHMIState_HMINone_WithoutCheckPolicy) {
   EXPECT_CALL(*app_mock_, set_is_resuming(true));
   EXPECT_CALL(state_controller_, SetRegularState(_, kDefaultTestLevel_))
       .Times(AtLeast(1));
-  const bool res = res_ctrl_->SetAppHMIState(app_mock_, kDefaultTestLevel_, false);
+  const bool res =
+      res_ctrl_->SetAppHMIState(app_mock_, kDefaultTestLevel_, false);
   EXPECT_TRUE(res);
 }
 
