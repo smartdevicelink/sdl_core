@@ -2187,7 +2187,9 @@ TEST_F(PolicyHandlerTest,
       .WillByDefault(Return(false));
 
   EXPECT_CALL(*mock_policy_manager_,
-              SetExternalConsentStatus(external_consent_status)).Times(0);
+              SetExternalConsentStatus(external_consent_status))
+      .WillOnce(Return(true));
+  ;
   policy_handler_.OnAppPermissionConsent(
       kConnectionKey_, permissions, external_consent_status);
 #else
@@ -2271,7 +2273,8 @@ TEST_F(PolicyHandlerTest,
   ON_CALL(*mock_policy_manager_, IsNeedToUpdateExternalConsentStatus(_))
       .WillByDefault(Return(false));
   EXPECT_CALL(*mock_policy_manager_,
-              SetExternalConsentStatus(external_consent_status)).Times(0);
+              SetExternalConsentStatus(external_consent_status))
+      .WillOnce(Return(true));
   policy_handler_.OnAppPermissionConsent(
       invalid_connection_key, permissions, external_consent_status);
 #else
@@ -2397,7 +2400,8 @@ TEST_F(PolicyHandlerTest,
   ON_CALL(*mock_policy_manager_, IsNeedToUpdateExternalConsentStatus(_))
       .WillByDefault(Return(false));
   EXPECT_CALL(*mock_policy_manager_,
-              SetExternalConsentStatus(external_consent_status)).Times(0);
+              SetExternalConsentStatus(external_consent_status))
+      .WillOnce(Return(true));
   policy_handler_.OnAppPermissionConsent(
       invalid_connection_key, permissions, external_consent_status);
 #else
