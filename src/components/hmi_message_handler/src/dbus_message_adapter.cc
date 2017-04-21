@@ -34,8 +34,8 @@
 #include <sstream>
 #include "utils/logger.h"
 #include "formatters/CSmartFactory.h"
+#include "smart_objects/smart_object.h"
 
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 namespace sos = NsSmartDeviceLink::NsJSONHandler::strings;
 
 namespace hmi_message_handler {

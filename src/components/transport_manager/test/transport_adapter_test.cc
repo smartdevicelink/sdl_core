@@ -159,7 +159,7 @@ TEST_F(TransportAdapterTest, SearchDeviceDone_DeviceExisting) {
   utils::SharedPtr<MockDevice> mockdev = new MockDevice(dev_id, uniq_id);
   transport_adapter.AddDevice(mockdev);
 
-  std::vector<utils::SharedPtr<Device>> devList;
+  std::vector<utils::SharedPtr<Device> > devList;
   devList.push_back(mockdev);
 
   EXPECT_CALL(*mockdev, IsSameAs(_)).WillOnce(Return(true));

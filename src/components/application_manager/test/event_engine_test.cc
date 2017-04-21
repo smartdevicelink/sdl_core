@@ -45,7 +45,6 @@ namespace test {
 namespace components {
 namespace event_engine_test {
 
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 using application_manager::event_engine::EventDispatcherImpl;
 using application_manager::event_engine::Event;
 using application_manager::event_engine::EventObserver;

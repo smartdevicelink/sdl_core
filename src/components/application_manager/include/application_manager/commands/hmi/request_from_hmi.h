@@ -35,12 +35,7 @@
 
 #include "application_manager/commands/command_impl.h"
 #include "interfaces/HMI_API.h"
-
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
-class SmartObject;
-}
-}
+#include "smart_objects/smart_object.h"
 
 namespace application_manager {
 

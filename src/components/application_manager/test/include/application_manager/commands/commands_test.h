@@ -42,22 +42,27 @@
 #include "utils/make_shared.h"
 #include "application_manager/mock_application_manager.h"
 #include "test/application_manager/mock_application_manager_settings.h"
+#include "application_manager/mock_hmi_interface.h"
 #include "application_manager/mock_application.h"
 
 namespace test {
 namespace components {
 namespace commands_test {
 
+namespace am = ::application_manager;
+
 using ::testing::ReturnRef;
+using ::testing::Return;
 using ::testing::NiceMock;
+using ::testing::_;
 
 using ::utils::SharedPtr;
 using ::smart_objects::SmartObject;
-using ::application_manager::commands::MessageSharedPtr;
+using am::commands::MessageSharedPtr;
 using ::test::components::application_manager_test::MockApplicationManager;
 using ::test::components::application_manager_test::
     MockApplicationManagerSettings;
-using ::application_manager::ApplicationSharedPtr;
+using am::ApplicationSharedPtr;
 using ::test::components::application_manager_test::MockApplication;
 
 // Depending on the value type will be selected
@@ -93,7 +98,6 @@ class CommandsTest : public ::testing::Test {
   typedef typename TypeIf<kIsNice,
                           NiceMock<MockApplication>,
                           MockApplication>::Result MockApp;
-
   typedef SharedPtr<MockApp> MockAppPtr;
 
   virtual ~CommandsTest() {}
@@ -131,6 +135,7 @@ class CommandsTest : public ::testing::Test {
 
   MockAppManager app_mngr_;
   MockAppManagerSettings app_mngr_settings_;
+  MOCK(am::MockHmiInterfaces) mock_hmi_interfaces_;
 
  protected:
   virtual void InitCommand(const uint32_t& timeout) {
@@ -140,7 +145,14 @@ class CommandsTest : public ::testing::Test {
         .WillByDefault(ReturnRef(timeout));
   }
 
-  CommandsTest() {}
+  CommandsTest() {
+    ON_CALL(app_mngr_, hmi_interfaces())
+        .WillByDefault(ReturnRef(mock_hmi_interfaces_));
+    ON_CALL(mock_hmi_interfaces_, GetInterfaceFromFunction(_))
+        .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_SDL));
+    ON_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
+        .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
+  }
 };
 
 }  // namespace commands_test

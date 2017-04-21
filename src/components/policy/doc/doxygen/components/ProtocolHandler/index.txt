@@ -1,5 +1,0 @@
-/*! \page components_protocolhandler Protocol Handler
-
-Here will be information about Protocol Handler component
-
-*/

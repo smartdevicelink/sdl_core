@@ -36,12 +36,12 @@
 #include "application_manager/policies/policy_handler_interface.h"
 #include "gmock/gmock.h"
 #include "policy/policy_types.h"
+#include "smart_objects/smart_object.h"
 
 namespace test {
 namespace components {
 namespace policy_test {
 
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
  public:
   MOCK_METHOD0(LoadPolicyLibrary, bool());

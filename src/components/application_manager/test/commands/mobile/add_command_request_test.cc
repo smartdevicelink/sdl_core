@@ -53,6 +53,7 @@
 namespace test {
 namespace components {
 namespace commands_test {
+namespace mobile_commands_test {
 namespace add_command_request {
 
 namespace am = application_manager;
@@ -338,6 +339,7 @@ TEST_F(AddCommandRequestTest, OnEvent_UI_HmiSendSuccess_UNSUPPORTED_RESOURCE) {
 }
 
 }  // namespace add_command_test
+}  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components
 }  // namespace tests

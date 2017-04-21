@@ -53,6 +53,8 @@
 namespace test {
 namespace components {
 namespace commands_test {
+namespace mobile_commands_test {
+namespace speak_request {
 
 namespace am = application_manager;
 namespace hmi_response = ::application_manager::hmi_response;
@@ -184,6 +186,8 @@ TEST_F(SpeakRequestTest,
                     true);
 }
 
+}  // namespace speak_request
+}  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace component
 }  // namespace test

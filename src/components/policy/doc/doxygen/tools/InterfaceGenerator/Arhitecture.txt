@@ -1,5 +1,0 @@
-/*! \page tools_interfacegenerator_architecture InterfaceGenerator architecture
-
-InterfaceGenerator is designed as flexible and easily expendable tool that allows to implement both new parsers and generators independently. The core idea of InterfaceGenerator that it has middle-ware product - abstract model of interface that should be generated. This middle layer allows to separate collection of parsers from generators. Also it is possible to add any new validation / normalization component between them. So at the moment the root script creates actual parser and that parser produces model of interface (set of Python classes objects). After that interface model is passed to the desired generator and generator creates result source code files.
-
-*/

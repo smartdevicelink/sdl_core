@@ -1,5 +1,0 @@
-/*! \page components_hmi HMI
-
-Here will be information about HMI component
-
-*/

@@ -848,7 +848,7 @@ TEST_F(ResumptionDataDBTest, DropAppResumptionData) {
 
   EXPECT_TRUE(res_db()->DropAppDataResumption(kMacAddress_, policy_app_id_));
 
-  am::smart_objects::SmartObject app;
+  smart_objects::SmartObject app;
   EXPECT_TRUE(res_db()->GetSavedApplication(policy_app_id_, kMacAddress_, app));
 
   EXPECT_TRUE(app.keyExists(am::strings::application_commands) &&

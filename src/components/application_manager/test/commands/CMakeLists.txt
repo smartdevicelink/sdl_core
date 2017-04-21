@@ -28,36 +28,38 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+include(sources)
+
 include_directories(
   ${GMOCK_INCLUDE_DIRECTORY}
   ${COMPONENTS_DIR}/application_manager/include/
+  ${COMPONENTS_DIR}/application_manager/include/application_manager/
+  ${COMPONENTS_DIR}/application_manager/include/application_manager/commands/
   ${COMPONENTS_DIR}/application_manager/test/include/
-  ${COMPONENTS_DIR}/application_manager/test/include/commands/
+  ${COMPONENTS_DIR}/application_manager/test/include/application_manager/
 )
 
-set(COMMANDS_TEST_SOURCE_DIR
-  ${COMPONENTS_DIR}/application_manager/test/commands
-)
+set(COMMANDS_TEST_DIR ${AM_TEST_DIR}/commands)
 
-set (SOURCES
+file(GLOB SOURCES
   ${COMPONENTS_DIR}/application_manager/test/mock_message_helper.cc
-  ${COMMANDS_TEST_SOURCE_DIR}/command_impl_test.cc
-  ${COMMANDS_TEST_SOURCE_DIR}/command_response_impl_test.cc
-  ${COMMANDS_TEST_SOURCE_DIR}/command_request_impl_test.cc
+  ${COMPONENTS_DIR}/application_manager/src/smart_object_keys.cc
+  ${COMMANDS_TEST_DIR}/*
+  ${COMMANDS_TEST_DIR}/mobile/*
+  ${COMMANDS_TEST_DIR}/hmi/*
 )
 
 set(LIBRARIES
   gmock
   Utils
-  ApplicationManager
-  connectionHandler
-  HMI_API
-  MOBILE_API
   SmartObjects
   jsoncpp
+  HMI_API
+  MOBILE_API
+  ApplicationManager
+  AMHMICommandsLibrary
+  AMMobileCommandsLibrary
+  connectionHandler
 )
 
-create_test("commands_test" "${SOURCES}" "${LIBRARIES}" )
-
-add_subdirectory(mobile)
-add_subdirectory(hmi)
+create_cotired_test("commands_test" "${SOURCES}" "${LIBRARIES}" )
