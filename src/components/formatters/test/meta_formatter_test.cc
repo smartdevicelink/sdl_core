@@ -138,6 +138,8 @@ TEST_F(CMetaFormatterTestHelper,
       0, result_object[S_MSG_PARAMS]["syncMsgVersion"]["majorVersion"].asInt());
   EXPECT_EQ(
       0, result_object[S_MSG_PARAMS]["syncMsgVersion"]["minorVersion"].asInt());
+  EXPECT_EQ(
+      0, result_object[S_MSG_PARAMS]["syncMsgVersion"]["patchVersion"].asInt());
 
   // Uncomment code to print object in console
   //    std::string str;

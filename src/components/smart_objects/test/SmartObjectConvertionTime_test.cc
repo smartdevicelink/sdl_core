@@ -428,6 +428,8 @@ TEST_F(SmartObjectConvertionTimeTest, test_some_object_convertion) {
   srcObj[S_MSG_PARAMS]["ngnMediaScreenAppName"] = "SCREEN NAME";
   srcObj[S_MSG_PARAMS]["syncMsgVersion"]["majorVersion"] = 2;
   srcObj[S_MSG_PARAMS]["syncMsgVersion"]["minorVersion"] = 10;
+  srcObj[S_MSG_PARAMS]["syncMsgVersion"]["patchVersion"] = 5;
+
   srcObj[S_MSG_PARAMS]["ttsName"][0]["text"] = "ABC";
   srcObj[S_MSG_PARAMS]["ttsName"][0]["type"] = "TEXT";
   srcObj[S_MSG_PARAMS]["vrSynonyms"][0] = "Synonym1";

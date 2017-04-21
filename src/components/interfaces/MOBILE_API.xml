@@ -1,7 +1,7 @@
 <?xml version="1.0" standalone="no"?>
 <?xml-stylesheet type="text/xml" href="protocol2html.xsl"?>
 
-<interface name="Ford Sync RAPI" version="4.3" date="2017-03-29">
+<interface name="Ford Sync RAPI" version="4.4.0" date="2017-04-27">
 
   <enum name="Result" internal_scope="base">
     <element name="SUCCESS">
@@ -875,6 +875,9 @@
     </param>
     <param name="minorVersion" type="Integer" minvalue="0" maxvalue="1000">
       <description>The minor version indicates a change to a previous version that should still allow to be run on an older version (with limited functionality)</description>
+    </param>
+    <param name="patchVersion" type="Integer" minvalue="0" maxvalue="1000" mandatory="false">
+      <description>The patch version indicates a fix to existing functionality in a previous version that should still be able to be run on an older version </description>
     </param>
   </struct>
 

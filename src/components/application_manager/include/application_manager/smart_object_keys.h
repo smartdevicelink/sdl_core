@@ -69,6 +69,7 @@ extern const char* success;
 extern const char* sync_msg_version;
 extern const char* major_version;
 extern const char* minor_version;
+extern const char* patch_version;
 extern const char* app_name;
 extern const char* ngn_media_screen_app_name;
 extern const char* vr_synonyms;
