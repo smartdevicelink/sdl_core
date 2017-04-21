@@ -1359,9 +1359,9 @@ TEST_F(PolicyHandlerTest, OnAppsSearchCompleted) {
   // Arrange
   EnablePolicyAndPolicyManagerMock();
   // Check expectations
-  EXPECT_CALL(*mock_policy_manager_, OnAppsSearchCompleted());
+  EXPECT_CALL(*mock_policy_manager_, OnAppsSearchCompleted(true));
   // Act
-  policy_handler_.OnAppsSearchCompleted();
+  policy_handler_.OnAppsSearchCompleted(true);
 }
 
 TEST_F(PolicyHandlerTest, OnAppRegisteredOnMobile) {

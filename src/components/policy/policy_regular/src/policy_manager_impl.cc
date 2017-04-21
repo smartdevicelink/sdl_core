@@ -86,7 +86,9 @@ PolicyManagerImpl::PolicyManagerImpl()
                             new timer::TimerTaskImpl<PolicyManagerImpl>(
                                 this, &PolicyManagerImpl::RetrySequence))
     , ignition_check(true)
-    , retry_sequence_url_(0, 0, "") {
+    , retry_sequence_url_(0, 0, "")
+    , wrong_ptu_update_received_(false)
+    , trigger_ptu_(false) {
 }
 
 void PolicyManagerImpl::set_listener(PolicyListener* listener) {
@@ -169,6 +171,7 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
   file_system::DeleteFile(file);
 
   if (!IsPTValid(pt_update, policy_table::PT_UPDATE)) {
+    wrong_ptu_update_received_ = true;
     update_status_manager_.OnWrongUpdateReceived();
     return false;
   }
@@ -312,7 +315,8 @@ void PolicyManagerImpl::StartPTExchange() {
   }
 
   if (update_status_manager_.IsUpdatePending() && update_required) {
-    update_status_manager_.ScheduleUpdate();
+    if (trigger_ptu_)
+      update_status_manager_.ScheduleUpdate();
     LOG4CXX_INFO(logger_,
                  "Starting exchange skipped, since another exchange "
                  "is in progress.");
@@ -342,9 +346,12 @@ void PolicyManagerImpl::OnAppsSearchStarted() {
   update_status_manager_.OnAppsSearchStarted();
 }
 
-void PolicyManagerImpl::OnAppsSearchCompleted() {
+void PolicyManagerImpl::OnAppsSearchCompleted(const bool trigger_ptu) {
   LOG4CXX_AUTO_TRACE(logger_);
   update_status_manager_.OnAppsSearchCompleted();
+
+  trigger_ptu_ = trigger_ptu;
+
   if (update_status_manager_.IsUpdateRequired()) {
     StartPTExchange();
   }
@@ -891,7 +898,13 @@ void PolicyManagerImpl::OnUpdateStarted() {
   uint32_t update_timeout = TimeoutExchangeMSec();
   LOG4CXX_DEBUG(logger_,
                 "Update timeout will be set to (milisec): " << update_timeout);
-  update_status_manager_.OnUpdateSentOut(update_timeout);
+
+  wrong_ptu_update_received_ =
+      !wrong_ptu_update_received_ && !update_status_manager_.IsUpdatePending();
+
+  if (wrong_ptu_update_received_) {
+    update_status_manager_.OnUpdateSentOut(update_timeout);
+  }
   cache_->SaveUpdateRequired(true);
 }
 

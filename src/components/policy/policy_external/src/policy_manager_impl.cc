@@ -514,10 +514,11 @@ void PolicyManagerImpl::OnAppsSearchStarted() {
   update_status_manager_.OnAppsSearchStarted();
 }
 
-void PolicyManagerImpl::OnAppsSearchCompleted() {
+void PolicyManagerImpl::OnAppsSearchCompleted(const bool trigger_ptu) {
   LOG4CXX_AUTO_TRACE(logger_);
   update_status_manager_.OnAppsSearchCompleted();
-  if (update_status_manager_.IsUpdateRequired()) {
+
+  if (update_status_manager_.IsUpdateRequired() && trigger_ptu) {
     StartPTExchange();
   }
 }

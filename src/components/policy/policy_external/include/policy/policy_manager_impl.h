@@ -226,7 +226,7 @@ class PolicyManagerImpl : public PolicyManager {
 
   virtual void OnAppsSearchStarted();
 
-  virtual void OnAppsSearchCompleted();
+  virtual void OnAppsSearchCompleted(const bool trigger_ptu);
 
 #ifdef BUILD_TESTS
   inline CacheManagerInterfaceSPtr GetCache() {
