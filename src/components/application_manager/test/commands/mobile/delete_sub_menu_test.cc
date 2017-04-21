@@ -260,8 +260,11 @@ TEST_F(DeleteSubMenuRequestTest, OnEvent_DeleteSubmenu_SUCCESS) {
   (*message_)[am::strings::msg_params][am::strings::cmd_id] = kCmdId;
   (*message_)[am::strings::msg_params][am::strings::menu_params]
              [am::hmi_request::parent_id] = kMenuId;
-  (*message_)[am::strings::params][am::hmi_response::code] =
-      am::mobile_api::Result::SUCCESS;
+  const hmi_apis::Common_Result::eType result_code =
+      hmi_apis::Common_Result::SUCCESS;
+  (*message_)[am::strings::params][am::hmi_response::code] = result_code;
+  ON_CALL(mock_message_helper_, HMIToMobileResult(result_code))
+      .WillByDefault(Return(am::mobile_api::Result::SUCCESS));
   event.set_smart_object(*message_);
 
   commands_map_.insert(

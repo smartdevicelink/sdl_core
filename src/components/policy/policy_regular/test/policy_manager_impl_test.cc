@@ -66,7 +66,6 @@ using ::testing::Return;
 using ::policy::PolicyManagerImpl;
 using ::policy::PolicyTable;
 
-
 namespace test {
 namespace components {
 namespace policy_test {

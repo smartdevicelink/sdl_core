@@ -387,7 +387,8 @@ mobile_apis::HMILevel::eType MessageHelper::StringToHMILevel(
   return mobile_apis::HMILevel::INVALID_ENUM;
 }
 
-std::string MessageHelper::StringifiedHMILevel(const mobile_apis::HMILevel::eType hmi_level) {
+std::string MessageHelper::StringifiedHMILevel(
+    const mobile_apis::HMILevel::eType hmi_level) {
   using namespace NsSmartDeviceLink::NsSmartObjects;
   const char* str = 0;
   if (EnumConversionHelper<mobile_apis::HMILevel::eType>::EnumToCString(
