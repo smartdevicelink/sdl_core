@@ -111,7 +111,8 @@ class PolicyManagerImpl : public PolicyManager {
   virtual void SetDeviceInfo(const std::string& device_id,
                              const DeviceInfo& device_info);
 
-  virtual void SetUserConsentForApp(const PermissionConsent& permissions);
+  void SetUserConsentForApp(const PermissionConsent& permissions,
+                            const NotificationMode mode) OVERRIDE;
 
   virtual bool GetDefaultHmi(const std::string& policy_app_id,
                              std::string* default_hmi) const;
@@ -214,6 +215,15 @@ class PolicyManagerImpl : public PolicyManager {
 
   AppIdURL RetrySequenceUrl(const struct RetrySequenceURL& rs,
                             const EndpointUrls& urls) const OVERRIDE;
+
+  /**
+   * @brief  Checks, if SDL needs to update it's policy table section
+             "external_consent_status"
+   * @param  ExternalConsent status
+   * @return true if such check is needed, false - if not.
+   */
+  bool IsNeedToUpdateExternalConsentStatus(
+      const ExternalConsentStatus& status) const;
 
   /**
    * @brief Gets customer connectivity settings status

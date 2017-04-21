@@ -567,68 +567,14 @@ void PolicyHandler::OnAppPermissionConsentInternal(
     const uint32_t connection_key,
     const ExternalConsentStatus& external_consent_status,
     PermissionConsent& out_permissions) {
-  POLICY_LIB_CHECK_VOID();
-
-  if (connection_key) {
-    ApplicationSharedPtr app = application_manager_.application(connection_key);
-
-    if (app.valid()) {
-      out_permissions.policy_app_id = app->policy_app_id();
-      DeviceParams device_params = GetDeviceParams(
-          app->device(),
-          application_manager_.connection_handler().get_session_observer());
-
-      out_permissions.device_id = device_params.device_mac_address;
-    }
-
-    if (!out_permissions.policy_app_id.empty()) {
-      policy_manager_->SetUserConsentForApp(out_permissions);
-    }
-  } else if (!app_to_device_link_.empty()) {
-    sync_primitives::AutoLock lock(app_to_device_link_lock_);
-    std::map<std::string, std::string>::const_iterator it =
-        app_to_device_link_.begin();
-    for (; app_to_device_link_.end() != it; ++it) {
-      ApplicationSharedPtr app =
-          application_manager_.application_by_policy_id(it->second);
-
-      // If list of apps sent to HMI for user consents is not the same as
-      // current,
-      // permissions should be set only for coincident to registered apps
-      if (!app.valid()) {
-        LOG4CXX_WARN(logger_,
-                     "Invalid pointer to application was passed."
-                     "Permissions setting skipped.");
-        continue;
-      }
-
-      DeviceParams device_params = GetDeviceParams(
-          app->device(),
-          application_manager_.connection_handler().get_session_observer());
-
-      if (device_params.device_mac_address != it->first) {
-        LOG4CXX_WARN(logger_,
-                     "Device_id of application is changed."
-                     "Permissions setting skipped.");
-        continue;
-      }
-
-      out_permissions.policy_app_id = it->second;
-      out_permissions.device_id = it->first;
-      policy_manager_->SetUserConsentForApp(out_permissions);
-    }
-  } else {
-    LOG4CXX_WARN(logger_,
-                 "There are no applications previously stored for "
-                 "setting common permissions.");
-  }
-  if (!policy_manager_->SetExternalConsentStatus(external_consent_status)) {
-    LOG4CXX_WARN(logger_, "ExternalConsent status has not been set!");
-  }
-}
+  LOG4CXX_AUTO_TRACE(logger_);
+  const PolicyManager::NotificationMode mode =
+      external_consent_status.empty() ? PolicyManager::kNotifyApplicationMode
+                                      : PolicyManager::kSilentMode;
 #else
 void PolicyHandler::OnAppPermissionConsentInternal(
     const uint32_t connection_key, PermissionConsent& out_permissions) {
+#endif
   POLICY_LIB_CHECK_VOID();
 
   if (connection_key) {
@@ -644,7 +590,11 @@ void PolicyHandler::OnAppPermissionConsentInternal(
     }
 
     if (!out_permissions.policy_app_id.empty()) {
+#ifdef EXTERNAL_PROPRIETARY_MODE
+      policy_manager_->SetUserConsentForApp(out_permissions, mode);
+#else
       policy_manager_->SetUserConsentForApp(out_permissions);
+#endif
     }
   } else if (!app_to_device_link_.empty()) {
     sync_primitives::AutoLock lock(app_to_device_link_lock_);
@@ -677,15 +627,24 @@ void PolicyHandler::OnAppPermissionConsentInternal(
 
       out_permissions.policy_app_id = it->second;
       out_permissions.device_id = it->first;
+#ifdef EXTERNAL_PROPRIETARY_MODE
+      policy_manager_->SetUserConsentForApp(out_permissions, mode);
+#else
       policy_manager_->SetUserConsentForApp(out_permissions);
+#endif
     }
   } else {
     LOG4CXX_WARN(logger_,
                  "There are no applications previously stored for "
                  "setting common permissions.");
   }
-}
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  if (!policy_manager_->SetExternalConsentStatus(external_consent_status)) {
+    LOG4CXX_WARN(logger_,
+                 "External User Consent Settings status has not been set!");
+  }
 #endif
+}
 
 void policy::PolicyHandler::SetDaysAfterEpoch() {
   POLICY_LIB_CHECK_VOID();

@@ -631,6 +631,7 @@ class CacheManager : public CacheManagerInterface {
 
   bool SetExternalConsentStatus(const ExternalConsentStatus& status) OVERRIDE;
   ExternalConsentStatus GetExternalConsentStatus() OVERRIDE;
+  ExternalConsentStatus GetExternalConsentEntities() OVERRIDE;
 
   /**
  * @brief Creates collection of ExternalConsent items known by current

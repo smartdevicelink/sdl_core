@@ -714,7 +714,12 @@ class CacheManagerInterface {
    * @return external consent status
    */
   virtual ExternalConsentStatus GetExternalConsentStatus() = 0;
-
+  /**
+   * @brief Creates externalConsentStatus data structure from policy table
+             section "externalConsentStatus"
+   * @return ExternalConsentStatus data structure
+  */
+  virtual ExternalConsentStatus GetExternalConsentEntities() = 0;
   /**
  * @brief Creates collection of ExternalConsent items known by current
  * functional

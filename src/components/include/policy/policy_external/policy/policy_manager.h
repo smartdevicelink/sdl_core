@@ -48,6 +48,11 @@ typedef utils::SharedPtr<utils::Callable> StatusNotifier;
 
 class PolicyManager : public usage_statistics::StatisticsManager {
  public:
+  /**
+   * @brief The NotificationMode enum defines whether application will be
+   * notified about changes done (e.g. after consents were changed) or not
+   */
+  enum NotificationMode { kSilentMode, kNotifyApplicationMode };
   virtual ~PolicyManager() {}
 
   virtual void set_listener(PolicyListener* listener) = 0;
@@ -263,7 +268,8 @@ class PolicyManager : public usage_statistics::StatisticsManager {
    * valid data as well as invalid. So we will remove all invalid data
    * from this structure.
    */
-  virtual void SetUserConsentForApp(const PermissionConsent& permissions) = 0;
+  virtual void SetUserConsentForApp(const PermissionConsent& permissions,
+                                    const NotificationMode mode) = 0;
 
   /**
    * @brief Get default HMI level for application
@@ -510,6 +516,16 @@ class PolicyManager : public usage_statistics::StatisticsManager {
    */
   virtual AppIdURL RetrySequenceUrl(const struct RetrySequenceURL& rs,
                                     const EndpointUrls& urls) const = 0;
+
+  /**
+  * @brief Checks, if SDL needs to update it's policy table "external consent
+  * status" section
+  * @param status ExternalConsent status
+  * @return true if there's such a need, otherwise - false
+  */
+  virtual bool IsNeedToUpdateExternalConsentStatus(
+      const ExternalConsentStatus& status) const = 0;
+
   /**
    * @brief Saves customer connectivity settings status
    * @param status ExternalConsent status

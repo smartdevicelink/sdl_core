@@ -929,7 +929,7 @@ void PolicyManagerImpl::NotifyPermissionsChanges(
 }
 
 void PolicyManagerImpl::SetUserConsentForApp(
-    const PermissionConsent& permissions) {
+    const PermissionConsent& permissions, const NotificationMode mode) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (permissions.group_permissions.empty()) {
@@ -948,10 +948,16 @@ void PolicyManagerImpl::SetUserConsentForApp(
     return;
   }
 
+  if (kSilentMode == mode) {
+    LOG4CXX_WARN(logger_,
+                 "Silent mode is enabled. Application won't be informed.");
+    return;
+  }
+
   if (!app_permissions_changed) {
     LOG4CXX_WARN(logger_,
-                 "Application permissions were not changed, skipping "
-                 "permission change notification");
+                 "Application already has same consents. "
+                 "Notificaton won't be sent.");
     return;
   }
 
@@ -1247,7 +1253,8 @@ void PolicyManagerImpl::UpdateAppConsentWithExternalConsent(
 
   // Need to check to which app to send notification since maybe app registered
   // from different device
-  SetUserConsentForApp(updated_user_permissions);
+  SetUserConsentForApp(updated_user_permissions,
+                       PolicyManager::kNotifyApplicationMode);
 
   PermissionConsent updated_external_consent_permissions;
   updated_external_consent_permissions.group_permissions =
@@ -1321,6 +1328,37 @@ void PolicyManagerImpl::ProcessExternalConsentStatusUpdate(
     UpdateAppConsentWithExternalConsent(
         it_links->first, it_links->second, allowed_groups, disallowed_groups);
   }
+}
+
+bool ConsentStatusComparatorFunc(const ExternalConsentStatusItem& i1,
+                                 const ExternalConsentStatusItem& i2) {
+  return (i1.entity_id_ < i2.entity_id_) ||
+         (i1.entity_type_ < i2.entity_type_) || (i1.status_ < i2.status_);
+}
+
+bool PolicyManagerImpl::IsNeedToUpdateExternalConsentStatus(
+    const ExternalConsentStatus& new_status) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  typedef std::vector<ExternalConsentStatusItem> ItemV;
+  const ExternalConsentStatus existing_status =
+      cache_->GetExternalConsentEntities();
+
+  ItemV new_status_v(new_status.begin(), new_status.end());
+  ItemV existing_status_v(existing_status.begin(), existing_status.end());
+
+  ItemV difference_v;
+  difference_v.resize(new_status_v.size() + existing_status_v.size());
+
+  ItemV::iterator ci = difference_v.begin();
+  ci = std::set_difference(new_status_v.begin(),
+                           new_status_v.end(),
+                           existing_status_v.begin(),
+                           existing_status_v.end(),
+                           difference_v.begin(),
+                           ConsentStatusComparatorFunc);
+  difference_v.resize(ci - difference_v.begin());
+
+  return !difference_v.empty();
 }
 
 bool PolicyManagerImpl::SetExternalConsentStatus(

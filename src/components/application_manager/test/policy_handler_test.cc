@@ -2097,10 +2097,13 @@ TEST_F(PolicyHandlerTest,
   sync_primitives::Lock wait_hmi_lock_first;
   sync_primitives::AutoLock auto_lock_first(wait_hmi_lock_first);
   WaitAsync waiter_first(kCallsCount_, kTimeout_);
-
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  EXPECT_CALL(*mock_policy_manager_, SetUserConsentForApp(_, _))
+      .WillOnce(NotifyAsync(&waiter_first));
+#else
   EXPECT_CALL(*mock_policy_manager_, SetUserConsentForApp(_))
       .WillOnce(NotifyAsync(&waiter_first));
-
+#endif
   ExternalConsentStatusItem item(1u, 1u, kStatusOn);
   ExternalConsentStatus external_consent_status;
   external_consent_status.insert(item);
@@ -2112,7 +2115,7 @@ TEST_F(PolicyHandlerTest,
 
   EXPECT_CALL(*mock_policy_manager_,
               SetExternalConsentStatus(external_consent_status))
-      .WillOnce(DoAll(NotifyAsync(&waiter_second), Return(true)));
+      .WillOnce(Return(true));
   policy_handler_.OnAppPermissionConsent(
       kConnectionKey_, permissions, external_consent_status);
 #else
@@ -2152,6 +2155,47 @@ TEST_F(PolicyHandlerTest,
   ExternalConsentStatus external_consent_status;
   external_consent_status.insert(item);
 #ifdef EXTERNAL_PROPRIETARY_MODE
+  EXPECT_CALL(*mock_policy_manager_,
+              SetExternalConsentStatus(external_consent_status))
+      .WillOnce(Return(true));
+  policy_handler_.OnAppPermissionConsent(
+      invalid_connection_key, permissions, external_consent_status);
+#else
+  policy_handler_.OnAppPermissionConsent(invalid_connection_key, permissions);
+#endif
+
+  EXPECT_FALSE(waiter.Wait(auto_lock));
+}
+
+TEST_F(PolicyHandlerTest,
+       OnAppPermissionConsentInternal_NoAppsPreviouslyStored_FAILED) {
+  EnablePolicyAndPolicyManagerMock();
+  const uint32_t invalid_connection_key = 0u;
+
+  PermissionConsent permissions;
+  permissions.device_id = kDeviceId_;
+  permissions.consent_source = "consent_source";
+
+  policy::FunctionalGroupPermission group_permission_allowed;
+  CreateFunctionalGroupPermission(GroupConsent::kGroupAllowed,
+                                  kGroupAliasAllowed_,
+                                  kGroupNameAllowed_,
+                                  group_permission_allowed);
+
+  permissions.group_permissions.push_back(group_permission_allowed);
+
+  sync_primitives::Lock wait_hmi_lock;
+  sync_primitives::AutoLock auto_lock(wait_hmi_lock);
+  WaitAsync waiter(kCallsCount_, kTimeout_);
+
+  EXPECT_CALL(app_manager_, application(_)).Times(0);
+
+  ExternalConsentStatusItem item = {1u, 1u, kStatusOn};
+  ExternalConsentStatus external_consent_status;
+  external_consent_status.insert(item);
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  ON_CALL(*mock_policy_manager_, IsNeedToUpdateExternalConsentStatus(_))
+      .WillByDefault(Return(false));
   EXPECT_CALL(*mock_policy_manager_,
               SetExternalConsentStatus(external_consent_status))
       .WillOnce(Return(true));
@@ -2226,6 +2270,69 @@ TEST_F(PolicyHandlerTest,
   Mock::VerifyAndClearExpectations(mock_app_.get());
 #ifdef EXTERNAL_PROPRIETARY_MODE
   EXPECT_TRUE(waiter.Wait(auto_lock));
+#endif
+}
+
+TEST_F(PolicyHandlerTest,
+       OnAppPermissionConsentInternal_ExistAppsPreviouslyStored_FAIL) {
+  EnablePolicyAndPolicyManagerMock();
+
+  EXPECT_CALL(*mock_app_, app_id()).WillRepeatedly(Return(kAppId1_));
+
+  test_app.insert(mock_app_);
+
+  const uint32_t invalid_connection_key = 0u;
+  const uint32_t device = 2u;
+
+  PermissionConsent permissions;
+  permissions.device_id = kDeviceId_;
+  permissions.consent_source = "consent_source";
+
+  policy::FunctionalGroupPermission group_permission_allowed;
+  CreateFunctionalGroupPermission(GroupConsent::kGroupAllowed,
+                                  kGroupAliasAllowed_,
+                                  kGroupNameAllowed_,
+                                  group_permission_allowed);
+
+  permissions.group_permissions.push_back(group_permission_allowed);
+  EXPECT_CALL(app_manager_, applications()).WillRepeatedly(Return(app_set));
+
+  EXPECT_CALL(*mock_app_, device()).WillRepeatedly(Return(1u));
+  EXPECT_CALL(*mock_app_, policy_app_id())
+      .WillRepeatedly(Return(kPolicyAppId_));
+
+  EXPECT_CALL(mock_session_observer, GetDataOnDeviceID(_, _, NULL, _, _))
+      .WillRepeatedly(DoAll(SetDeviceParamsMacAdress(kMacAddr_), (Return(1u))));
+
+  EXPECT_CALL(app_manager_, connection_handler())
+      .WillRepeatedly(ReturnRef(conn_handler));
+  EXPECT_CALL(conn_handler, get_session_observer())
+      .WillRepeatedly(ReturnRef(mock_session_observer));
+
+  EXPECT_CALL(*mock_app_, device()).WillRepeatedly(Return(device));
+
+  ExternalConsentStatusItem item = {1u, 1u, kStatusOn};
+  ExternalConsentStatus external_consent_status;
+  external_consent_status.insert(item);
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  sync_primitives::Lock wait_hmi_lock;
+  sync_primitives::AutoLock auto_lock(wait_hmi_lock);
+  WaitAsync waiter(kCallsCount_, kTimeout_);
+
+  ON_CALL(*mock_policy_manager_, IsNeedToUpdateExternalConsentStatus(_))
+      .WillByDefault(Return(false));
+  EXPECT_CALL(*mock_policy_manager_,
+              SetExternalConsentStatus(external_consent_status))
+      .WillOnce(Return(true));
+  policy_handler_.OnAppPermissionConsent(
+      invalid_connection_key, permissions, external_consent_status);
+#else
+  policy_handler_.OnAppPermissionConsent(invalid_connection_key, permissions);
+#endif
+
+  Mock::VerifyAndClearExpectations(mock_app_.get());
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  EXPECT_FALSE(waiter.Wait(auto_lock));
 #endif
 }
 

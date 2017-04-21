@@ -1020,7 +1020,6 @@ bool CacheManager::SetUserPermissionsForApp(
       permissions.group_permissions.begin();
   std::vector<FunctionalGroupPermission>::const_iterator iter_end =
       permissions.group_permissions.end();
-
   if (out_app_permissions_changed) {
     *out_app_permissions_changed = false;
   }
@@ -1035,20 +1034,16 @@ bool CacheManager::SetUserPermissionsForApp(
 
       GetGroupNameByHashID((*iter).group_id, group_name);
 
-      const bool set_group_to_allowed =
-          (policy::kGroupAllowed == (*iter).state);
-      if (out_app_permissions_changed) {
-        policy_table::ConsentGroups::const_iterator found_consent_group_it =
-            ucr.consent_groups->find(group_name);
-        // Permission change occurs if there is no group that has ever been
-        // consented or consent status of the existing one differs from the
-        // requested
-        *out_app_permissions_changed =
-            (ucr.consent_groups->end() == found_consent_group_it ||
-             set_group_to_allowed != found_consent_group_it->second);
+      policy_table::ConsentGroups::const_iterator it_group =
+          ucr.consent_groups->find(group_name);
+
+      const bool is_allowed = (*iter).state == policy::kGroupAllowed;
+      if (ucr.consent_groups->end() == it_group ||
+          it_group->second != is_allowed) {
+        *out_app_permissions_changed = true;
       }
 
-      (*ucr.consent_groups)[group_name] = set_group_to_allowed;
+      (*ucr.consent_groups)[group_name] = is_allowed;
       *ucr.input = policy_table::Input::I_GUI;
       *ucr.time_stamp = currentDateTime();
     }
@@ -2015,14 +2010,12 @@ long CacheManager::ConvertSecondsToMinute(int seconds) {
 bool CacheManager::SetDefaultPolicy(const std::string& app_id) {
   CACHE_MANAGER_CHECK(false);
   sync_primitives::AutoLock lock(cache_lock_);
-  policy_table::ApplicationPolicies::const_iterator iter =
-      pt_->policy_table.app_policies_section.apps.find(kDefaultId);
-  if (pt_->policy_table.app_policies_section.apps.end() != iter) {
-    pt_->policy_table.app_policies_section.apps[app_id] =
-        pt_->policy_table.app_policies_section.apps[kDefaultId];
+  auto& apps = pt_->policy_table.app_policies_section.apps;
 
-    SetIsDefault(app_id);
-  }
+  DCHECK_OR_RETURN(IsApplicationRepresented(kDefaultId), false);
+
+  apps[app_id] = apps[kDefaultId];
+  apps[app_id].set_to_string(kDefaultId);
   Backup();
   return true;
 }
@@ -2349,6 +2342,35 @@ GroupsByExternalConsentStatus CacheManager::GetGroupsWithSameEntities(
 
   return groups_by_external_consent;
 }
+
+ExternalConsentStatus CacheManager::GetExternalConsentEntities() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock auto_lock(cache_lock_);
+  ExternalConsentStatus items;
+  for (policy_table::FunctionalGroupings::const_iterator it =
+           pt_->policy_table.functional_groupings.begin();
+       it != pt_->policy_table.functional_groupings.end();
+       ++it) {
+    policy_table::DisallowedByExternalConsentEntities::const_iterator it_1 =
+        (*it->second.disallowed_by_external_consent_entities_on).begin();
+    for (;
+         it_1 != (*it->second.disallowed_by_external_consent_entities_on).end();
+         ++it_1) {
+      items.insert(ExternalConsentStatusItem(
+          it_1->entity_type, it_1->entity_id, EntityStatus::kStatusOn));
+    }
+    policy_table::DisallowedByExternalConsentEntities::const_iterator it_2 =
+        (*it->second.disallowed_by_external_consent_entities_off).begin();
+    for (; it_2 !=
+               (*it->second.disallowed_by_external_consent_entities_off).end();
+         ++it_2) {
+      items.insert(ExternalConsentStatusItem(
+          it_2->entity_type, it_2->entity_id, EntityStatus::kStatusOff));
+    }
+  }
+  return items;
+}
+
 
 std::map<std::string, std::string> CacheManager::GetKnownLinksFromPT() {
   LOG4CXX_AUTO_TRACE(logger_);
