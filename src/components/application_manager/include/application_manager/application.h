@@ -46,6 +46,14 @@
 #include "application_manager/application_state.h"
 #include "protocol_handler/protocol_handler.h"
 
+
+
+
+
+
+
+
+
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
 
@@ -71,7 +79,6 @@ enum APIVersion {
   kAPIV1 = 1,
   kAPIV2 = 2,
   kAPIV3 = 3,
-  kAPIV4 = 4
 };
 
 enum TLimitSource { POLICY_TABLE = 0, CONFIG_FILE };
