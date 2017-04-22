@@ -188,7 +188,7 @@ void CANModule::Handle(const MessageFromCAN can_msg) {
 
 functional_modules::ProcessResult CANModule::HandleMessage(
     application_manager::MessagePtr msg) {
-  LOG4CXX_INFO(logger_, "CANModule::HandleMessage");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   Json::Value value;
   Json::Reader reader;
@@ -231,7 +231,7 @@ functional_modules::ProcessResult CANModule::HandleMessage(
     return ProcessResult::FAILED;
   }
 
-  msg->set_protocol_version(application_manager::ProtocolVersion::kV3);
+//  msg->set_protocol_version(application_manager::ProtocolVersion::kV3);
 
   switch (msg->type()) {
     case application_manager::MessageType::kResponse:
