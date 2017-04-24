@@ -794,7 +794,8 @@ void PolicyManagerImplTest_ExternalConsent::
   permissions.group_permissions.push_back(group_permissions_1);
   permissions.group_permissions.push_back(group_permissions_2);
 
-  policy_manager_->SetUserConsentForApp(permissions);
+  policy_manager_->SetUserConsentForApp(permissions,
+                                        policy::PolicyManager::kSilentMode);
 }
 
 void PolicyManagerImplTest_ExternalConsent::

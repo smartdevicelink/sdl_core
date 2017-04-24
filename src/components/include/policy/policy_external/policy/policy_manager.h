@@ -51,6 +51,11 @@ typedef utils::SharedPtr<utils::Callable> StatusNotifier;
 
 class PolicyManager : public usage_statistics::StatisticsManager {
  public:
+  /**
+   * @brief The NotificationMode enum defines whether application will be
+   * notified about changes done (e.g. after consents were changed) or not
+   */
+  enum NotificationMode { kSilentMode, kNotifyApplicationMode };
   virtual ~PolicyManager() {}
 
   virtual void set_listener(PolicyListener* listener) = 0;
@@ -261,7 +266,8 @@ class PolicyManager : public usage_statistics::StatisticsManager {
    * valid data as well as invalid. So we will remove all invalid data
    * from this structure.
    */
-  virtual void SetUserConsentForApp(const PermissionConsent& permissions) = 0;
+  virtual void SetUserConsentForApp(const PermissionConsent& permissions,
+                                    const NotificationMode mode) = 0;
 
   /**
    * @brief Get default HMI level for application

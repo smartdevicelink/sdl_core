@@ -1033,7 +1033,8 @@ TEST_F(PolicyManagerImplTest2,
   groups_permissions.push_back(group1_perm);
   perm_consent.group_permissions = groups_permissions;
 
-  policy_manager_->SetUserConsentForApp(perm_consent);
+  policy_manager_->SetUserConsentForApp(perm_consent,
+                                        policy::PolicyManager::kSilentMode);
   policy_manager_->SendNotificationOnPermissionsUpdated(app_id_2_);
   std::vector< ::policy::FunctionalGroupPermission> actual_groups_permissions;
   std::vector< ::policy::FunctionalGroupPermission>::iterator it;
@@ -1140,7 +1141,8 @@ TEST_F(
   groups_permissions.push_back(group1_perm);
   perm_consent.group_permissions = groups_permissions;
 
-  policy_manager_->SetUserConsentForApp(perm_consent);
+  policy_manager_->SetUserConsentForApp(perm_consent,
+                                        policy::PolicyManager::kSilentMode);
   policy_manager_->SendNotificationOnPermissionsUpdated(app_id_2_);
   std::vector< ::policy::FunctionalGroupPermission> actual_groups_permissions;
   std::vector< ::policy::FunctionalGroupPermission>::iterator it;
@@ -1270,7 +1272,8 @@ TEST_F(PolicyManagerImplTest2,
   groups_permissions.push_back(group1_perm);
   perm_consent.group_permissions = groups_permissions;
 
-  policy_manager_->SetUserConsentForApp(perm_consent);
+  policy_manager_->SetUserConsentForApp(perm_consent,
+                                        policy::PolicyManager::kSilentMode);
   policy_manager_->SendNotificationOnPermissionsUpdated(app_id_2_);
   std::vector< ::policy::FunctionalGroupPermission> actual_groups_permissions;
   std::vector< ::policy::FunctionalGroupPermission>::iterator it;

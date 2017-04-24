@@ -535,16 +535,16 @@ void PolicyHandler::OnAppPermissionConsentInternal(
     const uint32_t connection_key,
     const ExternalConsentStatus& external_consent_status,
     PermissionConsent& out_permissions) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  const PolicyManager::NotificationMode mode =
+      external_consent_status.empty() ? PolicyManager::kNotifyApplicationMode
+                                      : PolicyManager::kSilentMode;
 #else
 void PolicyHandler::OnAppPermissionConsentInternal(
     const uint32_t connection_key, PermissionConsent& out_permissions) {
 #endif
   POLICY_LIB_CHECK_VOID();
-#ifdef EXTERNAL_PROPRIETARY_MODE
-  const bool k_isNeedToUpdateExternalConsent =
-      policy_manager_->IsNeedToUpdateExternalConsentStatus(
-          external_consent_status);
-#endif
+
   if (connection_key) {
     ApplicationSharedPtr app = application_manager_.application(connection_key);
 
@@ -557,13 +557,12 @@ void PolicyHandler::OnAppPermissionConsentInternal(
       out_permissions.device_id = device_params.device_mac_address;
     }
 
-    if (!out_permissions.policy_app_id.empty()
+    if (!out_permissions.policy_app_id.empty()) {
 #ifdef EXTERNAL_PROPRIETARY_MODE
-        &&
-        !k_isNeedToUpdateExternalConsent
-#endif
-        ) {
+      policy_manager_->SetUserConsentForApp(out_permissions, mode);
+#else
       policy_manager_->SetUserConsentForApp(out_permissions);
+#endif
     }
   } else if (!app_to_device_link_.empty()) {
     sync_primitives::AutoLock lock(app_to_device_link_lock_);
@@ -597,12 +596,10 @@ void PolicyHandler::OnAppPermissionConsentInternal(
       out_permissions.policy_app_id = it->second;
       out_permissions.device_id = it->first;
 #ifdef EXTERNAL_PROPRIETARY_MODE
-      if (!k_isNeedToUpdateExternalConsent) {
-        policy_manager_->SetUserConsentForApp(out_permissions);
-      }
+      policy_manager_->SetUserConsentForApp(out_permissions, mode);
 #else
       policy_manager_->SetUserConsentForApp(out_permissions);
-#endif  // EXTERNAL_PROPRIETARY_MODE
+#endif
     }
   } else {
     LOG4CXX_WARN(logger_,
@@ -610,10 +607,9 @@ void PolicyHandler::OnAppPermissionConsentInternal(
                  "setting common permissions.");
   }
 #ifdef EXTERNAL_PROPRIETARY_MODE
-  if (k_isNeedToUpdateExternalConsent) {
-    if (!policy_manager_->SetExternalConsentStatus(external_consent_status)) {
-      LOG4CXX_WARN(logger_, "ExternalConsent status has not been set!");
-    }
+  if (!policy_manager_->SetExternalConsentStatus(external_consent_status)) {
+    LOG4CXX_WARN(logger_,
+                 "External User Consent Settings status has not been set!");
   }
 #endif
 }
