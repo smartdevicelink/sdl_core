@@ -44,6 +44,10 @@ namespace application_manager_test {
 
 class MockHMICapabilities : public ::application_manager::HMICapabilities {
  public:
+  MOCK_METHOD2(convert_json_speech_capabilities_to_obj,
+               void(Json::Value& json_speech,
+                    smart_objects::SmartObject& speech_capabilities));
+
   MOCK_CONST_METHOD1(VerifyImageType, bool(const int32_t image_type));
 
   MOCK_CONST_METHOD0(is_vr_cooperating, bool());

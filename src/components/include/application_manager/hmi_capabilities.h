@@ -451,6 +451,16 @@ class HMICapabilities {
   virtual void convert_json_languages_to_obj(
       const Json::Value& json_languages,
       smart_objects::SmartObject& languages) const = 0;
+
+  /**
+   * @brief function converts json object "capabilities" to smart object
+   *
+   * @param json_speech is read from file hmi_capabilities.json
+   * @param speech_capabilities - the converted object
+   */
+  virtual void convert_json_speech_capabilities_to_obj(
+      Json::Value& json_speech,
+      smart_objects::SmartObject& speech_capabilities) = 0;
 };
 
 }  //  namespace application_manager

@@ -1050,8 +1050,12 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
       }
 
       if (check_existing_json_member(tts, "capabilities")) {
-        set_speech_capabilities(
-            smart_objects::SmartObject(tts.get("capabilities", "").asString()));
+        Json::Value capabilities_tts = tts.get("capabilities", "");
+        smart_objects::SmartObject tts_capabilities_so =
+            smart_objects::SmartObject(smart_objects::SmartType_Array);
+        convert_json_speech_capabilities_to_obj(capabilities_tts,
+                                                tts_capabilities_so);
+        set_speech_capabilities(tts_capabilities_so);
       }
     }  // TTS end
 
@@ -1097,6 +1101,8 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
     }  // VehicleType end
 
   } catch (...) {
+    LOG4CXX_ERROR(logger_,
+                  "Exception catched during loading hmi_capabilities.json");
     return false;
   }
   return true;
@@ -1131,6 +1137,13 @@ HMILanguageHandler& HMICapabilitiesImpl::get_hmi_language_handler() {
 void HMICapabilitiesImpl::set_handle_response_for(
     const smart_objects::SmartObject& request) {
   hmi_language_handler_.set_handle_response_for(request);
+}
+
+void HMICapabilitiesImpl::convert_json_speech_capabilities_to_obj(
+    Json::Value& json_speech, smart_objects::SmartObject& speech_capabilities) {
+  for (uint32_t i = 0; i < json_speech.size(); ++i) {
+    speech_capabilities[i] = json_speech[i].asString();
+  }
 }
 
 }  //  namespace application_manager

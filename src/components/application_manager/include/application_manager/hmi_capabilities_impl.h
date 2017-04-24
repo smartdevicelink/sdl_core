@@ -438,6 +438,16 @@ class HMICapabilitiesImpl : public HMICapabilities {
   void set_handle_response_for(
       const smart_objects::SmartObject& request) OVERRIDE;
 
+  /**
+   * @brief function converts json object "capabilities" to smart object
+   *
+   * @param json_speech is read from file hmi_capabilities.json
+   * @param speech_capabilities - the converted object
+   */
+  void convert_json_speech_capabilities_to_obj(
+      Json::Value& json_speech,
+      smart_objects::SmartObject& speech_capabilities) FINAL;
+
  protected:
   /*
    * @brief Loads capabilities from local file in case SDL was launched
