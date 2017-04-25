@@ -176,6 +176,10 @@ ApplicationManagerImpl::ApplicationManagerImpl(
           "AM ListUpdater",
           new TimerTaskImpl<ApplicationManagerImpl>(
               this, &ApplicationManagerImpl::OnApplicationListUpdateTimer))
+    , application_search_timer_(
+          "AM SearchTimer",
+          new TimerTaskImpl<ApplicationManagerImpl>(
+              this, &ApplicationManagerImpl::OnApplicationSearchTimer))
     , tts_global_properties_timer_(
           "AM TTSGLPRTimer",
           new TimerTaskImpl<ApplicationManagerImpl>(
@@ -486,8 +490,9 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   LOG4CXX_DEBUG(logger_, "Restarting application list update timer");
   GetPolicyHandler().OnAppsSearchStarted();
   uint32_t timeout = get_settings().application_list_update_timeout();
+  uint32_t search_timeout = GetPolicyHandler().TimeoutExchangeMSec();
   application_list_update_timer_.Start(timeout, timer::kSingleShot);
-
+  application_search_timer_.Start(search_timeout, timer::kSingleShot);
   if (!is_all_apps_allowed_) {
     LOG4CXX_WARN(logger_,
                  "RegisterApplication: access to app's disabled by user");
@@ -3339,6 +3344,10 @@ bool ApplicationManagerImpl::IsHMICooperating() const {
 void ApplicationManagerImpl::OnApplicationListUpdateTimer() {
   LOG4CXX_DEBUG(logger_, "Application list update timer finished");
   SendUpdateAppList();
+}
+
+void ApplicationManagerImpl::OnApplicationSearchTimer() {
+  LOG4CXX_DEBUG(logger_, "Search application timer finished");
   GetPolicyHandler().OnAppsSearchCompleted();
 }
 
