@@ -88,6 +88,7 @@ PolicyManagerImpl::PolicyManagerImpl()
     , ignition_check(true)
     , retry_sequence_url_(0, 0, "")
     , wrong_ptu_update_received_(false)
+    , send_on_update_sent_out_(false)
     , trigger_ptu_(false) {
 }
 
@@ -899,10 +900,10 @@ void PolicyManagerImpl::OnUpdateStarted() {
   LOG4CXX_DEBUG(logger_,
                 "Update timeout will be set to (milisec): " << update_timeout);
 
-  wrong_ptu_update_received_ =
+  send_on_update_sent_out_ =
       !wrong_ptu_update_received_ && !update_status_manager_.IsUpdatePending();
 
-  if (wrong_ptu_update_received_) {
+  if (send_on_update_sent_out_) {
     update_status_manager_.OnUpdateSentOut(update_timeout);
   }
   cache_->SaveUpdateRequired(true);

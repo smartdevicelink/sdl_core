@@ -236,8 +236,8 @@ class PolicyManagerImpl : public PolicyManager {
     return cache_;
   }
 
-  inline void SetWrongPtuUpdateReceived(const bool wrong_ptu_update) {
-    wrong_ptu_update_received_ = wrong_ptu_update;
+  inline void SetSendOnUpdateSentOut(const bool send_on_update_sent_out) {
+    send_on_update_sent_out_ = send_on_update_sent_out;
   }
 #endif  // BUILD_TESTS
   virtual const std::vector<std::string> GetAppRequestTypes(
@@ -449,6 +449,7 @@ class PolicyManagerImpl : public PolicyManager {
   RetrySequenceURL retry_sequence_url_;
 
   bool wrong_ptu_update_received_;
+  bool send_on_update_sent_out_;
   bool trigger_ptu_;
 };
 
