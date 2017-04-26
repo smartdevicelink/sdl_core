@@ -462,7 +462,7 @@ TEST_F(PolicyManagerImplTest2, GetNotificationsNumberAfterPTUpdate) {
   // Arrange
   Json::Value table = CreatePTforLoad();
   manager->ForcePTExchange();
-  manager->SetWrongPtuUpdateReceived(false);
+  manager->SetSendOnUpdateSentOut(false);
   manager->OnUpdateStarted();
   policy_table::Table update(&table);
   update.SetPolicyTableType(rpc::policy_table_interface_base::PT_UPDATE);
@@ -869,7 +869,7 @@ TEST_F(PolicyManagerImplTest2, ResetRetrySequence) {
   CreateLocalPT("sdl_preloaded_pt.json");
   manager->ResetRetrySequence();
   EXPECT_EQ("UPDATE_NEEDED", manager->GetPolicyTableStatus());
-  manager->SetWrongPtuUpdateReceived(false);
+  manager->SetSendOnUpdateSentOut(false);
   manager->OnUpdateStarted();
   EXPECT_EQ("UPDATING", manager->GetPolicyTableStatus());
 }
