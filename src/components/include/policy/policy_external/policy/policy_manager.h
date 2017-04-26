@@ -441,7 +441,7 @@ class PolicyManager : public usage_statistics::StatisticsManager {
   /**
    * @brief Handler on applications search completed
    */
-  virtual void OnAppsSearchCompleted() = 0;
+  virtual void OnAppsSearchCompleted(const bool trigger_ptu) = 0;
 
   /**
    * @brief OnAppRegisteredOnMobile allows to handle event when application were
