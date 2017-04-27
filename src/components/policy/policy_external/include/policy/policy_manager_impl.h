@@ -233,6 +233,11 @@ class PolicyManagerImpl : public PolicyManager {
   inline CacheManagerInterfaceSPtr GetCache() {
     return cache_;
   }
+  inline void SetSendOnUpdateFlags(const bool send_on_update_sent_out,
+                                   const bool wrong_ptu_update_received) {
+    send_on_update_sent_out_ = send_on_update_sent_out;
+    wrong_ptu_update_received_ = wrong_ptu_update_received;
+  }
 #endif  // BUILD_TESTS
 
   virtual const std::vector<std::string> GetAppRequestTypes(
@@ -563,6 +568,10 @@ class PolicyManagerImpl : public PolicyManager {
    */
   RetrySequenceURL retry_sequence_url_;
   friend struct ProccessAppGroups;
+
+  bool wrong_ptu_update_received_;
+  bool send_on_update_sent_out_;
+  bool trigger_ptu_;
 };
 
 }  // namespace policy
