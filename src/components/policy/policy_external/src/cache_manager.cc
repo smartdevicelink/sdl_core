@@ -2372,7 +2372,6 @@ ExternalConsentStatus CacheManager::GetExternalConsentEntities() {
   return items;
 }
 
-
 std::map<std::string, std::string> CacheManager::GetKnownLinksFromPT() {
   LOG4CXX_AUTO_TRACE(logger_);
   CACHE_MANAGER_CHECK((std::map<std::string, std::string>()));
