@@ -132,6 +132,7 @@ TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
   EXPECT_CALL(*cache_manager_, DaysBeforeExchange(_))
       .WillOnce(Return(kNonZero));
   manager_->ForcePTExchange();
+  manager_->SetSendOnUpdateFlags(true, false);
   manager_->OnUpdateStarted();
   Json::Value table = createPTforLoad();
 
@@ -202,6 +203,7 @@ TEST_F(PolicyManagerImplTest2, ResetRetrySequence) {
   CreateLocalPT(preloaded_pt_filename_);
   policy_manager_->ResetRetrySequence();
   EXPECT_EQ("UPDATE_NEEDED", policy_manager_->GetPolicyTableStatus());
+  policy_manager_->SetSendOnUpdateFlags(false, false);
   policy_manager_->OnUpdateStarted();
   EXPECT_EQ("UPDATING", policy_manager_->GetPolicyTableStatus());
 }
