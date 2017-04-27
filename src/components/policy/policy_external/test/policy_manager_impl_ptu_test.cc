@@ -141,6 +141,40 @@ TEST_F(PolicyManagerImplTest2, IsAppRevoked_SetRevokedAppID_ExpectAppRevoked) {
   EXPECT_TRUE(manager_->IsApplicationRevoked(app_id_1_));
 }
 
+TEST_F(
+    PolicyManagerImplTest2,
+    IsAppRevoked_ReregisterRevokedApp_OnHmiNotificationIsSentWithProperValues) {
+  // Arrange
+  CreateLocalPT(preloadet_pt_filename_);
+
+  manager_->AddApplication(app_id_1_);
+
+  // Check RPC is allowed and OnHMIStatus is sent
+  CheckRpcPermissions("OnHMIStatus", ::policy::kRpcAllowed);
+
+  std::ifstream ifile(kValidSdlPtUpdateJson);
+  Json::Reader reader;
+  std::string json;
+  Json::Value root(Json::objectValue);
+  if (ifile.is_open() && reader.parse(ifile, root, true)) {
+    root["policy_table"]["app_policies"][app_id_1_] = Json::nullValue;
+    json = root.toStyledString();
+  }
+  ifile.close();
+
+  ::policy::BinaryMessage msg(json.begin(), json.end());
+  ASSERT_TRUE(manager_->LoadPT(kFilePtUpdateJson, msg));
+  EXPECT_TRUE(manager_->IsApplicationRevoked(app_id_1_));
+
+  // Re-register application
+  manager_->AddApplication(app_id_1_);
+  EXPECT_NE(typeid(utils::CallNothing),
+            typeid(manager_->AddApplication(app_id_1_)));
+
+  // Check RPC is disallowed and OnHMIStatus is sent
+  CheckRpcPermissions("OnHMIStatus", ::policy::kRpcDisallowed);
+}
+
 TEST_F(PolicyManagerImplTest2,
        CheckPermissions_SetRevokedAppID_ExpectRPCDisallowed) {
   // Arrange
