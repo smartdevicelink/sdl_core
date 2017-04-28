@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -372,10 +372,9 @@ Json::Value& ResumptionDataJson::GetResumptionData() const {
   using namespace app_mngr;
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock autolock(resumption_lock_);
-  Json::Value& dictionary = last_state().dictionary;
+  Json::Value& dictionary = last_state().get_dictionary();
   if (!dictionary.isMember(strings::resumption)) {
-    last_state().dictionary[strings::resumption] =
-        Json::Value(Json::objectValue);
+    dictionary[strings::resumption] = Json::Value(Json::objectValue);
     LOG4CXX_WARN(logger_, "resumption section is missed");
   }
   Json::Value& resumption = dictionary[strings::resumption];
@@ -481,7 +480,7 @@ bool ResumptionDataJson::DropAppDataResumption(const std::string& device_id,
 }
 
 void ResumptionDataJson::Persist() {
-  last_state().SaveToFileSystem();
+  last_state().SaveStateToFileSystem();
 }
 
 }  // resumption

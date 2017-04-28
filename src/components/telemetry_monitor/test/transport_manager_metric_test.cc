@@ -111,6 +111,6 @@ TEST(TransportManagerMetricWrapper, GetJsonMetricWithGrabResources) {
   delete resources;
 }
 
-}  // namespace telemetry_monitor
+}  // namespace telemetry_monitor_test
 }  // namespace components
 }  // namespace test

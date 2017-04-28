@@ -2133,7 +2133,7 @@
     </function>
 </interface>
 
-<interface name="BasicCommunication" version="1.0" date="2013-04-12">
+<interface name="BasicCommunication" version="1.1" date="2016-12-01">
     <function name="OnReady" messagetype="notification">
       <description>HMI must notify SDL about its readiness to start communication. In fact, this has to be the first message between SDL and HMI.</description>
     </function>
@@ -2142,21 +2142,6 @@
     </function>
     <function name="OnUpdateDeviceList" messagetype="notification">
       <description>Notification from HMI to SDL sent when HMI requires update of device list (i.e. when user clicks 'Change Device' button)</description>
-    </function>
-    <function name="OnPhoneCall" messagetype="notification">
-        <description>Sender: HMI->SDL. When: upon phone-call event started or ended</description>
-        <param name="isActive" type="Boolean" mandatory="true">
-            <description>Must be 'true' - when the phone call is started on HMI. Must be 'false' when the phone call is ended on HMI</description>
-        </param>
-    </function>
-    <function name="OnEmergencyEvent" messagetype="notification">
-        <description>
-            "Sender: HMI->SDL. Conditions: when HMI enters the mode of "911 Assist", or other rear view camera,
-            or something else in the future. Purpose: for SDL to change the audioStreamingState of the related apps to
-            NOT_AUDIBLE when "enabled:true" and back to AUDIBLE when "enabled:false""
-        </description>
-        <param name="enabled" type="Boolean" mandatory="true">
-        </param>
     </function>
     <function name="OnResumeAudioSource" messagetype="notification">
       <description>This method must be invoked by SDL to update audio state.</description>
@@ -2359,8 +2344,8 @@
       <param name="fileName" type="String" maxlength="255" minlength="1" mandatory="true">
           <description>The path to file.</description>
       </param>
-      <param name="appID" type="Integer" mandatory="false">
-        <description>ID of application that requested this RPC.</description>
+      <param name="appID" type="Integer" mandatory="true">
+        <description>Internal ID of the application that requested this RPC.</description>
       </param>
     </function>
     <function name="SystemRequest" messagetype="response">
@@ -2458,17 +2443,16 @@
   <function name="OnIgnitionCycleOver" messagetype="notification">
     <description>Notification from system to SDL to let it know that ignition cycle is over.</description>
   </function>
-  <!-- End of Policies -->
-   <function name="OnDeactivateHMI" messagetype="notification">
-        <description>
-          Sender: HMI->SDL. When: in case GAL/DIO is active or disabling
-        </description>
-     <param name="isDeactivated" type="Boolean" mandatory="true">
-        <description>
-          Must be 'true' - GAL/DIO is active. Must be 'false' when GAL/DIO is disabling
-        </description>
+  <function name="DecryptCertificate" messagetype="request">
+     <description>Sender: SDL->HMI. Purpose: to decrypt the certificate received via the Updated Policy Table. </description>
+     <param name="fileName" type="String" maxlength="255" minlength="1" mandatory="true">
+         <description>The path to the file with the encrypted certificate from the PolicyTable.</description>
      </param>
    </function>
+   <function name="DecryptCertificate" messagetype="response">
+         <description>SUCCESS - in case the certificate is decrypted and placed to the same file from request.</description>
+   </function>
+  <!-- End of Policies -->
    <function name="OnEventChanged" messagetype="notification">
      <description>Sender: HMI->SDL. When event is become active</description>
      <param name="eventName" type="Common.EventTypes" mandatory="true">
@@ -3418,9 +3402,9 @@
     <param name="wayPointType" type="Common.WayPointType" mandatory="true">
       <description>To request for either the destination only or for all waypoints including destination</description>
     </param>
-    <param name="appID" type="Integer" mandatory="true"> 
-      <description>ID of the application.</description> 
-    </param> 
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of the application.</description>
+    </param>
   </function>
   <function name="GetWayPoints" functionID="GetWayPointsID" messagetype="response">
     <param name="appID" type="Integer" mandatory="true">

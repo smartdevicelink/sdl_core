@@ -44,6 +44,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace unsubscribe_vehicle_data_request {
 
 namespace am = ::application_manager;
 namespace mobile_result = mobile_apis::Result;
@@ -285,6 +286,7 @@ TEST_F(UnsubscribeVehicleRequestTest, OnEvent_DataUnsubscribed_SUCCESS) {
   command->on_event(test_event);
 }
 
+}  // namespace unsubscribe_vehicle_data_request
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

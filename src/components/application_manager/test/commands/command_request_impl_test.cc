@@ -54,6 +54,7 @@
 namespace test {
 namespace components {
 namespace commands_test {
+namespace command_request_impl {
 
 namespace am = application_manager;
 namespace strings = am::strings;
@@ -319,10 +320,10 @@ TEST_F(CommandRequestImplTest, RemoveDisallowedParameters_SUCCESS) {
   CommandPtr command = CreateCommand<UCommandRequestImpl>(msg);
 
   CommandParametersPermissions& permission = command->parameters_permissions();
-  permission.disallowed_params.push_back(kDisallowedParam1);
-  permission.disallowed_params.push_back(kDisallowedParam2);
-  permission.allowed_params.push_back(kAllowedParam);
-  permission.undefined_params.push_back(kUndefinedParam);
+  permission.disallowed_params.insert(kDisallowedParam1);
+  permission.disallowed_params.insert(kDisallowedParam2);
+  permission.allowed_params.insert(kAllowedParam);
+  permission.undefined_params.insert(kUndefinedParam);
 
   command->RemoveDisallowedParameters();
 
@@ -444,7 +445,7 @@ TEST_F(CommandRequestImplTest, AddDisallowedParameters_SUCCESS) {
 
   CommandPtr command = CreateCommand<UCommandRequestImpl>(msg);
 
-  command->removed_parameters_permissions().disallowed_params.push_back(
+  command->removed_parameters_permissions().disallowed_params.insert(
       kDisallowedParam1);
 
   command->AddDisallowedParameters(*msg);
@@ -498,7 +499,7 @@ TEST_F(CommandRequestImplTest,
 
   CommandPtr command = CreateCommand<UCommandRequestImpl>(msg);
 
-  command->removed_parameters_permissions().disallowed_params.push_back(
+  command->removed_parameters_permissions().disallowed_params.insert(
       kDisallowedParam1);
 
   MessageSharedPtr result;
@@ -514,6 +515,7 @@ TEST_F(CommandRequestImplTest,
       (*result)[strings::msg_params][strings::info].asString().empty());
 }
 
+}  // namespace command_request_impl
 }  // namespace commands_test
 }  // namespace components
 }  // namespace test

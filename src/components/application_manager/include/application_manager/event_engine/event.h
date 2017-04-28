@@ -30,8 +30,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_EVENT_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_EVENT_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_EVENT_ENGINE_EVENT_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_EVENT_ENGINE_EVENT_H_
 
 #include <interfaces/HMI_API.h>
 
@@ -42,8 +42,6 @@ namespace application_manager {
 namespace event_engine {
 
 class EventDispatcher;
-
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 class Event {
  public:
@@ -146,4 +144,4 @@ int32_t Event::smart_object_type() const {
 }  // namespace event_engine
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_EVENT_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_EVENT_ENGINE_EVENT_H_

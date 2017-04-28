@@ -564,8 +564,6 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   applications_.insert(application);
   applications_list_lock_.Release();
 
-  GetPolicyHandler().AddApplication(application->policy_app_id());
-
   return application;
 }
 
@@ -1404,7 +1402,7 @@ void ApplicationManagerImpl::SendMessageToMobile(
       for (; iter != iter_end; ++iter) {
         if (true == iter->second.asBool()) {
           LOG4CXX_INFO(logger_, "Request's param: " << iter->first);
-          params.push_back(iter->first);
+          params.insert(iter->first);
         }
       }
     }
@@ -1418,6 +1416,18 @@ void ApplicationManagerImpl::SendMessageToMobile(
                                  << ") not allowed by policy");
       return;
     }
+
+#ifdef EXTERNAL_PROPRIETARY_MODE
+    if (function_id == mobile_apis::FunctionID::OnSystemRequestID) {
+      mobile_apis::RequestType::eType request_type =
+          static_cast<mobile_apis::RequestType::eType>(
+              (*message)[strings::msg_params][strings::request_type].asUInt());
+      if (mobile_apis::RequestType::PROPRIETARY == request_type ||
+          mobile_apis::RequestType::HTTP == request_type) {
+        GetPolicyHandler().OnUpdateRequestSentToMobile();
+      }
+    }
+#endif  // EXTERNAL_PROPRIETARY_MODE
   }
 
   if (message_to_send->binary_data()) {
@@ -2988,7 +2998,7 @@ void ApplicationManagerImpl::EndNaviServices(uint32_t app_id) {
         "CloseNaviAppTimer",
         new TimerTaskImpl<ApplicationManagerImpl>(
             this, &ApplicationManagerImpl::CloseNaviApp)));
-    close_timer->Start(navi_close_app_timeout_, timer::kPeriodic);
+    close_timer->Start(navi_close_app_timeout_, timer::kSingleShot);
 
     sync_primitives::AutoLock lock(timer_pool_lock_);
     timer_pool_.push_back(close_timer);
@@ -3093,7 +3103,7 @@ void ApplicationManagerImpl::CloseNaviApp() {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace mobile_apis::AppInterfaceUnregisteredReason;
   using namespace mobile_apis::Result;
-
+  DCHECK_OR_RETURN_VOID(!navi_app_to_stop_.empty());
   uint32_t app_id = navi_app_to_stop_.front();
   navi_app_to_stop_.pop_front();
 

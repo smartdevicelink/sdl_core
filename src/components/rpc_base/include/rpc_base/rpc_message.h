@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TYPE_BASE_H_
-#define TYPE_BASE_H_
+#ifndef SRC_COMPONENTS_RPC_BASE_INCLUDE_RPC_BASE_RPC_MESSAGE_H_
+#define SRC_COMPONENTS_RPC_BASE_INCLUDE_RPC_BASE_RPC_MESSAGE_H_
 
 #include "rpc_base.h"
 
@@ -99,4 +99,4 @@ class NotificationBase : public Message, public CompositeType {
 
 }  // namespace rpc
 
-#endif /* TYPE_BASE_H_ */
+#endif  // SRC_COMPONENTS_RPC_BASE_INCLUDE_RPC_BASE_RPC_MESSAGE_H_

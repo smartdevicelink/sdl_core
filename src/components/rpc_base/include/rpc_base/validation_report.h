@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef RPC_BASE_VALIDATION_REPORT_H_
-#define RPC_BASE_VALIDATION_REPORT_H_
+#ifndef SRC_COMPONENTS_RPC_BASE_INCLUDE_RPC_BASE_VALIDATION_REPORT_H_
+#define SRC_COMPONENTS_RPC_BASE_INCLUDE_RPC_BASE_VALIDATION_REPORT_H_
 
 #include <string>
 #include <list>
@@ -119,4 +119,4 @@ inline std::string PrettyFormat(const ValidationReport& report) {
 
 }  // namespace rpc
 
-#endif /* RPC_BASE_VALIDATION_REPORT_H_ */
+#endif  // SRC_COMPONENTS_RPC_BASE_INCLUDE_RPC_BASE_VALIDATION_REPORT_H_

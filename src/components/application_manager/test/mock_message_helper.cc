@@ -68,6 +68,12 @@ void MessageHelper::SendOnDataStreaming(protocol_handler::ServiceType service,
       service, available, app_mngr);
 }
 
+void MessageHelper::SendDecryptCertificateToHMI(const std::string& file_name,
+                                                ApplicationManager& app_mngr) {
+  MockMessageHelper::message_helper_mock()->SendDecryptCertificateToHMI(
+      file_name, app_mngr);
+}
+
 smart_objects::SmartObjectSPtr GetHashUpdateNotification(
     const uint32_t app_id) {
   return MockMessageHelper::message_helper_mock()->GetHashUpdateNotification(
@@ -115,9 +121,12 @@ mobile_api::HMILevel::eType MessageHelper::StringToHMILevel(
   return MockMessageHelper::message_helper_mock()->StringToHMILevel(hmi_level);
 }
 
-smart_objects::SmartObjectSPtr CreateDeviceListSO(
-    const connection_handler::DeviceMap& devices) {
-  return MockMessageHelper::message_helper_mock()->CreateDeviceListSO(devices);
+smart_objects::SmartObjectSPtr MessageHelper::CreateDeviceListSO(
+    const connection_handler::DeviceMap& devices,
+    const policy::PolicyHandlerInterface& policy_handler,
+    ApplicationManager& app_mngr) {
+  return MockMessageHelper::message_helper_mock()->CreateDeviceListSO(
+      devices, policy_handler, app_mngr);
 }
 
 void MessageHelper::SendOnAppPermissionsChangedNotification(
@@ -196,7 +205,7 @@ void MessageHelper::SendSDLActivateAppResponse(
 }
 
 void MessageHelper::SendPolicyUpdate(const std::string& file_path,
-                                     int timeout,
+                                     const uint32_t timeout,
                                      const std::vector<int>& retries,
                                      ApplicationManager& app_mngr) {
   MockMessageHelper::message_helper_mock()->SendPolicyUpdate(

@@ -37,7 +37,7 @@
 #include "utils/macro.h"
 #include "utils/make_shared.h"
 #include "application_manager/policies/policy_handler.h"
-#include "application_manager/test/resumption/include/application_mock.h"
+#include "application_manager/mock_application.h"
 #include "utils/custom_string.h"
 #include "policy/mock_policy_settings.h"
 #include "application_manager/policies/policy_handler.h"
@@ -46,18 +46,19 @@
 #include "application_manager/state_controller.h"
 #include "application_manager/resumption/resume_ctrl.h"
 
-namespace application_manager {
 namespace test {
+namespace components {
+namespace application_manager_test {
 
 namespace HmiLanguage = hmi_apis::Common_Language;
 namespace HmiResults = hmi_apis::Common_Result;
 namespace MobileResults = mobile_apis::Result;
 
-typedef ::test::components::resumption_test::MockApplication AppMock;
-typedef utils::SharedPtr<AppMock> MockApplicationSharedPtr;
+using namespace application_manager;
+
+typedef utils::SharedPtr<MockApplication> MockApplicationSharedPtr;
 typedef std::vector<std::string> StringArray;
-typedef ::application_manager::Application App;
-typedef utils::SharedPtr<App> ApplicationSharedPtr;
+typedef utils::SharedPtr<application_manager::Application> ApplicationSharedPtr;
 
 using testing::AtLeast;
 using testing::ReturnRefOfCopy;
@@ -74,7 +75,7 @@ TEST(MessageHelperTestCreate,
   bool success = false;
 
   smart_objects::SmartObjectSPtr ptr =
-      MessageHelper::CreateBlockedByPoliciesResponse(
+      application_manager::MessageHelper::CreateBlockedByPoliciesResponse(
           function_id, result, correlation_id, connection_key);
 
   EXPECT_TRUE(ptr);
@@ -146,7 +147,7 @@ TEST(MessageHelperTestCreate,
 
 TEST(MessageHelperTestCreate,
      CreateGlobalPropertiesRequestsToHMI_SmartObject_NotEmpty) {
-  MockApplicationSharedPtr appSharedMock = utils::MakeShared<AppMock>();
+  MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
   smart_objects::SmartObjectSPtr objPtr =
       MakeShared<smart_objects::SmartObject>();
 
@@ -200,7 +201,7 @@ TEST(MessageHelperTestCreate,
 }
 
 TEST(MessageHelperTestCreate, CreateShowRequestToHMI_SendSmartObject_Equal) {
-  MockApplicationSharedPtr appSharedMock = utils::MakeShared<AppMock>();
+  MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
 
   smart_objects::SmartObjectSPtr smartObjectPtr =
       utils::MakeShared<smart_objects::SmartObject>();
@@ -241,7 +242,7 @@ TEST(MessageHelperTestCreate,
 
 TEST(MessageHelperTestCreate,
      CreateAddCommandRequestToHMI_SendSmartObject_Equal) {
-  MockApplicationSharedPtr appSharedMock = utils::MakeShared<AppMock>();
+  MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
   CommandsMap vis;
   DataAccessor<CommandsMap> data_accessor(vis, true);
   smart_objects::SmartObjectSPtr smartObjectPtr =
@@ -282,7 +283,7 @@ TEST(MessageHelperTestCreate,
 
 TEST(MessageHelperTestCreate,
      CreateAddVRCommandRequestFromChoiceToHMI_SendEmptyData_EmptyList) {
-  MockApplicationSharedPtr appSharedMock = utils::MakeShared<AppMock>();
+  MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
   application_manager::ChoiceSetMap vis;
   DataAccessor< ::application_manager::ChoiceSetMap> data_accessor(vis, true);
 
@@ -297,7 +298,7 @@ TEST(MessageHelperTestCreate,
 
 TEST(MessageHelperTestCreate,
      CreateAddVRCommandRequestFromChoiceToHMI_SendObject_EqualList) {
-  MockApplicationSharedPtr appSharedMock = utils::MakeShared<AppMock>();
+  MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
   application_manager::ChoiceSetMap vis;
   DataAccessor< ::application_manager::ChoiceSetMap> data_accessor(vis, true);
   smart_objects::SmartObjectSPtr smartObjectPtr =
@@ -343,7 +344,7 @@ TEST(MessageHelperTestCreate,
 }
 
 TEST(MessageHelperTestCreate, CreateAddSubMenuRequestToHMI_SendObject_Equal) {
-  MockApplicationSharedPtr appSharedMock = utils::MakeShared<AppMock>();
+  MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
   application_manager::SubMenuMap vis;
   DataAccessor< ::application_manager::SubMenuMap> data_accessor(vis, true);
   smart_objects::SmartObjectSPtr smartObjectPtr =
@@ -382,7 +383,7 @@ TEST(MessageHelperTestCreate, CreateAddSubMenuRequestToHMI_SendObject_Equal) {
 
 TEST(MessageHelperTestCreate,
      CreateAddSubMenuRequestToHMI_SendEmptyMap_EmptySmartObjectList) {
-  MockApplicationSharedPtr appSharedMock = utils::MakeShared<AppMock>();
+  MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
   application_manager::SubMenuMap vis;
   DataAccessor< ::application_manager::SubMenuMap> data_accessor(vis, true);
 
@@ -702,7 +703,7 @@ TEST_F(MessageHelperTest, VerifySoftButtonString_CorrectStrings_True) {
 TEST_F(MessageHelperTest,
        GetIVISubscriptionRequests_ValidApplication_HmiRequestNotEmpty) {
   // Creating sharedPtr to MockApplication
-  MockApplicationSharedPtr appSharedMock = utils::MakeShared<AppMock>();
+  MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
   // Creating data acessor
   application_manager::VehicleInfoSubscriptions vis;
   DataAccessor<application_manager::VehicleInfoSubscriptions> data_accessor(
@@ -721,7 +722,7 @@ TEST_F(MessageHelperTest,
 TEST_F(MessageHelperTest,
        ProcessSoftButtons_SmartObjectWithoutButtonsKey_Success) {
   // Creating sharedPtr to MockApplication
-  MockApplicationSharedPtr appSharedMock = utils::MakeShared<AppMock>();
+  MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
   // Creating input data for method
   smart_objects::SmartObject object;
   policy_handler_test::MockPolicySettings policy_settings_;
@@ -737,7 +738,7 @@ TEST_F(MessageHelperTest,
 TEST_F(MessageHelperTest,
        ProcessSoftButtons_IncorectSoftButonValue_InvalidData) {
   // Creating sharedPtr to MockApplication
-  MockApplicationSharedPtr appSharedMock = utils::MakeShared<AppMock>();
+  MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
   // Creating input data for method
   smart_objects::SmartObject object;
   smart_objects::SmartObject& buttons = object[strings::soft_buttons];
@@ -755,7 +756,7 @@ TEST_F(MessageHelperTest,
 
 TEST_F(MessageHelperTest, VerifyImage_ImageTypeIsStatic_Success) {
   // Creating sharedPtr to MockApplication
-  MockApplicationSharedPtr appSharedMock = utils::MakeShared<AppMock>();
+  MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
   // Creating input data for method
   smart_objects::SmartObject image;
   image[strings::image_type] = mobile_apis::ImageType::STATIC;
@@ -768,7 +769,7 @@ TEST_F(MessageHelperTest, VerifyImage_ImageTypeIsStatic_Success) {
 
 TEST_F(MessageHelperTest, VerifyImage_ImageValueNotValid_InvalidData) {
   // Creating sharedPtr to MockApplication
-  MockApplicationSharedPtr appSharedMock = utils::MakeShared<AppMock>();
+  MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
   // Creating input data for method
   smart_objects::SmartObject image;
   image[strings::image_type] = mobile_apis::ImageType::DYNAMIC;
@@ -783,7 +784,7 @@ TEST_F(MessageHelperTest, VerifyImage_ImageValueNotValid_InvalidData) {
 
 TEST_F(MessageHelperTest, VerifyImageFiles_SmartObjectWithValidData_Success) {
   // Creating sharedPtr to MockApplication
-  MockApplicationSharedPtr appSharedMock = utils::MakeShared<AppMock>();
+  MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
   // Creating input data for method
   smart_objects::SmartObject images;
   images[0][strings::image_type] = mobile_apis::ImageType::STATIC;
@@ -798,7 +799,7 @@ TEST_F(MessageHelperTest, VerifyImageFiles_SmartObjectWithValidData_Success) {
 TEST_F(MessageHelperTest,
        VerifyImageFiles_SmartObjectWithInvalidData_NotSuccsess) {
   // Creating sharedPtr to MockApplication
-  MockApplicationSharedPtr appSharedMock = utils::MakeShared<AppMock>();
+  MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
   // Creating input data for method
   smart_objects::SmartObject images;
   images[0][strings::image_type] = mobile_apis::ImageType::DYNAMIC;
@@ -816,7 +817,7 @@ TEST_F(MessageHelperTest,
 TEST_F(MessageHelperTest,
        VerifyImageVrHelpItems_SmartObjectWithSeveralValidImages_Succsess) {
   // Creating sharedPtr to MockApplication
-  MockApplicationSharedPtr appSharedMock = utils::MakeShared<AppMock>();
+  MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
   // Creating input data for method
   smart_objects::SmartObject message;
   message[0][strings::image][strings::image_type] =
@@ -833,7 +834,7 @@ TEST_F(MessageHelperTest,
 TEST_F(MessageHelperTest,
        VerifyImageVrHelpItems_SmartObjWithSeveralInvalidImages_NotSuccsess) {
   // Creating sharedPtr to MockApplication
-  MockApplicationSharedPtr appSharedMock = utils::MakeShared<AppMock>();
+  MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
   // Creating input data for method
   smart_objects::SmartObject message;
   message[0][strings::image][strings::image_type] =
@@ -894,7 +895,7 @@ TEST_F(MessageHelperTest, StringToHmiLevel_LevelString_EqEType) {
 
 TEST_F(MessageHelperTest, SubscribeApplicationToSoftButton_CallFromApp) {
   // Create application mock
-  MockApplicationSharedPtr appSharedPtr = utils::MakeShared<AppMock>();
+  MockApplicationSharedPtr appSharedPtr = utils::MakeShared<MockApplication>();
   // Prepare data for method
   smart_objects::SmartObject message_params;
   size_t function_id = 1;
@@ -905,5 +906,6 @@ TEST_F(MessageHelperTest, SubscribeApplicationToSoftButton_CallFromApp) {
       message_params, appSharedPtr, function_id);
 }
 
+}  // namespace application_manager_test
+}  // namespace components
 }  // namespace test
-}  // namespace application_manager

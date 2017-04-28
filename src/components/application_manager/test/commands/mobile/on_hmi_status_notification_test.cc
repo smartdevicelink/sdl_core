@@ -40,6 +40,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace on_hmi_status_notification {
 
 namespace {
 const uint32_t kConnectionKey = 1u;
@@ -207,6 +208,7 @@ TEST_F(OnHMIStatusNotificationTest, Run_FullAndTrueProperties_SUCCESS) {
   VerifySendNotificationData(msg);
 }
 
+}  // namespace on_hmi_status_notification
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

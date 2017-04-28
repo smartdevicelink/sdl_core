@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,9 +45,11 @@
 #include "utils/custom_string.h"
 #include "policy/policy_settings.h"
 #include "smart_objects/smart_object.h"
+#include "utils/callable.h"
 
 namespace policy {
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
+typedef utils::SharedPtr<utils::Callable> StatusNotifier;
+
 class PolicyHandlerInterface {
  public:
   virtual ~PolicyHandlerInterface() {}
@@ -69,6 +71,14 @@ class PolicyHandlerInterface {
   virtual void OnPermissionsUpdated(const std::string& policy_app_id,
                                     const Permissions& permissions) = 0;
 
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  virtual void OnSnapshotCreated(const BinaryMessage& pt_string,
+                                 const std::vector<int>& retry_delay_seconds,
+                                 uint32_t timeout_exchange) = 0;
+#else   // EXTERNAL_PROPRIETARY_MODE
+  virtual void OnSnapshotCreated(const BinaryMessage& pt_string) = 0;
+#endif  // EXTERNAL_PROPRIETARY_MODE
+
   virtual bool GetPriority(const std::string& policy_app_id,
                            std::string* priority) const = 0;
   virtual void CheckPermissions(const PTString& app_id,
@@ -76,7 +86,6 @@ class PolicyHandlerInterface {
                                 const PTString& rpc,
                                 const RPCParams& rpc_params,
                                 CheckPermissionResult& result) = 0;
-
   virtual uint32_t GetNotificationsNumber(
       const std::string& priority) const = 0;
   virtual DeviceConsent GetUserConsentForDevice(
@@ -86,12 +95,15 @@ class PolicyHandlerInterface {
   virtual bool GetInitialAppData(const std::string& application_id,
                                  StringArray* nicknames = NULL,
                                  StringArray* app_hmi_types = NULL) = 0;
-  virtual void GetServiceUrls(const std::string& service_type,
-                              EndpointUrls& end_points) = 0;
+  virtual void GetUpdateUrls(const std::string& service_type,
+                             EndpointUrls& out_end_points) = 0;
+  virtual void GetUpdateUrls(const uint32_t service_type,
+                             EndpointUrls& out_end_points) = 0;
   virtual std::string GetLockScreenIconUrl() const = 0;
   virtual void ResetRetrySequence() = 0;
   virtual uint32_t NextRetryTimeout() = 0;
-  virtual int TimeoutExchange() = 0;
+  virtual uint32_t TimeoutExchangeSec() = 0;
+  virtual uint32_t TimeoutExchangeMSec() = 0;
   virtual void OnExceededTimeout() = 0;
   virtual void OnSystemReady() = 0;
   virtual void PTUpdatedAt(Counters counter, int value) = 0;
@@ -131,11 +143,11 @@ class PolicyHandlerInterface {
 
   /**
    * @brief Process user consent on mobile data connection access
-   * @param Device id or empty string, if concern to all SDL functionality
-   * @param User consent from response
+   * @param is_allowed - user consent from response
+   * @param device_mac - mac adress of device
    */
   virtual void OnAllowSDLFunctionalityNotification(
-      bool is_allowed, const std::string& device_id) = 0;
+      bool is_allowed, const std::string& device_mac) = 0;
 
   /**
    * @brief Increment counter for ignition cycles
@@ -281,7 +293,9 @@ class PolicyHandlerInterface {
       std::map<std::string, StringArray> app_hmi_types) = 0;
 
   virtual void OnCertificateUpdated(const std::string& certificate_data) = 0;
-
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  virtual void OnCertificateDecrypted(bool is_succeeded) = 0;
+#endif  // EXTERNAL_PROPRIETARY_MODE
   virtual bool CanUpdate() = 0;
 
   virtual void OnDeviceConsentChanged(const std::string& device_id,
@@ -295,8 +309,9 @@ class PolicyHandlerInterface {
    * @brief Allows to add new or update existed application during
    * registration process
    * @param application_id The policy aplication id.
+   * @return function that will notify update manager about new application
    */
-  virtual void AddApplication(const std::string& application_id) = 0;
+  virtual StatusNotifier AddApplication(const std::string& application_id) = 0;
 
   /**
    * Checks whether application is revoked
@@ -360,7 +375,13 @@ class PolicyHandlerInterface {
    * @return Structure with vehicle information
    */
   virtual const VehicleInfo GetVehicleInfo() const = 0;
-
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  /**
+   * @brief Gets meta information
+   * @return meta information
+   */
+  virtual const policy::MetaInfo GetMetaInfo() const = 0;
+#endif  // EXTERNAL_PROPRIETARY_MODE
   virtual void Increment(usage_statistics::GlobalCounterId type) = 0;
   virtual void Increment(const std::string& app_id,
                          usage_statistics::AppCounterId type) = 0;

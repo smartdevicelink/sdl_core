@@ -33,6 +33,7 @@ if(BUILD_TESTS)
 include_directories(
     ${GMOCK_INCLUDE_DIRECTORY}
     ${COMPONENTS_DIR}/application_manager/test/include
+    ${POLICY_MOCK_INCLUDE_PATH}
 )
 
 set(LIBRARIES
@@ -42,7 +43,7 @@ set(LIBRARIES
 )
 
 set(SOURCES
-    state_controller_test.cc
+    ${COMPONENTS_DIR}/application_manager/test/state_controller/state_controller_test.cc
     ${COMPONENTS_DIR}/application_manager/test/mock_message_helper.cc
 )
 

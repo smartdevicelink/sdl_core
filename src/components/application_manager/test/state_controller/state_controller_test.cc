@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,6 @@
 #include "connection_handler/mock_connection_handler_settings.h"
 #include "connection_handler/connection_handler_impl.h"
 #include "transport_manager/mock_transport_manager.h"
-#include "application_manager/statistics_manager_mock.h"
 #include "utils/lock.h"
 #include "utils/data_accessor.h"
 #include "utils/make_shared.h"
@@ -48,6 +47,7 @@
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/mock_message_helper.h"
 #include "policy/mock_policy_settings.h"
+#include "policy/usage_statistics/mock_statistics_manager.h"
 #include "protocol_handler/mock_session_observer.h"
 #include "connection_handler/mock_connection_handler.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
@@ -69,11 +69,14 @@ using ::testing::InSequence;
 using ::testing::Truly;
 using ::testing::AtLeast;
 
-static application_manager::MockMessageHelper* message_helper_mock_;
-
 namespace test {
 namespace components {
 namespace state_controller_test {
+
+namespace constants {
+const uint32_t kCorrID = 314u;
+const uint32_t kHMIAppID = 2718u;
+}
 
 struct HmiStatesComparator {
   mobile_apis::HMILevel::eType hmi_level_;
@@ -130,9 +133,17 @@ class StateControllerImplTest : public ::testing::Test {
       : ::testing::Test()
       , usage_stat("0",
                    utils::SharedPtr<usage_statistics::StatisticsManager>(
+                       new usage_statistics_test::MockStatisticsManager))
+      , applications_(application_set_, applications_lock_)
+      , message_helper_mock_(
+            *application_manager::MockMessageHelper::message_helper_mock()) {
+    Mock::VerifyAndClearExpectations(&message_helper_mock_);
+  }
 
-                       new state_controller_test::MockStatisticsManager))
-      , applications_(application_set_, applications_lock_) {}
+  ~StateControllerImplTest() {
+    Mock::VerifyAndClearExpectations(&message_helper_mock_);
+  }
+
   NiceMock<application_manager_test::MockApplicationManager> app_manager_mock_;
   NiceMock<policy_test::MockPolicyHandlerInterface> policy_interface_;
   NiceMock<connection_handler_test::MockConnectionHandler>
@@ -191,6 +202,7 @@ class StateControllerImplTest : public ::testing::Test {
       mock_connection_handler__settings;
   transport_manager_test::MockTransportManager mock_transport_manager;
   connection_handler::ConnectionHandlerImpl* conn_handler;
+  application_manager::MockMessageHelper& message_helper_mock_;
 
   am::HmiStatePtr createHmiState(
       mobile_apis::HMILevel::eType hmi_level,
@@ -206,6 +218,26 @@ class StateControllerImplTest : public ::testing::Test {
     state->set_audio_streaming_state(aidio_ss);
     state->set_system_context(system_context);
     return state;
+  }
+
+  /**
+   * @brief Template created for the future if different hmi
+   * states are needed.
+   */
+  template <class HmiStateType>
+  am::HmiStatePtr CreateHmiStateByHmiStateType(
+      const mobile_apis::HMILevel::eType hmi_level,
+      const mobile_apis::AudioStreamingState::eType audio_ss,
+      const mobile_apis::SystemContext::eType system_context,
+      const uint32_t app_id) {
+    am::HmiStatePtr new_state =
+        utils::MakeShared<HmiStateType>(app_id, app_manager_mock_);
+
+    new_state->set_hmi_level(hmi_level);
+    new_state->set_audio_streaming_state(audio_ss);
+    new_state->set_system_context(system_context);
+
+    return new_state;
   }
 
   /**
@@ -600,8 +632,6 @@ class StateControllerImplTest : public ::testing::Test {
     namespace AudioStreamingState = mobile_apis::AudioStreamingState;
     namespace SystemContext = mobile_apis::SystemContext;
     // Valid states for not audio app
-    message_helper_mock_ =
-        application_manager::MockMessageHelper::message_helper_mock();
     valid_states_for_not_audio_app_.push_back(
         createHmiState(HMILevel::HMI_NONE,
                        AudioStreamingState::NOT_AUDIBLE,
@@ -867,7 +897,7 @@ class StateControllerImplTest : public ::testing::Test {
         new smart_objects::SmartObject();
     (*bc_activate_app_request)[am::strings::params]
                               [am::strings::correlation_id] = corr_id;
-    ON_CALL(*message_helper_mock_,
+    ON_CALL(message_helper_mock_,
             GetBCActivateAppRequestToHMI(_, _, _, hmi_lvl, _, _))
         .WillByDefault(Return(bc_activate_app_request));
 
@@ -949,6 +979,64 @@ class StateControllerImplTest : public ::testing::Test {
     return createHmiState(mobile_apis::HMILevel::HMI_BACKGROUND,
                           mobile_apis::AudioStreamingState::NOT_AUDIBLE,
                           mobile_apis::SystemContext::SYSCTXT_MAIN);
+  }
+
+  void ApplyTempStatesForApplication(
+      NiceMock<application_manager_test::MockApplication>& application,
+      std::vector<am::HmiState::StateID>& state_ids) {
+    using smart_objects::SmartObject;
+    using am::event_engine::Event;
+    namespace FunctionID = hmi_apis::FunctionID;
+
+    EXPECT_CALL(application, CurrentHmiState())
+        .WillRepeatedly(Return(NoneNotAudibleState()));
+
+    for (size_t i = 0; i < state_ids.size(); ++i) {
+      am::HmiState::StateID state_id = state_ids[i];
+      EXPECT_CALL(application,
+                  AddHMIState(Truly(HmiStatesIDComparator(state_id))));
+      switch (state_id) {
+        case am::HmiState::StateID::STATE_ID_VR_SESSION: {
+          Event vr_start_event(FunctionID::VR_Started);
+          state_ctrl_->on_event(vr_start_event);
+          break;
+        }
+        case am::HmiState::StateID::STATE_ID_TTS_SESSION: {
+          Event tts_start_event(FunctionID::TTS_Started);
+          state_ctrl_->on_event(tts_start_event);
+          break;
+        }
+        case am::HmiState::StateID::STATE_ID_PHONE_CALL: {
+          Event phone_call_event(FunctionID::BasicCommunication_OnEventChanged);
+          SmartObject message;
+          message[am::strings::msg_params][am::hmi_notification::is_active] =
+              true;
+          message[am::strings::msg_params][am::hmi_notification::event_name] =
+              hmi_apis::Common_EventTypes::PHONE_CALL;
+          phone_call_event.set_smart_object(message);
+          state_ctrl_->on_event(phone_call_event);
+          break;
+        }
+        case am::HmiState::StateID::STATE_ID_SAFETY_MODE: {
+          Event emergency_event(FunctionID::BasicCommunication_OnEventChanged);
+          SmartObject message;
+          message[am::strings::msg_params][am::hmi_notification::is_active] =
+              true;
+          message[am::strings::msg_params][am::hmi_notification::event_name] =
+              hmi_apis::Common_EventTypes::EMERGENCY_EVENT;
+          emergency_event.set_smart_object(message);
+          state_ctrl_->on_event(emergency_event);
+          break;
+        }
+        case am::HmiState::StateID::STATE_ID_NAVI_STREAMING: {
+          state_ctrl_->OnNaviStreamingStarted();
+          break;
+        }
+        default:
+          break;
+      }
+      EXPECT_CALL(application, AddHMIState(_)).Times(0);
+    }
   }
 
   void CheckStateApplyingForApplication(
@@ -1213,7 +1301,7 @@ TEST_F(StateControllerImplTest, MoveAudioResumeAppToValidStates) {
     // Audio resume app when HMI level is LIMITED or FULL gets audible state
     if (state_to_setup->hmi_level() == HMILevel::HMI_LIMITED) {
       EXPECT_CALL(*audio_app_mock, is_resuming()).WillRepeatedly(Return(true));
-      EXPECT_CALL(*message_helper_mock_,
+      EXPECT_CALL(message_helper_mock_,
                   SendOnResumeAudioSourceToHMI(media_navi_vc_app_id_, _));
       state_to_check->set_audio_streaming_state(AudioStreamingState::AUDIBLE);
 
@@ -2372,7 +2460,7 @@ TEST_F(StateControllerImplTest, SetRegularStateMediaToNonMediaApp_VR_Stopped) {
 
   EXPECT_CALL(*simple_app_ptr_, is_resuming()).WillRepeatedly(Return(false));
 
-  EXPECT_CALL(*message_helper_mock_,
+  EXPECT_CALL(message_helper_mock_,
               SendOnResumeAudioSourceToHMI(simple_app_id_, _)).Times(0);
   EXPECT_CALL(*simple_app_ptr_,
               SetPostponedState(Truly(HmiStatesComparator(check_state))))
@@ -2390,7 +2478,7 @@ TEST_F(StateControllerImplTest, SetRegularStateMediaToNonMediaApp_VR_Stopped) {
 
   EXPECT_CALL(*media_app_ptr_, is_resuming()).WillRepeatedly(Return(true));
 
-  EXPECT_CALL(*message_helper_mock_,
+  EXPECT_CALL(message_helper_mock_,
               SendOnResumeAudioSourceToHMI(media_app_id_, _));
   EXPECT_CALL(*media_app_ptr_,
               SetPostponedState(Truly(HmiStatesComparator(check_state))))
@@ -2476,6 +2564,424 @@ TEST_F(StateControllerImplTest,
   EXPECT_CALL(*media_app_ptr_,
               SetPostponedState(Truly(HmiStatesComparator(check_state))));
   state_ctrl_->SetRegularState(media_app_, check_state, false);
+}
+
+TEST_F(StateControllerImplTest,
+       SetStateForNaviApp_BCOnPhoneCall_SetPostponedState) {
+  using namespace hmi_apis;
+  using namespace smart_objects;
+  using namespace am::event_engine;
+
+  // Precondition
+  Event event(FunctionID::BasicCommunication_OnEventChanged);
+  SmartObject message;
+  message[am::strings::msg_params][am::hmi_notification::is_active] = true;
+  message[am::strings::msg_params][am::hmi_notification::event_name] =
+      hmi_apis::Common_EventTypes::PHONE_CALL;
+
+  event.set_smart_object(message);
+  state_ctrl_->on_event(event);
+
+  am::HmiStatePtr hmi_state = FullAudibleState();
+
+  EXPECT_CALL(*navi_app_ptr_, is_resuming()).WillRepeatedly(Return(true));
+
+  EXPECT_CALL(*navi_app_ptr_, is_navi()).WillRepeatedly(Return(true));
+
+  EXPECT_CALL(app_manager_mock_, IsAppTypeExistsInFullOrLimited(_))
+      .WillRepeatedly(Return(false));
+
+  EXPECT_CALL(*navi_app_ptr_, CurrentHmiState())
+      .WillRepeatedly(Return(hmi_state));
+
+  EXPECT_CALL(app_manager_mock_, active_application())
+      .WillRepeatedly(Return(am::ApplicationSharedPtr()));
+
+  state_ctrl_->SetRegularState(navi_app_, hmi_state, false);
+}
+
+TEST_F(StateControllerImplTest,
+       SetStateForNaviApp_BCOnPhoneCall_NotPostponedState) {
+  using namespace hmi_apis;
+  using namespace smart_objects;
+  using namespace am::event_engine;
+
+  // Precondition
+  Event event(FunctionID::BasicCommunication_OnEventChanged);
+  SmartObject message;
+  message[am::strings::msg_params][am::hmi_notification::is_active] = false;
+  message[am::strings::msg_params][am::hmi_notification::event_name] =
+      hmi_apis::Common_EventTypes::PHONE_CALL;
+
+  event.set_smart_object(message);
+  state_ctrl_->on_event(event);
+
+  am::HmiStatePtr hmi_state = FullAudibleState();
+
+  EXPECT_CALL(*navi_app_ptr_, is_resuming()).WillRepeatedly(Return(true));
+
+  EXPECT_CALL(*navi_app_ptr_, is_navi()).WillRepeatedly(Return(true));
+
+  EXPECT_CALL(app_manager_mock_, IsAppTypeExistsInFullOrLimited(_))
+      .WillRepeatedly(Return(false));
+
+  EXPECT_CALL(*navi_app_ptr_, CurrentHmiState())
+      .WillRepeatedly(Return(hmi_state));
+
+  EXPECT_CALL(app_manager_mock_, active_application())
+      .WillRepeatedly(Return(am::ApplicationSharedPtr()));
+
+  EXPECT_CALL(*navi_app_ptr_, SetPostponedState(_)).Times(0);
+
+  state_ctrl_->SetRegularState(navi_app_, hmi_state, false);
+}
+
+TEST_F(StateControllerImplTest,
+       SetStateForNaviApp_BCOnPhoneCall_SetPostponedStateWithActivation) {
+  using namespace hmi_apis;
+  using namespace smart_objects;
+  using namespace am::event_engine;
+  using namespace constants;
+
+  const uint32_t app_id = navi_app_->app_id();
+  // Precondition
+  Event event(FunctionID::BasicCommunication_OnEventChanged);
+  SmartObject message;
+  message[am::strings::msg_params][am::hmi_notification::is_active] = true;
+  message[am::strings::msg_params][am::hmi_notification::event_name] =
+      hmi_apis::Common_EventTypes::PHONE_CALL;
+
+  event.set_smart_object(message);
+  state_ctrl_->on_event(event);
+
+  am::HmiStatePtr hmi_state = FullAudibleState();
+
+  EXPECT_CALL(*navi_app_ptr_, is_resuming()).WillRepeatedly(Return(true));
+  EXPECT_CALL(*navi_app_ptr_, is_navi()).WillRepeatedly(Return(true));
+  EXPECT_CALL(*navi_app_ptr_, app_id()).WillRepeatedly(Return(app_id));
+
+  SetBCActivateAppRequestToHMI(hmi_apis::Common_HMILevel::FULL, kCorrID);
+
+  EXPECT_CALL(app_manager_mock_, IsAppTypeExistsInFullOrLimited(_))
+      .WillRepeatedly(Return(false));
+
+  EXPECT_CALL(*navi_app_ptr_, CurrentHmiState())
+      .WillRepeatedly(Return(hmi_state));
+
+  EXPECT_CALL(app_manager_mock_, active_application())
+      .WillRepeatedly(Return(am::ApplicationSharedPtr()));
+
+  state_ctrl_->SetRegularState(navi_app_, hmi_state, true);
+}
+
+TEST_F(StateControllerImplTest,
+       SetStateForNaviApp_BCOnPhoneCall_NotPostponedStateWithActivation) {
+  using namespace hmi_apis;
+  using namespace smart_objects;
+  using namespace am::event_engine;
+  using namespace constants;
+
+  const uint32_t app_id = navi_app_->app_id();
+  // Precondition
+  Event event(FunctionID::BasicCommunication_OnEventChanged);
+  SmartObject message;
+  message[am::strings::msg_params][am::hmi_notification::is_active] = false;
+  message[am::strings::msg_params][am::hmi_notification::event_name] =
+      hmi_apis::Common_EventTypes::PHONE_CALL;
+
+  event.set_smart_object(message);
+  state_ctrl_->on_event(event);
+
+  am::HmiStatePtr hmi_state = FullAudibleState();
+
+  EXPECT_CALL(*navi_app_ptr_, is_resuming()).WillRepeatedly(Return(true));
+  EXPECT_CALL(*navi_app_ptr_, is_navi()).WillRepeatedly(Return(true));
+  EXPECT_CALL(*navi_app_ptr_, app_id()).WillRepeatedly(Return(app_id));
+
+  SetBCActivateAppRequestToHMI(hmi_apis::Common_HMILevel::FULL, kCorrID);
+
+  EXPECT_CALL(app_manager_mock_, IsAppTypeExistsInFullOrLimited(_))
+      .WillRepeatedly(Return(false));
+
+  EXPECT_CALL(*navi_app_ptr_, CurrentHmiState())
+      .WillRepeatedly(Return(hmi_state));
+
+  EXPECT_CALL(app_manager_mock_, active_application())
+      .WillRepeatedly(Return(am::ApplicationSharedPtr()));
+
+  EXPECT_CALL(*navi_app_ptr_, SetPostponedState(_)).Times(0);
+
+  state_ctrl_->SetRegularState(navi_app_, hmi_state, true);
+}
+
+TEST_F(StateControllerImplTest, OnEventOnAppDeactivatedIncorrectHmiLevel) {
+  smart_objects::SmartObject msg;
+  const uint32_t app_id = simple_app_->app_id();
+  msg[am::strings::msg_params][am::strings::app_id] = app_id;
+  const hmi_apis::FunctionID::eType event_id =
+      hmi_apis::FunctionID::BasicCommunication_OnAppDeactivated;
+  am::event_engine::Event event(event_id);
+  event.set_smart_object(msg);
+  EXPECT_CALL(app_manager_mock_, application(app_id))
+      .WillOnce(Return(simple_app_));
+  EXPECT_CALL(*simple_app_ptr_, hmi_level())
+      .WillOnce(Return(mobile_apis::HMILevel::HMI_BACKGROUND));
+  EXPECT_CALL(*simple_app_ptr_, RegularHmiState()).Times(0);
+  state_ctrl_->on_event(event);
+}
+
+TEST_F(StateControllerImplTest, OnEventOnAppDeactivatedIncorrectApp) {
+  smart_objects::SmartObject msg;
+  msg[am::strings::msg_params][am::strings::app_id] = 0;
+  const hmi_apis::FunctionID::eType event_id =
+      hmi_apis::FunctionID::BasicCommunication_OnAppDeactivated;
+  am::event_engine::Event event(event_id);
+  event.set_smart_object(msg);
+  const am::ApplicationSharedPtr incorrect_app;
+  EXPECT_CALL(app_manager_mock_, application(_))
+      .WillOnce(Return(incorrect_app));
+  EXPECT_CALL(*simple_app_ptr_, hmi_level()).Times(0);
+  state_ctrl_->on_event(event);
+}
+
+TEST_F(StateControllerImplTest, OnEventOnAppDeactivatedAudioApplication) {
+  const uint32_t app_id = simple_app_->app_id();
+  smart_objects::SmartObject msg;
+  msg[am::strings::msg_params][am::strings::app_id] = app_id;
+  const hmi_apis::FunctionID::eType event_id =
+      hmi_apis::FunctionID::BasicCommunication_OnAppDeactivated;
+  am::event_engine::Event event(event_id);
+  event.set_smart_object(msg);
+  const HmiStatePtr state =
+      createHmiState(mobile_apis::HMILevel::HMI_LIMITED,
+                     mobile_apis::AudioStreamingState::AUDIBLE,
+                     mobile_apis::SystemContext::SYSCTXT_MAIN);
+  // OnAppDeactivated
+  EXPECT_CALL(app_manager_mock_, application(app_id))
+      .WillOnce(Return(simple_app_));
+  EXPECT_CALL(*simple_app_ptr_, app_id()).WillRepeatedly(Return(app_id));
+  EXPECT_CALL(*simple_app_ptr_, hmi_level())
+      .WillRepeatedly(Return(mobile_apis::HMILevel::HMI_FULL));
+  // DeactivateApp
+  EXPECT_CALL(*simple_app_ptr_, RegularHmiState()).WillOnce(Return(state));
+  EXPECT_CALL(*simple_app_ptr_, IsAudioApplication())
+      .WillRepeatedly(Return(true));
+  EXPECT_CALL(*simple_app_ptr_, CurrentHmiState())
+      .WillOnce(Return(BackgroundState()))
+      .WillOnce(Return(BackgroundState()));
+  state_ctrl_->on_event(event);
+}
+
+TEST_F(StateControllerImplTest, OnEventOnAppDeactivatedNotAudioApplication) {
+  const uint32_t app_id = simple_app_->app_id();
+  smart_objects::SmartObject msg;
+  msg[am::strings::msg_params][am::strings::app_id] = app_id;
+  const hmi_apis::FunctionID::eType event_id =
+      hmi_apis::FunctionID::BasicCommunication_OnAppDeactivated;
+  am::event_engine::Event event(event_id);
+  event.set_smart_object(msg);
+  const HmiStatePtr state =
+      createHmiState(mobile_apis::HMILevel::HMI_BACKGROUND,
+                     mobile_apis::AudioStreamingState::NOT_AUDIBLE,
+                     mobile_apis::SystemContext::SYSCTXT_MAIN);
+  // OnAppDeactivated
+  EXPECT_CALL(app_manager_mock_, application(app_id))
+      .WillOnce(Return(simple_app_));
+  EXPECT_CALL(*simple_app_ptr_, app_id()).WillRepeatedly(Return(app_id));
+  EXPECT_CALL(*simple_app_ptr_, hmi_level())
+      .WillRepeatedly(Return(mobile_apis::HMILevel::HMI_FULL));
+  // DeactivateApp
+  EXPECT_CALL(*simple_app_ptr_, RegularHmiState()).WillOnce(Return(state));
+  EXPECT_CALL(*simple_app_ptr_, IsAudioApplication())
+      .WillRepeatedly(Return(false));
+
+  EXPECT_CALL(*simple_app_ptr_, CurrentHmiState())
+      .WillOnce(Return(BackgroundState()))
+      .WillOnce(Return(BackgroundState()));
+  state_ctrl_->on_event(event);
+}
+
+TEST_F(StateControllerImplTest, OnEventOnAppActivatedIncorrectApp) {
+  smart_objects::SmartObject msg;
+  const uint32_t incorrect_app_ID = 0;
+  msg[am::strings::msg_params][am::strings::app_id] = incorrect_app_ID;
+  const hmi_apis::FunctionID::eType event_id =
+      hmi_apis::FunctionID::BasicCommunication_OnAppActivated;
+  am::event_engine::Event event(event_id);
+  event.set_smart_object(msg);
+  const am::ApplicationSharedPtr incorrect_app;
+  EXPECT_CALL(app_manager_mock_, application(_))
+      .WillOnce(Return(incorrect_app));
+  EXPECT_CALL(*simple_app_ptr_, app_id()).Times(0);
+  state_ctrl_->on_event(event);
+}
+
+TEST_F(StateControllerImplTest, OnEventOnAppActivated) {
+  using namespace constants;
+
+  smart_objects::SmartObject msg;
+  for (std::vector<am::ApplicationSharedPtr>::const_iterator it =
+           applications_list_.begin();
+       it != applications_list_.end();
+       ++it) {
+    uint32_t app_id = (*it)->app_id();
+    msg[am::strings::msg_params][am::strings::app_id] = app_id;
+    const hmi_apis::FunctionID::eType event_id =
+        hmi_apis::FunctionID::BasicCommunication_OnAppActivated;
+    am::event_engine::Event event(event_id);
+    event.set_smart_object(msg);
+
+    EXPECT_CALL(app_manager_mock_, application(app_id)).WillOnce(Return(*it));
+    // SetRegularState
+    EXPECT_CALL(*simple_app_ptr_, app_id()).WillRepeatedly(Return(app_id));
+    EXPECT_CALL(*simple_app_ptr_, IsAudioApplication())
+        .WillRepeatedly(Return(true));
+
+    smart_objects::SmartObjectSPtr activate_app =
+        utils::MakeShared<smart_objects::SmartObject>();
+    (*activate_app)[am::strings::params][am::strings::correlation_id] = kCorrID;
+    SetBCActivateAppRequestToHMI(hmi_apis::Common_HMILevel::FULL, kCorrID);
+    state_ctrl_->on_event(event);
+  }
+}
+
+TEST_F(StateControllerImplTest, IsStateActive) {
+  HmiStatePtr state = createHmiState(mobile_apis::HMILevel::HMI_FULL,
+                                     mobile_apis::AudioStreamingState::AUDIBLE,
+                                     mobile_apis::SystemContext::SYSCTXT_MAIN);
+  state->set_state_id(HmiState::STATE_ID_CURRENT);
+  EXPECT_TRUE(state_ctrl_->IsStateActive(state->state_id()));
+  state->set_state_id(HmiState::STATE_ID_REGULAR);
+  EXPECT_TRUE(state_ctrl_->IsStateActive(state->state_id()));
+  state->set_state_id(HmiState::STATE_ID_TTS_SESSION);
+  EXPECT_FALSE(state_ctrl_->IsStateActive(state->state_id()));
+}
+
+TEST_F(StateControllerImplTest, IsStateActiveApplyCorrectTempStates) {
+  InsertApplication(simple_app_);
+  ApplyTempStatesForApplication(*simple_app_ptr_, valid_state_ids_);
+  std::vector<am::HmiState::StateID>::const_iterator it =
+      valid_state_ids_.begin();
+  for (; it != valid_state_ids_.end(); ++it) {
+    EXPECT_TRUE(state_ctrl_->IsStateActive(*it));
+  }
+}
+
+TEST_F(StateControllerImplTest, IsStateActiveApplyNotCorrectTempStates) {
+  smart_objects::SmartObject msg;
+  msg[am::strings::msg_params][am::hmi_notification::event_name] =
+      hmi_apis::Common_EventTypes::AUDIO_SOURCE;
+  const hmi_apis::FunctionID::eType event_id = hmi_apis::FunctionID::VR_Started;
+  am::event_engine::Event event(event_id);
+  event.set_smart_object(msg);
+  state_ctrl_->on_event(event);
+  EXPECT_FALSE(state_ctrl_->IsStateActive(HmiState::STATE_ID_AUDIO_SOURCE));
+}
+
+TEST_F(StateControllerImplTest, OnApplicationRegisteredDifferentStates) {
+  const uint32_t app_id = simple_app_->app_id();
+  smart_objects::SmartObject msg;
+  msg[am::strings::msg_params][am::strings::app_id] = app_id;
+  msg[am::strings::msg_params][am::hmi_notification::is_active] = true;
+
+  const hmi_apis::FunctionID::eType event_id =
+      hmi_apis::FunctionID::BasicCommunication_OnEventChanged;
+  am::event_engine::Event event(event_id);
+
+  msg[am::strings::msg_params][am::hmi_notification::event_name] =
+      hmi_apis::Common_EventTypes::AUDIO_SOURCE;
+  event.set_smart_object(msg);
+  state_ctrl_->on_event(event);
+  msg[am::strings::msg_params][am::hmi_notification::event_name] =
+      hmi_apis::Common_EventTypes::PHONE_CALL;
+  event.set_smart_object(msg);
+  state_ctrl_->on_event(event);
+  msg[am::strings::msg_params][am::hmi_notification::event_name] =
+      hmi_apis::Common_EventTypes::DEACTIVATE_HMI;
+  event.set_smart_object(msg);
+  state_ctrl_->on_event(event);
+  msg[am::strings::msg_params][am::hmi_notification::event_name] =
+      hmi_apis::Common_EventTypes::EMBEDDED_NAVI;
+  event.set_smart_object(msg);
+  state_ctrl_->on_event(event);
+
+  const am::HmiStatePtr old_state = CreateHmiStateByHmiStateType<am::HmiState>(
+      mobile_apis::HMILevel::HMI_FULL,
+      mobile_apis::AudioStreamingState::AUDIBLE,
+      mobile_apis::SystemContext::SYSCTXT_MAIN,
+      app_id);
+
+  EXPECT_CALL(*simple_app_ptr_, app_id()).WillRepeatedly(Return(app_id));
+  EXPECT_CALL(*simple_app_ptr_, CurrentHmiState())
+      .WillRepeatedly(Return(old_state));
+  EXPECT_CALL(*simple_app_ptr_, AddHMIState(_)).Times(4);
+
+  const am::HmiStatePtr default_state =
+      CreateHmiStateByHmiStateType<am::HmiState>(
+          mobile_apis::HMILevel::HMI_BACKGROUND,
+          mobile_apis::AudioStreamingState::AUDIBLE,
+          mobile_apis::SystemContext::SYSCTXT_MAIN,
+          app_id);
+
+  EXPECT_CALL(*simple_app_ptr_, RegularHmiState()).WillOnce(Return(old_state));
+  EXPECT_CALL(*simple_app_ptr_, CurrentHmiState())
+      .WillRepeatedly(Return(default_state));
+
+  EXPECT_CALL(*simple_app_ptr_, ResetDataInNone()).Times(0);
+  EXPECT_CALL(app_manager_mock_, SendHMIStatusNotification(_));
+  EXPECT_CALL(app_manager_mock_, OnHMILevelChanged(_, _, _));
+
+  state_ctrl_->OnApplicationRegistered(simple_app_,
+                                       mobile_apis::HMILevel::HMI_BACKGROUND);
+}
+
+TEST_F(StateControllerImplTest, OnApplicationRegisteredEqualStates) {
+  const uint32_t app_id = simple_app_->app_id();
+  smart_objects::SmartObject msg;
+  msg[am::strings::msg_params][am::strings::app_id] = app_id;
+  msg[am::strings::msg_params][am::hmi_notification::is_active] = true;
+
+  const hmi_apis::FunctionID::eType event_id =
+      hmi_apis::FunctionID::BasicCommunication_OnEventChanged;
+  am::event_engine::Event event(event_id);
+
+  msg[am::strings::msg_params][am::hmi_notification::event_name] =
+      hmi_apis::Common_EventTypes::AUDIO_SOURCE;
+  event.set_smart_object(msg);
+  state_ctrl_->on_event(event);
+  msg[am::strings::msg_params][am::hmi_notification::event_name] =
+      hmi_apis::Common_EventTypes::PHONE_CALL;
+  event.set_smart_object(msg);
+  state_ctrl_->on_event(event);
+
+  const am::HmiStatePtr old_state = CreateHmiStateByHmiStateType<am::HmiState>(
+      mobile_apis::HMILevel::HMI_FULL,
+      mobile_apis::AudioStreamingState::AUDIBLE,
+      mobile_apis::SystemContext::SYSCTXT_MAIN,
+      app_id);
+
+  EXPECT_CALL(*simple_app_ptr_, app_id()).WillRepeatedly(Return(app_id));
+  EXPECT_CALL(*simple_app_ptr_, CurrentHmiState())
+      .WillRepeatedly(Return(old_state));
+  EXPECT_CALL(*simple_app_ptr_, AddHMIState(_)).Times(2);
+
+  const am::HmiStatePtr default_state =
+      CreateHmiStateByHmiStateType<am::HmiState>(
+          mobile_apis::HMILevel::HMI_BACKGROUND,
+          mobile_apis::AudioStreamingState::AUDIBLE,
+          mobile_apis::SystemContext::SYSCTXT_MAIN,
+          app_id);
+  EXPECT_CALL(*simple_app_ptr_, RegularHmiState())
+      .WillOnce(Return(default_state));
+  EXPECT_CALL(*simple_app_ptr_, CurrentHmiState())
+      .WillRepeatedly(Return(default_state));
+
+  EXPECT_CALL(*simple_app_ptr_, ResetDataInNone()).Times(0);
+  EXPECT_CALL(app_manager_mock_, SendHMIStatusNotification(_)).Times(0);
+  EXPECT_CALL(app_manager_mock_, OnHMILevelChanged(_, _, _)).Times(0);
+
+  state_ctrl_->OnApplicationRegistered(simple_app_,
+                                       mobile_apis::HMILevel::HMI_BACKGROUND);
 }
 
 }  // namespace state_controller_test

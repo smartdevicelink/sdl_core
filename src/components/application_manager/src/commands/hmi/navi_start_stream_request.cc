@@ -113,7 +113,7 @@ void NaviStartStreamRequest::on_event(const event_engine::Event& event) {
       }
       if (hmi_apis::Common_Result::REJECTED == code) {
         LOG4CXX_INFO(logger_, "StartStream response REJECTED ");
-        SendRequest();
+        RetryStartSession();
         break;
       }
     }
@@ -156,7 +156,7 @@ void NaviStartStreamRequest::RetryStartSession() {
   }
 
   uint32_t curr_retry_number = app->video_stream_retry_number();
-  if (curr_retry_number < retry_number_ - 1) {
+  if (curr_retry_number < retry_number_) {
     LOG4CXX_DEBUG(
         logger_,
         "Send NaviStartStream retry. retry_number = " << curr_retry_number);

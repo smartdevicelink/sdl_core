@@ -30,18 +30,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_POLICY_HANDLER_INTERFACE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_POLICY_HANDLER_INTERFACE_H_
+#ifndef SRC_COMPONENTS_INCLUDE_TEST_APPLICATION_MANAGER_POLICIES_MOCK_POLICY_HANDLER_INTERFACE_H_
+#define SRC_COMPONENTS_INCLUDE_TEST_APPLICATION_MANAGER_POLICIES_MOCK_POLICY_HANDLER_INTERFACE_H_
 
 #include "application_manager/policies/policy_handler_interface.h"
 #include "gmock/gmock.h"
 #include "policy/policy_types.h"
+#include "smart_objects/smart_object.h"
 
 namespace test {
 namespace components {
 namespace policy_test {
 
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
  public:
   MOCK_METHOD0(LoadPolicyLibrary, bool());
@@ -63,10 +63,16 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
   MOCK_METHOD2(OnPermissionsUpdated,
                void(const std::string& policy_app_id,
                     const policy::Permissions& permissions));
+
+#ifdef EXTERNAL_PROPRIETARY_MODE
   MOCK_METHOD3(OnSnapshotCreated,
                void(const policy::BinaryMessage& pt_string,
                     const std::vector<int>& retry_delay_seconds,
-                    int timeout_exchange));
+                    uint32_t timeout_exchange));
+#else   // EXTERNAL_PROPRIETARY_MODE
+  MOCK_METHOD1(OnSnapshotCreated, void(const policy::BinaryMessage& pt_string));
+#endif  // EXTERNAL_PROPRIETARY_MODE
+
   MOCK_CONST_METHOD2(GetPriority,
                      bool(const std::string& policy_app_id,
                           std::string* priority));
@@ -93,11 +99,13 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
                     policy::StringArray* nicknames));
   MOCK_METHOD1(GetInitialAppData, bool(const std::string& application_id));
   MOCK_METHOD2(GetUpdateUrls,
-               void(int service_type, policy::EndpointUrls& end_points));
+               void(const uint32_t service_type,
+                    policy::EndpointUrls& end_points));
   MOCK_CONST_METHOD0(GetLockScreenIconUrl, std::string());
   MOCK_METHOD0(ResetRetrySequence, void());
   MOCK_METHOD0(NextRetryTimeout, uint32_t());
-  MOCK_METHOD0(TimeoutExchange, int());
+  MOCK_METHOD0(TimeoutExchangeSec, uint32_t());
+  MOCK_METHOD0(TimeoutExchangeMSec, uint32_t());
   MOCK_METHOD0(OnExceededTimeout, void());
   MOCK_METHOD0(OnSystemReady, void());
   MOCK_METHOD2(PTUpdatedAt, void(policy::Counters counter, int value));
@@ -165,7 +173,8 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
                           const std::string& policy_app_id));
   MOCK_METHOD0(OnPTExchangeNeeded, void());
   MOCK_METHOD1(GetAvailableApps, void(std::queue<std::string>& apps));
-  MOCK_METHOD1(AddApplication, void(const std::string& application_id));
+  MOCK_METHOD1(AddApplication,
+               policy::StatusNotifier(const std::string& application_id));
   MOCK_METHOD1(IsApplicationRevoked, bool(const std::string& app_id));
   MOCK_METHOD0(OnUpdateRequestSentToMobile, void());
   MOCK_CONST_METHOD1(HeartBeatTimeout, uint32_t(const std::string& app_id));
@@ -180,6 +189,11 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
       GetAppRequestTypes,
       const std::vector<std::string>(const std::string& policy_app_id));
   MOCK_CONST_METHOD0(GetVehicleInfo, const policy::VehicleInfo());
+
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  MOCK_CONST_METHOD0(GetMetaInfo, const policy::MetaInfo());
+#endif  // EXTERNAL_PROPRIETARY_MODE
+
   MOCK_METHOD1(Increment, void(usage_statistics::GlobalCounterId type));
   MOCK_METHOD2(Increment,
                void(const std::string& app_id,
@@ -192,10 +206,12 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
                void(const std::string& app_id,
                     usage_statistics::AppStopwatchId type,
                     int32_t timespan_seconds));
+#ifdef ENABLE_SECURITY
   MOCK_CONST_METHOD0(RetrieveCertificate, std::string());
+#endif  // ENABLE_SECURITY
   MOCK_CONST_METHOD0(get_settings, const policy::PolicySettings&());
   MOCK_CONST_METHOD0(RemoteAppsUrl, const std::string());
-  MOCK_METHOD2(GetServiceUrls,
+  MOCK_METHOD2(GetUpdateUrls,
                void(const std::string& service_type,
                     policy::EndpointUrls& end_points));
 
@@ -209,4 +225,4 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
 }  // namespace components
 }  // namespace test
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_POLICY_HANDLER_INTERFACE_H_
+#endif  // SRC_COMPONENTS_INCLUDE_TEST_APPLICATION_MANAGER_POLICIES_MOCK_POLICY_HANDLER_INTERFACE_H_

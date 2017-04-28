@@ -41,8 +41,8 @@
 
 namespace test {
 namespace components {
-namespace SmartObjects {
-namespace SchemaItem {
+namespace smart_object_test {
+
 using NsSmartDeviceLink::NsSmartObjects::ISchemaItemPtr;
 
 /**
@@ -209,7 +209,7 @@ TEST(test_array_validate, test_BoolSchemaItemTest) {
   resultType = item->validate(obj);
   EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK, resultType);
 }
-}  // namespace SchemaItem"
-}  // namespace SmartObjects"
-}  // namespace components"
-}  // namespace test"
+
+}  // namespace smart_object_test
+}  // namespace components
+}  // namespace test

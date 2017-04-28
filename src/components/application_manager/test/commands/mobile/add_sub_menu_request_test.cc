@@ -48,6 +48,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace add_sub_menu_request {
 
 namespace am = ::application_manager;
 using am::commands::AddSubMenuRequest;
@@ -132,6 +133,7 @@ TEST_F(AddSubMenuRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
   Mock::VerifyAndClearExpectations(&mock_message_helper_);
 }
 
+}  // namespace add_sub_menu_request
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

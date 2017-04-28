@@ -173,6 +173,7 @@ void ConnectionHandlerImpl::OnDeviceRemoved(
   sync_primitives::AutoReadLock read_lock(connection_handler_observer_lock_);
   if (connection_handler_observer_) {
     connection_handler_observer_->RemoveDevice(device_info.device_handle());
+    connection_handler_observer_->OnDeviceListUpdated(device_list_);
   }
 }
 
@@ -388,6 +389,7 @@ uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
   ConnectionList::iterator it = connection_list_.find(connection_handle);
   if (connection_list_.end() == it) {
     LOG4CXX_WARN(logger_, "Unknown connection!");
+    connection_list_lock_.Release();
     return 0;
   }
   std::pair<int32_t, Connection*> connection_item = *it;
@@ -944,6 +946,7 @@ void ConnectionHandlerImpl::OnConnectionEnded(
   ConnectionList::iterator itr = connection_list_.find(connection_id);
   if (connection_list_.end() == itr) {
     LOG4CXX_ERROR(logger_, "Connection not found!");
+    connection_list_lock_.Release();
     return;
   }
   std::auto_ptr<Connection> connection(itr->second);

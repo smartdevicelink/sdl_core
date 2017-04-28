@@ -1,4 +1,4 @@
-# Copyright (c) 2015, Ford Motor Company
+# Copyright (c) 2016, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,21 +28,16 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-if(BUILD_TESTS)
-include_directories (
+include_directories(
   ${GMOCK_INCLUDE_DIRECTORY}
   ${JSONCPP_INCLUDE_DIRECTORY}
 )
+
+collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}")
 
 set(LIBRARIES
     gmock 
     jsoncpp
 )
 
-set (SOURCES
-  json_reader_test.cc
-)
-
-add_library("test_JSONCPPTest" ${SOURCES})
-create_test("test_JSONCPP" "${SOURCES}" "${LIBRARIES}")
-endif()  
+create_test(jsoncpp_test "${SOURCES}" "${LIBRARIES}")

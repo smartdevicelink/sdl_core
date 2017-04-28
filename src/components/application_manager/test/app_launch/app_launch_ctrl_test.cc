@@ -41,10 +41,12 @@
 #include "application_manager/mock_application_manager.h"
 #include "connection_handler/mock_connection_handler.h"
 #include "utils/make_shared.h"
+#include "utils/test_async_waiter.h"
 
 namespace test {
 namespace components {
 namespace app_launch_test {
+
 using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::Truly;
@@ -52,6 +54,7 @@ using ::testing::NiceMock;
 using ::testing::Invoke;
 using ::testing::AtLeast;
 using ::testing::InSequence;
+using ::testing::DoAll;
 
 namespace ch_test = test::components::connection_handler_test;
 namespace am_test = test::components::application_manager_test;
@@ -61,8 +64,8 @@ typedef utils::SharedPtr<am_test::MockApplication> MockAppPtr;
 class AppLaunchCtrlTest : public ::testing::Test {
  public:
   MockAppPtr AppFromAppData(const app_launch::ApplicationData& app_data) {
-    utils::SharedPtr<NiceMock<am_test::MockApplication>> app =
-        utils::MakeShared<NiceMock<am_test::MockApplication>>();
+    utils::SharedPtr<NiceMock<am_test::MockApplication> > app =
+        utils::MakeShared<NiceMock<am_test::MockApplication> >();
 
     ON_CALL(*app, mac_address()).WillByDefault(ReturnRef(app_data.device_mac_));
     ON_CALL(*app, bundle_id()).WillByDefault(ReturnRef(app_data.bundle_id_));
@@ -74,7 +77,7 @@ class AppLaunchCtrlTest : public ::testing::Test {
   app_launch::ApplicationDataPtr AppDataFromApp(
       const am_test::MockApplication& app) {
     app_launch::ApplicationDataPtr app_data =
-        utils::MakeShared<NiceMock<app_launch::ApplicationData>>(
+        utils::MakeShared<NiceMock<app_launch::ApplicationData> >(
             app.policy_app_id(), app.bundle_id(), app.mac_address());
     return app_data;
   }
@@ -198,6 +201,7 @@ TEST_F(AppLaunchCtrlTest, StoredAppIsLaunchedAfterDeviceConnected) {
   app_launch::ApplicationDataPtr app_to_launch = GetTestAppData(0);
   MockAppPtr app = GetTestApp(0);
 
+  TestAsyncWaiter waiter;
   applications_on_device.push_back(app_to_launch);
   EXPECT_CALL(app_launch_data_mock_,
               GetApplicationDataByDevice(app_to_launch->device_mac_))
@@ -206,17 +210,21 @@ TEST_F(AppLaunchCtrlTest, StoredAppIsLaunchedAfterDeviceConnected) {
       connection_handler_mock_,
       RunAppOnDevice(app_to_launch->device_mac_, app_to_launch->bundle_id_))
       .Times(AtLeast(1))
-      .WillOnce(InvokeOnAppRegistered(app_launch_ctrl_.get(), app.get()));
+      .WillOnce(DoAll(InvokeOnAppRegistered(app_launch_ctrl_.get(), app.get()),
+                      NotifyTestAsyncWaiter(&waiter)));
   app_launch_ctrl_->OnDeviceConnected(app_to_launch->device_mac_);
   const uint32_t wait_time =
       MAX_TEST_DURATION + settings_.app_launch_wait_time();
-  testing::Mock::AsyncVerifyAndClearExpectations(wait_time);
+  EXPECT_TRUE(waiter.WaitFor(1, wait_time));
 }
 
 TEST_F(AppLaunchCtrlTest, RelaunchAppIfNotRegisteredMultipleTimes) {
   std::vector<app_launch::ApplicationDataPtr> applications_on_device;
   app_launch::ApplicationDataPtr app_to_launch = GetTestAppData(0);
   applications_on_device.push_back(app_to_launch);
+
+  TestAsyncWaiter waiter;
+  const uint32_t times = settings_.app_launch_max_retry_attempt();
   EXPECT_CALL(app_launch_data_mock_,
               GetApplicationDataByDevice(app_to_launch->device_mac_))
       .WillOnce(Return(applications_on_device));
@@ -224,14 +232,15 @@ TEST_F(AppLaunchCtrlTest, RelaunchAppIfNotRegisteredMultipleTimes) {
   EXPECT_CALL(
       connection_handler_mock_,
       RunAppOnDevice(app_to_launch->device_mac_, app_to_launch->bundle_id_))
-      .Times(settings_.app_launch_max_retry_attempt());
+      .Times(times)
+      .WillRepeatedly(NotifyTestAsyncWaiter(&waiter));
 
   app_launch_ctrl_->OnDeviceConnected(app_to_launch->device_mac_);
   const uint32_t wait_time = MAX_TEST_DURATION +
                              settings_.app_launch_wait_time() +
                              settings_.app_launch_max_retry_attempt() *
                                  settings_.app_launch_retry_wait_time();
-  testing::Mock::AsyncVerifyAndClearExpectations(wait_time);
+  EXPECT_TRUE(waiter.WaitFor(times, wait_time));
 }
 
 TEST_F(AppLaunchCtrlTest, LaunchMultipleApps) {
@@ -243,6 +252,8 @@ TEST_F(AppLaunchCtrlTest, LaunchMultipleApps) {
     apps.push_back(it->second);
   }
 
+  TestAsyncWaiter waiter;
+  const uint32_t times = apps_and_data.size();
   EXPECT_CALL(app_launch_data_mock_, GetApplicationDataByDevice(DeviceMac(1)))
       .WillOnce(Return(apps));
 
@@ -250,13 +261,18 @@ TEST_F(AppLaunchCtrlTest, LaunchMultipleApps) {
   for (std::vector<AppAndAppData>::iterator it = apps_and_data.begin();
        it != apps_and_data.end();
        ++it) {
-    ExpectRegisteration(*it);
+    EXPECT_CALL(connection_handler_mock_,
+                RunAppOnDevice(it->second->device_mac_, it->second->bundle_id_))
+        .Times(AtLeast(1))
+        .WillOnce(DoAll(
+            InvokeOnAppRegistered(app_launch_ctrl_.get(), it->first.get()),
+            NotifyTestAsyncWaiter(&waiter)));
   }
   app_launch_ctrl_->OnDeviceConnected(DeviceMac(1));
   const uint32_t wait_time = MAX_TEST_DURATION +
                              settings_.app_launch_wait_time() +
                              apps.size() * settings_.wait_time_between_apps();
-  testing::Mock::AsyncVerifyAndClearExpectations(wait_time);
+  waiter.WaitFor(times, wait_time);
 }
 
 TEST_F(AppLaunchCtrlTest, LaunchMultipleAppsNoRegister) {
@@ -268,6 +284,9 @@ TEST_F(AppLaunchCtrlTest, LaunchMultipleAppsNoRegister) {
     apps.push_back(it->second);
   }
 
+  TestAsyncWaiter waiter;
+  const uint32_t times =
+      settings_.app_launch_max_retry_attempt() * apps_and_data.size();
   EXPECT_CALL(app_launch_data_mock_, GetApplicationDataByDevice(DeviceMac(1)))
       .WillOnce(Return(apps));
 
@@ -279,13 +298,14 @@ TEST_F(AppLaunchCtrlTest, LaunchMultipleAppsNoRegister) {
     EXPECT_CALL(connection_handler_mock_,
                 RunAppOnDevice(app_data.second->device_mac_,
                                app_data.second->bundle_id_))
-        .Times(settings_.app_launch_max_retry_attempt());
+        .Times(settings_.app_launch_max_retry_attempt())
+        .WillRepeatedly(NotifyTestAsyncWaiter(&waiter));
   }
   app_launch_ctrl_->OnDeviceConnected(DeviceMac(1));
   const uint32_t wait_time = MAX_TEST_DURATION +
                              settings_.app_launch_wait_time() +
                              apps.size() * settings_.wait_time_between_apps();
-  testing::Mock::AsyncVerifyAndClearExpectations(wait_time);
+  waiter.WaitFor(times, wait_time);
 }
 
 TEST_F(AppLaunchCtrlTest, LaunchMultipleAppsInHMILevelOrder) {
@@ -322,31 +342,28 @@ TEST_F(AppLaunchCtrlTest, LaunchMultipleAppsInHMILevelOrder) {
     apps.push_back(app_data);
   }
 
+  TestAsyncWaiter waiter;
+  const uint32_t times = apps_and_data.size();
   EXPECT_CALL(app_launch_data_mock_, GetApplicationDataByDevice(DeviceMac(1)))
       .WillOnce(Return(apps));
-  {
-    InSequence s;
-
-    ExpectRegisteration(apps_and_data[0]);
-    ExpectRegisteration(apps_and_data[1]);
-    ExpectRegisteration(apps_and_data[2]);
+  // Expect multiple call
+  for (std::vector<AppAndAppData>::iterator it = apps_and_data.begin();
+       it != apps_and_data.end();
+       ++it) {
+    EXPECT_CALL(connection_handler_mock_,
+                RunAppOnDevice(it->second->device_mac_, it->second->bundle_id_))
+        .Times(AtLeast(1))
+        .WillRepeatedly(DoAll(
+            InvokeOnAppRegistered(app_launch_ctrl_.get(), it->first.get()),
+            NotifyTestAsyncWaiter(&waiter)));
   }
 
   app_launch_ctrl_->OnDeviceConnected(DeviceMac(1));
+
   const uint32_t wait_time = MAX_TEST_DURATION +
                              settings_.app_launch_wait_time() +
                              apps.size() * settings_.wait_time_between_apps();
-  testing::Mock::AsyncVerifyAndClearExpectations(wait_time);
-}
-
-void AppLaunchCtrlTest::ExpectRegisteration(
-    const AppLaunchCtrlTest::AppAndAppData& app_data) {
-  EXPECT_CALL(
-      connection_handler_mock_,
-      RunAppOnDevice(app_data.second->device_mac_, app_data.second->bundle_id_))
-      .Times(AtLeast(1))
-      .WillOnce(
-          InvokeOnAppRegistered(app_launch_ctrl_.get(), app_data.first.get()));
+  waiter.WaitFor(times, wait_time);
 }
 
 }  // namespace app_launch_test
