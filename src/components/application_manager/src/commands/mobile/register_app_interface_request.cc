@@ -496,6 +496,8 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
       major_version;  // From generated file interfaces/generated_msg_version.h
   response_params[strings::sync_msg_version][strings::minor_version] =
       minor_version;  // From generated file interfaces/generated_msg_version.h
+  response_params[strings::sync_msg_version][strings::patch_version] =
+      patch_version;  // From generated file interfaces/generated_msg_version.h
 
   const smart_objects::SmartObject& msg_params =
       (*message_)[strings::msg_params];
