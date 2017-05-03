@@ -272,9 +272,12 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
   file_system::DeleteFile(file);
 
   if (!IsPTValid(pt_update, policy_table::PT_UPDATE)) {
+    LOG4CXX_ERROR(logger_, "Wrong PT received");
     wrong_ptu_update_received_ = true;
     update_status_manager_.OnWrongUpdateReceived();
     return false;
+  } else {
+    wrong_ptu_update_received_ = false;
   }
 
   update_status_manager_.OnValidUpdateReceived();
@@ -505,13 +508,18 @@ void PolicyManagerImpl::StartPTExchange() {
                  "is in progress.");
     return;
   }
-  LOG4CXX_INFO(logger_, "Policy want to  call RequestPTUpdate");
+  LOG4CXX_INFO(logger_, "Policy want to call RequestPTUpdate");
   if (listener_ && listener_->CanUpdate()) {
-    LOG4CXX_INFO(logger_, "Listener CanUpdate");
-    if (update_status_manager_.IsUpdateRequired()) {
-      LOG4CXX_INFO(logger_, "IsUpdateRequired");
+    LOG4CXX_INFO(logger_, "Listener is ready for update");
+    if (update_status_manager_.IsUpdateRequired() &&
+        !wrong_ptu_update_received_) {
+      LOG4CXX_INFO(logger_, "Update is required");
       RequestPTUpdate();
+    } else {
+      LOG4CXX_INFO(logger_, "Update is not required");
     }
+  } else {
+    LOG4CXX_INFO(logger_, "Listener cannot update");
   }
 }
 
