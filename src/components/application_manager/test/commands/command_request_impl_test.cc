@@ -123,8 +123,9 @@ class CommandRequestImplTest
     }
   };
 
-  CommandRequestImplTest() {
+  CommandRequestImplTest() : app_(CreateMockApp()) {
     mock_message_helper_ = am::MockMessageHelper::message_helper_mock();
+    ON_CALL(app_mngr_, application(kConnectionKey)).WillByDefault(Return(app_));
   }
   ~CommandRequestImplTest() {
     mock_message_helper_ = NULL;
@@ -139,7 +140,7 @@ class CommandRequestImplTest
             Return(DataAccessor<ApplicationSet>(*app_set, app_set_lock_)));
     return app;
   }
-
+  MockAppPtr app_;
   sync_primitives::Lock app_set_lock_;
   am::MockMessageHelper* mock_message_helper_;
 };
@@ -172,10 +173,6 @@ TEST_F(CommandRequestImplTest,
   (*msg)[strings::params][strings::connection_key] = kConnectionKey;
 
   CommandPtr command = CreateCommand<UCommandRequestImpl>(msg);
-
-  MockAppPtr app = CreateMockApp();
-  ON_CALL(app_mngr_, application(command->connection_key()))
-      .WillByDefault(Return(app));
 
   MessageSharedPtr dummy_msg(CreateMessage());
   EXPECT_CALL(*mock_message_helper_, CreateNegativeResponse(_, _, _, _))
@@ -361,41 +358,20 @@ TEST_F(CommandRequestImplTest,
   (*msg)[strings::params][strings::connection_key] = kConnectionKey;
 
   CommandPtr command = CreateCommand<UCommandRequestImpl>(msg);
+  MockAppPtr invalid_app;
+  EXPECT_CALL(app_mngr_, application(command->connection_key()))
+      .WillOnce(Return(invalid_app));
 
-  SharedPtr<ApplicationSet> app_set;
-  MockAppPtr app(InitAppSetDataAccessor(app_set));
-  EXPECT_CALL(*app, app_id()).WillOnce(Return(6u));
-  EXPECT_TRUE(command->CheckPermissions());
-}
-
-TEST_F(CommandRequestImplTest, CheckAllowedParameters_NoMsgParamsMap_SUCCESS) {
-  MessageSharedPtr msg = CreateMessage();
-  (*msg)[strings::params][strings::connection_key] = kConnectionKey;
-  (*msg)[strings::msg_params] = 0u;
-
-  CommandPtr command = CreateCommand<UCommandRequestImpl>(msg);
-
-  SharedPtr<ApplicationSet> app_set;
-  MockAppPtr app(InitAppSetDataAccessor(app_set));
-  EXPECT_CALL(*app, app_id()).WillOnce(Return(kConnectionKey));
-
-  EXPECT_CALL(app_mngr_, CheckPolicyPermissions(_, _, _, _))
-      .WillOnce(Return(kMobResultSuccess));
-
-  EXPECT_TRUE(command->CheckPermissions());
+  EXPECT_FALSE(command->CheckPermissions());
 }
 
 TEST_F(CommandRequestImplTest,
        CheckAllowedParameters_WrongPolicyPermissions_UNSUCCESS) {
   MessageSharedPtr msg = CreateMessage();
   (*msg)[strings::params][strings::connection_key] = kConnectionKey;
-  (*msg)[strings::msg_params] = 0u;
+  (*msg)[strings::msg_params][kPolicyAppId] = true;
 
   CommandPtr command = CreateCommand<UCommandRequestImpl>(msg);
-
-  SharedPtr<ApplicationSet> app_set;
-  MockAppPtr app(InitAppSetDataAccessor(app_set));
-  EXPECT_CALL(*app, app_id()).Times(2).WillRepeatedly(Return(kConnectionKey));
 
   EXPECT_CALL(app_mngr_, CheckPolicyPermissions(_, _, _, _))
       .WillOnce(Return(mobile_apis::Result::INVALID_ENUM));
@@ -418,10 +394,6 @@ TEST_F(CommandRequestImplTest, CheckAllowedParameters_MsgParamsMap_SUCCESS) {
   (*msg)[strings::msg_params][kPolicyAppId] = true;
 
   CommandPtr command = CreateCommand<UCommandRequestImpl>(msg);
-
-  SharedPtr<ApplicationSet> app_set;
-  MockAppPtr app(InitAppSetDataAccessor(app_set));
-  EXPECT_CALL(*app, app_id()).WillOnce(Return(kConnectionKey));
 
   RPCParams params;
   EXPECT_CALL(app_mngr_, CheckPolicyPermissions(_, _, _, _))
