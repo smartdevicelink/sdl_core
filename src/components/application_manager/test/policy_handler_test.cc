@@ -1073,8 +1073,8 @@ TEST_F(PolicyHandlerTest, PTExchangeAtUserRequest) {
   // Arrange
   ChangePolicyManagerToMock();
   // Check expectations
-  EXPECT_CALL(*mock_policy_manager_, ForcePTExchange());
-  EXPECT_CALL(mock_message_helper_, SendUpdateSDLResponse(_, _, _)).Times(0);
+  EXPECT_CALL(*mock_policy_manager_, ForcePTExchangeAtUserRequest());
+  EXPECT_CALL(mock_message_helper_, SendUpdateSDLResponse(_, _, _));
   // Act
   const uint32_t correlation_id = 2;
   policy_handler_.PTExchangeAtUserRequest(correlation_id);
@@ -2122,6 +2122,9 @@ TEST_F(PolicyHandlerTest,
   sync_primitives::AutoLock auto_lock_second(wait_hmi_lock_second);
   WaitAsync waiter_second(kCallsCount_, kTimeout_);
 
+  ON_CALL(*mock_policy_manager_, IsNeedToUpdateExternalConsentStatus(_))
+      .WillByDefault(Return(true));
+
   EXPECT_CALL(*mock_policy_manager_,
               SetExternalConsentStatus(external_consent_status))
       .WillOnce(Return(true));
@@ -2207,9 +2210,6 @@ TEST_F(PolicyHandlerTest,
 #ifdef EXTERNAL_PROPRIETARY_MODE
   ON_CALL(*mock_policy_manager_, IsNeedToUpdateExternalConsentStatus(_))
       .WillByDefault(Return(false));
-  EXPECT_CALL(*mock_policy_manager_,
-              SetExternalConsentStatus(external_consent_status))
-      .WillOnce(Return(true));
   policy_handler_.OnAppPermissionConsent(
       invalid_connection_key, permissions, external_consent_status);
 #else
@@ -2335,8 +2335,7 @@ TEST_F(PolicyHandlerTest,
   ON_CALL(*mock_policy_manager_, IsNeedToUpdateExternalConsentStatus(_))
       .WillByDefault(Return(false));
   EXPECT_CALL(*mock_policy_manager_,
-              SetExternalConsentStatus(external_consent_status))
-      .WillOnce(Return(true));
+              SetExternalConsentStatus(external_consent_status)).Times(0);
   policy_handler_.OnAppPermissionConsent(
       invalid_connection_key, permissions, external_consent_status);
 #else

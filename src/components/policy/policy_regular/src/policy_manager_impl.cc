@@ -805,22 +805,22 @@ uint32_t PolicyManagerImpl::NextRetryTimeout() {
   LOG4CXX_DEBUG(logger_, "Index: " << retry_sequence_index_);
   uint32_t next = 0u;
   if (retry_sequence_seconds_.empty() ||
-      retry_sequence_index_ >= (retry_sequence_seconds_.size())) {
-    sync_primitives::ConditionalVariable termination_condition_;
-    termination_condition_.WaitFor(auto_lock, retry_sequence_timeout_ * 60);
+      retry_sequence_index_ >= retry_sequence_seconds_.size()) {
     return next;
   }
 
-  ++retry_sequence_index_;
+  if (0 == retry_sequence_index_) {
+    ++retry_sequence_index_;
+    // Return miliseconds
+    return retry_sequence_timeout_;
+  }
 
   for (uint32_t i = 0u; i < retry_sequence_index_; ++i) {
-    next += retry_sequence_seconds_[i];
-    // According to requirement APPLINK-18244
+    next += retry_sequence_seconds_[i] *
+            date_time::DateTime::MILLISECONDS_IN_SECOND;
     next += retry_sequence_timeout_;
   }
-  if (retry_sequence_index_ == retry_sequence_seconds_.size()) {
-    retry_sequence_timeout_ = 1;
-  }
+  ++retry_sequence_index_;
 
   // Return miliseconds
   return next;
@@ -1050,6 +1050,8 @@ void PolicyManagerImpl::PromoteExistedApplication(
   // disconnected, app permissions should be changed also
   if (kDeviceAllowed == device_consent &&
       cache_->IsPredataPolicy(application_id)) {
+    cache_->SetDefaultPolicy(application_id);
+  } else if (cache_->IsDefaultPolicy(application_id)) {
     cache_->SetDefaultPolicy(application_id);
   }
   if (HasCertificate()) {
