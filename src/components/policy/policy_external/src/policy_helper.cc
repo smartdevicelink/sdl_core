@@ -339,7 +339,7 @@ bool CheckAppPolicy::operator()(const AppPoliciesValueType& app_policy) {
                "Permissions for application:" << app_id
                                               << " have been changed.");
 
-  if (!IsPredefinedApp(app_policy) && RESULT_CONSENT_NOT_REQIURED != result) {
+  if (!IsPredefinedApp(app_policy)) {
     SetPendingPermissions(app_policy, result);
     AddResult(app_id, result);
   }
