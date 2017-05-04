@@ -53,7 +53,8 @@ class ISchemaItem {
    *
    * @return NsSmartObjects::Errors::eType
    **/
-  virtual Errors::eType validate(const SmartObject& Object);
+  virtual Errors::eType validate(const SmartObject& Object,
+                                 std::string& errorMessage);
 
   /**
    * @brief Set default value to an object.

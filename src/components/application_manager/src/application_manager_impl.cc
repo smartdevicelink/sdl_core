@@ -1807,9 +1807,12 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
               message.function_id(),
               message.type(),
               message.correlation_id());
+
+      std::string errorMessage = "";
+
       if (!conversion_result ||
           !mobile_so_factory().attachSchema(output, true) ||
-          ((output.validate() != smart_objects::Errors::OK))) {
+          ((output.validate(errorMessage) != smart_objects::Errors::OK))) {
         LOG4CXX_WARN(logger_,
                      "Failed to parse string to smart object :"
                          << message.json_message());
@@ -1819,6 +1822,8 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
                 message.function_id(),
                 message.correlation_id(),
                 mobile_apis::Result::INVALID_DATA));
+
+        (*response)[strings::msg_params][strings::info] = errorMessage;
         ManageMobileCommand(response, commands::Command::ORIGIN_SDL);
         return false;
       }
@@ -1866,7 +1871,10 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
         LOG4CXX_WARN(logger_, "Failed to attach schema to object.");
         return false;
       }
-      if (output.validate() != smart_objects::Errors::OK) {
+
+      std::string errorMessage = "";
+
+      if (output.validate(errorMessage) != smart_objects::Errors::OK) {
         LOG4CXX_ERROR(logger_, "Incorrect parameter from HMI");
 
         if (application_manager::MessageType::kNotification ==
@@ -1884,8 +1892,7 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
         output.erase(strings::msg_params);
         output[strings::params][hmi_response::code] =
             hmi_apis::Common_Result::INVALID_DATA;
-        output[strings::msg_params][strings::info] =
-            std::string("Received invalid data on HMI response");
+        output[strings::msg_params][strings::info] = errorMessage;
       }
       break;
     }

@@ -52,7 +52,7 @@ bool GenericJsonFormatter::FromString(const std::string& str,
   bool result = reader.parse(str, json_root);
 
   if (true == result) {
-    jsonValueToObj(json_root, out);
+    jsonValueToObj(json_root, out, "");
   }
 
   return result;

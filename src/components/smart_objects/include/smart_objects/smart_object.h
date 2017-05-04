@@ -674,7 +674,7 @@ class SmartObject FINAL {
    *
    * @return Result of validation.
    */
-  Errors::eType validate();
+  Errors::eType validate(std::string& errorMessage);
 
   /**
    * @brief Sets new schema
@@ -697,6 +697,21 @@ class SmartObject FINAL {
    * @return NsSmartObjects::SmartType
    **/
   SmartType getType() const;
+
+  /**
+   * @brief Sets new key for this object
+   *
+   * @param std::string New key sequesnce
+   * @return void
+   **/
+  void setKey(const std::string& NewKey);
+
+  /**
+   * @brief Returns current object type
+   *
+   * @return std::string
+   **/
+  std::string getKey() const;
 
   /**
    * @brief Returns length of object
@@ -725,6 +740,35 @@ class SmartObject FINAL {
   template <typename Type>
   bool operator!=(const Type& Other) const {
     return !(*this == Other);
+  }
+
+  static std::string typeToString(SmartType type) {
+    switch (type) {
+      case SmartType_Null:
+        return "Null";
+      case SmartType_Boolean:
+        return "Boolean";
+      case SmartType_Integer:
+        return "Integer";
+      case SmartType_Character:
+        return "Character";
+      case SmartType_String:
+        return "String";
+      case SmartType_Double:
+        return "Double";
+      case SmartType_Map:
+        return "Object";
+      case SmartType_Array:
+        return "Array";
+      case SmartType_Binary:
+        return "Binary_Data";
+      case SmartType_UInteger:
+        return "Unsigned_Integer";
+      case SmartType_Invalid:
+        return "Invalid_Type";
+      default:
+        return "Unknown_Type";
+    }
   }
 
  protected:
@@ -976,6 +1020,12 @@ class SmartObject FINAL {
    * @brief Validation schema, attached to the object
    **/
   CSmartSchema m_schema;
+
+  /**
+   * @brief Key sequence that describes where the current object is within an
+   *object structure, for debugging purposes
+   **/
+  std::string* m_key;
 };
 
 /**

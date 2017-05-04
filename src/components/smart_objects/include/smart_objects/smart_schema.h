@@ -67,7 +67,8 @@ class CSmartSchema FINAL {
    *
    * @return Result of validation.
    */
-  Errors::eType validate(const SmartObject& Object) const;
+  Errors::eType validate(const SmartObject& Object,
+                         std::string& errorMessage) const;
 
   /**
    * @brief Set new root schema item.

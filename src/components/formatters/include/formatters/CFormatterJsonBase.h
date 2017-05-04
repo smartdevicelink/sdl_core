@@ -99,7 +99,8 @@ class CFormatterJsonBase {
    */
   static void jsonValueToObj(
       const Json::Value& value,
-      NsSmartDeviceLink::NsSmartObjects::SmartObject& obj);
+      NsSmartDeviceLink::NsSmartObjects::SmartObject& obj,
+      const std::string& key);
 
   /**
     * @brief The method constructs a JSON object from the input SmartObject

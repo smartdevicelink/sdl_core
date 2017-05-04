@@ -69,7 +69,8 @@ class TNumberSchemaItem : public CDefaultSchemaItem<NumberType> {
    * @param Object Object to validate.
    * @return NsSmartObjects::Errors::eType
    **/
-  Errors::eType validate(const SmartObject& Object) OVERRIDE;
+  Errors::eType validate(const SmartObject& Object,
+                         std::string& errorMessage) OVERRIDE;
 
  private:
   /**
@@ -127,8 +128,18 @@ bool TNumberSchemaItem<NumberType>::isValidNumberType(SmartType type) {
 
 template <typename NumberType>
 Errors::eType TNumberSchemaItem<NumberType>::validate(
-    const SmartObject& Object) {
+    const SmartObject& Object, std::string& errorMessage) {
   if (!isValidNumberType(Object.getType())) {
+    if (!Object.getKey().empty()) {
+      errorMessage.assign("Validation failed for \"" + Object.getKey() +
+                          "\". ");
+    }
+    SmartType expectedType = (typeid(double) == typeid(Object.getType()))
+                                 ? SmartType_Double
+                                 : SmartType_Integer;
+    errorMessage += "Incorrect type, expected: " +
+                    SmartObject::typeToString(expectedType) + ", got: " +
+                    SmartObject::typeToString(Object.getType());
     return Errors::INVALID_VALUE;
   }
   NumberType value(0);
@@ -148,10 +159,26 @@ Errors::eType TNumberSchemaItem<NumberType>::validate(
 
   NumberType rangeLimit;
   if (mMinValue.getValue(rangeLimit) && (value < rangeLimit)) {
+    if (!Object.getKey().empty()) {
+      errorMessage.assign("Validation failed for \"" + Object.getKey() +
+                          "\". ");
+    }
+    std::stringstream stream;
+    stream << "Value too small, got: " << value
+           << ", minimum allowed: " << rangeLimit;
+    errorMessage += stream.str();
     return Errors::OUT_OF_RANGE;
   }
 
   if (mMaxValue.getValue(rangeLimit) && (value > rangeLimit)) {
+    if (!Object.getKey().empty()) {
+      errorMessage.assign("Validation failed for \"" + Object.getKey() +
+                          "\". ");
+    }
+    std::stringstream stream;
+    stream << "Value too large, got: " << value
+           << ", maximum allowed: " << rangeLimit;
+    errorMessage += stream.str();
     return Errors::OUT_OF_RANGE;
   }
   return Errors::OK;

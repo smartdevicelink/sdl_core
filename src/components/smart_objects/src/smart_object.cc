@@ -50,17 +50,18 @@ namespace NsSmartObjects {
  **/
 static const char* invalid_cstr_value = "";
 
-SmartObject::SmartObject() : m_type(SmartType_Null), m_schema() {
+SmartObject::SmartObject() : m_type(SmartType_Null), m_schema(), m_key(NULL) {
   m_data.str_value = NULL;
 }
 
 SmartObject::SmartObject(const SmartObject& Other)
-    : m_type(SmartType_Null), m_schema() {
+    : m_type(SmartType_Null), m_schema(), m_key(NULL) {
   m_data.str_value = NULL;
   duplicate(Other);
 }
 
-SmartObject::SmartObject(SmartType Type) : m_type(SmartType_Null), m_schema() {
+SmartObject::SmartObject(SmartType Type)
+    : m_type(SmartType_Null), m_schema(), m_key(NULL) {
   switch (Type) {
     case SmartType_Null:
       break;
@@ -104,6 +105,8 @@ SmartObject::SmartObject(SmartType Type) : m_type(SmartType_Null), m_schema() {
 
 SmartObject::~SmartObject() {
   cleanup_data();
+  delete m_key;
+  m_key = NULL;
 }
 
 SmartObject& SmartObject::operator=(const SmartObject& Other) {
@@ -113,7 +116,7 @@ SmartObject& SmartObject::operator=(const SmartObject& Other) {
 }
 
 bool SmartObject::operator==(const SmartObject& Other) const {
-  if (m_type != Other.m_type)
+  if (m_type != Other.m_type || m_key != Other.m_key)
     return false;
 
   switch (m_type) {
@@ -168,7 +171,7 @@ bool SmartObject::operator==(const SmartObject& Other) const {
 }
 
 SmartObject::SmartObject(int32_t InitialValue)
-    : m_type(SmartType_Null), m_schema() {
+    : m_type(SmartType_Null), m_schema(), m_key(NULL) {
   m_data.str_value = NULL;
   set_value_integer(InitialValue);
 }
@@ -225,7 +228,7 @@ int64_t SmartObject::convert_int() const {
 }
 
 SmartObject::SmartObject(uint32_t InitialValue)
-    : m_type(SmartType_Null), m_schema() {
+    : m_type(SmartType_Null), m_schema(), m_key(NULL) {
   m_data.str_value = NULL;
   set_value_integer(InitialValue);
 }
@@ -254,7 +257,7 @@ bool SmartObject::operator==(const uint32_t Value) const {
 }
 
 SmartObject::SmartObject(int64_t InitialValue)
-    : m_type(SmartType_Null), m_schema() {
+    : m_type(SmartType_Null), m_schema(), m_key(NULL) {
   m_data.str_value = NULL;
   set_value_integer(InitialValue);
 }
@@ -282,7 +285,7 @@ SmartObject& SmartObject::operator=(const uint64_t NewValue) {
 }
 
 SmartObject::SmartObject(double InitialValue)
-    : m_type(SmartType_Null), m_schema() {
+    : m_type(SmartType_Null), m_schema(), m_key(NULL) {
   m_data.str_value = NULL;
   set_value_double(InitialValue);
 }
@@ -328,7 +331,7 @@ double SmartObject::convert_double() const {
 }
 
 SmartObject::SmartObject(bool InitialValue)
-    : m_type(SmartType_Null), m_schema() {
+    : m_type(SmartType_Null), m_schema(), m_key(NULL) {
   m_data.str_value = NULL;
   set_value_bool(InitialValue);
 }
@@ -373,7 +376,7 @@ bool SmartObject::convert_bool() const {
 }
 
 SmartObject::SmartObject(char InitialValue)
-    : m_type(SmartType_Null), m_schema() {
+    : m_type(SmartType_Null), m_schema(), m_key(NULL) {
   m_data.str_value = NULL;
   set_value_char(InitialValue);
 }
@@ -422,13 +425,13 @@ char SmartObject::convert_char() const {
 // =============================================================
 
 SmartObject::SmartObject(const custom_str::CustomString& InitialValue)
-    : m_type(SmartType_Null), m_schema() {
+    : m_type(SmartType_Null), m_schema(), m_key(NULL) {
   m_data.str_value = NULL;
   set_value_string(InitialValue);
 }
 
 SmartObject::SmartObject(const std::string& InitialValue)
-    : m_type(SmartType_Null), m_schema() {
+    : m_type(SmartType_Null), m_schema(), m_key(NULL) {
   m_data.str_value = NULL;
   set_value_string(custom_str::CustomString(InitialValue));
 }
@@ -508,7 +511,7 @@ custom_str::CustomString SmartObject::convert_custom_string() const {
 // =============================================================
 
 SmartObject::SmartObject(const char* const InitialValue)
-    : m_type(SmartType_Null), m_schema() {
+    : m_type(SmartType_Null), m_schema(), m_key(NULL) {
   m_data.str_value = NULL;
   set_value_cstr(InitialValue);
   return;
@@ -538,7 +541,7 @@ void SmartObject::set_value_cstr(const char* NewValue) {
 // BINARY TYPE SUPPORT
 // =============================================================
 SmartObject::SmartObject(const SmartBinary& InitialValue)
-    : m_type(SmartType_Null), m_schema() {
+    : m_type(SmartType_Null), m_schema(), m_key(NULL) {
   m_data.str_value = NULL;
   set_value_binary(InitialValue);
 }
@@ -723,6 +726,10 @@ void SmartObject::duplicate(const SmartObject& OtherObject) {
   }
   m_schema = OtherObject.m_schema;
 
+  if (OtherObject.m_key) {
+    setKey(*OtherObject.m_key);
+  }
+
   cleanup_data();
 
   m_type = newType;
@@ -838,6 +845,15 @@ SmartType SmartObject::getType() const {
   return m_type;
 }
 
+void SmartObject::setKey(const std::string& NewKey) {
+  delete m_key;
+  m_key = new std::string(NewKey);
+}
+
+std::string SmartObject::getKey() const {
+  return (m_key == NULL) ? "" : *m_key;
+}
+
 std::string SmartObject::OperatorToTransform(const SmartMap::value_type& pair) {
   return pair.first;
 }
@@ -869,11 +885,13 @@ bool SmartObject::erase(const std::string& Key) {
 }
 
 bool SmartObject::isValid() const {
-  return (Errors::OK == m_schema.validate(*this));
+  std::string errorMessage;
+
+  return (Errors::OK == m_schema.validate(*this, errorMessage));
 }
 
-Errors::eType SmartObject::validate() {
-  return m_schema.validate(*this);
+Errors::eType SmartObject::validate(std::string& errorMessage) {
+  return m_schema.validate(*this, errorMessage);
 }
 
 void SmartObject::setSchema(const CSmartSchema& schema) {

@@ -53,7 +53,8 @@ class CAlwaysTrueSchemaItem : public ISchemaItem {
    * @param Object Object to validate.
    * @return NsSmartObjects::Errors::eType
    **/
-  Errors::eType validate(const SmartObject& Object) OVERRIDE;
+  Errors::eType validate(const SmartObject& Object,
+                         std::string& errorMessage) OVERRIDE;
 
  private:
   CAlwaysTrueSchemaItem();

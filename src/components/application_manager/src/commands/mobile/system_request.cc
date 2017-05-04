@@ -559,7 +559,7 @@ void SystemRequest::Run() {
       return;
     }
 
-    CFormatterJsonBase::jsonValueToObj(root, sm_object);
+    CFormatterJsonBase::jsonValueToObj(root, sm_object, "");
     if (!ValidateQueryAppData(sm_object)) {
       SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
       return;

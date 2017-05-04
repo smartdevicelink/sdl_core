@@ -41,23 +41,47 @@ utils::SharedPtr<CArraySchemaItem> CArraySchemaItem::create(
   return new CArraySchemaItem(ElementSchemaItem, MinSize, MaxSize);
 }
 
-Errors::eType CArraySchemaItem::validate(const SmartObject& Object) {
+Errors::eType CArraySchemaItem::validate(const SmartObject& Object,
+                                         std::string& errorMessage) {
   if (SmartType_Array != Object.getType()) {
+    if (!Object.getKey().empty()) {
+      errorMessage.assign("Validation failed for \"" + Object.getKey() +
+                          "\". ");
+    }
+    errorMessage += "Incorrect type, expected: " +
+                    SmartObject::typeToString(SmartType_Array) + ", got: " +
+                    SmartObject::typeToString(Object.getType());
     return Errors::INVALID_VALUE;
   }
   size_t sizeLimit;
   const size_t array_len = Object.length();
 
   if (mMinSize.getValue(sizeLimit) && (array_len < sizeLimit)) {
+    if (!Object.getKey().empty()) {
+      errorMessage.assign("Validation failed for \"" + Object.getKey() +
+                          "\". ");
+    }
+    std::stringstream stream;
+    stream << "Got array of size: " << array_len
+           << ", minimum allowed: " << sizeLimit;
+    errorMessage += stream.str();
     return Errors::OUT_OF_RANGE;
   }
   if (mMaxSize.getValue(sizeLimit) && (array_len > sizeLimit)) {
+    if (!Object.getKey().empty()) {
+      errorMessage.assign("Validation failed for \"" + Object.getKey() +
+                          "\". ");
+    }
+    std::stringstream stream;
+    stream << "Got array of size: " << array_len
+           << ", maximum allowed: " << sizeLimit;
+    errorMessage += stream.str();
     return Errors::OUT_OF_RANGE;
   }
 
   for (size_t i = 0u; i < array_len; ++i) {
     const Errors::eType result =
-        mElementSchemaItem->validate(Object.getElement(i));
+        mElementSchemaItem->validate(Object.getElement(i), errorMessage);
     if (Errors::OK != result) {
       return result;
     }

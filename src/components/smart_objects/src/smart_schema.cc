@@ -40,8 +40,9 @@ CSmartSchema::CSmartSchema() : mSchemaItem(CAlwaysTrueSchemaItem::create()) {}
 CSmartSchema::CSmartSchema(const ISchemaItemPtr SchemaItem)
     : mSchemaItem(SchemaItem) {}
 
-Errors::eType CSmartSchema::validate(const SmartObject& object) const {
-  return mSchemaItem->validate(object);
+Errors::eType CSmartSchema::validate(const SmartObject& object,
+                                     std::string& errorMessage) const {
+  return mSchemaItem->validate(object, errorMessage);
 }
 
 void CSmartSchema::setSchemaItem(const ISchemaItemPtr schemaItem) {

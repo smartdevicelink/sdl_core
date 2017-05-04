@@ -54,7 +54,8 @@ class CDefaultSchemaItem : public ISchemaItem {
    * @param Object Object to validate.
    * @return NsSmartObjects::Errors::eType
    **/
-  Errors::eType validate(const SmartObject& Object) OVERRIDE;
+  Errors::eType validate(const SmartObject& Object,
+                         std::string& errorMessage) OVERRIDE;
 
   /**
    * @brief Set default value to an object.
@@ -98,9 +99,20 @@ CDefaultSchemaItem<Type>::CDefaultSchemaItem(const ParameterType& DefaultValue)
     : mDefaultValue(DefaultValue) {}
 
 template <typename Type>
-Errors::eType CDefaultSchemaItem<Type>::validate(const SmartObject& Object) {
-  return (getSmartType() == Object.getType()) ? Errors::OK
-                                              : Errors::INVALID_VALUE;
+Errors::eType CDefaultSchemaItem<Type>::validate(const SmartObject& Object,
+                                                 std::string& errorMessage) {
+  if (getSmartType() != Object.getType()) {
+    if (!Object.getKey().empty()) {
+      errorMessage.assign("Validation failed for \"" + Object.getKey() +
+                          "\". ");
+    }
+    errorMessage += "Incorrect type, expected: " +
+                    SmartObject::typeToString(getSmartType()) + ", got: " +
+                    SmartObject::typeToString(Object.getType());
+    return Errors::INVALID_VALUE;
+  } else {
+    return Errors::OK;
+  }
 }
 
 template <typename Type>

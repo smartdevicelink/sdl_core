@@ -56,8 +56,16 @@ utils::SharedPtr<CObjectSchemaItem> CObjectSchemaItem::create(
   return new CObjectSchemaItem(members);
 }
 
-Errors::eType CObjectSchemaItem::validate(const SmartObject& object) {
+Errors::eType CObjectSchemaItem::validate(const SmartObject& object,
+                                          std::string& errorMessage) {
   if (SmartType_Map != object.getType()) {
+    if (!object.getKey().empty()) {
+      errorMessage.assign("Validation failed for \"" + object.getKey() +
+                          "\". ");
+    }
+    errorMessage += "Incorrect type, expected: " +
+                    SmartObject::typeToString(SmartType_Map) + ", got: " +
+                    SmartObject::typeToString(object.getType());
     return Errors::INVALID_VALUE;
   }
 
@@ -71,12 +79,18 @@ Errors::eType CObjectSchemaItem::validate(const SmartObject& object) {
     std::set<std::string>::const_iterator key_it = object_keys.find(key);
     if (object_keys.end() == key_it) {
       if (member.mIsMandatory) {
+        if (!object.getKey().empty()) {
+          errorMessage.assign("Validation failed for \"" + object.getKey() +
+                              "\". ");
+        }
+        errorMessage += "Missing mandatory parameter: \"" + key + "\"";
         return Errors::MISSING_MANDATORY_PARAMETER;
       }
       continue;
     }
     const SmartObject& field = object.getElement(key);
-    const Errors::eType result = member.mSchemaItem->validate(field);
+    const Errors::eType result =
+        member.mSchemaItem->validate(field, errorMessage);
     if (Errors::OK != result) {
       return result;
     }

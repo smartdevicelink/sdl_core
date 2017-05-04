@@ -209,7 +209,8 @@ int32_t Formatters::CFormatterJsonSDLRPCv1::fromString(
     namespace S = NsSmartDeviceLink::NsJSONHandler::strings;
 
     if (!(result & kMessageTypeNotFound)) {
-      jsonValueToObj(root[type][S_PARAMETERS], out[S::S_MSG_PARAMS]);
+      jsonValueToObj(
+          root[type][S_PARAMETERS], out[S::S_MSG_PARAMS], "parameters");
 
       out[S::S_PARAMS][S::S_MESSAGE_TYPE] = messageType;
       out[S::S_PARAMS][S::S_FUNCTION_ID] = functionId;

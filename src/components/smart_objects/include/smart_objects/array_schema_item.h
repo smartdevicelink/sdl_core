@@ -69,7 +69,8 @@ class CArraySchemaItem : public ISchemaItem {
    *
    * @return NsSmartObjects::Errors::eType
    **/
-  Errors::eType validate(const SmartObject& Object) OVERRIDE;
+  Errors::eType validate(const SmartObject& Object,
+                         std::string& errorMessage) OVERRIDE;
 
   /**
    * @brief Apply schema.

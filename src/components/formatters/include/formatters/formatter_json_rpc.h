@@ -396,7 +396,8 @@ int32_t FormatterJsonRpc::FromString(const std::string& str,
         if (false == params_value.isObject()) {
           result |= kInvalidFormat;
         } else {
-          jsonValueToObj(root[kParams], out[strings::S_MSG_PARAMS]);
+          jsonValueToObj(
+              root[kParams], out[strings::S_MSG_PARAMS], strings::S_MSG_PARAMS);
         }
       } else if (true == root.isMember(kResult)) {
         const Json::Value& result_value = root[kResult];
@@ -404,10 +405,13 @@ int32_t FormatterJsonRpc::FromString(const std::string& str,
         if (false == result_value.isObject()) {
           result |= kInvalidFormat;
         } else {
-          jsonValueToObj(root[kResult], out[strings::S_MSG_PARAMS]);
+          jsonValueToObj(
+              root[kResult], out[strings::S_MSG_PARAMS], strings::S_MSG_PARAMS);
         }
       } else if (true == is_error_response) {
-        jsonValueToObj(response_value[kData], out[strings::S_PARAMS][kData]);
+        jsonValueToObj(response_value[kData],
+                       out[strings::S_PARAMS][kData],
+                       strings::S_PARAMS + "." + kData);
       }
 
       if ((kResponse == message_type_string) ||

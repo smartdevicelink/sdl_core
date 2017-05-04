@@ -69,7 +69,8 @@ class TEnumSchemaItem : public CDefaultSchemaItem<EnumType> {
    * @param Object Object to validate.
    * @return NsSmartObjects::Errors::eType
    **/
-  Errors::eType validate(const SmartObject& Object) OVERRIDE;
+  Errors::eType validate(const SmartObject& Object,
+                         std::string& errorMessage) OVERRIDE;
   /**
    * @brief Apply schema.
    * This implementation checks if enumeration is represented as string
@@ -206,12 +207,33 @@ utils::SharedPtr<TEnumSchemaItem<EnumType> > TEnumSchemaItem<EnumType>::create(
 }
 
 template <typename EnumType>
-Errors::eType TEnumSchemaItem<EnumType>::validate(const SmartObject& Object) {
+Errors::eType TEnumSchemaItem<EnumType>::validate(const SmartObject& Object,
+                                                  std::string& errorMessage) {
   if (SmartType_Integer != Object.getType()) {
+    if (!Object.getKey().empty()) {
+      errorMessage.assign("Validation failed for \"" + Object.getKey() +
+                          "\". ");
+    }
+
+    if (SmartType_String == Object.getType()) {
+      errorMessage += "Invalid enum value: " + Object.asString();
+    } else {
+      errorMessage += "Incorrect type, expected: " +
+                      SmartObject::typeToString(SmartType_Integer) +
+                      " (enum), got: " +
+                      SmartObject::typeToString(Object.getType());
+    }
     return Errors::INVALID_VALUE;
   }
   if (mAllowedElements.find(static_cast<EnumType>(Object.asInt())) ==
       mAllowedElements.end()) {
+    if (!Object.getKey().empty()) {
+      errorMessage.assign("Validation failed for \"" + Object.getKey() +
+                          "\". ");
+    }
+    std::stringstream stream;
+    stream << "Invalid enum value: " << Object.asInt();
+    errorMessage += stream.str();
     return Errors::OUT_OF_RANGE;
   }
   return Errors::OK;

@@ -225,7 +225,7 @@ bool ResumptionDataJson::GetSavedApplication(
     return false;
   }
   const Json::Value& json_saved_app = GetSavedApplications()[idx];
-  Formatters::CFormatterJsonBase::jsonValueToObj(json_saved_app, saved_app);
+  Formatters::CFormatterJsonBase::jsonValueToObj(json_saved_app, saved_app, "");
 
   return true;
 }

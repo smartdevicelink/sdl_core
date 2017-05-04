@@ -41,7 +41,9 @@ namespace formatters {
 TEST(CFormatterJsonSDLRPCv2Test, EmptySmartObjectToString) {
   SmartObject srcObj;
 
-  EXPECT_EQ(Errors::eType::OK, srcObj.validate());
+  std::string errorMessage;
+  EXPECT_EQ(Errors::eType::OK, srcObj.validate(errorMessage));
+  EXPECT_EQ(std::string(""), errorMessage);
 
   std::string jsonString;
   bool result = CFormatterJsonSDLRPCv2::toString(srcObj, jsonString);
@@ -64,7 +66,10 @@ TEST(CFormatterJsonSDLRPCv2Test, SmObjWithRequestWithoutMsgNotValid_ToString) {
   srcObj[S_PARAMS][S_PROTOCOL_TYPE] = 0;
   srcObj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
 
-  EXPECT_EQ(Errors::eType::MISSING_MANDATORY_PARAMETER, srcObj.validate());
+  std::string errorMessage;
+  EXPECT_EQ(Errors::eType::MISSING_MANDATORY_PARAMETER,
+            srcObj.validate(errorMessage));
+  EXPECT_NE(std::string(""), errorMessage);
 
   std::string jsonString;
   bool result = CFormatterJsonSDLRPCv2::toString(srcObj, jsonString);
@@ -88,7 +93,9 @@ TEST(CFormatterJsonSDLRPCv2Test,
   srcObj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
   srcObj[S_MSG_PARAMS][""] = "";
 
-  EXPECT_EQ(Errors::eType::OK, srcObj.validate());
+  std::string errorMessage;
+  EXPECT_EQ(Errors::eType::OK, srcObj.validate(errorMessage));
+  EXPECT_EQ(std::string(""), errorMessage);
 
   std::string jsonString;
 
@@ -262,7 +269,10 @@ TEST(CFormatterJsonSDLRPCv2Test, StringRequestWithoutCorIdToSmObj) {
       MessageTypeTest::request);
 
   EXPECT_EQ(true, result);
-  EXPECT_EQ(Errors::eType::MISSING_MANDATORY_PARAMETER, obj.validate());
+  std::string errorMessage;
+  EXPECT_EQ(Errors::eType::MISSING_MANDATORY_PARAMETER,
+            obj.validate(errorMessage));
+  EXPECT_NE(std::string(""), errorMessage);
   EXPECT_EQ(obj[S_PARAMS][S_MESSAGE_TYPE], MessageTypeTest::request);
   EXPECT_EQ(obj[S_PARAMS][S_FUNCTION_ID], FunctionIDTest::RegisterAppInterface);
   EXPECT_EQ(obj[S_PARAMS][S_PROTOCOL_TYPE], 0);
@@ -307,7 +317,9 @@ TEST(CFormatterJsonSDLRPCv2Test, StringRequestWithCorIdToSmObj) {
       corId);
 
   EXPECT_EQ(true, result);
-  EXPECT_EQ(Errors::eType::OK, obj.validate());
+  std::string errorMessage;
+  EXPECT_EQ(Errors::eType::OK, obj.validate(errorMessage));
+  EXPECT_EQ(std::string(""), errorMessage);
   EXPECT_EQ(obj[S_PARAMS][S_MESSAGE_TYPE], MessageTypeTest::request);
   EXPECT_EQ(obj[S_PARAMS][S_FUNCTION_ID], FunctionIDTest::RegisterAppInterface);
   EXPECT_EQ(obj[S_PARAMS][S_CORRELATION_ID], corId);
@@ -372,7 +384,9 @@ TEST(CFormatterJsonSDLRPCv2Test, StringNotificationToSmartObject) {
       MessageTypeTest::notification,
       corId);
   EXPECT_EQ(true, result);
-  EXPECT_EQ(Errors::eType::OK, obj.validate());
+  std::string errorMessage;
+  EXPECT_EQ(Errors::eType::OK, obj.validate(errorMessage));
+  EXPECT_EQ(std::string(""), errorMessage);
   EXPECT_EQ(obj[S_PARAMS][S_MESSAGE_TYPE], MessageTypeTest::notification);
   EXPECT_EQ(obj[S_PARAMS][S_FUNCTION_ID], FunctionIDTest::SetGlobalProperties);
   EXPECT_EQ(obj[S_PARAMS][S_CORRELATION_ID], corId);
