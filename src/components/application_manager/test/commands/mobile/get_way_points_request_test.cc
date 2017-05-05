@@ -92,6 +92,7 @@ class GetWayPointsRequestTest
     ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app_));
   }
 
+  MockMessageHelper& message_helper_mock_;
   MockAppPtr mock_app_;
   MessageSharedPtr message_;
   utils::SharedPtr<application_manager::commands::GetWayPointsRequest>

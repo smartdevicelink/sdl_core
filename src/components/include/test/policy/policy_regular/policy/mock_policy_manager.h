@@ -200,6 +200,10 @@ class MockPolicyManager : public PolicyManager {
                     const PTString& rpc,
                     const RPCParams& rpc_params,
                     CheckPermissionResult& result));
+  MOCK_METHOD2(
+      CheckPendingPermissionsChanges,
+      void(const std::string& policy_app_id,
+           const std::vector<FunctionalGroupPermission>& current_permissions));
 };
 
 }  // namespace policy_manager_test

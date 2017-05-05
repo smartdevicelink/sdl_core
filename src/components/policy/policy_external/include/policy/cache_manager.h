@@ -55,6 +55,8 @@ class CacheManager : public CacheManagerInterface {
   explicit CacheManager(bool in_memory);
   ~CacheManager();
 
+  const policy_table::Strings& GetGroups(const PTString& app_id);
+
   /**
    * @brief Checks if specified RPC for specified application
    * has permission to be executed in specified HMI Level
@@ -333,6 +335,21 @@ class CacheManager : public CacheManagerInterface {
    * @return true, if succedeed, otherwise - false
    */
   bool GetDefaultHMI(const std::string& app_id, std::string& default_hmi) const;
+
+  /**
+   * Gets HMI types from specific policy
+   * @param app_id ID application
+   * @return list of HMI types
+   */
+  const policy_table::AppHMITypes* GetHMITypes(const std::string& app_id);
+
+  /**
+   * @brief Allows to generate hash from the specified string.
+   * The djb2 algorithm uses for hash generation.
+   * @param str_to_hash - the string from which hash should be generated.
+   * @return integer hash for the specified string.
+   */
+  static int32_t GenerateHash(const std::string& str_to_hash);
 
   /**
    * @brief Resets user consent for device data and applications permissions

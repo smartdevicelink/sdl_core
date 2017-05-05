@@ -566,7 +566,7 @@ TEST_F(PolicyManagerImplTest2,
   manager->CheckPermissions(
       dev_id1, app_id1, std::string("FULL"), "Alert", input_params, output);
   // Check RPC is disallowed
-  EXPECT_EQ(::policy::kRpcAllowed, output.hmi_level_permitted);
+  EXPECT_EQ(::policy::kRpcDisallowed, output.hmi_level_permitted);
   ASSERT_TRUE(output.list_of_allowed_params.empty());
 }
 

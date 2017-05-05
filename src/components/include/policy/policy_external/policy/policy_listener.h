@@ -52,6 +52,12 @@ class PolicyListener {
                                     const Permissions& permissions) = 0;
   virtual void OnPendingPermissionChange(const std::string& policy_app_id) = 0;
   virtual void OnUpdateStatusChanged(const std::string&) = 0;
+  /**
+   * Gets device ID
+   * @param policy_app_id
+   * @return device ID
+   * @deprecated see std::vector<std::string> GetDevicesIds(const std::string&)
+   */
   virtual std::string OnCurrentDeviceIdUpdateRequired(
       const std::string& policy_app_id) = 0;
   virtual void OnSystemInfoUpdateRequired() = 0;
@@ -113,6 +119,14 @@ class PolicyListener {
    * @param certificate_data the value of the updated field.
    */
   virtual void OnCertificateUpdated(const std::string& certificate_data) = 0;
+
+  /**
+   * @brief OnPTUFinishedd the callback which signals PTU has finished
+   *
+   * @param ptu_result the result from the PTU - true if successful,
+   * otherwise false.
+   */
+  virtual void OnPTUFinished(const bool ptu_result) = 0;
 
   /**
  * @brief Collects currently registered applications ids linked to their

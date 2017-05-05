@@ -49,6 +49,8 @@ class CacheManagerInterface {
  public:
   virtual ~CacheManagerInterface() {}
 
+  virtual const policy_table::Strings& GetGroups(const PTString& app_id) = 0;
+
   /**
    * @brief Check if specified RPC for specified application
    * has permission to be executed in specified HMI Level
@@ -328,6 +330,14 @@ class CacheManagerInterface {
    */
   virtual bool GetDefaultHMI(const std::string& app_id,
                              std::string& default_hmi) const = 0;
+
+  /**
+   * Gets HMI types from specific policy
+   * @param app_id ID application
+   * @return list of HMI types
+   */
+  virtual const policy_table::AppHMITypes* GetHMITypes(
+      const std::string& app_id) = 0;
 
   /**
    * @brief Resets user consent for device data and applications permissions
@@ -714,12 +724,14 @@ class CacheManagerInterface {
    * @return external consent status
    */
   virtual ExternalConsentStatus GetExternalConsentStatus() = 0;
+
   /**
    * @brief Creates externalConsentStatus data structure from policy table
              section "externalConsentStatus"
    * @return ExternalConsentStatus data structure
   */
   virtual ExternalConsentStatus GetExternalConsentEntities() = 0;
+
   /**
  * @brief Creates collection of ExternalConsent items known by current
  * functional

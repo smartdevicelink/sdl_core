@@ -54,6 +54,7 @@
 #include "utils/file_system.h"
 #include "utils/scope_guard.h"
 #include "utils/make_shared.h"
+#include "policy/policy_manager.h"
 
 namespace policy {
 
@@ -180,7 +181,7 @@ struct SDLAllowedNotification {
   void operator()(const ApplicationSharedPtr& app) {
     DCHECK_OR_RETURN_VOID(policy_manager_);
     if (device_id_ == app->device()) {
-      std::string hmi_level;
+      std::string hmi_level = "NONE";
       mobile_apis::HMILevel::eType default_mobile_hmi;
       policy_manager_->GetDefaultHmi(app->policy_app_id(), &hmi_level);
       if ("BACKGROUND" == hmi_level) {
@@ -518,9 +519,9 @@ void PolicyHandler::SendOnAppPermissionsChanged(
 }
 
 void PolicyHandler::OnPTExchangeNeeded() {
+  LOG4CXX_AUTO_TRACE(logger_);
   POLICY_LIB_CHECK_VOID();
-  MessageHelper::SendOnStatusUpdate(policy_manager_->ForcePTExchange(),
-                                    application_manager_);
+  policy_manager_->ForcePTExchange();
 }
 
 void PolicyHandler::GetAvailableApps(std::queue<std::string>& apps) {
@@ -822,12 +823,7 @@ bool PolicyHandler::IsAppSuitableForPolicyUpdate(
   LOG4CXX_DEBUG(logger_,
                 "Is device " << device_params.device_mac_address << " allowed "
                              << std::boolalpha << is_device_allowed);
-
-  if (!is_device_allowed) {
-    return false;
-  }
-
-  return true;
+  return is_device_allowed;
 }
 
 uint32_t PolicyHandler::ChooseRandomAppForPolicyUpdate(
@@ -1091,6 +1087,7 @@ bool PolicyHandler::ReceiveMessageFromSDK(const std::string& file,
     LOG4CXX_WARN(logger_, "Exchange wasn't successful, trying another one.");
     policy_manager_->ForcePTExchange();
   }
+  OnPTUFinished(ret);
   return ret;
 }
 
@@ -1526,6 +1523,7 @@ void PolicyHandler::CheckPermissions(
       device_id, app->policy_app_id(), hmi_level, rpc, rpc_params, result);
 #endif  // EXTERNAL_PROPRIETARY_MODE
 }
+
 uint32_t PolicyHandler::GetNotificationsNumber(
     const std::string& priority) const {
   POLICY_LIB_CHECK(0);
@@ -1571,6 +1569,7 @@ std::string PolicyHandler::GetLockScreenIconUrl() const {
 
 uint32_t PolicyHandler::NextRetryTimeout() {
   POLICY_LIB_CHECK(0);
+  LOG4CXX_AUTO_TRACE(logger_);
   return policy_manager_->NextRetryTimeout();
 }
 
@@ -1762,6 +1761,17 @@ void PolicyHandler::OnCertificateUpdated(const std::string& certificate_data) {
   }
 }
 #endif  // EXTERNAL_PROPRIETARY_MODE
+
+void PolicyHandler::OnPTUFinished(const bool ptu_result) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(listeners_lock_);
+  HandlersCollection::const_iterator it = listeners_.begin();
+  std::for_each(
+      listeners_.begin(),
+      listeners_.end(),
+      std::bind2nd(std::mem_fun(&PolicyHandlerObserver::OnPTUFinished),
+                   ptu_result));
+}
 
 bool PolicyHandler::CanUpdate() {
   return 0 != GetAppIdForSending();

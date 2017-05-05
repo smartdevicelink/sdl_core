@@ -643,7 +643,8 @@ TEST_F(SecurityManagerTest, ProccessHandshakeData_WrongDataSize) {
  * getting SEND_HANDSHAKE_DATA from mobile side
  * for service which is not protected
  */
-TEST_F(SecurityManagerTest, ProccessHandshakeData_ServiceNotProtected) {
+TEST_F(SecurityManagerTest,
+       DISABLED_ProccessHandshakeData_ServiceNotProtected) {
   SetMockCryptoManager();
   // Expect InternalError with ERROR_ID
   uint32_t connection_id = 0;

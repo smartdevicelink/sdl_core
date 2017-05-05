@@ -574,17 +574,6 @@ void PolicyManagerImpl::CheckPermissions(const PTString& app_id,
                       << " returns true");
   }
 
-  if (cache_->IsApplicationRevoked(app_id)) {
-    // SDL must be able to notify mobile side with its status after app has
-    // been revoked by backend
-    if ("OnHMIStatus" == rpc && "NONE" == hmi_level) {
-      result.hmi_level_permitted = kRpcAllowed;
-    } else {
-      result.hmi_level_permitted = kRpcDisallowed;
-    }
-    return;
-  }
-
   const bool known_rpc = rpc_permissions.end() != rpc_permissions.find(rpc);
   LOG4CXX_INFO(logger_, "Is known rpc " << known_rpc);
   if (!known_rpc) {
@@ -685,6 +674,17 @@ void PolicyManagerImpl::CheckPermissions(const PTString& app_id,
   } else if (!result.IsAnyAllowed(rpc_params)) {
     LOG4CXX_DEBUG(logger_, "There are no parameters allowed.");
     result.hmi_level_permitted = kRpcDisallowed;
+  }
+
+  if (cache_->IsApplicationRevoked(app_id)) {
+    // SDL must be able to notify mobile side with its status after app has
+    // been revoked by backend
+    if ("OnHMIStatus" == rpc && "NONE" == hmi_level) {
+      result.hmi_level_permitted = kRpcAllowed;
+    } else {
+      result.hmi_level_permitted = kRpcDisallowed;
+    }
+    return;
   }
 }
 
@@ -1515,7 +1515,6 @@ void PolicyManagerImpl::OnUpdateStarted() {
   uint32_t update_timeout = TimeoutExchangeMSec();
   LOG4CXX_DEBUG(logger_,
                 "Update timeout will be set to (milisec): " << update_timeout);
-
   send_on_update_sent_out_ =
       !wrong_ptu_update_received_ && !update_status_manager_.IsUpdatePending();
 

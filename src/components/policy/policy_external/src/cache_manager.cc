@@ -272,6 +272,10 @@ CacheManager::~CacheManager() {
   threads::DeleteThread(backup_thread_);
 }
 
+const policy_table::Strings& CacheManager::GetGroups(const PTString& app_id) {
+  return pt_->policy_table.app_policies_section.apps[app_id].groups;
+}
+
 bool CacheManager::CanAppKeepContext(const std::string& app_id) const {
   CACHE_MANAGER_CHECK(false);
   bool result = false;
@@ -296,6 +300,32 @@ uint32_t CacheManager::HeartBeatTimeout(const std::string& app_id) const {
     result = *(app.heart_beat_timeout_ms);
   }
 
+  return result;
+}
+
+const policy_table::AppHMITypes* CacheManager::GetHMITypes(
+    const std::string& app_id) {
+  const policy_table::ApplicationPolicies& apps =
+      pt_->policy_table.app_policies_section.apps;
+  policy_table::ApplicationPolicies::const_iterator i = apps.find(app_id);
+  if (i != apps.end()) {
+    return &(*i->second.AppHMIType);
+  }
+  return NULL;
+}
+
+int32_t CacheManager::GenerateHash(const std::string& str_to_hash) {
+  uint32_t hash = 5381U;
+  std::string::const_iterator it = str_to_hash.begin();
+  std::string::const_iterator it_end = str_to_hash.end();
+
+  for (; it != it_end; ++it) {
+    hash = ((hash << 5) + hash) + (*it);
+  }
+
+  // Reset sign bit in case it has been set.
+  // This is needed to avoid overflow for signed int.
+  const int32_t result = hash & 0x7FFFFFFF;
   return result;
 }
 
@@ -2329,21 +2359,6 @@ ExternalConsentStatus CacheManager::GetExternalConsentStatus() {
   return ex_backup_->GetExternalConsentStatus();
 }
 
-GroupsByExternalConsentStatus CacheManager::GetGroupsWithSameEntities(
-    const ExternalConsentStatus& status) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  CACHE_MANAGER_CHECK(policy::GroupsByExternalConsentStatus());
-  sync_primitives::AutoLock auto_lock(cache_lock_);
-  GroupsByExternalConsentStatus groups_by_external_consent;
-
-  GroupByExternalConsentItemFinder groups_by_external_consent_finder(
-      pt_->policy_table.functional_groupings, groups_by_external_consent);
-  std::for_each(
-      status.begin(), status.end(), groups_by_external_consent_finder);
-
-  return groups_by_external_consent;
-}
-
 ExternalConsentStatus CacheManager::GetExternalConsentEntities() {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock auto_lock(cache_lock_);
@@ -2370,6 +2385,21 @@ ExternalConsentStatus CacheManager::GetExternalConsentEntities() {
     }
   }
   return items;
+}
+
+GroupsByExternalConsentStatus CacheManager::GetGroupsWithSameEntities(
+    const ExternalConsentStatus& status) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  CACHE_MANAGER_CHECK(policy::GroupsByExternalConsentStatus());
+  sync_primitives::AutoLock auto_lock(cache_lock_);
+  GroupsByExternalConsentStatus groups_by_external_consent;
+
+  GroupByExternalConsentItemFinder groups_by_external_consent_finder(
+      pt_->policy_table.functional_groupings, groups_by_external_consent);
+  std::for_each(
+      status.begin(), status.end(), groups_by_external_consent_finder);
+
+  return groups_by_external_consent;
 }
 
 std::map<std::string, std::string> CacheManager::GetKnownLinksFromPT() {

@@ -305,6 +305,9 @@ class PolicyHandlerInterface {
       std::map<std::string, StringArray> app_hmi_types) = 0;
 
   virtual void OnCertificateUpdated(const std::string& certificate_data) = 0;
+
+  virtual void OnPTUFinished(const bool ptu_result) = 0;
+
 #ifdef EXTERNAL_PROPRIETARY_MODE
   virtual void OnCertificateDecrypted(bool is_succeeded) = 0;
 #endif  // EXTERNAL_PROPRIETARY_MODE

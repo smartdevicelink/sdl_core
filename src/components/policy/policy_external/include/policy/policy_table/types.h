@@ -38,6 +38,7 @@
 
 #include "policy/policy_table/enums.h"
 #include "rpc_base/rpc_message.h"
+
 namespace Json {
 class Value;
 }  // namespace Json

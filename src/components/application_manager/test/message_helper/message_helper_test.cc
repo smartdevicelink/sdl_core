@@ -547,10 +547,7 @@ class MessageHelperTest : public ::testing::Test {
                             "DiagnosticMessage",
                             "SystemRequest",
                             "SendLocation",
-                            "DialNumber",
-                            "GetWayPoints",
-                            "SubscribeWayPoints",
-                            "UnsubscribeWayPoints"}
+                            "DialNumber"}
       , events_id_strings{"OnHMIStatus",
                           "OnAppInterfaceUnregistered",
                           "OnButtonEvent",

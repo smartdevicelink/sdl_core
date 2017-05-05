@@ -65,6 +65,7 @@ class ApplicationManager;
 }
 
 namespace policy {
+
 typedef std::vector<uint32_t> AppIds;
 typedef std::vector<uint32_t> DeviceHandles;
 namespace custom_str = utils::custom_string;
@@ -455,6 +456,8 @@ class PolicyHandler : public PolicyHandlerInterface,
 #endif  // ENABLE_SECURITY
 
   const PolicySettings& get_settings() const OVERRIDE;
+
+  virtual void OnPTUFinished(const bool ptu_result) OVERRIDE;
 
  protected:
   /**
