@@ -1022,7 +1022,7 @@ bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string,
 bool PolicyHandler::ReceiveMessageFromSDK(const std::string& file,
                                           const BinaryMessage& pt_string) {
   POLICY_LIB_CHECK(false);
-
+  LOG4CXX_AUTO_TRACE(logger_);
   bool ret = policy_manager_->LoadPT(file, pt_string);
   LOG4CXX_INFO(logger_, "Policy table is saved: " << std::boolalpha << ret);
   if (ret) {
