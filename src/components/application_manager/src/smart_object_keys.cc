@@ -185,6 +185,7 @@ const char* key_press_mode = "keypressMode";
 // duplicate names from hmi_request
 const char* limited_character_list = "limitedCharacterList";
 const char* auto_complete_text = "autoCompleteText";
+const char* auto_complete_list = "autoCompleteList";
 const char* navigation_text = "navigationText";
 
 // vehicle info
@@ -349,6 +350,7 @@ const char* method_name = "methodName";
 const char* keyboard_layout = "keyboardLayout";
 const char* limited_character_list = "limitedCharacterList";
 const char* auto_complete_text = "autoCompleteText";
+const char* auto_complete_list = "autoCompleteList";
 const char* file = "file";
 const char* file_name = "fileName";
 const char* retry = "retry";

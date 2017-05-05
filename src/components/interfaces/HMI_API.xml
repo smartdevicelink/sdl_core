@@ -1855,6 +1855,9 @@
   <param name="autoCompleteText" type="String" maxlength="1000" mandatory="false">
     <description>Allows an app to prepopulate the text field with a suggested or completed entry as the user types</description>
   </param>
+  <param name="autoCompleteList" type="String" maxlength="50" minsize="1" maxsize="100" array="true" mandatory="false">
+    <description>Allows an app to prepopulate the text field with a list of suggested or completed entry as the user types</description>
+  </param>
 </struct>
 
 <struct name="Turn">
