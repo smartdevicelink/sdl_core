@@ -61,8 +61,17 @@ UpdateStatusManager::~UpdateStatusManager() {
 
 void UpdateStatusManager::ProcessEvent(UpdateEvent event) {
   sync_primitives::AutoLock lock(status_lock_);
+  LOG4CXX_DEBUG(logger_,
+                "Current Status "
+                    << (current_status_.get())->get_status_string());
+  LOG4CXX_DEBUG(logger_, "Event" << event);
   current_status_->ProcessEvent(this, event);
+  LOG4CXX_DEBUG(logger_,
+                "next_status_ " << (next_status_.get())->get_status_string());
   DoTransition();
+  LOG4CXX_DEBUG(logger_,
+                "current_status_ "
+                    << (current_status_.get())->get_status_string());
 }
 
 void UpdateStatusManager::SetNextStatus(utils::SharedPtr<Status> status) {
