@@ -78,6 +78,23 @@ class SpinMutex {
   volatile unsigned int state_;
 };
 
+/**
+ * @brief The AutoSpin class used to automatically lock and unlock certain SpinMutex
+ */
+class AutoSpin {
+ public:
+   AutoSpin(SpinMutex& spin)
+       : spin_(spin) {
+       spin_.Lock();
+   }
+   ~AutoSpin() {
+       spin_.Unlock();
+   }
+ private:
+  SpinMutex& spin_;
+  DISALLOW_COPY_AND_ASSIGN(SpinMutex);
+};
+
 /* Platform-indepenednt NON-RECURSIVE lock (mutex) wrapper
    Please use AutoLock to ackquire and (automatically) release it
    It eases balancing of multple lock taking/releasing and makes it
