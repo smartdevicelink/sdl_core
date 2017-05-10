@@ -67,7 +67,7 @@ void get_version_from_file(int& first_version,
       ASSERT_TRUE(splitPos2 != std::string::npos);
 
       std::size_t versionEnd = str.find("\"", splitPos2 + 1);
-      ASSERT_TRUE(versionEnd != std::string::npos)
+      ASSERT_TRUE(versionEnd != std::string::npos);
 
       first_version = 0;
       for (std::size_t iter = versionStart + 1; iter < splitPos; iter++) {
