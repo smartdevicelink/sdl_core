@@ -78,6 +78,7 @@ class MockPolicyManager : public PolicyManager {
   MOCK_METHOD1(KmsChanged, void(int kilometers));
   MOCK_METHOD0(IncrementIgnitionCycles, void());
   MOCK_METHOD0(ForcePTExchange, std::string());
+  MOCK_METHOD0(ForcePTExchangeAtUserRequest, std::string());
   MOCK_METHOD0(ResetRetrySequence, void());
   MOCK_METHOD0(NextRetryTimeout, int());
   MOCK_METHOD0(TimeoutExchangeMSec, uint32_t());

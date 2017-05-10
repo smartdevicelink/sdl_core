@@ -62,6 +62,7 @@ UpdateStatusManager::~UpdateStatusManager() {
 void UpdateStatusManager::ProcessEvent(UpdateEvent event) {
   sync_primitives::AutoLock lock(status_lock_);
   current_status_->ProcessEvent(this, event);
+  last_processed_event_ = event;
   DoTransition();
 }
 
@@ -154,6 +155,10 @@ void UpdateStatusManager::ScheduleUpdate() {
   ProcessEvent(kScheduleUpdate);
 }
 
+void UpdateStatusManager::ScheduleManualUpdate() {
+  ProcessEvent(kScheduleManualUpdate);
+}
+
 std::string UpdateStatusManager::StringifiedUpdateStatus() const {
   return current_status_->get_status_string();
 }
@@ -184,14 +189,18 @@ void UpdateStatusManager::DoTransition() {
 
   current_status_ = next_status_;
   next_status_.reset();
-  listener_->OnUpdateStatusChanged(current_status_->get_status_string());
-
+  LOG4CXX_DEBUG(logger_, "last_processed_event_ = " << last_processed_event_);
+  if (last_processed_event_ != kScheduleManualUpdate) {
+    listener_->OnUpdateStatusChanged(current_status_->get_status_string());
+  }
   if (!postponed_status_) {
     return;
   }
 
   current_status_ = postponed_status_;
-  listener_->OnUpdateStatusChanged(current_status_->get_status_string());
+  if (last_processed_event_ != kScheduleManualUpdate) {
+    listener_->OnUpdateStatusChanged(current_status_->get_status_string());
+  }
   postponed_status_.reset();
 }
 

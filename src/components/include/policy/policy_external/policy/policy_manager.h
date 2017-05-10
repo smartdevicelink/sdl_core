@@ -142,9 +142,14 @@ class PolicyManager : public usage_statistics::StatisticsManager {
   virtual void IncrementIgnitionCycles() = 0;
 
   /**
-   * @brief ExchangeByUserRequest
+   * @brief Exchange by hmi or mobile request
    */
   virtual std::string ForcePTExchange() = 0;
+
+  /**
+   * @brief ExchangeByUserRequest
+   */
+  virtual std::string ForcePTExchangeAtUserRequest() = 0;
 
   /**
    * Resets retry sequence

@@ -1033,6 +1033,13 @@ std::string PolicyManagerImpl::ForcePTExchange() {
   return update_status_manager_.StringifiedUpdateStatus();
 }
 
+std::string PolicyManagerImpl::ForcePTExchangeAtUserRequest() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  update_status_manager_.ScheduleManualUpdate();
+  StartPTExchange();
+  return update_status_manager_.StringifiedUpdateStatus();
+}
+
 std::string PolicyManagerImpl::GetPolicyTableStatus() const {
   return update_status_manager_.StringifiedUpdateStatus();
 }

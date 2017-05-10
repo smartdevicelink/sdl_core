@@ -52,6 +52,7 @@ enum UpdateEvent {
   kOnResetPolicyTableRequireUpdate,
   kOnResetPolicyTableNoUpdate,
   kScheduleUpdate,
+  kScheduleManualUpdate,
   kOnResetRetrySequence
 };
 
