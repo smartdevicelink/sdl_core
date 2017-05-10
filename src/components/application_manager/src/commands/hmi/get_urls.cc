@@ -150,6 +150,34 @@ void FillSODefaultUrls(smart_objects::SmartObject& urls,
   }
 }
 
+void FillSOUrls(smart_objects::SmartObject& urls,
+                const policy::EndpointUrls& endpoints,
+                const ApplicationSharedPtr app) {
+  using namespace smart_objects;
+  const std::string mobile_app_id = app->policy_app_id();
+  size_t count_of_services = 0;
+
+  // Will use URLs for particular application if they will be found
+  // Otherwise URLs from default section will be used
+  for (size_t i = 0; i < endpoints.size(); ++i) {
+    SmartObject service_info = SmartObject(SmartType_Map);
+    policy::EndpointData endpointdata = endpoints[i];
+    if (mobile_app_id == endpointdata.app_id) {
+      for (size_t it_url = 0; it_url != endpointdata.url.size(); ++it_url) {
+        service_info[strings::url] = endpointdata.url[it_url];
+        urls[count_of_services++] = service_info;
+      }
+    }
+    if (policy::kDefaultId == endpointdata.app_id) {
+      for (size_t it_url = 0; it_url != endpointdata.url.size(); ++it_url) {
+        service_info[strings::app_id] = app->app_id();
+        service_info[strings::url] = endpointdata.url[it_url];
+        urls[count_of_services++] = service_info;
+      }
+    }
+  }
+}
+
 void GetUrls::ProcessPolicyServiceURLs(const policy::EndpointUrls& endpoints) {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace smart_objects;
@@ -195,35 +223,6 @@ void GetUrls::ProcessPolicyServiceURLs(const policy::EndpointUrls& endpoints) {
   // Possibly related to smart schema
   SendResponseToHMI(Common_Result::SUCCESS);
   return;
-}
-
-void GetUrls::FillSOUrls(smart_objects::SmartObject& urls,
-                         const policy::EndpointUrls& endpoints,
-                         const ApplicationSharedPtr app) {
-  using namespace smart_objects;
-  const std::string mobile_app_id = app->policy_app_id();
-  size_t count_of_services = 0;
-
-  // Will use URLs for particular application if they will be found
-  // Otherwise URLs from default section will be used
-  for (size_t i = 0; i < endpoints.size(); ++i) {
-    SmartObject service_info = SmartObject(SmartType_Map);
-    if (mobile_app_id == endpoints[i].app_id) {
-      if (endpoints[i].url.size()) {
-        for (size_t it_url = 0; it_url != endpoints[i].url.size(); ++it_url) {
-          service_info[strings::url] = endpoints[i].url[it_url];
-          urls[count_of_services++] = service_info;
-        }
-      }
-    }
-    if (policy::kDefaultId == endpoints[i].app_id) {
-      for (size_t it_url = 0; it_url != endpoints[i].url.size(); ++it_url) {
-        service_info[strings::app_id] = app->app_id();
-        service_info[strings::url] = endpoints[i].url[it_url];
-        urls[count_of_services++] = service_info;
-      }
-    }
-  }
 }
 
 #endif  // PROPRIETARY_MODE || EXTERNAL_PROPRIETARY

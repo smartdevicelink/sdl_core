@@ -69,10 +69,6 @@ class GetUrls : public RequestFromHMI {
    * @param endpoints Endpoints section of policy table
    */
   void ProcessPolicyServiceURLs(const policy::EndpointUrls& endpoints);
-
-  void FillSOUrls(smart_objects::SmartObject& urls,
-                  const policy::EndpointUrls& endpoints,
-                  const ApplicationSharedPtr app);
 #endif  // PROPRIETARY_MODE || EXTERNAL_PROPRIETARY_MODE
 
   /**
