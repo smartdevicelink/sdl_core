@@ -43,7 +43,9 @@ namespace test {
 namespace components {
 namespace utils_test {
 
-void get_version_from_file(int& first_version, int& second_version, int& third_version) {
+void get_version_from_file(int& first_version,
+                           int& second_version,
+                           int& third_version) {
   // Supposed that major and minor version include one number
   const std::string& absolute_current_path =
       file_system::CurrentWorkingDirectory();
@@ -56,7 +58,7 @@ void get_version_from_file(int& first_version, int& second_version, int& third_v
     std::size_t isfound = str.find("interface name");
     if (isfound != std::string::npos) {
       std::size_t versionStart = str.find("\"", str.find("version="));
-      ASSERT_TRUE(versionStart != std::string::npos);  
+      ASSERT_TRUE(versionStart != std::string::npos);
 
       std::size_t splitPos = str.find(".", versionStart + 1);
       ASSERT_TRUE(splitPos != std::string::npos);
@@ -65,7 +67,7 @@ void get_version_from_file(int& first_version, int& second_version, int& third_v
       ASSERT_TRUE(splitPos2 != std::string::npos);
 
       std::size_t versionEnd = str.find("\"", splitPos2 + 1);
-      ASSERT_TRUE(versionEnd != std::string::npos);
+      ASSERT_TRUE(versionEnd != std::string::npos)
 
       first_version = 0;
       for (std::size_t iter = versionStart + 1; iter < splitPos; iter++) {
