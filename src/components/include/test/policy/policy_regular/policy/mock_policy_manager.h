@@ -184,6 +184,10 @@ class MockPolicyManager : public PolicyManager {
   MOCK_CONST_METHOD0(get_settings, const PolicySettings&());
   MOCK_METHOD1(set_settings, void(const PolicySettings* get_settings));
   MOCK_CONST_METHOD0(GetLockScreenIconUrl, std::string());
+  MOCK_METHOD1(GetNextUpdateUrl, AppIdURL(const EndpointUrls& urls));
+  MOCK_CONST_METHOD2(RetrySequenceUrl,
+                     AppIdURL(const struct RetrySequenceURL&,
+                              const EndpointUrls& urls));
 };
 
 }  // namespace policy_manager_test

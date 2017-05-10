@@ -481,6 +481,26 @@ class PolicyManager : public usage_statistics::StatisticsManager {
 
   virtual const PolicySettings& get_settings() const = 0;
 
+  /**
+   * @brief Finds the next URL that must be sent on OnSystemRequest retry
+   * @param urls vector of vectors that contain urls for each application
+   * @return Pair of policy application id and application url id from the
+   * urls vector
+   */
+  virtual AppIdURL GetNextUpdateUrl(const EndpointUrls& urls) = 0;
+
+  /**
+   * @brief Checks if there is existing URL in the EndpointUrls vector with
+   * index saved in the policy manager and if not, it moves to the next
+   * application index
+   * @param rs contains the application index and url index from the
+   * urls vector that are to be sent on the next OnSystemRequest
+   * @param urls vector of vectors that contain urls for each application
+   * @return Pair of application index and url index
+   */
+  virtual AppIdURL RetrySequenceUrl(const struct RetrySequenceURL& rs,
+                                    const EndpointUrls& urls) const = 0;
+
  protected:
   /**
    * Checks is PT exceeded IgnitionCycles
