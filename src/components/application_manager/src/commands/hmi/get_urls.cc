@@ -150,6 +150,34 @@ void FillSODefaultUrls(smart_objects::SmartObject& urls,
   }
 }
 
+void FillSOUrls(smart_objects::SmartObject& urls,
+                const policy::EndpointUrls& endpoints,
+                const ApplicationSharedPtr app) {
+  using namespace smart_objects;
+  const std::string mobile_app_id = app->policy_app_id();
+  size_t count_of_services = 0;
+
+  // Will use URLs for particular application if they will be found
+  // Otherwise URLs from default section will be used
+  for (size_t i = 0; i < endpoints.size(); ++i) {
+    SmartObject service_info = SmartObject(SmartType_Map);
+    policy::EndpointData endpointdata = endpoints[i];
+    if (mobile_app_id == endpointdata.app_id) {
+      for (size_t it_url = 0; it_url != endpointdata.url.size(); ++it_url) {
+        service_info[strings::url] = endpointdata.url[it_url];
+        urls[count_of_services++] = service_info;
+      }
+    }
+    if (policy::kDefaultId == endpointdata.app_id) {
+      for (size_t it_url = 0; it_url != endpointdata.url.size(); ++it_url) {
+        service_info[strings::app_id] = app->app_id();
+        service_info[strings::url] = endpointdata.url[it_url];
+        urls[count_of_services++] = service_info;
+      }
+    }
+  }
+}
+
 void GetUrls::ProcessPolicyServiceURLs(const policy::EndpointUrls& endpoints) {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace smart_objects;
@@ -189,36 +217,14 @@ void GetUrls::ProcessPolicyServiceURLs(const policy::EndpointUrls& endpoints) {
   object[msg_params].erase(hmi_request::service);
   object[msg_params][hmi_response::urls] = SmartObject(SmartType_Array);
   SmartObject& urls = object[msg_params][hmi_response::urls];
-  const std::string mobile_app_id = app->policy_app_id();
-  std::string default_url = "URL is not found";
 
-  // Will use only one URL for particular application if it will be found
-  // Otherwise URL from default section will used
-  SmartObject service_info = SmartObject(SmartType_Map);
-
-  for (size_t e = 0; e < endpoints.size(); ++e) {
-    if (mobile_app_id == endpoints[e].app_id) {
-      if (endpoints[e].url.size()) {
-        service_info[url] = endpoints[e].url[0];
-        SendResponseToHMI(Common_Result::SUCCESS);
-        return;
-      }
-    }
-    if (policy::kDefaultId == endpoints[e].app_id) {
-      if (endpoints[e].url.size()) {
-        default_url = endpoints[e].url[0];
-      }
-    }
-  }
-
-  service_info[strings::app_id] = app->app_id();
-  service_info[strings::url] = default_url;
-  urls[0] = service_info;
+  FillSOUrls(urls, endpoints, app);
   // TODO(AOleynik): Issue with absent policy_app_id. Need to fix later on.
   // Possibly related to smart schema
   SendResponseToHMI(Common_Result::SUCCESS);
   return;
 }
+
 #endif  // PROPRIETARY_MODE || EXTERNAL_PROPRIETARY
 
 }  // namespace commands
