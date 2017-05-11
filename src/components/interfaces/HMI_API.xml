@@ -1199,6 +1199,13 @@
   </element>
 </enum>
 
+<enum name="SteeringWheelLocation">
+  <description>Describes the location of the Steering Wheel.</description>
+  <element name="LEFT" />
+  <element name="RIGHT" />
+  <element name="CENTER" />
+</enum>
+
 <enum name="DeliveryMode">
   <description>The mode in which the SendLocation request is sent</description>
   <element name="PROMPT" />
@@ -1604,6 +1611,9 @@
   </param>
   <param name="phoneCall" type="Boolean" mandatory="false">
     <description>Availability of build in phone. True: Available, False: Not Available</description>
+  </param>
+  <param name="steeringWheelLocation" type="Common.SteeringWheelLocation" mandatory="false">
+    <description>See SteeringWheelLocation</description>
   </param>
 </struct>
 
