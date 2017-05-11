@@ -532,60 +532,59 @@ bool CommandRequestImpl::CheckAllowedParameters() {
     return true;
   }
 
-  const ApplicationSet& accessor =
-      application_manager_.applications().GetData();
-  ApplicationSetConstIt it_app_list = accessor.begin();
-  ApplicationSetConstIt it_app_list_end = accessor.end();
-  for (; it_app_list != it_app_list_end; ++it_app_list) {
-    if (connection_key() == (*it_app_list).get()->app_id()) {
-      RPCParams params;
+  const ApplicationSharedPtr app =
+      application_manager_.application(connection_key());
+  if (!app) {
+    LOG4CXX_ERROR(logger_,
+                  "There is no registered application with "
+                  "connection key '"
+                      << connection_key() << "'");
+    return false;
+  }
 
-      const smart_objects::SmartObject& s_map =
-          (*message_)[strings::msg_params];
-      if (smart_objects::SmartType_Map == s_map.getType()) {
-        smart_objects::SmartMap::iterator iter = s_map.map_begin();
-        smart_objects::SmartMap::iterator iter_end = s_map.map_end();
+  RPCParams params;
 
-        for (; iter != iter_end; ++iter) {
-          if (true == iter->second.asBool()) {
-            LOG4CXX_DEBUG(logger_, "Request's param: " << iter->first);
-            params.insert(iter->first);
-          }
-        }
-      }
+  const smart_objects::SmartObject& s_map = (*message_)[strings::msg_params];
+  smart_objects::SmartMap::iterator iter = s_map.map_begin();
+  smart_objects::SmartMap::iterator iter_end = s_map.map_end();
 
-      mobile_apis::Result::eType check_result =
-          application_manager_.CheckPolicyPermissions(
-              *it_app_list,
-              MessageHelper::StringifiedFunctionID(
-                  static_cast<mobile_api::FunctionID::eType>(function_id())),
-              params,
-              &parameters_permissions_);
-
-      // Check, if RPC is allowed by policy
-      if (mobile_apis::Result::SUCCESS != check_result) {
-        smart_objects::SmartObjectSPtr response =
-            MessageHelper::CreateBlockedByPoliciesResponse(
-                static_cast<mobile_api::FunctionID::eType>(function_id()),
-                check_result,
-                correlation_id(),
-                (*it_app_list)->app_id());
-
-        application_manager_.SendMessageToMobile(response);
-        return false;
-      }
-
-      // If no parameters specified in policy table, no restriction will be
-      // applied for parameters
-      if (parameters_permissions_.allowed_params.empty() &&
-          parameters_permissions_.disallowed_params.empty() &&
-          parameters_permissions_.undefined_params.empty()) {
-        return true;
-      }
-
-      RemoveDisallowedParameters();
+  for (; iter != iter_end; ++iter) {
+    if (true == iter->second.asBool()) {
+      LOG4CXX_DEBUG(logger_, "Request's param: " << iter->first);
+      params.insert(iter->first);
     }
   }
+
+  mobile_apis::Result::eType check_result =
+      application_manager_.CheckPolicyPermissions(
+          app,
+          MessageHelper::StringifiedFunctionID(
+              static_cast<mobile_api::FunctionID::eType>(function_id())),
+          params,
+          &parameters_permissions_);
+
+  // Check, if RPC is allowed by policy
+  if (mobile_apis::Result::SUCCESS != check_result) {
+    smart_objects::SmartObjectSPtr response =
+        MessageHelper::CreateBlockedByPoliciesResponse(
+            static_cast<mobile_api::FunctionID::eType>(function_id()),
+            check_result,
+            correlation_id(),
+            app->app_id());
+
+    application_manager_.SendMessageToMobile(response);
+    return false;
+  }
+
+  // If no parameters specified in policy table, no restriction will be
+  // applied for parameters
+  if (parameters_permissions_.allowed_params.empty() &&
+      parameters_permissions_.disallowed_params.empty() &&
+      parameters_permissions_.undefined_params.empty()) {
+    return true;
+  }
+
+  RemoveDisallowedParameters();
   return true;
 }
 
