@@ -997,13 +997,47 @@ AppLevel::AppLevel(const Json::Value* value__)
           impl::ValueMember(value__, "count_of_rpcs_sent_in_hmi_none"))
     , count_of_removals_for_bad_behavior(
           impl::ValueMember(value__, "count_of_removals_for_bad_behavior"))
-    , count_of_tls_errors(impl::ValueMember(value__, "count_of_tls_errors"))
+    , count_of_tls_errors(impl::ValueMember(value__, "count_of_TLS_errors"))
     , count_of_run_attempts_while_revoked(
           impl::ValueMember(value__, "count_of_run_attempts_while_revoked")) {}
 
 Json::Value AppLevel::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
+  impl::WriteJsonField("minutes_in_hmi_full", minutes_in_hmi_full, &result__);
+  impl::WriteJsonField("app_registration_language_gui",
+                       app_registration_language_gui,
+                       &result__);
+  impl::WriteJsonField("app_registration_language_vui",
+                       app_registration_language_vui,
+                       &result__);
+  impl::WriteJsonField(
+      "minutes_in_hmi_limited", minutes_in_hmi_limited, &result__);
+  impl::WriteJsonField(
+      "minutes_in_hmi_background", minutes_in_hmi_background, &result__);
+  impl::WriteJsonField("minutes_in_hmi_none", minutes_in_hmi_none, &result__);
+  impl::WriteJsonField(
+      "count_of_user_selections", count_of_user_selections, &result__);
+  impl::WriteJsonField("count_of_rejections_sync_out_of_memory",
+                       count_of_rejections_sync_out_of_memory,
+                       &result__);
+  impl::WriteJsonField("count_of_rejections_nickname_mismatch",
+                       count_of_rejections_nickname_mismatch,
+                       &result__);
+  impl::WriteJsonField("count_of_rejections_duplicate_name",
+                       count_of_rejections_duplicate_name,
+                       &result__);
+  impl::WriteJsonField(
+      "count_of_rejected_rpc_calls", count_of_rejected_rpc_calls, &result__);
+  impl::WriteJsonField("count_of_rpcs_sent_in_hmi_none",
+                       count_of_rpcs_sent_in_hmi_none,
+                       &result__);
+  impl::WriteJsonField("count_of_removals_for_bad_behavior",
+                       count_of_removals_for_bad_behavior,
+                       &result__);
   impl::WriteJsonField("count_of_TLS_errors", count_of_tls_errors, &result__);
+  impl::WriteJsonField("count_of_run_attempts_while_revoked",
+                       count_of_run_attempts_while_revoked,
+                       &result__);
   return result__;
 }
 bool AppLevel::is_valid() const {
