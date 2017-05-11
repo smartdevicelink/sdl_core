@@ -72,6 +72,9 @@ const std::string kMethodName = "Navigation.GetWayPoints";
 class GetWayPointsRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
+  GetWayPointsRequestTest()
+      : message_helper_mock_(*am::MockMessageHelper::message_helper_mock()) {}
+
   void SetUp() OVERRIDE {
     message_ = utils::MakeShared<SmartObject>(::smart_objects::SmartType_Map);
     (*message_)[am::strings::msg_params] =
@@ -84,6 +87,7 @@ class GetWayPointsRequestTest
     ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app_));
   }
 
+  MockMessageHelper& message_helper_mock_;
   MockAppPtr mock_app_;
   MessageSharedPtr message_;
   utils::SharedPtr<application_manager::commands::GetWayPointsRequest>
@@ -117,6 +121,9 @@ class GetWayPointsRequestOnEventTest
     }
 
     event.set_smart_object(*event_msg);
+
+    ON_CALL(message_helper_mock_, HMIToMobileResult(_))
+        .WillByDefault(Return(ResultCode));
 
     MessageSharedPtr result_msg(
         CatchMobileCommandResult(CallOnEvent(*command, event)));
@@ -196,6 +203,9 @@ TEST_F(GetWayPointsRequestTest,
 
   CallOnEvent caller(*command_sptr_, event);
 
+  ON_CALL(message_helper_mock_,
+          HMIToMobileResult(hmi_apis::Common_Result::SUCCESS))
+      .WillByDefault(Return(mobile_apis::Result::SUCCESS));
   MessageSharedPtr result_message = CatchMobileCommandResult(caller);
 
   const mobile_apis::Result::eType result =
