@@ -335,7 +335,14 @@
     			"upDownAvailable"	 :true,
     			"imageSupported"	 :true
     		}
-        ]
+        ],
+        "keyboardPropertiesDefault":
+        {
+            "languageDefault" : "EN-US",
+            "keyboardLayoutDefault" : "QWERTY",
+            "keypressModeDefault" : "SINGLE_KEYPRESS",
+            "autoCompleteListDefault" : "false"
+        }
     },
     "VR":
 	{
