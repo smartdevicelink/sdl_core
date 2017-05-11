@@ -65,6 +65,7 @@ using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::DoAll;
+using ::testing::InSequence;
 
 namespace am = ::application_manager;
 
@@ -317,6 +318,18 @@ TEST_F(RegisterAppInterfaceRequestTest,
       .WillByDefault(
           Return(&(*expected_message)[am::hmi_response::display_capabilities]));
 
+  SmartObject& audio_pass_thru_capabilities =
+      (*expected_message)[am::strings::audio_pass_thru_capabilities][0];
+  audio_pass_thru_capabilities = "audio_pass_thru_capabilities";
+  ON_CALL(mock_hmi_capabilities_, audio_pass_thru_capabilities())
+      .WillByDefault(Return(&audio_pass_thru_capabilities));
+
+  SmartObject& ui_hmi_capabilities =
+      (*expected_message)[am::strings::hmi_capabilities];
+  ui_hmi_capabilities = "ui_hmi_capabilities";
+  ON_CALL(mock_hmi_capabilities_, ui_hmi_capabilities())
+      .WillByDefault(ReturnRef(ui_hmi_capabilities));
+
   ON_CALL(app_mngr_, applications())
       .WillByDefault(Return(DataAccessor<am::ApplicationSet>(app_set_, lock_)));
   ON_CALL(mock_policy_handler_, PolicyEnabled()).WillByDefault(Return(true));
@@ -356,6 +369,92 @@ TEST_F(RegisterAppInterfaceRequestTest,
               ManageMobileCommand(_, am::commands::Command::ORIGIN_SDL))
       .Times(2);
 
+  command_->Run();
+}
+
+MATCHER_P(CheckMobileResponseParameters, ui_hmi_capabilities, "") {
+  const bool is_result_id_correct =
+      mobile_apis::Result::SUCCESS ==
+      static_cast<mobile_apis::Result::eType>(
+          (*arg)[am::strings::msg_params][am::strings::result_code].asInt());
+  const bool is_navigation_value_valid =
+      (*arg)[am::strings::msg_params][am::strings::hmi_capabilities]
+            [am::strings::navigation].asBool() ==
+      (*ui_hmi_capabilities)[am::strings::navigation].asBool();
+  const bool is_phone_call_value_valid =
+      (*arg)[am::strings::msg_params][am::strings::hmi_capabilities]
+            [am::strings::phone_call].asBool() ==
+      (*ui_hmi_capabilities)[am::strings::phone_call].asBool();
+  const bool is_steering_wheel_location_value_valid =
+      (*arg)[am::strings::msg_params][am::strings::hmi_capabilities]
+            [am::strings::steering_wheel_location].asInt() ==
+      (*ui_hmi_capabilities)[am::strings::steering_wheel_location].asInt();
+  return is_result_id_correct && is_navigation_value_valid &&
+         is_phone_call_value_valid && is_steering_wheel_location_value_valid;
+}
+
+TEST_F(RegisterAppInterfaceRequestTest,
+       Check_Sending_UI_HMI_Capabilities_SUCCESS) {
+  InitBasicMessage();
+
+  MockAppPtr mock_app = CreateBasicMockedApp();
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillOnce(Return(ApplicationSharedPtr()))
+      .WillRepeatedly(Return(mock_app));
+
+  MessageSharedPtr ui_hmi_capabilities =
+      CreateMessage(smart_objects::SmartType_Map);
+  (*ui_hmi_capabilities)[am::strings::navigation] = true;
+  (*ui_hmi_capabilities)[am::strings::phone_call] = false;
+  (*ui_hmi_capabilities)[am::strings::steering_wheel_location] =
+      static_cast<int64_t>(mobile_apis::SteeringWheelLocation::RIGHT);
+
+  ON_CALL(mock_hmi_capabilities_, ui_hmi_capabilities())
+      .WillByDefault(ReturnRef((*ui_hmi_capabilities)));
+
+  ON_CALL(app_mngr_, applications())
+      .WillByDefault(Return(DataAccessor<am::ApplicationSet>(app_set_, lock_)));
+  ON_CALL(mock_policy_handler_, PolicyEnabled()).WillByDefault(Return(true));
+  ON_CALL(mock_policy_handler_, GetInitialAppData(kAppId, _, _))
+      .WillByDefault(Return(true));
+
+  policy::StatusNotifier notify_upd_manager =
+      utils::MakeShared<utils::CallNothing>();
+  ON_CALL(mock_policy_handler_, AddApplication(_))
+      .WillByDefault(Return(notify_upd_manager));
+
+  EXPECT_CALL(app_mngr_, RegisterApplication(msg_)).WillOnce(Return(mock_app));
+
+  EXPECT_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
+      .WillRepeatedly(Return(am::HmiInterfaces::STATE_AVAILABLE));
+
+  EXPECT_CALL(app_mngr_,
+              ManageHMICommand(HMIResultCodeIs(
+                  hmi_apis::FunctionID::BasicCommunication_OnAppRegistered)))
+      .WillOnce(Return(true));
+  EXPECT_CALL(app_mngr_,
+              ManageHMICommand(HMIResultCodeIs(
+                  hmi_apis::FunctionID::Buttons_OnButtonSubscription)))
+      .WillOnce(Return(true));
+  EXPECT_CALL(app_mngr_,
+              ManageHMICommand(
+                  HMIResultCodeIs(hmi_apis::FunctionID::VR_ChangeRegistration)))
+      .WillOnce(Return(true));
+  EXPECT_CALL(app_mngr_,
+              ManageHMICommand(HMIResultCodeIs(
+                  hmi_apis::FunctionID::TTS_ChangeRegistration)))
+      .WillOnce(Return(true));
+  EXPECT_CALL(app_mngr_,
+              ManageHMICommand(
+                  HMIResultCodeIs(hmi_apis::FunctionID::UI_ChangeRegistration)))
+      .WillOnce(Return(true));
+  {
+    InSequence s;
+    EXPECT_CALL(app_mngr_,
+                ManageMobileCommand(
+                    CheckMobileResponseParameters(ui_hmi_capabilities), _));
+    EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _));
+  }
   command_->Run();
 }
 

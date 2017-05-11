@@ -228,6 +228,7 @@ const char* phone_call = "phoneCall";
 const char* sdl_version = "sdlVersion";
 const char* system_software_version = "systemSoftwareVersion";
 const char* priority = "priority";
+const char* steering_wheel_location = "steeringWheelLocation";
 
 // resuming
 const char* application_commands = "applicationCommands";

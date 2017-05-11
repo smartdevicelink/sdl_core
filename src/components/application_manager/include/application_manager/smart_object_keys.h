@@ -261,6 +261,7 @@ extern const char* phone_call;
 extern const char* sdl_version;
 extern const char* system_software_version;
 extern const char* priority;
+extern const char* steering_wheel_location;
 
 // resuming
 extern const char* application_commands;
