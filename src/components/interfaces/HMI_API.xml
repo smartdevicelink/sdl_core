@@ -539,6 +539,9 @@
   <element name="locationImage">
     <description>The optional image of a destination / location</description>
   </element>
+  <element name="subMenuIcon">
+    <description>The image field for AddSubMenu </description>
+  </element>
 </enum>
 
 <enum name="TextAlignment">
@@ -1982,7 +1985,7 @@
 
 <struct name="DateTime">
   <param name="millisecond" type="Integer" minvalue="0" maxvalue="999" mandatory="false">
-    <description>Milliseconds </description>     
+    <description>Milliseconds </description>
   </param>
   <param name="second" type="Integer" minvalue="0" maxvalue="60" mandatory="false">
     <description>Seconds part of time</description>
@@ -2844,6 +2847,11 @@
     </param>
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application that requested this RPC.</description>
+    </param>
+    <param name="subMenuIcon" type="Common.Image" mandatory="false">
+      <description>
+        If omited on supported displays, no (or the default if applicable) icon shall be displayed.
+      </description>
     </param>
   </function>
   <function name="AddSubMenu" messagetype="response">
