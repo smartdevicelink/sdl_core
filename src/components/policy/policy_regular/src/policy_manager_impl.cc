@@ -77,8 +77,7 @@ PolicyManagerImpl::PolicyManagerImpl()
                             new timer::TimerTaskImpl<PolicyManagerImpl>(
                                 this, &PolicyManagerImpl::RetrySequence))
     , ignition_check(true)
-    , retry_sequence_url_(0, 0, "") {
-}
+    , retry_sequence_url_(0, 0, "") {}
 
 void PolicyManagerImpl::set_listener(PolicyListener* listener) {
   listener_ = listener;
@@ -316,7 +315,8 @@ void PolicyManagerImpl::StartPTExchange() {
       if (RequestPTUpdate() && !timer_retry_sequence_.is_running()) {
         // Start retry sequency
         const int timeout_sec = NextRetryTimeout();
-        LOG4CXX_DEBUG(logger_, "Start retry sequence timeout = " << timeout_sec);
+        LOG4CXX_DEBUG(logger_,
+                      "Start retry sequence timeout = " << timeout_sec);
         timer_retry_sequence_.Start(timeout_sec, timer::kPeriodic);
       }
     }

@@ -173,7 +173,6 @@ class PolicyManagerImpl : public PolicyManager {
 
   StatusNotifier AddApplication(const std::string& application_id);
 
-
   virtual void RemoveAppConsentForGroup(const std::string& app_id,
                                         const std::string& group_name);
 
