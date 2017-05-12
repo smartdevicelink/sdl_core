@@ -67,14 +67,14 @@ void GetUrls::Run() {
     return;
   }
 
-#if defined(PROPRIETARY_MODE) || defined(EXTERNAL_PROPRIETARY_MODE)
+#ifdef PROPRIETARY_MODE
   const uint32_t policy_service = 7u;
 
   if (policy_service == service_to_check) {
     ProcessPolicyServiceURLs(endpoints);
     return;
   }
-#endif  // PROPRIETARY_MODE || EXTERNAL_PROPRIETARY_MODE
+#endif  // PROPRIETARY_MODE
 
   ProcessServiceURLs(endpoints);
 }
@@ -88,30 +88,34 @@ void GetUrls::ProcessServiceURLs(const policy::EndpointUrls& endpoints) {
 
   size_t index = 0;
   for (size_t e = 0; e < endpoints.size(); ++e) {
-    for (size_t u = 0; u < endpoints[e].url.size(); ++u, ++index) {
-      const std::string app_url = endpoints[e].url[u];
+    ApplicationSharedPtr app =
+        application_manager_.application_by_policy_id(endpoints[e].app_id);
 
+#ifndef PROPRIETARY_MODE
+    bool registered_not_default = false;
+    if (policy::kDefaultId != endpoints[e].app_id) {
+      if (!app) {
+        LOG4CXX_ERROR(logger_,
+                      "Can't find application with policy id "
+                          << endpoints[e].app_id
+                          << " URLs adding for this application is skipped.");
+        continue;
+      }
+      registered_not_default = true;
+    }
+#endif  // EXTERNAL_PROPRIETARY_MODE || HTTP
+    for (size_t u = 0; u < endpoints[e].url.size(); ++u, ++index) {
+      const std::string& app_url = endpoints[e].url[u];
       SmartObject& service_info = urls[index];
 
       service_info[strings::url] = app_url;
-      if (policy::kDefaultId != endpoints[e].app_id) {
-#ifndef EXTERNAL_PROPRIETARY_MODE
-        service_info[hmi_response::policy_app_id] = endpoints[e].app_id;
-#else   // EXTERNAL_PROPRIETARY_MODE
-        ApplicationSharedPtr app =
-            application_manager_.application_by_policy_id(endpoints[e].app_id);
-
-        if (!app) {
-          LOG4CXX_ERROR(logger_,
-                        "Can't find application with policy id "
-                            << endpoints[e].app_id
-                            << " URLs adding for this appliation is skipped.");
-          continue;
-        }
-
+#ifndef PROPRIETARY_MODE
+      if (registered_not_default) {
         service_info[strings::app_id] = app->hmi_app_id();
-#endif  // EXTERNAL_PROPRIETARY_MODE
       }
+#else  // EXTERNAL_PROPRIETARY_MODE || HTTP
+      service_info[hmi_response::policy_app_id] = endpoints[e].app_id;
+#endif
     }
   }
   SendResponseToHMI(Common_Result::SUCCESS);
@@ -123,7 +127,7 @@ void GetUrls::SendResponseToHMI(hmi_apis::Common_Result::eType result) {
   application_manager_.ManageHMICommand(message_);
 }
 
-#if defined(PROPRIETARY_MODE) || defined(EXTERNAL_PROPRIETARY_MODE)
+#ifdef PROPRIETARY_MODE
 struct PolicyAppIdComparator {
   PolicyAppIdComparator(const std::string& policy_app_id)
       : policy_app_id_(policy_app_id) {}
@@ -219,7 +223,7 @@ void GetUrls::ProcessPolicyServiceURLs(const policy::EndpointUrls& endpoints) {
   SendResponseToHMI(Common_Result::SUCCESS);
   return;
 }
-#endif  // PROPRIETARY_MODE || EXTERNAL_PROPRIETARY
+#endif  // PROPRIETARY_MODE
 
 }  // namespace commands
 }  // namespace application_manager
