@@ -777,13 +777,18 @@ uint32_t PolicyManagerImpl::NextRetryTimeout() {
     return next;
   }
 
-  ++retry_sequence_index_;
+  if (0 == retry_sequence_index_) {
+    ++retry_sequence_index_;
+    // Return miliseconds
+    return retry_sequence_timeout_;
+  }
 
   for (uint32_t i = 0u; i < retry_sequence_index_; ++i) {
-    next += retry_sequence_seconds_[i];
-    // According to requirement APPLINK-18244
+    next += retry_sequence_seconds_[i] *
+            date_time::DateTime::MILLISECONDS_IN_SECOND;
     next += retry_sequence_timeout_;
   }
+  ++retry_sequence_index_;
 
   // Return miliseconds
   return next;

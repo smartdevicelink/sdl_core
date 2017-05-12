@@ -870,18 +870,30 @@ TEST_F(PolicyManagerImplTest2, NextRetryTimeout_ExpectTimeoutsFromPT) {
     Json::Value seconds_between_retries = Json::Value(Json::arrayValue);
     seconds_between_retries =
         root["policy_table"]["module_config"]["seconds_between_retries"];
-    uint32_t size = seconds_between_retries.size();
     CreateLocalPT("sdl_preloaded_pt.json");
-
-    uint32_t waiting_timeout = 0u;
-
-    for (uint32_t retry_number = 0u; retry_number < size; ++retry_number) {
-      waiting_timeout += seconds_between_retries[retry_number].asInt();
-      waiting_timeout += manager->TimeoutExchangeMSec();
-
-      // it's in miliseconds
-      EXPECT_EQ(waiting_timeout, manager->NextRetryTimeout());
-    }
+    // Check data
+    uint32_t timeout_after_x_seconds =
+        root["policy_table"]["module_config"]["timeout_after_x_seconds"]
+            .asInt() *
+        date_time::DateTime::MILLISECONDS_IN_SECOND;
+    const uint32_t first_retry = timeout_after_x_seconds;
+    EXPECT_EQ(first_retry, manager->NextRetryTimeout());
+    uint32_t next_retry = first_retry +
+                          seconds_between_retries[0].asInt() *
+                              date_time::DateTime::MILLISECONDS_IN_SECOND;
+    EXPECT_EQ(next_retry, manager->NextRetryTimeout());
+    next_retry = first_retry + next_retry +
+                 seconds_between_retries[1].asInt() *
+                     date_time::DateTime::MILLISECONDS_IN_SECOND;
+    EXPECT_EQ(next_retry, manager->NextRetryTimeout());
+    next_retry = first_retry + next_retry +
+                 seconds_between_retries[2].asInt() *
+                     date_time::DateTime::MILLISECONDS_IN_SECOND;
+    EXPECT_EQ(next_retry, manager->NextRetryTimeout());
+    next_retry = first_retry + next_retry +
+                 seconds_between_retries[3].asInt() *
+                     date_time::DateTime::MILLISECONDS_IN_SECOND;
+    EXPECT_EQ(next_retry, manager->NextRetryTimeout());
   }
 }
 
