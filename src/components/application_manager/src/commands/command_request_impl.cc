@@ -232,8 +232,7 @@ void CommandRequestImpl::SendResponse(
   }
 
   // Add disallowed parameters and info from request back to response with
-  // appropriate
-  // reasons (VehicleData result codes)
+  // appropriate reasons (VehicleData result codes)
   if (result_code != mobile_apis::Result::APPLICATION_NOT_REGISTERED) {
     const mobile_apis::FunctionID::eType& id =
         static_cast<mobile_apis::FunctionID::eType>(function_id());
@@ -247,7 +246,20 @@ void CommandRequestImpl::SendResponse(
   }
 
   response[strings::msg_params][strings::success] = success;
-  response[strings::msg_params][strings::result_code] = result_code;
+
+  // In case result type was not recognized the response that we received from
+  // HMI is considered as invalid response
+  if (mobile_apis::Result::INVALID_ENUM == result_code) {
+    LOG4CXX_ERROR(logger_,
+                  "HMI response contains unrecognizable result code, so it is "
+                  "considered as invalid response");
+    response[strings::msg_params][strings::result_code] =
+        mobile_apis::Result::GENERIC_ERROR;
+    response[strings::msg_params][strings::info] =
+        std::string("Invalid message received from vehicle");
+  } else {
+    response[strings::msg_params][strings::result_code] = result_code;
+  }
 
   application_manager_.ManageMobileCommand(result, ORIGIN_SDL);
 }
