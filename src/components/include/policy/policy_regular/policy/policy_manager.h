@@ -151,10 +151,6 @@ class PolicyManager : public usage_statistics::StatisticsManager {
   virtual std::string ForcePTExchangeAtUserRequest() = 0;
 
   /**
-   * Resets retry sequence
-   */
-  virtual void ResetRetrySequence() = 0;
-  /**
    * Gets timeout to wait before next retry updating PT
    * If timeout is equal to zero then the retry sequence is not need.
    * @return timeout in seconds

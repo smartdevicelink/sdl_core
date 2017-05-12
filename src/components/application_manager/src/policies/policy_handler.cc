@@ -1442,11 +1442,6 @@ std::string PolicyHandler::GetLockScreenIconUrl() const {
   return policy_manager_->GetLockScreenIconUrl();
 }
 
-void PolicyHandler::ResetRetrySequence() {
-  POLICY_LIB_CHECK_VOID();
-  policy_manager_->ResetRetrySequence();
-}
-
 uint32_t PolicyHandler::NextRetryTimeout() {
   POLICY_LIB_CHECK(0);
   return policy_manager_->NextRetryTimeout();

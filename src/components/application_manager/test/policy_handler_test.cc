@@ -500,15 +500,6 @@ TEST_F(PolicyHandlerTest, GetUpdateUrls) {
   policy_handler_.GetUpdateUrls(service_type, endpoints);
 }
 
-TEST_F(PolicyHandlerTest, ResetRetrySequence) {
-  // Arrange
-  EnablePolicyAndPolicyManagerMock();
-  // Check expectations
-  EXPECT_CALL(*mock_policy_manager_, ResetRetrySequence());
-  // Act
-  policy_handler_.ResetRetrySequence();
-}
-
 TEST_F(PolicyHandlerTest, NextRetryTimeout) {
   // Arrange
   EnablePolicyAndPolicyManagerMock();
