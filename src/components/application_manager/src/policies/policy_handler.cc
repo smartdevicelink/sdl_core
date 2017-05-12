@@ -484,6 +484,12 @@ void PolicyHandler::GetAvailableApps(std::queue<std::string>& apps) {
   }
 }
 
+struct SmartObjectToInt {
+  int operator()(const smart_objects::SmartObject& item) const {
+    return item.asInt();
+  }
+};
+
 StatusNotifier PolicyHandler::AddApplication(
     const std::string& application_id) {
   POLICY_LIB_CHECK(utils::MakeShared<utils::CallNothing>());
@@ -1366,32 +1372,12 @@ void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string) {
     return;
   }
 
-  static size_t current_app = 0;
-  static size_t current_url = 0;
-  if (current_url >= urls.at(current_app).url.size()) {
-    ApplicationSharedPtr app;
-    current_url = 0;
-
-    bool is_default = false;
-    bool is_registered = false;
-    bool has_urls = false;
-    bool valid_app_found = false;
-    do {
-      if (++current_app >= urls.size()) {
-        current_app = 0;
-      }
-      const std::string& app_id = urls.at(current_app).app_id;
-      app = application_manager_.application_by_policy_id(app_id);
-
-      is_default = (app_id == policy::kDefaultId);
-      is_registered = (app && app->IsRegistered());
-      has_urls = !urls.at(current_app).url.empty();
-      valid_app_found = (is_default || (is_registered && has_urls));
-    } while (!valid_app_found);
+  AppIdURL app_url = policy_manager_->GetNextUpdateUrl(urls);
+  while (!IsUrlAppIdValid(app_url.first, urls)) {
+    app_url = policy_manager_->GetNextUpdateUrl(urls);
   }
-
-  SendMessageToSDK(pt_string, urls.at(current_app).url.at(current_url));
-  current_url++;
+  const std::string& url = urls[app_url.first].url[app_url.second];
+  SendMessageToSDK(pt_string, url);
 #endif  // PROPRIETARY_MODE
   // reset update required false
   OnUpdateRequestSentToMobile();
@@ -1819,4 +1805,17 @@ void PolicyHandler::Add(const std::string& app_id,
   policy_manager_->Add(app_id, type, timespan_seconds);
 }
 
+bool PolicyHandler::IsUrlAppIdValid(const uint32_t app_idx,
+                                    const EndpointUrls& urls) const {
+  const EndpointData& app_data = urls[app_idx];
+  const std::vector<std::string> app_urls = app_data.url;
+  const ApplicationSharedPtr app =
+      application_manager_.application_by_policy_id(app_data.app_id);
+
+  const bool is_registered = (app && (app->IsRegistered()));
+  const bool is_default = (app_data.app_id == policy::kDefaultId);
+  const bool is_empty_urls = app_urls.empty();
+
+  return ((is_registered && !is_empty_urls) || is_default);
+}
 }  //  namespace policy

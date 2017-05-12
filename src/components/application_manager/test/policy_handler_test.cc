@@ -85,6 +85,8 @@ using ::testing::DoAll;
 using ::testing::SetArgReferee;
 using ::testing::Mock;
 
+const std::string kDummyData = "some_data";
+
 class PolicyHandlerTest : public ::testing::Test {
  public:
   PolicyHandlerTest()
@@ -1349,14 +1351,20 @@ TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlAdded) {
   EnablePolicyAndPolicyManagerMock();
   BinaryMessage msg;
   EndpointUrls test_data;
-  EndpointData data("some_data");
+  EndpointData data(kDummyData);
   test_data.push_back(data);
+  ApplicationSharedPtr mock_app;
 
 #ifdef PROPRIETARY_MODE
   ExtendedPolicyExpectations();
 #else
+  AppIdURL next_app_url = std::make_pair(0, 0);
   EXPECT_CALL(*mock_policy_manager_, GetUpdateUrls("0x07", _))
       .WillRepeatedly(SetArgReferee<1>(test_data));
+  EXPECT_CALL(*mock_policy_manager_, GetNextUpdateUrl(_))
+      .WillOnce(Return(next_app_url));
+  EXPECT_CALL(app_manager_, application_by_policy_id(_))
+      .WillOnce(Return(mock_app));
   EXPECT_CALL(app_manager_, connection_handler())
       .WillOnce(ReturnRef(conn_handler));
   EXPECT_CALL(conn_handler, get_session_observer())
@@ -1372,6 +1380,7 @@ TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlAdded) {
   EXPECT_CALL(*mock_app_, policy_app_id()).WillOnce(Return(kPolicyAppId_));
 #endif  // PROPRIETARY_MODE
 
+  EXPECT_CALL(*mock_policy_manager_, OnUpdateStarted());
   policy_handler_.OnSnapshotCreated(msg);
 }
 #endif  // EXTERNAL_PROPRIETARY_MODE
