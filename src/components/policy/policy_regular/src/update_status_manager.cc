@@ -43,8 +43,7 @@ UpdateStatusManager::UpdateStatusManager()
     : listener_(NULL)
     , current_status_(utils::MakeShared<UpToDateStatus>())
     , apps_search_in_progress_(false)
-    , app_registered_from_non_consented_device_(true) {
-}
+    , app_registered_from_non_consented_device_(true) {}
 
 UpdateStatusManager::~UpdateStatusManager() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -68,9 +67,8 @@ void UpdateStatusManager::set_listener(PolicyListener* listener) {
   listener_ = listener;
 }
 
-void UpdateStatusManager::OnUpdateSentOut(uint32_t update_timeout) {
+void UpdateStatusManager::OnUpdateSentOut() {
   LOG4CXX_AUTO_TRACE(logger_);
-  UNUSED(update_timeout);
   ProcessEvent(kOnUpdateSentOut);
 }
 

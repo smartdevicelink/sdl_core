@@ -823,15 +823,7 @@ void PolicyManagerImpl::OnExceededTimeout() {
 }
 
 void PolicyManagerImpl::OnUpdateStarted() {
-  uint32_t update_timeout = 0;
-  if (0 == current_retry_sequence_timeout_) {
-    update_timeout = TimeoutExchangeMSec();
-  } else {
-    update_timeout = current_retry_sequence_timeout_;
-  }
-  LOG4CXX_DEBUG(logger_,
-                "Update timeout will be set to (milisec): " << update_timeout);
-  update_status_manager_.OnUpdateSentOut(update_timeout);
+  update_status_manager_.OnUpdateSentOut();
   cache_->SaveUpdateRequired(true);
 }
 

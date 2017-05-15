@@ -83,9 +83,8 @@ class UpdateStatusManager : public UpdateStatusManagerInterface {
 
   /**
    * @brief Update status hanlder for PTS sending out
-   * @param update_timeout Timeout for waiting of incoming PTU (msec)
    */
-  void OnUpdateSentOut(uint32_t update_timeout);
+  void OnUpdateSentOut();
 
   /**
    * @brief Update status handler for PTU waiting timeout
@@ -208,7 +207,6 @@ class UpdateStatusManager : public UpdateStatusManagerInterface {
   bool apps_search_in_progress_;
   bool app_registered_from_non_consented_device_;
   sync_primitives::Lock apps_search_in_progress_lock_;
-
 };
 }
 
