@@ -156,7 +156,7 @@ TEST_F(UpdateTurnListRequestTest,
   EXPECT_CALL(app_mngr_, GetPolicyHandler())
       .WillOnce(ReturnRef(mock_policy_handler_));
 
-  const mobile_result::eType kExpectedResult = mobile_result::INVALID_ENUM;
+  const mobile_result::eType kExpectedResult = mobile_result::GENERIC_ERROR;
   EXPECT_CALL(mock_message_helper_,
               ProcessSoftButtons((*command_msg_)[am::strings::msg_params],
                                  Eq(mock_app),

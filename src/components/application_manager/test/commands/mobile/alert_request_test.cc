@@ -355,7 +355,7 @@ TEST_F(AlertRequestTest, Run_AlertFrequencyIsTooHigh_UNSUCCESS) {
 TEST_F(AlertRequestTest, Run_FailToProcessSoftButtons_UNSUCCESS) {
   Expectations();
   const mobile_apis::Result::eType result_code =
-      mobile_apis::Result::INVALID_ENUM;
+      mobile_apis::Result::GENERIC_ERROR;
 
   EXPECT_CALL(mock_message_helper_,
               ProcessSoftButtons((*msg_)[am::strings::msg_params], _, _, _))

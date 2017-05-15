@@ -238,7 +238,7 @@ TEST_F(AlertManeuverRequestTest, OnEvent_ReceivedUnknownEvent_UNSUCCESS) {
 
   MessageSharedPtr result_msg(
       CatchMobileCommandResult(CallOnEvent(*command, event)));
-  EXPECT_EQ(mobile_apis::Result::INVALID_ENUM,
+  EXPECT_EQ(mobile_apis::Result::GENERIC_ERROR,
             static_cast<mobile_apis::Result::eType>(
                 (*result_msg)[am::strings::msg_params][am::strings::result_code]
                     .asInt()));
