@@ -132,6 +132,9 @@
     <element name="RESUME_FAILED">
       <description>The provided hash ID does not match the hash of the current set of registered data or the core could not resume the previous data.</description>
     </element>
+    <element name="CORRUPTED_DATA">
+      <description>The data sent failed to pass CRC check in receiver end</description>
+    </element>
   </enum>
 
   <enum name="ButtonPressMode">
@@ -4561,8 +4564,11 @@
       	Optional length in bytes for resuming partial data chunks
       	If offset is set to 0, then length is the total length of the file to be downloaded
       </description>
-    </param>  
+    </param>
 
+    <param name="crc" type="Integer" minvalue="0" maxvalue="4294967295" mandatory="false">
+      <description> Additional CRC32 checksum to protect data integrity up to 512 Mbits . </description>
+    </param>
   </function>
 
   <function name="PutFile" functionID="PutFileID" messagetype="response">
@@ -4582,6 +4588,7 @@
       <element name="GENERIC_ERROR"/>
       <element name="REJECTED"/>
       <element name="UNSUPPORTED_REQUEST"/>
+      <element name="CORRUPTED_DATA"/>
     </param>
 
     <param name="spaceAvailable" type="Integer" minvalue="0" maxvalue="2000000000">
