@@ -209,23 +209,6 @@ class UpdateStatusManager : public UpdateStatusManagerInterface {
   bool app_registered_from_non_consented_device_;
   sync_primitives::Lock apps_search_in_progress_lock_;
 
-  class UpdateThreadDelegate : public threads::ThreadDelegate {
-   public:
-    UpdateThreadDelegate(UpdateStatusManager* update_status_manager);
-    ~UpdateThreadDelegate();
-    virtual void threadMain();
-    virtual void exitThreadMain();
-    void updateTimeOut(const uint32_t timeout_ms);
-
-    volatile uint32_t timeout_;
-    volatile bool stop_flag_;
-    sync_primitives::Lock state_lock_;
-    sync_primitives::ConditionalVariable termination_condition_;
-    UpdateStatusManager* update_status_manager_;
-  };
-
-  UpdateThreadDelegate* update_status_thread_delegate_;
-  threads::Thread* thread_;
 };
 }
 
