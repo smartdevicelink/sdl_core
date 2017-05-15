@@ -73,7 +73,7 @@ TEST_F(UpdateStatusManagerTest,
   manager_->OnPolicyInit(true);
   // Check
   EXPECT_EQ("UPDATE_NEEDED", manager_->StringifiedUpdateStatus());
-  manager_->OnUpdateSentOut(k_timeout_);
+  manager_->OnUpdateSentOut();
   // Check
   EXPECT_EQ("UPDATING", manager_->StringifiedUpdateStatus());
 }

@@ -177,7 +177,6 @@ Json::Value ApplicationParams::ToJsonValue() const {
   impl::WriteJsonField("memory_kb", memory_kb, &result__);
   impl::WriteJsonField(
       "heart_beat_timeout_ms", heart_beat_timeout_ms, &result__);
-  impl::WriteJsonField("certificate", certificate, &result__);
   return result__;
 }
 

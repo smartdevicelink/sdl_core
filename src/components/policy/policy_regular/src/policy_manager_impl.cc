@@ -856,21 +856,7 @@ void PolicyManagerImpl::OnExceededTimeout() {
 }
 
 void PolicyManagerImpl::OnUpdateStarted() {
-  uint32_t update_timeout = 0;
-  if (0 == current_retry_sequence_timeout_) {
-    update_timeout = TimeoutExchangeMSec();
-  } else {
-    update_timeout = current_retry_sequence_timeout_;
-  }
-  LOG4CXX_DEBUG(logger_,
-                "Update timeout will be set to (milisec): " << update_timeout);
-
-  send_on_update_sent_out_ =
-      !wrong_ptu_update_received_ && !update_status_manager_.IsUpdatePending();
-
-  if (send_on_update_sent_out_) {
-    update_status_manager_.OnUpdateSentOut(update_timeout);
-  }
+  update_status_manager_.OnUpdateSentOut();
   cache_->SaveUpdateRequired(true);
 }
 
@@ -1018,6 +1004,7 @@ StatusNotifier PolicyManagerImpl::AddApplication(
   const std::string device_id = GetCurrentDeviceId(application_id);
   DeviceConsent device_consent = GetUserConsentForDevice(device_id);
   sync_primitives::AutoLock lock(apps_registration_lock_);
+
   if (IsNewApplication(application_id)) {
     AddNewApplication(application_id, device_consent);
     return utils::MakeShared<CallStatusChange>(update_status_manager_,
@@ -1034,6 +1021,7 @@ StatusNotifier PolicyManagerImpl::AddApplication(
     return utils::MakeShared<utils::CallNothing>();
   }
 }
+
 void PolicyManagerImpl::RemoveAppConsentForGroup(
     const std::string& app_id, const std::string& group_name) {
   cache_->RemoveAppConsentForGroup(app_id, group_name);
