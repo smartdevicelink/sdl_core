@@ -74,6 +74,7 @@ class PolicyManagerImpl : public PolicyManager {
   virtual void KmsChanged(int kilometers);
   virtual void IncrementIgnitionCycles();
   virtual std::string ForcePTExchange();
+  virtual std::string ForcePTExchangeAtUserRequest();
   virtual std::string GetPolicyTableStatus() const;
   virtual void ResetRetrySequence();
   virtual int NextRetryTimeout();

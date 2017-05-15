@@ -1232,7 +1232,7 @@ void PolicyHandler::KmsChanged(int kilometers) {
 void PolicyHandler::PTExchangeAtUserRequest(uint32_t correlation_id) {
   LOG4CXX_TRACE(logger_, "PT exchange at user request");
   POLICY_LIB_CHECK_VOID();
-  std::string update_status = policy_manager_->ForcePTExchange();
+  std::string update_status = policy_manager_->ForcePTExchangeAtUserRequest();
   MessageHelper::SendUpdateSDLResponse(
       update_status, correlation_id, application_manager_);
 }
@@ -1440,11 +1440,6 @@ void PolicyHandler::GetUpdateUrls(const uint32_t service_type,
 std::string PolicyHandler::GetLockScreenIconUrl() const {
   POLICY_LIB_CHECK(std::string(""));
   return policy_manager_->GetLockScreenIconUrl();
-}
-
-void PolicyHandler::ResetRetrySequence() {
-  POLICY_LIB_CHECK_VOID();
-  policy_manager_->ResetRetrySequence();
 }
 
 uint32_t PolicyHandler::NextRetryTimeout() {
