@@ -139,7 +139,7 @@ file(COPY smartDeviceLink_test.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/resumption)
 file(COPY smartDeviceLink_test.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/resumption)
-create_test("resumption/data_resumption_test" "${ResumptionData_SOURCES}" "${LIBRARIES}")
+create_test("data_resumption_test" "${ResumptionData_SOURCES}" "${LIBRARIES}")
 
 add_subdirectory(state_controller)
 add_subdirectory(app_launch)
