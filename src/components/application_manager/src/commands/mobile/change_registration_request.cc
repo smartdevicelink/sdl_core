@@ -247,35 +247,21 @@ bool ChangeRegistrationRequest::PrepareResponseParameters(
     mobile_apis::Result::eType& result_code, std::string& response_info) {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace helpers;
+  ResponseInfo ui_properties_info(
+      ui_result_, HmiInterfaces::HMI_INTERFACE_UI, application_manager_);
+  ResponseInfo tts_properties_info(
+      tts_result_, HmiInterfaces::HMI_INTERFACE_TTS, application_manager_);
+  ResponseInfo vr_properties_info(
+      vr_result_, HmiInterfaces::HMI_INTERFACE_VR, application_manager_);
+
   const bool is_tts_succeeded_unsupported =
-      Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
-          tts_result_,
-          hmi_apis::Common_Result::SUCCESS,
-          hmi_apis::Common_Result::WARNINGS,
-          hmi_apis::Common_Result::WRONG_LANGUAGE,
-          hmi_apis::Common_Result::RETRY,
-          hmi_apis::Common_Result::SAVED,
-          hmi_apis::Common_Result::UNSUPPORTED_RESOURCE);
+      tts_properties_info.is_ok || tts_properties_info.is_unsupported_resource;
 
   const bool is_ui_succeeded_unsupported =
-      Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
-          ui_result_,
-          hmi_apis::Common_Result::SUCCESS,
-          hmi_apis::Common_Result::WARNINGS,
-          hmi_apis::Common_Result::WRONG_LANGUAGE,
-          hmi_apis::Common_Result::RETRY,
-          hmi_apis::Common_Result::SAVED,
-          hmi_apis::Common_Result::UNSUPPORTED_RESOURCE);
+      ui_properties_info.is_ok || ui_properties_info.is_unsupported_resource;
 
   const bool is_vr_succeeded_unsupported =
-      Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
-          vr_result_,
-          hmi_apis::Common_Result::SUCCESS,
-          hmi_apis::Common_Result::WARNINGS,
-          hmi_apis::Common_Result::WRONG_LANGUAGE,
-          hmi_apis::Common_Result::RETRY,
-          hmi_apis::Common_Result::SAVED,
-          hmi_apis::Common_Result::UNSUPPORTED_RESOURCE);
+      vr_properties_info.is_ok || vr_properties_info.is_unsupported_resource;
 
   const bool is_tts_ui_vr_unsupported =
       Compare<hmi_apis::Common_Result::eType, EQ, ALL>(
@@ -283,24 +269,6 @@ bool ChangeRegistrationRequest::PrepareResponseParameters(
           tts_result_,
           ui_result_,
           vr_result_);
-
-  const HmiInterfaces& hmi_interfaces = application_manager_.hmi_interfaces();
-  const HmiInterfaces::InterfaceState tts_state =
-      hmi_interfaces.GetInterfaceState(
-          HmiInterfaces::InterfaceID::HMI_INTERFACE_TTS);
-  const HmiInterfaces::InterfaceState vr_state =
-      hmi_interfaces.GetInterfaceState(
-          HmiInterfaces::InterfaceID::HMI_INTERFACE_VR);
-  const HmiInterfaces::InterfaceState ui_state =
-      hmi_interfaces.GetInterfaceState(
-          HmiInterfaces::InterfaceID::HMI_INTERFACE_UI);
-
-  ResponseInfo ui_properties_info(ui_result_, HmiInterfaces::HMI_INTERFACE_UI);
-
-  ResponseInfo tts_properties_info(tts_result_,
-                                   HmiInterfaces::HMI_INTERFACE_TTS);
-
-  ResponseInfo vr_properties_info(ui_result_, HmiInterfaces::HMI_INTERFACE_VR);
 
   bool result = ((!is_tts_ui_vr_unsupported) && is_tts_succeeded_unsupported &&
                  is_ui_succeeded_unsupported && is_vr_succeeded_unsupported);
@@ -339,11 +307,12 @@ bool ChangeRegistrationRequest::PrepareResponseParameters(
     result_code = MessageHelper::HMIToMobileResult(
         std::max(std::max(ui_result, vr_result), tts_result));
   }
-
   const bool is_tts_state_available =
-      tts_state == HmiInterfaces::STATE_AVAILABLE;
-  const bool is_vr_state_available = vr_state == HmiInterfaces::STATE_AVAILABLE;
-  const bool is_ui_state_available = ui_state == HmiInterfaces::STATE_AVAILABLE;
+      tts_properties_info.interface_state == HmiInterfaces::STATE_AVAILABLE;
+  const bool is_vr_state_available =
+      vr_properties_info.interface_state == HmiInterfaces::STATE_AVAILABLE;
+  const bool is_ui_state_available =
+      ui_properties_info.interface_state == HmiInterfaces::STATE_AVAILABLE;
 
   const bool is_tts_hmi_info =
       is_tts_state_available && !tts_response_info_.empty();

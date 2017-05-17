@@ -55,7 +55,8 @@ AlertRequest::AlertRequest(const MessageSharedPtr& message,
     , is_alert_succeeded_(false)
     , is_ui_alert_sent_(false)
     , alert_result_(hmi_apis::Common_Result::INVALID_ENUM)
-    , tts_speak_result_(hmi_apis::Common_Result::INVALID_ENUM) {
+    , tts_speak_result_(hmi_apis::Common_Result::INVALID_ENUM)
+    , is_tts_chunk_exist_(false) {
   subscribe_on_event(hmi_apis::FunctionID::UI_OnResetTimeout);
   subscribe_on_event(hmi_apis::FunctionID::TTS_OnResetTimeout);
 }
@@ -95,16 +96,13 @@ void AlertRequest::Run() {
     // Invalid command, abort execution
     return;
   }
-  bool tts_chunks_exists =
-      (*message_)[strings::msg_params].keyExists(strings::tts_chunks);
-  size_t length_tts_chunks = 0;
 
-  if (tts_chunks_exists) {
-    length_tts_chunks =
-        (*message_)[strings::msg_params][strings::tts_chunks].length();
+  if ((*message_)[strings::msg_params].keyExists(strings::tts_chunks) &&
+      (*message_)[strings::msg_params][strings::tts_chunks].length()) {
+    is_tts_chunk_exist_ = true;
   }
 
-  if ((tts_chunks_exists && length_tts_chunks) ||
+  if (is_tts_chunk_exist_ ||
       ((*message_)[strings::msg_params].keyExists(strings::play_tone) &&
        (*message_)[strings::msg_params][strings::play_tone].asBool())) {
     awaiting_tts_speak_response_ = true;
@@ -112,7 +110,7 @@ void AlertRequest::Run() {
 
   SendAlertRequest(app_id);
   if (awaiting_tts_speak_response_) {
-    SendSpeakRequest(app_id, tts_chunks_exists, length_tts_chunks);
+    SendSpeakRequest(app_id);
   }
 }
 
@@ -204,29 +202,24 @@ void AlertRequest::on_event(const event_engine::Event& event) {
 
 bool AlertRequest::PrepareResponseParameters(
     mobile_apis::Result::eType& result_code, std::string& info) {
-  ResponseInfo ui_alert_info(alert_result_, HmiInterfaces::HMI_INTERFACE_UI);
+  ResponseInfo ui_alert_info(
+      alert_result_, HmiInterfaces::HMI_INTERFACE_UI, application_manager_);
   ResponseInfo tts_alert_info(tts_speak_result_,
-                              HmiInterfaces::HMI_INTERFACE_TTS);
+                              HmiInterfaces::HMI_INTERFACE_TTS,
+                              application_manager_);
 
-  bool result = PrepareResultForMobileResponse(ui_alert_info, tts_alert_info);
-
-  /* result=false if UI interface is ok and TTS interface = UNSUPPORTED_RESOURCE
-   * and sdl receive TTS.IsReady=true or SDL doesn't receive responce for
-   * TTS.IsReady.
-   */
-  if (result && ui_alert_info.is_ok && tts_alert_info.is_unsupported_resource &&
-      HmiInterfaces::STATE_NOT_AVAILABLE != tts_alert_info.interface_state) {
-    result = false;
-  }
-  result_code = mobile_apis::Result::WARNINGS;
-  if ((ui_alert_info.is_ok || ui_alert_info.is_invalid_enum) &&
+  // Note(dtrunov): According to requirment APPLINK-19591
+  if (is_tts_chunk_exist_ && ui_alert_info.is_ok &&
       tts_alert_info.is_unsupported_resource &&
       HmiInterfaces::STATE_AVAILABLE == tts_alert_info.interface_state) {
+    result_code = mobile_apis::Result::WARNINGS;
     tts_response_info_ = "Unsupported phoneme type sent in a prompt";
     info = MergeInfos(
         ui_alert_info, ui_response_info_, tts_alert_info, tts_response_info_);
-    return result;
+    return true;
   }
+
+  bool result = PrepareResultForMobileResponse(ui_alert_info, tts_alert_info);
   result_code = PrepareResultCodeForResponse(ui_alert_info, tts_alert_info);
   info = MergeInfos(
       ui_alert_info, ui_response_info_, tts_alert_info, tts_response_info_);
@@ -350,15 +343,14 @@ void AlertRequest::SendAlertRequest(int32_t app_id) {
   }
 }
 
-void AlertRequest::SendSpeakRequest(int32_t app_id,
-                                    bool tts_chunks_exists,
-                                    size_t length_tts_chunks) {
+void AlertRequest::SendSpeakRequest(int32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
+
   using namespace hmi_apis;
   using namespace smart_objects;
   // crate HMI speak request
   SmartObject msg_params = smart_objects::SmartObject(SmartType_Map);
-  if (tts_chunks_exists && length_tts_chunks) {
+  if (is_tts_chunk_exist_) {
     msg_params[hmi_request::tts_chunks] =
         smart_objects::SmartObject(SmartType_Array);
     msg_params[hmi_request::tts_chunks] =

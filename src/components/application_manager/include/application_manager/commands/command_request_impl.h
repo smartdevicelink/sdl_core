@@ -43,21 +43,10 @@ namespace application_manager {
 namespace commands {
 
 struct ResponseInfo {
-  ResponseInfo()
-      : result_code(hmi_apis::Common_Result::INVALID_ENUM)
-      , interface(HmiInterfaces::HMI_INTERFACE_INVALID_ENUM)
-      , interface_state(HmiInterfaces::STATE_NOT_RESPONSE)
-      , is_ok(false)
-      , is_unsupported_resource(false)
-      , is_invalid_enum(false) {}
+  ResponseInfo();
   ResponseInfo(hmi_apis::Common_Result::eType result,
-               HmiInterfaces::InterfaceID interface)
-      : result_code(result)
-      , interface(interface)
-      , interface_state(HmiInterfaces::STATE_NOT_RESPONSE)
-      , is_ok(false)
-      , is_unsupported_resource(false)
-      , is_invalid_enum(false) {}
+               HmiInterfaces::InterfaceID hmi_interface,
+               ApplicationManager& application_manager);
   hmi_apis::Common_Result::eType result_code;
   HmiInterfaces::InterfaceID interface;
   HmiInterfaces::InterfaceState interface_state;
@@ -259,12 +248,53 @@ class CommandRequestImpl : public CommandImpl,
   mobile_apis::Result::eType PrepareResultCodeForResponse(
       const ResponseInfo& first, const ResponseInfo& second);
 
+  /**
+   * @brief Resolves if the return code must be
+   * UNSUPPORTED_RESOURCE
+   * @param first contains result_code from HMI response and
+   * interface that returns response
+   * @param second contains result_code from HMI response and
+   * interface that returns response.
+   * @return if the communication return code must be
+   * UNSUPPORTED_RESOURCE, function returns true, else
+   * false
+   */
+  bool IsResultCodeUnsupported(const ResponseInfo& first,
+                               const ResponseInfo& second) const;
+
  protected:
   /**
    * @brief Returns policy parameters permissions
    * @return Parameters permissions struct reference
    */
   const CommandParametersPermissions& parameters_permissions() const;
+
+  /**
+   * @brief Adds interface to be awaited for by sdl request command
+     @param interface_id interface which SDL expects to response in given time
+  */
+  void StartAwaitForInterface(const HmiInterfaces::InterfaceID& interface_id);
+
+  /**
+   * @brief Gets interface await state.
+     @param interface_id interface which SDL awaits for response in given time
+     @return true if SDL awaits for response from given interface in
+   interface_id
+  */
+  bool GetInterfaceAwaitState(const HmiInterfaces::InterfaceID& interface_id);
+
+  /**
+   * @brief Sets given HMI interface await status to false
+     @param interface_id interface which SDL no longer awaits for response in
+   given time
+  */
+  void EndAwaitForInterface(const HmiInterfaces::InterfaceID& interface_id);
+
+  /**
+   * @brief This set stores all the interfaces which are awaited by SDL to
+            return a response on some request
+  */
+  std::set<HmiInterfaces::InterfaceID> awaiting_response_interfaces_;
 
   RequestState current_state_;
   sync_primitives::Lock state_lock_;
@@ -292,6 +322,23 @@ class CommandRequestImpl : public CommandImpl,
   bool ProcessHMIInterfacesAvailability(
       const uint32_t hmi_correlation_id,
       const hmi_apis::FunctionID::eType& function_id);
+
+  /**
+   * @brief Method transforms AppHMIType to string
+   * @param enum AppHMIType app_hmi_type contains enum value
+   * @return string of AppHMIType
+   */
+  std::string AppHMITypeToString(
+      const mobile_apis::AppHMIType::eType app_hmi_type) const;
+
+  /**
+   * @brief Adds information to result message "info" param in case of
+   GENERIC_ERROR
+            about component which not responded in time
+   * @param response Response message, which info should be extended
+   */
+  void AddTimeOutComponentInfoToMessage(
+      smart_objects::SmartObject& response) const;
 };
 
 }  // namespace commands

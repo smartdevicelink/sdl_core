@@ -746,7 +746,13 @@
     <element name="locationImage">
       <description>The optional image of a destination / location</description>
     </element>
+    <element name="audioPassThruIcon">
+      <description>The optional image field for AudioPassThru</description>
+    </element>
 
+    <element name="subMenuIcon">
+      <description>The image field for AddSubMenu </description>
+    </element>
   </enum>
 
   <enum name="CharacterSet">
@@ -2833,6 +2839,12 @@
     <param name="menuName" maxlength="500" type="String">
       <description>Text to show in the menu for this sub menu.</description>
     </param>
+
+    <param name="subMenuIcon" type="Image" mandatory="false">
+     <description>
+      If omited on supported displays, no (or the default if applicable) icon shall be displayed.
+     </description>
+    </param>
   </function>
 
   <function name="AddSubMenu" functionID="AddSubMenuID" messagetype="response">
@@ -3399,6 +3411,10 @@
 		Defines if the current audio source should be muted during the APT session.  If not, the audio source will play without interruption.
       	If omitted, the value is set to true.
       </description>
+    </param>
+    <param name="audioPassThruIcon" type="Image" mandatory="false">
+      <description>Image struct determinig wheter static or dynamic icon.
+        If omitted on supported displays, no (or the default if applicable) icon shall be displayed.</description>
     </param>
   </function>
 
