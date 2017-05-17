@@ -1857,6 +1857,10 @@ void MessageHelper::SendSystemRequestNotification(
 
   content[strings::params][strings::connection_key] = connection_key;
 
+  policy::PolicyHandlerInterface& policy_handler = app_mngr.GetPolicyHandler();
+  content[strings::msg_params][strings::timeout] =
+      policy_handler.TimeoutExchangeSec();
+
 #ifdef DEBUG
   PrintSmartObject(content);
 #endif
