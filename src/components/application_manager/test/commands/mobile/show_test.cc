@@ -782,6 +782,10 @@ TEST_F(ShowRequestTest, OnEvent_WarningsResultCode_SUCCESS) {
 
   SharedPtr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
 
+  EXPECT_CALL(mock_message_helper_,
+              HMIToMobileResult(hmi_apis::Common_Result::WARNINGS))
+      .WillOnce(Return(mobile_apis::Result::WARNINGS));
+
   EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _));
 
   Event event(hmi_apis::FunctionID::UI_Show);
