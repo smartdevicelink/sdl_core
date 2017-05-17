@@ -645,6 +645,8 @@ class PolicyHandler : public PolicyHandlerInterface,
    */
   void LinkAppsToDevice();
 
+  void SetHeartBeatTimeout(const std::string& policy_app_id, uint32_t app_id);
+
   typedef std::vector<application_manager::ApplicationSharedPtr> Applications;
 
   /**
