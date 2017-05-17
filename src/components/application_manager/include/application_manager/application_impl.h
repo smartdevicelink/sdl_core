@@ -127,6 +127,12 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   void set_folder_name(const std::string& folder_name) OVERRIDE;
   const std::string folder_name() const;
   bool is_media_application() const;
+  /**
+   * @brief Returns current audio streaming indicator of application
+   * @return Returns current audio streaming indicator of application
+   */
+  mobile_apis::AudioStreamingIndicator::eType audio_streaming_indicator()
+      const OVERRIDE;
   bool is_foreground() const OVERRIDE;
   void set_foreground(const bool is_foreground) OVERRIDE;
   const mobile_apis::HMILevel::eType hmi_level() const;
@@ -148,6 +154,26 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   void set_version(const Version& ver);
   void set_name(const custom_str::CustomString& name);
   void set_is_media_application(bool is_media);
+  /**
+    * @brief Saves current audio streaming indicator for application
+    * @param indicator contains audio streaming indicator for this application
+    */
+  void set_audio_streaming_indicator(
+      const mobile_apis::AudioStreamingIndicator::eType indicator) OVERRIDE;
+  /**
+   * @brief Adds audio streaming indicator that is waiting for response from HMI
+   * @param indicator contains audio streaming indicator for this application
+   */
+  bool AddIndicatorWaitForResponse(
+      const mobile_api::AudioStreamingIndicator::eType indicator) OVERRIDE;
+  /**
+   * @brief Remove audio streaming indicator after response from HMI or after
+   * timeout event from
+   * request controller
+   * @param indicator contains audio streaming indicator for removing
+   */
+  void RemoveIndicatorWaitForResponse(
+      const mobile_api::AudioStreamingIndicator::eType indicator) OVERRIDE;
   void increment_put_file_in_none_count();
   void increment_delete_file_in_none_count();
   void increment_list_files_in_none_count();
@@ -354,6 +380,9 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   bool tts_properties_in_full_;
   bool is_foreground_;
   bool is_application_data_changed_;
+  mobile_apis::AudioStreamingIndicator::eType audio_streaming_indicator_;
+  AudioStreamingIndicators indicators_waiting_for_response_;
+  sync_primitives::Lock indicators_lock_;
   uint32_t put_file_in_none_count_;
   uint32_t delete_file_in_none_count_;
   uint32_t list_files_in_none_count_;

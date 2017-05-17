@@ -363,6 +363,15 @@ void PolicyManagerImpl::CheckPermissions(const PTString& app_id,
                                        << " for " << hmi_level << " level.");
 
   cache_->CheckPermissions(app_id, hmi_level, rpc, result);
+  if (cache_->IsApplicationRevoked(app_id)) {
+    // SDL must be able to notify mobile side with its status after app has
+    // been revoked by backend
+    if ("OnHMIStatus" == rpc && "NONE" == hmi_level) {
+      result.hmi_level_permitted = kRpcAllowed;
+    } else {
+      result.hmi_level_permitted = kRpcDisallowed;
+    }
+  }
 }
 
 bool PolicyManagerImpl::ResetUserConsent() {

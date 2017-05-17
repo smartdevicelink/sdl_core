@@ -277,6 +277,7 @@ const char* is_suscribed = "isSubscribed";
 const char* message_data = "messageData";
 
 const char* delivery_mode = "deliveryMode";
+const char* audio_streaming_indicator = "audioStreamingIndicator";
 }  // namespace strings
 
 namespace json {

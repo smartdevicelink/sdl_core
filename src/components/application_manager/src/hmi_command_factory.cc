@@ -276,6 +276,9 @@
 #include "application_manager/commands/hmi/on_tts_reset_timeout_notification.h"
 #include "application_manager/commands/hmi/dial_number_request.h"
 #include "application_manager/commands/hmi/dial_number_response.h"
+#include "application_manager/commands/hmi/ui_set_audio_streaming_indicator_request.h"
+#include "application_manager/commands/hmi/ui_set_audio_streaming_indicator_response.h"
+#include "utils/make_shared.h"
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 namespace application_manager {
@@ -2250,6 +2253,18 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     case hmi_apis::FunctionID::Navigation_OnWayPointChange: {
       command.reset(new commands::OnNaviWayPointChangeNotification(
           message, application_manager));
+      break;
+    }
+    case hmi_apis::FunctionID::UI_SetAudioStreamingIndicator: {
+      if (is_response) {
+        command =
+            utils::MakeShared<commands::UISetAudioStreamingIndicatorResponse>(
+                message, application_manager);
+      } else {
+        command =
+            utils::MakeShared<commands::UISetAudioStreamingIndicatorRequest>(
+                message, application_manager);
+      }
       break;
     }
   }

@@ -133,6 +133,8 @@
 #include "application_manager/commands/mobile/send_location_response.h"
 #include "application_manager/commands/mobile/dial_number_request.h"
 #include "application_manager/commands/mobile/dial_number_response.h"
+#include "application_manager/commands/mobile/set_audio_streaming_indicator_response.h"
+#include "application_manager/commands/mobile/set_audio_streaming_indicator_request.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/make_shared.h"
 
@@ -687,6 +689,19 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
     case mobile_apis::FunctionID::OnWayPointChangeID: {
       command = utils::MakeShared<commands::OnWayPointChangeNotification>(
           message, application_manager);
+      break;
+    }
+    case mobile_apis::FunctionID::SetAudioStreamingIndicatorID: {
+      if ((*message)[strings::params][strings::message_type] ==
+          static_cast<int>(application_manager::MessageType::kRequest)) {
+        command =
+            utils::MakeShared<commands::SetAudioStreamingIndicatorRequest>(
+                message, application_manager);
+      } else {
+        command =
+            utils::MakeShared<commands::SetAudioStreamingIndicatorResponse>(
+                message, application_manager);
+      }
       break;
     }
     default: {
