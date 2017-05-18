@@ -328,7 +328,7 @@ uint32_t CacheManager::HeartBeatTimeout(const std::string& app_id) const {
   sync_primitives::AutoLock auto_lock(cache_lock_);
   uint32_t result = 0;
   if (!IsApplicationRepresented(app_id)) {
-    LOG4CXX_DEBUG(logger_, "App is not represented");
+    LOG4CXX_WARN(logger_, "Application " << app_id << " is not represented");
     return result;
   }
 
@@ -645,20 +645,21 @@ void CacheManager::ProcessUpdate(
         initial_policy_iter) {
   using namespace policy;
   using rpc::policy_table_interface_base::RequestTypes;
+  using rpc::policy_table_interface_base::ApplicationParams;
   const RequestTypes& new_request_types =
       *(initial_policy_iter->second.RequestType);
 
   const std::string& app_id = initial_policy_iter->first;
   bool update_request_types = true;
 
-  if (app_id == kPreDataConsentId) {
-    *(pt_->policy_table.app_policies_section.apps[app_id]
-          .heart_beat_timeout_ms) =
+  ApplicationParams& params =
+      pt_->policy_table.app_policies_section.apps[app_id];
+  if (kPreDataConsentId == app_id) {
+    *(params.heart_beat_timeout_ms) =
         *(initial_policy_iter->second.heart_beat_timeout_ms);
     LOG4CXX_INFO(logger_,
                  "heart_beat_timeout_ms in predata = "
-                     << *(pt_->policy_table.app_policies_section.apps[app_id]
-                              .heart_beat_timeout_ms));
+                     << *(params.heart_beat_timeout_ms));
   }
   if (app_id == kDefaultId || app_id == kPreDataConsentId) {
     if (new_request_types.is_omitted()) {

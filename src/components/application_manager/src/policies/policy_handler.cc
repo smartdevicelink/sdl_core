@@ -661,16 +661,16 @@ void PolicyHandler::OnAppPermissionConsentInternal(
 }
 
 void PolicyHandler::SetHeartBeatTimeout(const std::string& policy_app_id,
-                                        uint32_t app_id) {
+                                        const uint32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
-  int timeout = policy_manager_->HeartBeatTimeout(policy_app_id);
+  const uint32_t timeout = policy_manager_->HeartBeatTimeout(policy_app_id);
   if (0 != timeout) {
-    LOG4CXX_INFO(logger_,
-                 "SetHeartBeatTimeout for " << app_id << " is " << timeout);
+    LOG4CXX_DEBUG(logger_,
+                  "SetHeartBeatTimeout for " << app_id << " is " << timeout);
     application_manager_.connection_handler().SetHeartBeatTimeout(app_id,
                                                                   timeout);
   } else {
-    LOG4CXX_INFO(logger_, "SetHeartBeatTimeout for " << app_id << "  ignored");
+    LOG4CXX_DEBUG(logger_, "SetHeartBeatTimeout for " << app_id << "  ignored");
   }
 }
 
