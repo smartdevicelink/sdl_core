@@ -334,6 +334,11 @@ class PolicyManagerImpl : public PolicyManager {
   uint32_t retry_sequence_index_;
 
   /**
+   * Timeout for current trying of retry sequence
+   */
+  uint32_t current_retry_sequence_timeout_;
+
+  /**
    * Lock for guarding retry sequence
    */
   sync_primitives::Lock retry_sequence_lock_;
