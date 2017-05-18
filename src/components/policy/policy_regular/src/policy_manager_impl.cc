@@ -1031,7 +1031,7 @@ void PolicyManagerImpl::RetrySequence() {
   LOG4CXX_INFO(logger_, "Start new retry sequence");
   current_retry_sequence_timeout_ = NextRetryTimeout();
 
-  LOG4CXX_INFO(
+  LOG4CXX_DEBUG(
       logger_,
       "current_retry_sequence_timeout_ = " << current_retry_sequence_timeout_);
   update_status_manager_.OnUpdateTimeoutOccurs();
