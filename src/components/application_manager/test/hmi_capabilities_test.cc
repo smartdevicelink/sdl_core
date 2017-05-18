@@ -359,6 +359,52 @@ TEST_F(HMICapabilitiesTest, LoadCapabilitiesFromFile) {
   EXPECT_EQ("SE", vehicle_type_so["trim"].asString());
 }
 
+TEST_F(HMICapabilitiesTest,
+       HmiCapabilitiesInitialized_UiVrTtsIviNotCooperating) {
+  // Precondition
+  hmi_capabilities_test->set_is_vr_cooperating(false);
+  hmi_capabilities_test->set_is_tts_cooperating(false);
+
+  hmi_capabilities_test->set_is_ui_cooperating(false);
+  hmi_capabilities_test->set_is_navi_cooperating(false);
+  hmi_capabilities_test->set_is_ivi_cooperating(false);
+  EXPECT_TRUE(hmi_capabilities_test->is_hmi_capabilities_initialized());
+}
+
+TEST_F(HMICapabilitiesTest, HmiCapabilitiesInitialized) {
+  // Precondition
+  SetCooperating();
+  smart_objects::SmartObjectSPtr language(
+      new smart_objects::SmartObject(smart_objects::SmartType_Map));
+
+  EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
+              CreateModuleInfoSO(_, _)).WillRepeatedly(Return(language));
+
+  hmi_capabilities_test->set_is_vr_cooperating(true);
+  smart_objects::SmartObject supported_languages;
+  supported_languages[0] = "EN_US";
+  hmi_capabilities_test->set_vr_supported_languages(supported_languages);
+  hmi_capabilities_test->set_tts_supported_languages(supported_languages);
+  hmi_capabilities_test->set_ui_supported_languages(supported_languages);
+  hmi_capabilities_test->set_vehicle_type(supported_languages);
+
+  hmi_capabilities_test->set_is_tts_cooperating(true);
+  hmi_capabilities_test->set_is_ui_cooperating(true);
+  hmi_capabilities_test->set_is_navi_cooperating(true);
+  hmi_capabilities_test->set_is_ivi_cooperating(true);
+
+  hmi_capabilities_test->set_active_vr_language(
+      hmi_apis::Common_Language::EN_US);
+  SetCooperating();
+  hmi_capabilities_test->set_active_tts_language(
+      hmi_apis::Common_Language::EN_US);
+  SetCooperating();
+  hmi_capabilities_test->set_active_ui_language(
+      hmi_apis::Common_Language::EN_US);
+
+  EXPECT_TRUE(hmi_capabilities_test->is_hmi_capabilities_initialized());
+}
+
 TEST_F(HMICapabilitiesTest, VerifyImageType) {
   const int32_t image_type = 1;
   smart_objects::SmartObject sm_obj;

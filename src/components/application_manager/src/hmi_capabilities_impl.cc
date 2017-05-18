@@ -343,6 +343,11 @@ HMICapabilitiesImpl::HMICapabilitiesImpl(ApplicationManager& app_mngr)
     , is_ui_cooperating_(false)
     , is_navi_cooperating_(false)
     , is_ivi_cooperating_(false)
+    , is_vr_ready_response_recieved_(false)
+    , is_tts_ready_response_recieved_(false)
+    , is_ui_ready_response_recieved_(false)
+    , is_navi_ready_response_recieved_(false)
+    , is_ivi_ready_response_recieved_(false)
     , attenuated_supported_(false)
     , ui_language_(hmi_apis::Common_Language::INVALID_ENUM)
     , vr_language_(hmi_apis::Common_Language::INVALID_ENUM)
@@ -367,6 +372,12 @@ HMICapabilitiesImpl::HMICapabilitiesImpl(ApplicationManager& app_mngr)
     , hmi_language_handler_(app_mngr) {
   InitCapabilities();
   if (false == app_mngr_.get_settings().launch_hmi()) {
+    is_vr_ready_response_recieved_ = true;
+    is_tts_ready_response_recieved_ = true;
+    is_ui_ready_response_recieved_ = true;
+    is_navi_ready_response_recieved_ = true;
+    is_ivi_ready_response_recieved_ = true;
+
     is_vr_cooperating_ = true;
     is_tts_cooperating_ = true;
     is_ui_cooperating_ = true;
@@ -390,6 +401,45 @@ HMICapabilitiesImpl::~HMICapabilitiesImpl() {
   delete audio_pass_thru_capabilities_;
   delete pcm_stream_capabilities_;
   delete prerecorded_speech_;
+}
+
+bool HMICapabilitiesImpl::is_hmi_capabilities_initialized() const {
+  bool result = true;
+
+  if (is_vr_ready_response_recieved_ && is_tts_ready_response_recieved_ &&
+      is_ui_ready_response_recieved_ && is_navi_ready_response_recieved_ &&
+      is_ivi_ready_response_recieved_) {
+    if (is_vr_cooperating_) {
+      if ((!vr_supported_languages_) ||
+          (hmi_apis::Common_Language::INVALID_ENUM == vr_language_)) {
+        result = false;
+      }
+    }
+
+    if (is_tts_cooperating_) {
+      if ((!tts_supported_languages_) ||
+          (hmi_apis::Common_Language::INVALID_ENUM == tts_language_)) {
+        result = false;
+      }
+    }
+
+    if (is_ui_cooperating_) {
+      if ((!ui_supported_languages_) ||
+          (hmi_apis::Common_Language::INVALID_ENUM == ui_language_)) {
+        result = false;
+      }
+    }
+
+    if (is_ivi_cooperating_) {
+      if (!vehicle_type_) {
+        result = false;
+      }
+    }
+  } else {
+    result = false;
+  }
+
+  return result;
 }
 
 bool HMICapabilitiesImpl::VerifyImageType(const int32_t image_type) const {

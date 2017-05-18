@@ -56,6 +56,13 @@ class HMICapabilities {
   virtual ~HMICapabilities() {}
 
   /**
+   * @brief Checks if all HMI capabilities received
+   *
+   * @return TRUE if all information received, otherwise FALSE
+   */
+  virtual bool is_hmi_capabilities_initialized() const = 0;
+
+  /**
      * @brief return component which follows for correctness of
      * languages
      * @return HMI language handler
