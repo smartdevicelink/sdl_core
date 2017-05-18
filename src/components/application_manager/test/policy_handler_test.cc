@@ -1793,7 +1793,7 @@ TEST_F(PolicyHandlerTest, OnDeviceConsentChanged_ConsentAllowed) {
   EXPECT_CALL(*mock_app_, policy_app_id()).WillOnce(Return(kPolicyAppId_));
 
   EXPECT_CALL(*mock_policy_manager_, IsPredataPolicy(kPolicyAppId_))
-      .WillOnce(Return(true));
+      .WillRepeatedly(Return(true));
 
   EXPECT_CALL(*mock_policy_manager_,
               ReactOnUserDevConsentForApp(kPolicyAppId_, is_allowed));
@@ -1821,7 +1821,7 @@ TEST_F(PolicyHandlerTest, OnDeviceConsentChanged_ConsentNotAllowed) {
   EXPECT_CALL(*mock_app_, policy_app_id()).WillOnce(Return(kPolicyAppId_));
 
   EXPECT_CALL(*mock_policy_manager_, IsPredataPolicy(kPolicyAppId_))
-      .WillOnce(Return(true));
+      .WillRepeatedly(Return(true));
 
   EXPECT_CALL(*mock_policy_manager_, ReactOnUserDevConsentForApp(_, _))
       .Times(0);
@@ -1850,7 +1850,7 @@ TEST_F(PolicyHandlerTest, OnDeviceConsentChanged_PredatePolicyNotAllowed) {
 
   // App does not have predate policy
   EXPECT_CALL(*mock_policy_manager_, IsPredataPolicy(kPolicyAppId_))
-      .WillOnce(Return(false));
+      .WillRepeatedly(Return(false));
 
   EXPECT_CALL(*mock_policy_manager_,
               ReactOnUserDevConsentForApp(kPolicyAppId_, is_allowed));
