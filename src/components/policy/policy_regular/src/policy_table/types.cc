@@ -172,7 +172,7 @@ Json::Value ApplicationParams::ToJsonValue() const {
   Json::Value result__(PolicyBase::ToJsonValue());
   impl::WriteJsonField("groups", groups, &result__);
   impl::WriteJsonField("nicknames", nicknames, &result__);
-  impl::WriteJsonField("AppHmiType", AppHMIType, &result__);
+  impl::WriteJsonField("AppHMIType", AppHMIType, &result__);
   impl::WriteJsonField("RequestType", RequestType, &result__);
   impl::WriteJsonField("memory_kb", memory_kb, &result__);
   impl::WriteJsonField(

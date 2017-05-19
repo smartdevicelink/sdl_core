@@ -1241,17 +1241,16 @@
   </struct>
   
   <struct name="PermissionItem">
-	<param name="name" type="String" mandatory="true">
-	  <description>Code of message of user-friendly text about functional group to be allowed/disallowed</description>
-	</param>
-	<param name="id" type="Integer" mandatory="true">
-	  <description>Id of corresponding functional group, needed by SDL.</description>
-	</param>
-	<param name="allowed" type="Boolean" mandatory="false">
-	  <description>Specifies whether functionality was allowed/disallowed. If ommited - no information about User Consent is yet found for app.</description>
-	</param>
-  </struct>
-  
+    <param name="name" type="String" mandatory="true">
+      <description>Code of message of user-friendly text about functional group to be allowed/disallowed</description>
+    </param>
+    <param name="id" type="Integer" mandatory="true">
+      <description>Id of corresponding functional group, needed by SDL.</description>
+    </param>
+    <param name="allowed" type="Boolean" mandatory="false">
+      <description>Specifies whether functionality was allowed/disallowed. If ommited - no information about User Consent is yet found for app.</description>
+    </param>
+  </struct>  
   <struct name="ServiceInfo">
     <param name="url" type="String" mandatory="true">
       <description>Get URL based on service type.</description>
@@ -1262,22 +1261,20 @@
   </struct>
 
   <enum name="EntityStatus">
-      <element name="ON"/>
-      <element name="OFF"/>
+    <element name="ON"/>
+    <element name="OFF"/>
   </enum>
 
   <struct name="ExternalConsentStatus">
-        <param name="entityType" type="Integer" minvalue="0" maxvalue="128" mandatory="true">
-          <description>The entityType which status is informed by "status" param.</description>
-        </param>
-
-        <param name="entityID" type="Integer" minvalue="0" maxvalue="128" mandatory="true">
-          <description>The corresponding ID of entityType which status is informed by "status" param</description>
-        </param>
-
-        <param name="status" type="Common.EntityStatus" mandatory="true">
-          <description>Status of the ExternalConsentStatus entity: "ON" or "OFF". </description>
-        </param>
+    <param name="entityType" type="Integer" minvalue="0" maxvalue="128" mandatory="true">
+      <description>The entityType which status is informed by "status" param.</description>
+    </param>
+    <param name="entityID" type="Integer" minvalue="0" maxvalue="128" mandatory="true">
+      <description>The corresponding ID of entityType which status is informed by "status" param</description>
+    </param>
+    <param name="status" type="Common.EntityStatus" mandatory="true">
+      <description>Status of the ExternalConsentStatus entity: "ON" or "OFF". </description>
+    </param>
   </struct>
 <!-- End of Policies -->
 
@@ -4170,7 +4167,7 @@
       <param name="allowedFunctions" type="Common.PermissionItem" mandatory="true" array="true" minsize="0" maxsize="100">
         <description>If no permissions were specified for application the array will come empty.</description>
       </param>
-	  <param name="externalConsentStatus" type="Common.ExternalConsentStatus" mandatory="true" array="true" minsize="0" maxsize="100">
+      <param name="externalConsentStatus" type="Common.ExternalConsentStatus" mandatory="true" array="true" minsize="0" maxsize="100">
         <description>External User Consent Settings (defined by entityType and entityID) status: enabled/disabled. If empty array is returned, SDL does not have any stored status.</description>
       </param>
     </function>
@@ -4178,14 +4175,14 @@
     <function name="OnAppPermissionConsent" messagetype="notification">
       <description>Initiated by HMI for specifying the allowance for the application to perform some functionality. Duplicates functionality of the request, needed if HMI has specific ways to allow/disallow functionality (i.e.Setting Menu)</description>
       <param name="appID" type="Integer" mandatory="false">
-          <description>Information about the application. See HMIApplication. If omitted - allow/disallow all applications </description>
+        <description>Information about the application. See HMIApplication. If omitted - allow/disallow all applications </description>
       </param>
       <param name="consentedFunctions" type="Common.PermissionItem" mandatory="false" array="true" minsize="1" maxsize="100"/>
       <param name="externalConsentStatus" type="Common.ExternalConsentStatus" mandatory="false" array="true" minsize="1" maxsize="100"/>
       <param name="source" type="Common.ConsentSource" mandatory="true"/>
      </function>
 
-     <function name="OnAppPermissionChanged" messagetype="notification">
+    <function name="OnAppPermissionChanged" messagetype="notification">
       <description>Notification from SDL to HMI. Occurs when app permissions were reduced. If no permission specified means that app was dissallowed and has to be unregitstered.</description>
       <param name="appID" type="Integer" mandatory="true"/>
       <param name="isAppPermissionsRevoked" type="Boolean" mandatory="false"/>
