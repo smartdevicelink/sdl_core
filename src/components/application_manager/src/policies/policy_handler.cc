@@ -1573,11 +1573,11 @@ uint32_t PolicyHandler::NextRetryTimeout() {
   return policy_manager_->NextRetryTimeout();
 }
 
-uint32_t PolicyHandler::TimeoutExchangeSec() {
+uint32_t PolicyHandler::TimeoutExchangeSec() const {
   return TimeoutExchangeMSec() / date_time::DateTime::MILLISECONDS_IN_SECOND;
 }
 
-uint32_t PolicyHandler::TimeoutExchangeMSec() {
+uint32_t PolicyHandler::TimeoutExchangeMSec() const {
   POLICY_LIB_CHECK(0);
   return policy_manager_->TimeoutExchangeMSec();
 }
