@@ -132,6 +132,13 @@ bool DeleteCommandRequest::PrepareResponseParameters(
     result_code = mobile_apis::Result::WARNINGS;
     return result;
   }
+
+  if (ui_delete_info.is_unsupported_resource && vr_delete_info.is_ok) {
+    LOG4CXX_DEBUG(logger_, "UI is Unsupported resourse and VR is ok");
+    result_code = mobile_apis::Result::UNSUPPORTED_RESOURCE;
+    return true;
+  }
+
   result_code = PrepareResultCodeForResponse(ui_delete_info, vr_delete_info);
   LOG4CXX_DEBUG(logger_, "Result is " << (result ? "true" : "false"));
   return result;

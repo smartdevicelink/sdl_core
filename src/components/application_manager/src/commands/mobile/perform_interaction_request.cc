@@ -930,8 +930,11 @@ void PerformInteractionRequest::SendBothModeResponse(
                                HmiInterfaces::HMI_INTERFACE_UI);
   ResponseInfo vr_perform_info(vr_result_code_,
                                HmiInterfaces::HMI_INTERFACE_VR);
-  const bool result =
+  bool result =
       PrepareResultForMobileResponse(ui_perform_info, vr_perform_info);
+  if (ui_perform_info.is_unsupported_resource && vr_perform_info.is_ok) {
+    result = true;
+  }
   perform_interaction_result_code =
       PrepareResultCodeForResponse(ui_perform_info, vr_perform_info);
   const smart_objects::SmartObject* response_params =

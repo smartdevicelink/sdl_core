@@ -304,6 +304,9 @@ bool SetGlobalPropertiesRequest::PrepareResponseParameters(
                     tts_response_info_,
                     ui_properties_info,
                     ui_response_info_);
+  if (ui_properties_info.is_unsupported_resource && tts_properties_info.is_ok) {
+    return true;
+  }
   return result;
 }
 

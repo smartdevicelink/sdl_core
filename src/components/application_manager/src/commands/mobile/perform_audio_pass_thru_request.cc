@@ -208,6 +208,9 @@ bool PerformAudioPassThruRequest::PrepareResponseParameters(
   }
   result_code = PrepareResultCodeForResponse(ui_perform_info, tts_perform_info);
   info = MergeInfos(ui_perform_info, ui_info_, tts_perform_info, tts_info_);
+  if (ui_perform_info.is_unsupported_resource && tts_perform_info.is_ok) {
+    return true;
+  }
   return result;
 }
 
