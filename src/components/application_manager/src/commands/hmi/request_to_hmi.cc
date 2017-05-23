@@ -46,12 +46,27 @@ bool CheckAvailabilityHMIInterfaces(ApplicationManager& application_manager,
 bool ChangeInterfaceState(ApplicationManager& application_manager,
                           const smart_objects::SmartObject& response_from_hmi,
                           HmiInterfaces::InterfaceID interface) {
+  using namespace helpers;
   if (response_from_hmi[strings::msg_params].keyExists(strings::available)) {
+    const hmi_apis::Common_Result::eType result_code =
+        static_cast<hmi_apis::Common_Result::eType>(
+            response_from_hmi[strings::params][hmi_response::code].asInt());
+
+    bool is_successful_resultCode =
+        Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
+            result_code,
+            hmi_apis::Common_Result::SUCCESS,
+            hmi_apis::Common_Result::WARNINGS,
+            hmi_apis::Common_Result::WRONG_LANGUAGE,
+            hmi_apis::Common_Result::RETRY,
+            hmi_apis::Common_Result::SAVED);
+
     const bool is_available =
         response_from_hmi[strings::msg_params][strings::available].asBool();
     const HmiInterfaces::InterfaceState interface_state =
-        is_available ? HmiInterfaces::STATE_AVAILABLE
-                     : HmiInterfaces::STATE_NOT_AVAILABLE;
+        (is_available && is_successful_resultCode)
+            ? HmiInterfaces::STATE_AVAILABLE
+            : HmiInterfaces::STATE_NOT_AVAILABLE;
     application_manager.hmi_interfaces().SetInterfaceState(interface,
                                                            interface_state);
     return is_available;
