@@ -85,6 +85,8 @@ TEST_F(NaviIsReadyRequestTest,
   MessageSharedPtr event_msg = CreateMessage();
   (*event_msg)[am::strings::msg_params][am::strings::available] =
       is_hmi_interface_available;
+  (*event_msg)[am::strings::params][am::hmi_response::code] =
+      hmi_apis::Common_Result::SUCCESS;
 
   Event event(kEventID);
   event.set_smart_object(*event_msg);
@@ -92,6 +94,29 @@ TEST_F(NaviIsReadyRequestTest,
   EXPECT_CALL(mock_hmi_interfaces_,
               SetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_Navigation,
                                 am::HmiInterfaces::STATE_AVAILABLE));
+
+  EXPECT_CALL(mock_hmi_capabilities_,
+              set_is_navi_cooperating(is_hmi_interface_available));
+
+  command_->on_event(event);
+}
+
+TEST_F(NaviIsReadyRequestTest,
+       OnEvent_HmiInterfaceIsAvailableWithErrorCode_NaviIsNotAvailable) {
+  const bool is_hmi_interface_available = true;
+
+  MessageSharedPtr event_msg = CreateMessage();
+  (*event_msg)[am::strings::msg_params][am::strings::available] =
+      is_hmi_interface_available;
+  (*event_msg)[am::strings::params][am::hmi_response::code] =
+      hmi_apis::Common_Result::GENERIC_ERROR;
+
+  Event event(kEventID);
+  event.set_smart_object(*event_msg);
+
+  EXPECT_CALL(mock_hmi_interfaces_,
+              SetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_Navigation,
+                                am::HmiInterfaces::STATE_NOT_AVAILABLE));
 
   EXPECT_CALL(mock_hmi_capabilities_,
               set_is_navi_cooperating(is_hmi_interface_available));

@@ -113,9 +113,25 @@ class VIIsReadyRequestTest
                     Event& event,
                     bool is_vi_cooperating_available = false) {
     MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
+    (*msg)[am::strings::params][am::hmi_response::code] =
+        hmi_apis::Common_Result::SUCCESS;
     if (is_message_contain_param) {
       (*msg)[am::strings::msg_params][am::strings::available] =
           is_vi_cooperating_available;
+    }
+    event.set_smart_object(*msg);
+  }
+
+  void PrepareErrorEvent(bool is_message_contain_param,
+                         Event& event,
+                         bool is_ui_cooperating_available = false) {
+    MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
+
+    (*msg)[am::strings::params][am::hmi_response::code] =
+        hmi_apis::Common_Result::GENERIC_ERROR;
+    if (is_message_contain_param) {
+      (*msg)[am::strings::msg_params][am::strings::available] =
+          is_ui_cooperating_available;
     }
     event.set_smart_object(*msg);
   }
@@ -162,6 +178,21 @@ TEST_F(VIIsReadyRequestTest, Run_KeyAvailableEqualToTrue_StateAvailable) {
                     is_send_message_to_hmi,
                     is_message_contain_param,
                     am::HmiInterfaces::STATE_AVAILABLE);
+  command_->on_event(event);
+}
+
+TEST_F(VIIsReadyRequestTest,
+       OnEvent_KeyAvailableEqualToTrue_ResultCodeError_StateNotAvailable) {
+  const bool is_vi_cooperating_available = true;
+  const bool is_send_message_to_hmi = false;
+  const bool is_message_contain_param = true;
+  Event event(hmi_apis::FunctionID::VehicleInfo_IsReady);
+  PrepareErrorEvent(
+      is_message_contain_param, event, is_vi_cooperating_available);
+  SetUpExpectations(is_vi_cooperating_available,
+                    is_send_message_to_hmi,
+                    is_message_contain_param,
+                    am::HmiInterfaces::STATE_NOT_AVAILABLE);
   command_->on_event(event);
 }
 
