@@ -1270,6 +1270,9 @@ StatusNotifier PolicyManagerImpl::AddApplication(
                                                device_consent);
   } else {
     PromoteExistedApplication(application_id, device_consent);
+    if (update_status_manager_.IsUpdateRequired()) {
+      update_status_manager_.OnNewApplicationAdded(device_consent);
+    }
     return utils::MakeShared<utils::CallNothing>();
   }
 }
