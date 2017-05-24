@@ -110,8 +110,8 @@ bool CheckResultCode(const ResponseInfo& first, const ResponseInfo& second) {
   return false;
 }
 
-bool IsResultCodeUnsupported(const ResponseInfo& first,
-                             const ResponseInfo& second) {
+bool CommandRequestImpl::IsResultCodeUnsupported(
+    const ResponseInfo& first, const ResponseInfo& second) const {
   return ((first.is_ok || first.is_invalid_enum) &&
           second.is_unsupported_resource) ||
          ((second.is_ok || second.is_invalid_enum) &&
@@ -777,15 +777,15 @@ const CommandParametersPermissions& CommandRequestImpl::parameters_permissions()
 }
 
 void CommandRequestImpl::StartAwaitForInterface(
-    const HmiInterfaces::InterfaceID& interface_id) {
+    const HmiInterfaces::InterfaceID interface_id) {
   awaiting_response_interfaces_.insert(interface_id);
 }
 
-bool CommandRequestImpl::GetInterfaceAwaitState(
+bool CommandRequestImpl::IsInterfaceAwaitState(
     const HmiInterfaces::InterfaceID& interface_id) {
   std::set<HmiInterfaces::InterfaceID>::const_iterator it =
       awaiting_response_interfaces_.find(interface_id);
-  return (it != awaiting_response_interfaces_.end());
+  return it != awaiting_response_interfaces_.end();
 }
 
 void CommandRequestImpl::EndAwaitForInterface(
@@ -839,7 +839,7 @@ void CommandRequestImpl::AddTimeOutComponentInfoToMessage(
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (awaiting_response_interfaces_.empty()) {
-    LOG4CXX_ERROR(logger_, "No interfaces awaiting, info param is empty");
+    LOG4CXX_WARN(logger_, "No interfaces awaiting, info param is empty");
     return;
   }
 

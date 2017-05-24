@@ -146,6 +146,7 @@ void AlertRequest::on_event(const event_engine::Event& event) {
       if (awaiting_tts_speak_response_ &&
           HmiInterfaces::STATE_NOT_AVAILABLE != ui_interface_state) {
         awaiting_tts_stop_speaking_response_ = true;
+        StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_TTS);
         SendHMIRequest(hmi_apis::FunctionID::TTS_StopSpeaking, NULL, true);
       }
       alert_result_ = static_cast<hmi_apis::Common_Result::eType>(
@@ -169,6 +170,7 @@ void AlertRequest::on_event(const event_engine::Event& event) {
     }
     case hmi_apis::FunctionID::TTS_StopSpeaking: {
       LOG4CXX_INFO(logger_, "Received TTS_StopSpeaking event");
+      EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_TTS);
       // Unsubscribe from event to avoid unwanted messages
       unsubscribe_from_event(hmi_apis::FunctionID::TTS_StopSpeaking);
       awaiting_tts_stop_speaking_response_ = false;

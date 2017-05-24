@@ -247,6 +247,18 @@ class CommandRequestImpl : public CommandImpl,
    */
   void GetInfo(const smart_objects::SmartObject& response_from_hmi,
                std::string& out_info);
+  /**
+     * @brief Resolves if the return code must be
+     * UNSUPPORTED_RESOURCE
+     * @param first contains result_code from HMI response and
+     * interface that returns response
+     * @param second contains result_code from HMI response and
+     * interface that returns response.
+     * @return True, if the communication return code must be
+     * UNSUPPORTED_RESOURCE, otherwise false.
+     */
+  bool IsResultCodeUnsupported(const ResponseInfo& first,
+                               const ResponseInfo& second) const;
 
   /**
    * @brief Prepare result code for sending to mobile application
@@ -267,10 +279,9 @@ class CommandRequestImpl : public CommandImpl,
   const CommandParametersPermissions& parameters_permissions() const;
 
   /**
-   * @brief Adds interface to be awaited for by sdl request command
-     @param interface_id interface which SDL expects to response in given time
+   * @brief Start waiting for response from 'inderface_id' interface
   */
-  void StartAwaitForInterface(const HmiInterfaces::InterfaceID& interface_id);
+  void StartAwaitForInterface(const HmiInterfaces::InterfaceID interface_id);
 
   /**
    * @brief Gets interface await state.
@@ -278,7 +289,7 @@ class CommandRequestImpl : public CommandImpl,
      @return true if SDL awaits for response from given interface in
    interface_id
   */
-  bool GetInterfaceAwaitState(const HmiInterfaces::InterfaceID& interface_id);
+  bool IsInterfaceAwaitState(const HmiInterfaces::InterfaceID& interface_id);
 
   /**
    * @brief Sets given HMI interface await status to false

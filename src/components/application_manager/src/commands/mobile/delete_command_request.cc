@@ -156,7 +156,7 @@ void DeleteCommandRequest::on_event(const event_engine::Event& event) {
       break;
     }
     case hmi_apis::FunctionID::VR_DeleteCommand: {
-      EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
+      EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VR);
       is_vr_received_ = true;
       vr_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
