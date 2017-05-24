@@ -75,6 +75,7 @@ class MockApplicationManagerSettings
   MOCK_CONST_METHOD0(tts_delimiter, const std::string&());
   MOCK_CONST_METHOD0(put_file_in_none, const uint32_t&());
   MOCK_CONST_METHOD0(sdl_version, const std::string&());
+  MOCK_CONST_METHOD0(help_prompt, const std::vector<std::string>&());
   MOCK_CONST_METHOD0(time_out_promt, const std::vector<std::string>&());
   MOCK_CONST_METHOD0(hmi_capabilities_file_name, const std::string&());
   MOCK_CONST_METHOD0(video_server_type, const std::string&());

@@ -194,6 +194,22 @@ bool ResetGlobalPropertiesRequest::ResetHelpPromt(
   }
   smart_objects::SmartObject so_help_prompt =
       smart_objects::SmartObject(smart_objects::SmartType_Array);
+
+  const std::vector<std::string>& help_prompt_default =
+      application_manager_.get_settings().help_prompt();
+
+  for (std::vector<std::string>::const_iterator it =
+           help_prompt_default.begin();
+       help_prompt_default.end() != it;
+       ++it) {
+    smart_objects::SmartObject so_help_prompt_item =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+    so_help_prompt_item[strings::text] = *it;
+    so_help_prompt_item[strings::type] =
+        hmi_apis::Common_SpeechCapabilities::SC_TEXT;
+    so_help_prompt[so_help_prompt.length()] = so_help_prompt_item;
+  }
+
   app->set_help_prompt(so_help_prompt);
   return true;
 }
