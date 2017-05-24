@@ -87,9 +87,6 @@ class VIIsReadyRequestTest
           .WillOnce(ReturnRef(mock_hmi_interfaces_));
       EXPECT_CALL(mock_hmi_interfaces_, SetInterfaceState(_, _)).Times(0);
     }
-    EXPECT_CALL(app_mngr_, GetPolicyHandler())
-        .WillOnce(ReturnRef(mock_policy_handler_interface_));
-    EXPECT_CALL(mock_policy_handler_interface_, OnVIIsReady());
 
     EXPECT_CALL(mock_hmi_interfaces_,
                 GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_VehicleInfo))
