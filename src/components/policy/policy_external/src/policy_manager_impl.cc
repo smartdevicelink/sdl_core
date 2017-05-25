@@ -1239,22 +1239,51 @@ AppIdURL PolicyManagerImpl::RetrySequenceUrl(const struct RetrySequenceURL& rs,
 }
 
 /**
- * @brief The CallStatusChange class notify update manager aboun new application
+ * @brief The CallNewAppRegistrationStatusChange class provides object to be
+ * called for policy update status change during application registration in
+ * case application being registered is new i.e. was not in policy database
  */
-class CallStatusChange : public utils::Callable {
+class CallNewAppRegistrationStatusChange : public utils::Callable {
  public:
-  CallStatusChange(UpdateStatusManager& upd_manager,
-                   const DeviceConsent& device_consent)
-      : upd_manager_(upd_manager), device_consent_(device_consent) {}
+  CallNewAppRegistrationStatusChange(UpdateStatusManager& status_manager,
+                                     const DeviceConsent& device_consent)
+      : status_manager_(status_manager), device_consent_(device_consent) {}
 
   // Callable interface
-  void operator()() const {
-    upd_manager_.OnNewApplicationAdded(device_consent_);
+  void operator()() const OVERRIDE {
+    status_manager_.OnNewApplicationAdded(device_consent_);
   }
 
  private:
-  UpdateStatusManager& upd_manager_;
+  UpdateStatusManager& status_manager_;
   const DeviceConsent device_consent_;
+};
+
+/**
+ * @brief The CallAppRegistrationStatusChange class provides object to be
+ * called for policy update status change during application registration in
+ * case policy requires to be updated after its initialization. Must be executed
+ * only once after start-up.
+ */
+class CallAppRegistrationStatusChange : public utils::Callable {
+ public:
+  CallAppRegistrationStatusChange(UpdateStatusManager& status_manager,
+                                  const bool& is_update_required)
+      : status_manager_(status_manager)
+      , is_update_required_(is_update_required) {}
+
+  void operator()() const OVERRIDE {
+    static bool is_sent = false;
+    if (is_sent) {
+      return;
+    }
+    status_manager_.OnPolicyInit(is_update_required_);
+    is_sent = true;
+  }
+
+ private:
+  UpdateStatusManager& status_manager_;
+  const bool is_update_required_;
 };
 
 StatusNotifier PolicyManagerImpl::AddApplication(
@@ -1263,15 +1292,16 @@ StatusNotifier PolicyManagerImpl::AddApplication(
   const std::string device_id = GetCurrentDeviceId(application_id);
   DeviceConsent device_consent = GetUserConsentForDevice(device_id);
   sync_primitives::AutoLock lock(apps_registration_lock_);
-
   if (IsNewApplication(application_id)) {
     AddNewApplication(application_id, device_consent);
-    return utils::MakeShared<CallStatusChange>(update_status_manager_,
-                                               device_consent);
+    return utils::MakeShared<CallNewAppRegistrationStatusChange>(
+        update_status_manager_, device_consent);
   } else {
     PromoteExistedApplication(application_id, device_consent);
-    return utils::MakeShared<utils::CallNothing>();
   }
+  const bool is_update_required = cache_->UpdateRequired();
+  return utils::MakeShared<CallAppRegistrationStatusChange>(
+      update_status_manager_, is_update_required);
 }
 
 void PolicyManagerImpl::RemoveAppConsentForGroup(
