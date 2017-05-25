@@ -2223,7 +2223,7 @@ mobile_apis::Result::eType MessageHelper::VerifyImageFiles(
   return mobile_apis::Result::SUCCESS;
 }
 
-mobile_apis::Result::eType MessageHelper::VerifyImage(
+mobile_apis::Result::eType MessageHelper::VerifyImageApplyPath(
     smart_objects::SmartObject& image,
     ApplicationConstSharedPtr app,
     ApplicationManager& app_mngr) {
@@ -2267,13 +2267,31 @@ mobile_apis::Result::eType MessageHelper::VerifyImage(
     full_file_path += file_name;
   }
 
+  image[strings::value] = full_file_path;
   if (!file_system::FileExists(full_file_path)) {
     return mobile_apis::Result::INVALID_DATA;
   }
 
-  image[strings::value] = full_file_path;
-
   return mobile_apis::Result::SUCCESS;
+}
+
+mobile_apis::Result::eType MessageHelper::VerifyImage(
+    smart_objects::SmartObject& image,
+    ApplicationConstSharedPtr app,
+    ApplicationManager& app_mngr) {
+  smart_objects::SmartObject temp_image = image;
+  const uint32_t image_type = image[strings::image_type].asUInt();
+  const mobile_apis::ImageType::eType type =
+      static_cast<mobile_apis::ImageType::eType>(image_type);
+
+  const mobile_apis::Result::eType result =
+      VerifyImageApplyPath(temp_image, app, app_mngr);
+  if ((mobile_apis::Result::SUCCESS == result) &&
+      (mobile_apis::ImageType::DYNAMIC == type)) {
+    image[strings::value] = temp_image[strings::value];
+  }
+
+  return result;
 }
 
 mobile_apis::Result::eType MessageHelper::VerifyImageVrHelpItems(

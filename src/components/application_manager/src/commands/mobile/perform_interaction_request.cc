@@ -227,6 +227,7 @@ void PerformInteractionRequest::on_event(const event_engine::Event& event) {
     }
     case hmi_apis::FunctionID::UI_PerformInteraction: {
       LOG4CXX_DEBUG(logger_, "Received UI_PerformInteraction event");
+      EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
       ui_response_received_ = true;
       unsubscribe_from_event(hmi_apis::FunctionID::UI_PerformInteraction);
       ui_result_code_ = static_cast<hmi_apis::Common_Result::eType>(
@@ -237,6 +238,7 @@ void PerformInteractionRequest::on_event(const event_engine::Event& event) {
     }
     case hmi_apis::FunctionID::VR_PerformInteraction: {
       LOG4CXX_DEBUG(logger_, "Received VR_PerformInteraction");
+      EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VR);
       vr_response_received_ = true;
       unsubscribe_from_event(hmi_apis::FunctionID::VR_PerformInteraction);
       vr_result_code_ = static_cast<hmi_apis::Common_Result::eType>(
@@ -392,14 +394,14 @@ void PerformInteractionRequest::ProcessUIResponse(
   if (result) {
     if (is_pi_warning) {
       ui_result_code_ = hmi_apis::Common_Result::WARNINGS;
-      ui_info_ = "Unsupported phoneme type was sent in an item";
+      ui_info_ = message[strings::msg_params][strings::info].asString();
       if (message.keyExists(strings::params) &&
           message[strings::params].keyExists(strings::data)) {
         msg_params = message[strings::params][strings::data];
       }
     } else if (is_pi_unsupported) {
       ui_result_code_ = hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
-      ui_info_ = "Unsupported phoneme type was sent in an item";
+      ui_info_ = message[strings::msg_params][strings::info].asString();
     } else if (message.keyExists(strings::msg_params)) {
       msg_params = message[strings::msg_params];
     }
@@ -503,6 +505,7 @@ void PerformInteractionRequest::SendUIPerformInteractionRequest(
         (*message_)[strings::msg_params][hmi_request::interaction_layout]
             .asInt();
   }
+  StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
   SendHMIRequest(
       hmi_apis::FunctionID::UI_PerformInteraction, &msg_params, true);
 }
@@ -595,6 +598,7 @@ void PerformInteractionRequest::SendVRPerformInteractionRequest(
     msg_params[strings::timeout] = default_timeout_;
   }
   msg_params[strings::app_id] = app->app_id();
+  StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VR);
   SendHMIRequest(
       hmi_apis::FunctionID::VR_PerformInteraction, &msg_params, true);
 }

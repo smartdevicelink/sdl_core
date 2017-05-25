@@ -86,13 +86,28 @@ class PerformAudioPassThruRequest : public CommandRequestImpl {
 
  private:
   /**
+   * @brief Response params
+   * result for sending to mobile application
+   * result code for sending to mobile application
+   * info for sending to mobile application
+   */
+  struct ResponseParams {
+    bool result;
+    mobile_apis::Result::eType result_code;
+    std::string info;
+    ResponseParams()
+        : result(false)
+        , result_code(mobile_apis::Result::INVALID_ENUM)
+        , info("") {}
+  };
+  ResponseParams response_params_;
+  /**
    * @brief Prepare result code, result and info for sending to mobile
    * application
    * @param result_code contains result code for sending to mobile application
    * @return result for sending to mobile application.
    */
-  bool PrepareResponseParameters(mobile_apis::Result::eType& result_code,
-                                 std::string& info);
+  const ResponseParams& PrepareResponseParameters();
   /**
    * @brief Sends TTS Speak request
    */
@@ -133,10 +148,31 @@ class PerformAudioPassThruRequest : public CommandRequestImpl {
    */
   bool IsWaitingHMIResponse();
 
-  /* flag display state of speak and ui perform audio
-  during perform audio pass thru*/
-  bool awaiting_tts_speak_response_;
-  bool awaiting_ui_response_;
+  /**
+   * @brief Validates audioPassThruIcon parameter and
+   * removes it if is not valid
+   * @param app Pointer to the application whose storage directory
+   * must be accessed
+   */
+  void ProcessAudioPassThruIcon(ApplicationSharedPtr app);
+
+  /**
+   * @brief Pair of result code and result for mobile app
+   */
+  typedef std::pair<mobile_apis::Result::eType, bool> AudioPassThruResults;
+
+  /**
+   * @brief Checks result code from HMI for splitted RPC
+   * and returns parameter for sending to mobile app in
+   * audioPassThru communication.
+   * @param ui_response contains result_code from UI
+   * @param tts_response contains result_code from TTS
+   * @return pair of result code (UI error code has precedence than TTS's,
+   * error_code from TTS is turned to WARNINGS) and
+   * result for mobile app
+   */
+  AudioPassThruResults PrepareAudioPassThruResultCodeForResponse(
+      const ResponseInfo& ui_response, const ResponseInfo& tts_response);
 
   hmi_apis::Common_Result::eType result_tts_speak_;
   hmi_apis::Common_Result::eType result_ui_;

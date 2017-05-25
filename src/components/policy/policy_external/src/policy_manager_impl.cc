@@ -1208,7 +1208,7 @@ AppIdURL PolicyManagerImpl::GetNextUpdateUrl(const EndpointUrls& urls) {
   retry_sequence_url_.app_idx_ = next_app_url.first;
   retry_sequence_url_.policy_app_id_ = urls[next_app_url.first].app_id;
 
-  return next_app_url;
+  return next_appl_url;
 }
 
 AppIdURL PolicyManagerImpl::RetrySequenceUrl(const struct RetrySequenceURL& rs,

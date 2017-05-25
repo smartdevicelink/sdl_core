@@ -104,12 +104,14 @@ void DeleteCommandRequest::Run() {
     is_vr_send_ = true;
   }
   if (is_ui_send_) {
+    StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
     SendHMIRequest(hmi_apis::FunctionID::UI_DeleteCommand, &msg_params, true);
   }
   if (is_vr_send_) {
     // VR params
     msg_params[strings::grammar_id] = application->get_grammar_id();
     msg_params[strings::type] = hmi_apis::Common_VRCommandType::Command;
+    StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VR);
     SendHMIRequest(hmi_apis::FunctionID::VR_DeleteCommand, &msg_params, true);
   }
 }
@@ -143,6 +145,7 @@ void DeleteCommandRequest::on_event(const event_engine::Event& event) {
   const smart_objects::SmartObject& message = event.smart_object();
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_DeleteCommand: {
+      EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
       is_ui_received_ = true;
       ui_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
@@ -153,6 +156,7 @@ void DeleteCommandRequest::on_event(const event_engine::Event& event) {
       break;
     }
     case hmi_apis::FunctionID::VR_DeleteCommand: {
+      EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VR);
       is_vr_received_ = true;
       vr_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());

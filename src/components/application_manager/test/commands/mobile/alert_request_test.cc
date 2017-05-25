@@ -131,12 +131,12 @@ class AlertRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
     ON_CALL(hmi_interfaces_,
             GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
         .WillByDefault(
-            Return(am::HmiInterfaces::InterfaceState::STATE_NOT_AVAILABLE));
+            Return(am::HmiInterfaces::InterfaceState::STATE_AVAILABLE));
 
     ON_CALL(hmi_interfaces_,
             GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_TTS))
         .WillByDefault(
-            Return(am::HmiInterfaces::InterfaceState::STATE_NOT_AVAILABLE));
+            Return(am::HmiInterfaces::InterfaceState::STATE_AVAILABLE));
   }
 
   void Expectations() {
@@ -301,14 +301,6 @@ TEST_F(AlertRequestTest, Init_DurationNotExists_SUCCESS) {
   Expectations();
   CommandPtr command(CreateCommand<AlertRequest>(msg_));
   EXPECT_TRUE(command->Init());
-}
-
-TEST_F(AlertRequestTest, OnTimeOut_UNSUCCESS) {
-  Expectations();
-  (*msg_)[am::strings::msg_params][am::strings::soft_buttons] = 0;
-  CommandPtr command(CreateCommand<AlertRequest>(msg_));
-  command->onTimeOut();
-  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
 }
 
 TEST_F(AlertRequestTest, OnTimeOut_SUCCESS) {

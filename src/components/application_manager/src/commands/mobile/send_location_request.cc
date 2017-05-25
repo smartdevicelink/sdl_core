@@ -125,6 +125,7 @@ void SendLocationRequest::Run() {
   SmartObject request_msg_params = SmartObject(smart_objects::SmartType_Map);
   request_msg_params = msg_params;
   request_msg_params[strings::app_id] = app->hmi_app_id();
+  StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_Navigation);
   SendHMIRequest(
       hmi_apis::FunctionID::Navigation_SendLocation, &request_msg_params, true);
 }
@@ -135,6 +136,7 @@ void SendLocationRequest::on_event(const event_engine::Event& event) {
   const smart_objects::SmartObject& message = event.smart_object();
   if (hmi_apis::FunctionID::Navigation_SendLocation == event.id()) {
     LOG4CXX_INFO(logger_, "Received Navigation_SendLocation event");
+    EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_Navigation);
     const Common_Result::eType result_code = static_cast<Common_Result::eType>(
         message[strings::params][hmi_response::code].asInt());
     std::string response_info;
