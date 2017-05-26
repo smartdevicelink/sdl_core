@@ -151,8 +151,13 @@ mobile_apis::Result::eType CreateInteractionChoiceSetRequest::CheckChoiceSet(
     for (next_choice_set_it = current_choice_set_it + 1;
          choice_set->end() != next_choice_set_it;
          ++next_choice_set_it) {
-      if (compareSynonyms(*current_choice_set_it, *next_choice_set_it)) {
-        return mobile_apis::Result::DUPLICATE_NAME;
+      const bool menu_name_duplicated =
+          compareStr((*current_choice_set_it)[strings::menu_name],
+                     (*next_choice_set_it)[strings::menu_name]);
+      const bool choice_set_duplicated =
+          compareSynonyms(*current_choice_set_it, *next_choice_set_it);
+      if (menu_name_duplicated || choice_set_duplicated) {
+        return mobile_api::Result::DUPLICATE_NAME;
       }
     }
   }
