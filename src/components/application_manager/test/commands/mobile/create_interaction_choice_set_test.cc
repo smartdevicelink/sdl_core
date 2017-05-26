@@ -105,7 +105,8 @@ const std::string kImage = "image";
 const std::string kSecondImage = "second_image";
 const std::string kVrCommands1 = "vr_commands_1";
 const std::string kVrCommands2 = "vr_commands_2";
-const std::string kMenuName = "menu_name";
+const std::string kMenuName1 = "menu_name_1";
+const std::string kMenuName2 = "menu_name_2";
 
 }  // namespace
 
@@ -142,7 +143,7 @@ class CreateInteractionChoiceSetRequestTest
 
   void FillMessageFieldsItem1(MessageSharedPtr message) {
     (*message)[am::strings::msg_params][am::strings::choice_set][0]
-              [am::strings::menu_name] = kMenuName;
+              [am::strings::menu_name] = kMenuName1;
     (*message)[am::strings::msg_params][am::strings::choice_set][0]
               [am::strings::image][am::strings::value] = kImage;
     (*message)[am::strings::msg_params][am::strings::choice_set][0]
@@ -156,7 +157,7 @@ class CreateInteractionChoiceSetRequestTest
     (*message)[am::strings::msg_params][am::strings::choice_set][1]
               [am::strings::choice_id] = kChoiceId2;
     (*message)[am::strings::msg_params][am::strings::choice_set][1]
-              [am::strings::menu_name] = kMenuName;
+              [am::strings::menu_name] = kMenuName2;
     (*message)[am::strings::msg_params][am::strings::choice_set][1]
               [am::strings::vr_commands][0] = kVrCommands2;
     (*message)[am::strings::msg_params]
@@ -319,7 +320,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest, Run_FindChoiceSetFail_UNSUCCESS) {
 TEST_F(CreateInteractionChoiceSetRequestTest,
        Run_CheckChoiceSet_InvalidChoiceId_UNSUCCESS) {
   (*message_)[am::strings::msg_params][am::strings::choice_set][0]
-             [am::strings::menu_name] = kMenuName;
+             [am::strings::menu_name] = kMenuName1;
   (*message_)[am::strings::msg_params][am::strings::choice_set][0]
              [am::strings::image][am::strings::value] = kImage;
   (*message_)[am::strings::msg_params][am::strings::choice_set][0]
@@ -390,7 +391,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
   if ((*message_)[am::strings::msg_params][am::strings::choice_set][0]
           .keyExists(am::strings::secondary_text)) {
     (*message_)[am::strings::msg_params][am::strings::choice_set][0]
-               [am::strings::menu_name] = kMenuName;
+               [am::strings::menu_name] = kMenuName1;
     CreateInteractionChoiceSetRequestPtr command(
         CreateCommand<CreateInteractionChoiceSetRequest>(message_));
 
@@ -464,7 +465,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
 TEST_F(CreateInteractionChoiceSetRequestTest,
        Run_EmptyAmountVrCommands_SUCCESS) {
   (*message_)[am::strings::msg_params][am::strings::choice_set][0]
-             [am::strings::menu_name] = kMenuName;
+             [am::strings::menu_name] = kMenuName1;
   (*message_)[am::strings::msg_params][am::strings::choice_set][0]
              [am::strings::image][am::strings::value] = kImage;
   (*message_)[am::strings::msg_params][am::strings::choice_set][0]
@@ -476,7 +477,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
   (*message_)[am::strings::msg_params][am::strings::choice_set][1]
              [am::strings::choice_id] = kChoiceId2;
   (*message_)[am::strings::msg_params][am::strings::choice_set][1]
-             [am::strings::menu_name] = kMenuName;
+             [am::strings::menu_name] = kMenuName2;
   (*message_)[am::strings::msg_params][am::strings::interaction_choice_set_id] =
       kChoiceSetId;
   (*message_)[am::strings::msg_params][am::strings::choice_set][1]
