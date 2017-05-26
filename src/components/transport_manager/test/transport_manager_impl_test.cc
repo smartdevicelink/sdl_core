@@ -488,9 +488,6 @@ TEST_F(TransportManagerImplTest, SearchDevices_AdapterWithBadState) {
 }
 
 TEST_F(TransportManagerImplTest, SendMessageToDevice) {
-  // Arrange
-  HandleConnection();
-
   TestAsyncWaiter waiter;
   EXPECT_CALL(*mock_adapter_,
               SendData(mac_address_, application_id_, test_message_))
@@ -501,6 +498,8 @@ TEST_F(TransportManagerImplTest, SendMessageToDevice) {
   EXPECT_CALL(mock_metric_observer_, StartRawMsg(test_message_.get()));
 #endif  // TELEMETRY_MONITOR
 
+  // Act
+  HandleConnection();
   EXPECT_EQ(E_SUCCESS, tm_.SendMessageToDevice(test_message_));
 
   EXPECT_TRUE(waiter.WaitFor(1, kAsyncExpectationsTimeout));
@@ -570,34 +569,31 @@ TEST_F(TransportManagerImplTest, SendMessageToDevice_SendDone) {
 }
 
 TEST_F(TransportManagerImplTest, SendMessageFailed_GetHandleSendFailed) {
-  // Arrange
-  HandleConnection();
-
   TestAsyncWaiter waiter;
+  int times = 0;
   EXPECT_CALL(*mock_adapter_,
               SendData(mac_address_, application_id_, test_message_))
       .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter),
                       Return(TransportAdapter::FAIL)));
-
+  times++;
 #ifdef TELEMETRY_MONITOR
   EXPECT_CALL(mock_metric_observer_, StartRawMsg(test_message_.get()));
 #endif  // TELEMETRY_MONITOR
-
-  EXPECT_CALL(*tm_listener_, OnTMMessageSendFailed(_, test_message_));
+  EXPECT_CALL(*tm_listener_, OnTMMessageSendFailed(_, test_message_))
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+  times++;
+  HandleConnection();
   EXPECT_EQ(E_SUCCESS, tm_.SendMessageToDevice(test_message_));
-
   HandleSendFailed();
-
-  EXPECT_TRUE(waiter.WaitFor(1, kAsyncExpectationsTimeout));
+  EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
 }
 
 TEST_F(TransportManagerImplTest, RemoveDevice_DeviceWasAdded) {
-  // Arrange
-  HandleDeviceListUpdated();
   EXPECT_CALL(*mock_adapter_, ConnectDevice(mac_address_))
       .WillOnce(Return(TransportAdapter::OK));
+  // Act
+  HandleDeviceListUpdated();
   EXPECT_EQ(E_SUCCESS, tm_.ConnectDevice(device_handle_));
-
   // Assert
   EXPECT_EQ(E_SUCCESS, tm_.RemoveDevice(device_handle_));
 }
@@ -615,9 +611,9 @@ TEST_F(TransportManagerImplTest, SetVisibilityOff_StopClientListening) {
 }
 
 TEST_F(TransportManagerImplTest, StopTransportManager) {
-  HandleDeviceListUpdated();
   EXPECT_CALL(*mock_adapter_, ConnectDevice(mac_address_))
       .WillRepeatedly(Return(TransportAdapter::OK));
+  HandleDeviceListUpdated();
   EXPECT_EQ(E_SUCCESS, tm_.ConnectDevice(device_handle_));
 
   EXPECT_CALL(*mock_adapter_, DisconnectDevice(mac_address_))
