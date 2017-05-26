@@ -474,22 +474,26 @@ void SubscribeVehicleDataRequest::CheckVISubscriptions(
       out_info = "No data in the request";
     }
     out_result = false;
+    return;
   }
 
   if (0 == subscribed_items && !is_interface_not_available) {
     out_result_code = mobile_apis::Result::IGNORED;
     out_info = "Already subscribed on provided VehicleData.";
     out_result = false;
+    return;
   }
 
   if (is_everything_already_subscribed) {
-    out_result_code = vi_already_subscribed_by_this_app_.size()
-                          ? mobile_apis::Result::IGNORED
-                          : mobile_apis::Result::SUCCESS;
-    if (!(vi_already_subscribed_by_this_app_.empty())) {
+    if (vi_already_subscribed_by_this_app_.empty()) {
+      out_result_code = mobile_apis::Result::SUCCESS;
+      out_result = true;
+    } else {
+      out_result_code = mobile_apis::Result::IGNORED;
       out_info = "Already subscribed on some provided VehicleData.";
+      out_result = false;
     }
-    out_result = true;
+    return;
   }
 }
 
