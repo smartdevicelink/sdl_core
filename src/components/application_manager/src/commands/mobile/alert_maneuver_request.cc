@@ -187,7 +187,6 @@ void AlertManeuverRequest::on_event(const event_engine::Event& event) {
 bool AlertManeuverRequest::PrepareResponseParameters(
     mobile_apis::Result::eType& result_code, std::string& return_info) {
   LOG4CXX_AUTO_TRACE(logger_);
-  using namespace helpers;
 
   application_manager::commands::ResponseInfo navigation_alert_info(
       navi_alert_maneuver_result_code_,
@@ -195,23 +194,42 @@ bool AlertManeuverRequest::PrepareResponseParameters(
 
   application_manager::commands::ResponseInfo tts_alert_info(
       tts_speak_result_code_, HmiInterfaces::HMI_INTERFACE_TTS);
+
   const bool result =
       PrepareResultForMobileResponse(navigation_alert_info, tts_alert_info);
-
-  if (result && (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE ==
-                     tts_speak_result_code_ &&
-                 (HmiInterfaces::STATE_AVAILABLE ==
-                  application_manager_.hmi_interfaces().GetInterfaceState(
-                      HmiInterfaces::HMI_INTERFACE_TTS)))) {
-    result_code = mobile_apis::Result::WARNINGS;
-    return_info = std::string("Unsupported phoneme type sent in a prompt");
-    return result;
-  }
   result_code =
       PrepareResultCodeForResponse(navigation_alert_info, tts_alert_info);
   return_info =
       MergeInfos(navigation_alert_info, info_navi_, tts_alert_info, info_tts_);
+
   return result;
+}
+
+bool AlertManeuverRequest::PrepareResultForMobileResponse(
+    ResponseInfo& navigation_alert_info, ResponseInfo& tts_alert_info) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  bool result = CommandRequestImpl::PrepareResultForMobileResponse(
+      navigation_alert_info, tts_alert_info);
+  if (IsResultCodeUnsupported(navigation_alert_info, tts_alert_info)) {
+    result = true;
+  }
+
+  return result;
+}
+
+mobile_apis::Result::eType AlertManeuverRequest::PrepareResultCodeForResponse(
+    const ResponseInfo& navigation_alert_info,
+    const ResponseInfo& tts_alert_info) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (tts_alert_info.is_unsupported_resource &&
+      (navigation_alert_info.is_ok || navigation_alert_info.is_invalid_enum)) {
+    return mobile_apis::Result::WARNINGS;
+  }
+
+  return CommandRequestImpl::PrepareResultCodeForResponse(navigation_alert_info,
+                                                          tts_alert_info);
 }
 
 bool AlertManeuverRequest::IsWhiteSpaceExist() {

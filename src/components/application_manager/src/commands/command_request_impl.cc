@@ -109,13 +109,26 @@ bool CheckResultCode(const ResponseInfo& first, const ResponseInfo& second) {
   return false;
 }
 
-bool IsResultCodeUnsupported(const ResponseInfo& first,
-                             const ResponseInfo& second) {
-  return ((first.is_ok || first.is_invalid_enum) &&
-          second.is_unsupported_resource) ||
-         ((second.is_ok || second.is_invalid_enum) &&
-          first.is_unsupported_resource) ||
-         (first.is_unsupported_resource && second.is_unsupported_resource);
+bool IsResultCodeUnsupported(const ResponseInfo& first_iface_response,
+                             const ResponseInfo& second_iface_response) {
+  const bool is_first_unsupported =
+      (second_iface_response.is_ok || second_iface_response.is_invalid_enum) &&
+      first_iface_response.is_unsupported_resource;
+  const bool is_second_unsupported =
+      (first_iface_response.is_ok || first_iface_response.is_invalid_enum) &&
+      second_iface_response.is_unsupported_resource;
+  const bool is_both_unsupported =
+      first_iface_response.is_unsupported_resource &&
+      second_iface_response.is_unsupported_resource;
+
+  return is_first_unsupported || is_second_unsupported || is_both_unsupported;
+}
+
+bool IsResultCodeUnsupported(const ResponseInfo& first_iface_response,
+                             const ResponseInfo& second_iface_response,
+                             const ResponseInfo& third_iface_response) {
+  return IsResultCodeUnsupported(first_iface_response, second_iface_response) ||
+         IsResultCodeUnsupported(second_iface_response, third_iface_response);
 }
 
 struct DisallowedParamsInserter {
@@ -689,49 +702,61 @@ bool CommandRequestImpl::PrepareResultForMobileResponse(
 }
 
 bool CommandRequestImpl::PrepareResultForMobileResponse(
-    ResponseInfo& out_first, ResponseInfo& out_second) const {
+    ResponseInfo& out_first_iface_response,
+    ResponseInfo& out_second_iface_response) const {
   using namespace helpers;
 
-  out_first.is_ok = Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
-      out_first.result_code,
-      hmi_apis::Common_Result::SUCCESS,
-      hmi_apis::Common_Result::WARNINGS,
-      hmi_apis::Common_Result::WRONG_LANGUAGE,
-      hmi_apis::Common_Result::RETRY,
-      hmi_apis::Common_Result::SAVED);
+  out_first_iface_response.is_ok =
+      Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
+          out_first_iface_response.result_code,
+          hmi_apis::Common_Result::SUCCESS,
+          hmi_apis::Common_Result::WARNINGS,
+          hmi_apis::Common_Result::WRONG_LANGUAGE,
+          hmi_apis::Common_Result::RETRY,
+          hmi_apis::Common_Result::SAVED);
 
-  out_second.is_ok = Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
-      out_second.result_code,
-      hmi_apis::Common_Result::SUCCESS,
-      hmi_apis::Common_Result::WARNINGS,
-      hmi_apis::Common_Result::WRONG_LANGUAGE,
-      hmi_apis::Common_Result::RETRY,
-      hmi_apis::Common_Result::SAVED);
+  out_second_iface_response.is_ok =
+      Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
+          out_second_iface_response.result_code,
+          hmi_apis::Common_Result::SUCCESS,
+          hmi_apis::Common_Result::WARNINGS,
+          hmi_apis::Common_Result::WRONG_LANGUAGE,
+          hmi_apis::Common_Result::RETRY,
+          hmi_apis::Common_Result::SAVED);
 
-  out_first.is_invalid_enum =
-      hmi_apis::Common_Result::INVALID_ENUM == out_first.result_code;
+  out_first_iface_response.is_invalid_enum =
+      hmi_apis::Common_Result::INVALID_ENUM ==
+      out_first_iface_response.result_code;
 
-  out_second.is_invalid_enum =
-      hmi_apis::Common_Result::INVALID_ENUM == out_second.result_code;
+  out_second_iface_response.is_invalid_enum =
+      hmi_apis::Common_Result::INVALID_ENUM ==
+      out_second_iface_response.result_code;
 
-  out_first.is_unsupported_resource =
-      hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == out_first.result_code;
+  out_first_iface_response.is_unsupported_resource =
+      hmi_apis::Common_Result::UNSUPPORTED_RESOURCE ==
+      out_first_iface_response.result_code;
 
-  out_second.is_unsupported_resource =
-      hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == out_second.result_code;
+  out_second_iface_response.is_unsupported_resource =
+      hmi_apis::Common_Result::UNSUPPORTED_RESOURCE ==
+      out_second_iface_response.result_code;
 
-  out_first.interface_state =
+  out_first_iface_response.interface_state =
       application_manager_.hmi_interfaces().GetInterfaceState(
-          out_first.interface);
-  out_second.interface_state =
+          out_first_iface_response.interface);
+  out_second_iface_response.interface_state =
       application_manager_.hmi_interfaces().GetInterfaceState(
-          out_second.interface);
+          out_second_iface_response.interface);
 
-  bool result = (out_first.is_ok && out_second.is_ok) ||
-                (out_second.is_invalid_enum && out_first.is_ok) ||
-                (out_first.is_invalid_enum && out_second.is_ok);
-  result = result || CheckResultCode(out_first, out_second);
-  result = result || CheckResultCode(out_second, out_first);
+  bool result =
+      (out_first_iface_response.is_ok && out_second_iface_response.is_ok) ||
+      (out_second_iface_response.is_invalid_enum &&
+       out_first_iface_response.is_ok) ||
+      (out_first_iface_response.is_invalid_enum &&
+       out_second_iface_response.is_ok);
+  result = result ||
+           CheckResultCode(out_first_iface_response, out_second_iface_response);
+  result = result ||
+           CheckResultCode(out_second_iface_response, out_first_iface_response);
   return result;
 }
 
@@ -747,9 +772,10 @@ void CommandRequestImpl::GetInfo(
 }
 
 mobile_apis::Result::eType CommandRequestImpl::PrepareResultCodeForResponse(
-    const ResponseInfo& first, const ResponseInfo& second) {
+    const ResponseInfo& first_iface_response,
+    const ResponseInfo& second_iface_response) {
   mobile_apis::Result::eType result_code = mobile_apis::Result::INVALID_ENUM;
-  if (IsResultCodeUnsupported(first, second)) {
+  if (IsResultCodeUnsupported(first_iface_response, second_iface_response)) {
     result_code = mobile_apis::Result::UNSUPPORTED_RESOURCE;
   } else {
     // If response contains erroneous result code SDL need return erroneus
@@ -758,11 +784,11 @@ mobile_apis::Result::eType CommandRequestImpl::PrepareResultCodeForResponse(
         hmi_apis::Common_Result::INVALID_ENUM;
     hmi_apis::Common_Result::eType second_result =
         hmi_apis::Common_Result::INVALID_ENUM;
-    if (!first.is_unsupported_resource) {
-      first_result = first.result_code;
+    if (!first_iface_response.is_unsupported_resource) {
+      first_result = first_iface_response.result_code;
     }
-    if (!second.is_unsupported_resource) {
-      second_result = second.result_code;
+    if (!second_iface_response.is_unsupported_resource) {
+      second_result = second_iface_response.result_code;
     }
     result_code =
         MessageHelper::HMIToMobileResult(std::max(first_result, second_result));

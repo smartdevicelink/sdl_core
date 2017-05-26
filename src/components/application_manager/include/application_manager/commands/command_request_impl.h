@@ -107,6 +107,33 @@ std::string MergeInfos(const std::string& first,
                        const std::string& second,
                        const std::string& third);
 
+/**
+ * @brief IsResultCodeUnsupported check if overall result code of provided infos
+ * is UNSUPPORTED_RESOURCE
+ * @param first_iface_response - contains result_code from first HMI response
+ * and interface that returns response
+ * @param second_iface_response - contains result_code from second HMI response
+ * and interface that returns response
+ * @return true if overall result code is UNSUPPORTED_RESOURCE otherwise false
+ */
+bool IsResultCodeUnsupported(const ResponseInfo& first_iface_response,
+                             const ResponseInfo& second_iface_response);
+
+/**
+ * @brief IsResultCodeUnsupported check if overall result code of provided infos
+ * is UNSUPPORTED_RESOURCE
+ * @param first_iface_response - contains result_code from first HMI response
+ * and interface that returns response
+ * @param second_iface_response - contains result_code from second HMI response
+ * and interface that returns response
+ * @param third_iface_response - contains result_code from third HMI response
+ * and interface that returns response
+ * @return true if overall result code is UNSUPPORTED_RESOURCE otherwise false
+ */
+bool IsResultCodeUnsupported(const ResponseInfo& first_iface_response,
+                             const ResponseInfo& second_iface_response,
+                             const ResponseInfo& third_iface_response);
+
 class CommandRequestImpl : public CommandImpl,
                            public event_engine::EventObserver {
  public:
@@ -226,15 +253,16 @@ class CommandRequestImpl : public CommandImpl,
   /**
    * @brief Checks result code from HMI for splitted RPC
    * and returns parameter for sending to mobile app.
-   * @param first contains result_code from HMI response and
-   * interface that returns response
-   * @param second contains result_code from HMI response and
-   * interface that returns response
+   * @param out_first_iface_response contains result_code from first HMI
+   * response and interface that returns response
+   * @param out_second_iface_response contains result_code from second HMI
+   * response and interface that returns response
    * @return true if result code complies successful result code
    * otherwise returns false
    */
-  bool PrepareResultForMobileResponse(ResponseInfo& out_first,
-                                      ResponseInfo& out_second) const;
+  virtual bool PrepareResultForMobileResponse(
+      ResponseInfo& out_first_iface_response,
+      ResponseInfo& out_second_iface_response) const;
 
   /**
    * @brief If message from HMI contains returns this info
@@ -250,14 +278,15 @@ class CommandRequestImpl : public CommandImpl,
 
   /**
    * @brief Prepare result code for sending to mobile application
-   * @param first contains result_code from HMI response and
-   * interface that returns response
-   * @param second contains result_code from HMI response and
-   * interface that returns response.
+   * @param first_iface_response contains result_code from first HMI response
+   * and interface that returns response
+   * @param second_iface_response contains result_code from second HMI response
+   * and interface that returns response.
    * @return resulting code for sending to mobile application.
    */
-  mobile_apis::Result::eType PrepareResultCodeForResponse(
-      const ResponseInfo& first, const ResponseInfo& second);
+  virtual mobile_apis::Result::eType PrepareResultCodeForResponse(
+      const ResponseInfo& first_iface_response,
+      const ResponseInfo& second_iface_response);
 
  protected:
   /**
