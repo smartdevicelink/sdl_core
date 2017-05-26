@@ -55,6 +55,9 @@
   log4cxx::LoggerPtr logger_var =                       \
       log4cxx::LoggerPtr(log4cxx::Logger::getLogger(logger_name));
 
+#define DESTROY_LOGGERPTR_GLOBAL(logger_var) \
+  logger_var = 0;
+
 #define INIT_LOGGER(file_name, logs_enabled)           \
   log4cxx::PropertyConfigurator::configure(file_name); \
   logger::set_logs_enabled(logs_enabled);
@@ -136,6 +139,8 @@ log4cxx_time_t time_now();
 #define CREATE_LOGGERPTR_GLOBAL(logger_var, logger_name)
 
 #define CREATE_LOGGERPTR_LOCAL(logger_var, logger_name)
+
+#define DESTROY_LOGGERPTR_GLOBAL(logger_var)
 
 #define INIT_LOGGER(file_name, logs_enabled)
 

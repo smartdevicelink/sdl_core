@@ -120,7 +120,9 @@ class SecurityManager : public protocol_handler::ProtocolObserver {
    * identifier
    * @return new \c  SSLContext or \c NULL on any error
    */
+#ifdef ENABLE_SECURITY
   virtual SSLContext* CreateSSLContext(const uint32_t& connection_key) = 0;
+#endif // ENABLE_SECURITY
 
   /**
    * \brief Start handshake as SSL client

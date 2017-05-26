@@ -54,8 +54,10 @@ class MockSecurityManager : public ::security_manager::SecurityManager {
   MOCK_METHOD4(
       SendInternalError,
       void(const uint32_t, const uint8_t&, const std::string&, const uint32_t));
+#ifdef ENABLE_SECURITY
   MOCK_METHOD1(CreateSSLContext,
                ::security_manager::SSLContext*(const uint32_t&));
+#endif // ENABLE_SECURITY
   MOCK_METHOD1(StartHandshake, void(uint32_t));
   MOCK_METHOD1(AddListener, void(::security_manager::SecurityManagerListener*));
   MOCK_METHOD1(RemoveListener,
