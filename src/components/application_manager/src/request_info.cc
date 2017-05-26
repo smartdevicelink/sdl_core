@@ -257,6 +257,7 @@ uint32_t RequestInfoSet::RemoveMobileRequests() {
 }
 
 const size_t RequestInfoSet::Size() {
+  sync_primitives::AutoLock lock(this_lock_);
   CheckSetSizes();
   return time_sorted_pending_requests_.size();
 }
