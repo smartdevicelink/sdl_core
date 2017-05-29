@@ -515,6 +515,26 @@ TEST_F(CommandRequestImplTest,
       (*result)[strings::msg_params][strings::info].asString().empty());
 }
 
+TEST_F(CommandRequestImplTest, CheckPermissions_UnregisterAppInterface_True) {
+  MessageSharedPtr msg = CreateMessage();
+  (*msg)[strings::params][strings::function_id] =
+      mobile_apis::FunctionID::UnregisterAppInterfaceID;
+
+  CommandPtr command = CreateCommand<UCommandRequestImpl>(msg);
+
+  EXPECT_TRUE(command->CheckPermissions());
+}
+
+TEST_F(CommandRequestImplTest, CheckPermissions_RegisterAppInterface_True) {
+  MessageSharedPtr msg = CreateMessage();
+  (*msg)[strings::params][strings::function_id] =
+      mobile_apis::FunctionID::RegisterAppInterfaceID;
+
+  CommandPtr command = CreateCommand<UCommandRequestImpl>(msg);
+
+  EXPECT_TRUE(command->CheckPermissions());
+}
+
 }  // namespace command_request_impl
 }  // namespace commands_test
 }  // namespace components
