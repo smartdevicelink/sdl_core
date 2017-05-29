@@ -487,9 +487,11 @@ mobile_apis::Result::eType CommandRequestImpl::GetMobileResultCode(
 bool CommandRequestImpl::CheckAllowedParameters() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  // RegisterAppInterface should always be allowed
-  if (mobile_apis::FunctionID::RegisterAppInterfaceID ==
-      static_cast<mobile_apis::FunctionID::eType>(function_id())) {
+  // RegisterAppInterface and UnregisterAppInterface should always be allowed
+  const mobile_apis::FunctionID::eType func_id =
+      static_cast<mobile_apis::FunctionID::eType>(function_id());
+  if (mobile_apis::FunctionID::RegisterAppInterfaceID == func_id ||
+      mobile_apis::FunctionID::UnregisterAppInterfaceID == func_id) {
     return true;
   }
 
