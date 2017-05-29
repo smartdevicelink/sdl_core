@@ -233,8 +233,8 @@ class CommandRequestImpl : public CommandImpl,
    * @return true if result code complies successful result code
    * otherwise returns false
    */
-  bool PrepareResultForMobileResponse(ResponseInfo& out_first,
-                                      ResponseInfo& out_second) const;
+  virtual bool PrepareResultForMobileResponse(ResponseInfo& out_first,
+                                              ResponseInfo& out_second) const;
 
   /**
    * @brief If message from HMI contains returns this info
@@ -256,7 +256,7 @@ class CommandRequestImpl : public CommandImpl,
    * interface that returns response.
    * @return resulting code for sending to mobile application.
    */
-  mobile_apis::Result::eType PrepareResultCodeForResponse(
+  virtual mobile_apis::Result::eType PrepareResultCodeForResponse(
       const ResponseInfo& first, const ResponseInfo& second);
 
  protected:
