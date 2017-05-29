@@ -488,10 +488,11 @@ bool CommandRequestImpl::CheckAllowedParameters() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   // RegisterAppInterface and UnregisterAppInterface should always be allowed
-  const mobile_apis::FunctionID::eType func_id =
-      static_cast<mobile_apis::FunctionID::eType>(function_id());
-  if (mobile_apis::FunctionID::RegisterAppInterfaceID == func_id ||
-      mobile_apis::FunctionID::UnregisterAppInterfaceID == func_id) {
+  using namespace helpers;
+  if (Compare<mobile_apis::FunctionID::eType, EQ, ONE>(
+          static_cast<mobile_apis::FunctionID::eType>(function_id()),
+          mobile_apis::FunctionID::RegisterAppInterfaceID,
+          mobile_apis::FunctionID::UnregisterAppInterfaceID)) {
     return true;
   }
 
