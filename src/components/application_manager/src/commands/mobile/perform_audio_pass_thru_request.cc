@@ -198,17 +198,38 @@ bool PerformAudioPassThruRequest::PrepareResponseParameters(
                                 HmiInterfaces::HMI_INTERFACE_TTS);
   const bool result =
       PrepareResultForMobileResponse(ui_perform_info, tts_perform_info);
-
-  if (ui_perform_info.is_ok && tts_perform_info.is_unsupported_resource &&
-      HmiInterfaces::STATE_AVAILABLE == tts_perform_info.interface_state) {
-    result_code = mobile_apis::Result::WARNINGS;
-    tts_info_ = "Unsupported phoneme type sent in a prompt";
-    info = MergeInfos(ui_perform_info, ui_info_, tts_perform_info, tts_info_);
-    return result;
-  }
   result_code = PrepareResultCodeForResponse(ui_perform_info, tts_perform_info);
   info = MergeInfos(ui_perform_info, ui_info_, tts_perform_info, tts_info_);
+
   return result;
+}
+
+bool PerformAudioPassThruRequest::PrepareResultForMobileResponse(
+    ResponseInfo& ui_perform_info, ResponseInfo& tts_perform_info) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  bool result = CommandRequestImpl::PrepareResultForMobileResponse(
+      ui_perform_info, tts_perform_info);
+  if (IsResultCodeUnsupported(ui_perform_info, tts_perform_info)) {
+    result = true;
+  }
+
+  return result;
+}
+
+mobile_apis::Result::eType
+PerformAudioPassThruRequest::PrepareResultCodeForResponse(
+    const ResponseInfo& ui_perform_info, const ResponseInfo& tts_perform_info) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if ((ui_perform_info.is_ok || ui_perform_info.is_invalid_enum) &&
+      tts_perform_info.is_unsupported_resource &&
+      HmiInterfaces::STATE_AVAILABLE == tts_perform_info.interface_state) {
+    return mobile_apis::Result::WARNINGS;
+  }
+
+  return CommandRequestImpl::PrepareResultCodeForResponse(ui_perform_info,
+                                                          tts_perform_info);
 }
 
 void PerformAudioPassThruRequest::SendSpeakRequest() {

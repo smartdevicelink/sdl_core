@@ -137,6 +137,31 @@ class AlertRequest : public CommandRequestImpl {
   bool PrepareResponseParameters(mobile_apis::Result::eType& result_code,
                                  std::string& info);
 
+  /**
+   * @brief Checks result code from HMI for splitted RPC
+   * and returns parameter for sending to mobile app.
+   * @param ui_alert_info contains result_code from HMI response and
+   * interface that returns ui response
+   * @param tts_alert_info contains result_code from HMI response and
+   * interface that returns tts response
+   * @return true if result code complies successful result code
+   * otherwise returns false
+   */
+  bool PrepareResultForMobileResponse(ResponseInfo& ui_alert_info,
+                                      ResponseInfo& tts_alert_info) const FINAL;
+
+  /**
+   * @brief Prepare result code for sending to mobile application
+   * @param ui_alert_info contains result_code from HMI response and
+   * interface that returns ui response
+   * @param tts_alert_info contains result_code from HMI response and
+   * interface that returns tts response.
+   * @return resulting code for sending to mobile application.
+   */
+  mobile_apis::Result::eType PrepareResultCodeForResponse(
+      const ResponseInfo& ui_alert_info,
+      const ResponseInfo& tts_alert_info) FINAL;
+
   bool awaiting_ui_alert_response_;
   bool awaiting_tts_speak_response_;
   bool awaiting_tts_stop_speaking_response_;

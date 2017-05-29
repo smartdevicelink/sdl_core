@@ -223,8 +223,9 @@ mobile_apis::Result::eType AlertManeuverRequest::PrepareResultCodeForResponse(
     const ResponseInfo& tts_alert_info) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  if (tts_alert_info.is_unsupported_resource &&
-      (navigation_alert_info.is_ok || navigation_alert_info.is_invalid_enum)) {
+  if ((navigation_alert_info.is_ok || navigation_alert_info.is_invalid_enum) &&
+      tts_alert_info.is_unsupported_resource &&
+      HmiInterfaces::STATE_AVAILABLE == tts_alert_info.interface_state) {
     return mobile_apis::Result::WARNINGS;
   }
 
