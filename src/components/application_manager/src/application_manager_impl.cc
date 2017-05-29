@@ -1267,7 +1267,9 @@ bool ApplicationManagerImpl::OnHandshakeDone(
   using namespace helpers;
 
   ApplicationSharedPtr app = application(connection_key);
-  DCHECK_OR_RETURN(app, false);
+  if (!app) {
+    return false;
+  }
   if (Compare<SSLContext::HandshakeResult, EQ, ONE>(
           result,
           SSLContext::Handshake_Result_CertExpired,
