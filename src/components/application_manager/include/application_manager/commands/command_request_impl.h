@@ -49,7 +49,7 @@ struct ResponseInfo {
       , interface_state(HmiInterfaces::STATE_NOT_RESPONSE)
       , is_ok(false)
       , is_unsupported_resource(false)
-      , is_invalid_enum(false) {}
+      , is_not_used(false) {}
   ResponseInfo(hmi_apis::Common_Result::eType result,
                HmiInterfaces::InterfaceID interface)
       : result_code(result)
@@ -57,13 +57,13 @@ struct ResponseInfo {
       , interface_state(HmiInterfaces::STATE_NOT_RESPONSE)
       , is_ok(false)
       , is_unsupported_resource(false)
-      , is_invalid_enum(false) {}
+      , is_not_used(false) {}
   hmi_apis::Common_Result::eType result_code;
   HmiInterfaces::InterfaceID interface;
   HmiInterfaces::InterfaceState interface_state;
   bool is_ok;
   bool is_unsupported_resource;
-  bool is_invalid_enum;
+  bool is_not_used;
 };
 
 namespace NsSmart = NsSmartDeviceLink::NsSmartObjects;

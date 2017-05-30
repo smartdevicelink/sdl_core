@@ -80,7 +80,6 @@ namespace strings = ::application_manager::strings;
 namespace hmi_response = ::application_manager::hmi_response;
 
 namespace {
-const int32_t kCommandId = 1;
 const uint32_t kAppId = 1u;
 const uint32_t kCmdId = 1u;
 const uint32_t kConnectionKey = 2u;
@@ -391,7 +390,7 @@ TEST_F(ChangeRegistrationRequestTest,
   CheckExpectations(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE,
                     mobile_apis::Result::UNSUPPORTED_RESOURCE,
                     am::HmiInterfaces::STATE_NOT_RESPONSE,
-                    false);
+                    true);
 }
 
 TEST_F(ChangeRegistrationRequestTest,
@@ -399,7 +398,7 @@ TEST_F(ChangeRegistrationRequestTest,
   CheckExpectations(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE,
                     mobile_apis::Result::UNSUPPORTED_RESOURCE,
                     am::HmiInterfaces::STATE_AVAILABLE,
-                    false);
+                    true);
 }
 
 TEST_F(ChangeRegistrationRequestTest,
@@ -407,7 +406,7 @@ TEST_F(ChangeRegistrationRequestTest,
   CheckExpectations(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE,
                     mobile_apis::Result::UNSUPPORTED_RESOURCE,
                     am::HmiInterfaces::STATE_AVAILABLE,
-                    false,
+                    true,
                     hmi_apis::Common_Result::SUCCESS,
                     hmi_apis::Common_Result::SUCCESS);
 }
