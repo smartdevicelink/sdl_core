@@ -254,8 +254,7 @@ class RequestInfoSet {
   TimeSortedRequestInfoSet time_sorted_pending_requests_;
   HashSortedRequestInfoSet hash_sorted_pending_requests_;
 
-  // the lock caled this_lock_, since the class represent collection by itself.
-  sync_primitives::Lock this_lock_;
+  sync_primitives::Lock pending_requests_lock_;
 };
 
 /**
