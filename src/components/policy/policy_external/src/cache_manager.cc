@@ -1077,6 +1077,10 @@ bool CacheManager::SetUserPermissionsForApp(
       (*ucr.consent_groups)[group_name] = is_allowed;
       *ucr.input = policy_table::Input::I_GUI;
       *ucr.time_stamp = currentDateTime();
+
+      time_t current_time = time(0);
+      UNUSED(*localtime(&current_time));
+      ucr.consent_last_updated = current_time;
     }
   }
   Backup();
@@ -2434,6 +2438,14 @@ void CacheManager::SetExternalConsentForApp(
       permissions.group_permissions.end(),
       std::inserter(external_consent_groups, external_consent_groups.begin()),
       appender);
+
+  policy_table::ConsentRecords& app_consent_records =
+      (*(*pt_->policy_table.device_data)[permissions.device_id]
+            .user_consent_records)[permissions.policy_app_id];
+
+  time_t current_time = time(0);
+  UNUSED(*localtime(&current_time));
+  app_consent_records.ext_consent_last_updated = current_time;
 
   Backup();
 }

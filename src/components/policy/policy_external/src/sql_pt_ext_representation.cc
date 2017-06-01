@@ -1009,6 +1009,7 @@ void SQLPTExtRepresentation::GatherConsentGroup(
     policy_table::EnumFromJsonString(query.GetString(4), &input);
     *app_consent_records->input = input;
     *app_consent_records->time_stamp = query.GetString(5);
+    app_consent_records->consent_last_updated = query.GetInteger(6);
   }
   if (!query.Reset()) {
     return;
@@ -1034,6 +1035,7 @@ void SQLPTExtRepresentation::GatherConsentGroup(
     external_consent_status_groups[query.GetString(2)] = query.GetBoolean(3);
     policy_table::Input input;
     policy_table::EnumFromJsonString(query.GetString(4), &input);
+    app_consent_records->ext_consent_last_updated = query.GetInteger(6);
   }
 }
 
@@ -1141,6 +1143,7 @@ bool SQLPTExtRepresentation::SaveConsentGroup(
             4,
             std::string(policy_table::EnumToJsonString(*(it->second.input))));
         query.Bind(5, std::string(*(it->second.time_stamp)));
+        query.Bind(6, (it->second.consent_last_updated));
         LOG4CXX_INFO(logger_,
                      "Device:"
                          << "time stamp "
@@ -1174,6 +1177,7 @@ bool SQLPTExtRepresentation::SaveConsentGroup(
       query.Bind(
           4, std::string(policy_table::EnumToJsonString(*(it->second.input))));
       query.Bind(5, std::string(*(it->second.time_stamp)));
+      query.Bind(6, (it->second.ext_consent_last_updated));
       LOG4CXX_INFO(logger_,
                    "Device:"
                        << "time stamp " << std::string(*(it->second.time_stamp))
