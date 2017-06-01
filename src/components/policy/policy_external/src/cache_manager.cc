@@ -272,6 +272,37 @@ CacheManager::~CacheManager() {
   threads::DeleteThread(backup_thread_);
 }
 
+ConsentPriorityType CacheManager::GetConsentsPriority(
+    const std::string& device_id, const std::string& application_id) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  ConsentPriorityType prio_type = ConsentPriorityType::kExternalConsentPrio;
+  CACHE_MANAGER_CHECK(prio_type);
+  policy_table::DeviceData::const_iterator dev_params_iter =
+      pt_->policy_table.device_data->find(device_id);
+
+  if (pt_->policy_table.device_data->end() == dev_params_iter) {
+    LOG4CXX_DEBUG(logger_, "Device id " << device_id << " not found.");
+    return prio_type;
+  }
+
+  const policy_table::DeviceParams& dev_par = (*dev_params_iter).second;
+
+  policy_table::UserConsentRecords::const_iterator app_consent_record =
+      dev_par.user_consent_records->find(application_id);
+
+  if (dev_par.user_consent_records->end() == app_consent_record) {
+    LOG4CXX_DEBUG(logger_,
+                  "Application id " << application_id << " not found.");
+    return prio_type;
+  }
+
+  const policy_table::ConsentRecords& record = app_consent_record->second;
+
+  return record.consent_last_updated > record.ext_consent_last_updated
+             ? ConsentPriorityType::kUserConsentPrio
+             : ConsentPriorityType::kExternalConsentPrio;
+}
+
 const policy_table::Strings& CacheManager::GetGroups(const PTString& app_id) {
   return pt_->policy_table.app_policies_section.apps[app_id].groups;
 }
@@ -1072,15 +1103,16 @@ bool CacheManager::SetUserPermissionsForApp(
       if (ucr.consent_groups->end() == it_group ||
           it_group->second != is_allowed) {
         *out_app_permissions_changed = true;
+
+        const TimevalStruct tm = date_time::DateTime::getCurrentTime();
+        int64_t current_time_msec = date_time::DateTime::getmSecs(tm);
+        ucr.consent_last_updated = current_time_msec;
+        LOG4CXX_DEBUG(logger_, "Updating consents time " << current_time_msec);
       }
 
       (*ucr.consent_groups)[group_name] = is_allowed;
       *ucr.input = policy_table::Input::I_GUI;
       *ucr.time_stamp = currentDateTime();
-
-      time_t current_time = time(0);
-      UNUSED(*localtime(&current_time));
-      ucr.consent_last_updated = current_time;
     }
   }
   Backup();
@@ -2420,6 +2452,32 @@ std::map<std::string, std::string> CacheManager::GetKnownLinksFromPT() {
   return links;
 }
 
+bool CacheManager::ConsentsSame(
+    const policy_table::ConsentGroups& external_consent_groups,
+    const PermissionConsent& permissions) const {
+  const std::vector<FunctionalGroupPermission>& group_permissions =
+      permissions.group_permissions;
+
+  std::vector<FunctionalGroupPermission>::const_iterator it_gp =
+      group_permissions.begin();
+
+  for (; group_permissions.end() != it_gp; ++it_gp) {
+    const policy_table::ConsentGroups::value_type value = std::make_pair(
+        it_gp->group_name, rpc::Boolean(it_gp->state == kGroupAllowed));
+
+    const bool is_found = external_consent_groups.end() !=
+                          std::find(external_consent_groups.begin(),
+                                    external_consent_groups.end(),
+                                    value);
+
+    if (!is_found) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 void CacheManager::SetExternalConsentForApp(
     const PermissionConsent& permissions) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -2429,6 +2487,11 @@ void CacheManager::SetExternalConsentForApp(
       *(*(*pt_->policy_table.device_data)[permissions.device_id]
              .user_consent_records)[permissions.policy_app_id]
            .external_consent_status_groups;
+
+  if (ConsentsSame(external_consent_groups, permissions)) {
+    LOG4CXX_DEBUG(logger_, "External consents already have same values.");
+    return;
+  }
 
   external_consent_groups.clear();
 
@@ -2443,9 +2506,10 @@ void CacheManager::SetExternalConsentForApp(
       (*(*pt_->policy_table.device_data)[permissions.device_id]
             .user_consent_records)[permissions.policy_app_id];
 
-  time_t current_time = time(0);
-  UNUSED(*localtime(&current_time));
-  app_consent_records.ext_consent_last_updated = current_time;
+  const TimevalStruct tm = date_time::DateTime::getCurrentTime();
+  int64_t current_time_msec = date_time::DateTime::getmSecs(tm);
+  app_consent_records.ext_consent_last_updated = current_time_msec;
+  LOG4CXX_DEBUG(logger_, "Updating consents time " << current_time_msec);
 
   Backup();
 }

@@ -49,6 +49,9 @@ namespace policy_test {
 
 class MockCacheManagerInterface : public ::policy::CacheManagerInterface {
  public:
+  MOCK_CONST_METHOD2(GetConsentsPriority,
+                     ConsentPriorityType(const std::string& device_id,
+                                         const std::string& application_id));
   MOCK_METHOD4(CheckPermissions,
                void(const PTString& app_id,
                     const PTString& hmi_level,
