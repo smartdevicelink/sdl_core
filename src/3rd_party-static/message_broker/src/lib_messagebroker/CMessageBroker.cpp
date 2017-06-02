@@ -458,12 +458,22 @@ void CMessageBroker::onMessageReceived(int fd, std::string& aJSONData, bool tryH
          * It can be a coincidence of course, but we have to give it a try. */
         return;
       } else if ('{' == aJSONData[0]) {
-        DBG_MSG_ERROR((" Incomplete JSON object probably.\n"));
+        const bool is_object = true;
+        const size_t next_object_pos =
+            p->jumpOverJSONObjectOrArray(is_object, aJSONData);
+
+        if (next_object_pos != std::string::npos) {
+          DBG_MSG_ERROR(("Invalid JSON object probably. Skipping.\n"));
+          aJSONData.erase(0, next_object_pos);
+          DBG_MSG(("Buffer after cut is: '%s'\n", aJSONData.c_str()));
+          continue;
+        }
+        DBG_MSG_ERROR(("Incomplete JSON object probably.\n"));
         return;
       } else {
-        DBG_MSG_ERROR((" Step in the buffer and try again...\n"));
+        DBG_MSG_ERROR(("Step in the buffer and try again...\n"));
         aJSONData.erase(0, 1);
-        DBG_MSG_ERROR(("Buffer after cut is: '%s'\n", aJSONData.c_str()));
+        DBG_MSG(("Buffer after cut is: '%s'\n", aJSONData.c_str()));
         continue;
       }
 
