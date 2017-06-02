@@ -444,13 +444,13 @@ void CMessageBroker::onMessageReceived(int fd, std::string& aJSONData, bool tryH
   while (! aJSONData.empty()) {
     Json::Value root;
     if ((! p->m_reader.parse(aJSONData, root)) || root.isNull()) {
-      DBG_MSG_ERROR(("Unable to parse JSON!"));
+      DBG_MSG_ERROR(("Unable to parse JSON!\n"));
       if (! tryHard) {
         return;
       }
       uint8_t first_byte = static_cast<uint8_t>(aJSONData[0]);
       if ((first_byte <= 0x08) || ((first_byte >= 0x80) && (first_byte <= 0x88))) {
-        DBG_MSG((" There is an unparsed websocket header probably.\n"));
+        DBG_MSG(("There is an unparsed websocket header probably.\n"));
         /* Websocket headers can have FIN flag set in the first byte (0x80).
          * Then there are 3 zero bits and 4 bits for opcode (from 0x00 to 0x0A).
          * But actually we don't use opcodes above 0x08.
@@ -505,7 +505,7 @@ void CMessageBroker::Test() {
       return;
     }
     std::string wmes = p->m_recieverWriter.write(root);
-    DBG_MSG(("Parsed JSON string:%s; length: %d\n", wmes.c_str(), wmes.length()));
+    DBG_MSG(("Parsed JSON string:%s; length: %zu\n", wmes.c_str(), wmes.length()));
     DBG_MSG(("Buffer is:%s\n", ReceivingBuffer.c_str()));
     ssize_t beginpos = ReceivingBuffer.find(wmes);
     ReceivingBuffer.erase(0, beginpos + wmes.length());
@@ -853,7 +853,7 @@ void CMessageBroker_Private::sendJsonMessage(int fd, Json::Value message) {
       DBG_MSG_ERROR(("Message hasn't been sent!\n"));
       return;
     }
-    DBG_MSG(("Length:%d, Sent: %d bytes\n", mes.length(), retVal));
+    DBG_MSG(("Length: %zu, Sent: %d bytes\n", mes.length(), retVal));
   } else {
     DBG_MSG_ERROR(("mpSender NULL pointer\n"));
   }
