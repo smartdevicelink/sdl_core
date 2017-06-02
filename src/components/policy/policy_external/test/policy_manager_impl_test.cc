@@ -1075,7 +1075,7 @@ TEST_F(
   EXPECT_TRUE(policy_manager_->SetExternalConsentStatus(status_on));
 
   // Checking ExternalConsent consents after setting new ExternalConsent status
-  const ConsentGroups& external_consent_statuss =
+  const ConsentGroups& external_consent_status =
       *updated_consent_records->second.external_consent_status_groups;
 
   ApplicationPolicies::const_iterator app_parameters =
@@ -1085,17 +1085,17 @@ TEST_F(
               app_parameters);
 
   EXPECT_EQ(app_parameters->second.groups.size(),
-            external_consent_statuss.size());
+            external_consent_status.size());
 
   ConsentGroups::const_iterator updated_group_1 =
-      external_consent_statuss.find(group_name_1_);
+      external_consent_status.find(group_name_1_);
 
-  EXPECT_TRUE(external_consent_statuss.end() != updated_group_1);
+  EXPECT_TRUE(external_consent_status.end() != updated_group_1);
 
   ConsentGroups::const_iterator updated_group_2 =
-      external_consent_statuss.find(group_name_2_);
+      external_consent_status.find(group_name_2_);
 
-  EXPECT_TRUE(external_consent_statuss.end() != updated_group_2);
+  EXPECT_TRUE(external_consent_status.end() != updated_group_2);
 
   EXPECT_EQ(Boolean(false), updated_group_1->second);
   EXPECT_EQ(Boolean(true), updated_group_2->second);
@@ -1106,9 +1106,17 @@ TEST_F(
   status_off.insert(ExternalConsentStatusItem(type_2_, id_2_, kStatusOff));
   status_off.insert(ExternalConsentStatusItem(type_3_, id_3_, kStatusOff));
 
-  EXPECT_CALL(listener_, OnPermissionsUpdated(app_id_1_, _)).Times(0);
+  EXPECT_CALL(listener_, OnPermissionsUpdated(app_id_1_, _)).Times(1);
 
-  EXPECT_TRUE(policy_manager_->SetExternalConsentStatus(status_on));
+  EXPECT_TRUE(policy_manager_->SetExternalConsentStatus(status_off));
+
+  updated_group_1 = external_consent_status.find(group_name_1_);
+
+  EXPECT_TRUE(external_consent_status.end() != updated_group_1);
+
+  updated_group_2 = external_consent_status.find(group_name_2_);
+
+  EXPECT_TRUE(external_consent_status.end() != updated_group_2);
 
   EXPECT_EQ(Boolean(true), updated_group_1->second);
   EXPECT_EQ(Boolean(false), updated_group_2->second);

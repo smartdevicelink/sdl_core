@@ -1583,7 +1583,10 @@ void UsageAndErrorCounts::SetPolicyTableType(PolicyTableType pt_type) {
 }
 
 // ConsentRecords methods
-ConsentRecords::ConsentRecords() : CompositeType(kUninitialized) {}
+ConsentRecords::ConsentRecords()
+    : CompositeType(kUninitialized)
+    , consent_last_updated(0)
+    , ext_consent_last_updated(0) {}
 
 ConsentRecords::~ConsentRecords() {}
 
@@ -1593,7 +1596,9 @@ ConsentRecords::ConsentRecords(const Json::Value* value__)
     , external_consent_status_groups(
           impl::ValueMember(value__, "external_consent_status_groups"))
     , input(impl::ValueMember(value__, "input"))
-    , time_stamp(impl::ValueMember(value__, "time_stamp")) {}
+    , time_stamp(impl::ValueMember(value__, "time_stamp"))
+    , consent_last_updated(0)
+    , ext_consent_last_updated(0) {}
 
 Json::Value ConsentRecords::ToJsonValue() const {
   Json::Value result__(Json::objectValue);

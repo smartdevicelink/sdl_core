@@ -485,6 +485,8 @@ struct ConsentRecords : CompositeType {
   Optional<ConsentGroups> external_consent_status_groups;
   Optional<Enum<Input> > input;
   Optional<String<1, 255> > time_stamp;
+  int64_t consent_last_updated;
+  int64_t ext_consent_last_updated;
 
  public:
   ConsentRecords();

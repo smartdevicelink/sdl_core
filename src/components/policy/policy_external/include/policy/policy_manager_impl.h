@@ -364,9 +364,12 @@ class PolicyManagerImpl : public PolicyManager {
    * known before by policy table (must have any user consent records)
    * @param groups_by_status Collection of ExternalConsent entities with their
    * statuses
+   * @param processing_policy Defines whether consents timestamps must be
+   * considered or external consents take over
    */
   void ProcessExternalConsentStatusUpdate(
-      const GroupsByExternalConsentStatus& groups_by_status);
+      const GroupsByExternalConsentStatus& groups_by_status,
+      const ConsentProcessingPolicy processing_policy);
 
   /**
    * @brief Processes ExternalConsent status for application registered
@@ -375,8 +378,12 @@ class PolicyManagerImpl : public PolicyManager {
    * updated
    * appropiately to current ExternalConsent status stored by policy table
    * @param application_id Application id
+   * @param processing_policy Defines whether consents timestamps must be
+   * considered or external consents take over
    */
-  void ProcessExternalConsentStatusForApp(const std::string& application_id);
+  void ProcessExternalConsentStatusForApp(
+      const std::string& application_id,
+      const ConsentProcessingPolicy processing_policy);
   /**
    * @brief Directly updates user consent and ExternalConsent consents (if any)
    * for
@@ -387,14 +394,16 @@ class PolicyManagerImpl : public PolicyManager {
    * @param allowed_groups List of group names allowed by current
    * ExternalConsent status
    * @param disallowed_groups List of group names disallwed by current
-   * ExternalConsent
-   * status
+   * ExternalConsent status
+   * @param processing_policy Defines whether consents timestamps have to be
+   * considered or external consents take over
    */
   void UpdateAppConsentWithExternalConsent(
       const std::string& device_id,
       const std::string& application_id,
       const GroupsNames& allowed_groups,
-      const GroupsNames& disallowed_groups);
+      const GroupsNames& disallowed_groups,
+      const ConsentProcessingPolicy processing_policy);
 
   typedef policy_table::ApplicationPolicies::value_type AppPoliciesValueType;
 

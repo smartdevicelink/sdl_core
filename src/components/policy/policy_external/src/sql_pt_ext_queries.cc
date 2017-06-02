@@ -136,14 +136,14 @@ const std::string kInsertDeviceData =
 const std::string kInsertConsentGroups =
     "INSERT OR REPLACE INTO `consent_group` "
     "(`device_id`, `application_id`, `functional_group_id`, `is_consented`, "
-    "`input`, `time_stamp`) "
-    "VALUES (?,?,?,?,?,?)";
+    "`input`, `time_stamp`, `last_updated`) "
+    "VALUES (?,?,?,?,?,?,?)";
 
 const std::string kInsertExternalConsentStatusGroups =
     "INSERT OR REPLACE INTO `external_consent_status_group` "
     "(`device_id`, `application_id`, `functional_group_id`, `is_consented`, "
-    "`input`, `time_stamp`) "
-    "VALUES (?,?,?,?,?,?)";
+    "`input`, `time_stamp`, `last_updated`) "
+    "VALUES (?,?,?,?,?,?,?)";
 
 const std::string kDeleteAppGroupConsent =
     "DELETE FROM `consent_group` WHERE "

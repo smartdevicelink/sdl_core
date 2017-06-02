@@ -77,7 +77,8 @@ struct GroupNamesAppender
 
 /**
  * @brief Updates permission state of input group permission value in case
- * group name is found within allowed or disallowed groups lists
+ * group name is found within allowed or disallowed groups lists considering
+ * current priorities of consents
  * Also collects matched groups names to separate collection for futher
  * processing
  */
@@ -86,28 +87,50 @@ struct ConsentsUpdater
   ConsentsUpdater(const policy::GroupsNames& allowed,
                   const policy::GroupsNames& disallowed,
                   std::vector<policy::FunctionalGroupPermission>&
-                      out_external_consent_matches)
+                      out_external_consent_matches,
+                  const policy::ConsentPriorityType prio)
       : allowed_(allowed)
       , disallowed_(disallowed)
-      , out_external_consent_matches_(out_external_consent_matches) {}
+      , out_external_consent_matches_(out_external_consent_matches)
+      , prio_(prio) {}
 
   void operator()(policy::FunctionalGroupPermission& value) {
     if (helpers::in_range(disallowed_, value.group_name)) {
-      value.state = policy::kGroupDisallowed;
-      out_external_consent_matches_.push_back(value);
+      policy::FunctionalGroupPermission external_consent = value;
+      external_consent.state = policy::kGroupDisallowed;
+      out_external_consent_matches_.push_back(external_consent);
+
+      if (IsAllowedToChangedUserConsent(value.state)) {
+        value.state = policy::kGroupDisallowed;
+      }
       return;
     }
 
     if (helpers::in_range(allowed_, value.group_name)) {
-      value.state = policy::kGroupAllowed;
-      out_external_consent_matches_.push_back(value);
+      policy::FunctionalGroupPermission external_consent = value;
+      external_consent.state = policy::kGroupAllowed;
+      out_external_consent_matches_.push_back(external_consent);
+
+      if (IsAllowedToChangedUserConsent(value.state)) {
+        value.state = policy::kGroupAllowed;
+      }
     }
   }
 
  private:
+  bool IsAllowedToChangedUserConsent(
+      policy::GroupConsent current_consent) const {
+    if (policy::GroupConsent::kGroupUndefined == current_consent) {
+      return true;
+    }
+
+    return policy::ConsentPriorityType::kUserConsentPrio != prio_;
+  }
+
   const policy::GroupsNames& allowed_;
   const policy::GroupsNames& disallowed_;
   std::vector<policy::FunctionalGroupPermission>& out_external_consent_matches_;
+  const policy::ConsentPriorityType prio_;
 };
 
 /**
@@ -294,7 +317,8 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
     GroupsByExternalConsentStatus groups_by_status =
         cache_->GetGroupsWithSameEntities(status);
 
-    ProcessExternalConsentStatusUpdate(groups_by_status);
+    ProcessExternalConsentStatusUpdate(
+        groups_by_status, ConsentProcessingPolicy::kExternalConsentBased);
 
     ProcessAppPolicyCheckResults(
         results, pt_update->policy_table.app_policies_section.apps);
@@ -1242,7 +1266,8 @@ void PolicyManagerImpl::UpdateAppConsentWithExternalConsent(
     const std::string& device_id,
     const std::string& application_id,
     const GroupsNames& allowed_groups,
-    const GroupsNames& disallowed_groups) {
+    const GroupsNames& disallowed_groups,
+    const ConsentProcessingPolicy processing_policy) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (allowed_groups.empty() && disallowed_groups.empty()) {
@@ -1255,9 +1280,14 @@ void PolicyManagerImpl::UpdateAppConsentWithExternalConsent(
   std::vector<FunctionalGroupPermission> current_permissions;
   GetUserConsentForApp(device_id, application_id, current_permissions);
 
+  ConsentPriorityType prio = ConsentPriorityType::kExternalConsentPrio;
+  if (ConsentProcessingPolicy::kTimestampBased == processing_policy) {
+    prio = cache_->GetConsentsPriority(device_id, application_id);
+  }
+
   std::vector<FunctionalGroupPermission> external_consent_groups_matches;
   ConsentsUpdater updater(
-      allowed_groups, disallowed_groups, external_consent_groups_matches);
+      allowed_groups, disallowed_groups, external_consent_groups_matches, prio);
   std::for_each(
       current_permissions.begin(), current_permissions.end(), updater);
 
@@ -1322,7 +1352,8 @@ void PolicyManagerImpl::SendPermissionsToApp(
 }
 
 void PolicyManagerImpl::ProcessExternalConsentStatusUpdate(
-    const GroupsByExternalConsentStatus& groups_by_status) {
+    const GroupsByExternalConsentStatus& groups_by_status,
+    const ConsentProcessingPolicy processing_policy) {
   GroupsNames allowed_groups;
   GroupsNames disallowed_groups;
   CalculateGroupsConsentFromExternalConsent(
@@ -1343,8 +1374,11 @@ void PolicyManagerImpl::ProcessExternalConsentStatusUpdate(
   std::map<std::string, std::string>::const_iterator it_links =
       all_known.begin();
   for (; all_known.end() != it_links; ++it_links) {
-    UpdateAppConsentWithExternalConsent(
-        it_links->first, it_links->second, allowed_groups, disallowed_groups);
+    UpdateAppConsentWithExternalConsent(it_links->first,
+                                        it_links->second,
+                                        allowed_groups,
+                                        disallowed_groups,
+                                        processing_policy);
   }
 }
 
@@ -1395,7 +1429,8 @@ bool PolicyManagerImpl::SetExternalConsentStatus(
 
   GroupsByExternalConsentStatus groups_by_status =
       cache_->GetGroupsWithSameEntities(status);
-  ProcessExternalConsentStatusUpdate(groups_by_status);
+  ProcessExternalConsentStatusUpdate(
+      groups_by_status, ConsentProcessingPolicy::kExternalConsentBased);
 
   return true;
 }
@@ -1728,7 +1763,8 @@ bool PolicyManagerImpl::IsPredataPolicy(
 }
 
 void PolicyManagerImpl::ProcessExternalConsentStatusForApp(
-    const std::string& application_id) {
+    const std::string& application_id,
+    const ConsentProcessingPolicy processing_policy) {
   ExternalConsentStatus status = cache_->GetExternalConsentStatus();
   GroupsByExternalConsentStatus groups_by_status =
       cache_->GetGroupsWithSameEntities(status);
@@ -1739,8 +1775,11 @@ void PolicyManagerImpl::ProcessExternalConsentStatusForApp(
       groups_by_status, allowed_groups, disallowed_groups);
 
   const std::string device_id = GetCurrentDeviceId(application_id);
-  UpdateAppConsentWithExternalConsent(
-      device_id, application_id, allowed_groups, disallowed_groups);
+  UpdateAppConsentWithExternalConsent(device_id,
+                                      application_id,
+                                      allowed_groups,
+                                      disallowed_groups,
+                                      processing_policy);
 }
 
 void PolicyManagerImpl::AddNewApplication(const std::string& application_id,
@@ -1762,7 +1801,8 @@ void PolicyManagerImpl::AddNewApplication(const std::string& application_id,
     cache_->SetDefaultPolicy(application_id);
   }
 
-  ProcessExternalConsentStatusForApp(application_id);
+  ProcessExternalConsentStatusForApp(
+      application_id, ConsentProcessingPolicy::kExternalConsentBased);
 }
 
 void PolicyManagerImpl::PromoteExistedApplication(
@@ -1773,7 +1813,8 @@ void PolicyManagerImpl::PromoteExistedApplication(
       cache_->IsPredataPolicy(application_id)) {
     cache_->SetDefaultPolicy(application_id);
   }
-  ProcessExternalConsentStatusForApp(application_id);
+  ProcessExternalConsentStatusForApp(application_id,
+                                     ConsentProcessingPolicy::kTimestampBased);
 }
 
 bool PolicyManagerImpl::IsNewApplication(
