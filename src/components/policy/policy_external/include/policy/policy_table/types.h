@@ -38,6 +38,7 @@
 
 #include "policy/policy_table/enums.h"
 #include "rpc_base/rpc_message.h"
+
 namespace Json {
 class Value;
 }  // namespace Json
@@ -68,7 +69,7 @@ typedef Array<Enum<HmiLevel>, 0, 4> HmiLevels;
 
 typedef Array<Enum<Parameter>, 0, 100> Parameters;
 
-typedef Map<RpcParameters, 0, 50> Rpc;
+typedef Map<RpcParameters, 0, 65535> Rpc;
 
 typedef Array<String<10, 65535>, 1, 3> URL;
 
@@ -80,7 +81,7 @@ typedef uint8_t NumberOfNotificationsType;
 typedef Map<Integer<NumberOfNotificationsType, 0, 255>, 0, 6>
     NumberOfNotificationsPerMinute;
 
-typedef Array<Integer<uint16_t, 1, 1000>, 0, 10> SecondsBetweenRetries;
+typedef Array<Integer<uint16_t, 1, 1000>, 0, 5> SecondsBetweenRetries;
 
 typedef Map<MessageString, 0, 600> Languages;
 
@@ -100,6 +101,9 @@ typedef Map<Rpcs, 1, 255> FunctionalGroupings;
 typedef Map<DeviceParams, 0, 255> DeviceData;
 
 typedef Array<Enum<RequestType>, 0, 255> RequestsTypeArray;
+
+typedef AppHMIType AppHmiType;
+typedef std::vector<AppHMIType> AppHmiTypes;
 
 struct RequestTypes : public RequestsTypeArray {
   RequestTypes();
@@ -229,10 +233,35 @@ struct RpcParameters : CompositeType {
   bool Validate() const;
 };
 
+struct ExternalConsentEntity : CompositeType {
+ public:
+  typedef Integer<int32_t, 0, 128> EntityInt;
+  EntityInt entity_type;
+  EntityInt entity_id;
+
+ public:
+  ExternalConsentEntity();
+  explicit ExternalConsentEntity(const Json::Value* value__);
+  ExternalConsentEntity(const int32_t type, const int32_t id);
+  Json::Value ToJsonValue() const;
+  bool operator==(const ExternalConsentEntity& rhs) const;
+  bool is_valid() const;
+  bool is_initialized() const;
+  void ReportErrors(rpc::ValidationReport* report__) const;
+  void SetPolicyTableType(PolicyTableType pt_type) OVERRIDE;
+};
+
+typedef Array<ExternalConsentEntity, 0, 100>
+    DisallowedByExternalConsentEntities;
+
 struct Rpcs : CompositeType {
  public:
   Optional<String<1, 255> > user_consent_prompt;
   Nullable<Rpc> rpcs;
+  Optional<DisallowedByExternalConsentEntities>
+      disallowed_by_external_consent_entities_on;
+  Optional<DisallowedByExternalConsentEntities>
+      disallowed_by_external_consent_entities_off;
 
  public:
   Rpcs();
@@ -453,8 +482,11 @@ struct UsageAndErrorCounts : CompositeType {
 struct ConsentRecords : CompositeType {
  public:
   Optional<ConsentGroups> consent_groups;
+  Optional<ConsentGroups> external_consent_status_groups;
   Optional<Enum<Input> > input;
   Optional<String<1, 255> > time_stamp;
+  int64_t consent_last_updated;
+  int64_t ext_consent_last_updated;
 
  public:
   ConsentRecords();

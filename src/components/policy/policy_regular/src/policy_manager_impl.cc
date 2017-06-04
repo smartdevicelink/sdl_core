@@ -77,7 +77,10 @@ PolicyManagerImpl::PolicyManagerImpl()
                             new timer::TimerTaskImpl<PolicyManagerImpl>(
                                 this, &PolicyManagerImpl::RetrySequence))
     , ignition_check(true)
-    , retry_sequence_url_(0, 0, "") {}
+    , retry_sequence_url_(0, 0, "")
+    , wrong_ptu_update_received_(false)
+    , send_on_update_sent_out_(false)
+    , trigger_ptu_(false) {}
 
 void PolicyManagerImpl::set_listener(PolicyListener* listener) {
   listener_ = listener;
@@ -159,6 +162,7 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
   file_system::DeleteFile(file);
 
   if (!IsPTValid(pt_update, policy_table::PT_UPDATE)) {
+    wrong_ptu_update_received_ = true;
     update_status_manager_.OnWrongUpdateReceived();
     return false;
   }
@@ -298,7 +302,8 @@ void PolicyManagerImpl::StartPTExchange() {
   }
 
   if (update_status_manager_.IsUpdatePending() && update_required) {
-    update_status_manager_.ScheduleUpdate();
+    if (trigger_ptu_)
+      update_status_manager_.ScheduleUpdate();
     LOG4CXX_INFO(logger_,
                  "Starting exchange skipped, since another exchange "
                  "is in progress.");
@@ -328,9 +333,12 @@ void PolicyManagerImpl::OnAppsSearchStarted() {
   update_status_manager_.OnAppsSearchStarted();
 }
 
-void PolicyManagerImpl::OnAppsSearchCompleted() {
+void PolicyManagerImpl::OnAppsSearchCompleted(const bool trigger_ptu) {
   LOG4CXX_AUTO_TRACE(logger_);
   update_status_manager_.OnAppsSearchCompleted();
+
+  trigger_ptu_ = trigger_ptu;
+
   if (update_status_manager_.IsUpdateRequired()) {
     StartPTExchange();
   }
@@ -353,16 +361,34 @@ const VehicleInfo PolicyManagerImpl::GetVehicleInfo() const {
   return cache_->GetVehicleInfo();
 }
 
-void PolicyManagerImpl::CheckPermissions(const PTString& app_id,
+void PolicyManagerImpl::CheckPermissions(const PTString& device_id,
+                                         const PTString& app_id,
                                          const PTString& hmi_level,
                                          const PTString& rpc,
                                          const RPCParams& rpc_params,
                                          CheckPermissionResult& result) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (!cache_->IsApplicationRepresented(app_id)) {
+    LOG4CXX_WARN(logger_, "Application " << app_id << " isn't exist");
+    return;
+  }
+
   LOG4CXX_INFO(logger_,
                "CheckPermissions for " << app_id << " and rpc " << rpc
                                        << " for " << hmi_level << " level.");
 
-  cache_->CheckPermissions(app_id, hmi_level, rpc, result);
+  const policy_table::Strings& groups = cache_->GetGroups(app_id);
+  cache_->CheckPermissions(groups, hmi_level, rpc, result);
+  if (cache_->IsApplicationRevoked(app_id)) {
+    // SDL must be able to notify mobile side with its status after app has
+    // been revoked by backend
+    if ("OnHMIStatus" == rpc && "NONE" == hmi_level) {
+      result.hmi_level_permitted = kRpcAllowed;
+    } else {
+      result.hmi_level_permitted = kRpcDisallowed;
+    }
+  }
 }
 
 bool PolicyManagerImpl::ResetUserConsent() {
@@ -830,7 +856,13 @@ void PolicyManagerImpl::OnUpdateStarted() {
   uint32_t update_timeout = TimeoutExchangeMSec();
   LOG4CXX_DEBUG(logger_,
                 "Update timeout will be set to (milisec): " << update_timeout);
-  update_status_manager_.OnUpdateSentOut(update_timeout);
+
+  send_on_update_sent_out_ =
+      !wrong_ptu_update_received_ && !update_status_manager_.IsUpdatePending();
+
+  if (send_on_update_sent_out_) {
+    update_status_manager_.OnUpdateSentOut(update_timeout);
+  }
   cache_->SaveUpdateRequired(true);
 }
 
@@ -946,8 +978,13 @@ AppIdURL PolicyManagerImpl::RetrySequenceUrl(const struct RetrySequenceURL& rs,
       app_idx = 0;
     }
   }
+  const AppIdURL next_app_url = std::make_pair(app_idx, url_idx);
 
-  return std::make_pair(app_idx, url_idx);
+  return next_app_url;
+}
+
+bool PolicyManagerImpl::HasCertificate() const {
+  return !cache_->GetCertificate().empty();
 }
 
 class CallStatusChange : public utils::Callable {
@@ -967,23 +1004,28 @@ class CallStatusChange : public utils::Callable {
 };
 
 StatusNotifier PolicyManagerImpl::AddApplication(
-    const std::string& application_id) {
+    const std::string& application_id,
+    const rpc::policy_table_interface_base::AppHmiTypes& hmi_types) {
   LOG4CXX_AUTO_TRACE(logger_);
   const std::string device_id = GetCurrentDeviceId(application_id);
   DeviceConsent device_consent = GetUserConsentForDevice(device_id);
   sync_primitives::AutoLock lock(apps_registration_lock_);
-
   if (IsNewApplication(application_id)) {
     AddNewApplication(application_id, device_consent);
     return utils::MakeShared<CallStatusChange>(update_status_manager_,
                                                device_consent);
   } else {
     PromoteExistedApplication(application_id, device_consent);
-    return utils::MakeShared<CallStatusChange>(update_status_manager_,
-                                               device_consent);
+    const policy_table::AppHMIType type = policy_table::AHT_NAVIGATION;
+    if (helpers::in_range(hmi_types,
+                          (rpc::Enum<policy_table::AppHMIType>)type) &&
+        !HasCertificate()) {
+      LOG4CXX_DEBUG(logger_, "Certificate does not exist, scheduling update.");
+      update_status_manager_.ScheduleUpdate();
+    }
+    return utils::MakeShared<utils::CallNothing>();
   }
 }
-
 void PolicyManagerImpl::RemoveAppConsentForGroup(
     const std::string& app_id, const std::string& group_name) {
   cache_->RemoveAppConsentForGroup(app_id, group_name);

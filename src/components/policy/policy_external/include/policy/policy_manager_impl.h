@@ -60,6 +60,8 @@ class PolicyManagerImpl : public PolicyManager {
                       const PolicySettings* settings);
   virtual bool LoadPT(const std::string& file, const BinaryMessage& pt_content);
   virtual bool ResetPT(const std::string& file_name);
+
+  virtual std::string GetUpdateUrl(int service_type);
   virtual void GetUpdateUrls(const uint32_t service_type,
                              EndpointUrls& out_end_points);
   virtual void GetUpdateUrls(const std::string& service_type,
@@ -109,7 +111,8 @@ class PolicyManagerImpl : public PolicyManager {
   virtual void SetDeviceInfo(const std::string& device_id,
                              const DeviceInfo& device_info);
 
-  virtual void SetUserConsentForApp(const PermissionConsent& permissions);
+  void SetUserConsentForApp(const PermissionConsent& permissions,
+                            const NotificationMode mode) OVERRIDE;
 
   virtual bool GetDefaultHmi(const std::string& policy_app_id,
                              std::string* default_hmi) const;
@@ -167,7 +170,9 @@ class PolicyManagerImpl : public PolicyManager {
   bool CanAppStealFocus(const std::string& app_id) const;
   void MarkUnpairedDevice(const std::string& device_id);
 
-  StatusNotifier AddApplication(const std::string& application_id);
+  StatusNotifier AddApplication(
+      const std::string& application_id,
+      const rpc::policy_table_interface_base::AppHmiTypes& hmi_types);
 
   virtual void RemoveAppConsentForGroup(const std::string& app_id,
                                         const std::string& group_name);
@@ -181,11 +186,16 @@ class PolicyManagerImpl : public PolicyManager {
 
   virtual void OnAppsSearchStarted();
 
-  virtual void OnAppsSearchCompleted();
+  virtual void OnAppsSearchCompleted(const bool trigger_ptu);
 
 #ifdef BUILD_TESTS
   inline CacheManagerInterfaceSPtr GetCache() {
     return cache_;
+  }
+  inline void SetSendOnUpdateFlags(const bool send_on_update_sent_out,
+                                   const bool wrong_ptu_update_received) {
+    send_on_update_sent_out_ = send_on_update_sent_out;
+    wrong_ptu_update_received_ = wrong_ptu_update_received;
   }
 #endif  // BUILD_TESTS
 
@@ -211,21 +221,53 @@ class PolicyManagerImpl : public PolicyManager {
   AppIdURL RetrySequenceUrl(const struct RetrySequenceURL& rs,
                             const EndpointUrls& urls) const OVERRIDE;
 
+  /**
+   * @brief  Checks, if SDL needs to update it's policy table section
+             "external_consent_status"
+   * @param  ExternalConsent status
+   * @return true if such check is needed, false - if not.
+   */
+  bool IsNeedToUpdateExternalConsentStatus(
+      const ExternalConsentStatus& status) const;
+
+  /**
+   * @brief Gets customer connectivity settings status
+   * @return ExternalConsent status
+   */
+  bool SetExternalConsentStatus(const ExternalConsentStatus& status) OVERRIDE;
+  ExternalConsentStatus GetExternalConsentStatus() OVERRIDE;
+
  protected:
   virtual utils::SharedPtr<policy_table::Table> Parse(
       const BinaryMessage& pt_content);
 
  private:
   void CheckTriggers();
-  /*
-   * @brief Checks policy table update along with current data for any changes
-   * in assigned functional group list of application
-   *
-   * @param Policy table update struct
+
+  /**
+   * @brief Compares current applications policies to the updated one and
+   * returns apporopriate result codes per application, which that are being
+   * processed by sending notification to applications registered and to the
+   * system
+   * @param update Shared pointer to policy table udpate
+   * @param snapshot Shared pointer to current copy of policy table
+   * @return Collection per-application results
    */
-  void CheckPermissionsChanges(
+  CheckAppPolicyResults CheckPermissionsChanges(
       const utils::SharedPtr<policy_table::Table> update,
       const utils::SharedPtr<policy_table::Table> snapshot);
+
+  /**
+   * @brief Processes results from policy table update analysis done by
+   * CheckPermissionsChanges() by sending OnPermissionChange and
+   * OnAppPermissionChanged notifications
+   * @param results Collection of per-application results
+   * @param app_policies Reference to updated application policies section as
+   * a data source for generating notifications data
+   */
+  void ProcessAppPolicyCheckResults(
+      const CheckAppPolicyResults& results,
+      const policy_table::ApplicationPolicies& app_policies);
 
   /**
    * @brief Fill structure to be sent with OnPermissionsChanged notification
@@ -303,13 +345,120 @@ class PolicyManagerImpl : public PolicyManager {
   bool IsPTValid(utils::SharedPtr<policy_table::Table> policy_table,
                  policy_table::PolicyTableType type) const;
 
+  /**
+   * @brief Notify application about its permissions changes by preparing and
+   * sending OnPermissionsChanged notification
+   * @param policy_app_id Application id to send notification to
+   * @param app_group_permissons Current permissions for groups assigned to
+   * application
+   */
+  void NotifyPermissionsChanges(
+      const std::string& policy_app_id,
+      const std::vector<FunctionalGroupPermission>& app_group_permissions);
+
+  /**
+   * @brief Processes updated ExternalConsent status received via
+   * OnAppPermissionConsent
+   * notification by updating user consents and ExternalConsent consents for
+   * registered and
+   * known before by policy table (must have any user consent records)
+   * @param groups_by_status Collection of ExternalConsent entities with their
+   * statuses
+   * @param processing_policy Defines whether consents timestamps must be
+   * considered or external consents take over
+   */
+  void ProcessExternalConsentStatusUpdate(
+      const GroupsByExternalConsentStatus& groups_by_status,
+      const ConsentProcessingPolicy processing_policy);
+
+  /**
+   * @brief Processes ExternalConsent status for application registered
+   * afterward, so its
+   * user consents (if any) and ExternalConsent consents (if any) will be
+   * updated
+   * appropiately to current ExternalConsent status stored by policy table
+   * @param application_id Application id
+   * @param processing_policy Defines whether consents timestamps must be
+   * considered or external consents take over
+   */
+  void ProcessExternalConsentStatusForApp(
+      const std::string& application_id,
+      const ConsentProcessingPolicy processing_policy);
+  /**
+   * @brief Directly updates user consent and ExternalConsent consents (if any)
+   * for
+   * application if it has assigned any of group from allowed or disallowed
+   * lists
+   * @param device_id Device id which is linked to application id
+   * @param application_id Application id
+   * @param allowed_groups List of group names allowed by current
+   * ExternalConsent status
+   * @param disallowed_groups List of group names disallwed by current
+   * ExternalConsent status
+   * @param processing_policy Defines whether consents timestamps have to be
+   * considered or external consents take over
+   */
+  void UpdateAppConsentWithExternalConsent(
+      const std::string& device_id,
+      const std::string& application_id,
+      const GroupsNames& allowed_groups,
+      const GroupsNames& disallowed_groups,
+      const ConsentProcessingPolicy processing_policy);
+
+  typedef policy_table::ApplicationPolicies::value_type AppPoliciesValueType;
+
+  /**
+   * @brief Notifies system by sending OnAppPermissionChanged notification
+   * @param app_policy Reference to application policy
+   */
+  void NotifySystem(const AppPoliciesValueType& app_policy) const;
+
+  /**
+   * @brief Sends OnPermissionChange notification to application if its
+   * currently registered
+   * @param app_policy Reference to application policy
+   */
+  void SendPermissionsToApp(const AppPoliciesValueType& app_policy);
+
+  /**
+   * @brief Gets groups names from collection of groups permissions
+   * @param app_group_permissions Collection of groups permissions
+   * @return Collection of group names
+   */
+  policy_table::Strings GetGroupsNames(
+      const std::vector<FunctionalGroupPermission>& app_group_permissions)
+      const;
+
+  /**
+   * @brief Calculates consents for groups based on mapped ExternalConsent
+   * entities statuses
+   * and groups containers where entities have been found
+   * @param groups_by_external_consent ExternalConsent entities mapped to
+   * functional groups names and
+   * their containters where this entity has been found
+   * @param out_allowed_groups List of groups allowed by ExternalConsent status
+   * @param out_disallowed_groups List of groups disallowed by ExternalConsent
+   * status
+   */
+  void CalculateGroupsConsentFromExternalConsent(
+      const GroupsByExternalConsentStatus& groups_by_external_consent,
+      GroupsNames& out_allowed_groups,
+      GroupsNames& out_disallowed_groups) const;
+
   PolicyListener* listener_;
 
   UpdateStatusManager update_status_manager_;
   CacheManagerInterfaceSPtr cache_;
   sync_primitives::Lock apps_registration_lock_;
   sync_primitives::Lock app_permissions_diff_lock_;
-  std::map<std::string, AppPermissions> app_permissions_diff_;
+
+  /**
+   * @brief Collection of parameters to be reported to the system with
+   * SDL.ActivateApp response or OnAppPermissionsChanged notification
+   * Being set during policy table update processing
+   */
+  typedef std::map<std::string, AppPermissions> PendingPermissions;
+  PendingPermissions app_permissions_diff_;
 
   /**
    * Timeout to wait response with UpdatePT
@@ -348,6 +497,10 @@ class PolicyManagerImpl : public PolicyManager {
    */
   RetrySequenceURL retry_sequence_url_;
   friend struct ProccessAppGroups;
+
+  bool wrong_ptu_update_received_;
+  bool send_on_update_sent_out_;
+  bool trigger_ptu_;
 };
 
 }  // namespace policy

@@ -43,6 +43,7 @@
 #include "utils/gen_hash.h"
 #include "policy/sql_pt_representation.h"
 #include "policy/sql_wrapper.h"
+#include "policy/sql_pt_ext_queries.h"
 #include "policy/sql_pt_queries.h"
 #include "policy/policy_helper.h"
 #include "policy/cache_manager.h"
@@ -51,6 +52,8 @@
 namespace policy {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "Policy")
+
+namespace dbms = utils::dbms;
 
 namespace {
 template <typename T, typename K>
@@ -69,6 +72,10 @@ const char* kDatabaseName = "policy.db";
 #else   // CUSTOMER_PASA
 const char* kDatabaseName = "policy";
 #endif  // CUSTOMER_PASA
+
+const std::string kExternalConsentEntitiesTypeStringOn = "ON";
+const std::string kExternalConsentEntitiesTypeStringOff = "OFF";
+
 }  // namespace
 
 SQLPTRepresentation::SQLPTRepresentation()
@@ -617,19 +624,32 @@ bool SQLPTRepresentation::GatherFunctionalGroupings(
     LOG4CXX_WARN(logger_, "Incorrect select from functional_groupings");
     return false;
   }
+
   utils::dbms::SQLQuery rpcs(db());
   if (!rpcs.Prepare(sql_pt::kSelectAllRpcs)) {
     LOG4CXX_WARN(logger_, "Incorrect select all from rpc");
     return false;
   }
 
+  utils::dbms::SQLQuery external_consent_entities(db());
+  if (!external_consent_entities.Prepare(
+          sql_pt::kSelectExternalConsentEntities)) {
+    LOG4CXX_WARN(logger_,
+                 "Incorrect select statement for 'external_consent_entities'.");
+    return false;
+  }
+
   while (func_group.Next()) {
     policy_table::Rpcs rpcs_tbl;
+
     if (!func_group.IsNull(2)) {
       *rpcs_tbl.user_consent_prompt = func_group.GetString(2);
     }
-    int func_id = func_group.GetInteger(0);
-    rpcs.Bind(0, func_id);
+
+    const int group_id = func_group.GetInteger(0);
+
+    rpcs.Bind(0, group_id);
+
     while (rpcs.Next()) {
       if (!rpcs.IsNull(1)) {
         policy_table::HmiLevel level;
@@ -650,10 +670,30 @@ bool SQLPTRepresentation::GatherFunctionalGroupings(
         }
       }
     }
+
+    rpcs.Reset();
+
     if (!rpcs_tbl.rpcs.is_initialized()) {
       rpcs_tbl.rpcs.set_to_null();
     }
-    rpcs.Reset();
+
+    // Collecting entities for disallowed_by_external_consent_entities_on/off
+    external_consent_entities.Bind(0, group_id);
+    while (external_consent_entities.Next()) {
+      policy_table::ExternalConsentEntity external_consent_entity(
+          external_consent_entities.GetInteger(0),
+          external_consent_entities.GetInteger(1));
+
+      policy_table::DisallowedByExternalConsentEntities&
+          external_consent_entities_container =
+              kExternalConsentEntitiesTypeStringOn ==
+                      external_consent_entities.GetString(2)
+                  ? *rpcs_tbl.disallowed_by_external_consent_entities_on
+                  : *rpcs_tbl.disallowed_by_external_consent_entities_off;
+
+      external_consent_entities_container.push_back(external_consent_entity);
+    }
+    external_consent_entities.Reset();
     (*groups)[func_group.GetString(1)] = rpcs_tbl;
   }
   return true;
@@ -667,7 +707,21 @@ bool SQLPTRepresentation::GatherConsumerFriendlyMessages(
     LOG4CXX_WARN(logger_, "Incorrect select from consumer_friendly_messages");
     return false;
   }
+
   messages->version = query.GetString(0);
+
+  if (query.Prepare(sql_pt::kCollectFriendlyMsg)) {
+    while (query.Next()) {
+      UserFriendlyMessage msg;
+      msg.message_code = query.GetString(7);
+      std::string language = query.GetString(6);
+
+      (*messages->messages)[msg.message_code].languages[language];
+    }
+  } else {
+    LOG4CXX_WARN(logger_, "Incorrect statement for select friendly messages.");
+  }
+
   return true;
 }
 
@@ -772,32 +826,38 @@ bool SQLPTRepresentation::SaveFunctionalGroupings(
     return false;
   }
 
+  if (!query_delete.Exec(sql_pt::kDeleteExternalConsentEntities)) {
+    LOG4CXX_WARN(logger_, "Incorrect delete from external consent entities.");
+    return false;
+  }
+
   utils::dbms::SQLQuery query(db());
   if (!query.Exec(sql_pt::kDeleteFunctionalGroup)) {
     LOG4CXX_WARN(logger_, "Incorrect delete from seconds between retries.");
     return false;
   }
+
   if (!query.Prepare(sql_pt::kInsertFunctionalGroup)) {
     LOG4CXX_WARN(logger_, "Incorrect insert statement for functional groups");
     return false;
   }
 
-  policy_table::FunctionalGroupings::const_iterator it;
+  policy_table::FunctionalGroupings::const_iterator groups_it;
 
-  for (it = groups.begin(); it != groups.end(); ++it) {
+  for (groups_it = groups.begin(); groups_it != groups.end(); ++groups_it) {
     // Since we uses this id in other tables, we have to be sure
     // that id for certain group will be same in case when
     // we drop records from the table and add them again.
     // That's why we use hash as a primary key insted of
     // simple auto incremental index.
-    const long int id = abs(utils::Djb2HashFromString(it->first));
+    const long int id = abs(utils::Djb2HashFromString(groups_it->first));
     // SQLite's Bind doesn support 'long' type
     // So we need to explicitly cast it to int64_t
     // to avoid ambiguity.
     query.Bind(0, static_cast<int64_t>(id));
-    query.Bind(1, it->first);
-    it->second.user_consent_prompt.is_initialized()
-        ? query.Bind(2, *(it->second.user_consent_prompt))
+    query.Bind(1, groups_it->first);
+    groups_it->second.user_consent_prompt.is_initialized()
+        ? query.Bind(2, *(groups_it->second.user_consent_prompt))
         : query.Bind(2);
 
     if (!query.Exec() || !query.Reset()) {
@@ -805,10 +865,27 @@ bool SQLPTRepresentation::SaveFunctionalGroupings(
       return false;
     }
 
-    if (!SaveRpcs(query.LastInsertId(), it->second.rpcs)) {
+    const int64_t last_group_id = query.LastInsertId();
+
+    if (!SaveRpcs(last_group_id, groups_it->second.rpcs)) {
+      return false;
+    }
+
+    if (!SaveExternalConsentEntities(
+            last_group_id,
+            *groups_it->second.disallowed_by_external_consent_entities_on,
+            kExternalConsentEntitiesTypeOn)) {
+      return false;
+    }
+
+    if (!SaveExternalConsentEntities(
+            last_group_id,
+            *groups_it->second.disallowed_by_external_consent_entities_off,
+            kExternalConsentEntitiesTypeOff)) {
       return false;
     }
   }
+
   return true;
 }
 
@@ -1189,9 +1266,11 @@ bool SQLPTRepresentation::SaveConsumerFriendlyMessages(
   // the policy table. So it won't be changed/updated
   if (messages.messages.is_initialized()) {
     utils::dbms::SQLQuery query(db());
-    if (!query.Exec(sql_pt::kDeleteMessageString)) {
-      LOG4CXX_WARN(logger_, "Incorrect delete from message.");
-      return false;
+    if (!messages.messages->empty()) {
+      if (!query.Exec(sql_pt::kDeleteMessageString)) {
+        LOG4CXX_WARN(logger_, "Incorrect delete from message.");
+        return false;
+      }
     }
 
     if (query.Prepare(sql_pt::kUpdateVersion)) {
@@ -1418,6 +1497,12 @@ bool SQLPTRepresentation::GetInitialAppData(const std::string& app_id,
     LOG4CXX_WARN(logger_, "Incorrect select from app types");
     return false;
   }
+  dbms::SQLQuery module_types(db());
+  if (!module_types.Prepare(sql_pt::kSelectModuleTypes)) {
+    LOG4CXX_WARN(logger_, "Incorrect select from module types");
+    return false;
+  }
+
   app_names.Bind(0, app_id);
   while (app_names.Next()) {
     nicknames->push_back(app_names.GetString(0));
@@ -1428,6 +1513,12 @@ bool SQLPTRepresentation::GetInitialAppData(const std::string& app_id,
     app_types->push_back(app_hmi_types.GetString(0));
   }
   app_hmi_types.Reset();
+  module_types.Bind(0, app_id);
+  while (module_types.Next()) {
+    app_types->push_back(module_types.GetString(0));
+  }
+  module_types.Reset();
+
   return true;
 }
 
@@ -1597,6 +1688,17 @@ bool SQLPTRepresentation::SetDefaultPolicy(const std::string& app_id) {
 
   SetPreloaded(false);
 
+  policy_table::RequestTypes request_types;
+  if (!GatherRequestType(kDefaultId, &request_types) ||
+      !SaveRequestType(app_id, request_types)) {
+    return false;
+  }
+  policy_table::AppHMITypes app_types;
+  if (!GatherAppType(kDefaultId, &app_types) ||
+      !SaveAppType(app_id, app_types)) {
+    return false;
+  }
+
   policy_table::Strings default_groups;
   if (GatherAppGroup(kDefaultId, &default_groups) &&
       SaveAppGroup(app_id, default_groups)) {
@@ -1738,6 +1840,40 @@ void SQLPTRepresentation::SetPreloaded(bool value) {
 }
 
 bool SQLPTRepresentation::SetVINValue(const std::string& value) {
+  return true;
+}
+
+bool SQLPTRepresentation::SaveExternalConsentEntities(
+    const int64_t group_id,
+    const policy_table::DisallowedByExternalConsentEntities& entities,
+    ExternalConsentEntitiesType type) const {
+  utils::dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt_ext::kInsertExternalConsentEntity)) {
+    LOG4CXX_WARN(logger_,
+                 "Incorrect insert statement for external consent entities.");
+    return false;
+  }
+
+  const std::string external_consent_entity_type =
+      kExternalConsentEntitiesTypeOn == type
+          ? kExternalConsentEntitiesTypeStringOn
+          : kExternalConsentEntitiesTypeStringOff;
+
+  policy_table::DisallowedByExternalConsentEntities::const_iterator it_entity =
+      entities.begin();
+  for (; entities.end() != it_entity; ++it_entity) {
+    query.Bind(0, group_id);
+    query.Bind(1, it_entity->entity_type);
+    query.Bind(2, it_entity->entity_id);
+    query.Bind(3, external_consent_entity_type);
+    if (!query.Exec() || !query.Reset()) {
+      LOG4CXX_ERROR(logger_,
+                    "Can't insert '" << external_consent_entity_type
+                                     << "' external consent entity.");
+      return false;
+    }
+  }
+
   return true;
 }
 

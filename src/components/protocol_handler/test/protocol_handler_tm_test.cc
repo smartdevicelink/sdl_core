@@ -1259,7 +1259,7 @@ TEST_F(ProtocolHandlerImplTest, MalformedVerificationDisable) {
   EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
 }
 
-TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification) {
+TEST_F(ProtocolHandlerImplTest, DISABLED_MalformedLimitVerification) {
   const size_t period_msec = 10000;
   const size_t max_messages = 100;
   InitProtocolHandlerImpl(0u, 0u, true, period_msec, max_messages);
@@ -1306,7 +1306,8 @@ TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification) {
   EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
 }
 
-TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification_MalformedStock) {
+TEST_F(ProtocolHandlerImplTest,
+       DISABLED_MalformedLimitVerification_MalformedStock) {
   const size_t period_msec = 10000;
   const size_t max_messages = 100;
   InitProtocolHandlerImpl(0u, 0u, true, period_msec, max_messages);
@@ -1520,7 +1521,8 @@ TEST_F(ProtocolHandlerImplTest,
   protocol_handler_impl->SendEndSession(connection_id, session_id);
 }
 
-TEST_F(ProtocolHandlerImplTest, SendEndServicePrivate_EndSession_MessageSent) {
+TEST_F(ProtocolHandlerImplTest,
+       DISABLED_SendEndServicePrivate_EndSession_MessageSent) {
   // Arrange
   ::utils::SharedPtr<TestAsyncWaiter> waiter =
       utils::MakeShared<TestAsyncWaiter>();
@@ -1638,7 +1640,8 @@ TEST_F(ProtocolHandlerImplTest, SendHeartBeatAck_Successful) {
   EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
 }
 
-TEST_F(ProtocolHandlerImplTest, SendHeartBeatAck_WrongProtocolVersion_NotSent) {
+TEST_F(ProtocolHandlerImplTest,
+       DISABLED_SendHeartBeatAck_WrongProtocolVersion_NotSent) {
   // Arrange
   ::utils::SharedPtr<TestAsyncWaiter> waiter =
       utils::MakeShared<TestAsyncWaiter>();

@@ -61,6 +61,7 @@ class MockPolicyManager : public PolicyManager {
   MOCK_METHOD2(LoadPT,
                bool(const std::string& file, const BinaryMessage& pt_content));
   MOCK_METHOD1(ResetPT, bool(const std::string& file_name));
+  MOCK_METHOD1(GetUpdateUrl, std::string(int service_type));
   MOCK_METHOD2(GetUpdateUrls,
                void(const uint32_t service_type, EndpointUrls& out_end_points));
   MOCK_METHOD2(GetUpdateUrls,
@@ -109,8 +110,9 @@ class MockPolicyManager : public PolicyManager {
   MOCK_METHOD2(SetDeviceInfo,
                void(const std::string& device_id,
                     const policy::DeviceInfo& device_info));
-  MOCK_METHOD1(SetUserConsentForApp,
-               void(const policy::PermissionConsent& permissions));
+  MOCK_METHOD2(SetUserConsentForApp,
+               void(const policy::PermissionConsent& permissions,
+                    const NotificationMode mode));
   MOCK_CONST_METHOD2(GetDefaultHmi,
                      bool(const std::string& policy_app_id,
                           std::string* default_hmi));
@@ -141,8 +143,11 @@ class MockPolicyManager : public PolicyManager {
   MOCK_METHOD1(SendNotificationOnPermissionsUpdated,
                void(const std::string& application_id));
   MOCK_METHOD1(MarkUnpairedDevice, void(const std::string& device_id));
-  MOCK_METHOD1(AddApplication,
-               StatusNotifier(const std::string& application_id));
+  MOCK_METHOD2(
+      AddApplication,
+      StatusNotifier(
+          const std::string& application_id,
+          const rpc::policy_table_interface_base::AppHmiTypes& hmi_types));
   MOCK_METHOD0(CleanupUnpairedDevices, bool());
   MOCK_CONST_METHOD1(CanAppKeepContext, bool(const std::string& app_id));
   MOCK_CONST_METHOD1(CanAppStealFocus, bool(const std::string& app_id));
@@ -154,7 +159,7 @@ class MockPolicyManager : public PolicyManager {
   MOCK_CONST_METHOD1(HeartBeatTimeout, uint32_t(const std::string& app_id));
   MOCK_METHOD1(SaveUpdateStatusRequired, void(bool is_update_needed));
   MOCK_METHOD0(OnAppsSearchStarted, void());
-  MOCK_METHOD0(OnAppsSearchCompleted, void());
+  MOCK_METHOD1(OnAppsSearchCompleted, void(const bool trigger_ptu));
   MOCK_METHOD1(OnAppRegisteredOnMobile,
                void(const std::string& application_id));
   MOCK_CONST_METHOD0(GetLockScreenIconUrl, std::string());
@@ -187,6 +192,10 @@ class MockPolicyManager : public PolicyManager {
   MOCK_CONST_METHOD2(RetrySequenceUrl,
                      AppIdURL(const struct RetrySequenceURL&,
                               const EndpointUrls& urls));
+  MOCK_METHOD1(SetExternalConsentStatus, bool(const ExternalConsentStatus&));
+  MOCK_METHOD0(GetExternalConsentStatus, ExternalConsentStatus());
+  MOCK_CONST_METHOD1(IsNeedToUpdateExternalConsentStatus,
+                     bool(const ExternalConsentStatus&));
 };
 }  // namespace policy_manager_test
 }  // namespace components

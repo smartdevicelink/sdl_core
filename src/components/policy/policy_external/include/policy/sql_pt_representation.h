@@ -182,7 +182,10 @@ class SQLPTRepresentation : public virtual PTRepresentation {
 #ifdef BUILD_TESTS
   uint32_t open_counter_;
 #endif  // BUILD_TESTS
-
+  enum ExternalConsentEntitiesType {
+    kExternalConsentEntitiesTypeOn,
+    kExternalConsentEntitiesTypeOff
+  };
   /**
    * @brief Calculates DB version from current schema
    * @return version
@@ -198,6 +201,10 @@ class SQLPTRepresentation : public virtual PTRepresentation {
   bool SaveLanguage(const std::string& code);
 
   bool is_in_memory;
+  bool SaveExternalConsentEntities(
+      const int64_t group_id,
+      const policy_table::DisallowedByExternalConsentEntities& entities,
+      ExternalConsentEntitiesType type) const;
 };
 }  //  namespace policy
 

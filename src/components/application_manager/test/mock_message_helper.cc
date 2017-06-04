@@ -173,10 +173,18 @@ void MessageHelper::CreateGetVehicleDataRequest(
 
 void MessageHelper::SendGetListOfPermissionsResponse(
     const std::vector<policy::FunctionalGroupPermission>& permissions,
+#ifdef EXTERNAL_PROPRIETARY_MODE
+    const policy::ExternalConsentStatus& external_consent_status,
+#endif  // EXTERNAL_PROPRIETARY_MODE
     uint32_t correlation_id,
     ApplicationManager& app_mngr) {
   MockMessageHelper::message_helper_mock()->SendGetListOfPermissionsResponse(
-      permissions, correlation_id, app_mngr);
+      permissions,
+#ifdef EXTERNAL_PROPRIETARY_MODE
+      external_consent_status,
+#endif  // EXTERNAL_PROPRIETARY_MODE
+      correlation_id,
+      app_mngr);
 }
 
 void MessageHelper::SendOnPermissionsChangeNotification(
@@ -457,6 +465,12 @@ std::string MessageHelper::StringifiedHMILevel(
     const mobile_apis::HMILevel::eType hmi_level) {
   return MockMessageHelper::message_helper_mock()->StringifiedHMILevel(
       hmi_level);
+}
+
+std::string MessageHelper::GetDeviceMacAddressForHandle(
+    const uint32_t device_handle, const ApplicationManager& app_mngr) {
+  return MockMessageHelper::message_helper_mock()->GetDeviceMacAddressForHandle(
+      device_handle, app_mngr);
 }
 
 }  // namespace application_manager

@@ -65,6 +65,7 @@ class ApplicationManager;
 }
 
 namespace policy {
+
 typedef std::vector<uint32_t> AppIds;
 typedef std::vector<uint32_t> DeviceHandles;
 namespace custom_str = utils::custom_string;
@@ -102,11 +103,11 @@ class PolicyHandler : public PolicyHandlerInterface,
 #endif  // EXTERNAL_PROPRIETARY_MODE
   virtual bool GetPriority(const std::string& policy_app_id,
                            std::string* priority) const OVERRIDE;
-  void CheckPermissions(const PTString& app_id,
-                        const PTString& hmi_level,
-                        const PTString& rpc,
-                        const RPCParams& rpc_params,
-                        CheckPermissionResult& result) OVERRIDE;
+  virtual void CheckPermissions(
+      const application_manager::ApplicationSharedPtr app,
+      const PTString& rpc,
+      const RPCParams& rpc_params,
+      CheckPermissionResult& result) OVERRIDE;
 
   uint32_t GetNotificationsNumber(const std::string& priority) const OVERRIDE;
   virtual DeviceConsent GetUserConsentForDevice(
@@ -193,14 +194,32 @@ class PolicyHandler : public PolicyHandlerInterface,
   void SetDeviceInfo(const std::string& device_id,
                      const DeviceInfo& device_info) OVERRIDE;
 
-  /**
-   * @brief Store user-changed permissions consent to DB
-   * @param connection_key Connection key of application or 0, if permissions
-   * should be applied to all applications
-   * @param permissions User-changed group permissions consent
-   */
+/**
+ * @brief Store user-changed permissions consent to DB
+ * @param connection_key Connection key of application or 0, if permissions
+ * should be applied to all applications
+ * @param permissions User-changed group permissions consent
+ */
+
+/**
+ * @brief Processes permissions changes received from system via
+ * OnAppPermissionConsent notification
+ * @param connection_key Connection key of application, 0 if no key has been
+ * provided by notification
+ * @param permissions Structure containing group permissions changes
+ * @param external_consent_status Structure containig customer connectivity
+ * settings
+ * changes
+ */
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  void OnAppPermissionConsent(
+      const uint32_t connection_key,
+      const PermissionConsent& permissions,
+      const ExternalConsentStatus& external_consent_status) OVERRIDE;
+#else
   void OnAppPermissionConsent(const uint32_t connection_key,
                               const PermissionConsent& permissions) OVERRIDE;
+#endif
 
   /**
    * @brief Get appropriate message parameters and send them with response
@@ -331,7 +350,9 @@ class PolicyHandler : public PolicyHandlerInterface,
    * @param application_id The policy aplication id.
    ** @return function that will notify update manager about new application
    */
-  StatusNotifier AddApplication(const std::string& application_id) OVERRIDE;
+  StatusNotifier AddApplication(
+      const std::string& application_id,
+      const rpc::policy_table_interface_base::AppHmiTypes& hmi_types) OVERRIDE;
 
   /**
    * Checks whether application is revoked
@@ -366,7 +387,7 @@ class PolicyHandler : public PolicyHandlerInterface,
   /**
    * @brief Handler on applications search completed
    */
-  void OnAppsSearchCompleted() OVERRIDE;
+  void OnAppsSearchCompleted(const bool trigger_ptu) OVERRIDE;
 
   /**
    * @brief OnAppRegisteredOnMobile allows to handle event when application were
@@ -424,6 +445,10 @@ class PolicyHandler : public PolicyHandlerInterface,
   void SetPolicyManager(utils::SharedPtr<PolicyManager> pm) {
     policy_manager_ = pm;
   }
+
+  AppIds& last_used_app_ids() {
+    return last_used_app_ids_;
+  }
 #endif  // BUILD_TESTS
 
 #ifdef ENABLE_SECURITY
@@ -431,6 +456,8 @@ class PolicyHandler : public PolicyHandlerInterface,
 #endif  // ENABLE_SECURITY
 
   const PolicySettings& get_settings() const OVERRIDE;
+
+  virtual void OnPTUFinished(const bool ptu_result) OVERRIDE;
 
  protected:
   /**
@@ -459,15 +486,29 @@ class PolicyHandler : public PolicyHandlerInterface,
    */
   bool CheckStealFocus(const std::string& policy_app_id) const;
 
-  /**
-   * @brief OnAppPermissionConsentInternal reacts on permission changing
-   *
-   * @param connection_key connection key
-   *
-   * @param permissions new permissions.
-   */
-  void OnAppPermissionConsentInternal(const uint32_t connection_key,
-                                      PermissionConsent& permissions) OVERRIDE;
+/**
+ * @brief Processes data received via OnAppPermissionChanged notification
+ * from. Being started asyncronously from AppPermissionDelegate class.
+ * Sets updated permissions and ExternalConsent for registered applications
+ * and
+ * applications which already have appropriate group assigned which related to
+ * devices already known by policy
+ * @param connection_key Connection key of application, 0 if no key has been
+ * provided within notification
+ * @param external_consent_status Customer connectivity settings changes to
+ * process
+ * @param permissions Permissions changes to process
+ */
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  void OnAppPermissionConsentInternal(
+      const uint32_t connection_key,
+      const ExternalConsentStatus& external_consent_status,
+      PermissionConsent& out_permissions) OVERRIDE;
+#else
+  void OnAppPermissionConsentInternal(
+      const uint32_t connection_key,
+      PermissionConsent& out_permissions) OVERRIDE;
+#endif
 
   /**
    * @brief Sets days after epoch on successful policy update
@@ -536,7 +577,35 @@ class PolicyHandler : public PolicyHandlerInterface,
   void OnEmptyCertificateArrived() const;
 #endif  // EXTERNAL_PROPRIETARY_MODE
   bool SaveSnapshot(const BinaryMessage& pt_string, std::string& snap_path);
+
+  /**
+   * @brief Collects permissions for all currently registered applications on
+   * all devices
+   * @return consolidated permissions list or empty list if no
+   * applications/devices currently present
+   */
+  std::vector<FunctionalGroupPermission> CollectRegisteredAppsPermissions();
+
+  /**
+   * @brief Collects permissions for application with certain connection key
+   * @param connection_key Connection key of application to look for
+   * @return list of application permissions or empty list if no such
+   * application found
+   */
+  std::vector<FunctionalGroupPermission> CollectAppPermissions(
+      const uint32_t connection_key);
+
+ private:
   static const std::string kLibrary;
+
+  /**
+ * @brief Collects currently registered applications ids linked to their
+ * device id
+ * @param out_links Collection of device_id-to-app_id links
+ */
+  void GetRegisteredLinks(std::map<std::string, std::string>& out_links) const;
+
+ private:
   mutable sync_primitives::RWLock policy_manager_lock_;
   utils::SharedPtr<PolicyManager> policy_manager_;
   void* dl_handle_;
@@ -556,8 +625,9 @@ class PolicyHandler : public PolicyHandlerInterface,
   mutable sync_primitives::Lock listeners_lock_;
 
   /**
-   * @brief Application-to-device map is used for getting/setting user consents
-   * for all apps
+   * @brief Application-to-device links are used for collecting their current
+   * consents to provide for HMI request and process response with possible
+   * changes done by user
    */
   std::map<std::string, std::string> app_to_device_link_;
 

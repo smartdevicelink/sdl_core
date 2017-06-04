@@ -493,7 +493,7 @@ bool CommandRequestImpl::CheckAllowedParameters() {
     return true;
   }
 
-  const ApplicationConstSharedPtr app =
+  const ApplicationSharedPtr app =
       application_manager_.application(connection_key());
   if (!app) {
     LOG4CXX_ERROR(logger_,
@@ -518,9 +518,9 @@ bool CommandRequestImpl::CheckAllowedParameters() {
 
   mobile_apis::Result::eType check_result =
       application_manager_.CheckPolicyPermissions(
-          app->policy_app_id(),
-          app->hmi_level(),
-          static_cast<mobile_api::FunctionID::eType>(function_id()),
+          app,
+          MessageHelper::StringifiedFunctionID(
+              static_cast<mobile_api::FunctionID::eType>(function_id())),
           params,
           &parameters_permissions_);
 

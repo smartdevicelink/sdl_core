@@ -137,6 +137,8 @@ class MessageHelper {
   static std::string MobileResultToString(
       mobile_apis::Result::eType mobile_result);
 
+  static std::string GetDeviceMacAddressForHandle(
+      const uint32_t device_handle, const ApplicationManager& app_mngr);
   /**
    * @brief Converts string to mobile Result enum value
    * @param mobile_result stringified value
@@ -359,15 +361,24 @@ class MessageHelper {
       uint32_t correlation_id,
       ApplicationManager& app_mngr);
 
-  /**
-   * @brief Send GetListOfPermissions response to HMI
-   * @param permissions Array of groups permissions
-   * @param correlation_id Correlation id of request
-   */
+/**
+ * @brief Send GetListOfPermissions response to HMI
+ * @param permissions Array of groups permissions
+ * @param external_consent_status External user consent status
+ * @param correlation_id Correlation id of request
+ */
+#ifdef EXTERNAL_PROPRIETARY_MODE
   static void SendGetListOfPermissionsResponse(
       const std::vector<policy::FunctionalGroupPermission>& permissions,
-      uint32_t correlation_id,
+      const policy::ExternalConsentStatus& external_consent_status,
+      const uint32_t correlation_id,
       ApplicationManager& app_mngr);
+#else
+  static void SendGetListOfPermissionsResponse(
+      const std::vector<policy::FunctionalGroupPermission>& permissions,
+      const uint32_t correlation_id,
+      ApplicationManager& app_mngr);
+#endif  // EXTERNAL_PROPRIETARY_MODE
 
   /*
    * @brief Sends notification to HMI to start video streaming
@@ -518,6 +529,18 @@ class MessageHelper {
       int32_t function_id,
       const uint32_t correlation_id,
       int32_t result_code);
+
+  /**
+    * @brief Verify image and add image file full path
+    * and add path, although the image doesn't exist
+    * @param SmartObject with image
+    * @param app current application
+    * @return verification result
+    */
+  static mobile_apis::Result::eType VerifyImageApplyPath(
+      smart_objects::SmartObject& image,
+      ApplicationConstSharedPtr app,
+      ApplicationManager& app_mngr);
 
   /*
    * @brief Verify image and add image file full path

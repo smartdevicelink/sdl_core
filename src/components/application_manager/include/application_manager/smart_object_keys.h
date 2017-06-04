@@ -310,6 +310,28 @@ extern const char* is_suscribed;
 extern const char* message_data;
 
 extern const char* delivery_mode;
+
+extern const char* audio_streaming_indicator;
+
+// keys for default parameters loaded from hmi_capabilities.json:
+extern const char* const keyboard_properties_default;
+extern const char* const language_default;
+extern const char* const keyboard_layout_default;
+extern const char* const keypress_mode_default;
+
+// keys for supported parameters loaded from hmi_capabilities.json:
+extern const char* const keyboard_properties_supported;
+extern const char* const language_supported;
+extern const char* const keyboard_layout_supported;
+extern const char* const keypress_mode_supported;
+extern const char* const limited_characters_list_supported;
+extern const char* const auto_complete_text_supported;
+extern const char* const entity_type;
+extern const char* const entity_id;
+extern const char* const status;
+extern const char* const external_consent_status;
+extern const char* const consented_functions;
+extern const char* const source;
 }  // namespace strings
 
 namespace json {

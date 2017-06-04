@@ -487,7 +487,7 @@ class StateControllerImplTest : public ::testing::Test {
   ApplicationType AppType(uint32_t app_id) {
     // TODO(AOleynik): Currently there is ongoing discussion regarding mixed
     // application properties, i.e. is_media_application flag from RAI and
-    // AppHMITypes (NAVIGATION, etc.). Most likely logic should be changed
+    // AppHmiTypes (NAVIGATION, etc.). Most likely logic should be changed
     // after conclusion on APPLINK-20231
     std::vector<am::ApplicationSharedPtr>::iterator app = std::find_if(
         applications_list_.begin(),

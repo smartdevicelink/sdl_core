@@ -65,8 +65,10 @@ class MockPolicyManager : public PolicyManager {
                void(const std::string& service_type,
                     EndpointUrls& out_end_points));
   MOCK_METHOD0(RequestPTUpdate, bool());
-  MOCK_METHOD5(CheckPermissions,
-               void(const PTString& app_id,
+
+  MOCK_METHOD6(CheckPermissions,
+               void(const PTString& device_id,
+                    const PTString& app_id,
                     const PTString& hmi_level,
                     const PTString& rpc,
                     const RPCParams& rpc_params,

@@ -38,6 +38,7 @@
 
 #include <set>
 #include <string>
+#include <strings.h>
 #include <algorithm>
 #include <utility>
 #include <map>
@@ -69,6 +70,8 @@ namespace {
 typedef std::map<std::string, hmi_apis::Common_AppPriority::eType>
     CommonAppPriorityMap;
 
+typedef std::vector<policy::FunctionalGroupPermission> PermissionsList;
+
 CommonAppPriorityMap app_priority_values = {
     {"NORMAL", hmi_apis::Common_AppPriority::NORMAL},
     {"COMMUNICATION", hmi_apis::Common_AppPriority::COMMUNICATION},
@@ -96,41 +99,96 @@ bool ValidateSoftButtons(smart_objects::SmartObject& soft_buttons) {
     }
   }
   return true;
-}  // namespace
 }
+
+struct GroupsAppender
+    : std::unary_function<void, const PermissionsList::value_type&> {
+  GroupsAppender(smart_objects::SmartObject& groups)
+      : groups_(groups), index_(0) {}
+
+  void operator()(const PermissionsList::value_type& item) {
+    using namespace smart_objects;
+    using namespace policy;
+    groups_[index_] = SmartObject(SmartType_Map);
+
+    SmartObject& group = groups_[index_];
+    group[strings::name] = item.group_alias;
+    group[strings::id] = item.group_id;
+    GroupConsent permission_state = item.state;
+    // If state undefined, 'allowed' parameter should be absent
+    if (kGroupUndefined != permission_state) {
+      group["allowed"] = kGroupAllowed == permission_state;
+    }
+    ++index_;
+  }
+
+ private:
+  smart_objects::SmartObject& groups_;
+  int32_t index_;
+};
+
+#ifdef EXTERNAL_PROPRIETARY_MODE
+struct ExternalConsentStatusAppender
+    : std::unary_function<void,
+                          const policy::ExternalConsentStatus::value_type&> {
+  ExternalConsentStatusAppender(smart_objects::SmartObject& status)
+      : status_(status), index_(0) {}
+
+  void operator()(const policy::ExternalConsentStatus::value_type& item) {
+    using namespace smart_objects;
+    using namespace policy;
+    using namespace hmi_apis;
+    status_[index_] = SmartObject(SmartType_Map);
+
+    SmartObject& external_consent_status = status_[index_];
+    external_consent_status[strings::entity_type] = item.entity_type_;
+    external_consent_status[strings::entity_id] = item.entity_id_;
+    external_consent_status[strings::status] =
+        policy::kStatusOn == item.status_
+            ? static_cast<int32_t>(Common_EntityStatus::ON)
+            : static_cast<int32_t>(Common_EntityStatus::OFF);
+    ++index_;
+  }
+
+ private:
+  smart_objects::SmartObject& status_;
+  int32_t index_;
+};
+#endif  // EXTERNAL_PROPRIETARY_MODE
+
+}  // namespace
+
 std::pair<std::string, VehicleDataType> kVehicleDataInitializer[] = {
-    std::make_pair(strings::gps, VehicleDataType::GPS),
-    std::make_pair(strings::speed, VehicleDataType::SPEED),
-    std::make_pair(strings::rpm, VehicleDataType::RPM),
-    std::make_pair(strings::fuel_level, VehicleDataType::FUELLEVEL),
-    std::make_pair(strings::fuel_level_state, VehicleDataType::FUELLEVEL_STATE),
-    std::make_pair(strings::instant_fuel_consumption,
-                   VehicleDataType::FUELCONSUMPTION),
-    std::make_pair(strings::external_temp, VehicleDataType::EXTERNTEMP),
-    std::make_pair(strings::vin, VehicleDataType::VIN),
-    std::make_pair(strings::prndl, VehicleDataType::PRNDL),
-    std::make_pair(strings::tire_pressure, VehicleDataType::TIREPRESSURE),
-    std::make_pair(strings::odometer, VehicleDataType::ODOMETER),
-    std::make_pair(strings::belt_status, VehicleDataType::BELTSTATUS),
-    std::make_pair(strings::body_information, VehicleDataType::BODYINFO),
-    std::make_pair(strings::device_status, VehicleDataType::DEVICESTATUS),
-    std::make_pair(strings::driver_braking, VehicleDataType::BRAKING),
-    std::make_pair(strings::wiper_status, VehicleDataType::WIPERSTATUS),
-    std::make_pair(strings::head_lamp_status, VehicleDataType::HEADLAMPSTATUS),
-    std::make_pair(strings::e_call_info, VehicleDataType::ECALLINFO),
-    std::make_pair(strings::airbag_status, VehicleDataType::AIRBAGSTATUS),
-    std::make_pair(strings::emergency_event, VehicleDataType::EMERGENCYEVENT),
-    std::make_pair(strings::cluster_mode_status,
-                   VehicleDataType::CLUSTERMODESTATUS),
-    std::make_pair(strings::my_key, VehicleDataType::MYKEY),
+    std::make_pair(strings::gps, GPS),
+    std::make_pair(strings::speed, SPEED),
+    std::make_pair(strings::rpm, RPM),
+    std::make_pair(strings::fuel_level, FUELLEVEL),
+    std::make_pair(strings::fuel_level_state, FUELLEVEL_STATE),
+    std::make_pair(strings::instant_fuel_consumption, FUELCONSUMPTION),
+    std::make_pair(strings::external_temp, EXTERNTEMP),
+    std::make_pair(strings::vin, VIN),
+    std::make_pair(strings::prndl, PRNDL),
+    std::make_pair(strings::tire_pressure, TIREPRESSURE),
+    std::make_pair(strings::odometer, ODOMETER),
+    std::make_pair(strings::belt_status, BELTSTATUS),
+    std::make_pair(strings::body_information, BODYINFO),
+    std::make_pair(strings::device_status, DEVICESTATUS),
+    std::make_pair(strings::driver_braking, BRAKING),
+    std::make_pair(strings::wiper_status, WIPERSTATUS),
+    std::make_pair(strings::head_lamp_status, HEADLAMPSTATUS),
+    std::make_pair(strings::e_call_info, ECALLINFO),
+    std::make_pair(strings::airbag_status, AIRBAGSTATUS),
+    std::make_pair(strings::emergency_event, EMERGENCYEVENT),
+    std::make_pair(strings::cluster_mode_status, CLUSTERMODESTATUS),
+    std::make_pair(strings::my_key, MYKEY),
     /*
      NOT DEFINED in mobile API
-     std::make_pair(strings::gps, VehicleDataType::BATTVOLTAGE),
+     std::make_pair(strings::gps,
+     BATTVOLTAGE),
      */
-    std::make_pair(strings::engine_torque, VehicleDataType::ENGINETORQUE),
-    std::make_pair(strings::acc_pedal_pos, VehicleDataType::ACCPEDAL),
-    std::make_pair(strings::steering_wheel_angle,
-                   VehicleDataType::STEERINGWHEEL),
+    std::make_pair(strings::engine_torque, ENGINETORQUE),
+    std::make_pair(strings::acc_pedal_pos, ACCPEDAL),
+    std::make_pair(strings::steering_wheel_angle, STEERINGWHEEL),
 };
 
 const VehicleData MessageHelper::vehicle_data_(
@@ -198,17 +256,6 @@ const uint32_t MessageHelper::GetPriorityCode(const std::string& priority) {
   return static_cast<uint32_t>(hmi_apis::Common_AppPriority::INVALID_ENUM);
 }
 
-std::string MessageHelper::CommonLanguageToString(
-    hmi_apis::Common_Language::eType language) {
-  using namespace NsSmartDeviceLink::NsSmartObjects;
-  const char* str = 0;
-  if (EnumConversionHelper<hmi_apis::Common_Language::eType>::EnumToCString(
-          language, &str)) {
-    return str ? str : "";
-  }
-  return std::string();
-}
-
 hmi_apis::Common_Language::eType MessageHelper::CommonLanguageFromString(
     const std::string& language) {
   using namespace NsSmartDeviceLink::NsSmartObjects;
@@ -218,6 +265,26 @@ hmi_apis::Common_Language::eType MessageHelper::CommonLanguageFromString(
     return value;
   }
   return hmi_apis::Common_Language::INVALID_ENUM;
+}
+
+std::string MessageHelper::GetDeviceMacAddressForHandle(
+    const uint32_t device_handle, const ApplicationManager& app_mngr) {
+  std::string device_mac_address = "";
+  app_mngr.connection_handler().get_session_observer().GetDataOnDeviceID(
+      device_handle, NULL, NULL, &device_mac_address);
+  LOG4CXX_DEBUG(logger_, "result : " << device_handle);
+  return device_mac_address;
+}
+
+std::string MessageHelper::CommonLanguageToString(
+    hmi_apis::Common_Language::eType language) {
+  using namespace NsSmartDeviceLink::NsSmartObjects;
+  const char* str = 0;
+  if (EnumConversionHelper<hmi_apis::Common_Language::eType>::EnumToCString(
+          language, &str)) {
+    return str ? str : "";
+  }
+  return std::string();
 }
 
 smart_objects::SmartObjectSPtr MessageHelper::CreateRequestObject(
@@ -1583,46 +1650,79 @@ void MessageHelper::SendGetUserFriendlyMessageResponse(
   app_mngr.ManageHMICommand(message);
 }
 
+#ifdef EXTERNAL_PROPRIETARY_MODE
 void MessageHelper::SendGetListOfPermissionsResponse(
     const std::vector<policy::FunctionalGroupPermission>& permissions,
-    const uint32_t correlation_id,
+    const policy::ExternalConsentStatus& external_consent_status,
+    uint32_t correlation_id,
     ApplicationManager& app_mngr) {
-  smart_objects::SmartObject message(smart_objects::SmartType_Map);
+  using namespace smart_objects;
+  using namespace hmi_apis;
 
-  message[strings::params][strings::function_id] =
-      hmi_apis::FunctionID::SDL_GetListOfPermissions;
-  message[strings::params][strings::message_type] = MessageType::kResponse;
-  message[strings::params][strings::correlation_id] = correlation_id;
-  message[strings::params][hmi_response::code] = 0;
+  SmartObjectSPtr message = utils::MakeShared<SmartObject>(SmartType_Map);
+  DCHECK_OR_RETURN_VOID(message);
+
+  SmartObject& params = (*message)[strings::params];
+
+  params[strings::function_id] = FunctionID::SDL_GetListOfPermissions;
+  params[strings::message_type] = MessageType::kResponse;
+  params[strings::correlation_id] = correlation_id;
+  params[hmi_response::code] = static_cast<int32_t>(Common_Result::SUCCESS);
+
+  SmartObject& msg_params = (*message)[strings::msg_params];
 
   const std::string allowed_functions = "allowedFunctions";
-  message[strings::msg_params][allowed_functions] =
-      smart_objects::SmartObject(smart_objects::SmartType_Array);
+  msg_params[allowed_functions] = SmartObject(SmartType_Array);
 
-  smart_objects::SmartObject& allowed_functions_array =
-      message[strings::msg_params][allowed_functions];
+  SmartObject& allowed_functions_array = msg_params[allowed_functions];
 
-  std::vector<policy::FunctionalGroupPermission>::const_iterator it =
-      permissions.begin();
-  std::vector<policy::FunctionalGroupPermission>::const_iterator it_end =
-      permissions.end();
-  for (uint32_t index = 0; it != it_end; ++it, ++index) {
-    allowed_functions_array[index] =
-        smart_objects::SmartObject(smart_objects::SmartType_Map);
+  GroupsAppender groups_appender(allowed_functions_array);
+  std::for_each(permissions.begin(), permissions.end(), groups_appender);
 
-    smart_objects::SmartObject& item = allowed_functions_array[index];
-    item[strings::name] = (*it).group_alias;
-    item[strings::id] = (*it).group_id;
-    policy::GroupConsent permission_state = (*it).state;
-    // If state undefined, 'allowed' parameter should be absent
-    if (policy::kGroupUndefined != permission_state) {
-      item["allowed"] = policy::kGroupAllowed == permission_state;
-    }
-  }
+  const std::string external_consent_status_key = "externalConsentStatus";
+  msg_params[external_consent_status_key] = SmartObject(SmartType_Array);
 
-  app_mngr.ManageHMICommand(
-      utils::MakeShared<smart_objects::SmartObject>(message));
+  SmartObject& external_consent_status_array =
+      msg_params[external_consent_status_key];
+
+  ExternalConsentStatusAppender external_consent_status_appender(
+      external_consent_status_array);
+  std::for_each(external_consent_status.begin(),
+                external_consent_status.end(),
+                external_consent_status_appender);
+
+  app_mngr.ManageHMICommand(message);
 }
+#else
+void MessageHelper::SendGetListOfPermissionsResponse(
+    const std::vector<policy::FunctionalGroupPermission>& permissions,
+    uint32_t correlation_id,
+    ApplicationManager& app_mngr) {
+  using namespace smart_objects;
+  using namespace hmi_apis;
+
+  SmartObjectSPtr message = utils::MakeShared<SmartObject>(SmartType_Map);
+  DCHECK_OR_RETURN_VOID(message);
+
+  SmartObject& params = (*message)[strings::params];
+
+  params[strings::function_id] = FunctionID::SDL_GetListOfPermissions;
+  params[strings::message_type] = MessageType::kResponse;
+  params[strings::correlation_id] = correlation_id;
+  params[hmi_response::code] = static_cast<int32_t>(Common_Result::SUCCESS);
+
+  SmartObject& msg_params = (*message)[strings::msg_params];
+
+  const std::string allowed_functions = "allowedFunctions";
+  msg_params[allowed_functions] = SmartObject(SmartType_Array);
+
+  SmartObject& allowed_functions_array = msg_params[allowed_functions];
+
+  GroupsAppender groups_appender(allowed_functions_array);
+  std::for_each(permissions.begin(), permissions.end(), groups_appender);
+  app_mngr.ManageHMICommand(message);
+}
+#endif  // EXTERNAL_PROPRIETARY_MODE
 
 smart_objects::SmartObjectSPtr MessageHelper::CreateNegativeResponse(
     uint32_t connection_key,
@@ -2223,7 +2323,7 @@ mobile_apis::Result::eType MessageHelper::VerifyImageFiles(
   return mobile_apis::Result::SUCCESS;
 }
 
-mobile_apis::Result::eType MessageHelper::VerifyImage(
+mobile_apis::Result::eType MessageHelper::VerifyImageApplyPath(
     smart_objects::SmartObject& image,
     ApplicationConstSharedPtr app,
     ApplicationManager& app_mngr) {
@@ -2267,13 +2367,31 @@ mobile_apis::Result::eType MessageHelper::VerifyImage(
     full_file_path += file_name;
   }
 
+  image[strings::value] = full_file_path;
   if (!file_system::FileExists(full_file_path)) {
     return mobile_apis::Result::INVALID_DATA;
   }
 
-  image[strings::value] = full_file_path;
-
   return mobile_apis::Result::SUCCESS;
+}
+
+mobile_apis::Result::eType MessageHelper::VerifyImage(
+    smart_objects::SmartObject& image,
+    ApplicationConstSharedPtr app,
+    ApplicationManager& app_mngr) {
+  smart_objects::SmartObject temp_image = image;
+  const uint32_t image_type = image[strings::image_type].asUInt();
+  const mobile_apis::ImageType::eType type =
+      static_cast<mobile_apis::ImageType::eType>(image_type);
+
+  const mobile_apis::Result::eType result =
+      VerifyImageApplyPath(temp_image, app, app_mngr);
+  if ((mobile_apis::Result::SUCCESS == result) &&
+      (mobile_apis::ImageType::DYNAMIC == type)) {
+    image[strings::value] = temp_image[strings::value];
+  }
+
+  return result;
 }
 
 mobile_apis::Result::eType MessageHelper::VerifyImageVrHelpItems(

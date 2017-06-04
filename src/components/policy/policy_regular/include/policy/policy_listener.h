@@ -75,6 +75,9 @@ class PolicyListener {
    *
    * @param pt_string the snapshot
    *
+   * @param retry_seconds retry sequence timeouts.
+   *
+   * @param timeout_exceed timeout.
    */
   virtual void OnSnapshotCreated(const BinaryMessage& pt_string) = 0;
 
@@ -86,6 +89,15 @@ class PolicyListener {
    */
   virtual void OnDeviceConsentChanged(const std::string& device_id,
                                       bool is_allowed) = 0;
+
+  /**
+   * @brief Sends OnAppPermissionsChanged notification to HMI
+   * @param permissions contains parameter for OnAppPermisionChanged
+   * @param policy_app_id contains policy application id
+   */
+  virtual void SendOnAppPermissionsChanged(
+      const AppPermissions& permissions,
+      const std::string& policy_app_id) const = 0;
 
   /**
    * @brief GetAvailableApps allows to obtain list of registered applications.
@@ -101,4 +113,4 @@ class PolicyListener {
   virtual void OnCertificateUpdated(const std::string& certificate_data) = 0;
 };
 }  //  namespace policy
-#endif  //  SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_POLICY_LISTENER_H_
+#endif  // SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_POLICY_LISTENER_H_

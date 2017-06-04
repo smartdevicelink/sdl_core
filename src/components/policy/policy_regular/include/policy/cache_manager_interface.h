@@ -50,6 +50,7 @@ class CacheManagerInterface {
  public:
   virtual ~CacheManagerInterface() {}
 
+  virtual const policy_table::Strings& GetGroups(const PTString& app_id) = 0;
   /**
    * @brief Check if specified RPC for specified application
    * has permission to be executed in specified HMI Level
@@ -60,7 +61,7 @@ class CacheManagerInterface {
    * @return CheckPermissionResult containing flag if HMI Level is allowed
    * and list of allowed params.
    */
-  virtual void CheckPermissions(const PTString& app_id,
+  virtual void CheckPermissions(const policy_table::Strings& groups,
                                 const PTString& hmi_level,
                                 const PTString& rpc,
                                 CheckPermissionResult& result) = 0;
@@ -210,6 +211,15 @@ class CacheManagerInterface {
    */
   virtual void GetHMIAppTypeAfterUpdate(
       std::map<std::string, StringArray>& app_hmi_types) = 0;
+
+  /**
+   * @brief AppHasHMIType checks whether app has been registered with certain
+   *HMI type.
+   *
+   * @return true in case app contains certain HMI type, false otherwise.
+   */
+  virtual bool AppHasHMIType(const std::string& application_id,
+                             policy_table::AppHMIType hmi_type) const = 0;
 
   /**
    * Gets flag updateRequired

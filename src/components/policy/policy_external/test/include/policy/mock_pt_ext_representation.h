@@ -137,6 +137,9 @@ class MockPTExtRepresentation : public MockPTRepresentation,
   MOCK_CONST_METHOD2(RemoveAppConsentForGroup,
                      bool(const std::string& policy_app_id,
                           const std::string& functional_group));
+  MOCK_CONST_METHOD1(SaveExternalConsentStatus,
+                     bool(const ExternalConsentStatus&));
+  MOCK_CONST_METHOD0(GetExternalConsentStatus, ExternalConsentStatus());
 };
 
 }  // namespace policy_test

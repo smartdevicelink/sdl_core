@@ -299,6 +299,7 @@ class ApplicationManager {
   virtual connection_handler::ConnectionHandler& connection_handler() const = 0;
   virtual protocol_handler::ProtocolHandler& protocol_handler() const = 0;
   virtual policy::PolicyHandlerInterface& GetPolicyHandler() = 0;
+  virtual const policy::PolicyHandlerInterface& GetPolicyHandler() const = 0;
 
   virtual uint32_t GetNextHMICorrelationID() = 0;
   virtual uint32_t GenerateNewHMIAppID() = 0;
@@ -477,9 +478,8 @@ class ApplicationManager {
    * @return SUCCESS, if allowed, otherwise result code of check
    */
   virtual mobile_apis::Result::eType CheckPolicyPermissions(
-      const std::string& policy_app_id,
-      mobile_apis::HMILevel::eType hmi_level,
-      mobile_apis::FunctionID::eType function_id,
+      const ApplicationSharedPtr app,
+      const std::string& function_id,
       const RPCParams& rpc_params,
       CommandParametersPermissions* params_permissions = NULL) = 0;
 

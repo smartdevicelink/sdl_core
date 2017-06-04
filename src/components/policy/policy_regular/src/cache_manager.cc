@@ -101,6 +101,10 @@ CacheManager::~CacheManager() {
   threads::DeleteThread(backup_thread_);
 }
 
+const policy_table::Strings& CacheManager::GetGroups(const PTString& app_id) {
+  return pt_->policy_table.app_policies_section.apps[app_id].groups;
+}
+
 bool CacheManager::CanAppKeepContext(const std::string& app_id) const {
   CACHE_MANAGER_CHECK(false);
   bool result = true;
@@ -275,6 +279,26 @@ void CacheManager::GetHMIAppTypeAfterUpdate(
   }
 }
 
+bool CacheManager::AppHasHMIType(const std::string& application_id,
+                                 policy_table::AppHMIType hmi_type) const {
+  const policy_table::ApplicationPolicies& policies =
+      pt_->policy_table.app_policies_section.apps;
+
+  policy_table::ApplicationPolicies::const_iterator policy_iter =
+      policies.find(application_id);
+
+  if (policy_iter == policies.end()) {
+    return false;
+  }
+
+  if (policy_iter->second.AppHMIType.is_initialized()) {
+    return helpers::in_range(*(policy_iter->second.AppHMIType),
+                             rpc::Enum<policy_table::AppHMIType>(hmi_type));
+  }
+
+  return false;
+}
+
 void CacheManager::Backup() {
   sync_primitives::AutoLock lock(backuper_locker_);
   DCHECK(backuper_);
@@ -410,25 +434,15 @@ bool CacheManager::IsApplicationRevoked(const std::string& app_id) const {
   return is_revoked;
 }
 
-void CacheManager::CheckPermissions(const PTString& app_id,
+void CacheManager::CheckPermissions(const policy_table::Strings& groups,
                                     const PTString& hmi_level,
                                     const PTString& rpc,
                                     CheckPermissionResult& result) {
   LOG4CXX_AUTO_TRACE(logger_);
   CACHE_MANAGER_CHECK_VOID();
 
-  if (pt_->policy_table.app_policies_section.apps.end() ==
-      pt_->policy_table.app_policies_section.apps.find(app_id)) {
-    LOG4CXX_ERROR(
-        logger_, "Application id " << app_id << " was not found in policy DB.");
-    return;
-  }
-
-  policy_table::Strings::const_iterator app_groups_iter =
-      pt_->policy_table.app_policies_section.apps[app_id].groups.begin();
-
-  policy_table::Strings::const_iterator app_groups_iter_end =
-      pt_->policy_table.app_policies_section.apps[app_id].groups.end();
+  policy_table::Strings::const_iterator app_groups_iter = groups.begin();
+  policy_table::Strings::const_iterator app_groups_iter_end = groups.end();
 
   policy_table::FunctionalGroupings::const_iterator concrete_group;
 
@@ -1333,7 +1347,9 @@ bool CacheManager::Init(const std::string& file_name,
           backup_->UpdateDBVersion();
           Backup();
         }
-        MergePreloadPT(file_name);
+        if (!MergePreloadPT(file_name)) {
+          result = false;
+        }
       }
     } break;
     case InitResult::SUCCESS: {
@@ -1475,12 +1491,12 @@ std::string CacheManager::GetCertificate() const {
   return std::string("");
 }
 
-void CacheManager::MergePreloadPT(const std::string& file_name) {
+bool CacheManager::MergePreloadPT(const std::string& file_name) {
   LOG4CXX_AUTO_TRACE(logger_);
   policy_table::Table table;
   if (!LoadFromFile(file_name, table)) {
     LOG4CXX_DEBUG(logger_, "Unable to load preloaded PT.");
-    return;
+    return false;
   }
 
   sync_primitives::AutoLock lock(cache_lock_);
@@ -1495,6 +1511,7 @@ void CacheManager::MergePreloadPT(const std::string& file_name) {
     MergeCFM(new_table, current);
     Backup();
   }
+  return true;
 }
 
 void CacheManager::MergeMC(const policy_table::PolicyTable& new_pt,

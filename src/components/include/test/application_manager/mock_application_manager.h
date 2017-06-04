@@ -132,6 +132,7 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                      connection_handler::ConnectionHandler&());
   MOCK_CONST_METHOD0(protocol_handler, protocol_handler::ProtocolHandler&());
   MOCK_METHOD0(GetPolicyHandler, policy::PolicyHandlerInterface&());
+  MOCK_CONST_METHOD0(GetPolicyHandler, const policy::PolicyHandlerInterface&());
   MOCK_METHOD0(GetNextHMICorrelationID, uint32_t());
   MOCK_METHOD0(GenerateNewHMIAppID, uint32_t());
   MOCK_METHOD1(EndNaviServices, void(uint32_t app_id));
@@ -191,13 +192,13 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_CONST_METHOD2(HMILevelAllowsStreaming,
                      bool(uint32_t app_id,
                           protocol_handler::ServiceType service_type));
-  MOCK_METHOD5(CheckPolicyPermissions,
+  MOCK_METHOD4(CheckPolicyPermissions,
                mobile_apis::Result::eType(
-                   const std::string&,
-                   mobile_apis::HMILevel::eType,
-                   mobile_apis::FunctionID::eType,
-                   const application_manager::RPCParams&,
-                   application_manager::CommandParametersPermissions*));
+                   const application_manager::ApplicationSharedPtr app,
+                   const std::string& function_id,
+                   const application_manager::RPCParams& rpc_params,
+                   application_manager::CommandParametersPermissions*
+                       params_permissions));
   MOCK_CONST_METHOD2(IsApplicationForbidden,
                      bool(uint32_t connection_key,
                           const std::string& policy_app_id));
@@ -246,6 +247,16 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_CONST_METHOD0(
       AppsWaitingForRegistration,
       DataAccessor<application_manager::AppsWaitRegistrationSet>());
+
+  MOCK_METHOD1(ReplaceMobileByHMIAppId,
+               void(smart_objects::SmartObject& message));
+  MOCK_METHOD1(ReplaceHMIByMobileAppId,
+               void(smart_objects::SmartObject& message));
+  MOCK_METHOD1(GetAvailableSpaceForApp,
+               uint32_t(const std::string& folder_name));
+  MOCK_METHOD0(OnTimerSendTTSGlobalProperties, void());
+  MOCK_METHOD0(OnLowVoltage, void());
+  MOCK_METHOD0(OnWakeUp, void());
 };
 
 }  // namespace application_manager_test

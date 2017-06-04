@@ -38,6 +38,7 @@
 #include "utils/callable.h"
 
 #include "policy/policy_types.h"
+#include "policy/policy_table/types.h"
 #include "policy/policy_listener.h"
 #include "usage_statistics/statistics_manager.h"
 
@@ -47,6 +48,11 @@ typedef utils::SharedPtr<utils::Callable> StatusNotifier;
 
 class PolicyManager : public usage_statistics::StatisticsManager {
  public:
+  /**
+   * @brief The NotificationMode enum defines whether application will be
+   * notified about changes done (e.g. after consents were changed) or not
+   */
+  enum NotificationMode { kSilentMode, kNotifyApplicationMode };
   virtual ~PolicyManager() {}
 
   virtual void set_listener(PolicyListener* listener) = 0;
@@ -77,11 +83,13 @@ class PolicyManager : public usage_statistics::StatisticsManager {
    */
   virtual bool ResetPT(const std::string& file_name) = 0;
 
+  virtual std::string GetUpdateUrl(int service_type) = 0;
+
   /**
-   * @brief Gets all URLs for sending PTS to from PT itself.
-   * @param service_type Service specifies user of URL
-   * @return vector of urls
-   */
+ * @brief Gets all URLs for sending PTS to from PT itself.
+ * @param service_type Service specifies user of URL
+ * @return vector of urls
+ */
 
   virtual void GetUpdateUrls(const uint32_t service_type,
                              EndpointUrls& out_end_points) = 0;
@@ -260,7 +268,8 @@ class PolicyManager : public usage_statistics::StatisticsManager {
    * valid data as well as invalid. So we will remove all invalid data
    * from this structure.
    */
-  virtual void SetUserConsentForApp(const PermissionConsent& permissions) = 0;
+  virtual void SetUserConsentForApp(const PermissionConsent& permissions,
+                                    const NotificationMode mode) = 0;
 
   /**
    * @brief Get default HMI level for application
@@ -364,7 +373,9 @@ class PolicyManager : public usage_statistics::StatisticsManager {
    * @param Application id assigned by Ford to the application
    * @return function that will notify update manager about new application
    */
-  virtual StatusNotifier AddApplication(const std::string& application_id) = 0;
+  virtual StatusNotifier AddApplication(
+      const std::string& application_id,
+      const rpc::policy_table_interface_base::AppHmiTypes& hmi_types) = 0;
 
   /**
    * @brief Removes unpaired device records and related records from DB
@@ -432,7 +443,7 @@ class PolicyManager : public usage_statistics::StatisticsManager {
   /**
    * @brief Handler on applications search completed
    */
-  virtual void OnAppsSearchCompleted() = 0;
+  virtual void OnAppsSearchCompleted(const bool trigger_ptu) = 0;
 
   /**
    * @brief OnAppRegisteredOnMobile allows to handle event when application were
@@ -505,6 +516,29 @@ class PolicyManager : public usage_statistics::StatisticsManager {
    */
   virtual AppIdURL RetrySequenceUrl(const struct RetrySequenceURL& rs,
                                     const EndpointUrls& urls) const = 0;
+
+  /**
+  * @brief Checks, if SDL needs to update it's policy table "external consent
+  * status" section
+  * @param status ExternalConsent status
+  * @return true if there's such a need, otherwise - false
+  */
+  virtual bool IsNeedToUpdateExternalConsentStatus(
+      const ExternalConsentStatus& status) const = 0;
+
+  /**
+   * @brief Saves customer connectivity settings status
+   * @param status ExternalConsent status
+   * @return true if succeeded, otherwise - false
+   */
+  virtual bool SetExternalConsentStatus(
+      const ExternalConsentStatus& status) = 0;
+
+  /**
+   * @brief Gets customer connectivity settings status
+   * @return external consent status
+   */
+  virtual ExternalConsentStatus GetExternalConsentStatus() = 0;
 
  protected:
   /**

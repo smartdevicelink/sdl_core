@@ -109,7 +109,7 @@ ApplicationManagerImpl::ApplicationManagerImpl(
     , media_manager_(NULL)
     , hmi_handler_(NULL)
     , connection_handler_(NULL)
-    , policy_handler_(policy_settings, *this)
+    , policy_handler_(new policy::PolicyHandler(policy_settings, *this))
     , protocol_handler_(NULL)
     , request_ctrl_(am_settings)
     , hmi_so_factory_(NULL)
@@ -139,6 +139,7 @@ ApplicationManagerImpl::ApplicationManagerImpl(
           new TimerTaskImpl<ApplicationManagerImpl>(
               this, &ApplicationManagerImpl::OnTimerSendTTSGlobalProperties))
     , is_low_voltage_(false)
+    , apps_size_(0)
     , is_stopping_(false) {
   std::srand(std::time(0));
   AddPolicyObserver(this);
@@ -556,6 +557,7 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   applications_list_lock_.Acquire();
   application->MarkRegistered();
   applications_.insert(application);
+  apps_size_ = applications_.size();
   applications_list_lock_.Release();
 
   return application;
@@ -980,10 +982,10 @@ mobile_apis::HMILevel::eType ApplicationManagerImpl::GetDefaultHmiLevel(
   LOG4CXX_AUTO_TRACE(logger_);
   HMILevel::eType default_hmi = HMILevel::HMI_NONE;
 
-  if (policy_handler_.PolicyEnabled()) {
+  if (GetPolicyHandler().PolicyEnabled()) {
     const std::string policy_app_id = application->policy_app_id();
     std::string default_hmi_string = "";
-    if (policy_handler_.GetDefaultHmi(policy_app_id, &default_hmi_string)) {
+    if (GetPolicyHandler().GetDefaultHmi(policy_app_id, &default_hmi_string)) {
       if ("BACKGROUND" == default_hmi_string) {
         default_hmi = HMILevel::HMI_BACKGROUND;
       } else if ("FULL" == default_hmi_string) {
@@ -1409,11 +1411,11 @@ void ApplicationManagerImpl::SendMessageToMobile(
         }
       }
     }
-    const mobile_apis::Result::eType check_result = CheckPolicyPermissions(
-        app->policy_app_id(), app->hmi_level(), function_id, params);
+    const std::string string_functionID =
+        MessageHelper::StringifiedFunctionID(function_id);
+    const mobile_apis::Result::eType check_result =
+        CheckPolicyPermissions(app, string_functionID, params);
     if (mobile_apis::Result::SUCCESS != check_result) {
-      const std::string string_functionID =
-          MessageHelper::StringifiedFunctionID(function_id);
       LOG4CXX_WARN(logger_,
                    "Function \"" << string_functionID << "\" (#" << function_id
                                  << ") not allowed by policy");
@@ -2779,32 +2781,20 @@ void ApplicationManagerImpl::Handle(const impl::AudioData message) {
 }
 
 mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
-    const std::string& policy_app_id,
-    mobile_apis::HMILevel::eType hmi_level,
-    mobile_apis::FunctionID::eType function_id,
+    const ApplicationSharedPtr app,
+    const std::string& function_id,
     const RPCParams& rpc_params,
     CommandParametersPermissions* params_permissions) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "CheckPolicyPermissions");
   // TODO(AOleynik): Remove check of policy_enable, when this flag will be
   // unused in config file
   if (!GetPolicyHandler().PolicyEnabled()) {
     return mobile_apis::Result::SUCCESS;
   }
 
-  const std::string stringified_functionID =
-      MessageHelper::StringifiedFunctionID(function_id);
-  const std::string stringified_hmi_level =
-      MessageHelper::StringifiedHMILevel(hmi_level);
-  LOG4CXX_DEBUG(logger_,
-                "Checking permissions for  " << policy_app_id << " in "
-                                             << stringified_hmi_level << " rpc "
-                                             << stringified_functionID);
+  DCHECK(app);
   policy::CheckPermissionResult result;
-  GetPolicyHandler().CheckPermissions(policy_app_id,
-                                      stringified_hmi_level,
-                                      stringified_functionID,
-                                      rpc_params,
-                                      result);
+  GetPolicyHandler().CheckPermissions(app, function_id, rpc_params, result);
 
   if (NULL != params_permissions) {
     params_permissions->allowed_params = result.list_of_allowed_params;
@@ -2812,30 +2802,22 @@ mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
     params_permissions->undefined_params = result.list_of_undefined_params;
   }
 
-  if (hmi_level == mobile_apis::HMILevel::HMI_NONE &&
-      function_id != mobile_apis::FunctionID::UnregisterAppInterfaceID) {
-    ApplicationSharedPtr app = application_by_policy_id(policy_app_id);
-    if (!app) {
-      LOG4CXX_ERROR(logger_, "No application for policy id " << policy_app_id);
-      return mobile_apis::Result::GENERIC_ERROR;
-    }
+  if (app->hmi_level() == mobile_apis::HMILevel::HMI_NONE &&
+      function_id != MessageHelper::StringifiedFunctionID(
+                         mobile_apis::FunctionID::UnregisterAppInterfaceID)) {
     if (result.hmi_level_permitted != policy::kRpcAllowed) {
       app->usage_report().RecordRpcSentInHMINone();
     }
   }
 
-  const std::string log_msg = "Application: " + policy_app_id + ", RPC: " +
-                              stringified_functionID + ", HMI status: " +
-                              stringified_hmi_level;
-
+#ifdef ENABLE_LOG
+  const std::string log_msg =
+      "Application: " + app->policy_app_id() + ", RPC: " + function_id +
+      ", HMI status: " + MessageHelper::StringifiedHMILevel(app->hmi_level());
+#endif  // ENABLE_LOG
   if (result.hmi_level_permitted != policy::kRpcAllowed) {
     LOG4CXX_WARN(logger_, "Request is blocked by policies. " << log_msg);
 
-    ApplicationSharedPtr app = application_by_policy_id(policy_app_id);
-    if (!app) {
-      LOG4CXX_ERROR(logger_, "No application for policy id " << policy_app_id);
-      return mobile_apis::Result::GENERIC_ERROR;
-    }
     app->usage_report().RecordPolicyRejectedRpcCall();
 
     switch (result.hmi_level_permitted) {
@@ -3190,7 +3172,7 @@ bool ApplicationManagerImpl::IsApplicationForbidden(
 
 policy::DeviceConsent ApplicationManagerImpl::GetUserConsentForDevice(
     const std::string& device_id) const {
-  return policy_handler_.GetUserConsentForDevice(device_id);
+  return GetPolicyHandler().GetUserConsentForDevice(device_id);
 }
 
 void ApplicationManagerImpl::OnWakeUp() {
@@ -3281,8 +3263,12 @@ bool ApplicationManagerImpl::IsHMICooperating() const {
 
 void ApplicationManagerImpl::OnApplicationListUpdateTimer() {
   LOG4CXX_DEBUG(logger_, "Application list update timer finished");
+
+  apps_to_register_list_lock_.Acquire();
+  const bool trigger_ptu = apps_size_ != applications_.size();
+  apps_to_register_list_lock_.Release();
   SendUpdateAppList();
-  GetPolicyHandler().OnAppsSearchCompleted();
+  GetPolicyHandler().OnAppsSearchCompleted(trigger_ptu);
 }
 
 void ApplicationManagerImpl::OnTimerSendTTSGlobalProperties() {
