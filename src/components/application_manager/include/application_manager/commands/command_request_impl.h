@@ -112,13 +112,36 @@ class CommandRequestImpl : public CommandImpl,
  public:
   enum RequestState { kAwaitingHMIResponse = 0, kTimedOut, kCompleted };
 
+  /**
+   * @brief The HashUpdateMode enum defines whether request has to update
+   * hash after its execution is finished
+   */
+  enum HashUpdateMode { kSkipHashUpdate, kDoHashUpdate };
+
   CommandRequestImpl(const MessageSharedPtr& message,
                      ApplicationManager& application_manager);
-  virtual ~CommandRequestImpl();
-  virtual bool CheckPermissions();
-  virtual bool Init();
-  virtual bool CleanUp();
-  virtual void Run();
+
+  ~CommandRequestImpl();
+
+  /**
+   * @brief Checks command permissions according to policy table
+   */
+  bool CheckPermissions() OVERRIDE;
+
+  /**
+   * @brief Init sets hash update mode for request
+   */
+  bool Init() OVERRIDE;
+
+  /**
+   * @brief Cleanup all resources used by command
+   **/
+  bool CleanUp() OVERRIDE;
+
+  /**
+   * @brief Execute corresponding command by calling the action on reciever
+   **/
+  void Run() OVERRIDE;
 
   /*
    * @brief Function is called by RequestController when request execution time
@@ -271,6 +294,12 @@ class CommandRequestImpl : public CommandImpl,
   CommandParametersPermissions parameters_permissions_;
   CommandParametersPermissions removed_parameters_permissions_;
 
+  /**
+   * @brief hash_update_mode_ Defines whether request must update hash value of
+   * application or not
+   */
+  HashUpdateMode hash_update_mode_;
+
  private:
   DISALLOW_COPY_AND_ASSIGN(CommandRequestImpl);
 
@@ -292,6 +321,19 @@ class CommandRequestImpl : public CommandImpl,
   bool ProcessHMIInterfacesAvailability(
       const uint32_t hmi_correlation_id,
       const hmi_apis::FunctionID::eType& function_id);
+
+  /**
+   * @brief UpdateHash updates hash field for application and sends
+   * OnHashChanged notification to mobile side in case of approriate hash mode
+   * is set
+   */
+  void UpdateHash();
+
+  /**
+   * @brief is_success_result_ Defines whether request succeded, at the moment
+   * it is value of 'success' field of appropriate response sent to mobile
+   */
+  bool is_success_result_;
 };
 
 }  // namespace commands

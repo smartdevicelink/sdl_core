@@ -70,7 +70,11 @@ void UnsubscribeButtonRequest::Run() {
 
   SendUnsubscribeButtonNotification();
   SendResponse(true, mobile_apis::Result::SUCCESS);
-  app->UpdateHash();
+}
+
+bool UnsubscribeButtonRequest::Init() {
+  hash_update_mode_ = HashUpdateMode::kDoHashUpdate;
+  return true;
 }
 
 void UnsubscribeButtonRequest::SendUnsubscribeButtonNotification() {

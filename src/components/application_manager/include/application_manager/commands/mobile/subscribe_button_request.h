@@ -58,12 +58,17 @@ class SubscribeButtonRequest : public CommandRequestImpl {
   /**
    * @brief SubscribeButtonRequest class destructor
    **/
-  virtual ~SubscribeButtonRequest();
+  ~SubscribeButtonRequest();
 
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() FINAL;
+
+  /**
+   * @brief Init sets hash update mode for request
+   */
+  bool Init() FINAL;
 
  private:
   /**

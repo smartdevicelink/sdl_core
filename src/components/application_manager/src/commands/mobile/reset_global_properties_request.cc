@@ -242,9 +242,6 @@ void ResetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
   const smart_objects::SmartObject& message = event.smart_object();
 
-  ApplicationSharedPtr application =
-      application_manager_.application(connection_key());
-
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_SetGlobalProperties: {
       LOG4CXX_INFO(logger_, "Received UI_SetGlobalProperties event");
@@ -281,15 +278,11 @@ void ResetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
                static_cast<mobile_apis::Result::eType>(result_code),
                response_info.empty() ? NULL : response_info.c_str(),
                &(message[strings::msg_params]));
+}
 
-  if (!application) {
-    LOG4CXX_ERROR(logger_, "NULL pointer");
-    return;
-  }
-
-  if (result) {
-    application->UpdateHash();
-  }
+bool ResetGlobalPropertiesRequest::Init() {
+  hash_update_mode_ = HashUpdateMode::kDoHashUpdate;
+  return true;
 }
 
 bool ResetGlobalPropertiesRequest::PrepareResponseParameters(

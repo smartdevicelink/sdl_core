@@ -58,19 +58,24 @@ class UnsubscribeVehicleDataRequest : public CommandRequestImpl {
   /**
    * @brief UnsubscribeVehicleDataRequest class destructor
    **/
-  virtual ~UnsubscribeVehicleDataRequest();
+  ~UnsubscribeVehicleDataRequest();
 
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() FINAL;
 
   /**
    * @brief Interface method that is called whenever new event received
    *
    * @param event The received event
    */
-  virtual void on_event(const event_engine::Event& event);
+  void on_event(const event_engine::Event& event) FINAL;
+
+  /**
+   * @brief Init sets hash update mode for request
+   */
+  bool Init() FINAL;
 
 #ifdef HMI_DBUS_API
  private:
@@ -101,11 +106,6 @@ class UnsubscribeVehicleDataRequest : public CommandRequestImpl {
    * @param msg_params 'message_params' response section reference
    */
   void AddAlreadyUnsubscribedVI(smart_objects::SmartObject& response) const;
-
-  /**
-   * @brief Allows to update hash after sending response to mobile.
-   */
-  void UpdateHash() const;
 
   /**
    * @brief VI parameters which still being subscribed by another apps after
