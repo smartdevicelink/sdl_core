@@ -563,17 +563,26 @@ bool SQLPTExtRepresentation::GatherConsumerFriendlyMessages(
       msg.message_code = query.GetString(7);
 
       std::string language = query.GetString(6);
-
-      *(*messages->messages)[msg.message_code].languages[language].tts =
-          msg.tts;
-      *(*messages->messages)[msg.message_code].languages[language].label =
-          msg.label;
-      *(*messages->messages)[msg.message_code].languages[language].line1 =
-          msg.line1;
-      *(*messages->messages)[msg.message_code].languages[language].line2 =
-          msg.line2;
-      *(*messages->messages)[msg.message_code].languages[language].textBody =
-          msg.text_body;
+      if (!msg.tts.empty()) {
+        *(*messages->messages)[msg.message_code].languages[language].tts =
+            msg.tts;
+      }
+      if (!msg.label.empty()) {
+        *(*messages->messages)[msg.message_code].languages[language].label =
+            msg.label;
+      }
+      if (!msg.line1.empty()) {
+        *(*messages->messages)[msg.message_code].languages[language].line1 =
+            msg.line1;
+      }
+      if (!msg.line2.empty()) {
+        *(*messages->messages)[msg.message_code].languages[language].line2 =
+            msg.line2;
+      }
+      if (!msg.text_body.empty()) {
+        *(*messages->messages)[msg.message_code].languages[language].textBody =
+            msg.text_body;
+      }
     }
   } else {
     LOG4CXX_WARN(logger_, "Incorrect statement for select friendly messages.");
@@ -1514,13 +1523,23 @@ bool SQLPTExtRepresentation::SaveMessageString(
     return false;
   }
 
-  query.Bind(0, *strings.tts);
-  query.Bind(1, *strings.label);
-  query.Bind(2, *strings.line1);
-  query.Bind(3, *strings.line2);
+  if (strings.tts.is_initialized()) {
+    query.Bind(0, *strings.tts);
+  }
+  if (strings.label.is_initialized()) {
+    query.Bind(1, *strings.label);
+  }
+  if (strings.line1.is_initialized()) {
+    query.Bind(2, *strings.line1);
+  }
+  if (strings.line2.is_initialized()) {
+    query.Bind(3, *strings.line2);
+  }
   query.Bind(4, lang);
   query.Bind(5, type);
-  query.Bind(6, *strings.textBody);
+  if (strings.textBody.is_initialized()) {
+    query.Bind(6, *strings.textBody);
+  }
 
   if (!query.Exec() || !query.Reset()) {
     LOG4CXX_WARN(logger_, "Incorrect insert into message.");
