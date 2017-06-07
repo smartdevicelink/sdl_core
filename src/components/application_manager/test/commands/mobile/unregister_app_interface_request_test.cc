@@ -84,7 +84,7 @@ TEST_F(UnregisterAppInterfaceRequestTest, Run_SUCCESS) {
 
   MockAppPtr mock_app(CreateMockApp());
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
-      .WillOnce(Return(mock_app));
+      .WillRepeatedly(Return(mock_app));
 
   const mobile_apis::AppInterfaceUnregisteredReason::eType kUnregisterReason =
       mobile_apis::AppInterfaceUnregisteredReason::INVALID_ENUM;

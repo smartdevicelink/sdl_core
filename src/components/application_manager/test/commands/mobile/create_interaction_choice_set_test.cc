@@ -64,7 +64,6 @@ using am::ApplicationManager;
 using am::commands::MessageSharedPtr;
 using am::ApplicationSharedPtr;
 using am::MockMessageHelper;
-using am::MockHmiInterfaces;
 using ::testing::_;
 using ::testing::Mock;
 using ::utils::SharedPtr;
@@ -213,11 +212,10 @@ TEST_F(CreateInteractionChoiceSetRequestTest, OnEvent_VR_UNSUPPORTED_RESOURCE) {
   utils::SharedPtr<CreateInteractionChoiceSetRequest> req_vr =
       CreateCommand<CreateInteractionChoiceSetRequest>(msg_vr);
 
-  MockAppPtr mock_app = CreateMockApp();
-  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app));
-  ON_CALL(*mock_app, app_id()).WillByDefault(Return(kConnectionKey));
+  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app_));
+
   smart_objects::SmartObject* null_obj = NULL;
-  ON_CALL(*mock_app, FindChoiceSet(_)).WillByDefault(Return(null_obj));
+  ON_CALL(*app_, FindChoiceSet(_)).WillByDefault(Return(null_obj));
 
   MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
   (*msg)[strings::params][hmi_response::code] =
@@ -229,25 +227,21 @@ TEST_F(CreateInteractionChoiceSetRequestTest, OnEvent_VR_UNSUPPORTED_RESOURCE) {
   event.set_smart_object(*msg);
 
   smart_objects::SmartObject* ptr = NULL;
-  ON_CALL(*mock_app, FindCommand(kCmdId)).WillByDefault(Return(ptr));
+  ON_CALL(*app_, FindCommand(kCmdId)).WillByDefault(Return(ptr));
   EXPECT_EQ(NULL, ptr);
 
-  MockMessageHelper* mock_message_helper =
-      MockMessageHelper::message_helper_mock();
-  ON_CALL(*mock_message_helper, HMIToMobileResult(_))
+  ON_CALL(message_helper_mock_, HMIToMobileResult(_))
       .WillByDefault(Return(mobile_apis::Result::SUCCESS));
 
   am::CommandsMap commands_map;
-  ON_CALL(*mock_app, commands_map())
+  ON_CALL(*app_, commands_map())
       .WillByDefault(
           Return(DataAccessor<am::CommandsMap>(commands_map, lock_)));
-  MockHmiInterfaces hmi_interfaces;
-  ON_CALL(app_mngr_, hmi_interfaces()).WillByDefault(ReturnRef(hmi_interfaces));
-  ON_CALL(hmi_interfaces, GetInterfaceFromFunction(_))
+
+  ON_CALL(mock_hmi_interfaces_, GetInterfaceFromFunction(_))
       .WillByDefault(
           Return(am::HmiInterfaces::HMI_INTERFACE_BasicCommunication));
-  ON_CALL(hmi_interfaces, GetInterfaceState(_))
-      .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
+
   EXPECT_CALL(app_mngr_, ManageHMICommand(_)).WillOnce(Return(true));
 
   req_vr->Run();
@@ -724,34 +718,36 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
   (*message_)[am::strings::msg_params][am::strings::interaction_choice_set_id] =
       kChoiceSetId;
 
-  EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app_));
-
   EXPECT_CALL(message_helper_mock_, VerifyImage(_, _, _))
       .WillRepeatedly(Return(mobile_apis::Result::SUCCESS));
 
   smart_objects::SmartObject* choice_set_id = NULL;
-  EXPECT_CALL(*app_, FindChoiceSet(kChoiceSetId))
-      .WillOnce(Return(choice_set_id));
 
+  EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app_));
   EXPECT_CALL(app_mngr_, GenerateGrammarID()).WillOnce(Return(kGrammarId));
-  EXPECT_CALL(*app_, AddChoiceSet(kChoiceSetId, _));
   ON_CALL(app_mngr_, GetNextHMICorrelationID())
       .WillByDefault(Return(kCorrelationId));
+
+  EXPECT_CALL(*app_, FindChoiceSet(kChoiceSetId))
+      .WillOnce(Return(choice_set_id));
+  EXPECT_CALL(*app_, AddChoiceSet(kChoiceSetId, _));
+
   command_->Run();
 
   FillMessageFieldsItem2(message_);
+
   EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _)).Times(0);
   EXPECT_CALL(app_mngr_, TerminateRequest(_, _, _));
+
   Event event(hmi_apis::FunctionID::VR_AddCommand);
   event.set_smart_object(*message_);
 
-  MockAppPtr invalid_app;
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
-      .WillOnce(Return(invalid_app));
   command_->on_event(event);
 
+  EXPECT_CALL(app_mngr_, TerminateRequest(_, _, _));
   EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app_));
   EXPECT_CALL(*app_, RemoveChoiceSet(_));
+
   command_->onTimeOut();
 }
 

@@ -59,7 +59,6 @@ using ::testing::ReturnRef;
 using am::commands::MessageSharedPtr;
 using am::commands::EndAudioPassThruRequest;
 using am::event_engine::Event;
-using am::MockHmiInterfaces;
 using am::MockMessageHelper;
 
 typedef SharedPtr<EndAudioPassThruRequest> EndAudioPassThruRequestPtr;
@@ -90,12 +89,6 @@ TEST_F(EndAudioPassThruRequestTest, OnEvent_UI_UNSUPPORTED_RESOUCRE) {
   Event event(hmi_apis::FunctionID::UI_EndAudioPassThru);
   event.set_smart_object(*event_msg);
 
-  MockHmiInterfaces hmi_interfaces;
-  ON_CALL(app_mngr_, hmi_interfaces()).WillByDefault(ReturnRef(hmi_interfaces));
-  ON_CALL(hmi_interfaces,
-          GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
-      .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
-
   EXPECT_CALL(mock_message_helper_,
               HMIToMobileResult(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE))
       .WillOnce(Return(mobile_apis::Result::UNSUPPORTED_RESOURCE));
@@ -107,6 +100,9 @@ TEST_F(EndAudioPassThruRequestTest, OnEvent_UI_UNSUPPORTED_RESOUCRE) {
       app_mngr_,
       ManageMobileCommand(_, am::commands::Command::CommandOrigin::ORIGIN_SDL))
       .WillOnce(DoAll(SaveArg<0>(&ui_command_result), Return(true)));
+
+  MockAppPtr app(CreateMockApp());
+  EXPECT_CALL(app_mngr_, application(_)).WillRepeatedly(Return(app));
 
   command->on_event(event);
 
