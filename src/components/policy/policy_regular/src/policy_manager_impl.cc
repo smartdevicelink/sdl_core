@@ -416,13 +416,13 @@ void PolicyManagerImpl::GetUpdateUrls(const uint32_t service_type,
   cache_->GetUpdateUrls(service_type, out_end_points);
 }
 
-bool PolicyManagerImpl::RequestPTUpdate() {
+BinaryMessageSptr PolicyManagerImpl::RequestPTUpdate() {
   LOG4CXX_AUTO_TRACE(logger_);
   std::shared_ptr<policy_table::Table> policy_table_snapshot =
       cache_->GenerateSnapshot();
   if (!policy_table_snapshot) {
     LOG4CXX_ERROR(logger_, "Failed to create snapshot of policy table");
-    return false;
+    return BinaryMessageSptr();
   }
 
   IsPTValid(policy_table_snapshot, policy_table::PT_SNAPSHOT);
@@ -433,10 +433,10 @@ bool PolicyManagerImpl::RequestPTUpdate() {
 
   LOG4CXX_DEBUG(logger_, "Snapshot contents is : " << message_string);
 
-  BinaryMessage update(message_string.begin(), message_string.end());
+  BinaryMessageSptr update = utils::MakeShared<BinaryMessage>(
+      message_string.begin(), message_string.end());
 
-  listener_->OnSnapshotCreated(update);
-  return true;
+  return update;
 }
 
 std::string PolicyManagerImpl::GetLockScreenIconUrl() const {
@@ -472,8 +472,10 @@ void PolicyManagerImpl::StartPTExchange() {
     }
 
     if (update_status_manager_.IsUpdateRequired()) {
-      if (RequestPTUpdate() && !timer_retry_sequence_.is_running()) {
+      BinaryMessageSptr pt_snapshot = RequestPTUpdate();
+      if (pt_snapshot && !timer_retry_sequence_.is_running()) {
         // Start retry sequency
+        listener_->OnSnapshotCreated(*pt_snapshot);
         const uint32_t timeout_msec = NextRetryTimeout();
 
         if (timeout_msec) {
@@ -1324,7 +1326,8 @@ void PolicyManagerImpl::RetrySequence() {
     return;
   }
 
-  RequestPTUpdate();
+  BinaryMessageSptr pt_snapshot = RequestPTUpdate();
+  listener_->OnSnapshotCreated(*pt_snapshot);
   timer_retry_sequence_.Start(timeout_msec, timer::kPeriodic);
 }
 

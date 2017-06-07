@@ -103,9 +103,10 @@ class PolicyManager : public usage_statistics::StatisticsManager {
                              EndpointUrls& out_end_points) = 0;
 
   /**
-   * @brief PTU is needed, for this PTS has to be formed and sent.
+   * @brief PTU is needed, for this PTS has to be formed.
+   * @return pointer to snapshot binary data
    */
-  virtual bool RequestPTUpdate() = 0;
+  virtual BinaryMessageSptr RequestPTUpdate() = 0;
 
   /**
    * @brief Check if specified RPC for specified application

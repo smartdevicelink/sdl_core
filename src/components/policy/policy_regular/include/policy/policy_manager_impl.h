@@ -119,7 +119,7 @@ class PolicyManagerImpl : public PolicyManager {
   /**
    * @brief PTU is needed, for this PTS has to be formed and sent.
    */
-  bool RequestPTUpdate() OVERRIDE;
+  BinaryMessageSptr RequestPTUpdate() OVERRIDE;
 
   /**
    * @brief Check if specified RPC for specified application
