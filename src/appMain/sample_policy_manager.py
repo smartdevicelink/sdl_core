@@ -110,14 +110,14 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     pack_application = tornado.web.Application([(r'/', WebSocketHandler, dict(encryption=args.encryption, add_http_header=args.add_http_header, 
-        handle_func = lambda data: pack(data, args.encryption, args.add_http_header)))])
+        handle_func = lambda data, encryption, add_http_header: pack(data, encryption, add_http_header)))])
 
     unpack_application = tornado.web.Application([(r'/', WebSocketHandler, dict(encryption=args.encryption, add_http_header=None,
-        handle_func = lambda data: unpack(data, args.encryption)))])
+        handle_func = lambda data, encryption, add_http_header: unpack(data, encryption)))])
 
     pack_server = tornado.httpserver.HTTPServer(pack_application)
     unpack_server = tornado.httpserver.HTTPServer(unpack_application)
 
     pack_server.listen(args.pack_port, args.host)
-    #unpack_server.listen(args.unpack_port, args.host)
+    unpack_server.listen(args.unpack_port, args.host)
     tornado.ioloop.IOLoop.instance().start()

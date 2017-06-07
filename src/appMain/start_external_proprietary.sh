@@ -1,5 +1,5 @@
 #!/bin/bash
-python sample_policy_manager.py --pack_port 8088 --unpack_port 8089 &
+python sample_policy_manager.py --pack_port 8088 --unpack_port 8089 --add_http_header --encryption &
 POLICY_MANAGER=$!
 
 trap ctrl_c INT
