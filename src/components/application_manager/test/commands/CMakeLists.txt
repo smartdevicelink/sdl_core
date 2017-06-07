@@ -44,6 +44,7 @@ include_directories(
 set(COMMANDS_TEST_DIR ${AM_TEST_DIR}/commands)
 
 file(GLOB SOURCES
+  ${COMMANDS_TEST_DIR}/*
   ${COMPONENTS_DIR}/application_manager/test/mock_message_helper.cc
   ${COMPONENTS_DIR}/application_manager/src/smart_object_keys.cc
   ${COMMANDS_TEST_DIR}/hmi/*
