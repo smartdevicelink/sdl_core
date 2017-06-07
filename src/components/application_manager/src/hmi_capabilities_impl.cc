@@ -68,6 +68,8 @@ std::map<std::string, hmi_apis::Common_ImageFieldName::eType>
 std::map<std::string, hmi_apis::Common_FileType::eType> file_type_enum;
 std::map<std::string, hmi_apis::Common_DisplayType::eType> display_type_enum;
 std::map<std::string, hmi_apis::Common_CharacterSet::eType> character_set_enum;
+std::map<std::string, hmi_apis::Common_SteeringWheelLocation::eType>
+    enum_steering_wheel_location;
 
 void InitCapabilities() {
   vr_enum_capabilities.insert(std::make_pair(
@@ -333,6 +335,12 @@ void InitCapabilities() {
       std::string("CID1SET"), hmi_apis::Common_CharacterSet::CID1SET));
   character_set_enum.insert(std::make_pair(
       std::string("CID2SET"), hmi_apis::Common_CharacterSet::CID2SET));
+  enum_steering_wheel_location.insert(std::make_pair(
+      std::string("LEFT"), hmi_apis::Common_SteeringWheelLocation::LEFT));
+  enum_steering_wheel_location.insert(std::make_pair(
+      std::string("RIGHT"), hmi_apis::Common_SteeringWheelLocation::RIGHT));
+  enum_steering_wheel_location.insert(std::make_pair(
+      std::string("CENTER"), hmi_apis::Common_SteeringWheelLocation::CENTER));
 }
 
 }  // namespace
@@ -361,8 +369,7 @@ HMICapabilitiesImpl::HMICapabilitiesImpl(ApplicationManager& app_mngr)
     , audio_pass_thru_capabilities_(NULL)
     , pcm_stream_capabilities_(NULL)
     , prerecorded_speech_(NULL)
-    , is_navigation_supported_(false)
-    , is_phone_call_supported_(false)
+    , ui_hmi_capabilities_(smart_objects::SmartType_Map)
     , app_mngr_(app_mngr)
     , hmi_language_handler_(app_mngr) {
   InitCapabilities();
@@ -598,11 +605,20 @@ void HMICapabilitiesImpl::set_prerecorded_speech(
   prerecorded_speech_ = new smart_objects::SmartObject(prerecorded_speech);
 }
 
-void HMICapabilitiesImpl::set_navigation_supported(const bool supported) {
-  is_navigation_supported_ = supported;
-}
-void HMICapabilitiesImpl::set_phone_call_supported(const bool supported) {
-  is_phone_call_supported_ = supported;
+void HMICapabilitiesImpl::set_ui_hmi_capabilities(
+    const smart_objects::SmartObject& ui_hmi_capabilities) {
+  if (ui_hmi_capabilities.keyExists(strings::navigation)) {
+    ui_hmi_capabilities_[strings::navigation] =
+        ui_hmi_capabilities[strings::navigation].asBool();
+  }
+  if (ui_hmi_capabilities.keyExists(strings::phone_call)) {
+    ui_hmi_capabilities_[strings::phone_call] =
+        ui_hmi_capabilities[strings::phone_call].asBool();
+  }
+  if (ui_hmi_capabilities.keyExists(strings::steering_wheel_location)) {
+    ui_hmi_capabilities_[strings::steering_wheel_location] =
+        ui_hmi_capabilities[strings::steering_wheel_location].asInt();
+  }
 }
 
 void HMICapabilitiesImpl::Init(resumption::LastState* last_state) {
@@ -708,12 +724,9 @@ const smart_objects::SmartObject* HMICapabilitiesImpl::prerecorded_speech()
   return prerecorded_speech_;
 }
 
-bool HMICapabilitiesImpl::navigation_supported() const {
-  return is_navigation_supported_;
-}
-
-bool HMICapabilitiesImpl::phone_call_supported() const {
-  return is_phone_call_supported_;
+const smart_objects::SmartObject& HMICapabilitiesImpl::ui_hmi_capabilities()
+    const {
+  return ui_hmi_capabilities_;
 }
 
 bool HMICapabilitiesImpl::load_capabilities_from_file() {
@@ -755,6 +768,28 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
         convert_json_languages_to_obj(languages_ui, ui_languages_so);
         set_ui_supported_languages(ui_languages_so);
       }
+      // Note(dtrunov): According to answer from BA(APPLINK-31441)
+      DCHECK_OR_RETURN(check_existing_json_member(ui, "hmiCapabilities"),
+                       false);
+      smart_objects::SmartObject ui_hmi_capabilities_so(
+          smart_objects::SmartType_Map);
+      Json::Value ui_hmi_capabilities = ui.get("hmiCapabilities", "");
+      Formatters::CFormatterJsonBase::jsonValueToObj(ui_hmi_capabilities,
+                                                     ui_hmi_capabilities_so);
+      const bool all_parameters_exist =
+          ui_hmi_capabilities_so.keyExists(strings::navigation) &&
+          ui_hmi_capabilities_so.keyExists(strings::phone_call) &&
+          ui_hmi_capabilities_so.keyExists(strings::steering_wheel_location);
+      // Note(dtrunov): According to answer from BA(APPLINK-31441)
+      DCHECK_OR_RETURN(all_parameters_exist, false);
+      std::map<std::string,
+               hmi_apis::Common_SteeringWheelLocation::eType>::const_iterator
+          it = enum_steering_wheel_location.find(
+              ui_hmi_capabilities_so[strings::steering_wheel_location]
+                  .asString());
+      DCHECK_OR_RETURN(it != enum_steering_wheel_location.end(), false);
+      ui_hmi_capabilities_so[strings::steering_wheel_location] = it->second;
+      set_ui_hmi_capabilities(ui_hmi_capabilities_so);
 
       if (check_existing_json_member(ui, "displayCapabilities")) {
         smart_objects::SmartObject display_capabilities_so;

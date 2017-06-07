@@ -472,11 +472,7 @@ void FillUIRelatedFields(smart_objects::SmartObject& response_params,
     }
   }
   response_params[strings::hmi_capabilities] =
-      smart_objects::SmartObject(smart_objects::SmartType_Map);
-  response_params[strings::hmi_capabilities][strings::navigation] =
-      hmi_capabilities.navigation_supported();
-  response_params[strings::hmi_capabilities][strings::phone_call] =
-      hmi_capabilities.phone_call_supported();
+      hmi_capabilities.ui_hmi_capabilities();
 }
 
 void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
@@ -572,12 +568,6 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
       response_params[hmi_response::hmi_zone_capabilities][0] =
           *hmi_capabilities.hmi_zone_capabilities();
     }
-  }
-
-  if (HmiInterfaces::STATE_NOT_AVAILABLE !=
-      application_manager_.hmi_interfaces().GetInterfaceState(
-          HmiInterfaces::HMI_INTERFACE_TTS)) {
-    FillTTSRelatedFields(response_params, hmi_capabilities);
   }
 
   if (hmi_capabilities.pcm_stream_capabilities()) {

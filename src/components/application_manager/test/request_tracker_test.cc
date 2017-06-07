@@ -72,7 +72,7 @@ class RequestTrackerTestClass : public ::testing::Test {
 
   application_manager::request_controller::RequestTracker tracker_;
 
-  const uint32_t kDefaultAppHmiLevelNoneRequestsTimeScale = 10u;
+  const uint32_t kDefaultAppHmiLevelNoneRequestsTimeScale = 100u;
   const uint32_t kDefaultAppHmiLevelNoneTimeScaleMaxRequests = 100u;
   const uint32_t kDefaultAppTimeScaleMaxRequests = 5u;
   const uint32_t kDefaultAppRequestsTimeScale = 200u;
@@ -82,14 +82,11 @@ TEST_F(RequestTrackerTestClass, TrackAppRequestInNone_ExpectSuccessTillLimit) {
   const uint32_t app_id = 1u;
   const mobile_apis::HMILevel::eType none_level =
       mobile_apis::HMILevel::HMI_NONE;
-
   SetDefaultConstraints();
-
   for (uint32_t i = 0; i < kDefaultAppHmiLevelNoneTimeScaleMaxRequests; ++i) {
     EXPECT_EQ(application_manager::request_controller::TrackResult::kSuccess,
               tracker_.Track(app_id, none_level));
   }
-
   EXPECT_EQ(application_manager::request_controller::TrackResult::
                 kNoneLevelMaxRequestsExceeded,
             tracker_.Track(app_id, none_level));
@@ -210,8 +207,8 @@ TEST_F(RequestTrackerTestClass,
 
 TEST_F(RequestTrackerTestClass,
        TrackAppRequestInNone_DoPause_TrackAgain_ExpectSuccessTillLimit) {
-  const uint32_t max_requests = 5;
-  const uint32_t time_scale_ms = 1;
+  const uint32_t max_requests = 5u;
+  const uint32_t time_scale_ms = 10u;
 
   sync_primitives::ConditionalVariable awaiter;
   sync_primitives::Lock lock;

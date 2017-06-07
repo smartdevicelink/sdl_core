@@ -805,6 +805,13 @@
     <element name="QUEUE" />
   </enum>
 
+  <enum name="SteeringWheelLocation"> 
+    <description>Describes the location of the Steering Wheel.</description>
+    <element name="LEFT" />
+    <element name="RIGHT" />
+    <element name="CENTER" />
+  </enum>
+
   <struct name="Image">
     <param name="value" minlength="0" maxlength="65535" type="String"> 
       <description>Either the static hex icon value or the binary image file name identifier (sent by PutFile).</description>
@@ -1869,6 +1876,9 @@
     </param>
     <param name="phoneCall" type="Boolean" mandatory="false">
       <description>Availability of build in phone. True: Available, False: Not Available </description>
+    </param>
+    <param name="steeringWheelLocation" type="SteeringWheelLocation" mandatory="false">
+      <description>See SteeringWheelLocation</description>
     </param>
   </struct>
 

@@ -6,6 +6,12 @@
           "EN_US","ES_MX","FR_CA","DE_DE","ES_ES","EN_GB","RU_RU","TR_TR","PL_PL","FR_FR","IT_IT","SV_SE","PT_PT","NL_NL","ZH_TW",
 "JA_JP","AR_SA","KO_KR","PT_BR","CS_CZ","DA_DK","NO_NO"
         ],
+        "hmiCapabilities":
+        {
+            "navigation" : false,
+            "phoneCall" : true,
+            "steeringWheelLocation": "LEFT"
+        },
         "displayCapabilities":
         {
             "displayType":"GEN2_8_DMA",
