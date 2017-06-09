@@ -198,15 +198,26 @@ class ApplicationImpl : public virtual Application,
   virtual DataAccessor<ButtonSubscriptions> SubscribedButtons() const OVERRIDE;
 
   virtual const std::string& curHash() const;
-#ifdef CUSTOMER_PASA
-  virtual bool flag_sending_hash_change_after_awake() const;
-  virtual void set_flag_sending_hash_change_after_awake(bool flag);
-#endif  // CUSTOMER_PASA
-        /**
-         * @brief Change Hash for current application
-         * and send notification to mobile
-         * @return updated_hash
-         */
+
+  /**
+   * @brief Retrieves flag_sending_hash_change_after_awake_
+   * @return Returns TRUE if hashID was changed during suspended state
+   * otherwise returns FALSE.
+   */
+  bool flag_sending_hash_change_after_awake() const OVERRIDE;
+
+  /**
+   * @brief Method is used when core receives OnAwakeSDL notification
+   * in order to change value of flag_sending_hash_change_after_awake_
+   * @param Contains FALSE
+   */
+  void set_flag_sending_hash_change_after_awake(bool flag) OVERRIDE;
+
+  /**
+   * @brief Change Hash for current application
+   * and send notification to mobile
+   * @return updated_hash
+   */
   virtual void UpdateHash();
 
   UsageStatistics& usage_report();
@@ -432,6 +443,7 @@ class ApplicationImpl : public virtual Application,
   protocol_handler::MajorProtocolVersion protocol_version_;
   bool is_voice_communication_application_;
   sync_primitives::atomic_bool is_resuming_;
+  bool flag_sending_hash_change_after_awake_;
 
   uint32_t video_stream_retry_number_;
   uint32_t audio_stream_retry_number_;

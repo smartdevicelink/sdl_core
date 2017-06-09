@@ -409,6 +409,20 @@ class Application : public virtual InitialApplicationData,
   virtual void UpdateHash() = 0;
 
   /**
+   * @brief Retrieves flag_sending_hash_change_after_awake_
+   * @return Returns TRUE if hashID was changed during suspended state
+   * otherwise returns FALSE.
+   */
+  virtual bool flag_sending_hash_change_after_awake() const = 0;
+
+  /**
+   * @brief Method is used when core receives OnAwakeSDL notification
+   * in order to change value of flag_sending_hash_change_after_awake_
+   * @param Contains FALSE
+   */
+  virtual void set_flag_sending_hash_change_after_awake(bool flag) = 0;
+
+  /**
    * @brief method is called when SDL is saving application data for resumption
    * @return TRUE if data of application need to save for resumption, otherwise
    * return FALSE

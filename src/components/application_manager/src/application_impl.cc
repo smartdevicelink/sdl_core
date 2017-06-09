@@ -44,6 +44,7 @@
 #include "utils/make_shared.h"
 #include "utils/timer_task_impl.h"
 #include "application_manager/policies/policy_handler_interface.h"
+#include "application_manager/resumption/resume_ctrl.h"
 
 namespace {
 
@@ -111,6 +112,7 @@ ApplicationImpl::ApplicationImpl(
           protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_3)
     , is_voice_communication_application_(false)
     , is_resuming_(false)
+    , flag_sending_hash_change_after_awake_(false)
     , video_stream_retry_number_(0)
     , audio_stream_retry_number_(0)
     , video_stream_suspend_timer_(
@@ -872,7 +874,19 @@ void ApplicationImpl::UpdateHash() {
       utils::gen_hash(application_manager_.get_settings().hash_string_size());
   set_is_application_data_changed(true);
 
-  MessageHelper::SendHashUpdateNotification(app_id(), application_manager_);
+  if (!application_manager_.resume_controller().is_suspended()) {
+    MessageHelper::SendHashUpdateNotification(app_id(), application_manager_);
+  } else {
+    flag_sending_hash_change_after_awake_ = true;
+  }
+}
+
+bool ApplicationImpl::flag_sending_hash_change_after_awake() const {
+  return flag_sending_hash_change_after_awake_;
+}
+
+void ApplicationImpl::set_flag_sending_hash_change_after_awake(bool flag) {
+  flag_sending_hash_change_after_awake_ = flag;
 }
 
 void ApplicationImpl::CleanupFiles() {
