@@ -115,9 +115,32 @@ class ResumeCtrl {
   virtual void OnSuspend() = 0;
 
   /**
+   * @brief Processes resumption data after receiving signal "Ignition Off"
+   */
+  virtual void OnIgnitionOff() = 0;
+
+  /**
    * @brief Processes resumption data after receiving signal "Awake"
    */
   virtual void OnAwake() = 0;
+
+  /**
+   * @brief Retrieves value of is_suspended_
+   *
+   * @return Returns TRUE if SDL has received OnExitAllApplication notification
+   * with reason "SUSPEND" otherwise returns FALSE
+   */
+  virtual bool is_suspended() const = 0;
+
+  /**
+   * @brief Sets value of is_suspended_
+   *
+   * @param contains TRUE if method is called when SDL has received
+   * OnExitAllApplication notification with reason "SUSPEND"
+   * contains FALSE if method is called when SDL has received
+   * OnAwakeSDL notification.
+   */
+  virtual void set_is_suspended(const bool suspended_flag) = 0;
 
   /**
    * @brief Method stops timer "RsmCtrlPercist" when SDL

@@ -67,6 +67,7 @@ ResumeCtrlImpl::ResumeCtrlImpl(ApplicationManager& application_manager)
                                       this, &ResumeCtrlImpl::SaveDataOnTimer))
     , is_resumption_active_(false)
     , is_data_saved_(false)
+    , is_suspended_(false)
     , launch_time_(time(NULL))
     , application_manager_(application_manager) {}
 #ifdef BUILD_TESTS
@@ -265,14 +266,27 @@ void ResumeCtrlImpl::OnSuspend() {
   LOG4CXX_AUTO_TRACE(logger_);
   StopSavePersistentDataTimer();
   SaveAllApplications();
-  resumption_storage_->OnSuspend();
   resumption_storage_->Persist();
 }
 
+void ResumeCtrlImpl::OnIgnitionOff() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  resumption_storage_->IncrementIgnOffCount();
+  OnSuspend();
+}
+
 void ResumeCtrlImpl::OnAwake() {
+  LOG4CXX_AUTO_TRACE(logger_);
   ResetLaunchTime();
   StartSavePersistentDataTimer();
-  return resumption_storage_->OnAwake();
+}
+
+bool ResumeCtrlImpl::is_suspended() const {
+  return is_suspended_;
+}
+
+void ResumeCtrlImpl::set_is_suspended(const bool suspended_flag) {
+  is_suspended_ = suspended_flag;
 }
 
 void ResumeCtrlImpl::StartSavePersistentDataTimer() {
@@ -774,7 +788,7 @@ void ResumeCtrlImpl::LoadResumeData() {
                     "Resumption data for application "
                         << app_id << " and device id " << device_id
                         << " will be dropped.");
-      resumption_storage_->DropAppDataResumption(device_id, app_id);
+      resumption_storage_->RemoveApplicationFromSaved(app_id, device_id);
       continue;
     }
   }

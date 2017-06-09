@@ -2883,7 +2883,7 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
     }
   }
   if (is_ignition_off) {
-    resume_controller().OnSuspend();
+    resume_controller().OnIgnitionOff();
   }
   request_ctrl_.terminateAllHMIRequests();
 }

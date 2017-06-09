@@ -130,6 +130,8 @@
 #include "application_manager/policies/mock_policy_handler_interface.h"
 #include "application_manager/mock_message_helper.h"
 #include "protocol_handler/mock_session_observer.h"
+#include "application_manager/mock_resume_ctrl.h"
+
 #ifdef SDL_REMOTE_CONTROL
 #include "functional_module/plugin_manager.h"
 #endif  // SDL_REMOTE_CONTROL
@@ -1029,10 +1031,18 @@ TEST_F(HMICommandsNotificationsTest,
       kCorrelationId_;
   MessageSharedPtr temp_message = CreateMessage();
 
+  resumprion_test::MockResumeCtrl mock_resume_ctrl;
+  EXPECT_CALL(app_mngr_, resume_controller())
+      .Times(2)
+      .WillRepeatedly(ReturnRef(mock_resume_ctrl));
+  EXPECT_CALL(mock_resume_ctrl, set_is_suspended(true));
+  EXPECT_CALL(mock_resume_ctrl, OnSuspend());
+
   EXPECT_CALL(app_mngr_, GetNextHMICorrelationID())
       .WillOnce(Return(kCorrelationId_));
   EXPECT_CALL(app_mngr_, ManageHMICommand(_))
       .WillOnce(GetMessage(temp_message));
+
   command->Run();
   EXPECT_EQ(
       static_cast<uint32_t>(
