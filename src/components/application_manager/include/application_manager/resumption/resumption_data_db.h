@@ -113,7 +113,13 @@ class ResumptionDataDB : public ResumptionData {
    * @brief Increments ignition counter for all registered applications
    * and remember ign_off time stamp
    */
-  virtual void OnSuspend();
+  void IncrementIgnOffCount() FINAL;
+
+  /**
+   * @brief Decrements ignition counter for all registered applications
+   * and remember ign_off time stamp
+   */
+  void DecrementIgnOffCount() FINAL;
 
   /**
    * @brief Retrieves hash ID for the given mobile app ID
@@ -128,12 +134,6 @@ class ResumptionDataDB : public ResumptionData {
   virtual bool GetHashId(const std::string& policy_app_id,
                          const std::string& device_id,
                          std::string& hash_id) const;
-
-  /**
-   * @brief Decrements ignition counter for all registered applications
-   * and remember ign_off time stamp
-   */
-  virtual void OnAwake();
 
   /**
    * @brief Retrieves data of saved application for the given mobile app ID

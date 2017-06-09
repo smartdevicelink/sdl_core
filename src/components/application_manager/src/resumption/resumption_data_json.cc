@@ -143,11 +143,11 @@ uint32_t ResumptionDataJson::GetHMIApplicationID(
   return hmi_app_id;
 }
 
-void ResumptionDataJson::OnSuspend() {
+void ResumptionDataJson::IncrementIgnOffCount() {
   using namespace app_mngr;
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock autolock(resumption_lock_);
-  Json::Value to_save;
+  Json::Value to_save = Json::arrayValue;
   for (Json::Value::iterator it = GetSavedApplications().begin();
        it != GetSavedApplications().end();
        ++it) {
@@ -167,7 +167,7 @@ void ResumptionDataJson::OnSuspend() {
   LOG4CXX_DEBUG(logger_, GetResumptionData().toStyledString());
 }
 
-void ResumptionDataJson::OnAwake() {
+void ResumptionDataJson::DecrementIgnOffCount() {
   using namespace app_mngr;
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock autolock(resumption_lock_);

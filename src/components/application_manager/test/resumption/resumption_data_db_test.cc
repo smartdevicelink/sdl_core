@@ -728,7 +728,7 @@ TEST_F(ResumptionDataDBTest, OnSuspend) {
   res_db()->SaveApplication(app_mock);
   CheckSavedDB();
 
-  res_db()->OnSuspend();
+  res_db()->IncrementIgnOffCount();
   ign_off_count_++;
   CheckSavedDB();
 }
@@ -740,18 +740,18 @@ TEST_F(ResumptionDataDBTest, OnSuspendFourTimes) {
   res_db()->SaveApplication(app_mock);
   CheckSavedDB();
 
-  res_db()->OnSuspend();
+  res_db()->IncrementIgnOffCount();
   ign_off_count_++;
   CheckSavedDB();
 
-  res_db()->OnSuspend();
+  res_db()->IncrementIgnOffCount();
   ign_off_count_++;
   CheckSavedDB();
-  res_db()->OnSuspend();
+  res_db()->IncrementIgnOffCount();
   ign_off_count_++;
   CheckSavedDB();
 
-  res_db()->OnSuspend();
+  res_db()->IncrementIgnOffCount();
 
   ssize_t result = res_db()->IsApplicationSaved(policy_app_id_, kMacAddress_);
   EXPECT_EQ(-1, result);
@@ -765,11 +765,11 @@ TEST_F(ResumptionDataDBTest, OnSuspendOnAwake) {
   res_db()->SaveApplication(app_mock);
   CheckSavedDB();
 
-  res_db()->OnSuspend();
+  res_db()->IncrementIgnOffCount();
 
   ign_off_count_++;
   CheckSavedDB();
-  res_db()->OnAwake();
+  res_db()->DecrementIgnOffCount();
   ign_off_count_ = 0;
   CheckSavedDB();
 }
@@ -782,7 +782,7 @@ TEST_F(ResumptionDataDBTest, Awake_AppNotSuspended) {
   res_db()->SaveApplication(app_mock);
   CheckSavedDB();
 
-  res_db()->OnAwake();
+  res_db()->DecrementIgnOffCount();
   ign_off_count_ = 0;
   CheckSavedDB();
 }
@@ -795,12 +795,12 @@ TEST_F(ResumptionDataDBTest, TwiceAwake_AppNotSuspended) {
   res_db()->SaveApplication(app_mock);
   CheckSavedDB();
 
-  res_db()->OnSuspend();
-  res_db()->OnAwake();
+  res_db()->IncrementIgnOffCount();
+  res_db()->DecrementIgnOffCount();
   ign_off_count_ = 0;
   CheckSavedDB();
 
-  res_db()->OnAwake();
+  res_db()->DecrementIgnOffCount();
   CheckSavedDB();
 }
 
@@ -826,14 +826,14 @@ TEST_F(ResumptionDataDBTest, GetIgnOffTime_AfterSuspendAndAwake) {
   last_ign_off_time = res_db()->GetIgnOffTime();
   EXPECT_EQ(0u, last_ign_off_time);
 
-  res_db()->OnSuspend();
+  res_db()->IncrementIgnOffCount();
 
   uint32_t after_suspend;
   after_suspend = res_db()->GetIgnOffTime();
   EXPECT_LE(last_ign_off_time, after_suspend);
 
   uint32_t after_awake;
-  res_db()->OnAwake();
+  res_db()->DecrementIgnOffCount();
 
   after_awake = res_db()->GetIgnOffTime();
   EXPECT_LE(after_suspend, after_awake);
