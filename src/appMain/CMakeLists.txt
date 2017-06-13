@@ -32,6 +32,15 @@ include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
 find_package(SDLOpenSSL REQUIRED)
 
+if (EXTENDED_MEDIA_MODE) 
+  set(default_media_inc 
+    ${GSTREAMER_gst_INCLUDE_DIR} 
+    ${GSTREAMER_gstconfig_INCLUDE_DIR} 
+  ) 
+else(EXTENDED_MEDIA_MODE) 
+  set(default_media_inc) 
+endif()
+
 include_directories(
   ${COMPONENTS_DIR}/protocol_handler/include
   ${COMPONENTS_DIR}/application_manager/include
@@ -56,6 +65,7 @@ include_directories(
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${LOG4CXX_INCLUDE_DIRECTORY}
   ${OPENSSL_INCLUDE_DIRECTORY}
+  ${default_media_inc}
   ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
 )
 
@@ -74,15 +84,6 @@ cmake_policy(PUSH)
 cmake_policy(SET CMP0015 NEW)
 link_directories(${LIBUSB_LIBS_DIRECTORY})
 cmake_policy(POP)
-
-if (EXTENDED_MEDIA_MODE)
-  set(default_media_inc
-    ${GSTREAMER_gst_INCLUDE_DIR}
-    ${GSTREAMER_gstconfig_INCLUDE_DIR}
-  )
-else(EXTENDED_MEDIA_MODE)
-  set(default_media_inc)
-endif()
 
 if (TELEMETRY_MONITOR)
   set(TELEMETRY_MONITOR_LIB
