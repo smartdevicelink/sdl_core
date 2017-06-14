@@ -71,9 +71,8 @@ class UpdateStatusManagerInterface {
 
   /**
    * @brief Update status hanlder for PTS sending out
-   * @param update_timeout Timeout for waiting of incoming PTU
    */
-  virtual void OnUpdateSentOut(uint32_t update_timeout) = 0;
+  virtual void OnUpdateSentOut() = 0;
 
   /**
    * @brief Update status handler for PTU waiting timeout

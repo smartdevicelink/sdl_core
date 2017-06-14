@@ -807,6 +807,11 @@ class ApplicationManagerImpl
 
   security_manager::SSLContext::HandshakeContext GetHandshakeContext(
       uint32_t key) const OVERRIDE;
+
+  bool CanStartProtectedService(
+      const int32_t& session_key,
+      const protocol_handler::ServiceType& type) const OVERRIDE;
+  bool HasNaviApp(const int32_t& session_key) const OVERRIDE;
 #endif  // ENABLE_SECURITY
 
   /**

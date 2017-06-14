@@ -79,9 +79,9 @@ ProtocolHandlerImpl::ProtocolHandlerImpl(
           "PH ToMobile", this, threads::ThreadOptions(kStackSize))
 #ifdef TELEMETRY_MONITOR
     , metric_observer_(NULL)
+    ,
 #endif  // TELEMETRY_MONITOR
-
-{
+    ptu_state_(kNotTriggered) {
   LOG4CXX_AUTO_TRACE(logger_);
   protocol_header_validator_.set_max_payload_size(
       get_settings().maximum_payload_size());
@@ -1024,8 +1024,12 @@ class StartSessionHandler : public security_manager::SecurityManagerListener {
         protocol_handler_->SendStartSessionNAck(
             connection_id_, session_id_, protocol_version_, service_type_);
       } else {
-        // Could not be success handshake and not already protected service
-        NOTREACHED();
+        protocol_handler_->SendStartSessionAck(connection_id_,
+                                               session_id_,
+                                               protocol_version_,
+                                               hash_id_,
+                                               service_type_,
+                                               success);
       }
     } else {
       if (success) {
@@ -1074,17 +1078,23 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
 
 #ifdef ENABLE_SECURITY
   const bool protection =
-      // Protocolo version 1 is not support protection
+      // Protocol version 1 is not support protection
       (protocol_version > PROTOCOL_VERSION_1) ? packet.protection_flag()
                                               : false;
 #else
   const bool protection = false;
 #endif  // ENABLE_SECURITY
 
-  uint32_t hash_id;
+  struct SessionObserver::ExistingSessionInfo si = {0};
   const ConnectionID connection_id = packet.connection_id();
-  const uint32_t session_id = session_observer_.OnSessionStartedCallback(
-      connection_id, packet.session_id(), service_type, protection, &hash_id);
+  const bool first_try = false;
+  const uint32_t session_id =
+      session_observer_.OnSessionStartedCallback(connection_id,
+                                                 packet.session_id(),
+                                                 service_type,
+                                                 protection,
+                                                 first_try,
+                                                 &si);
 
   if (0 == session_id) {
     LOG4CXX_WARN(logger_,
@@ -1098,29 +1108,132 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
   }
 
 #ifdef ENABLE_SECURITY
-  // for packet is encrypted and security plugin is enable
-  if (protection && security_manager_) {
+  // if encryption of the service is requested and security plug-in is enable
+  if (si.start_protected_ && security_manager_) {
     const uint32_t connection_key =
         session_observer_.KeyFromPair(connection_id, session_id);
-
+    struct SessionInfo session_info = SessionInfo(connection_id,
+                                                  packet.session_id(),
+                                                  protocol_version,
+                                                  packet.service_type(),
+                                                  si.hash_id_,
+                                                  si.service_exists_,
+                                                  connection_key);
     security_manager::SSLContext* ssl_context =
-        security_manager_->CreateSSLContext(connection_key);
+        GetSSLContextBySession(session_info);
     if (!ssl_context) {
+      ssl_context = security_manager_->CreateSSLContext(connection_key);
+    }
+    if (!ssl_context || security_manager_->IsCertificateUpdateRequired()) {
       const std::string error("CreateSSLContext failed");
       LOG4CXX_ERROR(logger_, error);
       security_manager_->SendInternalError(
           connection_key,
           security_manager::SecurityManager::ERROR_INTERNAL,
           error);
-      // Start service without protection
-      SendStartSessionAck(connection_id,
-                          session_id,
-                          packet.protocol_version(),
-                          hash_id,
-                          packet.service_type(),
-                          PROTECTION_OFF);
+      // PTU for navi application has already been triggered by RAI
+      // so that there is no need of new PTU
+      if (si.is_navi_) {
+        LOG4CXX_INFO(logger_, "application is navi ");
+        // if service has already been started as non encrypted
+        // or it has to be protected
+        // and there is no valid certificate
+        // Nack should be sent
+        if (si.service_exists_ ||
+            (si.start_protected_ && !si.can_be_unprotected_)) {
+          LOG4CXX_INFO(logger_,
+                       "application is " << si.start_protected_ << ", "
+                                         << si.can_be_unprotected_
+                                         << ", service exist"
+                                         << si.service_exists_);
+          //              if (!si.start_protected_) {
+          SendStartSessionNAck(connection_id,
+                               packet.session_id(),
+                               protocol_version,
+                               packet.service_type());
+        } else {
+          const bool second_try = true;
+          const uint32_t session_id =
+              session_observer_.OnSessionStartedCallback(connection_id,
+                                                         packet.session_id(),
+                                                         service_type,
+                                                         protection,
+                                                         second_try,
+                                                         &si);
+
+          // service has not been started yet
+          // so that start it as non encrypted
+          // Ack encryption=false should be sent
+          // Service was started, so session_id should not be = 0
+          if (session_id != 0) {
+            SendStartSessionAck(connection_id,
+                                session_id,
+                                packet.protocol_version(),
+                                si.hash_id_,
+                                packet.service_type(),
+                                PROTECTION_OFF);
+          } else {
+            SendStartSessionNAck(connection_id,
+                                 packet.session_id(),
+                                 protocol_version,
+                                 packet.service_type());
+          }
+        }
+        return RESULT_OK;
+      }
+      LOG4CXX_INFO(logger_, "application is not navi ");
+      // This is non navi application,
+      // so that a PTU must be triggered if no certificate is provided
+      // and PTU has not been triggered by this reason
+      sync_primitives::AutoLock lock(ptu_state_lock_);
+      // PTU has not been triggered
+      // trigger PTU
+
+      // TODO ADD LOGS HERE
+      if (ptu_state_ == kNotTriggered) {
+        LOG4CXX_INFO(logger_, "application should trigger PTU now");
+        ptu_state_ = kTriggered;
+        pending_session_ = session_info;
+        security_manager_->NotifyOnCertififcateUpdateRequired();
+      } else if (ptu_state_ != kTriggered) {
+        // PTU has already been triggered
+        // and had brought no valid certificate
+        // Nack should be sent
+
+        if (si.can_be_unprotected_) {
+          // service has not been started yet
+          // so that start can be started both as non encrypted and encrypted
+          // And TLS handshake failed
+          // We should start session as not encrypted
+          LOG4CXX_INFO(logger_, "application can start unprotected");
+          const bool second_try = true;
+          const uint32_t session_id =
+              session_observer_.OnSessionStartedCallback(connection_id,
+                                                         packet.session_id(),
+                                                         service_type,
+                                                         protection,
+                                                         second_try,
+                                                         &si);
+
+          // Ack encryption=false should be sent
+          SendStartSessionAck(connection_id,
+                              session_id,
+                              packet.protocol_version(),
+                              si.hash_id_,
+                              packet.service_type(),
+                              PROTECTION_OFF);
+        }
+        LOG4CXX_INFO(logger_, "application cannot start unprotected");
+        SendStartSessionNAck(connection_id,
+                             packet.session_id(),
+                             protocol_version,
+                             packet.service_type());
+      }
+
       return RESULT_OK;
     }
+    // Certificate is existing and doesn't rquire update,
+    // try to start encrypted service
     if (ssl_context->IsInitCompleted()) {
       // mark service as protected
       session_observer_.SetProtectionFlag(connection_key, service_type);
@@ -1128,7 +1241,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
       SendStartSessionAck(connection_id,
                           session_id,
                           packet.protocol_version(),
-                          hash_id,
+                          si.hash_id_,
                           packet.service_type(),
                           PROTECTION_ON);
     } else {
@@ -1139,17 +1252,17 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
                                   connection_id,
                                   session_id,
                                   packet.protocol_version(),
-                                  hash_id,
+                                  si.hash_id_,
                                   service_type,
                                   get_settings().force_protected_service()));
       if (!ssl_context->IsHandshakePending()) {
         // Start handshake process
         security_manager_->StartHandshake(connection_key);
       }
+      LOG4CXX_DEBUG(logger_,
+                    "Protection establishing for connection "
+                        << connection_key << " is in progress");
     }
-    LOG4CXX_DEBUG(logger_,
-                  "Protection establishing for connection "
-                      << connection_key << " is in progress");
     return RESULT_OK;
   }
 #endif  // ENABLE_SECURITY
@@ -1157,7 +1270,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
   SendStartSessionAck(connection_id,
                       session_id,
                       packet.protocol_version(),
-                      hash_id,
+                      si.hash_id_,
                       packet.service_type(),
                       PROTECTION_OFF);
   return RESULT_OK;
@@ -1517,4 +1630,105 @@ uint8_t ProtocolHandlerImpl::SupportedSDLProtocolVersion() const {
   }
   return PROTOCOL_VERSION_2;
 }
+
+void ProtocolHandlerImpl::OnPTUFinished(const bool ptu_result) {
+  LOG4CXX_AUTO_TRACE(logger_);
+#ifdef ENABLE_SECURITY
+  sync_primitives::AutoLock lock(ptu_state_lock_);
+  if (ptu_state_ != kTriggered) {
+    return;
+  }
+  if (ptu_result) {
+    ptu_state_ = kFinSuccess;
+    security_manager::SSLContext* ssl_context =
+        GetSSLContextBySession(pending_session_);
+    if ((!ssl_context) || security_manager_->IsCertificateUpdateRequired()) {
+      SendStartSessionNAck(pending_session_.connection_id_,
+                           pending_session_.session_id_,
+                           pending_session_.protocol_version_,
+                           pending_session_.service_type_);
+    } else {
+      StartEncryptedService(pending_session_);
+    }
+    return;
+  }
+  ptu_state_ = kFinNotSuccess;
+  SendStartSessionNAck(pending_session_.connection_id_,
+                       pending_session_.session_id_,
+                       pending_session_.protocol_version_,
+                       pending_session_.service_type_);
+#endif
+}
+
+bool ProtocolHandlerImpl::OnCertificateUpdated(
+    const std::string& certificate_data) {
+  LOG4CXX_AUTO_TRACE(logger_);
+#ifdef ENABLE_SECURITY
+  sync_primitives::AutoLock lock(ptu_state_lock_);
+  if (ptu_state_ != kTriggered) {
+    ptu_state_ = kNotTriggered;
+  }
+  return false;
+#else
+  return false;
+#endif
+}
+
+void ProtocolHandlerImpl::OnUpdateHMIAppType(
+    std::map<std::string, std::vector<std::string> > app_hmi_types) {}
+
+#ifdef ENABLE_SECURITY
+security_manager::SSLContext* ProtocolHandlerImpl::GetSSLContextBySession(
+    const SessionInfo& session_info) {
+  const uint32_t connection_key = session_observer_.KeyFromPair(
+      session_info.connection_id_, session_info.session_id_);
+  session_observer_.SetProtectionFlag(
+      connection_key, ServiceTypeFromByte(session_info.service_type_));
+  return session_observer_.GetSSLContext(connection_key,
+                                         protocol_handler::kControl);
+}
+
+void ProtocolHandlerImpl::StartEncryptedService(const SessionInfo& si) {
+  security_manager::SSLContext* ssl_context = GetSSLContextBySession(si);
+
+  struct SessionObserver::ExistingSessionInfo dump = {0};
+  const ServiceType service_type = ServiceTypeFromByte(si.service_type_);
+  const bool try_start = true;
+  session_observer_.OnSessionStartedCallback(si.connection_id_,
+                                             si.session_id_,
+                                             service_type,
+                                             PROTECTION_ON,
+                                             try_start,
+                                             &dump);
+
+  // Start service as protected with current SSLContext
+  if (ssl_context && ssl_context->IsInitCompleted()) {
+    SendStartSessionAck(si.connection_id_,
+                        si.session_id_,
+                        si.protocol_version_,
+                        si.hash_id_,
+                        si.service_type_,
+                        PROTECTION_ON);
+  } else {
+    security_manager_->AddListener(
+        new StartSessionHandler(si.connection_key_,
+                                this,
+                                session_observer_,
+                                si.connection_id_,
+                                si.session_id_,
+                                si.protocol_version_,
+                                si.hash_id_,
+                                ServiceTypeFromByte(si.service_type_),
+                                get_settings().force_protected_service()));
+    if (!ssl_context->IsHandshakePending()) {
+      // Start handshake process
+      security_manager_->StartHandshake(si.connection_key_);
+    }
+  }
+  LOG4CXX_DEBUG(logger_,
+                "Protection establishing for connection " << si.connection_key_
+                                                          << " is in progress");
+}
+#endif
+
 }  // namespace protocol_handler

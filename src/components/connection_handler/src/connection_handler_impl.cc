@@ -284,17 +284,42 @@ uint32_t ConnectionHandlerImpl::OnSessionStartedCallback(
     const uint8_t session_id,
     const protocol_handler::ServiceType& service_type,
     const bool is_protected,
-    uint32_t* hash_id) {
+    const bool can_start,
+    struct ExistingSessionInfo* out_session_info) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  if (hash_id) {
-    *hash_id = protocol_handler::HASH_ID_WRONG;
+  if (out_session_info) {
+    out_session_info->hash_id_ = protocol_handler::HASH_ID_WRONG;
   }
 #ifdef ENABLE_SECURITY
   if (!AllowProtection(get_settings(), service_type, is_protected)) {
     return 0;
   }
+  const uint32_t app_id = FindAppIdBySession(connection_handle, session_id);
+  if (out_session_info) {
+    out_session_info->is_navi_ = HasNaviApp(app_id);
+  }
+  bool can_start_protected =
+      is_protected && CanStartProtectedService(app_id, service_type);
+
+  bool can_be_unprotected =
+      (std::find(get_settings().force_protected_service().begin(),
+                 get_settings().force_protected_service().end(),
+                 service_type) ==
+       get_settings().force_protected_service().end());
+#else
+  bool can_start_protected = false;
 #endif  // ENABLE_SECURITY
+  if (out_session_info) {
+    out_session_info->start_protected_ = can_start_protected;
+    out_session_info->can_be_unprotected_ = can_be_unprotected;
+
+    LOG4CXX_INFO(logger_,
+                 "out_session_info has "
+                     << out_session_info->start_protected_ << ","
+                     << out_session_info->can_be_unprotected_);
+  }
+
   sync_primitives::AutoReadLock lock(connection_list_lock_);
   ConnectionList::iterator it = connection_list_.find(connection_handle);
   if (connection_list_.end() == it) {
@@ -310,39 +335,63 @@ uint32_t ConnectionHandlerImpl::OnSessionStartedCallback(
       LOG4CXX_ERROR(logger_, "Couldn't start new session!");
       return 0;
     }
-    if (hash_id) {
-      *hash_id = KeyFromPair(connection_handle, new_session_id);
+    if (out_session_info) {
+      out_session_info->hash_id_ =
+          KeyFromPair(connection_handle, new_session_id);
     }
   } else {  // Could be create new service or protected exists one
-    if (!connection->AddNewService(session_id, service_type, is_protected)) {
-      LOG4CXX_ERROR(logger_,
-                    "Couldn't establish "
+    // only for unprotected
+    bool service_exists = false;
+    if (can_start_protected == false ||
+        (can_start == true && can_be_unprotected == true)) {
+      LOG4CXX_INFO(logger_, "Now service can be added");
+      if (!connection->AddNewService(
+              session_id, service_type, can_start_protected, &service_exists)) {
+        LOG4CXX_ERROR(
+            logger_,
+            "Couldn't establish "
 #ifdef ENABLE_SECURITY
-                        << (is_protected ? "protected" : "non-protected")
+                << (can_start_protected ? "protected" : "non-protected")
 #endif  // ENABLE_SECURITY
-                        << " service " << static_cast<int>(service_type)
-                        << " for session " << static_cast<int>(session_id));
-      return 0;
+                << " service " << static_cast<int>(service_type)
+                << " for session " << static_cast<int>(session_id));
+        return 0;
+      }
+    } else {
+      LOG4CXX_INFO(logger_, "Now service couldn`t be added");
     }
+
     new_session_id = session_id;
-    if (hash_id) {
-      *hash_id = protocol_handler::HASH_ID_NOT_SUPPORTED;
+    if (out_session_info) {
+      out_session_info->hash_id_ = protocol_handler::HASH_ID_NOT_SUPPORTED;
+      out_session_info->service_exists_ = service_exists;
     }
   }
   sync_primitives::AutoReadLock read_lock(connection_handler_observer_lock_);
   if (connection_handler_observer_) {
-    const uint32_t session_key = KeyFromPair(connection_handle, new_session_id);
-    const bool success = connection_handler_observer_->OnServiceStartedCallback(
-        connection->connection_device_handle(), session_key, service_type);
-    if (!success) {
-      LOG4CXX_WARN(logger_,
-                   "Service starting forbidden by connection_handler_observer");
-      if (protocol_handler::kRpc == service_type) {
-        connection->RemoveSession(new_session_id);
-      } else {
-        connection->RemoveService(session_id, service_type);
+    if (can_start_protected == false ||
+        (can_start == true && can_be_unprotected == true)) {
+      LOG4CXX_INFO(logger_, "Now service should start");
+      const uint32_t session_key =
+          KeyFromPair(connection_handle, new_session_id);
+      const bool success =
+          connection_handler_observer_->OnServiceStartedCallback(
+              connection->connection_device_handle(),
+              session_key,
+              service_type);
+      if (!success) {
+        LOG4CXX_WARN(
+            logger_,
+            "Service starting forbidden by connection_handler_observer");
+        if (protocol_handler::kRpc == service_type) {
+          connection->RemoveSession(new_session_id);
+        } else {
+          connection->RemoveService(session_id, service_type);
+        }
+        return 0;
       }
-      return 0;
+    } else {
+      LOG4CXX_INFO(logger_, "Now service should not be started");
     }
   }
   return new_session_id;
@@ -1013,6 +1062,42 @@ bool ConnectionHandlerImpl::ProtocolVersionUsed(
   LOG4CXX_WARN(logger_, "Connection not found !");
   return false;
 }
+
+#ifdef ENABLE_SECURITY
+
+bool ConnectionHandlerImpl::CanStartProtectedService(
+    const int32_t& session_key,
+    const protocol_handler::ServiceType& type) const {
+  sync_primitives::AutoReadLock read_lock(connection_handler_observer_lock_);
+  if (connection_handler_observer_) {
+    return connection_handler_observer_->CanStartProtectedService(session_key,
+                                                                  type);
+  }
+  return true;
+}
+
+bool ConnectionHandlerImpl::HasNaviApp(const int32_t& session_key) const {
+  sync_primitives::AutoReadLock read_lock(connection_handler_observer_lock_);
+  if (connection_handler_observer_) {
+    return connection_handler_observer_->HasNaviApp(session_key);
+  }
+  return false;
+}
+
+uint32_t ConnectionHandlerImpl::FindAppIdBySession(
+    const transport_manager::ConnectionUID connection_handle,
+    const uint8_t& session_id) const {
+  const uint32_t conn_key = KeyFromPair(connection_handle, session_id);
+  uint32_t app_id = 0;
+
+  if (GetDataOnSessionKey(conn_key, &app_id, NULL, NULL)) {
+    app_id = 0;
+  }
+
+  return app_id;
+}
+
+#endif  // ENABLE_SECURITY
 
 #ifdef BUILD_TESTS
 ConnectionList& ConnectionHandlerImpl::getConnectionList() {

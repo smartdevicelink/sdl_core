@@ -41,7 +41,7 @@ namespace policy {
 class MockUpdateStatusManager : public UpdateStatusManager {
  public:
   MOCK_METHOD1(set_listener, void(PolicyListener* listener));
-  MOCK_METHOD1(OnUpdateSentOut, void(uint32_t update_timeout));
+  MOCK_METHOD0(OnUpdateSentOut, void());
   MOCK_METHOD0(OnUpdateTimeoutOccurs, void());
   MOCK_METHOD0(OnValidUpdateReceived, void());
   MOCK_METHOD0(OnWrongUpdateReceived, void());

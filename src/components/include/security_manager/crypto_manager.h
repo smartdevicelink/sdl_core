@@ -62,7 +62,6 @@ class CryptoManager : public policy::PolicyHandlerObserver {
    */
   virtual bool Init() = 0;
   virtual SSLContext* CreateSSLContext() = 0;
-  virtual bool OnCertificateUpdated(const std::string& data) = 0;
   virtual void ReleaseSSLContext(SSLContext* context) = 0;
   virtual std::string LastError() const = 0;
 
@@ -72,6 +71,8 @@ class CryptoManager : public policy::PolicyHandlerObserver {
   * \return pointer to crypto manager settings class
   */
   virtual const CryptoManagerSettings& get_settings() const = 0;
+  virtual bool OnCertificateUpdated(const std::string& data) = 0;
+  virtual void OnPTUFinished(const bool ptu_result) = 0;
   virtual ~CryptoManager() {}
 };
 

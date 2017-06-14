@@ -122,9 +122,10 @@ class PolicyHandler : public PolicyHandlerInterface,
   void GetUpdateUrls(const uint32_t service_type,
                      EndpointUrls& out_end_points) OVERRIDE;
   virtual std::string GetLockScreenIconUrl() const OVERRIDE;
+  void ResetRetrySequence() OVERRIDE;
   uint32_t NextRetryTimeout() OVERRIDE;
-  uint32_t TimeoutExchangeSec() OVERRIDE;
-  uint32_t TimeoutExchangeMSec() OVERRIDE;
+  uint32_t TimeoutExchangeSec() const OVERRIDE;
+  uint32_t TimeoutExchangeMSec() const OVERRIDE;
   void OnExceededTimeout() OVERRIDE;
   void OnSystemReady() OVERRIDE;
   void PTUpdatedAt(Counters counter, int value) OVERRIDE;
@@ -323,11 +324,6 @@ class PolicyHandler : public PolicyHandlerInterface,
   custom_str::CustomString GetAppName(
       const std::string& policy_app_id) OVERRIDE;
 
-  virtual void OnUpdateHMIAppType(
-      std::map<std::string, StringArray> app_hmi_types) OVERRIDE;
-
-  virtual void OnCertificateUpdated(
-      const std::string& certificate_data) OVERRIDE;
 #ifdef EXTERNAL_PROPRIETARY_MODE
   void OnCertificateDecrypted(bool is_succeeded) OVERRIDE;
 #endif  // EXTERNAL_PROPRIETARY_MODE
@@ -456,6 +452,12 @@ class PolicyHandler : public PolicyHandlerInterface,
 #endif  // ENABLE_SECURITY
 
   const PolicySettings& get_settings() const OVERRIDE;
+
+  virtual void OnUpdateHMIAppType(
+      std::map<std::string, StringArray> app_hmi_types) OVERRIDE;
+
+  virtual void OnCertificateUpdated(
+      const std::string& certificate_data) OVERRIDE;
 
   virtual void OnPTUFinished(const bool ptu_result) OVERRIDE;
 

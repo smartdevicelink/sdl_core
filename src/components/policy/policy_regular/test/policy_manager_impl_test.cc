@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,8 +39,9 @@
 #include "json/writer.h"
 #include "gtest/gtest.h"
 
-#include "config_profile/profile.h"
+#include "policy/policy_types.h"
 #include "policy/policy_manager_impl.h"
+#include "config_profile/profile.h"
 #include "policy/policy_table/enums.h"
 #include "policy/policy_table/types.h"
 #include "policy/mock_policy_settings.h"
@@ -62,6 +63,9 @@ using ::testing::_;
 using ::testing::SetArgReferee;
 using ::testing::AtLeast;
 using ::testing::Return;
+
+using ::policy::MockPolicyListener;
+using ::policy::MockUpdateStatusManager;
 
 using ::policy::PolicyManagerImpl;
 using ::policy::PolicyTable;
@@ -462,7 +466,6 @@ TEST_F(PolicyManagerImplTest2, GetNotificationsNumberAfterPTUpdate) {
   // Arrange
   Json::Value table = CreatePTforLoad();
   manager->ForcePTExchange();
-  manager->SetSendOnUpdateSentOut(false);
   manager->OnUpdateStarted();
   policy_table::Table update(&table);
   update.SetPolicyTableType(rpc::policy_table_interface_base::PT_UPDATE);
@@ -683,6 +686,23 @@ TEST_F(PolicyManagerImplTest, AddAppStopwatch) {
   EXPECT_CALL(*cache_manager,
               Add("12345", usage_statistics::SECONDS_HMI_FULL, 30));
   manager->Add("12345", usage_statistics::SECONDS_HMI_FULL, 30);
+}
+
+TEST_F(
+    PolicyManagerImplTest,
+    TriggerPTUForNaviAppInCaseNoCertificateExistsInPolicyTable_UPDATE_NEEDED) {
+  EXPECT_CALL(*cache_manager, IsPredataPolicy(_)).WillOnce(Return(false));
+  EXPECT_CALL(*cache_manager, IsApplicationRepresented(_))
+      .WillOnce(Return(true));
+  EXPECT_CALL(*cache_manager, GetCertificate())
+      .Times(2)
+      .WillRepeatedly(Return(""));
+  EXPECT_CALL(*cache_manager, AppHasHMIType(_, policy_table::AHT_NAVIGATION))
+      .WillOnce(Return(true));
+  EXPECT_EQ("UP_TO_DATE", manager->GetPolicyTableStatus());
+  manager->AddApplication(policy::kDefaultId,
+                          HmiTypes(policy_table::AHT_NAVIGATION));
+  EXPECT_EQ("UPDATE_NEEDED", manager->GetPolicyTableStatus());
 }
 
 TEST_F(PolicyManagerImplTest, ResetPT) {

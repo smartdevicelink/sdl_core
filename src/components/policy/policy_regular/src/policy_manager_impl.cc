@@ -73,6 +73,7 @@ PolicyManagerImpl::PolicyManagerImpl()
     , cache_(new CacheManager)
     , retry_sequence_timeout_(kDefaultRetryTimeoutInMSec)
     , retry_sequence_index_(0)
+    , current_retry_sequence_timeout_(0)
     , timer_retry_sequence_("Retry sequence timer",
                             new timer::TimerTaskImpl<PolicyManagerImpl>(
                                 this, &PolicyManagerImpl::RetrySequence))
@@ -319,10 +320,12 @@ void PolicyManagerImpl::StartPTExchange() {
     if (update_status_manager_.IsUpdateRequired()) {
       if (RequestPTUpdate() && !timer_retry_sequence_.is_running()) {
         // Start retry sequency
-        const int timeout_sec = NextRetryTimeout();
+        current_retry_sequence_timeout_ = NextRetryTimeout();
         LOG4CXX_DEBUG(logger_,
-                      "Start retry sequence timeout = " << timeout_sec);
-        timer_retry_sequence_.Start(timeout_sec, timer::kPeriodic);
+                      "Start retry sequence timeout = "
+                          << current_retry_sequence_timeout_);
+        timer_retry_sequence_.Start(current_retry_sequence_timeout_,
+                                    timer::kPeriodic);
       }
     }
   }
@@ -805,7 +808,7 @@ uint32_t PolicyManagerImpl::NextRetryTimeout() {
   LOG4CXX_DEBUG(logger_, "Index: " << retry_sequence_index_);
   uint32_t next = 0u;
   if (retry_sequence_seconds_.empty() ||
-      retry_sequence_index_ >= retry_sequence_seconds_.size()) {
+      retry_sequence_index_ > retry_sequence_seconds_.size()) {
     return next;
   }
 
@@ -853,16 +856,7 @@ void PolicyManagerImpl::OnExceededTimeout() {
 }
 
 void PolicyManagerImpl::OnUpdateStarted() {
-  uint32_t update_timeout = TimeoutExchangeMSec();
-  LOG4CXX_DEBUG(logger_,
-                "Update timeout will be set to (milisec): " << update_timeout);
-
-  send_on_update_sent_out_ =
-      !wrong_ptu_update_received_ && !update_status_manager_.IsUpdatePending();
-
-  if (send_on_update_sent_out_) {
-    update_status_manager_.OnUpdateSentOut(update_timeout);
-  }
+  update_status_manager_.OnUpdateSentOut();
   cache_->SaveUpdateRequired(true);
 }
 
@@ -1010,6 +1004,7 @@ StatusNotifier PolicyManagerImpl::AddApplication(
   const std::string device_id = GetCurrentDeviceId(application_id);
   DeviceConsent device_consent = GetUserConsentForDevice(device_id);
   sync_primitives::AutoLock lock(apps_registration_lock_);
+
   if (IsNewApplication(application_id)) {
     AddNewApplication(application_id, device_consent);
     return utils::MakeShared<CallStatusChange>(update_status_manager_,
@@ -1026,6 +1021,7 @@ StatusNotifier PolicyManagerImpl::AddApplication(
     return utils::MakeShared<utils::CallNothing>();
   }
 }
+
 void PolicyManagerImpl::RemoveAppConsentForGroup(
     const std::string& app_id, const std::string& group_name) {
   cache_->RemoveAppConsentForGroup(app_id, group_name);
@@ -1051,6 +1047,16 @@ void PolicyManagerImpl::PromoteExistedApplication(
   if (kDeviceAllowed == device_consent &&
       cache_->IsPredataPolicy(application_id)) {
     cache_->SetDefaultPolicy(application_id);
+  } else if (cache_->IsDefaultPolicy(application_id)) {
+    cache_->SetDefaultPolicy(application_id);
+  }
+  if (HasCertificate()) {
+    LOG4CXX_DEBUG(logger_, "Certificate exits, no update required.");
+    return;
+  }
+
+  if (cache_->AppHasHMIType(application_id, policy_table::AHT_NAVIGATION)) {
+    update_status_manager_.ScheduleUpdate();
   }
 }
 
@@ -1118,15 +1124,21 @@ void PolicyManagerImpl::set_cache_manager(
 
 void PolicyManagerImpl::RetrySequence() {
   LOG4CXX_INFO(logger_, "Start new retry sequence");
-  RequestPTUpdate();
+  current_retry_sequence_timeout_ = NextRetryTimeout();
 
-  uint32_t timeout = NextRetryTimeout();
-
-  if (!timeout && timer_retry_sequence_.is_running()) {
+  LOG4CXX_INFO(
+      logger_,
+      "current_retry_sequence_timeout_ = " << current_retry_sequence_timeout_);
+  update_status_manager_.OnUpdateTimeoutOccurs();
+  if (!current_retry_sequence_timeout_ && timer_retry_sequence_.is_running()) {
     timer_retry_sequence_.Stop();
+
+    listener()->OnPTUFinished(false);
     return;
   }
-  timer_retry_sequence_.Start(timeout, timer::kPeriodic);
+  RequestPTUpdate();
+  timer_retry_sequence_.Start(current_retry_sequence_timeout_,
+                              timer::kPeriodic);
 }
 
 }  //  namespace policy

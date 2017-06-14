@@ -87,6 +87,40 @@ typedef std::multimap<int32_t, RawMessagePtr> MessagesOverNaviMap;
 typedef std::set<ProtocolObserver*> ProtocolObservers;
 typedef transport_manager::ConnectionUID ConnectionID;
 
+enum PTUState { kNotTriggered = 0, kTriggered, kFinSuccess, kFinNotSuccess };
+
+struct SessionInfo {
+  ConnectionID connection_id_;
+  uint8_t session_id_;
+  uint8_t protocol_version_;
+  uint8_t service_type_;
+  uint32_t hash_id_;
+  uint32_t connection_key_;
+  bool service_exists_;
+  SessionInfo(ConnectionID connection_id,
+              uint8_t session_id,
+              uint8_t protocol_version,
+              uint8_t service_type,
+              uint32_t hash_id,
+              uint32_t connection_key,
+              bool service_exists)
+      : connection_id_(connection_id)
+      , session_id_(session_id)
+      , protocol_version_(protocol_version)
+      , service_type_(service_type)
+      , hash_id_(hash_id)
+      , connection_key_(connection_key)
+      , service_exists_(service_exists) {}
+  SessionInfo()
+      : connection_id_(0)
+      , session_id_(0)
+      , protocol_version_(0)
+      , service_type_(0)
+      , hash_id_(0)
+      , connection_key_(0)
+      , service_exists_(false) {}
+};
+
 namespace impl {
 /*
  * These dummy classes are here to locally impose strong typing on different
@@ -307,6 +341,25 @@ class ProtocolHandlerImpl
   }
 #endif
 
+  /**
+   * @brief OnPTUFinishedd the callback which signals PTU has finished
+   *
+   * @param ptu_result the result from the PTU - true if successful,
+   * otherwise false.
+   */
+  void OnPTUFinished(const bool ptu_result) OVERRIDE;
+
+  /**
+   * @brief OnCertificateUpdated the callback which signals if certificate field
+   * has been updated during PTU
+   *
+   * @param certificate_data the value of the updated field.
+   */
+  bool OnCertificateUpdated(const std::string& certificate_data) OVERRIDE;
+
+  void OnUpdateHMIAppType(
+      std::map<std::string, std::vector<std::string> > app_hmi_types) OVERRIDE;
+
  private:
   void SendEndServicePrivate(int32_t connection_id,
                              uint8_t session_id,
@@ -483,6 +536,10 @@ class ProtocolHandlerImpl
    */
   uint8_t SupportedSDLProtocolVersion() const;
 
+  void StartEncryptedService(const SessionInfo& si);
+  security_manager::SSLContext* GetSSLContextBySession(
+      const SessionInfo& session_info);
+
   const ProtocolHandlerSettings& settings_;
 
   /**
@@ -569,6 +626,9 @@ class ProtocolHandlerImpl
 #ifdef TELEMETRY_MONITOR
   PHTelemetryObserver* metric_observer_;
 #endif  // TELEMETRY_MONITOR
+  PTUState ptu_state_;
+  struct SessionInfo pending_session_;
+  mutable sync_primitives::Lock ptu_state_lock_;
 };
 }  // namespace protocol_handler
 #endif  // SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_HANDLER_IMPL_H_

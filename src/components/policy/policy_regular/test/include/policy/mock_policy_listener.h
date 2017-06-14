@@ -72,6 +72,7 @@ class MockPolicyListener : public PolicyListener {
   MOCK_METHOD1(OnSnapshotCreated, void(const BinaryMessage& pt_string));
   MOCK_METHOD0(CanUpdate, bool());
   MOCK_METHOD1(OnCertificateUpdated, void(const std::string&));
+  MOCK_METHOD1(OnPTUFinished, void(const bool ptu_result));
   MOCK_CONST_METHOD2(SendOnAppPermissionsChanged,
                      void(const AppPermissions&, const std::string&));
   MOCK_CONST_METHOD1(GetRegisteredLinks,

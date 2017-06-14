@@ -182,12 +182,13 @@ class ConnectionHandlerImpl
    * \param hash_id pointer for session hash identifier
    * \return uint32_t Id (number) of new session if successful, otherwise 0.
    */
-  virtual uint32_t OnSessionStartedCallback(
+  uint32_t OnSessionStartedCallback(
       const transport_manager::ConnectionUID connection_handle,
       const uint8_t session_id,
       const protocol_handler::ServiceType& service_type,
       const bool is_protected,
-      uint32_t* hash_id);
+      const bool can_start,
+      struct ExistingSessionInfo* out_session_info) OVERRIDE;
 
   /**
    * \brief Callback function used by ProtocolHandler
@@ -445,6 +446,16 @@ class ConnectionHandlerImpl
   void RemoveConnection(const ConnectionHandle connection_handle);
 
   void OnConnectionEnded(const transport_manager::ConnectionUID connection_id);
+
+#ifdef ENABLE_SECURITY
+  bool CanStartProtectedService(
+      const int32_t& session_key,
+      const protocol_handler::ServiceType& type) const;
+  bool HasNaviApp(const int32_t& session_key) const;
+  uint32_t FindAppIdBySession(
+      const transport_manager::ConnectionUID connection_handle,
+      const uint8_t& session_id) const;
+#endif  // ENABLE_SECURITY
 
   const ConnectionHandlerSettings& settings_;
   /**

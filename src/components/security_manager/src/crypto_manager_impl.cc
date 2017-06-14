@@ -93,6 +93,7 @@ CryptoManagerImpl::CryptoManagerImpl(
     OpenSSL_add_all_algorithms();
     SSL_library_init();
   }
+  InitCertExpTime();
 }
 
 CryptoManagerImpl::~CryptoManagerImpl() {
@@ -233,7 +234,7 @@ bool CryptoManagerImpl::OnCertificateUpdated(const std::string& data) {
 }
 
 SSLContext* CryptoManagerImpl::CreateSSLContext() {
-  if (context_ == NULL) {
+  if (NULL == context_) {
     return NULL;
   }
 
@@ -295,62 +296,62 @@ const CryptoManagerSettings& CryptoManagerImpl::get_settings() const {
 }
 
 bool CryptoManagerImpl::set_certificate(const std::string& cert_data) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
   if (cert_data.empty()) {
     LOG4CXX_WARN(logger_, "Empty certificate");
     return false;
   }
 
-  BIO* bio = BIO_new(BIO_f_base64());
-  BIO* bmem = BIO_new_mem_buf((char*)cert_data.c_str(), cert_data.length());
-  bmem = BIO_push(bio, bmem);
+  LOG4CXX_DEBUG(logger_,
+                "Updating certificate and key from base64 data: \" "
+                    << cert_data);
 
-  char* buf = new char[cert_data.length()];
-  int len = BIO_read(bmem, buf, cert_data.length());
-
-  BIO* bio_cert = BIO_new(BIO_s_mem());
+  BIO* bio_cert = BIO_new_mem_buf(
+      const_cast<std::string::pointer>(cert_data.data()), cert_data.length());
   if (NULL == bio_cert) {
-    LOG4CXX_WARN(logger_, "Unable to update certificate. BIO not created");
+    LOG4CXX_WARN(logger_, "Could not update certificate, BIO not created");
     return false;
   }
 
   utils::ScopeGuard bio_guard = utils::MakeGuard(BIO_free, bio_cert);
   UNUSED(bio_guard)
-  int k = 0;
-  if ((k = BIO_write(bio_cert, buf, len)) <= 0) {
-    LOG4CXX_WARN(logger_, "Unable to write into BIO");
-    return false;
-  }
 
-  PKCS12* p12 = d2i_PKCS12_bio(bio_cert, NULL);
-  if (NULL == p12) {
-    LOG4CXX_ERROR(logger_, "Unable to parse certificate");
-    return false;
-  }
+  X509* cert = NULL;
+  PEM_read_bio_X509(bio_cert, &cert, 0, 0);
 
   EVP_PKEY* pkey = NULL;
-  X509* cert = NULL;
-  PKCS12_parse(p12, NULL, &pkey, &cert, NULL);
+  if (1 == BIO_reset(bio_cert)) {
+    PEM_read_bio_PrivateKey(bio_cert, &pkey, 0, 0);
+  } else {
+    LOG4CXX_WARN(logger_, "Could not reset BIO to read key: " << LastError());
+  }
 
   if (NULL == cert || NULL == pkey) {
-    LOG4CXX_WARN(logger_, "Either certificate or key not valid.");
+    LOG4CXX_WARN(logger_,
+                 "Either certificate or key are not valid: " << LastError());
     return false;
   }
 
   if (!SSL_CTX_use_certificate(context_, cert)) {
-    LOG4CXX_WARN(logger_, "Could not use certificate");
+    LOG4CXX_WARN(logger_, "Could not use certificate: " << LastError());
     return false;
   }
 
   asn1_time_to_tm(X509_get_notAfter(cert));
 
   if (!SSL_CTX_use_PrivateKey(context_, pkey)) {
-    LOG4CXX_ERROR(logger_, "Could not use key");
+    LOG4CXX_ERROR(logger_, "Could not use key: " << LastError());
     return false;
   }
+
   if (!SSL_CTX_check_private_key(context_)) {
-    LOG4CXX_ERROR(logger_, "Could not use certificate ");
+    LOG4CXX_ERROR(logger_, "Could not check key: " << LastError());
     return false;
   }
+
+  LOG4CXX_DEBUG(logger_, "Certificate and key successfully updated");
+
   return true;
 }
 
@@ -396,5 +397,11 @@ void CryptoManagerImpl::asn1_time_to_tm(ASN1_TIME* time) {
     expiration_time_.tm_sec = sec;
   }
 }
+
+void CryptoManagerImpl::InitCertExpTime() {
+  strptime("1 Jan 1970 00:00:00", "%d %b %Y %H:%M:%S", &expiration_time_);
+}
+
+void CryptoManagerImpl::OnPTUFinished(const bool ptu_result) {}
 
 }  // namespace security_manager

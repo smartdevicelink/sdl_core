@@ -99,6 +99,9 @@ typedef Array<Enum<RequestType>, 0, 255> RequestTypes;
 typedef AppHMIType AppHmiType;
 typedef std::vector<AppHMIType> AppHmiTypes;
 
+typedef AppHMIType AppHmiType;
+typedef std::vector<AppHMIType> AppHmiTypes;
+
 struct PolicyBase : CompositeType {
  public:
   Enum<Priority> priority;

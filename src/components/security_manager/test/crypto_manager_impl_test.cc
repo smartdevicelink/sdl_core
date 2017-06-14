@@ -39,6 +39,7 @@
 #include <fstream>
 #include <sstream>
 
+#include "utils/make_shared.h"
 #include "gtest/gtest.h"
 #include "security_manager/crypto_manager_impl.h"
 #include "security_manager/mock_security_manager_settings.h"
@@ -64,10 +65,14 @@ namespace test {
 namespace components {
 namespace crypto_manager_test {
 
+using security_manager::CryptoManagerImpl;
+
 class CryptoManagerTest : public testing::Test {
  protected:
+  typedef NiceMock<security_manager_test::MockCryptoManagerSettings>
+      MockCryptoManagerSettings;
   static void SetUpTestCase() {
-    std::ifstream certificate_file("server/spt_credential.p12.enc");
+    std::ifstream certificate_file("server/spt_credential.pem");
     ASSERT_TRUE(certificate_file.is_open())
         << "Could not open certificate data file";
 
@@ -81,16 +86,9 @@ class CryptoManagerTest : public testing::Test {
   void SetUp() OVERRIDE {
     ASSERT_FALSE(certificate_data_base64_.empty());
     mock_security_manager_settings_ =
-        new NiceMock<security_manager_test::MockCryptoManagerSettings>();
-    utils::SharedPtr<security_manager::CryptoManagerSettings> scrypto =
-        utils::SharedPtr<security_manager::CryptoManagerSettings>::
-            static_pointer_cast<security_manager::CryptoManagerSettings>(
-                mock_security_manager_settings_);
-    crypto_manager_ = new security_manager::CryptoManagerImpl(scrypto);
-  }
-
-  void TearDown() OVERRIDE {
-    delete mock_security_manager_settings_;
+        utils::MakeShared<MockCryptoManagerSettings>();
+    crypto_manager_ =
+        utils::MakeShared<CryptoManagerImpl>(mock_security_manager_settings_);
   }
 
   void InitSecurityManager() {
@@ -117,11 +115,9 @@ class CryptoManagerTest : public testing::Test {
         .WillByDefault(Return(false));
   }
 
-  security_manager::CryptoManager* crypto_manager_;
+  utils::SharedPtr<CryptoManagerImpl> crypto_manager_;
+  utils::SharedPtr<MockCryptoManagerSettings> mock_security_manager_settings_;
   static std::string certificate_data_base64_;
-
-  NiceMock<security_manager_test::MockCryptoManagerSettings>*
-      mock_security_manager_settings_;
 };
 std::string CryptoManagerTest::certificate_data_base64_;
 
@@ -243,10 +239,41 @@ TEST_F(CryptoManagerTest, OnCertificateUpdated_NullString) {
   EXPECT_FALSE(crypto_manager_->OnCertificateUpdated(std::string()));
 }
 
-TEST_F(CryptoManagerTest, OnCertificateUpdated_MalformedSign) {
+TEST_F(CryptoManagerTest, OnCertificateUpdated_MalformedCertificateSign) {
   InitSecurityManager();
+
+  std::size_t start_pos =
+      certificate_data_base64_.find("-----BEGIN CERTIFICATE-----");
+  ASSERT_TRUE(start_pos != std::string::npos);
+  std::size_t end_pos =
+      certificate_data_base64_.find("-----END CERTIFICATE-----");
+  ASSERT_TRUE(end_pos != std::string::npos);
+
   // Corrupt the middle symbol
-  certificate_data_base64_[certificate_data_base64_.size() / 2] = '?';
+  certificate_data_base64_[(end_pos - start_pos) / 2] = '?';
+
+  EXPECT_FALSE(crypto_manager_->OnCertificateUpdated(certificate_data_base64_));
+}
+
+TEST_F(CryptoManagerTest, OnCertificateUpdated_MalformedKeySign) {
+  InitSecurityManager();
+
+  std::size_t start_pos =
+      certificate_data_base64_.find("-----BEGIN PRIVATE KEY-----");
+  bool is_rsa_key = false;
+  if (std::string::npos == start_pos) {
+    start_pos =
+        certificate_data_base64_.find("-----BEGIN RSA PRIVATE KEY-----");
+    is_rsa_key = true;
+  }
+  ASSERT_TRUE(start_pos != std::string::npos);
+  std::size_t end_pos = certificate_data_base64_.find(
+      !is_rsa_key ? "-----END PRIVATE KEY-----"
+                  : "-----END RSA PRIVATE KEY-----");
+  ASSERT_TRUE(end_pos != std::string::npos);
+
+  // Corrupt the middle symbol
+  certificate_data_base64_[(end_pos - start_pos) / 2] = '?';
 
   EXPECT_FALSE(crypto_manager_->OnCertificateUpdated(certificate_data_base64_));
 }

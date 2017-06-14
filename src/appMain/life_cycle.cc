@@ -128,31 +128,6 @@ bool LifeCycle::StartComponents() {
   hmi_handler_ = new hmi_message_handler::HMIMessageHandlerImpl(profile_);
 
   media_manager_ = new media_manager::MediaManagerImpl(*app_manager_, profile_);
-  app_manager_->set_connection_handler(connection_handler_);
-  if (!app_manager_->Init(*last_state_, media_manager_)) {
-    LOG4CXX_ERROR(logger_, "Application manager init failed.");
-    return false;
-  }
-
-#ifdef ENABLE_SECURITY
-  security_manager_ = new security_manager::SecurityManagerImpl();
-  crypto_manager_ = new security_manager::CryptoManagerImpl(
-      utils::MakeShared<security_manager::CryptoManagerSettingsImpl>(
-          profile_, app_manager_->GetPolicyHandler().RetrieveCertificate()));
-  protocol_handler_->AddProtocolObserver(security_manager_);
-  protocol_handler_->set_security_manager(security_manager_);
-
-  security_manager_->set_session_observer(connection_handler_);
-  security_manager_->set_protocol_handler(protocol_handler_);
-  security_manager_->set_crypto_manager(crypto_manager_);
-  security_manager_->AddListener(app_manager_);
-
-  app_manager_->AddPolicyObserver(crypto_manager_);
-  if (!crypto_manager_->Init()) {
-    LOG4CXX_ERROR(logger_, "CryptoManager initialization fail.");
-    return false;
-  }
-#endif  // ENABLE_SECURITY
 
   transport_manager_->AddEventListener(protocol_handler_);
   transport_manager_->AddEventListener(connection_handler_);
@@ -177,13 +152,39 @@ bool LifeCycle::StartComponents() {
 #endif  // TELEMETRY_MONITOR
   // It's important to initialise TM after setting up listener chain
   // [TM -> CH -> AM], otherwise some events from TM could arrive at nowhere
+  app_manager_->set_connection_handler(connection_handler_);
   app_manager_->set_protocol_handler(protocol_handler_);
   app_manager_->set_hmi_message_handler(hmi_handler_);
+
+  if (!app_manager_->Init(*last_state_, media_manager_)) {
+    LOG4CXX_ERROR(logger_, "Application manager init failed.");
+    return false;
+  }
+
+#ifdef ENABLE_SECURITY
+  security_manager_ = new security_manager::SecurityManagerImpl();
+  crypto_manager_ = new security_manager::CryptoManagerImpl(
+      utils::MakeShared<security_manager::CryptoManagerSettingsImpl>(
+          profile_, app_manager_->GetPolicyHandler().RetrieveCertificate()));
+  protocol_handler_->AddProtocolObserver(security_manager_);
+  protocol_handler_->set_security_manager(security_manager_);
+
+  security_manager_->set_session_observer(connection_handler_);
+  security_manager_->set_protocol_handler(protocol_handler_);
+  security_manager_->set_crypto_manager(crypto_manager_);
+  security_manager_->AddListener(app_manager_);
+
+  app_manager_->AddPolicyObserver(crypto_manager_);
+  app_manager_->AddPolicyObserver(protocol_handler_);
+  if (!crypto_manager_->Init()) {
+    LOG4CXX_ERROR(logger_, "CryptoManager initialization fail.");
+    return false;
+  }
+#endif  // ENABLE_SECURITY
 
   transport_manager_->Init(*last_state_);
   // start transport manager
   transport_manager_->Visibility(true);
-
   return true;
 }
 
