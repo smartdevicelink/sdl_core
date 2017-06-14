@@ -320,9 +320,12 @@ void PolicyManagerImpl::StartPTExchange() {
       if (RequestPTUpdate() && !timer_retry_sequence_.is_running()) {
         // Start retry sequency
         const uint32_t timeout_msec = NextRetryTimeout();
-        LOG4CXX_DEBUG(logger_,
-                      "Start retry sequence timeout = " << timeout_msec);
-        timer_retry_sequence_.Start(timeout_msec, timer::kPeriodic);
+
+        if(timeout_msec) {
+          LOG4CXX_DEBUG(logger_,
+            "Start retry sequence timeout = " << timeout_msec);                  
+          timer_retry_sequence_.Start(timeout_msec, timer::kPeriodic);
+        }
       }
     }
   }
@@ -1113,8 +1116,10 @@ void PolicyManagerImpl::RetrySequence() {
 
   const uint32_t timeout_msec = NextRetryTimeout();
   LOG4CXX_DEBUG(logger_, "New retry sequence timeout = " << timeout_msec);
-  if (!timeout_msec && timer_retry_sequence_.is_running()) {
-    timer_retry_sequence_.Stop();
+  if (!timeout_msec) {
+    if(timer_retry_sequence_.is_running()) {
+      timer_retry_sequence_.Stop();
+    }
     return;
   }
 
