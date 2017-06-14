@@ -99,6 +99,10 @@ void OnSystemRequestNotification::Run() {
     (*message_)[strings::msg_params][strings::file_type] = FileType::JSON;
   } else if (RequestType::HTTP == request_type) {
     (*message_)[strings::msg_params][strings::file_type] = FileType::BINARY;
+    if ((*message_)[strings::msg_params].keyExists(strings::url)) {
+      (*message_)[strings::msg_params][strings::timeout] =
+          policy_handler.TimeoutExchangeSec();
+    }
   }
 
   SendNotification();
