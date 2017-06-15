@@ -71,6 +71,13 @@ void SetAppIconRequest::Run() {
   const std::string& sync_file_name =
       (*message_)[strings::msg_params][strings::sync_file_name].asString();
 
+  if (!file_system::IsFileNameValid(sync_file_name)) {
+    const std::string err_msg = "Sync file name contains forbidden symbols.";
+    LOG4CXX_ERROR(logger_, err_msg);
+    SendResponse(false, mobile_apis::Result::INVALID_DATA, err_msg.c_str());
+    return;
+  }
+
   std::string full_file_path =
       application_manager_.get_settings().app_storage_folder() + "/";
   full_file_path += app->folder_name();

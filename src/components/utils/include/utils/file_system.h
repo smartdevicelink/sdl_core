@@ -153,6 +153,14 @@ std::string CurrentWorkingDirectory();
 std::string GetAbsolutePath(const std::string& path);
 
 /**
+ * @brief Checks if file name contains invalid symbols e.g. '/'
+ * @param file_name file name to check
+ * @return true if file name does not contain any invalid symbol otherwise
+ * returns false
+ */
+bool IsFileNameValid(const std::string& file_name);
+
+/**
   * @brief Removes file
   *
   * @param name path to file
