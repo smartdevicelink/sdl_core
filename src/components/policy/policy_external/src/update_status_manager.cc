@@ -62,6 +62,7 @@ UpdateStatusManager::~UpdateStatusManager() {
 void UpdateStatusManager::ProcessEvent(UpdateEvent event) {
   sync_primitives::AutoLock lock(status_lock_);
   current_status_->ProcessEvent(this, event);
+  last_processed_event_ = event;
   DoTransition();
 }
 
