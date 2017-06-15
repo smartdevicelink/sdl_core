@@ -2207,6 +2207,27 @@ void MessageHelper::SendPolicySnapshotNotification(
   SendSystemRequestNotification(connection_key, content, app_mngr);
 }
 
+void MessageHelper::SendPolicySnapshotNotification(
+    uint32_t connection_key,
+    const std::string& snapshot_file_path,
+    const std::string& url,
+    ApplicationManager& app_mngr) {
+  smart_objects::SmartObject content(smart_objects::SmartType_Map);
+
+  if (!url.empty()) {
+    content[strings::msg_params][strings::url] =
+        url;  // Doesn't work with mobile_notification::syncp_url ("URL")
+  } else {
+    LOG4CXX_WARN(logger_, "No service URLs");
+  }
+
+  content[strings::params][strings::file_name] = snapshot_file_path;
+  content[strings::msg_params][strings::request_type] =
+      mobile_apis::RequestType::PROPRIETARY;
+
+  SendSystemRequestNotification(connection_key, content, app_mngr);
+}
+
 void MessageHelper::SendSystemRequestNotification(
     const uint32_t connection_key,
     smart_objects::SmartObject& content,

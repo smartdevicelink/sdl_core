@@ -226,6 +226,15 @@ void MessageHelper::SendPolicySnapshotNotification(
       connection_key, policy_data, url, app_mngr);
 }
 
+void MessageHelper::SendPolicySnapshotNotification(
+    uint32_t connection_key,
+    const std::string& snapshot_file_path,
+    const std::string& url,
+    ApplicationManager& app_mngr) {
+  MockMessageHelper::message_helper_mock()->SendPolicySnapshotNotification(
+      connection_key, snapshot_file_path, url, app_mngr);
+}
+
 void MessageHelper::SendSDLActivateAppResponse(
     policy::AppPermissions& permissions,
     uint32_t correlation_id,

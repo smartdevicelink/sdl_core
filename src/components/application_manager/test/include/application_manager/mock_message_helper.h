@@ -162,6 +162,11 @@ class MockMessageHelper {
                     const std::vector<uint8_t>& policy_data,
                     const std::string& url,
                     ApplicationManager& app_mngr));
+  MOCK_METHOD4(SendPolicySnapshotNotification,
+               void(uint32_t connection_key,
+                    const std::string& snapshot_file_path,
+                    const std::string& url,
+                    ApplicationManager& app_mngr));
   MOCK_METHOD1(CommonLanguageFromString,
                hmi_apis::Common_Language::eType(const std::string& language));
   MOCK_METHOD1(CommonLanguageToString,
