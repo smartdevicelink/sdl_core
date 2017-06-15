@@ -1279,16 +1279,16 @@
 <!-- End of Policies -->
 
 <struct name="TextField">
-  <param name="name" type="Common.TextFieldName">
+  <param name="name" type="Common.TextFieldName" mandatory="true">
     <description>The name that identifies the field. See TextFieldName.</description>
   </param>
-  <param name="characterSet" type="Common.CharacterSet">
+  <param name="characterSet" type="Common.CharacterSet" mandatory="true">
     <description>The character set that is supported in this field. See CharacterSet.</description>
   </param>
-  <param name="width" type="Integer" minvalue="1" maxvalue="500">
+  <param name="width" type="Integer" minvalue="1" maxvalue="500" mandatory="true">
     <description>The number of characters in one row of this field.</description>
   </param>
-  <param name="rows" type="Integer" minvalue="1" maxvalue="8">
+  <param name="rows" type="Integer" minvalue="1" maxvalue="8" mandatory="true">
     <description>The number of rows of this field.</description>
   </param>
 </struct>
@@ -1311,10 +1311,10 @@
 
 <struct name="VehicleDataResult">
   <description>Individual published data request result</description>
-  <param name="dataType" type="Common.VehicleDataType">
+  <param name="dataType" type="Common.VehicleDataType" mandatory="true">
     <description>Defined published data element type.</description>
   </param>
-  <param name="resultCode" type="Common.VehicleDataResultCode">
+  <param name="resultCode" type="Common.VehicleDataResultCode" mandatory="true">
     <description>Published data result code.</description>
   </param>
 </struct>
@@ -1924,73 +1924,73 @@
 </struct>
 
 <struct name="ECallInfo">
-  <param name="eCallNotificationStatus" type="Common.VehicleDataNotificationStatus">
+  <param name="eCallNotificationStatus" type="Common.VehicleDataNotificationStatus" mandatory="true">
     <description>References signal "eCallNotification_4A". See VehicleDataNotificationStatus.</description>
   </param>
-  <param name="auxECallNotificationStatus" type="Common.VehicleDataNotificationStatus">
+  <param name="auxECallNotificationStatus" type="Common.VehicleDataNotificationStatus" mandatory="true">
     <description>References signal "eCallNotification". See VehicleDataNotificationStatus.</description>
   </param>
-  <param name="eCallConfirmationStatus" type="Common.ECallConfirmationStatus">
+  <param name="eCallConfirmationStatus" type="Common.ECallConfirmationStatus" mandatory="true">
     <description>References signal "eCallConfirmation". See ECallConfirmationStatus.</description>
   </param>
 </struct>
 
 <struct name="AirbagStatus">
-  <param name="driverAirbagDeployed" type="Common.VehicleDataEventStatus">
+  <param name="driverAirbagDeployed" type="Common.VehicleDataEventStatus" mandatory="true">
     <description>References signal "VedsDrvBag_D_Ltchd". See VehicleDataEventStatus.</description>
   </param>
-  <param name="driverSideAirbagDeployed" type="Common.VehicleDataEventStatus">
+  <param name="driverSideAirbagDeployed" type="Common.VehicleDataEventStatus" mandatory="true">
     <description>References signal "VedsDrvSideBag_D_Ltchd". See VehicleDataEventStatus.</description>
   </param>
-  <param name="driverCurtainAirbagDeployed" type="Common.VehicleDataEventStatus">
+  <param name="driverCurtainAirbagDeployed" type="Common.VehicleDataEventStatus" mandatory="true">
     <description>References signal "VedsDrvCrtnBag_D_Ltchd". See VehicleDataEventStatus.</description>
   </param>
-  <param name="passengerAirbagDeployed" type="Common.VehicleDataEventStatus">
+  <param name="passengerAirbagDeployed" type="Common.VehicleDataEventStatus" mandatory="true">
     <description>References signal "VedsPasBag_D_Ltchd". See VehicleDataEventStatus.</description>
   </param>
-  <param name="passengerCurtainAirbagDeployed" type="Common.VehicleDataEventStatus">
+  <param name="passengerCurtainAirbagDeployed" type="Common.VehicleDataEventStatus" mandatory="true">
     <description>References signal "VedsPasCrtnBag_D_Ltchd". See VehicleDataEventStatus.</description>
   </param>
-  <param name="driverKneeAirbagDeployed" type="Common.VehicleDataEventStatus">
+  <param name="driverKneeAirbagDeployed" type="Common.VehicleDataEventStatus" mandatory="true">
     <description>References signal "VedsKneeDrvBag_D_Ltchd". See VehicleDataEventStatus.</description>
   </param>
-  <param name="passengerSideAirbagDeployed" type="Common.VehicleDataEventStatus">
+  <param name="passengerSideAirbagDeployed" type="Common.VehicleDataEventStatus" mandatory="true">
     <description>References signal "VedsPasSideBag_D_Ltchd". See VehicleDataEventStatus.</description>
   </param>
-  <param name="passengerKneeAirbagDeployed" type="Common.VehicleDataEventStatus">
+  <param name="passengerKneeAirbagDeployed" type="Common.VehicleDataEventStatus" mandatory="true">
     <description>References signal "VedsKneePasBag_D_Ltchd". See VehicleDataEventStatus.</description>
   </param>
 </struct>
 
 <struct name="EmergencyEvent">
-  <param name="emergencyEventType" type="Common.EmergencyEventType">
+  <param name="emergencyEventType" type="Common.EmergencyEventType" mandatory="true">
     <description>References signal "VedsEvntType_D_Ltchd". See EmergencyEventType.</description>
   </param>
-  <param name="fuelCutoffStatus" type="Common.FuelCutoffStatus">
+  <param name="fuelCutoffStatus" type="Common.FuelCutoffStatus" mandatory="true">
     <description>References signal "RCM_FuelCutoff". See FuelCutoffStatus.</description>
   </param>
-  <param name="rolloverEvent" type="Common.VehicleDataEventStatus">
+  <param name="rolloverEvent" type="Common.VehicleDataEventStatus" mandatory="true">
     <description>References signal "VedsEvntRoll_D_Ltchd". See VehicleDataEventStatus.</description>
   </param>
-  <param name="maximumChangeVelocity" type="Common.VehicleDataEventStatus">
+  <param name="maximumChangeVelocity" type="Common.VehicleDataEventStatus" mandatory="true">
     <description>References signal "VedsMaxDeltaV_D_Ltchd". See VehicleDataEventStatus.</description>
   </param>
-  <param name="multipleEvents" type="Common.VehicleDataEventStatus">
+  <param name="multipleEvents" type="Common.VehicleDataEventStatus" mandatory="true">
     <description>References signal "VedsMultiEvnt_D_Ltchd". See VehicleDataEventStatus.</description>
   </param>
 </struct>
 
 <struct name="ClusterModeStatus">
-  <param name="powerModeActive" type="Boolean">
+  <param name="powerModeActive" type="Boolean" mandatory="true">
     <description>References signal "PowerMode_UB".</description>
   </param>
-  <param name="powerModeQualificationStatus" type="Common.PowerModeQualificationStatus">
+  <param name="powerModeQualificationStatus" type="Common.PowerModeQualificationStatus" mandatory="true">
     <description>References signal "PowerModeQF". See PowerModeQualificationStatus.</description>
   </param>
-  <param name="carModeStatus" type="Common.CarModeStatus">
+  <param name="carModeStatus" type="Common.CarModeStatus" mandatory="true">
     <description>References signal "CarMode". See CarMode.</description>
   </param>
-  <param name="powerModeStatus" type="Common.PowerModeStatus">
+  <param name="powerModeStatus" type="Common.PowerModeStatus" mandatory="true">
     <description>References signal "PowerMode". See PowerMode.</description>
   </param>
 </struct>
@@ -2317,7 +2317,7 @@
     </function>
     <function name="DialNumber" messagetype="request">
       <description>Request from SDL to call a specific number.</description>
-      <param name="number" type="String" maxlength="40">
+      <param name="number" type="String" maxlength="40" mandatory="true">
         <description>The number to dial. Only the character + and numbers are allowed.</description>
       </param>
       <param name="appID" type="Integer" mandatory="true">

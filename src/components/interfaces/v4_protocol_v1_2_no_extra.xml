@@ -326,16 +326,16 @@
 	</enum>
 	<struct name="Choice">
 		<description>A choice is an option given to the user, which can be selected either by menu, or through voice recognition system.</description>
-		<param name="choiceID" type="Integer" minvalue="0" maxvalue="65535"/>
-		<param name="menuName" type="String" maxlength="500"/>
-		<param name="vrCommands" type="String" minsize="1" maxsize="100" maxlength="99" array="true"/>
+		<param name="choiceID" type="Integer" minvalue="0" maxvalue="65535" mandatory="true"/>
+		<param name="menuName" type="String" maxlength="500" mandatory="true"/>
+		<param name="vrCommands" type="String" minsize="1" maxsize="100" maxlength="99" array="true" mandatory="true"/>
 	</struct>
 	<struct name="SyncMsgVersion">
 		<description>Specifies the version number of the SYNC V4 protocol, that is supported by the mobile application</description>
-		<param name="majorVersion" type="Integer" minvalue="1" maxvalue="1">
+		<param name="majorVersion" type="Integer" minvalue="1" maxvalue="1" mandatory="true">
 			<description>The major version indicates versions that is not-compatible to previous versions.</description>
 		</param>
-		<param name="minorVersion" type="Integer" minvalue="0" maxvalue="1000">
+		<param name="minorVersion" type="Integer" minvalue="0" maxvalue="1000" mandatory="true">
 			<description>The minor version indicates a change to a previous version that should still allow to be run on an older version (with limited functionality)</description>
 		</param>
 	</struct>
@@ -349,53 +349,53 @@
 		</element>
 	</enum>
 	<struct name="StartTime">
-		<param name="hours" type="Integer" minvalue="0" maxvalue="59">
+		<param name="hours" type="Integer" minvalue="0" maxvalue="59" mandatory="true">
 			<description>The hour of the media clock.</description>
 			<description>Some radios only support a max of 19 hours. If out of range, it will be rejected.</description>
 		</param>
-		<param name="minutes" type="Integer" minvalue="0" maxvalue="59"/>
-		<param name="seconds" type="Integer" minvalue="0" maxvalue="59"/>
+		<param name="minutes" type="Integer" minvalue="0" maxvalue="59" mandatory="true"/>
+		<param name="seconds" type="Integer" minvalue="0" maxvalue="59" mandatory="true"/>
 	</struct>
 	<struct name="TextField">
-		<param name="name" type="TextFieldName">
+		<param name="name" type="TextFieldName" mandatory="true">
 			<description>The name that identifies the field. See TextFieldName.</description>
 		</param>
-		<param name="characterSet" type="CharacterSet">
+		<param name="characterSet" type="CharacterSet" mandatory="true">
 			<description>The character set that is supported in this field. See CharacterSet.</description>
 		</param>
-		<param name="width" type="Integer" minvalue="1" maxvalue="40">
+		<param name="width" type="Integer" minvalue="1" maxvalue="40" mandatory="true">
 			<description>The number of characters in one row of this field.</description>
 		</param>
-		<param name="rows" type="Integer" minvalue="1" maxvalue="3">
+		<param name="rows" type="Integer" minvalue="1" maxvalue="3" mandatory="true">
 			<description>The number of rows of this field.</description>
 		</param>
 	</struct>
 	<struct name="DisplayCapabilities">
 		<description>Contains information about the display capabilities.</description>
-		<param name="displayType" type="DisplayType">
+		<param name="displayType" type="DisplayType" mandatory="true">
 			<description>The type of the display. See DisplayType</description>
 		</param>
-		<param name="textFields" type="TextField" minsize="1" maxsize="100" array="true">
+		<param name="textFields" type="TextField" minsize="1" maxsize="100" array="true" mandatory="true">
 			<description>A set of all fields that support text data. See TextField</description>
 		</param>
-		<param name="mediaClockFormats" type="MediaClockFormat" minsize="1" maxsize="100" array="true">
+		<param name="mediaClockFormats" type="MediaClockFormat" minsize="1" maxsize="100" array="true" mandatory="true">
 			<description>A set of all supported formats of the media clock. See MediaClockFormat</description>
 		</param>
 	</struct>
 	<struct name="ButtonCapabilities">
 		<description>Contains information about a buttons capabilities.</description>
-		<param name="name" type="ButtonName">
+		<param name="name" type="ButtonName" mandatory="true">
 			<description>The name of the button. See ButtonName.</description>
 		</param>
-		<param name="shortPressAvailable" type="Boolean">
+		<param name="shortPressAvailable" type="Boolean" mandatory="true">
 			<description>The button supports a short press.</description>
 			<description>Whenever the button is pressed short, onButtonPressed( SHORT) will be invoked.</description>
 		</param>
-		<param name="longPressAvailable" type="Boolean">
+		<param name="longPressAvailable" type="Boolean" mandatory="true">
 			<description>The button supports a LONG press.</description>
 			<description>Whenever the button is pressed long, onButtonPressed( LONG) will be invoked.</description>
 		</param>
-		<param name="upDownAvailable" type="Boolean">
+		<param name="upDownAvailable" type="Boolean" mandatory="true">
 			<description>The button supports "button down" and "button up".</description>
 			<description>Whenever the button is pressed, onButtonEvent( DOWN) will be invoked.</description>
 			<description>Whenever the button is released, onButtonEvent( UP) will be invoked.</description>
@@ -413,17 +413,17 @@
 			<description>if position is greater or equal than the number of items on top level, the sub menu will be appended to the end.</description>
 			<description>If this param was omitted the entry will be added at the end.</description>
 		</param>
-		<param name="menuName" type="String" maxlength="500">
+		<param name="menuName" type="String" maxlength="500" mandatory="true">
 			<description>Text to show in the menu for this sub menu.</description>
 		</param>
 	</struct>
 	<struct name="TTSChunk">
 		<description>A TTS chunk, that consists of the text/phonemes to speak and the type (like text or SAPI)</description>
-		<param name="text" maxlength="500" type="String">
+		<param name="text" maxlength="500" type="String" mandatory="true">
 			<description>The text or phonemes to speak.</description>
 			<description>May not be empty.</description>
 		</param>
-		<param name="type" type="SpeechCapabilities">
+		<param name="type" type="SpeechCapabilities" mandatory="true">
 			<description>Describes, whether it is text or a specific phoneme set. See SpeechCapabilities</description>
 		</param>
 	</struct>
@@ -431,10 +431,10 @@
 	<function name="RegisterAppInterface" messagetype="request">
 		<description>Establishes an interface with a mobile application.</description>
 		<description>Before registerAppInterface no other commands will be accepted/executed.</description>
-		<param name="syncMsgVersion" type="SyncMsgVersion">
+		<param name="syncMsgVersion" type="SyncMsgVersion" mandatory="true">
 			<description>See SyncMsgVersion</description>
 		</param>
-		<param name="appName" type="String" maxlength="100">
+		<param name="appName" type="String" maxlength="100" mandatory="true">
 			<description>The mobile application name, e.g. "Ford Drive Green".</description>
 			<description>Needs to be unique over all applications.</description>
 			<description>May not be empty.</description>
@@ -457,11 +457,11 @@
 			<description>If not provided, the default is equal to False"</description>
 			<description>Indicates if the mobile application wants to use vehicle data like GPS or speed.</description>
 		</param>
-		<param name="isMediaApplication" type="Boolean">
+		<param name="isMediaApplication" type="Boolean" mandatory="true">
 			<description>Indicates if the application is a media or a non-media application.</description>
 			<description>Only media applications will be able to stream audio to Sync that is audible outside of the BT media source.</description>
 		</param>
-		<param name="languageDesired" type="Language">
+		<param name="languageDesired" type="Language" mandatory="true">
 			<description>See Language</description>
 			<description>If the language doesn't match the active language on Sync, it will be rejected.</description>
 			<description>If the language is changed, while an app is registered, it will get disconnected.</description>
@@ -475,11 +475,11 @@
 	</function>
 	<function name="RegisterAppInterface" messagetype="response">
 		<description>The response to registerAppInterface</description>
-		<param name="success" type="Boolean">
+		<param name="success" type="Boolean" mandatory="true">
 			<description>true, if successful</description>
 			<description>false, if failed</description>
 		</param>
-		<param name="resultCode" type="Result">
+		<param name="resultCode" type="Result" mandatory="true">
 			<description>See Result</description>
 			<element name="SUCCESS"/>
 			<element name="INVALID_DATA"/>
@@ -527,11 +527,11 @@
 		<description>Will fail, if no registerAppInterface was completed successfully before.</description>
 	</function>
 	<function name="UnregisterAppInterface" messagetype="response">
-		<param name="success" type="Boolean">
+		<param name="success" type="Boolean" mandatory="true">
 			<description>true, if successful</description>
 			<description>false, if failed</description>
 		</param>
-		<param name="resultCode" type="Result">
+		<param name="resultCode" type="Result" mandatory="true">
 			<description>See Result</description>
 			<element name="SUCCESS"/>
 			<element name="INVALID_DATA"/>
@@ -559,11 +559,11 @@
 		<issue creator="rs">Do we want to add VR threshold params?</issue>
 	</function>
 	<function name="SetGlobalProperties" messagetype="response">
-		<param name="success" type="Boolean">
+		<param name="success" type="Boolean" mandatory="true">
 			<description>true, if successful</description>
 			<description>false, if failed</description>
 		</param>
-		<param name="resultCode" type="Result">
+		<param name="resultCode" type="Result" mandatory="true">
 			<description>See Result</description>
 			<element name="SUCCESS"/>
 			<element name="INVALID_DATA"/>
@@ -579,16 +579,16 @@
 	</function>
 	<function name="ResetGlobalProperties" messagetype="request">
 		<description>Allows resetting global properties.</description>
-		<param name="properties" type="GlobalProperty" minsize="1" maxsize="100" array="true">
+		<param name="properties" type="GlobalProperty" minsize="1" maxsize="100" array="true" mandatory="true">
 			<description>Contains the names of all global properties (like timeoutPrompt) that should be unset. Resetting means, that they have the same value as at start up (default)</description>
 		</param>
 	</function>
 	<function name="ResetGlobalProperties" messagetype="response">
-		<param name="success" type="Boolean">
+		<param name="success" type="Boolean" mandatory="true">
 			<description>true, if successful</description>
 			<description>false, if failed</description>
 		</param>
-		<param name="resultCode" type="Result">
+		<param name="resultCode" type="Result" mandatory="true">
 			<description>See Result</description>
 			<element name="SUCCESS"/>
 			<element name="INVALID_DATA"/>
@@ -605,7 +605,7 @@
 	<function name="AddCommand" messagetype="request">
 		<description>Adds a command to the in application menu.</description>
 		<description>Either menuParams or vrCommands must be provided.</description>
-		<param name="cmdID" type="Integer" minvalue="0" maxvalue="2000000000">
+		<param name="cmdID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
 			<description>unique ID of the command to add.</description>
 		</param>
 		<param name="menuParams" type="MenuParams" mandatory="false">
@@ -617,11 +617,11 @@
 		</param>
 	</function>
 	<function name="AddCommand" messagetype="response">
-		<param name="success" type="Boolean">
+		<param name="success" type="Boolean" mandatory="true">
 			<description>true, if successful</description>
 			<description>false, if failed</description>
 		</param>
-		<param name="resultCode" type="Result">
+		<param name="resultCode" type="Result" mandatory="true">
 			<description>See Result</description>
 			<element name="SUCCESS"/>
 			<element name="INVALID_DATA"/>
@@ -639,16 +639,16 @@
 	</function>
 	<function name="DeleteCommand" messagetype="request">
 		<description>Deletes all commands from the in-application menu with the specified command id.</description>
-		<param name="cmdID" type="Integer" minvalue="0" maxvalue="2000000000">
+		<param name="cmdID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
 			<description>ID of the command(s) to delete.</description>
 		</param>
 	</function>
 	<function name="DeleteCommand" messagetype="response">
-		<param name="success" type="Boolean">
+		<param name="success" type="Boolean" mandatory="true">
 			<description>true, if successful</description>
 			<description>false, if failed</description>
 		</param>
-		<param name="resultCode" type="Result">
+		<param name="resultCode" type="Result" mandatory="true">
 			<description>See Result</description>
 			<element name="SUCCESS"/>
 			<element name="INVALID_DATA"/>
@@ -666,7 +666,7 @@
 	</function>
 	<function name="AddSubMenu" messagetype="request">
 		<description>Adds a sub menu to the in-application menu.</description>
-		<param name="menuID" type="Integer" minvalue="0" maxvalue="2000000000">
+		<param name="menuID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
 			<description>unique ID of the sub menu to add.</description>
 		</param>
 		<param name="position" type="Integer" minvalue="0" maxvalue="1000" mandatory="false">
@@ -677,16 +677,16 @@
 			<description>Position of any submenu will always be located before the return and exit options</description>
 			<description>If this param was omitted the entry will be added at the end.</description>
 		</param>
-		<param name="menuName" maxlength="500" type="String">
+		<param name="menuName" maxlength="500" type="String" mandatory="true">
 			<description>Text to show in the menu for this sub menu.</description>
 		</param>
 	</function>
 	<function name="AddSubMenu" messagetype="response">
-		<param name="success" type="Boolean">
+		<param name="success" type="Boolean" mandatory="true">
 			<description>true, if successful</description>
 			<description>false, if failed</description>
 		</param>
-		<param name="resultCode" type="Result">
+		<param name="resultCode" type="Result" mandatory="true">
 			<description>See Result</description>
 			<element name="SUCCESS"/>
 			<element name="INVALID_DATA"/>
@@ -704,16 +704,16 @@
 	</function>
 	<function name="DeleteSubMenu" messagetype="request">
 		<description>Deletes a submenu from the in-application menu.</description>
-		<param name="menuID" type="Integer" minvalue="0" maxvalue="2000000000">
+		<param name="menuID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
 			<description>The "menuID" of the submenu to delete. (See addSubMenu.menuID)</description>
 		</param>
 	</function>
 	<function name="DeleteSubMenu" messagetype="response">
-		<param name="success" type="Boolean">
+		<param name="success" type="Boolean" mandatory="true">
 			<description>true, if successful</description>
 			<description>false, if failed</description>
 		</param>
-		<param name="resultCode" type="Result">
+		<param name="resultCode" type="Result" mandatory="true">
 			<description>See Result</description>
 			<element name="SUCCESS"/>
 			<element name="INVALID_DATA"/>
@@ -731,17 +731,17 @@
 	</function>
 	<function name="CreateInteractionChoiceSet" messagetype="request">
 		<description>creates interaction choice set to be used later by performInteraction</description>
-		<param name="interactionChoiceSetID" type="Integer" minvalue="0" maxvalue="2000000000">
+		<param name="interactionChoiceSetID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
 			<description>Unique ID used for this interaction choice set.</description>
 		</param>
-		<param name="choiceSet" type="Choice" minsize="1" maxsize="100" array="true"/>
+		<param name="choiceSet" type="Choice" minsize="1" maxsize="100" array="true" mandatory="true"/>
 	</function>
 	<function name="CreateInteractionChoiceSet" messagetype="response">
-		<param name="success" type="Boolean">
+		<param name="success" type="Boolean" mandatory="true">
 			<description>true, if successful</description>
 			<description>false, if failed</description>
 		</param>
-		<param name="resultCode" type="Result">
+		<param name="resultCode" type="Result" mandatory="true">
 			<description>See Result</description>
 			<element name="SUCCESS"/>
 			<element name="INVALID_DATA"/>
@@ -759,18 +759,18 @@
 	</function>
 	<function name="PerformInteraction" messagetype="request">
 		<description>Triggers an interaction (e.g. "Permit GPS?" - Yes, no, Always Allow).</description>
-		<param name="initialText" type="String" maxlength="500">
+		<param name="initialText" type="String" maxlength="500" mandatory="true">
 			<description>Text to be displayed first.</description>
 		</param>
-		<param name="initialPrompt" type="TTSChunk" minsize="1" maxsize="100" array="true">
+		<param name="initialPrompt" type="TTSChunk" minsize="1" maxsize="100" array="true" mandatory="true">
 			<description>This is the intial prompt spoken to the user at the start of an interaction</description>
 			<description>An array of text chunks of type TTSChunk. See TTSChunk</description>
 			<description>The array must have at least one item</description>
 		</param>
-		<param name="interactionMode" type="InteractionMode">
+		<param name="interactionMode" type="InteractionMode" mandatory="true">
 			<description>See InteractionMode.</description>
 		</param>
-		<param name="interactionChoiceSetIDList" type="Integer" minsize="1" maxsize="100" minvalue="0" maxvalue="2000000000" array="true">
+		<param name="interactionChoiceSetIDList" type="Integer" minsize="1" maxsize="100" minvalue="0" maxvalue="2000000000" array="true" mandatory="true">
 			<description>List of interaction choice set IDs to use with an interaction.</description>
 		</param>
 		<param name="helpPrompt" type="TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false">
@@ -789,11 +789,11 @@
 		</param>
 	</function>
 	<function name="PerformInteraction" messagetype="response">
-		<param name="success" type="Boolean">
+		<param name="success" type="Boolean" mandatory="true">
 			<description>true, if successful</description>
 			<description>false, if failed</description>
 		</param>
-		<param name="resultCode" type="Result">
+		<param name="resultCode" type="Result" mandatory="true">
 			<description>See Result</description>
 			<element name="SUCCESS"/>
 			<element name="INVALID_DATA"/>
@@ -819,16 +819,16 @@
 	<function name="DeleteInteractionChoiceSet" messagetype="request">
 		<description>Deletes interaction choice set that has been created with "CreateInteractionChoiceSet".</description>
 		<description>The interaction may only be deleted when not currently in use by a "performInteraction".</description>
-		<param name="interactionChoiceSetID" type="Integer" minvalue="0" maxvalue="2000000000">
+		<param name="interactionChoiceSetID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
 			<description>ID of the interaction choice set to delete.</description>
 		</param>
 	</function>
 	<function name="DeleteInteractionChoiceSet" messagetype="response">
-		<param name="success" type="Boolean">
+		<param name="success" type="Boolean" mandatory="true">
 			<description>true, if successful</description>
 			<description>false, if failed</description>
 		</param>
-		<param name="resultCode" type="Result">
+		<param name="resultCode" type="Result" mandatory="true">
 			<description>See Result</description>
 			<element name="SUCCESS"/>
 			<element name="INVALID_DATA"/>
@@ -867,11 +867,11 @@
 		</param>
 	</function>
 	<function name="Alert" messagetype="response">
-		<param name="success" type="Boolean">
+		<param name="success" type="Boolean" mandatory="true">
 			<description>true, if successful</description>
 			<description>false, if failed</description>
 		</param>
-		<param name="resultCode" type="Result">
+		<param name="resultCode" type="Result" mandatory="true">
 			<description>See Result</description>
 			<element name="SUCCESS"/>
 			<element name="INVALID_DATA"/>
@@ -917,11 +917,11 @@
 		</param>
 	</function>
 	<function name="Show" messagetype="response">
-		<param name="success" type="Boolean">
+		<param name="success" type="Boolean" mandatory="true">
 			<description>true, if successful</description>
 			<description>false, if failed</description>
 		</param>
-		<param name="resultCode" type="Result">
+		<param name="resultCode" type="Result" mandatory="true">
 			<description>See Result</description>
 			<element name="SUCCESS"/>
 			<element name="INVALID_DATA"/>
@@ -937,17 +937,17 @@
 	</function>
 	<function name="Speak" messagetype="request">
 		<description>Speaks a text.</description>
-		<param name="ttsChunks" type="TTSChunk" minsize="1" maxsize="100" array="true">
+		<param name="ttsChunks" type="TTSChunk" minsize="1" maxsize="100" array="true" mandatory="true">
 			<description>An array of text chunks of type TTSChunk. See TTSChunk</description>
 			<description>The array must have at least one item</description>
 		</param>
 	</function>
 	<function name="Speak" messagetype="response">
-		<param name="success" type="Boolean">
+		<param name="success" type="Boolean" mandatory="true">
 			<description>true, if successful</description>
 			<description>false, if failed</description>
 		</param>
-		<param name="resultCode" type="Result">
+		<param name="resultCode" type="Result" mandatory="true">
 			<description>See Result</description>
 			<element name="SUCCESS"/>
 			<element name="INVALID_DATA"/>
@@ -969,17 +969,17 @@
 			<description>startTime must be provided for "run"</description>
 			<description>startTime will be ignored for "pause" and "resum"</description>
 		</param>
-		<param name="updateMode" type="UpdateMode">
+		<param name="updateMode" type="UpdateMode" mandatory="true">
 			<description>Enumeration to control the media clock.</description>
 			<description>In case of pause or resume, the start time value is ignored and shall be left out.  For resume, the time continues with the same value as it was when paused.</description>
 		</param>
 	</function>
 	<function name="SetMediaClockTimer" messagetype="response">
-		<param name="success" type="Boolean">
+		<param name="success" type="Boolean" mandatory="true">
 			<description>true, if successful</description>
 			<description>false, if failed</description>
 		</param>
-		<param name="resultCode" type="Result">
+		<param name="resultCode" type="Result" mandatory="true">
 			<description>See Result</description>
 			<element name="SUCCESS"/>
 			<element name="INVALID_DATA"/>
@@ -1002,11 +1002,11 @@
 		</param>
 	</function>
 	<function name="EncodedSyncPData" messagetype="response">
-		<param name="success" type="Boolean">
+		<param name="success" type="Boolean" mandatory="true">
 			<description>true, if successful</description>
 			<description>false, if failed</description>
 		</param>
-		<param name="resultCode" type="Result">
+		<param name="resultCode" type="Result" mandatory="true">
 			<description>See Result</description>
 			<element name="SUCCESS"/>
 			<element name="INVALID_DATA"/>
@@ -1024,16 +1024,16 @@
 		<description>Subscribes to built-in HMI buttons.</description>
 		<description>The application will be notified by the OnButtonEvent and OnButtonPress.</description>
 		<description>To unsubscribe the notifications, use unsubscribeButton.</description>
-		<param name="buttonName" type="ButtonName">
+		<param name="buttonName" type="ButtonName" mandatory="true">
 			<description>Name of the button to subscribe.</description>
 		</param>
 	</function>
 	<function name="SubscribeButton" messagetype="response">
-		<param name="success" type="Boolean">
+		<param name="success" type="Boolean" mandatory="true">
 			<description>true, if successful</description>
 			<description>false, if failed</description>
 		</param>
-		<param name="resultCode" type="Result">
+		<param name="resultCode" type="Result" mandatory="true">
 			<description>See Result</description>
 			<element name="SUCCESS"/>
 			<element name="INVALID_DATA"/>
@@ -1051,16 +1051,16 @@
 	</function>
 	<function name="UnsubscribeButton" messagetype="request">
 		<description>Unsubscribes from built-in HMI buttons.</description>
-		<param name="buttonName" type="ButtonName">
+		<param name="buttonName" type="ButtonName" mandatory="true">
 			<description>Name of the button to unsubscribe.</description>
 		</param>
 	</function>
 	<function name="UnsubscribeButton" messagetype="response">
-		<param name="success" type="Boolean">
+		<param name="success" type="Boolean" mandatory="true">
 			<description>true, if successful</description>
 			<description>false, if failed</description>
 		</param>
-		<param name="resultCode" type="Result">
+		<param name="resultCode" type="Result" mandatory="true">
 			<description>See Result</description>
 			<element name="SUCCESS"/>
 			<element name="INVALID_DATA"/>
@@ -1079,11 +1079,11 @@
 	<function name="GenericResponse" messagetype="response">
 		<description>Generic Response is sent, when the name of a received msg cannot be retrieved. Only used in case of an error.</description>
 		<description>Currently, only resultCode INVALID_DATA is used.</description>
-		<param name="success" type="Boolean">
+		<param name="success" type="Boolean" mandatory="true">
 			<description>true, if successful</description>
 			<description>false, if failed</description>
 		</param>
-		<param name="resultCode" type="Result">
+		<param name="resultCode" type="Result" mandatory="true">
 			<description>See Result</description>
 			<element name="INVALID_DATA"/>
 		</param>
@@ -1093,40 +1093,40 @@
 	</function>
 	<!-- Notifications -->
 	<function name="OnHMIStatus" messagetype="notification">
-		<param name="hmiLevel" type="HMILevel">
+		<param name="hmiLevel" type="HMILevel" mandatory="true">
 			<description>See HMILevel</description>
 		</param>
-		<param name="audioStreamingState" type="AudioStreamingState">
+		<param name="audioStreamingState" type="AudioStreamingState" mandatory="true">
 			<description>See AudioStreamingState</description>
 		</param>
-		<param name="systemContext" type="SystemContext">
+		<param name="systemContext" type="SystemContext" mandatory="true">
 			<description>See SystemContext</description>
 		</param>
 	</function>
 	<function name="OnAppInterfaceUnregistered" messagetype="notification">
-		<param name="reason" type="AppInterfaceUnregisteredReason">
+		<param name="reason" type="AppInterfaceUnregisteredReason" mandatory="true">
 			<description>See AppInterfaceUnregisteredReason</description>
 		</param>
 	</function>
 	<function name="OnButtonEvent" messagetype="notification">
 		<description>Notifies application of UP/DOWN events for buttons to which the application is subscribed.</description>
-		<param name="buttonName" type="ButtonName"/>
-		<param name="buttonEventMode" type="ButtonEventMode">
+		<param name="buttonName" type="ButtonName" mandatory="true"/>
+		<param name="buttonEventMode" type="ButtonEventMode" mandatory="true">
 			<description>Indicates whether this is an UP or DOWN event.</description>
 		</param>
 	</function>
 	<function name="OnButtonPress" messagetype="notification">
 		<description>Notifies application of LONG/SHORT press events for buttons to which the application is subscribed.</description>
-		<param name="buttonName" type="ButtonName"/>
-		<param name="buttonPressMode" type="ButtonPressMode">
+		<param name="buttonName" type="ButtonName" mandatory="true"/>
+		<param name="buttonPressMode" type="ButtonPressMode" mandatory="true">
 			<description>Indicates whether this is a LONG or SHORT button press event.</description>
 		</param>
 	</function>
 	<function name="OnCommand" messagetype="notification">
-		<param name="cmdID" type="Integer" minvalue="0" maxvalue="2000000000">
+		<param name="cmdID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
 			<description>Command ID, which is related to a specific menu entry.</description>
 		</param>
-		<param name="triggerSource" type="TriggerSource">
+		<param name="triggerSource" type="TriggerSource" mandatory="true">
 			<description>See TriggerSource</description>
 		</param>
 	</function>
@@ -1138,13 +1138,13 @@
 	</function>
 	<function name="OnTBTClientState" messagetype="notification">
 		<description>Provides applications with notifications specific to the current TBT client status on the module</description>
-		<param name="state" type="TBTState">
+		<param name="state" type="TBTState" mandatory="true">
 			<description>Current State of TBT client</description>
 		</param>
 	</function>
 	<function name="OnDriverDistraction" messagetype="notification">
 		<description>Provides driver distraction state to mobile applications</description>
-		<param name="state" type="DriverDistractionState">
+		<param name="state" type="DriverDistractionState" mandatory="true">
 			<description>Current State of Driver Distraction</description>
 		</param>
 	</function>
