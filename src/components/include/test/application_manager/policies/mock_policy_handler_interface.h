@@ -65,6 +65,7 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
                void(const std::string& policy_app_id,
                     const policy::Permissions& permissions));
 
+  MOCK_METHOD1(SaveShapshotFilePath, void(const std::string& filename));
 #ifdef EXTERNAL_PROPRIETARY_MODE
   MOCK_METHOD3(OnSnapshotCreated,
                void(const policy::BinaryMessage& pt_string,

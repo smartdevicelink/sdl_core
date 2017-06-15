@@ -433,7 +433,7 @@ BinaryMessageSptr PolicyManagerImpl::RequestPTUpdate() {
 
   LOG4CXX_DEBUG(logger_, "Snapshot contents is : " << message_string);
 
-  BinaryMessageSptr update = utils::MakeShared<BinaryMessage>(
+  BinaryMessageSptr update = std::make_shared<BinaryMessage>(
       message_string.begin(), message_string.end());
 
   return update;
@@ -1325,9 +1325,9 @@ void PolicyManagerImpl::RetrySequence() {
     }
     return;
   }
-
-  BinaryMessageSptr pt_snapshot = RequestPTUpdate();
-  listener_->OnSnapshotCreated(*pt_snapshot);
+#ifdef PROPRIETARY_MODE
+  listener_->OnNextRetry();
+#endif  // PROPRIETARY_MODE
   timer_retry_sequence_.Start(timeout_msec, timer::kPeriodic);
 }
 

@@ -78,7 +78,7 @@ void OnSystemRequestNotification::Run() {
   const mobile_apis::RequestType::eType request_type =
       static_cast<mobile_apis::RequestType::eType>(
           (*message_)[strings::msg_params][strings::request_type].asInt());
-  const policy::PolicyHandlerInterface& policy_handler = policy_handler_;
+  policy::PolicyHandlerInterface& policy_handler = policy_handler_;
   const std::string stringified_request_type =
       rpc::policy_table_interface_base::EnumToJsonString(
           static_cast<rpc::policy_table_interface_base::RequestType>(
@@ -119,6 +119,9 @@ void OnSystemRequestNotification::Run() {
     file_system::ReadBinaryFile(filename, binary_data);
 #if defined(PROPRIETARY_MODE)
     AddHeader(binary_data);
+    if (!filename.empty()) {
+      policy_handler.SaveShapshotFilePath(filename);
+    }
 #endif  // PROPRIETARY_MODE
 
 #if defined(PROPRIETARY_MODE) || defined(EXTERNAL_PROPRIETARY_MODE)

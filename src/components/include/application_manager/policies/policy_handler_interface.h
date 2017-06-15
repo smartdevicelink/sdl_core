@@ -460,6 +460,7 @@ class PolicyHandlerInterface {
 
   virtual const PolicySettings& get_settings() const = 0;
   virtual const std::string RemoteAppsUrl() const = 0;
+  virtual void SaveShapshotFilePath(const std::string& filename) = 0;
 
   /**
    * @brief OnDeviceSwitching Notifies policy manager on device switch event so

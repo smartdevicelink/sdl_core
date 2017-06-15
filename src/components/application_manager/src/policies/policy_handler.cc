@@ -805,6 +805,10 @@ void PolicyHandler::LinkAppsToDevice() {
   }
 }
 
+void PolicyHandler::SaveShapshotFilePath(const std::string& filename) {
+  snapshot_file_path_ = filename;
+}
+
 bool PolicyHandler::IsAppSuitableForPolicyUpdate(
     const Applications::value_type value) const {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -1029,10 +1033,24 @@ void PolicyHandler::OnPendingPermissionChange(
   policy_manager_->RemovePendingPermissionChanges(policy_app_id);
 }
 
-bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string,
-                                     const std::string& url) {
+const std::string PolicyHandler::ChooseUrl() {
+  EndpointUrls urls;
+  policy_manager_->GetUpdateUrls("0x07", urls);
+
+  if (urls.empty()) {
+    LOG4CXX_ERROR(logger_, "Service URLs are empty! NOT sending PT to mobile!");
+    return std::string();
+  }
+  AppIdURL app_url = policy_manager_->GetNextUpdateUrl(urls);
+  while (!IsUrlAppIdValid(app_url.first, urls)) {
+    app_url = policy_manager_->GetNextUpdateUrl(urls);
+  }
+  const std::string& url = urls[app_url.first].url[app_url.second];
+  return url;
+}
+
+ApplicationSharedPtr PolicyHandler::ChooseApplication() {
   LOG4CXX_AUTO_TRACE(logger_);
-  POLICY_LIB_CHECK(false);
 
   const uint32_t app_id = GetAppIdForSending();
   ApplicationSharedPtr app = application_manager_.application(app_id);
@@ -1042,7 +1060,7 @@ bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string,
                  "There is no registered application with "
                  "connection key '"
                      << app_id << "'");
-    return false;
+    return app;
   }
 
   const std::string& mobile_app_id = app->policy_app_id();
@@ -1051,6 +1069,21 @@ bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string,
                  "Application with connection key '"
                      << app_id << "'"
                                   " has no application id.");
+    return app;
+  }
+
+  return app;
+}
+
+bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string,
+                                     const std::string& url) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  POLICY_LIB_CHECK(false);
+
+  ApplicationSharedPtr app = ChooseApplication();
+  uint32_t app_id = app->app_id();
+
+  if (!app) {
     return false;
   }
 
@@ -1460,11 +1493,12 @@ void PolicyHandler::OnSnapshotCreated(
                                     application_manager_);
   }
 }
-#else  // EXTERNAL_PROPRIETARY_MODE
+#endif
+
+#ifdef PROPRIETARY_MODE
 void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string) {
   LOG4CXX_AUTO_TRACE(logger_);
   POLICY_LIB_CHECK_VOID();
-#ifdef PROPRIETARY_MODE
   std::string policy_snapshot_full_path;
   if (!SaveSnapshot(pt_string, policy_snapshot_full_path)) {
     LOG4CXX_ERROR(logger_, "Snapshot processing skipped.");
@@ -1474,27 +1508,34 @@ void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string) {
                                   TimeoutExchangeSec(),
                                   policy_manager_->RetrySequenceDelaysSeconds(),
                                   application_manager_);
-#else   // PROPRIETARY_MODE
-  LOG4CXX_ERROR(logger_, "HTTP policy");
-  EndpointUrls urls;
-  policy_manager_->GetUpdateUrls("0x07", urls);
 
-  if (urls.empty()) {
-    LOG4CXX_ERROR(logger_, "Service URLs are empty! NOT sending PT to mobile!");
-    return;
-  }
-
-  AppIdURL app_url = policy_manager_->GetNextUpdateUrl(urls);
-  while (!IsUrlAppIdValid(app_url.first, urls)) {
-    app_url = policy_manager_->GetNextUpdateUrl(urls);
-  }
-  const std::string& url = urls[app_url.first].url[app_url.second];
-  SendMessageToSDK(pt_string, url);
-#endif  // PROPRIETARY_MODE
-  // reset update required false
   OnUpdateRequestSentToMobile();
 }
-#endif  // EXTERNAL_PROPRIETARY_MODE
+
+void PolicyHandler::OnNextRetry() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  const std::string url = ChooseUrl();
+  ApplicationSharedPtr app = ChooseApplication();
+  if (!app || url.empty()) {
+    return;
+  }
+  const uint32_t app_id = app->app_id();
+  MessageHelper::SendPolicySnapshotNotification(
+      app_id, snapshot_file_path_, url, application_manager_);
+  OnUpdateRequestSentToMobile();
+}
+#endif
+
+#ifdef HTTP_MODE
+void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  const std::string url = ();
+  if (url.empty()) {
+    return;
+  }
+  SendMessageToSDK(pt_string, url);
+}
+#endif
 
 bool PolicyHandler::GetPriority(const std::string& policy_app_id,
                                 std::string* priority) const {

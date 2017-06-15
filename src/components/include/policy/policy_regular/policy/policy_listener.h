@@ -81,6 +81,13 @@ class PolicyListener {
    */
   virtual void OnSnapshotCreated(const BinaryMessage& pt_string) = 0;
 
+#ifdef PROPRIETARY_MODE
+  /**
+   * @brief Sends snapshot via OnSystemRequest to mobile.
+   */
+  virtual void OnNextRetry() = 0;
+#endif  // PROPRIETARY_MODE
+
   /**
    * @brief Make appropriate changes for related applications permissions and
    * notify them, if it possible
