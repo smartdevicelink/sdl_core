@@ -1265,7 +1265,7 @@ bool SQLPTRepresentation::SaveConsumerFriendlyMessages(
   // the current local consumer_friendly_messages section shall be maintained in
   // the policy table. So it won't be changed/updated
   if (!messages.messages.is_initialized()) {
-    LOG4CXX_INFO(logger_, "Messages list is empty");
+    LOG4CXX_INFO(logger_, "ConsumerFriendlyMessages messages list is empty");
     return true;
   }
 
@@ -1276,18 +1276,18 @@ bool SQLPTRepresentation::SaveConsumerFriendlyMessages(
   }
 
   if (!delete_query_exec_result) {
-    LOG4CXX_WARN(logger_, "Incorrect delete from message.");
+    LOG4CXX_WARN(logger_, "Failed to delete messages from DB.");
     return false;
   }
 
   if (!query.Prepare(sql_pt::kUpdateVersion)) {
-    LOG4CXX_WARN(logger_, "Incorrect update statement for version.");
+    LOG4CXX_WARN(logger_, "Invalid update messages version statement.");
     return false;
   }
 
   query.Bind(0, messages.version);
   if (!query.Exec()) {
-    LOG4CXX_WARN(logger_, "Incorrect update into version.");
+    LOG4CXX_WARN(logger_, "Failed to update messages version number in DB.");
     return false;
   }
 
