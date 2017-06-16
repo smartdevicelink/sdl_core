@@ -550,6 +550,44 @@ bool CommandRequestImpl::CheckAllowedParameters() {
   return true;
 }
 
+bool CommandRequestImpl::CheckHMICapabilities(
+    const mobile_apis::ButtonName::eType button) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  using namespace smart_objects;
+  using namespace mobile_apis;
+
+  const HMICapabilities& hmi_capabilities =
+      application_manager_.hmi_capabilities();
+  if (!hmi_capabilities.is_ui_cooperating()) {
+    LOG4CXX_ERROR(logger_, "UI is not supported by HMI");
+    return false;
+  }
+
+  const SmartObject* button_capabilities_so =
+      hmi_capabilities.button_capabilities();
+  if (!button_capabilities_so) {
+    LOG4CXX_ERROR(logger_, "Invalid button capabilities object");
+    return false;
+  }
+
+  const SmartObject& button_capabilities = *button_capabilities_so;
+  for (size_t i = 0; i < button_capabilities.length(); ++i) {
+    const SmartObject& capabilities = button_capabilities[i];
+    const ButtonName::eType current_button = static_cast<ButtonName::eType>(
+        capabilities.getElement(hmi_response::button_name).asInt());
+    if (current_button == button) {
+      LOG4CXX_DEBUG(logger_,
+                    "Button capabilities for " << button << " was found");
+      return true;
+    }
+  }
+
+  LOG4CXX_DEBUG(logger_,
+                "Button capabilities for " << button << " was not found");
+  return false;
+}
+
 void CommandRequestImpl::RemoveDisallowedParameters() {
   LOG4CXX_AUTO_TRACE(logger_);
 

@@ -193,6 +193,14 @@ class CommandRequestImpl : public CommandImpl,
   bool CheckAllowedParameters();
 
   /**
+   * @brief Checks HMI capabilities for specified button support
+   * @param button Button to check
+   * @return true if button is present in HMI capabilities
+   * otherwise returns false
+   */
+  bool CheckHMICapabilities(const mobile_apis::ButtonName::eType button) const;
+
+  /**
    * @brief Remove from current message parameters disallowed by policy table
    */
   void RemoveDisallowedParameters();
