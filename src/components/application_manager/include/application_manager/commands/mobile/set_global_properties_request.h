@@ -32,7 +32,7 @@
 
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_SET_GLOBAL_PROPERTIES_REQUEST_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_SET_GLOBAL_PROPERTIES_REQUEST_H_
-
+#include <string>
 #include "application_manager/commands/command_request_impl.h"
 #include "utils/macro.h"
 #include "application_manager/application.h"
@@ -125,6 +125,15 @@ class SetGlobalPropertiesRequest : public CommandRequestImpl {
    */
   bool IsWhiteSpaceExist();
 
+  /*
+   * @brief Prepare result code and result for sending to mobile application
+   * @param result_code contains result code for sending to mobile application
+   * @param info contains info for sending to mobile applicaion
+   * @return result for sending to mobile application.
+   */
+  bool PrepareResponseParameters(mobile_apis::Result::eType& result_code,
+                                 std::string& info);
+
   bool is_ui_send_;
   bool is_tts_send_;
 
@@ -133,6 +142,8 @@ class SetGlobalPropertiesRequest : public CommandRequestImpl {
 
   hmi_apis::Common_Result::eType ui_result_;
   hmi_apis::Common_Result::eType tts_result_;
+  std::string ui_response_info_;
+  std::string tts_response_info_;
 
   DISALLOW_COPY_AND_ASSIGN(SetGlobalPropertiesRequest);
 };

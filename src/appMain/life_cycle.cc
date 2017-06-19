@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2016, Ford Motor Company
+* Copyright (c) 2017, Ford Motor Company
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,7 @@
 #include "utils/signals.h"
 #include "utils/make_shared.h"
 #include "config_profile/profile.h"
-#include "resumption/last_state.h"
+#include "resumption/last_state_impl.h"
 
 #ifdef ENABLE_SECURITY
 #include "security_manager/security_manager_impl.h"
@@ -102,8 +102,8 @@ LifeCycle::LifeCycle(const profile::Profile& profile)
 bool LifeCycle::StartComponents() {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK(!last_state_);
-  last_state_ = new resumption::LastState(profile_.app_storage_folder(),
-                                          profile_.app_info_storage());
+  last_state_ = new resumption::LastStateImpl(profile_.app_storage_folder(),
+                                              profile_.app_info_storage());
 
   DCHECK(!transport_manager_);
   transport_manager_ = new transport_manager::TransportManagerDefault(profile_);
@@ -128,6 +128,7 @@ bool LifeCycle::StartComponents() {
   hmi_handler_ = new hmi_message_handler::HMIMessageHandlerImpl(profile_);
 
   media_manager_ = new media_manager::MediaManagerImpl(*app_manager_, profile_);
+  app_manager_->set_connection_handler(connection_handler_);
   if (!app_manager_->Init(*last_state_, media_manager_)) {
     LOG4CXX_ERROR(logger_, "Application manager init failed.");
     return false;
@@ -177,7 +178,6 @@ bool LifeCycle::StartComponents() {
   // It's important to initialise TM after setting up listener chain
   // [TM -> CH -> AM], otherwise some events from TM could arrive at nowhere
   app_manager_->set_protocol_handler(protocol_handler_);
-  app_manager_->set_connection_handler(connection_handler_);
   app_manager_->set_hmi_message_handler(hmi_handler_);
 
   transport_manager_->Init(*last_state_);
@@ -291,15 +291,6 @@ bool LifeCycle::InitMessageSystem() {
   return true;
 }
 #endif  // DBUS_HMIADAPTER
-
-#ifdef MQUEUE_HMIADAPTER
-bool LifeCycle::InitMessageSystem() {
-  hmi_message_adapter_ = new hmi_message_handler::MqueueAdapter(hmi_handler_);
-  hmi_handler.AddHMIMessageAdapter(hmi_message_adapter_);
-  return true;
-}
-
-#endif  // MQUEUE_HMIADAPTER
 
 namespace {
 void sig_handler(int sig) {

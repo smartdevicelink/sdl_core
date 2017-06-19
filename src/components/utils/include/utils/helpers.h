@@ -29,8 +29,8 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_HELPERS_H
-#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_HELPERS_H
+#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_HELPERS_H_
+#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_HELPERS_H_
 #include <algorithm>
 /**
  * These helpers allows to simplify compare strategy between some objects.
@@ -117,6 +117,15 @@ bool Compare(T what, T to, T to1, T to2, T to3, T to4) {
       Compare<T, CompareType, CmpStrategy>(what, to4));
 }
 
+template <typename T,
+          bool (*CompareType)(T, T),
+          bool (*CmpStrategy)(bool, bool)>
+bool Compare(T what, T to, T to1, T to2, T to3, T to4, T to5) {
+  return CmpStrategy(
+      Compare<T, CompareType, CmpStrategy>(what, to, to1, to2, to3),
+      Compare<T, CompareType, CmpStrategy>(what, to4, to5));
+}
+
 template <typename Container>
 bool in_range(const Container& container,
               const typename Container::value_type& value) {
@@ -125,4 +134,4 @@ bool in_range(const Container& container,
 }
 }
 
-#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_HELPERS_H
+#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_HELPERS_H_

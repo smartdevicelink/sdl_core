@@ -47,12 +47,11 @@ sync_primitives::Lock shot_lock;
 sync_primitives::ConditionalVariable shot_condition;
 
 const std::string kTimerName = "TestTimer";
-const bool kSingleShot = true;
 
 /*
  * Default timeout used during timer testing.
  * Value should be greater than at least 30 ms
- * to avoid timer firing beetwen two sequental Start/Stop calls
+ * to avoid timer firing between two sequental Start/Stop calls
  */
 const uint32_t kDefaultTimeoutMs = 30u;
 const uint32_t kDefaultTimeoutRestartMs = 45u;
@@ -87,7 +86,7 @@ class TestTaskWithStart : public TestTask {
  public:
   void PerformTimer() const OVERRIDE {
     if (timer_) {
-      timer_->Start(kDefaultTimeoutRestartMs, !kSingleShot);
+      timer_->Start(kDefaultTimeoutRestartMs, timer::kPeriodic);
     }
   }
 };
@@ -113,7 +112,7 @@ TEST(TimerTest, Start_Stop_NoLoop_NoCall) {
   EXPECT_FALSE(timer.is_running());
   EXPECT_EQ(0u, timer.timeout());
 
-  timer.Start(kDefaultTimeoutMs, kSingleShot);
+  timer.Start(kDefaultTimeoutMs, timer::kSingleShot);
   EXPECT_TRUE(timer.is_running());
   EXPECT_EQ(kDefaultTimeoutMs, timer.timeout());
 
@@ -130,7 +129,7 @@ TEST(TimerTest, Start_Stop_Loop_NoCall) {
   EXPECT_FALSE(timer.is_running());
   EXPECT_EQ(0u, timer.timeout());
 
-  timer.Start(kDefaultTimeoutMs, !kSingleShot);
+  timer.Start(kDefaultTimeoutMs, timer::kPeriodic);
   EXPECT_TRUE(timer.is_running());
   EXPECT_EQ(kDefaultTimeoutMs, timer.timeout());
 
@@ -147,7 +146,7 @@ TEST(TimerTest, Start_Stop_NoLoop_OneCall) {
   EXPECT_FALSE(timer.is_running());
   EXPECT_EQ(0u, timer.timeout());
 
-  timer.Start(kDefaultTimeoutMs, kSingleShot);
+  timer.Start(kDefaultTimeoutMs, timer::kSingleShot);
   EXPECT_TRUE(timer.is_running());
   EXPECT_EQ(kDefaultTimeoutMs, timer.timeout());
 
@@ -172,7 +171,7 @@ TEST(TimerTest, Start_Stop_Loop_3Calls) {
   EXPECT_FALSE(timer.is_running());
   EXPECT_EQ(0u, timer.timeout());
 
-  timer.Start(kDefaultTimeoutMs, !kSingleShot);
+  timer.Start(kDefaultTimeoutMs, timer::kPeriodic);
   EXPECT_TRUE(timer.is_running());
   EXPECT_EQ(kDefaultTimeoutMs, timer.timeout());
 
@@ -197,11 +196,11 @@ TEST(TimerTest, Restart_NoLoop_NoCall) {
 
   timer::Timer timer(kTimerName, mock_task);
 
-  timer.Start(kDefaultTimeoutMs, kSingleShot);
+  timer.Start(kDefaultTimeoutMs, timer::kSingleShot);
   EXPECT_TRUE(timer.is_running());
   EXPECT_EQ(kDefaultTimeoutMs, timer.timeout());
 
-  timer.Start(kDefaultTimeoutRestartMs, kSingleShot);
+  timer.Start(kDefaultTimeoutRestartMs, timer::kSingleShot);
   EXPECT_TRUE(timer.is_running());
   EXPECT_EQ(kDefaultTimeoutRestartMs, timer.timeout());
 }
@@ -212,11 +211,11 @@ TEST(TimerTest, Restart_Loop_NoCall) {
 
   timer::Timer timer(kTimerName, mock_task);
 
-  timer.Start(kDefaultTimeoutMs, !kSingleShot);
+  timer.Start(kDefaultTimeoutMs, timer::kPeriodic);
   EXPECT_TRUE(timer.is_running());
   EXPECT_EQ(kDefaultTimeoutMs, timer.timeout());
 
-  timer.Start(kDefaultTimeoutRestartMs, !kSingleShot);
+  timer.Start(kDefaultTimeoutRestartMs, timer::kPeriodic);
   EXPECT_TRUE(timer.is_running());
   EXPECT_EQ(kDefaultTimeoutRestartMs, timer.timeout());
 }
@@ -228,7 +227,7 @@ TEST(TimerTest, Restart_Loop_3Calls) {
   TestTask* task = new TestTask();
   timer::Timer timer(kTimerName, task);
 
-  timer.Start(kDefaultTimeoutMs, !kSingleShot);
+  timer.Start(kDefaultTimeoutMs, timer::kPeriodic);
   EXPECT_TRUE(timer.is_running());
   EXPECT_EQ(kDefaultTimeoutMs, timer.timeout());
 
@@ -236,7 +235,7 @@ TEST(TimerTest, Restart_Loop_3Calls) {
   for (size_t i = 0; i < loops_count; ++i) {
     shot_condition.Wait(shot_lock);
   }
-  timer.Start(kDefaultTimeoutRestartMs, !kSingleShot);
+  timer.Start(kDefaultTimeoutRestartMs, timer::kPeriodic);
   EXPECT_TRUE(timer.is_running());
   EXPECT_EQ(kDefaultTimeoutRestartMs, timer.timeout());
 
@@ -251,7 +250,7 @@ TEST(TimerTest, Restart_NoLoop_FromCall) {
   timer::Timer timer(kTimerName, task);
   task->set_timer(&timer);
 
-  timer.Start(kDefaultTimeoutMs, kSingleShot);
+  timer.Start(kDefaultTimeoutMs, timer::kSingleShot);
   EXPECT_TRUE(timer.is_running());
   EXPECT_EQ(kDefaultTimeoutMs, timer.timeout());
 
@@ -270,7 +269,7 @@ TEST(TimerTest, Restart_Loop_FromCall) {
   timer::Timer timer(kTimerName, task);
   task->set_timer(&timer);
 
-  timer.Start(kDefaultTimeoutMs, !kSingleShot);
+  timer.Start(kDefaultTimeoutMs, timer::kPeriodic);
   EXPECT_TRUE(timer.is_running());
   EXPECT_EQ(kDefaultTimeoutMs, timer.timeout());
 
@@ -291,7 +290,7 @@ TEST(TimerTest, Stop_Loop_FromCall) {
   timer::Timer timer(kTimerName, task);
   task->set_timer(&timer);
 
-  timer.Start(kDefaultTimeoutMs, !kSingleShot);
+  timer.Start(kDefaultTimeoutMs, timer::kPeriodic);
   EXPECT_TRUE(timer.is_running());
   EXPECT_EQ(kDefaultTimeoutMs, timer.timeout());
 
@@ -314,7 +313,7 @@ TEST(TimerTest, Delete_Running_NoLoop) {
   EXPECT_FALSE(timer->is_running());
   EXPECT_EQ(0u, timer->timeout());
 
-  timer->Start(kDefaultTimeoutMs, kSingleShot);
+  timer->Start(kDefaultTimeoutMs, timer::kSingleShot);
   EXPECT_TRUE(timer->is_running());
   EXPECT_EQ(kDefaultTimeoutMs, timer->timeout());
 

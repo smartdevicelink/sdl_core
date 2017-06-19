@@ -71,11 +71,22 @@ timer::Timer::~Timer() {
   LOG4CXX_DEBUG(logger_, "Timer " << name_ << " has been destroyed");
 }
 
-void timer::Timer::Start(const Milliseconds timeout, const bool single_shot) {
+void timer::Timer::Start(const Milliseconds timeout,
+                         const TimerType timer_type) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock auto_lock(state_lock_);
   StopThread();
-  single_shot_ = single_shot;
+  switch (timer_type) {
+    case kSingleShot: {
+      single_shot_ = true;
+      break;
+    }
+    case kPeriodic: {
+      single_shot_ = false;
+      break;
+    }
+    default: { ASSERT("timer_type should be kSingleShot or kPeriodic"); }
+  };
   StartDelegate(timeout);
   StartThread();
   LOG4CXX_DEBUG(logger_, "Timer " << name_ << " has been started");

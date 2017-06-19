@@ -30,7 +30,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <stdint.h>
+#include <string>
+
 #include "gtest/gtest.h"
+#include "mobile/unsubscribe_way_points_request.h"
+#include "interfaces/MOBILE_API.h"
 #include "utils/shared_ptr.h"
 #include "smart_objects/smart_object.h"
 #include "commands/commands_test.h"
@@ -38,61 +43,140 @@
 #include "application_manager/application.h"
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_application.h"
-#include "application_manager/mock_hmi_capabilities.h"
-#include "mobile/unsubscribe_way_points_request.h"
-#include "interfaces/MOBILE_API.h"
+#include "application_manager/mock_message_helper.h"
 #include "application_manager/smart_object_keys.h"
+#include "application_manager/event_engine/event.h"
 
 namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace unsubscribe_way_points_request {
+
+namespace am = ::application_manager;
+namespace mobile_result = mobile_apis::Result;
 
 using ::testing::_;
 using ::testing::Return;
-using ::testing::ReturnRef;
-using ::testing::DoAll;
-using ::testing::SaveArg;
-using ::testing::InSequence;
-namespace am = ::application_manager;
+
 using am::commands::UnSubscribeWayPointsRequest;
 using am::commands::MessageSharedPtr;
 
-typedef SharedPtr<UnSubscribeWayPointsRequest> CommandPtr;
+namespace {
+const uint32_t kConnectionKey = 3u;
+const uint32_t kAppId = 5u;
+}  // namespace
 
-class UnsubscribeWayPointsRequestTest
+class UnSubscribeWayPointsRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
-  typedef TypeIf<kMocksIsNice,
-                 NiceMock<application_manager_test::MockHMICapabilities>,
-                 application_manager_test::MockHMICapabilities>::Result
-      MockHMICapabilities;
-};
-
-TEST_F(UnsubscribeWayPointsRequestTest, OnEvent_SUCCESS) {
-  CommandPtr command(CreateCommand<UnSubscribeWayPointsRequest>());
-  MockAppPtr app(CreateMockApp());
-  Event event(hmi_apis::FunctionID::Navigation_UnsubscribeWayPoints);
-
-  MessageSharedPtr event_msg(CreateMessage(smart_objects::SmartType_Map));
-  (*event_msg)[am::strings::params][am::hmi_response::code] =
-      mobile_apis::Result::SUCCESS;
-  (*event_msg)[am::strings::msg_params] = 0;
-
-  event.set_smart_object(*event_msg);
-
-  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
-
-  {
-    InSequence dummy;
-    EXPECT_CALL(app_mngr_, UnsubscribeAppFromWayPoints(_));
-    EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _));
-    EXPECT_CALL(*app, UpdateHash());
+  UnSubscribeWayPointsRequestTest()
+      : command_msg_(CreateMessage(smart_objects::SmartType_Map))
+      , command_(CreateCommand<UnSubscribeWayPointsRequest>(command_msg_))
+      , mock_message_helper_(*am::MockMessageHelper::message_helper_mock()) {
+    (*command_msg_)[am::strings::params][am::strings::connection_key] =
+        kConnectionKey;
+    testing::Mock::VerifyAndClearExpectations(&mock_message_helper_);
   }
 
-  command->on_event(event);
+  ~UnSubscribeWayPointsRequestTest() {
+    testing::Mock::VerifyAndClearExpectations(&mock_message_helper_);
+  }
+
+  MessageSharedPtr command_msg_;
+  ::utils::SharedPtr<UnSubscribeWayPointsRequest> command_;
+  am::MockMessageHelper& mock_message_helper_;
+};
+
+TEST_F(UnSubscribeWayPointsRequestTest,
+       Run_ApplicationIsNotRegistered_UNSUCCESS) {
+  EXPECT_CALL(app_mngr_, application(_))
+      .WillOnce(Return(ApplicationSharedPtr()));
+
+  EXPECT_CALL(
+      app_mngr_,
+      ManageMobileCommand(
+          MobileResultCodeIs(mobile_result::APPLICATION_NOT_REGISTERED), _));
+
+  command_->Run();
 }
 
+TEST_F(UnSubscribeWayPointsRequestTest,
+       Run_AppIsNotSubscribedForWayPoints_UNSUCCESS) {
+  MockAppPtr mock_app(CreateMockApp());
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillOnce(Return(mock_app));
+
+  EXPECT_CALL(*mock_app, app_id()).WillOnce(Return(kAppId));
+
+  EXPECT_CALL(app_mngr_, IsAppSubscribedForWayPoints(kAppId))
+      .WillOnce(Return(false));
+
+  EXPECT_CALL(
+      app_mngr_,
+      ManageMobileCommand(MobileResultCodeIs(mobile_result::IGNORED), _));
+
+  command_->Run();
+}
+
+TEST_F(UnSubscribeWayPointsRequestTest, Run_AppSubscribedForWayPoints_SUCCESS) {
+  MockAppPtr mock_app(CreateMockApp());
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillOnce(Return(mock_app));
+
+  EXPECT_CALL(*mock_app, app_id()).WillOnce(Return(kAppId));
+
+  EXPECT_CALL(app_mngr_, IsAppSubscribedForWayPoints(kAppId))
+      .WillOnce(Return(true));
+
+  EXPECT_CALL(app_mngr_,
+              ManageHMICommand(HMIResultCodeIs(
+                  hmi_apis::FunctionID::Navigation_UnsubscribeWayPoints)));
+
+  command_->Run();
+}
+
+TEST_F(UnSubscribeWayPointsRequestTest, OnEvent_UnknownEvent_UNSUCCESS) {
+  MockAppPtr mock_app(CreateMockApp());
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillOnce(Return(mock_app));
+
+  EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _)).Times(0);
+
+  Event event(hmi_apis::FunctionID::INVALID_ENUM);
+
+  command_->on_event(event);
+}
+
+TEST_F(UnSubscribeWayPointsRequestTest,
+       OnEvent_ReceivedNavigationUnSubscribeWayPointsEvent_SUCCESS) {
+  MockAppPtr mock_app(CreateMockApp());
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillOnce(Return(mock_app));
+
+  MessageSharedPtr event_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*event_msg)[am::strings::msg_params] = 0;
+  (*event_msg)[am::strings::params][am::hmi_response::code] =
+      mobile_result::SUCCESS;
+  Event event(hmi_apis::FunctionID::Navigation_UnsubscribeWayPoints);
+  event.set_smart_object(*event_msg);
+
+  EXPECT_CALL(*mock_app, app_id()).WillOnce(Return(kAppId));
+
+  EXPECT_CALL(app_mngr_, UnsubscribeAppFromWayPoints(kAppId));
+
+  EXPECT_CALL(mock_message_helper_,
+              HMIToMobileResult(hmi_apis::Common_Result::SUCCESS))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
+
+  EXPECT_CALL(
+      app_mngr_,
+      ManageMobileCommand(MobileResultCodeIs(mobile_result::SUCCESS), _));
+
+  command_->on_event(event);
+}
+
+}  // namespace unsubscribe_way_points_request
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

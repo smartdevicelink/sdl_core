@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -179,6 +179,18 @@ class TransportManagerImpl
    **/
   int SendMessageToDevice(
       const protocol_handler::RawMessagePtr message) OVERRIDE;
+
+  /**
+   * @brief RunAppOnDevice allows to run specific application on the certain
+   *device.
+   *
+   * @param device_handle device identifier to run application on.
+   *
+   * @param bundle_id application id also known as bundle id on some devices to
+   *run.
+   */
+  void RunAppOnDevice(const DeviceHandle device_handle,
+                      const std::string& bundle_id) OVERRIDE;
 
   /**
    * @brief Post event in the event queue.

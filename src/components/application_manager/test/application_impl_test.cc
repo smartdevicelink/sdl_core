@@ -31,7 +31,10 @@
  */
 
 #include "application_manager/application_impl.h"
+
+#include <stdint.h>
 #include <iostream>
+
 #include "gtest/gtest.h"
 #include "application_manager/hmi_state.h"
 #include "utils/file_system.h"
@@ -47,7 +50,8 @@
 #include "resumption/last_state.h"
 #include "application_manager/resumption/resume_ctrl.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
-#include "policy/mock_statistics_manager.h"
+#include "policy/usage_statistics/mock_statistics_manager.h"
+#include "smart_objects/smart_object.h"
 
 namespace test {
 namespace components {
@@ -56,7 +60,6 @@ namespace application_manager_test {
 using namespace application_manager;
 
 using namespace mobile_apis;
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 namespace custom_str = utils::custom_string;
 
 using ::testing::_;
@@ -475,7 +478,7 @@ TEST_F(ApplicationImplTest, LoadPersistentFiles) {
   EXPECT_EQ(FileType::AUDIO_MP3, test_file8->file_type);
 }
 
-TEST_F(ApplicationImplTest, IsCommandLimitsExceeded_SetLimitFromConfig) {
+TEST_F(ApplicationImplTest, AreCommandLimitsExceeded_SetLimitFromConfig) {
   std::pair<uint32_t, int32_t> get_frequency;
   get_frequency.first = 5;
   get_frequency.second = 1;
@@ -484,21 +487,22 @@ TEST_F(ApplicationImplTest, IsCommandLimitsExceeded_SetLimitFromConfig) {
   EXPECT_CALL(mock_application_manager_settings_, get_vehicle_data_frequency())
       .WillRepeatedly(ReturnRef(get_frequency));
   for (uint32_t i = 0; i < get_frequency.first; i++) {
-    EXPECT_FALSE(app_impl->IsCommandLimitsExceeded(FunctionID::ReadDIDID,
-                                                   TLimitSource::CONFIG_FILE));
+    EXPECT_FALSE(app_impl->AreCommandLimitsExceeded(FunctionID::ReadDIDID,
+                                                    TLimitSource::CONFIG_FILE));
   }
-  EXPECT_TRUE(app_impl->IsCommandLimitsExceeded(FunctionID::ReadDIDID,
-                                                TLimitSource::CONFIG_FILE));
+  EXPECT_TRUE(app_impl->AreCommandLimitsExceeded(FunctionID::ReadDIDID,
+                                                 TLimitSource::CONFIG_FILE));
 
   for (uint32_t i = 0; i < get_frequency.first; i++) {
-    EXPECT_FALSE(app_impl->IsCommandLimitsExceeded(FunctionID::GetVehicleDataID,
-                                                   TLimitSource::CONFIG_FILE));
+    EXPECT_FALSE(app_impl->AreCommandLimitsExceeded(
+        FunctionID::GetVehicleDataID, TLimitSource::CONFIG_FILE));
   }
-  EXPECT_TRUE(app_impl->IsCommandLimitsExceeded(FunctionID::GetVehicleDataID,
-                                                TLimitSource::CONFIG_FILE));
+  EXPECT_TRUE(app_impl->AreCommandLimitsExceeded(FunctionID::GetVehicleDataID,
+                                                 TLimitSource::CONFIG_FILE));
 }
 
-TEST_F(ApplicationImplTest, IsCommandLimitsExceeded_LimitFromPT) {
+TEST_F(ApplicationImplTest, AreCommandLimitsExceeded_LimitFromPT) {
+  const uint32_t cmd_limit = 100u;
   policy_test::MockPolicyHandlerInterface policy_interface;
   EXPECT_CALL(mock_application_manager_, GetPolicyHandler())
       .WillRepeatedly(ReturnRef(policy_interface));
@@ -506,20 +510,20 @@ TEST_F(ApplicationImplTest, IsCommandLimitsExceeded_LimitFromPT) {
       .WillRepeatedly(Return(false));
 
   EXPECT_CALL(policy_interface, GetNotificationsNumber(_))
-      .WillOnce(Return(100u));
-  EXPECT_FALSE(app_impl->IsCommandLimitsExceeded(FunctionID::ReadDIDID,
-                                                 TLimitSource::POLICY_TABLE));
+      .WillOnce(Return(cmd_limit));
+  EXPECT_FALSE(app_impl->AreCommandLimitsExceeded(FunctionID::ReadDIDID,
+                                                  TLimitSource::POLICY_TABLE));
 
   EXPECT_CALL(policy_interface, GetNotificationsNumber(_))
-      .WillOnce(Return(100u));
-  EXPECT_FALSE(app_impl->IsCommandLimitsExceeded(FunctionID::GetVehicleDataID,
-                                                 TLimitSource::POLICY_TABLE));
+      .WillOnce(Return(cmd_limit));
+  EXPECT_FALSE(app_impl->AreCommandLimitsExceeded(FunctionID::GetVehicleDataID,
+                                                  TLimitSource::POLICY_TABLE));
   EXPECT_CALL(policy_interface, GetNotificationsNumber(_))
       .WillRepeatedly(Return(0));
-  EXPECT_TRUE(app_impl->IsCommandLimitsExceeded(FunctionID::ReadDIDID,
-                                                TLimitSource::POLICY_TABLE));
-  EXPECT_TRUE(app_impl->IsCommandLimitsExceeded(FunctionID::GetVehicleDataID,
-                                                TLimitSource::POLICY_TABLE));
+  EXPECT_TRUE(app_impl->AreCommandLimitsExceeded(FunctionID::ReadDIDID,
+                                                 TLimitSource::POLICY_TABLE));
+  EXPECT_TRUE(app_impl->AreCommandLimitsExceeded(FunctionID::GetVehicleDataID,
+                                                 TLimitSource::POLICY_TABLE));
 }
 
 TEST_F(ApplicationImplTest, SubscribeToButton_UnsubscribeFromButton) {

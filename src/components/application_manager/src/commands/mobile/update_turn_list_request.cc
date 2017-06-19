@@ -155,18 +155,17 @@ void UpdateTurnListRequest::on_event(const event_engine::Event& event) {
     case hmi_apis::FunctionID::Navigation_UpdateTurnList: {
       LOG4CXX_INFO(logger_, "Received Navigation_UpdateTurnList event");
 
-      mobile_apis::Result::eType result_code =
-          static_cast<mobile_apis::Result::eType>(
+      const hmi_apis::Common_Result::eType result_code =
+          static_cast<hmi_apis::Common_Result::eType>(
               message[strings::params][hmi_response::code].asInt());
-      HMICapabilities& hmi_capabilities =
-          application_manager_.hmi_capabilities();
-
-      bool result =
-          (mobile_apis::Result::SUCCESS == result_code) ||
-          ((mobile_apis::Result::UNSUPPORTED_RESOURCE == result_code) &&
-           (hmi_capabilities.is_ui_cooperating()));
-
-      SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
+      std::string response_info;
+      GetInfo(message, response_info);
+      const bool result = PrepareResultForMobileResponse(
+          result_code, HmiInterfaces::HMI_INTERFACE_Navigation);
+      SendResponse(result,
+                   MessageHelper::HMIToMobileResult(result_code),
+                   response_info.empty() ? NULL : response_info.c_str(),
+                   &(message[strings::msg_params]));
       break;
     }
     default: {

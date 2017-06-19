@@ -28,8 +28,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-if (BUILD_TESTS)
-  
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
+
 include_directories(
   ${GMOCK_INCLUDE_DIRECTORY}
   ${COMPONENTS_DIR}/protocol_handler/test/include
@@ -39,19 +39,14 @@ include_directories(
   ${JSONCPP_INCLUDE_DIRECTORY}
 )
 
-set(SOURCES
-  ${COMPONENTS_DIR}/security_manager/test/crypto_manager_impl_test.cc
-  ${COMPONENTS_DIR}/security_manager/test/security_manager_test.cc
-  ${COMPONENTS_DIR}/security_manager/test/security_query_test.cc
-  ${COMPONENTS_DIR}/security_manager/test/security_query_matcher.cc
-  ${COMPONENTS_DIR}/security_manager/test/ssl_context_test.cc
-  ${COMPONENTS_DIR}/security_manager/test/ssl_certificate_handshake_test.cc
- )
+collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}")
 
 set(LIBRARIES
   gmock
   ${SecurityManagerLibrary}
 )
+
+create_test (security_manager_test "${SOURCES}" "${LIBRARIES}")
 
 set(CERT_LIST 
   ${CMAKE_SOURCE_DIR}/mycert.pem
@@ -64,11 +59,8 @@ add_custom_target(generate_certificates
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 )
 
-foreach( file_i ${CERT_LIST})
-  file(COPY ${file_i} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-endforeach( file_i )
+foreach(CERT_ENTRY ${CERT_LIST})
+  file(COPY ${CERT_ENTRY} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+endforeach()
 
-create_test (security_manager_test "${SOURCES}" "${LIBRARIES}")
 add_dependencies(security_manager_test generate_certificates)
-
-endif ()

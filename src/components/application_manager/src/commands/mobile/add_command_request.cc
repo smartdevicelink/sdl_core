@@ -1,6 +1,6 @@
 /*
 
- Copyright (c) 2013, Ford Motor Company
+ Copyright (c) 2016, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -289,6 +289,7 @@ bool AddCommandRequest::CheckCommandParentId(ApplicationConstSharedPtr app) {
   return true;
 }
 
+// TODO(AKUTSAN) APPLINK-26973: Refactor AddCommandRequest
 void AddCommandRequest::on_event(const event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace helpers;
@@ -314,7 +315,7 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
       is_ui_received_ = true;
       ui_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
-
+      GetInfo(message, ui_info_);
       if (hmi_apis::Common_Result::SUCCESS != ui_result_) {
         (*message_)[strings::msg_params].erase(strings::menu_params);
       }
@@ -325,7 +326,7 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
       is_vr_received_ = true;
       vr_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
-
+      GetInfo(message, vr_info_);
       if (hmi_apis::Common_Result::SUCCESS != vr_result_) {
         (*message_)[strings::msg_params].erase(strings::vr_commands);
       }
@@ -341,10 +342,6 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
     return;
   }
 
-  if (hmi_apis::Common_Result::REJECTED == ui_result_) {
-    RemoveCommand();
-  }
-
   smart_objects::SmartObject msg_params(smart_objects::SmartType_Map);
   msg_params[strings::cmd_id] =
       (*message_)[strings::msg_params][strings::cmd_id];
@@ -358,37 +355,73 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
           hmi_apis::Common_Result::INVALID_ENUM,
           hmi_apis::Common_Result::UNSUPPORTED_RESOURCE);
 
-  const bool is_ui_ivalid_unsupported =
+  const bool is_ui_invalid_unsupported =
       Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
           ui_result_,
           hmi_apis::Common_Result::INVALID_ENUM,
           hmi_apis::Common_Result::UNSUPPORTED_RESOURCE);
+  const bool is_vr_unsupported =
+      vr_result_ == hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
+  const bool is_ui_unsupported =
+      ui_result_ == hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
 
   const bool is_no_ui_error = Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
       ui_result_,
       hmi_apis::Common_Result::SUCCESS,
-      hmi_apis::Common_Result::WARNINGS);
+      hmi_apis::Common_Result::WARNINGS,
+      hmi_apis::Common_Result::WRONG_LANGUAGE,
+      hmi_apis::Common_Result::RETRY,
+      hmi_apis::Common_Result::SAVED,
+      hmi_apis::Common_Result::UNSUPPORTED_RESOURCE);
 
   const bool is_no_vr_error = Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
       vr_result_,
       hmi_apis::Common_Result::SUCCESS,
-      hmi_apis::Common_Result::WARNINGS);
+      hmi_apis::Common_Result::WARNINGS,
+      hmi_apis::Common_Result::WRONG_LANGUAGE,
+      hmi_apis::Common_Result::RETRY,
+      hmi_apis::Common_Result::SAVED,
+      hmi_apis::Common_Result::UNSUPPORTED_RESOURCE);
 
   bool result = (is_no_ui_error && is_no_vr_error) ||
                 (is_no_ui_error && is_vr_invalid_unsupported) ||
-                (is_no_vr_error && is_ui_ivalid_unsupported);
+                (is_no_vr_error && is_ui_invalid_unsupported);
 
+  LOG4CXX_DEBUG(logger_,
+                "calculated result " << ui_result_ << " " << is_no_ui_error
+                                     << " " << is_no_vr_error);
   const bool is_vr_or_ui_warning =
       Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
           hmi_apis::Common_Result::WARNINGS, ui_result_, vr_result_);
 
+  const bool is_vr_or_ui_unsupported =
+      Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
+          hmi_apis::Common_Result::UNSUPPORTED_RESOURCE,
+          ui_result_,
+          vr_result_);
+
+  const bool is_vr_and_ui_unsupported =
+      Compare<hmi_apis::Common_Result::eType, EQ, ALL>(
+          hmi_apis::Common_Result::UNSUPPORTED_RESOURCE,
+          ui_result_,
+          vr_result_);
+
   if (!result && hmi_apis::Common_Result::REJECTED == ui_result_) {
     result_code = MessageHelper::HMIToMobileResult(ui_result_);
+  } else if (result && is_vr_or_ui_unsupported) {
+    result_code = mobile_apis::Result::UNSUPPORTED_RESOURCE;
   } else if (is_vr_or_ui_warning) {
     result_code = mobile_apis::Result::WARNINGS;
   } else {
     result_code =
         MessageHelper::HMIToMobileResult(std::max(ui_result_, vr_result_));
+    if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == ui_result_) {
+      result_code = MessageHelper::HMIToMobileResult(vr_result_);
+    }
+    if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == vr_result_) {
+      result_code = MessageHelper::HMIToMobileResult(ui_result_);
+    }
+    LOG4CXX_DEBUG(logger_, "HMIToMobileResult " << result_code);
   }
 
   if (BothSend() && hmi_apis::Common_Result::SUCCESS == vr_result_) {
@@ -410,11 +443,13 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
       application->RemoveCommand(
           (*message_)[strings::msg_params][strings::cmd_id].asUInt());
       result = false;
+      LOG4CXX_DEBUG(logger_, "Result " << result);
     }
   }
 
   if (BothSend() && hmi_apis::Common_Result::SUCCESS == ui_result_ &&
-      !is_no_vr_error) {
+      !is_no_vr_error &&
+      hmi_apis::Common_Result::UNSUPPORTED_RESOURCE != vr_result_) {
     result_code = vr_result_ == hmi_apis::Common_Result::REJECTED
                       ? mobile_apis::Result::REJECTED
                       : mobile_apis::Result::GENERIC_ERROR;
@@ -424,9 +459,39 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
     application->RemoveCommand(
         (*message_)[strings::msg_params][strings::cmd_id].asUInt());
     result = false;
+    LOG4CXX_DEBUG(logger_, "Result " << result);
   }
 
-  SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
+  HmiInterfaces::InterfaceState ui_interface_state =
+      application_manager_.hmi_interfaces().GetInterfaceState(
+          HmiInterfaces::HMI_INTERFACE_UI);
+  HmiInterfaces::InterfaceState vr_interface_state =
+      application_manager_.hmi_interfaces().GetInterfaceState(
+          HmiInterfaces::HMI_INTERFACE_VR);
+
+  if (!BothSend() &&
+      ((is_vr_unsupported &&
+        HmiInterfaces::STATE_NOT_AVAILABLE == vr_interface_state) ||
+       (is_ui_unsupported &&
+        HmiInterfaces::STATE_NOT_AVAILABLE == ui_interface_state))) {
+    LOG4CXX_DEBUG(logger_, "!BothSend() && is_vr_or_ui_unsupported");
+    result = false;
+  }
+
+  if (is_vr_and_ui_unsupported) {
+    LOG4CXX_DEBUG(logger_, "UI and VR interface both unsupported");
+    result = false;
+  }
+
+  if (!result) {
+    RemoveCommand();
+  }
+
+  const std::string info = GenerateMobileResponseInfo();
+  SendResponse(result,
+               result_code,
+               info.empty() ? NULL : info.c_str(),
+               &(message[strings::msg_params]));
 
   if (result) {
     application->UpdateHash();
@@ -477,6 +542,35 @@ bool AddCommandRequest::IsWhiteSpaceExist() {
 
 bool AddCommandRequest::BothSend() const {
   return send_vr_ && send_ui_;
+}
+
+const std::string AddCommandRequest::GenerateMobileResponseInfo() {
+  // In case if vr_result_ is UNSUPPORTED_RESOURCE vr_info should be on the
+  // first place
+  // In case if ui_result_ is UNSUPPORTED_RESOURCE ui_info should be on the
+  // first place
+  // Other way order is doesn't matter
+
+  HmiInterfaces& hmi_interfaces = application_manager_.hmi_interfaces();
+  HmiInterfaces::InterfaceState ui_interface_state =
+      hmi_interfaces.GetInterfaceState(HmiInterfaces::HMI_INTERFACE_UI);
+
+  HmiInterfaces::InterfaceState vr_interface_state =
+      hmi_interfaces.GetInterfaceState(HmiInterfaces::HMI_INTERFACE_VR);
+
+  if ((ui_interface_state == HmiInterfaces::STATE_NOT_AVAILABLE) &&
+      (vr_interface_state != HmiInterfaces::STATE_NOT_AVAILABLE) &&
+      !vr_info_.empty()) {
+    return vr_info_;
+  }
+
+  if ((vr_interface_state == HmiInterfaces::STATE_NOT_AVAILABLE) &&
+      (ui_interface_state != HmiInterfaces::STATE_NOT_AVAILABLE) &&
+      !ui_info_.empty()) {
+    return ui_info_;
+  }
+
+  return MergeInfos(ui_info_, vr_info_);
 }
 
 void AddCommandRequest::RemoveCommand() {

@@ -1016,4 +1016,7 @@ static SmartObject invalid_object_value(SmartType_Invalid);
 static const SmartBinary invalid_binary_value;
 }  // namespace NsSmartObjects
 }  // namespace NsSmartDeviceLink
+
+namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
+
 #endif  // SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_SMART_OBJECT_H_

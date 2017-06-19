@@ -35,6 +35,9 @@
 #include "rpc_base/rpc_base.h"
 
 namespace test {
+namespace components {
+namespace rpc_base_test {
+
 using namespace rpc;
 using Json::Value;
 
@@ -278,8 +281,8 @@ TEST(ValidatedTypesJson, OptionalMapAbsentValueTest) {
 
 TEST(ValidatedTypesJson, ArrayJsonTest) {
   Value array_value;
-  array_value.append(Value("Hello"));
-  array_value.append(Value("World"));
+  array_value.append(Value(10));
+  array_value.append(Value(20));
   Array<Integer<int8_t, 0, 32>, 2, 4> int_array(&array_value);
   ASSERT_TRUE(int_array.is_initialized());
   ASSERT_TRUE(int_array.is_valid());
@@ -365,4 +368,6 @@ TEST(ValidatedTypesJson, OptionalIntFromJsonTest) {
   ASSERT_EQ(readback.asInt(), 42);
 }
 
+}  // namespace rpc_base_test
+}  // namespace components
 }  // namespace test

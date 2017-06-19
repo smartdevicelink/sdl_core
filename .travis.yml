@@ -21,28 +21,24 @@ addons:
     - libbluetooth3
     - libbluetooth-dev
     - libudev-dev
+    - libusb-1.0
     - cmake
     - html2text
     - clang-format-3.6
-  coverity_scan:
-    project:
-      name: "smartdevicelink/sdl_core"
-      description: "Build submitted via Travis CI"
-    notification_email: jack@livio.io
-    build_command_prepend: "mkdir build && cd build && cmake ../ -DBUILD_TESTS=ON -DENABLE_GCOV=ON"
-    build_command:   "make install"
-    branch_pattern: coverity
+    - binutils
 before_install:
   - sudo apt-get -qq update
-  - sudo apt-get -q -y install libavahi-client-dev bluez-tools sqlite3 libsqlite3-dev automake1.11
+  - sudo apt-get -q -y install bluez-tools sqlite3 libsqlite3-dev automake1.11
   - wget http://archive.ubuntu.com/ubuntu/pool/main/l/lcov/lcov_1.11-3_all.deb
   - sudo dpkg -i lcov_1.11-3_all.deb
 script:
   - sudo ln -sf /usr/bin/gcov-4.9 /usr/bin/gcov
   - bash -e tools/infrastructure/check_style.sh
+  - echo "Number of processing units available ${PROCESSING_UNITS_COUNT}"
+  - mkdir build && cd build && cmake ../ -DBUILD_TESTS=ON -DENABLE_GCOV=ON && make install -j${PROCESSING_UNITS_COUNT}
   - sudo ldconfig
-  - cd build
-  - make test
+  - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:`pwd`/bin/lib ; make test
+  - bash ../tools/infrastructure/show_disabled.sh 
   - bash -ex ../tools/infrastructure/collect_coverage.sh ./
 env:
   global:
@@ -51,9 +47,7 @@ env:
   - CMAKE_CXX_COMPILER=g++-4.9
   - CMAKE_C_COMPILER=gcc-4.9
   - LD_LIBRARY_PATH=.
-  # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
-  # via the "travis encrypt" command using the project repo's public key
-  - secure: "gGRieQzK0ExcuQRaMs/8mbXK4gitDSBs9RFV/iIqVUeKv+1ZyA4UP4tGAFXeY8Kl0sbRtld7t03Wx1/u0JI1bON2XMn/wCj0Hr8kbwt3eJr1bpG8dVr0tqDpfYVsBjX/nMxwNNBillvBpyXRoZf8z7ukZJAyRMMVG5tHqUVJM4k="
+  - PROCESSING_UNITS_COUNT=$("nproc")
 after_success:
   - pwd ; bash <(curl -s https://codecov.io/bash) -f ./coverage/coverage.info || echo "Codecov did not collect coverage reports"
 deploy:
@@ -67,10 +61,6 @@ deploy:
 notifications:
   email:
     - AKutsan@luxoft.com
-    - AByzhynar@luxoft.com
     - NSnitsar@luxoft.com
-    - RMalynovskyi@luxoft.com
     - MGhiumiusliu@luxoft.com
-    - AGaliuzov@luxoft.com
-    - ANosach@luxoft.com
 

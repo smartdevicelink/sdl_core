@@ -82,4 +82,4 @@ class DeviceScanner {
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif /* DEVICE_SCANNER_H_ */
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_DEVICE_SCANNER_H_

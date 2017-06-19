@@ -20,6 +20,7 @@ Pull Requests Welcome!
   * [Transport Manager Programming Guide](https://smartdevicelink.com/en/guides/core/transport-manager-programming/)
   * [Software Detailed Design](https://app.box.com/s/ohgrvemtx39f8hfea1ab676xxrzvyx1y)
   * [Integration Guidelines](https://smartdevicelink.com/en/docs/hmi/master/overview/)
+  * [Evolution Proposals versus Issues](https://github.com/smartdevicelink/sdl_evolution/blob/master/proposals_versus_issues.md)
 
 ## SDL Core
 
@@ -41,16 +42,14 @@ A quick guide to installing, configuring, and running an instance of the SDL Cor
 ```
 %make
 %make install
-%cp bin/mykey.pem src/appMain
-%cp bin/mycert.pem src/appMain
 ```
 
 ## Start SDL Core
 Once SDL Core is compiled and installed you can start it from the executable in the bin folder
 
 ```
-%cd src/appMain
-%./smartDeviceLinkCore
+%cd bin/
+%./start.sh
 ```
 
 ## Start WEB HMI
@@ -73,6 +72,11 @@ The dependencies for SDL Core vary based on the configuration. You can change SD
 |Bluetooth|Enable bluetooth transport adapter|libbluetooth3, libbluetooth-dev, bluez-tools|
 |Testing framework|Needed to support running unit tests|libgtest-dev|
 |Cmake|Needed to configure SDL prior to compilation|cmake|
+
+#### Sample Policy Manager
+The included sample policy manager (for use with `EXTERNAL_PROPRIETARY` policy mode) requires the following packages:
+  - python-pip
+  - python-dev
 
 ### Known Dependency Issues
   * log4cxx - We know that the version of log4cxx on a linux machine can conflict with the one used, which is why it is provided in the repository. To avoid the conflict, we recommend removing liblog4cxx*.

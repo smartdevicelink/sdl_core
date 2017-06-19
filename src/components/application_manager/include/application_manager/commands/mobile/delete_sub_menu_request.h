@@ -31,8 +31,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DELETE_SUB_MENU_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DELETE_SUB_MENU_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_DELETE_SUB_MENU_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_DELETE_SUB_MENU_REQUEST_H_
 
 #include "application_manager/commands/command_request_impl.h"
 #include "application_manager/application.h"
@@ -65,6 +65,13 @@ class DeleteSubMenuRequest : public CommandRequestImpl {
    **/
   virtual void Run();
 
+  /**
+   * @brief Interface method that is called whenever new event received
+   *
+   * @param event The received event
+   */
+  void on_event(const event_engine::Event& event);
+
  private:
   /*
    * @brief Deletes VR commands from SDL for corresponding submenu ID
@@ -84,17 +91,10 @@ class DeleteSubMenuRequest : public CommandRequestImpl {
    */
   void DeleteSubMenuUICommands(ApplicationSharedPtr const app);
 
-  /**
-   * @brief Interface method that is called whenever new event received
-   *
-   * @param event The received event
-   */
-  void on_event(const event_engine::Event& event);
-
   DISALLOW_COPY_AND_ASSIGN(DeleteSubMenuRequest);
 };
 
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DELETE_SUB_MENU_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_DELETE_SUB_MENU_REQUEST_H_

@@ -71,7 +71,6 @@ class CreateInteractionChoiceSetRequest : public CommandRequestImpl {
    **/
   virtual void Run();
 
- private:
   /**
    * @brief Interface method that is called whenever new event received
    *
@@ -88,6 +87,8 @@ class CreateInteractionChoiceSetRequest : public CommandRequestImpl {
    * @brief DeleteChoices allows to walk through the sent commands collection
    * in order to sent appropriate DeleteCommand request.
    */
+
+ private:
   void DeleteChoices();
 
   /**
@@ -230,6 +231,30 @@ class CreateInteractionChoiceSetRequest : public CommandRequestImpl {
    * @return if choice_set contains \t\n \\t \\n return TRUE, FALSE otherwise
    */
   bool IsWhiteSpaceExist(const smart_objects::SmartObject& choice_set);
+
+  /**
+   * @brief ProcessHmiError process received error from HMI.
+   * This function id not thread safe. It should be protected with
+   * vr_commands_lock_
+   * @param vr_result ERROR type
+   */
+  void ProcessHmiError(const hmi_apis::Common_Result::eType vr_result);
+
+  /**
+   * @brief ProcessSuccesfulHMIResponse process succesful response from HMI\
+   * This function id not thread safe. It should be protected with
+   * vr_commands_lock_
+   * @param corr_id correlation id of received response
+   * @return true if resuest with corr_itd was sent on HMI, false otherwise
+   */
+  bool ProcessSuccesfulHMIResponse(const uint32_t corr_id);
+
+  /**
+   * @brief CountReceivedVRResponses counts received HMI responses. Updated
+   * request timeout if not all responses received
+   * Send response to mobile if all responses received.
+   */
+  void CountReceivedVRResponses();
 
   DISALLOW_COPY_AND_ASSIGN(CreateInteractionChoiceSetRequest);
 };

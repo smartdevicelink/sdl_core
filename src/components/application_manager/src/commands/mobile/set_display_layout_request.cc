@@ -33,6 +33,7 @@
 
 #include "application_manager/commands/mobile/set_display_layout_request.h"
 
+#include "application_manager/message_helper.h"
 #include "application_manager/application_impl.h"
 
 namespace application_manager {
@@ -69,14 +70,14 @@ void SetDisplayLayoutRequest::on_event(const event_engine::Event& event) {
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_SetDisplayLayout: {
       LOG4CXX_INFO(logger_, "Received UI_SetDisplayLayout event");
-
-      mobile_apis::Result::eType result_code =
-          static_cast<mobile_apis::Result::eType>(
+      hmi_apis::Common_Result::eType result_code =
+          static_cast<hmi_apis::Common_Result::eType>(
               message[strings::params][hmi_response::code].asInt());
-      bool response_success = mobile_apis::Result::SUCCESS == result_code;
-
+      const bool response_success = PrepareResultForMobileResponse(
+          result_code, HmiInterfaces::HMI_INTERFACE_UI);
+      std::string info;
+      GetInfo(message, info);
       smart_objects::SmartObject msg_params = message[strings::msg_params];
-
       if (response_success) {
         HMICapabilities& hmi_capabilities =
             application_manager_.hmi_capabilities();
@@ -93,7 +94,10 @@ void SetDisplayLayoutRequest::on_event(const event_engine::Event& event) {
           }
         }
       }
-      SendResponse(response_success, result_code, NULL, &msg_params);
+      SendResponse(response_success,
+                   MessageHelper::HMIToMobileResult(result_code),
+                   info.empty() ? NULL : info.c_str(),
+                   &msg_params);
       break;
     }
     default: {

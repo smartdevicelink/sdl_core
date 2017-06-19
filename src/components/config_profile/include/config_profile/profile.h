@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -137,7 +137,7 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   /**
    * @brief Sets the path to the config file
    */
-  void config_file_name(const std::string& fileName);
+  void set_config_file_name(const std::string& file_name);
 
   /**
    * @brief Returns server address
@@ -271,13 +271,13 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
    * @brief Returns timeout for SDL to wait for the next package of raw data
    * over audio service
    */
-  const std::uint32_t audio_data_stopped_timeout() const;
+  const uint32_t audio_data_stopped_timeout() const;
 
   /**
    * @brief Returns timeout for SDL to wait for the next package of raw data
    * over video service
    */
-  const std::uint32_t video_data_stopped_timeout() const;
+  const uint32_t video_data_stopped_timeout() const;
 
   /**
    * @brief Returns allowable max amount of requests per time scale for
@@ -560,7 +560,7 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
 
   uint32_t resumption_delay_before_ign() const;
 
-  uint32_t resumption_delay_after_ign() const;
+  const uint32_t resumption_delay_after_ign() const;
 
   uint32_t hash_string_size() const;
 
@@ -582,10 +582,55 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
    */
   uint16_t open_attempt_timeout_ms_resumption_db() const;
 
-  /*
+  /**
+   * @brief Returns wait time after device connection
+   * before app launch request
+   */
+  const uint16_t app_launch_wait_time() const OVERRIDE;
+
+  /**
+   * @brief Returns max number of attempts to launch an application
+   * after device connection
+   */
+  const uint16_t app_launch_max_retry_attempt() const OVERRIDE;
+
+  /**
+   * @brief Returns wait time before next app launch request
+   */
+  const uint16_t app_launch_retry_wait_time() const OVERRIDE;
+
+  /**
+   * @brief Returns max number of failed iOS app
+   * registration requests
+   */
+  const uint16_t remove_bundle_id_attempts() const OVERRIDE;
+
+  /**
+   * @brief Returns max number of iOS devices to be stored
+   */
+  const uint16_t max_number_of_ios_device() const OVERRIDE;
+
+  /**
+   * @brief Returns wait time before attempt to launch next app
+   */
+  const uint16_t wait_time_between_apps() const OVERRIDE;
+
+  /**
+   * @brief Returns status of feature of app launch on iOS
+   */
+  const bool enable_app_launch_ios() const OVERRIDE;
+
+  /**
    * @brief Updates all related values from ini file
    */
   void UpdateValues();
+
+  /**
+   * @brief Gets reading result of all related values from ini file
+   * @returns TRUE if no error appeared during updating
+   * otherwise FALSE
+   */
+  const bool ErrorOccured() const;
 
   const uint32_t& list_files_response_size() const OVERRIDE;
 
@@ -599,7 +644,20 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   const std::pair<uint32_t, int32_t>& start_stream_retry_amount()
       const OVERRIDE;
 
+  /**
+   * @brief Returns error description
+   * @return Actual error description if error appears otherwise empty line
+   */
+  const std::string ErrorDescription() const;
+
  private:
+  /**
+   * @brief Checks that filename consists of portable symbols
+   * @param file_name - file name to check
+   * @return FALSE if file name has unportable symbols otherwise TRUE
+   */
+  bool IsFileNamePortable(const std::string& file_name) const;
+
   /**
    * @brief Reads a string value from the profile and interpret it
    * as \c true on "true" value or as \c false on any other value
@@ -752,8 +810,8 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   std::string system_files_path_;
   uint16_t transport_manager_tcp_adapter_port_;
   std::string tts_delimiter_;
-  std::uint32_t audio_data_stopped_timeout_;
-  std::uint32_t video_data_stopped_timeout_;
+  uint32_t audio_data_stopped_timeout_;
+  uint32_t video_data_stopped_timeout_;
   std::string mme_db_name_;
   std::string event_mq_name_;
   std::string ack_mq_name_;
@@ -810,6 +868,15 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   bool use_db_for_resumption_;
   uint16_t attempts_to_open_resumption_db_;
   uint16_t open_attempt_timeout_ms_resumption_db_;
+  uint16_t app_launch_wait_time_;
+  uint16_t app_launch_max_retry_attempt_;
+  uint16_t app_launch_retry_wait_time_;
+  uint16_t remove_bundle_id_attempts_;
+  uint16_t max_number_of_ios_device_;
+  uint16_t wait_time_between_apps_;
+  bool enable_app_launch_ios_;
+  bool error_occured_;
+  std::string error_description_;
 
   DISALLOW_COPY_AND_ASSIGN(Profile);
 };

@@ -34,20 +34,21 @@
 #define SRC_COMPONENTS_INCLUDE_APPLICATION_MANAGER_APPLICATION_MANAGER_SETTINGS_H_
 
 #include "application_manager/request_controller_settings.h"
+#include "application_manager/app_launch_settings.h"
 
 #include <stdint.h>
 #include <string>
 
 namespace application_manager {
-class ApplicationManagerSettings : public RequestControlerSettings {
+class ApplicationManagerSettings : public RequestControlerSettings,
+                                   public app_launch::AppLaunchSettings {
  public:
   virtual const uint32_t video_data_stopped_timeout() const = 0;
-  virtual const std::uint32_t audio_data_stopped_timeout() const = 0;
+  virtual const uint32_t audio_data_stopped_timeout() const = 0;
   virtual const std::pair<uint32_t, int32_t>& read_did_frequency() const = 0;
   virtual const std::pair<uint32_t, int32_t>& get_vehicle_data_frequency()
       const = 0;
   virtual uint32_t hash_string_size() const = 0;
-  virtual const std::string& app_storage_folder() const = 0;
   virtual const uint32_t& app_dir_quota() const = 0;
   virtual uint32_t stop_streaming_timeout() const = 0;
   virtual uint32_t application_list_update_timeout() const = 0;
@@ -82,11 +83,10 @@ class ApplicationManagerSettings : public RequestControlerSettings {
   virtual const uint32_t& app_resumption_save_persistent_data_timeout()
       const = 0;
   virtual uint32_t resumption_delay_before_ign() const = 0;
-  virtual uint32_t resumption_delay_after_ign() const = 0;
   virtual const uint32_t& app_resuming_timeout() const = 0;
   virtual uint16_t attempts_to_open_resumption_db() const = 0;
   virtual uint16_t open_attempt_timeout_ms_resumption_db() const = 0;
-  virtual void config_file_name(const std::string& fileName) = 0;
+  virtual void set_config_file_name(const std::string& fileName) = 0;
   virtual const std::pair<uint32_t, int32_t>& start_stream_retry_amount()
       const = 0;
   virtual const std::string& app_icons_folder() const = 0;
@@ -94,6 +94,7 @@ class ApplicationManagerSettings : public RequestControlerSettings {
   virtual const uint32_t& app_icons_amount_to_remove() const = 0;
   virtual const uint32_t& list_files_response_size() const = 0;
 };
+
 }  // namespace application_manager
 
 #endif  // SRC_COMPONENTS_INCLUDE_APPLICATION_MANAGER_APPLICATION_MANAGER_SETTINGS_H_

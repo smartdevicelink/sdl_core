@@ -49,6 +49,7 @@ class MockPolicyHandlerObserver : public ::policy::PolicyHandlerObserver {
   MOCK_METHOD1(OnUpdateHMIAppType,
                void(std::map<std::string, std::vector<std::string> >));
   MOCK_METHOD1(OnCertificateUpdated, bool(const std::string&));
+  MOCK_METHOD1(OnPTUFinished, void(const bool ptu_result));
 };
 }  //  namespace application_manager_test
 }  //  namespace components

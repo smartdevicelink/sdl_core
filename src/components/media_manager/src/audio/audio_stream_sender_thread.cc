@@ -52,7 +52,11 @@
 namespace media_manager {
 using sync_primitives::AutoLock;
 
-const int32_t AudioStreamSenderThread::kAudioPassThruTimeout = 1;
+#ifdef EXTENDED_MEDIA_MODE
+const int32_t AudioStreamSenderThread::kAudioPassThruTimeout = 50;
+#else
+const int32_t AudioStreamSenderThread::kAudioPassThruTimeout = 1000;
+#endif
 const uint32_t kMqueueMessageSize = 4095;
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "MediaManager")
@@ -80,7 +84,7 @@ void AudioStreamSenderThread::threadMain() {
 
   while (false == getShouldBeStopped()) {
     AutoLock auto_lock(shouldBeStoped_lock_);
-    shouldBeStoped_cv_.WaitFor(auto_lock, kAudioPassThruTimeout * 1000);
+    shouldBeStoped_cv_.WaitFor(auto_lock, kAudioPassThruTimeout);
     sendAudioChunkToMobile();
   }
 }

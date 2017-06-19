@@ -32,6 +32,7 @@
  */
 
 #include <string>
+#include <cstring>
 #include <algorithm>
 #include <vector>
 #include "application_manager/commands/mobile/create_interaction_choice_set_request.h"
@@ -52,7 +53,8 @@ CreateInteractionChoiceSetRequest::CreateInteractionChoiceSetRequest(
     , expected_chs_count_(0)
     , received_chs_count_(0)
     , error_from_hmi_(false)
-    , is_timed_out_(false) {}
+    , is_timed_out_(false)
+    , vr_commands_lock_(true) {}
 
 CreateInteractionChoiceSetRequest::~CreateInteractionChoiceSetRequest() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -129,22 +131,31 @@ mobile_apis::Result::eType CreateInteractionChoiceSetRequest::CheckChoiceSet(
   const SmartArray* choice_set =
       (*message_)[strings::msg_params][strings::choice_set].asArray();
 
-  SmartArray::const_iterator choice_set_it = choice_set->begin();
+  SmartArray::const_iterator current_choice_set_it = choice_set->begin();
+  SmartArray::const_iterator next_choice_set_it;
 
-  for (; choice_set->end() != choice_set_it; ++choice_set_it) {
+  for (; choice_set->end() != current_choice_set_it; ++current_choice_set_it) {
     std::pair<std::set<uint32_t>::iterator, bool> ins_res =
-        choice_id_set.insert((*choice_set_it)[strings::choice_id].asInt());
+        choice_id_set.insert(
+            (*current_choice_set_it)[strings::choice_id].asInt());
     if (!ins_res.second) {
       LOG4CXX_ERROR(logger_,
                     "Choise with ID "
-                        << (*choice_set_it)[strings::choice_id].asInt()
+                        << (*current_choice_set_it)[strings::choice_id].asInt()
                         << " already exists");
       return mobile_apis::Result::INVALID_ID;
     }
 
-    if (IsWhiteSpaceExist(*choice_set_it)) {
+    if (IsWhiteSpaceExist(*current_choice_set_it)) {
       LOG4CXX_ERROR(logger_, "Incoming choice set has contains \t\n \\t \\n");
       return mobile_apis::Result::INVALID_DATA;
+    }
+    for (next_choice_set_it = current_choice_set_it + 1;
+         choice_set->end() != next_choice_set_it;
+         ++next_choice_set_it) {
+      if (compareSynonyms(*current_choice_set_it, *next_choice_set_it)) {
+        return mobile_apis::Result::DUPLICATE_NAME;
+      }
     }
   }
   return mobile_apis::Result::SUCCESS;
@@ -289,6 +300,48 @@ void CreateInteractionChoiceSetRequest::SendVRAddCommandRequests(
   LOG4CXX_DEBUG(logger_, "expected_chs_count_ = " << expected_chs_count_);
 }
 
+void CreateInteractionChoiceSetRequest::ProcessHmiError(
+    const hmi_apis::Common_Result::eType vr_result) {
+  LOG4CXX_DEBUG(logger_,
+                "Hmi response is not Success: "
+                    << vr_result << ". Stop sending VRAddCommand requests");
+  if (!error_from_hmi_) {
+    error_from_hmi_ = true;
+    std::string info =
+        vr_result == hmi_apis::Common_Result::UNSUPPORTED_RESOURCE
+            ? "VR is not supported by system"
+            : "";
+    SendResponse(false, GetMobileResultCode(vr_result), info.c_str());
+  }
+}
+
+bool CreateInteractionChoiceSetRequest::ProcessSuccesfulHMIResponse(
+    const uint32_t corr_id) {
+  SentCommandsMap::iterator it = sent_commands_map_.find(corr_id);
+  if (sent_commands_map_.end() == it) {
+    LOG4CXX_WARN(logger_, "HMI response for unknown VR command received");
+    return false;
+  }
+  VRCommandInfo& vr_command = it->second;
+  vr_command.succesful_response_received_ = true;
+  return true;
+}
+
+void CreateInteractionChoiceSetRequest::CountReceivedVRResponses() {
+  received_chs_count_++;
+  LOG4CXX_DEBUG(logger_,
+                "Got VR.AddCommand response, there are "
+                    << expected_chs_count_ - received_chs_count_
+                    << " more to wait.");
+  if (received_chs_count_ < expected_chs_count_) {
+    application_manager_.updateRequestTimeout(
+        connection_key(), correlation_id(), default_timeout());
+    LOG4CXX_DEBUG(logger_, "Timeout for request was updated");
+  } else {
+    OnAllHMIResponsesReceived();
+  }
+}
+
 void CreateInteractionChoiceSetRequest::on_event(
     const event_engine::Event& event) {
   using namespace hmi_apis;
@@ -296,50 +349,24 @@ void CreateInteractionChoiceSetRequest::on_event(
   LOG4CXX_AUTO_TRACE(logger_);
 
   const smart_objects::SmartObject& message = event.smart_object();
+  const Common_Result::eType result = static_cast<Common_Result::eType>(
+      message[strings::params][hmi_response::code].asInt());
+  const bool is_no_error = Compare<Common_Result::eType, EQ, ONE>(
+      result, Common_Result::SUCCESS, Common_Result::WARNINGS);
+  uint32_t corr_id = static_cast<uint32_t>(
+      message[strings::params][strings::correlation_id].asUInt());
   if (event.id() == hmi_apis::FunctionID::VR_AddCommand) {
-    received_chs_count_++;
-    LOG4CXX_DEBUG(logger_,
-                  "Got VR.AddCommand response, there are "
-                      << expected_chs_count_ - received_chs_count_
-                      << " more to wait.");
-
-    uint32_t corr_id = static_cast<uint32_t>(
-        message[strings::params][strings::correlation_id].asUInt());
     {
       sync_primitives::AutoLock commands_lock(vr_commands_lock_);
-      SentCommandsMap::iterator it = sent_commands_map_.find(corr_id);
-      if (sent_commands_map_.end() == it) {
-        LOG4CXX_WARN(logger_, "HMI response for unknown VR command received");
-        return;
-      }
-
-      Common_Result::eType vr_result = static_cast<Common_Result::eType>(
-          message[strings::params][hmi_response::code].asInt());
-
-      const bool is_vr_no_error = Compare<Common_Result::eType, EQ, ONE>(
-          vr_result, Common_Result::SUCCESS, Common_Result::WARNINGS);
-
-      if (is_vr_no_error) {
-        VRCommandInfo& vr_command = it->second;
-        vr_command.succesful_response_received_ = true;
-      } else {
-        LOG4CXX_DEBUG(logger_,
-                      "Hmi response is not Success: "
-                          << vr_result
-                          << ". Stop sending VRAddCommand requests");
-        if (!error_from_hmi_) {
-          error_from_hmi_ = true;
-          SendResponse(false, GetMobileResultCode(vr_result));
+      if (is_no_error) {
+        if (!ProcessSuccesfulHMIResponse(corr_id)) {
+          return;
         }
+      } else {
+        ProcessHmiError(result);
       }
     }
-    if (received_chs_count_ < expected_chs_count_) {
-      application_manager_.updateRequestTimeout(
-          connection_key(), correlation_id(), default_timeout());
-      LOG4CXX_DEBUG(logger_, "Timeout for request was updated");
-      return;
-    }
-    OnAllHMIResponsesReceived();
+    CountReceivedVRResponses();
   }
 }
 
@@ -355,7 +382,8 @@ void CreateInteractionChoiceSetRequest::onTimeOut() {
   // according to SDLAQ-CRS-2976
   sync_primitives::AutoLock timeout_lock_(is_timed_out_lock_);
   is_timed_out_ = true;
-  application_manager_.TerminateRequest(connection_key(), correlation_id());
+  application_manager_.TerminateRequest(
+      connection_key(), correlation_id(), function_id());
 }
 
 void CreateInteractionChoiceSetRequest::DeleteChoices() {
@@ -381,7 +409,7 @@ void CreateInteractionChoiceSetRequest::DeleteChoices() {
       SendHMIRequest(hmi_apis::FunctionID::VR_DeleteCommand, &msg_param);
     } else {
       LOG4CXX_WARN(logger_,
-                   "Succesfull response has not been received for cmd_id =  "
+                   "succesful response has not been received for cmd_id =  "
                        << vr_command_info.cmd_id_);
     }
   }
@@ -405,7 +433,8 @@ void CreateInteractionChoiceSetRequest::OnAllHMIResponsesReceived() {
     DeleteChoices();
   }
 
-  application_manager_.TerminateRequest(connection_key(), correlation_id());
+  application_manager_.TerminateRequest(
+      connection_key(), correlation_id(), function_id());
 }
 
 }  // namespace commands

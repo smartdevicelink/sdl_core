@@ -907,6 +907,25 @@
                     }
                 }
             },
+            "WayPoints": {
+                "rpcs": {
+                    "GetWayPoints": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED"]
+                    },
+                    "SubscribeWayPoints": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED"]
+                    },
+                    "UnsubscribeWayPoints": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED"]
+                    }
+                }
+            },
             "BackgroundAPT": {
                 "rpcs": {
                     "EndAudioPassThru": {

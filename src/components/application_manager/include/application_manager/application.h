@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,20 +45,11 @@
 #include "application_manager/hmi_state.h"
 #include "application_manager/application_state.h"
 #include "protocol_handler/protocol_handler.h"
-
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
-
-class SmartObject;
-}
-}
+#include "smart_objects/smart_object.h"
 
 namespace application_manager {
 
 namespace mobile_api = mobile_apis;
-
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
-
 namespace custom_str = utils::custom_string;
 
 typedef int32_t ErrorCode;
@@ -112,6 +103,8 @@ class InitialApplicationData {
   virtual const smart_objects::SmartObject* app_types() const = 0;
   virtual const smart_objects::SmartObject* vr_synonyms() const = 0;
   virtual const std::string& mac_address() const = 0;
+  virtual const std::string& bundle_id() const = 0;
+  virtual void set_bundle_id(const std::string& bundle_id) = 0;
   virtual std::string policy_app_id() const = 0;
   virtual const smart_objects::SmartObject* tts_name() const = 0;
   virtual const smart_objects::SmartObject* ngn_media_screen_name() const = 0;
@@ -219,9 +212,16 @@ class DynamicApplicationData {
   virtual void set_video_stream_retry_number(
       const uint32_t& video_stream_retry_number) = 0;
 
-  /*
-   * @brief Adds a command to the in application menu
+  /**
+   * @brief Checks if application is media, voice communication or navigation
+   * @return true if application is media, voice communication or navigation,
+   * false otherwise
    */
+  virtual bool is_audio() const = 0;
+
+  /*
+ * @brief Adds a command to the in application menu
+ */
   virtual void AddCommand(uint32_t cmd_id,
                           const smart_objects::SmartObject& command) = 0;
 
@@ -581,8 +581,8 @@ class Application : public virtual InitialApplicationData,
    * @param source Limits source, e.g. policy table, config file etc.
    * @return true, if - excedeed, otherwise - false
    */
-  virtual bool IsCommandLimitsExceeded(mobile_apis::FunctionID::eType cmd_id,
-                                       TLimitSource source) = 0;
+  virtual bool AreCommandLimitsExceeded(mobile_apis::FunctionID::eType cmd_id,
+                                        TLimitSource source) = 0;
 
   /**
    * Returns object for recording statistics

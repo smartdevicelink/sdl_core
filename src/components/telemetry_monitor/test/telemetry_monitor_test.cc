@@ -101,6 +101,6 @@ TEST(TelemetryMonitorTest, MessageProcess) {
   telemetry_monitor.SendMetric(test_metric);
 }
 
-}  // namespace telemetry_monitor
+}  // namespace telemetry_monitor_test
 }  // namespace components
 }  // namespace test

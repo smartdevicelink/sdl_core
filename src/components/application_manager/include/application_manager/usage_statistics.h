@@ -62,6 +62,7 @@ class UsageStatistics {
   void RecordAppUserSelection();
   void RecordRunAttemptsWhileRevoked();
   void RecordRemovalsForBadBehavior();
+  void RecordRejectionsSyncOutOfMemory();
   void RecordTLSError();
 
  private:
@@ -74,6 +75,7 @@ class UsageStatistics {
   usage_statistics::AppCounter count_of_run_attempts_while_revoked_;
   usage_statistics::AppCounter count_of_removals_for_bad_behavior_;
   usage_statistics::AppCounter count_of_tls_error_;
+  usage_statistics::AppCounter count_of_rejections_sync_out_of_memory_;
   DISALLOW_COPY_AND_ASSIGN(UsageStatistics);
 };
 

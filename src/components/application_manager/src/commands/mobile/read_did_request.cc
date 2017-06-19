@@ -36,6 +36,7 @@
 #include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
+#include "application_manager/message_helper.h"
 
 namespace application_manager {
 
@@ -65,7 +66,7 @@ void ReadDIDRequest::Run() {
     return;
   }
 
-  if (app->IsCommandLimitsExceeded(
+  if (app->AreCommandLimitsExceeded(
           static_cast<mobile_apis::FunctionID::eType>(function_id()),
           application_manager::TLimitSource::CONFIG_FILE)) {
     LOG4CXX_ERROR(logger_, "ReadDID frequency is too high.");
@@ -96,18 +97,17 @@ void ReadDIDRequest::on_event(const event_engine::Event& event) {
 
   switch (event.id()) {
     case hmi_apis::FunctionID::VehicleInfo_ReadDID: {
-      mobile_apis::Result::eType result_code =
-          static_cast<mobile_apis::Result::eType>(
+      hmi_apis::Common_Result::eType result_code =
+          static_cast<hmi_apis::Common_Result::eType>(
               message[strings::params][hmi_response::code].asInt());
-
-      bool result = mobile_apis::Result::SUCCESS == result_code;
-
-      const std::string return_info =
-          message[strings::msg_params][hmi_response::message].asString();
+      const bool result = PrepareResultForMobileResponse(
+          result_code, HmiInterfaces::HMI_INTERFACE_VehicleInfo);
+      std::string response_info;
+      GetInfo(message, response_info);
 
       SendResponse(result,
-                   result_code,
-                   return_info.c_str(),
+                   MessageHelper::HMIToMobileResult(result_code),
+                   response_info.empty() ? NULL : response_info.c_str(),
                    &(message[strings::msg_params]));
       break;
     }

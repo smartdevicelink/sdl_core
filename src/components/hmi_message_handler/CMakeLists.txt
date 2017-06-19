@@ -1,4 +1,4 @@
-# Copyright (c) 2014, Ford Motor Company
+# Copyright (c) 2016, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,6 +28,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/platform.cmake)
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
 include_directories (
     include/
@@ -46,30 +48,36 @@ include_directories (
     ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
-IF (HMIADAPTER STREQUAL "dbus")
-    set (DBUS_SOURCE ./src/dbus_message_adapter.cc)
-    set (DBUS_ADAPTER DBus)
-ENDIF ()
-
-set (SOURCES
-    ${COMPONENTS_DIR}/hmi_message_handler/src/hmi_message_handler_impl.cc
-    ${COMPONENTS_DIR}/hmi_message_handler/src/messagebroker_adapter.cc
-    ${COMPONENTS_DIR}/hmi_message_handler/src/hmi_message_adapter_impl.cc
-    ${COMPONENTS_DIR}/hmi_message_handler/src/mqueue_adapter.cc
-    ${DBUS_SOURCE}
+set(PATHS
+  ${CMAKE_CURRENT_SOURCE_DIR}/include
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
+if (HMIADAPTER STREQUAL "dbus")
+  set(EXCLUDE_PATHS)
+  set(DBUS_ADAPTER DBus)
+else()
+  set(EXCLUDE_PATHS dbus_message_adapter.cc)
+  set(DBUS_ADAPTER)
+endif ()
+
+list(APPEND EXCLUDE_PATHS
+  mqueue_adapter.cc
+)
+
+collect_sources(SOURCES "${PATHS}" "${EXCLUDE_PATHS}")
+
 set(LIBRARIES
-    Utils
-    ${DBUS_ADAPTER}
-    ${RTLIB}
+  Utils
+  ${DBUS_ADAPTER}
+  ${RTLIB}
 )
 
 add_library("HMIMessageHandler" ${SOURCES})
 target_link_libraries("HMIMessageHandler" ${LIBRARIES})
 
 if(ENABLE_LOG)
-    target_link_libraries("HMIMessageHandler" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
+  target_link_libraries("HMIMessageHandler" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
 endif()
 
 # Tests temporary are inactivated. For details please check

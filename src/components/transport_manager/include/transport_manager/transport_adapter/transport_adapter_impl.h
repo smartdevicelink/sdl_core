@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -413,6 +413,18 @@ class TransportAdapterImpl : public TransportAdapter,
    * @return connection type.
    */
   std::string GetConnectionType() const OVERRIDE;
+
+  /**
+   * @brief RunAppOnDevice allows run specific application on the certain
+   *device.
+   *
+   * @param device_handle device identifier to run application on.
+   *
+   * @param bundle_id application id also known as bundle id on some devices to
+   *run.
+   */
+  void RunAppOnDevice(const DeviceUID& device_uid,
+                      const std::string& bundle_id) OVERRIDE;
 
 #ifdef TELEMETRY_MONITOR
   /**

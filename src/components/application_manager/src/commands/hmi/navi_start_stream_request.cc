@@ -58,21 +58,24 @@ NaviStartStreamRequest::~NaviStartStreamRequest() {}
 
 void NaviStartStreamRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-
-  SetAllowedToTerminate(false);
-  subscribe_on_event(hmi_apis::FunctionID::Navigation_StartStream,
-                     correlation_id());
-
+  if (!CheckAvailabilityHMIInterfaces(
+          application_manager_, HmiInterfaces::HMI_INTERFACE_Navigation)) {
+    LOG4CXX_INFO(logger_, "Interface Navi is not supported by system");
+    return;
+  }
   ApplicationSharedPtr app =
       application_manager_.application_by_hmi_app(application_id());
-  if (app) {
-    app->set_video_streaming_allowed(true);
-    SendRequest();
-  } else {
+  if (!app) {
     LOG4CXX_ERROR(logger_,
                   "Applcation with hmi_app_id " << application_id()
                                                 << "does not exist");
+    return;
   }
+  SetAllowedToTerminate(false);
+  subscribe_on_event(hmi_apis::FunctionID::Navigation_StartStream,
+                     correlation_id());
+  app->set_video_streaming_allowed(true);
+  SendRequest();
 }
 
 void NaviStartStreamRequest::on_event(const event_engine::Event& event) {
@@ -110,7 +113,7 @@ void NaviStartStreamRequest::on_event(const event_engine::Event& event) {
       }
       if (hmi_apis::Common_Result::REJECTED == code) {
         LOG4CXX_INFO(logger_, "StartStream response REJECTED ");
-        SendRequest();
+        RetryStartSession();
         break;
       }
     }
@@ -124,7 +127,8 @@ void NaviStartStreamRequest::on_event(const event_engine::Event& event) {
 void NaviStartStreamRequest::onTimeOut() {
   RetryStartSession();
 
-  application_manager_.TerminateRequest(connection_key(), correlation_id());
+  application_manager_.TerminateRequest(
+      connection_key(), correlation_id(), function_id());
 }
 
 void NaviStartStreamRequest::RetryStartSession() {
@@ -152,7 +156,7 @@ void NaviStartStreamRequest::RetryStartSession() {
   }
 
   uint32_t curr_retry_number = app->video_stream_retry_number();
-  if (curr_retry_number < retry_number_ - 1) {
+  if (curr_retry_number < retry_number_) {
     LOG4CXX_DEBUG(
         logger_,
         "Send NaviStartStream retry. retry_number = " << curr_retry_number);

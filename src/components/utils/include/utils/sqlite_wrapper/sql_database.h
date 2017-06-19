@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_POLICY_SQLITE_WRAPPER_INCLUDE_SQLITE_WRAPPER_SQL_DATABASE_H_
-#define SRC_COMPONENTS_POLICY_SQLITE_WRAPPER_INCLUDE_SQLITE_WRAPPER_SQL_DATABASE_H_
+#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SQLITE_WRAPPER_SQL_DATABASE_H_
+#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SQLITE_WRAPPER_SQL_DATABASE_H_
 
 #include <string>
 #include "utils/sqlite_wrapper/sql_error.h"
@@ -131,6 +131,11 @@ class SQLDatabase {
   sync_primitives::Lock conn_lock_;
 
   /**
+   * The file path of database
+   */
+  std::string path_;
+
+  /**
    * The filename of database
    */
   std::string databasename_;
@@ -164,4 +169,4 @@ class SQLDatabase {
 }  // namespace dbms
 }  // namespace utils
 
-#endif  // SRC_COMPONENTS_POLICY_SQLITE_WRAPPER_INCLUDE_SQLITE_WRAPPER_SQL_DATABASE_H_
+#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SQLITE_WRAPPER_SQL_DATABASE_H_

@@ -2,7 +2,7 @@
  * \file bluetooth_transport_adapter.cc
  * \brief BluetoothTransportAdapter class source file.
  *
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -111,7 +111,8 @@ void BluetoothTransportAdapter::Store() const {
     }
   }
   bluetooth_adapter_dictionary["devices"] = devices_dictionary;
-  last_state().dictionary["TransportManager"]["BluetoothAdapter"] =
+  Json::Value& dictionary = last_state().get_dictionary();
+  dictionary["TransportManager"]["BluetoothAdapter"] =
       bluetooth_adapter_dictionary;
   LOG4CXX_TRACE(logger_, "exit");
 }
@@ -120,7 +121,7 @@ bool BluetoothTransportAdapter::Restore() {
   LOG4CXX_TRACE(logger_, "enter");
   bool errors_occured = false;
   const Json::Value bluetooth_adapter_dictionary =
-      last_state().dictionary["TransportManager"]["BluetoothAdapter"];
+      last_state().get_dictionary()["TransportManager"]["BluetoothAdapter"];
   const Json::Value devices_dictionary =
       bluetooth_adapter_dictionary["devices"];
   for (Json::Value::const_iterator i = devices_dictionary.begin();

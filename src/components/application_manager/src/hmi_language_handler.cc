@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,6 +36,7 @@
 #include "application_manager/hmi_capabilities.h"
 #include "utils/helpers.h"
 #include "resumption/last_state.h"
+#include "smart_objects/smart_object.h"
 
 static const std::string LanguagesKey = "Languages";
 static const std::string UIKey = "UI";
@@ -79,7 +80,8 @@ void HMILanguageHandler::set_language_for(
   LOG4CXX_DEBUG(logger_,
                 "Setting language " << language << " for interface "
                                     << interface);
-  last_state_->dictionary[LanguagesKey][key] = language;
+  Json::Value& dictionary = last_state_->get_dictionary();
+  dictionary[LanguagesKey][key] = language;
   return;
 }
 
@@ -104,10 +106,11 @@ hmi_apis::Common_Language::eType HMILanguageHandler::get_language_for(
       return Common_Language::INVALID_ENUM;
   }
 
-  if (last_state_->dictionary.isMember(LanguagesKey)) {
-    if (last_state_->dictionary[LanguagesKey].isMember(key)) {
+  const Json::Value& dictionary = last_state_->get_dictionary();
+  if (dictionary.isMember(LanguagesKey)) {
+    if (dictionary[LanguagesKey].isMember(key)) {
       Common_Language::eType language = static_cast<Common_Language::eType>(
-          last_state_->dictionary[LanguagesKey][key].asInt());
+          dictionary[LanguagesKey][key].asInt());
       return language;
     }
   }
@@ -150,7 +153,7 @@ void HMILanguageHandler::on_event(const event_engine::Event& event) {
 }
 
 void HMILanguageHandler::set_handle_response_for(
-    const event_engine::smart_objects::SmartObject& request) {
+    const smart_objects::SmartObject& request) {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace helpers;
   if (!request.keyExists(strings::params)) {

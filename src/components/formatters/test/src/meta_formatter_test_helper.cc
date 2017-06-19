@@ -193,6 +193,7 @@ void CMetaFormatterTestHelper::FillObjectWithDefaultValues(SmartObject& obj) {
 
   obj[S_MSG_PARAMS]["syncMsgVersion"]["majorVersion"] = 0;
   obj[S_MSG_PARAMS]["syncMsgVersion"]["minorVersion"] = 0;
+  obj[S_MSG_PARAMS]["syncMsgVersion"]["patchVersion"] = 0;
   obj[S_MSG_PARAMS]["appName"] = "";
   obj[S_MSG_PARAMS]["ngnMediaScreenAppName"] = "";
   obj[S_MSG_PARAMS]["isMediaApplication"] = false;

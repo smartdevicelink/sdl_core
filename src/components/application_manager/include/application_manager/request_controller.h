@@ -49,6 +49,7 @@
 
 #include "application_manager/request_info.h"
 #include "application_manager/request_controller_settings.h"
+#include "application_manager/request_tracker.h"
 
 namespace application_manager {
 
@@ -139,11 +140,13 @@ class RequestController {
   *
   * @param correlation_id Active request correlation ID,
   * @param connection_key Active request connection key (0 for HMI requersts)
+  * @param function_id Active request  function id
   * @param force_terminate if true, request controller will terminate
   * even if not allowed by request
   */
-  void terminateRequest(const uint32_t& correlation_id,
-                        const uint32_t& connection_key,
+  void TerminateRequest(const uint32_t correlation_id,
+                        const uint32_t connection_key,
+                        const int32_t function_id,
                         bool force_terminate = false);
 
   /**
@@ -152,8 +155,9 @@ class RequestController {
   * @param mobile_correlation_id Active mobile request correlation ID
   *
   */
-  void OnMobileResponse(const uint32_t& mobile_correlation_id,
-                        const uint32_t& connection_key);
+  void OnMobileResponse(const uint32_t mobile_correlation_id,
+                        const uint32_t connection_key,
+                        const int32_t function_id);
 
   /**
   * @brief Removes request from queue
@@ -161,7 +165,7 @@ class RequestController {
   * @param mobile_correlation_id Active mobile request correlation ID
   *
   */
-  void OnHMIResponse(const uint32_t& correlation_id);
+  void OnHMIResponse(const uint32_t correlation_id, const int32_t function_id);
 
   /**
   * @ Add notification to collection
@@ -213,25 +217,28 @@ class RequestController {
 
  protected:
   /**
-  * @brief Timer Callback
+  * @brief Timer callback which handles all request timeouts
   */
-  void onTimer();
+  void TimeoutThread();
 
   /**
-  * @brief Update timout for next OnTimer
-  * Not thread safe
+  * @brief Signal timer condition variable
   */
-  void UpdateTimer();
+  void NotifyTimer();
 
   void terminateWaitingForExecutionAppRequests(const uint32_t& app_id);
   void terminateWaitingForResponseAppRequests(const uint32_t& app_id);
 
   /**
-   * @brief Check Posibility to add new requests, or limits was exceeded
-   * @param request - request to check possipility to Add
-   * @return True if new request could be added, false otherwise
+   * @brief Checks whether all constraints are met before adding of request into
+   * processing queue. Verifies amount of pending requests, amount of requests
+   * per time scale for different HMI levels
+   * @param request - request to check constraints for
+   * @param level - HMI level in which request has been issued
+   * @return Appropriate result code of verification
    */
-  TResult CheckPosibilitytoAdd(const RequestPtr request);
+  TResult CheckPosibilitytoAdd(const RequestPtr request,
+                               const mobile_api::HMILevel::eType level);
 
   /**
    * @brief Check Posibility to add new requests, or limits was exceeded
@@ -272,6 +279,12 @@ class RequestController {
   RequestInfoSet waiting_for_response_;
 
   /**
+   * @brief Tracker verifying time scale and maximum requests amount in
+   * different HMI levels
+   */
+  RequestTracker request_tracker_;
+
+  /**
   * @brief Set of HMI notifications with timeout.
   */
   std::list<RequestPtr> notification_list_;
@@ -280,6 +293,13 @@ class RequestController {
    * timer for checking requests timeout
    */
   timer::Timer timer_;
+
+  /*
+   * Timer for lock
+   */
+  bool timer_stop_flag_;
+  sync_primitives::Lock timer_lock;
+  sync_primitives::ConditionalVariable timer_condition_;
 
   bool is_low_voltage_;
   const RequestControlerSettings& settings_;

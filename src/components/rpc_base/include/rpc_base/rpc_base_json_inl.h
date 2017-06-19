@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef VALIDATED_TYPES_JSON_INL_H_
-#define VALIDATED_TYPES_JSON_INL_H_
+#ifndef SRC_COMPONENTS_RPC_BASE_INCLUDE_RPC_BASE_RPC_BASE_JSON_INL_H_
+#define SRC_COMPONENTS_RPC_BASE_INCLUDE_RPC_BASE_RPC_BASE_JSON_INL_H_
 
 #include "rpc_base/rpc_base.h"
 #include "json/value.h"
@@ -140,8 +140,7 @@ Integer<T, minval, maxval>::Integer(const Json::Value* value)
 
 template <typename T, T minval, T maxval>
 Integer<T, minval, maxval>::Integer(const Integer& val)
-    : PrimitiveType(range_.Includes(val.value_) ? kValid : kInvalid)
-    , value_(val.value_) {}
+    : PrimitiveType(val.value_state_), value_(val.value_) {}
 
 template <typename T, T minval, T maxval>
 Integer<T, minval, maxval>::Integer(const Json::Value* value, IntType def_value)
@@ -385,4 +384,4 @@ inline Json::Value Stringifyable<T>::ToJsonValue() const {
 
 }  // namespace rpc
 
-#endif /* VALIDATED_TYPES_JSON_INL_H_ */
+#endif  // SRC_COMPONENTS_RPC_BASE_INCLUDE_RPC_BASE_RPC_BASE_JSON_INL_H_

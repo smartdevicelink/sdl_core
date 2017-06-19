@@ -44,7 +44,6 @@ ClosePopupRequest::~ClosePopupRequest() {}
 
 void ClosePopupRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-
   SendRequest();
 }
 

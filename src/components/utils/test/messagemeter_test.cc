@@ -42,7 +42,7 @@
 
 namespace test {
 namespace components {
-namespace utils {
+namespace utils_test {
 
 // Pair of values <second, msecond>
 typedef std::pair<int, int> TimePair;
@@ -261,6 +261,6 @@ INSTANTIATE_TEST_CASE_P(MessageMeterTestCase,
                         MessageMeterTest,
                         ::testing::ValuesIn(testing_time_pairs));
 
-}  // namespace utils
+}  // namespace utils_test
 }  // namespace components
 }  // namespace test
