@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sqlite_wrapper/sql_database.h"
+#include "utils/sqlite_wrapper/sql_database.h"
 #include <sqlite3.h>
 
 namespace utils {
@@ -53,7 +53,10 @@ bool SQLDatabase::Open() {
   sync_primitives::AutoLock auto_lock(conn_lock_);
   if (conn_)
     return true;
-  error_ = sqlite3_open(databasename_.c_str(), &conn_);
+  error_ = sqlite3_open(get_path().c_str(), &conn_);
+  if (error_ != SQLITE_OK) {
+    conn_ = NULL;
+  }
   return error_ == SQLITE_OK;
 }
 
@@ -101,11 +104,11 @@ sqlite3* SQLDatabase::conn() const {
 }
 
 void SQLDatabase::set_path(const std::string& path) {
-  databasename_ = path + databasename_;
+  path_ = path;
 }
 
 std::string SQLDatabase::get_path() const {
-  return databasename_;
+  return path_ + databasename_;
 }
 
 bool SQLDatabase::Backup() {

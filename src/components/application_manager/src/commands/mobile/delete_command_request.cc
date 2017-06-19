@@ -94,16 +94,19 @@ void DeleteCommandRequest::Run() {
   if ((*command).keyExists(strings::vr_commands)) {
     ++chaining_counter;
   }
-
+  /* Need to set all flags before sending request to HMI
+   * for correct processing this flags in method on_event */
   if ((*command).keyExists(strings::menu_params)) {
     is_ui_send_ = true;
-
-    SendHMIRequest(hmi_apis::FunctionID::UI_DeleteCommand, &msg_params, true);
   }
   // check vr params
   if ((*command).keyExists(strings::vr_commands)) {
     is_vr_send_ = true;
-
+  }
+  if (is_ui_send_) {
+    SendHMIRequest(hmi_apis::FunctionID::UI_DeleteCommand, &msg_params, true);
+  }
+  if (is_vr_send_) {
     // VR params
     msg_params[strings::grammar_id] = application->get_grammar_id();
     msg_params[strings::type] = hmi_apis::Common_VRCommandType::Command;
@@ -111,29 +114,52 @@ void DeleteCommandRequest::Run() {
   }
 }
 
+bool DeleteCommandRequest::PrepareResponseParameters(
+    mobile_apis::Result::eType& result_code, std::string& info) {
+  using namespace helpers;
+  ResponseInfo ui_delete_info(ui_result_, HmiInterfaces::HMI_INTERFACE_UI);
+  ResponseInfo vr_delete_info(vr_result_, HmiInterfaces::HMI_INTERFACE_VR);
+  const bool result =
+      PrepareResultForMobileResponse(ui_delete_info, vr_delete_info);
+
+  const bool is_vr_or_ui_warning =
+      Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
+          hmi_apis::Common_Result::WARNINGS, ui_result_, vr_result_);
+  info = MergeInfos(ui_delete_info, ui_info_, vr_delete_info, vr_info_);
+  if (is_vr_or_ui_warning && !ui_delete_info.is_unsupported_resource &&
+      !vr_delete_info.is_unsupported_resource) {
+    LOG4CXX_DEBUG(logger_, "VR or UI result is warning");
+    result_code = mobile_apis::Result::WARNINGS;
+    return result;
+  }
+  result_code = PrepareResultCodeForResponse(ui_delete_info, vr_delete_info);
+  LOG4CXX_DEBUG(logger_, "Result is " << (result ? "true" : "false"));
+  return result;
+}
+
 void DeleteCommandRequest::on_event(const event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
-  using namespace helpers;
 
   const smart_objects::SmartObject& message = event.smart_object();
-
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_DeleteCommand: {
       is_ui_received_ = true;
-      const int result = message[strings::params][hmi_response::code].asInt();
-      ui_result_ = static_cast<hmi_apis::Common_Result::eType>(result);
+      ui_result_ = static_cast<hmi_apis::Common_Result::eType>(
+          message[strings::params][hmi_response::code].asInt());
       LOG4CXX_DEBUG(logger_,
                     "Received UI_DeleteCommand event with result "
                         << MessageHelper::HMIResultToString(ui_result_));
+      GetInfo(message, ui_info_);
       break;
     }
     case hmi_apis::FunctionID::VR_DeleteCommand: {
       is_vr_received_ = true;
-      const int result = message[strings::params][hmi_response::code].asInt();
-      vr_result_ = static_cast<hmi_apis::Common_Result::eType>(result);
+      vr_result_ = static_cast<hmi_apis::Common_Result::eType>(
+          message[strings::params][hmi_response::code].asInt());
       LOG4CXX_DEBUG(logger_,
                     "Received VR_DeleteCommand event with result "
                         << MessageHelper::HMIResultToString(vr_result_));
+      GetInfo(message, vr_info_);
       break;
     }
     default: {
@@ -167,51 +193,14 @@ void DeleteCommandRequest::on_event(const event_engine::Event& event) {
                                 << connection_key());
     return;
   }
-
-  const bool is_vr_success_invalid =
-      Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
-          vr_result_,
-          hmi_apis::Common_Result::SUCCESS,
-          hmi_apis::Common_Result::INVALID_ENUM);
-
-  const bool is_ui_success_invalid =
-      Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
-          ui_result_,
-          hmi_apis::Common_Result::SUCCESS,
-          hmi_apis::Common_Result::INVALID_ENUM);
-
-  const bool is_vr_ui_invalid =
-      Compare<hmi_apis::Common_Result::eType, EQ, ALL>(
-          hmi_apis::Common_Result::INVALID_ENUM, vr_result_, ui_result_);
-
-  const bool is_vr_or_ui_warning =
-      Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
-          hmi_apis::Common_Result::WARNINGS, ui_result_, vr_result_);
-
-  const bool result =
-      // In case of UI/VR is SUCCESS and other is SUCCESS/INVALID_ENUM
-      (is_vr_success_invalid && is_ui_success_invalid && !is_vr_ui_invalid) ||
-      // or one of them is WARNINGS
-      is_vr_or_ui_warning;
-
-  LOG4CXX_DEBUG(logger_, "Result code is " << (result ? "true" : "false"));
-
+  mobile_apis::Result::eType result_code = mobile_apis::Result::INVALID_ENUM;
+  std::string info;
+  const bool result = PrepareResponseParameters(result_code, info);
   if (result) {
     application->RemoveCommand(msg_params[strings::cmd_id].asInt());
   }
-
-  mobile_apis::Result::eType result_code = mobile_apis::Result::INVALID_ENUM;
-  if (!result && hmi_apis::Common_Result::REJECTED == ui_result_) {
-    result_code = MessageHelper::HMIToMobileResult(vr_result_);
-  } else if (is_vr_or_ui_warning) {
-    LOG4CXX_DEBUG(logger_, "VR or UI result is warning");
-    result_code = mobile_apis::Result::WARNINGS;
-  } else {
-    result_code =
-        MessageHelper::HMIToMobileResult(std::max(ui_result_, vr_result_));
-  }
-
-  SendResponse(result, result_code, NULL, &msg_params);
+  SendResponse(
+      result, result_code, info.empty() ? NULL : info.c_str(), &msg_params);
   if (result) {
     application->UpdateHash();
   }

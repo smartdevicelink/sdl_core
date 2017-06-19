@@ -120,23 +120,13 @@ void SpeakRequest::ProcessTTSSpeakResponse(
   mobile_apis::Result::eType result_code =
       MessageHelper::HMIToMobileResult(hmi_result_code);
 
-  const bool result = Compare<mobile_api::Result::eType, EQ, ONE>(
-      result_code, mobile_api::Result::SUCCESS, mobile_api::Result::WARNINGS);
+  const bool result = PrepareResultForMobileResponse(
+      hmi_result_code, HmiInterfaces::HMI_INTERFACE_TTS);
 
   (*message_)[strings::params][strings::function_id] =
       mobile_apis::FunctionID::SpeakID;
 
   const char* return_info = NULL;
-
-  const bool is_result_ok = Compare<mobile_api::Result::eType, EQ, ONE>(
-      result_code,
-      mobile_api::Result::UNSUPPORTED_RESOURCE,
-      mobile_api::Result::WARNINGS);
-
-  if (is_result_ok) {
-    result_code = mobile_apis::Result::WARNINGS;
-    return_info = "Unsupported phoneme type sent in a prompt";
-  }
 
   SendResponse(
       result, result_code, return_info, &(message[strings::msg_params]));

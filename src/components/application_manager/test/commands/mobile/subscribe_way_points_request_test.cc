@@ -33,13 +33,14 @@
 #include "gtest/gtest.h"
 #include "utils/shared_ptr.h"
 #include "smart_objects/smart_object.h"
-#include "commands/commands_test.h"
-#include "commands/command_request_test.h"
+#include "application_manager/test/include/application_manager/commands/commands_test.h"
+#include "application_manager/test/include/application_manager/commands/command_request_test.h"
 #include "application_manager/application.h"
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_hmi_capabilities.h"
-#include "mobile/subscribe_way_points_request.h"
+#include "application_manager/mock_message_helper.h"
+#include "application_manager/include/application_manager/commands/mobile/subscribe_way_points_request.h"
 #include "interfaces/MOBILE_API.h"
 #include "application_manager/smart_object_keys.h"
 
@@ -47,6 +48,7 @@ namespace test {
 namespace components {
 namespace commands_test {
 namespace mobile_commands_test {
+namespace subscribe_way_points_request {
 
 using ::testing::_;
 using ::testing::Return;
@@ -54,20 +56,16 @@ using ::testing::ReturnRef;
 using ::testing::DoAll;
 using ::testing::SaveArg;
 using ::testing::InSequence;
+using ::testing::Mock;
 namespace am = ::application_manager;
 using am::commands::SubscribeWayPointsRequest;
 using am::commands::MessageSharedPtr;
+using am::MockMessageHelper;
 
 typedef SharedPtr<SubscribeWayPointsRequest> CommandPtr;
 
 class SubscribeWayPointsRequestTest
-    : public CommandRequestTest<CommandsTestMocks::kIsNice> {
- public:
-  typedef TypeIf<kMocksIsNice,
-                 NiceMock<application_manager_test::MockHMICapabilities>,
-                 application_manager_test::MockHMICapabilities>::Result
-      MockHMICapabilities;
-};
+    : public CommandRequestTest<CommandsTestMocks::kIsNice> {};
 
 TEST_F(SubscribeWayPointsRequestTest, Run_SUCCESS) {
   CommandPtr command(CreateCommand<SubscribeWayPointsRequest>());
@@ -100,24 +98,34 @@ TEST_F(SubscribeWayPointsRequestTest, OnEvent_SUCCESS) {
   Event event(hmi_apis::FunctionID::Navigation_SubscribeWayPoints);
 
   MessageSharedPtr event_msg(CreateMessage(smart_objects::SmartType_Map));
-  (*event_msg)[am::strings::params][am::hmi_response::code] =
-      mobile_apis::Result::SUCCESS;
+  const hmi_apis::Common_Result::eType result_code =
+      hmi_apis::Common_Result::SUCCESS;
+  (*event_msg)[am::strings::params][am::hmi_response::code] = result_code;
   (*event_msg)[am::strings::msg_params] = 0;
 
   event.set_smart_object(*event_msg);
+
+  MockMessageHelper* mock_message_helper =
+      MockMessageHelper::message_helper_mock();
+  Mock::VerifyAndClearExpectations(mock_message_helper);
 
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
 
   {
     InSequence dummy;
     EXPECT_CALL(app_mngr_, SubscribeAppForWayPoints(_));
+    EXPECT_CALL(*mock_message_helper, HMIToMobileResult(result_code))
+        .WillOnce(Return(mobile_apis::Result::SUCCESS));
     EXPECT_CALL(app_mngr_, ManageMobileCommand(_, _));
     EXPECT_CALL(*app, UpdateHash());
   }
 
   command->on_event(event);
+
+  Mock::VerifyAndClearExpectations(mock_message_helper);
 }
 
+}  // namespace subscribe_way_points_request
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components

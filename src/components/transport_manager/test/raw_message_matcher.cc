@@ -30,12 +30,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "include/raw_message_matcher.h"
-//#include "../../include/protocol/raw_message.h"
+#include "include/transport_manager/raw_message_matcher.h"
 
 namespace test {
 namespace components {
-namespace transport_manager {
+namespace transport_manager_test {
 
 RawMessageMatcher::RawMessageMatcher(RawMessagePtr ptr) : ptr_(ptr) {}
 
@@ -60,6 +59,6 @@ void RawMessageMatcher::DescribeNegationTo(::std::ostream* os) const {
   ::std::copy(ptr_->data(), ptr_->data() + ptr_->data_size(), out);
 }
 
-}  // namespace transport_manager
+}  // namespace transport_manager_test
 }  // namespace components
 }  // namespace test

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -189,6 +189,10 @@ TransportAdapter::Error TransportAdapterImpl::Connect(
     return NOT_SUPPORTED;
   }
   if (!server_connection_factory_->IsInitialised()) {
+    LOG4CXX_TRACE(logger_, "exit with BAD_STATE");
+    return BAD_STATE;
+  }
+  if (!initialised_) {
     LOG4CXX_TRACE(logger_, "exit with BAD_STATE");
     return BAD_STATE;
   }
@@ -751,21 +755,20 @@ void TransportAdapterImpl::ConnectFailed(const DeviceUID& device_handle,
 void TransportAdapterImpl::RemoveFinalizedConnection(
     const DeviceUID& device_handle, const ApplicationHandle& app_handle) {
   const DeviceUID device_uid = device_handle;
-  const ApplicationHandle app_uid = app_handle;
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoWriteLock lock(connections_lock_);
   ConnectionMap::iterator it_conn =
       connections_.find(std::make_pair(device_uid, app_handle));
   if (it_conn == connections_.end()) {
     LOG4CXX_WARN(logger_,
-                 "Device_id: " << &device_uid << ", app_handle: " << &app_uid
+                 "Device_id: " << &device_uid << ", app_handle: " << &app_handle
                                << " connection not found");
     return;
   }
   const ConnectionInfo& info = it_conn->second;
   if (info.state != ConnectionInfo::FINALISING) {
     LOG4CXX_WARN(logger_,
-                 "Device_id: " << &device_uid << ", app_handle: " << &app_uid
+                 "Device_id: " << &device_uid << ", app_handle: " << &app_handle
                                << " connection not finalized");
     return;
   }
@@ -950,6 +953,21 @@ TransportAdapter::Error TransportAdapterImpl::ConnectDevice(DeviceSptr device) {
     LOG4CXX_TRACE(logger_, "exit with error:OK");
     return OK;
   }
+}
+
+void TransportAdapterImpl::RunAppOnDevice(const DeviceUID& device_uid,
+                                          const std::string& bundle_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  DeviceSptr device = FindDevice(device_uid);
+  if (!device) {
+    LOG4CXX_WARN(logger_,
+                 "Device with id: " << device_uid << " Not found"
+                                    << "withing list of connected deviced");
+    return;
+  }
+
+  device->LaunchApp(bundle_id);
 }
 
 void TransportAdapterImpl::RemoveDevice(const DeviceUID& device_handle) {

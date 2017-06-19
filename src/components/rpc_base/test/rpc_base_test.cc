@@ -36,6 +36,8 @@
 #include "rpc_base/rpc_base.h"
 
 namespace test {
+namespace components {
+namespace rpc_base_test {
 using namespace rpc;
 
 namespace {
@@ -435,4 +437,6 @@ TEST(ValidatedTypes, ReportIncorrectlyInitializedMap2) {
       PrettyFormat(report));
 }
 
-}  // namespace codegen
+}  // namespace rpc_base_test
+}  // namespace components
+}  // namespace test

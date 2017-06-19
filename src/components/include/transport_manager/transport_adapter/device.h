@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,6 +38,7 @@
 
 #include "transport_manager/common.h"
 #include "utils/shared_ptr.h"
+#include "utils/macro.h"
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -75,6 +76,15 @@ class Device {
   virtual bool IsSameAs(const Device* other_device) const = 0;
 
   virtual ApplicationList GetApplicationList() const = 0;
+
+  /**
+   * @brief LaunchApp allows to run appropriate application on the device.
+   *
+   * @param bundle_id application identifier to run.
+   */
+  virtual void LaunchApp(const std::string& bundle_id) const {
+    UNUSED(bundle_id);
+  }
 
   virtual void Stop() {}
 

@@ -51,6 +51,12 @@ extern const char* msg_params;
 extern const char* method_name;
 extern const char* info;
 extern const char* app_id;
+extern const char* bundle_id;
+extern const char* app_info;
+extern const char* app_launch;
+extern const char* app_launch_list;
+extern const char* app_launch_last_session;
+extern const char* policy_app_id;
 extern const char* hmi_app_id;
 extern const char* device_id;
 extern const char* subscribed_for_way_points;
@@ -63,6 +69,7 @@ extern const char* success;
 extern const char* sync_msg_version;
 extern const char* major_version;
 extern const char* minor_version;
+extern const char* patch_version;
 extern const char* app_name;
 extern const char* ngn_media_screen_app_name;
 extern const char* vr_synonyms;
@@ -158,6 +165,8 @@ extern const char* speech_capabilities;
 extern const char* vr_capabilities;
 extern const char* audio_pass_thru_capabilities;
 extern const char* pcm_stream_capabilities;
+extern const char* audio_pass_thru_icon;
+extern const char* way_points;
 
 // PutFile
 extern const char* sync_file_name;
@@ -301,6 +310,28 @@ extern const char* is_suscribed;
 extern const char* message_data;
 
 extern const char* delivery_mode;
+
+extern const char* audio_streaming_indicator;
+
+// keys for default parameters loaded from hmi_capabilities.json:
+extern const char* const keyboard_properties_default;
+extern const char* const language_default;
+extern const char* const keyboard_layout_default;
+extern const char* const keypress_mode_default;
+
+// keys for supported parameters loaded from hmi_capabilities.json:
+extern const char* const keyboard_properties_supported;
+extern const char* const language_supported;
+extern const char* const keyboard_layout_supported;
+extern const char* const keypress_mode_supported;
+extern const char* const limited_characters_list_supported;
+extern const char* const auto_complete_text_supported;
+extern const char* const entity_type;
+extern const char* const entity_id;
+extern const char* const status;
+extern const char* const external_consent_status;
+extern const char* const consented_functions;
+extern const char* const source;
 }  // namespace strings
 
 namespace json {
@@ -374,6 +405,7 @@ extern const char* keyboard_layout;
 extern const char* limited_character_list;
 extern const char* auto_complete_text;
 extern const char* file;
+extern const char* file_name;
 extern const char* retry;
 extern const char* service;
 }  // namespace hmi_request

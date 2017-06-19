@@ -1,4 +1,4 @@
-# Copyright (c) 2014, Ford Motor Company
+# Copyright (c) 2016, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,6 +28,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/platform.cmake)
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
 set (AM_SOURCE_DIR ${COMPONENTS_DIR}/application_manager)
 set (AM_TEST_DIR ${AM_SOURCE_DIR}/test)
@@ -41,15 +43,16 @@ include_directories (
   ${COMPONENTS_DIR}/protocol_handler/include/
   ${COMPONENTS_DIR}/smart_objects/include/
   ${COMPONENTS_DIR}/hmi_message_handler/include
-  ${COMPONENTS_DIR}/media_manager/include/
-  ${COMPONENTS_DIR}/connection_handler/include/
-  ${COMPONENTS_DIR}/config_profile/include/
-  ${COMPONENTS_DIR}/request_watchdog/include/
-  ${COMPONENTS_DIR}/resumption/include/
-  ${COMPONENTS_DIR}/rpc_base/include/
+  ${COMPONENTS_DIR}/media_manager/include
+  ${COMPONENTS_DIR}/connection_handler/include
+  ${COMPONENTS_DIR}/config_profile/include
+  ${COMPONENTS_DIR}/request_watchdog/include
+  ${COMPONENTS_DIR}/resumption/include
+  ${COMPONENTS_DIR}/rpc_base/include
   ${COMPONENTS_DIR}/interfaces
+  ${POLICY_PATH}/include/
+  ${POLICY_GLOBAL_INCLUDE_PATH}/
   ${CMAKE_BINARY_DIR}/src/components/
-  ${COMPONENTS_DIR}/policy/include/
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${ENCRYPTION_INCLUDE_DIRECTORY}
   ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
@@ -68,286 +71,322 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "QNX")
   )
 endif()
 
-file (GLOB SOURCES
-  ${AM_SOURCE_DIR}/src/*
+set (MESSAGE_HELPER_SOURCE_DIR
+  ${AM_SOURCE_DIR}/src/message_helper
 )
 
-set (MESSAGE_HELPER_SOURCES
-  ${AM_SOURCE_DIR}/src/message_helper/message_helper.cc
+set (MESSAGE_HELPER_PATHS
+  ${MESSAGE_HELPER_SOURCE_DIR}
+)
+collect_sources(MESSAGE_HELPER_SOURCES "${MESSAGE_HELPER_PATHS}")
+
+
+set (POLICIES_SOURCE_DIR
+  ${AM_SOURCE_DIR}/src/policies
 )
 
-set (POLICIES_MANAGER
-${AM_SOURCE_DIR}/src/policies/policy_handler.cc
-${AM_SOURCE_DIR}/src/usage_statistics.cc
-${AM_SOURCE_DIR}/src/policies/policy_event_observer.cc
-${AM_SOURCE_DIR}/src/policies/delegates/app_permission_delegate.cc
-${AM_SOURCE_DIR}/src/policies/delegates/statistics_delegate.cc
+set (POLICIES_MANAGER_SOURCES
+  ${POLICIES_SOURCE_DIR}/policy_handler.cc
+  ${POLICIES_SOURCE_DIR}/policy_event_observer.cc
+  ${POLICIES_SOURCE_DIR}/delegates/app_permission_delegate.cc
+  ${POLICIES_SOURCE_DIR}/delegates/statistics_delegate.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/usage_statistics.cc
 )
 
-  include_directories(
-    ${COMPONENTS_DIR}/policy/src/policy/policy_table/table_struct
-  )
-file (GLOB EVENT_ENGINE
-  ${AM_SOURCE_DIR}/src/event_engine/*
+include_directories(
+  ${POLICY_PATH}/src/policy/policy_table/table_struct
 )
 
-file (GLOB RESUMPTION
-  ${AM_SOURCE_DIR}/src/resumption/*
+set (EVENT_ENGINE_SOURCE_DIR
+  ${AM_SOURCE_DIR}/src/event_engine
 )
 
-file (GLOB MOBILE_COMMANDS_SOURCES
-  ${AM_SOURCE_DIR}/src/commands/*
-  ${AM_SOURCE_DIR}/src/commands/mobile/*
+set (EVENT_ENGINE_PATHS
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/application_manager/event_engine
+  ${EVENT_ENGINE_SOURCE_DIR}
+)
+collect_sources(EVENT_ENGINE_SOURCES "${EVENT_ENGINE_PATHS}")
+
+set (COMMANDS_SOURCE_DIR
+  ${AM_SOURCE_DIR}/src/commands
+)
+collect_sources(POLICIES_SOURCES "${POLICIES_PATHS}")
+
+set(MOBILE_COMMANDS_EXCLUDE_PATHS
+  ${COMMANDS_SOURCE_DIR}/hmi
 )
 
-  set (HMI_COMMANDS_SOURCES
-  ${AM_SOURCE_DIR}/src/commands/hmi/request_to_hmi.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/response_from_hmi.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/request_from_hmi.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/response_to_hmi.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/notification_to_hmi.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/notification_from_hmi.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/allow_all_apps_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/allow_all_apps_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/allow_app_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/allow_app_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/update_sdl_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/update_sdl_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/activate_app_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/activate_app_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/get_system_info_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/get_system_info_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/sdl_get_list_of_permissions_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/sdl_get_list_of_permissions_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/sdl_get_user_friendly_message_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/sdl_get_user_friendly_message_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/sdl_get_status_update_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/sdl_get_status_update_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_status_update_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/sdl_activate_app_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/sdl_activate_app_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/mixing_audio_supported_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/mixing_audio_supported_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/update_app_list_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/update_app_list_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_update_device_list.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/update_device_list_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/update_device_list_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_audio_data_streaming_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_video_data_streaming_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_sdl_consent_needed_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_sdl_persistence_complete_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_exit_all_applications_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_exit_application_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_navi_way_point_change_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_start_device_discovery.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/close_popup_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/close_popup_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_app_activated_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/button_get_capabilities_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/button_get_capabilities_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/vr_is_ready_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/vr_is_ready_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/vr_add_command_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/vr_add_command_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/vr_delete_command_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/vr_delete_command_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/vr_change_registration_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/vr_change_registration_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/vr_get_supported_languages_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/vr_get_supported_languages_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/vr_get_language_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/vr_get_language_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/vr_get_capabilities_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/vr_get_capabilities_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/tts_is_ready_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/tts_is_ready_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/tts_change_registration_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/tts_change_registration_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/tts_get_language_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/tts_get_language_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/tts_get_supported_languages_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/tts_get_supported_languages_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/tts_stop_speaking_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/tts_stop_speaking_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/tts_speak_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/tts_speak_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/tts_set_global_properties_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/tts_set_global_properties_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/tts_get_capabilities_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/tts_get_capabilities_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/vr_perform_interaction_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/vr_perform_interaction_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/ui_add_command_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/ui_add_command_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/ui_delete_command_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/ui_delete_command_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/ui_add_submenu_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/ui_add_submenu_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/ui_delete_submenu_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/ui_delete_submenu_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/ui_get_supported_languages_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/ui_get_supported_languages_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/ui_get_language_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/ui_get_language_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/ui_get_capabilities_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/ui_get_capabilities_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/ui_change_registration_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/ui_change_registration_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/ui_show_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/ui_show_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/ui_alert_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/ui_alert_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/ui_slider_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/ui_scrollable_message_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/ui_scrollable_message_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/ui_set_global_properties_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/ui_set_global_properties_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/ui_slider_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/ui_is_ready_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/ui_is_ready_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/ui_perform_audio_pass_thru_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/ui_perform_audio_pass_thru_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/ui_end_audio_pass_thru_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/ui_end_audio_pass_thru_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/ui_perform_interaction_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/ui_perform_interaction_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/ui_set_app_icon_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/ui_set_app_icon_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/ui_set_media_clock_timer_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/ui_set_media_clock_timer_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/ui_show_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/ui_show_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/vi_is_ready_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/vi_is_ready_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/vi_read_did_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/vi_read_did_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/vi_get_dtcs_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/vi_get_dtcs_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/vi_diagnostic_message_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/vi_diagnostic_message_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/vi_get_vehicle_type_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/vi_get_vehicle_type_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/navi_is_ready_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/navi_is_ready_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/navi_alert_maneuver_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/navi_alert_maneuver_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/navi_update_turn_list_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/navi_update_turn_list_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/navi_show_constant_tbt_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/navi_show_constant_tbt_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/navi_send_location_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/navi_send_location_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/navi_subscribe_way_points_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/navi_subscribe_way_points_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/navi_unsubscribe_way_points_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/navi_unsubscribe_way_points_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_ready_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_system_context_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_device_chosen_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_allow_sdl_functionality_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_app_permission_consent_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_app_registered_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_app_permission_changed_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_app_unregistered_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_driver_distraction_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_ignition_cycle_over_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_system_info_changed_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_file_removed_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_tts_started_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_tts_stopped_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_vr_started_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_vr_stopped_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_vr_command_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_ui_command_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_navi_tbt_client_state_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_app_deactivated_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_tts_language_change_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_vr_language_change_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_ui_language_change_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_button_event_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_button_press_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_button_subscription_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_find_applications.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_ui_keyboard_input_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_ui_touch_event_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_ui_reset_timeout_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/navi_start_stream_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/navi_start_stream_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/navi_stop_stream_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/navi_stop_stream_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/navi_audio_start_stream_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/navi_audio_start_stream_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/navi_audio_stop_stream_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/navi_audio_stop_stream_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/navi_get_way_points_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/navi_get_way_points_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_system_request_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_put_file_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_resume_audio_source_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_sdl_close_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/ui_set_display_layout_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/ui_set_display_layout_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_record_start_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/add_statistics_info_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_system_error_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/basic_communication_system_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/basic_communication_system_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/sdl_policy_update.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/sdl_policy_update_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_received_policy_update.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_policy_update.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/get_urls.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/get_urls_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_device_state_changed_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_tts_reset_timeout_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/dial_number_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/dial_number_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_event_changed_notification.cc
+set (MOBILE_COMMANDS_PATHS
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/application_manager/commands
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/application_manager/commands/mobile
+  ${COMMANDS_SOURCE_DIR}
+  ${COMMANDS_SOURCE_DIR}/mobile
+)
+collect_sources(MOBILE_COMMANDS_SOURCES "${MOBILE_COMMANDS_PATHS}" "${MOBILE_COMMANDS_EXCLUDE_PATHS}")
+
+set (HMI_COMMANDS_SOURCES
+  ${COMMANDS_SOURCE_DIR}/hmi/request_to_hmi.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/response_from_hmi.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/request_from_hmi.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/response_to_hmi.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/notification_to_hmi.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/notification_from_hmi.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/allow_all_apps_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/allow_all_apps_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/allow_app_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/allow_app_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/update_sdl_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/update_sdl_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/activate_app_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/activate_app_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/get_system_info_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/get_system_info_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/sdl_get_list_of_permissions_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/sdl_get_list_of_permissions_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/sdl_get_user_friendly_message_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/sdl_get_user_friendly_message_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/sdl_get_status_update_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/sdl_get_status_update_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_status_update_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/sdl_activate_app_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/sdl_activate_app_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/mixing_audio_supported_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/mixing_audio_supported_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/update_app_list_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/update_app_list_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_update_device_list.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/update_device_list_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/update_device_list_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_audio_data_streaming_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_video_data_streaming_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_sdl_consent_needed_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_sdl_persistence_complete_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_exit_all_applications_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_exit_application_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_navi_way_point_change_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_start_device_discovery.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/close_popup_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/close_popup_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_app_activated_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/button_get_capabilities_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/button_get_capabilities_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/vr_is_ready_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/vr_is_ready_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/vr_add_command_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/vr_add_command_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/vr_delete_command_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/vr_delete_command_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/vr_change_registration_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/vr_change_registration_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/vr_get_supported_languages_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/vr_get_supported_languages_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/vr_get_language_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/vr_get_language_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/vr_get_capabilities_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/vr_get_capabilities_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/tts_is_ready_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/tts_is_ready_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/tts_change_registration_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/tts_change_registration_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/tts_get_language_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/tts_get_language_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/tts_get_supported_languages_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/tts_get_supported_languages_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/tts_stop_speaking_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/tts_stop_speaking_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/tts_speak_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/tts_speak_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/tts_set_global_properties_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/tts_set_global_properties_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/tts_get_capabilities_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/tts_get_capabilities_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/vr_perform_interaction_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/vr_perform_interaction_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/ui_add_command_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/ui_add_command_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/ui_delete_command_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/ui_delete_command_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/ui_add_submenu_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/ui_add_submenu_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/ui_delete_submenu_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/ui_delete_submenu_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/ui_get_supported_languages_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/ui_get_supported_languages_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/ui_get_language_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/ui_get_language_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/ui_get_capabilities_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/ui_get_capabilities_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/ui_change_registration_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/ui_change_registration_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/ui_show_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/ui_show_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/ui_alert_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/ui_alert_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/ui_slider_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/ui_scrollable_message_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/ui_scrollable_message_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/ui_set_global_properties_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/ui_set_global_properties_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/ui_slider_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/ui_is_ready_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/ui_is_ready_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/ui_perform_audio_pass_thru_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/ui_perform_audio_pass_thru_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/ui_end_audio_pass_thru_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/ui_end_audio_pass_thru_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/ui_perform_interaction_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/ui_perform_interaction_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/ui_set_app_icon_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/ui_set_app_icon_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/ui_set_media_clock_timer_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/ui_set_media_clock_timer_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/ui_show_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/ui_show_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/vi_is_ready_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/vi_is_ready_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/vi_read_did_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/vi_read_did_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/vi_get_dtcs_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/vi_get_dtcs_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/vi_diagnostic_message_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/vi_diagnostic_message_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/vi_get_vehicle_type_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/vi_get_vehicle_type_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/navi_is_ready_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/navi_is_ready_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/navi_alert_maneuver_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/navi_alert_maneuver_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/navi_update_turn_list_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/navi_update_turn_list_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/navi_show_constant_tbt_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/navi_show_constant_tbt_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/navi_send_location_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/navi_send_location_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/navi_subscribe_way_points_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/navi_subscribe_way_points_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/navi_unsubscribe_way_points_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/navi_unsubscribe_way_points_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_ready_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_system_context_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_device_chosen_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_allow_sdl_functionality_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_app_permission_consent_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_app_registered_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_app_permission_changed_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_app_unregistered_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_driver_distraction_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_ignition_cycle_over_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_system_info_changed_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_file_removed_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_tts_started_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_tts_stopped_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_vr_started_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_vr_stopped_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_vr_command_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_ui_command_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_navi_tbt_client_state_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_app_deactivated_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_tts_language_change_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_vr_language_change_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_ui_language_change_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_button_event_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_button_press_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_button_subscription_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_find_applications.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_ui_keyboard_input_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_ui_touch_event_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_ui_reset_timeout_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/navi_start_stream_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/navi_start_stream_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/navi_stop_stream_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/navi_stop_stream_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/navi_audio_start_stream_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/navi_audio_start_stream_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/navi_audio_stop_stream_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/navi_audio_stop_stream_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/navi_get_way_points_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/navi_get_way_points_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_system_request_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_put_file_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_resume_audio_source_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_sdl_close_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/ui_set_display_layout_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/ui_set_display_layout_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_record_start_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/add_statistics_info_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_system_error_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/basic_communication_system_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/basic_communication_system_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/sdl_policy_update.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/sdl_policy_update_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_received_policy_update.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_policy_update.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/get_urls.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/get_urls_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_device_state_changed_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_tts_reset_timeout_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/dial_number_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/dial_number_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_event_changed_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/decrypt_certificate_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/decrypt_certificate_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/ui_set_icon_request.cc
 )
 
 set (HMI_COMMANDS_SOURCES_JSON
-  ${AM_SOURCE_DIR}/src/commands/hmi/vi_get_vehicle_data_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/vi_get_vehicle_data_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/vi_subscribe_vehicle_data_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/vi_subscribe_vehicle_data_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/vi_unsubscribe_vehicle_data_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/vi_unsubscribe_vehicle_data_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_vehicle_data_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/vi_get_vehicle_data_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/vi_get_vehicle_data_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/vi_subscribe_vehicle_data_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/vi_subscribe_vehicle_data_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/vi_unsubscribe_vehicle_data_request.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/vi_unsubscribe_vehicle_data_response.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_vi_vehicle_data_notification.cc
 )
 
 set (HMI_COMMANDS_SOURCES_DBUS
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_gps_data_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_speed_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_rpm_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_fuel_level_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_fuel_level_state_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_instant_fuel_consumption_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_external_temperature_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_vin_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_prndl_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_tire_pressure_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_odometer_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_belt_status_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_body_information_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_device_status_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_driver_braking_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_wiper_status_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_head_lamp_status_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_engine_torque_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_acc_pedal_position_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_steering_wheel_angle_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_my_key_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_vi_gps_data_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_vi_speed_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_vi_rpm_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_vi_fuel_level_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_vi_fuel_level_state_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_vi_instant_fuel_consumption_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_vi_external_temperature_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_vi_vin_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_vi_prndl_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_vi_tire_pressure_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_vi_odometer_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_vi_belt_status_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_vi_body_information_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_vi_device_status_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_vi_driver_braking_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_vi_wiper_status_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_vi_head_lamp_status_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_vi_engine_torque_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_vi_acc_pedal_position_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_vi_steering_wheel_angle_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_vi_my_key_notification.cc
 )
 
 if (${HMI_JSON_API})
-    set (HMI_COMMANDS_SOURCES ${HMI_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES_JSON})
+  set (HMI_COMMANDS_SOURCES ${HMI_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES_JSON})
 endif (${HMI_JSON_API})
-if (${HMI_DBUS_API})
-    set (HMI_COMMANDS_SOURCES ${HMI_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES_DBUS})
-endif (${HMI_DBUS_API})
 
-SET (LIBRARIES
+set (HMI_COMMANDS_SOURCES ${HMI_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES_DBUS})
+
+set(EXCLUDE_PATHS
+  ${COMMANDS_SOURCE_DIR}
+  ${EVENT_ENGINE_SOURCE_DIR}
+  ${MESSAGE_HELPER_SOURCE_DIR}
+  ${POLICIES_SOURCE_DIR}
+)
+
+set(PATHS
+  ${CMAKE_CURRENT_SOURCE_DIR}/include
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
+collect_sources(SOURCES "${PATHS}" "${EXCLUDE_PATHS}")
+
+set(LIBRARIES
   HMI_API
   MOBILE_API
   v4_protocol_v1_2_no_extra
@@ -357,42 +396,47 @@ SET (LIBRARIES
   dl
   formatters
   dbms
+  Utils
 )
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   list(APPEND LIBRARIES sqlite3)
 endif ()
 
-IF(${CMAKE_SYSTEM_NAME} MATCHES "QNX")
+if (${CMAKE_SYSTEM_NAME} MATCHES "QNX")
   list(REMOVE_ITEM LIBRARIES dl)
 endif()
 
-add_library("AMEventEngine" ${EVENT_ENGINE})
+add_library("AMEventEngine" ${EVENT_ENGINE_SOURCES})
 target_link_libraries("AMEventEngine" ${LIBRARIES})
 
-
-add_library("AMPolicyLibrary" ${POLICIES_MANAGER} )
+add_library("AMPolicyLibrary" ${POLICIES_MANAGER_SOURCES} )
 target_link_libraries("AMPolicyLibrary" ${LIBRARIES} AMEventEngine)
 
 add_library("AMHMICommandsLibrary" ${HMI_COMMANDS_SOURCES})
 target_link_libraries("AMHMICommandsLibrary" ${LIBRARIES} AMEventEngine)
 
 add_library("MessageHelper" ${MESSAGE_HELPER_SOURCES})
+target_link_libraries("MessageHelper" ${LIBRARIES})
 
 add_library("AMMobileCommandsLibrary" ${MOBILE_COMMANDS_SOURCES} )
 target_link_libraries("AMMobileCommandsLibrary" ${LIBRARIES} AMEventEngine)
 
-add_library("ApplicationManager" ${SOURCES} ${RESUMPTION})
-target_link_libraries("ApplicationManager" ${LIBRARIES} AMHMICommandsLibrary
-                                                        AMMobileCommandsLibrary
-                                                        AMEventEngine
-                                                        AMPolicyLibrary)
+add_library("ApplicationManager" ${SOURCES})
+
+list(APPEND LIBRARIES
+  AMEventEngine
+  AMPolicyLibrary
+  AMHMICommandsLibrary
+  AMMobileCommandsLibrary
+)
 
 if(ENABLE_LOG)
-  target_link_libraries("ApplicationManager" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
+  list(APPEND LIBRARIES log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
 endif()
+
+target_link_libraries("ApplicationManager" ${LIBRARIES})
 
 if(BUILD_TESTS)
   add_subdirectory(test)
-  add_subdirectory(test/message_helper)
 endif()

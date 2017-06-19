@@ -32,8 +32,8 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef __CSMARTFACTORY_HPP__
-#define __CSMARTFACTORY_HPP__
+#ifndef SRC_COMPONENTS_FORMATTERS_INCLUDE_FORMATTERS_CSMARTFACTORY_H_
+#define SRC_COMPONENTS_FORMATTERS_INCLUDE_FORMATTERS_CSMARTFACTORY_H_
 
 #include "smart_objects/smart_object.h"
 #include "smart_objects/smart_schema.h"
@@ -407,4 +407,4 @@ bool operator<(const SmartSchemaKey<FunctionIdEnum, MessageTypeEnum>& l,
 }
 }
 }
-#endif  //__CSMARTFACTORY_HPP__
+#endif  // SRC_COMPONENTS_FORMATTERS_INCLUDE_FORMATTERS_CSMARTFACTORY_H_

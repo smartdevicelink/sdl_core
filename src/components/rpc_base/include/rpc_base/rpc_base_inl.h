@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef VALIDATED_TYPES_INL_H_
-#define VALIDATED_TYPES_INL_H_
+#ifndef SRC_COMPONENTS_RPC_BASE_INCLUDE_RPC_BASE_RPC_BASE_INL_H_
+#define SRC_COMPONENTS_RPC_BASE_INCLUDE_RPC_BASE_RPC_BASE_INL_H_
 
 #include "rpc_base.h"
 
@@ -177,7 +177,7 @@ Integer<T, minval, maxval>& Integer<T, minval, maxval>::operator=(
     const Integer& new_val) {
   this->value_ = new_val.value_;
   if (new_val.is_initialized()) {
-    this->value_state_ = range_.Includes(new_val.value_) ? kValid : kInvalid;
+    this->value_state_ = new_val.value_state_;
   }
 
   return *this;
@@ -674,4 +674,4 @@ void Stringifyable<T>::ReportErrors(ValidationReport* report) const {
 
 }  // namespace rpc
 
-#endif /* VALIDATED_TYPES_INL_H_ */
+#endif  // SRC_COMPONENTS_RPC_BASE_INCLUDE_RPC_BASE_RPC_BASE_INL_H_

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,6 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <string>
+
 #include "application_manager/hmi_capabilities.h"
 #include "gtest/gtest.h"
 #include "smart_objects/smart_object.h"
@@ -43,7 +45,7 @@
 #include "application_manager/mock_application_manager_settings.h"
 #include "application_manager/mock_event_dispatcher.h"
 #include "application_manager/state_controller.h"
-#include "resumption/last_state.h"
+#include "resumption/last_state_impl.h"
 #include "application_manager/resumption/resume_ctrl.h"
 
 namespace test {
@@ -57,19 +59,20 @@ using ::testing::AtLeast;
 using ::testing::Invoke;
 using ::testing::InSequence;
 
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 using namespace application_manager;
 
 class HMICapabilitiesTest : public ::testing::Test {
  protected:
-  HMICapabilitiesTest() : last_state_("app_storage_folder", "app_info_data") {}
+  HMICapabilitiesTest()
+      : last_state_("app_storage_folder", "app_info_data")
+      , file_name_("hmi_capabilities.json") {}
   virtual void SetUp() OVERRIDE {
     EXPECT_CALL(app_mngr_, event_dispatcher())
         .WillOnce(ReturnRef(mock_event_dispatcher));
     EXPECT_CALL(app_mngr_, get_settings())
         .WillRepeatedly(ReturnRef(mock_application_manager_settings_));
     EXPECT_CALL(mock_application_manager_settings_,
-                hmi_capabilities_file_name()).WillOnce(ReturnRef(kFileName));
+                hmi_capabilities_file_name()).WillOnce(ReturnRef(file_name_));
     EXPECT_CALL(mock_event_dispatcher, add_observer(_, _, _)).Times(1);
     EXPECT_CALL(mock_event_dispatcher, remove_observer(_)).Times(1);
     EXPECT_CALL(mock_application_manager_settings_, launch_hmi())
@@ -91,10 +94,10 @@ class HMICapabilitiesTest : public ::testing::Test {
   void SetCooperating();
   MockApplicationManager app_mngr_;
   event_engine_test::MockEventDispatcher mock_event_dispatcher;
-  resumption::LastState last_state_;
+  resumption::LastStateImpl last_state_;
   MockApplicationManagerSettings mock_application_manager_settings_;
   utils::SharedPtr<HMICapabilitiesForTesting> hmi_capabilities_test;
-  const std::string kFileName = "hmi_capabilities.json";
+  const std::string file_name_;
 };
 
 const char* const cstring_values_[] = {
@@ -226,6 +229,13 @@ TEST_F(HMICapabilitiesTest, LoadCapabilitiesFromFile) {
             static_cast<hmi_apis::Common_Language::eType>(
                 tts_supported_languages[2].asInt()));
 
+  // Check TTS capabilities
+  const smart_objects::SmartObject tts_capabilities =
+      *(hmi_capabilities_test->speech_capabilities());
+  EXPECT_EQ(hmi_apis::Common_SpeechCapabilities::SC_TEXT,
+            static_cast<hmi_apis::Common_SpeechCapabilities::eType>(
+                tts_capabilities[0].asInt()));
+
   // Check button capabilities
   const smart_objects::SmartObject buttons_capabilities_so =
       *(hmi_capabilities_test->button_capabilities());
@@ -349,75 +359,6 @@ TEST_F(HMICapabilitiesTest, LoadCapabilitiesFromFile) {
   EXPECT_EQ("SE", vehicle_type_so["trim"].asString());
 }
 
-TEST_F(HMICapabilitiesTest, ConvertJsonLanguagesToObj) {
-  Json::Value json_languages(Json::arrayValue);
-  json_languages[0] = "EN_US";
-  json_languages[1] = "ES_MX";
-  smart_objects::SmartObject sm_obj =
-      smart_objects::SmartObject(smart_objects::SmartType_Array);
-
-  EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
-              CommonLanguageFromString(json_languages[0].asString()))
-      .WillOnce(Return(hmi_apis::Common_Language::EN_US));
-
-  EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
-              CommonLanguageFromString(json_languages[1].asString()))
-      .WillOnce(Return(hmi_apis::Common_Language::ES_MX));
-
-  hmi_capabilities_test->ConvertJsonLanguagesToObj(json_languages, sm_obj);
-
-  EXPECT_EQ(hmi_apis::Common_Language::EN_US,
-            static_cast<hmi_apis::Common_Language::eType>(sm_obj[0].asInt()));
-  EXPECT_EQ(hmi_apis::Common_Language::ES_MX,
-            static_cast<hmi_apis::Common_Language::eType>(sm_obj[1].asInt()));
-}
-
-TEST_F(HMICapabilitiesTest,
-       HmiCapabilitiesInitialized_UiVrTtsIviNotCooperating) {
-  // Precondition
-  hmi_capabilities_test->set_is_vr_cooperating(false);
-  hmi_capabilities_test->set_is_tts_cooperating(false);
-
-  hmi_capabilities_test->set_is_ui_cooperating(false);
-  hmi_capabilities_test->set_is_navi_cooperating(false);
-  hmi_capabilities_test->set_is_ivi_cooperating(false);
-  EXPECT_TRUE(hmi_capabilities_test->is_hmi_capabilities_initialized());
-}
-
-TEST_F(HMICapabilitiesTest, HmiCapabilitiesInitialized) {
-  // Precondition
-  SetCooperating();
-  smart_objects::SmartObjectSPtr language(
-      new smart_objects::SmartObject(smart_objects::SmartType_Map));
-
-  EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
-              CreateModuleInfoSO(_, _)).WillRepeatedly(Return(language));
-
-  hmi_capabilities_test->set_is_vr_cooperating(true);
-  smart_objects::SmartObject supported_languages;
-  supported_languages[0] = "EN_US";
-  hmi_capabilities_test->set_vr_supported_languages(supported_languages);
-  hmi_capabilities_test->set_tts_supported_languages(supported_languages);
-  hmi_capabilities_test->set_ui_supported_languages(supported_languages);
-  hmi_capabilities_test->set_vehicle_type(supported_languages);
-
-  hmi_capabilities_test->set_is_tts_cooperating(true);
-  hmi_capabilities_test->set_is_ui_cooperating(true);
-  hmi_capabilities_test->set_is_navi_cooperating(true);
-  hmi_capabilities_test->set_is_ivi_cooperating(true);
-
-  hmi_capabilities_test->set_active_vr_language(
-      hmi_apis::Common_Language::EN_US);
-  SetCooperating();
-  hmi_capabilities_test->set_active_tts_language(
-      hmi_apis::Common_Language::EN_US);
-  SetCooperating();
-  hmi_capabilities_test->set_active_ui_language(
-      hmi_apis::Common_Language::EN_US);
-
-  EXPECT_TRUE(hmi_capabilities_test->is_hmi_capabilities_initialized());
-}
-
 TEST_F(HMICapabilitiesTest, VerifyImageType) {
   const int32_t image_type = 1;
   smart_objects::SmartObject sm_obj;
@@ -438,88 +379,23 @@ void HMICapabilitiesTest::SetCooperating() {
 }
 
 TEST_F(HMICapabilitiesTest, SetVRCooperating) {
-  // Without sequence it is impossible to check correct call of ManageHMICommand
-  InSequence dummy;
-  smart_objects::SmartObjectSPtr language(
-      new smart_objects::SmartObject(smart_objects::SmartType_Map));
-  EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
-              CreateModuleInfoSO(hmi_apis::FunctionID::VR_GetLanguage, _))
-      .WillOnce(Return(language));
-  EXPECT_CALL(app_mngr_, ManageHMICommand(language));
-
-  smart_objects::SmartObjectSPtr support_language;
-  EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
-              CreateModuleInfoSO(hmi_apis::FunctionID::VR_GetSupportedLanguages,
-                                 _)).WillOnce(Return(support_language));
-  EXPECT_CALL(app_mngr_, ManageHMICommand(support_language));
-
-  smart_objects::SmartObjectSPtr capabilities;
-  EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
-              CreateModuleInfoSO(hmi_apis::FunctionID::VR_GetCapabilities, _))
-      .WillOnce(Return(capabilities));
-  EXPECT_CALL(app_mngr_, ManageHMICommand(capabilities));
-
   hmi_capabilities_test->set_is_vr_cooperating(true);
+  EXPECT_EQ(true, hmi_capabilities_test->is_vr_cooperating());
 }
 
 TEST_F(HMICapabilitiesTest, SetTTSCooperating) {
-  smart_objects::SmartObjectSPtr language(
-      new smart_objects::SmartObject(smart_objects::SmartType_Map));
-  InSequence dummy;
-  EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
-              CreateModuleInfoSO(hmi_apis::FunctionID::TTS_GetLanguage, _))
-      .WillOnce(Return(language));
-  EXPECT_CALL(app_mngr_, ManageHMICommand(language));
-
-  smart_objects::SmartObjectSPtr support_language;
-  EXPECT_CALL(
-      *(MockMessageHelper::message_helper_mock()),
-      CreateModuleInfoSO(hmi_apis::FunctionID::TTS_GetSupportedLanguages, _))
-      .WillOnce(Return(support_language));
-  EXPECT_CALL(app_mngr_, ManageHMICommand(support_language));
-
-  smart_objects::SmartObjectSPtr capabilities;
-  EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
-              CreateModuleInfoSO(hmi_apis::FunctionID::TTS_GetCapabilities, _))
-      .WillOnce(Return(capabilities));
-  EXPECT_CALL(app_mngr_, ManageHMICommand(capabilities));
-
   hmi_capabilities_test->set_is_tts_cooperating(true);
+  EXPECT_EQ(true, hmi_capabilities_test->is_tts_cooperating());
 }
 
 TEST_F(HMICapabilitiesTest, SetUICooperating) {
-  InSequence dummy;
-  smart_objects::SmartObjectSPtr language(
-      new smart_objects::SmartObject(smart_objects::SmartType_Map));
-  EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
-              CreateModuleInfoSO(hmi_apis::FunctionID::UI_GetLanguage, _))
-      .WillOnce(Return(language));
-  EXPECT_CALL(app_mngr_, ManageHMICommand(language));
-
-  smart_objects::SmartObjectSPtr support_language;
-  EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
-              CreateModuleInfoSO(hmi_apis::FunctionID::UI_GetSupportedLanguages,
-                                 _)).WillOnce(Return(support_language));
-  EXPECT_CALL(app_mngr_, ManageHMICommand(support_language));
-
-  smart_objects::SmartObjectSPtr capabilities;
-  EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
-              CreateModuleInfoSO(hmi_apis::FunctionID::UI_GetCapabilities, _))
-      .WillOnce(Return(capabilities));
-  EXPECT_CALL(app_mngr_, ManageHMICommand(capabilities));
-
   hmi_capabilities_test->set_is_ui_cooperating(true);
+  EXPECT_EQ(true, hmi_capabilities_test->is_ui_cooperating());
 }
 
 TEST_F(HMICapabilitiesTest, SetIviCooperating) {
-  smart_objects::SmartObjectSPtr ivi_type;
-  EXPECT_CALL(
-      *(MockMessageHelper::message_helper_mock()),
-      CreateModuleInfoSO(hmi_apis::FunctionID::VehicleInfo_GetVehicleType, _))
-      .WillOnce(Return(ivi_type));
-  EXPECT_CALL(app_mngr_, ManageHMICommand(ivi_type));
-
   hmi_capabilities_test->set_is_ivi_cooperating(true);
+  EXPECT_EQ(true, hmi_capabilities_test->is_ivi_cooperating());
 }
 
 }  // namespace application_manager_test

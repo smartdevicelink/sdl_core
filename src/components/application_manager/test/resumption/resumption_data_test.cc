@@ -35,7 +35,7 @@
 #include "gtest/gtest.h"
 
 #include "application_manager/usage_statistics.h"
-#include "application_manager/resumption_data_mock.h"
+#include "application_manager/mock_resumption_data.h"
 #include "utils/custom_string.h"
 #include "application_manager/application.h"
 #include "utils/data_accessor.h"

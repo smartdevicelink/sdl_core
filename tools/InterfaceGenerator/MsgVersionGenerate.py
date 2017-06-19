@@ -8,7 +8,7 @@ from generator.parsers import RPCBase
  
 def generate_msg_version(file_name, path_to_storage):
     """Parses MOBILE_API.xml in order to
-    receive major_version and minor_version
+    receive major_version, minor_version, and patch_version
     """
     tree = xml.etree.ElementTree.parse(file_name)
     root = tree.getroot()
@@ -17,8 +17,9 @@ def generate_msg_version(file_name, path_to_storage):
         array = (root.attrib["version"]).split(".")
         major_version = array[0]
         minor_version = array[1]
-        if (major_version.isdigit() and minor_version.isdigit()):
-            data_for_storage = prepare_data_for_storage(major_version, minor_version)
+        patch_version = array[2]
+        if (major_version.isdigit() and minor_version.isdigit() and patch_version.isdigit):
+            data_for_storage = prepare_data_for_storage(major_version, minor_version, patch_version)
             store_data_to_file(path_to_storage, data_for_storage)  
         else:
             raise RPCBase.ParseError("Attribute version has incorect value in MOBILE_API.xml")
@@ -38,13 +39,13 @@ def store_data_to_file(path_to_storage, data_for_storage):
 def check_version_format(version):
     """Checks correctness of format of version
     """
-    p = re.compile('\d+\\.\d+')
+    p = re.compile('\d+\\.\d+\\.\d+')
     result = p.match(version)
     if result == None or (result.end() != len(version)):
         raise RPCBase.ParseError("Incorrect format of version please check MOBILE_API.xml. "
-                                 "Need format of version major_version.minor_version")
+                                 "Need format of version major_version.minor_version.patch_version")
 
-def prepare_data_for_storage(major_version, minor_version):
+def prepare_data_for_storage(major_version, minor_version, patch_version):
     """Prepares data to store to file.
     """
     temp = Template(
@@ -78,8 +79,9 @@ def prepare_data_for_storage(major_version, minor_version):
     u'''namespace application_manager {\n\n'''
     u'''const uint16_t major_version = $m_version;\n'''
     u'''const uint16_t minor_version = $min_version;\n'''
+    u'''const uint16_t patch_version = $p_version;\n'''
     u'''}  // namespace application_manager\n'''
     u'''#endif  // GENERATED_MSG_VERSION_H''')
-    data_to_file = temp.substitute(m_version = major_version, min_version = minor_version)
+    data_to_file = temp.substitute(m_version = major_version, min_version = minor_version, p_version = patch_version)
     return data_to_file
     

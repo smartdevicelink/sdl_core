@@ -1,6 +1,6 @@
 /*
  *
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,6 +53,7 @@
 #include <sstream>
 
 #include "utils/logger.h"
+#include "utils/make_shared.h"
 #include "utils/threads/thread.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "transport_manager/tcp/tcp_device.h"
@@ -241,12 +242,16 @@ void TcpClientListener::Loop() {
     const ApplicationHandle app_handle =
         tcp_device->AddIncomingApplication(connection_fd);
 
-    TcpSocketConnection* connection(new TcpSocketConnection(
-        device->unique_device_id(), app_handle, controller_));
+    utils::SharedPtr<TcpSocketConnection> connection =
+        utils::MakeShared<TcpSocketConnection>(
+            device->unique_device_id(), app_handle, controller_);
+    controller_->ConnectionCreated(
+        connection, device->unique_device_id(), app_handle);
     connection->set_socket(connection_fd);
     const TransportAdapter::Error error = connection->Start();
-    if (error != TransportAdapter::OK) {
-      delete connection;
+    if (TransportAdapter::OK != error) {
+      LOG4CXX_ERROR(logger_,
+                    "TCP connection::Start() failed with error: " << error);
     }
   }
 }

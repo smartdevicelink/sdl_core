@@ -58,7 +58,7 @@ class CryptoManager : public policy::PolicyHandlerObserver {
   /**
    * @brief Init allows to initialize cryptomanager with certain values.
    *
-   * @return true in case initialization was succesfull, false otherwise.
+   * @return true in case initialization was succesful, false otherwise.
    */
   virtual bool Init() = 0;
   virtual SSLContext* CreateSSLContext() = 0;

@@ -1,5 +1,5 @@
 ﻿/*
- Copyright (c) 2014, Ford Motor Company
+ Copyright (c) 2016, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -37,17 +37,75 @@
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 #include "utils/lock.h"
-
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
-class SmartObject;
-}
-}
+#include "smart_objects/smart_object.h"
 
 namespace application_manager {
 namespace commands {
 
+struct ResponseInfo {
+  ResponseInfo()
+      : result_code(hmi_apis::Common_Result::INVALID_ENUM)
+      , interface(HmiInterfaces::HMI_INTERFACE_INVALID_ENUM)
+      , interface_state(HmiInterfaces::STATE_NOT_RESPONSE)
+      , is_ok(false)
+      , is_unsupported_resource(false)
+      , is_invalid_enum(false) {}
+  ResponseInfo(hmi_apis::Common_Result::eType result,
+               HmiInterfaces::InterfaceID interface)
+      : result_code(result)
+      , interface(interface)
+      , interface_state(HmiInterfaces::STATE_NOT_RESPONSE)
+      , is_ok(false)
+      , is_unsupported_resource(false)
+      , is_invalid_enum(false) {}
+  hmi_apis::Common_Result::eType result_code;
+  HmiInterfaces::InterfaceID interface;
+  HmiInterfaces::InterfaceState interface_state;
+  bool is_ok;
+  bool is_unsupported_resource;
+  bool is_invalid_enum;
+};
+
 namespace NsSmart = NsSmartDeviceLink::NsSmartObjects;
+
+/**
+ * @brief MergeInfos merge 2 infos in one string
+ * @param first - info string that should be first in result info
+ * @param second - info string that should be second in result info
+ * @return if first is empty return second
+ *         if second is empty return first
+ *         if both are empty return empty string
+ *         if both are not empty return empty first +", " + second
+ */
+std::string MergeInfos(const std::string& first, const std::string& second);
+
+/**
+ * @brief MergeInfos merge 2 infos into one string with info
+ * @param first_info -contains result_code from HMI response and
+ * interface that returns response
+ * @param first_str - info string that should be first in result info
+ * @param second_info -contains result_code from HMI response and
+ * interface that returns response
+ * @param second_str - info string that should be second in result info
+ * @return if first_info is not available and second_str not empty return second
+ *         if second_info is not available and first_str not empty return first
+ *         other cases return result MergeInfos for 2 params
+ */
+std::string MergeInfos(const ResponseInfo& first_info,
+                       const std::string& first_str,
+                       const ResponseInfo& second_info,
+                       const std::string& second_str);
+
+/**
+ * @brief MergeInfos merge 3 infos in one string
+ * @param first - info string that should be first in result info
+ * @param second - info string that should be second in result info
+ * @param third - info string that should be second in result info
+ * @return resulting string contain merge all incoming parameters
+ */
+std::string MergeInfos(const std::string& first,
+                       const std::string& second,
+                       const std::string& third);
 
 class CommandRequestImpl : public CommandImpl,
                            public event_engine::EventObserver {
@@ -153,6 +211,54 @@ class CommandRequestImpl : public CommandImpl,
    */
   bool HasDisallowedParams() const;
 
+  /**
+   * @brief Checks result code from HMI for single RPC
+   * and returns parameter for sending to mobile app.
+   * @param result_code contains result code from HMI response
+   * @param interface contains interface for which HMI sent response
+   * @return true if result code complies successful result cods
+   * otherwise returns false.
+   */
+  bool PrepareResultForMobileResponse(
+      hmi_apis::Common_Result::eType result_code,
+      HmiInterfaces::InterfaceID interface) const;
+
+  /**
+   * @brief Checks result code from HMI for splitted RPC
+   * and returns parameter for sending to mobile app.
+   * @param first contains result_code from HMI response and
+   * interface that returns response
+   * @param second contains result_code from HMI response and
+   * interface that returns response
+   * @return true if result code complies successful result code
+   * otherwise returns false
+   */
+  bool PrepareResultForMobileResponse(ResponseInfo& out_first,
+                                      ResponseInfo& out_second) const;
+
+  /**
+   * @brief If message from HMI contains returns this info
+   * or process result code from HMI and checks state of interface
+   * and create info.
+   * @param interface contains interface for which HMI sent response
+   * @param result_code contains result code from HMI
+   * @param response_from_hmi contains response from HMI
+   * @param out_info contain info for sending to application
+   */
+  void GetInfo(const smart_objects::SmartObject& response_from_hmi,
+               std::string& out_info);
+
+  /**
+   * @brief Prepare result code for sending to mobile application
+   * @param first contains result_code from HMI response and
+   * interface that returns response
+   * @param second contains result_code from HMI response and
+   * interface that returns response.
+   * @return resulting code for sending to mobile application.
+   */
+  mobile_apis::Result::eType PrepareResultCodeForResponse(
+      const ResponseInfo& first, const ResponseInfo& second);
+
  protected:
   /**
    * @brief Returns policy parameters permissions
@@ -182,6 +288,10 @@ class CommandRequestImpl : public CommandImpl,
    */
   void AddDisallowedParametersToInfo(
       smart_objects::SmartObject& response) const;
+
+  bool ProcessHMIInterfacesAvailability(
+      const uint32_t hmi_correlation_id,
+      const hmi_apis::FunctionID::eType& function_id);
 };
 
 }  // namespace commands

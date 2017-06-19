@@ -1,22 +1,17 @@
 /*
  Copyright (c) 2016, Ford Motor Company
  All rights reserved.
-
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions are met:
-
  Redistributions of source code must retain the above copyright notice, this
  list of conditions and the following disclaimer.
-
  Redistributions in binary form must reproduce the above copyright notice,
  this list of conditions and the following
  disclaimer in the documentation and/or other materials provided with the
  distribution.
-
  Neither the name of the Ford Motor Company nor the names of its contributors
  may be used to endorse or promote products derived from this software
  without specific prior written permission.
-
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -33,11 +28,9 @@
 #include <cstring>
 #include <string>
 #include "application_manager/commands/mobile/alert_maneuver_request.h"
-
 #include "application_manager/application_impl.h"
 #include "application_manager/policies/policy_handler.h"
 #include "application_manager/message_helper.h"
-#include "utils/helpers.h"
 
 namespace application_manager {
 
@@ -46,8 +39,8 @@ namespace commands {
 AlertManeuverRequest::AlertManeuverRequest(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
     : CommandRequestImpl(message, application_manager)
-    , tts_speak_result_code_(mobile_apis::Result::INVALID_ENUM)
-    , navi_alert_maneuver_result_code_(mobile_apis::Result::INVALID_ENUM) {
+    , tts_speak_result_code_(hmi_apis::Common_Result::INVALID_ENUM)
+    , navi_alert_maneuver_result_code_(hmi_apis::Common_Result::INVALID_ENUM) {
   subscribe_on_event(hmi_apis::FunctionID::TTS_OnResetTimeout);
 }
 
@@ -136,66 +129,24 @@ void AlertManeuverRequest::Run() {
 
 void AlertManeuverRequest::on_event(const event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
-  using namespace helpers;
   const smart_objects::SmartObject& message = event.smart_object();
-  bool is_tts_ok;
-  bool is_no_navi_error;
-  hmi_apis::Common_Result::eType tts_result;
-  hmi_apis::Common_Result::eType navi_result;
   hmi_apis::FunctionID::eType event_id = event.id();
   switch (event_id) {
     case hmi_apis::FunctionID::Navigation_AlertManeuver: {
       LOG4CXX_INFO(logger_, "Received Navigation_AlertManeuver event");
-
       pending_requests_.Remove(event_id);
-
       navi_alert_maneuver_result_code_ =
-          static_cast<mobile_apis::Result::eType>(
+          static_cast<hmi_apis::Common_Result::eType>(
               message[strings::params][hmi_response::code].asInt());
-      navi_result =
-          MessageHelper::MobileToHMIResult(navi_alert_maneuver_result_code_);
-      is_no_navi_error = Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
-          navi_result,
-          hmi_apis::Common_Result::SUCCESS,
-          hmi_apis::Common_Result::WARNINGS);
-
-      const bool is_navi_success =
-          Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
-              navi_result, hmi_apis::Common_Result::SUCCESS);
-      if (is_navi_success) {
-        info_navi_ =
-            message[strings::msg_params][hmi_response::message].asString();
-      } else {
-        info_navi_ = message[strings::msg_params][strings::info].asString();
-      }
+      GetInfo(message, info_navi_);
       break;
     }
     case hmi_apis::FunctionID::TTS_Speak: {
       LOG4CXX_INFO(logger_, "Received TTS_Speak event");
-
       pending_requests_.Remove(event_id);
-
-      tts_speak_result_code_ = static_cast<mobile_apis::Result::eType>(
+      tts_speak_result_code_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
-
-      tts_result = MessageHelper::MobileToHMIResult(tts_speak_result_code_);
-
-      is_tts_ok = Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
-          tts_result,
-          hmi_apis::Common_Result::SUCCESS,
-          hmi_apis::Common_Result::UNSUPPORTED_RESOURCE,
-          hmi_apis::Common_Result::WARNINGS,
-          hmi_apis::Common_Result::INVALID_ENUM);
-
-      const bool is_tts_success =
-          Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
-              tts_result, hmi_apis::Common_Result::SUCCESS);
-      if (is_tts_success) {
-        info_tts_ =
-            message[strings::msg_params][hmi_response::message].asString();
-      } else {
-        info_tts_ = message[strings::msg_params][strings::info].asString();
-      }
+      GetInfo(message, info_tts_);
       break;
     }
     case hmi_apis::FunctionID::TTS_OnResetTimeout: {
@@ -219,32 +170,9 @@ void AlertManeuverRequest::on_event(const event_engine::Event& event) {
                   "AlertManeuverRequest still waiting.");
     return;
   }
-
-  const bool result =
-      (is_tts_ok && is_no_navi_error) ||
-      (hmi_apis::Common_Result::SUCCESS == tts_result &&
-       hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == navi_result);
-
-  mobile_apis::Result::eType result_code =
-      static_cast<mobile_apis::Result::eType>(
-          std::max(tts_speak_result_code_, navi_alert_maneuver_result_code_));
-
   std::string return_info;
-
-  const bool is_tts_or_navi_warning =
-      Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
-          hmi_apis::Common_Result::WARNINGS, tts_result, navi_result);
-
-  if (result && (is_tts_or_navi_warning ||
-                 hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == tts_result)) {
-    result_code = mobile_apis::Result::WARNINGS;
-    return_info = std::string("Unsupported phoneme type sent in a prompt");
-  }
-
-  if (!info_tts_.empty() && !info_navi_.empty()) {
-    info_tts_ += ". ";
-  }
-  return_info = info_tts_ + info_navi_;
+  mobile_apis::Result::eType result_code;
+  const bool result = PrepareResponseParameters(result_code, return_info);
   bool must_be_empty_info = false;
   if (return_info.find("\n") != std::string::npos ||
       return_info.find("\t") != std::string::npos) {
@@ -254,6 +182,36 @@ void AlertManeuverRequest::on_event(const event_engine::Event& event) {
                result_code,
                (must_be_empty_info) ? NULL : return_info.c_str(),
                &(message[strings::msg_params]));
+}
+
+bool AlertManeuverRequest::PrepareResponseParameters(
+    mobile_apis::Result::eType& result_code, std::string& return_info) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  using namespace helpers;
+
+  application_manager::commands::ResponseInfo navigation_alert_info(
+      navi_alert_maneuver_result_code_,
+      HmiInterfaces::HMI_INTERFACE_Navigation);
+
+  application_manager::commands::ResponseInfo tts_alert_info(
+      tts_speak_result_code_, HmiInterfaces::HMI_INTERFACE_TTS);
+  const bool result =
+      PrepareResultForMobileResponse(navigation_alert_info, tts_alert_info);
+
+  if (result && (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE ==
+                     tts_speak_result_code_ &&
+                 (HmiInterfaces::STATE_AVAILABLE ==
+                  application_manager_.hmi_interfaces().GetInterfaceState(
+                      HmiInterfaces::HMI_INTERFACE_TTS)))) {
+    result_code = mobile_apis::Result::WARNINGS;
+    return_info = std::string("Unsupported phoneme type sent in a prompt");
+    return result;
+  }
+  result_code =
+      PrepareResultCodeForResponse(navigation_alert_info, tts_alert_info);
+  return_info =
+      MergeInfos(navigation_alert_info, info_navi_, tts_alert_info, info_tts_);
+  return result;
 }
 
 bool AlertManeuverRequest::IsWhiteSpaceExist() {

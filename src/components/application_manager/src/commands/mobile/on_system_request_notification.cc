@@ -78,21 +78,24 @@ void OnSystemRequestNotification::Run() {
   }
 
   if (RequestType::PROPRIETARY == request_type) {
-/* According to requirements:
-   "If the requestType = PROPRIETARY, add to mobile API fileType = JSON
-    If the requestType = HTTP, add to mobile API fileType = BINARY"
-   Also in Genivi SDL we don't save the PT to file - we put it directly in
-   binary_data */
+    /* According to requirements:
+       "If the requestType = PROPRIETARY, add to mobile API fileType = JSON
+        If the requestType = HTTP, add to mobile API fileType = BINARY"
+       Also in Genivi SDL we don't save the PT to file - we put it directly in
+       binary_data */
 
-#ifdef EXTENDED_POLICY
     const std::string filename =
         (*message_)[strings::msg_params][strings::file_name].asString();
-
     BinaryMessage binary_data;
     file_system::ReadBinaryFile(filename, binary_data);
+#if defined(PROPRIETARY_MODE)
     AddHeader(binary_data);
+#endif  // PROPRIETARY_MODE
+
+#if defined(PROPRIETARY_MODE) || defined(EXTERNAL_PROPRIETARY_MODE)
     (*message_)[strings::params][strings::binary_data] = binary_data;
-#endif
+#endif  // PROPRIETARY_MODE
+
     (*message_)[strings::msg_params][strings::file_type] = FileType::JSON;
   } else if (RequestType::HTTP == request_type) {
     (*message_)[strings::msg_params][strings::file_type] = FileType::BINARY;
@@ -101,10 +104,11 @@ void OnSystemRequestNotification::Run() {
   SendNotification();
 }
 
-#ifdef EXTENDED_POLICY
+#ifdef PROPRIETARY_MODE
 void OnSystemRequestNotification::AddHeader(BinaryMessage& message) const {
   LOG4CXX_AUTO_TRACE(logger_);
-  const int timeout = application_manager_.GetPolicyHandler().TimeoutExchange();
+  const uint32_t timeout =
+      application_manager_.GetPolicyHandler().TimeoutExchangeSec();
 
   size_t content_length;
   char size_str[24];
@@ -149,7 +153,7 @@ void OnSystemRequestNotification::AddHeader(BinaryMessage& message) const {
       ","
       "\"InstanceFollowRedirects\": false,"
       "\"charset\": \"utf-8\","
-      "\"Content_-Length\": " +
+      "\"Content-Length\": " +
       std::string(size_str) +
       "},"
       "\"body\": \"" +
@@ -184,7 +188,7 @@ size_t OnSystemRequestNotification::ParsePTString(
   pt_string = result;
   return result_length;
 }
-#endif
+#endif  // PROPRIETARY_MODE
 
 }  // namespace mobile
 

@@ -36,8 +36,8 @@
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager_settings.h"
 #include "interfaces/MOBILE_API.h"
-#include "sql_database.h"
-#include "sql_query.h"
+#include "utils/sqlite_wrapper/sql_database.h"
+#include "utils/sqlite_wrapper/sql_query.h"
 #include "utils/make_shared.h"
 #include "utils/file_system.h"
 #include "application_manager/resumption_data_test.h"
@@ -848,7 +848,7 @@ TEST_F(ResumptionDataDBTest, DropAppResumptionData) {
 
   EXPECT_TRUE(res_db()->DropAppDataResumption(kMacAddress_, policy_app_id_));
 
-  am::smart_objects::SmartObject app;
+  smart_objects::SmartObject app;
   EXPECT_TRUE(res_db()->GetSavedApplication(policy_app_id_, kMacAddress_, app));
 
   EXPECT_TRUE(app.keyExists(am::strings::application_commands) &&

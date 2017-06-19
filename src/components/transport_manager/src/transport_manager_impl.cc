@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -341,6 +341,34 @@ int TransportManagerImpl::SendMessageToDevice(
   return E_SUCCESS;
 }
 
+void TransportManagerImpl::RunAppOnDevice(const DeviceHandle device_handle,
+                                          const std::string& bundle_id) {
+  if (!this->is_initialized_) {
+    LOG4CXX_ERROR(logger_, "TransportManager is not initialized.");
+    return;
+  }
+  DeviceUID device_id = converter_.HandleToUid(device_handle);
+  LOG4CXX_DEBUG(logger_, "Convert handle to id:" << device_id);
+
+  sync_primitives::AutoReadLock lock(device_to_adapter_map_lock_);
+  DeviceToAdapterMap::iterator it = device_to_adapter_map_.find(device_id);
+  if (it == device_to_adapter_map_.end()) {
+    LOG4CXX_ERROR(logger_, "No device adapter found by id " << device_id);
+    return;
+  }
+  transport_adapter::TransportAdapter* ta = it->second;
+
+  if (!ta) {
+    LOG4CXX_ERROR(logger_,
+                  "Transport adapter for device: " << device_id << " is NULL");
+    return;
+  }
+
+  ta->RunAppOnDevice(device_id, bundle_id);
+
+  return;
+}
+
 int TransportManagerImpl::ReceiveEventFromDevice(
     const TransportAdapterEvent& event) {
   LOG4CXX_TRACE(logger_, "enter. TransportAdapterEvent: " << &event);
@@ -385,14 +413,17 @@ int TransportManagerImpl::AddTransportAdapter(
                   "transport_adapter_listeners_.end()");
     return E_ADAPTER_EXISTS;
   }
-  transport_adapter_listeners_[transport_adapter] =
-      new TransportAdapterListenerImpl(this, transport_adapter);
-  transport_adapter->AddListener(
-      transport_adapter_listeners_[transport_adapter]);
 
   if (transport_adapter->IsInitialised() ||
       transport_adapter->Init() == TransportAdapter::OK) {
+    transport_adapter_listeners_[transport_adapter] =
+        new TransportAdapterListenerImpl(this, transport_adapter);
+    transport_adapter->AddListener(
+        transport_adapter_listeners_[transport_adapter]);
+
     transport_adapters_.push_back(transport_adapter);
+  } else {
+    delete transport_adapter;
   }
   LOG4CXX_TRACE(logger_, "exit with E_SUCCESS");
   return E_SUCCESS;
@@ -590,22 +621,29 @@ void TransportManagerImpl::AddConnection(const ConnectionInternal& c) {
   connections_.push_back(c);
 }
 
+namespace {
+struct ConnectionFinder {
+  const uint32_t id_;
+  ConnectionFinder(const uint32_t id) : id_(id) {}
+  bool operator()(const transport_manager::TransportManagerImpl::Connection&
+                      connection) const {
+    return id_ == connection.id;
+  }
+};
+}
+
 void TransportManagerImpl::RemoveConnection(
     const uint32_t id, transport_adapter::TransportAdapter* transport_adapter) {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "Id: " << id);
   sync_primitives::AutoWriteLock lock(connections_lock_);
-  for (std::vector<ConnectionInternal>::iterator it = connections_.begin();
-       it != connections_.end();
-       ++it) {
-    if (it->id == id) {
-      connections_.erase(it);
-      if (transport_adapter) {
-        transport_adapter->RemoveFinalizedConnection(it->device,
-                                                     it->application);
-      }
-      break;
+  const std::vector<ConnectionInternal>::iterator it = std::find_if(
+      connections_.begin(), connections_.end(), ConnectionFinder(id));
+  if (connections_.end() != it) {
+    if (transport_adapter) {
+      transport_adapter->RemoveFinalizedConnection(it->device, it->application);
     }
+    connections_.erase(it);
   }
 }
 
@@ -665,7 +703,6 @@ void TransportManagerImpl::OnDeviceListUpdated(TransportAdapter* ta) {
     device_infos.push_back(it->second);
   }
   device_list_lock_.Release();
-  RaiseEvent(&TransportManagerListener::OnDeviceListUpdated, device_infos);
   LOG4CXX_TRACE(logger_, "exit");
 }
 

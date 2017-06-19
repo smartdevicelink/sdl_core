@@ -43,7 +43,11 @@ AudioStopStreamRequest::~AudioStopStreamRequest() {}
 
 void AudioStopStreamRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-
+  if (!CheckAvailabilityHMIInterfaces(
+          application_manager_, HmiInterfaces::HMI_INTERFACE_Navigation)) {
+    LOG4CXX_INFO(logger_, "Interface Navi is not supported by system");
+    return;
+  }
   SendRequest();
 }
 

@@ -154,13 +154,14 @@ void SliderRequest::on_event(const event_engine::Event& event) {
       response_msg_params[strings::slider_position] = 0;
     }
   }
-
-  const bool is_response_success = Compare<Common_Result::eType, EQ, ONE>(
-      response_code, Common_Result::SUCCESS, Common_Result::WARNINGS);
+  std::string response_info;
+  GetInfo(message, response_info);
+  const bool is_response_success = PrepareResultForMobileResponse(
+      response_code, HmiInterfaces::HMI_INTERFACE_UI);
 
   SendResponse(is_response_success,
                MessageHelper::HMIToMobileResult(response_code),
-               0,
+               response_info.empty() ? NULL : response_info.c_str(),
                &response_msg_params);
 }
 

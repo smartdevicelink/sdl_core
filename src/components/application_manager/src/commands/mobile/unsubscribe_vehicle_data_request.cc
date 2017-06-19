@@ -1,6 +1,6 @@
 /*
 
- Copyright (c) 2013, Ford Motor Company
+ Copyright (c) 2017, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -201,16 +201,14 @@ void UnsubscribeVehicleDataRequest::Run() {
   }
 
   if (is_everything_already_unsubscribed) {
-    mobile_apis::Result::eType result_code =
-        vi_already_unsubscribed_by_this_app_.size()
-            ? mobile_apis::Result::IGNORED
-            : mobile_apis::Result::SUCCESS;
-
-    const char* info = vi_already_unsubscribed_by_this_app_.size()
-                           ? "Already subscribed on some provided VehicleData."
-                           : NULL;
-
-    SendResponse(true, result_code, info, &response_params);
+    if (!vi_already_unsubscribed_by_this_app_.empty()) {
+      SendResponse(false,
+                   mobile_apis::Result::IGNORED,
+                   "Some provided VehicleData was not subscribed.",
+                   &response_params);
+    } else {
+      SendResponse(true, mobile_apis::Result::SUCCESS, NULL, &response_params);
+    }
     return;
   }
 
@@ -315,21 +313,18 @@ void UnsubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
   hmi_apis::Common_Result::eType hmi_result =
       static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
-
-  bool is_succeeded = Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
-      hmi_result,
-      hmi_apis::Common_Result::SUCCESS,
-      hmi_apis::Common_Result::WARNINGS);
+  std::string response_info;
+  GetInfo(message, response_info);
+  const bool result = PrepareResultForMobileResponse(
+      hmi_result, HmiInterfaces::HMI_INTERFACE_VehicleInfo);
 
   mobile_apis::Result::eType result_code =
       MessageHelper::HMIToMobileResult(hmi_result);
 
-  const char* return_info = NULL;
-
-  if (is_succeeded) {
+  if (result) {
     if (vi_already_unsubscribed_by_this_app_.size()) {
       result_code = mobile_apis::Result::IGNORED;
-      return_info = "Some provided VehicleData was not subscribed.";
+      response_info = "Some provided VehicleData was not subscribed.";
     }
   }
 
@@ -339,12 +334,14 @@ void UnsubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
         const_cast<smart_objects::SmartObject&>(message[strings::msg_params]));
   }
 
-  if (is_succeeded) {
+  if (result) {
     SetAllowedToTerminate(false);
   }
-  SendResponse(
-      is_succeeded, result_code, return_info, &(message[strings::msg_params]));
-  if (is_succeeded) {
+  SendResponse(result,
+               result_code,
+               response_info.empty() ? NULL : response_info.c_str(),
+               &(message[strings::msg_params]));
+  if (result) {
     UpdateHash();
   }
 #endif  // #ifdef HMI_DBUS_API
@@ -401,7 +398,8 @@ void UnsubscribeVehicleDataRequest::UpdateHash() const {
                   "Application with connection_key = " << connection_key()
                                                        << " doesn't exist.");
   }
-  application_manager_.TerminateRequest(connection_key(), correlation_id());
+  application_manager_.TerminateRequest(
+      connection_key(), correlation_id(), function_id());
 }
 
 }  // namespace commands

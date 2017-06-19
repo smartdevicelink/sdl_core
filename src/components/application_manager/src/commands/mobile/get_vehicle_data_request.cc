@@ -230,7 +230,7 @@ void GetVehicleDataRequest::Run() {
     return;
   }
 
-  if (app->IsCommandLimitsExceeded(
+  if (app->AreCommandLimitsExceeded(
           static_cast<mobile_apis::FunctionID::eType>(function_id()),
           application_manager::TLimitSource::CONFIG_FILE)) {
     LOG4CXX_ERROR(logger_, "GetVehicleData frequency is too high.");
@@ -266,26 +266,28 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
 
   switch (event.id()) {
     case hmi_apis::FunctionID::VehicleInfo_GetVehicleData: {
-      mobile_apis::Result::eType result_code =
-          static_cast<mobile_apis::Result::eType>(
+      hmi_apis::Common_Result::eType result_code =
+          static_cast<hmi_apis::Common_Result::eType>(
               message[strings::params][hmi_response::code].asInt());
-      bool result = false;
-      if (mobile_apis::Result::SUCCESS == result_code ||
-          (mobile_apis::Result::VEHICLE_DATA_NOT_AVAILABLE == result_code &&
-           message[strings::msg_params].length() > 1)) {
-        result = true;
-      }
-      const char* info = NULL;
-      std::string error_message;
+      bool result = PrepareResultForMobileResponse(
+          result_code, HmiInterfaces::HMI_INTERFACE_VehicleInfo);
+      std::string response_info;
+      GetInfo(message, response_info);
+      result = result ||
+               ((hmi_apis::Common_Result::DATA_NOT_AVAILABLE == result_code) &&
+                (message[strings::msg_params].length() > 1));
+
       if (true ==
           message[strings::msg_params].keyExists(hmi_response::method)) {
         message[strings::msg_params].erase(hmi_response::method);
       }
       if (true == message[strings::params].keyExists(strings::error_msg)) {
-        error_message = message[strings::params][strings::error_msg].asString();
-        info = error_message.c_str();
+        response_info = message[strings::params][strings::error_msg].asString();
       }
-      SendResponse(result, result_code, info, &(message[strings::msg_params]));
+      SendResponse(result,
+                   MessageHelper::HMIToMobileResult(result_code),
+                   response_info.empty() ? NULL : response_info.c_str(),
+                   &(message[strings::msg_params]));
       break;
     }
     default: {

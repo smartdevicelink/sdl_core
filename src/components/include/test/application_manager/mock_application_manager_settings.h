@@ -90,11 +90,11 @@ class MockApplicationManagerSettings
   MOCK_CONST_METHOD0(app_resumption_save_persistent_data_timeout,
                      const uint32_t&());
   MOCK_CONST_METHOD0(resumption_delay_before_ign, uint32_t());
-  MOCK_CONST_METHOD0(resumption_delay_after_ign, uint32_t());
+  MOCK_CONST_METHOD0(resumption_delay_after_ign, const uint32_t());
   MOCK_CONST_METHOD0(app_resuming_timeout, const uint32_t&());
   MOCK_CONST_METHOD0(attempts_to_open_resumption_db, uint16_t());
   MOCK_CONST_METHOD0(open_attempt_timeout_ms_resumption_db, uint16_t());
-  MOCK_METHOD1(config_file_name, void(const std::string& fileName));
+  MOCK_METHOD1(set_config_file_name, void(const std::string& fileName));
   // The following line won't really compile, as the return
   // type has multiple template arguments.  To fix it, use a
   // typedef for the return type.
@@ -113,6 +113,15 @@ class MockApplicationManagerSettings
   MOCK_CONST_METHOD0(app_time_scale, const uint32_t&());
   MOCK_CONST_METHOD0(app_time_scale_max_requests, const uint32_t&());
   MOCK_CONST_METHOD0(pending_requests_amount, const uint32_t&());
+
+  // app_launch::AppLaunchSettings
+  MOCK_CONST_METHOD0(app_launch_wait_time, const uint16_t());
+  MOCK_CONST_METHOD0(app_launch_max_retry_attempt, const uint16_t());
+  MOCK_CONST_METHOD0(app_launch_retry_wait_time, const uint16_t());
+  MOCK_CONST_METHOD0(remove_bundle_id_attempts, const uint16_t());
+  MOCK_CONST_METHOD0(max_number_of_ios_device, const uint16_t());
+  MOCK_CONST_METHOD0(wait_time_between_apps, const uint16_t());
+  MOCK_CONST_METHOD0(enable_app_launch_ios, const bool());
 };
 
 }  // namespace application_manager_test

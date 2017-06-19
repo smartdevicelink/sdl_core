@@ -228,23 +228,19 @@ void ShowRequest::on_event(const event_engine::Event& event) {
     case hmi_apis::FunctionID::UI_Show: {
       LOG4CXX_DEBUG(logger_, "Received UI_Show event.");
       std::string response_info;
-      mobile_apis::Result::eType result_code =
-          static_cast<mobile_apis::Result::eType>(
+      hmi_apis::Common_Result::eType result_code =
+          static_cast<hmi_apis::Common_Result::eType>(
               message[strings::params][hmi_response::code].asInt());
-
-      const bool result = Compare<mobile_api::Result::eType, EQ, ONE>(
-          result_code,
-          mobile_api::Result::SUCCESS,
-          mobile_api::Result::WARNINGS);
-
-      if (mobile_apis::Result::WARNINGS == result_code &&
+      const bool result = PrepareResultForMobileResponse(
+          result_code, HmiInterfaces::HMI_INTERFACE_UI);
+      GetInfo(message, response_info);
+      if (hmi_apis::Common_Result::WARNINGS == result_code &&
           message[strings::params].keyExists(hmi_response::message)) {
         response_info =
             message[strings::params][hmi_response::message].asString();
       }
-
       SendResponse(result,
-                   result_code,
+                   MessageHelper::HMIToMobileResult(result_code),
                    response_info.empty() ? NULL : response_info.c_str(),
                    &(message[strings::msg_params]));
       break;

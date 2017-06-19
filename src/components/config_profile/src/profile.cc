@@ -38,6 +38,8 @@
 #include <sstream>
 #include <algorithm>
 
+#include <string>
+
 #include "config_profile/ini_file.h"
 #include "utils/logger.h"
 #include "utils/threads/thread.h"
@@ -84,6 +86,7 @@ const char* kIAPSection = "IAP";
 const char* kProtocolHandlerSection = "ProtocolHandler";
 const char* kSDL4Section = "SDL4";
 const char* kResumptionSection = "Resumption";
+const char* kAppLaunchSection = "AppLaunch";
 
 const char* kSDLVersionKey = "SDLVersion";
 const char* kHmiCapabilitiesKey = "HMICapabilities";
@@ -102,7 +105,6 @@ const char* kAppIconsFolderKey = "AppIconsFolder";
 const char* kAppIconsFolderMaxSizeKey = "AppIconsFolderMaxSize";
 const char* kAppIconsAmountToRemoveKey = "AppIconsAmountToRemove";
 const char* kLaunchHMIKey = "LaunchHMI";
-
 const char* kDefaultSDLVersion = "";
 #ifdef WEB_HMI
 const char* kLinkToWebHMI = "LinkToWebHMI";
@@ -197,6 +199,13 @@ const char* kAttemptsToOpenResumptionDBKey = "AttemptsToOpenResumptionDB";
 const char* kOpenAttemptTimeoutMsResumptionDBKey =
     "OpenAttemptTimeoutMsResumptionDB";
 
+const char* kAppLaunchWaitTimeKey = "AppLaunchWaitTime";
+const char* kAppLaunchMaxRetryAttemptKey = "AppLaunchMaxRetryAttempt";
+const char* kAppLaunchRetryWaitTimeKey = "AppLaunchRetryWaitTime";
+const char* kRemoveBundleIDattemptsKey = "RemoveBundleIDattempts";
+const char* kMaxNumberOfiOSDeviceKey = "MaxNumberOfiOSDevice";
+const char* kWaitTimeBetweenAppsKey = "WaitTimeBetweenApps";
+const char* kEnableAppLaunchIOSKey = "EnableAppLaunchIOS";
 #ifdef WEB_HMI
 const char* kDefaultLinkToWebHMI = "HMI/index.html";
 #endif  // WEB_HMI
@@ -278,6 +287,15 @@ const uint32_t kDefaultAppIconsFolderMaxSize = 104857600;
 const uint32_t kDefaultAppIconsAmountToRemove = 1;
 const uint16_t kDefaultAttemptsToOpenResumptionDB = 5;
 const uint16_t kDefaultOpenAttemptTimeoutMsResumptionDB = 500;
+const uint16_t kDefaultAppLaunchWaitTime = 5000;
+const uint16_t kDefaultAppLaunchMaxRetryAttempt = 3;
+const uint16_t kDefaultAppLaunchRetryWaitTime = 15000;
+const uint16_t kDefaultRemoveBundleIDattempts = 3;
+const uint16_t kDefaultMaxNumberOfiOSDevice = 10;
+const uint16_t kDefaultWaitTimeBetweenApps = 4000;
+const bool kDefaultEnableAppLaunchIOS = true;
+const std::string kAllowedSymbols =
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890_.-";
 }  // namespace
 
 namespace profile {
@@ -366,14 +384,26 @@ Profile::Profile()
     , use_db_for_resumption_(false)
     , attempts_to_open_resumption_db_(kDefaultAttemptsToOpenResumptionDB)
     , open_attempt_timeout_ms_resumption_db_(
-          kDefaultOpenAttemptTimeoutMsResumptionDB) {
+          kDefaultOpenAttemptTimeoutMsResumptionDB)
+    , app_launch_wait_time_(kDefaultAppLaunchWaitTime)
+    , app_launch_max_retry_attempt_(kDefaultAppLaunchMaxRetryAttempt)
+    , app_launch_retry_wait_time_(kDefaultAppLaunchRetryWaitTime)
+    , remove_bundle_id_attempts_(kDefaultRemoveBundleIDattempts)
+    , max_number_of_ios_device_(kDefaultMaxNumberOfiOSDevice)
+    , wait_time_between_apps_(kDefaultWaitTimeBetweenApps)
+    , enable_app_launch_ios_(kDefaultEnableAppLaunchIOS)
+    , error_occured_(false)
+    , error_description_() {
+  // SDL version
+  ReadStringValue(
+      &sdl_version_, kDefaultSDLVersion, kMainSection, kSDLVersionKey);
 }
 
 Profile::~Profile() {}
 
-void Profile::config_file_name(const std::string& fileName) {
-  if (false == fileName.empty()) {
-    config_file_name_ = fileName;
+void Profile::set_config_file_name(const std::string& file_name) {
+  if (false == file_name.empty()) {
+    config_file_name_ = file_name;
     UpdateValues();
   }
 }
@@ -532,11 +562,11 @@ const std::string& Profile::audio_stream_file() const {
   return audio_stream_file_;
 }
 
-const std::uint32_t Profile::audio_data_stopped_timeout() const {
+const uint32_t Profile::audio_data_stopped_timeout() const {
   return audio_data_stopped_timeout_;
 }
 
-const std::uint32_t Profile::video_data_stopped_timeout() const {
+const uint32_t Profile::video_data_stopped_timeout() const {
   return video_data_stopped_timeout_;
 }
 
@@ -758,7 +788,7 @@ uint32_t Profile::resumption_delay_before_ign() const {
   return resumption_delay_before_ign_;
 }
 
-uint32_t Profile::resumption_delay_after_ign() const {
+const uint32_t Profile::resumption_delay_after_ign() const {
   return resumption_delay_after_ign_;
 }
 
@@ -827,6 +857,49 @@ uint16_t Profile::attempts_to_open_resumption_db() const {
 
 uint16_t Profile::open_attempt_timeout_ms_resumption_db() const {
   return open_attempt_timeout_ms_resumption_db_;
+}
+
+const uint16_t Profile::app_launch_max_retry_attempt() const {
+  return app_launch_max_retry_attempt_;
+}
+
+const uint16_t Profile::app_launch_retry_wait_time() const {
+  return app_launch_retry_wait_time_;
+}
+
+const uint16_t Profile::app_launch_wait_time() const {
+  return app_launch_wait_time_;
+}
+
+const bool Profile::enable_app_launch_ios() const {
+  return enable_app_launch_ios_;
+}
+
+const uint16_t Profile::max_number_of_ios_device() const {
+  return max_number_of_ios_device_;
+}
+
+const uint16_t Profile::remove_bundle_id_attempts() const {
+  return remove_bundle_id_attempts_;
+}
+
+const uint16_t Profile::wait_time_between_apps() const {
+  return wait_time_between_apps_;
+}
+
+const bool Profile::ErrorOccured() const {
+  return error_occured_;
+}
+
+const std::string Profile::ErrorDescription() const {
+  return error_description_;
+}
+
+bool Profile::IsFileNamePortable(const std::string& file_name) const {
+  if (file_name.find_first_not_of(kAllowedSymbols) != std::string::npos) {
+    return false;
+  }
+  return true;
 }
 
 void Profile::UpdateValues() {
@@ -1522,6 +1595,11 @@ void Profile::UpdateValues() {
   LOG_UPDATED_VALUE(
       policy_snapshot_file_name_, kPathToSnapshotKey, kPolicySection);
 
+  if (!IsFileNamePortable(policy_snapshot_file_name_)) {
+    error_occured_ = true;
+    error_description_ = "PathToSnapshot has forbidden(non-portable) symbols";
+  }
+
   // Attempts number for opening policy DB
   ReadUIntValue(&attempts_to_open_policy_db_,
                 kDefaultAttemptsToOpenPolicyDB,
@@ -1687,6 +1765,66 @@ void Profile::UpdateValues() {
   LOG_UPDATED_VALUE(open_attempt_timeout_ms_resumption_db_,
                     kOpenAttemptTimeoutMsResumptionDBKey,
                     kResumptionSection);
+
+  // Read parameters from App Launch section
+  ReadUIntValue(&app_launch_wait_time_,
+                kDefaultAppLaunchWaitTime,
+                kAppLaunchSection,
+                kAppLaunchWaitTimeKey);
+
+  LOG_UPDATED_VALUE(
+      app_launch_wait_time_, kAppLaunchWaitTimeKey, kAppLaunchSection);
+
+  ReadUIntValue(&app_launch_max_retry_attempt_,
+                kDefaultAppLaunchMaxRetryAttempt,
+                kAppLaunchSection,
+                kAppLaunchMaxRetryAttemptKey);
+
+  LOG_UPDATED_VALUE(app_launch_max_retry_attempt_,
+                    kAppLaunchMaxRetryAttemptKey,
+                    kAppLaunchSection);
+
+  ReadUIntValue(&app_launch_retry_wait_time_,
+                kDefaultAppLaunchRetryWaitTime,
+                kAppLaunchSection,
+                kAppLaunchRetryWaitTimeKey);
+
+  LOG_UPDATED_VALUE(app_launch_retry_wait_time_,
+                    kAppLaunchRetryWaitTimeKey,
+                    kAppLaunchSection);
+
+  ReadUIntValue(&remove_bundle_id_attempts_,
+                kDefaultRemoveBundleIDattempts,
+                kAppLaunchSection,
+                kRemoveBundleIDattemptsKey);
+
+  LOG_UPDATED_VALUE(remove_bundle_id_attempts_,
+                    kRemoveBundleIDattemptsKey,
+                    kAppLaunchSection);
+
+  ReadUIntValue(&max_number_of_ios_device_,
+                kDefaultMaxNumberOfiOSDevice,
+                kAppLaunchSection,
+                kMaxNumberOfiOSDeviceKey);
+
+  LOG_UPDATED_VALUE(
+      max_number_of_ios_device_, kMaxNumberOfiOSDeviceKey, kAppLaunchSection);
+
+  ReadUIntValue(&wait_time_between_apps_,
+                kDefaultWaitTimeBetweenApps,
+                kAppLaunchSection,
+                kWaitTimeBetweenAppsKey);
+
+  LOG_UPDATED_VALUE(
+      wait_time_between_apps_, kWaitTimeBetweenAppsKey, kAppLaunchSection);
+
+  ReadBoolValue(&enable_app_launch_ios_,
+                kDefaultEnableAppLaunchIOS,
+                kAppLaunchSection,
+                kEnableAppLaunchIOSKey);
+
+  LOG_UPDATED_BOOL_VALUE(
+      enable_app_launch_ios_, kEnableAppLaunchIOSKey, kAppLaunchSection);
 }
 
 bool Profile::ReadValue(bool* value,

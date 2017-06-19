@@ -251,6 +251,7 @@ void ResetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
       is_ui_received_ = true;
       ui_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
+      GetInfo(message, ui_response_info_);
       break;
     }
     case hmi_apis::FunctionID::TTS_SetGlobalProperties: {
@@ -258,6 +259,7 @@ void ResetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
       is_tts_received_ = true;
       tts_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
+      GetInfo(message, tts_response_info_);
       break;
     }
     default: {
@@ -266,48 +268,63 @@ void ResetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
     }
   }
 
-  if (!IsPendingResponseExist()) {
-    bool result =
-        ((hmi_apis::Common_Result::SUCCESS == ui_result_) &&
-         (hmi_apis::Common_Result::SUCCESS == tts_result_ ||
-          hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == tts_result_)) ||
-        ((hmi_apis::Common_Result::SUCCESS == ui_result_) &&
-         (hmi_apis::Common_Result::INVALID_ENUM == tts_result_)) ||
-        ((hmi_apis::Common_Result::INVALID_ENUM == ui_result_) &&
-         (hmi_apis::Common_Result::SUCCESS == tts_result_));
-
-    mobile_apis::Result::eType result_code;
-    const char* return_info = NULL;
-
-    if (result) {
-      if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == tts_result_) {
-        result_code = mobile_apis::Result::WARNINGS;
-        return_info = "Unsupported phoneme type sent in a prompt";
-      } else {
-        result_code = static_cast<mobile_apis::Result::eType>(
-            std::max(ui_result_, tts_result_));
-      }
-    } else {
-      result_code = static_cast<mobile_apis::Result::eType>(
-          std::max(ui_result_, tts_result_));
-    }
-
-    SendResponse(result,
-                 static_cast<mobile_apis::Result::eType>(result_code),
-                 return_info,
-                 &(message[strings::msg_params]));
-
-    if (!application) {
-      LOG4CXX_ERROR(logger_, "NULL pointer");
-      return;
-    }
-
-    if (result) {
-      application->UpdateHash();
-    }
-  } else {
-    LOG4CXX_WARN(logger_, "unable to find application: " << connection_key());
+  if (IsPendingResponseExist()) {
+    LOG4CXX_DEBUG(logger_, "Waiting for remaining responses");
+    return;
   }
+
+  mobile_apis::Result::eType result_code = mobile_apis::Result::INVALID_ENUM;
+  std::string response_info;
+  const bool result = PrepareResponseParameters(result_code, response_info);
+
+  SendResponse(result,
+               static_cast<mobile_apis::Result::eType>(result_code),
+               response_info.empty() ? NULL : response_info.c_str(),
+               &(message[strings::msg_params]));
+
+  if (!application) {
+    LOG4CXX_ERROR(logger_, "NULL pointer");
+    return;
+  }
+
+  if (result) {
+    application->UpdateHash();
+  }
+}
+
+bool ResetGlobalPropertiesRequest::PrepareResponseParameters(
+    mobile_apis::Result::eType& out_result_code,
+    std::string& out_response_info) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  using namespace helpers;
+
+  bool result = false;
+  ResponseInfo ui_properties_info(ui_result_, HmiInterfaces::HMI_INTERFACE_UI);
+  ResponseInfo tts_properties_info(tts_result_,
+                                   HmiInterfaces::HMI_INTERFACE_TTS);
+
+  HmiInterfaces::InterfaceState tts_interface_state =
+      application_manager_.hmi_interfaces().GetInterfaceState(
+          HmiInterfaces::HMI_INTERFACE_TTS);
+
+  if (hmi_apis::Common_Result::SUCCESS == ui_result_ &&
+      hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == tts_result_ &&
+      HmiInterfaces::STATE_AVAILABLE == tts_interface_state) {
+    result = true;
+    out_result_code = mobile_apis::Result::WARNINGS;
+    out_response_info = "Unsupported phoneme type sent in a prompt";
+  } else {
+    result =
+        PrepareResultForMobileResponse(ui_properties_info, tts_properties_info);
+    out_result_code =
+        PrepareResultCodeForResponse(ui_properties_info, tts_properties_info);
+    out_response_info = MergeInfos(tts_properties_info,
+                                   tts_response_info_,
+                                   ui_properties_info,
+                                   ui_response_info_);
+  }
+
+  return result;
 }
 
 bool ResetGlobalPropertiesRequest::IsPendingResponseExist() {

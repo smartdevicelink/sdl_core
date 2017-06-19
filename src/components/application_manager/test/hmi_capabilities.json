@@ -2,7 +2,7 @@
     "UI":
     {
         "language":"EN_US",
-        "languages":[ 
+        "languages":[
           "EN_US","ES_MX","FR_CA","DE_DE","ES_ES","EN_GB","RU_RU","TR_TR","PL_PL","FR_FR","IT_IT","SV_SE","PT_PT","NL_NL","ZH_TW",
 "JA_JP","AR_SA","KO_KR","PT_BR","CS_CZ","DA_DK","NO_NO"
         ],
@@ -250,7 +250,7 @@
                                         "name":"graphic",
                                         "imageTypeSupported":
                                          [
-                        
+
                                          ],
                                         "imageResolution":
                                          {
@@ -270,7 +270,7 @@
                                                 "resolutionHeight":35
                                          }
                             }
-                            
+
                         ],
             "mediaClockFormats":
             [
@@ -279,7 +279,7 @@
             "graphicSupported":true,
                         "templatesAvailable":
                         [
-                          
+
                             "DEFAULT","MEDIA","NON-MEDIA","ONSCREEN_PRESETS","NAV_FULLSCREEN_MAP","NAV_KEYBOARD",
                             "GRAPHIC_WITH_TEXT","TEXT_WITH_GRAPHIC","TILES_ONLY","TEXTBUTTONS_ONLY",
                                 "GRAPHIC_WITH_TILES","TILES_WITH_GRAPHIC","GRAPHIC_WITH_TEXT_AND_SOFTBUTTONS",
@@ -335,15 +335,15 @@
     {
         "capabilities":["TEXT"],
         "language":"ES_MX",
-        "languages":    
-            [ 
+        "languages":
+            [
          "AR_SA", "EN_US","ES_MX","FR_CA","DE_DE","ES_ES","EN_GB","RU_RU","TR_TR","PL_PL","FR_FR","IT_IT","SV_SE","PT_PT","NL_NL","ZH_TW",
 "JA_JP","KO_KR","PT_BR","CS_CZ","DA_DK","NO_NO"
-            ]       
+            ]
 },
     "TTS":
     {
-        "capabilities":"TEXT",
+        "capabilities":["TEXT"],
         "language":"DE_DE",
         "languages":
         [

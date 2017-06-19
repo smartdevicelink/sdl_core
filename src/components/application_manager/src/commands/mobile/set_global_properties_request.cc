@@ -127,6 +127,12 @@ void SetGlobalPropertiesRequest::Run() {
     SendResponse(false, mobile_apis::Result::REJECTED);
     return;
   }
+
+  /* Need to set flags before sending request to HMI
+   * for correct processing this flags in method on_event */
+  if (is_help_prompt_present || is_timeout_prompt_present) {
+    is_tts_send_ = true;
+  }
   if (is_vr_help_title_present && is_vr_help_present) {
     LOG4CXX_DEBUG(logger_, "VRHelp params presents");
 
@@ -226,6 +232,7 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
       is_ui_received_ = true;
       ui_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
+      GetInfo(message, ui_response_info_);
       break;
     }
     case hmi_apis::FunctionID::TTS_SetGlobalProperties: {
@@ -233,6 +240,7 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
       is_tts_received_ = true;
       tts_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
+      GetInfo(message, tts_response_info_);
       break;
     }
     default: {
@@ -245,54 +253,18 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
     LOG4CXX_DEBUG(logger_, "Continue waiting for response");
     return;
   }
-
-  const bool is_tts_succeeded =
-      Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
-          tts_result_,
-          hmi_apis::Common_Result::SUCCESS,
-          hmi_apis::Common_Result::UNSUPPORTED_RESOURCE,
-          hmi_apis::Common_Result::WARNINGS);
-
-  const bool is_ui_succeeded = Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
-      ui_result_,
-      hmi_apis::Common_Result::SUCCESS,
-      hmi_apis::Common_Result::UNSUPPORTED_RESOURCE,
-      hmi_apis::Common_Result::WARNINGS);
-
-  const bool is_ui_invalid_unsupported =
-      Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
-          ui_result_,
-          hmi_apis::Common_Result::INVALID_ENUM,
-          hmi_apis::Common_Result::UNSUPPORTED_RESOURCE);
-
-  bool result = (is_tts_succeeded && is_ui_succeeded) ||
-                (is_ui_succeeded &&
-                 hmi_apis::Common_Result::INVALID_ENUM == tts_result_) ||
-                (is_ui_invalid_unsupported && is_tts_succeeded);
-
   mobile_apis::Result::eType result_code = mobile_apis::Result::INVALID_ENUM;
-  const char* return_info = NULL;
-
-  const bool is_ui_or_tts_warning =
-      Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
-          hmi_apis::Common_Result::WARNINGS, tts_result_, ui_result_);
-
-  if (result && (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == tts_result_ ||
-                 is_ui_or_tts_warning)) {
-    result_code = mobile_apis::Result::WARNINGS;
-    return_info =
-        std::string("Unsupported phoneme type sent in a prompt").c_str();
-  } else {
-    result_code =
-        MessageHelper::HMIToMobileResult(std::max(ui_result_, tts_result_));
-  }
+  std::string response_info;
+  const bool result = PrepareResponseParameters(result_code, response_info);
 
   // TODO{ALeshin} APPLINK-15858. connection_key removed during SendResponse
   ApplicationSharedPtr application =
       application_manager_.application(connection_key());
 
-  SendResponse(
-      result, result_code, return_info, &(message[strings::msg_params]));
+  SendResponse(result,
+               result_code,
+               response_info.empty() ? NULL : response_info.c_str(),
+               &(message[strings::msg_params]));
 
   if (!application) {
     LOG4CXX_DEBUG(logger_, "NULL pointer.");
@@ -302,6 +274,37 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
   if (result) {
     application->UpdateHash();
   }
+}
+
+bool SetGlobalPropertiesRequest::PrepareResponseParameters(
+    mobile_apis::Result::eType& result_code, std::string& info) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  using namespace helpers;
+
+  ResponseInfo ui_properties_info(ui_result_, HmiInterfaces::HMI_INTERFACE_UI);
+
+  ResponseInfo tts_properties_info(tts_result_,
+                                   HmiInterfaces::HMI_INTERFACE_TTS);
+  const bool result =
+      PrepareResultForMobileResponse(ui_properties_info, tts_properties_info);
+  if (result &&
+      (HmiInterfaces::STATE_AVAILABLE == tts_properties_info.interface_state) &&
+      (tts_properties_info.is_unsupported_resource)) {
+    result_code = mobile_apis::Result::WARNINGS;
+    tts_response_info_ = "Unsupported phoneme type sent in a prompt";
+    info = MergeInfos(tts_properties_info,
+                      tts_response_info_,
+                      ui_properties_info,
+                      ui_response_info_);
+    return result;
+  }
+  result_code =
+      PrepareResultCodeForResponse(ui_properties_info, tts_properties_info);
+  info = MergeInfos(tts_properties_info,
+                    tts_response_info_,
+                    ui_properties_info,
+                    ui_response_info_);
+  return result;
 }
 
 bool SetGlobalPropertiesRequest::ValidateVRHelpTitle(
@@ -397,17 +400,17 @@ void SetGlobalPropertiesRequest::PrepareUIRequestMenuAndKeyboardData(
 void SetGlobalPropertiesRequest::SendTTSRequest(
     const smart_objects::SmartObject& params, bool use_events) {
   LOG4CXX_AUTO_TRACE(logger_);
+  is_tts_send_ = true;
   SendHMIRequest(
       hmi_apis::FunctionID::TTS_SetGlobalProperties, &params, use_events);
-  is_tts_send_ = true;
 }
 
 void SetGlobalPropertiesRequest::SendUIRequest(
     const smart_objects::SmartObject& params, bool use_events) {
   LOG4CXX_AUTO_TRACE(logger_);
+  is_ui_send_ = true;
   SendHMIRequest(
       hmi_apis::FunctionID::UI_SetGlobalProperties, &params, use_events);
-  is_ui_send_ = true;
 }
 
 bool SetGlobalPropertiesRequest::IsPendingResponseExist() {

@@ -60,7 +60,6 @@ struct RequestInfo {
   RequestInfo()
       : timeout_msec_(0)
       , app_id_(0)
-      , hmi_level_(mobile_apis::HMILevel::INVALID_ENUM)
       , requst_type_(RequestNone)
       , correlation_id_(0) {
     start_time_ = date_time::DateTime::getCurrentTime();
@@ -71,10 +70,7 @@ struct RequestInfo {
   RequestInfo(RequestPtr request,
               const RequestType requst_type,
               const uint64_t timeout_msec)
-      : request_(request)
-      , timeout_msec_(timeout_msec)
-      , hmi_level_(mobile_apis::HMILevel::INVALID_ENUM)
-      , correlation_id_(0) {
+      : request_(request), timeout_msec_(timeout_msec), correlation_id_(0) {
     start_time_ = date_time::DateTime::getCurrentTime();
     updateEndTime();
     requst_type_ = requst_type;
@@ -115,14 +111,6 @@ struct RequestInfo {
     return app_id_;
   }
 
-  mobile_apis::HMILevel::eType hmi_level() {
-    return hmi_level_;
-  }
-
-  void set_hmi_level(const mobile_apis::HMILevel::eType& level) {
-    hmi_level_ = level;
-  }
-
   RequestType requst_type() const {
     return requst_type_;
   }
@@ -144,7 +132,6 @@ struct RequestInfo {
   uint64_t timeout_msec_;
   TimevalStruct end_time_;
   uint32_t app_id_;
-  mobile_apis::HMILevel::eType hmi_level_;
   RequestType requst_type_;
   uint32_t correlation_id_;
 };
@@ -243,34 +230,6 @@ class RequestInfoSet {
    */
   const size_t Size();
 
-  /**
-   * @brief Check if this app is able to add new requests,
-   * or limits was exceeded
-   * @param app_id - application id
-   * @param app_time_scale - time scale (seconds)
-   * @param max_request_per_time_scale - maximum count of request
-   * that should be allowed for app_time_scale seconds
-   * @return True if new request could be added, false otherwise
-   */
-  bool CheckTimeScaleMaxRequest(uint32_t app_id,
-                                uint32_t app_time_scale,
-                                uint32_t max_request_per_time_scale);
-
-  /**
-   * @brief Check if this app is able to add new requests
-   * in current hmi_level, or limits was exceeded
-   * @param hmi_level - hmi level
-   * @param app_id - application id
-   * @param app_time_scale - time scale (seconds)
-   * @param max_request_per_time_scale - maximum count of request
-   * that should be allowed for app_time_scale seconds
-   * @return True if new request could be added, false otherwise
-   */
-  bool CheckHMILevelTimeScaleMaxRequest(mobile_apis::HMILevel::eType hmi_level,
-                                        uint32_t app_id,
-                                        uint32_t app_time_scale,
-                                        uint32_t max_request_per_time_scale);
-
  private:
   /*
    * @brief Comparator of connection key for std::find_if function
@@ -336,47 +295,6 @@ struct TimeScale {
   TimevalStruct start_;
   TimevalStruct end_;
   uint32_t app_id_;
-};
-
-/**
-* @brief Structure used in std algorithms to determine amount of request
-* during time scale for application in defined hmi level
-*/
-struct HMILevelTimeScale {
-  HMILevelTimeScale(const TimevalStruct& start,
-                    const TimevalStruct& end,
-                    const uint32_t& app_id,
-                    const mobile_apis::HMILevel::eType& hmi_level)
-      : start_(start), end_(end), app_id_(app_id), hmi_level_(hmi_level) {}
-
-  bool operator()(RequestInfoPtr setEntry) {
-    if (!setEntry.valid()) {
-      return false;
-    }
-
-    if (setEntry->app_id() != app_id_) {
-      return false;
-    }
-
-    if (setEntry->hmi_level() != hmi_level_) {
-      return false;
-    }
-
-    if (date_time::DateTime::getSecs(setEntry->start_time()) <
-            date_time::DateTime::getSecs(start_) ||
-        date_time::DateTime::getSecs(setEntry->start_time()) >
-            date_time::DateTime::getSecs(end_)) {
-      return false;
-    }
-
-    return true;
-  }
-
- private:
-  TimevalStruct start_;
-  TimevalStruct end_;
-  uint32_t app_id_;
-  mobile_apis::HMILevel::eType hmi_level_;
 };
 
 }  //  namespace request_controller

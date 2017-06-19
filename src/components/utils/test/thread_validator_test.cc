@@ -38,7 +38,7 @@
 
 namespace test {
 namespace components {
-namespace utils {
+namespace utils_test {
 
 using namespace ::threads;
 
@@ -47,6 +47,6 @@ TEST(ThreadValidatorTest, CompareID_CurrentThreadAndPthread_AreEqual) {
   ASSERT_EQ(object.creation_thread_id(), pthread_self());
 }
 
-}  // namespace utils
+}  // namespace utils_test
 }  // namespace components
 }  // namespace test

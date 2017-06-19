@@ -61,22 +61,16 @@ void UnsubscribeButtonRequest::Run() {
   const uint32_t btn_id =
       (*message_)[str::msg_params][str::button_name].asUInt();
 
-  if (!app->IsSubscribedToButton(
+  if (!app->UnsubscribeFromButton(
           static_cast<mobile_apis::ButtonName::eType>(btn_id))) {
     LOG4CXX_ERROR(logger_, "App doesn't subscibe to button " << btn_id);
     SendResponse(false, mobile_apis::Result::IGNORED);
     return;
   }
 
-  app->UnsubscribeFromButton(
-      static_cast<mobile_apis::ButtonName::eType>(btn_id));
-
   SendUnsubscribeButtonNotification();
-  const bool is_succedeed = true;
-  SendResponse(is_succedeed, mobile_apis::Result::SUCCESS);
-  if (is_succedeed) {
-    app->UpdateHash();
-  }
+  SendResponse(true, mobile_apis::Result::SUCCESS);
+  app->UpdateHash();
 }
 
 void UnsubscribeButtonRequest::SendUnsubscribeButtonNotification() {

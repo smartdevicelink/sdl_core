@@ -39,6 +39,10 @@
 
 using namespace NsSmartDeviceLink::NsSmartObjects;
 
+namespace test {
+namespace components {
+namespace smart_object_test {
+
 namespace {
 void MakeMapObject(SmartObject& obj, const int size) {
   char i_key[8], j_key[8];
@@ -73,3 +77,7 @@ TEST(SmartObjectPerformanceTest, SmartObjectPerformance) {
     }
   }
 }
+
+}  // namespace smart_object_test
+}  // namespace components
+}  // namespace test

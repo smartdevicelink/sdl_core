@@ -2,7 +2,7 @@
  * \file transport_adapter.h
  * \brief TransportAdapter class header file.
  *
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -173,6 +173,18 @@ class TransportAdapter {
    * @return Error information about connecting applications on device
    */
   virtual Error ConnectDevice(const DeviceUID& device_handle) = 0;
+
+  /**
+   * @brief RunAppOnDevice allows to run specific application on the certain
+   *device.
+   *
+   * @param device_handle device identifier to run application on.
+   *
+   * @param app_id application id also known as bundle id on some devices to
+   *run.
+   */
+  virtual void RunAppOnDevice(const std::string& device_uid,
+                              const std::string& bundle_id) = 0;
 
   /**
    * @brief Notify that listener of client connection is available.

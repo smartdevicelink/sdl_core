@@ -41,9 +41,11 @@ using namespace std;
 
 namespace test {
 namespace components {
-namespace utils {
+namespace utils_test {
 
-void get_version_from_file(int& first_version, int& second_version) {
+void get_version_from_file(int& first_version,
+                           int& second_version,
+                           int& third_version) {
   // Supposed that major and minor version include one number
   const std::string& absolute_current_path =
       file_system::CurrentWorkingDirectory();
@@ -55,10 +57,36 @@ void get_version_from_file(int& first_version, int& second_version) {
   while (getline(xml_file, str)) {
     std::size_t isfound = str.find("interface name");
     if (isfound != std::string::npos) {
-      std::size_t snd = str.find(".");
-      ASSERT_TRUE(snd != std::string::npos);
-      first_version = str[snd - 1] - 48;
-      second_version = str[snd + 1] - 48;
+      std::size_t versionStart = str.find("\"", str.find("version="));
+      ASSERT_TRUE(versionStart != std::string::npos);
+
+      std::size_t splitPos = str.find(".", versionStart + 1);
+      ASSERT_TRUE(splitPos != std::string::npos);
+
+      std::size_t splitPos2 = str.find(".", splitPos + 1);
+      ASSERT_TRUE(splitPos2 != std::string::npos);
+
+      std::size_t versionEnd = str.find("\"", splitPos2 + 1);
+      ASSERT_TRUE(versionEnd != std::string::npos);
+
+      first_version = 0;
+      for (std::size_t iter = versionStart + 1; iter < splitPos; iter++) {
+        first_version *= 10;
+        first_version += (str[iter] - 48);
+      }
+
+      second_version = 0;
+      for (std::size_t iter = splitPos + 1; iter < splitPos2; iter++) {
+        second_version *= 10;
+        second_version += (str[iter] - 48);
+      }
+
+      third_version = 0;
+      for (std::size_t iter = splitPos2 + 1; iter < versionEnd; iter++) {
+        third_version *= 10;
+        third_version += (str[iter] - 48);
+      }
+
       break;
     }
   }
@@ -67,11 +95,13 @@ void get_version_from_file(int& first_version, int& second_version) {
 TEST(GeneratorTool, GetCorrectVersion) {
   int first_version = 0;
   int second_version = 0;
-  get_version_from_file(first_version, second_version);
+  int third_version = 0;
+  get_version_from_file(first_version, second_version, third_version);
   EXPECT_EQ(first_version, application_manager::major_version);
   EXPECT_EQ(second_version, application_manager::minor_version);
+  EXPECT_EQ(third_version, application_manager::patch_version);
 }
 
-}  // namespace utils
+}  // namespace utils_test
 }  // namespace components
 }  // namespace test

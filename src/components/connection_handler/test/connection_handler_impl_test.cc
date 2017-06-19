@@ -40,10 +40,11 @@
 #include "security_manager/mock_security_manager.h"
 #include "security_manager/mock_ssl_context.h"
 #include "protocol_handler/mock_protocol_handler.h"
-#include "connection_handler/connection_handler_observer_mock.h"
+#include "connection_handler/mock_connection_handler_observer.h"
 #include "connection_handler/mock_connection_handler_settings.h"
 #include "transport_manager/mock_transport_manager.h"
 #include "encryption/hashing.h"
+#include "utils/test_async_waiter.h"
 
 namespace test {
 namespace components {
@@ -58,6 +59,10 @@ using ::testing::Mock;
 using ::testing::Return;
 using ::testing::ReturnRefOfCopy;
 
+namespace {
+const uint32_t kAsyncExpectationsTimeout = 10000u;
+}
+
 // For service types and PROTECTION_ON/OFF
 
 enum UnnamedService { kServedService1 = 0x06, kServedService2 = 0x08 };
@@ -65,8 +70,14 @@ enum UnnamedService { kServedService1 = 0x06, kServedService2 = 0x08 };
 class ConnectionHandlerTest : public ::testing::Test {
  protected:
   void SetUp() OVERRIDE {
+    device_handle_ = 0;
+
+    connection_type_ = "BTMAC";
+    device_name_ = "test_name";
+    mac_address_ = "test_address";
+
     connection_handler_ = new ConnectionHandlerImpl(
-        mock_connection_handler_settings, mock_transport_manager);
+        mock_connection_handler_settings, mock_transport_manager_);
     uid_ = 1u;
     connection_key_ = connection_handler_->KeyFromPair(0, 0u);
     protected_services_.clear();
@@ -87,12 +98,6 @@ class ConnectionHandlerTest : public ::testing::Test {
   }
   // Additional SetUp
   void AddTestDeviceConnection() {
-    device_handle_ = 0;
-
-    connection_type_ = "BTMAC";
-    device_name_ = "test_name";
-    mac_address_ = "test_address";
-
     const transport_manager::DeviceInfo device_info(
         device_handle_, mac_address_, device_name_, connection_type_);
     // Add Device and connection
@@ -239,7 +244,7 @@ class ConnectionHandlerTest : public ::testing::Test {
 
   ConnectionHandlerImpl* connection_handler_;
   testing::NiceMock<transport_manager_test::MockTransportManager>
-      mock_transport_manager;
+      mock_transport_manager_;
   testing::NiceMock<MockConnectionHandlerSettings>
       mock_connection_handler_settings;
   protocol_handler_test::MockProtocolHandler mock_protocol_handler_;
@@ -448,7 +453,7 @@ TEST_F(ConnectionHandlerTest, SendEndService) {
 TEST_F(ConnectionHandlerTest, OnFindNewApplicationsRequest) {
   AddTestDeviceConnection();
   AddTestSession();
-  connection_handler_test::ConnectionHandlerObserverMock
+  connection_handler_test::MockConnectionHandlerObserver
       mock_connection_handler_observer;
   connection_handler_->set_connection_handler_observer(
       &mock_connection_handler_observer);
@@ -458,7 +463,7 @@ TEST_F(ConnectionHandlerTest, OnFindNewApplicationsRequest) {
 }
 
 TEST_F(ConnectionHandlerTest, OnFindNewApplicationsRequestWithoutObserver) {
-  connection_handler_test::ConnectionHandlerObserverMock
+  connection_handler_test::MockConnectionHandlerObserver
       mock_connection_handler_observer;
   EXPECT_CALL(mock_connection_handler_observer, OnFindNewApplicationsRequest())
       .Times(0);
@@ -466,7 +471,7 @@ TEST_F(ConnectionHandlerTest, OnFindNewApplicationsRequestWithoutObserver) {
 }
 
 TEST_F(ConnectionHandlerTest, OnFindNewApplicationsRequestWithoutSession) {
-  connection_handler_test::ConnectionHandlerObserverMock
+  connection_handler_test::MockConnectionHandlerObserver
       mock_connection_handler_observer;
   connection_handler_->set_connection_handler_observer(
       &mock_connection_handler_observer);
@@ -480,7 +485,7 @@ TEST_F(ConnectionHandlerTest, OnMalformedMessageCallback) {
   AddTestSession();
   AddTestService(kAudio);
   AddTestService(kMobileNav);
-  connection_handler_test::ConnectionHandlerObserverMock
+  connection_handler_test::MockConnectionHandlerObserver
       mock_connection_handler_observer;
   connection_handler_->set_connection_handler_observer(
       &mock_connection_handler_observer);
@@ -506,7 +511,7 @@ TEST_F(ConnectionHandlerTest, OnApplicationFloodCallBack) {
   AddTestSession();
   AddTestService(kAudio);
   AddTestService(kMobileNav);
-  connection_handler_test::ConnectionHandlerObserverMock
+  connection_handler_test::MockConnectionHandlerObserver
       mock_connection_handler_observer;
   connection_handler_->set_connection_handler_observer(
       &mock_connection_handler_observer);
@@ -534,7 +539,7 @@ TEST_F(ConnectionHandlerTest, OnApplicationFloodCallBack_SessionFound) {
   AddTestService(kAudio);
   AddTestService(kMobileNav);
 
-  connection_handler_test::ConnectionHandlerObserverMock
+  connection_handler_test::MockConnectionHandlerObserver
       mock_connection_handler_observer;
   connection_handler_->set_connection_handler_observer(
       &mock_connection_handler_observer);
@@ -558,12 +563,12 @@ TEST_F(ConnectionHandlerTest, StartDevicesDiscovery) {
   AddTestDeviceConnection();
   AddTestSession();
 
-  connection_handler_test::ConnectionHandlerObserverMock
+  connection_handler_test::MockConnectionHandlerObserver
       mock_connection_handler_observer;
   connection_handler_->set_connection_handler_observer(
       &mock_connection_handler_observer);
 
-  EXPECT_CALL(mock_transport_manager, SearchDevices());
+  EXPECT_CALL(mock_transport_manager_, SearchDevices());
   EXPECT_CALL(mock_connection_handler_observer, OnDeviceListUpdated(_));
   connection_handler_->StartDevicesDiscovery();
 }
@@ -599,7 +604,7 @@ TEST_F(ConnectionHandlerTest, UpdateDeviceList) {
   // Precondition
   AddTestDeviceConnection();
   AddTestSession();
-  connection_handler_test::ConnectionHandlerObserverMock
+  connection_handler_test::MockConnectionHandlerObserver
       mock_connection_handler_observer;
   connection_handler_->set_connection_handler_observer(
       &mock_connection_handler_observer);
@@ -662,7 +667,7 @@ TEST_F(ConnectionHandlerTest, StartTransportManager) {
   AddTestDeviceConnection();
   AddTestSession();
 
-  EXPECT_CALL(mock_transport_manager, Visibility(true));
+  EXPECT_CALL(mock_transport_manager_, Visibility(true));
   connection_handler_->StartTransportManager();
 }
 
@@ -678,7 +683,7 @@ TEST_F(ConnectionHandlerTest, OnDeviceRemoved_ServiceNotStarted) {
   connection_handler_->OnDeviceAdded(device1);
   connection_handler_->OnDeviceAdded(device2);
 
-  connection_handler_test::ConnectionHandlerObserverMock
+  connection_handler_test::MockConnectionHandlerObserver
       mock_connection_handler_observer;
   connection_handler_->set_connection_handler_observer(
       &mock_connection_handler_observer);
@@ -697,7 +702,7 @@ TEST_F(ConnectionHandlerTest, OnDeviceRemoved_ServiceStarted) {
   const transport_manager::DeviceInfo device1(
       device_handle_, mac_address_, device_name_, connection_type_);
 
-  connection_handler_test::ConnectionHandlerObserverMock
+  connection_handler_test::MockConnectionHandlerObserver
       mock_connection_handler_observer;
   connection_handler_->set_connection_handler_observer(
       &mock_connection_handler_observer);
@@ -715,7 +720,7 @@ TEST_F(ConnectionHandlerTest, OnConnectionClosed) {
   AddTestDeviceConnection();
   AddTestSession();
 
-  connection_handler_test::ConnectionHandlerObserverMock
+  connection_handler_test::MockConnectionHandlerObserver
       mock_connection_handler_observer;
   connection_handler_->set_connection_handler_observer(
       &mock_connection_handler_observer);
@@ -732,7 +737,7 @@ TEST_F(ConnectionHandlerTest, OnUnexpectedDisconnect) {
   AddTestDeviceConnection();
   AddTestSession();
 
-  connection_handler_test::ConnectionHandlerObserverMock
+  connection_handler_test::MockConnectionHandlerObserver
       mock_connection_handler_observer;
   connection_handler_->set_connection_handler_observer(
       &mock_connection_handler_observer);
@@ -759,9 +764,9 @@ TEST_F(ConnectionHandlerTest, ConnectToDevice) {
   connection_handler_->OnDeviceAdded(device1);
   connection_handler_->OnDeviceAdded(device2);
 
-  EXPECT_CALL(mock_transport_manager, ConnectDevice(dev_handle1))
+  EXPECT_CALL(mock_transport_manager_, ConnectDevice(dev_handle1))
       .WillOnce(Return(transport_manager::E_SUCCESS));
-  EXPECT_CALL(mock_transport_manager, ConnectDevice(dev_handle2)).Times(0);
+  EXPECT_CALL(mock_transport_manager_, ConnectDevice(dev_handle2)).Times(0);
   connection_handler_->ConnectToDevice(dev_handle1);
 }
 
@@ -777,9 +782,9 @@ TEST_F(ConnectionHandlerTest, ConnectToAllDevices) {
   connection_handler_->OnDeviceAdded(device1);
   connection_handler_->OnDeviceAdded(device2);
 
-  EXPECT_CALL(mock_transport_manager, ConnectDevice(dev_handle1))
+  EXPECT_CALL(mock_transport_manager_, ConnectDevice(dev_handle1))
       .WillOnce(Return(transport_manager::E_SUCCESS));
-  EXPECT_CALL(mock_transport_manager, ConnectDevice(dev_handle2))
+  EXPECT_CALL(mock_transport_manager_, ConnectDevice(dev_handle2))
       .WillOnce(Return(transport_manager::E_SUCCESS));
   connection_handler_->ConnectToAllDevices();
 }
@@ -788,7 +793,7 @@ TEST_F(ConnectionHandlerTest, CloseConnection) {
   AddTestDeviceConnection();
   AddTestSession();
 
-  EXPECT_CALL(mock_transport_manager, DisconnectForce(uid_));
+  EXPECT_CALL(mock_transport_manager_, DisconnectForce(uid_));
   connection_handler_->CloseConnection(uid_);
 }
 
@@ -796,7 +801,7 @@ TEST_F(ConnectionHandlerTest, CloseRevokedConnection) {
   AddTestDeviceConnection();
   AddTestSession();
 
-  EXPECT_CALL(mock_transport_manager, DisconnectForce(uid_));
+  EXPECT_CALL(mock_transport_manager_, DisconnectForce(uid_));
   connection_handler_->CloseRevokedConnection(connection_key_);
 }
 
@@ -805,27 +810,40 @@ TEST_F(ConnectionHandlerTest, CloseSessionWithCommonReason) {
   AddTestSession();
   AddTestService(kAudio);
   AddTestService(kMobileNav);
-  connection_handler_test::ConnectionHandlerObserverMock
+  connection_handler_test::MockConnectionHandlerObserver
       mock_connection_handler_observer;
   connection_handler_->set_connection_handler_observer(
       &mock_connection_handler_observer);
 
   connection_handler_->set_protocol_handler(&mock_protocol_handler_);
+
+  TestAsyncWaiter waiter;
+  uint32_t times = 0;
   EXPECT_CALL(mock_protocol_handler_, SendEndSession(uid_, start_session_id_))
-      .Times(1);
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+  times++;
+
   InSequence seq;
   EXPECT_CALL(mock_connection_handler_observer,
               OnServiceEndedCallback(connection_key_, kMobileNav, kCommon))
-      .Times(1);
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+  times++;
   EXPECT_CALL(mock_connection_handler_observer,
               OnServiceEndedCallback(connection_key_, kAudio, kCommon))
-      .Times(1);
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+  times++;
   EXPECT_CALL(mock_connection_handler_observer,
-              OnServiceEndedCallback(connection_key_, kBulk, kCommon)).Times(1);
+              OnServiceEndedCallback(connection_key_, kBulk, kCommon))
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+  times++;
   EXPECT_CALL(mock_connection_handler_observer,
-              OnServiceEndedCallback(connection_key_, kRpc, kCommon)).Times(1);
+              OnServiceEndedCallback(connection_key_, kRpc, kCommon))
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+  times++;
+
   connection_handler_->CloseSession(connection_key_, kCommon);
-  Mock::AsyncVerifyAndClearExpectations(10000);
+
+  EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
 }
 
 TEST_F(ConnectionHandlerTest, CloseSessionWithFloodReason) {
@@ -833,27 +851,40 @@ TEST_F(ConnectionHandlerTest, CloseSessionWithFloodReason) {
   AddTestSession();
   AddTestService(kAudio);
   AddTestService(kMobileNav);
-  connection_handler_test::ConnectionHandlerObserverMock
+  connection_handler_test::MockConnectionHandlerObserver
       mock_connection_handler_observer;
   connection_handler_->set_connection_handler_observer(
       &mock_connection_handler_observer);
 
   connection_handler_->set_protocol_handler(&mock_protocol_handler_);
+
+  TestAsyncWaiter waiter;
+  uint32_t times = 0;
   EXPECT_CALL(mock_protocol_handler_, SendEndSession(uid_, start_session_id_))
-      .Times(1);
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+  times++;
 
   InSequence seq;
   EXPECT_CALL(mock_connection_handler_observer,
               OnServiceEndedCallback(connection_key_, kMobileNav, kFlood))
-      .Times(1);
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+  times++;
   EXPECT_CALL(mock_connection_handler_observer,
-              OnServiceEndedCallback(connection_key_, kAudio, kFlood)).Times(1);
+              OnServiceEndedCallback(connection_key_, kAudio, kFlood))
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+  times++;
   EXPECT_CALL(mock_connection_handler_observer,
-              OnServiceEndedCallback(connection_key_, kBulk, kFlood)).Times(1);
+              OnServiceEndedCallback(connection_key_, kBulk, kFlood))
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+  times++;
   EXPECT_CALL(mock_connection_handler_observer,
-              OnServiceEndedCallback(connection_key_, kRpc, kFlood)).Times(1);
+              OnServiceEndedCallback(connection_key_, kRpc, kFlood))
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+  times++;
+
   connection_handler_->CloseSession(connection_key_, kFlood);
-  Mock::AsyncVerifyAndClearExpectations(10000);
+
+  EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
 }
 
 TEST_F(ConnectionHandlerTest, CloseSessionWithMalformedMessage) {
@@ -861,30 +892,39 @@ TEST_F(ConnectionHandlerTest, CloseSessionWithMalformedMessage) {
   AddTestSession();
   AddTestService(kAudio);
   AddTestService(kMobileNav);
-  connection_handler_test::ConnectionHandlerObserverMock
+  connection_handler_test::MockConnectionHandlerObserver
       mock_connection_handler_observer;
   connection_handler_->set_connection_handler_observer(
       &mock_connection_handler_observer);
 
   connection_handler_->set_protocol_handler(&mock_protocol_handler_);
 
+  TestAsyncWaiter waiter;
+  uint32_t times = 0;
   EXPECT_CALL(mock_protocol_handler_, SendEndSession(uid_, start_session_id_))
       .Times(0);
+
   InSequence seq;
   EXPECT_CALL(mock_connection_handler_observer,
               OnServiceEndedCallback(connection_key_, kMobileNav, kMalformed))
-      .Times(1);
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+  times++;
   EXPECT_CALL(mock_connection_handler_observer,
               OnServiceEndedCallback(connection_key_, kAudio, kMalformed))
-      .Times(1);
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+  times++;
   EXPECT_CALL(mock_connection_handler_observer,
               OnServiceEndedCallback(connection_key_, kBulk, kMalformed))
-      .Times(1);
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+  times++;
   EXPECT_CALL(mock_connection_handler_observer,
               OnServiceEndedCallback(connection_key_, kRpc, kMalformed))
-      .Times(1);
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+  times++;
+
   connection_handler_->CloseSession(connection_key_, kMalformed);
-  Mock::AsyncVerifyAndClearExpectations(10000);
+
+  EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
 }
 
 TEST_F(ConnectionHandlerTest, CloseConnectionSessionsWithMalformedMessage) {
@@ -892,30 +932,39 @@ TEST_F(ConnectionHandlerTest, CloseConnectionSessionsWithMalformedMessage) {
   AddTestSession();
   AddTestService(kAudio);
   AddTestService(kMobileNav);
-  connection_handler_test::ConnectionHandlerObserverMock
+  connection_handler_test::MockConnectionHandlerObserver
       mock_connection_handler_observer;
   connection_handler_->set_connection_handler_observer(
       &mock_connection_handler_observer);
 
   connection_handler_->set_protocol_handler(&mock_protocol_handler_);
 
+  TestAsyncWaiter waiter;
+  uint32_t times = 0;
   EXPECT_CALL(mock_protocol_handler_, SendEndSession(uid_, start_session_id_))
       .Times(0);
+
   InSequence seq;
   EXPECT_CALL(mock_connection_handler_observer,
               OnServiceEndedCallback(connection_key_, kMobileNav, kMalformed))
-      .Times(1);
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+  times++;
   EXPECT_CALL(mock_connection_handler_observer,
               OnServiceEndedCallback(connection_key_, kAudio, kMalformed))
-      .Times(1);
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+  times++;
   EXPECT_CALL(mock_connection_handler_observer,
               OnServiceEndedCallback(connection_key_, kBulk, kMalformed))
-      .Times(1);
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+  times++;
   EXPECT_CALL(mock_connection_handler_observer,
               OnServiceEndedCallback(connection_key_, kRpc, kMalformed))
-      .Times(1);
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+  times++;
+
   connection_handler_->CloseConnectionSessions(uid_, kMalformed);
-  Mock::AsyncVerifyAndClearExpectations(10000);
+
+  EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
 }
 
 TEST_F(ConnectionHandlerTest, CloseConnectionSessionsWithCommonReason) {
@@ -923,28 +972,40 @@ TEST_F(ConnectionHandlerTest, CloseConnectionSessionsWithCommonReason) {
   AddTestSession();
   AddTestService(kAudio);
   AddTestService(kMobileNav);
-  connection_handler_test::ConnectionHandlerObserverMock
+  connection_handler_test::MockConnectionHandlerObserver
       mock_connection_handler_observer;
   connection_handler_->set_connection_handler_observer(
       &mock_connection_handler_observer);
 
   connection_handler_->set_protocol_handler(&mock_protocol_handler_);
 
+  TestAsyncWaiter waiter;
+  uint32_t times = 0;
   EXPECT_CALL(mock_protocol_handler_, SendEndSession(uid_, start_session_id_))
-      .Times(1);
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+  times++;
+
   InSequence seq;
   EXPECT_CALL(mock_connection_handler_observer,
               OnServiceEndedCallback(connection_key_, kMobileNav, kCommon))
-      .Times(1);
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+  times++;
   EXPECT_CALL(mock_connection_handler_observer,
               OnServiceEndedCallback(connection_key_, kAudio, kCommon))
-      .Times(1);
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+  times++;
   EXPECT_CALL(mock_connection_handler_observer,
-              OnServiceEndedCallback(connection_key_, kBulk, kCommon)).Times(1);
+              OnServiceEndedCallback(connection_key_, kBulk, kCommon))
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+  times++;
   EXPECT_CALL(mock_connection_handler_observer,
-              OnServiceEndedCallback(connection_key_, kRpc, kCommon)).Times(1);
+              OnServiceEndedCallback(connection_key_, kRpc, kCommon))
+      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+  times++;
+
   connection_handler_->CloseConnectionSessions(uid_, kCommon);
-  Mock::AsyncVerifyAndClearExpectations(10000);
+
+  EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
 }
 
 TEST_F(ConnectionHandlerTest, StartService_withServices) {
@@ -1051,7 +1112,7 @@ TEST_F(ConnectionHandlerTest, SessionStarted_WithRpc) {
   // Add virtual device and connection
   AddTestDeviceConnection();
   // Expect that rpc service has started
-  connection_handler_test::ConnectionHandlerObserverMock
+  connection_handler_test::MockConnectionHandlerObserver
       mock_connection_handler_observer;
   connection_handler_->set_connection_handler_observer(
       &mock_connection_handler_observer);
@@ -1426,6 +1487,40 @@ TEST_F(ConnectionHandlerTest, SendHeartBeat) {
   connection_handler_->set_protocol_handler(&mock_protocol_handler_);
   EXPECT_CALL(mock_protocol_handler_, SendHeartBeat(uid_, start_session_id_));
   connection_handler_->SendHeartBeat(uid_, start_session_id_);
+}
+
+TEST_F(ConnectionHandlerTest, RunAppOnDevice_NoAppOnDevice_UNSUCCESS) {
+  const std::string bundle_id = "test_bundle_id";
+  const std::string mac_address0 = "test_mac_address0";
+  // All MAC addresses were stored in device list of ConnectionHandler in form
+  // of hashed string.
+  const std::string hash_of_mac_address0 = encryption::MakeHash(mac_address0);
+  const std::string hash_of_mac_address1 =
+      encryption::MakeHash("test_mac_address1");
+
+  // By default device list of ConnectionHandler was empty.
+  EXPECT_CALL(mock_transport_manager_, RunAppOnDevice(_, _)).Times(0);
+  connection_handler_->RunAppOnDevice(hash_of_mac_address0, bundle_id);
+
+  transport_manager::DeviceInfo device_info(
+      device_handle_, mac_address0, device_name_, connection_type_);
+  connection_handler_->OnDeviceAdded(device_info);
+
+  connection_handler_->RunAppOnDevice(hash_of_mac_address1, bundle_id);
+}
+
+TEST_F(ConnectionHandlerTest, RunAppOnDevice_AppOnDevice_SUCCESS) {
+  const std::string bundle_id = "test_bundle_id";
+
+  transport_manager::DeviceInfo device_info(
+      device_handle_, mac_address_, device_name_, connection_type_);
+  connection_handler_->OnDeviceAdded(device_info);
+
+  const std::string hash_of_mac_address = encryption::MakeHash(mac_address_);
+
+  EXPECT_CALL(mock_transport_manager_,
+              RunAppOnDevice(device_handle_, bundle_id));
+  connection_handler_->RunAppOnDevice(hash_of_mac_address, bundle_id);
 }
 
 }  // namespace connection_handler_test

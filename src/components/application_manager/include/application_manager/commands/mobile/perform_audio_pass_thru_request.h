@@ -31,8 +31,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_PERFORM_AUDIO_PASS_THRU_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_PERFORM_AUDIO_PASS_THRU_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_PERFORM_AUDIO_PASS_THRU_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_PERFORM_AUDIO_PASS_THRU_REQUEST_H_
 
 #include "application_manager/commands/command_request_impl.h"
 #include "utils/macro.h"
@@ -85,23 +85,31 @@ class PerformAudioPassThruRequest : public CommandRequestImpl {
   void on_event(const event_engine::Event& event);
 
  private:
-  /*
+  /**
+   * @brief Prepare result code, result and info for sending to mobile
+   * application
+   * @param result_code contains result code for sending to mobile application
+   * @return result for sending to mobile application.
+   */
+  bool PrepareResponseParameters(mobile_apis::Result::eType& result_code,
+                                 std::string& info);
+  /**
    * @brief Sends TTS Speak request
    */
   void SendSpeakRequest();
 
-  /*
+  /**
    * @brief Sends UI PerformAudioPassThru request
    */
   void SendPerformAudioPassThruRequest();
 
-  /*
+  /**
    * @brief Sends UI RecordStart notification after TTS Speak response received.
    * Indicates that capturing mic data should be started
    */
   void SendRecordStartNotification();
 
-  /*
+  /**
    * @brief Starts microphone recording
    */
   void StartMicrophoneRecording();
@@ -115,21 +123,25 @@ class PerformAudioPassThruRequest : public CommandRequestImpl {
   bool IsWhiteSpaceExist();
 
   /**
-   * @brief Waiting for TTS.Speak response, after default timeout send
-   * GENERIC_ERROR response
-   * @return if receive TTS.Speak return TRUE, FALSE otherwise
-   */
-  bool WaitTTSSpeak();
-
-  /**
    * @brief If is_active_tts_speak_ TRUE - set up to FALSE and send request
    * TTS_StopSpeaking to HMI
    */
   void FinishTTSSpeak();
 
-  // flag display state of speak during perform audio pass thru
-  bool is_active_tts_speak_;
-  mobile_apis::Result::eType result_tts_speak_;
+  /*
+   * @brief Tells if there are sent requests without responses
+   */
+  bool IsWaitingHMIResponse();
+
+  /* flag display state of speak and ui perform audio
+  during perform audio pass thru*/
+  bool awaiting_tts_speak_response_;
+  bool awaiting_ui_response_;
+
+  hmi_apis::Common_Result::eType result_tts_speak_;
+  hmi_apis::Common_Result::eType result_ui_;
+  std::string ui_info_;
+  std::string tts_info_;
 
   DISALLOW_COPY_AND_ASSIGN(PerformAudioPassThruRequest);
 };
@@ -137,4 +149,4 @@ class PerformAudioPassThruRequest : public CommandRequestImpl {
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_PERFORM_AUDIO_PASS_THRU_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_PERFORM_AUDIO_PASS_THRU_REQUEST_H_

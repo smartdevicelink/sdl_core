@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,25 +33,19 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_HMI_CAPABILITIES_FOR_TESTING_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_HMI_CAPABILITIES_FOR_TESTING_H_
 
-#include "application_manager/hmi_capabilities.h"
+#include "application_manager/hmi_capabilities_impl.h"
 
 namespace test {
 namespace components {
 namespace application_manager_test {
 
 class HMICapabilitiesForTesting
-    : public ::application_manager::HMICapabilities {
+    : public ::application_manager::HMICapabilitiesImpl {
  public:
   HMICapabilitiesForTesting(::application_manager::ApplicationManager& app_mngr)
-      : HMICapabilities(app_mngr) {}
+      : HMICapabilitiesImpl(app_mngr) {}
   bool LoadCapabilitiesFromFile() {
     return load_capabilities_from_file();
-  }
-
-  void ConvertJsonLanguagesToObj(
-      Json::Value& json_languages,
-      ::NsSmartDeviceLink::NsSmartObjects::SmartObject& languages) {
-    convert_json_languages_to_obj(json_languages, languages);
   }
 };
 

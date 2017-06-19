@@ -43,9 +43,6 @@
 #if (defined(MESSAGEBROKER_HMIADAPTER) || defined(PASA_HMI))
 #include "hmi_message_handler/messagebroker_adapter.h"
 #endif  // #if ( defined (MESSAGEBROKER_HMIADAPTER) || defined(PASA_HMI)  )
-#ifdef MQUEUE_HMIADAPTER
-#include "hmi_message_handler/mqueue_adapter.h"
-#endif  // MQUEUE_HMIADAPTER
 #include "application_manager/application_manager_impl.h"
 #include "connection_handler/connection_handler_impl.h"
 #include "protocol_handler/protocol_handler_impl.h"
