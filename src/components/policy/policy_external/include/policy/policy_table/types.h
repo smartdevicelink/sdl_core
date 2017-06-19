@@ -360,7 +360,7 @@ struct MessageLanguages : CompositeType {
 
  private:
   bool Validate() const;
-  static const std::string kMandatoryLanguage_;
+  static const std::string default_language_;
 };
 
 struct ConsumerFriendlyMessages : CompositeType {

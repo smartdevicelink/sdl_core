@@ -298,6 +298,7 @@ struct MessageLanguages : CompositeType {
   virtual void SetPolicyTableType(PolicyTableType pt_type);
 
  private:
+  static const std::string default_language_;
   bool Validate() const;
 };
 
