@@ -1082,9 +1082,6 @@ bool CacheManager::SetUserPermissionsForApp(
       permissions.group_permissions.begin();
   std::vector<FunctionalGroupPermission>::const_iterator iter_end =
       permissions.group_permissions.end();
-  if (out_app_permissions_changed) {
-    *out_app_permissions_changed = false;
-  }
 
   std::string group_name;
   for (; iter != iter_end; ++iter) {
