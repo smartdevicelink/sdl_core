@@ -69,7 +69,7 @@ typedef Array<Enum<Parameter>, 0, 24> Parameters;
 
 typedef Map<RpcParameters, 0, 50> Rpc;
 
-typedef Array<String<10, 255>, 1, 255> URL;
+typedef Array<String<10, 255>, 1, 3> URL;
 
 typedef Map<URL, 1, 255> URLList;
 

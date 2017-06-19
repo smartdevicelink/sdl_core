@@ -177,6 +177,19 @@ bool ModuleConfig::Validate() const {
     default:
       break;
   }
+
+  for (ServiceEndpoints::const_iterator it_endpoints = endpoints.begin();
+       it_endpoints != endpoints.end();
+       ++it_endpoints) {
+    const URLList& endpoint_list = it_endpoints->second;
+    if (endpoint_list.end() == endpoint_list.find(kDefaultApp)) {
+      LOG4CXX_ERROR(logger_,
+                    "Endpoint " << it_endpoints->first
+                                << "does not contain default group");
+      return false;
+    }
+  }
+
   return true;
 }
 
