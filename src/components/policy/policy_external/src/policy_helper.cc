@@ -576,11 +576,11 @@ void FillNotificationData::UpdateParameters(
 
 void FillNotificationData::ExcludeSame(RpcPermissions& rpc) {
   HMIPermissions& rpc_hmi_permissions = rpc.hmi_permissions;
-  HMIPermissions::const_iterator it_hmi_allowed =
+  HMIPermissions::iterator it_hmi_allowed =
       rpc.hmi_permissions.find(kAllowedKey);
-  HMIPermissions::const_iterator it_hmi_undefined =
+  HMIPermissions::iterator it_hmi_undefined =
       rpc.hmi_permissions.find(kUndefinedKey);
-  HMIPermissions::const_iterator it_hmi_user_disallowed =
+  HMIPermissions::iterator it_hmi_user_disallowed =
       rpc.hmi_permissions.find(kUserDisallowedKey);
 
   // There is different logic of processing RPCs with and w/o 'parameters'
