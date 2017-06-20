@@ -79,7 +79,7 @@ typedef uint8_t NumberOfNotificationsType;
 typedef Map<Integer<NumberOfNotificationsType, 0, 255>, 0, 6>
     NumberOfNotificationsPerMinute;
 
-typedef Array<Integer<uint16_t, 1, 1000>, 0, 10> SecondsBetweenRetries;
+typedef Array<Integer<uint16_t, 1, 1000>, 0, 5> SecondsBetweenRetries;
 
 typedef Map<MessageString, 0, 500> Languages;
 
