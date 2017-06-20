@@ -194,6 +194,20 @@ void Message::set_message_type(MessageType type) {
   type_ = type;
 }
 
+// DEPRECATED
+void Message::set_binary_data(BinaryData* data) {
+  if (NULL == data) {
+    NOTREACHED();
+    return;
+  }
+
+  if (binary_data_) {
+    delete binary_data_;
+  }
+
+  binary_data_ = new BinaryData(*data);
+}
+
 void Message::set_binary_data(const BinaryData* data) {
   if (NULL == data) {
     NOTREACHED();
