@@ -64,29 +64,29 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "PolicyHandler")
 
 namespace {
 using namespace mobile_apis;
-typedef std::map<RequestType::eType, std::string> RequestTypeMap;
+typedef std::map<mobile_apis::RequestType::eType, std::string> RequestTypeMap;
 RequestTypeMap TypeToString = {
-    {RequestType::INVALID_ENUM, "INVALID_ENUM"},
-    {RequestType::HTTP, "HTTP"},
-    {RequestType::FILE_RESUME, "FILE_RESUME"},
-    {RequestType::AUTH_REQUEST, "AUTH_REQUEST"},
-    {RequestType::AUTH_CHALLENGE, "AUTH_CHALLENGE"},
-    {RequestType::AUTH_ACK, "AUTH_ACK"},
-    {RequestType::PROPRIETARY, "PROPRIETARY"},
-    {RequestType::QUERY_APPS, "QUERY_APPS"},
-    {RequestType::LAUNCH_APP, "LAUNCH_APP"},
-    {RequestType::LOCK_SCREEN_ICON_URL, "LOCK_SCREEN_ICON_URL"},
-    {RequestType::TRAFFIC_MESSAGE_CHANNEL, "TRAFFIC_MESSAGE_CHANNEL"},
-    {RequestType::DRIVER_PROFILE, "DRIVER_PROFILE"},
-    {RequestType::VOICE_SEARCH, "VOICE_SEARCH"},
-    {RequestType::NAVIGATION, "NAVIGATION"},
-    {RequestType::PHONE, "PHONE"},
-    {RequestType::CLIMATE, "CLIMATE"},
-    {RequestType::SETTINGS, "SETTINGS"},
-    {RequestType::VEHICLE_DIAGNOSTICS, "VEHICLE_DIAGNOSTICS"},
-    {RequestType::EMERGENCY, "EMERGENCY"},
-    {RequestType::MEDIA, "MEDIA"},
-    {RequestType::FOTA, "FOTA"}};
+    {mobile_apis::RequestType::INVALID_ENUM, "INVALID_ENUM"},
+    {mobile_apis::RequestType::HTTP, "HTTP"},
+    {mobile_apis::RequestType::FILE_RESUME, "FILE_RESUME"},
+    {mobile_apis::RequestType::AUTH_REQUEST, "AUTH_REQUEST"},
+    {mobile_apis::RequestType::AUTH_CHALLENGE, "AUTH_CHALLENGE"},
+    {mobile_apis::RequestType::AUTH_ACK, "AUTH_ACK"},
+    {mobile_apis::RequestType::PROPRIETARY, "PROPRIETARY"},
+    {mobile_apis::RequestType::QUERY_APPS, "QUERY_APPS"},
+    {mobile_apis::RequestType::LAUNCH_APP, "LAUNCH_APP"},
+    {mobile_apis::RequestType::LOCK_SCREEN_ICON_URL, "LOCK_SCREEN_ICON_URL"},
+    {mobile_apis::RequestType::TRAFFIC_MESSAGE_CHANNEL, "TRAFFIC_MESSAGE_CHANNEL"},
+    {mobile_apis::RequestType::DRIVER_PROFILE, "DRIVER_PROFILE"},
+    {mobile_apis::RequestType::VOICE_SEARCH, "VOICE_SEARCH"},
+    {mobile_apis::RequestType::NAVIGATION, "NAVIGATION"},
+    {mobile_apis::RequestType::PHONE, "PHONE"},
+    {mobile_apis::RequestType::CLIMATE, "CLIMATE"},
+    {mobile_apis::RequestType::SETTINGS, "SETTINGS"},
+    {mobile_apis::RequestType::VEHICLE_DIAGNOSTICS, "VEHICLE_DIAGNOSTICS"},
+    {mobile_apis::RequestType::EMERGENCY, "EMERGENCY"},
+    {mobile_apis::RequestType::MEDIA, "MEDIA"},
+    {mobile_apis::RequestType::FOTA, "FOTA"}};
 
 const std::string RequestTypeToString(RequestType::eType type) {
   RequestTypeMap::const_iterator it = TypeToString.find(type);
