@@ -224,8 +224,7 @@ int SQLPTRepresentation::DaysBeforeExchange(uint16_t current) {
     return limit;
   }
 
-  if (limit < 0 || last < 0 || current < last ||
-      limit < (current - last)) {
+  if (limit < 0 || last < 0 || current < last || limit < (current - last)) {
     return 0;
   }
 

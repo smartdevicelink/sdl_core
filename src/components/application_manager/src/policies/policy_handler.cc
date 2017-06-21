@@ -76,7 +76,8 @@ RequestTypeMap TypeToString = {
     {mobile_apis::RequestType::QUERY_APPS, "QUERY_APPS"},
     {mobile_apis::RequestType::LAUNCH_APP, "LAUNCH_APP"},
     {mobile_apis::RequestType::LOCK_SCREEN_ICON_URL, "LOCK_SCREEN_ICON_URL"},
-    {mobile_apis::RequestType::TRAFFIC_MESSAGE_CHANNEL, "TRAFFIC_MESSAGE_CHANNEL"},
+    {mobile_apis::RequestType::TRAFFIC_MESSAGE_CHANNEL,
+     "TRAFFIC_MESSAGE_CHANNEL"},
     {mobile_apis::RequestType::DRIVER_PROFILE, "DRIVER_PROFILE"},
     {mobile_apis::RequestType::VOICE_SEARCH, "VOICE_SEARCH"},
     {mobile_apis::RequestType::NAVIGATION, "NAVIGATION"},
@@ -88,7 +89,7 @@ RequestTypeMap TypeToString = {
     {mobile_apis::RequestType::MEDIA, "MEDIA"},
     {mobile_apis::RequestType::FOTA, "FOTA"}};
 
-const std::string RequestTypeToString(RequestType::eType type) {
+const std::string RequestTypeToString(mobile_apis::RequestType::eType type) {
   RequestTypeMap::const_iterator it = TypeToString.find(type);
   if (TypeToString.end() != it) {
     return (*it).second;
