@@ -118,8 +118,7 @@ class QueryAppsDataValidator {
     smart_objects::SmartArray::iterator applications_iterator =
         objects_array->begin();
 
-    for (; applications_iterator != objects_array->end();
-         ++applications_iterator) {
+    for (; applications_iterator != objects_array->end(); ) {
       const smart_objects::SmartObject& app_data = *applications_iterator;
 
       if (!app_data.isValid()) {
@@ -133,7 +132,8 @@ class QueryAppsDataValidator {
         LOG4CXX_WARN(logger_,
                      "Application hasn`t some of mandatory parameters. "
                      "Application will be skipped.");
-        objects_array->erase(applications_iterator);
+
+        applications_iterator = objects_array->erase(applications_iterator);
         continue;
       }
 
@@ -186,6 +186,7 @@ class QueryAppsDataValidator {
         return false;
       }
       has_response_valid_application = true;
+      ++applications_iterator;
     }
     return has_response_valid_application;
   }

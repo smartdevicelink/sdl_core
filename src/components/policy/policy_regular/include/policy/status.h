@@ -53,7 +53,8 @@ enum UpdateEvent {
   kOnResetPolicyTableNoUpdate,
   kScheduleUpdate,
   kScheduleManualUpdate,
-  kOnResetRetrySequence
+  kOnResetRetrySequence,
+  kNoEvent
 };
 
 const std::string kUpToDate = "UP_TO_DATE";
