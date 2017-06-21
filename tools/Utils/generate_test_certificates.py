@@ -9,7 +9,7 @@
 import os
 import subprocess
 import tempfile
-from argparse import ArgumentParser
+import argparse
 from subprocess import check_call
 
 def run(command, *args):
@@ -58,7 +58,7 @@ def gen_expire_cert(out_cert_file, key_file, ca_cert_file, ca_key_file, days, an
     """Expired certificate generator
     wrap console call
     'openssl req -new -key $key_file -days $days -out $out_cert_file -subj $answer'
-    'openssl ca -batch -config $config_file_path -in $request_file -out $out_cert_file, 
+    'openssl ca -batch -config $config_file_path -in $request_file -out $out_cert_file,
         "-cert",  ca_cert_file, "-keyfile", ca_key_file, "-startdate 150101000000Z -enddate 150314092653Z'
     """
     request_file = out_cert_file + ".req"
@@ -83,7 +83,7 @@ def gen_expire_cert(out_cert_file, key_file, ca_cert_file, ca_key_file, days, an
         default_ca = ca_default
 
         [ ca_default ]
-        dir = %s""" % (temp_dir, ) + """ 
+        dir = %s""" % (temp_dir, ) + """
         certs = %s""" % (current_dir, ) + """
         new_certs_dir =  %s""" % (current_dir, ) + """
         database = %s""" % (database_file_path, ) + """
@@ -118,12 +118,13 @@ def gen_pkcs12(out, key_file, cert_file, verification_certificate) :
        "-name 'SPT key and certificates'", "-CAfile ", verification_certificate, \
        " -passout pass:")
 
-    """
-    Encode certificate $out to base 64
-    """
-    with open(out, "rb") as cert:
-        with open(out + ".enc", "wb") as enc_cert:
-            enc_cert.write(cert.read().encode("base64"))
+def gen_pem_file(out, key_file, cert_file, verification_certificate) :
+    """Join $key_file, $cert_file, $verification_certificate in pem file named $out"""
+    files = [key_file, cert_file, verification_certificate]
+    with open(out, "wb") as cert:
+        for fl in files:
+            with open(fl) as infile:
+                cert.write(infile.read())
 
 def answers(name, app_id, country, state, locality, organization, unit, email) :
     """Answer string generator
@@ -139,18 +140,43 @@ def answers(name, app_id, country, state, locality, organization, unit, email) :
     return answer
 
 def concat_files(out_file_name, *args) :
-    print "Concatenate text files", args, "into", out_file_name 
+    print "Concatenate text files", args, "into", out_file_name
     with open(out_file_name, 'w') as outfile:
         for fname in args :
             with open(fname) as infile :
                 outfile.write(infile.read())
 
+def generate_server_answers(apps_amount):
+    answers_list = []
+    for index in range(apps_amount):
+        app_name = 'server'
+        app_id = 'SPT'
+        if index >= 1:
+            app_name += str(index)
+            app_id += str(index)
+        answers_list.insert(index, answers(app_name, app_id, "RU", "Russia", "St. Petersburg", "Luxoft", "Mobile", "sample@luxoft.com"))
+    return answers_list
+
+def generate_cert_file_path(server_dir, credential, index, ext):
+    if index >= 1:
+        credential += str(index)
+    credential += ext
+    server_file = os.path.join(server_dir, credential)
+    return server_file
+
+def positive_integer(value):
+    ivalue = int(value)
+    if ivalue <= 0:
+         raise argparse.ArgumentTypeError("%s is an invalid positive int value" % value)
+    return ivalue
+
 
 def main():
     soft_verify_file  = os.path.join("server", "server_root.key")
-    arg_parser = ArgumentParser(description='Welcome to SDL test certificate generator.')
+    arg_parser = argparse.ArgumentParser(description='Welcome to SDL test certificate generator.')
     arg_parser.add_argument('-d', '--dir', help="directory for certificate generating")
     arg_parser.add_argument('-s', '--soft', help="do not override existing certificates if '%s' exists" % soft_verify_file, action='store_true' )
+    arg_parser.add_argument('-ca', '--certs_amount', type=positive_integer, default = 1, help="Amount of security certificates to generate for different apps")
     args = arg_parser.parse_args()
     if args.dir:
         if not os.path.exists(args.dir):
@@ -160,13 +186,14 @@ def main():
         if os.path.exists(soft_verify_file):
             print "Root key file '%s' exists. Generation skipped according to soft mode." % (soft_verify_file, )
             return
-
+    if args.certs_amount:
+        mobile_app_certificates_amount = args.certs_amount
     server_root_answer = answers("server_root", "", "US", "California", "Silicon Valley", "CAcert.org", "CAcert", "sample@cacert.org")
     client_root_answer = answers("client_root", "", "US", "California", "Silicon Valley", "CAcert.org", "CAcert", "sample@cacert.org")
     ford_server_answer = answers("FORD", "", "US", "Michigan", "Detroit", "FORD_SERVER", "FORD_SDL_SERVER" ,"sample@ford.com")
     ford_client_answer = answers("FORD_CLIENT", "", "US", "Michigan", "Detroit", "FORD_CLIENT", "FORD_SDL_CLIENT" ,"sample@ford.com")
     client_answer  = answers("client", "SPT", "RU", "Russia", "St. Petersburg", "Luxoft", "HeadUnit" ,"sample@luxoft.com")
-    server_answer  = answers("server", "SPT", "RU", "Russia", "St. Petersburg", "Luxoft", "Mobile" ,"sample@luxoft.com")
+    server_answers_list = generate_server_answers(mobile_app_certificates_amount)
     server_unsigned_answer  = answers("server", "SPT", "RU", "Russia", "St. Petersburg", "Luxoft", "Mobile_unsigned" ,"sample@luxoft.com")
     server_expired_answer  = answers("server", "SPT", "RU", "Russia", "St. Petersburg", "Luxoft", "Mobile_expired" ,"sample@luxoft.com")
     client_unsigned_answer  = answers("client", "SPT", "RU", "Russia", "St. Petersburg", "Luxoft", "Mobile_unsigned" ,"sample@luxoft.com")
@@ -227,48 +254,55 @@ def main():
     print " --== Server certificate generating ==-- "
     server_key_file = os.path.join(server_dir, "server.key")
     server_cert_file = os.path.join(server_dir, "server.crt")
-    server_pkcs12_file = os.path.join(server_dir, "spt_credential.p12")
-    gen_rsa_key(server_key_file, 2048)
-    gen_cert(server_cert_file, server_key_file, ford_server_cert_file, ford_server_key_file, days, server_answer)
-    gen_pkcs12(server_pkcs12_file, server_key_file, server_cert_file, client_verification_ca_cert_file)
+    for index, value in enumerate(server_answers_list):
+      server_pkcs12_file = generate_cert_file_path(server_dir, "spt_credential", index, ".p12")
+      server_pem_file = generate_cert_file_path(server_dir, "spt_credential", index, ".pem")
+      gen_rsa_key(server_key_file, 2048)
+      gen_cert(server_cert_file, server_key_file, ford_server_cert_file, ford_server_key_file, days, value)
+      gen_pkcs12(server_pkcs12_file, server_key_file, server_cert_file, client_verification_ca_cert_file)
+      gen_pem_file(server_pem_file, server_key_file, server_cert_file, client_verification_ca_cert_file)
 
     print
     print " --== Server unsigned certificate generating ==-- "
     server_unsigned_cert_file = os.path.join(server_dir, "server_unsigned.crt")
     server_pkcs12_unsigned_file = os.path.join(server_dir, "spt_credential_unsigned.p12")
+    server_pem_unsigned_file = os.path.join(server_dir, "spt_credential_unsigned.pem")
     gen_root_cert(server_unsigned_cert_file, server_key_file, days, server_unsigned_answer)
     gen_pkcs12(server_pkcs12_unsigned_file, server_key_file, server_unsigned_cert_file, client_verification_ca_cert_file)
+    gen_pem_file(server_pem_unsigned_file, server_key_file, server_unsigned_cert_file, client_verification_ca_cert_file)
 
     print
     print " --== Server expired certificate generating ==-- "
     server_expired_cert_file = os.path.join(server_dir, "server_expired.crt")
     server_pkcs12_expired_file = os.path.join(server_dir, "spt_credential_expired.p12")
+    server_pem_expired_file = os.path.join(server_dir, "spt_credential_expired.pem")
     gen_expire_cert(server_expired_cert_file, server_key_file, ford_server_cert_file, ford_server_key_file, days, server_expired_answer)
     gen_pkcs12(server_pkcs12_expired_file, server_key_file, server_expired_cert_file, client_verification_ca_cert_file)
+    gen_pem_file(server_pem_expired_file, server_key_file, server_expired_cert_file, client_verification_ca_cert_file)
 
 
     print
     print " --== Client pkcs12 certificate generating ==-- "
     client_key_file = os.path.join(client_dir, "client.key")
     client_cert_file = os.path.join(client_dir, "client.crt")
-    client_pkcs12_file = os.path.join(client_dir, "client_credential.p12")
+    client_pkcs12_file = os.path.join(client_dir, "client_credential.pem")
     gen_rsa_key(client_key_file, 2048)
     gen_cert(client_cert_file, client_key_file, ford_client_cert_file, ford_client_key_file, days, client_answer)
-    gen_pkcs12(client_pkcs12_file, client_key_file, client_cert_file, server_verification_ca_cert_file)
+    gen_pem_file(client_pkcs12_file, client_key_file, client_cert_file, server_verification_ca_cert_file)
 
     print
     print " --== Client pkcs12 unsigned certificate generating ==-- "
     client_unsigned_cert_file = os.path.join(client_dir, "client_unsigned.crt")
-    client_pkcs12_unsigned_file = os.path.join(client_dir, "client_credential_unsigned.p12")
+    client_pkcs12_unsigned_file = os.path.join(client_dir, "client_credential_unsigned.pem")
     gen_root_cert(client_unsigned_cert_file, client_key_file, days, client_unsigned_answer)
-    gen_pkcs12(client_pkcs12_unsigned_file, client_key_file, client_unsigned_cert_file, server_verification_ca_cert_file)
+    gen_pem_file(client_pkcs12_unsigned_file, client_key_file, client_unsigned_cert_file, server_verification_ca_cert_file)
 
     print
     print " --== Client pkcs12 expired certificate generating ==-- "
     client_expired_cert_file = os.path.join(client_dir, "client_expired.crt")
-    client_pkcs12_expired_file = os.path.join(client_dir, "client_credential_expired.p12")
+    client_pkcs12_expired_file = os.path.join(client_dir, "client_credential_expired.pem")
     gen_expire_cert(client_expired_cert_file, client_key_file, ford_client_cert_file, ford_client_key_file, days, client_expired_answer)
-    gen_pkcs12(client_pkcs12_expired_file, client_key_file, client_expired_cert_file, server_verification_ca_cert_file)
+    gen_pem_file(client_pkcs12_expired_file, client_key_file, client_expired_cert_file, server_verification_ca_cert_file)
 
     subprocess.call(["c_rehash", server_dir])
     subprocess.call(["c_rehash", client_dir])
