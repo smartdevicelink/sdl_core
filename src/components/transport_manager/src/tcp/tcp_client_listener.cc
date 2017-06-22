@@ -93,7 +93,10 @@ TransportAdapter::Error TcpClientListener::Init() {
   server_address.sin_addr.s_addr = INADDR_ANY;
 
   int optval = 1;
-  setsockopt(socket_, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
+  if (0 !=
+      setsockopt(socket_, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval))) {
+    LOG4CXX_WARN_WITH_ERRNO(logger_, "setsockopt SO_REUSEADDR failed");
+  }
 
   if (bind(socket_,
            reinterpret_cast<sockaddr*>(&server_address),
@@ -146,12 +149,28 @@ void SetKeepaliveOptions(const int fd) {
   int keepintvl = 1;
 #ifdef __linux__
   int user_timeout = 7000;  // milliseconds
-  setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &yes, sizeof(yes));
-  setsockopt(fd, IPPROTO_TCP, TCP_KEEPIDLE, &keepidle, sizeof(keepidle));
-  setsockopt(fd, IPPROTO_TCP, TCP_KEEPCNT, &keepcnt, sizeof(keepcnt));
-  setsockopt(fd, IPPROTO_TCP, TCP_KEEPINTVL, &keepintvl, sizeof(keepintvl));
-  setsockopt(
-      fd, IPPROTO_TCP, TCP_USER_TIMEOUT, &user_timeout, sizeof(user_timeout));
+  if (0 != setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &yes, sizeof(yes))) {
+    LOG4CXX_WARN_WITH_ERRNO(logger_, "setsockopt SO_KEEPALIVE failed");
+  }
+  if (0 !=
+      setsockopt(fd, IPPROTO_TCP, TCP_KEEPIDLE, &keepidle, sizeof(keepidle))) {
+    LOG4CXX_WARN_WITH_ERRNO(logger_, "setsockopt TCP_KEEPIDLE failed");
+  }
+  if (0 !=
+      setsockopt(fd, IPPROTO_TCP, TCP_KEEPCNT, &keepcnt, sizeof(keepcnt))) {
+    LOG4CXX_WARN_WITH_ERRNO(logger_, "setsockopt TCP_KEEPCNT failed");
+  }
+  if (0 != setsockopt(
+               fd, IPPROTO_TCP, TCP_KEEPINTVL, &keepintvl, sizeof(keepintvl))) {
+    LOG4CXX_WARN_WITH_ERRNO(logger_, "setsockopt TCP_KEEPINTVL failed");
+  }
+  if (0 != setsockopt(fd,
+                      IPPROTO_TCP,
+                      TCP_USER_TIMEOUT,
+                      &user_timeout,
+                      sizeof(user_timeout))) {
+    LOG4CXX_WARN_WITH_ERRNO(logger_, "setsockopt TCP_USER_TIMEOUT failed");
+  }
 #elif defined(__QNX__)  // __linux__
   // TODO(KKolodiy): Out of order!
   const int kMidLength = 4;
@@ -246,10 +265,16 @@ void TcpClientListener::StopLoop() {
   server_address.sin_family = AF_INET;
   server_address.sin_port = htons(port_);
   server_address.sin_addr.s_addr = INADDR_ANY;
-  connect(byesocket,
-          reinterpret_cast<sockaddr*>(&server_address),
-          sizeof(server_address));
-  shutdown(byesocket, SHUT_RDWR);
+  if (0 != connect(byesocket,
+                   reinterpret_cast<sockaddr*>(&server_address),
+                   sizeof(server_address))) {
+    LOG4CXX_WARN_WITH_ERRNO(logger_, "Failed to connect byesocket");
+  } else {
+    // Can only shutdown socket if connected
+    if (0 != shutdown(byesocket, SHUT_RDWR)) {
+      LOG4CXX_WARN_WITH_ERRNO(logger_, "Failed to shutdown byesocket");
+    }
+  }
   close(byesocket);
 }
 

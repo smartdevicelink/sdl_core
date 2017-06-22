@@ -547,12 +547,14 @@ void Nullable<T>::ReportErrors(ValidationReport* report) const {
  * Optional class
  */
 template <typename T>
-Optional<T>::Optional() {}
+Optional<T>::Optional()
+    : policy_table_type_(policy_table_interface_base::INVALID_PT_TYPE) {}
 
 template <typename T>
 template <typename U>
 Optional<T>::Optional(const U& value)
-    : value_(value) {}
+    : policy_table_type_(policy_table_interface_base::INVALID_PT_TYPE)
+    , value_(value) {}
 
 template <typename T>
 T& Optional<T>::operator*() {

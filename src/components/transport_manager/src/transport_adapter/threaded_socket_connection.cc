@@ -267,7 +267,7 @@ void ThreadedSocketConnection::Transmit() {
   const bool is_queue_empty = IsFramesToSendQueueEmpty();
 
   // Send data if possible
-  if (!is_queue_empty && (poll_fds[0].revents | POLLOUT)) {
+  if (!is_queue_empty && (poll_fds[0].revents & POLLOUT)) {
     LOG4CXX_DEBUG(logger_, "frames_to_send_ not empty() ");
 
     // send data

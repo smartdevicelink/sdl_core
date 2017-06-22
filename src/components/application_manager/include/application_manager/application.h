@@ -78,7 +78,10 @@ struct Version {
 
 struct AppFile {
   // need to use in std::map;
-  AppFile() {}
+  AppFile()
+      : is_persistent(false)
+      , is_download_complete(false)
+      , file_type(mobile_apis::FileType::INVALID_ENUM) {}
   AppFile(const std::string& name,
           bool persistent,
           bool download_complete,
