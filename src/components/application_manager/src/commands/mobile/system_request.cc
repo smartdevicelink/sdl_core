@@ -118,7 +118,7 @@ class QueryAppsDataValidator {
     smart_objects::SmartArray::iterator applications_iterator =
         objects_array->begin();
 
-    for (; applications_iterator != objects_array->end(); ) {
+    for (; applications_iterator != objects_array->end();) {
       const smart_objects::SmartObject& app_data = *applications_iterator;
 
       if (!app_data.isValid()) {
