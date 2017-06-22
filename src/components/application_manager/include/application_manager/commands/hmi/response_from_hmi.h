@@ -43,7 +43,7 @@ namespace commands {
 
 class ResponseFromHMI : public CommandImpl {
  public:
-  ResponseFromHMI(const MessageSharedPtr& message,
+  ResponseFromHMI(const MessageSharedPtr& response_message,
                   ApplicationManager& application_manager);
   virtual ~ResponseFromHMI();
   virtual bool Init();
@@ -52,7 +52,7 @@ class ResponseFromHMI : public CommandImpl {
   void SendResponseToMobile(const MessageSharedPtr& message,
                             ApplicationManager& application_manager);
 
-  /*
+  /**
    * @brief Creates HMI request
    *
    * @param function_id HMI request ID
@@ -60,6 +60,15 @@ class ResponseFromHMI : public CommandImpl {
    */
   void CreateHMIRequest(const hmi_apis::FunctionID::eType& function_id,
                         const smart_objects::SmartObject& msg_params) const;
+
+  /**
+   * @brief Extracts "message" param value from HMI response
+   *
+   * @param message HMI response message to process
+   * @return value of message param if exists otherwise returns empty string
+   */
+  const std::string GetMessageParamValue(
+      const MessageSharedPtr& response_message) const;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(ResponseFromHMI);

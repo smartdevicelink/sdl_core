@@ -38,17 +38,16 @@ namespace application_manager {
 
 namespace commands {
 
-ResponseFromHMI::ResponseFromHMI(const MessageSharedPtr& message,
+ResponseFromHMI::ResponseFromHMI(const MessageSharedPtr& response_message,
                                  ApplicationManager& application_manager)
-    : CommandImpl(message, application_manager) {
-  // If it is error response, shift info
-  if ((*message)[strings::params].keyExists(hmi_response::message)) {
-    (*message)[strings::msg_params][strings::info] =
-        (*message)[strings::params][hmi_response::message];
+    : CommandImpl(response_message, application_manager) {
+  const std::string message_value = GetMessageParamValue(response_message);
+  if (!message_value.empty()) {
+    (*response_message)[strings::msg_params][strings::info] = message_value;
   }
 
   // Replace HMI app id with Mobile connection id
-  ReplaceHMIByMobileAppId(*(message.get()));
+  ReplaceHMIByMobileAppId(*(response_message.get()));
 }
 
 ResponseFromHMI::~ResponseFromHMI() {}
@@ -99,6 +98,22 @@ void ResponseFromHMI::CreateHMIRequest(
     LOG4CXX_ERROR(logger_, "Unable to send request");
     return;
   }
+}
+
+const std::string ResponseFromHMI::GetMessageParamValue(
+    const MessageSharedPtr& response_message) const {
+  const hmi_apis::messageType::eType msg_type =
+      static_cast<hmi_apis::messageType::eType>(
+          (*response_message)[strings::params][strings::message_type].asInt());
+
+  const smart_objects::SmartObject& hmi_response_params =
+      hmi_apis::messageType::error_response == msg_type
+          ? (*response_message)[strings::params]
+          : (*response_message)[strings::msg_params];
+
+  return hmi_response_params.keyExists(hmi_response::message)
+             ? hmi_response_params[hmi_response::message].asString()
+             : "";
 }
 
 }  // namespace commands
