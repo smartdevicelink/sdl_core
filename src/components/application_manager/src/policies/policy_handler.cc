@@ -472,8 +472,12 @@ void PolicyHandler::OnDeviceConsentChanged(const std::string& device_id,
                                            const bool is_allowed) {
   POLICY_LIB_CHECK_VOID();
   connection_handler::DeviceHandle device_handle;
-  application_manager_.connection_handler().GetDeviceID(device_id,
-                                                        &device_handle);
+  if (!application_manager_.connection_handler().GetDeviceID(device_id,
+                                                             &device_handle)) {
+    LOG4CXX_ERROR(logger_,
+                  "Unable to get device handle for device_id: " << device_id);
+    return;
+  }
   // In case of changed consent for device, related applications will be
   // limited to pre_DataConsent permissions, if device disallowed, or switch
   // back to their own permissions, if device allowed again, and must be
