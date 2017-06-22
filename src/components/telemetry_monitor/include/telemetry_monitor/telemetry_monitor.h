@@ -95,7 +95,6 @@ class TelemetryMonitor {
  private:
   std::string server_address_;
   int16_t port_;
-  bool is_ready_;
   threads::Thread* thread_;
   Streamer* streamer_;
   ApplicationManagerObserver app_observer;

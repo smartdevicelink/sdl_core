@@ -644,7 +644,7 @@ bool ResumeCtrlImpl::DisconnectedJustBeforeIgnOff(
   DCHECK_OR_RETURN(saved_app.keyExists(strings::time_stamp), false);
 
   const time_t time_stamp =
-      static_cast<time_t>(saved_app[strings::time_stamp].asUInt());
+      static_cast<time_t>(saved_app[strings::time_stamp].asInt());
   time_t ign_off_time =
       static_cast<time_t>(resumption_storage_->GetIgnOffTime());
   const uint32_t sec_spent_before_ign = labs(ign_off_time - time_stamp);
@@ -798,9 +798,13 @@ void ResumeCtrlImpl::OnAppRegistrationEnd() {
 
 int32_t ResumeCtrlImpl::GetSavedAppHmiLevel(
     const std::string& app_id, const std::string& device_id) const {
+  using namespace mobile_apis;
   smart_objects::SmartObject saved_app;
   if (resumption_storage_->GetSavedApplication(app_id, device_id, saved_app)) {
-    const int32_t saved_hmi_level = saved_app[strings::hmi_level].asInt();
+    const HMILevel::eType saved_hmi_level =
+        static_cast<mobile_apis::HMILevel::eType>(
+            saved_app[strings::hmi_level].asInt());
+
     return saved_hmi_level;
   }
   return static_cast<int32_t>(mobile_apis::HMILevel::INVALID_ENUM);

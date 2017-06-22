@@ -401,7 +401,8 @@ struct ExternalConsentStatusItem {
                             const EntityStatus status)
       : entity_type_(type), entity_id_(id), status_(status) {}
 
-  ExternalConsentStatusItem() {}
+  ExternalConsentStatusItem()
+      : entity_type_(0), entity_id_(0), status_(kStatusOff) {}
 
   ExternalConsentStatusItem operator=(const ExternalConsentStatusItem& rhs) {
     this->entity_id_ = rhs.entity_id_;

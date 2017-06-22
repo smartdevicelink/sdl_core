@@ -1660,7 +1660,7 @@ void ConsentRecords::ReportErrors(rpc::ValidationReport* report__) const {
   if (!consent_groups.is_valid()) {
     consent_groups.ReportErrors(&report__->ReportSubobject("consent_groups"));
   }
-  if (!consent_groups.is_valid()) {
+  if (!external_consent_status_groups.is_valid()) {
     external_consent_status_groups.ReportErrors(
         &report__->ReportSubobject("external_consent_status_groups"));
   }

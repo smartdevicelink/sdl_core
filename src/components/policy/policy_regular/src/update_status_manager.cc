@@ -42,6 +42,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "Policy")
 UpdateStatusManager::UpdateStatusManager()
     : listener_(NULL)
     , current_status_(utils::MakeShared<UpToDateStatus>())
+    , last_processed_event_(kNoEvent)
     , apps_search_in_progress_(false)
     , app_registered_from_non_consented_device_(true) {}
 

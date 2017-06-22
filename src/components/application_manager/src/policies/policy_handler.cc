@@ -64,31 +64,32 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "PolicyHandler")
 
 namespace {
 using namespace mobile_apis;
-typedef std::map<RequestType::eType, std::string> RequestTypeMap;
+typedef std::map<mobile_apis::RequestType::eType, std::string> RequestTypeMap;
 RequestTypeMap TypeToString = {
-    {RequestType::INVALID_ENUM, "INVALID_ENUM"},
-    {RequestType::HTTP, "HTTP"},
-    {RequestType::FILE_RESUME, "FILE_RESUME"},
-    {RequestType::AUTH_REQUEST, "AUTH_REQUEST"},
-    {RequestType::AUTH_CHALLENGE, "AUTH_CHALLENGE"},
-    {RequestType::AUTH_ACK, "AUTH_ACK"},
-    {RequestType::PROPRIETARY, "PROPRIETARY"},
-    {RequestType::QUERY_APPS, "QUERY_APPS"},
-    {RequestType::LAUNCH_APP, "LAUNCH_APP"},
-    {RequestType::LOCK_SCREEN_ICON_URL, "LOCK_SCREEN_ICON_URL"},
-    {RequestType::TRAFFIC_MESSAGE_CHANNEL, "TRAFFIC_MESSAGE_CHANNEL"},
-    {RequestType::DRIVER_PROFILE, "DRIVER_PROFILE"},
-    {RequestType::VOICE_SEARCH, "VOICE_SEARCH"},
-    {RequestType::NAVIGATION, "NAVIGATION"},
-    {RequestType::PHONE, "PHONE"},
-    {RequestType::CLIMATE, "CLIMATE"},
-    {RequestType::SETTINGS, "SETTINGS"},
-    {RequestType::VEHICLE_DIAGNOSTICS, "VEHICLE_DIAGNOSTICS"},
-    {RequestType::EMERGENCY, "EMERGENCY"},
-    {RequestType::MEDIA, "MEDIA"},
-    {RequestType::FOTA, "FOTA"}};
+    {mobile_apis::RequestType::INVALID_ENUM, "INVALID_ENUM"},
+    {mobile_apis::RequestType::HTTP, "HTTP"},
+    {mobile_apis::RequestType::FILE_RESUME, "FILE_RESUME"},
+    {mobile_apis::RequestType::AUTH_REQUEST, "AUTH_REQUEST"},
+    {mobile_apis::RequestType::AUTH_CHALLENGE, "AUTH_CHALLENGE"},
+    {mobile_apis::RequestType::AUTH_ACK, "AUTH_ACK"},
+    {mobile_apis::RequestType::PROPRIETARY, "PROPRIETARY"},
+    {mobile_apis::RequestType::QUERY_APPS, "QUERY_APPS"},
+    {mobile_apis::RequestType::LAUNCH_APP, "LAUNCH_APP"},
+    {mobile_apis::RequestType::LOCK_SCREEN_ICON_URL, "LOCK_SCREEN_ICON_URL"},
+    {mobile_apis::RequestType::TRAFFIC_MESSAGE_CHANNEL,
+     "TRAFFIC_MESSAGE_CHANNEL"},
+    {mobile_apis::RequestType::DRIVER_PROFILE, "DRIVER_PROFILE"},
+    {mobile_apis::RequestType::VOICE_SEARCH, "VOICE_SEARCH"},
+    {mobile_apis::RequestType::NAVIGATION, "NAVIGATION"},
+    {mobile_apis::RequestType::PHONE, "PHONE"},
+    {mobile_apis::RequestType::CLIMATE, "CLIMATE"},
+    {mobile_apis::RequestType::SETTINGS, "SETTINGS"},
+    {mobile_apis::RequestType::VEHICLE_DIAGNOSTICS, "VEHICLE_DIAGNOSTICS"},
+    {mobile_apis::RequestType::EMERGENCY, "EMERGENCY"},
+    {mobile_apis::RequestType::MEDIA, "MEDIA"},
+    {mobile_apis::RequestType::FOTA, "FOTA"}};
 
-const std::string RequestTypeToString(RequestType::eType type) {
+const std::string RequestTypeToString(mobile_apis::RequestType::eType type) {
   RequestTypeMap::const_iterator it = TypeToString.find(type);
   if (TypeToString.end() != it) {
     return (*it).second;
@@ -471,8 +472,12 @@ void PolicyHandler::OnDeviceConsentChanged(const std::string& device_id,
                                            const bool is_allowed) {
   POLICY_LIB_CHECK_VOID();
   connection_handler::DeviceHandle device_handle;
-  application_manager_.connection_handler().GetDeviceID(device_id,
-                                                        &device_handle);
+  if (!application_manager_.connection_handler().GetDeviceID(device_id,
+                                                             &device_handle)) {
+    LOG4CXX_ERROR(logger_,
+                  "Unable to get device handle for device_id: " << device_id);
+    return;
+  }
   // In case of changed consent for device, related applications will be
   // limited to pre_DataConsent permissions, if device disallowed, or switch
   // back to their own permissions, if device allowed again, and must be
@@ -535,12 +540,6 @@ void PolicyHandler::GetAvailableApps(std::queue<std::string>& apps) {
     apps.push((*iter)->policy_app_id());
   }
 }
-
-struct SmartObjectToInt {
-  int operator()(const smart_objects::SmartObject& item) const {
-    return item.asInt();
-  }
-};
 
 StatusNotifier PolicyHandler::AddApplication(
     const std::string& application_id,
