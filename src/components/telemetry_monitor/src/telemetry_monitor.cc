@@ -52,7 +52,6 @@ TelemetryMonitor::TelemetryMonitor(const std::string& server_address,
                                    uint16_t port)
     : server_address_(server_address)
     , port_(port)
-    , is_ready_(false)
     , thread_(NULL)
     , streamer_(NULL)
     , app_observer(this)
