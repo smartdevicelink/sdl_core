@@ -575,40 +575,38 @@ void FillNotificationData::UpdateParameters(
 }
 
 void FillNotificationData::ExcludeSame(RpcPermissions& rpc) {
-  HMIPermissions& rpc_hmi_permissions = rpc.hmi_permissions;
-  HMIPermissions::iterator it_hmi_allowed =
+  HMIPermissions::const_iterator it_hmi_allowed =
       rpc.hmi_permissions.find(kAllowedKey);
-  HMIPermissions::iterator it_hmi_undefined =
+  HMIPermissions::const_iterator it_hmi_undefined =
       rpc.hmi_permissions.find(kUndefinedKey);
-  HMIPermissions::iterator it_hmi_user_disallowed =
+  HMIPermissions::const_iterator it_hmi_user_disallowed =
       rpc.hmi_permissions.find(kUserDisallowedKey);
 
   // There is different logic of processing RPCs with and w/o 'parameters'
   if (RpcParametersEmpty(rpc)) {
     // First, remove disallowed from other types
-    if (rpc_hmi_permissions.end() != it_hmi_user_disallowed) {
-      if (rpc_hmi_permissions.end() != it_hmi_allowed) {
-        ExcludeSameHMILevels(rpc_hmi_permissions[kAllowedKey],
-                             rpc_hmi_permissions[kUserDisallowedKey]);
+    if (rpc.hmi_permissions.end() != it_hmi_user_disallowed) {
+      if (rpc.hmi_permissions.end() != it_hmi_allowed) {
+        ExcludeSameHMILevels(rpc.hmi_permissions[kAllowedKey],
+                             rpc.hmi_permissions[kUserDisallowedKey]);
       }
-      if (rpc_hmi_permissions.end() != it_hmi_undefined) {
-        ExcludeSameHMILevels(rpc_hmi_permissions[kUndefinedKey],
-                             rpc_hmi_permissions[kUserDisallowedKey]);
+      if (rpc.hmi_permissions.end() != it_hmi_undefined) {
+        ExcludeSameHMILevels(rpc.hmi_permissions[kUndefinedKey],
+                             rpc.hmi_permissions[kUserDisallowedKey]);
       }
     }
 
     // Then, remove undefined from allowed
-    if (rpc_hmi_permissions.end() != it_hmi_undefined) {
-      if (rpc_hmi_permissions.end() != it_hmi_allowed) {
-        ExcludeSameHMILevels(rpc_hmi_permissions[kAllowedKey],
-                             rpc_hmi_permissions[kUndefinedKey]);
+    if (rpc.hmi_permissions.end() != it_hmi_undefined) {
+      if (rpc.hmi_permissions.end() != it_hmi_allowed) {
+        ExcludeSameHMILevels(rpc.hmi_permissions[kAllowedKey],
+                             rpc.hmi_permissions[kUndefinedKey]);
       }
     }
 
     return;
   }
 
-  ParameterPermissions& rpc_parameter_permissions = rpc.parameter_permissions;
   ParameterPermissions::const_iterator it_parameter_allowed =
       rpc.parameter_permissions.find(kAllowedKey);
   ParameterPermissions::const_iterator it_parameter_undefined =
@@ -619,34 +617,34 @@ void FillNotificationData::ExcludeSame(RpcPermissions& rpc) {
   // First, removing allowed HMI levels from other types, permissions will be
   // dependent on parameters instead of HMI levels since w/o parameters RPC
   // won't passed to HMI
-  if (rpc_hmi_permissions.end() != it_hmi_allowed) {
-    if (rpc_hmi_permissions.end() != it_hmi_user_disallowed) {
-      ExcludeSameHMILevels(rpc_hmi_permissions[kUserDisallowedKey],
-                           rpc_hmi_permissions[kAllowedKey]);
+  if (rpc.hmi_permissions.end() != it_hmi_allowed) {
+    if (rpc.hmi_permissions.end() != it_hmi_user_disallowed) {
+      ExcludeSameHMILevels(rpc.hmi_permissions[kUserDisallowedKey],
+                           rpc.hmi_permissions[kAllowedKey]);
     }
     if (rpc.hmi_permissions.end() != it_hmi_undefined) {
-      ExcludeSameHMILevels(rpc_hmi_permissions[kUndefinedKey],
-                           rpc_hmi_permissions[kAllowedKey]);
+      ExcludeSameHMILevels(rpc.hmi_permissions[kUndefinedKey],
+                           rpc.hmi_permissions[kAllowedKey]);
     }
   }
 
   // Removing disallowed parameters from allowed and undefined (by user consent)
-  if (rpc_parameter_permissions.end() != it_parameter_user_disallowed) {
-    if (rpc_parameter_permissions.end() != it_parameter_allowed) {
-      ExcludeSameParameters(rpc_parameter_permissions[kAllowedKey],
-                            rpc_parameter_permissions[kUserDisallowedKey]);
+  if (rpc.parameter_permissions.end() != it_parameter_user_disallowed) {
+    if (rpc.parameter_permissions.end() != it_parameter_allowed) {
+      ExcludeSameParameters(rpc.parameter_permissions[kAllowedKey],
+                            rpc.parameter_permissions[kUserDisallowedKey]);
     }
-    if (rpc_parameter_permissions.end() != it_parameter_undefined) {
-      ExcludeSameParameters(rpc_parameter_permissions[kUndefinedKey],
-                            rpc_parameter_permissions[kUserDisallowedKey]);
+    if (rpc.parameter_permissions.end() != it_parameter_undefined) {
+      ExcludeSameParameters(rpc.parameter_permissions[kUndefinedKey],
+                            rpc.parameter_permissions[kUserDisallowedKey]);
     }
   }
 
   // Removing undefined (by user consent) parameters from allowed
-  if (rpc_parameter_permissions.end() != it_parameter_undefined) {
-    if (rpc_parameter_permissions.end() != it_parameter_allowed) {
-      ExcludeSameParameters(rpc_parameter_permissions[kAllowedKey],
-                            rpc_parameter_permissions[kUndefinedKey]);
+  if (rpc.parameter_permissions.end() != it_parameter_undefined) {
+    if (rpc.parameter_permissions.end() != it_parameter_allowed) {
+      ExcludeSameParameters(rpc.parameter_permissions[kAllowedKey],
+                            rpc.parameter_permissions[kUndefinedKey]);
     }
   }
 }
