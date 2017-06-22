@@ -42,6 +42,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "Policy")
 UpdateStatusManager::UpdateStatusManager()
     : listener_(NULL)
     , current_status_(utils::MakeShared<UpToDateStatus>())
+    , last_processed_event_(kNoEvent)
     , apps_search_in_progress_(false)
     , app_registered_from_non_consented_device_(true) {
   update_status_thread_delegate_ = new UpdateThreadDelegate(this);
@@ -62,6 +63,7 @@ UpdateStatusManager::~UpdateStatusManager() {
 void UpdateStatusManager::ProcessEvent(UpdateEvent event) {
   sync_primitives::AutoLock lock(status_lock_);
   current_status_->ProcessEvent(this, event);
+  last_processed_event_ = event;
   DoTransition();
 }
 
