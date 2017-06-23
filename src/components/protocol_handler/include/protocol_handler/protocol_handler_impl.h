@@ -245,7 +245,7 @@ class ProtocolHandlerImpl
    */
   void SendStartSessionAck(ConnectionID connection_id,
                            uint8_t session_id,
-                           uint8_t protocol_version,
+                           uint8_t input_protocol_version,
                            uint32_t hash_code,
                            uint8_t service_type,
                            bool protection);

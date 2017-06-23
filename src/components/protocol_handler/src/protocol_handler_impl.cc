@@ -176,20 +176,23 @@ void set_hash_id(uint32_t hash_id, protocol_handler::ProtocolPacket& packet) {
 
 void ProtocolHandlerImpl::SendStartSessionAck(ConnectionID connection_id,
                                               uint8_t session_id,
-                                              uint8_t protocol_version,
+                                              uint8_t input_protocol_version,
                                               uint32_t hash_id,
                                               uint8_t service_type,
                                               bool protection) {
   LOG4CXX_AUTO_TRACE(logger_);
-  uint8_t protocolVersion = SupportedSDLProtocolVersion();
+  uint8_t ack_protocol_version = SupportedSDLProtocolVersion();
 
   if (kRpc != service_type) {
-    protocolVersion = protocol_version;
+    // In case if input protocol version os bigger then supported, SDL should respond with maximum supported protocol version
+    ack_protocol_version = input_protocol_version < ack_protocol_version
+                               ? input_protocol_version
+                               : ack_protocol_version;
   }
 
   ProtocolFramePtr ptr(
       new protocol_handler::ProtocolPacket(connection_id,
-                                           protocolVersion,
+                                           ack_protocol_version,
                                            protection,
                                            FRAME_TYPE_CONTROL,
                                            service_type,
