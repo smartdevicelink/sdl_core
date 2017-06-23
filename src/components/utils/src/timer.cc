@@ -64,7 +64,7 @@ timer::Timer::~Timer() {
   StopDelegate();
   single_shot_ = true;
 
-  delegate_.release();
+  delegate_.reset();
   DeleteThread(thread_);
   DCHECK(task_);
   delete task_;
