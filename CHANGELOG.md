@@ -1,4 +1,6 @@
-# New Features
+# 4.3.0 Release Candidate
+
+## New Features
 
 ### EXTENDED_POLICY modes:
 - The `EXTENDED_POLICY` CMake variable (previously `ENABLE_EXTENDED_POLICY`) now has three possible configurations
@@ -76,6 +78,10 @@ Several API additions were made as part of the implementation of the external us
   - [EntityStatus](https://github.com/smartdevicelink/sdl_core/blob/6283aa26e262d2d16ed1393989d8e0e062dba88d/src/components/interfaces/HMI_API.xml#L1263-L1266) enum
   - [ExternalConsentStatus](https://github.com/smartdevicelink/sdl_core/blob/6283aa26e262d2d16ed1393989d8e0e062dba88d/src/components/interfaces/HMI_API.xml#L1268-L1278) struct
   - externalConsentStatus field added to [OnAppPermissionConsent](https://github.com/smartdevicelink/sdl_core/blob/6283aa26e262d2d16ed1393989d8e0e062dba88d/src/components/interfaces/HMI_API.xml#L4170-L4172) and [GetListOfPermissions](https://github.com/smartdevicelink/sdl_core/blob/6283aa26e262d2d16ed1393989d8e0e062dba88d/src/components/interfaces/HMI_API.xml#L4170-L4172)
+
+## Fixes
+- Includes fixes for all defects found by the Coverity scan tool that were introduced in this release - #1641
+- Includes fixes for several Coverity defects that were previously implemented in the `coverity` branch - #1637
 
 ## Implemented proposals
 Two new evolution proposals were implemented in release 4.3.0:
