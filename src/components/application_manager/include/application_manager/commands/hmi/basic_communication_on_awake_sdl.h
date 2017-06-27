@@ -60,7 +60,7 @@ class OnAwakeSDLNotification : public NotificationFromHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() FINAL;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(OnAwakeSDLNotification);
