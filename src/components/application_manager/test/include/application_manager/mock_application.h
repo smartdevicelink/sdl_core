@@ -50,8 +50,8 @@ class MockApplication : public ::application_manager::Application {
   MOCK_CONST_METHOD0(active_message, const smart_objects::SmartObject*());
   MOCK_CONST_METHOD0(curHash, const std::string&());
   MOCK_METHOD0(UpdateHash, void());
-  MOCK_CONST_METHOD0(flag_sending_hash_change_after_awake, bool());
-  MOCK_METHOD1(set_flag_sending_hash_change_after_awake, void(bool flag));
+  MOCK_CONST_METHOD0(IsHashChangedAfterAwake, bool());
+  MOCK_METHOD1(SetHashChangedAfterAwake, void(const bool flag));
   MOCK_CONST_METHOD0(is_application_data_changed, bool());
   MOCK_METHOD1(set_is_application_data_changed,
                void(bool state_application_data));

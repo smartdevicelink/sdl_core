@@ -112,7 +112,7 @@ ApplicationImpl::ApplicationImpl(
           protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_3)
     , is_voice_communication_application_(false)
     , is_resuming_(false)
-    , flag_sending_hash_change_after_awake_(false)
+    , is_hash_changed_during_suspend_(false)
     , video_stream_retry_number_(0)
     , audio_stream_retry_number_(0)
     , video_stream_suspend_timer_(
@@ -877,16 +877,16 @@ void ApplicationImpl::UpdateHash() {
   if (!application_manager_.resume_controller().is_suspended()) {
     MessageHelper::SendHashUpdateNotification(app_id(), application_manager_);
   } else {
-    flag_sending_hash_change_after_awake_ = true;
+    is_hash_changed_during_suspend_ = true;
   }
 }
 
-bool ApplicationImpl::flag_sending_hash_change_after_awake() const {
-  return flag_sending_hash_change_after_awake_;
+bool ApplicationImpl::IsHashChangedAfterAwake() const {
+  return is_hash_changed_during_suspend_;
 }
 
-void ApplicationImpl::set_flag_sending_hash_change_after_awake(bool flag) {
-  flag_sending_hash_change_after_awake_ = flag;
+void ApplicationImpl::SetHashChangedAfterAwake(const bool state) {
+  is_hash_changed_during_suspend_ = state;
 }
 
 void ApplicationImpl::CleanupFiles() {

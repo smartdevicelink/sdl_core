@@ -47,25 +47,25 @@ OnAwakeSDLNotification::~OnAwakeSDLNotification() {}
 void OnAwakeSDLNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  if (application_manager_.resume_controller().is_suspended()) {
-    {
-      application_manager_.resume_controller().set_is_suspended(false);
-      DataAccessor<ApplicationSet> accessor =
-          application_manager_.applications();
-      ApplicationSetIt it = accessor.GetData().begin();
-      ApplicationSetIt itEnd = accessor.GetData().end();
-      for (; it != itEnd; ++it) {
-        if ((*it).get()) {
-          if ((*it)->flag_sending_hash_change_after_awake()) {
-            MessageHelper::SendHashUpdateNotification((*it)->app_id(),
-                                                      application_manager_);
-            (*it)->set_flag_sending_hash_change_after_awake(false);
-          }
-        }
+  if (!application_manager_.resume_controller().is_suspended()) {
+    return;
+  }
+
+  {
+    DataAccessor<ApplicationSet> accessor = application_manager_.applications();
+    ApplicationSetIt itBegin = accessor.GetData().begin();
+    ApplicationSetIt itEnd = accessor.GetData().end();
+    for (; itBegin != itEnd; ++itBegin) {
+      const ApplicationSharedPtr app = *itBegin;
+      if (app && app->IsHashChangedAfterAwake()) {
+        MessageHelper::SendHashUpdateNotification(app->app_id(),
+                                                  application_manager_);
+        app->SetHashChangedAfterAwake(false);
       }
     }
-    application_manager_.resume_controller().OnAwake();
   }
+
+  application_manager_.resume_controller().OnAwake();
 }
 
 }  // namespace commands
